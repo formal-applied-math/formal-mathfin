@@ -6,13 +6,13 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoFormulaAdaptedProcess
-public import MathFin.Foundations.ItoFormulaUnrestricted
+public import MathFin.Foundations.ItoFormulaCutoff
 public import MathFin.Foundations.LevyCharacterization
 
-/-! # Summit C — the unrestricted-`C³` Itô formula as a local martingale
+/-! # Summit C — the unrestricted-`C²` Itô formula as a local martingale
 
-For a general `C³` function `f` (six partials, all jointly continuous, **no** growth or
-boundedness hypothesis) the Itô residual
+For a general `C²` function `f` (`f_t`, `f_x`, `f_xx` with `HasDerivAt` witnesses, all jointly
+continuous together with `f`, **no** growth or boundedness hypothesis) the Itô residual
 `M_t = f(t, B_t) − f(0, B_0) − ∫₀ᵗ (f_t + ½ f_xx)(s, B_s) ds` (`itoResidual`) is a continuous local
 martingale for the null-augmented Brownian filtration, localised by `σ_N = min(τ_N, N)`, `τ_N` the
 exit time of `B` from `[−N, N]` (`sigmaSeq`).
@@ -26,8 +26,7 @@ a local martingale because it is indistinguishable from the stopped continuous l
 Itô's formula for `B` regarded as an Itô process with `σ = 1`, `b = 0`
 (`exists_localMartingale_ito_formula`, `ae_localItoIntegral_one_eq`), and bounded, since up to `σ_N`
 `|B| ≤ N` and `t ≤ N` while `f`, `f_t`, `f_xx` are bounded on that compact square; a bounded local
-martingale is a martingale (`bounded_localMartingale_is_martingale`). Only `f`, `f_t`, `f_x`,
-`f_xx` are used; the hypotheses on `f_tt`, `f_tx`, `f_xxx` are carried by the statements.
+martingale is a martingale (`bounded_localMartingale_is_martingale`).
 
 `M` is adapted to the null-augmented filtration (`residual_stronglyMeasurable`): the drift primitive
 `D_t = ∫₀ᵗ (f_t + ½ f_xx)(s, B_s) ds` is `𝓕_t`-measurable (`driftPrimitive_stronglyMeasurable`)
@@ -64,7 +63,7 @@ lemma driftPrimitive_stronglyMeasurable (hBmeas : ∀ t, Measurable (B t))
     f_t (↑(min s t)) (B (min s t) ω) + (1 / 2) * f_xx (↑(min s t)) (B (min s t) ω) with hg
   -- every clamped slice is `𝓕_t`-measurable (`min s t ≤ t`) — proved with `mΩ` still ambient
   have hBmin : ∀ s : ℝ≥0, StronglyMeasurable[natFiltration hBmeas t] (B (min s t)) := fun s ↦
-    ((measurable_eval_natFiltration hBmeas (min s t)).mono
+    ((stronglyAdapted_natFiltration hBmeas (min s t)).measurable.mono
       ((natFiltration hBmeas).mono (min_le_right s t)) le_rfl).stronglyMeasurable
   have hg_meas : ∀ s, StronglyMeasurable[natFiltration hBmeas t] (g s) := by
     intro s
@@ -125,9 +124,9 @@ lemma residual_stronglyMeasurable (hBmeas : ∀ t, Measurable (B t))
         - ∫ s in Set.Ioc 0 t,
             (f_t (s : ℝ) (B s ω) + (1 / 2) * f_xx (s : ℝ) (B s ω)) ∂timeMeasure) := by
   have hBt : StronglyMeasurable[natFiltration hBmeas t] (B t) :=
-    (measurable_eval_natFiltration hBmeas t).stronglyMeasurable
+    stronglyAdapted_natFiltration hBmeas t
   have hB0 : StronglyMeasurable[natFiltration hBmeas t] (B 0) :=
-    ((measurable_eval_natFiltration hBmeas 0).mono
+    ((stronglyAdapted_natFiltration hBmeas 0).measurable.mono
       ((natFiltration hBmeas).mono zero_le) le_rfl).stronglyMeasurable
   refine (StronglyMeasurable.sub ?_ ?_).sub
     (driftPrimitive_stronglyMeasurable hBmeas hBcont hf_t_cont hf_xx_cont t)
@@ -213,7 +212,7 @@ theorem martingale_stoppedProcess_itoResidual (hB : IsPreBrownianReal B μ)
   have hσ := (isLocalizingSequence_sigma (μ := μ) hBmeas hBcont).isStoppingTime N
   have hs_le (t : ℝ≥0) (ω : Ω) : (min (t : WithTop ℝ≥0) (sigmaSeq B N ω)).untopA ≤ (N : ℝ≥0) := by
     refine WithTop.coe_le_coe.1 ?_
-    rw [LevyCharacterization.coe_untopA_min]
+    rw [coe_untopA_min]
     exact (min_le_right _ _).trans (min_le_right _ _)
   -- the local martingale of the process formula at `σ = 1`, `b = 0`, horizon `N`
   obtain ⟨Y, hYM, -, hYm⟩ := ItoFormulaAdapted.exists_localMartingale_ito_formula hB (N : ℝ≥0)
@@ -270,7 +269,7 @@ theorem martingale_stoppedProcess_itoResidual (hB : IsPreBrownianReal B μ)
       have hBs (u : ℝ≥0) (hu : u ≤ s) : |B u ω| ≤ N := by
         refine abs_le_of_le_exitTime hBcont (lt_min_iff.1 hpos).1 ?_
         calc (u : WithTop ℝ≥0) ≤ (s : WithTop ℝ≥0) := WithTop.coe_le_coe.2 hu
-          _ = min (t : WithTop ℝ≥0) (sigmaSeq B N ω) := LevyCharacterization.coe_untopA_min _ _
+          _ = min (t : WithTop ℝ≥0) (sigmaSeq B N ω) := coe_untopA_min _ _
           _ ≤ sigmaSeq B N ω := min_le_right _ _
           _ ≤ exitTime B N ω := min_le_left _ _
       have hmem (u : ℝ≥0) (hu : u ≤ s) :
@@ -296,30 +295,24 @@ theorem martingale_stoppedProcess_itoResidual (hB : IsPreBrownianReal B μ)
   exact bounded_localMartingale_is_martingale (isLocalMartingale_congr_ae hloc hadapt hcad hind)
     hadapt hbound
 
-/-- **The unrestricted-`C³` Itô formula — Summit C, in Degenne's `IsLocalMartingale` typeclass.**
-For a general `C³` `f` (six partials, all jointly continuous, **no** growth or boundedness), the
+/-- **The unrestricted-`C²` Itô formula — Summit C, in Degenne's `IsLocalMartingale` typeclass.**
+For a general `C²` `f` (`f_t`, `f_x`, `f_xx` and `f` jointly continuous, **no** growth or
+boundedness), the
 compensated residual `M_t = f(t,B_t) − f(0,B_0) − ∫₀ᵗ(f_t+½f_xx)ds` is everywhere-continuous,
 satisfies the Itô identity by construction, and is a genuine **`IsLocalMartingale`** on the
 null-augmented Brownian filtration, localised by `σ_N = min(τ_N, N)`, `τ_N` the exit time of `B`
 from `[−N, N]`: stopped there it is a bounded martingale
-(`martingale_stoppedProcess_itoResidual`). Only `f`, `f_t`, `f_x`, `f_xx` and their continuity
-enter the proof; the other partials are hypotheses of the statement. -/
+(`martingale_stoppedProcess_itoResidual`). -/
 theorem ito_formula_unrestricted (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
-    {f f_t f_x f_xx f_tt f_tx f_xxx : ℝ → ℝ → ℝ}
+    {f f_t f_x f_xx : ℝ → ℝ → ℝ}
     (hf_t : ∀ t x, HasDerivAt (fun s ↦ f s x) (f_t t x) t)
-    (_hf_tt : ∀ t x, HasDerivAt (fun s ↦ f_t s x) (f_tt t x) t)
-    (_hf_tx : ∀ t x, HasDerivAt (fun u ↦ f_t t u) (f_tx t x) x)
     (hf_x : ∀ t x, HasDerivAt (fun u ↦ f t u) (f_x t x) x)
     (hf_xx : ∀ t x, HasDerivAt (fun u ↦ f_x t u) (f_xx t x) x)
-    (_hf_xxx : ∀ t x, HasDerivAt (fun u ↦ f_xx t u) (f_xxx t x) x)
     (hf_cont : Continuous fun p : ℝ × ℝ ↦ f p.1 p.2)
     (hf_t_cont : Continuous fun p : ℝ × ℝ ↦ f_t p.1 p.2)
     (hf_x_cont : Continuous fun p : ℝ × ℝ ↦ f_x p.1 p.2)
-    (hf_xx_cont : Continuous fun p : ℝ × ℝ ↦ f_xx p.1 p.2)
-    (_hf_tt_cont : Continuous fun p : ℝ × ℝ ↦ f_tt p.1 p.2)
-    (_hf_tx_cont : Continuous fun p : ℝ × ℝ ↦ f_tx p.1 p.2)
-    (_hf_xxx_cont : Continuous fun p : ℝ × ℝ ↦ f_xxx p.1 p.2) :
+    (hf_xx_cont : Continuous fun p : ℝ × ℝ ↦ f_xx p.1 p.2) :
     ∃ M : ℝ≥0 → Ω → ℝ,
       (∀ ω, Continuous fun t ↦ M t ω) ∧
       IsLocalMartingale M (augFiltration (μ := μ) hBmeas) μ ∧
@@ -335,25 +328,19 @@ theorem ito_formula_unrestricted (hB : IsPreBrownianReal B μ)
       ((isLocalizingSequence_sigma (μ := μ) hBmeas hBcont).isStoppingTime N)⟩⟩,
     fun t ↦ Filter.Eventually.of_forall fun ω ↦ by simp only [itoResidual]; ring⟩
 
-/-- **The unrestricted-`C³` Itô formula in explicit local-martingale form.** The same residual `M`
+/-- **The unrestricted-`C²` Itô formula in explicit local-martingale form.** The same residual `M`
 and the localizing sequence `σ_N = min(τ_N, N)`; for each `N` a continuous true martingale `Mₙ`
 (`M` stopped at `σ_N`, zeroed where `σ_N = 0`) with `M = Mₙ` on `{t ≤ σ_N}`. -/
 theorem ito_formula_unrestricted_local (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
-    {f f_t f_x f_xx f_tt f_tx f_xxx : ℝ → ℝ → ℝ}
+    {f f_t f_x f_xx : ℝ → ℝ → ℝ}
     (hf_t : ∀ t x, HasDerivAt (fun s ↦ f s x) (f_t t x) t)
-    (_hf_tt : ∀ t x, HasDerivAt (fun s ↦ f_t s x) (f_tt t x) t)
-    (_hf_tx : ∀ t x, HasDerivAt (fun u ↦ f_t t u) (f_tx t x) x)
     (hf_x : ∀ t x, HasDerivAt (fun u ↦ f t u) (f_x t x) x)
     (hf_xx : ∀ t x, HasDerivAt (fun u ↦ f_x t u) (f_xx t x) x)
-    (_hf_xxx : ∀ t x, HasDerivAt (fun u ↦ f_xx t u) (f_xxx t x) x)
     (hf_cont : Continuous fun p : ℝ × ℝ ↦ f p.1 p.2)
     (hf_t_cont : Continuous fun p : ℝ × ℝ ↦ f_t p.1 p.2)
     (hf_x_cont : Continuous fun p : ℝ × ℝ ↦ f_x p.1 p.2)
-    (hf_xx_cont : Continuous fun p : ℝ × ℝ ↦ f_xx p.1 p.2)
-    (_hf_tt_cont : Continuous fun p : ℝ × ℝ ↦ f_tt p.1 p.2)
-    (_hf_tx_cont : Continuous fun p : ℝ × ℝ ↦ f_tx p.1 p.2)
-    (_hf_xxx_cont : Continuous fun p : ℝ × ℝ ↦ f_xxx p.1 p.2) :
+    (hf_xx_cont : Continuous fun p : ℝ × ℝ ↦ f_xx p.1 p.2) :
     ∃ M : ℝ≥0 → Ω → ℝ,
       (∀ ω, Continuous fun t ↦ M t ω) ∧
       (∀ t : ℝ≥0, (fun ω ↦ f (t : ℝ) (B t ω) - f 0 (B 0 ω)) =ᵐ[μ]
@@ -365,29 +352,8 @@ theorem ito_formula_unrestricted_local (hB : IsPreBrownianReal B μ)
           Martingale Mₙ (augFiltration (μ := μ) hBmeas) μ ∧
           (∀ ω, Continuous fun t ↦ Mₙ t ω) ∧
           ∀ t : ℝ≥0, ∀ᵐ ω ∂μ, (t : WithTop ℝ≥0) ≤ σ N ω → M t ω = Mₙ t ω := by
-  have hMcont := continuous_itoResidual (f := f) (f_t := f_t) (f_xx := f_xx) hf_cont hf_t_cont
-    hf_xx_cont hBcont
-  refine ⟨itoResidual f f_t f_xx B, hMcont,
-    fun t ↦ Filter.Eventually.of_forall fun ω ↦ by simp only [itoResidual]; ring,
-    fun N ↦ sigmaSeq B N, isLocalizingSequence_sigma hBmeas hBcont, fun N ↦
-      ⟨_, martingale_stoppedProcess_itoResidual hB hBmeas hBcont hf_t hf_x hf_xx hf_cont
-        hf_t_cont hf_x_cont hf_xx_cont N, fun ω ↦ ?_, fun t ↦ Filter.Eventually.of_forall
-        fun ω hle ↦ ?_⟩⟩
-  · by_cases hpos : ⊥ < sigmaSeq B N ω
-    · simp only [stoppedProcess, Set.indicator_of_mem (show ω ∈ {ω | ⊥ < sigmaSeq B N ω} from hpos)]
-      exact (hMcont ω).comp (LevyCharacterization.continuous_untopA_min _)
-    · simp only [stoppedProcess,
-        Set.indicator_of_notMem (show ω ∉ {ω | ⊥ < sigmaSeq B N ω} from hpos)]
-      exact continuous_const
-  · by_cases hpos : ⊥ < sigmaSeq B N ω
-    · rw [stoppedProcess_eq_of_le hle,
-        Set.indicator_of_mem (show ω ∈ {ω | ⊥ < sigmaSeq B N ω} from hpos)]
-    · have ht : t = 0 :=
-        le_antisymm (WithTop.coe_le_coe.1 (hle.trans (not_lt.1 hpos))) zero_le
-      subst ht
-      have h1 : itoResidual f f_t f_xx B 0 ω = 0 := by simp [itoResidual]
-      rw [h1]
-      simp only [stoppedProcess]
-      rw [Set.indicator_of_notMem (show ω ∉ {ω | ⊥ < sigmaSeq B N ω} from hpos)]
+  obtain ⟨M, hMcont, hloc, hI⟩ := ito_formula_unrestricted hB hBmeas hBcont hf_t hf_x hf_xx hf_cont
+    hf_t_cont hf_x_cont hf_xx_cont
+  exact ⟨M, hMcont, hI, exists_martingale_eqOn hloc hMcont ((hI 0).mono fun ω h ↦ by simpa using h.symm)⟩
 
 end MathFin

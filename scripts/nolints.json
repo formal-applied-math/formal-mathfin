@@ -21,8 +21,4 @@
  ["docBlame", "MathFin.SmoothTrunc.φ"],
  ["docBlame", "MathFin.SmoothTrunc.φ'"],
  ["docBlame", "MathFin.SmoothTrunc.φ''"],
- ["docBlame", "MathFin.SmoothTrunc.φ'''"],
- ["unusedArguments", "MathFin.ItoIntegralBrownian.riemannFn"],
- ["unusedArguments", "MathFin.ItoIntegralBrownian.truncRiemannFn"],
- ["unusedArguments", "MathFin.ItoIntegralRiemannBridge.riemannφ"],
- ["unusedArguments", "MathFin.ItoIntegralRiemannBridgeTD.riemannφTD"]]
+ ["docBlame", "MathFin.SmoothTrunc.φ'''"]]

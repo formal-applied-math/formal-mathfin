@@ -15,14 +15,15 @@ public import MathFin.BlackScholes.Digital
 # Binary (digital) barrier options: Rubinstein & Reiner's closed form
 
 A digital (cash-or-nothing / asset-or-nothing) option that is additionally knocked in or
-knocked out by a single barrier `H` (Rubinstein & Reiner 1991; Haug, *The Complete Guide to
-Option Pricing Formulas*, §"Binary Barrier Options"). Unlike the two-asset barriers in
+knocked out by a single barrier `H` (Rubinstein & Reiner, *Risk* 4(9) (1991); Haug, *The Complete
+Guide to Option Pricing Formulas*, 2nd ed. (2007), ch. 4, "Binary Barrier Options"). Unlike the
+two-asset barriers in
 `HeynenKatTwoAssetBarrier.lean`, this is single-underlying, single-variable Black–Scholes
 machinery — no bivariate normal CDF needed.
 
 Transcribed from QuantLib's
 `ql/pricingengines/barrier/analyticbinarybarrierengine.cpp`
-(`AnalyticBinaryBarrierEngine_helper::payoffAtExpiry`, upstream commit `5f4811e`, 2026-10-16).
+(`AnalyticBinaryBarrierEngine_helper::payoffAtExpiry`, upstream commit `6efc1ed`, 2026-09-23).
 QuantLib computes a *drift* `mu` once (`mu = log(dividendDiscount/discount)/variance − 1/2`,
 which for constant cost-of-carry `b = r − q` is `(b − σ²/2)/σ²`, i.e. the same `hkMu`-style
 drift divided by `σ²`) and shares one formula shape between the **cash-or-nothing** payoff
@@ -39,8 +40,9 @@ With `stdDev = σ√T`, `η = 1` for `Down{In,Out}` / `η = −1` for `Up{In,Out
   `x₁ = φ(log(S/X)/stdDev + μ·stdDev)`,  `x₂ = φ(log(S/H)/stdDev + μ·stdDev)`,
   `y₁ = η(log(H²/(SX))/stdDev + μ·stdDev)`,  `y₂ = η(log(H/S)/stdDev + μ·stdDev)`,
 
-and, with `(H/S)^{2μ}` written as `exp(2μ·log(H/S))` (algebraically identical for `S, H > 0`,
-and the form QuantLib itself falls back to when `(H/S)^{2μ}` overflows),
+and, with `(H/S)^{2μ}` written as `exp(2μ·log(H/S))` (algebraically identical for `S, H > 0`;
+QuantLib's own overflow guard evaluates the product `(H/S)^{2μ}·Φ(y)` as a whole in logs,
+`exp(2μ·log(H/S) + log Φ(y))`, rather than this factor alone),
 
   `B₁ = Φ(x₁)`,  `B₂ = Φ(x₂)`,  `B₃ = (H/S)^{2μ}·Φ(y₁)`,  `B₄ = (H/S)^{2μ}·Φ(y₂)`.
 
@@ -107,8 +109,8 @@ noncomputable def bboY2 (S H mu σ T eta : ℝ) : ℝ :=
   eta * (Real.log (H / S) / (σ * Real.sqrt T) + mu * σ * Real.sqrt T)
 
 /-- **`(H/S)^{2μ}`**, written as `exp(2μ·log(H/S))` — algebraically the same value for
-`S, H > 0`, and the closed form QuantLib itself substitutes when the direct power
-overflows. -/
+`S, H > 0`. QuantLib's own overflow guard evaluates this factor together with its `Φ(y)`
+multiplier as one logged product, not this factor alone. -/
 noncomputable def bboHS2mu (S H mu : ℝ) : ℝ := Real.exp (2 * mu * Real.log (H / S))
 
 /-- **`B₁`**: the vanilla (barrier-free) digital `α`-factor for the `isCall` side — cash-or-nothing

@@ -203,9 +203,9 @@ namespace MathFin.AxiomAudit
 
 /-! ## Binomial trees -/
 
-/-- info: 'MathFin.americanCallPrice_le_binomialPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.bermudanCallPrice_eq_binomialPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
-#print axioms MathFin.americanCallPrice_le_binomialPrice
+#print axioms MathFin.bermudanCallPrice_eq_binomialPrice
 
 /-! ## Variance swap (QV limit) -/
 
@@ -269,23 +269,19 @@ namespace MathFin.AxiomAudit
 
 /-! ## Predictable-rectangle pairing (inner-product core of the continuous Itô integral) -/
 
-/-- info: 'MathFin.ItoIsometryAdapted.adapted_indepFun_forward' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.ItoIsometryAdapted.integral_adapted_mul_increment_mul_increment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.ItoIsometryAdapted.adapted_indepFun_forward
-
-/-- info: 'MathFin.ItoIsometryAdapted.integral_two_increment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.ItoIsometryAdapted.integral_two_increment
+#print axioms MathFin.ItoIsometryAdapted.integral_adapted_mul_increment_mul_increment
 
 /-- info: 'MathFin.ItoIsometryAdapted.rect_increment_pairing' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ItoIsometryAdapted.rect_increment_pairing
 
-/-! ## Continuous Itô integral — foundational bridge (AdaptedAt ↔ natural filtration) -/
+/-! ## The isometry core against a filtration (`IsFilteredPreBrownian`) -/
 
-/-- info: 'MathFin.ItoIntegralL2.adaptedAt_of_measurable_natural' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.ItoIsometryAdapted.adapted_indepFun_increment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.ItoIntegralL2.adaptedAt_of_measurable_natural
+#print axioms MathFin.ItoIsometryAdapted.adapted_indepFun_increment
 
 /-! ## Continuous Itô integral as a CLM on `[0,T]` — the headline -/
 
@@ -588,17 +584,17 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.snellAux_le_of_supermartingale_of_ge
 
-/-- info: 'MathFin.snellAux_eq_discounted_americanPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.snellAux_eq_discounted_bermudanPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.snellAux_eq_discounted_americanPrice
+#print axioms MathFin.snellAux_eq_discounted_bermudanPrice
 
-/-- info: 'MathFin.discounted_americanPrice_supermartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.discounted_bermudanPrice_supermartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.discounted_americanPrice_supermartingale
+#print axioms MathFin.discounted_bermudanPrice_supermartingale
 
-/-- info: 'MathFin.discounted_intrinsic_le_americanPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.discounted_intrinsic_le_bermudanPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.discounted_intrinsic_le_americanPrice
+#print axioms MathFin.discounted_intrinsic_le_bermudanPrice
 
 -- Poisson-process theory + Itô-process QV (2026-06-05 full-push round)
 
@@ -1489,6 +1485,12 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.bs_discounted_isQMartingale
 
+-- The same measure as an equivalent martingale measure of the continuous-market frame, at the
+-- horizon `T` (`ContinuousMarket.IsEMM`).
+/-- info: 'MathFin.bs_discounted_isEMM' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.bs_discounted_isEMM
+
 -- Multi-state single-period FTAP, now a biconditional (`FTAPMultiState.lean`):
 -- the backward direction (no arbitrage ⟹ EMM) via the separating-dual kernel.
 /-- info: 'MathFin.hasEMM_multi_iff_not_hasArbitrage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -1554,10 +1556,10 @@ coefficients (Summit C). -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.isLocalizingSequence_exitTime
 
-/-! ## The unrestricted-`C³` Itô formula via stopping-time localization (Summit C)
+/-! ## The unrestricted-`C²` Itô formula via stopping-time localization (Summit C)
 
-`ItoFormulaUnrestrictedLocMart.lean`: for a general `C³` `f` (six partials, all jointly continuous,
-**no** growth or boundedness hypothesis), the compensated process
+`ItoFormulaUnrestrictedLocMart.lean`: for a general `C²` `f` (`f_t`, `f_x`, `f_xx` with `HasDerivAt` witnesses, all four of
+`f, f_t, f_x, f_xx` jointly continuous, **no** growth or boundedness hypothesis), the compensated process
 `M_t = f(t,B_t) − f(0,B_0) − ∫₀ᵗ drift` is everywhere-continuous, satisfies the Itô identity by
 construction, and is a genuine `IsLocalMartingale` on the null-augmented Brownian filtration
 (`ito_formula_unrestricted`) and a **continuous local martingale in explicit form**
@@ -1673,8 +1675,8 @@ consistently: `changeOfNumeraire` is the invariance `N₀·𝔼^{Q^N}[X/N_T] = B
 measure-transport identity plus cancellation of `N_T` — no integrability hypothesis.
 `numeraireMeasure_isProbabilityMeasure` is the companion normalization (`N/B` a `Q`-martingale ⟹
 `Q^N` a probability measure). The abstract backbone is genuinely CONSUMED:
-`stockNumeraireMeasure_eq_numeraireMeasure` exhibits the Black–Scholes stock numéraire
-`dQ^(S)/dQ = e^{−rT}·S_T/S₀` as the instance `B_T = e^{rT}`, `B₀ = 1`, `N = S`. -/
+`numeraireMeasure` at `B_T = e^{rT}`, `B₀ = 1`, `N = S` is the Black–Scholes stock numéraire
+`dQ^(S)/dQ = e^{−rT}·S_T/S₀` (`stockNumeraire_exercise_probability`). -/
 
 /-- info: 'MathFin.changeOfNumeraire' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1684,9 +1686,9 @@ measure-transport identity plus cancellation of `N_T` — no integrability hypot
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.numeraireMeasure_isProbabilityMeasure
 
-/-- info: 'MathFin.stockNumeraireMeasure_eq_numeraireMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.stockNumeraire_exercise_probability' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.stockNumeraireMeasure_eq_numeraireMeasure
+#print axioms MathFin.stockNumeraire_exercise_probability
 
 /-! ## Two further numéraire seams: the Kelly portfolio ⟹ EMM, and the exchange option
 
@@ -1762,14 +1764,13 @@ A model-agnostic continuous-market frame (`Foundations/ContinuousMarket.lean`): 
 martingale measure** for a discounted price process precludes arbitrage against **simple**
 (piecewise-constant, predictable, bounded) strategies — the honest, economically transparent
 meaning-1 scope (general admissible strategies, NFLVR, and the converse are the deferred
-Delbaen–Schachermayer meaning-2). The forward theorem is DIRECT: each predictable-weighted
-increment `⟪φᵢ, S(tᵢ₊₁) − S(tᵢ)⟫` integrates to `0` under `Q` via the bilinear
-conditional-expectation pull-out (`condExp_bilin_of_stronglyMeasurable_left` with `innerSL ℝ`) and
-the martingale property, the finite sum vanishes, and the shared closing primitive
-`ae_zero_of_nonneg_of_integral_zero` — the SAME step the discrete `emm_implies_no_arbitrage` uses,
-each setting supplying its own zero-integral — finishes. Instantiated at `F = ℝ` by the discounted
-GBM under its risk-neutral measure (`Q = P`, `discountedGBM_isMartingale` a full-horizon
-`P`-martingale). -/
+Delbaen–Schachermayer meaning-2). The notion carries a horizon `T`, like the discrete `IsEMM`: `S`
+is a `Q`-martingale on `[0, T]`. The forward theorem is the discrete one: a simple strategy is a
+discrete predictable strategy for the price sampled at its own dates (`martingale_comp_monotone`),
+its gains are the `F`-valued martingale transform (Theorem 2.2.9), and `IsEMM.noArbitrage`
+(closing through `ae_zero_of_nonneg_of_integral_zero`) applies. Instantiated at `F = ℝ` by the discounted GBM under its risk-neutral measure (`Q = P`,
+`discountedGBM_isMartingale` a `P`-martingale on all of `ℝ≥0`, hence an EMM at every horizon) and by
+the Girsanov measure `bs_discounted_isEMM` (a martingale measure on `[0, T]` only). -/
 
 /-- info: 'MathFin.ae_zero_of_nonneg_of_integral_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

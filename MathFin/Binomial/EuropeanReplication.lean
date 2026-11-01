@@ -5,23 +5,21 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Binomial.MartingaleRepresentation
 public import MathFin.Binomial.SnellEnvelope
 
 /-!
-# A European claim in the binomial tree is replicated, and its price is the hedge's cost
+# The discounted tree value and the discounted spot, as one-step martingales
 
 `binomialPrice u d r g N S₀` is the backward-induction price of the claim that pays `g(S_N)`
-after `N` steps. This file proves it is also the initial capital of a hedge: under
-no-arbitrage there is a predictable strategy `H` such that, along every coin-flip path,
+after `N` steps. Along a coin-flip path, the **discounted tree value** `discountedTreeValue`
+(the tree price with the steps left, at the spot reached, discounted and stopped at `N`) and the
+**discounted spot** `discountedSpot` `S̃_k = e^{−rk} S_k` are both one-step martingales under the
+risk-neutral up-probability: the node average `q X_{n+1}(↑) + (1 − q) X_{n+1}(↓)` is `X_n`.
+The first is the backward recursion `binomialPrice_succ`, the second is `crrUpProb_mul_up_add`.
 
-  `e^{−rN} g(S_N) = binomialPrice u d r g N S₀ + ∑_{k<N} H_k (S̃_{k+1} − S̃_k)`,
-
-where `S̃_k = e^{−rk} S_k` is the discounted spot (`binomialPrice_replication`). The proof
-is the discrete martingale representation theorem (`binomial_martingale_representation`)
-applied to two one-step martingales: the discounted tree value of the claim, stopped at `N`
-(`discountedTreeValue_step`, which is `binomialPrice_succ`), and the discounted spot
-(`discountedSpot_step`, which is `crrUpProb_mul_up_add`).
+These are the two inputs of the replication theorem `binomialPrice_replication`
+(`Binomial/MartingaleRepresentation.lean`): under no-arbitrage the claim's discounted payoff is
+its tree price plus the gains of a predictable strategy in the discounted spot.
 
 ## Main definitions
 
@@ -32,18 +30,13 @@ applied to two one-step martingales: the discounted tree value of the claim, sto
 
 * `discountedTreeValue_step`, `discountedSpot_step` — both are one-step martingales under the
   risk-neutral up-probability.
-* `binomialPrice_replication` — the claim's discounted payoff is its tree price plus the gains of a
-  predictable strategy in the discounted spot, on every path.
+* `discountedSpot_update_ne` — under no-arbitrage and `S₀ ≠ 0` the two children of a node have
+  different discounted spots (the non-degeneracy the hedge ratio divides by).
 -/
 
 @[expose] public section
 
 namespace MathFin
-
-/-- A function of the first `m` flips is a function of the first `n`, for `m ≤ n`. -/
-lemma PathAdaptedAt.mono {m n : ℕ} {X : (ℕ → Bool) → ℝ} (h : PathAdaptedAt m X)
-    (hmn : m ≤ n) : PathAdaptedAt n X :=
-  fun ω ω' hω ↦ h ω ω' fun i hi ↦ hω i (hi.trans_le hmn)
 
 /-- The spot after `k` flips does not see the `n`-th flip, for `k ≤ n`. -/
 lemma spotPath_update_of_le {k n : ℕ} (hkn : k ≤ n) (S₀ u d : ℝ) (ω : ℕ → Bool) (b : Bool) :
@@ -120,24 +113,5 @@ lemma discountedSpot_update_ne {u d r : ℝ} (h : BinomialNoArb u d r) {S₀ : �
   simp only [discountedSpot, spotPath_update_succ_true, spotPath_update_succ_false]
   intro heq
   exact h.d_lt_u.ne' (mul_left_cancel₀ hS (mul_left_cancel₀ (Real.exp_pos _).ne' heq))
-
-/-- **The tree price is the cost of a hedge.** Under no-arbitrage and `S₀ ≠ 0`, for every payoff
-`g` and horizon `N` there is a predictable strategy `H` (`H_k` depends only on the first `k`
-flips) whose gains in the discounted spot, added to the tree price, are the discounted payoff
-on every path:
-
-  `e^{−rN} g(S_N) = binomialPrice u d r g N S₀ + ∑_{k<N} H_k (S̃_{k+1} − S̃_k)`. -/
-theorem binomialPrice_replication {u d r : ℝ} (h : BinomialNoArb u d r) {S₀ : ℝ} (hS₀ : S₀ ≠ 0)
-    (g : ℝ → ℝ) (N : ℕ) :
-    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, PathAdaptedAt n (H n)) ∧ ∀ ω,
-      Real.exp (-(r * N)) * g (spotPath S₀ u d N ω) = binomialPrice u d r g N S₀
-        + ∑ k ∈ Finset.range N,
-          H k ω * (discountedSpot S₀ u d r (k + 1) ω - discountedSpot S₀ u d r k ω) := by
-  obtain ⟨H, hH, hrep⟩ := binomial_martingale_representation
-    (pathAdaptedAt_discountedTreeValue u d r g N S₀) (pathAdaptedAt_discountedSpot S₀ u d r)
-    (discountedTreeValue_step u d r g N S₀) (discountedSpot_step h S₀)
-    (discountedSpot_update_ne h hS₀)
-  refine ⟨H, hH, fun ω ↦ ?_⟩
-  simpa [discountedTreeValue] using hrep N ω
 
 end MathFin

@@ -116,7 +116,7 @@ theorem gridReward_eq_discountedLogPayoff (K r q σ x : ℝ) (T δ : ℝ≥0) :
       fun i ω => discountedLogPayoff K r (cappedGridTime T δ i)
         (brownianLogState (r-q-σ^2/2) σ x (cappedGridTime T δ i) ω) := by
   funext i ω
-  simp only [gridReward,putReward,MathFin.gbmValue,discountedLogPayoff,
+  simp only [gridReward,putRewardAt,putReward,MathFin.gbmValue,discountedLogPayoff,
     brownianLogState,cappedGridTime,Real.exp_add,mul_assoc]
 
 /-- Deterministic Gaussian recursion for the actual capped-grid put value. -/
@@ -132,12 +132,14 @@ theorem brownianGridPrice_continuous {K r : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r)
 /-- **The Gaussian recursion prices the grid put in any filtration where the log state is Gaussian
 Markov.** Raw and usual Brownian filtrations are the two instances; `P` and `𝓕` are free. -/
 theorem brownianGridPrice_eq_gridAmericanPutValue [MeasurableSpace (ℝ≥0 → ℝ)]
-    {P : Measure (ℝ≥0 → ℝ)} [IsProbabilityMeasure P] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace (ℝ≥0 → ℝ)›}
+    {P : Measure (ℝ≥0 → ℝ)} [IsProbabilityMeasure P]
+    {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace (ℝ≥0 → ℝ)›}
     (hW : Measurable (Function.uncurry brownian)) (ha : Adapted 𝓕 brownian)
     (hz : ∀ᵐ ω ∂P, brownian 0 ω = 0)
     (hL : ∀ β σ x, IsGaussianMarkov P 𝓕 β σ (brownianLogState β σ x))
     {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r) (T : ℝ≥0) {δ : ℝ≥0} (hδ : 0 < δ) (x : ℝ) :
-    brownianGridPrice K r q σ T δ x = gridAmericanPutValue P 𝓕 brownian K r q σ (Real.exp x) T δ := by
+    brownianGridPrice K r q σ T δ x =
+      gridAmericanPutValue P 𝓕 brownian K r q σ (Real.exp x) T δ := by
   rw [gridValue_eq_bellman hW ha hK hr (Real.exp_pos x).le hδ]
   have he : bellmanAux P (cappedGridFiltration 𝓕 T δ)
       (fun j ω => discountedLogPayoff K r (cappedGridTime T δ j)

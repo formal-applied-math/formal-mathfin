@@ -15,7 +15,7 @@ to zero, with no nesting assumption and no classical pricing contract.
 
 ## Result
 
-Public entry points include `BoundedRule.roundUp_time_tendsto_of_mesh`,
+Public entry points include `StoppingRule.roundUp_time_tendsto_of_mesh`,
 `expectedReward_roundUp_tendsto_of_mesh`, `gridValue_tendsto_americanValue_of_mesh`,
 `brownianGridPrice_tendsto_usual_of_mesh`.
 -/
@@ -30,7 +30,7 @@ open scoped NNReal Topology
 variable {Ω : Type*} [MeasurableSpace Ω] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
   {T : ℝ≥0} {δ : ℕ → ℝ≥0}
 
-theorem BoundedRule.roundUp_time_tendsto_of_mesh (θ : BoundedRule 𝓕 T)
+theorem StoppingRule.roundUp_time_tendsto_of_mesh (θ : StoppingRule 𝓕 T)
     (hδ : ∀ n, 0 < δ n) (hlim : Tendsto δ atTop (𝓝 0)) (ω : Ω) :
     Tendsto (fun n => (θ.roundUp (hδ n)).time ω) atTop (𝓝 (θ.time ω)) := by
   apply tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds
@@ -48,7 +48,7 @@ theorem expectedReward_roundUp_tendsto_of_mesh {P : Measure Ω} [IsProbabilityMe
     {W : ℝ≥0 → Ω → ℝ} (hW : Measurable W.uncurry)
     (hpaths : ∀ ω, Continuous (fun t => W t ω))
     {K r q σ S : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S)
-    (θ : BoundedRule 𝓕 T) (hδ : ∀ n, 0 < δ n) (hlim : Tendsto δ atTop (𝓝 0)) :
+    (θ : StoppingRule 𝓕 T) (hδ : ∀ n, 0 < δ n) (hlim : Tendsto δ atTop (𝓝 0)) :
     Tendsto (fun n => ∫ ω, putReward W K r q σ S (θ.roundUp (hδ n)).time ω ∂P) atTop
       (𝓝 (∫ ω, putReward W K r q σ S θ.time ω ∂P)) := by
   apply tendsto_integral_of_dominated_convergence (fun _ => K)
@@ -75,13 +75,12 @@ theorem gridValue_tendsto_americanValue_of_mesh {P : Measure Ω} [IsProbabilityM
   apply tendsto_order.mpr
   constructor
   · intro a ha
-    obtain ⟨_,⟨θ,rfl⟩,hθ⟩ := exists_lt_of_lt_csSup
-      (exerciseValues_nonempty (P := P) (𝓕 := 𝓕) (W := W) (K := K) (r := r)
-        (q := q) (σ := σ) (S := S) (T := T)) ha
+    obtain ⟨θ,-,hθ⟩ := exists_lt_of_lt_stoppingValue ha univ_nonempty
     have he := expectedReward_roundUp_tendsto_of_mesh (P := P) (q := q) (σ := σ)
       hW hpaths hK hr hS θ hδ hlim
     filter_upwards [he.eventually (Ioi_mem_nhds hθ)] with n hn
-    exact hn.trans_le (expectedReward_le_gridValue hW hK hr hS (θ.toGridRule (hδ n)))
+    exact hn.trans_le (expectedReward_le_gridValue hW hK hr hS (θ.roundUp (hδ n))
+      (θ.roundUp_mem_grid (hδ n)))
   · intro a ha
     exact Eventually.of_forall (fun _ => (gridValue_le_value hW hK hr hS).trans_lt ha)
 

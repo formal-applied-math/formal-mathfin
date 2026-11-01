@@ -63,8 +63,8 @@ one-period operator. The structure:
    values are bounded; by monotonicity, the bound lifts; the one-period
    inequality closes the step.
 
-Used in `call_intrinsic_le_binomialPrice`; `americanCallPrice_le_binomialPrice` then follows from
-the Snell minimality of `americanPrice` (the European price process is a martingale above the
+Used in `call_intrinsic_le_binomialPrice`; `bermudanCallPrice_eq_binomialPrice` then follows from
+the Snell minimality of `bermudanPrice E` (the European price process is a martingale above the
 payoff).
 
 ### Algebraic-identity / counting-bijection decoupling
@@ -502,10 +502,10 @@ clauses there (dominance, supermartingale, adaptedness, minimality), then prove
 ONE induction — the identification `scalar recursion = discounted path object`
 — and every clause transports to the scalar object for free.
 
-Concrete: `snellAux_eq_discounted_americanPrice`
-(`Binomial/SnellEnvelope.lean`): `snell q Z N k ω = e^{−rk}·americanPrice
+Concrete: `snellAux_eq_discounted_bermudanPrice`
+(`Binomial/SnellEnvelope.lean`): `snell E q Z N k ω = e^{−rk}·bermudanPrice E
 (N−k) (S_k ω)`. Four abstract Snell clauses + one induction = the genuine
-supermartingale/intrinsic statements about `americanPrice`, with the
+supermartingale/intrinsic statements about `bermudanPrice`, with the
 node-average conditional expectation made explicit. Same instrument as the
 "this IS already that" structural reduction, but for *recursions* rather than
 single formulas.
@@ -1188,7 +1188,7 @@ theory. A localizing family that is eventually inert pointwise is usually identi
 
 ### A trim measure erases a time cutoff
 
-`ae_fst_mem_Ioc_trimMeasure_T` (`Foundations/ItoIntegralCLM.lean`): trim-a.e. `z`, `z.1 ∈ Ioc 0 T`, the
+`ae_fst_mem_Ioc_trimMeasure_T` (`Foundations/ItoIntegralHorizonDense.lean`): trim-a.e. `z`, `z.1 ∈ Ioc 0 T`, the
 pointwise reading of `trimMeasure_T_eq_restrict`. That is what lets `ito_formula_itoProcess` state its
 integrand as `σ·f'(X₀ + b·z.1 + σ·B)` although the localized formula hands back
 `σ·f'(X₀ + b·φₙ(z.1) + σ·B)`: past the horizon the trim charges nothing, and inside it `φₙ = id`. The

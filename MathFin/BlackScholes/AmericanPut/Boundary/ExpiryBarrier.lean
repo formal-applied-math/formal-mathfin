@@ -203,11 +203,11 @@ theorem expiryBarrier_le_price {k h T : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ 
     exact (mul_le_mul_of_nonneg_left (Real.sqrt_le_sqrt htT)
       (add_nonneg (abs_nonneg _) hp.rate_pos.le)).trans hsmall
   · intro x _ _
-    simpa using hp.price_nonneg x (t := 0) le_rfl
+    simpa using hp.nonneg x (t := 0) le_rfl
   · intro t ht htT
     exact (expiryBarrier_left_le_payoff ht (htT.trans hT1)).trans (hp.dominates _ t ht)
   · intro t ht _
-    simpa using hp.price_nonneg (Real.sqrt t) ht
+    simpa using hp.nonneg (Real.sqrt t) ht
 
 /-- There is a genuine positive time window on which this price lower bound
 holds. The small-time restriction is constructed by continuity, not assumed. -/

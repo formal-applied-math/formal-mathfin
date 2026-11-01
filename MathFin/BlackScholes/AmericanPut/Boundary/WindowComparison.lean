@@ -140,7 +140,7 @@ theorem DividendPutSolution.obstacle_comparison_unbounded_window
     have hedge (y : ℝ) (hy : y^2 = R^2) (s : ℝ) (hs : s ∈ Icc a T) : V y s ≤ p y s := by
       have hW := localizationBarrier_ge_quad k h y (ha.trans hs.1)
       rw [hy] at hW
-      have hP := hp.price_nonneg y (ha.trans hs.1)
+      have hP := hp.nonneg y (ha.trans hs.1)
       have hB := hUb y s hs
       dsimp [V]
       nlinarith

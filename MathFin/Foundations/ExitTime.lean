@@ -155,7 +155,7 @@ theorem isStoppingTime_exitTime_of_measurable {𝓕 : Filtration ℝ≥0 mΩ}
 theorem isStoppingTime_exitTime (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (N : ℕ) :
     IsStoppingTime (ItoIntegralL2.natFiltration hBmeas) (exitTime B N) :=
-  isStoppingTime_exitTime_of_measurable (measurable_eval_natFiltration hBmeas) hBcont N
+  isStoppingTime_exitTime_of_measurable (fun t ↦ (ItoIntegralL2.stronglyAdapted_natFiltration hBmeas t).measurable) hBcont N
 
 /-- **The exit times increase with `N`** (the closed exterior shrinks, so the hit comes later or
 never): `N ≤ M → exitTime N ω ≤ exitTime M ω`, pointwise in `ω`. -/
@@ -209,7 +209,7 @@ theorem isLocalizingSequence_exitTime (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) :
     IsLocalizingSequence (augFiltration (μ := μ) hBmeas) (fun N ↦ exitTime B N) μ :=
   isLocalizingSequence_exitTime_of_measurable (fun t ↦
-    (measurable_eval_natFiltration hBmeas t).mono le_sup_left le_rfl) hBcont
+    (ItoIntegralL2.stronglyAdapted_natFiltration hBmeas t).measurable.mono le_sup_left le_rfl) hBcont
 
 /-- **The path stays confined up to the exit time.** On `{s ≤ τ_N}` with `0 < s`, `|B_s| ≤ N`:
 for `u < s ≤ τ_N` the exit has not happened (`|B_u| < N`), and left-continuity carries the bound

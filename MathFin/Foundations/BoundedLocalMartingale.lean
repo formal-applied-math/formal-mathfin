@@ -6,6 +6,8 @@ Authors: Robert Martin, Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
+public import MathFin.Foundations.MartingaleSetIntegral
+public import MathFin.Foundations.StoppedProcessPaths
 
 /-!
 # Bounded local martingales and smaller filtrations
@@ -19,7 +21,7 @@ not silently treated as pointwise adaptation on exceptional null outcomes.
 
 ## Result
 
-Public entry points include `martingale_of_setIntegral_eq_real`, `martingale_smaller_filtration`,
+Public entry points include `martingale_smaller_filtration`,
 `locally_bounded_localMartingale_is_martingale`, `bounded_localMartingale_is_martingale`,
 `isLocalMartingale_congr_ae`.
 -/
@@ -34,18 +36,9 @@ open scoped NNReal Topology
 variable {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} [IsFiniteMeasure P]
   {𝓕 𝓖 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {X : ℝ≥0 → Ω → ℝ}
 
-theorem martingale_of_setIntegral_eq_real (hadapt : StronglyAdapted 𝓕 X)
-    (hint : ∀ t, Integrable (X t) P)
-    (heq : ∀ i j, i ≤ j → ∀ s, MeasurableSet[𝓕 i] s →
-      (∫ ω in s, X i ω ∂P) = ∫ ω in s, X j ω ∂P) : Martingale X 𝓕 P := by
-  refine ⟨hadapt,fun i j hij => ?_⟩
-  exact (ae_eq_condExp_of_forall_setIntegral_eq (𝓕.le i) (hint j)
-    (fun _ _ _ => (hint i).integrableOn) (fun s hs _ => heq i j hij s hs)
-    (hadapt i).aestronglyMeasurable).symm
-
 theorem martingale_smaller_filtration (hFG : 𝓕 ≤ 𝓖) (hX : Martingale X 𝓖 P)
     (hadapt : StronglyAdapted 𝓕 X) : Martingale X 𝓕 P :=
-  martingale_of_setIntegral_eq_real hadapt hX.integrable
+  martingale_of_setIntegral_eq hadapt hX.integrable
     (fun _ _ hij _ hs => hX.setIntegral_eq hij (hFG _ _ hs))
 
 theorem locally_bounded_localMartingale_is_martingale (hX : IsLocalMartingale X 𝓕 P)
@@ -85,7 +78,7 @@ theorem locally_bounded_localMartingale_is_martingale (hX : IsLocalMartingale X 
     obtain ⟨C,hC⟩ := hbound t
     exact (integrable_const C).mono' ((hadapt t).mono (𝓕.le t)).aestronglyMeasurable
       (Eventually.of_forall (hC t le_rfl))
-  apply martingale_of_setIntegral_eq_real hadapt hint
+  apply martingale_of_setIntegral_eq hadapt hint
   intro i j hij s hs
   have hconv (t : ℝ≥0) : Tendsto (fun n => ∫ ω in s, Y n t ω ∂P) atTop
       (𝓝 (∫ ω in s, X t ω ∂P)) := by
@@ -104,6 +97,45 @@ theorem bounded_localMartingale_is_martingale (hX : IsLocalMartingale X 𝓕 P)
     (hbound : ∀ t ω, ‖X t ω‖ ≤ C) : Martingale X 𝓕 P :=
   locally_bounded_localMartingale_is_martingale hX hadapt
     (fun _ => ⟨C,fun t _ ω => hbound t ω⟩)
+
+/-- **A continuous adapted local martingale stopped at a positive stopping time where it is
+locally bounded is a martingale.** Stopping a local martingale keeps it a local martingale
+(`IsStable.locally`); at a positive `ρ` the stopping indicator is inert
+(`stoppedProcess_indicator_eq`), so this is `locally_bounded_localMartingale_is_martingale`. -/
+theorem martingale_stoppedProcess_of_locally_bounded {ρ : Ω → WithTop ℝ≥0}
+    (hX : IsLocalMartingale X 𝓕 P) (hXad : StronglyAdapted 𝓕 X)
+    (hXc : ∀ ω, Continuous fun t ↦ X t ω) (hρ : IsStoppingTime 𝓕 ρ) (hpos : ∀ ω, ⊥ < ρ ω)
+    (hbound : ∀ T : ℝ≥0, ∃ C : ℝ, ∀ t, t ≤ T → ∀ ω, ‖stoppedProcess X ρ t ω‖ ≤ C) :
+    Martingale (stoppedProcess X ρ) 𝓕 P := by
+  have hloc := (isStable_martingale (𝓕 := 𝓕) (P := P)).locally X hX _ hρ
+  rw [stoppedProcess_indicator_eq hpos] at hloc
+  have had := hXad.stoppedProcess_indicator (fun ω ↦ (hXc ω).isCadlag.right_continuous) hρ
+  rw [stoppedProcess_indicator_eq hpos] at had
+  exact locally_bounded_localMartingale_is_martingale hloc had hbound
+
+omit [IsFiniteMeasure P] in
+/-- **A continuous local martingale is, along its localising sequence, a continuous martingale.**
+For `σ` the localising sequence of `X`, each `N` has a continuous martingale `Y` (`X` stopped at
+`σ N`, zeroed where `σ N = 0`) with `X t = Y t` almost surely on `{t ≤ σ N}`. The zeroing is
+invisible because `X 0 = 0` almost surely. -/
+theorem exists_martingale_eqOn (hX : IsLocalMartingale X 𝓕 P)
+    (hXc : ∀ ω, Continuous fun t ↦ X t ω) (hX0 : ∀ᵐ ω ∂P, X 0 ω = 0) :
+    ∃ σ : ℕ → Ω → WithTop ℝ≥0, IsLocalizingSequence 𝓕 σ P ∧ ∀ N, ∃ Y : ℝ≥0 → Ω → ℝ,
+      Martingale Y 𝓕 P ∧ (∀ ω, Continuous fun t ↦ Y t ω) ∧
+        ∀ t : ℝ≥0, ∀ᵐ ω ∂P, (t : WithTop ℝ≥0) ≤ σ N ω → X t ω = Y t ω := by
+  obtain ⟨σ, hσ, hloc⟩ := hX
+  refine ⟨σ, hσ, fun N ↦ ⟨_, (hloc N).1, fun ω ↦ ?_, fun t ↦ hX0.mono fun ω h0 hle ↦ ?_⟩⟩
+  · by_cases hpos : ⊥ < σ N ω
+    · simp only [stoppedProcess, Set.indicator_of_mem (show ω ∈ {ω | ⊥ < σ N ω} from hpos)]
+      exact (hXc ω).comp (continuous_untopA_min _)
+    · simp only [stoppedProcess, Set.indicator_of_notMem (show ω ∉ {ω | ⊥ < σ N ω} from hpos)]
+      exact continuous_const
+  · by_cases hpos : ⊥ < σ N ω
+    · rw [stoppedProcess_eq_of_le hle, Set.indicator_of_mem (show ω ∈ {ω | ⊥ < σ N ω} from hpos)]
+    · obtain rfl : t = 0 := le_antisymm (WithTop.coe_le_coe.1 (hle.trans (not_lt.1 hpos))) zero_le
+      rw [h0]
+      simp only [stoppedProcess]
+      rw [Set.indicator_of_notMem (show ω ∉ {ω | ⊥ < σ N ω} from hpos)]
 
 omit [IsFiniteMeasure P] in
 /-- **A process indistinguishable from a local martingale is one**, provided it is adapted with

@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
 module
-public import MathFin.Foundations.ItoIntegralL2Dense
+public import MathFin.Foundations.ItoIntegralCLM
 /-! # Covariation of Itô integrals: the bilinear Itô isometry
 
 The Itô isometry `‖∫φ dB‖ = ‖φ‖` (`ItoIntegralCLM.itoIntegralCLM_T_norm`) says

@@ -35,8 +35,12 @@ worth `∑ cᵢ P(0, tᵢ)` with
 
 In each, the measure is read as the pricing measure: no change of measure is built, as in the
 bond-price theorems the instances consume. Contracts whose cash flows depend on the rate, such as
-a floating leg paying the rate it observes, are not covered: valuing one needs the bond prices
-`P(t, T)` at `t > 0`, which the library does not have for these models.
+a floating leg paying the rate it observes, are not covered by these closed forms: valuing one
+needs the bond prices `P(t, T)` at `t > 0`, the conditional expectation `bondPrice`
+(`Contracts/Models/Caplet.lean`). For the Vasicek and Hull–White models they are in closed form
+(`bondPrice_vasicek`, `bondPrice_hullWhite`, `Contracts/Models/VasicekBond.lean`,
+`Contracts/Models/HullWhiteBond.lean`), and the bond put and caplet follow
+(`Contracts/Models/Jamshidian.lean`); the two-piece GSR has only `P(0, T)`.
 
 ## Main definitions
 
@@ -89,6 +93,25 @@ noncomputable def Contract.valueDisc (Q : Measure Ω) (D : ℝ≥0 → Ω → �
 theorem Contract.valueDisc_const (Q : Measure Ω) (D : ℝ≥0 → ℝ) (X : ι → ℝ≥0 → Ω → ℝ)
     (c : Contract ι) : c.valueDisc Q (fun t _ ↦ D t) X = c.value Q D X :=
   rfl
+
+/-- **The value of a single cash flow under a stochastic discount factor** is the integral of its
+payoff discounted along each outcome. -/
+theorem Contract.valueDisc_pay (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ) (X : ι → ℝ≥0 → Ω → ℝ)
+    (t : ℝ≥0) (a : Payoff ι) :
+    (Contract.pay t a).valueDisc Q D X = ∫ ω, D t ω * a.eval (scenarioAt X ω) ∂Q := by
+  simp [Contract.valueDisc, Contract.pathPV, Contract.cashflows]
+
+/-- A schedule of payments is worth the sum of its payments, given each discounted payoff is
+integrable. -/
+theorem Contract.valueDisc_payFlows (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ) (X : ι → ℝ≥0 → Ω → ℝ)
+    (t : ℕ → ℝ≥0) (a : ℕ → Payoff ι) (n : ℕ)
+    (hint : ∀ i < n, Integrable (fun ω ↦ D (t i) ω * (a i).eval (scenarioAt X ω)) Q) :
+    (payFlows t a n).valueDisc Q D X
+      = ∑ i ∈ Finset.range n, (Contract.pay (t i) (a i)).valueDisc Q D X := by
+  simp only [Contract.valueDisc_pay]
+  rw [Contract.valueDisc]
+  simp only [pathPV_payFlows]
+  exact integral_finsetSum _ fun i hi ↦ hint i (Finset.mem_range.1 hi)
 
 /-- The **zero curve** of a stochastic discount factor, `P(0, t) = 𝔼_Q[D t]`: the value of one
 unit paid at `t`. -/

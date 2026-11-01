@@ -120,19 +120,17 @@ level. -/
 theorem valueAtRisk_hedged_eq_zero (hqcrr : crrUpProb u d ρ = q) (S₀ : ℝ) {T : ℝ≥0} {N : ℕ}
     (hTN : (T : ℝ) / h = N) (hna : BinomialNoArb u d ρ) (hS₀ : S₀ ≠ 0) {a : Payoff Unit}
     {g : ℝ → ℝ} (hg : ∀ s : Scenario Unit, a.eval s = g (s () T)) :
-    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, PathAdaptedAt n (H n)) ∧
+    ∃ H : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ H (n + 1)) ∧
       ∀ (P : Measure (ℕ → Bool)) [IsProbabilityMeasure P], ∀ α ∈ Ioo (0 : ℝ) 1,
         let L := fun ω ↦ (Contract.pay T a).pathPV (discount ρ h) (scenarioAt (assets S₀ u d h) ω)
           - ((Contract.pay T a).value (coinFlipMeasure q hq) (discount ρ h) (assets S₀ u d h)
-            + ∑ k ∈ Finset.range N,
-              H k ω * (discountedSpot S₀ u d ρ (k + 1) ω - discountedSpot S₀ u d ρ k ω))
+            + martingaleTransform H (discountedSpot S₀ u d ρ) N ω)
         valueAtRisk L P α = 0 ∧ expectedShortfall L P α = 0 := by
   obtain ⟨H, hH, hrep⟩ := pathPV_eq_value_add_gains hq hqcrr S₀ hTN hna hS₀ hg
   refine ⟨H, hH, fun P _ α hα ↦ ?_⟩
   have hL : (fun ω ↦ (Contract.pay T a).pathPV (discount ρ h) (scenarioAt (assets S₀ u d h) ω)
       - ((Contract.pay T a).value (coinFlipMeasure q hq) (discount ρ h) (assets S₀ u d h)
-        + ∑ k ∈ Finset.range N,
-          H k ω * (discountedSpot S₀ u d ρ (k + 1) ω - discountedSpot S₀ u d ρ k ω)))
+        + martingaleTransform H (discountedSpot S₀ u d ρ) N ω))
       = fun _ ↦ 0 := funext fun ω ↦ sub_eq_zero.2 (hrep ω)
   simp only [hL]
   exact ⟨valueAtRisk_const 0 hα, expectedShortfall_const 0 hα⟩

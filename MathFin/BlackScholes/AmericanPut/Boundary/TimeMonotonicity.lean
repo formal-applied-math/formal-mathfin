@@ -104,7 +104,7 @@ theorem penalizedDelay_le_price (hp : DividendPutSolution k h p b)
     have hD : delayedPrice p a y t ≤ 1 := hp.bounded y _ (le_max_right _ _)
     have hW := localizationBarrier_ge_quad k h y ht
     rw [hy] at hW
-    have hP := hp.price_nonneg y ht
+    have hP := hp.nonneg y ht
     unfold penalizedDelay
     nlinarith
   have hcont : Continuous (fun z : ℝ × ℝ => penalizedDelay p k h a ε z.1 z.2) :=

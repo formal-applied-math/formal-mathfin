@@ -96,6 +96,7 @@ import MathFin.Foundations.ExpMartingaleQBrownian
 import MathFin.Foundations.LevyQuadraticSums
 import MathFin.Foundations.LevyExpMartingale
 import MathFin.Foundations.ExpMartingaleBrownian
+import MathFin.Foundations.StoppedProcessPaths
 import MathFin.Foundations.BoundedLocalMartingale
 import MathFin.Foundations.LevyCharacterization
 import MathFin.Foundations.GirsanovConstantTheta
@@ -111,6 +112,7 @@ import MathFin.Foundations.NoArbitrageCore
 import MathFin.Foundations.FTAP
 import MathFin.Foundations.OptionalSamplingInequality
 import MathFin.Foundations.LpContinuousMartingaleConvergence
+import MathFin.Foundations.MartingaleSetIntegral
 import MathFin.Foundations.MartingaleTransform
 import MathFin.Foundations.DoobLpMaximalInequality
 import MathFin.Foundations.ExtendOfNormIsometry
@@ -118,6 +120,8 @@ import MathFin.Foundations.WienerIntegralL2
 import MathFin.Foundations.WienerIntegralGaussian
 -- Wiener integral of a step indicator is the increment (∫𝟙_{(s,t]} dB = B_t − B_s)
 import MathFin.Foundations.WienerIntegralIndicator
+import MathFin.Foundations.WienerIntegralIto
+import MathFin.Foundations.WienerIntegralFiltration
 -- Structural / principle modules:
 import MathFin.Foundations.StandardGaussianMGF
 import MathFin.Foundations.ExponentialDiscount
@@ -178,6 +182,7 @@ import MathFin.Foundations.ItoIntegralL2
 -- 𝓕ᴮ_T is the countable supremum of dyadic cylinder σ-algebras (path continuity)
 import MathFin.Foundations.BrownianCylinderGeneration
 -- The Itô integral as a continuous linear isometry `Lp 2 trim_T → Lp 2 μ` on `[0,T]`
+import MathFin.Foundations.ItoIntegralHorizonDense
 import MathFin.Foundations.ItoIntegralCLM
 import MathFin.Foundations.LpMulIsometry
 import MathFin.Foundations.PredictableDensityGeneral
@@ -228,6 +233,7 @@ import MathFin.Foundations.SDEPathwise
 -- The general-integrand Itô process as a continuous local martingale (null-augmented filtration)
 import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
 -- The unbounded-horizon Itô process: the L² process, horizon consistency (the [0,∞) climb)
+import MathFin.Foundations.ItoIntegralProcessL2Inf
 import MathFin.Foundations.ItoIntegralProcessL2Infinite
 -- The [0,∞) crown: the unbounded-horizon Itô integral as a continuous local martingale on ℝ≥0
 import MathFin.Foundations.ItoIntegralProcessLocalMartingaleInfinite
@@ -310,6 +316,7 @@ import MathFin.Foundations.ItoFormulaAdaptedDriftConstructed
 import MathFin.Foundations.ItoIntegralCrossHorizon
 import MathFin.Foundations.GyongyMimicry
 import MathFin.FixedIncome.HullWhiteCalibration
+import MathFin.FixedIncome.HullWhiteBondPriceAt
 import MathFin.BlackScholes.MonteCarloPricer
 -- Martingale representation, step 3: the Doléans exponential of a deterministic step
 -- integrand is an Itô integral (time locality of `∫·dB` + unbounded `𝓕_a`-scaling)
@@ -329,7 +336,7 @@ import MathFin.Foundations.PricePathDrift
 import MathFin.Foundations.PricingMeasureL2Density
 import MathFin.Foundations.ItoFormulaProcess
 import MathFin.Foundations.ExitTime
-import MathFin.Foundations.ItoFormulaUnrestricted
+import MathFin.Foundations.ItoFormulaCutoff
 import MathFin.Foundations.ItoFormulaUnrestrictedLocMart
 -- Phase 37: FTAP both directions, two-state market (adapted from Nagy 2026)
 import MathFin.Foundations.FTAPTwoState
@@ -474,7 +481,8 @@ import MathFin.BlackScholes.Heston
 import MathFin.BlackScholes.Lookback
 import MathFin.BlackScholes.BarrierParity
 import MathFin.BlackScholes.BinaryBarrierOption
--- Also consumes the bivariate normal CDF (Foundations/BivariateNormalCDF), like Stulz/Heynen-Kat below
+-- Also consumes the bivariate normal CDF (Foundations/BivariateNormalCDF),
+-- like Stulz/Heynen-Kat below
 import MathFin.BlackScholes.PartialTimeBarrierOption
 import MathFin.BlackScholes.PowerOption
 import MathFin.BlackScholes.BreedenLitzenberger
@@ -503,6 +511,7 @@ import MathFin.Binomial.DriftLimit
 import MathFin.Binomial.Bermudan
 import MathFin.Binomial.MartingaleRepresentation
 import MathFin.Binomial.EuropeanReplication
+import MathFin.Binomial.FlipPaths
 -- Phase 13 additions:
 import MathFin.Binomial.Girsanov
 import MathFin.Binomial.SecondFTAP
@@ -598,6 +607,8 @@ import MathFin.FixedIncome.VasicekSDEGaussian
 import MathFin.FixedIncome.CIRSquaredOU
 -- Vasicek zero-coupon bond price: the affine term structure (Gaussian Laplace transform)
 import MathFin.FixedIncome.VasicekBondPrice
+-- Vasicek bond price at t > 0: the conditional discount factor is affine in the short rate
+import MathFin.FixedIncome.VasicekBondPriceAt
 -- Vasicek real-world vs. risk-neutral terminal mean; an Esscher tilt reproducing the
 -- risk-neutral terminal law
 import MathFin.FixedIncome.VasicekMarketPriceOfRisk
@@ -611,6 +622,7 @@ import MathFin.FixedIncome.Inflation
 import MathFin.FixedIncome.ABCDVolatility
 -- GSR (Gaussian short rate): two-piece piecewise-constant-volatility bond price
 import MathFin.FixedIncome.GSRPiecewiseVol
+import MathFin.FixedIncome.GSRBondPriceAt
 
 -- Portfolio
 import MathFin.Portfolio.Markowitz
@@ -745,13 +757,23 @@ import MathFin.Contracts.Adapted
 import MathFin.Contracts.Pricing
 import MathFin.Contracts.Instruments.Options
 import MathFin.Contracts.Instruments.FixedIncome
+import MathFin.Contracts.Instruments.Credit
 import MathFin.Contracts.Parity
 import MathFin.Contracts.Models.BlackScholes
 import MathFin.Contracts.Models.BlackScholesExchange
 import MathFin.Contracts.Models.BlackScholesAsian
+import MathFin.Contracts.Models.BlackScholesChooser
 import MathFin.Contracts.Models.Binomial
 import MathFin.Contracts.Models.BinomialLimit
+import MathFin.Contracts.Models.Caplet
+import MathFin.Contracts.Models.CMS
 import MathFin.Contracts.Models.ShortRate
+import MathFin.Contracts.Models.VasicekBond
+import MathFin.Contracts.Models.HullWhiteBond
+import MathFin.Contracts.Models.GSRBond
+import MathFin.Contracts.Models.Jamshidian
+import MathFin.Contracts.Models.DefaultTime
+import MathFin.Contracts.Models.DefaultTimeMesh
 import MathFin.Contracts.Risk
 
 -- Execution: market microstructure — the Glosten-Milgrom adverse-selection

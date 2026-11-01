@@ -419,14 +419,14 @@ options, and the `1/K²` density is exactly what a variance swap holds.
 [`Foundations/CarrMadan.lean`](../MathFin/Foundations/CarrMadan.lean)
 
 ### Binomial martingale representation — market completeness ✅
-On the binomial tree (coin-flip paths, with the node-wise risk-neutral condition
-`q·X^U + (1−q)·X^D = X` — the explicit binomial conditional expectation), every martingale `M`
-is the discrete stochastic integral of a **predictable** hedge against the discounted asset:
-`M_N = M_0 + ∑_{k<N} H_k·(S_{k+1} − S_k)` (`binomial_martingale_representation`). The hedge is
-the node-wise delta `H = ΔM/ΔS`, predictable because it is fixed *before* the next flip is
-revealed; the proof is purely algebraic and pathwise (no measure theory), telescoping the
-one-step identity. The discrete companion of the abstract martingale-transform converse
-(`Foundations/MartingaleTransform.lean`).
+On the binomial tree (i.i.d. `Bernoulli(q)` coin flips, `0 < q < 1`), every Mathlib `Martingale` `M`
+of the flips' natural filtration (`flipFiltration`) is its initial value plus the
+`martingaleTransform` of a **predictable** hedge (`StronglyAdapted`) against the discounted asset:
+`M_N = M_0 + ∑_{k<N} A_{k+1}·(S_{k+1} − S_k)` (`binomial_martingale_representation`). The hedge is
+the node-wise delta `A = ΔM/ΔS`, predictable because it is fixed *before* the next flip is
+revealed. The conditional expectation is the node average `q·X^U + (1−q)·X^D = X`
+(`oneStep_of_martingale`), and the proof is the pathwise one-period delta hedge, telescoped. The
+converse of `martingaleTransform_isMartingale` (`Foundations/MartingaleTransform.lean`).
 → *Finance:* **completeness** — the second pillar of the FTAP: every contingent claim is
 replicable by a self-financing strategy, so the risk-neutral price is the *unique* arbitrage-free
 price.

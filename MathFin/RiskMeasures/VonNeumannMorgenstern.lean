@@ -14,7 +14,7 @@ public import Mathlib
 agent through `expectedUtility` and shows that a concave utility makes it convex and
 an increasing one makes it closed under adding cash. Such a set need not be a cone,
 so it need not be the acceptance set of a coherent risk measure
-(`not_exists_isCoherentRisk_log_acceptance`). This file supplies the layer
+(`not_exists_isCoherentRiskMeasure_log_acceptance`). This file supplies the layer
 underneath: the mixture algebra of lotteries, the affinity of expected utility in
 that mixture, and the verification that an expected-utility preference satisfies
 the von Neumann–Morgenstern axioms.

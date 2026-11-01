@@ -14,9 +14,11 @@ public import MathFin.FixedIncome.FRA
 /-!
 # Bonds and swaps, as contracts
 
-A schedule of fixed cash flows is a contract: `fixedFlows t c n` pays `c i` at `t i` for each
-`i < n`. Along every scenario its present value is `∑ D(tᵢ) cᵢ` (`pathPV_fixedFlows`), and since
-it observes nothing its value in every model is that same sum (`value_fixedFlows`). The library's
+A schedule of payments is a contract: `payFlows t a n` pays the payoff `a i` at `t i` for each
+`i < n`, worth `∑ D(tᵢ) · aᵢ` along a scenario (`pathPV_payFlows`); `fixedFlows t c n` is the case of
+constant payoffs, `c i` at `t i`. Along every scenario its present value is `∑ D(tᵢ) cᵢ`
+(`pathPV_fixedFlows`), and since it observes nothing its value in every model is that same sum
+(`value_fixedFlows`). The library's
 fixed-income prices are instances:
 
 * a coupon bond discounted at a yield `y`, with integer payment times, is `bondPriceDisc`
@@ -36,13 +38,13 @@ the swap is a forward-rate agreement, worth `fraValue` (`value_payerSwap_one_eq_
 
 ## Main definitions
 
-* `fixedFlows` — a schedule of fixed cash flows.
+* `payFlows` — a schedule of payments; `fixedFlows` — the schedule of fixed cash flows.
 * `yieldDiscount` — discounting at a yield with annual compounding.
 * `floatingLeg`, `fixedLeg`, `payerSwap` — the legs of a swap on a deterministic curve.
 
 ## Main results
 
-* `pathPV_fixedFlows`, `value_fixedFlows`, `pathPV_fixedFlows_yieldDiscount`,
+* `pathPV_payFlows`, `pathPV_fixedFlows`, `value_fixedFlows`, `pathPV_fixedFlows_yieldDiscount`,
   `pathPV_fixedFlows_zcb`.
 * `pathPV_floatingLeg`, `pathPV_fixedLeg`, `value_payerSwap`, `value_payerSwap_eq_zero_iff`,
   `value_payerSwap_one_eq_fraValue`.
@@ -80,19 +82,29 @@ theorem Contract.value_eq_of_pathPV_eq {Q : Measure Ω} [IsProbabilityMeasure Q]
     c.value Q D X = v := by
   simp [Contract.value, h]
 
-/-- A **schedule of fixed cash flows**: for each `i < n`, pay `c i` at time `t i`. -/
-noncomputable def fixedFlows (t : ℕ → ℝ≥0) (c : ℕ → ℝ) : ℕ → Contract ι
+/-- A **schedule of payments**: for each `i < n`, pay the payoff `a i` at time `t i`. -/
+noncomputable def payFlows (t : ℕ → ℝ≥0) (a : ℕ → Payoff ι) : ℕ → Contract ι
   | 0 => .zero
-  | n + 1 => .both (fixedFlows t c n) (.pay (t n) (.const (c n)))
+  | n + 1 => .both (payFlows t a n) (.pay (t n) (a n))
+
+/-- Along every scenario, a schedule of payments is worth `∑ D(tᵢ) · aᵢ`. -/
+theorem pathPV_payFlows (D : ℝ≥0 → ℝ) (s : Scenario ι) (t : ℕ → ℝ≥0) (a : ℕ → Payoff ι)
+    (n : ℕ) :
+    (payFlows t a n).pathPV D s = ∑ i ∈ Finset.range n, D (t i) * (a i).eval s := by
+  induction n with
+  | zero => simp [payFlows, Contract.pathPV, Contract.cashflows]
+  | succ n ih =>
+    rw [payFlows, Contract.pathPV_both, ih, Finset.sum_range_succ]
+    simp [Contract.pathPV, Contract.cashflows]
+
+/-- A **schedule of fixed cash flows**: for each `i < n`, pay `c i` at time `t i`. -/
+noncomputable def fixedFlows (t : ℕ → ℝ≥0) (c : ℕ → ℝ) (n : ℕ) : Contract ι :=
+  payFlows t (fun i ↦ .const (c i)) n
 
 /-- Along every scenario, a schedule of fixed cash flows is worth `∑ D(tᵢ) cᵢ`. -/
 theorem pathPV_fixedFlows (D : ℝ≥0 → ℝ) (s : Scenario ι) (t : ℕ → ℝ≥0) (c : ℕ → ℝ) (n : ℕ) :
     (fixedFlows t c n : Contract ι).pathPV D s = ∑ i ∈ Finset.range n, D (t i) * c i := by
-  induction n with
-  | zero => simp [fixedFlows, Contract.pathPV, Contract.cashflows]
-  | succ n ih =>
-    rw [fixedFlows, Contract.pathPV_both, ih, Finset.sum_range_succ]
-    simp [Contract.pathPV, Contract.cashflows, Payoff.eval]
+  simp [fixedFlows, pathPV_payFlows, Payoff.eval]
 
 /-- In every model, a schedule of fixed cash flows is worth `∑ D(tᵢ) cᵢ`. -/
 theorem value_fixedFlows {Q : Measure Ω} [IsProbabilityMeasure Q] (D : ℝ≥0 → ℝ)

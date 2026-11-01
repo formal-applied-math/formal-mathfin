@@ -16,16 +16,16 @@ public import MathFin.BlackScholes.HeynenKatTwoAssetBarrier
 
 A barrier that is monitored only on part of the option's life. This file covers the **start**
 window, **call** side (QuantLib's `PartialBarrier::Start`, `Option::Call`): the barrier is live
-on `[0, t₁]` and switched off for the remainder `(t₁, T]` of the option's life (Haug, *The
-Complete Guide to Option Pricing Formulas*, §"Partial-Time Barrier Options"). Unlike the binary
-and soft barriers transcribed alongside this file, this genuinely needs the **bivariate** normal
+on `[0, t₁]` and switched off for the remainder `(t₁, T]` of the option's life (Haug's
+"Partial-Time Single-Asset Barrier Options", full citation below). Unlike the binary barrier
+transcribed alongside this file, this genuinely needs the **bivariate** normal
 CDF — the barrier-monitoring window `[0, t₁]` and the full life `[0, T]` are correlated
 (correlation `ρ = √(t₁/T)`, the two Brownian increments share the `[0, t₁]` leg) — which is why
 this file builds on the same `BivariateNormalCDF.lean` substrate (`bivariateNormalCDF`,
 `bivariateNormalCDF_flip_snd`) as `HeynenKatTwoAssetBarrier.lean`. Sources for the closed
 form: Heynen & Kat, "Partial barrier options", *Journal of Financial Engineering* 3 (1994);
-Haug, *The Complete Guide to Option Pricing Formulas*, 2nd ed. (2007), ch. 2, "Partial-Time
-Barrier Options" (the `A`-value table the engine's `CA` transcribes).
+Haug, *The Complete Guide to Option Pricing Formulas*, 2nd ed. (2007), ch. 4, "Partial-Time
+Single-Asset Barrier Options" (the `A`-value table the engine's `CA` transcribes).
 
 **Scope, disclosed honestly**: QuantLib's `AnalyticPartialTimeBarrierOptionEngine` also prices
 the **end**-window case (`PartialBarrier::EndB1`/`EndB2`, barrier live only on `(t₁, T]`) via
@@ -75,6 +75,12 @@ start-window out-barrier **call** value (`η = 1` down, `η = −1` up) is
   down-and-out call closed form (the `X ≥ H` branch) for every `0 ≤ t₁ ≤ T`, not only in some
   limit. It verifies the `(ηe_i, ηρ)` sign pattern is self-consistent across `η = ±1`, the same
   scope the Heynen–Kat file disclosed for its own analogous check.
+
+* `ptCA_down_monitored_full_life`: **monitoring over the whole life is the standard barrier**
+  — at `t₁ = T` (with `X ≥ H`), the correlation `ρ = 1` degenerates each `N₂(a, ηb; ηρ)` to
+  `Φ(min(a, ηb))` via `bivariateNormalCDF_one`, and `X ≥ H` orders every such pair so the `d`/`f`
+  term is the minimum, reducing `CA(1)` directly to the same full-life down-and-out closed form
+  `ptCA_down_add_up` reaches via the in–out collapse.
 -/
 
 @[expose] public section

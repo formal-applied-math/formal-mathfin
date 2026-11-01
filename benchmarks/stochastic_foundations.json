@@ -177,6 +177,37 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.itoDrift_expectation_identity_adapted_at_adaptedItoProcess (MathFin/Foundations/ItoFormulaAdaptedDriftConstructed.lean), which applies MathFin.ItoDriftConditional.itoDrift_expectation_identity_adapted (MathFin/Foundations/ItoFormulaAdaptedDrift.lean: per-path discrete Itô formula, martingale kill, weighted increment isometry, Taylor-remainder and cross-term limits) to M t = itoContinuousMod φ (t ∧ T): adapted by itoContinuousMod_isStronglyPredictable, pinned to the Itô process by itoContinuousMod_min_ae_eq_itoProcessCLM, a.s. path-continuous by itoContinuousMod_continuousOn. SCOPE: horizon T only; f''' bounded; the discrete route alone also covers a B without continuous paths, for which the library constructs no version M."
       }
+    },
+    {
+      "id": "mf-wiener-integral-is-ito-integral",
+      "name": "The Wiener Integral Is the Itô Integral of a Deterministic Integrand",
+      "domain": "stochastic_calculus",
+      "description": "For a pre-Brownian motion B with measurable sections on a probability space and T ≥ 0, the Wiener integral wienerIntegralLp B hB T : L²((0, T]) →L[ℝ] L²(μ) equals the Itô integral itoIntegralCLM_T hB T hBmeas composed with detEmbed, the isometric embedding of f ∈ L²((0, T]) as the deterministic process (s, ω) ↦ f s into the predictable L² space. An identity of the two continuous linear maps on L²((0, T]); it does not construct a pathwise or process-level integral, and it needs the measurability hypothesis that the Wiener integral alone does not.",
+      "code": {
+        "lean": "import MathFin.Foundations.WienerIntegralIto\n\nopen MeasureTheory ProbabilityTheory MathFin.WienerIntegralL2 MathFin.ItoIntegralCLM\n  MathFin.WienerIntegralIto\nopen scoped NNReal\n\n/-- The Wiener integral `L²((0, T]) →L[ℝ] L²(μ)` is the Itô integral `itoIntegralCLM_T` composed with\nthe embedding `detEmbed` of `f` as the deterministic process `(s, ω) ↦ f s`. Re-export of\n`wienerIntegralLp_eq_itoIntegralCLM_T`. -/\ntheorem wiener_integral_eq_ito_integral_deterministic {Ω : Type*} [MeasurableSpace Ω]\n    {μ : Measure Ω} [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :\n    wienerIntegralLp B hB T =\n      (itoIntegralCLM_T hB T hBmeas).comp (detEmbed (μ := μ) T hBmeas).toContinuousLinearMap :=\n  wienerIntegralLp_eq_itoIntegralCLM_T hB T hBmeas\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Saporito Ch 7 (Itô integral for adapted integrands, Wiener integral as the deterministic case); B. Øksendal, Stochastic Differential Equations, 6th ed., Springer (2003), §3.1-3.2",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.WienerIntegralIto.wienerIntegralLp_eq_itoIntegralCLM_T (MathFin/Foundations/WienerIntegralIto.lean): both maps are continuous and agree on step indicators (each sends 1_{(s,t]} to B_t - B_s: wienerIntegralLp_stepIndicator and itoIntegralCLM_T_simpleAssembly_T), which are dense (stepAssembly_denseRange). SCOPE: the identity of the two continuous linear maps on L²((0,T]) only; the embedding detEmbed is composition with the time coordinate (an isometry into the predictable trim L² space); hBmeas is needed because the Itô side is built on the natural filtration."
+      }
+    },
+    {
+      "id": "mf-wiener-conditional-laplace",
+      "name": "Conditional Laplace Transform of a Wiener Integral Given the Past",
+      "description": "For a pre-Brownian motion B with measurable sections on a probability space, times t <= T, kernels h in L2((0,t]) and f in L2((0,T]), and reals a, b, c, the conditional exponential moment given the natural filtration at time t is E[exp(a + b*int_0^t h dB - c*int_0^T f dB) | F_t] = exp(a + b*int_0^t h dB - c*int_0^t f dB)*exp(c^2 * int_t^T f^2 / 2) almost surely, where int_0^t f dB is the Wiener integral over (0,t] of the restriction of f to (0,t]. The proof splits int_0^T f dB into that F_t-measurable past part and an independent remainder with the exponential moments of a centred Gaussian of variance int_t^T f^2 (its Gaussian law is not stated).",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.WienerIntegralFiltration\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The conditional Laplace transform of a Wiener integral given the past.** -/\ntheorem wiener_conditional_laplace\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Measurable (B s))\n    {t T : ℝ≥0} (htT : t ≤ T) (h : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) t)))\n    (f : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) T))) (a b c : ℝ) :\n    μ[fun ω ↦ Real.exp (a + b * wienerIntegralLp B hB t h ω - c * wienerIntegralLp B hB T f ω)\n        | Filtration.natural B (fun s ↦ (hBm s).stronglyMeasurable) t]\n      =ᵐ[μ] fun ω ↦ Real.exp (a + b * wienerIntegralLp B hB t h ω\n          - c * wienerIntegralLp B hB t (kernelRestrict htT f) ω)\n        * Real.exp (c ^ 2 * (∫ s in Set.Ioc (t : ℝ) T, f s ^ 2) / 2) :=\n  MathFin.condExp_exp_wienerIntegralLp hB hBm htT h f a b c\n"
+      },
+      "metadata": {
+        "reference": "Karatzas and Shreve, Brownian Motion and Stochastic Calculus, section 3.2 (Wiener integral of a deterministic integrand); Shreve, Stochastic Calculus for Finance II, Theorem 4.4.9 and the independence lemma (conditional expectation of a function of the independent increment)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. condExp_exp_wienerIntegralLp in MathFin/Foundations/WienerIntegralFiltration.lean. The Wiener integral is wienerIntegralLp (the isometry extension from step indicators), the filtration is Filtration.natural of B, and the restricted kernel is kernelRestrict, the continuous linear restriction L2((0,T]) -> L2((0,t]). Both the F_t-measurability of the past part and the independence of the remainder from F_t are closed conditions on the kernel (lpMeas is closed, the Wiener integral is continuous) checked on step indicators, where the integral is a Brownian increment: the clipped increments B_{s min t} are F_t-measurable, and the remainders B_{max(s,t)} - B_t are increments of the post-t process, independent of F_t by shift_indep_natural (Brownian Markov property). The exponential moment of the remainder is read off the product of the exponential moments of int_0^T f dB and of the past part, by independence. SCOPE: B is a pre-Brownian motion with measurable sections started at 0 (IsPreBrownianReal); the filtration is the natural one, not an augmented one. Axioms-clean."
+      }
     }
   ]
 }

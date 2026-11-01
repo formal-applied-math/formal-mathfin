@@ -49,7 +49,10 @@ one theorem.
 * `MathFin.increments_iIndepFun_of_expMartingale` — successive increments are jointly
   `Q`-independent.
 * `MathFin.hasIndepIncrements_of_expMartingale` — `Y` has independent increments on `[0,T]`.
-* `MathFin.isQBrownianMotion_of_expMartingale` — the three properties packaged.
+* `MathFin.IsBrownianOn` — the three properties packaged: the finite-dimensional laws of a
+  Brownian motion on `[0,T]`.
+* `MathFin.isQBrownianMotion_of_expMartingale` — `IsExpQMartingale Q 𝓕 Y T → IsBrownianOn Q T Y`.
+* `MathFin.IsBrownianOn.congr_modification` — invariance under a modification.
 -/
 
 @[expose] public section
@@ -401,8 +404,39 @@ theorem hasIndepIncrements_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) :
     (g := fun k : S ↦ (⟨k, Finset.mem_range.mp (hN k.2)⟩ : Fin N))
     fun a b hab ↦ Subtype.ext (congrArg Fin.val hab)
 
+/-- **`Y` has the finite-dimensional laws of a Brownian motion on `[0,T]` under `Q`**: zero start,
+`N(0,t−s)` increments, and independent increments (`HasIndepIncrements`). Path continuity and
+independence of the increments from the past are not part of it.
+
+This is `IsPreBrownianReal` restricted to a horizon, and it has to be a separate predicate:
+`IsPreBrownianReal Y Q` quantifies over all of `ℝ≥0`, while a Girsanov measure
+`Q = μ.withDensity(Z_T)` is only defined up to the horizon `T`. Nor can it be phrased as
+`IsPreBrownianReal` of the process stopped at `T`, whose increments past `T` vanish and whose
+variance is `t ∧ T`, not `t`. -/
+def IsBrownianOn (Q : Measure Ω) (T : ℝ≥0) (Y : ℝ≥0 → Ω → ℝ) : Prop :=
+  (∀ᵐ ω ∂Q, Y 0 ω = 0)
+    ∧ (∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T → Q.map (fun ω ↦ Y t ω - Y s ω) = gaussianReal 0 (t - s))
+    ∧ HasIndepIncrements (fun t : Set.Iic T ↦ Y t) Q
+
+/-- **Being Brownian on `[0,T]` is invariant under a modification.** If `X` and `Y` agree
+`Q`-a.e. at every time `u ≤ T`, each of the three properties depends on the process only through
+finitely many of its coordinates, up to `Q`-null sets. -/
+theorem IsBrownianOn.congr_modification {Q : Measure Ω} {T : ℝ≥0} {X Y : ℝ≥0 → Ω → ℝ}
+    (h : ∀ u ≤ T, X u =ᵐ[Q] Y u) (hX : IsBrownianOn Q T X) : IsBrownianOn Q T Y := by
+  obtain ⟨h0, hlaw, hind⟩ := hX
+  refine ⟨?_, fun s t hst htT ↦ ?_, fun n t ht ↦ ?_⟩
+  · filter_upwards [h0, h 0 zero_le] with ω h1 h2
+    rw [← h2]
+    exact h1
+  · rw [← hlaw hst htT]
+    exact Measure.map_congr ((h t htT).sub (h s (hst.trans htT))).symm
+  · exact iIndepFun.congr
+      (fun i ↦ (h (t i.succ) (t i.succ).2).sub (h (t i.castSucc) (t i.castSucc).2))
+      (hind n t ht)
+
 /-- **Brownian increment laws from an exponential martingale.** From the exponential-martingale
-data `IsExpQMartingale Q 𝓕 Y T`, the process `Y` has three properties under `Q` on `[0,T]`:
+data `IsExpQMartingale Q 𝓕 Y T`, the process `Y` is Brownian on `[0,T]` under `Q`
+(`IsBrownianOn`):
 
 * **zero start**: `Y_0 = 0` a.e. `Q` (the hypothesis `zero_start`, restated);
 * **Gaussian increments**: `Y_t − Y_s ~ N(0, t−s)`
@@ -415,11 +449,7 @@ Neither path continuity nor independence of the increments from `𝓕_s` is part
 Process- and measure-agnostic: any drift-corrected Girsanov process supplying its own exponential
 martingale (via the Bayes engine) gets these three properties by one application of this
 theorem. -/
-theorem isQBrownianMotion_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) :
-    (∀ᵐ ω ∂Q, Y 0 ω = 0)
-      ∧ (∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T →
-          Q.map (fun ω ↦ Y t ω - Y s ω) = gaussianReal 0 (t - s))
-      ∧ HasIndepIncrements (fun t : Set.Iic T ↦ Y t) Q :=
+theorem isQBrownianMotion_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) : IsBrownianOn Q T Y :=
   ⟨h.zero_start, fun _ _ hst htT ↦ increment_map_eq_gaussianReal_of_expMartingale h hst htT,
     hasIndepIncrements_of_expMartingale h⟩
 

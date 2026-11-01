@@ -18,9 +18,8 @@ given by raw SVI, and the derivatives of its `d₊`, `d₋` terms and of its del
 (`blackDelta_hasDerivAt`).
 
 The Black terms are the abstract-variance ones of `BlackScholes/ForwardSmile.lean` at the SVI total
-variance `w(k)`: `blackPlus p k = dpl k (w k)` (`blackPlus_eq_dpl`), `blackMinus` is `dmi`
-(`blackMinus_eq_dmi`) and `logBlackCall` is `blackForm` (`logBlackCall_eq_blackForm`). The Gaussian
-density cancellation `black_density_identity` is `exp_mul_pdf_dmi` at `w(k)`.
+variance `w(k)`: `dpl k (w k)`, `dmi k (w k)` and `blackForm k (w k)` are used directly, and the
+Gaussian density cancellation is `exp_mul_pdf_dmi` at `w(k)`.
 `durrleman_eq_one_add_smileDelta` relates Durrleman's function to the denominator deformation
 `1 + smileDelta` of Dupire's ratio.
 -/
@@ -30,43 +29,33 @@ density cancellation `black_density_identity` is `exp_mul_pdf_dmi` at `w(k)`.
 namespace MathFin
 namespace SVI
 open Real ProbabilityTheory
+open ForwardSmile (dpl dmi blackForm)
 
 /-- The square root `√w(k)` of the SVI total variance. -/
 noncomputable def rootVariance (p : Params) (k : ℝ) : ℝ := Real.sqrt (variance p k)
-/-- The Black term `d₊ = −k/√w + √w/2` at log-strike `k`. -/
-noncomputable def blackPlus (p : Params) (k : ℝ) : ℝ := -k / rootVariance p k + rootVariance p k / 2
-/-- The Black term `d₋ = −k/√w − √w/2` at log-strike `k`. -/
-noncomputable def blackMinus (p : Params) (k : ℝ) : ℝ := -k / rootVariance p k -
-    rootVariance p k / 2
-/-- The SVI Black term `d₊` is `ForwardSmile.dpl` at the SVI total variance. -/
-theorem blackPlus_eq_dpl (p : Params) (k : ℝ) : blackPlus p k = ForwardSmile.dpl k (variance p k) :=
-  (ForwardSmile.dpl_eq k _).symm
+/-- `d₊ = −k/√w + √w/2` at the SVI total variance, in terms of `rootVariance`. -/
+theorem dpl_eq_rootVariance (p : Params) (k : ℝ) :
+    dpl k (variance p k) = -k / rootVariance p k + rootVariance p k / 2 :=
+  ForwardSmile.dpl_eq k _
 
-/-- The SVI Black term `d₋` is `ForwardSmile.dmi` at the SVI total variance. -/
-theorem blackMinus_eq_dmi (p : Params) (k : ℝ) : blackMinus p k = ForwardSmile.dmi k (variance p k) :=
-  (ForwardSmile.dmi_eq k _).symm
+/-- `d₋ = −k/√w − √w/2` at the SVI total variance, in terms of `rootVariance`. -/
+theorem dmi_eq_rootVariance (p : Params) (k : ℝ) :
+    dmi k (variance p k) = -k / rootVariance p k - rootVariance p k / 2 :=
+  ForwardSmile.dmi_eq k _
 
-/-- The explicit derivative of `blackMinus` in log-strike (`blackMinus_hasDerivAt`). -/
-noncomputable def blackMinusSlope (p : Params) (k : ℝ) : ℝ :=
+/-- The explicit derivative of `d₋` in log-strike (`dmi_hasDerivAt`). -/
+noncomputable def dmiSlope (p : Params) (k : ℝ) : ℝ :=
   -1 / rootVariance p k + k*slope p k / (2*(rootVariance p k)^3) - slope p k / (4*rootVariance p k)
 
-/-- Forward-normalized Black call, as a function of log strike. -/
-noncomputable def logBlackCall (p : Params) (k : ℝ) : ℝ :=
-  MathFin.Phi (blackPlus p k) - Real.exp k * MathFin.Phi (blackMinus p k)
-
-/-- The SVI Black call is `ForwardSmile.blackForm` at the SVI total variance. -/
-theorem logBlackCall_eq_blackForm (p : Params) (k : ℝ) :
-    logBlackCall p k = ForwardSmile.blackForm k (variance p k) := by
-  rw [logBlackCall, ForwardSmile.blackForm, blackPlus_eq_dpl, blackMinus_eq_dmi]
-
-/-- The explicit derivative of `logBlackCall` in log-strike, divided by `eᵏ`: the smile term minus
-`Φ(d₋)`. -/
+/-- The explicit derivative of the Black call `blackForm k (w k)` in log-strike, divided by `eᵏ`:
+the smile term minus `Φ(d₋)`. -/
 noncomputable def blackDelta (p : Params) (k : ℝ) : ℝ :=
-  gaussianPDFReal 0 1 (blackMinus p k) * slope p k / (2*rootVariance p k) -
-    MathFin.Phi (blackMinus p k)
+  gaussianPDFReal 0 1 (dmi k (variance p k)) * slope p k / (2*rootVariance p k) -
+    MathFin.Phi (dmi k (variance p k))
 
 /-- Forward-normalized Black call, as a function of positive strike ratio. -/
-noncomputable def blackCall (p : Params) (K : ℝ) : ℝ := logBlackCall p (Real.log K)
+noncomputable def blackCall (p : Params) (K : ℝ) : ℝ :=
+  blackForm (Real.log K) (variance p (Real.log K))
 
 theorem rootVariance_pos (p : Params) (k : ℝ) (hw : 0 < variance p k) :
     0 < rootVariance p k := Real.sqrt_pos.mpr hw
@@ -74,65 +63,68 @@ theorem rootVariance_pos (p : Params) (k : ℝ) (hw : 0 < variance p k) :
 theorem rootVariance_sq (p : Params) (k : ℝ) (hw : 0 ≤ variance p k) :
     (rootVariance p k)^2 = variance p k := Real.sq_sqrt hw
 
-theorem rootVariance_hasDerivAt (p : Params) (hs : 0 < p.sigma) (k : ℝ)
+/-- The derivative of `√w`, given that of the SVI total variance `w`. -/
+theorem rootVariance_hasDerivAt (p : Params) (k : ℝ)
+    (hv : HasDerivAt (variance p) (slope p k) k)
     (hw : 0 < variance p k) :
     HasDerivAt (rootVariance p) (slope p k / (2*rootVariance p k)) k :=
-  (variance_hasDerivAt p hs k).sqrt (ne_of_gt hw)
+  hv.sqrt (ne_of_gt hw)
 
-theorem blackMinus_hasDerivAt (p : Params) (hs : 0 < p.sigma) (k : ℝ)
+theorem dmi_hasDerivAt (p : Params) (k : ℝ)
+    (hv : HasDerivAt (variance p) (slope p k) k)
     (hw : 0 < variance p k) :
-    HasDerivAt (blackMinus p) (blackMinusSlope p k) k := by
-  have hr := rootVariance_hasDerivAt p hs k hw
+    HasDerivAt (fun k ↦ dmi k (variance p k)) (dmiSlope p k) k := by
+  have hr := rootVariance_hasDerivAt p k hv hw
   have hn := ne_of_gt (rootVariance_pos p k hw)
   have h := (((hasDerivAt_id k).neg).div hr hn).sub (hr.div_const 2)
+  simp only [dmi_eq_rootVariance]
   convert h using 1 <;> try rfl
-  dsimp [blackMinusSlope]
+  dsimp [dmiSlope]
   field_simp
   ring
 
-theorem blackPlus_hasDerivAt (p : Params) (hs : 0 < p.sigma) (k : ℝ)
+theorem dpl_hasDerivAt (p : Params) (k : ℝ)
+    (hv : HasDerivAt (variance p) (slope p k) k)
     (hw : 0 < variance p k) :
-    HasDerivAt (blackPlus p)
-      (blackMinusSlope p k + slope p k / (2*rootVariance p k)) k := by
-  have h := (blackMinus_hasDerivAt p hs k hw).add (rootVariance_hasDerivAt p hs k hw)
+    HasDerivAt (fun k ↦ dpl k (variance p k))
+      (dmiSlope p k + slope p k / (2*rootVariance p k)) k := by
+  have h := (dmi_hasDerivAt p k hv hw).add (rootVariance_hasDerivAt p k hv hw)
   convert h using 1 <;> try rfl
   funext x
-  dsimp [blackPlus, blackMinus]
+  simp only [dpl_eq_rootVariance, dmi_eq_rootVariance, Pi.add_apply]
   ring
 
-/-- The Gaussian density cancellation underlying Black's strike derivatives. -/
-theorem black_density_identity (p : Params) (k : ℝ) (hw : 0 < variance p k) :
-    gaussianPDFReal 0 1 (blackPlus p k) =
-      Real.exp k * gaussianPDFReal 0 1 (blackMinus p k) := by
-  rw [blackPlus_eq_dpl, blackMinus_eq_dmi]
-  exact (ForwardSmile.exp_mul_pdf_dmi hw).symm
-
-theorem logBlackCall_hasDerivAt (p : Params) (hs : 0 < p.sigma) (k : ℝ)
+theorem blackForm_hasDerivAt (p : Params) (k : ℝ)
+    (hv : HasDerivAt (variance p) (slope p k) k)
     (hw : 0 < variance p k) :
-    HasDerivAt (logBlackCall p) (Real.exp k * blackDelta p k) k := by
-  have hp := (MathFin.hasDerivAt_Phi (blackPlus p k)).comp k (blackPlus_hasDerivAt p hs k hw)
-  have hm := (MathFin.hasDerivAt_Phi (blackMinus p k)).comp k (blackMinus_hasDerivAt p hs k hw)
+    HasDerivAt (fun k ↦ blackForm k (variance p k)) (Real.exp k * blackDelta p k) k := by
+  have hp := (MathFin.hasDerivAt_Phi (dpl k (variance p k))).comp k (dpl_hasDerivAt p k hv hw)
+  have hm := (MathFin.hasDerivAt_Phi (dmi k (variance p k))).comp k (dmi_hasDerivAt p k hv hw)
   have h := hp.sub ((Real.hasDerivAt_exp k).mul hm)
   convert h using 1 <;> try rfl
-  rw [black_density_identity p k hw]
+  rw [← ForwardSmile.exp_mul_pdf_dmi hw]
   dsimp [blackDelta]
   ring
 
 /-- The derivative of the strike delta is the positive Gaussian factor times
-Durrleman's expression. -/
-theorem blackDelta_hasDerivAt (p : Params) (hs : 0 < p.sigma) (k : ℝ)
+Durrleman's expression, given the derivatives of the total variance and of its slope (the
+regime-specific input: `variance_hasDerivAt`, `slope_hasDerivAt` for `σ > 0`, and their
+zero-scale counterparts off the kink). -/
+theorem blackDelta_hasDerivAt (p : Params) (k : ℝ)
+    (hv : HasDerivAt (variance p) (slope p k) k)
+    (hslope : HasDerivAt (slope p) (curvature p k) k)
     (hw : 0 < variance p k) :
     HasDerivAt (blackDelta p)
-      (gaussianPDFReal 0 1 (blackMinus p k) / rootVariance p k * durrleman p k) k := by
-  have hm := blackMinus_hasDerivAt p hs k hw
-  have hp := (MathFin.hasDerivAt_gaussianPDFReal_zero_one (blackMinus p k)).comp k hm
-  have hc := (MathFin.hasDerivAt_Phi (blackMinus p k)).comp k hm
-  have hr := rootVariance_hasDerivAt p hs k hw
+      (gaussianPDFReal 0 1 (dmi k (variance p k)) / rootVariance p k * durrleman p k) k := by
+  have hm := dmi_hasDerivAt p k hv hw
+  have hp := (MathFin.hasDerivAt_gaussianPDFReal_zero_one (dmi k (variance p k))).comp k hm
+  have hc := (MathFin.hasDerivAt_Phi (dmi k (variance p k))).comp k hm
+  have hr := rootVariance_hasDerivAt p k hv hw
   have hn := ne_of_gt (rootVariance_pos p k hw)
-  have h := ((hp.mul (slope_hasDerivAt p hs k)).div (hr.const_mul 2)
+  have h := ((hp.mul hslope).div (hr.const_mul 2)
     (mul_ne_zero (by norm_num) hn)).sub hc
   convert h using 1 <;> try rfl
-  dsimp [durrleman, blackMinusSlope, blackMinus]
+  simp only [durrleman, dmiSlope, dmi_eq_rootVariance, Function.comp_apply, Pi.mul_apply]
   rw [← rootVariance_sq p k hw.le]
   field_simp
   ring

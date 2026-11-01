@@ -124,7 +124,7 @@ theorem tendsto_integral_abs_weighted_qv {v : ℝ≥0 → Ω → ℝ}
     (fun n ↦ integral_abs_le_sqrt_integral_sq (memLp_weighted_qv_sub hB T
       (fun s ↦ ((hv_adap s).mono ((natFiltration hBmeas).le s)).measurable) hv_cont hv_bdd n))
     (by simpa using (tendsto_weighted_qv_process_of_ae_continuous hB hBmeas
-      (fun s ↦ adaptedAt_of_measurable_natural hBmeas (hv_adap s).measurable)
+      (fun s ↦ (hv_adap s).measurable)
       ((abs_nonneg _).trans (hv_bdd 0 (nonempty_of_isProbabilityMeasure μ).some)) hv_bdd T
       hv_cont).sqrt)
 

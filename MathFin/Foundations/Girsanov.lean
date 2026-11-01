@@ -5,6 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Foundations.ContinuousMarket
+public import MathFin.Foundations.EquivMeasure
 public import MathFin.Foundations.GirsanovConstantTheta
 
 /-!
@@ -40,9 +42,17 @@ motion, `gir-thm-9.1.8`) is strictly stronger: `GirsanovConstantTheta` for const
 `GirsanovAdaptedTheta` for bounded continuous adapted `θ`, and `GirsanovPredictableTheta`
 for bounded predictable `θ`.
 
-## Main result
+That is the martingale property as a set-integral identity. `bs_discounted_isEMM` packages it as an
+equivalent martingale measure of the model-agnostic frame `ContinuousMarket.IsEMM`, at the horizon
+`T` of the density: `Q ≈ P` (the density `exp(−θ X_T − ½θ² T)` is positive and integrates to `1`)
+and the discounted price stopped at `T` is a `Q`-martingale. The horizon is part of the statement,
+not an artefact: past `T` the discounted price is not a `Q`-martingale, and the frame's forward FTAP
+(`ContinuousMarket.isEMM_noArbitrageSimple`) is then about strategies trading up to `T`.
+
+## Main results
 
 * `MathFin.bs_discounted_isQMartingale`
+* `MathFin.bs_discounted_isEMM`
 -/
 
 @[expose] public section
@@ -78,5 +88,56 @@ theorem bs_discounted_isQMartingale
     ring
   simp only [hD, integral_const_mul]
   rw [expBtheta_isQMartingale ((μ - r) / σ) σ T hst htT hA]
+
+/-- **The Black–Scholes Girsanov measure is an equivalent martingale measure up to `T`.** With
+physical drift `μ`, rate `r`, volatility `σ ≠ 0` and market price of risk `θ = (μ − r)/σ`, the
+measure `Q = P.withDensity (exp(−θ X_T − ½θ² T))` is equivalent to `P` and makes the discounted
+price `D_t = S_0 · exp((μ − r − σ²/2)t + σ X_t)` a `Q`-martingale on `[0, T]`: an `IsEMM` of the
+continuous-market frame at the horizon `T`.
+
+The set-integral identity is `bs_discounted_isQMartingale`; what the frame adds is adaptedness,
+`Q`-integrability (under `Q` the drift-corrected `X_t + θ t` is `N(0, t)`, so `D_t` is `S_0` times a
+Gaussian exponential), and equivalence (`girsanovMeasure_isProbabilityMeasure`, a positive density
+of unit mean). -/
+theorem bs_discounted_isEMM
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
+    {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
+    (S_0 r μ σ : ℝ) (hσ : σ ≠ 0) (T : ℝ≥0) :
+    ContinuousMarket.IsEMM 𝓕 P
+      (fun (t : ℝ≥0) ω ↦ S_0 * Real.exp ((μ - r - σ ^ 2 / 2) * (t : ℝ) + σ * X t ω)) T
+      (P.withDensity fun ω ↦ ENNReal.ofReal
+        (Real.exp (-((μ - r) / σ) * X T ω - ((μ - r) / σ) ^ 2 * (T : ℝ) / 2))) := by
+  set θ : ℝ := (μ - r) / σ with hθ
+  haveI : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
+      (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) :=
+    girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
+  have hmeasX (u : ℝ≥0) : Measurable (X u) := ((hX.stronglyAdapted u).mono (𝓕.le u)).measurable
+  have hcont (t : ℝ≥0) : Continuous fun x : ℝ ↦ S_0 * Real.exp ((μ - r - σ ^ 2 / 2) * (t : ℝ) + σ * x) := by
+    fun_prop
+  refine ⟨isEquivProbMeasure_withDensity_of_isProbabilityMeasure P
+      (Real.measurable_exp.comp (((hmeasX T).const_mul (-θ)).sub_const _)).aemeasurable
+      (ae_of_all _ fun _ ↦ Real.exp_pos _) inferInstance,
+    ContinuousMarket.martingale_stopped_of_setIntegral_eq
+      (fun t _ ↦ (hcont t).comp_stronglyMeasurable (hX.stronglyAdapted t)) (fun t htT ↦ ?_)
+      (fun s t hst htT A hA ↦ ?_)⟩
+  · -- `D_t = S_0 · exp(σ B^θ_t − ½σ² t)` with `B^θ_t ~ N(0, t)` under `Q`
+    have hσθ : σ * θ = μ - r := by rw [hθ]; field_simp
+    have hlaw := Btheta_map_eq_gaussianReal (P := P) (X := X) (𝓕 := 𝓕) θ T htT
+    have hexp : Integrable (fun x : ℝ ↦ Real.exp (σ * x)) (gaussianReal 0 t) :=
+      integrable_exp_mul_gaussianReal σ
+    have hg : Integrable (fun x : ℝ ↦ S_0 * Real.exp (σ * x - σ ^ 2 * (t : ℝ) / 2))
+        (gaussianReal 0 t) := by
+      refine (hexp.const_mul (S_0 * Real.exp (-(σ ^ 2 * (t : ℝ) / 2)))).congr (ae_of_all _ fun x ↦ ?_)
+      beta_reduce
+      rw [show σ * x - σ ^ 2 * (t : ℝ) / 2 = -(σ ^ 2 * (t : ℝ) / 2) + σ * x by ring, Real.exp_add]
+      ring
+    rw [← hlaw] at hg
+    refine ((integrable_map_measure hg.aestronglyMeasurable
+      ((hmeasX t).add_const _ |>.aemeasurable)).mp hg).congr (ae_of_all _ fun ω ↦ ?_)
+    show S_0 * Real.exp (σ * (X t ω + θ * (t : ℝ)) - σ ^ 2 * (t : ℝ) / 2) = _
+    rw [show σ * (X t ω + θ * (t : ℝ)) - σ ^ 2 * (t : ℝ) / 2
+      = (μ - r - σ ^ 2 / 2) * (t : ℝ) + σ * X t ω by linear_combination (t : ℝ) * hσθ]
+  · exact bs_discounted_isQMartingale S_0 r μ σ hσ T hst htT hA
 
 end MathFin

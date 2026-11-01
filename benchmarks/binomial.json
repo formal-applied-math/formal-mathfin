@@ -101,17 +101,17 @@
     {
       "id": "mf-american-intrinsic-bound",
       "name": "American Option ≥ Intrinsic",
-      "description": "Along every coin-flip path the discounted intrinsic payoff is dominated by the discounted American value: e^(−rk)·g(S_k(ω)) ≤ e^(−rk)·americanPrice(N−k, S_k(ω)) — the dominance clause of the Snell-envelope characterization at path level, routed through the identification theorem rather than the scalar Bellman max.",
+      "description": "Along every coin-flip path the discounted intrinsic payoff is dominated by the discounted American value: e^(−rk)·g(S_k(ω)) ≤ e^(−rk)·americanPrice(N−k, S_k(ω)) — the dominance clause of the Snell-envelope characterization at path level, routed through the identification theorem rather than the scalar Bellman max (the American case E = univ of the exercise-set statement discounted_intrinsic_le_bermudanPrice).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.SnellEnvelope\n\nopen MathFin\n\ntheorem discounted_intrinsic_le_americanPrice_thm\n    (u d r : ℝ) (g : ℝ → ℝ) (S₀ : ℝ) (N k : ℕ) (ω : ℕ → Bool) :\n    Real.exp (-r * k) * g (MathFin.spotPath S₀ u d k ω)\n      ≤ Real.exp (-r * k) * MathFin.americanPrice u d r g (N - k)\n          (MathFin.spotPath S₀ u d k ω) :=\n  MathFin.discounted_intrinsic_le_americanPrice u d r g S₀ N k ω\n"
+        "lean": "import MathFin.Binomial.American\nimport MathFin.Binomial.SnellEnvelope\n\nopen MathFin\n\ntheorem discounted_intrinsic_le_americanPrice_thm\n    (u d r : ℝ) (g : ℝ → ℝ) (S₀ : ℝ) (N k : ℕ) (ω : ℕ → Bool) :\n    Real.exp (-r * k) * g (MathFin.spotPath S₀ u d k ω)\n      ≤ Real.exp (-r * k) * MathFin.americanPrice u d r g (N - k)\n          (MathFin.spotPath S₀ u d k ω) :=\n  MathFin.discounted_intrinsic_le_bermudanPrice Set.univ u d r g S₀ (N := N) (k := k)\n    (Or.inr (Set.mem_univ _)) ω\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "American option intrinsic bound (Shreve I 4.4)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the dominance clause of the Snell characterization at path level — the discounted intrinsic payoff e^{-rk}*g(S_k(omega)) is dominated by the discounted American value along every path, proved through the identification theorem snellAux_eq_discounted_americanPrice (an induction over the tree, Binomial/SnellEnvelope.lean), not by le_max on the Bellman definition. Honest scope: this clause is the elementary corner of the characterization; the depth lives in the sibling clauses (supermartingale property, adaptedness, minimality over arbitrary path-processes) proved in the same module — see mf-american-supermartingale. Axioms-clean."
+        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the dominance clause of the Snell characterization at path level — the discounted intrinsic payoff e^{-rk}*g(S_k(omega)) is dominated by the discounted American value along every path, proved through the identification theorem snellAux_eq_discounted_bermudanPrice (an induction over the tree, Binomial/SnellEnvelope.lean), not by le_max on the Bellman definition. Honest scope: this clause is the elementary corner of the characterization; the depth lives in the sibling clauses (supermartingale property, adaptedness, minimality over arbitrary path-processes) proved in the same module — see mf-american-supermartingale. Axioms-clean."
       }
     },
     {
@@ -120,30 +120,30 @@
       "description": "The discounted American value process X_k(ω) = e^(−rk)·americanPrice(N−k, S_k(ω)) on coin-flip paths is a supermartingale under the risk-neutral node average: q·X_{k+1}(up) + (1−q)·X_{k+1}(down) ≤ X_k — the conditional-expectation form E[X_{k+1}|ℱ_k] ≤ X_k on the finite tree, via the identification snellAux = e^(−rk)·americanPrice: the discounted American value is the Snell envelope of the discounted payoff.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.SnellEnvelope\n\nopen MathFin\n\ntheorem discounted_americanPrice_supermartingale_thm\n    (u d r : ℝ) (g : ℝ → ℝ) (S₀ : ℝ) {N k : ℕ} (hk : k < N) (ω : ℕ → Bool) :\n    MathFin.crrUpProb u d r * (Real.exp (-r * (k + 1 : ℕ)) *\n        MathFin.americanPrice u d r g (N - (k + 1))\n          (MathFin.spotPath S₀ u d (k + 1) (Function.update ω k true)))\n      + (1 - MathFin.crrUpProb u d r) * (Real.exp (-r * (k + 1 : ℕ)) *\n        MathFin.americanPrice u d r g (N - (k + 1))\n          (MathFin.spotPath S₀ u d (k + 1) (Function.update ω k false)))\n      ≤ Real.exp (-r * k) * MathFin.americanPrice u d r g (N - k)\n          (MathFin.spotPath S₀ u d k ω) :=\n  MathFin.discounted_americanPrice_supermartingale u d r g S₀ hk ω\n"
+        "lean": "import MathFin.Binomial.American\nimport MathFin.Binomial.SnellEnvelope\n\nopen MathFin\n\ntheorem discounted_americanPrice_supermartingale_thm\n    (u d r : ℝ) (g : ℝ → ℝ) (S₀ : ℝ) {N k : ℕ} (hk : k < N) (ω : ℕ → Bool) :\n    MathFin.crrUpProb u d r * (Real.exp (-r * (k + 1 : ℕ)) *\n        MathFin.americanPrice u d r g (N - (k + 1))\n          (MathFin.spotPath S₀ u d (k + 1) (Function.update ω k true)))\n      + (1 - MathFin.crrUpProb u d r) * (Real.exp (-r * (k + 1 : ℕ)) *\n        MathFin.americanPrice u d r g (N - (k + 1))\n          (MathFin.spotPath S₀ u d (k + 1) (Function.update ω k false)))\n      ≤ Real.exp (-r * k) * MathFin.americanPrice u d r g (N - k)\n          (MathFin.spotPath S₀ u d k ω) :=\n  MathFin.discounted_bermudanPrice_supermartingale Set.univ u d r g S₀ hk ω\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "American supermartingale property (Shreve I 4.4, Hull 21.5)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the genuine path-process supermartingale property of the discounted American value X_k(omega) = e^{-rk}*americanPrice(N-k, S_k(omega)) on coin-flip paths — q*X_{k+1}(up) + (1-q)*X_{k+1}(down) <= X_k, the explicit node-average form of E[X_{k+1}|F_k] (which on a finite tree IS the conditional expectation; same pathwise idiom as Binomial/MartingaleRepresentation.lean). Proved via the identification theorem snellAux_eq_discounted_americanPrice (the scalar Bellman recursion is the Markov instance of the path-space Snell envelope) in Binomial/SnellEnvelope.lean, where the FULL Snell characterization lives: payoff dominance, supermartingale, adaptedness (pathAdaptedAt clauses), and minimality over arbitrary path-processes (americanPrice_snell_minimal). Replaces the former le_max-on-the-Bellman-def shadow. Axioms-clean."
+        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the genuine path-process supermartingale property of the discounted American value X_k(omega) = e^{-rk}*americanPrice(N-k, S_k(omega)) on coin-flip paths — q*X_{k+1}(up) + (1-q)*X_{k+1}(down) <= X_k, the explicit node-average form of E[X_{k+1}|F_k] (which on a finite tree IS the conditional expectation; same pathwise idiom as Binomial/MartingaleRepresentation.lean). Proved via the identification theorem snellAux_eq_discounted_bermudanPrice (the scalar Bellman recursion is the Markov instance of the path-space Snell envelope) in Binomial/SnellEnvelope.lean, where the FULL Snell characterization lives: payoff dominance, supermartingale, adaptedness (pathAdaptedAt clauses), and minimality over arbitrary path-processes (bermudanPrice_snell_minimal). Replaces the former le_max-on-the-Bellman-def shadow. Axioms-clean. The entry is the American case E = univ of discounted_bermudanPrice_supermartingale, which holds for every early-exercise step set."
       }
     },
     {
       "id": "mf-american-ge-european",
       "name": "American ≥ European",
-      "description": "binomialPrice ≤ americanPrice for the same intrinsic g. The American option dominates the European with the same payoff — the early-exercise feature can only add value.",
+      "description": "Under BinomialNoArb u d r, binomialPrice ≤ americanPrice for the same intrinsic g. The American option dominates the European with the same payoff — the early-exercise feature can only add value.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.American\n\nopen MathFin\n\ntheorem american_ge_european_thm {u d r : ℝ} (h : MathFin.BinomialNoArb u d r)\n    (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :\n    MathFin.binomialPrice u d r g n S ≤ MathFin.americanPrice u d r g n S :=\n  MathFin.binomialPrice_le_americanPrice h g n S\n"
+        "lean": "import MathFin.Binomial.Bermudan\n\nopen MathFin\n\ntheorem american_ge_european_thm {u d r : ℝ} (h : MathFin.BinomialNoArb u d r)\n    (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :\n    MathFin.binomialPrice u d r g n S ≤ MathFin.americanPrice u d r g n S :=\n  MathFin.bermudanPrice_mono h g (Set.empty_subset _) n S\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "American ≥ European (Hull 11.5, Shreve I 4.4)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof by induction on remaining steps, using supermartingale property + monotonicity of binomialOptionPriceOnePeriod. Lives in MathFin/Binomial/American.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: monotonicity of the tree price in the early-exercise step set (bermudanPrice_mono, Binomial/Bermudan.lean) for the sets empty subset univ, i.e. European = bermudanPrice with E empty and American = bermudanPrice with E = univ. The monotonicity is an instance of Snell minimality: the American price is a supermartingale dominating the payoff at maturity, so it dominates the European envelope. Axioms-clean."
       }
     },
     {
@@ -181,7 +181,7 @@
     {
       "id": "mf-bermudan-sandwich",
       "name": "Bermudan Sandwich: European ≤ Bermudan ≤ American",
-      "description": "For nested exercise sets Eur ⊆ Berm ⊆ Amer, the optimal-stopping values are sandwiched in the same order (monotonicity of Finset.sup' under subset inclusion).",
+      "description": "On the CRR binomial tree with BinomialNoArb, for every early-exercise step set E, the European price binomialPrice is at most the Bermudan price bermudanPrice E, which is at most the American price americanPrice, at every number of steps and every spot (all three are the one Bellman recursion bermudanPrice at E = empty, E, univ).",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Binomial.Bermudan\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem bermudan_sandwich_thm {u d r : ℝ} (h : BinomialNoArb u d r)\n    (g : ℝ → ℝ) (E : Set ℕ) (n : ℕ) (S : ℝ) :\n    binomialPrice u d r g n S ≤ bermudanPrice E u d r g n S ∧\n      bermudanPrice E u d r g n S ≤ americanPrice u d r g n S :=\n  MathFin.binomialPrice_le_bermudanPrice_le_americanPrice h g E n S\n"
@@ -191,7 +191,7 @@
         "reference": "Bermudan sandwich (Hull 26.6, Rogers-Williams Vol 2)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+        "formalization_scope": "Full formal proof of the price-tree sandwich binomialPrice <= bermudanPrice E <= americanPrice (binomialPrice_le_bermudanPrice_le_americanPrice, Binomial/Bermudan.lean), from monotonicity of bermudanPrice in the exercise set (bermudanPrice_mono), itself an instance of Snell minimality (bermudanPrice_le_of_supermartingale_dominating). The abstract Finset.sup' form (bermudan_sandwich) is a separate lemma not stated in this entry. Axioms-clean."
       }
     },
     {
@@ -213,33 +213,33 @@
     {
       "id": "mf-binomial-martingale-representation",
       "name": "Binomial Martingale Representation (Completeness)",
-      "description": "On the binomial tree, every martingale is the discrete stochastic integral of a predictable hedge against the discounted asset -- market completeness, the second pillar of the FTAP.",
+      "description": "On the binomial tree with i.i.d. Bernoulli(q) coin flips, 0 < q < 1, every Mathlib Martingale M for the natural filtration of the flips is, on every path, its initial value plus the martingaleTransform (discrete stochastic integral) of a hedge A against a martingale S of the same filtration whose two children at every node differ; the hedge is StronglyAdapted for the filtration (A_{k+1} depends only on the first k flips) -- market completeness, the second pillar of the FTAP.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.MartingaleRepresentation\n\nopen MathFin\n\ntheorem binomial_martingale_representation_thm {q : ℝ} {M S : ℕ → (ℕ → Bool) → ℝ}\n    (hM_adapt : ∀ n, MathFin.PathAdaptedAt n (M n)) (hS_adapt : ∀ n, MathFin.PathAdaptedAt n (S n))\n    (hM_mart : ∀ n ω, q * M (n + 1) (Function.update ω n true) + (1 - q) * M (n + 1) (Function.update ω n false) = M n ω)\n    (hS_mart : ∀ n ω, q * S (n + 1) (Function.update ω n true) + (1 - q) * S (n + 1) (Function.update ω n false) = S n ω)\n    (hS_nondeg : ∀ n ω, S (n + 1) (Function.update ω n true) ≠ S (n + 1) (Function.update ω n false)) :\n    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, MathFin.PathAdaptedAt n (H n)) ∧\n      ∀ N ω, M N ω = M 0 ω + ∑ k ∈ Finset.range N, H k ω * (S (k + 1) ω - S k ω) :=\n  MathFin.binomial_martingale_representation hM_adapt hS_adapt hM_mart hS_mart hS_nondeg\n"
+        "lean": "import MathFin.Binomial.MartingaleRepresentation\n\nopen MeasureTheory MathFin\nopen scoped NNReal\n\ntheorem binomial_martingale_representation_thm {q : ℝ≥0} (hq0 : 0 < q) (hq1 : q < 1)\n    {M S : ℕ → (ℕ → Bool) → ℝ}\n    (hM : Martingale M flipFiltration (coinFlipMeasure q hq1.le))\n    (hS : Martingale S flipFiltration (coinFlipMeasure q hq1.le))\n    (hS_nondeg : ∀ n ω, S (n + 1) (Function.update ω n true) ≠ S (n + 1) (Function.update ω n false)) :\n    ∃ A : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ A (n + 1)) ∧\n      ∀ N ω, M N ω = M 0 ω + martingaleTransform A S N ω :=\n  binomial_martingale_representation hq0 hq1 hM hS hS_nondeg\n"
       },
       "metadata": {
         "chapter": 7,
         "reference": "Discrete martingale representation / market completeness (Harrison-Pliska 1981)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: pathwise node-wise representation, hedge = (delta M)/(delta S), telescoped. Lives in MathFin/Binomial/MartingaleRepresentation.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. oneStep_of_martingale (MathFin/Binomial/PathMeasure.lean) turns a Martingale of flipFiltration under coinFlipMeasure q into the node-average identity on every path (condExp_flipFiltration_succ: the conditional expectation is the node average because the next flip is independent of the past; the almost-sure identity is pointwise because every cylinder has positive probability for 0 < q < 1); then the pathwise delta hedge repr_one_step (hedge = (delta M)/(delta S), MathFin/Binomial/FlipPaths.lean) telescopes. Lives in MathFin/Binomial/MartingaleRepresentation.lean. The space is the infinite coin-flip paths; flipFiltration is the pullback of the finite-horizon filtration of the multi-period market. Axioms-clean."
       }
     },
     {
       "id": "mf-binomial-european-replication",
       "name": "The Binomial Price of a European Claim Is the Cost of Its Hedge",
       "domain": "mathematical_finance",
-      "description": "Under no-arbitrage (0 < d < e^r < u) and S0 != 0, for every payoff g and horizon N there is a predictable strategy H (H_k depends only on the first k flips) such that, along every coin-flip path, e^(-rN) g(S_N) = binomialPrice u d r g N S0 + sum_{k<N} H_k (S~_{k+1} - S~_k), where S~_k = e^(-rk) S_k is the discounted spot.",
+      "description": "Under no-arbitrage (0 < d < e^r < u) and S0 != 0, for every payoff g and horizon N there is a predictable strategy H (H_{k+1} is strongly measurable for the natural filtration of the first k coin flips, i.e. depends only on them) such that, along every coin-flip path, e^(-rN) g(S_N) = binomialPrice u d r g N S0 + sum_{k<N} H_{k+1} (S~_{k+1} - S~_k) (the martingaleTransform of H against the discounted spot), where S~_k = e^(-rk) S_k is the discounted spot.",
       "code": {
-        "lean": "import MathFin.Binomial.EuropeanReplication\n\nopen MathFin\n\n/-- The binomial price of a European claim is the initial capital of a hedge. -/\ntheorem binomialPrice_replication' {u d r : ℝ} (h : BinomialNoArb u d r) {S₀ : ℝ}\n    (hS₀ : S₀ ≠ 0) (g : ℝ → ℝ) (N : ℕ) :\n    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, PathAdaptedAt n (H n)) ∧ ∀ ω,\n      Real.exp (-(r * N)) * g (spotPath S₀ u d N ω) = binomialPrice u d r g N S₀\n        + ∑ k ∈ Finset.range N,\n          H k ω * (discountedSpot S₀ u d r (k + 1) ω - discountedSpot S₀ u d r k ω) :=\n  binomialPrice_replication h hS₀ g N\n"
+        "lean": "import MathFin.Binomial.MartingaleRepresentation\n\nopen MeasureTheory MathFin\n\n/-- The binomial price of a European claim is the initial capital of a hedge. -/\ntheorem binomialPrice_replication' {u d r : ℝ} (h : BinomialNoArb u d r) {S₀ : ℝ}\n    (hS₀ : S₀ ≠ 0) (g : ℝ → ℝ) (N : ℕ) :\n    ∃ H : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ H (n + 1)) ∧ ∀ ω,\n      Real.exp (-(r * N)) * g (spotPath S₀ u d N ω) = binomialPrice u d r g N S₀\n        + martingaleTransform H (discountedSpot S₀ u d r) N ω :=\n  binomialPrice_replication h hS₀ g N\n"
       },
       "metadata": {
         "chapter": 7,
         "reference": "Cox, Ross and Rubinstein (1979); Shreve, Stochastic Calculus for Finance I, Theorem 1.2.2 (replication in the N-period binomial model)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. binomialPrice_replication in MathFin/Binomial/EuropeanReplication.lean: binomial_martingale_representation applied to two one-step martingales under crrUpProb u d r, the discounted tree value stopped at N (discountedTreeValue_step, from binomialPrice_succ) and the discounted spot (discountedSpot_step, from crrUpProb_mul_up_add), with nondegeneracy from d < u and S0 != 0. The strategy is the representation's node-wise delta. European payoffs of the terminal spot only; the identity is pathwise, with no measure on paths. Axioms-clean."
+        "formalization_scope": "Full formal proof. binomialPrice_replication in MathFin/Binomial/MartingaleRepresentation.lean: binomial_martingale_representation applied to two Mathlib martingales of flipFiltration under coinFlipMeasure (crrUpProb u d r), the discounted tree value stopped at N (martingale_discountedTreeValue, from binomialPrice_succ) and the discounted spot (martingale_discountedSpot, from crrUpProb_mul_up_add), with nondegeneracy from d < u and S0 != 0. The strategy is the representation's node-wise delta. European payoffs of the terminal spot only; the identity is pathwise, with no measure on paths. Axioms-clean."
       }
     },
     {
@@ -351,7 +351,7 @@
         "reference": "S. E. Shreve, Stochastic Calculus for Finance I: The Binomial Asset Pricing Model, Springer (2004), §4.5; R. C. Merton, Theory of Rational Option Pricing, Bell J. Econ. Manag. Sci. 4(1) (1973) 141–183",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.americanCallPrice_eq_binomialPrice (MathFin/Binomial/MertonAmericanCallTree.lean): americanCallPrice_le_binomialPrice by induction from call_one_period_continuation_dominates_intrinsic, and binomialPrice_le_americanPrice (Binomial/American). SCOPE: the discrete tree, no dividends, r ≥ 0, K ≥ 0. The continuous-time American = European statement is not part of this entry (mf-merton-1973-no-early-exercise proves the strict dominance bsV > S₀ − K only)."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.americanCallPrice_eq_binomialPrice (MathFin/Binomial/MertonAmericanCallTree.lean): the case E = univ of bermudanCallPrice_eq_binomialPrice, proved by the Snell minimality of bermudanPrice E against the European price process (a martingale above the payoff, by induction from call_one_period_continuation_dominates_intrinsic), and bermudanPrice_mono for the exercise sets empty subset E (Binomial/Bermudan). SCOPE: the discrete tree, no dividends, r ≥ 0, K ≥ 0. The continuous-time American = European statement is not part of this entry (mf-merton-1973-no-early-exercise proves the strict dominance bsV > S₀ − K only)."
       }
     },
     {
@@ -390,7 +390,7 @@
       "id": "mf-binomial-multi-period-emm",
       "name": "The Multi-Period CRR Tree Has an Equivalent Martingale Measure (Discrete FTAP Instance)",
       "domain": "mathematical_finance",
-      "description": "For the T-period CRR market on the sample space Fin T -> Bool of the first T coin flips, with the filtration generated by the flips revealed so far, the discounted spot S_n = e^{-rn} S_0 prod_{i<n} (u or d) frozen at T, and any real-world law of i.i.d. Bernoulli(p) flips with 0 < p < 1: if d < e^r < u and d > 0 (BinomialNoArb u d r), then the law of the first T i.i.d. Bernoulli(q) flips with q = crrUpProb u d r = (e^r - d)/(u - d) is an equivalent martingale measure in the sense of the library's finite-horizon discrete FTAP (IsEMM): a probability measure, mutually absolutely continuous with the real-world law, under which S_t = E[S_{t+1} | F_t] for every t < T. The martingale property is the Mathlib Martingale of the discounted spot under the infinite product of Bernoulli(q) measures, transported along the first-T-flips map. Existence only; uniqueness of the EMM is not claimed.",
+      "description": "For the T-period CRR market on the sample space Fin T -> Bool of the first T coin flips, with the filtration generated by the flips revealed so far, the discounted spot S_n = e^{-rn} S_0 prod_{i<n} (u or d) frozen at T, and any real-world law of i.i.d. Bernoulli(p) flips with 0 < p < 1: if d < e^r < u and d > 0 (BinomialNoArb u d r), then the law of the first T i.i.d. Bernoulli(q) flips with q = crrUpProb u d r = (e^r - d)/(u - d) is an equivalent martingale measure in the sense of the library's finite-horizon discrete FTAP (IsEMM): a probability measure, mutually absolutely continuous with the real-world law, under which S_t = E[S_{t+1} | F_t] for every t < T. The martingale property is the Mathlib Martingale of the discounted spot under the infinite product of Bernoulli(q) measures, transported along the first-T-flips map. Existence only; uniqueness is the separate entry mf-binomial-multi-period-emm-unique.",
       "code": {
         "lean": "import MathFin.Binomial.MultiPeriodFTAP\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin\n\n/-- The risk-neutral law of the first `T` flips is an equivalent martingale measure for the\ndiscounted spot of the `T`-period CRR market. -/\ntheorem binomial_multi_period_emm {T : ℕ} {u d r : ℝ} (h : BinomialNoArb u d r) (S₀ : ℝ)\n    {p q : ℝ≥0} (hp0 : 0 < p) (hp1 : p < 1) (hq1 : q ≤ 1) (hqcrr : crrUpProb u d r = q) :\n    IsEMM (horizonFiltration T) (horizonMeasure T p hp1.le) (horizonSpot T S₀ u d r) T\n      (horizonMeasure T q hq1) :=\n  MathFin.isEMM_horizonSpot h S₀ hp0 hp1 hq1 hqcrr\n"
       },
@@ -399,7 +399,7 @@
         "reference": "Harrison and Pliska, Martingales and stochastic integrals in the theory of continuous trading, Stoch. Proc. Appl. 11 (1981); Shreve, Stochastic Calculus for Finance I, Section 5.4 (fundamental theorems of asset pricing)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. isEMM_horizonSpot in MathFin/Binomial/MultiPeriodFTAP.lean: the Mathlib Martingale of the discounted spot under coinFlipMeasure (martingale_discountedSpot, MathFin/Binomial/PathMeasure.lean) is pulled back to the finite space Fin T -> Bool, where the filtration horizonFiltration T has the path-space flipFiltration as its preimage under flips T (comap_flips_horizonFiltration); equivalence of the two measures is full support from the cylinder formula. Single risky asset, finite horizon T, finite sample space; the real-world law is any i.i.d. Bernoulli(p) with 0 < p < 1. Says an EMM exists, not that it is unique. Axioms-clean."
+        "formalization_scope": "Full formal proof. isEMM_horizonSpot in MathFin/Binomial/MultiPeriodFTAP.lean: the Mathlib Martingale of the discounted spot under coinFlipMeasure (martingale_discountedSpot, MathFin/Binomial/PathMeasure.lean) is pulled back to the finite space Fin T -> Bool, where the filtration horizonFiltration T has the path-space flipFiltration as its preimage under flips T (comap_flips_horizonFiltration); equivalence of the two measures is full support from the cylinder formula. Single risky asset, finite horizon T, finite sample space; the real-world law is any i.i.d. Bernoulli(p) with 0 < p < 1. Says an EMM exists; uniqueness is mf-binomial-multi-period-emm-unique. Axioms-clean."
       }
     },
     {
@@ -416,6 +416,22 @@
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. noArbitrage_horizonSpot_iff in MathFin/Binomial/MultiPeriodFTAP.lean. Forward: isEMM_horizonSpot plus ftap_discrete (MathFin/Foundations/FTAPDiscrete.lean). Converse: binomialNoArb_of_noArbitrage, a first-period buy-and-hold or short-and-hold arbitrage, which uses S_0 > 0, d < u and at least one period; the standing hypotheses 0 < d < u are model assumptions (u = d gives a deterministic market with no arbitrage and no d < e^r < u). Single risky asset, finite horizon, finite sample space. Does not claim uniqueness of the EMM. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-binomial-multi-period-emm-unique",
+      "name": "The Multi-Period CRR Tree Has a Unique Equivalent Martingale Measure",
+      "domain": "mathematical_finance",
+      "description": "For the T-period CRR market on the sample space Fin T -> Bool of the first T coin flips, with the filtration generated by the flips revealed so far, the discounted spot S_n = e^{-rn} S_0 prod_{i<n} (u or d) frozen at T with S_0 > 0, and any real-world law of i.i.d. Bernoulli(p) flips with 0 < p < 1: if d < e^r < u and d > 0 (BinomialNoArb u d r), there is exactly one equivalent martingale measure in the sense of the library's finite-horizon discrete FTAP (IsEMM), namely the law of the first T i.i.d. Bernoulli(q) flips with q = crrUpProb u d r = (e^r - d)/(u - d). Existence is isEMM_horizonSpot; uniqueness shows that any probability measure Q under which S_t = E_Q[S_{t+1} | F_t] for every t < T gives the next flip conditional up-probability q on every history atom of F_t, hence every path the product probability.",
+      "code": {
+        "lean": "import MathFin.Binomial.MultiPeriodFTAP\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin\n\n/-- The risk-neutral law of the first `T` flips is the only equivalent martingale measure of the\n`T`-period CRR market. -/\ntheorem binomial_multi_period_emm_unique {T : ℕ} {S₀ u d r : ℝ} (hS₀ : 0 < S₀)\n    (h : BinomialNoArb u d r) {p q : ℝ≥0} (hp0 : 0 < p) (hp1 : p < 1) (hq1 : q ≤ 1)\n    (hqcrr : crrUpProb u d r = q) :\n    ∃! Q, IsEMM (horizonFiltration T) (horizonMeasure T p hp1.le) (horizonSpot T S₀ u d r) T Q :=\n  MathFin.existsUnique_isEMM_horizonSpot hS₀ h hp0 hp1 hq1 hqcrr\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Harrison and Pliska, Martingales and stochastic integrals in the theory of continuous trading, Stoch. Proc. Appl. 11 (1981); Shreve, Stochastic Calculus for Finance I, Section 5.4 (fundamental theorems of asset pricing)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. existsUnique_isEMM_horizonSpot in MathFin/Binomial/MultiPeriodFTAP.lean: existence is isEMM_horizonSpot; uniqueness is IsEMM.eq_horizonMeasure. Node by node, on the atom A of F_t of paths agreeing with x on the first t flips, the martingale property in set-integral form gives the integral over A of S_{t+1} - S_t equal to zero; there the increment is S_t(x)(e^{-r}u - 1) or S_t(x)(e^{-r}d - 1) according to flip t, which with Q(A) = Q(A and up) + Q(A and down) forces Q(A and up) = crrUpProb * Q(A) (IsEMM.real_atom_flip, using S_0 > 0 and d > 0 for S_t(x) > 0). Induction on the prefix length gives each atom the product probability (IsEMM.real_horizonAtom), and at t = T the atoms are the paths. Single risky asset, finite horizon T, finite sample space, standing hypotheses S_0 > 0 and BinomialNoArb. The uniqueness proof uses only the probability and martingale fields of IsEMM, not the equivalence with the real-world law. Uniqueness of the EMM is what the second fundamental theorem equates with completeness; replication of contingent claims is not stated in this entry. Axioms-clean."
       }
     }
   ]

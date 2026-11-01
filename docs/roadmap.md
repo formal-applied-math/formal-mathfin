@@ -47,25 +47,27 @@ sign it does not belong yet. That is a conversation with the maintainer, not a m
 
 ## Direction
 
-The concrete next rungs, each tracked by an issue:
+The concrete next rungs, each tracked by an issue. The coherence wave (#357–#368) folded about sixty
+parallel developments into instances of one object each; what it left open is below.
 
-* **Rates and credit under a measure the library constructs.** One Wiener-integral bond lemma for
-  Vasicek, Hull–White and GSR ([#287](https://github.com/formal-applied-math/formal-mathfin/issues/287));
-  the market price of risk as a Girsanov density
-  ([#288](https://github.com/formal-applied-math/formal-mathfin/issues/288)); then the HJM program
-  ([#138](https://github.com/formal-applied-math/formal-mathfin/issues/138)) through the stochastic
-  Fubini theorems ([#141](https://github.com/formal-applied-math/formal-mathfin/issues/141)–[#145](https://github.com/formal-applied-math/formal-mathfin/issues/145)).
-* **The spine's open seams.** Lévy's characterisation
-  ([#179](https://github.com/formal-applied-math/formal-mathfin/issues/179)), the multi-dimensional
-  martingale representation ([#180](https://github.com/formal-applied-math/formal-mathfin/issues/180)),
-  the converse of the second FTAP ([#181](https://github.com/formal-applied-math/formal-mathfin/issues/181)),
-  and Clark–Ocone ([#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)).
-* **Jumps.** The Itô–Lévy formula ([#132](https://github.com/formal-applied-math/formal-mathfin/issues/132))
-  and the PIDE ([#133](https://github.com/formal-applied-math/formal-mathfin/issues/133)). Before
-  them, the jump-diffusion process itself, which the library so far constructs only without jumps.
-* **One encoding per concept.** The bivariate normal on Mathlib's Gaussian API, and one
-  parametrisation of the one-factor model
-  ([#286](https://github.com/formal-applied-math/formal-mathfin/issues/286)).
+* **Rates and credit under a measure the library constructs.** Vasicek and Hull–White bond prices at
+  t > 0 and the Jamshidian bond put are done (#410, #413). Next comes GSR, which needs a kernel
+  identity for piecewise volatility, then CMS through a swap-rate model bundle, and CDS legs as the
+  mesh limit of the grid legs ([#367](https://github.com/formal-applied-math/formal-mathfin/issues/367)). The CMS convexity adjustment ([#303](https://github.com/formal-applied-math/formal-mathfin/issues/303)) follows from that.
+  Then the HJM program ([#138](https://github.com/formal-applied-math/formal-mathfin/issues/138)), through the stochastic Fubini theorems
+  ([#141](https://github.com/formal-applied-math/formal-mathfin/issues/141)–[#145](https://github.com/formal-applied-math/formal-mathfin/issues/145)).
+* **The spine's open seams.** The multi-dimensional martingale representation ([#180](https://github.com/formal-applied-math/formal-mathfin/issues/180)), the
+  converse of the second FTAP ([#181](https://github.com/formal-applied-math/formal-mathfin/issues/181)) together with FTAP II for the tree ([#415](https://github.com/formal-applied-math/formal-mathfin/issues/415)), Clark–Ocone
+  ([#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)), and the Wiener ↔ Itô bridges ([#366](https://github.com/formal-applied-math/formal-mathfin/issues/366), which is partly blocked on Doob–Meyer
+  upstream).
+* **One object per concept, continued.**
+  * One Snell envelope for the tree and for the foundations ([#415](https://github.com/formal-applied-math/formal-mathfin/issues/415)).
+  * One sampled filtration for the American put's grids, and its leftover canonical parameters
+    ([#414](https://github.com/formal-applied-math/formal-mathfin/issues/414)).
+  * The Itô stack at C² ([#416](https://github.com/formal-applied-math/formal-mathfin/issues/416)).
+  * The accepted elegance rewrites from the lens-8 review ([#418](https://github.com/formal-applied-math/formal-mathfin/issues/418)).
+* **Jumps.** The Itô–Lévy formula ([#132](https://github.com/formal-applied-math/formal-mathfin/issues/132)) and the PIDE ([#133](https://github.com/formal-applied-math/formal-mathfin/issues/133)). Before them comes the
+  jump-diffusion process itself, which the library so far constructs only without jumps ([#305](https://github.com/formal-applied-math/formal-mathfin/issues/305)).
 
 ## What stays out
 

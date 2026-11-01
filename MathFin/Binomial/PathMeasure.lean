@@ -206,6 +206,29 @@ theorem coinFlipMeasure_flips_preimage (q : ℝ≥0) (hq : q ≤ 1) (N : ℕ) (x
     rw [flips_preimage_singleton, coinFlipMeasure_cylinder, ← Fin.prod_univ_eq_prod_range]
     exact prod_congr rfl fun i _ ↦ by simp [i.isLt]
 
+/-- **Full support on cylinders.** For `0 < q < 1`, every finite flip sequence has positive
+probability. -/
+theorem coinFlipMeasure_flips_preimage_pos {q : ℝ≥0} (hq0 : 0 < q) (hq1 : q < 1) (N : ℕ)
+    (x : Fin N → Bool) : 0 < coinFlipMeasure q hq1.le (flips N ⁻¹' {x}) := by
+  rw [coinFlipMeasure_flips_preimage, pos_iff_ne_zero, Finset.prod_ne_zero_iff]
+  intro i _
+  split_ifs
+  · exact_mod_cast hq0.ne'
+  · exact (tsub_pos_iff_lt.2 (by exact_mod_cast hq1)).ne'
+
+/-- **Almost-sure equality of functions of finitely many flips is pointwise equality**, for
+`0 < q < 1`: the cylinder through every path has positive probability. -/
+theorem PathAdaptedAt.eq_of_ae_eq {q : ℝ≥0} (hq0 : 0 < q) (hq1 : q < 1) {n : ℕ}
+    {f g : (ℕ → Bool) → ℝ} (hf : PathAdaptedAt n f) (hg : PathAdaptedAt n g)
+    (h : f =ᵐ[coinFlipMeasure q hq1.le] g) (ω : ℕ → Bool) : f ω = g ω := by
+  by_contra hne
+  refine (coinFlipMeasure_flips_preimage_pos hq0 hq1 n (flips n ω)).ne' ?_
+  refine measure_mono_null (fun ω' (hω' : flips n ω' = flips n ω) ↦ ?_) (ae_iff.1 h)
+  have hagree : ∀ i, i < n → ω' i = ω i := fun i hi ↦ congrFun hω' ⟨i, hi⟩
+  show ¬ f ω' = g ω'
+  rw [hf ω' ω hagree, hg ω' ω hagree]
+  exact hne
+
 /-- **Integrals of functions of finitely many flips are finite sums.** For any
 `F : (Fin N → Bool) → ℝ`, the expectation of `F` of the first `N` flips is the sum over the
 `2^N` flip sequences `x` of `F x` weighted by `∏ᵢ Bernoulli(q)(xᵢ)`. -/
@@ -291,25 +314,20 @@ section Martingale
 
 variable {q : ℝ≥0} {hq : q ≤ 1}
 
-/-- **One-step node averages make a martingale.** A path process `M` adapted to the flips
-(`Mₙ` depends only on the first `n` flips) whose node averages close up,
-`q Mₙ₊₁(ω, flip n up) + (1 − q) Mₙ₊₁(ω, flip n down) = Mₙ(ω)`, is a Mathlib `Martingale` for
-the natural flip filtration under i.i.d. `Bernoulli(q)` flips. The conditional expectation is
-the node average because the next flip is independent of the past
+/-- **The conditional expectation of a function of `n + 1` flips is its node average.** For `f`
+depending only on the first `n + 1` flips, `E[f | ℱₙ](ω) = q f(ω, flip n up) + (1 − q) f(ω, flip n
+down)` almost surely, because the next flip is independent of the past
 (`indep_flip_flipFiltration`, from `iIndepFun_infinitePi`). -/
-theorem martingale_of_oneStep {M : ℕ → (ℕ → Bool) → ℝ} (hM : ∀ n, PathAdaptedAt n (M n))
-    (hstep : ∀ n ω, (q : ℝ) * M (n + 1) (Function.update ω n true)
-      + (1 - q) * M (n + 1) (Function.update ω n false) = M n ω) :
-    Martingale M flipFiltration (coinFlipMeasure q hq) := by
-  refine martingale_nat (fun n ↦ stronglyMeasurable_flipFiltration_iff.2 (hM n))
-    (fun n ↦ (hM n).integrable) fun n ↦ ?_
+theorem condExp_flipFiltration_succ {n : ℕ} {f : (ℕ → Bool) → ℝ} (hf : PathAdaptedAt (n + 1) f) :
+    (coinFlipMeasure q hq)[f | flipFiltration n] =ᵐ[coinFlipMeasure q hq]
+      fun ω ↦ (q : ℝ) * f (Function.update ω n true) + (1 - q) * f (Function.update ω n false) := by
   set μ := coinFlipMeasure q hq
-  set A : (ℕ → Bool) → ℝ := fun ω ↦ M (n + 1) (Function.update ω n true)
-  set B : (ℕ → Bool) → ℝ := fun ω ↦ M (n + 1) (Function.update ω n false)
+  set A : (ℕ → Bool) → ℝ := fun ω ↦ f (Function.update ω n true)
+  set B : (ℕ → Bool) → ℝ := fun ω ↦ f (Function.update ω n false)
   set ind : (ℕ → Bool) → ℝ := fun ω ↦ if ω n then 1 else 0
-  have hA := (hM (n + 1)).fixFlip (n := n) true
-  have hB := (hM (n + 1)).fixFlip (n := n) false
-  have hdecomp : M (n + 1) = B + (A - B) * ind := by
+  have hA := hf.fixFlip (n := n) true
+  have hB := hf.fixFlip (n := n) false
+  have hdecomp : f = B + (A - B) * ind := by
     funext ω
     have e := Function.update_eq_self n ω
     cases hω : ω n
@@ -328,22 +346,54 @@ theorem martingale_of_oneStep {M : ℕ → (ℕ → Bool) → ℝ} (hM : ∀ n, 
     (stronglyMeasurable_flipFiltration_iff.2 hA).sub (stronglyMeasurable_flipFiltration_iff.2 hB)
   have hBint : Integrable B μ := hB.integrable
   have hmul_int : Integrable ((A - B) * ind) μ := by
-    have hMint : Integrable (M (n + 1)) μ := (hM (n + 1)).integrable
-    have : (A - B) * ind = M (n + 1) - B := by rw [hdecomp]; ring
+    have : (A - B) * ind = f - B := by rw [hdecomp]; ring
     rw [this]
-    exact hMint.sub hBint
+    exact hf.integrable.sub hBint
   have hind_cond : μ[ind | flipFiltration n] =ᵐ[μ] fun _ ↦ (q : ℝ) :=
     (condExp_indep_eq (measurable_pi_apply n).comap_le (flipFiltration.le n) hind_sm
       (indep_flip_flipFiltration n)).trans (by rw [integral_flip_indicator])
   have h1 := condExp_add hBint hmul_int (flipFiltration n) (μ := μ)
-  rw [hdecomp]
+  have hc : μ[f | flipFiltration n] = μ[B + (A - B) * ind | flipFiltration n] := by
+    rw [← hdecomp]
+  rw [hc]
   filter_upwards [h1, condExp_mul_of_stronglyMeasurable_left hAB_sm hmul_int hind_int
       (m := flipFiltration n), hind_cond] with ω h1 h2 h3
   rw [Pi.add_apply] at h1
   rw [h1, h2, condExp_of_stronglyMeasurable (flipFiltration.le n)
     (stronglyMeasurable_flipFiltration_iff.2 hB) hBint, Pi.mul_apply, h3]
   simp only [Pi.sub_apply, A, B]
-  linear_combination (-1 : ℝ) * hstep n ω
+  ring
+
+/-- **One-step node averages make a martingale.** A path process `M` adapted to the flips
+(`Mₙ` depends only on the first `n` flips) whose node averages close up,
+`q Mₙ₊₁(ω, flip n up) + (1 − q) Mₙ₊₁(ω, flip n down) = Mₙ(ω)`, is a Mathlib `Martingale` for
+the natural flip filtration under i.i.d. `Bernoulli(q)` flips
+(`condExp_flipFiltration_succ`). -/
+theorem martingale_of_oneStep {M : ℕ → (ℕ → Bool) → ℝ} (hM : ∀ n, PathAdaptedAt n (M n))
+    (hstep : ∀ n ω, (q : ℝ) * M (n + 1) (Function.update ω n true)
+      + (1 - q) * M (n + 1) (Function.update ω n false) = M n ω) :
+    Martingale M flipFiltration (coinFlipMeasure q hq) :=
+  martingale_nat (fun n ↦ stronglyMeasurable_flipFiltration_iff.2 (hM n))
+    (fun n ↦ (hM n).integrable) fun n ↦
+      ((condExp_flipFiltration_succ (hM (n + 1))).trans (ae_of_all _ (hstep n))).symm
+
+/-- **A process adapted to the flips is a martingale exactly when its node averages close up**,
+for `0 < q < 1` (every node has positive probability, so the almost-sure identity holds at
+every path). The converse of `martingale_of_oneStep`. -/
+theorem oneStep_of_martingale (hq0 : 0 < q) (hq1 : q < 1) {M : ℕ → (ℕ → Bool) → ℝ}
+    (hM : Martingale M flipFiltration (coinFlipMeasure q hq1.le)) (n : ℕ) (ω : ℕ → Bool) :
+    (q : ℝ) * M (n + 1) (Function.update ω n true)
+      + (1 - q) * M (n + 1) (Function.update ω n false) = M n ω := by
+  have hn1 : PathAdaptedAt (n + 1) (M (n + 1)) :=
+    stronglyMeasurable_flipFiltration_iff.1 (hM.stronglyAdapted (n + 1))
+  have hn : PathAdaptedAt n (M n) := stronglyMeasurable_flipFiltration_iff.1 (hM.stronglyAdapted n)
+  have hae := (condExp_flipFiltration_succ (hq := hq1.le) hn1).symm.trans
+    (hM.2 n (n + 1) n.le_succ)
+  refine PathAdaptedAt.eq_of_ae_eq hq0 hq1 (fun ω ω' h ↦ ?_) hn hae ω
+  have h1 := hn1.fixFlip true ω ω' h
+  have h2 := hn1.fixFlip false ω ω' h
+  simp only at h1 h2
+  rw [h1, h2]
 
 end Martingale
 

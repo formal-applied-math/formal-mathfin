@@ -53,7 +53,7 @@ theorem expectedReward_tendsto_zero_spot (hW : Measurable W.uncurry)
     (hpaths : ∀ ω, Continuous (fun t => W t ω))
     (hK : 0 ≤ K) (hr : 0 ≤ r) {S : ℕ → ℝ}
     (hS0 : ∀ n, 0 ≤ S n) (hS : Tendsto S atTop atTop)
-    (θ : ℕ → BoundedRule 𝓕 T) :
+    (θ : ℕ → StoppingRule 𝓕 T) :
     Tendsto (fun n => ∫ ω, putReward W K r q σ (S n) (θ n).time ω ∂P)
       atTop (𝓝 0) := by
   have hh : Tendsto (fun n => ∫ ω, putReward W K r q σ (S n) (θ n).time ω ∂P)
@@ -79,14 +79,10 @@ theorem americanPutValue_spot_seq_decay (hW : Measurable W.uncurry)
     (hK : 0 ≤ K) (hr : 0 ≤ r) {S : ℕ → ℝ}
     (hS0 : ∀ n, 0 ≤ S n) (hS : Tendsto S atTop atTop) :
     Tendsto (fun n => americanPutValue P 𝓕 W K r q σ (S n) T) atTop (𝓝 0) := by
-  have happrox (n : ℕ) : ∃ θ : BoundedRule 𝓕 T,
+  have happrox (n : ℕ) : ∃ θ : StoppingRule 𝓕 T,
       americanPutValue P 𝓕 W K r q σ (S n) T-localizationEps n <
-        ∫ ω, putReward W K r q σ (S n) θ.time ω ∂P := by
-    obtain ⟨_,⟨θ,rfl⟩,hθ⟩ := exists_lt_of_lt_csSup
-      (exerciseValues_nonempty (P := P) (𝓕 := 𝓕) (W := W) (K := K) (r := r)
-        (q := q) (σ := σ) (S := S n) (T := T))
-      (sub_lt_self _ (localizationEps_pos n))
-    exact ⟨θ,hθ⟩
+        ∫ ω, putReward W K r q σ (S n) θ.time ω ∂P :=
+    exists_expectedReward_gt_value_sub (P := P) (localizationEps_pos n)
   choose θ hθ using happrox
   have he := expectedReward_tendsto_zero_spot (P := P) (q := q) (σ := σ)
     hW hpaths hK hr hS0 hS θ

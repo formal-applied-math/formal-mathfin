@@ -43,7 +43,7 @@ then no portfolio yields a non-negative payoff with at least one
 strictly positive state (no arbitrage). Not a fourth argument: `q` is a full-support
 probability on `Fin N` and an EMM for `multiStateReturn z` against itself, so the forward
 direction of `Foundations/FTAPOnePeriodVector.lean` (`OnePeriodVector.noArbitrage_of_isEMM`,
-itself `emm_implies_no_arbitrage` at horizon one) applies.
+itself `IsEMM.noArbitrage` at horizon one) applies.
 
 ## Backward FTAP (proved)
 
@@ -155,7 +155,7 @@ theorem hasArbitrage_multi_state_iff_not_noArbitrage {N M : ℕ} (z : Fin M → 
 /-- **Forward FTAP, multi-state**: EMM ⟹ no arbitrage. The EMM vector `q` is a full-support
 probability `Q` on the states, and `Q` is a one-period EMM for the return vector
 `multiStateReturn z` against itself (`E_Q[multiStateReturn z] = ∑ᵢ qᵢ · (z k i)ₖ = 0`);
-`OnePeriodVector.noArbitrage_of_isEMM` (an instance of `emm_implies_no_arbitrage`) is no
+`OnePeriodVector.noArbitrage_of_isEMM` (an instance of `IsEMM.noArbitrage`) is no
 arbitrage for it, which is `¬ HasArbitrage_multi_state z` by
 `hasArbitrage_multi_state_iff_not_noArbitrage`. -/
 theorem noArbitrage_of_emm_multi {N M : ℕ} (z : Fin M → Fin N → ℝ)
@@ -173,8 +173,7 @@ theorem noArbitrage_of_emm_multi {N M : ℕ} (z : Fin M → Fin N → ℝ)
   rw [hasArbitrage_multi_state_iff_not_noArbitrage z p.toMeasure hne, not_not]
   refine OnePeriodVector.noArbitrage_of_isEMM p.toMeasure (multiStateReturn z)
     (measurable_of_finite _)
-    ⟨inferInstance, Measure.AbsolutelyContinuous.rfl, Measure.AbsolutelyContinuous.rfl,
-      Integrable.of_finite, ?_⟩
+    ⟨⟨inferInstance, .rfl, .rfl⟩, Integrable.of_finite, ?_⟩
   rw [integral_fintype Integrable.of_finite]
   ext k
   simp only [hQ, multiStateReturn, WithLp.ofLp_sum, WithLp.ofLp_smul, Finset.sum_apply,

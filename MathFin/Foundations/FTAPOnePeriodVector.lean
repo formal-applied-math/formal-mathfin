@@ -22,7 +22,7 @@ probability space `(Ω, P)`: no arbitrage ⟺ there is an equivalent martingale 
 
 This is the `d`-asset generalisation of the scalar `Foundations/FTAPOnePeriod.lean`, which is
 its `F = ℝ` corollary and has no proofs of its own. The forward direction is
-`MathFin.emm_implies_no_arbitrage` (`Foundations/FTAP.lean`) at horizon `1`.
+`MathFin.IsEMM.noArbitrage` (`Foundations/FTAP.lean`) at horizon `1`.
 Because `θ` ranges over the **finite-dimensional** `F`, the equivalent martingale measure
 is **explicit**: the backward direction minimises the smooth convex softplus
 potential `θ ↦ E[log(1 + exp⟪θ,Y⟫)]`. The
@@ -88,21 +88,18 @@ def NoArbitrage : Prop :=
 /-- **Equivalent martingale measure** (one period, finite-dim): `Q ~ P`, `Y` is
 `Q`-integrable, and `E_Q[Y] = 0 ∈ F`. The library's canonical one-period notion; see the
 module docstring for the encodings proved equivalent to it. -/
-structure IsEMM (Q : Measure Ω) : Prop where
-  prob : IsProbabilityMeasure Q
-  absP : Q ≪ P
-  Pabs : P ≪ Q
+structure IsEMM (Q : Measure Ω) : Prop extends IsEquivProbMeasure P Q where
   int  : Integrable Y Q
   fair : ∫ ω, Y ω ∂Q = 0
 
 omit [IsProbabilityMeasure P] in
 /-- **Forward direction**: an equivalent martingale measure precludes arbitrage. The one-period
-market is the horizon-`1` market with `𝓕 0 = ⊥`, `S 0 = 0`, `S 1 = ⟪θ, Y⟫` and the constant
-strategy `1`: `E_Q[⟪θ, Y⟫] = ⟪θ, E_Q[Y]⟫ = 0` makes `S` a `Q`-martingale up to the horizon, and
-`MathFin.emm_implies_no_arbitrage` does the rest. -/
+market is the horizon-`1` market with `𝓕 0 = ⊥`, the `F`-valued price `S 0 = 0`, `S 1 = Y` and the
+constant holding `θ`: `E_Q[Y] = 0` makes `S` a `Q`-martingale up to the horizon, the gain is
+`⟪θ, S 1 − S 0⟫ = ⟪θ, Y⟫`, and `MathFin.IsEMM.noArbitrage` does the rest. -/
 theorem noArbitrage_of_isEMM (hY : Measurable Y) {Q : Measure Ω} (hQ : IsEMM P Y Q) :
     NoArbitrage P Y := by
-  haveI := hQ.prob
+  haveI := hQ.isProb
   intro θ hpos
   -- the two-step filtration `⊥ ≤ mΩ`
   obtain ⟨𝓕, h0, h1⟩ : ∃ 𝓕 : Filtration ℕ mΩ, 𝓕 0 = ⊥ ∧ 𝓕 1 = mΩ :=
@@ -118,29 +115,27 @@ theorem noArbitrage_of_isEMM (hY : Measurable Y) {Q : Measure Ω} (hQ : IsEMM P 
          split_ifs
          · exact bot_le
          · exact le_rfl }, rfl, rfl⟩
-  let S : ℕ → Ω → ℝ := fun n ω ↦ if n = 0 then 0 else inner ℝ θ (Y ω)
+  let S : ℕ → Ω → F := fun n ω ↦ if n = 0 then 0 else Y ω
   have hS0 : S 0 = 0 := funext fun ω ↦ if_pos rfl
-  have hS1 : S 1 = fun ω ↦ inner ℝ θ (Y ω) := funext fun ω ↦ if_neg one_ne_zero
-  have hint : ∫ ω, inner ℝ θ (Y ω) ∂Q = 0 := by
-    rw [integral_inner hQ.int, hQ.fair, inner_zero_right]
-  have hnull : P {ω | 0 < inner ℝ θ (Y ω)} = 0 := by
-    have := emm_implies_no_arbitrage (T := 1) (𝓕 := 𝓕) (S := S) hQ.absP hQ.Pabs
-      (fun t ht ↦ by
-        rcases Nat.le_one_iff_eq_zero_or_eq_one.mp ht with rfl | rfl
-        · rw [hS0]; exact stronglyMeasurable_zero
-        · rw [hS1, h1]; exact (measurable_const.inner hY).stronglyMeasurable)
-      (fun t ht ↦ by
-        rcases Nat.le_one_iff_eq_zero_or_eq_one.mp ht with rfl | rfl
-        · rw [hS0]; exact integrable_zero _ _ _
-        · rw [hS1]; exact hQ.int.const_inner θ)
-      (fun t ht ↦ by
-        obtain rfl : t = 0 := Nat.lt_one_iff.mp ht
-        rw [h0, condExp_bot, hS1, hint, hS0]
-        exact Filter.Eventually.of_forall fun ω ↦ by simp)
-      (fun _ _ ↦ (1 : ℝ)) (fun _ _ ↦ stronglyMeasurable_const) ⟨1, fun _ _ _ ↦ by simp⟩
-      (by filter_upwards [hpos] with ω h; simpa [S] using h)
-    simpa [S] using this
-  exact ae_eq_zero_of_nonneg_of_null_pos hpos hnull
+  have hS1 : S 1 = Y := funext fun ω ↦ if_neg one_ne_zero
+  have hgain : martingaleTransform (fun _ _ ↦ θ) S 1 = fun ω ↦ inner ℝ θ (Y ω) := by
+    funext ω; simp [martingaleTransform, hS0, hS1]
+  have hE : MathFin.IsEMM 𝓕 P S 1 Q := .of_condExp_succ hQ.toIsEquivProbMeasure
+    (fun t ht ↦ by
+      rcases Nat.le_one_iff_eq_zero_or_eq_one.mp ht with rfl | rfl
+      · rw [hS0]; exact stronglyMeasurable_zero
+      · rw [hS1, h1]; exact hY.stronglyMeasurable)
+    (fun t ht ↦ by
+      rcases Nat.le_one_iff_eq_zero_or_eq_one.mp ht with rfl | rfl
+      · rw [hS0]; exact integrable_zero _ _ _
+      · rw [hS1]; exact hQ.int)
+    (fun t ht ↦ by
+      obtain rfl : t = 0 := Nat.lt_one_iff.mp ht
+      rw [h0, condExp_bot, hS1, hQ.fair, hS0]
+      exact Filter.Eventually.of_forall fun ω ↦ by simp)
+  have hnull := hE.noArbitrage (fun _ _ ↦ θ) (fun _ _ ↦ stronglyMeasurable_const)
+    ⟨‖θ‖, fun _ _ _ ↦ le_rfl⟩ (by rw [hgain]; exact hpos)
+  rwa [hgain] at hnull
 
 /-! ### The softplus potential and its logistic derivative
 
@@ -533,8 +528,7 @@ theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Inte
     ∃ Q, IsEMM P Y Q := by
   by_cases hY0 : (gainsKernel P Y)ᗮ = ⊥
   · -- `Nᗮ = ⊥ ⟹ N = ⊤`: `Y` is a.e. orthogonal to every `θ`, so `E[Y] = 0` and `Q = P`
-    refine ⟨P, inferInstance, Measure.AbsolutelyContinuous.refl P,
-      Measure.AbsolutelyContinuous.refl P, hYint, ?_⟩
+    refine ⟨P, ⟨inferInstance, .rfl, .rfl⟩, hYint, ?_⟩
     have hNtop : gainsKernel P Y = ⊤ := by
       have hoo := Submodule.orthogonal_orthogonal (gainsKernel P Y)
       rw [hY0, Submodule.bot_orthogonal_eq_top] at hoo
@@ -601,7 +595,7 @@ theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Inte
         change (z ω / ζ) • Y ω = ζ⁻¹ • (z ω • Y ω)
         rw [div_eq_inv_mul, mul_smul]
       rw [heq, integral_smul, hfair, smul_zero]
-    exact ⟨Q, hQprob, hQP, hPQ, hYintQ, hQfair⟩
+    exact ⟨Q, ⟨hQprob, hQP, hPQ⟩, hYintQ, hQfair⟩
 
 /-- **General backward direction** (finite-dim market, integrability dropped). For a
 measurable `Y`, no arbitrage gives an EMM. Pass to the equivalent probability measure
@@ -658,7 +652,7 @@ theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y) 
   have hNAt : NoArbitrage Pt Y := fun θ h ↦
     hPt_ll_P.ae_eq (hNA θ (hP_ll_Pt.ae_le h))
   obtain ⟨Q, hQ⟩ := exists_isEMM_of_noArbitrage_integrable Pt Y hY hYintPt hNAt
-  exact ⟨Q, hQ.prob, hQ.absP.trans hPt_ll_P, hP_ll_Pt.trans hQ.Pabs, hQ.int, hQ.fair⟩
+  exact ⟨Q, ⟨hQ.isProb, hQ.ac.trans hPt_ll_P, hP_ll_Pt.trans hQ.ac'⟩, hQ.int, hQ.fair⟩
 
 /-- **One-period Fundamental Theorem of Asset Pricing**, finite-dimensional market, general
 `Ω`. For a measurable `F`-valued discounted excess return `Y` (`F = EuclideanSpace ℝ (Fin

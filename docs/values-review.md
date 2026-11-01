@@ -130,6 +130,171 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-10-31 — corpus 742, modules 678 — elegance: does each headline proof read as its argument
+
+Scope: lens 8 alone, at the maintainer's bar ("mathematical highest quality … and beauty"), over the
+headline theorems of the coherence wave (#370–#411), plus the Jamshidian/Hull–White work (#367) this
+entry ships with. The maintainer's reading took five proofs (`value_eq_of_attained`, the classical
+supermartingale, `condExp_exp_wienerIntegralLp`, `IsEquivProbMeasure`,
+`binomial_martingale_representation`); three read-only reviewers took the rest (risk measures and the
+American put; pricing and the FTAP; stochastic calculus), each theorem judged *exemplary*, *sound but
+obscured* or *wrong shape*, with every proposed rewrite adjudicated before it was accepted.
+
+### Upgrades executed
+
+- **Jamshidian as one Gaussian step.** `HasBondPrice.valueDisc_bondPut_gaussian`: under the
+  T₀-forward measure a bond `a·e^{−βr}` with `r` Gaussian is lognormal, the put is a Black put, and
+  the mean of the lognormal is `P(0,T₁)/P(0,T₀)` by the tower property
+  (`HasBondPrice.integral_bond_forward`), with no algebra on the affine coefficients. Hull–White and
+  Vasicek puts and caplets are instances; Vasicek is Hull–White at constant forcing.
+- **One bond-price-at-t argument.** `condExp_exp_neg_integratedRate` is the lifted body of
+  `vasicekBondPrice_condExp`; its only model input is the identity between the deterministic parts,
+  so the Hull–White price is a three-line instance (`HullWhite.integratedMean_sub`).
+- `HasBondPrice` factored out of `BondModel`: the bond-price facts, without the forward rate, are all
+  the put needs.
+
+### The standing first pass: prose against statement
+
+The five new entries were read against their Lean: each says the underlying is hypothesised to be the
+bond price a.s., the put pays at T₀, and the caplet entries say they are not Black-76 caplets (the
+Vasicek forward rate is a shifted lognormal, a remark, not a theorem). No overstatement found.
+
+### Lens gradients
+
+8. Beauty, the panel's verdicts. Exemplary, leave them: `ftap_discrete`,
+   `noArbitrage_horizonSpot_iff`, `bermudanPrice` and `bermudanCallPrice_eq_binomialPrice`, the CDS
+   and cap values, `value_chooser` and parity, `itoIntegralCLM_T := itoIntegralL2 ∘ bandExtend` with
+   its cross-horizon consistency, the adapted Girsanov proof (12 lines, one idea per transport lemma),
+   and the proof of `martingale_of_setIntegral_eq`. Sound but obscured: Lévy's characterization (the
+   stopped pair spelled out ~25 times, one localisation recipe three times), the local Itô formula (a
+   9-hypothesis preamble twice, path continuity re-proved), the Itô process (`itoProcessCLM` is `rfl`
+   to the infinite-horizon process defined after it, which re-proves its four properties), and in
+   pricing the freeze-at-T step inlined in both FTAP directions, the `q`/`hq1`/`hqcrr` plumbing, the
+   caplet identity buried in its proof. Rejected as not buying clarity: a second coherence structure
+   (the #384 decision), an abstract Markov predicate, an `exerciseStep` abbreviation, and a new
+   `IsBrownianOn` beside BrownianMotion's `IsPreBrownianReal` / `IsFilteredPreBrownian`.
+
+### Ranked backlog
+
+1. Invert the Itô process architecture: infinite-horizon engine first,
+   `itoProcessCLM := itoProcessL2Inf.comp (bandExtend T)`, the terminal identities from
+   F_T-measurability; two of three density proofs go (in flight, `polish/stochastic-elegance`).
+2. `IsLocalMartingale.martingale_stoppedProcess_of_bound` and `.exists_martingale_eqOn` lifted; the
+   local Itô formula a corollary; stopped-process lemmas out of `LevyCharacterization` (in flight).
+3. The freeze lemma for both FTAP directions; `SimpleStrategy.toDiscrete`, so
+   `isEMM_noArbitrageSimple` applies the discrete theorem.
+4. `bond_mul_capletPayoff`, so the caplet is tower + identity; `integral_discount_mul_eq_forward`
+   replacing the inline forward-measure step in `Caplet.lean`.
+5. `crrUpProbNN : ℝ≥0`; `martingale_iff_setIntegral_eq` at `[SigmaFiniteFiltration μ 𝒢]`.
+6. The Girsanov conclusions through `IsFilteredPreBrownian`; VaR subadditivity from lifted
+   `covariance_le_sqrt_variance_mul` / `sqrt_variance_add_le`.
+7. GSR (two-piece volatility): its own `kernelRestrict` identity before `condExp_exp_neg_integratedRate`
+   applies; `bondPrice_vasicek` from `bondPrice_hullWhite`.
+
+### Evidence
+
+Reviewer claims about Mathlib/BrownianMotion checked against the pinned sources: Mathlib has only
+`martingale_of_setIntegral_eq_succ` (ℕ-indexed), so the general lemma stays; BrownianMotion has
+`IsFilteredPreBrownian` (`Gaussian/BrownianMotion.lean:284`), so no parallel Brownian predicate.
+Jamshidian branch: ledger sweep green on all 12 shards, fresh 742/742.
+
+## 2026-10-31 — corpus 725, modules 669 — the coherence wave, read again after it landed
+
+Scope: everything the coherence audit (#357–#368) changed, #370–#404: about 250 files, 60 parallel
+developments folded into instances. The question was the maintainer's: "we might have broken values in
+this big refactor". Collapsing a proof into an instance can quietly add a hypothesis, weaken a
+conclusion, leave prose describing the old theorem, or swap a conceptual argument for one that merely
+compiles, and most of these proofs were written by agents and checked only by CI. Four read-only
+reviewers split the tree (stochastic foundations; the American put; binomial, contracts, fixed income
+and Black–Scholes pricing; risk measures with a corpus-wide prose pass over the 72 entries whose text or
+code changed), each diffing statements at `a944c6c` against main.
+
+### Upgrades executed
+
+- **Nothing was weakened that mattered, and the losses that did occur are restored.** Every changed
+  public statement was diffed. Two lost generality: `isCoherentRiskMeasure_neg_iff` required full support
+  in both directions where only the converse uses it, and the Gaussian ES/CVaR lemmas assumed positive
+  variances. #402 splits the first (`IsCoherentRiskMeasure.positions_of_neg`, any finite measure) and
+  drops the second (a Gaussian of variance zero is a.s. constant). Many statements got stronger in the
+  wave: Itô unrestricted from C³ to C^{1,2}, Lévy's characterization from `reduced_core` to `full`,
+  `emm_implies_no_arbitrage` F-valued over a horizon, `varianceSwap_fairStrike` as the integral of the sum.
+- **One verification theorem for the American put** (#404). `PutEnvelope` (#400) and `PutWaiting` (the
+  price dominates its own Gaussian evolution) are the two facts both the classical and the actual track
+  produce, and the supermartingale is proved once from them; the PDE and dynamic programming are its two
+  suppliers. `value_eq_of_attained` states the two halves of "the price is the value" once: the
+  supermartingale bounds every rule, and a rule attaining `∫ U 0` is optimal. The classical theorems are
+  instances. The actual track is the dual rather than an instance: given a supermartingale and a contact
+  rule, attaining the initial value and the contact-stopped process being a martingale are equivalent,
+  and the classical track proves one direction while the actual track proves the other. That equivalence
+  is the mathematics the two tracks were circling.
+- **`IsEquivProbMeasure`** (#403): the probability-plus-mutual-absolute-continuity condition was a field
+  prefix of three `IsEMM` structures under two naming schemes and an anonymous conjunction returned by
+  three theorems named `…_isEquivProbMeasure`. One structure now, extended by all three.
+- **One set-integral martingale lemma** (`MeasureTheory.martingale_of_setIntegral_eq`, E-valued, any
+  preorder index) and the one-step martingale-transform lemmas once over any index.
+- **One SVI derivative chain** from `HasDerivAt (variance p) (slope p k) k`, its five `sigmaZero_` twins
+  deleted; `bermudanCallPrice_eq_binomialPrice` for every exercise set, the American call its `univ` case.
+- **Twins removed**: `measurable_eval_natFiltration` (Mathlib's `Filtration.stronglyAdapted_natural`),
+  `multi_period_FTAP_marginals`, `stockNumeraireMeasure`, `ContinuousMarket.increment_*`.
+
+### The standing first pass: prose against statement
+
+#401 fixed what the pass found. Six `mf-gaussian-*` entries described `ring`/`linarith` identities on
+real parameters as satisfying the coherent-risk axioms; they now say what they are, and the two
+"subadditive" entries are named for the closed form. Stale scopes: `sc-thm-7.1.1` (C³, mollification),
+`mart-thm-2.6.7`, a Merton entry citing an entry the wave deleted, the CDS grid, `mf-american-ge-european`
+(its `BinomialNoArb`). The README, `architecture.md`, `mathematical-architecture.md` and `AxiomAudit.lean`
+still said C³ and "Lévy reduced". Junk values now disclosed: `forwardMeasure` (`∫ 1/B` is 0 off
+integrability; its docstring also claimed equivalence to `Q`, which it does not prove), `Payoff.rpow` at
+a negative base, `stoppingValue` on an empty or unbounded class. `ItoFormulaUnrestricted.lean` held the
+cutoff, not the formula; it is `ItoFormulaCutoff.lean`.
+
+### Lens gradients
+
+1. Inspired math: exemplar `value_eq_of_attained` and the attained ⇔ martingale duality, now one
+   theorem (`expectedReward_eq_initial_iff_stopped_martingale`, executed after this review).
+2. Coherence: exemplar `IsEquivProbMeasure` extended by every `IsEMM`; next, the binomial `snell` and
+   `finiteBellman` are two unconnected Snell envelopes — one in `Foundations/`, the other its instance.
+3. Zero slop: exemplar `classicalCandidate_norm_le` replacing a six-line block at nine sites; next, the
+   C³ chain under `planeGenerator_eq_partials` (now C²) carried down to C².
+4. Architecture: exemplar `PutEnvelope` + `PutWaiting` as the interface between the PDE and the stopping
+   problem; next, three sampled grid filtrations as views of one sample-along-a-schedule construction.
+5. First principles: exemplar `positions_of_neg` for any finite measure; next, `stockNumeraire_exercise_probability`
+   as a value of `numeraireMeasure`, not an integral against its density.
+6. Idiomatic register: exemplar the explicit `𝓕 P` in `IsEMM`/`NoArbitrageSimple` (40 named-argument
+   sites gone); next, the 124 `convert!` in `AmericanPut/`.
+7. Concept clarity: exemplar the six parameter-identity entries saying what they are; next, corpus
+   entries for `valueAtRisk_of_hasGaussianLaw` / `expectedShortfall_of_hasGaussianLaw`, cited only in
+   scope strings.
+8. Beauty: exemplar the American call as the `E = univ` case of a statement for every exercise set;
+   next, CDS mesh convergence, so the grid legs converge to `Cox.cdsLosses` and the last grid/continuous
+   twin pair is one object.
+
+### Ranked backlog
+
+1. The attained ⇔ martingale equivalence as one theorem (American put), and `aeAmericanPutValue` through
+   `stoppingValue`.
+2. `snell` and `finiteBellman` as one Snell envelope in `Foundations/`.
+3. CDS: pay-at-a-stopping-time combinator and mesh convergence of the grid legs.
+4. The C³ chain under `planeGenerator_eq_partials` at C²; the explicit canonical parameters left in
+   `ActualSmoothFit` and `CanonicalPrice`.
+5. One sampled-filtration construction; `GridSampling`'s dominated-convergence block from
+   `OrderedSampling`; `rounded_time_stopping` from `toGridIndexRule`/`toPhysicalRule`.
+6. Discrete `IsEMM` F-valued, so `isEMM_noArbitrageSimple` is `.sampled.noArbitrage`; Brownian and
+   Poisson isometry kernels unified; the Wiener integral a corollary rather than a construction.
+7. FTAP II for the tree, after `IsEMM.eq_horizonMeasure`.
+8. Split the 5000-line `ItoFormulaAdaptedDrift.lean`.
+
+### Evidence
+
+Panel claims adjudicated against `git grep` before acting: `bermudan_sandwich`, called dead, is cited by
+`benchmarks/binomial.json` and stays; "eight inlined set-integral martingale proofs" were mostly
+single-pair `condExp` identities, not martingale structures, so the lemma lands at three sites, not
+eight; the inflation `hP` the wave added ties `forwardMeasure`'s normaliser to the bond price and is
+correct; `lowerExpectedShortfall` stays Fissler–Ziegel's definition, since the reflection identity needs
+a finite mean. A coercion from the solution structures to `PutEnvelope p` cannot exist (the target does
+not determine `k` and `b`). Every branch: ledger fresh 725/725, sweep and build green before merge.
+
 ## 2026-10-29 — corpus 713, modules 656 — stochastic discount factors, and bonds in the Gaussian short-rate models
 
 Scope: the rates tower's first step into contracts, after #287. Four entries were added to `contracts.json` (all `full`); corpus 709 → 713. One module was added: `Contracts/Models/ShortRate.lean`.
@@ -2438,7 +2603,7 @@ the sign formula, hygiene, conventions and the licence. The parent adjudicated.
    mirror of `certificateFormula`.
 4. **Port hygiene** (lens 6): scope `maxHeartbeats`, `maxRecDepth` and `open scoped Classical` to
    the declarations that need them; drop the redundant `public import Mathlib` lines; docstrings
-   for the remaining definitions (`numerator`, `rootVariance`, `blackPlus`, `blackMinus`).
+   for the remaining definitions (`numerator`, `rootVariance`).
 5. **Ask upstream for a LICENSE file.**
 6. **Carried.** The earlier 2026-10-04 and 2026-10-03 backlogs stand.
 

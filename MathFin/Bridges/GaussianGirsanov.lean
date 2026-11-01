@@ -141,14 +141,11 @@ the two measures have the same null sets. -/
 theorem esscherTilt_isEquivProbMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω}
     {P : Measure Ω} {W : Ω → ℝ} (c : ℝ)
     (hWmeas : Measurable W) (hW : HasLaw W (gaussianReal 0 1) P) :
-    IsProbabilityMeasure
-        (P.withDensity (fun ω ↦ ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2)))) ∧
-      P.withDensity (fun ω ↦ ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2))) ≪ P ∧
-      P ≪ P.withDensity (fun ω ↦ ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2))) :=
-  ⟨esscherTilt_isProbabilityMeasure c hWmeas hW, withDensity_absolutelyContinuous _ _,
-    absolutelyContinuous_withDensity_ofReal P
-      (Real.measurable_exp.comp ((hWmeas.const_mul c).sub_const _)).aemeasurable
-      (ae_of_all _ fun _ ↦ Real.exp_pos _)⟩
+    IsEquivProbMeasure P
+      (P.withDensity (fun ω ↦ ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2)))) :=
+  isEquivProbMeasure_withDensity_of_isProbabilityMeasure P
+    (Real.measurable_exp.comp ((hWmeas.const_mul c).sub_const _)).aemeasurable
+    (ae_of_all _ fun _ ↦ Real.exp_pos _) (esscherTilt_isProbabilityMeasure c hWmeas hW)
 
 /-- **The risk-neutral measure, derived** (static Girsanov capstone). Given a
 standard-normal physical driver `W` under `P`, there **exists** a probability

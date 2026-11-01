@@ -6,20 +6,22 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.Verification
-public import MathFin.BlackScholes.AmericanPut.Boundary.DividendProblem
+public import MathFin.BlackScholes.AmericanPut.Boundary.ContinuousBoundaryProblem
 
 /-!
 # The discounted classical-price candidate
 
 The process is frozen at maturity. Its continuity, boundedness and payoff
-domination follow from the classical contract. Supermartingality and the
+domination follow from `PutEnvelope p` alone: the price is continuous, lies between the payoff
+and the strike, and equals the payoff at expiry. No PDE, boundary or smoothness is used, so the
+results apply to any such price, classical or the stopping value itself. Supermartingality and the
 contact-rule martingale property are NOT asserted here; they are the remaining
 stochastic verification obligations.
 
 ## Result
 
 Public entry points include `classicalLogSpot`, `classicalCandidate`, `scaled_classical_payoff`,
-`classicalCandidate_bounds`.
+`classicalCandidate_bounds`, `classicalCandidate_norm_le`.
 -/
 
 @[expose] public section
@@ -56,8 +58,8 @@ theorem scaled_classical_payoff (W : ℝ≥0 → Ω → ℝ) {K r q σ S : ℝ}
   unfold putPayoff
   rw [mul_max_of_nonneg _ _ hK.le,mul_zero,mul_sub,mul_one,he]
 
-theorem classicalCandidate_bounds {k h K r q σ S : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
-    (hp : DividendPutSolution k h p b) (W : ℝ≥0 → Ω → ℝ)
+theorem classicalCandidate_bounds {K r q σ S : ℝ} {p : ℝ → ℝ → ℝ}
+    (hp : PutEnvelope p) (W : ℝ≥0 → Ω → ℝ)
     (hK : 0 ≤ K) (hr : 0 ≤ r) (T t : ℝ≥0) (ω : Ω) :
     0 ≤ classicalCandidate W K r q σ S p T t ω ∧
       classicalCandidate W K r q σ S p T t ω ≤ K := by
@@ -78,8 +80,14 @@ theorem classicalCandidate_bounds {k h K r q σ S : ℝ} {p : ℝ → ℝ → �
         mul_le_mul_of_nonneg_right he (mul_nonneg hK hlo)
       _ ≤ K := by simpa only [one_mul,mul_one] using mul_le_mul_of_nonneg_left hhi hK
 
-theorem classicalCandidate_dominates {k h K r q σ S : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
-    (hp : DividendPutSolution k h p b) (W : ℝ≥0 → Ω → ℝ)
+theorem classicalCandidate_norm_le {K r q σ S : ℝ} {p : ℝ → ℝ → ℝ}
+    (hp : PutEnvelope p) (W : ℝ≥0 → Ω → ℝ) (hK : 0 ≤ K) (hr : 0 ≤ r) (T t : ℝ≥0) (ω : Ω) :
+    ‖classicalCandidate W K r q σ S p T t ω‖ ≤ K := by
+  obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp W hK hr T t ω
+  simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
+
+theorem classicalCandidate_dominates {K r q σ S : ℝ} {p : ℝ → ℝ → ℝ}
+    (hp : PutEnvelope p) (W : ℝ≥0 → Ω → ℝ)
     (hK : 0 < K) (hS : 0 < S) {T t : ℝ≥0} (ht : t ≤ T) (ω : Ω) :
     putReward W K r q σ S (fun _ => t) ω ≤ classicalCandidate W K r q σ S p T t ω := by
   have htime : 0 ≤ σ^2/2*((T : ℝ)-(t : ℝ)) :=
@@ -89,8 +97,8 @@ theorem classicalCandidate_dominates {k h K r q σ S : ℝ} {p : ℝ → ℝ →
       (hp.dominates (classicalLogSpot W K r q σ S t ω) _ htime) hK.le)
           (Real.exp_pos (-r*(t : ℝ))).le
 
-theorem classicalCandidate_continuous {k h K r q σ S : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
-    (hp : DividendPutSolution k h p b) {W : ℝ≥0 → Ω → ℝ}
+theorem classicalCandidate_continuous {K r q σ S : ℝ} {p : ℝ → ℝ → ℝ}
+    (hp : PutEnvelope p) {W : ℝ≥0 → Ω → ℝ}
     (hW : ∀ ω, Continuous (fun t => W t ω)) (T : ℝ≥0) (ω : Ω) :
     Continuous (fun t => classicalCandidate W K r q σ S p T t ω) := by
   have hlog : Continuous (fun t => classicalLogSpot W K r q σ S (min t T) ω) := by
@@ -106,8 +114,8 @@ theorem classicalCandidate_continuous {k h K r q σ S : ℝ} {p : ℝ → ℝ �
   exact (show Continuous (fun t : ℝ≥0 => Real.exp (-r*(min t T : ℝ))) by fun_prop).mul
     (continuous_const.mul hpcont)
 
-theorem classicalCandidate_maturity {k h K r q σ S : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ}
-    (hp : DividendPutSolution k h p b) (W : ℝ≥0 → Ω → ℝ)
+theorem classicalCandidate_maturity {K r q σ S : ℝ} {p : ℝ → ℝ → ℝ}
+    (hp : PutEnvelope p) (W : ℝ≥0 → Ω → ℝ)
     (hK : 0 < K) (hS : 0 < S) (T : ℝ≥0) (ω : Ω) :
     classicalCandidate W K r q σ S p T T ω = putReward W K r q σ S (fun _ => T) ω := by
   simp only [classicalCandidate,min_self,sub_self,mul_zero,hp.initial,
@@ -127,21 +135,19 @@ explicit: this is not yet PDE-to-stopping verification. -/
 theorem classical_price_eq_value_of_verification [MeasurableSpace Ω]
     {P : Measure Ω} [IsProbabilityMeasure P]
     {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {W : ℝ≥0 → Ω → ℝ}
-    {k h K r q σ S : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} {T : ℝ≥0}
-    (hp : DividendPutSolution k h p b) (hW : Measurable W.uncurry)
+    {K r q σ S : ℝ} {p : ℝ → ℝ → ℝ} {T : ℝ≥0}
+    (hp : PutEnvelope p) (hW : Measurable W.uncurry)
     (hpaths : ∀ ω, Continuous (fun t => W t ω)) (hzero : ∀ᵐ ω ∂P, W 0 ω = 0)
     (hK : 0 < K) (hr : 0 ≤ r) (hS : 0 < S)
     (hsuper : Supermartingale (classicalCandidate W K r q σ S p T) 𝓕 P)
-    (θ : BoundedRule 𝓕 T)
+    (θ : StoppingRule 𝓕 T)
     (hcontact : ∀ᵐ ω ∂P, classicalCandidate W K r q σ S p T (θ.time ω) ω =
       putReward W K r q σ S θ.time ω)
     (hmart : Martingale (fun t ω => classicalCandidate W K r q σ S p T
       (min t (θ.time ω)) ω) 𝓕 P) :
     americanPutValue P 𝓕 W K r q σ S T = K*p (Real.log (S/K)) (σ^2/2*(T : ℝ)) := by
-  have hbound : ∀ t ω, ‖classicalCandidate W K r q σ S p T t ω‖ ≤ K := by
-    intro t ω
-    obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S) hp W hK.le hr T t ω
-    simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
+  have hbound : ∀ t ω, ‖classicalCandidate W K r q σ S p T t ω‖ ≤ K :=
+    classicalCandidate_norm_le hp W hK.le hr T
   rw [value_eq_of_contact_martingale hW hK.le hr hS.le hsuper
     (classicalCandidate_continuous hp hpaths T) hbound
     (fun _ ht ω => classicalCandidate_dominates hp W hK hS ht ω) θ hcontact hmart,

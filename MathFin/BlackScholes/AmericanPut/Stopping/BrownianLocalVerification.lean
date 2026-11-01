@@ -44,16 +44,17 @@ theorem stoppedClassicalCandidate_stronglyAdapted {Ω : Type*} [MeasurableSpace 
     {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {W : ℝ≥0 → Ω → ℝ}
     {k h K r q σ S : ℝ} {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} {T : ℝ≥0}
     (hp : DividendPutSolution k h p b) (hadapt : Adapted 𝓕 W)
-    (hpaths : ∀ ω, Continuous (fun t => W t ω)) (θ : BoundedRule 𝓕 T) :
+    (hpaths : ∀ ω, Continuous (fun t => W t ω)) (θ : StoppingRule 𝓕 T) :
     StronglyAdapted 𝓕 (fun t ω => classicalCandidate W K r q σ S p T (min t (θ.time ω)) ω) := by
   have hA : StronglyAdapted 𝓕 (classicalCandidate W K r q σ S p T) :=
-    fun t => (classicalCandidate_adapted hp hadapt T t).stronglyMeasurable
-  convert! hA.stoppedProcess (classicalCandidate_continuous hp hpaths T) θ.stopping using 1
+    fun t => (classicalCandidate_adapted hp.toPutEnvelope hadapt T t).stronglyMeasurable
+  convert! hA.stoppedProcess (classicalCandidate_continuous hp.toPutEnvelope hpaths T)
+    θ.stopping using 1
 
 theorem brownian_stoppedCandidate_martingale_of_local {K r q σ S : ℝ}
     {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} {T : ℝ≥0}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
-    (hK : 0 < K) (hr : 0 ≤ r) (θ : BoundedRule brownianFiltration T)
+    (hK : 0 < K) (hr : 0 ≤ r) (θ : StoppingRule brownianFiltration T)
     (hlocal : IsLocalMartingale (fun t ω => classicalCandidate brownian K r q σ S p T
       (min t (θ.time ω)) ω) brownianAugFiltration gaussianLimit) :
     Martingale (fun t ω => classicalCandidate brownian K r q σ S p T
@@ -65,7 +66,7 @@ theorem brownian_stoppedCandidate_martingale_of_local {K r q σ S : ℝ}
     (fun t => (hadapt t).mono (brownianFiltration_le_aug t)) (C := K)
   intro t ω
   obtain ⟨hlo,hhi⟩ := classicalCandidate_bounds (q := q) (σ := σ) (S := S)
-    hp brownian hK.le hr T (min t (θ.time ω)) ω
+    hp.toPutEnvelope brownian hK.le hr T (min t (θ.time ω)) ω
   simpa only [Real.norm_eq_abs,abs_of_nonneg hlo] using hhi
 
 theorem brownian_price_identification_of_localMartingale {K r q σ S : ℝ}
