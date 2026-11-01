@@ -74,11 +74,10 @@ admissible pairing Lipschitz-continuous in time. -/
 /-- The pairing of a bounded measurable function against a probability measure
 is bounded by the sup bound. -/
 lemma abs_pairing_le {μ : Measure ℝ} (hμ : IsProbabilityMeasure μ) {g : ℝ → ℝ} {C : ℝ}
-    (hmeas : Measurable g) (hg : ∀ x, |g x| ≤ C) : |∫ y, g y ∂μ| ≤ C := by
+    (hg : ∀ x, |g x| ≤ C) : |∫ y, g y ∂μ| ≤ C := by
   have h1 : |∫ y, g y ∂μ| ≤ ∫ y, |g y| ∂μ := abs_integral_le_integral_abs
-  have h2 : ∫ y, |g y| ∂μ ≤ ∫ y, C ∂μ := by
-    have hm1 : Measurable (fun y => |g y| : ℝ → ℝ) := Measurable.abs hmeas
-    refine integral_mono_of_nonneg (ae_of_all μ (fun x => abs_nonneg (g x)))
+  have h2 : ∫ y, |g y| ∂μ ≤ ∫ y, C ∂μ :=
+    integral_mono_of_nonneg (ae_of_all μ (fun x => abs_nonneg (g x)))
       (integrable_const C) (ae_of_all μ hg)
   rw [integral_const] at h2
   simp at h2
@@ -97,9 +96,6 @@ lemma pairing_increment {b v T : ℝ} {ρ : ℝ → Measure ℝ} (hρ : IsWeakFo
     ∫ y, g y ∂(ρ s) - ∫ y, g y ∂(ρ s₀)
       = ∫ r in s₀..s, (b * ∫ y, g' y ∂(ρ r) + v / 2 * ∫ y, g'' y ∂(ρ r)) := by
   obtain ⟨hprob, hident⟩ := hρ
-  have hgc : Continuous g := continuous_iff_continuousAt.mpr fun x ↦ (h1 x).continuousAt
-  have hg'c : Continuous g' := continuous_iff_continuousAt.mpr fun x ↦ (h2 x).continuousAt
-  have hg''c : Continuous g'' := continuous_iff_continuousAt.mpr fun x ↦ (h3 x).continuousAt
   set w : ℝ → ℝ := fun r => b * ∫ y, g' y ∂(ρ r) + v / 2 * ∫ y, g'' y ∂(ρ r) with hw
   have ident : ∀ u ∈ Set.Ioc 0 T,
       ∫ y, g y ∂(ρ u) = ∫ y, g y ∂(ρ 0) + ∫ r in (0)..u, w r ∧
@@ -149,12 +145,10 @@ lemma abs_pairing_lipschitz {b v T : ℝ} {ρ : ℝ → Measure ℝ} (hρ : IsWe
     {s₀ s : ℝ} (hs₀ : s₀ ∈ Set.Icc 0 T) (hs : s ∈ Set.Icc 0 T) :
     |∫ y, g y ∂(ρ s) - ∫ y, g y ∂(ρ s₀)| ≤ (|b| * C1 + |v| / 2 * C2) * |s - s₀| := by
   rw [pairing_increment hρ h1 h2 h3 h0 hb1 hb2 hb3 hs₀ hs, ← Real.norm_eq_abs]
-  have hg'c : Continuous g' := continuous_iff_continuousAt.mpr fun x ↦ (h2 x).continuousAt
-  have hg''c : Continuous g'' := continuous_iff_continuousAt.mpr fun x ↦ (h3 x).continuousAt
   refine intervalIntegral.norm_integral_le_of_norm_le_const (fun r _ => ?_)
   rw [Real.norm_eq_abs]
-  have hb1' : |∫ y, g' y ∂(ρ r)| ≤ C1 := abs_pairing_le (hρ.1 r) hg'c.measurable hb1
-  have hb2' : |∫ y, g'' y ∂(ρ r)| ≤ C2 := abs_pairing_le (hρ.1 r) hg''c.measurable hb2
+  have hb1' : |∫ y, g' y ∂(ρ r)| ≤ C1 := abs_pairing_le (hρ.1 r) hb1
+  have hb2' : |∫ y, g'' y ∂(ρ r)| ≤ C2 := abs_pairing_le (hρ.1 r) hb2
   have hhalf : |v / 2| = |v| / 2 := by rw [abs_div]; norm_num
   calc |b * ∫ y, g' y ∂(ρ r) + v / 2 * ∫ y, g'' y ∂(ρ r)|
       ≤ |b * ∫ y, g' y ∂(ρ r)| + |v / 2 * ∫ y, g'' y ∂(ρ r)| := abs_add_le _ _
@@ -163,6 +157,24 @@ lemma abs_pairing_lipschitz {b v T : ℝ} {ρ : ℝ → Measure ℝ} (hρ : IsWe
         rw [hhalf]
         exact add_le_add (mul_le_mul_of_nonneg_left hb1' (abs_nonneg b))
           (mul_le_mul_of_nonneg_left hb2' (by positivity))
+
+/-- A function Lipschitz on `[0, T]` (with a known-nonnegative constant) is continuous
+there: the `ε`-`δ` argument shared by every Lipschitz-from-a-pairing-identity bound in
+this file. -/
+private lemma continuousOn_of_lipschitzOn_Icc {f : ℝ → ℝ} {T L : ℝ} (hL0 : 0 ≤ L)
+    (hLip : ∀ s₀ s, s₀ ∈ Set.Icc (0 : ℝ) T → s ∈ Set.Icc (0 : ℝ) T →
+      |f s - f s₀| ≤ L * |s - s₀|) :
+    ContinuousOn f (Set.Icc 0 T) := by
+  rw [Metric.continuousOn_iff]
+  intro s hs ε hε
+  refine ⟨ε / (L + 1), by positivity, fun s₀ hs₀ hdist => ?_⟩
+  rw [Real.dist_eq] at hdist ⊢
+  calc |f s₀ - f s| ≤ L * |s₀ - s| := hLip s s₀ hs hs₀
+    _ ≤ (L + 1) * |s₀ - s| := by nlinarith [abs_nonneg (s₀ - s)]
+    _ < (L + 1) * (ε / (L + 1)) := mul_lt_mul_of_pos_left hdist (by positivity)
+    _ = ε := by
+          have hpos : (0 : ℝ) < L + 1 := by positivity
+          field_simp
 
 /-! ### Trigonometric test chains
 
@@ -206,6 +218,32 @@ lemma hasDerivAt_negSinSqMul (ξ x : ℝ) :
   have hlin : HasDerivAt (fun y : ℝ => ξ * y) ξ x := by
     simpa using (hasDerivAt_id x).const_mul ξ
   exact (((Real.hasDerivAt_sin (ξ * x)).comp x hlin).const_mul (-ξ ^ 2)).congr_deriv (by ring)
+
+/-- The sup bounds for the `cos(ξ·)` derivative chain, bundled: `C0 = 1`, `C1 = |ξ|`,
+`C2 = ξ²`, `C3 = |ξ|³`. -/
+private lemma abs_cosChain_bounds (ξ : ℝ) :
+    (∀ y : ℝ, |Real.cos (ξ * y)| ≤ 1) ∧ (∀ y : ℝ, |(-ξ) * Real.sin (ξ * y)| ≤ |ξ|) ∧
+    (∀ y : ℝ, |(-ξ ^ 2) * Real.cos (ξ * y)| ≤ ξ ^ 2) ∧
+    (∀ y : ℝ, |ξ ^ 3 * Real.sin (ξ * y)| ≤ |ξ| ^ 3) := by
+  refine ⟨fun y => Real.abs_cos_le_one _, fun y => ?_, fun y => ?_, fun y => ?_⟩
+  · rw [abs_mul]; simpa using mul_le_mul_of_nonneg_left (Real.abs_sin_le_one _) (abs_nonneg ξ)
+  · rw [abs_mul, abs_neg, abs_of_nonneg (sq_nonneg ξ)]
+    exact (mul_le_mul_of_nonneg_left (Real.abs_cos_le_one _) (sq_nonneg ξ)).trans_eq (mul_one _)
+  · rw [abs_mul, abs_pow]
+    exact (mul_le_mul_of_nonneg_left (Real.abs_sin_le_one _) (by positivity)).trans_eq (mul_one _)
+
+/-- The sup bounds for the `sin(ξ·)` derivative chain, bundled: same constants as
+`abs_cosChain_bounds`. -/
+private lemma abs_sinChain_bounds (ξ : ℝ) :
+    (∀ y : ℝ, |Real.sin (ξ * y)| ≤ 1) ∧ (∀ y : ℝ, |ξ * Real.cos (ξ * y)| ≤ |ξ|) ∧
+    (∀ y : ℝ, |(-ξ ^ 2) * Real.sin (ξ * y)| ≤ ξ ^ 2) ∧
+    (∀ y : ℝ, |(-ξ ^ 3) * Real.cos (ξ * y)| ≤ |ξ| ^ 3) := by
+  refine ⟨fun y => Real.abs_sin_le_one _, fun y => ?_, fun y => ?_, fun y => ?_⟩
+  · rw [abs_mul]; simpa using mul_le_mul_of_nonneg_left (Real.abs_cos_le_one _) (abs_nonneg ξ)
+  · rw [abs_mul, abs_neg, abs_of_nonneg (sq_nonneg ξ)]
+    exact (mul_le_mul_of_nonneg_left (Real.abs_sin_le_one _) (sq_nonneg ξ)).trans_eq (mul_one _)
+  · rw [abs_mul, abs_neg, abs_pow]
+    exact (mul_le_mul_of_nonneg_left (Real.abs_cos_le_one _) (by positivity)).trans_eq (mul_one _)
 
 /-! ### Localizing the fundamental theorem of calculus to `[0, T]`
 
@@ -262,54 +300,16 @@ lemma hasDerivWithinAt_cosPairing_sinPairing {b v T : ℝ} {μ : ℝ → Measure
       (b * ξ * (∫ y, Real.cos (ξ * y) ∂(μ x)) - v / 2 * ξ ^ 2 * (∫ y, Real.sin (ξ * y) ∂(μ x)))
       (Set.Ici x) x := by
   have hT : 0 < T := hx0.trans_lt hxT
-  have hb0 : ∀ y : ℝ, |Real.cos (ξ * y)| ≤ 1 := fun y => Real.abs_cos_le_one _
-  have hb1 : ∀ y : ℝ, |(-ξ) * Real.sin (ξ * y)| ≤ |ξ| := fun y => by
-    rw [abs_mul]; simpa using mul_le_mul_of_nonneg_left (Real.abs_sin_le_one _) (abs_nonneg ξ)
-  have hb2 : ∀ y : ℝ, |(-ξ ^ 2) * Real.cos (ξ * y)| ≤ ξ ^ 2 := fun y => by
-    rw [abs_mul, abs_neg, abs_of_nonneg (sq_nonneg ξ)]
-    exact (mul_le_mul_of_nonneg_left (Real.abs_cos_le_one _) (sq_nonneg ξ)).trans_eq (mul_one _)
-  have hb3 : ∀ y : ℝ, |ξ ^ 3 * Real.sin (ξ * y)| ≤ |ξ| ^ 3 := fun y => by
-    rw [abs_mul, abs_pow]
-    exact (mul_le_mul_of_nonneg_left (Real.abs_sin_le_one _) (by positivity)).trans_eq (mul_one _)
-  have hb0' : ∀ y : ℝ, |Real.sin (ξ * y)| ≤ 1 := fun y => Real.abs_sin_le_one _
-  have hb1' : ∀ y : ℝ, |ξ * Real.cos (ξ * y)| ≤ |ξ| := fun y => by
-    rw [abs_mul]; simpa using mul_le_mul_of_nonneg_left (Real.abs_cos_le_one _) (abs_nonneg ξ)
-  have hb2' : ∀ y : ℝ, |(-ξ ^ 2) * Real.sin (ξ * y)| ≤ ξ ^ 2 := fun y => by
-    rw [abs_mul, abs_neg, abs_of_nonneg (sq_nonneg ξ)]
-    exact (mul_le_mul_of_nonneg_left (Real.abs_sin_le_one _) (sq_nonneg ξ)).trans_eq (mul_one _)
-  have hb3' : ∀ y : ℝ, |(-ξ ^ 3) * Real.cos (ξ * y)| ≤ |ξ| ^ 3 := fun y => by
-    rw [abs_mul, abs_neg, abs_pow]
-    exact (mul_le_mul_of_nonneg_left (Real.abs_cos_le_one _) (by positivity)).trans_eq (mul_one _)
-  have hCcont : ContinuousOn (fun s => ∫ y, Real.cos (ξ * y) ∂(μ s)) (Set.Icc 0 T) := by
-    rw [Metric.continuousOn_iff]
-    intro s hs ε hε
-    set L : ℝ := |b| * |ξ| + |v| / 2 * ξ ^ 2 with hL
-    refine ⟨ε / (L + 1), by positivity, fun s₀ hs₀ hdist => ?_⟩
-    rw [Real.dist_eq] at hdist ⊢
-    have hlip := abs_pairing_lipschitz hμ (hasDerivAt_cosMul ξ) (hasDerivAt_negSinMul ξ)
-      (hasDerivAt_negCosSqMul ξ) hb0 hb1 hb2 hb3 hs hs₀
-    calc |(∫ y, Real.cos (ξ * y) ∂(μ s₀)) - ∫ y, Real.cos (ξ * y) ∂(μ s)|
-        ≤ L * |s₀ - s| := hlip
-      _ ≤ (L + 1) * |s₀ - s| := by nlinarith [abs_nonneg (s₀ - s)]
-      _ < (L + 1) * (ε / (L + 1)) := mul_lt_mul_of_pos_left hdist (by positivity)
-      _ = ε := by
-          have hLpos : (0:ℝ) < L + 1 := by positivity
-          field_simp
-  have hScont : ContinuousOn (fun s => ∫ y, Real.sin (ξ * y) ∂(μ s)) (Set.Icc 0 T) := by
-    rw [Metric.continuousOn_iff]
-    intro s hs ε hε
-    set L : ℝ := |b| * |ξ| + |v| / 2 * ξ ^ 2 with hL
-    refine ⟨ε / (L + 1), by positivity, fun s₀ hs₀ hdist => ?_⟩
-    rw [Real.dist_eq] at hdist ⊢
-    have hlip := abs_pairing_lipschitz hμ (hasDerivAt_sinMul ξ) (hasDerivAt_cosMulScaled ξ)
-      (hasDerivAt_negSinSqMul ξ) hb0' hb1' hb2' hb3' hs hs₀
-    calc |(∫ y, Real.sin (ξ * y) ∂(μ s₀)) - ∫ y, Real.sin (ξ * y) ∂(μ s)|
-        ≤ L * |s₀ - s| := hlip
-      _ ≤ (L + 1) * |s₀ - s| := by nlinarith [abs_nonneg (s₀ - s)]
-      _ < (L + 1) * (ε / (L + 1)) := mul_lt_mul_of_pos_left hdist (by positivity)
-      _ = ε := by
-          have hLpos : (0:ℝ) < L + 1 := by positivity
-          field_simp
+  obtain ⟨hb0, hb1, hb2, hb3⟩ := abs_cosChain_bounds ξ
+  obtain ⟨hb0', hb1', hb2', hb3'⟩ := abs_sinChain_bounds ξ
+  have hCcont : ContinuousOn (fun s => ∫ y, Real.cos (ξ * y) ∂(μ s)) (Set.Icc 0 T) :=
+    continuousOn_of_lipschitzOn_Icc (by positivity) fun s₀ s hs₀ hs =>
+      abs_pairing_lipschitz hμ (hasDerivAt_cosMul ξ) (hasDerivAt_negSinMul ξ)
+        (hasDerivAt_negCosSqMul ξ) hb0 hb1 hb2 hb3 hs₀ hs
+  have hScont : ContinuousOn (fun s => ∫ y, Real.sin (ξ * y) ∂(μ s)) (Set.Icc 0 T) :=
+    continuousOn_of_lipschitzOn_Icc (by positivity) fun s₀ s hs₀ hs =>
+      abs_pairing_lipschitz hμ (hasDerivAt_sinMul ξ) (hasDerivAt_cosMulScaled ξ)
+        (hasDerivAt_negSinSqMul ξ) hb0' hb1' hb2' hb3' hs₀ hs
   set h : ℝ → ℝ := fun r => -b * ξ * (∫ y, Real.sin (ξ * y) ∂(μ r))
       - v / 2 * ξ ^ 2 * (∫ y, Real.cos (ξ * y) ∂(μ r)) with hhdef
   set k : ℝ → ℝ := fun r => b * ξ * (∫ y, Real.cos (ξ * y) ∂(μ r))
@@ -387,24 +387,8 @@ lemma pairing_cos_sin_eq {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
     ∀ s ∈ Set.Icc (0 : ℝ) T,
       (∫ y, Real.cos (ξ * y) ∂(ρ s) = ∫ y, Real.cos (ξ * y) ∂(η s)) ∧
       (∫ y, Real.sin (ξ * y) ∂(ρ s) = ∫ y, Real.sin (ξ * y) ∂(η s)) := by
-  have hb0 : ∀ y : ℝ, |Real.cos (ξ * y)| ≤ 1 := fun y => Real.abs_cos_le_one _
-  have hb1 : ∀ y : ℝ, |(-ξ) * Real.sin (ξ * y)| ≤ |ξ| := fun y => by
-    rw [abs_mul]; simpa using mul_le_mul_of_nonneg_left (Real.abs_sin_le_one _) (abs_nonneg ξ)
-  have hb2 : ∀ y : ℝ, |(-ξ ^ 2) * Real.cos (ξ * y)| ≤ ξ ^ 2 := fun y => by
-    rw [abs_mul, abs_neg, abs_of_nonneg (sq_nonneg ξ)]
-    exact (mul_le_mul_of_nonneg_left (Real.abs_cos_le_one _) (sq_nonneg ξ)).trans_eq (mul_one _)
-  have hb3 : ∀ y : ℝ, |ξ ^ 3 * Real.sin (ξ * y)| ≤ |ξ| ^ 3 := fun y => by
-    rw [abs_mul, abs_pow]
-    exact (mul_le_mul_of_nonneg_left (Real.abs_sin_le_one _) (by positivity)).trans_eq (mul_one _)
-  have hb0' : ∀ y : ℝ, |Real.sin (ξ * y)| ≤ 1 := fun y => Real.abs_sin_le_one _
-  have hb1' : ∀ y : ℝ, |ξ * Real.cos (ξ * y)| ≤ |ξ| := fun y => by
-    rw [abs_mul]; simpa using mul_le_mul_of_nonneg_left (Real.abs_cos_le_one _) (abs_nonneg ξ)
-  have hb2' : ∀ y : ℝ, |(-ξ ^ 2) * Real.sin (ξ * y)| ≤ ξ ^ 2 := fun y => by
-    rw [abs_mul, abs_neg, abs_of_nonneg (sq_nonneg ξ)]
-    exact (mul_le_mul_of_nonneg_left (Real.abs_sin_le_one _) (sq_nonneg ξ)).trans_eq (mul_one _)
-  have hb3' : ∀ y : ℝ, |(-ξ ^ 3) * Real.cos (ξ * y)| ≤ |ξ| ^ 3 := fun y => by
-    rw [abs_mul, abs_neg, abs_pow]
-    exact (mul_le_mul_of_nonneg_left (Real.abs_cos_le_one _) (by positivity)).trans_eq (mul_one _)
+  obtain ⟨hb0, hb1, hb2, hb3⟩ := abs_cosChain_bounds ξ
+  obtain ⟨hb0', hb1', hb2', hb3'⟩ := abs_sinChain_bounds ξ
   set K : ℝ := |b| * |ξ| + |v| / 2 * ξ ^ 2 with hKdef
   have hK0 : 0 ≤ K := by rw [hKdef]; positivity
   set U : ℝ → ℝ := fun s => (∫ y, Real.cos (ξ * y) ∂(ρ s)) - ∫ y, Real.cos (ξ * y) ∂(η s)
@@ -443,32 +427,8 @@ lemma pairing_cos_sin_eq {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
           abs_sub _ _
       _ ≤ K * |s - s₀| + K * |s - s₀| := by rw [← hKdef] at h1 h2; linarith [h1, h2]
       _ = 2 * K * |s - s₀| := by ring
-  have hUcont : ContinuousOn U (Set.Icc 0 T) := by
-    rw [Metric.continuousOn_iff]
-    intro s hs ε hε
-    refine ⟨ε / (2 * K + 1), by positivity, fun s₀ hs₀ hdist => ?_⟩
-    rw [Real.dist_eq] at hdist ⊢
-    calc |U s₀ - U s| ≤ 2 * K * |s₀ - s| := hUlip s s₀ hs hs₀
-      _ ≤ (2 * K + 1) * |s₀ - s| := by nlinarith [abs_nonneg (s₀ - s)]
-      _ < (2 * K + 1) * (ε / (2 * K + 1)) := by
-          have hpos : (0:ℝ) < 2 * K + 1 := by positivity
-          exact mul_lt_mul_of_pos_left hdist hpos
-      _ = ε := by
-          have hpos2 : (0:ℝ) < 2 * K + 1 := by positivity
-          field_simp
-  have hWcont : ContinuousOn W (Set.Icc 0 T) := by
-    rw [Metric.continuousOn_iff]
-    intro s hs ε hε
-    refine ⟨ε / (2 * K + 1), by positivity, fun s₀ hs₀ hdist => ?_⟩
-    rw [Real.dist_eq] at hdist ⊢
-    calc |W s₀ - W s| ≤ 2 * K * |s₀ - s| := hWlip s s₀ hs hs₀
-      _ ≤ (2 * K + 1) * |s₀ - s| := by nlinarith [abs_nonneg (s₀ - s)]
-      _ < (2 * K + 1) * (ε / (2 * K + 1)) := by
-          have hpos : (0:ℝ) < 2 * K + 1 := by positivity
-          exact mul_lt_mul_of_pos_left hdist hpos
-      _ = ε := by
-          have hpos2 : (0:ℝ) < 2 * K + 1 := by positivity
-          field_simp
+  have hUcont : ContinuousOn U (Set.Icc 0 T) := continuousOn_of_lipschitzOn_Icc (by positivity) hUlip
+  have hWcont : ContinuousOn W (Set.Icc 0 T) := continuousOn_of_lipschitzOn_Icc (by positivity) hWlip
   set F : ℝ → ℝ × ℝ := fun s => (U s, W s) with hFdef
   set F' : ℝ → ℝ × ℝ := fun x => (-b * ξ * W x - v / 2 * ξ ^ 2 * U x,
       b * ξ * U x - v / 2 * ξ ^ 2 * W x) with hF'def

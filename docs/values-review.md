@@ -130,7 +130,7 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
-## 2026-11-02 — corpus 755, modules 684 — the standing first pass, scoped to this session's own addition
+## 2026-11-02 — corpus 755, modules 686 — the standing first pass, scoped to this session's own addition
 
 Scope: the standing first pass (prose vs. statement) plus the eight lenses, over this
 session's own new content only — `MathFin.Foundations.FlowDuality` and its corpus entry
