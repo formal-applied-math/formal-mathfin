@@ -130,6 +130,56 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-11-01 — corpus 756, modules 686 — the Vasicek zero-mean-reversion limit
+
+Scope: a single-reviewer pass, not the three-agent panel, over this branch's own addition —
+`FixedIncome/VasicekZeroMeanReversionLimit.lean` (15 declarations, corpus 754 → 756) — rather
+than re-reviewing the upstream growth 742 → 754 already absorbed from `origin/main`'s own merged
+PRs. That growth is on the maintainer's own cadence; this entry covers what's new on top of it.
+
+### The standing first pass: prose against statement
+
+Read the two `description`/`formalization_scope` fields and the module docstring against the
+Lean, three times over three independent review rounds plus one independent-model pass before
+this PR was opened (the branch's own pr-roll history). That process caught and fixed three real
+overclaims, not cosmetic nits:
+
+- "a sum of three terms of order `κ⁻³`" was wrong — all three terms of `V(T)`'s closed form are
+  individually order `κ⁻²` (both exponential numerators vanish linearly in `κ`); the orders that
+  actually cancel are `κ⁻²` and `κ⁻¹`, not `κ⁻³, κ⁻², κ⁻¹`. Fixed in the module docstring.
+- "QuantLib's `Vasicek::A`'s `a → 0` limit ... is the same price" conflated the affine factor `A`
+  with the full bond price `A · exp(−B·r₀)` — the two differ by exactly that discount factor.
+  Reworded to state the correspondence without the false equality.
+- The cross-check entry's `description` (the HF-dataset-exported claim) stated the two-routes
+  agreement without disclosing that the driftless model's Wiener representation relies on a cited,
+  not proved, time-order-swap identity — present in `formalization_scope` but not in the headline
+  `description` a reader would see first. Added to `description`.
+
+### Lens gradients
+
+1. **Inspired math quality.** Exemplar: `abs_vasicekBondV_sub_le` turns a three-term
+   catastrophic-cancellation identity into an explicit `O(κ)` rate via cubic Taylor remainders,
+   rather than an unquantified limit — the same cancellation QuantLib's own small-`a` branch has
+   to resolve numerically. Upgrade: none proposed this round; the file's own stretch goal
+   (`tendsto_vasicekBondPrice_girsanov_zero_meanReversion`) already goes beyond what was asked.
+7. **Concept clarity.** Exemplar, post-fix: the "What the formalization forces" section now
+   states the cancellation orders, the substitution-vs-limit trap, and the `λ`-sign convention
+   each as a checkable claim rather than a narrative aside. Upgrade: the `λ`-sign reconciliation
+   paragraph could cite the exact QuantLib source line (`vasicek.cpp`'s `A` function) the way the
+   module's own "What the formalization forces" bullet 1 already cites `Vasicek::A`'s branch.
+2–6, 8. No findings beyond the standing first pass above; this module reuses
+`VasicekBondPrice.lean`'s existing machinery throughout (no re-derivation), and the proof
+decomposition (`tendsto_vasicekBondB` → `abs_vasicekBondV_sub_le` → `tendsto_vasicekBondV` →
+`tendsto_vasicekIntegratedMean` → the headline) is one idea per lemma.
+
+### Evidence
+
+Three consecutive clean review rounds plus one independent-model (Fable) pass against the real
+QuantLib source (`gh pr diff`/direct source reads) and the cited papers, zero `sorry`,
+`#print axioms` on all 15 public declarations showing exactly `[propext, Classical.choice,
+Quot.sound]`. `lake build`/`lake lint` clean; `tools.verify.ledger status` fresh after the hosted
+sweep.
+
 ## 2026-10-31 — corpus 742, modules 678 — elegance: does each headline proof read as its argument
 
 Scope: lens 8 alone, at the maintainer's bar ("mathematical highest quality … and beauty"), over the

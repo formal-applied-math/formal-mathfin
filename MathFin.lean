@@ -608,6 +608,8 @@ import MathFin.FixedIncome.VasicekBondPriceAt
 -- Vasicek real-world vs. risk-neutral terminal mean; an Esscher tilt reproducing the
 -- risk-neutral terminal law
 import MathFin.FixedIncome.VasicekMarketPriceOfRisk
+-- Vasicek bond price as κ → 0⁺: the three-term cancellation limit to the driftless model
+import MathFin.FixedIncome.VasicekZeroMeanReversionLimit
 -- CIR loadings: B solves the Riccati equation, A solves A' = −κθB
 import MathFin.FixedIncome.CIRRiccati
 -- The T-forward measure: the zero-coupon bond as numéraire (change-of-numéraire instance)
