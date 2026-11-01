@@ -44,6 +44,91 @@
       }
     },
     {
+      "id": "mf-ju-zhong-raw-eq-stable",
+      "name": "Ju-Zhong Quadratic Approximation: NaN Fix Preserves Semantics",
+      "description": "For every nonzero volatility sigma, time-to-expiry T, and risk-free rate r, the pre-fix Ju-Zhong (1999) modified quadratic-approximation price juValueRaw (computing alpha/h = (2r/sigma^2)/(1 - e^{-rT}) directly, which is 0/0 at r = 0) equals the post-fix, limit-stable price juValue (using rho, the removable-singularity extension of alpha/h, extended by its limit 2/(sigma^2 T) at r = 0), identically in the critical price S* and the spot S. This is the algebraic identity behind QuantLib's rewrite of juquadraticengine.cpp that removes a NaN at r = 0: the rewrite changes nothing for r != 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JuZhongZeroRateLimit\n\nopen MathFin\n\ntheorem ju_zhong_raw_eq_stable_thm (φ K q : ℝ) {σ T r : ℝ} (hσ : σ ≠ 0) (hT : T ≠ 0)\n    (hr : r ≠ 0) (Sk S : ℝ) :\n    MathFin.juValueRaw φ K q σ T r Sk S = MathFin.juValue φ K q σ T r Sk S :=\n  MathFin.juValueRaw_eq_juValue φ K q hσ hT hr Sk S\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "N. Ju and R. Zhong, \"An approximate formula for pricing American options\", Journal of Derivatives 7(2) (1999), 31-40 (the quadratic approximation rewritten here as QuantLib's juquadraticengine.cpp).",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, identically in the critical price S* and spot S, for every sigma != 0, T != 0 and r != 0. Pure algebra: alpha*(X/hA) = (alpha*X)/hA holds in Lean even when hA = 0, so no hypothesis on hA or on 1 - chi is needed. Lives in MathFin/BlackScholes/JuZhongZeroRateLimit.lean. Axioms-clean.",
+        "alignment_source": "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
+      }
+    },
+    {
+      "id": "mf-ju-zhong-zero-rate-limit",
+      "name": "Ju-Zhong Quadratic Approximation: Conditional Zero-Rate Limit",
+      "description": "Let S*(r) be any American-option critical-price function with S*(r) -> S0 > 0 as r -> 0+. If the Ju-Zhong (1999) early-exercise premium coefficient hA(0, S0) is nonzero and 1 - chi(0, S0, S) is nonzero, the pre-fix Ju-Zhong price juValueRaw along (r, S*(r)) tends to the post-fix price juValue at (0, S0) as r -> 0+. The critical price's existence, uniqueness and continuity in r (the Barone-Adesi-Whaley Newton fixed point) are hypotheses, not derived; so are the two nonvanishing side conditions, which QuantLib's rewrite checks for neither. This is the headline conditional limit: it confirms the removable-singularity rewrite is correct wherever its hypotheses hold.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.JuZhongZeroRateLimit\n\nopen MathFin Filter Topology\n\ntheorem ju_zhong_zero_rate_limit_thm {φ K q σ T S S₀ : ℝ} {Sk : ℝ → ℝ}\n    (hφ : φ = 1 ∨ φ = -1) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (hS : 0 < S)\n    (hSk : Tendsto Sk (𝓝[>] 0) (𝓝 S₀)) (hS₀ : 0 < S₀)\n    (hA₀ : MathFin.juHA φ K q σ T 0 S₀ ≠ 0) (hχ₀ : 1 - MathFin.juChi φ K q σ T 0 S₀ S ≠ 0) :\n    Tendsto (fun r => MathFin.juValueRaw φ K q σ T r (Sk r) S) (𝓝[>] 0)\n      (𝓝 (MathFin.juValue φ K q σ T 0 S₀ S)) :=\n  MathFin.tendsto_juValueRaw_zero_rate hφ hK hσ hT hS hSk hS₀ hA₀ hχ₀\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "N. Ju and R. Zhong, \"An approximate formula for pricing American options\", Journal of Derivatives 7(2) (1999), 31-40 (the quadratic approximation rewritten here as QuantLib's juquadraticengine.cpp).",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, conditional on continuity of the critical price at 0+ with a positive limit S0 (hSk, hS0), and on the two side conditions hA(0, S0) != 0 and 1 - chi(0, S0, S) != 0 (hA0, hchi0 above), neither of which QuantLib's rewrite checks. The critical price's existence, uniqueness and continuity (the BAW Newton fixed point) are not derived; S*(r) is an input function. Lives in MathFin/BlackScholes/JuZhongZeroRateLimit.lean. Axioms-clean.",
+        "alignment_source": "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
+      }
+    },
+    {
+      "id": "mf-american-put-boundary-expiry-limit",
+      "name": "American Put Exercise Boundary Tends to the Strike at Expiry",
+      "description": "For positive strike K, risk-free rate r, dividend yield q with 0 <= q <= r, and volatility sigma, the continuous-time American put exercise boundary B(tau) tends to the strike K as time-to-expiry tau decreases to 0. B is defined from the optimal-stopping value on the completed usual filtration of the constructed Brownian motion, the same boundary as the convexity entries above. Only the parameter cell 0 < r, 0 <= q <= r is covered; q > r > 0, q < 0 and negative rates are not treated, since the underlying boundary theory assumes this cell.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.AmericanPut.Stopping.ActualBoundaryExpiryLimit\n\nopen Filter\nopen MathFin.BlackScholes.AmericanPut.Stopping\nopen scoped Topology\n\ntheorem american_put_boundary_expiry_limit {K r q σ : ℝ}\n    (hK : 0 < K) (hr : 0 < r) (hq : 0 ≤ q) (hqr : q ≤ r) (hσ : 0 < σ) :\n    Tendsto (fun τ : ℝ ↦ brownianUsualExerciseBoundary K r q σ τ.toNNReal)\n      (𝓝[>] 0) (𝓝 K) :=\n  tendsto_brownianUsualExerciseBoundary_expiry hK hr hq hqr hσ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Andersen, Lake & Offengenden, \"High-performance American option pricing\", Journal of Computational Finance (2016); QuantLib's qdplusamericanengine.cpp (QdPlusAmericanEngine::xMax, 0 < r, 0 <= q <= r cell -- unchanged by PR#1534, which added the other cells of a Table-2 switch, including the r < 0, q < r double-boundary cell from the distinct 2021 Andersen-Lake \"Fast American Option Pricing: The Double-Boundary Case\" paper).",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, MathFin/BlackScholes/AmericanPut/Stopping/ActualBoundaryExpiryLimit.lean (tendsto_brownianUsualExerciseBoundary_expiry), a corollary composing the existing American-put boundary convexity stack's continuity-at-expiry result (canonicalStockBoundary_continuousAt) with its normalization lemmas. Covers the Andersen-Lake Table-2 cell for the true boundary at expiry. Axioms-clean. LIMITS: only 0 < r, 0 <= q <= r; the q > r > 0, q < 0 and negative-rate cells (including the double-boundary case) are not treated.",
+        "alignment_source": "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
+      }
+    },
+    {
+      "id": "mf-qdplus-k12-endpoint-differentiable",
+      "name": "QD+ Fixed-Point Integrand Endpoint Limit (Differentiable Boundary)",
+      "description": "The Andersen-Lake-Offengenden fixed-point scheme for the American put exercise boundary integrates, at collocation node tau with trial boundary value b, an explicit integrand K12 built from an interpolated boundary B via the Black-Scholes d+ term, after the substitution m = tau*(1+y)^2/4 used by a Gauss-Lobatto quadrature rule on y in [-1,1]. At the endpoint y = -1 (m = 0) the time argument of d+ vanishes, giving a 0/0 form on the diagonal b = B(tau); this is the one-sided limit that resolves it. When B is differentiable at tau with B(tau) > 0 and b = B(tau), K12(y) tends to exp(q*tau)*(sqrt(tau)/sigma)/sqrt(2*pi) as y -> -1 from above. This is transcribed from QuantLib's qdfpamericanengine.cpp over an abstract boundary B, with no fixed-point or pricing content.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.AmericanQDPlusLimits\n\nopen Filter MathFin\nopen scoped Topology Real\n\ntheorem qdplus_k12_endpoint_differentiable_thm {B : ℝ → ℝ} {r q σ τ : ℝ}\n    (hσ : 0 < σ) (hτ : 0 < τ) (hB : DifferentiableAt ℝ B τ) (hBpos : 0 < B τ) :\n    Tendsto (qdfpK12 B r q σ τ (B τ)) (𝓝[>] (-1))\n      (𝓝 (Real.exp (q * τ) * (Real.sqrt τ / σ) / Real.sqrt (2 * π))) :=\n  tendsto_qdfpK12_endpoint hσ hτ hB hBpos\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Healy, \"Pricing American options under negative rates\", arXiv:2109.15157, §5.1 (restates Andersen-Lake-Offengenden's fixed-point equations); QuantLib's qdfpamericanengine.cpp; QuantLib PR#1512.",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, MathFin/BlackScholes/AmericanQDPlusLimits.lean (tendsto_qdfpK12_endpoint), over an abstract boundary B rather than Andersen-Lake's specific boundary formula. The sibling integrands K3, ni, di have matching endpoint-limit theorems in the same file (tendsto_qdfpK3_endpoint, tendsto_qdfpNi_endpoint, tendsto_qdfpDi_endpoint), and each has an off-diagonal (b != B(tau)) counterpart tending to 0 or a step function instead. Axioms-clean. LIMITS: purely the one-sided limit of the printed quadrature integrand; no claim about the fixed-point iteration's convergence, the boundary B itself, or American-option pricing accuracy.",
+        "alignment_source": "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
+      }
+    },
+    {
+      "id": "mf-qdplus-k12-endpoint-differentiability-tight",
+      "name": "QD+ Endpoint Limit: Differentiability Cannot Be Weakened to Continuity",
+      "description": "Differentiability of the boundary B at tau is sufficient for the QD+ fixed-point integrand K12's endpoint limit at y = -1 on the diagonal b = B(tau) to equal exp(q*tau)*(sqrt(tau)/sigma)/sqrt(2*pi), the value QuantLib's quadrature rule implicitly assumes -- but continuity alone is not. For the continuous, 1/2-Holder boundary B(s) = b*exp(-c*sqrt(tau-s)) (so B(tau) = b), which is nondifferentiable at tau, the same integrand instead tends to exp(q*tau)*(sqrt(tau)/sigma)*phi(c/sigma), which differs from the differentiable-case value whenever c != 0. This pair shows continuity alone does not pin down the differentiable-case limit; it does not establish that differentiability is necessary for the integrand to converge at all.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.AmericanQDPlusLimits\n\nopen Filter MathFin ProbabilityTheory\nopen scoped Topology Real\n\ntheorem qdplus_k12_endpoint_differentiability_tight_thm {r q σ τ b c : ℝ}\n    (hσ : 0 < σ) (hτ : 0 < τ) (hb : 0 < b) (hc : c ≠ 0) :\n    Tendsto (qdfpK12 (fun s ↦ b * Real.exp (-(c * Real.sqrt (τ - s)))) r q σ τ b) (𝓝[>] (-1))\n        (𝓝 (Real.exp (q * τ) * (Real.sqrt τ / σ) * gaussianPDFReal 0 1 (c / σ))) ∧\n      ¬ Tendsto (qdfpK12 (fun s ↦ b * Real.exp (-(c * Real.sqrt (τ - s)))) r q σ τ b) (𝓝[>] (-1))\n        (𝓝 (Real.exp (q * τ) * (Real.sqrt τ / σ) / Real.sqrt (2 * π))) :=\n  ⟨tendsto_qdfpK12_endpoint_holder hσ hτ hb,\n    not_tendsto_qdfpK12_endpoint_holder hσ hτ hb hc⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Healy, \"Pricing American options under negative rates\", arXiv:2109.15157, §5.1; QuantLib's qdfpamericanengine.cpp; QuantLib PR#1512.",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, MathFin/BlackScholes/AmericanQDPlusLimits.lean (tendsto_qdfpK12_endpoint_holder, not_tendsto_qdfpK12_endpoint_holder), bundled here as a conjunction of the two theorems for a single benchmark entry. The continuous boundary B(s) = b*exp(-c*sqrt(tau-s)) is an explicit counterexample, not a generic continuous boundary; the claim is only that continuity alone does not pin down the endpoint value QuantLib's quadrature assumes. Axioms-clean.",
+        "alignment_source": "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
+      }
+    },
+    {
       "id": "mf-american-put-optimal-rule-stopped-martingale",
       "name": "American Put Verification: A Contact Rule Attains the Initial Value Iff the Stopped Candidate Is a Martingale",
       "description": "Let U be a bounded continuous supermartingale on a filtered finite measure space and theta an admissible stopping rule at whose time U equals the American put's discounted reward almost surely. Then the expected reward at theta equals the integral of U at time 0 if and only if the process U stopped at theta, t maps to U(min(t, theta)), is a martingale. The statement does not assume that U dominates the reward, and it does not identify U with the put's value.",

@@ -26,6 +26,28 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### American early-exercise approximations at their degenerate boundary (2026-11-01)
+
+Two independent small-parameter/boundary limits of American-option early-exercise engines,
+five entries, all `full`, in `benchmarks/american_put_boundary.json`. Corpus 754 → 759.
+
+| Benchmark ID | Mathematical conclusion | Lean declaration |
+|---|---|---|
+| `mf-ju-zhong-raw-eq-stable` | The pre-fix Ju–Zhong quadratic-approximation price and the post-fix, limit-stable price agree identically for every nonzero risk-free rate `r`. | `MathFin.juValueRaw_eq_juValue` |
+| `mf-ju-zhong-zero-rate-limit` | Conditional on continuity of the critical price at `r = 0+` and two nonvanishing side conditions, the pre-fix price along the critical-price path tends to the post-fix price as `r → 0+`. | `MathFin.tendsto_juValueRaw_zero_rate` |
+| `mf-american-put-boundary-expiry-limit` | For `0 < r`, `0 ≤ q ≤ r`, the American put exercise boundary tends to the strike `K` as time-to-expiry tends to `0`. | `MathFin.BlackScholes.AmericanPut.Stopping.tendsto_brownianUsualExerciseBoundary_expiry` |
+| `mf-qdplus-k12-endpoint-differentiable` | The Andersen–Lake–Offengenden QD+ fixed-point quadrature integrand `K12` has an explicit one-sided limit at its collocation endpoint when the trial boundary is differentiable there. | `MathFin.tendsto_qdfpK12_endpoint` |
+| `mf-qdplus-k12-endpoint-differentiability-tight` | The same endpoint limit takes a different value for a continuous but only Hölder-1/2 boundary, showing the differentiability hypothesis cannot be weakened to continuity. | `MathFin.tendsto_qdfpK12_endpoint_holder`, `MathFin.not_tendsto_qdfpK12_endpoint_holder` |
+
+Ju–Zhong (1999)'s quadratic approximation and QuantLib's rewrite of it (`juquadraticengine.cpp`)
+motivate the first two entries; Healy's restatement of Andersen–Lake–Offengenden's fixed-point
+equations (arXiv:2109.15157 §5.1) and QuantLib's `qdfpamericanengine.cpp` motivate the last three.
+Both are transcriptions of printed closed forms, not derivations of the underlying free-boundary
+problem; the Ju–Zhong limit is explicitly conditional (critical-price continuity and two
+nonvanishing side conditions are hypotheses, not derived), and the QD+ entries are over an
+abstract boundary, with no claim about the fixed-point iteration's convergence or pricing
+accuracy.
+
 ### One route to Merton's formula; one Black–Scholes family (2026-10-30)
 
 Issue #362. Corpus 713 → 711 (`mf-merton-from-general-jump-law` and `mf-merton-model-exists` removed).

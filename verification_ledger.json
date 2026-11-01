@@ -570,6 +570,13 @@
       "input_hash": "2081a6d5c90e08fa28761b3243347a64f09459a6c827bf5721d2357a864e48cd",
       "verified_at_commit": "924cd26"
     },
+    "mf-american-put-boundary-expiry-limit": {
+      "benchmark_file": "american_put_boundary.json",
+      "date": "2026-11-01",
+      "elapsed_s": 3.0,
+      "input_hash": "8c3f5d2d2b1459bc6c9d7ff09ae2e0dc14e3f650d814b5db8c4bb65b10bb1843",
+      "verified_at_commit": "1472a7d2"
+    },
     "mf-american-put-ge-bsm-european-put": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-10-31",
@@ -2803,6 +2810,20 @@
       "input_hash": "0b5b2866ec64dd7cacb4ab05ce95b01c53126fe26df75bfcbce9bbf776c92edd",
       "verified_at_commit": "afc22c8"
     },
+    "mf-ju-zhong-raw-eq-stable": {
+      "benchmark_file": "american_put_boundary.json",
+      "date": "2026-11-01",
+      "elapsed_s": 2.9,
+      "input_hash": "a7238326d3d5a7d4d4f5a9f6f0e22cdbe21cf22dfffa0e9cf2b7a44ec11ff88d",
+      "verified_at_commit": "1472a7d2"
+    },
+    "mf-ju-zhong-zero-rate-limit": {
+      "benchmark_file": "american_put_boundary.json",
+      "date": "2026-11-01",
+      "elapsed_s": 6.7,
+      "input_hash": "ba1cdfce5e274a4125f16575bc0a2be1dbe8313a77b1134d654aaad86a52c7cb",
+      "verified_at_commit": "1472a7d2"
+    },
     "mf-jump-diffusion-brownian-no-jumps": {
       "benchmark_file": "jumps_and_variance_swaps.json",
       "date": "2026-10-31",
@@ -3733,6 +3754,20 @@
       "elapsed_s": 4.2,
       "input_hash": "00f1814fb2e2528c35b25d53b806ce0c51876a81e900e089021f644fd09f8e88",
       "verified_at_commit": "c55d62c"
+    },
+    "mf-qdplus-k12-endpoint-differentiability-tight": {
+      "benchmark_file": "american_put_boundary.json",
+      "date": "2026-11-01",
+      "elapsed_s": 6.4,
+      "input_hash": "acc2a993de7b9f7cb08458c1c5f289b7a6eabf54aec72abc266176419397d98e",
+      "verified_at_commit": "1472a7d2"
+    },
+    "mf-qdplus-k12-endpoint-differentiable": {
+      "benchmark_file": "american_put_boundary.json",
+      "date": "2026-11-01",
+      "elapsed_s": 6.3,
+      "input_hash": "96a94db3554a7ed3863b8eb98e0ea67f7055e65807264c668287baf1f08f479b",
+      "verified_at_commit": "1472a7d2"
     },
     "mf-quanto-correction-factor": {
       "benchmark_file": "black_scholes.json",
