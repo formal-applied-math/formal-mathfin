@@ -2309,9 +2309,9 @@
     "mf-flow-duality-const": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-11-02",
-      "elapsed_s": 7.2,
+      "elapsed_s": 7.3,
       "input_hash": "040d0971a1fdc8bfaaa0fd462733085ac1637b54b8b9a8ee3beaaf55096a10e8",
-      "verified_at_commit": "9093dfda"
+      "verified_at_commit": "28319665"
     },
     "mf-forward-measure-spot": {
       "benchmark_file": "interest_rates.json",
