@@ -36,8 +36,11 @@ worth `∑ cᵢ P(0, tᵢ)` with
 In each, the measure is read as the pricing measure: no change of measure is built, as in the
 bond-price theorems the instances consume. Contracts whose cash flows depend on the rate, such as
 a floating leg paying the rate it observes, are not covered by these closed forms: valuing one
-needs the bond prices `P(t, T)` at `t > 0`, which the library has only as the conditional
-expectation `bondPrice` (`Contracts/Models/Caplet.lean`), not in closed form for these models.
+needs the bond prices `P(t, T)` at `t > 0`, the conditional expectation `bondPrice`
+(`Contracts/Models/Caplet.lean`). For the Vasicek and Hull–White models they are in closed form
+(`bondPrice_vasicek`, `bondPrice_hullWhite`, `Contracts/Models/VasicekBond.lean`,
+`Contracts/Models/HullWhiteBond.lean`), and the bond put and caplet follow
+(`Contracts/Models/Jamshidian.lean`); the two-piece GSR has only `P(0, T)`.
 
 ## Main definitions
 

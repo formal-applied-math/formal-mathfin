@@ -24,12 +24,12 @@ consistency directly, for the σ-realization `processToLp δ` of a bounded, adap
 path-continuous `δ` in the process form:
 
 * `itoProcessCLM_eq_terminal_of_ge` — the CLM process freezes at its horizon:
-  `itoProcessCLM hB T t φ = itoIntegralCLM_T hB T hBmeas φ` for `t ≥ T` — the same
-  `DenseRange.equalizer` argument as `itoProcessCLM_terminal_eq`, at `t ≥ T`;
+  `itoProcessCLM hB T t φ = itoIntegralCLM_T hB T hBmeas φ` for `t ≥ T` — the terminal value
+  is `𝓕_T ⊆ 𝓕_t`-measurable (`itoProcessCLM_terminal_eq`), so the `𝓕_t`-projection fixes it;
 * `itoIntegralCLM_cross_horizon` — **the consistency kernel**: an integrand carried by
   `(0,τ] × Ω` integrates to the *same* `L²` random variable at horizon `τ` and at
   horizon `T ≥ τ`. Both are the infinite-horizon integral of the integrand extended by zero
-  (`itoIntegralCLM_T_eq_itoIntegralL2_bandExtend`), and the two extensions by zero are the same
+  (`itoIntegralCLM_T_apply`), and the two extensions by zero are the same
   class of the same function (`bandExtend_toLp_ae_eq`);
 * `itoProcessCLM_consist` — the process form: for `t ≤ τ ≤ T` the T-horizon CLM
   process of `processToLp δ` at `t` and the τ-horizon one agree (band-truncate the integrand
@@ -120,26 +120,24 @@ private theorem memLp_bandIic (hBmeas : ∀ t, Measurable (B t))
     exact le_trans (abs_nonneg _) (hδbdd 0 z.2)
 
 /-- **The CLM process freezes at its horizon.** For `t ≥ T` the general CLM integral
-process `itoProcessCLM hB T t φ` equals the terminal integral `itoIntegralCLM_T φ`:
-both are continuous-linear in the integrand and agree on the dense `simpleAssembly_T`
-range, where the simple process has finished by `t` (`itoSimpleProcess_eq_itoSimple`). -/
+process `itoProcessCLM hB T t φ` equals the terminal integral `itoIntegralCLM_T φ`: the
+terminal integral is the process at `T` (`itoProcessCLM_terminal_eq`), hence `𝓕_T`-measurable,
+hence `𝓕_t`-measurable, so the `𝓕_t`-projection that defines the process fixes it. -/
 theorem itoProcessCLM_eq_terminal_of_ge (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {T t : ℝ≥0} (hTt : T ≤ t)
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     itoProcessCLM hB T t hBmeas φ = itoIntegralCLM_T hB T hBmeas φ := by
-  refine congrFun (DenseRange.equalizer (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
-    (itoProcessCLM hB T t hBmeas).continuous (itoIntegralCLM_T hB T hBmeas).continuous
-    (funext fun V ↦ ?_)) φ
-  simp only [Function.comp_apply, itoProcessCLM_simpleAssembly_T,
-    itoIntegralCLM_T_simpleAssembly_T, itoSimpleProcessLp, itoSimpleLp,
-    itoSimpleProcess_eq_itoSimple hBmeas V.val
-      (fun p hp ↦ (V.property p hp).trans hTt)]
+  haveI : Fact ((natFiltration hBmeas t : MeasurableSpace Ω) ≤ mΩ) :=
+    ⟨(natFiltration hBmeas).le t⟩
+  rw [itoProcessCLM_eq_condExpL2, ← itoProcessCLM_terminal_eq hB T hBmeas φ]
+  exact Submodule.starProjection_eq_self_iff.mpr (mem_lpMeas_iff_aestronglyMeasurable.mpr
+    ((itoProcessCLM_aeStronglyMeasurable hB T T hBmeas φ).mono ((natFiltration hBmeas).mono hTt)))
 
 /-- **The cross-horizon consistency kernel.** An integrand carried by `(0,τ] × Ω`
 integrates to the *same* `L²` random variable at horizon `τ` and at horizon `T ≥ τ`.
 
 Both are the infinite-horizon integral `itoIntegralL2` of the integrand extended by zero
-(`itoIntegralCLM_T_eq_itoIntegralL2_bandExtend`), and the two extensions by zero are the same
+(`itoIntegralCLM_T_apply`), and the two extensions by zero are the same
 class of the same function (`bandExtend_toLp_ae_eq`). -/
 theorem itoIntegralCLM_cross_horizon (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {τ T : ℝ≥0} (hτT : τ ≤ T)
@@ -147,11 +145,10 @@ theorem itoIntegralCLM_cross_horizon (hB : IsPreBrownianReal B μ)
     (hgmτ : MemLp g 2 (trimMeasure_T (μ := μ) τ hBmeas))
     (hgmT : MemLp g 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     itoIntegralCLM_T hB τ hBmeas (hgmτ.toLp g) = itoIntegralCLM_T hB T hBmeas (hgmT.toLp g) := by
-  rw [ItoIntegralProcessL2Infinite.itoIntegralCLM_T_eq_itoIntegralL2_bandExtend,
-    ItoIntegralProcessL2Infinite.itoIntegralCLM_T_eq_itoIntegralL2_bandExtend]
+  rw [itoIntegralCLM_T_apply, itoIntegralCLM_T_apply]
   congr 1
-  exact Lp.ext ((ItoIntegralProcessL2Infinite.bandExtend_toLp_ae_eq τ hBmeas hg0 hgmτ).trans
-    (ItoIntegralProcessL2Infinite.bandExtend_toLp_ae_eq T hBmeas
+  exact Lp.ext ((bandExtend_toLp_ae_eq τ hBmeas hg0 hgmτ).trans
+    (bandExtend_toLp_ae_eq T hBmeas
       (fun z hz ↦ hg0 z (hτT.trans_lt hz)) hgmT).symm)
 
 /-- **Cross-horizon consistency of the CLM process**: for the σ-realization `processToLp δ`

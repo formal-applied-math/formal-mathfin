@@ -120,7 +120,7 @@ level. -/
 theorem valueAtRisk_hedged_eq_zero (hqcrr : crrUpProb u d ρ = q) (S₀ : ℝ) {T : ℝ≥0} {N : ℕ}
     (hTN : (T : ℝ) / h = N) (hna : BinomialNoArb u d ρ) (hS₀ : S₀ ≠ 0) {a : Payoff Unit}
     {g : ℝ → ℝ} (hg : ∀ s : Scenario Unit, a.eval s = g (s () T)) :
-    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, PathAdaptedAt n (H (n + 1))) ∧
+    ∃ H : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ H (n + 1)) ∧
       ∀ (P : Measure (ℕ → Bool)) [IsProbabilityMeasure P], ∀ α ∈ Ioo (0 : ℝ) 1,
         let L := fun ω ↦ (Contract.pay T a).pathPV (discount ρ h) (scenarioAt (assets S₀ u d h) ω)
           - ((Contract.pay T a).value (coinFlipMeasure q hq) (discount ρ h) (assets S₀ u d h)

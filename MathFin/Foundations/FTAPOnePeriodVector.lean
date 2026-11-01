@@ -22,7 +22,7 @@ probability space `(Ω, P)`: no arbitrage ⟺ there is an equivalent martingale 
 
 This is the `d`-asset generalisation of the scalar `Foundations/FTAPOnePeriod.lean`, which is
 its `F = ℝ` corollary and has no proofs of its own. The forward direction is
-`MathFin.emm_implies_no_arbitrage` (`Foundations/FTAP.lean`) at horizon `1`.
+`MathFin.IsEMM.noArbitrage` (`Foundations/FTAP.lean`) at horizon `1`.
 Because `θ` ranges over the **finite-dimensional** `F`, the equivalent martingale measure
 is **explicit**: the backward direction minimises the smooth convex softplus
 potential `θ ↦ E[log(1 + exp⟪θ,Y⟫)]`. The
@@ -96,7 +96,7 @@ omit [IsProbabilityMeasure P] in
 /-- **Forward direction**: an equivalent martingale measure precludes arbitrage. The one-period
 market is the horizon-`1` market with `𝓕 0 = ⊥`, the `F`-valued price `S 0 = 0`, `S 1 = Y` and the
 constant holding `θ`: `E_Q[Y] = 0` makes `S` a `Q`-martingale up to the horizon, the gain is
-`⟪θ, S 1 − S 0⟫ = ⟪θ, Y⟫`, and `MathFin.emm_implies_no_arbitrage` does the rest. -/
+`⟪θ, S 1 − S 0⟫ = ⟪θ, Y⟫`, and `MathFin.IsEMM.noArbitrage` does the rest. -/
 theorem noArbitrage_of_isEMM (hY : Measurable Y) {Q : Measure Ω} (hQ : IsEMM P Y Q) :
     NoArbitrage P Y := by
   haveI := hQ.isProb
@@ -120,7 +120,7 @@ theorem noArbitrage_of_isEMM (hY : Measurable Y) {Q : Measure Ω} (hQ : IsEMM P 
   have hS1 : S 1 = Y := funext fun ω ↦ if_neg one_ne_zero
   have hgain : martingaleTransform (fun _ _ ↦ θ) S 1 = fun ω ↦ inner ℝ θ (Y ω) := by
     funext ω; simp [martingaleTransform, hS0, hS1]
-  have hnull := emm_implies_no_arbitrage (T := 1) (𝓕 := 𝓕) (S := S) hQ.ac hQ.ac'
+  have hE : MathFin.IsEMM 𝓕 P S 1 Q := .of_condExp_succ hQ.toIsEquivProbMeasure
     (fun t ht ↦ by
       rcases Nat.le_one_iff_eq_zero_or_eq_one.mp ht with rfl | rfl
       · rw [hS0]; exact stronglyMeasurable_zero
@@ -133,10 +133,9 @@ theorem noArbitrage_of_isEMM (hY : Measurable Y) {Q : Measure Ω} (hQ : IsEMM P 
       obtain rfl : t = 0 := Nat.lt_one_iff.mp ht
       rw [h0, condExp_bot, hS1, hQ.fair, hS0]
       exact Filter.Eventually.of_forall fun ω ↦ by simp)
-    (fun _ _ ↦ θ) (fun _ _ ↦ stronglyMeasurable_const) ⟨‖θ‖, fun _ _ _ ↦ le_rfl⟩
-    (by rw [hgain]; exact hpos)
-  rw [hgain] at hnull
-  exact ae_eq_zero_of_nonneg_of_null_pos hpos hnull
+  have hnull := hE.noArbitrage (fun _ _ ↦ θ) (fun _ _ ↦ stronglyMeasurable_const)
+    ⟨‖θ‖, fun _ _ _ ↦ le_rfl⟩ (by rw [hgain]; exact hpos)
+  rwa [hgain] at hnull
 
 /-! ### The softplus potential and its logistic derivative
 
