@@ -1604,7 +1604,7 @@
     },
     {
       "id": "mf-sabr-fk-omega0-nu-zero-limit",
-      "name": "Le Floc'h-Kennedy Leading-Order SABR Vol Tends to the Lognormal Vol as nu -> 0",
+      "name": "Le Floc'h-Kennedy Leading-Order SABR Vol's nu -> 0 Limit (the Lognormal Vol at beta = 1)",
       "domain": "mathematical_finance",
       "description": "Le Floc'h & Kennedy's leading-order vol omega_0(k) = log(F/k)/Dint(k) is an infinity-times-zero indeterminate form at zero vol-of-vol nu = 0, since their distance Dint(k) = (1/nu)*log(1) there. The removable singularity resolves to omega_0(k) -> -alpha*log(F/k)/y as nu -> 0, nu != 0, for alpha != 0, rho != 1, y != 0 (k != F); at y = -log(F/k) (the beta = 1 case) this limit is exactly alpha, the lognormal vol. The limit is obtained via Dint = nu^-1 * x(-nu*y/alpha), reusing Hagan's x(z) building block and its known slope x'(0) = 1 at the origin.",
       "code": {
