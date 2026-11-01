@@ -12,9 +12,9 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 754 results from the literature in [`benchmarks/`](benchmarks), each with a
+The corpus records 756 results from the literature in [`benchmarks/`](benchmarks), each with a
 Lean statement and proof. Of these, 721 are proved in full, 18 restate a lemma from Mathlib or
-BrownianMotion, and 15 are reduced cores that prove less than the result they are named after.
+BrownianMotion, and 17 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
 axioms `propext`, `Classical.choice` and `Quot.sound`.
@@ -168,15 +168,22 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Fifteen of the 754 results are reduced cores. Eleven assume a structure whose fields include the
+- Seventeen of the 756 results are reduced cores. Eleven assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, the two-dimensional Itô formula,
-  and five theorems on Markov chains. The other four prove special cases: the first interarrival
+  and five theorems on Markov chains. The other six prove special cases: the first interarrival
   time of a Poisson process is exponential; Stulz's call on the maximum is checked only in its
   zero-strike limit, and the Heynen–Kat two-asset barrier only at zero correlation, neither formula
   being derived as an expected payoff; the Ornstein–Uhlenbeck Hermite modes decay at their
-  eigenvalues only for degree at most 2.
+  eigenvalues only for degree at most 2; Haug's partial-time-start barrier's down-window-plus-up-window
+  sum collapses to the standard down-and-out closed form for every start-window length, and
+  (separately) the down-window value alone reduces to that same closed form once the window spans
+  the whole life, for strike at or above the barrier — neither draws on the reflection principle
+  behind the transcribed bivariate-normal
+  terms; and the Rubinstein–Reiner binary barrier's in–out parity is checked branch-by-branch
+  against the transcribed closed form, and its vanilla leg is derived separately as the
+  Black–Scholes cash-or-nothing price, with the barrier density itself not derived.
 - Girsanov's theorem is proved only for bounded $`\theta`$ (predictable, or adapted with continuous
   paths), and only at the level of finite-dimensional laws: neither path continuity of the new
   process nor independence of its increments from the past is stated.

@@ -368,6 +368,38 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.normalizedSpread_hasLaw_std (MathFin/BlackScholes/MargrabeGrounding.lean): Gaussianity of a linear image of the pair, variance 1 from margrabe_effective_variance. SCOPE: the law of the normalized spread only; Margrabe's price as the discounted expected exchange payoff is not part of this entry."
       }
+    },
+    {
+      "id": "mf-partial-time-barrier-down-add-up",
+      "name": "Partial-Time Barrier: Down-Window Plus Up-Window",
+      "domain": "mathematical_finance",
+      "description": "Haug's partial-time-start barrier call (start window, call side): the down-window plus up-window values collapse to the t1-free full-life down-and-out closed form, and at t1 = T (with X >= H) the start-window value reduces to that same standard-barrier closed form via the degenerate (rho = 1) bivariate normal CDF. The closed form itself is transcribed from Haug/Heynen–Kat, not derived here: the reflection-principle step behind the transcribed bivariate-normal terms is not proved.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PartialTimeBarrierOption\n\nopen MathFin\n\n/-- **Down-window plus up-window, same strike/barrier.** Re-exports\n`MathFin.ptCA_down_add_up`. -/\ntheorem partial_time_barrier_down_add_up (S X H b r σ t1 T : ℝ) (ht1 : 0 ≤ t1) (hT : t1 ≤ T) :\n    ptCA 1 S X H b r σ t1 T + ptCA (-1) S X H b r σ t1 T\n      = S * Real.exp ((b - r) * T) *\n          (Phi (ptD1 S X b σ T) - ptHSmu1 S H b σ * Phi (ptF1 S X H b σ T))\n        - X * Real.exp (-r * T) *\n            (Phi (ptD2 S X b σ T) - ptHSmu S H b σ * Phi (ptF2 S X H b σ T)) :=\n  MathFin.ptCA_down_add_up S X H b r σ t1 T ht1 hT\n\n/-- **Monitoring over the whole life is the standard barrier.** Re-exports\n`MathFin.ptCA_down_monitored_full_life`. -/\ntheorem partial_time_barrier_down_monitored_full_life (S X H b r σ T : ℝ) (hS : 0 < S)\n    (hX : 0 < X) (hH : 0 < H) (hXH : H ≤ X) (hσ : 0 < σ) (hT : 0 < T) :\n    ptCA 1 S X H b r σ T T\n      = S * Real.exp ((b - r) * T) *\n          (Phi (ptD1 S X b σ T) - ptHSmu1 S H b σ * Phi (ptF1 S X H b σ T))\n        - X * Real.exp (-r * T) *\n            (Phi (ptD2 S X b σ T) - ptHSmu S H b σ * Phi (ptF2 S X H b σ T)) :=\n  MathFin.ptCA_down_monitored_full_life S X H b r σ T hS hX hH hXH hσ hT\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Haug, The Complete Guide to Option Pricing Formulas, 2nd ed. (2007), ch. 4, \"Partial-Time Single-Asset Barrier Options\"; Heynen & Kat, \"Partial barrier options\", Journal of Financial Engineering 3 (1994)",
+        "difficulty": "intermediate",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Reduced core. Re-export of MathFin.ptCA_down_add_up and MathFin.ptCA_down_monitored_full_life (MathFin/BlackScholes/PartialTimeBarrierOption.lean). The Haug/Heynen–Kat start-window closed form is transcribed, not derived: what is proved is (1) the in–out collapse CA(1) + CA(−1) to the t₁-free full-life down-and-out expression, via bivariateNormalCDF_flip_snd, and (2) the whole-life reduction — at t₁ = T (X ≥ H) the correlation is 1 and bivariateNormalCDF_one turns ptCA into that same standard-barrier closed form. The barrier density itself (the reflection-principle step behind the transcribed N₂ terms) is not proved; main's precedent for transcribed barriers proving no more than this is reduced_core (Heynen–Kat, Stulz). Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-binary-barrier-inout-parity",
+      "name": "Binary Barrier In-Out Parity (Down and Up Families)",
+      "domain": "mathematical_finance",
+      "description": "Rubinstein & Reiner's binary (digital) barrier closed forms: the down- and up-barrier knock-in plus knock-out alpha-factors sum to the vanilla digital alpha-factor B1 across all sixteen branch cases, and at the risk-neutral drift the discounted vanilla leg equals the cash-or-nothing price e^{-rT} Phi(d2). The closed form itself is transcribed from Rubinstein & Reiner/Haug, not derived here: the barrier density behind the transcribed reflected terms is not proved.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.BinaryBarrierOption\n\nopen MathFin\n\n/-- **In-out parity, down-barrier family.** Re-exports `MathFin.bboDownIn_add_DownOut`. -/\ntheorem binary_barrier_down_in_add_out (S X H mu σ T : ℝ) (isCall xGeH : Bool) :\n    bboDownInAlpha S X H mu σ T isCall xGeH + bboDownOutAlpha S X H mu σ T isCall xGeH\n      = bboB1 S X mu σ T isCall :=\n  MathFin.bboDownIn_add_DownOut S X H mu σ T isCall xGeH\n\n/-- **In-out parity, up-barrier family.** Re-exports `MathFin.bboUpIn_add_UpOut`. -/\ntheorem binary_barrier_up_in_add_out (S X H mu σ T : ℝ) (isCall xGeH : Bool) :\n    bboUpInAlpha S X H mu σ T isCall xGeH + bboUpOutAlpha S X H mu σ T isCall xGeH\n      = bboB1 S X mu σ T isCall :=\n  MathFin.bboUpIn_add_UpOut S X H mu σ T isCall xGeH\n\n/-- **Vanilla leg equals the Black–Scholes d2 term.** Re-exports `MathFin.bboB1_eq_Phi_bsd2`. -/\ntheorem binary_barrier_vanilla_leg_eq_phi_bsd2 (S X r σ T mu : ℝ) (hσ : σ ≠ 0) (hT : 0 < T)\n    (hmu : mu = (r - σ ^ 2 / 2) / σ ^ 2) :\n    bboB1 S X mu σ T true = Phi (bsd2 S X r σ T) :=\n  MathFin.bboB1_eq_Phi_bsd2 S X r σ T mu hσ hT hmu\n\n/-- **Vanilla leg is the discounted cash-or-nothing price.** Re-exports\n`MathFin.bboB1_cash_or_nothing_price`. -/\ntheorem binary_barrier_vanilla_leg_cash_or_nothing_price (S_0 K r σ T mu : ℝ) (hσ : σ ≠ 0)\n    (hT : 0 < T) (hmu : mu = (r - σ ^ 2 / 2) / σ ^ 2) :\n    Real.exp (-r * T) * bboB1 S_0 K mu σ T true\n      = Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) :=\n  MathFin.bboB1_cash_or_nothing_price S_0 K r σ T mu hσ hT hmu\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Rubinstein & Reiner, Risk 4(9) (1991); Haug, The Complete Guide to Option Pricing Formulas, 2nd ed. (2007), ch. 4, \"Binary Barrier Options\"",
+        "difficulty": "intermediate",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Reduced core. Re-export of MathFin.bboDownIn_add_DownOut and MathFin.bboUpIn_add_UpOut (MathFin/BlackScholes/BinaryBarrierOption.lean), plus MathFin.bboB1_eq_Phi_bsd2 and MathFin.bboB1_cash_or_nothing_price. The Rubinstein–Reiner 16-branch closed form is transcribed, not derived: what is proved is the in–out parity branch-by-branch across all sixteen (barrier type, call/put, strike-vs-barrier) cases — the closed-form instance of knockIn_add_knockOut_eq_vanilla — and that the parity's vanilla leg at the risk-neutral drift μ = (r − σ²/2)/σ² is the discounted cash-or-nothing price bs_cash_or_nothing_formula proves (e^{−rT}·B₁ = e^{−rT}·Φ(d₂)). The barrier density itself is not proved; main's precedent for transcribed barriers proving no more than this is reduced_core (Heynen–Kat, Stulz). Axioms-clean."
+      }
     }
   ]
 }
