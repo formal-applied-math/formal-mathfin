@@ -197,14 +197,18 @@ three is a correctness or honesty finding; all are optional follow-on polish.
 
 **Update (same day, post-review):** backlog item (2) landed — the pattern did recur (three
 times more, in fact, across several rounds of review before this PR was opened). The
-resulting cleanup extracted nine shared private lemmas in total:
+resulting cleanup extracted eight shared private lemmas in total:
 `continuousOn_of_lipschitzOn_Icc`, `abs_cosChain_bounds`, `abs_sinChain_bounds`,
 `pairing_volterra_primitive`, `diff_pairing_lipschitz`, `abs_genLinComb_le` (the
-`abs_mul`-chain helper backlog item (2) names), `hasDerivAt_linMul`,
-`integrable_ofReal_of_abs_le_one`, and `hasDerivWithinAt_of_volterra_primitive`. The
-`charFun`-splitting computation in `weakForwardUniqueConst` was also consolidated into a
-single lemma (`charFun_eq_cos_add_sin_mul_I`) applied once per flow, replacing a nine-step
-calc that repeated the same computation forwards and backwards. The file has no remaining
+`abs_mul`-chain helper backlog item (2) names), `hasDerivAt_linMul`, and
+`hasDerivWithinAt_of_volterra_primitive`. A later pass folded two more: `abs_pairing_le` now
+calls `MeasureTheory.norm_integral_le_of_norm_le_const` directly instead of a hand-derived
+proof, `continuousOn_of_lipschitzOn_Icc` now builds on `LipschitzOnWith.of_dist_le'` instead
+of a hand-rolled epsilon-delta argument, and the `charFun`-splitting computation in
+`weakForwardUniqueConst` (including its integrability domination step, previously the
+short-lived `integrable_ofReal_of_abs_le_one`) was consolidated into a single lemma
+(`charFun_eq_cos_add_sin_mul_I`) applied once per flow, replacing a nine-step calc that
+repeated the same computation forwards and backwards. The file has no remaining
 literal-duplicate `calc`/proof blocks. Backlog item (1) remains open (no second consumer
 yet).
 
