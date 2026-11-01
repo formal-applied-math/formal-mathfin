@@ -322,6 +322,21 @@ lemma hasDerivWithinAt_Ici_of_continuousOn {h : ℝ → ℝ} {x T : ℝ}
     ContinuousOn.intervalIntegrable_of_Icc hx0 (hcont.mono (Set.Icc_subset_Icc_right hxT.le))
   exact intervalIntegral.integral_hasDerivWithinAt_right hintg hmeas hb
 
+/-- A function equal to its own Volterra primitive on `[0, T]` is right-differentiable there,
+with derivative the (continuous) generator value: combines
+`hasDerivWithinAt_Ici_of_continuousOn` (the primitive's own derivative) with the
+`=ᶠ[𝓝[Ici x] x]` transfer from the primitive identity — the shared step behind both
+`hCderiv` and `hSderiv` in `hasDerivWithinAt_cosPairing_sinPairing`. -/
+private lemma hasDerivWithinAt_of_volterra_primitive {g h : ℝ → ℝ} {x T : ℝ}
+    (hcont : ContinuousOn h (Set.Icc 0 T)) (hx0 : 0 ≤ x) (hxT : x < T)
+    (hprim : ∀ s ∈ Set.Icc (0 : ℝ) T, g s = g 0 + ∫ r in (0 : ℝ)..s, h r) :
+    HasDerivWithinAt g (h x) (Set.Ici x) x := by
+  have hderiv0 : HasDerivWithinAt (fun u => ∫ r in (0 : ℝ)..u, h r) (h x) (Set.Ici x) x :=
+    hasDerivWithinAt_Ici_of_continuousOn hcont hx0 hxT
+  have heq : g =ᶠ[nhdsWithin x (Set.Ici x)] (fun s => g 0 + ∫ r in (0 : ℝ)..s, h r) :=
+    Filter.eventually_of_mem (icc_mem_nhdsWithin_Ici_of_lt hx0 hxT) hprim
+  exact (hderiv0.const_add (g 0)).congr_of_eventuallyEq_of_mem heq (le_refl x)
+
 /-- An admissible pairing is the Volterra primitive of its generator value, once the
 generator is recognized as a named function `h`: the shared `pairing_increment` + generator
 rewrite step behind both `hCprim` and `hSprim` in `hasDerivWithinAt_cosPairing_sinPairing`. -/
@@ -386,23 +401,10 @@ lemma hasDerivWithinAt_cosPairing_sinPairing {b v T : ℝ} {μ : ℝ → Measure
     pairing_volterra_primitive hμ hT (hasDerivAt_sinMul ξ) (hasDerivAt_cosMulScaled ξ)
       (hasDerivAt_negSinSqMul ξ) hb0' hb1' hb2' hb3' k fun r => by
         simp only [hkdef, integral_const_mul]; ring
-  have hCderiv0 : HasDerivWithinAt (fun u => ∫ r in (0 : ℝ)..u, h r) (h x) (Set.Ici x) x :=
-    hasDerivWithinAt_Ici_of_continuousOn hhcont hx0 hxT
-  have hSderiv0 : HasDerivWithinAt (fun u => ∫ r in (0 : ℝ)..u, k r) (k x) (Set.Ici x) x :=
-    hasDerivWithinAt_Ici_of_continuousOn hkcont hx0 hxT
-  have hmemIci : x ∈ Set.Ici x := le_refl x
-  have heqC : (fun s => ∫ y, Real.cos (ξ * y) ∂(μ s))
-      =ᶠ[nhdsWithin x (Set.Ici x)]
-      (fun s => (∫ y, Real.cos (ξ * y) ∂(μ 0)) + ∫ r in (0 : ℝ)..s, h r) :=
-    Filter.eventually_of_mem (icc_mem_nhdsWithin_Ici_of_lt hx0 hxT) hCprim
-  have heqS : (fun s => ∫ y, Real.sin (ξ * y) ∂(μ s))
-      =ᶠ[nhdsWithin x (Set.Ici x)]
-      (fun s => (∫ y, Real.sin (ξ * y) ∂(μ 0)) + ∫ r in (0 : ℝ)..s, k r) :=
-    Filter.eventually_of_mem (icc_mem_nhdsWithin_Ici_of_lt hx0 hxT) hSprim
   have hCderiv : HasDerivWithinAt (fun s => ∫ y, Real.cos (ξ * y) ∂(μ s)) (h x) (Set.Ici x) x :=
-    (hCderiv0.const_add (∫ y, Real.cos (ξ * y) ∂(μ 0))).congr_of_eventuallyEq_of_mem heqC hmemIci
+    hasDerivWithinAt_of_volterra_primitive hhcont hx0 hxT hCprim
   have hSderiv : HasDerivWithinAt (fun s => ∫ y, Real.sin (ξ * y) ∂(μ s)) (k x) (Set.Ici x) x :=
-    (hSderiv0.const_add (∫ y, Real.sin (ξ * y) ∂(μ 0))).congr_of_eventuallyEq_of_mem heqS hmemIci
+    hasDerivWithinAt_of_volterra_primitive hkcont hx0 hxT hSprim
   exact ⟨hCderiv, hSderiv⟩
 
 /-- For a fixed frequency `ξ`, the pairings of `ρ` and `η` against `cos(ξ·)`
