@@ -210,10 +210,15 @@ theorem bboB1_eq_Phi_bsd2 (S X r σ T mu : ℝ) (hσ : σ ≠ 0) (hT : 0 < T)
   simp only [Real.sq_sqrt (le_of_lt hT)]
   ring
 
-/-- **The parity's vanilla leg is a price.** With the risk-neutral drift substitution of
-`bboB1_eq_Phi_bsd2`, the discounted vanilla leg `e^{−rT}·B₁` of both parity theorems equals
-`e^{−rT}·Φ(d₂)` — which `bs_cash_or_nothing_formula` (`BlackScholes/Digital.lean`) proves is
-exactly the discounted cash-or-nothing call price. -/
+/-- **The parity's vanilla leg is the value QuantLib's cash-or-nothing price computes.** A
+deterministic algebraic identity, valid for every `σ ≠ 0` (including negative `σ`, for which
+`bboB1`/`bsd2` are still well-defined real expressions). With the risk-neutral drift
+substitution of `bboB1_eq_Phi_bsd2`, the discounted vanilla leg `e^{−rT}·B₁` of both parity
+theorems equals `e^{−rT}·Φ(d₂)`. The *pricing* interpretation — that this is the discounted
+expected cash-or-nothing payoff — is a separate fact, `bs_cash_or_nothing_formula`
+(`BlackScholes/Digital.lean`), which needs `BSCallHyp` (in particular `σ > 0`, the model's actual
+volatility) and gives exactly this same closed form as its conclusion; the two compose by
+substitution, not by this theorem consuming `BSCallHyp` directly. -/
 theorem bboB1_cash_or_nothing_price (S_0 K r σ T mu : ℝ) (hσ : σ ≠ 0) (hT : 0 < T)
     (hmu : mu = (r - σ ^ 2 / 2) / σ ^ 2) :
     Real.exp (-r * T) * bboB1 S_0 K mu σ T true
