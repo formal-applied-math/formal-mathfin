@@ -27,10 +27,12 @@ of the Wiener bond-price lemma `integral_exp_neg_add_mul_wienerIntegralLp`.
 ## What the formalization forces
 
 * **The variance limit is a cancellation, not a lemma.** `V(T) = T/κ² − 2(1−e^{−κT})/κ³ +
-  (1−e^{−2κT})/(2κ³)` is a sum of three terms of order `κ⁻³`; for `T > 0` the middle one alone
-  tends to `−∞`. No limit rule applies term by term. `abs_vasicekBondV_sub_le` substitutes the
-  cubic Taylor polynomials of `e^{−κT}` and `e^{−2κT}` (from `Real.exp_bound` at `n = 4`), the
-  orders `κ⁻³, κ⁻², κ⁻¹` cancel exactly, and what is left is the explicit rate
+  (1−e^{−2κT})/(2κ³)` is a sum of three terms each of leading order `κ⁻²` (both exponential
+  numerators vanish linearly in `κ`, so dividing by `κ³` leaves `κ⁻²`); for `T > 0` the middle
+  one alone tends to `−∞`. No limit rule applies term by term. `abs_vasicekBondV_sub_le`
+  substitutes the cubic Taylor polynomials of `e^{−κT}` and `e^{−2κT}` (from `Real.exp_bound`
+  at `n = 4`), the divergent orders `κ⁻², κ⁻¹` cancel exactly, and what is left is the explicit
+  rate
   `|V(T) − T³/3| ≤ 10·|κ|·T⁴` for `|2κT| ≤ 1`. The limit follows by a squeeze. This is the
   cancellation a small-`a` branch of QuantLib's `Vasicek::A` has to resolve, here with a stated
   error bound.
@@ -43,8 +45,11 @@ of the Wiener bond-price lemma `integral_exp_neg_add_mul_wienerIntegralLp`.
   `exp(−λB_T − λ²T/2)` the risk-adjusted level is `θ − λσ/κ`
   (`vasicekBondPrice_girsanov`), and the `κ → 0⁺` limit of the risk-neutral price is
   `exp(−r₀T + λσT²/2 + σ²T³/6)` (`tendsto_vasicekBondPrice_girsanov_zero_meanReversion`).
-  QuantLib's `Vasicek::A` uses the level `b + λσ/a`, so its `λ` is the negative of the one here,
-  and its `a → 0` limit `exp(−λσT²/2 + σ²T³/6)` is the same price.
+  QuantLib's `Vasicek::A` uses the level `b + λσ/a`, so its `λ` is the negative of the one here.
+  `A` alone is only the affine factor, not the price (the price is `A·exp(−B·r₀)`, and
+  `tendsto_vasicekBondA_zero_meanReversion` below gives `A`'s own `λ = 0` limit); the proved
+  price limit `tendsto_vasicekBondPrice_girsanov_zero_meanReversion` matches QuantLib's
+  convention under that sign flip.
 
 ## Scope (disclosed)
 
