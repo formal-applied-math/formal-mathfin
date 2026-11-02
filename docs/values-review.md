@@ -130,6 +130,128 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-11-02 — corpus 755, modules 686 — the standing first pass, scoped to this session's own addition
+
+Scope: the standing first pass (prose vs. statement) plus the eight lenses, over this
+session's own new content only — `MathFin.Foundations.FlowDuality` and its corpus entry
+`mf-flow-duality-const`. The corpus's other growth since the 2026-10-31 review (742 → 754,
+twelve entries landed via already-merged PRs before this session started) is each PR's own
+landing responsibility under this protocol and is not re-audited here; this entry exists to
+keep the cadence gate's record pointed at the corpus's current size, not to re-certify work
+this session did not touch.
+
+**Standing first pass.** `weakForwardUniqueConst`'s statement is `∀ s ∈ Set.Ioc (0:ℝ) T, ρ s
+= η s` for two flows obeying `IsWeakForwardFlow` with a shared initial law — the corpus
+`description` claims exactly that ("two probability-measure flows … coincide at every later
+time"), named via the method actually used (pairing against `cos(ξ·)`/`sin(ξ·)`, a Lipschitz
+bound, the one-sided FTC, Grönwall, `ext_of_charFun`), not an unused "duality/adjoint
+operator" framing. `formalization_scope` discloses the two hypothesis-shape strengthenings
+relative to a bare Fokker–Planck hypothesis (the test class bounds the test function itself;
+the identity hypothesis supplies interval-integrability directly) — neither is a junk-value
+or hidden-conclusion issue, both are stated plainly. No price/expectation/probability
+junk-value conditions apply (the statement has none of those objects).
+
+**Eight lenses, scoped to this module:**
+
+1. *Inspired math* — exemplar: the reduction from an abstract Volterra-system argument to the
+   library's existing one-sided-FTC and Grönwall machinery, rather than a bespoke fixed-point
+   argument. Upgrade: a non-constant-coefficient version would need the same
+   bootstrap–Lipschitz–FTC pattern with time-dependent coefficients; not attempted here.
+2. *Mathlib coherence* — consumes `eq_zero_of_abs_deriv_le_mul_abs_self_of_eq_zero_right`
+   (`Analysis/ODE/Gronwall.lean`), `intervalIntegral.integral_hasDerivWithinAt_right`, and
+   `MeasureTheory.Measure.ext_of_charFun` as the three load-bearing upstream facts, each used
+   for exactly the role its name promises; no re-derivation of any of the three. Upgrade:
+   `hasDerivWithinAt_Ici_of_continuousOn`'s within-filter localization (the
+   `continuousWithinAt_inter'` pattern) is a small reusable idiom — worth lifting to a shared
+   lemma if a second module needs the same "FTC localized to a closed sub-interval" step
+   (flagged, not yet needed elsewhere in the library).
+3. *Zero slop* — every inequality step is a named triangle/Lipschitz estimate, not a blanket
+   `nlinarith`/`norm_num` discharge standing in for the argument; `ring`/`field_simp` appear
+   only for literal algebraic rearrangement, never in place of an analytic step.
+4. *Architectural ingenuity* — `abs_pairing_lipschitz` and
+   `hasDerivWithinAt_cosPairing_sinPairing` are each proved once per flow (`ρ` or `η`
+   generically) and instantiated twice in `pairing_cos_sin_eq`, rather than duplicated
+   per-flow; the trig derivative chains (`hasDerivAt_cosMul` through `hasDerivAt_negSinSqMul`)
+   are six small standalone lemmas reused by both the Lipschitz and the derivative arguments.
+5. *First principles* — `IsWeakForwardFlow`'s hypothesis does not contain the conclusion:
+   it is an integrated identity at every admissible test, and uniqueness is the separating
+   content extracted from it via the trig family, not assumed.
+6. *Idiomatic register* — bare proof terms where the goal is defeq
+   (`(... ).congr_deriv (by ring)`, the `hasDerivAt_*Mul` lemmas), `↦`/`fun` consistently,
+   no gratuitous `classical`. One register gap: a few `calc` chains in `pairing_cos_sin_eq`
+   repeat the four-fold `abs_mul` rewrite rather than a single named helper lemma — flagged
+   as a mechanical-not-mathematical polish item, not fixed in this pass to avoid re-touching
+   already-green proof text without a build re-check cycle.
+7. *Concept clarity* — the module docstring states the proof method in one paragraph a
+   probabilist can check against the Lean names; the two strengthenings are disclosed in the
+   same place they would be needed to assess the theorem's reach.
+8. *Beautiful/elegant math* — the frequency-by-frequency trig pairing is the classical
+   characteristic-function uniqueness argument in its most direct Lean shape; nothing about
+   the formalization dresses up the argument or obscures it.
+
+**Backlog (ranked, this module only):** (1) a shared `hasDerivWithinAt_Ici_of_continuousOn`
+style helper, once a second module needs the same closed-interval FTC localization; (2) a
+named `abs_mul`-chain helper if the pattern recurs a third time; (3) the acknowledged
+non-constant-coefficient extension, parked per the module's own docstring scope. None of the
+three is a correctness or honesty finding; all are optional follow-on polish.
+
+**Update (same day, post-review):** backlog item (2) landed — the pattern did recur (three
+times more, in fact, across several rounds of review before this PR was opened). The
+resulting cleanup extracted eight shared private lemmas in total:
+`continuousOn_of_lipschitzOn_Icc`, `abs_cosChain_bounds`, `abs_sinChain_bounds`,
+`pairing_volterra_primitive`, `diff_pairing_lipschitz`, `abs_genLinComb_le` (the
+`abs_mul`-chain helper backlog item (2) names), `hasDerivAt_linMul`, and
+`hasDerivWithinAt_of_volterra_primitive`. A later pass folded two more: `abs_pairing_le` now
+calls `MeasureTheory.norm_integral_le_of_norm_le_const` directly instead of a hand-derived
+proof, `continuousOn_of_lipschitzOn_Icc` now builds on `LipschitzOnWith.of_dist_le'` instead
+of a hand-rolled epsilon-delta argument, and the `charFun`-splitting computation in
+`weakForwardUniqueConst` (including its integrability domination step, previously the
+short-lived `integrable_ofReal_of_abs_le_one`) was consolidated into a single lemma
+(`charFun_eq_cos_add_sin_mul_I`) applied once per flow, replacing a nine-step calc that
+repeated the same computation forwards and backwards. The file has no remaining
+literal-duplicate `calc`/proof blocks. Backlog item (1) remains open (no second consumer
+yet).
+
+**Update (same day, the architecture-connectivity bridge):** `FlowDuality.lean` imports only
+`Mathlib` and nothing in `MathFin/` imported it, so `tests/test_architecture.py::
+test_every_module_is_connected` flagged it as an island (`test_every_module_is_used` already
+passed — the corpus snippet above imports it, which counts as a citation). Per `CLAUDE.md`'s
+rule ("a module that connects to nothing gets a bridge … never a quarantine list"), the fix
+is `MathFin.GyongyMimicry.hgate_const_of_isWeakForwardFlow`
+(`MathFin/Foundations/GyongyMimicry.lean`, which now imports `FlowDuality`): given `hgate`'s
+own per-flow hypothesis for two probability-measure flows, specialized to the
+constant-coefficient instance `afn ≡ b`, `bfn ≡ v` and restricted to `IsWeakForwardFlow`'s
+`C0`-bounded test class (a weaker ask of the caller than `hgate`'s own all-`ContDiff ℝ 2 g`
+class, not an extra burden), together with the pairing integrand's interval-integrability
+supplied as an explicit hypothesis (the one genuine extra condition `IsWeakForwardFlow` adds
+beyond `hgate`'s own, not derived here from anything weaker), the theorem builds the two
+`IsWeakForwardFlow` instances and invokes `weakForwardUniqueConst` to reach exactly `hgate`'s
+own conclusion for that instance. Three small private lemmas carry the construction and the
+mismatch between the two hypothesis classes' shapes: `isWeakForwardFlow_of_const_gate` (the
+shared single-flow constructor, applied once per flow instead of duplicating its six-line
+body); `genLinComb_mul_const_eq` (the conversion from `hgate`'s `∫ g' · b` pairing-integrand
+shape to `IsWeakForwardFlow`'s `b · ∫ g'` shape, via `integral_mul_const` and `ring`
+normalization — not a bare associativity rewrite); and `contDiff_two_of_hasDerivAt_chain`
+(recovering `hgate`'s explicit `ContDiff ℝ 2 g`
+hypothesis from the three `HasDerivAt` links `IsWeakForwardFlow` itself provides, by the same
+`contDiff_succ_iff_deriv`-then-`contDiff_one_iff_deriv` route `MathFin.Dupire.
+call_spanning_compactSupport` already uses for its own constructed primitive — no new Mathlib
+surface, in-repo precedent reused). This is a real, non-trivial bridge, not a dummy import: it
+is the constant-coefficient bridge to `hgate` that `FlowDuality`'s own module docstring named
+and deferred — reaching `hgate`'s conclusion, not literally pluggable as an `hgate` argument,
+given the same two disclosed differences the corpus entry's `description`
+field already states (it does not newly close the second one — deriving the integrability
+conjunct from something weaker, e.g. continuity of the pairing integrand, is still future
+work, exactly as disclosed; the first is a restriction on the test class, not a gap to close).
+`lake build`, `lake lint`, and the full `pytest tests/` suite (including
+`test_every_module_is_connected`) are green after the edit; no `sorry`, standard three axioms
+only (`#print axioms MathFin.GyongyMimicry.hgate_const_of_isWeakForwardFlow` — `propext`,
+`Classical.choice`, `Quot.sound`). Several further review-driven wording passes on this same
+bridge each re-triggered transitive content-hash staleness on `mf-dupire-local-vol` (whose
+import closure includes `GyongyMimicry.lean`) and, when `FlowDuality.lean`'s or the benchmark's
+own text changed, on `mf-flow-duality-const` too — never a correctness gap, each time closed by
+a hosted `ledger sweep` run; the ledger is fresh (755/755) at this entry's final commit.
+
 ## 2026-10-31 — corpus 742, modules 678 — elegance: does each headline proof read as its argument
 
 Scope: lens 8 alone, at the maintainer's bar ("mathematical highest quality … and beauty"), over the
