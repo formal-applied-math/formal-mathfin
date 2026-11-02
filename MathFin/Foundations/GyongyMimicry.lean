@@ -71,9 +71,11 @@ Public API (all in namespace `MathFin.GyongyMimicry`):
 * `exists_driftCoeff_fn`, `exists_diffCoeffSq_fn`, `marginal_flow_weak_equation_fn_constructed`,
   `gyongy_mimicry_gated` — the coefficient functions and the mimicry statement;
 * `hgate_const_of_isWeakForwardFlow` — the constant-coefficient bridge from
-  `MathFin.FlowDuality.weakForwardUniqueConst` to `gyongy_mimicry_gated`'s `hgate` hypothesis
-  (modulo `IsWeakForwardFlow`'s two disclosed extra conditions, supplied here as explicit
-  hypotheses rather than derived).
+  `MathFin.weakForwardUniqueConst` to `gyongy_mimicry_gated`'s `hgate` conclusion: `hgate`'s
+  own per-test identity, restricted to `IsWeakForwardFlow`'s bounded-test class (a weaker ask
+  than `hgate`'s own, not an extra burden), plus the pairing integrand's
+  interval-integrability supplied as an explicit extra hypothesis (the one genuine extra
+  obligation `hgate` itself does not give).
 
 Supporting lemmas (`integrable_testβ`, `integrable_testδsq`, `hasDerivAt_marginal_flow_core`,
 `constructedGenIntegrandExp_eq`, `exists_coeffFn_comp`,
@@ -1416,11 +1418,12 @@ private lemma contDiff_two_of_hasDerivAt_chain {g g' g'' g''' : ℝ → ℝ}
 /-- Shared constructor behind both halves of `hgate_const_of_isWeakForwardFlow`: a probability
 flow satisfying `hgate`'s own per-test hypothesis (specialized to the constant-coefficient
 instance `afn ≡ b`, `bfn ≡ v`, with `ContDiff ℝ 2 g` still required as `hgate` requires it),
-together with `IsWeakForwardFlow`'s two extra conditions (a `C0` bound on the test itself, and
-the pairing integrand's interval-integrability) supplied test-by-test, is an `IsWeakForwardFlow`
-instance: unwrap the `ContDiff ℝ 2 g` hypothesis to `contDiff_two_of_hasDerivAt_chain`'s chain
-form and the `afn x y`/`bfn x y` integrand to `IsWeakForwardFlow`'s `b * ∫ g'` shape via
-`genLinComb_mul_const_eq`. -/
+restricted to `IsWeakForwardFlow`'s `C0`-bounded test class (asking for *less* than `hgate`'s
+own all-`ContDiff ℝ 2 g` class, not an extra burden), and supplying separately, test-by-test,
+the one genuine extra obligation `IsWeakForwardFlow` adds — the pairing integrand's
+interval-integrability — is an `IsWeakForwardFlow` instance: unwrap the `ContDiff ℝ 2 g`
+hypothesis to `contDiff_two_of_hasDerivAt_chain`'s chain form and the `afn x y`/`bfn x y`
+integrand to `IsWeakForwardFlow`'s `b * ∫ g'` shape via `genLinComb_mul_const_eq`. -/
 private lemma isWeakForwardFlow_of_const_gate {b v T : ℝ} {μ : ℝ → Measure ℝ}
     (hprob : ∀ s, IsProbabilityMeasure (μ s))
     (hflow : ∀ (g g' g'' g''' : ℝ → ℝ) (C0 C1 C2 C3 : ℝ),
@@ -1447,16 +1450,18 @@ bounded `g', g'', g'''` forces agreement at every later time. `MathFin.weakForwa
 proves exactly this for the constant-coefficient instance `afn ≡ b`, `bfn ≡ v` (written here
 with `afn x y`, `bfn x y` already reduced to the constants `b`, `v`), on `IsWeakForwardFlow` —
 a hypothesis class with two differences from `hgate`'s, disclosed in `MathFin.FlowDuality`'s
-module docstring: its test class also bounds the test function itself (the `C0` bound below),
-and its identity hypothesis directly supplies the interval-integrability of the pairing
-integrand (the second conjunct below) rather than deriving it from a weaker premise.
+module docstring: its test class also bounds the test function itself (the `C0` bound below —
+a *restriction* on which tests the caller must handle, so weaker than `hgate`'s own ask, not
+an extra burden), and its identity hypothesis directly supplies the interval-integrability of
+the pairing integrand (the second conjunct below) rather than deriving it from a weaker
+premise — the one genuine extra obligation this bridge asks the caller to discharge.
 
-Given `hgate`'s own per-flow hypothesis for `ρ` and `η`, specialized to constant coefficients,
-*together with* both of these extra conditions supplied as explicit hypotheses (not derived
-from anything weaker — that derivation, e.g. from continuity of the pairing integrand, is
-left to a future module), this theorem builds the two `IsWeakForwardFlow` instances
-(`isWeakForwardFlow_of_const_gate`) and invokes `weakForwardUniqueConst` to reach exactly
-`hgate`'s conclusion for this instance. -/
+Given `hgate`'s own per-flow hypothesis for `ρ` and `η`, specialized to constant coefficients
+and restricted to `C0`-bounded tests, *together with* that integrability conjunct supplied as
+an explicit hypothesis (not derived from anything weaker — that derivation, e.g. from
+continuity of the pairing integrand, is left to a future module), this theorem builds the two
+`IsWeakForwardFlow` instances (`isWeakForwardFlow_of_const_gate`) and invokes
+`weakForwardUniqueConst` to reach exactly `hgate`'s conclusion for this instance. -/
 theorem hgate_const_of_isWeakForwardFlow (b v T : ℝ) (ρ η : ℝ → Measure ℝ)
     (hρprob : ∀ s, IsProbabilityMeasure (ρ s)) (hηprob : ∀ s, IsProbabilityMeasure (η s))
     (hρflow : ∀ (g g' g'' g''' : ℝ → ℝ) (C0 C1 C2 C3 : ℝ),

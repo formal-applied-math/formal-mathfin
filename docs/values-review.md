@@ -220,17 +220,19 @@ rule ("a module that connects to nothing gets a bridge … never a quarantine li
 is `MathFin.GyongyMimicry.hgate_const_of_isWeakForwardFlow`
 (`MathFin/Foundations/GyongyMimicry.lean`, which now imports `FlowDuality`): given `hgate`'s
 own per-flow hypothesis for two probability-measure flows, specialized to the
-constant-coefficient instance `afn ≡ b`, `bfn ≡ v`, together with the two conditions
-`IsWeakForwardFlow` adds beyond `hgate`'s own class (a bound on the test function itself, and
-the interval-integrability of the pairing integrand — both supplied here as explicit
-hypotheses, not derived from anything weaker), the theorem builds the two `IsWeakForwardFlow`
-instances and invokes `weakForwardUniqueConst` to reach exactly `hgate`'s own conclusion for
-that instance. Three small private lemmas carry the construction and the mismatch between the
-two hypothesis classes' shapes: `isWeakForwardFlow_of_const_gate` (the shared single-flow
-constructor, applied once per flow instead of duplicating its six-line body); `genLinComb_mul_const_eq`
-(the conversion from `hgate`'s `∫ g' · b` pairing-integrand shape to `IsWeakForwardFlow`'s
-`b · ∫ g'` shape, via `integral_mul_const` plus commutativity — not an associativity rewrite);
-and `contDiff_two_of_hasDerivAt_chain` (recovering `hgate`'s explicit `ContDiff ℝ 2 g`
+constant-coefficient instance `afn ≡ b`, `bfn ≡ v` and restricted to `IsWeakForwardFlow`'s
+`C0`-bounded test class (a weaker ask of the caller than `hgate`'s own all-`ContDiff ℝ 2 g`
+class, not an extra burden), together with the pairing integrand's interval-integrability
+supplied as an explicit hypothesis (the one genuine extra condition `IsWeakForwardFlow` adds
+beyond `hgate`'s own, not derived here from anything weaker), the theorem builds the two
+`IsWeakForwardFlow` instances and invokes `weakForwardUniqueConst` to reach exactly `hgate`'s
+own conclusion for that instance. Three small private lemmas carry the construction and the
+mismatch between the two hypothesis classes' shapes: `isWeakForwardFlow_of_const_gate` (the
+shared single-flow constructor, applied once per flow instead of duplicating its six-line
+body); `genLinComb_mul_const_eq` (the conversion from `hgate`'s `∫ g' · b` pairing-integrand
+shape to `IsWeakForwardFlow`'s `b · ∫ g'` shape, via `integral_mul_const` and `ring`
+normalization — not a bare associativity rewrite); and `contDiff_two_of_hasDerivAt_chain`
+(recovering `hgate`'s explicit `ContDiff ℝ 2 g`
 hypothesis from the three `HasDerivAt` links `IsWeakForwardFlow` itself provides, by the same
 `contDiff_succ_iff_deriv`-then-`contDiff_one_iff_deriv` route `MathFin.Dupire.
 call_spanning_compactSupport` already uses for its own constructed primitive — no new Mathlib
