@@ -113,10 +113,10 @@ theorem tendsto_vasicekBondB_zero_meanReversion (T : ℝ) :
   ring
 
 /-- The quantitative cancellation in `V`: for `κ ≠ 0` with `|2κT| ≤ 1`,
-`|V(T) − T³/3| ≤ 10·|κ|·T⁴`. Each of the three terms of `V` is of order `κ⁻³` (the middle one
-alone tends to `−∞`); substituting the cubic Taylor polynomials of `e^{−κT}` and `e^{−2κT}`
-cancels the `κ⁻³`, `κ⁻²` and `κ⁻¹` orders exactly and leaves `T³/3` plus the quartic
-remainders divided by `κ³`. -/
+`|V(T) − T³/3| ≤ 10·|κ|·T⁴`. Each of the three terms of `V` is of leading order `κ⁻²` (both
+exponential numerators vanish linearly in `κ`); substituting the cubic Taylor polynomials of
+`e^{−κT}` and `e^{−2κT}` cancels the `κ⁻²` and `κ⁻¹` orders exactly and leaves `T³/3` plus the
+quartic remainders divided by `κ³`. -/
 lemma abs_vasicekBondV_sub_le {κ T : ℝ} (hκ : κ ≠ 0) (hsmall : |2 * κ * T| ≤ 1) :
     |vasicekBondV κ T - T ^ 3 / 3| ≤ 10 * |κ| * T ^ 4 := by
   have hx : |κ * T| ≤ 1 / 2 := by
