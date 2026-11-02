@@ -242,9 +242,11 @@ or integrability conditions from something weaker is still future work, exactly 
 `lake build`, `lake lint`, and the full `pytest tests/` suite (including
 `test_every_module_is_connected`) are green after the edit; no `sorry`, standard three axioms
 only (`#print axioms MathFin.GyongyMimicry.hgate_const_of_isWeakForwardFlow` — `propext`,
-`Classical.choice`, `Quot.sound`). The verification ledger briefly showed `mf-dupire-local-vol`
-stale (its transitive import closure includes `GyongyMimicry.lean`, whose content changed);
-closed by the hosted `ledger sweep` workflow, not a correctness gap in this entry.
+`Classical.choice`, `Quot.sound`). As of this commit the ledger still shows two rows stale —
+`mf-dupire-local-vol` (its transitive import closure includes `GyongyMimicry.lean`, whose
+content changed) and `mf-flow-duality-const` (this entry's own benchmark, whose module
+docstring this commit also edited) — pending a hosted `ledger sweep` run; this is transitive
+content-hash staleness from the edits above, not a correctness gap in either entry.
 
 ## 2026-10-31 — corpus 742, modules 678 — elegance: does each headline proof read as its argument
 
