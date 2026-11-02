@@ -72,14 +72,15 @@ Public API (all in namespace `MathFin.GyongyMimicry`):
   `gyongy_mimicry_gated` — the coefficient functions and the mimicry statement;
 * `hgate_const_of_isWeakForwardFlow` — the constant-coefficient bridge from
   `MathFin.weakForwardUniqueConst` to `gyongy_mimicry_gated`'s `hgate` conclusion: `hgate`'s
-  own per-test identity, restricted to `IsWeakForwardFlow`'s bounded-test class (a weaker ask
-  than `hgate`'s own, not an extra burden), plus the pairing integrand's
-  interval-integrability supplied as an explicit extra hypothesis (the one genuine extra
-  obligation `hgate` itself does not give).
+  own per-flow hypothesis, restricted to `IsWeakForwardFlow`'s bounded-test class (a weaker
+  ask than `hgate`'s own, not an extra burden), plus the pairing integrand's
+  interval-integrability as an explicit extra conjunct of that same hypothesis (the one
+  genuine extra obligation `hgate` itself does not give).
 
 Supporting lemmas (`integrable_testβ`, `integrable_testδsq`, `hasDerivAt_marginal_flow_core`,
-`constructedGenIntegrandExp_eq`, `exists_coeffFn_comp`,
-`hitoid_constructed_fn_Ioc`) are `private`.
+`constructedGenIntegrandExp_eq`, `exists_coeffFn_comp`, `hitoid_constructed_fn_Ioc`,
+`genLinComb_mul_const_eq`, `contDiff_two_of_hasDerivAt_chain`, `isWeakForwardFlow_of_const_gate`)
+are `private`.
 -/
 
 @[expose] public section
@@ -1443,7 +1444,7 @@ private lemma isWeakForwardFlow_of_const_gate {b v T : ℝ} {μ : ℝ → Measur
   simp only [genLinComb_mul_const_eq] at hid hint
   exact ⟨hid, hint⟩
 
-/-- **Constant-coefficient discharge of the flow-uniqueness gate.** `hgate` (the flow-uniqueness
+/-- **Constant-coefficient bridge to the flow-uniqueness gate.** `hgate` (the flow-uniqueness
 hypothesis of `gyongy_mimicry_gated`) asks, for two probability-measure flows and a fixed pair
 of Borel coefficient functions `afn, bfn`, that agreement at `0` plus both flows solving the
 integrated weak forward equation for every test with the `HasDerivAt`/`ContDiff ℝ 2` chain and

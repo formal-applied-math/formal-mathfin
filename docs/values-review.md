@@ -237,8 +237,9 @@ hypothesis from the three `HasDerivAt` links `IsWeakForwardFlow` itself provides
 `contDiff_succ_iff_deriv`-then-`contDiff_one_iff_deriv` route `MathFin.Dupire.
 call_spanning_compactSupport` already uses for its own constructed primitive — no new Mathlib
 surface, in-repo precedent reused). This is a real, non-trivial bridge, not a dummy import: it
-is the constant-coefficient discharge of `hgate` that `FlowDuality`'s own module docstring
-named and deferred, modulo the same two disclosed differences the corpus entry's `description`
+is the constant-coefficient bridge to `hgate` that `FlowDuality`'s own module docstring named
+and deferred — reaching `hgate`'s conclusion, not literally pluggable as an `hgate` argument,
+given the same two disclosed differences the corpus entry's `description`
 field already states (it does not newly close the second one — deriving the integrability
 conjunct from something weaker, e.g. continuity of the pairing integrand, is still future
 work, exactly as disclosed; the first is a restriction on the test class, not a gap to close).
