@@ -223,24 +223,28 @@ own per-flow hypothesis for two probability-measure flows, specialized to the
 constant-coefficient instance `afn ≡ b`, `bfn ≡ v`, together with the two conditions
 `IsWeakForwardFlow` adds beyond `hgate`'s own class (a bound on the test function itself, and
 the interval-integrability of the pairing integrand — both supplied here as explicit
-hypotheses, not derived from anything weaker), the lemma builds the two `IsWeakForwardFlow`
+hypotheses, not derived from anything weaker), the theorem builds the two `IsWeakForwardFlow`
 instances and invokes `weakForwardUniqueConst` to reach exactly `hgate`'s own conclusion for
-that instance. Two small private lemmas carry the mismatch between the two hypothesis
-classes' shapes: `genLinComb_mul_const_eq` (the `∫ g' · b` vs. `b · ∫ g'` associativity
-`hgate` and `IsWeakForwardFlow` each write differently) and
-`contDiff_two_of_hasDerivAt_chain` (recovering `hgate`'s explicit `ContDiff ℝ 2 g` hypothesis
-from the three `HasDerivAt` links `IsWeakForwardFlow` itself provides, by the same
-`contDiff_succ_iff_deriv` route `MathFin.Dupire.call_spanning_compactSupport` already uses for
-its own constructed primitive — no new Mathlib surface, in-repo precedent reused). This is a
-real, non-trivial bridge, not a dummy import: it is the constant-coefficient discharge of
-`hgate` that `FlowDuality`'s own module docstring named and deferred, modulo the same two
-disclosed differences the corpus entry's `formalization_scope` already states (it does not
-newly discharge them — a derivation of the test-boundedness or integrability conditions from
-something weaker is still future work, exactly as disclosed). `lake build`, `lake lint`, and
-the full `pytest tests/` suite (including `test_every_module_is_connected`) are green after
-the edit; no `sorry`, standard three axioms only
-(`#print axioms MathFin.GyongyMimicry.hgate_const_of_isWeakForwardFlow` — `propext`,
-`Classical.choice`, `Quot.sound`).
+that instance. Three small private lemmas carry the construction and the mismatch between the
+two hypothesis classes' shapes: `isWeakForwardFlow_of_const_gate` (the shared single-flow
+constructor, applied once per flow instead of duplicating its six-line body); `genLinComb_mul_const_eq`
+(the conversion from `hgate`'s `∫ g' · b` pairing-integrand shape to `IsWeakForwardFlow`'s
+`b · ∫ g'` shape, via `integral_mul_const` plus commutativity — not an associativity rewrite);
+and `contDiff_two_of_hasDerivAt_chain` (recovering `hgate`'s explicit `ContDiff ℝ 2 g`
+hypothesis from the three `HasDerivAt` links `IsWeakForwardFlow` itself provides, by the same
+`contDiff_succ_iff_deriv`-then-`contDiff_one_iff_deriv` route `MathFin.Dupire.
+call_spanning_compactSupport` already uses for its own constructed primitive — no new Mathlib
+surface, in-repo precedent reused). This is a real, non-trivial bridge, not a dummy import: it
+is the constant-coefficient discharge of `hgate` that `FlowDuality`'s own module docstring
+named and deferred, modulo the same two disclosed differences the corpus entry's `description`
+field already states (it does not newly discharge them — a derivation of the test-boundedness
+or integrability conditions from something weaker is still future work, exactly as disclosed).
+`lake build`, `lake lint`, and the full `pytest tests/` suite (including
+`test_every_module_is_connected`) are green after the edit; no `sorry`, standard three axioms
+only (`#print axioms MathFin.GyongyMimicry.hgate_const_of_isWeakForwardFlow` — `propext`,
+`Classical.choice`, `Quot.sound`). The verification ledger briefly showed `mf-dupire-local-vol`
+stale (its transitive import closure includes `GyongyMimicry.lean`, whose content changed);
+closed by the hosted `ledger sweep` workflow, not a correctness gap in this entry.
 
 ## 2026-10-31 — corpus 742, modules 678 — elegance: does each headline proof read as its argument
 

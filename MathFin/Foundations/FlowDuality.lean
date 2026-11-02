@@ -43,11 +43,11 @@ is unaffected by it); and the identity hypothesis here directly supplies the
 interval-integrability of the pairing integrand, which `gyongy_mimicry_gated`
 does not require (automatic when the pairing maps are continuous, e.g. for flows
 built from Itô processes, but not derived here from a weaker hypothesis — a real
-strengthening). Closing that second gap and restating `gyongy_mimicry_gated`'s
-gate with a bounded-test-function class, to wire `weakForwardUniqueConst` into
-its constant-coefficient instances, is left to a follow-up: this module is the
-standalone duality/uniqueness result on its own hypothesis class, not yet a
-discharge of that gate.
+strengthening). `MathFin.GyongyMimicry.hgate_const_of_isWeakForwardFlow` wires
+`weakForwardUniqueConst` into `gyongy_mimicry_gated`'s `hgate` for the
+constant-coefficient instance, given both of these conditions supplied as
+explicit hypotheses rather than derived; deriving them from something weaker
+(e.g. continuity of the pairing integrand) is left to a future module.
 -/
 
 @[expose] public section
