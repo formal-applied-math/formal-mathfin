@@ -246,11 +246,11 @@ work, exactly as disclosed; the first is a restriction on the test class, not a 
 `lake build`, `lake lint`, and the full `pytest tests/` suite (including
 `test_every_module_is_connected`) are green after the edit; no `sorry`, standard three axioms
 only (`#print axioms MathFin.GyongyMimicry.hgate_const_of_isWeakForwardFlow` — `propext`,
-`Classical.choice`, `Quot.sound`). As of this commit the ledger still shows two rows stale —
-`mf-dupire-local-vol` (its transitive import closure includes `GyongyMimicry.lean`, whose
-content changed) and `mf-flow-duality-const` (this entry's own benchmark, whose module
-docstring this commit also edited) — pending a hosted `ledger sweep` run; this is transitive
-content-hash staleness from the edits above, not a correctness gap in either entry.
+`Classical.choice`, `Quot.sound`). Several further review-driven wording passes on this same
+bridge each re-triggered transitive content-hash staleness on `mf-dupire-local-vol` (whose
+import closure includes `GyongyMimicry.lean`) and, when `FlowDuality.lean`'s or the benchmark's
+own text changed, on `mf-flow-duality-const` too — never a correctness gap, each time closed by
+a hosted `ledger sweep` run; the ledger is fresh (755/755) at this entry's final commit.
 
 ## 2026-10-31 — corpus 742, modules 678 — elegance: does each headline proof read as its argument
 
