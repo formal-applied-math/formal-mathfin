@@ -239,8 +239,9 @@ call_spanning_compactSupport` already uses for its own constructed primitive —
 surface, in-repo precedent reused). This is a real, non-trivial bridge, not a dummy import: it
 is the constant-coefficient discharge of `hgate` that `FlowDuality`'s own module docstring
 named and deferred, modulo the same two disclosed differences the corpus entry's `description`
-field already states (it does not newly discharge them — a derivation of the test-boundedness
-or integrability conditions from something weaker is still future work, exactly as disclosed).
+field already states (it does not newly close the second one — deriving the integrability
+conjunct from something weaker, e.g. continuity of the pairing integrand, is still future
+work, exactly as disclosed; the first is a restriction on the test class, not a gap to close).
 `lake build`, `lake lint`, and the full `pytest tests/` suite (including
 `test_every_module_is_connected`) are green after the edit; no `sorry`, standard three axioms
 only (`#print axioms MathFin.GyongyMimicry.hgate_const_of_isWeakForwardFlow` — `propext`,

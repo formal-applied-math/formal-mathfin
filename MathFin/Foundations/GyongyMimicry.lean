@@ -1421,8 +1421,9 @@ instance `afn ≡ b`, `bfn ≡ v`, with `ContDiff ℝ 2 g` still required as `hg
 restricted to `IsWeakForwardFlow`'s `C0`-bounded test class (asking for *less* than `hgate`'s
 own all-`ContDiff ℝ 2 g` class, not an extra burden), and supplying separately, test-by-test,
 the one genuine extra obligation `IsWeakForwardFlow` adds — the pairing integrand's
-interval-integrability — is an `IsWeakForwardFlow` instance: unwrap the `ContDiff ℝ 2 g`
-hypothesis to `contDiff_two_of_hasDerivAt_chain`'s chain form and the `afn x y`/`bfn x y`
+interval-integrability — is an `IsWeakForwardFlow` instance: discharge `hflow`'s
+`ContDiff ℝ 2 g` requirement from `IsWeakForwardFlow`'s own three-`HasDerivAt` chain via
+`contDiff_two_of_hasDerivAt_chain`, and rewrite the resulting `g' y * b`/`g'' y * v`
 integrand to `IsWeakForwardFlow`'s `b * ∫ g'` shape via `genLinComb_mul_const_eq`. -/
 private lemma isWeakForwardFlow_of_const_gate {b v T : ℝ} {μ : ℝ → Measure ℝ}
     (hprob : ∀ s, IsProbabilityMeasure (μ s))
@@ -1444,7 +1445,7 @@ private lemma isWeakForwardFlow_of_const_gate {b v T : ℝ} {μ : ℝ → Measur
 
 /-- **Constant-coefficient discharge of the flow-uniqueness gate.** `hgate` (the flow-uniqueness
 hypothesis of `gyongy_mimicry_gated`) asks, for two probability-measure flows and a fixed pair
-of Borel coefficient functions `afn, bfn`, that agreement at `0` plus agreement on the
+of Borel coefficient functions `afn, bfn`, that agreement at `0` plus both flows solving the
 integrated weak forward equation for every test with the `HasDerivAt`/`ContDiff ℝ 2` chain and
 bounded `g', g'', g'''` forces agreement at every later time. `MathFin.weakForwardUniqueConst`
 proves exactly this for the constant-coefficient instance `afn ≡ b`, `bfn ≡ v` (written here

@@ -35,7 +35,8 @@ the same characteristic function at every time, and
 
 Two differences from the hypothesis shape of `MathFin.GyongyMimicry`'s
 `gyongy_mimicry_gated` (the gated mimicry theorem this module's hypothesis class
-is modeled on, for the constant-coefficient instance wired up below): the test class here
+is modeled on, for the constant-coefficient instance wired up downstream in
+`MathFin.GyongyMimicry.hgate_const_of_isWeakForwardFlow`): the test class here
 also bounds the test function itself, which *restricts* the admissible tests
 relative to `gyongy_mimicry_gated`'s `ContDiff ℝ 2 g` (a real restriction, not a
 strengthening — though `cos(ξ·)`/`sin(ξ·)` stay admissible, so the argument below
