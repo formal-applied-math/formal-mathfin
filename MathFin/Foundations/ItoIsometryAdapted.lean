@@ -152,7 +152,7 @@ adapted simple integral. -/
 theorem memLp_adapted_mul_increment
     (hF : IsFilteredPreBrownian B 𝓕 μ) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
     {φ : Ω → ℝ} (hφ : Measurable[𝓕 t₀] φ) (hφL2 : MemLp φ 2 μ) :
-    MemLp (fun ω ↦ φ ω * (B t₁ ω - B t₀ ω)) 2 μ := by
+    MemLp (fun ω ↦ φ ω * (B t₁ ω - B t₀ ω)) 2 μ :=
   (adapted_indepFun_increment hF ht hφ).memLp_two_mul hφL2
     hF.isGaussianProcess.hasGaussianLaw_sub.memLp_two
 

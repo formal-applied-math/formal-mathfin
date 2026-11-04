@@ -235,7 +235,7 @@ theorem integral_cross_compensated_eq_zero (N : PoissonRandomMeasure P ν)
 theorem memLp_adapted_mul_compensated (N : PoissonRandomMeasure P ν) {s t : ℝ}
     {A : Set E} (hA : MeasurableSet A) (hAfin : ν A ≠ ⊤)
     {φ : Ω → ℝ} (hφ : Measurable[N.pastFiltration s] φ) (hφL2 : MemLp φ 2 P) :
-    MemLp (fun ω => φ ω * N.compensated (Set.Ioc s t ×ˢ A) ω) 2 P := by
+    MemLp (fun ω => φ ω * N.compensated (Set.Ioc s t ×ˢ A) ω) 2 P :=
   (adapted_indepFun_compensated N hA hφ).memLp_two_mul hφL2
     (memLp_compensated N (measurableSet_Ioc.prod hA) (referenceIntensity_box_ne_top hAfin))
 
