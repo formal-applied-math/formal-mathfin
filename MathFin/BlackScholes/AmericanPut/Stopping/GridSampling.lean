@@ -18,7 +18,7 @@ assumed.
 ## Result
 
 Public entry points include `gridFiltration`, `gridIndex`, `gridIndex_le_iff`, `gridIndex_stopping`,
-`expected_gridValue_tendsto`.
+`isStoppingTime_sampledFiltration`, `expected_gridValue_tendsto`.
 -/
 
 @[expose] public section
@@ -47,13 +47,23 @@ theorem gridIndex_le_iff {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T
     gridIndex θ δ ω ≤ i ↔ θ.time ω ≤ (i : ℝ≥0)*δ := by
   simp only [gridIndex,Nat.ceil_le,div_le_iff₀ hδ]
 
+/-- **A discrete index is a stopping time of the sampled filtration** once it is the first index at
+which the schedule `s` reaches the stopping time: if `i ω ≤ n ↔ θ.time ω ≤ s n` for every `n`, then
+`i` is a stopping time of `ContinuousMarket.sampledFiltration 𝓕 hs`. This is the one place where a
+continuous-time rule is read on a sampled filtration; the uniform grid (`gridIndex_stopping`) and
+the capped grid (`StoppingRule.toGridIndexRule`) are its instances. -/
+theorem isStoppingTime_sampledFiltration {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T : ℝ≥0}
+    {s : ℕ → ℝ≥0} (hs : Monotone s) (θ : StoppingRule 𝓕 T) {i : Ω → ℕ}
+    (h : ∀ ω n, i ω ≤ n ↔ θ.time ω ≤ s n) :
+    IsStoppingTime (ContinuousMarket.sampledFiltration 𝓕 hs) (fun ω => WithTop.some (i ω)) := by
+  intro n
+  show MeasurableSet[𝓕 (s n)] _
+  simpa only [WithTop.coe_le_coe, h] using θ.stopping (s n)
+
 theorem gridIndex_stopping {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T δ : ℝ≥0}
     (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) :
-    IsStoppingTime (gridFiltration 𝓕 δ) (fun ω => (gridIndex θ δ ω : ℕ∞)) := by
-  intro i
-  change MeasurableSet[𝓕 ((i : ℝ≥0)*δ)] {ω | (gridIndex θ δ ω : ℕ∞) ≤ i}
-  simpa only [ENat.natCast_le_natCast,WithTop.coe_le_coe,gridIndex_le_iff θ hδ] using
-      θ.stopping ((i : ℝ≥0)*δ)
+    IsStoppingTime (gridFiltration 𝓕 δ) (fun ω => (gridIndex θ δ ω : ℕ∞)) :=
+  isStoppingTime_sampledFiltration _ θ (i := gridIndex θ δ) (gridIndex_le_iff θ hδ)
 
 theorem gridIndex_bounded {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T δ : ℝ≥0}
     (θ : StoppingRule 𝓕 T) (ω : Ω) : gridIndex θ δ ω ≤ ⌈T/δ⌉₊ :=
