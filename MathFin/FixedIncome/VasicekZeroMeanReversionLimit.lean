@@ -62,7 +62,7 @@ of the Wiener bond-price lemma `integral_exp_neg_add_mul_wienerIntegralLp`.
 
 ## Main results
 
-* `tendsto_vasicekBondB_zero_meanReversion`: `B(T) → T`.
+* `tendsto_vasicekBondB_zero_meanReversion`: `B(T) → T` as `κ → 0` (two-sided).
 * `abs_vasicekBondV_sub_le`: `|V(T) − T³/3| ≤ 10·|κ|·T⁴` for `κ ≠ 0`, `|2κT| ≤ 1`.
 * `tendsto_vasicekBondV_zero_meanReversion`: `V(T) → T³/3`.
 * `tendsto_vasicekIntegratedMean_zero_meanReversion`: `M(T) → r₀T`.
@@ -101,13 +101,14 @@ private lemma abs_exp_sub_quadratic_le {x : ℝ} (hx : |x| ≤ 1) :
         convert h using 3
     _ ≤ |x| ^ 3 := by nlinarith [pow_nonneg (abs_nonneg x) 3]
 
-/-- **`B(T) → T` as `κ → 0⁺`.** `B(T) = (1 − e^{−κT})/κ` is the difference quotient at `0` of
+/-- **`B(T) → T` as `κ → 0`**, from either side (the limits below use it along `κ → 0⁺`).
+`B(T) = (1 − e^{−κT})/κ` is the difference quotient at `0` of
 `κ ↦ −e^{−κT}`, whose derivative there is `T`. -/
 theorem tendsto_vasicekBondB_zero_meanReversion (T : ℝ) :
-    Tendsto (fun κ ↦ vasicekBondB κ T) (𝓝[>] 0) (𝓝 T) := by
+    Tendsto (fun κ ↦ vasicekBondB κ T) (𝓝[≠] 0) (𝓝 T) := by
   have hd : HasDerivAt (fun κ : ℝ ↦ 1 - Real.exp (κ * -T)) T 0 :=
     ((((hasDerivAt_id' (0 : ℝ)).mul_const (-T)).exp).const_sub 1).congr_deriv (by simp)
-  refine hd.tendsto_slope_zero_right.congr fun κ ↦ ?_
+  refine hd.tendsto_slope_zero.congr fun κ ↦ ?_
   simp only [vasicekBondB, zero_add, smul_eq_mul, mul_neg, zero_mul, neg_zero, Real.exp_zero,
     sub_self, sub_zero]
   ring
@@ -178,7 +179,7 @@ theorem tendsto_vasicekBondV_zero_meanReversion (T : ℝ) :
 without mean reversion the long-run level `θ` is never felt. -/
 theorem tendsto_vasicekIntegratedMean_zero_meanReversion (r₀ θ T : ℝ) :
     Tendsto (fun κ ↦ vasicekIntegratedMean r₀ θ κ T) (𝓝[>] 0) (𝓝 (r₀ * T)) := by
-  have hB := tendsto_vasicekBondB_zero_meanReversion T
+  have hB := (tendsto_vasicekBondB_zero_meanReversion T).mono_left (nhdsGT_le_nhdsNE 0)
   simpa [vasicekIntegratedMean] using
     ((tendsto_const_nhds (x := r₀)).mul hB).add
       ((tendsto_const_nhds (x := θ)).mul ((tendsto_const_nhds (x := T)).sub hB))
@@ -201,7 +202,7 @@ theorem tendsto_vasicekBondPrice_zero_meanReversion (r₀ θ σ T : ℝ) :
 (`vasicekBondPrice_affine`) tends to `exp(σ²T³/6)`, not to the `κ = 0` substitution value. -/
 theorem tendsto_vasicekBondA_zero_meanReversion (θ σ T : ℝ) :
     Tendsto (fun κ ↦ vasicekBondA θ σ κ T) (𝓝[>] 0) (𝓝 (Real.exp (σ ^ 2 * T ^ 3 / 6))) := by
-  have hB := tendsto_vasicekBondB_zero_meanReversion T
+  have hB := (tendsto_vasicekBondB_zero_meanReversion T).mono_left (nhdsGT_le_nhdsNE 0)
   have h := (((tendsto_const_nhds (x := θ)).mul ((tendsto_const_nhds (x := T)).sub hB)).neg.add
     (((tendsto_const_nhds (x := σ ^ 2)).mul
       (tendsto_vasicekBondV_zero_meanReversion T)).div_const 2)).rexp
