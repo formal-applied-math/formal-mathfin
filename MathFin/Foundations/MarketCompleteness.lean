@@ -230,7 +230,7 @@ theorem integral_eq_of_pricesGainsAtZero (hBmeas : ∀ t, Measurable (B t))
   exact integral_eq_of_replicates hB T hBmeas hQ hg hφ
 
 /-- Anything a.e. equal to the indicator of `A` integrates to `ν A`. -/
-private theorem integral_eq_measure_toReal {ν : Measure Ω} [IsFiniteMeasure ν] {A : Set Ω}
+private theorem integral_eq_measure_toReal {ν : Measure Ω} {A : Set Ω}
     (hA : MeasurableSet A) {f : Ω → ℝ} (hf : f =ᵐ[ν] A.indicator fun _ ↦ (1 : ℝ)) :
     ∫ ω, f ω ∂ν = (ν A).toReal := by
   rw [integral_congr_ae hf, integral_indicator hA]

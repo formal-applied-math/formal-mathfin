@@ -183,15 +183,14 @@ variable {T : ℕ} {S₀ u d r : ℝ}
 
 /-- Mutual absolute continuity from full support: a measure charging every point dominates every
 measure on a measurable-singleton space. -/
-private lemma absolutelyContinuous_of_pos {Ω : Type*} [MeasurableSpace Ω]
-    [MeasurableSingletonClass Ω] {μ ν : Measure Ω} (h : ∀ x, 0 < ν {x}) : μ ≪ ν := by
+private lemma absolutelyContinuous_of_pos {Ω : Type*} [MeasurableSpace Ω] {μ ν : Measure Ω} (h : ∀ x, 0 < ν {x}) : μ ≪ ν := by
   intro s hs
   by_contra hne
   obtain ⟨x, hx⟩ : s.Nonempty := Set.nonempty_iff_ne_empty.2 fun hs' ↦ hne (by rw [hs']; simp)
   exact (h x).not_ge ((measure_mono (Set.singleton_subset_iff.2 hx)).trans_eq hs)
 
 /-- On a full-support space, a.e. equality is pointwise equality. -/
-private lemma eq_of_ae_eq_of_pos {Ω : Type*} [MeasurableSpace Ω] [MeasurableSingletonClass Ω]
+private lemma eq_of_ae_eq_of_pos {Ω : Type*} [MeasurableSpace Ω]
     {μ : Measure Ω} (hμ : ∀ x, 0 < μ {x}) {f g : Ω → ℝ} (h : f =ᵐ[μ] g) (x : Ω) :
     f x = g x := by
   by_contra hx

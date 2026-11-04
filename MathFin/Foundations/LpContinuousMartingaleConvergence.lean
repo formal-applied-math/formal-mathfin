@@ -104,7 +104,7 @@ private lemma discreteSample_martingale
 
 /-- L^1-norm bound from L^p-norm bound on a finite measure space (Hölder). -/
 private lemma eLpNorm_one_le_of_eLpNorm_p
-    {μ : Measure Ω} [IsFiniteMeasure μ] {f : Ω → ℝ} {p : ℝ} (hp : 1 ≤ p)
+    {μ : Measure Ω} {f : Ω → ℝ} {p : ℝ} (hp : 1 ≤ p)
     {R : ℝ} (hR : eLpNorm f (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R)
     (hfm : AEStronglyMeasurable f μ) :
     eLpNorm f 1 μ ≤ ENNReal.ofReal R * μ Set.univ ^ ((1 : ℝ) - 1 / p) := by

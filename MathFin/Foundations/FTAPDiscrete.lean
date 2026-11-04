@@ -71,7 +71,7 @@ open MeasureTheory ProbabilityTheory
 
 -- Heterogeneous use of one rich `variable` context: the algebraic transform
 -- lemmas need only `S`, and several theorems do not touch
--- `Nonempty`/`MeasurableSingletonClass`/`IsProbabilityMeasure`. Five scattered
+-- `MeasurableSingletonClass`/`IsProbabilityMeasure` (`Nonempty` is stated where an EMM is built). Five scattered
 -- `omit … in` clauses would be noisier than a single suppression, so we disable
 -- the unused-section-variable linter file-wide (deliberate, localized).
 set_option linter.unusedSectionVars false
@@ -88,11 +88,11 @@ lemma exists_bound_horizon {Ω : Type*} [Finite Ω] (N : ℕ) (φ : ℕ → Ω �
         (fun _ _ ↦ Finset.sum_nonneg fun _ _ ↦ abs_nonneg _)
         (Finset.mem_range.mpr (Nat.lt_succ_of_le hn)))⟩
 
-variable {Ω : Type*} [Fintype Ω] [Nonempty Ω] {mΩ : MeasurableSpace Ω}
+variable {Ω : Type*} [Fintype Ω] {mΩ : MeasurableSpace Ω}
   [MeasurableSingletonClass Ω] (𝓕 : Filtration ℕ mΩ)
   (P : Measure Ω) [IsProbabilityMeasure P] (S : ℕ → Ω → ℝ) (T : ℕ)
 
-omit [Fintype Ω] in
+omit [Fintype Ω] [MeasurableSingletonClass Ω] in
 /-- On a full-support measure a null set is empty — hence any two full-support
 measures on `Ω` are mutually absolutely continuous. -/
 private lemma eq_empty_of_pos_singleton {μ : Measure Ω} (hμ : ∀ ω, 0 < μ {ω})
@@ -169,7 +169,7 @@ theorem mem_gains_imp_predictable {g : Ω → ℝ} (hg : g ∈ gainsSubspace �
     obtain ⟨φ, hφ, hφeq⟩ := ih
     exact ⟨c • φ, fun n ↦ (hφ n).const_smul c, by rw [martingaleTransform_smul, hφeq]⟩
 
-omit [IsProbabilityMeasure P] in
+omit [IsProbabilityMeasure P] [MeasurableSingletonClass Ω] in
 /-- Under no arbitrage, the attainable-gains subspace contains no probability vector (a
 nonnegative `v` with `∑ ω, v ω = 1`): a nonnegative, nonzero gains vector would be an arbitrage. -/
 theorem gains_disjoint_stdSimplex (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage 𝓕 P S T) :
@@ -199,7 +199,7 @@ attainable gains give, once normalised, an equivalent martingale measure `Q`, wi
 `Q {ω} = q ω / ∑ q`. Strict positivity gives `Q ~ P`, and the annihilation of every
 increment-indicator gives the martingale property via the conditional-expectation
 characterisation. -/
-theorem exists_isEMM_of_pos_dual (hS : StronglyAdapted 𝓕 S)
+theorem exists_isEMM_of_pos_dual [Nonempty Ω] (hS : StronglyAdapted 𝓕 S)
     (hP : ∀ ω, 0 < P {ω}) {q : Ω → ℝ} (hq_pos : ∀ ω, 0 < q ω)
     (hq_dual : ∀ v ∈ gainsSubspace 𝓕 S T, ∑ ω, q ω * v ω = 0) :
     ∃ Q, IsEMM 𝓕 P S T Q ∧ ∀ ω, Q {ω} = ENNReal.ofReal (q ω / ∑ ω', q ω') := by
@@ -253,7 +253,7 @@ omit [IsProbabilityMeasure P] [Fintype Ω] in
 /-- **Backward direction**: no arbitrage ⟹ an equivalent martingale measure exists. The
 separating dual `q` of the gains subspace (`exists_pos_dual_of_disjoint_stdSimplex`) is strictly
 positive and annihilates the gains, so it builds the EMM (`exists_isEMM_of_pos_dual`). -/
-theorem exists_isEMM_of_noArbitrage [Finite Ω] (hS : StronglyAdapted 𝓕 S)
+theorem exists_isEMM_of_noArbitrage [Finite Ω] [Nonempty Ω] (hS : StronglyAdapted 𝓕 S)
     (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage 𝓕 P S T) :
     ∃ Q, IsEMM 𝓕 P S T Q := by
   cases nonempty_fintype Ω
@@ -267,7 +267,7 @@ omit [IsProbabilityMeasure P] [Fintype Ω] in
 finite case of Dalang–Morton–Willinger): a finite-horizon, single-asset market
 on a finite full-support probability space has no arbitrage **iff** it admits an
 equivalent martingale measure. -/
-theorem ftap_discrete [Finite Ω] (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :
+theorem ftap_discrete [Finite Ω] [Nonempty Ω] (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :
     NoArbitrage 𝓕 P S T ↔ ∃ Q, IsEMM 𝓕 P S T Q :=
   ⟨fun hNA ↦ exists_isEMM_of_noArbitrage 𝓕 P S T hS hP hNA,
    fun ⟨_, hQ⟩ ↦ hQ.noArbitrage⟩
@@ -280,7 +280,7 @@ constant position, and `Q[· | ⊥]` is the plain expectation (`condExp_bot`). T
 market is then the one-period market of `Foundations/FTAPOnePeriod.lean` for the increment
 `S 1 − S 0`. -/
 
-omit [Nonempty Ω] [IsProbabilityMeasure P] [Fintype Ω] in
+omit [IsProbabilityMeasure P] [Fintype Ω] in
 /-- **At horizon `1` the discrete-time EMM is the one-period EMM.** With `𝓕 0 = ⊥` and `S`
 adapted, `Q` is an equivalent martingale measure for the one-step market iff it is one for
 the one-period excess return `S 1 − S 0`: the one-step martingale condition
@@ -313,7 +313,7 @@ theorem isEMM_one_iff_onePeriod [Finite Ω] (hS : StronglyAdapted 𝓕 S) (h0 : 
     rw [integral_sub Integrable.of_finite Integrable.of_finite, hmean Q] at hfair
     exact Filter.Eventually.of_forall fun _ ↦ (sub_eq_zero.mp hfair).symm
 
-omit [Fintype Ω] [Nonempty Ω] [MeasurableSingletonClass Ω] [IsProbabilityMeasure P] in
+omit [Fintype Ω] [MeasurableSingletonClass Ω] [IsProbabilityMeasure P] in
 /-- **At horizon `1` discrete-time no arbitrage is one-period no arbitrage.** With
 `𝓕 0 = ⊥`, a predictable strategy holds a constant `θ` over the single period, and its
 discounted gain `martingaleTransform φ S 1` is `θ · (S 1 − S 0)`. -/

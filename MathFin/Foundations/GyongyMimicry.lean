@@ -938,7 +938,7 @@ a measurable version. This is `MeasureTheory.StronglyMeasurable.exists_eq_measur
 (the fit is exact: `Z := ℝ` is nonempty and completely metrizable), with the strongly
 measurable factorization function upgraded to `Measurable` through ℝ's standard-Borel
 structure. -/
-private theorem exists_coeffFn_comp {Ω : Type*} [MeasurableSpace Ω]
+private theorem exists_coeffFn_comp {Ω : Type*}
     (X : ℝ → Ω → ℝ) (g : Ω → ℝ) (t : ℝ) (hg : StronglyMeasurable[sigmaGen X t] g) :
     ∃ a : ℝ → ℝ, Measurable a ∧ ∀ ω, g ω = a (X t ω) := by
   obtain ⟨a, ha, haeq⟩ := hg.exists_eq_measurable_comp
