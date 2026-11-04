@@ -204,39 +204,14 @@ lemma itoProcessCLM_simpleProcessL2_T (T t : ℝ≥0) (hBmeas : ∀ u, Measurabl
   exact clampSP_itoSimpleProcess T t hBmeas V ht ▸
     (memLp_itoSimpleProcess hB hBmeas (clampSP T hBmeas V) t).coeFn_toLp
 
-/-! ## Step 2 — horizon consistency with the finite-horizon process
-
-The crux relating `itoProcessL2Inf` (`[0,∞)`) to `itoProcessCLM` (`[0,T]`) is the
-**Itô increment-independence**: `E[∫₀^∞ f dB | 𝓕_T] = ∫₀ᵀ f dB`. On the dense
-simple processes this is concrete — the conditional expectation of the `[0,∞)`
-integral onto `𝓕_t` is exactly the `[0,t]` truncation `(V●B)_t`, which is B1a's
-martingale property applied past the simple process's (finite) support. -/
-
-/-- **Simple-process increment-independence (the step-2 core).** For a simple
-process `V`, the conditional expectation of its `[0,∞)` integral onto `𝓕_t` is the
-`[0,t]` truncation `(V●B)_t`: pick a horizon past `V`'s finite support, where the
-`[0,∞)` integral coincides with the truncated process, and apply B1a's martingale
-property (`condExp_itoSimple_eq`). The density lift to all `f ∈ Lp 2 trim_full`
-(via a restriction CLM `Lp 2 trim_full → Lp 2 (trimMeasure_T T)` + `DenseRange`) is
-the remaining work of step 2. -/
-lemma condExp_itoIntegralL2_simple (t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
-    μ[(itoIntegralL2 hB hBmeas (simpleAssembly hBmeas V) : Ω → ℝ) | natFiltration hBmeas t]
-      =ᵐ[μ] fun ω ↦ itoSimpleProcess hBmeas V t ω := by
-  have hbridge : (itoIntegralL2 hB hBmeas (simpleAssembly hBmeas V) : Ω → ℝ)
-      =ᵐ[μ] itoSimple hBmeas V := by
-    rw [itoIntegralL2_simpleAssembly]
-    exact (memLp_itoSimple hB hBmeas V).coeFn_toLp
-  exact (condExp_congr_ae hbridge).trans
-    (condExp_itoSimple_eq hB (V.value.support.sup (fun p ↦ p.2)) t hBmeas V
-      (fun p hp ↦ Finset.le_sup hp))
-
 /-! ## Step 2 — horizon consistency
 
-The `[0,∞)` process restricted to `[0,T]` is the finite-horizon process of the band-restricted
-integrand. Both `f ↦ itoProcessL2Inf t f` and `f ↦ itoProcessCLM T t (restrictToBand T f)` are
+The crux relating `itoProcessL2Inf` (`[0,∞)`) to `itoProcessCLM` (`[0,T]`) is the **Itô
+increment-independence** `E[∫₀^∞ f dB | 𝓕_T] = ∫₀ᵀ f dB`. The `[0,∞)` process restricted to
+`[0,T]` is the finite-horizon process of the band-restricted integrand. Both
+`f ↦ itoProcessL2Inf t f` and `f ↦ itoProcessCLM T t (restrictToBand T f)` are
 continuous-linear in `f` and, on the dense simple processes, both reproduce `V`'s `[0,t]`
-discrete Itô integral (`condExp_itoIntegralL2_simple` on the left;
+discrete Itô integral (`itoProcessL2Inf_simpleAssembly_ae` on the left;
 `restrictToBand_simpleAssembly` + `itoProcessCLM_simpleProcessL2_T` on the right), so they
 agree everywhere. -/
 
@@ -254,13 +229,7 @@ theorem itoProcessL2Inf_eq_itoProcessCLM (T t : ℝ≥0) (hBmeas : ∀ u, Measur
     (funext fun V ↦ ?_)) f
   simp only [Function.comp_apply, ContinuousLinearMap.comp_apply]
   refine Lp.ext ?_
-  have hLHS : (itoProcessL2Inf hB t hBmeas (simpleAssembly hBmeas V) : Ω → ℝ)
-      =ᵐ[μ] itoSimpleProcess hBmeas V t := by
-    rw [itoProcessL2Inf_apply]
-    have h := (Lp.memLp (itoIntegralL2 hB hBmeas (simpleAssembly hBmeas V))).condExpL2_ae_eq_condExp
-      (𝕜 := ℝ) ((natFiltration hBmeas).le t)
-    rw [Lp.toLp_coeFn] at h
-    exact h.trans (condExp_itoIntegralL2_simple hB t hBmeas V)
+  have hLHS := itoProcessL2Inf_simpleAssembly_ae hB t hBmeas V
   have hRHS : (itoProcessCLM hB T t hBmeas
         (restrictToBand (μ := μ) T hBmeas (simpleAssembly hBmeas V)) : Ω → ℝ)
       =ᵐ[μ] itoSimpleProcess hBmeas V t := by
