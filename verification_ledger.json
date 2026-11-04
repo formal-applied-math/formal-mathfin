@@ -801,6 +801,13 @@
       "input_hash": "6cf0d5c3456581d68c612a07bde14578969310ebac5fcb364e2b0fea1ea26444",
       "verified_at_commit": "fb90d61"
     },
+    "mf-binary-barrier-inout-parity": {
+      "benchmark_file": "exotic_options.json",
+      "date": "2026-11-04",
+      "elapsed_s": 6.5,
+      "input_hash": "f6d506790224fa0e265005322a7c187f24846dd05bd4bb4d4439790b9f21b6b7",
+      "verified_at_commit": "283e04c"
+    },
     "mf-binomial-american-call-eq-european": {
       "benchmark_file": "binomial.json",
       "date": "2026-11-02",
@@ -3649,6 +3656,13 @@
       "elapsed_s": 5.1,
       "input_hash": "fda174aa3c38ebe18639014f95d802467a788644ffbd2b944ef0f799b07869a6",
       "verified_at_commit": "fb90d61"
+    },
+    "mf-partial-time-barrier-down-add-up": {
+      "benchmark_file": "exotic_options.json",
+      "date": "2026-11-04",
+      "elapsed_s": 4.4,
+      "input_hash": "7ea13453abfd0fa978c7ba37d0efb5793bbf5522b75342948cf171c8020c580b",
+      "verified_at_commit": "283e04c"
     },
     "mf-performance-gain_to_pain": {
       "benchmark_file": "portfolio_and_performance.json",

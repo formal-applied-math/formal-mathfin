@@ -368,6 +368,38 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.normalizedSpread_hasLaw_std (MathFin/BlackScholes/MargrabeGrounding.lean): Gaussianity of a linear image of the pair, variance 1 from margrabe_effective_variance. SCOPE: the law of the normalized spread only; Margrabe's price as the discounted expected exchange payoff is not part of this entry."
       }
+    },
+    {
+      "id": "mf-partial-time-barrier-down-add-up",
+      "name": "Partial-Time Barrier: Down-Window Plus Up-Window",
+      "domain": "mathematical_finance",
+      "description": "Haug's partial-time-start barrier call (start window, call side), as transcribed closed forms: the down-window plus up-window values sum to ptDownOutCall, the transcribed full-life down-and-out call closed form, for every window length t1 in [0, T]; and at t1 = T (with X >= H) the start-window value alone equals ptDownOutCall, via the degenerate (rho = 1) bivariate normal CDF. Neither closed form is derived or proved to be a price: the reflection-principle step behind the transcribed bivariate-normal terms is not proved.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PartialTimeBarrierOption\n\nopen MathFin\n\n/-- **Down-window plus up-window, same strike/barrier.** Re-exports\n`MathFin.ptCA_down_add_up`. -/\ntheorem partial_time_barrier_down_add_up (S X H b r σ t1 T : ℝ) (ht1 : 0 ≤ t1) (hT : t1 ≤ T) :\n    ptCA 1 S X H b r σ t1 T + ptCA (-1) S X H b r σ t1 T = ptDownOutCall S X H b r σ T :=\n  MathFin.ptCA_down_add_up S X H b r σ t1 T ht1 hT\n\n/-- **Monitoring over the whole life gives the full-life closed form.** Re-exports\n`MathFin.ptCA_down_monitored_full_life`. -/\ntheorem partial_time_barrier_down_monitored_full_life (S X H b r σ T : ℝ) (hS : 0 < S)\n    (hX : 0 < X) (hH : 0 < H) (hXH : H ≤ X) (hσ : 0 < σ) (hT : 0 < T) :\n    ptCA 1 S X H b r σ T T = ptDownOutCall S X H b r σ T :=\n  MathFin.ptCA_down_monitored_full_life S X H b r σ T hS hX hH hXH hσ hT\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Haug, The Complete Guide to Option Pricing Formulas, 2nd ed. (2007), ch. 4, \"Partial-Time Single-Asset Barrier Options\"; Heynen & Kat, \"Partial barrier options\", Journal of Financial Engineering 3 (1994)",
+        "difficulty": "intermediate",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Reduced core. Re-export of MathFin.ptCA_down_add_up and MathFin.ptCA_down_monitored_full_life (MathFin/BlackScholes/PartialTimeBarrierOption.lean). The Haug/Heynen–Kat start-window closed form ptCA and the full-life down-and-out closed form ptDownOutCall are both transcribed, not derived: what is proved is (1) the collapse CA(1) + CA(−1) = ptDownOutCall for 0 ≤ t₁ ≤ T, via bivariateNormalCDF_flip_snd, and (2) at t₁ = T with X ≥ H, CA(1) = ptDownOutCall, via bivariateNormalCDF_one. Neither expression is proved to be the expected discounted payoff of a barrier option; the barrier density (the reflection-principle step behind the transcribed N₂ terms) is not proved. Main's precedent for transcribed barriers proving no more than this is reduced_core (Heynen–Kat, Stulz). Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-binary-barrier-inout-parity",
+      "name": "Binary Barrier In-Out Parity (Down and Up Families)",
+      "domain": "mathematical_finance",
+      "description": "Rubinstein & Reiner's binary (digital) barrier closed forms, as transcribed: the down- and up-barrier knock-in plus knock-out alpha-factors sum to the vanilla digital alpha-factor B1 across all sixteen branch cases; and, on the call side at the risk-neutral drift, the Black-Scholes value of the digital call contract (Contracts.digitalCall, under BSCallHyp) equals the discounted vanilla leg e^{-rT} B1. The knock-in and knock-out terms are transcribed, not derived, and not proved to be prices: the barrier density behind the reflected terms is not proved.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.BinaryBarrierOption\n\nopen MathFin MeasureTheory\nopen scoped NNReal\n\n/-- **In-out parity, down-barrier family.** Re-exports `MathFin.bboDownIn_add_DownOut`. -/\ntheorem binary_barrier_down_in_add_out (S X H mu σ T : ℝ) (isCall xGeH : Bool) :\n    bboDownInAlpha S X H mu σ T isCall xGeH + bboDownOutAlpha S X H mu σ T isCall xGeH\n      = bboB1 S X mu σ T isCall :=\n  MathFin.bboDownIn_add_DownOut S X H mu σ T isCall xGeH\n\n/-- **In-out parity, up-barrier family.** Re-exports `MathFin.bboUpIn_add_UpOut`. -/\ntheorem binary_barrier_up_in_add_out (S X H mu σ T : ℝ) (isCall xGeH : Bool) :\n    bboUpInAlpha S X H mu σ T isCall xGeH + bboUpOutAlpha S X H mu σ T isCall xGeH\n      = bboB1 S X mu σ T isCall :=\n  MathFin.bboUpIn_add_UpOut S X H mu σ T isCall xGeH\n\n/-- **Vanilla leg equals the Black–Scholes d2 term.** Re-exports `MathFin.bboB1_eq_Phi_bsd2`. -/\ntheorem binary_barrier_vanilla_leg_eq_phi_bsd2 (S X r σ T mu : ℝ) (hσ : σ ≠ 0) (hT : 0 < T)\n    (hmu : mu = (r - σ ^ 2 / 2) / σ ^ 2) :\n    bboB1 S X mu σ T true = Phi (bsd2 S X r σ T) :=\n  MathFin.bboB1_eq_Phi_bsd2 S X r σ T mu hσ hT hmu\n\n/-- **The vanilla leg is the value of the digital call contract.** Re-exports\n`MathFin.value_digitalCall_eq_bboB1`. -/\ntheorem binary_barrier_vanilla_leg_digital_call_value {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {Q : Measure Ω} [IsProbabilityMeasure Q] {S_0 K r σ mu : ℝ} {T : ℝ≥0} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) (hmu : mu = (r - σ ^ 2 / 2) / σ ^ 2) :\n    (Contracts.digitalCall K T).value Q (fun _ ↦ Real.exp (-r * T))\n        (Contracts.BlackScholes.assets S_0 r σ T Z)\n      = Real.exp (-r * T) * bboB1 S_0 K mu σ T true :=\n  MathFin.value_digitalCall_eq_bboB1 h hmu\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Rubinstein & Reiner, Risk 4(9) (1991); Haug, The Complete Guide to Option Pricing Formulas, 2nd ed. (2007), ch. 4, \"Binary Barrier Options\"",
+        "difficulty": "intermediate",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Reduced core. Re-export of MathFin.bboDownIn_add_DownOut and MathFin.bboUpIn_add_UpOut (MathFin/BlackScholes/BinaryBarrierOption.lean), plus MathFin.bboB1_eq_Phi_bsd2 and MathFin.value_digitalCall_eq_bboB1. The Rubinstein–Reiner 16-branch closed form is transcribed, not derived: what is proved is the in–out identity branch-by-branch across all sixteen (barrier type, call/put, strike-vs-barrier) cases — the closed-form counterpart of knockIn_add_knockOut_eq_vanilla, not derived from it — and, call side only, that under BSCallHyp at the risk-neutral drift μ = (r − σ²/2)/σ² the Black–Scholes value of the digital call contract Contracts.digitalCall equals e^{−rT}·B₁ (through Contracts.BlackScholes.value_digitalCall). The knock-in/knock-out terms are not proved to be prices; the barrier density is not proved. Main's precedent for transcribed barriers proving no more than this is reduced_core (Heynen–Kat, Stulz). Axioms-clean."
+      }
     }
   ]
 }
