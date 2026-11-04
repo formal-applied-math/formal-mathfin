@@ -68,9 +68,9 @@ theorem planeResidual_localMartingale {G : ℝ × ℝ → ℝ} (hG : ContDiff �
   obtain ⟨M,hMc,hM,he⟩ := plane_ito_localMartingale
     isBrownianReal_brownian.toIsPreBrownianReal measurable_brownian continuous_brownian
     (hG.of_le (by norm_num))
-  apply localMartingale_of_ae_path_eq hM
+  apply isLocalMartingale_congr_ae hM
     (fun t => (planeResidual_stronglyAdapted hG t).mono (brownianFiltration_le_aug t))
-    (planeResidual_continuous hG)
+    fun ω => (planeResidual_continuous hG ω).isCadlag
   apply indistinguishable_of_modification (Eventually.of_forall hMc)
     (Eventually.of_forall (planeResidual_continuous hG))
   intro t
@@ -108,9 +108,9 @@ theorem planeResidual_stopped_martingale {G : ℝ × ℝ → ℝ} (hG : ContDiff
   have hθ : IsStoppingTime brownianAugFiltration (fun ω => (θ.time ω : WithTop ℝ≥0)) :=
     fun t => brownianFiltration_le_aug t _ (θ.stopping t)
   have hlocal : IsLocalMartingale X brownianAugFiltration gaussianLimit := by
-    apply localMartingale_of_ae_path_eq
+    apply isLocalMartingale_congr_ae
       (localMartingale_stopped_indicator (planeResidual_localMartingale hG) hθ)
-      (fun t => (hA t).mono (brownianFiltration_le_aug t)) hc
+      (fun t => (hA t).mono (brownianFiltration_le_aug t)) fun ω => (hc ω).isCadlag
     apply Eventually.of_forall
     intro ω t
     by_cases hp : 0 < θ.time ω

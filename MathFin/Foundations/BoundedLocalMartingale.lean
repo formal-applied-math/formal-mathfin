@@ -143,7 +143,7 @@ cadlag paths: the stopped processes are almost surely equal at each time, hence 
 conditional expectations, and the stopped `Y` is adapted. -/
 theorem isLocalMartingale_congr_ae {Y : ℝ≥0 → Ω → ℝ} (hX : IsLocalMartingale X 𝓕 P)
     (hY : StronglyAdapted 𝓕 Y) (hYc : ∀ ω, IsCadlag fun t ↦ Y t ω)
-    (hXY : ∀ᵐ ω ∂P, ∀ t, X t ω = Y t ω) : IsLocalMartingale Y 𝓕 P := by
+    (hXY : X ≡ᵐ[P] Y) : IsLocalMartingale Y 𝓕 P := by
   obtain ⟨τ, hτ, hloc⟩ := hX
   refine ⟨τ, hτ, fun n ↦ ?_⟩
   obtain ⟨hmart, -⟩ := hloc n
