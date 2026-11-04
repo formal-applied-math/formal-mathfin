@@ -34,6 +34,27 @@ open scoped NNReal Topology
 noncomputable def canonicalPrice (k h x t : ℝ) : ℝ :=
   brownianUsualAmericanPut 1 k h (Real.sqrt 2) (Real.exp x) t.toNNReal
 
+/-- The canonical discounted put reward is integrable at any measurable time, for any process `W`
+jointly measurable in time and sample. -/
+theorem canonicalReward_integrable {Ω : Type*} [MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ}
+    (hW : Measurable W.uncurry) (P : Measure Ω) [IsFiniteMeasure P] {k h : ℝ} (hk : 0 ≤ k) (x : ℝ)
+    {θ : Ω → ℝ≥0} (hθ : Measurable θ) :
+    Integrable (putReward W 1 k h (Real.sqrt 2) (Real.exp x) θ) P :=
+  putReward_integrable hW P zero_le_one hk (Real.exp_pos x).le hθ
+
+/-- No bounded rule on the usual Brownian filtration earns more than `canonicalPrice`. -/
+theorem expectedReward_le_canonicalPrice {k h : ℝ} (hk : 0 ≤ k) (x : ℝ) (T : ℝ≥0)
+    (θ : @StoppingRule (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit) ℝ≥0 _
+      brownianUsualFiltration T) :
+    (∫ ω, putReward brownian 1 k h (Real.sqrt 2) (Real.exp x)
+      (@StoppingRule.time _ (completedMeasurableSpace gaussianLimit) _ _ _ _ θ) ω
+        ∂completedMeasure gaussianLimit) ≤ canonicalPrice k h x (T : ℝ) := by
+  let μ := completedMeasure gaussianLimit
+  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  simpa only [canonicalPrice, Real.toNNReal_coe, brownianUsualAmericanPut] using
+    expectedReward_le_value (P := μ) (q := h) (σ := Real.sqrt 2)
+      brownian_completed_measurable zero_le_one hk (Real.exp_pos x).le θ
+
 theorem canonicalPrice_continuous {k h : ℝ} (hk : 0 ≤ k) :
     Continuous (fun z : ℝ × ℝ => canonicalPrice k h z.1 z.2) := by
   let μ := completedMeasure gaussianLimit
@@ -80,10 +101,6 @@ theorem canonicalPrice_putEnvelope {k h : ℝ} (hk : 0 ≤ k) : PutEnvelope (can
   initial := canonicalPrice_initial hk
   dominates x t _ := (canonicalPrice_bounds hk x t).1
   bounded x t _ := (canonicalPrice_bounds hk x t).2
-
-theorem canonicalPrice_normalization (k : ℝ) : normalizedRate k (Real.sqrt 2) = k := by
-  simp only [normalizedRate,Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)]
-  ring
 
 theorem canonicalPrice_decay {k h : ℝ} (hk : 0 ≤ k) (t : ℝ) :
     Tendsto (fun x => canonicalPrice k h x t) atTop (𝓝 0) := by
