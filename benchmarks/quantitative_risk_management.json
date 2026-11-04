@@ -408,7 +408,7 @@
       "description": "For a loss with continuous CDF and α ∈ (0, 1), the median of the conditional law of X given X > VaR_α(X) equals VaR_{(1+α)/2}(X).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.RiskClosedForms\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem medianShortfall_eq_valueAtRisk_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ} {α : ℝ} [IsProbabilityMeasure P] (hX : AEMeasurable X P) (hF : Continuous (cdf (P.map X))) (hα : α ∈ Ioo 0 1) :\n    medianShortfall X P α = valueAtRisk X P ((1 + α) / 2) :=\n  MathFin.medianShortfall_eq_valueAtRisk hX hF hα\n\n"
+        "lean": "import MathFin.RiskMeasures.RiskClosedForms\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem medianShortfall_eq_valueAtRisk_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ} {α : ℝ} [IsProbabilityMeasure P] (hF : Continuous (cdf (P.map X))) (hα : α ∈ Ioo 0 1) :\n    medianShortfall X P α = valueAtRisk X P ((1 + α) / 2) :=\n  MathFin.medianShortfall_eq_valueAtRisk hF hα\n\n"
       },
       "metadata": {
         "chapter": 2,

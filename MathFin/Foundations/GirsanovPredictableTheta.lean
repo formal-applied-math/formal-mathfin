@@ -353,7 +353,8 @@ lemma tendstoInMeasure_marshalDrift (T : ℝ≥0)
          (Lp.aestronglyMeasurable θhat)]
        exact Lp.eLpNorm_lt_top θhat
   have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s ↦ ⇑θhat (s, ω)) 2 (timeMeasure_T T) := by
-    filter_upwards [hg_prod.aestronglyMeasurable.prodMk_right, hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
+    filter_upwards [hg_prod.aestronglyMeasurable.prodMk_right,
+      hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
     exact (memLp_two_iff_integrable_sq hω1).mpr hω2
   -- the honest limit-drift is a.e. the slice integral `∫₀ᵘ⇑θ̂ ds`
   have hlim_eq : ∀ᵐ ω ∂μ, driftContinuousMod T hBmeas θhat u ω
@@ -431,7 +432,8 @@ lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
          (Lp.aestronglyMeasurable θhat)]
        exact Lp.eLpNorm_lt_top θhat
   have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s ↦ ⇑θhat (s, ω)) 2 (timeMeasure_T T) := by
-    filter_upwards [hg_prod.aestronglyMeasurable.prodMk_right, hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
+    filter_upwards [hg_prod.aestronglyMeasurable.prodMk_right,
+      hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
     exact (memLp_two_iff_integrable_sq hω1).mpr hω2
   have hQmeas : ∀ n, AEStronglyMeasurable
       (fun ω ↦ simpleQuadVar (marshalPart hBmeas T (V n).val)

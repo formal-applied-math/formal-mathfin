@@ -329,7 +329,8 @@ theorem driftProcessAssembled_coeFn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
     rw [hrw]
     exact ((driftProcessAssembled (μ := μ) T hBmeas).continuous.tendsto g).comp hsa
   -- two convergences in measure, then a.e.-uniqueness
-  have hGmeas := fun n ↦ (memLp_uncurry_driftSimpleProcess (μ := μ) T hBmeas (V n).val).aestronglyMeasurable
+  have hGmeas := fun n ↦
+    (memLp_uncurry_driftSimpleProcess (μ := μ) T hBmeas (V n).val).aestronglyMeasurable
   have hmeasG : TendstoInMeasure (trimMeasure_T (μ := μ) T hBmeas)
       (fun n ↦ Function.uncurry (driftSimpleProcess hBmeas (V n).val)) atTop
       (Function.uncurry (driftContinuousMod T hBmeas g)) :=
@@ -435,7 +436,8 @@ theorem driftContinuousMod_eq_setIntegral (T : ℝ≥0) (hBmeas : ∀ t, Measura
          (Lp.aestronglyMeasurable g)]
        exact Lp.eLpNorm_lt_top g
   have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s ↦ ⇑g (s, ω)) 2 (timeMeasure_T T) := by
-    filter_upwards [hg_prod.aestronglyMeasurable.prodMk_right, hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
+    filter_upwards [hg_prod.aestronglyMeasurable.prodMk_right,
+      hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
     exact (memLp_two_iff_integrable_sq hω1).mpr hω2
   -- the ω-slice energy and its L¹(μ) decay
   set D : ℕ → Ω → ℝ := fun n ω ↦

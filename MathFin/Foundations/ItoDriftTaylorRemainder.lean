@@ -145,7 +145,8 @@ theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
           ).const_mul 1).add (integrable_const (1 : ℝ)))
         ((((memLp_M hB hBmeas hδadap hδcont hδbdd hMeq
           (unifPart T n (k + 1))).sub
-          (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq (unifPart T n k))).abs).aestronglyMeasurable.pow 3)
+          (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq (unifPart T n k))).abs).aestronglyMeasurable.pow
+          3)
         (Eventually.of_forall fun ω ↦ by
           rw [Real.norm_eq_abs]
           set x := abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) with hxdef
@@ -484,7 +485,8 @@ theorem remainderCell_integrable {n : ℕ} (hn : 0 < n) {k : ℕ} (hk : k < n)
         ).const_mul 1).add (integrable_const (1 : ℝ)))
       ((((memLp_M hB hBmeas hδadap hδcont hδbdd hMeq
         (unifPart T n (k + 1))).sub
-        (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq (unifPart T n k))).abs).aestronglyMeasurable.pow 3)
+        (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq (unifPart T n k))).abs).aestronglyMeasurable.pow
+        3)
       (Eventually.of_forall fun ω ↦ by
         rw [Real.norm_eq_abs]
         set x := abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) with hxdef

@@ -11,8 +11,8 @@ public import MathFin.RiskMeasures.ValueAtRisk
 /-!
 # Value-at-risk and expected shortfall at a finite law
 
-For a loss `L : ι → ℝ` on a finite state space with probability vector `q` (`0 ≤ q i`, `∑ i, q i = 1`),
-value-at-risk is `VaR_α = inf {x | α ≤ ∑_{L i ≤ x} q i}` (`finiteVaR`) and expected shortfall is
+For a loss `L : ι → ℝ` on a finite state space with probability vector `q` (`0 ≤ q i`,
+`∑ i, q i = 1`), value-at-risk is `VaR_α = inf {x | α ≤ ∑_{L i ≤ x} q i}` (`finiteVaR`) and expected shortfall is
 the quantile average `ES_α = (1 − α)⁻¹ ∫_α^1 VaR_u du` (`finiteES`). For `α ∈ (0, 1)` these are
 `valueAtRisk` and `expectedShortfall` of `RiskMeasures/ValueAtRisk.lean` at the law
 `∑ i, q i • δ_i` (`finiteVaR_eq_valueAtRisk`, `finiteES_eq_expectedShortfall`), written as
@@ -68,8 +68,8 @@ variable {ι : Type*} [Fintype ι]
 /-! ## The definitions and the bridge to `valueAtRisk` -/
 
 /-- **VaR at a finite law**: the infimum of the loss levels `x` at which the `q`-mass of
-`{i | L i ≤ x}` reaches `α`. The lemmas that need `q` to be a probability vector take
-a probability vector `q` (`0 ≤ q i` and `∑ i, q i = 1`); for such `q` and `α ∈ (0, 1]` the set is nonempty and
+`{i | L i ≤ x}` reaches `α`. The lemmas that need `q` to be a probability vector take the
+hypotheses `0 ≤ q i` and `∑ i, q i = 1`; for such `q` and `α ∈ (0, 1]` the set is nonempty and
 bounded below, which is the only range used in this file. Outside that range (or for weights that
 don't sum to `1`) the set can be empty or all of `ℝ`, where `sInf` returns the junk value `0`. -/
 noncomputable def finiteVaR (q L : ι → ℝ) (α : ℝ) : ℝ :=
@@ -86,8 +86,8 @@ noncomputable def finiteES (q L : ι → ℝ) (α : ℝ) : ℝ :=
   (1 - α)⁻¹ * ∫ u in α..1, finiteVaR q L u
 
 /-- The finite measure `∑ i, ENNReal.ofReal (q i) • δ_i`: negative weights are clipped to `0` by
-`ENNReal.ofReal`. When `q` is a probability vector this is the law `∑ i, q i • δ_i` of the probability
-vector `q`, a probability measure (`isProbabilityMeasure_finiteLaw`). -/
+`ENNReal.ofReal`. When `q` is a probability vector this is the law `∑ i, q i • δ_i` of the
+probability vector `q`, a probability measure (`isProbabilityMeasure_finiteLaw`). -/
 noncomputable def finiteLaw [MeasurableSpace ι] (q : ι → ℝ) : Measure ι :=
   ∑ i, ENNReal.ofReal (q i) • Measure.dirac i
 

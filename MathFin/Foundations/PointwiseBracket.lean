@@ -150,8 +150,7 @@ theorem condExp_increment_sq (hB : IsPreBrownianReal B μ)
 
 omit [IsProbabilityMeasure μ] in
 /-- A Brownian increment lies in `L²(μ)`. -/
-private theorem memLp_increment (hB : IsPreBrownianReal B μ)
-    (hBmeas : ∀ t, Measurable (B t)) {u v : ℝ≥0} (huv : u ≤ v) :
+private theorem memLp_increment (hB : IsPreBrownianReal B μ) {u v : ℝ≥0} (huv : u ≤ v) :
     MemLp (fun ω ↦ B v ω - B u ω) 2 μ := by
   have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hL : HasLaw (B v - B u) (gaussianReal 0 (v - u)) μ := hasLaw_increment hB huv
@@ -172,7 +171,7 @@ theorem condExp_adapted_mul_increment_sq (hB : IsPreBrownianReal B μ)
     (μ[fun ω ↦ χ ω * (B d ω - B c ω) ^ 2 | natFiltration hBmeas a])
       =ᵐ[μ] fun ω ↦ ((d : ℝ) - c) * (μ[χ | natFiltration hBmeas a]) ω := by
   have hsq_int : Integrable (fun ω ↦ (B d ω - B c ω) ^ 2) μ :=
-    (memLp_increment hB hBmeas hcd).integrable_sq
+    (memLp_increment hB hcd).integrable_sq
   have hinner : (μ[fun ω ↦ χ ω * (B d ω - B c ω) ^ 2 | natFiltration hBmeas c])
       =ᵐ[μ] fun ω ↦ χ ω * ((d : ℝ) - c) :=
     (condExp_mul_of_stronglyMeasurable_left hχm hint hsq_int).trans
@@ -205,7 +204,7 @@ theorem condExp_adapted_mul_increment_zero (hB : IsPreBrownianReal B μ)
   have hinner : (μ[fun ω ↦ X ω * (B v ω - B u ω) | natFiltration hBmeas u])
       =ᵐ[μ] fun _ ↦ (0 : ℝ) :=
     (condExp_mul_of_stronglyMeasurable_left hXm hint
-      ((memLp_increment hB hBmeas huv).integrable one_le_two)).trans
+      ((memLp_increment hB huv).integrable one_le_two)).trans
       (by filter_upwards [condExp_increment_eq_zero hB hBmeas huv] with ω hω
           show (X * μ[fun ω ↦ B v ω - B u ω | natFiltration hBmeas u]) ω = 0
           rw [Pi.mul_apply, hω, mul_zero])
@@ -636,7 +635,7 @@ theorem condExp_bandGen_second_moment (hB : IsPreBrownianReal B μ) (T : ℝ≥0
       (Eventually.of_forall fun ω ↦ by
         simpa [Real.norm_eq_abs] using hZb ω) : MemLp Z 2 μ).integrable_sq
   have hint : Integrable (fun ω ↦ (Z ω * (B d ω - B c ω)) ^ 2) μ :=
-    (MemLp.mul (hf := hZinf) (hφ := memLp_increment hB hBmeas hcd)).integrable_sq.congr
+    (MemLp.mul (hf := hZinf) (hφ := memLp_increment hB hcd)).integrable_sq.congr
       (Filter.Eventually.of_forall fun ω ↦ by
         change (((fun ω ↦ B d ω - B c ω) * Z) ω) ^ 2 = (Z ω * (B d ω - B c ω)) ^ 2
         rw [Pi.mul_apply, mul_comm])

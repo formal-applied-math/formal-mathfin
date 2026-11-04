@@ -135,7 +135,7 @@ theorem bs_discounted_isEMM
     rw [← hlaw] at hg
     refine ((integrable_map_measure hg.aestronglyMeasurable
       ((hmeasX t).add_const _ |>.aemeasurable)).mp hg).congr (ae_of_all _ fun ω ↦ ?_)
-    show S_0 * Real.exp (σ * (X t ω + θ * (t : ℝ)) - σ ^ 2 * (t : ℝ) / 2) = _
+    change S_0 * Real.exp (σ * (X t ω + θ * (t : ℝ)) - σ ^ 2 * (t : ℝ) / 2) = _
     rw [show σ * (X t ω + θ * (t : ℝ)) - σ ^ 2 * (t : ℝ) / 2
       = (μ - r - σ ^ 2 / 2) * (t : ℝ) + σ * X t ω by linear_combination (t : ℝ) * hσθ]
   · exact bs_discounted_isQMartingale S_0 r μ σ hσ T hst htT hA

@@ -50,7 +50,7 @@ private lemma hasDerivAt_blackV_FF {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r :
       (Real.exp (-(r * T)) * gaussianPDFReal 0 1 (bsd1 F K 0 σ T) / (F * σ * Real.sqrt T)) F := by
   have h_bs := hasDerivAt_Phi_bsd1_S (r := 0) hK hσ hF hT
   have h := h_bs.const_mul (Real.exp (-(r * T)))
-  convert h using 1 <;> try rfl
+  convert h using 1
   ring
 
 /-- **Black-76 gamma**: `∂²V_B/∂F² = e^{-rT} · ϕ(d₁) / (F σ √T)`, for the price itself: the
@@ -116,7 +116,7 @@ lemma hasDerivAt_blackV_r (K σ F T : ℝ) (r : ℝ) :
       (Real.exp (-(r * T)) * (-T)) r := h_neg.exp
   have h := h_exp.mul_const (bsV K 0 σ F T)
   unfold blackV
-  convert h using 1 <;> try rfl
+  convert h using 1
   ring
 
 /-- **Black-76 theta** (`∂_T` form): `∂_T V_B = -r · V_B + e^{-rT} · σ · F · ϕ(d₁) / (2√T)`.
@@ -138,7 +138,7 @@ lemma hasDerivAt_blackV_T {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)
   have h_bsV := hasDerivAt_bsV_tau (r := 0) hK hσ hF hT
   have h := h_exp.mul h_bsV
   unfold blackV
-  convert h using 1 <;> try rfl
+  convert h using 1
   simp
   ring
 

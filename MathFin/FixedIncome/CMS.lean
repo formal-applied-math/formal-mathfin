@@ -359,7 +359,7 @@ theorem annuityMeasure_price {Q : Measure Ω} (D : Ω → ℝ) (δ : ℝ) (P : �
       = ∫ ω, D ω * (S ω * annuityRandom δ P s ω) ∂Q := by
     rw [one_mul]
     exact integral_congr_ae (ae_of_all _ fun ω ↦ by
-      show S ω * annuityRandom δ P s ω / (D ω)⁻¹ = D ω * (S ω * annuityRandom δ P s ω)
+      change S ω * annuityRandom δ P s ω / (D ω)⁻¹ = D ω * (S ω * annuityRandom δ P s ω)
       rw [div_inv_eq_mul, mul_comm])
   rw [← h2]
   exact h

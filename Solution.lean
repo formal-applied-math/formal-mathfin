@@ -53,7 +53,7 @@ theorem coherentRisk_isLUB {ι : Type*} [Fintype ι] {ρ : (ι → ℝ) → ℝ}
       rw [← Finset.sum_neg_distrib]
       exact Finset.sum_congr rfl fun i _ ↦ mul_neg _ _
     refine and_congr_right fun _ ↦ and_congr_right fun _ ↦ ⟨fun h Y hY ↦ ?_, fun h Z hZ ↦ ?_⟩
-    · have := h (-Y) (by show ρ (-(-Y)) ≤ 0; rw [neg_neg]; exact hY)
+    · have := h (-Y) (by change ρ (-(-Y)) ≤ 0; rw [neg_neg]; exact hY)
       rw [e] at this
       linarith
     · have := h (-Z) hZ

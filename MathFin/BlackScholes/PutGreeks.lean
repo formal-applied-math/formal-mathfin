@@ -63,7 +63,7 @@ lemma hasDerivAt_bsP_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   have h_id : HasDerivAt (fun s : ℝ ↦ s) 1 S := hasDerivAt_id S
   have h_const : HasDerivAt (fun _ : ℝ ↦ K * Real.exp (-(r * τ))) 0 S := hasDerivAt_const _ _
   have h := (h_V.sub h_id).add h_const
-  convert h using 1 <;> try rfl
+  convert h using 1
   ring
 
 /-- **The put gamma formula**: the S-derivative of the put delta `Φ(d₁) − 1` is
@@ -110,7 +110,6 @@ lemma hasDerivAt_bsP_tau {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
       (K * (Real.exp (-(r * τ)) * -r)) τ := h_exp.const_mul K
   have h := (h_V.sub h_const_S).add h_K_exp
   convert h using 1
-  all_goals try rfl
   have h_phi := Phi_add_Phi_neg (bsd2 S K r σ τ)
   linear_combination -(r * K * Real.exp (-(r * τ))) * h_phi
 
@@ -128,7 +127,7 @@ lemma hasDerivAt_bsP_sigma {K r : ℝ} (hK : 0 < K)
   have h_const_S : HasDerivAt (fun _ : ℝ ↦ S) 0 σ := hasDerivAt_const _ _
   have h_const_disc : HasDerivAt (fun _ : ℝ ↦ K * Real.exp (-(r * τ))) 0 σ := hasDerivAt_const _ _
   have h := (h_V.sub h_const_S).add h_const_disc
-  convert h using 1 <;> try rfl
+  convert h using 1
   ring
 
 /-- **Put rho**: `∂_r P = -K · τ · e^{-rτ} · Φ(-d₂)`.
@@ -154,7 +153,6 @@ lemma hasDerivAt_bsP_r {K σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ
       (K * (Real.exp (-(r * τ)) * -τ)) r := h_exp.const_mul K
   have h := (h_V.sub h_const_S).add h_K_exp
   convert h using 1
-  all_goals try rfl
   have h_phi := Phi_add_Phi_neg (bsd2 S K r σ τ)
   linear_combination -(K * τ * Real.exp (-(r * τ))) * h_phi
 

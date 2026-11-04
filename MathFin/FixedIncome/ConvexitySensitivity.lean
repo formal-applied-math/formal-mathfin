@@ -84,7 +84,7 @@ theorem hasDerivAt_modifiedNumerator
       (fun y' : ℝ ↦ (t i : ℝ) * c i / (1 + y') ^ (t i + 1)) := by
     funext y'; ring
   rw [h_func] at h_pulled
-  convert h_pulled using 1 <;> try rfl
+  convert h_pulled using 1
   push_cast
   have : t i + 1 + 1 = t i + 2 := by omega
   rw [this]

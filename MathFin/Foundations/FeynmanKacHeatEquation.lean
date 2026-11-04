@@ -73,11 +73,11 @@ private lemma heatKernel_eq_gaussianPDFReal {t : ℝ} (ht : 0 < t) (y : ℝ) :
 private lemma hasDerivAt_heatKernel_y {t : ℝ} (ht : 0 < t) (y : ℝ) :
     HasDerivAt (fun z ↦ heatKernel t z) (-(y / t) * heatKernel t y) y := by
   have h_neg_y_sq : HasDerivAt (fun z : ℝ ↦ -(z ^ 2)) (-(2 * y)) y := by
-    convert (hasDerivAt_pow 2 y).neg using 1 <;> first | rfl | (push_cast; ring)
+    convert (hasDerivAt_pow 2 y).neg using 1; push_cast; ring
   have h_inner : HasDerivAt (fun z : ℝ ↦ -(z ^ 2) / (2 * t)) (-(y / t)) y := by
     have := h_neg_y_sq.div_const (2 * t)
     have ht_ne : (2 * t) ≠ 0 := by positivity
-    convert this using 1 <;> first | rfl | field_simp
+    convert this using 1; field_simp
   have h_exp : HasDerivAt (fun z : ℝ ↦ Real.exp (-(z ^ 2) / (2 * t)))
       (Real.exp (-(y ^ 2) / (2 * t)) * -(y / t)) y := h_inner.exp
   have h_mul := h_exp.const_mul ((Real.sqrt (2 * Real.pi * t))⁻¹)

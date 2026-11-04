@@ -40,8 +40,9 @@ theorem neg_mul_Phi_le_gaussianPDFReal (x : ℝ) : -x * Phi x ≤ gaussianPDFRea
 theorem gaussianPDFReal_zero_one_le_one (x : ℝ) : gaussianPDFReal 0 1 x ≤ 1 := by
   rw [gaussianPDFReal_def]
   simp only [NNReal.coe_one, mul_one, sub_zero]
-  exact mul_le_one₀ (inv_le_one_of_one_le₀ (Real.one_le_sqrt.2 (by nlinarith [Real.pi_gt_three])))
-    (Real.exp_pos _).le (Real.exp_le_one_iff.2
+  exact (mul_le_of_le_one_left (Real.exp_pos _).le
+    (inv_le_one_of_one_le₀ (Real.one_le_sqrt.2 (by nlinarith [Real.pi_gt_three])))).trans
+    (Real.exp_le_one_iff.2
       (div_nonpos_of_nonpos_of_nonneg (neg_nonpos.2 (sq_nonneg x)) zero_le_two))
 
 end MathFin

@@ -58,7 +58,7 @@ theorem jumpCounts_split (h : JumpDiffusionHyp Q Λ Z N J) {A : Set ℝ} (hA : M
     hall.mono fun ω hω ↦
       congrArg Finset.card (Finset.ext fun i ↦ by simp only [Finset.mem_filter, hω])
   have hpre : Q (J 0 ⁻¹' A) = Q (J' 0 ⁻¹' A) :=
-    measure_congr (Filter.eventuallyEq_set.2 ((hJJ' 0).mono fun ω hω ↦ by
+    measure_congr (Filter.eventuallyEqSet_iff.2 ((hJJ' 0).mono fun ω hω ↦ by
       simp only [Set.mem_preimage, hω]))
   have hid (i : ℕ) : IdentDistrib (J' i) (J' 0) Q Q :=
     (IdentDistrib.of_ae_eq (h.aemeasurable_J i) (hJJ' i)).symm.trans

@@ -53,7 +53,7 @@ lemma worstCase_isCoherent [MeasurableSpace ι] {P : Measure ι}
   add_const X _ m := by
     refine le_antisymm (worstCase_le fun i ↦ ?_) ?_
     · have := le_worstCase X i
-      show X i + m ≤ worstCase X + m
+      change X i + m ≤ worstCase X + m
       linarith
     obtain ⟨i, -, hi⟩ := Finset.exists_mem_eq_sup' Finset.univ_nonempty X
     have hwx : worstCase X = X i := hi

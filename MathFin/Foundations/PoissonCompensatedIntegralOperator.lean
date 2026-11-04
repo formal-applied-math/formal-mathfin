@@ -426,7 +426,7 @@ overlapping-box bilinear pairing) and extended by continuity to their closure. -
 theorem itoLevyIntegralL2_norm (N : PoissonRandomMeasure P ν) (H : levyClosure N) :
     ‖itoLevyIntegralL2 N H‖ = ‖H‖ := by
   have key : ∀ V : levySimpleModule N, ‖intAssembly N V‖ = ‖embCorestrict N V‖ :=
-    fun V => by rw [Submodule.coe_norm]; exact assembly_isometry N V
+    fun V => by rw [← Submodule.norm_coe]; exact assembly_isometry N V
   -- `unfold` exposes the def's already-bridged `extendOfNorm` term; discharging the isometry kernel
   -- against the submodule codomain re-triggers the instance diamond (a heavy but finite `whnf`),
   -- hence the raised `maxHeartbeats` above. (docs/patterns.md — "extendOfNorm into a submodule".)

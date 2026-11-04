@@ -353,11 +353,11 @@ theorem marginalVariance_minVarWeightTwo {σ₁ σ₂ ρ : ℝ} (hD : minVarDeno
   have hDdef : minVarDenom σ₁ σ₂ ρ = σ₁ ^ 2 - 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2 := rfl
   rw [marginalVariance_univ]
   fin_cases i
-  · simp only [mulVec, dotProduct, covTwo, Nat.reduceAdd, Fin.zero_eta, Fin.isValue, of_apply,
+  · simp only [mulVec, dotProduct, covTwo, Fin.zero_eta, Fin.isValue, of_apply,
       cons_val', cons_val_fin_one, cons_val_zero, Fin.sum_univ_two, cons_val_one]
     refine mul_right_cancel₀ hD ?_
     linear_combination (σ₁ ^ 2 - ρ * σ₁ * σ₂) * hw + ρ * σ₁ * σ₂ * hDdef - hV
-  · simp only [mulVec, dotProduct, covTwo, Nat.reduceAdd, Fin.mk_one, Fin.isValue, of_apply,
+  · simp only [mulVec, dotProduct, covTwo, Fin.mk_one, Fin.isValue, of_apply,
       cons_val', cons_val_fin_one, cons_val_one, Fin.sum_univ_two, cons_val_zero]
     refine mul_right_cancel₀ hD ?_
     linear_combination (ρ * σ₁ * σ₂ - σ₂ ^ 2) * hw + σ₂ ^ 2 * hDdef - hV

@@ -89,7 +89,7 @@ theorem dpl_hasDerivAt (p : Params) (k : ℝ)
     HasDerivAt (fun k ↦ dpl k (variance p k))
       (dmiSlope p k + slope p k / (2*rootVariance p k)) k := by
   have h := (dmi_hasDerivAt p k hv hw).add (rootVariance_hasDerivAt p k hv hw)
-  convert h using 1 <;> try rfl
+  convert h using 1
   funext x
   simp only [dpl_eq_rootVariance, dmi_eq_rootVariance, Pi.add_apply]
   ring

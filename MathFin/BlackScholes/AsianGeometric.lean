@@ -54,7 +54,7 @@ theorem asianGeom_driver_hasLaw (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     funext ω; simp [Fin.sum_univ_two]
   have hv : (∑ i, ∑ j, min ((![s, t] i : ℝ≥0) : ℝ) ((![s, t] j : ℝ≥0) : ℝ)) / ((2 : ℕ) : ℝ) ^ 2
       = (3 * (s : ℝ) + t) / 4 := by
-    simp [Fin.sum_univ_two, min_eq_left hst', min_eq_right hst'] <;> ring
+    simp [Fin.sum_univ_two, min_eq_left hst', min_eq_right hst']; ring
   rw [hf, hv] at h
   exact h
 

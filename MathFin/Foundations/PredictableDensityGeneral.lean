@@ -111,7 +111,8 @@ lemma isFiniteMeasure_sqWeight (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   refine ⟨?_⟩
   have hlt : ∫⁻ z, ‖f z‖ₑ ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) < ⊤ := by
     have h := hfL2.eLpNorm_lt_top
-    rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num) hfL2.aestronglyMeasurable] at h
+    rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num)
+      hfL2.aestronglyMeasurable] at h
     have h2 : (∫⁻ z, ‖f z‖ₑ ^ ((2 : ℝ≥0∞).toReal) ∂(trimMeasure_T (μ := μ) T hBmeas)) ≠ ⊤ := by
       intro htop
       rw [htop] at h

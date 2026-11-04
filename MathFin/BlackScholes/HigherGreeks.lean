@@ -45,7 +45,6 @@ private lemma hasDerivAt_bsd1_sigma_clean (S K r : ℝ) {σ τ : ℝ}
     HasDerivAt (fun s ↦ bsd1 S K r s τ) (-(bsd2 S K r σ τ) / σ) σ := by
   have h := hasDerivAt_bsd1_sigma S K r hσ hτ
   convert h using 1
-  try rfl
   have h_sqrt_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
   have h_sqrt_ne : Real.sqrt τ ≠ 0 := h_sqrt_pos.ne'
   have hσ_ne : σ ≠ 0 := hσ.ne'

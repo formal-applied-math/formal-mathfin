@@ -64,7 +64,7 @@ private lemma hasDerivAt_bsVDiv_SS {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
         / (S * σ * Real.sqrt τ)) S := by
   have h_bs := hasDerivAt_Phi_bsd1_S (r := r - q) hK hσ hS hτ
   have h := h_bs.const_mul (Real.exp (-(q * τ)))
-  convert h using 1 <;> try rfl
+  convert h using 1
   ring
 
 /-- **BS-Merton gamma**: `∂²V_q/∂S² = e^{-qτ} · ϕ(d₁') / (S σ √τ)`, for the price itself:
@@ -136,7 +136,6 @@ lemma hasDerivAt_bsVDiv_q {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0
       convert this.neg using 1 <;> first | rfl | ring
     have h := h_neg.exp
     convert h using 1
-    try rfl
     ring
   -- ∂_q' [bsV(K, r-q', σ, S, τ)] via chain rule on (r - q').
   have h_sub : HasDerivAt (fun q' : ℝ ↦ r - q') (-1) q := by
@@ -170,14 +169,13 @@ lemma hasDerivAt_bsVDiv_tau {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
       convert this.neg using 1 <;> first | rfl | ring
     have h := h_neg.exp
     convert h using 1
-    try rfl
     ring
   -- g(t) = bsV K (r-q) σ S t, derivative from hasDerivAt_bsV_tau
   have h_g := hasDerivAt_bsV_tau (r := r - q) hK hσ hS hτ
   -- Product
   have h_full := h_f.mul h_g
   unfold bsVDiv
-  convert h_full using 1 <;> try rfl
+  convert h_full using 1
   ring
 
 /-- **Black–Scholes–Merton PDE with dividend yield** (Hull eq. 19.4 with `q`): writing
@@ -247,7 +245,6 @@ lemma hasDerivAt_bsPDiv_q {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0
   have h := ((hasDerivAt_bsVDiv_q (r := r) hK hσ hτ hS q).sub (h_neg.exp.const_mul S)).add_const
     (K * Real.exp (-(r * τ)))
   convert h using 1
-  all_goals try rfl
   linear_combination S * τ * Real.exp (-(q * τ)) * Phi_add_Phi_neg (bsd1 S K (r - q) σ τ)
 
 /-- **Put psi sign**: the put psi formula `∂_q P_q = S τ e^{-qτ} Φ(−d₁')` of

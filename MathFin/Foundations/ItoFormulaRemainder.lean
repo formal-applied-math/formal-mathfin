@@ -63,7 +63,7 @@ theorem abs_discreteTaylorRemainder_le {f f' f'' f''' : ℝ → ℝ}
       have h := ((hf' u).sub_const (f' x)).sub
         (((hasDerivAt_id u).sub_const x).const_mul (f'' x))
       simp only [id_eq] at h
-      convert h using 1 <;> first | rfl | ring
+      convert h using 1; ring
   have hL1 : ∀ t ∈ Set.uIcc x y, |f' t - f' x - f'' x * (t - x)| ≤ Cf3 * |y - x| ^ 2 := by
     intro t ht
     have h := (convex_uIcc x y).norm_image_sub_le_of_norm_hasDerivWithin_le
@@ -82,7 +82,7 @@ theorem abs_discreteTaylorRemainder_le {f f' f'' f''' : ℝ → ℝ}
         (((hasDerivAt_id u).sub_const x).const_mul (f' x))).sub
         ((((hasDerivAt_id u).sub_const x).pow 2).const_mul (1 / 2 * f'' x))
     simp only [id_eq] at h
-    convert h using 1 <;> first | rfl | ring
+    convert h using 1; ring
   have h := (convex_uIcc x y).norm_image_sub_le_of_norm_hasDerivWithin_le
     (fun u _ ↦ (hd0 u).hasDerivWithinAt)
     (fun u hu ↦ by rw [Real.norm_eq_abs]; exact hL1 u hu)

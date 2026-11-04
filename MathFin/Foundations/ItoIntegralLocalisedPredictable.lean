@@ -99,7 +99,9 @@ theorem measurable_denseLevel {Ω : Type*} {mΩ : MeasurableSpace Ω} {t : ℝ�
       ↔ ω ∈ {ω | ∀ s ∈ denseIcc t, |X s ω| ≤ N}
         ∨ ∀ M : ℕ, ω ∉ {ω | ∀ s ∈ denseIcc t, |X s ω| ≤ M} := by
     by_cases hS : ∃ M : ℕ, ∀ s ∈ denseIcc t, |X s ω| ≤ M
-    · refine ⟨fun h ↦ Or.inl fun s hs ↦ (Nat.sInf_mem (s := {N : ℕ | ∀ s ∈ denseIcc t, |X s ω| ≤ N}) hS s hs).trans (Nat.cast_le.2 h), ?_⟩
+    · refine ⟨fun h ↦ Or.inl fun s hs ↦
+        (Nat.sInf_mem (s := {N : ℕ | ∀ s ∈ denseIcc t, |X s ω| ≤ N}) hS s hs).trans
+          (Nat.cast_le.2 h), ?_⟩
       rintro (h | h)
       · exact Nat.sInf_le h
       · exact absurd hS fun ⟨M, hM⟩ ↦ h M hM

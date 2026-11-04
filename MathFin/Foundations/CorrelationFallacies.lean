@@ -176,7 +176,6 @@ private lemma measureReal_add_mul_eq_zero (hZ : HasLaw Z (gaussianReal 0 1) P)
     (hV : HasLaw V rademacher P) : P.real {ω | Z ω + V ω * Z ω = 0} = 2⁻¹ := by
   have hset : {ω | Z ω + V ω * Z ω = 0} =ᵐ[P] (V ⁻¹' {-1} ∪ Z ⁻¹' {0} : Set Ω) := by
     filter_upwards [ae_eq_one_or_neg_one hV] with ω hω
-    change (Z ω + V ω * Z ω = 0) = (ω ∈ V ⁻¹' {-1} ∪ Z ⁻¹' {0})
     rcases hω with h1 | h1 <;> simp [h1, show (1 : ℝ) ≠ -1 by norm_num]
   have hV1 : P.real (V ⁻¹' {-1}) = 2⁻¹ := by
     rw [measureReal_preimage_of_hasLaw hV (measurableSet_singleton _), measureReal_def,

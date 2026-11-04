@@ -110,14 +110,14 @@ noncomputable def expAffine2 (A Bx Bv x v : ℝ) : ℝ := Real.exp (A + Bx * x +
 theorem expAffine2_left (A Bx Bv v : ℝ) :
     (fun y => expAffine2 A Bx Bv y v) = expAffine (A + Bv * v) Bx := by
   funext y
-  show Real.exp (A + Bx * y + Bv * v) = Real.exp ((A + Bv * v) + Bx * y)
+  change Real.exp (A + Bx * y + Bv * v) = Real.exp ((A + Bv * v) + Bx * y)
   exact Real.exp_eq_exp.mpr (by ring)
 
 /-- v-frozen bridge: `E_{A,Bx,Bv}(x, ·)` is the 1D member `expAffine (A + Bx·x) Bv`. -/
 theorem expAffine2_right (A Bx Bv x : ℝ) :
     expAffine2 A Bx Bv x = expAffine (A + Bx * x) Bv := by
   funext w
-  show Real.exp (A + Bx * x + Bv * w) = Real.exp ((A + Bx * x) + Bv * w)
+  change Real.exp (A + Bx * x + Bv * w) = Real.exp ((A + Bx * x) + Bv * w)
   exact Real.exp_eq_exp.mpr (by ring)
 
 /-- ∂_x of the 2D family: `Bx · E`. -/

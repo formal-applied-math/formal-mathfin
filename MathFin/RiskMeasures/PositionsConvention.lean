@@ -44,7 +44,7 @@ open MeasureTheory
 Artzner–Delbaen–Eber–Heath axioms for positions (monotone decreasing, `ρ (X + m) = ρ X − m`,
 positively homogeneous, subadditive). No support assumption: the converse is where the order on
 almost-sure classes must be pointwise (`isCoherentRiskMeasure_neg_iff`). -/
-theorem IsCoherentRiskMeasure.positions_of_neg {ι : Type*} [Fintype ι] [MeasurableSpace ι]
+theorem IsCoherentRiskMeasure.positions_of_neg {ι : Type*} [Finite ι] [MeasurableSpace ι]
     [MeasurableSingletonClass ι] {P : Measure ι} [IsFiniteMeasure P] {ρ : (ι → ℝ) → ℝ}
     (hρ : IsCoherentRiskMeasure P (fun L ↦ ρ (-L))) :
     (∀ X Y : ι → ℝ, (∀ i, X i ≤ Y i) → ρ Y ≤ ρ X) ∧
@@ -76,7 +76,7 @@ state (`P {i} ≠ 0`, so almost-sure order is the pointwise order), a functional
 `ρ : (ι → ℝ) → ℝ` satisfies the four Artzner–Delbaen–Eber–Heath axioms for positions
 (monotone decreasing, `ρ (X + m) = ρ X − m`, positively homogeneous, subadditive) if and only if
 `L ↦ ρ (−L)` is a coherent risk measure of losses. -/
-theorem isCoherentRiskMeasure_neg_iff {ι : Type*} [Fintype ι] [MeasurableSpace ι]
+theorem isCoherentRiskMeasure_neg_iff {ι : Type*} [Finite ι] [MeasurableSpace ι]
     [MeasurableSingletonClass ι] {P : Measure ι} [IsFiniteMeasure P] (hP : ∀ i, P {i} ≠ 0)
     {ρ : (ι → ℝ) → ℝ} :
     IsCoherentRiskMeasure P (fun L ↦ ρ (-L)) ↔

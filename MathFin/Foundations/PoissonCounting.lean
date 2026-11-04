@@ -110,7 +110,6 @@ private lemma hasDerivAt_gamma_antideriv {k : ℕ} (hk : k ≠ 0)
     simpa using this
   have h3 := (h1.mul h2).div_const ((m + 1)! : ℝ)
   convert h3 using 1
-  all_goals try rfl
   -- value identity: γ_{m+1}(s) − γ_{m+2}(s) equals the product-rule expression
   have hGm : Real.Gamma ((m + 1 : ℕ) : ℝ) = (m ! : ℝ) := by
     push_cast
