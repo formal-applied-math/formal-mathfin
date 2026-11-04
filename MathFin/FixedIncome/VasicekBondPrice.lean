@@ -82,6 +82,10 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
 the log bond price to the short rate, and the integral `∫₀ᵀ e^{−κs} ds`. -/
 noncomputable def vasicekBondB (κ T : ℝ) : ℝ := (1 - Real.exp (-(κ * T))) / κ
 
+/-- `B(τ) = (1 − e^{−κτ})/κ` is positive for `κ, τ > 0`. -/
+theorem vasicekBondB_pos {κ τ : ℝ} (hκ : 0 < κ) (hτ : 0 < τ) : 0 < vasicekBondB κ τ :=
+  div_pos (sub_pos.2 (Real.exp_lt_one_iff.2 (neg_neg_of_pos (mul_pos hκ hτ)))) hκ
+
 /-- The **integrated Vasicek kernel** `g(u) = (1 − e^{−κ(T−u)})/κ = ∫_u^T e^{−κ(s−u)} ds`
 — the deterministic integrand whose Wiener integral is the diffusion part of the
 integrated short rate. -/

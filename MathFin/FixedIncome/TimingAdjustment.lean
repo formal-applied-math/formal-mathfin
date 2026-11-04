@@ -75,8 +75,9 @@ statements about the instantaneous short rate `r_S`, not about a futures contrac
 * `futuresForwardBasis_of_integral_mul_exp_neg` — the numéraire step, for any law satisfying the
   covariance identity.
 * `futuresForwardBasis_gaussian` — Bagaria §8.4's covariance identity, exact Gaussian form.
-* `integrable_one_div_exp_add_mul_wienerIntegralLp` (the forward measure of a Wiener-represented
-  bank account is a probability measure), `hasLaw_forwardMeasure_wienerIntegralLp` (the law of a
+* `integrable_one_div_exp_add_mul_wienerIntegralLp` (the discount factor, the reciprocal of a
+  Wiener-represented bank account, is integrable, so the forward measure of that bank account is
+  a probability measure), `hasLaw_forwardMeasure_wienerIntegralLp` (the law of a
   Wiener-represented rate under it: the mean shifts by minus the covariance, the variance is
   unchanged), and its Hull–White instances `HullWhite.shortRate_hasLaw_forwardMeasure`,
   `HullWhite.integral_shortRate_sub_forwardMeasure`,
@@ -224,13 +225,7 @@ theorem futuresForwardBasis_gaussian (m s n u ρ : ℝ)
   futuresForwardBasis_of_integral_mul_exp_neg (ρ * s * u) (by fun_prop) hN₀
     (integral_mul_exp_neg_gaussian m s n u ρ h₁ h₂ hm₁ hm₂ hindep)
 
-/-! ## The Hull–White instance: the `S`-forward measure and the short rate
-
-`r_S = α(S) + σ∫₀ˢ e^{−κ(S−u)} dB_u` (`HullWhite.integratedRate`) and
-`∫₀ˢ r = ∫₀ˢ α + σ∫₀ˢ g dB` (`HullWhite.bondRate`) are both Wiener integrals against the same `B`,
-so their covariance is `σ²⟪e^{−κ(S−·)}, g⟫ = σ²B(S)²/2`. -/
-
-/-! ### The forward measure of a Wiener-represented bank account -/
+/-! ## The forward measure of a Wiener-represented bank account -/
 
 section WienerForwardMeasure
 
@@ -306,6 +301,12 @@ theorem hasLaw_forwardMeasure_wienerIntegralLp (hB : IsPreBrownianReal B μ) (S 
   ring
 
 end WienerForwardMeasure
+
+/-! ## The Hull–White instance: the `S`-forward measure and the short rate
+
+`r_S = α(S) + σ∫₀ˢ e^{−κ(S−u)} dB_u` (`HullWhite.integratedRate`) and
+`∫₀ˢ r = ∫₀ˢ α + σ∫₀ˢ g dB` (`HullWhite.bondRate`) are both Wiener integrals against the same `B`,
+so their covariance is `σ²⟪e^{−κ(S−·)}, g⟫ = σ²B(S)²/2`. -/
 
 namespace HullWhite
 

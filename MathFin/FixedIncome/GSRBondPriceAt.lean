@@ -266,8 +266,7 @@ theorem gsrShortRate_hasLaw_gaussian [IsProbabilityMeasure μ] (hB : IsPreBrowni
     ((gsrShortKernel_memLp hκ.le σ1 σ2 (Tstar : ℝ) t).integral_sq_toLp.trans
       (gsrShortKernel_integral_sq_eq hκ.ne' σ1 σ2 Tstar.coe_nonneg t.coe_nonneg)))
     (vasicekSDEMean r₀ θ κ (t : ℝ))
-  rw [zero_add] at h
-  exact h
+  rwa [zero_add] at h
 
 /-- **The GSR short rate under the `t`-forward measure.** With the forward measure of the bank
 account `exp(∫₀ᵗ r)` (`gsrIntegratedRate`), `r_t` stays Gaussian with the same variance and its
