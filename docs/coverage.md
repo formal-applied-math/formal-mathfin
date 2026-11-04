@@ -50,6 +50,28 @@ Three `full` entries in `benchmarks/black_scholes.json`. Corpus 754 → 757.
   (That the total variance is the integral of the `ξ = 0` variance path is the library's
   `HullWhite.integratedMean_const`, not part of the entry.)
 
+### American early-exercise approximations at their degenerate boundary (2026-11-01)
+
+Two independent small-parameter/boundary limits of American-option early-exercise engines,
+five entries, all `full`, in `benchmarks/american_put_boundary.json`. Corpus 754 → 759.
+
+| Benchmark ID | Mathematical conclusion | Lean declaration |
+|---|---|---|
+| `mf-ju-zhong-raw-eq-stable` | Two Lean transcriptions of the Ju–Zhong quadratic-approximation price, the direct form and the limit-stable form, agree identically for every nonzero risk-free rate `r`; not tied to an American price. | `MathFin.juValueRaw_eq_juValue` |
+| `mf-ju-zhong-zero-rate-limit` | For any `Sk` tending to `S₀ > 0` as `r → 0+`, and two nonvanishing side conditions, the direct form along `Sk` tends to the limit-stable form as `r → 0+`. | `MathFin.tendsto_juValueRaw_zero_rate` |
+| `mf-american-put-boundary-expiry-limit` | For `0 < r`, `0 ≤ q ≤ r`, the American put exercise boundary tends to the strike `K` as time-to-expiry tends to `0`. | `MathFin.BlackScholes.AmericanPut.Stopping.tendsto_brownianUsualExerciseBoundary_expiry` |
+| `mf-qdplus-k12-endpoint-differentiable` | The QD+ fixed-point integrand `K12`, over an abstract boundary function `B`, has an explicit one-sided limit at its collocation endpoint when `B` is differentiable there. | `MathFin.tendsto_qdfpK12_endpoint` |
+| `mf-qdplus-k12-endpoint-differentiability-tight` | The same endpoint limit takes a different value for a continuous but only Hölder-1/2 boundary, showing the differentiability hypothesis cannot be weakened to continuity. | `MathFin.tendsto_qdfpK12_endpoint_holder`, `MathFin.not_tendsto_qdfpK12_endpoint_holder` |
+
+Ju–Zhong (1999)'s quadratic approximation (in Li's restatement, MPRA 15018) motivates the first two
+entries; Healy's restatement of Andersen–Lake–Offengenden's fixed-point equations (arXiv:2109.15157
+§5.1) motivates the last two QD+ entries. Both are transcriptions of printed closed forms, not
+derivations of the underlying free-boundary problem. The Ju–Zhong entries relate two Lean
+transcriptions of the formula and say nothing about an American price; the limit is conditional
+(`Sk` is an arbitrary input function, and two nonvanishing side conditions are hypotheses). The
+QD+ entries are over an abstract boundary function, with no claim about the fixed-point iteration's
+convergence or pricing accuracy.
+
 ### One route to Merton's formula; one Black–Scholes family (2026-10-30)
 
 Issue #362. Corpus 713 → 711 (`mf-merton-from-general-jump-law` and `mf-merton-model-exists` removed).

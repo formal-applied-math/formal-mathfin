@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.BlackScholes.JumpDiffusionProcess
+public import MathFin.Foundations.StandardNormal
 
 /-!
 # The density of a jump-diffusion log-return
@@ -53,11 +54,6 @@ lemma gaussianPDFReal_le_inv_sqrt (μ : ℝ) (v : ℝ≥0) (x : ℝ) :
   refine mul_le_of_le_one_right (inv_nonneg.2 (Real.sqrt_nonneg _)) (Real.exp_le_one_iff.2 ?_)
   rw [neg_div]
   exact neg_nonpos.2 (by positivity)
-
-/-- A Gaussian density is continuous. -/
-lemma continuous_gaussianPDFReal (μ : ℝ) (v : ℝ≥0) : Continuous (gaussianPDFReal μ v) := by
-  rw [gaussianPDFReal_def]
-  fun_prop
 
 /-- **The density of the jump-diffusion log-return** over `τ`: the mixture, over the jump count `n`
 and the jump sizes `j` (law `Poisson(Λτ) ⊗ ν^ℕ`), of the Gaussian densities
