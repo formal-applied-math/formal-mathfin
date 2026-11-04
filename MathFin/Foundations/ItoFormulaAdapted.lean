@@ -126,8 +126,8 @@ theorem tendstoInMeasure_of_tendsto_integral_abs {Ω : Type*} [MeasurableSpace �
   have h' := ENNReal.tendsto_ofReal h
   rw [ENNReal.ofReal_zero] at h'
   refine h'.congr fun n ↦ ?_
-  rw [eLpNorm_one_eq_lintegral_enorm (hint n).aestronglyMeasurable]
-  exact ofReal_integral_norm_eq_lintegral_enorm (hint n)
+  exact (ofReal_integral_norm_eq_lintegral_enorm (hint n)).trans
+    (eLpNorm_one_eq_lintegral_enorm (hint n).aestronglyMeasurable).symm
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
@@ -205,7 +205,7 @@ theorem tendstoInMeasure_weighted_qv_adapted {X A : ℝ≥0 → Ω → ℝ} {X�
   have hk' := Finset.mem_range.mp hk
   have hd := hΔ (unifPart_mono T n (Nat.le_succ k)) (unifPart_le_T hk')
   refine (hd.integrable_sq.const_mul Cw).mono'
-    ((hw_meas _).aestronglyMeasurable.mul (hd.1.pow 2)) (ae_of_all _ fun ω ↦ ?_)
+    ((hw_meas _).aestronglyMeasurable.mul (hd.aestronglyMeasurable.pow 2)) (ae_of_all _ fun ω ↦ ?_)
   rw [Real.norm_eq_abs, abs_mul, abs_pow, sq_abs]
   exact mul_le_mul_of_nonneg_right (hw_bdd _ ω) (sq_nonneg _)
 
