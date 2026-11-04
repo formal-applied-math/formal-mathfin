@@ -342,12 +342,9 @@ theorem integral_mul_condExp_eq {𝓕 : MeasurableSpace Ω} (h𝓕 : 𝓕 ≤ m�
 omit hMadap in
 /-- The Itô-integral process `M` is square-integrable at every time (its values are
 a.e.-equal to `L²` CLM values). -/
-theorem memLp_M (t : ℝ≥0) : MemLp (M t) 2 μ := by
-  have h := Lp.memLp (itoProcessCLM hB T t hBmeas
-    (processToLp T hBmeas hδadap hδcont hδbdd))
-  refine ⟨h.1.congr (hMeq t).symm, ?_⟩
-  rw [eLpNorm_congr_ae (hMeq t)]
-  exact h.2
+theorem memLp_M (t : ℝ≥0) : MemLp (M t) 2 μ :=
+  (Lp.memLp (itoProcessCLM hB T t hBmeas (processToLp T hBmeas hδadap hδcont hδbdd))).ae_eq
+    (hMeq t).symm
 
 /-- **The increment-energy law** (the unweighted half of stage 3): for `u ≤ v ≤ T`,
 
@@ -1583,7 +1580,7 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
   have hδεsm : AEStronglyMeasurable (fun ω ↦ M (unifPart T n (k + 1)) ω
       - M (unifPart T n k) ω
       - δ (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) μ :=
-    AEStronglyMeasurable.congr hDmem.1 haede.symm
+    AEStronglyMeasurable.congr hDmem.aestronglyMeasurable haede.symm
   have hpair : ∫ ω, |w ω * ((M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω
           - δ (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)))
         * ((M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)
@@ -2238,7 +2235,7 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
     have hZ4mem : MemLp (fun ω ↦ ∑ k ∈ Finset.range N,
         φ k ω * (B (s (k + 1)) ω - B (s k) ω)) 4 μ :=
       memLp_finsetSum _ fun k _ ↦ hY4mem k
-    have hZaesm := hZ4mem.1
+    have hZaesm := hZ4mem.aestronglyMeasurable
     have hintZ4 : Integrable (fun ω ↦ (∑ k ∈ Finset.range N,
         φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 4) μ := by
       have h := hZ4mem.integrable_norm_pow (by norm_num : (4 : ℕ) ≠ 0)
@@ -3047,7 +3044,7 @@ theorem trueIncr_pow3_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk : k < n) :
   -- `L²` membership of `X²`: from the `L⁴` integrability via `integrable_norm_rpow_iff`
   have hΔsq2 : MemLp (fun ω ↦
       (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2) 2 μ :=
-    (integrable_norm_rpow_iff (hΔ2.1.pow 2) (by norm_num) (by simp)).mp
+    (integrable_norm_rpow_iff (hΔ2.aestronglyMeasurable.pow 2) (by norm_num) (by simp)).mp
       (hint4M.congr (Eventually.of_forall fun ω ↦
         show (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 4
           = ‖(M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2‖
@@ -3942,7 +3939,7 @@ theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
           ).const_mul 1).add (integrable_const (1 : ℝ)))
         ((((memLp_M hB hBmeas hδadap hδcont hδbdd hMeq
           (unifPart T n (k + 1))).sub
-          (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq (unifPart T n k))).abs).1.pow 3)
+          (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq (unifPart T n k))).abs).aestronglyMeasurable.pow 3)
         (Eventually.of_forall fun ω ↦ by
           rw [Real.norm_eq_abs]
           set x := abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) with hxdef
@@ -4290,7 +4287,7 @@ private theorem remainderCell_integrable {n : ℕ} (hn : 0 < n) {k : ℕ} (hk : 
         ).const_mul 1).add (integrable_const (1 : ℝ)))
       ((((memLp_M hB hBmeas hδadap hδcont hδbdd hMeq
         (unifPart T n (k + 1))).sub
-        (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq (unifPart T n k))).abs).1.pow 3)
+        (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq (unifPart T n k))).abs).aestronglyMeasurable.pow 3)
       (Eventually.of_forall fun ω ↦ by
         rw [Real.norm_eq_abs]
         set x := abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) with hxdef

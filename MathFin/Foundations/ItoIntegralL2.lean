@@ -343,8 +343,7 @@ lemma memLp_uncurry_trim (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
     MemLp (Function.uncurry ⇑V) 2
       ((timeMeasure.prod μ).trim (natFiltration hBmeas).predictable_le_prod) :=
-  ⟨V.isStronglyPredictable.aestronglyMeasurable,
-   by rw [eLpNorm_trim _ V.isStronglyPredictable]; exact (memLp_uncurry_prod hBmeas V).2⟩
+  by rw [memLp_iff, eLpNorm_trim _ V.isStronglyPredictable]; exact memLp_uncurry_prod hBmeas V
 
 /-- **The embedding** of a simple process into the predictable `L²` space, as the class of
 its uncurried version. The codomain `Lp ℝ 2 ((timeMeasure.prod μ).trim …)` is *definitionally*

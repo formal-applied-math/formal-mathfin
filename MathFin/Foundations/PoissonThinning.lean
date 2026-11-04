@@ -164,9 +164,9 @@ theorem thinned_streams₀ {M K : Ω → ℕ} (hM : AEMeasurable M μ) (hK : AEM
       = (poissonMeasure (p * r)).prod (poissonMeasure ((1 - p) * r)) := by
     rw [map_pair_eq_marked₀ hM hK hjoint, markedPoissonMeasure_eq_prod r hp]
   have hMlaw : μ.map M = poissonMeasure (p * r) := by
-    rw [← Measure.fst_map_prodMk₀ hK, hpair, Measure.fst_prod]
+    rw [← Measure.fst_map_prodMk₀ hM hK, hpair, Measure.fst_prod]
   have hKlaw : μ.map K = poissonMeasure ((1 - p) * r) := by
-    rw [← Measure.snd_map_prodMk₀ hM, hpair, Measure.snd_prod]
+    rw [← Measure.snd_map_prodMk₀ hM hK, hpair, Measure.snd_prod]
   have σM : SigmaFinite (μ.map M) := by rw [hMlaw]; infer_instance
   have σK : SigmaFinite (μ.map K) := by rw [hKlaw]; infer_instance
   refine ⟨hMlaw, hKlaw, ?_⟩

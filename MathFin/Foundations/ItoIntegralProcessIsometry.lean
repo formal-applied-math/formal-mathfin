@@ -248,7 +248,7 @@ private noncomputable def truncCLM (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (
     1 (fun φ ↦ by
       simp only [LinearMap.coe_mk, AddHom.coe_mk]
       rw [one_mul, Lp.norm_toLp, Lp.norm_def]
-      exact ENNReal.toReal_mono (Lp.memLp φ).2.ne
+      exact ENNReal.toReal_mono (Lp.memLp φ).eLpNorm_ne_top
         (eLpNorm_indicator_le _ (measurableSet_band t hBmeas).nullMeasurableSet))
 
 omit [IsProbabilityMeasure μ] hB in

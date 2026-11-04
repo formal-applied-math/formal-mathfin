@@ -191,7 +191,7 @@ theorem tendstoInMeasure_weighted_qv_adapted {X A : ℝ≥0 → Ω → ℝ} {X�
     have hI := (Lp.memLp (itoProcessCLM hB T t hBmeas φ)).sub
       (Lp.memLp (itoProcessCLM hB T s hBmeas φ))
     have hAm : MemLp (fun ω ↦ A t ω - A s ω) 2 μ :=
-      MemLp.of_bound ((((hX_meas t).sub (hX_meas s)).sub hI.1).congr (by
+      MemLp.of_bound ((((hX_meas t).sub (hX_meas s)).sub hI.aestronglyMeasurable).congr (by
         filter_upwards [hX t ht, hX s (hst.trans ht)] with ω h1 h2
         simp only [Pi.sub_apply, h1, h2]
         ring)) (Ca * ((t : ℝ) - s)) (ae_of_all _ fun ω ↦ hA hst ω)

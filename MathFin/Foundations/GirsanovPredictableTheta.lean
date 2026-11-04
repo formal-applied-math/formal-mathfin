@@ -348,13 +348,11 @@ lemma tendstoInMeasure_marshalDrift (T : ℝ≥0)
     simpa using h0.pow 2
   -- `θ̂` sliced is `L²` a.e.
   have hg_prod : MemLp (⇑θhat) 2 ((timeMeasure_T T).prod μ) :=
-    ⟨aestronglyMeasurable_of_aestronglyMeasurable_trim (natFiltration hBmeas).predictable_le_prod
-      (Lp.aestronglyMeasurable θhat),
-     by rw [← eLpNorm_trim_ae (natFiltration hBmeas).predictable_le_prod
+    by rw [memLp_iff, ← eLpNorm_trim_ae (natFiltration hBmeas).predictable_le_prod
          (Lp.aestronglyMeasurable θhat)]
-        exact (Lp.memLp θhat).2⟩
+       exact Lp.eLpNorm_lt_top θhat
   have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s ↦ ⇑θhat (s, ω)) 2 (timeMeasure_T T) := by
-    filter_upwards [hg_prod.1.prodMk_right, hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
+    filter_upwards [hg_prod.aestronglyMeasurable.prodMk_right, hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
     exact (memLp_two_iff_integrable_sq hω1).mpr hω2
   -- the honest limit-drift is a.e. the slice integral `∫₀ᵘ⇑θ̂ ds`
   have hlim_eq : ∀ᵐ ω ∂μ, driftContinuousMod T hBmeas θhat u ω
@@ -428,13 +426,11 @@ lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
         (tendsto_simpleAssembly_marshalStepSP T hBmeas hpred hC hbdd V hV)
     simpa using h0.pow 2
   have hg_prod : MemLp (⇑θhat) 2 ((timeMeasure_T T).prod μ) :=
-    ⟨aestronglyMeasurable_of_aestronglyMeasurable_trim (natFiltration hBmeas).predictable_le_prod
-      (Lp.aestronglyMeasurable θhat),
-     by rw [← eLpNorm_trim_ae (natFiltration hBmeas).predictable_le_prod
+    by rw [memLp_iff, ← eLpNorm_trim_ae (natFiltration hBmeas).predictable_le_prod
          (Lp.aestronglyMeasurable θhat)]
-        exact (Lp.memLp θhat).2⟩
+       exact Lp.eLpNorm_lt_top θhat
   have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s ↦ ⇑θhat (s, ω)) 2 (timeMeasure_T T) := by
-    filter_upwards [hg_prod.1.prodMk_right, hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
+    filter_upwards [hg_prod.aestronglyMeasurable.prodMk_right, hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
     exact (memLp_two_iff_integrable_sq hω1).mpr hω2
   have hQmeas : ∀ n, AEStronglyMeasurable
       (fun ω ↦ simpleQuadVar (marshalPart hBmeas T (V n).val)
@@ -945,7 +941,7 @@ theorem isExpQMartingale_BthetaPredictable (hBmeas : ∀ t, Measurable (B t)) {�
   have hC : 0 ≤ C := nonneg_of_bdd μ hbdd
   haveI hFB : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
   have hZTaesm : AEStronglyMeasurable (ZTpred hB T hBmeas hpred hbdd) μ :=
-    (memLp_ZTpred_one hB hBmeas T hpred hbdd V hV).1
+    (memLp_ZTpred_one hB hBmeas T hpred hbdd V hV).aestronglyMeasurable
   have hZTpos : ∀ ω, 0 ≤ ZTpred hB T hBmeas hpred hbdd ω := fun ω ↦ (contDoleansExp_pos _ _ _ _).le
   have hB0 : ∀ᵐ ω ∂μ, B 0 ω = 0 := by
     have hmap := Measure.map_apply (μ := μ) (hBmeas 0) (measurableSet_singleton (0 : ℝ)).compl

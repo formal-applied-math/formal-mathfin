@@ -287,7 +287,7 @@ theorem itoContinuousMod_modification (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
   have hV := (approxSeq T hBmeas φ).choose_spec
   set F : ℕ → Ω → ℝ := fun n ω ↦ itoSimpleProcess hBmeas (V n).val t ω
   have hFmeas : ∀ n, AEStronglyMeasurable (F n) μ :=
-    fun n ↦ (memLp_itoSimpleProcess hB hBmeas (V n).val t).1
+    fun n ↦ (memLp_itoSimpleProcess hB hBmeas (V n).val t).aestronglyMeasurable
   -- (a) F → itoContinuousMod a.e. ⟹ in measure
   have hmeasG : TendstoInMeasure μ F atTop (fun ω ↦ itoContinuousMod T hBmeas φ t ω) := by
     refine tendstoInMeasure_of_tendsto_ae hFmeas ?_

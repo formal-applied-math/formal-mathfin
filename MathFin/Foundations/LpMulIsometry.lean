@@ -152,8 +152,7 @@ measures — an `Lp` element carries a genuinely `StronglyMeasurable` representa
 (`Lp.stronglyMeasurable`), so it is measurable for every measure at once. -/
 lemma memLp_mul (hf : Measurable f) (ψ : Lp ℝ 2 (sqWeight ν f)) :
     MemLp (fun x ↦ f x * ψ x) 2 ν :=
-  ⟨hf.aestronglyMeasurable.mul (Lp.stronglyMeasurable ψ).aestronglyMeasurable,
-    by rw [eLpNorm_mul_eq hf (Lp.stronglyMeasurable ψ).measurable]; exact Lp.eLpNorm_lt_top ψ⟩
+  (eLpNorm_mul_eq hf (Lp.stronglyMeasurable ψ).measurable).trans_lt (Lp.eLpNorm_lt_top ψ)
 
 /-- When `f ≠ 0` a.e., an a.e. statement for the weighted measure transfers back to `ν`. The
 two measures are then equivalent: `f²·ν ≪ ν` always, and the density is a.e. nonzero. -/
@@ -237,8 +236,7 @@ theorem exists_mulLI_eq (hf : Measurable f) (hf0 : ∀ᵐ x ∂ν, f x ≠ 0) (u
     field_simp
   have hquot : MemLp (fun x ↦ (u : α → ℝ) x / f x) 2 (sqWeight ν f) := by
     have hmeas := (Lp.stronglyMeasurable u).measurable.div hf
-    refine ⟨hmeas.aestronglyMeasurable, ?_⟩
-    rw [← eLpNorm_mul_eq hf hmeas, eLpNorm_congr_ae hcancel]
+    rw [memLp_iff, ← eLpNorm_mul_eq hf hmeas, eLpNorm_congr_ae hcancel]
     exact Lp.eLpNorm_lt_top u
   refine ⟨hquot.toLp _, Lp.ext ?_⟩
   have hcoe : ∀ᵐ x ∂ν, (hquot.toLp _ : α → ℝ) x = (u : α → ℝ) x / f x :=

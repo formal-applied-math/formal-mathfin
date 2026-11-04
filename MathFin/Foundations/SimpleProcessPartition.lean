@@ -539,7 +539,7 @@ lemma norm_simpleAssembly_marshalStepSP_sub_le (hBmeas : ∀ t, Measurable (B t)
       - processToLpPredictable (μ := μ) T hBmeas hpred hbdd
       = hfV.toLp _ - hg.toLp _ := rfl
   rw [hLHS, hRHS, ← MemLp.toLp_sub hf1 hg, ← MemLp.toLp_sub hfV hg, Lp.norm_toLp, Lp.norm_toLp]
-  apply ENNReal.toReal_mono (hfV.sub hg).2.ne
+  apply ENNReal.toReal_mono (hfV.sub hg).eLpNorm_ne_top
   rw [eLpNorm_congr_ae ((uncurry_marshalStepSP_ae_eq_clamp hBmeas T V hle hC hmpN).sub
     (Filter.EventuallyEq.refl _ (Function.uncurry θ)))]
   apply eLpNorm_mono_ae

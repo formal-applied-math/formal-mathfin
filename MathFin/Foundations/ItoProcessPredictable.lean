@@ -125,8 +125,7 @@ theorem memLp_itoContinuousMod (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     MemLp (Function.uncurry (itoContinuousMod T hBmeas φ)) 2 (trimMeasure_T (μ := μ) T hBmeas) := by
   have hpred := itoContinuousMod_isStronglyPredictable hB T hBmeas hBcont φ
-  refine ⟨hpred.aestronglyMeasurable, ?_⟩
-  rw [show trimMeasure_T (μ := μ) T hBmeas
+  rw [memLp_iff, show trimMeasure_T (μ := μ) T hBmeas
         = ((timeMeasure_T T).prod μ).trim (natFiltration hBmeas).predictable_le_prod from rfl,
       eLpNorm_trim _ hpred,
       eLpNorm_lt_top_iff_lintegral_rpow_enorm_lt_top (by norm_num) (by norm_num)
@@ -184,9 +183,8 @@ theorem itoProcessAssembled_norm_sq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
   have hmem := memLp_itoContinuousMod hB T hBmeas hBcont φ
   have hmem_prod : MemLp (Function.uncurry (itoContinuousMod T hBmeas φ)) 2
       ((timeMeasure_T T).prod μ) := by
-    refine ⟨(hpred.mono (natFiltration hBmeas).predictable_le_prod).aestronglyMeasurable, ?_⟩
-    rw [← eLpNorm_trim (natFiltration hBmeas).predictable_le_prod hpred]
-    exact hmem.2
+    rw [memLp_iff, ← eLpNorm_trim (natFiltration hBmeas).predictable_le_prod hpred]
+    exact hmem
   have hint : Integrable (fun z ↦ (Function.uncurry (itoContinuousMod T hBmeas φ) z) ^ 2)
       ((timeMeasure_T T).prod μ) := by
     refine (hmem_prod.integrable_mul hmem_prod).congr ?_

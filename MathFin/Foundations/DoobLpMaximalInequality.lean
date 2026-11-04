@@ -12,6 +12,8 @@ public import Mathlib.MeasureTheory.Integral.MeanInequalities
 public import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 public import Mathlib.Analysis.MeanInequalities
 
+import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+
 /-!
 # Doob's Lᵖ maximal inequality
 
@@ -277,10 +279,8 @@ private lemma fubini_swap
           (fun s ↦ ENNReal.ofReal (s ^ (p - 2)) *
             {ω | s ≤ runMax f n ω}.indicator
               (fun ω ↦ ENNReal.ofReal (f n ω)) ω) t))
-      (volume.prod μ) := by
-    refine (Measurable.indicator ?_ ?_).aemeasurable
-    · exact hF_meas
-    · exact measurable_fst measurableSet_Ioi
+      (volume.prod μ) :=
+    (hF_meas.indicator (measurable_fst measurableSet_Ioi)).aemeasurable
   rw [lintegral_lintegral_swap hSwap_meas]
   -- Now have ∫⁻ ω, ∫⁻ t, indicator(Ioi 0) F(t,ω) ∂volume ∂μ.
   -- For each ω, the inner is the integral over Ioi 0 of
@@ -503,10 +503,9 @@ private lemma fubini_swap_truncated
           (fun s ↦ ENNReal.ofReal (s ^ (p - 2)) *
             {ω | s ≤ runMax f n ω}.indicator
               (fun ω ↦ ENNReal.ofReal (f n ω)) ω) t))
-      (volume.prod μ) := by
-    refine (Measurable.indicator ?_ ?_).aemeasurable
-    · exact hF_meas
-    · exact measurable_fst (measurableSet_Ioi.inter measurableSet_Iic)
+      (volume.prod μ) :=
+    (hF_meas.indicator
+      (measurable_fst (measurableSet_Ioi.inter measurableSet_Iic))).aemeasurable
   rw [lintegral_lintegral_swap hSwap_meas]
   apply lintegral_congr_ae
   filter_upwards with ω
@@ -1156,7 +1155,8 @@ lemma dominator_memLp [IsFiniteMeasure μ] (hp : 1 < p) (hf : Martingale f 𝒢 
     (hbound : ∀ n, eLpNorm (f n) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R) :
     MemLp (dominator f) (ENNReal.ofReal p) μ := by
   have hp_pos : 0 < p := lt_trans zero_lt_one hp
-  have hmeas := (measurable_dominator (measurable_of_martingale hf)).aestronglyMeasurable
+  have hmeas : AEStronglyMeasurable (dominator f) μ :=
+    (measurable_dominator (measurable_of_martingale hf)).aestronglyMeasurable
   refine ⟨hmeas, ?_⟩
   rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by simp [hp_pos]) ENNReal.ofReal_ne_top hmeas,
     ENNReal.toReal_ofReal hp_pos.le]

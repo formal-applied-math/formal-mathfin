@@ -67,7 +67,7 @@ lemma setIntegral_uniformIoo_Iic (f : ℝ → ℝ) {t : ℝ} (h0 : 0 ≤ t) (h1 
   rcases h1.lt_or_eq with h1 | rfl
   · rw [show Iic t ∩ Ioo 0 1 = Ioc 0 t by
       ext p; exact ⟨fun h ↦ ⟨h.2.1, h.1⟩, fun h ↦ ⟨h.2, h.1, h.2.trans_lt h1⟩⟩]
-  · rw [inter_eq_right.2 fun _ hp ↦ mem_Iic.2 hp.2.le]
+  · rw [inter_eq_right.2 Ioo_subset_Iic_self]
     exact setIntegral_congr_set Ioo_ae_eq_Ioc
 
 /-! ### Spearman's rho of a bivariate copula -/

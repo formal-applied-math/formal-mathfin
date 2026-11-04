@@ -59,7 +59,8 @@ private lemma pdf_mul_eq (ha : 0 < a) (hr : 0 < r) {z x : ℝ} (hx : x ≠ 0) :
           (fun t ↦ r ^ (a + 1) / Gamma a * Real.exp (-(r * z)) * t ^ (a - 1)) x) := by
   rcases lt_or_gt_of_ne hx with hx_neg | hx_pos
   · rw [gammaPDF_of_neg hx_neg,
-      Set.indicator_of_notMem (fun h ↦ absurd h.1 (not_lt.mpr hx_neg.le)),
+      Set.indicator_of_notMem
+        (show x ∉ Set.Ioc 0 z from fun h ↦ absurd h.1 (not_lt.mpr hx_neg.le)),
       ENNReal.ofReal_zero, zero_mul]
   · by_cases hxz : x ≤ z
     · have hzx : (0 : ℝ) ≤ z - x := by linarith
@@ -77,7 +78,8 @@ private lemma pdf_mul_eq (ha : 0 < a) (hr : 0 < r) {z x : ℝ} (hx : x ≠ 0) :
         _ = r ^ (a + 1) / Gamma a * Real.exp (-(r * z)) * x ^ (a - 1) := by
             rw [hexp, Real.rpow_add_one hr.ne']; ring
     · rw [exponentialPDF_of_neg (by linarith), mul_zero,
-        Set.indicator_of_notMem (fun h ↦ absurd h.2 hxz), ENNReal.ofReal_zero]
+        Set.indicator_of_notMem (show x ∉ Set.Ioc 0 z from fun h ↦ absurd h.2 hxz),
+        ENNReal.ofReal_zero]
 
 /-- The elementary Beta-degenerate integral: `∫_{(0,z]} x^(a−1) dx = z^a / a`. -/
 private lemma setIntegral_rpow_Ioc (ha : 0 < a) {z : ℝ} (hz : 0 ≤ z) :

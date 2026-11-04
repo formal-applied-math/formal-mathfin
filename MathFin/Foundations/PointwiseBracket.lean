@@ -324,12 +324,10 @@ omit [IsProbabilityMeasure μ] in
 see the trim on a strongly predictable function. -/
 private theorem memLp_prod (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    MemLp (⇑φ) 2 ((timeMeasure_T T).prod μ) :=
-  ⟨((Lp.stronglyMeasurable φ).mono
-      (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod).aestronglyMeasurable, by
-    rw [← eLpNorm_trim (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod
-      (Lp.stronglyMeasurable φ)]
-    exact (Lp.memLp φ).2⟩
+    MemLp (⇑φ) 2 ((timeMeasure_T T).prod μ) := by
+  rw [memLp_iff, ← eLpNorm_trim (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod
+    (Lp.stronglyMeasurable φ)]
+  exact Lp.eLpNorm_lt_top φ
 
 omit [IsProbabilityMeasure μ] in
 /-- The ω-section of `bandSq` at a sample point of `F`: the band indicator of the squared time

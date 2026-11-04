@@ -159,7 +159,7 @@ theorem memLp_two_of_subseq_ae_of_sq_bound {f : ℕ → α → ℝ} {g : α → 
   refine ⟨hgmeas.pow 2, ?_⟩
   rw [hasFiniteIntegral_iff_enorm]
   have hsqbnd : ∀ k, ∫⁻ x, ‖(f (ms k) x) ^ 2‖ₑ ∂μ ≤ ENNReal.ofReal M := fun k ↦ by
-    have hint_sq := (memLp_two_iff_integrable_sq (hf (ms k)).1).mp (hf (ms k))
+    have hint_sq := (memLp_two_iff_integrable_sq (hf (ms k)).aestronglyMeasurable).mp (hf (ms k))
     calc ∫⁻ x, ‖(f (ms k) x) ^ 2‖ₑ ∂μ
         = ∫⁻ x, ENNReal.ofReal ((f (ms k) x) ^ 2) ∂μ :=
           lintegral_congr fun x ↦ by rw [Real.enorm_eq_ofReal (sq_nonneg _)]
