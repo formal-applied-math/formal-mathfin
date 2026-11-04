@@ -35,9 +35,8 @@ open scoped NNReal Topology
 /-- The `i`-th grid time `i*δ`, capped at the horizon `T`. -/
 def cappedGridTime (T δ : ℝ≥0) (i : ℕ) : ℝ≥0 := min ((i : ℝ≥0)*δ) T
 
-theorem cappedGridTime_mono (T δ : ℝ≥0) : Monotone (cappedGridTime T δ) := by
-  intro i j hij
-  exact min_le_min (mul_le_mul_of_nonneg_right (by exact_mod_cast hij) zero_le) le_rfl
+theorem cappedGridTime_mono (T δ : ℝ≥0) : Monotone (cappedGridTime T δ) :=
+  (gridTime_mono δ).min monotone_const
 
 theorem cappedGridTime_ceil (T : ℝ≥0) {δ : ℝ≥0} (hδ : 0 < δ) : cappedGridTime T δ ⌈T/δ⌉₊ = T :=
   min_eq_right ((div_le_iff₀ hδ).mp (Nat.le_ceil (T/δ)))

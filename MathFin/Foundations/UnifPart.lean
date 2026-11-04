@@ -25,12 +25,15 @@ facts about it are proved here once: monotone, `≤ T`, endpoints, cell length, 
   `T`, and the endpoints `0` and `T`.
 * `unifPart_succ_sub`, `unifPart_mesh_sum` — every cell has length `T/n`, and the lengths
   telescope to `T`.
+* `tendsto_inv_sqrt_nat_add`, `one_div_sqrt_le_two` — the `1/√n` mesh rate of the `O(√mesh)`
+  bounds: a null sequence, and the shift comparison `1/√n ≤ 2/√(n+1)`.
 -/
 
 @[expose] public section
 
 namespace MathFin
 
+open Filter Topology
 open scoped NNReal
 
 /-- The uniform partition of `[0, T]`: the `n`-th refinement places its `k`-th node at `kT/n`. -/
@@ -85,5 +88,28 @@ lemma unifPartIcc_succ_sub {s t : ℝ≥0} (hst : s ≤ t) (n k : ℕ) :
     ((unifPartIcc s t n (k + 1) : ℝ) - unifPartIcc s t n k) = ((t : ℝ) - s) / n := by
   rw [unifPartIcc, unifPartIcc, NNReal.coe_add, NNReal.coe_add, add_sub_add_left_eq_sub,
     unifPart_succ_sub, NNReal.coe_sub hst]
+
+/-! ### The `1/√n` rate -/
+
+/-- The `1/√(n+1)` null sequence over the naturals: the square root of Mathlib's
+`tendsto_one_div_add_atTop_nhds_zero_nat`. -/
+theorem tendsto_inv_sqrt_nat_add :
+    Tendsto (fun n : ℕ ↦ (1 : ℝ) / Real.sqrt ((n : ℝ) + 1)) atTop (𝓝 0) := by
+  simpa only [Real.sqrt_div zero_le_one, Real.sqrt_one, Real.sqrt_zero] using
+    (tendsto_one_div_add_atTop_nhds_zero_nat (𝕜 := ℝ)).sqrt
+
+/-- The `1/√n ≤ 2/√(n+1)` comparison for `n ≥ 1`. -/
+theorem one_div_sqrt_le_two {n : ℕ} (hn : 0 < n) :
+    (1 : ℝ) / Real.sqrt ((n : ℝ)) ≤ 2 / Real.sqrt (((n : ℝ)) + 1) := by
+  have hne : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hn
+  have hpos1 : (0 : ℝ) < Real.sqrt ((n : ℝ)) := Real.sqrt_pos.mpr hne
+  have hpos2 : (0 : ℝ) < Real.sqrt (((n : ℝ)) + 1) := Real.sqrt_pos.mpr (by linarith)
+  have hsq : Real.sqrt (((n : ℝ)) + 1) ≤ 2 * Real.sqrt ((n : ℝ)) := by
+    have hnm : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
+    refine le_trans (Real.sqrt_le_sqrt (show ((n : ℝ)) + 1 ≤ 4 * (n : ℝ) from by nlinarith)) ?_
+    rw [show (2 : ℝ) * Real.sqrt ((n : ℝ)) = Real.sqrt (4 * (n : ℝ)) from by
+      rw [Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 4)]; norm_num]
+  rw [div_le_div_iff₀ hpos1 hpos2]
+  simpa using hsq
 
 end MathFin

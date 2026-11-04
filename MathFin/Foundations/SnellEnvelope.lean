@@ -14,10 +14,11 @@ The discrete-time Snell envelope of an adapted integrable reward `Z` is the back
 `U_i = max(Z_i, 𝔼[U_{i+1} | 𝓕_i])` from the horizon `N`; early exercise is allowed at the times
 of an exercise set `X` (at the other times the recursion is the bare continuation value
 `𝔼[U_{i+1} | 𝓕_i]`), so `X = univ` is the American envelope and a finite `X` the Bermudan one.
-This is the one envelope of the library: the American-put stopping rules
+This is the library's general envelope: the American-put stopping rules
 (`BlackScholes/AmericanPut/Stopping/`) are its `X = univ` instances, and the binomial tree's
-pathwise envelope `snell` (`Binomial/SnellEnvelope.lean`) is its explicit form, computed with the
-node-average conditional expectation (`snell_ae_eq_snellEnvelope`, `Binomial/PathMeasure.lean`).
+pathwise envelope `snell` (`Binomial/SnellEnvelope.lean`), computed with the node-average
+conditional expectation, agrees with it almost surely (`snell_ae_eq_snellEnvelope`,
+`Binomial/PathMeasure.lean`).
 
 * `snellEnvelopeAux P 𝓕 X Z n i` — the recursion with `n` steps left from time `i`.
 * `snellEnvelope P 𝓕 X Z N i` — the envelope for the horizon `N`, frozen at `Z N` past it.
@@ -38,8 +39,8 @@ variable {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
 
 open scoped Classical in
 /-- The Snell recursion with `n` steps left from time `i`, exercise allowed at the times in `X`:
-it is `Z i` for `n = 0`; for `n + 1` it is the continuation value `P[·_{n} (i+1) | 𝓕 i]`, maxed
-with `Z i` when `i ∈ X`. -/
+it is `Z i` for `n = 0`; for `n + 1` it is the continuation value
+`P[snellEnvelopeAux P 𝓕 X Z n (i + 1) | 𝓕 i]`, maxed with `Z i` when `i ∈ X`. -/
 noncomputable def snellEnvelopeAux (P : Measure Ω) (𝓕 : Filtration ℕ ‹MeasurableSpace Ω›)
     (X : Set ℕ) (Z : ℕ → Ω → ℝ) : ℕ → ℕ → Ω → ℝ
   | 0, i => Z i
@@ -137,24 +138,6 @@ theorem snellEnvelope_dominates {N i : ℕ} (h : i ∈ X ∨ N ≤ i) (ω : Ω) 
   · exact snellEnvelopeAux_dominates
       (Or.inr (by rw [min_eq_left hiN.le]; exact h.resolve_right hiN.not_ge)) ω
 
-variable [IsProbabilityMeasure P]
-
-/-- **The Snell envelope is a supermartingale.** -/
-theorem snellEnvelope_supermartingale (hZ : Adapted 𝓕 Z) (hi : ∀ i, Integrable (Z i) P)
-    (N : ℕ) : Supermartingale (snellEnvelope P 𝓕 X Z N) 𝓕 P := by
-  refine supermartingale_nat (snellEnvelope_stronglyAdapted hZ N) (snellEnvelope_integrable hi N)
-    fun i ↦ ?_
-  by_cases hiN : i < N
-  · by_cases hX : i ∈ X
-    · rw [snellEnvelope_succ_of_mem hiN hX]
-      exact Eventually.of_forall fun ω ↦ le_max_right _ _
-    · rw [snellEnvelope_succ_of_notMem hiN hX]
-  · have hNi : N ≤ i := le_of_not_gt hiN
-    rw [snellEnvelope_after_horizon hNi, snellEnvelope_after_horizon (hNi.trans i.le_succ),
-      condExp_of_stronglyMeasurable (𝓕.le i)
-        (((hZ N).mono (𝓕.mono hNi) le_rfl).stronglyMeasurable) (hi N)]
-
-omit [IsProbabilityMeasure P] in
 /-- **Minimality**: an integrable supermartingale `U` that dominates the reward almost surely at
 the exercise times in `[i, i + n)` and at time `i + n` dominates the envelope with `n` steps
 left from `i`. -/
@@ -178,7 +161,6 @@ theorem snellEnvelopeAux_le_supermartingale {U : ℕ → Ω → ℝ} (hU : Super
       filter_upwards [hc, hU.2.1 i (i + 1) i.le_succ] with ω hc hu
       exact hc.trans hu
 
-omit [IsProbabilityMeasure P] in
 /-- **The Snell envelope is the smallest supermartingale** dominating the reward (almost surely)
 at the exercise times up to the horizon `N` and at `N`. -/
 theorem snellEnvelope_le_supermartingale {N : ℕ} {U : ℕ → Ω → ℝ} (hU : Supermartingale U 𝓕 P)
@@ -188,7 +170,6 @@ theorem snellEnvelope_le_supermartingale {N : ℕ} {U : ℕ → Ω → ℝ} (hU 
     snellEnvelopeAux_le_supermartingale hU hi (N - i) i fun j hij hj h ↦
       hdom j (by omega) (h.imp_right fun h ↦ by omega)
 
-omit [IsProbabilityMeasure P] in
 /-- The envelope is positively homogeneous in the reward. -/
 theorem snellEnvelopeAux_const_mul {a : ℝ} (ha : 0 ≤ a) (n i : ℕ) :
     snellEnvelopeAux P 𝓕 X (fun j ω ↦ a * Z j ω) n i =ᵐ[P]
@@ -209,5 +190,22 @@ theorem snellEnvelopeAux_const_mul {a : ℝ} (ha : 0 ≤ a) (n i : ℕ) :
       filter_upwards [hc, hm] with ω hω hmω
       rw [hω]
       exact hmω
+
+variable [IsProbabilityMeasure P]
+
+/-- **The Snell envelope is a supermartingale.** -/
+theorem snellEnvelope_supermartingale (hZ : Adapted 𝓕 Z) (hi : ∀ i, Integrable (Z i) P)
+    (N : ℕ) : Supermartingale (snellEnvelope P 𝓕 X Z N) 𝓕 P := by
+  refine supermartingale_nat (snellEnvelope_stronglyAdapted hZ N) (snellEnvelope_integrable hi N)
+    fun i ↦ ?_
+  by_cases hiN : i < N
+  · by_cases hX : i ∈ X
+    · rw [snellEnvelope_succ_of_mem hiN hX]
+      exact Eventually.of_forall fun ω ↦ le_max_right _ _
+    · rw [snellEnvelope_succ_of_notMem hiN hX]
+  · have hNi : N ≤ i := le_of_not_gt hiN
+    rw [snellEnvelope_after_horizon hNi, snellEnvelope_after_horizon (hNi.trans i.le_succ),
+      condExp_of_stronglyMeasurable (𝓕.le i)
+        (((hZ N).mono (𝓕.mono hNi) le_rfl).stronglyMeasurable) (hi N)]
 
 end MathFin

@@ -23,7 +23,11 @@ property** (`itoProcessL2Inf_isMartingale`), **adaptedness**
 (`itoProcessL2Inf_aeStronglyMeasurable`) and the **contraction**
 (`itoProcessL2Inf_norm_le`) hold on all of `ℝ≥0` directly from the conditional-expectation
 tower, once. The finite-horizon process `itoProcessCLM T t` (`ItoIntegralProcessGeneral`) is
-this engine composed with `bandExtend T`, and inherits all three. -/
+this engine composed with `bandExtend T`, and inherits all three.
+
+On the dense simple integrands the process is B1a's discrete process
+(`condExp_itoSimple_eq`, `condExp_itoIntegralL2_simple`, `itoProcessL2Inf_simpleAssembly_ae`),
+and density transfers the start `(f●B)_0 = 0` (`itoProcessL2Inf_zero_time`). -/
 
 @[expose] public section
 
@@ -113,7 +117,7 @@ theorem condExp_itoSimple_eq (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
   simpa only [hT'eq] using (itoSimpleProcess_isMartingale hB hBmeas V).2 t (max t T)
       (le_max_left t T)
 
-/-- **Simple-process increment-independence (the step-2 core).** For a simple
+/-- **Simple-process increment-independence.** For a simple
 process `V`, the conditional expectation of its `[0,∞)` integral onto `𝓕_t` is the
 `[0,t]` truncation `(V●B)_t`: pick a horizon past `V`'s finite support, where the
 `[0,∞)` integral coincides with the truncated process, and apply B1a's martingale

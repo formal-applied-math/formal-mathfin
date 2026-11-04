@@ -66,7 +66,7 @@ theorem delayedGridReward_eq (K r q σ x : ℝ) (u T δ : ℝ≥0) :
   rw [he]
   simp only [Real.exp_add,mul_assoc]
 
-theorem delayedGrid_bellman_eq {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r)
+theorem delayedGrid_snellEnvelope_ae_eq {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r)
     (u T δ : ℝ≥0) (x : ℝ) :
     snellEnvelope gaussianLimit (delayedGridFiltration u T δ) Set.univ
       (delayedGridReward K r q σ x u T δ) ⌈T/δ⌉₊ 0 =ᵐ[gaussianLimit]
@@ -109,7 +109,7 @@ theorem delayedGridPrice_le_american {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 ≤
     measurable_brownian_uncurry hK hr (Real.exp_pos x).le hη
   have hi := snellContact_expected_payoff (P := gaussianLimit)
     (delayedGridReward_adapted K r q σ x u T δ) (delayedGridReward_integrable hK hr u T δ) ⌈T/δ⌉₊
-  have he := integral_congr_ae (delayedGrid_bellman_eq (q := q) (σ := σ) hK hr u T δ x)
+  have he := integral_congr_ae (delayedGrid_snellEnvelope_ae_eq (q := q) (σ := σ) hK hr u T δ x)
   rw [← he,← hi]
   convert! hv using 1
   rw [hsT]

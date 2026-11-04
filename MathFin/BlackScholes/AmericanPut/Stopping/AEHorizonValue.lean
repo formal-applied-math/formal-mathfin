@@ -69,7 +69,7 @@ theorem clip_time_ae_eq (θ : AEBoundedRule P 𝓕 T) : θ.clip.time =ᵐ[P] θ.
 /-- Clipping at the horizon does not change the expected payoff of any process `Z`. -/
 theorem clip_integral (θ : AEBoundedRule P 𝓕 T) (Z : ℝ≥0 → Ω → ℝ) :
     (∫ ω, Z (θ.clip.time ω) ω ∂P) = ∫ ω, Z (θ.finiteTime ω) ω ∂P :=
-  integral_congr_ae (by filter_upwards [θ.clip_time_ae_eq] with ω hω using by simp only [hω])
+  integral_congr_ae (θ.clip_time_ae_eq.mono fun ω hω ↦ congrArg (Z · ω) hω)
 
 end AEBoundedRule
 
@@ -91,7 +91,11 @@ theorem toAEBoundedRule_finiteTime (θ : StoppingRule 𝓕 T) :
 end StoppingRule
 
 /-- The value of the payoff process `Z` over almost-surely bounded rules: the supremum of the
-expected payoffs `∫ Z (θ.finiteTime ω) ω`. -/
+expected payoffs `∫ Z (θ.finiteTime ω) ω`.
+
+Like `stoppingValue` this is Mathlib's junk-valued `sSup` and Bochner integral: it is the
+optimal-stopping value only when the rule class is nonempty and the expected payoffs are
+integrable and bounded above (`aeStoppingValue_eq` identifies it with `stoppingValue`). -/
 noncomputable def aeStoppingValue (P : Measure Ω) (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›)
     (Z : ℝ≥0 → Ω → ℝ) (T : ℝ≥0) : ℝ :=
   sSup (range fun θ : AEBoundedRule P 𝓕 T => ∫ ω, Z (θ.finiteTime ω) ω ∂P)

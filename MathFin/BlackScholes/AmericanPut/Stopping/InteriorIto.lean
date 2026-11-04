@@ -60,7 +60,7 @@ theorem brownianInteriorRule_ito_representation {p : ℝ → ℝ → ℝ} {b : �
   obtain ⟨G,hG,_,hpath⟩ := brownianInteriorRule_smooth_extension hp hK hS hσ T n
   obtain ⟨M,hMcont,hM,hIto⟩ := plane_ito_localMartingale
     isBrownianReal_brownian.toIsPreBrownianReal measurable_brownian continuous_brownian
-    (hG.of_le (by norm_num))
+    hG
   refine ⟨M,hMcont,hM,?_⟩
   have ha : ∀ᵐ ω ∂gaussianLimit, 0 < θ.time ω → ∀ t ≤ θ.time ω,
       G (t,brownian t ω)-G (0,brownian 0 ω) = M t ω := by

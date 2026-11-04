@@ -70,8 +70,8 @@ def NoArbitrage (𝓕 : Filtration ℕ m0) (P : Measure Ω) (S : ℕ → Ω → 
     (∃ K : ℝ, ∀ n ≤ T, ∀ ω, ‖φ n ω‖ ≤ K) →
     0 ≤ᵐ[P] martingaleTransform φ S T → martingaleTransform φ S T =ᵐ[P] 0
 
-/-- **Complete market** up to the horizon `T`: every bounded `𝓕 T`-measurable claim `H` is replicated,
-`P`-a.s., by a bounded predictable strategy `φ` from some initial wealth `x`:
+/-- **Complete market** up to the horizon `T`: every bounded `𝓕 T`-measurable claim `H` is
+replicated, `P`-a.s., by a bounded predictable strategy `φ` from some initial wealth `x`:
 `H = x + martingaleTransform φ S T`, the terminal value of the self-financing portfolio holding
 `φ_{t+1}` over `(t, t+1]`. The same strategy class as `NoArbitrage`. -/
 def IsCompleteMarket (𝓕 : Filtration ℕ m0) (P : Measure Ω) (S : ℕ → Ω → F) (T : ℕ) : Prop :=

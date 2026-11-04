@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.ItoDriftIncrementEnergy
 public import MathFin.Foundations.ItoDriftWeightedIsometry
+public import MathFin.Foundations.FiniteMeasureCauchySchwarz
 
 /-! # The third-moment bound for the true increment (the discrete route, stage 5b)
 
@@ -19,63 +20,13 @@ increment through the step approximants' `L²` convergence and Fatou, and the cu
 @[expose] public section
 
 open MeasureTheory ProbabilityTheory Filter Topology
-open scoped NNReal
+open scoped NNReal ENNReal
 
 namespace MathFin.ItoDriftConditional
 
-open MathFin ItoIntegralL2 ItoIntegralCLM ItoIntegralProcessGeneral
-  QuadraticVariationL2 ItoIntegralBrownian
+open MathFin ItoIntegralL2 ItoIntegralCLM ItoIntegralRiemannBridge ItoIsometryAdapted
+  ItoIntegralProcessGeneral ItoIntegralProcess QuadraticVariationL2 ItoIntegralBrownian
 
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
-
-/-! #### Stage 5b — the third-moment bound
-
-The fourth moment of the true increment over a uniform cell, obtained from the step-sum
-recursion `stepSum_pow4_le` (the potential `3S² + 6D²SC + 3D⁴Q`: each refined-band Riemann
-sum of the bounded adapted integrand has fourth moment at most `3·(D²·band length)²`),
-passed to the true increment through the step approximants' `L²` convergence
-(`clm_band_energy` + `deltaStepLp_tendsto`), convergence in measure, an a.e. subsequence,
-and Fatou (`lintegral_liminf_le`). The cube bound then drops out by Cauchy–Schwarz
-interpolation (`∫|X|³ ≤ ‖X‖₂·‖X‖₄²·...`). -/
-
-section StageFiveB
-
-open MeasureTheory ProbabilityTheory Filter Topology ItoIntegralProcessGeneral
-open ItoIntegralL2 ItoIntegralCLM ItoIntegralRiemannBridge ItoIsometryAdapted
-open ItoIntegralProcess QuadraticVariationL2 MathFin
-open scoped NNReal ENNReal
-
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
-  {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
-  (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-  (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-  (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-  {M : ℝ≥0 → Ω → ℝ}
-  (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-  (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-    (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
-
-include hB hBmeas hδadap hδcont hδbdd hMadap hMeq
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- Pointwise fourth-power domination from an absolute-value bound
-(the `sq_le_sq'`/`abs_le` elaboration-order trap, spelled out). -/
-private theorem pow4_le_pow4_of_abs_le {a b : ℝ} (h : |a| ≤ b) : a ^ 4 ≤ b ^ 4 := by
-  have e1 : a ^ 4 = |a| ^ 4 := by
-    rw [← abs_pow, abs_of_nonneg (by positivity)]
-  calc a ^ 4 = |a| ^ 4 := e1
-    _ ≤ b ^ 4 := pow_le_pow_left₀ (abs_nonneg a) h 4
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- Pointwise square domination from an absolute-value bound. -/
-private theorem sq_le_sq_of_abs_le {a b : ℝ} (h : |a| ≤ b) : a ^ 2 ≤ b ^ 2 := by
-  have e1 : a ^ 2 = |a| ^ 2 := by
-    rw [← abs_pow, abs_of_nonneg (by positivity)]
-  calc a ^ 2 = |a| ^ 2 := e1
-    _ ≤ b ^ 2 := pow_le_pow_left₀ (abs_nonneg a) h 2
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- Young's pointwise inequality `|a|³|b| ≤ 3a⁴/4 + b⁴/4`: from
 `(a − b)²(2a² + (a+b)²) = 3a⁴ + b⁴ − 4a³b ≥ 0`, evaluated at `(|a|, |b|)`. -/
 private theorem young34 (a b : ℝ) : |a| ^ 3 * |b| ≤ 3 * a ^ 4 / 4 + b ^ 4 / 4 := by
@@ -91,45 +42,35 @@ private theorem young34 (a b : ℝ) : |a| ^ 3 * |b| ≤ 3 * a ^ 4 / 4 + b ^ 4 / 
     linarith
   linarith
 
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- Young's pointwise inequality, the symmetric instance `|a|·|b|³ ≤ a⁴/4 + 3b⁴/4`. -/
 private theorem young134 (a b : ℝ) : |a| * |b| ^ 3 ≤ a ^ 4 / 4 + 3 * b ^ 4 / 4 := by
   linarith [young34 b a, mul_comm (abs b ^ 3) (abs a)]
 
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- Third moment of a centered real Gaussian (odd moment, by density symmetry). -/
-private theorem integral_pow3_gaussianReal (v : ℝ≥0) :
-    ∫ x, x ^ 3 ∂(gaussianReal 0 v) = 0 := by
-  rcases eq_or_ne v 0 with rfl | hv
-  · rw [gaussianReal_zero_var]
-    simp
-  · rw [integral_gaussianReal_eq_integral_smul hv]
-    simp only [smul_eq_mul]
-    have hmap : Measure.map (fun x : ℝ ↦ -x) (volume : Measure ℝ) = volume :=
-      (Measure.measurePreserving_neg (μ := (volume : Measure ℝ))).map_eq
-    have hpdfneg : ∀ x : ℝ, gaussianPDFReal 0 v (-x) = gaussianPDFReal 0 v x := by
-      intro x
-      simp only [gaussianPDFReal, sub_zero, neg_sq]
-    have hsub : ∫ y, gaussianPDFReal 0 v y * y ^ 3 ∂volume
-        = ∫ x, gaussianPDFReal 0 v (-x) * (-x) ^ 3 ∂volume := by
-      have h1 : ∫ y, gaussianPDFReal 0 v y * y ^ 3 ∂volume
-          = ∫ y, gaussianPDFReal 0 v y * y ^ 3
-              ∂(Measure.map (fun x : ℝ ↦ -x) (volume : Measure ℝ)) := by
-        rw [hmap]
-      rw [h1]
-      exact integral_map_equiv (MeasurableEquiv.neg (G := ℝ))
-        (fun y : ℝ ↦ gaussianPDFReal 0 v y * y ^ 3)
-    rw [hsub]
-    have hcongr : ∫ x, gaussianPDFReal 0 v (-x) * (-x) ^ 3 ∂volume
-        = -∫ x, gaussianPDFReal 0 v x * x ^ 3 ∂volume := by
-      have hpt : ∀ x : ℝ, gaussianPDFReal 0 v (-x) * (-x) ^ 3
-          = -(gaussianPDFReal 0 v x * x ^ 3) := by
-        intro x
-        rw [hpdfneg x]
-        ring
-      rw [integral_congr_ae (Eventually.of_forall hpt), integral_neg]
-    rw [hcongr]
-    linarith
+
+/-! #### Stage 5b — the third-moment bound
+
+The fourth moment of the true increment over a uniform cell, obtained from the step-sum
+recursion `stepSum_pow4_le` (the potential `3S² + 6D²SC + 3D⁴Q`: each refined-band Riemann
+sum of the bounded adapted integrand has fourth moment at most `3·(D²·band length)²`),
+passed to the true increment through the step approximants' `L²` convergence
+(`clm_band_energy` + `deltaStepLp_tendsto`), convergence in measure, an a.e. subsequence,
+and Fatou (`lintegral_liminf_le`). The cube bound then drops out by Cauchy–Schwarz
+interpolation (`∫|X|³ ≤ ‖X‖₂·‖X‖₄²·...`). -/
+
+section StageFiveB
+
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
+  {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
+  {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
+  (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
+  (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
+  (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
+  {M : ℝ≥0 → Ω → ℝ}
+  (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
+  (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
+    (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+
+include hB hBmeas hδadap hδcont hδbdd hMadap hMeq
 
 omit [IsProbabilityMeasure μ] hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- Third moment of a Brownian increment: `E[(B_{t₁} − B_{t₀})³] = 0` for `t₀ ≤ t₁`
@@ -158,13 +99,22 @@ private theorem integral_natMeasurable_mul_increment_pow4
       = (∫ ω, χ ω ∂μ) * (3 * ((t₁ : ℝ) - t₀) ^ 2) := by
   have hχm : Measurable χ := hχ.mono ((natFiltration hBmeas).le t₀) le_rfl
   have hΔm : Measurable (fun ω ↦ B t₁ ω - B t₀ ω) := (hBmeas t₁).sub (hBmeas t₀)
-  have hindep := adapted_indepFun_increment (hB.isFilteredPreBrownian hBmeas) ht hχ
-  have hindep2 := hindep.comp (φ := (id : ℝ → ℝ)) (ψ := fun x : ℝ ↦ x ^ 4)
-    measurable_id (by fun_prop)
-  have key := hindep2.integral_fun_mul_eq_mul_integral
-    hχm.aestronglyMeasurable (hΔm.pow_const 4).aestronglyMeasurable
-  simp only [Function.comp_apply, id_eq] at key
-  rw [key, integral_increment_pow4 hB ht]
+  rw [(adapted_indepFun_increment (hB.isFilteredPreBrownian hBmeas) ht hχ).integral_mul_comp
+      (g := fun x : ℝ ↦ x ^ 4) (by fun_prop) hχm.aestronglyMeasurable hΔm.aemeasurable,
+    integral_increment_pow4 hB ht]
+
+omit [IsProbabilityMeasure μ] hδadap hδcont hδbdd hMadap hMeq in
+/-- Third-power isometry kernel: for `χ` measurable in the natural filtration at `t₀`,
+`E[χ·(B t₁ − B t₀)³] = 0` (the odd Gaussian moment vanishes). -/
+private theorem integral_natMeasurable_mul_increment_pow3
+    {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
+    {χ : Ω → ℝ} (hχ : Measurable[natFiltration hBmeas t₀] χ) :
+    ∫ ω, χ ω * (B t₁ ω - B t₀ ω) ^ 3 ∂μ = 0 := by
+  have hχm : Measurable χ := hχ.mono ((natFiltration hBmeas).le t₀) le_rfl
+  have hΔm : Measurable (fun ω ↦ B t₁ ω - B t₀ ω) := (hBmeas t₁).sub (hBmeas t₀)
+  rw [(adapted_indepFun_increment (hB.isFilteredPreBrownian hBmeas) ht hχ).integral_mul_comp
+      (g := fun x : ℝ ↦ x ^ 3) (by fun_prop) hχm.aestronglyMeasurable hΔm.aemeasurable,
+    integral_increment_pow3 hB ht, mul_zero]
 
 set_option maxHeartbeats 1600000 in
 -- a long estimate: elaborating the whole proof exceeds the default budget
@@ -238,7 +188,8 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
         refine le_trans (integral_mono_of_nonneg (μ := μ)
           (Eventually.of_forall fun ω ↦ show (0:ℝ) ≤ φ N ω ^ 4 from by positivity)
           (integrable_const (D ^ 4)) (ae_of_all μ fun ω ↦ ?_)) ?_
-        · exact pow4_le_pow4_of_abs_le (hφbdd N ω)
+        · exact (Even.pow_abs (n := 4) ⟨2, rfl⟩ _).symm.trans_le
+            (pow_le_pow_left₀ (abs_nonneg _) (hφbdd N ω) 4)
         · rw [integral_const]
           simp
       calc (∫ ω, (φ N ω) ^ 4 ∂μ) * (3 * ((s (N + 1) : ℝ) - s N) ^ 2)
@@ -255,7 +206,8 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
           (ae_of_all μ fun ω ↦ by
             change ‖(φ k ω) ^ 4‖ ≤ D ^ 4
             rw [Real.norm_eq_abs, abs_of_nonneg (by positivity : (0:ℝ) ≤ (φ k ω) ^ 4)]
-            exact pow4_le_pow4_of_abs_le (hφbdd k ω))
+            exact (Even.pow_abs (n := 4) ⟨2, rfl⟩ _).symm.trans_le
+              (pow_le_pow_left₀ (abs_nonneg _) (hφbdd k ω) 4))
       have hΔ4 : Integrable (fun ω ↦ (B (s (k + 1)) ω - B (s k) ω) ^ 4) μ := by
         have h := (memLp_increment_four hB (s k) (s (k + 1))).integrable_norm_pow
           (by norm_num)
@@ -422,25 +374,13 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
     have hY30 : ∫ ω, (∑ k ∈ Finset.range N,
           φ k ω * (B (s (k + 1)) ω - B (s k) ω))
         * (φ N ω * (B (s (N + 1)) ω - B (s N) ω)) ^ 3 ∂μ = 0 := by
-      have hcoefm : Measurable (fun ω ↦
-          (∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω)) * (φ N ω) ^ 3) :=
-        (hZm.mul ((hφmN N (Nat.le_refl N)).pow_const 3)).mono
-          ((natFiltration hBmeas).le (s N)) le_rfl
-      have hΔm3 : Measurable (fun ω ↦ (B (s (N + 1)) ω - B (s N) ω) ^ 3) :=
-        hΔmeasN.pow_const 3
-      have hindep3 := (adapted_indepFun_increment (hB.isFilteredPreBrownian hBmeas)
-        (hsmono (Nat.le_succ N)) hcoef3).comp (φ := (id : ℝ → ℝ)) (ψ := fun x : ℝ ↦ x ^ 3)
-        measurable_id (by fun_prop)
-      have key := hindep3.integral_fun_mul_eq_mul_integral
-        hcoefm.aestronglyMeasurable hΔm3.aestronglyMeasurable
-      simp only [Function.comp_apply, id_eq] at key
       rw [show (fun ω ↦ (∑ k ∈ Finset.range N,
             φ k ω * (B (s (k + 1)) ω - B (s k) ω))
           * (φ N ω * (B (s (N + 1)) ω - B (s N) ω)) ^ 3)
         = (fun ω ↦ ((∑ k ∈ Finset.range N,
               φ k ω * (B (s (k + 1)) ω - B (s k) ω)) * (φ N ω) ^ 3)
           * (B (s (N + 1)) ω - B (s N) ω) ^ 3) from by funext ω; ring]
-      rw [key, integral_increment_pow3 hB (hsmono (Nat.le_succ N)), mul_zero]
+      exact integral_natMeasurable_mul_increment_pow3 hB hBmeas (hsmono (Nat.le_succ N)) hcoef3
     -- the even mixed term: isometry kernel at `χ = Z²φN²`
     have hZ2adapt : Measurable[natFiltration hBmeas (s N)] (fun ω ↦
         (∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 2
@@ -457,7 +397,7 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
             have hmono : ∫ (a : Ω), φ k a ^ 2 ∂μ ≤ ∫ (a : Ω), D ^ 2 ∂μ :=
               integral_mono_of_nonneg (Eventually.of_forall fun ω ↦ sq_nonneg _)
                 (integrable_const (D ^ 2)) (ae_of_all _ fun ω ↦
-                  sq_le_sq_of_abs_le (hφbdd k ω))
+                  sq_le_sq.mpr ((hφbdd k ω).trans (le_abs_self D)))
             rw [integral_const] at hmono
             simpa using hmono)
           (sub_nonneg.mpr (NNReal.coe_le_coe.mpr (hsmono (Nat.le_succ k))))
@@ -474,7 +414,7 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
               φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 2 * (φ N ω) ^ 2
             ≤ (∑ k ∈ Finset.range N,
               φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 2 * D ^ 2 :=
-              mul_le_mul_of_nonneg_left (sq_le_sq_of_abs_le (hφbdd N ω))
+              mul_le_mul_of_nonneg_left (sq_le_sq.mpr ((hφbdd N ω).trans (le_abs_self D)))
                 (pow_two_nonneg (∑ k ∈ Finset.range N,
                   φ k ω * (B (s (k + 1)) ω - B (s k) ω)))
         _ = D ^ 2 * (∑ k ∈ Finset.range N,
@@ -992,45 +932,31 @@ private theorem clmIncr_pow4_integrable {n : ℕ} (hn : 0 < n) (k : ℕ) (hk : k
         (trueIncr_pow4_lintegral_le hB hBmeas hδadap hδcont hδbdd hn k hk)
         ENNReal.ofReal_lt_top⟩
 
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- Pointwise un-absolutization of the fourth power (even power). -/
-private theorem abs4_eq_pow4 (x : ℝ) : |x| ^ 4 = x ^ 4 := by
-  rw [← abs_pow]
+omit hMadap in
+/-- The fourth power of the true increment is a.e. the fourth power of the CLM coe-difference
+(the a.e. transfer along `hMeq`, shared by `trueIncr_pow4_integrable` and `trueIncr_pow4_le`). -/
+private theorem abs_pow4_trueIncr_ae (n k : ℕ) :
+    (fun ω ↦ |M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω| ^ 4)
+    =ᵐ[μ] (fun ω ↦ (((itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
+          (processToLp T hBmeas hδadap hδcont hδbdd)
+        - itoProcessCLM hB T (unifPart T n k) hBmeas
+          (processToLp T hBmeas hδadap hδcont hδbdd) : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4) := by
+  filter_upwards [hMeq (unifPart T n (k + 1)), hMeq (unifPart T n k),
+    Lp.coeFn_sub
+      (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
+        (processToLp T hBmeas hδadap hδcont hδbdd))
+      (itoProcessCLM hB T (unifPart T n k) hBmeas
+        (processToLp T hBmeas hδadap hδcont hδbdd))] with ω h1 h0 hsub
+  show |M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω| ^ 4 = _
+  rw [h1, h0, ← Pi.sub_apply, ← hsub, ← abs_pow]
   exact abs_of_nonneg (by positivity)
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- Pointwise fourth power as a squared square. -/
-private theorem sqsq_eq_pow4 (x : ℝ) : (x ^ 2) ^ 2 = x ^ 4 := by
-  rw [← pow_mul]
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- Pointwise fourth power as the squared real norm (`ℝ≥0∞`-cast form, for
-`integrable_norm_rpow_iff` at `p = 2`; the `(2 : ℝ) = ((2 : ℕ) : ℝ)` pre-rewrite is the
-`rpow_natCast` keyed-matching unblock). -/
-private theorem pow4_eq_normsq2 (x : ℝ) : x ^ 4 = ‖x ^ 2‖ ^ ((2 : ℕ) : ℝ≥0∞).toReal := by
-  have h2r : ((2 : ℕ) : ℝ≥0∞).toReal = (2 : ℝ) := by norm_num
-  rw [h2r, Real.norm_eq_abs, show ((2 : ℝ) = ((2 : ℕ) : ℝ)) from by norm_num,
-    Real.rpow_natCast, abs_pow, sq_abs, ← pow_mul]
 
 omit hMadap in
 /-- The true increment is in `L⁴` (modifying-process form): the a.e. transfer of
 `clmIncr_pow4_integrable` along the `hMeq` congruence. -/
 theorem trueIncr_pow4_integrable {n : ℕ} (hn : 0 < n) (k : ℕ) (hk : k < n) :
     Integrable (fun ω ↦ |M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω| ^ 4) μ := by
-  have hG4 : (fun ω ↦ |M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω| ^ 4)
-      =ᵐ[μ] (fun ω ↦ (((itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-            (processToLp T hBmeas hδadap hδcont hδbdd)
-          - itoProcessCLM hB T (unifPart T n k) hBmeas
-            (processToLp T hBmeas hδadap hδcont hδbdd) : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4) := by
-    filter_upwards [hMeq (unifPart T n (k + 1)), hMeq (unifPart T n k),
-      Lp.coeFn_sub
-        (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-          (processToLp T hBmeas hδadap hδcont hδbdd))
-        (itoProcessCLM hB T (unifPart T n k) hBmeas
-          (processToLp T hBmeas hδadap hδcont hδbdd))] with ω h1 h0 hsub
-    show |M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω| ^ 4 = _
-    rw [h1, h0, ← Pi.sub_apply, ← hsub, ← abs_pow]
-    exact abs_of_nonneg (by positivity)
+  have hG4 := abs_pow4_trueIncr_ae hB hBmeas hδadap hδcont hδbdd hMeq n k
   exact (clmIncr_pow4_integrable hB hBmeas hδadap hδcont hδbdd hn k hk).congr hG4.symm
 
 omit hMadap in
@@ -1043,20 +969,7 @@ theorem trueIncr_pow4_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk : k < n) :
     ∫ ω, |M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω| ^ 4 ∂μ
       ≤ 3 * (Dd ^ 2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 2 := by
   -- a.e. transfer to the CLM coe-difference
-  have hG4 : (fun ω ↦ |M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω| ^ 4)
-      =ᵐ[μ] (fun ω ↦ (((itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-            (processToLp T hBmeas hδadap hδcont hδbdd)
-          - itoProcessCLM hB T (unifPart T n k) hBmeas
-            (processToLp T hBmeas hδadap hδcont hδbdd) : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4) := by
-    filter_upwards [hMeq (unifPart T n (k + 1)), hMeq (unifPart T n k),
-      Lp.coeFn_sub
-        (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-          (processToLp T hBmeas hδadap hδcont hδbdd))
-        (itoProcessCLM hB T (unifPart T n k) hBmeas
-          (processToLp T hBmeas hδadap hδcont hδbdd))] with ω h1 h0 hsub
-    show |M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω| ^ 4 = _
-    rw [h1, h0, ← Pi.sub_apply, ← hsub, ← abs_pow]
-    exact abs_of_nonneg (by positivity)
+  have hG4 := abs_pow4_trueIncr_ae hB hBmeas hδadap hδcont hδbdd hMeq n k
   rw [integral_congr_ae hG4]
   have hint4 : Integrable (fun ω ↦ (((itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
             (processToLp T hBmeas hδadap hδcont hδbdd)
@@ -1078,7 +991,7 @@ theorem trueIncr_pow4_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk : k < n) :
 /-- **The third-moment bound** for the true increment (the Taylor-remainder kernel of the
 adapted assembly): `𝔼|ΔM|³ ≤ √(3·(D_δ²·cell)³) = O(cell^{3/2})`. Route: Cauchy–Schwarz
 interpolation `∫|X|³ = ∫|X·X²| ≤ ‖X‖₂·‖X²‖₂` (the real `L²` pairing
-`integral_abs_mul_le_L2L2`), the two factors from `trueIncr_sq_le` and `trueIncr_pow4_le`;
+`integral_abs_mul_le_sqrt_mul_sqrt`), the two factors from `trueIncr_sq_le` and `trueIncr_pow4_le`;
 the `L²` memberships from `memLp_M` (for `X`) and from the `L⁴` integrability
 (`integrable_norm_rpow_iff` + the pointwise `‖X²‖² = X⁴` identification) for `X²`. -/
 theorem trueIncr_pow3_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk : k < n) :
@@ -1102,13 +1015,13 @@ theorem trueIncr_pow3_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk : k < n) :
   have hint4M : Integrable (fun ω ↦
       (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 4) μ :=
     (trueIncr_pow4_integrable hB hBmeas hδadap hδcont hδbdd hMeq hn k hk).congr
-      (Eventually.of_forall fun ω ↦ abs4_eq_pow4 _)
+      (Eventually.of_forall fun ω ↦ Even.pow_abs ⟨2, rfl⟩ _)
   have hint4 : ∫ ω, (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 4 ∂μ
       ≤ 3 * (Dd ^ 2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 2 := by
     refine le_trans (le_of_eq ?_)
       (trueIncr_pow4_le hB hBmeas hδadap hδcont hδbdd hMeq hn k hk)
     exact integral_congr_ae (μ := μ)
-      (Eventually.of_forall fun ω ↦ (abs4_eq_pow4 _).symm)
+      (Eventually.of_forall fun ω ↦ (Even.pow_abs ⟨2, rfl⟩ _).symm)
   -- `L²` membership of `X²`: from the `L⁴` integrability via `integrable_norm_rpow_iff`
   have hΔsq2 : MemLp (fun ω ↦
       (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2) 2 μ :=
@@ -1116,7 +1029,11 @@ theorem trueIncr_pow3_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk : k < n) :
       (hint4M.congr (Eventually.of_forall fun ω ↦
         show (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 4
           = ‖(M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2‖
-              ^ ((2 : ℕ) : ℝ≥0∞).toReal from pow4_eq_normsq2 _))
+              ^ ((2 : ℕ) : ℝ≥0∞).toReal from by
+          -- the `(2 : ℝ) = ((2 : ℕ) : ℝ)` pre-rewrite unblocks `rpow_natCast`
+          rw [show ((2 : ℕ) : ℝ≥0∞).toReal = (2 : ℝ) by norm_num, Real.norm_eq_abs,
+            show ((2 : ℝ) = ((2 : ℕ) : ℝ)) from by norm_num, Real.rpow_natCast, abs_pow, sq_abs,
+            ← pow_mul]))
   -- Cauchy–Schwarz interpolation and the two energy bounds
   calc ∫ ω, |M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω| ^ 3 ∂μ
       = ∫ ω, |(M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)
@@ -1129,13 +1046,14 @@ theorem trueIncr_pow3_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk : k < n) :
         ring
     _ ≤ Real.sqrt (∫ ω, (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ)
         * Real.sqrt (∫ ω, (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 4 ∂μ) := by
-        refine le_trans (integral_abs_mul_le_L2L2 hΔ2 hΔsq2) ?_
+        refine le_trans (integral_abs_mul_le_sqrt_mul_sqrt hΔ2 hΔsq2) ?_
         refine mul_le_mul le_rfl (Real.sqrt_le_sqrt (le_of_eq ?_))
           (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
         exact integral_congr_ae (μ := μ)
           (Eventually.of_forall fun ω ↦
             show ((M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2) ^ 2
-              = (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 4 from sqsq_eq_pow4 _)
+              = (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 4 from by
+              rw [← pow_mul])
     _ ≤ Real.sqrt (Dd ^ 2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k))
         * Real.sqrt (3 * (Dd ^ 2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 2) :=
         mul_le_mul (Real.sqrt_le_sqrt hint2) (Real.sqrt_le_sqrt hint4)

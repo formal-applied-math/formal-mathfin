@@ -12,9 +12,10 @@ public import MathFin.Foundations.FTAPDiscrete
 # Second FTAP on a finite probability space: complete ⟺ unique equivalent martingale measure
 
 For the finite-Ω, finite-horizon, single-asset market of `FTAPDiscrete.lean` (a full-support
-probability `P`, an adapted discounted price `S`, a horizon `T`), a market with no arbitrage is
-**complete** (`IsCompleteMarket`: every claim is the terminal wealth of a predictable strategy
-started from some initial wealth) **iff** its equivalent martingale measure is **unique**.
+probability `P`, an adapted discounted price `S`, a horizon `T`), a market with no arbitrage and
+full information at the horizon (`𝓕 T = ⊤`) is **complete** (`IsCompleteMarket`: every claim is
+the terminal wealth of a predictable strategy started from some initial wealth) **iff** its
+equivalent martingale measure is **unique**.
 
 * `complete ⇒ unique` is general (`IsEMM.measure_eq_of_isCompleteMarket`, `Foundations/FTAP.lean`):
   replicate the indicator of an event and read off its probability.
@@ -41,6 +42,7 @@ open MeasureTheory
 variable {Ω : Type*} [Fintype Ω] [Nonempty Ω] {mΩ : MeasurableSpace Ω}
   [MeasurableSingletonClass Ω] (𝓕 : Filtration ℕ mΩ) (P : Measure Ω) (S : ℕ → Ω → ℝ) (T : ℕ)
 
+variable {𝓕 P S T} in
 /-- **Gains are a fair game under an equivalent martingale measure**: every element of the
 attainable-gains subspace has `Q`-mean zero. -/
 theorem IsEMM.sum_mul_eq_zero_of_mem_gainsSubspace {Q : Measure Ω} (hQ : IsEMM 𝓕 P S T Q)
@@ -51,53 +53,33 @@ theorem IsEMM.sum_mul_eq_zero_of_mem_gainsSubspace {Q : Measure Ω} (hQ : IsEMM 
   rw [integral_fintype Integrable.of_finite] at h
   simpa using h
 
+omit [Fintype Ω] in
 /-- **Second FTAP, `unique ⇒ complete`**: if the market has an equivalent martingale measure and
 only one, every claim is replicated by a predictable strategy from some initial wealth. -/
-theorem isCompleteMarket_of_unique (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω})
+theorem isCompleteMarket_of_unique [Finite Ω] (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω})
     {Q₀ : Measure Ω} (h₀ : IsEMM 𝓕 P S T Q₀) (hu : ∀ Q, IsEMM 𝓕 P S T Q → Q = Q₀) :
     IsCompleteMarket 𝓕 P S T := by
   classical
+  cases nonempty_fintype Ω
   haveI := h₀.isProb
   have hW : Submodule.span ℝ {fun _ : Ω ↦ (1 : ℝ)} ⊔ gainsSubspace 𝓕 S T = ⊤ := by
     by_contra hne
-    obtain ⟨ℓ, hℓ0, hℓ⟩ := Submodule.exists_le_ker_of_lt_top _ (lt_top_iff_ne_top.2 hne)
-    set η : Ω → ℝ := fun ω ↦ ℓ fun j ↦ if ω = j then 1 else 0 with hη
-    have hℓη (g : Ω → ℝ) : ℓ g = ∑ ω, g ω * η ω := by
-      rw [LinearMap.pi_apply_eq_sum_univ ℓ g]
-      simp [hη]
-    have hη0 : η ≠ 0 := fun h ↦ hℓ0 (LinearMap.ext fun g ↦ by simp [hℓη, h])
+    obtain ⟨η, hη0, hη⟩ := exists_ne_zero_sum_mul_eq_zero (lt_top_iff_ne_top.2 hne)
     have hsum : ∑ ω, η ω = 0 := by
-      have := LinearMap.mem_ker.1 (hℓ (Submodule.mem_sup_left (Submodule.subset_span rfl)))
-      simpa [hℓη] using this
-    have hgain (g : Ω → ℝ) (hg : g ∈ gainsSubspace 𝓕 S T) : ∑ ω, g ω * η ω = 0 := by
-      simpa [hℓη] using LinearMap.mem_ker.1 (hℓ (Submodule.mem_sup_right hg))
+      simpa using hη _ (Submodule.mem_sup_left (Submodule.subset_span rfl))
     -- the weights of `Q₀`
-    set p : Ω → ℝ := fun ω ↦ Q₀.real {ω} with hp
-    have hp_pos (ω : Ω) : 0 < p ω := by
-      refine ENNReal.toReal_pos (fun h ↦ (hP ω).ne' (h₀.ac' h)) (measure_ne_top _ _)
-    have hp_sum : ∑ ω, p ω = 1 := by simp [hp]
-    -- a perturbation of size `ε` keeps the weights positive
-    set M : ℝ := ∑ ω, |η ω| / p ω with hM
-    have hM_le (ω : Ω) : |η ω| / p ω ≤ M :=
-      Finset.single_le_sum (f := fun ω ↦ |η ω| / p ω)
-        (fun ω _ ↦ div_nonneg (abs_nonneg _) (hp_pos ω).le) (Finset.mem_univ ω)
-    set ε : ℝ := 1 / (M + 1) with hε
-    have hM0 : 0 ≤ M := Finset.sum_nonneg fun ω _ ↦ div_nonneg (abs_nonneg _) (hp_pos ω).le
-    have hεpos : 0 < ε := by positivity
-    have hq_pos (ω : Ω) : 0 < p ω + ε * η ω := by
-      have h1 : |η ω| < (M + 1) * p ω := by
-        have := (div_le_iff₀ (hp_pos ω)).1 (hM_le ω)
-        nlinarith [hp_pos ω]
-      have h2 : ε * |η ω| < p ω := by
-        rw [hε, one_div, inv_mul_lt_iff₀ (by positivity)]
-        exact h1
-      nlinarith [neg_abs_le (η ω), abs_nonneg (η ω)]
+    set p : Ω → ℝ := fun ω ↦ Q₀.real {ω}
+    have hp_pos (ω : Ω) : 0 < p ω :=
+      ENNReal.toReal_pos (fun h ↦ (hP ω).ne' (h₀.ac' h)) (measure_ne_top _ _)
+    have hp_sum : ∑ ω, p ω = 1 := by simp [p]
+    -- a small perturbation of the weights in the direction `η` keeps them positive
+    obtain ⟨ε, hεpos, hq_pos⟩ := exists_pos_add_mul_pos hp_pos η
     have hq_dual (g : Ω → ℝ) (hg : g ∈ gainsSubspace 𝓕 S T) :
         ∑ ω, (p ω + ε * η ω) * g ω = 0 := by
       have : ∑ ω, (p ω + ε * η ω) * g ω = ∑ ω, p ω * g ω + ε * ∑ ω, g ω * η ω := by
         rw [Finset.mul_sum, ← Finset.sum_add_distrib]
         exact Finset.sum_congr rfl fun ω _ ↦ by ring
-      rw [this, h₀.sum_mul_eq_zero_of_mem_gainsSubspace 𝓕 P S T hg, hgain g hg]
+      rw [this, h₀.sum_mul_eq_zero_of_mem_gainsSubspace hg, hη g (Submodule.mem_sup_right hg)]
       simp
     obtain ⟨Q', hQ', hQ's⟩ := exists_isEMM_of_pos_dual 𝓕 P S T hS hP hq_pos hq_dual
     have hZ : ∑ ω, (p ω + ε * η ω) = 1 := by
@@ -114,13 +96,15 @@ theorem isCompleteMarket_of_unique (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0
   obtain ⟨y, hy, g, hg, rfl⟩ := Submodule.mem_sup.1 (hW ▸ Submodule.mem_top : H ∈ _)
   obtain ⟨x, rfl⟩ := Submodule.mem_span_singleton.1 hy
   obtain ⟨φ, hφ, rfl⟩ := mem_gains_imp_predictable 𝓕 S T hg
-  exact ⟨x, φ, fun t _ ↦ hφ t, exists_bound_horizon T φ, Filter.Eventually.of_forall fun ω ↦ by simp⟩
+  exact ⟨x, φ, fun t _ ↦ hφ t, exists_bound_horizon T φ,
+    Filter.Eventually.of_forall fun ω ↦ by simp⟩
 
+omit [Fintype Ω] in
 /-- **The Second Fundamental Theorem of Asset Pricing on a finite probability space.** For a
 single-asset, finite-horizon market on a finite full-support space with no arbitrage and full
 information at the horizon (`𝓕 T = ⊤`), the market is complete iff its equivalent martingale
 measure is unique. -/
-theorem ftap_two (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) (hT : 𝓕 T = mΩ)
+theorem ftap_two [Finite Ω] (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) (hT : 𝓕 T = mΩ)
     (hNA : NoArbitrage 𝓕 P S T) : IsCompleteMarket 𝓕 P S T ↔ ∃! Q, IsEMM 𝓕 P S T Q := by
   refine ⟨fun hc ↦ ?_, fun ⟨Q₀, h₀, hu⟩ ↦ isCompleteMarket_of_unique 𝓕 P S T hS hP h₀ hu⟩
   obtain ⟨Q₀, h₀⟩ := exists_isEMM_of_noArbitrage 𝓕 P S T hS hP hNA

@@ -53,8 +53,9 @@ probability (`IsEMM.real_horizonAtom`), and at `t = T` the atoms are the paths, 
 * `IsEMM.eq_horizonMeasure` — under `BinomialNoArb` and `S₀ > 0`, every `IsEMM` of the market is
   `horizonMeasure T (crrUpProb u d r)`; `existsUnique_isEMM_horizonSpot` packages existence and
   uniqueness.
-* `isCompleteMarket_horizonSpot_iff`, `isCompleteMarket_horizonSpot` — the Second FTAP for the tree:
-  under `BinomialNoArb` the market is complete, iff the martingale measure is unique, and both hold.
+* `isCompleteMarket_horizonSpot_iff` — the Second FTAP for the tree: under `BinomialNoArb` the
+  market is complete iff it has exactly one equivalent martingale measure.
+* `isCompleteMarket_horizonSpot` — for `S₀ > 0` both hold: the market is complete.
 -/
 
 @[expose] public section
@@ -88,7 +89,8 @@ def horizonFiltration : Filtration ℕ (inferInstance : MeasurableSpace (Fin T �
     exact MeasurableSpace.comap_mono (Measurable.comap_le (measurable_revealed T m))
   le' n := (measurable_revealed T n).comap_le
 
-/-- The first `T` flips as a path of length `T`, extended by `false`: a right inverse of `flips T`. -/
+/-- The first `T` flips as a path of length `T`, extended by `false`: a right inverse of
+`flips T`. -/
 def padFlips (x : Fin T → Bool) : ℕ → Bool := fun k ↦ if h : k < T then x ⟨k, h⟩ else false
 
 lemma flips_padFlips (x : Fin T → Bool) : flips T (padFlips T x) = x :=
@@ -164,7 +166,8 @@ lemma horizonSpot_revealed (n : ℕ) (x : Fin T → Bool) :
     simp [padFlips, revealed, hiT, hin]
 
 /-- The market price is adapted to `horizonFiltration`. -/
-lemma stronglyAdapted_horizonSpot : StronglyAdapted (horizonFiltration T) (horizonSpot T S₀ u d r) :=
+lemma stronglyAdapted_horizonSpot :
+    StronglyAdapted (horizonFiltration T) (horizonSpot T S₀ u d r) :=
   fun n ↦ by
     have : horizonSpot T S₀ u d r n = horizonSpot T S₀ u d r n ∘ revealed T n :=
       funext fun x ↦ (horizonSpot_revealed n x).symm
@@ -236,9 +239,7 @@ the easy direction of `ftap_discrete`. -/
 theorem noArbitrage_horizonSpot (h : BinomialNoArb u d r) (S₀ : ℝ) {p : ℝ≥0} (hp0 : 0 < p)
     (hp1 : p < 1) :
     NoArbitrage (horizonFiltration T) (horizonMeasure T p hp1.le) (horizonSpot T S₀ u d r) T := by
-  obtain ⟨q, hq1, hqcrr⟩ : ∃ q : ℝ≥0, q ≤ 1 ∧ crrUpProb u d r = q :=
-    ⟨(crrUpProb u d r).toNNReal, Real.toNNReal_le_one.2 (crrUpProb_mem_Ioo h).2.le,
-      (Real.coe_toNNReal _ (crrUpProb_mem_Ioo h).1.le).symm⟩
+  obtain ⟨q, hq1, hqcrr⟩ := h.exists_nnreal_crrUpProb
   exact (ftap_discrete _ _ _ _ stronglyAdapted_horizonSpot (horizonMeasure_pos T hp0 hp1)).2
     ⟨_, isEMM_horizonSpot h S₀ hp0 hp1 hq1 hqcrr⟩
 
@@ -405,7 +406,8 @@ theorem IsEMM.real_atom_up (hS₀ : 0 < S₀) (h : BinomialNoArb u d r)
   have hup : ∫ y in A ∩ U, horizonSpot T S₀ u d r (t + 1) y ∂Q
       = Q.real (A ∩ U) * (s * (Real.exp (-r) * u)) := by
     rw [setIntegral_congr_fun (hA.inter hU) fun y hy ↦ by
-      rw [horizonSpot_succ ht, horizonSpot_eq_of_mem_horizonAtom hy.1, if_pos (show y ⟨t, ht⟩ = true from hy.2)],
+      rw [horizonSpot_succ ht, horizonSpot_eq_of_mem_horizonAtom hy.1,
+        if_pos (show y ⟨t, ht⟩ = true from hy.2)],
       setIntegral_const, smul_eq_mul]
   have hdown : ∫ y in A \ U, horizonSpot T S₀ u d r (t + 1) y ∂Q
       = Q.real (A \ U) * (s * (Real.exp (-r) * d)) := by
@@ -467,7 +469,8 @@ theorem IsEMM.real_horizonAtom (hS₀ : 0 < S₀) (h : BinomialNoArb u d r)
     have hpt (i : Fin T) : (if (i : ℕ) < t + 1 then
           (if x i then crrUpProb u d r else 1 - crrUpProb u d r) else 1)
         = (if (i : ℕ) < t then (if x i then crrUpProb u d r else 1 - crrUpProb u d r) else 1)
-          * (if i = ⟨t, ht'⟩ then (if x i then crrUpProb u d r else 1 - crrUpProb u d r) else 1) := by
+          * (if i = ⟨t, ht'⟩ then (if x i then crrUpProb u d r else 1 - crrUpProb u d r)
+            else 1) := by
       by_cases h1 : (i : ℕ) < t
       · have : i ≠ ⟨t, ht'⟩ := fun e ↦ by simp [e] at h1
         simp [h1, this, show (i : ℕ) < t + 1 by omega]
@@ -540,8 +543,9 @@ lemma horizonFiltration_horizon :
 /-- **The Second Fundamental Theorem for the multi-period binomial tree.** Under
 `BinomialNoArb u d r`, the `T`-period CRR market is complete (`IsCompleteMarket`: every claim on
 the paths is the terminal wealth of a predictable strategy in the discounted spot, from some
-initial wealth) exactly when its equivalent martingale measure is unique; both hold. This is
-`ftap_two` for the market of this file, whose uniqueness is `existsUnique_isEMM_horizonSpot`. -/
+initial wealth) exactly when its equivalent martingale measure is unique. This is `ftap_two` for
+the market of this file; that the measure is unique, so that both sides hold, needs `S₀ > 0` and
+is `existsUnique_isEMM_horizonSpot`. -/
 theorem isCompleteMarket_horizonSpot_iff (h : BinomialNoArb u d r) (S₀ : ℝ) {p : ℝ≥0}
     (hp0 : 0 < p) (hp1 : p < 1) :
     IsCompleteMarket (horizonFiltration T) (horizonMeasure T p hp1.le) (horizonSpot T S₀ u d r) T
@@ -559,9 +563,7 @@ theorem isCompleteMarket_horizonSpot (hS₀ : 0 < S₀) (h : BinomialNoArb u d r
     (hp0 : 0 < p) (hp1 : p < 1) :
     IsCompleteMarket (horizonFiltration T) (horizonMeasure T p hp1.le)
       (horizonSpot T S₀ u d r) T := by
-  obtain ⟨q, hq1, hqcrr⟩ : ∃ q : ℝ≥0, q ≤ 1 ∧ crrUpProb u d r = q :=
-    ⟨(crrUpProb u d r).toNNReal, Real.toNNReal_le_one.2 (crrUpProb_mem_Ioo h).2.le,
-      (Real.coe_toNNReal _ (crrUpProb_mem_Ioo h).1.le).symm⟩
+  obtain ⟨q, hq1, hqcrr⟩ := h.exists_nnreal_crrUpProb
   exact (isCompleteMarket_horizonSpot_iff h S₀ hp0 hp1).2
     (existsUnique_isEMM_horizonSpot hS₀ h hp0 hp1 hq1 hqcrr)
 

@@ -70,6 +70,13 @@ lemma crrUpProb_mem_Ioo {u d r : ℝ} (h : BinomialNoArb u d r) :
   · unfold crrUpProb
     rw [div_lt_one h_ud]; linarith [h.lt_u]
 
+/-- Under no-arbitrage the risk-neutral up-probability `crrUpProb u d r` is a probability in
+`ℝ≥0`: the form the `ℝ≥0`-parametrised flip laws (`coinFlipMeasure`, `horizonMeasure`) take. -/
+lemma BinomialNoArb.exists_nnreal_crrUpProb {u d r : ℝ} (h : BinomialNoArb u d r) :
+    ∃ q : NNReal, q ≤ 1 ∧ crrUpProb u d r = q :=
+  ⟨(crrUpProb u d r).toNNReal, Real.toNNReal_le_one.2 (crrUpProb_mem_Ioo h).2.le,
+    (Real.coe_toNNReal _ (crrUpProb_mem_Ioo h).1.le).symm⟩
+
 /-- The probability `1 - q = (u - e^r) / (u - d)`. -/
 lemma one_sub_crrUpProb {u d r : ℝ} (h : BinomialNoArb u d r) :
     1 - crrUpProb u d r = (u - Real.exp r) / (u - d) := by

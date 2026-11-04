@@ -7,10 +7,8 @@ module
 
 public import MathFin.Foundations.ItoDriftIncrementEnergy
 public import MathFin.Foundations.ItoDriftMomentBounds
-public import MathFin.Foundations.ItoDriftBlock
-public import MathFin.Foundations.ItoDriftQuadraticCorrections
 
-/-! # The Taylor remainder of the adapted Itô–drift identity (the discrete route, stage 5e)
+/-! # The Taylor remainder of the adapted Itô–drift identity (the discrete route, stage 5f)
 
 `taylorRemainderSum_tendsto`: the expected sum of Taylor remainders of the discrete Itô formula
 tends to `0`, by the cubic Taylor bound `abs_discreteTaylorRemainder_le` and the third-moment
@@ -20,21 +18,15 @@ estimate `trueIncr_pow3_le`.
 @[expose] public section
 
 open MeasureTheory ProbabilityTheory Filter Topology
-open scoped NNReal
+open scoped NNReal ENNReal
 
 namespace MathFin.ItoDriftConditional
 
-open MathFin ItoIntegralL2 ItoIntegralCLM ItoIntegralProcessGeneral
-  QuadraticVariationL2 ItoIntegralBrownian
+open MathFin ItoIntegralL2 ItoIntegralCLM ItoIntegralRiemannBridge ItoIsometryAdapted
+  ItoIntegralProcessGeneral ItoIntegralProcess QuadraticVariationL2 ItoIntegralBrownian
+  AdaptedDrift
 
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
-
-section StageFiveD
-
-open MeasureTheory ProbabilityTheory Filter Topology ItoIntegralProcessGeneral
-open ItoIntegralL2 ItoIntegralCLM ItoIntegralRiemannBridge ItoIsometryAdapted
-open ItoIntegralProcess QuadraticVariationL2 ItoIntegralBrownian AdaptedDrift MathFin
-open scoped NNReal ENNReal
+section StageFiveF
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
@@ -49,14 +41,13 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
 
 include hB hBmeas hδadap hδcont hδbdd hMadap hMeq
 
-
 set_option maxHeartbeats 1600000 in
 -- a long estimate: elaborating the whole proof exceeds the default budget
 /-- **The Taylor remainder dies**: the summed discrete Taylor remainders along the uniform
 partition have expectation tending to `0` (the statement; the rate below is the proof's) —
 each `|Rₖ| ≤ C₃·|ΔXₖ|³`
 (`abs_discreteTaylorRemainder_le`) with `ΔXₖ = Δ(AdaptedDrift.driftPath β)ₖ + ΔMₖ` (the increment
-decomposition), `(a+b)³ ≤ 4·(a³+b³)` (`pow3_add_le`), the drift increment pointwise
+decomposition), `(a+b)³ ≤ 4·(a³+b³)` (`add_pow_le`), the drift increment pointwise
 `D_β·cell`, and the martingale increment `𝔼|ΔM|³ ≤ √(3·(D_δ²·cell)³)`
 (`trueIncr_pow3_le`); the cells telescope to `T`, giving
 `|𝔼[∑ₖ Rₖ]| ≤ 4·C₃·(4·D_β³·T³/(n+1)² + 2·√(3·(D_δ²·T)³)/√(n+1)) → 0`. -/
@@ -137,10 +128,6 @@ theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
             + abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) := by
         rw [hΔ ω]
         exact abs_add_le _ _
-      have h2 := pow3_add_le (abs_nonneg _) (abs_nonneg _)
-        (a := abs (driftPath β (unifPart T n (k + 1)) ω
-              - driftPath β (unifPart T n k) ω))
-        (b := abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω))
       calc (abs (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω)) ^ 3
           ≤ (abs (driftPath β (unifPart T n (k + 1)) ω
                 - driftPath β (unifPart T n k) ω)
@@ -148,7 +135,8 @@ theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
             pow_le_pow_left₀ (abs_nonneg _) h1 3
         _ ≤ (4 : ℝ) * ((abs (driftPath β (unifPart T n (k + 1)) ω
                 - driftPath β (unifPart T n k) ω)) ^ 3
-              + (abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)) ^ 3) := h2
+              + (abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)) ^ 3) :=
+          (add_pow_le (abs_nonneg _) (abs_nonneg _) 3).trans_eq (by norm_num)
     -- integrability of |ΔM|³ (dominated by |ΔM|⁴ + 1)
     have htdI3 : Integrable (fun ω ↦ (abs (M (unifPart T n (k + 1)) ω
           - M (unifPart T n k) ω)) ^ 3) μ := by
@@ -430,15 +418,7 @@ theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
         rw [hzero] at h
         exact h
       exact hfin
-  refine tendsto_iff_dist_tendsto_zero.mpr ?_
-  refine hboundtendsto.congr' (Eventually.of_forall fun n ↦ ?_)
-  change |∫ ω : Ω, ∑ k ∈ Finset.range n,
-      discreteTaylorRemainder f f' f'' (X (unifPart T n k) ω)
-        (X (unifPart T n (k + 1)) ω) ∂μ|
-    = dist (∫ ω : Ω, ∑ k ∈ Finset.range n,
-      discreteTaylorRemainder f f' f'' (X (unifPart T n k) ω)
-        (X (unifPart T n (k + 1)) ω) ∂μ) 0
-  rw [Real.dist_eq, sub_zero]
+  exact (tendsto_zero_iff_abs_tendsto_zero _).mpr hboundtendsto
 
 
 set_option maxHeartbeats 1600000 in
@@ -530,10 +510,6 @@ theorem remainderCell_integrable {n : ℕ} (hn : 0 < n) {k : ℕ} (hk : k < n)
           + abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) := by
       rw [hΔ ω]
       exact abs_add_le _ _
-    have h2 := pow3_add_le (abs_nonneg _) (abs_nonneg _)
-      (a := abs (driftPath β (unifPart T n (k + 1)) ω
-            - driftPath β (unifPart T n k) ω))
-      (b := abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω))
     calc (abs (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω)) ^ 3
         ≤ (abs (driftPath β (unifPart T n (k + 1)) ω
               - driftPath β (unifPart T n k) ω)
@@ -541,7 +517,8 @@ theorem remainderCell_integrable {n : ℕ} (hn : 0 < n) {k : ℕ} (hk : k < n)
           pow_le_pow_left₀ (abs_nonneg _) h1 3
       _ ≤ (4 : ℝ) * ((abs (driftPath β (unifPart T n (k + 1)) ω
               - driftPath β (unifPart T n k) ω)) ^ 3
-            + (abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)) ^ 3) := h2
+            + (abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)) ^ 3) :=
+          (add_pow_le (abs_nonneg _) (abs_nonneg _) 3).trans_eq (by norm_num)
       _ ≤ (4 : ℝ) * (((|Db| * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 3
             + (abs (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)) ^ 3)) :=
           mul_le_mul_of_nonneg_left
@@ -573,6 +550,6 @@ theorem remainderCell_integrable {n : ℕ} (hn : 0 < n) {k : ℕ} (hk : k < n)
       rw [Real.norm_eq_abs]
       exact abs_discreteTaylorRemainder_le hf hf' hf'' hg3 _ _)
 
-end StageFiveD
+end StageFiveF
 
 end MathFin.ItoDriftConditional

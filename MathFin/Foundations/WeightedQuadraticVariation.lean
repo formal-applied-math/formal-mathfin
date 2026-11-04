@@ -54,13 +54,11 @@ private theorem integral_adapted_mul_centered_sq
     ∫ ω, χ ω * ((B t₁ ω - B t₀ ω) ^ 2 - ((t₁ : ℝ) - t₀)) ∂μ = 0 := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hχm : Measurable χ := hχ.mono ((ItoIntegralL2.natFiltration hBmeas).le t₀) le_rfl
-  have hYm : Measurable (fun ω ↦ (B t₁ ω - B t₀ ω) ^ 2 - ((t₁ : ℝ) - t₀)) := by fun_prop
-  have hindep : IndepFun χ (fun ω ↦ (B t₁ ω - B t₀ ω) ^ 2 - ((t₁ : ℝ) - t₀)) μ := by
-    have h := (adapted_indepFun_increment (hB.isFilteredPreBrownian hBmeas) ht hχ).comp
-      measurable_id (by fun_prop : Measurable (fun x : ℝ ↦ x ^ 2 - ((t₁ : ℝ) - t₀)))
-    simpa [Function.comp_def] using h
-  rw [hindep.integral_fun_mul_eq_mul_integral hχm.aestronglyMeasurable hYm.aestronglyMeasurable,
-      integral_increment_centered_mean hB ht, mul_zero]
+  have hΔm : Measurable (fun ω ↦ B t₁ ω - B t₀ ω) := by fun_prop
+  rw [(adapted_indepFun_increment (hB.isFilteredPreBrownian hBmeas) ht hχ).integral_mul_comp
+      (g := fun x ↦ x ^ 2 - ((t₁ : ℝ) - t₀)) (by fun_prop) hχm.aestronglyMeasurable
+      hΔm.aemeasurable,
+    integral_increment_centered_mean hB ht, mul_zero]
 
 /-- **Term I, per-`n` bound.** The `L²` norm² of the weighted fluctuation
 `∑ₖ w_{tₖ}·((ΔBₖ)² − Δtₖ)` is at most `∑ₖ C²·2(Δtₖ)²` for any adapted weight process `w`

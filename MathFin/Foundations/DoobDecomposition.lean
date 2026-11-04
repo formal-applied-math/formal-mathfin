@@ -36,7 +36,7 @@ process `n ↦ A (n + 1)` is `ℱ`-strongly-adapted, i.e. `A (n + 1)` is
   agrees a.e. with `(martingalePart f ℱ μ, predictablePart f ℱ μ)`.
 * `doob_decomposition` — the full existence-and-uniqueness statement.
 
-`Bridges/BellmanDoobDecomposition.lean` applies the uniqueness half to the finite-horizon Snell
+`Foundations/SnellDoobDecomposition.lean` applies the uniqueness half to the finite-horizon Snell
 envelope `snellEnvelope` (`Foundations/SnellEnvelope.lean`) at `X = univ`, whose compensator is a.e.
 nonincreasing and constant on the continuation region.
 -/

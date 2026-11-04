@@ -18,7 +18,7 @@ assumed.
 ## Result
 
 Public entry points include `gridFiltration`, `gridIndex`, `gridIndex_le_iff`, `gridIndex_stopping`,
-`isStoppingTime_sampledFiltration`, `expected_gridValue_tendsto`.
+`isStoppingTime_sampledFiltration`, `gridTime_mono`, `expected_gridValue_tendsto`.
 -/
 
 @[expose] public section
@@ -30,12 +30,15 @@ open scoped NNReal Topology
 
 variable {Ω : Type*} [MeasurableSpace Ω]
 
+/-- The uniform grid times `i*δ` increase with the index. -/
+theorem gridTime_mono (δ : ℝ≥0) : Monotone fun i : ℕ => (i : ℝ≥0)*δ := fun _ _ hij =>
+  mul_le_mul_of_nonneg_right (by exact_mod_cast hij) zero_le
+
 /-- The continuous filtration sampled at the uniform grid times `i*δ`: the sampled filtration
 `ContinuousMarket.sampledFiltration` along the schedule `i ↦ i*δ`. -/
 def gridFiltration (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›) (δ : ℝ≥0) :
     Filtration ℕ ‹MeasurableSpace Ω› :=
-  ContinuousMarket.sampledFiltration 𝓕 (t := fun i : ℕ => (i : ℝ≥0)*δ)
-    fun _ _ hij => mul_le_mul_of_nonneg_right (by exact_mod_cast hij) zero_le
+  ContinuousMarket.sampledFiltration 𝓕 (gridTime_mono δ)
 
 /-- The first grid index at or after a rule's time, `⌈θ.time ω/δ⌉₊`. -/
 noncomputable def gridIndex {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T : ℝ≥0}
@@ -57,7 +60,7 @@ theorem isStoppingTime_sampledFiltration {𝓕 : Filtration ℝ≥0 ‹Measurabl
     (h : ∀ ω n, i ω ≤ n ↔ θ.time ω ≤ s n) :
     IsStoppingTime (ContinuousMarket.sampledFiltration 𝓕 hs) (fun ω => WithTop.some (i ω)) := by
   intro n
-  show MeasurableSet[𝓕 (s n)] _
+  change MeasurableSet[𝓕 (s n)] _
   simpa only [WithTop.coe_le_coe, h] using θ.stopping (s n)
 
 theorem gridIndex_stopping {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T δ : ℝ≥0}
@@ -74,7 +77,7 @@ theorem supermartingale_grid {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›
     Supermartingale (fun i : ℕ => U ((i : ℝ≥0)*δ)) (gridFiltration 𝓕 δ) P := by
   refine ⟨fun i => hU.stronglyAdapted _, ?_, fun i => hU.integrable _⟩
   intro i j hij
-  exact hU.2.1 _ _ (mul_le_mul_of_nonneg_right (by exact_mod_cast hij) zero_le)
+  exact hU.2.1 _ _ (gridTime_mono δ hij)
 
 theorem expected_gridValue_le {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
     {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ}

@@ -51,9 +51,9 @@ and the `d`-asset generalisation are out of scope here.
   direction: sampled along any monotone schedule inside `[0, T]`, a continuous-time EMM is an
   EMM here for the sampled price and filtration (`ContinuousMarket.IsEMM.sampled`, in
   `ContinuousMarket.lean`, general Ω, though `ftap_discrete` itself needs finite Ω), and it is a
-  one-period EMM for every increment
-  `S t − S s` with `s, t ≤ T` (`ContinuousMarket.IsEMM.increment`). The converses are not claimed: neither restriction
-  sees adaptedness of `S` at all times or the martingale property between arbitrary times.
+  one-period EMM for every increment `S t − S s` with `s, t ≤ T`
+  (`ContinuousMarket.IsEMM.increment`). The converses are not claimed: neither restriction sees
+  adaptedness of `S` at all times or the martingale property between arbitrary times.
 
 ## Main definitions / results (assembled across this file)
 
@@ -77,9 +77,10 @@ open MeasureTheory ProbabilityTheory
 set_option linter.unusedSectionVars false
 
 /-- On a finite space every strategy is bounded on the horizon. -/
-lemma exists_bound_horizon {Ω : Type*} [Fintype Ω] (N : ℕ) (φ : ℕ → Ω → ℝ) :
-    ∃ K : ℝ, ∀ n ≤ N, ∀ ω, ‖φ n ω‖ ≤ K :=
-  ⟨∑ n ∈ Finset.range (N + 1), ∑ ω', |φ n ω'|, fun n hn ω ↦ by
+lemma exists_bound_horizon {Ω : Type*} [Finite Ω] (N : ℕ) (φ : ℕ → Ω → ℝ) :
+    ∃ K : ℝ, ∀ n ≤ N, ∀ ω, ‖φ n ω‖ ≤ K := by
+  cases nonempty_fintype Ω
+  exact ⟨∑ n ∈ Finset.range (N + 1), ∑ ω', |φ n ω'|, fun n hn ω ↦ by
     rw [Real.norm_eq_abs]
     exact (Finset.single_le_sum (f := fun ω' ↦ |φ n ω'|) (fun _ _ ↦ abs_nonneg _)
       (Finset.mem_univ ω)).trans

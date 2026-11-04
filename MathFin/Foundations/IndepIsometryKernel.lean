@@ -34,6 +34,15 @@ open MeasureTheory
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {φ X : Ω → ℝ}
 
+/-- **A coefficient against a function of an independent increment factorises**:
+`𝔼[φ·g(X)] = 𝔼[φ]·𝔼[g(X)]` (Mathlib's `IndepFun.integral_fun_comp_mul_comp` at `f = id`, the
+form every isometry kernel uses: `g` a power of the increment, possibly shifted). -/
+theorem IndepFun.integral_mul_comp (h : IndepFun φ X μ) {g : ℝ → ℝ} (hg : Measurable g)
+    (hφ : AEStronglyMeasurable φ μ) (hX : AEMeasurable X μ) :
+    ∫ ω, φ ω * g (X ω) ∂μ = (∫ ω, φ ω ∂μ) * ∫ ω, g (X ω) ∂μ :=
+  h.integral_fun_comp_mul_comp (f := id) hφ.aemeasurable hX aestronglyMeasurable_id
+    hg.aestronglyMeasurable
+
 /-- **A coefficient independent of a centred increment pairs to zero**: `𝔼[φ·X] = 0`. -/
 theorem IndepFun.integral_mul_eq_zero (h : IndepFun φ X μ) (hφ : AEStronglyMeasurable φ μ)
     (hX : AEStronglyMeasurable X μ) (h0 : ∫ ω, X ω ∂μ = 0) : ∫ ω, φ ω * X ω ∂μ = 0 := by
@@ -44,8 +53,7 @@ theorem IndepFun.integral_mul_eq_zero (h : IndepFun φ X μ) (hφ : AEStronglyMe
 theorem IndepFun.integral_mul_sq (h : IndepFun φ X μ) (hφ : AEStronglyMeasurable φ μ)
     (hX : AEStronglyMeasurable X μ) :
     ∫ ω, φ ω * X ω ^ 2 ∂μ = (∫ ω, φ ω ∂μ) * ∫ ω, X ω ^ 2 ∂μ :=
-  (h.comp (φ := id) (ψ := fun x : ℝ ↦ x ^ 2) measurable_id (by fun_prop)).integral_fun_mul_eq_mul_integral
-    hφ (hX.pow 2)
+  h.integral_mul_comp (g := fun x : ℝ ↦ x ^ 2) (by fun_prop) hφ hX.aemeasurable
 
 /-- **A square-integrable coefficient times an independent square-integrable increment is
 square-integrable**, since `𝔼[(φ·X)²] = 𝔼[φ²]·𝔼[X²]` is finite. -/

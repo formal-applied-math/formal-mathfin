@@ -8,7 +8,8 @@ module
 public import MathFin.BlackScholes.AmericanPut.Stopping.DiscreteContactMartingale
 public import MathFin.Foundations.SnellEnvelope
 
-/-! # First-contact attainment of the finite conditional-expectation Bellman value 
+/-! # First-contact attainment of the finite Snell envelope (the Bellman recursion)
+
 ## Result
 
 Public entry points include `snellContact`, `snellContact_le`,
@@ -24,7 +25,7 @@ open Set Filter MeasureTheory ProbabilityTheory
 variable {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
   {𝓕 : Filtration ℕ ‹MeasurableSpace Ω›} {Z : ℕ → Ω → ℝ}
 
-/-- The first index in `[0,N]` at which the Bellman value meets the reward, that is at which
+/-- The first index in `[0,N]` at which the Snell envelope meets the reward, that is at which
 `snellEnvelope P 𝓕 Set.univ Z N i-Z (min i N)` vanishes. -/
 noncomputable def snellContact (P : Measure Ω) (𝓕 : Filtration ℕ ‹MeasurableSpace Ω›)
     (Z : ℕ → Ω → ℝ) (N : ℕ) : Ω → ℕ :=
@@ -103,7 +104,7 @@ theorem snellContact_expected_payoff (ha : Adapted 𝓕 Z)
   rw [h0,hN] at he
   simpa only [Measure.restrict_univ] using he.symm
 
-theorem expected_discrete_payoff_le_bellman (ha : Adapted 𝓕 Z)
+theorem expected_discrete_payoff_le_snellEnvelope (ha : Adapted 𝓕 Z)
     (hi : ∀ i, Integrable (Z i) P) {N : ℕ} {τ : Ω → ℕ}
     (hτ : IsStoppingTime 𝓕 (fun ω => (τ ω : WithTop ℕ))) (hb : ∀ ω, τ ω ≤ N) :
     (∫ ω, Z (τ ω) ω ∂P) ≤ ∫ ω, snellEnvelope P 𝓕 Set.univ Z N 0 ω ∂P := by
@@ -131,6 +132,6 @@ theorem snellContact_optimal (ha : Adapted 𝓕 Z)
     (hτ : IsStoppingTime 𝓕 (fun ω => (τ ω : WithTop ℕ))) (hb : ∀ ω, τ ω ≤ N) :
     (∫ ω, Z (τ ω) ω ∂P) ≤ ∫ ω, Z (snellContact P 𝓕 Z N ω) ω ∂P := by
   rw [snellContact_expected_payoff ha hi N]
-  exact expected_discrete_payoff_le_bellman ha hi hτ hb
+  exact expected_discrete_payoff_le_snellEnvelope ha hi hτ hb
 
 end MathFin.BlackScholes.AmericanPut.Stopping

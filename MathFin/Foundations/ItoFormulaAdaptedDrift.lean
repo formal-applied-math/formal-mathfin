@@ -8,7 +8,6 @@ module
 public import MathFin.Foundations.ItoDriftIncrementEnergy
 public import MathFin.Foundations.ItoDriftWeightedIsometry
 public import MathFin.Foundations.ItoDriftGapDecay
-public import MathFin.Foundations.ItoDriftMartingaleKill
 public import MathFin.Foundations.ItoDriftBlock
 public import MathFin.Foundations.ItoDriftQuadraticCorrections
 public import MathFin.Foundations.ItoDriftTaylorRemainder
@@ -55,14 +54,17 @@ drift² corrections (`quadDriftSqSum_tendsto`), the drift–martingale cross cor
 estimate, `taylorRemainderSum_tendsto`, `trueIncr_pow3_le`) tend to `0` — the proofs bound
 them by `O(mesh)`, `O(√mesh)` and `O(√mesh)`; only the limits are stated. Path continuity of
 `X` enters only through dominated convergence and the Fubini interchange
-(`expectation_pathIntegral_eq_of_ae`), so almost sure continuity suffices.
+(`expectation_pathIntegral_eq`, stated for almost surely continuous paths), so almost sure
+continuity suffices.
 
-Supporting layers, bottom-up: `bandIntegral_slice` (the band-to-slice conversion; the Fubini
-interchange `expectation_pathIntegral_eq` comes from `ItoDriftExpectation`), `incrementEnergy`
-(the increment-energy law), `deltaStepLp`/`deltaStepLp_tendsto` (the step approximants), the
-per-cell weighted isometry (`weightedCellSq_step`, `clm_band_energy`, `stepIncr_stepCLM_ae`), the
-gap decay (`errorIncr_ae`, `cellGap_le`, `gapSum_le`) and the quadratic block with its gap
-hypothesis discharged (`quadraticSqSum_tendsto'`, for the hypothesized `M`), the
+Supporting layers, bottom-up: the band-to-slice conversion of the predictable trim measure
+(a private lemma of `ItoDriftIncrementEnergy`; the Fubini interchange
+`expectation_pathIntegral_eq` comes from `ItoDriftExpectation`), `incrementEnergy`
+(the increment-energy law), `mul_trueIncr_expect_eq_zero` (the martingale kill),
+`deltaStepLp`/`deltaStepLp_tendsto` (the step approximants), the per-cell weighted isometry
+(`weightedCellSq_step`, `clm_band_energy`, `stepIncr_stepCLM_ae`), the gap decay (`errorIncr_ae`,
+`cellGap_le`, `gapSum_le`) and the quadratic block with its gap hypothesis discharged
+(`quadraticSqSum_tendsto'`, for the hypothesized `M`), the
 fourth/third-moment bounds (`stepSum_pow4_le`, `trueIncr_pow4_le`, `trueIncr_pow3_le`),
 the drift primitive (`AdaptedDrift.driftPath` reused, with its adaptedness
 `stronglyMeasurable_driftPath`, from `Foundations/AdaptedDrift`), the drift
@@ -87,7 +89,7 @@ The constant-coefficient case and the Fubini interchange are `ito_drift_expectat
 and `expectation_pathIntegral_eq` in `ItoDriftExpectation`.
 
 The supporting layers are the modules `ItoDriftIncrementEnergy`, `ItoDriftWeightedIsometry`,
-`ItoDriftGapDecay`, `ItoDriftMomentBounds`, `ItoDriftMartingaleKill`, `ItoDriftBlock`,
+`ItoDriftGapDecay`, `ItoDriftMomentBounds`, `ItoDriftBlock`,
 `ItoDriftQuadraticCorrections` and `ItoDriftTaylorRemainder`; this file is the assembly of
 `itoDrift_expectation_identity_adapted` from them.
 -/

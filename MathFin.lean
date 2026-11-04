@@ -42,6 +42,7 @@
 -- Foundations
 import MathFin.Foundations.StandardNormal
 import MathFin.Foundations.DoobDecomposition
+import MathFin.Foundations.SnellDoobDecomposition
 import MathFin.Foundations.SnellEnvelope
 import MathFin.Foundations.L2MartingaleConvergence
 import MathFin.Foundations.BrownianMarkov
@@ -313,7 +314,6 @@ import MathFin.Foundations.ItoDriftIncrementEnergy
 import MathFin.Foundations.ItoDriftWeightedIsometry
 import MathFin.Foundations.ItoDriftGapDecay
 import MathFin.Foundations.ItoDriftMomentBounds
-import MathFin.Foundations.ItoDriftMartingaleKill
 import MathFin.Foundations.ItoDriftBlock
 import MathFin.Foundations.ItoDriftQuadraticCorrections
 import MathFin.Foundations.ItoDriftTaylorRemainder
@@ -882,7 +882,6 @@ import MathFin.Binomial.MultiPeriodFTAP
 import MathFin.BlackScholes.JumpDiffusionThinning
 import MathFin.Bridges.ABCDBlack76
 import MathFin.Bridges.AmericanPutEuropeanBound
-import MathFin.Bridges.BellmanDoobDecomposition
 import MathFin.Bridges.ConstantProductLPLognormal
 import MathFin.Bridges.LiquidationAsStructuralDefault
 import MathFin.Bridges.OUHermiteVasicek

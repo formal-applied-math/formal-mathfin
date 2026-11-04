@@ -6,9 +6,7 @@ Authors: Yang Ye, Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoDriftWeightedIsometry
-public import MathFin.Foundations.ItoDriftGapDecay
-public import MathFin.Foundations.ItoDriftMomentBounds
-public import MathFin.Foundations.ItoDriftMartingaleKill
+public import MathFin.Foundations.AdaptedDrift
 
 /-! # The drift block of the adapted Itô–drift identity (the discrete route, stage 5d)
 
@@ -25,62 +23,11 @@ open scoped NNReal
 
 namespace MathFin.ItoDriftConditional
 
-open MathFin ItoIntegralL2 ItoIntegralCLM ItoIntegralProcessGeneral
-  QuadraticVariationL2 ItoIntegralBrownian
+open MathFin ItoIntegralL2 AdaptedDrift
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
+  {B : ℝ≥0 → Ω → ℝ}
 
-/-! #### Stage 5d — the adapted assembly (`itoDrift_expectation_identity_adapted`)
-
-The integrated Itô–drift identity for `X_t = c + ∫₀ᵗ β + M_t` with bounded adapted
-path-continuous `β, δ`, under the hypotheses on `M` and `X` of the module docstring of `ItoFormulaAdaptedDrift`:
-
-  `𝔼[f(X_T)] = 𝔼[f(X_0)] + ∫₀ᵀ 𝔼[f'(X_s)·β_s + ½·f''(X_s)·δ_s²] ds`,
-
-for `f` three times differentiable with `f'`, `f''`, `f'''` bounded. Route: the per-path
-discrete Itô formula (`MathFin.discrete_ito_formula`) at the grid values of `X`, integrated
-over `Ω`; the first-order martingale terms die exactly (`mul_trueIncr_expect_eq_zero`); the
-drift block converges by pathwise Riemann–Stieltjes sums
-(`AdaptedDrift.tendsto_sum_mul_driftPath_sub` along each path at the weight `f'∘X`) + DCT
-(`driftBlock_tendsto`); the quadratic block converges by `quadraticSqSum_tendsto'`
-at the weight `f''∘X`, with the drift–martingale cross terms (`quadCrossSum_tendsto`)
-and the drift² corrections (`quadDriftSqSum_tendsto`) tending to `0`; the Taylor remainder dies by
-`abs_discreteTaylorRemainder_le` + `trueIncr_pow3_le` (`taylorRemainderSum_tendsto`).
-The two drift integrals cross the expectation by the stage-1 Fubini lemma
-`expectation_pathIntegral_eq`. -/
-
-section StageFiveD
-
-open MeasureTheory ProbabilityTheory Filter Topology ItoIntegralProcessGeneral
-open ItoIntegralL2 ItoIntegralCLM ItoIntegralRiemannBridge ItoIsometryAdapted
-open ItoIntegralProcess QuadraticVariationL2 ItoIntegralBrownian AdaptedDrift MathFin
-open scoped NNReal ENNReal
-
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
-  {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
-  (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-  (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-  (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-  {M : ℝ≥0 → Ω → ℝ}
-  (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-  (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-    (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
-
-include hB hBmeas hδadap hδcont hδbdd hMadap hMeq
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- `(a + b)³ ≤ 4·(a³ + b³)` for `a, b ≥ 0` — the Taylor-remainder kernel
-(sharp at `a = b`, from `4·(a³+b³) − (a+b)³ = 3·(a−b)²·(a+b) ≥ 0`). -/
-theorem pow3_add_le {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
-    (a + b) ^ 3 ≤ 4 * (a ^ 3 + b ^ 3) := by
-  have hsq : (0 : ℝ) ≤ (a - b) ^ 2 := sq_nonneg _
-  have e : 4 * (a ^ 3 + b ^ 3) - (a + b) ^ 3 = 3 * (a - b) ^ 2 * (a + b) := by ring
-  have hnn : (0 : ℝ) ≤ 3 * (a - b) ^ 2 * (a + b) :=
-    mul_nonneg (by nlinarith) (add_nonneg ha hb)
-  linarith
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- **The drift block at the expectation level (DCT)**: the expectations of the per-cell
 drift sums — `𝔼[∑ₖ g (X tₖ) · (AdaptedDrift.driftPath β tₖ₊₁ − AdaptedDrift.driftPath β tₖ)]`
 — converge to the
@@ -162,7 +109,6 @@ theorem driftSum_expect_tendsto (hBmeas : ∀ t, Measurable (B t))
     (hXcont.mono fun ω hω ↦ tendsto_sum_mul_driftPath_sub hβcont hβbdd T ω
       (g := fun s ↦ g (X s ω)) (hgcont.comp hω).continuousOn fun s ↦ hg1 (X s ω))
 
-omit hB hδadap hδcont hδbdd hMadap hMeq in
 /-- **The drift block** (`driftBlock_tendsto`): for `X` adapted and path-continuous, `g`
 continuous with `|g| ≤ C₁`, and `β` bounded adapted path-continuous, the per-cell drift
 sums of the adapted assembly converge to the time integral of the means `𝔼[g (X_s) β_s]`,
@@ -174,7 +120,8 @@ Route: the DCT convergence `driftSum_expect_tendsto` (per-path Riemann–Stieltj
 global domination) for the expectation-of-sum form, the finite-sum/expectation interchange,
 and the stage-1 Fubini lemma `expectation_pathIntegral_eq` crossing the expectation of the
 limit integrand. -/
-theorem driftBlock_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω → ℝ} (T : ℝ≥0)
+theorem driftBlock_tendsto (hBmeas : ∀ t, Measurable (B t)) {β : ℝ≥0 → Ω → ℝ}
+    {X : ℝ≥0 → Ω → ℝ} (T : ℝ≥0)
     (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
     (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
     {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
@@ -246,7 +193,7 @@ theorem driftBlock_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω →
   -- the Fubini interchange on the limit integrand
   have hβm : ∀ t : ℝ≥0, Measurable (β t) :=
     fun t ↦ (hβadap t).measurable.mono ((natFiltration hBmeas).le t) le_rfl
-  have hEq := expectation_pathIntegral_eq_of_ae (μ := μ)
+  have hEq := expectation_pathIntegral_eq (μ := μ)
     (w := fun s ω ↦ g (X s ω) * β s ω)
     (fun s ↦ (hgcont.measurable.comp ((hXadap s).measurable.mono
       ((natFiltration hBmeas).le s) le_rfl)).mul (hβm s))
@@ -259,7 +206,5 @@ theorem driftBlock_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω →
     T
   rw [← hEq]
   exact hB
-
-end StageFiveD
 
 end MathFin.ItoDriftConditional

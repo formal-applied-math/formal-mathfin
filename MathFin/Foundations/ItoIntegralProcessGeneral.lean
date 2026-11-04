@@ -13,8 +13,9 @@ public import MathFin.Foundations.ItoIntegralProcessL2Inf
 
 B1a built the simple-integrand Itô integral `t ↦ (V●B)_t` as a continuous L²
 martingale. This file extends it to a **general** predictable integrand
-`φ ∈ Lp ℝ 2 (trimMeasure_T T)` (= Degenne's `L2Predictable` on `[0,T]`): the process `t ↦ (φ●B)_t := ∫₀ᵗ φ dB` is a continuous L² martingale, with
-the Itô contraction `‖(φ●B)_t‖ ≤ ‖φ‖` and the terminal Itô isometry
+`φ ∈ Lp ℝ 2 (trimMeasure_T T)` (= Degenne's `L2Predictable` on `[0,T]`): the process
+`t ↦ (φ●B)_t := ∫₀ᵗ φ dB` is an L² martingale (a.e.-adapted; no path continuity is claimed
+here), with the Itô contraction `‖(φ●B)_t‖ ≤ ‖φ‖` and the terminal Itô isometry
 `‖(φ●B)_T‖ = ‖φ‖`. The explicit time-indexed isometry
 `E[(φ●B)_t²] = ∫₀ᵗ E[φ_s²] ds` is proved in the companion module
 `ItoIntegralProcessIsometry` (`itoProcessCLM_norm_sq`), by density-transferring the
@@ -27,15 +28,12 @@ adaptedness and the contraction `‖(φ●B)_t‖ ≤ ‖φ‖` are those of the
 proved there once. The bridge to B1a's simple-integrand process (`itoProcessCLM_simpleAssembly_T`)
 is B1a's martingale property.
 
-The infinite-horizon `[0,∞)` integral (σ-finite predictable exhaustion) is the
-separate later milestone B2.
-
 ## Result
 
 * `itoProcessCLM` — the Itô integral process of a general predictable `L²` integrand.
 * `itoProcessCLM_simpleAssembly_T` — the bridge back to B1a.
-* `itoProcessCLM_zero_time` — the process starts at `0` (that of the infinite-horizon engine,
-  `itoProcessL2Inf_zero_time`).
+* `itoProcessCLM_zero_time` — the process starts at `0` (inherited from the infinite-horizon
+  engine, `itoProcessL2Inf_zero_time`).
 * `itoProcessCLM_eq_condExpL2` — **the key identity** (by definition): `(φ●B)_t` is the
   `𝓕_t`-projection of the terminal integral.
 * `itoProcessCLM_aeStronglyMeasurable`, `itoIntegralProcessGen_isMartingale` — its two

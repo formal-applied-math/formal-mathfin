@@ -41,7 +41,7 @@ drift `A` — nothing else.
 * `submartingale_optional_sampling`: the optional sampling inequality
   `f_σ ≤ᵐ μ[f_τ | ℱ_σ]` for bounded stopping times `σ ≤ τ`.
 
-`Bridges/BellmanDoobDecomposition.lean` applies it to the finite-horizon Snell envelope
+`Foundations/SnellDoobDecomposition.lean` applies it to the finite-horizon Snell envelope
 `snellEnvelope` (`Foundations/SnellEnvelope.lean`) at `X = univ`:
 `𝔼[Z_τ | 𝓕_σ] ≤ U_σ` for stopping times `σ ≤ τ ≤ N`.
 

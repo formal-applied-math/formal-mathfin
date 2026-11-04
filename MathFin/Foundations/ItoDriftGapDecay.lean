@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.ItoDriftIncrementEnergy
 public import MathFin.Foundations.ItoDriftWeightedIsometry
+public import MathFin.Foundations.FiniteMeasureCauchySchwarz
 
 /-! # The gap decay of the weighted increment isometry (the discrete route, stage 5a)
 
@@ -22,10 +23,43 @@ open scoped NNReal
 
 namespace MathFin.ItoDriftConditional
 
-open MathFin ItoIntegralL2 ItoIntegralCLM ItoIntegralProcessGeneral
-  QuadraticVariationL2 ItoIntegralBrownian
+open MathFin ItoIntegralL2 ItoIntegralCLM ItoIntegralRiemannBridge ItoIsometryAdapted
+  ItoIntegralProcessGeneral ItoIntegralProcess QuadraticVariationL2 ItoIntegralBrownian
+open scoped ENNReal
 
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
+
+/-- The real `L²` triangle inequality at the integral level: `‖a + b‖₂ ≤ ‖a‖₂ + ‖b‖₂`. -/
+private theorem sqrtIntegral_sq_add_le {a b : Ω → ℝ}
+    (ham : MemLp a 2 μ) (hbm : MemLp b 2 μ) :
+    √(∫ ω, (a ω + b ω) ^ 2 ∂μ) ≤ √(∫ ω, a ω ^ 2 ∂μ) + √(∫ ω, b ω ^ 2 ∂μ) := by
+  have h {f : Ω → ℝ} (hf : MemLp f 2 μ) : √(∫ ω, f ω ^ 2 ∂μ) = ‖hf.toLp f‖ := by
+    refine (congrArg Real.sqrt ?_).trans (Real.sqrt_sq (norm_nonneg _))
+    rw [lp_two_norm_sq]
+    exact integral_congr_ae (hf.coeFn_toLp.mono fun ω hω ↦ by simp only [hω])
+  refine (h (ham.add hbm)).trans_le ?_
+  rw [h ham, h hbm, MemLp.toLp_add]
+  exact norm_add_le _ _
+
+/-- Generic weighted-square transfer: if `f =ᵐ g`, `g²` is integrable with energy `E`,
+and `|w| ≤ C`, then `𝔼[(w·f)²] ≤ C²·E`. -/
+private theorem weighted_sq_le_of_congr {f g w : Ω → ℝ} {C E : ℝ}
+    (hwb : ∀ ω, |w ω| ≤ C) (hcongr : f =ᵐ[μ] g)
+    (hint2 : Integrable (fun ω ↦ g ω ^ 2) μ) (hE : ∫ ω, g ω ^ 2 ∂μ = E) :
+    ∫ ω, (w ω * f ω) ^ 2 ∂μ ≤ C ^ 2 * E :=
+  calc ∫ ω, (w ω * f ω) ^ 2 ∂μ
+      = ∫ ω, (w ω * g ω) ^ 2 ∂μ :=
+        integral_congr_ae (by filter_upwards [hcongr] with ω hω; rw [hω])
+    _ ≤ ∫ ω, C ^ 2 * g ω ^ 2 ∂μ := by
+        refine integral_mono_of_nonneg (Eventually.of_forall fun ω ↦ sq_nonneg _)
+          (hint2.const_mul (C ^ 2)) (Eventually.of_forall fun ω ↦ ?_)
+        have hw := abs_le.mp (hwb ω)
+        change (w ω * g ω) ^ 2 ≤ C ^ 2 * g ω ^ 2
+        rw [mul_pow]
+        exact mul_le_mul_of_nonneg_right (sq_le_sq' hw.1 hw.2) (sq_nonneg _)
+    _ = C ^ 2 * E := by rw [integral_const_mul, hE]
+
+variable [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ}
 
 /-! #### Stage 5a — the gap decay, discharging `hgap` (for the hypothesized `M`)
 
@@ -39,13 +73,7 @@ The pairing gives exactly the constant `2·|C_w|·|D_δ|·√T` of `quadraticSqS
 
 section StageFiveA
 
-open MeasureTheory ProbabilityTheory Filter Topology ItoIntegralProcessGeneral
-open ItoIntegralL2 ItoIntegralCLM ItoIntegralRiemannBridge ItoIsometryAdapted
-open ItoIntegralProcess QuadraticVariationL2 MathFin
-open scoped NNReal ENNReal
-
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
+variable (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
   {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
   (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
   (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
@@ -55,9 +83,6 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
   (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
     (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
 
-include hB hBmeas hδadap hδcont hδbdd hMadap hMeq
-
-omit hδadap hδcont hδbdd hMadap hMeq in
 /-- Coe-linearity of the CLM process in the integrand class (the a.e. form). -/
 private theorem clm_coe_sub_ae (T t : ℝ≥0)
     (φ₁ φ₂ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
@@ -67,7 +92,7 @@ private theorem clm_coe_sub_ae (T t : ℝ≥0)
   rw [map_sub]
   exact Lp.coeFn_sub _ _
 
-omit hMadap in
+include hB hBmeas hδadap hδcont hδbdd hMeq in
 /-- The per-cell error increment `δεₖ := ΔMₖ − δ(tₖ)·ΔBₖ` is a.e. the band increment of the
 CLM process of the integrand error `φ − δⁿ`. -/
 private theorem errorIncr_ae {n k : ℕ} (hk : k < n) :
@@ -122,37 +147,7 @@ private theorem errorIncr_ae {n k : ℕ} (hk : k < n) :
             - deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω := by
         rw [hsub1, hsub0]
 
-set_option linter.unusedSectionVars false in
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- Generic weighted-square transfer: if `f =ᵐ g`, `g²` is integrable with energy `E`,
-and `|w| ≤ C`, then `𝔼[(w·f)²] ≤ C²·E`. -/
-private theorem weighted_sq_le_of_congr {f g w : Ω → ℝ} {C E : ℝ}
-    (hwb : ∀ ω, |w ω| ≤ C) (hcongr : f =ᵐ[μ] g)
-    (hint2 : Integrable (fun ω ↦ g ω ^ 2) μ) (hE : ∫ ω, g ω ^ 2 ∂μ = E) :
-    ∫ ω, (w ω * f ω) ^ 2 ∂μ ≤ C ^ 2 * E := by
-  have hw : ∀ ω : Ω, w ω ^ 2 ≤ C ^ 2 := fun ω ↦ by
-    have h := mul_self_le_mul_self (abs_nonneg (w ω)) (hwb ω)
-    have e1 : |w ω| * |w ω| = w ω ^ 2 := by
-      rw [← pow_two, sq_abs]
-    have e2 : C * C = C ^ 2 := (sq C).symm
-    rwa [e1, e2] at h
-  have hdom : Integrable (fun ω ↦ (C * g ω) ^ 2) μ :=
-    (hint2.const_mul (C ^ 2)).congr
-      (Eventually.of_forall fun ω ↦ by ring)
-  calc ∫ ω, (w ω * f ω) ^ 2 ∂μ
-      = ∫ ω, (w ω * g ω) ^ 2 ∂μ := integral_congr_ae
-          (by filter_upwards [hcongr] with ω hω; rw [hω])
-    _ ≤ ∫ ω, (C * g ω) ^ 2 ∂μ := by
-        refine integral_mono_of_nonneg (Eventually.of_forall fun ω ↦ sq_nonneg _)
-          hdom (Eventually.of_forall fun ω ↦ ?_)
-        change (w ω * g ω) ^ 2 ≤ (C * g ω) ^ 2
-        have h1 : (w ω * g ω) ^ 2 = w ω ^ 2 * g ω ^ 2 := by ring
-        have h2 : (C * g ω) ^ 2 = C ^ 2 * g ω ^ 2 := by ring
-        rw [h1, h2]
-        exact mul_le_mul_of_nonneg_right (hw ω) (sq_nonneg _)
-    _ = C ^ 2 * E := by simp_rw [mul_pow]; rw [integral_const_mul, hE]
-
-omit hMadap in
+include hB hBmeas hδadap hδcont hδbdd hMeq in
 /-- **Weighted error energy**: the second moment of `w·δεₖ` is at most `C_w²` cell-band
 energies of the integrand error (`|w| ≤ C_w` pointwise). -/
 private theorem weightedErrorIncr_sq_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
@@ -200,39 +195,7 @@ private theorem weightedErrorIncr_sq_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ
     (errorIncr_ae hB hBmeas hδadap hδcont hδbdd hMeq hk)
     hDmem.integrable_sq hbandE
 
-omit [IsProbabilityMeasure μ] hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- The real `L²` triangle inequality at the integral level: `‖a + b‖₂ ≤ ‖a‖₂ + ‖b‖₂`. -/
-private theorem sqrtIntegral_sq_add_le {a b : Ω → ℝ}
-    (ham : MemLp a 2 μ) (hbm : MemLp b 2 μ) :
-    Real.sqrt (∫ ω, (a ω + b ω) ^ 2 ∂μ)
-      ≤ Real.sqrt (∫ ω, a ω ^ 2 ∂μ) + Real.sqrt (∫ ω, b ω ^ 2 ∂μ) := by
-  have ha2 := ham.integrable_sq
-  have hb2 := hbm.integrable_sq
-  have hab := ham.integrable_mul hbm
-  have hexp : ∫ ω, (a ω + b ω) ^ 2 ∂μ
-      = ∫ ω, a ω ^ 2 ∂μ + 2 * ∫ ω, a ω * b ω ∂μ + ∫ ω, b ω ^ 2 ∂μ :=
-    integral_sq_add ha2 hb2 hab
-  have hcs : ∫ ω, a ω * b ω ∂μ
-      ≤ Real.sqrt (∫ ω, a ω ^ 2 ∂μ) * Real.sqrt (∫ ω, b ω ^ 2 ∂μ) := by
-    refine le_trans (integral_mono hab hab.abs (fun ω ↦ le_abs_self _)) ?_
-    exact integral_abs_mul_le_L2L2 ham hbm
-  calc Real.sqrt (∫ ω, (a ω + b ω) ^ 2 ∂μ)
-      = Real.sqrt (∫ ω, a ω ^ 2 ∂μ + 2 * ∫ ω, a ω * b ω ∂μ + ∫ ω, b ω ^ 2 ∂μ) := by
-        rw [hexp]
-    _ ≤ Real.sqrt ((Real.sqrt (∫ ω, a ω ^ 2 ∂μ) + Real.sqrt (∫ ω, b ω ^ 2 ∂μ)) ^ 2) := by
-        refine Real.sqrt_le_sqrt ?_
-        have hA : Real.sqrt (∫ ω, a ω ^ 2 ∂μ) ^ 2 = ∫ ω, a ω ^ 2 ∂μ :=
-          Real.sq_sqrt (integral_nonneg fun ω ↦ sq_nonneg _)
-        have hB : Real.sqrt (∫ ω, b ω ^ 2 ∂μ) ^ 2 = ∫ ω, b ω ^ 2 ∂μ :=
-          Real.sq_sqrt (integral_nonneg fun ω ↦ sq_nonneg _)
-        have hrw : (Real.sqrt (∫ ω, a ω ^ 2 ∂μ) + Real.sqrt (∫ ω, b ω ^ 2 ∂μ)) ^ 2
-            = Real.sqrt (∫ ω, a ω ^ 2 ∂μ) ^ 2
-              + 2 * (Real.sqrt (∫ ω, a ω ^ 2 ∂μ) * Real.sqrt (∫ ω, b ω ^ 2 ∂μ))
-              + Real.sqrt (∫ ω, b ω ^ 2 ∂μ) ^ 2 := by ring
-        rw [hrw, hA, hB]
-        linarith [hcs]
-    _ = Real.sqrt (∫ ω, a ω ^ 2 ∂μ) + Real.sqrt (∫ ω, b ω ^ 2 ∂μ) :=
-        Real.sqrt_sq (add_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _))
+include hB hBmeas hδadap hδcont hδbdd hMadap hMeq
 
 /-- **Per-cell gap bound**: the absolute difference over one cell between the expectations
 of the weighted true-increment square and of the weighted rectangle square — the
@@ -362,7 +325,7 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
             - δ (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)))) ^ 2 ∂μ)
         * Real.sqrt (∫ ω, ((M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)
           + δ (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2 ∂μ) :=
-    integral_abs_mul_le_L2L2
+    integral_abs_mul_le_sqrt_mul_sqrt
       (MemLp.mono' ((hDmem.abs).const_mul (|Cw|))
         (hwm'.aestronglyMeasurable.mul hδεsm)
         (by
@@ -627,7 +590,8 @@ theorem gapSum_le (n : ℕ) (hn : 0 < n) {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
               Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
         ∂(trimMeasure_T (μ := μ) T hBmeas)) := by ring
 
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
+end StageFiveA
+
 /-- **The convergence of the quadratic block, gap hypothesis discharged** (the `hgap`
 hypothesis of `quadraticSqSum_tendsto` discharged by `gapSum_le` + `deltaStepLp_tendsto`). Not
 unconditional: `M` is still a hypothesized version of `δ●B` (`hMadap`, `hMeq`). -/
@@ -730,7 +694,5 @@ theorem quadraticSqSum_tendsto' (hB : IsPreBrownianReal B μ)
           (lp_two_norm_sq (processToLp T hBmeas hδadap hδcont hδbdd
             - deltaStepLp hBmeas hδadap hδbdd n)).symm
   · exact fun n hn ↦ gapSum_le hB hBmeas hδadap hδcont hδbdd hMadap hMeq n hn hwadap hwbdd
-
-end StageFiveA
 
 end MathFin.ItoDriftConditional

@@ -10,9 +10,9 @@ public import MathFin.Foundations.ItoDriftIncrementEnergy
 /-! # The weighted increment isometry of an adapted Itô integral (the discrete route, stage 4)
 
 The per-cell weighted second-moment identity `weightedCellSq_step` on the left-endpoint step
-approximants, the band energy of the CLM process (`clm_band_energy`), the mean-function Riemann
-limit `frozenRiemann_tendsto`, and the summed weighted increment isometry
-`quadraticSqSum_tendsto` (with its gap hypothesis `hgap`, discharged in `ItoDriftGapDecay`).
+approximants, the band energy of the CLM process (`clm_band_energy`), the energy of the true
+increment `trueIncr_sq_le`, and the summed weighted increment isometry `quadraticSqSum_tendsto`
+(with its gap hypothesis `hgap`, which `ItoDriftGapDecay` discharges).
 -/
 
 @[expose] public section
@@ -22,13 +22,15 @@ open scoped NNReal
 
 namespace MathFin.ItoDriftConditional
 
-open MathFin ItoIntegralL2 ItoIntegralCLM ItoIntegralProcessGeneral
-  QuadraticVariationL2 ItoIntegralBrownian
+open MathFin ItoIntegralL2 ItoIntegralCLM ItoIntegralRiemannBridge ItoIsometryAdapted
+  ItoIntegralProcessGeneral ItoIntegralProcess QuadraticVariationL2 ItoIntegralBrownian
+open scoped ENNReal
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
+  {B : ℝ≥0 → Ω → ℝ}
 
-/-! #### Stage 4 — the weighted increment isometry (per-cell step identification, the
-gap decay, and the summed isometry)
+/-! #### Stage 4 — the weighted increment isometry (per-cell step identification and the
+summed isometry)
 
 The route: for the left-endpoint step approximant `δⁿ` of `δ`
 on the uniform partition, the per-cell increment of the approximant process is the single
@@ -38,46 +40,9 @@ second-moment identity on the approximant is the independence isometry kernel
 `ΔMₖ = δ(tₖ)ΔBₖ + δεₖ` with `δεₖ` the band-restricted CLM increment of the integrand
 error `φ − δⁿ`, whose `L²` norm is exactly the cell band energy (`clm_band_energy`),
 and Cauchy–Schwarz pairs each cell band with the cell energy. Summing kills the gap at
-rate `√T·‖δ − δⁿ‖_{L²(trim)} → 0` (`deltaStepLp_tendsto`). -/
+rate `√T·‖δ − δⁿ‖_{L²(trim)} → 0` (`deltaStepLp_tendsto`; the summed isometry takes the gap
+bound as its hypothesis `hgap`, which `ItoDriftGapDecay` discharges). -/
 
-section StageFour
-
-open MeasureTheory ProbabilityTheory Filter Topology ItoIntegralProcessGeneral
-open ItoIntegralL2 ItoIntegralCLM ItoIntegralRiemannBridge ItoIsometryAdapted
-open ItoIntegralProcess QuadraticVariationL2 MathFin
-open scoped NNReal ENNReal
-
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
-
-omit [IsProbabilityMeasure μ] in
-/-- Real `L²` pairing bound: `∫ |f g| ≤ ‖f‖₂·‖g‖₂` (Hölder at exponents `2, 2`). -/
-theorem integral_abs_mul_le_L2L2 {f g : Ω → ℝ}
-    (hf : MemLp f 2 μ) (hg : MemLp g 2 μ) :
-    ∫ ω, |f ω * g ω| ∂μ
-      ≤ Real.sqrt (∫ ω, f ω ^ 2 ∂μ) * Real.sqrt (∫ ω, g ω ^ 2 ∂μ) := by
-  have hp : (2 : ℝ).HolderConjugate 2 := Real.HolderConjugate.two_two
-  have hf' : MemLp |f| (ENNReal.ofReal 2) μ := by simpa using hf.abs
-  have hg' : MemLp |g| (ENNReal.ofReal 2) μ := by simpa using hg.abs
-  have h := integral_mul_le_Lp_mul_Lq_of_nonneg (μ := μ) hp
-    (f := fun ω ↦ |f ω|) (g := fun ω ↦ |g ω|)
-    (ae_of_all μ fun ω ↦ abs_nonneg _) (ae_of_all μ fun ω ↦ abs_nonneg _)
-    hf' hg'
-  have h2f : ∫ a, |f a| ^ (2 : ℝ) ∂μ = ∫ a, f a ^ 2 ∂μ := by
-    refine integral_congr_ae (Eventually.of_forall fun a ↦ ?_)
-    change |f a| ^ (2 : ℝ) = f a ^ 2
-    rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) by norm_num, Real.rpow_natCast, sq_abs]
-  have h2g : ∫ a, |g a| ^ (2 : ℝ) ∂μ = ∫ a, g a ^ 2 ∂μ := by
-    refine integral_congr_ae (Eventually.of_forall fun a ↦ ?_)
-    change |g a| ^ (2 : ℝ) = g a ^ 2
-    rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) by norm_num, Real.rpow_natCast, sq_abs]
-  rw [h2f, h2g] at h
-  rw [Real.sqrt_eq_rpow, Real.sqrt_eq_rpow]
-  have hfin : ∫ a, |f a| * |g a| ∂μ = ∫ a, |f a * g a| ∂μ := by
-    refine integral_congr_ae (Eventually.of_forall fun a ↦ ?_)
-    change |f a| * |g a| = |f a * g a|
-    rw [abs_mul]
-  rw [hfin] at h
-  exact h
 
 /-- The process-level elementary Itô integral is additive over finite sums of simple
 processes (the `itoSimpleProcess` analogue of `ItoIntegralBrownian.itoSimple_sum`). -/
@@ -228,23 +193,20 @@ theorem clm_band_energy {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B �
             ∂(trimMeasure_T (μ := μ) T hBmeas) := by
     intro w hwT
     calc ∫ ω, (itoProcessCLM hB T w hBmeas φ' : Ω → ℝ) ω ^ 2 ∂μ
-        = ‖itoProcessCLM hB T w hBmeas φ'‖ ^ 2 := sqIntegral_of_Lp _
+        = ‖itoProcessCLM hB T w hBmeas φ'‖ ^ 2 := (lp_two_norm_sq _).symm
       _ = ∫ z in Set.Ioc (0:ℝ≥0) w ×ˢ (Set.univ : Set Ω), (φ' : ℝ≥0 × Ω → ℝ) z ^ 2
             ∂(trimMeasure_T (μ := μ) T hBmeas) := itoProcessCLM_norm_sq hB hwT hBmeas φ'
   have hint : Integrable (fun z : ℝ≥0 × Ω ↦ (φ' : ℝ≥0 × Ω → ℝ) z ^ 2)
       (trimMeasure_T (μ := μ) T hBmeas) := (Lp.memLp φ').integrable_sq
   have hintU : IntegrableOn (fun z : ℝ≥0 × Ω ↦ (φ' : ℝ≥0 × Ω → ℝ) z ^ 2)
       ((Set.Ioc (0:ℝ≥0) u) ×ˢ (Set.univ : Set Ω)) (trimMeasure_T (μ := μ) T hBmeas) :=
-    hint.mono_measure Measure.restrict_le_self
+    hint.integrableOn
   have hintUV : IntegrableOn (fun z : ℝ≥0 × Ω ↦ (φ' : ℝ≥0 × Ω → ℝ) z ^ 2)
       ((Set.Ioc u v) ×ˢ (Set.univ : Set Ω)) (trimMeasure_T (μ := μ) T hBmeas) :=
-    hint.mono_measure Measure.restrict_le_self
+    hint.integrableOn
   have hdisj : Disjoint
       ((Set.Ioc (0:ℝ≥0) u) ×ˢ (Set.univ : Set Ω)) ((Set.Ioc u v) ×ˢ (Set.univ : Set Ω)) :=
-    Set.disjoint_left.2 fun a ha hb ↦ by
-      have h1 : (u : ℝ) < (a.1 : ℝ) := by exact_mod_cast hb.1.1
-      have h2 : (a.1 : ℝ) ≤ (u : ℝ) := by exact_mod_cast ha.1.2
-      linarith
+    Set.Disjoint.set_prod_left (Set.Ioc_disjoint_Ioc_of_le le_rfl) _ _
   have hbandsplit : ∫ z in Set.Ioc (0:ℝ≥0) v ×ˢ (Set.univ : Set Ω),
       (φ' : ℝ≥0 × Ω → ℝ) z ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas)
       = ∫ z in Set.Ioc (0:ℝ≥0) u ×ˢ (Set.univ : Set Ω), (φ' : ℝ≥0 × Ω → ℝ) z ^ 2
@@ -262,20 +224,7 @@ theorem clm_band_energy {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B �
   rw [hsplit, hband v hvT, hband u (le_trans huv hvT), hbandsplit]
   ring
 
-end StageFour
-
-/-! #### Stage 4 (headline) — the per-cell weighted identity, the gap decay, and the
-summed weighted increment isometry -/
-
-section StageFourB
-
-open MeasureTheory ProbabilityTheory Filter Topology ItoIntegralProcessGeneral
-open ItoIntegralL2 ItoIntegralCLM ItoIntegralRiemannBridge ItoIsometryAdapted
-open ItoIntegralProcess QuadraticVariationL2 MathFin
-open scoped NNReal ENNReal
-
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {B : ℝ≥0 → Ω → ℝ}
+/-! #### Stage 4 — the uniform band split and the per-cell weighted identity -/
 
 omit [IsProbabilityMeasure μ] in
 /-- The uniform-partition band split: the `(0,T]`-band integral of an integrable
@@ -292,9 +241,7 @@ lemma uniform_band_split (hBmeas : ∀ t, Measurable (B t)) {T : ℝ≥0} {n : �
   have hTn : unifPart T n n = T := unifPart_self T hn.ne'
   have hintOn : ∀ m : ℕ, m ≤ n →
       IntegrableOn F ((Set.Ioc (0:ℝ≥0) (unifPart T n m)) ×ˢ (Set.univ : Set Ω))
-        (trimMeasure_T (μ := μ) T hBmeas) := by
-    intro m hm
-    exact hFint.mono_measure (Measure.restrict_le_self)
+        (trimMeasure_T (μ := μ) T hBmeas) := fun _ _ ↦ hFint.integrableOn
   have key : ∀ m : ℕ, 0 < m → m ≤ n →
       ∫ z in Set.Ioc (0:ℝ≥0) (unifPart T n m) ×ˢ (Set.univ : Set Ω), F z
           ∂(trimMeasure_T (μ := μ) T hBmeas)
@@ -303,7 +250,7 @@ lemma uniform_band_split (hBmeas : ∀ t, Measurable (B t)) {T : ℝ≥0} {n : �
               F z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
     intro m
     induction m with
-    | zero => intro hm; exact absurd hm (Nat.not_lt_zero 0)
+    | zero => intro hm; exact (Nat.not_lt_zero _ hm).elim
     | succ m ih =>
       intro hm hmT
       rcases Nat.eq_zero_or_pos m with hm0 | hm0
@@ -319,14 +266,10 @@ lemma uniform_band_split (hBmeas : ∀ t, Measurable (B t)) {T : ℝ≥0} {n : �
         have hdisj : Disjoint
             ((Set.Ioc (0:ℝ≥0) (unifPart T n m)) ×ˢ (Set.univ : Set Ω))
             ((Set.Ioc (unifPart T n m) (unifPart T n (m + 1))) ×ˢ (Set.univ : Set Ω)) :=
-          Set.disjoint_left.2 fun a ha hb ↦ by
-            have h1 : ((unifPart T n m : ℝ)) < (a.1 : ℝ) := by exact_mod_cast hb.1.1
-            have h2 : (a.1 : ℝ) ≤ ((unifPart T n m : ℝ)) := by exact_mod_cast ha.1.2
-            linarith
+          Set.Disjoint.set_prod_left (Set.Ioc_disjoint_Ioc_of_le le_rfl) _ _
         have hintV : IntegrableOn F
             ((Set.Ioc (unifPart T n m) (unifPart T n (m + 1))) ×ˢ (Set.univ : Set Ω))
-            (trimMeasure_T (μ := μ) T hBmeas) := by
-          exact hFint.mono_measure (Measure.restrict_le_self)
+            (trimMeasure_T (μ := μ) T hBmeas) := hFint.integrableOn
         calc ∫ z in Set.Ioc (0:ℝ≥0) (unifPart T n (m + 1)) ×ˢ (Set.univ : Set Ω), F z
               ∂(trimMeasure_T (μ := μ) T hBmeas)
             = ∫ z in (Set.Ioc (0:ℝ≥0) (unifPart T n m) ×ˢ (Set.univ : Set Ω))
@@ -416,91 +359,12 @@ theorem weightedCellSq_step {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal
   exact integral_adapted_mul_increment_sq (hB.isFilteredPreBrownian hBmeas)
     (unifPart_mono T n (Nat.le_succ k)) hχ
 
-end StageFourB
-
-/-! #### Stage 4 (headline) — the gap decay, the summed weighted increment isometry,
-and the convergence of the quadratic block -/
+/-! #### Stage 4 (headline) — the energy of the true increment and the summed weighted
+increment isometry, conditional on the gap bound `hgap` (discharged in `ItoDriftGapDecay`) -/
 
 section StageFourC
 
-open MeasureTheory ProbabilityTheory Filter Topology ItoIntegralProcessGeneral
-open ItoIntegralL2 ItoIntegralCLM ItoIntegralRiemannBridge ItoIsometryAdapted
-open ItoIntegralProcess QuadraticVariationL2 MathFin
-open scoped NNReal ENNReal
-
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
-
-omit hB in
-/-- The mean function of a bounded measurable family with almost surely continuous paths is
-continuous (the stage-1 DCT interchange, factored out). -/
-lemma continuous_mean_of_bdd_cont {g : ℝ≥0 → Ω → ℝ}
-    (hgmeas : ∀ s, Measurable (g s)) (hgcont : ∀ᵐ ω ∂μ, Continuous fun s : ℝ≥0 ↦ g s ω)
-    {C : ℝ} (hgbdd : ∀ s ω, |g s ω| ≤ C) :
-    Continuous fun s : ℝ≥0 ↦ ∫ ω, g s ω ∂μ :=
-  continuous_iff_continuousAt.mpr fun s₀ ↦
-    MeasureTheory.tendsto_integral_filter_of_dominated_convergence
-      (bound := fun _ : Ω ↦ C)
-      (Eventually.of_forall fun s ↦ (hgmeas s).aestronglyMeasurable)
-      (Eventually.of_forall fun s ↦ Eventually.of_forall fun ω ↦ by
-        simpa [Real.norm_eq_abs] using hgbdd s ω)
-      (integrable_const C)
-      (hgcont.mono fun _ h ↦ h.continuousAt)
-
-omit hB in
-/-- `expectation_pathIntegral_eq` (`ItoDriftExpectation`) for a bounded measurable family whose
-paths are continuous only almost surely: set the family to `0` on a measurable null set
-containing every discontinuous path, apply the everywhere-continuous version, and undo the
-change on both sides (it alters each integrand on a null set only). -/
-lemma expectation_pathIntegral_eq_of_ae {w : ℝ≥0 → Ω → ℝ}
-    (hw_meas : ∀ s, Measurable (w s)) (hw_cont : ∀ᵐ ω ∂μ, Continuous fun s : ℝ≥0 ↦ w s ω)
-    {C : ℝ} (hC0 : 0 ≤ C) (hw_bdd : ∀ s ω, |w s ω| ≤ C) (T : ℝ≥0) :
-    ∫ ω, (∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure) ∂μ
-      = ∫ s in Set.Ioc 0 T, (∫ ω, w s ω ∂μ) ∂ItoIntegralL2.timeMeasure := by
-  obtain ⟨t, hbad, ht, hμt⟩ := exists_measurable_superset_of_null (ae_iff.1 hw_cont)
-  have hgood : ∀ᵐ ω ∂μ, ω ∈ tᶜ := measure_eq_zero_iff_ae_notMem.1 hμt
-  have hw'_cont (ω : Ω) : Continuous fun s ↦ tᶜ.indicator (w s) ω := by
-    by_cases hω : ω ∈ t
-    · simp only [Set.indicator_of_notMem (Set.notMem_compl_iff.2 hω)]
-      exact continuous_const
-    · simp only [Set.indicator_of_mem (Set.mem_compl hω)]
-      exact Classical.byContradiction fun h ↦ hω (hbad h)
-  have hw'_bdd (s : ℝ≥0) (ω : Ω) : |tᶜ.indicator (w s) ω| ≤ C := by
-    by_cases hω : ω ∈ tᶜ
-    · rw [Set.indicator_of_mem hω]
-      exact hw_bdd s ω
-    · rw [Set.indicator_of_notMem hω, abs_zero]
-      exact hC0
-  calc ∫ ω, (∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure) ∂μ
-      = ∫ ω, (∫ s in Set.Ioc 0 T, tᶜ.indicator (w s) ω ∂ItoIntegralL2.timeMeasure) ∂μ :=
-        integral_congr_ae (hgood.mono fun ω hω ↦ by simp only [Set.indicator_of_mem hω])
-    _ = ∫ s in Set.Ioc 0 T, (∫ ω, tᶜ.indicator (w s) ω ∂μ) ∂ItoIntegralL2.timeMeasure :=
-        expectation_pathIntegral_eq (w := fun s ↦ tᶜ.indicator (w s))
-          (fun s ↦ (hw_meas s).indicator ht.compl) hw'_cont hC0 hw'_bdd T
-    _ = ∫ s in Set.Ioc 0 T, (∫ ω, w s ω ∂μ) ∂ItoIntegralL2.timeMeasure :=
-        setIntegral_congr_fun measurableSet_Ioc fun s _ ↦
-          integral_congr_ae (hgood.mono fun ω hω ↦ by simp only [Set.indicator_of_mem hω])
-
-omit hB in
-/-- **The frozen Riemann convergence**: the left-endpoint Riemann sums of the deterministic
-mean function of a bounded measurable family with almost surely continuous paths converge to
-the time integral of the means (the deterministic `tendsto_riemann_continuous` applied to the
-mean function). -/
-theorem frozenRiemann_tendsto {g : ℝ≥0 → Ω → ℝ} {T : ℝ≥0}
-    (hgmeas : ∀ s, Measurable (g s)) (hgcont : ∀ᵐ ω ∂μ, Continuous fun s : ℝ≥0 ↦ g s ω)
-    {C : ℝ} (hgbdd : ∀ s ω, |g s ω| ≤ C) :
-    Tendsto (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
-        (∫ ω, g (unifPart T n k) ω ∂μ) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k))
-      atTop (𝓝 (∫ s in Set.Ioc 0 T, (∫ ω, g s ω ∂μ) ∂ItoIntegralL2.timeMeasure)) := by
-  have hmeanbdd : ∀ s : ℝ≥0, |∫ ω, g s ω ∂μ| ≤ C := fun s ↦ by
-    calc |∫ ω, g s ω ∂μ| ≤ ∫ ω, |g s ω| ∂μ := abs_integral_le_integral_abs
-      _ ≤ ∫ ω, C ∂μ := integral_mono_of_nonneg
-          (Eventually.of_forall fun ω ↦ abs_nonneg _)
-          (integrable_const C)
-          (Eventually.of_forall fun ω ↦ by simpa [Real.norm_eq_abs] using hgbdd s ω)
-      _ = C := by rw [integral_const]; simp
-  exact tendsto_riemann_continuous (continuous_mean_of_bdd_cont hgmeas hgcont hgbdd) T
-    (fun s _ ↦ hmeanbdd s)
+variable (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
 
 variable {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
   (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
@@ -589,9 +453,10 @@ theorem trueIncr_sq_le {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
         show |Dd| * |Dd| * ((v : ℝ) - u) ≤ Dd ^ 2 * ((v : ℝ) - u)
         rw [sq Dd, hDsq2]
 
+end StageFourC
+
 set_option maxHeartbeats 1600000 in
 -- a long estimate: elaborating the whole proof exceeds the default budget
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- **The convergence of the quadratic block** (the summed weighted increment isometry,
 conditional on a gap bound): if for some null sequence `r` the weighted second-moment sum
 along the uniform partition differs from the frozen rectangle sum by at most
@@ -663,21 +528,6 @@ theorem quadraticSqSum_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Me
     refine integral_congr_ae (Eventually.of_forall fun ω ↦ by show _ = _; ring)
   obtain ⟨r, hr0, hgap'⟩ := hgap
   -- the gap dies along the null sequence r
-  have hSFabs : Tendsto (fun n : ℕ ↦ |(∑ k ∈ Finset.range n,
-      ∫ ω, w (unifPart T n k) ω
-        * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ)
-    - ∑ k ∈ Finset.range n,
-        (∫ ω, w (unifPart T n k) ω
-          * (δ (unifPart T n k) ω * δ (unifPart T n k) ω) ∂μ)
-          * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)|) atTop (𝓝 0) := by
-    refine squeeze_zero' (g := fun n : ℕ ↦ 2 * |Cw| * |Dd| * Real.sqrt (T : ℝ) * r n)
-      (Eventually.of_forall fun n ↦ abs_nonneg _) ?_ ?_
-    · filter_upwards [eventually_gt_atTop 0] with n hn
-      have h := hgap' n hn
-      rw [hFeq n] at h
-      exact h
-    · simpa using (tendsto_const_nhds
-        (x := 2 * |Cw| * |Dd| * Real.sqrt (T : ℝ))).mul hr0
   have hSF : Tendsto (fun n : ℕ ↦ (∑ k ∈ Finset.range n,
         ∫ ω, w (unifPart T n k) ω
           * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ)
@@ -685,23 +535,11 @@ theorem quadraticSqSum_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Me
           (∫ ω, w (unifPart T n k) ω
             * (δ (unifPart T n k) ω * δ (unifPart T n k) ω) ∂μ)
             * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) atTop (𝓝 0) := by
-    refine tendsto_iff_dist_tendsto_zero.mpr ?_
-    refine Filter.Tendsto.congr' (Eventually.of_forall fun n ↦ ?_) hSFabs
-    change |(∑ k ∈ Finset.range n,
-          ∫ ω, w (unifPart T n k) ω
-            * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ)
-        - ∑ k ∈ Finset.range n,
-            (∫ ω, w (unifPart T n k) ω
-              * (δ (unifPart T n k) ω * δ (unifPart T n k) ω) ∂μ)
-              * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)|
-      = dist ((∑ k ∈ Finset.range n,
-          ∫ ω, w (unifPart T n k) ω
-            * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ)
-        - ∑ k ∈ Finset.range n,
-            (∫ ω, w (unifPart T n k) ω
-              * (δ (unifPart T n k) ω * δ (unifPart T n k) ω) ∂μ)
-              * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) 0
-    rw [Real.dist_eq, sub_zero]
+    refine squeeze_zero_norm' (a := fun n : ℕ ↦ 2 * |Cw| * |Dd| * Real.sqrt (T : ℝ) * r n)
+      ?_ (by simpa using (tendsto_const_nhds
+        (x := 2 * |Cw| * |Dd| * Real.sqrt (T : ℝ))).mul hr0)
+    filter_upwards [eventually_gt_atTop 0] with n hn
+    simpa only [Real.norm_eq_abs, hFeq n] using hgap' n hn
   have key := hSF.add hF
   rw [zero_add] at key
   exact key.congr' (Eventually.of_forall fun n ↦ by
@@ -718,7 +556,5 @@ theorem quadraticSqSum_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Me
             * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)
       = _
     ring)
-
-end StageFourC
 
 end MathFin.ItoDriftConditional

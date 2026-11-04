@@ -694,7 +694,7 @@ private theorem constructedGenIntegrandExp_eq
                           mul_le_mul_of_nonneg_left
                             ((hδbdd (Real.toNNReal x) ω).trans (le_abs_self Dd))
                             (abs_nonneg Dd)) hC2)
-  show (∫ ω, f' (reindexed X x ω) * reindexed β x ω ∂μ)
+  change (∫ ω, f' (reindexed X x ω) * reindexed β x ω ∂μ)
     + (1 / 2) * (∫ ω, f'' (reindexed X x ω) * (reindexed δ x ω * reindexed δ x ω) ∂μ)
     = ∫ ω, (f' (reindexed X x ω) * reindexed β x ω
         + 1 / 2 * (f'' (reindexed X x ω) * (reindexed δ x ω * reindexed δ x ω))) ∂μ
@@ -1035,14 +1035,14 @@ theorem marginal_flow_weak_equation_fn_constructed
           * driftCoeff μ (reindexed X) (reindexed β) t ω ∂μ)
       = (∫ ω, f' (X (Real.toNNReal t) ω) * afn t (X (Real.toNNReal t) ω) ∂μ) :=
     integral_congr_ae (Eventually.of_forall fun ω => by
-      show f' (X (Real.toNNReal t) ω) * driftCoeff μ (reindexed X) (reindexed β) t ω
+      change f' (X (Real.toNNReal t) ω) * driftCoeff μ (reindexed X) (reindexed β) t ω
         = f' (X (Real.toNNReal t) ω) * afn t (X (Real.toNNReal t) ω)
       rw [(hafn t).2 ω])
   have e2 : (∫ ω, f'' (X (Real.toNNReal t) ω)
           * diffCoeffSq μ (reindexed X) (reindexed δ) t ω ∂μ)
       = (∫ ω, f'' (X (Real.toNNReal t) ω) * bfn t (X (Real.toNNReal t) ω) ∂μ) :=
     integral_congr_ae (Eventually.of_forall fun ω => by
-      show f'' (X (Real.toNNReal t) ω) * diffCoeffSq μ (reindexed X) (reindexed δ) t ω
+      change f'' (X (Real.toNNReal t) ω) * diffCoeffSq μ (reindexed X) (reindexed δ) t ω
         = f'' (X (Real.toNNReal t) ω) * bfn t (X (Real.toNNReal t) ω)
       rw [(hbfn t).2 ω])
   rw [← e1, ← e2]
@@ -1099,7 +1099,7 @@ private theorem constructedGenIntegrandExp_fn
               hMadap c hXcont hXrel) x hf'meas hg1
       _ = (∫ ω, f' (X (Real.toNNReal x) ω) * afn x (X (Real.toNNReal x) ω) ∂μ) :=
           integral_congr_ae (Eventually.of_forall fun ω => by
-            show f' (reindexed X x ω) * driftCoeff μ (reindexed X) (reindexed β) x ω
+            change f' (reindexed X x ω) * driftCoeff μ (reindexed X) (reindexed β) x ω
               = f' (X (Real.toNNReal x) ω) * afn x (X (Real.toNNReal x) ω)
             rw [hafnRep x ω])
   have e2 : (∫ ω, f'' (reindexed X x ω) * (reindexed δ x ω * reindexed δ x ω) ∂μ)
@@ -1112,10 +1112,10 @@ private theorem constructedGenIntegrandExp_fn
               hMadap c hXcont hXrel) x hf''meas hg2
       _ = (∫ ω, f'' (X (Real.toNNReal x) ω) * bfn x (X (Real.toNNReal x) ω) ∂μ) :=
           integral_congr_ae (Eventually.of_forall fun ω => by
-            show f'' (reindexed X x ω) * diffCoeffSq μ (reindexed X) (reindexed δ) x ω
+            change f'' (reindexed X x ω) * diffCoeffSq μ (reindexed X) (reindexed δ) x ω
               = f'' (X (Real.toNNReal x) ω) * bfn x (X (Real.toNNReal x) ω)
             rw [hbfnRep x ω])
-  show (∫ ω, f' (reindexed X x ω) * reindexed β x ω ∂μ)
+  change (∫ ω, f' (reindexed X x ω) * reindexed β x ω ∂μ)
       + 1 / 2 * (∫ ω, f'' (reindexed X x ω) * (reindexed δ x ω * reindexed δ x ω) ∂μ) = _
   rw [e1, e2]
 

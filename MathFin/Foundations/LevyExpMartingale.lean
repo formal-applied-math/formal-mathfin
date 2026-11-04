@@ -381,7 +381,7 @@ theorem integral_mul_exp_eq (a : ℝ) {s t : ℝ≥0} (hst : s ≤ t) {V : Ω �
       have h := abs_integral_mul_exp_increment_sub_le hA hM hM2 hK a
         (unifPartIcc_mono s t n k.le_succ) ((hV.mono (𝓕.mono hsk)).mul (hZsm (π k)))
         (C := C') (fun ω ↦ by
-          show |V ω * Z (π k) ω| ≤ C'
+          change |V ω * Z (π k) ω| ≤ C'
           rw [abs_mul, abs_of_pos (Real.exp_pos _)]
           exact mul_le_mul (hC ω) (exp_le_exp_abs_mul hA hK a _ ω) (Real.exp_pos _).le
             ((abs_nonneg _).trans (hC ω)))
@@ -403,8 +403,8 @@ theorem integral_mul_exp_eq (a : ℝ) {s t : ℝ≥0} (hst : s ≤ t) {V : Ω �
       integral_mono ((hM.integrable _).sub (hM.integrable _)).abs hmaxI fun ω ↦
         abs_le_maxIncr s t hk ω
     rw [← integral_sub (iVZ t) (iVZ s), integral_congr_ae (.of_forall htel),
-      integral_finsetSum _ fun k _ ↦ ((iVZ (π (k + 1))).sub (iVZ (π k))).congr (.of_forall fun ω ↦ by
-        simp only [Pi.sub_apply, mul_sub])]
+      integral_finsetSum _ fun k _ ↦ ((iVZ (π (k + 1))).sub (iVZ (π k))).congr
+        (.of_forall fun ω ↦ by simp only [Pi.sub_apply, mul_sub])]
     refine (abs_sum_le_sum_abs _ _).trans ((sum_le_sum fun k _ ↦ hcell k).trans
       ((sum_le_sum fun k hk ↦ mul_le_mul_of_nonneg_left (add_le_add_right
         (mul_le_mul_of_nonneg_left (hc1 k hk) (mul_nonneg (div_nonneg hg0 n.cast_nonneg)

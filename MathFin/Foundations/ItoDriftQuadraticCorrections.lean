@@ -5,10 +5,8 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoDriftIncrementEnergy
 public import MathFin.Foundations.ItoDriftWeightedIsometry
-public import MathFin.Foundations.ItoDriftMomentBounds
-public import MathFin.Foundations.ItoDriftBlock
+public import MathFin.Foundations.FiniteMeasureCauchySchwarz
 
 /-! # The quadratic corrections of the adapted Itô–drift identity (the discrete route, stage 5e)
 
@@ -19,39 +17,20 @@ The two corrections of the quadratic block that tend to `0`: the drift² correct
 @[expose] public section
 
 open MeasureTheory ProbabilityTheory Filter Topology
-open scoped NNReal
+open scoped NNReal ENNReal
 
 namespace MathFin.ItoDriftConditional
 
-open MathFin ItoIntegralL2 ItoIntegralCLM ItoIntegralProcessGeneral
-  QuadraticVariationL2 ItoIntegralBrownian
+open MathFin ItoIntegralL2 ItoIntegralCLM ItoIntegralRiemannBridge ItoIsometryAdapted
+  ItoIntegralProcessGeneral ItoIntegralProcess QuadraticVariationL2 ItoIntegralBrownian
+  AdaptedDrift
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
+  {B : ℝ≥0 → Ω → ℝ}
 
-section StageFiveD
+/-! #### Stage 5e — the dying quadratic corrections
 
-open MeasureTheory ProbabilityTheory Filter Topology ItoIntegralProcessGeneral
-open ItoIntegralL2 ItoIntegralCLM ItoIntegralRiemannBridge ItoIsometryAdapted
-open ItoIntegralProcess QuadraticVariationL2 ItoIntegralBrownian AdaptedDrift MathFin
-open scoped NNReal ENNReal
-
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
-  {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
-  (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-  (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-  (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-  {M : ℝ≥0 → Ω → ℝ}
-  (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-  (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-    (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
-
-include hB hBmeas hδadap hδcont hδbdd hMadap hMeq
-
-
-/-! #### Stage 5e — the dying blocks of the assembly
-
-Three convergences consumed by `itoDrift_expectation_identity_adapted`; each statement gives
+Two convergences consumed by `itoDrift_expectation_identity_adapted`; each statement gives
 only the limit `0`, and the bounds below are what the proofs establish:
 
 * `quadDriftSqSum_tendsto` — the drift² corrections `O(mesh)`:
@@ -59,20 +38,10 @@ only the limit `0`, and the bounds below are what the proofs establish:
 * `quadCrossSum_tendsto` — the drift–martingale cross corrections `O(√mesh)`:
   `∑ₖ |𝔼[g (X tₖ)·Δ(AdaptedDrift.driftPath β)ₖ·ΔMₖ]| ≤ 2·C₂·D_β·|D_δ|·T·√T/√(n+1) → 0`
   (the `D_β·cell`-bounded drift increment paired against the `D_δ²·cell`-energy
-  martingale increment, `trueIncr_sq_le`);
-* `taylorRemainderSum_tendsto` — the Taylor remainder: `|𝔼[∑ₖ Rₖ]|` is at most
-  `4·C₃·(4·D_β³·T³/(n+1)² + 2·√(3·(D_δ²·T)³)/√(n+1)) → 0`
-  (`abs_discreteTaylorRemainder_le` + `pow3_add_le` + `trueIncr_pow3_le`). -/
+  martingale increment, `trueIncr_sq_le`).
 
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- The `1/√(n+1)` null sequence over the naturals: the square root of Mathlib's
-`tendsto_one_div_add_atTop_nhds_zero_nat`. -/
-theorem tendsto_inv_sqrt_nat_add :
-    Tendsto (fun n : ℕ ↦ (1 : ℝ) / Real.sqrt ((n : ℝ) + 1)) atTop (𝓝 0) := by
-  simpa only [Real.sqrt_div zero_le_one, Real.sqrt_one, Real.sqrt_zero] using
-    (tendsto_one_div_add_atTop_nhds_zero_nat (𝕜 := ℝ)).sqrt
+The third dying block, the Taylor remainder, is stage 5f (`ItoDriftTaylorRemainder`). -/
 
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- **The drift² corrections of the quadratic block die**: the statement is the limit `0`.
 The proof bounds the summed absolute expectations of the frozen weight against the
 drift-increment squares by `2·C₂·D_β²·T²/(n+1)` (`O(mesh)`) — each drift increment is
@@ -193,30 +162,21 @@ theorem quadDriftSqSum_tendsto (hBmeas : ∀ t, Measurable (B t)) {β : ℝ≥0 
             nlinarith
     · simpa only [mul_one_div, mul_zero] using
         (tendsto_one_div_add_atTop_nhds_zero_nat (𝕜 := ℝ)).const_mul (2 * C2 * Db ^ 2 * (T : ℝ) ^ 2)
-  refine tendsto_iff_dist_tendsto_zero.mpr ?_
-  refine hboundtendsto.congr' (Eventually.of_forall fun n ↦ ?_)
-  change |∑ k ∈ Finset.range n,
-      ∫ ω, g (X (unifPart T n k) ω)
-        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2 ∂μ|
-    = dist (∑ k ∈ Finset.range n,
-      ∫ ω, g (X (unifPart T n k) ω)
-        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω) ^ 2 ∂μ) 0
-  rw [Real.dist_eq, sub_zero]
+  exact (tendsto_zero_iff_abs_tendsto_zero _).mpr hboundtendsto
 
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- The `1/√n ≤ 2/√(n+1)` comparison for `n ≥ 1`. -/
-theorem one_div_sqrt_le_two {n : ℕ} (hn : 0 < n) :
-    (1 : ℝ) / Real.sqrt ((n : ℝ)) ≤ 2 / Real.sqrt (((n : ℝ)) + 1) := by
-  have hne : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hn
-  have hpos1 : (0 : ℝ) < Real.sqrt ((n : ℝ)) := Real.sqrt_pos.mpr hne
-  have hpos2 : (0 : ℝ) < Real.sqrt (((n : ℝ)) + 1) := Real.sqrt_pos.mpr (by linarith)
-  have hsq : Real.sqrt (((n : ℝ)) + 1) ≤ 2 * Real.sqrt ((n : ℝ)) := by
-    have hnm : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
-    refine le_trans (Real.sqrt_le_sqrt (show ((n : ℝ)) + 1 ≤ 4 * (n : ℝ) from by nlinarith)) ?_
-    rw [show (2 : ℝ) * Real.sqrt ((n : ℝ)) = Real.sqrt (4 * (n : ℝ)) from by
-      rw [Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 4)]; norm_num]
-  rw [div_le_div_iff₀ hpos1 hpos2]
-  simpa using hsq
+section Cross
+
+variable (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
+  {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
+  (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
+  (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
+  (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
+  {M : ℝ≥0 → Ω → ℝ}
+  (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
+  (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
+    (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+
+include hB hBmeas hδadap hδcont hδbdd hMadap hMeq
 
 set_option maxHeartbeats 1600000 in
 -- a long estimate: elaborating the whole proof exceeds the default budget
@@ -284,21 +244,8 @@ theorem quadCrossSum_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω �
         (unifPart T n (k + 1))).sub
         (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq (unifPart T n k))
     -- the mean-integrability inputs
-    have hone : MemLp (fun _ : Ω ↦ (1 : ℝ)) 2 μ :=
-      MemLp.of_bound (stronglyMeasurable_const.aestronglyMeasurable) 1
-        (Eventually.of_forall fun ω ↦ by norm_num)
-    have hnorm1 : ∫ ω, |tI ω| ∂μ ≤ Real.sqrt (∫ ω, tI ω ^ 2 ∂μ) := by
-      have h1 := integral_abs_mul_le_L2L2 (htImem.norm) hone
-      have hA : (∫ ω, abs (‖tI ω‖ * 1) ∂μ) = ∫ ω, |tI ω| ∂μ := by
-        refine integral_congr_ae (Eventually.of_forall fun ω ↦ ?_)
-        change abs (‖tI ω‖ * 1) = |tI ω|
-        rw [Real.norm_eq_abs, mul_one, abs_abs]
-      have hB : (∫ ω, ‖tI ω‖ ^ 2 ∂μ) = ∫ ω, tI ω ^ 2 ∂μ := by
-        refine integral_congr_ae (Eventually.of_forall fun ω ↦ ?_)
-        change ‖tI ω‖ ^ 2 = tI ω ^ 2
-        rw [Real.norm_eq_abs, sq_abs]
-      rw [hA, hB] at h1
-      simpa using h1
+    have hnorm1 : ∫ ω, |tI ω| ∂μ ≤ Real.sqrt (∫ ω, tI ω ^ 2 ∂μ) :=
+      integral_abs_le_sqrt_integral_sq htImem
     have htI2 := trueIncr_sq_le hB hBmeas hδadap hδcont hδbdd hMadap hMeq
       (unifPart_mono T n (Nat.le_succ k)) (unifPart_le_T (Nat.lt_iff_add_one_le.mp hk))
     have hsqrtT : Real.sqrt (∫ ω, tI ω ^ 2 ∂μ) ≤ |Dd| * Real.sqrt
@@ -419,18 +366,8 @@ theorem quadCrossSum_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω �
         (tendsto_const_nhds (x := (2 * C2 * |Db| * |Dd| * (T : ℝ)
           * Real.sqrt (T : ℝ)))).mul tendsto_inv_sqrt_nat_add
       rwa [hzero] at h2'
-  refine tendsto_iff_dist_tendsto_zero.mpr ?_
-  refine hboundtendsto.congr' (Eventually.of_forall fun n ↦ ?_)
-  change |∑ k ∈ Finset.range n,
-      ∫ ω, g (X (unifPart T n k) ω)
-        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)
-        * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ|
-    = dist (∑ k ∈ Finset.range n,
-      ∫ ω, g (X (unifPart T n k) ω)
-        * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)
-        * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ) 0
-  rw [Real.dist_eq, sub_zero]
+  exact (tendsto_zero_iff_abs_tendsto_zero _).mpr hboundtendsto
 
-end StageFiveD
+end Cross
 
 end MathFin.ItoDriftConditional

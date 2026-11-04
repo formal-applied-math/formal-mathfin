@@ -10,13 +10,13 @@ public import MathFin.Foundations.DoobDecomposition
 public import MathFin.Foundations.OptionalSamplingInequality
 
 /-!
-# Bridge: Doob decomposition and optional sampling of the finite-horizon Snell envelope
+# Doob decomposition and optional sampling of the finite-horizon Snell envelope
 
 `snellEnvelope P 𝓕 Set.univ Z N` (`Foundations/SnellEnvelope.lean`, every time an exercise time)
-is the backward Bellman recursion `U_i = max(Z_i, 𝔼[U_{i+1} | 𝓕_i])` for an adapted integrable reward `Z` on an
-arbitrary filtered probability space, frozen at `Z_N` after the horizon `N`: the discrete Snell
-envelope of `Z`. It is a supermartingale (`snellEnvelope_supermartingale`). This file applies two
-results of `Foundations/` to it.
+is the backward recursion `U_i = max(Z_i, 𝔼[U_{i+1} | 𝓕_i])` for an adapted integrable reward `Z`
+on an arbitrary filtered probability space, frozen at `Z_N` after the horizon `N`: the discrete
+Snell envelope of `Z`. It is a supermartingale (`snellEnvelope_supermartingale`). This file applies
+two results of `Foundations/` to it.
 
 * **Doob decomposition** (`Foundations/DoobDecomposition`). `U = M + A` with `M` a martingale and
   `A` predictable with `A₀ = 0`, unique up to a.e. equality at every time
@@ -26,7 +26,8 @@ results of `Foundations/` to it.
 * **Optional sampling** (`Foundations/OptionalSamplingInequality`). For stopping times
   `σ ≤ τ ≤ N`, `𝔼[Z_τ | 𝓕_σ] ≤ U_σ` almost surely: at any stopping time the envelope dominates
   the conditional expected reward of every later bounded stopping rule. At `σ = 0` and in
-  expectation this is `expected_discrete_payoff_le_bellman`.
+  expectation this is `expected_discrete_payoff_le_snellEnvelope`
+  (`BlackScholes/AmericanPut/Stopping/FiniteBellmanOptimality.lean`).
 
 ## Main results
 
@@ -36,7 +37,7 @@ results of `Foundations/` to it.
 
 @[expose] public section
 
-namespace MathFin.BlackScholes.AmericanPut.Stopping
+namespace MathFin
 
 open MeasureTheory ProbabilityTheory
 
@@ -44,7 +45,7 @@ variable {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} [IsProbabilityMeasur
   {𝓕 : Filtration ℕ ‹MeasurableSpace Ω›} {Z : ℕ → Ω → ℝ}
 
 /-- **Doob decomposition of the finite-horizon Snell envelope.** For an adapted integrable reward
-`Z` and a horizon `N`, the Bellman value `U = snellEnvelope P 𝓕 Set.univ Z N` is `M + A` with `M` a
+`Z` and a horizon `N`, the Snell envelope `U = snellEnvelope P 𝓕 Set.univ Z N` is `M + A` with `M` a
 martingale and `A` predictable (`A (n + 1)` is `𝓕 n`-measurable) with `A 0 = 0`, and:
 
 * `A` is a.e. nonincreasing (`U` is a supermartingale);
@@ -86,7 +87,8 @@ theorem snellEnvelope_doob_decomposition (ha : Adapted 𝓕 Z) (hi : ∀ i, Inte
     simp only [Pi.zero_apply] at hn
     rw [predictablePart_add_one, Pi.add_apply]
     linarith
-  · have hrec : U i = fun ω ↦ max (Z i ω) (P[U (i + 1) | 𝓕 i] ω) := snellEnvelope_succ_of_mem hiN (Set.mem_univ i)
+  · have hrec : U i = fun ω ↦ max (Z i ω) (P[U (i + 1) | 𝓕 i] ω) :=
+      snellEnvelope_succ_of_mem hiN (Set.mem_univ i)
     have hself : P[U i | 𝓕 i] = U i := condExp_of_stronglyMeasurable (𝓕.le i) (hUa i) (hUi i)
     filter_upwards [condExp_sub (hUi (i + 1)) (hUi i) (𝓕 i)] with ω hω hlt
     have hUω : U i ω = max (Z i ω) (P[U (i + 1) | 𝓕 i] ω) := congrFun hrec ω
@@ -98,7 +100,7 @@ theorem snellEnvelope_doob_decomposition (ha : Adapted 𝓕 Z) (hi : ∀ i, Inte
 
 /-- **Optional sampling for the Snell envelope.** For an adapted integrable reward `Z`, a
 horizon `N` and stopping times `σ ≤ τ` with `τ ≤ N`, the conditional expected reward at `τ`
-given `𝓕_σ` is at most the Bellman value at `σ`:
+given `𝓕_σ` is at most the Snell envelope at `σ`:
 
   `𝔼[Z_τ | 𝓕_σ] ≤ U_σ`  almost surely, `U = snellEnvelope P 𝓕 Set.univ Z N`.
 
@@ -129,9 +131,10 @@ theorem condExp_stoppedValue_le_snellEnvelope (ha : Adapted 𝓕 Z) (hi : ∀ i,
   rw [hneg, hneg] at hos
   filter_upwards [condExp_mono (m := hσ.measurableSpace) (integrable_stoppedValue ℕ hτ hi hτN)
       (integrable_stoppedValue ℕ hτ (snellEnvelope_integrable hi N) hτN) hdom, hos,
-    condExp_neg (stoppedValue (snellEnvelope P 𝓕 Set.univ Z N) τ) hσ.measurableSpace] with ω h1 h2 h3
+    condExp_neg (stoppedValue (snellEnvelope P 𝓕 Set.univ Z N) τ) hσ.measurableSpace]
+    with ω h1 h2 h3
   simp only [Pi.neg_apply] at h2 h3
   rw [h3] at h2
   linarith
 
-end MathFin.BlackScholes.AmericanPut.Stopping
+end MathFin
