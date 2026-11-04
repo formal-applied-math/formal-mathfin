@@ -279,7 +279,7 @@ theorem martingale_stoppedProcess_itoResidual (hB : IsPreBrownianReal B μ)
           ∂timeMeasure‖ ≤ Cd * s := by
         refine (norm_setIntegral_le_of_norm_le_const
           (by rw [timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top)
-          (fun u hu ↦ hCd _ (hmem u hu.2))).trans_eq ?_
+          (fun u (hu : u ∈ Set.Ioc (0 : ℝ≥0) s) ↦ hCd _ (hmem u hu.2))).trans_eq ?_
         simp [Measure.real, timeMeasure_Ioc]
       calc ‖M s ω‖ ≤ ‖f (s : ℝ) (B s ω)‖ + ‖f 0 (B 0 ω)‖ + ‖∫ u in Set.Ioc 0 s,
             (f_t (u : ℝ) (B u ω) + 1 / 2 * f_xx (u : ℝ) (B u ω)) ∂timeMeasure‖ :=
