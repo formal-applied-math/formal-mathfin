@@ -271,7 +271,8 @@ theorem bandGen_support {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     change ⇑(simpleAssembly_T (μ := μ) T hBmeas (stepSP hBmeas hcd hdT hZm hZb)) p = 0
     rw [hcoe]
     show (Set.Ioc c d).indicator (fun _ ↦ (1 : ℝ)) p.1 * Z p.2 = 0
-    rw [Set.indicator_of_notMem (fun hc ↦ absurd hc.1 (not_lt.mpr hpc)), zero_mul]
+    rw [Set.indicator_of_notMem
+      (show p.1 ∉ Set.Ioc c d from fun hc ↦ absurd hc.1 (not_lt.mpr hpc)), zero_mul]
 
 /-- Band generators vanish after their right endpoint — the companion of `bandGen_support`, and
 what says the elementary integral has finished by `d`. -/
@@ -285,7 +286,8 @@ theorem bandGen_support_after {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
   change ⇑(simpleAssembly_T (μ := μ) T hBmeas (stepSP hBmeas hcd hdT hZm hZb)) p = 0
   rw [hcoe]
   show (Set.Ioc c d).indicator (fun _ ↦ (1 : ℝ)) p.1 * Z p.2 = 0
-  rw [Set.indicator_of_notMem (fun hc ↦ absurd hc.2 (not_le.mpr hpd)), zero_mul]
+  rw [Set.indicator_of_notMem
+    (show p.1 ∉ Set.Ioc c d from fun hc ↦ absurd hc.2 (not_le.mpr hpd)), zero_mul]
 
 /-- **The band generator's integral is the explicit increment**: integrating
 `Z·1_{(c,d]} dB` over `[0,T]` returns `Z·(B_d − B_c)` — the Riemann–Stieltjes term. -/
@@ -340,7 +342,8 @@ private theorem bandSq_section (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   by_cases hu : u ∈ Set.Ioc a b
   · rw [bandSq, Set.indicator_of_mem (show (u, ω) ∈ Set.Ioc a b ×ˢ F from ⟨hu, hω⟩),
       Set.indicator_of_mem hu]
-  · rw [bandSq, Set.indicator_of_notMem (fun h ↦ hu h.1), Set.indicator_of_notMem hu]
+  · rw [bandSq, Set.indicator_of_notMem (show (u, ω) ∉ Set.Ioc a b ×ˢ F from fun h ↦ hu h.1),
+      Set.indicator_of_notMem hu]
 
 /-- The band `(a,b]` sits inside the horizon, so the time measure may be restricted to it
 directly. The one place `b ≤ T` is used. -/
@@ -362,7 +365,7 @@ private theorem integral_section_bandSq (T : ℝ≥0) (hBmeas : ∀ t, Measurabl
     simp only [bandSq_section T hBmeas φ a b hω]
     rw [integral_indicator measurableSet_Ioc, restrict_timeMeasure_T T hbT, bracketRep]
   · have hpt : ∀ u : ℝ≥0, bandSq (μ := μ) T hBmeas φ a b F (u, ω) = 0 := fun u ↦ by
-      rw [bandSq, Set.indicator_of_notMem (fun h ↦ hω h.2)]
+      rw [bandSq, Set.indicator_of_notMem (show (u, ω) ∉ Set.Ioc a b ×ˢ F from fun h ↦ hω h.2)]
     simp only [hpt, integral_zero, Set.indicator_of_notMem hω]
 
 omit [IsProbabilityMeasure μ] in
@@ -421,7 +424,8 @@ theorem bracketRep_add (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   simp only [bracketRep]
   rw [← Set.Ioc_union_Ioc_eq_Ioc hab hbc]
   exact (setIntegral_union
-    (Set.disjoint_left.mpr fun u hu1 hu2 ↦ absurd hu2.1 (not_lt.mpr hu1.2)) measurableSet_Ioc
+    (Set.disjoint_left.mpr fun u (hu1 : u ∈ Set.Ioc a b) (hu2 : u ∈ Set.Ioc b c) ↦
+      absurd hu2.1 (not_lt.mpr hu1.2)) measurableSet_Ioc
     (hsec.mono_set (Set.Ioc_subset_Ioc_right hbc))
     (hsec.mono_set (Set.Ioc_subset_Ioc_left hab))).symm
 

@@ -80,10 +80,10 @@ theorem tendsto_eLpNorm_sub_of_dominated_convergence {p : ℝ≥0∞} (hp : p �
     (h_bound : ∀ n, ∀ᵐ x ∂ν, ‖F n x‖ ≤ bound x)
     (h_lim : ∀ᵐ x ∂ν, Tendsto (fun n ↦ F n x) atTop (𝓝 (f x))) :
     Tendsto (fun n ↦ eLpNorm (F n - f) p ν) atTop (𝓝 0) := by
-  rcases eq_or_ne p 0 with rfl | hp0
-  · simp
-  have hp_pos : 0 < p.toReal := ENNReal.toReal_pos hp0 hp
   have hfm : AEStronglyMeasurable f ν := aestronglyMeasurable_of_tendsto_ae _ F_measurable h_lim
+  rcases eq_or_ne p 0 with rfl | hp0
+  · simp [fun n ↦ eLpNorm_exponent_zero ((F_measurable n).sub hfm)]
+  have hp_pos : 0 < p.toReal := ENNReal.toReal_pos hp0 hp
   -- the `p`-th powers of `‖F n − f‖ₑ` are dominated by `(2‖bound‖ₑ)^p` and tend to `0`
   have hdom (n : ℕ) : (fun x ↦ ‖(F n - f) x‖ₑ ^ p.toReal) ≤ᵐ[ν]
       fun x ↦ (2 * ‖bound x‖ₑ) ^ p.toReal := by
@@ -596,7 +596,8 @@ theorem agree_cut_indicator (hI' : IsOtherExtension (T := T) (φ := φ) hB I' S'
         simp only [cut, Pi.zero_apply]
         rw [Set.indicator_apply]
         split_ifs with h1
-        · exact Set.indicator_of_notMem (fun h ↦ haK (h.1.1.le.trans h1.1)) _
+        · exact Set.indicator_of_notMem (s := Set.Ioc a b ×ˢ F) (a := (t, ω))
+            (fun h ↦ haK (h.1.1.le.trans h1.1)) _
         · rfl
   · intro A _ hA
     convert (agree_cut_univ hI' K).sub hI' hA using 1
