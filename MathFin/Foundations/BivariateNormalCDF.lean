@@ -569,7 +569,7 @@ theorem hasGaussianLaw_gaussianPair (r : ℝ) (μ σ : Fin 2 → ℝ) :
   have h : (fun q i ↦ gaussianPair μ σ i q) = (μ + ·) ∘ L := by
     ext q i
     fin_cases i <;> simp [gaussianPair, L]
-  refine ⟨?_⟩
+  refine ⟨by rw [h]; fun_prop, ?_⟩
   rw [h, ← Measure.map_map (measurable_const_add μ) L.measurable]
   infer_instance
 

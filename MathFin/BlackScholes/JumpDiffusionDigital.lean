@@ -104,8 +104,8 @@ theorem hasDerivAt_jumpDiffusionCallPrice_strike {S r b σ : ℝ} (hS : 0 < S) (
   have := nullSingletonClass_jumpDiffusionIncrementLaw b hσ Λ ν hτ
   -- the price `Seʸ` has no atom at `K`, since `y ↦ Seʸ` is injective
   have hK : jumpDiffusionIncrementLaw b σ Λ ν τ {y | S * rexp y = K} = 0 :=
-    Set.Subsingleton.measure_zero (fun y₁ (h₁ : S * rexp y₁ = K) y₂ (h₂ : S * rexp y₂ = K) ↦
-      Real.exp_injective (mul_left_cancel₀ hS.ne' (h₁.trans h₂.symm))) _
+    Set.Subsingleton.measure_zero (s := {y | S * rexp y = K})
+      (fun y₁ h₁ y₂ h₂ ↦ Real.exp_injective (mul_left_cancel₀ hS.ne' (h₁.trans h₂.symm))) _
   rw [jumpDiffusionDigitalPrice_eq, ← mul_neg]
   exact ((hasDerivAt_integral_call (by fun_prop : Measurable fun y ↦ S * rexp y)
     (hY.const_mul S) hK).const_mul (rexp (-r * τ))).congr_of_eventuallyEq

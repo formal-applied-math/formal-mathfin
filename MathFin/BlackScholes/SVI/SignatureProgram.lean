@@ -28,14 +28,10 @@ open Polynomial
 noncomputable def symbolicCoeffList (n : ℕ) (Q : Polynomial ParameterRing) : List ParameterRing :=
   (List.range (n+1)).reverse.map Q.coeff
 
-/-- The number of sign changes in a list of signs, zeros dropped. -/
-def signVariationsList (ss : List SignType) : ℕ :=
-  ((ss.filter (· ≠ 0)).destutter (· ≠ ·)).length - 1
-
 /-- The program computing the sign variations of `Q` read at degree `n` (`variationProgram_eval`).
 -/
 noncomputable def variationProgram (n : ℕ) (Q : Polynomial ParameterRing) : SignProgram ℕ :=
-  (signListProgram (symbolicCoeffList n Q)).bind fun ss ↦ .pure (signVariationsList ss)
+  (signListProgram (symbolicCoeffList n Q)).bind fun ss ↦ .pure ss.signVariations
 
 theorem variationProgram_eval (p : Params) (n : ℕ) (Q : Polynomial ParameterRing)
     (hd : (Q.map (parameterEval p)).degree = n) :
@@ -45,9 +41,10 @@ theorem variationProgram_eval (p : Params) (n : ℕ) (Q : Polynomial ParameterRi
     exact coeff_map _ _
   have hne : Q.map (parameterEval p) ≠ 0 := fun h0 ↦ by simp [h0] at hd
   simp [variationProgram, SignProgram.eval_bind, SignProgram.eval, symbolicCoeffList,
-    signVariationsList, signVariations, coeffList_of_ne_zero hne, natDegree_eq_of_degree_eq_some hd,
+    Polynomial.signVariations, coeffList_of_ne_zero hne, natDegree_eq_of_degree_eq_some hd,
     List.map_map, hc]
-  rfl
+  refine Eq.trans ?_ (List.signVariations_map_sign _)
+  simp [List.map_reverse, List.map_map, Function.comp_def]
 
 /-- The program computing the signature test of the `i`-th universal matrix at size `n`
 (`signatureProgram_eval`). -/

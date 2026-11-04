@@ -222,7 +222,8 @@ lemma bandExtend_toLp_ae_eq (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)) {g 
   by_cases hz : z.1 ≤ T
   · exact Set.indicator_of_mem (show z ∈ Set.Ioc 0 T ×ˢ (Set.univ : Set Ω) from
     ⟨⟨pos_iff_ne_zero.2 h0, hz⟩, Set.mem_univ _⟩) _
-  · rw [Set.indicator_of_notMem (fun h => hz h.1.2), hg0 z (not_le.1 hz)]
+  · rw [Set.indicator_of_notMem (show z ∉ Set.Ioc 0 T ×ˢ (Set.univ : Set Ω) from fun h ↦ hz h.1.2),
+      hg0 z (not_le.1 hz)]
 
 /-- On a `T`-bounded simple process, extension by zero turns the `[0,T]` embedding into the
 `[0,∞)` one. -/
@@ -239,7 +240,8 @@ lemma bandExtend_simpleAssembly_T (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u
   by_cases ht : t ≤ T
   · exact Set.indicator_of_mem (show (t, ω) ∈ Set.Ioc 0 T ×ˢ (Set.univ : Set Ω) from
     ⟨⟨pos_iff_ne_zero.2 h0, ht⟩, Set.mem_univ _⟩) _
-  · rw [Set.indicator_of_notMem (fun h => ht h.1.2)]
+  · rw [Set.indicator_of_notMem
+      (show (t, ω) ∉ Set.Ioc 0 T ×ˢ (Set.univ : Set Ω) from fun h ↦ ht h.1.2)]
     exact (uncurry_eq_zero_of_lt V (not_le.1 ht) ω).symm
 
 /-! ### The CLM `itoIntegralCLM_T` and its isometry -/

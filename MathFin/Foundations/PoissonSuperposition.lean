@@ -94,8 +94,7 @@ theorem map_add_count_eq_poissonMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω} 
       PoissonCounting.map_count_eq_poissonMeasure hr₁ hξm hξ0 hξlaw hξind hN₁ ht⟩
     ⟨(hmeas η hηm hN₂).aemeasurable,
       PoissonCounting.map_count_eq_poissonMeasure hr₂ hηm hη0 hηlaw hηind hN₂ ht⟩
-  rw [add_mul]
-  exact h.map_eq
+  exact h.map_eq.trans (congrArg _ (add_mul r₁ r₂ _).symm)
 
 end PoissonSuperposition
 
