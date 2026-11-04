@@ -181,7 +181,7 @@ theorem snellEnvelopeAux_le_supermartingale {U : ℕ → Ω → ℝ} (hU : Super
 omit [IsProbabilityMeasure P] in
 /-- **The Snell envelope is the smallest supermartingale** dominating the reward (almost surely)
 at the exercise times up to the horizon `N` and at `N`. -/
-theorem snellEnvelope_le_supermartingale {U : ℕ → Ω → ℝ} (hU : Supermartingale U 𝓕 P)
+theorem snellEnvelope_le_supermartingale {N : ℕ} {U : ℕ → Ω → ℝ} (hU : Supermartingale U 𝓕 P)
     (hi : ∀ i, Integrable (Z i) P) (hdom : ∀ j ≤ N, (j ∈ X ∨ j = N) → Z j ≤ᵐ[P] U j)
     {i : ℕ} (hiN : i ≤ N) : snellEnvelope P 𝓕 X Z N i ≤ᵐ[P] U i := by
   simpa only [snellEnvelope, min_eq_left hiN] using
