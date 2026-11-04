@@ -71,7 +71,9 @@ Public API (all in namespace `MathFin.GyongyMimicry`):
 * `exists_driftCoeff_fn`, `exists_diffCoeffSq_fn`, `marginal_flow_weak_equation_fn_constructed`,
   `gyongy_mimicry_gated` — the coefficient functions and the mimicry statement; its flow
   uniqueness hypothesis `hgate` is stated for `MathFin.IsWeakForwardFlow`, whose
-  constant-coefficient instance is proved by `MathFin.weakForwardUniqueConst`.
+  constant-coefficient instance is proved by `MathFin.weakForwardUniqueConst`;
+* `gyongy_mimicry_const` — `gyongy_mimicry_gated` at constant coefficients, with `hgate`
+  supplied by `MathFin.weakForwardUniqueConst`.
 
 Supporting lemmas (`integrable_testβ`, `integrable_testδsq`, `hasDerivAt_marginal_flow_core`,
 `constructedGenIntegrandExp_eq`, `exists_coeffFn_comp`, `hitoid_constructed_fn_Ioc`,
@@ -1415,6 +1417,60 @@ theorem gyongy_mimicry_gated
     _ = ∫ y, f y ∂(Measure.map (fun ω => X (Real.toNNReal t) ω) μ) := by rw [hfin]
     _ = ∫ ω, f (X (Real.toNNReal t) ω) ∂μ :=
         integral_map (hXm t).aemeasurable hfmeas.stronglyMeasurable.aestronglyMeasurable
+
+/-- **Thm 9.6's one-time-marginal mimicry at constant coefficients, with no gate hypothesis.**
+`gyongy_mimicry_gated` at `afn ≡ b`, `bfn ≡ v`: its flow-uniqueness hypothesis `hgate` is
+supplied by `MathFin.weakForwardUniqueConst`. The hypotheses are those of
+`gyongy_mimicry_gated` with the coefficient functions replaced by the constants: the
+conditional expectations `driftCoeff`, `diffCoeffSq` of the constructed `X` equal `b`, `v`
+pointwise (`hafnRep`, `hbfnRep`), and `hyflow` is the Y-side forward identity with the
+constants `b`, `v` (with interval-integrable integrand). The conclusion is that of
+`gyongy_mimicry_gated`: `∫ f(Y_t) ∂ν = ∫ f(X_{t⁺}) ∂μ` for every `C²` test `f` and
+`t ∈ (0, ↑T]`. -/
+theorem gyongy_mimicry_const
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
+    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
+    {T : ℝ≥0} {β : ℝ≥0 → Ω → ℝ}
+    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
+    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
+    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
+    {δ : ℝ≥0 → Ω → ℝ}
+    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
+    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
+    {Dd : ℝ} (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
+    {M : ℝ≥0 → Ω → ℝ}
+    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
+    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
+      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
+    (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
+    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
+    {Ω' : Type*} [mΩ' : MeasurableSpace Ω'] {ν : Measure Ω'} [IsProbabilityMeasure ν]
+    (Y : ℝ → Ω' → ℝ) (hYmeas : ∀ s, Measurable (Y s))
+    {b v : ℝ}
+    (hafnRep : ∀ (s : ℝ) (ω : Ω), driftCoeff μ (reindexed X) (reindexed β) s ω
+      = b)
+    (hbfnRep : ∀ (s : ℝ) (ω : Ω), diffCoeffSq μ (reindexed X) (reindexed δ) s ω
+      = v)
+    (hY0law : HasLaw (Y 0) (μ.map fun ω => X 0 ω) ν)
+    (hyflow : ∀ (f f' f'' f''' : ℝ → ℝ) (C1 C2 C3 : ℝ),
+      (∀ x, HasDerivAt f (f' x) x) → (∀ x, HasDerivAt f' (f'' x) x) → ContDiff ℝ 2 f →
+      (∀ x, HasDerivAt f'' (f''' x) x) →
+      (∀ x, |f' x| ≤ C1) → (∀ x, |f'' x| ≤ C2) → (∀ x, |f''' x| ≤ C3) →
+      ∀ s ∈ Set.Ioc (0:ℝ) (T:ℝ),
+      (∫ ω, f (Y s ω) ∂ν = ∫ ω, f (Y 0 ω) ∂ν
+        + ∫ x in (0)..s, ((∫ ω, f' (Y x ω) * b ∂ν)
+          + 1 / 2 * (∫ ω, f'' (Y x ω) * v ∂ν))) ∧
+      IntervalIntegrable
+        (fun x => (∫ ω, f' (Y x ω) * b ∂ν)
+          + 1 / 2 * (∫ ω, f'' (Y x ω) * v ∂ν)) volume 0 s)
+    {f : ℝ → ℝ} (h2 : ContDiff ℝ 2 f)
+    (t : ℝ) (ht : 0 < t) (htT : t ≤ (T:ℝ)) :
+    ∫ ω, f (Y t ω) ∂ν = ∫ ω, f (X (Real.toNNReal t) ω) ∂μ :=
+  gyongy_mimicry_gated (afn := fun _ _ ↦ b) (bfn := fun _ _ ↦ v) hB hBmeas hβadap hβcont hβbdd
+    hδadap hδcont hδbdd hMadap hMeq c hXcont hXrel Y hYmeas (fun _ ↦ measurable_const)
+    (fun _ ↦ measurable_const) hafnRep hbfnRep hY0law hyflow
+    (fun _ _ hρ hη h0 ↦ weakForwardUniqueConst hρ hη h0) h2 t ht htT
 
 end Fn
 
