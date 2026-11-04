@@ -82,7 +82,8 @@ lemma continuous_timeMeasure_primitive {h : ℝ≥0 → ℝ} (hh : Continuous h)
         exact Set.indicator_of_mem (Set.mem_Ioc.mpr ⟨hs0, le_of_lt ht⟩) h
       · refine (continuousAt_congr ?_).mpr (continuousAt_const (y := (0 : ℝ)))
         filter_upwards [Iio_mem_nhds hgt] with t ht
-        exact Set.indicator_of_notMem (fun hmem ↦ absurd (Set.mem_Ioc.mp hmem).2 (not_le.mpr ht)) h
+        exact Set.indicator_of_notMem
+          (show s ∉ Set.Ioc 0 t from fun hmem ↦ absurd hmem.2 (not_le.mpr ht)) h
     · refine (continuousAt_congr ?_).mpr (continuousAt_const (y := (0 : ℝ)))
       have hs00 : s = 0 := le_antisymm (not_lt.mp hs0) (zero_le)
       filter_upwards with t

@@ -493,7 +493,7 @@ lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
             - ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑(W n).val s ω - ⇑θhat (s, ω)) ^ 2 ∂timeMeasure := by
         rw [integral_sub (f := fun s ↦ 2 * (⇑(W n).val s ω * (⇑(W n).val s ω - ⇑θhat (s, ω))))
             (g := fun s ↦ (⇑(W n).val s ω - ⇑θhat (s, ω)) ^ 2)
-            ((((hVt.sub hgt).mul hVt).integrable le_rfl).const_mul 2) (hVt.sub hgt).integrable_sq,
+            (((hVt.mul (hVt.sub hgt)).integrable le_rfl).const_mul 2) (hVt.sub hgt).integrable_sq,
           integral_const_mul]
       rw [h1, h2, hDdef]
     rw [hdecomp]
@@ -505,7 +505,7 @@ lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
           ≤ ∫ s in Set.Ioc (0 : ℝ≥0) T,
             C * |⇑(W n).val s ω - ⇑θhat (s, ω)| ∂timeMeasure := by
         refine (abs_integral_le_integral_abs).trans ?_
-        refine setIntegral_mono_on (((hVt.sub hgt).mul hVt).integrable le_rfl).abs
+        refine setIntegral_mono_on ((hVt.mul (hVt.sub hgt)).integrable le_rfl).abs
           (((hVt.sub hgt).integrable one_le_two).abs.const_mul C) measurableSet_Ioc
           (fun s hs ↦ ?_)
         rw [abs_mul]

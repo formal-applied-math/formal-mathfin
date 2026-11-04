@@ -442,14 +442,16 @@ private lemma coe_afterStepSP (T a : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
       · rw [Set.indicator_of_notMem (fun hc ↦ hin (hmem.mp hc)), Set.indicator_of_notMem hin,
           mul_zero]
     · rw [if_neg hat, zero_mul]
-      exact Set.indicator_of_notMem (fun hc ↦ hat (lt_of_le_of_lt le_sup_left hc.1)) _
+      exact Set.indicator_of_notMem
+        (show t ∉ Set.Ioc (a ⊔ p.val.1) p.val.2 from
+          fun hc ↦ hat (lt_of_le_of_lt le_sup_left hc.1)) _
   · rw [dif_neg hle]
     have hzero : ⇑((0 : TBoundedSP T hBmeas).val) t ω = 0 := by simp
     rw [hzero, eq_comm]
     simp only [afterFactor]
     by_cases hat : a < t
-    · rw [Set.indicator_of_notMem (fun hc ↦ hle (sup_le (hat.le.trans hc.2) (hc.1.le.trans hc.2))),
-        mul_zero]
+    · rw [Set.indicator_of_notMem (show t ∉ Set.Ioc p.val.1 p.val.2 from
+        fun hc ↦ hle (sup_le (hat.le.trans hc.2) (hc.1.le.trans hc.2))), mul_zero]
     · rw [if_neg hat, zero_mul]
 
 /-- **The simple-process bridge.** Embedding the restarted process is the same as
@@ -693,10 +695,10 @@ theorem itoIntegralCLM_T_smul_of_memLp (T a : ℝ≥0) (hBmeas : ∀ t, Measurab
           = ENNReal.ofReal ‖smulAdapted T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ‖ from by
         rw [Lp.norm_def, ENNReal.ofReal_toReal (Lp.eLpNorm_ne_top _)]]
       exact ENNReal.ofReal_le_ofReal (hbound M)
-    exact ⟨hmeas, lt_of_le_of_lt ((MeasureTheory.Lp.eLpNorm_lim_le_liminf_eLpNorm
+    exact memLp_iff.2 (lt_of_le_of_lt ((MeasureTheory.Lp.eLpNorm_lim_le_liminf_eLpNorm
       (fun M : ℕ ↦ Lp.aestronglyMeasurable
         (smulAdapted T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ)) _ hmeas hlim).trans hle)
-      ENNReal.ofReal_lt_top⟩
+      ENNReal.ofReal_lt_top)
   exact ⟨hZφ.toLp _, hZφ.coeFn_toLp,
     itoIntegralCLM_T_smulAdapted_of_memLp hB T a hBmeas Z hZm φ hφ hZφ⟩
 
