@@ -241,8 +241,8 @@ variable [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ}
 theorem integrable_one_div_exp_add_mul_wienerIntegralLp (hB : IsPreBrownianReal B μ) (S : ℝ≥0)
     (M c : ℝ) (g : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (S : ℝ)))) :
     Integrable (fun ω ↦ 1 / Real.exp (M + c * wienerIntegralLp B hB S g ω)) μ := by
-  refine ((integrable_exp_mul_of_hasLaw (wienerIntegralLp_hasLaw_gaussian hB S g) (-c)).const_mul
-    (Real.exp (-M))).congr (ae_of_all _ fun ω ↦ ?_)
+  refine (((wienerIntegralLp_hasLaw_gaussian hB S g).integrable_fun_comp
+    (integrable_exp_mul_gaussianReal (-c))).const_mul (Real.exp (-M))).congr (ae_of_all _ fun ω ↦ ?_)
   simp only [one_div, ← Real.exp_neg, ← Real.exp_add]
   congr 1
   ring
