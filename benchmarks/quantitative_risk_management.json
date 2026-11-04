@@ -1151,7 +1151,7 @@
         "reference": "MFE (2015) Example 2.15",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure: valueAtRisk_le_expectedShortfall at the integrable loss μ + σT (integrable_of_hasLaw_studentTMeasure, ν > 1). The closed-form reading, quantile_studentTMeasure_le_expectedShortfall_closedForm, applies the same inequality to the identity under the law and rewrites with the Student-t VaR and ES theorems. Lives in MathFin/RiskMeasures/StudentTValueAtRisk.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure: valueAtRisk_le_expectedShortfall at the integrable loss μ + σT (HasLaw.integrable with integrable_id_studentTMeasure, ν > 1). The closed-form reading, quantile_studentTMeasure_le_expectedShortfall_closedForm, applies the same inequality to the identity under the law and rewrites with the Student-t VaR and ES theorems. Lives in MathFin/RiskMeasures/StudentTValueAtRisk.lean. Axioms-clean."
       }
     },
     {

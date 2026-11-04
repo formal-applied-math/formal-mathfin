@@ -155,10 +155,7 @@ private theorem memLp_increment (hB : IsPreBrownianReal B μ)
     MemLp (fun ω ↦ B v ω - B u ω) 2 μ := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hL : HasLaw (B v - B u) (gaussianReal 0 (v - u)) μ := hasLaw_increment hB huv
-  have hd : Measurable (fun ω ↦ B v ω - B u ω) := (hBmeas v).sub (hBmeas u)
-  rw [show (fun ω ↦ B v ω - B u ω) = (B v - B u : Ω → ℝ) from rfl]
-  exact ((hL.map_eq ▸ memLp_id_gaussianReal 2 :
-    MemLp (id : ℝ → ℝ) 2 (Measure.map (B v - B u) μ))).comp_of_map hd.aemeasurable
+  exact hL.memLp (memLp_id_gaussianReal 2)
 
 omit [IsProbabilityMeasure μ] in
 /-- **Kernel 3 (adapted diagonal)**: an `𝓕_c`-measurable coefficient times a squared

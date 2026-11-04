@@ -85,7 +85,8 @@ lemma exists_fullHorizon_extension (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B 
   have hmem : MemLp Ffn 2 ((timeMeasure.prod μ).trim
       (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod) := by
     refine ⟨hFfn_sm.aestronglyMeasurable, ?_⟩
-    rw [hFfn, eLpNorm_indicator_eq_eLpNorm_restrict hSpred, hSrestrict, ← eLpNorm_congr_ae hgh]
+    rw [hFfn, eLpNorm_indicator_eq_eLpNorm_restrict hSpred.nullMeasurableSet, hSrestrict,
+      ← eLpNorm_congr_ae hgh]
     exact (Lp.memLp g).2
   refine ⟨hmem.toLp Ffn, ?_⟩
   have hle : trimMeasure_T (μ := μ) T hBmeas ≤ (timeMeasure.prod μ).trim
@@ -95,7 +96,7 @@ lemma exists_fullHorizon_extension (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B 
       =ᵐ[trimMeasure_T (μ := μ) T hBmeas] Ffn :=
         (MemLp.coeFn_toLp hmem).filter_mono (ae_mono hle)
     _ =ᵐ[trimMeasure_T (μ := μ) T hBmeas] h := by
-        rw [hFfn, ← hSrestrict]; exact indicator_ae_eq_restrict hSpred
+        rw [hFfn, ← hSrestrict]; exact indicator_ae_eq_restrict hSpred.nullMeasurableSet
     _ =ᵐ[trimMeasure_T (μ := μ) T hBmeas] ⇑g := hgh.symm
 
 /-- **The time-dependent Itô formula as a process (semimartingale decomposition).** For `f(t,x)`

@@ -309,7 +309,7 @@ lemma strictMono_gpdOfExp (hβ : 0 < β) : StrictMono (gpdOfExp ξ β) := by
 
 instance isProbabilityMeasure_gpdMeasure : IsProbabilityMeasure (gpdMeasure ξ β) :=
   haveI := isProbabilityMeasure_expMeasure (r := 1) one_pos
-  Measure.isProbabilityMeasure_map continuous_gpdOfExp.measurable.aemeasurable
+  inferInstanceAs (IsProbabilityMeasure ((expMeasure 1).map (gpdOfExp ξ β)))
 
 /-- **The distribution function of the GPD law** is `G_{ξ,β}`. -/
 theorem cdf_gpdMeasure (hβ : 0 < β) (x : ℝ) : cdf (gpdMeasure ξ β) x = gpdCDF ξ β x := by
@@ -471,8 +471,6 @@ theorem map_cond_gpdMeasure (hβ : 0 < β) {u : ℝ} (hu : 0 ≤ u) (hsupp : 0 <
     exact (ENNReal.ofReal_pos.2 htail).ne'
   haveI : IsProbabilityMeasure ((gpdMeasure ξ β)[|Ioi u]) := cond_isProbabilityMeasure hne
   have hmeas : Measurable fun x : ℝ ↦ x - u := measurable_sub_const u
-  haveI : IsProbabilityMeasure (((gpdMeasure ξ β)[|Ioi u]).map (· - u)) :=
-    Measure.isProbabilityMeasure_map hmeas.aemeasurable
   refine Measure.ext_of_Iic _ _ fun a ↦ ?_
   have hpre : Ioi u ∩ (fun x ↦ x - u) ⁻¹' Iic a = Ioc u (a + u) := by
     ext y

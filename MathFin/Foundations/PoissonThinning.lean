@@ -342,7 +342,7 @@ theorem thinned_streams_of_iid_marks [IsProbabilityMeasure μ] {r : ℝ≥0} {N 
     have h := prob_le_one (μ := μ) (s := Y 0 ⁻¹' A)
     rw [hpμ] at h
     exact_mod_cast h
-  have hYvec : AEMeasurable (fun ω i ↦ Y i ω) μ := (measurable_pi_lambda _ hY).aemeasurable
+  have hYvec : AEMeasurable (fun ω i ↦ Y i ω) μ := .of_eval fun i ↦ (hY i).aemeasurable
   -- the marks in `Aᶜ` are the marks not in `A`, so the two counts add up to the total
   have hsum (n : ℕ) (ω : Ω) : marksIn Y A n ω + marksIn Y Aᶜ n ω = n := by
     have h := card_filter_add_card_filter_not (s := range n) fun i ↦ Y i ω ∈ A

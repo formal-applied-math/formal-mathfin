@@ -104,7 +104,7 @@ theorem measureReal_forall_lt_le_of_poisson {μ : Measure ℝ} [IsProbabilityMea
   have hsum := PoissonPgf.hasSum_poisson_weights_mul_pow r (cdf μ x)
   rw [measureReal_def, hevent, measure_iUnion hdisj fun n ↦
       (hNm (measurableSet_singleton n)).inter
-        ((measurable_pi_lambda _ fun i ↦ hYm i) (hSm n)),
+        ((Measurable.of_eval hYm : Measurable fun ω i ↦ Y i ω) (hSm n)),
     tsum_congr hpiece, ← ENNReal.ofReal_tsum_of_nonneg
       (fun n ↦ mul_nonneg (by positivity) (pow_nonneg (cdf_nonneg μ x) n)) hsum.summable,
     hsum.tsum_eq, ENNReal.toReal_ofReal (exp_pos _).le]

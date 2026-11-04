@@ -486,7 +486,7 @@ private theorem lpNorm_sq_eq_lintegral_enorm_sq {α : Type*} {mα : MeasurableSp
     ‖W‖ ^ 2 = (∫⁻ x, ‖(W : α → ℝ) x‖ₑ ^ 2 ∂ν).toReal := by
   have hrpow : eLpNorm (W : α → ℝ) 2 ν
       = (∫⁻ x, ‖(W : α → ℝ) x‖ₑ ^ ((2 : ℝ≥0∞).toReal) ∂ν) ^ (1 / ((2 : ℝ≥0∞).toReal)) :=
-    eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num)
+    eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num) (Lp.aestronglyMeasurable W)
   have hIeq : (∫⁻ x, ‖(W : α → ℝ) x‖ₑ ^ ((2 : ℝ≥0∞).toReal) ∂ν)
       = (∫⁻ x, ‖(W : α → ℝ) x‖ₑ ^ 2 ∂ν) :=
     lintegral_congr fun x ↦ by

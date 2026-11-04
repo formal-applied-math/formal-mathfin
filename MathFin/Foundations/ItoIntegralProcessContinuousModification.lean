@@ -103,8 +103,9 @@ theorem itoSimpleProcess_maximal_prob (hBmeas : ∀ t, Measurable (B t))
   have hL2 : ∫ ω, ‖f ω‖ ∂μ ≤ ‖itoSimpleProcessLp hB hBmeas V.val T‖ := by
     rw [itoSimpleProcessLp, Lp.norm_toLp,
       ← ENNReal.toReal_ofReal (integral_nonneg fun ω ↦ norm_nonneg _),
-      ofReal_integral_norm_eq_lintegral_enorm hfi, ← eLpNorm_one_eq_lintegral_enorm]
-    exact ENNReal.toReal_mono hf.2.ne (eLpNorm_le_eLpNorm_of_exponent_le (by norm_num) hf.1)
+      ofReal_integral_norm_eq_lintegral_enorm hfi,
+      ← eLpNorm_one_eq_lintegral_enorm hfi.aestronglyMeasurable]
+    exact ENNReal.toReal_mono hf.2.ne (eLpNorm_le_eLpNorm_of_exponent_le (by norm_num))
   -- terminal Itô isometry on the simple embedding
   have hterm : ‖itoSimpleProcessLp hB hBmeas V.val T‖ = ‖simpleAssembly_T (μ := μ) T hBmeas V‖ := by
     rw [← itoProcessCLM_simpleAssembly_T hB T T hBmeas V, itoProcessCLM_norm_terminal hB T hBmeas]
@@ -311,8 +312,7 @@ theorem itoContinuousMod_modification (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
     simp only [Lp.toLp_coeFn]
     exact hLp
   have hmeasH : TendstoInMeasure μ F atTop (⇑(itoProcessCLM hB T t hBmeas φ)) :=
-    tendstoInMeasure_of_tendsto_eLpNorm (by norm_num) hFmeas
-      (Lp.aestronglyMeasurable _) heLp
+    tendstoInMeasure_of_tendsto_eLpNorm (by norm_num) heLp
   exact tendstoInMeasure_ae_unique hmeasG hmeasH
 
 omit hB in

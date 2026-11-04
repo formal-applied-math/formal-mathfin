@@ -75,6 +75,7 @@ rather than signalling that the estimator is undefined there.
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory
+open scoped ENNReal
 
 /-- **A fair random sign has variance `1`.** -/
 lemma variance_id_rademacher : Var[id; rademacher] = 1 := by
@@ -87,13 +88,10 @@ lemma variance_id_rademacher : Var[id; rademacher] = 1 := by
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
 
-omit [IsProbabilityMeasure P] in
-/-- **A fair random sign is square-integrable**: it is bounded by `1`. -/
-lemma memLp_two_of_hasLaw_rademacher {X : Ω → ℝ} (hX : HasLaw X rademacher P) : MemLp X 2 P := by
-  have hbdd : MemLp id 2 rademacher :=
-    MemLp.of_bound aestronglyMeasurable_id 1
-      (by filter_upwards [ae_rademacher] with x hx; rcases hx with h | h <;> simp [h])
-  exact (memLp_map_measure_iff aestronglyMeasurable_id hX.aemeasurable).1 (hX.map_eq ▸ hbdd)
+/-- **A fair random sign lies in every `L^p`**: it is bounded by `1`. -/
+lemma memLp_id_rademacher (p : ℝ≥0∞) : MemLp id p rademacher :=
+  MemLp.of_bound aestronglyMeasurable_id 1
+    (by filter_upwards [ae_rademacher] with x hx; rcases hx with h | h <;> simp [h])
 
 omit [IsProbabilityMeasure P] in
 /-- **A fair random sign has variance `1`, transported along its law.** -/
@@ -124,9 +122,9 @@ theorem covariance_rollPriceChange
     (h_dm2q0 : dm2 ⟂ᵢ[P] q0) (h_dm2q1 : dm2 ⟂ᵢ[P] q1)
     (h_dm1q1 : dm1 ⟂ᵢ[P] q1) (h_dm1q2 : dm1 ⟂ᵢ[P] q2) :
     cov[rollPriceChange dm2 q1 q2 s, rollPriceChange dm1 q0 q1 s; P] = -(s / 2) ^ 2 := by
-  have hq0' := memLp_two_of_hasLaw_rademacher hq0
-  have hq1' := memLp_two_of_hasLaw_rademacher hq1
-  have hq2' := memLp_two_of_hasLaw_rademacher hq2
+  have hq0' := hq0.memLp (memLp_id_rademacher 2)
+  have hq1' := hq1.memLp (memLp_id_rademacher 2)
+  have hq2' := hq2.memLp (memLp_id_rademacher 2)
   have hsq0 : MemLp (fun ω ↦ s / 2 * q0 ω) 2 P := hq0'.const_mul _
   have hsq1 : MemLp (fun ω ↦ s / 2 * q1 ω) 2 P := hq1'.const_mul _
   have hsq2 : MemLp (fun ω ↦ s / 2 * q2 ω) 2 P := hq2'.const_mul _

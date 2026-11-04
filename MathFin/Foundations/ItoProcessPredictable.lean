@@ -129,7 +129,8 @@ theorem memLp_itoContinuousMod (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   rw [show trimMeasure_T (μ := μ) T hBmeas
         = ((timeMeasure_T T).prod μ).trim (natFiltration hBmeas).predictable_le_prod from rfl,
       eLpNorm_trim _ hpred,
-      eLpNorm_lt_top_iff_lintegral_rpow_enorm_lt_top (by norm_num) (by norm_num),
+      eLpNorm_lt_top_iff_lintegral_rpow_enorm_lt_top (by norm_num) (by norm_num)
+        (hpred.mono (natFiltration hBmeas).predictable_le_prod).aestronglyMeasurable,
       lintegral_prod _
         ((hpred.mono (natFiltration hBmeas).predictable_le_prod).measurable.enorm.pow_const _
           |>.aemeasurable)]
@@ -145,7 +146,8 @@ theorem memLp_itoContinuousMod (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
       rw [hω]
     rw [hmod, lintegral_rpow_enorm_eq_rpow_eLpNorm' (by norm_num : (0 : ℝ) < (2 : ℝ≥0∞).toReal)]
     gcongr
-    rw [← eLpNorm_eq_eLpNorm' (by norm_num) (by norm_num), ← Lp.enorm_def, ← ofReal_norm]
+    rw [← eLpNorm_eq_eLpNorm' (by norm_num) (by norm_num)
+      (Lp.aestronglyMeasurable (itoProcessCLM hB T t hBmeas φ)), ← Lp.enorm_def, ← ofReal_norm]
     exact ENNReal.ofReal_le_ofReal (itoProcessCLM_norm_le hB T t hBmeas φ)
   refine lt_of_le_of_lt
     (lintegral_mono_ae (g := fun _ ↦ (ENNReal.ofReal ‖φ‖) ^ (2 : ℝ≥0∞).toReal) ?_) ?_

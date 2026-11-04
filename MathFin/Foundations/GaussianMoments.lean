@@ -130,19 +130,6 @@ theorem integral_sq_of_hasLaw_gaussianReal {Ω : Type*} {mΩ : MeasurableSpace �
   rw [hc]
   linarith
 
-/-- `Real.exp (α · X) ∘ Z` is integrable when `Z` has a Gaussian law (the law supplies the
-required `AEMeasurable`). Shared helper for `waldExponential_isMartingale`, the marginal
-exponential moments in `BrownianExpMoment` and the exponential-of-a-Gaussian integrability
-(`α = 1`). -/
-lemma _root_.ProbabilityTheory.integrable_exp_mul_of_hasLaw {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    {P : Measure Ω} {Z : Ω → ℝ} {m : ℝ} {v : ℝ≥0}
-    (hZ : HasLaw Z (gaussianReal m v) P) (α : ℝ) :
-    Integrable (fun ω ↦ Real.exp (α * Z ω)) P := by
-  rw [show (fun ω ↦ Real.exp (α * Z ω)) = (fun x ↦ Real.exp (α * x)) ∘ Z from rfl]
-  refine Integrable.comp_aemeasurable ?_ hZ.aemeasurable
-  rw [hZ.map_eq]
-  exact integrable_exp_mul_gaussianReal α
-
 /-! ### Brownian increments -/
 
 /-- For `s ≤ t : ℝ≥0`, the increment `B t − B s` of a pre-Brownian motion has law

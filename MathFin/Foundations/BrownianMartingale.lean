@@ -55,7 +55,7 @@ lemma integral_exp_mul_gaussianReal_zero (α : ℝ) (v : ℝ≥0) :
 lemma integral_exp_mul_stdNormal {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
     {Z : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1) P) (a : ℝ) :
     ∫ ω, Real.exp (a * Z ω) ∂P = Real.exp (a ^ 2 / 2) := by
-  simpa [mgf] using mgf_gaussianReal hZ.map_eq a
+  simpa [mgf] using mgf_gaussianReal hZ a
 
 /-- The MGF of an affine form in two independent standard normals:
 `𝔼[exp(c + a Z₁ + b Z₂)] = exp(c + a²/2 + b²/2)`. -/
@@ -135,14 +135,10 @@ theorem squareSubTime_isMartingale :
     MathFin.hasLaw_increment hX.toIsPreBrownianReal hst
   have hL_s : HasLaw (X s) (gaussianReal 0 s) P := hX.hasLaw_eval s
   -- L² membership transferred via HasLaw + `memLp_id_gaussianReal`.
-  have h_Bs_memLp : MemLp (X s) 2 P :=
-    ((hL_s.map_eq ▸ memLp_id_gaussianReal 2 :
-      MemLp (id : ℝ → ℝ) 2 (Measure.map (X s) P))).comp_of_map h_meas_s.aemeasurable
+  have h_Bs_memLp : MemLp (X s) 2 P := hL_s.memLp (memLp_id_gaussianReal 2)
   have h_diff_memLp : MemLp (fun ω ↦ X t ω - X s ω) 2 P := by
     rw [h_eq_diff]
-    exact ((hL_diff.map_eq ▸ memLp_id_gaussianReal 2 :
-      MemLp (id : ℝ → ℝ) 2 (Measure.map (X t - X s) P))).comp_of_map
-      (h_eq_diff ▸ h_meas_diff.aemeasurable)
+    exact hL_diff.memLp (memLp_id_gaussianReal 2)
   -- Integrabilities.
   have h_int_Bs_sq : Integrable (fun ω ↦ (X s ω) ^ 2) P := h_Bs_memLp.integrable_sq
   have h_int_diff_sq : Integrable (fun ω ↦ (X t ω - X s ω) ^ 2) P := h_diff_memLp.integrable_sq
@@ -280,7 +276,8 @@ theorem waldExponential_isMartingale (α : ℝ) :
     Martingale (fun t ω ↦ Real.exp (α * X t ω - α ^ 2 * (t : ℝ) / 2)) 𝓕 P := by
   refine MathFin.martingale_exp_sub_of_indep_increments (X := fun t ω ↦ α * X t ω)
     (ψ := fun t : ℝ≥0 ↦ α ^ 2 * (t : ℝ) / 2) (fun t ↦ (hX.stronglyAdapted t).const_mul α)
-    (fun s t hst ↦ ?_) (fun t ↦ integrable_exp_mul_of_hasLaw (hX.hasLaw_eval t) α)
+    (fun s t hst ↦ ?_)
+    (fun t ↦ (hX.hasLaw_eval t).integrable_fun_comp (integrable_exp_mul_gaussianReal α))
     (fun s t hst ↦ ?_)
   · -- `α(X_t − X_s)` is a function of the increment, which is independent of `𝓕_s`
     exact hX.indep_comap_of_eq_comp_increment hst (f := fun y ↦ α * y) (by fun_prop)

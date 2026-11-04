@@ -47,11 +47,11 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 
 include hB
 
-/-- `exp(c · B_s)` is integrable: the Gaussian-law-transfer base stone
-`integrable_exp_mul_of_hasLaw` at the marginal law `B_s ~ N(0, s)`. -/
+/-- `exp(c · B_s)` is integrable: Mathlib's `integrable_exp_mul_gaussianReal` transferred along
+`HasLaw.integrable_fun_comp` at the marginal law `B_s ~ N(0, s)`. -/
 lemma integrable_exp_mul_eval (s : ℝ≥0) (c : ℝ) :
     Integrable (fun ω ↦ Real.exp (c * B s ω)) μ :=
-  integrable_exp_mul_of_hasLaw (hB.hasLaw_eval s) c
+  (hB.hasLaw_eval s).integrable_fun_comp (integrable_exp_mul_gaussianReal c)
 
 /-- The Brownian marginal MGF: `∫ exp(c · B_s) ∂μ = exp(c² s / 2)`, the gaussianReal MGF
 `integral_exp_mul_gaussianReal_zero` transferred along `B_s ~ N(0, s)`. -/

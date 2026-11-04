@@ -276,10 +276,7 @@ theorem tendstoInMeasure_qv (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
       intro k _
       simpa using memLp_increment_sq_centered_two hB (unifPart T n k) (unifPart T n (k + 1)) 0
     exact hsum.sub (memLp_const (T : ℝ))
-  refine tendstoInMeasure_of_tendsto_eLpNorm (by norm_num : (2 : ℝ≥0∞) ≠ 0)
-    (fun n ↦ (Finset.measurable_sum _ fun k _ ↦
-      ((hBmeas _).sub (hBmeas _)).pow_const 2).aestronglyMeasurable)
-    aestronglyMeasurable_const ?_
+  refine tendstoInMeasure_of_tendsto_eLpNorm (by norm_num : (2 : ℝ≥0∞) ≠ 0) ?_
   -- `eLpNorm (Sₙ − T) 2 = ofReal √(∫ (Sₙ − T)²) → 0`, the L² convergence `tendsto_qv`
   have hconv : ∀ n : ℕ, eLpNorm (fun ω ↦ (∑ k ∈ Finset.range n,
         (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) - (T : ℝ)) 2 μ

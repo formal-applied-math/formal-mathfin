@@ -73,7 +73,7 @@ theorem measureReal_iInter_default_eq_integral_pow [Finite ι] {Q : Ω → ℝ} 
   cases nonempty_fintype ι
   classical
   have hUv : AEMeasurable (fun ω i ↦ U i ω) P :=
-    aemeasurable_pi_lambda _ fun i ↦ (hU i).aemeasurable
+    .of_eval fun i ↦ (hU i).aemeasurable
   -- the joint law of `(Q, U)` is `law(Q) ⊗ Unif(0,1)^ι`
   have hlawU : P.map (fun ω i ↦ U i ω) = Measure.pi fun _ ↦ volume.restrict (Ioo (0 : ℝ) 1) := by
     rw [(iIndepFun_iff_map_fun_eq_pi_map fun i ↦ (hU i).aemeasurable).1 hUind]
@@ -206,7 +206,7 @@ theorem oneFactor_bernoulliMixture {π ρ : ℝ} {F : Ω → ℝ} {ε : ι → �
     ae_of_all _ fun ω ↦ Ioo_subset_Icc_self (Phi_mem_Ioo _), fun i ↦ ?_,
     hεind.comp (fun _ ↦ Phi) fun _ ↦ hPhi,
     hFε.comp (measurable_oneFactorPD π ρ)
-      (measurable_pi_lambda _ fun i ↦ hPhi.comp (measurable_pi_apply i))⟩
+      (.of_eval fun i ↦ hPhi.comp (measurable_pi_apply i))⟩
   have h := hasLaw_cdf (hε i) (by rw [cdf_gaussianReal_zero_one]; exact continuous_Phi)
   simpa only [cdf_gaussianReal_zero_one] using h
 
@@ -235,7 +235,8 @@ theorem oneFactor_measureReal_default {π ρ : ℝ} {F e : Ω → ℝ}
     (hπ : π ∈ Ioo 0 1) (hρ0 : 0 ≤ ρ) (hρ1 : ρ ≤ 1) :
     P.real {ω | √ρ * F ω + √(1 - ρ) * e ω ≤ PhiInv π} = π := by
   have hscale {X : Ω → ℝ} (hX : HasLaw X (gaussianReal 0 1) P) (c : ℝ) :
-      P.map (fun ω ↦ c * X ω) = gaussianReal 0 (.mk (c ^ 2) (sq_nonneg c)) := by
+      HasLaw (fun ω ↦ c * X ω) (gaussianReal 0 (.mk (c ^ 2) (sq_nonneg c))) P := by
+    refine ⟨hX.aemeasurable.const_mul c, ?_⟩
     rw [← Function.comp_def, ← AEMeasurable.map_map_of_aemeasurable
       (measurable_const_mul c).aemeasurable hX.aemeasurable, hX.map_eq,
       gaussianReal_map_const_mul, mul_zero, mul_one]

@@ -227,7 +227,6 @@ theorem quantile_map [IsProbabilityMeasure μ] {h : ℝ → ℝ} (hmono : Monoto
     (hlsc : LowerSemicontinuous h) (hp : p ∈ Ioo 0 1) :
     quantile (μ.map h) p = h (quantile μ p) := by
   have hmeas : Measurable h := hmono.measurable
-  have : IsProbabilityMeasure (μ.map h) := Measure.isProbabilityMeasure_map hmeas.aemeasurable
   refine eq_of_forall_ge_iff fun y ↦ ?_
   rw [quantile_le_iff hp, cdf_eq_real, map_measureReal_apply hmeas measurableSet_Iic]
   constructor

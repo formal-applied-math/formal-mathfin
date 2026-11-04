@@ -278,7 +278,7 @@ private lemma setIntegral_eq_zero_of_iSup_comap (hB : IsPreBrownianReal B μ)
   have hfaeneg : AEMeasurable (fun ω ↦ -f ω) μ := hfae.neg
   have hfint : Integrable f μ := memLp_one_iff_integrable.mp (hfL2.mono_exponent one_le_two)
   have hXmeas : Measurable fun (ω : Ω) (i : ι) ↦ B (τ i) ω :=
-    measurable_pi_lambda _ fun i ↦ hBmeas (τ i)
+    .of_eval fun i ↦ hBmeas (τ i)
   obtain ⟨G, hGmeas, hGA⟩ :
       ∃ G : Set (ι → ℝ), MeasurableSet G ∧ (fun (ω : Ω) (i : ι) ↦ B (τ i) ω) ⁻¹' G = A := by
     rw [← MeasurableSpace.comap_process_pi fun i ↦ B (τ i)] at hA
@@ -463,7 +463,7 @@ theorem eq_zero_of_orthogonal_stepDoleans (hB : IsPreBrownianReal B μ)
     rw [eLpNorm_congr_ae hsub, eLpNorm_neg]
   simp only [heq] at hlim
   have hf0ae : f =ᵐ[μ] 0 :=
-    (eLpNorm_eq_zero_iff hfL2.aestronglyMeasurable one_ne_zero).mp
+    (eLpNorm_eq_zero_iff one_ne_zero).mp
       (tendsto_nhds_unique hlim tendsto_const_nhds).symm
   exact Lp.ext_iff.mpr ((hfae.trans hf0ae).trans (Lp.coeFn_zero ℝ 2 μ).symm)
 

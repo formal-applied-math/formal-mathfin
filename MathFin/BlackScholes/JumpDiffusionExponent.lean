@@ -44,11 +44,6 @@ open scoped NNReal
 
 /-! ### Scaling the log-return -/
 
-/-- The jump law pushed forward by `x ↦ θx` is a probability measure. -/
-instance isProbabilityMeasure_map_const_mul (ν : Measure ℝ) [IsProbabilityMeasure ν] (θ : ℝ) :
-    IsProbabilityMeasure (ν.map (θ * ·)) :=
-  Measure.isProbabilityMeasure_map (measurable_const_mul θ).aemeasurable
-
 /-- `eˣ` is integrable under the jump law pushed forward by `x ↦ θx` when `e^{θx}` is integrable
 under `ν`. -/
 lemma integrable_exp_map_const_mul {ν : Measure ℝ} {θ : ℝ}
@@ -65,7 +60,7 @@ lemma jumpDiffusionMeasure_map_jumps (Λ : ℝ≥0) (ν : Measure ℝ) [IsProbab
     (jumpDiffusionMeasure Λ ν).map (Prod.map id (Prod.map id fun j i ↦ g (j i)))
       = jumpDiffusionMeasure Λ (ν.map g) := by
   have hj : Measurable fun (j : ℕ → ℝ) i ↦ g (j i) :=
-    measurable_pi_lambda _ fun i ↦ hg.comp (measurable_pi_apply i)
+    .of_eval fun i ↦ hg.comp (measurable_pi_apply i)
   have hid (α : Type) [MeasurableSpace α] : Measurable (@id α) := measurable_id
   unfold jumpDiffusionMeasure
   rw [← Measure.map_prod_map _ _ (hid ℝ) ((hid ℕ).prodMap hj),
@@ -90,7 +85,7 @@ theorem jumpDiffusionIncrementLaw_map_const_mul (θ b σ : ℝ) (Λ : ℝ≥0) (
       = jumpDiffusionIncrementLaw (θ * b) (θ * σ) Λ (ν.map (θ * ·)) τ := by
   have hj : Measurable (Prod.map (@id ℝ) (Prod.map (@id ℕ) fun (j : ℕ → ℝ) i ↦ θ * j i)) :=
     measurable_id.prodMap (measurable_id.prodMap
-      (measurable_pi_lambda _ fun i ↦ (measurable_const_mul θ).comp (measurable_pi_apply i)))
+      (.of_eval fun i ↦ (measurable_const_mul θ).comp (measurable_pi_apply i)))
   unfold jumpDiffusionIncrementLaw
   rw [← jumpDiffusionMeasure_map_jumps (Λ * τ) ν (measurable_const_mul θ),
     Measure.map_map (measurable_jumpDiffusionLogReturn (θ * b) (θ * σ) τ) hj,

@@ -338,7 +338,7 @@ private lemma eLpNorm_increment_p_tendsto_zero
       funext ω
       ring
     rw [h_eq]
-    exact eLpNorm_sub_le ((h_meas_M _).sub h_meas_L) ((h_meas_M _).sub h_meas_L) h_one_le_p
+    exact eLpNorm_sub_le h_one_le_p
   have h_rhs : Tendsto (fun n : ℕ ↦
       eLpNorm (fun ω ↦ M ((n : ℝ) + 1) ω - L ω) (ENNReal.ofReal p) μ +
       eLpNorm (fun ω ↦ M (n : ℝ) ω - L ω) (ENNReal.ofReal p) μ) atTop (𝓝 0) := by
@@ -399,7 +399,7 @@ private lemma integral_norm_increment_tendsto_zero
   have h_eq : (fun n : ℕ ↦ ∫ ω, ‖M ((n : ℝ) + 1) ω - M (n : ℝ) ω‖ ∂μ) =
       (fun n : ℕ ↦ (eLpNorm (fun ω ↦ M ((n : ℝ) + 1) ω - M (n : ℝ) ω) 1 μ).toReal) := by
     funext n
-    rw [integral_norm_eq_lintegral_enorm (h_meas n), eLpNorm_one_eq_lintegral_enorm]
+    rw [integral_norm_eq_lintegral_enorm (h_meas n), eLpNorm_one_eq_lintegral_enorm (h_meas n)]
   rw [h_eq]
   have h_toReal :
       Tendsto (fun n : ℕ ↦ (eLpNorm (fun ω ↦ M ((n : ℝ) + 1) ω - M (n : ℝ) ω) 1 μ).toReal)

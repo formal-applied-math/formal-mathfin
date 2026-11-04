@@ -204,7 +204,7 @@ lemma restrict_compl_zero_secondDifferenceMeasure (σ s : ℝ) (Λ : ℝ≥0) (�
     (secondDifferenceMeasure σ s Λ ν).restrict {0}ᶜ
       = ((Λ • ν).withDensity fun x ↦ coshKernel s x).restrict {0}ᶜ := by
   have hδ : (Measure.dirac (0 : ℝ)).restrict {0}ᶜ = 0 :=
-    Measure.restrict_eq_zero.2 ((dirac_eq_zero_iff_not_mem (measurableSet_singleton 0).compl).2
+    Measure.restrict_eq_zero.2 ((dirac_eq_zero_iff_notMem (measurableSet_singleton 0).compl).2
       (by simp))
   rw [secondDifferenceMeasure, Measure.restrict_add, Measure.restrict_smul, hδ, smul_zero,
     zero_add]

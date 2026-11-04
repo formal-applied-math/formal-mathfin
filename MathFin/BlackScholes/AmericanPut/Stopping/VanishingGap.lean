@@ -44,7 +44,8 @@ theorem exists_subseq_gap_tendsto_zero {Ω : Type*} [MeasurableSpace Ω] {P : Me
     (he : Tendsto (fun n => ∫ ω, G n ω ∂P) atTop (𝓝 0)) :
     ∃ ns : ℕ → ℕ, StrictMono ns ∧ ∀ᵐ ω ∂P, Tendsto (fun n => G (ns n) ω) atTop (𝓝 0) := by
   have hnorm (n : ℕ) : eLpNorm (G n) 1 P = ENNReal.ofReal (∫ ω, G n ω ∂P) := by
-    rw [eLpNorm_one_eq_lintegral_enorm,← ofReal_integral_norm_eq_lintegral_enorm (hi n)]
+    rw [eLpNorm_one_eq_lintegral_enorm (hi n).aestronglyMeasurable,
+      ← ofReal_integral_norm_eq_lintegral_enorm (hi n)]
     congr 1
     apply integral_congr_ae
     exact Eventually.of_forall (fun ω => by
@@ -55,6 +56,6 @@ theorem exists_subseq_gap_tendsto_zero {Ω : Type*} [MeasurableSpace Ω] {P : Me
     simpa only [hz,hnorm,ENNReal.ofReal_zero,Function.comp_def] using
       ENNReal.continuous_ofReal.continuousAt.tendsto.comp he
   exact (tendstoInMeasure_of_tendsto_eLpNorm (by norm_num : (1 : ℝ≥0∞) ≠ 0)
-    (fun n => (hi n).aestronglyMeasurable) aestronglyMeasurable_const hl).exists_seq_tendsto_ae
+    hl).exists_seq_tendsto_ae
 
 end MathFin.BlackScholes.AmericanPut.Stopping

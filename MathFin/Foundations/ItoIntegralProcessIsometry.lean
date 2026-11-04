@@ -205,6 +205,14 @@ private lemma measurableSet_band (t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)
     MeasurableSet.univ
 
 omit hB in
+/-- Truncation to the `(0,t]`-band keeps `L²`. -/
+private lemma memLp_truncBand (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    MemLp ((Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)).indicator (φ : ℝ≥0 × Ω → ℝ)) 2
+      (trimMeasure_T (μ := μ) T hBmeas) :=
+  (Lp.memLp φ).indicator (measurableSet_band t hBmeas).nullMeasurableSet
+
+omit hB in
 /-- **Band truncation as a norm-`≤1` CLM** on the predictable `L²` space: pointwise
 indicator multiplication `φ ↦ 𝟙_{(0,t]×Ω} · φ` (on `L²` this is the orthogonal projection
 onto the `(0,t]`-band, but it is formalised here only as a norm-`≤1` CLM — `mkContinuous`
@@ -215,24 +223,24 @@ private noncomputable def truncCLM (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (
     Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) →L[ℝ]
       Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
   LinearMap.mkContinuous
-    { toFun := fun φ ↦ ((Lp.memLp φ).indicator (measurableSet_band t hBmeas)).toLp
+    { toFun := fun φ ↦ (memLp_truncBand T t hBmeas φ).toLp
         ((Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)).indicator (φ : ℝ≥0 × Ω → ℝ))
       map_add' := fun φ ψ ↦ by
         refine Lp.ext ?_
-        filter_upwards [((Lp.memLp (φ + ψ)).indicator (measurableSet_band t hBmeas)).coeFn_toLp,
-          Lp.coeFn_add (((Lp.memLp φ).indicator (measurableSet_band t hBmeas)).toLp _)
-            (((Lp.memLp ψ).indicator (measurableSet_band t hBmeas)).toLp _),
-          ((Lp.memLp φ).indicator (measurableSet_band t hBmeas)).coeFn_toLp,
-          ((Lp.memLp ψ).indicator (measurableSet_band t hBmeas)).coeFn_toLp,
+        filter_upwards [(memLp_truncBand T t hBmeas (φ + ψ)).coeFn_toLp,
+          Lp.coeFn_add ((memLp_truncBand T t hBmeas φ).toLp _)
+            ((memLp_truncBand T t hBmeas ψ).toLp _),
+          (memLp_truncBand T t hBmeas φ).coeFn_toLp,
+          (memLp_truncBand T t hBmeas ψ).coeFn_toLp,
           Lp.coeFn_add φ ψ] with z e_sum e_radd e_φ e_ψ h_φψ
         rw [e_sum, e_radd, Pi.add_apply, e_φ, e_ψ]
         simp only [Set.indicator_apply, h_φψ, Pi.add_apply]
         split_ifs <;> ring
       map_smul' := fun c φ ↦ by
         refine Lp.ext ?_
-        filter_upwards [((Lp.memLp (c • φ)).indicator (measurableSet_band t hBmeas)).coeFn_toLp,
-          Lp.coeFn_smul c (((Lp.memLp φ).indicator (measurableSet_band t hBmeas)).toLp _),
-          ((Lp.memLp φ).indicator (measurableSet_band t hBmeas)).coeFn_toLp,
+        filter_upwards [(memLp_truncBand T t hBmeas (c • φ)).coeFn_toLp,
+          Lp.coeFn_smul c ((memLp_truncBand T t hBmeas φ).toLp _),
+          (memLp_truncBand T t hBmeas φ).coeFn_toLp,
           Lp.coeFn_smul c φ] with z e_sm e_rsmul e_φ h_φ
         rw [e_sm, RingHom.id_apply, e_rsmul, Pi.smul_apply, e_φ]
         simp only [Set.indicator_apply, h_φ, Pi.smul_apply, smul_eq_mul]
@@ -240,7 +248,8 @@ private noncomputable def truncCLM (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (
     1 (fun φ ↦ by
       simp only [LinearMap.coe_mk, AddHom.coe_mk]
       rw [one_mul, Lp.norm_toLp, Lp.norm_def]
-      exact ENNReal.toReal_mono (Lp.memLp φ).2.ne (eLpNorm_indicator_le _))
+      exact ENNReal.toReal_mono (Lp.memLp φ).2.ne
+        (eLpNorm_indicator_le _ (measurableSet_band t hBmeas).nullMeasurableSet))
 
 omit [IsProbabilityMeasure μ] hB in
 /-- **The truncation CLM realises the band energy.** `‖truncCLM T t φ‖² = ∫_{(0,t]×Ω} φ²`:
@@ -253,7 +262,7 @@ private lemma truncCLM_norm_sq (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)
           ∂(trimMeasure_T (μ := μ) T hBmeas) := by
   rw [lp_two_norm_sq, ← integral_indicator (measurableSet_band t hBmeas)]
   refine integral_congr_ae ?_
-  filter_upwards [((Lp.memLp φ).indicator (measurableSet_band t hBmeas)).coeFn_toLp] with z hz
+  filter_upwards [(memLp_truncBand T t hBmeas φ).coeFn_toLp] with z hz
   rw [show (truncCLM (μ := μ) T t hBmeas φ : ℝ≥0 × Ω → ℝ) z
         = (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)).indicator (φ : ℝ≥0 × Ω → ℝ) z from hz]
   by_cases hzm : z ∈ (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω))

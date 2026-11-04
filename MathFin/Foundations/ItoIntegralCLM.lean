@@ -152,7 +152,7 @@ lemma memLp_indicator_band (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     MemLp ((Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)).indicator φ) 2
       ((timeMeasure.prod μ).trim (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod) :=
   (memLp_indicator_iff_restrict (MeasureTheory.measurableSet_predictable_Ioc_prod
-      (𝓕 := natFiltration (mΩ := mΩ) hBmeas) 0 T MeasurableSet.univ)).2
+      (𝓕 := natFiltration (mΩ := mΩ) hBmeas) 0 T MeasurableSet.univ).nullMeasurableSet).2
     (by rw [← trimMeasure_T_eq_restrict]; exact Lp.memLp φ)
 
 /-- **Extension by zero** of a `[0,T]` integrand to the `[0,∞)` predictable `L²`: the
@@ -185,7 +185,7 @@ noncomputable def bandExtend (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)) :
   norm_map' φ := by
     rw [LinearMap.coe_mk, AddHom.coe_mk, Lp.norm_toLp, Lp.norm_def, eLpNorm_indicator_eq_eLpNorm_restrict
       (MeasureTheory.measurableSet_predictable_Ioc_prod
-        (𝓕 := natFiltration (mΩ := mΩ) hBmeas) 0 T MeasurableSet.univ),
+        (𝓕 := natFiltration (mΩ := mΩ) hBmeas) 0 T MeasurableSet.univ).nullMeasurableSet,
       ← trimMeasure_T_eq_restrict]
 
 lemma bandExtend_coeFn (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))

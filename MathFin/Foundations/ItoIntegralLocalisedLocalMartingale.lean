@@ -113,11 +113,11 @@ theorem exists_continuous_localMartingale_localItoIntegral :
       ((stronglyAdapted_localItoIntegral hB T hBmeas hBcont hadap hcont (min i T)).mono
         (((natFiltration hBmeas).mono (min_le_left i T)).trans le_sup_left)).indicator
         (le_sup_right (b := nullsAlg mΩ μ) _ hG))
-      (fun ω ↦ (hXc ω).isCadlag.right_continuous)
+      (fun ω ↦ (hXc ω).isCadlag.isRightContinuous)
       (martingale_itoLocalMod hB T hBmeas hBcont hG hGc (processToLp (μ := μ) T hBmeas
         (clip_adapted hadap N) (clip_continuous hcont N) (abs_clip_le N σ)))
       (fun ω ↦ (continuous_indicator_min (fun ω hω ↦ (hGgood ω hω).1 N) ω).isCadlag
-        |>.right_continuous) ?_
+        |>.isRightContinuous) ?_
     filter_upwards [hGae] with ω hω hpos u hu
     simp only [X, itoLocalMod, Set.indicator_of_mem hω]
     exact (hGgood ω hω).2.2 N _ ⟨zero_le, min_le_right u T⟩ fun s hs ↦

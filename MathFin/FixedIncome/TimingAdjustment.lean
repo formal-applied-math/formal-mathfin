@@ -282,8 +282,9 @@ variable [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ}
 theorem integrable_one_div_exp_bondRate (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ)
     (κ σ r₀ : ℝ) (hκ : 0 < κ) (S : ℝ≥0) :
     Integrable (fun ω ↦ 1 / Real.exp (bondRate hB θ κ σ r₀ hκ S ω)) μ := by
-  refine ((integrable_exp_mul_of_hasLaw (wienerIntegralLp_hasLaw_gaussian hB S
-    (vasicekIntegratedKernelLp hκ S)) (-σ)).const_mul
+  refine (((wienerIntegralLp_hasLaw_gaussian hB S
+    (vasicekIntegratedKernelLp hκ S)).integrable_fun_comp
+      (integrable_exp_mul_gaussianReal (-σ))).const_mul
     (Real.exp (-integratedMean θ κ r₀ S))).congr (ae_of_all _ fun ω ↦ ?_)
   simp only [bondRate, one_div, ← Real.exp_neg, ← Real.exp_add]
   congr 1
@@ -344,7 +345,7 @@ theorem shortRate_hasLaw_forwardMeasure (hB : IsPreBrownianReal B μ) (θ : ℝ 
   refine ⟨hae, (measure_eq_of_mgf_id_eq integrable_exp_mul_gaussianReal ?_).symm⟩
   rw [mgf_id_gaussianReal, mgf_id_map hae]
   funext t
-  have hμ := mgf_gaussianReal hlaw.map_eq t
+  have hμ := mgf_gaussianReal hlaw t
   have h := integral_exp_mul_shortRate_eq_forwardMeasure hB θ κ σ r₀ hκ S t
   simp only [mgf] at hμ ⊢
   rw [hμ, eq_comm, ← eq_div_iff (Real.exp_pos _).ne', ← Real.exp_sub] at h

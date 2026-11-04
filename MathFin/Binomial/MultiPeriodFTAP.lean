@@ -123,7 +123,7 @@ noncomputable def horizonMeasure (q : ℝ≥0) (hq : q ≤ 1) : Measure (Fin T �
   (coinFlipMeasure q hq).map (flips T)
 
 instance (q : ℝ≥0) (hq : q ≤ 1) : IsProbabilityMeasure (horizonMeasure T q hq) :=
-  Measure.isProbabilityMeasure_map (measurable_flips T).aemeasurable
+  inferInstanceAs (IsProbabilityMeasure ((coinFlipMeasure q hq).map (flips T)))
 
 lemma horizonMeasure_singleton (q : ℝ≥0) (hq : q ≤ 1) (x : Fin T → Bool) :
     horizonMeasure T q hq {x} = ∏ i, if x i then (q : ℝ≥0∞) else 1 - q := by

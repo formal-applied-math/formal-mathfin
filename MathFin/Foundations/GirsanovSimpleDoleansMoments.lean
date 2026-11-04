@@ -241,7 +241,7 @@ lemma quad_integral_driftExp_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s
     ∫ ω, (Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) ^ 4 ∂P
       ≤ Real.exp (4 * |a| * K * (T : ℝ)) * ∫ ω, Real.exp (4 * a * X u ω) ∂P := by
   have hMGF : Integrable (fun ω ↦ Real.exp (4 * a * X u ω)) P :=
-    integrable_exp_mul_of_hasLaw (hX.hasLaw_eval u) (4 * a)
+    (hX.hasLaw_eval u).integrable_fun_comp (integrable_exp_mul_gaussianReal (4 * a))
   have hpt : ∀ ω, (Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) ^ 4
       ≤ Real.exp (4 * |a| * K * (T : ℝ)) * Real.exp (4 * a * X u ω) := by
     intro ω
@@ -273,7 +273,7 @@ lemma integrable_driftExp_four {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 
     Integrable
         (fun ω ↦ (Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) ^ 4) P := by
   have hMGF : Integrable (fun ω ↦ Real.exp (4 * a * X u ω)) P :=
-    integrable_exp_mul_of_hasLaw (hX.hasLaw_eval u) (4 * a)
+    (hX.hasLaw_eval u).integrable_fun_comp (integrable_exp_mul_gaussianReal (4 * a))
   refine (hMGF.const_mul (Real.exp (4 * |a| * K * (T : ℝ)))).mono'
     ((measurable_driftExp (X := X) (P := P) hs hc a N u).pow_const 4).aestronglyMeasurable
     (ae_of_all _ fun ω ↦ ?_)

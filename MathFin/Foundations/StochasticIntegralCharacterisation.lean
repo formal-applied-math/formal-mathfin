@@ -106,7 +106,8 @@ theorem tendsto_eLpNorm_sub_of_dominated_convergence {p : ℝ≥0∞} (hp : p �
       (tendsto_sub_nhds_zero_iff.2 hx).enorm.ennrpow_const p.toReal
   have hlin := tendsto_lintegral_of_dominated_convergence' _
     (fun n ↦ ((F_measurable n).sub hfm).enorm.pow_const _) hdom hfin hzero
-  simp_rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp0 hp]
+  refine Tendsto.congr
+    (fun n ↦ (eLpNorm_eq_lintegral_rpow_enorm_toReal hp0 hp ((F_measurable n).sub hfm)).symm) ?_
   simpa [ENNReal.zero_rpow_of_pos (inv_pos.2 hp_pos)] using hlin.ennrpow_const (1 / p.toReal)
 
 end DominatedLp

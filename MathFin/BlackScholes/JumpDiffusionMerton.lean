@@ -110,7 +110,7 @@ theorem call_eq_mertonCallPrice (h : JumpDiffusionHyp Q Λ Z N J) {k δ : ℝ} (
         (fun i ↦ J i ω) - K) 0 ∂Q
       = mertonCallPrice S_0 K r σ T k δ Λ := by
   have hJexp : Integrable (fun ω ↦ rexp (J 0 ω)) Q := by
-    simpa only [one_mul] using integrable_exp_mul_of_hasLaw hJ 1
+    simpa only [one_mul] using hJ.integrable_fun_comp (integrable_exp_mul_gaussianReal 1)
   have h1k : (0 : ℝ) < 1 + k := by linarith
   rw [h.call_poisson_mixture hJexp hS_0 hK hσ hT (k * Λ), mertonCallPrice]
   refine integral_congr_ae (ae_of_all _ fun n ↦ ?_)
@@ -151,7 +151,7 @@ theorem discounted_terminal_merton (h : JumpDiffusionHyp Q Λ Z N J) {k δ : ℝ
     ∫ ω, rexp (-r * T) * jumpDiffusionTerminal S_0 r σ T (k * Λ) (Z ω) (N ω)
         (fun i ↦ J i ω) ∂Q = S_0 := by
   have hJexp : Integrable (fun ω ↦ rexp (J 0 ω)) Q := by
-    simpa only [one_mul] using integrable_exp_mul_of_hasLaw hJ 1
+    simpa only [one_mul] using hJ.integrable_fun_comp (integrable_exp_mul_gaussianReal 1)
   have hmean : ∫ ω, rexp (J 0 ω) ∂Q = 1 + k :=
     (hJ.integral_comp (f := rexp) measurable_exp.aestronglyMeasurable).trans
       (integral_exp_mertonJump hk δ)
@@ -171,7 +171,7 @@ theorem put_eq_mertonPutPrice (h : JumpDiffusionHyp Q Λ Z N J) {k δ : ℝ} (hk
         (fun i ↦ J i ω)) 0 ∂Q = mertonPutPrice S_0 K r σ T k δ Λ := by
   have := h.J_indep.isProbabilityMeasure
   have hJexp : Integrable (fun ω ↦ rexp (J 0 ω)) Q := by
-    simpa only [one_mul] using integrable_exp_mul_of_hasLaw hJ 1
+    simpa only [one_mul] using hJ.integrable_fun_comp (integrable_exp_mul_gaussianReal 1)
   have hS : Integrable (fun ω ↦ jumpDiffusionTerminal S_0 r σ T (k * Λ) (Z ω) (N ω)
       (fun i ↦ J i ω)) Q := by
     simp_rw [jumpDiffusionTerminal_eq]

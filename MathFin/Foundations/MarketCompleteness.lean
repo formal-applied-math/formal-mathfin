@@ -246,7 +246,7 @@ theorem measure_eq_of_pricesGainsAtZero (hBmeas : ∀ t, Measurable (B t))
     Q A = μ A := by
   have hA' : MeasurableSet A := (ItoIntegralL2.natFiltration hBmeas).le T A hA
   have hmem : MemLp (A.indicator fun _ ↦ (1 : ℝ)) 2 μ :=
-    memLp_indicator_const 2 hA' 1 (Or.inr (measure_ne_top μ A))
+    memLp_indicator_const 2 hA'.nullMeasurableSet 1 (Or.inr (measure_ne_top μ A))
   have hclaim := integral_eq_of_pricesGainsAtZero hB hBmeas hBcont T hQ hg
     (hmem.toLp (A.indicator fun _ ↦ (1 : ℝ)))
     ((stronglyMeasurable_const.indicator hA).aestronglyMeasurable.congr hmem.coeFn_toLp.symm)

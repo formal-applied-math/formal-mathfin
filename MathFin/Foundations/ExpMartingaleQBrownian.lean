@@ -364,9 +364,9 @@ theorem increments_iIndepFun_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) 
       = charFun (Q.map fun ω ↦ ∑ k ∈ Finset.range n, c k * (Y (t (k + 1)) ω - Y (t k) ω)) 1 := by
         have hvec : Measurable fun ω ↦
             WithLp.toLp 2 fun i : Fin n ↦ Y (t ((i : ℕ) + 1)) ω - Y (t i) ω :=
-          (WithLp.measurable_toLp 2 _).comp <| measurable_pi_lambda
-            (fun ω (i : Fin n) ↦ Y (t ((i : ℕ) + 1)) ω - Y (t i) ω) fun i ↦
-              (h.measurable _).sub (h.measurable _)
+          (WithLp.measurable_toLp 2 _).comp
+            (Measurable.of_eval fun i ↦ (h.measurable _).sub (h.measurable _) :
+              Measurable fun ω (i : Fin n) ↦ Y (t ((i : ℕ) + 1)) ω - Y (t i) ω)
         have hlin : Measurable fun ω ↦ ∑ k ∈ Finset.range n, c k * (Y (t (k + 1)) ω - Y (t k) ω) :=
           Finset.measurable_sum _ fun k _ ↦ ((h.measurable _).sub (h.measurable _)).const_mul (c k)
         rw [charFun_apply, charFun_apply_real, integral_map hvec.aemeasurable (by fun_prop),

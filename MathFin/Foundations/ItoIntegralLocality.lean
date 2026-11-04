@@ -695,7 +695,7 @@ theorem itoIntegralCLM_T_smul_of_memLp (T a : ℝ≥0) (hBmeas : ∀ t, Measurab
       exact ENNReal.ofReal_le_ofReal (hbound M)
     exact ⟨hmeas, lt_of_le_of_lt ((MeasureTheory.Lp.eLpNorm_lim_le_liminf_eLpNorm
       (fun M : ℕ ↦ Lp.aestronglyMeasurable
-        (smulAdapted T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ)) _ hlim).trans hle)
+        (smulAdapted T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ)) _ hmeas hlim).trans hle)
       ENNReal.ofReal_lt_top⟩
   exact ⟨hZφ.toLp _, hZφ.coeFn_toLp,
     itoIntegralCLM_T_smulAdapted_of_memLp hB T a hBmeas Z hZm φ hφ hZφ⟩

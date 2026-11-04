@@ -143,7 +143,8 @@ theorem stdDevPrinciple_not_monotone {k : ℝ} (hk : 0 ≤ k) {B : Ω → ℝ} (
     rcases hB ω with h | h
     · simp [A, h]
     · simp [A, h]
-  have hB2 : MemLp B 2 P := hBeq ▸ (memLp_indicator_const 2 hA 1 (Or.inr (measure_ne_top _ _))).neg
+  have hB2 : MemLp B 2 P :=
+    hBeq ▸ (memLp_indicator_const 2 hA.nullMeasurableSet 1 (Or.inr (measure_ne_top _ _))).neg
   have hmean : P[B] = -q := by
     rw [hBeq, integral_neg, integral_indicator_one hA, hq]
   have hsq : P[B ^ 2] = q := by

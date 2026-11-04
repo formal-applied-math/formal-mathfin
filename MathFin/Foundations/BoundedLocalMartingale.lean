@@ -109,7 +109,7 @@ theorem martingale_stoppedProcess_of_locally_bounded {ρ : Ω → WithTop ℝ≥
     Martingale (stoppedProcess X ρ) 𝓕 P := by
   have hloc := (isStable_martingale (𝓕 := 𝓕) (P := P)).locally X hX _ hρ
   rw [stoppedProcess_indicator_eq hpos] at hloc
-  have had := hXad.stoppedProcess_indicator (fun ω ↦ (hXc ω).isCadlag.right_continuous) hρ
+  have had := hXad.stoppedProcess_indicator (fun ω ↦ (hXc ω).isCadlag.isRightContinuous) hρ
   rw [stoppedProcess_indicator_eq hpos] at had
   exact locally_bounded_localMartingale_is_martingale hloc had hbound
 
@@ -151,7 +151,7 @@ theorem isLocalMartingale_congr_ae {Y : ℝ≥0 → Ω → ℝ} (hX : IsLocalMar
       =ᵐ[P] fun ω ↦ stoppedProcess (fun i ↦ {ω | ⊥ < τ n ω}.indicator (Y i)) (τ n) t ω := by
     filter_upwards [hXY] with ω h
     simp only [stoppedProcess, Set.indicator_apply, h]
-  exact ⟨⟨hY.stoppedProcess_indicator (fun ω ↦ (hYc ω).right_continuous) (hτ.isStoppingTime n),
+  exact ⟨⟨hY.stoppedProcess_indicator (fun ω ↦ (hYc ω).isRightContinuous) (hτ.isStoppingTime n),
     fun i j hij ↦ (condExp_congr_ae (ht j).symm).trans ((hmart.2 i j hij).trans (ht i))⟩,
     isStable_isCadlag Y hYc _ (hτ.isStoppingTime n)⟩
 

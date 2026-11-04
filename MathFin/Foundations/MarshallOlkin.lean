@@ -137,7 +137,6 @@ private lemma hasLaw_min (hrate : ∀ i, 0 < rate i)
     HasLaw (fun ω ↦ min (T i ω) (T j ω)) (expMeasure (rate i + rate j)) P := by
   have hmeas : AEMeasurable (fun ω ↦ min (T i ω) (T j ω)) P :=
     (hT i).aemeasurable.min (hT j).aemeasurable
-  have := Measure.isProbabilityMeasure_map (μ := P) hmeas
   have := isProbabilityMeasure_expMeasure (add_pos (hrate i) (hrate j))
   refine ⟨hmeas, ext_of_real_Ioi fun u ↦ ?_⟩
   rw [map_measureReal_apply_of_aemeasurable hmeas measurableSet_Ioi]
@@ -286,7 +285,6 @@ theorem covariance_indicator_marshallOlkin (hrate : ∀ i, 0 < rate i)
   set Z : Ω → ℝ × ℝ := fun ω ↦ (min (T 0 ω) (T 2 ω), min (T 1 ω) (T 2 ω))
   have hZ : AEMeasurable Z P := ((hT 0).aemeasurable.min (hT 2).aemeasurable).prodMk
     ((hT 1).aemeasurable.min (hT 2).aemeasurable)
-  have := Measure.isProbabilityMeasure_map (μ := P) hZ
   have hA : MeasurableSet (Prod.fst ⁻¹' Iic s : Set (ℝ × ℝ)) :=
     measurableSet_Iic.preimage measurable_fst
   have hB : MeasurableSet (Prod.snd ⁻¹' Iic t : Set (ℝ × ℝ)) :=

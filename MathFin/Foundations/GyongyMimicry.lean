@@ -1353,9 +1353,9 @@ theorem gyongy_mimicry_gated
     exact hx
   -- both law flows are probability flows
   have hρprob : ∀ s, IsProbabilityMeasure (Measure.map (Y s) ν) := fun s =>
-    ν.isProbabilityMeasure_map (hYmeas s).aemeasurable
+    inferInstance
   have hηprob : ∀ s, IsProbabilityMeasure (Measure.map (fun ω => X (Real.toNNReal s) ω) μ) :=
-    fun s => μ.isProbabilityMeasure_map (hXm s).aemeasurable
+    fun s => inferInstance
   -- the initial laws agree (`Y₀` has the law of `X₀`)
   have hz : (fun ω => X (Real.toNNReal (0:ℝ)) ω) = (X 0) := by
     funext ω

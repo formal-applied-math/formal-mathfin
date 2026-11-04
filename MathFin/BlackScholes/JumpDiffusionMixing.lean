@@ -111,7 +111,8 @@ lemma integrable_jumpDiffusion_terminal {S_0 r σ T : ℝ} {Z Y : Ω → ℝ}
     rw [Real.exp_add _ (Y ω), Real.exp_add]
     ring
   rw [hfun]
-  exact (hind.integrable_mul (integrable_exp_mul_of_hasLaw hZ _) hexp).const_mul _
+  exact (hind.integrable_mul (hZ.integrable_fun_comp (integrable_exp_mul_gaussianReal _))
+    hexp).const_mul _
 
 /-- The discounted call payoff of a jump-diffusion with an independent jump part `Y` is
 integrable when `𝔼[e^Y] < ∞`: it is the positive part of an integrable function. -/
@@ -284,7 +285,7 @@ lemma aemeasurable_J (h : JumpDiffusionHyp Q Λ Z N J) (i : ℕ) : AEMeasurable 
 /-- The jump sizes are jointly a.e.-measurable. -/
 lemma aemeasurable_jumps (h : JumpDiffusionHyp Q Λ Z N J) :
     AEMeasurable (fun ω i ↦ J i ω) Q :=
-  aemeasurable_pi_lambda _ h.aemeasurable_J
+  .of_eval h.aemeasurable_J
 
 /-- The jump count is independent of the jump sizes. -/
 lemma N_indep_J (h : JumpDiffusionHyp Q Λ Z N J) : IndepFun N (fun ω i ↦ J i ω) Q :=

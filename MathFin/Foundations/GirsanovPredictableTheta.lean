@@ -209,12 +209,11 @@ lemma tendstoInMeasure_of_ae_dist_le_sqrt {f : ℕ → Ω → ℝ} {g : Ω → �
           refine lintegral_congr_ae ?_
           filter_upwards [hDnn n] with ω hω
           rw [Real.enorm_eq_ofReal_abs, abs_of_nonneg hω]
-        rw [hsub, eLpNorm_one_eq_lintegral_enorm, hlint,
+        rw [hsub, eLpNorm_one_eq_lintegral_enorm (hDint n).aestronglyMeasurable, hlint,
           ← ofReal_integral_eq_lintegral_ofReal (hDint n) (hDnn n)]
       rw [tendsto_congr hrw, ← ENNReal.ofReal_zero]
       exact (ENNReal.continuous_ofReal.tendsto 0).comp hD0
-    exact tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero (fun n ↦ (hDint n).aestronglyMeasurable)
-      aestronglyMeasurable_const hDeLp
+    exact tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero hDeLp
   intro ε hε
   rcases eq_or_ne ε ⊤ with hεtop | hεtop
   · -- `ε = ⊤`: the difference has finite `edist`, so every level set is empty
@@ -286,11 +285,11 @@ lemma tendstoInMeasure_of_ae_dist_le_of_tendsto_integral {f : ℕ → Ω → ℝ
     (hdom : ∀ n, ∀ᵐ ω ∂μ, dist (f n ω) (g ω) ≤ h n ω)
     (hh0 : Tendsto (fun n ↦ ∫ ω, h n ω ∂μ) atTop (𝓝 0)) :
     TendstoInMeasure μ f atTop g := by
-  refine tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero hf hg ?_
+  refine tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero ?_
   have hbnd : ∀ n, eLpNorm (f n - g) 1 μ ≤ ENNReal.ofReal (∫ ω, h n ω ∂μ) := by
     intro n
     have hnn : 0 ≤ᵐ[μ] h n := by filter_upwards [hdom n] with ω hω; exact dist_nonneg.trans hω
-    rw [eLpNorm_one_eq_lintegral_enorm]
+    rw [eLpNorm_one_eq_lintegral_enorm ((hf n).sub hg)]
     calc ∫⁻ ω, ‖(f n - g) ω‖ₑ ∂μ
         = ∫⁻ ω, ENNReal.ofReal (dist (f n ω) (g ω)) ∂μ := by
           refine lintegral_congr fun ω ↦ ?_

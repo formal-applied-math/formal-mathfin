@@ -120,16 +120,13 @@ theorem exists_seq_tendsto_ae_comp {Ω : Type*} [MeasurableSpace Ω] {μ : Measu
 measure. -/
 theorem tendstoInMeasure_of_tendsto_integral_abs {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
     {g : ℕ → Ω → ℝ} {g' : Ω → ℝ} (hint : ∀ n, Integrable (fun ω ↦ g n ω - g' ω) μ)
-    (hg' : AEStronglyMeasurable g' μ)
     (h : Tendsto (fun n ↦ ∫ ω, |g n ω - g' ω| ∂μ) atTop (𝓝 0)) :
     TendstoInMeasure μ g atTop g' := by
-  refine tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero
-    (fun n ↦ ((hint n).aestronglyMeasurable.add hg').congr
-      (ae_of_all _ fun ω ↦ sub_add_cancel (g n ω) (g' ω))) hg' ?_
+  refine tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero ?_
   have h' := ENNReal.tendsto_ofReal h
   rw [ENNReal.ofReal_zero] at h'
   refine h'.congr fun n ↦ ?_
-  rw [eLpNorm_one_eq_lintegral_enorm]
+  rw [eLpNorm_one_eq_lintegral_enorm (hint n).aestronglyMeasurable]
   exact ofReal_integral_norm_eq_lintegral_enorm (hint n)
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
@@ -203,7 +200,7 @@ theorem tendstoInMeasure_weighted_qv_adapted {X A : ℝ≥0 → Ω → ℝ} {X�
     simp only [Pi.add_apply, Pi.sub_apply, h1, h2]
     ring
   refine tendstoInMeasure_of_tendsto_integral_abs (fun n ↦ Integrable.sub
-    (integrable_finsetSum _ fun k hk ↦ ?_) hW) hW.1
+    (integrable_finsetSum _ fun k hk ↦ ?_) hW)
     (tendsto_weighted_qv_adapted hB T hBmeas hadap hcont hbdd hA hX hw_adap hw_cont hw_bdd)
   have hk' := Finset.mem_range.mp hk
   have hd := hΔ (unifPart_mono T n (Nat.le_succ k)) (unifPart_le_T hk')

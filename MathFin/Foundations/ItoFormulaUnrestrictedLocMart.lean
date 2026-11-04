@@ -244,7 +244,7 @@ theorem martingale_stoppedProcess_itoResidual (hB : IsPreBrownianReal B μ)
     simp only [stoppedProcess, Set.indicator_apply]
     rw [hω _ ⟨zero_le, hs_le t ω⟩]
   have hadapt := hMadapt.stoppedProcess_indicator
-    (fun ω ↦ (hMcont ω).isCadlag.right_continuous) hσ
+    (fun ω ↦ (hMcont ω).isCadlag.isRightContinuous) hσ
   have hcad := isStable_isCadlag M (fun ω ↦ (hMcont ω).isCadlag) _ hσ
   -- bounded: `|B| ≤ N` and `t ≤ N` up to `σ_N`, where `f`, `f_t`, `f_xx` are bounded
   have hK : IsCompact (Set.Icc (0 : ℝ) N ×ˢ Set.Icc (-(N : ℝ)) N) :=

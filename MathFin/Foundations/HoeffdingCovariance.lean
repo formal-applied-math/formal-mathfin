@@ -71,7 +71,7 @@ variable {α : Type*} {mα : MeasurableSpace α} {μ : Measure α} [IsProbabilit
 
 /-- An indicator is square integrable. -/
 private lemma memLp_indicator_one (hA : MeasurableSet A) : MemLp (A.indicator (1 : α → ℝ)) 2 μ :=
-  memLp_indicator_const 2 hA 1 (Or.inr (measure_ne_top _ _))
+  memLp_indicator_const 2 hA.nullMeasurableSet 1 (Or.inr (measure_ne_top _ _))
 
 /-- **Covariance of two indicators**: `cov(𝟙_A, 𝟙_B) = P(A ∩ B) − P(A) P(B)`. -/
 theorem covariance_indicator_one (hA : MeasurableSet A) (hB : MeasurableSet B) :
@@ -364,7 +364,6 @@ theorem covariance_eq_integral_cdf (hX : MemLp X 2 P) (hY : MemLp Y 2 P) :
     cov[X, Y; P] = ∫ p : ℝ × ℝ,
       (P.real {ω | X ω ≤ p.1 ∧ Y ω ≤ p.2} - P.real {ω | X ω ≤ p.1} * P.real {ω | Y ω ≤ p.2}) := by
   have hZ := hX.aemeasurable.prodMk hY.aemeasurable
-  have := Measure.isProbabilityMeasure_map (μ := P) hZ
   obtain ⟨h₁, h₂⟩ := memLp_fst_snd_map hX hY
   have hlaw : HasLaw (fun ω ↦ (X ω, Y ω)) (P.map fun ω ↦ (X ω, Y ω)) P := ⟨hZ, rfl⟩
   rw [show cov[X, Y; P] = cov[Prod.fst ∘ (fun ω ↦ (X ω, Y ω)), Prod.snd ∘ (fun ω ↦ (X ω, Y ω)); P]
@@ -376,7 +375,6 @@ theorem covariance_eq_integral_cdf (hX : MemLp X 2 P) (hY : MemLp Y 2 P) :
 theorem integrable_cdf_sub_mul (hX : MemLp X 2 P) (hY : MemLp Y 2 P) :
     Integrable fun p : ℝ × ℝ ↦
       P.real {ω | X ω ≤ p.1 ∧ Y ω ≤ p.2} - P.real {ω | X ω ≤ p.1} * P.real {ω | Y ω ≤ p.2} := by
-  have := Measure.isProbabilityMeasure_map (μ := P) (hX.aemeasurable.prodMk hY.aemeasurable)
   obtain ⟨h₁, h₂⟩ := memLp_fst_snd_map hX hY
   exact (integrable_cdf_sub_mul_fst_snd h₁ h₂).congr
     (ae_of_all _ (cdf_sub_mul_map hX.aemeasurable hY.aemeasurable))

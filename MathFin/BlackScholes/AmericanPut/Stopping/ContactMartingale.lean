@@ -36,7 +36,7 @@ theorem localMartingale_of_ae_path_eq {Ω : Type*} [MeasurableSpace Ω]
   obtain ⟨τ,hτ,hlocal⟩ := hX
   refine ⟨τ,hτ,fun n => ⟨?_,?_⟩⟩
   · apply (hlocal n).1.congr
-      (hY.stoppedProcess_indicator (fun ω => (hcY ω).isCadlag.right_continuous)
+      (hY.stoppedProcess_indicator (fun ω => (hcY ω).isCadlag.isRightContinuous)
           (hτ.isStoppingTime n))
     intro t
     filter_upwards [heq] with ω hω

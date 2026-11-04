@@ -85,7 +85,7 @@ theorem gaussian_loss_report {L : Ω → ℝ} {m s α : ℝ}
   have := nullSingletonClass_gaussianReal (μ := m) hv
   have hF : Continuous (cdf (P.map L)) := hL.map_eq ▸ continuous_cdf
   refine ⟨?_, ?_, measureReal_valueAtRisk_lt hL.aemeasurable hF hα,
-    expectedShortfall_eq_setIntegral_tail (integrable_of_hasLaw_gaussianReal hL) hF hα⟩
+    expectedShortfall_eq_setIntegral_tail hL.hasGaussianLaw.integrable hF hα⟩
   · rw [valueAtRisk_of_hasLaw_gaussianReal hL hα, hσ]
   · rw [expectedShortfall_of_hasLaw_gaussianReal hv hL hα, hσ]
 
@@ -176,8 +176,8 @@ theorem IsRealization.expectedShortfall_add_le [IsProbabilityMeasure P] (h : b.I
     {α : ℝ} (hα : α ∈ Ioo 0 1) :
     expectedShortfall (fun ω ↦ X 0 ω + X 1 ω) P α ≤
       expectedShortfall (X 0) P α + expectedShortfall (X 1) P α :=
-  MathFin.expectedShortfall_add_le (integrable_of_hasLaw_gaussianReal (h.hasLaw 0))
-    (integrable_of_hasLaw_gaussianReal (h.hasLaw 1)) hα
+  MathFin.expectedShortfall_add_le (h.hasLaw 0).hasGaussianLaw.integrable
+    (h.hasLaw 1).hasGaussianLaw.integrable hα
 
 /-- **Every book has a realization**: on the Cholesky pair `bivariateNormalLaw ρ`, position `i`
 losing `μᵢ + σᵢ Zᵢ` (`gaussianPair`) has the book's joint Gaussian law. So the report is not about

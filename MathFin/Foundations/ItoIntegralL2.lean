@@ -287,7 +287,7 @@ lemma memLp_rectTerm (hBmeas : ∀ t, Measurable (B t))
     ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter, timeMeasure_Ioc];
         exact ENNReal.ofReal_lt_top⟩
   rw [rectTerm_eq_indicator,
-      memLp_indicator_iff_restrict (measurableSet_Ioc.prod MeasurableSet.univ),
+      memLp_indicator_iff_restrict (measurableSet_Ioc.prod MeasurableSet.univ).nullMeasurableSet,
       ← Measure.prod_restrict, Measure.restrict_univ]
   have hmeas : Measurable (fun z : ℝ≥0 × Ω ↦ V.value p z.2) :=
     ((V.measurable_value p).mono ((natFiltration hBmeas).le p.1) le_rfl).comp measurable_snd

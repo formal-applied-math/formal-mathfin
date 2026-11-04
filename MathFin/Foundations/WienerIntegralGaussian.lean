@@ -171,11 +171,11 @@ lemma wienerAssembly_map_eq_gaussianReal (hB : IsPreBrownianReal B μ) (T : ℝ�
 lemma L1_norm_le_L2_norm_prob (g : Lp ℝ 2 μ) :
     ∫ ω, ‖g ω‖ ∂μ ≤ ‖g‖ := by
   rw [show (∫ ω, ‖g ω‖ ∂μ) = (eLpNorm (g : Ω → ℝ) 1 μ).toReal by
-    rw [eLpNorm_one_eq_lintegral_enorm,
+    rw [eLpNorm_one_eq_lintegral_enorm (Lp.aestronglyMeasurable g),
         ← integral_norm_eq_lintegral_enorm (Lp.aestronglyMeasurable g)],
     Lp.norm_def]
   exact ENNReal.toReal_mono (Lp.eLpNorm_ne_top g)
-    (eLpNorm_le_eLpNorm_of_exponent_le one_le_two (Lp.aestronglyMeasurable g))
+    (eLpNorm_le_eLpNorm_of_exponent_le one_le_two)
 
 /-- The characteristic function of `μ.map h` is `|t|`-Lipschitz in `h : L²(μ)`. -/
 lemma charFun_map_lp_dist_le (t : ℝ) (h₁ h₂ : Lp ℝ 2 μ) :

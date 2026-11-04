@@ -138,10 +138,10 @@ theorem IsSpanLabel.indepFun_of_le {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrown
   have hφ : Measurable fun x : Set.Iic c → ℝ ↦
       F fun p : Set.Icc a b × Set.Icc a b ↦
         x ⟨p.2, p.2.2.2.trans hbc⟩ - x ⟨p.1, p.1.2.2.trans hbc⟩ :=
-    hF.comp (measurable_pi_lambda _ fun _ ↦ (measurable_pi_apply _).sub (measurable_pi_apply _))
+    hF.comp (.of_eval fun _ ↦ (measurable_pi_apply _).sub (measurable_pi_apply _))
   have hψ : Measurable fun y : ℝ≥0 → ℝ ↦
       G fun p : Set.Icc c d × Set.Icc c d ↦ y (p.2 - c) - y (p.1 - c) :=
-    hG.comp (measurable_pi_lambda _ fun _ ↦ (measurable_pi_apply _).sub (measurable_pi_apply _))
+    hG.comp (.of_eval fun _ ↦ (measurable_pi_apply _).sub (measurable_pi_apply _))
   refine ((hB.indepFun_shift c).symm.comp hφ hψ).congr (ae_of_all _ fun ω ↦ rfl)
     (ae_of_all _ fun ω ↦ ?_)
   simp only [Function.comp_apply]

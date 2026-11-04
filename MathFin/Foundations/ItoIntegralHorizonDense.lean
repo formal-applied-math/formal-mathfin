@@ -326,7 +326,7 @@ private lemma eLpNorm_uncurry_trim_T_eq_trim (T : ℝ≥0) (hBmeas : ∀ t, Meas
             (Set.Ioc 0 T ×ˢ Set.univ)) := by rw [trimMeasure_T_eq_restrict]
     _ = eLpNorm ((Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)).indicator (Function.uncurry ⇑V.val)) 2
           ((ItoIntegralL2.timeMeasure.prod μ).trim 𝓕.predictable_le_prod) :=
-        (MeasureTheory.eLpNorm_indicator_eq_eLpNorm_restrict hS_pred).symm
+        (MeasureTheory.eLpNorm_indicator_eq_eLpNorm_restrict hS_pred.nullMeasurableSet).symm
     _ = eLpNorm (Function.uncurry ⇑V.val) 2
           ((ItoIntegralL2.timeMeasure.prod μ).trim 𝓕.predictable_le_prod) :=
         MeasureTheory.eLpNorm_congr_ae h_ae_eq

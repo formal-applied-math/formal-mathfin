@@ -125,7 +125,7 @@ noncomputable def bivariateNormalLaw (r : ℝ) : Measure (ℝ × ℝ) :=
   stdNormalPair.map (choleskyPair r)
 
 instance (r : ℝ) : IsProbabilityMeasure (bivariateNormalLaw r) :=
-  Measure.isProbabilityMeasure_map (measurable_choleskyPair r).aemeasurable
+  inferInstanceAs (IsProbabilityMeasure (stdNormalPair.map (choleskyPair r)))
 
 /-- **The Cholesky pair is Gaussian**, for every `r`: the image of the Gaussian measure
 `N(0,1) ⊗ N(0,1)` under a continuous linear map (Mathlib's `isGaussian_map`). -/

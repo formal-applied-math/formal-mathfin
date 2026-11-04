@@ -102,7 +102,7 @@ theorem coinFlipMeasure_cylinder (q : ℝ≥0) (hq : q ≤ 1) (path : ℕ → Bo
 def flips (N : ℕ) (ω : ℕ → Bool) : Fin N → Bool := fun i ↦ ω i
 
 lemma measurable_flips (N : ℕ) : Measurable (flips N) :=
-  measurable_pi_lambda _ fun i ↦ measurable_pi_apply (i : ℕ)
+  .of_eval fun i ↦ measurable_pi_apply (i : ℕ)
 
 /-- A function of the first `n` flips factors through `flips n`. -/
 lemma PathAdaptedAt.eq_comp_flips {n : ℕ} {f : (ℕ → Bool) → ℝ} (hf : PathAdaptedAt n f) :
@@ -307,7 +307,7 @@ theorem abs_spotPath_le (S₀ u d : ℝ) (k : ℕ) (ω : ℕ → Bool) :
   rw [spotPath, abs_mul, abs_prod]
   gcongr
   calc ∏ i ∈ range k, |if ω i then u else d| ≤ ∏ _i ∈ range k, max |u| |d| :=
-        prod_le_prod (fun _ _ ↦ abs_nonneg _) fun i _ ↦ by split_ifs <;> simp
+        prod_le_prod₀ (fun _ _ ↦ abs_nonneg _) fun i _ ↦ by split_ifs <;> simp
     _ = max |u| |d| ^ k := by simp
 
 section Martingale

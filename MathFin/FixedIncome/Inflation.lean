@@ -306,7 +306,7 @@ theorem integral_exp_hwD_forwardMeasure [IsProbabilityMeasure μ] {B : NNReal �
         (HullWhite.bondRate hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S ω)) = 1 := by
   have hlaw := gaussianReal_sub_const
     (HullWhite.shortRate_hasLaw_forwardMeasure hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S) (f0 S)
-  have hm := mgf_gaussianReal hlaw.map_eq (-b)
+  have hm := mgf_gaussianReal hlaw (-b)
   simp only [mgf] at hm
   have hfac (ω : Ω) : Real.exp (hwD b (vasicekSDEVariance σ κ S)
       - b * (HullWhite.integratedRate hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S ω - f0 S))

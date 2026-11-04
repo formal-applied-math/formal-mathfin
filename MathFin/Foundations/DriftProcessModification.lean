@@ -348,7 +348,7 @@ theorem driftProcessAssembled_coeFn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
   have hmeasP : TendstoInMeasure (trimMeasure_T (μ := μ) T hBmeas)
       (fun n ↦ Function.uncurry (driftSimpleProcess hBmeas (V n).val)) atTop
       (⇑(driftProcessAssembled (μ := μ) T hBmeas g)) :=
-    tendstoInMeasure_of_tendsto_eLpNorm (by norm_num) hGmeas (Lp.aestronglyMeasurable _) heLp
+    tendstoInMeasure_of_tendsto_eLpNorm (by norm_num) heLp
   exact (tendstoInMeasure_ae_unique hmeasG hmeasP).symm
 
 /-! ## Layer 4 refinement — the pathwise drift as an honest single Lebesgue integral -/
@@ -468,13 +468,12 @@ theorem driftContinuousMod_eq_setIntegral (T : ℝ≥0) (hBmeas : ∀ t, Measura
         refine lintegral_congr_ae ?_
         filter_upwards [hDnn n] with ω hω
         rw [Real.enorm_eq_ofReal_abs, abs_of_nonneg hω]
-      rw [hsub, eLpNorm_one_eq_lintegral_enorm, hlint,
+      rw [hsub, eLpNorm_one_eq_lintegral_enorm (hDint n).aestronglyMeasurable, hlint,
         ← ofReal_integral_eq_lintegral_ofReal (hDint n) (hDnn n)]
     rw [tendsto_congr hrw, ← ENNReal.ofReal_zero]
     exact (ENNReal.continuous_ofReal.tendsto 0).comp hD0
   have hDmeasure : TendstoInMeasure μ D atTop (fun _ ↦ (0 : ℝ)) :=
-    tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero (fun n ↦ (hDint n).aestronglyMeasurable)
-      aestronglyMeasurable_const hDeLp
+    tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero hDeLp
   obtain ⟨ns, hns_mono, hns_ae⟩ := hDmeasure.exists_seq_tendsto_ae
   -- combine, a.e. ω
   filter_upwards [hns_ae, hg_slice, driftContinuousMod_tendsto T hBmeas g] with ω hωD hωg hωlim
