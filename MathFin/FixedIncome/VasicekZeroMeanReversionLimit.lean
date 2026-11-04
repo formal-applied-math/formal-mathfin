@@ -16,9 +16,9 @@ public import MathFin.FixedIncome.VasicekMarketPriceOfRisk
 `P(0,T) = exp(−M(T) + σ²V(T)/2)` (`vasicekBondPrice_eq`), for every `κ > 0`. This file takes
 `κ → 0⁺` in that closed form and shows it lands on the bond price of the driftless Gaussian
 short rate `r_s = r₀ + σB_s`, which is priced here a second time, directly, with no Vasicek
-formula and no limit:
+formula and no limit (both models carried in their Wiener representation, see Scope):
 
-  `exp(−M(T) + σ²V(T)/2) → exp(−r₀T + σ²T³/6) = 𝔼[exp(−∫₀ᵀ (r₀ + σB_s) ds)]`.
+  `exp(−M(T) + σ²V(T)/2) → exp(−r₀T + σ²T³/6) = 𝔼[exp(−r₀T − σ∫₀ᵀ (T − u) dB_u)]`.
 
 Limit algebra on the existing definitions (`vasicekBondB`, `vasicekIntegratedMean`,
 `vasicekBondV`, `vasicekBondA`); the only new probability is the second route, one more instance
@@ -148,25 +148,31 @@ lemma abs_vasicekBondV_sub_le {κ T : ℝ} (hκ : κ ≠ 0) (hsmall : |2 * κ * 
 
 /-- A continuous function of `κ` vanishing at `0` tends to `0` along `κ → 0⁺`. -/
 private lemma tendsto_nhdsGT_zero_of_continuous {f : ℝ → ℝ} (hf : Continuous f) (h0 : f 0 = 0) :
-    Tendsto f (𝓝[>] 0) (𝓝 0) := by
-  simpa [h0] using (hf.tendsto 0).mono_left nhdsWithin_le_nhds
+    Tendsto f (𝓝[>] 0) (𝓝 0) :=
+  (hf.tendsto' 0 0 h0).mono_left nhdsWithin_le_nhds
+
+/-- **A linear error bound gives the limit.** If `|f κ − L| ≤ C·|κ|` for `κ → 0⁺` eventually,
+then `f κ → L`. Both limits below are this squeeze, fed by an explicit Taylor bound. -/
+private lemma tendsto_nhdsGT_zero_of_abs_sub_le {f : ℝ → ℝ} {L C : ℝ}
+    (h : ∀ᶠ κ in 𝓝[>] (0 : ℝ), |f κ - L| ≤ C * |κ|) : Tendsto f (𝓝[>] 0) (𝓝 L) :=
+  tendsto_sub_nhds_zero_iff.mp <| squeeze_zero_norm' (by simpa only [Real.norm_eq_abs] using h)
+    (tendsto_nhdsGT_zero_of_continuous (by fun_prop) (by simp))
+
+/-- `|c·κ| ≤ 1` for `κ → 0⁺` eventually: the regime of the Taylor bounds below. -/
+private lemma eventually_abs_mul_le_one (c : ℝ) : ∀ᶠ κ in 𝓝[>] (0 : ℝ), |c * κ| ≤ 1 :=
+  (tendsto_nhdsGT_zero_of_continuous (f := fun κ ↦ |c * κ|) (by fun_prop) (by simp)).eventually
+    (ge_mem_nhds one_pos)
 
 /-- **`V(T) → T³/3` as `κ → 0⁺`** — the genuine three-term cancellation limit. The terms
 `T/κ²`, `−2(1 − e^{−κT})/κ³` and `(1 − e^{−2κT})/(2κ³)` of `vasicekBondV` each diverge
 (for `T > 0` the middle one tends to `−∞`); only their sum converges, at rate `O(κ)`, by the
 explicit bound `abs_vasicekBondV_sub_le` and a squeeze. -/
 theorem tendsto_vasicekBondV_zero_meanReversion (T : ℝ) :
-    Tendsto (fun κ ↦ vasicekBondV κ T) (𝓝[>] 0) (𝓝 (T ^ 3 / 3)) := by
-  have hsmall : ∀ᶠ κ in 𝓝[>] (0 : ℝ), |2 * κ * T| ≤ 1 :=
-    (tendsto_nhdsGT_zero_of_continuous (f := fun κ ↦ |2 * κ * T|) (by fun_prop)
-      (by simp)).eventually (ge_mem_nhds one_pos)
-  have hlin : Tendsto (fun κ : ℝ ↦ 10 * |κ| * T ^ 4) (𝓝[>] 0) (𝓝 0) :=
-    tendsto_nhdsGT_zero_of_continuous (by fun_prop) (by simp)
-  rw [← tendsto_sub_nhds_zero_iff]
-  refine squeeze_zero_norm' ?_ hlin
-  filter_upwards [hsmall, self_mem_nhdsWithin] with κ hs hκ
-  rw [Real.norm_eq_abs]
-  exact abs_vasicekBondV_sub_le (ne_of_gt hκ) hs
+    Tendsto (fun κ ↦ vasicekBondV κ T) (𝓝[>] 0) (𝓝 (T ^ 3 / 3)) :=
+  tendsto_nhdsGT_zero_of_abs_sub_le (C := 10 * T ^ 4) <| by
+    filter_upwards [eventually_abs_mul_le_one (2 * T), self_mem_nhdsWithin] with κ hs hκ
+    exact (abs_vasicekBondV_sub_le hκ.ne' (by rwa [show 2 * κ * T = 2 * T * κ by ring])).trans_eq
+      (by ring)
 
 /-- **`M(T) → r₀·T` as `κ → 0⁺`.** With `B(T) → T`, the level term `θ·(T − B(T))` vanishes:
 without mean reversion the long-run level `θ` is never felt. -/
@@ -178,9 +184,9 @@ theorem tendsto_vasicekIntegratedMean_zero_meanReversion (r₀ θ T : ℝ) :
       ((tendsto_const_nhds (x := θ)).mul ((tendsto_const_nhds (x := T)).sub hB))
 
 /-- **The Vasicek bond price at vanishing mean reversion.** The closed form of
-`vasicekBondPrice_eq`, `exp(−M(T) + σ²V(T)/2)`, tends as `κ → 0⁺` to `exp(−r₀T + σ²T³/6)` —
-the bond price of the driftless Gaussian short rate `r_s = r₀ + σB_s`
-(`brownianBondPrice_eq`, derived independently below). -/
+`vasicekBondPrice_eq`, `exp(−M(T) + σ²V(T)/2)`, tends as `κ → 0⁺` to `exp(−r₀T + σ²T³/6)`, the
+value `brownianBondPrice_eq` below gives for the driftless Gaussian short rate
+`r_s = r₀ + σB_s` (in its Wiener representation). -/
 theorem tendsto_vasicekBondPrice_zero_meanReversion (r₀ θ σ T : ℝ) :
     Tendsto (fun κ ↦ Real.exp (-(vasicekIntegratedMean r₀ θ κ T) + σ ^ 2 * vasicekBondV κ T / 2))
       (𝓝[>] 0) (𝓝 (Real.exp (-(r₀ * T) + σ ^ 2 * T ^ 3 / 6))) := by
@@ -226,7 +232,9 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
   {B : ℝ≥0 → Ω → ℝ}
 
 /-- The integrated kernel of the driftless model `r_s = r₀ + σB_s`, `u ↦ T − u`
-(`∫₀ᵀ B_s ds = ∫₀ᵀ (T − u) dB_u`), is in `L²((0, T])`: it lies in `[0, T)` there. -/
+(`∫₀ᵀ B_s ds = ∫₀ᵀ (T − u) dB_u`), is in `L²((0, T])`: it lies in `[0, T)` there. It is the
+`κ → 0⁺` limit of `vasicekIntegratedKernel`, which is defined only for `κ > 0`, so the `κ = 0`
+model needs its own. -/
 lemma brownianIntegratedKernel_memLp (T : ℝ≥0) :
     MemLp (fun u : ℝ ↦ (T : ℝ) - u) 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) := by
   refine (memLp_top_of_bound (by fun_prop) (T : ℝ) ?_).mono_exponent le_top
@@ -259,8 +267,9 @@ noncomputable def brownianIntegratedRate (hB : IsPreBrownianReal B μ) (r₀ σ 
 
 /-- **The bond price of the driftless Gaussian short rate**,
 `𝔼[exp(−∫₀ᵀ r_s ds)] = exp(−r₀T + σ²T³/6)`: the Wiener bond-price lemma
-`integral_exp_neg_add_mul_wienerIntegralLp` at `m = r₀T`, `c = σ` and the kernel `T − u`. No
-Vasicek formula and no limit enters. -/
+`integral_exp_neg_add_mul_wienerIntegralLp` at `m = r₀T`, `c = σ` and the kernel `T − u` (the
+same lemma `vasicekBondPrice_eq` applies to the Vasicek kernel). No Vasicek formula and no
+limit enters. -/
 theorem brownianBondPrice_eq (hB : IsPreBrownianReal B μ) (r₀ σ : ℝ) (T : ℝ≥0) :
     ∫ ω, Real.exp (-(brownianIntegratedRate hB r₀ σ T ω)) ∂μ
       = Real.exp (-(r₀ * T) + σ ^ 2 * (T : ℝ) ^ 3 / 6) := by
@@ -272,7 +281,7 @@ theorem brownianBondPrice_eq (hB : IsPreBrownianReal B μ) (r₀ σ : ℝ) (T : 
 
 /-- **Two routes to the same price.** The Vasicek closed form (`vasicekBondPrice_eq`, which for
 each `κ > 0` is the `μ`-expectation `𝔼[exp(−∫₀ᵀ r^κ_s ds)]`) converges as `κ → 0⁺` to the
-expectation of the driftless model, priced independently by `brownianBondPrice_eq`. -/
+expectation of the driftless model, priced directly by `brownianBondPrice_eq`. -/
 theorem tendsto_vasicekBondPrice_brownianBondPrice (hB : IsPreBrownianReal B μ)
     (r₀ θ σ : ℝ) (T : ℝ≥0) :
     Tendsto (fun κ ↦ Real.exp (-(vasicekIntegratedMean r₀ θ κ T) + σ ^ 2 * vasicekBondV κ T / 2))
@@ -282,7 +291,7 @@ theorem tendsto_vasicekBondPrice_brownianBondPrice (hB : IsPreBrownianReal B μ)
 
 end Brownian
 
-/-! ### Stretch: a constant market price of risk `λ` -/
+/-! ### A constant market price of risk `λ` -/
 
 /-- The second-order behaviour of `B`: for `κ ≠ 0` with `|κT| ≤ 1`,
 `|(T − B(T))/κ − T²/2| ≤ |κ|·|T|³`. -/
@@ -303,17 +312,10 @@ lemma abs_vasicekBondB_secondOrder_sub_le {κ T : ℝ} (hκ : κ ≠ 0) (hsmall 
 /-- `(T − B(T))/κ → T²/2` as `κ → 0⁺` — the `κ ↓ 0` limit of the mass `∫₀ᵀ g` of the integrated
 kernel (`integral_vasicekIntegratedKernel`), which carries the Girsanov mean shift. -/
 theorem tendsto_vasicekBondB_secondOrder_zero_meanReversion (T : ℝ) :
-    Tendsto (fun κ ↦ (T - vasicekBondB κ T) / κ) (𝓝[>] 0) (𝓝 (T ^ 2 / 2)) := by
-  have hsmall : ∀ᶠ κ in 𝓝[>] (0 : ℝ), |κ * T| ≤ 1 :=
-    (tendsto_nhdsGT_zero_of_continuous (f := fun κ ↦ |κ * T|) (by fun_prop)
-      (by simp)).eventually (ge_mem_nhds one_pos)
-  have hlin : Tendsto (fun κ : ℝ ↦ |κ| * |T| ^ 3) (𝓝[>] 0) (𝓝 0) :=
-    tendsto_nhdsGT_zero_of_continuous (by fun_prop) (by simp)
-  rw [← tendsto_sub_nhds_zero_iff]
-  refine squeeze_zero_norm' ?_ hlin
-  filter_upwards [hsmall, self_mem_nhdsWithin] with κ hs hκ
-  rw [Real.norm_eq_abs]
-  exact abs_vasicekBondB_secondOrder_sub_le (ne_of_gt hκ) hs
+    Tendsto (fun κ ↦ (T - vasicekBondB κ T) / κ) (𝓝[>] 0) (𝓝 (T ^ 2 / 2)) :=
+  tendsto_nhdsGT_zero_of_abs_sub_le (C := |T| ^ 3) <| by
+    filter_upwards [eventually_abs_mul_le_one T, self_mem_nhdsWithin] with κ hs hκ
+    exact (abs_vasicekBondB_secondOrder_sub_le hκ.ne' (by rwa [mul_comm])).trans_eq (by ring)
 
 section Girsanov
 
