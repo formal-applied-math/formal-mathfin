@@ -292,7 +292,7 @@ theorem hasLaw_forwardMeasure_wienerIntegralLp (hB : IsPreBrownianReal B μ) (S 
   refine ⟨hae, (measure_eq_of_mgf_id_eq integrable_exp_mul_gaussianReal ?_).symm⟩
   rw [mgf_id_gaussianReal, mgf_id_map hae]
   funext t
-  have hμ := mgf_gaussianReal hlaw.map_eq t
+  have hμ := mgf_gaussianReal hlaw t
   have h := integral_exp_mul_wienerIntegralLp_eq_forwardMeasure hB S m M c₁ c₂ t f g
   simp only [mgf] at hμ ⊢
   rw [hμ, eq_comm, ← eq_div_iff (Real.exp_pos _).ne', ← Real.exp_sub] at h

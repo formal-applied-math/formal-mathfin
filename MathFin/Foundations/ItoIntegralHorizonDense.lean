@@ -134,7 +134,7 @@ and `(⊥ : ℝ≥0) = 0`) or `Ioc a b ×ˢ F` (`F ∈ ℱₐ`, `a < b`). This i
 upstreamed to BrownianMotion, so we consume it rather than restate it, and get
 `IsSetSemiring` (strictly more than the π-system this tower needs) for free. No
 `T` constraint at the σ-algebra level: T enters only via `timeMeasure_T`. -/
-def predictableRect (hBmeas : ∀ t, Measurable (B t)) :
+noncomputable def predictableRect (hBmeas : ∀ t, Measurable (B t)) :
     Set (Set (ℝ≥0 × Ω)) :=
   (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictableRectangles
 

@@ -1157,9 +1157,8 @@ lemma dominator_memLp [IsFiniteMeasure μ] (hp : 1 < p) (hf : Martingale f 𝒢 
   have hp_pos : 0 < p := lt_trans zero_lt_one hp
   have hmeas : AEStronglyMeasurable (dominator f) μ :=
     (measurable_dominator (measurable_of_martingale hf)).aestronglyMeasurable
-  refine ⟨hmeas, ?_⟩
-  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by simp [hp_pos]) ENNReal.ofReal_ne_top hmeas,
-    ENNReal.toReal_ofReal hp_pos.le]
+  rw [memLp_iff, eLpNorm_eq_lintegral_rpow_enorm_toReal (by simp [hp_pos]) ENNReal.ofReal_ne_top
+    hmeas, ENNReal.toReal_ofReal hp_pos.le]
   refine ENNReal.rpow_lt_top_of_nonneg (by positivity) (lt_of_le_of_lt ?_
     (enormSup_rpow_lintegral_lt_top hp hf hbound)).ne
   refine lintegral_mono fun ω ↦ ENNReal.rpow_le_rpow ?_ hp_pos.le

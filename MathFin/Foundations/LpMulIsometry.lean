@@ -235,7 +235,7 @@ theorem exists_mulLI_eq (hf : Measurable f) (hf0 : ∀ᵐ x ∂ν, f x ≠ 0) (u
     filter_upwards [hf0] with x hx
     field_simp
   have hquot : MemLp (fun x ↦ (u : α → ℝ) x / f x) 2 (sqWeight ν f) := by
-    have hmeas := (Lp.stronglyMeasurable u).measurable.div hf
+    have hmeas : Measurable fun x ↦ (u : α → ℝ) x / f x := (Lp.stronglyMeasurable u).measurable.div hf
     rw [memLp_iff, ← eLpNorm_mul_eq hf hmeas, eLpNorm_congr_ae hcancel]
     exact Lp.eLpNorm_lt_top u
   refine ⟨hquot.toLp _, Lp.ext ?_⟩

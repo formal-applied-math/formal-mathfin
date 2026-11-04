@@ -221,7 +221,8 @@ lemma integral_sq_Ioc_split (htT : t ≤ T) (f : Lp ℝ 2 (volume.restrict (Set.
     (Lp.memLp f).integrable_sq
   have ht : (t : ℝ) ≤ T := NNReal.coe_le_coe.2 htT
   have h := setIntegral_union (μ := volume) (f := fun s ↦ f s ^ 2)
-    (Set.disjoint_left.2 fun x hx hy ↦ absurd hx.2 (not_le.2 hy.1)) measurableSet_Ioc
+    (Set.disjoint_left.2 fun x (hx : x ∈ Set.Ioc (0 : ℝ) t) (hy : x ∈ Set.Ioc (t : ℝ) T) ↦
+      absurd hx.2 (not_le.2 hy.1)) measurableSet_Ioc
     (hsq.mono_measure (Measure.restrict_mono (Set.Ioc_subset_Ioc_right ht) le_rfl))
     (hsq.mono_measure (Measure.restrict_mono (Set.Ioc_subset_Ioc_left t.coe_nonneg) le_rfl))
   rw [Set.Ioc_union_Ioc_eq_Ioc t.coe_nonneg ht] at h

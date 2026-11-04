@@ -99,7 +99,7 @@ theorem condExp_adapted_mul_increment (hBmeas : ∀ t, Measurable (B t))
     simp only [Pi.zero_apply, integral_zero]
     rw [← integral_indicator (hm s hs), heq2]
     exact (ItoIsometryAdapted.integral_adapted_mul_increment
-      (hB.isFilteredPreBrownian hBmeas) ht (hφ.indicator hs.nullMeasurableSet)).symm
+      (hB.isFilteredPreBrownian hBmeas) ht (hφ.indicator hs)).symm
   · exact stronglyMeasurable_const.aestronglyMeasurable
 
 omit hB in

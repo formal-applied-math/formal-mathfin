@@ -145,7 +145,8 @@ theorem DividendPutSolution.obstacle_comparison_unbounded_window
       dsimp [V]
       nlinarith
     have hc : ContinuousOn (fun z : ℝ × ℝ => V z.1 z.2) (Icc (-R) R ×ˢ Icc a T) :=
-      (hUc.mono (fun _ hz => hz.2)).sub
+      (hUc.mono (show Icc (-R) R ×ˢ Icc a T ⊆ {z : ℝ × ℝ | z.2 ∈ Icc a T} from
+        fun _ hz => hz.2)).sub
         ((localizationBarrier_contDiff k h).continuous.const_mul ε).continuousOn
     have hcomp := hp.obstacle_comparison_window ha hc
       (fun y s has hsT _ _ hgt => (hUj y s has hsT (hVgt hgt)).sub

@@ -44,7 +44,11 @@ theorem unifIntegrable_one_of_sq_integral_le (hf : ∀ i, MemLp (f i) 2 μ)
     {M : ℝ} (hM : ∀ i, ∫ x, (f i x) ^ 2 ∂μ ≤ M) :
     UnifIntegrable f 1 μ := by
   refine unifIntegrable_of le_rfl (by norm_num) (fun i ↦ (hf i).aestronglyMeasurable) ?_
-  intro ε hε
+  intro ε' hε'
+  rcases eq_or_ne ε' ⊤ with rfl | hε'top
+  · exact ⟨0, fun _ ↦ le_top⟩
+  obtain ⟨ε, hε, rfl⟩ : ∃ ε : ℝ, 0 < ε ∧ ENNReal.ofReal ε = ε' :=
+    ⟨ε'.toReal, ENNReal.toReal_pos hε'.ne' hε'top, ENNReal.ofReal_toReal hε'top⟩
   refine ⟨Real.toNNReal (M / ε) + 1, fun i ↦ ?_⟩
   set C : ℝ≥0 := Real.toNNReal (M / ε) + 1 with hCdef
   have hCpos : (0 : ℝ≥0∞) < (C : ℝ≥0∞) := by

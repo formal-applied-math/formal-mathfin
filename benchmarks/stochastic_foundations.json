@@ -111,7 +111,7 @@
         "reference": "Saporito, Theorem 3.3.9 (superposition), one-time marginal of the arrival-time construction of Theorem 3.3.5",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.PoissonSuperposition.map_add_count_eq_poissonMeasure (MathFin/Foundations/PoissonSuperposition.lean). Both marginals Poisson(r_i t) are derived from the constructions by PoissonCounting.map_count_eq_poissonMeasure (MathFin/Foundations/PoissonCounting.lean); the counts are independent because each is measurable for the σ-algebra of its own interarrival family (measurable_count_comap); the sum law is Mathlib's Poisson convolution through indepFun_map_add_poissonMeasure. SCOPE: one time t; process-level superposition not proved."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.PoissonSuperposition.map_add_count_eq_poissonMeasure (MathFin/Foundations/PoissonSuperposition.lean). Both marginals Poisson(r_i t) are derived from the constructions by PoissonCounting.map_count_eq_poissonMeasure (MathFin/Foundations/PoissonCounting.lean); the counts are independent because each is measurable for the σ-algebra of its own interarrival family (measurable_count_comap); the sum law is Mathlib's IndepFun.hasLaw_add_poissonMeasure (Poisson convolution), the HasLaw hypotheses supplied from the measurable counts and their derived marginals. SCOPE: one time t; process-level superposition not proved."
       }
     },
     {

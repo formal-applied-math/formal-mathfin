@@ -43,8 +43,10 @@ theorem variationProgram_eval (p : Params) (n : ℕ) (Q : Polynomial ParameterRi
   have hc : (Q.map (parameterEval p)).coeff = fun r ↦ parameterEval p (Q.coeff r) := by
     funext r
     exact coeff_map _ _
+  have hne : Q.map (parameterEval p) ≠ 0 := fun h0 ↦ by simp [h0] at hd
   simp [variationProgram, SignProgram.eval_bind, SignProgram.eval, symbolicCoeffList,
-    signVariationsList, signVariations, coeffList, hd, List.map_map, hc]
+    signVariationsList, signVariations, coeffList_of_ne_zero hne, natDegree_eq_of_degree_eq_some hd,
+    List.map_map, hc]
   rfl
 
 /-- The program computing the signature test of the `i`-th universal matrix at size `n`
