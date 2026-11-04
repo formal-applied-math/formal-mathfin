@@ -122,16 +122,14 @@ theorem integral_increment_sq_centered_cross {𝓕 : Filtration ℝ≥0 mΩ}
   set χ : Ω → ℝ := fun ω ↦ (B b ω - B a ω) ^ 2 - ((b : ℝ) - a) with hχdef
   have hχ_adapted : Measurable[𝓕 c] χ :=
     measurable_increment_sq_sub hF (hab.trans hbc) hbc ((b : ℝ) - a)
-  have hindep : IndepFun χ (fun ω ↦ (B d ω - B c ω) ^ 2 - ((d : ℝ) - c)) μ := by
-    have h := (adapted_indepFun_increment hF hcd hχ_adapted).comp
-      (φ := (id : ℝ → ℝ)) (ψ := fun x ↦ x ^ 2 - ((d : ℝ) - c)) measurable_id (by fun_prop)
-    simpa [Function.comp_def] using h
   have hχm : Measurable χ := hχ_adapted.mono (𝓕.le c) le_rfl
-  have hYm : Measurable (fun ω ↦ (B d ω - B c ω) ^ 2 - ((d : ℝ) - c)) := by
+  have hΔm : Measurable (fun ω ↦ B d ω - B c ω) := by
     have := hF.measurable_eval
     fun_prop
-  rw [hindep.integral_fun_mul_eq_mul_integral hχm.aestronglyMeasurable hYm.aestronglyMeasurable,
-      integral_increment_centered_mean hF.toIsPreBrownianReal hcd, mul_zero]
+  rw [(adapted_indepFun_increment hF hcd hχ_adapted).integral_mul_comp
+      (g := fun x ↦ x ^ 2 - ((d : ℝ) - c)) (by fun_prop) hχm.aestronglyMeasurable
+      hΔm.aemeasurable,
+    integral_increment_centered_mean hF.toIsPreBrownianReal hcd, mul_zero]
 
 /-- A centered squared Brownian increment is in `L²` (`Yₖ = (ΔB)² − Δt`): the squared
 increment is `L²` since the increment is `L⁴`, and a constant is `L²` on a probability space. -/

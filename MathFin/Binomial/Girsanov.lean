@@ -235,7 +235,7 @@ end ChangeOfMeasure
 one-step node average is `binomialRN_expectation_one`. -/
 theorem martingale_binomialDensity {p : ℝ≥0} (hp0 : 0 < p) (hp : p < 1) (c : ℝ) :
     Martingale (binomialDensity p c) flipFiltration (coinFlipMeasure p hp.le) :=
-  martingale_of_oneStep (pathAdaptedAt_binomialDensity p c) fun n ω ↦ by
+  martingale_of_oneStep hp.le (pathAdaptedAt_binomialDensity p c) fun n ω ↦ by
     rw [binomialDensity_update_succ, binomialDensity_update_succ]
     linear_combination binomialDensity p c n ω *
       binomialRN_expectation_one p c (NNReal.coe_pos.2 hp0).ne' (NNReal.coe_lt_one.2 hp).ne

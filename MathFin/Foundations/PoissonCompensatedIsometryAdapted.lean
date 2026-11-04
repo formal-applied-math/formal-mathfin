@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.Foundations.PoissonRandomMeasure
+public import MathFin.Foundations.IndepIsometryKernel
 
 /-!
 # The compensated-Poisson isometry kernel (increment-independence cornerstone)
@@ -23,6 +24,9 @@ Both flow from the single structure field `indep_of_disjoint_region` (independen
 `s` and the count on any box disjoint from a future box both live in that "disjoint region", so
 one field closes every cross-term — the different-time cross pairs *and* the same-time /
 different-mark cross pairs that a `time × mark` simple integrand produces.
+
+The one-term facts that follow from independence (mean zero, diagonal energy, `L²`-membership)
+are the Brownian ones, stated once in `IndepIsometryKernel`.
 
 ## Provenance
 
@@ -168,9 +172,8 @@ theorem integral_mul_compensated_eq_zero (N : PoissonRandomMeasure P ν) {D : Se
       (ψ := fun x : ℝ≥0∞ => x.toReal - (referenceIntensity ν D).toReal) measurable_id (by fun_prop)
     simp only [Function.comp_def, id_eq] at h
     exact h
-  rw [hcomp.integral_fun_mul_eq_mul_integral hXm.aestronglyMeasurable
-        (N.measurable_compensated hD).aestronglyMeasurable,
-      compensated_integral_zero N hD hfin, mul_zero]
+  exact hcomp.integral_mul_eq_zero hXm.aestronglyMeasurable
+    (N.measurable_compensated hD).aestronglyMeasurable (compensated_integral_zero N hD hfin)
 
 /-- **Diagonal energy** (the isometry's diagonal term): for `φ` adapted at `s`,
 `𝔼[φ² · Ñ((s,t] × A)²] = 𝔼[φ²] · ν̂((s,t] × A)`. The increment's square is independent of
@@ -185,14 +188,9 @@ theorem integral_adapted_sq_mul_compensated_sq (N : PoissonRandomMeasure P ν)
   have hfin : referenceIntensity ν (Set.Ioc s t ×ˢ A) ≠ ⊤ := referenceIntensity_box_ne_top hAfin
   have hφm : Measurable φ := (hφ.mono (N.pastFiltration.le s) le_rfl)
   have hÑm : Measurable (N.compensated (Set.Ioc s t ×ˢ A)) := N.measurable_compensated hbox
-  have hindep : IndepFun φ (N.compensated (Set.Ioc s t ×ˢ A)) P :=
-    adapted_indepFun_compensated N hA hφ
-  have hindep2 := hindep.comp (φ := fun x : ℝ => x ^ 2) (ψ := fun x : ℝ => x ^ 2)
-    (by fun_prop) (by fun_prop)
-  have key := hindep2.integral_fun_mul_eq_mul_integral (hφm.pow_const 2).aestronglyMeasurable
-    (hÑm.pow_const 2).aestronglyMeasurable
-  simp only [Function.comp_apply] at key
-  rw [key, compensated_integral_sq N hbox hfin]
+  rw [(adapted_indepFun_compensated N hA (hφ.pow_const 2)).integral_mul_sq
+    (hφm.pow_const 2).aestronglyMeasurable hÑm.aestronglyMeasurable,
+    compensated_integral_sq N hbox hfin]
 
 /-- **Cross-term vanishing** (both cross families of a `time × mark` simple integrand). For
 `φa` adapted at `sa`, `φb` adapted at `sb` with `sa ≤ sb`, a measurable `Ba` disjoint from the
@@ -237,22 +235,8 @@ theorem integral_cross_compensated_eq_zero (N : PoissonRandomMeasure P ν)
 theorem memLp_adapted_mul_compensated (N : PoissonRandomMeasure P ν) {s t : ℝ}
     {A : Set E} (hA : MeasurableSet A) (hAfin : ν A ≠ ⊤)
     {φ : Ω → ℝ} (hφ : Measurable[N.pastFiltration s] φ) (hφL2 : MemLp φ 2 P) :
-    MemLp (fun ω => φ ω * N.compensated (Set.Ioc s t ×ˢ A) ω) 2 P := by
-  have hbox : MeasurableSet (Set.Ioc s t ×ˢ A) := measurableSet_Ioc.prod hA
-  have hfin : referenceIntensity ν (Set.Ioc s t ×ˢ A) ≠ ⊤ := referenceIntensity_box_ne_top hAfin
-  have hφm : Measurable φ := (hφ.mono (N.pastFiltration.le s) le_rfl)
-  have hÑm : Measurable (N.compensated (Set.Ioc s t ×ˢ A)) := N.measurable_compensated hbox
-  have hindep : IndepFun φ (N.compensated (Set.Ioc s t ×ˢ A)) P :=
-    adapted_indepFun_compensated N hA hφ
-  have hφsq : Integrable (fun ω => (φ ω) ^ 2) P := hφL2.integrable_sq
-  have hÑsq : Integrable (fun ω => (N.compensated (Set.Ioc s t ×ˢ A) ω) ^ 2) P :=
-    (memLp_compensated N hbox hfin).integrable_sq
-  have hindep2 := hindep.comp (φ := fun x : ℝ => x ^ 2) (ψ := fun x : ℝ => x ^ 2)
-    (by fun_prop) (by fun_prop)
-  have hprod : Integrable
-      (fun ω => (φ ω) ^ 2 * (N.compensated (Set.Ioc s t ×ˢ A) ω) ^ 2) P :=
-    hindep2.integrable_mul hφsq hÑsq
-  refine (memLp_two_iff_integrable_sq (hφm.mul hÑm).aestronglyMeasurable).mpr ?_
-  simpa [mul_pow] using hprod
+    MemLp (fun ω => φ ω * N.compensated (Set.Ioc s t ×ˢ A) ω) 2 P :=
+  (adapted_indepFun_compensated N hA hφ).memLp_two_mul hφL2
+    (memLp_compensated N (measurableSet_Ioc.prod hA) (referenceIntensity_box_ne_top hAfin))
 
 end MathFin

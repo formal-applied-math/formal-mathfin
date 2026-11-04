@@ -23,9 +23,9 @@ instantiates it at `F = ℝ`; a multi-asset model would instantiate at `F = Fin 
 * `IsEMM 𝓕 P S T Q` — `Q` is an equivalent martingale measure for `S` up to the horizon `T`:
   `Q ≈ P` (mutual absolute continuity) and `S` is a `Q`-martingale w.r.t. the filtration `𝓕` on
   `{t ≤ T}`, i.e. the process stopped at `T` is a `Q`-martingale. This is the discrete
-  `MathFin.IsEMM` (`FTAP.lean`) with `ℝ≥0` for `ℕ`, and `IsEMM.sampled` restricts it to one; it is what an
-  equivalent measure obtained by a density change on `𝓕_T` can be: the Girsanov/Esscher measure
-  makes the discounted Black–Scholes price a martingale on `[0, T]` and no further
+  `MathFin.IsEMM` (`FTAP.lean`) with `ℝ≥0` for `ℕ`, and `IsEMM.sampled` restricts it to one; it
+  is what an equivalent measure obtained by a density change on `𝓕_T` can be: the Girsanov/Esscher
+  measure makes the discounted Black–Scholes price a martingale on `[0, T]` and no further
   (`bs_discounted_isEMM`). A martingale on all of `ℝ≥0` is an EMM at every horizon.
 * `SimpleStrategy 𝓕 F` — a piecewise-constant, predictable, bounded trading strategy:
   finitely many trading dates `time : Fin (N+1) → ℝ≥0` and `𝓕`-measurable bounded holdings
@@ -56,7 +56,8 @@ times, and the general stochastic integral `∫ φ dS`). Absent by design:
   integral `∫ φ dS` against a semimartingale;
 * **NFLVR** (no free lunch with vanishing risk) and its distinction from plain no-arbitrage;
 * the **converse** direction `NoArbitrageSimple 𝓕 P S T → ∃ Q, IsEMM 𝓕 P S T Q`, and closedness
-  of the set of claims super-replicable from zero wealth (the Kreps–Yan / Hahn–Banach core DS needs).
+  of the set of claims super-replicable from zero wealth (the Kreps–Yan / Hahn–Banach core DS
+  needs).
 
 `IsEMM` here is stated *on a process* `S`, exactly the object Delbaen–Schachermayer's theorem
 would produce — so this frame is a strict sub-object of the DS one, and extending it to
@@ -102,9 +103,9 @@ theorem martingale_stopped_of_setIntegral_eq {Q : Measure Ω} [IsFiniteMeasure Q
     (hset : ∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T → ∀ ⦃A : Set Ω⦄, MeasurableSet[𝓕 s] A →
       ∫ ω in A, S t ω ∂Q = ∫ ω in A, S s ω ∂Q) :
     Martingale (fun t ↦ S (min t T)) 𝓕 Q := by
-  refine martingale_of_setIntegral_eq
-    (fun s ↦ (hadapt _ (min_le_right _ _)).mono (𝓕.mono (min_le_left _ _)))
-    (fun s ↦ hint _ (min_le_right _ _)) fun s t hst A hA ↦ ?_
+  refine martingale_iff_setIntegral_eq.2
+    ⟨fun s ↦ (hadapt _ (min_le_right _ _)).mono (𝓕.mono (min_le_left _ _)),
+      fun s ↦ hint _ (min_le_right _ _), fun s t hst A hA ↦ ?_⟩
   by_cases hsT : s ≤ T
   · rw [min_eq_left hsT]
     exact (hset (le_min hst hsT) (min_le_right _ _) hA).symm

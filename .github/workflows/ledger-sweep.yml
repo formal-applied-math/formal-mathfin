@@ -15,7 +15,7 @@ name: ledger sweep
 # `lake env lean` (~30-90 s each, immune to the daemon's cold-start
 # pathology). Twelve shards, dealt round-robin off the import-set ordering so
 # no shard inherits all the cold import sets, bring that to ~30 min of
-# wall-clock. Each shard writes only the rows it verified (`--fragment`); a
+# wall-clock (fewer shards when fewer entries are stale: the preflight sizes the matrix). Each shard writes only the rows it verified (`--fragment`); a
 # final job folds them together (`merge-fragments`) and commits the refreshed
 # ledger back to the branch, because a ledger nobody committed proves nothing.
 #
@@ -61,20 +61,38 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       stale: ${{ steps.check.outputs.stale }}
+      shards: ${{ steps.check.outputs.shards }}
+      count: ${{ steps.check.outputs.count }}
     steps:
       - uses: actions/checkout@v4
+      # Every shard pays a full `lake build` before it verifies anything, so the shard count
+      # follows the work: about 15 entries a shard, at most 12. Re-verifying two entries is one
+      # runner, not twelve.
       - id: check
+        env:
+          SCOPE: ${{ inputs.scope || 'all' }}
         run: |
           if python3 -m tools.verify.ledger status > status.txt; then
             echo "ledger is already fresh — nothing to sweep"
             echo "stale=false" >> "$GITHUB_OUTPUT"
-          else
-            head -1 status.txt
-            echo "stale=true" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          python3 -m tools.verify.ledger status > status.txt || true
+          head -1 status.txt
+          n=$(python3 - "$SCOPE" <<'PY'
+          import re, sys
+          f, s, m = map(int, re.findall(r"\d+", open("status.txt").readline())[:3])
+          print(f + s + m if sys.argv[1] == "all" else s + m)
+          PY
+          )
+          k=$(( (n + 14) / 15 )); [ "$k" -lt 1 ] && k=1; [ "$k" -gt 12 ] && k=12
+          echo "$n entries to verify on $k shard(s)"
+          echo "stale=true" >> "$GITHUB_OUTPUT"
+          echo "count=$k" >> "$GITHUB_OUTPUT"
+          echo "shards=$(python3 -c "import json; print(json.dumps(list(range(1, $k + 1))))")" >> "$GITHUB_OUTPUT"
 
   verify:
-    name: shard ${{ matrix.shard }}/12
+    name: shard ${{ matrix.shard }}/${{ needs.preflight.outputs.count }}
     needs: preflight
     if: needs.preflight.outputs.stale == 'true'
     runs-on: ubuntu-latest
@@ -82,7 +100,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        shard: ${{ fromJSON(needs.preflight.outputs.shards) }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -123,7 +141,7 @@ jobs:
           SCOPE: ${{ inputs.scope || 'all' }}
         run: |
           python3 -m tools.verify.ledger verify "--${SCOPE}" --exec \
-            --shard "${{ matrix.shard }}/12" \
+            --shard "${{ matrix.shard }}/${{ needs.preflight.outputs.count }}" \
             --fragment "fragment-${{ matrix.shard }}.json" \
             --timeout 600
 

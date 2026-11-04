@@ -5,7 +5,7 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.FiniteBellman
+public import Mathlib
 
 /-! # Stopping a discrete process when its conditional drift first becomes nonzero 
 ## Result

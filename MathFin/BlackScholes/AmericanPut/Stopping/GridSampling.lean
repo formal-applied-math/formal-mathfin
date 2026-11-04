@@ -17,7 +17,8 @@ assumed.
 
 ## Result
 
-Public entry points include `gridFiltration`, `gridIndex`, `gridIndex_le_iff`, `gridIndex_stopping`.
+Public entry points include `gridFiltration`, `gridIndex`, `gridIndex_le_iff`, `gridIndex_stopping`,
+`isStoppingTime_sampledFiltration`, `gridTime_mono`, `expected_gridValue_tendsto`.
 -/
 
 @[expose] public section
@@ -29,12 +30,15 @@ open scoped NNReal Topology
 
 variable {Ω : Type*} [MeasurableSpace Ω]
 
+/-- The uniform grid times `i*δ` increase with the index. -/
+theorem gridTime_mono (δ : ℝ≥0) : Monotone fun i : ℕ => (i : ℝ≥0)*δ := fun _ _ hij =>
+  mul_le_mul_of_nonneg_right (by exact_mod_cast hij) zero_le
+
 /-- The continuous filtration sampled at the uniform grid times `i*δ`: the sampled filtration
 `ContinuousMarket.sampledFiltration` along the schedule `i ↦ i*δ`. -/
 def gridFiltration (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›) (δ : ℝ≥0) :
     Filtration ℕ ‹MeasurableSpace Ω› :=
-  ContinuousMarket.sampledFiltration 𝓕 (t := fun i : ℕ => (i : ℝ≥0)*δ)
-    fun _ _ hij => mul_le_mul_of_nonneg_right (by exact_mod_cast hij) zero_le
+  ContinuousMarket.sampledFiltration 𝓕 (gridTime_mono δ)
 
 /-- The first grid index at or after a rule's time, `⌈θ.time ω/δ⌉₊`. -/
 noncomputable def gridIndex {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T : ℝ≥0}
@@ -46,13 +50,23 @@ theorem gridIndex_le_iff {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T
     gridIndex θ δ ω ≤ i ↔ θ.time ω ≤ (i : ℝ≥0)*δ := by
   simp only [gridIndex,Nat.ceil_le,div_le_iff₀ hδ]
 
+/-- **A discrete index is a stopping time of the sampled filtration** once it is the first index at
+which the schedule `s` reaches the stopping time: if `i ω ≤ n ↔ θ.time ω ≤ s n` for every `n`, then
+`i` is a stopping time of `ContinuousMarket.sampledFiltration 𝓕 hs`. This is the one place where a
+continuous-time rule is read on a sampled filtration; the uniform grid (`gridIndex_stopping`) and
+the capped grid (`StoppingRule.toGridIndexRule`) are its instances. -/
+theorem isStoppingTime_sampledFiltration {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T : ℝ≥0}
+    {s : ℕ → ℝ≥0} (hs : Monotone s) (θ : StoppingRule 𝓕 T) {i : Ω → ℕ}
+    (h : ∀ ω n, i ω ≤ n ↔ θ.time ω ≤ s n) :
+    IsStoppingTime (ContinuousMarket.sampledFiltration 𝓕 hs) (fun ω => WithTop.some (i ω)) := by
+  intro n
+  change MeasurableSet[𝓕 (s n)] _
+  simpa only [WithTop.coe_le_coe, h] using θ.stopping (s n)
+
 theorem gridIndex_stopping {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T δ : ℝ≥0}
     (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) :
-    IsStoppingTime (gridFiltration 𝓕 δ) (fun ω => (gridIndex θ δ ω : ℕ∞)) := by
-  intro i
-  change MeasurableSet[𝓕 ((i : ℝ≥0)*δ)] {ω | (gridIndex θ δ ω : ℕ∞) ≤ i}
-  simpa only [ENat.natCast_le_natCast,WithTop.coe_le_coe,gridIndex_le_iff θ hδ] using
-      θ.stopping ((i : ℝ≥0)*δ)
+    IsStoppingTime (gridFiltration 𝓕 δ) (fun ω => (gridIndex θ δ ω : ℕ∞)) :=
+  isStoppingTime_sampledFiltration _ θ (i := gridIndex θ δ) (gridIndex_le_iff θ hδ)
 
 theorem gridIndex_bounded {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T δ : ℝ≥0}
     (θ : StoppingRule 𝓕 T) (ω : Ω) : gridIndex θ δ ω ≤ ⌈T/δ⌉₊ :=
@@ -63,7 +77,7 @@ theorem supermartingale_grid {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›
     Supermartingale (fun i : ℕ => U ((i : ℝ≥0)*δ)) (gridFiltration 𝓕 δ) P := by
   refine ⟨fun i => hU.stronglyAdapted _, ?_, fun i => hU.integrable _⟩
   intro i j hij
-  exact hU.2.1 _ _ (mul_le_mul_of_nonneg_right (by exact_mod_cast hij) zero_le)
+  exact hU.2.1 _ _ (gridTime_mono δ hij)
 
 theorem expected_gridValue_le {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
     {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ}
@@ -103,27 +117,30 @@ theorem gridIndex_measurable {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›
     (θ : StoppingRule 𝓕 T) : Measurable (gridIndex θ δ) :=
   Nat.measurable_ceil.comp (θ.measurable_time.div_const δ)
 
+theorem expected_gridValue_tendsto {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
+    {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ}
+    (hU : Supermartingale U 𝓕 P) (hc : ∀ ω, Continuous (fun t => U t ω))
+    {C : ℝ} (hb : ∀ t ω, ‖U t ω‖ ≤ C) {T : ℝ≥0} (θ : StoppingRule 𝓕 T) :
+    Tendsto (fun n => ∫ ω, U ((gridIndex θ (gridStep n) ω : ℝ≥0)*gridStep n) ω ∂P)
+      atTop (𝓝 (∫ ω, U (θ.time ω) ω ∂P)) := by
+  have hm : Measurable U.uncurry := measurable_uncurry_of_continuous_of_measurable hc
+    (fun t => (hU.stronglyAdapted t).measurable.mono (𝓕.le t) le_rfl)
+  exact tendsto_integral_of_dominated_convergence (fun _ => C)
+    (fun n => (hm.comp ((show Measurable (fun ω =>
+      (gridIndex θ (gridStep n) ω : ℝ≥0)*gridStep n) by
+        exact ((measurable_from_nat : Measurable (fun i : ℕ => (i : ℝ≥0))).comp
+          (gridIndex_measurable θ)).mul_const _).prodMk measurable_id)).aestronglyMeasurable)
+    (integrable_const C) (fun _ => Eventually.of_forall (fun ω => hb _ ω))
+    (Eventually.of_forall (fun ω => ((hc ω).tendsto (θ.time ω)).comp (gridValue_time_tendsto θ ω)))
+
 /-- Bounded continuous-path optional stopping. This is derived from discrete
 optional stopping, not assumed as an axiom or as a pricing-contract field. -/
 theorem expected_stoppedValue_le_initial {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
     {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ}
     (hU : Supermartingale U 𝓕 P) (hcont : ∀ ω, Continuous (fun t => U t ω))
     {C : ℝ} (hbound : ∀ t ω, ‖U t ω‖ ≤ C) {T : ℝ≥0} (θ : StoppingRule 𝓕 T) :
-    (∫ ω, U (θ.time ω) ω ∂P) ≤ ∫ ω, U 0 ω ∂P := by
-  have hmeas : Measurable U.uncurry :=
-    measurable_uncurry_of_continuous_of_measurable hcont
-      (fun t => (hU.stronglyAdapted t).measurable.mono (𝓕.le t) le_rfl)
-  have hlim := tendsto_integral_of_dominated_convergence (μ := P) (fun _ => C)
-    (F := fun n ω => U ((gridIndex θ (gridStep n) ω : ℝ≥0)*gridStep n) ω)
-    (f := fun ω => U (θ.time ω) ω)
-    (fun n => (hmeas.comp ((show Measurable (fun ω =>
-      (gridIndex θ (gridStep n) ω : ℝ≥0)*gridStep n) by
-        exact ((measurable_from_nat : Measurable (fun i : ℕ => (i : ℝ≥0))).comp
-          (gridIndex_measurable θ)).mul_const _).prodMk measurable_id)).aestronglyMeasurable)
-    (integrable_const C) (fun n => Filter.Eventually.of_forall (fun ω => hbound _ ω))
-    (Filter.Eventually.of_forall (fun ω =>
-      ((hcont ω).tendsto (θ.time ω)).comp (gridValue_time_tendsto θ ω)))
-  exact le_of_tendsto hlim (Filter.Eventually.of_forall
+    (∫ ω, U (θ.time ω) ω ∂P) ≤ ∫ ω, U 0 ω ∂P :=
+  le_of_tendsto (expected_gridValue_tendsto hU hcont hbound θ) (Filter.Eventually.of_forall
     (fun n => expected_gridValue_le hU θ (gridStep_pos n)))
 
 theorem expected_stoppedValue_eq_initial {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}

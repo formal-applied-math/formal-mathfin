@@ -119,7 +119,7 @@ theorem brownianInteriorRule_mem_region {p : ℝ → ℝ → ℝ} {b : ℝ → �
 theorem brownianInteriorRule_smooth_extension {p : ℝ → ℝ → ℝ} {b : ℝ → ℝ} {K r q σ S : ℝ}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hK : 0 < K) (hS : 0 < S) (hσ : 0 < σ) (T : ℝ≥0) (n : ℕ) :
-    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 3 G ∧ HasCompactSupport G ∧
+    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 2 G ∧ HasCompactSupport G ∧
       ∀ ω, 0 < (brownianInteriorRule (K := K) (S := S) hp T n).time ω →
         ∀ t ≤ (brownianInteriorRule (K := K) (S := S) hp T n).time ω,
           G (t,brownian t ω) = classicalCandidate brownian K r q σ S p T t ω ∧

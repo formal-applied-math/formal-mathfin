@@ -30,7 +30,7 @@ pricing-free base.
 * `setIntegral_gaussianPDFReal_eq_toReal` — the `∫ pdf = N(s).toReal` bridge
   every closed-form Gaussian integral factors through.
 * `gaussianPDFReal_zero_one_neg` — evenness of the standard-normal density
-  `ϕ(-z) = ϕ(z)`.
+  `ϕ(-z) = ϕ(z)`; `continuous_gaussianPDFReal` — a Gaussian density is continuous.
 * `gaussianReal_Ioi_toReal` — the right tail `Q(Ioi a) = Φ(-a)`.
 * `exp_mul_gaussianPDFReal_zero_one` — the completing-the-square shift.
 * `integral_exp_mul_gaussianPDFReal_Ioi` — the shifted Gaussian tail integral
@@ -132,6 +132,11 @@ lemma gaussianPDFReal_zero_one_neg (z : ℝ) :
   unfold gaussianPDFReal
   congr 2
   ring
+
+/-- A Gaussian density is continuous. -/
+lemma continuous_gaussianPDFReal (μ : ℝ) (v : ℝ≥0) : Continuous (gaussianPDFReal μ v) := by
+  rw [gaussianPDFReal_def]
+  fun_prop
 
 /-! ### Tail probabilities of the standard normal -/
 

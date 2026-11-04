@@ -42,6 +42,8 @@
 -- Foundations
 import MathFin.Foundations.StandardNormal
 import MathFin.Foundations.DoobDecomposition
+import MathFin.Foundations.SnellDoobDecomposition
+import MathFin.Foundations.SnellEnvelope
 import MathFin.Foundations.L2MartingaleConvergence
 import MathFin.Foundations.BrownianMarkov
 -- Markov-chain path law derived from the pin's Ionescu–Tulcea trajectory
@@ -113,6 +115,7 @@ import MathFin.Foundations.FTAP
 import MathFin.Foundations.OptionalSamplingInequality
 import MathFin.Foundations.LpContinuousMartingaleConvergence
 import MathFin.Foundations.MartingaleSetIntegral
+import MathFin.Foundations.IndepIsometryKernel
 import MathFin.Foundations.MartingaleTransform
 import MathFin.Foundations.DoobLpMaximalInequality
 import MathFin.Foundations.ExtendOfNormIsometry
@@ -307,6 +310,13 @@ import MathFin.Foundations.ItoDriftExpectation
 -- The integrated Itô–drift identity for adapted coefficients along `X_t = c + ∫β + M`,
 -- conditional on a hypothesized adapted, path-continuous version `M` of the Itô integral
 -- (the library does not construct one for general δ)
+import MathFin.Foundations.ItoDriftIncrementEnergy
+import MathFin.Foundations.ItoDriftWeightedIsometry
+import MathFin.Foundations.ItoDriftGapDecay
+import MathFin.Foundations.ItoDriftMomentBounds
+import MathFin.Foundations.ItoDriftBlock
+import MathFin.Foundations.ItoDriftQuadraticCorrections
+import MathFin.Foundations.ItoDriftTaylorRemainder
 import MathFin.Foundations.ItoFormulaAdaptedDrift
 -- The companion with no hypothesized M (for B with continuous paths): the same identity for
 -- the constructed process, derived from ito_formula_adapted (centering + Fubini)
@@ -363,6 +373,7 @@ import MathFin.Foundations.EquivMeasure
 -- Phase 42: Multi-state FTAP backward (hypothesis-form, forward direction proved)
 import MathFin.Foundations.FTAPMultiState
 import MathFin.Foundations.FTAPDiscrete
+import MathFin.Foundations.FTAPComplete
 -- General-Ω one-period FTAP (Föllmer–Schied §1.2 / one-period DMW, scalar)
 import MathFin.Foundations.FTAPOnePeriod
 -- General-Ω one-period FTAP, d assets (Esscher minimal-divergence EMM, full — finite-dim market)
@@ -391,6 +402,9 @@ import MathFin.BlackScholes.ImpliedVolatility
 -- SABR (Hagan-Kumar-Lesniewski-Woodward 2002) lognormal implied-vol asymptotic
 -- approximation: eq. 2.17 -> eq. 2.18 as K -> f, backbone law, ATM Black-76 price
 import MathFin.BlackScholes.SABRImpliedVol
+-- Le Floc'h-Kennedy SABR building blocks: y(k) -> -log(F/k) as beta -> 1,
+-- Dint -> -y/alpha as nu -> 0 (the removable singularities of the closed forms)
+import MathFin.BlackScholes.SABRFlochKennedyLimits
 import MathFin.BlackScholes.LognormalMoments
 import MathFin.BlackScholes.VarianceSwap
 -- Merton (1976) jump-diffusion: Poisson-mixture price, compensation
@@ -412,6 +426,9 @@ import MathFin.BlackScholes.MertonStrikeGreeks
 import MathFin.BlackScholes.JumpDiffusionMixing
 -- Compensated jumps lift the Black–Scholes implied volatility strictly above σ
 import MathFin.BlackScholes.JumpImpliedVol
+-- The Ju-Zhong quadratic approximation's r -> 0 limit: the pre-fix and post-fix
+-- closed forms agree for every r != 0, and agree in the limit as r -> 0 too
+import MathFin.BlackScholes.JuZhongZeroRateLimit
 -- The canonical jump-diffusion model: the hypotheses are satisfiable for every
 -- expected jump count and jump law, and the call depends only on these two
 import MathFin.BlackScholes.JumpDiffusionCanonical
@@ -478,6 +495,9 @@ import MathFin.BlackScholes.Dupire
 -- The Heston 2D affine transform at the generator/PDE level: the rho-shifted Riccati
 -- closed forms, the pricing PDE, and the gated real-moment expectation
 import MathFin.BlackScholes.Heston
+-- The Heston transform at vanishing vol-of-vol: the Black-Scholes moment with the integrated
+-- deterministic variance
+import MathFin.BlackScholes.HestonSmallVolOfVol
 import MathFin.BlackScholes.Lookback
 import MathFin.BlackScholes.BarrierParity
 import MathFin.BlackScholes.BinaryBarrierOption
@@ -787,6 +807,11 @@ import MathFin.Execution.RollSpread
 import MathFin.BlackScholes.AmericanPut.Stopping.PhysicalBoundaryConvexity
 import MathFin.BlackScholes.AmericanPut.Stopping.PlanePartial
 import MathFin.BlackScholes.AmericanPut.Stopping.AEHorizonValue
+-- The American put exercise boundary tends to the strike at expiry
+import MathFin.BlackScholes.AmericanPut.Stopping.ActualBoundaryExpiryLimit
+-- The Andersen-Lake-Offengenden QD+ fixed-point quadrature integrand's endpoint
+-- limits, and that differentiability of the boundary cannot be weakened to continuity
+import MathFin.BlackScholes.AmericanQDPlusLimits
 -- QRM bridges: equicorrelation, Gaussian VaR/ES-optimal = Markowitz portfolios, the HHI
 -- systematic floor, and the square-root-of-time rule for GBM losses
 import MathFin.Portfolio.Equicorrelation
@@ -857,7 +882,6 @@ import MathFin.Binomial.MultiPeriodFTAP
 import MathFin.BlackScholes.JumpDiffusionThinning
 import MathFin.Bridges.ABCDBlack76
 import MathFin.Bridges.AmericanPutEuropeanBound
-import MathFin.Bridges.BellmanDoobDecomposition
 import MathFin.Bridges.ConstantProductLPLognormal
 import MathFin.Bridges.LiquidationAsStructuralDefault
 import MathFin.Bridges.OUHermiteVasicek
@@ -883,3 +907,6 @@ import MathFin.FixedIncome.FxForwardParity
 import MathFin.FixedIncome.LoanAmortization
 -- Key-rate partials sum to the parallel-shift derivative; on a flat curve, to dP/dy
 import MathFin.FixedIncome.KeyRateDuration
+-- Weak uniqueness for the constant-coefficient integrated weak forward equation, via
+-- the characteristic-function/Groenwall method
+import MathFin.Foundations.WeakForwardUniqueness

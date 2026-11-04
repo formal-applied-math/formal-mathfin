@@ -381,7 +381,7 @@ theorem integral_mul_exp_eq (a : ℝ) {s t : ℝ≥0} (hst : s ≤ t) {V : Ω �
       have h := abs_integral_mul_exp_increment_sub_le hA hM hM2 hK a
         (unifPartIcc_mono s t n k.le_succ) ((hV.mono (𝓕.mono hsk)).mul (hZsm (π k)))
         (C := C') (fun ω ↦ by
-          show |V ω * Z (π k) ω| ≤ C'
+          change |V ω * Z (π k) ω| ≤ C'
           rw [abs_mul, abs_of_pos (Real.exp_pos _)]
           exact mul_le_mul (hC ω) (exp_le_exp_abs_mul hA hK a _ ω) (Real.exp_pos _).le
             ((abs_nonneg _).trans (hC ω)))
@@ -403,8 +403,8 @@ theorem integral_mul_exp_eq (a : ℝ) {s t : ℝ≥0} (hst : s ≤ t) {V : Ω �
       integral_mono ((hM.integrable _).sub (hM.integrable _)).abs hmaxI fun ω ↦
         abs_le_maxIncr s t hk ω
     rw [← integral_sub (iVZ t) (iVZ s), integral_congr_ae (.of_forall htel),
-      integral_finsetSum _ fun k _ ↦ ((iVZ (π (k + 1))).sub (iVZ (π k))).congr (.of_forall fun ω ↦ by
-        simp only [Pi.sub_apply, mul_sub])]
+      integral_finsetSum _ fun k _ ↦ ((iVZ (π (k + 1))).sub (iVZ (π k))).congr
+        (.of_forall fun ω ↦ by simp only [Pi.sub_apply, mul_sub])]
     refine (abs_sum_le_sum_abs _ _).trans ((sum_le_sum fun k _ ↦ hcell k).trans
       ((sum_le_sum fun k hk ↦ mul_le_mul_of_nonneg_left (add_le_add_right
         (mul_le_mul_of_nonneg_left (hc1 k hk) (mul_nonneg (div_nonneg hg0 n.cast_nonneg)
@@ -438,7 +438,7 @@ theorem setIntegral_exp_eq (a : ℝ) {s t : ℝ≥0} (hst : s ≤ t) {S : Set Ω
 
 /-- **`exp(a·M_t − a²A_t/2)` is a martingale**, as Mathlib's `Martingale`: adapted, and the
 set-integral identity `setIntegral_exp_eq` makes it a martingale
-(`martingale_of_setIntegral_eq`). -/
+(`martingale_iff_setIntegral_eq`). -/
 theorem martingale_exp (a : ℝ) :
     Martingale (fun t ω ↦ Real.exp (a * M t ω - a ^ 2 * A t ω / 2)) 𝓕 P := by
   have hAad := stronglyAdapted_of_martingale_sq_sub hM hM2
@@ -452,8 +452,8 @@ theorem martingale_exp (a : ℝ) :
     (memLp_of_abs_le ((hZsm r).mono (𝓕.le r)).aestronglyMeasurable (C := Real.exp (|a| * K))
       (fun ω ↦ by rw [abs_of_pos (Real.exp_pos _)]; exact exp_le_exp_abs_mul hA hK a r ω)
       1).integrable le_rfl
-  exact martingale_of_setIntegral_eq hZsm hi fun s t hst S hS ↦
-    (setIntegral_exp_eq hA hM hM2 hK hcont a hst hS).symm
+  exact martingale_iff_setIntegral_eq.2 ⟨hZsm, hi, fun s t hst S hS ↦
+    (setIntegral_exp_eq hA hM hM2 hK hcont a hst hS).symm⟩
 
 end Exp
 

@@ -37,8 +37,7 @@ theorem canonicalDiscountedPrice_apply (k h x : ℝ) (T t : ℝ≥0) (ω : ℝ�
       Real.exp (-k*(min t T : ℝ≥0))*canonicalPrice k h
         (brownianLogState (k-h-1) (Real.sqrt 2) x (min t T) ω) ((T : ℝ)-(min t T : ℝ≥0)) := by
   unfold canonicalDiscountedPrice
-  simp only [classicalCandidate,classicalLogSpot_canonical,sqrt_two_sq_div_two_mul,one_mul,
-    brownianLogState]
+  simp [classicalCandidate,brownianLogState]
 
 theorem canonicalDiscountedPrice_initial (k h x : ℝ) (T : ℝ≥0) :
     canonicalDiscountedPrice k h x T 0 =ᵐ[gaussianLimit] fun _ => canonicalPrice k h x (T : ℝ) := by

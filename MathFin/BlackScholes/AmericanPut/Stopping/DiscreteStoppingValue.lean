@@ -8,16 +8,16 @@ module
 public import MathFin.BlackScholes.AmericanPut.Stopping.FiniteBellmanOptimality
 public import MathFin.BlackScholes.AmericanPut.Stopping.Rules
 
-/-! # Bellman identification of the stopping value over `ℕ`
+/-! # Snell envelope (the Bellman recursion) and the stopping value over `ℕ`
 
 For an adapted integrable reward process on a discrete filtration, `stoppingValue` (the supremum
-over all rules with horizon `N`) is the expectation of the finite Bellman envelope at index `0`,
-and the Bellman first-contact rule attains it.
+over all rules with horizon `N`) is the expectation of the finite Snell envelope at index `0`,
+and the Snell first-contact rule attains it.
 
 ## Result
 
-Public entry points include `finiteBellmanRule`, `stoppingValue_eq_bellman`,
-`finiteBellmanRule_attains_value`.
+Public entry points include `snellRule`, `stoppingValue_eq_integral_snellEnvelope`,
+`snellRule_attains_value`.
 -/
 
 @[expose] public section
@@ -28,28 +28,28 @@ open Set Filter MeasureTheory ProbabilityTheory
 
 variable {Ω : Type*} [MeasurableSpace Ω]
 
-/-- The Bellman first-contact time of `Z`, packaged as a discrete rule with horizon `N`. -/
-noncomputable def finiteBellmanRule {P : Measure Ω} {𝓕 : Filtration ℕ ‹MeasurableSpace Ω›}
+/-- The Snell first-contact time of `Z`, packaged as a discrete rule with horizon `N`. -/
+noncomputable def snellRule {P : Measure Ω} {𝓕 : Filtration ℕ ‹MeasurableSpace Ω›}
     {Z : ℕ → Ω → ℝ} (ha : Adapted 𝓕 Z) (N : ℕ) : StoppingRule 𝓕 N :=
-  ⟨finiteBellmanContact P 𝓕 Z N,finiteBellmanContact_stopping ha N,finiteBellmanContact_le N⟩
+  ⟨snellContact P 𝓕 Z N,snellContact_stopping ha N,snellContact_le N⟩
 
-theorem stoppingValue_eq_bellman {P : Measure Ω} [IsProbabilityMeasure P]
+theorem stoppingValue_eq_integral_snellEnvelope {P : Measure Ω} [IsProbabilityMeasure P]
     {𝓕 : Filtration ℕ ‹MeasurableSpace Ω›} {Z : ℕ → Ω → ℝ}
     (ha : Adapted 𝓕 Z) (hi : ∀ i, Integrable (Z i) P) (N : ℕ) :
-    stoppingValue P 𝓕 Z N = ∫ ω, finiteBellman P 𝓕 Z N 0 ω ∂P := by
+    stoppingValue P 𝓕 Z N = ∫ ω, snellEnvelope P 𝓕 Set.univ Z N 0 ω ∂P := by
   have hle (θ : StoppingRule 𝓕 N) :
-      (∫ ω, Z (θ.time ω) ω ∂P) ≤ ∫ ω, finiteBellman P 𝓕 Z N 0 ω ∂P :=
-    expected_discrete_payoff_le_bellman ha hi θ.stopping θ.le_horizon
+      (∫ ω, Z (θ.time ω) ω ∂P) ≤ ∫ ω, snellEnvelope P 𝓕 Set.univ Z N 0 ω ∂P :=
+    expected_discrete_payoff_le_snellEnvelope ha hi θ.stopping θ.le_horizon
   apply le_antisymm
   · exact stoppingValue_le univ_nonempty fun θ _ ↦ hle θ
-  · rw [← finiteBellmanContact_expected_payoff ha hi N]
-    exact integral_le_stoppingValue (fun θ _ ↦ hle θ) (mem_univ (finiteBellmanRule ha N))
+  · rw [← snellContact_expected_payoff ha hi N]
+    exact integral_le_stoppingValue (fun θ _ ↦ hle θ) (mem_univ (snellRule ha N))
 
-theorem finiteBellmanRule_attains_value {P : Measure Ω} [IsProbabilityMeasure P]
+theorem snellRule_attains_value {P : Measure Ω} [IsProbabilityMeasure P]
     {𝓕 : Filtration ℕ ‹MeasurableSpace Ω›} {Z : ℕ → Ω → ℝ}
     (ha : Adapted 𝓕 Z) (hi : ∀ i, Integrable (Z i) P) (N : ℕ) :
-    (∫ ω, Z ((finiteBellmanRule (P := P) ha N).time ω) ω ∂P) = stoppingValue P 𝓕 Z N := by
-  rw [stoppingValue_eq_bellman ha hi N]
-  exact finiteBellmanContact_expected_payoff ha hi N
+    (∫ ω, Z ((snellRule (P := P) ha N).time ω) ω ∂P) = stoppingValue P 𝓕 Z N := by
+  rw [stoppingValue_eq_integral_snellEnvelope ha hi N]
+  exact snellContact_expected_payoff ha hi N
 
 end MathFin.BlackScholes.AmericanPut.Stopping

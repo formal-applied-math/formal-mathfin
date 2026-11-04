@@ -31,10 +31,10 @@ noncomputable def pricingOperator (k h : ℝ) (F : ℝ × ℝ → ℝ) (z : ℝ 
   deriv (fun t => F (z.1,t)) z.2 - deriv (deriv (fun x => F (x,z.2))) z.1 -
     (k-h-1)*deriv (fun x => F (x,z.2)) z.1 + k*F z
 
-/-- The smooth-test subsolution property on `U`: at every `z ∈ U`, every `C³` function `F` that
+/-- The smooth-test subsolution property on `U`: at every `z ∈ U`, every `C²` function `F` that
 agrees with `u` at `z` and dominates it nearby satisfies `pricingOperator k h F z ≤ 0`. -/
 def SmoothPricingSubsolutionOn (k h : ℝ) (u : ℝ × ℝ → ℝ) (U : Set (ℝ × ℝ)) : Prop :=
-  ∀ z ∈ U, ∀ F : ℝ × ℝ → ℝ, ContDiff ℝ 3 F → F z = u z →
+  ∀ z ∈ U, ∀ F : ℝ × ℝ → ℝ, ContDiff ℝ 2 F → F z = u z →
     (∀ᶠ y in 𝓝 z, u y ≤ F y) → pricingOperator k h F z ≤ 0
 
 theorem pricingOperator_barrier {F G : ℝ × ℝ → ℝ} {z : ℝ × ℝ}
@@ -63,7 +63,7 @@ theorem smoothPricingSubsolution_le_before_terminal {k h : ℝ} (hk : 0 ≤ k)
     {u F : ℝ × ℝ → ℝ} {L R a T : ℝ}
     (hu : ContinuousOn u (Icc L R ×ˢ Icc a T))
     (hF : ContinuousOn F (Icc L R ×ˢ Icc a T))
-    (hFs : ContDiffOn ℝ 3 F (Ioo L R ×ˢ Ioo a T))
+    (hFs : ContDiffOn ℝ 2 F (Ioo L R ×ˢ Ioo a T))
     (hsub : SmoothPricingSubsolutionOn k h u (Ioo L R ×ˢ Ioo a T))
     (hsuper : ∀ z ∈ Ioo L R ×ˢ Ioo a T, 0 ≤ pricingOperator k h F z)
     (hbottom : ∀ x ∈ Icc L R, u (x, a) ≤ F (x, a))
@@ -107,7 +107,7 @@ theorem smoothPricingSubsolution_le_before_terminal {k h : ℝ} (hk : 0 ≤ k)
   have hnear : Ioo L R ×ˢ Ioo a T ∈ 𝓝 w :=
     (isOpen_Ioo.prod isOpen_Ioo).mem_nhds hwint
   have hne : T-w.2 ≠ 0 := ne_of_gt (sub_pos.mpr hwT)
-  have hlocal : ContDiffOn ℝ 3 (fun y : ℝ × ℝ => F y+V w/(T-y.2))
+  have hlocal : ContDiffOn ℝ 2 (fun y : ℝ × ℝ => F y+V w/(T-y.2))
       (Ioo L R ×ˢ Ioo a T) :=
     hFs.add (contDiffOn_const.div (contDiffOn_const.sub contDiffOn_snd)
       (fun y hy => ne_of_gt (sub_pos.mpr hy.2.2)))
@@ -142,7 +142,7 @@ theorem smoothPricingSubsolution_le {k h : ℝ} (hk : 0 ≤ k)
     {u F : ℝ × ℝ → ℝ} {L R a T : ℝ} (haT : a < T)
     (hu : ContinuousOn u (Icc L R ×ˢ Icc a T))
     (hF : ContinuousOn F (Icc L R ×ˢ Icc a T))
-    (hFs : ContDiffOn ℝ 3 F (Ioo L R ×ˢ Ioo a T))
+    (hFs : ContDiffOn ℝ 2 F (Ioo L R ×ˢ Ioo a T))
     (hsub : SmoothPricingSubsolutionOn k h u (Ioo L R ×ˢ Ioo a T))
     (hsuper : ∀ z ∈ Ioo L R ×ˢ Ioo a T, 0 ≤ pricingOperator k h F z)
     (hbottom : ∀ x ∈ Icc L R, u (x, a) ≤ F (x, a))

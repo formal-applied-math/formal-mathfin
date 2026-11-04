@@ -35,16 +35,11 @@ theorem canonicalPrice_slope_le_contactSlope {k h : ℝ} (hk : 0 ≤ k)
   letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   let θ := brownianUsualActualContactRule (h := h) hk x T
   have hθ : Measurable (brownianUsualActualContactTime (h := h) hk x T) := θ.measurable_time
-  have hxI := putReward_integrable (q := h) (σ := Real.sqrt 2) brownian_completed_measurable μ
-    (show (0 : ℝ) ≤ 1 by norm_num) hk (Real.exp_pos x).le hθ
-  have hbI := putReward_integrable (q := h) (σ := Real.sqrt 2) brownian_completed_measurable μ
-    (show (0 : ℝ) ≤ 1 by norm_num) hk (Real.exp_pos b).le hθ
+  have hxI := canonicalReward_integrable (h := h) brownian_completed_measurable μ hk x hθ
+  have hbI := canonicalReward_integrable (h := h) brownian_completed_measurable μ hk b hθ
   have hbV : (∫ ω, putReward brownian 1 k h (Real.sqrt 2) (Real.exp b)
-      (brownianUsualActualContactTime (h := h) hk x T) ω ∂μ) ≤ canonicalPrice k h b (T : ℝ) := by
-    have he := expectedReward_le_value (P := μ) (q := h) (σ := Real.sqrt 2)
-      brownian_completed_measurable (show (0 : ℝ) ≤ 1 by norm_num) hk (Real.exp_pos b).le θ
-    simpa only [θ,μ,brownianUsualActualContactTime,canonicalPrice,Real.toNNReal_coe,
-      brownianUsualAmericanPut] using he
+      (brownianUsualActualContactTime (h := h) hk x T) ω ∂μ) ≤ canonicalPrice k h b (T : ℝ) :=
+    expectedReward_le_canonicalPrice (h := h) hk b T θ
   have heI : (∫ ω, actualContactSlope (h := h) hk b x T ω ∂μ) =
       (canonicalPrice k h x (T : ℝ) - ∫ ω, putReward brownian 1 k h (Real.sqrt 2) (Real.exp b)
         (brownianUsualActualContactTime (h := h) hk x T) ω ∂μ)/(x-b) := by

@@ -924,6 +924,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.BracketCompensator.condExp_sq_sub_bracket. SCOPE, stated honestly. (1) The bracket is bracketProcess, the omega-wise time-integral of the squared predictable representative of phi, clamped at the horizon; it is proved ADAPTED here (Adapted (natFiltration hBmeas) (bracketProcess ...)), a.e. nondecreasing and zero at 0 -- but it is still NOT identified with a pathwise quadratic variation, since no limit of sums along partitions is taken anywhere. (2) The conclusion is the conditional-expectation identity, not a bundled Martingale structure for t -> M_t^2 - bracket_t: M is an Lp-valued process and supplies only a.e. adaptedness, which Martingale does not accept (the same gap MarketCompletenessInPrice.pricePathCondExp works around elsewhere). (3) M is an Ito integral against a Brownian motion on a bounded horizon [0,T], not a general continuous L^2 martingale, so this is not the Doob-Meyer decomposition -- existence and uniqueness of a compensator for an arbitrary submartingale is not proved. (4) a <= b <= T."
       }
+    },
+    {
+      "id": "mf-weak-forward-uniqueness-const",
+      "name": "Weak Uniqueness for the Constant-Coefficient Forward Equation",
+      "description": "Two flows of probability measures that solve the integrated weak forward equation with the same constant drift b and variance v (for every test with three bounded derivatives, with interval-integrable generator integrand) and share an initial law coincide at every time in (0, T]. The equation is IsWeakForwardFlow at the constant coefficient functions afn = b, bfn = v, the hypothesis that gyongy_mimicry_gated states for the two flows its uniqueness hypothesis hgate compares; this entry proves that uniqueness statement for constant coefficients.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.WeakForwardUniqueness\n\nopen MeasureTheory MathFin\n\n/-- **Weak uniqueness for the constant-coefficient forward equation.** Two flows of\n    probability measures `ρ η : ℝ → Measure ℝ` solving the integrated weak forward equation\n    with the same constant drift `b` and variance `v`, and sharing an initial law\n    `ρ 0 = η 0`, coincide at every time `s ∈ (0, T]`. Re-export of\n    `MathFin.weakForwardUniqueConst`. -/\ntheorem weak_uniqueness_constant_coefficient_forward_equation\n    {ρ η : ℝ → Measure ℝ} {b v T : ℝ}\n    (hρ : IsWeakForwardFlow (fun _ _ ↦ b) (fun _ _ ↦ v) T ρ)\n    (hη : IsWeakForwardFlow (fun _ _ ↦ b) (fun _ _ ↦ v) T η)\n    (hstart : ρ 0 = η 0) :\n    ∀ s ∈ Set.Ioc (0 : ℝ) T, ρ s = η s :=\n  weakForwardUniqueConst hρ hη hstart\n"
+      },
+      "metadata": {
+        "chapter": null,
+        "reference": "The characteristic-function method for weak uniqueness of SDEs with constant coefficients (classical): Stroock & Varadhan, Multidimensional Diffusion Processes (Springer, 1979); Karatzas & Shreve, Brownian Motion and Stochastic Calculus, 2nd ed. (Springer, 1991)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The hypothesis IsWeakForwardFlow asks, besides the integrated identity, that the generator integrand be interval-integrable: it is a hypothesis on the flows, not derived from the identity (a non-integrable integrand would make the interval integral the junk value 0). gyongy_mimicry_gated carries the same requirement for its Y-side flow and derives it for the constructed X-side flow. Only constant coefficients are covered; the result is uniqueness, not existence of a solution, and says nothing at times outside (0, T]."
+      }
     }
   ]
 }

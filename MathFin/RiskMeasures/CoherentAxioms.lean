@@ -20,16 +20,15 @@ Delbaen, Eber and Heath (1999) read on them.
 
 **Expected shortfall.** It is coherent on every integrable loss, Gaussian or not
 (`expectedShortfall_isCoherentRiskMeasure`, an instance of the library's one coherence structure
-`IsCoherentRiskMeasure`). Translation, homogeneity and monotonicity of Gaussian expected shortfall need nothing
-Gaussian: they are the structure's axioms. What the
-Gaussian family adds is the closed form of the sum. A jointly Gaussian pair has a Gaussian sum, so
-the structure's `ES(X + Y) ≤ ES X + ES Y` is the parameter inequality
-`gaussianCVaR_sd_add_le`, with the variance of the sum in the volatility slot.
-
+`IsCoherentRiskMeasure`). Translation, homogeneity and monotonicity of Gaussian expected shortfall
+need nothing Gaussian: they are the structure's axioms. What the Gaussian family adds is the closed
+form of the sum. A jointly Gaussian pair has a Gaussian sum, so the structure's
+`ES(X + Y) ≤ ES X + ES Y` is the parameter inequality `gaussianCVaR_sd_add_le`, with the variance of
+the sum in the volatility slot.
 **Value-at-risk.** It is not coherent in general (`RiskMeasures/VaRSuperadditivity.lean`), but on a
 jointly Gaussian pair at a level `α ≥ 1/2` it is subadditive
 (`valueAtRisk_add_le_of_hasGaussianLaw` there), because `VaR = E + sd Φ⁻¹(α)` and the standard
-deviation is subadditive (`variance_add_le_sq`).
+deviation is subadditive (`sqrt_variance_add_le`).
 
 **The random-variable side.** For a Gaussian loss `X`, the Gaussian laws of the affine images
 `X + c` and `λ X` (`gaussianReal_add_const`, `gaussianReal_const_mul`) turn the value-at-risk and
@@ -47,8 +46,8 @@ parameter identities below finish the proofs:
 and `μ + σ ϕ(z)/(1 − α)` on all real parameters, including `σ < 0` and `α ≥ 1`, where neither is
 the risk measure of any law. They stay as parameter algebra for that reason, and the translation
 and homogeneity ones are the lemmas the random-variable theorems consume. Monotonicity in the mean
-orders the parameters at equal volatility, not random variables, so it keeps its parameter form. In `gaussianVaR_subadditive` and
-`gaussianCVaR_subadditive` the correlation `ρ` is a free parameter;
+orders the parameters at equal volatility, not random variables, so it keeps its parameter form.
+In `gaussianVaR_subadditive` and `gaussianCVaR_subadditive` the correlation `ρ` is a free parameter;
 `valueAtRisk_add_le_of_hasGaussianLaw` and `gaussianCVaR_sd_add_le` are the statements at the
 correlation a pair actually has.
 
