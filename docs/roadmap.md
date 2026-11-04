@@ -50,9 +50,9 @@ sign it does not belong yet. That is a conversation with the maintainer, not a m
 The concrete next rungs, each tracked by an issue. The coherence wave (#357–#368) folded about sixty
 parallel developments into instances of one object each; what it left open is below.
 
-* **Rates and credit under a measure the library constructs.** Vasicek and Hull–White bond prices at
-  t > 0 and the Jamshidian bond put are done (#410, #413). Next comes GSR, which needs a kernel
-  identity for piecewise volatility, then CMS through a swap-rate model bundle, and CDS legs as the
+* **Rates and credit under a measure the library constructs.** Vasicek, Hull–White and GSR bond prices
+  at t > 0 and the Jamshidian bond put are done (#410, #413, the GSR put on `feat/gsr-bond-put`).
+  Next comes CMS through a swap-rate model bundle, and CDS legs as the
   mesh limit of the grid legs ([#367](https://github.com/formal-applied-math/formal-mathfin/issues/367)). The CMS convexity adjustment ([#303](https://github.com/formal-applied-math/formal-mathfin/issues/303)) follows from that.
   Then the HJM program ([#138](https://github.com/formal-applied-math/formal-mathfin/issues/138)), through the stochastic Fubini theorems
   ([#141](https://github.com/formal-applied-math/formal-mathfin/issues/141)–[#145](https://github.com/formal-applied-math/formal-mathfin/issues/145)).

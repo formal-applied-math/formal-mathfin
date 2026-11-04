@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Contracts.Models.GSRBond
 public import MathFin.Contracts.Models.HullWhiteBond
 public import MathFin.Contracts.Models.VasicekBond
 public import MathFin.BlackScholes.Put
@@ -18,7 +19,9 @@ expectation under the `T₀`-forward measure (`forwardMeasure`, the change of nu
 `forwardMeasure_price`). In a Gaussian short-rate model the bond is
 `P(T₀, T₁) = a·exp(−β r_{T₀})` (`bondPrice_hullWhite`), and `r_{T₀}` stays Gaussian under the
 `T₀`-forward measure, its mean shifted by `−Cov(r_{T₀}, ∫₀^{T₀} r)`
-(`HullWhite.shortRate_hasLaw_forwardMeasure`). So the bond is lognormal there, and the put is
+(`HullWhite.shortRate_hasLaw_forwardMeasure`; for the two-piece GSR,
+`gsrShortRate_hasLaw_forwardMeasure`, both instances of `hasLaw_forwardMeasure_wienerIntegralLp`).
+So the bond is lognormal there, and the put is
 a Black put (`bs_put_formula`) on it:
 
   `put = k·P(0, T₀)·Φ(−d₂) − P(0, T₁)·Φ(−d₁)`,   `d₁ = (ln(F/k) + s²/2)/s`,   `d₂ = d₁ − s`,
@@ -33,7 +36,10 @@ property (`HasBondPrice.integral_discount_mul`), `𝔼^{T₀}[P(T₀, T₁)] = P
   Gaussian under the `T₀`-forward measure.
 * `valueDisc_bondPut_hullWhite`, `valueDisc_bondPut_vasicek` — the Hull–White put, with
   `s = B(T₁ − T₀)·sd(r_{T₀})`, and the Vasicek put as the constant forcing (`bondRate_const`).
-* `valueDisc_caplet_hullWhite`, `valueDisc_caplet_vasicek` — the caplet of
+* `valueDisc_bondPut_gsr` — the put in the two-piece GSR model: `r_{T₀}` is Gaussian under `Q^{T₀}`
+  with the variance `gsrShortRateV` of `FixedIncome/GSRBondPriceAt.lean`, and the coefficient
+  `A(T₀, T₁)` of the bond, which depends on `T₀` and `T₁` separately, never enters.
+* `valueDisc_caplet_hullWhite`, `valueDisc_caplet_vasicek`, `valueDisc_caplet_gsr` — the caplet of
   `valueDisc_caplet_eq_bondPut`, `(1 + δK)` such puts at strike `1/(1 + δK)`.
 
 ## What this is, and is not
@@ -174,8 +180,9 @@ theorem valueDisc_bondPut_hullWhite (hB : IsPreBrownianReal B μ) (hBm : ∀ s, 
     unfold D shortRateDiscount HullWhite.bondRate
     exact (((Lp.stronglyMeasurable _).measurable.const_mul σ).const_add _).neg.exp
   have hDi (T : ℝ≥0) : Integrable (D T) μ :=
-    (HullWhite.integrable_one_div_exp_bondRate hB θ κ σ r₀ hκ T).congr <| ae_of_all _ fun ω ↦ by
-      simp [D, shortRateDiscount, Real.exp_neg]
+    (integrable_one_div_exp_add_mul_wienerIntegralLp hB T (HullWhite.integratedMean θ κ r₀ T) σ
+      (vasicekIntegratedKernelLp hκ T)).congr <| ae_of_all _ fun ω ↦ by
+      simp only [D, shortRateDiscount, HullWhite.bondRate, one_div, ← Real.exp_neg]
   have hbp : HasBondPrice μ (Filtration.natural B fun s ↦ (hBm s).stronglyMeasurable) D X b T₀ T₁ :=
     ⟨fun ω ↦ Real.exp_pos _, hDi T₁, hb⟩
   have hfm : (forwardMeasure μ fun ω ↦ 1 / D T₀ ω)
@@ -186,7 +193,8 @@ theorem valueDisc_bondPut_hullWhite (hB : IsPreBrownianReal B μ) (hBm : ∀ s, 
   haveI : IsProbabilityMeasure (forwardMeasure μ fun ω ↦ 1 / D T₀ ω) := by
     rw [hfm]
     exact forwardMeasure_isProbabilityMeasure (fun ω ↦ Real.exp_pos _)
-      (HullWhite.integrable_one_div_exp_bondRate hB θ κ σ r₀ hκ T₀)
+      (integrable_one_div_exp_add_mul_wienerIntegralLp hB T₀ (HullWhite.integratedMean θ κ r₀ T₀) σ
+        (vasicekIntegratedKernelLp hκ T₀))
   have hr := HullWhite.shortRate_hasLaw_forwardMeasure hB θ κ σ r₀ hκ T₀
   rw [← hfm] at hr
   have hvar := vasicekSDE_variance_pos σ κ T₀ hκ (by exact_mod_cast h0) hσ
@@ -283,6 +291,109 @@ theorem valueDisc_caplet_vasicek (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Mea
             (vasicekBondB κ ((T₁ - T₀ : ℝ≥0) : ℝ) * Real.sqrt (vasicekSDEVariance σ κ T₀)) 1)) := by
   rw [valueDisc_caplet_eq_bondPut h hK hint]
   exact congrArg _ (valueDisc_bondPut_vasicek hB hBm r₀ θ σ hκ h0 hT hσ h.bond_eq
+    (one_div_pos.2 hK))
+
+/-- **The zero-coupon bond put in the two-piece GSR model.** With volatility `σ₁` up to the
+breakpoint `T*` and `σ₂` after, for `0 < T₀ < T₁`, `T* ≤ T₁` and `σ₁, σ₂ ≠ 0`, a put struck at `k`
+expiring at `T₀` on the bond `P(T₀, T₁)` (an underlying `b` that is a.e. the conditional
+expectation `bondPrice` of the GSR discount factor) is worth
+
+  `P(0, T₀)·k·Φ(−d₂) − P(0, T₁)·Φ(−d₁)`,   `d₁ = bsd1 F k 0 s 1`,   `d₂ = bsd2 F k 0 s 1`,
+
+with `P(0, T) = zeroCurve` the bond prices of the model (`gsrBondPrice_eq`, for `T ≥ T*`),
+`F = P(0, T₁)/P(0, T₀)` and `s = B(T₁ − T₀)·sd(r_{T₀})`, the standard deviation of `ln P(T₀, T₁)`:
+the bond is `A(T₀, T₁)·exp(−B(T₁ − T₀) r_{T₀})` (`bondPrice_gsr`) and `r_{T₀}` is Gaussian under the
+`T₀`-forward measure with variance `gsrShortRateV`, the volatility-weighted
+`∫₀^{T₀} σ(u)² e^{−2κ(T₀−u)} du` (`gsrShortRate_hasLaw_forwardMeasure`), so
+`HasBondPrice.valueDisc_bondPut_gaussian` prices the put as a Black put. The coefficient `A(T₀, T₁)`,
+which depends on `T₀` and `T₁` separately, plays no role: only `s` enters. The measure is read as
+the pricing measure. -/
+theorem valueDisc_bondPut_gsr (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Measurable (B s))
+    (r₀ θ σ1 σ2 : ℝ) {κ : ℝ} (hκ : 0 < κ) {Tstar : ℝ≥0} (h0 : 0 < T₀) (hT : T₀ < T₁)
+    (hTstar : Tstar ≤ T₁) (hσ1 : σ1 ≠ 0) (hσ2 : σ2 ≠ 0)
+    (hb : X b T₀ =ᵐ[μ] bondPrice μ (Filtration.natural B fun s ↦ (hBm s).stronglyMeasurable)
+      (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar)) T₀ T₁) {k : ℝ} (hk : 0 < k) :
+    (bondPut b T₀ k).valueDisc μ (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar)) X
+      = zeroCurve μ (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar)) T₀ * k
+          * Phi (-bsd2 (zeroCurve μ
+              (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar)) T₁
+              / zeroCurve μ (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar)) T₀) k 0
+            (vasicekBondB κ ((T₁ : ℝ) - T₀)
+              * Real.sqrt (gsrShortRateV κ σ1 σ2 (Tstar : ℝ) T₀)) 1)
+        - zeroCurve μ (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar)) T₁
+          * Phi (-bsd1 (zeroCurve μ
+              (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar)) T₁
+              / zeroCurve μ (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar)) T₀) k 0
+            (vasicekBondB κ ((T₁ : ℝ) - T₀)
+              * Real.sqrt (gsrShortRateV κ σ1 σ2 (Tstar : ℝ) T₀)) 1) := by
+  set D := shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar) with hD
+  have hDm (T : ℝ≥0) : Measurable (D T) := by
+    unfold D shortRateDiscount gsrIntegratedRate
+    exact (((Lp.stronglyMeasurable _).measurable.const_add _).neg).exp
+  have hDi (T : ℝ≥0) : Integrable (D T) μ :=
+    (integrable_one_div_exp_add_mul_wienerIntegralLp hB T (vasicekIntegratedMean r₀ θ κ T) 1
+      (gsrKernelLp hκ σ1 σ2 (Tstar : ℝ) T)).congr <| ae_of_all _ fun ω ↦ by
+      simp only [D, shortRateDiscount, gsrIntegratedRate, one_mul, one_div, ← Real.exp_neg]
+  have hbp : HasBondPrice μ (Filtration.natural B fun s ↦ (hBm s).stronglyMeasurable) D X b T₀ T₁ :=
+    ⟨fun ω ↦ Real.exp_pos _, hDi T₁, hb⟩
+  have hfm : (forwardMeasure μ fun ω ↦ 1 / D T₀ ω)
+      = forwardMeasure μ fun ω ↦ Real.exp (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar T₀ ω) := by
+    congr 1
+    funext ω
+    simp [D, shortRateDiscount, Real.exp_neg]
+  haveI : IsProbabilityMeasure (forwardMeasure μ fun ω ↦ 1 / D T₀ ω) := by
+    rw [hfm]
+    exact forwardMeasure_isProbabilityMeasure (fun ω ↦ Real.exp_pos _)
+      ((integrable_one_div_exp_add_mul_wienerIntegralLp hB T₀ (vasicekIntegratedMean r₀ θ κ T₀) 1
+        (gsrKernelLp hκ σ1 σ2 (Tstar : ℝ) T₀)).congr (ae_of_all _ fun ω ↦ by
+          simp [gsrIntegratedRate]))
+  have hr := gsrShortRate_hasLaw_forwardMeasure hB r₀ θ σ1 σ2 hκ Tstar T₀
+  rw [← hfm] at hr
+  have hvar := gsrShortRateV_pos hκ hσ1 hσ2 Tstar.coe_nonneg (t := (T₀ : ℝ))
+    (by exact_mod_cast h0)
+  have hτ : 0 < (T₁ : ℝ) - T₀ := sub_pos.2 (by exact_mod_cast hT)
+  have hβ : 0 < vasicekBondB κ ((T₁ : ℝ) - T₀) := by
+    unfold vasicekBondB
+    have : Real.exp (-(κ * ((T₁ : ℝ) - T₀))) < 1 := by
+      rw [← Real.exp_zero]; exact Real.exp_lt_exp.2 (by nlinarith)
+    exact div_pos (by linarith) hκ
+  have hac : (forwardMeasure μ fun ω ↦ 1 / D T₀ ω) ≪ μ := withDensity_absolutelyContinuous _ _
+  have hP := hac.ae_le (hb.trans (bondPrice_gsr hB hBm r₀ θ σ1 σ2 hκ hT.le hTstar))
+  have := hbp.valueDisc_bondPut_gaussian rfl (hDm T₀) (hDi T₀) (Real.toNNReal_pos.2 hvar) hr
+    (Real.exp_pos _) hβ hk hP
+  rwa [Real.coe_toNNReal _ hvar.le] at this
+
+/-- **The caplet in the two-piece GSR model**: `(1 + δK)` bond puts struck at `1/(1 + δK)`
+(`valueDisc_caplet_eq_bondPut`), each priced by `valueDisc_bondPut_gsr`. As for Hull–White, the
+forward LIBOR is a shifted lognormal here, not a lognormal: this is not
+`valueDisc_caplet_black76`. -/
+theorem valueDisc_caplet_gsr (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Measurable (B s))
+    (r₀ θ σ1 σ2 : ℝ) {κ : ℝ} (hκ : 0 < κ) {Tstar : ℝ≥0} (h0 : 0 < T₀) (hT : T₀ < T₁)
+    (hTstar : Tstar ≤ T₁) (hσ1 : σ1 ≠ 0) (hσ2 : σ2 ≠ 0) {ℓ : ι} {δ K : ℝ}
+    (h : BondModel μ (Filtration.natural B fun s ↦ (hBm s).stronglyMeasurable)
+      (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar)) X b ℓ T₀ T₁ δ)
+    (hK : 0 < 1 + δ * K)
+    (hint : Integrable (fun ω ↦ shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar) T₁ ω
+      * (δ * max (X ℓ T₀ ω - K) 0)) μ) :
+    (caplet ℓ T₀ T₁ δ K).valueDisc μ
+        (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar)) X
+      = (1 + δ * K) *
+        (zeroCurve μ (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar)) T₀
+            * (1 / (1 + δ * K))
+          * Phi (-bsd2 (zeroCurve μ
+              (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar)) T₁
+              / zeroCurve μ (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar)) T₀)
+            (1 / (1 + δ * K)) 0
+            (vasicekBondB κ ((T₁ : ℝ) - T₀) * Real.sqrt (gsrShortRateV κ σ1 σ2 (Tstar : ℝ) T₀)) 1)
+          - zeroCurve μ (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar)) T₁
+            * Phi (-bsd1 (zeroCurve μ
+              (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar)) T₁
+              / zeroCurve μ (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar)) T₀)
+            (1 / (1 + δ * K)) 0
+            (vasicekBondB κ ((T₁ : ℝ) - T₀) * Real.sqrt (gsrShortRateV κ σ1 σ2 (Tstar : ℝ) T₀))
+              1)) := by
+  rw [valueDisc_caplet_eq_bondPut h hK hint]
+  exact congrArg _ (valueDisc_bondPut_gsr hB hBm r₀ θ σ1 σ2 hκ h0 hT hTstar hσ1 hσ2 h.bond_eq
     (one_div_pos.2 hK))
 
 end GaussianShortRate
