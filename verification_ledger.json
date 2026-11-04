@@ -4261,17 +4261,17 @@
     },
     "mf-vasicek-zero-meanreversion-crosscheck": {
       "benchmark_file": "interest_rates.json",
-      "date": "2026-11-02",
-      "elapsed_s": 5.3,
-      "input_hash": "e8769b28492c00458ca5ddfe6dcd58b3b8891838482bc33a328b55c670aa7ed5",
-      "verified_at_commit": "fb90d61"
+      "date": "2026-11-04",
+      "elapsed_s": 8.0,
+      "input_hash": "864b0d87ff70a884f8bfad34b92b4f5f6399d0f6028a6f2a2577d97c2a90ea79",
+      "verified_at_commit": "6ae4a23"
     },
     "mf-vasicek-zero-meanreversion-limit": {
       "benchmark_file": "interest_rates.json",
-      "date": "2026-11-02",
-      "elapsed_s": 4.8,
-      "input_hash": "669b1346ecc5c394464aeda0d8efd930d262fa0a8896b010d6db7156973c70bb",
-      "verified_at_commit": "fb90d61"
+      "date": "2026-11-04",
+      "elapsed_s": 8.5,
+      "input_hash": "7b22831d816d6a3ba3a3ace56b96df97cdfbb1fe57fb008d156b09e3c7c8a702",
+      "verified_at_commit": "6ae4a23"
     },
     "mf-vega": {
       "benchmark_file": "black_scholes.json",
