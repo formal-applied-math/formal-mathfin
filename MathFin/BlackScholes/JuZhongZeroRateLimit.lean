@@ -8,7 +8,7 @@ module
 public import Mathlib
 public import MathFin.BlackScholes.DividendsGreeks
 public import MathFin.BlackScholes.JumpDiffusionMixing
-public import MathFin.FixedIncome.VasicekBondPrice
+public import MathFin.FixedIncome.VasicekZeroMeanReversionLimit
 
 /-!
 # The Ju–Zhong quadratic approximation at zero interest rate
@@ -27,7 +27,8 @@ from the source equations; `φ = 1` is a call, `φ = −1` a put.
 
 * `tendsto_juAlpha_div_juH_zero_rate`, `continuousAt_juRho_zero` — the removable singularity
   `α/h → 2/(σ²T)` as `r → 0` (two-sided). `α/h = (2/σ²)/vasicekBondB r T`
-  (`juAlpha_div_juH_eq`), and `vasicekBondB r T → T`.
+  (`juAlpha_div_juH_eq`), and `vasicekBondB r T → T`
+  (`tendsto_vasicekBondB_zero_meanReversion`).
 * `juValueRaw_eq_juValue` — the fix preserves semantics: for every `r ≠ 0` the pre-fix price
   `juValueRaw` and the post-fix price `juValue` are equal, identically in `S*` and `S`.
 * `tendsto_juValueRaw_zero_rate` — the headline, **conditional**: if `S*(r) → S*₀ > 0` as
@@ -194,15 +195,6 @@ noncomputable def juValue (φ K q σ T r Sk S : ℝ) : ℝ :=
 
 /-! ### The removable singularity `α/h → 2/(σ²T)` -/
 
-/-- `vasicekBondB κ T → T` as `κ → 0` (two-sided): `B` is the slope of `κ ↦ 1 − e^{−κT}` at `0`. -/
-private lemma tendsto_vasicekBondB_zero (T : ℝ) :
-    Tendsto (fun κ ↦ vasicekBondB κ T) (𝓝[≠] 0) (𝓝 T) := by
-  have hd : HasDerivAt (fun κ ↦ 1 - Real.exp (-(κ * T))) T 0 := by
-    have := (((hasDerivAt_id (0 : ℝ)).mul_const T).neg.exp).const_sub 1
-    simpa using this
-  refine hd.tendsto_slope_zero.congr fun κ ↦ ?_
-  simp [vasicekBondB, div_eq_inv_mul]
-
 /-- `α/h = (2/σ²)/B(r, T)`, the Vasicek bond coefficient at speed `r`. -/
 lemma juAlpha_div_juH_eq (σ T r : ℝ) (hr : r ≠ 0) :
     juAlpha σ r / juH T r = 2 / σ ^ 2 / vasicekBondB r T := by
@@ -213,7 +205,8 @@ lemma juAlpha_div_juH_eq (σ T r : ℝ) (hr : r ≠ 0) :
 `r → 0`, from either side. -/
 theorem tendsto_juAlpha_div_juH_zero_rate {σ T : ℝ} (hT : T ≠ 0) :
     Tendsto (fun r ↦ juAlpha σ r / juH T r) (𝓝[≠] 0) (𝓝 (2 / (σ ^ 2 * T))) := by
-  have := (tendsto_const_nhds (x := 2 / σ ^ 2)).div (tendsto_vasicekBondB_zero T) hT
+  have := (tendsto_const_nhds (x := 2 / σ ^ 2)).div
+    (tendsto_vasicekBondB_zero_meanReversion T) hT
   rw [div_div] at this
   refine this.congr' ?_
   filter_upwards [self_mem_nhdsWithin] with r hr
@@ -342,7 +335,8 @@ theorem tendsto_juValueRaw_zero_rate {φ K q σ T S S₀ : ℝ} {Sk : ℝ → �
   have hαVEh : Tendsto (fun r ↦ juAlphaVEh φ K q σ T r (Sk r)) L
       (𝓝 (juAlphaVEh φ K q σ T 0 S₀)) := by
     simp only [juAlphaVEh]
-    exact (((hF.mul (((continuous_gaussianPDFReal 0 1).tendsto _).comp (hd1 hSk hS₀))).div_const _).add
+    exact (((hF.mul (((continuous_gaussianPDFReal 0 1).tendsto _).comp
+      (hd1 hSk hS₀))).div_const _).add
       ((((hF.const_mul (2 * φ)).mul (hΦ (hd1 hSk hS₀))).mul_const _).div_const _)).add
       (((hα.const_mul φ).mul_const K).mul (hΦ (hd2 hSk hS₀)))
   have hαlp : Tendsto (fun r ↦ juAlphaLambdaPrime φ q σ T r) L
