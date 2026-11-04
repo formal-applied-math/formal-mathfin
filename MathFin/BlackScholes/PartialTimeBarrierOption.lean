@@ -37,7 +37,7 @@ of scope. **`CA` is also call-only**: QuantLib's `CA` is commented
 `calculate()` via the put–call spot-reflection symmetry (strike `X ↦ S²/X`, barrier `H ↦ S²/H`,
 barrier direction mirrored, the `CA`-call result on the transformed inputs scaled by `X/S`) rather
 than a second closed form — that symmetry transform is not formalized here either. The knock-in
-case (`CIA = vanilla − CA`) is in–out parity — the closed-form instance of
+case (`CIA = vanilla − CA`) is in–out parity — the closed-form counterpart of
 `BarrierParity.lean`'s `knockIn_add_knockOut_eq_vanilla` (the barrier-hit event and its
 complement partition the payoff) — rather than an independent closed form, so it is not
 separately formalized.
@@ -71,16 +71,19 @@ start-window out-barrier **call** value (`η = 1` down, `η = −1` up) is
   single `Φ(a)`, exactly the mechanism behind `HeynenKatTwoAssetBarrier.lean`'s
   `heynenKat_downOut_add_upOut`. As there, the down/up window-start prices are mutually exclusive
   regimes (down-monitored vs. up-monitored), so the sum itself is not a payoff decomposition;
-  what the identity shows is that the right-hand side is `t₁`-free — it equals Haug's full-life
-  down-and-out call closed form (the `X ≥ H` branch) for every `0 ≤ t₁ ≤ T`, not only in some
-  limit. It verifies the `(ηe_i, ηρ)` sign pattern is self-consistent across `η = ±1`, the same
-  scope the Heynen–Kat file disclosed for its own analogous check.
+  what the identity shows is that the sum is `t₁`-free — it equals `ptDownOutCall`, the
+  transcribed full-life down-and-out call closed form (the `X ≥ H` branch), for every
+  `0 ≤ t₁ ≤ T`, not only in some limit. It verifies the `(ηe_i, ηρ)` sign pattern is
+  self-consistent across `η = ±1`, the same scope the Heynen–Kat file disclosed for its own
+  analogous check.
 
-* `ptCA_down_monitored_full_life`: **monitoring over the whole life is the standard barrier**
-  — at `t₁ = T` (with `X ≥ H`), the correlation `ρ = 1` degenerates each `N₂(a, ηb; ηρ)` to
+* `ptCA_down_monitored_full_life`: **monitoring over the whole life gives the full-life
+  closed form** — at `t₁ = T` (with `X ≥ H`), the correlation `ρ = 1` degenerates each
+  `N₂(a, ηb; ηρ)` to
   `Φ(min(a, ηb))` via `bivariateNormalCDF_one`, and `X ≥ H` orders every such pair so the `d`/`f`
-  term is the minimum, reducing `CA(1)` directly to the same full-life down-and-out closed form
-  `ptCA_down_add_up` reaches via the in–out collapse.
+  term is the minimum, reducing `CA(1)` directly to `ptDownOutCall`, the closed form
+  `ptCA_down_add_up` reaches.
+  Both are identities between transcribed closed forms; neither is proved to be a price.
 -/
 
 @[expose] public section
@@ -101,12 +104,11 @@ noncomputable def ptD1 (S X b σ T : ℝ) : ℝ := bsd1 S X b σ T
 /-- **`d₂`** = `bsd2 S X b σ T` — `d₁ − σ√T`. -/
 noncomputable def ptD2 (S X b σ T : ℝ) : ℝ := bsd2 S X b σ T
 
-/-- **`e₁`**: the "distance" of the barrier `H` over the monitoring window `t₁`. -/
-noncomputable def ptE1 (S H b σ t1 : ℝ) : ℝ :=
-  (Real.log (S / H) + (b + σ ^ 2 / 2) * t1) / (σ * Real.sqrt t1)
+/-- **`e₁`**: `bsd1` against the barrier `H` over the monitoring window `t₁`. -/
+noncomputable def ptE1 (S H b σ t1 : ℝ) : ℝ := bsd1 S H b σ t1
 
-/-- **`e₂` = `e₁ − σ√t₁`**. -/
-noncomputable def ptE2 (S H b σ t1 : ℝ) : ℝ := ptE1 S H b σ t1 - σ * Real.sqrt t1
+/-- **`e₂` = `e₁ − σ√t₁`** = `bsd2 S H b σ t₁`. -/
+noncomputable def ptE2 (S H b σ t1 : ℝ) : ℝ := bsd2 S H b σ t1
 
 /-- **`e₃`**: `e₁` shifted by the barrier reflection term. -/
 noncomputable def ptE3 (S H b σ t1 : ℝ) : ℝ :=
@@ -141,6 +143,15 @@ noncomputable def ptCA (eta S X H b r σ t1 T : ℝ) : ℝ :=
           - ptHSmu S H b σ *
               bivariateNormalCDF (ptF2 S X H b σ T) (eta * ptE4 S H b σ t1) (eta * ptRho t1 T))
 
+/-- **The full-life down-and-out call closed form** (Rubinstein & Reiner (1991); Haug (2007),
+ch. 4, the `X ≥ H` branch), transcribed: the barrier monitored over all of `[0, T]`. It is a
+closed-form expression here, not proved to be the expected discounted knock-out payoff. -/
+noncomputable def ptDownOutCall (S X H b r σ T : ℝ) : ℝ :=
+  S * Real.exp ((b - r) * T) *
+      (Phi (ptD1 S X b σ T) - ptHSmu1 S H b σ * Phi (ptF1 S X H b σ T))
+    - X * Real.exp (-r * T) *
+        (Phi (ptD2 S X b σ T) - ptHSmu S H b σ * Phi (ptF2 S X H b σ T))
+
 /-- `ρ² ≤ 1` whenever `0 ≤ t₁ ≤ T` — the hypothesis `bivariateNormalCDF_flip_snd` needs, since
 a monitoring window can only be a sub-interval of the option's life. -/
 theorem ptRho_sq_le_one {t1 T : ℝ} (ht1 : 0 ≤ t1) (hT : t1 ≤ T) : ptRho t1 T ^ 2 ≤ 1 := by
@@ -152,36 +163,28 @@ theorem ptRho_sq_le_one {t1 T : ℝ} (ht1 : 0 ≤ t1) (hT : t1 ≤ T) : ptRho t1
 form with every bivariate CDF replaced by a single `Φ`, via `bivariateNormalCDF_flip_snd` applied
 to each of the four `N₂` pairs (see the module docstring for the scope this checks). -/
 theorem ptCA_down_add_up (S X H b r σ t1 T : ℝ) (ht1 : 0 ≤ t1) (hT : t1 ≤ T) :
-    ptCA 1 S X H b r σ t1 T + ptCA (-1) S X H b r σ t1 T
-      = S * Real.exp ((b - r) * T) *
-          (Phi (ptD1 S X b σ T) - ptHSmu1 S H b σ * Phi (ptF1 S X H b σ T))
-        - X * Real.exp (-r * T) *
-            (Phi (ptD2 S X b σ T) - ptHSmu S H b σ * Phi (ptF2 S X H b σ T)) := by
+    ptCA 1 S X H b r σ t1 T + ptCA (-1) S X H b r σ t1 T = ptDownOutCall S X H b r σ T := by
   have hr : ptRho t1 T ^ 2 ≤ 1 := ptRho_sq_le_one ht1 hT
   have hd1 := bivariateNormalCDF_flip_snd (ptD1 S X b σ T) (ptE1 S H b σ t1) hr
   have hf1 := bivariateNormalCDF_flip_snd (ptF1 S X H b σ T) (ptE3 S H b σ t1) hr
   have hd2 := bivariateNormalCDF_flip_snd (ptD2 S X b σ T) (ptE2 S H b σ t1) hr
   have hf2 := bivariateNormalCDF_flip_snd (ptF2 S X H b σ T) (ptE4 S H b σ t1) hr
-  simp only [ptCA, one_mul, neg_one_mul]
+  simp only [ptCA, ptDownOutCall, one_mul, neg_one_mul]
   linear_combination S * Real.exp ((b - r) * T) * hd1
     - S * Real.exp ((b - r) * T) * ptHSmu1 S H b σ * hf1
     - X * Real.exp (-r * T) * hd2 + X * Real.exp (-r * T) * ptHSmu S H b σ * hf2
 
-/-- **Monitoring over the whole life is the standard barrier.** With the barrier live on
+/-- **Monitoring over the whole life gives the full-life closed form.** With the barrier live on
 `[0, T]` (i.e. `t₁ = T`) and the strike dominating the barrier (`X ≥ H`, the branch where the
 down-and-out closed form holds without a min inside the payoff), the start-window value
-`ptCA 1 … T T` reduces to the full-life down-and-out call closed form — the same `t₁`-free
-expression `ptCA_down_add_up` collapses to, here obtained directly: the correlation
-`ptRho T T = 1`, so `bivariateNormalCDF_one` turns each `N₂(a, b; 1)` into `Φ(min(a, b))`,
+`ptCA 1 … T T` reduces to `ptDownOutCall`, the transcribed full-life down-and-out call closed
+form — the same `t₁`-free expression `ptCA_down_add_up` collapses to, here obtained directly:
+the correlation `ptRho T T = 1`, so `bivariateNormalCDF_one` turns each `N₂(a, b; 1)` into `Φ(min(a, b))`,
 and `X ≥ H` makes `d₁ ≤ e₁`, `f₁ ≤ e₃`, `d₂ ≤ e₂`, `f₂ ≤ e₄` (each pair differs exactly by
 `log(S/X) ≤ log(S/H)` over the same positive denominator), so every min is the `d`/`f` term. -/
 theorem ptCA_down_monitored_full_life (S X H b r σ T : ℝ) (hS : 0 < S) (hX : 0 < X)
     (hH : 0 < H) (hXH : H ≤ X) (hσ : 0 < σ) (hT : 0 < T) :
-    ptCA 1 S X H b r σ T T
-      = S * Real.exp ((b - r) * T) *
-          (Phi (ptD1 S X b σ T) - ptHSmu1 S H b σ * Phi (ptF1 S X H b σ T))
-        - X * Real.exp (-r * T) *
-            (Phi (ptD2 S X b σ T) - ptHSmu S H b σ * Phi (ptF2 S X H b σ T)) := by
+    ptCA 1 S X H b r σ T T = ptDownOutCall S X H b r σ T := by
   have hsqrt : 0 < σ * Real.sqrt T := mul_pos hσ (Real.sqrt_pos.mpr hT)
   have hSdX : 0 < S / X := div_pos hS hX
   have hSdH : 0 < S / H := div_pos hS hH
@@ -215,7 +218,7 @@ theorem ptCA_down_monitored_full_life (S X H b r σ T : ℝ) (hS : 0 < S) (hX : 
   have hF1 := bivariateNormalCDF_one (ptF1 S X H b σ T) (ptE3 S H b σ T)
   have hD2 := bivariateNormalCDF_one (ptD2 S X b σ T) (ptE2 S H b σ T)
   have hF2 := bivariateNormalCDF_one (ptF2 S X H b σ T) (ptE4 S H b σ T)
-  simp only [ptCA, one_mul, hrho, hD1, hF1, hD2, hF2,
+  simp only [ptCA, ptDownOutCall, one_mul, hrho, hD1, hF1, hD2, hF2,
     min_eq_left hd1e1, min_eq_left hf1e3, min_eq_left hd2e2, min_eq_left hf2e4]
 
 end MathFin

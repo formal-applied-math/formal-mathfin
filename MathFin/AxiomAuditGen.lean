@@ -1127,10 +1127,6 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.basketMomentMatchPrice_single_eq_integral
 
-/-- info: 'MathFin.bboB1_cash_or_nothing_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.bboB1_cash_or_nothing_price
-
 /-- info: 'MathFin.bboB1_eq_Phi_bsd2' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.bboB1_eq_Phi_bsd2
@@ -3438,6 +3434,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.valueFunction_satisfies_approxHJ' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.valueFunction_satisfies_approxHJ
+
+/-- info: 'MathFin.value_digitalCall_eq_bboB1' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.value_digitalCall_eq_bboB1
 
 /-- info: 'MathFin.varianceSwap_log_contribution' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

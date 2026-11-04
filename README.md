@@ -176,14 +176,9 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   time of a Poisson process is exponential; Stulz's call on the maximum is checked only in its
   zero-strike limit, and the Heynen–Kat two-asset barrier only at zero correlation, neither formula
   being derived as an expected payoff; the Ornstein–Uhlenbeck Hermite modes decay at their
-  eigenvalues only for degree at most 2; Haug's partial-time-start barrier's down-window-plus-up-window
-  sum collapses to the standard down-and-out closed form for every start-window length, and
-  (separately) the down-window value alone reduces to that same closed form once the window spans
-  the whole life, for strike at or above the barrier — neither draws on the reflection principle
-  behind the transcribed bivariate-normal
-  terms; and the Rubinstein–Reiner binary barrier's in–out parity is checked branch-by-branch
-  against the transcribed closed form, and its vanilla leg is derived separately as the
-  Black–Scholes cash-or-nothing price, with the barrier density itself not derived.
+  eigenvalues only for degree at most 2; Haug's partial-time-start barrier and Rubinstein–Reiner's
+  binary barrier are transcribed closed forms with proved identities between their terms, neither derived
+  as an expected payoff (only the binary's vanilla leg is shown to be the digital call's price).
 - Girsanov's theorem is proved only for bounded $`\theta`$ (predictable, or adapted with continuous
   paths), and only at the level of finite-dimensional laws: neither path continuity of the new
   process nor independence of its increments from the past is stated.

@@ -130,68 +130,64 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
-## 2026-11-01 — corpus 756, modules 687 — Haug barrier closed forms: partial-time and binary parity
+## 2026-11-04 — corpus 756, modules 687 — five contributor PRs, read at the raised merge bar
 
-Scope: a single-reviewer pass over this branch's own addition — `BlackScholes/
-PartialTimeBarrierOption.lean` and `BlackScholes/BinaryBarrierOption.lean` (2 entries, corpus
-754 -> 756) — not the upstream growth 742 -> 754 already absorbed from `origin/main`'s own
-merged PRs, which is on the maintainer's own cadence. A third transcription in this PR's original
-scope (the soft corridor-average barrier) was dropped before merge: the Hart-Ross reduction needs
-genuinely new machinery (an integral of the standard knock-in closed form over the barrier
-parameter), so a smaller honest PR without it was preferred to a dressed-up one.
+Scope: Yang Ye's five open PRs (#325 Haug barriers, #423 Vasicek κ → 0, #427 American exercise
+approximations at their degenerate boundary, #428 removable singularities in Heston and SABR, #429
+weak uniqueness for the constant-coefficient forward equation), read by three independent reviewers
+and then by the maintainer. The bar since v1.8.0 is coherence, integration and elegance, not only
+honest prose: a contribution consumes the objects the library already has, connects to them through
+a proved theorem (an instrument with a price is a `Contract` whose `value` is that price), and leaves
+no parallel scaffolding behind. Each PR carried a self-review entry written to clear the cadence
+gate; those are replaced by this one.
 
 ### The standing first pass: prose against statement
 
-Several review-and-fix rounds (the maintainer's own close read, three Fable-gate passes, and a
-GitHub Copilot automated pass addressed with inline replies) ran against this branch. Real
-overclaims caught and fixed, not cosmetic:
+Every PR had sentences stronger than its Lean, all in the same direction: a transcribed closed form
+described as a price or as "the standard" object. #325: the binary vanilla leg called "a genuine
+price" by a theorem that only multiplied `bboB1_eq_Phi_bsd2` by `e^{−rT}`; "the closed-form instance
+of `knockIn_add_knockOut_eq_vanilla`" for an identity not derived from it; "the standard down-and-out
+closed form" for an expression with no Lean name. #423: the κ → 0 limit's description named the
+driftless model the separate cross-check entry identifies. #427: a hypothesis said to "fail" for puts
+where Lean proves only that the r = 0 equation has no positive root; "divides by zero" and "jointly
+necessary" asserted without proof. #428: integral identities stated for closed forms that never
+mention an integral; a Riccati-profile limit described as the Heston expectation. #429: the same
+hypothesis-difference sentence repeated in six places.
 
-- The maintainer's own review asked for the partial-time barrier's "monitoring over the whole
-  life reduces to the standard barrier" claim to be a proved reduction, not prose:
-  `ptCA_down_monitored_full_life` now proves it (`t1 = T` with `X >= H` collapses `ptRho T T = 1`,
-  and `bivariateNormalCDF_one` turns each `N2` into `Phi` of the min).
-- Headline results were reduced to compose the library's own vocabulary (`ptD1`/`ptD2` are
-  `bsd1`/`bsd2` with the carry in the rate slot; the binary parity's vanilla leg became a genuine
-  price, `bboB1_eq_Phi_bsd2` composing with `bs_cash_or_nothing_formula`) rather than parallel
-  private definitions duplicating existing machinery.
-- "Transcribed from, and cross-checked against, QuantLib's ..." was overselling; the maintainer's
-  standing rule is "transcribed from QuantLib's `<file>`" and stop. Fixed in both barrier modules'
-  module docstrings.
-- The in-out parity docstrings described the identity as "a genuine cross-check on the 16-branch
-  transcription" without naming what it's an instance of; reworded as the closed-form instance of
-  the measure-theoretic parity theorem `knockIn_add_knockOut_eq_vanilla` (`BarrierParity.lean`).
-- GitHub Copilot found `bboB1_cash_or_nothing_price`'s docstring didn't disclose that the theorem
-  is a deterministic algebraic identity valid for any `sigma != 0` (including negative `sigma`,
-  where the identity still holds but doesn't mean anything as a price) — the pricing
-  interpretation is a separate composition with `bs_cash_or_nothing_formula` under `BSCallHyp`
-  (which needs `sigma > 0`), not something this theorem's own hypotheses establish. Reworded to
-  state this explicitly rather than letting the name imply more than the type captures.
+### Upgrades executed
+
+- **#325, integration through the contracts tower.** `value_digitalCall_eq_bboB1`: the Black–Scholes
+  value of `Contracts.digitalCall K T` is the binary parity's vanilla leg `e^{−rT}·B₁`, through
+  `Contracts.BlackScholes.value_digitalCall`; it replaces the restating theorem. `ptDownOutCall`
+  names the full-life down-and-out closed form, so both partial-time theorems state against one
+  object instead of a four-line expression written four times; `e₁`/`e₂` are `bsd1`/`bsd2`. Prose
+  says "counterpart", not "instance", and the README's limitation paragraph shrank to what is proved.
+- The other four PRs get their reviewers' blocking and coherence findings in their own maintainer
+  commits before merge: #428 drops `integral_vasicekDeterministic` and its entry for
+  `HullWhiteCalibration.integratedMean_const`; #427 consumes `continuous_gaussianPDFReal` instead of
+  five inline re-proofs and drops its release-metadata edits; #429 replaces `IsWeakForwardFlow` and
+  the inline `hgate` block of `gyongy_mimicry_gated` by one predicate, so the Gyöngy theorem consumes
+  what the uniqueness theorem is about, and the module is renamed for what it proves.
 
 ### Lens gradients
 
-1. **Inspired math quality.** Exemplar: `ptCA_down_monitored_full_life` — a genuine reduction
-   theorem (one parameter family specializes to another via an algebraic identity on the
-   bivariate normal), not a restated transcription. Upgrade: none proposed this round.
-2. **Mathlib / BrownianMotion coherence.** `ptD1`/`ptD2` reusing `bsd1`/`bsd2` and `ptMu` reusing
-   `hkMu`/sigma^2, rather than parallel private drift/exponent helpers, is the exemplar this repo's
-   own review discipline asks for (grep the existing barrier/BS modules before defining a new
-   one). Upgrade: none proposed.
-7. **Concept clarity.** Post-fix exemplar: both modules' "Scope, disclosed honestly" sections now
-   state the identity is a closed-form transcription check, not a from-first-principles
-   reflection-principle derivation, and name the measure-theoretic parity theorem it instantiates.
-   Upgrade: `bboB1_cash_or_nothing_price`'s fix (disclosing the `sigma != 0` vs `sigma > 0`
-   distinction) is a pattern worth checking on other transcribed-identity theorems whose names
-   imply a pricing claim their hypotheses don't fully establish — left as a backlog item.
-3–6, 8. No findings beyond the standing first pass above.
+2. Coherence. Exemplar: #428's Heston limit, which writes `hestonA` as an integral through
+   `hasDerivAt_hestonA` and avoids the 2κθ/ξ² cancellation entirely. Next: the reflection factor
+   `(H/S)^{2μ}` is defined twice (`bboHS2mu`, `ptHSmu`) and once more implicitly in Heynen–Kat.
+4. Architecture. Exemplar after the rework: Gyöngy consuming the weak-forward predicate. Next: a
+   non-vacuity witness — the Gaussian flow `s ↦ N(bs, vs)` satisfies the predicate — which is the
+   bridge from the Itô side.
+8. Beauty. Exemplar: #423's `abs_vasicekBondV_sub_le`. Next: #429's cos/sin Volterra pair is the real
+   and imaginary part of one complex linear ODE; solving it identifies the flow, `ρ_s = ρ_0 ∗ N(bs, vs)`,
+   a stronger theorem with a shorter proof.
 
-### Evidence
+### Ranked backlog
 
-Three Fable-gate passes plus the maintainer's own close read (addressed point-by-point, each
-confirmed at the resulting head) plus GitHub Copilot's automated review (two findings: the
-values-review cadence gap this entry resolves, and the `BSCallHyp`/negative-volatility docstring
-gap above, both addressed). Citations: Haug 2nd ed. (2007) with section, Heynen & Kat
-*J. Financial Engineering* 3 (1994), Rubinstein & Reiner *Risk* 4(9) (1991). Zero `sorry`; ledger
-fresh (756/756) after the hosted sweep; `lake build`/`lake lint` clean.
+1. The barriers as contracts: a payoff on a path event, so the transcribed knock-out closed forms can
+   be stated as values once the reflection principle is derived rather than assumed.
+2. #429's flow identification through one complex ODE (lens 8 above).
+3. One reflection factor `(H/S)^{2μ}` for the binary, partial-time and Heynen–Kat barriers.
+4. #423's two squeeze scaffolds as one lemma ("`|f κ − L| ≤ C|κ|` near 0⁺ gives the limit").
 
 ## 2026-10-31 — corpus 742, modules 678 — elegance: does each headline proof read as its argument
 

@@ -9,7 +9,7 @@ public import Mathlib
 public import MathFin.Foundations.StandardNormal
 public import MathFin.BlackScholes.BarrierParity
 public import MathFin.BlackScholes.Call
-public import MathFin.BlackScholes.Digital
+public import MathFin.Contracts.Models.BlackScholes
 
 /-!
 # Binary (digital) barrier options: Rubinstein & Reiner's closed form
@@ -55,17 +55,16 @@ QuantLib's 16-branch `switch` (barrier type × call/put × strike-vs-barrier) se
 
 * `bboDownIn_add_DownOut`: knock-in + knock-out, same direction/type/regime, collapses to the
   vanilla digital α-factor `B₁` — the barrier-hit event and its complement partition the payoff
-  (the same in–out parity as `BarrierParity.lean`'s `knockIn_add_knockOut_eq_vanilla`, here
-  verified against the literal 16-branch closed form rather than the measure-theoretic
-  definition). Checked for every `(isCall, xGeH)` combination by `decide`-free case split.
+  (the closed-form counterpart of `BarrierParity.lean`'s
+  `knockIn_add_knockOut_eq_vanilla`, checked on the literal 16-branch table; not derived from
+  it here). Checked for every `(isCall, xGeH)` combination by `decide`-free case split.
 * `bboUpIn_add_UpOut`: the same parity for the up-barrier family (`η = −1`).
 * `bboB1_eq_Phi_bsd2`: at the risk-neutral drift `μ = (r − σ²/2)/σ²` the vanilla exponent
   `x₁` is Black–Scholes' `d₂` (`bsd2 S X r σ T`) — `B₁` is the standard-normal factor of the
   cash-or-nothing digital.
-* `bboB1_cash_or_nothing_price`: so the parity's vanilla leg `e^{−rT}·B₁` equals the
-  discounted cash-or-nothing price `e^{−rT}·Φ(d₂)` — the conclusion of
-  `bs_cash_or_nothing_formula` (`BlackScholes/Digital.lean`) — making the parity's right
-  side a genuine price, not merely a transcription factor.
+* `value_digitalCall_eq_bboB1`: under `BSCallHyp`, the Black–Scholes value of the digital call
+  contract `Contracts.digitalCall K T` is the parity's vanilla leg `e^{−rT}·B₁` (call side),
+  through `Contracts.BlackScholes.value_digitalCall`.
 
 **Scope, disclosed honestly**: this is a transcription of the QuantLib closed form, not a
 from-first-principles reflection-principle derivation of the barrier density. The in–out
@@ -74,9 +73,10 @@ identity here is the closed-form counterpart of the measure-theoretic parity
 complement partition the payoff, so knock-in + knock-out must equal the vanilla leg `B₁` —
 and the 16-branch table satisfies it branch-by-branch (a misplaced `+`/`−` sign on any one of
 the 14 sign-bearing QuantLib branches breaks it; the other two branches are the constant `0`),
-though by pure term cancellation once the table is fixed. What grounds the vanilla leg beyond
-transcription is `bboB1_cash_or_nothing_price` below: at the risk-neutral drift, `e^{−rT}·B₁`
-*is* the cash-or-nothing price `bs_cash_or_nothing_formula` proves. The `variance
+though by pure term cancellation once the table is fixed. The vanilla leg alone is
+grounded beyond transcription: `value_digitalCall_eq_bboB1` proves that, on the call side and
+at the risk-neutral drift, `e^{−rT}·B₁` is the Black–Scholes value of the digital call contract. The
+knock-in and knock-out terms are not proved to be prices. The `variance
 = 0` and `(H/S)^{2μ}` overflow edge cases QuantLib special-cases numerically, and the
 already-knocked-in/knocked-out spot guards `AnalyticBinaryBarrierEngine::calculate()` applies
 *before* calling `payoffAtExpiry` (a `DownOut`/`UpOut` priced at `0` once the spot has already
@@ -88,6 +88,9 @@ crossed the barrier, a `DownIn`/`UpIn` re-priced as a plain vanilla digital via
 @[expose] public section
 
 namespace MathFin
+
+open MeasureTheory
+open scoped NNReal
 
 /-- `φ(isCall) = 1` for a call, `−1` for a put (QuantLib's `phi`). -/
 noncomputable def bboPhiOf (isCall : Bool) : ℝ := if isCall then 1 else -1
@@ -175,11 +178,13 @@ noncomputable def bboUpOutAlpha (S X H mu σ T : ℝ) (isCall xGeH : Bool) : ℝ
 /-- **In–out parity, down-barrier family**: for every call/put choice and every
 strike-vs-barrier regime, the down-knock-in and down-knock-out values (QuantLib's `DownIn` and
 `DownOut` switch cases, `η = 1` throughout) sum to the vanilla digital α-factor `B₁` — the
-closed-form instance of `knockIn_add_knockOut_eq_vanilla`'s partition identity. Each of the
+closed-form counterpart of `knockIn_add_knockOut_eq_vanilla`'s partition identity (not derived
+from it here). Each of the
 four `(isCall, xGeH)` branches cancels its `B₂, B₃, B₄` terms against the paired branch
 independently (so a transposed sign on any one of the seven sign-bearing `Down*` branches
 would break exactly that case; the eighth, the knock-out put with `X < H`, is the constant
-`0`). Via `bboB1_cash_or_nothing_price` the right side is a price, not just `B₁`. -/
+`0`). On the call side, `value_digitalCall_eq_bboB1` identifies `e^{−rT}·B₁` with the value
+of the digital call contract. -/
 theorem bboDownIn_add_DownOut (S X H mu σ T : ℝ) (isCall xGeH : Bool) :
     bboDownInAlpha S X H mu σ T isCall xGeH + bboDownOutAlpha S X H mu σ T isCall xGeH
       = bboB1 S X mu σ T isCall := by
@@ -210,19 +215,19 @@ theorem bboB1_eq_Phi_bsd2 (S X r σ T mu : ℝ) (hσ : σ ≠ 0) (hT : 0 < T)
   simp only [Real.sq_sqrt (le_of_lt hT)]
   ring
 
-/-- **The parity's vanilla leg is the value QuantLib's cash-or-nothing price computes.** A
-deterministic algebraic identity, valid for every `σ ≠ 0` (including negative `σ`, for which
-`bboB1`/`bsd2` are still well-defined real expressions). With the risk-neutral drift
-substitution of `bboB1_eq_Phi_bsd2`, the discounted vanilla leg `e^{−rT}·B₁` of both parity
-theorems equals `e^{−rT}·Φ(d₂)`. The *pricing* interpretation — that this is the discounted
-expected cash-or-nothing payoff — is a separate fact, `bs_cash_or_nothing_formula`
-(`BlackScholes/Digital.lean`), which needs `BSCallHyp` (in particular `σ > 0`, the model's actual
-volatility) and gives exactly this same closed form as its conclusion; the two compose by
-substitution, not by this theorem consuming `BSCallHyp` directly. -/
-theorem bboB1_cash_or_nothing_price (S_0 K r σ T mu : ℝ) (hσ : σ ≠ 0) (hT : 0 < T)
-    (hmu : mu = (r - σ ^ 2 / 2) / σ ^ 2) :
-    Real.exp (-r * T) * bboB1 S_0 K mu σ T true
-      = Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) := by
-  rw [bboB1_eq_Phi_bsd2 S_0 K r σ T mu hσ hT hmu]
+/-- **The parity's vanilla leg is the price of the digital call contract.** Under `BSCallHyp`
+and at the risk-neutral drift `μ = (r − σ²/2)/σ²`, the value of the contract
+`Contracts.digitalCall K T` (pay `1` at `T` if `S_T > K`) in the Black–Scholes model is the
+discounted vanilla leg `e^{−rT}·B₁` (call side) of both parity theorems:
+`Contracts.BlackScholes.value_digitalCall` prices it at `e^{−rT}·Φ(d₂)`, and
+`bboB1_eq_Phi_bsd2` identifies `Φ(d₂)` with `B₁`. -/
+theorem value_digitalCall_eq_bboB1 {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {Q : Measure Ω} [IsProbabilityMeasure Q] {S_0 K r σ mu : ℝ} {T : ℝ≥0} {Z : Ω → ℝ}
+    (h : BSCallHyp Q S_0 K r σ T Z) (hmu : mu = (r - σ ^ 2 / 2) / σ ^ 2) :
+    (Contracts.digitalCall K T).value Q (fun _ ↦ Real.exp (-r * T))
+        (Contracts.BlackScholes.assets S_0 r σ T Z)
+      = Real.exp (-r * T) * bboB1 S_0 K mu σ T true := by
+  rw [Contracts.BlackScholes.value_digitalCall h,
+    bboB1_eq_Phi_bsd2 S_0 K r σ T mu h.σ_pos.ne' h.T_pos hmu]
 
 end MathFin
