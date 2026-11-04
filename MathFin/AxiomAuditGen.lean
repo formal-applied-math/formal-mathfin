@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (898 MathFin constants, 29 upstream). Citations
+  corpus (899 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -511,9 +511,13 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.DiscreteVaR.finiteES_one_bond
 
-/-- info: 'MathFin.DiscreteVaR.oneQ_mem_simplex' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.DiscreteVaR.oneQ_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.DiscreteVaR.oneQ_mem_simplex
+#print axioms MathFin.DiscreteVaR.oneQ_nonneg
+
+/-- info: 'MathFin.DiscreteVaR.oneQ_sum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DiscreteVaR.oneQ_sum
 
 /-- info: 'MathFin.Dupire.dupire_pointwise' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
