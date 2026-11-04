@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoIntegralL2Dense
+public import MathFin.Foundations.ItoIntegralProcessMartingale
 
 /-!
 # The unbounded-horizon Itô integral as an L² process
@@ -22,7 +23,11 @@ property** (`itoProcessL2Inf_isMartingale`), **adaptedness**
 (`itoProcessL2Inf_aeStronglyMeasurable`) and the **contraction**
 (`itoProcessL2Inf_norm_le`) hold on all of `ℝ≥0` directly from the conditional-expectation
 tower, once. The finite-horizon process `itoProcessCLM T t` (`ItoIntegralProcessGeneral`) is
-this engine composed with `bandExtend T`, and inherits all three. -/
+this engine composed with `bandExtend T`, and inherits all three.
+
+On the dense simple integrands the process is B1a's discrete process
+(`condExp_itoSimple_eq`, `condExp_itoIntegralL2_simple`, `itoProcessL2Inf_simpleAssembly_ae`),
+and density transfers the start `(f●B)_0 = 0` (`itoProcessL2Inf_zero_time`). -/
 
 @[expose] public section
 
@@ -32,7 +37,7 @@ open scoped NNReal ENNReal
 namespace MathFin
 namespace ItoIntegralProcessL2Infinite
 
-open ItoIntegralL2
+open ItoIntegralL2 ItoIntegralProcess
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
   [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
@@ -98,6 +103,61 @@ theorem itoProcessL2Inf_norm_le (t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
   rw [itoProcessL2Inf_apply]
   exact (norm_condExpL2_le ((natFiltration hBmeas).le t) (itoIntegralL2 hB hBmeas f)).trans
     (itoIntegralL2_norm hB hBmeas f).le
+
+omit [IsProbabilityMeasure μ] in
+include hB in
+/-- B1a's martingale to the terminal: `μ[itoSimple V | 𝓕_t] = (V●B)_t` for
+`T`-bounded `V` (`(V●B)_{T'} = itoSimple V` at `T' = t ⊔ T`). -/
+theorem condExp_itoSimple_eq (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    (V : SimpleProcess ℝ (natFiltration hBmeas)) (hVT : ∀ p ∈ V.value.support, p.2 ≤ T) :
+    μ[itoSimple hBmeas V | natFiltration hBmeas t]
+      =ᵐ[μ] fun ω ↦ itoSimpleProcess hBmeas V t ω := by
+  have hT'eq : itoSimpleProcess hBmeas V (max t T) = itoSimple hBmeas V :=
+    itoSimpleProcess_eq_itoSimple hBmeas V fun p hp ↦ (hVT p hp).trans (le_max_right t T)
+  simpa only [hT'eq] using (itoSimpleProcess_isMartingale hB hBmeas V).2 t (max t T)
+      (le_max_left t T)
+
+/-- **Simple-process increment-independence.** For a simple
+process `V`, the conditional expectation of its `[0,∞)` integral onto `𝓕_t` is the
+`[0,t]` truncation `(V●B)_t`: pick a horizon past `V`'s finite support, where the
+`[0,∞)` integral coincides with the truncated process, and apply B1a's martingale
+property (`condExp_itoSimple_eq`). -/
+lemma condExp_itoIntegralL2_simple (t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
+    μ[(itoIntegralL2 hB hBmeas (simpleAssembly hBmeas V) : Ω → ℝ) | natFiltration hBmeas t]
+      =ᵐ[μ] fun ω ↦ itoSimpleProcess hBmeas V t ω := by
+  have hbridge : (itoIntegralL2 hB hBmeas (simpleAssembly hBmeas V) : Ω → ℝ)
+      =ᵐ[μ] itoSimple hBmeas V := by
+    rw [itoIntegralL2_simpleAssembly]
+    exact (memLp_itoSimple hB hBmeas V).coeFn_toLp
+  exact (condExp_congr_ae hbridge).trans
+    (condExp_itoSimple_eq hB (V.value.support.sup (fun p ↦ p.2)) t hBmeas V
+      (fun p hp ↦ Finset.le_sup hp))
+
+/-- **The process on a simple integrand is B1a's `[0,t]` discrete integral**:
+`(V●B)_t = E[∫₀^∞ V dB | 𝓕_t]` a.e. -/
+lemma itoProcessL2Inf_simpleAssembly_ae (t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
+    (itoProcessL2Inf hB t hBmeas (simpleAssembly hBmeas V) : Ω → ℝ)
+      =ᵐ[μ] itoSimpleProcess hBmeas V t := by
+  rw [itoProcessL2Inf_apply]
+  have h := (Lp.memLp (itoIntegralL2 hB hBmeas (simpleAssembly hBmeas V))).condExpL2_ae_eq_condExp
+    (𝕜 := ℝ) ((natFiltration hBmeas).le t)
+  rw [Lp.toLp_coeFn] at h
+  exact h.trans (condExp_itoIntegralL2_simple hB t hBmeas V)
+
+/-- **The unbounded-horizon Itô process starts at zero**, `(f●B)_0 = 0`. On the dense simple
+processes this is `itoSimpleProcess_zero_time`, and both sides are continuous-linear in `f`. -/
+theorem itoProcessL2Inf_zero_time (hBmeas : ∀ u, Measurable (B u))
+    (f : Lp ℝ 2 ((timeMeasure.prod μ).trim
+      (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod)) :
+    itoProcessL2Inf hB 0 hBmeas f = 0 := by
+  refine congrFun (DenseRange.equalizer (simpleAssembly_denseRange (μ := μ) hBmeas)
+    (itoProcessL2Inf hB 0 hBmeas).continuous
+    (continuous_const (y := (0 : Lp ℝ 2 μ))) (funext fun V ↦ ?_)) f
+  refine Lp.ext ((itoProcessL2Inf_simpleAssembly_ae hB 0 hBmeas V).trans ?_)
+  rw [itoSimpleProcess_zero_time]
+  exact (Lp.coeFn_zero ℝ 2 μ).symm
 
 end ItoIntegralProcessL2Infinite
 end MathFin

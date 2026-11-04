@@ -36,22 +36,22 @@ noncomputable def planeDrift (G : ℝ × ℝ → ℝ) (t : ℝ≥0) (ω : ℝ≥
 noncomputable def planeResidual (G : ℝ × ℝ → ℝ) (t : ℝ≥0) (ω : ℝ≥0 → ℝ) : ℝ :=
   G (t,brownian t ω)-G (0,brownian 0 ω)-planeDrift G t ω
 
-theorem planeGenerator_continuous {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) :
+theorem planeGenerator_continuous {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G) :
     Continuous (planeGenerator G) :=
   (planePartial_contDiff hG (1,0)).continuous.add
     (continuous_const.mul (planePartial_contDiff (planePartial_contDiff hG (0,1)) (0,1)).continuous)
 
-theorem planeDrift_continuous {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
+theorem planeDrift_continuous {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G)
     (ω : ℝ≥0 → ℝ) : Continuous (fun t => planeDrift G t ω) :=
   MathFin.continuous_timeMeasure_primitive
     ((planeGenerator_continuous hG).comp (NNReal.continuous_coe.prodMk (continuous_brownian ω)))
 
-theorem planeResidual_continuous {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
+theorem planeResidual_continuous {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G)
     (ω : ℝ≥0 → ℝ) : Continuous (fun t => planeResidual G t ω) :=
   ((hG.continuous.comp (NNReal.continuous_coe.prodMk (continuous_brownian ω))).sub
     continuous_const).sub (planeDrift_continuous hG ω)
 
-theorem planeResidual_stronglyAdapted {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) :
+theorem planeResidual_stronglyAdapted {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G) :
     StronglyAdapted brownianFiltration (planeResidual G) := by
   intro t
   exact MathFin.residual_stronglyMeasurable measurable_brownian continuous_brownian
@@ -63,11 +63,11 @@ theorem planeResidual_stronglyAdapted {G : ℝ × ℝ → ℝ} (hG : ContDiff �
 theorem planeResidual_zero (G : ℝ × ℝ → ℝ) (ω : ℝ≥0 → ℝ) : planeResidual G 0 ω = 0 := by
   simp [planeResidual,planeDrift]
 
-theorem planeResidual_localMartingale {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) :
+theorem planeResidual_localMartingale {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G) :
     IsLocalMartingale (planeResidual G) brownianAugFiltration gaussianLimit := by
   obtain ⟨M,hMc,hM,he⟩ := plane_ito_localMartingale
     isBrownianReal_brownian.toIsPreBrownianReal measurable_brownian continuous_brownian
-    (hG.of_le (by norm_num))
+    hG
   apply isLocalMartingale_congr_ae hM
     (fun t => (planeResidual_stronglyAdapted hG t).mono (brownianFiltration_le_aug t))
     fun ω => (planeResidual_continuous hG ω).isCadlag
@@ -93,7 +93,7 @@ theorem planeDrift_norm_le {G : ℝ × ℝ → ℝ} {T t : ℝ≥0} {C : ℝ}
     MathFin.ItoIntegralL2.timeMeasure_Ioc,NNReal.coe_zero,sub_zero,
     ENNReal.toReal_ofReal t.coe_nonneg,mul_comm] using hh
 
-theorem planeResidual_stopped_martingale {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
+theorem planeResidual_stopped_martingale {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G)
     {T : ℝ≥0} (θ : StoppingRule brownianFiltration T) {A C : ℝ}
     (hb : ∀ s : ℝ≥0, s ≤ T → ∀ w : ℝ, ‖G (s,w)‖ ≤ A)
     (hL : ∀ s : ℝ≥0, s ≤ T → ∀ w : ℝ, ‖planeGenerator G (s,w)‖ ≤ C) :
@@ -127,7 +127,7 @@ theorem planeResidual_stopped_martingale {G : ℝ × ℝ → ℝ} (hG : ContDiff
     ((norm_sub_le _ _).trans (add_le_add (hb _ hs _) (hb 0 zero_le _)))
     ((planeDrift_norm_le hL hs ω).trans (mul_le_mul_of_nonneg_right (by exact_mod_cast hs) hC)))
 
-theorem planeResidual_expected_stopped_zero {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
+theorem planeResidual_expected_stopped_zero {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G)
     {T : ℝ≥0} (θ : StoppingRule brownianFiltration T) {A C : ℝ}
     (hb : ∀ s : ℝ≥0, s ≤ T → ∀ w : ℝ, ‖G (s,w)‖ ≤ A)
     (hL : ∀ s : ℝ≥0, s ≤ T → ∀ w : ℝ, ‖planeGenerator G (s,w)‖ ≤ C) :
@@ -137,7 +137,7 @@ theorem planeResidual_expected_stopped_zero {G : ℝ × ℝ → ℝ} (hG : ContD
   simpa only [setIntegral_univ,zero_min,planeResidual_zero,integral_zero,
     min_eq_right (θ.le_horizon _)] using he.symm
 
-theorem planeDrift_stronglyAdapted {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) :
+theorem planeDrift_stronglyAdapted {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G) :
     StronglyAdapted brownianFiltration (planeDrift G) := by
   intro t
   exact MathFin.driftPrimitive_stronglyMeasurable measurable_brownian continuous_brownian
@@ -146,7 +146,7 @@ theorem planeDrift_stronglyAdapted {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3
     (planePartial_contDiff hG (1,0)).continuous
     (planePartial_contDiff (planePartial_contDiff hG (0,1)) (0,1)).continuous t
 
-theorem planeDrift_stopped_integrable {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
+theorem planeDrift_stopped_integrable {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G)
     {T : ℝ≥0} (θ : StoppingRule brownianFiltration T) {C : ℝ}
     (hL : ∀ s : ℝ≥0, s ≤ T → ∀ w : ℝ, ‖planeGenerator G (s,w)‖ ≤ C) :
     Integrable (fun ω => planeDrift G (θ.time ω) ω) gaussianLimit := by
@@ -171,7 +171,7 @@ theorem planeValue_stopped_integrable {G : ℝ × ℝ → ℝ} (hG : Continuous 
   exact Eventually.of_forall (fun ω => hb _ (θ.le_horizon ω) _)
 
 /-- Dynkin's identity at any bounded raw Brownian stopping rule. -/
-theorem plane_dynkin_boundedRule {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
+theorem plane_dynkin_boundedRule {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G)
     {T : ℝ≥0} (θ : StoppingRule brownianFiltration T) {A C : ℝ}
     (hb : ∀ s : ℝ≥0, s ≤ T → ∀ w : ℝ, ‖G (s,w)‖ ≤ A)
     (hL : ∀ s : ℝ≥0, s ≤ T → ∀ w : ℝ, ‖planeGenerator G (s,w)‖ ≤ C) :
@@ -202,8 +202,8 @@ theorem planeGenerator_hasCompactSupport {G : ℝ × ℝ → ℝ} (hc : HasCompa
     HasCompactSupport (planeGenerator G) :=
   (hc.fderiv_apply ℝ (1,0)).add (((hc.fderiv_apply ℝ (0,1)).fderiv_apply ℝ (0,1)).mul_left)
 
-/-- Compactly supported C3 test functions discharge both boundedness obligations. -/
-theorem plane_dynkin_compact {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
+/-- Compactly supported C2 test functions discharge both boundedness obligations. -/
+theorem plane_dynkin_compact {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G)
     (hc : HasCompactSupport G) {T : ℝ≥0} (θ : StoppingRule brownianFiltration T) :
     (∫ ω, G (θ.time ω,brownian (θ.time ω) ω) ∂gaussianLimit) =
       G (0,0) + ∫ ω, planeDrift G (θ.time ω) ω ∂gaussianLimit := by

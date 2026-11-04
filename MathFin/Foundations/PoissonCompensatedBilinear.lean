@@ -212,13 +212,9 @@ private lemma integral_adapted_mul_compensated_sq_sub (N : PoissonRandomMeasure 
     (hDfin : referenceIntensity ν D ≠ ⊤) {φ : Ω → ℝ} (hφ : Measurable[N.pastFiltration s] φ)
     (hφint : Integrable φ P) :
     ∫ ω, φ ω * (N.compensated D ω) ^ 2 ∂P = (∫ ω, φ ω ∂P) * (referenceIntensity ν D).toReal := by
-  have hindep2 := (adapted_indepFun_compensated_sub N hDms hDsub hφ).comp
-    (φ := (id : ℝ → ℝ)) (ψ := fun x : ℝ => x ^ 2) measurable_id (by fun_prop)
-  simp only [Function.comp_def, id_eq] at hindep2
-  have hÑsq : Integrable (fun ω => (N.compensated D ω) ^ 2) P :=
-    (memLp_compensated N hDms hDfin).integrable_sq
-  rw [hindep2.integral_fun_mul_eq_mul_integral hφint.aestronglyMeasurable
-        hÑsq.aestronglyMeasurable, compensated_integral_sq N hDms hDfin]
+  rw [(adapted_indepFun_compensated_sub N hDms hDsub hφ).integral_mul_sq
+      hφint.aestronglyMeasurable (memLp_compensated N hDms hDfin).1,
+    compensated_integral_sq N hDms hDfin]
 
 /-- **The weighted future bilinear pairing** — the covariance carrying a past-adapted weight. For
 `φ` adapted at `s` and integrable, and `C, D ⊆ (s, ∞) × E` measurable finite-intensity,

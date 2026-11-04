@@ -10,8 +10,7 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.Verification
 /-! # Ordered bounded continuous-time optional sampling 
 ## Result
 
-Public entry points include `expected_gridValue_tendsto`,
-`expected_stoppedValue_le_of_le`.
+Public entry points include `expected_stoppedValue_le_of_le`.
 -/
 
 @[expose] public section
@@ -22,21 +21,6 @@ open Set Filter MeasureTheory
 open scoped NNReal Topology
 
 variable {Ω : Type*} [MeasurableSpace Ω] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
-
-theorem expected_gridValue_tendsto {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ}
-    (hU : Supermartingale U 𝓕 P) (hc : ∀ ω, Continuous (fun t => U t ω))
-    {C : ℝ} (hb : ∀ t ω, ‖U t ω‖ ≤ C) {T : ℝ≥0} (θ : StoppingRule 𝓕 T) :
-    Tendsto (fun n => ∫ ω, U ((gridIndex θ (gridStep n) ω : ℝ≥0)*gridStep n) ω ∂P)
-      atTop (𝓝 (∫ ω, U (θ.time ω) ω ∂P)) := by
-  have hm : Measurable U.uncurry := measurable_uncurry_of_continuous_of_measurable hc
-    (fun t => (hU.stronglyAdapted t).measurable.mono (𝓕.le t) le_rfl)
-  exact tendsto_integral_of_dominated_convergence (fun _ => C)
-    (fun n => (hm.comp ((show Measurable (fun ω =>
-      (gridIndex θ (gridStep n) ω : ℝ≥0)*gridStep n) by
-        exact ((measurable_from_nat : Measurable (fun i : ℕ => (i : ℝ≥0))).comp
-          (gridIndex_measurable θ)).mul_const _).prodMk measurable_id)).aestronglyMeasurable)
-    (integrable_const C) (fun _ => Eventually.of_forall (fun ω => hb _ ω))
-    (Eventually.of_forall (fun ω => ((hc ω).tendsto (θ.time ω)).comp (gridValue_time_tendsto θ ω)))
 
 theorem expected_stoppedValue_le_of_le {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ}
     (hU : Supermartingale U 𝓕 P) (hc : ∀ ω, Continuous (fun t => U t ω))

@@ -16,7 +16,7 @@ with it, the expectation form of that decomposition for the **constant-coefficie
 process `X_t = X₀ + b·t + σ·B_t`:
 
 * `expectation_pathIntegral_eq` — the Fubini interchange `𝔼[∫₀ᵀ g(s,ω) ds] = ∫₀ᵀ 𝔼[g(s,·)] ds`
-  for a family with measurable sections, every path continuous, and `|g| ≤ C` everywhere,
+  for a family with measurable sections, almost every path continuous, and `|g| ≤ C` everywhere,
   proved by pathwise Riemann sums
   (`tendsto_riemann_continuous`) + dominated convergence on both sides — no product-measure
   machinery, no Tonelli: boundedness makes both DCTs one-liners;
@@ -51,19 +51,47 @@ open ItoIntegralL2 ItoIntegralCLM ItoIntegralProcessGeneral QuadraticVariationL2
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
 
-/-- **Fubini for the path integral of a bounded path-continuous family** (the interchange the
-integrated Itô–drift identity needs):
+/-- The mean function of a bounded measurable family with almost surely continuous paths is
+continuous (dominated convergence, `continuous_of_dominated`, at the constant bound). -/
+lemma continuous_mean_of_bdd_cont {g : ℝ≥0 → Ω → ℝ}
+    (hgmeas : ∀ s, Measurable (g s)) (hgcont : ∀ᵐ ω ∂μ, Continuous fun s : ℝ≥0 ↦ g s ω)
+    {C : ℝ} (hgbdd : ∀ s ω, |g s ω| ≤ C) :
+    Continuous fun s : ℝ≥0 ↦ ∫ ω, g s ω ∂μ :=
+  continuous_of_dominated (bound := fun _ : Ω ↦ C) (fun s ↦ (hgmeas s).aestronglyMeasurable)
+    (fun s ↦ ae_of_all _ fun ω ↦ (Real.norm_eq_abs _).trans_le (hgbdd s ω))
+    (integrable_const C) hgcont
+
+/-- The mean of a uniformly bounded random variable is bounded by the same constant. -/
+lemma abs_mean_le {g : Ω → ℝ} {C : ℝ} (hg : ∀ ω, |g ω| ≤ C) : |∫ ω, g ω ∂μ| ≤ C := by
+  simpa using norm_integral_le_of_norm_le_const (μ := μ)
+    (ae_of_all _ fun ω ↦ (Real.norm_eq_abs _).trans_le (hg ω))
+
+/-- **The frozen Riemann convergence**: the left-endpoint Riemann sums of the deterministic
+mean function of a bounded measurable family with almost surely continuous paths converge to
+the time integral of the means (the deterministic `tendsto_riemann_continuous` applied to the
+mean function). -/
+theorem frozenRiemann_tendsto {g : ℝ≥0 → Ω → ℝ} {T : ℝ≥0}
+    (hgmeas : ∀ s, Measurable (g s)) (hgcont : ∀ᵐ ω ∂μ, Continuous fun s : ℝ≥0 ↦ g s ω)
+    {C : ℝ} (hgbdd : ∀ s ω, |g s ω| ≤ C) :
+    Tendsto (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
+        (∫ ω, g (unifPart T n k) ω ∂μ) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k))
+      atTop (𝓝 (∫ s in Set.Ioc 0 T, (∫ ω, g s ω ∂μ) ∂ItoIntegralL2.timeMeasure)) :=
+  tendsto_riemann_continuous (continuous_mean_of_bdd_cont hgmeas hgcont hgbdd) T
+    fun s _ ↦ abs_mean_le (hgbdd s)
+
+/-- **Fubini for the path integral of a bounded, almost surely path-continuous family** (the
+interchange the integrated Itô–drift identity needs):
 
   `𝔼[∫₀ᵀ g(s, ω) ds] = ∫₀ᵀ 𝔼[g(s, ·)] ds`
 
-for `g` with measurable sections, every `ω`-path continuous, and `|g s ω| ≤ C` for all `s`
-and `ω`. Proof shape: pathwise Riemann
+for `g` with measurable sections, almost every `ω`-path continuous, and `|g s ω| ≤ C` for
+all `s` and `ω`. Proof shape: pathwise Riemann
 sums (`tendsto_riemann_continuous` — deterministic, applied per `ω` and to the deterministic
 mean function `s ↦ 𝔼[g s]`) + dominated convergence (dominator `C·T`) for the expectation of
 the limit. No product measure, no Tonelli — boundedness makes both DCTs one-liners. -/
 theorem expectation_pathIntegral_eq {w : ℝ≥0 → Ω → ℝ}
     (hw_meas : ∀ s, Measurable (w s))
-    (hw_cont : ∀ ω, Continuous fun s : ℝ≥0 ↦ w s ω)
+    (hw_cont : ∀ᵐ ω ∂μ, Continuous fun s : ℝ≥0 ↦ w s ω)
     {C : ℝ} (hC0 : 0 ≤ C) (hw_bdd : ∀ s ω, |w s ω| ≤ C) (T : ℝ≥0) :
     ∫ ω, (∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure) ∂μ
       = ∫ s in Set.Ioc 0 T, (∫ ω, w s ω ∂μ) ∂ItoIntegralL2.timeMeasure := by
@@ -72,30 +100,15 @@ theorem expectation_pathIntegral_eq {w : ℝ≥0 → Ω → ℝ}
     Integrable.of_bound (hw_meas s).aestronglyMeasurable C
       (Eventually.of_forall fun ω ↦ by simpa [Real.norm_eq_abs] using hw_bdd s ω)
   -- the mean function `s ↦ 𝔼[w s]` is bounded by `C` and continuous in `s`
-  have hu_bdd : ∀ s, |∫ ω, w s ω ∂μ| ≤ C := by
-    intro s
-    calc |∫ ω, w s ω ∂μ| ≤ ∫ ω, |w s ω| ∂μ :=
-        MeasureTheory.abs_integral_le_integral_abs
-      _ ≤ ∫ ω, C ∂μ := integral_mono_of_nonneg
-          (Eventually.of_forall fun ω ↦ abs_nonneg _) (integrable_const C)
-          (Eventually.of_forall fun ω ↦ by simpa [Real.norm_eq_abs] using hw_bdd s ω)
-      _ = C := by rw [integral_const]; simp
-  have hu_cont : Continuous fun s : ℝ≥0 ↦ ∫ ω, w s ω ∂μ :=
-    continuous_iff_continuousAt.2 fun s₀ ↦
-      MeasureTheory.tendsto_integral_filter_of_dominated_convergence
-        (bound := fun _ : Ω ↦ C)
-        (Eventually.of_forall fun s ↦ (hw_meas s).aestronglyMeasurable)
-        (Eventually.of_forall fun s ↦ Eventually.of_forall fun ω ↦ by
-          simpa [Real.norm_eq_abs] using hw_bdd s ω)
-        (integrable_const C)
-        (Eventually.of_forall fun ω ↦ (hw_cont ω).continuousAt)
+  have hu_bdd (s : ℝ≥0) : |∫ ω, w s ω ∂μ| ≤ C := abs_mean_le (hw_bdd s)
+  have hu_cont := continuous_mean_of_bdd_cont hw_meas hw_cont hw_bdd
   -- pathwise Riemann convergence per `ω` (the tower's deterministic lemma,
   -- applied to each `ω`-path) and for the deterministic mean function
-  have hpath : ∀ ω : Ω, Tendsto
+  have hpath : ∀ᵐ ω ∂μ, Tendsto
       (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
           w (unifPart T n k) ω * ((unifPart T n (k + 1) : ℝ) - unifPart T n k))
       atTop (𝓝 (∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure)) :=
-    fun ω ↦ tendsto_riemann_continuous (h := fun s : ℝ≥0 ↦ w s ω) (hw_cont ω) T
+    hw_cont.mono fun ω h ↦ tendsto_riemann_continuous (h := fun s : ℝ≥0 ↦ w s ω) h T
       (fun s _ ↦ hw_bdd s ω)
   have hdet : Tendsto
       (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
@@ -148,7 +161,7 @@ theorem expectation_pathIntegral_eq {w : ℝ≥0 → Ω → ℝ}
       (fun n ↦ (hmeas_R n).aestronglyMeasurable) (integrable_const _)
       (fun n ↦ Eventually.of_forall fun (ω : Ω) ↦ by
         simpa [Real.norm_eq_abs] using hR_bound n ω)
-      (Eventually.of_forall fun ω ↦ hpath ω)
+      hpath
   -- the deterministic Riemann sums have the same values as `𝔼[R_n]` (finite sums),
   -- so the deterministic limit must be `𝔼[∫ w]`
   have hsum_eq : ∀ n : ℕ,
@@ -317,7 +330,7 @@ theorem ito_drift_expectation_identity
       _ = ∫ ω, (∫ s in Set.Ioc 0 T, g s ω ∂ItoIntegralL2.timeMeasure) ∂μ := by
           rw [integral_itoIntegralCLM_T hB T hBmeas gfx, zero_add]
       _ = ∫ s in Set.Ioc 0 T, (∫ ω, g s ω ∂μ) ∂ItoIntegralL2.timeMeasure :=
-          expectation_pathIntegral_eq hg_meas hg_cont hG0 hg_bdd T
+          expectation_pathIntegral_eq hg_meas (ae_of_all _ hg_cont) hG0 hg_bdd T
   linarith [hmain]
 
 end MathFin

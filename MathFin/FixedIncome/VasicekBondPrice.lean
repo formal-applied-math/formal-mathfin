@@ -82,6 +82,10 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
 the log bond price to the short rate, and the integral `∫₀ᵀ e^{−κs} ds`. -/
 noncomputable def vasicekBondB (κ T : ℝ) : ℝ := (1 - Real.exp (-(κ * T))) / κ
 
+/-- `B(τ) = (1 − e^{−κτ})/κ` is positive for `κ, τ > 0`. -/
+theorem vasicekBondB_pos {κ τ : ℝ} (hκ : 0 < κ) (hτ : 0 < τ) : 0 < vasicekBondB κ τ :=
+  div_pos (sub_pos.2 (Real.exp_lt_one_iff.2 (neg_neg_of_pos (mul_pos hκ hτ)))) hκ
+
 /-- The **integrated Vasicek kernel** `g(u) = (1 − e^{−κ(T−u)})/κ = ∫_u^T e^{−κ(s−u)} ds`
 — the deterministic integrand whose Wiener integral is the diffusion part of the
 integrated short rate. -/
@@ -92,6 +96,24 @@ noncomputable def vasicekIntegratedKernel (κ T : ℝ) : ℝ → ℝ :=
 `M(T) = ∫₀ᵀ (r₀e^{−κs} + θ(1 − e^{−κs})) ds = r₀·B(T) + θ·(T − B(T))`. -/
 noncomputable def vasicekIntegratedMean (r₀ θ κ T : ℝ) : ℝ :=
   r₀ * vasicekBondB κ T + θ * (T - vasicekBondB κ T)
+
+/-- The integrated mean `M(T)` is nonnegative (`κ > 0`, `v₀, θ, τ ≥ 0`):
+`0 ≤ B(τ) ≤ τ`. -/
+theorem vasicekIntegratedMean_nonneg {κ v₀ θ τ : ℝ} (hκ : 0 < κ) (hv : 0 ≤ v₀) (hθ : 0 ≤ θ)
+    (hτ : 0 ≤ τ) : 0 ≤ vasicekIntegratedMean v₀ θ κ τ := by
+  have hB0 : 0 ≤ vasicekBondB κ τ := by
+    rw [vasicekBondB]
+    refine div_nonneg ?_ hκ.le
+    have : Real.exp (-(κ * τ)) ≤ 1 := Real.exp_le_one_iff.mpr (by nlinarith)
+    linarith
+  have hBτ : vasicekBondB κ τ ≤ τ := by
+    rw [vasicekBondB, div_le_iff₀ hκ]
+    have := Real.add_one_le_exp (-(κ * τ))
+    nlinarith
+  rw [vasicekIntegratedMean]
+  have := mul_nonneg hv hB0
+  have := mul_nonneg hθ (sub_nonneg.mpr hBτ)
+  linarith
 
 /-- The variance of the integrated short rate's diffusion part (the `L²`-norm of
 the integrated kernel `g`): `V(T) = ∫₀ᵀ g² = T/κ² − 2(1−e^{−κT})/κ³ + (1−e^{−2κT})/(2κ³)`. -/

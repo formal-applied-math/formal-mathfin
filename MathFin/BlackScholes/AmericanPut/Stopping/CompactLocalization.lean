@@ -11,7 +11,7 @@ public import Mathlib.Geometry.Manifold.PartitionOfUnity
 /-!
 # Smooth price extensions around compact interior sets
 
-A single globally C3 compactly supported function agrees with the price on a
+A single globally C2 compactly supported function agrees with the price on a
 neighborhood of a whole compact subset of continuation. This strengthens the
 pointwise localization used by the local Ito calculation.
 
@@ -30,12 +30,12 @@ open scoped Topology ContDiff Manifold
 
 theorem exists_compact_set_localization {F : ℝ × ℝ → ℝ} {C U : Set (ℝ × ℝ)}
     (hC : IsCompact C) (hU : IsOpen U) (hCU : C ⊆ U)
-    (hF : ContDiffOn ℝ 3 F U) :
-    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 3 G ∧ HasCompactSupport G ∧
+    (hF : ContDiffOn ℝ 2 F U) :
+    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 2 G ∧ HasCompactSupport G ∧
       G =ᶠ[𝓝ˢ C] F := by
   obtain ⟨L,hL,hCL,hLU⟩ := exists_compact_between hC hU hCU
   obtain ⟨χ,hχone,hχzero,_⟩ :=
-    exists_contMDiffMap_one_nhds_of_subset_interior 𝓘(ℝ, ℝ × ℝ) hC.isClosed hCL (n := 3)
+    exists_contMDiffMap_one_nhds_of_subset_interior 𝓘(ℝ, ℝ × ℝ) hC.isClosed hCL (n := 2)
   have hsupp : tsupport χ ⊆ L := by
     apply hL.isClosed.closure_subset_iff.mpr
     intro z hz
@@ -77,13 +77,13 @@ theorem brownianPriceKernel_compact_localization {p : ℝ → ℝ → ℝ} {b : 
     (hp : Boundary.DividendPutSolution (Boundary.normalizedRate r σ)
         (Boundary.normalizedRate q σ) p b)
     (hσ : 0 < σ) (hC : IsCompact C) (hCU : C ⊆ kernelContinuation b r q σ x₀ T) :
-    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 3 G ∧ HasCompactSupport G ∧
+    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 2 G ∧ HasCompactSupport G ∧
       G =ᶠ[𝓝ˢ C] (fun z => brownianPriceKernel p K r q σ x₀ T z.1 z.2) ∧
       ∀ z ∈ C, planeGenerator G z = 0 := by
   obtain ⟨G,hG,hcompact,heq⟩ := exists_compact_set_localization hC
     (kernelContinuation_isOpen hp hσ) hCU (fun z hz =>
       ((brownianPriceKernel_contDiffAt (K := K) hp hσ hz.1 hz.2).of_le
-        (show (3 : WithTop ℕ∞) ≤ ∞ from WithTop.coe_le_coe.mpr le_top)).contDiffWithinAt)
+        (show (2 : WithTop ℕ∞) ≤ ∞ from WithTop.coe_le_coe.mpr le_top)).contDiffWithinAt)
   refine ⟨G,hG,hcompact,heq,?_⟩
   intro z hzC
   have hz := heq.filter_mono (nhds_le_nhdsSet hzC)

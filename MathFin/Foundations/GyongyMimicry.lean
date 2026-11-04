@@ -13,6 +13,7 @@ public import MathFin.Foundations.ItoIntegralCLM
 public import MathFin.Foundations.AdaptedDrift
 public import MathFin.Foundations.ItoIntegralCrossHorizon
 public import MathFin.Foundations.ItoFormulaAdaptedDrift
+public import MathFin.Foundations.WeakForwardUniqueness
 
 /-! # Gyöngy mimicry — the generator-matching core and the weak forward equation
 
@@ -68,11 +69,15 @@ Public API (all in namespace `MathFin.GyongyMimicry`):
   identities `hitoid_constructed_terminal` / `hitoid_constructed_band`, and the weak
   forward equation in both forms;
 * `exists_driftCoeff_fn`, `exists_diffCoeffSq_fn`, `marginal_flow_weak_equation_fn_constructed`,
-  `gyongy_mimicry_gated` — the coefficient functions and the mimicry statement.
+  `gyongy_mimicry_gated` — the coefficient functions and the mimicry statement; its flow
+  uniqueness hypothesis `hgate` is stated for `MathFin.IsWeakForwardFlow`, whose
+  constant-coefficient instance is proved by `MathFin.weakForwardUniqueConst`;
+* `gyongy_mimicry_const` — `gyongy_mimicry_gated` at constant coefficients, with `hgate`
+  supplied by `MathFin.weakForwardUniqueConst`.
 
 Supporting lemmas (`integrable_testβ`, `integrable_testδsq`, `hasDerivAt_marginal_flow_core`,
-`constructedGenIntegrandExp_eq`, `exists_coeffFn_comp`,
-`hitoid_constructed_fn_Ioc`) are `private`.
+`constructedGenIntegrandExp_eq`, `exists_coeffFn_comp`, `hitoid_constructed_fn_Ioc`,
+`intervalIntegrable_constructed_fn`, `contDiff_two_of_hasDerivAt_chain`) are `private`.
 -/
 
 @[expose] public section
@@ -139,6 +144,19 @@ theorem continuous_f2_of_contDiff2 {f f' f'' : ℝ → ℝ} (h2 : ContDiff ℝ 2
   have hderivf' : deriv f' = f'' := funext fun x => (hf' x).deriv
   rw [← hderivf', ← hderivf]
   exact h1.continuous_deriv le_rfl
+
+/-- `ContDiff ℝ 2 g` follows from the three-step `HasDerivAt` chain `g, g', g'', g'''`: the
+converse of `continuous_f2_of_contDiff2`. -/
+private lemma contDiff_two_of_hasDerivAt_chain {g g' g'' g''' : ℝ → ℝ}
+    (h1 : ∀ x, HasDerivAt g (g' x) x) (h2 : ∀ x, HasDerivAt g' (g'' x) x)
+    (h3 : ∀ x, HasDerivAt g'' (g''' x) x) : ContDiff ℝ 2 g := by
+  have hderivg : deriv g = g' := funext fun x => (h1 x).deriv
+  have hderivg' : deriv g' = g'' := funext fun x => (h2 x).deriv
+  rw [show (2 : WithTop ℕ∞) = 1 + 1 from rfl, contDiff_succ_iff_deriv]
+  refine ⟨fun x => (h1 x).differentiableAt, by simp, ?_⟩
+  rw [hderivg, contDiff_one_iff_deriv, hderivg']
+  exact ⟨fun x => (h2 x).differentiableAt,
+    continuous_iff_continuousAt.2 fun x => (h3 x).differentiableAt.continuousAt⟩
 
 end Smoothness
 
@@ -676,7 +694,7 @@ private theorem constructedGenIntegrandExp_eq
                           mul_le_mul_of_nonneg_left
                             ((hδbdd (Real.toNNReal x) ω).trans (le_abs_self Dd))
                             (abs_nonneg Dd)) hC2)
-  show (∫ ω, f' (reindexed X x ω) * reindexed β x ω ∂μ)
+  change (∫ ω, f' (reindexed X x ω) * reindexed β x ω ∂μ)
     + (1 / 2) * (∫ ω, f'' (reindexed X x ω) * (reindexed δ x ω * reindexed δ x ω) ∂μ)
     = ∫ ω, (f' (reindexed X x ω) * reindexed β x ω
         + 1 / 2 * (f'' (reindexed X x ω) * (reindexed δ x ω * reindexed δ x ω))) ∂μ
@@ -1017,14 +1035,14 @@ theorem marginal_flow_weak_equation_fn_constructed
           * driftCoeff μ (reindexed X) (reindexed β) t ω ∂μ)
       = (∫ ω, f' (X (Real.toNNReal t) ω) * afn t (X (Real.toNNReal t) ω) ∂μ) :=
     integral_congr_ae (Eventually.of_forall fun ω => by
-      show f' (X (Real.toNNReal t) ω) * driftCoeff μ (reindexed X) (reindexed β) t ω
+      change f' (X (Real.toNNReal t) ω) * driftCoeff μ (reindexed X) (reindexed β) t ω
         = f' (X (Real.toNNReal t) ω) * afn t (X (Real.toNNReal t) ω)
       rw [(hafn t).2 ω])
   have e2 : (∫ ω, f'' (X (Real.toNNReal t) ω)
           * diffCoeffSq μ (reindexed X) (reindexed δ) t ω ∂μ)
       = (∫ ω, f'' (X (Real.toNNReal t) ω) * bfn t (X (Real.toNNReal t) ω) ∂μ) :=
     integral_congr_ae (Eventually.of_forall fun ω => by
-      show f'' (X (Real.toNNReal t) ω) * diffCoeffSq μ (reindexed X) (reindexed δ) t ω
+      change f'' (X (Real.toNNReal t) ω) * diffCoeffSq μ (reindexed X) (reindexed δ) t ω
         = f'' (X (Real.toNNReal t) ω) * bfn t (X (Real.toNNReal t) ω)
       rw [(hbfn t).2 ω])
   rw [← e1, ← e2]
@@ -1081,7 +1099,7 @@ private theorem constructedGenIntegrandExp_fn
               hMadap c hXcont hXrel) x hf'meas hg1
       _ = (∫ ω, f' (X (Real.toNNReal x) ω) * afn x (X (Real.toNNReal x) ω) ∂μ) :=
           integral_congr_ae (Eventually.of_forall fun ω => by
-            show f' (reindexed X x ω) * driftCoeff μ (reindexed X) (reindexed β) x ω
+            change f' (reindexed X x ω) * driftCoeff μ (reindexed X) (reindexed β) x ω
               = f' (X (Real.toNNReal x) ω) * afn x (X (Real.toNNReal x) ω)
             rw [hafnRep x ω])
   have e2 : (∫ ω, f'' (reindexed X x ω) * (reindexed δ x ω * reindexed δ x ω) ∂μ)
@@ -1094,12 +1112,60 @@ private theorem constructedGenIntegrandExp_fn
               hMadap c hXcont hXrel) x hf''meas hg2
       _ = (∫ ω, f'' (X (Real.toNNReal x) ω) * bfn x (X (Real.toNNReal x) ω) ∂μ) :=
           integral_congr_ae (Eventually.of_forall fun ω => by
-            show f'' (reindexed X x ω) * diffCoeffSq μ (reindexed X) (reindexed δ) x ω
+            change f'' (reindexed X x ω) * diffCoeffSq μ (reindexed X) (reindexed δ) x ω
               = f'' (X (Real.toNNReal x) ω) * bfn x (X (Real.toNNReal x) ω)
             rw [hbfnRep x ω])
-  show (∫ ω, f' (reindexed X x ω) * reindexed β x ω ∂μ)
+  change (∫ ω, f' (reindexed X x ω) * reindexed β x ω ∂μ)
       + 1 / 2 * (∫ ω, f'' (reindexed X x ω) * (reindexed δ x ω * reindexed δ x ω) ∂μ) = _
   rw [e1, e2]
+
+/-- The coefficient-function generator integrand of the constructed process is continuous in
+time, hence interval-integrable: it is `constructedGenIntegrandExp`
+(`constructedGenIntegrandExp_fn`), whose continuity is the dominated-convergence interchange
+`continuous_marginal_integrand` for the constructed instance. -/
+private theorem intervalIntegrable_constructed_fn
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
+    {B : ℝ≥0 → Ω → ℝ} (hBmeas : ∀ t, Measurable (B t))
+    {β : ℝ≥0 → Ω → ℝ}
+    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
+    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
+    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
+    {δ : ℝ≥0 → Ω → ℝ}
+    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
+    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
+    {Dd : ℝ} (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
+    {M : ℝ≥0 → Ω → ℝ}
+    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
+    {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
+    (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
+    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
+    {afn bfn : ℝ → ℝ → ℝ}
+    (hafnRep : ∀ (s : ℝ) (ω : Ω), driftCoeff μ (reindexed X) (reindexed β) s ω
+      = afn s (X (Real.toNNReal s) ω))
+    (hbfnRep : ∀ (s : ℝ) (ω : Ω), diffCoeffSq μ (reindexed X) (reindexed δ) s ω
+      = bfn s (X (Real.toNNReal s) ω))
+    {f f' f'' : ℝ → ℝ}
+    (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
+    (h2 : ContDiff ℝ 2 f)
+    {C1 C2 : ℝ} (hg1 : ∀ x, |f' x| ≤ C1) (hg2 : ∀ x, |f'' x| ≤ C2) (a b : ℝ) :
+    IntervalIntegrable
+      (fun x => (∫ ω, f' (X (Real.toNNReal x) ω) * afn x (X (Real.toNNReal x) ω) ∂μ)
+        + 1 / 2 * (∫ ω, f'' (X (Real.toNNReal x) ω) * bfn x (X (Real.toNNReal x) ω) ∂μ))
+      volume a b := by
+  have hf'cont : Continuous f' :=
+    (show Differentiable ℝ f' from fun x => (hf' x).differentiableAt).continuous
+  have hfun : (fun x => (∫ ω, f' (X (Real.toNNReal x) ω) * afn x (X (Real.toNNReal x) ω) ∂μ)
+        + 1 / 2 * (∫ ω, f'' (X (Real.toNNReal x) ω) * bfn x (X (Real.toNNReal x) ω) ∂μ))
+      = fun s => ∫ ω, generatorIntegrand (reindexed X) (reindexed β) (reindexed δ) f' f'' s ω
+          ∂μ :=
+    funext fun x => (constructedGenIntegrandExp_fn hBmeas hβadap hβcont hβbdd hδadap hδcont
+      hδbdd hMadap c hXcont hXrel hafnRep hbfnRep hf hf' h2 hg1 hg2 x).symm.trans
+        (constructedGenIntegrandExp_eq hBmeas hβadap hβcont hβbdd hδadap hδbdd hMadap c hXrel
+          hf hf' h2 hg1 hg2 x)
+  rw [hfun]
+  exact (continuous_marginal_integrand
+    (constructedCoeffData hBmeas hβadap hβcont hβbdd hδadap hδcont hδbdd hMadap c hXcont hXrel)
+    hf'cont (continuous_f2_of_contDiff2 h2 hf hf') hg1 hg2).intervalIntegrable a b
 
 /-- The integrated forward identity of the constructed process in **coefficient-function
 form**, on the whole time band `(0, ↑T]`: for every test
@@ -1188,12 +1254,15 @@ the same initial law, and `hgate` turns the two solutions into equal one-time ma
 * (ii) `hyflow` — the Y-side integrated forward identity for the test class: for every
   `C²` test function with bounded first, second and third derivatives (the third
   derivative is what the X-side identities require), `∫ f(Y_s) = ∫ f(Y_0) +
-  ∫_{(0,s]} (𝔼[f'(Y_x)·â(x, Y_x)] + ½ 𝔼[f''(Y_x)·b̂²(x, Y_x)]) dx` on `s ∈ (0, ↑T]` — the
-  expectation characterization of `dY = â(t,Y) dt + b(t,Y) dW`;
+  ∫_{(0,s]} (𝔼[f'(Y_x)·â(x, Y_x)] + ½ 𝔼[f''(Y_x)·b̂²(x, Y_x)]) dx` on `s ∈ (0, ↑T]`, together
+  with the interval-integrability of that integrand on `[0, s]` (so the interval integral is
+  not a junk value) — the expectation characterization of `dY = â(t,Y) dt + b(t,Y) dW`;
 * (iii) `hY0law` — `Y_0` has the same law as `X_0` (`HasLaw` form);
-* (iv) `hgate` — flow uniqueness: two probability-measure flows solving the weak forward
-  equation of `GyongyMimicry.marginal_flow_weak_equation_fn_constructed` (integrated form,
-  every test function of the class) from the same initial law coincide;
+* (iv) `hgate` — flow uniqueness: two flows solving `MathFin.IsWeakForwardFlow afn bfn T` (the
+  weak forward equation of `GyongyMimicry.marginal_flow_weak_equation_fn_constructed` in
+  integrated form, every test function of the class, with integrable generator) from the
+  same initial law coincide on `(0, ↑T]`. For constant coefficients this is
+  `MathFin.weakForwardUniqueConst`;
 
 then at every `t ∈ (0, ↑T]` and every `C²` test `f`, `∫ f(Y_t) ∂ν = ∫ f(X_{t⁺}) ∂μ` — the
 one-time marginals of `Y` mimic those of the constructed `X`.
@@ -1237,29 +1306,15 @@ theorem gyongy_mimicry_gated
       (∀ x, HasDerivAt f'' (f''' x) x) →
       (∀ x, |f' x| ≤ C1) → (∀ x, |f'' x| ≤ C2) → (∀ x, |f''' x| ≤ C3) →
       ∀ s ∈ Set.Ioc (0:ℝ) (T:ℝ),
-      ∫ ω, f (Y s ω) ∂ν = ∫ ω, f (Y 0 ω) ∂ν
+      (∫ ω, f (Y s ω) ∂ν = ∫ ω, f (Y 0 ω) ∂ν
         + ∫ x in (0)..s, ((∫ ω, f' (Y x ω) * afn x (Y x ω) ∂ν)
-          + 1 / 2 * (∫ ω, f'' (Y x ω) * bfn x (Y x ω) ∂ν)))
+          + 1 / 2 * (∫ ω, f'' (Y x ω) * bfn x (Y x ω) ∂ν))) ∧
+      IntervalIntegrable
+        (fun x => (∫ ω, f' (Y x ω) * afn x (Y x ω) ∂ν)
+          + 1 / 2 * (∫ ω, f'' (Y x ω) * bfn x (Y x ω) ∂ν)) volume 0 s)
     (hgate : ∀ (ρ η : ℝ → Measure ℝ),
-      (∀ s, IsProbabilityMeasure (ρ s)) → (∀ s, IsProbabilityMeasure (η s)) →
-      (∀ (g g' g'' g''' : ℝ → ℝ) (C1 C2 C3 : ℝ),
-        (∀ x, HasDerivAt g (g' x) x) → (∀ x, HasDerivAt g' (g'' x) x) → ContDiff ℝ 2 g →
-        (∀ x, HasDerivAt g'' (g''' x) x) →
-        (∀ x, |g' x| ≤ C1) → (∀ x, |g'' x| ≤ C2) → (∀ x, |g''' x| ≤ C3) →
-        ∀ s ∈ Set.Ioc (0:ℝ) (T:ℝ),
-        ∫ y, g y ∂(ρ s) = ∫ y, g y ∂(ρ 0)
-          + ∫ x in (0)..s, ((∫ y, g' y * afn x y ∂(ρ x))
-            + 1 / 2 * (∫ y, g'' y * bfn x y ∂(ρ x)))) →
-      (∀ (g g' g'' g''' : ℝ → ℝ) (C1 C2 C3 : ℝ),
-        (∀ x, HasDerivAt g (g' x) x) → (∀ x, HasDerivAt g' (g'' x) x) → ContDiff ℝ 2 g →
-        (∀ x, HasDerivAt g'' (g''' x) x) →
-        (∀ x, |g' x| ≤ C1) → (∀ x, |g'' x| ≤ C2) → (∀ x, |g''' x| ≤ C3) →
-        ∀ s ∈ Set.Ioc (0:ℝ) (T:ℝ),
-        ∫ y, g y ∂(η s) = ∫ y, g y ∂(η 0)
-          + ∫ x in (0)..s, ((∫ y, g' y * afn x y ∂(η x))
-            + 1 / 2 * (∫ y, g'' y * bfn x y ∂(η x)))) →
-      ρ 0 = η 0 →
-      ∀ s ∈ Set.Ioc (0:ℝ) (T:ℝ), ρ s = η s)
+      IsWeakForwardFlow afn bfn (T:ℝ) ρ → IsWeakForwardFlow afn bfn (T:ℝ) η →
+      ρ 0 = η 0 → ∀ s ∈ Set.Ioc (0:ℝ) (T:ℝ), ρ s = η s)
     {f : ℝ → ℝ} (h2 : ContDiff ℝ 2 f)
     (t : ℝ) (ht : 0 < t) (htT : t ≤ (T:ℝ)) :
     ∫ ω, f (Y t ω) ∂ν = ∫ ω, f (X (Real.toNNReal t) ω) ∂μ := by
@@ -1268,16 +1323,16 @@ theorem gyongy_mimicry_gated
     (constructedCoeffData hBmeas hβadap hβcont hβbdd hδadap hδcont hδbdd hMadap c
       hXcont hXrel).hXmeas s
   have hfmeas : Measurable f := h2.continuous.measurable
+  -- both law flows are probability flows
+  have hρprob : ∀ s, IsProbabilityMeasure (Measure.map (Y s) ν) := fun s =>
+    ν.isProbabilityMeasure_map (hYmeas s).aemeasurable
+  have hηprob : ∀ s, IsProbabilityMeasure (Measure.map (fun ω => X (Real.toNNReal s) ω) μ) :=
+    fun s => μ.isProbabilityMeasure_map (hXm s).aemeasurable
   -- the Y-side law flow solves the weak forward equation (map form), from `hyflow`
-  have hρflow : ∀ (g g' g'' g''' : ℝ → ℝ) (C1 C2 C3 : ℝ),
-      (∀ x, HasDerivAt g (g' x) x) → (∀ x, HasDerivAt g' (g'' x) x) → ContDiff ℝ 2 g →
-      (∀ x, HasDerivAt g'' (g''' x) x) →
-      (∀ x, |g' x| ≤ C1) → (∀ x, |g'' x| ≤ C2) → (∀ x, |g''' x| ≤ C3) →
-      ∀ s ∈ Set.Ioc (0:ℝ) (T:ℝ),
-      ∫ y, g y ∂(Measure.map (Y s) ν) = ∫ y, g y ∂(Measure.map (Y 0) ν)
-        + ∫ x in (0)..s, ((∫ y, g' y * afn x y ∂(Measure.map (Y x) ν))
-          + 1 / 2 * (∫ y, g'' y * bfn x y ∂(Measure.map (Y x) ν))) := by
-    intro g g' g'' g''' C1 C2 C3 hgd1 hgd2 hgd3 hgd4 hgb1 hgb2 hgb3 s hs
+  have hρflow : IsWeakForwardFlow afn bfn (T:ℝ) (fun s => Measure.map (Y s) ν) := by
+    refine ⟨hρprob, fun g g' g'' g''' C1 C2 C3 hgd1 hgd2 hgd4 hgb1 hgb2 hgb3 s hs => ?_⟩
+    beta_reduce
+    have hgd3 : ContDiff ℝ 2 g := contDiff_two_of_hasDerivAt_chain hgd1 hgd2 hgd4
     have hy := hyflow g g' g'' g''' C1 C2 C3 hgd1 hgd2 hgd3 hgd4 hgb1 hgb2 hgb3 s hs
     have hgm : Measurable g := hgd3.continuous.measurable
     have hgd' : Differentiable ℝ g' := fun x => (hgd2 x).differentiableAt
@@ -1295,31 +1350,26 @@ theorem gyongy_mimicry_gated
         = (∫ ω, g'' (Y x ω) * bfn x (Y x ω) ∂ν) := fun x =>
       integral_map (hYmeas x).aemeasurable
         ((hgm''.mul (hbfn x)).stronglyMeasurable.aestronglyMeasurable)
-    have hI : (∫ x in (0)..s, ((∫ y, g' y * afn x y ∂(Measure.map (Y x) ν))
-          + 1 / 2 * (∫ y, g'' y * bfn x y ∂(Measure.map (Y x) ν))))
-        = (∫ x in (0)..s, ((∫ ω, g' (Y x ω) * afn x (Y x ω) ∂ν)
-          + 1 / 2 * (∫ ω, g'' (Y x ω) * bfn x (Y x ω) ∂ν))) :=
-      intervalIntegral.integral_congr fun x _ => by rw [t2 x, t3 x]
-    rw [t1, t0, hI]
+    have hfun : (fun x => (∫ y, g' y * afn x y ∂(Measure.map (Y x) ν))
+          + 1 / 2 * (∫ y, g'' y * bfn x y ∂(Measure.map (Y x) ν)))
+        = fun x => (∫ ω, g' (Y x ω) * afn x (Y x ω) ∂ν)
+          + 1 / 2 * (∫ ω, g'' (Y x ω) * bfn x (Y x ω) ∂ν) :=
+      funext fun x => by rw [t2 x, t3 x]
+    rw [t1, t0, hfun]
     exact hy
   -- the X-side law flow solves the same equation (map form), from the integrated
   -- coefficient-function identity of the constructed process
-  have hηflow : ∀ (g g' g'' g''' : ℝ → ℝ) (C1 C2 C3 : ℝ),
-      (∀ x, HasDerivAt g (g' x) x) → (∀ x, HasDerivAt g' (g'' x) x) → ContDiff ℝ 2 g →
-      (∀ x, HasDerivAt g'' (g''' x) x) →
-      (∀ x, |g' x| ≤ C1) → (∀ x, |g'' x| ≤ C2) → (∀ x, |g''' x| ≤ C3) →
-      ∀ s ∈ Set.Ioc (0:ℝ) (T:ℝ),
-      ∫ y, g y ∂(Measure.map (fun ω => X (Real.toNNReal s) ω) μ)
-        = ∫ y, g y ∂(Measure.map (fun ω => X (Real.toNNReal 0) ω) μ)
-        + ∫ x in (0)..s, ((∫ y, g' y * afn x y
-            ∂(Measure.map (fun ω => X (Real.toNNReal x) ω) μ))
-          + 1 / 2 * (∫ y, g'' y * bfn x y
-            ∂(Measure.map (fun ω => X (Real.toNNReal x) ω) μ))) := by
-    intro g g' g'' g''' C1 C2 C3 hgd1 hgd2 hgd3 hgd4 hgb1 hgb2 hgb3 s hs
+  have hηflow : IsWeakForwardFlow afn bfn (T:ℝ)
+      (fun s => Measure.map (fun ω => X (Real.toNNReal s) ω) μ) := by
+    refine ⟨hηprob, fun g g' g'' g''' C1 C2 C3 hgd1 hgd2 hgd4 hgb1 hgb2 hgb3 s hs => ?_⟩
+    beta_reduce
+    have hgd3 : ContDiff ℝ 2 g := contDiff_two_of_hasDerivAt_chain hgd1 hgd2 hgd4
     have hx := hitoid_constructed_fn_Ioc hB hBmeas hβadap hβcont hβbdd hδadap hδcont hδbdd
       hMadap hMeq c hXcont hXrel hafnRep hbfnRep g g' g'' g''' hgd1 hgd2 hgd3 hgd4 hgb1 hgb2
       hgb3 hs
     rw [show (0:ℝ≥0) = Real.toNNReal (0:ℝ) from Real.toNNReal_zero.symm] at hx
+    have hxi := intervalIntegrable_constructed_fn hBmeas hβadap hβcont hβbdd hδadap hδcont
+      hδbdd hMadap c hXcont hXrel hafnRep hbfnRep hgd1 hgd2 hgd3 hgb1 hgb2 0 s
     have hgm : Measurable g := hgd3.continuous.measurable
     have hgd' : Differentiable ℝ g' := fun x => (hgd2 x).differentiableAt
     have hgm' : Measurable g' := hgd'.continuous.measurable
@@ -1340,22 +1390,15 @@ theorem gyongy_mimicry_gated
         = (∫ ω, g'' (X (Real.toNNReal x) ω) * bfn x (X (Real.toNNReal x) ω) ∂μ) := fun x =>
       integral_map (hXm x).aemeasurable
         ((hgm''.mul (hbfn x)).stronglyMeasurable.aestronglyMeasurable)
-    have hI : (∫ x in (0)..s, ((∫ y, g' y * afn x y
+    have hfun : (fun x => (∫ y, g' y * afn x y
             ∂(Measure.map (fun ω => X (Real.toNNReal x) ω) μ))
           + 1 / 2 * (∫ y, g'' y * bfn x y
-            ∂(Measure.map (fun ω => X (Real.toNNReal x) ω) μ))))
-        = (∫ x in (0)..s, ((∫ ω, g' (X (Real.toNNReal x) ω)
-            * afn x (X (Real.toNNReal x) ω) ∂μ)
-          + 1 / 2 * (∫ ω, g'' (X (Real.toNNReal x) ω)
-            * bfn x (X (Real.toNNReal x) ω) ∂μ))) :=
-      intervalIntegral.integral_congr fun x _ => by rw [t2 x, t3 x]
-    rw [t1, t0, hI]
-    exact hx
-  -- both law flows are probability flows
-  have hρprob : ∀ s, IsProbabilityMeasure (Measure.map (Y s) ν) := fun s =>
-    inferInstance
-  have hηprob : ∀ s, IsProbabilityMeasure (Measure.map (fun ω => X (Real.toNNReal s) ω) μ) :=
-    fun s => inferInstance
+            ∂(Measure.map (fun ω => X (Real.toNNReal x) ω) μ)))
+        = fun x => (∫ ω, g' (X (Real.toNNReal x) ω) * afn x (X (Real.toNNReal x) ω) ∂μ)
+          + 1 / 2 * (∫ ω, g'' (X (Real.toNNReal x) ω) * bfn x (X (Real.toNNReal x) ω) ∂μ) :=
+      funext fun x => by rw [t2 x, t3 x]
+    rw [t1, t0, hfun]
+    exact ⟨hx, hxi⟩
   -- the initial laws agree (`Y₀` has the law of `X₀`)
   have hz : (fun ω => X (Real.toNNReal (0:ℝ)) ω) = (X 0) := by
     funext ω
@@ -1365,7 +1408,7 @@ theorem gyongy_mimicry_gated
     exact hY0law.map_eq
   -- flow uniqueness: two flows solving the same equation from the same initial law coincide
   have hfin := hgate (fun s => Measure.map (Y s) ν)
-    (fun s => Measure.map (fun ω => X (Real.toNNReal s) ω) μ) hρprob hηprob hρflow hηflow h0
+    (fun s => Measure.map (fun ω => X (Real.toNNReal s) ω) μ) hρflow hηflow h0
     t ⟨ht, htT⟩
   -- read the measure equality through `integral_map`
   calc ∫ ω, f (Y t ω) ∂ν = ∫ y, f y ∂(Measure.map (Y t) ν) :=
@@ -1375,6 +1418,59 @@ theorem gyongy_mimicry_gated
     _ = ∫ ω, f (X (Real.toNNReal t) ω) ∂μ :=
         integral_map (hXm t).aemeasurable hfmeas.stronglyMeasurable.aestronglyMeasurable
 
+/-- **Thm 9.6's one-time-marginal mimicry at constant coefficients, with no gate hypothesis.**
+`gyongy_mimicry_gated` at `afn ≡ b`, `bfn ≡ v`: its flow-uniqueness hypothesis `hgate` is
+supplied by `MathFin.weakForwardUniqueConst`. The hypotheses are those of
+`gyongy_mimicry_gated` with the coefficient functions replaced by the constants: the
+conditional expectations `driftCoeff`, `diffCoeffSq` of the constructed `X` equal `b`, `v`
+pointwise (`hafnRep`, `hbfnRep`), and `hyflow` is the Y-side forward identity with the
+constants `b`, `v` (with interval-integrable integrand). The conclusion is that of
+`gyongy_mimicry_gated`: `∫ f(Y_t) ∂ν = ∫ f(X_{t⁺}) ∂μ` for every `C²` test `f` and
+`t ∈ (0, ↑T]`. -/
+theorem gyongy_mimicry_const
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
+    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
+    {T : ℝ≥0} {β : ℝ≥0 → Ω → ℝ}
+    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
+    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
+    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
+    {δ : ℝ≥0 → Ω → ℝ}
+    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
+    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
+    {Dd : ℝ} (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
+    {M : ℝ≥0 → Ω → ℝ}
+    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
+    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
+      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
+    (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
+    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
+    {Ω' : Type*} [mΩ' : MeasurableSpace Ω'] {ν : Measure Ω'} [IsProbabilityMeasure ν]
+    (Y : ℝ → Ω' → ℝ) (hYmeas : ∀ s, Measurable (Y s))
+    {b v : ℝ}
+    (hafnRep : ∀ (s : ℝ) (ω : Ω), driftCoeff μ (reindexed X) (reindexed β) s ω
+      = b)
+    (hbfnRep : ∀ (s : ℝ) (ω : Ω), diffCoeffSq μ (reindexed X) (reindexed δ) s ω
+      = v)
+    (hY0law : HasLaw (Y 0) (μ.map fun ω => X 0 ω) ν)
+    (hyflow : ∀ (f f' f'' f''' : ℝ → ℝ) (C1 C2 C3 : ℝ),
+      (∀ x, HasDerivAt f (f' x) x) → (∀ x, HasDerivAt f' (f'' x) x) → ContDiff ℝ 2 f →
+      (∀ x, HasDerivAt f'' (f''' x) x) →
+      (∀ x, |f' x| ≤ C1) → (∀ x, |f'' x| ≤ C2) → (∀ x, |f''' x| ≤ C3) →
+      ∀ s ∈ Set.Ioc (0:ℝ) (T:ℝ),
+      (∫ ω, f (Y s ω) ∂ν = ∫ ω, f (Y 0 ω) ∂ν
+        + ∫ x in (0)..s, ((∫ ω, f' (Y x ω) * b ∂ν)
+          + 1 / 2 * (∫ ω, f'' (Y x ω) * v ∂ν))) ∧
+      IntervalIntegrable
+        (fun x => (∫ ω, f' (Y x ω) * b ∂ν)
+          + 1 / 2 * (∫ ω, f'' (Y x ω) * v ∂ν)) volume 0 s)
+    {f : ℝ → ℝ} (h2 : ContDiff ℝ 2 f)
+    (t : ℝ) (ht : 0 < t) (htT : t ≤ (T:ℝ)) :
+    ∫ ω, f (Y t ω) ∂ν = ∫ ω, f (X (Real.toNNReal t) ω) ∂μ :=
+  gyongy_mimicry_gated (afn := fun _ _ ↦ b) (bfn := fun _ _ ↦ v) hB hBmeas hβadap hβcont hβbdd
+    hδadap hδcont hδbdd hMadap hMeq c hXcont hXrel Y hYmeas (fun _ ↦ measurable_const)
+    (fun _ ↦ measurable_const) hafnRep hbfnRep hY0law hyflow
+    (fun _ _ hρ hη h0 ↦ weakForwardUniqueConst hρ hη h0) h2 t ht htT
 
 end Fn
 

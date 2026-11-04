@@ -78,11 +78,11 @@ theorem exists_continuationRectangle_in_nhds {k h x : ℝ} (hk : 0 ≤ k) {T : �
   exact ⟨R,hR,δ,hδ,hδδ.trans_lt hδT,
     fun s hs y hy => hrect s (hs.trans hδδ) y (hy.trans hRR),hsub⟩
 
-/-- A compact C3 test touching the discounted actual price from above has
+/-- A compact C2 test touching the discounted actual price from above has
 nonnegative backward-driver generator. -/
 theorem canonicalPrice_upper_pointwise_test {k h x : ℝ} (hk : 0 ≤ k) {T : ℝ≥0}
     (hp : (x, (T : ℝ)) ∈ canonicalContinuationRegion k h)
-    {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) (hc : HasCompactSupport G)
+    {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G) (hc : HasCompactSupport G)
     (h0 : G (0, 0) = canonicalPrice k h x (T : ℝ))
     (htouch : ∀ᶠ z in 𝓝 (0, 0), canonicalDiscountedPlane k h x T z ≤ G z) :
     0 ≤ planeGenerator G (0,0) := by
@@ -97,7 +97,7 @@ theorem canonicalPrice_upper_pointwise_test {k h x : ℝ} (hk : 0 ≤ k) {T : �
 
 theorem canonicalPrice_lower_pointwise_test {k h x : ℝ} (hk : 0 ≤ k) {T : ℝ≥0}
     (hp : (x, (T : ℝ)) ∈ canonicalContinuationRegion k h)
-    {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) (hc : HasCompactSupport G)
+    {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G) (hc : HasCompactSupport G)
     (h0 : G (0, 0) = canonicalPrice k h x (T : ℝ))
     (htouch : ∀ᶠ z in 𝓝 (0, 0), G z ≤ canonicalDiscountedPlane k h x T z) :
     planeGenerator G (0,0) ≤ 0 := by
@@ -121,8 +121,8 @@ theorem planeGenerator_congr {F G : ℝ × ℝ → ℝ} {z : ℝ × ℝ}
     congrArg (fun A : (ℝ × ℝ) →L[ℝ] ℝ => A (0,1)) hx.fderiv_eq
   exact congrArg₂ (fun a b : ℝ => a+(1/2)*b) ht hxx
 
-theorem exists_compact_test {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 3 F) (z : ℝ × ℝ) :
-    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 3 G ∧ HasCompactSupport G ∧ G =ᶠ[𝓝 z] F := by
+theorem exists_compact_test {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 2 F) (z : ℝ × ℝ) :
+    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 2 G ∧ HasCompactSupport G ∧ G =ᶠ[𝓝 z] F := by
   let χ : ContDiffBump z := {
     rIn := 1
     rOut := 2
@@ -135,7 +135,7 @@ theorem exists_compact_test {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 3 F) (z 
 
 theorem canonicalPrice_upper_generator_test {k h x : ℝ} (hk : 0 ≤ k) {T : ℝ≥0}
     (hp : (x, (T : ℝ)) ∈ canonicalContinuationRegion k h)
-    {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 3 F)
+    {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 2 F)
     (h0 : F (0, 0) = canonicalPrice k h x (T : ℝ))
     (htouch : ∀ᶠ z in 𝓝 (0, 0), canonicalDiscountedPlane k h x T z ≤ F z) :
     0 ≤ planeGenerator F (0,0) := by
@@ -147,7 +147,7 @@ theorem canonicalPrice_upper_generator_test {k h x : ℝ} (hk : 0 ≤ k) {T : �
 
 theorem canonicalPrice_lower_generator_test {k h x : ℝ} (hk : 0 ≤ k) {T : ℝ≥0}
     (hp : (x, (T : ℝ)) ∈ canonicalContinuationRegion k h)
-    {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 3 F)
+    {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 2 F)
     (h0 : F (0, 0) = canonicalPrice k h x (T : ℝ))
     (htouch : ∀ᶠ z in 𝓝 (0, 0), F z ≤ canonicalDiscountedPlane k h x T z) :
     planeGenerator F (0,0) ≤ 0 := by

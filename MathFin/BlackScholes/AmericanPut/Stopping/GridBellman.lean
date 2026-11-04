@@ -8,11 +8,12 @@ module
 public import MathFin.BlackScholes.AmericanPut.Stopping.GridReindexing
 public import MathFin.BlackScholes.AmericanPut.Stopping.ActualContact
 
-/-! # Bellman identification and attained optimality on physical exercise grids 
+/-! # Snell envelope (the Bellman recursion) and attained optimality on physical exercise grids
+
 ## Result
 
 Public entry points include `gridReward_adapted`, `gridReward_integrable`, `optimalGridRule`,
-`gridValue_eq_bellman`.
+`gridValue_eq_integral_snellEnvelope`.
 -/
 
 @[expose] public section
@@ -39,10 +40,10 @@ theorem gridReward_integrable {P : Measure Ω} [IsProbabilityMeasure P]
     Integrable (gridReward W K r q σ S T δ i) P :=
   putReward_integrable hW P hK hr hS measurable_const
 
-/-- The Bellman first-contact rule for the grid rewards, carried back to physical grid times. -/
+/-- The Snell first-contact rule for the grid rewards, carried back to physical grid times. -/
 noncomputable def optimalGridRule (P : Measure Ω) (ha : Adapted 𝓕 W)
     (K r q σ S : ℝ) (T : ℝ≥0) {δ : ℝ≥0} (hδ : 0 < δ) : StoppingRule 𝓕 T :=
-  (finiteBellmanRule (P := P) (gridReward_adapted ha K r q σ S T δ) ⌈T/δ⌉₊).toPhysicalRule hδ
+  (snellRule (P := P) (gridReward_adapted ha K r q σ S T δ) ⌈T/δ⌉₊).toPhysicalRule hδ
 
 theorem optimalGridRule_mem_grid (P : Measure Ω) (ha : Adapted 𝓕 W) (K r q σ S : ℝ) (T : ℝ≥0)
     {δ : ℝ≥0} (hδ : 0 < δ) :
@@ -51,13 +52,13 @@ theorem optimalGridRule_mem_grid (P : Measure Ω) (ha : Adapted 𝓕 W) (K r q �
 
 variable {P : Measure Ω} [IsProbabilityMeasure P] {K r q σ S : ℝ} {T δ : ℝ≥0}
 
-theorem gridValue_eq_bellman (hW : Measurable W.uncurry) (ha : Adapted 𝓕 W)
+theorem gridValue_eq_integral_snellEnvelope (hW : Measurable W.uncurry) (ha : Adapted 𝓕 W)
     (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) (hδ : 0 < δ) :
     gridAmericanPutValue P 𝓕 W K r q σ S T δ =
-      ∫ ω, finiteBellman P (cappedGridFiltration 𝓕 T δ)
+      ∫ ω, snellEnvelope P (cappedGridFiltration 𝓕 T δ) Set.univ
         (gridReward W K r q σ S T δ) ⌈T/δ⌉₊ 0 ω ∂P := by
   rw [gridValue_eq_discreteValue P W K r q σ S hδ]
-  exact stoppingValue_eq_bellman (gridReward_adapted ha K r q σ S T δ)
+  exact stoppingValue_eq_integral_snellEnvelope (gridReward_adapted ha K r q σ S T δ)
     (gridReward_integrable hW hK hr hS T δ) _
 
 theorem optimalGridRule_attains_value (hW : Measurable W.uncurry) (ha : Adapted 𝓕 W)
@@ -65,7 +66,7 @@ theorem optimalGridRule_attains_value (hW : Measurable W.uncurry) (ha : Adapted 
     (∫ ω, putReward W K r q σ S (optimalGridRule P ha K r q σ S T hδ).time ω ∂P) =
       gridAmericanPutValue P 𝓕 W K r q σ S T δ := by
   rw [gridValue_eq_discreteValue P W K r q σ S hδ]
-  have he := finiteBellmanRule_attains_value (P := P) (gridReward_adapted ha K r q σ S T δ)
+  have he := snellRule_attains_value (P := P) (gridReward_adapted ha K r q σ S T δ)
     (gridReward_integrable hW hK hr hS T δ) ⌈T/δ⌉₊
   convert! he using 1
 

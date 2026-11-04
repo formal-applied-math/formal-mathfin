@@ -50,18 +50,20 @@ sign it does not belong yet. That is a conversation with the maintainer, not a m
 The concrete next rungs, each tracked by an issue. The coherence wave (#357–#368) folded about sixty
 parallel developments into instances of one object each; what it left open is below.
 
-* **Rates and credit under a measure the library constructs.** Vasicek and Hull–White bond prices at
-  t > 0 and the Jamshidian bond put are done (#410, #413). Next comes GSR, which needs a kernel
-  identity for piecewise volatility, then CMS through a swap-rate model bundle, and CDS legs as the
-  mesh limit of the grid legs ([#367](https://github.com/formal-applied-math/formal-mathfin/issues/367)). The CMS convexity adjustment ([#303](https://github.com/formal-applied-math/formal-mathfin/issues/303)) follows from that.
+* **Rates and credit under a measure the library constructs.** Vasicek, Hull–White and GSR bond prices
+  at t > 0 and the Jamshidian bond put, in the Hull–White, Vasicek and two-piece GSR models, are
+  done (#410, #413), and so is CMS through a swap-rate model bundle (#419). Next come CDS legs as the
+  mesh limit of the grid legs ([#367](https://github.com/formal-applied-math/formal-mathfin/issues/367)),
+  and the CMS convexity adjustment
+  ([#303](https://github.com/formal-applied-math/formal-mathfin/issues/303)) on top of the swap-rate
+  bundle.
   Then the HJM program ([#138](https://github.com/formal-applied-math/formal-mathfin/issues/138)), through the stochastic Fubini theorems
   ([#141](https://github.com/formal-applied-math/formal-mathfin/issues/141)–[#145](https://github.com/formal-applied-math/formal-mathfin/issues/145)).
 * **The spine's open seams.** The multi-dimensional martingale representation ([#180](https://github.com/formal-applied-math/formal-mathfin/issues/180)), the
-  converse of the second FTAP ([#181](https://github.com/formal-applied-math/formal-mathfin/issues/181)) together with FTAP II for the tree ([#415](https://github.com/formal-applied-math/formal-mathfin/issues/415)), Clark–Ocone
+  converse of the second FTAP in continuous time ([#181](https://github.com/formal-applied-math/formal-mathfin/issues/181)), Clark–Ocone
   ([#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)), and the Wiener ↔ Itô bridges ([#366](https://github.com/formal-applied-math/formal-mathfin/issues/366), which is partly blocked on Doob–Meyer
   upstream).
 * **One object per concept, continued.**
-  * One Snell envelope for the tree and for the foundations ([#415](https://github.com/formal-applied-math/formal-mathfin/issues/415)).
   * One sampled filtration for the American put's grids, and its leftover canonical parameters
     ([#414](https://github.com/formal-applied-math/formal-mathfin/issues/414)).
   * The Itô stack at C² ([#416](https://github.com/formal-applied-math/formal-mathfin/issues/416)).

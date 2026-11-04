@@ -51,9 +51,9 @@ and the `d`-asset generalisation are out of scope here.
   direction: sampled along any monotone schedule inside `[0, T]`, a continuous-time EMM is an
   EMM here for the sampled price and filtration (`ContinuousMarket.IsEMM.sampled`, in
   `ContinuousMarket.lean`, general Ω, though `ftap_discrete` itself needs finite Ω), and it is a
-  one-period EMM for every increment
-  `S t − S s` with `s, t ≤ T` (`ContinuousMarket.IsEMM.increment`). The converses are not claimed: neither restriction
-  sees adaptedness of `S` at all times or the martingale property between arbitrary times.
+  one-period EMM for every increment `S t − S s` with `s, t ≤ T`
+  (`ContinuousMarket.IsEMM.increment`). The converses are not claimed: neither restriction sees
+  adaptedness of `S` at all times or the martingale property between arbitrary times.
 
 ## Main definitions / results (assembled across this file)
 
@@ -77,9 +77,10 @@ open MeasureTheory ProbabilityTheory
 set_option linter.unusedSectionVars false
 
 /-- On a finite space every strategy is bounded on the horizon. -/
-private lemma exists_bound_horizon {Ω : Type*} [Fintype Ω] (N : ℕ) (φ : ℕ → Ω → ℝ) :
-    ∃ K : ℝ, ∀ n ≤ N, ∀ ω, ‖φ n ω‖ ≤ K :=
-  ⟨∑ n ∈ Finset.range (N + 1), ∑ ω', |φ n ω'|, fun n hn ω ↦ by
+lemma exists_bound_horizon {Ω : Type*} [Finite Ω] (N : ℕ) (φ : ℕ → Ω → ℝ) :
+    ∃ K : ℝ, ∀ n ≤ N, ∀ ω, ‖φ n ω‖ ≤ K := by
+  cases nonempty_fintype Ω
+  exact ⟨∑ n ∈ Finset.range (N + 1), ∑ ω', |φ n ω'|, fun n hn ω ↦ by
     rw [Real.norm_eq_abs]
     exact (Finset.single_le_sum (f := fun ω' ↦ |φ n ω'|) (fun _ _ ↦ abs_nonneg _)
       (Finset.mem_univ ω)).trans
@@ -192,20 +193,17 @@ theorem gains_disjoint_stdSimplex (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage �
   rw [eq_empty_of_pos_singleton hP hnull] at hmem
   simp at hmem
 
-omit [IsProbabilityMeasure P] [Fintype Ω] in
-/-- **Backward direction**: no arbitrage ⟹ an equivalent martingale measure
-exists. The separating-dual `q` of the gains subspace, normalised to a
-probability `Q`, is the EMM: strict positivity gives `Q ~ P`, and the
-annihilation of every increment-indicator gives the martingale property via the
-conditional-expectation characterisation. -/
-theorem exists_isEMM_of_noArbitrage [Finite Ω] (hS : StronglyAdapted 𝓕 S)
-    (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage 𝓕 P S T) :
-    ∃ Q, IsEMM 𝓕 P S T Q := by
-  cases nonempty_fintype Ω
+omit [IsProbabilityMeasure P] in
+/-- **The way a finite-space EMM is built**: strictly positive weights `q` annihilating the
+attainable gains give, once normalised, an equivalent martingale measure `Q`, with
+`Q {ω} = q ω / ∑ q`. Strict positivity gives `Q ~ P`, and the annihilation of every
+increment-indicator gives the martingale property via the conditional-expectation
+characterisation. -/
+theorem exists_isEMM_of_pos_dual (hS : StronglyAdapted 𝓕 S)
+    (hP : ∀ ω, 0 < P {ω}) {q : Ω → ℝ} (hq_pos : ∀ ω, 0 < q ω)
+    (hq_dual : ∀ v ∈ gainsSubspace 𝓕 S T, ∑ ω, q ω * v ω = 0) :
+    ∃ Q, IsEMM 𝓕 P S T Q ∧ ∀ ω, Q {ω} = ENNReal.ofReal (q ω / ∑ ω', q ω') := by
   classical
-  obtain ⟨q, hq_pos, hq_dual⟩ :=
-    exists_pos_dual_of_disjoint_stdSimplex (gainsSubspace 𝓕 S T)
-      (gains_disjoint_stdSimplex 𝓕 P S T hP hNA)
   set Z : ℝ := ∑ ω, q ω with hZ
   have hZpos : 0 < Z := Finset.sum_pos (fun ω _ ↦ hq_pos ω) Finset.univ_nonempty
   have hmnn : ∀ ω, (0 : ℝ) ≤ q ω / Z := fun ω ↦ (div_pos (hq_pos ω) hZpos).le
@@ -230,7 +228,7 @@ theorem exists_isEMM_of_noArbitrage [Finite Ω] (hS : StronglyAdapted 𝓕 S)
   have hPQ : P ≪ Q := by
     intro s hs; rw [eq_empty_of_pos_singleton hQpos hs]; exact measure_empty
   refine ⟨Q, .of_condExp_succ ⟨hQprob, hQP, hPQ⟩ (fun t _ ↦ hS t) (fun t _ ↦ Integrable.of_finite)
-    fun t htT ↦ ?_⟩
+    fun t htT ↦ ?_, hQsingle⟩
   -- Martingale property via the conditional-expectation characterisation.
   refine ae_eq_condExp_of_forall_setIntegral_eq (𝓕.le t) Integrable.of_finite
     (fun s _ _ ↦ Integrable.of_finite.integrableOn) (fun s hs _ ↦ ?_)
@@ -250,6 +248,19 @@ theorem exists_isEMM_of_noArbitrage [Finite Ω] (hS : StronglyAdapted 𝓕 S)
   rw [integral_indicator hsm,
     integral_sub Integrable.of_finite.integrableOn Integrable.of_finite.integrableOn] at hkey
   linarith [hkey]
+
+omit [IsProbabilityMeasure P] [Fintype Ω] in
+/-- **Backward direction**: no arbitrage ⟹ an equivalent martingale measure exists. The
+separating dual `q` of the gains subspace (`exists_pos_dual_of_disjoint_stdSimplex`) is strictly
+positive and annihilates the gains, so it builds the EMM (`exists_isEMM_of_pos_dual`). -/
+theorem exists_isEMM_of_noArbitrage [Finite Ω] (hS : StronglyAdapted 𝓕 S)
+    (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage 𝓕 P S T) :
+    ∃ Q, IsEMM 𝓕 P S T Q := by
+  cases nonempty_fintype Ω
+  obtain ⟨q, hq_pos, hq_dual⟩ :=
+    exists_pos_dual_of_disjoint_stdSimplex (gainsSubspace 𝓕 S T)
+      (gains_disjoint_stdSimplex 𝓕 P S T hP hNA)
+  exact (exists_isEMM_of_pos_dual 𝓕 P S T hS hP hq_pos hq_dual).imp fun _ h ↦ h.1
 
 omit [IsProbabilityMeasure P] [Fintype Ω] in
 /-- **Finite-Ω Fundamental Theorem of Asset Pricing** (Harrison–Pliska; the

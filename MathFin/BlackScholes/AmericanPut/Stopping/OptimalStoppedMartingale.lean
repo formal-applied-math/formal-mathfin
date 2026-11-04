@@ -98,8 +98,7 @@ theorem stopped_martingale_of_expected_value_eq
     (integral_congr_ae (.of_forall fun ω ↦ congrArg (U · ω) (min_comm t (τ.time ω)))).trans
       (expected_value_eq_before_optimal_rule hU hc hb τ hopt
         (τ.minimum (.constant 𝓕 t t le_rfl)) fun _ ↦ min_le_left _ _)
-  apply martingale_of_setIntegral_eq ha hi
-  intro i j hij A hA
+  refine martingale_iff_setIntegral_eq.2 ⟨ha, hi, fun i j hij A hA ↦ ?_⟩
   have hAm : MeasurableSet A := 𝓕.le i A hA
   let η := τ.minimum (StoppingRule.binary hij A hA)
   have hη : (∫ ω, U (η.time ω) ω ∂P) = ∫ ω, U 0 ω ∂P :=

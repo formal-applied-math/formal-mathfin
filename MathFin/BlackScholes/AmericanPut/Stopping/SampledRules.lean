@@ -12,8 +12,7 @@ public import MathFin.Foundations.ContinuousMarket
 /-! # Discrete rules sampled at arbitrary deterministic increasing times 
 ## Result
 
-Public entry points include `StoppingRule.toSampledRule`,
-`bellmanAux_const_mul`.
+Public entry points include `StoppingRule.toSampledRule`.
 -/
 
 @[expose] public section
@@ -52,21 +51,5 @@ def StoppingRule.toSampledRule {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω�
     · exact 𝓕.mono hit _ (η.stopping i)
     · exact @MeasurableSet.empty Ω (𝓕 t)
   le_horizon := fun ω => hs (η.le_horizon ω)
-
-theorem bellmanAux_const_mul {P : Measure Ω} {𝓕 : Filtration ℕ ‹MeasurableSpace Ω›}
-    (Z : ℕ → Ω → ℝ) {a : ℝ} (ha : 0 ≤ a) (n i : ℕ) :
-    bellmanAux P 𝓕 (fun j ω => a*Z j ω) n i =ᵐ[P]
-      fun ω => a*bellmanAux P 𝓕 Z n i ω := by
-  induction n generalizing i with
-  | zero => exact Eventually.of_forall (fun _ => rfl)
-  | succ n ih =>
-    have hc := condExp_congr_ae (m := 𝓕 i) (ih (i+1))
-    have hm := condExp_smul (μ := P) a (bellmanAux P 𝓕 Z n (i+1)) (𝓕 i)
-    filter_upwards [hc,hm] with ω hω hmω
-    change max (a*Z i ω) _ = a*max (Z i ω) _
-    rw [hω]
-    change P[fun ω => a*bellmanAux P 𝓕 Z n (i+1) ω | 𝓕 i] ω = _ at hmω
-    rw [hmω]
-    exact (mul_max_of_nonneg _ _ ha).symm
 
 end MathFin.BlackScholes.AmericanPut.Stopping

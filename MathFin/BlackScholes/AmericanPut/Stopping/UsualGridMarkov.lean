@@ -8,7 +8,7 @@ module
 public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianBellman
 public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianUsualTransition
 
-/-! # The same Gaussian Bellman prices in the raw and usual Brownian filtrations
+/-! # The same Gaussian Snell-envelope prices in the raw and usual Brownian filtrations
 
 Finite-grid identification and convergence remove the classical-solution premise
 from raw/usual American-value equality at positive spot.

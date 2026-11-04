@@ -11,7 +11,7 @@ public import MathFin.BlackScholes.AmericanPut.Boundary.DividendProblem
 /-!
 # Zero-drift smooth Ito localizations of the classical price
 
-Every continuation point admits a compact C3 localization whose Brownian
+Every continuation point admits a compact C2 localization whose Brownian
 generator is zero nearby and whose compensated Brownian evaluation is a
 genuine local martingale. Compact-region assembly and transfer to the raw
 filtration are proved subsequently in `InteriorIto` and `ContactMartingale`.
@@ -33,7 +33,7 @@ theorem brownianPriceKernel_localization_zero_drift {p : ℝ → ℝ → ℝ} {b
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hσ : 0 < σ) (ht : t < T)
     (hx : b (σ ^ 2 / 2 * (T - t)) < x₀ + (r - q - σ ^ 2 / 2) * t + σ * w) :
-    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 3 G ∧ HasCompactSupport G ∧
+    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 2 G ∧ HasCompactSupport G ∧
       G =ᶠ[𝓝 (t,w)] (fun z => brownianPriceKernel p K r q σ x₀ T z.1 z.2) ∧
       ∀ᶠ z in 𝓝 (t,w), planeGenerator G z = 0 := by
   obtain ⟨G,hG,hcompact,heq⟩ := brownianPriceKernel_localization (K := K) hp hσ ht hx
@@ -57,7 +57,7 @@ theorem brownianPriceKernel_localization_zero_drift {p : ℝ → ℝ → ℝ} {b
       (fun y => brownianPriceKernel p K r q σ x₀ T z.1 y) :=
     hz.comp_tendsto (show Tendsto (fun y : ℝ => (z.1,y)) (𝓝 z.2) (𝓝 z) by
       convert! (continuous_const.prodMk continuous_id).tendsto z.2 using 1)
-  rw [show z = (z.1,z.2) from rfl,planeGenerator_eq_partials (hG.of_le (by norm_num)),
+  rw [show z = (z.1,z.2) from rfl,planeGenerator_eq_partials hG,
     htEq.deriv_eq,hxEq.deriv.deriv_eq]
   exact brownianPriceKernel_heat_equation hp hσ hzt hzx
 
@@ -69,7 +69,7 @@ theorem local_price_ito {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hσ : 0 < σ) (ht : t < T)
     (hx : b (σ ^ 2 / 2 * (T - t)) < x₀ + (r - q - σ ^ 2 / 2) * t + σ * w) :
-    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 3 G ∧ HasCompactSupport G ∧
+    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 2 G ∧ HasCompactSupport G ∧
       G =ᶠ[𝓝 (t,w)] (fun z => brownianPriceKernel p K r q σ x₀ T z.1 z.2) ∧
       (∀ᶠ z in 𝓝 (t,w), planeGenerator G z = 0) ∧
       ∃ M : ℝ≥0 → Ω → ℝ, (∀ ω, Continuous (fun s => M s ω)) ∧
@@ -81,6 +81,6 @@ theorem local_price_ito {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
   obtain ⟨G,hG,hcompact,heq,hzero⟩ :=
       brownianPriceKernel_localization_zero_drift (K := K) hp hσ ht hx
   exact ⟨G,hG,hcompact,heq,hzero,
-    plane_ito_localMartingale hW hmeas hpaths (hG.of_le (by norm_num))⟩
+    plane_ito_localMartingale hW hmeas hpaths hG⟩
 
 end MathFin.BlackScholes.AmericanPut.Stopping

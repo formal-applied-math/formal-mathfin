@@ -107,7 +107,7 @@ theorem classicalGap_terminal (hp : PutEnvelope p)
 
 /-- The rule that exercises at the first zero of `classicalGap`, admissible by
 `firstContactRule`. -/
-noncomputable def classicalContactRule (hp : PutEnvelope p)
+noncomputable def classicalContactRule (r q σ : ℝ) (hp : PutEnvelope p)
     (hadapt : Adapted 𝓕 W) (hpaths : ∀ ω, Continuous (fun t => W t ω))
     (hK : 0 < K) (hS : 0 < S) (T : ℝ≥0) : StoppingRule 𝓕 T :=
   firstContactRule (Z := classicalGap W K r q σ S p T)
@@ -118,16 +118,16 @@ theorem classicalContactRule_gap (hp : PutEnvelope p)
     (hadapt : Adapted 𝓕 W) (hpaths : ∀ ω, Continuous (fun t => W t ω))
     (hK : 0 < K) (hS : 0 < S) (T : ℝ≥0) (ω : Ω) :
     classicalGap W K r q σ S p T
-      ((classicalContactRule (r := r) (q := q) (σ := σ) hp hadapt hpaths hK hS T).time ω) ω = 0 :=
+      ((classicalContactRule r q σ hp hadapt hpaths hK hS T).time ω) ω = 0 :=
   (firstContactTime_mem (classicalGap_continuous (r := r) (q := q) (σ := σ) hp hpaths T)
     (classicalGap_terminal hp hK hS T) ω).2
 
 theorem classicalContactRule_contact (hp : PutEnvelope p)
     (hadapt : Adapted 𝓕 W) (hpaths : ∀ ω, Continuous (fun t => W t ω))
     (hK : 0 < K) (hS : 0 < S) (T : ℝ≥0) (ω : Ω) :
-    let θ := classicalContactRule (r := r) (q := q) (σ := σ) hp hadapt hpaths hK hS T
+    let θ := classicalContactRule r q σ hp hadapt hpaths hK hS T
     classicalCandidate W K r q σ S p T (θ.time ω) ω = putReward W K r q σ S θ.time ω := by
-  let θ := classicalContactRule (r := r) (q := q) (σ := σ) hp hadapt hpaths hK hS T
+  let θ := classicalContactRule r q σ hp hadapt hpaths hK hS T
   have hh := classicalContactRule_gap (r := r) (q := q) (σ := σ) hp hadapt hpaths hK hS T ω
   change classicalGap W K r q σ S p T (θ.time ω) ω = 0 at hh
   have ht := θ.le_horizon ω
@@ -157,7 +157,7 @@ theorem classicalGap_zero_iff (hp : ContinuousBoundaryPutSolution k h p b)
 theorem classicalContactRule_gap_pos (hp : PutEnvelope p)
     (hadapt : Adapted 𝓕 W) (hpaths : ∀ ω, Continuous (fun t => W t ω))
     (hK : 0 < K) (hS : 0 < S) {T t : ℝ≥0} (ω : Ω)
-    (ht : t < (classicalContactRule (r := r) (q := q) (σ := σ) hp hadapt hpaths hK hS T).time ω) :
+    (ht : t < (classicalContactRule r q σ hp hadapt hpaths hK hS T).time ω) :
     0 < classicalGap W K r q σ S p T t ω :=
   firstContactTime_pos_before (classicalGap_continuous (r := r) (q := q) (σ := σ) hp hpaths T)
     (classicalGap_nonneg hp hK hS T) (classicalGap_terminal hp hK hS T) ω ht
@@ -166,7 +166,7 @@ theorem classicalContactRule_gap_pos (hp : PutEnvelope p)
 theorem classicalContactRule_reward_lt (hp : PutEnvelope p)
     (hadapt : Adapted 𝓕 W) (hpaths : ∀ ω, Continuous (fun t => W t ω))
     (hK : 0 < K) (hS : 0 < S) {T t : ℝ≥0} (ω : Ω)
-    (ht : t < (classicalContactRule (r := r) (q := q) (σ := σ) hp hadapt hpaths hK hS T).time ω) :
+    (ht : t < (classicalContactRule r q σ hp hadapt hpaths hK hS T).time ω) :
     frozenPutReward W K r q σ S T t ω < classicalCandidate W K r q σ S p T t ω :=
   sub_pos.mp (classicalContactRule_gap_pos hp hadapt hpaths hK hS ω ht)
 
@@ -174,7 +174,7 @@ theorem classicalContactRule_reward_lt (hp : PutEnvelope p)
 theorem classicalContactRule_price_eq (hp : PutEnvelope p)
     (hadapt : Adapted 𝓕 W) (hpaths : ∀ ω, Continuous (fun t => W t ω))
     (hK : 0 < K) (hS : 0 < S) (T : ℝ≥0) (ω : Ω) :
-    let θ := classicalContactRule (r := r) (q := q) (σ := σ) hp hadapt hpaths hK hS T
+    let θ := classicalContactRule r q σ hp hadapt hpaths hK hS T
     p (classicalLogSpot W K r q σ S (θ.time ω) ω) (σ^2/2*((T : ℝ)-(θ.time ω : ℝ))) =
       putPayoff (classicalLogSpot W K r q σ S (θ.time ω) ω) := by
   intro θ
@@ -187,11 +187,11 @@ theorem classicalContactRule_price_eq (hp : PutEnvelope p)
 theorem classicalContactRule_payoff_lt (hp : PutEnvelope p)
     (hadapt : Adapted 𝓕 W) (hpaths : ∀ ω, Continuous (fun t => W t ω))
     (hK : 0 < K) (hS : 0 < S) {T t : ℝ≥0} (ω : Ω)
-    (ht : t < (classicalContactRule (r := r) (q := q) (σ := σ) hp hadapt hpaths hK hS T).time ω) :
+    (ht : t < (classicalContactRule r q σ hp hadapt hpaths hK hS T).time ω) :
     t < T ∧ putPayoff (classicalLogSpot W K r q σ S t ω) <
       p (classicalLogSpot W K r q σ S t ω) (σ^2/2*((T : ℝ)-(t : ℝ))) := by
   have htT : t < T := ht.trans_le
-    ((classicalContactRule (r := r) (q := q) (σ := σ) hp hadapt hpaths hK hS T).le_horizon ω)
+    ((classicalContactRule r q σ hp hadapt hpaths hK hS T).le_horizon ω)
   have hpos := classicalContactRule_gap_pos hp hadapt hpaths hK hS ω ht
   rw [classicalGap_eq hK hS htT.le] at hpos
   exact ⟨htT,sub_pos.mp ((mul_pos_iff_of_pos_left hK).mp
@@ -200,7 +200,7 @@ theorem classicalContactRule_payoff_lt (hp : PutEnvelope p)
 theorem classicalContactRule_continuation (hp : ContinuousBoundaryPutSolution k h p b)
     (hadapt : Adapted 𝓕 W) (hpaths : ∀ ω, Continuous (fun t => W t ω))
     (hK : 0 < K) (hS : 0 < S) (hσ : 0 < σ) {T t : ℝ≥0} (ω : Ω)
-    (ht : t < (classicalContactRule (r := r) (q := q) (σ := σ) hp.toPutEnvelope hadapt hpaths
+    (ht : t < (classicalContactRule r q σ hp.toPutEnvelope hadapt hpaths
       hK hS T).time ω) :
     t < T ∧ b (σ^2/2*((T : ℝ)-(t : ℝ))) < classicalLogSpot W K r q σ S t ω := by
   obtain ⟨htT,hlt⟩ := classicalContactRule_payoff_lt hp.toPutEnvelope hadapt hpaths hK hS ω ht
@@ -217,11 +217,11 @@ theorem classical_price_eq_value_of_contact_verification
     (hK : 0 < K) (hr : 0 ≤ r) (hS : 0 < S)
     (hsuper : Supermartingale (classicalCandidate W K r q σ S p T) 𝓕 P)
     (hmart : Martingale (fun t ω => classicalCandidate W K r q σ S p T
-      (min t ((classicalContactRule (r := r) (q := q) (σ := σ) hp hadapt hpaths hK hS T).time ω)) ω)
+      (min t ((classicalContactRule r q σ hp hadapt hpaths hK hS T).time ω)) ω)
           𝓕 P) :
     americanPutValue P 𝓕 W K r q σ S T = K*p (Real.log (S/K)) (σ^2/2*(T : ℝ)) :=
   classical_price_eq_value_of_verification hp hW hpaths hzero hK hr hS hsuper
-    (classicalContactRule hp hadapt hpaths hK hS T)
+    (classicalContactRule r q σ hp hadapt hpaths hK hS T)
     (Filter.Eventually.of_forall (classicalContactRule_contact hp hadapt hpaths hK hS T)) hmart
 
 end MathFin.BlackScholes.AmericanPut.Stopping

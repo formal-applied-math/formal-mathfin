@@ -77,39 +77,46 @@ noncomputable def vasicekKernelLp (κ : ℝ) (hκ : 0 ≤ κ) (T : ℝ≥0) :
 
 /-! ### The kernel's `L²`-norm is the Vasicek variance (the deterministic integral) -/
 
-/-- **The Riemann integral fixing the variance**:
-`∫₀ᵀ (e^{−κ(T−s)})² ds = (1 − e^{−2κT})/(2κ)`, by the FTC with antiderivative
-`s ↦ e^{−2κ(T−s)}/(2κ)`. -/
-lemma vasicekKernel_integral_sq (κ : ℝ) (hκ : κ ≠ 0) (T : ℝ≥0) :
-    ∫ s in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekKernel κ T s) ^ 2 ∂volume
-      = (1 - Real.exp (-(2 * κ * T))) / (2 * κ) := by
-  have hsq : ∀ s : ℝ, (vasicekKernel κ T s) ^ 2 = Real.exp (-(2 * κ * ((T : ℝ) - s))) := by
-    intro s
+/-- The antiderivative `u ↦ e^{−2κ(T−u)}/(2κ)` of the squared diffusion kernel
+`(e^{−κ(T−u)})²`. -/
+noncomputable def vasicekKernelSqAntideriv (κ T u : ℝ) : ℝ :=
+  Real.exp (-(2 * κ * (T - u))) / (2 * κ)
+
+/-- For `κ ≠ 0`, `vasicekKernelSqAntideriv` differentiates to the squared kernel
+`(e^{−κ(T−u)})² = e^{−2κ(T−u)}`. -/
+lemma hasDerivAt_vasicekKernelSqAntideriv (κ T u : ℝ) (hκ : κ ≠ 0) :
+    HasDerivAt (vasicekKernelSqAntideriv κ T) ((vasicekKernel κ T u) ^ 2) u := by
+  have hsq : (vasicekKernel κ T u) ^ 2 = Real.exp (-(2 * κ * (T - u))) := by
     rw [vasicekKernel, sq, ← Real.exp_add]
     congr 1
     ring
-  rw [← intervalIntegral.integral_of_le (by positivity : (0 : ℝ) ≤ (T : ℝ))]
-  rw [show (fun s ↦ (vasicekKernel κ T s) ^ 2)
-        = (fun s ↦ Real.exp (-(2 * κ * ((T : ℝ) - s)))) from funext hsq]
-  have hderiv : ∀ s ∈ Set.uIcc (0 : ℝ) (T : ℝ),
-      HasDerivAt (fun s ↦ Real.exp (-(2 * κ * ((T : ℝ) - s))) / (2 * κ))
-        (Real.exp (-(2 * κ * ((T : ℝ) - s)))) s := by
-    intro s _
-    have h1 : HasDerivAt (fun s ↦ -(2 * κ * ((T : ℝ) - s)))
-        (2 * κ) s := by
-      have : HasDerivAt (fun s ↦ -(2 * κ * ((T : ℝ) - s)))
-          (-(2 * κ * (-1))) s := by
-        apply HasDerivAt.neg
-        apply HasDerivAt.const_mul
-        simpa using (hasDerivAt_id s).const_sub (T : ℝ)
-      simpa using this
-    have h2 := (Real.hasDerivAt_exp _).comp s h1
-    have h3 := h2.div_const (2 * κ)
-    rwa [mul_div_assoc, div_self (mul_ne_zero two_ne_zero hκ), mul_one] at h3
-  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv
-    (by apply Continuous.intervalIntegrable; fun_prop)]
-  simp only [sub_self, mul_zero, neg_zero, Real.exp_zero]
-  rw [show (2 : ℝ) * κ * ((T : ℝ) - 0) = 2 * κ * T by ring]
+  have h1 : HasDerivAt (fun u ↦ -(2 * κ * (T - u))) (2 * κ) u := by
+    have : HasDerivAt (fun u ↦ -(2 * κ * (T - u))) (-(2 * κ * (-1))) u := by
+      apply HasDerivAt.neg
+      apply HasDerivAt.const_mul
+      simpa using (hasDerivAt_id u).const_sub T
+    simpa using this
+  have h3 := ((Real.hasDerivAt_exp _).comp u h1).div_const (2 * κ)
+  rw [hsq]
+  rwa [mul_div_assoc, div_self (mul_ne_zero two_ne_zero hκ), mul_one] at h3
+
+/-- The FTC form over any interval, for `κ ≠ 0`:
+`∫_A^B (e^{−κ(T−u)})² du = e^{−2κ(T−B)}/(2κ) − e^{−2κ(T−A)}/(2κ)`. -/
+lemma integral_vasicekKernel_sq_eq_sub (κ T A B : ℝ) (hκ : κ ≠ 0) :
+    ∫ u in A..B, (vasicekKernel κ T u) ^ 2
+      = vasicekKernelSqAntideriv κ T B - vasicekKernelSqAntideriv κ T A :=
+  intervalIntegral.integral_eq_sub_of_hasDerivAt
+    (fun u _ ↦ hasDerivAt_vasicekKernelSqAntideriv κ T u hκ)
+    (Continuous.intervalIntegrable (by unfold vasicekKernel; fun_prop) _ _)
+
+/-- **The Riemann integral fixing the variance**:
+`∫₀ᵀ (e^{−κ(T−s)})² ds = (1 − e^{−2κT})/(2κ)`, by the FTC with antiderivative
+`vasicekKernelSqAntideriv`. -/
+lemma vasicekKernel_integral_sq (κ : ℝ) (hκ : κ ≠ 0) (T : ℝ≥0) :
+    ∫ s in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekKernel κ T s) ^ 2 ∂volume
+      = (1 - Real.exp (-(2 * κ * T))) / (2 * κ) := by
+  rw [← intervalIntegral.integral_of_le T.coe_nonneg, integral_vasicekKernel_sq_eq_sub κ T 0 T hκ]
+  simp only [vasicekKernelSqAntideriv, sub_self, sub_zero, mul_zero, neg_zero, Real.exp_zero]
   ring
 
 /-! ### The genuine terminal short rate and its derived Gaussian law -/

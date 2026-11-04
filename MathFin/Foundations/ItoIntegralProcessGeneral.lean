@@ -13,8 +13,9 @@ public import MathFin.Foundations.ItoIntegralProcessL2Inf
 
 B1a built the simple-integrand Itô integral `t ↦ (V●B)_t` as a continuous L²
 martingale. This file extends it to a **general** predictable integrand
-`φ ∈ Lp ℝ 2 (trimMeasure_T T)` (= Degenne's `L2Predictable` on `[0,T]`): the process `t ↦ (φ●B)_t := ∫₀ᵗ φ dB` is a continuous L² martingale, with
-the Itô contraction `‖(φ●B)_t‖ ≤ ‖φ‖` and the terminal Itô isometry
+`φ ∈ Lp ℝ 2 (trimMeasure_T T)` (= Degenne's `L2Predictable` on `[0,T]`): the process
+`t ↦ (φ●B)_t := ∫₀ᵗ φ dB` is an L² martingale (a.e.-adapted; no path continuity is claimed
+here), with the Itô contraction `‖(φ●B)_t‖ ≤ ‖φ‖` and the terminal Itô isometry
 `‖(φ●B)_T‖ = ‖φ‖`. The explicit time-indexed isometry
 `E[(φ●B)_t²] = ∫₀ᵗ E[φ_s²] ds` is proved in the companion module
 `ItoIntegralProcessIsometry` (`itoProcessCLM_norm_sq`), by density-transferring the
@@ -27,15 +28,12 @@ adaptedness and the contraction `‖(φ●B)_t‖ ≤ ‖φ‖` are those of the
 proved there once. The bridge to B1a's simple-integrand process (`itoProcessCLM_simpleAssembly_T`)
 is B1a's martingale property.
 
-The infinite-horizon `[0,∞)` integral (σ-finite predictable exhaustion) is the
-separate later milestone B2.
-
 ## Result
 
 * `itoProcessCLM` — the Itô integral process of a general predictable `L²` integrand.
 * `itoProcessCLM_simpleAssembly_T` — the bridge back to B1a.
-* `itoProcessCLM_zero_time` — the process starts at `0`.
-* `condExp_itoSimple_eq` — B1a's martingale read to the terminal.
+* `itoProcessCLM_zero_time` — the process starts at `0` (inherited from the infinite-horizon
+  engine, `itoProcessL2Inf_zero_time`).
 * `itoProcessCLM_eq_condExpL2` — **the key identity** (by definition): `(φ●B)_t` is the
   `𝓕_t`-projection of the terminal integral.
 * `itoProcessCLM_aeStronglyMeasurable`, `itoIntegralProcessGen_isMartingale` — its two
@@ -79,18 +77,6 @@ theorem itoProcessCLM_eq_condExpL2 (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (
           (itoIntegralCLM_T hB T hBmeas φ) : Lp ℝ 2 μ) :=
   rfl
 
-omit [IsProbabilityMeasure μ] in
-/-- B1a's martingale to the terminal: `μ[itoSimple V | 𝓕_t] = (V●B)_t` for
-`T`-bounded `V` (`(V●B)_{T'} = itoSimple V` at `T' = t ⊔ T`). -/
-theorem condExp_itoSimple_eq (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (V : SimpleProcess ℝ (natFiltration hBmeas)) (hVT : ∀ p ∈ V.value.support, p.2 ≤ T) :
-    μ[itoSimple hBmeas V | natFiltration hBmeas t]
-      =ᵐ[μ] fun ω ↦ itoSimpleProcess hBmeas V t ω := by
-  have hT'eq : itoSimpleProcess hBmeas V (max t T) = itoSimple hBmeas V :=
-    itoSimpleProcess_eq_itoSimple hBmeas V fun p hp ↦ (hVT p hp).trans (le_max_right t T)
-  simpa only [hT'eq] using (itoSimpleProcess_isMartingale hB hBmeas V).2 t (max t T)
-      (le_max_left t T)
-
 /-- **The bridge to B1a.** On the embedding of a `T`-bounded simple process, the general CLM
 reproduces B1a's t-process `(V●B)_t`: on simple processes the terminal integral is `itoSimple V`
 and B1a's martingale reads `μ[itoSimple V | 𝓕_t] = (V●B)_t`. -/
@@ -107,18 +93,12 @@ theorem itoProcessCLM_simpleAssembly_T (T t : ℝ≥0) (hBmeas : ∀ u, Measurab
     condExp_itoSimple_eq hB T t hBmeas V.val V.property] with ω hω1 hω2 hω3
   rw [hω2, hω3, hω1]
 
-/-- **The Itô integral process starts at zero.** On the dense simple processes this is
-`itoSimpleProcess_zero_time`, and both sides are continuous-linear in the integrand. -/
+/-- **The Itô integral process starts at zero**: it is the infinite-horizon process, which does
+(`itoProcessL2Inf_zero_time`), at the band extension of the integrand. -/
 @[simp] theorem itoProcessCLM_zero_time (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    itoProcessCLM hB T 0 hBmeas φ = 0 := by
-  refine congrFun (DenseRange.equalizer (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
-    (itoProcessCLM hB T 0 hBmeas).continuous
-    (continuous_const (y := (0 : Lp ℝ 2 μ))) (funext fun V ↦ ?_)) φ
-  simp only [Function.comp_apply, itoProcessCLM_simpleAssembly_T, itoSimpleProcessLp]
-  refine Lp.ext (((memLp_itoSimpleProcess hB hBmeas V.val 0).coeFn_toLp).trans ?_)
-  rw [itoSimpleProcess_zero_time]
-  exact (Lp.coeFn_zero ℝ 2 μ).symm
+    itoProcessCLM hB T 0 hBmeas φ = 0 :=
+  itoProcessL2Inf_zero_time hB hBmeas _
 
 /-- **a.e.-adaptedness.** `(φ●B)_t` is a.e. `𝓕_t`-measurable: it is the `condExpL2`
 projection onto the `𝓕_t`-measurable subspace (`itoProcessL2Inf_aeStronglyMeasurable`). -/
