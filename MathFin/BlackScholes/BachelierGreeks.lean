@@ -43,7 +43,7 @@ private lemma hasDerivAt_bachelierD_S {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T)
   have h_sqrt_pos : 0 < Real.sqrt T := Real.sqrt_pos.mpr hT
   have h_στ_pos : 0 < σ * Real.sqrt T := mul_pos hσ h_sqrt_pos
   have h_num : HasDerivAt (fun s : ℝ ↦ s - K) 1 S := by
-    convert (hasDerivAt_id S).sub_const K using 1
+    convert (hasDerivAt_id S).sub_const K using 1 <;> rfl
   exact h_num.div_const (σ * Real.sqrt T)
 
 /-- **Bachelier delta**: `∂V/∂S = Φ(d)`. -/
@@ -59,7 +59,7 @@ lemma hasDerivAt_bachelierV_S {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : �
   have h_pdf_chain := (hasDerivAt_gaussianPDFReal_zero_one (bachelierD S K σ T)).comp S h_d_S
   -- ∂_S [(S - K)] = 1
   have h_S_sub : HasDerivAt (fun s : ℝ ↦ s - K) 1 S := by
-    convert (hasDerivAt_id S).sub_const K using 1
+    convert (hasDerivAt_id S).sub_const K using 1 <;> rfl
   -- ∂_S [(S-K) · Φ(d(S))] = Φ(d) + (S-K) · ϕ(d) · ∂_S d
   have h_term1 := h_S_sub.mul h_Phi_chain
   -- ∂_S [σ √T · ϕ(d(S))] = σ √T · (-d ϕ(d)) · ∂_S d
@@ -95,7 +95,7 @@ lemma hasDerivAt_bachelierV_sigma {K T : ℝ} (hT : 0 < T)
         ((0 * (σ * Real.sqrt T) - (S - K) * (1 * Real.sqrt T)) / (σ * Real.sqrt T)^2) σ := by
       have h_const : HasDerivAt (fun _ : ℝ ↦ (S - K)) 0 σ := hasDerivAt_const _ _
       have h_denom : HasDerivAt (fun s : ℝ ↦ s * Real.sqrt T) (1 * Real.sqrt T) σ := by
-        convert (hasDerivAt_id σ).mul_const (Real.sqrt T) using 1
+        convert (hasDerivAt_id σ).mul_const (Real.sqrt T) using 1 <;> rfl
       exact h_const.div h_denom (mul_pos hσ h_sqrt_pos).ne'
     convert h_quot using 1 <;> try rfl
     field_simp

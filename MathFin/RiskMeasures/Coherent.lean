@@ -109,6 +109,7 @@ lemma convexOn_univ [Finite ι] (hρ : IsCoherentRiskMeasure P ρ) : ConvexOn �
 omit [Fintype ι] in
 /-- A finite-state coherent risk measure is continuous (a finite convex function on `ℝ^ι`). -/
 lemma continuous [Finite ι] (hρ : IsCoherentRiskMeasure P ρ) : Continuous ρ := by
+  have := Fintype.ofFinite ι
   rw [← continuousOn_univ]
   exact hρ.convexOn_univ.continuousOn isOpen_univ
 
