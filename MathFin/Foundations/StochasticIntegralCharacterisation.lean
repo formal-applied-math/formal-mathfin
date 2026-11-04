@@ -368,12 +368,12 @@ theorem sIntegral_dct (hB : IsPreBrownianReal B μ) (X : ℕ → ℝ≥0 → Ω 
   -- the limit version, pathwise
   set Vl : ℝ≥0 → Ω → ℝ := fun t ω ↦ limUnder atTop (fun n ↦ V n t ω)
   have hall : ∀ᵐ ω ∂μ, (∀ n t, V n t ω = X n t ω) ∧ ∀ t, Vd t ω = X_dom t ω := by
-    filter_upwards [ae_all_iff.2 fun n ↦ (hV n).2.2, hVd.2.2] with ω hn hd
-    exact ⟨fun n t ↦ (hn n t).symm, fun t ↦ (hd t).symm⟩
+    filter_upwards [ae_all_iff.2 fun n ↦ (hV n).2.2.symm, hVd.2.2.symm] with ω hn hd
+    exact ⟨hn, hd⟩
   have htend : ∀ᵐ ω ∂μ, ∀ t, Tendsto (fun n ↦ V n t ω) atTop (𝓝 (X_lim t ω)) := by
     filter_upwards [hall] with ω hω t
     simpa only [hω.1 _ t] using h_lim t ω
-  have hVl_eq : ∀ᵐ ω ∂μ, ∀ t, Vl t ω = X_lim t ω := by
+  have hVl_eq : Vl ≡ᵐ[μ] X_lim := by
     filter_upwards [htend] with ω hω t
     exact (hω t).limUnder_eq
   have hVm (n : ℕ) : StronglyMeasurable[pred] (Function.uncurry (V n)) :=
@@ -403,7 +403,7 @@ theorem sIntegral_dct (hB : IsPreBrownianReal B μ) (X : ℕ → ℝ≥0 → Ω 
     exact le_of_tendsto' hz.norm hzd
   have hVl : IsPredictableVersion T hBmeas φ X_lim Vl :=
     ⟨hVl_meas, hVd.2.1.of_le hVl_meas.stronglyMeasurable.aestronglyMeasurable hdom_lim,
-      hVl_eq.mono fun ω h t ↦ (h t).symm⟩
+      hVl_eq.symm⟩
   refine ⟨⟨Vl, hVl⟩, ?_⟩
   -- convergence in `L²(⟨M⟩)`, then through the isometry, then in measure
   have hLp : Tendsto (fun n ↦ integrandLp T hBmeas φ (X n)) atTop
@@ -596,8 +596,8 @@ theorem agree_cut_indicator (hI' : IsOtherExtension (T := T) (φ := φ) hB I' S'
         simp only [cut, Pi.zero_apply]
         rw [Set.indicator_apply]
         split_ifs with h1
-        · exact Set.indicator_of_notMem (s := Set.Ioc a b ×ˢ F) (a := (t, ω))
-            (fun h ↦ haK (h.1.1.le.trans h1.1)) _
+        · exact Set.indicator_of_notMem
+            (show (t, ω) ∉ Set.Ioc a b ×ˢ F from fun h ↦ haK (h.1.1.le.trans h1.1)) _
         · rfl
   · intro A _ hA
     convert (agree_cut_univ hI' K).sub hI' hA using 1
@@ -688,8 +688,10 @@ theorem sIntegral_ae_eq_of_isRiemannStieltjesExtension
       exact hV.1.indicator (measurableSet_le hV.1.abs measurable_const)
     refine agree_cut_bounded hI' n hm (Nat.cast_nonneg n) fun z ↦ ?_
     by_cases h : |Function.uncurry V z| ≤ n
-    · simpa [Set.indicator_of_mem (s := {z | |Function.uncurry V z| ≤ n}) h] using h
-    · simp [Set.indicator_of_notMem (s := {z | |Function.uncurry V z| ≤ n}) h]
+    · simpa [Set.indicator_of_mem
+        (show z ∈ {z | |Function.uncurry V z| ≤ n} from h)] using h
+    · simp [Set.indicator_of_notMem
+        (show z ∉ {z | |Function.uncurry V z| ≤ n} from h)]
   have hVagree : Agree T hBmeas φ hB I' S' V := by
     refine Agree.of_tendsto hI' hWagree ⟨⟨V, hVV⟩, hVS'⟩
       (fun n t ω ↦ by
@@ -700,7 +702,8 @@ theorem sIntegral_ae_eq_of_isRiemannStieltjesExtension
       (tendsto_natCast_atTop_atTop (R := ℝ)).eventually_ge_atTop |V t ω|] with n htn hVn
     simp only [W, cut, Set.indicator_of_mem
       (show (t, ω) ∈ Set.Iic (n : ℝ≥0) ×ˢ (Set.univ : Set Ω) from ⟨htn, Set.mem_univ _⟩)]
-    rw [Set.indicator_of_mem (s := {z | |Function.uncurry V z| ≤ (n : ℝ)}) hVn]
+    rw [Set.indicator_of_mem
+        (show (t, ω) ∈ {z | |Function.uncurry V z| ≤ (n : ℝ)} from hVn)]
     rfl
   have hXV : sIntegral T hBmeas φ hB X = sIntegral T hBmeas φ hB V := by
     simp only [sIntegral, integrandLp_eq hV, integrandLp_eq hVV]

@@ -119,9 +119,6 @@ theorem integrable_increment_pow6 (t₀ t₁ : ℝ≥0) :
     have hfe : (fun x : ℝ ↦ |x| ^ 6) = fun x : ℝ ↦ x ^ 6 :=
       funext fun x ↦ by rw [pow_abs, abs_of_nonneg (by positivity)]
     rwa [hfe] at h
-  have hmap : Integrable (fun x : ℝ ↦ x ^ 6) (Measure.map (B t₁ - B t₀) μ) := by
-    rw [(hB.hasLaw_sub t₁ t₀).map_eq]; exact hg
-  exact (integrable_map_measure hmap.aestronglyMeasurable (hB.hasLaw_sub t₁ t₀).aemeasurable).mp
-      hmap
+  exact (hB.hasLaw_sub t₁ t₀).integrable_fun_comp hg
 
 end MathFin

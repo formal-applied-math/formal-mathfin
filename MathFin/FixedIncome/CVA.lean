@@ -127,9 +127,7 @@ theorem cva_gaussian [IsProbabilityMeasure ν] [IsProbabilityMeasure μ]
   have hV : Measurable (Function.uncurry fun s ω ↦ m s + σ s * √s * Z ω) :=
     (hm.comp measurable_fst).add (((hσ.comp measurable_fst).mul
       (measurable_fst.sqrt)).mul (hZm.comp measurable_snd))
-  have hZint : Integrable Z ν := by
-    have : Integrable id (ν.map Z) := hZ.map_eq ▸ (memLp_id_gaussianReal 1).integrable le_rfl
-    exact (integrable_map_measure aestronglyMeasurable_id hZm.aemeasurable).mp this
+  have hZint : Integrable Z ν := hZ.integrable ((memLp_id_gaussianReal 1).integrable le_rfl)
   have hC : 0 ≤ C := (abs_nonneg _).trans (hDb 0)
   have hS : 0 ≤ S := (hσpos 0).le.trans (hσb 0)
   have hg : ∀ x : ℝ, 0 ≤ M + S * √T * |x| := fun x ↦

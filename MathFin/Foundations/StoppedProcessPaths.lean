@@ -57,7 +57,7 @@ theorem stoppedProcess_indicator_eq {ρ : Ω → WithTop ℝ≥0} (hρ : ∀ ω,
     stoppedProcess (fun i ↦ {ω | ⊥ < ρ ω}.indicator (X i)) ρ = stoppedProcess X ρ := by
   funext t ω
   simp only [stoppedProcess]
-  exact Set.indicator_of_mem (s := {ω : Ω | ⊥ < ρ ω}) (hρ ω) _
+  exact Set.indicator_of_mem (show ω ∈ {ω : Ω | ⊥ < ρ ω} from hρ ω) _
 
 /-- The stopped process has continuous paths. -/
 theorem continuous_stoppedProcess (hcont : ∀ ω, Continuous fun t ↦ X t ω)

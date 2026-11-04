@@ -259,7 +259,7 @@ function of the Black–Scholes Gaussian `N((r − σ²/2)T, σ²T)`
 This is the precise hypothesis Lévy's continuity theorem consumes: once the `n`-step
 CRR log-return law is identified as the `n`-fold convolution of the step law — whose
 characteristic function is `crrStepCharFun`, so the convolution's is `crrStepCharFun ^ n`
-(`MeasureTheory.charFun_conv`) — `ProbabilityMeasure.tendsto_iff_tendsto_charFun`
+(`MeasureTheory.charFun_conv`) — `ProbabilityMeasure.tendsto_of_tendsto_charFun`
 upgrades this pointwise charFun convergence to convergence in distribution, i.e. the
 CRR risk-neutral log-return converges in law to the Black–Scholes normal. -/
 theorem crr_charFun_pow_tendsto_gaussian (hσ : 0 < σ) (hT : 0 < T) (t : ℝ) :

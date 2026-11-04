@@ -182,9 +182,8 @@ theorem itoProcessAssembled_norm_sq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
   have hpred := itoContinuousMod_isStronglyPredictable hB T hBmeas hBcont φ
   have hmem := memLp_itoContinuousMod hB T hBmeas hBcont φ
   have hmem_prod : MemLp (Function.uncurry (itoContinuousMod T hBmeas φ)) 2
-      ((timeMeasure_T T).prod μ) := by
-    rw [memLp_iff, ← eLpNorm_trim (natFiltration hBmeas).predictable_le_prod hpred]
-    exact hmem
+      ((timeMeasure_T T).prod μ) :=
+    memLp_of_memLp_trim (natFiltration hBmeas).predictable_le_prod hmem
   have hint : Integrable (fun z ↦ (Function.uncurry (itoContinuousMod T hBmeas φ) z) ^ 2)
       ((timeMeasure_T T).prod μ) := by
     refine (hmem_prod.integrable_mul hmem_prod).congr ?_

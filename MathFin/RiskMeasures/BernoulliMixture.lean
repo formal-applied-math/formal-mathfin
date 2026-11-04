@@ -234,19 +234,14 @@ theorem oneFactor_measureReal_default {π ρ : ℝ} {F e : Ω → ℝ}
     (hF : HasLaw F (gaussianReal 0 1) P) (he : HasLaw e (gaussianReal 0 1) P) (hFe : F ⟂ᵢ[P] e)
     (hπ : π ∈ Ioo 0 1) (hρ0 : 0 ≤ ρ) (hρ1 : ρ ≤ 1) :
     P.real {ω | √ρ * F ω + √(1 - ρ) * e ω ≤ PhiInv π} = π := by
-  have hscale {X : Ω → ℝ} (hX : HasLaw X (gaussianReal 0 1) P) (c : ℝ) :
-      HasLaw (fun ω ↦ c * X ω) (gaussianReal 0 (.mk (c ^ 2) (sq_nonneg c))) P := by
-    refine ⟨hX.aemeasurable.const_mul c, ?_⟩
-    rw [← Function.comp_def, ← AEMeasurable.map_map_of_aemeasurable
-      (measurable_const_mul c).aemeasurable hX.aemeasurable, hX.map_eq,
-      gaussianReal_map_const_mul, mul_zero, mul_one]
   have hsum := gaussianReal_add_gaussianReal_of_indepFun
     (hFe.comp (measurable_const_mul √ρ) (measurable_const_mul √(1 - ρ)))
-    (hscale hF √ρ) (hscale he √(1 - ρ))
-  have hvar : (.mk (√ρ ^ 2) (sq_nonneg _) + .mk (√(1 - ρ) ^ 2) (sq_nonneg _) : ℝ≥0) = 1 := by
+    (gaussianReal_const_mul hF √ρ) (gaussianReal_const_mul he √(1 - ρ))
+  have hvar : (.mk (√ρ ^ 2) (sq_nonneg _) * 1 + .mk (√(1 - ρ) ^ 2) (sq_nonneg _) * 1 : ℝ≥0)
+      = 1 := by
     apply NNReal.coe_injective
     simp [Real.sq_sqrt hρ0, Real.sq_sqrt (sub_nonneg.2 hρ1)]
-  rw [add_zero, hvar] at hsum
+  rw [mul_zero, mul_zero, add_zero, hvar] at hsum
   have hlaw : HasLaw (fun ω ↦ √ρ * F ω + √(1 - ρ) * e ω) (gaussianReal 0 1) P :=
     ⟨(hF.aemeasurable.const_mul _).add (he.aemeasurable.const_mul _), by rw [← hsum]; rfl⟩
   rw [hlaw.measureReal_eq (p := (· ≤ PhiInv π)) measurableSet_Iic]

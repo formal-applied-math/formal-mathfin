@@ -321,16 +321,6 @@ private noncomputable def bandSq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)
   (Set.Ioc a b ×ˢ F).indicator fun z ↦ ((φ : ℝ≥0 × Ω → ℝ) z) ^ 2
 
 omit [IsProbabilityMeasure μ] in
-/-- A predictable `L²` class is `L²` for the *untrimmed* product measure: `eLpNorm` does not
-see the trim on a strongly predictable function. -/
-private theorem memLp_prod (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    MemLp (⇑φ) 2 ((timeMeasure_T T).prod μ) := by
-  rw [memLp_iff, ← eLpNorm_trim (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod
-    (Lp.stronglyMeasurable φ)]
-  exact Lp.eLpNorm_lt_top φ
-
-omit [IsProbabilityMeasure μ] in
 /-- The ω-section of `bandSq` at a sample point of `F`: the band indicator of the squared time
 section. Every section statement below is this identity plus a case on `ω ∈ F`. -/
 private theorem bandSq_section (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
@@ -373,7 +363,7 @@ private theorem integrable_bandSq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (a b : ℝ≥0) {F : Set Ω}
     (hF : MeasurableSet[natFiltration hBmeas a] F) :
     Integrable (bandSq (μ := μ) T hBmeas φ a b F) ((timeMeasure_T T).prod μ) :=
-  (memLp_prod T hBmeas φ).integrable_sq.indicator
+  (memLp_prod_of_lp T hBmeas φ).integrable_sq.indicator
     ((natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod _
       (MeasureTheory.measurableSet_predictable_Ioc_prod a b hF))
 

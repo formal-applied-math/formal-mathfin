@@ -81,7 +81,7 @@ private lemma functional_nonneg_on_cone {ι : Type*} {C : Set (ι → ℝ)}
   have hlt2 := hlb _ hmem; rw [hval] at hlt2; linarith
 
 /-- **Cone separation root.** A closed convex cone `C ⊆ (ι → ℝ)` containing no probability vector
-(the weights of a `Convexity.StdSimplex`, i.e. disjoint from the standard simplex) admits a
+(no nonnegative `v` with `∑ i, v i = 1`, i.e. disjoint from the standard simplex) admits a
 strictly-positive functional `q` that is `≤ 0` on `C` (a separating supporting functional).
 The geometric heart shared by the FTAP (gains cone), the coherent-risk representation (acceptance
 cone), and superhedging (super-replication cone). Generalizes
@@ -91,7 +91,7 @@ theorem exists_pos_separating_of_cone_disjoint_simplex
     {ι : Type*} [Fintype ι]
     (C : Set (ι → ℝ)) (hCconv : Convex ℝ C) (hCclosed : IsClosed C)
     (hCcone : ∀ ⦃x⦄, x ∈ C → ∀ ⦃c : ℝ⦄, 0 ≤ c → c • x ∈ C)
-    (hdisj : ∀ w : Convexity.StdSimplex ℝ ι, ⇑w.weights ∉ C) :
+    (hdisj : ∀ v : ι → ℝ, (∀ i, 0 ≤ v i) → ∑ i, v i = 1 → v ∉ C) :
     ∃ q : ι → ℝ, (∀ i, 0 < q i) ∧ ∀ v ∈ C, ∑ i, q i * v i ≤ 0 := by
   classical
   rcases C.eq_empty_or_nonempty with hCempty | hCne
@@ -105,7 +105,8 @@ theorem exists_pos_separating_of_cone_disjoint_simplex
   have hcompΔ : IsCompact Δ :=
     isCompact_range (Convexity.StdSimplex.isEmbedding_toFun_comp_weights ℝ ι).continuous
   obtain ⟨f, u, v, hfu, huv, hfv⟩ := geometric_hahn_banach_compact_closed hconvΔ hcompΔ hCconv
-    hCclosed (Set.disjoint_left.2 (by rintro _ ⟨w, rfl⟩; exact hdisj w))
+    hCclosed (Set.disjoint_left.2 (by
+      rintro _ ⟨w, rfl⟩; exact hdisj _ w.weights_nonneg w.total_of_fintype))
   have hv_neg : v < 0 := by have h0 := hfv 0 h0C; rwa [map_zero] at h0
   have hfC_nonneg : ∀ c ∈ C, 0 ≤ f c := functional_nonneg_on_cone hCcone hv_neg hfv
   have hsingle_mem (i : ι) : (Pi.single i (1 : ℝ)) ∈ Δ :=

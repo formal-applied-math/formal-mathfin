@@ -336,10 +336,9 @@ theorem driftSimpleProcessLp_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (
     -- ∫ (drift)² ∂prod ≤ (T:ℝ)² · ∫ (⇑V)² ∂prod
     have hmemD_prod : MemLp (Function.uncurry (driftSimpleProcess hBmeas V.val)) 2
         ((timeMeasure_T T).prod μ) :=
-      by rw [memLp_iff, ← eLpNorm_trim 𝓕.predictable_le_prod hpredD]; exact hmemD
+      memLp_of_memLp_trim 𝓕.predictable_le_prod hmemD
     have hmemV_prod : MemLp (Function.uncurry ⇑V.val) 2 ((timeMeasure_T T).prod μ) :=
-      by rw [memLp_iff, ← eLpNorm_trim 𝓕.predictable_le_prod V.val.isStronglyPredictable]
-         exact hmemV
+      memLp_of_memLp_trim 𝓕.predictable_le_prod hmemV
     have hintD := hmemD_prod.integrable_sq
     have hintV := hmemV_prod.integrable_sq
     rw [integral_prod _ hintD]

@@ -99,13 +99,8 @@ theorem integral_increment_centered_mean {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t�
 moments. Needed for the `L²`-integrability of products of squared increments in the
 quadratic-variation assembly. -/
 theorem memLp_increment_four (t₀ t₁ : ℝ≥0) :
-    MemLp (fun ω ↦ B t₁ ω - B t₀ ω) 4 μ := by
-  have hmap : MemLp (id : ℝ → ℝ) 4 (Measure.map (fun ω ↦ B t₁ ω - B t₀ ω) μ) := by
-    rw [show Measure.map (fun ω ↦ B t₁ ω - B t₀ ω) μ
-          = gaussianReal 0 (nndist (t₁ : ℝ) (t₀ : ℝ)) from (hB.hasLaw_sub t₁ t₀).map_eq]
-    exact memLp_id_gaussianReal (μ := 0) 4
-  exact (memLp_map_measure_iff measurable_id.aestronglyMeasurable
-    (hB.hasLaw_sub t₁ t₀).aemeasurable).mp hmap
+    MemLp (fun ω ↦ B t₁ ω - B t₀ ω) 4 μ :=
+  (hB.hasLaw_sub t₁ t₀).memLp (memLp_id_gaussianReal 4)
 
 omit hB in
 /-- **Pairwise orthogonality of centered squared increments** (the vanishing cross terms).

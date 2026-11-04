@@ -169,16 +169,12 @@ theorem mem_gains_imp_predictable {g : Ω → ℝ} (hg : g ∈ gainsSubspace �
     obtain ⟨φ, hφ, hφeq⟩ := ih
     exact ⟨c • φ, fun n ↦ (hφ n).const_smul c, by rw [martingaleTransform_smul, hφeq]⟩
 
-omit [IsProbabilityMeasure P] [Fintype Ω] in
-/-- Under no arbitrage, the attainable-gains subspace contains no probability vector (the weights
-of a `Convexity.StdSimplex`): a non-negative, non-zero gains vector would be an arbitrage. -/
-theorem gains_disjoint_stdSimplex [Finite Ω] (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage 𝓕 P S T) :
-    ∀ w : Convexity.StdSimplex ℝ Ω, ⇑w.weights ∉ gainsSubspace 𝓕 S T := by
-  cases nonempty_fintype Ω
-  intro w hv
-  have hnn : ∀ ω, 0 ≤ w.weights ω := w.weights_nonneg
-  have hsum : ∑ ω, w.weights ω = 1 := w.total_of_fintype
-  generalize ⇑w.weights = v at hv hnn hsum
+omit [IsProbabilityMeasure P] in
+/-- Under no arbitrage, the attainable-gains subspace contains no probability vector (a
+nonnegative `v` with `∑ ω, v ω = 1`): a nonnegative, nonzero gains vector would be an arbitrage. -/
+theorem gains_disjoint_stdSimplex (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage 𝓕 P S T) :
+    ∀ v : Ω → ℝ, (∀ ω, 0 ≤ v ω) → ∑ ω, v ω = 1 → v ∉ gainsSubspace 𝓕 S T := by
+  intro v hnn hsum hv
   obtain ⟨φ, hφ, hφeq⟩ := mem_gains_imp_predictable 𝓕 S T hv
   -- The gains are `≥ 0` (`v` is in the simplex), so no arbitrage forces them `= 0`.
   have hge : 0 ≤ᵐ[P] martingaleTransform φ S T := by

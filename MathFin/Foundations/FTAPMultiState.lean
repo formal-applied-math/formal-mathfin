@@ -203,11 +203,8 @@ theorem hasEMM_multi_of_not_hasArbitrage {N M : ℕ} [NeZero N]
   -- The attainable-payoff subspace.
   set V : Submodule ℝ (Fin N → ℝ) := Submodule.span ℝ (Set.range z) with hVdef
   -- No arbitrage ⇒ `V` misses the standard simplex.
-  have hdisj : ∀ w : Convexity.StdSimplex ℝ (Fin N), ⇑w.weights ∉ V := by
-    intro w hv
-    have hnn : ∀ i, 0 ≤ w.weights i := w.weights_nonneg
-    have hsum : ∑ i, w.weights i = 1 := w.total_of_fintype
-    generalize ⇑w.weights = v at hv hnn hsum
+  have hdisj : ∀ v : Fin N → ℝ, (∀ i, 0 ≤ v i) → ∑ i, v i = 1 → v ∉ V := by
+    intro v hnn hsum hv
     rw [hVdef, Submodule.mem_span_range_iff_exists_fun] at hv
     obtain ⟨c, hc⟩ := hv
     have hpayoff : ∀ i, (∑ k, c k * z k i) = v i := by

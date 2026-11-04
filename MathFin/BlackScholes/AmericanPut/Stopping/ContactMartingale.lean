@@ -74,7 +74,7 @@ theorem brownianInteriorRule_martingale {p : ℝ → ℝ → ℝ} {b : ℝ → �
   have hlocal : IsLocalMartingale X brownianAugFiltration gaussianLimit :=
     isLocalMartingale_congr_ae (localMartingale_stopped_indicator hM hθ)
       (fun t => (hXadapt t).mono (brownianFiltration_le_aug t)) (fun ω => (hXcont ω).isCadlag)
-      (heq.mono (fun ω hω t => (hω t).symm))
+      heq
   have hXM : Martingale X brownianFiltration gaussianLimit :=
     martingale_smaller_filtration brownianFiltration_le_aug
       (bounded_localMartingale_is_martingale hlocal

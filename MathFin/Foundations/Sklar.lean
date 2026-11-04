@@ -79,7 +79,9 @@ omit [Fintype ι] in
 probability-integral transforms of `X` is a copula. -/
 theorem isCopula_copulaOf [Finite ι] (hX : AEMeasurable X P)
     (hF : ∀ i, Continuous (cdf (P.map fun ω ↦ X ω i))) : IsCopula (copulaOf X P) where
-  isProbabilityMeasure := by unfold copulaOf; infer_instance
+  isProbabilityMeasure :=
+    inferInstanceAs (IsProbabilityMeasure
+      (P.map fun ω i ↦ cdf (P.map fun ω ↦ X ω i) (X ω i)))
   map_eval i := by
     rw [copulaOf, AEMeasurable.map_map_of_aemeasurable (measurable_pi_apply i).aemeasurable
       (aemeasurable_cdf_coord hX)]

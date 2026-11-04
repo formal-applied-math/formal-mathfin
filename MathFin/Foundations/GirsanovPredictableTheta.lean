@@ -348,10 +348,7 @@ lemma tendstoInMeasure_marshalDrift (T : ℝ≥0)
         (tendsto_simpleAssembly_marshalStepSP T hBmeas hpred hC hbdd V hV)
     simpa using h0.pow 2
   -- `θ̂` sliced is `L²` a.e.
-  have hg_prod : MemLp (⇑θhat) 2 ((timeMeasure_T T).prod μ) :=
-    by rw [memLp_iff, ← eLpNorm_trim_ae (natFiltration hBmeas).predictable_le_prod
-         (Lp.aestronglyMeasurable θhat)]
-       exact Lp.eLpNorm_lt_top θhat
+  have hg_prod : MemLp (⇑θhat) 2 ((timeMeasure_T T).prod μ) := memLp_prod_of_lp T hBmeas θhat
   have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s ↦ ⇑θhat (s, ω)) 2 (timeMeasure_T T) := by
     filter_upwards [hg_prod.aestronglyMeasurable.prodMk_right,
       hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
@@ -427,10 +424,7 @@ lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
       tendsto_iff_norm_sub_tendsto_zero.mp
         (tendsto_simpleAssembly_marshalStepSP T hBmeas hpred hC hbdd V hV)
     simpa using h0.pow 2
-  have hg_prod : MemLp (⇑θhat) 2 ((timeMeasure_T T).prod μ) :=
-    by rw [memLp_iff, ← eLpNorm_trim_ae (natFiltration hBmeas).predictable_le_prod
-         (Lp.aestronglyMeasurable θhat)]
-       exact Lp.eLpNorm_lt_top θhat
+  have hg_prod : MemLp (⇑θhat) 2 ((timeMeasure_T T).prod μ) := memLp_prod_of_lp T hBmeas θhat
   have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s ↦ ⇑θhat (s, ω)) 2 (timeMeasure_T T) := by
     filter_upwards [hg_prod.aestronglyMeasurable.prodMk_right,
       hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2

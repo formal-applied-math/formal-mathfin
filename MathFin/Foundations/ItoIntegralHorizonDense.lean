@@ -228,6 +228,15 @@ lemma memLp_uncurry_trim_T (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   rw [trimMeasure_T_eq_restrict]
   exact (ItoIntegralL2.memLp_uncurry_trim hBmeas V).restrict _
 
+omit [IsProbabilityMeasure μ] in
+/-- An `L²` class of the predictable trim is `L²` of the product measure itself: the trim only
+coarsens the σ-algebra, so `MemLp` lifts through `memLp_of_memLp_trim`. -/
+lemma memLp_prod_of_lp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    MemLp (⇑φ) 2 ((timeMeasure_T T).prod μ) :=
+  memLp_of_memLp_trim (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod
+    (Lp.memLp φ)
+
 /-- The simple process's `L²` class in the T-restricted trim. -/
 noncomputable def simpleProcessL2_T (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)) :

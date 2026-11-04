@@ -41,11 +41,11 @@ namespace MathFin
 
 
 /-- **Separating-dual kernel.** A subspace `V` of the finite-dimensional space
-`ι → ℝ` that contains no probability vector (the weights of a `Convexity.StdSimplex`) admits a
+`ι → ℝ` that contains no probability vector (no nonnegative `v` with `∑ i, v i = 1`) admits a
 strictly-positive vector `q` whose induced functional annihilates `V`. -/
 theorem exists_pos_dual_of_disjoint_stdSimplex
     {ι : Type*} [Fintype ι]
-    (V : Submodule ℝ (ι → ℝ)) (hV : ∀ w : Convexity.StdSimplex ℝ ι, ⇑w.weights ∉ V) :
+    (V : Submodule ℝ (ι → ℝ)) (hV : ∀ v : ι → ℝ, (∀ i, 0 ≤ v i) → ∑ i, v i = 1 → v ∉ V) :
     ∃ q : ι → ℝ, (∀ i, 0 < q i) ∧ ∀ v ∈ V, ∑ i, q i * v i = 0 := by
   -- A subspace is a two-sided cone: apply the cone-separation root to `V`, then
   -- use neg-closure to promote the one-sided `≤ 0` to the two-sided `= 0`.

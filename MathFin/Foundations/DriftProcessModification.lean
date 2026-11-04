@@ -77,7 +77,7 @@ lemma simpleAssembly_T_norm_sq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   have hmemV := memLp_uncurry_trim_T (μ := μ) T hBmeas W.val
   have hpredV := W.val.isStronglyPredictable
   have hmemV_prod : MemLp (Function.uncurry ⇑W.val) 2 ((timeMeasure_T T).prod μ) :=
-    by rw [memLp_iff, ← eLpNorm_trim 𝓕.predictable_le_prod hpredV]; exact hmemV
+    memLp_of_memLp_trim 𝓕.predictable_le_prod hmemV
   have hintV := hmemV_prod.integrable_sq
   rw [show simpleAssembly_T (μ := μ) T hBmeas W = hmemV.toLp (Function.uncurry ⇑W.val) from rfl,
     lp_two_norm_sq, integral_congr_ae (g := fun z ↦ (Function.uncurry ⇑W.val z) ^ 2)
@@ -123,9 +123,8 @@ lemma drift_maximal_prob (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (W : T
       ≤ (ε ^ 2)⁻¹ * ((T : ℝ) * ‖simpleAssembly_T (μ := μ) T hBmeas W‖ ^ 2) := by
   set 𝓕 := natFiltration (mΩ := mΩ) hBmeas
   have hmemV := memLp_uncurry_trim_T (μ := μ) T hBmeas W.val
-  have hpredV := W.val.isStronglyPredictable
   have hmemV_prod : MemLp (Function.uncurry ⇑W.val) 2 ((timeMeasure_T T).prod μ) :=
-    by rw [memLp_iff, ← eLpNorm_trim 𝓕.predictable_le_prod hpredV]; exact hmemV
+    memLp_of_memLp_trim 𝓕.predictable_le_prod hmemV
   have hintV := hmemV_prod.integrable_sq
   have hfun_int : Integrable
       (fun ω ↦ (T : ℝ) * ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑W.val s ω) ^ 2 ∂timeMeasure) μ :=
@@ -378,9 +377,7 @@ theorem drift_slice_energy_eq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
       =ᵐ[(timeMeasure_T T).prod μ] fun z ↦ (⇑W.val z.1 z.2 - ⇑g z) ^ 2 := by
     filter_upwards [hcoe_prod] with z hz; rw [hz]
   -- ⇑h is L² over the product, so (⇑h)² is integrable there
-  have hmemh_prod : MemLp (⇑h) 2 ((timeMeasure_T T).prod μ) :=
-    by rw [memLp_iff, ← eLpNorm_trim_ae 𝓕.predictable_le_prod (Lp.aestronglyMeasurable h)]
-       exact Lp.eLpNorm_lt_top h
+  have hmemh_prod : MemLp (⇑h) 2 ((timeMeasure_T T).prod μ) := memLp_prod_of_lp T hBmeas h
   have hinth : Integrable (fun z ↦ (⇑h z) ^ 2) ((timeMeasure_T T).prod μ) :=
       hmemh_prod.integrable_sq
   have hintdiff : Integrable (fun z ↦ (⇑W.val z.1 z.2 - ⇑g z) ^ 2) ((timeMeasure_T T).prod μ) :=
@@ -408,10 +405,8 @@ theorem drift_slice_sq_integrable (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t
     rw [hz1, Pi.sub_apply, hz2]; rfl
   have hcoe : ⇑h =ᵐ[(timeMeasure_T T).prod μ] fun z ↦ ⇑W.val z.1 z.2 - ⇑g z :=
     ae_eq_of_ae_eq_trim hcoe_trim
-  have hmem : MemLp (⇑h) 2 ((timeMeasure_T T).prod μ) :=
-    by rw [memLp_iff, ← eLpNorm_trim_ae 𝓕.predictable_le_prod (Lp.aestronglyMeasurable h)]
-       exact Lp.eLpNorm_lt_top h
-  exact hmem.integrable_sq.congr (by filter_upwards [hcoe] with z hz; rw [hz])
+  exact (memLp_prod_of_lp T hBmeas h).integrable_sq.congr
+    (by filter_upwards [hcoe] with z hz; rw [hz])
 
 /-- **The pathwise drift limit is a Lebesgue integral.** For every `t ≤ T`, the pointwise `limUnder`
 drift `driftContinuousMod T g t ω` equals the time integral `∫_{(0,t]} ⇑g(s,ω) ds` of the
@@ -431,10 +426,7 @@ theorem driftContinuousMod_eq_setIntegral (T : ℝ≥0) (hBmeas : ∀ t, Measura
   have hV := (approxSeq T hBmeas g).choose_spec
   have : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) t)) :=
     ⟨by rw [Measure.restrict_apply_univ, timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
-  have hg_prod : MemLp (⇑g) 2 ((timeMeasure_T T).prod μ) :=
-    by rw [memLp_iff, ← eLpNorm_trim_ae (natFiltration hBmeas).predictable_le_prod
-         (Lp.aestronglyMeasurable g)]
-       exact Lp.eLpNorm_lt_top g
+  have hg_prod : MemLp (⇑g) 2 ((timeMeasure_T T).prod μ) := memLp_prod_of_lp T hBmeas g
   have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s ↦ ⇑g (s, ω)) 2 (timeMeasure_T T) := by
     filter_upwards [hg_prod.aestronglyMeasurable.prodMk_right,
       hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2

@@ -191,7 +191,8 @@ theorem independenceCopula_real_Iic (u : ι → ℝ) (hu : ∀ i, u i ∈ Icc 0 
 omit [Fintype ι] in
 /-- `M` is a copula. -/
 theorem isCopula_comonotoneCopula : IsCopula (comonotoneCopula ι) where
-  isProbabilityMeasure := by unfold comonotoneCopula; infer_instance
+  isProbabilityMeasure :=
+    inferInstanceAs (IsProbabilityMeasure ((volume.restrict (Ioo (0 : ℝ) 1)).map fun t _ ↦ t))
   map_eval i := by
     rw [comonotoneCopula, Measure.map_map (measurable_pi_apply i) (by fun_prop)]
     exact Measure.map_id
@@ -222,7 +223,9 @@ lemma map_one_sub_uniformIoo :
 
 /-- `W` is a copula. -/
 theorem isCopula_countermonotoneCopula : IsCopula countermonotoneCopula where
-  isProbabilityMeasure := by unfold countermonotoneCopula; infer_instance
+  isProbabilityMeasure :=
+    inferInstanceAs (IsProbabilityMeasure
+      ((volume.restrict (Ioo (0 : ℝ) 1)).map fun t ↦ ![t, 1 - t]))
   map_eval i := by
     rw [countermonotoneCopula, Measure.map_map (measurable_pi_apply i) (by fun_prop)]
     fin_cases i
