@@ -75,7 +75,7 @@ theorem prob_bsTerminal_lt_eq_kmvPD {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q :
     ext ω
     simp only [Set.mem_ofPred_eq, Set.mem_preimage, Set.mem_Iio]
     exact bsTerminal_lt_iff hS_0 hK hσ hT (Z ω)
-  haveI : NullSingletonClass (gaussianReal (0 : ℝ) 1) := nullSingletonClass_gaussianReal one_ne_zero
+  have : NullSingletonClass (gaussianReal (0 : ℝ) 1) := nullSingletonClass_gaussianReal one_ne_zero
   rw [hset, ← Measure.map_apply_of_aemeasurable hZ.aemeasurable measurableSet_Iio, hZ.map_eq,
     measure_congr (Iio_ae_eq_Iic (μ := gaussianReal 0 1)), ← Phi_def, kmvPD,
     kmvDistanceToDefault_eq_bsd2 _ _ _ _ _ hS_0 hK]

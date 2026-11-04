@@ -45,8 +45,8 @@ def representingSet {ι : Type*} [Fintype ι] (ρ : (ι → ℝ) → ℝ) : Set 
 theorem coherentRisk_isLUB {ι : Type*} [Fintype ι] {ρ : (ι → ℝ) → ℝ}
     (hρ : IsCoherentRisk ρ) (X : ι → ℝ) :
     IsLUB ((fun q ↦ ∑ i, q i * (- X i)) '' representingSet ρ) (ρ X) := by
-  letI : MeasurableSpace ι := ⊤
-  haveI : MeasurableSingletonClass ι := ⟨fun _ ↦ trivial⟩
+  let : MeasurableSpace ι := ⊤
+  have : MeasurableSingletonClass ι := ⟨fun _ ↦ trivial⟩
   have hrep : MathFin.representingSet (fun L : ι → ℝ ↦ ρ (-L)) = representingSet ρ := by
     ext q
     have e (Y : ι → ℝ) : ∑ i, q i * (-Y) i = -∑ i, q i * Y i := by
@@ -70,8 +70,8 @@ theorem coherentRisk_isLUB {ι : Type*} [Fintype ι] {ρ : (ι → ℝ) → ℝ}
 theorem worstCase_isCoherentRisk {ι : Type*} [Fintype ι] [Nonempty ι] :
     IsCoherentRisk
       (fun X : ι → ℝ ↦ Finset.univ.sup' Finset.univ_nonempty (fun i ↦ - X i)) := by
-  letI : MeasurableSpace ι := ⊤
-  haveI : MeasurableSingletonClass ι := ⟨fun _ ↦ trivial⟩
+  let : MeasurableSpace ι := ⊤
+  have : MeasurableSingletonClass ι := ⟨fun _ ↦ trivial⟩
   have e : (fun L : ι → ℝ ↦
       (fun X : ι → ℝ ↦ Finset.univ.sup' Finset.univ_nonempty (fun i ↦ - X i)) (-L)) =
         MathFin.worstCase := by

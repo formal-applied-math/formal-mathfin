@@ -588,11 +588,11 @@ private lemma A_K_le_layer_integral
         if t ≤ K then μ {ω | t ≤ runMax f n ω} else 0 := by
     intro t ht
     by_cases hle : t ≤ K
-    · simp only [hle, if_true]
+    · simp only [hle, ite_true]
       congr 1
       ext ω
       simp [hle]
-    · simp only [hle, if_false]
+    · simp only [hle, ite_false]
       rw [show {ω | t ≤ min (runMax f n ω) K} = ∅ by
         ext ω
         simp [hle]]
@@ -637,7 +637,7 @@ private lemma A_K_le_layer_integral
       intro t ht
       change μ {ω | t ≤ min (runMax f n ω) K} * _ =
             μ {ω | t ≤ runMax f n ω} * _
-      rw [h_ZK_set t ht.1, if_pos ht.2]
+      rw [h_ZK_set t ht.1, ite_eq_left ht.2]
     rw [h_left, h_zero_right, add_zero]
   rw [h_split]
   -- Now apply layer_integrand_bound pointwise.

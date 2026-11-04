@@ -223,7 +223,7 @@ theorem discounted_terminal_eq_S0_of_physical {Ω : Type*} {mΩ : MeasurableSpac
   obtain ⟨Q, hQ, hQeq, hbs⟩ :=
     BSCallHyp.exists_of_physical (S_0 := S_0) (K := K) (r := r) (σ := σ) (T := T)
       c hS_0 hK hσ hT hWmeas hW
-  haveI := hQ
+  have := hQ
   exact ⟨Q, hQ, hQeq, discounted_terminal_eq_S0 hbs⟩
 
 /-- **Black-Scholes call price from the physical measure** (full chain). For
@@ -244,7 +244,7 @@ theorem bs_call_formula_of_physical {Ω : Type*} {mΩ : MeasurableSpace Ω}
   obtain ⟨Q, hQ, hQeq, hbs⟩ :=
     BSCallHyp.exists_of_physical (S_0 := S_0) (K := K) (r := r) (σ := σ) (T := T)
       c hS_0 hK hσ hT hWmeas hW
-  haveI := hQ
+  have := hQ
   exact ⟨Q, hQ, hQeq, bs_call_formula hbs⟩
 
 /-- **The physical-drift asset reprices to `S_0` under the constructed EMM** —
@@ -266,7 +266,7 @@ theorem discounted_physical_terminal_eq_S0 {Ω : Type*} {mΩ : MeasurableSpace �
   obtain ⟨Q, hQ, _, hbs⟩ :=
     discounted_terminal_eq_S0_of_physical (K := S_0) (r := r)
       ((r - μ) * Real.sqrt T / σ) hS_0 hS_0 hσ hT hWmeas hW
-  haveI := hQ
+  have := hQ
   refine ⟨Q, hQ, ?_⟩
   have hfun : ∀ ω, Real.exp (-(r * T)) * bsTerminal S_0 μ σ T (W ω)
       = Real.exp (-(r * T)) * bsTerminal S_0 r σ T (W ω - (r - μ) * Real.sqrt T / σ) := by

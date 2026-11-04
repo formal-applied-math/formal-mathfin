@@ -195,14 +195,14 @@ lemma bermudanPrice_succ_of_mem {E : Set ℕ} {n : ℕ} (hn : n + 1 ∈ E) (u d 
     (S : ℝ) :
     bermudanPrice E u d r g (n + 1) S = max (g S) (binomialOptionPriceOnePeriod u d r
       (bermudanPrice E u d r g n (S * u)) (bermudanPrice E u d r g n (S * d))) := by
-  rw [bermudanPrice, if_pos hn]
+  rw [bermudanPrice, ite_eq_left hn]
 
 /-- Bellman step off the exercise set (`n + 1 ∉ E`): the bare continuation. -/
 lemma bermudanPrice_succ_of_notMem {E : Set ℕ} {n : ℕ} (hn : n + 1 ∉ E) (u d r : ℝ)
     (g : ℝ → ℝ) (S : ℝ) :
     bermudanPrice E u d r g (n + 1) S = binomialOptionPriceOnePeriod u d r
       (bermudanPrice E u d r g n (S * u)) (bermudanPrice E u d r g n (S * d)) := by
-  rw [bermudanPrice, if_neg hn]
+  rw [bermudanPrice, ite_eq_right hn]
 
 /-- **Supermartingale clause**: the one-period continuation never exceeds the price. -/
 lemma bermudanPrice_supermartingale (E : Set ℕ) (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :

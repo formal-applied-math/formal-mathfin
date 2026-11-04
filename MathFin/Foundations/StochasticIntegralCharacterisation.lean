@@ -182,7 +182,7 @@ noncomputable def integrandLp (X : ℝ≥0 → Ω → ℝ) : Lp ℝ 2 (bracketMe
 theorem integrandLp_eq {X X' : ℝ≥0 → Ω → ℝ} (h : IsPredictableVersion T hBmeas φ X X') :
     integrandLp T hBmeas φ X = h.2.1.toLp _ := by
   have hX : X ∈ domain T hBmeas φ := ⟨X', h⟩
-  rw [integrandLp, dif_pos hX]
+  rw [integrandLp, dite_eq_left hX]
   exact MemLp.toLp_congr _ _ (uncurry_ae_eq_of_isPredictableVersion hX.choose_spec h)
 
 /-! ### The integrator and the integral -/
@@ -255,7 +255,7 @@ theorem sIntegral_band (hB : IsPreBrownianReal B μ) {i j : ℝ≥0} (hij : i �
         Lp.coeFn_zero ℝ 2 (bracketMeasure (μ := μ) T hBmeas φ)] with z hz hzT h0
       rw [hz, h0, uncurry_band]
       simp only [elemIntegrand, Set.indicator_apply, Set.mem_Ioc, Pi.zero_apply]
-      rw [if_neg fun h ↦ absurd (hiT.trans h.1) (not_lt.2 hzT.2), zero_mul]
+      rw [ite_eq_right fun h ↦ absurd (hiT.trans h.1) (not_lt.2 hzT.2), zero_mul]
     rw [hzero, map_zero]
     filter_upwards [Lp.coeFn_zero ℝ 2 μ] with ω hω
     simp [integrator, min_eq_right hiT.le, min_eq_right (hiT.le.trans hij)]
@@ -430,12 +430,12 @@ theorem isRiemannStieltjesExtension (hB : IsPreBrownianReal B μ) :
   elementary_ioc i j hij X := by
     -- a simple function over `𝓕_i` is bounded and `𝓕_i`-measurable
     obtain ⟨⟨C, hC⟩, hXm⟩ : (∃ C, ∀ ω, ‖X ω‖ ≤ C) ∧ Measurable[natFiltration hBmeas i] X := by
-      letI : MeasurableSpace Ω := natFiltration hBmeas i
+      let : MeasurableSpace Ω := natFiltration hBmeas i
       exact ⟨X.exists_forall_norm_le, X.measurable⟩
     exact ⟨⟨_, isPredictableVersion_band hij hXm hC⟩, sIntegral_band hB hij hXm hC⟩
   elementary_iic i X := by
     obtain ⟨⟨C, hC⟩, hXm⟩ : (∃ C, ∀ ω, ‖X ω‖ ≤ C) ∧ Measurable[natFiltration hBmeas ⊥] X := by
-      letI : MeasurableSpace Ω := natFiltration hBmeas ⊥
+      let : MeasurableSpace Ω := natFiltration hBmeas ⊥
       exact ⟨X.exists_forall_norm_le, X.measurable⟩
     exact ⟨⟨_, isPredictableVersion_bottomBand i hXm hC⟩, sIntegral_bottomBand hB i hXm hC⟩
   integral_add X₁ X₂ h₁ h₂ := by
@@ -629,17 +629,17 @@ theorem agree_cut_indicator (hI' : IsOtherExtension (T := T) (φ := φ) hB I' S'
         filter_upwards [eventually_gt_atTop m] with N hN
         have hmem : (t, ω) ∈ ⋃ n ∈ Finset.range N, f n :=
           Set.mem_biUnion (Finset.mem_range.2 hN) hm
-        simp only [cut, Set.indicator_apply, hz, hmem, if_true, Pi.one_apply]
+        simp only [cut, Set.indicator_apply, hz, hmem, ite_true, Pi.one_apply]
       · refine tendsto_const_nhds.congr' (Eventually.of_forall fun N ↦ ?_)
         have hmem : (t, ω) ∉ ⋃ n ∈ Finset.range N, f n := fun h ↦
           hz (Set.mem_iUnion.2 (by obtain ⟨n, -, hn⟩ := Set.mem_iUnion₂.1 h; exact ⟨n, hn⟩))
-        simp only [cut, Set.indicator_apply, hz, hmem, if_false]
+        simp only [cut, Set.indicator_apply, hz, hmem, ite_false]
 
 /-- **Simple predictable functions**, cut at `K`, by linearity. -/
 theorem agree_cut_simpleFunc (hI' : IsOtherExtension (T := T) (φ := φ) hB I' S') (K : ℝ≥0)
     (f : @SimpleFunc (ℝ≥0 × Ω) (natFiltration (mΩ := mΩ) hBmeas).predictable ℝ) :
     Agree T hBmeas φ hB I' S' (cut f K) := by
-  letI : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
+  let : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
   induction f using SimpleFunc.induction with
   | @const c A hA =>
     convert (agree_cut_indicator hI' K A hA).const_smul hI' c using 1
@@ -684,7 +684,7 @@ theorem sIntegral_ae_eq_of_isRiemannStieltjesExtension
   have hWagree (n : ℕ) : Agree T hBmeas φ hB I' S' (W n) := by
     have hm : Measurable[(natFiltration (mΩ := mΩ) hBmeas).predictable]
         ({z | |Function.uncurry V z| ≤ n}.indicator (Function.uncurry V)) := by
-      letI : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
+      let : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
       exact hV.1.indicator (measurableSet_le hV.1.abs measurable_const)
     refine agree_cut_bounded hI' n hm (Nat.cast_nonneg n) fun z ↦ ?_
     by_cases h : |Function.uncurry V z| ≤ n

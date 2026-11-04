@@ -284,7 +284,7 @@ theorem hasLaw_forwardMeasure_wienerIntegralLp (hB : IsPreBrownianReal B μ) (S 
     HasLaw (fun ω ↦ m + c₁ * wienerIntegralLp B hB S f ω)
       (gaussianReal (m' - c₁ * c₂ * ⟪f, g⟫_ℝ) v)
       (forwardMeasure μ fun ω ↦ Real.exp (M + c₂ * wienerIntegralLp B hB S g ω)) := by
-  haveI := forwardMeasure_isProbabilityMeasure (Q := μ) (fun _ ↦ Real.exp_pos _)
+  have := forwardMeasure_isProbabilityMeasure (Q := μ) (fun _ ↦ Real.exp_pos _)
     (integrable_one_div_exp_add_mul_wienerIntegralLp hB S M c₂ g)
   have hae : AEMeasurable (fun ω ↦ m + c₁ * wienerIntegralLp B hB S f ω)
       (forwardMeasure μ fun ω ↦ Real.exp (M + c₂ * wienerIntegralLp B hB S g ω)) :=

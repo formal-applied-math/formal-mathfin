@@ -155,7 +155,7 @@ theorem mem_gains_imp_predictable {g : Ω → ℝ} (hg : g ∈ gainsSubspace �
       rw [Finset.sum_eq_single t]
       · simp [incrementIndicator]
       · intro k _ hk
-        rw [if_neg (by omega : ¬ k + 1 = t + 1)]
+        rw [ite_eq_right (by omega : ¬ k + 1 = t + 1)]
         simp
       · intro ht
         exact absurd (Finset.mem_range.mpr htT) ht
@@ -169,16 +169,20 @@ theorem mem_gains_imp_predictable {g : Ω → ℝ} (hg : g ∈ gainsSubspace �
     obtain ⟨φ, hφ, hφeq⟩ := ih
     exact ⟨c • φ, fun n ↦ (hφ n).const_smul c, by rw [martingaleTransform_smul, hφeq]⟩
 
-omit [IsProbabilityMeasure P] in
-/-- Under no arbitrage, the attainable-gains subspace is disjoint from the
-standard simplex: a non-negative, non-zero gains vector would be an arbitrage. -/
-theorem gains_disjoint_stdSimplex (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage 𝓕 P S T) :
-    ∀ v ∈ gainsSubspace 𝓕 S T, v ∉ stdSimplex ℝ Ω := by
-  intro v hv hsimplex
+omit [IsProbabilityMeasure P] [Fintype Ω] in
+/-- Under no arbitrage, the attainable-gains subspace contains no probability vector (the weights
+of a `Convexity.StdSimplex`): a non-negative, non-zero gains vector would be an arbitrage. -/
+theorem gains_disjoint_stdSimplex [Finite Ω] (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage 𝓕 P S T) :
+    ∀ w : Convexity.StdSimplex ℝ Ω, ⇑w.weights ∉ gainsSubspace 𝓕 S T := by
+  cases nonempty_fintype Ω
+  intro w hv
+  have hnn : ∀ ω, 0 ≤ w.weights ω := w.weights_nonneg
+  have hsum : ∑ ω, w.weights ω = 1 := w.total_of_fintype
+  generalize ⇑w.weights = v at hv hnn hsum
   obtain ⟨φ, hφ, hφeq⟩ := mem_gains_imp_predictable 𝓕 S T hv
   -- The gains are `≥ 0` (`v` is in the simplex), so no arbitrage forces them `= 0`.
   have hge : 0 ≤ᵐ[P] martingaleTransform φ S T := by
-    rw [hφeq]; exact Filter.Eventually.of_forall fun ω ↦ hsimplex.1 ω
+    rw [hφeq]; exact Filter.Eventually.of_forall hnn
   have hzero : v =ᵐ[P] 0 := by
     rw [← hφeq]
     exact hNA φ (fun t _ ↦ hφ t) (exists_bound_horizon T φ) hge
@@ -187,7 +191,7 @@ theorem gains_disjoint_stdSimplex (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage �
     by_contra hcon
     simp only [not_exists, not_lt] at hcon
     have hle : ∑ ω, v ω ≤ 0 := Finset.sum_nonpos fun ω _ ↦ hcon ω
-    rw [hsimplex.2] at hle; linarith
+    rw [hsum] at hle; linarith
   have hnull : P {ω | v ω ≠ 0} = 0 := by simpa using ae_iff.mp hzero
   have hmem : ω₀ ∈ {ω | v ω ≠ 0} := ne_of_gt hω₀
   rw [eq_empty_of_pos_singleton hP hnull] at hmem
@@ -212,7 +216,7 @@ theorem exists_isEMM_of_pos_dual (hS : StronglyAdapted 𝓕 S)
       div_self hZpos.ne', ENNReal.ofReal_one]
   set Q : Measure Ω := (PMF.ofFintype (fun ω ↦ ENNReal.ofReal (q ω / Z)) hsum1).toMeasure
     with hQdef
-  haveI hQprob : IsProbabilityMeasure Q := by rw [hQdef]; infer_instance
+  have hQprob : IsProbabilityMeasure Q := by rw [hQdef]; infer_instance
   have hQsingle : ∀ ω, Q {ω} = ENNReal.ofReal (q ω / Z) := fun ω ↦ by
     rw [hQdef, PMF.toMeasure_apply_singleton _ _ (measurableSet_singleton ω), PMF.ofFintype_apply]
   have hQpos : ∀ ω, 0 < Q {ω} := fun ω ↦ by
@@ -295,7 +299,7 @@ theorem isEMM_one_iff_onePeriod [Finite Ω] (hS : StronglyAdapted 𝓕 S) (h0 : 
   have hmean (μ : Measure Ω) [IsProbabilityMeasure μ] : ∫ ω, S 0 ω ∂μ = c := by simp [hc]
   constructor
   · intro hQ
-    haveI := hQ.isProb
+    have := hQ.isProb
     have hm := (hQ.condExp_eq (Nat.zero_le 1) le_rfl).symm
     rw [h0, condExp_bot, hc] at hm
     obtain ⟨_, hcQ⟩ := hm.exists
@@ -304,7 +308,7 @@ theorem isEMM_one_iff_onePeriod [Finite Ω] (hS : StronglyAdapted 𝓕 S) (h0 : 
     rw [integral_sub Integrable.of_finite Integrable.of_finite, hmean Q]
     exact sub_eq_zero.mpr hcQ.symm
   · intro hQ
-    haveI := hQ.isProb
+    have := hQ.isProb
     refine .of_condExp_succ hQ.toIsEquivProbMeasure (fun t _ ↦ hS t)
       (fun t _ ↦ Integrable.of_finite) fun t ht ↦ ?_
     obtain rfl : t = 0 := by omega
@@ -359,7 +363,7 @@ theorem IsEMM.increment {F : Type*} [NormedAddCommGroup F] [InnerProductSpace �
     [FiniteDimensional ℝ F] {S : ℝ≥0 → Ω → F} {T : ℝ≥0} {Q : Measure Ω}
     (h : IsEMM 𝓕 P S T Q) {s t : ℝ≥0} (hs : s ≤ T) (ht : t ≤ T) :
     OnePeriodVector.IsEMM P (S t - S s) Q := by
-  haveI := h.isProb
+  have := h.isProb
   have hmean {u : ℝ≥0} (hu : u ≤ T) : ∫ ω, S u ω ∂Q = ∫ ω, S 0 ω ∂Q := by
     rw [← integral_condExp (𝓕.le 0)]
     exact integral_congr_ae (h.condExp_eq zero_le hu)

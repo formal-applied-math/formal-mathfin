@@ -197,7 +197,7 @@ omit [FiniteDimensional ℝ F] in
 theorem toDiscrete_succ (i : Fin ψ.N) : ψ.toDiscrete (i + 1) = ψ.hold i := by
   funext ω
   simp only [toDiscrete]
-  rw [dif_pos ⟨by omega, i.2⟩]
+  rw [dite_eq_left ⟨by omega, i.2⟩]
   rfl
 
 omit [FiniteDimensional ℝ F] in
@@ -248,18 +248,18 @@ theorem of_martingale [IsProbabilityMeasure Q] (hS : Martingale S 𝓕 Q) (hQP :
 /-- Before the horizon the price is `𝓕`-adapted. -/
 theorem adapted (h : IsEMM 𝓕 P S T Q) {t : ℝ≥0} (ht : t ≤ T) :
     StronglyMeasurable[𝓕 t] (S t) :=
-  haveI := h.isProb
+  have := h.isProb
   (martingale_min_iff.mp h.martingale).1 t ht
 
 /-- Before the horizon the price is `Q`-integrable. -/
 theorem integrable (h : IsEMM 𝓕 P S T Q) {t : ℝ≥0} (ht : t ≤ T) : Integrable (S t) Q :=
-  haveI := h.isProb
+  have := h.isProb
   (martingale_min_iff.mp h.martingale).2.1 t ht
 
 /-- **The martingale property before the horizon**: `Q[S t | 𝓕 s] = S s` for `s ≤ t ≤ T`. -/
 theorem condExp_eq (h : IsEMM 𝓕 P S T Q) {s t : ℝ≥0} (hst : s ≤ t)
     (ht : t ≤ T) : Q[S t | 𝓕 s] =ᵐ[Q] S s :=
-  haveI := h.isProb
+  have := h.isProb
   ((martingale_min_iff.mp h.martingale).2.2 hst ht).symm
 
 /-- **A continuous-time EMM, sampled, is a discrete-time EMM.** If `Q` is an equivalent
@@ -271,7 +271,7 @@ three consequences of `IsEMM` before the horizon (`martingale_min_iff`). -/
 theorem sampled (h : IsEMM 𝓕 P S T Q) {t : ℕ → ℝ≥0} (ht : Monotone t) (T' : ℕ)
     (hT' : t T' ≤ T) :
     MathFin.IsEMM (sampledFiltration 𝓕 ht) P (fun n ↦ S (t n)) T' Q :=
-  haveI := h.isProb
+  have := h.isProb
   ⟨h.toIsEquivProbMeasure, martingale_min_iff.mpr
     ⟨fun n hn ↦ h.adapted (t := t n) ((ht hn).trans hT'),
       fun n hn ↦ h.integrable (t := t n) ((ht hn).trans hT'),

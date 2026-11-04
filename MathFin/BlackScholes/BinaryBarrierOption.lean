@@ -208,7 +208,7 @@ theorem bboB1_eq_Phi_bsd2 (S X r σ T mu : ℝ) (hσ : σ ≠ 0) (hT : 0 < T)
     bboB1 S X mu σ T true = Phi (bsd2 S X r σ T) := by
   have hsqrt : σ * Real.sqrt T ≠ 0 :=
     mul_ne_zero hσ (ne_of_gt (Real.sqrt_pos.mpr hT))
-  simp only [bboB1, bboX1, bboPhiOf, if_true, one_mul, bsd2, bsd1]
+  simp only [bboB1, bboX1, bboPhiOf, ite_true, one_mul, bsd2, bsd1]
   congr 1
   rw [hmu]
   field_simp

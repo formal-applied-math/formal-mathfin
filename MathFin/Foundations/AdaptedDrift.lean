@@ -110,7 +110,7 @@ theorem stronglyMeasurable_driftPath (t : ℝ≥0) :
         b (unifPart t n k) ω * ((unifPart t n (k + 1) : ℝ) - unifPart t n k) :=
     Finset.stronglyMeasurable_fun_sum _ fun k hk ↦ ((hb_adap _).mono ((natFiltration hBmeas).mono
       (unifPart_le_T (Finset.mem_range.mp hk).le))).mul_const _
-  letI : MeasurableSpace Ω := natFiltration hBmeas t
+  let : MeasurableSpace Ω := natFiltration hBmeas t
   exact stronglyMeasurable_of_tendsto atTop hmeas (tendsto_pi_nhds.2 fun ω ↦
     tendsto_riemannSum_setIntegral (hb_cont ω) (fun s ↦ hb_bdd s ω) t)
 
@@ -135,7 +135,7 @@ theorem tendsto_sum_mul_driftPath_sub (T : ℝ≥0) (ω : Ω) {g : ℝ≥0 → �
       (𝓝 (∫ s in Set.Ioc 0 T, g s * b s ω ∂timeMeasure)) := by
   have hCg : 0 ≤ Cg := (abs_nonneg _).trans (hg_bdd 0)
   have hCb : 0 ≤ Cb := (abs_nonneg _).trans (hb_bdd 0 ω)
-  haveI : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) :=
+  have : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) :=
     ⟨by rw [Measure.restrict_apply_univ, timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
   set F : ℕ → ℝ≥0 → ℝ := fun n s ↦ ∑ j ∈ Finset.range n,
     (Set.Ioc (unifPart T n j) (unifPart T n (j + 1))).indicator (fun _ ↦ g (unifPart T n j)) s

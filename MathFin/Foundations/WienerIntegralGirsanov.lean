@@ -107,7 +107,7 @@ theorem wienerIntegralLp_hasLaw_girsanov (hB : IsPreBrownianReal B μ) (lam : �
       (gaussianReal (-(lam * ∫ s in Set.Ioc (0 : ℝ) (T : ℝ), f s))
         (∫ s in Set.Ioc (0 : ℝ) (T : ℝ), f s ^ 2).toNNReal)
       (μ.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-lam * B T ω - lam ^ 2 * (T : ℝ) / 2))) := by
-  haveI := isProbabilityMeasure_withDensity_girsanov hB lam T
+  have := isProbabilityMeasure_withDensity_girsanov hB lam T
   have hae : AEMeasurable (fun ω ↦ wienerIntegralLp B hB T f ω)
       (μ.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-lam * B T ω - lam ^ 2 * (T : ℝ) / 2))) :=
     (Lp.aestronglyMeasurable _).aemeasurable.mono_ac (withDensity_absolutelyContinuous _ _)

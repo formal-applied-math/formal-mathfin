@@ -283,7 +283,7 @@ finite-measure interval `(p.1,p.2]` and `V(p)` is bounded. -/
 lemma memLp_rectTerm (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (p : ℝ≥0 × ℝ≥0) :
     MemLp (rectTerm hBmeas V p) 2 (timeMeasure.prod μ) := by
-  haveI : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc p.1 p.2)) :=
+  have : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc p.1 p.2)) :=
     ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter, timeMeasure_Ioc];
         exact ENNReal.ofReal_lt_top⟩
   rw [rectTerm_eq_indicator,

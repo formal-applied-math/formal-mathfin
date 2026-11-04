@@ -724,7 +724,7 @@ theorem itoDrift_expectation_identity_adapted
       (hXcont.mono fun ω h ↦ (hf''c.comp h).mul ((hδcont ω).mul (hδcont ω))) hbdd_q
   have hdint : IntegrableOn (fun s : ℝ≥0 ↦ (∫ ω, f' (X s ω) * β s ω ∂μ))
       (Set.Ioc (0 : ℝ≥0) T) ItoIntegralL2.timeMeasure := by
-    haveI : IsFiniteMeasure
+    have : IsFiniteMeasure
         (ItoIntegralL2.timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) :=
       ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
         ItoIntegralL2.timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
@@ -743,7 +743,7 @@ theorem itoDrift_expectation_identity_adapted
       _ = C1 * |Db| := by rw [integral_const]; simp
   have hqint : IntegrableOn (fun s : ℝ≥0 ↦ (∫ ω, f'' (X s ω) * (δ s ω * δ s ω) ∂μ))
       (Set.Ioc (0 : ℝ≥0) T) ItoIntegralL2.timeMeasure := by
-    haveI : IsFiniteMeasure
+    have : IsFiniteMeasure
         (ItoIntegralL2.timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) :=
       ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
         ItoIntegralL2.timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩

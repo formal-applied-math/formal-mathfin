@@ -204,11 +204,11 @@ theorem gsrShortKernel_integral_sq_eq {κ : ℝ} (hκ : κ ≠ 0) (σ1 σ2 : ℝ
   have hmt : m ≤ t := min_le_right _ _
   have heq1 : Set.EqOn (fun u ↦ (gsrShortKernel σ1 σ2 Tstar κ t u) ^ 2)
       (fun u ↦ σ1 ^ 2 * vasicekKernel κ t u ^ 2) (Set.Ioc 0 m) := fun u hu ↦ by
-    simp only [gsrShortKernel, gsrSigma, if_pos (hu.2.trans (min_le_left _ _))]
+    simp only [gsrShortKernel, gsrSigma, ite_eq_left (hu.2.trans (min_le_left _ _))]
     ring
   have heq2 : Set.EqOn (fun u ↦ (gsrShortKernel σ1 σ2 Tstar κ t u) ^ 2)
       (fun u ↦ σ2 ^ 2 * vasicekKernel κ t u ^ 2) (Set.Ioc m t) := fun u hu ↦ by
-    simp only [gsrShortKernel, gsrSigma, if_neg fun h ↦ (not_le.2 hu.1) (le_min h hu.2)]
+    simp only [gsrShortKernel, gsrSigma, ite_eq_right fun h ↦ (not_le.2 hu.1) (le_min h hu.2)]
     ring
   have hcont (c : ℝ) {x y : ℝ} (hxy : x ≤ y) : IntegrableOn
       (fun u ↦ c * vasicekKernel κ t u ^ 2) (Set.Ioc x y) volume :=

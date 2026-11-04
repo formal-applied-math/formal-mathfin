@@ -86,7 +86,7 @@ theorem portfolioVarN_singleIndex_eq [DecidableEq ι] :
       (∑ i ∈ s, w i * β i) ^ 2 * σM ^ 2 + ∑ i ∈ s, w i ^ 2 * Dε i := by
   unfold singleIndexKernel
   rw [portfolioVarN_add_kernel s w, portfolioVarN_rankOne_eq,
-    portfolioVarN_diag s w _ fun i _ j _ hij ↦ if_neg hij]
+    portfolioVarN_diag s w _ fun i _ j _ hij ↦ ite_eq_right hij]
   simp
   ring
 

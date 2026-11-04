@@ -110,7 +110,7 @@ theorem itoContinuousMod_isStronglyPredictable (T : ℝ≥0) (hBmeas : ∀ t, Me
             ((approxSeq T hBmeas φ).choose n).val) z) := by
     funext z; rfl
   rw [hrw]
-  letI : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration hBmeas).predictable
+  let : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration hBmeas).predictable
   exact StronglyMeasurable.limUnder (fun n ↦
     itoSimpleProcess_isStronglyPredictable hB hBmeas hBcont
       ((approxSeq T hBmeas φ).choose n).val)

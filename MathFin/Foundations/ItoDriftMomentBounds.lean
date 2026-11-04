@@ -129,7 +129,7 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
         ((∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 4) ∂μ
       ≤ ENNReal.ofReal
         (3 * (D ^ 2 * ∑ k ∈ Finset.range N, ((s (k + 1) : ℝ) - s k)) ^ 2) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   induction N with
   | zero => simp
   | succ N ihN =>
@@ -805,7 +805,7 @@ private theorem trueIncr_pow4_lintegral_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk 
           exact add_le_add h1 h2
       _ = _ := rfl
   -- convergence in measure, a.e. subsequence, Fatou
-  haveI h2inst : Fact (1 ≤ 2) := ⟨by norm_num⟩
+  have h2inst : Fact (1 ≤ 2) := ⟨by norm_num⟩
   have hLp : Tendsto (fun p : ℕ ↦
       (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
           (deltaStepLp hBmeas hδadap hδbdd (n * 2 ^ p))

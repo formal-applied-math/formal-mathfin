@@ -124,7 +124,7 @@ omit [IsProbabilityMeasure μ] in
 theorem condExp_increment_eq_zero (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {u v : ℝ≥0} (huv : u ≤ v) :
     (μ[fun ω ↦ B v ω - B u ω | natFiltration hBmeas u]) =ᵐ[μ] fun _ ↦ (0 : ℝ) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hL : HasLaw (B v - B u) (gaussianReal 0 (v - u)) μ := hasLaw_increment hB huv
   have hint : ∫ ω, (B v ω - B u ω) ∂μ = 0 := by
     have h_eq : (fun ω ↦ B v ω - B u ω) = (B v - B u : Ω → ℝ) := rfl
@@ -138,7 +138,7 @@ theorem condExp_increment_sq (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {u v : ℝ≥0} (huv : u ≤ v) :
     (μ[fun ω ↦ (B v ω - B u ω) ^ 2 | natFiltration hBmeas u])
       =ᵐ[μ] fun _ ↦ (v : ℝ) - u := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hL : HasLaw (B v - B u) (gaussianReal 0 (v - u)) μ := hasLaw_increment hB huv
   have hint : ∫ ω, (B v ω - B u ω) ^ 2 ∂μ = (v : ℝ) - u := by
     have h_change : ∫ ω, (B v ω - B u ω) ^ 2 ∂μ
@@ -153,7 +153,7 @@ omit [IsProbabilityMeasure μ] in
 private theorem memLp_increment (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {u v : ℝ≥0} (huv : u ≤ v) :
     MemLp (fun ω ↦ B v ω - B u ω) 2 μ := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hL : HasLaw (B v - B u) (gaussianReal 0 (v - u)) μ := hasLaw_increment hB huv
   exact hL.memLp (memLp_id_gaussianReal 2)
 

@@ -89,23 +89,23 @@ adapted and integrable up to `T` and satisfies the one-step martingale identity
 theorem of_condExp_succ (hQ : IsEquivProbMeasure P Q)
     (hadapt : ∀ t ≤ T, StronglyMeasurable[𝓕 t] (S t)) (hint : ∀ t ≤ T, Integrable (S t) Q)
     (hmart : ∀ t < T, S t =ᵐ[Q] Q[S (t + 1) | 𝓕 t]) : IsEMM 𝓕 P S T Q :=
-  haveI := hQ.isProb
+  have := hQ.isProb
   ⟨hQ, martingale_min_of_condExp_succ hadapt hint hmart⟩
 
 /-- Before the horizon the price is `𝓕`-adapted. -/
 theorem adapted (h : IsEMM 𝓕 P S T Q) {t : ℕ} (ht : t ≤ T) : StronglyMeasurable[𝓕 t] (S t) :=
-  haveI := h.isProb
+  have := h.isProb
   (martingale_min_iff.mp h.martingale).1 t ht
 
 /-- Before the horizon the price is `Q`-integrable. -/
 theorem integrable (h : IsEMM 𝓕 P S T Q) {t : ℕ} (ht : t ≤ T) : Integrable (S t) Q :=
-  haveI := h.isProb
+  have := h.isProb
   (martingale_min_iff.mp h.martingale).2.1 t ht
 
 /-- **The martingale property before the horizon**: `Q[S t | 𝓕 s] = S s` for `s ≤ t ≤ T`. -/
 theorem condExp_eq (h : IsEMM 𝓕 P S T Q) {s t : ℕ} (hst : s ≤ t) (ht : t ≤ T) :
     Q[S t | 𝓕 s] =ᵐ[Q] S s :=
-  haveI := h.isProb
+  have := h.isProb
   ((martingale_min_iff.mp h.martingale).2.2 hst ht).symm
 
 /-- **The gains of a bounded predictable strategy are a `Q`-martingale started at `0`.** The
@@ -116,19 +116,19 @@ theorem exists_martingale_gains (h : IsEMM 𝓕 P S T Q) {φ : ℕ → Ω → F}
     (hφ_pred : ∀ t < T, StronglyMeasurable[𝓕 t] (φ (t + 1)))
     (hφ_bdd : ∃ K : ℝ, ∀ n ≤ T, ∀ ω, ‖φ n ω‖ ≤ K) :
     ∃ V : ℕ → Ω → ℝ, Martingale V 𝓕 Q ∧ V 0 = 0 ∧ V T = martingaleTransform φ S T := by
-  haveI := h.isProb
+  have := h.isProb
   obtain ⟨K, hK⟩ := hφ_bdd
   let φ' : ℕ → Ω → F := fun n ω ↦ if n ≤ T then φ n ω else 0
   have hsum : martingaleTransform φ' (fun n ↦ S (min n T)) T = martingaleTransform φ S T := by
     funext ω
     refine Finset.sum_congr rfl fun t ht ↦ ?_
     have htT : t + 1 ≤ T := Finset.mem_range.mp ht
-    simp only [φ', if_pos htT, min_eq_left htT, min_eq_left (t.le_succ.trans htT)]
+    simp only [φ', ite_eq_left htT, min_eq_left htT, min_eq_left (t.le_succ.trans htT)]
   exact ⟨_, martingaleTransform_isMartingale h.martingale
       (fun n ↦ by
         rcases lt_or_ge n T with hn | hn
-        · simpa only [φ', if_pos (Nat.succ_le_of_lt hn)] using hφ_pred n hn
-        · simp only [φ', if_neg (by omega : ¬ n + 1 ≤ T)]
+        · simpa only [φ', ite_eq_left (Nat.succ_le_of_lt hn)] using hφ_pred n hn
+        · simp only [φ', ite_eq_right (by omega : ¬ n + 1 ≤ T)]
           exact stronglyMeasurable_zero)
       ⟨max K 0, Filter.Eventually.of_forall fun ω n ↦ by
         simp only [φ']
@@ -142,7 +142,7 @@ theorem integral_martingaleTransform (h : IsEMM 𝓕 P S T Q) {φ : ℕ → Ω �
     (hφ_pred : ∀ t < T, StronglyMeasurable[𝓕 t] (φ (t + 1)))
     (hφ_bdd : ∃ K : ℝ, ∀ n ≤ T, ∀ ω, ‖φ n ω‖ ≤ K) :
     ∫ ω, martingaleTransform φ S T ω ∂Q = 0 := by
-  haveI := h.isProb
+  have := h.isProb
   obtain ⟨V, hV, hV0, hVT⟩ := h.exists_martingale_gains hφ_pred hφ_bdd
   simpa [← hVT, hV0] using (hV.setIntegral_eq (Nat.zero_le T) MeasurableSet.univ).symm
 
@@ -160,7 +160,7 @@ Proof: the gains are a `Q`-martingale started at `0` (`exists_martingale_gains`)
 nonnegative terminal value of such a martingale vanishes (`martingale_nonneg_terminal_ae_zero`),
 and `P ≪ Q` carries the null set over. -/
 theorem noArbitrage (h : IsEMM 𝓕 P S T Q) : NoArbitrage 𝓕 P S T := by
-  haveI := h.isProb
+  have := h.isProb
   intro φ hφ_pred hφ_bdd hV_nonneg
   obtain ⟨V, hV, hV0, hVT⟩ := h.exists_martingale_gains hφ_pred hφ_bdd
   refine ae_eq_zero_of_nonneg_of_null_pos hV_nonneg ?_
@@ -175,7 +175,7 @@ theorem measureReal_eq_of_replicates (h : IsEMM 𝓕 P S T Q) {A : Set Ω} (hA :
     (hφ_bdd : ∃ K : ℝ, ∀ n ≤ T, ∀ ω, ‖φ n ω‖ ≤ K)
     (hrep : A.indicator (1 : Ω → ℝ) =ᵐ[P] fun ω ↦ x + martingaleTransform φ S T ω) :
     Q.real A = x := by
-  haveI := h.isProb
+  have := h.isProb
   obtain ⟨V, hV, -, hVT⟩ := h.exists_martingale_gains hφ_pred hφ_bdd
   have hint : Integrable (martingaleTransform φ S T) Q := hVT ▸ hV.integrable T
   rw [← integral_indicator_one hA, integral_congr_ae (h.ac.ae_le hrep),
@@ -189,8 +189,8 @@ initial wealth of the replicating strategy (`measureReal_eq_of_replicates`). -/
 theorem measure_eq_of_isCompleteMarket {Q₁ Q₂ : Measure Ω} (hc : IsCompleteMarket 𝓕 P S T)
     (h₁ : IsEMM 𝓕 P S T Q₁) (h₂ : IsEMM 𝓕 P S T Q₂) {A : Set Ω} (hA : MeasurableSet[𝓕 T] A) :
     Q₁ A = Q₂ A := by
-  haveI := h₁.isProb
-  haveI := h₂.isProb
+  have := h₁.isProb
+  have := h₂.isProb
   obtain ⟨x, φ, hpred, hbdd, hrep⟩ := hc (A.indicator 1) (stronglyMeasurable_const.indicator hA)
     ⟨1, fun ω ↦ by by_cases hω : ω ∈ A <;> simp [hω]⟩
   have hA' : MeasurableSet A := 𝓕.le T A hA

@@ -192,7 +192,7 @@ theorem gainsFunctional_eq_zero (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     {S : ℝ≥0 → Ω → ℝ} (hSmod : ∀ t ≤ T, S t =ᵐ[μ] pricePath hB T hBmeas S₀ σ t)
     (hmart : Martingale S (ItoIntegralL2.natFiltration hBmeas) Q) :
     gainsFunctional hB T hBmeas σ D = 0 := by
-  haveI : IsFiniteMeasure (sqWeight (trimMeasure_T (μ := μ) T hBmeas) (⇑σ)) :=
+  have : IsFiniteMeasure (sqWeight (trimMeasure_T (μ := μ) T hBmeas) (⇑σ)) :=
     instIsFiniteMeasureBracketMeasure (μ := μ) T hBmeas σ
   refine ContinuousLinearMap.ext fun ψ ↦ ?_
   refine congrFun (DenseRange.equalizer

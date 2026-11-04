@@ -32,7 +32,7 @@ theorem weightedTraceForm_realRoot_signature (c : ℝ) (r : ℕ) (hr : 0 < r) (q
     formSignature (weightedTraceForm ((X-C c)^r) q).toQuadraticMap = sign (q.eval c) := by
   have hf : (X-C c)^r ≠ (0 : ℝ[X]) := pow_ne_zero _ (X_sub_C_ne_zero c)
   let pb := AdjoinRoot.powerBasis hf
-  letI : FiniteDimensional ℝ (AdjoinRoot ((X-C c)^r)) := Module.Finite.of_basis pb.basis
+  let : FiniteDimensional ℝ (AdjoinRoot ((X-C c)^r)) := Module.Finite.of_basis pb.basis
   have hQ (x : AdjoinRoot ((X-C c)^r)) :
       (weightedTraceForm ((X-C c)^r) q).toQuadraticMap x =
         ((r : ℝ)*q.eval c) * (realRootEval c r hr x)^2 := by

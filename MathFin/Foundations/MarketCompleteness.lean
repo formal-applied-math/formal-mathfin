@@ -271,8 +271,8 @@ theorem emm_unique_of_complete (hBmeas : ∀ t, Measurable (B t))
     (hg₁ : PricesGainsAtZero hB T hBmeas Q₁) (hg₂ : PricesGainsAtZero hB T hBmeas Q₂)
     {A : Set Ω} (hA : MeasurableSet[ItoIntegralL2.natFiltration hBmeas T] A) :
     Q₁ A = Q₂ A :=
-  haveI := h₁.isProb
-  haveI := h₂.isProb
+  have := h₁.isProb
+  have := h₂.isProb
   (measure_eq_of_pricesGainsAtZero hB hBmeas hBcont T h₁.ac hg₁ hA).trans
     (measure_eq_of_pricesGainsAtZero hB hBmeas hBcont T h₂.ac hg₂ hA).symm
 

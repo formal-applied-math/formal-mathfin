@@ -132,7 +132,7 @@ lemma mem_lpMeas_of_stepIndicator (hm : m ≤ mΩ)
     (Φ : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) T)) →L[ℝ] Lp ℝ 2 μ)
     (h : ∀ i : StepIndex T, Φ (stepIndicatorLp T i) ∈ lpMeas ℝ ℝ m 2 μ)
     (f : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) T))) : Φ f ∈ lpMeas ℝ ℝ m 2 μ := by
-  haveI : Fact (m ≤ mΩ) := ⟨hm⟩
+  have : Fact (m ≤ mΩ) := ⟨hm⟩
   have hclosed : IsClosed (lpMeas ℝ ℝ m 2 μ : Set (Lp ℝ 2 μ)) :=
     (completeSpace_coe_iff_isComplete.1 (inferInstance : CompleteSpace (lpMeas ℝ ℝ m 2 μ))).isClosed
   refine (stepAssembly_denseRange T).induction_on (p := fun f ↦ Φ f ∈ lpMeas ℝ ℝ m 2 μ) f

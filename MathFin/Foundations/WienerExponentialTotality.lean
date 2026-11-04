@@ -300,8 +300,8 @@ private lemma setIntegral_eq_zero_of_iSup_comap (hB : IsPreBrownianReal B μ)
         · rw [max_eq_right h, norm_zero]; exact norm_nonneg _)
   set nuPos : Measure Ω := μ.withDensity (fun ω ↦ ENNReal.ofReal (f ω)) with hnuPos
   set nuNeg : Measure Ω := μ.withDensity (fun ω ↦ ENNReal.ofReal (-f ω)) with hnuNeg
-  haveI : IsFiniteMeasure nuPos := isFiniteMeasure_withDensity_ofReal hfint.2
-  haveI : IsFiniteMeasure nuNeg := isFiniteMeasure_withDensity_ofReal hfint.neg.2
+  have : IsFiniteMeasure nuPos := isFiniteMeasure_withDensity_ofReal hfint.2
+  have : IsFiniteMeasure nuNeg := isFiniteMeasure_withDensity_ofReal hfint.neg.2
   -- The total masses agree, because `f` is centered.
   have huniv : nuPos Set.univ = nuNeg Set.univ := by
     have hp : nuPos Set.univ = ∫⁻ ω, ENNReal.ofReal (f ω) ∂μ := by
@@ -319,9 +319,9 @@ private lemma setIntegral_eq_zero_of_iSup_comap (hB : IsPreBrownianReal B μ)
   -- Equality of the two laws of the coordinate vector.
   have hmap : nuPos.map (fun (ω : Ω) (i : ι) ↦ B (τ i) ω)
       = nuNeg.map (fun (ω : Ω) (i : ι) ↦ B (τ i) ω) := by
-    haveI : IsFiniteMeasure (nuPos.map fun (ω : Ω) (i : ι) ↦ B (τ i) ω) :=
+    have : IsFiniteMeasure (nuPos.map fun (ω : Ω) (i : ι) ↦ B (τ i) ω) :=
       Measure.isFiniteMeasure_map _ _
-    haveI : IsFiniteMeasure (nuNeg.map fun (ω : Ω) (i : ι) ↦ B (τ i) ω) :=
+    have : IsFiniteMeasure (nuNeg.map fun (ω : Ω) (i : ι) ↦ B (τ i) ω) :=
       Measure.isFiniteMeasure_map _ _
     refine Measure.ext_of_charFunDual (funext fun L ↦ ?_)
     set lam : ι → ℝ := fun i ↦ L (fun j ↦ if i = j then (1 : ℝ) else 0) with hlam

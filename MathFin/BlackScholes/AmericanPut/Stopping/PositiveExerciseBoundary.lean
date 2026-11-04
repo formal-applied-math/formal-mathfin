@@ -56,7 +56,7 @@ theorem canonicalPrice_le_stationaryPutCap {k h m d : ℝ} (hk : 0 < k)
       exact (hcap y).trans (le_add_of_nonneg_right hε.le))
     (fun s _ => by
       dsimp only
-      rw [stationaryPutCap,if_pos hLd]
+      rw [stationaryPutCap,ite_eq_left hLd]
       linarith [(canonicalPrice_bounds (h := h) hk.le L s).2])
     (fun s hs => by
       have hv := (hR₀ R (le_max_right _ _) s hs.2).2
@@ -70,7 +70,7 @@ theorem canonicalPrice_contact_below_stationary_join {k h m d : ℝ} (hk : 0 < k
     {x t : ℝ} (hx : x ≤ d) (ht : 0 ≤ t) : canonicalPrice k h x t = putPayoff x := by
   apply le_antisymm _ (canonicalPrice_bounds hk.le x t).1
   have hu := canonicalPrice_le_stationaryPutCap hk hh hhk hm hd0 hd hmQ x ht
-  simpa only [stationaryPutCap,if_pos hx,putPayoff,
+  simpa only [stationaryPutCap,ite_eq_left hx,putPayoff,
     max_eq_left (sub_nonneg.mpr (Real.exp_le_one_iff.mpr (hx.trans hd0.le)))] using hu
 
 /-- The positive lower bound is uniform over all nonnegative maturities. -/

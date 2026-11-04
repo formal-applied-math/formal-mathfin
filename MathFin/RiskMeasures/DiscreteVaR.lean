@@ -11,7 +11,7 @@ public import MathFin.RiskMeasures.ValueAtRisk
 /-!
 # Value-at-risk and expected shortfall at a finite law
 
-For a loss `L : ι → ℝ` on a finite state space with probability vector `q ∈ stdSimplex ℝ ι`,
+For a loss `L : ι → ℝ` on a finite state space with probability vector `q` (`0 ≤ q i`, `∑ i, q i = 1`),
 value-at-risk is `VaR_α = inf {x | α ≤ ∑_{L i ≤ x} q i}` (`finiteVaR`) and expected shortfall is
 the quantile average `ES_α = (1 − α)⁻¹ ∫_α^1 VaR_u du` (`finiteES`). For `α ∈ (0, 1)` these are
 `valueAtRisk` and `expectedShortfall` of `RiskMeasures/ValueAtRisk.lean` at the law
@@ -69,7 +69,7 @@ variable {ι : Type*} [Fintype ι]
 
 /-- **VaR at a finite law**: the infimum of the loss levels `x` at which the `q`-mass of
 `{i | L i ≤ x}` reaches `α`. The lemmas that need `q` to be a probability vector take
-`q ∈ stdSimplex ℝ ι` as a hypothesis; for such `q` and `α ∈ (0, 1]` the set is nonempty and
+a probability vector `q` (`0 ≤ q i` and `∑ i, q i = 1`); for such `q` and `α ∈ (0, 1]` the set is nonempty and
 bounded below, which is the only range used in this file. Outside that range (or for weights that
 don't sum to `1`) the set can be empty or all of `ℝ`, where `sInf` returns the junk value `0`. -/
 noncomputable def finiteVaR (q L : ι → ℝ) (α : ℝ) : ℝ :=
@@ -79,14 +79,14 @@ noncomputable def finiteVaR (q L : ι → ℝ) (α : ℝ) : ℝ :=
 `∫ u in α..1` of the quantile function `u ↦ finiteVaR q L u`. For `α ∈ (0, 1)` this is the
 quantile average over `[α, 1]`, and the bridge `finiteES_eq_expectedShortfall` covers exactly that
 range, the only one used in this file. Elsewhere it is junk: for `α ≤ 0` and nonnegative weights
-(in particular `q ∈ stdSimplex ℝ ι`) the integrand on `[α, 0]` is `finiteVaR`'s junk value `0`;
+(in particular a probability vector `q`) the integrand on `[α, 0]` is `finiteVaR`'s junk value `0`;
 at `α = 1` the factor `(1 - α)⁻¹` is Lean's `0⁻¹ = 0`, so `finiteES q L 1 = 0` for every loss;
 for `α > 1` the integral runs backwards and the prefactor is negative. -/
 noncomputable def finiteES (q L : ι → ℝ) (α : ℝ) : ℝ :=
   (1 - α)⁻¹ * ∫ u in α..1, finiteVaR q L u
 
 /-- The finite measure `∑ i, ENNReal.ofReal (q i) • δ_i`: negative weights are clipped to `0` by
-`ENNReal.ofReal`. When `q ∈ stdSimplex ℝ ι` this is the law `∑ i, q i • δ_i` of the probability
+`ENNReal.ofReal`. When `q` is a probability vector this is the law `∑ i, q i • δ_i` of the probability
 vector `q`, a probability measure (`isProbabilityMeasure_finiteLaw`). -/
 noncomputable def finiteLaw [MeasurableSpace ι] (q : ι → ℝ) : Measure ι :=
   ∑ i, ENNReal.ofReal (q i) • Measure.dirac i
@@ -96,9 +96,9 @@ section Bridge
 variable [MeasurableSpace ι] {q : ι → ℝ}
 
 /-- The law of a probability vector is a probability measure. -/
-lemma isProbabilityMeasure_finiteLaw (hq : q ∈ stdSimplex ℝ ι) :
+lemma isProbabilityMeasure_finiteLaw (hq₀ : ∀ i, 0 ≤ q i) (hq₁ : ∑ i, q i = 1) :
     IsProbabilityMeasure (finiteLaw q) :=
-  ⟨by simp [finiteLaw, ← ENNReal.ofReal_sum_of_nonneg fun i _ ↦ hq.1 i, hq.2]⟩
+  ⟨by simp [finiteLaw, ← ENNReal.ofReal_sum_of_nonneg fun i _ ↦ hq₀ i, hq₁]⟩
 
 variable [MeasurableSingletonClass ι]
 
@@ -116,23 +116,24 @@ lemma finiteLaw_real_le (hq : ∀ i, 0 ≤ q i) (L : ι → ℝ) (x : ℝ) :
 
 /-- For `α ∈ (0, 1)` and a probability vector `q`, `finiteVaR` is `valueAtRisk` at the law
 `∑ i, q i • δ_i`. -/
-theorem finiteVaR_eq_valueAtRisk (hq : q ∈ stdSimplex ℝ ι) {L : ι → ℝ} {α : ℝ}
+theorem finiteVaR_eq_valueAtRisk (hq₀ : ∀ i, 0 ≤ q i) (hq₁ : ∑ i, q i = 1) {L : ι → ℝ} {α : ℝ}
     (hα : α ∈ Ioo 0 1) : finiteVaR q L α = valueAtRisk L (finiteLaw q) α := by
-  have := isProbabilityMeasure_finiteLaw hq
+  have := isProbabilityMeasure_finiteLaw hq₀ hq₁
   have hset : {x | α ≤ ∑ i with L i ≤ x, q i}
       = Ici (valueAtRisk L (finiteLaw q) α) := by
     ext x
-    simp [valueAtRisk_le_iff (measurable_of_finite L).aemeasurable hα, finiteLaw_real_le hq.1]
+    simp [valueAtRisk_le_iff (measurable_of_finite L).aemeasurable hα, finiteLaw_real_le hq₀]
   rw [finiteVaR, hset, csInf_Ici]
 
 /-- For `α ∈ (0, 1)` and a probability vector `q`, `finiteES` is `expectedShortfall` at the law
 `∑ i, q i • δ_i`. -/
-theorem finiteES_eq_expectedShortfall (hq : q ∈ stdSimplex ℝ ι) {L : ι → ℝ} {α : ℝ}
+theorem finiteES_eq_expectedShortfall (hq₀ : ∀ i, 0 ≤ q i) (hq₁ : ∑ i, q i = 1) {L : ι → ℝ}
+    {α : ℝ}
     (hα : α ∈ Ioo 0 1) : finiteES q L α = expectedShortfall L (finiteLaw q) α := by
   rw [finiteES, expectedShortfall, intervalIntegral.integral_of_le hα.2.le,
     integral_Ioc_eq_integral_Ioo]
   exact congrArg _ <| setIntegral_congr_fun measurableSet_Ioo fun u hu ↦
-    finiteVaR_eq_valueAtRisk hq ⟨hα.1.trans hu.1, hu.2⟩
+    finiteVaR_eq_valueAtRisk hq₀ hq₁ ⟨hα.1.trans hu.1, hu.2⟩
 
 end Bridge
 
@@ -154,21 +155,21 @@ theorem finiteVaR_eq_of_mem_of_forall_lt {v₀ : ℝ}
 /-- For a probability vector `q` and `α ≤ 1`, the loss values `v` at which the mass of `{L ≤ v}`
 is at least α form a nonempty finite set: at the largest loss value that mass is the full mass
 `1 ≥ α`. -/
-theorem nonempty_values_mass_ge (hq : q ∈ stdSimplex ℝ ι) (hα1 : α ≤ 1) :
+theorem nonempty_values_mass_ge (hq₁ : ∑ i, q i = 1) (hα1 : α ≤ 1) :
     {v ∈ Finset.univ.image L | α ≤ ∑ i with L i ≤ v, q i}.Nonempty := by
-  have hne := (Finset.nonempty_of_sum_ne_zero (by rw [hq.2]; norm_num)).image L
+  have hne := (Finset.nonempty_of_sum_ne_zero (by rw [hq₁]; norm_num)).image L
   have hfull : {i ∈ (Finset.univ : Finset ι) | L i ≤ (Finset.univ.image L).max' hne}
       = Finset.univ :=
     Finset.filter_true_of_mem fun i _ ↦
       Finset.le_max' _ _ (Finset.mem_image_of_mem _ (Finset.mem_univ _))
-  exact ⟨_, Finset.mem_filter.2 ⟨Finset.max'_mem _ hne, by rwa [hfull, hq.2]⟩⟩
+  exact ⟨_, Finset.mem_filter.2 ⟨Finset.max'_mem _ hne, by rwa [hfull, hq₁]⟩⟩
 
 /-- **Attainment.** For `α ∈ (0, 1]` and a probability vector `q`, the infimum over `ℝ` is the
 minimum over the loss values `v ∈ Finset.image L univ` at which the `q`-mass of `{L ≤ v}` is at
 least α, so VaR is attained at a loss value. -/
-theorem finiteVaR_eq_value_min (hq : q ∈ stdSimplex ℝ ι) (hα0 : 0 < α) (hα1 : α ≤ 1) :
+theorem finiteVaR_eq_value_min (hq₁ : ∑ i, q i = 1) (hα0 : 0 < α) (hα1 : α ≤ 1) :
     finiteVaR q L α = {v ∈ Finset.univ.image L | α ≤ ∑ i with L i ≤ v, q i}.min'
-      (nonempty_values_mass_ge hq hα1) := by
+      (nonempty_values_mass_ge hq₁ hα1) := by
   refine IsLeast.csInf_eq ⟨(Finset.mem_filter.1 (Finset.min'_mem _ _)).2,
     fun x (hx : α ≤ _) ↦ ?_⟩
   -- the largest loss value `L j ≤ x` carries the same mass as `x`, so it lies in the filter
@@ -203,9 +204,11 @@ noncomputable def oneQ : Bool → ℝ := fun b ↦ if b then 1 / 25 else 24 / 25
 /-- Loss of the single `$100` bond: 100 on default, 0 on survival. -/
 def oneL : Bool → ℝ := fun b ↦ if b then 100 else 0
 
-/-- `oneQ` is a probability vector. -/
-lemma oneQ_mem_simplex : oneQ ∈ stdSimplex ℝ Bool :=
-  ⟨fun b ↦ by cases b <;> norm_num [oneQ], by norm_num [oneQ]⟩
+/-- `oneQ` has nonnegative weights. -/
+lemma oneQ_nonneg (b : Bool) : 0 ≤ oneQ b := by cases b <;> norm_num [oneQ]
+
+/-- `oneQ` has total mass `1`, so with `oneQ_nonneg` it is a probability vector. -/
+lemma oneQ_sum : ∑ b, oneQ b = 1 := by norm_num [oneQ]
 
 private lemma one_bond_cdf (x : ℝ) :
     ∑ b with oneL b ≤ x, oneQ b
@@ -222,7 +225,7 @@ theorem finiteVaR_one_bond_window (α : ℝ) (hα0 : 0 < α) (hα1 : α ≤ 1) :
 /-- The single `$100` bond defaulting w.p. `1/25` has `VaR₀.₉₅ = 0`: the loss is 0 with probability
 `24/25 ≥ 19/20`. -/
 theorem finiteVaR_one_bond : finiteVaR oneQ oneL (19 / 20) = 0 := by
-  rw [finiteVaR_one_bond_window _ (by norm_num) (by norm_num), if_pos (by norm_num)]
+  rw [finiteVaR_one_bond_window _ (by norm_num) (by norm_num), ite_eq_left (by norm_num)]
 
 /-! ## The two half-bonds on their joint space `Bool × Bool` -/
 
@@ -237,10 +240,11 @@ def halfL₁ : Bool × Bool → ℝ := fun p ↦ if p.1 then 50 else 0
 /-- Loss of the second half-bond: 50 if it defaults, else 0. -/
 def halfL₂ : Bool × Bool → ℝ := fun p ↦ if p.2 then 50 else 0
 
-/-- `jointQ` is a probability vector. -/
-lemma jointQ_mem_simplex : jointQ ∈ stdSimplex ℝ (Bool × Bool) :=
-  ⟨fun ⟨a, b⟩ ↦ by cases a <;> cases b <;> norm_num [jointQ, oneQ],
-    by norm_num [jointQ, oneQ, Fintype.sum_prod_type]⟩
+/-- `jointQ` has nonnegative weights. -/
+lemma jointQ_nonneg (p : Bool × Bool) : 0 ≤ jointQ p := mul_nonneg (oneQ_nonneg _) (oneQ_nonneg _)
+
+/-- `jointQ` has total mass `1`, so with `jointQ_nonneg` it is a probability vector. -/
+lemma jointQ_sum : ∑ p, jointQ p = 1 := by norm_num [jointQ, oneQ, Fintype.sum_prod_type]
 
 private lemma joint_half₁_cdf (x : ℝ) :
     ∑ p with halfL₁ p ≤ x, jointQ p
@@ -303,7 +307,7 @@ theorem finiteVaR_counterexample_window (α : ℝ) (hα0 : 0 < α) (hα1 : α �
   constructor
   · split_ifs <;> intro h <;> norm_num at h <;> exact ⟨by linarith, by linarith⟩
   · rintro ⟨h1, h2⟩
-    rw [if_pos h2, if_neg h1.not_ge, if_pos (by linarith)]
+    rw [ite_eq_left h2, ite_eq_right h1.not_ge, ite_eq_left (by linarith)]
     norm_num
 
 /-- **Subadditivity fails at the 95% level** on one probability space: the two `$50` half-bonds'
@@ -323,9 +327,9 @@ theorem valueAtRisk_finiteLaw_subadditivity_fails :
         valueAtRisk halfL₂ (finiteLaw jointQ) (19 / 20)
       < valueAtRisk (halfL₁ + halfL₂) (finiteLaw jointQ) (19 / 20) := by
   have hα : (19 / 20 : ℝ) ∈ Ioo 0 1 := ⟨by norm_num, by norm_num⟩
-  rw [← finiteVaR_eq_valueAtRisk jointQ_mem_simplex hα,
-    ← finiteVaR_eq_valueAtRisk jointQ_mem_simplex hα,
-    ← finiteVaR_eq_valueAtRisk jointQ_mem_simplex hα]
+  rw [← finiteVaR_eq_valueAtRisk jointQ_nonneg jointQ_sum hα,
+    ← finiteVaR_eq_valueAtRisk jointQ_nonneg jointQ_sum hα,
+    ← finiteVaR_eq_valueAtRisk jointQ_nonneg jointQ_sum hα]
   exact finiteVaR_subadditivity_fails
 
 /-! ## Expected shortfall at the single bond -/
@@ -334,9 +338,9 @@ theorem valueAtRisk_finiteLaw_subadditivity_fails :
 on `(24/25, 1]`, so the average is `(1/(1/20)) · 100 · (1 - 24/25) = 80`. -/
 theorem finiteES_one_bond : finiteES oneQ oneL (19 / 20) = 80 := by
   have hz1 (u) (hu : u ∈ Icc (19 / 20 : ℝ) (24 / 25)) : finiteVaR oneQ oneL u = 0 := by
-    rw [finiteVaR_one_bond_window u (by linarith [hu.1]) (by linarith [hu.2]), if_pos hu.2]
+    rw [finiteVaR_one_bond_window u (by linarith [hu.1]) (by linarith [hu.2]), ite_eq_left hu.2]
   have hc1 (u) (hu : u ∈ Ioc (24 / 25 : ℝ) 1) : finiteVaR oneQ oneL u = 100 := by
-    rw [finiteVaR_one_bond_window u (by linarith [hu.1]) hu.2, if_neg (not_le.2 hu.1)]
+    rw [finiteVaR_one_bond_window u (by linarith [hu.1]) hu.2, ite_eq_right (not_le.2 hu.1)]
   -- the quantile function agrees a.e. with a constant on each piece, which gives both
   -- integrability and the value of the integral in one hypothesis
   have hae1 : finiteVaR oneQ oneL =ᵐ[volume.restrict (Ι (19 / 20 : ℝ) (24 / 25))]
@@ -376,7 +380,7 @@ theorem condTailMean_one_bond : condTailMean oneQ oneL (19 / 20) = 4 := by
   have hfilt : {b ∈ (Finset.univ : Finset Bool) | finiteVaR oneQ oneL (19 / 20) ≤ oneL b}
       = Finset.univ :=
     Finset.filter_true_of_mem fun b _ ↦ by rw [finiteVaR_one_bond]; cases b <;> norm_num [oneL]
-  rw [condTailMean, hfilt, oneQ_mem_simplex.2, div_one]
+  rw [condTailMean, hfilt, oneQ_sum, div_one]
   norm_num [oneQ, oneL]
 
 /-! ## The bounded-density representation of ES at the single bond -/

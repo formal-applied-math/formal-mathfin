@@ -61,7 +61,7 @@ theorem brownian_completed_measurable :
       inferInstance brownian.uncurry := by
   have hm (t : ℝ≥0) : Measurable[completedMeasurableSpace gaussianLimit] (brownian t) :=
     (measurable_brownian t).mono (ambient_le_completion gaussianLimit) le_rfl
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   exact measurable_uncurry_of_continuous_of_measurable continuous_brownian
     hm
 
@@ -81,7 +81,7 @@ theorem brownianClassicalCandidate_usual_supermartingale {K r q σ S : ℝ}
     classicalCandidate_norm_le hp.toPutEnvelope brownian hK hr T t ω
   have hu := bounded_supermartingale_completion gaussianLimit
     (brownianClassicalCandidate_supermartingale hp.toPutEnvelope hp.putWaiting hK hr hσ T) hb
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   exact bounded_continuous_supermartingale_rightCont (supermartingale_nullAugmentation hu)
     (classicalCandidate_continuous hp.toPutEnvelope continuous_brownian T) hb
 
@@ -109,7 +109,7 @@ theorem brownianUsualAmericanPut_eq_raw {K r q σ S : ℝ}
   have θstop := θ.stopping
   have θbound := θ.le_horizon
   let μ := completedMeasure gaussianLimit
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   let θ' : StoppingRule brownianUsualFiltration T :=
     { time := θtime
       stopping := fun t => brownian_completedRaw_le_usual t _ (θstop t)
@@ -147,7 +147,7 @@ theorem brownianUsual_boundary_eq_classical {K r q σ : ℝ}
       brownian_price_identification hp hK hr hS hσ,Real.coe_toNNReal _ hτ.le]
   have hz : ∀ᵐ ω ∂completedMeasure gaussianLimit, brownian 0 ω = 0 :=
     isBrownianReal_brownian.eval_zero_ae_eq_zero
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   exact threshold_eq_of_price_identification hp brownian_completed_measurable hz hK hr
     (mul_pos (div_pos (sq_pos_of_pos hσ) (by norm_num)) hτ) hprice
 

@@ -225,7 +225,7 @@ lemma norm_le_iSup_Iic (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
       continuous_subtype_val
   have hIic : (Set.Iic T : Set ℝ≥0) = Set.Icc 0 T := by
     ext x; simp only [Set.mem_Iic, Set.mem_Icc, zero_le, true_and]
-  haveI : CompactSpace (Set.Iic T) := isCompact_iff_compactSpace.mp (hIic ▸ isCompact_Icc)
+  have : CompactSpace (Set.Iic T) := isCompact_iff_compactSpace.mp (hIic ▸ isCompact_Icc)
   exact le_ciSup (isCompact_range hcont).bddAbove ⟨i, hi⟩
 
 omit hB in

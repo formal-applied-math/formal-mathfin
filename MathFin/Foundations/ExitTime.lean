@@ -88,7 +88,7 @@ lemma exitTime_le_iff (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (
     have hval : exitTime B N ω = ((sInf A : ℝ≥0) : WithTop ℝ≥0) := by
       rw [exitTime]
       simp only [hittingAfter_def]
-      rw [if_pos hexists]
+      rw [ite_eq_left hexists]
       congr 1
       apply le_antisymm
       · exact csInf_le_csInf (OrderBot.bddBelow _) hAne (fun x hx ↦ ⟨zero_le, hx⟩)
@@ -226,7 +226,7 @@ lemma abs_le_N_of_le_exitTime (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B
     exact absurd hle (not_le.mpr (lt_of_lt_of_le (by exact_mod_cast hu) h))
   have htend : Tendsto (fun u : ℝ≥0 ↦ |B u ω|) (𝓝[<] s) (𝓝 (|B s ω|)) :=
     (continuous_abs.comp (hBcont ω)).continuousWithinAt
-  haveI : (𝓝[<] s).NeBot := nhdsWithin_Iio_neBot' ⟨0, hs0⟩ le_rfl
+  have : (𝓝[<] s).NeBot := nhdsWithin_Iio_neBot' ⟨0, hs0⟩ le_rfl
   exact le_of_tendsto htend
     (eventually_nhdsWithin_of_forall fun u hu ↦ le_of_lt (hbelow u hu))
 

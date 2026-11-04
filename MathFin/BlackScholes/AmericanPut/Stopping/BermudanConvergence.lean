@@ -125,7 +125,7 @@ noncomputable def canonicalGridPrice (k h x t : ℝ) (n : ℕ) : ℝ :=
 theorem canonicalGridPrice_tendsto {k h : ℝ} (hk : 0 ≤ k) (x t : ℝ) :
     Tendsto (canonicalGridPrice k h x t) atTop (𝓝 (canonicalPrice k h x t)) := by
   let μ := completedMeasure gaussianLimit
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   exact gridValue_tendsto_americanValue (P := μ) (𝓕 := brownianUsualFiltration)
     brownian_completed_measurable continuous_brownian (by norm_num) hk (Real.exp_pos x).le
 

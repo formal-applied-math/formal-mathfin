@@ -140,25 +140,25 @@ theorem thresholdMatrix_mem_rowStochastic (μ : Measure ℝ) [IsProbabilityMeasu
 noncomputable def gaussianThreshold (c : ℝ) : EReal :=
   if c ≤ 0 then ⊥ else if 1 ≤ c then ⊤ else (PhiInv c : EReal)
 
-lemma gaussianThreshold_zero : gaussianThreshold 0 = ⊥ := if_pos le_rfl
+lemma gaussianThreshold_zero : gaussianThreshold 0 = ⊥ := ite_eq_left le_rfl
 
 lemma gaussianThreshold_of_mem_Ioo {c : ℝ} (hc : c ∈ Ioo 0 1) :
     gaussianThreshold c = (PhiInv c : EReal) := by
-  rw [gaussianThreshold, if_neg (not_le.2 hc.1), if_neg (not_le.2 hc.2)]
+  rw [gaussianThreshold, ite_eq_right (not_le.2 hc.1), ite_eq_right (not_le.2 hc.2)]
 
 lemma gaussianThreshold_mono {c d : ℝ} (hcd : c ≤ d) :
     gaussianThreshold c ≤ gaussianThreshold d := by
   by_cases hc0 : c ≤ 0
-  · rw [gaussianThreshold, if_pos hc0]
+  · rw [gaussianThreshold, ite_eq_left hc0]
     exact bot_le
   by_cases hd1 : 1 ≤ d
   · have hd0 : ¬d ≤ 0 := not_le.2 (by linarith [not_le.1 hc0])
-    simp only [gaussianThreshold, if_pos hd1, if_neg hd0]
+    simp only [gaussianThreshold, ite_eq_left hd1, ite_eq_right hd0]
     exact le_top
   have hc1 : ¬1 ≤ c := fun h ↦ hd1 (h.trans hcd)
   have hd0 : ¬d ≤ 0 := fun h ↦ hc0 (hcd.trans h)
-  simp only [gaussianThreshold, if_neg hc0, if_neg hc1, if_neg hd0, if_neg hd1,
-    EReal.coe_le_coe_iff]
+  simp only [gaussianThreshold, ite_eq_right hc0, ite_eq_right hc1, ite_eq_right hd0,
+    ite_eq_right hd1, EReal.coe_le_coe_iff]
   exact strictMonoOn_PhiInv.monotoneOn ⟨not_le.1 hc0, not_le.1 hc1⟩ ⟨not_le.1 hd0, not_le.1 hd1⟩ hcd
 
 /-- A standard normal return falls below the threshold of `c ∈ [0, 1]` with probability `c`. -/

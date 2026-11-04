@@ -99,7 +99,7 @@ constant holding `θ`: `E_Q[Y] = 0` makes `S` a `Q`-martingale up to the horizon
 `⟪θ, S 1 − S 0⟫ = ⟪θ, Y⟫`, and `MathFin.IsEMM.noArbitrage` does the rest. -/
 theorem noArbitrage_of_isEMM (hY : Measurable Y) {Q : Measure Ω} (hQ : IsEMM P Y Q) :
     NoArbitrage P Y := by
-  haveI := hQ.isProb
+  have := hQ.isProb
   intro θ hpos
   -- the two-step filtration `⊥ ≤ mΩ`
   obtain ⟨𝓕, h0, h1⟩ : ∃ 𝓕 : Filtration ℕ mΩ, 𝓕 0 = ⊥ ∧ 𝓕 1 = mΩ :=
@@ -116,8 +116,8 @@ theorem noArbitrage_of_isEMM (hY : Measurable Y) {Q : Measure Ω} (hQ : IsEMM P 
          · exact bot_le
          · exact le_rfl }, rfl, rfl⟩
   let S : ℕ → Ω → F := fun n ω ↦ if n = 0 then 0 else Y ω
-  have hS0 : S 0 = 0 := funext fun ω ↦ if_pos rfl
-  have hS1 : S 1 = Y := funext fun ω ↦ if_neg one_ne_zero
+  have hS0 : S 0 = 0 := funext fun ω ↦ ite_eq_left rfl
+  have hS1 : S 1 = Y := funext fun ω ↦ ite_eq_right one_ne_zero
   have hgain : martingaleTransform (fun _ _ ↦ θ) S 1 = fun ω ↦ inner ℝ θ (Y ω) := by
     funext ω; simp [martingaleTransform, hS0, hS1]
   have hE : MathFin.IsEMM 𝓕 P S 1 Q := .of_condExp_succ hQ.toIsEquivProbMeasure
@@ -571,7 +571,7 @@ theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Inte
       ENNReal.measurable_ofReal.comp hdmeas
     obtain ⟨hQprob, hQP, hPQ⟩ := isEquivProbMeasure_withDensity P hdpos hdint hdsum
     rw [← hQ] at hQprob hQP hPQ
-    haveI := hQprob
+    have := hQprob
     have hdY_int : Integrable (fun ω ↦ dens ω • Y ω) P := by
       refine Integrable.mono' (hYint.norm.const_mul ζ⁻¹)
         (hdmeas.aestronglyMeasurable.smul hYint.aestronglyMeasurable)
@@ -633,7 +633,7 @@ theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y) 
   obtain ⟨hPt_prob, hPt_ll_P, hP_ll_Pt⟩ :=
     isEquivProbMeasure_withDensity P hd_pos hd_int hd_sum
   rw [← hPtdef] at hPt_prob hPt_ll_P hP_ll_Pt
-  haveI := hPt_prob
+  have := hPt_prob
   have hdY_int : Integrable (fun ω ↦ dens ω • Y ω) P := by
     refine ⟨(hd_meas.aestronglyMeasurable.smul hY.aestronglyMeasurable),
       HasFiniteIntegral.of_bounded (C := κ⁻¹) (Filter.Eventually.of_forall fun ω ↦ ?_)⟩

@@ -127,7 +127,7 @@ theorem itoProcessCLM_eq_terminal_of_ge (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {T t : ℝ≥0} (hTt : T ≤ t)
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     itoProcessCLM hB T t hBmeas φ = itoIntegralCLM_T hB T hBmeas φ := by
-  haveI : Fact ((natFiltration hBmeas t : MeasurableSpace Ω) ≤ mΩ) :=
+  have : Fact ((natFiltration hBmeas t : MeasurableSpace Ω) ≤ mΩ) :=
     ⟨(natFiltration hBmeas).le t⟩
   rw [itoProcessCLM_eq_condExpL2, ← itoProcessCLM_terminal_eq hB T hBmeas φ]
   exact Submodule.starProjection_eq_self_iff.mpr (mem_lpMeas_iff_aestronglyMeasurable.mpr

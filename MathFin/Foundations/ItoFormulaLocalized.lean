@@ -764,7 +764,7 @@ theorem drift_tendsto_L2 (hBmeas : ∀ t, Measurable (B t))
                   + f_x s (S.cut n (B s ω)) * S.cutD2 n (B s ω))) ∂ItoIntegralL2.timeMeasure)
           - (∫ s in Set.Ioc 0 T, (f_t s (B s ω) + (1 / 2) * f_xx s (B s ω))
               ∂ItoIntegralL2.timeMeasure)) ^ 2 ∂μ) atTop (𝓝 0) := by
-  haveI hνT : IsFiniteMeasure (ItoIntegralL2.timeMeasure.restrict (Set.Ioc 0 T)) :=
+  have hνT : IsFiniteMeasure (ItoIntegralL2.timeMeasure.restrict (Set.Ioc 0 T)) :=
     ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
         ItoIntegralL2.timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
   have hC0 : 0 ≤ C := le_trans (abs_nonneg _) (by simpa using hg_t 0 0)

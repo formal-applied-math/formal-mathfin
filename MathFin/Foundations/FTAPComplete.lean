@@ -47,7 +47,7 @@ variable {𝓕 P S T} in
 attainable-gains subspace has `Q`-mean zero. -/
 theorem IsEMM.sum_mul_eq_zero_of_mem_gainsSubspace {Q : Measure Ω} (hQ : IsEMM 𝓕 P S T Q)
     {g : Ω → ℝ} (hg : g ∈ gainsSubspace 𝓕 S T) : ∑ ω, Q.real {ω} * g ω = 0 := by
-  haveI := hQ.isProb
+  have := hQ.isProb
   obtain ⟨φ, hφ, rfl⟩ := mem_gains_imp_predictable 𝓕 S T hg
   have h := hQ.integral_martingaleTransform (fun t _ ↦ hφ t) (exists_bound_horizon T φ)
   rw [integral_fintype Integrable.of_finite] at h
@@ -61,7 +61,7 @@ theorem isCompleteMarket_of_unique [Finite Ω] (hS : StronglyAdapted 𝓕 S) (hP
     IsCompleteMarket 𝓕 P S T := by
   classical
   cases nonempty_fintype Ω
-  haveI := h₀.isProb
+  have := h₀.isProb
   have hW : Submodule.span ℝ {fun _ : Ω ↦ (1 : ℝ)} ⊔ gainsSubspace 𝓕 S T = ⊤ := by
     by_contra hne
     obtain ⟨η, hη0, hη⟩ := exists_ne_zero_sum_mul_eq_zero (lt_top_iff_ne_top.2 hne)

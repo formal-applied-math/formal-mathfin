@@ -35,7 +35,7 @@ theorem brownianUsualActualContactTime_le_of_downcrossing {k h : ℝ} (hk : 0 < 
     (hcross : x + (k - h - 1) * (s : ℝ) + Real.sqrt 2 * brownian s ω ≤
       canonicalLogBoundary k h (T : ℝ)) :
     brownianUsualActualContactTime (h := h) hk.le x T ω ≤ s := by
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   by_contra! hτ
   have hcont := canonicalContactRule_continuation_before (h := h) hk.le
     brownianUsual_adapted continuous_brownian x T ω

@@ -349,7 +349,7 @@ theorem ito_formula_td_L2_bddDeriv
   rw [hI] at hω
   simp only at hω
   -- recombine the two `ds`-integrals into the classical drift `∫ (f_t + ½f_xx) ds`
-  haveI : IsFiniteMeasure (ItoIntegralL2.timeMeasure.restrict (Set.Ioc 0 T)) :=
+  have : IsFiniteMeasure (ItoIntegralL2.timeMeasure.restrict (Set.Ioc 0 T)) :=
     ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
           ItoIntegralL2.timeMeasure_Ioc]
         exact ENNReal.ofReal_lt_top⟩

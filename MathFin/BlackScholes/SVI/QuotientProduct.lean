@@ -79,11 +79,11 @@ theorem weightedTraceForm_prod_equivalent (f g q : ℝ[X]) (hf : f ≠ 0) (hg : 
     QuadraticMap.Equivalent (weightedTraceForm (f*g) q).toQuadraticMap
       (formProd (weightedTraceForm f q).toQuadraticMap
         (weightedTraceForm g q).toQuadraticMap) := by
-  letI : Module.Free ℝ (AdjoinRoot f) := Module.Free.of_basis (AdjoinRoot.powerBasis hf).basis
-  letI : Module.Free ℝ (AdjoinRoot g) := Module.Free.of_basis (AdjoinRoot.powerBasis hg).basis
-  letI : FiniteDimensional ℝ (AdjoinRoot f) :=
+  let : Module.Free ℝ (AdjoinRoot f) := Module.Free.of_basis (AdjoinRoot.powerBasis hf).basis
+  let : Module.Free ℝ (AdjoinRoot g) := Module.Free.of_basis (AdjoinRoot.powerBasis hg).basis
+  let : FiniteDimensional ℝ (AdjoinRoot f) :=
       Module.Finite.of_basis (AdjoinRoot.powerBasis hf).basis
-  letI : FiniteDimensional ℝ (AdjoinRoot g) :=
+  let : FiniteDimensional ℝ (AdjoinRoot g) :=
       Module.Finite.of_basis (AdjoinRoot.powerBasis hg).basis
   let e := quotientProdEquiv f g hc
   refine ⟨{ e.toLinearEquiv with map_app' := ?_ }⟩
@@ -99,9 +99,9 @@ theorem weightedTraceForm_prod_signature (f g q : ℝ[X]) (hf : f ≠ 0) (hg : g
     formSignature (weightedTraceForm (f*g) q).toQuadraticMap =
       formSignature (weightedTraceForm f q).toQuadraticMap +
       formSignature (weightedTraceForm g q).toQuadraticMap := by
-  letI : FiniteDimensional ℝ (AdjoinRoot f) :=
+  let : FiniteDimensional ℝ (AdjoinRoot f) :=
       Module.Finite.of_basis (AdjoinRoot.powerBasis hf).basis
-  letI : FiniteDimensional ℝ (AdjoinRoot g) :=
+  let : FiniteDimensional ℝ (AdjoinRoot g) :=
       Module.Finite.of_basis (AdjoinRoot.powerBasis hg).basis
   rw [formSignature_eq_of_equivalent (weightedTraceForm_prod_equivalent f g q hf hg hc),
     formSignature_prod]

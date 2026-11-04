@@ -103,7 +103,7 @@ theorem uniqueness_pooled_eq_of_purged [Fintype ι] [Fintype κ] (lo hi : ι →
     uniqueness (Sum.elim lo lo') (Sum.elim hi hi') t (Sum.inl i) = uniqueness lo hi t i := by
   have h0 : concurrency lo' hi' t = 0 :=
     Finset.sum_eq_zero fun j _ ↦
-      if_neg fun ht' ↦ hret j (overlapsTest_of_mem_of_mem lo hi lo' hi' ht ht')
+      ite_eq_right fun ht' ↦ hret j (overlapsTest_of_mem_of_mem lo hi lo' hi' ht ht')
   unfold uniqueness
   rw [concurrency_sumElim, h0, add_zero]
   rfl

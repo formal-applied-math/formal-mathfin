@@ -389,7 +389,7 @@ theorem cmsCurveRate_jensenGap_nonneg {Q : Measure Ω} (D : Ω → ℝ) (δ P0 C
     (hfwd : ∫ ω, W ω ∂(annuityMeasure Q D δ P s A0) = x₀) :
     cmsCurveRate P0 δ C x₀
       ≤ ∫ ω, cmsCurveRate P0 δ C (W ω) ∂(annuityMeasure Q D δ P s A0) := by
-  haveI hprob := annuityMeasure_isProbabilityMeasure D δ P s A0 hD hδ hs hP hA0 hint hrepr
+  have hprob := annuityMeasure_isProbabilityMeasure D δ P s A0 hD hδ hs hP hA0 hint hrepr
   have hfs : ∀ᵐ ω ∂(annuityMeasure Q D δ P s A0), W ω ∈ Set.Ici (0 : ℝ) :=
     ae_of_all _ fun ω ↦ Set.mem_Ici.2 (hWpos ω)
   have hj := ConvexOn.map_integral_le (f := W) (g := cmsCurveRate P0 δ C)

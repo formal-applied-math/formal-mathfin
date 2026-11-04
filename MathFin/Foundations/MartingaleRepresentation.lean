@@ -160,7 +160,7 @@ theorem mem_range_itoIntegralCLM_T_of_centered (hBmeas : ∀ t, Measurable (B t)
     (hFmeas : AEStronglyMeasurable[ItoIntegralL2.natFiltration hBmeas T] (⇑F) μ)
     (hF0 : ∫ ω, F ω ∂μ = 0) :
     F ∈ LinearMap.range (itoIntegralCLM_T hB T hBmeas).toLinearMap := by
-  haveI : CompleteSpace ↥(LinearMap.range (itoIntegralCLM_T hB T hBmeas).toLinearMap) :=
+  have : CompleteSpace ↥(LinearMap.range (itoIntegralCLM_T hB T hBmeas).toLinearMap) :=
     ((itoIsometry_T hB T hBmeas).isometry.isClosedEmbedding.isClosed_range).completeSpace_coe
   obtain ⟨y, hy, z, hz, hFyz⟩ :=
     (LinearMap.range (itoIntegralCLM_T hB T hBmeas).toLinearMap).exists_add_mem_mem_orthogonal F

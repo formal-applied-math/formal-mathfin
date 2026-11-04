@@ -31,7 +31,7 @@ theorem gaussian_put_integral_pos {K r q σ S : ℝ} (hK : 0 < K) (hr : 0 ≤ r)
       max (K-MathFin.gbmValue S (r-q) σ T y) 0 ∂gaussianReal 0 T := by
   let F : ℝ → ℝ := fun y => Real.exp (-r*(T : ℝ))*
     max (K-MathFin.gbmValue S (r-q) σ T y) 0
-  letI : (gaussianReal 0 T).IsOpenPosMeasure :=
+  let : (gaussianReal 0 T).IsOpenPosMeasure :=
     (gaussianReal_absolutelyContinuous' 0 (ne_of_gt hT)).isOpenPosMeasure
   have hc : Continuous F := by dsimp [F,MathFin.gbmValue]; fun_prop
   have hnonneg (y : ℝ) : 0 ≤ F y := mul_nonneg (Real.exp_pos _).le (le_max_right _ _)
@@ -83,7 +83,7 @@ theorem brownianUsualAmericanPut_pos {K r q σ S : ℝ} (hK : 0 < K) (hr : 0 ≤
   have hp := brownian_put_maturity_reward_pos (q := q) hK hr hσ hS hT
   rw [← he] at hp
   let μ := completedMeasure gaussianLimit
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   exact hp.trans_le (european_expectation_le_value (P := μ) (𝓕 := brownianUsualFiltration)
     brownian_completed_measurable hK.le hr hS.le)
 

@@ -424,7 +424,7 @@ theorem Btheta_simple_isQBrownianMotion (s : ℕ → ℝ≥0) (hs : Monotone s) 
   have hdneg : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (fun ω ↦ -(c i ω)) :=
     fun i ↦ (hc i).neg
   have hbneg : ∀ i ω, |(-(c i ω))| ≤ K := fun i ω ↦ by rw [abs_neg]; exact hc_bdd i ω
-  haveI : IsProbabilityMeasure (P.withDensity fun ω ↦
+  have : IsProbabilityMeasure (P.withDensity fun ω ↦
       ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω)) :=
     simpleGirsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) s hs _ hdneg hbneg N T
   exact isQBrownianMotion_of_expMartingale

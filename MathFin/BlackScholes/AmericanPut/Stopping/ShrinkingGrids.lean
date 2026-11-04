@@ -90,7 +90,7 @@ theorem brownianGridPrice_tendsto_usual_of_mesh {K r q σ : ℝ}
     Tendsto (fun n => brownianGridPrice K r q σ T (δ n) x) atTop
       (𝓝 (brownianUsualAmericanPut K r q σ (Real.exp x) T)) := by
   let μ := completedMeasure gaussianLimit
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   have he : (fun n => brownianGridPrice K r q σ T (δ n) x) =
       fun n => gridAmericanPutValue μ brownianUsualFiltration brownian
         K r q σ (Real.exp x) T (δ n) :=

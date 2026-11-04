@@ -75,7 +75,7 @@ branch takes at `U = Uopt`. That the `else` branch approaches the same value is
 theorem kinkedRate_apply_optimal (R₀ slope1 slope2 Uopt : ℝ) (hU : Uopt ≠ 0) :
     kinkedRate R₀ slope1 slope2 Uopt Uopt = R₀ + slope1 := by
   unfold kinkedRate
-  rw [if_pos le_rfl, div_self hU, one_mul]
+  rw [ite_eq_left le_rfl, div_self hU, one_mul]
 
 /-- **The kinked rate is an affine rate plus a call on utilization.** For `Uopt ≠ 0`,
 
@@ -114,16 +114,16 @@ theorem kinkedRate_monotone {R₀ slope1 slope2 Uopt : ℝ}
   unfold kinkedRate
   have h1mUopt : 0 < 1 - Uopt := by linarith
   by_cases hUle : U ≤ Uopt <;> by_cases hVle : V ≤ Uopt
-  · rw [if_pos hUle, if_pos hVle]
+  · rw [ite_eq_left hUle, ite_eq_left hVle]
     gcongr
-  · rw [if_pos hUle, if_neg hVle]
+  · rw [ite_eq_left hUle, ite_eq_right hVle]
     have h1 : U / Uopt * slope1 ≤ slope1 :=
       mul_le_of_le_one_left hs1 ((div_le_one hUopt0).mpr hUle)
     have h2 : 0 ≤ (V - Uopt) / (1 - Uopt) * slope2 :=
       mul_nonneg (div_nonneg (by linarith [not_le.mp hVle]) h1mUopt.le) hs2
     linarith
   · exact absurd ((not_le.mp hUle).trans_le (hUV.trans hVle)) (lt_irrefl _)
-  · rw [if_neg hUle, if_neg hVle]
+  · rw [ite_eq_right hUle, ite_eq_right hVle]
     have : (U - Uopt) / (1 - Uopt) ≤ (V - Uopt) / (1 - Uopt) :=
       (div_le_div_iff_of_pos_right h1mUopt).mpr (by linarith)
     nlinarith [mul_le_mul_of_nonneg_right this hs2]

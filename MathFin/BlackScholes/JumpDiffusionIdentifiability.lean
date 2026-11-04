@@ -266,9 +266,9 @@ theorem jumpDiffusionIncrementLaw_eq_iff {b₁ b₂ σ₁ σ₂ : ℝ} {Λ₁ Λ
       rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_lt]
       exact ⟨hy₁, hy₂⟩)
     have hs : ε / 2 ≠ 0 := (half_pos hε).ne'
-    haveI := isFiniteMeasure_secondDifferenceMeasure σ₁ Λ₁ (s := ε / 2)
+    have := isFiniteMeasure_secondDifferenceMeasure σ₁ Λ₁ (s := ε / 2)
       (hin (ε / 2) (by linarith) (by linarith)).1 (hin (-(ε / 2)) (by linarith) (by linarith)).1
-    haveI := isFiniteMeasure_secondDifferenceMeasure σ₂ Λ₂ (s := ε / 2)
+    have := isFiniteMeasure_secondDifferenceMeasure σ₂ Λ₂ (s := ε / 2)
       (hin (ε / 2) (by linarith) (by linarith)).2.1
       (hin (-(ε / 2)) (by linarith) (by linarith)).2.1
     -- the second-difference measures have the same moment-generating function on `(-ε/2, ε/2)`

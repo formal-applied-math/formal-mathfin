@@ -114,7 +114,7 @@ diagonal instance of the Wiener-layer increment covariance
 theorem integral_increment_sq (hB : IsPreBrownianReal B μ)
     {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) :
     ∫ ω, (B t₁ ω - B t₀ ω) ^ 2 ∂μ = (t₁ : ℝ) - t₀ := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have h := WienerIntegralL2.covariance_increment_aux hB t₀ t₁ t₀ t₁ ht ht
   simp only [min_self, max_self] at h
   rw [max_eq_right (sub_nonneg.mpr (NNReal.coe_le_coe.mpr ht))] at h
@@ -197,7 +197,7 @@ theorem ito_isometry_discrete_bilinear
     ∫ ω, (∑ k ∈ Finset.range N, φ k ω * (B (t (k + 1)) ω - B (t k) ω)) *
           (∑ k ∈ Finset.range N, ψ k ω * (B (t (k + 1)) ω - B (t k) ω)) ∂μ =
       ∑ k ∈ Finset.range N, (∫ ω, φ k ω * ψ k ω ∂μ) * ((t (k + 1) : ℝ) - t k) := by
-  haveI : IsProbabilityMeasure μ := hF.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hF.isGaussianProcess.isProbabilityMeasure
   set a : ℕ → Ω → ℝ := fun k ω ↦ φ k ω * (B (t (k + 1)) ω - B (t k) ω) with ha_def
   set b : ℕ → Ω → ℝ := fun k ω ↦ ψ k ω * (B (t (k + 1)) ω - B (t k) ω) with hb_def
   have ha_L2 : ∀ k, MemLp (a k) 2 μ := fun k ↦

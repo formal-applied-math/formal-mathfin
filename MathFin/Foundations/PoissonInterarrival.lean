@@ -106,7 +106,7 @@ theorem map_firstArrival_eq_expMeasure [IsProbabilityMeasure μ]
     (hτ_first : ∀ ⦃t : ℝ⦄, 0 ≤ t → {ω | t < τ ω} = {ω | N t ω = 0}) :
     μ.map τ = expMeasure rate := by
   have hr : (0 : ℝ) < rate := NNReal.coe_pos.mpr hrate
-  haveI : IsProbabilityMeasure (expMeasure (rate : ℝ)) :=
+  have : IsProbabilityMeasure (expMeasure (rate : ℝ)) :=
     isProbabilityMeasure_expMeasure hr
   -- the exponential CDF in measure form
   have hexp_Iic : ∀ x : ℝ, expMeasure (rate : ℝ) (Set.Iic x)
@@ -120,7 +120,7 @@ theorem map_firstArrival_eq_expMeasure [IsProbabilityMeasure μ]
   rw [Measure.map_apply hτ_meas measurableSet_Iic, hexp_Iic x]
   rcases lt_or_ge x 0 with hx | hx
   · -- x < 0 : τ ≥ 0 makes the event empty
-    rw [if_neg (not_le.mpr hx), ENNReal.ofReal_zero,
+    rw [ite_eq_right (not_le.mpr hx), ENNReal.ofReal_zero,
       show τ ⁻¹' Set.Iic x = ∅ from Set.eq_empty_of_forall_notMem fun ω h ↦
         absurd (le_trans (hτ_nonneg ω) (Set.mem_Iic.mp h)) (not_le.mpr hx)]
     exact measure_empty
@@ -130,7 +130,7 @@ theorem map_firstArrival_eq_expMeasure [IsProbabilityMeasure μ]
       simp [not_lt]
     have hsurv_set : MeasurableSet {ω | x < τ ω} :=
       measurableSet_lt measurable_const hτ_meas
-    rw [if_pos hx, hcompl, measure_compl hsurv_set (measure_ne_top μ _),
+    rw [ite_eq_left hx, hcompl, measure_compl hsurv_set (measure_ne_top μ _),
       measure_univ, hτ_first hx,
       survival_eq hmeas hzero hincr hx,
       show (1 : ℝ≥0∞) = ENNReal.ofReal 1 from ENNReal.ofReal_one.symm,

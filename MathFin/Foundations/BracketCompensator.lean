@@ -161,7 +161,7 @@ private theorem measurable_integral_section {Ω' : Type*} (m : MeasurableSpace �
     (g : ℝ≥0 × Ω' → ℝ)
     (hg : Measurable[@Prod.instMeasurableSpace ℝ≥0 Ω' _ m] g) :
     Measurable[m] fun ω ↦ ∫ u, g (u, ω) ∂ItoIntegralL2.timeMeasure := by
-  letI : MeasurableSpace Ω' := m
+  let : MeasurableSpace Ω' := m
   exact ((hg.comp measurable_swap).stronglyMeasurable.integral_prod_right').measurable
 
 omit [IsProbabilityMeasure μ] in

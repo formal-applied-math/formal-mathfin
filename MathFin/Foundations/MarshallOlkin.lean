@@ -66,10 +66,10 @@ lemma expMeasure_real_Ioi {r : ℝ} (hr : 0 < r) (t : ℝ) :
   rw [← compl_Iic, probReal_compl_eq_one_sub measurableSet_Iic, ← cdf_eq_real,
     cdf_expMeasure_eq hr]
   rcases le_total 0 t with ht | ht
-  · rw [if_pos ht, max_eq_left ht]
+  · rw [ite_eq_left ht, max_eq_left ht]
     ring
   · rcases ht.lt_or_eq with ht | rfl
-    · rw [if_neg (not_le.2 ht), max_eq_right ht.le]
+    · rw [ite_eq_right (not_le.2 ht), max_eq_right ht.le]
       simp
     · simp
 
@@ -84,7 +84,7 @@ private lemma expMeasure_Ioi_ne_zero {r : ℝ} (hr : 0 < r) (t : ℝ) : expMeasu
 private lemma expMeasure_Iic_ne_zero {r t : ℝ} (hr : 0 < r) (ht : 0 < t) :
     expMeasure r (Iic t) ≠ 0 := by
   have := isProbabilityMeasure_expMeasure hr
-  rw [← ofReal_cdf, cdf_expMeasure_eq hr, if_pos ht.le, ne_eq, ENNReal.ofReal_eq_zero, not_le,
+  rw [← ofReal_cdf, cdf_expMeasure_eq hr, ite_eq_left ht.le, ne_eq, ENNReal.ofReal_eq_zero, not_le,
     sub_pos]
   exact (Real.exp_lt_exp.2 (neg_lt_zero.2 (mul_pos hr ht))).trans_eq Real.exp_zero
 

@@ -65,7 +65,7 @@ theorem certificateProgram_eval (p : Params) :
         simp [hlp, h0p]
     · have hln : ¬ 0 < (polynomial p).leadingCoeff := by
         intro h; exact hl (sign_eq_one_iff.mpr h)
-      rw [if_neg hl]
+      rw [ite_eq_right hl]
       simp [SignProgram.eval, hln]
 
 open scoped Classical in

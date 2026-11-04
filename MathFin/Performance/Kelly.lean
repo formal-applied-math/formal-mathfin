@@ -106,7 +106,7 @@ theorem kellyGrowth_n_periods (n : ℕ) {p : ℝ} (hp : 0 ≤ p) (hp1 : p ≤ 1)
     ∫ R : Fin n → ℝ, ∑ i, Real.log (R i)
         ∂(Measure.pi fun _ : Fin n ↦ kellyReturnMeasure p b f)
       = (n : ℝ) * kellyGrowth p b f := by
-  haveI : IsProbabilityMeasure (kellyReturnMeasure p b f) :=
+  have : IsProbabilityMeasure (kellyReturnMeasure p b f) :=
     kellyReturnMeasure_isProbability hp hp1 b f
   -- each coordinate evaluation is measure-preserving onto the one-period law
   have hmp : ∀ i : Fin n, MeasurePreserving (Function.eval i)

@@ -64,7 +64,7 @@ private lemma pdf_mul_eq (ha : 0 < a) (hr : 0 < r) {z x : ℝ} (hx : x ≠ 0) :
       ENNReal.ofReal_zero, zero_mul]
   · by_cases hxz : x ≤ z
     · have hzx : (0 : ℝ) ≤ z - x := by linarith
-      rw [gammaPDF_of_nonneg hx_pos.le, exponentialPDF_eq, if_pos hzx,
+      rw [gammaPDF_of_nonneg hx_pos.le, exponentialPDF_eq, ite_eq_left hzx,
         ← ENNReal.ofReal_mul (by positivity),
         Set.indicator_of_mem (Set.mem_Ioc.mpr ⟨hx_pos, hxz⟩)]
       congr 1
@@ -258,7 +258,7 @@ theorem sum_iidExp_law_gammaMeasure [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 
     (hlaw : ∀ i, Measure.map (X i) μ = expMeasure r)
     (hindep : iIndepFun X μ) :
     Measure.map (fun ω ↦ ∑ i, X i ω) μ = gammaMeasure n r := by
-  haveI : Nonempty (Fin n) := ⟨⟨0, Nat.pos_of_ne_zero hn⟩⟩
+  have : Nonempty (Fin n) := ⟨⟨0, Nat.pos_of_ne_zero hn⟩⟩
   have h := map_sum_iidExp hr hmeas hlaw hindep Finset.univ Finset.univ_nonempty
   rw [show (fun ω ↦ ∑ i, X i ω) = ∑ i, X i from
     funext fun ω ↦ (Finset.sum_apply ω Finset.univ X).symm]

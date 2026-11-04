@@ -59,7 +59,7 @@ theorem localizationMargin_adapted (hZ : Adapted 𝓕 Z) (hW : Adapted 𝓕 W)
   intro t
   have hzt := hZ t
   have hwt := hW t
-  letI : MeasurableSpace Ω := 𝓕 t
+  let : MeasurableSpace Ω := 𝓕 t
   exact measurable_const.max ((hzt.sub measurable_const).min
     ((measurable_const.sub hwt.abs).min measurable_const))
 

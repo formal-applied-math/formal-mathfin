@@ -294,14 +294,14 @@ theorem binomialNoArb_of_noArbitrage (hS₀ : 0 < S₀) (hd : 0 < d) (hdu : d < 
     have := noarb 1 (fun x ↦ by
       split_ifs <;> exact mul_nonneg (by norm_num) (mul_nonneg hden.le (by linarith))) fun _ ↦ true
     beta_reduce at this
-    rw [if_pos rfl, one_mul] at this
+    rw [ite_eq_left rfl, one_mul] at this
     exact (mul_pos hden (by linarith)).ne' this
   · by_contra hle
     have hle := not_lt.1 hle
     have := noarb (-1) (fun x ↦ by
       split_ifs <;> exact (by nlinarith [mul_nonneg hden.le (sub_nonneg.2 hle)])) fun _ ↦ false
     beta_reduce at this
-    rw [if_neg (by decide)] at this
+    rw [ite_eq_right (by decide)] at this
     nlinarith [mul_pos hden (show 0 < Real.exp r - d by linarith)]
 
 /-- **No arbitrage in the multi-period binomial tree iff `d < e^r < u`.** For `S₀ > 0`,
@@ -327,7 +327,7 @@ lemma horizonSpot_succ {t : ℕ} (ht : t < T) (y : Fin T → Bool) :
   have h1 : min (t + 1) T = t + 1 := min_eq_left ht
   have h2 : min t T = t := min_eq_left ht.le
   simp only [horizonSpot, discountedSpot, spotPath, h1, h2, Finset.prod_range_succ,
-    padFlips, dif_pos ht]
+    padFlips, dite_eq_left ht]
   rw [show -(r * ((t + 1 : ℕ) : ℝ)) = -(r * t) + -r by push_cast; ring, Real.exp_add]
   ring
 
@@ -385,7 +385,7 @@ theorem IsEMM.real_atom_up (hS₀ : 0 < S₀) (h : BinomialNoArb u d r)
     (x : Fin T → Bool) :
     Q.real (horizonAtom T t x ∩ {y | y ⟨t, ht⟩ = true})
       = crrUpProb u d r * Q.real (horizonAtom T t x) := by
-  haveI := hQ.isProb
+  have := hQ.isProb
   set A := horizonAtom T t x
   set U : Set (Fin T → Bool) := {y | y ⟨t, ht⟩ = true}
   have hA : MeasurableSet A := (horizonFiltration T).le t _ (measurableSet_horizonAtom t x)
@@ -407,13 +407,13 @@ theorem IsEMM.real_atom_up (hS₀ : 0 < S₀) (h : BinomialNoArb u d r)
       = Q.real (A ∩ U) * (s * (Real.exp (-r) * u)) := by
     rw [setIntegral_congr_fun (hA.inter hU) fun y hy ↦ by
       rw [horizonSpot_succ ht, horizonSpot_eq_of_mem_horizonAtom hy.1,
-        if_pos (show y ⟨t, ht⟩ = true from hy.2)],
+        ite_eq_left (show y ⟨t, ht⟩ = true from hy.2)],
       setIntegral_const, smul_eq_mul]
   have hdown : ∫ y in A \ U, horizonSpot T S₀ u d r (t + 1) y ∂Q
       = Q.real (A \ U) * (s * (Real.exp (-r) * d)) := by
     rw [setIntegral_congr_fun (hA.diff hU) fun y hy ↦ by
       rw [horizonSpot_succ ht, horizonSpot_eq_of_mem_horizonAtom hy.1,
-        if_neg (show ¬ y ⟨t, ht⟩ = true from hy.2)],
+        ite_eq_right (show ¬ y ⟨t, ht⟩ = true from hy.2)],
       setIntegral_const, smul_eq_mul]
   have hnow : ∫ y in A, horizonSpot T S₀ u d r t y ∂Q = Q.real A * s := by
     rw [setIntegral_congr_fun hA fun y hy ↦ horizonSpot_eq_of_mem_horizonAtom hy,
@@ -437,13 +437,13 @@ theorem IsEMM.real_atom_flip (hS₀ : 0 < S₀) (h : BinomialNoArb u d r)
       = (if b then crrUpProb u d r else 1 - crrUpProb u d r) * Q.real (horizonAtom T t x) := by
   have hup := IsEMM.real_atom_up hS₀ h hQ ht x
   cases b
-  · haveI := hQ.isProb
+  · have := hQ.isProb
     have hU : MeasurableSet {y : Fin T → Bool | y ⟨t, ht⟩ = true} := MeasurableSet.of_discrete
     have hsum := measureReal_inter_add_sdiff (μ := Q) (s := horizonAtom T t x) hU
     have hset : horizonAtom T t x ∩ {y | y ⟨t, ht⟩ = false}
         = horizonAtom T t x \ {y | y ⟨t, ht⟩ = true} := by
       ext y; simp
-    rw [hset, if_neg Bool.false_ne_true]
+    rw [hset, ite_eq_right Bool.false_ne_true]
     linear_combination hsum - hup
   · simpa using hup
 
@@ -459,7 +459,7 @@ theorem IsEMM.real_horizonAtom (hS₀ : 0 < S₀) (h : BinomialNoArb u d r)
   intro t
   induction t with
   | zero =>
-    haveI := hQ.isProb
+    have := hQ.isProb
     intro _
     simp [horizonAtom_zero]
   | succ t ih =>
@@ -505,7 +505,7 @@ is the law of `T` i.i.d. `Bernoulli(q)` flips with `q = crrUpProb u d r`. Node b
 theorem IsEMM.eq_horizonMeasure (hS₀ : 0 < S₀) (h : BinomialNoArb u d r)
     (hQ : IsEMM (horizonFiltration T) P (horizonSpot T S₀ u d r) T Q) {q : ℝ≥0} (hq1 : q ≤ 1)
     (hqcrr : crrUpProb u d r = q) : Q = horizonMeasure T q hq1 := by
-  haveI := hQ.isProb
+  have := hQ.isProb
   refine Measure.ext_iff_singleton.2 fun x ↦ ?_
   refine (ENNReal.toReal_eq_toReal_iff' (measure_ne_top _ _) (measure_ne_top _ _)).1 ?_
   change Q.real {x} = (horizonMeasure T q hq1).real {x}

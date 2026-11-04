@@ -36,7 +36,7 @@ theorem planeDrift_pos {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G)
     (hp : ∀ s ≤ t, 0 < planeGenerator G (s, brownian s ω)) :
     0 < planeDrift G t ω := by
   let ν := MathFin.ItoIntegralL2.timeMeasure.restrict (Ioc 0 t)
-  haveI : NeZero ν := ⟨by
+  have : NeZero ν := ⟨by
     intro hz
     have he := congrArg (fun μ : Measure ℝ≥0 => μ univ) hz
     have ht' : (0 : ℝ) < t := by exact_mod_cast ht
@@ -55,7 +55,7 @@ theorem planeDrift_neg {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G)
     (hp : ∀ s ≤ t, planeGenerator G (s, brownian s ω) < 0) :
     planeDrift G t ω < 0 := by
   let ν := MathFin.ItoIntegralL2.timeMeasure.restrict (Ioc 0 t)
-  haveI : NeZero ν := ⟨by
+  have : NeZero ν := ⟨by
     intro hz
     have he := congrArg (fun μ : Measure ℝ≥0 => μ univ) hz
     have ht' : (0 : ℝ) < t := by exact_mod_cast ht

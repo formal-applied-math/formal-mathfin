@@ -349,7 +349,7 @@ private lemma setIntegral_eq_zero_of_orthogonal {T : ℝ≥0}
     (s : Set ℝ) (hs : MeasurableSet s) :
     ∫ x in s, g x ∂(volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) = 0 := by
   -- ν is a finite measure (volume of (0, T] = T < ∞).
-  haveI : IsFiniteMeasure (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) := by
+  have : IsFiniteMeasure (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) := by
     refine ⟨?_⟩
     rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter, Real.volume_Ioc]
     exact ENNReal.ofReal_lt_top
@@ -388,7 +388,7 @@ complement with `⊥` using `setIntegral_eq_zero_of_orthogonal` and
 `Lp.ae_eq_zero_of_forall_setIntegral_eq_zero`. -/
 theorem stepAssembly_denseRange (T : ℝ≥0) :
     DenseRange (stepAssembly T) := by
-  haveI : IsFiniteMeasure (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) :=
+  have : IsFiniteMeasure (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) :=
     ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter, Real.volume_Ioc];
         exact ENNReal.ofReal_lt_top⟩
   -- Suffices: `(LinearMap.range (stepAssembly T))ᗮ = ⊥` (every `g` orthogonal to range is 0).

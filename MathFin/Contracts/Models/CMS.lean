@@ -286,7 +286,7 @@ theorem SwapModel.cmsCurveRate_integral_le_forwardSwapRate (h : SwapModel Q 𝓕
         (∫ ω, X (b n) (T 0) ω ∂(swapAnnuityMeasure Q D X b T n δ))
       ≤ parSwapRate (zeroCurve Q D (T 0)) (zeroCurve Q D (T n))
           (annuity δ (fun i ↦ zeroCurve Q D (T i)) (Finset.Icc 1 n)) := by
-  haveI := h.isProbabilityMeasure
+  have := h.isProbabilityMeasure
   have hn : n ∈ Finset.Icc 1 n := Finset.mem_Icc.2 ⟨h.n_pos, le_rfl⟩
   have hac : swapAnnuityMeasure Q D X b T n δ ≪ Q := withDensity_absolutelyContinuous _ _
   have hae := hac.ae_eq (h.rate_eq_cmsCurveRate hc)
@@ -346,7 +346,7 @@ theorem SwapModel.zeroCurve_mul_forwardSwapRate_le_valueDisc_cmsSwaplet
     zeroCurve Q D (T 0) * parSwapRate (zeroCurve Q D (T 0)) (zeroCurve Q D (T n))
         (annuity δ (fun i ↦ zeroCurve Q D (T i)) (Finset.Icc 1 n))
       ≤ (cmsSwaplet σ (T 0)).valueDisc Q D X := by
-  haveI := h.isProbabilityMeasure
+  have := h.isProbabilityMeasure
   set A := CMS.annuityRandom δ (swapCurve X b (T 0)) (Finset.Icc 1 n) with hA
   set μ := swapAnnuityMeasure Q D X b T n δ with hμ
   set C := ∑ i ∈ (Finset.Icc 1 n).erase n, c i

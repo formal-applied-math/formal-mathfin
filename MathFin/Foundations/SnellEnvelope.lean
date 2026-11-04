@@ -58,12 +58,12 @@ theorem snellEnvelopeAux_succ_of_mem {n i : ℕ} (hi : i ∈ X) :
     snellEnvelopeAux P 𝓕 X Z (n + 1) i =
       fun ω ↦ max (Z i ω) (P[snellEnvelopeAux P 𝓕 X Z n (i + 1) | 𝓕 i] ω) := by
   rw [snellEnvelopeAux]
-  exact funext fun ω ↦ if_pos hi
+  exact funext fun ω ↦ ite_eq_left hi
 
 theorem snellEnvelopeAux_succ_of_notMem {n i : ℕ} (hi : i ∉ X) :
     snellEnvelopeAux P 𝓕 X Z (n + 1) i = P[snellEnvelopeAux P 𝓕 X Z n (i + 1) | 𝓕 i] := by
   rw [snellEnvelopeAux]
-  exact funext fun ω ↦ if_neg hi
+  exact funext fun ω ↦ ite_eq_right hi
 
 theorem snellEnvelopeAux_measurable (hZ : Adapted 𝓕 Z) (n i : ℕ) :
     Measurable[𝓕 i] (snellEnvelopeAux P 𝓕 X Z n i) := by

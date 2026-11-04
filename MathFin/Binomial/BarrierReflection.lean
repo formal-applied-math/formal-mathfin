@@ -61,13 +61,13 @@ noncomputable def reflectHitLtGt (a : ℤ) :
     {ω : Fin n → Bool // HitsLevel a ω ∧ a < walkPos ω n} where
   toFun ω := ⟨reflectAtFirstHit a ω.1, by
     refine ⟨?_, ?_⟩
-    · rw [reflectAtFirstHit, dif_pos ω.2.1]
+    · rw [reflectAtFirstHit, dite_eq_left ω.2.1]
       exact HitsLevel.reflectAfter_firstHit ω.1 a ω.2.1
     · have h := walkPos_reflectAtFirstHit_endpoint ω.1 a (walkPos ω.1 n) ω.2.1 rfl
       have := ω.2.2; rw [h]; linarith⟩
   invFun ω := ⟨reflectAtFirstHit a ω.1, by
     refine ⟨?_, ?_⟩
-    · rw [reflectAtFirstHit, dif_pos ω.2.1]
+    · rw [reflectAtFirstHit, dite_eq_left ω.2.1]
       exact HitsLevel.reflectAfter_firstHit ω.1 a ω.2.1
     · have h := walkPos_reflectAtFirstHit_endpoint ω.1 a (walkPos ω.1 n) ω.2.1 rfl
       have := ω.2.2; rw [h]; linarith⟩

@@ -344,7 +344,7 @@ theorem increments_iIndepFun_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) 
     ((h.measurable _).sub (h.measurable _)).aemeasurable
   refine (iIndepFun_iff_charFun_pi hX).mpr fun w ↦ ?_
   set c : ℕ → ℝ := fun k ↦ if hk : k < n then w ⟨k, hk⟩ else 0
-  have hc (i : Fin n) : c i = w i := dif_pos i.isLt
+  have hc (i : Fin n) : c i = w i := dite_eq_left i.isLt
   have hσ2 : 0 ≤ ∑ k ∈ Finset.range n, c k ^ 2 * ((t (k + 1) : ℝ) - (t k : ℝ)) :=
     Finset.sum_nonneg fun k _ ↦ mul_nonneg (sq_nonneg _)
       (sub_nonneg.mpr (NNReal.coe_le_coe.mpr (ht (Nat.le_add_right k 1))))

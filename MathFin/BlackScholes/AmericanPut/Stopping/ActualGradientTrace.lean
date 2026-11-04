@@ -42,7 +42,7 @@ theorem canonicalStockPrice_eq_log (k h t : ℝ) {S : ℝ} (hS : 0 < S) :
 theorem canonicalStockPrice_convexOn {k h : ℝ} (hk : 0 ≤ k) (t : ℝ) :
     ConvexOn ℝ (Ici 0) (fun S => canonicalStockPrice k h S t) := by
   let μ := completedMeasure gaussianLimit
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   exact value_convexOn_spot (P := μ) (𝓕 := brownianUsualFiltration)
     (q := h) (σ := Real.sqrt 2) (T := t.toNNReal)
     brownian_completed_measurable (by norm_num : (0 : ℝ) ≤ 1) hk

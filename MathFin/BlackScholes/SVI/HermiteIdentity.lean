@@ -30,7 +30,7 @@ open Polynomial
 private theorem unit_trace_signature (f q : ℝ[X]) (hf : IsUnit f) :
     formSignature (weightedTraceForm f q).toQuadraticMap = 0 := by
   have hf0 := hf.ne_zero
-  letI : FiniteDimensional ℝ (AdjoinRoot f) :=
+  let : FiniteDimensional ℝ (AdjoinRoot f) :=
       Module.Finite.of_basis (AdjoinRoot.powerBasis hf0).basis
   have hd : Module.finrank ℝ (AdjoinRoot f) = 0 := by
     rw [(AdjoinRoot.powerBasis hf0).finrank, AdjoinRoot.powerBasis_dim]

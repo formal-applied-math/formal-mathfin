@@ -305,7 +305,7 @@ theorem abs_integral_mul_exp_increment_sub_le (hA : IsSlowClock A) (hM : Marting
     rw [h2]
     have := integral_mono iα (integrable_const ((q : ℝ) - p)) hαd
     simpa [measureReal_def] using this
-  haveI : Nonempty Ω := nonempty_of_isProbabilityMeasure P
+  have : Nonempty Ω := nonempty_of_isProbabilityMeasure P
   have hC0 : 0 ≤ C := (abs_nonneg _).trans (hC (Classical.arbitrary Ω))
   rw [hFG]
   refine abs_integral_le_integral_abs.trans ((integral_mono iFG.abs (ib.const_mul C) hpt).trans ?_)
@@ -354,7 +354,7 @@ theorem integral_mul_exp_eq (a : ℝ) {s t : ℝ≥0} (hst : s ≤ t) {V : Ω �
     ((memLp_of_abs_le ((hZsm r).mono (𝓕.le r)).aestronglyMeasurable (C := Real.exp (|a| * K))
       (fun ω ↦ by rw [abs_of_pos (Real.exp_pos _)]; exact exp_le_exp_abs_mul hA hK a r ω)
       1).integrable le_rfl).bdd_mul hVm.aestronglyMeasurable (.of_forall hC)
-  haveI : Nonempty Ω := nonempty_of_isProbabilityMeasure P
+  have : Nonempty Ω := nonempty_of_isProbabilityMeasure P
   have hC0 : 0 ≤ C := (abs_nonneg _).trans (hC (Classical.arbitrary Ω))
   have hC'0 : 0 ≤ C' := by positivity
   -- the bound along the `n`-th partition

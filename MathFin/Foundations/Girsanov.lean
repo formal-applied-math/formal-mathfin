@@ -109,7 +109,7 @@ theorem bs_discounted_isEMM
       (P.withDensity fun ω ↦ ENNReal.ofReal
         (Real.exp (-((μ - r) / σ) * X T ω - ((μ - r) / σ) ^ 2 * (T : ℝ) / 2))) := by
   set θ : ℝ := (μ - r) / σ with hθ
-  haveI : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
+  have : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
       (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) :=
     girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
   have hmeasX (u : ℝ≥0) : Measurable (X u) := ((hX.stronglyAdapted u).mono (𝓕.le u)).measurable

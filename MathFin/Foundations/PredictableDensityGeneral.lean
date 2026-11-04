@@ -142,7 +142,7 @@ lemma inner_simpleAssemblyOfMeasure_iocSP_T (T : ℝ≥0) (hBmeas : ∀ t, Measu
         (iocSP_T hBmeas hab hbT hF), g⟫_ℝ
       = ∫ z in Set.Ioc a b ×ˢ F, f z ^ 2 * g z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
   set 𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas
-  letI : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
+  let : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
   have hRpred : MeasurableSet (Set.Ioc a b ×ˢ F) :=
     MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := 𝓕) a b hF
   rw [L2.inner_def]
@@ -180,7 +180,7 @@ theorem simpleAssembly_sqWeight_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measur
     DenseRange (simpleAssemblyOfMeasure T hBmeas
       (sqWeight (trimMeasure_T (μ := μ) T hBmeas) f)) := by
   set 𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas
-  letI : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
+  let : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
   suffices h_orth_bot : (LinearMap.range (simpleAssemblyOfMeasure T hBmeas
       (sqWeight (trimMeasure_T (μ := μ) T hBmeas) f)))ᗮ = ⊥ by
     rw [denseRange_iff_closure_range,

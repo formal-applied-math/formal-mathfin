@@ -31,7 +31,7 @@ open scoped Topology ContDiff NNReal
 theorem canonicalPrice_monotone_time {k h : ℝ} (hk : 0 ≤ k) (x : ℝ) :
     Monotone (canonicalPrice k h x) := by
   let μ := completedMeasure gaussianLimit
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   intro s t hst
   exact value_mono_horizon (P := μ) (𝓕 := brownianUsualFiltration)
     brownian_completed_measurable (by norm_num) hk (Real.exp_pos x).le

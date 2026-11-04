@@ -276,18 +276,18 @@ theorem cumHazard_surjOn_Ici {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s
 `ν(−∞, x] = 1 − e^{−x}`. -/
 private theorem expClock_Iic {x : ℝ} (hx : 0 ≤ x) :
     expMeasure 1 (Set.Iic x) = ENNReal.ofReal (1 - rexp (-x)) := by
-  haveI : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
+  have : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
   rw [← ENNReal.ofReal_toReal (measure_ne_top _ _),
     show ENNReal.toReal (expMeasure 1 (Set.Iic x)) = cdf (expMeasure 1) x from by
       rw [cdf_eq_real, measureReal_def],
-    cdf_expMeasure_eq one_pos x, if_pos hx]
+    cdf_expMeasure_eq one_pos x, ite_eq_left hx]
   simp only [one_mul]
 
 /-- **Tail of the unit exponential clock**: for `ν = Exp(1)` and `x ≥ 0`,
 `ν(x, ∞) = e^{−x}`. -/
 private theorem expClock_Ioi {x : ℝ} (hx : 0 ≤ x) :
     expMeasure 1 (Set.Ioi x) = ENNReal.ofReal (rexp (-x)) := by
-  haveI : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
+  have : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
   have hset : Set.Ioi x = (Set.Iic x)ᶜ := by
     ext y
     simp only [Set.mem_Ioi, Set.mem_compl_iff, Set.mem_Iic, not_le]
@@ -303,7 +303,7 @@ private theorem expClock_Ioi {x : ℝ} (hx : 0 ≤ x) :
 /-- The unit exponential clock is almost surely nonnegative. -/
 private theorem expClock_null_neg {ξ : Ω → ℝ} (hξmeas : Measurable ξ)
     (hξlaw : Measure.map ξ μ = expMeasure 1) : μ {ω | ξ ω < 0} = 0 := by
-  haveI : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
+  have : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
   rw [show {ω | ξ ω < 0} = ξ ⁻¹' Set.Iio 0 from rfl,
     ← Measure.map_apply hξmeas measurableSet_Iio, hξlaw]
   refine le_antisymm
@@ -412,7 +412,7 @@ theorem cox_survival_timeVarying {h : ℝ → ℝ} (hh : Continuous h) (hpos : �
     {ξ : Ω → ℝ} (hξmeas : Measurable ξ) (hξlaw : Measure.map ξ μ = expMeasure 1)
     {t : ℝ} (ht : 0 ≤ t) :
     μ {ω | coxDefaultTime h ξ ω > t} = ENNReal.ofReal (hazardSurvival h t) := by
-  haveI : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
+  have : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
   have hΛt : 0 ≤ cumHazard h t := cumHazard_nonneg hpos ht
   rw [measure_congr (coxDefaultTime_survSet hh hpos hdiv hξmeas hξlaw t),
     show {ω | cumHazard h t < ξ ω} = ξ ⁻¹' Set.Ioi (cumHazard h t) from rfl,
@@ -426,7 +426,7 @@ theorem cox_cdf_timeVarying {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s,
     {ξ : Ω → ℝ} (hξmeas : Measurable ξ) (hξlaw : Measure.map ξ μ = expMeasure 1)
     {a : ℝ} (ha : 0 ≤ a) :
     μ {ω | coxDefaultTime h ξ ω ≤ a} = 1 - ENNReal.ofReal (hazardSurvival h a) := by
-  haveI : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
+  have : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
   have hΛa : 0 ≤ cumHazard h a := cumHazard_nonneg hpos ha
   rw [measure_congr (coxDefaultTime_cdfSet hh hpos hdiv hξmeas hξlaw a),
     show {ω | ξ ω ≤ cumHazard h a} = ξ ⁻¹' Set.Iic (cumHazard h a) from rfl,
@@ -595,7 +595,7 @@ theorem cox_defaultProb_density {h : ℝ → ℝ} (hh : Continuous h) (hpos : �
     {a : ℝ} (ha : 0 ≤ a) :
     μ {ω | coxDefaultTime h ξ ω ≤ a}
       = ENNReal.ofReal (∫ s in (0:ℝ)..a, h s * hazardSurvival h s) := by
-  haveI : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
+  have : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
   rw [cox_cdf_timeVarying hh hpos hdiv hξmeas hξlaw ha,
     show ((1:ℝ≥0∞)) = ENNReal.ofReal 1 from ENNReal.ofReal_one.symm,
     ← ENNReal.ofReal_sub 1 (le_of_lt (hazardSurvival_pos h a))]
@@ -620,7 +620,7 @@ theorem cox_mixing_survival {Λ : ℝ → Ω₁ → ℝ} (hΛmeas : ∀ t, Measu
     (hΛnn : ∀ t ω, 0 ≤ Λ t ω) (t : ℝ) :
     (μ₁.prod (expMeasure 1)) {p : Ω₁ × ℝ | Λ t p.1 < p.2}
       = ∫⁻ ω : Ω₁, ENNReal.ofReal (rexp (-(Λ t ω))) ∂μ₁ := by
-  haveI : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
+  have : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
   have hmap : Measurable fun p : Ω₁ × ℝ ↦ (Λ t p.1, p.2) :=
     ((hΛmeas t).comp measurable_fst).prodMk measurable_snd
   have hset : MeasurableSet {p : Ω₁ × ℝ | Λ t p.1 < p.2} :=

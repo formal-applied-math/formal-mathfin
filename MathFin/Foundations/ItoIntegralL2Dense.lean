@@ -102,7 +102,7 @@ private lemma inner_simpleAssembly_iocSP (hBmeas : ∀ t, Measurable (B t)) (a b
     ⟪simpleAssembly (μ := μ) hBmeas (iocSP hBmeas a b hF), g⟫_ℝ
       = ∫ z in Set.Ioc a b ×ˢ F, g z ∂((timeMeasure.prod μ).trim
           (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod) := by
-  letI : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
+  let : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
   rw [L2.inner_def]
   have h_coe := MemLp.coeFn_toLp
     (memLp_uncurry_trim (μ := μ) hBmeas (iocSP hBmeas a b hF))
@@ -179,7 +179,7 @@ private lemma aezeroOfOrth (hBmeas : ∀ t, Measurable (B t))
       ⟪simpleAssembly (μ := μ) hBmeas V, g⟫_ℝ = 0) :
     (g : ℝ≥0 × Ω → ℝ) =ᵐ[(timeMeasure.prod μ).trim
       (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod] 0 := by
-  letI : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
+  let : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
   have h_rect := itoOrthRect (μ := μ) hBmeas g h_orth
   -- predictable-measurability of any rectangle in `predictableRect`
   have hRpred : ∀ R ∈ ItoIntegralCLM.predictableRect (mΩ := mΩ) hBmeas,

@@ -81,7 +81,7 @@ theorem canonicalDiscountedPrice_usual_supermartingale {k h : ℝ} (hk : 0 ≤ k
   have hu := bounded_supermartingale_completion gaussianLimit
     (canonicalDiscountedPrice_supermartingale (h := h) hk x T)
         (canonicalDiscountedPrice_bound hk x T)
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   exact bounded_continuous_supermartingale_rightCont (supermartingale_nullAugmentation hu)
     (canonicalDiscountedPrice_continuous hk x T) (canonicalDiscountedPrice_bound hk x T)
 

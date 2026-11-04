@@ -93,7 +93,7 @@ private theorem bandIntegral_slice (hBmeas : ∀ t, Measurable (B t)) (ψ : ℝ�
       (ae_of_all _ fun z ↦ by rw [Real.norm_eq_abs]; exact hψbdd z.1 z.2)).integrable one_le_two
   have hUVamb : MeasurableSet (Set.Ioc u v ×ˢ (Set.univ : Set Ω)) :=
     MeasurableSet.prod measurableSet_Ioc MeasurableSet.univ
-  haveI : IsFiniteMeasure (ItoIntegralL2.timeMeasure.restrict (Set.Ioc u v)) := by
+  have : IsFiniteMeasure (ItoIntegralL2.timeMeasure.restrict (Set.Ioc u v)) := by
     refine ⟨?_⟩
     rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
       ItoIntegralL2.timeMeasure_Ioc]
@@ -152,7 +152,7 @@ private theorem bandIntegral_slice (hBmeas : ∀ t, Measurable (B t)) (ψ : ℝ�
           ∂(ItoIntegralL2.timeMeasure.prod μ) := integral_indicator hUVamb
     _ = ∫ z, (Set.Ioc u v ×ˢ (Set.univ : Set Ω)).indicator (Function.uncurry ψ) z
           ∂((ItoIntegralL2.timeMeasure.restrict (Set.Ioc u v)).prod μ) := by
-        haveI : SFinite ItoIntegralL2.timeMeasure := inferInstance
+        have : SFinite ItoIntegralL2.timeMeasure := inferInstance
         have hmeas : ((ItoIntegralL2.timeMeasure.restrict (Set.Ioc u v)).prod μ)
             = (ItoIntegralL2.timeMeasure.prod μ).restrict
               (Set.Ioc u v ×ˢ (Set.univ : Set Ω)) := by

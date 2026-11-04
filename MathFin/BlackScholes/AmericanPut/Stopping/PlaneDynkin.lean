@@ -83,7 +83,7 @@ theorem planeDrift_norm_le {G : ℝ × ℝ → ℝ} {T t : ℝ≥0} {C : ℝ}
     (hL : ∀ s : ℝ≥0, s ≤ T → ∀ w : ℝ, ‖planeGenerator G (s,w)‖ ≤ C)
     (ht : t ≤ T) (ω : ℝ≥0 → ℝ) : ‖planeDrift G t ω‖ ≤ (t : ℝ)*C := by
   let ν := MathFin.ItoIntegralL2.timeMeasure.restrict (Ioc 0 t)
-  haveI : IsFiniteMeasure ν := ⟨by
+  have : IsFiniteMeasure ν := ⟨by
     simp only [ν,Measure.restrict_apply_univ,MathFin.ItoIntegralL2.timeMeasure_Ioc]
     exact ENNReal.ofReal_lt_top⟩
   have hh := norm_integral_le_of_norm_le_const (μ := ν)

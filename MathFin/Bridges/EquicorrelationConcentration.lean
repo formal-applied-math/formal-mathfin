@@ -63,12 +63,12 @@ theorem portfolioVarN_equicorrelated_eq_herfindahl (s : Finset ι) (w : ι → �
       ρ * v * (w i * w j) + (1 - ρ) * v * (if i = j then w i * w j else 0) := by
     by_cases hij : i = j
     · subst hij
-      rw [h_var i hi, if_pos rfl]
+      rw [h_var i hi, ite_eq_left rfl]
       ring
-    · rw [h_cov i hi j hj hij, if_neg hij]
+    · rw [h_cov i hi j hj hij, ite_eq_right hij]
       ring
   have hdiag (i : ι) (hi : i ∈ s) : ∑ j ∈ s, (if i = j then w i * w j else 0) = w i ^ 2 := by
-    rw [Finset.sum_ite_eq, if_pos hi, sq]
+    rw [Finset.sum_ite_eq, ite_eq_left hi, sq]
   calc portfolioVarN s w σ
       = ∑ i ∈ s, ∑ j ∈ s,
           (ρ * v * (w i * w j) + (1 - ρ) * v * (if i = j then w i * w j else 0)) :=

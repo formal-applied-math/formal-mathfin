@@ -795,29 +795,30 @@ theorem heatConvolution_eq_add_integral_deriv {t : ℝ} (ht : 0 < t) {f f' f'' :
   have hΦ_cont : ContinuousOn Φ (Set.Icc 0 t) := by
     intro s hs
     rcases eq_or_lt_of_le hs.1 with h0 | h0
-    · rw [← h0, ContinuousWithinAt, show Φ 0 = f 0 from if_neg (lt_irrefl 0),
+    · rw [← h0, ContinuousWithinAt, show Φ 0 = f 0 from ite_eq_right (lt_irrefl 0),
         show Set.Icc (0:ℝ) t = {0} ∪ Set.Ioc 0 t from by
           rw [Set.union_comm, Set.Ioc_union_left ht.le],
         nhdsWithin_union, nhdsWithin_singleton, tendsto_sup]
-      refine ⟨by rw [← show Φ 0 = f 0 from if_neg (lt_irrefl 0)]; exact tendsto_pure_nhds Φ 0, ?_⟩
+      refine ⟨by rw [← show Φ 0 = f 0 from ite_eq_right (lt_irrefl 0)]; exact tendsto_pure_nhds Φ 0,
+        ?_⟩
       refine Filter.Tendsto.congr' ?_ ((tendsto_integral_heatKernel_zero hfc hCf).mono_left
         (nhdsWithin_mono 0 Set.Ioc_subset_Ioi_self))
-      filter_upwards [self_mem_nhdsWithin] with x hx using (if_pos hx.1).symm
+      filter_upwards [self_mem_nhdsWithin] with x hx using (ite_eq_left hx.1).symm
     · have hca : ContinuousAt Φ s := by
         refine (hasDerivAt_phi h0 hfc hCf).continuousAt.congr ?_
-        filter_upwards [lt_mem_nhds h0] with x hx using (if_pos hx).symm
+        filter_upwards [lt_mem_nhds h0] with x hx using (ite_eq_left hx).symm
       exact hca.continuousWithinAt
   -- (c) right derivative of `Φ` on `(0, t)` is `ψ`
   have hΦ_deriv : ∀ s ∈ Set.Ioo (0:ℝ) t, HasDerivWithinAt Φ (ψ s) (Set.Ioi s) s := by
     intro s hs
     have heq : Φ =ᶠ[nhds s] φ := by
-      filter_upwards [lt_mem_nhds hs.1] with x hx using if_pos hx
+      filter_upwards [lt_mem_nhds hs.1] with x hx using ite_eq_left hx
     exact ((hasDerivAt_phi_heatEq hs.1 hf hf' hf''c hCf hCf' hCf'').congr_of_eventuallyEq
       heq).hasDerivWithinAt
   -- (d) FTC, then read off the boundary values `Φ t = φ t`, `Φ 0 = f 0`
   have hFTC :=
       intervalIntegral.integral_eq_sub_of_hasDeriv_right_of_le ht.le hΦ_cont hΦ_deriv hψ_int
-  rw [show Φ t = φ t from if_pos ht, show Φ 0 = f 0 from if_neg (lt_irrefl 0)] at hFTC
+  rw [show Φ t = φ t from ite_eq_left ht, show Φ 0 = f 0 from ite_eq_right (lt_irrefl 0)] at hFTC
   linarith [hFTC]
 
 /-! ### The Feynman–Kac function `u(t, x) = ∫ z, g(z) · K(t, z - x) dz`

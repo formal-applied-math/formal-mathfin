@@ -146,7 +146,7 @@ theorem driftContinuousMod_isStronglyPredictable (T : ℝ≥0) (hBmeas : ∀ t, 
             ((approxSeq T hBmeas φ).choose n).val) z) := by
     funext z; rfl
   rw [hrw]
-  letI : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration hBmeas).predictable
+  let : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration hBmeas).predictable
   exact StronglyMeasurable.limUnder (fun n ↦
     driftSimpleProcess_isStronglyPredictable hBmeas
       ((approxSeq T hBmeas φ).choose n).val)
@@ -161,7 +161,7 @@ theorem driftContinuousMod_stronglyAdapted (T : ℝ≥0) (hBmeas : ∀ t, Measur
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     StronglyAdapted (natFiltration hBmeas) (driftContinuousMod T hBmeas φ) := by
   intro t
-  letI : MeasurableSpace Ω := (natFiltration hBmeas t : MeasurableSpace Ω)
+  let : MeasurableSpace Ω := (natFiltration hBmeas t : MeasurableSpace Ω)
   exact StronglyMeasurable.limUnder fun n ↦
     driftSimpleProcess_stronglyAdapted hBmeas ((approxSeq T hBmeas φ).choose n).val t
 

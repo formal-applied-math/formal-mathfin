@@ -200,13 +200,13 @@ theorem coeFn_bandRestrict (T a b : ℝ≥0) (hab : a ≤ b) (hBmeas : ∀ t, Me
   rw [hsub, Pi.sub_apply, ha, hb]
   by_cases hza : a < z.1
   · by_cases hzb : b < z.1
-    · rw [if_pos hza, if_pos hzb, sub_self,
+    · rw [ite_eq_left hza, ite_eq_left hzb, sub_self,
         Set.indicator_of_notMem
           (show z.1 ∉ Set.Ioc a b from fun hmem ↦ absurd hmem.2 (not_le.mpr hzb)), zero_mul]
-    · rw [if_pos hza, if_neg hzb, sub_zero,
+    · rw [ite_eq_left hza, ite_eq_right hzb, sub_zero,
         Set.indicator_of_mem (by exact ⟨hza, not_lt.mp hzb⟩), one_mul]
   · have hzb : ¬ b < z.1 := fun h ↦ hza (lt_of_le_of_lt hab h)
-    rw [if_neg hza, if_neg hzb, sub_zero,
+    rw [ite_eq_right hza, ite_eq_right hzb, sub_zero,
       Set.indicator_of_notMem (show z.1 ∉ Set.Ioc a b from fun hmem ↦ hza hmem.1), zero_mul]
 
 omit [IsProbabilityMeasure μ] in
@@ -301,12 +301,12 @@ theorem elemIntegrand_eq_sub {a b : ℝ≥0} (hab : a ≤ b) (Z : Ω → ℝ) :
   · by_cases h2 : b < z.1
     · rw [Set.indicator_of_notMem
         (show z.1 ∉ Set.Ioc a b from fun hm ↦ absurd hm.2 (not_le.mpr h2)), zero_mul,
-        if_pos h1, if_pos h2, sub_self]
+        ite_eq_left h1, ite_eq_left h2, sub_self]
     · rw [Set.indicator_of_mem (show z.1 ∈ Set.Ioc a b from ⟨h1, not_lt.mp h2⟩), one_mul,
-        if_pos h1, if_neg h2, sub_zero]
+        ite_eq_left h1, ite_eq_right h2, sub_zero]
   · have h2 : ¬ b < z.1 := fun h ↦ h1 (lt_of_le_of_lt hab h)
     rw [Set.indicator_of_notMem (show z.1 ∉ Set.Ioc a b from fun hm ↦ h1 hm.1), zero_mul,
-      if_neg h1, if_neg h2, sub_zero]
+      ite_eq_right h1, ite_eq_right h2, sub_zero]
 
 omit [IsProbabilityMeasure μ] in
 /-- The band is predictable. -/
@@ -360,7 +360,7 @@ theorem coeFn_bandLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     {p : ℝ≥0 × ℝ≥0} (hp : p ∈ V.val.value.support) :
     ⇑(bandLp T hBmeas φ V p) =ᵐ[bracketMeasure (μ := μ) T hBmeas φ]
       elemIntegrand p.1 p.2 (V.val.value p) := by
-  rw [bandLp, dif_pos (memLp_elemIntegrand_of_mem_support T hBmeas φ V hp)]
+  rw [bandLp, dite_eq_left (memLp_elemIntegrand_of_mem_support T hBmeas φ V hp)]
   exact MemLp.coeFn_toLp _
 
 /-- **A simple process is the sum of its bands**, in `L²(⟨M⟩)`. This is what lets the
@@ -431,7 +431,7 @@ theorem itoIntegralAgainst_unique (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t
             (simpleAssemblyOfMeasure T hBmeas (bracketMeasure (μ := μ) T hBmeas φ) V)) :
     I = itoIntegralAgainstCLM hB T hBmeas φ := by
   -- instance search does not unfold `bracketMeasure`, so hand it the unfolded form
-  haveI : IsFiniteMeasure (sqWeight (trimMeasure_T (μ := μ) T hBmeas) (⇑φ)) :=
+  have : IsFiniteMeasure (sqWeight (trimMeasure_T (μ := μ) T hBmeas) (⇑φ)) :=
     instIsFiniteMeasureBracketMeasure (μ := μ) T hBmeas φ
   refine ContinuousLinearMap.ext fun ψ ↦ ?_
   exact congrFun (DenseRange.equalizer

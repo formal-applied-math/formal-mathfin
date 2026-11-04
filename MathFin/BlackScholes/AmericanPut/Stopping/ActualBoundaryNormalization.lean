@@ -58,7 +58,7 @@ theorem brownianUsualExerciseBoundary_normalization {K r q σ : ℝ}
     rw [mul_comm K]
   let μ := completedMeasure gaussianLimit
   have hz : ∀ᵐ ω ∂μ, brownian 0 ω = 0 := isBrownianReal_brownian.eval_zero_ae_eq_zero
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   change exerciseThreshold μ brownianUsualFiltration brownian K r q σ τ.toNNReal = B
   have hmem : B ∈ exerciseSet μ brownianUsualFiltration brownian K r q σ τ.toNNReal := by
     refine ⟨hBpos.le,hBK,?_⟩

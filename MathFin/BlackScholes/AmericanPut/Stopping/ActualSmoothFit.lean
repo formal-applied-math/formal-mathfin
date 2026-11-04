@@ -32,7 +32,7 @@ theorem canonicalPrice_slope_le_contactSlope {k h : ℝ} (hk : 0 ≤ k)
     slope (fun y => canonicalPrice k h y (T : ℝ)) b x ≤
       ∫ ω, actualContactSlope (h := h) hk b x T ω ∂completedMeasure gaussianLimit := by
   let μ := completedMeasure gaussianLimit
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   let θ := brownianUsualActualContactRule (h := h) hk x T
   have hθ : Measurable (brownianUsualActualContactTime (h := h) hk x T) := θ.measurable_time
   have hxI := canonicalReward_integrable (h := h) brownian_completed_measurable μ hk x hθ

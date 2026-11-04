@@ -76,15 +76,15 @@ def InMDA (F H : ℝ → ℝ) : Prop :=
 
 /-- The Gumbel case of the GEV. -/
 lemma gevCDF_zero (x : ℝ) : gevCDF 0 x = exp (-exp (-x)) :=
-  if_pos rfl
+  ite_eq_left rfl
 
 lemma gevCDF_of_pos {ξ x : ℝ} (hξ : ξ ≠ 0) (hx : 0 < 1 + ξ * x) :
     gevCDF ξ x = exp (-(1 + ξ * x) ^ (-1 / ξ)) := by
-  rw [gevCDF, if_neg hξ, if_pos hx]
+  rw [gevCDF, ite_eq_right hξ, ite_eq_left hx]
 
 lemma gevCDF_of_nonpos {ξ x : ℝ} (hξ : ξ ≠ 0) (hx : 1 + ξ * x ≤ 0) :
     gevCDF ξ x = if 0 < ξ then 0 else 1 := by
-  rw [gevCDF, if_neg hξ, if_neg hx.not_gt]
+  rw [gevCDF, ite_eq_right hξ, ite_eq_right hx.not_gt]
 
 /-! ### The Poisson approximation -/
 
@@ -164,7 +164,7 @@ lemma gevNormScale_pos (ξ : ℝ) (n : ℕ) : 0 < gevNormScale ξ n :=
 `1 + ξ (cₙ x + dₙ) = cₙ (1 + ξ x)`. -/
 lemma one_add_mul_gevNorm {ξ : ℝ} (hξ : ξ ≠ 0) (n : ℕ) (x : ℝ) :
     1 + ξ * (gevNormScale ξ n * x + gevNormLoc ξ n) = gevNormScale ξ n * (1 + ξ * x) := by
-  rw [gevNormLoc, if_neg hξ]
+  rw [gevNormLoc, ite_eq_right hξ]
   field_simp
   ring
 
@@ -178,7 +178,7 @@ theorem gevCDF_max_stable (ξ x : ℝ) {n : ℕ} (hn : n ≠ 0) :
   have hn0 : (n : ℝ) ≠ 0 := hnpos.ne'
   by_cases hξ : ξ = 0
   · subst hξ
-    rw [gevNormLoc, if_pos rfl, gevNormScale, rpow_zero, one_mul, gevCDF_zero, gevCDF_zero,
+    rw [gevNormLoc, ite_eq_left rfl, gevNormScale, rpow_zero, one_mul, gevCDF_zero, gevCDF_zero,
       ← exp_nat_mul, neg_add, exp_add, exp_neg (log n), exp_log hnpos]
     congr 1
     field_simp
@@ -223,7 +223,7 @@ theorem tendsto_cdf_expMeasure_pow_gumbel {r : ℝ} (hr : 0 < r) (x : ℝ) :
   have hr0 : r ≠ 0 := hr.ne'
   have hlog' : 0 ≤ x + log n := by simp only [Function.comp_apply] at hlog; linarith
   have harg : r⁻¹ * x + log n / r = (x + log n) / r := by field_simp
-  rw [harg, cdf_expMeasure_eq hr, if_pos (div_nonneg hlog' hr.le),
+  rw [harg, cdf_expMeasure_eq hr, ite_eq_left (div_nonneg hlog' hr.le),
     show r * ((x + log n) / r) = x + log n by field_simp, neg_add, exp_add, exp_neg (log n),
     exp_log hnpos]
   field_simp

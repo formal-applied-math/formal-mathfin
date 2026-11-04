@@ -96,7 +96,7 @@ private lemma condExp_exp_adapted_freeze_setIntegral
     rw [hval, Real.norm_eq_abs, abs_mul, abs_of_nonneg (Real.exp_nonneg _)]
     by_cases hω : ω ∈ A
     · rw [Set.indicator_of_mem hω]; simp only [abs_one, one_mul]; exact hbound ω
-    · rw [Set.indicator_apply, if_neg hω, abs_zero, zero_mul]; positivity
+    · rw [Set.indicator_apply, ite_eq_right hω, abs_zero, zero_mul]; positivity
   have hFcomp_int : Integrable (fun ω ↦ F (Y ω, Δ ω)) P :=
     Integrable.mono' hbnd_int (hF_meas.comp (hY_meas.prodMk hΔ_meas)).aestronglyMeasurable
       (Filter.Eventually.of_forall hFcomp_le)

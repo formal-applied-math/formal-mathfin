@@ -100,7 +100,7 @@ theorem tendsto_simpleAssemblyOfMeasure_stepσ :
         {z : ℝ≥0 × Ω | z.1 ∈ Set.Ioc 0 T → Tendsto (fun n ↦ Function.uncurry
           ⇑(stepσ hBmeas (fun t ↦ hw_pred.stronglyAdapted t) hw_bdd T n).val z) atTop
             (𝓝 (Function.uncurry w z))} := by
-      letI : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
+      let : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
       have h1 : MeasurableSet {z : ℝ≥0 × Ω | z.1 ∈ Set.Ioc 0 T} := by
         convert measurableSet_predictable_Ioc_prod (𝓕 := natFiltration hBmeas) 0 T
           MeasurableSet.univ using 1

@@ -196,11 +196,11 @@ lemma flips_preimage_singleton (n : ℕ) (x : Fin (n + 1) → Bool) :
     Set.mem_ofPred_eq]
   constructor
   · intro h k hk
-    rw [dif_pos (Nat.lt_succ_of_le hk)]
+    rw [dite_eq_left (Nat.lt_succ_of_le hk)]
     exact h ⟨k, Nat.lt_succ_of_le hk⟩
   · intro h i
     have hi := h i (Nat.le_of_lt_succ i.isLt)
-    rwa [dif_pos i.isLt] at hi
+    rwa [dite_eq_left i.isLt] at hi
 
 /-- The probability that the first `N` flips are `x` is `∏ᵢ Bernoulli(q)(xᵢ)`. -/
 theorem coinFlipMeasure_flips_preimage (q : ℝ≥0) (hq : q ≤ 1) (N : ℕ) (x : Fin N → Bool) :

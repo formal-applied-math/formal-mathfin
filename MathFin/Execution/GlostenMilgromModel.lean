@@ -152,7 +152,7 @@ theorem spread_pos_witness {θ p VL VH : ℝ}
     0 < (∫ ω, payoff gmHigh VL VH ω ∂((gmMeasure θ p)[|gmBuy]))
       - (∫ ω, payoff gmHigh VL VH ω ∂((gmMeasure θ p)[|gmBuyᶜ])) := by
   have hnn := gmWeight_nonneg hθ0.le hθ1.le hp0.le hp1
-  haveI := gmMeasure_isProbabilityMeasure hnn
+  have := gmMeasure_isProbabilityMeasure hnn
   exact spread_pos_of_model (gmMeasure θ p) gmHigh gmBuy gmInformed
     MeasurableSet.of_discrete MeasurableSet.of_discrete MeasurableSet.of_discrete
     hθ0 hθ1 hp0 hV (gmMeasure_high_eq hnn) gm_buy_inter_inf

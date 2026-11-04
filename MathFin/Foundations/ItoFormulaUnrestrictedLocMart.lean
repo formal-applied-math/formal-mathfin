@@ -81,7 +81,7 @@ lemma driftPrimitive_stronglyMeasurable (hBmeas : ∀ t, Measurable (B t))
         (continuous_const.mul (hf_xx_cont.comp (NNReal.continuous_coe.prodMk (hBcont ω))))
     exact hdrift.comp (continuous_id.min continuous_const)
   -- now switch to `𝓕_t` as the ambient σ-algebra for the joint-measurability + integral lemmas
-  letI : MeasurableSpace Ω := natFiltration hBmeas t
+  let : MeasurableSpace Ω := natFiltration hBmeas t
   -- the uncurried clamped integrand is jointly strongly measurable (Carathéodory + swap +
   -- indicator)
   have huncurry : StronglyMeasurable

@@ -28,13 +28,13 @@ variable {Ω : Type*} {n : ℕ} {rates : Fin n → ℝ} {τ : Fin n → Ω → �
 /-- Survival function of `expMeasure r` for `t ≥ 0`. -/
 private lemma expMeasure_Ioi (r : ℝ) (hr : 0 < r) {t : ℝ} (ht : 0 ≤ t) :
     expMeasure r (Set.Ioi t) = ENNReal.ofReal (Real.exp (-(r * t))) := by
-  haveI : IsProbabilityMeasure (expMeasure r) := isProbabilityMeasure_expMeasure hr
+  have : IsProbabilityMeasure (expMeasure r) := isProbabilityMeasure_expMeasure hr
   have h_compl : expMeasure r (Set.Ioi t) = 1 - expMeasure r (Set.Iic t) := by
     have h_eq : (Set.Ioi t : Set ℝ) = (Set.Iic t)ᶜ := Set.compl_Iic.symm
     rw [h_eq, measure_compl measurableSet_Iic (measure_ne_top _ _), measure_univ]
   have h_iic : expMeasure r (Set.Iic t) = ENNReal.ofReal (cdf (expMeasure r) t) :=
     (ProbabilityTheory.ofReal_cdf (expMeasure r) t).symm
-  rw [h_compl, h_iic, cdf_expMeasure_eq hr t, if_pos ht]
+  rw [h_compl, h_iic, cdf_expMeasure_eq hr t, ite_eq_left ht]
   have hexp_le : Real.exp (-(r * t)) ≤ 1 := by
     apply Real.exp_le_one_iff.mpr
     have := mul_nonneg hr.le ht

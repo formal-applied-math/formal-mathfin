@@ -185,7 +185,7 @@ include hB
 part being `L²` (`memLp_increment_sq_centered_two`) over a probability space. -/
 theorem integrable_increment_sq (t₀ t₁ : ℝ≥0) :
     Integrable (fun ω ↦ (B t₁ ω - B t₀ ω) ^ 2) μ := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have h := (memLp_increment_sq_centered_two (B := B) (μ := μ) hB t₀ t₁
       ((t₁ : ℝ) - t₀)).integrable one_le_two
   refine (h.add (integrable_const ((t₁ : ℝ) - t₀))).congr
@@ -212,7 +212,7 @@ theorem memLp_discreteTaylorRemainder2D_two
     (hbd_tt : ∀ t x, |f_tt t x| ≤ Ctt) (hbd_tx : ∀ t x, |f_tx t x| ≤ Ctx)
     (hbd_xxx : ∀ t x, |f_xxx t x| ≤ Cxxx) (t₀ t₁ : ℝ≥0) :
     MemLp (fun ω ↦ discreteTaylorRemainder2D f f_t f_x f_xx t₀ t₁ (B t₀ ω) (B t₁ ω)) 2 μ := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   -- section measurability (each section is differentiable, hence continuous)
   have hfm : ∀ c : ℝ, Measurable (f c) := fun c ↦
     (continuous_iff_continuousAt.mpr fun x ↦ (hf_x c x).continuousAt).measurable
@@ -263,7 +263,7 @@ theorem tendsto_ito_remainder_td
         discreteTaylorRemainder2D f f_t f_x f_xx
           (unifPart T n k) (unifPart T n (k + 1))
           (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2 ∂μ) atTop (𝓝 0) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hmono : ∀ n, Monotone (unifPart T n) := unifPart_mono T
   -- integrability of the dominator, hence of the squared remainder (per-step `L²`)
   have hdom_int : ∀ n k, Integrable (fun ω ↦

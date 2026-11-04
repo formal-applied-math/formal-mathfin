@@ -224,7 +224,7 @@ lemma setOf_filter_eq (Y : ℕ → Ω → α) (A : Set α) {n : ℕ} {S : Finset
     · intro hiS
       have hi := mem_range.1 (hS hiS)
       have hi' := h i hi
-      rw [if_pos hiS] at hi'
+      rw [ite_eq_left hiS] at hi'
       exact ⟨hi, hi'⟩
 
 open scoped Classical in

@@ -244,7 +244,7 @@ theorem Btheta_map_eq_gaussianReal
     (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))).map
         (fun ω ↦ X t ω + θ * (t : ℝ))
       = gaussianReal 0 t := by
-  haveI : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
+  have : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
       (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) :=
     girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
   exact map_eq_gaussianReal_of_expMartingale (isExpQMartingale_Btheta (X := X) (𝓕 := 𝓕) θ T) htT
@@ -260,7 +260,7 @@ theorem Btheta_increment_map_eq_gaussianReal
     (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))).map
         (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
       = gaussianReal 0 (t - s) := by
-  haveI : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
+  have : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
       (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) :=
     girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
   exact increment_map_eq_gaussianReal_of_expMartingale
@@ -284,7 +284,7 @@ theorem Btheta_isQBrownianMotion
     IsBrownianOn (P.withDensity fun ω ↦
       ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) T
       fun t ω ↦ X t ω + θ * (t : ℝ) := by
-  haveI : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
+  have : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
       (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) :=
     girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
   exact isQBrownianMotion_of_expMartingale (isExpQMartingale_Btheta (X := X) (𝓕 := 𝓕) θ T)

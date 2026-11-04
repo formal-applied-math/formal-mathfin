@@ -46,7 +46,7 @@ private lemma integral_rectTerm_mul_band (t : ℝ≥0) (hBmeas : ∀ u, Measurab
         rectTerm hBmeas V p z * rectTerm hBmeas V q z ∂(timeMeasure.prod μ)
       = (∫ ω, V.value p ω * V.value q ω ∂μ)
           * max 0 ((min (min (p.2 : ℝ) q.2) (t : ℝ)) - (max (p.1 : ℝ) q.1)) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hfun : (fun z : ℝ≥0 × Ω ↦ rectTerm hBmeas V p z * rectTerm hBmeas V q z)
       = fun z ↦ ((Set.Ioc p.1 p.2).indicator (fun _ ↦ (1 : ℝ)) z.1
                     * (Set.Ioc q.1 q.2).indicator (fun _ ↦ (1 : ℝ)) z.1)
@@ -148,7 +148,7 @@ private lemma band_integral_uncurry_sq {t T : ℝ≥0} (htT : t ≤ T)
       = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
           (∫ ω, V.value p ω * V.value q ω ∂μ)
             * max 0 ((min (min (p.2 : ℝ) q.2) (t : ℝ)) - max (p.1 : ℝ) q.1) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   -- (A) collapse band+trim to the horizon-`t` measure, then drop the trim.
   rw [trimMeasure_T_restrict_band htT]
   simp only [pow_two]

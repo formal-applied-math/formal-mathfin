@@ -46,7 +46,7 @@ lemma drift_norm_le_iSup_Iic (hBmeas : ∀ t, Measurable (B t))
     (continuous_abs.comp (driftSimpleProcess_continuous hBmeas W ω)).comp continuous_subtype_val
   have hIic : (Set.Iic T : Set ℝ≥0) = Set.Icc 0 T := by
     ext x; simp only [Set.mem_Iic, Set.mem_Icc, zero_le, true_and]
-  haveI : CompactSpace (Set.Iic T) := isCompact_iff_compactSpace.mp (hIic ▸ isCompact_Icc)
+  have : CompactSpace (Set.Iic T) := isCompact_iff_compactSpace.mp (hIic ▸ isCompact_Icc)
   exact le_ciSup (isCompact_range hcont).bddAbove ⟨i, hi⟩
 
 /-! ## Layer 1 — the drift maximal estimate (direct Chebyshev) and Borel–Cantelli -/
@@ -98,7 +98,7 @@ lemma drift_iSup_sq_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (W : SimpleProcess ℝ (natFiltration hBmeas)) (ω : Ω) :
     (⨆ i : Set.Iic T, |driftSimpleProcess hBmeas W (i : ℝ≥0) ω|) ^ 2
       ≤ (T : ℝ) * ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑W s ω) ^ 2 ∂timeMeasure := by
-  haveI : Nonempty (Set.Iic T) := ⟨⟨0, by simp⟩⟩
+  have : Nonempty (Set.Iic T) := ⟨⟨0, by simp⟩⟩
   set R := (T : ℝ) * ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑W s ω) ^ 2 ∂timeMeasure
   have hR0 : 0 ≤ R := mul_nonneg T.coe_nonneg (integral_nonneg fun s ↦ sq_nonneg _)
   have hbound : (⨆ i : Set.Iic T, |driftSimpleProcess hBmeas W (i : ℝ≥0) ω|) ≤ Real.sqrt R :=
@@ -292,7 +292,7 @@ theorem driftProcessAssembled_coeFn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
       (fun n ↦ Function.uncurry (driftSimpleProcess hBmeas (V n).val) z) atTop
       (𝓝 (Function.uncurry (driftContinuousMod T hBmeas g) z))} with hC
   have hCpred : MeasurableSet[(natFiltration hBmeas).predictable] C := by
-    letI : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration hBmeas).predictable
+    let : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration hBmeas).predictable
     exact measurableSet_tendsto_fun (fun n ↦ (hGpred n).measurable) hHpred.measurable
   -- C is prod-conull, built from the per-slice a.e. convergence of Layer 2
   have hCprod : ∀ᵐ z ∂((timeMeasure_T T).prod μ), z ∈ C := by
@@ -428,7 +428,7 @@ theorem driftContinuousMod_eq_setIntegral (T : ℝ≥0) (hBmeas : ∀ t, Measura
       = ∫ s in Set.Ioc (0 : ℝ≥0) t, ⇑g (s, ω) ∂timeMeasure := by
   set V := (approxSeq T hBmeas g).choose with hVdef
   have hV := (approxSeq T hBmeas g).choose_spec
-  haveI : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) t)) :=
+  have : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) t)) :=
     ⟨by rw [Measure.restrict_apply_univ, timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
   have hg_prod : MemLp (⇑g) 2 ((timeMeasure_T T).prod μ) :=
     by rw [memLp_iff, ← eLpNorm_trim_ae (natFiltration hBmeas).predictable_le_prod
