@@ -38,8 +38,8 @@ variable {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} [IsFiniteMeasure P]
 
 theorem martingale_smaller_filtration (hFG : 𝓕 ≤ 𝓖) (hX : Martingale X 𝓖 P)
     (hadapt : StronglyAdapted 𝓕 X) : Martingale X 𝓕 P :=
-  martingale_of_setIntegral_eq hadapt hX.integrable
-    (fun _ _ hij _ hs => hX.setIntegral_eq hij (hFG _ _ hs))
+  martingale_iff_setIntegral_eq.2 ⟨hadapt, hX.integrable,
+    fun _ _ hij _ hs => hX.setIntegral_eq hij (hFG _ _ hs)⟩
 
 theorem locally_bounded_localMartingale_is_martingale (hX : IsLocalMartingale X 𝓕 P)
     (hadapt : StronglyAdapted 𝓕 X)
@@ -78,8 +78,7 @@ theorem locally_bounded_localMartingale_is_martingale (hX : IsLocalMartingale X 
     obtain ⟨C,hC⟩ := hbound t
     exact (integrable_const C).mono' ((hadapt t).mono (𝓕.le t)).aestronglyMeasurable
       (Eventually.of_forall (hC t le_rfl))
-  apply martingale_of_setIntegral_eq hadapt hint
-  intro i j hij s hs
+  refine martingale_iff_setIntegral_eq.2 ⟨hadapt, hint, fun i j hij s hs ↦ ?_⟩
   have hconv (t : ℝ≥0) : Tendsto (fun n => ∫ ω in s, Y n t ω ∂P) atTop
       (𝓝 (∫ ω in s, X t ω ∂P)) := by
     obtain ⟨C,hC⟩ := hYbound t

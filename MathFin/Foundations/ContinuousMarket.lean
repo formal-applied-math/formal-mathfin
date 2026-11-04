@@ -102,9 +102,9 @@ theorem martingale_stopped_of_setIntegral_eq {Q : Measure Ω} [IsFiniteMeasure Q
     (hset : ∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T → ∀ ⦃A : Set Ω⦄, MeasurableSet[𝓕 s] A →
       ∫ ω in A, S t ω ∂Q = ∫ ω in A, S s ω ∂Q) :
     Martingale (fun t ↦ S (min t T)) 𝓕 Q := by
-  refine martingale_of_setIntegral_eq
-    (fun s ↦ (hadapt _ (min_le_right _ _)).mono (𝓕.mono (min_le_left _ _)))
-    (fun s ↦ hint _ (min_le_right _ _)) fun s t hst A hA ↦ ?_
+  refine martingale_iff_setIntegral_eq.2
+    ⟨fun s ↦ (hadapt _ (min_le_right _ _)).mono (𝓕.mono (min_le_left _ _)),
+      fun s ↦ hint _ (min_le_right _ _), fun s t hst A hA ↦ ?_⟩
   by_cases hsT : s ≤ T
   · rw [min_eq_left hsT]
     exact (hset (le_min hst hsT) (min_le_right _ _) hA).symm
