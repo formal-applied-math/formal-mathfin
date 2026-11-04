@@ -204,7 +204,7 @@ private lemma measurableSet_band (t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)
   MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := natFiltration hBmeas) 0 t
     MeasurableSet.univ
 
-omit hB in
+omit [IsProbabilityMeasure μ] hB in
 /-- Truncation to the `(0,t]`-band keeps `L²`. -/
 private lemma memLp_truncBand (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
@@ -212,7 +212,7 @@ private lemma memLp_truncBand (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
       (trimMeasure_T (μ := μ) T hBmeas) :=
   (Lp.memLp φ).indicator (measurableSet_band t hBmeas).nullMeasurableSet
 
-omit hB in
+omit [IsProbabilityMeasure μ] hB in
 /-- **Band truncation as a norm-`≤1` CLM** on the predictable `L²` space: pointwise
 indicator multiplication `φ ↦ 𝟙_{(0,t]×Ω} · φ` (on `L²` this is the orthogonal projection
 onto the `(0,t]`-band, but it is formalised here only as a norm-`≤1` CLM — `mkContinuous`

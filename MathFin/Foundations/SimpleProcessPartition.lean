@@ -540,9 +540,10 @@ lemma norm_simpleAssembly_marshalStepSP_sub_le (hBmeas : ∀ t, Measurable (B t)
       = hfV.toLp _ - hg.toLp _ := rfl
   rw [hLHS, hRHS, ← MemLp.toLp_sub hf1 hg, ← MemLp.toLp_sub hfV hg, Lp.norm_toLp, Lp.norm_toLp]
   apply ENNReal.toReal_mono (hfV.sub hg).eLpNorm_ne_top
-  rw [eLpNorm_congr_ae ((uncurry_marshalStepSP_ae_eq_clamp hBmeas T V hle hC hmpN).sub
-    (Filter.EventuallyEq.refl _ (Function.uncurry θ)))]
-  apply eLpNorm_mono_ae
+  have hclamp := (uncurry_marshalStepSP_ae_eq_clamp (μ := μ) hBmeas T V hle hC hmpN).sub
+    (Filter.EventuallyEq.refl _ (Function.uncurry θ))
+  rw [eLpNorm_congr_ae hclamp]
+  refine eLpNorm_mono_ae ((hf1.sub hg).aestronglyMeasurable.congr hclamp) ?_
   filter_upwards with z
   simp only [Pi.sub_apply, Real.norm_eq_abs]
   exact clampM_dist_le (hbdd z.1 z.2)

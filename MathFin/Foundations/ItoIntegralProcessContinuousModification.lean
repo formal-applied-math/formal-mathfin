@@ -105,7 +105,7 @@ theorem itoSimpleProcess_maximal_prob (hBmeas : ∀ t, Measurable (B t))
       ← ENNReal.toReal_ofReal (integral_nonneg fun ω ↦ norm_nonneg _),
       ofReal_integral_norm_eq_lintegral_enorm hfi,
       ← eLpNorm_one_eq_lintegral_enorm hfi.aestronglyMeasurable]
-    exact ENNReal.toReal_mono hf.2.ne (eLpNorm_le_eLpNorm_of_exponent_le (by norm_num))
+    exact ENNReal.toReal_mono hf.eLpNorm_ne_top (eLpNorm_le_eLpNorm_of_exponent_le (by norm_num))
   -- terminal Itô isometry on the simple embedding
   have hterm : ‖itoSimpleProcessLp hB hBmeas V.val T‖ = ‖simpleAssembly_T (μ := μ) T hBmeas V‖ := by
     rw [← itoProcessCLM_simpleAssembly_T hB T T hBmeas V, itoProcessCLM_norm_terminal hB T hBmeas]
