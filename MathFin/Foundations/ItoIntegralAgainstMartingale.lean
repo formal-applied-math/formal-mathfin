@@ -201,12 +201,13 @@ theorem coeFn_bandRestrict (T a b : ℝ≥0) (hab : a ≤ b) (hBmeas : ∀ t, Me
   by_cases hza : a < z.1
   · by_cases hzb : b < z.1
     · rw [if_pos hza, if_pos hzb, sub_self,
-        Set.indicator_of_notMem (fun hmem ↦ absurd hmem.2 (not_le.mpr hzb)), zero_mul]
+        Set.indicator_of_notMem
+          (show z.1 ∉ Set.Ioc a b from fun hmem ↦ absurd hmem.2 (not_le.mpr hzb)), zero_mul]
     · rw [if_pos hza, if_neg hzb, sub_zero,
         Set.indicator_of_mem (by exact ⟨hza, not_lt.mp hzb⟩), one_mul]
   · have hzb : ¬ b < z.1 := fun h ↦ hza (lt_of_le_of_lt hab h)
     rw [if_neg hza, if_neg hzb, sub_zero,
-      Set.indicator_of_notMem (fun hmem ↦ hza hmem.1), zero_mul]
+      Set.indicator_of_notMem (show z.1 ∉ Set.Ioc a b from fun hmem ↦ hza hmem.1), zero_mul]
 
 omit [IsProbabilityMeasure μ] in
 /-- `bandRestrict` vanishes on `[0, a]`, which is the support hypothesis the `𝓕_a`-linearity
@@ -216,7 +217,8 @@ theorem bandRestrict_eq_zero_of_le (T a b : ℝ≥0) (hab : a ≤ b)
     ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), z.1 ≤ a →
       (bandRestrict (μ := μ) T a b hBmeas φ : ℝ≥0 × Ω → ℝ) z = 0 := by
   filter_upwards [coeFn_bandRestrict (μ := μ) T a b hab hBmeas φ] with z hz hza
-  rw [hz, Set.indicator_of_notMem (fun hmem ↦ absurd hmem.1 (not_lt.mpr hza)), zero_mul]
+  rw [hz, Set.indicator_of_notMem
+    (show z.1 ∉ Set.Ioc a b from fun hmem ↦ absurd hmem.1 (not_lt.mpr hza)), zero_mul]
 
 /-- **The band integral**: restricting an integrand to `(a,b]` integrates to the increment,
 
@@ -297,12 +299,14 @@ theorem elemIntegrand_eq_sub {a b : ℝ≥0} (hab : a ≤ b) (Z : Ω → ℝ) :
       = (if a < z.1 then Z z.2 else 0) - (if b < z.1 then Z z.2 else 0)
   by_cases h1 : a < z.1
   · by_cases h2 : b < z.1
-    · rw [Set.indicator_of_notMem (fun hm ↦ absurd hm.2 (not_le.mpr h2)), zero_mul,
+    · rw [Set.indicator_of_notMem
+        (show z.1 ∉ Set.Ioc a b from fun hm ↦ absurd hm.2 (not_le.mpr h2)), zero_mul,
         if_pos h1, if_pos h2, sub_self]
     · rw [Set.indicator_of_mem (show z.1 ∈ Set.Ioc a b from ⟨h1, not_lt.mp h2⟩), one_mul,
         if_pos h1, if_neg h2, sub_zero]
   · have h2 : ¬ b < z.1 := fun h ↦ h1 (lt_of_le_of_lt hab h)
-    rw [Set.indicator_of_notMem (fun hm ↦ h1 hm.1), zero_mul, if_neg h1, if_neg h2, sub_zero]
+    rw [Set.indicator_of_notMem (show z.1 ∉ Set.Ioc a b from fun hm ↦ h1 hm.1), zero_mul,
+      if_neg h1, if_neg h2, sub_zero]
 
 omit [IsProbabilityMeasure μ] in
 /-- The band is predictable. -/
@@ -533,7 +537,8 @@ theorem norm_sq_increment_eq_bracket (T : ℝ≥0) (hBmeas : ∀ t, Measurable (
             Set.indicator_of_mem (show z ∈ Set.Ioc a b ×ˢ (Set.univ : Set Ω) from
               ⟨hmem, Set.mem_univ _⟩)]
         · rw [hz, Set.indicator_of_notMem hmem, zero_mul, enorm_zero, zero_pow two_ne_zero,
-            Set.indicator_of_notMem (fun hprod ↦ hmem hprod.1)]
+            Set.indicator_of_notMem
+              (show z ∉ Set.Ioc a b ×ˢ (Set.univ : Set Ω) from fun hprod ↦ hmem hprod.1)]
     _ = ∫⁻ z in Set.Ioc a b ×ˢ (Set.univ : Set Ω), ‖(φ : ℝ≥0 × Ω → ℝ) z‖ₑ ^ 2
           ∂(trimMeasure_T (μ := μ) T hBmeas) := lintegral_indicator hset _
     _ = (bracketMeasure (μ := μ) T hBmeas φ)

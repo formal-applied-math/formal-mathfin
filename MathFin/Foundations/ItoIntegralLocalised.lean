@@ -106,7 +106,7 @@ noncomputable def pathLevel (T : ℝ≥0) (x : ℝ≥0 → ℝ) : ℕ :=
 /-- A path continuous on `[0, T]` is bounded there by its level (`exists_nat_abs_le_Icc`). -/
 theorem abs_le_pathLevel {T : ℝ≥0} {x : ℝ≥0 → ℝ} (hx : ContinuousOn x (Icc 0 T)) :
     ∀ t ∈ Icc 0 T, |x t| ≤ pathLevel T x :=
-  Nat.sInf_mem (exists_nat_abs_le_Icc hx)
+  Nat.sInf_mem (s := {N : ℕ | ∀ t ∈ Icc 0 T, |x t| ≤ N}) (exists_nat_abs_le_Icc hx)
 
 theorem pathLevel_le {T : ℝ≥0} {x : ℝ≥0 → ℝ} {N : ℕ} (h : ∀ t ∈ Icc 0 T, |x t| ≤ N) :
     pathLevel T x ≤ N :=

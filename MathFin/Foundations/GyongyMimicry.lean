@@ -1324,10 +1324,9 @@ theorem gyongy_mimicry_gated
       hXcont hXrel).hXmeas s
   have hfmeas : Measurable f := h2.continuous.measurable
   -- both law flows are probability flows
-  have hρprob : ∀ s, IsProbabilityMeasure (Measure.map (Y s) ν) := fun s =>
-    ν.isProbabilityMeasure_map (hYmeas s).aemeasurable
+  have hρprob : ∀ s, IsProbabilityMeasure (Measure.map (Y s) ν) := fun _ ↦ inferInstance
   have hηprob : ∀ s, IsProbabilityMeasure (Measure.map (fun ω => X (Real.toNNReal s) ω) μ) :=
-    fun s => μ.isProbabilityMeasure_map (hXm s).aemeasurable
+    fun _ ↦ inferInstance
   -- the Y-side law flow solves the weak forward equation (map form), from `hyflow`
   have hρflow : IsWeakForwardFlow afn bfn (T:ℝ) (fun s => Measure.map (Y s) ν) := by
     refine ⟨hρprob, fun g g' g'' g''' C1 C2 C3 hgd1 hgd2 hgd4 hgb1 hgb2 hgb3 s hs => ?_⟩
