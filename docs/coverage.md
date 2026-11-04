@@ -26,6 +26,30 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Removable singularities in two stochastic-vol smile models (2026-11-01)
+
+Three `full` entries in `benchmarks/black_scholes.json`. Corpus 754 → 757.
+
+- **`mf-sabr-fk-y-beta-one-limit`** (`tendsto_sabrFKY_beta_one`): QuantLib's
+  `SabrFlochKennedyVolatility` (Le Floc'h & Kennedy, SSRN 2467231, 2014) normalizing transform
+  `y(k) = -(F^(1-β) - k^(1-β))/(1-β)` is `0/0` at `β = 1`; it tends to `-log(F/k)` as `β → 1`,
+  `β ≠ 1`, for `F, k > 0`.
+- **`mf-sabr-fk-omega0-nu-zero-limit`** (`tendsto_sabrFKOmega0_nu_zero`, via
+  `tendsto_sabrFKDint_nu_zero` and `sabrFKDint_eq_sabrX` reusing `SABRImpliedVol.lean`'s
+  `sabrX`): the same engine's leading-order vol `ω₀(k) = log(F/k)/Dint(k)` is `∞·0` at `ν = 0`;
+  it tends to `-α log(F/k)/y` as `ν → 0`, `ν ≠ 0`, for `α ≠ 0`, `ρ ≠ 1` and `y = sabrFKY F k β ≠ 0`
+  (the printed closed forms; that they equal the integrals `∫_F^k x^(-β) dx` and `∫_k^F dx/D(x)`
+  is not proved). Neither entry covers the full Le Floc'h-Kennedy expansion (the `ω₀` correction terms, `D(F)`, `D(k)`) or its
+  approximation quality against the true SABR implied volatility.
+- **`mf-heston-small-vol-of-vol-blackscholes-limit`** (`MathFin.Heston.tendsto_hestonProfile_smallVolOfVol_blackScholes`):
+  the Heston transform's Riccati closed forms (`hestonA`, `hestonBv`) carry a `2κθ/ξ²`
+  prefactor that is `∞ · 0` at vol-of-vol `ξ = 0`; the transform tends to the Black-Scholes real
+  moment generating function with total variance `vasicekIntegratedMean v θ κ (T - t)`, for
+  `κ > 0`, `0 < u < 1`, `v, θ ≥ 0`, `t ≤ T`. The limit is at the Riccati-profile level: not the
+  complex characteristic function, and not identified with a Heston process's `E[e^{u log S_T}]`.
+  (That the total variance is the integral of the `ξ = 0` variance path is the library's
+  `HullWhite.integratedMean_const`, not part of the entry.)
+
 ### One route to Merton's formula; one Black–Scholes family (2026-10-30)
 
 Issue #362. Corpus 713 → 711 (`mf-merton-from-general-jump-law` and `mf-merton-model-exists` removed).
@@ -463,7 +487,11 @@ split by area. What each bridge proves, by area:
   `mf-basket-lognormal-moments`); the chooser as an expected payoff (`mf-chooser-price-bs`);
   Heynen–Kat at zero correlation as Black–Scholes times a barrier factor
   (`mf-heynen-kat-independent-bs-factor`, `reduced_core`); the normalised spread is standard normal
-  (`mf-margrabe-normalized-spread-normal`); the GBM log return law (`mf-gbm-log-return-law`).
+  (`mf-margrabe-normalized-spread-normal`); the GBM log return law (`mf-gbm-log-return-law`);
+  the in–out identities of Haug's partial-time-start and Rubinstein–Reiner's binary barrier
+  closed forms, the first reduced to the full-life down-and-out form at `t₁ = T`, the second's
+  vanilla leg identified with the digital call contract's value
+  (`mf-partial-time-barrier-down-add-up`, `mf-binary-barrier-inout-parity`, both `reduced_core`).
   `MargrabeGrounding`'s two existential theorems no longer claim to derive their hypothesis: they
   now exhibit the measure and driver.
 - **Structural** (`black_scholes.json`, `binomial.json`). The American put is at least the
