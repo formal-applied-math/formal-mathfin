@@ -130,6 +130,65 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-11-04 — corpus 756, modules 687 — five contributor PRs, read at the raised merge bar
+
+Scope: Yang Ye's five open PRs (#325 Haug barriers, #423 Vasicek κ → 0, #427 American exercise
+approximations at their degenerate boundary, #428 removable singularities in Heston and SABR, #429
+weak uniqueness for the constant-coefficient forward equation), read by three independent reviewers
+and then by the maintainer. The bar since v1.8.0 is coherence, integration and elegance, not only
+honest prose: a contribution consumes the objects the library already has, connects to them through
+a proved theorem (an instrument with a price is a `Contract` whose `value` is that price), and leaves
+no parallel scaffolding behind. Each PR carried a self-review entry written to clear the cadence
+gate; those are replaced by this one.
+
+### The standing first pass: prose against statement
+
+Every PR had sentences stronger than its Lean, all in the same direction: a transcribed closed form
+described as a price or as "the standard" object. #325: the binary vanilla leg called "a genuine
+price" by a theorem that only multiplied `bboB1_eq_Phi_bsd2` by `e^{−rT}`; "the closed-form instance
+of `knockIn_add_knockOut_eq_vanilla`" for an identity not derived from it; "the standard down-and-out
+closed form" for an expression with no Lean name. #423: the κ → 0 limit's description named the
+driftless model the separate cross-check entry identifies. #427: a hypothesis said to "fail" for puts
+where Lean proves only that the r = 0 equation has no positive root; "divides by zero" and "jointly
+necessary" asserted without proof. #428: integral identities stated for closed forms that never
+mention an integral; a Riccati-profile limit described as the Heston expectation. #429: the same
+hypothesis-difference sentence repeated in six places.
+
+### Upgrades executed
+
+- **#325, integration through the contracts tower.** `value_digitalCall_eq_bboB1`: the Black–Scholes
+  value of `Contracts.digitalCall K T` is the binary parity's vanilla leg `e^{−rT}·B₁`, through
+  `Contracts.BlackScholes.value_digitalCall`; it replaces the restating theorem. `ptDownOutCall`
+  names the full-life down-and-out closed form, so both partial-time theorems state against one
+  object instead of a four-line expression written four times; `e₁`/`e₂` are `bsd1`/`bsd2`. Prose
+  says "counterpart", not "instance", and the README's limitation paragraph shrank to what is proved.
+- The other four PRs get their reviewers' blocking and coherence findings in their own maintainer
+  commits before merge: #428 drops `integral_vasicekDeterministic` and its entry for
+  `HullWhiteCalibration.integratedMean_const`; #427 consumes `continuous_gaussianPDFReal` instead of
+  five inline re-proofs and drops its release-metadata edits; #429 replaces `IsWeakForwardFlow` and
+  the inline `hgate` block of `gyongy_mimicry_gated` by one predicate, so the Gyöngy theorem consumes
+  what the uniqueness theorem is about, and the module is renamed for what it proves.
+
+### Lens gradients
+
+2. Coherence. Exemplar: #428's Heston limit, which writes `hestonA` as an integral through
+   `hasDerivAt_hestonA` and avoids the 2κθ/ξ² cancellation entirely. Next: the reflection factor
+   `(H/S)^{2μ}` is defined twice (`bboHS2mu`, `ptHSmu`) and once more implicitly in Heynen–Kat.
+4. Architecture. Exemplar after the rework: Gyöngy consuming the weak-forward predicate. Next: a
+   non-vacuity witness — the Gaussian flow `s ↦ N(bs, vs)` satisfies the predicate — which is the
+   bridge from the Itô side.
+8. Beauty. Exemplar: #423's `abs_vasicekBondV_sub_le`. Next: #429's cos/sin Volterra pair is the real
+   and imaginary part of one complex linear ODE; solving it identifies the flow, `ρ_s = ρ_0 ∗ N(bs, vs)`,
+   a stronger theorem with a shorter proof.
+
+### Ranked backlog
+
+1. The barriers as contracts: a payoff on a path event, so the transcribed knock-out closed forms can
+   be stated as values once the reflection principle is derived rather than assumed.
+2. #429's flow identification through one complex ODE (lens 8 above).
+3. One reflection factor `(H/S)^{2μ}` for the binary, partial-time and Heynen–Kat barriers.
+4. #423's two squeeze scaffolds as one lemma ("`|f κ − L| ≤ C|κ|` near 0⁺ gives the limit").
+
 ## 2026-10-31 — corpus 742, modules 678 — elegance: does each headline proof read as its argument
 
 Scope: lens 8 alone, at the maintainer's bar ("mathematical highest quality … and beauty"), over the
