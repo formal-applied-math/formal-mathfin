@@ -463,7 +463,11 @@ split by area. What each bridge proves, by area:
   `mf-basket-lognormal-moments`); the chooser as an expected payoff (`mf-chooser-price-bs`);
   Heynen–Kat at zero correlation as Black–Scholes times a barrier factor
   (`mf-heynen-kat-independent-bs-factor`, `reduced_core`); the normalised spread is standard normal
-  (`mf-margrabe-normalized-spread-normal`); the GBM log return law (`mf-gbm-log-return-law`).
+  (`mf-margrabe-normalized-spread-normal`); the GBM log return law (`mf-gbm-log-return-law`);
+  the in–out identities of Haug's partial-time-start and Rubinstein–Reiner's binary barrier
+  closed forms, the first reduced to the full-life down-and-out form at `t₁ = T`, the second's
+  vanilla leg identified with the digital call contract's value
+  (`mf-partial-time-barrier-down-add-up`, `mf-binary-barrier-inout-parity`, both `reduced_core`).
   `MargrabeGrounding`'s two existential theorems no longer claim to derive their hypothesis: they
   now exhibit the measure and driver.
 - **Structural** (`black_scholes.json`, `binomial.json`). The American put is at least the
