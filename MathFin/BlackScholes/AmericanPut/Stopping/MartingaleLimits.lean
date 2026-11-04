@@ -38,8 +38,7 @@ theorem martingale_of_bounded_limits {X : ℝ≥0 → Ω → ℝ} {Y : ℕ → �
   have hint : ∀ t, Integrable (X t) P := fun t =>
     (integrable_const C).mono' ((hadapt t).mono (𝓕.le t)).aestronglyMeasurable
       (Eventually.of_forall (hXbound t))
-  apply martingale_of_setIntegral_eq hadapt hint
-  intro i j hij s hs
+  refine martingale_iff_setIntegral_eq.2 ⟨hadapt, hint, fun i j hij s hs ↦ ?_⟩
   have hconv (t : ℝ≥0) : Tendsto (fun n => ∫ ω in s, Y n t ω ∂P) atTop
       (𝓝 (∫ ω in s, X t ω ∂P)) :=
     tendsto_integral_of_dominated_convergence (fun _ => C)

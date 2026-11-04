@@ -114,6 +114,7 @@ import MathFin.Foundations.FTAP
 import MathFin.Foundations.OptionalSamplingInequality
 import MathFin.Foundations.LpContinuousMartingaleConvergence
 import MathFin.Foundations.MartingaleSetIntegral
+import MathFin.Foundations.IndepIsometryKernel
 import MathFin.Foundations.MartingaleTransform
 import MathFin.Foundations.DoobLpMaximalInequality
 import MathFin.Foundations.ExtendOfNormIsometry
@@ -308,6 +309,14 @@ import MathFin.Foundations.ItoDriftExpectation
 -- The integrated Itô–drift identity for adapted coefficients along `X_t = c + ∫β + M`,
 -- conditional on a hypothesized adapted, path-continuous version `M` of the Itô integral
 -- (the library does not construct one for general δ)
+import MathFin.Foundations.ItoDriftIncrementEnergy
+import MathFin.Foundations.ItoDriftWeightedIsometry
+import MathFin.Foundations.ItoDriftGapDecay
+import MathFin.Foundations.ItoDriftMomentBounds
+import MathFin.Foundations.ItoDriftMartingaleKill
+import MathFin.Foundations.ItoDriftBlock
+import MathFin.Foundations.ItoDriftQuadraticCorrections
+import MathFin.Foundations.ItoDriftTaylorRemainder
 import MathFin.Foundations.ItoFormulaAdaptedDrift
 -- The companion with no hypothesized M (for B with continuous paths): the same identity for
 -- the constructed process, derived from ito_formula_adapted (centering + Fubini)

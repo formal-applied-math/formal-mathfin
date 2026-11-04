@@ -10,7 +10,7 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.CandidatePDE
 /-!
 # Compact smooth localization of the Brownian-coordinate price
 
-At each continuation point there is a globally C3, compactly supported function
+At each continuation point there is a globally C2, compactly supported function
 agreeing with the actual Brownian-coordinate price on a neighborhood. This
 justifies availability of global smooth test functions without pretending that
 the price is globally C2 across its free boundary. `CompactLocalization`
@@ -30,8 +30,8 @@ open scoped Topology ContDiff
 
 theorem exists_compact_localization {F : ℝ × ℝ → ℝ} {z : ℝ × ℝ}
     (hF : ContDiffAt ℝ ∞ F z) :
-    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 3 G ∧ HasCompactSupport G ∧ G =ᶠ[𝓝 z] F := by
-  obtain ⟨u,hu,hFu⟩ := hF.contDiffOn (m := 3)
+    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 2 G ∧ HasCompactSupport G ∧ G =ᶠ[𝓝 z] F := by
+  obtain ⟨u,hu,hFu⟩ := hF.contDiffOn (m := 2)
     (WithTop.coe_le_coe.mpr le_top) (by norm_num)
   obtain ⟨ε,hε,hball⟩ := Metric.mem_nhds_iff.mp hu
   let χ : ContDiffBump z := {
@@ -61,7 +61,7 @@ theorem brownianPriceKernel_localization {p : ℝ → ℝ → ℝ} {b : ℝ → 
         (Boundary.normalizedRate q σ) p b)
     (hσ : 0 < σ) (ht : t < T)
     (hx : b (σ ^ 2 / 2 * (T - t)) < x₀ + (r - q - σ ^ 2 / 2) * t + σ * w) :
-    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 3 G ∧ HasCompactSupport G ∧
+    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 2 G ∧ HasCompactSupport G ∧
       G =ᶠ[𝓝 (t,w)] (fun z => brownianPriceKernel p K r q σ x₀ T z.1 z.2) :=
   exists_compact_localization (brownianPriceKernel_contDiffAt hp hσ ht hx)
 

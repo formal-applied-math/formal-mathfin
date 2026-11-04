@@ -112,7 +112,7 @@ theorem canonicalPrice_rectangle_meanValue_raw {k h : ℝ} (hk : 0 ≤ k)
 theorem canonicalPrice_rectangle_upper_test {k h : ℝ} (hk : 0 ≤ k)
     {x R : ℝ} {T δ : ℝ≥0} (hδT : δ ≤ T)
     (hrect : InContinuationRectangle k h x T R δ)
-    {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) (hc : HasCompactSupport G)
+    {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G) (hc : HasCompactSupport G)
     (h0 : G (0, 0) = canonicalPrice k h x (T : ℝ))
     (hupper : ∀ᵐ ω ∂gaussianLimit,
       let s := (rawRectangleExitRule k h x R δ).time ω
@@ -130,7 +130,7 @@ theorem canonicalPrice_rectangle_upper_test {k h : ℝ} (hk : 0 ≤ k)
 theorem canonicalPrice_rectangle_lower_test {k h : ℝ} (hk : 0 ≤ k)
     {x R : ℝ} {T δ : ℝ≥0} (hδT : δ ≤ T)
     (hrect : InContinuationRectangle k h x T R δ)
-    {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) (hc : HasCompactSupport G)
+    {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G) (hc : HasCompactSupport G)
     (h0 : G (0, 0) = canonicalPrice k h x (T : ℝ))
     (hlower : ∀ᵐ ω ∂gaussianLimit,
       let s := (rawRectangleExitRule k h x R δ).time ω
@@ -150,7 +150,7 @@ random-exit hypothesis. No smoothness of the price is used. -/
 theorem canonicalPrice_rectangle_upper_test_of_patch {k h : ℝ} (hk : 0 ≤ k)
     {x R : ℝ} (hR : 0 < R) {T δ : ℝ≥0} (hδ : 0 < δ) (hδT : δ ≤ T)
     (hrect : InContinuationRectangle k h x T R δ)
-    {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) (hc : HasCompactSupport G)
+    {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G) (hc : HasCompactSupport G)
     (h0 : G (0, 0) = canonicalPrice k h x (T : ℝ))
     (hpatch : ∀ z ∈ driverRectangle k h R δ, canonicalDiscountedPlane k h x T z ≤ G z) :
     0 ≤ ∫ ω, planeDrift G ((rawRectangleExitRule k h x R δ).time ω) ω ∂gaussianLimit := by
@@ -164,7 +164,7 @@ theorem canonicalPrice_rectangle_upper_test_of_patch {k h : ℝ} (hk : 0 ≤ k)
 theorem canonicalPrice_rectangle_lower_test_of_patch {k h : ℝ} (hk : 0 ≤ k)
     {x R : ℝ} (hR : 0 < R) {T δ : ℝ≥0} (hδ : 0 < δ) (hδT : δ ≤ T)
     (hrect : InContinuationRectangle k h x T R δ)
-    {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G) (hc : HasCompactSupport G)
+    {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G) (hc : HasCompactSupport G)
     (h0 : G (0, 0) = canonicalPrice k h x (T : ℝ))
     (hpatch : ∀ z ∈ driverRectangle k h R δ, G z ≤ canonicalDiscountedPlane k h x T z) :
     (∫ ω, planeDrift G ((rawRectangleExitRule k h x R δ).time ω) ω ∂gaussianLimit) ≤ 0 := by

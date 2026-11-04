@@ -31,7 +31,7 @@ theorem integral_pos_of_ae_pos {Ω : Type*} [MeasurableSpace Ω] {μ : Measure �
   obtain ⟨ω,hpω,hzω⟩ := (hp.and hz).exists
   exact (ne_of_gt hpω) hzω
 
-theorem planeDrift_pos {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
+theorem planeDrift_pos {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G)
     {t : ℝ≥0} (ht : 0 < t) (ω : ℝ≥0 → ℝ)
     (hp : ∀ s ≤ t, 0 < planeGenerator G (s, brownian s ω)) :
     0 < planeDrift G t ω := by
@@ -50,7 +50,7 @@ theorem planeDrift_pos {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
   filter_upwards [ae_restrict_mem measurableSet_Ioc] with s hs
   exact hp s hs.2
 
-theorem planeDrift_neg {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
+theorem planeDrift_neg {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 2 G)
     {t : ℝ≥0} (ht : 0 < t) (ω : ℝ≥0 → ℝ)
     (hp : ∀ s ≤ t, planeGenerator G (s, brownian s ω) < 0) :
     planeDrift G t ω < 0 := by
@@ -74,7 +74,7 @@ theorem planeDrift_neg {G : ℝ × ℝ → ℝ} (hG : ContDiff ℝ 3 G)
 
 theorem expected_rectangle_drift_pos (k h x : ℝ) {R : ℝ} (hR : 0 < R)
     {δ : ℝ≥0} (hδ : 0 < δ) {G : ℝ × ℝ → ℝ}
-    (hG : ContDiff ℝ 3 G) (hc : HasCompactSupport G)
+    (hG : ContDiff ℝ 2 G) (hc : HasCompactSupport G)
     (hp : ∀ z ∈ driverRectangle k h R δ, 0 < planeGenerator G z) :
     0 < ∫ ω, planeDrift G ((rawRectangleExitRule k h x R δ).time ω) ω ∂gaussianLimit := by
   obtain ⟨C,hC⟩ := (planeGenerator_hasCompactSupport hc).exists_bound_of_continuous
@@ -86,7 +86,7 @@ theorem expected_rectangle_drift_pos (k h x : ℝ) {R : ℝ} (hR : 0 < R)
 
 theorem expected_rectangle_drift_neg (k h x : ℝ) {R : ℝ} (hR : 0 < R)
     {δ : ℝ≥0} (hδ : 0 < δ) {G : ℝ × ℝ → ℝ}
-    (hG : ContDiff ℝ 3 G) (hc : HasCompactSupport G)
+    (hG : ContDiff ℝ 2 G) (hc : HasCompactSupport G)
     (hp : ∀ z ∈ driverRectangle k h R δ, planeGenerator G z < 0) :
     (∫ ω, planeDrift G ((rawRectangleExitRule k h x R δ).time ω) ω ∂gaussianLimit) < 0 := by
   obtain ⟨C,hC⟩ := (planeGenerator_hasCompactSupport hc).exists_bound_of_continuous
