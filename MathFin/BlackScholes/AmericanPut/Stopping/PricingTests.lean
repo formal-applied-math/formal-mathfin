@@ -31,8 +31,8 @@ noncomputable def pricingTestKernel (F : ℝ × ℝ → ℝ) (k h x : ℝ) (T : 
     (z : ℝ × ℝ) : ℝ :=
   Real.exp (-k*z.1)*F (x+(k-h-1)*z.1+Real.sqrt 2*z.2,(T : ℝ)-z.1)
 
-theorem pricingTestKernel_contDiff {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 3 F)
-    (k h x : ℝ) (T : ℝ≥0) : ContDiff ℝ 3 (pricingTestKernel F k h x T) := by
+theorem pricingTestKernel_contDiff {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 2 F)
+    (k h x : ℝ) (T : ℝ≥0) : ContDiff ℝ 2 (pricingTestKernel F k h x T) := by
   unfold pricingTestKernel
   fun_prop
 
@@ -42,7 +42,7 @@ theorem pricingTestKernel_eq_brownian (F : ℝ × ℝ → ℝ) (k h x : ℝ) (T 
   funext z
   simp [pricingTestKernel,brownianPriceKernel,Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)]
 
-theorem pricingTestKernel_generator {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 3 F)
+theorem pricingTestKernel_generator {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 2 F)
     (k h x : ℝ) (T : ℝ≥0) :
     planeGenerator (pricingTestKernel F k h x T) (0,0) =
       deriv (deriv (fun y => F (y,(T : ℝ)))) x +
@@ -61,7 +61,7 @@ theorem pricingTestKernel_generator {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 
 
 theorem canonicalPrice_upper_pricing_test {k h x : ℝ} (hk : 0 ≤ k) {T : ℝ≥0}
     (hp : (x, (T : ℝ)) ∈ canonicalContinuationRegion k h)
-    {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 3 F)
+    {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 2 F)
     (h0 : F (x, (T : ℝ)) = canonicalPrice k h x (T : ℝ))
     (htouch : ∀ᶠ z in 𝓝 (x, (T : ℝ)), canonicalPrice k h z.1 z.2 ≤ F z) :
     deriv (fun t => F (x,t)) (T : ℝ) ≤
@@ -85,7 +85,7 @@ theorem canonicalPrice_upper_pricing_test {k h x : ℝ} (hk : 0 ≤ k) {T : ℝ�
 
 theorem canonicalPrice_lower_pricing_test {k h x : ℝ} (hk : 0 ≤ k) {T : ℝ≥0}
     (hp : (x, (T : ℝ)) ∈ canonicalContinuationRegion k h)
-    {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 3 F)
+    {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 2 F)
     (h0 : F (x, (T : ℝ)) = canonicalPrice k h x (T : ℝ))
     (htouch : ∀ᶠ z in 𝓝 (x, (T : ℝ)), F z ≤ canonicalPrice k h z.1 z.2) :
     deriv (deriv (fun y => F (y,(T : ℝ)))) x +

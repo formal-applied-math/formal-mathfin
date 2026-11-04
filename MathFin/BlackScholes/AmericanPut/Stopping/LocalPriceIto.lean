@@ -11,7 +11,7 @@ public import MathFin.BlackScholes.AmericanPut.Boundary.DividendProblem
 /-!
 # Zero-drift smooth Ito localizations of the classical price
 
-Every continuation point admits a compact C3 localization whose Brownian
+Every continuation point admits a compact C2 localization whose Brownian
 generator is zero nearby and whose compensated Brownian evaluation is a
 genuine local martingale. Compact-region assembly and transfer to the raw
 filtration are proved subsequently in `InteriorIto` and `ContactMartingale`.
@@ -33,7 +33,7 @@ theorem brownianPriceKernel_localization_zero_drift {p : ℝ → ℝ → ℝ} {b
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hσ : 0 < σ) (ht : t < T)
     (hx : b (σ ^ 2 / 2 * (T - t)) < x₀ + (r - q - σ ^ 2 / 2) * t + σ * w) :
-    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 3 G ∧ HasCompactSupport G ∧
+    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 2 G ∧ HasCompactSupport G ∧
       G =ᶠ[𝓝 (t,w)] (fun z => brownianPriceKernel p K r q σ x₀ T z.1 z.2) ∧
       ∀ᶠ z in 𝓝 (t,w), planeGenerator G z = 0 := by
   obtain ⟨G,hG,hcompact,heq⟩ := brownianPriceKernel_localization (K := K) hp hσ ht hx
@@ -69,7 +69,7 @@ theorem local_price_ito {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
     (hp : DividendPutSolution (normalizedRate r σ) (normalizedRate q σ) p b)
     (hσ : 0 < σ) (ht : t < T)
     (hx : b (σ ^ 2 / 2 * (T - t)) < x₀ + (r - q - σ ^ 2 / 2) * t + σ * w) :
-    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 3 G ∧ HasCompactSupport G ∧
+    ∃ G : ℝ × ℝ → ℝ, ContDiff ℝ 2 G ∧ HasCompactSupport G ∧
       G =ᶠ[𝓝 (t,w)] (fun z => brownianPriceKernel p K r q σ x₀ T z.1 z.2) ∧
       (∀ᶠ z in 𝓝 (t,w), planeGenerator G z = 0) ∧
       ∃ M : ℝ≥0 → Ω → ℝ, (∀ ω, Continuous (fun s => M s ω)) ∧
