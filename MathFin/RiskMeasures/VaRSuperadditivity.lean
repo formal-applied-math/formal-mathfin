@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import MathFin.RiskMeasures.RiskClosedForms
 public import MathFin.RiskMeasures.GaussianValueAtRisk
+public import MathFin.RiskMeasures.StandardDeviationPrinciple
 
 /-!
 # Value-at-risk is not subadditive
@@ -32,7 +33,7 @@ and one law family in which it is subadditive at the levels used in practice, fo
   VaR is subadditive exactly when `α ≥ 1/2` (`valueAtRisk_add_le_iff_of_hasGaussianLaw`): on a
   Gaussian pair it holds at the levels used in practice, whatever the correlation
   (`valueAtRisk_add_le_of_hasGaussianLaw`, from the subadditivity of the standard deviation,
-  `variance_add_le_sq`), and fails below the median when the correlation is below one.
+  `sqrt_variance_add_le`), and fails below the median when the correlation is below one.
 
 Expected shortfall is subadditive for every pair of integrable losses
 (`RiskMeasures/ExpectedShortfall.lean`); the contrast is the reason the Basel III market-risk
@@ -49,7 +50,6 @@ framework replaced VaR by ES.
 * `cdf_conv_paretoMeasure_half`: the sum of two independent `Pareto(1, 1/2)` losses has CDF
   `1 − 2√(x − 1)/x` on `[2, ∞)`.
 * `valueAtRisk_add_gt_of_paretoHalf`: VaR is superadditive at every level for them.
-* `variance_add_le_sq`: the standard deviation is subadditive, `Var(X + Y) ≤ (sd X + sd Y)²`.
 * `valueAtRisk_add_le_of_hasGaussianLaw`: for a jointly Gaussian pair, VaR is subadditive at every
   level `α ≥ 1/2`, for every correlation.
 * `valueAtRisk_add_le_iff_of_hasGaussianLaw`: for a Gaussian pair with correlation `< 1`,
@@ -377,23 +377,6 @@ end Pareto
 
 section Gaussian
 
-/-- **The standard deviation is subadditive**: `Var(X + Y) ≤ (sd X + sd Y)²` for square-integrable
-`X, Y`, the discriminant of the nonnegative quadratic `t ↦ Var(t X + Y)`. -/
-lemma variance_add_le_sq [IsProbabilityMeasure P] {X Y : Ω → ℝ} (hX : MemLp X 2 P)
-    (hY : MemLp Y 2 P) : Var[X + Y; P] ≤ (√Var[X; P] + √Var[Y; P]) ^ 2 := by
-  have hq (t : ℝ) : 0 ≤ Var[X; P] * (t * t) + (2 * cov[X, Y; P]) * t + Var[Y; P] := by
-    have := variance_nonneg (t • X + Y) P
-    rw [variance_add (hX.const_smul t) hY, variance_smul, covariance_smul_left] at this
-    linarith
-  have hd := discrim_le_zero hq
-  have hc : cov[X, Y; P] ≤ √Var[X; P] * √Var[Y; P] := by
-    rw [← sqrt_mul (variance_nonneg _ _)]
-    refine le_trans (le_abs_self _) ?_
-    rw [← sqrt_sq_eq_abs]
-    exact sqrt_le_sqrt (by unfold discrim at hd; nlinarith)
-  rw [variance_add hX hY, add_sq, sq_sqrt (variance_nonneg _ _), sq_sqrt (variance_nonneg _ _)]
-  linarith
-
 /-- **Gaussian VaR is subadditive at levels above the median**: for a jointly Gaussian pair,
 `VaR_α(X + Y) ≤ VaR_α(X) + VaR_α(Y)` when `α ≥ 1/2`. `VaR = E + sd Φ⁻¹(α)` and the standard
 deviation is subadditive, so no hypothesis on the correlation is needed. -/
@@ -403,10 +386,8 @@ theorem valueAtRisk_add_le_of_hasGaussianLaw {X Y : Ω → ℝ}
   have := h.isProbabilityMeasure
   rw [valueAtRisk_of_hasGaussianLaw h.fun_add hα, valueAtRisk_of_hasGaussianLaw h.fst hα,
     valueAtRisk_of_hasGaussianLaw h.snd hα, integral_add h.fst.integrable h.snd.integrable]
-  have hσ : √Var[fun ω ↦ X ω + Y ω; P] ≤ √Var[X; P] + √Var[Y; P] := by
-    rw [← sqrt_sq (add_nonneg (sqrt_nonneg Var[X; P]) (sqrt_nonneg Var[Y; P]))]
-    exact sqrt_le_sqrt (variance_add_le_sq h.fst.memLp_two h.snd.memLp_two)
-  nlinarith [mul_le_mul_of_nonneg_right hσ ((PhiInv_nonneg_iff hα).2 hα₂)]
+  nlinarith [mul_le_mul_of_nonneg_right (sqrt_variance_add_le h.fst.memLp_two h.snd.memLp_two)
+    ((PhiInv_nonneg_iff hα).2 hα₂)]
 
 /-- **Gaussian VaR is subadditive exactly above the median** (QRM Exercise Book, Exercise 2.22):
 for a jointly Gaussian pair `(X₁, X₂)` with correlation below one
