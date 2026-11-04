@@ -2306,13 +2306,6 @@
       "input_hash": "8f66ab7eaa258f6a83d9d43c4ee1c7d3adc1fd082091ed65b81980b8524c1a9b",
       "verified_at_commit": "7932841"
     },
-    "mf-flow-duality-const": {
-      "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-11-02",
-      "elapsed_s": 4.9,
-      "input_hash": "993cb3e76054b7a211bd078178e54b6b17f11b9d53136e29b73834584ec1d8d9",
-      "verified_at_commit": "7932841"
-    },
     "mf-forward-measure-spot": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-11-02",
@@ -4278,6 +4271,13 @@
       "date": "2026-11-02",
       "elapsed_s": 3.9,
       "input_hash": "3ec7ac40e64b872acc4b1955517cba41b5da4b15785cb29e8ea65a1042e638c1",
+      "verified_at_commit": "7932841"
+    },
+    "mf-weak-forward-uniqueness-const": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-11-02",
+      "elapsed_s": 4.9,
+      "input_hash": "993cb3e76054b7a211bd078178e54b6b17f11b9d53136e29b73834584ec1d8d9",
       "verified_at_commit": "7932841"
     },
     "mf-wiener-conditional-laplace": {

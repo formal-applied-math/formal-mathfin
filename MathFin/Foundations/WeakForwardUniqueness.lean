@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
@@ -10,48 +10,22 @@ public import Mathlib
 /-!
 # Weak uniqueness for the constant-coefficient forward equation
 
-A probability-measure flow `ρ : ℝ → Measure ℝ` satisfying the integrated weak
-forward equation with constant drift `b` and variance `v`,
+`IsWeakForwardFlow afn bfn T ρ` says that a flow of probability measures `ρ : ℝ → Measure ℝ`
+solves, on `[0, T]`, the integrated weak forward equation with coefficient functions `afn`,
+`bfn : ℝ → ℝ → ℝ`: for every test `g` whose first three derivatives are bounded,
 
-`∫ f dρ s = ∫ f dρ 0 + ∫ r in 0..s, (b · ∫ f' dρ r + v/2 · ∫ f'' dρ r) dr`
+`∫ g dρ s = ∫ g dρ 0 + ∫ x in 0..s, (∫ g' · afn x dρ x + ½ ∫ g'' · bfn x dρ x)`,
 
-for every test with three uniformly bounded derivatives (and the test itself
-bounded), is **determined by its initial law**: two such flows with
-`ρ 0 = η 0` coincide at every time in `(0, T]` (`weakForwardUniqueConst`).
+and the generator integrand is interval-integrable (so the interval integral is not a junk
+value). This is the hypothesis that `MathFin.GyongyMimicry.gyongy_mimicry_gated` states for
+the two flows its flow-uniqueness hypothesis `hgate` compares.
 
-The proof pairs each flow against the trigonometric tests `cos(ξ·)`, `sin(ξ·)`
-at a fixed frequency `ξ`. These tests have constant-coefficient derivative
-chains (`cos' = −ξ sin`, `cos'' = −ξ² cos`, and the twin identities for
-`sin`), so the weak forward identity turns the pairing differences
-`U s = ⟨cos(ξ·), ρ s⟩ − ⟨cos(ξ·), η s⟩` and `W s = ⟨sin(ξ·), ρ s⟩ − ⟨sin(ξ·),
-η s⟩` into a linear Volterra system with `U 0 = W 0 = 0`. A direct Lipschitz
-bound (from the pairing identity's bounded integrand) gives continuity of
-`U, W`; the one-sided fundamental theorem of calculus then gives their right
-derivatives on `[0, T)`, bounded in the `ℝ × ℝ` sup-norm by `K * ‖(U, W)‖` for
-a constant `K` depending on `b, v, ξ`; Grönwall's inequality forces `U = W =
-0` on `[0, T]`. Since this holds for every frequency `ξ`, the two flows share
-the same characteristic function at every time, and
-`MeasureTheory.Measure.ext_of_charFun` concludes.
-
-Two differences from the hypothesis shape of `MathFin.GyongyMimicry`'s
-`gyongy_mimicry_gated` (the gated mimicry theorem this module's hypothesis class
-is modeled on, for the constant-coefficient instance wired up downstream in
-`MathFin.GyongyMimicry.hgate_const_of_isWeakForwardFlow`): the test class here
-also bounds the test function itself, which *restricts* the admissible tests
-relative to `gyongy_mimicry_gated`'s `ContDiff ℝ 2 g` (a real restriction, not a
-strengthening — though `cos(ξ·)`/`sin(ξ·)` stay admissible, so the argument below
-is unaffected by it); and the identity hypothesis here directly supplies the
-interval-integrability of the pairing integrand, which `gyongy_mimicry_gated`
-does not require (automatic when the pairing maps are continuous, e.g. for flows
-built from Itô processes, but not derived here from a weaker hypothesis — a real
-strengthening). `MathFin.GyongyMimicry.hgate_const_of_isWeakForwardFlow` wires
-`weakForwardUniqueConst` into `gyongy_mimicry_gated`'s `hgate` for the
-constant-coefficient instance, given `hgate`'s own hypothesis restricted to the
-bounded-test class (the first difference above — a weaker ask of the caller, not
-an extra one) together with the interval-integrability conjunct supplied as an
-explicit hypothesis (the second difference, the one genuine extra obligation);
-deriving that second condition from something weaker (e.g. continuity of the
-pairing integrand) is left to a future module.
+`weakForwardUniqueConst` is the constant-coefficient case (`afn ≡ b`, `bfn ≡ v`): two such
+flows with `ρ 0 = η 0` coincide on `(0, T]`. It is the statement `hgate` asks for, proved
+for constant coefficients. The proof pairs both flows against `cos(ξ·)` and `sin(ξ·)`; the
+pairing differences solve a linear system with zero initial value, which Grönwall's
+inequality forces to vanish, so the flows have equal characteristic functions
+(`MeasureTheory.Measure.ext_of_charFun`).
 -/
 
 @[expose] public section
@@ -60,23 +34,43 @@ namespace MathFin
 
 open MeasureTheory
 
-/-- A probability-measure flow on `[0, T]` satisfying the integrated weak
-forward equation with constant drift `b` and variance `v`, for every test with
-three uniformly bounded derivatives (the test itself bounded too), together
-with the interval-integrability of the pairing integrand. -/
-def IsWeakForwardFlow (b v T : ℝ) (ρ : ℝ → Measure ℝ) : Prop :=
+/-- `ρ` is a flow of probability measures solving, on `[0, T]`, the integrated weak forward
+equation with coefficient functions `afn`, `bfn`, for every test `g` with `HasDerivAt` chain
+`g, g', g'', g'''` and bounded `g', g'', g'''`. The generator integrand is required to be
+interval-integrable, so the interval integral in the identity is a genuine one. -/
+def IsWeakForwardFlow (afn bfn : ℝ → ℝ → ℝ) (T : ℝ) (ρ : ℝ → Measure ℝ) : Prop :=
   (∀ s, IsProbabilityMeasure (ρ s)) ∧
-  ∀ (f f' f'' f''' : ℝ → ℝ) (C0 C1 C2 C3 : ℝ),
-    (∀ x, HasDerivAt f (f' x) x) → (∀ x, HasDerivAt f' (f'' x) x) →
-    (∀ x, HasDerivAt f'' (f''' x) x) →
-    (∀ x, |f x| ≤ C0) → (∀ x, |f' x| ≤ C1) → (∀ x, |f'' x| ≤ C2) →
-    (∀ x, |f''' x| ≤ C3) →
+  ∀ (g g' g'' g''' : ℝ → ℝ) (C1 C2 C3 : ℝ),
+    (∀ x, HasDerivAt g (g' x) x) → (∀ x, HasDerivAt g' (g'' x) x) →
+    (∀ x, HasDerivAt g'' (g''' x) x) →
+    (∀ x, |g' x| ≤ C1) → (∀ x, |g'' x| ≤ C2) → (∀ x, |g''' x| ≤ C3) →
     ∀ s ∈ Set.Ioc 0 T,
-      (∫ y, f y ∂(ρ s) = ∫ y, f y ∂(ρ 0)
-        + ∫ r in (0)..s,
-          (b * ∫ y, f' y ∂(ρ r) + v / 2 * ∫ y, f'' y ∂(ρ r))) ∧
+      (∫ y, g y ∂(ρ s) = ∫ y, g y ∂(ρ 0)
+        + ∫ x in (0)..s,
+          ((∫ y, g' y * afn x y ∂(ρ x)) + 1 / 2 * (∫ y, g'' y * bfn x y ∂(ρ x)))) ∧
       IntervalIntegrable
-        (fun r => b * ∫ y, f' y ∂(ρ r) + v / 2 * ∫ y, f'' y ∂(ρ r)) volume 0 s
+        (fun x => (∫ y, g' y * afn x y ∂(ρ x)) + 1 / 2 * (∫ y, g'' y * bfn x y ∂(ρ x)))
+        volume 0 s
+
+/-- The constant-coefficient identity of `IsWeakForwardFlow`, with the constants pulled out
+of the pairings. -/
+private lemma IsWeakForwardFlow.const_identity {b v T : ℝ} {ρ : ℝ → Measure ℝ}
+    (hρ : IsWeakForwardFlow (fun _ _ ↦ b) (fun _ _ ↦ v) T ρ)
+    {g g' g'' g''' : ℝ → ℝ} {C1 C2 C3 : ℝ}
+    (h1 : ∀ x, HasDerivAt g (g' x) x) (h2 : ∀ x, HasDerivAt g' (g'' x) x)
+    (h3 : ∀ x, HasDerivAt g'' (g''' x) x)
+    (hb1 : ∀ x, |g' x| ≤ C1) (hb2 : ∀ x, |g'' x| ≤ C2) (hb3 : ∀ x, |g''' x| ≤ C3)
+    {s : ℝ} (hs : s ∈ Set.Ioc 0 T) :
+    (∫ y, g y ∂(ρ s) = ∫ y, g y ∂(ρ 0)
+      + ∫ r in (0)..s, (b * ∫ y, g' y ∂(ρ r) + v / 2 * ∫ y, g'' y ∂(ρ r))) ∧
+    IntervalIntegrable
+      (fun r => b * ∫ y, g' y ∂(ρ r) + v / 2 * ∫ y, g'' y ∂(ρ r)) volume 0 s := by
+  have hw : (fun r => (∫ y, g' y * b ∂(ρ r)) + 1 / 2 * (∫ y, g'' y * v ∂(ρ r)))
+      = fun r => b * ∫ y, g' y ∂(ρ r) + v / 2 * ∫ y, g'' y ∂(ρ r) :=
+    funext fun r => by rw [integral_mul_const, integral_mul_const]; ring
+  simpa only [hw] using hρ.2 g g' g'' g''' C1 C2 C3 h1 h2 h3 hb1 hb2 hb3 s hs
+
+private lemma abs_half (v : ℝ) : |v / 2| = |v| / 2 := by rw [abs_div]; norm_num
 
 /-! ### The pairing layer
 
@@ -86,28 +80,28 @@ pairing Lipschitz-continuous in time. -/
 
 /-- The pairing of a bounded function against a probability measure is
 bounded by the sup bound. -/
-lemma abs_pairing_le {μ : Measure ℝ} (hμ : IsProbabilityMeasure μ) {g : ℝ → ℝ} {C : ℝ}
+private lemma abs_pairing_le {μ : Measure ℝ} (hμ : IsProbabilityMeasure μ) {g : ℝ → ℝ} {C : ℝ}
     (hg : ∀ x, |g x| ≤ C) : |∫ y, g y ∂μ| ≤ C := by
   simpa using norm_integral_le_of_norm_le_const (μ := μ) (f := g) (ae_of_all μ hg)
 
 /-- The increment of an admissible pairing over an interval, both endpoints in
 `[0, T]`: the difference of pairings is the oriented integral of the pairing
 integrand. -/
-lemma pairing_increment {b v T : ℝ} {ρ : ℝ → Measure ℝ} (hρ : IsWeakForwardFlow b v T ρ)
-    {g g' g'' g''' : ℝ → ℝ} {C0 C1 C2 C3 : ℝ}
+private lemma pairing_increment {b v T : ℝ} {ρ : ℝ → Measure ℝ}
+    (hρ : IsWeakForwardFlow (fun _ _ ↦ b) (fun _ _ ↦ v) T ρ)
+    {g g' g'' g''' : ℝ → ℝ} {C1 C2 C3 : ℝ}
     (h1 : ∀ x, HasDerivAt g (g' x) x) (h2 : ∀ x, HasDerivAt g' (g'' x) x)
     (h3 : ∀ x, HasDerivAt g'' (g''' x) x)
-    (h0 : ∀ x, |g x| ≤ C0) (hb1 : ∀ x, |g' x| ≤ C1) (hb2 : ∀ x, |g'' x| ≤ C2)
+    (hb1 : ∀ x, |g' x| ≤ C1) (hb2 : ∀ x, |g'' x| ≤ C2)
     (hb3 : ∀ x, |g''' x| ≤ C3)
     {s₀ s : ℝ} (hs₀ : s₀ ∈ Set.Icc 0 T) (hs : s ∈ Set.Icc 0 T) :
     ∫ y, g y ∂(ρ s) - ∫ y, g y ∂(ρ s₀)
       = ∫ r in s₀..s, (b * ∫ y, g' y ∂(ρ r) + v / 2 * ∫ y, g'' y ∂(ρ r)) := by
-  obtain ⟨hprob, hident⟩ := hρ
   set w : ℝ → ℝ := fun r => b * ∫ y, g' y ∂(ρ r) + v / 2 * ∫ y, g'' y ∂(ρ r)
   have ident : ∀ u ∈ Set.Ioc 0 T,
       ∫ y, g y ∂(ρ u) = ∫ y, g y ∂(ρ 0) + ∫ r in (0)..u, w r ∧
       IntervalIntegrable w volume 0 u := fun u hu =>
-    hident g g' g'' g''' C0 C1 C2 C3 h1 h2 h3 h0 hb1 hb2 hb3 u hu
+    hρ.const_identity h1 h2 h3 hb1 hb2 hb3 hu
   have interior : ∀ {u₁ u₂ : ℝ}, 0 < u₁ → 0 < u₂ → u₁ ≤ T → u₂ ≤ T →
       ∫ y, g y ∂(ρ u₂) - ∫ y, g y ∂(ρ u₁) = ∫ r in u₁..u₂, w r := by
     intro u₁ u₂ hu₁ hu₂ hu₁T hu₂T
@@ -143,25 +137,25 @@ lemma pairing_increment {b v T : ℝ} {ρ : ℝ → Measure ℝ} (hρ : IsWeakFo
 /-- The pairing of an admissible test is Lipschitz in time on `[0, T]`: the
 pairing increment is an interval integral of an integrand bounded by
 `|b| * C1 + |v| / 2 * C2` (via `abs_pairing_le` on each of the two pieces). -/
-lemma abs_pairing_lipschitz {b v T : ℝ} {ρ : ℝ → Measure ℝ} (hρ : IsWeakForwardFlow b v T ρ)
-    {g g' g'' g''' : ℝ → ℝ} {C0 C1 C2 C3 : ℝ}
+private lemma abs_pairing_lipschitz {b v T : ℝ} {ρ : ℝ → Measure ℝ}
+    (hρ : IsWeakForwardFlow (fun _ _ ↦ b) (fun _ _ ↦ v) T ρ)
+    {g g' g'' g''' : ℝ → ℝ} {C1 C2 C3 : ℝ}
     (h1 : ∀ x, HasDerivAt g (g' x) x) (h2 : ∀ x, HasDerivAt g' (g'' x) x)
     (h3 : ∀ x, HasDerivAt g'' (g''' x) x)
-    (h0 : ∀ x, |g x| ≤ C0) (hb1 : ∀ x, |g' x| ≤ C1) (hb2 : ∀ x, |g'' x| ≤ C2)
+    (hb1 : ∀ x, |g' x| ≤ C1) (hb2 : ∀ x, |g'' x| ≤ C2)
     (hb3 : ∀ x, |g''' x| ≤ C3)
     {s₀ s : ℝ} (hs₀ : s₀ ∈ Set.Icc 0 T) (hs : s ∈ Set.Icc 0 T) :
     |∫ y, g y ∂(ρ s) - ∫ y, g y ∂(ρ s₀)| ≤ (|b| * C1 + |v| / 2 * C2) * |s - s₀| := by
-  rw [pairing_increment hρ h1 h2 h3 h0 hb1 hb2 hb3 hs₀ hs, ← Real.norm_eq_abs]
+  rw [pairing_increment hρ h1 h2 h3 hb1 hb2 hb3 hs₀ hs, ← Real.norm_eq_abs]
   refine intervalIntegral.norm_integral_le_of_norm_le_const (fun r _ => ?_)
   rw [Real.norm_eq_abs]
   have hb1' : |∫ y, g' y ∂(ρ r)| ≤ C1 := abs_pairing_le (hρ.1 r) hb1
   have hb2' : |∫ y, g'' y ∂(ρ r)| ≤ C2 := abs_pairing_le (hρ.1 r) hb2
-  have hhalf : |v / 2| = |v| / 2 := by rw [abs_div]; norm_num
   calc |b * ∫ y, g' y ∂(ρ r) + v / 2 * ∫ y, g'' y ∂(ρ r)|
       ≤ |b * ∫ y, g' y ∂(ρ r)| + |v / 2 * ∫ y, g'' y ∂(ρ r)| := abs_add_le _ _
     _ = |b| * |∫ y, g' y ∂(ρ r)| + |v / 2| * |∫ y, g'' y ∂(ρ r)| := by rw [abs_mul, abs_mul]
     _ ≤ |b| * C1 + |v| / 2 * C2 := by
-        rw [hhalf]
+        rw [abs_half]
         exact add_le_add (mul_le_mul_of_nonneg_left hb1' (abs_nonneg b))
           (mul_le_mul_of_nonneg_left hb2' (by positivity))
 
@@ -169,17 +163,18 @@ lemma abs_pairing_lipschitz {b v T : ℝ} {ρ : ℝ → Measure ℝ} (hρ : IsWe
 twice the single-flow constant: the shared triangle-inequality step behind both `hUlip` and
 `hWlip` in `pairing_cos_sin_eq`. -/
 private lemma diff_pairing_lipschitz {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
-    (hρ : IsWeakForwardFlow b v T ρ) (hη : IsWeakForwardFlow b v T η)
-    {g g' g'' g''' : ℝ → ℝ} {C0 C1 C2 C3 : ℝ}
+    (hρ : IsWeakForwardFlow (fun _ _ ↦ b) (fun _ _ ↦ v) T ρ)
+    (hη : IsWeakForwardFlow (fun _ _ ↦ b) (fun _ _ ↦ v) T η)
+    {g g' g'' g''' : ℝ → ℝ} {C1 C2 C3 : ℝ}
     (h1 : ∀ x, HasDerivAt g (g' x) x) (h2 : ∀ x, HasDerivAt g' (g'' x) x)
     (h3 : ∀ x, HasDerivAt g'' (g''' x) x)
-    (h0 : ∀ x, |g x| ≤ C0) (hb1 : ∀ x, |g' x| ≤ C1) (hb2 : ∀ x, |g'' x| ≤ C2)
+    (hb1 : ∀ x, |g' x| ≤ C1) (hb2 : ∀ x, |g'' x| ≤ C2)
     (hb3 : ∀ x, |g''' x| ≤ C3)
     {s₀ s : ℝ} (hs₀ : s₀ ∈ Set.Icc (0 : ℝ) T) (hs : s ∈ Set.Icc (0 : ℝ) T) :
     |((∫ y, g y ∂(ρ s)) - ∫ y, g y ∂(η s)) - ((∫ y, g y ∂(ρ s₀)) - ∫ y, g y ∂(η s₀))|
       ≤ 2 * (|b| * C1 + |v| / 2 * C2) * |s - s₀| := by
-  have h1' := abs_pairing_lipschitz hρ h1 h2 h3 h0 hb1 hb2 hb3 hs₀ hs
-  have h2' := abs_pairing_lipschitz hη h1 h2 h3 h0 hb1 hb2 hb3 hs₀ hs
+  have h1' := abs_pairing_lipschitz hρ h1 h2 h3 hb1 hb2 hb3 hs₀ hs
+  have h2' := abs_pairing_lipschitz hη h1 h2 h3 hb1 hb2 hb3 hs₀ hs
   calc |((∫ y, g y ∂(ρ s)) - ∫ y, g y ∂(η s)) - ((∫ y, g y ∂(ρ s₀)) - ∫ y, g y ∂(η s₀))|
       = |((∫ y, g y ∂(ρ s)) - ∫ y, g y ∂(ρ s₀)) - ((∫ y, g y ∂(η s)) - ∫ y, g y ∂(η s₀))| := by
         congr 1; ring
@@ -206,11 +201,10 @@ private lemma abs_genLinComb_le (b v ξ p q : ℝ) :
     |b * ξ * p + v / 2 * ξ ^ 2 * q| ≤ (|b| * |ξ| + |v| / 2 * ξ ^ 2) * max |p| |q| := by
   have hp : |p| ≤ max |p| |q| := le_max_left _ _
   have hq : |q| ≤ max |p| |q| := le_max_right _ _
-  have hhalf : |v / 2| = |v| / 2 := by rw [abs_div]; norm_num
   calc |b * ξ * p + v / 2 * ξ ^ 2 * q|
       ≤ |b * ξ * p| + |v / 2 * ξ ^ 2 * q| := abs_add_le _ _
     _ = |b| * |ξ| * |p| + |v| / 2 * ξ ^ 2 * |q| := by
-        rw [abs_mul, abs_mul, abs_mul, abs_mul, hhalf, abs_of_nonneg (sq_nonneg ξ)]
+        rw [abs_mul, abs_mul, abs_mul, abs_mul, abs_half, abs_of_nonneg (sq_nonneg ξ)]
     _ ≤ |b| * |ξ| * max |p| |q| + |v| / 2 * ξ ^ 2 * max |p| |q| :=
         add_le_add (mul_le_mul_of_nonneg_left hp (by positivity))
           (mul_le_mul_of_nonneg_left hq (by positivity))
@@ -227,41 +221,41 @@ Volterra system in `pairing_cos_sin_eq`. -/
 private lemma hasDerivAt_linMul (ξ x : ℝ) : HasDerivAt (fun y : ℝ => ξ * y) ξ x := by
   simpa using (hasDerivAt_id x).const_mul ξ
 
-lemma hasDerivAt_cosMul (ξ x : ℝ) :
+private lemma hasDerivAt_cosMul (ξ x : ℝ) :
     HasDerivAt (fun x => Real.cos (ξ * x)) (-ξ * Real.sin (ξ * x)) x :=
   ((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_linMul ξ x)).congr_deriv (by ring)
 
-lemma hasDerivAt_negSinMul (ξ x : ℝ) :
+private lemma hasDerivAt_negSinMul (ξ x : ℝ) :
     HasDerivAt (fun x => -ξ * Real.sin (ξ * x)) (-ξ ^ 2 * Real.cos (ξ * x)) x :=
   (((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_linMul ξ x)).const_mul (-ξ)).congr_deriv
     (by ring)
 
-lemma hasDerivAt_negCosSqMul (ξ x : ℝ) :
+private lemma hasDerivAt_negCosSqMul (ξ x : ℝ) :
     HasDerivAt (fun x => -ξ ^ 2 * Real.cos (ξ * x)) (ξ ^ 3 * Real.sin (ξ * x)) x :=
   (((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_linMul ξ x)).const_mul
     (-ξ ^ 2)).congr_deriv (by ring)
 
-lemma hasDerivAt_sinMul (ξ x : ℝ) :
+private lemma hasDerivAt_sinMul (ξ x : ℝ) :
     HasDerivAt (fun x => Real.sin (ξ * x)) (ξ * Real.cos (ξ * x)) x :=
   ((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_linMul ξ x)).congr_deriv (by ring)
 
-lemma hasDerivAt_cosMulScaled (ξ x : ℝ) :
+private lemma hasDerivAt_cosMulScaled (ξ x : ℝ) :
     HasDerivAt (fun x => ξ * Real.cos (ξ * x)) (-ξ ^ 2 * Real.sin (ξ * x)) x :=
   (((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_linMul ξ x)).const_mul ξ).congr_deriv
     (by ring)
 
-lemma hasDerivAt_negSinSqMul (ξ x : ℝ) :
+private lemma hasDerivAt_negSinSqMul (ξ x : ℝ) :
     HasDerivAt (fun x => -ξ ^ 2 * Real.sin (ξ * x)) (-ξ ^ 3 * Real.cos (ξ * x)) x :=
   (((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_linMul ξ x)).const_mul
     (-ξ ^ 2)).congr_deriv (by ring)
 
-/-- The sup bounds for the `cos(ξ·)` derivative chain, bundled: `C0 = 1`, `C1 = |ξ|`,
-`C2 = ξ²`, `C3 = |ξ|³`. -/
+/-- The sup bounds for the `cos(ξ·)` derivative chain, bundled: `C1 = |ξ|`, `C2 = ξ²`,
+`C3 = |ξ|³`. -/
 private lemma abs_cosChain_bounds (ξ : ℝ) :
-    (∀ y : ℝ, |Real.cos (ξ * y)| ≤ 1) ∧ (∀ y : ℝ, |(-ξ) * Real.sin (ξ * y)| ≤ |ξ|) ∧
+    (∀ y : ℝ, |(-ξ) * Real.sin (ξ * y)| ≤ |ξ|) ∧
     (∀ y : ℝ, |(-ξ ^ 2) * Real.cos (ξ * y)| ≤ ξ ^ 2) ∧
     (∀ y : ℝ, |ξ ^ 3 * Real.sin (ξ * y)| ≤ |ξ| ^ 3) := by
-  refine ⟨fun y => Real.abs_cos_le_one _, fun y => ?_, fun y => ?_, fun y => ?_⟩
+  refine ⟨fun y => ?_, fun y => ?_, fun y => ?_⟩
   · rw [abs_mul]; simpa using mul_le_mul_of_nonneg_left (Real.abs_sin_le_one _) (abs_nonneg ξ)
   · rw [abs_mul, abs_neg, abs_of_nonneg (sq_nonneg ξ)]
     exact (mul_le_mul_of_nonneg_left (Real.abs_cos_le_one _) (sq_nonneg ξ)).trans_eq (mul_one _)
@@ -271,10 +265,10 @@ private lemma abs_cosChain_bounds (ξ : ℝ) :
 /-- The sup bounds for the `sin(ξ·)` derivative chain, bundled: same constants as
 `abs_cosChain_bounds`. -/
 private lemma abs_sinChain_bounds (ξ : ℝ) :
-    (∀ y : ℝ, |Real.sin (ξ * y)| ≤ 1) ∧ (∀ y : ℝ, |ξ * Real.cos (ξ * y)| ≤ |ξ|) ∧
+    (∀ y : ℝ, |ξ * Real.cos (ξ * y)| ≤ |ξ|) ∧
     (∀ y : ℝ, |(-ξ ^ 2) * Real.sin (ξ * y)| ≤ ξ ^ 2) ∧
     (∀ y : ℝ, |(-ξ ^ 3) * Real.cos (ξ * y)| ≤ |ξ| ^ 3) := by
-  refine ⟨fun y => Real.abs_sin_le_one _, fun y => ?_, fun y => ?_, fun y => ?_⟩
+  refine ⟨fun y => ?_, fun y => ?_, fun y => ?_⟩
   · rw [abs_mul]; simpa using mul_le_mul_of_nonneg_left (Real.abs_cos_le_one _) (abs_nonneg ξ)
   · rw [abs_mul, abs_neg, abs_of_nonneg (sq_nonneg ξ)]
     exact (mul_le_mul_of_nonneg_left (Real.abs_sin_le_one _) (sq_nonneg ξ)).trans_eq (mul_one _)
@@ -290,26 +284,12 @@ sees the germ of the function within the target set, so continuity on `[0,
 T]` already supplies everything `integral_hasDerivWithinAt_right` needs at
 the one-sided filters `Ici x` / `Ioi x`. -/
 
-private lemma icc_mem_nhdsWithin_Ioi_of_lt {x T : ℝ} (hx0 : 0 ≤ x) (hxT : x < T) :
-    Set.Icc (0 : ℝ) T ∈ nhdsWithin x (Set.Ioi x) := by
-  rw [mem_nhdsWithin]
-  refine ⟨Set.Iio T, isOpen_Iio, hxT, ?_⟩
-  rintro y ⟨hy1, hy2⟩
-  exact ⟨hx0.trans hy2.le, hy1.le⟩
-
-private lemma icc_mem_nhdsWithin_Ici_of_lt {x T : ℝ} (hx0 : 0 ≤ x) (hxT : x < T) :
-    Set.Icc (0 : ℝ) T ∈ nhdsWithin x (Set.Ici x) := by
-  rw [mem_nhdsWithin]
-  refine ⟨Set.Iio T, isOpen_Iio, hxT, ?_⟩
-  rintro y ⟨hy1, hy2⟩
-  exact ⟨hx0.trans hy2, hy1.le⟩
-
-lemma hasDerivWithinAt_Ici_of_continuousOn {h : ℝ → ℝ} {x T : ℝ}
+private lemma hasDerivWithinAt_Ici_of_continuousOn {h : ℝ → ℝ} {x T : ℝ}
     (hcont : ContinuousOn h (Set.Icc 0 T)) (hx0 : 0 ≤ x) (hxT : x < T) :
     HasDerivWithinAt (fun u => ∫ r in (0 : ℝ)..u, h r) (h x) (Set.Ici x) x := by
   have hmemx : x ∈ Set.Icc (0 : ℝ) T := ⟨hx0, hxT.le⟩
   have hmem : Set.Icc (0 : ℝ) T ∈ nhdsWithin x (Set.Ioi x) :=
-    icc_mem_nhdsWithin_Ioi_of_lt hx0 hxT
+    Icc_mem_nhdsGT_of_mem ⟨hx0, hxT⟩
   have hmeas : StronglyMeasurableAtFilter h (nhdsWithin x (Set.Ioi x)) :=
     ⟨Set.Icc 0 T, hmem, hcont.aestronglyMeasurable measurableSet_Icc⟩
   have hb : ContinuousWithinAt h (Set.Ioi x) x := by
@@ -333,24 +313,24 @@ private lemma hasDerivWithinAt_of_volterra_primitive {g h : ℝ → ℝ} {x T : 
   have hderiv0 : HasDerivWithinAt (fun u => ∫ r in (0 : ℝ)..u, h r) (h x) (Set.Ici x) x :=
     hasDerivWithinAt_Ici_of_continuousOn hcont hx0 hxT
   have heq : g =ᶠ[nhdsWithin x (Set.Ici x)] (fun s => g 0 + ∫ r in (0 : ℝ)..s, h r) :=
-    Filter.eventually_of_mem (icc_mem_nhdsWithin_Ici_of_lt hx0 hxT) hprim
+    Filter.eventually_of_mem (Icc_mem_nhdsGE_of_mem ⟨hx0, hxT⟩) hprim
   exact (hderiv0.const_add (g 0)).congr_of_eventuallyEq_of_mem heq (le_refl x)
 
 /-- An admissible pairing is the Volterra primitive of its generator value, once the
 generator is recognized as a named function `h`: the shared `pairing_increment` + generator
 rewrite step behind both `hCprim` and `hSprim` in `hasDerivWithinAt_cosPairing_sinPairing`. -/
 private lemma pairing_volterra_primitive {b v T : ℝ} {μ : ℝ → Measure ℝ}
-    (hμ : IsWeakForwardFlow b v T μ) (hT : 0 < T)
-    {g g' g'' g''' : ℝ → ℝ} {C0 C1 C2 C3 : ℝ}
+    (hμ : IsWeakForwardFlow (fun _ _ ↦ b) (fun _ _ ↦ v) T μ) (hT : 0 < T)
+    {g g' g'' g''' : ℝ → ℝ} {C1 C2 C3 : ℝ}
     (h1 : ∀ x, HasDerivAt g (g' x) x) (h2 : ∀ x, HasDerivAt g' (g'' x) x)
     (h3 : ∀ x, HasDerivAt g'' (g''' x) x)
-    (h0 : ∀ x, |g x| ≤ C0) (hb1 : ∀ x, |g' x| ≤ C1) (hb2 : ∀ x, |g'' x| ≤ C2)
+    (hb1 : ∀ x, |g' x| ≤ C1) (hb2 : ∀ x, |g'' x| ≤ C2)
     (hb3 : ∀ x, |g''' x| ≤ C3) (h : ℝ → ℝ)
     (hheq : ∀ r, h r = b * ∫ y, g' y ∂(μ r) + v / 2 * ∫ y, g'' y ∂(μ r)) :
     ∀ s ∈ Set.Icc (0 : ℝ) T,
       (∫ y, g y ∂(μ s)) = (∫ y, g y ∂(μ 0)) + ∫ r in (0 : ℝ)..s, h r := by
   intro s hs
-  have hinc := pairing_increment hμ h1 h2 h3 h0 hb1 hb2 hb3 (Set.left_mem_Icc.mpr hT.le) hs
+  have hinc := pairing_increment hμ h1 h2 h3 hb1 hb2 hb3 (Set.left_mem_Icc.mpr hT.le) hs
   have hcongr : (∫ r in (0 : ℝ)..s,
       (b * ∫ y, g' y ∂(μ r) + v / 2 * ∫ y, g'' y ∂(μ r))) = ∫ r in (0 : ℝ)..s, h r :=
     intervalIntegral.integral_congr fun r _ => (hheq r).symm
@@ -363,8 +343,9 @@ private lemma pairing_volterra_primitive {b v T : ℝ} {μ : ℝ → Measure ℝ
 the pairings against `cos(ξ·)` and `sin(ξ·)` are right-differentiable on `[0,
 T)`, with derivatives given by the generator applied to the paired
 trigonometric test. -/
-lemma hasDerivWithinAt_cosPairing_sinPairing {b v T : ℝ} {μ : ℝ → Measure ℝ}
-    (hμ : IsWeakForwardFlow b v T μ) (ξ x : ℝ) (hx0 : 0 ≤ x) (hxT : x < T) :
+private lemma hasDerivWithinAt_cosPairing_sinPairing {b v T : ℝ} {μ : ℝ → Measure ℝ}
+    (hμ : IsWeakForwardFlow (fun _ _ ↦ b) (fun _ _ ↦ v) T μ) (ξ x : ℝ) (hx0 : 0 ≤ x)
+    (hxT : x < T) :
     HasDerivWithinAt (fun s => ∫ y, Real.cos (ξ * y) ∂(μ s))
       (-b * ξ * (∫ y, Real.sin (ξ * y) ∂(μ x)) - v / 2 * ξ ^ 2 * (∫ y, Real.cos (ξ * y) ∂(μ x)))
       (Set.Ici x) x ∧
@@ -372,16 +353,16 @@ lemma hasDerivWithinAt_cosPairing_sinPairing {b v T : ℝ} {μ : ℝ → Measure
       (b * ξ * (∫ y, Real.cos (ξ * y) ∂(μ x)) - v / 2 * ξ ^ 2 * (∫ y, Real.sin (ξ * y) ∂(μ x)))
       (Set.Ici x) x := by
   have hT : 0 < T := hx0.trans_lt hxT
-  obtain ⟨hb0, hb1, hb2, hb3⟩ := abs_cosChain_bounds ξ
-  obtain ⟨hb0', hb1', hb2', hb3'⟩ := abs_sinChain_bounds ξ
+  obtain ⟨hb1, hb2, hb3⟩ := abs_cosChain_bounds ξ
+  obtain ⟨hb1', hb2', hb3'⟩ := abs_sinChain_bounds ξ
   have hCcont : ContinuousOn (fun s => ∫ y, Real.cos (ξ * y) ∂(μ s)) (Set.Icc 0 T) :=
     continuousOn_of_lipschitzOn_Icc fun s₀ s hs₀ hs =>
       abs_pairing_lipschitz hμ (hasDerivAt_cosMul ξ) (hasDerivAt_negSinMul ξ)
-        (hasDerivAt_negCosSqMul ξ) hb0 hb1 hb2 hb3 hs₀ hs
+        (hasDerivAt_negCosSqMul ξ) hb1 hb2 hb3 hs₀ hs
   have hScont : ContinuousOn (fun s => ∫ y, Real.sin (ξ * y) ∂(μ s)) (Set.Icc 0 T) :=
     continuousOn_of_lipschitzOn_Icc fun s₀ s hs₀ hs =>
       abs_pairing_lipschitz hμ (hasDerivAt_sinMul ξ) (hasDerivAt_cosMulScaled ξ)
-        (hasDerivAt_negSinSqMul ξ) hb0' hb1' hb2' hb3' hs₀ hs
+        (hasDerivAt_negSinSqMul ξ) hb1' hb2' hb3' hs₀ hs
   set h : ℝ → ℝ := fun r => -b * ξ * (∫ y, Real.sin (ξ * y) ∂(μ r))
       - v / 2 * ξ ^ 2 * (∫ y, Real.cos (ξ * y) ∂(μ r)) with hhdef
   set k : ℝ → ℝ := fun r => b * ξ * (∫ y, Real.cos (ξ * y) ∂(μ r))
@@ -393,12 +374,12 @@ lemma hasDerivWithinAt_cosPairing_sinPairing {b v T : ℝ} {μ : ℝ → Measure
   have hCprim : ∀ s ∈ Set.Icc (0 : ℝ) T,
       (∫ y, Real.cos (ξ * y) ∂(μ s)) = (∫ y, Real.cos (ξ * y) ∂(μ 0)) + ∫ r in (0 : ℝ)..s, h r :=
     pairing_volterra_primitive hμ hT (hasDerivAt_cosMul ξ) (hasDerivAt_negSinMul ξ)
-      (hasDerivAt_negCosSqMul ξ) hb0 hb1 hb2 hb3 h fun r => by
+      (hasDerivAt_negCosSqMul ξ) hb1 hb2 hb3 h fun r => by
         simp only [hhdef, integral_const_mul]; ring
   have hSprim : ∀ s ∈ Set.Icc (0 : ℝ) T,
       (∫ y, Real.sin (ξ * y) ∂(μ s)) = (∫ y, Real.sin (ξ * y) ∂(μ 0)) + ∫ r in (0 : ℝ)..s, k r :=
     pairing_volterra_primitive hμ hT (hasDerivAt_sinMul ξ) (hasDerivAt_cosMulScaled ξ)
-      (hasDerivAt_negSinSqMul ξ) hb0' hb1' hb2' hb3' k fun r => by
+      (hasDerivAt_negSinSqMul ξ) hb1' hb2' hb3' k fun r => by
         simp only [hkdef, integral_const_mul]; ring
   have hCderiv : HasDerivWithinAt (fun s => ∫ y, Real.cos (ξ * y) ∂(μ s)) (h x) (Set.Ici x) x :=
     hasDerivWithinAt_of_volterra_primitive hhcont hx0 hxT hCprim
@@ -412,14 +393,15 @@ differences solve a linear Volterra system; a Lipschitz bound gives their
 continuity, the one-sided FTC gives their right derivatives, and Grönwall's
 inequality (applied to the `ℝ × ℝ`-valued pair, whose sup-norm bounds the
 derivative by `K` times itself) forces both to vanish. -/
-lemma pairing_cos_sin_eq {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
-    (hρ : IsWeakForwardFlow b v T ρ) (hη : IsWeakForwardFlow b v T η)
+private lemma pairing_cos_sin_eq {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
+    (hρ : IsWeakForwardFlow (fun _ _ ↦ b) (fun _ _ ↦ v) T ρ)
+    (hη : IsWeakForwardFlow (fun _ _ ↦ b) (fun _ _ ↦ v) T η)
     (hstart : ρ 0 = η 0) (ξ : ℝ) :
     ∀ s ∈ Set.Icc (0 : ℝ) T,
       (∫ y, Real.cos (ξ * y) ∂(ρ s) = ∫ y, Real.cos (ξ * y) ∂(η s)) ∧
       (∫ y, Real.sin (ξ * y) ∂(ρ s) = ∫ y, Real.sin (ξ * y) ∂(η s)) := by
-  obtain ⟨hb0, hb1, hb2, hb3⟩ := abs_cosChain_bounds ξ
-  obtain ⟨hb0', hb1', hb2', hb3'⟩ := abs_sinChain_bounds ξ
+  obtain ⟨hb1, hb2, hb3⟩ := abs_cosChain_bounds ξ
+  obtain ⟨hb1', hb2', hb3'⟩ := abs_sinChain_bounds ξ
   set K : ℝ := |b| * |ξ| + |v| / 2 * ξ ^ 2 with hKdef
   set U : ℝ → ℝ := fun s => (∫ y, Real.cos (ξ * y) ∂(ρ s)) - ∫ y, Real.cos (ξ * y) ∂(η s)
     with hUdef
@@ -429,13 +411,13 @@ lemma pairing_cos_sin_eq {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
       |U s - U s₀| ≤ 2 * K * |s - s₀| := by
     intro s₀ s hs₀ hs
     have := diff_pairing_lipschitz hρ hη (hasDerivAt_cosMul ξ) (hasDerivAt_negSinMul ξ)
-      (hasDerivAt_negCosSqMul ξ) hb0 hb1 hb2 hb3 hs₀ hs
+      (hasDerivAt_negCosSqMul ξ) hb1 hb2 hb3 hs₀ hs
     simpa only [hUdef, hKdef] using this
   have hWlip : ∀ s₀ s, s₀ ∈ Set.Icc (0 : ℝ) T → s ∈ Set.Icc (0 : ℝ) T →
       |W s - W s₀| ≤ 2 * K * |s - s₀| := by
     intro s₀ s hs₀ hs
     have := diff_pairing_lipschitz hρ hη (hasDerivAt_sinMul ξ) (hasDerivAt_cosMulScaled ξ)
-      (hasDerivAt_negSinSqMul ξ) hb0' hb1' hb2' hb3' hs₀ hs
+      (hasDerivAt_negSinSqMul ξ) hb1' hb2' hb3' hs₀ hs
     simpa only [hWdef, hKdef] using this
   have hUcont : ContinuousOn U (Set.Icc 0 T) := continuousOn_of_lipschitzOn_Icc hUlip
   have hWcont : ContinuousOn W (Set.Icc 0 T) := continuousOn_of_lipschitzOn_Icc hWlip
@@ -508,14 +490,12 @@ private lemma charFun_eq_cos_add_sin_mul_I {μ : Measure ℝ} [IsProbabilityMeas
     ((hint _ (by fun_prop) fun x => Real.abs_sin_le_one (ξ * x)).mul_const Complex.I),
     integral_mul_const, integral_complex_ofReal, integral_complex_ofReal]
 
-/-- Two probability-measure flows obeying the integrated weak forward equation
-with the same constant drift and variance, and sharing an initial law, coincide
-at every time in `(0, T]`: weak uniqueness for the constant-coefficient forward
-equation. The argument pairs both flows against `cos(ξ·)`/`sin(ξ·)` at every
-frequency `ξ` (`pairing_cos_sin_eq`), giving equal characteristic functions, and
-concludes via `MeasureTheory.Measure.ext_of_charFun`. -/
+/-- **Weak uniqueness for the constant-coefficient forward equation.** Two flows solving
+`IsWeakForwardFlow` with the same constant coefficients (`afn ≡ b`, `bfn ≡ v`) and the same
+initial law coincide at every time in `(0, T]`. -/
 theorem weakForwardUniqueConst {ρ η : ℝ → Measure ℝ} {b v T : ℝ}
-    (hρ : IsWeakForwardFlow b v T ρ) (hη : IsWeakForwardFlow b v T η)
+    (hρ : IsWeakForwardFlow (fun _ _ ↦ b) (fun _ _ ↦ v) T ρ)
+    (hη : IsWeakForwardFlow (fun _ _ ↦ b) (fun _ _ ↦ v) T η)
     (hstart : ρ 0 = η 0) :
     ∀ s ∈ Set.Ioc (0 : ℝ) T, ρ s = η s := by
   intro s hs

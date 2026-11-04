@@ -879,4 +879,4 @@ import MathFin.FixedIncome.LoanAmortization
 import MathFin.FixedIncome.KeyRateDuration
 -- Weak uniqueness for the constant-coefficient integrated weak forward equation, via
 -- the characteristic-function/Groenwall method
-import MathFin.Foundations.FlowDuality
+import MathFin.Foundations.WeakForwardUniqueness
