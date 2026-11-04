@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.WienerIntegralL2
+public import MathFin.Foundations.IndepIsometryKernel
 
 /-!
 # The adapted Itô isometry (the increment-independence cornerstone)
@@ -26,7 +27,9 @@ increment `B t - B s` is independent of `𝓕 s`), and "adapted at `t₀`" is Ma
 `IsPreBrownianReal.isFilteredPreBrownian` (`ItoIntegralL2.natFiltration`). The
 Poisson isometry (`PoissonCompensatedIsometryAdapted.lean`) is the same argument against
 `PoissonRandomMeasure.pastFiltration`, with the independent-scattering field
-`indep_of_disjoint_region` in place of `hF.indep`.
+`indep_of_disjoint_region` in place of `hF.indep`. The one-term facts that follow from independence
+(`integral_mul_eq_zero`, `integral_mul_sq`, `memLp_two_mul`) are stated once for both, in
+`IndepIsometryKernel`.
 
 ## Crux results
 
@@ -99,16 +102,11 @@ theorem integral_adapted_mul_increment
     (hF : IsFilteredPreBrownian B 𝓕 μ) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
     {φ : Ω → ℝ} (hφ : Measurable[𝓕 t₀] φ) :
     ∫ ω, φ ω * (B t₁ ω - B t₀ ω) ∂μ = 0 := by
-  have hindep := adapted_indepFun_increment hF ht hφ
-  have hφm : Measurable φ := hφ.mono (𝓕.le t₀) le_rfl
-  have hΔm : Measurable (fun ω ↦ B t₁ ω - B t₀ ω) :=
-    (hF.measurable_eval t₁).sub (hF.measurable_eval t₀)
-  rw [hindep.integral_fun_mul_eq_mul_integral hφm.aestronglyMeasurable
-        hΔm.aestronglyMeasurable]
-  have hmean : ∫ ω, (B t₁ ω - B t₀ ω) ∂μ = 0 := by
-    have h := (hF.hasLaw_sub t₁ t₀).integral_eq
-    rwa [integral_id_gaussianReal] at h
-  rw [hmean, mul_zero]
+  refine (adapted_indepFun_increment hF ht hφ).integral_mul_eq_zero
+    (hφ.mono (𝓕.le t₀) le_rfl).aestronglyMeasurable
+    ((hF.measurable_eval t₁).sub (hF.measurable_eval t₀)).aestronglyMeasurable ?_
+  have h := (hF.hasLaw_sub t₁ t₀).integral_eq
+  rwa [integral_id_gaussianReal] at h
 
 /-- The forward increment has second moment `E[(B_{t₁} - B_{t₀})²] = t₁ - t₀`: the
 diagonal instance of the Wiener-layer increment covariance
@@ -132,16 +130,10 @@ theorem integral_adapted_mul_increment_sq
     (hF : IsFilteredPreBrownian B 𝓕 μ) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
     {χ : Ω → ℝ} (hχ : Measurable[𝓕 t₀] χ) :
     ∫ ω, χ ω * (B t₁ ω - B t₀ ω) ^ 2 ∂μ = (∫ ω, χ ω ∂μ) * ((t₁ : ℝ) - t₀) := by
-  have hχm : Measurable χ := hχ.mono (𝓕.le t₀) le_rfl
-  have hΔm : Measurable (fun ω ↦ B t₁ ω - B t₀ ω) :=
-    (hF.measurable_eval t₁).sub (hF.measurable_eval t₀)
-  have hindep := adapted_indepFun_increment hF ht hχ
-  have hindep2 := hindep.comp (φ := (id : ℝ → ℝ)) (ψ := fun x : ℝ ↦ x ^ 2)
-    measurable_id (by fun_prop)
-  have key := hindep2.integral_fun_mul_eq_mul_integral
-    hχm.aestronglyMeasurable (hΔm.pow_const 2).aestronglyMeasurable
-  simp only [Function.comp_apply, id_eq] at key
-  rw [key, integral_increment_sq hF.toIsPreBrownianReal ht]
+  rw [(adapted_indepFun_increment hF ht hχ).integral_mul_sq
+    (hχ.mono (𝓕.le t₀) le_rfl).aestronglyMeasurable
+    ((hF.measurable_eval t₁).sub (hF.measurable_eval t₀)).aestronglyMeasurable,
+    integral_increment_sq hF.toIsPreBrownianReal ht]
 
 /-- **Isometry kernel** (the diagonal term of the Itô isometry): for `φ`
 adapted to `𝓕_{t₀}`, `E[φ² · (B_{t₁} - B_{t₀})²] = E[φ²] · (t₁ - t₀)`. The
@@ -161,21 +153,8 @@ theorem memLp_adapted_mul_increment
     (hF : IsFilteredPreBrownian B 𝓕 μ) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
     {φ : Ω → ℝ} (hφ : Measurable[𝓕 t₀] φ) (hφL2 : MemLp φ 2 μ) :
     MemLp (fun ω ↦ φ ω * (B t₁ ω - B t₀ ω)) 2 μ := by
-  have hindep := adapted_indepFun_increment hF ht hφ
-  have hφm : Measurable φ := hφ.mono (𝓕.le t₀) le_rfl
-  have hΔm : Measurable (fun ω ↦ B t₁ ω - B t₀ ω) :=
-    (hF.measurable_eval t₁).sub (hF.measurable_eval t₀)
-  have hφsq : Integrable (fun ω ↦ (φ ω) ^ 2) μ := hφL2.integrable_sq
-  have hΔsq : Integrable (fun ω ↦ (B t₁ ω - B t₀ ω) ^ 2) μ :=
-    (hF.isGaussianProcess.hasGaussianLaw_sub.memLp_two).integrable_sq
-  have hindep2 := hindep.comp (φ := fun x : ℝ ↦ x ^ 2) (ψ := fun x : ℝ ↦ x ^ 2)
-    (by fun_prop) (by fun_prop)
-  have hprod : Integrable
-      (fun ω ↦ (φ ω) ^ 2 * (B t₁ ω - B t₀ ω) ^ 2) μ := by
-    have h := hindep2.integrable_mul hφsq hΔsq
-    exact h
-  refine (memLp_two_iff_integrable_sq (hφm.mul hΔm).aestronglyMeasurable).mpr ?_
-  simpa [mul_pow] using hprod
+  (adapted_indepFun_increment hF ht hφ).memLp_two_mul hφL2
+    hF.isGaussianProcess.hasGaussianLaw_sub.memLp_two
 
 /-! ### The discrete Itô isometry over a partition -/
 
