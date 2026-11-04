@@ -114,7 +114,7 @@ theorem planeResidual_stopped_martingale {G : ℝ × ℝ → ℝ} (hG : ContDiff
     apply Eventually.of_forall
     intro ω t
     by_cases hp : 0 < θ.time ω
-    · rw [indicator_of_mem (show ω ∈ {ω | 0 < θ.time ω} from hp)]
+    · exact indicator_of_mem (show ω ∈ {ω | 0 < θ.time ω} from hp) _
     · have hz : θ.time ω = 0 := le_antisymm (le_of_not_gt hp) zero_le
       simp [X,hz,planeResidual_zero]
   apply martingale_smaller_filtration brownianFiltration_le_aug _ hA
