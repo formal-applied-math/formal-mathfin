@@ -2231,10 +2231,10 @@
     },
     "mf-dupire-local-vol": {
       "benchmark_file": "black_scholes.json",
-      "date": "2026-11-02",
-      "elapsed_s": 3.7,
-      "input_hash": "7dd3db90a9858c80fd44a6b411300455c9baef1a1fc3795d448522d2920faae2",
-      "verified_at_commit": "7932841"
+      "date": "2026-11-04",
+      "elapsed_s": 9.0,
+      "input_hash": "ff96a9dd2f961738f96be01598efa71890a37472afa42586314629f02b703d19",
+      "verified_at_commit": "d308864"
     },
     "mf-dupire-tilted-smile-local-skew": {
       "benchmark_file": "black_scholes.json",
@@ -4275,10 +4275,10 @@
     },
     "mf-weak-forward-uniqueness-const": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-11-02",
-      "elapsed_s": 4.9,
-      "input_hash": "993cb3e76054b7a211bd078178e54b6b17f11b9d53136e29b73834584ec1d8d9",
-      "verified_at_commit": "7932841"
+      "date": "2026-11-04",
+      "elapsed_s": 8.2,
+      "input_hash": "362d55a981b79f789435ae4ff6e94d1e3d504c8ff35630e6ccda2fa12b55ee67",
+      "verified_at_commit": "d308864"
     },
     "mf-wiener-conditional-laplace": {
       "benchmark_file": "stochastic_foundations.json",
