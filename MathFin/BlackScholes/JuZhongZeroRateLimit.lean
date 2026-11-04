@@ -33,30 +33,30 @@ from the source equations; `φ = 1` is a call, `φ = −1` a put.
 * `tendsto_juValueRaw_zero_rate` — the headline, **conditional**: if `S*(r) → S*₀ > 0` as
   `r → 0⁺`, `hA(0, S*₀) ≠ 0` and `1 − χ(0, S*₀, S) ≠ 0`, the pre-fix price tends to the
   post-fix value at `r = 0`. The critical price and both nonvanishing conditions are
-  hypotheses; QuantLib checks neither condition.
+  hypotheses.
 * `put_intrinsic_le_parityBound` — the pointwise half of the put exit: under `DR ≥ 1`,
   `DR ≥ DQ`, `0 < S ≤ K`, `K − S ≤ K·DR − S·DQ ≤ bsPDiv`.
 * `bawPut_no_positive_root_zero_rate`, `bawPut_criticalPrice_eq_zero_zero_rate` — at `r = 0`
-  with `q ≥ 0` the BAW put critical-price equation has no positive root: any `S* ≥ 0` solving
-  it must be `S* = 0`, excluding a positive critical price without asserting that `S* = 0`
-  itself solves the equation. Either way the hypothesis `0 < S*₀` of the headline fails: the
-  rewrite alone does not handle these puts, and the early exit is required as well.
+  with `q ≥ 0` the BAW put critical-price equation (as transcribed here) has no root `S > 0`:
+  any `S* ≥ 0` solving it is `S* = 0`. This excludes a positive root of the `r = 0` equation;
+  it does not assert that `S* = 0` solves it, and it does not show that the limit of the
+  critical prices of the `r > 0` problems is such a root (that limit is not studied).
 * `juVE_one`, `juVE_neg_one` — the European leg is `bsVDiv` / `bsPDiv`.
 
 ## Scoped out
 
 * The BAW critical price as a function of `r`: existence, uniqueness and continuity of the
   Newton fixed point are not formalized; `S*` is an input.
-* The put limit `r → 0⁺` when `q ≥ 0`, where `S*(r) → 0` and `hA → 0` (very slowly at `q = 0`):
-  whether the early-exercise premium tends to `0` depends on the decay rate of `S*` and is not
-  addressed.
+* The put limit `r → 0⁺` when `q ≥ 0`: the behaviour of the critical prices `S*(r)` and of
+  `hA` as `r → 0⁺`, and hence of the early-exercise premium, is not addressed.
 * Any accuracy claim for the approximation, the derivation of its trial-solution ODE, and the
   identification of `juVEhRaw` with `∂V_E/∂h`: these are transcribed, not derived.
 * The statement that American and European puts agree when `r ≤ 0` and `r ≤ q` (optional
   stopping).
 * Floating point: QuantLib's `close(DR, 1, 1000)` switch is replaced by the exact branch
   `r = 0`, and nothing is stated about the raw formula *at* `r = 0`, where Lean's `x/0 = 0`
-  makes it a junk value rather than NaN.
+  makes it a junk value rather than NaN (so `juValueRaw_eq_juValue` compares two Lean
+  transcriptions for `r ≠ 0`, not QuantLib's code).
 
 ## References
 
@@ -194,9 +194,7 @@ noncomputable def juValue (φ K q σ T r Sk S : ℝ) : ℝ :=
 
 /-! ### The removable singularity `α/h → 2/(σ²T)` -/
 
-/-- `vasicekBondB κ T → T` as `κ → 0` (two-sided): `B` is the slope of `κ ↦ 1 − e^{−κT}` at
-`0`. Proved locally and privately, rather than imported, so this file has no dependency on
-any other zero-mean-reversion-limit development. -/
+/-- `vasicekBondB κ T → T` as `κ → 0` (two-sided): `B` is the slope of `κ ↦ 1 − e^{−κT}` at `0`. -/
 private lemma tendsto_vasicekBondB_zero (T : ℝ) :
     Tendsto (fun κ ↦ vasicekBondB κ T) (𝓝[≠] 0) (𝓝 T) := by
   have hd : HasDerivAt (fun κ ↦ 1 - Real.exp (-(κ * T))) T 0 := by
@@ -263,7 +261,8 @@ lemma juCRaw_eq (φ K q : ℝ) {σ T r : ℝ} (hσ : σ ≠ 0) (hT : T ≠ 0) (h
 /-- **The fix preserves semantics.** For every `σ ≠ 0`, `T ≠ 0` and `r ≠ 0` the post-fix
 (limit-stable) Ju–Zhong price equals the pre-fix one, identically in `S*` and `S`. Pure
 algebra: `α·(X/hA) = (αX)/hA` holds in Lean even when `hA = 0`, so no hypothesis on `hA` or
-`1 − χ` is needed. -/
+`1 − χ` is needed. This is an identity between the two Lean transcriptions `juValueRaw` and
+`juValue`; it is not tied to an American option price or to QuantLib's code. -/
 theorem juValueRaw_eq_juValue (φ K q : ℝ) {σ T r : ℝ} (hσ : σ ≠ 0) (hT : T ≠ 0) (hr : r ≠ 0)
     (Sk S : ℝ) : juValueRaw φ K q σ T r Sk S = juValue φ K q σ T r Sk S := by
   rw [juValueRaw, juValue, juChiRaw, juChi, juBRaw_eq φ q σ T hr, juCRaw_eq φ K q hσ hT hr,
@@ -288,8 +287,9 @@ side conditions `hA(0, S*₀) ≠ 0` and `1 − χ(0, S*₀, S) ≠ 0` hold, the
 
 The critical price is a black box: its existence, uniqueness and continuity in `r` (the BAW
 Newton fixed point) are hypotheses here, not derived. The two nonvanishing conditions are
-hypotheses as well; QuantLib's `juquadraticengine.cpp` checks neither. For a put with `q ≥ 0`
-the hypothesis `0 < S*₀` fails (`bawPut_no_positive_root_zero_rate`). -/
+hypotheses as well. `bawPut_no_positive_root_zero_rate` excludes a positive root of the `r = 0`
+put critical-price equation for `q ≥ 0`; whether the limit `S*₀` of the critical prices of the
+`r > 0` problems is such a root is not proved here. -/
 theorem tendsto_juValueRaw_zero_rate {φ K q σ T S S₀ : ℝ} {Sk : ℝ → ℝ}
     (hφ : φ = 1 ∨ φ = -1) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (hS : 0 < S)
     (hSk : Tendsto Sk (𝓝[>] 0) (𝓝 S₀)) (hS₀ : 0 < S₀)
@@ -316,8 +316,6 @@ theorem tendsto_juValueRaw_zero_rate {φ K q σ T S S₀ : ℝ} {Sk : ℝ → �
   have hD0 : 2 * juLambda φ q σ T 0 + juBeta q σ 0 - 1 ≠ 0 := by
     rw [two_mul_juLambda_add_juBeta_sub_one]; exact mul_ne_zero hφ0 hroot0.ne'
   have hD := ((hlam.const_mul 2).add hβ).sub_const 1
-  have hpdf : Continuous (gaussianPDFReal 0 1) := by
-    unfold gaussianPDFReal; exact continuous_const.mul (by fun_prop)
   have hd1 : ∀ {s : ℝ → ℝ} {s₀ : ℝ}, Tendsto s L (𝓝 s₀) → 0 < s₀ →
       Tendsto (fun r ↦ bsd1 (s r) K (r - q) σ T) L (𝓝 (bsd1 s₀ K (0 - q) σ T)) := by
     intro s s₀ hs hs₀
@@ -344,7 +342,7 @@ theorem tendsto_juValueRaw_zero_rate {φ K q σ T S S₀ : ℝ} {Sk : ℝ → �
   have hαVEh : Tendsto (fun r ↦ juAlphaVEh φ K q σ T r (Sk r)) L
       (𝓝 (juAlphaVEh φ K q σ T 0 S₀)) := by
     simp only [juAlphaVEh]
-    exact (((hF.mul ((hpdf.tendsto _).comp (hd1 hSk hS₀))).div_const _).add
+    exact (((hF.mul (((continuous_gaussianPDFReal 0 1).tendsto _).comp (hd1 hSk hS₀))).div_const _).add
       ((((hF.const_mul (2 * φ)).mul (hΦ (hd1 hSk hS₀))).mul_const _).div_const _)).add
       (((hα.const_mul φ).mul_const K).mul (hΦ (hd2 hSk hS₀)))
   have hαlp : Tendsto (fun r ↦ juAlphaLambdaPrime φ q σ T r) L
@@ -384,7 +382,7 @@ lemma juVE_neg_one (K q σ T r S : ℝ) : juVE (-1) K q σ T r S = bsPDiv K r q 
   simp only [neg_one_mul]
   ring
 
-/-! ### The put side at `r = 0`: why the early exit is needed -/
+/-! ### The put side at `r = 0` -/
 
 /-- **The pointwise half of the put "no early exercise" exit.** If `DR = e^{−rT} ≥ 1` and
 `DR ≥ DQ = e^{−qT}`, then for `0 < S ≤ K` the intrinsic value is below the parity bound
@@ -417,11 +415,8 @@ lemma juLambda_neg_one_zero_neg (q : ℝ) {σ T : ℝ} (hσ : 0 < σ) (hT : 0 < 
 The equation (Li eq. (9), with `q_QD` at its `r = 0` value `juLambda (-1) q σ T 0`) is
 `K − S − p(S) = −S(1 − e^{−qT}Φ(−d₁(S)))/q_QD`. Its left side is `≤ 0` (parity at `r = 0` and
 a nonnegative call give `p(S) ≥ K − S·e^{−qT} ≥ K − S`); its right side is `> 0`
-(`q_QD < 0` and `1 − e^{−qT}Φ(−d₁) ≥ Φ(d₁) > 0`). This excludes a positive root — it does not
-establish that `S = 0` itself solves the equation or that `hA = 0` there — but either way the
-stable formula divides by zero for such puts, and QuantLib's early exit in
-`juquadraticengine.cpp` is what handles `r = 0` there. The rewrite and the exit are jointly
-necessary. -/
+(`q_QD < 0` and `1 − e^{−qT}Φ(−d₁) ≥ Φ(d₁) > 0`). This excludes a positive root; it does not
+establish that `S = 0` itself solves the equation or that `hA = 0` there. -/
 theorem bawPut_no_positive_root_zero_rate {K q σ T S : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     (hT : 0 < T) (hq : 0 ≤ q) (hS : 0 < S) :
     K - S - bsPDiv K 0 q σ S T ≠
@@ -447,8 +442,9 @@ theorem bawPut_no_positive_root_zero_rate {K q σ T S : ℝ} (hK : 0 < K) (hσ :
 
 /-- **Corollary: a positive put critical price at `r = 0`, `q ≥ 0` is excluded.** Any `S* ≥ 0`
 solving the BAW put equation is `S* = 0` — this excludes a positive root, not asserts that
-`S* = 0` itself solves the equation — so the hypothesis `0 < S*₀` of `tendsto_juValueRaw_zero_rate`
-cannot hold for such puts. -/
+`S* = 0` itself solves the equation. Whether the limit of the critical prices of the `r > 0`
+problems is such a root is not proved, so this does not by itself refute the hypothesis
+`0 < S*₀` of `tendsto_juValueRaw_zero_rate` for such puts. -/
 theorem bawPut_criticalPrice_eq_zero_zero_rate {K q σ T Sstar : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     (hT : 0 < T) (hq : 0 ≤ q) (hSstar : 0 ≤ Sstar)
     (heq : K - Sstar - bsPDiv K 0 q σ Sstar T =

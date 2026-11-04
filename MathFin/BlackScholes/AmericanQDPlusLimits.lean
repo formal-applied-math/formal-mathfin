@@ -8,11 +8,13 @@ module
 public import MathFin.Foundations.NormalTail
 public import MathFin.BlackScholes.Call
 
-/-! # Endpoint limits of the American-put fixed-point integrands
+/-! # Endpoint limits of the QD+ fixed-point integrands
 
-The fixed-point scheme of Andersen, Lake and Offengenden for the American put exercise
+The fixed-point scheme of Andersen, Lake and Offengenden (QD+) for the American put exercise
 boundary integrates, at a collocation node `τ` with trial boundary value `b`, explicit
-integrands built from an interpolated boundary `B`. With
+integrands built from an interpolated boundary `B`. Here `B` is an arbitrary real function: the
+integrands below are not tied to the American put's exercise boundary, and nothing in this file
+connects them to it. With
 `d₊(t, z) = bsd1 z 1 (r - q) σ t` and `d₋(t, z) = bsd2 z 1 (r - q) σ t`, they are
 
 * equation A, after the substitution `m = τ (1 + y)² / 4`, `y ∈ [-1, 1]`:
@@ -241,7 +243,7 @@ theorem tendsto_exp_qdfpDiscount (c : ℝ) {τ : ℝ} (hτ : 0 < τ) :
     (((tendsto_qdfpTimeChange_nhds hτ).const_sub τ).const_mul c)
 
 /-- **Equation A, `K₁₂` at `y = -1`, on the diagonal.** With `b = B τ` and `B` differentiable
-at `τ`, the integrand tends to QuantLib's endpoint value `e^{qτ} (√τ/σ)/√(2π)`. -/
+at `τ`, the integrand tends to `e^{qτ} (√τ/σ)/√(2π)`. -/
 theorem tendsto_qdfpK12_endpoint {B : ℝ → ℝ} {r q σ τ : ℝ} (hσ : 0 < σ) (hτ : 0 < τ)
     (hB : DifferentiableAt ℝ B τ) (hBpos : 0 < B τ) :
     Tendsto (qdfpK12 B r q σ τ (B τ)) (𝓝[>] (-1))
@@ -250,7 +252,7 @@ theorem tendsto_qdfpK12_endpoint {B : ℝ → ℝ} {r q σ τ : ℝ} (hσ : 0 < 
     (tendsto_qdfpTimeChange hτ)
   have := (tendsto_exp_qdfpDiscount q hτ).mul
     (((tendsto_qdfpHalfJacobian τ).mul ((continuous_Phi.tendsto 0).comp hd)).add
-      (((by unfold gaussianPDFReal; fun_prop : Continuous (gaussianPDFReal 0 1)).tendsto 0).comp
+      (((continuous_gaussianPDFReal 0 1).tendsto 0).comp
         hd |>.const_mul (Real.sqrt τ / σ)))
   rw [gaussianPDFReal_zero_one_zero] at this
   convert this using 2 <;> first | rfl | ring
@@ -263,7 +265,7 @@ theorem tendsto_qdfpK3_endpoint {B : ℝ → ℝ} {r q σ τ : ℝ} (hσ : 0 < �
   have hd := (tendsto_bsd2_boundaryRatio_of_eq (a := r - q) hB hBpos hσ).comp
     (tendsto_qdfpTimeChange hτ)
   have := ((tendsto_exp_qdfpDiscount r hτ).const_mul (Real.sqrt τ / σ)).mul
-    (((by unfold gaussianPDFReal; fun_prop : Continuous (gaussianPDFReal 0 1)).tendsto 0).comp hd)
+    (((continuous_gaussianPDFReal 0 1).tendsto 0).comp hd)
   rw [gaussianPDFReal_zero_one_zero] at this
   convert this using 2 <;> first | rfl | ring
 
@@ -407,7 +409,7 @@ theorem tendsto_qdfpK12_endpoint_holder {r q σ τ b c : ℝ} (hσ : 0 < σ) (h�
   have hd := hcore.comp (tendsto_qdfpTimeChange hτ)
   have := (tendsto_exp_qdfpDiscount q hτ).mul
     (((tendsto_qdfpHalfJacobian τ).mul ((continuous_Phi.tendsto _).comp hd)).add
-      (((by unfold gaussianPDFReal; fun_prop : Continuous (gaussianPDFReal 0 1)).tendsto _).comp
+      (((continuous_gaussianPDFReal 0 1).tendsto _).comp
         hd |>.const_mul (Real.sqrt τ / σ)))
   convert this using 2 <;> first | rfl | ring
 

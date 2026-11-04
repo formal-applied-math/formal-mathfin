@@ -13,10 +13,9 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.ActualBoundaryNormalizat
 For `0 < r` and `0 ≤ q ≤ r`, the optimal-stopping exercise boundary of the American put
 converges to the strike as time to expiry decreases to zero: `B(τ) → K` as `τ ↓ 0`.
 
-On this parameter cell the boundary-at-expiry value `K * min 1 (r / q)` used by
-fixed-point American-put engines equals `K`. Only this cell is covered. The cells
-`q > r > 0`, `q < 0`, and negative rates (including the double-boundary case) are not
-treated here, because the underlying boundary theory assumes `0 < r` and `0 ≤ q ≤ r`.
+Only this cell is covered. The cells `q > r > 0`, `q < 0`, and negative rates (including the
+double-boundary case) are not treated here, because the underlying boundary theory assumes
+`0 < r` and `0 ≤ q ≤ r`.
 
 ## Result
 
