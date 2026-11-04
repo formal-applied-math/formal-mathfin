@@ -364,6 +364,7 @@ import MathFin.Foundations.EquivMeasure
 -- Phase 42: Multi-state FTAP backward (hypothesis-form, forward direction proved)
 import MathFin.Foundations.FTAPMultiState
 import MathFin.Foundations.FTAPDiscrete
+import MathFin.Foundations.FTAPComplete
 -- General-Ω one-period FTAP (Föllmer–Schied §1.2 / one-period DMW, scalar)
 import MathFin.Foundations.FTAPOnePeriod
 -- General-Ω one-period FTAP, d assets (Esscher minimal-divergence EMM, full — finite-dim market)

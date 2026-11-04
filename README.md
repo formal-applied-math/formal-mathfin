@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 754 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 721 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 756 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 723 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 15 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -168,7 +168,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Fifteen of the 754 results are reduced cores. Eleven assume a structure whose fields include the
+- Fifteen of the 756 results are reduced cores. Eleven assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, the two-dimensional Itô formula,
@@ -180,8 +180,10 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 - Girsanov's theorem is proved only for bounded $`\theta`$ (predictable, or adapted with continuous
   paths), and only at the level of finite-dimensional laws: neither path continuity of the new
   process nor independence of its increments from the past is stated.
-- Of the second fundamental theorem, only the direction from completeness to uniqueness is proved:
-  for a price $`S = S_0 + \int_0^t \sigma\,dB`$ with $`\sigma \neq 0`$ almost everywhere, a
+- The second fundamental theorem is proved in both directions on a finite probability space, and so
+  for the binomial tree (completeness meaning replication of every claim by a predictable strategy
+  in the discounted spot). In continuous time only the direction from completeness to uniqueness
+  is proved: for a price $`S = S_0 + \int_0^t \sigma\,dB`$ with $`\sigma \neq 0`$ almost everywhere, a
   probability measure with square-integrable density with respect to $`P`$, under which $`S`$ is a
   martingale, agrees with $`P`$ on $`\mathcal{F}^B_T`$.
 - Martingale representation proves that a hedge exists and is unique, but does not identify it;

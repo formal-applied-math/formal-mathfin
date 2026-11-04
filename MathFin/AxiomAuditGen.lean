@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (874 MathFin constants, 29 upstream). Citations
+  corpus (876 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -91,17 +91,17 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.BlackScholes.AmericanPut.Stopping.bsPDiv_le_brownianUsualAmericanPut
 
-/-- info: 'MathFin.BlackScholes.AmericanPut.Stopping.condExp_stoppedValue_le_finiteBellman' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.BlackScholes.AmericanPut.Stopping.condExp_stoppedValue_le_snellEnvelope' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.BlackScholes.AmericanPut.Stopping.condExp_stoppedValue_le_finiteBellman
+#print axioms MathFin.BlackScholes.AmericanPut.Stopping.condExp_stoppedValue_le_snellEnvelope
 
 /-- info: 'MathFin.BlackScholes.AmericanPut.Stopping.expectedReward_eq_initial_iff_stopped_martingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.BlackScholes.AmericanPut.Stopping.expectedReward_eq_initial_iff_stopped_martingale
 
-/-- info: 'MathFin.BlackScholes.AmericanPut.Stopping.finiteBellman_doob_decomposition' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.BlackScholes.AmericanPut.Stopping.snellEnvelope_doob_decomposition' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.BlackScholes.AmericanPut.Stopping.finiteBellman_doob_decomposition
+#print axioms MathFin.BlackScholes.AmericanPut.Stopping.snellEnvelope_doob_decomposition
 
 /-- info: 'MathFin.Bootstrapping.boot_reprices_swapChain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1795,6 +1795,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ftap_discrete
 
+/-- info: 'MathFin.ftap_two' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ftap_two
+
 /-- info: 'MathFin.gainToPain_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.gainToPain_nonneg
@@ -2382,6 +2386,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.isCoherentRiskMeasure_spectralRiskMeasure_sum_esSpectrum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.isCoherentRiskMeasure_spectralRiskMeasure_sum_esSpectrum
+
+/-- info: 'MathFin.isCompleteMarket_horizonSpot' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.isCompleteMarket_horizonSpot
 
 /-- info: 'MathFin.isCopula_copulaOf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

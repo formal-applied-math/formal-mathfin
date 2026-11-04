@@ -177,6 +177,22 @@
       }
     },
     {
+      "id": "mf-ftap-two-discrete",
+      "name": "Second FTAP on a Finite Probability Space: Complete if and only if the Equivalent Martingale Measure is Unique",
+      "description": "On a finite probability space with a full-support real-world measure P, a filtration whose horizon σ-algebra 𝓕 T is the whole σ-algebra, an adapted scalar discounted price S over a finite horizon T, and no arbitrage: the market is complete (every bounded claim is, P-a.s., an initial wealth plus the gains Σ φ_{t+1}(S_{t+1} − S_t) of a bounded predictable strategy φ) if and only if there is exactly one equivalent martingale measure. Complete ⇒ unique: replicate the indicator of an event; every equivalent martingale measure gives it the initial wealth as probability. Unique ⇒ complete: if the replicable claims (constants plus the span of the one-period increment-indicators) are a proper subspace, a nonzero functional vanishing on it perturbs the strictly positive weights of the equivalent martingale measure into a second one.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.FTAPComplete\n\nopen MeasureTheory\n\n/-- **Second FTAP on a finite space.** With no arbitrage and full information at the horizon, a\nfinite full-support market is complete iff its equivalent martingale measure is unique. Re-exports\n`MathFin.ftap_two`. -/\ntheorem ftap_two_discrete {Ω : Type*} [Fintype Ω] [Nonempty Ω]\n    {mΩ : MeasurableSpace Ω} [MeasurableSingletonClass Ω] (𝓕 : Filtration ℕ mΩ)\n    (P : Measure Ω) (S : ℕ → Ω → ℝ) (T : ℕ)\n    (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) (hT : 𝓕 T = mΩ)\n    (hNA : MathFin.NoArbitrage 𝓕 P S T) :\n    MathFin.IsCompleteMarket 𝓕 P S T ↔ ∃! Q, MathFin.IsEMM 𝓕 P S T Q :=\n  MathFin.ftap_two 𝓕 P S T hS hP hT hNA\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Harrison and Pliska, Martingales and stochastic integrals in the theory of continuous trading, Stoch. Proc. Appl. 11 (1981); Föllmer and Schied, Stochastic Finance, Theorem 5.30 (second fundamental theorem, finite case)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of ftap_two in MathFin/Foundations/FTAPComplete.lean. Completeness is the library definition IsCompleteMarket (Foundations/FTAP.lean): every bounded 𝓕 T-measurable claim H equals, P-a.s., x + martingaleTransform φ S T for some initial wealth x and a bounded strategy φ that is predictable (φ (t+1) is 𝓕 t-measurable for t < T); no weaker notion is used. complete ⇒ unique is IsEMM.measure_eq_of_isCompleteMarket (general Ω): the two equivalent martingale measures agree on 𝓕 T, hence everywhere because 𝓕 T is the whole σ-algebra (the hypothesis hT). unique ⇒ complete is isCompleteMarket_of_unique: constants plus gainsSubspace is the whole space, by perturbing the weights of the unique equivalent martingale measure along a functional that annihilates it (exists_isEMM_of_pos_dual builds the second measure). Scope: finite Ω, one scalar discounted asset, finite horizon, full-support P, and no arbitrage assumed (it supplies existence of an equivalent martingale measure). The general-Ω and d-asset versions are not claimed."
+      }
+    },
+    {
       "id": "mf-ftap-one-period-general",
       "name": "General-Ω One-Period FTAP (Föllmer–Schied)",
       "description": "On an arbitrary probability space, a single scalar discounted excess return Y ∈ L⁰ admits no arbitrage ⟺ there is an equivalent martingale measure Q ~ P under which Y is integrable with E_Q[Y] = 0. The Föllmer–Schied / one-period Dalang–Morton–Willinger theorem — the measure-theoretic step beyond finite Ω — obtained as the F = ℝ case of the d-asset theorem (backward via a bounded-density reduction to L¹ and an explicit logistic tilt; no Hahn–Banach, no Kreps–Yan).",
