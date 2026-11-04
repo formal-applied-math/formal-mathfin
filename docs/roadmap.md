@@ -57,11 +57,10 @@ parallel developments into instances of one object each; what it left open is be
   Then the HJM program ([#138](https://github.com/formal-applied-math/formal-mathfin/issues/138)), through the stochastic Fubini theorems
   ([#141](https://github.com/formal-applied-math/formal-mathfin/issues/141)–[#145](https://github.com/formal-applied-math/formal-mathfin/issues/145)).
 * **The spine's open seams.** The multi-dimensional martingale representation ([#180](https://github.com/formal-applied-math/formal-mathfin/issues/180)), the
-  converse of the second FTAP ([#181](https://github.com/formal-applied-math/formal-mathfin/issues/181)) together with FTAP II for the tree ([#415](https://github.com/formal-applied-math/formal-mathfin/issues/415)), Clark–Ocone
+  converse of the second FTAP in continuous time ([#181](https://github.com/formal-applied-math/formal-mathfin/issues/181)), Clark–Ocone
   ([#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)), and the Wiener ↔ Itô bridges ([#366](https://github.com/formal-applied-math/formal-mathfin/issues/366), which is partly blocked on Doob–Meyer
   upstream).
 * **One object per concept, continued.**
-  * One Snell envelope for the tree and for the foundations ([#415](https://github.com/formal-applied-math/formal-mathfin/issues/415)).
   * One sampled filtration for the American put's grids, and its leftover canonical parameters
     ([#414](https://github.com/formal-applied-math/formal-mathfin/issues/414)).
   * The Itô stack at C² ([#416](https://github.com/formal-applied-math/formal-mathfin/issues/416)).

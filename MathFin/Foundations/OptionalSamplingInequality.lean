@@ -42,7 +42,8 @@ drift `A` — nothing else.
   `f_σ ≤ᵐ μ[f_τ | ℱ_σ]` for bounded stopping times `σ ≤ τ`.
 
 `Bridges/BellmanDoobDecomposition.lean` applies it to the finite-horizon Snell envelope
-`finiteBellman` of the American-put tower: `𝔼[Z_τ | 𝓕_σ] ≤ U_σ` for stopping times `σ ≤ τ ≤ N`.
+`snellEnvelope` (`Foundations/SnellEnvelope.lean`) at `X = univ`:
+`𝔼[Z_τ | 𝓕_σ] ≤ U_σ` for stopping times `σ ≤ τ ≤ N`.
 
 The Degenne `BrownianMotion` package now **proves** a `⊓`-form sibling,
 `Submartingale.stoppedValue_min_ae_le_condExp_nat`

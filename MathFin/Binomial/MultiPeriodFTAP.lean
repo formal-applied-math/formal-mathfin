@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Binomial.PathMeasure
-public import MathFin.Foundations.FTAPDiscrete
+public import MathFin.Foundations.FTAPComplete
 
 /-!
 # Multi-period binomial no-arbitrage through the discrete FTAP
@@ -30,7 +30,10 @@ converse is explicit: if `e^r ≤ d` or `u ≤ e^r`, holding `±1` unit over the
 arbitrage (`binomialNoArb_of_noArbitrage`). Together:
 `NoArbitrage ↔ BinomialNoArb u d r` for the multi-period tree (`noArbitrage_horizonSpot_iff`).
 
-The martingale measure is unique (`IsEMM.eq_horizonMeasure`, `existsUnique_isEMM_horizonSpot`).
+The martingale measure is unique (`IsEMM.eq_horizonMeasure`, `existsUnique_isEMM_horizonSpot`),
+and so, by the Second FTAP (`ftap_two`, `Foundations/FTAPComplete.lean`), the market is complete
+(`isCompleteMarket_horizonSpot`): every claim on the paths is replicated by a predictable strategy
+in the discounted spot.
 Node by node, on the atom `{y | y agrees with x on the first t flips}` of `ℱₜ`
 (`horizonAtom`), the martingale property in set-integral form gives
 `∫_A (S_{t+1} − S_t) dQ = 0`; on `A` the increment is `S_t(x) (e^{-r} u − 1)` or
@@ -50,6 +53,8 @@ probability (`IsEMM.real_horizonAtom`), and at `t = T` the atoms are the paths, 
 * `IsEMM.eq_horizonMeasure` — under `BinomialNoArb` and `S₀ > 0`, every `IsEMM` of the market is
   `horizonMeasure T (crrUpProb u d r)`; `existsUnique_isEMM_horizonSpot` packages existence and
   uniqueness.
+* `isCompleteMarket_horizonSpot_iff`, `isCompleteMarket_horizonSpot` — the Second FTAP for the tree:
+  under `BinomialNoArb` the market is complete, iff the martingale measure is unique, and both hold.
 -/
 
 @[expose] public section
@@ -511,7 +516,7 @@ theorem IsEMM.eq_horizonMeasure (hS₀ : 0 < S₀) (h : BinomialNoArb u d r)
 `0 < p < 1`, the `T`-period CRR market has exactly one `MathFin.IsEMM`, the i.i.d.
 `Bernoulli(crrUpProb u d r)` law of the flips: existence is `isEMM_horizonSpot` and uniqueness
 `IsEMM.eq_horizonMeasure`. Uniqueness of the equivalent martingale measure is what the second
-fundamental theorem equates with completeness; replication of claims is not stated here. -/
+fundamental theorem equates with completeness (`isCompleteMarket_horizonSpot_iff`). -/
 theorem existsUnique_isEMM_horizonSpot (hS₀ : 0 < S₀) (h : BinomialNoArb u d r) {p q : ℝ≥0}
     (hp0 : 0 < p) (hp1 : p < 1) (hq1 : q ≤ 1) (hqcrr : crrUpProb u d r = q) :
     ∃! Q, IsEMM (horizonFiltration T) (horizonMeasure T p hp1.le) (horizonSpot T S₀ u d r) T Q :=
@@ -519,5 +524,47 @@ theorem existsUnique_isEMM_horizonSpot (hS₀ : 0 < S₀) (h : BinomialNoArb u d
     fun _ hQ ↦ hQ.eq_horizonMeasure hS₀ h hq1 hqcrr⟩
 
 end Uniqueness
+
+section Complete
+
+variable {T : ℕ} {S₀ u d r : ℝ}
+
+/-- At the horizon the whole path is known: `horizonFiltration T T` is the full σ-algebra of
+`Fin T → Bool`. -/
+lemma horizonFiltration_horizon :
+    horizonFiltration T T = (inferInstance : MeasurableSpace (Fin T → Bool)) := by
+  change MeasurableSpace.comap (revealed T T) _ = _
+  rw [show revealed T T = id from funext fun x ↦ funext fun i ↦ by simp [revealed, i.2],
+    MeasurableSpace.comap_id]
+
+/-- **The Second Fundamental Theorem for the multi-period binomial tree.** Under
+`BinomialNoArb u d r`, the `T`-period CRR market is complete (`IsCompleteMarket`: every claim on
+the paths is the terminal wealth of a predictable strategy in the discounted spot, from some
+initial wealth) exactly when its equivalent martingale measure is unique; both hold. This is
+`ftap_two` for the market of this file, whose uniqueness is `existsUnique_isEMM_horizonSpot`. -/
+theorem isCompleteMarket_horizonSpot_iff (h : BinomialNoArb u d r) (S₀ : ℝ) {p : ℝ≥0}
+    (hp0 : 0 < p) (hp1 : p < 1) :
+    IsCompleteMarket (horizonFiltration T) (horizonMeasure T p hp1.le) (horizonSpot T S₀ u d r) T
+      ↔ ∃! Q, IsEMM (horizonFiltration T) (horizonMeasure T p hp1.le)
+        (horizonSpot T S₀ u d r) T Q :=
+  ftap_two _ _ _ _ stronglyAdapted_horizonSpot (horizonMeasure_pos T hp0 hp1)
+    horizonFiltration_horizon (noArbitrage_horizonSpot h S₀ hp0 hp1)
+
+/-- **The multi-period binomial market is complete.** Under `BinomialNoArb u d r` and `S₀ > 0`,
+every claim on the `T` flips is replicated by a predictable strategy in the discounted spot from
+some initial wealth: the unique equivalent martingale measure
+(`existsUnique_isEMM_horizonSpot`) makes the market complete
+(`isCompleteMarket_horizonSpot_iff`). -/
+theorem isCompleteMarket_horizonSpot (hS₀ : 0 < S₀) (h : BinomialNoArb u d r) {p : ℝ≥0}
+    (hp0 : 0 < p) (hp1 : p < 1) :
+    IsCompleteMarket (horizonFiltration T) (horizonMeasure T p hp1.le)
+      (horizonSpot T S₀ u d r) T := by
+  obtain ⟨q, hq1, hqcrr⟩ : ∃ q : ℝ≥0, q ≤ 1 ∧ crrUpProb u d r = q :=
+    ⟨(crrUpProb u d r).toNNReal, Real.toNNReal_le_one.2 (crrUpProb_mem_Ioo h).2.le,
+      (Real.coe_toNNReal _ (crrUpProb_mem_Ioo h).1.le).symm⟩
+  exact (isCompleteMarket_horizonSpot_iff h S₀ hp0 hp1).2
+    (existsUnique_isEMM_horizonSpot hS₀ h hp0 hp1 hq1 hqcrr)
+
+end Complete
 
 end MathFin

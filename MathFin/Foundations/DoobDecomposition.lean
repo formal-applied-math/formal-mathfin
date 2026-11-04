@@ -37,8 +37,8 @@ process `n ↦ A (n + 1)` is `ℱ`-strongly-adapted, i.e. `A (n + 1)` is
 * `doob_decomposition` — the full existence-and-uniqueness statement.
 
 `Bridges/BellmanDoobDecomposition.lean` applies the uniqueness half to the finite-horizon Snell
-envelope `finiteBellman` of the American-put tower, whose compensator is a.e. nonincreasing and
-constant on the continuation region.
+envelope `snellEnvelope` (`Foundations/SnellEnvelope.lean`) at `X = univ`, whose compensator is a.e.
+nonincreasing and constant on the continuation region.
 -/
 
 @[expose] public section

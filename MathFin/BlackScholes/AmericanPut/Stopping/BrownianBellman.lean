@@ -18,7 +18,7 @@ delayed grid are instances. No classical pricing solution is assumed.
 ## Result
 
 Public entry points include `brownianGridMarkovAux`, `brownianGridMarkovAux_bound`,
-`bellmanAux_eq_brownianGridMarkovAux`, `brownianGridPrice_eq_gridAmericanPutValue`.
+`snellEnvelopeAux_eq_brownianGridMarkovAux`, `brownianGridPrice_eq_gridAmericanPutValue`.
 -/
 
 @[expose] public section
@@ -75,17 +75,19 @@ theorem brownianGridMarkovAux_add_left (Z : ℕ → ℝ → ℝ) (u : ℝ≥0) {
 
 /-- **The Bellman recursion on a sampled filtration is Gaussian integration in the log state.**
 For any monotone schedule `s` and any log state `L` that is `IsGaussianMarkov` in `𝓕` under `P`,
-the `bellmanAux` of the rewards `Z j (L (s j))` on the sampled filtration `𝓕 (s j)` is
+the American Snell recursion `snellEnvelopeAux P 𝓕 Set.univ` of the rewards `Z j (L (s j))` on the sampled filtration `𝓕 (s j)` is
 `brownianGridMarkovAux Z s β σ n i` evaluated at `L (s i)`. -/
-theorem bellmanAux_eq_brownianGridMarkovAux {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
+theorem snellEnvelopeAux_eq_brownianGridMarkovAux {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
     {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {s : ℕ → ℝ≥0} (hs : Monotone s) {β σ : ℝ}
     {L : ℝ≥0 → Ω → ℝ} (hL : IsGaussianMarkov P 𝓕 β σ L) {Z : ℕ → ℝ → ℝ} {C : ℝ}
     (hc : ∀ i, Continuous (Z i)) (hb : ∀ i x, ‖Z i x‖ ≤ C) (n i : ℕ) :
-    bellmanAux P (ContinuousMarket.sampledFiltration 𝓕 hs) (fun j ω => Z j (L (s j) ω)) n i
+    snellEnvelopeAux P (ContinuousMarket.sampledFiltration 𝓕 hs) Set.univ
+      (fun j ω => Z j (L (s j) ω)) n i
       =ᵐ[P] fun ω => brownianGridMarkovAux Z s β σ n i (L (s i) ω) := by
   induction n generalizing i with
   | zero => exact Eventually.of_forall (fun _ => rfl)
   | succ n ih =>
+    rw [snellEnvelopeAux_succ_of_mem (Set.mem_univ i)]
     have hcond := condExp_congr_ae (m := ContinuousMarket.sampledFiltration 𝓕 hs i) (ih (i+1))
     have ht := hL (brownianGridMarkovAux_continuous hc hb s β σ n (i+1))
       (brownianGridMarkovAux_bound hb s β σ n (i+1)) (hs (Nat.le_succ i))
@@ -141,17 +143,17 @@ theorem brownianGridPrice_eq_gridAmericanPutValue [MeasurableSpace (ℝ≥0 → 
     brownianGridPrice K r q σ T δ x =
       gridAmericanPutValue P 𝓕 brownian K r q σ (Real.exp x) T δ := by
   rw [gridValue_eq_bellman hW ha hK hr (Real.exp_pos x).le hδ]
-  have he : bellmanAux P (cappedGridFiltration 𝓕 T δ)
+  have he : snellEnvelopeAux P (cappedGridFiltration 𝓕 T δ) Set.univ
       (fun j ω => discountedLogPayoff K r (cappedGridTime T δ j)
         (brownianLogState (r-q-σ^2/2) σ x (cappedGridTime T δ j) ω)) ⌈T/δ⌉₊ 0 =ᵐ[P]
       fun ω => brownianGridMarkovAux (fun i => discountedLogPayoff K r (cappedGridTime T δ i))
         (cappedGridTime T δ) (r-q-σ^2/2) σ ⌈T/δ⌉₊ 0
         (brownianLogState (r-q-σ^2/2) σ x (cappedGridTime T δ 0) ω) :=
-    bellmanAux_eq_brownianGridMarkovAux (cappedGridTime_mono T δ) (hL (r-q-σ^2/2) σ x)
+    snellEnvelopeAux_eq_brownianGridMarkovAux (cappedGridTime_mono T δ) (hL (r-q-σ^2/2) σ x)
       (fun i => discountedLogPayoff_continuous K r (cappedGridTime T δ i))
       (fun i y => discountedLogPayoff_bound hK hr (cappedGridTime T δ i) y) ⌈T/δ⌉₊ 0
   rw [gridReward_eq_discountedLogPayoff]
-  simp only [finiteBellman,Nat.sub_zero,min_eq_left (Nat.zero_le _)]
+  simp only [snellEnvelope,Nat.sub_zero,min_eq_left (Nat.zero_le _)]
   rw [integral_congr_ae he]
   have he0 : (fun ω => brownianGridMarkovAux
       (fun i => discountedLogPayoff K r (cappedGridTime T δ i))
