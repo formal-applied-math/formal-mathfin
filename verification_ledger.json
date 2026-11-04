@@ -621,10 +621,10 @@
     },
     "mf-ar1-ou-one-step-residual": {
       "benchmark_file": "commodities.json",
-      "date": "2026-10-30",
-      "elapsed_s": 5.5,
-      "input_hash": "546b85d4effd472520b786820109846e32932995a0e07105a135be7949ff4c55",
-      "verified_at_commit": "c55d62c"
+      "date": "2026-11-04",
+      "elapsed_s": 17.1,
+      "input_hash": "b8da6b9e5cbf4d7df27e854163de44e73e35ab2b2a4bc0a8061391b3ff6ed171",
+      "verified_at_commit": "7e4a677"
     },
     "mf-asian-geom-driver-gaussian": {
       "benchmark_file": "exotic_options.json",
@@ -1720,10 +1720,10 @@
     },
     "mf-contract-bond-price-hullwhite": {
       "benchmark_file": "contracts.json",
-      "date": "2026-10-31",
-      "elapsed_s": 5.4,
-      "input_hash": "67ed7a2d03b1e9a3078d7c5d318fe52da806990dd6324d251492ecffec6a5d51",
-      "verified_at_commit": "8f8384a"
+      "date": "2026-11-04",
+      "elapsed_s": 13.2,
+      "input_hash": "42e5e812de4f91dd9db7e8d766b84026c97c58e828f77841e15ba1e48ab81d33",
+      "verified_at_commit": "7e4a677"
     },
     "mf-contract-bond-price-vasicek": {
       "benchmark_file": "contracts.json",
@@ -2665,10 +2665,10 @@
     },
     "mf-gsr-bond-price-at-t": {
       "benchmark_file": "interest_rates.json",
-      "date": "2026-10-31",
-      "elapsed_s": 5.3,
-      "input_hash": "624061da12f4b609b21da3e96dc395a042e9bb2fafa55cc142a40451395e6271",
-      "verified_at_commit": "d3a41ed"
+      "date": "2026-11-04",
+      "elapsed_s": 5.1,
+      "input_hash": "28849e2ed8fcd949297bd6117e4963c79979b189325c5ad16de65c9b27b6264a",
+      "verified_at_commit": "7e4a677"
     },
     "mf-gsr-two-piece-bond-price": {
       "benchmark_file": "interest_rates.json",
