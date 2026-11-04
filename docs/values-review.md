@@ -130,6 +130,88 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-11-04 — corpus 773, modules 703 — the backlog wave, read before it lands
+
+Scope: the four maintainer branches that close the 2026-10-31 backlog, merged with the five
+contributor PRs into one integration branch so the corpus is swept once: `feat/snell-ftap2` (one
+Snell envelope, FTAP II for the finite market and the tree), `feat/aput-coherence` (the American-put
+grid and sampling layer), `feat/ito-stack-c2` (the 4000-line `ItoFormulaAdaptedDrift` split by stage,
+the Itô-isometry files on one kernel, the American-put Itô chain at C²) and `feat/gsr-bond-put` (#367's
+GSR bond put as a contract value). Three read-only reviewers, one per area; their findings were
+executed before the merge, not backlogged, by two fixers and the maintainer, each change built.
+
+### The standing first pass: prose against statement
+
+The overclaims were of two kinds. Dropped hypotheses: FTAP II stated as "complete iff the EMM is
+unique" without `𝓕 T = ⊤`, which the completeness-to-uniqueness direction needs; the tree's Snell
+envelope "the discounted Bermudan price at every time" for a statement at `k ≤ N`, almost surely; the
+README's FTAP bullet without its hypotheses; "and both hold" attached to an iff it does not belong to.
+Prose that outlived a refactor: the split Itô modules kept the monolith's stage headers, each
+narrating an assembly that now lives elsewhere (`ItoDriftMartingaleKill` described the whole proof
+and proved one lemma); "the one envelope of the library" while the tree's `snell` keeps its own
+recursion, tied to the general envelope only almost surely; a bridges row naming the deleted
+`FiniteBellman`; a roadmap naming a branch and calling CMS "next" after #419. All restated to what is
+proved; `aeStoppingValue` (a bare `sSup`) gained the junk-value sentence `stoppingValue` carries.
+
+### Upgrades executed
+
+- **Duplicates of Mathlib and of the library, deleted.** In the Itô stack:
+  `integral_abs_mul_le_L2L2` was `integral_abs_mul_le_sqrt_mul_sqrt`; `pow3_add_le` was `add_pow_le`;
+  the private `1/(n+1)` null sequence was `tendsto_one_div_add_atTop_nhds_zero_nat`; the hand-rolled
+  `L²` triangle inequalities and `sqIntegral_of_Lp` went to the `Lp` norm; `continuous_of_dominated`,
+  `Even.pow_abs`, `sq_le_sq'`, `Set.Disjoint.set_prod_left` replace their re-proofs; the
+  independence step "compose with a power, integrate the product" is one `IndepFun.integral_mul_comp`,
+  used by the moment bounds and the quadratic-variation and Poisson isometry files;
+  `expectation_pathIntegral_eq` is stated almost surely, absorbing its `_of_ae` twin.
+- **A module that was a corollary, dissolved.** `ItoDriftMartingaleKill` proved the martingale
+  congruence three times; the hypothesised `M` is now a Mathlib `Martingale` once (`martingale_M`),
+  and the kill lemma is `integral_inner_sub_eq_zero` at `F = ℝ`.
+- **The Gaussian bond put, once.** `valueDisc_bondPut_wiener` carries the plumbing for any
+  integrated short rate in Wiener representation `R T = M T + c T·∫ g_T dB` (integrable discount
+  factor, forward measure a probability measure, the put by `valueDisc_bondPut_gaussian`); the
+  Hull–White and GSR puts, which repeated 25 lines of it, are now its instances, and Vasicek is
+  Hull–White at constant forcing. `vasicekBondB_pos` replaces two inline proofs. The Hull–White caplet
+  gets the corpus entry its Vasicek and GSR siblings had.
+- **Snell and FTAP.** The tree's Snell envelope agrees with the general one
+  (`snell_ae_eq_snellEnvelope`, now a corpus entry and a bridges row); the Doob decomposition of the
+  envelope moves to `Foundations/SnellDoobDecomposition` in namespace `MathFin` (it never needed the
+  American put); the `*_bellman` lemma names follow the object they are about (`snellEnvelope`);
+  FTAP II's 45-line `by_contra` ladder is two lemmas in `ConvexSeparation` (a nonzero annihilator of a
+  proper subspace, on Mathlib's `Submodule.exists_le_ker_of_lt_top`; a positive perturbation); one
+  `BinomialNoArb.exists_nnreal_crrUpProb` in `Binomial/Model` replaces a repeated block; `gridTime_mono`
+  replaces three cast inequalities; implicit `hq` arguments that every caller named became explicit.
+
+### Lens gradients
+
+1. Inspired math. Exemplar: `isCompleteMarket_of_unique`. Next: `isCompleteMarket_horizonSpot` names no
+   hedge; tie its `(x, φ)` to `pathPV_eq_value_add_gains`, so `x` is a `Contract.value`.
+2. Coherence. Exemplar: `snell_ae_eq_snellEnvelope`. Next: the tree's `snell` as a Mathlib
+   `Supermartingale` under `coinFlipMeasure`, dropping its pathwise clause where a.e. suffices.
+4. Architecture. Exemplar: `valueDisc_bondPut_wiener`. Next: `stepSum_pow4_le` (500 lines, run at
+   `maxHeartbeats 1600000`) as its own module, "the fourth moment of a bounded adapted Brownian sum".
+6. Idiomatic register. Exemplar: the stage modules without their `omit` lists. Next: one
+   `IsAdaptedItoDrift` bundle for the seven hypotheses every drift-stack lemma re-threads.
+8. Beauty. Exemplar: the kill lemma as a one-line corollary. Next: the GSR put at `σ₁ = σ₂` is the
+   Vasicek put (`gsrShortRateV_self`), stated and proved as such.
+
+### Ranked backlog
+
+1. The CDS half of #367: a pay-at-a-stopping-time combinator and the mesh limit of the grid legs.
+2. `isCompleteMarket_horizonSpot`'s hedge as a contract value (lens 1).
+3. `stepSum_pow4_le` in its own module; the `IsAdaptedItoDrift` bundle (lenses 4, 6).
+4. `hasLaw_forwardMeasure_wienerIntegralLp` beside the Wiener integral, so `GSRBondPriceAt` stops
+   importing a timing-adjustment file for a Wiener fact; the GSR–Vasicek bridge (lens 8).
+5. `lp_two_norm_sq` stated twice (`PoissonCompensatedIntegralOperator`, `ItoIntegralL2`); the band
+   split argument still repeated between `ItoDriftIncrementEnergy` and `ItoDriftWeightedIsometry`.
+6. The predictable-`L²`-is-product-`L²` block, four times across the Girsanov and drift-process files
+   (found by the pin-bump port).
+7. Unjoined twins: `measure_eq_of_pricesGainsAtZero` (Brownian market) and
+   `measureReal_eq_of_replicates` (finite market) are one argument without a theorem linking them.
+
+Closed from earlier backlogs: one Snell envelope (2026-10-31, item 2); FTAP II for the tree (item 7);
+the split of `ItoFormulaAdaptedDrift` (item 8); the C³ chain at C² (item 4); #423's two squeeze
+scaffolds as one lemma (2026-11-04, item 4).
+
 ## 2026-11-04 — corpus 756, modules 687 — five contributor PRs, read at the raised merge bar
 
 Scope: Yang Ye's five open PRs (#325 Haug barriers, #423 Vasicek κ → 0, #427 American exercise

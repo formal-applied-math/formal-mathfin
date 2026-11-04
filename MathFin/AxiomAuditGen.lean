@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (896 MathFin constants, 29 upstream). Citations
+  corpus (899 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -91,17 +91,9 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.BlackScholes.AmericanPut.Stopping.bsPDiv_le_brownianUsualAmericanPut
 
-/-- info: 'MathFin.BlackScholes.AmericanPut.Stopping.condExp_stoppedValue_le_snellEnvelope' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.BlackScholes.AmericanPut.Stopping.condExp_stoppedValue_le_snellEnvelope
-
 /-- info: 'MathFin.BlackScholes.AmericanPut.Stopping.expectedReward_eq_initial_iff_stopped_martingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.BlackScholes.AmericanPut.Stopping.expectedReward_eq_initial_iff_stopped_martingale
-
-/-- info: 'MathFin.BlackScholes.AmericanPut.Stopping.snellEnvelope_doob_decomposition' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.BlackScholes.AmericanPut.Stopping.snellEnvelope_doob_decomposition
 
 /-- info: 'MathFin.BlackScholes.AmericanPut.Stopping.tendsto_brownianUsualExerciseBoundary_expiry' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -390,6 +382,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.Contracts.valueDisc_caplet_gsr' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.valueDisc_caplet_gsr
+
+/-- info: 'MathFin.Contracts.valueDisc_caplet_hullWhite' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.valueDisc_caplet_hullWhite
 
 /-- info: 'MathFin.Contracts.valueDisc_caplet_vasicek' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1502,6 +1498,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.condExp_shift_eq_integral_gaussianLimit' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.condExp_shift_eq_integral_gaussianLimit
+
+/-- info: 'MathFin.condExp_stoppedValue_le_snellEnvelope' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.condExp_stoppedValue_le_snellEnvelope
 
 /-- info: 'MathFin.continuous_jumpDiffusionDensity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3162,6 +3162,18 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.sharpeSqTwo_critical_iff_crossProduct_FOC' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.sharpeSqTwo_critical_iff_crossProduct_FOC
+
+/-- info: 'MathFin.snellEnvelope_discounted_bermudanPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.snellEnvelope_discounted_bermudanPrice
+
+/-- info: 'MathFin.snellEnvelope_doob_decomposition' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.snellEnvelope_doob_decomposition
+
+/-- info: 'MathFin.snell_ae_eq_snellEnvelope' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.snell_ae_eq_snellEnvelope
 
 /-- info: 'MathFin.sortinoRatio_scale_invariant' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
