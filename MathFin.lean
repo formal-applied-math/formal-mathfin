@@ -42,6 +42,7 @@
 -- Foundations
 import MathFin.Foundations.StandardNormal
 import MathFin.Foundations.DoobDecomposition
+import MathFin.Foundations.SnellEnvelope
 import MathFin.Foundations.L2MartingaleConvergence
 import MathFin.Foundations.BrownianMarkov
 -- Markov-chain path law derived from the pin's Ionescu–Tulcea trajectory

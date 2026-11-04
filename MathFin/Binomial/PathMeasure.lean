@@ -7,6 +7,7 @@ module
 
 public import MathFin.Binomial.EuropeanReplication
 public import MathFin.Binomial.SnellEnvelope
+public import MathFin.Foundations.SnellEnvelope
 public import MathFin.Foundations.MarkovPathMeasure
 
 /-!
@@ -45,6 +46,12 @@ library's other probabilistic form of the price, `binomialPrice_eq_integral_conv
   `coinFlipMeasure q`; the independence of the flips comes from `iIndepFun_infinitePi`.
 * `martingale_discountedSpot`, `martingale_discountedTreeValue` — the discounted CRR spot and
   the discounted tree price are Mathlib martingales under `coinFlipMeasure (crrUpProb …)`.
+* `snell_ae_eq_snellEnvelope` — the tree's pathwise Snell envelope `snell` is, almost surely, the
+  library's Snell envelope `snellEnvelope` (`Foundations/SnellEnvelope.lean`) of the same payoff
+  for the flip filtration under `coinFlipMeasure`: `snell` is its explicit form, computed by the
+  node-average conditional expectation (`condExp_flipFiltration_succ`).
+* `snellEnvelope_discounted_bermudanPrice` — the Snell envelope of the discounted payoff
+  `e^{−rn} g(Sₙ)` is the discounted `bermudanPrice` at every time.
 -/
 
 @[expose] public section
@@ -412,5 +419,65 @@ theorem martingale_discountedTreeValue (u d r : ℝ) (g : ℝ → ℝ) (N : ℕ)
     Martingale (discountedTreeValue u d r g N S₀) flipFiltration (coinFlipMeasure q hq) :=
   martingale_of_oneStep (pathAdaptedAt_discountedTreeValue u d r g N S₀) fun n ω ↦ by
     simpa [hqcrr] using discountedTreeValue_step u d r g N S₀ n ω
+
+section Snell
+
+variable {q : ℝ≥0} {hq : q ≤ 1} {E : Set ℕ} {Z : ℕ → (ℕ → Bool) → ℝ}
+
+/-- **The pathwise Snell envelope is the Snell envelope, with `j` steps left from time `k`.** For a
+payoff process adapted to the flips, `snellAux E q Z j k` agrees almost surely under
+`coinFlipMeasure q` with `snellEnvelopeAux` for the flip filtration, whose exercise times are those
+`i` with `N - i ∈ E` (`N = k + j` the horizon): the conditional expectation of the recursion is the
+node average (`condExp_flipFiltration_succ`). -/
+theorem snellAux_ae_eq_snellEnvelopeAux (hZ : ∀ n, PathAdaptedAt n (Z n)) (N : ℕ) :
+    ∀ j k, k + j = N → snellAux E (q : ℝ) Z j k =ᵐ[coinFlipMeasure q hq]
+      snellEnvelopeAux (coinFlipMeasure q hq) flipFiltration {i | N - i ∈ E} Z j k := by
+  intro j
+  induction j with
+  | zero => exact fun k _ ↦ Filter.EventuallyEq.rfl
+  | succ j ih =>
+    intro k hk
+    have hnode := condExp_flipFiltration_succ (q := q) (hq := hq)
+      (pathAdaptedAt_snellAux (E := E) (q := (q : ℝ)) hZ j (k + 1))
+    have hcongr := condExp_congr_ae (m := flipFiltration k) (ih (k + 1) (by omega)).symm
+    have hkX : k ∈ {i | N - i ∈ E} ↔ j + 1 ∈ E := by
+      show N - k ∈ E ↔ _
+      rw [show N - k = j + 1 by omega]
+    by_cases hj : j + 1 ∈ E
+    · filter_upwards [hnode, hcongr] with ω h1 h2
+      rw [snellAux_succ_of_mem hj, snellEnvelopeAux_succ_of_mem (hkX.2 hj)]
+      beta_reduce
+      rw [h2, h1]
+    · filter_upwards [hnode, hcongr] with ω h1 h2
+      rw [snellAux_succ_of_notMem hj, snellEnvelopeAux_succ_of_notMem (mt hkX.1 hj), h2, h1]
+
+/-- **The tree's Snell envelope is an instance of the library's.** For a payoff process adapted to
+the flips, `snell E q Z N k` is, almost surely under `coinFlipMeasure q` and for `k ≤ N`, the Snell
+envelope `snellEnvelope` of `Z` for the flip filtration with horizon `N`, exercisable at the times
+`i` with `N - i ∈ E` (`E` counts the steps still to go). `snell` is its explicit form: the
+conditional expectations are node averages, which is what makes the pathwise minimality
+`snellAux_le_of_supermartingale_of_ge` hold at every path. -/
+theorem snell_ae_eq_snellEnvelope (hZ : ∀ n, PathAdaptedAt n (Z n)) {N k : ℕ} (hk : k ≤ N) :
+    snell E (q : ℝ) Z N k =ᵐ[coinFlipMeasure q hq]
+      snellEnvelope (coinFlipMeasure q hq) flipFiltration {i | N - i ∈ E} Z N k := by
+  rw [snellEnvelope, min_eq_left hk]
+  exact snellAux_ae_eq_snellEnvelopeAux (hq := hq) hZ N (N - k) k (by omega)
+
+/-- **The Bermudan price is the Snell envelope of the discounted payoff.** Under i.i.d.
+`Bernoulli(crrUpProb u d r)` flips, the Snell envelope (`snellEnvelope`) of the discounted
+payoff `e^{−rn} g(Sₙ)` for the flip filtration, exercisable at the times `i` with `N - i ∈ E`, is
+at time `k ≤ N` the discounted `bermudanPrice E` with `N - k` steps to go at the spot `S_k`. -/
+theorem snellEnvelope_discounted_bermudanPrice (u d r : ℝ) (g : ℝ → ℝ) (S₀ : ℝ)
+    (hqcrr : crrUpProb u d r = q) {N k : ℕ} (hk : k ≤ N) :
+    snellEnvelope (coinFlipMeasure q hq) flipFiltration {i | N - i ∈ E}
+        (fun n ω ↦ Real.exp (-r * n) * g (spotPath S₀ u d n ω)) N k
+      =ᵐ[coinFlipMeasure q hq] fun ω ↦
+        Real.exp (-r * k) * bermudanPrice E u d r g (N - k) (spotPath S₀ u d k ω) := by
+  have hZ (n : ℕ) : PathAdaptedAt n fun ω ↦ Real.exp (-r * n) * g (spotPath S₀ u d n ω) :=
+    fun ω ω' h ↦ by simp only [pathAdaptedAt_spotPath S₀ u d n ω ω' h]
+  refine (snell_ae_eq_snellEnvelope (E := E) (hq := hq) hZ hk).symm.trans (ae_of_all _ fun ω ↦ ?_)
+  rw [snell, ← hqcrr, snellAux_eq_discounted_bermudanPrice]
+
+end Snell
 
 end MathFin
