@@ -6,7 +6,6 @@ Authors: Yang Ye
 module
 
 public import MathFin.BlackScholes.Heston
-public import MathFin.FixedIncome.Vasicek
 public import MathFin.FixedIncome.AffineTermStructurePDE
 
 /-!
@@ -16,16 +15,19 @@ The Riccati closed forms of `BlackScholes/Heston.lean` (`hestonBv`, `hestonA`) c
 vol-of-vol `ξ` in two places that break at `ξ = 0`: the prefactor `2κθ/ξ²` of the `A`-flow,
 multiplying the bracket `((γ + κ − ρξu)/2)τ − log(D(τ)/(2γ))` whose two terms each tend to
 `κτ`. Each piece alone diverges like `κ²θτ/ξ²`; their difference is `O(ξ²)`. This is the
-cancellation behind QuantLib's `AnalyticHestonEngine::chF` small-`σ` Taylor branch (taken
-for `σ ≤ 1e-6` and `κ ≥ 1e-8`), which `COSHestonEngine`, `AnalyticPTDHestonEngine` and
-`HestonRNDCalculator` lack. This file proves the limit those engines should reach.
+cancellation that a small-`σ` Taylor branch (as in QuantLib's `AnalyticHestonEngine::chF`)
+handles. This file proves the limit such a branch must reach, at the level of the Riccati
+closed forms.
 
 At `ξ = 0` the variance follows the deterministic ODE `dv = κ(θ − v)dt`, whose solution is
 `vasicekDeterministic v₀ θ κ` (`FixedIncome/Vasicek`), and the transform tends to the
 Black–Scholes real moment with total variance
 `W = ∫₀^τ v(s) ds = v₀B(τ) + θ(τ − B(τ))`, `B(τ) = (1 − e^{−κτ})/κ` — `vasicekIntegratedMean`
 and `vasicekBondB` from `FixedIncome/VasicekBondPrice` (with `hasDerivAt_vasicekBondB` from
-`FixedIncome/AffineTermStructurePDE`), reused here as plain closed forms.
+`FixedIncome/AffineTermStructurePDE`), reused here as plain closed forms. That `W` is the integral
+of the deterministic variance path is `HullWhite.integratedMean_const` with
+`HullWhite.deterministic_const` (`FixedIncome/HullWhiteCalibration`); it is not re-proved here, and
+the theorems below state the limit with `W := vasicekIntegratedMean v θ κ τ`.
 
 The `A`-limit is proved without expanding the cancellation: for `ξ ≠ 0`,
 `â(τ) = ∫₀^τ (ru + κθ·b̂(s)) ds` (FTC on `hasDerivAt_hestonA`); `b̂` is jointly continuous in
@@ -38,7 +40,6 @@ Results (`κ > 0`, `0 < u < 1`; limits are `ξ → 0`, `ξ ≠ 0`):
 * `hestonA_zero_volOfVol`: Lean's own value at `ξ = 0` is `ruτ` (`2κθ/0 = 0`) — **not** the
   limit; the closed form is discontinuous there, the formal shape of the missing branch.
 * `tendsto_hestonA_smallVolOfVol`: `â(τ) → ruτ + θ·((u² − u)/2)·(τ − B(τ))`.
-* `integral_vasicekDeterministic`: `∫₀^τ vasicekDeterministic v₀ θ κ = vasicekIntegratedMean`.
 * `tendsto_hestonProfile_smallVolOfVol_blackScholes`: the transform profile tends to
   `mgf id (gaussianReal (x + r(T − t) − W/2) W) u`, the lognormal log-spot moment.
 
@@ -54,54 +55,6 @@ algebra is the same under `u ↦ iz`: QuantLib's `D = √((κ − iρσz)² + (z
 
 open Filter Topology ProbabilityTheory
 open scoped NNReal
-
-namespace MathFin
-
-/-! ### The `ξ = 0` variance path: integrated deterministic variance -/
-
-/-- **The limit's variance is the integrated deterministic variance path.** At `ξ = 0` the
-variance obeys the ODE `dv = κ(θ − v)dt`, solved by `vasicekDeterministic v₀ θ κ`
-(`vasicekDeterministic_solves_ODE`), and
-`∫₀^τ v(s) ds = v₀·B(τ) + θ·(τ − B(τ)) = vasicekIntegratedMean v₀ θ κ τ`. -/
-theorem integral_vasicekDeterministic {κ : ℝ} (hκ : κ ≠ 0) (v₀ θ τ : ℝ) :
-    ∫ s in (0 : ℝ)..τ, vasicekDeterministic v₀ θ κ s = vasicekIntegratedMean v₀ θ κ τ := by
-  have hderiv : ∀ s ∈ Set.uIcc (0 : ℝ) τ,
-      HasDerivAt (vasicekIntegratedMean v₀ θ κ) (vasicekDeterministic v₀ θ κ s) s := by
-    intro s _
-    have h : HasDerivAt (fun s => v₀ * vasicekBondB κ s + θ * (s - vasicekBondB κ s))
-        (v₀ * (1 - κ * vasicekBondB κ s) + θ * (1 - (1 - κ * vasicekBondB κ s))) s :=
-      ((hasDerivAt_vasicekBondB hκ s).const_mul v₀).fun_add
-        (((hasDerivAt_id' s).fun_sub (hasDerivAt_vasicekBondB hκ s)).const_mul θ)
-    convert h using 1
-    · rfl
-    · simp only [vasicekDeterministic, vasicekBondB]
-      field_simp
-      ring
-  have hcont : Continuous (vasicekDeterministic v₀ θ κ) := by
-    unfold vasicekDeterministic
-    fun_prop
-  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv (hcont.intervalIntegrable _ _)]
-  simp [vasicekIntegratedMean, vasicekBondB]
-
-/-- The integrated deterministic variance is nonnegative (`κ > 0`, `v₀, θ, τ ≥ 0`):
-`0 ≤ B(τ) ≤ τ`. -/
-theorem vasicekIntegratedMean_nonneg {κ v₀ θ τ : ℝ} (hκ : 0 < κ) (hv : 0 ≤ v₀) (hθ : 0 ≤ θ)
-    (hτ : 0 ≤ τ) : 0 ≤ vasicekIntegratedMean v₀ θ κ τ := by
-  have hB0 : 0 ≤ vasicekBondB κ τ := by
-    rw [vasicekBondB]
-    refine div_nonneg ?_ hκ.le
-    have : Real.exp (-(κ * τ)) ≤ 1 := Real.exp_le_one_iff.mpr (by nlinarith)
-    linarith
-  have hBτ : vasicekBondB κ τ ≤ τ := by
-    rw [vasicekBondB, div_le_iff₀ hκ]
-    have := Real.add_one_le_exp (-(κ * τ))
-    nlinarith
-  rw [vasicekIntegratedMean]
-  have := mul_nonneg hv hB0
-  have := mul_nonneg hθ (sub_nonneg.mpr hBτ)
-  linarith
-
-end MathFin
 
 namespace MathFin.Heston
 
@@ -242,7 +195,7 @@ theorem tendsto_hestonA_smallVolOfVol {κ u : ℝ} (hκ : 0 < κ) (hu1 : 0 < u) 
 `Φ_ξ(t, x, v) = e^{â(T−t) + u·x + b̂(T−t)·v} → exp(ux + ru(T − t) + ((u² − u)/2)·W)`,
 
 `W = vasicekIntegratedMean v θ κ (T − t) = ∫₀^{T−t} (θ + (v − θ)e^{−κs}) ds` — the integrated
-deterministic variance (`integral_vasicekDeterministic`). -/
+deterministic variance (`HullWhite.integratedMean_const`, `HullWhite.deterministic_const`). -/
 theorem tendsto_hestonProfile_smallVolOfVol {κ u : ℝ} (hκ : 0 < κ) (hu1 : 0 < u) (hu2 : u < 1)
     (r θ ρ T t x v : ℝ) :
     Tendsto (fun ξ => hestonProfile u (fun w => hestonA r κ θ ξ ρ u (T - w))

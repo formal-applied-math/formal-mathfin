@@ -17,9 +17,11 @@ Calibration through Simple Expansions" (SSRN 2467231, 2014). The SABR implied vo
 (model `dF = α̂ F^β dW₁`, `dα̂ = ν α̂ dW₂`, `dW₁ dW₂ = ρ dt`) is written in terms of two
 building blocks of the strike `k`, given the forward `F`:
 
-* the normalizing transform `y(k) = ∫_F^k x^(-β) dx = -(F^(1-β) - k^(1-β)) / (1-β)`;
-* the distance `Dint(k) = ∫_k^F dx / D(x)`, `D(x) = √(α² + 2αρν y(x) + ν² y(x)²) · x^β`, in
-  closed form `Dint = (1/ν) · log((√(1 + 2ρνy/α + (νy/α)²) - ρ - νy/α) / (1-ρ))`;
+* the normalizing transform, in closed form `y(k) = -(F^(1-β) - k^(1-β)) / (1-β)`
+  (as printed; it is the integral `∫_F^k x^(-β) dx`, an identity not proved here);
+* the distance, in closed form `Dint = (1/ν) · log((√(1 + 2ρνy/α + (νy/α)²) - ρ - νy/α) / (1-ρ))`
+  (as printed; it is the integral `∫_k^F dx / D(x)` with
+  `D(x) = √(α² + 2αρν y(x) + ν² y(x)²) · x^β`, an identity not proved here);
 
 with leading-order vol `ω₀(k) = log(F/k) / Dint(k)`. Both closed forms are removable
 singularities on admissible SABR parameters: `y` is `0/0` at `β = 1` (the lognormal SABR) and
@@ -30,7 +32,8 @@ fill them:
 * `tendsto_sabrFKDint_nu_zero` — `Dint → -y/α` as `ν → 0` (`ρ ≠ 1`, every `α`, `y`; at
   `α = 0` this holds only through Lean's `x/0 = 0` junk value, not as a fact about the
   closed form, which is undefined there);
-* `tendsto_sabrFKOmega0_nu_zero` — hence `ω₀(k) → -α log(F/k) / y` as `ν → 0` (`y ≠ 0`).
+* `tendsto_sabrFKOmega0_nu_zero` — hence `ω₀(k) → -α log(F/k) / y` as `ν → 0` (`y ≠ 0`), for
+  any real `y`, in particular for `y = sabrFKY F k β`.
 
 The `ν → 0` limit reuses Hagan's `x(z)` (`sabrX`, `BlackScholes/SABRImpliedVol.lean`):
 `Dint = ν⁻¹ · x(-νy/α)` (`sabrFKDint_eq_sabrX`), so the limit is the slope `x'(0) = 1`
@@ -51,15 +54,16 @@ namespace MathFin
 
 open Filter Topology
 
-/-- **Le Floc'h–Kennedy's normalizing transform** `y(k) = -(F^(1-β) - k^(1-β)) / (1-β)`
-(`= ∫_F^k x^(-β) dx` for `β ≠ 1`). At `β = 1` the closed form is `0/0`;
-`tendsto_sabrFKY_beta_one` gives its limit `-log(F/k)`. -/
+/-- **Le Floc'h–Kennedy's normalizing transform**, the closed form as printed,
+`y(k) = -(F^(1-β) - k^(1-β)) / (1-β)`; the identification with `∫_F^k x^(-β) dx` (`β ≠ 1`) is
+not proved here. At `β = 1` the closed form is `0/0`; `tendsto_sabrFKY_beta_one` gives its limit
+`-log(F/k)`. -/
 noncomputable def sabrFKY (F k β : ℝ) : ℝ := -(F ^ (1 - β) - k ^ (1 - β)) / (1 - β)
 
-/-- **Le Floc'h–Kennedy's distance** `Dint` as a function of `y = y(k)`:
-`(1/ν) · log((√(1 + 2ρνy/α + (νy/α)²) - ρ - νy/α) / (1-ρ))` (`= ∫_k^F dx / D(x)` for
-`ν ≠ 0`). At `ν = 0` the closed form is `(1/0) · log 1`; `tendsto_sabrFKDint_nu_zero`
-gives its limit `-y/α`. -/
+/-- **Le Floc'h–Kennedy's distance** `Dint` as a function of `y = y(k)`, the closed form as
+printed: `(1/ν) · log((√(1 + 2ρνy/α + (νy/α)²) - ρ - νy/α) / (1-ρ))`; the identification with
+`∫_k^F dx / D(x)` is not proved here. At `ν = 0` the closed form is `(1/0) · log 1`;
+`tendsto_sabrFKDint_nu_zero` gives its limit `-y/α`. -/
 noncomputable def sabrFKDint (α ρ ν y : ℝ) : ℝ :=
   1 / ν * Real.log ((Real.sqrt (1 + 2 * ρ * ν / α * y + (ν / α * y) ^ 2) - ρ - ν / α * y)
     / (1 - ρ))
@@ -111,8 +115,9 @@ theorem sabrFKDint_eq_sabrX (α ρ ν y : ℝ) :
 only through Lean's `x/0 = 0` junk value, not as a fact about the closed form, which is
 undefined there): the `∞ · 0` in the closed form at zero vol-of-vol is removable. Via
 `sabrFKDint_eq_sabrX`, `Dint` is the difference quotient at `ν = 0` of `ν ↦ x(-(y/α)ν)`,
-whose derivative there is `x'(0) · (-y/α) = -y/α` (`hasDerivAt_sabrX_zero`). This is
-`∫_k^F dx / D(x)` with `D(x) = α x^β`, the `ν = 0` diffusion coefficient. -/
+whose derivative there is `x'(0) · (-y/α) = -y/α` (`hasDerivAt_sabrX_zero`). This is the limit
+of the closed form as printed; that the closed form is `∫_k^F dx / D(x)` (so that the limit is
+the integral with the `ν = 0` coefficient `D(x) = α x^β`) is not proved here. -/
 theorem tendsto_sabrFKDint_nu_zero {α ρ : ℝ} (hρ : ρ ≠ 1) (y : ℝ) :
     Tendsto (fun ν ↦ sabrFKDint α ρ ν y) (𝓝[≠] 0) (𝓝 (-y / α)) := by
   have hinner : HasDerivAt (fun ν : ℝ ↦ -(y / α) * ν) (-(y / α)) 0 := by
@@ -129,8 +134,8 @@ theorem tendsto_sabrFKDint_nu_zero {α ρ : ℝ} (hρ : ρ ≠ 1) (y : ℝ) :
   simp [sabrFKDint_eq_sabrX, h0]
 
 /-- **The leading-order vol at zero vol-of-vol**: `ω₀ → -α log(F/k) / y` as `ν → 0`, `ν ≠ 0`
-(`α ≠ 0`, `ρ ≠ 1`, `y ≠ 0`, i.e. `k ≠ F`). With `y = -log(F/k)` (the `β = 1` limit of
-`tendsto_sabrFKY_beta_one`) this is `α`, the lognormal vol. -/
+(`α ≠ 0`, `ρ ≠ 1`, and any real `y ≠ 0`; `y` is a free argument of `sabrFKOmega0`, not tied to
+`F`, `k` or `β`). Taking `y = sabrFKY F k β` gives the limit for the printed transform. -/
 theorem tendsto_sabrFKOmega0_nu_zero {F k α ρ y : ℝ} (hα : α ≠ 0) (hρ : ρ ≠ 1) (hy : y ≠ 0) :
     Tendsto (fun ν ↦ sabrFKOmega0 F k α ρ ν y) (𝓝[≠] 0) (𝓝 (-α * Real.log (F / k) / y)) := by
   have h := tendsto_const_nhds (x := Real.log (F / k)).div (tendsto_sabrFKDint_nu_zero hρ y)

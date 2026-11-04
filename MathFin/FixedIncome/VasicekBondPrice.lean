@@ -93,6 +93,24 @@ noncomputable def vasicekIntegratedKernel (κ T : ℝ) : ℝ → ℝ :=
 noncomputable def vasicekIntegratedMean (r₀ θ κ T : ℝ) : ℝ :=
   r₀ * vasicekBondB κ T + θ * (T - vasicekBondB κ T)
 
+/-- The integrated mean `M(T)` is nonnegative (`κ > 0`, `v₀, θ, τ ≥ 0`):
+`0 ≤ B(τ) ≤ τ`. -/
+theorem vasicekIntegratedMean_nonneg {κ v₀ θ τ : ℝ} (hκ : 0 < κ) (hv : 0 ≤ v₀) (hθ : 0 ≤ θ)
+    (hτ : 0 ≤ τ) : 0 ≤ vasicekIntegratedMean v₀ θ κ τ := by
+  have hB0 : 0 ≤ vasicekBondB κ τ := by
+    rw [vasicekBondB]
+    refine div_nonneg ?_ hκ.le
+    have : Real.exp (-(κ * τ)) ≤ 1 := Real.exp_le_one_iff.mpr (by nlinarith)
+    linarith
+  have hBτ : vasicekBondB κ τ ≤ τ := by
+    rw [vasicekBondB, div_le_iff₀ hκ]
+    have := Real.add_one_le_exp (-(κ * τ))
+    nlinarith
+  rw [vasicekIntegratedMean]
+  have := mul_nonneg hv hB0
+  have := mul_nonneg hθ (sub_nonneg.mpr hBτ)
+  linarith
+
 /-- The variance of the integrated short rate's diffusion part (the `L²`-norm of
 the integrated kernel `g`): `V(T) = ∫₀ᵀ g² = T/κ² − 2(1−e^{−κT})/κ³ + (1−e^{−2κT})/(2κ³)`. -/
 noncomputable def vasicekBondV (κ T : ℝ) : ℝ :=

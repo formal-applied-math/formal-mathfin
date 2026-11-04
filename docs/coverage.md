@@ -28,7 +28,7 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ### Removable singularities in two stochastic-vol smile models (2026-11-01)
 
-Four `full` entries in `benchmarks/black_scholes.json`. Corpus 754 → 758.
+Three `full` entries in `benchmarks/black_scholes.json`. Corpus 754 → 757.
 
 - **`mf-sabr-fk-y-beta-one-limit`** (`tendsto_sabrFKY_beta_one`): QuantLib's
   `SabrFlochKennedyVolatility` (Le Floc'h & Kennedy, SSRN 2467231, 2014) normalizing transform
@@ -37,21 +37,18 @@ Four `full` entries in `benchmarks/black_scholes.json`. Corpus 754 → 758.
 - **`mf-sabr-fk-omega0-nu-zero-limit`** (`tendsto_sabrFKOmega0_nu_zero`, via
   `tendsto_sabrFKDint_nu_zero` and `sabrFKDint_eq_sabrX` reusing `SABRImpliedVol.lean`'s
   `sabrX`): the same engine's leading-order vol `ω₀(k) = log(F/k)/Dint(k)` is `∞·0` at `ν = 0`;
-  it tends to `-α log(F/k)/y` as `ν → 0`, `ν ≠ 0`, for `α ≠ 0`, `ρ ≠ 1`, `y ≠ 0`. Neither entry
-  covers the full Le Floc'h-Kennedy expansion (the `ω₀` correction terms, `D(F)`, `D(k)`) or its
+  it tends to `-α log(F/k)/y` as `ν → 0`, `ν ≠ 0`, for `α ≠ 0`, `ρ ≠ 1` and `y = sabrFKY F k β ≠ 0`
+  (the printed closed forms; that they equal the integrals `∫_F^k x^(-β) dx` and `∫_k^F dx/D(x)`
+  is not proved). Neither entry covers the full Le Floc'h-Kennedy expansion (the `ω₀` correction terms, `D(F)`, `D(k)`) or its
   approximation quality against the true SABR implied volatility.
 - **`mf-heston-small-vol-of-vol-blackscholes-limit`** (`MathFin.Heston.tendsto_hestonProfile_smallVolOfVol_blackScholes`):
   the Heston transform's Riccati closed forms (`hestonA`, `hestonBv`) carry a `2κθ/ξ²`
-  prefactor that is `∞ · 0` at vol-of-vol `ξ = 0` (the cancellation QuantLib's
-  `AnalyticHestonEngine::chF` Taylor-expands around, for `σ ≤ 1e-6` and `κ ≥ 1e-8`); the
-  transform tends to the Black-Scholes real moment generating function for `κ > 0`,
-  `0 < u < 1`, `v, θ ≥ 0`, `t ≤ T`. Only the real moment transform at the Riccati level is
-  covered, not the complex characteristic function or the identification with an actual
-  Heston process's `E[e^{u log S_T}]`.
-- **`mf-heston-zero-vol-of-vol-integrated-variance`** (`integral_vasicekDeterministic`): the
-  integrated deterministic variance feeding the limit above, `∫₀^τ v(s) ds = v₀B(τ) +
-  θ(τ - B(τ))` for the `ξ = 0` variance path `v(s) = θ + (v₀ - θ)e^{-κs}`, reusing
-  `FixedIncome/Vasicek.lean`'s `vasicekBondB`.
+  prefactor that is `∞ · 0` at vol-of-vol `ξ = 0`; the transform tends to the Black-Scholes real
+  moment generating function with total variance `vasicekIntegratedMean v θ κ (T - t)`, for
+  `κ > 0`, `0 < u < 1`, `v, θ ≥ 0`, `t ≤ T`. The limit is at the Riccati-profile level: not the
+  complex characteristic function, and not identified with a Heston process's `E[e^{u log S_T}]`.
+  (That the total variance is the integral of the `ξ = 0` variance path is the library's
+  `HullWhite.integratedMean_const`, not part of the entry.)
 
 ### One route to Merton's formula; one Black–Scholes family (2026-10-30)
 
