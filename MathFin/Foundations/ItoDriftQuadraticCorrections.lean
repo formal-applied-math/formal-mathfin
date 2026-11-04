@@ -65,36 +65,12 @@ only the limit `0`, and the bounds below are what the proofs establish:
   (`abs_discreteTaylorRemainder_le` + `pow3_add_le` + `trueIncr_pow3_le`). -/
 
 omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- The `(n+1)`-divergence and the `1/(n+1)` null sequence over the naturals. -/
-private theorem tendsto_nat_add_one_atTop :
-    Tendsto (fun n : ℕ ↦ ((n : ℝ) + 1)) atTop atTop := by
-  refine Filter.tendsto_atTop_atTop.mpr fun x ↦ ⟨Nat.ceil x, fun n hn ↦ ?_⟩
-  have h2 : (x : ℝ) ≤ ((Nat.ceil x : ℕ) : ℝ) := Nat.le_ceil x
-  have h3 : ((Nat.ceil x : ℕ) : ℝ) ≤ ((n : ℕ) : ℝ) := by exact_mod_cast hn
-  linarith
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-private theorem tendsto_one_div_nat_add :
-    Tendsto (fun n : ℕ ↦ (1 : ℝ) / ((n : ℝ) + 1)) atTop (𝓝 0) := by
-  refine tendsto_nat_add_one_atTop.inv_tendsto_atTop.congr'
-    (Eventually.of_forall fun n ↦ ?_)
-  change ((n : ℝ) + 1)⁻¹ = (1 : ℝ) / ((n : ℝ) + 1)
-  rw [one_div]
-
-omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
-/-- The `1/√(n+1)` null sequence over the naturals. -/
+/-- The `1/√(n+1)` null sequence over the naturals: the square root of Mathlib's
+`tendsto_one_div_add_atTop_nhds_zero_nat`. -/
 theorem tendsto_inv_sqrt_nat_add :
     Tendsto (fun n : ℕ ↦ (1 : ℝ) / Real.sqrt ((n : ℝ) + 1)) atTop (𝓝 0) := by
-  have hsqrt : Tendsto (fun n : ℕ ↦ Real.sqrt ((1 : ℝ) / ((n : ℝ) + 1))) atTop
-      (𝓝 (Real.sqrt 0)) :=
-    ((Real.continuous_sqrt.tendsto (0 : ℝ)).comp tendsto_one_div_nat_add).congr'
-      (Eventually.of_forall fun n ↦ rfl)
-  have hsqrt2 : Tendsto (fun n : ℕ ↦ Real.sqrt ((1 : ℝ) / ((n : ℝ) + 1))) atTop
-      (𝓝 (0 : ℝ)) := by
-    simpa [Real.sqrt_zero] using hsqrt
-  refine hsqrt2.congr' (Eventually.of_forall fun n ↦ ?_)
-  change Real.sqrt ((1 : ℝ) / ((n : ℝ) + 1)) = (1 : ℝ) / Real.sqrt ((n : ℝ) + 1)
-  rw [Real.sqrt_div (by norm_num : (0 : ℝ) ≤ 1), Real.sqrt_one]
+  simpa only [Real.sqrt_div zero_le_one, Real.sqrt_one, Real.sqrt_zero] using
+    (tendsto_one_div_add_atTop_nhds_zero_nat (𝕜 := ℝ)).sqrt
 
 omit hB hBmeas hδadap hδcont hδbdd hMadap hMeq in
 /-- **The drift² corrections of the quadratic block die**: the statement is the limit `0`.
@@ -215,17 +191,8 @@ theorem quadDriftSqSum_tendsto (hBmeas : ∀ t, Measurable (B t)) {β : ℝ≥0 
             have hK : (0 : ℝ) ≤ C2 * Db ^ 2 * (T : ℝ) ^ 2 := by positivity
             have hnm : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
             nlinarith
-    · have hzero : ((2 * C2 * Db ^ 2 * (T : ℝ) ^ 2) * (0 : ℝ)) = (0 : ℝ) := mul_zero _
-      have h2' : Tendsto (fun n : ℕ ↦ (2 * C2 * Db ^ 2 * (T : ℝ) ^ 2) / ((n : ℝ) + 1))
-          atTop (𝓝 ((2 * C2 * Db ^ 2 * (T : ℝ) ^ 2) * 0)) := by
-        refine ((tendsto_const_nhds
-          (x := (2 * C2 * Db ^ 2 * (T : ℝ) ^ 2))).mul
-          tendsto_nat_add_one_atTop.inv_tendsto_atTop).congr'
-          (Eventually.of_forall fun n ↦ ?_)
-        change (2 * C2 * Db ^ 2 * (T : ℝ) ^ 2) * ((n : ℝ) + 1)⁻¹
-          = (2 * C2 * Db ^ 2 * (T : ℝ) ^ 2) / ((n : ℝ) + 1)
-        rw [div_eq_mul_inv]
-      rwa [hzero] at h2'
+    · simpa only [mul_one_div, mul_zero] using
+        (tendsto_one_div_add_atTop_nhds_zero_nat (𝕜 := ℝ)).const_mul (2 * C2 * Db ^ 2 * (T : ℝ) ^ 2)
   refine tendsto_iff_dist_tendsto_zero.mpr ?_
   refine hboundtendsto.congr' (Eventually.of_forall fun n ↦ ?_)
   change |∑ k ∈ Finset.range n,

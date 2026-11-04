@@ -412,8 +412,7 @@ theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
           + (4 * C3 * (2 * Real.sqrt (3 * (Dd ^ 2 * (T : ℝ)) ^ 3))) * (0 : ℝ)) = 0 := by
         norm_num
       have h1 : Tendsto (fun n : ℕ ↦ ((1 / ((n : ℝ) + 1)) ^ 2)) atTop (𝓝 (0 : ℝ)) :=
-        (tendsto_one_div_nat_add.pow 2).trans_eq
-          (congrArg (fun x : ℝ ↦ 𝓝 x) (by norm_num : ((0 : ℝ) ^ 2) = (0 : ℝ)))
+        by simpa using (tendsto_one_div_add_atTop_nhds_zero_nat (𝕜 := ℝ)).pow 2
       have hA : Tendsto (fun n : ℕ ↦ (4 * C3 * (4 * |Db| ^ 3 * (T : ℝ) ^ 3))
           * ((1 / ((n : ℝ) + 1)) ^ 2)) atTop
           (𝓝 ((4 * C3 * (4 * |Db| ^ 3 * (T : ℝ) ^ 3)) * (0 : ℝ))) :=
