@@ -397,6 +397,8 @@ import MathFin.BlackScholes.HigherGreeks
 import MathFin.BlackScholes.StrikeGreeks
 -- Local-vol skew of a tilted smile surface via Dupire's ratio; the rule of two
 import MathFin.BlackScholes.ForwardSmile
+-- Natural cubic spline pillar interpolation: the moment system and its unique solution
+import MathFin.BlackScholes.CubicSplineSmile
 import MathFin.BlackScholes.PutStrikeConvexity
 import MathFin.BlackScholes.AsianInequality
 -- Geometric-average Asian: two-date log-driver is Gaussian with the covariance-sum variance
