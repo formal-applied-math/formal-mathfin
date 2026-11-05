@@ -26,28 +26,26 @@ upstream of this file on the scenario data, not a theorem about the risk measure
 formalized is the historical-simulation *risk measure applied to the position's deterministic value
 function*, reusing the general finite-law VaR machinery of `MathFin.DiscreteVaR`
 (`RiskMeasures/DiscreteVaR.lean`) rather than re-deriving quantile mechanics, together with the
-already-proved Uniswap v3 virtual-reserve curve (`MathFin/DeFi/UniswapMechanics.lean`).
+already-proved Uniswap v3 virtual-reserve curve (`MathFin/DeFi/UniswapMechanics.lean`). The two
+theorems below rest only on the position's value being nonnegative and linear in liquidity — true
+of any such value function, not special to the concentrated-liquidity range shape — so they do not
+yet use the v3 curve's own monotonicity in price. A genuine "VaR is the full revaluation at the
+empirical price quantile" result is future work, not claimed here.
 
 ## Main definitions
 
 * `historicalScenarioLoss`: the loss of a v3 position, marked today at square-root price `s0`,
-  under a historical scenario `i` whose square-root price is `scenarios i`;
-  `historicalScenarioLoss_self` checks it vanishes at a scenario equal to today's price.
-* `uniformWeights`: the equal-probability-`1/n` weight vector historical simulation assigns to `n`
-  historical scenarios.
+  under a historical scenario `i` whose square-root price is `scenarios i`.
 * `clHistoricalVaR`: the historical-simulation VaR of the position — `MathFin.DiscreteVaR.finiteVaR`
-  of `historicalScenarioLoss` at `uniformWeights`.
+  of `historicalScenarioLoss` at `MathFin.DiscreteVaR.uniformWeights`.
 
 ## Main results
 
-* `v3PositionValue_smul_liquidity`: `v3PositionValue` is linear in the liquidity `L` — for any real
-  `c` (not just `c ≥ 0`) — since `realReserveX`/`realReserveY` are literally linear in `L`, and the
-  price-range case split does not depend on it.
-* `clHistoricalVaR_smul_liquidity`: historical VaR inherits that linearity restricted to `c ≥ 0`
-  (positive homogeneity, the sign restriction VaR itself needs) — scaling the
-  liquidity deployed to a range by a nonnegative factor (holding the range and the historical
-  scenarios fixed) scales its historical-simulation VaR by the same factor, via
-  `MathFin.DiscreteVaR.finiteVaR_const_mul`.
+* `clHistoricalVaR_const_mul`: historical VaR scales with liquidity restricted to `c ≥ 0` (positive
+  homogeneity, the sign restriction VaR itself needs) — scaling the liquidity deployed to a range by
+  a nonnegative factor (holding the range and the historical scenarios fixed) scales its
+  historical-simulation VaR by the same factor, via `MathFin.DeFi.v3PositionValue_const_mul`
+  (linear in `L` for any real `c`) and `MathFin.DiscreteVaR.finiteVaR_const_mul`.
 * `clHistoricalVaR_le_value`: historical VaR never exceeds the position's current mark-to-market
   value — a concentrated-liquidity LP position is worth at least `0` at every price
   (`v3PositionValue_nonneg`), so no historical scenario's loss can exceed today's value, and VaR is
@@ -67,18 +65,7 @@ namespace MathFin
 
 namespace DeFi
 
-open MathFin.DiscreteVaR Set Convexity
-
-/-! ## Positive homogeneity of the position value in liquidity -/
-
-/-- **A v3 position's value is linear in its liquidity.** `realReserveX`/`realReserveY` are
-literally `L` times a function of the price range and current price alone, and the three-way case
-split in `v3PositionValue` does not depend on `L` — so scaling `L` by any real `c` scales the
-position's value at every square-root price `s` by the same factor. -/
-theorem v3PositionValue_smul_liquidity (c L a b s : ℝ) :
-    v3PositionValue (c * L) a b s = c * v3PositionValue L a b s := by
-  unfold v3PositionValue realReserveX realReserveY
-  split_ifs <;> ring
+open MathFin.DiscreteVaR Set
 
 /-! ## Historical-simulation VaR -/
 
@@ -88,22 +75,6 @@ marked today at square-root price `s0`, under historical scenario `i`'s square-r
 noncomputable def historicalScenarioLoss (L a b s0 : ℝ) {n : ℕ} (scenarios : Fin n → ℝ)
     (i : Fin n) : ℝ :=
   v3PositionValue L a b s0 - v3PositionValue L a b (scenarios i)
-
-/-- The loss at a scenario equal to today's price is zero: marking at `s0` itself cannot produce a
-gain or a loss. -/
-theorem historicalScenarioLoss_self {n : ℕ} (L a b s0 : ℝ) (scenarios : Fin n → ℝ) {i : Fin n}
-    (hi : scenarios i = s0) : historicalScenarioLoss L a b s0 scenarios i = 0 := by
-  unfold historicalScenarioLoss
-  rw [hi, sub_self]
-
-/-- **Equal weights on `n` historical scenarios**: the `1/n` probability historical simulation
-assigns to each of `n` historical observations, for `n ≥ 1`. -/
-noncomputable def uniformWeights (n : ℕ) (hn : 0 < n) : StdSimplex ℝ (Fin n) where
-  weights := Finsupp.equivFunOnFinite.symm (fun _ ↦ (n : ℝ)⁻¹)
-  nonneg _ := by simp
-  total := by
-    have hn' : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-    simp [Finsupp.sum_fintype, Finset.sum_const, Finset.card_univ, nsmul_eq_mul, hn']
 
 /-- **Historical-simulation VaR** of a v3 concentrated-liquidity position: the `finiteVaR` of
 `historicalScenarioLoss` at the equal weights `uniformWeights n hn` — the empirical `α`-quantile of
@@ -115,9 +86,9 @@ noncomputable def clHistoricalVaR (L a b s0 : ℝ) {n : ℕ} (hn : 0 < n) (scena
 /-- **Historical VaR scales with deployed liquidity.** Holding the range `[a, b]`, the mark `s0`
 and the historical scenarios fixed, scaling the liquidity `L` by a nonnegative factor `c` scales the
 position's historical-simulation VaR by the same factor: the loss function scales by `c` pointwise
-(`v3PositionValue_smul_liquidity`), and VaR is positively homogeneous in the loss
+(`v3PositionValue_const_mul`), and VaR is positively homogeneous in the loss
 (`MathFin.DiscreteVaR.finiteVaR_const_mul`). -/
-theorem clHistoricalVaR_smul_liquidity {n : ℕ} (hn : 0 < n) (L a b s0 : ℝ)
+theorem clHistoricalVaR_const_mul {n : ℕ} (hn : 0 < n) (L a b s0 : ℝ)
     (scenarios : Fin n → ℝ) {α : ℝ} (hα : α ∈ Ioo (0 : ℝ) 1) {c : ℝ} (hc : 0 ≤ c) :
     clHistoricalVaR (c * L) a b s0 hn scenarios α
       = c * clHistoricalVaR L a b s0 hn scenarios α := by
@@ -125,7 +96,7 @@ theorem clHistoricalVaR_smul_liquidity {n : ℕ} (hn : 0 < n) (L a b s0 : ℝ)
       = fun i ↦ c * historicalScenarioLoss L a b s0 scenarios i := by
     funext i
     unfold historicalScenarioLoss
-    rw [v3PositionValue_smul_liquidity, v3PositionValue_smul_liquidity, mul_sub]
+    rw [v3PositionValue_const_mul, v3PositionValue_const_mul, mul_sub]
   unfold clHistoricalVaR
   rw [hloss]
   exact finiteVaR_const_mul hα hc
@@ -137,12 +108,8 @@ today's mark `v3PositionValue L a b s0` — and VaR is attained at a loss value
 -/
 theorem clHistoricalVaR_le_value {n : ℕ} (hn : 0 < n) {L a b : ℝ} (hL : 0 ≤ L) (ha : 0 < a)
     (hab : a ≤ b) (s0 : ℝ) (scenarios : Fin n → ℝ) {α : ℝ} (hα0 : 0 < α) (hα1 : α ≤ 1) :
-    clHistoricalVaR L a b s0 hn scenarios α ≤ v3PositionValue L a b s0 := by
-  unfold clHistoricalVaR
-  refine finiteVaR_le_of_forall_le hα0 hα1 (fun i ↦ ?_)
-  have h0 := v3PositionValue_nonneg (L := L) (a := a) (b := b) (s := scenarios i) hL ha hab
-  unfold historicalScenarioLoss
-  linarith
+    clHistoricalVaR L a b s0 hn scenarios α ≤ v3PositionValue L a b s0 :=
+  finiteVaR_le_of_forall_le hα0 hα1 fun _ ↦ sub_le_self _ (v3PositionValue_nonneg hL ha hab)
 
 end DeFi
 

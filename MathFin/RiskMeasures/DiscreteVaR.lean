@@ -41,10 +41,13 @@ For an integrable loss and `α ∈ (0, 1)`, the dual representation of ES over b
 
 * `finiteVaR_eq_valueAtRisk`, `finiteES_eq_expectedShortfall`: for `α ∈ (0, 1)`, the finite forms
   agree with the general definitions at the law `∑ i, q i • δ_i`.
-* `finiteVaR_const_mul`: positive homogeneity, `finiteVaR q (fun i ↦ c * L i) α = c * finiteVaR q L α`
-  for `c ≥ 0`, inherited from `valueAtRisk_const_mul` through the bridge.
+* `finiteVaR_const_mul`: positive homogeneity,
+  `finiteVaR q (fun i ↦ c * L i) α = c * finiteVaR q L α` for `c ≥ 0`, inherited from
+  `valueAtRisk_const_mul` through the bridge (needs no `MeasurableSpace` on `ι` in its statement,
+  only in the proof, which borrows one locally).
 * `finiteVaR_eq_value_min`: for `α ∈ (0, 1]`, VaR at a finite law is attained at a loss value.
 * `finiteVaR_le_of_forall_le`: a uniform cap on every outcome's loss caps VaR the same way.
+* `uniformWeights`: the equal-`1/n`-weights `StdSimplex` on `n` observations.
 * `finiteVaR_two_point`: for `α ∈ (0, 1]`, VaR of a loss that is `0` with mass `a` and `c > 0` with
   mass `1 - a`.
 * `finiteVaR_one_bond`, `finiteVaR_two_halves`: `VaR₀.₉₅` is `0` for the single bond and `50`
@@ -132,14 +135,6 @@ theorem finiteES_eq_expectedShortfall {L : ι → ℝ} {α : ℝ} (hα : α ∈ 
   exact congrArg _ <| setIntegral_congr_fun measurableSet_Ioo fun u hu ↦
     finiteVaR_eq_valueAtRisk ⟨hα.1.trans hu.1, hu.2⟩
 
-/-- **Positive homogeneity** of `finiteVaR`: scaling every outcome's loss by a nonnegative constant
-`c` scales VaR by the same constant, inherited from `valueAtRisk_const_mul`
-(`RiskMeasures/ValueAtRisk.lean`) through the bridge `finiteVaR_eq_valueAtRisk`. -/
-theorem finiteVaR_const_mul {L : ι → ℝ} {α : ℝ} (hα : α ∈ Ioo 0 1) {c : ℝ} (hc : 0 ≤ c) :
-    finiteVaR q (fun i ↦ c * L i) α = c * finiteVaR q L α := by
-  rw [finiteVaR_eq_valueAtRisk hα, finiteVaR_eq_valueAtRisk hα]
-  exact valueAtRisk_const_mul (measurable_of_finite L).aemeasurable hα hc
-
 end Bridge
 
 /-! ## Evaluating `finiteVaR` -/
@@ -199,6 +194,19 @@ theorem finiteVaR_le_of_forall_le (hα0 : 0 < α) (hα1 : α ≤ 1) {c : ℝ} (h
   rw [← hi]
   exact hc i
 
+/-- **Positive homogeneity** of `finiteVaR`: scaling every outcome's loss by a nonnegative constant
+`c` scales VaR by the same constant, inherited from `valueAtRisk_const_mul`
+(`RiskMeasures/ValueAtRisk.lean`) through the bridge `finiteVaR_eq_valueAtRisk`. The *statement*
+needs no measurable-space structure on `ι` (`finiteVaR` is pure `Finset` arithmetic); the proof
+borrows an arbitrary one locally to reach the bridge, so this lemma is usable for any `Fintype ι`,
+not only one that happens to carry a `MeasurableSpace` instance. -/
+theorem finiteVaR_const_mul (hα : α ∈ Ioo 0 1) {c : ℝ} (hc : 0 ≤ c) :
+    finiteVaR q (fun i ↦ c * L i) α = c * finiteVaR q L α := by
+  let _ : MeasurableSpace ι := ⊤
+  have _ : MeasurableSingletonClass ι := ⟨fun _ ↦ trivial⟩
+  rw [finiteVaR_eq_valueAtRisk hα, finiteVaR_eq_valueAtRisk hα]
+  exact valueAtRisk_const_mul (measurable_of_finite L).aemeasurable hα hc
+
 /-- **Two-point laws.** If the mass of `{L ≤ x}` is `0` for `x < 0`, `a` for `0 ≤ x < c` and
 `a + b = 1` for `x ≥ c`, with `c > 0`, then at every level `α ∈ (0, 1]` the VaR is `0` for
 `α ≤ a` and `c` above. -/
@@ -211,6 +219,20 @@ theorem finiteVaR_two_point {a b c : ℝ} (hab : a + b = 1) (hc : 0 < c)
     split_ifs <;> linarith
 
 end Evaluation
+
+/-! ## Uniform weights on `n` observations -/
+
+/-- **Equal weights on `n` observations**: the `1/n` probability historical simulation (and any
+other equally-likely-scenario construction) assigns to each of `n` observations, for `n ≥ 1`. No
+premade `n`-point uniform `StdSimplex` exists upstream (Mathlib's `Convexity.StdSimplex` namespace
+has `single` and `duple` only); this is the general building block, usable wherever a finite
+equally-likely law on `Fin n` is needed. -/
+noncomputable def uniformWeights (n : ℕ) (hn : 0 < n) : StdSimplex ℝ (Fin n) where
+  weights := Finsupp.equivFunOnFinite.symm (fun _ ↦ (n : ℝ)⁻¹)
+  nonneg _ := by simp
+  total := by
+    have hn' : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
+    simp [Finsupp.sum_fintype, Finset.sum_const, Finset.card_univ, nsmul_eq_mul, hn']
 
 /-! ## The single bond -/
 

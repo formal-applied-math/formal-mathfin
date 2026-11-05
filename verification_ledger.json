@@ -2154,17 +2154,17 @@
     },
     "mf-cpmm-impermanent-loss-nonpositive": {
       "benchmark_file": "defi.json",
-      "date": "2026-11-04",
-      "elapsed_s": 6.2,
-      "input_hash": "fda0eb8d585edf52d1555ec4f48deb60751297493d47f6fe4795a5e49535d5e3",
-      "verified_at_commit": "cd32dd5"
+      "date": "2026-11-05",
+      "elapsed_s": 4.1,
+      "input_hash": "9f07e99ea01fecf8512cd15f1ac566b2490db48eceab419d19f6d0aeb907b9c8",
+      "verified_at_commit": "9705eb05"
     },
     "mf-cpmm-lp-expected-value-lognormal": {
       "benchmark_file": "defi.json",
-      "date": "2026-11-04",
-      "elapsed_s": 4.5,
-      "input_hash": "c96e7ccf77593b39cc8a3ebaf37475e782d344eaef297ef7e050097369981139",
-      "verified_at_commit": "cd32dd5"
+      "date": "2026-11-05",
+      "elapsed_s": 4.0,
+      "input_hash": "e5c74fd0f6bee969d4c3d84e1b07bf59cf12e2b9dc525a50180151ac613218d6",
+      "verified_at_commit": "9705eb05"
     },
     "mf-credit-spread-eq-hazard": {
       "benchmark_file": "credit.json",
@@ -2296,8 +2296,8 @@
       "benchmark_file": "risk_measures.json",
       "date": "2026-11-05",
       "elapsed_s": 4.2,
-      "input_hash": "ff58e43f3e410ce89a3259b9cbadadf55aa0890365e1c1d035d6cd34fc87cf12",
-      "verified_at_commit": "89620dad"
+      "input_hash": "602a93780d5fb197b245c6a9e02c9077d5f4966c401e82a7d891cb43f61d1d9f",
+      "verified_at_commit": "9705eb05"
     },
     "mf-downside-performance-metrics": {
       "benchmark_file": "portfolio_and_performance.json",
@@ -4305,22 +4305,22 @@
       "benchmark_file": "defi.json",
       "date": "2026-11-05",
       "elapsed_s": 4.1,
-      "input_hash": "8b65fbd1ada61b554ee50dd9a41f9389e313e1d4f558eda7925ad52375e1afca",
-      "verified_at_commit": "89620dad"
+      "input_hash": "440f85b99ac2086ae16fbb8e5a48a5aa7943024d31b6918647b5eba2741b0873",
+      "verified_at_commit": "9705eb05"
     },
     "mf-uniswap-v3-position-bs-price-bound": {
       "benchmark_file": "defi.json",
-      "date": "2026-11-04",
-      "elapsed_s": 4.3,
-      "input_hash": "2451cb653c682a3eca1d5fa41c3ab42f84653a077e77a60e4fa8b2f1d2a56b6e",
-      "verified_at_commit": "cd32dd5"
+      "date": "2026-11-05",
+      "elapsed_s": 4.1,
+      "input_hash": "58d1cd5a25f27bd6a370ac1538adb3a23bd84f069a7758da8901cfd08b017cf6",
+      "verified_at_commit": "9705eb05"
     },
     "mf-uniswap-v3-position-covered-call": {
       "benchmark_file": "defi.json",
-      "date": "2026-11-04",
+      "date": "2026-11-05",
       "elapsed_s": 4.2,
-      "input_hash": "6dbd2c1f9f2c9f786c767a8fe1418e7aca14d13c88d6abfa96ae87bc0433ba2c",
-      "verified_at_commit": "cd32dd5"
+      "input_hash": "c5d63a48562a1ccb74b273dc5b8ea1e585aa06944ef795527b289dc6dac475b2",
+      "verified_at_commit": "9705eb05"
     },
     "mf-utility-acceptance-not-cone": {
       "benchmark_file": "risk_measures.json",

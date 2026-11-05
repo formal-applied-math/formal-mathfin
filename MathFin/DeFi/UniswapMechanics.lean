@@ -67,7 +67,8 @@ market makers, building on the constant-product substrate in
 * `v3PositionValue`: the value, in token Y, of a v3 position at any square-root price `s`:
   all token X below the range, the in-range reserves inside, all token Y above (v3 whitepaper
   §6.4.1, eqs. 6.29–6.30). `v3PositionValue_at_lower`, `v3PositionValue_at_upper`: the two
-  boundary cases, all X at `s = √p_a` and all Y at `s = √p_b`; `v3PositionValue_nonneg`.
+  boundary cases, all X at `s = √p_a` and all Y at `s = √p_b`; `v3PositionValue_nonneg`;
+  `v3PositionValue_const_mul`: linear in the liquidity `L`, for any real `c`.
 * `v3PositionValue_eq_coveredCall_of_le`, `v3PositionValue_eq_coveredCall_of_lt`,
   `coveredCall_sub_v3PositionValue`, `v3PositionValue_le_coveredCall`: **a v3 position is a
   covered call, less a smoothing term.** With `x_max = realReserveX L √p_a √p_b` the position's
@@ -376,6 +377,15 @@ theorem v3PositionValue_nonneg {L a b s : ℝ} (hL : 0 ≤ L) (ha : 0 < a) (hab 
     exact add_nonneg (mul_nonneg hL (by linarith [not_le.mp hsa]))
       (mul_nonneg (sq_nonneg s) (mul_nonneg hL (sub_nonneg.mpr (one_div_le_one_div_of_le hs' hsb))))
   · exact mul_nonneg hL (by linarith)
+
+/-- **A v3 position's value is linear in its liquidity.** `realReserveX`/`realReserveY` are
+literally `L` times a function of the price range and current price alone, and the three-way case
+split in `v3PositionValue` does not depend on `L` — so scaling `L` by any real `c` (not just
+`c ≥ 0`) scales the position's value at every square-root price `s` by the same factor. -/
+theorem v3PositionValue_const_mul (c L a b s : ℝ) :
+    v3PositionValue (c * L) a b s = c * v3PositionValue L a b s := by
+  unfold v3PositionValue realReserveX realReserveY
+  split_ifs <;> ring
 
 /-- **Below the range the position is the covered call**: for `0 ≤ s ≤ a`,
 `v3PositionValue L a b s = x_max · (s² − max (s² − ab) 0)` with `x_max = realReserveX L a b`

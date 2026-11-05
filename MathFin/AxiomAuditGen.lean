@@ -475,13 +475,13 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.DeFi.arbitragePresent_iff
 
+/-- info: 'MathFin.DeFi.clHistoricalVaR_const_mul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.clHistoricalVaR_const_mul
+
 /-- info: 'MathFin.DeFi.clHistoricalVaR_le_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.DeFi.clHistoricalVaR_le_value
-
-/-- info: 'MathFin.DeFi.clHistoricalVaR_smul_liquidity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.DeFi.clHistoricalVaR_smul_liquidity
 
 /-- info: 'MathFin.DeFi.coveredCall_sub_v3PositionValue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
