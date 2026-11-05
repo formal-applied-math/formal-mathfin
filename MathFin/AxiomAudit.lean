@@ -1960,8 +1960,8 @@ forms exactly once; every composed instrument built from them afterward prices b
 three values rather than by a fresh integration argument.
 
 A second model prices the same terms (2026-10-28). `Contracts/Models/Binomial.lean` reads the
-underlying off coin-flip paths and gives each European payoff its tree price; there every contract
-is integrable, because the model is bounded (`Contract.integrable_pathPV_of_bounded`).
+underlying off coin-flip paths and gives each European payoff its tree price; there every fixed-date
+contract is integrable, because the model is bounded (`Contract.integrable_pathPV_of_bounded`).
 `tendsto_binomial_value_europeanCall` then shows that `europeanCall K T`, one term, has CRR values
 converging to its Black–Scholes value. The contract stays fixed and only the model moves.
 In the tree the value is also the cost of a hedge (2026-10-29): `pathPV_eq_value_add_gains` writes

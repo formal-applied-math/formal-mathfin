@@ -249,7 +249,7 @@ theorem Contract.integrable_pathPV_of_bounded {Q : Measure Ω} [IsFiniteMeasure 
         List.sum_cons, List.sum_nil, add_zero]
       exact (Integrable.of_bound (a.measurable_eval X hXm).aestronglyMeasurable C
         (.of_forall hC)).const_mul _
-  | payAtHit i A a => exact False.elim hc
+  | payAtHit i A a => exact hc.elim
   | both a b ha hb =>
       simp only [Contract.pathPV_both]
       exact (ha hc.1).add (hb hc.2)

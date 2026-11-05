@@ -168,9 +168,7 @@ theorem Contract.pathPV_payAtHit_of_eq (D : ℝ≥0 → ℝ) (s : Scenario ι) {
 /-- **A payment at the hitting time is nothing** if the underlying never hits `A`. -/
 theorem Contract.pathPV_payAtHit_of_eq_top (D : ℝ≥0 → ℝ) (s : Scenario ι) {i : ι} {A : Set ℝ}
     (a : Payoff ι) (h : s.hitTime i A = ⊤) : (Contract.payAtHit i A a).pathPV D s = 0 := by
-  simp only [pathPV, cashflows, h]
-  change (([] : List (ℝ≥0 × ℝ)).map fun p ↦ D p.1 * p.2).sum = 0
-  simp
+  simp [pathPV, cashflows, h]
 
 theorem Contract.pathPV_both (D : ℝ≥0 → ℝ) (s : Scenario ι)
     (a b : Contract ι) :

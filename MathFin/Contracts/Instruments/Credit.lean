@@ -16,7 +16,8 @@ time `τ`). `N` enters `[1, ∞)` exactly at `τ`, and `Contract.payAtHit` pays 
 observed underlying enters a set, so a payment at the default time is a contract:
 
 * the **protection leg paid at the default time** pays the loss `1 − R` at `τ` if `τ ≤ T`
-  (`cdsProtectionAtDefault`), the contract whose value is `Cox.protectionLeg`.
+  (`cdsProtectionAtDefault`), the contract whose value under the Cox default time, at a flat
+  rate, is `Cox.protectionLeg`.
 
 The tower otherwise pays at fixed dates, so the CDS is also written on a payment grid
 `t 0 ≤ t 1 ≤ … ≤ t n`:

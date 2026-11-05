@@ -29,17 +29,15 @@ discrete analogues of `Cox.cdsAnnuity`, `Cox.cdsLosses` and `Cox.cdsFairSpreadTV
 
 The Cox default time of `FixedIncome/Cox.lean`, built by inverting a unit-exponential clock
 through the cumulative hazard, has `S = hazardSurvival h` (`cox_cdf_timeVarying`), so under it the
-CDS contract is worth the grid legs of the hazard curve (`value_cdsBuyer_coxDefaultTime`). Against
-the continuous legs. The protection leg paid at `τ` itself is the contract
-`cdsProtectionAtDefault` (`Contract.payAtHit` on the default indicator): its value is
-`(1 − R)·𝔼[D(τ)·1{τ ≤ T}]` (`value_cdsProtectionAtDefault`), which under the Cox default time is
-`Cox.protectionLeg` (`value_cdsProtectionAtDefault_coxDefaultTime`, by
-`CVA.protectionLeg_eq_integral_coxDefaultTime`). With no discounting the grid losses on any grid
-from `0` to `T` telescope to
-the default probability `1 − S(T)`, which is `Cox.cdsLosses 0 h T`
-(`cdsLossesGrid_one_eq_cdsLosses`). With
-discounting the grid legs converge to the continuous ones as the mesh goes to zero
-(`Contracts/Models/DefaultTimeMesh.lean`).
+CDS contract is worth the grid legs of the hazard curve (`value_cdsBuyer_coxDefaultTime`). The
+protection leg paid at `τ` itself is the contract `cdsProtectionAtDefault` (`Contract.payAtHit` on
+the default indicator): its value is `(1 − R)·𝔼[D(τ)·1{τ ≤ T}]` (`value_cdsProtectionAtDefault`),
+which under the Cox default time at a flat rate is `Cox.protectionLeg`
+(`value_cdsProtectionAtDefault_coxDefaultTime`, by `CVA.protectionLeg_eq_integral_coxDefaultTime`).
+Against the continuous legs: with no discounting the grid losses on any grid from `0` to `T`
+telescope to the default probability `1 − S(T)`, which is `Cox.cdsLosses 0 h T`
+(`cdsLossesGrid_one_eq_cdsLosses`). With discounting the grid legs converge to the continuous ones
+as the mesh goes to zero (`Contracts/Models/DefaultTimeMesh.lean`).
 
 ## Main definitions
 
@@ -210,7 +208,9 @@ theorem pathPV_cdsProtectionAtDefault (D : ℝ≥0 → ℝ) (τ : Ω → ℝ) (T
   simp [Payoff.eval, scenarioAt]
 
 /-- **The protection leg paid at the default time is worth `(1 − R)·𝔼[D(τ)·1{τ ≤ T}]`**, for any
-pricing measure, default time and discount curve (`D` is read at `τ` made nonnegative). -/
+pricing measure, default time and discount curve (`D` is read at `τ` made nonnegative). It is an
+identity of Bochner integrals with no integrability assumed: when the integrand is not integrable
+both sides are `0`. -/
 theorem value_cdsProtectionAtDefault (D : ℝ≥0 → ℝ) (τ : Ω → ℝ) (T : ℝ≥0)
     (R : ℝ) :
     (cdsProtectionAtDefault T R).value μ D (defaultIndicator τ)

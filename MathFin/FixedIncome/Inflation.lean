@@ -8,7 +8,7 @@ module
 public import Mathlib
 public import MathFin.Foundations.Numeraire
 public import MathFin.Foundations.BrownianMartingale
-public import MathFin.FixedIncome.ForwardMeasure
+public import MathFin.Foundations.ForwardMeasure
 public import MathFin.FixedIncome.TimingAdjustment
 
 /-!
