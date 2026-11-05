@@ -225,8 +225,9 @@ end Evaluation
 /-- **Equal weights on `n` observations**: the `1/n` probability historical simulation (and any
 other equally-likely-scenario construction) assigns to each of `n` observations, for `n ≥ 1`. No
 premade `n`-point uniform `StdSimplex` exists upstream (Mathlib's `Convexity.StdSimplex` namespace
-has `single` and `duple` only); this is the general building block, usable wherever a finite
-equally-likely law on `Fin n` is needed. -/
+offers only the `single` and `duple` point constructions, plus combinators `map`/`join`/`restrict`/
+`equivIcc` over them — no general uniform law); this is the general building block, usable wherever
+a finite equally-likely law on `Fin n` is needed. -/
 noncomputable def uniformWeights (n : ℕ) (hn : 0 < n) : StdSimplex ℝ (Fin n) where
   weights := Finsupp.equivFunOnFinite.symm (fun _ ↦ (n : ℝ)⁻¹)
   nonneg _ := by simp
