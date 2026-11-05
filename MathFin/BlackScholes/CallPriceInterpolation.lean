@@ -18,10 +18,12 @@ that is itself free of static arbitrage everywhere, not only at the quoted strik
 construction interpolates the prices on each strike interval by a convex piece of Black–Scholes
 form plus an affine term, reaching class `C²` through two nested non-linear minimisations; the
 original is a paywalled *Risk Magazine* article, and the secondary literature that discusses it
-(Fengler, *Arbitrage-Free Smoothing of the Implied Volatility Surface*, Quantitative Finance
-9(4), 2009: "piecewise convex polynomials that have the form of the Black Scholes valuation
-formula with an additive linear term"; Le Floc'h, arXiv:2004.08650: "two embedded non-linear
-minimizations", "not proven ... converges") names the shape of the pieces but does not reproduce
+(Fengler, *Arbitrage-Free Smoothing of the Implied Volatility Surface*, SFB 649 Discussion
+Paper 2005-019 (the Quantitative Finance 9(4), 2009 version shortens this to "piecewise convex
+polynomials mimicking the BS pricing formula"): "piecewise convex polynomials that have the form
+of the Black Scholes (BS) valuation formula with an additive linear term"; Le Floc'h,
+arXiv:2004.08650: "two embedded non-linear minimizations", "not proven ... converges") names
+the shape of the pieces but does not reproduce
 the equations that pin them down. None of that is enough to transcribe faithfully, so this file
 does not attempt the `C²` scheme.
 
@@ -61,9 +63,10 @@ for the interpolant: `IsArbitrageFreeQuotes` is the convexity-and-monotonicity t
 * `piecewiseLinear_eq_segment`: on each quoted interval it *is* the straight line through the
   two endpoint quotes (so it is genuinely the piecewise-linear interpolant, not merely some
   convex function agreeing with the data at the knots).
-* `isArbitrageFreeQuotes_of_isNormalizedCallPrice`: `IsArbitrageFreeQuotes` is exactly the trace
-  a genuine arbitrage-free call price function (`IsNormalizedCallPrice`) leaves on finitely many
-  increasing strikes — real market quotes sampled from one automatically satisfy it.
+* `isArbitrageFreeQuotes_of_isNormalizedCallPrice`: the trace a genuine arbitrage-free call price
+  function (`IsNormalizedCallPrice`) leaves on finitely many increasing strikes satisfies
+  `IsArbitrageFreeQuotes` — real market quotes sampled from one automatically do. (One direction
+  only: `IsArbitrageFreeQuotes` carries no price bounds, so it is weaker than being such a trace.)
 -/
 
 @[expose] public section
@@ -107,13 +110,8 @@ continuum. -/
 private lemma antitoneOn_glue {f : ℝ → ℝ} {a b c : ℝ} (hab : a ≤ b) (hbc : b ≤ c)
     (hleft : AntitoneOn f (Icc a b)) (hright : AntitoneOn f (Icc b c)) :
     AntitoneOn f (Icc a c) := by
-  intro x hx y hy hxy
-  rcases le_total x b with hxb | hxb
-  · rcases le_total y b with hyb | hyb
-    · exact hleft ⟨hx.1, hxb⟩ ⟨hy.1, hyb⟩ hxy
-    · exact (hright (left_mem_Icc.2 hbc) ⟨hyb, hy.2⟩ hyb).trans
-        (hleft ⟨hx.1, hxb⟩ (right_mem_Icc.2 hab) hxb)
-  · exact hright ⟨hxb, hx.2⟩ ⟨hxb.trans hxy, hy.2⟩ hxy
+  rw [← Icc_union_Icc_eq_Icc hab hbc]
+  exact hleft.union_right hright (isGreatest_Icc hab) ⟨left_mem_Icc.2 hbc, fun _ hx ↦ hx.1⟩
 
 /-- If `L` bounds the secant from `y` into the junction `b`, and `f` is affine with slope `s ≥ L`
 beyond `b`, then `L` also bounds the secant from `y` into any point beyond `b`. The algebraic core
@@ -376,9 +374,9 @@ theorem piecewiseLinear_eq_segment (K C : ℕ → ℝ) {n : ℕ} (hn : 1 ≤ n)
 
 /-! ### The bridge to the continuous no-arbitrage conditions
 
-`IsArbitrageFreeQuotes` is not an ad hoc discretisation: it is exactly the trace a genuine
-arbitrage-free call price function (`IsNormalizedCallPrice`, Roper's Theorem 2.1) leaves on any
-finite increasing set of strikes. Real market quotes sampled from such a surface automatically
+`IsArbitrageFreeQuotes` is not an ad hoc discretisation: the trace a genuine arbitrage-free call
+price function (`IsNormalizedCallPrice`, Roper's Theorem 2.1) leaves on any finite increasing set
+of strikes satisfies it. Real market quotes sampled from such a surface automatically
 satisfy the hypotheses this file's interpolant needs. -/
 
 /-- Sampling a normalised (arbitrage-free) call price function at finitely many positive,
