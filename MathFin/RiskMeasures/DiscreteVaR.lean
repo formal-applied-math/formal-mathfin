@@ -223,17 +223,14 @@ end Evaluation
 /-! ## Uniform weights on `n` observations -/
 
 /-- **Equal weights on `n` observations**: the `1/n` probability historical simulation (and any
-other equally-likely-scenario construction) assigns to each of `n` observations, for `n ≥ 1`. No
-premade `n`-point uniform `StdSimplex` exists upstream (Mathlib's `Convexity.StdSimplex` namespace
-offers only the `single` and `duple` point constructions, plus combinators `map`/`join`/`restrict`/
-`equivIcc` over them — no general uniform law); this is the general building block, usable wherever
-a finite equally-likely law on `Fin n` is needed. -/
-noncomputable def uniformWeights (n : ℕ) (hn : 0 < n) : StdSimplex ℝ (Fin n) where
-  weights := Finsupp.equivFunOnFinite.symm (fun _ ↦ (n : ℝ)⁻¹)
-  nonneg _ := by simp
-  total := by
-    have hn' : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-    simp [Finsupp.sum_fintype, Finset.sum_const, Finset.card_univ, nsmul_eq_mul, hn']
+other equally-likely-scenario construction) assigns to each of `n` observations, for `n ≥ 1` —
+`Convexity.StdSimplex.barycenter` (`Mathlib.Geometry.Convex.ConvexSpace.Barycenter`) specialized to
+`Fin n`, under a name that takes the hypothesis `0 < n` historical-simulation callers already carry
+rather than the library's own `Nonempty (Fin n)` instance. `weights_barycenter_apply` gives the
+closed form `weights i = (n : ℝ)⁻¹` for every `i`. -/
+noncomputable def uniformWeights (n : ℕ) (hn : 0 < n) : StdSimplex ℝ (Fin n) :=
+  haveI : Nonempty (Fin n) := ⟨⟨0, hn⟩⟩
+  StdSimplex.barycenter
 
 /-! ## The single bond -/
 
