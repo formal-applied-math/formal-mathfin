@@ -11,22 +11,9 @@ public import MathFin.BlackScholes.DividendsGreeks
 /-!
 # Shout-floor monotonicity: Dai–Kwok–Wu (2004), Lemma 2.1(i)
 
-**Scope disclaimer**: this file proves one *supporting* calculus lemma from
-Dai, Kwok & Wu (2004), "Optimal Shouting Policies of Options with Strike Reset
-Right," *Mathematical Finance* 14(3), 383-401 — **Lemma 2.1, case (i)** (p. 386).
-It is **not** their Theorem 3.1 (the shout-floor pricing formula itself).
-Theorem 3.1 identifies the shout-floor value `R(S, τ)` with the ATM-put value
-`S · P(τ)` via a free-boundary / optimal-stopping argument (shout as soon as
-holding no longer dominates the reward). This library's optimal-stopping and
-free-boundary substrate — the general `StoppingRule`/`stoppingValue` of
-`MathFin/BlackScholes/AmericanPut/Stopping/Rules.lean`, the bounded-supermartingale
-verification `expected_stoppedValue_le_initial`
-(`MathFin/BlackScholes/AmericanPut/Stopping/GridSampling.lean`), and the
-`MathFin/BlackScholes/AmericanPut/Boundary/*` obstacle contracts — is built around the
-vanilla put reward `(K − S)⁺`: bounded and time-independent. The shout floor's
-reward `S_t · P(τ − t)` is unbounded in `S` and time-dependent, so none of it
-applies as stated, and that step is not done here. What *is* pure calculus,
-and is what this file proves: the function whose sign drives that argument,
+This file proves Dai, Kwok & Wu (2004), "Optimal Shouting Policies of Options
+with Strike Reset Right," *Mathematical Finance* 14(3), 383-401, **Lemma 2.1,
+case (i)** (p. 386): the shout floor's scaled ATM put
 
   `g(τ) := e^{qτ} · P(τ)`,
 
@@ -36,45 +23,43 @@ Black–Scholes ATM (`K = S`) put value with continuous dividend yield `q`:
   `P(τ) = e^{-rτ} · N(-d₂) - e^{-qτ} · N(-d₁)`,
   `d₁ = (r - q + σ²/2) √τ / σ`,  `d₂ = d₁ - σ √τ`.
 
+(The paper leaves `e^{qτ}P(τ)` unnamed here and reuses `g` for the normalized
+shout-floor price `R(S, τ)/S` in its §3; the `g` in this file is the scaled
+put above, not that one.)
+
 The ATM put is linearly homogeneous on the diagonal — `bsPDiv K r q σ K τ =
 K · P(τ)` (`bsPDiv_diagonal_eq_shoutFloorAtmPut`; the `log(S/K)` term in
 `bsd1`/`bsd2` vanishes there) — so we model `P(τ)` as the `S = K = 1` instance
 of the repo's existing `bsPDiv` (`DividendsGreeks.lean`):
-`shoutFloorAtmPut r q σ τ := bsPDiv 1 r q σ 1 τ`. For general `S`, the paper's
-`R(S, τ) = S · P(τ)` claim is the *statement* of Theorem 3.1 (not proved here);
-only the ATM-put side `P(τ)` is built and analyzed in this file.
+`shoutFloorAtmPut r q σ τ := bsPDiv 1 r q σ 1 τ`.
 
-## What this gives, and what is still missing
-
-`shoutFloor_g_strictMonoOn` is exactly Dai–Kwok–Wu Lemma 2.1(i). To reach
-their Theorem 3.1(i) (`R(S, τ) = S · P(τ)` for all `τ > 0` when `r ≤ q`) from
-here still needs: (a) the shout-floor value as the `stoppingValue` of the
-discounted reward `e^{-rt} S_t P(τ − t)` on the library's Brownian model, and
-(b) optional stopping for the *unbounded* nonnegative discounted-stock
-martingale `e^{-(r−q)t} S_t` at bounded rules (`expected_stoppedValue_le_initial`
-needs a uniform bound, which the put reward has and this one does not) — the
-bound is load-bearing only in the dominated-convergence mesh-refinement step
-`expected_gridValue_tendsto`, not in the fixed-mesh `expected_gridValue_le`,
-so a truncation `min(·, N)` plus monotone convergence in `N` would remove it
-without a full uniform-integrability bridge; this is not built here either.
-Given (b), Lemma 2.1(i) (plus `bsP_nonneg` at the boundary `t = τ`, where the
-reward is `0`) does the rest: `e^{-rt} S_t P(τ − t) = e^{-(r−q)t} S_t ·
-e^{-qτ} g(τ − t) ≤ e^{-(r−q)t} S_t · P(τ)`, so every rule's expected reward is
-at most `S · P(τ)`, attained by `StoppingRule.zero` — Theorem 3.1(i). Neither
-(a) nor (b) is built here.
+**Scope**: `shoutFloor_g_strictMonoOn` is exactly Lemma 2.1(i), not the
+paper's Theorem 3.1 (the shout-floor pricing identity `R(S, τ) = S · P(τ)`
+itself, for `r ≤ q`). Reaching Theorem 3.1(i) from here needs the shout-floor
+value as an optimal-stopping value on the library's Brownian model, plus
+optional stopping for the *unbounded* discounted-stock martingale
+`e^{-(r−q)t} S_t` — this library's optimal-stopping substrate
+(`MathFin/BlackScholes/AmericanPut/Stopping/*`) is built around the bounded,
+time-independent vanilla put reward, so it does not apply here as stated; a
+truncation argument (`min(·, N)` plus monotone convergence) would avoid
+needing a full uniform-integrability bridge, but neither that nor the
+stopping-value wiring is built here.
 
 ## Main result
 
 * `shoutFloorAtmPut` — the ATM (`K = S = 1`) Black–Scholes put with dividend
   yield `q`, as a function of `τ` alone: `P(τ)`; `bsPDiv_diagonal_eq_shoutFloorAtmPut`
   is the diagonal homogeneity `bsPDiv K r q σ K τ = K · P(τ)` that makes `K = 1` WLOG.
-* `hasDerivAt_shoutFloorAtmPut_tau` — its `τ`-derivative, by the product rule
-  on `bsPDiv = e^{-qτ} · bsP` (mirrors `hasDerivAt_bsVDiv_tau`).
-* `shoutFloor_discriminant_pos` — for `r ≤ q`, `σ > 0`, the derivative of
-  `g(τ) = e^{qτ} P(τ)` is strictly positive on `(0, ∞)`: the `q · P(τ)` terms
-  from the product rule cancel exactly, leaving
-  `g'(τ) = σ · ϕ(d₁) / (2√τ) - (r - q) · e^{-(r-q)τ} · Φ(-d₂)`, a sum of two
-  nonnegative terms (the first strictly positive).
+* `shoutFloor_g_eq_bsP` — Dai–Kwok–Wu's own first reduction, Appendix A (p. 397):
+  `e^{qτ} P(τ; r, q) = P(τ; r - q, 0)`, i.e. `g(τ)` is literally the ordinary
+  (no-dividend) ATM put `bsP 1 (r - q) σ 1 τ` at the shifted rate `r - q`.
+* `hasDerivAt_shoutFloor_g` — `g`'s `τ`-derivative follows immediately via
+  `shoutFloor_g_eq_bsP` from the library's own `hasDerivAt_bsP_tau` (at
+  `K = S = 1`, rate `r - q`) — no new differentiation needed, matching the
+  paper's own printed route rather than re-deriving a product rule on `bsPDiv`.
+* `shoutFloor_discriminant_pos` — for `r ≤ q`, `σ > 0`, that derivative
+  `g'(τ) = σ · ϕ(d₁) / (2√τ) - (r - q) · e^{-(r-q)τ} · Φ(-d₂)` is strictly
+  positive: a sum of two nonnegative terms (the first strictly positive).
 * `shoutFloor_g_strictMonoOn` — **Lemma 2.1(i)**: `g` is `StrictMonoOn (Ioi 0)`
   when `r ≤ q`.
 -/
@@ -101,33 +86,18 @@ theorem bsPDiv_diagonal_eq_shoutFloorAtmPut {K : ℝ} (hK : 0 < K) (r q σ τ : 
   rw [div_self hK.ne', div_one, Real.log_one]
   ring
 
-/-- **`τ`-derivative of the ATM put** `P(τ)`, by the product rule on
-`bsPDiv = e^{-qτ} · bsP(·, r - q, σ, ·, ·)`, exactly mirroring the call version
-`hasDerivAt_bsVDiv_tau`. -/
-theorem hasDerivAt_shoutFloorAtmPut_tau {r q σ τ : ℝ} (hσ : 0 < σ) (hτ : 0 < τ) :
-    HasDerivAt (shoutFloorAtmPut r q σ)
-      (-(q * shoutFloorAtmPut r q σ τ) +
-        Real.exp (-(q * τ)) *
-          (σ * gaussianPDFReal 0 1 (bsd1 1 1 (r - q) σ τ) / (2 * Real.sqrt τ)
-            - (r - q) * Real.exp (-((r - q) * τ)) * Phi (-bsd2 1 1 (r - q) σ τ))) τ := by
-  have h_f : HasDerivAt (fun t : ℝ ↦ Real.exp (-(q * t))) (-q * Real.exp (-(q * τ))) τ := by
-    have h_neg : HasDerivAt (fun t : ℝ ↦ -(q * t)) (-q) τ := by
-      have := (hasDerivAt_id τ).const_mul q
-      convert this.neg using 1 <;> first | rfl | ring
-    have h := h_neg.exp
-    convert h using 1
-    ring
-  have h_g := hasDerivAt_bsP_tau (r := r - q) (K := 1) (S := 1)
-    one_pos hσ one_pos hτ
-  have h_full := h_f.mul h_g
+/-- **Dai–Kwok–Wu's Appendix A reduction** (p. 397, first line): the scaled
+ATM put `e^{qτ} P(τ; r, q)` is exactly the ordinary (no-dividend) ATM put at
+the shifted rate `r - q`: `g(τ) = e^{qτ}·P(τ) = bsP 1 (r - q) σ 1 τ`. -/
+theorem shoutFloor_g_eq_bsP (r q σ τ : ℝ) :
+    Real.exp (q * τ) * shoutFloorAtmPut r q σ τ = bsP 1 (r - q) σ 1 τ := by
   unfold shoutFloorAtmPut bsPDiv
-  convert h_full using 1
-  ring
+  rw [← mul_assoc, ← Real.exp_add]
+  simp
 
 /-- **The shout-floor discriminant is strictly positive** whenever `r ≤ q`.
-This is the formula-level content of Lemma 2.1(i): in the product-rule
-derivative of `g(τ) = e^{qτ} P(τ)`, the `q · P(τ)` contributions cancel
-exactly, leaving `g'(τ) = σ · ϕ(d₁) / (2√τ) - (r - q) · e^{-(r-q)τ} · Φ(-d₂)` —
+This is the formula-level content of Lemma 2.1(i): `g(τ) = e^{qτ} P(τ)`'s
+derivative is `g'(τ) = σ · ϕ(d₁) / (2√τ) - (r - q) · e^{-(r-q)τ} · Φ(-d₂)` —
 a strictly positive first term plus a nonnegative second term, since
 `r ≤ q ⟹ -(r - q) ≥ 0`. -/
 theorem shoutFloor_discriminant_pos {r q σ τ : ℝ} (hrq : r ≤ q) (hσ : 0 < σ) (hτ : 0 < τ) :
@@ -148,36 +118,19 @@ theorem shoutFloor_discriminant_pos {r q σ τ : ℝ} (hrq : r ≤ q) (hσ : 0 <
   linarith
 
 /-- **`g(τ) = e^{qτ} P(τ)` is differentiable with derivative the discriminant
-of `shoutFloor_discriminant_pos`.** The `q · P(τ)` term from differentiating
-`e^{qτ}` exactly cancels the `-(q · P(τ))` term from
-`hasDerivAt_shoutFloorAtmPut_tau`, via `Real.exp (q * τ) * Real.exp (-(q * τ)) = 1`. -/
+of `shoutFloor_discriminant_pos`.** Via `shoutFloor_g_eq_bsP`, `g` is literally
+`bsP 1 (r - q) σ 1 ·`, so this is a direct instance of the library's own
+`hasDerivAt_bsP_tau` at the shifted rate `r - q` -- no new product-rule
+cancellation needed, matching the paper's own reduction (Appendix A). -/
 theorem hasDerivAt_shoutFloor_g {r q σ τ : ℝ} (hσ : 0 < σ) (hτ : 0 < τ) :
     HasDerivAt (fun t ↦ Real.exp (q * t) * shoutFloorAtmPut r q σ t)
       (σ * gaussianPDFReal 0 1 (bsd1 1 1 (r - q) σ τ) / (2 * Real.sqrt τ)
         - (r - q) * Real.exp (-((r - q) * τ)) * Phi (-bsd2 1 1 (r - q) σ τ)) τ := by
-  have h_exp : HasDerivAt (fun t : ℝ ↦ Real.exp (q * t)) (q * Real.exp (q * τ)) τ := by
-    have h_lin : HasDerivAt (fun t : ℝ ↦ q * t) q τ := by
-      simpa using (hasDerivAt_id τ).const_mul q
-    have h := h_lin.exp
-    convert h using 1
-    ring
-  have h_P := hasDerivAt_shoutFloorAtmPut_tau (r := r) (q := q) hσ hτ
-  have h_full := h_exp.mul h_P
-  have h_cancel : Real.exp (q * τ) * Real.exp (-(q * τ)) = 1 := by
-    rw [← Real.exp_add]; simp
-  convert h_full using 1
-  have h_expand :
-      q * Real.exp (q * τ) * shoutFloorAtmPut r q σ τ +
-        Real.exp (q * τ) *
-          (-(q * shoutFloorAtmPut r q σ τ) +
-            Real.exp (-(q * τ)) *
-              (σ * gaussianPDFReal 0 1 (bsd1 1 1 (r - q) σ τ) / (2 * Real.sqrt τ)
-                - (r - q) * Real.exp (-((r - q) * τ)) * Phi (-bsd2 1 1 (r - q) σ τ)))
-        = (Real.exp (q * τ) * Real.exp (-(q * τ))) *
-            (σ * gaussianPDFReal 0 1 (bsd1 1 1 (r - q) σ τ) / (2 * Real.sqrt τ)
-              - (r - q) * Real.exp (-((r - q) * τ)) * Phi (-bsd2 1 1 (r - q) σ τ)) := by
-    ring
-  rw [h_expand, h_cancel, one_mul]
+  have h_eq : (fun t ↦ Real.exp (q * t) * shoutFloorAtmPut r q σ t)
+      = fun t ↦ bsP 1 (r - q) σ 1 t := funext fun t ↦ shoutFloor_g_eq_bsP r q σ t
+  rw [h_eq]
+  convert hasDerivAt_bsP_tau (r := r - q) (K := 1) (S := 1) one_pos hσ one_pos hτ using 1
+  ring
 
 /-- **`g` is continuous on `(0, ∞)`**: it is differentiable there
 (`hasDerivAt_shoutFloor_g`). -/
