@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import MathFin.Foundations.PoissonCompensatedSimpleIntegrand
 public import MathFin.Foundations.ExtendOfNormIsometry
+public import MathFin.Foundations.LpMulIsometry
 
 /-!
 # The compensated-Poisson integral operator on marked simple integrands
@@ -193,16 +194,6 @@ noncomputable def emb (N : PoissonRandomMeasure P ν) :
     exact embFun_smul N c V
 
 /-! ### The isometry `‖intAssembly V‖ = ‖emb V‖` (summing the bilinear pairing) -/
-
-/-- For `g : Lp ℝ 2 μ`, `‖g‖² = ∫ (g a)² ∂μ`. -/
-lemma lp_two_norm_sq {α : Type*} {mα : MeasurableSpace α} {μ : Measure α} (g : Lp ℝ 2 μ) :
-    ‖g‖ ^ 2 = ∫ a, (g a) ^ 2 ∂μ := by
-  have h : ⟪g, g⟫_ℝ = ‖g‖ ^ 2 := real_inner_self_eq_norm_sq g
-  rw [L2.inner_def] at h
-  rw [← h]
-  refine integral_congr_ae (Filter.Eventually.of_forall fun a => ?_)
-  change (g a) * (g a) = (g a) ^ 2
-  ring
 
 /-- Each box term of the elementary integral is in `L²(P)`. -/
 lemma memLp_intTerm (N : PoissonRandomMeasure P ν) (V : levySimpleModule N)

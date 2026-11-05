@@ -448,7 +448,7 @@ theorem trueIncr_pow3_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk : k < n) :
     sub_nonneg.mpr (NNReal.coe_le_coe.mpr huv)
   have hint2 : ∫ ω, (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ
       ≤ Dd ^ 2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) :=
-    trueIncr_sq_le hB hBmeas hδadap hδcont hδbdd hMadap hMeq huv hvT
+    trueIncr_sq_le hB hBmeas hδadap hδcont hδbdd hMeq huv hvT
   -- the fourth moment in un-absolutized form, and its `Integrable` witness (for `X²`)
   have hint4M : Integrable (fun ω ↦
       (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 4) μ :=

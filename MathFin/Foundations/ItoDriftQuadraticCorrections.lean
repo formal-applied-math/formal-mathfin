@@ -246,7 +246,7 @@ theorem quadCrossSum_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω �
     -- the mean-integrability inputs
     have hnorm1 : ∫ ω, |tI ω| ∂μ ≤ Real.sqrt (∫ ω, tI ω ^ 2 ∂μ) :=
       integral_abs_le_sqrt_integral_sq htImem
-    have htI2 := trueIncr_sq_le hB hBmeas hδadap hδcont hδbdd hMadap hMeq
+    have htI2 := trueIncr_sq_le hB hBmeas hδadap hδcont hδbdd hMeq
       (unifPart_mono T n (Nat.le_succ k)) (unifPart_le_T (Nat.lt_iff_add_one_le.mp hk))
     have hsqrtT : Real.sqrt (∫ ω, tI ω ^ 2 ∂μ) ≤ |Dd| * Real.sqrt
         ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by

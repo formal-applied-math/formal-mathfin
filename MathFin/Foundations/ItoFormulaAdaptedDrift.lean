@@ -59,10 +59,10 @@ continuity suffices.
 
 Supporting layers, bottom-up: the band-to-slice conversion of the predictable trim measure
 (a private lemma of `ItoDriftIncrementEnergy`; the Fubini interchange
-`expectation_pathIntegral_eq` comes from `ItoDriftExpectation`), `incrementEnergy`
+`expectation_pathIntegral_eq` comes from `ItoDriftExpectation`), `clm_band_energy` and `incrementEnergy`
 (the increment-energy law), `mul_trueIncr_expect_eq_zero` (the martingale kill),
 `deltaStepLp`/`deltaStepLp_tendsto` (the step approximants), the per-cell weighted isometry
-(`weightedCellSq_step`, `clm_band_energy`, `stepIncr_stepCLM_ae`), the gap decay (`errorIncr_ae`,
+(`weightedCellSq_step`, `stepIncr_stepCLM_ae`), the gap decay (`errorIncr_ae`,
 `cellGap_le`, `gapSum_le`) and the quadratic block with its gap hypothesis discharged
 (`quadraticSqSum_tendsto'`, for the hypothesized `M`), the
 fourth/third-moment bounds (`stepSum_pow4_le`, `trueIncr_pow4_le`, `trueIncr_pow3_le`),

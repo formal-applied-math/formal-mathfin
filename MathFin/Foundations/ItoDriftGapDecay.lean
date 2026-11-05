@@ -342,7 +342,7 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
         + Real.sqrt (∫ ω, (δ (unifPart T n k) ω
           * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2 ∂μ) :=
     sqrtIntegral_sq_add_le hMsub hs
-  have hM2le := trueIncr_sq_le hB hBmeas hδadap hδcont hδbdd hMadap hMeq huv
+  have hM2le := trueIncr_sq_le hB hBmeas hδadap hδcont hδbdd hMeq huv
     (unifPart_le_T hk)
   have hs2le : ∫ ω, (δ (unifPart T n k) ω
       * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2 ∂μ
