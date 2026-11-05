@@ -225,10 +225,11 @@ theorem exists_unique_moments {n : ℕ} (x y : ℕ → ℝ) (hn : 2 ≤ n)
 /-! ## Exact interpolation at the pillars -/
 
 /-- The standard piecewise-cubic formula on the piece `[x i, x (i+1)]`, built from the gap,
-the two pillar values and the two candidate moments `Mi = M i`, `Mi1 = M (i+1)`
-(Stoer & Bulirsch, *Introduction to Numerical Analysis*, 3rd ed. (2002), §2.4.2, the
-moment form of the natural cubic spline piece). Defined for any moment sequence `M`,
-independent of which linear system (if any) it solves. -/
+the two pillar values and the two candidate moments `Mi = M i`, `Mi1 = M (i+1)`: the moment
+form of the natural cubic spline piece, equivalent to the one in J. Stoer & R. Bulirsch,
+*Introduction to Numerical Analysis*, 3rd ed. (2002), §2.4.2 (regrouped here into two
+linear-in-`t` terms rather than kept in their own `A j, B j` grouping). Defined for any
+moment sequence `M`, independent of which linear system (if any) it solves. -/
 noncomputable def interpSpline (x y : ℕ → ℝ) (M : ℕ → ℝ) (i : ℕ) (t : ℝ) : ℝ :=
   M i * (x (i + 1) - t) ^ 3 / (6 * gap x i) + M (i + 1) * (t - x i) ^ 3 / (6 * gap x i) +
     (y i / gap x i - M i * gap x i / 6) * (x (i + 1) - t) +

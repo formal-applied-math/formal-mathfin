@@ -50,9 +50,10 @@ One `full` entry in `benchmarks/black_scholes.json`. Corpus 779 → 780.
   Reference: the nonsingularity step is formalized on the normalized moment system of
   J. Stoer & R. Bulirsch, *Introduction to Numerical Analysis*, 3rd ed. (2002), §2.4.2;
   existence and uniqueness of the natural cubic spline itself is R. L. Burden &
-  J. D. Faires, *Numerical Analysis*, 9th ed. (2011), Theorem 3.11 — the same
-  nonsingularity argument, run on that normalized system. SCOPE: does not construct a
-  single global function glued across all
+  J. D. Faires, *Numerical Analysis*, 9th ed. (2011), Theorem 3.11. The strict-diagonal-
+  dominance step formalized here is the same nonsingularity argument that theorem's proof
+  uses, run on the normalized system rather than on B&F's own unnormalized one. SCOPE:
+  does not construct a single global function glued across all
   pieces and does not prove global `C²` matching of one-sided derivatives at interior
   knots (left to future work).
 
