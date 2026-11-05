@@ -4304,9 +4304,9 @@
     "mf-uniswap-v3-concentrated-liquidity-historical-var": {
       "benchmark_file": "defi.json",
       "date": "2026-11-05",
-      "elapsed_s": 4.1,
-      "input_hash": "440f85b99ac2086ae16fbb8e5a48a5aa7943024d31b6918647b5eba2741b0873",
-      "verified_at_commit": "9705eb05"
+      "elapsed_s": 3.7,
+      "input_hash": "05db438c693c3ea53da15deb46efdf96f49854d717bae2d52b762c9a89427c06",
+      "verified_at_commit": "a85138d1"
     },
     "mf-uniswap-v3-position-bs-price-bound": {
       "benchmark_file": "defi.json",
