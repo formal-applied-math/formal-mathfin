@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoIntegralProcessGeneral
+public import MathFin.Foundations.LpMulIsometry
 
 /-! # The time-indexed Itô isometry for the general Itô integral (B1b)
 
@@ -292,6 +293,63 @@ theorem itoProcessCLM_norm_sq {t T : ℝ≥0} (htT : t ≤ T) (hBmeas : ∀ u, M
   filter_upwards [ae_restrict_of_ae (memLp_uncurry_trim_T T hBmeas V.val).coeFn_toLp] with z hz
   rw [show (simpleAssembly_T (μ := μ) T hBmeas V : ℝ≥0 × Ω → ℝ) z
         = Function.uncurry ⇑V.val z from hz]
+
+
+omit hB [IsProbabilityMeasure μ] in
+/-- **The band integral is additive in the time band**: for an integrable space-time function the
+integral over `(a,c] × Ω` of the predictable trim measure is the sum of the integrals over the
+adjacent bands `(a,b] × Ω` and `(b,c] × Ω`. -/
+theorem setIntegral_Ioc_prod_add {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t)) {F : ℝ≥0 × Ω → ℝ}
+    (hF : Integrable F (trimMeasure_T (μ := μ) T hBmeas)) {a b c : ℝ≥0} (hab : a ≤ b)
+    (hbc : b ≤ c) :
+    ∫ z in Set.Ioc a c ×ˢ (Set.univ : Set Ω), F z ∂(trimMeasure_T (μ := μ) T hBmeas)
+      = ∫ z in Set.Ioc a b ×ˢ (Set.univ : Set Ω), F z ∂(trimMeasure_T (μ := μ) T hBmeas)
+        + ∫ z in Set.Ioc b c ×ˢ (Set.univ : Set Ω), F z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
+  rw [← Set.Ioc_union_Ioc_eq_Ioc hab hbc, Set.union_prod]
+  exact setIntegral_union (Set.Disjoint.set_prod_left (Set.Ioc_disjoint_Ioc_of_le le_rfl) _ _)
+    (measurableSet_predictable_Ioc_prod b c MeasurableSet.univ) hF.integrableOn hF.integrableOn
+
+/-- **The band-energy law of the Itô integral process**: the `L²` energy of the increment of
+`(φ●B)` over a band `(u,v]`, `v ≤ T`, is the band energy of the integrand,
+
+  `𝔼[((φ●B)_v − (φ●B)_u)²] = ∫_{(u,v]×Ω} φ² d(trimMeasure_T T)`.
+
+Pythagoras for the martingale `itoProcessCLM` (`(φ●B)_u` is the conditional expectation of
+`(φ●B)_v`: `condVar_ae_eq_condExp_sq_sub_sq_condExp`), then the time-indexed isometry
+`itoProcessCLM_norm_sq` at `v` and at `u` and the band additivity `setIntegral_Ioc_prod_add`. -/
+theorem clm_band_energy (hBmeas : ∀ t, Measurable (B t)) {T : ℝ≥0}
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
+    ∫ ω, ((itoProcessCLM hB T v hBmeas φ : Ω → ℝ) ω
+        - (itoProcessCLM hB T u hBmeas φ : Ω → ℝ) ω) ^ 2 ∂μ
+      = ∫ z in Set.Ioc u v ×ˢ (Set.univ : Set Ω), (φ z) ^ 2
+          ∂(trimMeasure_T (μ := μ) T hBmeas) := by
+  set A := itoProcessCLM hB T v hBmeas φ
+  set b := itoProcessCLM hB T u hBmeas φ
+  have hm := (natFiltration hBmeas).le u
+  have hmart : μ[(A : Ω → ℝ) | natFiltration hBmeas u] =ᵐ[μ] (b : Ω → ℝ) :=
+    itoIntegralProcessGen_isMartingale hB T hBmeas φ huv
+  have hnrm (w : ℝ≥0) (hw : w ≤ T) : ∫ ω, (itoProcessCLM hB T w hBmeas φ : Ω → ℝ) ω ^ 2 ∂μ
+      = ∫ z in Set.Ioc 0 w ×ˢ (Set.univ : Set Ω), (φ z) ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) :=
+    (lp_two_norm_sq _).symm.trans (itoProcessCLM_norm_sq hB hw hBmeas φ)
+  have hpyth : ∫ ω, ((A : Ω → ℝ) ω - μ[(A : Ω → ℝ) | natFiltration hBmeas u] ω) ^ 2 ∂μ
+      = ∫ ω, (A : Ω → ℝ) ω ^ 2 ∂μ - ∫ ω, μ[(A : Ω → ℝ) | natFiltration hBmeas u] ω ^ 2 ∂μ := by
+    have hA := Lp.memLp A
+    have hsq : Integrable (μ[(A : Ω → ℝ) | natFiltration hBmeas u] ^ 2) μ :=
+      (hA.condExp one_le_two).integrable_sq
+    have h := integral_congr_ae (condVar_ae_eq_condExp_sq_sub_sq_condExp hm hA)
+    rw [condVar, integral_condExp hm, integral_sub' integrable_condExp hsq,
+      integral_condExp hm] at h
+    exact h
+  calc _ = ∫ ω, ((A : Ω → ℝ) ω - μ[(A : Ω → ℝ) | natFiltration hBmeas u] ω) ^ 2 ∂μ :=
+        integral_congr_ae (by filter_upwards [hmart] with ω hω using by rw [hω])
+    _ = ∫ ω, (A : Ω → ℝ) ω ^ 2 ∂μ - ∫ ω, (b : Ω → ℝ) ω ^ 2 ∂μ := by
+        rw [hpyth, show ∫ ω, μ[(A : Ω → ℝ) | natFiltration hBmeas u] ω ^ 2 ∂μ
+          = ∫ ω, (b : Ω → ℝ) ω ^ 2 ∂μ from
+          integral_congr_ae (by filter_upwards [hmart] with ω hω using by rw [hω])]
+    _ = _ := by
+        rw [hnrm v hvT, hnrm u (huv.trans hvT),
+          setIntegral_Ioc_prod_add hBmeas (Lp.memLp φ).integrable_sq zero_le huv]
+        ring
 
 end ItoIntegralProcessGeneral
 end MathFin

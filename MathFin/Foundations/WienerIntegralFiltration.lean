@@ -308,7 +308,7 @@ lemma integral_exp_neg_future (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Measur
   have hmul := hIndFun.integral_mul_eq_mul_integral hE1ae hE2ae
   rw [hI_W, hI_P] at hmul
   have hnorm : ‖f‖ ^ 2 = ‖kernelRestrict htT f‖ ^ 2 + ∫ s in Set.Ioc (t : ℝ) T, f s ^ 2 := by
-    rw [Lp_real_two_norm_sq, Lp_real_two_norm_sq, integral_sq_Ioc_split htT f]
+    rw [lp_two_norm_sq, lp_two_norm_sq, integral_sq_Ioc_split htT f]
     congr 1
     exact integral_congr_ae ((kernelRestrict_coeFn htT f).mono fun x hx ↦ by simp only [hx])
   have hpos := Real.exp_pos (c ^ 2 * ‖kernelRestrict htT f‖ ^ 2 / 2)

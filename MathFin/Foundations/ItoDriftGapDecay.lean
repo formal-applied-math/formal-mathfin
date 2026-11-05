@@ -181,7 +181,7 @@ private theorem weightedErrorIncr_sq_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ
               - deltaStepLp hBmeas hD.adapted hD.bdd n :
                 Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
           ∂(trimMeasure_T (μ := μ) T hBmeas) :=
-    (clm_band_energy hB hBmeas T
+    (clm_band_energy hB hBmeas
       (processToLp T hBmeas hD.adapted hD.continuous hD.bdd - deltaStepLp hBmeas hD.adapted hD.bdd
         n)
       (unifPart_mono T n (Nat.le_succ k))

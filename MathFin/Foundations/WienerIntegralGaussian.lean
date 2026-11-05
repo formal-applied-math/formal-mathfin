@@ -162,7 +162,7 @@ lemma wienerAssembly_map_eq_gaussianReal (hB : IsPreBrownianReal B μ) (T : ℝ�
     rw [variance_eq_integral
       ((Lp.aestronglyMeasurable (wienerAssembly B hB T x)).aemeasurable), hmean]
     simp only [sub_zero]
-    rw [← Lp_real_two_norm_sq μ (wienerAssembly B hB T x), ← wiener_assembly_isometry hB T x]
+    rw [← lp_two_norm_sq (wienerAssembly B hB T x), ← wiener_assembly_isometry hB T x]
   rw [hmean, hvar]
 
 /-! ### Pass to the L²-limit by characteristic functions -/
@@ -276,7 +276,7 @@ theorem wienerIntegralLp_hasLaw_gaussian (hB : IsPreBrownianReal B μ) (T : ℝ�
   map_eq := by
     rw [wienerIntegralLp_map_eq_gaussianReal hB T f]
     congr 2
-    exact Lp_real_two_norm_sq (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) f
+    exact lp_two_norm_sq f
 
 /-- The `L²` representative of an `L²` function has the same squared integral. -/
 theorem _root_.MeasureTheory.MemLp.integral_sq_toLp {α : Type*} {mα : MeasurableSpace α}
