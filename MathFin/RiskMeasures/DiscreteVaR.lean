@@ -41,8 +41,8 @@ For an integrable loss and `α ∈ (0, 1)`, the dual representation of ES over b
 
 * `finiteVaR_eq_valueAtRisk`, `finiteES_eq_expectedShortfall`: for `α ∈ (0, 1)`, the finite forms
   agree with the general definitions at the law `∑ i, q i • δ_i`.
-* `finiteVaR_const_mul`: positive homogeneity, `finiteVaR q (c • L) α = c * finiteVaR q L α` for
-  `c ≥ 0`, inherited from `valueAtRisk_const_mul` through the bridge.
+* `finiteVaR_const_mul`: positive homogeneity, `finiteVaR q (fun i ↦ c * L i) α = c * finiteVaR q L α`
+  for `c ≥ 0`, inherited from `valueAtRisk_const_mul` through the bridge.
 * `finiteVaR_eq_value_min`: for `α ∈ (0, 1]`, VaR at a finite law is attained at a loss value.
 * `finiteVaR_le_of_forall_le`: a uniform cap on every outcome's loss caps VaR the same way.
 * `finiteVaR_two_point`: for `α ∈ (0, 1]`, VaR of a loss that is `0` with mass `a` and `c > 0` with

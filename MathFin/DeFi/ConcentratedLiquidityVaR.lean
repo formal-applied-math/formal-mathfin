@@ -15,7 +15,7 @@ public import MathFin.RiskMeasures.DiscreteVaR
 Historical-simulation VaR revalues today's position under each of `n` historical scenarios for the
 risk factor, treats the resulting `n` hypothetical losses as equally likely (`1/n` each), and
 reports the empirical `α`-quantile of that loss distribution — the standard methodology of
-P. Jorion, *Value at Risk* (3rd ed., 2007), §12.2 — applied here to a Uniswap v3
+P. Jorion, *Value at Risk* (3rd ed., 2007), ch. 10 "VAR Methods" — applied here to a Uniswap v3
 concentrated-liquidity LP position (`MathFin.DeFi.v3PositionValue`,
 `MathFin/DeFi/UniswapMechanics.lean`) whose risk factor is the square-root price `√P`.
 
@@ -31,7 +31,8 @@ already-proved Uniswap v3 virtual-reserve curve (`MathFin/DeFi/UniswapMechanics.
 ## Main definitions
 
 * `historicalScenarioLoss`: the loss of a v3 position, marked today at square-root price `s0`,
-  under a historical scenario `i` whose square-root price is `scenarios i`.
+  under a historical scenario `i` whose square-root price is `scenarios i`;
+  `historicalScenarioLoss_self` checks it vanishes at a scenario equal to today's price.
 * `uniformWeights`: the equal-probability-`1/n` weight vector historical simulation assigns to `n`
   historical scenarios.
 * `clHistoricalVaR`: the historical-simulation VaR of the position — `MathFin.DiscreteVaR.finiteVaR`
@@ -56,8 +57,8 @@ already-proved Uniswap v3 virtual-reserve curve (`MathFin/DeFi/UniswapMechanics.
 ## References
 
 * H. Adams, N. Zinsmeister, M. Salem, R. Keefer, D. Robinson, *Uniswap v3 Core* (2021), §2, §6.4.1.
-* P. Jorion, *Value at Risk: The New Benchmark for Managing Financial Risk*, 3rd ed. (2007), §12.2
-  (historical simulation).
+* P. Jorion, *Value at Risk: The New Benchmark for Managing Financial Risk*, 3rd ed. (2007),
+  ch. 10 "VAR Methods" (historical simulation).
 -/
 
 @[expose] public section

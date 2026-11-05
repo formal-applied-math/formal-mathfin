@@ -2295,9 +2295,9 @@
     "mf-discrete-es-vs-tail-mean": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-11-05",
-      "elapsed_s": 3.8,
-      "input_hash": "2552e4f506c7ef848a38e533533e3b7d3a010b28f5ccd37f1c64da5dfbc8de61",
-      "verified_at_commit": "6801b1b9"
+      "elapsed_s": 4.2,
+      "input_hash": "ff58e43f3e410ce89a3259b9cbadadf55aa0890365e1c1d035d6cd34fc87cf12",
+      "verified_at_commit": "89620dad"
     },
     "mf-downside-performance-metrics": {
       "benchmark_file": "portfolio_and_performance.json",
@@ -4304,9 +4304,9 @@
     "mf-uniswap-v3-concentrated-liquidity-historical-var": {
       "benchmark_file": "defi.json",
       "date": "2026-11-05",
-      "elapsed_s": 5.0,
-      "input_hash": "de8c5e8f251fe05017c58f301a3d013a18376212e647301d78fbc2c5106c6ff1",
-      "verified_at_commit": "1fa2c1bd"
+      "elapsed_s": 4.1,
+      "input_hash": "8b65fbd1ada61b554ee50dd9a41f9389e313e1d4f558eda7925ad52375e1afca",
+      "verified_at_commit": "89620dad"
     },
     "mf-uniswap-v3-position-bs-price-bound": {
       "benchmark_file": "defi.json",
