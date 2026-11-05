@@ -17,12 +17,15 @@ Right," *Mathematical Finance* 14(3), 383-401 — **Lemma 2.1, case (i)** (p. 38
 It is **not** their Theorem 3.1 (the shout-floor pricing formula itself).
 Theorem 3.1 identifies the shout-floor value `R(S, τ)` with the ATM-put value
 `S · P(τ)` via a free-boundary / optimal-stopping argument (shout as soon as
-holding no longer dominates the reward); this library currently has **no**
-optimal-stopping or free-boundary substrate (`grep -rln
-"optimalStopping\|freeBoundary\|americanOption"` over `MathFin/` turns up
-nothing reusable for this payoff), so that step is out of reach here. What
-*is* pure calculus, and is what this file proves: the function whose sign
-drives that argument,
+holding no longer dominates the reward). This library's optimal-stopping and
+free-boundary substrate — the general `StoppingRule`/`stoppingValue` of
+`AmericanPut/Stopping/Rules.lean`, the bounded-supermartingale verification
+`expected_stoppedValue_le_initial` (`AmericanPut/Stopping/GridSampling.lean`),
+and the `AmericanPut/Boundary/*` obstacle contracts — is built around the
+vanilla put reward `(K − S)⁺`: bounded and time-independent. The shout floor's
+reward `S_t · P(τ − t)` is unbounded in `S` and time-dependent, so none of it
+applies as stated, and that step is not done here. What *is* pure calculus,
+and is what this file proves: the function whose sign drives that argument,
 
   `g(τ) := e^{qτ} · P(τ)`,
 
@@ -32,9 +35,10 @@ Black–Scholes ATM (`K = S`) put value with continuous dividend yield `q`:
   `P(τ) = e^{-rτ} · N(-d₂) - e^{-qτ} · N(-d₁)`,
   `d₁ = (r - q + σ²/2) √τ / σ`,  `d₂ = d₁ - σ √τ`.
 
-Since `P(τ)` does not depend on the common value of `S = K` (the `log(S/K)`
-term in `bsd1`/`bsd2` vanishes on the diagonal), we model it as the `S = K = 1`
-instance of the repo's existing `bsPDiv` (`DividendsGreeks.lean`):
+The ATM put is linearly homogeneous on the diagonal — `bsPDiv K r q σ K τ =
+K · P(τ)` (`bsPDiv_diagonal_eq_shoutFloorAtmPut`; the `log(S/K)` term in
+`bsd1`/`bsd2` vanishes there) — so we model `P(τ)` as the `S = K = 1` instance
+of the repo's existing `bsPDiv` (`DividendsGreeks.lean`):
 `shoutFloorAtmPut r q σ τ := bsPDiv 1 r q σ 1 τ`. For general `S`, the paper's
 `R(S, τ) = S · P(τ)` claim is the *statement* of Theorem 3.1 (not proved here);
 only the ATM-put side `P(τ)` is built and analyzed in this file.
@@ -43,17 +47,21 @@ only the ATM-put side `P(τ)` is built and analyzed in this file.
 
 `shoutFloor_g_strictMonoOn` is exactly Dai–Kwok–Wu Lemma 2.1(i). To reach
 their Theorem 3.1(i) (`R(S, τ) = S · P(τ)` for all `τ > 0` when `r ≤ q`) from
-here still needs: (a) a linear-complementarity / free-boundary formulation of
-the shout-floor value as an optimal-stopping problem, and (b) the argument
-that a monotone-increasing discounted reward (`g` above) forces immediate
-exercise, so value = reward everywhere. Neither exists in this library yet;
-building them is a substantially larger undertaking (general optimal-stopping
-verification theorems, not just this one closed-form computation).
+here still needs: (a) the shout-floor value as the `stoppingValue` of the
+discounted reward `e^{-rt} S_t P(τ − t)` on the library's Brownian model, and
+(b) optional stopping for the *unbounded* nonnegative discounted-stock
+martingale `e^{-(r−q)t} S_t` at bounded rules (`expected_stoppedValue_le_initial`
+needs a uniform bound, which the put reward has and this one does not). Given
+(b), Lemma 2.1(i) does the rest: `e^{-rt} S_t P(τ − t) = e^{-(r−q)t} S_t ·
+e^{-qτ} g(τ − t) ≤ e^{-(r−q)t} S_t · P(τ)`, so every rule's expected reward is
+at most `S · P(τ)`, attained by `StoppingRule.zero` — Theorem 3.1(i). Neither
+(a) nor (b) is built here.
 
 ## Main result
 
 * `shoutFloorAtmPut` — the ATM (`K = S = 1`) Black–Scholes put with dividend
-  yield `q`, as a function of `τ` alone: `P(τ)`.
+  yield `q`, as a function of `τ` alone: `P(τ)`; `bsPDiv_diagonal_eq_shoutFloorAtmPut`
+  is the diagonal homogeneity `bsPDiv K r q σ K τ = K · P(τ)` that makes `K = 1` WLOG.
 * `hasDerivAt_shoutFloorAtmPut_tau` — its `τ`-derivative, by the product rule
   on `bsPDiv = e^{-qτ} · bsP` (mirrors `hasDerivAt_bsVDiv_tau`).
 * `shoutFloor_discriminant_pos` — for `r ≤ q`, `σ > 0`, the derivative of
@@ -74,9 +82,18 @@ open scoped NNReal
 
 /-- The Black–Scholes **ATM** (`K = S = 1`) put value with continuous dividend
 yield `q`, as a function of time-to-maturity `τ`: Dai–Kwok–Wu's `P(τ)`. Taking
-`S = K = 1` is WLOG — the `log(S/K)` term in `bsd1`/`bsd2` vanishes whenever
-`S = K`, for any common value, so `P(τ)` does not depend on it. -/
+`S = K = 1` is the paper's normalization; `bsPDiv_diagonal_eq_shoutFloorAtmPut`
+shows the general diagonal value is `K · P(τ)`. -/
 noncomputable def shoutFloorAtmPut (r q σ τ : ℝ) : ℝ := bsPDiv 1 r q σ 1 τ
+
+/-- **Diagonal homogeneity of the dividend-yield put**: `bsPDiv K r q σ K τ = K · P(τ)`
+for `K > 0`. The `log(S/K)` term in `bsd1`/`bsd2` vanishes on the diagonal, so `d₁`, `d₂`
+are those of `shoutFloorAtmPut` and the price scales linearly in the common value. -/
+theorem bsPDiv_diagonal_eq_shoutFloorAtmPut {K : ℝ} (hK : 0 < K) (r q σ τ : ℝ) :
+    bsPDiv K r q σ K τ = K * shoutFloorAtmPut r q σ τ := by
+  unfold shoutFloorAtmPut bsPDiv bsP bsd2 bsd1
+  rw [div_self hK.ne', div_one, Real.log_one]
+  ring
 
 /-- **`τ`-derivative of the ATM put** `P(τ)`, by the product rule on
 `bsPDiv = e^{-qτ} · bsP(·, r - q, σ, ·, ·)`, exactly mirroring the call version
