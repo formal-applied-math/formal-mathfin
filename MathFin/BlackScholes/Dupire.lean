@@ -254,7 +254,7 @@ open MathFin.GyongyMimicry
 /-- **The weak forward (Fokker–Planck) equation at zero rates**, in weak form:
 `GyongyMimicry.marginal_flow_weak_equation_fn_constructed`,
 specialized to the driftless process `X = c + M` (`β := 0`, with `M` a hypothesized adapted
-process equal a.e. at each `t` (`hMeq`) to the CLM Itô integral of the bounded adapted `δ`),
+process equal a.e. at each `t` (`hD.ae_eq`) to the CLM Itô integral of the bounded adapted `δ`),
 with the drift term erased. For every test function `f` of the
 class (`C²`, bounded `f', f'', f'''`),
 
@@ -342,9 +342,7 @@ theorem dupire_weak
   have hXint : ∀ s : ℝ≥0, Integrable (X s) μ := fun s => by
     rw [hXrel s]
     exact (integrable_const c).add
-      (((Lp.memLp (itoProcessCLM hB T s hBmeas
-        (processToLp T hBmeas hD.adapted hD.continuous hD.bdd))).integrable one_le_two).congr
-          (hD.ae_eq s).symm)
+      ((ItoDriftConditional.memLp_M hB hBmeas hD s).integrable one_le_two)
   have hfun : (fun s : ℝ => ∫ K, ψ K * callSurface μ X s K)
       = fun s : ℝ => ∫ ω, f (X (Real.toNNReal s) ω) ∂μ := by
     funext s
@@ -626,9 +624,7 @@ theorem dupire_ae_window
   have hXint : ∀ s : ℝ≥0, Integrable (X s) μ := fun s => by
     rw [hXrel s]
     exact (integrable_const c).add
-      (((Lp.memLp (itoProcessCLM hB T s hBmeas
-        (processToLp T hBmeas hD.adapted hD.continuous hD.bdd))).integrable one_le_two).congr
-          (hD.ae_eq s).symm)
+      ((ItoDriftConditional.memLp_M hB hBmeas hD s).integrable one_le_two)
   have hXm : Measurable (X (Real.toNNReal t)) := by
     rw [hXrel]
     exact ((hD.adaptedM _).measurable.mono ((natFiltration hBmeas).le _) le_rfl).const_add c
@@ -821,9 +817,7 @@ theorem dupire_pointwise_coeff
   have hXint : Integrable (X (Real.toNNReal t)) μ := by
     rw [hXrel]
     exact (integrable_const c).add
-      (((Lp.memLp (itoProcessCLM hB T _ hBmeas
-        (processToLp T hBmeas hD.adapted hD.continuous hD.bdd))).integrable one_le_two).congr
-          (hD.ae_eq _).symm)
+      ((ItoDriftConditional.memLp_M hB hBmeas hD _).integrable one_le_two)
   have hXm : Measurable (X (Real.toNNReal t)) := by
     rw [hXrel]
     exact ((hD.adaptedM _).measurable.mono ((natFiltration hBmeas).le _) le_rfl).const_add c
@@ -951,8 +945,7 @@ theorem dupire_localVol
     Integrable.of_bound (hsm.mono (sigmaGen_le _ _ hXm)).aestronglyMeasurable (Dd * Dd)
       (ae_of_all _ fun ω => by
         rw [Real.norm_eq_abs, abs_mul]
-        exact mul_le_mul (hD.bdd _ _) (hD.bdd _ _) (abs_nonneg _)
-          ((abs_nonneg _).trans (hD.bdd (Real.toNNReal t) ω)))
+        exact mul_self_le_mul_self (abs_nonneg _) (hD.bdd _ _))
   change μ[_ | _] ω = _
   rw [condExp_of_stronglyMeasurable (sigmaGen_le _ _ hXm) hsm hI]
   simp only [reindexed, hδloc, Real.coe_toNNReal t ht.le]

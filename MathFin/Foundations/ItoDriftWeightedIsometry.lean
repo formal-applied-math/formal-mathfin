@@ -226,7 +226,7 @@ variable (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
 variable {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
   {M : ℝ≥0 → Ω → ℝ} (hD : IsAdaptedItoDrift hB hBmeas T δ Dd M)
 
-include hB hBmeas hD
+include hD
 
 /-- The energy of the true increment: `𝔼[(M_v − M_u)²] ≤ D_δ²·(v−u)` for `u ≤ v ≤ T`
 (`incrementEnergy` plus the pointwise `δ`-bound on the mean function). -/

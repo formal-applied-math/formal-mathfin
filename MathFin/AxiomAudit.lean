@@ -2286,7 +2286,8 @@ the SABR model are not proved. -/
 /-! ### Dupire: the distributional headline and the pointwise Thm 9.5 (2026-10-25)
 
 Bagaria ch. 9, zero rates, on the driftless Itô process `X = c + M` with `M` a hypothesized
-version of `∫δ dB` (pinned to the CLM integral a.e. at each `t` by `hMeq`). `dupire_weak` (Thm 9.5 ∘
+version of `∫δ dB` (pinned to the CLM integral a.e. at each `t` by `hD.ae_eq`). `dupire_weak` (Thm
+9.5 ∘
 Thm 9.7 in distributional form): for every smooth compactly supported strike density `ψ`,
 `d/dT ∫ ψ(K) C(T, K) dK = ½ · 𝔼[ψ(X_T) · b̂²(T, X_T)]` — together with `breedenLitzenberger_weak`
 this is `∂_T C = ½ · b̂²(T, ·) · ∂²_K C` in `D'(ℝ_K)`, with no density, no Tanaka formula and no

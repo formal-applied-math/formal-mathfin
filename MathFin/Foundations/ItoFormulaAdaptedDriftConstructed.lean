@@ -396,7 +396,8 @@ theorem itoDrift_expectation_identity_adapted_at_adaptedItoProcess (hB : IsPreBr
           fun s ↦ ⟨zero_le, min_le_right s T⟩)
   have hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd
       (fun t ↦ itoContinuousMod T hBmeas φ (min t T)) :=
-    ⟨hδadap, hδcont, hδbdd, hMadap, itoContinuousMod_min_ae_eq_itoProcessCLM hBmeas hB hBcont φ⟩
+    { adapted := hδadap, continuous := hδcont, bdd := hδbdd, adaptedM := hMadap,
+      ae_eq := itoContinuousMod_min_ae_eq_itoProcessCLM hBmeas hB hBcont φ }
   have h := ItoDriftConditional.itoDrift_expectation_identity_adapted hB hBmeas hD hβadap hβcont
     hβbdd
     (X := fun t ω ↦ c + AdaptedDrift.driftPath β t ω + itoContinuousMod T hBmeas φ (min t T) ω)

@@ -21,11 +21,12 @@ Itô's formula along an Itô process with random coefficients,
 
 for `β, δ` bounded, `natFiltration`-adapted and path-continuous, and `f` three times
 differentiable with `f'`, `f''`, `f'''` bounded, proved from the discrete Itô formula on uniform
-partitions. `M` and `X` are hypotheses: a `natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for
-every `t ≥ 0` (`hMeq`, the process values of `itoProcessCLM` at the σ-realization
-`processToLp δ`), and an `X` with `X t = c + ∫₀ᵗ β_s ds + M t` (`hXrel`) whose paths are
-continuous almost surely (`hXcont`). `B` is a pre-Brownian motion with measurable sections; its
-paths need not be continuous.
+partitions. `M` and `X` are hypotheses. The integrand `δ` and a `natFiltration`-adapted `M` with
+`M t =ᵐ (δ●B)_t` for every `t ≥ 0` (the process values of `itoProcessCLM` at the σ-realization
+`processToLp δ`) are the bundle `IsAdaptedItoDrift` (`hD`), which every layer below takes; `X` is
+a process with `X t = c + ∫₀ᵗ β_s ds + M t` (`hXrel`) whose paths are continuous almost surely
+(`hXcont`). `B` is a pre-Brownian motion with measurable sections; its paths need not be
+continuous.
 
 ## Relation to the constructed process
 
@@ -45,7 +46,7 @@ an `M` satisfying the hypotheses.
 Route: the per-path discrete Itô formula (`MathFin.discrete_ito_formula`) at the grid
 values of `X`, integrated over `Ω`; the first-order martingale terms die exactly
 (`mul_trueIncr_expect_eq_zero`, the martingale property of the adapted Itô integral
-transferred along the a.e. `hMeq`); the drift block converges by pathwise Riemann–Stieltjes
+transferred along the a.e. `hD.ae_eq`); the drift block converges by pathwise Riemann–Stieltjes
 sums + DCT + the Fubini interchange (`driftBlock_tendsto`); the quadratic block converges by
 the summed weighted increment isometry (`quadraticSqSum_tendsto'`, discharged from its
 conditional form by the step-approximant `L²` convergence `deltaStepLp_tendsto`); the
@@ -59,13 +60,15 @@ continuity suffices.
 
 Supporting layers, bottom-up: the band-to-slice conversion of the predictable trim measure
 (a private lemma of `ItoDriftIncrementEnergy`; the Fubini interchange
-`expectation_pathIntegral_eq` comes from `ItoDriftExpectation`), `clm_band_energy` and `incrementEnergy`
-(the increment-energy law), `mul_trueIncr_expect_eq_zero` (the martingale kill),
+`expectation_pathIntegral_eq` comes from `ItoDriftExpectation`), `clm_band_energy` (the band
+energy of the CLM Itô integral, `ItoIntegralProcessIsometry`) and `incrementEnergy` (its transfer
+to `M`), `mul_trueIncr_expect_eq_zero` (the martingale kill),
 `deltaStepLp`/`deltaStepLp_tendsto` (the step approximants), the per-cell weighted isometry
 (`weightedCellSq_step`, `stepIncr_stepCLM_ae`), the gap decay (`errorIncr_ae`,
 `cellGap_le`, `gapSum_le`) and the quadratic block with its gap hypothesis discharged
 (`quadraticSqSum_tendsto'`, for the hypothesized `M`), the
-fourth/third-moment bounds (`stepSum_pow4_le`, `trueIncr_pow4_le`, `trueIncr_pow3_le`),
+fourth/third-moment bounds (`stepSum_pow4_le` of `ItoStepSumFourthMoment`, `trueIncr_pow4_le`,
+`trueIncr_pow3_le`),
 the drift primitive (`AdaptedDrift.driftPath` reused, with its adaptedness
 `stronglyMeasurable_driftPath`, from `Foundations/AdaptedDrift`), the drift
 block, the two quadratic corrections and the Taylor-remainder convergence.
@@ -75,7 +78,7 @@ block, the two quadratic corrections and the Taylor-remainder convergence.
 All public names are in the namespace `MathFin.ItoDriftConditional`.
 
 * `itoDrift_expectation_identity_adapted` — the identity above, conditional on `M` and `X`.
-* Foundations: `integral_mul_condExp_eq`, `memLp_M`, `incrementEnergy` (the increment
+* Foundations: `IsAdaptedItoDrift`, `memLp_M`, `incrementEnergy` (the increment
   isometry), `weightedCellSq_step` (the per-cell weighted isometry), the step approximants
   `deltaStepLp` / `deltaStepLp_tendsto`.
 * Convergence blocks: `driftBlock_tendsto` (with the drift primitive `AdaptedDrift.driftPath`
@@ -89,7 +92,7 @@ The constant-coefficient case and the Fubini interchange are `ito_drift_expectat
 and `expectation_pathIntegral_eq` in `ItoDriftExpectation`.
 
 The supporting layers are the modules `ItoDriftIncrementEnergy`, `ItoDriftWeightedIsometry`,
-`ItoDriftGapDecay`, `ItoDriftMomentBounds`, `ItoDriftBlock`,
+`ItoDriftGapDecay`, `ItoStepSumFourthMoment`, `ItoDriftMomentBounds`, `ItoDriftBlock`,
 `ItoDriftQuadraticCorrections` and `ItoDriftTaylorRemainder`; this file is the assembly of
 `itoDrift_expectation_identity_adapted` from them.
 -/
@@ -118,7 +121,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
   {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
   {M : ℝ≥0 → Ω → ℝ} (hD : IsAdaptedItoDrift hB hBmeas T δ Dd M)
 
-include hB hBmeas hD
+include hD
 
 
 set_option maxHeartbeats 1600000 in
@@ -684,23 +687,11 @@ theorem itoDrift_expectation_identity_adapted
     rw [abs_mul]
     exact mul_le_mul (hg1 (X s ω)) (le_trans (hβbdd s ω) (le_abs_self Db)) (abs_nonneg _)
       (le_trans (abs_nonneg _) (hg1 0))
-  have hDsq2 : |Dd| * |Dd| = Dd * Dd := by
-    rcases le_total 0 Dd with h | h
-    · rw [abs_of_nonneg h]
-    · rcases eq_or_lt_of_le h with rfl | h'
-      · simp
-      · rw [abs_of_neg h']
-        ring
   have hbdd_q : ∀ s : ℝ≥0, ∀ ω : Ω, |f'' (X s ω) * (δ s ω * δ s ω)| ≤ C2 * (Dd * Dd) := by
     intro s ω
-    have hd2 : |δ s ω * δ s ω| ≤ |Dd| * |Dd| := by
-      rw [abs_mul]
-      exact mul_le_mul (le_trans (hD.bdd s ω) (le_abs_self Dd))
-        (le_trans (hD.bdd s ω) (le_abs_self Dd)) (abs_nonneg _) (abs_nonneg Dd)
-    rw [abs_mul]
-    refine (mul_le_mul (hg2 (X s ω)) hd2 (abs_nonneg _)
-      (le_trans (abs_nonneg _) (hg2 0))).trans ?_
-    rw [hDsq2]
+    rw [abs_mul, abs_mul]
+    exact mul_le_mul (hg2 (X s ω)) (mul_self_le_mul_self (abs_nonneg _) (hD.bdd s ω))
+      (mul_nonneg (abs_nonneg _) (abs_nonneg _)) (le_trans (abs_nonneg _) (hg2 0))
   have hdm : ∀ s : ℝ≥0, Measurable (fun ω ↦ f' (X s ω) * β s ω) := fun s ↦
     (hf'c.measurable.comp
       ((hXadap s).measurable.mono ((natFiltration hBmeas).le s) le_rfl)).mul
