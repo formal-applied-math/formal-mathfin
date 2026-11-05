@@ -22,9 +22,12 @@ transcribed closed form to the already-built vanilla Black–Scholes call (`bsV`
 `BlackScholes/PDE.lean`).
 
 Transcribed from QuantLib's `ql/pricingengines/lookback/analyticcontinuousfloatinglookback.cpp`
-(`AnalyticContinuousFloatingLookbackEngine::A`, upstream commit `5f4811e`, 2026-10-16;
+(`AnalyticContinuousFloatingLookbackEngine::A`, upstream commit `c547e0ae6`, 2026-10-22;
 contributed 2006 by Warren Chou), which prices both the call (`η = 1`, strike floats at the
 running minimum) and the put (`η = -1`, strike floats at the running maximum) from one formula.
+The engine's own zero-carry handling (`|λ| < 1e-7`, upstream commit `060d87ef3`, "Price
+continuous lookbacks when the carry is zero") is the true removable-singularity limit this file
+does not transcribe — see the Scope section below and `lookbackFloatingPrice`'s own docstring.
 With cost of carry `b = r − q`, `a₁ = bsd1 S m b σ T`, `a₂ = bsd2 S m b σ T`
 (`BlackScholes/Call.lean`), the price is
 
