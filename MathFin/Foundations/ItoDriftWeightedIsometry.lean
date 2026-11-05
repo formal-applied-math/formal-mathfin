@@ -126,7 +126,7 @@ lemma itoSimpleProcess_stepσ_incr {B : ℝ≥0 → Ω → ℝ} (hBmeas : ∀ t,
 omit [IsProbabilityMeasure μ] in
 /-- The uniform-partition band split: the `(0,T]`-band integral of an integrable
 space-time function is the sum of its uniform cell integrals (iterated
-`setIntegral_union` over the nested left endpoints). -/
+`setIntegral_Ioc_prod_add` over the nested left endpoints). -/
 lemma uniform_band_split (hBmeas : ∀ t, Measurable (B t)) {T : ℝ≥0} {n : ℕ}
     (hn : 0 < n) {F : ℝ≥0 × Ω → ℝ}
     (hFint : Integrable F (trimMeasure_T (μ := μ) T hBmeas)) :
@@ -136,10 +136,7 @@ lemma uniform_band_split (hBmeas : ∀ t, Measurable (B t)) {T : ℝ≥0} {n : �
           ∫ z in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)) ×ˢ (Set.univ : Set Ω),
             F z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
   have hTn : unifPart T n n = T := unifPart_self T hn.ne'
-  have hintOn : ∀ m : ℕ, m ≤ n →
-      IntegrableOn F ((Set.Ioc (0:ℝ≥0) (unifPart T n m)) ×ˢ (Set.univ : Set Ω))
-        (trimMeasure_T (μ := μ) T hBmeas) := fun _ _ ↦ hFint.integrableOn
-  have key : ∀ m : ℕ, 0 < m → m ≤ n →
+  have key : ∀ m : ℕ, m ≤ n →
       ∫ z in Set.Ioc (0:ℝ≥0) (unifPart T n m) ×ˢ (Set.univ : Set Ω), F z
           ∂(trimMeasure_T (μ := μ) T hBmeas)
         = ∑ k ∈ Finset.range m,
@@ -147,49 +144,12 @@ lemma uniform_band_split (hBmeas : ∀ t, Measurable (B t)) {T : ℝ≥0} {n : �
               F z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
     intro m
     induction m with
-    | zero => intro hm; exact (Nat.not_lt_zero _ hm).elim
+    | zero => intro _; simp [unifPart_zero]
     | succ m ih =>
-      intro hm hmT
-      rcases Nat.eq_zero_or_pos m with hm0 | hm0
-      · subst hm0
-        rw [Finset.range_one, Finset.sum_singleton, unifPart_zero]
-      · have hmt : unifPart T n m ≤ unifPart T n (m + 1) :=
-          unifPart_mono T n (Nat.le_succ m)
-        have hunion : (Set.Ioc (0:ℝ≥0) (unifPart T n m) ×ˢ (Set.univ : Set Ω))
-            ∪ (Set.Ioc (unifPart T n m) (unifPart T n (m + 1)) ×ˢ (Set.univ : Set Ω))
-            = (Set.Ioc (0:ℝ≥0) (unifPart T n (m + 1))) ×ˢ (Set.univ : Set Ω) := by
-          rw [← Set.union_prod, Set.Ioc_union_Ioc_eq_Ioc
-            zero_le hmt]
-        have hdisj : Disjoint
-            ((Set.Ioc (0:ℝ≥0) (unifPart T n m)) ×ˢ (Set.univ : Set Ω))
-            ((Set.Ioc (unifPart T n m) (unifPart T n (m + 1))) ×ˢ (Set.univ : Set Ω)) :=
-          Set.Disjoint.set_prod_left (Set.Ioc_disjoint_Ioc_of_le le_rfl) _ _
-        have hintV : IntegrableOn F
-            ((Set.Ioc (unifPart T n m) (unifPart T n (m + 1))) ×ˢ (Set.univ : Set Ω))
-            (trimMeasure_T (μ := μ) T hBmeas) := hFint.integrableOn
-        calc ∫ z in Set.Ioc (0:ℝ≥0) (unifPart T n (m + 1)) ×ˢ (Set.univ : Set Ω), F z
-              ∂(trimMeasure_T (μ := μ) T hBmeas)
-            = ∫ z in (Set.Ioc (0:ℝ≥0) (unifPart T n m) ×ˢ (Set.univ : Set Ω))
-                ∪ (Set.Ioc (unifPart T n m) (unifPart T n (m + 1)) ×ˢ (Set.univ : Set Ω)),
-                F z ∂(trimMeasure_T (μ := μ) T hBmeas) := by rw [hunion]
-          _ = ∫ z in Set.Ioc (0:ℝ≥0) (unifPart T n m) ×ˢ (Set.univ : Set Ω), F z
-                ∂(trimMeasure_T (μ := μ) T hBmeas)
-              + ∫ z in Set.Ioc (unifPart T n m) (unifPart T n (m + 1)) ×ˢ (Set.univ : Set Ω),
-                F z ∂(trimMeasure_T (μ := μ) T hBmeas) :=
-              setIntegral_union hdisj
-                (MeasureTheory.measurableSet_predictable_Ioc_prod (unifPart T n m)
-                  (unifPart T n (m + 1)) MeasurableSet.univ)
-                (hintOn m (by omega)) hintV
-          _ = ∑ k ∈ Finset.range m,
-                ∫ z in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)) ×ˢ (Set.univ : Set Ω),
-                  F z ∂(trimMeasure_T (μ := μ) T hBmeas)
-              + ∫ z in Set.Ioc (unifPart T n m) (unifPart T n (m + 1)) ×ˢ (Set.univ : Set Ω),
-                F z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
-              rw [ih hm0 (by omega)]
-          _ = ∑ k ∈ Finset.range (m + 1),
-                ∫ z in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)) ×ˢ (Set.univ : Set Ω),
-                  F z ∂(trimMeasure_T (μ := μ) T hBmeas) := (Finset.sum_range_succ _ m).symm
-  have hkey := key n hn (le_refl n)
+      intro hmT
+      rw [setIntegral_Ioc_prod_add hBmeas hFint zero_le
+          (unifPart_mono T n (Nat.le_succ m)), ih (by omega), Finset.sum_range_succ]
+  have hkey := key n (le_refl n)
   rw [hTn] at hkey
   exact hkey
 
@@ -266,7 +226,7 @@ variable (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
 variable {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
   {M : ℝ≥0 → Ω → ℝ} (hD : IsAdaptedItoDrift hB hBmeas T δ Dd M)
 
-include hB hBmeas hD
+include hD
 
 /-- The energy of the true increment: `𝔼[(M_v − M_u)²] ≤ D_δ²·(v−u)` for `u ≤ v ≤ T`
 (`incrementEnergy` plus the pointwise `δ`-bound on the mean function). -/

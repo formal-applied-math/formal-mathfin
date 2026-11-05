@@ -28,16 +28,6 @@ namespace MathFin.ItoDriftConditional
 open MathFin ItoIntegralL2 ItoIntegralCLM ItoIntegralRiemannBridge ItoIsometryAdapted
   ItoIntegralProcessGeneral ItoIntegralProcess QuadraticVariationL2 ItoIntegralBrownian
 
-/-! #### Stage 5b — the third-moment bound
-
-The fourth moment of the true increment over a uniform cell, obtained from the step-sum
-recursion `stepSum_pow4_le` (`ItoStepSumFourthMoment`: each refined-band Riemann
-sum of the bounded adapted integrand has fourth moment at most `3·(D²·band length)²`),
-passed to the true increment through the step approximants' `L²` convergence
-(`clm_band_energy` + `deltaStepLp_tendsto`), convergence in measure, an a.e. subsequence,
-and Fatou (`lintegral_liminf_le`). The cube bound then drops out by Cauchy–Schwarz
-interpolation (`∫|X|³ ≤ ‖X‖₂·‖X‖₄²·...`). -/
-
 section StageFiveB
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
@@ -45,7 +35,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
   {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
   {M : ℝ≥0 → Ω → ℝ} (hD : IsAdaptedItoDrift hB hBmeas T δ Dd M)
 
-include hB hBmeas hD
+include hD
 
 /-- The step-approximant process value at a grid point of its own partition, as the
 running Itô sum (the range form of `itoSimpleProcess_stepσ_incr`). -/
@@ -80,9 +70,9 @@ one: it feeds both the `Integrable` extraction and the real-integral bound. -/
 private theorem trueIncr_pow4_lintegral_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk : k < n) :
     ∫⁻ ω, ENNReal.ofReal
         ((((itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-              (processToLp T hBmeas hD.adapted hD.continuous hD.bdd)
+              hD.integrand
             - itoProcessCLM hB T (unifPart T n k) hBmeas
-              (processToLp T hBmeas hD.adapted hD.continuous hD.bdd) : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4) ∂μ
+              hD.integrand : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4) ∂μ
       ≤ ENNReal.ofReal (3 * (Dd ^ 2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 2) := by
   -- grid arithmetic: the refined partition `m = n·2^p` contains the cell endpoints
   have hgrid : ∀ (p j : ℕ), unifPart T (n * 2 ^ p) (2 ^ p * j) = unifPart T n j := by
@@ -164,9 +154,9 @@ private theorem trueIncr_pow4_lintegral_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk 
           - itoProcessCLM hB T (unifPart T n k) hBmeas
             (deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)))
         - (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-            (processToLp T hBmeas hD.adapted hD.continuous hD.bdd)
+            hD.integrand
           - itoProcessCLM hB T (unifPart T n k) hBmeas
-            (processToLp T hBmeas hD.adapted hD.continuous hD.bdd)) : Lp ℝ 2 μ)‖) atTop (𝓝 0) := by
+            hD.integrand) : Lp ℝ 2 μ)‖) atTop (𝓝 0) := by
     have hemb : Tendsto (fun p : ℕ ↦ n * 2 ^ p) atTop atTop := by
       refine Filter.tendsto_atTop_atTop.mpr fun j ↦ ⟨j, fun p hp ↦ ?_⟩
       calc j ≤ p := hp
@@ -176,7 +166,7 @@ private theorem trueIncr_pow4_lintegral_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk 
     have hsub := deltaStepLp_tendsto (T := T) hB hBmeas hD.adapted hD.continuous hD.bdd
     have hFp : Tendsto (fun p : ℕ ↦
         ‖(deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
-          - processToLp T hBmeas hD.adapted hD.continuous hD.bdd :
+          - hD.integrand :
             Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))‖) atTop (𝓝 0) :=
       (tendsto_iff_norm_sub_tendsto_zero.mp hsub).comp hemb
     refine squeeze_zero' (Eventually.of_forall fun _p ↦ norm_nonneg _)
@@ -188,48 +178,48 @@ private theorem trueIncr_pow4_lintegral_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk 
           - itoProcessCLM hB T (unifPart T n k) hBmeas
             (deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)))
         - (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-            (processToLp T hBmeas hD.adapted hD.continuous hD.bdd)
+            hD.integrand
           - itoProcessCLM hB T (unifPart T n k) hBmeas
-            (processToLp T hBmeas hD.adapted hD.continuous hD.bdd)) : Lp ℝ 2 μ)
+            hD.integrand) : Lp ℝ 2 μ)
         = (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
             (deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
-              - processToLp T hBmeas hD.adapted hD.continuous hD.bdd)
+              - hD.integrand)
           - itoProcessCLM hB T (unifPart T n k) hBmeas
             (deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
-              - processToLp T hBmeas hD.adapted hD.continuous hD.bdd)) := by
+              - hD.integrand)) := by
       intro p
       simp only [map_sub]
       abel
     rw [hdec p]
     calc ‖(itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
             (deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
-              - processToLp T hBmeas hD.adapted hD.continuous hD.bdd)
+              - hD.integrand)
           - itoProcessCLM hB T (unifPart T n k) hBmeas
             (deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
-              - processToLp T hBmeas hD.adapted hD.continuous hD.bdd) : Lp ℝ 2 μ)‖
+              - hD.integrand) : Lp ℝ 2 μ)‖
         ≤ ‖itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
             (deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
-              - processToLp T hBmeas hD.adapted hD.continuous hD.bdd)‖
+              - hD.integrand)‖
           + ‖itoProcessCLM hB T (unifPart T n k) hBmeas
             (deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
-              - processToLp T hBmeas hD.adapted hD.continuous hD.bdd)‖ := norm_sub_le _ _
+              - hD.integrand)‖ := norm_sub_le _ _
       _ ≤ ‖(deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
-              - processToLp T hBmeas hD.adapted hD.continuous hD.bdd :
+              - hD.integrand :
               Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))‖ * 2 := by
           have h1 := itoProcessCLM_norm_le hB T (unifPart T n (k + 1)) hBmeas
             (deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
-              - processToLp T hBmeas hD.adapted hD.continuous hD.bdd)
+              - hD.integrand)
           have h2 := itoProcessCLM_norm_le hB T (unifPart T n k) hBmeas
             (deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
-              - processToLp T hBmeas hD.adapted hD.continuous hD.bdd)
+              - hD.integrand)
           have h3 : ‖(deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
-                - processToLp T hBmeas hD.adapted hD.continuous hD.bdd :
+                - hD.integrand :
                 Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))‖ * 2
               = ‖(deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
-                  - processToLp T hBmeas hD.adapted hD.continuous hD.bdd :
+                  - hD.integrand :
                   Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))‖
               + ‖(deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
-                  - processToLp T hBmeas hD.adapted hD.continuous hD.bdd :
+                  - hD.integrand :
                   Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))‖ := by ring
           rw [h3]
           exact add_le_add h1 h2
@@ -242,9 +232,9 @@ private theorem trueIncr_pow4_lintegral_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk 
         - itoProcessCLM hB T (unifPart T n k) hBmeas
           (deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)) : Lp ℝ 2 μ)) atTop
       (𝓝 (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-          (processToLp T hBmeas hD.adapted hD.continuous hD.bdd)
+          hD.integrand
         - itoProcessCLM hB T (unifPart T n k) hBmeas
-          (processToLp T hBmeas hD.adapted hD.continuous hD.bdd) : Lp ℝ 2 μ)) :=
+          hD.integrand : Lp ℝ 2 μ)) :=
     tendsto_iff_norm_sub_tendsto_zero.mpr hconv
   have htmi : TendstoInMeasure μ (fun p : ℕ ↦
       ((itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
@@ -252,9 +242,9 @@ private theorem trueIncr_pow4_lintegral_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk 
         - itoProcessCLM hB T (unifPart T n k) hBmeas
           (deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)) : Lp ℝ 2 μ) : Ω → ℝ)) atTop
       ((itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-          (processToLp T hBmeas hD.adapted hD.continuous hD.bdd)
+          hD.integrand
         - itoProcessCLM hB T (unifPart T n k) hBmeas
-          (processToLp T hBmeas hD.adapted hD.continuous hD.bdd) : Lp ℝ 2 μ) : Ω → ℝ) :=
+          hD.integrand : Lp ℝ 2 μ) : Ω → ℝ) :=
     tendstoInMeasure_of_tendsto_Lp (p := 2) hLp
   obtain ⟨ns, _hnsmono, hae⟩ := htmi.exists_seq_tendsto_ae
   -- the Fatou functions and their a.e. limit (coe-of-difference forms throughout)
@@ -302,24 +292,24 @@ private theorem trueIncr_pow4_lintegral_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk 
   have hGmeas : AEMeasurable
       (fun ω : Ω ↦ ENNReal.ofReal
         ((((itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-              (processToLp T hBmeas hD.adapted hD.continuous hD.bdd)
+              hD.integrand
             - itoProcessCLM hB T (unifPart T n k) hBmeas
-              (processToLp T hBmeas hD.adapted hD.continuous hD.bdd) : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4))
+              hD.integrand : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4))
                 μ :=
     (ENNReal.continuous_ofReal.measurable).comp_aemeasurable
       (AEMeasurable.pow_const
         (Lp.aestronglyMeasurable
           (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-              (processToLp T hBmeas hD.adapted hD.continuous hD.bdd)
+              hD.integrand
             - itoProcessCLM hB T (unifPart T n k) hBmeas
-              (processToLp T hBmeas hD.adapted hD.continuous hD.bdd) :
+              hD.integrand :
             Lp ℝ 2 μ)).aemeasurable 4)
   have hlimfun : ∀ᵐ ω : Ω ∂μ,
       ENNReal.ofReal
         ((((itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-              (processToLp T hBmeas hD.adapted hD.continuous hD.bdd)
+              hD.integrand
             - itoProcessCLM hB T (unifPart T n k) hBmeas
-              (processToLp T hBmeas hD.adapted hD.continuous hD.bdd) : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4)
+              hD.integrand : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4)
         = atTop.liminf (fun i : ℕ ↦ ENNReal.ofReal
           ((((itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
                 (deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ ns i))
@@ -332,9 +322,9 @@ private theorem trueIncr_pow4_lintegral_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk 
     exact ((hcont.tendsto _).comp hw).liminf_eq.symm
   have hlimint : ∫⁻ ω, ENNReal.ofReal
         ((((itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-              (processToLp T hBmeas hD.adapted hD.continuous hD.bdd)
+              hD.integrand
             - itoProcessCLM hB T (unifPart T n k) hBmeas
-              (processToLp T hBmeas hD.adapted hD.continuous hD.bdd) : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4) ∂μ
+              hD.integrand : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4) ∂μ
       ≤ ENNReal.ofReal (3 * (Dd ^ 2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 2) := by
     rw [lintegral_congr_ae hlimfun]
     refine le_trans (lintegral_liminf_le' fun i ↦ hXmeas i) ?_
@@ -349,14 +339,14 @@ private theorem trueIncr_pow4_lintegral_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk 
 `a := ENNReal.ofReal _`, so a lintegral LHS never unifies; stay in the `ofReal` world). -/
 private theorem clmIncr_pow4_integrable {n : ℕ} (hn : 0 < n) (k : ℕ) (hk : k < n) :
     Integrable (fun ω ↦ (((itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-            (processToLp T hBmeas hD.adapted hD.continuous hD.bdd)
+            hD.integrand
           - itoProcessCLM hB T (unifPart T n k) hBmeas
-            (processToLp T hBmeas hD.adapted hD.continuous hD.bdd) : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4) μ :=
+            hD.integrand : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4) μ :=
   ⟨(Lp.aestronglyMeasurable
       (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-          (processToLp T hBmeas hD.adapted hD.continuous hD.bdd)
+          hD.integrand
         - itoProcessCLM hB T (unifPart T n k) hBmeas
-          (processToLp T hBmeas hD.adapted hD.continuous hD.bdd) :
+          hD.integrand :
         Lp ℝ 2 μ)).pow 4,
     by
       rw [hasFiniteIntegral_iff_ofReal (Eventually.of_forall fun ω ↦ by positivity)]
@@ -370,15 +360,15 @@ private theorem clmIncr_pow4_integrable {n : ℕ} (hn : 0 < n) (k : ℕ) (hk : k
 private theorem abs_pow4_trueIncr_ae (n k : ℕ) :
     (fun ω ↦ |M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω| ^ 4)
     =ᵐ[μ] (fun ω ↦ (((itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-          (processToLp T hBmeas hD.adapted hD.continuous hD.bdd)
+          hD.integrand
         - itoProcessCLM hB T (unifPart T n k) hBmeas
-          (processToLp T hBmeas hD.adapted hD.continuous hD.bdd) : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4) := by
+          hD.integrand : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4) := by
   filter_upwards [hD.ae_eq (unifPart T n (k + 1)), hD.ae_eq (unifPart T n k),
     Lp.coeFn_sub
       (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-        (processToLp T hBmeas hD.adapted hD.continuous hD.bdd))
+        hD.integrand)
       (itoProcessCLM hB T (unifPart T n k) hBmeas
-        (processToLp T hBmeas hD.adapted hD.continuous hD.bdd))] with ω h1 h0 hsub
+        hD.integrand)] with ω h1 h0 hsub
   show |M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω| ^ 4 = _
   rw [h1, h0, ← Pi.sub_apply, ← hsub, ← abs_pow]
   exact abs_of_nonneg (by positivity)
@@ -402,14 +392,14 @@ theorem trueIncr_pow4_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk : k < n) :
   have hG4 := abs_pow4_trueIncr_ae hB hBmeas hD n k
   rw [integral_congr_ae hG4]
   have hint4 : Integrable (fun ω ↦ (((itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-            (processToLp T hBmeas hD.adapted hD.continuous hD.bdd)
+            hD.integrand
           - itoProcessCLM hB T (unifPart T n k) hBmeas
-            (processToLp T hBmeas hD.adapted hD.continuous hD.bdd) : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4) μ :=
+            hD.integrand : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4) μ :=
     clmIncr_pow4_integrable hB hBmeas hD hn k hk
   have hofR : ENNReal.ofReal (∫ ω, (((itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-            (processToLp T hBmeas hD.adapted hD.continuous hD.bdd)
+            hD.integrand
           - itoProcessCLM hB T (unifPart T n k) hBmeas
-            (processToLp T hBmeas hD.adapted hD.continuous hD.bdd) : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4 ∂μ)
+            hD.integrand : Lp ℝ 2 μ) : Ω → ℝ) ω) ^ 4 ∂μ)
       ≤ ENNReal.ofReal (3 * (Dd ^ 2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 2) := by
     rw [ofReal_integral_eq_lintegral_ofReal hint4
       (Eventually.of_forall fun ω ↦ by positivity)]

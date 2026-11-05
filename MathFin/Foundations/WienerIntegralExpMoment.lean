@@ -144,7 +144,7 @@ theorem integral_exp_neg_add_mul_wienerIntegralLp (hB : IsPreBrownianReal B μ) 
     ∫ ω, Real.exp (-(m + c * wienerIntegralLp B hB T f ω)) ∂μ
       = Real.exp (-m + c ^ 2 * (∫ s in Set.Ioc (0 : ℝ) (T : ℝ), f s ^ 2) / 2) := by
   simp_rw [neg_add, Real.exp_add, ← neg_mul]
-  rw [integral_const_mul, integral_exp_mul_wienerIntegralLp, Lp_real_two_norm_sq, neg_sq]
+  rw [integral_const_mul, integral_exp_mul_wienerIntegralLp, lp_two_norm_sq, neg_sq]
 
 /-- **The covariance identity for two Wiener integrals**: with `⟪f, g⟫ = Cov(∫f dB, ∫g dB)`,
 

@@ -116,7 +116,7 @@ theorem wienerIntegralLp_hasLaw_girsanov (hB : IsPreBrownianReal B μ) (lam : �
   funext t
   simp only [mgf]
   rw [integral_exp_mul_wienerIntegralLp_withDensity_girsanov, inner_stepIndicatorLp_whole,
-    Lp_real_two_norm_sq, Real.coe_toNNReal _ (integral_nonneg fun _ ↦ sq_nonneg _)]
+    lp_two_norm_sq, Real.coe_toNNReal _ (integral_nonneg fun _ ↦ sq_nonneg _)]
   congr 1
   ring
 

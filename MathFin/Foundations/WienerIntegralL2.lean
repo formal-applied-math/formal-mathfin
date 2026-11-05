@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.ExtendOfNormIsometry
+public import MathFin.Foundations.LpMulIsometry
 
 /-!
 # Wiener integral on L²([0, T])
@@ -422,28 +423,15 @@ theorem wienerIntegralLp_norm (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
   exact LinearMap.norm_extendOfNorm_eq_of_isometry
     (stepAssembly_denseRange T) (wiener_assembly_isometry hB T) f
 
-/-- Helper: for any `g : Lp ℝ 2 ν`, `‖g‖² = ∫ ω, (g ω)² ∂ν`. (Public so the
-Gaussian-law companion `Foundations/WienerIntegralGaussian.lean` reuses it on
-both the Ω-side and the time-side measures.) -/
-lemma Lp_real_two_norm_sq {α : Type*} {mα : MeasurableSpace α} (ν : Measure α)
-    (g : Lp ℝ 2 ν) : ‖g‖ ^ 2 = ∫ ω, (g ω) ^ 2 ∂ν := by
-  have h : ⟪g, g⟫_ℝ = ‖g‖ ^ 2 := real_inner_self_eq_norm_sq g
-  rw [L2.inner_def] at h
-  rw [← h]
-  refine integral_congr_ae ?_
-  filter_upwards with ω
-  change (g ω) * (g ω) = (g ω) ^ 2
-  ring
-
 /-- Itô isometry, integral form. For every `f ∈ L²([0, T])`,
 `∫ ω, (wienerIntegralLp f ω)² ∂μ = ∫ s in (0, T], (f s)² ∂volume`. -/
 theorem wienerIntegralLp_integral_sq (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (f : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ)))) :
     ∫ ω, (wienerIntegralLp B hB T f ω) ^ 2 ∂μ =
       ∫ s in Set.Ioc (0 : ℝ) (T : ℝ), (f s) ^ 2 ∂volume := by
-  rw [← Lp_real_two_norm_sq μ (wienerIntegralLp B hB T f),
+  rw [← lp_two_norm_sq (wienerIntegralLp B hB T f),
       wienerIntegralLp_norm hB T f,
-      Lp_real_two_norm_sq (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) f]
+      lp_two_norm_sq f]
 
 end WienerIntegralL2
 end MathFin
