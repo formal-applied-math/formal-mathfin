@@ -268,13 +268,7 @@ theorem forward_eq_weak_zeroRate
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ}
-    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-    {Dd : ℝ} (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-    {M : ℝ≥0 → Ω → ℝ}
-    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
     (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + M t ω)
@@ -304,14 +298,14 @@ theorem forward_eq_weak_zeroRate
   have key := marginal_flow_weak_equation_fn_constructed (β := β0) (Db := 0)
     (afn := fun _ _ => 0)
     hB hBmeas (fun _ => stronglyMeasurable_const) (fun _ => continuous_const) (by simp [hβ0])
-    hδadap hδcont hδbdd hMadap hMeq c hXcont hXrel0 hafn hbfn hf hf' h2 hf'' hg1 hg2 hg3
+    hD c hXcont hXrel0 hafn hbfn hf hf' h2 hf'' hg1 hg2 hg3
     t ht htT
   simpa using key
 
 /-- **Dupire's formula, distributional form (Bagaria ch. 9 Thm 9.5 ∘ Thm 9.7, zero rates) —
 the headline of the distributional half.** For the driftless Itô process `X = c + M` (`M` a
 hypothesized adapted process equal a.e. at
-each `t` (`hMeq`) to the CLM Itô integral `∫δ dB` of the bounded adapted `δ`) and every smooth
+each `t` (`hD.ae_eq`) to the CLM Itô integral `∫δ dB` of the bounded adapted `δ`) and every smooth
 compactly supported strike density `ψ`, the `ψ`-pairing of the
 *defined* call surface `C(s, K) = 𝔼[(X_{s⁺} − K)⁺]` is differentiable in maturity on
 `(0, ↑T)`, with
@@ -331,13 +325,7 @@ theorem dupire_weak
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ}
-    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-    {Dd : ℝ} (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-    {M : ℝ≥0 → Ω → ℝ}
-    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
     (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + M t ω)
@@ -355,14 +343,15 @@ theorem dupire_weak
     rw [hXrel s]
     exact (integrable_const c).add
       (((Lp.memLp (itoProcessCLM hB T s hBmeas
-        (processToLp T hBmeas hδadap hδcont hδbdd))).integrable one_le_two).congr (hMeq s).symm)
+        (processToLp T hBmeas hD.adapted hD.continuous hD.bdd))).integrable one_le_two).congr
+          (hD.ae_eq s).symm)
   have hfun : (fun s : ℝ => ∫ K, ψ K * callSurface μ X s K)
       = fun s : ℝ => ∫ ω, f (X (Real.toNNReal s) ω) ∂μ := by
     funext s
     rw [← integral_payoff_eq_integral_call (hXint _) hψ.continuous hψc]
     exact integral_congr_ae (Eventually.of_forall fun ω => (hspan _).symm)
   rw [hfun]
-  exact forward_eq_weak_zeroRate hB hBmeas hδadap hδcont hδbdd hMadap hMeq c hXcont hXrel
+  exact forward_eq_weak_zeroRate hB hBmeas hD c hXcont hXrel
     hbfn hf hf' h2 hf'' hg1 hg2 hg3 t ht htT
 
 end Dupire
@@ -615,13 +604,7 @@ theorem dupire_ae_window
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ}
-    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-    {Dd : ℝ} (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-    {M : ℝ≥0 → Ω → ℝ}
-    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
     (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + M t ω)
@@ -644,10 +627,11 @@ theorem dupire_ae_window
     rw [hXrel s]
     exact (integrable_const c).add
       (((Lp.memLp (itoProcessCLM hB T s hBmeas
-        (processToLp T hBmeas hδadap hδcont hδbdd))).integrable one_le_two).congr (hMeq s).symm)
+        (processToLp T hBmeas hD.adapted hD.continuous hD.bdd))).integrable one_le_two).congr
+          (hD.ae_eq s).symm)
   have hXm : Measurable (X (Real.toNNReal t)) := by
     rw [hXrel]
-    exact ((hMadap _).measurable.mono ((natFiltration hBmeas).le _) le_rfl).const_add c
+    exact ((hD.adaptedM _).measurable.mono ((natFiltration hBmeas).le _) le_rfl).const_add c
   set Xt := X (Real.toNNReal t) with hXt
   set ν := μ.map Xt with hν
   set bt := bfn t with hbdef
@@ -698,7 +682,7 @@ theorem dupire_ae_window
     -- (b) the maturity derivative of the `ψ`-pairing, computed two ways
     have huniq := (hasDerivAt_integral_mul_callSurface hXint hε hCt hCtc hψ.continuous hψc
       (hψU.trans (Ioo_subset_Ioo hap.le hqb.le))).unique
-      (dupire_weak hB hBmeas hδadap hδcont hδbdd hMadap hMeq c hXcont hXrel hbfn hψ hψc
+      (dupire_weak hB hBmeas hD c hXcont hXrel hbfn hψ hψc
         t ht htT)
     -- (a) its right side, through `law(X_t) = C_KK · Leb` on the window
     have hlawint : ∫ ω, ψ (Xt ω) * bt (Xt ω) ∂μ = ∫ K in Ioc p q, ψ K * ((ρ K : ℝ) * bt K) := by
@@ -765,13 +749,7 @@ theorem dupire_ae
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ}
-    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-    {Dd : ℝ} (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-    {M : ℝ≥0 → Ω → ℝ}
-    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
     (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + M t ω)
@@ -798,7 +776,7 @@ theorem dupire_ae
       bfn t (X (Real.toNNReal t) ω)
         = 2 * Ct t (X (Real.toNNReal t) ω) / CKK (X (Real.toNNReal t) ω) := fun pq => by
     by_cases h : a < (pq.1 : ℝ) ∧ (pq.1 : ℝ) ≤ pq.2 ∧ (pq.2 : ℝ) < b
-    · filter_upwards [dupire_ae_window hB hBmeas hδadap hδcont hδbdd hMadap hMeq c hXcont hXrel
+    · filter_upwards [dupire_ae_window hB hBmeas hD c hXcont hXrel
         (fun s => ⟨hbfm s, hbfeq s⟩) t ht htT hε hCK hCKK hCKKc hCt hCtc h.1 h.2.1 h.2.2]
         with ω hω _ using hω
     · exact ae_of_all _ fun ω h' => absurd h' h
@@ -822,13 +800,7 @@ theorem dupire_pointwise_coeff
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ}
-    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-    {Dd : ℝ} (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-    {M : ℝ≥0 → Ω → ℝ}
-    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
     (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + M t ω)
@@ -850,13 +822,14 @@ theorem dupire_pointwise_coeff
     rw [hXrel]
     exact (integrable_const c).add
       (((Lp.memLp (itoProcessCLM hB T _ hBmeas
-        (processToLp T hBmeas hδadap hδcont hδbdd))).integrable one_le_two).congr (hMeq _).symm)
+        (processToLp T hBmeas hD.adapted hD.continuous hD.bdd))).integrable one_le_two).congr
+          (hD.ae_eq _).symm)
   have hXm : Measurable (X (Real.toNNReal t)) := by
     rw [hXrel]
-    exact ((hMadap _).measurable.mono ((natFiltration hBmeas).le _) le_rfl).const_add c
+    exact ((hD.adaptedM _).measurable.mono ((natFiltration hBmeas).le _) le_rfl).const_add c
   set Xt := X (Real.toNNReal t)
   have hae : ∀ᵐ ω ∂μ, Xt ω ∈ Ioo a b → v2 (Xt ω) = 2 * Ct t (Xt ω) / CKK (Xt ω) := by
-    filter_upwards [dupire_ae hB hBmeas hδadap hδcont hδbdd hMadap hMeq c hXcont hXrel t ht htT
+    filter_upwards [dupire_ae hB hBmeas hD c hXcont hXrel t ht htT
       hε hCK hCKK hCKKc hCt hCtc, hv2rep] with ω h1 h2 hmem
     rw [← h2 hmem, h1 hmem]
   -- the two sides differ, and `C_KK > 0`, on a whole neighbourhood of `K₀`
@@ -905,13 +878,7 @@ theorem dupire_pointwise
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ}
-    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-    {Dd : ℝ} (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-    {M : ℝ≥0 → Ω → ℝ}
-    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
     (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + M t ω)
@@ -929,7 +896,7 @@ theorem dupire_pointwise
         = σloc (X (Real.toNNReal t) ω) ^ 2 * X (Real.toNNReal t) ω ^ 2) :
     ∀ K ∈ Ioo a b, 0 < CKK K → σloc K ^ 2 = 2 * Ct t K / (K ^ 2 * CKK K) := by
   intro K hK hpos
-  have h := dupire_pointwise_coeff hB hBmeas hδadap hδcont hδbdd hMadap hMeq c hXcont hXrel t ht
+  have h := dupire_pointwise_coeff hB hBmeas hD c hXcont hXrel t ht
     htT hε hCK hCKK hCKKc hCt hCtc (v2 := fun K => σloc K ^ 2 * K ^ 2)
     ((hσc.pow 2).mul (continuousOn_id.pow 2)) hσrep K hK hpos
   have hK2 : K ^ 2 ≠ 0 := pow_ne_zero 2 (by linarith [hK.1])
@@ -952,13 +919,7 @@ theorem dupire_localVol
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ}
-    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-    {Dd : ℝ} (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-    {M : ℝ≥0 → Ω → ℝ}
-    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
     (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + M t ω)
@@ -975,8 +936,8 @@ theorem dupire_localVol
     ∀ K ∈ Ioo a b, 0 < CKK K → v t K ^ 2 = 2 * Ct t K / CKK K := by
   have hXm : Measurable (X (Real.toNNReal t)) := by
     rw [hXrel]
-    exact ((hMadap _).measurable.mono ((natFiltration hBmeas).le _) le_rfl).const_add c
-  refine dupire_pointwise_coeff hB hBmeas hδadap hδcont hδbdd hMadap hMeq c hXcont hXrel t ht
+    exact ((hD.adaptedM _).measurable.mono ((natFiltration hBmeas).le _) le_rfl).const_add c
+  refine dupire_pointwise_coeff hB hBmeas hD c hXcont hXrel t ht
     htT hε hCK hCKK hCKKc hCt hCtc (v2 := fun K => v t K ^ 2) (hvc.pow 2)
     (ae_of_all _ fun ω _ => ?_)
   -- `δ_t² = v(t, X_t)²` is `σ(X_t)`-measurable, so it is its own conditional expectation
@@ -990,8 +951,8 @@ theorem dupire_localVol
     Integrable.of_bound (hsm.mono (sigmaGen_le _ _ hXm)).aestronglyMeasurable (Dd * Dd)
       (ae_of_all _ fun ω => by
         rw [Real.norm_eq_abs, abs_mul]
-        exact mul_le_mul (hδbdd _ _) (hδbdd _ _) (abs_nonneg _)
-          ((abs_nonneg _).trans (hδbdd (Real.toNNReal t) ω)))
+        exact mul_le_mul (hD.bdd _ _) (hD.bdd _ _) (abs_nonneg _)
+          ((abs_nonneg _).trans (hD.bdd (Real.toNNReal t) ω)))
   change μ[_ | _] ω = _
   rw [condExp_of_stronglyMeasurable (sigmaGen_le _ _ hXm) hsm hI]
   simp only [reindexed, hδloc, Real.coe_toNNReal t ht.le]

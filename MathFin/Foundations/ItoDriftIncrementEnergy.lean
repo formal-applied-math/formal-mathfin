@@ -53,11 +53,12 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
 The data of the integrated Itô–drift identity for an Itô process with random adapted
 coefficients: a pre-Brownian motion `B` with measurable sections (path continuity of `B` is not
 assumed), bounded adapted path-continuous `β, δ`, and two hypothesized processes: a
-`natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for every `t ≥ 0` (`hMeq`, the process values
+`natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for every `t ≥ 0` (`hD.ae_eq`, the process values
 of `itoProcessCLM` at the σ-realization `processToLp δ`), and an `X` with
 `X t = c + ∫₀ᵗ β_s ds + M t` (`hXrel`) whose paths are continuous almost surely (`hXcont`). For
 `B` with continuous paths, the constructed Itô process provides such an `M` (see the module
-docstring of `ItoFormulaAdaptedDrift`). The blocks use `M` through `hMeq` and `hMadap`; almost
+docstring of `ItoFormulaAdaptedDrift`). The blocks use `M` through `hD.ae_eq` and `hD.adaptedM`;
+almost
 sure path continuity enters through the hypothesis `hXcont`.
 
 The conversion below is the first ingredient: for a bounded adapted path-continuous `ψ`, the
@@ -356,34 +357,49 @@ theorem clm_band_energy {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B �
   rw [hsplit, hband v hvT, hband u (le_trans huv hvT), hbandsplit]
   ring
 
+/-- **The setting of the adapted Itô–drift stack.** For a pre-Brownian motion `B` with measurable
+sections, a bounded `natFiltration`-adapted path-continuous integrand `δ` (bound `Dd`), and a
+process `M` that is `natFiltration`-adapted and, at every time, a.e. equal to the Itô integral
+process `(δ●B)_t` of `itoProcessCLM` at horizon `T` (the σ-realization `processToLp δ`):
+`M` is a hypothesized version of `∫ δ dB`. The drift stack (`incrementEnergy` through
+`itoDrift_expectation_identity_adapted`, the Gyöngy and Dupire consumers) is conditional on this
+one object. -/
+structure IsAdaptedItoDrift {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
+    (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (δ : ℝ≥0 → Ω → ℝ) (Dd : ℝ)
+    (M : ℝ≥0 → Ω → ℝ) : Prop where
+  /-- `δ` is adapted to the natural filtration of `B`. -/
+  adapted : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t)
+  /-- `δ` has continuous paths. -/
+  continuous : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω
+  /-- `δ` is bounded by `Dd`. -/
+  bdd : ∀ t ω, |δ t ω| ≤ Dd
+  /-- `M` is adapted to the natural filtration of `B`. -/
+  adaptedM : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t)
+  /-- `M t` is a.e. the CLM Itô integral process of `δ` at time `t`, horizon `T`. -/
+  ae_eq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
+    (processToLp T hBmeas adapted continuous bdd) : Ω → ℝ)
+
 section AdaptedData
 
 variable (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
   {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
-  (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-  (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-  (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-  {M : ℝ≥0 → Ω → ℝ}
-  (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-  (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-    (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+  {M : ℝ≥0 → Ω → ℝ} (hD : IsAdaptedItoDrift hB hBmeas T δ Dd M)
 
-include hB hBmeas hδadap hδcont hδbdd hMeq
+include hB hBmeas hD
 
 /-- The Itô-integral process `M` is square-integrable at every time (its values are
 a.e.-equal to `L²` CLM values). -/
 theorem memLp_M (t : ℝ≥0) : MemLp (M t) 2 μ :=
-  (Lp.memLp (itoProcessCLM hB T t hBmeas (processToLp T hBmeas hδadap hδcont hδbdd))).ae_eq
-    (hMeq t).symm
-
-include hMadap
+  (Lp.memLp (itoProcessCLM hB T t hBmeas (processToLp T hBmeas hD.adapted hD.continuous
+    hD.bdd))).ae_eq
+    (hD.ae_eq t).symm
 
 /-- The hypothesized Itô-integral process `M` is a martingale for the natural filtration of `B`:
 the martingale property of `itoProcessCLM` (`itoIntegralProcessGen_isMartingale`) transferred
-along the a.e. identification `hMeq`. -/
+along the a.e. identification `hD.ae_eq`. -/
 theorem martingale_M : Martingale M (natFiltration hBmeas) μ :=
-  ⟨hMadap, fun u v huv ↦ condExp_congr_ae (hMeq v) |>.trans
-    ((itoIntegralProcessGen_isMartingale hB T hBmeas _ huv).trans (hMeq u).symm)⟩
+  ⟨hD.adaptedM, fun u v huv ↦ condExp_congr_ae (hD.ae_eq v) |>.trans
+    ((itoIntegralProcessGen_isMartingale hB T hBmeas _ huv).trans (hD.ae_eq u).symm)⟩
 
 /-- **The martingale-kill lemma** (the exact first-order cross-term zero of the adapted
 assembly): for `h` bounded and `𝓕_u`-measurable, `u ≤ v`,
@@ -398,16 +414,15 @@ theorem mul_trueIncr_expect_eq_zero {u v : ℝ≥0} (huv : u ≤ v)
     (hbdd : ∀ ω, |h ω| ≤ Ch) :
     ∫ ω, h ω * (M v ω - M u ω) ∂μ = 0 := by
   simpa only [Real.inner_apply] using
-    integral_inner_sub_eq_zero (martingale_M hB hBmeas hδadap hδcont hδbdd hMadap hMeq) huv hmadap
+    integral_inner_sub_eq_zero (martingale_M hB hBmeas hD) huv hmadap
       (ae_of_all _ fun ω ↦ (Real.norm_eq_abs _).le.trans (hbdd ω))
 
-omit hMadap in
 /-- **The increment-energy law** (the unweighted half of stage 3): for `u ≤ v ≤ T`,
 
   `𝔼[(M_v − M_u)²] = ∫_u^v 𝔼[δ_s²] ds`,
 
 the energy of the Itô-integral increment over a time band is the predictable energy
-of the band. Route: `M` agrees a.e. with the CLM process (`hMeq`), whose increment energy is the
+of the band. Route: `M` agrees a.e. with the CLM process (`hD.ae_eq`), whose increment energy is the
 band energy of the integrand (`clm_band_energy`), and the band-to-slice conversion of stage 2
 (`bandIntegral_slice` at `δ²`) turns that into the slice integral. -/
 theorem incrementEnergy {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
@@ -415,7 +430,7 @@ theorem incrementEnergy {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
       = ∫ s in Set.Ioc u v, (∫ ω, δ s ω * δ s ω ∂μ)
           ∂ItoIntegralL2.timeMeasure := by
   set φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
-    processToLp T hBmeas hδadap hδcont hδbdd with hφdef
+    processToLp T hBmeas hD.adapted hD.continuous hD.bdd with hφdef
   have hband : ∫ z in Set.Ioc u v ×ˢ (Set.univ : Set Ω), (φ : ℝ≥0 × Ω → ℝ) z ^ 2
         ∂(trimMeasure_T (μ := μ) T hBmeas)
       = ∫ s in Set.Ioc u v, (∫ ω, δ s ω * δ s ω ∂μ) ∂ItoIntegralL2.timeMeasure := by
@@ -426,24 +441,24 @@ theorem incrementEnergy {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
             ∂(trimMeasure_T (μ := μ) T hBmeas) := by
       refine integral_congr_ae ?_
       filter_upwards [ae_restrict_of_ae
-        (processToLp_coeFn T hBmeas hδadap hδcont hδbdd)] with z hz
+        (processToLp_coeFn T hBmeas hD.adapted hD.continuous hD.bdd)] with z hz
       show (φ : ℝ≥0 × Ω → ℝ) z ^ 2 = Function.uncurry (fun s ω ↦ δ s ω * δ s ω) z
       rw [hz, pow_two]
       rfl
     rw [hcoe, bandIntegral_slice hBmeas (μ := μ)
       (ψ := fun (t : ℝ≥0) (ω : Ω) ↦ δ t ω * δ t ω)
-      (hψadap := fun t ↦ (hδadap t).mul (hδadap t))
-      (hψcont := fun ω ↦ (hδcont ω).mul (hδcont ω))
+      (hψadap := fun t ↦ (hD.adapted t).mul (hD.adapted t))
+      (hψcont := fun ω ↦ (hD.continuous ω).mul (hD.continuous ω))
       (hψbdd := fun s ω ↦ by
         rw [abs_mul]
         calc |δ s ω| * |δ s ω| ≤ Dd * |δ s ω| :=
-              mul_le_mul_of_nonneg_right (hδbdd s ω) (abs_nonneg _)
-          _ ≤ Dd * Dd := mul_le_mul_of_nonneg_left (hδbdd s ω)
-              (le_trans (abs_nonneg _) (hδbdd 0 ω)))
+              mul_le_mul_of_nonneg_right (hD.bdd s ω) (abs_nonneg _)
+          _ ≤ Dd * Dd := mul_le_mul_of_nonneg_left (hD.bdd s ω)
+              (le_trans (abs_nonneg _) (hD.bdd 0 ω)))
       u v hvT]
   rw [← hband, ← clm_band_energy hB hBmeas T φ huv hvT]
   refine integral_congr_ae ?_
-  filter_upwards [hMeq u, hMeq v] with ω hu hv
+  filter_upwards [hD.ae_eq u, hD.ae_eq v] with ω hu hv
   rw [hu, hv]
 
 end AdaptedData

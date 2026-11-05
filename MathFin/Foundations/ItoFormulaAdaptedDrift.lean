@@ -116,22 +116,16 @@ open scoped NNReal ENNReal
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
   {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
-  (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-  (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-  (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-  {M : ℝ≥0 → Ω → ℝ}
-  (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-  (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-    (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+  {M : ℝ≥0 → Ω → ℝ} (hD : IsAdaptedItoDrift hB hBmeas T δ Dd M)
 
-include hB hBmeas hδadap hδcont hδbdd hMadap hMeq
+include hB hBmeas hD
 
 
 set_option maxHeartbeats 1600000 in
 -- a long estimate: elaborating the whole proof exceeds the default budget
 /-- **The integrated Itô–drift identity for adapted coefficients**, conditional on the
 process `M`. For `β, δ` bounded, `natFiltration`-adapted and path-continuous, a hypothesized
-`natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for every `t` (`hMeq`), and a hypothesized
+`natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for every `t` (`hD.ae_eq`), and a hypothesized
 `X` with `X_t = c + ∫₀ᵗ β_s ds + M_t` (`hXrel`, the `AdaptedDrift.driftPath β` decomposition)
 with almost every path continuous (`hXcont`), and `f` three times differentiable with `f'`,
 `f''`, `f'''` bounded,
@@ -179,7 +173,7 @@ theorem itoDrift_expectation_identity_adapted
     intro t
     rw [hXrel t]
     exact (((stronglyMeasurable_driftPath hBmeas hβadap hβcont hβbdd t).measurable.const_add c).add
-      (hMadap t).measurable).stronglyMeasurable
+      (hD.adaptedM t).measurable).stronglyMeasurable
   -- `f ∘ X` is integrable (linear growth of `f` from `|f'| ≤ C₁`)
   have hf_lin : ∀ x, |f x| ≤ |f 0| + C1 * |x| := by
     intro x
@@ -190,7 +184,7 @@ theorem itoDrift_expectation_identity_adapted
       _ ≤ |f 0| + |f x - f 0| := abs_add_le _ _
       _ ≤ |f 0| + C1 * |x| := by linarith
   have hMint : ∀ t : ℝ≥0, Integrable (fun ω ↦ |M t ω|) μ :=
-    fun t ↦ (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq t).norm.integrable one_le_two
+    fun t ↦ (memLp_M hB hBmeas hD t).norm.integrable one_le_two
   have hdpb : ∀ t : ℝ≥0, ∀ ω, |driftPath β t ω| ≤ |Db| * (t : ℝ) := by
     intro t ω
     have h0 : driftPath β (0 : ℝ≥0) ω = 0 := by
@@ -242,19 +236,19 @@ theorem itoDrift_expectation_identity_adapted
         * (driftPath β (unifPart T n (k + 1)) ω - driftPath β (unifPart T n k) ω)
         * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ)
     atTop (𝓝 0) :=
-    quadCrossSum_tendsto hB hBmeas hδadap hδcont hδbdd hMadap hMeq
+    quadCrossSum_tendsto hB hBmeas hD
       hβadap hβcont hβbdd hXadap hf''c hg2
   have hE0 : Tendsto (fun n : ℕ ↦ ∫ ω, ∑ k ∈ Finset.range n,
       discreteTaylorRemainder f f' f'' (X (unifPart T n k) ω)
         (X (unifPart T n (k + 1)) ω) ∂μ) atTop (𝓝 0) :=
-    taylorRemainderSum_tendsto hB hBmeas hδadap hδcont hδbdd hMadap hMeq hBmeas c
+    taylorRemainderSum_tendsto hB hBmeas hD hBmeas c
       hβcont hβbdd hXrel hXadap hf hf' hf'' hg3
   have hD0 : Tendsto (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
       ∫ ω, f'' (X (unifPart T n k) ω)
         * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ)
     atTop (𝓝 (∫ s in Set.Ioc (0 : ℝ≥0) T,
         (∫ ω, f'' (X s ω) * (δ s ω * δ s ω) ∂μ) ∂ItoIntegralL2.timeMeasure)) :=
-    quadraticSqSum_tendsto' hB hBmeas hδadap hδcont hδbdd hMadap hMeq
+    quadraticSqSum_tendsto' hB hBmeas hD
       (w := fun s ω ↦ f'' (X s ω)) (Cw := C2)
       (fun t ↦ hf''c.measurable.comp (hXadap t).measurable)
       (hXcont.mono fun ω h ↦ hf''c.comp h)
@@ -316,9 +310,9 @@ theorem itoDrift_expectation_identity_adapted
       hf''c.measurable.comp (hXm (unifPart T n k))
     have hdMm : ∀ k : ℕ, Measurable (fun ω ↦ M (unifPart T n (k + 1)) ω
         - M (unifPart T n k) ω) := fun k ↦
-      ((hMadap (unifPart T n (k + 1))).measurable.mono
+      ((hD.adaptedM (unifPart T n (k + 1))).measurable.mono
         ((natFiltration hBmeas).le (unifPart T n (k + 1))) le_rfl).sub
-      ((hMadap (unifPart T n k)).measurable.mono
+      ((hD.adaptedM (unifPart T n k)).measurable.mono
         ((natFiltration hBmeas).le (unifPart T n k)) le_rfl)
     have hdIb : ∀ k : ℕ, ∀ ω : Ω, |driftPath β (unifPart T n (k + 1)) ω
         - driftPath β (unifPart T n k) ω| ≤ |Db| * ((unifPart T n (k + 1) : ℝ)
@@ -339,8 +333,8 @@ theorem itoDrift_expectation_identity_adapted
     -- per-cell integrabilities
     have hdMint : ∀ k : ℕ, Integrable (fun ω ↦ M (unifPart T n (k + 1)) ω
         - M (unifPart T n k) ω) μ := fun k ↦
-      ((memLp_M hB hBmeas hδadap hδcont hδbdd hMeq (unifPart T n (k + 1))).sub
-        (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq (unifPart T n k))).integrable
+      ((memLp_M hB hBmeas hD (unifPart T n (k + 1))).sub
+        (memLp_M hB hBmeas hD (unifPart T n k))).integrable
           one_le_two
     have hint1 : ∀ k : ℕ, Integrable (fun ω ↦ f' (X (unifPart T n k) ω)
         * (driftPath β (unifPart T n (k + 1)) ω
@@ -409,9 +403,9 @@ theorem itoDrift_expectation_identity_adapted
     have hint5 : ∀ k : ℕ, Integrable (fun ω ↦ f'' (X (unifPart T n k) ω)
         * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2) μ := fun k ↦
       Integrable.mono'
-        (((memLp_M hB hBmeas hδadap hδcont hδbdd hMeq
+        (((memLp_M hB hBmeas hD
             (unifPart T n (k + 1))).sub
-          (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq (unifPart T n k))).integrable_sq.const_mul C2)
+          (memLp_M hB hBmeas hD (unifPart T n k))).integrable_sq.const_mul C2)
         (((hf''Xk k).mul ((hdMm k).pow_const 2)).aestronglyMeasurable)
         (Eventually.of_forall fun ω ↦ by
           change ‖f'' (X (unifPart T n k) ω)
@@ -427,7 +421,7 @@ theorem itoDrift_expectation_identity_adapted
     have hint6 : ∀ k ∈ Finset.range n, Integrable (fun ω ↦
         discreteTaylorRemainder f f' f'' (X (unifPart T n k) ω)
           (X (unifPart T n (k + 1)) ω)) μ := fun k hk ↦
-      remainderCell_integrable hB hBmeas hδadap hδcont hδbdd hMeq
+      remainderCell_integrable hB hBmeas hD
         (n := n) hn (k := k) (Finset.mem_range.mp hk) c hβcont hβbdd hXrel hXadap
         hf hf' hf'' hg3
     -- integrability of the full increments `f'·ΔX`, `f''·ΔX²`
@@ -500,7 +494,7 @@ theorem itoDrift_expectation_identity_adapted
     have hzero1 : (∑ k ∈ Finset.range n, ∫ ω, f' (X (unifPart T n k) ω)
         * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ∂μ) = 0 := by
       refine Finset.sum_eq_zero fun k _ ↦ ?_
-      exact mul_trueIncr_expect_eq_zero hB hBmeas hδadap hδcont hδbdd hMadap hMeq
+      exact mul_trueIncr_expect_eq_zero hB hBmeas hD
         (unifPart_mono T n (Nat.le_succ k))
         ((hf'c.measurable.comp (hXadap (unifPart T n k)).measurable).stronglyMeasurable)
         (fun ω ↦ hg1 (X (unifPart T n k) ω))
@@ -701,8 +695,8 @@ theorem itoDrift_expectation_identity_adapted
     intro s ω
     have hd2 : |δ s ω * δ s ω| ≤ |Dd| * |Dd| := by
       rw [abs_mul]
-      exact mul_le_mul (le_trans (hδbdd s ω) (le_abs_self Dd))
-        (le_trans (hδbdd s ω) (le_abs_self Dd)) (abs_nonneg _) (abs_nonneg Dd)
+      exact mul_le_mul (le_trans (hD.bdd s ω) (le_abs_self Dd))
+        (le_trans (hD.bdd s ω) (le_abs_self Dd)) (abs_nonneg _) (abs_nonneg Dd)
     rw [abs_mul]
     refine (mul_le_mul (hg2 (X s ω)) hd2 (abs_nonneg _)
       (le_trans (abs_nonneg _) (hg2 0))).trans ?_
@@ -714,14 +708,14 @@ theorem itoDrift_expectation_identity_adapted
   have hqm : ∀ s : ℝ≥0, Measurable (fun ω ↦ f'' (X s ω) * (δ s ω * δ s ω)) := fun s ↦
     (hf''c.measurable.comp
       ((hXadap s).measurable.mono ((natFiltration hBmeas).le s) le_rfl)).mul
-      (((hδadap s).measurable.mono ((natFiltration hBmeas).le s) le_rfl).mul
-        ((hδadap s).measurable.mono ((natFiltration hBmeas).le s) le_rfl))
+      (((hD.adapted s).measurable.mono ((natFiltration hBmeas).le s) le_rfl).mul
+        ((hD.adapted s).measurable.mono ((natFiltration hBmeas).le s) le_rfl))
   have hcontd : Continuous fun s : ℝ≥0 ↦ ∫ ω, f' (X s ω) * β s ω ∂μ :=
     continuous_mean_of_bdd_cont hdm (hXcont.mono fun ω h ↦ (hf'c.comp h).mul (hβcont ω))
       hbdd_d
   have hcontq : Continuous fun s : ℝ≥0 ↦ ∫ ω, f'' (X s ω) * (δ s ω * δ s ω) ∂μ :=
     continuous_mean_of_bdd_cont hqm
-      (hXcont.mono fun ω h ↦ (hf''c.comp h).mul ((hδcont ω).mul (hδcont ω))) hbdd_q
+      (hXcont.mono fun ω h ↦ (hf''c.comp h).mul ((hD.continuous ω).mul (hD.continuous ω))) hbdd_q
   have hdint : IntegrableOn (fun s : ℝ≥0 ↦ (∫ ω, f' (X s ω) * β s ω ∂μ))
       (Set.Ioc (0 : ℝ≥0) T) ItoIntegralL2.timeMeasure := by
     have : IsFiniteMeasure

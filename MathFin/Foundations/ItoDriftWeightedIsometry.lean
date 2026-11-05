@@ -264,27 +264,20 @@ section StageFourC
 variable (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
 
 variable {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
-  (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-  (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-  (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-  {M : ℝ≥0 → Ω → ℝ}
-  (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-  (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-    (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+  {M : ℝ≥0 → Ω → ℝ} (hD : IsAdaptedItoDrift hB hBmeas T δ Dd M)
 
-include hB hBmeas hδadap hδcont hδbdd hMadap hMeq
+include hB hBmeas hD
 
-omit hMadap in
 /-- The energy of the true increment: `𝔼[(M_v − M_u)²] ≤ D_δ²·(v−u)` for `u ≤ v ≤ T`
 (`incrementEnergy` plus the pointwise `δ`-bound on the mean function). -/
 theorem trueIncr_sq_le {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
     ∫ ω, (M v ω - M u ω) ^ 2 ∂μ ≤ Dd ^ 2 * ((v : ℝ) - u) := by
-  rw [incrementEnergy hB hBmeas hδadap hδcont hδbdd hMeq huv hvT]
+  rw [incrementEnergy hB hBmeas hD huv hvT]
   have hgmeas : ∀ s : ℝ≥0, Measurable (fun ω ↦ δ s ω * δ s ω) :=
-    fun s ↦ (((hδadap s).measurable.mul (hδadap s).measurable).mono
+    fun s ↦ (((hD.adapted s).measurable.mul (hD.adapted s).measurable).mono
       ((natFiltration hBmeas).le s) le_rfl)
   have hgcont : ∀ ω : Ω, Continuous fun s : ℝ≥0 ↦ δ s ω * δ s ω :=
-    fun ω ↦ (hδcont ω).mul (hδcont ω)
+    fun ω ↦ (hD.continuous ω).mul (hD.continuous ω)
   have hDsq2 : |Dd| * |Dd| = Dd * Dd := by
     rcases le_total 0 Dd with h | h
     · rw [abs_of_nonneg h]
@@ -304,9 +297,9 @@ theorem trueIncr_sq_le {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
           rw [abs_mul]
           calc |δ s ω| * |δ s ω| ≤ |Dd| * |δ s ω| :=
                 mul_le_mul_of_nonneg_right
-                  (le_trans (hδbdd s ω) (le_abs_self Dd)) (abs_nonneg _)
+                  (le_trans (hD.bdd s ω) (le_abs_self Dd)) (abs_nonneg _)
             _ ≤ |Dd| * |Dd| := mul_le_mul_of_nonneg_left
-                  (le_trans (hδbdd s ω) (le_abs_self Dd)) (abs_nonneg _)
+                  (le_trans (hD.bdd s ω) (le_abs_self Dd)) (abs_nonneg _)
       _ = Dd * Dd := by
           rw [integral_const, hDsq2]
           simp
@@ -314,10 +307,10 @@ theorem trueIncr_sq_le {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
     (continuous_mean_of_bdd_cont hgmeas (ae_of_all _ hgcont) (fun s ω ↦ by
       rw [abs_mul]
       calc |δ s ω| * |δ s ω| ≤ |Dd| * |δ s ω| :=
-            mul_le_mul_of_nonneg_right (le_trans (hδbdd s ω) (le_abs_self Dd))
+            mul_le_mul_of_nonneg_right (le_trans (hD.bdd s ω) (le_abs_self Dd))
               (abs_nonneg _)
         _ ≤ |Dd| * |Dd| := mul_le_mul_of_nonneg_left
-            (le_trans (hδbdd s ω) (le_abs_self Dd)) (abs_nonneg _))).measurable
+            (le_trans (hD.bdd s ω) (le_abs_self Dd)) (abs_nonneg _))).measurable
   have : IsFiniteMeasure
       (ItoIntegralL2.timeMeasure.restrict (Set.Ioc u v)) := by
     refine ⟨?_⟩
@@ -362,13 +355,8 @@ along the uniform partition differs from the frozen rectangle sum by at most
 `r n = ‖φ − δⁿ‖_{L²(trim)}`), then the sum converges to the quadratic block
 `∫₀ᵀ 𝔼[w·δ²] ds`. -/
 theorem quadraticSqSum_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
-    {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
-    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-    (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-    {M : ℝ≥0 → Ω → ℝ}
-    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ}
+    (hD : IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
     (hwadap : ∀ t, Measurable[natFiltration hBmeas t] (w t))
     (hwcont : ∀ᵐ ω ∂μ, Continuous fun s : ℝ≥0 ↦ w s ω)
@@ -389,10 +377,10 @@ theorem quadraticSqSum_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Me
   have hgmeas : ∀ s, Measurable (fun ω ↦ w s ω * (δ s ω * δ s ω)) := by
     intro s
     exact (((hwadap s).mono ((natFiltration hBmeas).le s) le_rfl).mul
-      (((hδadap s).mono ((natFiltration hBmeas).le s)).measurable.mul
-        ((hδadap s).mono ((natFiltration hBmeas).le s)).measurable))
+      (((hD.adapted s).mono ((natFiltration hBmeas).le s)).measurable.mul
+        ((hD.adapted s).mono ((natFiltration hBmeas).le s)).measurable))
   have hgcont : ∀ᵐ ω ∂μ, Continuous fun s : ℝ≥0 ↦ w s ω * (δ s ω * δ s ω) :=
-    hwcont.mono fun ω h ↦ h.mul ((hδcont ω).mul (hδcont ω))
+    hwcont.mono fun ω h ↦ h.mul ((hD.continuous ω).mul (hD.continuous ω))
   have hgbdd : ∀ s ω, |w s ω * (δ s ω * δ s ω)| ≤ |Cw| * (Dd * Dd) := by
     intro s ω
     have hDd : |Dd| * |Dd| = Dd * Dd := by
@@ -404,8 +392,8 @@ theorem quadraticSqSum_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Me
           ring
     have hd2 : |δ s ω * δ s ω| ≤ |Dd| * |Dd| := by
       rw [abs_mul]
-      exact mul_le_mul (le_trans (hδbdd s ω) (le_abs_self Dd))
-        (le_trans (hδbdd s ω) (le_abs_self Dd)) (abs_nonneg _)
+      exact mul_le_mul (le_trans (hD.bdd s ω) (le_abs_self Dd))
+        (le_trans (hD.bdd s ω) (le_abs_self Dd)) (abs_nonneg _)
         (abs_nonneg Dd)
     change |w s ω * (δ s ω * δ s ω)| ≤ |Cw| * (Dd * Dd)
     rw [abs_mul]
