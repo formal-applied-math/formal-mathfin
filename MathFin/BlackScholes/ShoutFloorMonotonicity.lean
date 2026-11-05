@@ -121,7 +121,11 @@ theorem shoutFloor_discriminant_pos {r q σ τ : ℝ} (hrq : r ≤ q) (hσ : 0 <
 of `shoutFloor_discriminant_pos`.** Via `shoutFloor_g_eq_bsP`, `g` is literally
 `bsP 1 (r - q) σ 1 ·`, so this is a direct instance of the library's own
 `hasDerivAt_bsP_tau` at the shifted rate `r - q` -- no new product-rule
-cancellation needed, matching the paper's own reduction (Appendix A). -/
+cancellation needed, matching the paper's own reduction (Appendix A). Appendix A
+prints the derivative's first term as `e^{-(r-q)τ} σ n(-d₂) / (2√τ)` rather than
+`σ ϕ(d₁) / (2√τ)`; the two agree on the diagonal `S = K` via
+`ϕ(d₁) = e^{-(r-q)τ} ϕ(d₂)`, so this is the same value in the library's own
+printed form, not a different quantity. -/
 theorem hasDerivAt_shoutFloor_g {r q σ τ : ℝ} (hσ : 0 < σ) (hτ : 0 < τ) :
     HasDerivAt (fun t ↦ Real.exp (q * t) * shoutFloorAtmPut r q σ t)
       (σ * gaussianPDFReal 0 1 (bsd1 1 1 (r - q) σ τ) / (2 * Real.sqrt τ)
