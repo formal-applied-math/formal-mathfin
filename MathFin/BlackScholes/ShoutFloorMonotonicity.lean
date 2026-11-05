@@ -19,9 +19,10 @@ Theorem 3.1 identifies the shout-floor value `R(S, τ)` with the ATM-put value
 `S · P(τ)` via a free-boundary / optimal-stopping argument (shout as soon as
 holding no longer dominates the reward). This library's optimal-stopping and
 free-boundary substrate — the general `StoppingRule`/`stoppingValue` of
-`AmericanPut/Stopping/Rules.lean`, the bounded-supermartingale verification
-`expected_stoppedValue_le_initial` (`AmericanPut/Stopping/GridSampling.lean`),
-and the `AmericanPut/Boundary/*` obstacle contracts — is built around the
+`MathFin/BlackScholes/AmericanPut/Stopping/Rules.lean`, the bounded-supermartingale
+verification `expected_stoppedValue_le_initial`
+(`MathFin/BlackScholes/AmericanPut/Stopping/GridSampling.lean`), and the
+`MathFin/BlackScholes/AmericanPut/Boundary/*` obstacle contracts — is built around the
 vanilla put reward `(K − S)⁺`: bounded and time-independent. The shout floor's
 reward `S_t · P(τ − t)` is unbounded in `S` and time-dependent, so none of it
 applies as stated, and that step is not done here. What *is* pure calculus,
