@@ -32,7 +32,7 @@ theorem normalized_putReward_eq_logPayoff (k h x : ℝ) (θ : (ℝ≥0 → ℝ) 
       Real.exp (-k*(θ ω : ℝ))*putPayoff
         (x+((k-h-1)*(θ ω : ℝ)+Real.sqrt 2*brownian (θ ω) ω)) := by
   unfold putReward MathFin.gbmValue putPayoff
-  rw [Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2),show (2 : ℝ)/2 = 1 by norm_num,
+  rw [Real.sq_sqrt zero_le_two,show (2 : ℝ)/2 = 1 by norm_num,
     Real.exp_add x]
 
 /-- The discounted put slope between `b` and `x`, evaluated at the actual contact time `s` of the

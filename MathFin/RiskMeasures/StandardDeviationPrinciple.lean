@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.Actuarial.ActuarialInsurance
+public import MathFin.Foundations.FiniteMeasureCauchySchwarz
 public import MathFin.RiskMeasures.GaussianExpectedShortfall
 
 /-!
@@ -25,8 +26,7 @@ the fourth (QRM Exercise Book, Exercises 2.19 and 8.11).
 * **Positive homogeneity** (`stdDevPrinciple_const_mul`).
 * **Subadditivity** (`stdDevPrinciple_add_le`): the standard deviation is subadditive because
   covariance obeys the Cauchy–Schwarz inequality `cov(X, Y) ≤ sd(X) sd(Y)`
-  (`covariance_le_sqrt_mul_sqrt`). That inequality is the discriminant condition for the
-  nonnegative quadratic `t ↦ Var(X + tY)`.
+  (`covariance_le_sqrt_mul_sqrt`, in `Foundations/FiniteMeasureCauchySchwarz.lean`).
 * **Monotonicity fails** (`stdDevPrinciple_not_monotone`): a loss `B ≤ 0` that equals `−1` with a
   small probability `q` and `0` otherwise has `ρ(B) > 0 = ρ(0)` once `q(1 + k²) < k²`. Its rare
   gains inflate the standard deviation more than they lower the mean. This is the counterexample
@@ -42,8 +42,6 @@ with the mean and variance of the law.
 
 ## Main results
 
-* `covariance_le_sqrt_mul_sqrt`: `cov(X, Y) ≤ √Var X · √Var Y`.
-* `sqrt_variance_add_le`: the standard deviation is subadditive.
 * `stdDevPrinciple_add_const`, `stdDevPrinciple_const_mul`, `stdDevPrinciple_add_le`.
 * `stdDevPrinciple_not_monotone`: the principle is not monotone.
 * `integral_le_stdDevPrinciple`: a nonnegative loading prices at or above the mean.
@@ -61,32 +59,6 @@ open scoped NNReal
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
   {X Y : Ω → ℝ}
-
-/-- **Cauchy–Schwarz for covariance**: `cov(X, Y) ≤ √Var X · √Var Y`. The quadratic
-`t ↦ Var(X + tY) = Var X + 2t·cov(X, Y) + t²·Var Y` is nonnegative, so its discriminant is not
-positive. -/
-theorem covariance_le_sqrt_mul_sqrt (hX : MemLp X 2 P) (hY : MemLp Y 2 P) :
-    cov[X, Y; P] ≤ √Var[X; P] * √Var[Y; P] := by
-  have hquad : ∀ t : ℝ, 0 ≤ Var[Y; P] * (t * t) + 2 * cov[X, Y; P] * t + Var[X; P] := fun t ↦ by
-    have h := variance_fun_add hX (hY.const_mul t)
-    rw [covariance_const_mul_right, variance_const_mul] at h
-    nlinarith [variance_nonneg (fun ω ↦ X ω + t * Y ω) P]
-  have hsq : cov[X, Y; P] ^ 2 ≤ Var[X; P] * Var[Y; P] := by
-    have := discrim_le_zero hquad
-    rw [discrim] at this
-    nlinarith
-  calc cov[X, Y; P] ≤ |cov[X, Y; P]| := le_abs_self _
-    _ = √(cov[X, Y; P] ^ 2) := (Real.sqrt_sq_eq_abs _).symm
-    _ ≤ √(Var[X; P] * Var[Y; P]) := Real.sqrt_le_sqrt hsq
-    _ = √Var[X; P] * √Var[Y; P] := Real.sqrt_mul (variance_nonneg _ _) _
-
-/-- **The standard deviation is subadditive**: `sd(X + Y) ≤ sd(X) + sd(Y)`. -/
-theorem sqrt_variance_add_le (hX : MemLp X 2 P) (hY : MemLp Y 2 P) :
-    √Var[fun ω ↦ X ω + Y ω; P] ≤ √Var[X; P] + √Var[Y; P] := by
-  rw [variance_fun_add hX hY]
-  have hcs := covariance_le_sqrt_mul_sqrt hX hY
-  refine Real.sqrt_le_iff.2 ⟨add_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _), ?_⟩
-  nlinarith [Real.sq_sqrt (variance_nonneg X P), Real.sq_sqrt (variance_nonneg Y P)]
 
 /-- The standard deviation is unchanged by a cash shift, so it is not translation invariant on
 its own: `sd(X + m) = sd(X)`. -/

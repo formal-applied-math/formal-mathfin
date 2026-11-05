@@ -19,11 +19,17 @@ assembled once here.
 Consumed by the drift `L²` energy bound (`DriftProcessPredictable`, at `ν = timeMeasure.restrict`),
 the SDE-uniqueness drift estimate (`SDEUniqueness`, at `ν = volume.restrict (Ioc 0 s)`), and the
 `L¹` bounds of the adapted quadratic variation (`AdaptedQuadraticVariation`).
+
+The same inequality at the centred variables `X − E X`, `Y − E Y` is Cauchy–Schwarz for the
+covariance, `cov(X, Y) ≤ √Var X · √Var Y` (`covariance_le_sqrt_mul_sqrt`). Expanding
+`Var(X + Y)` makes the standard deviation subadditive (`sqrt_variance_add_le`). Mathlib has the
+covariance calculus but neither inequality. Consumed by the standard-deviation principle and the
+Gaussian VaR subadditivity.
 -/
 
 @[expose] public section
 
-open MeasureTheory
+open MeasureTheory ProbabilityTheory
 
 namespace MathFin
 
@@ -53,5 +59,28 @@ theorem sq_integral_le_measureReal_mul [IsFiniteMeasure ν] {f : α → ℝ} (hf
 theorem integral_abs_le_sqrt_integral_sq [IsProbabilityMeasure ν] {f : α → ℝ}
     (hf : MemLp f 2 ν) : ∫ a, |f a| ∂ν ≤ √(∫ a, f a ^ 2 ∂ν) := by
   simpa using integral_abs_mul_le_sqrt_mul_sqrt hf (memLp_const (1 : ℝ))
+
+section Covariance
+
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+  {X Y : Ω → ℝ}
+
+/-- **Cauchy–Schwarz for covariance**: `cov(X, Y) ≤ √Var X · √Var Y`, the inequality
+`integral_abs_mul_le_sqrt_mul_sqrt` for the centred variables. -/
+theorem covariance_le_sqrt_mul_sqrt (hX : MemLp X 2 P) (hY : MemLp Y 2 P) :
+    cov[X, Y; P] ≤ √Var[X; P] * √Var[Y; P] := by
+  rw [variance_eq_integral hX.aemeasurable, variance_eq_integral hY.aemeasurable]
+  exact (le_abs_self _).trans <| abs_integral_le_integral_abs.trans <|
+    integral_abs_mul_le_sqrt_mul_sqrt (hX.sub (memLp_const _)) (hY.sub (memLp_const _))
+
+/-- **The standard deviation is subadditive**: `sd(X + Y) ≤ sd(X) + sd(Y)`. -/
+theorem sqrt_variance_add_le (hX : MemLp X 2 P) (hY : MemLp Y 2 P) :
+    √Var[fun ω ↦ X ω + Y ω; P] ≤ √Var[X; P] + √Var[Y; P] := by
+  rw [variance_fun_add hX hY]
+  have hcs := covariance_le_sqrt_mul_sqrt hX hY
+  refine Real.sqrt_le_iff.2 ⟨add_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _), ?_⟩
+  nlinarith [Real.sq_sqrt (variance_nonneg X P), Real.sq_sqrt (variance_nonneg Y P)]
+
+end Covariance
 
 end MathFin

@@ -80,10 +80,10 @@ theorem brownianGridPrice_scale {K r q σ k h : ℝ} {a : ℝ≥0}
       K*brownianGridPrice 1 k h (Real.sqrt 2) (a*T) (a*δ) x := by
   have hcount : a*T/(a*δ) = T/δ := mul_div_mul_left T δ ha.ne'
   have hβ : (k-h-(Real.sqrt 2)^2/2)*(a : ℝ) = r-q-σ^2/2 := by
-    rw [Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
+    rw [Real.sq_sqrt zero_le_two]
     nlinarith [hk,hh,hσ]
   have hv : (Real.sqrt 2)^2*(a : ℝ) = σ^2 := by
-    rwa [Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
+    rwa [Real.sq_sqrt zero_le_two]
   unfold brownianGridPrice
   rw [hcount]
   apply brownianGridMarkovAux_scale hK.le hβ hv

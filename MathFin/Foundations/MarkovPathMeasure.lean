@@ -72,9 +72,9 @@ noncomputable def markovPathMeasure (init : PMF ι) (P : ι → PMF ι) :
   Kernel.trajMeasure init.toMeasure (markovTransitionKernel P)
 
 instance (init : PMF ι) (P : ι → PMF ι) :
-    IsProbabilityMeasure (markovPathMeasure init P) := by
-  unfold markovPathMeasure
-  infer_instance
+    IsProbabilityMeasure (markovPathMeasure init P) :=
+  inferInstanceAs (IsProbabilityMeasure
+    (Kernel.trajMeasure (X := fun _ : ℕ ↦ ι) init.toMeasure (markovTransitionKernel P)))
 
 /-- The `n`-cylinder along `path`: trajectories agreeing with `path` up to
 time `n` — the event `{X₀ = path 0, …, X_n = path n}`. -/

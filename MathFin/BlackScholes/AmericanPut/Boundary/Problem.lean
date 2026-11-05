@@ -20,7 +20,8 @@ spatial operator. The contracts themselves are `ContinuousBoundaryPutSolution`,
 
 ## Result
 
-Public entry points include `normalizedRate`, `normalizedRate_pos`, `putPayoff`,
+Public entry points include `normalizedRate`, `normalizedRate_pos`, `normalizedRate_sqrt_two`
+(`simp`), `putPayoff`,
 `PutEnvelope`, `continuationRegion`, `dividendSpatialOperator`.
 -/
 @[expose] public section
@@ -35,6 +36,10 @@ theorem normalizedRate_pos {r σ : ℝ} (hr : 0 < r) (hσ : 0 < σ) :
     0 < normalizedRate r σ := by
   unfold normalizedRate
   positivity
+
+/-- At volatility `√2` the normalized rate is the rate itself. -/
+@[simp] theorem normalizedRate_sqrt_two (r : ℝ) : normalizedRate r √2 = r := by
+  simp [normalizedRate]
 
 /-- Strike-normalized put payoff in log spot. -/
 noncomputable def putPayoff (x : ℝ) : ℝ := max (1 - Real.exp x) 0
