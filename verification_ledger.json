@@ -3800,9 +3800,9 @@
     "mf-piecewise-linear-arbitrage-free-interpolation": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-11-05",
-      "elapsed_s": 8.1,
-      "input_hash": "7aac2c79efdac44b1ba8c35eb842ceb372ce00e5a8261615f7f9383ff8cb896d",
-      "verified_at_commit": "d644599"
+      "elapsed_s": 4.1,
+      "input_hash": "49494a92d7a8ce9abd4f1efcfa573d8d6db4ef78fd0aa3203a967145483a09f3",
+      "verified_at_commit": "214097f"
     },
     "mf-poisson-merged-arrivals": {
       "benchmark_file": "stochastic_foundations.json",
