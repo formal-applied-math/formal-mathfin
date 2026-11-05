@@ -2264,6 +2264,13 @@
       "input_hash": "bad17b45d6a939d890c65d07955521d9d8a928febdd4c656fa2888594a7e0631",
       "verified_at_commit": "cd32dd5"
     },
+    "mf-cubic-spline-moments-unique": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-11-05",
+      "elapsed_s": 4.2,
+      "input_hash": "7bb76d82572ed61afbbd72957dc2b7dfecd69705ba4fcbe06f30e69451788d35",
+      "verified_at_commit": "6801b1b9"
+    },
     "mf-cva-gaussian-exposure": {
       "benchmark_file": "credit.json",
       "date": "2026-11-04",

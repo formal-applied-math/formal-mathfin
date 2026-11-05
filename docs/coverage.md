@@ -26,6 +26,30 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Natural cubic spline pillar interpolation: the moment system is a unit (2026-11-05)
+
+One `full` entry in `benchmarks/black_scholes.json`. Corpus 779 → 780.
+
+- **`mf-cubic-spline-moments-unique`** (`MathFin.CubicSpline.exists_unique_moments`,
+  `MathFin/BlackScholes/CubicSplineSmile.lean`): a natural cubic spline interpolating
+  pillar values `y 0, …, y n` at strictly increasing pillars `x 0 < ⋯ < x n` (e.g. an
+  FX/equity vol smile sampled at pillar deltas) reduces, after the natural boundary
+  conditions `M 0 = M n = 0` are substituted in, to a tridiagonal linear system in the
+  interior moments `M 1, …, M (n-1)`. Every row of that system's coefficient matrix has
+  diagonal entry `2` and off-diagonal entries `μᵢ, λᵢ ≥ 0` with `μᵢ + λᵢ = 1 < 2`, so it is
+  strictly row diagonally dominant; Mathlib's `det_ne_zero_of_sum_row_lt_diag`
+  (`LinearAlgebra/Matrix/Gershgorin.lean`, a corollary of Gershgorin's circle theorem)
+  gives nonzero determinant, hence the system has exactly one solution for any data and
+  pillars. The same file's `interpSpline_left_eq`/`interpSpline_right_eq` show the
+  standard piecewise-cubic formula matches the pillar values exactly at both ends of each
+  piece for *any* candidate moment sequence, and `svi_pillar_interpSpline_eq` connects the
+  scheme to the repository's parametric SVI smile (`MathFin.BlackScholes.SVI`): pillar
+  values sampled from an SVI slice's total variance interpolate exactly at the pillars.
+  Reference: R. L. Burden & J. D. Faires, *Numerical Analysis*, 9th ed. (2011), §3.5 and
+  Theorem 3.11. SCOPE: does not construct a single global function glued across all
+  pieces and does not prove global `C²` matching of one-sided derivatives at interior
+  knots (left to future work).
+
 ### Removable singularities in two stochastic-vol smile models (2026-11-01)
 
 Three `full` entries in `benchmarks/black_scholes.json`. Corpus 754 → 757.
