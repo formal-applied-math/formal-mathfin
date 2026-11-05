@@ -241,7 +241,9 @@ with strike held fixed at `K = f`, priced at spot `s` with the ATM vol curve eva
 that spot, `σ_ATM(s) = sabrATMVol s α β ρ ν tex` — spot and the vol's own forward-dependence
 moving together, strike fixed — equals `Δ_BS + Λ_BS · ∂σ_ATM/∂f`. See the file docstring
 for exactly what this is (and is not) relative to Hagan's eq. 3.9. `hσ` (vol positivity) is
-a standing domain hypothesis, as for `sabrATMVol_bsV_gt_backbone_bsV` above. -/
+a standing domain hypothesis, assumed rather than derived — as `BSCallHyp.σ_pos` is for
+`sabrATMVol_black_futures_price` (`SABRImpliedVol.lean`; its `sabrATMVol_bsV_gt_backbone_bsV`
+instead *derives* positivity from `0 < α` and a positive correction bracket). -/
 theorem sabrATMVol_bsV_delta_chainRule {f α β ρ ν tex : ℝ} (hf : 0 < f)
     (hσ : 0 < sabrATMVol f α β ρ ν tex) (htex : 0 < tex) :
     HasDerivAt (fun s ↦ bsV f 0 (sabrATMVol s α β ρ ν tex) s tex)
