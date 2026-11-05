@@ -3954,16 +3954,16 @@
     "mf-sabr-atm-chain-rule-delta": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-05",
-      "elapsed_s": 5.0,
-      "input_hash": "14dfb2bb98a19472ba46fc6095180b84c925cfe87b1b27dc20fe1cf305bc60f6",
-      "verified_at_commit": "936aa07"
+      "elapsed_s": 6.2,
+      "input_hash": "1691ee01b7b8b9d1fe7c69d82feb2e0815968fc0346a6e2c749e12fc1dfcf819",
+      "verified_at_commit": "d8361b4"
     },
     "mf-sabr-atm-chain-rule-vega": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-05",
-      "elapsed_s": 5.6,
-      "input_hash": "a10e6644a54e44793e212658301ccdb4d1536e94438fe268b0c20c47303a7b5a",
-      "verified_at_commit": "936aa07"
+      "elapsed_s": 5.9,
+      "input_hash": "fb0a531eb30c6c73c9410419471f81234061b4ffa19271da2428136874c56576",
+      "verified_at_commit": "d8361b4"
     },
     "mf-sabr-backbone-law": {
       "benchmark_file": "black_scholes.json",
