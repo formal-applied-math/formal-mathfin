@@ -124,7 +124,9 @@ the Gaussian MGF of `wienerIntegralLp_map_eq_gaussianReal`. -/
 theorem integral_exp_mul_wienerIntegralLp (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (f : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ)))) (c : ℝ) :
     ∫ ω, Real.exp (c * wienerIntegralLp B hB T f ω) ∂μ = Real.exp (c ^ 2 * ‖f‖ ^ 2 / 2) := by
-  have h := mgf_gaussianReal (wienerIntegralLp_map_eq_gaussianReal hB T f) c
+  have h := mgf_gaussianReal
+    (⟨(Lp.aestronglyMeasurable _).aemeasurable, wienerIntegralLp_map_eq_gaussianReal hB T f⟩ :
+      HasLaw (fun ω ↦ wienerIntegralLp B hB T f ω) (gaussianReal 0 (‖f‖ ^ 2).toNNReal) μ) c
   simp only [mgf] at h
   rw [h, Real.coe_toNNReal _ (sq_nonneg _)]
   congr 1

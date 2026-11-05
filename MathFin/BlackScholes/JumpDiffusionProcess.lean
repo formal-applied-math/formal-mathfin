@@ -90,7 +90,7 @@ lemma mgf_logReturn (h : JumpDiffusionHyp Q Λ Z N J) {θ : ℝ}
     simp only [Pi.add_apply]
     ring
   rw [hsplit, mgf_const_add, hind.mgf_add' (h.Z_law.aemeasurable.const_mul _).aestronglyMeasurable
-      hS.aestronglyMeasurable, mgf_const_mul, mgf_gaussianReal h.Z_law.map_eq,
+      hS.aestronglyMeasurable, mgf_const_mul, mgf_gaussianReal h.Z_law,
     compoundPoisson_mgf_of_indepFun Λ θ J h.N_law h.J_indep h.J_ident h.N_indep_J hJ,
     ← Real.exp_add, ← Real.exp_add]
   congr 1
@@ -128,7 +128,8 @@ noncomputable def jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) (ν : Me
 instance isProbabilityMeasure_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ≥0) (ν : Measure ℝ)
     [IsProbabilityMeasure ν] (τ : ℝ≥0) :
     IsProbabilityMeasure (jumpDiffusionIncrementLaw b σ Λ ν τ) :=
-  Measure.isProbabilityMeasure_map (measurable_jumpDiffusionLogReturn b σ τ).aemeasurable
+  inferInstanceAs
+    (IsProbabilityMeasure ((jumpDiffusionMeasure (Λ * τ) ν).map (jumpDiffusionLogReturn b σ τ)))
 
 /-- **The Laplace exponent of a jump-diffusion**, `κ(θ) = bθ + σ²θ²/2 + Λ(∫ e^{θx} dν − 1)`. For
 `θ` with `∫ e^{θx} dν < ∞` it is the cumulant generating function of the log-return per unit

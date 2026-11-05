@@ -9,39 +9,21 @@ public import Mathlib
 public import MathFin.Foundations.PoissonCounting
 
 /-!
-# Superposition of Poisson streams: the map-form increment law
+# Superposition of Poisson streams: merging two arrival-time constructions
 
-The convolution identity `poissonMeasure a ∗ poissonMeasure b =
-poissonMeasure (a + b)` is **Mathlib's** — `ProbabilityTheory.poissonMeasure_conv_poissonMeasure`,
-landed 2026-05-26 (leanprover-community/mathlib4#34435), proved there by
-characteristic functions. This file used to re-derive it from the point masses
-(Cauchy product + binomial collapse); that proof was a duplicate of upstream and
-has been replaced by consumption. What remains here is the piece Mathlib does
-not carry in this form.
-
-Mathlib's superposition statements are `HasLaw`-shaped
-(`IndepFun.hasLaw_add_poissonMeasure`). The Poisson-process tower states its
-increment laws as **pushforward equalities** `μ.map X = poissonMeasure a`, and
-gets the measurability side conditions for free from a nonzero pushforward
-rather than assuming them. `indepFun_map_add_poissonMeasure` is that adapter,
-and it is the only mathematical content this file still owns.
+Two counting processes built from independent families of i.i.d. `Exp(r₁)` and `Exp(r₂)`
+interarrival times (`Foundations/PoissonCounting`) merge into a count with `Poisson((r₁ + r₂)·t)`
+law at every time `t ≥ 0`. The marginal laws are derived by `map_count_eq_poissonMeasure`, and the
+independence of the two counts is derived from that of the interarrival families; the
+convolution is Mathlib's `IndepFun.hasLaw_add_poissonMeasure` (the sum of independent Poisson
+variables is Poisson), consumed directly. This is the one-time marginal of the merged stream;
+that the merged count is a Poisson process (independent increments, exponential merged
+interarrival times) is not proved.
 
 ## Main results
 
-* `PoissonSuperposition.poissonMeasure_conv_poissonMeasure` — re-export of
-  Mathlib's convolution identity, kept as the name the Poisson benchmark
-  snippets reference.
-* `PoissonSuperposition.indepFun_map_add_poissonMeasure` — if `X, Y` are
-  independent with `Poisson(a)`, `Poisson(b)` laws *as pushforwards*, then
-  `X + Y` has `Poisson(a+b)` law (the superposition theorem at increment level,
-  Saporito Theorem 3.3.9, with no measurability hypotheses).
-* `PoissonSuperposition.map_add_count_eq_poissonMeasure` — two counting processes built
-  from independent families of i.i.d. `Exp(r₁)` and `Exp(r₂)` interarrival times
-  (`Foundations/PoissonCounting`) merge into a count with `Poisson((r₁ + r₂)·t)` law at
-  every time `t ≥ 0`. The marginal laws are derived by `map_count_eq_poissonMeasure`, and
-  the independence of the two counts is derived from that of the interarrival families.
-  This is the one-time marginal of the merged stream; that the merged count is a Poisson
-  process (independent increments, exponential merged interarrival times) is not proved.
+* `PoissonSuperposition.map_add_count_eq_poissonMeasure` — the merged count has
+  `Poisson((r₁ + r₂)·t)` law at every time `t ≥ 0`.
 -/
 
 @[expose] public section
@@ -52,33 +34,6 @@ open MeasureTheory ProbabilityTheory
 open scoped NNReal
 
 namespace PoissonSuperposition
-
-/-- **Poisson convolution identity** — Mathlib's
-`ProbabilityTheory.poissonMeasure_conv_poissonMeasure`, re-exported under the
-name the Poisson benchmark snippets reference. Not proved here: upstream has it
-(via characteristic functions) and a second proof would be a duplicate. -/
-theorem poissonMeasure_conv_poissonMeasure (a b : ℝ≥0) :
-    poissonMeasure a ∗ poissonMeasure b = poissonMeasure (a + b) :=
-  _root_.ProbabilityTheory.poissonMeasure_conv_poissonMeasure a b
-
-/-! ### Superposition at increment level -/
-
-/-- **Superposition theorem (increment form, Saporito Theorem 3.3.9).** If
-`X` and `Y` are independent `ℕ`-valued random counts with `Poisson(a)` and
-`Poisson(b)` laws, their sum is `Poisson(a + b)`. No measurability hypotheses
-are needed: a nonzero pushforward forces a.e.-measurability. -/
-theorem indepFun_map_add_poissonMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    {μ : Measure Ω} {a b : ℝ≥0} {X Y : Ω → ℕ} (hXY : IndepFun X Y μ)
-    (hX : μ.map X = poissonMeasure a) (hY : μ.map Y = poissonMeasure b) :
-    μ.map (fun ω ↦ X ω + Y ω) = poissonMeasure (a + b) := by
-  rw [show (fun ω ↦ X ω + Y ω) = X + Y from rfl,
-    hXY.map_add_eq_map_conv_map₀', hX, hY, poissonMeasure_conv_poissonMeasure]
-  · apply AEMeasurable.of_map_ne_zero
-    simp [hX, NeZero.ne]
-  · apply AEMeasurable.of_map_ne_zero
-    simp [hY, NeZero.ne]
-  · rw [hX]; infer_instance
-  · rw [hY]; infer_instance
 
 /-! ### Merging two arrival-time constructions -/
 
@@ -108,7 +63,7 @@ counting processes they generate (`N t = k` iff the `k`-th arrival has happened 
 The marginals `Poisson(r₁ t)` and `Poisson(r₂ t)` are derived from the constructions
 (`PoissonCounting.map_count_eq_poissonMeasure`); the two counts are independent because each is
 a function of its own interarrival family (`measurable_count_comap`); the convolution is
-`indepFun_map_add_poissonMeasure`. Only the one-time marginal of the merged stream is stated. -/
+`IndepFun.hasLaw_add_poissonMeasure`. Only the one-time marginal of the merged stream is stated. -/
 theorem map_add_count_eq_poissonMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
     [IsProbabilityMeasure μ] {r₁ r₂ : ℝ≥0} (hr₁ : 0 < r₁) (hr₂ : 0 < r₂) {ξ η : ℕ → Ω → ℝ}
     (hξm : ∀ i, Measurable (ξ i)) (hηm : ∀ i, Measurable (η i))
@@ -128,10 +83,18 @@ theorem map_add_count_eq_poissonMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω} 
       (indep_of_indep_of_le_left ((IndepFun_iff_Indep _ _ _).1 hξη)
         (measurable_count_comap hN₁ t).comap_le)
       (measurable_count_comap hN₂ t).comap_le)
-  convert indepFun_map_add_poissonMeasure hind
-    (PoissonCounting.map_count_eq_poissonMeasure hr₁ hξm hξ0 hξlaw hξind hN₁ ht)
-    (PoissonCounting.map_count_eq_poissonMeasure hr₂ hηm hη0 hηlaw hηind hN₂ ht) using 2
-  exact add_mul r₁ r₂ (⟨t, ht⟩ : ℝ≥0)
+  have hmeas (ζ : ℕ → Ω → ℝ) (hζ : ∀ i, Measurable (ζ i)) {N : ℝ → Ω → ℕ}
+      (hN : ∀ t k ω, N t ω = k ↔
+        (∑ i ∈ Finset.range k, ζ i ω) ≤ t ∧ t < ∑ i ∈ Finset.range (k + 1), ζ i ω) :
+      Measurable (N t) :=
+    (measurable_count_comap hN t).mono
+      (show Measurable fun ω i ↦ ζ i ω from measurable_pi_iff.2 hζ).comap_le le_rfl
+  have h := hind.hasLaw_add_poissonMeasure
+    ⟨(hmeas ξ hξm hN₁).aemeasurable,
+      PoissonCounting.map_count_eq_poissonMeasure hr₁ hξm hξ0 hξlaw hξind hN₁ ht⟩
+    ⟨(hmeas η hηm hN₂).aemeasurable,
+      PoissonCounting.map_count_eq_poissonMeasure hr₂ hηm hη0 hηlaw hηind hN₂ ht⟩
+  exact h.map_eq.trans (congrArg _ (add_mul r₁ r₂ _).symm)
 
 end PoissonSuperposition
 

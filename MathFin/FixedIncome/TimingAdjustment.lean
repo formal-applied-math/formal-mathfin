@@ -241,8 +241,9 @@ variable [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ}
 theorem integrable_one_div_exp_add_mul_wienerIntegralLp (hB : IsPreBrownianReal B μ) (S : ℝ≥0)
     (M c : ℝ) (g : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (S : ℝ)))) :
     Integrable (fun ω ↦ 1 / Real.exp (M + c * wienerIntegralLp B hB S g ω)) μ := by
-  refine ((integrable_exp_mul_of_hasLaw (wienerIntegralLp_hasLaw_gaussian hB S g) (-c)).const_mul
-    (Real.exp (-M))).congr (ae_of_all _ fun ω ↦ ?_)
+  refine (((wienerIntegralLp_hasLaw_gaussian hB S g).integrable_fun_comp
+    (integrable_exp_mul_gaussianReal (-c))).const_mul (Real.exp (-M))).congr
+    (ae_of_all _ fun ω ↦ ?_)
   simp only [one_div, ← Real.exp_neg, ← Real.exp_add]
   congr 1
   ring
@@ -284,7 +285,7 @@ theorem hasLaw_forwardMeasure_wienerIntegralLp (hB : IsPreBrownianReal B μ) (S 
     HasLaw (fun ω ↦ m + c₁ * wienerIntegralLp B hB S f ω)
       (gaussianReal (m' - c₁ * c₂ * ⟪f, g⟫_ℝ) v)
       (forwardMeasure μ fun ω ↦ Real.exp (M + c₂ * wienerIntegralLp B hB S g ω)) := by
-  haveI := forwardMeasure_isProbabilityMeasure (Q := μ) (fun _ ↦ Real.exp_pos _)
+  have := forwardMeasure_isProbabilityMeasure (Q := μ) (fun _ ↦ Real.exp_pos _)
     (integrable_one_div_exp_add_mul_wienerIntegralLp hB S M c₂ g)
   have hae : AEMeasurable (fun ω ↦ m + c₁ * wienerIntegralLp B hB S f ω)
       (forwardMeasure μ fun ω ↦ Real.exp (M + c₂ * wienerIntegralLp B hB S g ω)) :=
@@ -292,7 +293,7 @@ theorem hasLaw_forwardMeasure_wienerIntegralLp (hB : IsPreBrownianReal B μ) (S 
   refine ⟨hae, (measure_eq_of_mgf_id_eq integrable_exp_mul_gaussianReal ?_).symm⟩
   rw [mgf_id_gaussianReal, mgf_id_map hae]
   funext t
-  have hμ := mgf_gaussianReal hlaw.map_eq t
+  have hμ := mgf_gaussianReal hlaw t
   have h := integral_exp_mul_wienerIntegralLp_eq_forwardMeasure hB S m M c₁ c₂ t f g
   simp only [mgf] at hμ ⊢
   rw [hμ, eq_comm, ← eq_div_iff (Real.exp_pos _).ne', ← Real.exp_sub] at h

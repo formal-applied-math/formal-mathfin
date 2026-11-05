@@ -135,7 +135,7 @@ lemma marshalPart_lt (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     (hi : i + 1 < (marshalEndpoints hBmeas T V).card) :
     marshalPart hBmeas T V i < marshalPart hBmeas T V (i + 1) := by
   have hi' : i < (marshalEndpoints hBmeas T V).card := by omega
-  rw [marshalPart, dif_pos hi', marshalPart, dif_pos hi]
+  rw [marshalPart, dite_eq_left hi', marshalPart, dite_eq_left hi]
   exact ((marshalEndpoints hBmeas T V).orderEmbOfFin rfl).strictMono (Fin.mk_lt_mk.mpr (by omega))
 
 /-- **Consecutiveness.** Within an enumerated cell `(sᵢ, sᵢ₊₁]` there is no other boundary: every
@@ -149,7 +149,7 @@ lemma marshalEndpoints_consecutive (hBmeas : ∀ t, Measurable (B t)) (T : ℝ�
   rw [← Finset.mem_coe, ← Finset.range_orderEmbOfFin (marshalEndpoints hBmeas T V) rfl] at hx
   obtain ⟨k, hk⟩ := hx
   have hxk : marshalPart hBmeas T V k.val = x := by
-    rw [marshalPart, dif_pos k.isLt]; exact hk
+    rw [marshalPart, dite_eq_left k.isLt]; exact hk
   rcases le_or_gt k.val i with h | h
   · exact Or.inl (hxk ▸ marshalPart_mono hBmeas T V hle h)
   · exact Or.inr (hxk ▸ marshalPart_mono hBmeas T V hle h)
@@ -197,7 +197,7 @@ lemma marshalPart_le_iff (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) {a i : ℕ}
     (ha : a < (marshalEndpoints hBmeas T V).card) (hi : i < (marshalEndpoints hBmeas T V).card) :
     marshalPart hBmeas T V a ≤ marshalPart hBmeas T V i ↔ a ≤ i := by
-  rw [marshalPart, dif_pos ha, marshalPart, dif_pos hi,
+  rw [marshalPart, dite_eq_left ha, marshalPart, dite_eq_left hi,
     ((marshalEndpoints hBmeas T V).orderEmbOfFin rfl).le_iff_le]
   exact Fin.mk_le_mk
 
@@ -209,7 +209,7 @@ lemma exists_marshalPart_eq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     ∃ k, k < (marshalEndpoints hBmeas T V).card ∧ marshalPart hBmeas T V k = x := by
   rw [← Finset.mem_coe, ← Finset.range_orderEmbOfFin (marshalEndpoints hBmeas T V) rfl] at hx
   obtain ⟨k, hk⟩ := hx
-  exact ⟨k.val, k.isLt, by rw [marshalPart, dif_pos k.isLt]; exact hk⟩
+  exact ⟨k.val, k.isLt, by rw [marshalPart, dite_eq_left k.isLt]; exact hk⟩
 
 /-- **Telescoping over covering cells (general endpoint function `F`).** For a support interval
 `(p.1, p.2]` (its endpoints are cell boundaries), summing `F(sᵢ₊₁) − F(sᵢ)` over exactly the cells
@@ -274,8 +274,8 @@ lemma marshalStochExp_eq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
   rw [← telescope_cover hBmeas T V hp (fun x ↦ B x ω) hN, Finset.mul_sum]
   refine Finset.sum_congr rfl (fun i _ ↦ ?_)
   by_cases hc : p.1 ≤ marshalPart hBmeas T V i ∧ marshalPart hBmeas T V (i + 1) ≤ p.2
-  · rw [if_pos hc, if_pos hc]
-  · rw [if_neg hc, if_neg hc, zero_mul, mul_zero]
+  · rw [ite_eq_left hc, ite_eq_left hc]
+  · rw [ite_eq_right hc, ite_eq_right hc, zero_mul, mul_zero]
 
 /-- The partition starts at `0` (the least boundary). -/
 lemma marshalPart_zero (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
@@ -292,9 +292,9 @@ lemma marshalPart_le_T (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (hle : ∀ p ∈ V.value.support, p.2 ≤ T)
     (i : ℕ) : marshalPart hBmeas T V i ≤ T := by
   by_cases h : i < (marshalEndpoints hBmeas T V).card
-  · rw [marshalPart, dif_pos h]
+  · rw [marshalPart, dite_eq_left h]
     exact marshalEndpoints_le_T hBmeas T V hle _ (Finset.orderEmbOfFin_mem _ _ _)
-  · exact le_of_eq (by rw [marshalPart, dif_neg h])
+  · exact le_of_eq (by rw [marshalPart, dite_eq_right h])
 
 /-- **Coverage.** The last enumerated cell boundary is `T` (`T` is the maximum, since every endpoint
 is `≤ T`). Taking `N = card − 1` gives `marshalPart N = T`, so the partition covers `[0, T]`. -/
@@ -306,7 +306,7 @@ lemma marshalPart_card_sub_one (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
   refine le_antisymm ?_ ?_
   · have hlt : (marshalEndpoints hBmeas T V).card - 1 <
       (marshalEndpoints hBmeas T V).card := by omega
-    rw [marshalPart, dif_pos hlt]
+    rw [marshalPart, dite_eq_left hlt]
     exact marshalEndpoints_le_T hBmeas T V hle _ (Finset.orderEmbOfFin_mem _ _ _)
   · obtain ⟨k, hk_card, hk⟩ := exists_marshalPart_eq hBmeas T V (T_mem_marshalEndpoints hBmeas T V)
     calc T = marshalPart hBmeas T V k := hk.symm
@@ -330,8 +330,8 @@ lemma marshalDrift_eq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
   rw [← telescope_cover hBmeas T V hp (fun x ↦ NNReal.toReal (min x u)) hN, Finset.mul_sum]
   refine Finset.sum_congr rfl (fun i _ ↦ ?_)
   by_cases hc : p.1 ≤ marshalPart hBmeas T V i ∧ marshalPart hBmeas T V (i + 1) ≤ p.2
-  · rw [if_pos hc, if_pos hc]
-  · rw [if_neg hc, if_neg hc, zero_mul, mul_zero]
+  · rw [ite_eq_left hc, ite_eq_left hc]
+  · rw [ite_eq_right hc, ite_eq_right hc, zero_mul, mul_zero]
 
 /-- **Cell-constancy.** On the enumerated cell `(sᵢ, sᵢ₊₁]` the step process `V` is constant, equal
 to the per-cell multiplier: `⇑V t ω = marshalMult i ω` for `t` in the cell. (The `⊥` atom of
@@ -349,8 +349,9 @@ lemma marshalMult_eq_uncurry (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
   refine Finset.sum_congr rfl (fun p hp ↦ ?_)
   rw [Set.indicator_apply]
   by_cases hmem : t ∈ Set.Ioc p.1 p.2
-  · rw [if_pos hmem, if_pos ((mem_Ioc_iff_cover hBmeas T V hle ht1 ht2 hp).mp hmem)]
-  · rw [if_neg hmem, if_neg (fun hc ↦ hmem ((mem_Ioc_iff_cover hBmeas T V hle ht1 ht2 hp).mpr hc))]
+  · rw [ite_eq_left hmem, ite_eq_left ((mem_Ioc_iff_cover hBmeas T V hle ht1 ht2 hp).mp hmem)]
+  · rw [ite_eq_right hmem,
+      ite_eq_right (fun hc ↦ hmem ((mem_Ioc_iff_cover hBmeas T V hle ht1 ht2 hp).mpr hc))]
 
 /-! ### The clamped marshalled step process (Rung 1 approximant)
 
@@ -426,13 +427,15 @@ lemma sum_cell_indicator_eq_one (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     have hab := marshalPart_mono hBmeas T V hle (Nat.le_succ i)
     simp only [Set.indicator_apply, Set.mem_Ioc, Set.mem_Iic]
     by_cases h1 : s ≤ marshalPart hBmeas T V i
-    · rw [if_neg (fun h ↦ absurd h.1 (not_lt.mpr h1)), if_pos (h1.trans hab), if_pos h1]; ring
+    · rw [ite_eq_right (fun h ↦ absurd h.1 (not_lt.mpr h1)), ite_eq_left (h1.trans hab),
+        ite_eq_left h1]
+      ring
     · rw [not_le] at h1
       by_cases h2 : s ≤ marshalPart hBmeas T V (i + 1)
-      · rw [if_pos ⟨h1, h2⟩, if_pos h2, if_neg (not_le.mpr h1)]; ring
+      · rw [ite_eq_left ⟨h1, h2⟩, ite_eq_left h2, ite_eq_right (not_le.mpr h1)]; ring
       · rw [not_le] at h2
-        rw [if_neg (fun h ↦ absurd h.2 (not_le.mpr h2)), if_neg (not_le.mpr h2),
-          if_neg (not_le.mpr (hab.trans_lt h2))]; ring
+        rw [ite_eq_right (fun h ↦ absurd h.2 (not_le.mpr h2)), ite_eq_right (not_le.mpr h2),
+          ite_eq_right (not_le.mpr (hab.trans_lt h2))]; ring
   simp_rw [hsub]
   rw [Finset.sum_range_sub
       (fun i ↦ (Set.Iic (marshalPart hBmeas T V i)).indicator (fun _ ↦ (1 : ℝ)) s),
@@ -459,10 +462,10 @@ lemma uncurry_marshalStepSP_eq_clamp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
     intro i _
     rw [Set.indicator_apply, Set.indicator_apply]
     by_cases hmem : s ∈ Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))
-    · rw [if_pos hmem, if_pos hmem]
+    · rw [ite_eq_left hmem, ite_eq_left hmem]
       congr 1
       exact (marshalMult_eq_uncurry hBmeas T V hle hmem.1 hmem.2 ω).symm
-    · rw [if_neg hmem, if_neg hmem]
+    · rw [ite_eq_right hmem, ite_eq_right hmem]
   have hconst : ∀ i,
       (Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))).indicator
           (fun _ ↦ clampM C (⇑V s ω)) s
@@ -472,8 +475,8 @@ lemma uncurry_marshalStepSP_eq_clamp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
     intro i
     rw [Set.indicator_apply, Set.indicator_apply]
     by_cases hmem : s ∈ Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))
-    · rw [if_pos hmem, if_pos hmem, mul_one]
-    · rw [if_neg hmem, if_neg hmem, mul_zero]
+    · rw [ite_eq_left hmem, ite_eq_left hmem, mul_one]
+    · rw [ite_eq_right hmem, ite_eq_right hmem, mul_zero]
   rw [Finset.sum_congr rfl hstep]
   simp_rw [hconst]
   rw [← Finset.mul_sum, sum_cell_indicator_eq_one hBmeas T V hle hmpN hs0 hsT, mul_one]
@@ -539,10 +542,11 @@ lemma norm_simpleAssembly_marshalStepSP_sub_le (hBmeas : ∀ t, Measurable (B t)
       - processToLpPredictable (μ := μ) T hBmeas hpred hbdd
       = hfV.toLp _ - hg.toLp _ := rfl
   rw [hLHS, hRHS, ← MemLp.toLp_sub hf1 hg, ← MemLp.toLp_sub hfV hg, Lp.norm_toLp, Lp.norm_toLp]
-  apply ENNReal.toReal_mono (hfV.sub hg).2.ne
-  rw [eLpNorm_congr_ae ((uncurry_marshalStepSP_ae_eq_clamp hBmeas T V hle hC hmpN).sub
-    (Filter.EventuallyEq.refl _ (Function.uncurry θ)))]
-  apply eLpNorm_mono_ae
+  apply ENNReal.toReal_mono (hfV.sub hg).eLpNorm_ne_top
+  have hclamp := (uncurry_marshalStepSP_ae_eq_clamp (μ := μ) hBmeas T V hle hC hmpN).sub
+    (Filter.EventuallyEq.refl _ (Function.uncurry θ))
+  rw [eLpNorm_congr_ae hclamp]
+  refine eLpNorm_mono_ae ((hf1.sub hg).aestronglyMeasurable.congr hclamp) ?_
   filter_upwards with z
   simp only [Pi.sub_apply, Real.norm_eq_abs]
   exact clampM_dist_le (hbdd z.1 z.2)

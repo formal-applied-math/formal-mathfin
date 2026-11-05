@@ -67,7 +67,7 @@ lemma simpleDrift_marshalStepSP_eq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ�
     {C : ℝ} (hC : 0 ≤ C) (N : ℕ) (u : ℝ≥0) (ω : Ω) :
     simpleDrift (marshalPart hBmeas T V) (fun i ω ↦ clampM C (marshalMult hBmeas T V i ω)) N u ω
       = driftSimpleProcess hBmeas (marshalStepSP hBmeas T V hle hC N).val u ω := by
-  haveI : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) u)) :=
+  have : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) u)) :=
     ⟨by rw [Measure.restrict_apply_univ, timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
   rw [driftSimpleProcess_eq_setIntegral]
   have htoReal : ∀ i : ℕ, marshalPart hBmeas T V i ≤ marshalPart hBmeas T V (i + 1) →
@@ -118,7 +118,7 @@ lemma simpleQuadVar_marshalStepSP_eq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
         (fun i ω ↦ clampM C (marshalMult hBmeas T V i ω)) N T ω
       = ∫ s in Set.Ioc (0 : ℝ≥0) T,
           (⇑(marshalStepSP hBmeas T V hle hC N).val s ω) ^ 2 ∂timeMeasure := by
-  haveI : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) :=
+  have : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) :=
     ⟨by rw [Measure.restrict_apply_univ, timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
   have htoReal : ∀ i : ℕ, marshalPart hBmeas T V i ≤ marshalPart hBmeas T V (i + 1) →
       (timeMeasure (Set.Ioc (0 : ℝ≥0) T ∩
@@ -158,8 +158,9 @@ lemma simpleQuadVar_marshalStepSP_eq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
       intro i _
       rw [Set.indicator_apply, Set.indicator_apply]
       by_cases hmem : s ∈ Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))
-      · rw [if_pos hmem, if_pos hmem, marshalMult_eq_uncurry hBmeas T V hle hmem.1 hmem.2 ω]
-      · rw [if_neg hmem, if_neg hmem]
+      · rw [ite_eq_left hmem, ite_eq_left hmem,
+          marshalMult_eq_uncurry hBmeas T V hle hmem.1 hmem.2 ω]
+      · rw [ite_eq_right hmem, ite_eq_right hmem]
     have hconst : ∀ i,
         (Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))).indicator
             (fun _ ↦ (clampM C (⇑V s ω)) ^ 2) s
@@ -169,8 +170,8 @@ lemma simpleQuadVar_marshalStepSP_eq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
       intro i
       rw [Set.indicator_apply, Set.indicator_apply]
       by_cases hmem : s ∈ Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))
-      · rw [if_pos hmem, if_pos hmem, mul_one]
-      · rw [if_neg hmem, if_neg hmem, mul_zero]
+      · rw [ite_eq_left hmem, ite_eq_left hmem, mul_one]
+      · rw [ite_eq_right hmem, ite_eq_right hmem, mul_zero]
     rw [Finset.sum_congr rfl hstep]
     simp_rw [hconst]
     rw [← Finset.mul_sum, sum_cell_indicator_eq_one hBmeas T V hle hmpN hs.1 hs.2, mul_one]
@@ -209,12 +210,11 @@ lemma tendstoInMeasure_of_ae_dist_le_sqrt {f : ℕ → Ω → ℝ} {g : Ω → �
           refine lintegral_congr_ae ?_
           filter_upwards [hDnn n] with ω hω
           rw [Real.enorm_eq_ofReal_abs, abs_of_nonneg hω]
-        rw [hsub, eLpNorm_one_eq_lintegral_enorm, hlint,
+        rw [hsub, eLpNorm_one_eq_lintegral_enorm (hDint n).aestronglyMeasurable, hlint,
           ← ofReal_integral_eq_lintegral_ofReal (hDint n) (hDnn n)]
       rw [tendsto_congr hrw, ← ENNReal.ofReal_zero]
       exact (ENNReal.continuous_ofReal.tendsto 0).comp hD0
-    exact tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero (fun n ↦ (hDint n).aestronglyMeasurable)
-      aestronglyMeasurable_const hDeLp
+    exact tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero hDeLp
   intro ε hε
   rcases eq_or_ne ε ⊤ with hεtop | hεtop
   · -- `ε = ⊤`: the difference has finite `edist`, so every level set is empty
@@ -286,11 +286,11 @@ lemma tendstoInMeasure_of_ae_dist_le_of_tendsto_integral {f : ℕ → Ω → ℝ
     (hdom : ∀ n, ∀ᵐ ω ∂μ, dist (f n ω) (g ω) ≤ h n ω)
     (hh0 : Tendsto (fun n ↦ ∫ ω, h n ω ∂μ) atTop (𝓝 0)) :
     TendstoInMeasure μ f atTop g := by
-  refine tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero hf hg ?_
+  refine tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero ?_
   have hbnd : ∀ n, eLpNorm (f n - g) 1 μ ≤ ENNReal.ofReal (∫ ω, h n ω ∂μ) := by
     intro n
     have hnn : 0 ≤ᵐ[μ] h n := by filter_upwards [hdom n] with ω hω; exact dist_nonneg.trans hω
-    rw [eLpNorm_one_eq_lintegral_enorm]
+    rw [eLpNorm_one_eq_lintegral_enorm ((hf n).sub hg)]
     calc ∫⁻ ω, ‖(f n - g) ω‖ₑ ∂μ
         = ∫⁻ ω, ENNReal.ofReal (dist (f n ω) (g ω)) ∂μ := by
           refine lintegral_congr fun ω ↦ ?_
@@ -331,7 +331,7 @@ lemma tendstoInMeasure_marshalDrift (T : ℝ≥0)
   set θhat := processToLpPredictable (μ := μ) T hBmeas hpred hbdd with hθhat
   set W : ℕ → TBoundedSP T hBmeas := fun n ↦ marshalStepSP hBmeas T (V n).val (V n).property hC
     ((marshalEndpoints hBmeas T (V n).val).card - 1) with hW
-  haveI : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) u)) :=
+  have : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) u)) :=
     ⟨by rw [Measure.restrict_apply_univ, timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
   -- ω-slice energy `Dₙ` and its `L¹(μ)` decay
   set D : ℕ → Ω → ℝ := fun n ω ↦
@@ -348,14 +348,10 @@ lemma tendstoInMeasure_marshalDrift (T : ℝ≥0)
         (tendsto_simpleAssembly_marshalStepSP T hBmeas hpred hC hbdd V hV)
     simpa using h0.pow 2
   -- `θ̂` sliced is `L²` a.e.
-  have hg_prod : MemLp (⇑θhat) 2 ((timeMeasure_T T).prod μ) :=
-    ⟨aestronglyMeasurable_of_aestronglyMeasurable_trim (natFiltration hBmeas).predictable_le_prod
-      (Lp.aestronglyMeasurable θhat),
-     by rw [← eLpNorm_trim_ae (natFiltration hBmeas).predictable_le_prod
-         (Lp.aestronglyMeasurable θhat)]
-        exact (Lp.memLp θhat).2⟩
+  have hg_prod : MemLp (⇑θhat) 2 ((timeMeasure_T T).prod μ) := memLp_prod_of_lp T hBmeas θhat
   have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s ↦ ⇑θhat (s, ω)) 2 (timeMeasure_T T) := by
-    filter_upwards [hg_prod.1.prodMk_right, hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
+    filter_upwards [hg_prod.aestronglyMeasurable.prodMk_right,
+      hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
     exact (memLp_two_iff_integrable_sq hω1).mpr hω2
   -- the honest limit-drift is a.e. the slice integral `∫₀ᵘ⇑θ̂ ds`
   have hlim_eq : ∀ᵐ ω ∂μ, driftContinuousMod T hBmeas θhat u ω
@@ -413,7 +409,7 @@ lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
   set θhat := processToLpPredictable (μ := μ) T hBmeas hpred hbdd with hθhat
   set W : ℕ → TBoundedSP T hBmeas := fun n ↦ marshalStepSP hBmeas T (V n).val (V n).property hC
     ((marshalEndpoints hBmeas T (V n).val).card - 1) with hW
-  haveI hfin : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) :=
+  have hfin : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) :=
     ⟨by rw [Measure.restrict_apply_univ, timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
   set D : ℕ → Ω → ℝ := fun n ω ↦
     ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑(W n).val s ω - ⇑θhat (s, ω)) ^ 2 ∂timeMeasure with hDdef
@@ -428,14 +424,10 @@ lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
       tendsto_iff_norm_sub_tendsto_zero.mp
         (tendsto_simpleAssembly_marshalStepSP T hBmeas hpred hC hbdd V hV)
     simpa using h0.pow 2
-  have hg_prod : MemLp (⇑θhat) 2 ((timeMeasure_T T).prod μ) :=
-    ⟨aestronglyMeasurable_of_aestronglyMeasurable_trim (natFiltration hBmeas).predictable_le_prod
-      (Lp.aestronglyMeasurable θhat),
-     by rw [← eLpNorm_trim_ae (natFiltration hBmeas).predictable_le_prod
-         (Lp.aestronglyMeasurable θhat)]
-        exact (Lp.memLp θhat).2⟩
+  have hg_prod : MemLp (⇑θhat) 2 ((timeMeasure_T T).prod μ) := memLp_prod_of_lp T hBmeas θhat
   have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s ↦ ⇑θhat (s, ω)) 2 (timeMeasure_T T) := by
-    filter_upwards [hg_prod.1.prodMk_right, hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
+    filter_upwards [hg_prod.aestronglyMeasurable.prodMk_right,
+      hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
     exact (memLp_two_iff_integrable_sq hω1).mpr hω2
   have hQmeas : ∀ n, AEStronglyMeasurable
       (fun ω ↦ simpleQuadVar (marshalPart hBmeas T (V n).val)
@@ -498,7 +490,7 @@ lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
             - ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑(W n).val s ω - ⇑θhat (s, ω)) ^ 2 ∂timeMeasure := by
         rw [integral_sub (f := fun s ↦ 2 * (⇑(W n).val s ω * (⇑(W n).val s ω - ⇑θhat (s, ω))))
             (g := fun s ↦ (⇑(W n).val s ω - ⇑θhat (s, ω)) ^ 2)
-            ((((hVt.sub hgt).mul hVt).integrable le_rfl).const_mul 2) (hVt.sub hgt).integrable_sq,
+            (((hVt.mul (hVt.sub hgt)).integrable le_rfl).const_mul 2) (hVt.sub hgt).integrable_sq,
           integral_const_mul]
       rw [h1, h2, hDdef]
     rw [hdecomp]
@@ -510,7 +502,7 @@ lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
           ≤ ∫ s in Set.Ioc (0 : ℝ≥0) T,
             C * |⇑(W n).val s ω - ⇑θhat (s, ω)| ∂timeMeasure := by
         refine (abs_integral_le_integral_abs).trans ?_
-        refine setIntegral_mono_on (((hVt.sub hgt).mul hVt).integrable le_rfl).abs
+        refine setIntegral_mono_on ((hVt.mul (hVt.sub hgt)).integrable le_rfl).abs
           (((hVt.sub hgt).integrable one_le_two).abs.const_mul C) measurableSet_Ioc
           (fun s hs ↦ ?_)
         rw [abs_mul]
@@ -733,7 +725,7 @@ lemma memLp_ZTpred_two (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
     MemLp (ZTpred hB T hBmeas hpred hbdd) 2 μ := by
   have hC : 0 ≤ C := nonneg_of_bdd μ hbdd
-  haveI hFB : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
+  have hFB : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
   refine memLp_two_of_subseq_ae_of_sq_bound (f := fun n ω ↦
       simpleDoleansExp (X := B) (marshalPart hBmeas T (V n).val)
         (fun i ω ↦ -(clampM C (marshalMult hBmeas T (V n).val i ω)))
@@ -832,7 +824,7 @@ lemma memLp_gpred_one (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     MemLp (fun ω ↦ Real.exp (a * BthetaPred (μ := μ) T hBmeas hpred hbdd u ω - a ^ 2 * (u : ℝ) / 2)
       * ZTpred hB T hBmeas hpred hbdd ω) 1 μ := by
   have hC : 0 ≤ C := nonneg_of_bdd μ hbdd
-  haveI hFB : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
+  have hFB : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
   refine (memLp_two_of_subseq_ae_of_sq_bound (f := fun n ω ↦
       Real.exp (a * (B u ω + simpleDrift (marshalPart hBmeas T (V n).val)
         (fun i ω ↦ clampM C (marshalMult hBmeas T (V n).val i ω))
@@ -874,7 +866,7 @@ lemma integral_ZTpred_eq_one (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
     ∫ ω, ZTpred hB T hBmeas hpred hbdd ω ∂μ = 1 := by
   have hC : 0 ≤ C := nonneg_of_bdd μ hbdd
-  haveI hFB : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
+  have hFB : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
   have hone : ∀ n, ∫ ω, simpleDoleansExp (X := B) (marshalPart hBmeas T (V n).val)
       (fun i ω ↦ -(clampM C (marshalMult hBmeas T (V n).val i ω)))
       ((marshalEndpoints hBmeas T (V n).val).card - 1) T ω ∂μ = 1 := fun n ↦
@@ -944,9 +936,9 @@ theorem isExpQMartingale_BthetaPredictable (hBmeas : ∀ t, Measurable (B t)) {�
     IsExpQMartingale (μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω))
       (natFiltration hBmeas) (BthetaPred (μ := μ) T hBmeas hpred hbdd) T := by
   have hC : 0 ≤ C := nonneg_of_bdd μ hbdd
-  haveI hFB : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
+  have hFB : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
   have hZTaesm : AEStronglyMeasurable (ZTpred hB T hBmeas hpred hbdd) μ :=
-    (memLp_ZTpred_one hB hBmeas T hpred hbdd V hV).1
+    (memLp_ZTpred_one hB hBmeas T hpred hbdd V hV).aestronglyMeasurable
   have hZTpos : ∀ ω, 0 ≤ ZTpred hB T hBmeas hpred hbdd ω := fun ω ↦ (contDoleansExp_pos _ _ _ _).le
   have hB0 : ∀ᵐ ω ∂μ, B 0 ω = 0 := by
     have hmap := Measure.map_apply (μ := μ) (hBmeas 0) (measurableSet_singleton (0 : ℝ)).compl
@@ -1053,7 +1045,7 @@ theorem Btheta_isQBrownianMotion_predictable (hBmeas : ∀ t, Measurable (B t)) 
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
     IsBrownianOn (μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)) T
       (BthetaPred (μ := μ) T hBmeas hpred hbdd) := by
-  haveI : IsProbabilityMeasure (μ.withDensity fun ω ↦
+  have : IsProbabilityMeasure (μ.withDensity fun ω ↦
       ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)) :=
     isProbabilityMeasure_predGirsanov hB hBmeas T hpred hbdd V hV
   exact isQBrownianMotion_of_expMartingale

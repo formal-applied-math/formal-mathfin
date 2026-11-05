@@ -420,7 +420,7 @@ theorem trueIncr_sq_le {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
               (abs_nonneg _)
         _ ≤ |Dd| * |Dd| := mul_le_mul_of_nonneg_left
             (le_trans (hδbdd s ω) (le_abs_self Dd)) (abs_nonneg _))).measurable
-  haveI : IsFiniteMeasure
+  have : IsFiniteMeasure
       (ItoIntegralL2.timeMeasure.restrict (Set.Ioc u v)) := by
     refine ⟨?_⟩
     rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,

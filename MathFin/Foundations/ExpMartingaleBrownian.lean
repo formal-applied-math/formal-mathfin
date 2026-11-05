@@ -57,14 +57,6 @@ open scoped NNReal ENNReal
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} [IsProbabilityMeasure Q]
   {𝓕 : Filtration ℝ≥0 mΩ} {Y : ℝ≥0 → Ω → ℝ} {T : ℝ≥0}
 
-omit [IsProbabilityMeasure Q] in
-/-- A random variable with law `N(0,v)` has every exponential moment. -/
-private theorem integrable_exp_mul_of_map_eq_gaussianReal {X : Ω → ℝ} (hX : Measurable X)
-    {v : ℝ≥0} (hlaw : Q.map X = gaussianReal 0 v) (c : ℝ) :
-    Integrable (fun ω ↦ Real.exp (c * X ω)) Q :=
-  (integrable_map_measure (g := fun x ↦ Real.exp (c * x)) (by fun_prop) hX.aemeasurable).1
-    (hlaw ▸ integrable_exp_mul_gaussianReal c)
-
 /-- **Conditional moment-generating function of an increment.**
 `𝔼_Q[exp(a·(Y_t − Y_s)) | 𝓕_s] = exp(½a²(t−s))` a.e., deterministic. The `martingale` field is
 the conditional identity `𝔼_Q[exp(a·Y_t − ½a²t) | 𝓕_s] = exp(a·Y_s − ½a²s)`
@@ -77,8 +69,9 @@ theorem condExp_exp_increment_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T)
   -- `f u = exp(a·Y_u − ½a²u)`, the exponential martingale
   set f : ℝ≥0 → Ω → ℝ := fun u ω ↦ Real.exp (a * Y u ω - a ^ 2 * (u : ℝ) / 2)
   have hf {u : ℝ≥0} (hu : u ≤ T) : Integrable (f u) Q := by
-    refine ((integrable_exp_mul_of_map_eq_gaussianReal (h.measurable u)
-      (map_eq_gaussianReal_of_expMartingale h hu) a).mul_const
+    have hlaw : HasLaw (Y u) (gaussianReal 0 u) Q :=
+      ⟨(h.measurable u).aemeasurable, map_eq_gaussianReal_of_expMartingale h hu⟩
+    refine ((hlaw.integrable_fun_comp (integrable_exp_mul_gaussianReal a)).mul_const
         (Real.exp (-(a ^ 2 * (u : ℝ) / 2)))).congr (.of_forall fun ω ↦ ?_)
     simp only [f, ← Real.exp_add, sub_eq_add_neg]
   -- functions of `Y_s` are known at time `s`
@@ -96,8 +89,10 @@ theorem condExp_exp_increment_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T)
     simp only [Pi.mul_apply, f, ← Real.exp_add]
     ring_nf
   have hD : Integrable (fun ω ↦ Real.exp (a * (Y t ω - Y s ω))) Q :=
-    integrable_exp_mul_of_map_eq_gaussianReal ((h.measurable t).sub (h.measurable s))
-      (increment_map_eq_gaussianReal_of_expMartingale h hst htT) a
+    (⟨((h.measurable t).sub (h.measurable s)).aemeasurable,
+      increment_map_eq_gaussianReal_of_expMartingale h hst htT⟩ :
+        HasLaw (fun ω ↦ Y t ω - Y s ω) (gaussianReal 0 (t - s)) Q).integrable_fun_comp
+      (integrable_exp_mul_gaussianReal a)
   rw [hsplit] at hD ⊢
   filter_upwards [condExp_mul_of_stronglyMeasurable_left
       (hsm (g := fun x ↦ Real.exp (a ^ 2 * (t : ℝ) / 2 - a * x)) (by fun_prop)) hD (hf htT), hmart]
@@ -117,15 +112,20 @@ theorem indep_increment_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) {s t 
     Indep (MeasurableSpace.comap (fun ω ↦ Y t ω - Y s ω) inferInstance) (𝓕 s) Q := by
   have hD : Measurable fun ω ↦ Y t ω - Y s ω := (h.measurable t).sub (h.measurable s)
   have hlaw := increment_map_eq_gaussianReal_of_expMartingale h hst htT
+  have hlaw' : HasLaw (fun ω ↦ Y t ω - Y s ω) (gaussianReal 0 (t - s)) Q :=
+    ⟨hD.aemeasurable, hlaw⟩
+  have hexp (u : ℝ) : Integrable (fun ω ↦ Real.exp (u * (Y t ω - Y s ω))) Q :=
+    hlaw'.integrable_fun_comp (integrable_exp_mul_gaussianReal u)
   refine (Indep_iff _ _ Q).2 fun _ A ⟨B, hB, hBA⟩ hA ↦ ?_
   subst hBA
-  have : IsFiniteMeasure (Q A • gaussianReal 0 (t - s)) := Measure.smul_finite _ (measure_ne_top Q A)
+  have : IsFiniteMeasure (Q A • gaussianReal 0 (t - s)) :=
+    Measure.smul_finite _ (measure_ne_top Q A)
   have hrestrict : (Q.restrict A).map (fun ω ↦ Y t ω - Y s ω) = Q A • gaussianReal 0 (t - s) := by
     refine measure_eq_of_mgf_id_eq (fun u ↦ (integrable_map_measure (by fun_prop)
-      hD.aemeasurable).2 (integrable_exp_mul_of_map_eq_gaussianReal hD hlaw u).restrict) ?_
+      hD.aemeasurable).2 (hexp u).restrict) ?_
     funext u
     rw [mgf_id_map hD.aemeasurable, mgf_smul_measure, mgf_id_gaussianReal, mgf,
-      ← setIntegral_condExp (𝓕.le s) (integrable_exp_mul_of_map_eq_gaussianReal hD hlaw u) hA,
+      ← setIntegral_condExp (𝓕.le s) (hexp u) hA,
       setIntegral_congr_ae (𝓕.le s A hA) ((condExp_exp_increment_of_expMartingale h u hst
         htT).mono fun _ hω _ ↦ hω), setIntegral_const, NNReal.coe_sub hst, measureReal_def,
       smul_eq_mul]

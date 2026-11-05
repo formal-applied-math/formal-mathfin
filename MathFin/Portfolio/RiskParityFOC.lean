@@ -182,11 +182,11 @@ theorem hasDerivAt_logBarrierObj_update
       (if k = j then (1 : ℝ) else 0) (w j) := by
     intro k
     by_cases hk : k = j
-    · rw [if_pos hk]
+    · rw [ite_eq_left hk]
       have hfun : (fun x ↦ Function.update w j x k) = fun x ↦ x := by
         funext x; rw [hk, Function.update_self]
       rw [hfun]; exact hasDerivAt_id (w j)
-    · rw [if_neg hk]
+    · rw [ite_eq_right hk]
       have hfun : (fun x ↦ Function.update w j x k) = fun _ ↦ w k := by
         funext x; rw [Function.update_of_ne hk]
       rw [hfun]; exact hasDerivAt_const (w j) (w k)
@@ -198,19 +198,19 @@ theorem hasDerivAt_logBarrierObj_update
         (if l = j then Sg k j else 0) (w j) := by
       intro l
       by_cases hl : l = j
-      · rw [if_pos hl]
+      · rw [ite_eq_left hl]
         have hfun : (fun x ↦ Sg k l * Function.update w j x l)
             = fun x ↦ Sg k l * x := by funext x; rw [hl, Function.update_self]
         rw [hfun, hl]
         simpa using (hasDerivAt_id (w j)).const_mul (Sg k j)
-      · rw [if_neg hl]
+      · rw [ite_eq_right hl]
         have hfun : (fun x ↦ Sg k l * Function.update w j x l)
             = fun _ ↦ Sg k l * w l := by funext x; rw [Function.update_of_ne hl]
         rw [hfun]; exact hasDerivAt_const (w j) (Sg k l * w l)
     have hsum : HasDerivAt (fun x ↦ ∑ l ∈ s, Sg k l * Function.update w j x l)
         (∑ l ∈ s, if l = j then Sg k j else 0) (w j) :=
       HasDerivAt.fun_sum (fun l (_ : l ∈ s) ↦ hterm l)
-    rw [Finset.sum_ite_eq' s j, if_pos hj] at hsum
+    rw [Finset.sum_ite_eq' s j, ite_eq_left hj] at hsum
     exact hsum
   -- product rule per outer index k
   have hF : ∀ k, HasDerivAt
@@ -246,7 +246,7 @@ theorem hasDerivAt_logBarrierObj_update
           (if k = j then (1 : ℝ) else 0) * (∑ l ∈ s, Sg k l * w l)
             = if k = j then (∑ l ∈ s, Sg k l * w l) else 0 := by
         intro k _; by_cases hk : k = j <;> simp [hk]
-      rw [Finset.sum_congr rfl hcongr, Finset.sum_ite_eq' s j, if_pos hj]
+      rw [Finset.sum_congr rfl hcongr, Finset.sum_ite_eq' s j, ite_eq_left hj]
       rfl
     have h2 : (∑ k ∈ s, w k * Sg k j) = marginalVariance s Sg w j := by
       unfold marginalVariance
@@ -272,13 +272,13 @@ theorem hasDerivAt_logBarrierObj_update
         (if i = j then b j / w j else 0) (w j) := by
       intro i
       by_cases hi : i = j
-      · rw [if_pos hi]
+      · rw [ite_eq_left hi]
         have hfun : (fun x ↦ b i * Real.log (Function.update w j x i))
             = fun x ↦ b i * Real.log x := by
           funext x; rw [hi, Function.update_self]
         rw [hfun, hi, div_eq_mul_inv]
         exact (Real.hasDerivAt_log hwj).const_mul (b j)
-      · rw [if_neg hi]
+      · rw [ite_eq_right hi]
         have hfun : (fun x ↦ b i * Real.log (Function.update w j x i))
             = fun _ ↦ b i * Real.log (w i) := by
           funext x; rw [Function.update_of_ne hi]
@@ -287,7 +287,7 @@ theorem hasDerivAt_logBarrierObj_update
         (fun x ↦ ∑ i ∈ s, b i * Real.log (Function.update w j x i))
         (∑ i ∈ s, if i = j then b j / w j else 0) (w j) :=
       HasDerivAt.fun_sum (fun i (_ : i ∈ s) ↦ hterm i)
-    rw [Finset.sum_ite_eq' s j, if_pos hj] at hsumLog
+    rw [Finset.sum_ite_eq' s j, ite_eq_left hj] at hsumLog
     exact hsumLog
   -- === combine ===
   unfold logBarrierObj

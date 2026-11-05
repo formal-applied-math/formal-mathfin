@@ -99,13 +99,8 @@ theorem integral_increment_centered_mean {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t�
 moments. Needed for the `L²`-integrability of products of squared increments in the
 quadratic-variation assembly. -/
 theorem memLp_increment_four (t₀ t₁ : ℝ≥0) :
-    MemLp (fun ω ↦ B t₁ ω - B t₀ ω) 4 μ := by
-  have hmap : MemLp (id : ℝ → ℝ) 4 (Measure.map (fun ω ↦ B t₁ ω - B t₀ ω) μ) := by
-    rw [show Measure.map (fun ω ↦ B t₁ ω - B t₀ ω) μ
-          = gaussianReal 0 (nndist (t₁ : ℝ) (t₀ : ℝ)) from (hB.hasLaw_sub t₁ t₀).map_eq]
-    exact memLp_id_gaussianReal (μ := 0) 4
-  exact (memLp_map_measure_iff measurable_id.aestronglyMeasurable
-    (hB.hasLaw_sub t₁ t₀).aemeasurable).mp hmap
+    MemLp (fun ω ↦ B t₁ ω - B t₀ ω) 4 μ :=
+  (hB.hasLaw_sub t₁ t₀).memLp (memLp_id_gaussianReal 4)
 
 omit hB in
 /-- **Pairwise orthogonality of centered squared increments** (the vanishing cross terms).
@@ -118,7 +113,7 @@ theorem integral_increment_sq_centered_cross {𝓕 : Filtration ℝ≥0 mΩ}
     (hF : IsFilteredPreBrownian B 𝓕 μ)
     {a b c d : ℝ≥0} (hab : a ≤ b) (hbc : b ≤ c) (hcd : c ≤ d) :
     ∫ ω, ((B b ω - B a ω) ^ 2 - ((b : ℝ) - a)) * ((B d ω - B c ω) ^ 2 - ((d : ℝ) - c)) ∂μ = 0 := by
-  haveI : IsProbabilityMeasure μ := hF.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hF.isGaussianProcess.isProbabilityMeasure
   set χ : Ω → ℝ := fun ω ↦ (B b ω - B a ω) ^ 2 - ((b : ℝ) - a) with hχdef
   have hχ_adapted : Measurable[𝓕 c] χ :=
     measurable_increment_sq_sub hF (hab.trans hbc) hbc ((b : ℝ) - a)
@@ -135,8 +130,8 @@ theorem integral_increment_sq_centered_cross {𝓕 : Filtration ℝ≥0 mΩ}
 increment is `L²` since the increment is `L⁴`, and a constant is `L²` on a probability space. -/
 theorem memLp_increment_sq_centered_two (t₀ t₁ : ℝ≥0) (r : ℝ) :
     MemLp (fun ω ↦ (B t₁ ω - B t₀ ω) ^ 2 - r) 2 μ := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  haveI : ENNReal.HolderTriple 4 4 2 := ⟨by
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : ENNReal.HolderTriple 4 4 2 := ⟨by
     have h2 : (2 : ℝ≥0∞) ≠ 0 := by norm_num
     have ht : (2 : ℝ≥0∞) ≠ ∞ := ENNReal.ofNat_ne_top
     rw [show (4 : ℝ≥0∞) = 2 * 2 from by norm_num,
@@ -164,7 +159,7 @@ theorem sum_increment_sq_sub_sq_integral (hBmeas : ∀ t, Measurable (B t))
     {s : ℕ → ℝ≥0} (hmono : Monotone s) (hs0 : s 0 = 0) (n : ℕ) :
     ∫ ω, (∑ k ∈ Finset.range n, (B (s (k + 1)) ω - B (s k) ω) ^ 2 - (s n : ℝ)) ^ 2 ∂μ
       = ∑ k ∈ Finset.range n, 2 * ((s (k + 1) : ℝ) - s k) ^ 2 := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   set Y : ℕ → Ω → ℝ :=
     fun k ω ↦ (B (s (k + 1)) ω - B (s k) ω) ^ 2 - ((s (k + 1) : ℝ) - s k) with hY
   have hYL2 : ∀ k, MemLp (Y k) 2 μ := fun k ↦ memLp_increment_sq_centered_two hB _ _ _
@@ -240,7 +235,7 @@ theorem tendsto_qv (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
     Tendsto (fun n : ℕ ↦ ∫ ω, (∑ k ∈ Finset.range n,
         (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2 - (T : ℝ)) ^ 2 ∂μ)
       atTop (𝓝 0) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   refine squeeze_zero' (g := fun n : ℕ ↦ 2 * (T : ℝ) ^ 2 / (n : ℝ))
     (Eventually.of_forall fun n ↦ integral_nonneg fun ω ↦ sq_nonneg _) ?_
     (tendsto_const_div_atTop_nhds_zero_nat (2 * (T : ℝ) ^ 2))
@@ -263,7 +258,7 @@ theorem tendstoInMeasure_qv (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
       (fun n ω ↦ ∑ k ∈ Finset.range n,
         (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2)
       atTop (fun _ ↦ (T : ℝ)) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   -- each centered sum `Sₙ − T` lies in `L²` (each squared increment is `L²`, via `r = 0`)
   have hmem : ∀ n : ℕ, MemLp (fun ω ↦ (∑ k ∈ Finset.range n,
       (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) - (T : ℝ)) 2 μ := by
@@ -274,10 +269,7 @@ theorem tendstoInMeasure_qv (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
       intro k _
       simpa using memLp_increment_sq_centered_two hB (unifPart T n k) (unifPart T n (k + 1)) 0
     exact hsum.sub (memLp_const (T : ℝ))
-  refine tendstoInMeasure_of_tendsto_eLpNorm (by norm_num : (2 : ℝ≥0∞) ≠ 0)
-    (fun n ↦ (Finset.measurable_sum _ fun k _ ↦
-      ((hBmeas _).sub (hBmeas _)).pow_const 2).aestronglyMeasurable)
-    aestronglyMeasurable_const ?_
+  refine tendstoInMeasure_of_tendsto_eLpNorm (by norm_num : (2 : ℝ≥0∞) ≠ 0) ?_
   -- `eLpNorm (Sₙ − T) 2 = ofReal √(∫ (Sₙ − T)²) → 0`, the L² convergence `tendsto_qv`
   have hconv : ∀ n : ℕ, eLpNorm (fun ω ↦ (∑ k ∈ Finset.range n,
         (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) - (T : ℝ)) 2 μ

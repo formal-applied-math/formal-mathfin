@@ -68,9 +68,9 @@ theorem planeResidual_localMartingale {G : ℝ × ℝ → ℝ} (hG : ContDiff �
   obtain ⟨M,hMc,hM,he⟩ := plane_ito_localMartingale
     isBrownianReal_brownian.toIsPreBrownianReal measurable_brownian continuous_brownian
     hG
-  apply localMartingale_of_ae_path_eq hM
+  apply isLocalMartingale_congr_ae hM
     (fun t => (planeResidual_stronglyAdapted hG t).mono (brownianFiltration_le_aug t))
-    (planeResidual_continuous hG)
+    fun ω => (planeResidual_continuous hG ω).isCadlag
   apply indistinguishable_of_modification (Eventually.of_forall hMc)
     (Eventually.of_forall (planeResidual_continuous hG))
   intro t
@@ -83,7 +83,7 @@ theorem planeDrift_norm_le {G : ℝ × ℝ → ℝ} {T t : ℝ≥0} {C : ℝ}
     (hL : ∀ s : ℝ≥0, s ≤ T → ∀ w : ℝ, ‖planeGenerator G (s,w)‖ ≤ C)
     (ht : t ≤ T) (ω : ℝ≥0 → ℝ) : ‖planeDrift G t ω‖ ≤ (t : ℝ)*C := by
   let ν := MathFin.ItoIntegralL2.timeMeasure.restrict (Ioc 0 t)
-  haveI : IsFiniteMeasure ν := ⟨by
+  have : IsFiniteMeasure ν := ⟨by
     simp only [ν,Measure.restrict_apply_univ,MathFin.ItoIntegralL2.timeMeasure_Ioc]
     exact ENNReal.ofReal_lt_top⟩
   have hh := norm_integral_le_of_norm_le_const (μ := ν)
@@ -108,13 +108,13 @@ theorem planeResidual_stopped_martingale {G : ℝ × ℝ → ℝ} (hG : ContDiff
   have hθ : IsStoppingTime brownianAugFiltration (fun ω => (θ.time ω : WithTop ℝ≥0)) :=
     fun t => brownianFiltration_le_aug t _ (θ.stopping t)
   have hlocal : IsLocalMartingale X brownianAugFiltration gaussianLimit := by
-    apply localMartingale_of_ae_path_eq
+    apply isLocalMartingale_congr_ae
       (localMartingale_stopped_indicator (planeResidual_localMartingale hG) hθ)
-      (fun t => (hA t).mono (brownianFiltration_le_aug t)) hc
+      (fun t => (hA t).mono (brownianFiltration_le_aug t)) fun ω => (hc ω).isCadlag
     apply Eventually.of_forall
     intro ω t
     by_cases hp : 0 < θ.time ω
-    · rw [indicator_of_mem (show ω ∈ {ω | 0 < θ.time ω} from hp)]
+    · exact indicator_of_mem (show ω ∈ {ω | 0 < θ.time ω} from hp) _
     · have hz : θ.time ω = 0 := le_antisymm (le_of_not_gt hp) zero_le
       simp [X,hz,planeResidual_zero]
   apply martingale_smaller_filtration brownianFiltration_le_aug _ hA

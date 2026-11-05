@@ -178,9 +178,8 @@ theorem hasLaw_fracDiff_one_driftEstimator {Ω : Type*} {mΩ : MeasurableSpace �
           ring
   have hB0 : HasLaw (fun ω ↦ B T ω - B 0 ω) (gaussianReal 0 (T : ℝ).toNNReal) P := by
     convert hB.hasLaw_sub T 0 using 2
-    · rfl
-    · ext
-      simp
+    ext
+    simp
   convert drift_se_endpoint_hasLaw (NNReal.coe_pos.2 hT) mu sigma hB0 using 1
   funext ω
   rw [hsum ω]

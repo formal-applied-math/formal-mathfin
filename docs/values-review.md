@@ -130,6 +130,39 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-11-04 — corpus 773, modules 703 — the pin bump (BrownianMotion 497e5e2, Mathlib e91b128), read before it lands
+
+Scope: the port to Lean v4.35.0, Mathlib e91b128 and BrownianMotion 497e5e2. One read-only
+reviewer read the whole diff against the new upstream API; nothing blocked. Its findings were
+executed before the push, each change built, the final no-argument build green.
+
+### Upgrades executed
+
+- **Upstream absorbs the library's copies.** `HasLaw.integrable`, `.memLp` and
+  `.integrable_fun_comp` replace five Gaussian, Student-t and Rademacher integrability lemmas and the
+  private map-form `integrable_exp_mul_of_map_eq_gaussianReal`; `isLocalMartingale_congr_ae` replaces
+  the American put's own path-congruence lemma; `List.signVariations` replaces `signVariationsList`;
+  the upstream instance replaces `isProbabilityMeasure_map_const_mul`; `gaussianReal_const_mul` and
+  `gaussianReal_map_neg` replace hand-built scalings in `BernoulliMixture` and `BivariateNormalCDF`.
+- **The predictable-`L²`-is-product-`L²` block, once** (2026-11-04 wave backlog, item 6). Eleven
+  hand-rolled `eLpNorm_trim` rewrites are Mathlib's `memLp_of_memLp_trim`; the six `Lp` cases are one
+  `ItoIntegralCLM.memLp_prod_of_lp`, and `PointwiseBracket`'s private copy is gone.
+- **Probability vectors, one spelling.** The convex-separation roots take "no nonnegative `v` with
+  `∑ v = 1` lies in `C`", so FTAP I's two proofs lose their `generalize` ritual; `Convexity.StdSimplex`
+  stays where a statement ranges over the simplex (`representingSet_worstCase`).
+- **Indistinguishability stated as such.** `brownianInteriorRule_ito_representation` concludes `≡ᵐ` in
+  the orientation its caller needs, and the manual flips in `StochasticIntegralCharacterisation`
+  are `.symm`.
+
+### Ranked backlog
+
+1. `DiscreteVaR`: bundle the probability vector so `hq₀ hq₁` stop being threaded. Skipped in the
+   port: `StdSimplex` has no product constructor for `jointQ`, and `PMF` would put every explicit
+   cdf lemma behind `ENNReal.toReal`. The right move is probably a small product lemma for
+   `StdSimplex`, upstreamable.
+2. `MarkovPathMeasure` keeps `unfold; infer_instance`, because `inferInstanceAs` times out in `whnf`
+   there. The definition wants an `instance` lemma of its own, as `referenceIntensity` now has.
+
 ## 2026-11-04 — corpus 773, modules 703 — the backlog wave, read before it lands
 
 Scope: the four maintainer branches that close the 2026-10-31 backlog, merged with the five

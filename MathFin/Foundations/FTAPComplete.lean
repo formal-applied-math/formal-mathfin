@@ -39,7 +39,7 @@ namespace MathFin
 
 open MeasureTheory
 
-variable {Ω : Type*} [Fintype Ω] [Nonempty Ω] {mΩ : MeasurableSpace Ω}
+variable {Ω : Type*} [Fintype Ω] {mΩ : MeasurableSpace Ω}
   [MeasurableSingletonClass Ω] (𝓕 : Filtration ℕ mΩ) (P : Measure Ω) (S : ℕ → Ω → ℝ) (T : ℕ)
 
 variable {𝓕 P S T} in
@@ -47,7 +47,7 @@ variable {𝓕 P S T} in
 attainable-gains subspace has `Q`-mean zero. -/
 theorem IsEMM.sum_mul_eq_zero_of_mem_gainsSubspace {Q : Measure Ω} (hQ : IsEMM 𝓕 P S T Q)
     {g : Ω → ℝ} (hg : g ∈ gainsSubspace 𝓕 S T) : ∑ ω, Q.real {ω} * g ω = 0 := by
-  haveI := hQ.isProb
+  have := hQ.isProb
   obtain ⟨φ, hφ, rfl⟩ := mem_gains_imp_predictable 𝓕 S T hg
   have h := hQ.integral_martingaleTransform (fun t _ ↦ hφ t) (exists_bound_horizon T φ)
   rw [integral_fintype Integrable.of_finite] at h
@@ -56,12 +56,12 @@ theorem IsEMM.sum_mul_eq_zero_of_mem_gainsSubspace {Q : Measure Ω} (hQ : IsEMM 
 omit [Fintype Ω] in
 /-- **Second FTAP, `unique ⇒ complete`**: if the market has an equivalent martingale measure and
 only one, every claim is replicated by a predictable strategy from some initial wealth. -/
-theorem isCompleteMarket_of_unique [Finite Ω] (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω})
+theorem isCompleteMarket_of_unique [Finite Ω] [Nonempty Ω] (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω})
     {Q₀ : Measure Ω} (h₀ : IsEMM 𝓕 P S T Q₀) (hu : ∀ Q, IsEMM 𝓕 P S T Q → Q = Q₀) :
     IsCompleteMarket 𝓕 P S T := by
   classical
   cases nonempty_fintype Ω
-  haveI := h₀.isProb
+  have := h₀.isProb
   have hW : Submodule.span ℝ {fun _ : Ω ↦ (1 : ℝ)} ⊔ gainsSubspace 𝓕 S T = ⊤ := by
     by_contra hne
     obtain ⟨η, hη0, hη⟩ := exists_ne_zero_sum_mul_eq_zero (lt_top_iff_ne_top.2 hne)
@@ -104,7 +104,7 @@ omit [Fintype Ω] in
 single-asset, finite-horizon market on a finite full-support space with no arbitrage and full
 information at the horizon (`𝓕 T = ⊤`), the market is complete iff its equivalent martingale
 measure is unique. -/
-theorem ftap_two [Finite Ω] (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) (hT : 𝓕 T = mΩ)
+theorem ftap_two [Finite Ω] [Nonempty Ω] (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) (hT : 𝓕 T = mΩ)
     (hNA : NoArbitrage 𝓕 P S T) : IsCompleteMarket 𝓕 P S T ↔ ∃! Q, IsEMM 𝓕 P S T Q := by
   refine ⟨fun hc ↦ ?_, fun ⟨Q₀, h₀, hu⟩ ↦ isCompleteMarket_of_unique 𝓕 P S T hS hP h₀ hu⟩
   obtain ⟨Q₀, h₀⟩ := exists_isEMM_of_noArbitrage 𝓕 P S T hS hP hNA

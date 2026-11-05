@@ -82,7 +82,7 @@ theorem abs_discreteTaylorRemainder_le_of_abs_sub_le {f f' f'' : ℝ → ℝ}
     have h := ((hf' u).sub_const (f' x)).sub
       (((hasDerivAt_id u).sub_const x).const_mul (f'' x))
     simp only [id_eq] at h
-    convert h using 1 <;> first | rfl | ring
+    convert h using 1; ring
   have hL1 (t : ℝ) (ht : t ∈ uIcc x y) : |f' t - f' x - f'' x * (t - x)| ≤ η * |y - x| := by
     have h := (convex_uIcc x y).norm_image_sub_le_of_norm_hasDerivWithin_le
       (fun u _ ↦ (hd1 u).hasDerivWithinAt) (fun u hu ↦ (Real.norm_eq_abs _).trans_le (hη u hu))
@@ -95,7 +95,7 @@ theorem abs_discreteTaylorRemainder_le_of_abs_sub_le {f f' f'' : ℝ → ℝ}
         (((hasDerivAt_id u).sub_const x).const_mul (f' x))).sub
         ((((hasDerivAt_id u).sub_const x).pow 2).const_mul (1 / 2 * f'' x))
     simp only [id_eq] at h
-    convert h using 1 <;> first | rfl | ring
+    convert h using 1; ring
   have h := (convex_uIcc x y).norm_image_sub_le_of_norm_hasDerivWithin_le
     (fun u _ ↦ (hd0 u).hasDerivWithinAt) (fun u hu ↦ (Real.norm_eq_abs _).trans_le (hL1 u hu))
     left_mem_uIcc right_mem_uIcc
@@ -120,17 +120,14 @@ theorem exists_seq_tendsto_ae_comp {Ω : Type*} [MeasurableSpace Ω] {μ : Measu
 measure. -/
 theorem tendstoInMeasure_of_tendsto_integral_abs {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
     {g : ℕ → Ω → ℝ} {g' : Ω → ℝ} (hint : ∀ n, Integrable (fun ω ↦ g n ω - g' ω) μ)
-    (hg' : AEStronglyMeasurable g' μ)
     (h : Tendsto (fun n ↦ ∫ ω, |g n ω - g' ω| ∂μ) atTop (𝓝 0)) :
     TendstoInMeasure μ g atTop g' := by
-  refine tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero
-    (fun n ↦ ((hint n).aestronglyMeasurable.add hg').congr
-      (ae_of_all _ fun ω ↦ sub_add_cancel (g n ω) (g' ω))) hg' ?_
+  refine tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero ?_
   have h' := ENNReal.tendsto_ofReal h
   rw [ENNReal.ofReal_zero] at h'
   refine h'.congr fun n ↦ ?_
-  rw [eLpNorm_one_eq_lintegral_enorm]
-  exact ofReal_integral_norm_eq_lintegral_enorm (hint n)
+  exact (ofReal_integral_norm_eq_lintegral_enorm (hint n)).trans
+    (eLpNorm_one_eq_lintegral_enorm (hint n).aestronglyMeasurable).symm
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
@@ -194,7 +191,7 @@ theorem tendstoInMeasure_weighted_qv_adapted {X A : ℝ≥0 → Ω → ℝ} {X�
     have hI := (Lp.memLp (itoProcessCLM hB T t hBmeas φ)).sub
       (Lp.memLp (itoProcessCLM hB T s hBmeas φ))
     have hAm : MemLp (fun ω ↦ A t ω - A s ω) 2 μ :=
-      MemLp.of_bound ((((hX_meas t).sub (hX_meas s)).sub hI.1).congr (by
+      MemLp.of_bound ((((hX_meas t).sub (hX_meas s)).sub hI.aestronglyMeasurable).congr (by
         filter_upwards [hX t ht, hX s (hst.trans ht)] with ω h1 h2
         simp only [Pi.sub_apply, h1, h2]
         ring)) (Ca * ((t : ℝ) - s)) (ae_of_all _ fun ω ↦ hA hst ω)
@@ -203,12 +200,12 @@ theorem tendstoInMeasure_weighted_qv_adapted {X A : ℝ≥0 → Ω → ℝ} {X�
     simp only [Pi.add_apply, Pi.sub_apply, h1, h2]
     ring
   refine tendstoInMeasure_of_tendsto_integral_abs (fun n ↦ Integrable.sub
-    (integrable_finsetSum _ fun k hk ↦ ?_) hW) hW.1
+    (integrable_finsetSum _ fun k hk ↦ ?_) hW)
     (tendsto_weighted_qv_adapted hB T hBmeas hadap hcont hbdd hA hX hw_adap hw_cont hw_bdd)
   have hk' := Finset.mem_range.mp hk
   have hd := hΔ (unifPart_mono T n (Nat.le_succ k)) (unifPart_le_T hk')
   refine (hd.integrable_sq.const_mul Cw).mono'
-    ((hw_meas _).aestronglyMeasurable.mul (hd.1.pow 2)) (ae_of_all _ fun ω ↦ ?_)
+    ((hw_meas _).aestronglyMeasurable.mul (hd.aestronglyMeasurable.pow 2)) (ae_of_all _ fun ω ↦ ?_)
   rw [Real.norm_eq_abs, abs_mul, abs_pow, sq_abs]
   exact mul_le_mul_of_nonneg_right (hw_bdd _ ω) (sq_nonneg _)
 

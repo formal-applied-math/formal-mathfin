@@ -16,7 +16,7 @@ The global supermartingale property is separate.
 
 ## Result
 
-Public entry points include `localMartingale_of_ae_path_eq`, `localMartingale_stopped_indicator`,
+Public entry points include `localMartingale_stopped_indicator`,
 `brownianInteriorRule_martingale`, `brownianClassicalContactRule_martingale`.
 -/
 
@@ -26,25 +26,6 @@ namespace MathFin.BlackScholes.AmericanPut.Stopping
 
 open Set Filter MeasureTheory ProbabilityTheory Boundary
 open scoped NNReal Topology
-
-theorem localMartingale_of_ae_path_eq {Ω : Type*} [MeasurableSpace Ω]
-    {P : Measure Ω} {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
-    {X Y : ℝ≥0 → Ω → ℝ} (hX : IsLocalMartingale X 𝓕 P)
-    (hY : StronglyAdapted 𝓕 Y) (hcY : ∀ ω, Continuous (fun t => Y t ω))
-    (heq : ∀ᵐ ω ∂P, ∀ t, X t ω = Y t ω) : IsLocalMartingale Y 𝓕 P := by
-  classical
-  obtain ⟨τ,hτ,hlocal⟩ := hX
-  refine ⟨τ,hτ,fun n => ⟨?_,?_⟩⟩
-  · apply (hlocal n).1.congr
-      (hY.stoppedProcess_indicator (fun ω => (hcY ω).isCadlag.right_continuous)
-          (hτ.isStoppingTime n))
-    intro t
-    filter_upwards [heq] with ω hω
-    simp only [stoppedProcess]
-    by_cases hs : ω ∈ {ω | ⊥ < τ n ω}
-    · simp only [indicator_of_mem hs,hω]
-    · simp only [indicator_of_notMem hs]
-  · exact isStable_isCadlag Y (fun ω => (hcY ω).isCadlag) (τ n) (hτ.isStoppingTime n)
 
 theorem localMartingale_stopped_indicator {Ω : Type*} [MeasurableSpace Ω]
     {P : Measure Ω} [IsFiniteMeasure P] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
@@ -91,9 +72,9 @@ theorem brownianInteriorRule_martingale {p : ℝ → ℝ → ℝ} {b : ℝ → �
   have hθ : IsStoppingTime brownianAugFiltration (fun ω => (θ.time ω : WithTop ℝ≥0)) :=
     fun t => brownianFiltration_le_aug t _ (θ.stopping t)
   have hlocal : IsLocalMartingale X brownianAugFiltration gaussianLimit :=
-    localMartingale_of_ae_path_eq (localMartingale_stopped_indicator hM hθ)
-      (fun t => (hXadapt t).mono (brownianFiltration_le_aug t)) hXcont
-      (heq.mono (fun ω hω t => (hω t).symm))
+    isLocalMartingale_congr_ae (localMartingale_stopped_indicator hM hθ)
+      (fun t => (hXadapt t).mono (brownianFiltration_le_aug t)) (fun ω => (hXcont ω).isCadlag)
+      heq
   have hXM : Martingale X brownianFiltration gaussianLimit :=
     martingale_smaller_filtration brownianFiltration_le_aug
       (bounded_localMartingale_is_martingale hlocal

@@ -277,7 +277,7 @@ private lemma hasDerivAt_bsCashDigital_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 <
   have h_id : HasDerivAt (fun s : ℝ ↦ s) 1 S := hasDerivAt_id S
   have h_denom : HasDerivAt (fun s : ℝ ↦ s * σ * Real.sqrt τ) (σ * Real.sqrt τ) S := by
     have h := (h_id.mul_const σ).mul_const (Real.sqrt τ)
-    convert h using 1 <;> first | rfl | ring
+    convert h using 1; ring
   have h_div := h_num.div h_denom h_denom_ne
   convert h_div using 1
   all_goals try rfl

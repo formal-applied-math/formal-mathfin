@@ -303,7 +303,8 @@ theorem integrable_expBthetaSimple_mul_density (s : ℕ → ℝ≥0) (hs : Monot
     rw [memLp_two_iff_integrable_sq hDmeas.aestronglyMeasurable]
     refine Integrable.mono'
       (g := fun ω ↦ Real.exp (2 * |a| * K * (T : ℝ)) * Real.exp (2 * a * X u ω))
-      ((integrable_exp_mul_of_hasLaw (hX.hasLaw_eval u) (2 * a)).const_mul _)
+      (((hX.hasLaw_eval u).integrable_fun_comp
+        (integrable_exp_mul_gaussianReal (2 * a))).const_mul _)
       (hDmeas.pow_const 2).aestronglyMeasurable (Filter.Eventually.of_forall fun ω ↦ ?_)
     have hK0 : (0 : ℝ) ≤ K := (abs_nonneg (c 0 ω)).trans (hc_bdd 0 ω)
     have hdrift := simpleDrift_abs_le hs hs0 hc_bdd N (huT.trans hNT) ω
@@ -346,7 +347,7 @@ theorem integrable_expBthetaSimple_mul_density (s : ℕ → ℝ≥0) (hs : Monot
     rw [mul_comm (Real.exp (K ^ 2 * (T : ℝ)))]
     exact mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr hSumBnd)
       (simpleDoleansExp_pos s _ N T ω).le
-  exact (memLp_one_iff_integrable.mp (hDu2.mul hZT2)).congr
+  exact (memLp_one_iff_integrable.mp (hZT2.mul hDu2)).congr
     (Filter.Eventually.of_forall fun ω ↦ mul_comm _ _)
 
 include hX in
@@ -423,7 +424,7 @@ theorem Btheta_simple_isQBrownianMotion (s : ℕ → ℝ≥0) (hs : Monotone s) 
   have hdneg : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (fun ω ↦ -(c i ω)) :=
     fun i ↦ (hc i).neg
   have hbneg : ∀ i ω, |(-(c i ω))| ≤ K := fun i ω ↦ by rw [abs_neg]; exact hc_bdd i ω
-  haveI : IsProbabilityMeasure (P.withDensity fun ω ↦
+  have : IsProbabilityMeasure (P.withDensity fun ω ↦
       ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω)) :=
     simpleGirsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) s hs _ hdneg hbneg N T
   exact isQBrownianMotion_of_expMartingale

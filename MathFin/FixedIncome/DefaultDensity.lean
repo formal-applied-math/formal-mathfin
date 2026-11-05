@@ -215,14 +215,14 @@ theorem integral_indicator_Iic_eq [IsFiniteMeasure μ] {h : ℝ → ℝ} (hh : C
 process. Obtained from `map_eq_withDensity` with `τ = id`. -/
 theorem expMeasure_eq_withDensity {r : ℝ} (hr : 0 < r) :
     ProbabilityTheory.expMeasure r = volume.withDensity (lawDensity fun _ ↦ r) := by
-  haveI := ProbabilityTheory.isProbabilityMeasure_expMeasure hr
+  have := ProbabilityTheory.isProbabilityMeasure_expMeasure hr
   have hS : ∀ a, hazardSurvival (fun _ ↦ r) a = rexp (-(r * a)) := fun a ↦ by
     unfold hazardSurvival survivalFromIntensity
     rw [show cumulativeIntensity (fun _ ↦ r) a = r * a from cumHazard_const r a]
   have := map_eq_withDensity (μ := ProbabilityTheory.expMeasure r) (τ := id) continuous_const
     (fun _ ↦ hr.le) aemeasurable_id fun a ha ↦ by
       rw [show {ω : ℝ | id ω ≤ a} = Set.Iic a from rfl, ← ProbabilityTheory.ofReal_cdf,
-        ProbabilityTheory.cdf_expMeasure_eq hr, if_pos ha, hS,
+        ProbabilityTheory.cdf_expMeasure_eq hr, ite_eq_left ha, hS,
         ENNReal.ofReal_sub _ (Real.exp_pos _).le, ENNReal.ofReal_one]
   rwa [Measure.map_id] at this
 

@@ -134,7 +134,7 @@ theorem blackForm_hasDerivWithinAt (p : Params) (s k : ℝ) (S : Set ℝ)
     ring
   have hp : HasDerivWithinAt (fun k ↦ dpl k (variance p k)) (dm + s / (2*rootVariance p k)) S
       k := by
-    convert hm.add hr using 1 <;> try rfl
+    convert hm.add hr using 1
     funext x
     simp only [dpl_eq_rootVariance, dmi_eq_rootVariance, Pi.add_apply]
     ring

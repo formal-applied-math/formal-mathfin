@@ -203,8 +203,8 @@ theorem hasEMM_multi_of_not_hasArbitrage {N M : ℕ} [NeZero N]
   -- The attainable-payoff subspace.
   set V : Submodule ℝ (Fin N → ℝ) := Submodule.span ℝ (Set.range z) with hVdef
   -- No arbitrage ⇒ `V` misses the standard simplex.
-  have hdisj : ∀ v ∈ V, v ∉ stdSimplex ℝ (Fin N) := by
-    intro v hv hsimplex
+  have hdisj : ∀ v : Fin N → ℝ, (∀ i, 0 ≤ v i) → ∑ i, v i = 1 → v ∉ V := by
+    intro v hnn hsum hv
     rw [hVdef, Submodule.mem_span_range_iff_exists_fun] at hv
     obtain ⟨c, hc⟩ := hv
     have hpayoff : ∀ i, (∑ k, c k * z k i) = v i := by
@@ -213,12 +213,12 @@ theorem hasEMM_multi_of_not_hasArbitrage {N M : ℕ} [NeZero N]
       rw [Finset.sum_apply] at h1
       simpa only [Pi.smul_apply, smul_eq_mul] using h1
     refine absurd ⟨c, fun i ↦ ?_, ?_⟩ h
-    · rw [hpayoff i]; exact hsimplex.1 i
+    · rw [hpayoff i]; exact hnn i
     · obtain ⟨i₀, hi₀⟩ : ∃ i₀, 0 < v i₀ := by
         by_contra hcon
         simp only [not_exists, not_lt] at hcon
         have hle : ∑ i, v i ≤ 0 := Finset.sum_nonpos fun i _ ↦ hcon i
-        rw [hsimplex.2] at hle; linarith
+        rw [hsum] at hle; linarith
       exact ⟨i₀, by rw [hpayoff i₀]; exact hi₀⟩
   obtain ⟨q, hq_pos, hq_dual⟩ := exists_pos_dual_of_disjoint_stdSimplex V hdisj
   exact hasEMM_multi_of_pos_dual hq_pos fun k ↦ hq_dual (z k) (Submodule.subset_span ⟨k, rfl⟩)

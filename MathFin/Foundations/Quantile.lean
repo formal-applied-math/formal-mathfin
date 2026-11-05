@@ -151,7 +151,7 @@ theorem uniformIoo_Iic {c : ℝ} (h0 : 0 ≤ c) (h1 : c ≤ 1) :
   · rw [show Iic c ∩ Ioo 0 1 = Ioc 0 c by
       ext p; exact ⟨fun h ↦ ⟨h.2.1, h.1⟩, fun h ↦ ⟨h.2, h.1, h.2.trans_lt h1⟩⟩]
     simp
-  · rw [inter_eq_right.2 fun _ hp ↦ mem_Iic.2 hp.2.le]
+  · rw [inter_eq_right.2 (Ioo_subset_Ioc_self.trans Ioc_subset_Iic_self)]
     simp
 
 /-- **The quantile transform.** Under the uniform law on `(0, 1)`, the quantile function of a
@@ -227,7 +227,6 @@ theorem quantile_map [IsProbabilityMeasure μ] {h : ℝ → ℝ} (hmono : Monoto
     (hlsc : LowerSemicontinuous h) (hp : p ∈ Ioo 0 1) :
     quantile (μ.map h) p = h (quantile μ p) := by
   have hmeas : Measurable h := hmono.measurable
-  have : IsProbabilityMeasure (μ.map h) := Measure.isProbabilityMeasure_map hmeas.aemeasurable
   refine eq_of_forall_ge_iff fun y ↦ ?_
   rw [quantile_le_iff hp, cdf_eq_real, map_measureReal_apply hmeas measurableSet_Iic]
   constructor

@@ -109,7 +109,7 @@ theorem bs_discounted_isEMM
       (P.withDensity fun ω ↦ ENNReal.ofReal
         (Real.exp (-((μ - r) / σ) * X T ω - ((μ - r) / σ) ^ 2 * (T : ℝ) / 2))) := by
   set θ : ℝ := (μ - r) / σ with hθ
-  haveI : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
+  have : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
       (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) :=
     girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
   have hmeasX (u : ℝ≥0) : Measurable (X u) := ((hX.stronglyAdapted u).mono (𝓕.le u)).measurable
@@ -135,7 +135,7 @@ theorem bs_discounted_isEMM
     rw [← hlaw] at hg
     refine ((integrable_map_measure hg.aestronglyMeasurable
       ((hmeasX t).add_const _ |>.aemeasurable)).mp hg).congr (ae_of_all _ fun ω ↦ ?_)
-    show S_0 * Real.exp (σ * (X t ω + θ * (t : ℝ)) - σ ^ 2 * (t : ℝ) / 2) = _
+    change S_0 * Real.exp (σ * (X t ω + θ * (t : ℝ)) - σ ^ 2 * (t : ℝ) / 2) = _
     rw [show σ * (X t ω + θ * (t : ℝ)) - σ ^ 2 * (t : ℝ) / 2
       = (μ - r - σ ^ 2 / 2) * (t : ℝ) + σ * X t ω by linear_combination (t : ℝ) * hσθ]
   · exact bs_discounted_isQMartingale S_0 r μ σ hσ T hst htT hA

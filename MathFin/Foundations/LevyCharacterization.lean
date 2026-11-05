@@ -166,7 +166,7 @@ theorem martingale_stoppedProcess_exitTime (hadapt : StronglyAdapted 𝓕 M)
   have hb : |M s ω| ≤ ((n + 1 : ℕ) : ℝ) := abs_stoppedProcess_le hcont hM0 n t ω
   have hsq : M s ω ^ 2 ≤ ((n + 1 : ℕ) : ℝ) ^ 2 := sq_le_sq' (abs_le.1 hb).1 (abs_le.1 hb).2
   have ht' : (t : ℝ) ≤ T := ht
-  show ‖M s ω ^ 2 - (s : ℝ)‖ ≤ _
+  change ‖M s ω ^ 2 - (s : ℝ)‖ ≤ _
   rw [Real.norm_eq_abs, abs_le]
   have := NNReal.coe_nonneg s
   have := NNReal.coe_nonneg t

@@ -122,7 +122,7 @@ lemma walkPos_reflectAfter_le (τ : ℕ) (ω : Fin n → Bool) {k : ℕ} (hk : k
   simp only [Finset.mem_filter] at hi
   have h_i_lt_τ : i.val < τ := lt_of_lt_of_le hi.2 hk
   unfold reflectAfter
-  rw [if_pos h_i_lt_τ]
+  rw [ite_eq_left h_i_lt_τ]
 
 /-- **Position-reflection identity** (the algebraic core of André's principle).
 
@@ -178,7 +178,7 @@ lemma walkPos_reflectAfter_ge (τ : ℕ) (ω : Fin n → Bool) {k : ℕ} (hτk :
     intro i hi
     simp only [Pτ, Finset.mem_filter] at hi
     unfold reflectAfter
-    rw [if_pos hi.2]
+    rw [ite_eq_left hi.2]
   have h_suffix :
       (∑ i ∈ Pτk, walkStep (reflectAfter τ ω i)) = -∑ i ∈ Pτk, walkStep (ω i) := by
     rw [← Finset.sum_neg_distrib]
@@ -186,7 +186,7 @@ lemma walkPos_reflectAfter_ge (τ : ℕ) (ω : Fin n → Bool) {k : ℕ} (hτk :
     intro i hi
     simp only [Pτk, Finset.mem_filter] at hi
     unfold reflectAfter
-    rw [if_neg (not_lt.mpr hi.2.1), walkStep_not]
+    rw [ite_eq_right (not_lt.mpr hi.2.1), walkStep_not]
   rw [h_split_σ, h_prefix, h_suffix, h_split_ω, h_τ_eq]
   ring
 
@@ -331,14 +331,14 @@ theorem reflectAtFirstHit_involutive (a : ℤ) :
       firstHit_reflectAfter_firstHit ω a h1
     change reflectAtFirstHit a (reflectAtFirstHit a ω) = ω
     unfold reflectAtFirstHit
-    rw [dif_pos h1]
-    rw [dif_pos h2]
+    rw [dite_eq_left h1]
+    rw [dite_eq_left h2]
     rw [h_τ_eq]
     exact reflectAfter_involutive (firstHit ω a h1) ω
   · -- ω doesn't hit a; reflectAtFirstHit acts as identity.
     show reflectAtFirstHit a (reflectAtFirstHit a ω) = ω
     unfold reflectAtFirstHit
-    rw [dif_neg h1, dif_neg h1]
+    rw [dite_eq_right h1, dite_eq_right h1]
 
 /-- **Endpoint flip under reflection at first hit**: if `ω` hits `a` and ends
 at `b`, then `reflectAtFirstHit a ω` ends at `2a − b`. -/
@@ -346,7 +346,7 @@ theorem walkPos_reflectAtFirstHit_endpoint (ω : Fin n → Bool) (a b : ℤ)
     (h : HitsLevel a ω) (h_end : walkPos ω n = b) :
     walkPos (reflectAtFirstHit a ω) n = 2 * a - b := by
   unfold reflectAtFirstHit
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact walkPos_reflectAfter_endpoint (firstHit ω a h) ω (firstHit_le ω a h)
     a b (walkPos_firstHit ω a h) h_end
 
@@ -484,7 +484,7 @@ noncomputable def reflectionPrincipleEquiv (a b : ℤ) :
        constructor
        · -- Reflected hits a.
          unfold reflectAtFirstHit
-         rw [dif_pos ω.property.1]
+         rw [dite_eq_left ω.property.1]
          exact HitsLevel.reflectAfter_firstHit ω.val a ω.property.1
        · exact walkPos_reflectAtFirstHit_endpoint ω.val a b ω.property.1 ω.property.2⟩
   invFun ω :=
@@ -492,7 +492,7 @@ noncomputable def reflectionPrincipleEquiv (a b : ℤ) :
      by
        constructor
        · unfold reflectAtFirstHit
-         rw [dif_pos ω.property.1]
+         rw [dite_eq_left ω.property.1]
          exact HitsLevel.reflectAfter_firstHit ω.val a ω.property.1
        · -- Reflected ends at 2a - (2a - b) = b.
          have h := walkPos_reflectAtFirstHit_endpoint ω.val a (2 * a - b)
@@ -546,23 +546,23 @@ noncomputable def firstHit? (ω : Fin n → Bool) (a : ℤ) : Option ℕ :=
 
 lemma firstHit?_eq_some_of_hitsLevel (ω : Fin n → Bool) (a : ℤ)
     (h : HitsLevel a ω) : firstHit? ω a = some (firstHit ω a h) := by
-  unfold firstHit?; rw [dif_pos h]
+  unfold firstHit?; rw [dite_eq_left h]
 
 lemma firstHit?_eq_none_iff_not_hitsLevel (ω : Fin n → Bool) (a : ℤ) :
     firstHit? ω a = none ↔ ¬ HitsLevel a ω := by
   refine ⟨fun h h_hit ↦ ?_, fun h_not_hit ↦ ?_⟩
   · unfold firstHit? at h
-    rw [dif_pos h_hit] at h
+    rw [dite_eq_left h_hit] at h
     exact Option.some_ne_none _ h
-  · unfold firstHit?; exact dif_neg h_not_hit
+  · unfold firstHit?; exact dite_eq_right h_not_hit
 
 lemma firstHit?_isSome_iff (ω : Fin n → Bool) (a : ℤ) :
     (firstHit? ω a).isSome ↔ HitsLevel a ω := by
   refine ⟨fun h ↦ ?_, fun h_hit ↦ ?_⟩
   · by_contra h_not_hit
     unfold firstHit? at h
-    rw [dif_neg h_not_hit] at h
+    rw [dite_eq_right h_not_hit] at h
     exact Bool.false_ne_true h
-  · unfold firstHit?; rw [dif_pos h_hit]; rfl
+  · unfold firstHit?; rw [dite_eq_left h_hit]; rfl
 
 end MathFin

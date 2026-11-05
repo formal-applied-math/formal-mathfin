@@ -104,7 +104,7 @@ theorem canonicalOptimalGridRule_payoffs_tendsto {k h : ℝ} (hk : 0 ≤ k) (x t
       (canonicalOptimalGridTime k h x t n) ω ∂completedMeasure gaussianLimit)
       atTop (𝓝 (canonicalPrice k h x t)) := by
   let μ := completedMeasure gaussianLimit
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   have hh := optimalGridRule_payoffs_tendsto (P := μ) (𝓕 := brownianUsualFiltration)
     (K := 1) (r := k) (q := h) (σ := Real.sqrt 2) (S := Real.exp x) (T := t.toNNReal)
     brownian_completed_measurable brownianUsual_adapted continuous_brownian

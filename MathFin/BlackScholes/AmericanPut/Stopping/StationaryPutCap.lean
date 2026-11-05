@@ -120,9 +120,9 @@ theorem stationaryPutCap_upper_support {k h m d : ℝ} (hk : 0 ≤ k)
         0 ≤ pricingOperator k h F z := by
   by_cases hx : z.1 < d
   · refine ⟨fun w => (1-Real.exp w.1)+ε,by fun_prop,?_,?_,?_⟩
-    · simp only [stationaryPutCap,if_pos hx.le]
+    · simp only [stationaryPutCap,ite_eq_left hx.le]
     · filter_upwards [(isOpen_lt continuous_fst continuous_const).mem_nhds hx] with w hw
-      simp only [stationaryPutCap,if_pos (show w.1 ≤ d from hw.le),le_refl]
+      simp only [stationaryPutCap,ite_eq_left (show w.1 ≤ d from hw.le),le_refl]
     · rw [pricingOperator_add_constant,intrinsic_pricingOperator]
       have he : Real.exp z.1 ≤ 1 := Real.exp_le_one_iff.mpr (hx.trans hd0).le
       have hhx := mul_le_mul_of_nonneg_left he hh
@@ -132,8 +132,8 @@ theorem stationaryPutCap_upper_support {k h m d : ℝ} (hk : 0 ≤ k)
       fun_prop
     · by_cases he : z.1 = d
       · simp only [stationaryPutCap,he,le_refl,ite_true,stationaryPutTail_at_join]
-      · simp only
-          [stationaryPutCap,if_neg (not_le.mpr (lt_of_le_of_ne (le_of_not_gt hx) (Ne.symm he)))]
+      · simp only [stationaryPutCap,
+          ite_eq_right (not_le.mpr (lt_of_le_of_ne (le_of_not_gt hx) (Ne.symm he)))]
     · exact Filter.Eventually.of_forall (fun w => by
         dsimp only
         linarith [stationaryPutCap_le_tail hm hd w.1])

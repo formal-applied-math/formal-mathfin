@@ -125,6 +125,9 @@ noncomputable def poissonMeasureENN (μ : ℝ≥0) : Measure ℝ≥0∞ :=
 noncomputable def referenceIntensity (ν : Measure E) : Measure (ℝ × E) :=
   (volume.restrict (Set.Ici (0 : ℝ))).prod ν
 
+instance (ν : Measure E) [SigmaFinite ν] : SigmaFinite (referenceIntensity ν) :=
+  inferInstanceAs (SigmaFinite ((volume.restrict (Set.Ici (0 : ℝ))).prod ν))
+
 /-- **Poisson random measure on `[0,∞) × E`** with σ-finite mark-intensity `ν`, over a
 probability space `(Ω, P)`. Its fields are the Applebaum (Def. 2.3.1) properties: each
 `N(·, B)` is `Poisson(ν̂(B))`-distributed (`ν̂ = Leb[0,∞) ⊗ ν`), and `N` scatters

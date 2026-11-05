@@ -132,7 +132,7 @@ lemma mem_lpMeas_of_stepIndicator (hm : m ≤ mΩ)
     (Φ : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) T)) →L[ℝ] Lp ℝ 2 μ)
     (h : ∀ i : StepIndex T, Φ (stepIndicatorLp T i) ∈ lpMeas ℝ ℝ m 2 μ)
     (f : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) T))) : Φ f ∈ lpMeas ℝ ℝ m 2 μ := by
-  haveI : Fact (m ≤ mΩ) := ⟨hm⟩
+  have : Fact (m ≤ mΩ) := ⟨hm⟩
   have hclosed : IsClosed (lpMeas ℝ ℝ m 2 μ : Set (Lp ℝ 2 μ)) :=
     (completeSpace_coe_iff_isComplete.1 (inferInstance : CompleteSpace (lpMeas ℝ ℝ m 2 μ))).isClosed
   refine (stepAssembly_denseRange T).induction_on (p := fun f ↦ Φ f ∈ lpMeas ℝ ℝ m 2 μ) f
@@ -174,7 +174,7 @@ abbrev postσ (B : ℝ≥0 → Ω → ℝ) (t : ℝ≥0) : MeasurableSpace Ω :=
   MeasurableSpace.comap (fun ω (s : ℝ≥0) ↦ B (t + s) ω - B t ω) inferInstance
 
 lemma postσ_le (hBm : ∀ s, Measurable (B s)) (t : ℝ≥0) : postσ B t ≤ mΩ :=
-  Measurable.comap_le (measurable_pi_lambda _ fun _ ↦ (hBm _).sub (hBm _))
+  Measurable.comap_le (.of_eval fun _ ↦ (hBm _).sub (hBm _))
 
 lemma stronglyMeasurable_postσ (s : ℝ≥0) :
     StronglyMeasurable[postσ B t] fun ω ↦ B (t + s) ω - B t ω :=
@@ -221,7 +221,8 @@ lemma integral_sq_Ioc_split (htT : t ≤ T) (f : Lp ℝ 2 (volume.restrict (Set.
     (Lp.memLp f).integrable_sq
   have ht : (t : ℝ) ≤ T := NNReal.coe_le_coe.2 htT
   have h := setIntegral_union (μ := volume) (f := fun s ↦ f s ^ 2)
-    (Set.disjoint_left.2 fun x hx hy ↦ absurd hx.2 (not_le.2 hy.1)) measurableSet_Ioc
+    (Set.disjoint_left.2 fun x (hx : x ∈ Set.Ioc (0 : ℝ) t) (hy : x ∈ Set.Ioc (t : ℝ) T) ↦
+      absurd hx.2 (not_le.2 hy.1)) measurableSet_Ioc
     (hsq.mono_measure (Measure.restrict_mono (Set.Ioc_subset_Ioc_right ht) le_rfl))
     (hsq.mono_measure (Measure.restrict_mono (Set.Ioc_subset_Ioc_left t.coe_nonneg) le_rfl))
   rw [Set.Ioc_union_Ioc_eq_Ioc t.coe_nonneg ht] at h
@@ -275,7 +276,8 @@ lemma integral_exp_neg_future (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Measur
     congr 1
     ring
   have hWint : Integrable (fun ω ↦ Real.exp (-(c * wienerIntegralLp B hB T f ω))) μ :=
-    (integrable_exp_mul_of_hasLaw (wienerIntegralLp_hasLaw_gaussian hB T f) (-c)).congr
+    ((wienerIntegralLp_hasLaw_gaussian hB T f).integrable_fun_comp
+      (integrable_exp_mul_gaussianReal (-c))).congr
       (ae_of_all _ fun ω ↦ by simp only [neg_mul])
   have hint : Integrable (E1 * E2) μ := hWint.congr hprod
   have hindep : Indep (postσ B t)
@@ -373,8 +375,9 @@ theorem condExp_exp_wienerIntegralLp (hB : IsPreBrownianReal B μ)
     rw [h1, Pi.sub_apply, h2, h3]
     rfl
   have hE1int : Integrable E1 μ :=
-    ((integrable_exp_mul_of_hasLaw (wienerIntegralLp_hasLaw_gaussian hB t
-      (b • h - c • kernelRestrict htT f)) 1).const_mul (Real.exp a)).congr <| by
+    (((wienerIntegralLp_hasLaw_gaussian hB t
+      (b • h - c • kernelRestrict htT f)).integrable_fun_comp
+        (integrable_exp_mul_gaussianReal 1)).const_mul (Real.exp a)).congr <| by
       filter_upwards [hlin, hPP', hHH'] with ω h1 h2 h3
       dsimp only [E1]
       rw [← Real.exp_add, one_mul, h1, ← h2, ← h3]

@@ -66,7 +66,7 @@ private lemma qv_bound (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable
           - σ ^ 2 * (T : ℝ)) ^ 2 ∂μ
       ≤ (3 * (Ca ^ 2 * (T : ℝ) ^ 2) ^ 2 + 12 * σ ^ 2 * Ca ^ 2 * (T : ℝ) ^ 3
           + 6 * σ ^ 4 * (T : ℝ) ^ 2) / n := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hn1 : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
   have hnR : (0 : ℝ) < (n : ℝ) := by linarith
   have hmono : Monotone (unifPart T n) := unifPart_mono T n
@@ -328,7 +328,7 @@ theorem tendsto_qv_ito_process (hB : IsPreBrownianReal B μ)
         (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω) ^ 2
           - σ ^ 2 * (T : ℝ)) ^ 2 ∂μ)
       atTop (𝓝 0) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   refine squeeze_zero'
     (g := fun n : ℕ ↦ (3 * (Ca ^ 2 * (T : ℝ) ^ 2) ^ 2
       + 12 * σ ^ 2 * Ca ^ 2 * (T : ℝ) ^ 3 + 6 * σ ^ 4 * (T : ℝ) ^ 2) / n)

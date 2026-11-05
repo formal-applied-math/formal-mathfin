@@ -67,7 +67,7 @@ lemma setIntegral_uniformIoo_Iic (f : ℝ → ℝ) {t : ℝ} (h0 : 0 ≤ t) (h1 
   rcases h1.lt_or_eq with h1 | rfl
   · rw [show Iic t ∩ Ioo 0 1 = Ioc 0 t by
       ext p; exact ⟨fun h ↦ ⟨h.2.1, h.1⟩, fun h ↦ ⟨h.2, h.1, h.2.trans_lt h1⟩⟩]
-  · rw [inter_eq_right.2 fun _ hp ↦ mem_Iic.2 hp.2.le]
+  · rw [inter_eq_right.2 (Ioo_subset_Ioc_self.trans Ioc_subset_Iic_self)]
     exact setIntegral_congr_set Ioo_ae_eq_Ioc
 
 /-! ### Spearman's rho of a bivariate copula -/
@@ -200,7 +200,7 @@ theorem fgmCopula_rect (hθ : |θ| ≤ 1) {A B : Set ℝ} (hA : MeasurableSet A)
     have hb (i : Fin 2) : |1 - 2 * v i| ≤ 1 :=
       abs_le.2 ⟨by linarith [(hv i).2], by linarith [(hv i).1]⟩
     rw [abs_mul]
-    refine mul_le_one₀ ?_ (abs_nonneg _) ?_
+    refine (mul_le_of_le_one_left (abs_nonneg _) ?_).trans ?_
     · by_cases h0 : v 0 ∈ A
       · simpa [h0] using hb 0
       · simp [h0]
@@ -329,16 +329,16 @@ theorem spearmanRho_fgmCopula (hθ : |θ| ≤ 1) : spearmanRho (fgmCopula θ) = 
   have hint1 : Integrable (fun v : Fin 2 → ℝ ↦ v 0 * v 1) (independenceCopula (Fin 2)) :=
     integrable_independenceCopula_two (by fun_prop) 1 fun v hv ↦ by
       rw [abs_mul, abs_of_pos (hv 0).1, abs_of_pos (hv 1).1]
-      exact mul_le_one₀ (hv 0).2.le (hv 1).1.le (hv 1).2.le
+      exact (mul_le_of_le_one_left (hv 1).1.le (hv 0).2.le).trans (hv 1).2.le
   have hint2 : Integrable (fun v : Fin 2 → ℝ ↦ (v 0 * (1 - 2 * v 0)) * (v 1 * (1 - 2 * v 1)))
       (independenceCopula (Fin 2)) :=
     integrable_independenceCopula_two (by fun_prop) 1 fun v hv ↦ by
       have hb (i : Fin 2) : |v i * (1 - 2 * v i)| ≤ 1 := by
         rw [abs_mul, abs_of_pos (hv i).1]
-        exact mul_le_one₀ (hv i).2.le (abs_nonneg _)
+        exact (mul_le_of_le_one_left (abs_nonneg _) (hv i).2.le).trans
           (abs_le.2 ⟨by linarith [(hv i).2], by linarith [(hv i).1]⟩)
       rw [abs_mul]
-      exact mul_le_one₀ (hb 0) (abs_nonneg _) (hb 1)
+      exact (mul_le_of_le_one_left (abs_nonneg _) (hb 0)).trans (hb 1)
   have hx : ∫ x in (0 : ℝ)..1, x = 1 / 2 := by rw [integral_id]; norm_num
   have hx2 : ∫ x in (0 : ℝ)..1, x * (1 - 2 * x) = -1 / 6 := by
     rw [show (fun x : ℝ ↦ x * (1 - 2 * x)) = fun x ↦ x - 2 * x ^ 2 by ext x; ring,

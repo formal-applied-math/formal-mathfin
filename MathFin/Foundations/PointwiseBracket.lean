@@ -124,7 +124,7 @@ omit [IsProbabilityMeasure μ] in
 theorem condExp_increment_eq_zero (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {u v : ℝ≥0} (huv : u ≤ v) :
     (μ[fun ω ↦ B v ω - B u ω | natFiltration hBmeas u]) =ᵐ[μ] fun _ ↦ (0 : ℝ) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hL : HasLaw (B v - B u) (gaussianReal 0 (v - u)) μ := hasLaw_increment hB huv
   have hint : ∫ ω, (B v ω - B u ω) ∂μ = 0 := by
     have h_eq : (fun ω ↦ B v ω - B u ω) = (B v - B u : Ω → ℝ) := rfl
@@ -138,7 +138,7 @@ theorem condExp_increment_sq (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {u v : ℝ≥0} (huv : u ≤ v) :
     (μ[fun ω ↦ (B v ω - B u ω) ^ 2 | natFiltration hBmeas u])
       =ᵐ[μ] fun _ ↦ (v : ℝ) - u := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hL : HasLaw (B v - B u) (gaussianReal 0 (v - u)) μ := hasLaw_increment hB huv
   have hint : ∫ ω, (B v ω - B u ω) ^ 2 ∂μ = (v : ℝ) - u := by
     have h_change : ∫ ω, (B v ω - B u ω) ^ 2 ∂μ
@@ -150,15 +150,11 @@ theorem condExp_increment_sq (hB : IsPreBrownianReal B μ)
 
 omit [IsProbabilityMeasure μ] in
 /-- A Brownian increment lies in `L²(μ)`. -/
-private theorem memLp_increment (hB : IsPreBrownianReal B μ)
-    (hBmeas : ∀ t, Measurable (B t)) {u v : ℝ≥0} (huv : u ≤ v) :
+private theorem memLp_increment (hB : IsPreBrownianReal B μ) {u v : ℝ≥0} (huv : u ≤ v) :
     MemLp (fun ω ↦ B v ω - B u ω) 2 μ := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hL : HasLaw (B v - B u) (gaussianReal 0 (v - u)) μ := hasLaw_increment hB huv
-  have hd : Measurable (fun ω ↦ B v ω - B u ω) := (hBmeas v).sub (hBmeas u)
-  rw [show (fun ω ↦ B v ω - B u ω) = (B v - B u : Ω → ℝ) from rfl]
-  exact ((hL.map_eq ▸ memLp_id_gaussianReal 2 :
-    MemLp (id : ℝ → ℝ) 2 (Measure.map (B v - B u) μ))).comp_of_map hd.aemeasurable
+  exact hL.memLp (memLp_id_gaussianReal 2)
 
 omit [IsProbabilityMeasure μ] in
 /-- **Kernel 3 (adapted diagonal)**: an `𝓕_c`-measurable coefficient times a squared
@@ -175,7 +171,7 @@ theorem condExp_adapted_mul_increment_sq (hB : IsPreBrownianReal B μ)
     (μ[fun ω ↦ χ ω * (B d ω - B c ω) ^ 2 | natFiltration hBmeas a])
       =ᵐ[μ] fun ω ↦ ((d : ℝ) - c) * (μ[χ | natFiltration hBmeas a]) ω := by
   have hsq_int : Integrable (fun ω ↦ (B d ω - B c ω) ^ 2) μ :=
-    (memLp_increment hB hBmeas hcd).integrable_sq
+    (memLp_increment hB hcd).integrable_sq
   have hinner : (μ[fun ω ↦ χ ω * (B d ω - B c ω) ^ 2 | natFiltration hBmeas c])
       =ᵐ[μ] fun ω ↦ χ ω * ((d : ℝ) - c) :=
     (condExp_mul_of_stronglyMeasurable_left hχm hint hsq_int).trans
@@ -208,7 +204,7 @@ theorem condExp_adapted_mul_increment_zero (hB : IsPreBrownianReal B μ)
   have hinner : (μ[fun ω ↦ X ω * (B v ω - B u ω) | natFiltration hBmeas u])
       =ᵐ[μ] fun _ ↦ (0 : ℝ) :=
     (condExp_mul_of_stronglyMeasurable_left hXm hint
-      ((memLp_increment hB hBmeas huv).integrable one_le_two)).trans
+      ((memLp_increment hB huv).integrable one_le_two)).trans
       (by filter_upwards [condExp_increment_eq_zero hB hBmeas huv] with ω hω
           show (X * μ[fun ω ↦ B v ω - B u ω | natFiltration hBmeas u]) ω = 0
           rw [Pi.mul_apply, hω, mul_zero])
@@ -274,7 +270,8 @@ theorem bandGen_support {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     change ⇑(simpleAssembly_T (μ := μ) T hBmeas (stepSP hBmeas hcd hdT hZm hZb)) p = 0
     rw [hcoe]
     show (Set.Ioc c d).indicator (fun _ ↦ (1 : ℝ)) p.1 * Z p.2 = 0
-    rw [Set.indicator_of_notMem (fun hc ↦ absurd hc.1 (not_lt.mpr hpc)), zero_mul]
+    rw [Set.indicator_of_notMem
+      (show p.1 ∉ Set.Ioc c d from fun hc ↦ absurd hc.1 (not_lt.mpr hpc)), zero_mul]
 
 /-- Band generators vanish after their right endpoint — the companion of `bandGen_support`, and
 what says the elementary integral has finished by `d`. -/
@@ -288,7 +285,8 @@ theorem bandGen_support_after {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
   change ⇑(simpleAssembly_T (μ := μ) T hBmeas (stepSP hBmeas hcd hdT hZm hZb)) p = 0
   rw [hcoe]
   show (Set.Ioc c d).indicator (fun _ ↦ (1 : ℝ)) p.1 * Z p.2 = 0
-  rw [Set.indicator_of_notMem (fun hc ↦ absurd hc.2 (not_le.mpr hpd)), zero_mul]
+  rw [Set.indicator_of_notMem
+    (show p.1 ∉ Set.Ioc c d from fun hc ↦ absurd hc.2 (not_le.mpr hpd)), zero_mul]
 
 /-- **The band generator's integral is the explicit increment**: integrating
 `Z·1_{(c,d]} dB` over `[0,T]` returns `Z·(B_d − B_c)` — the Riemann–Stieltjes term. -/
@@ -323,18 +321,6 @@ private noncomputable def bandSq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)
   (Set.Ioc a b ×ˢ F).indicator fun z ↦ ((φ : ℝ≥0 × Ω → ℝ) z) ^ 2
 
 omit [IsProbabilityMeasure μ] in
-/-- A predictable `L²` class is `L²` for the *untrimmed* product measure: `eLpNorm` does not
-see the trim on a strongly predictable function. -/
-private theorem memLp_prod (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    MemLp (⇑φ) 2 ((timeMeasure_T T).prod μ) :=
-  ⟨((Lp.stronglyMeasurable φ).mono
-      (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod).aestronglyMeasurable, by
-    rw [← eLpNorm_trim (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod
-      (Lp.stronglyMeasurable φ)]
-    exact (Lp.memLp φ).2⟩
-
-omit [IsProbabilityMeasure μ] in
 /-- The ω-section of `bandSq` at a sample point of `F`: the band indicator of the squared time
 section. Every section statement below is this identity plus a case on `ω ∈ F`. -/
 private theorem bandSq_section (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
@@ -345,7 +331,8 @@ private theorem bandSq_section (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   by_cases hu : u ∈ Set.Ioc a b
   · rw [bandSq, Set.indicator_of_mem (show (u, ω) ∈ Set.Ioc a b ×ˢ F from ⟨hu, hω⟩),
       Set.indicator_of_mem hu]
-  · rw [bandSq, Set.indicator_of_notMem (fun h ↦ hu h.1), Set.indicator_of_notMem hu]
+  · rw [bandSq, Set.indicator_of_notMem (show (u, ω) ∉ Set.Ioc a b ×ˢ F from fun h ↦ hu h.1),
+      Set.indicator_of_notMem hu]
 
 /-- The band `(a,b]` sits inside the horizon, so the time measure may be restricted to it
 directly. The one place `b ≤ T` is used. -/
@@ -367,7 +354,7 @@ private theorem integral_section_bandSq (T : ℝ≥0) (hBmeas : ∀ t, Measurabl
     simp only [bandSq_section T hBmeas φ a b hω]
     rw [integral_indicator measurableSet_Ioc, restrict_timeMeasure_T T hbT, bracketRep]
   · have hpt : ∀ u : ℝ≥0, bandSq (μ := μ) T hBmeas φ a b F (u, ω) = 0 := fun u ↦ by
-      rw [bandSq, Set.indicator_of_notMem (fun h ↦ hω h.2)]
+      rw [bandSq, Set.indicator_of_notMem (show (u, ω) ∉ Set.Ioc a b ×ˢ F from fun h ↦ hω h.2)]
     simp only [hpt, integral_zero, Set.indicator_of_notMem hω]
 
 omit [IsProbabilityMeasure μ] in
@@ -376,7 +363,7 @@ private theorem integrable_bandSq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (a b : ℝ≥0) {F : Set Ω}
     (hF : MeasurableSet[natFiltration hBmeas a] F) :
     Integrable (bandSq (μ := μ) T hBmeas φ a b F) ((timeMeasure_T T).prod μ) :=
-  (memLp_prod T hBmeas φ).integrable_sq.indicator
+  (memLp_prod_of_lp T hBmeas φ).integrable_sq.indicator
     ((natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod _
       (MeasureTheory.measurableSet_predictable_Ioc_prod a b hF))
 
@@ -426,7 +413,8 @@ theorem bracketRep_add (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   simp only [bracketRep]
   rw [← Set.Ioc_union_Ioc_eq_Ioc hab hbc]
   exact (setIntegral_union
-    (Set.disjoint_left.mpr fun u hu1 hu2 ↦ absurd hu2.1 (not_lt.mpr hu1.2)) measurableSet_Ioc
+    (Set.disjoint_left.mpr fun u (hu1 : u ∈ Set.Ioc a b) (hu2 : u ∈ Set.Ioc b c) ↦
+      absurd hu2.1 (not_lt.mpr hu1.2)) measurableSet_Ioc
     (hsec.mono_set (Set.Ioc_subset_Ioc_right hbc))
     (hsec.mono_set (Set.Ioc_subset_Ioc_left hab))).symm
 
@@ -637,7 +625,7 @@ theorem condExp_bandGen_second_moment (hB : IsPreBrownianReal B μ) (T : ℝ≥0
       (Eventually.of_forall fun ω ↦ by
         simpa [Real.norm_eq_abs] using hZb ω) : MemLp Z 2 μ).integrable_sq
   have hint : Integrable (fun ω ↦ (Z ω * (B d ω - B c ω)) ^ 2) μ :=
-    (MemLp.mul (hf := hZinf) (hφ := memLp_increment hB hBmeas hcd)).integrable_sq.congr
+    (MemLp.mul (hf := hZinf) (hφ := memLp_increment hB hcd)).integrable_sq.congr
       (Filter.Eventually.of_forall fun ω ↦ by
         change (((fun ω ↦ B d ω - B c ω) * Z) ω) ^ 2 = (Z ω * (B d ω - B c ω)) ^ 2
         rw [Pi.mul_apply, mul_comm])

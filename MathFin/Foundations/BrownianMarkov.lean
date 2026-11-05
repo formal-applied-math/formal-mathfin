@@ -109,7 +109,7 @@ theorem condExp_shift_eq_integral_gaussianLimit (h : IsPreBrownianReal X P)
       =ᵐ[P] fun ω ↦ ∫ x, g (Y ω, x) ∂gaussianLimit := by
   have : IsProbabilityMeasure P := h.isGaussianProcess.isProbabilityMeasure
   have hshift : Measurable fun ω (t : ℝ≥0) ↦ X (t₀ + t) ω - X t₀ ω :=
-    measurable_pi_lambda _ fun t ↦ (hX _).sub (hX _)
+    .of_eval fun t ↦ (hX _).sub (hX _)
   have hlaw : P.map (fun ω (t : ℝ≥0) ↦ X (t₀ + t) ω - X t₀ ω) = gaussianLimit :=
     ((h.shift t₀).hasLaw_gaussianLimit hshift.aemeasurable).map_eq
   rw [← hlaw]

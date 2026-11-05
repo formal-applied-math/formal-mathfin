@@ -93,7 +93,7 @@ private theorem bandIntegral_slice (hBmeas : ∀ t, Measurable (B t)) (ψ : ℝ�
       (ae_of_all _ fun z ↦ by rw [Real.norm_eq_abs]; exact hψbdd z.1 z.2)).integrable one_le_two
   have hUVamb : MeasurableSet (Set.Ioc u v ×ˢ (Set.univ : Set Ω)) :=
     MeasurableSet.prod measurableSet_Ioc MeasurableSet.univ
-  haveI : IsFiniteMeasure (ItoIntegralL2.timeMeasure.restrict (Set.Ioc u v)) := by
+  have : IsFiniteMeasure (ItoIntegralL2.timeMeasure.restrict (Set.Ioc u v)) := by
     refine ⟨?_⟩
     rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
       ItoIntegralL2.timeMeasure_Ioc]
@@ -152,7 +152,7 @@ private theorem bandIntegral_slice (hBmeas : ∀ t, Measurable (B t)) (ψ : ℝ�
           ∂(ItoIntegralL2.timeMeasure.prod μ) := integral_indicator hUVamb
     _ = ∫ z, (Set.Ioc u v ×ˢ (Set.univ : Set Ω)).indicator (Function.uncurry ψ) z
           ∂((ItoIntegralL2.timeMeasure.restrict (Set.Ioc u v)).prod μ) := by
-        haveI : SFinite ItoIntegralL2.timeMeasure := inferInstance
+        have : SFinite ItoIntegralL2.timeMeasure := inferInstance
         have hmeas : ((ItoIntegralL2.timeMeasure.restrict (Set.Ioc u v)).prod μ)
             = (ItoIntegralL2.timeMeasure.prod μ).restrict
               (Set.Ioc u v ×ˢ (Set.univ : Set Ω)) := by
@@ -266,12 +266,9 @@ include hB hBmeas hδadap hδcont hδbdd hMeq
 
 /-- The Itô-integral process `M` is square-integrable at every time (its values are
 a.e.-equal to `L²` CLM values). -/
-theorem memLp_M (t : ℝ≥0) : MemLp (M t) 2 μ := by
-  have h := Lp.memLp (itoProcessCLM hB T t hBmeas
-    (processToLp T hBmeas hδadap hδcont hδbdd))
-  refine ⟨h.1.congr (hMeq t).symm, ?_⟩
-  rw [eLpNorm_congr_ae (hMeq t)]
-  exact h.2
+theorem memLp_M (t : ℝ≥0) : MemLp (M t) 2 μ :=
+  (Lp.memLp (itoProcessCLM hB T t hBmeas (processToLp T hBmeas hδadap hδcont hδbdd))).ae_eq
+    (hMeq t).symm
 
 include hMadap
 

@@ -129,7 +129,7 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
         ((∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 4) ∂μ
       ≤ ENNReal.ofReal
         (3 * (D ^ 2 * ∑ k ∈ Finset.range N, ((s (k + 1) : ℝ) - s k)) ^ 2) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   induction N with
   | zero => simp
   | succ N ihN =>
@@ -255,7 +255,7 @@ private theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ 
     have hZ4mem : MemLp (fun ω ↦ ∑ k ∈ Finset.range N,
         φ k ω * (B (s (k + 1)) ω - B (s k) ω)) 4 μ :=
       memLp_finsetSum _ fun k _ ↦ hY4mem k
-    have hZaesm := hZ4mem.1
+    have hZaesm := hZ4mem.aestronglyMeasurable
     have hintZ4 : Integrable (fun ω ↦ (∑ k ∈ Finset.range N,
         φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 4) μ := by
       have h := hZ4mem.integrable_norm_pow (by norm_num : (4 : ℕ) ≠ 0)
@@ -805,7 +805,7 @@ private theorem trueIncr_pow4_lintegral_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk 
           exact add_le_add h1 h2
       _ = _ := rfl
   -- convergence in measure, a.e. subsequence, Fatou
-  haveI h2inst : Fact (1 ≤ 2) := ⟨by norm_num⟩
+  have h2inst : Fact (1 ≤ 2) := ⟨by norm_num⟩
   have hLp : Tendsto (fun p : ℕ ↦
       (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
           (deltaStepLp hBmeas hδadap hδbdd (n * 2 ^ p))
@@ -1025,7 +1025,7 @@ theorem trueIncr_pow3_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk : k < n) :
   -- `L²` membership of `X²`: from the `L⁴` integrability via `integrable_norm_rpow_iff`
   have hΔsq2 : MemLp (fun ω ↦
       (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2) 2 μ :=
-    (integrable_norm_rpow_iff (hΔ2.1.pow 2) (by norm_num) (by simp)).mp
+    (integrable_norm_rpow_iff (hΔ2.aestronglyMeasurable.pow 2) (by norm_num) (by simp)).mp
       (hint4M.congr (Eventually.of_forall fun ω ↦
         show (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 4
           = ‖(M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2‖

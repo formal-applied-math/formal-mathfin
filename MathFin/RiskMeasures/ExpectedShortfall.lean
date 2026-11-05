@@ -78,7 +78,6 @@ variable [IsProbabilityMeasure P]
 `E[(X − c)⁺] = ∫₀¹ (VaR_u(X) − c)⁺ du`. -/
 lemma integral_max_sub_eq_setIntegral_valueAtRisk (hX : AEMeasurable X P) (c : ℝ) :
     ∫ ω, max (X ω - c) 0 ∂P = ∫ u in Ioo 0 1, max (valueAtRisk X P u - c) 0 := by
-  have := Measure.isProbabilityMeasure_map hX
   calc ∫ ω, max (X ω - c) 0 ∂P = ∫ x, max (x - c) 0 ∂P.map X :=
         (integral_map (f := fun x ↦ max (x - c) 0) hX (by fun_prop)).symm
     _ = ∫ u in Ioo 0 1, max (valueAtRisk X P u - c) 0 :=
@@ -218,7 +217,6 @@ theorem expectedShortfall_eq_acerbiTasche (hX : Integrable X P) (hα : α ∈ Io
 `P(X > VaR_α(X)) = 1 − α`. -/
 theorem measureReal_valueAtRisk_lt (hX : AEMeasurable X P) (hF : Continuous (cdf (P.map X)))
     (hα : α ∈ Ioo 0 1) : P.real {ω | valueAtRisk X P α < X ω} = 1 - α := by
-  have := Measure.isProbabilityMeasure_map hX
   rw [show {ω | valueAtRisk X P α < X ω} = X ⁻¹' (Iic (valueAtRisk X P α))ᶜ by ext; simp,
     ← map_measureReal_apply_of_aemeasurable hX measurableSet_Iic.compl,
     probReal_compl_eq_one_sub measurableSet_Iic, ← cdf_eq_real, valueAtRisk, cdf_quantile hF hα]
@@ -277,7 +275,6 @@ theorem exists_density_integral_mul_eq_expectedShortfall (hX : Integrable X P)
     ∃ g : ℝ → ℝ, Measurable g ∧ (∀ x, 0 ≤ g x) ∧ (∀ x, g x ≤ (1 - α)⁻¹) ∧
       ∫ ω, g (X ω) ∂P = 1 ∧ ∫ ω, g (X ω) * X ω ∂P = expectedShortfall X P α := by
   have h1α : 0 < 1 - α := sub_pos.2 hα.2
-  have := Measure.isProbabilityMeasure_map hX.aemeasurable
   set q := valueAtRisk X P α
   -- the tail above `q` has mass at most `1 − α`, and with the atom at least `1 − α`
   have ha : (P.map X).real (Ioi q) ≤ 1 - α := by

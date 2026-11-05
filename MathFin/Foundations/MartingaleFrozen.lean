@@ -50,7 +50,7 @@ theorem martingale_min_iff [IsFiniteMeasure μ] :
         (h.condExp_ae_eq hst).symm⟩, fun ⟨hadapt, hint, hmart⟩ ↦
     ⟨fun s ↦ (hadapt _ (min_le_right _ _)).mono (𝓕.mono (min_le_left _ _)),
       fun i j hij ↦ ?_⟩⟩
-  show μ[S (min j T) | 𝓕 i] =ᵐ[μ] S (min i T)
+  change μ[S (min j T) | 𝓕 i] =ᵐ[μ] S (min i T)
   rcases le_or_gt j T with hj | hj
   · simpa only [min_eq_left hj, min_eq_left (hij.trans hj)] using (hmart hij hj).symm
   rw [min_eq_right hj.le]

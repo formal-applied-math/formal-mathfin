@@ -499,8 +499,8 @@ theorem weakForwardUniqueConst {ρ η : ℝ → Measure ℝ} {b v T : ℝ}
     (hstart : ρ 0 = η 0) :
     ∀ s ∈ Set.Ioc (0 : ℝ) T, ρ s = η s := by
   intro s hs
-  haveI := hρ.1 s
-  haveI := hη.1 s
+  have := hρ.1 s
+  have := hη.1 s
   have hsIcc : s ∈ Set.Icc (0 : ℝ) T := ⟨hs.1.le, hs.2⟩
   refine Measure.ext_of_charFun (funext fun ξ => ?_)
   obtain ⟨hc, hsi⟩ := pairing_cos_sin_eq hρ hη hstart ξ s hsIcc

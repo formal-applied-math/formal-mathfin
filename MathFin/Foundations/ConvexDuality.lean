@@ -80,8 +80,9 @@ private lemma functional_nonneg_on_cone {ι : Type*} {C : Set (ι → ℝ)}
   have hval : f (((u - 1) / f c) • c) = u - 1 := by rw [map_smul, smul_eq_mul]; field_simp
   have hlt2 := hlb _ hmem; rw [hval] at hlt2; linarith
 
-/-- **Cone separation root.** A closed convex cone `C ⊆ (ι → ℝ)` disjoint from the standard simplex
-admits a strictly-positive functional `q` that is `≤ 0` on `C` (a separating supporting functional).
+/-- **Cone separation root.** A closed convex cone `C ⊆ (ι → ℝ)` containing no probability vector
+(no nonnegative `v` with `∑ i, v i = 1`, i.e. disjoint from the standard simplex) admits a
+strictly-positive functional `q` that is `≤ 0` on `C` (a separating supporting functional).
 The geometric heart shared by the FTAP (gains cone), the coherent-risk representation (acceptance
 cone), and superhedging (super-replication cone). Generalizes
 `exists_pos_dual_of_disjoint_stdSimplex` (subspace ⇒ two-sided `= 0`) to a cone (one-sided `≤ 0`).
@@ -90,23 +91,26 @@ theorem exists_pos_separating_of_cone_disjoint_simplex
     {ι : Type*} [Fintype ι]
     (C : Set (ι → ℝ)) (hCconv : Convex ℝ C) (hCclosed : IsClosed C)
     (hCcone : ∀ ⦃x⦄, x ∈ C → ∀ ⦃c : ℝ⦄, 0 ≤ c → c • x ∈ C)
-    (hdisj : Disjoint (stdSimplex ℝ ι) C) :
+    (hdisj : ∀ v : ι → ℝ, (∀ i, 0 ≤ v i) → ∑ i, v i = 1 → v ∉ C) :
     ∃ q : ι → ℝ, (∀ i, 0 < q i) ∧ ∀ v ∈ C, ∑ i, q i * v i ≤ 0 := by
   classical
   rcases C.eq_empty_or_nonempty with hCempty | hCne
   · exact ⟨fun _ ↦ 1, fun _ ↦ one_pos, fun w hw ↦ by rw [hCempty] at hw; simp at hw⟩
   obtain ⟨x₀, hx₀⟩ := hCne
   have h0C : (0 : ι → ℝ) ∈ C := by simpa using hCcone hx₀ (le_refl (0 : ℝ))
-  have hconvΔ : Convex ℝ (stdSimplex ℝ ι) := convex_stdSimplex ℝ ι
-  have hcompΔ : IsCompact (stdSimplex ℝ ι) := isCompact_stdSimplex ℝ ι
-  obtain ⟨f, u, v, hfu, huv, hfv⟩ :=
-    geometric_hahn_banach_compact_closed hconvΔ hcompΔ hCconv hCclosed hdisj
+  set Δ : Set (ι → ℝ) := Set.range fun w : Convexity.StdSimplex ℝ ι ↦ ⇑w.weights
+  have hconvΔ : Convex ℝ Δ := by
+    rintro _ ⟨w₁, rfl⟩ _ ⟨w₂, rfl⟩ a b ha hb hab
+    exact ⟨Convexity.convexCombPair a b ha hb hab w₁ w₂, by simp⟩
+  have hcompΔ : IsCompact Δ :=
+    isCompact_range (Convexity.StdSimplex.isEmbedding_toFun_comp_weights ℝ ι).continuous
+  obtain ⟨f, u, v, hfu, huv, hfv⟩ := geometric_hahn_banach_compact_closed hconvΔ hcompΔ hCconv
+    hCclosed (Set.disjoint_left.2 (by
+      rintro _ ⟨w, rfl⟩; exact hdisj _ w.weights_nonneg w.total_of_fintype))
   have hv_neg : v < 0 := by have h0 := hfv 0 h0C; rwa [map_zero] at h0
   have hfC_nonneg : ∀ c ∈ C, 0 ≤ f c := functional_nonneg_on_cone hCcone hv_neg hfv
-  have hsingle_mem : ∀ i, (Pi.single i (1 : ℝ)) ∈ stdSimplex ℝ ι := by
-    intro i; refine ⟨fun j ↦ ?_, ?_⟩
-    · rw [Pi.single_apply]; split <;> norm_num
-    · simp [Finset.sum_pi_single']
+  have hsingle_mem (i : ι) : (Pi.single i (1 : ℝ)) ∈ Δ :=
+    ⟨.single i, by simp [Finsupp.single_eq_pi_single]⟩
   have hsingle_neg : ∀ i, f (Pi.single i (1 : ℝ)) < 0 := fun i ↦ by
     have := hfu _ (hsingle_mem i); linarith
   refine ⟨fun i ↦ - f (Pi.single i 1), fun i ↦ by have := hsingle_neg i; linarith, fun w hw ↦ ?_⟩

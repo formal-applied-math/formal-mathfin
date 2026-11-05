@@ -192,12 +192,9 @@ omit [Fintype ι] in
 /-- `M` is a copula. -/
 theorem isCopula_comonotoneCopula : IsCopula (comonotoneCopula ι) where
   isProbabilityMeasure :=
-    Measure.isProbabilityMeasure_map
-      (measurable_pi_lambda (fun t (_ : ι) ↦ t) fun _ ↦ measurable_id).aemeasurable
+    inferInstanceAs (IsProbabilityMeasure ((volume.restrict (Ioo (0 : ℝ) 1)).map fun t _ ↦ t))
   map_eval i := by
-    rw [comonotoneCopula,
-      Measure.map_map (measurable_pi_apply i)
-        (measurable_pi_lambda (fun t (_ : ι) ↦ t) fun _ ↦ measurable_id)]
+    rw [comonotoneCopula, Measure.map_map (measurable_pi_apply i) (by fun_prop)]
     exact Measure.map_id
 
 /-- `M(u) = minᵢ uᵢ` on `[0, 1]^ι`: the comonotonicity copula attains the upper Fréchet–Hoeffding
@@ -226,7 +223,9 @@ lemma map_one_sub_uniformIoo :
 
 /-- `W` is a copula. -/
 theorem isCopula_countermonotoneCopula : IsCopula countermonotoneCopula where
-  isProbabilityMeasure := Measure.isProbabilityMeasure_map (by fun_prop)
+  isProbabilityMeasure :=
+    inferInstanceAs (IsProbabilityMeasure
+      ((volume.restrict (Ioo (0 : ℝ) 1)).map fun t ↦ ![t, 1 - t]))
   map_eval i := by
     rw [countermonotoneCopula, Measure.map_map (measurable_pi_apply i) (by fun_prop)]
     fin_cases i
@@ -285,10 +284,10 @@ theorem not_exists_isCopula_frechetLower {ι : Type*} [Fintype ι]
   -- two distinct coordinates are almost never both at most `1/2`
   have hpair {a b : ι} (hab : a ≠ b) : AEDisjoint C (A a) (A b) := by
     set u : ι → ℝ := fun c ↦ 1 - (if c = a then 1 / 2 else 0) - (if c = b then 1 / 2 else 0)
-    have hua : u a = 1 / 2 := by simp only [u, if_neg hab]; norm_num
-    have hub : u b = 1 / 2 := by simp only [u, if_neg hab.symm]; norm_num
+    have hua : u a = 1 / 2 := by simp only [u, ite_eq_right hab]; norm_num
+    have hub : u b = 1 / 2 := by simp only [u, ite_eq_right hab.symm]; norm_num
     have huc {c : ι} (hca : c ≠ a) (hcb : c ≠ b) : u c = 1 := by
-      simp only [u, if_neg hca, if_neg hcb]; norm_num
+      simp only [u, ite_eq_right hca, ite_eq_right hcb]; norm_num
     have hu : ∀ c, u c ∈ Icc 0 1 := fun c ↦ by
       by_cases hca : c = a
       · rw [hca, hua]; norm_num
@@ -297,7 +296,7 @@ theorem not_exists_isCopula_frechetLower {ι : Type*} [Fintype ι]
       rw [huc hca hcb]; norm_num
     have hsum : ∑ c, u c = Fintype.card ι - 1 := by
       simp only [u, Finset.sum_sub_distrib, Finset.sum_const, Finset.card_univ, nsmul_eq_mul,
-        mul_one, Finset.sum_ite_eq', Finset.mem_univ, if_true]
+        mul_one, Finset.sum_ite_eq', Finset.mem_univ, ite_true]
       ring
     have hIic : C (Iic u) = 0 := by
       rw [← ofReal_measureReal, hW u hu, hsum, sub_self, max_self, ENNReal.ofReal_zero]

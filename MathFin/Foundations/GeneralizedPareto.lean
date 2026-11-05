@@ -76,16 +76,16 @@ lemma gpdTail_of_nonpos (hx : x ≤ 0) : gpdTail ξ β x = 1 := by
     max_eq_left zero_le_one, one_rpow, ite_self]
 
 lemma gpdTail_zero_shape (hx : 0 ≤ x) : gpdTail 0 β x = exp (-(x / β)) := by
-  rw [gpdTail, if_pos rfl, max_eq_left hx]
+  rw [gpdTail, ite_eq_left rfl, max_eq_left hx]
 
 lemma gpdTail_of_nonneg (hξ : ξ ≠ 0) (hx : 0 ≤ x) (h : 0 ≤ 1 + ξ * (x / β)) :
     gpdTail ξ β x = (1 + ξ * (x / β)) ^ (-1 / ξ) := by
-  rw [gpdTail, if_neg hξ, max_eq_left hx, max_eq_left h]
+  rw [gpdTail, ite_eq_right hξ, max_eq_left hx, max_eq_left h]
 
 /-- Beyond the right endpoint `−β/ξ` (only possible for `ξ < 0`) the tail vanishes. -/
 lemma gpdTail_of_endpoint_le (hξ : ξ ≠ 0) (hx : 0 ≤ x) (h : 1 + ξ * (x / β) ≤ 0) :
     gpdTail ξ β x = 0 := by
-  rw [gpdTail, if_neg hξ, max_eq_left hx, max_eq_right h,
+  rw [gpdTail, ite_eq_right hξ, max_eq_left hx, max_eq_right h,
     zero_rpow (div_ne_zero (by norm_num) hξ)]
 
 /-- The tail is positive inside the support. -/
@@ -144,7 +144,7 @@ theorem tendsto_gpdCDF_pow (hβ : 0 < β) (ξ x : ℝ) :
     have hn0 : (n : ℝ) ≠ 0 := hnpos.ne'
     have hlog' : 0 ≤ x + log n := by simp only [Function.comp_apply] at hlog; linarith
     have hv : gevNormScale 0 n * x + gevNormLoc 0 n = x + log n := by
-      rw [gevNormScale, rpow_zero, one_mul, gevNormLoc, if_pos rfl]
+      rw [gevNormScale, rpow_zero, one_mul, gevNormLoc, ite_eq_left rfl]
     rw [gpdCDF, sub_sub_cancel, gpdTail_zero_shape (mul_nonneg hβ.le (hv ▸ hlog')), hlev, hv,
       neg_add, exp_add, exp_neg (log n), exp_log hnpos]
     field_simp
@@ -215,13 +215,13 @@ theorem tendsto_gpdCDF_pow (hβ : 0 < β) (ξ x : ℝ) :
         nlinarith [mul_pos_of_neg_of_neg hneg h3]
       have hle' : 1 + ξ * (β * (gevNormScale ξ n * x + gevNormLoc ξ n) / β) ≤ 0 := by
         rwa [hlev]
-      rw [if_neg (not_lt.2 hneg.le), gpdCDF,
+      rw [ite_eq_right (not_lt.2 hneg.le), gpdCDF,
         gpdTail_of_endpoint_le hξ (mul_nonneg hβ.le hv) hle', sub_zero, one_pow]
     · -- `ξ > 0`: below the left endpoint, `G = 0`
       have hv : gevNormScale ξ n * x + gevNormLoc ξ n ≤ 0 := by
         by_contra! h3
         nlinarith [mul_pos hpos h3]
-      rw [if_pos hpos, gpdCDF, gpdTail_of_nonpos (mul_nonpos_of_nonneg_of_nonpos hβ.le hv),
+      rw [ite_eq_left hpos, gpdCDF, gpdTail_of_nonpos (mul_nonpos_of_nonneg_of_nonpos hβ.le hv),
         sub_self, zero_pow (by omega)]
 
 /-- **The GPD is in the maximum domain of attraction of the GEV of the same shape**
@@ -309,16 +309,16 @@ lemma strictMono_gpdOfExp (hβ : 0 < β) : StrictMono (gpdOfExp ξ β) := by
 
 instance isProbabilityMeasure_gpdMeasure : IsProbabilityMeasure (gpdMeasure ξ β) :=
   haveI := isProbabilityMeasure_expMeasure (r := 1) one_pos
-  Measure.isProbabilityMeasure_map continuous_gpdOfExp.measurable.aemeasurable
+  inferInstanceAs (IsProbabilityMeasure ((expMeasure 1).map (gpdOfExp ξ β)))
 
 /-- **The distribution function of the GPD law** is `G_{ξ,β}`. -/
 theorem cdf_gpdMeasure (hβ : 0 < β) (x : ℝ) : cdf (gpdMeasure ξ β) x = gpdCDF ξ β x := by
-  haveI := isProbabilityMeasure_expMeasure (r := 1) one_pos
+  have := isProbabilityMeasure_expMeasure (r := 1) one_pos
   have hβ0 : β ≠ 0 := hβ.ne'
   have hmeas : Measurable (gpdOfExp ξ β) := continuous_gpdOfExp.measurable
   have hsm : StrictMono (gpdOfExp ξ β) := strictMono_gpdOfExp hβ
   have hexp (t : ℝ) (ht : 0 ≤ t) : (expMeasure 1).real (Iic t) = 1 - exp (-t) := by
-    rw [← cdf_eq_real, cdf_expMeasure_eq one_pos, if_pos ht, one_mul]
+    rw [← cdf_eq_real, cdf_expMeasure_eq one_pos, ite_eq_left ht, one_mul]
   rw [cdf_eq_real, gpdMeasure, map_measureReal_apply hmeas measurableSet_Iic, gpdCDF]
   rcases lt_or_ge x 0 with hx | hx
   · -- below the support
@@ -343,7 +343,7 @@ theorem cdf_gpdMeasure (hβ : 0 < β) (x : ℝ) : cdf (gpdMeasure ξ β) x = gpd
     have hall : gpdOfExp ξ β ⁻¹' Iic x = univ := by
       ext e
       simp only [mem_preimage, mem_Iic, mem_univ, iff_true]
-      rw [gpdOfExp, if_neg hξ]
+      rw [gpdOfExp, ite_eq_right hξ]
       have h2 : β * exp (ξ * e) / ξ < 0 := div_neg_of_pos_of_neg (mul_pos hβ (exp_pos _)) hneg
       calc β * (exp (ξ * e) - 1) / ξ = β * exp (ξ * e) / ξ + -β / ξ := by ring
         _ ≤ x := by linarith
@@ -361,10 +361,10 @@ theorem cdf_gpdMeasure (hβ : 0 < β) (x : ℝ) : cdf (gpdMeasure ξ β) x = gpd
   have hinv : gpdOfExp ξ β t = x := by
     by_cases hξ : ξ = 0
     · subst hξ
-      rw [ht, gpdTail_zero_shape hx, log_exp, neg_neg, gpdOfExp, if_pos rfl]
+      rw [ht, gpdTail_zero_shape hx, log_exp, neg_neg, gpdOfExp, ite_eq_left rfl]
       field_simp
     · have hs := hend hξ
-      rw [ht, gpdTail_of_nonneg hξ hx hs.le, log_rpow hs, gpdOfExp, if_neg hξ,
+      rw [ht, gpdTail_of_nonneg hξ hx hs.le, log_rpow hs, gpdOfExp, ite_eq_right hξ,
         show ξ * -(-1 / ξ * log (1 + ξ * (x / β))) = log (1 + ξ * (x / β)) by field_simp,
         exp_log hs]
       field_simp
@@ -379,20 +379,20 @@ theorem cdf_gpdMeasure (hβ : 0 < β) (x : ℝ) : cdf (gpdMeasure ξ β) x = gpd
 `q(p) = gpdOfExp ξ β (−log(1 − p))`. -/
 theorem quantile_gpdMeasure (hβ : 0 < β) {p : ℝ} (hp : p ∈ Ioo 0 1) :
     quantile (gpdMeasure ξ β) p = gpdOfExp ξ β (-log (1 - p)) := by
-  haveI := isProbabilityMeasure_expMeasure (r := 1) one_pos
+  have := isProbabilityMeasure_expMeasure (r := 1) one_pos
   rw [gpdMeasure, quantile_map (strictMono_gpdOfExp hβ).monotone
     continuous_gpdOfExp.lowerSemicontinuous hp, quantile_expMeasure one_pos hp, div_one]
 
 /-- **Value-at-risk of a GPD loss** (`ξ ≠ 0`): `q(p) = β((1 − p)^{−ξ} − 1)/ξ`. -/
 theorem quantile_gpdMeasure_of_ne_zero (hβ : 0 < β) (hξ : ξ ≠ 0) {p : ℝ} (hp : p ∈ Ioo 0 1) :
     quantile (gpdMeasure ξ β) p = β * ((1 - p) ^ (-ξ) - 1) / ξ := by
-  rw [quantile_gpdMeasure hβ hp, gpdOfExp, if_neg hξ, rpow_def_of_pos (sub_pos.2 hp.2)]
+  rw [quantile_gpdMeasure hβ hp, gpdOfExp, ite_eq_right hξ, rpow_def_of_pos (sub_pos.2 hp.2)]
   ring_nf
 
 /-- **Value-at-risk of an exponential GPD loss** (`ξ = 0`): `q(p) = −β log(1 − p)`. -/
 theorem quantile_gpdMeasure_zero (hβ : 0 < β) {p : ℝ} (hp : p ∈ Ioo 0 1) :
     quantile (gpdMeasure 0 β) p = -(β * log (1 - p)) := by
-  rw [quantile_gpdMeasure hβ hp, gpdOfExp, if_pos rfl, mul_neg]
+  rw [quantile_gpdMeasure hβ hp, gpdOfExp, ite_eq_left rfl, mul_neg]
 
 /-! ### Tail averages, the mean, and the mean excess function -/
 
@@ -410,7 +410,7 @@ theorem setIntegral_gpdOfExp_Ioo (hβ : 0 < β) (hξ1 : ξ < 1) {α : ℝ} (hα1
     intervalIntegral.integral_comp_sub_left (fun t ↦ gpdOfExp ξ β (-log t)) 1, sub_self]
   by_cases hξ : ξ = 0
   · subst hξ
-    simp only [gpdOfExp, if_true]
+    simp only [gpdOfExp, ite_true]
     rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_neg, integral_log]
     simp only [log_zero, mul_zero, sub_zero, add_zero]
     ring
@@ -419,7 +419,7 @@ theorem setIntegral_gpdOfExp_Ioo (hβ : 0 < β) (hξ1 : ξ < 1) {α : ℝ} (hα1
         ∫ t in (0 : ℝ)..1 - α, β / ξ * (t ^ (-ξ) - 1) := by
       refine intervalIntegral.integral_congr_ae (ae_of_all _ fun t ht ↦ ?_)
       rw [uIoc_of_le hs.le] at ht
-      rw [gpdOfExp, if_neg hξ, rpow_def_of_pos ht.1]
+      rw [gpdOfExp, ite_eq_right hξ, rpow_def_of_pos ht.1]
       ring_nf
     have hint : IntervalIntegrable (fun t : ℝ ↦ t ^ (-ξ)) volume 0 (1 - α) :=
       intervalIntegral.intervalIntegrable_rpow' (by linarith)
@@ -427,7 +427,7 @@ theorem setIntegral_gpdOfExp_Ioo (hβ : 0 < β) (hξ1 : ξ < 1) {α : ℝ} (hα1
     rw [hcongr, intervalIntegral.integral_const_mul, intervalIntegral.integral_sub hint
       intervalIntegrable_const, integral_rpow (Or.inl (by linarith)),
       intervalIntegral.integral_const, zero_rpow h1ξ', rpow_add_one hs0, smul_eq_mul, mul_one,
-      sub_zero, sub_zero, gpdOfExp, if_neg hξ,
+      sub_zero, sub_zero, gpdOfExp, ite_eq_right hξ,
       show ξ * -log (1 - α) = log (1 - α) * -ξ by ring, ← rpow_def_of_pos hs]
     field_simp
     ring
@@ -469,10 +469,8 @@ theorem map_cond_gpdMeasure (hβ : 0 < β) {u : ℝ} (hu : 0 ≤ u) (hsupp : 0 <
   have hne : gpdMeasure ξ β (Ioi u) ≠ 0 := by
     rw [hIoi]
     exact (ENNReal.ofReal_pos.2 htail).ne'
-  haveI : IsProbabilityMeasure ((gpdMeasure ξ β)[|Ioi u]) := cond_isProbabilityMeasure hne
+  have : IsProbabilityMeasure ((gpdMeasure ξ β)[|Ioi u]) := cond_isProbabilityMeasure hne
   have hmeas : Measurable fun x : ℝ ↦ x - u := measurable_sub_const u
-  haveI : IsProbabilityMeasure (((gpdMeasure ξ β)[|Ioi u]).map (· - u)) :=
-    Measure.isProbabilityMeasure_map hmeas.aemeasurable
   refine Measure.ext_of_Iic _ _ fun a ↦ ?_
   have hpre : Ioi u ∩ (fun x ↦ x - u) ⁻¹' Iic a = Ioc u (a + u) := by
     ext y

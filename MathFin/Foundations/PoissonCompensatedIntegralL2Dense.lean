@@ -69,7 +69,6 @@ theorem simpleIntegrand_sq_integral
   set a : ℕ × ℕ → (Ω × (ℝ × E)) → ℝ :=
     fun i p => φ i.1 i.2 p.1 * (box i).indicator (fun _ => (1 : ℝ)) p.2 with ha
   set I : Finset (ℕ × ℕ) := Finset.range Nt ×ˢ Finset.range m with hI
-  haveI : SFinite (referenceIntensity ν) := by unfold referenceIntensity; infer_instance
   have ht0j : ∀ j, 0 ≤ t j := fun j => le_trans ht0 (hmono (Nat.zero_le j))
   have hboxms : ∀ i : ℕ × ℕ, MeasurableSet (box i) := fun i => measurableSet_Ioc.prod (hAms i.2)
   have hboxfin : ∀ i : ℕ × ℕ, referenceIntensity ν (box i) ≠ ⊤ :=

@@ -160,7 +160,7 @@ lemma integral_basketLognormalFactor {W : Ω → ℝ} (hW : HasLaw W (gaussianRe
   have := hW.isProbabilityMeasure
   have hmgf : ∫ ω, Real.exp (σ * Real.sqrt T * W ω) ∂P
       = Real.exp ((σ * Real.sqrt T) ^ 2 / 2) := by
-    simpa [mgf] using mgf_gaussianReal hW.map_eq (σ * Real.sqrt T)
+    simpa [mgf] using mgf_gaussianReal hW (σ * Real.sqrt T)
   have hfun : (fun ω ↦ basketLognormalFactor σ T (W ω))
       = fun ω ↦ Real.exp (-(σ ^ 2 * T / 2)) * Real.exp (σ * Real.sqrt T * W ω) := by
     funext ω
@@ -174,8 +174,8 @@ lemma integral_basketLognormalFactor {W : Ω → ℝ} (hW : HasLaw W (gaussianRe
 /-- The lognormal factor of a Gaussian driver is integrable. -/
 lemma integrable_basketLognormalFactor {W : Ω → ℝ} (hW : HasLaw W (gaussianReal 0 1) P)
     (σ T : ℝ) : Integrable (fun ω ↦ basketLognormalFactor σ T (W ω)) P := by
-  have h := integrable_exp_mul_of_hasLaw
-    (gaussianReal_sub_const (gaussianReal_const_mul hW (σ * Real.sqrt T)) (σ ^ 2 * T / 2)) 1
+  have h := (gaussianReal_sub_const (gaussianReal_const_mul hW (σ * Real.sqrt T))
+    (σ ^ 2 * T / 2)).integrable_fun_comp (integrable_exp_mul_gaussianReal 1)
   simp only [one_mul] at h
   exact h
 
@@ -209,10 +209,10 @@ lemma integrable_basketLognormalFactor_mul {U V : Ω → ℝ} {ρ : ℝ}
     (hcov : cov[U, V; P] = ρ) (σ₁ σ₂ T : ℝ) :
     Integrable (fun ω ↦ basketLognormalFactor σ₁ T (U ω) * basketLognormalFactor σ₂ T (V ω))
       P := by
-  have h := integrable_exp_mul_of_hasLaw
-    (gaussianReal_sub_const
+  have h := (gaussianReal_sub_const
       (hasLaw_linear_gaussianPair hUV hU hV hcov (σ₁ * Real.sqrt T) (σ₂ * Real.sqrt T))
-      (σ₁ ^ 2 * T / 2 + σ₂ ^ 2 * T / 2)) 1
+      (σ₁ ^ 2 * T / 2 + σ₂ ^ 2 * T / 2)).integrable_fun_comp
+    (integrable_exp_mul_gaussianReal 1)
   simp only [one_mul] at h
   refine h.congr (ae_of_all _ fun ω ↦ ?_)
   simp only [basketLognormalFactor]

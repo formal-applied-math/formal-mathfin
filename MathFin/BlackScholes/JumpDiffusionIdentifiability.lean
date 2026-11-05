@@ -204,7 +204,7 @@ lemma restrict_compl_zero_secondDifferenceMeasure (σ s : ℝ) (Λ : ℝ≥0) (�
     (secondDifferenceMeasure σ s Λ ν).restrict {0}ᶜ
       = ((Λ • ν).withDensity fun x ↦ coshKernel s x).restrict {0}ᶜ := by
   have hδ : (Measure.dirac (0 : ℝ)).restrict {0}ᶜ = 0 :=
-    Measure.restrict_eq_zero.2 ((dirac_eq_zero_iff_not_mem (measurableSet_singleton 0).compl).2
+    Measure.restrict_eq_zero.2 ((dirac_eq_zero_iff_notMem (measurableSet_singleton 0).compl).2
       (by simp))
   rw [secondDifferenceMeasure, Measure.restrict_add, Measure.restrict_smul, hδ, smul_zero,
     zero_add]
@@ -266,9 +266,9 @@ theorem jumpDiffusionIncrementLaw_eq_iff {b₁ b₂ σ₁ σ₂ : ℝ} {Λ₁ Λ
       rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_lt]
       exact ⟨hy₁, hy₂⟩)
     have hs : ε / 2 ≠ 0 := (half_pos hε).ne'
-    haveI := isFiniteMeasure_secondDifferenceMeasure σ₁ Λ₁ (s := ε / 2)
+    have := isFiniteMeasure_secondDifferenceMeasure σ₁ Λ₁ (s := ε / 2)
       (hin (ε / 2) (by linarith) (by linarith)).1 (hin (-(ε / 2)) (by linarith) (by linarith)).1
-    haveI := isFiniteMeasure_secondDifferenceMeasure σ₂ Λ₂ (s := ε / 2)
+    have := isFiniteMeasure_secondDifferenceMeasure σ₂ Λ₂ (s := ε / 2)
       (hin (ε / 2) (by linarith) (by linarith)).2.1
       (hin (-(ε / 2)) (by linarith) (by linarith)).2.1
     -- the second-difference measures have the same moment-generating function on `(-ε/2, ε/2)`

@@ -431,26 +431,28 @@ private lemma coe_afterStepSP (T a : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
         (fun _ ↦ V.val.value q ω) t)]
   refine Finset.sum_congr rfl fun p _ ↦ ?_
   by_cases hle : a ⊔ p.val.1 ≤ p.val.2
-  · rw [dif_pos hle, coe_stepSP]
+  · rw [dite_eq_left hle, coe_stepSP]
     simp only [afterFactor]
     by_cases hat : a < t
     · have hmem : t ∈ Set.Ioc (a ⊔ p.val.1) p.val.2 ↔ t ∈ Set.Ioc p.val.1 p.val.2 := by
         simp only [Set.mem_Ioc, sup_lt_iff]
         exact ⟨fun h ↦ ⟨h.1.2, h.2⟩, fun h ↦ ⟨⟨hat, h.1⟩, h.2⟩⟩
       by_cases hin : t ∈ Set.Ioc p.val.1 p.val.2
-      · rw [Set.indicator_of_mem (hmem.mpr hin), Set.indicator_of_mem hin, if_pos hat]
+      · rw [Set.indicator_of_mem (hmem.mpr hin), Set.indicator_of_mem hin, ite_eq_left hat]
       · rw [Set.indicator_of_notMem (fun hc ↦ hin (hmem.mp hc)), Set.indicator_of_notMem hin,
           mul_zero]
-    · rw [if_neg hat, zero_mul]
-      exact Set.indicator_of_notMem (fun hc ↦ hat (lt_of_le_of_lt le_sup_left hc.1)) _
-  · rw [dif_neg hle]
+    · rw [ite_eq_right hat, zero_mul]
+      exact Set.indicator_of_notMem
+        (show t ∉ Set.Ioc (a ⊔ p.val.1) p.val.2 from
+          fun hc ↦ hat (lt_of_le_of_lt le_sup_left hc.1)) _
+  · rw [dite_eq_right hle]
     have hzero : ⇑((0 : TBoundedSP T hBmeas).val) t ω = 0 := by simp
     rw [hzero, eq_comm]
     simp only [afterFactor]
     by_cases hat : a < t
-    · rw [Set.indicator_of_notMem (fun hc ↦ hle (sup_le (hat.le.trans hc.2) (hc.1.le.trans hc.2))),
-        mul_zero]
-    · rw [if_neg hat, zero_mul]
+    · rw [Set.indicator_of_notMem (show t ∉ Set.Ioc p.val.1 p.val.2 from
+        fun hc ↦ hle (sup_le (hat.le.trans hc.2) (hc.1.le.trans hc.2))), mul_zero]
+    · rw [ite_eq_right hat, zero_mul]
 
 /-- **The simple-process bridge.** Embedding the restarted process is the same as
 scaling the embedding. -/
@@ -485,8 +487,8 @@ private lemma itoSimple_afterStepSP_eq (T a : ℝ≥0) (hBmeas : ∀ t, Measurab
     Finset.sum_apply]
   refine Finset.sum_congr rfl fun p _ ↦ ?_
   by_cases hle : a ⊔ p.val.1 ≤ p.val.2
-  · rw [dif_pos hle, dif_pos hle, ItoIntegralBrownian.itoSimple_stepSP]
-  · rw [dif_neg hle, dif_neg hle]
+  · rw [dite_eq_left hle, dite_eq_left hle, ItoIntegralBrownian.itoSimple_stepSP]
+  · rw [dite_eq_right hle, dite_eq_right hle]
     simp [ItoIntegralL2.itoSimple]
 
 /-- **The scaling passes through the elementary integral**: `Z` factors out of the
@@ -501,8 +503,8 @@ private lemma itoSimple_afterStepSP_smul (T a : ℝ≥0) (hBmeas : ∀ t, Measur
   rw [itoSimple_afterStepSP_eq, itoSimple_afterStepSP_eq, Finset.mul_sum]
   refine Finset.sum_congr rfl fun p _ ↦ ?_
   by_cases hle : a ⊔ p.val.1 ≤ p.val.2
-  · rw [dif_pos hle, dif_pos hle]; ring
-  · rw [dif_neg hle, dif_neg hle, mul_zero]
+  · rw [dite_eq_left hle, dite_eq_left hle]; ring
+  · rw [dite_eq_right hle, dite_eq_right hle, mul_zero]
 
 /-! ### `𝓕_a`-linearity -/
 
@@ -674,7 +676,7 @@ theorem itoIntegralCLM_T_smul_of_memLp (T a : ℝ≥0) (hBmeas : ∀ t, Measurab
       · have hz (M : ℕ) :
             (smulAdapted T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ : ℝ≥0 × Ω → ℝ) p = 0 := by
           rw [hall M]
-          simp only [afterFactor, if_neg (not_lt.mpr hle), zero_mul]
+          simp only [afterFactor, ite_eq_right (not_lt.mpr hle), zero_mul]
         simp only [hz, hp hle, mul_zero]
         exact tendsto_const_nhds
       · refine Tendsto.congr' ?_ tendsto_const_nhds
@@ -682,7 +684,7 @@ theorem itoIntegralCLM_T_smul_of_memLp (T a : ℝ≥0) (hBmeas : ∀ t, Measurab
         have hmem : p.2 ∈ {ω | |Z ω| ≤ (M : ℝ)} :=
           (Nat.le_ceil |Z p.2|).trans (Nat.cast_le.mpr hM)
         rw [hall M]
-        simp only [afterFactor, if_pos hlt, Set.indicator_of_mem hmem]
+        simp only [afterFactor, ite_eq_left hlt, Set.indicator_of_mem hmem]
     have hle : atTop.liminf (fun M : ℕ ↦ eLpNorm
         (⇑(smulAdapted T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ)) 2
           (trimMeasure_T (μ := μ) T hBmeas))
@@ -693,10 +695,10 @@ theorem itoIntegralCLM_T_smul_of_memLp (T a : ℝ≥0) (hBmeas : ∀ t, Measurab
           = ENNReal.ofReal ‖smulAdapted T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ‖ from by
         rw [Lp.norm_def, ENNReal.ofReal_toReal (Lp.eLpNorm_ne_top _)]]
       exact ENNReal.ofReal_le_ofReal (hbound M)
-    exact ⟨hmeas, lt_of_le_of_lt ((MeasureTheory.Lp.eLpNorm_lim_le_liminf_eLpNorm
+    exact memLp_iff.2 (lt_of_le_of_lt ((MeasureTheory.Lp.eLpNorm_lim_le_liminf_eLpNorm
       (fun M : ℕ ↦ Lp.aestronglyMeasurable
-        (smulAdapted T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ)) _ hlim).trans hle)
-      ENNReal.ofReal_lt_top⟩
+        (smulAdapted T a hBmeas _ (hZMm M) (M : ℝ) (hZMb M) φ)) _ hmeas hlim).trans hle)
+      ENNReal.ofReal_lt_top)
   exact ⟨hZφ.toLp _, hZφ.coeFn_toLp,
     itoIntegralCLM_T_smulAdapted_of_memLp hB T a hBmeas Z hZm φ hφ hZφ⟩
 
@@ -742,7 +744,7 @@ theorem itoIntegralCLM_T_eq_itoProcessCLM_of_vanishes_after (T u : ℝ≥0) (huT
     (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
     (hφ : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), u < p.1 → φ p = 0) :
     itoIntegralCLM_T hB T hBmeas φ = itoProcessCLM hB T u hBmeas φ := by
-  haveI : Fact ((ItoIntegralL2.natFiltration hBmeas u : MeasurableSpace Ω) ≤ mΩ) :=
+  have : Fact ((ItoIntegralL2.natFiltration hBmeas u : MeasurableSpace Ω) ≤ mΩ) :=
     ⟨(ItoIntegralL2.natFiltration hBmeas).le u⟩
   set X := itoIntegralCLM_T hB T hBmeas φ with hX
   -- the band energy is the whole energy: `φ` is carried by `(0,u]`
@@ -781,10 +783,10 @@ theorem itoIntegralCLM_T_restrictAfterCLM (T u : ℝ≥0) (huT : u ≤ T)
   set R := restrictAfterCLM T u hBmeas φ
   have hafter : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), p.1 ≤ u → R p = 0 := by
     filter_upwards [coeFn_restrictAfterCLM T u hBmeas φ] with p hp hpu
-    rw [hp, if_neg (not_lt.mpr hpu)]
+    rw [hp, ite_eq_right (not_lt.mpr hpu)]
   have hbefore : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), u < p.1 → (φ - R) p = 0 := by
     filter_upwards [coeFn_restrictAfterCLM T u hBmeas φ, Lp.coeFn_sub φ R] with p hp hsub hpu
-    rw [hsub, Pi.sub_apply, hp, if_pos hpu, sub_self]
+    rw [hsub, Pi.sub_apply, hp, ite_eq_left hpu, sub_self]
   have hkey : itoIntegralCLM_T hB T hBmeas (φ - R) = itoProcessCLM hB T u hBmeas φ := by
     rw [itoIntegralCLM_T_eq_itoProcessCLM_of_vanishes_after hB T u huT hBmeas (φ - R) hbefore,
       map_sub, itoProcessCLM_eq_zero_of_vanishes_before hB T u huT hBmeas R hafter, sub_zero]

@@ -86,7 +86,7 @@ theorem hasDerivAt_almgrenChrissPath (X_0 κ T t : ℝ) :
       (-(X_0 * κ * Real.cosh (κ * (T - t)) / Real.sinh (κ * T))) t := by
   unfold almgrenChrissPath
   convert ((hasDerivAt_mul_sub κ T t).sinh.const_mul X_0).div_const (Real.sinh (κ * T))
-    using 1 <;> first | rfl | ring
+    using 1; ring
 
 /-- The t-derivative of the first-derivative formula `−X₀ κ cosh(κ (T − t)) / sinh(κ T)` is
 `κ² · X(t)`: the same `sinh(κ (T − t))` shape, multiplied by `κ²`. -/
@@ -95,7 +95,7 @@ private lemma hasDerivAt_almgrenChrissPath_deriv_formula (X_0 κ T t : ℝ) :
       (κ ^ 2 * almgrenChrissPath X_0 κ T t) t := by
   unfold almgrenChrissPath
   convert (((hasDerivAt_mul_sub κ T t).cosh.const_mul (X_0 * κ)).div_const
-    (Real.sinh (κ * T))).neg using 1 <;> first | rfl | ring
+    (Real.sinh (κ * T))).neg using 1; ring
 
 /-- **Almgren-Chriss EL equation**: the closed-form trajectory satisfies `X''(t) = κ² · X(t)`,
 the Euler-Lagrange equation of the cost functional: `hasDerivAt_almgrenChrissPath` gives `X'`

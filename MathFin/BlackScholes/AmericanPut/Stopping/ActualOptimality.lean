@@ -40,7 +40,7 @@ theorem brownianUsualActualContactRule_optimal {k h : ℝ} (hk : 0 ≤ k) (x : �
   let μ := completedMeasure gaussianLimit
   have hinit : canonicalDiscountedPrice k h x T 0 =ᵐ[μ] fun _ => canonicalPrice k h x (T : ℝ) :=
     canonicalDiscountedPrice_initial k h x T
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   let U := canonicalDiscountedPrice k h x T
   let Z := frozenPutReward brownian 1 k h (Real.sqrt 2) (Real.exp x) T
   let τ : StoppingRule brownianUsualFiltration T :=

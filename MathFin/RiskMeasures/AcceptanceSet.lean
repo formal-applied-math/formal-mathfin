@@ -45,8 +45,10 @@ namespace IsCoherentRiskMeasure
 variable {ι : Type*} [Fintype ι] [MeasurableSpace ι] [MeasurableSingletonClass ι]
   {P : Measure ι} [IsFiniteMeasure P] {ρ : (ι → ℝ) → ℝ}
 
+omit [Fintype ι] in
 /-- The acceptance set `{L | ρ L ≤ 0}` is closed (ρ is continuous). -/
-lemma acceptance_closed (hρ : IsCoherentRiskMeasure P ρ) : IsClosed {L : ι → ℝ | ρ L ≤ 0} :=
+lemma acceptance_closed [Finite ι] (hρ : IsCoherentRiskMeasure P ρ) :
+    IsClosed {L : ι → ℝ | ρ L ≤ 0} :=
   isClosed_le hρ.continuous continuous_const
 
 omit [Fintype ι] [MeasurableSingletonClass ι] [IsFiniteMeasure P] in
@@ -54,17 +56,21 @@ omit [Fintype ι] [MeasurableSingletonClass ι] [IsFiniteMeasure P] in
 lemma zero_mem (hρ : IsCoherentRiskMeasure P ρ) : (0 : ι → ℝ) ∈ {L : ι → ℝ | ρ L ≤ 0} :=
   hρ.rho_zero.le
 
+omit [Fintype ι] in
 /-- The acceptance set is a cone (positive homogeneity). -/
-lemma cone (hρ : IsCoherentRiskMeasure P ρ) :
+lemma cone [Finite ι] (hρ : IsCoherentRiskMeasure P ρ) :
     ∀ ⦃L⦄, L ∈ {L : ι → ℝ | ρ L ≤ 0} → ∀ ⦃c : ℝ⦄, 0 ≤ c → c • L ∈ {L : ι → ℝ | ρ L ≤ 0} :=
   fun _ hL _ hc ↦ (hρ.const_mul .of_finite hc).trans_le (mul_nonpos_of_nonneg_of_nonpos hc hL)
 
+omit [Fintype ι] in
 /-- The acceptance set is convex. -/
-lemma convex_acceptance (hρ : IsCoherentRiskMeasure P ρ) : Convex ℝ {L : ι → ℝ | ρ L ≤ 0} := by
+lemma convex_acceptance [Finite ι] (hρ : IsCoherentRiskMeasure P ρ) :
+    Convex ℝ {L : ι → ℝ | ρ L ≤ 0} := by
   simpa using hρ.convexOn_univ.convex_le 0
 
+omit [Fintype ι] in
 /-- Every nonpositive loss (a gain in every state) is acceptable (monotonicity). -/
-lemma nonpos_mem (hρ : IsCoherentRiskMeasure P ρ) {L : ι → ℝ} (hL : L ≤ 0) :
+lemma nonpos_mem [Finite ι] (hρ : IsCoherentRiskMeasure P ρ) {L : ι → ℝ} (hL : L ≤ 0) :
     L ∈ {L : ι → ℝ | ρ L ≤ 0} :=
   (hρ.mono_of_le hL).trans_eq hρ.rho_zero
 

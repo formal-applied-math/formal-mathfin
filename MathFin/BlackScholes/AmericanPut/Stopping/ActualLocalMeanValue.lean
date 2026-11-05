@@ -63,7 +63,7 @@ theorem actualRectangleExit_boundary_ae (k h x : ℝ) {R : ℝ} (hR : 0 < R)
         (|brownianLogState (k-h-1) (Real.sqrt 2) x s ω-x| = R ∨ s = δ) := by
   let μ := completedMeasure gaussianLimit
   have hz : ∀ᵐ ω ∂μ, brownian 0 ω = 0 := isBrownianReal_brownian.eval_zero_ae_eq_zero
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   filter_upwards [hz] with ω hω
   have hs : |brownianLogState (k-h-1) (Real.sqrt 2) x 0 ω-x| < R := by
     simpa only [brownianLogState,NNReal.coe_zero,mul_zero,add_zero,hω,sub_self,abs_zero] using hR
@@ -74,7 +74,7 @@ theorem actualRectangleExit_boundary_ae (k h x : ℝ) {R : ℝ} (hR : 0 < R)
 theorem actualRectangleExit_le_contact {k h : ℝ} (hk : 0 ≤ k) {x R : ℝ} {T δ : ℝ≥0}
     (hrect : InContinuationRectangle k h x T R δ) (ω : ℝ≥0 → ℝ) :
     actualRectangleExitTime k h x R δ ω ≤ brownianUsualActualContactTime (h := h) hk x T ω := by
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   let τ := brownianUsualActualContactRule (h := h) hk x T
   let ρ := actualRectangleExitRule k h x R δ
   change ρ.time ω ≤ τ.time ω
@@ -95,7 +95,7 @@ theorem canonicalPrice_rectangle_meanValue {k h : ℝ} (hk : 0 ≤ k) {x R : ℝ
         ((T : ℝ)-(actualRectangleExitTime k h x R δ ω : ℝ)) ∂completedMeasure gaussianLimit) =
       canonicalPrice k h x (T : ℝ) := by
   let μ := completedMeasure gaussianLimit
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   let ρ := actualRectangleExitRule k h x R δ
   let η := ρ.extend hδT
   have he := canonicalPrice_contact_meanValue (h := h) hk x T η

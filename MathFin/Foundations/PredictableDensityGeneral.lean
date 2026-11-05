@@ -110,8 +110,9 @@ lemma isFiniteMeasure_sqWeight (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     IsFiniteMeasure (sqWeight (trimMeasure_T (μ := μ) T hBmeas) f) := by
   refine ⟨?_⟩
   have hlt : ∫⁻ z, ‖f z‖ₑ ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) < ⊤ := by
-    have h := hfL2.2
-    rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num)] at h
+    have h := hfL2.eLpNorm_lt_top
+    rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num)
+      hfL2.aestronglyMeasurable] at h
     have h2 : (∫⁻ z, ‖f z‖ₑ ^ ((2 : ℝ≥0∞).toReal) ∂(trimMeasure_T (μ := μ) T hBmeas)) ≠ ⊤ := by
       intro htop
       rw [htop] at h
@@ -142,7 +143,7 @@ lemma inner_simpleAssemblyOfMeasure_iocSP_T (T : ℝ≥0) (hBmeas : ∀ t, Measu
         (iocSP_T hBmeas hab hbT hF), g⟫_ℝ
       = ∫ z in Set.Ioc a b ×ˢ F, f z ^ 2 * g z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
   set 𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas
-  letI : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
+  let : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
   have hRpred : MeasurableSet (Set.Ioc a b ×ˢ F) :=
     MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := 𝓕) a b hF
   rw [L2.inner_def]
@@ -180,7 +181,7 @@ theorem simpleAssembly_sqWeight_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measur
     DenseRange (simpleAssemblyOfMeasure T hBmeas
       (sqWeight (trimMeasure_T (μ := μ) T hBmeas) f)) := by
   set 𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas
-  letI : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
+  let : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
   suffices h_orth_bot : (LinearMap.range (simpleAssemblyOfMeasure T hBmeas
       (sqWeight (trimMeasure_T (μ := μ) T hBmeas) f)))ᗮ = ⊥ by
     rw [denseRange_iff_closure_range,

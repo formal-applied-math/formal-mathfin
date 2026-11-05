@@ -134,7 +134,7 @@ and `(⊥ : ℝ≥0) = 0`) or `Ioc a b ×ˢ F` (`F ∈ ℱₐ`, `a < b`). This i
 upstreamed to BrownianMotion, so we consume it rather than restate it, and get
 `IsSetSemiring` (strictly more than the π-system this tower needs) for free. No
 `T` constraint at the σ-algebra level: T enters only via `timeMeasure_T`. -/
-def predictableRect (hBmeas : ∀ t, Measurable (B t)) :
+noncomputable def predictableRect (hBmeas : ∀ t, Measurable (B t)) :
     Set (Set (ℝ≥0 × Ω)) :=
   (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictableRectangles
 
@@ -227,6 +227,15 @@ lemma memLp_uncurry_trim_T (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     MemLp (Function.uncurry ⇑V) 2 (trimMeasure_T (μ := μ) T hBmeas) := by
   rw [trimMeasure_T_eq_restrict]
   exact (ItoIntegralL2.memLp_uncurry_trim hBmeas V).restrict _
+
+omit [IsProbabilityMeasure μ] in
+/-- An `L²` class of the predictable trim is `L²` of the product measure itself: the trim only
+coarsens the σ-algebra, so `MemLp` lifts through `memLp_of_memLp_trim`. -/
+lemma memLp_prod_of_lp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    MemLp (⇑φ) 2 ((timeMeasure_T T).prod μ) :=
+  memLp_of_memLp_trim (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod
+    (Lp.memLp φ)
 
 /-- The simple process's `L²` class in the T-restricted trim. -/
 noncomputable def simpleProcessL2_T (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
@@ -326,7 +335,7 @@ private lemma eLpNorm_uncurry_trim_T_eq_trim (T : ℝ≥0) (hBmeas : ∀ t, Meas
             (Set.Ioc 0 T ×ˢ Set.univ)) := by rw [trimMeasure_T_eq_restrict]
     _ = eLpNorm ((Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)).indicator (Function.uncurry ⇑V.val)) 2
           ((ItoIntegralL2.timeMeasure.prod μ).trim 𝓕.predictable_le_prod) :=
-        (MeasureTheory.eLpNorm_indicator_eq_eLpNorm_restrict hS_pred).symm
+        (MeasureTheory.eLpNorm_indicator_eq_eLpNorm_restrict hS_pred.nullMeasurableSet).symm
     _ = eLpNorm (Function.uncurry ⇑V.val) 2
           ((ItoIntegralL2.timeMeasure.prod μ).trim 𝓕.predictable_le_prod) :=
         MeasureTheory.eLpNorm_congr_ae h_ae_eq
@@ -487,7 +496,7 @@ noncomputable def iocSP_T {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     -- The value is `Finsupp.onFinset I (...)` so its support is contained in I.
     have h_I_eq : (ElementaryPredictableSet.IocProd a b hF).I = {(a, b)} := by
       change (if a ≤ b then ({(a, b)} : Finset _) else ∅) = _
-      rw [if_pos hab]
+      rw [ite_eq_left hab]
     have h_in_I : p ∈ (ElementaryPredictableSet.IocProd a b hF).I := by
       by_contra hp_not
       apply Finsupp.mem_support_iff.mp hp
@@ -524,7 +533,7 @@ private lemma inner_simpleAssembly_T_iocSP_T {T : ℝ≥0} (hBmeas : ∀ t, Meas
   -- The Lp inner product takes its typeclass MeasurableSpace from trim_T's σ-alg
   -- (which is predictable, not the default product σ-alg). Make it explicit so
   -- `L2.inner_def` synthesises correctly.
-  letI : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
+  let : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
   rw [L2.inner_def]
   -- The L² inner product unfolds to ∫ ⟪f z, g z⟫_ℝ = ∫ g z * f z (Mathlib's
   -- real inner product convention `⟪x, y⟫_ℝ = y * x`).
@@ -570,7 +579,7 @@ lemma setIntegral_eq_setIntegral_inter_supp {T : ℝ≥0}
       ∫ z in R ∩ (Set.Ioc 0 T ×ˢ Set.univ), g z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
   set 𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas
   -- Reset the typeclass to predictable σ-alg locally (trim_T's natural σ-alg).
-  letI : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
+  let : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
   have hS_pred : MeasurableSet (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)) :=
     MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := 𝓕) 0 T MeasurableSet.univ
   -- (trim_T).restrict R = (trim_full.restrict S).restrict R = trim_full.restrict (R ∩ S)
@@ -650,7 +659,7 @@ theorem simpleAssembly_T_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
         rw [Set.Ioc_eq_empty (not_lt.mpr hab'.le), Set.empty_prod, setIntegral_empty]
   -- Apply Phase 5 + Lp.ae_eq_zero_of_forall_setIntegral_eq_zero. Use letI to make
   -- trim_T's σ-alg (predictable) the ambient typeclass.
-  letI : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
+  let : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
   refine (Lp.eq_zero_iff_ae_eq_zero (f := g)).mpr ?_
   exact Lp.ae_eq_zero_of_forall_setIntegral_eq_zero g
     (by norm_num : (2 : ℝ≥0∞) ≠ 0) (by norm_num : (2 : ℝ≥0∞) ≠ ∞)

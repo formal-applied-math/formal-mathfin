@@ -61,7 +61,7 @@ private lemma continuousOn_gammaPDFReal {a : ℝ} (ha : 1 ≤ a) (r : ℝ) :
     · exact continuousOn_id.rpow_const fun x _ ↦ Or.inr (by linarith)
     · exact ((continuous_const.mul continuous_id).neg.rexp).continuousOn
   exact hform.congr fun x hx ↦ by
-    rw [gammaPDFReal, if_pos (Set.mem_Ici.mp hx)]
+    rw [gammaPDFReal, ite_eq_left (Set.mem_Ici.mp hx)]
 
 private lemma intervalIntegrable_gammaPDFReal {a : ℝ} (ha : 1 ≤ a) (ht : 0 ≤ t) :
     IntervalIntegrable (gammaPDFReal a r) volume 0 t := by
@@ -110,7 +110,6 @@ private lemma hasDerivAt_gamma_antideriv {k : ℕ} (hk : k ≠ 0)
     simpa using this
   have h3 := (h1.mul h2).div_const ((m + 1)! : ℝ)
   convert h3 using 1
-  all_goals try rfl
   -- value identity: γ_{m+1}(s) − γ_{m+2}(s) equals the product-rule expression
   have hGm : Real.Gamma ((m + 1 : ℕ) : ℝ) = (m ! : ℝ) := by
     push_cast
@@ -130,7 +129,7 @@ private lemma hasDerivAt_gamma_antideriv {k : ℕ} (hk : k ≠ 0)
     Real.rpow_natCast r (m + 1 + 1)
   have hm0 : (m ! : ℝ) ≠ 0 := by positivity
   have hm10 : ((m + 1)! : ℝ) ≠ 0 := by positivity
-  simp only [gammaPDFReal, if_pos hs]
+  simp only [gammaPDFReal, ite_eq_left hs]
   rw [hGm, hGm1, hr_pow, hr_pow1, hs_pow, hs_pow1, Nat.factorial_succ]
   simp only [mul_pow]
   push_cast
@@ -169,7 +168,7 @@ private lemma integral_gammaPDFReal_one (ht : 0 ≤ t) :
     rw [Set.uIcc_of_le ht] at hs
     have h := hasDerivAt_neg_exp_mul_exp (r := r) (x := s)
     convert h using 1
-    simp only [gammaPDFReal, if_pos hs.1]
+    simp only [gammaPDFReal, ite_eq_left hs.1]
     rw [Real.Gamma_one, Real.rpow_one, sub_self, Real.rpow_zero]
     ring
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv

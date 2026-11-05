@@ -155,7 +155,7 @@ theorem vasicekBondPrice_girsanov (hB : IsPreBrownianReal B μ) (r₀ θ σ lam 
       = ∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ (θ - lam * σ / κ) σ hκ T ω)) ∂μ := by
   have hW := wienerIntegralLp_hasLaw_girsanov hB lam T (vasicekIntegratedKernelLp hκ T)
   rw [integral_vasicekIntegratedKernelLp hκ T, vasicekIntegratedKernelLp_integral_sq hκ T] at hW
-  have hm := mgf_gaussianReal hW.map_eq (-σ)
+  have hm := mgf_gaussianReal hW (-σ)
   simp only [mgf] at hm
   have hfac (ω : Ω) : Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω))
       = Real.exp (-vasicekIntegratedMean r₀ θ κ T)

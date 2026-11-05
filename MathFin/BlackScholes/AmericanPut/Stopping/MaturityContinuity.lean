@@ -66,7 +66,7 @@ theorem brownianAmericanPut_continuous_horizon {K r q σ S : ℝ}
 theorem brownianUsualAmericanPut_continuous_horizon {K r q σ S : ℝ}
     (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) : Continuous (brownianUsualAmericanPut K r q σ S) := by
   let μ := completedMeasure gaussianLimit
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   exact americanPutValue_continuous_horizon (P := μ) (𝓕 := brownianUsualFiltration)
     brownian_completed_measurable continuous_brownian hK hr hS
 

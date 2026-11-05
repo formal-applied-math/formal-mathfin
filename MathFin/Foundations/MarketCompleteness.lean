@@ -230,7 +230,7 @@ theorem integral_eq_of_pricesGainsAtZero (hBmeas : ∀ t, Measurable (B t))
   exact integral_eq_of_replicates hB T hBmeas hQ hg hφ
 
 /-- Anything a.e. equal to the indicator of `A` integrates to `ν A`. -/
-private theorem integral_eq_measure_toReal {ν : Measure Ω} [IsFiniteMeasure ν] {A : Set Ω}
+private theorem integral_eq_measure_toReal {ν : Measure Ω} {A : Set Ω}
     (hA : MeasurableSet A) {f : Ω → ℝ} (hf : f =ᵐ[ν] A.indicator fun _ ↦ (1 : ℝ)) :
     ∫ ω, f ω ∂ν = (ν A).toReal := by
   rw [integral_congr_ae hf, integral_indicator hA]
@@ -246,7 +246,7 @@ theorem measure_eq_of_pricesGainsAtZero (hBmeas : ∀ t, Measurable (B t))
     Q A = μ A := by
   have hA' : MeasurableSet A := (ItoIntegralL2.natFiltration hBmeas).le T A hA
   have hmem : MemLp (A.indicator fun _ ↦ (1 : ℝ)) 2 μ :=
-    memLp_indicator_const 2 hA' 1 (Or.inr (measure_ne_top μ A))
+    memLp_indicator_const 2 hA'.nullMeasurableSet 1 (Or.inr (measure_ne_top μ A))
   have hclaim := integral_eq_of_pricesGainsAtZero hB hBmeas hBcont T hQ hg
     (hmem.toLp (A.indicator fun _ ↦ (1 : ℝ)))
     ((stronglyMeasurable_const.indicator hA).aestronglyMeasurable.congr hmem.coeFn_toLp.symm)
@@ -271,8 +271,8 @@ theorem emm_unique_of_complete (hBmeas : ∀ t, Measurable (B t))
     (hg₁ : PricesGainsAtZero hB T hBmeas Q₁) (hg₂ : PricesGainsAtZero hB T hBmeas Q₂)
     {A : Set Ω} (hA : MeasurableSet[ItoIntegralL2.natFiltration hBmeas T] A) :
     Q₁ A = Q₂ A :=
-  haveI := h₁.isProb
-  haveI := h₂.isProb
+  have := h₁.isProb
+  have := h₂.isProb
   (measure_eq_of_pricesGainsAtZero hB hBmeas hBcont T h₁.ac hg₁ hA).trans
     (measure_eq_of_pricesGainsAtZero hB hBmeas hBcont T h₂.ac hg₂ hA).symm
 

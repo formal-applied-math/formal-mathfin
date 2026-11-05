@@ -241,7 +241,7 @@ noncomputable def lomaxMeasure (θ κ : ℝ) : Measure ℝ :=
 lemma isProbabilityMeasure_lomaxMeasure (hθ : 0 < θ) (hκ : 0 < κ) :
     IsProbabilityMeasure (lomaxMeasure θ κ) :=
   have := isProbabilityMeasure_paretoMeasure hκ hθ
-  Measure.isProbabilityMeasure_map (measurable_sub_const κ).aemeasurable
+  inferInstanceAs (IsProbabilityMeasure ((paretoMeasure κ θ).map (· - κ)))
 
 /-- **The Lomax CDF**: `F(x) = 1 − (κ/(κ + x))^θ` for `x ≥ 0`. -/
 theorem cdf_lomaxMeasure (hθ : 0 < θ) (hκ : 0 < κ) {x : ℝ} (hx : 0 ≤ x) :
@@ -337,10 +337,9 @@ noncomputable def medianShortfall (X : Ω → ℝ) (P : Measure Ω) (α : ℝ) :
 with a continuous distribution function, `MS_α(X) = VaR_{(1+α)/2}(X)`. Given that the loss
 exceeds `VaR_α`, its conditional CDF is `(F − α)/(1 − α)`, which crosses `1/2` exactly where `F`
 crosses `(1 + α)/2`. -/
-theorem medianShortfall_eq_valueAtRisk [IsProbabilityMeasure P] (hX : AEMeasurable X P)
+theorem medianShortfall_eq_valueAtRisk [IsProbabilityMeasure P]
     (hF : Continuous (cdf (P.map X))) (hα : α ∈ Ioo 0 1) :
     medianShortfall X P α = valueAtRisk X P ((1 + α) / 2) := by
-  have := Measure.isProbabilityMeasure_map hX
   have h1α : 0 < 1 - α := sub_pos.2 hα.2
   have hv : cdf (P.map X) (valueAtRisk X P α) = α := cdf_quantile hF hα
   -- the tail beyond `VaR_α` carries mass `1 − α`

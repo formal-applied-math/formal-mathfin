@@ -299,7 +299,7 @@ theorem forward_eq_weak_zeroRate
       driftCoeff μ (reindexed X) (reindexed β0) s ω
         = (fun _ : ℝ => (0 : ℝ)) (X (Real.toNNReal s) ω) :=
     fun s => ⟨measurable_const, fun ω => by
-      show μ[(0 : Ω → ℝ) | sigmaGen (reindexed X) s] ω = 0
+      change μ[(0 : Ω → ℝ) | sigmaGen (reindexed X) s] ω = 0
       rw [condExp_zero]; rfl⟩
   have key := marginal_flow_weak_equation_fn_constructed (β := β0) (Db := 0)
     (afn := fun _ _ => 0)
@@ -666,7 +666,7 @@ theorem dupire_ae_window
     rw [hν, law_restrict_eq_withDensity hXm (hXint _) hCK hCKK hCKKc hap hqb]
     refine withDensity_congr_ae ((ae_restrict_iff' measurableSet_Ioc).2
       (ae_of_all _ fun K hK => ?_))
-    show ENNReal.ofReal (CKK K) = (ρ K : ℝ≥0∞)
+    change ENNReal.ofReal (CKK K) = (ρ K : ℝ≥0∞)
     rw [← ENNReal.ofReal_coe_nnreal, hρeq K (Ioc_subset_Icc_self hK)]
   -- `b̂²(t, ·)` is `law(X_t)`-integrable (it represents a conditional expectation)
   have hbint : Integrable bt ν := by
@@ -992,7 +992,7 @@ theorem dupire_localVol
         rw [Real.norm_eq_abs, abs_mul]
         exact mul_le_mul (hδbdd _ _) (hδbdd _ _) (abs_nonneg _)
           ((abs_nonneg _).trans (hδbdd (Real.toNNReal t) ω)))
-  show μ[_ | _] ω = _
+  change μ[_ | _] ω = _
   rw [condExp_of_stronglyMeasurable (sigmaGen_le _ _ hXm) hsm hI]
   simp only [reindexed, hδloc, Real.coe_toNNReal t ht.le]
   ring

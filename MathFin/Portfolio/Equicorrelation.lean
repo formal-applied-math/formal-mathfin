@@ -88,7 +88,7 @@ lemma portfolioVarN_equicorrelation (w : n → ℝ) :
   have hterm (i j : n) : w i * w j * equicorrelationMatrix n ρ i j =
       ρ * (w i * w j) + (1 - ρ) * (if i = j then w i * w j else 0) := by
     by_cases hij : i = j <;> simp [equicorrelationMatrix, hij] <;> ring
-  simp only [portfolioVarN, hterm, sum_add_distrib, ← mul_sum, sum_ite_eq, mem_univ, if_true,
+  simp only [portfolioVarN, hterm, sum_add_distrib, ← mul_sum, sum_ite_eq, mem_univ, ite_true,
     sq, sum_mul_sum]
   ring
 
@@ -114,11 +114,11 @@ theorem posSemidef_equicorrelationMatrix_iff (hn : 2 ≤ Fintype.card n) :
       have hk (k : n) : (Pi.single i 1 - Pi.single j 1 : n → ℝ) k ^ 2 =
           (Pi.single i 1 : n → ℝ) k + (Pi.single j 1 : n → ℝ) k := by
         by_cases hki : k = i <;> by_cases hkj : k = j <;> simp_all [Pi.single_apply]
-      simp only [hk, sum_add_distrib, sum_pi_single', mem_univ, if_true]
+      simp only [hk, sum_add_distrib, sum_pi_single', mem_univ, ite_true]
       norm_num
     simp only [one_pow, sum_const, card_univ, nsmul_eq_mul, mul_one] at h1
     rw [hsq] at h2
-    simp only [Pi.sub_apply, sum_sub_distrib, sum_pi_single', mem_univ, if_true, sub_self,
+    simp only [Pi.sub_apply, sum_sub_distrib, sum_pi_single', mem_univ, ite_true, sub_self,
       ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, mul_zero, add_zero] at h2
     change 0 ≤ (1 - ρ) * d + ρ * d ^ 2 at h1
     refine ⟨?_, by linarith⟩

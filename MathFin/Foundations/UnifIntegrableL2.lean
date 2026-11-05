@@ -44,7 +44,11 @@ theorem unifIntegrable_one_of_sq_integral_le (hf : ∀ i, MemLp (f i) 2 μ)
     {M : ℝ} (hM : ∀ i, ∫ x, (f i x) ^ 2 ∂μ ≤ M) :
     UnifIntegrable f 1 μ := by
   refine unifIntegrable_of le_rfl (by norm_num) (fun i ↦ (hf i).aestronglyMeasurable) ?_
-  intro ε hε
+  intro ε' hε'
+  rcases eq_or_ne ε' ⊤ with rfl | hε'top
+  · exact ⟨0, fun _ ↦ le_top⟩
+  obtain ⟨ε, hε, rfl⟩ : ∃ ε : ℝ, 0 < ε ∧ ENNReal.ofReal ε = ε' :=
+    ⟨ε'.toReal, ENNReal.toReal_pos hε'.ne' hε'top, ENNReal.ofReal_toReal hε'top⟩
   refine ⟨Real.toNNReal (M / ε) + 1, fun i ↦ ?_⟩
   set C : ℝ≥0 := Real.toNNReal (M / ε) + 1 with hCdef
   have hCpos : (0 : ℝ≥0∞) < (C : ℝ≥0∞) := by
@@ -59,7 +63,8 @@ theorem unifIntegrable_one_of_sq_integral_le (hf : ∀ i, MemLp (f i) 2 μ)
             (ae_of_all _ fun x ↦ sq_nonneg _)).symm
       _ ≤ ENNReal.ofReal M := ENNReal.ofReal_le_ofReal (hM i)
   -- `eLpNorm (indicator …) 1 = ∫⁻ over the truncation set of `‖f i‖ₑ`.
-  rw [eLpNorm_one_eq_lintegral_enorm]
+  rw [eLpNorm_one_eq_lintegral_enorm ((hf i).aestronglyMeasurable.indicator₀
+    (nullMeasurableSet_le aemeasurable_const (hf i).aestronglyMeasurable.nnnorm.aemeasurable))]
   set S : Set α := {x | C ≤ ‖f i x‖₊}
   have henorm_ind : ∀ x, ‖S.indicator (f i) x‖ₑ = S.indicator (fun x ↦ ‖f i x‖ₑ) x := fun x ↦ by
     by_cases hx : x ∈ S <;> simp [hx]
@@ -110,7 +115,8 @@ theorem tendsto_setIntegral_of_tendstoInMeasure_of_sq_bound [IsFiniteMeasure μ]
       (fun n ↦ (hf n).aestronglyMeasurable) hg hui hconv
   refine tendsto_setIntegral_of_L1 g hg.aestronglyMeasurable
     (Filter.Eventually.of_forall fun n ↦ (hf n).integrable (by norm_num)) ?_ A
-  simpa only [eLpNorm_one_eq_lintegral_enorm, Pi.sub_apply] using hL1
+  exact hL1.congr fun n ↦
+    eLpNorm_one_eq_lintegral_enorm ((hf n).aestronglyMeasurable.sub hg.aestronglyMeasurable)
 
 /-- **Set-integral limit from the a.e.-subsequence principle + an `L²` bound.** On a finite measure,
 a family `f : ℕ → α → ℝ` with `f n ∈ L²`, a uniform second-moment bound `∫ (f n)² ≤ M`, a limit
@@ -157,7 +163,7 @@ theorem memLp_two_of_subseq_ae_of_sq_bound {f : ℕ → α → ℝ} {g : α → 
   refine ⟨hgmeas.pow 2, ?_⟩
   rw [hasFiniteIntegral_iff_enorm]
   have hsqbnd : ∀ k, ∫⁻ x, ‖(f (ms k) x) ^ 2‖ₑ ∂μ ≤ ENNReal.ofReal M := fun k ↦ by
-    have hint_sq := (memLp_two_iff_integrable_sq (hf (ms k)).1).mp (hf (ms k))
+    have hint_sq := (memLp_two_iff_integrable_sq (hf (ms k)).aestronglyMeasurable).mp (hf (ms k))
     calc ∫⁻ x, ‖(f (ms k) x) ^ 2‖ₑ ∂μ
         = ∫⁻ x, ENNReal.ofReal ((f (ms k) x) ^ 2) ∂μ :=
           lintegral_congr fun x ↦ by rw [Real.enorm_eq_ofReal (sq_nonneg _)]

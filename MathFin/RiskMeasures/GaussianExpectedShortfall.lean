@@ -27,7 +27,6 @@ supplies its meaning.
 
 ## Main results
 
-* `integrable_of_hasLaw_gaussianReal`: a Gaussian loss is integrable.
 * `rockafellarUryasev_of_hasLaw_gaussianReal`: the law-side objective equals `ruObjective`.
 * `expectedShortfall_of_hasLaw_gaussianReal`: `ES_α(X) = m + σ ϕ(Φ⁻¹(α))/(1 − α)` for
   `X ~ N(m, σ²)` with `σ > 0`.
@@ -44,14 +43,6 @@ open scoped NNReal
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
   {X : Ω → ℝ} {α : ℝ}
-
-omit [IsProbabilityMeasure P] in
-/-- A Gaussian loss is integrable. -/
-lemma integrable_of_hasLaw_gaussianReal {m : ℝ} {v : ℝ≥0} (hX : HasLaw X (gaussianReal m v) P) :
-    Integrable X P := by
-  have h : Integrable id (gaussianReal m v) := (memLp_id_gaussianReal 1).integrable (by simp)
-  rw [← hX.map_eq] at h
-  exact (integrable_map_measure aestronglyMeasurable_id hX.aemeasurable).1 h
 
 omit [IsProbabilityMeasure P] in
 /-- The Rockafellar–Uryasev objective of a Gaussian loss, written against its law, is the objective
@@ -79,7 +70,7 @@ theorem expectedShortfall_of_hasLaw_gaussianReal {m : ℝ} {v : ℝ≥0} (hv : v
     (hX : HasLaw X (gaussianReal m v) P) (hα : α ∈ Ioo 0 1) :
     expectedShortfall X P α = gaussianCVaR m √(v : ℝ) (PhiInv α) α := by
   have hσ : 0 < √(v : ℝ) := Real.sqrt_pos.2 (by positivity)
-  have h := isLeast_rockafellarUryasev (integrable_of_hasLaw_gaussianReal hX) hα
+  have h := isLeast_rockafellarUryasev hX.hasGaussianLaw.integrable hα
   rw [show rockafellarUryasev X P α = ruObjective m √(v : ℝ) α from
     funext (rockafellarUryasev_of_hasLaw_gaussianReal hX)] at h
   exact h.unique (gaussianCVaR_isLeast_ruObjective m _ _ α hσ (Phi_PhiInv hα) hα.2)

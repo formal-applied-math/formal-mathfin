@@ -66,10 +66,10 @@ lemma expMeasure_real_Ioi {r : ℝ} (hr : 0 < r) (t : ℝ) :
   rw [← compl_Iic, probReal_compl_eq_one_sub measurableSet_Iic, ← cdf_eq_real,
     cdf_expMeasure_eq hr]
   rcases le_total 0 t with ht | ht
-  · rw [if_pos ht, max_eq_left ht]
+  · rw [ite_eq_left ht, max_eq_left ht]
     ring
   · rcases ht.lt_or_eq with ht | rfl
-    · rw [if_neg (not_le.2 ht), max_eq_right ht.le]
+    · rw [ite_eq_right (not_le.2 ht), max_eq_right ht.le]
       simp
     · simp
 
@@ -84,7 +84,7 @@ private lemma expMeasure_Ioi_ne_zero {r : ℝ} (hr : 0 < r) (t : ℝ) : expMeasu
 private lemma expMeasure_Iic_ne_zero {r t : ℝ} (hr : 0 < r) (ht : 0 < t) :
     expMeasure r (Iic t) ≠ 0 := by
   have := isProbabilityMeasure_expMeasure hr
-  rw [← ofReal_cdf, cdf_expMeasure_eq hr, if_pos ht.le, ne_eq, ENNReal.ofReal_eq_zero, not_le,
+  rw [← ofReal_cdf, cdf_expMeasure_eq hr, ite_eq_left ht.le, ne_eq, ENNReal.ofReal_eq_zero, not_le,
     sub_pos]
   exact (Real.exp_lt_exp.2 (neg_lt_zero.2 (mul_pos hr ht))).trans_eq Real.exp_zero
 
@@ -137,7 +137,6 @@ private lemma hasLaw_min (hrate : ∀ i, 0 < rate i)
     HasLaw (fun ω ↦ min (T i ω) (T j ω)) (expMeasure (rate i + rate j)) P := by
   have hmeas : AEMeasurable (fun ω ↦ min (T i ω) (T j ω)) P :=
     (hT i).aemeasurable.min (hT j).aemeasurable
-  have := Measure.isProbabilityMeasure_map (μ := P) hmeas
   have := isProbabilityMeasure_expMeasure (add_pos (hrate i) (hrate j))
   refine ⟨hmeas, ext_of_real_Ioi fun u ↦ ?_⟩
   rw [map_measureReal_apply_of_aemeasurable hmeas measurableSet_Ioi]
@@ -286,7 +285,6 @@ theorem covariance_indicator_marshallOlkin (hrate : ∀ i, 0 < rate i)
   set Z : Ω → ℝ × ℝ := fun ω ↦ (min (T 0 ω) (T 2 ω), min (T 1 ω) (T 2 ω))
   have hZ : AEMeasurable Z P := ((hT 0).aemeasurable.min (hT 2).aemeasurable).prodMk
     ((hT 1).aemeasurable.min (hT 2).aemeasurable)
-  have := Measure.isProbabilityMeasure_map (μ := P) hZ
   have hA : MeasurableSet (Prod.fst ⁻¹' Iic s : Set (ℝ × ℝ)) :=
     measurableSet_Iic.preimage measurable_fst
   have hB : MeasurableSet (Prod.snd ⁻¹' Iic t : Set (ℝ × ℝ)) :=

@@ -93,18 +93,23 @@ section Finite
 variable {ι : Type*} [Fintype ι] [MeasurableSpace ι] [MeasurableSingletonClass ι]
   {P : Measure ι} [IsFiniteMeasure P] {ρ : (ι → ℝ) → ℝ}
 
+omit [Fintype ι] in
 /-- On a finite state space a pointwise smaller loss has the smaller risk: pointwise order implies
 almost-sure order, and every function is integrable. -/
-lemma mono_of_le (hρ : IsCoherentRiskMeasure P ρ) {X Y : ι → ℝ} (h : X ≤ Y) : ρ X ≤ ρ Y :=
+lemma mono_of_le [Finite ι] (hρ : IsCoherentRiskMeasure P ρ) {X Y : ι → ℝ} (h : X ≤ Y) :
+    ρ X ≤ ρ Y :=
   hρ.mono .of_finite .of_finite (ae_of_all _ h)
 
+omit [Fintype ι] in
 /-- A finite-state coherent risk measure is convex on all of `ℝ^ι`. -/
-lemma convexOn_univ (hρ : IsCoherentRiskMeasure P ρ) : ConvexOn ℝ Set.univ ρ := by
+lemma convexOn_univ [Finite ι] (hρ : IsCoherentRiskMeasure P ρ) : ConvexOn ℝ Set.univ ρ := by
   simpa [show {X : ι → ℝ | Integrable X P} = Set.univ from
     Set.eq_univ_of_forall fun _ ↦ .of_finite] using hρ.convexOn
 
+omit [Fintype ι] in
 /-- A finite-state coherent risk measure is continuous (a finite convex function on `ℝ^ι`). -/
-lemma continuous (hρ : IsCoherentRiskMeasure P ρ) : Continuous ρ := by
+lemma continuous [Finite ι] (hρ : IsCoherentRiskMeasure P ρ) : Continuous ρ := by
+  have := Fintype.ofFinite ι
   rw [← continuousOn_univ]
   exact hρ.convexOn_univ.continuousOn isOpen_univ
 

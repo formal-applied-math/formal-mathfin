@@ -39,7 +39,7 @@ theorem rectangleMargin_adapted (ha : Adapted 𝓕 X) (x R : ℝ) (δ : ℝ≥0)
     Adapted 𝓕 (rectangleMargin X x R δ) := by
   intro t
   have ht := ha t
-  letI : MeasurableSpace Ω := 𝓕 t
+  let : MeasurableSpace Ω := 𝓕 t
   exact measurable_const.max
       ((measurable_const.sub (ht.sub measurable_const).abs).min measurable_const)
 

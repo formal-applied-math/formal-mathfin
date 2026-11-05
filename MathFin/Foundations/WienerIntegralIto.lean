@@ -63,7 +63,7 @@ lemma measurePreserving_coe_timeMeasure_T (T : ℝ≥0) :
 `(a, ∞) × Ω` is a countable union of basic predictable rectangles `(a, n] × Ω`. -/
 lemma measurable_fst_predictable (𝓕 : Filtration ℝ≥0 mΩ) :
     Measurable[𝓕.predictable, inferInstance] (Prod.fst : ℝ≥0 × Ω → ℝ≥0) := by
-  letI : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
+  let : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
   refine measurable_of_Ioi fun a ↦ ?_
   have : (Prod.fst : ℝ≥0 × Ω → ℝ≥0) ⁻¹' Set.Ioi a = ⋃ n : ℕ, Set.Ioc a n ×ˢ (Set.univ : Set Ω) := by
     ext ⟨t, ω⟩
@@ -82,7 +82,7 @@ lemma measurePreserving_fst_trimMeasure_T (T : ℝ≥0) (hBmeas : ∀ t, Measura
     @MeasurePreserving _ _ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable _
       Prod.fst (ItoIntegralCLM.trimMeasure_T (μ := μ) T hBmeas) (ItoIntegralCLM.timeMeasure_T T) := by
   set 𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas
-  letI : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
+  let : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
   refine ⟨measurable_fst_predictable 𝓕, ?_⟩
   ext A hA
   rw [Measure.map_apply (measurable_fst_predictable 𝓕) hA, ItoIntegralCLM.trimMeasure_T,
@@ -119,7 +119,7 @@ lemma detEmbed_stepIndicatorLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) 
     detEmbed (μ := μ) T hBmeas (stepIndicatorLp T i) =
       simpleAssembly_T (μ := μ) T hBmeas
         (iocSP_T hBmeas i.2.1 i.2.2 (F := Set.univ) MeasurableSet.univ) := by
-  letI : MeasurableSpace (ℝ≥0 × Ω) := (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable
+  let : MeasurableSpace (ℝ≥0 × Ω) := (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable
   refine Lp.ext ?_
   have hA := (Lp.coeFn_compMeasurePreserving (p := 2) (stepIndicatorLp T i)
     (measurePreserving_coe_timeMeasure_T T)).trans
@@ -153,7 +153,7 @@ lemma itoSimpleLp_iocSP_T (hB : IsPreBrownianReal B μ) (T : ℝ≥0) (hBmeas : 
   refine MemLp.toLp_congr _ _ (Filter.Eventually.of_forall fun ω ↦ ?_)
   have hI : (ElementaryPredictableSet.IocProd i.1.1 i.1.2
       (𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)
-      (B := Set.univ) MeasurableSet.univ).I = {(i.1.1, i.1.2)} := if_pos i.2.1
+      (B := Set.univ) MeasurableSet.univ).I = {(i.1.1, i.1.2)} := ite_eq_left i.2.1
   unfold ItoIntegralL2.itoSimple
   have hsub : (iocSP_T hBmeas i.2.1 i.2.2 (F := Set.univ) MeasurableSet.univ).val.value.support ⊆
       {(i.1.1, i.1.2)} := fun p hp ↦ by
@@ -169,7 +169,7 @@ lemma itoSimpleLp_iocSP_T (hB : IsPreBrownianReal B μ) (T : ℝ≥0) (hBmeas : 
   rw [Finsupp.sum_of_support_subset _ hsub (fun p v ↦ v ω * (B p.2 ω - B p.1 ω))
     (fun p _ ↦ by simp), Finset.sum_singleton]
   simp only [iocSP_T, ElementaryPredictableSet.indicator, Finsupp.onFinset_apply, hI,
-    Finset.mem_singleton, if_true]
+    Finset.mem_singleton, ite_true]
   change Set.univ.indicator (fun _ ↦ (1 : ℝ)) ω * (B i.1.2 ω - B i.1.1 ω) = _
   simp
 

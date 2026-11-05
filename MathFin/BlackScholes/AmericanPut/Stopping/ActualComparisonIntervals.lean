@@ -88,7 +88,7 @@ theorem canonicalLogBoundary_below_line_time_interval {k h c d : ℝ}
   let f : ℝ → ℝ := fun t => canonicalLogBoundary k h t-(d-c*t)
   have hf : ContinuousOn f (Icc a m) :=
     ((canonicalLogBoundary_continuousOn hk hh hhk).mono
-      (fun t ht => ha.1.le.trans ht.1)).sub (by fun_prop)
+      (fun t (ht : t ∈ Icc a m) => ha.1.le.trans ht.1)).sub (by fun_prop)
   obtain ⟨T,haT,hTm,hzero,hpast⟩ := exists_first_nonnegative_contact hm.1 hf
     (show f a < 0 from sub_neg.mpr ha.2) (show 0 ≤ f m from sub_nonneg.mpr hn)
   have hmU : m < U := lt_of_le_of_ne hm.2 (by

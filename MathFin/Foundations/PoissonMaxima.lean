@@ -104,7 +104,7 @@ theorem measureReal_forall_lt_le_of_poisson {μ : Measure ℝ} [IsProbabilityMea
   have hsum := PoissonPgf.hasSum_poisson_weights_mul_pow r (cdf μ x)
   rw [measureReal_def, hevent, measure_iUnion hdisj fun n ↦
       (hNm (measurableSet_singleton n)).inter
-        ((measurable_pi_lambda _ fun i ↦ hYm i) (hSm n)),
+        ((Measurable.of_eval hYm : Measurable fun ω i ↦ Y i ω) (hSm n)),
     tsum_congr hpiece, ← ENNReal.ofReal_tsum_of_nonneg
       (fun n ↦ mul_nonneg (by positivity) (pow_nonneg (cdf_nonneg μ x) n)) hsum.summable,
     hsum.tsum_eq, ENNReal.toReal_ofReal (exp_pos _).le]
@@ -156,7 +156,7 @@ theorem exp_neg_mul_gpdTail {ξ β : ℝ} (hξ : ξ ≠ 0) (hβ : 0 < β) {l : �
       rw [hkey]
       exact div_nonpos_of_nonpos_of_nonneg hle hs.le
     rw [gpdTail_of_endpoint_le hξ hx hle, mul_zero, neg_zero, exp_zero,
-      gevCDF_of_nonpos hξ hnp, if_neg (not_lt.2 hneg.le)]
+      gevCDF_of_nonpos hξ hnp, ite_eq_right (not_lt.2 hneg.le)]
 
 /-- For `ξ = 0`, `λ > 0` and `x ≥ 0`, `exp(−λ e^{−x/β}) = H_0((x − β log λ)/β)`. -/
 theorem exp_neg_mul_gpdTail_zero {β : ℝ} (hβ : 0 < β) {l : ℝ} (hl : 0 < l) {x : ℝ}

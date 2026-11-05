@@ -49,7 +49,7 @@ theorem one_le_concurrency (t0 t1 : ι → ℝ) {t : ℝ} {i : ι}
   have h := Finset.single_le_sum
     (f := fun j ↦ if t ∈ Set.Icc (t0 j) (t1 j) then (1 : ℝ) else 0)
     (fun j _ ↦ by split <;> norm_num) (Finset.mem_univ i)
-  rwa [if_pos hi] at h
+  rwa [ite_eq_left hi] at h
 
 theorem concurrency_pos (t0 t1 : ι → ℝ) {t : ℝ} {i : ι}
     (hi : t ∈ Set.Icc (t0 i) (t1 i)) : 0 < concurrency t0 t1 t :=
@@ -61,9 +61,9 @@ theorem uniqueness_mem_Ioc (t0 t1 : ι → ℝ) {t : ℝ} {i : ι}
     (hi : t ∈ Set.Icc (t0 i) (t1 i)) : uniqueness t0 t1 t i ∈ Set.Ioc (0 : ℝ) 1 := by
   have hpos := concurrency_pos t0 t1 hi
   refine ⟨?_, ?_⟩
-  · rw [uniqueness, if_pos hi]
+  · rw [uniqueness, ite_eq_left hi]
     exact div_pos one_pos hpos
-  · rw [uniqueness, if_pos hi, div_le_one hpos]
+  · rw [uniqueness, ite_eq_left hi, div_le_one hpos]
     exact one_le_concurrency t0 t1 hi
 
 /-- **Concurrency of a pooled sample**: the labels of `ι ⊕ κ` active at `t` are those of `ι`

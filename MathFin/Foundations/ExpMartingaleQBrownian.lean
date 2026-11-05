@@ -344,7 +344,7 @@ theorem increments_iIndepFun_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) 
     ((h.measurable _).sub (h.measurable _)).aemeasurable
   refine (iIndepFun_iff_charFun_pi hX).mpr fun w ↦ ?_
   set c : ℕ → ℝ := fun k ↦ if hk : k < n then w ⟨k, hk⟩ else 0
-  have hc (i : Fin n) : c i = w i := dif_pos i.isLt
+  have hc (i : Fin n) : c i = w i := dite_eq_left i.isLt
   have hσ2 : 0 ≤ ∑ k ∈ Finset.range n, c k ^ 2 * ((t (k + 1) : ℝ) - (t k : ℝ)) :=
     Finset.sum_nonneg fun k _ ↦ mul_nonneg (sq_nonneg _)
       (sub_nonneg.mpr (NNReal.coe_le_coe.mpr (ht (Nat.le_add_right k 1))))
@@ -364,9 +364,9 @@ theorem increments_iIndepFun_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) 
       = charFun (Q.map fun ω ↦ ∑ k ∈ Finset.range n, c k * (Y (t (k + 1)) ω - Y (t k) ω)) 1 := by
         have hvec : Measurable fun ω ↦
             WithLp.toLp 2 fun i : Fin n ↦ Y (t ((i : ℕ) + 1)) ω - Y (t i) ω :=
-          (WithLp.measurable_toLp 2 _).comp <| measurable_pi_lambda
-            (fun ω (i : Fin n) ↦ Y (t ((i : ℕ) + 1)) ω - Y (t i) ω) fun i ↦
-              (h.measurable _).sub (h.measurable _)
+          (WithLp.measurable_toLp 2 _).comp
+            (Measurable.of_eval fun i ↦ (h.measurable _).sub (h.measurable _) :
+              Measurable fun ω (i : Fin n) ↦ Y (t ((i : ℕ) + 1)) ω - Y (t i) ω)
         have hlin : Measurable fun ω ↦ ∑ k ∈ Finset.range n, c k * (Y (t (k + 1)) ω - Y (t k) ω) :=
           Finset.measurable_sum _ fun k _ ↦ ((h.measurable _).sub (h.measurable _)).const_mul (c k)
         rw [charFun_apply, charFun_apply_real, integral_map hvec.aemeasurable (by fun_prop),

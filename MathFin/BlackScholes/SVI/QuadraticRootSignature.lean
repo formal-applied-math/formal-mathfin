@@ -37,7 +37,7 @@ theorem quadraticRoot_has_imaginary (a b : ℝ) (hb : b ≠ 0) (r : ℕ) (hr : 0
   let A := AdjoinRoot f
   have hdeg : f.natDegree = 2*r := by
     simp [f, natDegree_pow, positiveQuadratic_degree, Nat.mul_comm]
-  letI : Nontrivial A := AdjoinRoot.nontrivial f
+  let : Nontrivial A := AdjoinRoot.nontrivial f
     (ne_of_gt (natDegree_pos_iff_degree_pos.mp (by rw [hdeg]; omega)))
   let z : A := AdjoinRoot.root f
   let alpha : A := algebraMap ℝ A a

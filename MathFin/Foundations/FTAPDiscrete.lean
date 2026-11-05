@@ -71,7 +71,7 @@ open MeasureTheory ProbabilityTheory
 
 -- Heterogeneous use of one rich `variable` context: the algebraic transform
 -- lemmas need only `S`, and several theorems do not touch
--- `Nonempty`/`MeasurableSingletonClass`/`IsProbabilityMeasure`. Five scattered
+-- `MeasurableSingletonClass`/`IsProbabilityMeasure` (`Nonempty` is stated where an EMM is built). Five scattered
 -- `omit … in` clauses would be noisier than a single suppression, so we disable
 -- the unused-section-variable linter file-wide (deliberate, localized).
 set_option linter.unusedSectionVars false
@@ -88,11 +88,11 @@ lemma exists_bound_horizon {Ω : Type*} [Finite Ω] (N : ℕ) (φ : ℕ → Ω �
         (fun _ _ ↦ Finset.sum_nonneg fun _ _ ↦ abs_nonneg _)
         (Finset.mem_range.mpr (Nat.lt_succ_of_le hn)))⟩
 
-variable {Ω : Type*} [Fintype Ω] [Nonempty Ω] {mΩ : MeasurableSpace Ω}
+variable {Ω : Type*} [Fintype Ω] {mΩ : MeasurableSpace Ω}
   [MeasurableSingletonClass Ω] (𝓕 : Filtration ℕ mΩ)
   (P : Measure Ω) [IsProbabilityMeasure P] (S : ℕ → Ω → ℝ) (T : ℕ)
 
-omit [Fintype Ω] in
+omit [Fintype Ω] [MeasurableSingletonClass Ω] in
 /-- On a full-support measure a null set is empty — hence any two full-support
 measures on `Ω` are mutually absolutely continuous. -/
 private lemma eq_empty_of_pos_singleton {μ : Measure Ω} (hμ : ∀ ω, 0 < μ {ω})
@@ -155,7 +155,7 @@ theorem mem_gains_imp_predictable {g : Ω → ℝ} (hg : g ∈ gainsSubspace �
       rw [Finset.sum_eq_single t]
       · simp [incrementIndicator]
       · intro k _ hk
-        rw [if_neg (by omega : ¬ k + 1 = t + 1)]
+        rw [ite_eq_right (by omega : ¬ k + 1 = t + 1)]
         simp
       · intro ht
         exact absurd (Finset.mem_range.mpr htT) ht
@@ -169,16 +169,16 @@ theorem mem_gains_imp_predictable {g : Ω → ℝ} (hg : g ∈ gainsSubspace �
     obtain ⟨φ, hφ, hφeq⟩ := ih
     exact ⟨c • φ, fun n ↦ (hφ n).const_smul c, by rw [martingaleTransform_smul, hφeq]⟩
 
-omit [IsProbabilityMeasure P] in
-/-- Under no arbitrage, the attainable-gains subspace is disjoint from the
-standard simplex: a non-negative, non-zero gains vector would be an arbitrage. -/
+omit [IsProbabilityMeasure P] [MeasurableSingletonClass Ω] in
+/-- Under no arbitrage, the attainable-gains subspace contains no probability vector (a
+nonnegative `v` with `∑ ω, v ω = 1`): a nonnegative, nonzero gains vector would be an arbitrage. -/
 theorem gains_disjoint_stdSimplex (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage 𝓕 P S T) :
-    ∀ v ∈ gainsSubspace 𝓕 S T, v ∉ stdSimplex ℝ Ω := by
-  intro v hv hsimplex
+    ∀ v : Ω → ℝ, (∀ ω, 0 ≤ v ω) → ∑ ω, v ω = 1 → v ∉ gainsSubspace 𝓕 S T := by
+  intro v hnn hsum hv
   obtain ⟨φ, hφ, hφeq⟩ := mem_gains_imp_predictable 𝓕 S T hv
   -- The gains are `≥ 0` (`v` is in the simplex), so no arbitrage forces them `= 0`.
   have hge : 0 ≤ᵐ[P] martingaleTransform φ S T := by
-    rw [hφeq]; exact Filter.Eventually.of_forall fun ω ↦ hsimplex.1 ω
+    rw [hφeq]; exact Filter.Eventually.of_forall hnn
   have hzero : v =ᵐ[P] 0 := by
     rw [← hφeq]
     exact hNA φ (fun t _ ↦ hφ t) (exists_bound_horizon T φ) hge
@@ -187,7 +187,7 @@ theorem gains_disjoint_stdSimplex (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage �
     by_contra hcon
     simp only [not_exists, not_lt] at hcon
     have hle : ∑ ω, v ω ≤ 0 := Finset.sum_nonpos fun ω _ ↦ hcon ω
-    rw [hsimplex.2] at hle; linarith
+    rw [hsum] at hle; linarith
   have hnull : P {ω | v ω ≠ 0} = 0 := by simpa using ae_iff.mp hzero
   have hmem : ω₀ ∈ {ω | v ω ≠ 0} := ne_of_gt hω₀
   rw [eq_empty_of_pos_singleton hP hnull] at hmem
@@ -199,7 +199,7 @@ attainable gains give, once normalised, an equivalent martingale measure `Q`, wi
 `Q {ω} = q ω / ∑ q`. Strict positivity gives `Q ~ P`, and the annihilation of every
 increment-indicator gives the martingale property via the conditional-expectation
 characterisation. -/
-theorem exists_isEMM_of_pos_dual (hS : StronglyAdapted 𝓕 S)
+theorem exists_isEMM_of_pos_dual [Nonempty Ω] (hS : StronglyAdapted 𝓕 S)
     (hP : ∀ ω, 0 < P {ω}) {q : Ω → ℝ} (hq_pos : ∀ ω, 0 < q ω)
     (hq_dual : ∀ v ∈ gainsSubspace 𝓕 S T, ∑ ω, q ω * v ω = 0) :
     ∃ Q, IsEMM 𝓕 P S T Q ∧ ∀ ω, Q {ω} = ENNReal.ofReal (q ω / ∑ ω', q ω') := by
@@ -212,7 +212,7 @@ theorem exists_isEMM_of_pos_dual (hS : StronglyAdapted 𝓕 S)
       div_self hZpos.ne', ENNReal.ofReal_one]
   set Q : Measure Ω := (PMF.ofFintype (fun ω ↦ ENNReal.ofReal (q ω / Z)) hsum1).toMeasure
     with hQdef
-  haveI hQprob : IsProbabilityMeasure Q := by rw [hQdef]; infer_instance
+  have hQprob : IsProbabilityMeasure Q := by rw [hQdef]; infer_instance
   have hQsingle : ∀ ω, Q {ω} = ENNReal.ofReal (q ω / Z) := fun ω ↦ by
     rw [hQdef, PMF.toMeasure_apply_singleton _ _ (measurableSet_singleton ω), PMF.ofFintype_apply]
   have hQpos : ∀ ω, 0 < Q {ω} := fun ω ↦ by
@@ -253,7 +253,7 @@ omit [IsProbabilityMeasure P] [Fintype Ω] in
 /-- **Backward direction**: no arbitrage ⟹ an equivalent martingale measure exists. The
 separating dual `q` of the gains subspace (`exists_pos_dual_of_disjoint_stdSimplex`) is strictly
 positive and annihilates the gains, so it builds the EMM (`exists_isEMM_of_pos_dual`). -/
-theorem exists_isEMM_of_noArbitrage [Finite Ω] (hS : StronglyAdapted 𝓕 S)
+theorem exists_isEMM_of_noArbitrage [Finite Ω] [Nonempty Ω] (hS : StronglyAdapted 𝓕 S)
     (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage 𝓕 P S T) :
     ∃ Q, IsEMM 𝓕 P S T Q := by
   cases nonempty_fintype Ω
@@ -267,7 +267,7 @@ omit [IsProbabilityMeasure P] [Fintype Ω] in
 finite case of Dalang–Morton–Willinger): a finite-horizon, single-asset market
 on a finite full-support probability space has no arbitrage **iff** it admits an
 equivalent martingale measure. -/
-theorem ftap_discrete [Finite Ω] (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :
+theorem ftap_discrete [Finite Ω] [Nonempty Ω] (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :
     NoArbitrage 𝓕 P S T ↔ ∃ Q, IsEMM 𝓕 P S T Q :=
   ⟨fun hNA ↦ exists_isEMM_of_noArbitrage 𝓕 P S T hS hP hNA,
    fun ⟨_, hQ⟩ ↦ hQ.noArbitrage⟩
@@ -280,7 +280,7 @@ constant position, and `Q[· | ⊥]` is the plain expectation (`condExp_bot`). T
 market is then the one-period market of `Foundations/FTAPOnePeriod.lean` for the increment
 `S 1 − S 0`. -/
 
-omit [Nonempty Ω] [IsProbabilityMeasure P] [Fintype Ω] in
+omit [IsProbabilityMeasure P] [Fintype Ω] in
 /-- **At horizon `1` the discrete-time EMM is the one-period EMM.** With `𝓕 0 = ⊥` and `S`
 adapted, `Q` is an equivalent martingale measure for the one-step market iff it is one for
 the one-period excess return `S 1 − S 0`: the one-step martingale condition
@@ -295,7 +295,7 @@ theorem isEMM_one_iff_onePeriod [Finite Ω] (hS : StronglyAdapted 𝓕 S) (h0 : 
   have hmean (μ : Measure Ω) [IsProbabilityMeasure μ] : ∫ ω, S 0 ω ∂μ = c := by simp [hc]
   constructor
   · intro hQ
-    haveI := hQ.isProb
+    have := hQ.isProb
     have hm := (hQ.condExp_eq (Nat.zero_le 1) le_rfl).symm
     rw [h0, condExp_bot, hc] at hm
     obtain ⟨_, hcQ⟩ := hm.exists
@@ -304,7 +304,7 @@ theorem isEMM_one_iff_onePeriod [Finite Ω] (hS : StronglyAdapted 𝓕 S) (h0 : 
     rw [integral_sub Integrable.of_finite Integrable.of_finite, hmean Q]
     exact sub_eq_zero.mpr hcQ.symm
   · intro hQ
-    haveI := hQ.isProb
+    have := hQ.isProb
     refine .of_condExp_succ hQ.toIsEquivProbMeasure (fun t _ ↦ hS t)
       (fun t _ ↦ Integrable.of_finite) fun t ht ↦ ?_
     obtain rfl : t = 0 := by omega
@@ -313,7 +313,7 @@ theorem isEMM_one_iff_onePeriod [Finite Ω] (hS : StronglyAdapted 𝓕 S) (h0 : 
     rw [integral_sub Integrable.of_finite Integrable.of_finite, hmean Q] at hfair
     exact Filter.Eventually.of_forall fun _ ↦ (sub_eq_zero.mp hfair).symm
 
-omit [Fintype Ω] [Nonempty Ω] [MeasurableSingletonClass Ω] [IsProbabilityMeasure P] in
+omit [Fintype Ω] [MeasurableSingletonClass Ω] [IsProbabilityMeasure P] in
 /-- **At horizon `1` discrete-time no arbitrage is one-period no arbitrage.** With
 `𝓕 0 = ⊥`, a predictable strategy holds a constant `θ` over the single period, and its
 discounted gain `martingaleTransform φ S 1` is `θ · (S 1 − S 0)`. -/
@@ -359,7 +359,7 @@ theorem IsEMM.increment {F : Type*} [NormedAddCommGroup F] [InnerProductSpace �
     [FiniteDimensional ℝ F] {S : ℝ≥0 → Ω → F} {T : ℝ≥0} {Q : Measure Ω}
     (h : IsEMM 𝓕 P S T Q) {s t : ℝ≥0} (hs : s ≤ T) (ht : t ≤ T) :
     OnePeriodVector.IsEMM P (S t - S s) Q := by
-  haveI := h.isProb
+  have := h.isProb
   have hmean {u : ℝ≥0} (hu : u ≤ T) : ∫ ω, S u ω ∂Q = ∫ ω, S 0 ω ∂Q := by
     rw [← integral_condExp (𝓕.le 0)]
     exact integral_congr_ae (h.condExp_eq zero_le hu)

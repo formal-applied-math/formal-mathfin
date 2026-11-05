@@ -63,7 +63,7 @@ theorem abs_discreteTaylorRemainder_le {f f' f'' f''' : ℝ → ℝ}
       have h := ((hf' u).sub_const (f' x)).sub
         (((hasDerivAt_id u).sub_const x).const_mul (f'' x))
       simp only [id_eq] at h
-      convert h using 1 <;> first | rfl | ring
+      convert h using 1; ring
   have hL1 : ∀ t ∈ Set.uIcc x y, |f' t - f' x - f'' x * (t - x)| ≤ Cf3 * |y - x| ^ 2 := by
     intro t ht
     have h := (convex_uIcc x y).norm_image_sub_le_of_norm_hasDerivWithin_le
@@ -82,7 +82,7 @@ theorem abs_discreteTaylorRemainder_le {f f' f'' f''' : ℝ → ℝ}
         (((hasDerivAt_id u).sub_const x).const_mul (f' x))).sub
         ((((hasDerivAt_id u).sub_const x).pow 2).const_mul (1 / 2 * f'' x))
     simp only [id_eq] at h
-    convert h using 1 <;> first | rfl | ring
+    convert h using 1; ring
   have h := (convex_uIcc x y).norm_image_sub_le_of_norm_hasDerivWithin_le
     (fun u _ ↦ (hd0 u).hasDerivWithinAt)
     (fun u hu ↦ by rw [Real.norm_eq_abs]; exact hL1 u hu)
@@ -119,9 +119,6 @@ theorem integrable_increment_pow6 (t₀ t₁ : ℝ≥0) :
     have hfe : (fun x : ℝ ↦ |x| ^ 6) = fun x : ℝ ↦ x ^ 6 :=
       funext fun x ↦ by rw [pow_abs, abs_of_nonneg (by positivity)]
     rwa [hfe] at h
-  have hmap : Integrable (fun x : ℝ ↦ x ^ 6) (Measure.map (B t₁ - B t₀) μ) := by
-    rw [(hB.hasLaw_sub t₁ t₀).map_eq]; exact hg
-  exact (integrable_map_measure hmap.aestronglyMeasurable (hB.hasLaw_sub t₁ t₀).aemeasurable).mp
-      hmap
+  exact (hB.hasLaw_sub t₁ t₀).integrable_fun_comp hg
 
 end MathFin

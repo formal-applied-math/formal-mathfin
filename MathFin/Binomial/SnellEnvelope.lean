@@ -150,7 +150,7 @@ lemma snellAux_succ_of_mem {j : ℕ} (hj : j + 1 ∈ E) (q : ℝ) (Z : ℕ → (
     snellAux E q Z (j + 1) k ω = max (Z k ω)
       (q * snellAux E q Z j (k + 1) (Function.update ω k true)
         + (1 - q) * snellAux E q Z j (k + 1) (Function.update ω k false)) := by
-  rw [snellAux, if_pos hj]
+  rw [snellAux, ite_eq_left hj]
 
 /-- Envelope step off the exercise set: the bare node-average continuation. -/
 lemma snellAux_succ_of_notMem {j : ℕ} (hj : j + 1 ∉ E) (q : ℝ) (Z : ℕ → (ℕ → Bool) → ℝ) (k : ℕ)
@@ -158,7 +158,7 @@ lemma snellAux_succ_of_notMem {j : ℕ} (hj : j + 1 ∉ E) (q : ℝ) (Z : ℕ �
     snellAux E q Z (j + 1) k ω =
       q * snellAux E q Z j (k + 1) (Function.update ω k true)
         + (1 - q) * snellAux E q Z j (k + 1) (Function.update ω k false) := by
-  rw [snellAux, if_neg hj]
+  rw [snellAux, ite_eq_right hj]
 
 /-- **Dominance clause**: at the horizon and at every exercise date the envelope dominates
 the payoff. -/

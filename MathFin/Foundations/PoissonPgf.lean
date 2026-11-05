@@ -53,7 +53,6 @@ lemma hasSum_poisson_weights_mul_pow (r : ℝ≥0) (x : ℝ) :
   convert (NormedSpace.expSeries_div_hasSum_exp ((r : ℝ) * x)).mul_left
     (rexp (-(r : ℝ))) using 1 <;>
     first
-      | rfl
       | (funext n; rw [mul_pow]; ring)
       | (rw [← exp_eq_exp_ℝ, ← Real.exp_add]; congr 1; ring)
 

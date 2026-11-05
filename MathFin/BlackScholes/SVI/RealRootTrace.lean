@@ -56,7 +56,7 @@ theorem trace_realRoot_component (c : ℝ) (r : ℕ) (hr : 0 < r)
     Algebra.trace ℝ _ x = (r : ℝ) * realRootEval c r hr x := by
   have hf : (X-C c)^r ≠ (0 : ℝ[X]) := pow_ne_zero _ (X_sub_C_ne_zero c)
   let pb := AdjoinRoot.powerBasis hf
-  letI : Module.Free ℝ (AdjoinRoot ((X-C c)^r)) := Module.Free.of_basis pb.basis
+  let : Module.Free ℝ (AdjoinRoot ((X-C c)^r)) := Module.Free.of_basis pb.basis
   have hz := (Algebra.isNilpotent_trace_of_isNilpotent
     (R := ℝ) (realRoot_nilpotent_remainder c r hr x)).eq_zero
   rw [map_sub, Algebra.trace_algebraMap] at hz

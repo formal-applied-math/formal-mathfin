@@ -316,7 +316,7 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
   have hδεsm : AEStronglyMeasurable (fun ω ↦ M (unifPart T n (k + 1)) ω
       - M (unifPart T n k) ω
       - δ (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) μ :=
-    AEStronglyMeasurable.congr hDmem.1 haede.symm
+    AEStronglyMeasurable.congr hDmem.aestronglyMeasurable haede.symm
   have hpair : ∫ ω, |w ω * ((M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω
           - δ (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)))
         * ((M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)

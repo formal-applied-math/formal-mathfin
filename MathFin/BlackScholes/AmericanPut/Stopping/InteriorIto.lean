@@ -51,10 +51,9 @@ theorem brownianInteriorRule_ito_representation {p : ℝ → ℝ → ℝ} {b : �
     let θ := brownianInteriorRule (K := K) (S := S) hp T n
     ∃ M : ℝ≥0 → (ℝ≥0 → ℝ) → ℝ, (∀ ω, Continuous (fun t => M t ω)) ∧
       IsLocalMartingale M brownianAugFiltration gaussianLimit ∧
-      ∀ᵐ ω ∂gaussianLimit, ∀ t,
-        classicalCandidate brownian K r q σ S p T (min t (θ.time ω)) ω -
-          classicalCandidate brownian K r q σ S p T 0 ω =
-        {ω | 0 < θ.time ω}.indicator (fun ω => M (min t (θ.time ω)) ω) ω := by
+      (fun t ω => {ω | 0 < θ.time ω}.indicator (fun ω => M (min t (θ.time ω)) ω) ω)
+        ≡ᵐ[gaussianLimit] fun t ω => classicalCandidate brownian K r q σ S p T (min t (θ.time ω)) ω -
+          classicalCandidate brownian K r q σ S p T 0 ω := by
   classical
   let θ := brownianInteriorRule (K := K) (S := S) hp T n
   obtain ⟨G,hG,_,hpath⟩ := brownianInteriorRule_smooth_extension hp hK hS hσ T n
@@ -76,6 +75,7 @@ theorem brownianInteriorRule_ito_representation {p : ℝ → ℝ → ℝ} {b : �
     rw [hz,add_zero] at hω
     convert! hω using 1
   filter_upwards [ha] with ω hω t
+  symm
   by_cases hpos : 0 < θ.time ω
   · rw [Set.indicator_of_mem (show ω ∈ {ω | 0 < θ.time ω} from hpos)]
     rw [← (hpath ω hpos _ (min_le_right t (θ.time ω))).1,

@@ -598,14 +598,6 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 
 -- Poisson-process theory + Itô-process QV (2026-06-05 full-push round)
 
-/-- info: 'MathFin.PoissonSuperposition.poissonMeasure_conv_poissonMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.PoissonSuperposition.poissonMeasure_conv_poissonMeasure
-
-/-- info: 'MathFin.PoissonSuperposition.indepFun_map_add_poissonMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.PoissonSuperposition.indepFun_map_add_poissonMeasure
-
 /-- info: 'MathFin.PoissonThinning.markedPoissonMeasure_eq_prod' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.PoissonThinning.markedPoissonMeasure_eq_prod

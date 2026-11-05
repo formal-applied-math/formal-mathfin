@@ -60,18 +60,13 @@ lemma cdf_studentTMeasure_quantile (hν : 0 < ν) (hα : α ∈ Ioo 0 1) :
     cdf (studentTMeasure ν) (quantile (studentTMeasure ν) α) = α :=
   cdf_quantile (continuous_cdf_studentTMeasure hν) hα
 
-omit [IsProbabilityMeasure P] in
-/-- A Student-t loss with `ν > 1` is integrable. -/
-lemma integrable_of_hasLaw_studentTMeasure (hν : 1 < ν) (hT : HasLaw T (studentTMeasure ν) P) :
-    Integrable T P := by
+/-- The Student-t law with `ν > 1` has a mean: `id` is integrable. -/
+lemma integrable_id_studentTMeasure (hν : 1 < ν) : Integrable id (studentTMeasure ν) := by
   have hν0 : 0 < ν := by linarith
-  have h : Integrable id (studentTMeasure ν) := by
-    rw [studentTMeasure, integrable_withDensity_iff (measurable_studentTPDF ν)
-      (ae_of_all _ fun _ ↦ ENNReal.ofReal_lt_top)]
-    refine (integrable_mul_studentTPDFReal hν).congr (ae_of_all _ fun x ↦ ?_)
-    simp [studentTPDF, ENNReal.toReal_ofReal (studentTPDFReal_pos hν0 x).le]
-  rw [← hT.map_eq] at h
-  exact (integrable_map_measure aestronglyMeasurable_id hT.aemeasurable).1 h
+  rw [studentTMeasure, integrable_withDensity_iff (measurable_studentTPDF ν)
+    (ae_of_all _ fun _ ↦ ENNReal.ofReal_lt_top)]
+  refine (integrable_mul_studentTPDFReal hν).congr (ae_of_all _ fun x ↦ ?_)
+  simp [studentTPDF, ENNReal.toReal_ofReal (studentTPDFReal_pos hν0 x).le]
 
 /-- **Value-at-risk of a Student-t loss**: `VaR_α(μ + σ T) = μ + σ t_ν⁻¹(α)` for `T ~ t_ν` and
 `σ ≥ 0`. -/
@@ -107,7 +102,7 @@ theorem expectedShortfall_of_hasLaw_studentTMeasure_standard (hν : 1 < ν)
         (ae_of_all _ fun _ ↦ ENNReal.ofReal_lt_top) _ measurableSet_Ioi]
     refine setIntegral_congr_fun measurableSet_Ioi fun t _ ↦ ?_
     simp [studentTPDF, ENNReal.toReal_ofReal (studentTPDFReal_pos hν0 t).le, mul_comm]
-  rw [expectedShortfall_eq_acerbiTasche (integrable_of_hasLaw_studentTMeasure hν hT) hα, hVaR,
+  rw [expectedShortfall_eq_acerbiTasche (hT.integrable (integrable_id_studentTMeasure hν)) hα, hVaR,
     htail, hmoment, setIntegral_Ioi_mul_studentTPDFReal hν, sub_self, mul_zero, add_zero]
   ring
 
@@ -119,7 +114,7 @@ theorem expectedShortfall_of_hasLaw_studentTMeasure (hν : 1 < ν)
     expectedShortfall (fun ω ↦ μ + σ * T ω) P α =
       μ + σ * (studentTPDFReal ν (quantile (studentTMeasure ν) α) / (1 - α) *
         ((ν + quantile (studentTMeasure ν) α ^ 2) / (ν - 1))) := by
-  have hint := integrable_of_hasLaw_studentTMeasure hν hT
+  have hint := hT.integrable (integrable_id_studentTMeasure hν)
   rw [show (fun ω ↦ μ + σ * T ω) = fun ω ↦ σ * T ω + μ from funext fun _ ↦ add_comm _ _,
     expectedShortfall_add_const (hint.const_mul σ) hα, expectedShortfall_const_mul hint hα hσ,
     expectedShortfall_of_hasLaw_studentTMeasure_standard hν hT hα, add_comm]
@@ -130,7 +125,7 @@ theorem valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure (hν : 1 < ν
     (hT : HasLaw T (studentTMeasure ν) P) (hα : α ∈ Ioo 0 1) :
     valueAtRisk (fun ω ↦ μ + σ * T ω) P α ≤ expectedShortfall (fun ω ↦ μ + σ * T ω) P α :=
   valueAtRisk_le_expectedShortfall
-    ((integrable_const μ).add ((integrable_of_hasLaw_studentTMeasure hν hT).const_mul σ)) hα
+    ((integrable_const μ).add ((hT.integrable (integrable_id_studentTMeasure hν)).const_mul σ)) hα
 
 /-- **The closed forms inherit `VaR ≤ ES`**: at `q = t_ν⁻¹(α)` with `ν > 1`,
 `q ≤ g_ν(q)/(1 − α) · (ν + q²)/(ν − 1)`. An inequality about the Student-t density and quantile,
@@ -142,6 +137,6 @@ theorem quantile_studentTMeasure_le_expectedShortfall_closedForm (hν : 1 < ν) 
   have := isProbabilityMeasure_studentTMeasure (by linarith : 0 < ν)
   have hT : HasLaw id (studentTMeasure ν) (studentTMeasure ν) := .id
   rw [← expectedShortfall_of_hasLaw_studentTMeasure_standard hν hT hα, ← valueAtRisk_eq_quantile hT]
-  exact valueAtRisk_le_expectedShortfall (integrable_of_hasLaw_studentTMeasure hν hT) hα
+  exact valueAtRisk_le_expectedShortfall (hT.integrable (integrable_id_studentTMeasure hν)) hα
 
 end MathFin

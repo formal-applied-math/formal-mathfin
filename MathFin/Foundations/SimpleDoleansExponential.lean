@@ -72,7 +72,8 @@ private lemma condExp_exp_adapted_freeze_setIntegral
     · exact le_add_of_nonneg_of_le (Real.exp_nonneg _)
         (Real.exp_le_exp.mpr (mul_le_mul_of_nonpos_right hlo hΔ))
   have hbnd_int : Integrable (fun ω ↦ Real.exp (K * Δ ω) + Real.exp (-K * Δ ω)) P :=
-    (integrable_exp_mul_of_hasLaw hΔlaw K).add (integrable_exp_mul_of_hasLaw hΔlaw (-K))
+    (hΔlaw.integrable_fun_comp (integrable_exp_mul_gaussianReal K)).add
+      (hΔlaw.integrable_fun_comp (integrable_exp_mul_gaussianReal (-K)))
   -- The `𝓕_r`-measurable pair `Y = (c, 𝟙_A)` and the coupling `F ((cc,ind),z) = ind·exp(cc·z)`.
   set Y : Ω → ℝ × ℝ := fun ω ↦ (c ω, A.indicator (fun _ ↦ (1 : ℝ)) ω) with hYdef
   set F : (ℝ × ℝ) × ℝ → ℝ := fun p ↦ p.1.2 * Real.exp (p.1.1 * p.2) with hFdef
@@ -95,7 +96,7 @@ private lemma condExp_exp_adapted_freeze_setIntegral
     rw [hval, Real.norm_eq_abs, abs_mul, abs_of_nonneg (Real.exp_nonneg _)]
     by_cases hω : ω ∈ A
     · rw [Set.indicator_of_mem hω]; simp only [abs_one, one_mul]; exact hbound ω
-    · rw [Set.indicator_apply, if_neg hω, abs_zero, zero_mul]; positivity
+    · rw [Set.indicator_apply, ite_eq_right hω, abs_zero, zero_mul]; positivity
   have hFcomp_int : Integrable (fun ω ↦ F (Y ω, Δ ω)) P :=
     Integrable.mono' hbnd_int (hF_meas.comp (hY_meas.prodMk hΔ_meas)).aestronglyMeasurable
       (Filter.Eventually.of_forall hFcomp_le)
@@ -161,7 +162,8 @@ theorem condExp_exp_adapted_mul_increment
   -- Integrability of `f = exp(c·Δ)` and `g`.
   have hf_int : Integrable (fun ω ↦ Real.exp (c ω * (X t ω - X r ω))) P := by
     refine Integrable.mono'
-      ((integrable_exp_mul_of_hasLaw hΔlaw K).add (integrable_exp_mul_of_hasLaw hΔlaw (-K)))
+      ((hΔlaw.integrable_fun_comp (integrable_exp_mul_gaussianReal K)).add
+        (hΔlaw.integrable_fun_comp (integrable_exp_mul_gaussianReal (-K))))
       (hc_meas.mul h_meas_diff).exp.aestronglyMeasurable (Filter.Eventually.of_forall fun ω ↦ ?_)
     rw [Real.norm_of_nonneg (Real.exp_nonneg _)]
     obtain ⟨hlo, hhi⟩ := abs_le.mp (hK ω)
@@ -214,7 +216,8 @@ theorem condExp_expCell_eq_one {c : Ω → ℝ} {r : ℝ≥0}
   -- Domination bound reused for both `ft` and `gr·ft`.
   have hbnd_int : Integrable (fun ω ↦ Real.exp (K * (X t ω - X r ω))
       + Real.exp (-K * (X t ω - X r ω))) P :=
-    (integrable_exp_mul_of_hasLaw hΔlaw K).add (integrable_exp_mul_of_hasLaw hΔlaw (-K))
+    (hΔlaw.integrable_fun_comp (integrable_exp_mul_gaussianReal K)).add
+      (hΔlaw.integrable_fun_comp (integrable_exp_mul_gaussianReal (-K)))
   have hft_int : Integrable ft P := by
     refine Integrable.mono' hbnd_int (by fun_prop) (Filter.Eventually.of_forall fun ω ↦ ?_)
     rw [hftdef, Real.norm_of_nonneg (Real.exp_nonneg _)]
@@ -288,7 +291,8 @@ private lemma integrable_cellIncrement {c : Ω → ℝ} (hc_meas : Measurable c)
   have hpqr : (0 : ℝ) ≤ NNReal.toReal q - NNReal.toReal p :=
       sub_nonneg.mpr (NNReal.coe_le_coe.mpr hpq)
   refine Integrable.mono'
-    ((integrable_exp_mul_of_hasLaw hΔlaw K).add (integrable_exp_mul_of_hasLaw hΔlaw (-K)))
+    ((hΔlaw.integrable_fun_comp (integrable_exp_mul_gaussianReal K)).add
+      (hΔlaw.integrable_fun_comp (integrable_exp_mul_gaussianReal (-K))))
     (by fun_prop) (Filter.Eventually.of_forall fun ω ↦ ?_)
   rw [Real.norm_of_nonneg (Real.exp_nonneg _)]
   have hstep : Real.exp
@@ -434,8 +438,10 @@ theorem mul_cellExp_isMartingale {M : ℝ≥0 → Ω → ℝ} (hM : Martingale M
       have hMabs_int : Integrable (fun ω ↦ |M p ω|) P := (hM.integrable p).abs
       have hbnd : Integrable (fun ω ↦ |M p ω| * Real.exp (K * (X (min q t) ω - X p ω))
           + |M p ω| * Real.exp (-K * (X (min q t) ω - X p ω))) P :=
-        (hindepK.integrable_mul hMabs_int (integrable_exp_mul_of_hasLaw hΔlaw K)).add
-          (hindepnK.integrable_mul hMabs_int (integrable_exp_mul_of_hasLaw hΔlaw (-K)))
+        (hindepK.integrable_mul hMabs_int
+          (hΔlaw.integrable_fun_comp (integrable_exp_mul_gaussianReal K))).add
+          (hindepnK.integrable_mul hMabs_int
+            (hΔlaw.integrable_fun_comp (integrable_exp_mul_gaussianReal (-K))))
       rw [hcellval]
       have hpqr : (0 : ℝ) ≤ NNReal.toReal (min q t) - NNReal.toReal p :=
         sub_nonneg.mpr (NNReal.coe_le_coe.mpr hpqt)

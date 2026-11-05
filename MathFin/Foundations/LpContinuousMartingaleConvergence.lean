@@ -104,7 +104,7 @@ private lemma discreteSample_martingale
 
 /-- L^1-norm bound from L^p-norm bound on a finite measure space (Hölder). -/
 private lemma eLpNorm_one_le_of_eLpNorm_p
-    {μ : Measure Ω} [IsFiniteMeasure μ] {f : Ω → ℝ} {p : ℝ} (hp : 1 ≤ p)
+    {μ : Measure Ω} {f : Ω → ℝ} {p : ℝ} (hp : 1 ≤ p)
     {R : ℝ} (hR : eLpNorm f (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R)
     (hfm : AEStronglyMeasurable f μ) :
     eLpNorm f 1 μ ≤ ENNReal.ofReal R * μ Set.univ ^ ((1 : ℝ) - 1 / p) := by
@@ -338,7 +338,7 @@ private lemma eLpNorm_increment_p_tendsto_zero
       funext ω
       ring
     rw [h_eq]
-    exact eLpNorm_sub_le ((h_meas_M _).sub h_meas_L) ((h_meas_M _).sub h_meas_L) h_one_le_p
+    exact eLpNorm_sub_le h_one_le_p
   have h_rhs : Tendsto (fun n : ℕ ↦
       eLpNorm (fun ω ↦ M ((n : ℝ) + 1) ω - L ω) (ENNReal.ofReal p) μ +
       eLpNorm (fun ω ↦ M (n : ℝ) ω - L ω) (ENNReal.ofReal p) μ) atTop (𝓝 0) := by
@@ -399,7 +399,7 @@ private lemma integral_norm_increment_tendsto_zero
   have h_eq : (fun n : ℕ ↦ ∫ ω, ‖M ((n : ℝ) + 1) ω - M (n : ℝ) ω‖ ∂μ) =
       (fun n : ℕ ↦ (eLpNorm (fun ω ↦ M ((n : ℝ) + 1) ω - M (n : ℝ) ω) 1 μ).toReal) := by
     funext n
-    rw [integral_norm_eq_lintegral_enorm (h_meas n), eLpNorm_one_eq_lintegral_enorm]
+    rw [integral_norm_eq_lintegral_enorm (h_meas n), eLpNorm_one_eq_lintegral_enorm (h_meas n)]
   rw [h_eq]
   have h_toReal :
       Tendsto (fun n : ℕ ↦ (eLpNorm (fun ω ↦ M ((n : ℝ) + 1) ω - M (n : ℝ) ω) 1 μ).toReal)
@@ -409,14 +409,12 @@ private lemma integral_norm_increment_tendsto_zero
 
 /-- The L^1 integrability of each increment (each is in L^p, p > 1, on a finite measure space). -/
 private lemma increment_integrable
-    {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
+    {μ : Measure Ω} [IsFiniteMeasure μ]
     {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 < p)
-    (hM : Martingale M 𝓕 μ)
     (hbound : ∀ t, eLpNorm (M t) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R) (n : ℕ) :
     Integrable (fun ω ↦ M ((n : ℝ) + 1) ω - M (n : ℝ) ω) μ :=
   let memLp_at : ∀ t : ℝ, MemLp (M t) (ENNReal.ofReal p) μ := fun _ ↦
-    ⟨((hM.stronglyMeasurable _).mono (𝓕.le _)).aestronglyMeasurable,
-     (hbound _).trans_lt ENNReal.ofReal_lt_top⟩
+    (hbound _).trans_lt ENNReal.ofReal_lt_top
   ((memLp_at _).sub (memLp_at _)).integrable (ENNReal.one_le_ofReal.mpr hp.le)
 
 /-- Sup-in-measure: for each `ε > 0`, `μ.real {ω | ε ≤ sup_{t ≤ 1} |incrementProc M n t ω|} → 0`. -/
@@ -444,7 +442,7 @@ private lemma sup_increment_measure_tendsto_zero
       change ‖M ((n : ℝ) + ((1 : ℝ≥0) : ℝ)) ω - _‖ = _
       rw [NNReal.coe_one]
     rw [h_endpoint]
-    exact setIntegral_le_integral (increment_integrable hp hM hbound n).norm
+    exact setIntegral_le_integral (increment_integrable hp hbound n).norm
       (Filter.Eventually.of_forall fun _ ↦ norm_nonneg _)
   -- ε * μ.real S → 0 by sandwich with integral_norm_increment_tendsto_zero
   have h_int := integral_norm_increment_tendsto_zero hp hM hbound

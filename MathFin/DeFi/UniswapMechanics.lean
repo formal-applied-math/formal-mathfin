@@ -356,14 +356,14 @@ noncomputable def v3PositionValue (L a b s : ℝ) : ℝ :=
 holding `realReserveX L a b` at price `a²`. -/
 theorem v3PositionValue_at_lower (L a b : ℝ) :
     v3PositionValue L a b a = a ^ 2 * realReserveX L a b := by
-  rw [v3PositionValue, if_pos le_rfl]
+  rw [v3PositionValue, ite_eq_left le_rfl]
 
 /-- **All token Y at the upper end** of the range: at `s = b` the in-range X reserve is zero and
 the position is worth its full Y holding `realReserveY L b a`. -/
 theorem v3PositionValue_at_upper (L : ℝ) {a b : ℝ} (hab : a < b) :
     v3PositionValue L a b b = realReserveY L b a := by
-  rw [v3PositionValue, if_neg (not_le.mpr hab), if_pos le_rfl, realReserveX, sub_self, mul_zero,
-    mul_zero, add_zero]
+  rw [v3PositionValue, ite_eq_right (not_le.mpr hab), ite_eq_left le_rfl, realReserveX, sub_self,
+    mul_zero, mul_zero, add_zero]
 
 /-- **A v3 position has nonnegative value** for `L ≥ 0` and `0 < a ≤ b`. -/
 theorem v3PositionValue_nonneg {L a b s : ℝ} (hL : 0 ≤ L) (ha : 0 < a) (hab : a ≤ b) :
@@ -383,7 +383,7 @@ theorem v3PositionValue_nonneg {L a b s : ℝ} (hL : 0 ≤ L) (ha : 0 < a) (hab 
 theorem v3PositionValue_eq_coveredCall_of_le {L a b s : ℝ} (ha : 0 < a) (hab : a ≤ b)
     (hs : 0 ≤ s) (hsa : s ≤ a) :
     v3PositionValue L a b s = realReserveX L a b * (s ^ 2 - max (s ^ 2 - a * b) 0) := by
-  rw [v3PositionValue, if_pos hsa,
+  rw [v3PositionValue, ite_eq_left hsa,
     max_eq_right (by nlinarith [mul_le_mul hsa hsa hs ha.le, mul_le_mul_of_nonneg_left hab ha.le]),
     sub_zero, mul_comm]
 
@@ -394,7 +394,7 @@ theorem v3PositionValue_eq_coveredCall_of_lt {L a b s : ℝ} (ha : 0 < a) (hab :
     (hbs : b < s) :
     v3PositionValue L a b s = realReserveX L a b * (s ^ 2 - max (s ^ 2 - a * b) 0) := by
   have hb : 0 < b := ha.trans_le hab
-  rw [v3PositionValue, if_neg (not_le.mpr (hab.trans_lt hbs)), if_neg (not_le.mpr hbs),
+  rw [v3PositionValue, ite_eq_right (not_le.mpr (hab.trans_lt hbs)), ite_eq_right (not_le.mpr hbs),
     max_eq_left (by nlinarith [mul_le_mul hbs.le hbs.le hb.le (hb.trans hbs).le,
       mul_le_mul_of_nonneg_right hab hb.le]),
     sub_sub_cancel, realReserveX, realReserveY]
@@ -431,7 +431,7 @@ theorem coveredCall_sub_v3PositionValue {L a b s : ℝ} (hL : 0 ≤ L) (ha : 0 <
     mul_nonneg hL (sub_nonneg.mpr (one_div_le_one_div_of_le ha (has.le.trans hsb)))
   have h1 := realReserveX_mul_sq_sub_inRange (L := L) ha.ne' hb.ne' hs.ne'
   have h2 := realReserveX_mul_mul_sub_inRange (L := L) ha.ne' hb.ne' hs.ne'
-  rw [v3PositionValue, if_neg (not_le.mpr has), if_pos hsb]
+  rw [v3PositionValue, ite_eq_right (not_le.mpr has), ite_eq_left hsb]
   rcases le_total (s ^ 2) (a * b) with h | h
   · rw [max_eq_right (sub_nonpos.mpr h), sub_zero, h1, min_eq_left]
     nlinarith [mul_nonneg hX (sub_nonneg.mpr h)]

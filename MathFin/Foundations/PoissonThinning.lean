@@ -164,9 +164,9 @@ theorem thinned_streams₀ {M K : Ω → ℕ} (hM : AEMeasurable M μ) (hK : AEM
       = (poissonMeasure (p * r)).prod (poissonMeasure ((1 - p) * r)) := by
     rw [map_pair_eq_marked₀ hM hK hjoint, markedPoissonMeasure_eq_prod r hp]
   have hMlaw : μ.map M = poissonMeasure (p * r) := by
-    rw [← Measure.fst_map_prodMk₀ hK, hpair, Measure.fst_prod]
+    rw [← Measure.fst_map_prodMk₀ hM hK, hpair, Measure.fst_prod]
   have hKlaw : μ.map K = poissonMeasure ((1 - p) * r) := by
-    rw [← Measure.snd_map_prodMk₀ hM, hpair, Measure.snd_prod]
+    rw [← Measure.snd_map_prodMk₀ hM hK, hpair, Measure.snd_prod]
   have σM : SigmaFinite (μ.map M) := by rw [hMlaw]; infer_instance
   have σK : SigmaFinite (μ.map K) := by rw [hKlaw]; infer_instance
   refine ⟨hMlaw, hKlaw, ?_⟩
@@ -224,7 +224,7 @@ lemma setOf_filter_eq (Y : ℕ → Ω → α) (A : Set α) {n : ℕ} {S : Finset
     · intro hiS
       have hi := mem_range.1 (hS hiS)
       have hi' := h i hi
-      rw [if_pos hiS] at hi'
+      rw [ite_eq_left hiS] at hi'
       exact ⟨hi, hi'⟩
 
 open scoped Classical in
@@ -342,7 +342,7 @@ theorem thinned_streams_of_iid_marks [IsProbabilityMeasure μ] {r : ℝ≥0} {N 
     have h := prob_le_one (μ := μ) (s := Y 0 ⁻¹' A)
     rw [hpμ] at h
     exact_mod_cast h
-  have hYvec : AEMeasurable (fun ω i ↦ Y i ω) μ := (measurable_pi_lambda _ hY).aemeasurable
+  have hYvec : AEMeasurable (fun ω i ↦ Y i ω) μ := .of_eval fun i ↦ (hY i).aemeasurable
   -- the marks in `Aᶜ` are the marks not in `A`, so the two counts add up to the total
   have hsum (n : ℕ) (ω : Ω) : marksIn Y A n ω + marksIn Y Aᶜ n ω = n := by
     have h := card_filter_add_card_filter_not (s := range n) fun i ↦ Y i ω ∈ A

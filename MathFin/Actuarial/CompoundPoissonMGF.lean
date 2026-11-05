@@ -125,7 +125,7 @@ theorem compoundPoisson_mgf_of_indepFun (lam : ℝ≥0) (t : ℝ) {N : Ω → �
         integral_comp_of_hasLaw_of_countable
           (F := fun n x ↦ Real.exp (t * ∑ i ∈ Finset.range n, x i))
           (c := fun n ↦ mgf (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ t) hN
-          (aemeasurable_pi_lambda _ fun i ↦ (hident i).aemeasurable_fst) hNX hgm
+          (.of_eval fun i ↦ (hident i).aemeasurable_fst) hNX hgm
           (fun _ _ ↦ (Real.exp_pos _).le)
           (integrable_exp_mul_sum_range_of_iid t X hindep hident hint) (fun _ ↦ rfl) hcint
     _ = Real.exp ((lam : ℝ) * (mgf (X 0) μ t - 1)) :=

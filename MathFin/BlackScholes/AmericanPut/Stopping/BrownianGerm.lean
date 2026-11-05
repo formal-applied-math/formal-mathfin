@@ -123,7 +123,7 @@ theorem negativeProbeTest_zero {x : ℝ} (hx : -1 ≤ x) : negativeProbeTest x =
   exact (min_le_right _ _).trans (by linarith)
 
 theorem negativeProbeTest_integral_pos : 0 < ∫ x, negativeProbeTest x ∂gaussianReal 0 1 := by
-  letI : (gaussianReal 0 1).IsOpenPosMeasure :=
+  let : (gaussianReal 0 1).IsOpenPosMeasure :=
     (gaussianReal_absolutelyContinuous' 0 (by norm_num : (1 : ℝ≥0) ≠ 0)).isOpenPosMeasure
   have hi : Integrable negativeProbeTest (gaussianReal 0 1) :=
     (integrable_const (1 : ℝ)).mono_nonneg negativeProbeTest_continuous.aestronglyMeasurable

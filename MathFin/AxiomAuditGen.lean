@@ -511,9 +511,13 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.DiscreteVaR.finiteES_one_bond
 
-/-- info: 'MathFin.DiscreteVaR.oneQ_mem_simplex' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.DiscreteVaR.oneQ_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.DiscreteVaR.oneQ_mem_simplex
+#print axioms MathFin.DiscreteVaR.oneQ_nonneg
+
+/-- info: 'MathFin.DiscreteVaR.oneQ_sum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DiscreteVaR.oneQ_sum
 
 /-- info: 'MathFin.Dupire.dupire_pointwise' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -978,10 +982,6 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.PoissonPgf.integral_pow_poissonMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.PoissonPgf.integral_pow_poissonMeasure
-
-/-- info: 'MathFin.PoissonSuperposition.indepFun_map_add_poissonMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.PoissonSuperposition.indepFun_map_add_poissonMeasure
 
 /-- info: 'MathFin.PoissonSuperposition.map_add_count_eq_poissonMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

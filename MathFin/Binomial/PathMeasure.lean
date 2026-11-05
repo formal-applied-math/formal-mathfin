@@ -110,7 +110,7 @@ theorem coinFlipMeasure_cylinder (q : ℝ≥0) (hq : q ≤ 1) (path : ℕ → Bo
 def flips (N : ℕ) (ω : ℕ → Bool) : Fin N → Bool := fun i ↦ ω i
 
 lemma measurable_flips (N : ℕ) : Measurable (flips N) :=
-  measurable_pi_lambda _ fun i ↦ measurable_pi_apply (i : ℕ)
+  .of_eval fun i ↦ measurable_pi_apply (i : ℕ)
 
 /-- A function of the first `n` flips factors through `flips n`. -/
 lemma PathAdaptedAt.eq_comp_flips {n : ℕ} {f : (ℕ → Bool) → ℝ} (hf : PathAdaptedAt n f) :
@@ -196,11 +196,11 @@ lemma flips_preimage_singleton (n : ℕ) (x : Fin (n + 1) → Bool) :
     Set.mem_ofPred_eq]
   constructor
   · intro h k hk
-    rw [dif_pos (Nat.lt_succ_of_le hk)]
+    rw [dite_eq_left (Nat.lt_succ_of_le hk)]
     exact h ⟨k, Nat.lt_succ_of_le hk⟩
   · intro h i
     have hi := h i (Nat.le_of_lt_succ i.isLt)
-    rwa [dif_pos i.isLt] at hi
+    rwa [dite_eq_left i.isLt] at hi
 
 /-- The probability that the first `N` flips are `x` is `∏ᵢ Bernoulli(q)(xᵢ)`. -/
 theorem coinFlipMeasure_flips_preimage (q : ℝ≥0) (hq : q ≤ 1) (N : ℕ) (x : Fin N → Bool) :
@@ -315,7 +315,7 @@ theorem abs_spotPath_le (S₀ u d : ℝ) (k : ℕ) (ω : ℕ → Bool) :
   rw [spotPath, abs_mul, abs_prod]
   gcongr
   calc ∏ i ∈ range k, |if ω i then u else d| ≤ ∏ _i ∈ range k, max |u| |d| :=
-        prod_le_prod (fun _ _ ↦ abs_nonneg _) fun i _ ↦ by split_ifs <;> simp
+        prod_le_prod₀ (fun _ _ ↦ abs_nonneg _) fun i _ ↦ by split_ifs <;> simp
     _ = max |u| |d| ^ k := by simp
 
 section Martingale

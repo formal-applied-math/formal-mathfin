@@ -46,7 +46,7 @@ lemma drift_norm_le_iSup_Iic (hBmeas : ∀ t, Measurable (B t))
     (continuous_abs.comp (driftSimpleProcess_continuous hBmeas W ω)).comp continuous_subtype_val
   have hIic : (Set.Iic T : Set ℝ≥0) = Set.Icc 0 T := by
     ext x; simp only [Set.mem_Iic, Set.mem_Icc, zero_le, true_and]
-  haveI : CompactSpace (Set.Iic T) := isCompact_iff_compactSpace.mp (hIic ▸ isCompact_Icc)
+  have : CompactSpace (Set.Iic T) := isCompact_iff_compactSpace.mp (hIic ▸ isCompact_Icc)
   exact le_ciSup (isCompact_range hcont).bddAbove ⟨i, hi⟩
 
 /-! ## Layer 1 — the drift maximal estimate (direct Chebyshev) and Borel–Cantelli -/
@@ -77,8 +77,7 @@ lemma simpleAssembly_T_norm_sq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   have hmemV := memLp_uncurry_trim_T (μ := μ) T hBmeas W.val
   have hpredV := W.val.isStronglyPredictable
   have hmemV_prod : MemLp (Function.uncurry ⇑W.val) 2 ((timeMeasure_T T).prod μ) :=
-    ⟨(hpredV.mono 𝓕.predictable_le_prod).aestronglyMeasurable, by
-      rw [← eLpNorm_trim 𝓕.predictable_le_prod hpredV]; exact hmemV.2⟩
+    memLp_of_memLp_trim 𝓕.predictable_le_prod hmemV
   have hintV := hmemV_prod.integrable_sq
   rw [show simpleAssembly_T (μ := μ) T hBmeas W = hmemV.toLp (Function.uncurry ⇑W.val) from rfl,
     lp_two_norm_sq, integral_congr_ae (g := fun z ↦ (Function.uncurry ⇑W.val z) ^ 2)
@@ -99,7 +98,7 @@ lemma drift_iSup_sq_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (W : SimpleProcess ℝ (natFiltration hBmeas)) (ω : Ω) :
     (⨆ i : Set.Iic T, |driftSimpleProcess hBmeas W (i : ℝ≥0) ω|) ^ 2
       ≤ (T : ℝ) * ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑W s ω) ^ 2 ∂timeMeasure := by
-  haveI : Nonempty (Set.Iic T) := ⟨⟨0, by simp⟩⟩
+  have : Nonempty (Set.Iic T) := ⟨⟨0, by simp⟩⟩
   set R := (T : ℝ) * ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑W s ω) ^ 2 ∂timeMeasure
   have hR0 : 0 ≤ R := mul_nonneg T.coe_nonneg (integral_nonneg fun s ↦ sq_nonneg _)
   have hbound : (⨆ i : Set.Iic T, |driftSimpleProcess hBmeas W (i : ℝ≥0) ω|) ≤ Real.sqrt R :=
@@ -124,10 +123,8 @@ lemma drift_maximal_prob (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (W : T
       ≤ (ε ^ 2)⁻¹ * ((T : ℝ) * ‖simpleAssembly_T (μ := μ) T hBmeas W‖ ^ 2) := by
   set 𝓕 := natFiltration (mΩ := mΩ) hBmeas
   have hmemV := memLp_uncurry_trim_T (μ := μ) T hBmeas W.val
-  have hpredV := W.val.isStronglyPredictable
   have hmemV_prod : MemLp (Function.uncurry ⇑W.val) 2 ((timeMeasure_T T).prod μ) :=
-    ⟨(hpredV.mono 𝓕.predictable_le_prod).aestronglyMeasurable, by
-      rw [← eLpNorm_trim 𝓕.predictable_le_prod hpredV]; exact hmemV.2⟩
+    memLp_of_memLp_trim 𝓕.predictable_le_prod hmemV
   have hintV := hmemV_prod.integrable_sq
   have hfun_int : Integrable
       (fun ω ↦ (T : ℝ) * ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑W.val s ω) ^ 2 ∂timeMeasure) μ :=
@@ -294,7 +291,7 @@ theorem driftProcessAssembled_coeFn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
       (fun n ↦ Function.uncurry (driftSimpleProcess hBmeas (V n).val) z) atTop
       (𝓝 (Function.uncurry (driftContinuousMod T hBmeas g) z))} with hC
   have hCpred : MeasurableSet[(natFiltration hBmeas).predictable] C := by
-    letI : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration hBmeas).predictable
+    let : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration hBmeas).predictable
     exact measurableSet_tendsto_fun (fun n ↦ (hGpred n).measurable) hHpred.measurable
   -- C is prod-conull, built from the per-slice a.e. convergence of Layer 2
   have hCprod : ∀ᵐ z ∂((timeMeasure_T T).prod μ), z ∈ C := by
@@ -331,7 +328,8 @@ theorem driftProcessAssembled_coeFn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
     rw [hrw]
     exact ((driftProcessAssembled (μ := μ) T hBmeas).continuous.tendsto g).comp hsa
   -- two convergences in measure, then a.e.-uniqueness
-  have hGmeas := fun n ↦ (memLp_uncurry_driftSimpleProcess (μ := μ) T hBmeas (V n).val).1
+  have hGmeas := fun n ↦
+    (memLp_uncurry_driftSimpleProcess (μ := μ) T hBmeas (V n).val).aestronglyMeasurable
   have hmeasG : TendstoInMeasure (trimMeasure_T (μ := μ) T hBmeas)
       (fun n ↦ Function.uncurry (driftSimpleProcess hBmeas (V n).val)) atTop
       (Function.uncurry (driftContinuousMod T hBmeas g)) :=
@@ -348,7 +346,7 @@ theorem driftProcessAssembled_coeFn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
   have hmeasP : TendstoInMeasure (trimMeasure_T (μ := μ) T hBmeas)
       (fun n ↦ Function.uncurry (driftSimpleProcess hBmeas (V n).val)) atTop
       (⇑(driftProcessAssembled (μ := μ) T hBmeas g)) :=
-    tendstoInMeasure_of_tendsto_eLpNorm (by norm_num) hGmeas (Lp.aestronglyMeasurable _) heLp
+    tendstoInMeasure_of_tendsto_eLpNorm (by norm_num) heLp
   exact (tendstoInMeasure_ae_unique hmeasG hmeasP).symm
 
 /-! ## Layer 4 refinement — the pathwise drift as an honest single Lebesgue integral -/
@@ -379,11 +377,7 @@ theorem drift_slice_energy_eq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
       =ᵐ[(timeMeasure_T T).prod μ] fun z ↦ (⇑W.val z.1 z.2 - ⇑g z) ^ 2 := by
     filter_upwards [hcoe_prod] with z hz; rw [hz]
   -- ⇑h is L² over the product, so (⇑h)² is integrable there
-  have hmemh_prod : MemLp (⇑h) 2 ((timeMeasure_T T).prod μ) :=
-    ⟨aestronglyMeasurable_of_aestronglyMeasurable_trim 𝓕.predictable_le_prod
-      (Lp.aestronglyMeasurable h),
-     by rw [← eLpNorm_trim_ae 𝓕.predictable_le_prod (Lp.aestronglyMeasurable h)]
-        exact (Lp.memLp h).2⟩
+  have hmemh_prod : MemLp (⇑h) 2 ((timeMeasure_T T).prod μ) := memLp_prod_of_lp T hBmeas h
   have hinth : Integrable (fun z ↦ (⇑h z) ^ 2) ((timeMeasure_T T).prod μ) :=
       hmemh_prod.integrable_sq
   have hintdiff : Integrable (fun z ↦ (⇑W.val z.1 z.2 - ⇑g z) ^ 2) ((timeMeasure_T T).prod μ) :=
@@ -411,12 +405,8 @@ theorem drift_slice_sq_integrable (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t
     rw [hz1, Pi.sub_apply, hz2]; rfl
   have hcoe : ⇑h =ᵐ[(timeMeasure_T T).prod μ] fun z ↦ ⇑W.val z.1 z.2 - ⇑g z :=
     ae_eq_of_ae_eq_trim hcoe_trim
-  have hmem : MemLp (⇑h) 2 ((timeMeasure_T T).prod μ) :=
-    ⟨aestronglyMeasurable_of_aestronglyMeasurable_trim 𝓕.predictable_le_prod
-        (Lp.aestronglyMeasurable h),
-     by rw [← eLpNorm_trim_ae 𝓕.predictable_le_prod (Lp.aestronglyMeasurable h)]; exact
-         (Lp.memLp h).2⟩
-  exact hmem.integrable_sq.congr (by filter_upwards [hcoe] with z hz; rw [hz])
+  exact (memLp_prod_of_lp T hBmeas h).integrable_sq.congr
+    (by filter_upwards [hcoe] with z hz; rw [hz])
 
 /-- **The pathwise drift limit is a Lebesgue integral.** For every `t ≤ T`, the pointwise `limUnder`
 drift `driftContinuousMod T g t ω` equals the time integral `∫_{(0,t]} ⇑g(s,ω) ds` of the
@@ -434,16 +424,12 @@ theorem driftContinuousMod_eq_setIntegral (T : ℝ≥0) (hBmeas : ∀ t, Measura
       = ∫ s in Set.Ioc (0 : ℝ≥0) t, ⇑g (s, ω) ∂timeMeasure := by
   set V := (approxSeq T hBmeas g).choose with hVdef
   have hV := (approxSeq T hBmeas g).choose_spec
-  haveI : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) t)) :=
+  have : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) t)) :=
     ⟨by rw [Measure.restrict_apply_univ, timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
-  have hg_prod : MemLp (⇑g) 2 ((timeMeasure_T T).prod μ) :=
-    ⟨aestronglyMeasurable_of_aestronglyMeasurable_trim (natFiltration hBmeas).predictable_le_prod
-      (Lp.aestronglyMeasurable g),
-     by rw [← eLpNorm_trim_ae (natFiltration hBmeas).predictable_le_prod
-         (Lp.aestronglyMeasurable g)]
-        exact (Lp.memLp g).2⟩
+  have hg_prod : MemLp (⇑g) 2 ((timeMeasure_T T).prod μ) := memLp_prod_of_lp T hBmeas g
   have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s ↦ ⇑g (s, ω)) 2 (timeMeasure_T T) := by
-    filter_upwards [hg_prod.1.prodMk_right, hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
+    filter_upwards [hg_prod.aestronglyMeasurable.prodMk_right,
+      hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
     exact (memLp_two_iff_integrable_sq hω1).mpr hω2
   -- the ω-slice energy and its L¹(μ) decay
   set D : ℕ → Ω → ℝ := fun n ω ↦
@@ -468,13 +454,12 @@ theorem driftContinuousMod_eq_setIntegral (T : ℝ≥0) (hBmeas : ∀ t, Measura
         refine lintegral_congr_ae ?_
         filter_upwards [hDnn n] with ω hω
         rw [Real.enorm_eq_ofReal_abs, abs_of_nonneg hω]
-      rw [hsub, eLpNorm_one_eq_lintegral_enorm, hlint,
+      rw [hsub, eLpNorm_one_eq_lintegral_enorm (hDint n).aestronglyMeasurable, hlint,
         ← ofReal_integral_eq_lintegral_ofReal (hDint n) (hDnn n)]
     rw [tendsto_congr hrw, ← ENNReal.ofReal_zero]
     exact (ENNReal.continuous_ofReal.tendsto 0).comp hD0
   have hDmeasure : TendstoInMeasure μ D atTop (fun _ ↦ (0 : ℝ)) :=
-    tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero (fun n ↦ (hDint n).aestronglyMeasurable)
-      aestronglyMeasurable_const hDeLp
+    tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero hDeLp
   obtain ⟨ns, hns_mono, hns_ae⟩ := hDmeasure.exists_seq_tendsto_ae
   -- combine, a.e. ω
   filter_upwards [hns_ae, hg_slice, driftContinuousMod_tendsto T hBmeas g] with ω hωD hωg hωlim

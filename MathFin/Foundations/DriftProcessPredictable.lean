@@ -146,7 +146,7 @@ theorem driftContinuousMod_isStronglyPredictable (T : ℝ≥0) (hBmeas : ∀ t, 
             ((approxSeq T hBmeas φ).choose n).val) z) := by
     funext z; rfl
   rw [hrw]
-  letI : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration hBmeas).predictable
+  let : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration hBmeas).predictable
   exact StronglyMeasurable.limUnder (fun n ↦
     driftSimpleProcess_isStronglyPredictable hBmeas
       ((approxSeq T hBmeas φ).choose n).val)
@@ -161,7 +161,7 @@ theorem driftContinuousMod_stronglyAdapted (T : ℝ≥0) (hBmeas : ∀ t, Measur
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     StronglyAdapted (natFiltration hBmeas) (driftContinuousMod T hBmeas φ) := by
   intro t
-  letI : MeasurableSpace Ω := (natFiltration hBmeas t : MeasurableSpace Ω)
+  let : MeasurableSpace Ω := (natFiltration hBmeas t : MeasurableSpace Ω)
   exact StronglyMeasurable.limUnder fun n ↦
     driftSimpleProcess_stronglyAdapted hBmeas ((approxSeq T hBmeas φ).choose n).val t
 
@@ -336,11 +336,9 @@ theorem driftSimpleProcessLp_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (
     -- ∫ (drift)² ∂prod ≤ (T:ℝ)² · ∫ (⇑V)² ∂prod
     have hmemD_prod : MemLp (Function.uncurry (driftSimpleProcess hBmeas V.val)) 2
         ((timeMeasure_T T).prod μ) :=
-      ⟨(hpredD.mono 𝓕.predictable_le_prod).aestronglyMeasurable, by
-        rw [← eLpNorm_trim 𝓕.predictable_le_prod hpredD]; exact hmemD.2⟩
+      memLp_of_memLp_trim 𝓕.predictable_le_prod hmemD
     have hmemV_prod : MemLp (Function.uncurry ⇑V.val) 2 ((timeMeasure_T T).prod μ) :=
-      ⟨(V.val.isStronglyPredictable.mono 𝓕.predictable_le_prod).aestronglyMeasurable, by
-        rw [← eLpNorm_trim 𝓕.predictable_le_prod V.val.isStronglyPredictable]; exact hmemV.2⟩
+      memLp_of_memLp_trim 𝓕.predictable_le_prod hmemV
     have hintD := hmemD_prod.integrable_sq
     have hintV := hmemV_prod.integrable_sq
     rw [integral_prod _ hintD]

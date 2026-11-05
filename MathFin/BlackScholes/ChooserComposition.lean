@@ -218,7 +218,9 @@ theorem chooser_price_eq_expected_payoff {S_0 K r σ T t_1 : ℝ} {Z : Ω → �
   have hC : Integrable
       (fun ω ↦ Real.exp (-r * t_1) * bsV K r σ (bsTerminal S_0 r σ t_1 (Z ω)) (T - t_1)) Q :=
     (integrable_bsV_mul_exp (bsLogReturn_hasLaw h).aemeasurable
-      (by simpa only [one_mul] using integrable_exp_mul_of_hasLaw (bsLogReturn_hasLaw h) 1) h.S_0_pos h.K_pos
+      (by simpa only [one_mul] using
+        (bsLogReturn_hasLaw h).integrable_fun_comp (integrable_exp_mul_gaussianReal 1))
+      h.S_0_pos h.K_pos
       h.σ_pos (sub_pos.mpr ht)).const_mul _
   simp_rw [hpt]
   rw [integral_add hC

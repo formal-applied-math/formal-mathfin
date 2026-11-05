@@ -213,7 +213,7 @@ private lemma integral_adapted_mul_compensated_sq_sub (N : PoissonRandomMeasure 
     (hφint : Integrable φ P) :
     ∫ ω, φ ω * (N.compensated D ω) ^ 2 ∂P = (∫ ω, φ ω ∂P) * (referenceIntensity ν D).toReal := by
   rw [(adapted_indepFun_compensated_sub N hDms hDsub hφ).integral_mul_sq
-      hφint.aestronglyMeasurable (memLp_compensated N hDms hDfin).1,
+      hφint.aestronglyMeasurable (memLp_compensated N hDms hDfin).aestronglyMeasurable,
     compensated_integral_sq N hDms hDfin]
 
 /-- **The weighted future bilinear pairing** — the covariance carrying a past-adapted weight. For

@@ -214,15 +214,15 @@ theorem tendsto_juAlpha_div_juH_zero_rate {σ T : ℝ} (hT : T ≠ 0) :
 
 /-- `ρ` is continuous at `r = 0`: the extension `ρ(0) = 2/(σ²T)` is the limit. -/
 theorem continuousAt_juRho_zero {σ T : ℝ} (hT : T ≠ 0) : ContinuousAt (juRho σ T) 0 := by
-  rw [← continuousWithinAt_compl_self, ContinuousWithinAt, juRho, if_pos rfl]
+  rw [← continuousWithinAt_compl_self, ContinuousWithinAt, juRho, ite_eq_left rfl]
   refine (tendsto_juAlpha_div_juH_zero_rate hT).congr' ?_
   filter_upwards [self_mem_nhdsWithin] with r (hr : r ≠ 0)
-  rw [juRho, if_neg hr]
+  rw [juRho, ite_eq_right hr]
 
 /-! ### The fix preserves semantics: raw = stable for `r ≠ 0` -/
 
 lemma juRootRaw_eq (q σ T : ℝ) {r : ℝ} (hr : r ≠ 0) : juRootRaw q σ T r = juRoot q σ T r := by
-  rw [juRootRaw, juRoot, juRho, if_neg hr]
+  rw [juRootRaw, juRoot, juRho, ite_eq_right hr]
 
 lemma juLambdaRaw_eq (φ q σ T : ℝ) {r : ℝ} (hr : r ≠ 0) :
     juLambdaRaw φ q σ T r = juLambda φ q σ T r := by
@@ -231,7 +231,7 @@ lemma juLambdaRaw_eq (φ q σ T : ℝ) {r : ℝ} (hr : r ≠ 0) :
 /-- `α·λ′ = −φρ²/√((N − 1)² + 4ρ)`: the `O(1/r)` factor `λ′` times `α = O(r)`. -/
 lemma juAlpha_mul_juLambdaPrime (φ q σ T : ℝ) {r : ℝ} (hr : r ≠ 0) :
     juAlpha σ r * juLambdaPrime φ q σ T r = juAlphaLambdaPrime φ q σ T r := by
-  rw [juLambdaPrime, juAlphaLambdaPrime, juRootRaw_eq q σ T hr, juRho, if_neg hr]
+  rw [juLambdaPrime, juAlphaLambdaPrime, juRootRaw_eq q σ T hr, juRho, ite_eq_right hr]
   ring
 
 /-- `α·V_E_h` in the stable form: `α·part1` cancels the `1/α`, and `α/log DR = −2/(σ²T)`. -/
@@ -248,7 +248,7 @@ lemma juBRaw_eq (φ q σ T : ℝ) {r : ℝ} (hr : r ≠ 0) : juBRaw φ q σ T r 
 lemma juCRaw_eq (φ K q : ℝ) {σ T r : ℝ} (hσ : σ ≠ 0) (hT : T ≠ 0) (hr : r ≠ 0) (Sk : ℝ) :
     juCRaw φ K q σ T r Sk = juC φ K q σ T r Sk := by
   rw [juCRaw, juC, juLambdaRaw_eq φ q σ T hr, ← juAlpha_mul_juLambdaPrime φ q σ T hr,
-    ← juAlpha_mul_juVEhRaw φ K q hσ hT hr, juRho, if_neg hr]
+    ← juAlpha_mul_juVEhRaw φ K q hσ hT hr, juRho, ite_eq_right hr]
   ring
 
 /-- **The fix preserves semantics.** For every `σ ≠ 0`, `T ≠ 0` and `r ≠ 0` the post-fix
@@ -270,7 +270,7 @@ lemma two_mul_juLambda_add_juBeta_sub_one (φ q σ T r : ℝ) :
   rw [juLambda]; ring
 
 lemma juRoot_zero_pos (q : ℝ) {σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) : 0 < juRoot q σ T 0 := by
-  rw [juRoot, juRho, if_pos rfl]
+  rw [juRoot, juRho, ite_eq_left rfl]
   exact Real.sqrt_pos.2 (by positivity)
 
 /-- **Headline: the pre-fix price tends to the post-fix price at `r = 0`** — conditionally.
@@ -397,7 +397,7 @@ theorem put_intrinsic_le_parityBound {K r q σ S T : ℝ} (hK : 0 < K) (hσ : 0 
 /-- At `r = 0` the put's `q_QD` (`φ = −1`) is negative, whatever `q`. -/
 lemma juLambda_neg_one_zero_neg (q : ℝ) {σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
     juLambda (-1) q σ T 0 < 0 := by
-  have h4 : 0 < 4 * juRho σ T 0 := by rw [juRho, if_pos rfl]; positivity
+  have h4 : 0 < 4 * juRho σ T 0 := by rw [juRho, ite_eq_left rfl]; positivity
   have : -(juBeta q σ 0 - 1) < juRoot q σ T 0 := by
     calc -(juBeta q σ 0 - 1) ≤ |juBeta q σ 0 - 1| := neg_le_abs _
       _ = Real.sqrt ((juBeta q σ 0 - 1) ^ 2) := (Real.sqrt_sq_eq_abs _).symm

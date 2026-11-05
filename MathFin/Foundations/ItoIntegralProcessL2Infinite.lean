@@ -66,8 +66,8 @@ private lemma clamp_value_apply (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
   rw [Finsupp.support_filter, Finset.mem_filter] at ha
   rw [Finsupp.single_apply]
   by_cases h : (a.1, a.2 ⊓ T) = p
-  · simp only [if_pos h, Finsupp.filter_apply_pos (fun q ↦ q.1 ≤ T) V.value ha.2]
-  · simp only [if_neg h, Pi.zero_apply]
+  · simp only [ite_eq_left h, Finsupp.filter_apply_pos (fun q ↦ q.1 ≤ T) V.value ha.2]
+  · simp only [ite_eq_right h, Pi.zero_apply]
 
 /-- **The `[0,T]` clamp of a simple process.** -/
 noncomputable def clampSP (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
@@ -87,11 +87,11 @@ noncomputable def clampSP (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
         from funext fun ω ↦ clamp_value_apply T hBmeas V p ω]
     refine Finset.measurable_sum _ fun a ha ↦ ?_
     by_cases h : (a.1, a.2 ⊓ T) = p
-    · simp only [if_pos h]
+    · simp only [ite_eq_left h]
       rw [Finsupp.support_filter, Finset.mem_filter] at ha
       have hp1 : a.1 = p.1 := (Prod.ext_iff.mp h).1
       exact hp1 ▸ V.measurable_value a
-    · simp only [if_neg h]; exact measurable_const
+    · simp only [ite_eq_right h]; exact measurable_const
   bounded_valueBot := V.bounded_valueBot
   bounded_value := by
     refine ⟨(V.value.filter (fun q ↦ q.1 ≤ T)).support.card • |V.valueBound|, fun p hp ω ↦ ?_⟩
@@ -103,9 +103,9 @@ noncomputable def clampSP (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
       _ ≤ ∑ _a ∈ (V.value.filter (fun q ↦ q.1 ≤ T)).support, |V.valueBound| := by
           refine Finset.sum_le_sum fun a ha ↦ ?_
           by_cases h : (a.1, a.2 ⊓ T) = p
-          · simp only [if_pos h]
+          · simp only [ite_eq_left h]
             exact (V.value_le_valueBound a ω).trans (le_abs_self _)
-          · simp only [if_neg h, norm_zero]; exact abs_nonneg _
+          · simp only [ite_eq_right h, norm_zero]; exact abs_nonneg _
       _ = (V.value.filter (fun q ↦ q.1 ≤ T)).support.card • |V.valueBound| := by
           rw [Finset.sum_const]
 
@@ -128,9 +128,9 @@ private lemma clampSP_value_sum {N : Type*} [AddCommMonoid N] (T : ℝ≥0)
   conv_rhs => rw [Finsupp.sum]
   refine Finset.sum_congr rfl fun a ha ↦ ?_
   by_cases hP : a.1 ≤ T
-  · rw [if_pos hP, Finsupp.filter_apply_pos (fun q ↦ q.1 ≤ T) V.value hP]
+  · rw [ite_eq_left hP, Finsupp.filter_apply_pos (fun q ↦ q.1 ≤ T) V.value hP]
     exact hclamp a ha hP
-  · rw [if_neg hP]
+  · rw [ite_eq_right hP]
     exact (hdrop a ha (not_le.mp hP)).symm
 
 /-- **Clamp preserves the `[0,t]` discrete Itô integral for `t ≤ T`.** -/

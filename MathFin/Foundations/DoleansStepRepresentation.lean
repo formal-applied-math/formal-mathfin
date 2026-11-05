@@ -118,7 +118,7 @@ theorem constDoleans_band_mem_range (hBmeas : ∀ t, Measurable (B t))
       (fun ω ↦ Real.exp (σ * B b ω - σ ^ 2 * (b : ℝ) / 2)
           - Real.exp (σ * B a ω - σ ^ 2 * (a : ℝ) / 2))
         =ᵐ[μ] ⇑(itoIntegralCLM_T hB T hBmeas φ) := by
-  haveI : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
+  have : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
   obtain ⟨ψ, hψ⟩ := constDoleans_sub_one_mem_range hB hBmeas hBcont T σ
   have haT : a ≤ T := hab.trans hbT
   -- the Itô-integral process of `ψ` is the Wald exponential minus one
@@ -139,10 +139,10 @@ theorem constDoleans_band_mem_range (hBmeas : ∀ t, Measurable (B t))
   have hcutb := coeFn_restrictAfterCLM T b hBmeas ψ
   refine ⟨restrictAfterCLM T a hBmeas ψ - restrictAfterCLM T b hBmeas ψ, ?_, ?_, ?_⟩
   · filter_upwards [hcut, hcuta, hcutb] with p h1 h2 h3 hpa
-    rw [h1, Pi.sub_apply, h2, h3, if_neg (not_lt.mpr hpa), if_neg (not_lt.mpr (hpa.trans hab)),
-      sub_self]
+    rw [h1, Pi.sub_apply, h2, h3, ite_eq_right (not_lt.mpr hpa),
+      ite_eq_right (not_lt.mpr (hpa.trans hab)), sub_self]
   · filter_upwards [hcut, hcuta, hcutb] with p h1 h2 h3 hpb
-    rw [h1, Pi.sub_apply, h2, h3, if_pos (lt_of_le_of_lt hab hpb), if_pos hpb, sub_self]
+    rw [h1, Pi.sub_apply, h2, h3, ite_eq_left (lt_of_le_of_lt hab hpb), ite_eq_left hpb, sub_self]
   · rw [map_sub, itoIntegralCLM_T_restrictAfterCLM hB T a haT hBmeas ψ,
       itoIntegralCLM_T_restrictAfterCLM hB T b hbT hBmeas ψ]
     filter_upwards [Lp.coeFn_sub (itoIntegralCLM_T hB T hBmeas ψ - itoProcessCLM hB T a hBmeas ψ)

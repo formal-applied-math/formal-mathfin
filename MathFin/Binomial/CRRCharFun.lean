@@ -259,7 +259,7 @@ function of the Black–Scholes Gaussian `N((r − σ²/2)T, σ²T)`
 This is the precise hypothesis Lévy's continuity theorem consumes: once the `n`-step
 CRR log-return law is identified as the `n`-fold convolution of the step law — whose
 characteristic function is `crrStepCharFun`, so the convolution's is `crrStepCharFun ^ n`
-(`MeasureTheory.charFun_conv`) — `ProbabilityMeasure.tendsto_iff_tendsto_charFun`
+(`MeasureTheory.charFun_conv`) — `ProbabilityMeasure.tendsto_of_tendsto_charFun`
 upgrades this pointwise charFun convergence to convergence in distribution, i.e. the
 CRR risk-neutral log-return converges in law to the Black–Scholes normal. -/
 theorem crr_charFun_pow_tendsto_gaussian (hσ : 0 < σ) (hT : 0 < T) (t : ℝ) :
@@ -297,7 +297,7 @@ lemma convPow_isProbabilityMeasure (ν : Measure ℝ) [IsProbabilityMeasure ν] 
   | 0 => by unfold convPow; infer_instance
   | n + 1 => by
     unfold convPow
-    haveI := convPow_isProbabilityMeasure ν n
+    have := convPow_isProbabilityMeasure ν n
     infer_instance
 
 /-- **The characteristic function of an `n`-fold convolution is the `n`-th power**
@@ -308,7 +308,7 @@ lemma charFun_convPow (ν : Measure ℝ) [IsProbabilityMeasure ν] (n : ℕ) (t 
   induction n with
   | zero => simp [convPow, charFun_dirac]
   | succ k ih =>
-    haveI := convPow_isProbabilityMeasure ν k
+    have := convPow_isProbabilityMeasure ν k
     rw [convPow, charFun_conv, ih, pow_succ]
 
 /-- The law of one CRR risk-neutral log-return increment: mass `pₙ` at the up-move
@@ -375,7 +375,7 @@ theorem crr_tendsto_gaussian_inDistribution {r σ T : ℝ} (hσ : 0 < σ) (hT : 
   have heq : (fun n : ℕ ↦ charFun (convPow (crrStepMeasure r σ T n) n) t)
       = (fun n ↦ crrStepCharFun r σ T n t ^ n) := by
     funext n
-    haveI := isProbabilityMeasure_crrStepMeasure (hp n).1 (hp n).2
+    have := isProbabilityMeasure_crrStepMeasure (hp n).1 (hp n).2
     rw [charFun_convPow, charFun_crrStepMeasure t (hp n).1 (hp n).2]
   change Tendsto (fun n : ℕ ↦ charFun (convPow (crrStepMeasure r σ T n) n) t) atTop
     (𝓝 (charFun (gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal) t))
@@ -419,7 +419,7 @@ lemma binomialPrice_eq_integral_convPow {r σ T : ℝ} {n : ℕ}
       binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n) g k S
         = Real.exp (-(crrPerStepRate r T n) * k) *
           ∫ x, g (S * Real.exp x) ∂(convPow (crrStepMeasure r σ T n) k) := by
-  haveI : IsProbabilityMeasure (crrStepMeasure r σ T n) :=
+  have : IsProbabilityMeasure (crrStepMeasure r σ T n) :=
     isProbabilityMeasure_crrStepMeasure hp0 hp1
   have hcrrUp : (0 : ℝ) < crrUp σ T n := crrUp_pos σ T n
   have hcrrDown : (0 : ℝ) < crrDown σ T n := crrDown_pos σ T n
@@ -431,7 +431,7 @@ lemma binomialPrice_eq_integral_convPow {r σ T : ℝ} {n : ℕ}
       convPow, integral_dirac, mul_one]
   | succ k ih =>
     intro S hS
-    haveI : IsProbabilityMeasure (convPow (crrStepMeasure r σ T n) k) :=
+    have : IsProbabilityMeasure (convPow (crrStepMeasure r σ T n) k) :=
       convPow_isProbabilityMeasure _ k
     have hprob : crrUpProb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
         = crrProb r σ T n := rfl

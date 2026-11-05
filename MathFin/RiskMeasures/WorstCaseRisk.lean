@@ -53,7 +53,7 @@ lemma worstCase_isCoherent [MeasurableSpace ι] {P : Measure ι}
   add_const X _ m := by
     refine le_antisymm (worstCase_le fun i ↦ ?_) ?_
     · have := le_worstCase X i
-      show X i + m ≤ worstCase X + m
+      change X i + m ≤ worstCase X + m
       linarith
     obtain ⟨i, -, hi⟩ := Finset.exists_mem_eq_sup' Finset.univ_nonempty X
     have hwx : worstCase X = X i := hi
@@ -68,21 +68,25 @@ lemma worstCase_isCoherent [MeasurableSpace ι] {P : Measure ι}
   add_le X Y _ _ :=
     worstCase_le fun i ↦ add_le_add (le_worstCase X i) (le_worstCase Y i)
 
-/-- The representing set of worst-case loss is the entire probability simplex. -/
+/-- The representing set of worst-case loss is the entire probability simplex: the weight vectors
+of the points of `Convexity.StdSimplex ℝ ι`. -/
 lemma representingSet_worstCase :
-    representingSet (worstCase (ι := ι)) = stdSimplex ℝ ι := by
+    representingSet (worstCase (ι := ι))
+      = Set.range fun w : Convexity.StdSimplex ℝ ι ↦ ⇑w.weights := by
+  rw [Convexity.StdSimplex.range_toFun_comp_weights]
   ext q
-  refine ⟨fun ⟨hnn, hsum, _⟩ ↦ ⟨hnn, hsum⟩, fun ⟨hnn, hsum⟩ ↦ ⟨hnn, hsum, fun Z hZ ↦ ?_⟩⟩
+  refine ⟨fun ⟨hnn, hsum, _⟩ ↦ ⟨Set.mem_iInter.2 hnn, hsum⟩,
+    fun ⟨hnn, hsum⟩ ↦ ⟨Set.mem_iInter.1 hnn, hsum, fun Z hZ ↦ ?_⟩⟩
   exact Finset.sum_nonpos fun i _ ↦
-    mul_nonpos_of_nonneg_of_nonpos (hnn i) ((le_worstCase Z i).trans hZ)
+    mul_nonpos_of_nonneg_of_nonpos (Set.mem_iInter.1 hnn i) ((le_worstCase Z i).trans hZ)
 
 /-- **Worst-case loss is the supremum of expected loss over the entire probability simplex** —
 the concrete instance of the ADEH representation. -/
 theorem worstCase_isLUB (L : ι → ℝ) :
-    IsLUB ((fun q ↦ ∑ i, q i * L i) '' stdSimplex ℝ ι) (worstCase L) := by
-  letI : MeasurableSpace ι := ⊤
-  haveI : MeasurableSingletonClass ι := ⟨fun _ ↦ trivial⟩
-  rw [← representingSet_worstCase]
-  exact coherentRisk_isLUB (worstCase_isCoherent (P := Measure.count) fun i ↦ by simp) L
+    IsLUB (Set.range fun w : Convexity.StdSimplex ℝ ι ↦ ∑ i, w.weights i * L i) (worstCase L) := by
+  let : MeasurableSpace ι := ⊤
+  have : MeasurableSingletonClass ι := ⟨fun _ ↦ trivial⟩
+  have h := coherentRisk_isLUB (worstCase_isCoherent (P := Measure.count) fun i ↦ by simp) L
+  rwa [representingSet_worstCase, ← Set.range_comp] at h
 
 end MathFin

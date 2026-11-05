@@ -123,7 +123,7 @@ lemma convPow_moments (hν : ∀ᵐ y ∂ν, |y| ≤ a) :
         = k * (∫ y, y ^ 2 ∂ν - (∫ y, y ∂ν) ^ 2)
   | 0 => by simp [convPow]
   | k + 1 => by
-    haveI := convPow_isProbabilityMeasure ν k
+    have := convPow_isProbabilityMeasure ν k
     obtain ⟨h1, h2⟩ := convPow_moments hν k
     obtain ⟨c1, c2⟩ := integral_id_and_sq_conv (ae_abs_le_convPow hν k) hν
     rw [h1] at h2
@@ -149,7 +149,7 @@ lemma variance_id_eq_of_ae_abs_le {μ : Measure ℝ} [IsProbabilityMeasure μ] {
 law `ν` carried by a bounded interval. -/
 lemma variance_convPow (hν : ∀ᵐ y ∂ν, |y| ≤ a) (k : ℕ) :
     variance id (convPow ν k) = k * variance id ν := by
-  haveI := convPow_isProbabilityMeasure ν k
+  have := convPow_isProbabilityMeasure ν k
   rw [variance_id_eq_of_ae_abs_le (ae_abs_le_convPow hν k), variance_id_eq_of_ae_abs_le hν]
   exact (convPow_moments hν k).2
 
@@ -176,7 +176,7 @@ lemma variance_id_crrStepMeasure {r σ T : ℝ} {n : ℕ} (hp0 : 0 ≤ crrProb r
     (hp1 : crrProb r σ T n ≤ 1) :
     variance id (crrStepMeasure r σ T n)
       = 4 * crrProb r σ T n * (1 - crrProb r σ T n) * (σ * Real.sqrt (T / n)) ^ 2 := by
-  haveI := isProbabilityMeasure_crrStepMeasure hp0 hp1
+  have := isProbabilityMeasure_crrStepMeasure hp0 hp1
   rw [variance_id_eq_of_ae_abs_le (crrStepMeasure_ae_abs_le r σ T n),
     integral_crrStepMeasure hp0 hp1 fun x ↦ x ^ 2, integral_id_crrStepMeasure hp0 hp1]
   ring
@@ -199,13 +199,13 @@ theorem crrRowLaw_moments_tendsto {r σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
   constructor
   · refine (crr_drift_limit_n hσ hT).congr' ?_
     filter_upwards [hp] with n hn
-    haveI := isProbabilityMeasure_crrStepMeasure hn.1.le hn.2.le
+    have := isProbabilityMeasure_crrStepMeasure hn.1.le hn.2.le
     rw [integral_id_convPow (crrStepMeasure_ae_abs_le r σ T n) n,
       integral_id_crrStepMeasure hn.1.le hn.2.le]
     ring
   · refine (crr_variance_limit (r := r) hσ hT).congr' ?_
     filter_upwards [hp, eventually_gt_atTop 0] with n hn hn0
-    haveI := isProbabilityMeasure_crrStepMeasure hn.1.le hn.2.le
+    have := isProbabilityMeasure_crrStepMeasure hn.1.le hn.2.le
     have hcancel : (n : ℝ) * (T / n) = T := mul_div_cancel₀ T (Nat.cast_ne_zero.mpr hn0.ne')
     rw [variance_convPow (crrStepMeasure_ae_abs_le r σ T n) n,
       variance_id_crrStepMeasure hn.1.le hn.2.le, mul_pow,

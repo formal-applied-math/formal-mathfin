@@ -99,7 +99,7 @@ theorem brownianTerminalValue_usual_martingale {f : ℝ → ℝ} {C : ℝ}
   have hu := bounded_supermartingale_completion gaussianLimit hM.supermartingale hbound
   have hn := bounded_supermartingale_completion gaussianLimit hM.neg.supermartingale
     (fun t ω => by simpa only [Pi.neg_apply,norm_neg] using hbound t ω)
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   have hu' :=
       bounded_continuous_supermartingale_rightCont
       (supermartingale_nullAugmentation hu) hc hbound

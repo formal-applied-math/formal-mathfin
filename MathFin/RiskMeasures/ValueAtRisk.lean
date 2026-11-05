@@ -75,7 +75,6 @@ variable [IsProbabilityMeasure P]
 /-- The Galois connection for VaR: `VaR_α(X) ≤ x ↔ α ≤ P(X ≤ x)`. -/
 theorem valueAtRisk_le_iff (hX : AEMeasurable X P) (hα : α ∈ Ioo 0 1) :
     valueAtRisk X P α ≤ x ↔ α ≤ P.real {ω | X ω ≤ x} := by
-  have := Measure.isProbabilityMeasure_map hX
   rw [valueAtRisk, quantile_le_iff hα, cdf_eq_real,
     map_measureReal_apply_of_aemeasurable hX measurableSet_Iic]
   rfl
@@ -102,7 +101,6 @@ theorem valueAtRisk_mono (hX : AEMeasurable X P) (hY : AEMeasurable Y P) (hXY : 
 theorem valueAtRisk_comp (hX : AEMeasurable X P) {h : ℝ → ℝ} (hmono : Monotone h)
     (hlsc : LowerSemicontinuous h) (hα : α ∈ Ioo 0 1) :
     valueAtRisk (fun ω ↦ h (X ω)) P α = h (valueAtRisk X P α) := by
-  have := Measure.isProbabilityMeasure_map hX
   rw [valueAtRisk, valueAtRisk, ← quantile_map hmono hlsc hα,
     AEMeasurable.map_map_of_aemeasurable hmono.measurable.aemeasurable hX]
   rfl
@@ -145,7 +143,6 @@ theorem valueAtRisk_add_affine (hX : AEMeasurable X P) (hα : α ∈ Ioo 0 1) {a
 /-- An integrable loss has an integrable VaR curve on `(0, 1)`. -/
 theorem integrableOn_valueAtRisk (hX : Integrable X P) :
     IntegrableOn (fun u ↦ valueAtRisk X P u) (Ioo 0 1) := by
-  have := Measure.isProbabilityMeasure_map hX.aemeasurable
   exact (integrableOn_comp_quantile_iff (f := id) aestronglyMeasurable_id).2 <|
     (integrable_map_measure aestronglyMeasurable_id hX.aemeasurable).2 hX
 

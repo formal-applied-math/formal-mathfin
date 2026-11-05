@@ -35,7 +35,7 @@ theorem brownianUsualActualContactRule_value_preserving {k h : ℝ} (hk : 0 ≤ 
   have hinit : canonicalDiscountedPrice k h x T 0 =ᵐ[μ] fun _ => canonicalPrice k h x (T : ℝ) :=
     canonicalDiscountedPrice_initial k h x T
   have hopt := brownianUsualActualContactRule_optimal (h := h) hk x T
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   let τ := brownianUsualActualContactRule (h := h) hk x T
   have hc (ω : ℝ≥0 → ℝ) : canonicalDiscountedPrice k h x T (τ.time ω) ω =
       putReward brownian 1 k h (Real.sqrt 2) (Real.exp x) τ.time ω := by
@@ -51,7 +51,7 @@ theorem brownianUsualActualContactRule_martingale {k h : ℝ} (hk : 0 ≤ k) (x 
       brownianUsualFiltration (completedMeasure gaussianLimit) := by
   let μ := completedMeasure gaussianLimit
   have hopt := brownianUsualActualContactRule_value_preserving (h := h) hk x T
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   have hh := stopped_martingale_of_expected_value_eq (P := μ)
     (canonicalDiscountedPrice_usual_supermartingale hk x T)
     (canonicalDiscountedPrice_continuous hk x T) (canonicalDiscountedPrice_bound hk x T)
@@ -70,7 +70,7 @@ theorem canonicalPrice_contact_meanValue {k h : ℝ} (hk : 0 ≤ k) (x : ℝ) (T
   let μ := completedMeasure gaussianLimit
   have hinit : canonicalDiscountedPrice k h x T 0 =ᵐ[μ] fun _ => canonicalPrice k h x (T : ℝ) :=
     canonicalDiscountedPrice_initial k h x T
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   have hh := expected_stoppedValue_eq_initial (P := μ)
     (brownianUsualActualContactRule_martingale (h := h) hk x T)
     (fun ω =>

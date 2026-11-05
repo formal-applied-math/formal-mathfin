@@ -50,7 +50,7 @@ theorem expectedReward_le_canonicalPrice {k h : ℝ} (hk : 0 ≤ k) (x : ℝ) (T
       (@StoppingRule.time _ (completedMeasurableSpace gaussianLimit) _ _ _ _ θ) ω
         ∂completedMeasure gaussianLimit) ≤ canonicalPrice k h x (T : ℝ) := by
   let μ := completedMeasure gaussianLimit
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   simpa only [canonicalPrice, Real.toNNReal_coe, brownianUsualAmericanPut] using
     expectedReward_le_value (P := μ) (q := h) (σ := Real.sqrt 2)
       brownian_completed_measurable zero_le_one hk (Real.exp_pos x).le θ
@@ -58,7 +58,7 @@ theorem expectedReward_le_canonicalPrice {k h : ℝ} (hk : 0 ≤ k) (x : ℝ) (T
 theorem canonicalPrice_continuous {k h : ℝ} (hk : 0 ≤ k) :
     Continuous (fun z : ℝ × ℝ => canonicalPrice k h z.1 z.2) := by
   let μ := completedMeasure gaussianLimit
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   apply continuous_iff_continuousAt.mpr
   intro z
   have hv := americanPutValue_joint_continuousAt (P := μ) (𝓕 := brownianUsualFiltration)
@@ -77,7 +77,7 @@ theorem canonicalPrice_initial {k h : ℝ} (hk : 0 ≤ k) (x : ℝ) :
     canonicalPrice k h x 0 = putPayoff x := by
   let μ := completedMeasure gaussianLimit
   have hz : ∀ᵐ ω ∂μ, brownian 0 ω = 0 := isBrownianReal_brownian.eval_zero_ae_eq_zero
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   have hh :=
       value_at_expiry (P := μ) (𝓕 := brownianUsualFiltration) (K := 1) (q := h) (σ := Real.sqrt 2)
     brownian_completed_measurable hz
@@ -88,7 +88,7 @@ theorem canonicalPrice_bounds {k h : ℝ} (hk : 0 ≤ k) (x t : ℝ) :
     putPayoff x ≤ canonicalPrice k h x t ∧ canonicalPrice k h x t ≤ 1 := by
   let μ := completedMeasure gaussianLimit
   have hz : ∀ᵐ ω ∂μ, brownian 0 ω = 0 := isBrownianReal_brownian.eval_zero_ae_eq_zero
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   exact ⟨payoff_le_value (P := μ) (𝓕 := brownianUsualFiltration) brownian_completed_measurable hz
     (by norm_num) hk (Real.exp_pos x).le,
     value_le_strike (P := μ) (𝓕 := brownianUsualFiltration) brownian_completed_measurable
@@ -105,7 +105,7 @@ theorem canonicalPrice_putEnvelope {k h : ℝ} (hk : 0 ≤ k) : PutEnvelope (can
 theorem canonicalPrice_decay {k h : ℝ} (hk : 0 ≤ k) (t : ℝ) :
     Tendsto (fun x => canonicalPrice k h x t) atTop (𝓝 0) := by
   let μ := completedMeasure gaussianLimit
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   have hd := americanPutValue_spot_decay (P := μ) (𝓕 := brownianUsualFiltration)
     (q := h) (σ := Real.sqrt 2) (T := t.toNNReal)
     brownian_completed_measurable continuous_brownian (show (0 : ℝ) ≤ 1 by norm_num) hk
@@ -117,7 +117,7 @@ theorem canonicalPrice_decay_uniform {k h : ℝ} (hk : 0 ≤ k) (T : ℝ)
     ∀ᶠ x in atTop, ∀ t : ℝ, t ≤ T →
       0 ≤ canonicalPrice k h x t ∧ canonicalPrice k h x t < ε := by
   let μ := completedMeasure gaussianLimit
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   have hd := americanPutValue_spot_decay_uniform (P := μ) (𝓕 := brownianUsualFiltration)
     (q := h) (σ := Real.sqrt 2) brownian_completed_measurable continuous_brownian
     (show (0 : ℝ) ≤ 1 by norm_num) hk T.toNNReal hε

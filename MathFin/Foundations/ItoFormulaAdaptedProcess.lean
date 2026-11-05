@@ -189,7 +189,7 @@ theorem driftPath_isStronglyPredictable_of_continuous :
   have hm (N : ℕ) : StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)]
       (driftPath (clip N b) t) := stronglyMeasurable_driftPath hBmeas
     (clip_adapted hb_adap N) (clip_continuous hb_cont N) (abs_clip_le N b) t
-  letI : MeasurableSpace Ω := natFiltration hBmeas t
+  let : MeasurableSpace Ω := natFiltration hBmeas t
   refine stronglyMeasurable_of_tendsto atTop hm
     (tendsto_pi_nhds.2 fun ω ↦ tendsto_const_nhds.congr' ?_)
   filter_upwards [eventually_ge_atTop (pathLevel t fun s ↦ b s ω)] with N hN

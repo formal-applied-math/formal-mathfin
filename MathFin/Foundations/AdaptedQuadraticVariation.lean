@@ -105,8 +105,8 @@ theorem memLp_weighted_qv_sub {v : ℝ≥0 → Ω → ℝ} (hv_meas : ∀ s, Mea
     refine memLp_finsetSum _ fun k _ ↦ ?_
     have hZ : MemLp (fun ω ↦ (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) 2 μ := by
       simpa using memLp_increment_sq_centered_two hB (unifPart T n k) (unifPart T n (k + 1)) 0
-    exact hZ.mul' (memLp_top_of_bound (hv_meas _).aestronglyMeasurable Cv
-      (ae_of_all _ fun ω ↦ hv_bdd _ ω))
+    exact (memLp_top_of_bound (hv_meas _).aestronglyMeasurable Cv
+      (ae_of_all _ fun ω ↦ hv_bdd _ ω)).fun_mul hZ
   exact hsum.sub (memLp_pathIntegral_process_of_ae_continuous hv_meas
     ((abs_nonneg _).trans (hv_bdd 0 (nonempty_of_isProbabilityMeasure μ).some)) hv_bdd T hv_cont)
 

@@ -76,7 +76,7 @@ theorem integral_bsV_mul_exp_gaussianReal_of_sq {S K r σ σ' T : ℝ} (hS : 0 <
       measurable_id).symm
   have hexp : Integrable (fun ω : ℝ × ℝ ↦ rexp ω.2)
       ((gaussianReal 0 1).prod (gaussianReal m v)) := by
-    simpa only [one_mul] using integrable_exp_mul_of_hasLaw hG 1
+    simpa only [one_mul] using hG.integrable_fun_comp (integrable_exp_mul_gaussianReal 1)
   -- the total log-shock `σ√T·Z + G` is `N(m, σ²T + v)`, so standardized it is `N(0, 1)`
   have hshock : HasLaw (fun ω : ℝ × ℝ ↦ σ * Real.sqrt T * ω.1 + ω.2)
       (gaussianReal m (.mk ((σ * Real.sqrt T) ^ 2) (sq_nonneg _) * 1 + v))

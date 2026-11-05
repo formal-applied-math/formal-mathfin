@@ -177,12 +177,13 @@ theorem gsrKernel_integral_sq_Ioc_eq {κ : ℝ} (hκ : 0 < κ) (σ1 σ2 Tstar a 
       rcases le_total a Tstar with h | h
       · exact (hu.2.trans_eq (max_eq_right h))
       · exact absurd (hu.2.trans_eq (max_eq_left h)) (not_le.2 hu.1)
-    simp only [gsrKernel, gsrSigma, if_pos this]
+    simp only [gsrKernel, gsrSigma, ite_eq_left this]
     ring
   have heq2 : Set.EqOn (fun u ↦ (gsrKernel σ1 σ2 Tstar κ T u) ^ 2)
       (fun u ↦ σ2 ^ 2 * vasicekIntegratedKernel κ T u ^ 2) (Set.Ioc m T) := by
     intro u hu
-    simp only [gsrKernel, gsrSigma, if_neg (not_le.mpr (lt_of_le_of_lt (le_max_right _ _) hu.1))]
+    simp only [gsrKernel, gsrSigma,
+      ite_eq_right (not_le.mpr (lt_of_le_of_lt (le_max_right _ _) hu.1))]
     ring
   have hcont (c : ℝ) {x y : ℝ} (hxy : x ≤ y) : IntegrableOn
       (fun u ↦ c * vasicekIntegratedKernel κ T u ^ 2) (Set.Ioc x y) volume :=

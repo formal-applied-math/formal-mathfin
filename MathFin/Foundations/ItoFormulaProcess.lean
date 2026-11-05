@@ -77,16 +77,15 @@ lemma exists_fullHorizon_extension (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B 
     (Lp.aestronglyMeasurable g).ae_eq_mk
   -- the zero-extension
   set Ffn : ℝ≥0 × Ω → ℝ := (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)).indicator h with hFfn
-  have hFfn_sm : StronglyMeasurable[m] Ffn := hh_sm.indicator hSpred
   have hSrestrict : ((timeMeasure.prod μ).trim
         (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod).restrict
         (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)) = trimMeasure_T (μ := μ) T hBmeas :=
     (trimMeasure_T_eq_restrict T hBmeas).symm
   have hmem : MemLp Ffn 2 ((timeMeasure.prod μ).trim
       (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod) := by
-    refine ⟨hFfn_sm.aestronglyMeasurable, ?_⟩
-    rw [hFfn, eLpNorm_indicator_eq_eLpNorm_restrict hSpred, hSrestrict, ← eLpNorm_congr_ae hgh]
-    exact (Lp.memLp g).2
+    rw [memLp_iff, hFfn, eLpNorm_indicator_eq_eLpNorm_restrict hSpred.nullMeasurableSet,
+      hSrestrict, ← eLpNorm_congr_ae hgh]
+    exact Lp.eLpNorm_lt_top g
   refine ⟨hmem.toLp Ffn, ?_⟩
   have hle : trimMeasure_T (μ := μ) T hBmeas ≤ (timeMeasure.prod μ).trim
       (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod := by
@@ -95,7 +94,7 @@ lemma exists_fullHorizon_extension (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B 
       =ᵐ[trimMeasure_T (μ := μ) T hBmeas] Ffn :=
         (MemLp.coeFn_toLp hmem).filter_mono (ae_mono hle)
     _ =ᵐ[trimMeasure_T (μ := μ) T hBmeas] h := by
-        rw [hFfn, ← hSrestrict]; exact indicator_ae_eq_restrict hSpred
+        rw [hFfn, ← hSrestrict]; exact indicator_ae_eq_restrict hSpred.nullMeasurableSet
     _ =ᵐ[trimMeasure_T (μ := μ) T hBmeas] ⇑g := hgh.symm
 
 /-- **The time-dependent Itô formula as a process (semimartingale decomposition).** For `f(t,x)`

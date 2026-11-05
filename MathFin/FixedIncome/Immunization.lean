@@ -70,7 +70,7 @@ lemma hasDerivAt_bondPortfolioValue_r
     -- `ZCB.hasDerivAt_zcb_r` (face value `w i`, maturity `T i`), not a fresh chase.
     have h := (hasDerivAt_zcb_r t (T i) r).const_mul (w i)
     simp only [zcb] at h
-    convert h using 1 <;> first | rfl | ring
+    convert h using 1; ring
   have h_raw := HasDerivAt.fun_sum h_each
   rw [Finset.sum_neg_distrib] at h_raw
   exact h_raw

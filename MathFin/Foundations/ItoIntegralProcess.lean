@@ -140,7 +140,7 @@ bounded by `V.valueBound`, hence `L²` on the probability space. -/
 theorem memLp_value (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas))
     (p : ℝ≥0 × ℝ≥0) : MemLp (V.value p) 2 μ := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   exact MemLp.of_bound
     ((V.measurable_value p).mono ((ItoIntegralL2.natFiltration hBmeas).le p.1)
       le_rfl).aestronglyMeasurable
@@ -153,7 +153,7 @@ theorem memLp_truncated_term (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas))
     (t : ℝ≥0) {p : ℝ≥0 × ℝ≥0} (hp : p ∈ V.value.support) :
     MemLp (fun ω ↦ V.value p ω * (B (min p.2 t) ω - B (min p.1 t) ω)) 2 μ := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   by_cases ht : p.1 ≤ t
   · -- active interval: adapted coefficient × increment over `[p.1, p.2 ∧ t]`
     rw [min_eq_left ht]

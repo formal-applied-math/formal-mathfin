@@ -50,7 +50,6 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
 /-- The CDF of the law of `X` at `x` is the probability of `{X ≤ x}`. -/
 lemma cdf_map_eq_measureReal [IsProbabilityMeasure P] {X : Ω → ℝ} (hX : AEMeasurable X P)
     (x : ℝ) : cdf (P.map X) x = P.real (X ⁻¹' Iic x) := by
-  have := Measure.isProbabilityMeasure_map hX
   rw [cdf_eq_real, map_measureReal_apply_of_aemeasurable hX measurableSet_Iic]
 
 /-! ### Quantiles along almost-sure convergence -/

@@ -98,7 +98,7 @@ theorem canonicalStockBoundary_lt_one {k h : ℝ} (hk : 0 ≤ k) {t : ℝ} (ht :
   have hz : ∀ᵐ ω ∂μ, brownian 0 ω = 0 := isBrownianReal_brownian.eval_zero_ae_eq_zero
   have hp := brownianUsualAmericanPut_pos (K := 1) (q := h) (σ := Real.sqrt 2) (S := 1)
     (by norm_num) hk (Real.sqrt_pos.mpr (by norm_num)) (by norm_num) (Real.toNNReal_pos.mpr ht)
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   exact threshold_lt_strike_of_price_pos (P := μ) (𝓕 := brownianUsualFiltration)
     brownian_completed_measurable hz (by norm_num) hk hp
 
@@ -109,7 +109,7 @@ theorem canonicalPrice_contact_iff {k h : ℝ} (hk : 0 ≤ k) (x : ℝ) {t : ℝ
   have hp (S : ℝ) (hS : 0 < S) := brownianUsualAmericanPut_pos (K := 1) (q := h)
     (σ := Real.sqrt 2) (by norm_num) hk (Real.sqrt_pos.mpr (by norm_num)) hS
     (Real.toNNReal_pos.mpr ht)
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   exact value_contact_iff_le_threshold (P := μ) (𝓕 := brownianUsualFiltration)
     brownian_completed_measurable hz (by norm_num) hk hp (Real.exp_pos x).le
 
@@ -128,7 +128,7 @@ theorem canonicalStockBoundary_nonneg {k h : ℝ} (hk : 0 ≤ k) (t : ℝ) :
     0 ≤ canonicalStockBoundary k h t := by
   let μ := completedMeasure gaussianLimit
   have hz : ∀ᵐ ω ∂μ, brownian 0 ω = 0 := isBrownianReal_brownian.eval_zero_ae_eq_zero
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   exact (threshold_bounds (P := μ) (𝓕 := brownianUsualFiltration)
     brownian_completed_measurable hz (by norm_num) hk).1
 
@@ -136,7 +136,7 @@ theorem canonicalStockBoundary_initial {k h : ℝ} (hk : 0 ≤ k) :
     canonicalStockBoundary k h 0 = 1 := by
   let μ := completedMeasure gaussianLimit
   have hz : ∀ᵐ ω ∂μ, brownian 0 ω = 0 := isBrownianReal_brownian.eval_zero_ae_eq_zero
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   have hh := threshold_at_expiry (P := μ) (𝓕 := brownianUsualFiltration) (K := 1)
     (q := h) (σ := Real.sqrt 2) brownian_completed_measurable hz (by norm_num) hk
   simpa only [canonicalStockBoundary,brownianUsualExerciseBoundary,Real.toNNReal_zero] using hh

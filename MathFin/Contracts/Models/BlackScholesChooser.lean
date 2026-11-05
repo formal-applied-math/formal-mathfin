@@ -69,3 +69,5 @@ theorem value_chooser {μ : Measure Ω} [IsProbabilityMeasure μ] {B : ℝ≥0 �
     pathAssets_eq_bsTerminal B ht₁]
   rw [bs_call_formula (hyp hT hK), bs_put_formula (hyp ht₁ hKd), chooserPrice_expanded]
   simp only [neg_mul]
+
+end MathFin.Contracts.BlackScholes

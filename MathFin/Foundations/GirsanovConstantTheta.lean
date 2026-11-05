@@ -32,7 +32,7 @@ exponentials —
 both `P`-martingales; the engine turns `D_t = exp(a·B^θ_t − ½a² t)` into a
 `Q`-martingale. The one genuinely new estimate is the mixed-time integrability of
 `D_u · Z_T`, by AM–GM (`exp(a X_u)·exp(−θ X_T) ≤ exp(2a X_u) + exp(−2θ X_T)`, each a
-Gaussian-MGF term via `integrable_exp_mul_of_hasLaw`). The Black–Scholes discounted-price
+Gaussian-MGF term via `integrable_exp_mul_gaussianReal`). The Black–Scholes discounted-price
 martingale `bs_discounted_isQMartingale` is this theorem at `a = σ`.
 
 The identity `E_Q[exp(a(B^θ_t − B^θ_s)) | 𝓕_s] = exp(½a²(t−s))` for all `a`, together with
@@ -114,8 +114,8 @@ theorem expBtheta_isQMartingale
     have hcore : Integrable (fun ω ↦ Real.exp (a * X u ω) * Real.exp (-θ * X T ω)) P := by
       have hbnd : Integrable
           (fun ω ↦ Real.exp (2 * a * X u ω) + Real.exp (-2 * θ * X T ω)) P :=
-        (integrable_exp_mul_of_hasLaw (hX.hasLaw_eval u) (2 * a)).add
-          (integrable_exp_mul_of_hasLaw (hX.hasLaw_eval T) (-2 * θ))
+        ((hX.hasLaw_eval u).integrable_fun_comp (integrable_exp_mul_gaussianReal (2 * a))).add
+          ((hX.hasLaw_eval T).integrable_fun_comp (integrable_exp_mul_gaussianReal (-2 * θ)))
       refine Integrable.mono' hbnd ?_ ?_
       · exact ((Real.measurable_exp.comp ((hmeasX u).const_mul a)).mul
           (Real.measurable_exp.comp ((hmeasX T).const_mul (-θ)))).aestronglyMeasurable
@@ -165,7 +165,9 @@ theorem girsanovMeasure_isProbabilityMeasure
     rw [show -θ * X T ω - θ ^ 2 * (T : ℝ) / 2
           = -(θ ^ 2 * (T : ℝ) / 2) + -θ * X T ω from by ring, Real.exp_add]
   have hgint : Integrable g P := by
-    rw [hgfactor]; exact (integrable_exp_mul_of_hasLaw (hX.hasLaw_eval T) (-θ)).const_mul _
+    rw [hgfactor]
+    exact ((hX.hasLaw_eval T).integrable_fun_comp
+      (integrable_exp_mul_gaussianReal (-θ))).const_mul _
   -- The Wald exponential `Z_u = exp(−θ X_u − ½θ² u)` is a `P`-martingale.
   have hZmart : Martingale (fun u ω ↦ Real.exp (-θ * X u ω - θ ^ 2 * (u : ℝ) / 2)) 𝓕 P := by
     have key : (fun u ω ↦ Real.exp (-θ * X u ω - θ ^ 2 * (u : ℝ) / 2))
@@ -242,7 +244,7 @@ theorem Btheta_map_eq_gaussianReal
     (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))).map
         (fun ω ↦ X t ω + θ * (t : ℝ))
       = gaussianReal 0 t := by
-  haveI : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
+  have : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
       (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) :=
     girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
   exact map_eq_gaussianReal_of_expMartingale (isExpQMartingale_Btheta (X := X) (𝓕 := 𝓕) θ T) htT
@@ -258,7 +260,7 @@ theorem Btheta_increment_map_eq_gaussianReal
     (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))).map
         (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
       = gaussianReal 0 (t - s) := by
-  haveI : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
+  have : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
       (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) :=
     girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
   exact increment_map_eq_gaussianReal_of_expMartingale
@@ -282,7 +284,7 @@ theorem Btheta_isQBrownianMotion
     IsBrownianOn (P.withDensity fun ω ↦
       ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) T
       fun t ω ↦ X t ω + θ * (t : ℝ) := by
-  haveI : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
+  have : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
       (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) :=
     girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
   exact isQBrownianMotion_of_expMartingale (isExpQMartingale_Btheta (X := X) (𝓕 := 𝓕) θ T)

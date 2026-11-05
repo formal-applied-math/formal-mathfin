@@ -79,9 +79,10 @@ omit [Fintype ι] in
 probability-integral transforms of `X` is a copula. -/
 theorem isCopula_copulaOf [Finite ι] (hX : AEMeasurable X P)
     (hF : ∀ i, Continuous (cdf (P.map fun ω ↦ X ω i))) : IsCopula (copulaOf X P) where
-  isProbabilityMeasure := Measure.isProbabilityMeasure_map (aemeasurable_cdf_coord hX)
+  isProbabilityMeasure :=
+    inferInstanceAs (IsProbabilityMeasure
+      (P.map fun ω i ↦ cdf (P.map fun ω ↦ X ω i) (X ω i)))
   map_eval i := by
-    have := Measure.isProbabilityMeasure_map (μ := P) (hX.eval i)
     rw [copulaOf, AEMeasurable.map_map_of_aemeasurable (measurable_pi_apply i).aemeasurable
       (aemeasurable_cdf_coord hX)]
     exact (hasLaw_cdf ⟨hX.eval i, rfl⟩ (hF i)).map_eq
@@ -91,7 +92,6 @@ theorem isCopula_copulaOf [Finite ι] (hX : AEMeasurable X P)
 lemma ae_eq_le_iff_cdf_le {Y : Ω → ℝ} (hY : AEMeasurable Y P)
     (hF : Continuous (cdf (P.map Y))) (y : ℝ) :
     {ω | Y ω ≤ y} =ᵐ[P] {ω | cdf (P.map Y) (Y ω) ≤ cdf (P.map Y) y} := by
-  have := Measure.isProbabilityMeasure_map hY
   have hU := hasLaw_cdf (μ := P.map Y) ⟨hY, rfl⟩ hF
   refine ae_eq_of_subset_of_measure_ge (fun ω hω ↦ monotone_cdf _ hω)
     (le_of_eq ?_) (hY.nullMeasurable measurableSet_Iic) (measure_ne_top _ _)
@@ -160,14 +160,12 @@ theorem eq_copulaOf_of_measureReal_le [Finite ι] (hX : AEMeasurable X P)
       C.real (Iic fun i ↦ cdf (P.map fun ω ↦ X ω i) (x i))) :
     C = copulaOf X P := by
   set μ : ι → Measure ℝ := fun i ↦ P.map fun ω ↦ X ω i
-  have : ∀ i, IsProbabilityMeasure (μ i) := fun i ↦ Measure.isProbabilityMeasure_map (hX.eval i)
+  have : ∀ i, IsProbabilityMeasure (μ i) := fun _ ↦ inferInstance
   have := hC.isProbabilityMeasure
-  have := Measure.isProbabilityMeasure_map hX
   set q : (ι → ℝ) → ι → ℝ := fun v i ↦ quantile (μ i) (v i)
   set F : (ι → ℝ) → ι → ℝ := fun y i ↦ cdf (μ i) (y i)
   have hq : AEMeasurable q C := aemeasurable_quantile_coord μ hC
-  have := Measure.isProbabilityMeasure_map hq
-  have hFmeas : Measurable F := measurable_pi_lambda _ fun i ↦
+  have hFmeas : Measurable F := .of_eval fun i ↦
     (monotone_cdf (μ i)).measurable.comp (measurable_pi_apply i)
   -- the quantile vector of `C` has the law of `X`
   have hlaw : C.map q = P.map X := by
@@ -200,8 +198,6 @@ theorem copulaOf_comp_strictMono (hX : AEMeasurable X P)
       cdf (P.map fun ω ↦ T i (X ω i)) (T i y) = cdf (P.map fun ω ↦ X ω i) y := by
     have hTi : AEMeasurable (fun ω ↦ T i (X ω i)) P :=
       (hT i).monotone.measurable.comp_aemeasurable (hX.eval i)
-    have := Measure.isProbabilityMeasure_map hTi
-    have := Measure.isProbabilityMeasure_map (μ := P) (hX.eval i)
     rw [cdf_eq_real, cdf_eq_real, map_measureReal_apply_of_aemeasurable hTi measurableSet_Iic,
       map_measureReal_apply_of_aemeasurable (hX.eval i) measurableSet_Iic]
     congr 1

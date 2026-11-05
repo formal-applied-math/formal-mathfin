@@ -59,7 +59,7 @@ theorem IndepFun.integral_mul_sq (h : IndepFun φ X μ) (hφ : AEStronglyMeasura
 square-integrable**, since `𝔼[(φ·X)²] = 𝔼[φ²]·𝔼[X²]` is finite. -/
 theorem IndepFun.memLp_two_mul (h : IndepFun φ X μ) (hφ : MemLp φ 2 μ) (hX : MemLp X 2 μ) :
     MemLp (fun ω ↦ φ ω * X ω) 2 μ :=
-  (memLp_two_iff_integrable_sq (hφ.1.mul hX.1)).2 <| by
+  (memLp_two_iff_integrable_sq (hφ.aestronglyMeasurable.mul hX.aestronglyMeasurable)).2 <| by
     simpa [Pi.mul_def, Function.comp_def, mul_pow] using
       (h.comp (φ := fun x : ℝ ↦ x ^ 2) (ψ := fun x : ℝ ↦ x ^ 2) (by fun_prop)
         (by fun_prop)).integrable_mul hφ.integrable_sq hX.integrable_sq

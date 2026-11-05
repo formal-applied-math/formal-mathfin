@@ -156,7 +156,7 @@ lemma hasDerivAt_bachelierV_T {K σ : ℝ} (hσ : 0 < σ) {S T : ℝ} (hT : 0 < 
     have h_sqrt : HasDerivAt Real.sqrt (1 / (2 * Real.sqrt T)) T := Real.hasDerivAt_sqrt hT.ne'
     have h_σsqrt : HasDerivAt (fun t : ℝ ↦ σ * Real.sqrt t) (σ / (2 * Real.sqrt T)) T := by
       have := h_sqrt.const_mul σ
-      convert this using 1 <;> try rfl
+      convert this using 1
       field_simp
     have h_quot : HasDerivAt (fun t : ℝ ↦ (S - K) / (σ * Real.sqrt t))
         ((0 * (σ * Real.sqrt T) - (S - K) * (σ / (2 * Real.sqrt T))) / (σ * Real.sqrt T)^2) T := by
@@ -173,7 +173,7 @@ lemma hasDerivAt_bachelierV_T {K σ : ℝ} (hσ : 0 < σ) {S T : ℝ} (hT : 0 < 
   -- ∂_T [σ √T] = σ / (2√T)
   have h_σsqrt' : HasDerivAt (fun t : ℝ ↦ σ * Real.sqrt t) (σ / (2 * Real.sqrt T)) T := by
     have h := (Real.hasDerivAt_sqrt hT.ne').const_mul σ
-    convert h using 1 <;> try rfl
+    convert h using 1
     field_simp
   -- ∂_T [σ √T · ϕ(d(T))] = (σ/(2√T)) · ϕ(d) + σ √T · (-d ϕ(d)) · ∂_T d
   have h_term2 := h_σsqrt'.mul h_pdf

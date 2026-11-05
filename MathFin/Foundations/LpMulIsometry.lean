@@ -37,7 +37,7 @@ Mathlib's `withDensitySMulLI` does. This is the step at which a naive attempt br
 
 * `sqWeight` — the weighted measure `f²·ν`.
 * `lintegral_sqWeight` — the change-of-density identity for lower integrals.
-* `eLpNorm_mul_eq` — the norm identity, for an arbitrary function.
+* `eLpNorm_mul_eq` — the norm identity, for a measurable function.
 * `integral_sqWeight`, `setIntegral_sqWeight` — the Bochner transfer, and its set form.
 * `sqWeight_ae_ne_zero` — `f²·ν` is carried by `{f ≠ 0}`.
 * `sqWeight_sqWeight` — **the weight composes**, `(f²·ν) weighted by g² = (fg)²·ν`; read as a
@@ -103,12 +103,14 @@ lemma sqWeight_sqWeight (hf : Measurable f) {g : α → ℝ} (hg : Measurable g)
   simp only [sqWeight, hdens]
   exact (withDensity_mul ν (measurable_sqDensity hf) (measurable_sqDensity hg)).symm
 
-/-- **The norm identity.** `‖f·g‖_{L²(ν)} = ‖g‖_{L²(f²·ν)}`, for an arbitrary `g` — no
+/-- **The norm identity.** `‖f·g‖_{L²(ν)} = ‖g‖_{L²(f²·ν)}`, for a measurable `g` — no
 integrability is needed, both sides being lower integrals. -/
-lemma eLpNorm_mul_eq (hf : Measurable f) (g : α → ℝ) :
+lemma eLpNorm_mul_eq (hf : Measurable f) {g : α → ℝ} (hg : Measurable g) :
     eLpNorm (fun x ↦ f x * g x) 2 ν = eLpNorm g 2 (sqWeight ν f) := by
-  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num),
-    eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num), lintegral_sqWeight hf]
+  have hfg : AEStronglyMeasurable (fun x ↦ f x * g x) ν := (hf.mul hg).aestronglyMeasurable
+  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num) hfg,
+    eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num) hg.aestronglyMeasurable,
+    lintegral_sqWeight hf]
   congr 1
   refine lintegral_congr fun x ↦ ?_
   rw [enorm_mul, ENNReal.mul_rpow_of_nonneg _ _ (by norm_num : (0:ℝ) ≤ (2:ℝ≥0∞).toReal)]
@@ -150,8 +152,7 @@ measures — an `Lp` element carries a genuinely `StronglyMeasurable` representa
 (`Lp.stronglyMeasurable`), so it is measurable for every measure at once. -/
 lemma memLp_mul (hf : Measurable f) (ψ : Lp ℝ 2 (sqWeight ν f)) :
     MemLp (fun x ↦ f x * ψ x) 2 ν :=
-  ⟨hf.aestronglyMeasurable.mul (Lp.stronglyMeasurable ψ).aestronglyMeasurable,
-    by rw [eLpNorm_mul_eq hf]; exact Lp.eLpNorm_lt_top ψ⟩
+  (eLpNorm_mul_eq hf (Lp.stronglyMeasurable ψ).measurable).trans_lt (Lp.eLpNorm_lt_top ψ)
 
 /-- When `f ≠ 0` a.e., an a.e. statement for the weighted measure transfers back to `ν`. The
 two measures are then equivalent: `f²·ν ≪ ν` always, and the density is a.e. nonzero. -/
@@ -196,7 +197,8 @@ noncomputable def mulLI (ν : Measure α) (hf : Measurable f) :
     Lp ℝ 2 (sqWeight ν f) →ₗᵢ[ℝ] Lp ℝ 2 ν where
   toLinearMap := mulLM ν hf
   norm_map' ψ := by
-    rw [Lp.norm_def, Lp.norm_def, eLpNorm_congr_ae (coeFn_mulLM ν hf ψ), eLpNorm_mul_eq hf]
+    rw [Lp.norm_def, Lp.norm_def, eLpNorm_congr_ae (coeFn_mulLM ν hf ψ),
+      eLpNorm_mul_eq hf (Lp.stronglyMeasurable ψ).measurable]
 
 /-- `coeFn_mulLM` for the bundled isometry. -/
 lemma coeFn_mulLI (ν : Measure α) (hf : Measurable f) (ψ : Lp ℝ 2 (sqWeight ν f)) :
@@ -233,8 +235,9 @@ theorem exists_mulLI_eq (hf : Measurable f) (hf0 : ∀ᵐ x ∂ν, f x ≠ 0) (u
     filter_upwards [hf0] with x hx
     field_simp
   have hquot : MemLp (fun x ↦ (u : α → ℝ) x / f x) 2 (sqWeight ν f) := by
-    refine ⟨(((Lp.stronglyMeasurable u).measurable.div hf)).aestronglyMeasurable, ?_⟩
-    rw [← eLpNorm_mul_eq hf, eLpNorm_congr_ae hcancel]
+    have hmeas : Measurable fun x ↦ (u : α → ℝ) x / f x :=
+      (Lp.stronglyMeasurable u).measurable.div hf
+    rw [memLp_iff, ← eLpNorm_mul_eq hf hmeas, eLpNorm_congr_ae hcancel]
     exact Lp.eLpNorm_lt_top u
   refine ⟨hquot.toLp _, Lp.ext ?_⟩
   have hcoe : ∀ᵐ x ∂ν, (hquot.toLp _ : α → ℝ) x = (u : α → ℝ) x / f x :=

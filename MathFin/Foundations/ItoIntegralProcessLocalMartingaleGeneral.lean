@@ -68,8 +68,8 @@ theorem condExp_sup_nulls [IsFiniteMeasure μ] {m₁ : MeasurableSpace Ω} (hm�
     {f : Ω → ℝ} (hf : Integrable f μ) :
     μ[f | m₁ ⊔ nullsAlg m0 μ] =ᵐ[μ] μ[f | m₁] := by
   have hm : m₁ ⊔ nullsAlg m0 μ ≤ m0 := sup_le hm₁ nullsAlg_le
-  haveI : SigmaFinite (μ.trim hm₁) := (isFiniteMeasure_trim hm₁).toSigmaFinite
-  haveI : SigmaFinite (μ.trim hm) := (isFiniteMeasure_trim hm).toSigmaFinite
+  have : SigmaFinite (μ.trim hm₁) := (isFiniteMeasure_trim hm₁).toSigmaFinite
+  have : SigmaFinite (μ.trim hm) := (isFiniteMeasure_trim hm).toSigmaFinite
   refine (ae_eq_condExp_of_forall_setIntegral_eq hm hf
     (fun s _ _ ↦ integrable_condExp.integrableOn) (fun s hs _ ↦ ?_)
     ((stronglyMeasurable_condExp.mono le_sup_left).aestronglyMeasurable)).symm

@@ -99,7 +99,9 @@ theorem measurable_denseLevel {Ω : Type*} {mΩ : MeasurableSpace Ω} {t : ℝ�
       ↔ ω ∈ {ω | ∀ s ∈ denseIcc t, |X s ω| ≤ N}
         ∨ ∀ M : ℕ, ω ∉ {ω | ∀ s ∈ denseIcc t, |X s ω| ≤ M} := by
     by_cases hS : ∃ M : ℕ, ∀ s ∈ denseIcc t, |X s ω| ≤ M
-    · refine ⟨fun h ↦ Or.inl fun s hs ↦ (Nat.sInf_mem hS s hs).trans (Nat.cast_le.2 h), ?_⟩
+    · refine ⟨fun h ↦ Or.inl fun s hs ↦
+        (Nat.sInf_mem (s := {N : ℕ | ∀ s ∈ denseIcc t, |X s ω| ≤ N}) hS s hs).trans
+          (Nat.cast_le.2 h), ?_⟩
       rintro (h | h)
       · exact Nat.sInf_le h
       · exact absurd hS fun ⟨M, hM⟩ ↦ h M hM
@@ -379,11 +381,11 @@ theorem exists_continuous_localMartingale_predItoIntegral :
     refine martingale_stoppedProcess_of_ae_eq (hτ.isStoppingTime N) (fun i ↦
       ((stronglyAdapted_predItoIntegral hB T hBmeas hBcont hpred (min i T)).mono
         (((natFiltration hBmeas).mono (min_le_left i T)).trans le_sup_left)).indicator (hGaug i))
-      (fun ω ↦ (hXc ω).isCadlag.right_continuous)
+      (fun ω ↦ (hXc ω).isCadlag.isRightContinuous)
       (martingale_itoLocalMod hB T hBmeas hBcont hG hGc (processToLpPredictable (μ := μ) T hBmeas
         (clip_isStronglyPredictable hBmeas hpred N) (abs_clip_le N σ)))
       (fun ω ↦ (continuous_indicator_min (fun ω hω ↦ (hGgood ω hω).2.1 N) ω).isCadlag
-        |>.right_continuous) ?_
+        |>.isRightContinuous) ?_
     filter_upwards [hGae] with ω hω hpos u hu
     simp only [X, itoLocalMod, Set.indicator_of_mem hω]
     refine (hGgood ω hω).2.2.2 N _ ⟨zero_le, min_le_right u T⟩ fun s hs ↦ ?_

@@ -82,7 +82,7 @@ theorem schwartzFuturesPrice_eq_integral (hB : IsPreBrownianReal B μ)
     ∫ ω, Real.exp (vasicekSDEMean x₀ θ κ (T : ℝ)
         + σ * (wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω)) ∂μ
       = schwartzFuturesPrice x₀ θ κ σ T := by
-  have h := mgf_gaussianReal (vasicekShortRate_hasLaw_gaussian hB x₀ θ σ hκ T).map_eq 1
+  have h := mgf_gaussianReal (vasicekShortRate_hasLaw_gaussian hB x₀ θ σ hκ T) 1
   simp only [mgf, one_mul, mul_one, one_pow] at h
   rw [h, schwartzFuturesPrice, Real.coe_toNNReal _ (vasicekSDEVariance_nonneg σ hκ T.coe_nonneg)]
 

@@ -65,7 +65,7 @@ noncomputable def monoMeasureLp (h : ν ≤ μ) : Lp ℝ 2 μ →L[ℝ] Lp ℝ 2
         simp only [h1, h2, h3, h4, Pi.smul_apply, RingHom.id_apply] }
     1 (fun f ↦ by
       simp only [LinearMap.coe_mk, AddHom.coe_mk, one_mul, Lp.norm_def]
-      refine ENNReal.toReal_mono (Lp.memLp f).2.ne ?_
+      refine ENNReal.toReal_mono (Lp.memLp f).eLpNorm_ne_top ?_
       rw [eLpNorm_congr_ae (MemLp.coeFn_toLp ((Lp.memLp f).mono_measure h))]
       exact eLpNorm_mono_measure _ h)
 
@@ -152,7 +152,7 @@ lemma memLp_indicator_band (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     MemLp ((Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)).indicator φ) 2
       ((timeMeasure.prod μ).trim (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod) :=
   (memLp_indicator_iff_restrict (MeasureTheory.measurableSet_predictable_Ioc_prod
-      (𝓕 := natFiltration (mΩ := mΩ) hBmeas) 0 T MeasurableSet.univ)).2
+      (𝓕 := natFiltration (mΩ := mΩ) hBmeas) 0 T MeasurableSet.univ).nullMeasurableSet).2
     (by rw [← trimMeasure_T_eq_restrict]; exact Lp.memLp φ)
 
 /-- **Extension by zero** of a `[0,T]` integrand to the `[0,∞)` predictable `L²`: the
@@ -185,7 +185,7 @@ noncomputable def bandExtend (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)) :
   norm_map' φ := by
     rw [LinearMap.coe_mk, AddHom.coe_mk, Lp.norm_toLp, Lp.norm_def, eLpNorm_indicator_eq_eLpNorm_restrict
       (MeasureTheory.measurableSet_predictable_Ioc_prod
-        (𝓕 := natFiltration (mΩ := mΩ) hBmeas) 0 T MeasurableSet.univ),
+        (𝓕 := natFiltration (mΩ := mΩ) hBmeas) 0 T MeasurableSet.univ).nullMeasurableSet,
       ← trimMeasure_T_eq_restrict]
 
 lemma bandExtend_coeFn (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
@@ -222,7 +222,8 @@ lemma bandExtend_toLp_ae_eq (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)) {g 
   by_cases hz : z.1 ≤ T
   · exact Set.indicator_of_mem (show z ∈ Set.Ioc 0 T ×ˢ (Set.univ : Set Ω) from
     ⟨⟨pos_iff_ne_zero.2 h0, hz⟩, Set.mem_univ _⟩) _
-  · rw [Set.indicator_of_notMem (fun h => hz h.1.2), hg0 z (not_le.1 hz)]
+  · rw [Set.indicator_of_notMem (show z ∉ Set.Ioc 0 T ×ˢ (Set.univ : Set Ω) from fun h ↦ hz h.1.2),
+      hg0 z (not_le.1 hz)]
 
 /-- On a `T`-bounded simple process, extension by zero turns the `[0,T]` embedding into the
 `[0,∞)` one. -/
@@ -239,7 +240,8 @@ lemma bandExtend_simpleAssembly_T (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u
   by_cases ht : t ≤ T
   · exact Set.indicator_of_mem (show (t, ω) ∈ Set.Ioc 0 T ×ˢ (Set.univ : Set Ω) from
     ⟨⟨pos_iff_ne_zero.2 h0, ht⟩, Set.mem_univ _⟩) _
-  · rw [Set.indicator_of_notMem (fun h => ht h.1.2)]
+  · rw [Set.indicator_of_notMem
+      (show (t, ω) ∉ Set.Ioc 0 T ×ˢ (Set.univ : Set Ω) from fun h ↦ ht h.1.2)]
     exact (uncurry_eq_zero_of_lt V (not_le.1 ht) ω).symm
 
 /-! ### The CLM `itoIntegralCLM_T` and its isometry -/

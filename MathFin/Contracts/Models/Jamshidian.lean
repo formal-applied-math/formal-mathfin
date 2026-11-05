@@ -188,7 +188,7 @@ theorem valueDisc_bondPut_wiener (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Mea
     congr 1
     funext ω
     simp [shortRateDiscount, Real.exp_neg]
-  haveI : IsProbabilityMeasure (forwardMeasure μ fun ω ↦ 1 / shortRateDiscount R T₀ ω) := by
+  have : IsProbabilityMeasure (forwardMeasure μ fun ω ↦ 1 / shortRateDiscount R T₀ ω) := by
     rw [hfm]
     exact forwardMeasure_isProbabilityMeasure (fun ω ↦ Real.exp_pos _)
       ((integrable_one_div_exp_add_mul_wienerIntegralLp hB T₀ (M T₀) (c T₀) (g T₀)).congr

@@ -97,12 +97,8 @@ instance isGaussian_stdNormalVec (ι : Type*) [Fintype ι] : IsGaussian (stdNorm
 
 /-- A coordinate of a vector of independent standard normals is square integrable. -/
 lemma memLp_eval_stdNormalVec {ι : Type*} [Fintype ι] (i : ι) :
-    MemLp (fun w : ι → ℝ ↦ w i) 2 (stdNormalVec ι) := by
-  have hmap : (stdNormalVec ι).map (fun w ↦ w i) = gaussianReal 0 1 :=
-    (measurePreserving_eval (fun _ : ι ↦ gaussianReal 0 1) i).map_eq
-  have h := memLp_id_gaussianReal' (μ := 0) (v := 1) 2 (by norm_num)
-  rw [← hmap] at h
-  exact (memLp_map_measure_iff aestronglyMeasurable_id (measurable_pi_apply i).aemeasurable).1 h
+    MemLp (fun w : ι → ℝ ↦ w i) 2 (stdNormalVec ι) :=
+  (measurePreserving_eval (fun _ : ι ↦ gaussianReal 0 1) i).hasLaw.memLp (memLp_id_gaussianReal 2)
 
 /-- The Cholesky map `(z₁, z₂) ↦ (r z₂ + √(1 − r²) z₁, z₂)`, as a continuous linear map. -/
 noncomputable def choleskyPair (r : ℝ) : ℝ × ℝ →L[ℝ] ℝ × ℝ :=
@@ -125,13 +121,12 @@ noncomputable def bivariateNormalLaw (r : ℝ) : Measure (ℝ × ℝ) :=
   stdNormalPair.map (choleskyPair r)
 
 instance (r : ℝ) : IsProbabilityMeasure (bivariateNormalLaw r) :=
-  Measure.isProbabilityMeasure_map (measurable_choleskyPair r).aemeasurable
+  inferInstanceAs (IsProbabilityMeasure (stdNormalPair.map (choleskyPair r)))
 
 /-- **The Cholesky pair is Gaussian**, for every `r`: the image of the Gaussian measure
 `N(0,1) ⊗ N(0,1)` under a continuous linear map (Mathlib's `isGaussian_map`). -/
-instance isGaussian_bivariateNormalLaw (r : ℝ) : IsGaussian (bivariateNormalLaw r) := by
-  unfold bivariateNormalLaw
-  infer_instance
+instance isGaussian_bivariateNormalLaw (r : ℝ) : IsGaussian (bivariateNormalLaw r) :=
+  inferInstanceAs (IsGaussian (stdNormalPair.map (choleskyPair r)))
 
 /-- **The standard bivariate normal CDF** `N₂(a, b; r) = P(X ≤ a, Y ≤ b)` for the Cholesky pair
 `X = r Z₂ + √(1 − r²) Z₁`, `Y = Z₂`. -/
@@ -180,11 +175,8 @@ lemma map_linear_bivariateNormalLaw {r : ℝ} (hr : r ^ 2 ≤ 1) (c d : ℝ) :
 
 /-- `c X + d Y ∈ L²(bivariateNormalLaw r)`, for every `r`. -/
 lemma memLp_linear_bivariateNormalLaw (r c d : ℝ) :
-    MemLp (fun q : ℝ × ℝ ↦ c * q.1 + d * q.2) 2 (bivariateNormalLaw r) := by
-  have h := memLp_id_gaussianReal (μ := 0)
-    (v := ((c * √(1 - r ^ 2)) ^ 2 + (c * r + d) ^ 2).toNNReal) 2
-  rw [← map_linear_bivariateNormalLaw' r c d] at h
-  exact (memLp_map_measure_iff aestronglyMeasurable_id (by fun_prop)).1 h
+    MemLp (fun q : ℝ × ℝ ↦ c * q.1 + d * q.2) 2 (bivariateNormalLaw r) :=
+  HasLaw.memLp ⟨by fun_prop, map_linear_bivariateNormalLaw' r c d⟩ (memLp_id_gaussianReal 2)
 
 lemma memLp_fst_bivariateNormalLaw (r : ℝ) : MemLp Prod.fst 2 (bivariateNormalLaw r) := by
   simpa using memLp_linear_bivariateNormalLaw r 1 0
@@ -442,13 +434,8 @@ lemma bivariateNormalLaw_map_negSnd (r : ℝ) :
     (bivariateNormalLaw r).map (fun p : ℝ × ℝ ↦ (p.1, -p.2)) = bivariateNormalLaw (-r) := by
   have hnegStd : stdNormalPair.map (fun p : ℝ × ℝ ↦ (p.1, -p.2)) = stdNormalPair := by
     have hf : (fun p : ℝ × ℝ ↦ (p.1, -p.2)) = Prod.map id (fun x : ℝ ↦ -x) := rfl
-    have hneg : (gaussianReal (0 : ℝ) (1 : NNReal)).map ((-1 : ℝ) * ·) = gaussianReal 0 1 := by
-      have h := gaussianReal_map_const_mul (μ := (0 : ℝ)) (v := (1 : NNReal)) (-1)
-      simpa using h
-    have hneg' : (gaussianReal (0 : ℝ) (1 : NNReal)).map (fun x : ℝ ↦ -x) = gaussianReal 0 1 := by
-      simpa [neg_one_mul] using hneg
     rw [hf, stdNormalPair, ← Measure.map_prod_map _ _ measurable_id (by fun_prop),
-      Measure.map_id, hneg']
+      Measure.map_id, gaussianReal_map_neg, neg_zero]
   have hcomm : (fun p : ℝ × ℝ ↦ (p.1, -p.2)) ∘ choleskyPair r =
       choleskyPair (-r) ∘ (fun p : ℝ × ℝ ↦ (p.1, -p.2)) := by
     funext p
@@ -569,7 +556,7 @@ theorem hasGaussianLaw_gaussianPair (r : ℝ) (μ σ : Fin 2 → ℝ) :
   have h : (fun q i ↦ gaussianPair μ σ i q) = (μ + ·) ∘ L := by
     ext q i
     fin_cases i <;> simp [gaussianPair, L]
-  refine ⟨?_⟩
+  refine ⟨by rw [h]; fun_prop, ?_⟩
   rw [h, ← Measure.map_map (measurable_const_add μ) L.measurable]
   infer_instance
 

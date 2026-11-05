@@ -80,10 +80,10 @@ theorem tendsto_eLpNorm_sub_of_dominated_convergence {p : ℝ≥0∞} (hp : p �
     (h_bound : ∀ n, ∀ᵐ x ∂ν, ‖F n x‖ ≤ bound x)
     (h_lim : ∀ᵐ x ∂ν, Tendsto (fun n ↦ F n x) atTop (𝓝 (f x))) :
     Tendsto (fun n ↦ eLpNorm (F n - f) p ν) atTop (𝓝 0) := by
-  rcases eq_or_ne p 0 with rfl | hp0
-  · simp
-  have hp_pos : 0 < p.toReal := ENNReal.toReal_pos hp0 hp
   have hfm : AEStronglyMeasurable f ν := aestronglyMeasurable_of_tendsto_ae _ F_measurable h_lim
+  rcases eq_or_ne p 0 with rfl | hp0
+  · simp [fun n ↦ eLpNorm_exponent_zero ((F_measurable n).sub hfm)]
+  have hp_pos : 0 < p.toReal := ENNReal.toReal_pos hp0 hp
   -- the `p`-th powers of `‖F n − f‖ₑ` are dominated by `(2‖bound‖ₑ)^p` and tend to `0`
   have hdom (n : ℕ) : (fun x ↦ ‖(F n - f) x‖ₑ ^ p.toReal) ≤ᵐ[ν]
       fun x ↦ (2 * ‖bound x‖ₑ) ^ p.toReal := by
@@ -106,7 +106,8 @@ theorem tendsto_eLpNorm_sub_of_dominated_convergence {p : ℝ≥0∞} (hp : p �
       (tendsto_sub_nhds_zero_iff.2 hx).enorm.ennrpow_const p.toReal
   have hlin := tendsto_lintegral_of_dominated_convergence' _
     (fun n ↦ ((F_measurable n).sub hfm).enorm.pow_const _) hdom hfin hzero
-  simp_rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp0 hp]
+  refine Tendsto.congr
+    (fun n ↦ (eLpNorm_eq_lintegral_rpow_enorm_toReal hp0 hp ((F_measurable n).sub hfm)).symm) ?_
   simpa [ENNReal.zero_rpow_of_pos (inv_pos.2 hp_pos)] using hlin.ennrpow_const (1 / p.toReal)
 
 end DominatedLp
@@ -181,7 +182,7 @@ noncomputable def integrandLp (X : ℝ≥0 → Ω → ℝ) : Lp ℝ 2 (bracketMe
 theorem integrandLp_eq {X X' : ℝ≥0 → Ω → ℝ} (h : IsPredictableVersion T hBmeas φ X X') :
     integrandLp T hBmeas φ X = h.2.1.toLp _ := by
   have hX : X ∈ domain T hBmeas φ := ⟨X', h⟩
-  rw [integrandLp, dif_pos hX]
+  rw [integrandLp, dite_eq_left hX]
   exact MemLp.toLp_congr _ _ (uncurry_ae_eq_of_isPredictableVersion hX.choose_spec h)
 
 /-! ### The integrator and the integral -/
@@ -254,7 +255,7 @@ theorem sIntegral_band (hB : IsPreBrownianReal B μ) {i j : ℝ≥0} (hij : i �
         Lp.coeFn_zero ℝ 2 (bracketMeasure (μ := μ) T hBmeas φ)] with z hz hzT h0
       rw [hz, h0, uncurry_band]
       simp only [elemIntegrand, Set.indicator_apply, Set.mem_Ioc, Pi.zero_apply]
-      rw [if_neg fun h ↦ absurd (hiT.trans h.1) (not_lt.2 hzT.2), zero_mul]
+      rw [ite_eq_right fun h ↦ absurd (hiT.trans h.1) (not_lt.2 hzT.2), zero_mul]
     rw [hzero, map_zero]
     filter_upwards [Lp.coeFn_zero ℝ 2 μ] with ω hω
     simp [integrator, min_eq_right hiT.le, min_eq_right (hiT.le.trans hij)]
@@ -367,12 +368,12 @@ theorem sIntegral_dct (hB : IsPreBrownianReal B μ) (X : ℕ → ℝ≥0 → Ω 
   -- the limit version, pathwise
   set Vl : ℝ≥0 → Ω → ℝ := fun t ω ↦ limUnder atTop (fun n ↦ V n t ω)
   have hall : ∀ᵐ ω ∂μ, (∀ n t, V n t ω = X n t ω) ∧ ∀ t, Vd t ω = X_dom t ω := by
-    filter_upwards [ae_all_iff.2 fun n ↦ (hV n).2.2, hVd.2.2] with ω hn hd
-    exact ⟨fun n t ↦ (hn n t).symm, fun t ↦ (hd t).symm⟩
+    filter_upwards [ae_all_iff.2 fun n ↦ (hV n).2.2.symm, hVd.2.2.symm] with ω hn hd
+    exact ⟨hn, hd⟩
   have htend : ∀ᵐ ω ∂μ, ∀ t, Tendsto (fun n ↦ V n t ω) atTop (𝓝 (X_lim t ω)) := by
     filter_upwards [hall] with ω hω t
     simpa only [hω.1 _ t] using h_lim t ω
-  have hVl_eq : ∀ᵐ ω ∂μ, ∀ t, Vl t ω = X_lim t ω := by
+  have hVl_eq : Vl ≡ᵐ[μ] X_lim := by
     filter_upwards [htend] with ω hω t
     exact (hω t).limUnder_eq
   have hVm (n : ℕ) : StronglyMeasurable[pred] (Function.uncurry (V n)) :=
@@ -402,7 +403,7 @@ theorem sIntegral_dct (hB : IsPreBrownianReal B μ) (X : ℕ → ℝ≥0 → Ω 
     exact le_of_tendsto' hz.norm hzd
   have hVl : IsPredictableVersion T hBmeas φ X_lim Vl :=
     ⟨hVl_meas, hVd.2.1.of_le hVl_meas.stronglyMeasurable.aestronglyMeasurable hdom_lim,
-      hVl_eq.mono fun ω h t ↦ (h t).symm⟩
+      hVl_eq.symm⟩
   refine ⟨⟨Vl, hVl⟩, ?_⟩
   -- convergence in `L²(⟨M⟩)`, then through the isometry, then in measure
   have hLp : Tendsto (fun n ↦ integrandLp T hBmeas φ (X n)) atTop
@@ -429,12 +430,12 @@ theorem isRiemannStieltjesExtension (hB : IsPreBrownianReal B μ) :
   elementary_ioc i j hij X := by
     -- a simple function over `𝓕_i` is bounded and `𝓕_i`-measurable
     obtain ⟨⟨C, hC⟩, hXm⟩ : (∃ C, ∀ ω, ‖X ω‖ ≤ C) ∧ Measurable[natFiltration hBmeas i] X := by
-      letI : MeasurableSpace Ω := natFiltration hBmeas i
+      let : MeasurableSpace Ω := natFiltration hBmeas i
       exact ⟨X.exists_forall_norm_le, X.measurable⟩
     exact ⟨⟨_, isPredictableVersion_band hij hXm hC⟩, sIntegral_band hB hij hXm hC⟩
   elementary_iic i X := by
     obtain ⟨⟨C, hC⟩, hXm⟩ : (∃ C, ∀ ω, ‖X ω‖ ≤ C) ∧ Measurable[natFiltration hBmeas ⊥] X := by
-      letI : MeasurableSpace Ω := natFiltration hBmeas ⊥
+      let : MeasurableSpace Ω := natFiltration hBmeas ⊥
       exact ⟨X.exists_forall_norm_le, X.measurable⟩
     exact ⟨⟨_, isPredictableVersion_bottomBand i hXm hC⟩, sIntegral_bottomBand hB i hXm hC⟩
   integral_add X₁ X₂ h₁ h₂ := by
@@ -595,7 +596,8 @@ theorem agree_cut_indicator (hI' : IsOtherExtension (T := T) (φ := φ) hB I' S'
         simp only [cut, Pi.zero_apply]
         rw [Set.indicator_apply]
         split_ifs with h1
-        · exact Set.indicator_of_notMem (fun h ↦ haK (h.1.1.le.trans h1.1)) _
+        · exact Set.indicator_of_notMem
+            (show (t, ω) ∉ Set.Ioc a b ×ˢ F from fun h ↦ haK (h.1.1.le.trans h1.1)) _
         · rfl
   · intro A _ hA
     convert (agree_cut_univ hI' K).sub hI' hA using 1
@@ -627,17 +629,17 @@ theorem agree_cut_indicator (hI' : IsOtherExtension (T := T) (φ := φ) hB I' S'
         filter_upwards [eventually_gt_atTop m] with N hN
         have hmem : (t, ω) ∈ ⋃ n ∈ Finset.range N, f n :=
           Set.mem_biUnion (Finset.mem_range.2 hN) hm
-        simp only [cut, Set.indicator_apply, hz, hmem, if_true, Pi.one_apply]
+        simp only [cut, Set.indicator_apply, hz, hmem, ite_true, Pi.one_apply]
       · refine tendsto_const_nhds.congr' (Eventually.of_forall fun N ↦ ?_)
         have hmem : (t, ω) ∉ ⋃ n ∈ Finset.range N, f n := fun h ↦
           hz (Set.mem_iUnion.2 (by obtain ⟨n, -, hn⟩ := Set.mem_iUnion₂.1 h; exact ⟨n, hn⟩))
-        simp only [cut, Set.indicator_apply, hz, hmem, if_false]
+        simp only [cut, Set.indicator_apply, hz, hmem, ite_false]
 
 /-- **Simple predictable functions**, cut at `K`, by linearity. -/
 theorem agree_cut_simpleFunc (hI' : IsOtherExtension (T := T) (φ := φ) hB I' S') (K : ℝ≥0)
     (f : @SimpleFunc (ℝ≥0 × Ω) (natFiltration (mΩ := mΩ) hBmeas).predictable ℝ) :
     Agree T hBmeas φ hB I' S' (cut f K) := by
-  letI : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
+  let : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
   induction f using SimpleFunc.induction with
   | @const c A hA =>
     convert (agree_cut_indicator hI' K A hA).const_smul hI' c using 1
@@ -682,12 +684,14 @@ theorem sIntegral_ae_eq_of_isRiemannStieltjesExtension
   have hWagree (n : ℕ) : Agree T hBmeas φ hB I' S' (W n) := by
     have hm : Measurable[(natFiltration (mΩ := mΩ) hBmeas).predictable]
         ({z | |Function.uncurry V z| ≤ n}.indicator (Function.uncurry V)) := by
-      letI : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
+      let : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
       exact hV.1.indicator (measurableSet_le hV.1.abs measurable_const)
     refine agree_cut_bounded hI' n hm (Nat.cast_nonneg n) fun z ↦ ?_
     by_cases h : |Function.uncurry V z| ≤ n
-    · simpa [Set.indicator_of_mem (s := {z | |Function.uncurry V z| ≤ n}) h] using h
-    · simp [Set.indicator_of_notMem (s := {z | |Function.uncurry V z| ≤ n}) h]
+    · simpa [Set.indicator_of_mem
+        (show z ∈ {z | |Function.uncurry V z| ≤ n} from h)] using h
+    · simp [Set.indicator_of_notMem
+        (show z ∉ {z | |Function.uncurry V z| ≤ n} from h)]
   have hVagree : Agree T hBmeas φ hB I' S' V := by
     refine Agree.of_tendsto hI' hWagree ⟨⟨V, hVV⟩, hVS'⟩
       (fun n t ω ↦ by
@@ -698,7 +702,8 @@ theorem sIntegral_ae_eq_of_isRiemannStieltjesExtension
       (tendsto_natCast_atTop_atTop (R := ℝ)).eventually_ge_atTop |V t ω|] with n htn hVn
     simp only [W, cut, Set.indicator_of_mem
       (show (t, ω) ∈ Set.Iic (n : ℝ≥0) ×ˢ (Set.univ : Set Ω) from ⟨htn, Set.mem_univ _⟩)]
-    rw [Set.indicator_of_mem (s := {z | |Function.uncurry V z| ≤ (n : ℝ)}) hVn]
+    rw [Set.indicator_of_mem
+        (show (t, ω) ∈ {z | |Function.uncurry V z| ≤ (n : ℝ)} from hVn)]
     rfl
   have hXV : sIntegral T hBmeas φ hB X = sIntegral T hBmeas φ hB V := by
     simp only [sIntegral, integrandLp_eq hV, integrandLp_eq hVV]

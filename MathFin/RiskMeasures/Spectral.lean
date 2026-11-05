@@ -181,7 +181,6 @@ quantile function of the law of `X`, which pushes the uniform law on `(0, 1)` fo
 law (`integral_eq_setIntegral_quantile`). -/
 theorem spectralRiskMeasure_one [IsProbabilityMeasure P] (hX : AEMeasurable X P) :
     spectralRiskMeasure 1 X P = ∫ ω, X ω ∂P := by
-  have := Measure.isProbabilityMeasure_map hX
   have hq := integral_eq_setIntegral_quantile (μ := P.map X) (f := fun x ↦ x) (by fun_prop)
   rw [integral_map hX (by fun_prop)] at hq
   simp only [spectralRiskMeasure, Pi.one_apply, one_mul]

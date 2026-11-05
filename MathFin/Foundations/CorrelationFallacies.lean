@@ -97,13 +97,6 @@ private lemma measureReal_preimage_of_hasLaw {X : Ω → ℝ} {μ : Measure ℝ}
   rw [← map_measureReal_apply_of_aemeasurable hX.aemeasurable hs, hX.map_eq]
 
 omit [IsProbabilityMeasure P] in
-/-- A standard normal variable is square integrable. -/
-private lemma memLp_two_of_hasLaw_gaussianReal {X : Ω → ℝ} (hX : HasLaw X (gaussianReal 0 1) P) :
-    MemLp X 2 P :=
-  (memLp_map_measure_iff aestronglyMeasurable_id hX.aemeasurable).1
-    (hX.map_eq ▸ memLp_id_gaussianReal' 2 (by norm_num))
-
-omit [IsProbabilityMeasure P] in
 /-- **`Y = V Z` is standard normal**: a random sign times an independent standard normal
 variable. -/
 theorem hasLaw_mul_gaussianReal (hZ : HasLaw Z (gaussianReal 0 1) P) (hV : HasLaw V rademacher P)
@@ -120,8 +113,8 @@ theorem covariance_mul_eq_zero (hZ : HasLaw Z (gaussianReal 0 1) P) (hV : HasLaw
   have hEZ : P[Z] = 0 := by rw [hZ.integral_eq, integral_id_gaussianReal]
   have hind : V ⟂ᵢ[P] (fun ω ↦ Z ω * Z ω) :=
     hVZ.comp (φ := id) (ψ := fun z ↦ z * z) measurable_id (measurable_id.mul measurable_id)
-  rw [covariance_eq_sub (memLp_two_of_hasLaw_gaussianReal hZ)
-    (memLp_two_of_hasLaw_gaussianReal hY), hEZ, zero_mul, sub_zero]
+  rw [covariance_eq_sub hZ.hasGaussianLaw.memLp_two
+    hY.hasGaussianLaw.memLp_two, hEZ, zero_mul, sub_zero]
   calc P[Z * fun ω ↦ V ω * Z ω] = ∫ ω, V ω * (Z ω * Z ω) ∂P := by
         congr 1; ext ω; simp only [Pi.mul_apply]; ring
     _ = P[V] * ∫ ω, Z ω * Z ω ∂P :=
@@ -183,7 +176,6 @@ private lemma measureReal_add_mul_eq_zero (hZ : HasLaw Z (gaussianReal 0 1) P)
     (hV : HasLaw V rademacher P) : P.real {ω | Z ω + V ω * Z ω = 0} = 2⁻¹ := by
   have hset : {ω | Z ω + V ω * Z ω = 0} =ᵐ[P] (V ⁻¹' {-1} ∪ Z ⁻¹' {0} : Set Ω) := by
     filter_upwards [ae_eq_one_or_neg_one hV] with ω hω
-    change (Z ω + V ω * Z ω = 0) = (ω ∈ V ⁻¹' {-1} ∪ Z ⁻¹' {0})
     rcases hω with h1 | h1 <;> simp [h1, show (1 : ℝ) ≠ -1 by norm_num]
   have hV1 : P.real (V ⁻¹' {-1}) = 2⁻¹ := by
     rw [measureReal_preimage_of_hasLaw hV (measurableSet_singleton _), measureReal_def,

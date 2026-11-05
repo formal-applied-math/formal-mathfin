@@ -115,7 +115,6 @@ lemma memLp_indicatorTerm {s t : ℝ} {A : Set E}
     (hφL2 : MemLp φ 2 P) :
     MemLp (fun p : Ω × (ℝ × E) => φ p.1 * (Set.Ioc s t ×ˢ A).indicator (fun _ => (1 : ℝ)) p.2) 2
       (P.prod (referenceIntensity ν)) := by
-  haveI : SFinite (referenceIntensity ν) := by unfold referenceIntensity; infer_instance
   have hboxms : MeasurableSet (Set.Ioc s t ×ˢ A) := measurableSet_Ioc.prod hA
   have hboxfin : referenceIntensity ν (Set.Ioc s t ×ˢ A) ≠ ⊤ := referenceIntensity_box_ne_top hAfin
   have hgm : Measurable
@@ -295,7 +294,6 @@ lemma pair_integral_eq (N : PoissonRandomMeasure P ν) (V : levySimpleModule N)
       = ∫ p, (V.1 ba p.1 * (indexBox ba).indicator (fun _ => (1 : ℝ)) p.2)
               * (V.1 bb p.1 * (indexBox bb).indicator (fun _ => (1 : ℝ)) p.2)
           ∂(P.prod (referenceIntensity ν)) := by
-  haveI : SFinite (referenceIntensity ν) := by unfold referenceIntensity; infer_instance
   obtain ⟨C, _, hC⟩ := V.2.bound_coe
   have hboxams : MeasurableSet (indexBox ba) := measurableSet_Ioc.prod (V.2.markMeasurable ba hba)
   have hboxbms : MeasurableSet (indexBox bb) := measurableSet_Ioc.prod (V.2.markMeasurable bb hbb)
@@ -426,7 +424,7 @@ overlapping-box bilinear pairing) and extended by continuity to their closure. -
 theorem itoLevyIntegralL2_norm (N : PoissonRandomMeasure P ν) (H : levyClosure N) :
     ‖itoLevyIntegralL2 N H‖ = ‖H‖ := by
   have key : ∀ V : levySimpleModule N, ‖intAssembly N V‖ = ‖embCorestrict N V‖ :=
-    fun V => by rw [Submodule.coe_norm]; exact assembly_isometry N V
+    fun V => by rw [← Submodule.norm_coe]; exact assembly_isometry N V
   -- `unfold` exposes the def's already-bridged `extendOfNorm` term; discharging the isometry kernel
   -- against the submodule codomain re-triggers the instance diamond (a heavy but finite `whnf`),
   -- hence the raised `maxHeartbeats` above. (docs/patterns.md — "extendOfNorm into a submodule".)

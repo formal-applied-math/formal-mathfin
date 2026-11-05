@@ -67,7 +67,7 @@ lemma hasDerivAt_bondPortfolioDur_r
     -- scaled by the duration weight `w i · (T i − t)`.
     have h := (hasDerivAt_zcb_r t (T i) r).const_mul (w i * (T i - t))
     simp only [zcb] at h
-    convert h using 1 <;> first | rfl | ring
+    convert h using 1; ring
   have h_raw := HasDerivAt.fun_sum h_each
   rw [Finset.sum_neg_distrib] at h_raw
   exact h_raw

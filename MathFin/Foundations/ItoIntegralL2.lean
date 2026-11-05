@@ -283,11 +283,11 @@ finite-measure interval `(p.1,p.2]` and `V(p)` is bounded. -/
 lemma memLp_rectTerm (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (p : ℝ≥0 × ℝ≥0) :
     MemLp (rectTerm hBmeas V p) 2 (timeMeasure.prod μ) := by
-  haveI : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc p.1 p.2)) :=
+  have : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc p.1 p.2)) :=
     ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter, timeMeasure_Ioc];
         exact ENNReal.ofReal_lt_top⟩
   rw [rectTerm_eq_indicator,
-      memLp_indicator_iff_restrict (measurableSet_Ioc.prod MeasurableSet.univ),
+      memLp_indicator_iff_restrict (measurableSet_Ioc.prod MeasurableSet.univ).nullMeasurableSet,
       ← Measure.prod_restrict, Measure.restrict_univ]
   have hmeas : Measurable (fun z : ℝ≥0 × Ω ↦ V.value p z.2) :=
     ((V.measurable_value p).mono ((natFiltration hBmeas).le p.1) le_rfl).comp measurable_snd
@@ -343,8 +343,7 @@ lemma memLp_uncurry_trim (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
     MemLp (Function.uncurry ⇑V) 2
       ((timeMeasure.prod μ).trim (natFiltration hBmeas).predictable_le_prod) :=
-  ⟨V.isStronglyPredictable.aestronglyMeasurable,
-   by rw [eLpNorm_trim _ V.isStronglyPredictable]; exact (memLp_uncurry_prod hBmeas V).2⟩
+  by rw [memLp_iff, eLpNorm_trim _ V.isStronglyPredictable]; exact memLp_uncurry_prod hBmeas V
 
 /-- **The embedding** of a simple process into the predictable `L²` space, as the class of
 its uncurried version. The codomain `Lp ℝ 2 ((timeMeasure.prod μ).trim …)` is *definitionally*

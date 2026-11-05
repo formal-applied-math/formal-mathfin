@@ -101,7 +101,7 @@ theorem bsPDiv_le_brownianUsualAmericanPut {K r q σ S : ℝ} (hK : 0 < K) (hr :
       (f := putReward brownian K r q σ S (fun _ => T))
   rw [← maturityReward_eq_bsPDiv isBrownianReal_brownian.toIsPreBrownianReal hK hσ hS hT, ← he]
   let μ := completedMeasure gaussianLimit
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   exact european_expectation_le_value (P := μ) (𝓕 := brownianUsualFiltration)
     brownian_completed_measurable hK.le hr hS.le
 

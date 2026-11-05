@@ -186,7 +186,7 @@ theorem valueAtRisk_sum_bernoulli_of_card_two (hcard : Fintype.card ι = 2)
     (Finset.measurable_sum _ fun i _ ↦ hmeas i).aemeasurable
   refine ⟨le_antisymm ((valueAtRisk_le_iff hS hα).2 ?_)
       (one_le_valueAtRisk_sum hmeas h01 hp hind hα (by rwa [hcard])),
-    fun i ↦ by rw [valueAtRisk_of_bernoulli (hmeas i) (h01 i) (hp i) hα, if_pos hhi]⟩
+    fun i ↦ by rw [valueAtRisk_of_bernoulli (hmeas i) (h01 i) (hp i) hα, ite_eq_left hhi]⟩
   -- the portfolio loss exceeds `1` only if both loans default, with probability `p²`
   obtain ⟨i₀⟩ : Nonempty ι := Fintype.card_pos_iff.1 (by omega)
   have hp01 : 0 ≤ p ∧ p ≤ 1 := by
@@ -286,7 +286,7 @@ theorem cdf_conv_paretoMeasure_half {x : ℝ} (hx : 2 ≤ x) :
   have hsupp (a : ℝ) (ha : a ∉ Icc 1 (x - 1)) :
       paretoPDFReal 1 (1 / 2) a * cdf (paretoMeasure 1 (1 / 2)) (x - a) = 0 := by
     rcases not_and_or.1 ha with ha1 | ha1
-    · rw [paretoPDFReal, if_neg ha1, zero_mul]
+    · rw [paretoPDFReal, ite_eq_right ha1, zero_mul]
     · rw [cdf_paretoMeasure_of_lt one_pos (by norm_num : (0 : ℝ) < 1 / 2)
         (by linarith [not_le.1 ha1] : x - a < 1), mul_zero]
   -- on `[1, x − 1]` it is `(1 − 1/√(x − a))/(2a√a)`
@@ -303,7 +303,7 @@ theorem cdf_conv_paretoMeasure_half {x : ℝ} (hx : 2 ≤ x) :
         ← sqrt_eq_rpow]
     have e2 : (1 / (x - a)) ^ (1 / 2 : ℝ) = (√(x - a))⁻¹ := by
       rw [← sqrt_eq_rpow, one_div, sqrt_inv]
-    simp only [paretoPDFReal, if_pos ha.1, one_rpow, mul_one,
+    simp only [paretoPDFReal, ite_eq_left ha.1, one_rpow, mul_one,
       cdf_paretoMeasure_of_le one_pos (by norm_num : (0 : ℝ) < 1 / 2) hxa]
     rw [e1, e2]
     field_simp

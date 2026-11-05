@@ -88,7 +88,7 @@ theorem brownianUsualExerciseBoundary_upperSemicontinuous {K r q σ : ℝ}
     (hK : 0 ≤ K) (hr : 0 ≤ r) : UpperSemicontinuous (brownianUsualExerciseBoundary K r q σ) := by
   let μ := completedMeasure gaussianLimit
   have hz : ∀ᵐ ω ∂μ, brownian 0 ω = 0 := isBrownianReal_brownian.eval_zero_ae_eq_zero
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   exact threshold_upperSemicontinuous (P := μ) (𝓕 := brownianUsualFiltration)
     brownian_completed_measurable continuous_brownian hz hK hr
 
@@ -96,7 +96,7 @@ theorem canonicalStockBoundary_antitone {k h : ℝ} (hk : 0 ≤ k) :
     Antitone (canonicalStockBoundary k h) := by
   let μ := completedMeasure gaussianLimit
   have hz : ∀ᵐ ω ∂μ, brownian 0 ω = 0 := isBrownianReal_brownian.eval_zero_ae_eq_zero
-  letI : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   intro s t hst
   exact threshold_antitone_horizon (P := μ) (𝓕 := brownianUsualFiltration)
     brownian_completed_measurable hz (by norm_num) hk (Real.toNNReal_mono hst)

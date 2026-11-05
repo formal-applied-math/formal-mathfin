@@ -196,7 +196,7 @@ this is `ask` when `E` is a buy and `bid` when `E` is a sell. -/
 theorem integral_payoff_cond [IsFiniteMeasure μ] (E H : Set Ω) (hH : MeasurableSet H)
     (hE0 : μ E ≠ 0) (VL VH : ℝ) :
     ∫ ω, payoff H VL VH ω ∂(μ[|E]) = VL + (μ[H | E]).toReal * (VH - VL) := by
-  haveI : IsProbabilityMeasure (μ[|E]) := cond_isProbabilityMeasure hE0
+  have : IsProbabilityMeasure (μ[|E]) := cond_isProbabilityMeasure hE0
   exact integral_payoff (μ[|E]) H hH VL VH
 
 /-- **The spread, reduced to the posteriors.** Every trace of the payoff cancels
@@ -345,7 +345,7 @@ that `F` is not null — the hypothesis the model already forces. -/
 theorem cond_compl_toReal [IsFiniteMeasure μ] (E F : Set Ω) (hE : MeasurableSet E)
     (hF0 : μ F ≠ 0) :
     (μ[Eᶜ | F]).toReal = 1 - (μ[E | F]).toReal := by
-  haveI : IsProbabilityMeasure (μ[|F]) := cond_isProbabilityMeasure hF0
+  have : IsProbabilityMeasure (μ[|F]) := cond_isProbabilityMeasure hF0
   rw [← measureReal_def, probReal_compl_eq_one_sub hE, measureReal_def]
 
 /-- `P(buy | V_H) = (1+p)/2`, converted from Stage 1's additive form. -/

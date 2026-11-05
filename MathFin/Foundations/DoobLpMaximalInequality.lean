@@ -12,6 +12,8 @@ public import Mathlib.MeasureTheory.Integral.MeanInequalities
 public import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 public import Mathlib.Analysis.MeanInequalities
 
+import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+
 /-!
 # Doob's Lᵖ maximal inequality
 
@@ -277,10 +279,8 @@ private lemma fubini_swap
           (fun s ↦ ENNReal.ofReal (s ^ (p - 2)) *
             {ω | s ≤ runMax f n ω}.indicator
               (fun ω ↦ ENNReal.ofReal (f n ω)) ω) t))
-      (volume.prod μ) := by
-    refine (Measurable.indicator ?_ ?_).aemeasurable
-    · exact hF_meas
-    · exact measurable_fst measurableSet_Ioi
+      (volume.prod μ) :=
+    (hF_meas.indicator (measurable_fst measurableSet_Ioi)).aemeasurable
   rw [lintegral_lintegral_swap hSwap_meas]
   -- Now have ∫⁻ ω, ∫⁻ t, indicator(Ioi 0) F(t,ω) ∂volume ∂μ.
   -- For each ω, the inner is the integral over Ioi 0 of
@@ -345,7 +345,7 @@ private lemma fubini_swap
     Wraps `ENNReal.lintegral_mul_le_Lp_mul_Lq` plus the rpow algebra
     `(x^(p-1))^q = x^p` (using `(p-1)*q = p`). -/
 private lemma holder_apply
-    [IsFiniteMeasure μ] {𝒢 : Filtration ℕ m0} {f : ℕ → Ω → ℝ} {p : ℝ}
+    {𝒢 : Filtration ℕ m0} {f : ℕ → Ω → ℝ} {p : ℝ}
     (hsub : Submartingale f 𝒢 μ) (hnonneg : ∀ n ω, 0 ≤ f n ω)
     (hp : 1 < p) (n : ℕ) :
     (∫⁻ ω, ENNReal.ofReal (f n ω) *
@@ -503,10 +503,9 @@ private lemma fubini_swap_truncated
           (fun s ↦ ENNReal.ofReal (s ^ (p - 2)) *
             {ω | s ≤ runMax f n ω}.indicator
               (fun ω ↦ ENNReal.ofReal (f n ω)) ω) t))
-      (volume.prod μ) := by
-    refine (Measurable.indicator ?_ ?_).aemeasurable
-    · exact hF_meas
-    · exact measurable_fst (measurableSet_Ioi.inter measurableSet_Iic)
+      (volume.prod μ) :=
+    (hF_meas.indicator
+      (measurable_fst (measurableSet_Ioi.inter measurableSet_Iic))).aemeasurable
   rw [lintegral_lintegral_swap hSwap_meas]
   apply lintegral_congr_ae
   filter_upwards with ω
@@ -589,11 +588,11 @@ private lemma A_K_le_layer_integral
         if t ≤ K then μ {ω | t ≤ runMax f n ω} else 0 := by
     intro t ht
     by_cases hle : t ≤ K
-    · simp only [hle, if_true]
+    · simp only [hle, ite_true]
       congr 1
       ext ω
       simp [hle]
-    · simp only [hle, if_false]
+    · simp only [hle, ite_false]
       rw [show {ω | t ≤ min (runMax f n ω) K} = ∅ by
         ext ω
         simp [hle]]
@@ -638,7 +637,7 @@ private lemma A_K_le_layer_integral
       intro t ht
       change μ {ω | t ≤ min (runMax f n ω) K} * _ =
             μ {ω | t ≤ runMax f n ω} * _
-      rw [h_ZK_set t ht.1, if_pos ht.2]
+      rw [h_ZK_set t ht.1, ite_eq_left ht.2]
     rw [h_left, h_zero_right, add_zero]
   rw [h_split]
   -- Now apply layer_integrand_bound pointwise.
@@ -822,14 +821,15 @@ private lemma holder_step
 /-- Conversion lemma: for a non-negative `f : Ω → ℝ` and `1 < p`,
     `eLpNorm f (ofReal p) μ = (∫⁻ ω, ofReal(f ω ^ p) ∂μ)^(1/p)`. -/
 private lemma eLpNorm_eq_lintegral_ofReal_pow
-    {f : Ω → ℝ} (hf_nn : ∀ ω, 0 ≤ f ω) {p : ℝ} (hp : 1 < p) :
+    {f : Ω → ℝ} (hf : AEStronglyMeasurable f μ) (hf_nn : ∀ ω, 0 ≤ f ω) {p : ℝ}
+    (hp : 1 < p) :
     eLpNorm f (ENNReal.ofReal p) μ
       = (∫⁻ ω, ENNReal.ofReal (f ω ^ p) ∂μ) ^ (1 / p) := by
   have hp_pos : 0 < p := lt_trans zero_lt_one hp
   have hp_ne_zero : (ENNReal.ofReal p) ≠ 0 := by
     simp [hp_pos]
   have hp_ne_top : (ENNReal.ofReal p) ≠ ⊤ := ENNReal.ofReal_ne_top
-  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp_ne_zero hp_ne_top]
+  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp_ne_zero hp_ne_top hf]
   rw [ENNReal.toReal_ofReal hp_pos.le]
   congr 1
   apply lintegral_congr_ae
@@ -946,8 +946,10 @@ theorem maximal_ineq_Lp
           eLpNorm (f n) (ENNReal.ofReal p) μ := by
   -- `Finset.sup'` is definitionally `runMax f n`.
   change eLpNorm (runMax f n) (ENNReal.ofReal p) μ ≤ _
-  rw [eLpNorm_eq_lintegral_ofReal_pow (runMax_nonneg hnonneg n) hp,
-      eLpNorm_eq_lintegral_ofReal_pow (hnonneg n) hp]
+  rw [eLpNorm_eq_lintegral_ofReal_pow (runMax_measurable hsub n).aestronglyMeasurable
+      (runMax_nonneg hnonneg n) hp,
+    eLpNorm_eq_lintegral_ofReal_pow
+      ((hsub.stronglyMeasurable n).mono (𝒢.le n)).aestronglyMeasurable (hnonneg n) hp]
   set A : ℝ≥0∞ := ∫⁻ ω, ENNReal.ofReal ((runMax f n ω) ^ p) ∂μ
   set B : ℝ≥0∞ := ∫⁻ ω, ENNReal.ofReal ((f n ω) ^ p) ∂μ
   set C : ℝ≥0∞ := ENNReal.ofReal (p / (p - 1)) with hC_def
@@ -1015,7 +1017,8 @@ theorem Martingale.eLpNorm_norm_runMax_le
       ≤ ENNReal.ofReal (p / (p - 1)) * eLpNorm (f n) (ENNReal.ofReal p) μ := by
   have hsub := martingale_norm_submartingale hf
   have hbound := maximal_ineq_Lp hsub (fun _ _ ↦ norm_nonneg _) hp n
-  rwa [eLpNorm_norm] at hbound
+  rwa [eLpNorm_norm (f n)
+    ((hf.stronglyMeasurable n).mono (𝒢.le n)).aestronglyMeasurable] at hbound
 
 /-! ## The `L^p` dominator of an `L^p`-bounded `ℕ`-indexed martingale
 
@@ -1084,6 +1087,10 @@ private lemma iSup_ofReal_runMaxNorm (f : ℕ → Ω → ℝ) (ω : Ω) :
     exact ENNReal.ofReal_le_ofReal <|
       Finset.le_sup' (f := fun j ↦ ‖f j ω‖) (Finset.mem_range.mpr (Nat.lt_succ_self k))
 
+private lemma measurable_runMaxNorm (hf : Martingale f 𝒢 μ) (n : ℕ) :
+    Measurable (runMaxNorm f n) :=
+  Finset.measurable_range_sup'' (n := n) fun k _ ↦ (measurable_of_martingale hf k).norm
+
 private lemma lintegral_ofReal_runMaxNorm_rpow_le [IsFiniteMeasure μ] (hp : 1 < p)
     (hf : Martingale f 𝒢 μ)
     (hbound : ∀ n, eLpNorm (f n) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R) (n : ℕ) :
@@ -1093,8 +1100,9 @@ private lemma lintegral_ofReal_runMaxNorm_rpow_le [IsFiniteMeasure μ] (hp : 1 <
   have hDoob : eLpNorm (fun ω ↦ runMaxNorm f n ω) (ENNReal.ofReal p) μ
       ≤ ENNReal.ofReal (p / (p - 1)) * ENNReal.ofReal R :=
     (Martingale.eLpNorm_norm_runMax_le hf hp n).trans (by gcongr; exact hbound _)
-  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by simp [hp_pos]) ENNReal.ofReal_ne_top,
-      ENNReal.toReal_ofReal hp_pos.le] at hDoob
+  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by simp [hp_pos]) ENNReal.ofReal_ne_top
+      (measurable_runMaxNorm hf n).aestronglyMeasurable,
+    ENNReal.toReal_ofReal hp_pos.le] at hDoob
   have hpow := ENNReal.rpow_le_rpow hDoob hp_pos.le
   rw [← ENNReal.rpow_mul, one_div, inv_mul_cancel₀ hp_pos.ne', ENNReal.rpow_one] at hpow
   refine le_trans (le_of_eq <| lintegral_congr fun ω ↦ ?_) hpow
@@ -1109,12 +1117,9 @@ lemma lintegral_enormSup_rpow_le [IsFiniteMeasure μ] (hp : 1 < p) (hf : Marting
   set g : ℕ → Ω → ℝ≥0∞ := fun n ω ↦ ENNReal.ofReal (runMaxNorm f n ω)
   have hg_mono : ∀ ω, Monotone (fun n ↦ g n ω) := fun ω _ _ hmn ↦
     ENNReal.ofReal_le_ofReal (runMaxNorm_mono f ω hmn)
-  have h_runMaxNorm_meas : ∀ n, Measurable (runMaxNorm f n) := fun n ↦
-    Finset.measurable_range_sup'' (n := n) fun k _ ↦
-      (measurable_of_martingale hf k).norm
   have h_meas : ∀ n, AEMeasurable (fun ω ↦ g n ω ^ p) μ := fun n ↦
     ((ENNReal.continuous_rpow_const.measurable.comp
-      (h_runMaxNorm_meas n).ennreal_ofReal)).aemeasurable
+      (measurable_runMaxNorm hf n).ennreal_ofReal)).aemeasurable
   rw [show (fun ω ↦ enormSup f ω ^ p) = fun ω ↦ ⨆ n, g n ω ^ p from
     funext fun ω ↦ by rw [← iSup_ofReal_runMaxNorm, iSup_rpow_atTop_nat (hg_mono ω) hp_pos.le]]
   rw [lintegral_iSup' h_meas (Filter.Eventually.of_forall fun ω _ _ hmn ↦
@@ -1150,9 +1155,10 @@ lemma dominator_memLp [IsFiniteMeasure μ] (hp : 1 < p) (hf : Martingale f 𝒢 
     (hbound : ∀ n, eLpNorm (f n) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R) :
     MemLp (dominator f) (ENNReal.ofReal p) μ := by
   have hp_pos : 0 < p := lt_trans zero_lt_one hp
-  refine ⟨(measurable_dominator (measurable_of_martingale hf)).aestronglyMeasurable, ?_⟩
-  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by simp [hp_pos]) ENNReal.ofReal_ne_top,
-      ENNReal.toReal_ofReal hp_pos.le]
+  have hmeas : AEStronglyMeasurable (dominator f) μ :=
+    (measurable_dominator (measurable_of_martingale hf)).aestronglyMeasurable
+  rw [memLp_iff, eLpNorm_eq_lintegral_rpow_enorm_toReal (by simp [hp_pos]) ENNReal.ofReal_ne_top
+    hmeas, ENNReal.toReal_ofReal hp_pos.le]
   refine ENNReal.rpow_lt_top_of_nonneg (by positivity) (lt_of_le_of_lt ?_
     (enormSup_rpow_lintegral_lt_top hp hf hbound)).ne
   refine lintegral_mono fun ω ↦ ENNReal.rpow_le_rpow ?_ hp_pos.le

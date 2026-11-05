@@ -81,7 +81,7 @@ lemma driftPrimitive_stronglyMeasurable (hBmeas : ∀ t, Measurable (B t))
         (continuous_const.mul (hf_xx_cont.comp (NNReal.continuous_coe.prodMk (hBcont ω))))
     exact hdrift.comp (continuous_id.min continuous_const)
   -- now switch to `𝓕_t` as the ambient σ-algebra for the joint-measurability + integral lemmas
-  letI : MeasurableSpace Ω := natFiltration hBmeas t
+  let : MeasurableSpace Ω := natFiltration hBmeas t
   -- the uncurried clamped integrand is jointly strongly measurable (Carathéodory + swap +
   -- indicator)
   have huncurry : StronglyMeasurable
@@ -244,7 +244,7 @@ theorem martingale_stoppedProcess_itoResidual (hB : IsPreBrownianReal B μ)
     simp only [stoppedProcess, Set.indicator_apply]
     rw [hω _ ⟨zero_le, hs_le t ω⟩]
   have hadapt := hMadapt.stoppedProcess_indicator
-    (fun ω ↦ (hMcont ω).isCadlag.right_continuous) hσ
+    (fun ω ↦ (hMcont ω).isCadlag.isRightContinuous) hσ
   have hcad := isStable_isCadlag M (fun ω ↦ (hMcont ω).isCadlag) _ hσ
   -- bounded: `|B| ≤ N` and `t ≤ N` up to `σ_N`, where `f`, `f_t`, `f_xx` are bounded
   have hK : IsCompact (Set.Icc (0 : ℝ) N ×ˢ Set.Icc (-(N : ℝ)) N) :=
@@ -279,7 +279,7 @@ theorem martingale_stoppedProcess_itoResidual (hB : IsPreBrownianReal B μ)
           ∂timeMeasure‖ ≤ Cd * s := by
         refine (norm_setIntegral_le_of_norm_le_const
           (by rw [timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top)
-          (fun u hu ↦ hCd _ (hmem u hu.2))).trans_eq ?_
+          (fun u (hu : u ∈ Set.Ioc (0 : ℝ≥0) s) ↦ hCd _ (hmem u hu.2))).trans_eq ?_
         simp [Measure.real, timeMeasure_Ioc]
       calc ‖M s ω‖ ≤ ‖f (s : ℝ) (B s ω)‖ + ‖f 0 (B 0 ω)‖ + ‖∫ u in Set.Ioc 0 s,
             (f_t (u : ℝ) (B u ω) + 1 / 2 * f_xx (u : ℝ) (B u ω)) ∂timeMeasure‖ :=
