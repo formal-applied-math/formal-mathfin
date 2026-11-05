@@ -19,13 +19,12 @@ construction interpolates the prices on each strike interval by a convex piece o
 form plus an affine term, reaching class `C²` through two nested non-linear minimisations; the
 original is a paywalled *Risk Magazine* article, and the secondary literature that discusses it
 (Fengler, *Arbitrage-Free Smoothing of the Implied Volatility Surface*, SFB 649 Discussion
-Paper 2005-019 (the Quantitative Finance 9(4), 2009 version shortens this to "piecewise convex
-polynomials mimicking the BS pricing formula"): "piecewise convex polynomials that have the form
-of the Black Scholes (BS) valuation formula with an additive linear term"; Le Floc'h,
-arXiv:2004.08650: "two embedded non-linear minimizations", "not proven ... converges") names
-the shape of the pieces but does not reproduce
-the equations that pin them down. None of that is enough to transcribe faithfully, so this file
-does not attempt the `C²` scheme.
+Paper 2005-019: "piecewise convex polynomials that have the form of the Black Scholes (BS)
+valuation formula with an additive linear term" — shortened in the Quantitative Finance 9(4),
+2009 published version to "piecewise convex polynomials mimicking the BS pricing formula"; Le
+Floc'h, arXiv:2004.08650: "two embedded non-linear minimizations", "not proven ... converges")
+names the shape of the pieces but does not reproduce the equations that pin them down. None of
+that is enough to transcribe faithfully, so this file does not attempt the `C²` scheme.
 
 **What is formalised instead.** The static no-arbitrage conditions Kahalé's interpolant must
 preserve — convexity in the strike (no butterfly arbitrage) and monotonicity (no vertical-spread
@@ -111,7 +110,7 @@ private lemma antitoneOn_glue {f : ℝ → ℝ} {a b c : ℝ} (hab : a ≤ b) (h
     (hleft : AntitoneOn f (Icc a b)) (hright : AntitoneOn f (Icc b c)) :
     AntitoneOn f (Icc a c) := by
   rw [← Icc_union_Icc_eq_Icc hab hbc]
-  exact hleft.union_right hright (isGreatest_Icc hab) ⟨left_mem_Icc.2 hbc, fun _ hx ↦ hx.1⟩
+  exact hleft.union_right hright (isGreatest_Icc hab) (isLeast_Icc hbc)
 
 /-- If `L` bounds the secant from `y` into the junction `b`, and `f` is affine with slope `s ≥ L`
 beyond `b`, then `L` also bounds the secant from `y` into any point beyond `b`. The algebraic core
