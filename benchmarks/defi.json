@@ -121,6 +121,21 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.integral_discounted_v3PositionValue_le (MathFin/Bridges/UniswapV3CoveredCallPrice.lean): the pointwise covered-call bound MathFin.DeFi.v3PositionValue_le_coveredCall at s = sqrt(S_T), integral_mono (the position value is measurable and bounded by x_max * ab), then discounted_terminal_eq_S0 (MathFin/BlackScholes/Forward.lean) and bs_call_formula (MathFin/BlackScholes/Call.lean). SCOPE: an upper bound, not the price; the position is held to T with no fees, no rebalancing and Y as the numeraire; the expected in-range gap is not computed."
       }
+    },
+    {
+      "id": "mf-uniswap-v3-concentrated-liquidity-historical-var",
+      "name": "Historical-Simulation VaR of a Uniswap v3 Concentrated-Liquidity Position",
+      "domain": "mathematical_finance",
+      "description": "Historical-simulation VaR revalues a Uniswap v3 concentrated-liquidity position (liquidity L >= 0 on square-root price range [a, b], 0 < a <= b, marked today at square-root price s0) under n >= 1 historical square-root-price scenarios, each equally likely (weight 1/n), and reports the empirical alpha-quantile of the resulting loss distribution (alpha in (0, 1)). This VaR never exceeds the position's current mark-to-market value, since the position's value is always nonnegative, and scales linearly with the deployed liquidity: doubling L (same range and scenarios) doubles the VaR. Fees, re-ranging and multi-day return compounding (the horizon-scaling convention a genuine 99%/10-day VaR needs) are not modelled; the n historical scenarios are taken as given data, not derived from a price process.",
+      "code": {
+        "lean": "import MathFin.DeFi.ConcentratedLiquidityVaR\n\nopen MathFin.DeFi\n\n/-- Historical-simulation VaR of a Uniswap v3 concentrated-liquidity position never exceeds\nthe position's current value, and scales linearly with the deployed liquidity. -/\ntheorem uniswap_v3_concentrated_liquidity_historical_var {n : ℕ} (hn : 0 < n) {L a b : ℝ}\n    (hL : 0 ≤ L) (ha : 0 < a) (hab : a ≤ b) (s0 : ℝ) (scenarios : Fin n → ℝ) {α : ℝ}\n    (hα : α ∈ Set.Ioo (0 : ℝ) 1) {c : ℝ} (hc : 0 ≤ c) :\n    clHistoricalVaR L a b s0 hn scenarios α ≤ v3PositionValue L a b s0 ∧\n      clHistoricalVaR (c * L) a b s0 hn scenarios α\n        = c * clHistoricalVaR L a b s0 hn scenarios α :=\n  ⟨clHistoricalVaR_le_value hn hL ha hab s0 scenarios hα.1 hα.2.le,\n    clHistoricalVaR_const_mul hn L a b s0 scenarios hα hc⟩\n"
+      },
+      "metadata": {
+        "reference": "H. Adams, N. Zinsmeister, M. Salem, R. Keefer, D. Robinson, Uniswap v3 Core (2021), §2, §6.4.1 (eqs. 6.29-6.30, position token amounts); P. Jorion, Value at Risk: The New Benchmark for Managing Financial Risk, 3rd ed. (2007), ch. 10 \"VAR Methods\" (historical simulation)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.DeFi.clHistoricalVaR_le_value and MathFin.DeFi.clHistoricalVaR_const_mul (MathFin/DeFi/ConcentratedLiquidityVaR.lean). clHistoricalVaR is MathFin.DiscreteVaR.finiteVaR (RiskMeasures/DiscreteVaR.lean) of the per-scenario loss v3PositionValue L a b s0 - v3PositionValue L a b (scenarios i) at the uniform weight vector; the value-cap bound comes from v3PositionValue_nonneg plus the new general lemma MathFin.DiscreteVaR.finiteVaR_le_of_forall_le, and the homogeneity from MathFin.DeFi.v3PositionValue_const_mul (UniswapMechanics.lean; v3PositionValue is literally linear in L, for any real c) plus the new general lemma MathFin.DiscreteVaR.finiteVaR_const_mul (positive homogeneity of finiteVaR, derived from RiskMeasures/ValueAtRisk.lean's valueAtRisk_const_mul through the existing finiteVaR-valueAtRisk bridge). SCOPE: the risk measure applied to the position's deterministic value function at n given scenarios; no fee model, no re-ranging, and no horizon-scaling theorem for turning 1-day scenarios into a 10-day VaR."
+      }
     }
   ]
 }
