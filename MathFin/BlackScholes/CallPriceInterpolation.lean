@@ -191,10 +191,8 @@ private lemma convexOn_affine (m b₀ x₀ : ℝ) {s : Set ℝ} (hs : Convex ℝ
   ring
 
 private lemma antitoneOn_affine_of_nonpos {m b₀ x₀ : ℝ} (hm : m ≤ 0) (s : Set ℝ) :
-    AntitoneOn (fun x ↦ b₀ + m * (x - x₀)) s := by
-  have hshift : Monotone (fun x : ℝ ↦ x - x₀) := fun _ _ h ↦ by linarith
-  have hadd : Monotone (fun y : ℝ ↦ b₀ + y) := fun _ _ h ↦ by linarith
-  exact (hadd.comp_antitone (hshift.const_mul_of_nonpos hm)).antitoneOn s
+    AntitoneOn (fun x ↦ b₀ + m * (x - x₀)) s :=
+  (((monotone_id.add_const (-x₀)).const_mul_of_nonpos hm).const_add b₀).antitoneOn s
 
 /-! ### Restricting arbitrage-free quotes to a shorter prefix -/
 
