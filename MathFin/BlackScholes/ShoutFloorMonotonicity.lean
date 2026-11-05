@@ -52,8 +52,13 @@ here still needs: (a) the shout-floor value as the `stoppingValue` of the
 discounted reward `e^{-rt} S_t P(τ − t)` on the library's Brownian model, and
 (b) optional stopping for the *unbounded* nonnegative discounted-stock
 martingale `e^{-(r−q)t} S_t` at bounded rules (`expected_stoppedValue_le_initial`
-needs a uniform bound, which the put reward has and this one does not). Given
-(b), Lemma 2.1(i) does the rest: `e^{-rt} S_t P(τ − t) = e^{-(r−q)t} S_t ·
+needs a uniform bound, which the put reward has and this one does not) — the
+bound is load-bearing only in the dominated-convergence mesh-refinement step
+`expected_gridValue_tendsto`, not in the fixed-mesh `expected_gridValue_le`,
+so a truncation `min(·, N)` plus monotone convergence in `N` would remove it
+without a full uniform-integrability bridge; this is not built here either.
+Given (b), Lemma 2.1(i) (plus `bsP_nonneg` at the boundary `t = τ`, where the
+reward is `0`) does the rest: `e^{-rt} S_t P(τ − t) = e^{-(r−q)t} S_t ·
 e^{-qτ} g(τ − t) ≤ e^{-(r−q)t} S_t · P(τ)`, so every rule's expected reward is
 at most `S · P(τ)`, attained by `StoppingRule.zero` — Theorem 3.1(i). Neither
 (a) nor (b) is built here.

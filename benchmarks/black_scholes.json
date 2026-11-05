@@ -1668,7 +1668,7 @@
     },
     {
       "id": "mf-shout-floor-g-strict-mono",
-      "name": "Shout-Floor ATM-Put Discriminant Is Strictly Increasing (Dai-Kwok-Wu Lemma 2.1(i))",
+      "name": "Shout-Floor Scaled ATM Put e^{q tau} P(tau) Is Strictly Increasing (Dai-Kwok-Wu Lemma 2.1(i))",
       "description": "For r <= q and sigma > 0, the ATM Black-Scholes put with continuous dividend yield q, P(tau) = shoutFloorAtmPut r q sigma tau, scaled by e^{q*tau}, is strictly increasing in tau on (0, infinity). This is a *supporting* calculus lemma (Dai-Kwok-Wu's Lemma 2.1, case (i)) behind their Theorem 3.1(i), the shout-floor option's pricing identity R(S, tau) = S * P(tau) for r <= q; the pricing identity itself, which needs the library's optimal-stopping substrate applied to the unbounded discounted-stock martingale, is not proved by this entry.",
       "domain": "mathematical_finance",
       "code": {
