@@ -35,6 +35,7 @@ Mathlib's `withDensitySMulLI` does. This is the step at which a naive attempt br
 
 ## Result
 
+* `lp_two_norm_sq` — `‖g‖² = ∫ (g a)² ∂ν` for `g : Lp ℝ 2 ν`.
 * `sqWeight` — the weighted measure `f²·ν`.
 * `lintegral_sqWeight` — the change-of-density identity for lower integrals.
 * `eLpNorm_mul_eq` — the norm identity, for a measurable function.
@@ -52,6 +53,21 @@ Mathlib's `withDensitySMulLI` does. This is the step at which a naive attempt br
 @[expose] public section
 
 namespace MathFin
+
+open MeasureTheory in
+/-- **The real `L²` norm-square as an integral**: `‖g‖² = ∫ (g a)² ∂ν` for `g : Lp ℝ 2 ν`. The one
+`L²`-norm bridge of the Brownian and jump towers (Itô isometry, Wiener integral, compensated Poisson
+integral), stated once here. -/
+lemma lp_two_norm_sq {α : Type*} {mα : MeasurableSpace α} {ν : Measure α} (g : Lp ℝ 2 ν) :
+    ‖g‖ ^ 2 = ∫ a, (g a) ^ 2 ∂ν := by
+  have h : inner ℝ g g = ‖g‖ ^ 2 := real_inner_self_eq_norm_sq g
+  rw [L2.inner_def] at h
+  rw [← h]
+  refine integral_congr_ae ?_
+  filter_upwards with a
+  change (g a) * (g a) = (g a) ^ 2
+  ring
+
 namespace LpMulIsometry
 
 open MeasureTheory Filter

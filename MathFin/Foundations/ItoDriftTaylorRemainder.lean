@@ -31,15 +31,9 @@ section StageFiveF
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
   {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
-  (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-  (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-  (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-  {M : ℝ≥0 → Ω → ℝ}
-  (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-  (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-    (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+  {M : ℝ≥0 → Ω → ℝ} (hD : IsAdaptedItoDrift hB hBmeas T δ Dd M)
 
-include hB hBmeas hδadap hδcont hδbdd hMadap hMeq
+include hB hBmeas hD
 
 set_option maxHeartbeats 1600000 in
 -- a long estimate: elaborating the whole proof exceeds the default budget
@@ -141,11 +135,11 @@ theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
     have htdI3 : Integrable (fun ω ↦ (abs (M (unifPart T n (k + 1)) ω
           - M (unifPart T n k) ω)) ^ 3) μ := by
       refine Integrable.mono'
-        (((trueIncr_pow4_integrable hB hBmeas hδadap hδcont hδbdd hMeq hn k hk
+        (((trueIncr_pow4_integrable hB hBmeas hD hn k hk
           ).const_mul 1).add (integrable_const (1 : ℝ)))
-        ((((memLp_M hB hBmeas hδadap hδcont hδbdd hMeq
+        ((((memLp_M hB hBmeas hD
           (unifPart T n (k + 1))).sub
-          (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq (unifPart T n k))).abs).aestronglyMeasurable.pow
+          (memLp_M hB hBmeas hD (unifPart T n k))).abs).aestronglyMeasurable.pow
           3)
         (Eventually.of_forall fun ω ↦ by
           rw [Real.norm_eq_abs]
@@ -203,7 +197,7 @@ theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
           (Eventually.of_forall fun ω ↦ ?_)) ?_
         · exact pow_le_pow_left₀ (abs_nonneg _) (hdIb ω) 3
         · rw [integral_const]; simp
-      have htI3 := trueIncr_pow3_le hB hBmeas hδadap hδcont hδbdd hMadap hMeq hn k hk
+      have htI3 := trueIncr_pow3_le hB hBmeas hD hn k hk
       refine le_trans (integral_mono_of_nonneg
         (Eventually.of_forall fun ω ↦ by positivity) htdom
         (Eventually.of_forall fun ω ↦ by
@@ -424,7 +418,6 @@ theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
 
 set_option maxHeartbeats 1600000 in
 -- a long estimate: elaborating the whole proof exceeds the default budget
-omit hMadap in
 /-- **Per-cell Taylor-remainder integrability** (assembly input): along the adapted process
 `X` with the decomposition `X t = c + AdaptedDrift.driftPath β t + M t`, the `k`-th cell's
 discrete Taylor remainder is integrable — `|Rₖ| ≤ C₃·|ΔXₖ|³` (`abs_discreteTaylorRemainder_le`)
@@ -481,11 +474,11 @@ theorem remainderCell_integrable {n : ℕ} (hn : 0 < n) {k : ℕ} (hk : k < n)
   have htdI3 : Integrable (fun ω ↦ (abs (M (unifPart T n (k + 1)) ω
       - M (unifPart T n k) ω)) ^ 3) μ := by
     refine Integrable.mono'
-      (((trueIncr_pow4_integrable hB hBmeas hδadap hδcont hδbdd hMeq hn k hk
+      (((trueIncr_pow4_integrable hB hBmeas hD hn k hk
         ).const_mul 1).add (integrable_const (1 : ℝ)))
-      ((((memLp_M hB hBmeas hδadap hδcont hδbdd hMeq
+      ((((memLp_M hB hBmeas hD
         (unifPart T n (k + 1))).sub
-        (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq (unifPart T n k))).abs).aestronglyMeasurable.pow
+        (memLp_M hB hBmeas hD (unifPart T n k))).abs).aestronglyMeasurable.pow
         3)
       (Eventually.of_forall fun ω ↦ by
         rw [Real.norm_eq_abs]

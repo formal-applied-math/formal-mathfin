@@ -759,7 +759,7 @@ theorem itoIntegralCLM_T_eq_itoProcessCLM_of_vanishes_after (T u : ℝ≥0) (huT
       ‖(condExpL2 ℝ ℝ ((ItoIntegralL2.natFiltration hBmeas).le u) X : Lp ℝ 2 μ)‖ = ‖X‖ := by
     have hsq : ‖itoProcessCLM hB T u hBmeas φ‖ ^ 2 = ‖X‖ ^ 2 := by
       rw [itoProcessCLM_norm_sq hB huT hBmeas φ, hband, hX, itoIntegralCLM_T_norm hB T hBmeas φ,
-        ItoIntegralL2.lp_two_norm_sq φ]
+        lp_two_norm_sq φ]
     rw [← itoProcessCLM_eq_condExpL2 hB T u hBmeas φ]
     have hs := congrArg Real.sqrt hsq
     rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq (norm_nonneg _)] at hs

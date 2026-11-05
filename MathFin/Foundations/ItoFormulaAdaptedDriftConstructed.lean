@@ -394,9 +394,11 @@ theorem itoDrift_expectation_identity_adapted_at_adaptedItoProcess (hB : IsPreBr
       (continuous_const.add (AdaptedDrift.continuous_driftPath hβcont hβbdd ω)).add
         (hω.comp_continuous (continuous_id.min continuous_const)
           fun s ↦ ⟨zero_le, min_le_right s T⟩)
-  have h := ItoDriftConditional.itoDrift_expectation_identity_adapted hB hBmeas hδadap hδcont
-    hδbdd (M := fun t ↦ itoContinuousMod T hBmeas φ (min t T)) hMadap
-    (itoContinuousMod_min_ae_eq_itoProcessCLM hBmeas hB hBcont φ) hβadap hβcont hβbdd
+  have hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd
+      (fun t ↦ itoContinuousMod T hBmeas φ (min t T)) :=
+    ⟨hδadap, hδcont, hδbdd, hMadap, itoContinuousMod_min_ae_eq_itoProcessCLM hBmeas hB hBcont φ⟩
+  have h := ItoDriftConditional.itoDrift_expectation_identity_adapted hB hBmeas hD hβadap hβcont
+    hβbdd
     (X := fun t ω ↦ c + AdaptedDrift.driftPath β t ω + itoContinuousMod T hBmeas φ (min t T) ω)
     c hXcont (fun _ ↦ rfl) hf hf' hf'' hg1 hg2 hg3
   -- up to the horizon, that process is the constructed one

@@ -317,6 +317,7 @@ import MathFin.Foundations.ItoDriftExpectation
 import MathFin.Foundations.ItoDriftIncrementEnergy
 import MathFin.Foundations.ItoDriftWeightedIsometry
 import MathFin.Foundations.ItoDriftGapDecay
+import MathFin.Foundations.ItoStepSumFourthMoment
 import MathFin.Foundations.ItoDriftMomentBounds
 import MathFin.Foundations.ItoDriftBlock
 import MathFin.Foundations.ItoDriftQuadraticCorrections

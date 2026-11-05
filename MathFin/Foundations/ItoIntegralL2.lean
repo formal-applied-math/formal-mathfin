@@ -10,6 +10,7 @@ public import BrownianMotion.Gaussian.BrownianMotion
 public import BrownianMotion.StochasticIntegral.SimpleProcess
 public import BrownianMotion.StochasticIntegral.L2M
 public import MathFin.Foundations.ItoIsometryAdapted
+public import MathFin.Foundations.LpMulIsometry
 
 /-!
 # The L²-adapted Itô isometry, anchored on Degenne's `SimpleProcess`
@@ -169,18 +170,6 @@ theorem itoSimple_sq_integral (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Mea
           (fun ω ↦ by rw [← Real.norm_eq_abs]; exact V.value_le_valueBound p ω)
           (fun ω ↦ by rw [← Real.norm_eq_abs]; exact V.value_le_valueBound q ω)
           (V.le_of_mem_support_value p hp) (V.le_of_mem_support_value q hq)
-
-/-- For `g : Lp ℝ 2 ν`, `‖g‖² = ∫ (g a)² ∂ν` (the real `L²` norm-square as an integral).
-Public: the time-indexed Itô-isometry layer (`ItoIntegralProcessIsometry`) reuses it. -/
-lemma lp_two_norm_sq {α : Type*} {mα : MeasurableSpace α} {ν : Measure α}
-    (g : Lp ℝ 2 ν) : ‖g‖ ^ 2 = ∫ a, (g a) ^ 2 ∂ν := by
-  have h : ⟪g, g⟫_ℝ = ‖g‖ ^ 2 := real_inner_self_eq_norm_sq g
-  rw [L2.inner_def] at h
-  rw [← h]
-  refine integral_congr_ae ?_
-  filter_upwards with a
-  change (g a) * (g a) = (g a) ^ 2
-  ring
 
 /-- **The Itô isometry in `Lp`-norm form.** `‖itoSimpleLp V‖²` equals the predictable-
 rectangle double sum — i.e. `‖V‖²` in the predictable `L²` space. This is the norm

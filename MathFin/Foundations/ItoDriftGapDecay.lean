@@ -75,13 +75,7 @@ section StageFiveA
 
 variable (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
   {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
-  (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-  (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-  (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-  {M : ℝ≥0 → Ω → ℝ}
-  (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-  (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-    (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+  {M : ℝ≥0 → Ω → ℝ} (hD : IsAdaptedItoDrift hB hBmeas T δ Dd M)
 
 /-- Coe-linearity of the CLM process in the integrand class (the a.e. form). -/
 private theorem clm_coe_sub_ae (T t : ℝ≥0)
@@ -92,7 +86,7 @@ private theorem clm_coe_sub_ae (T t : ℝ≥0)
   rw [map_sub]
   exact Lp.coeFn_sub _ _
 
-include hB hBmeas hδadap hδcont hδbdd hMeq in
+include hB hBmeas hD in
 /-- The per-cell error increment `δεₖ := ΔMₖ − δ(tₖ)·ΔBₖ` is a.e. the band increment of the
 CLM process of the integrand error `φ − δⁿ`. -/
 private theorem errorIncr_ae {n k : ℕ} (hk : k < n) :
@@ -100,54 +94,54 @@ private theorem errorIncr_ae {n k : ℕ} (hk : k < n) :
         - δ (unifPart T n k) ω
           * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω))
       =ᵐ[μ] (fun ω ↦ (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-              (processToLp T hBmeas hδadap hδcont hδbdd
-                - deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω
+              (processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+                - deltaStepLp hBmeas hD.adapted hD.bdd n) : Ω → ℝ) ω
         - (itoProcessCLM hB T (unifPart T n k) hBmeas
-              (processToLp T hBmeas hδadap hδcont hδbdd
-                - deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω) := by
-  have h1 := hMeq (unifPart T n (k + 1))
-  have h0 := hMeq (unifPart T n k)
+              (processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+                - deltaStepLp hBmeas hD.adapted hD.bdd n) : Ω → ℝ) ω) := by
+  have h1 := hD.ae_eq (unifPart T n (k + 1))
+  have h0 := hD.ae_eq (unifPart T n k)
   have hsub1 := clm_coe_sub_ae (μ := μ) hB hBmeas T (unifPart T n (k + 1))
-    (processToLp T hBmeas hδadap hδcont hδbdd) (deltaStepLp hBmeas hδadap hδbdd n)
+    (processToLp T hBmeas hD.adapted hD.continuous hD.bdd) (deltaStepLp hBmeas hD.adapted hD.bdd n)
   have hsub0 := clm_coe_sub_ae (μ := μ) hB hBmeas T (unifPart T n k)
-    (processToLp T hBmeas hδadap hδcont hδbdd) (deltaStepLp hBmeas hδadap hδbdd n)
+    (processToLp T hBmeas hD.adapted hD.continuous hD.bdd) (deltaStepLp hBmeas hD.adapted hD.bdd n)
   have hstep : (fun ω ↦ (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-          (deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω
+          (deltaStepLp hBmeas hD.adapted hD.bdd n) : Ω → ℝ) ω
       - (itoProcessCLM hB T (unifPart T n k) hBmeas
-        (deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω)
+        (deltaStepLp hBmeas hD.adapted hD.bdd n) : Ω → ℝ) ω)
       =ᵐ[μ] (fun ω ↦ δ (unifPart T n k) ω
           * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) :=
     stepIncr_stepCLM_ae (μ := μ) (B := B) (hB := hB) (hBmeas := hBmeas)
-    (hδadap := hδadap) (hδbdd := hδbdd) (T := T) (n := n) (k := k) hk
+    (hδadap := hD.adapted) (hδbdd := hD.bdd) (T := T) (n := n) (k := k) hk
   filter_upwards [h1, h0, hsub1, hsub0, hstep] with ω h1 h0 hsub1 hsub0 hstep
   calc M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω
         - δ (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)
       = (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-          (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ) ω
+          (processToLp T hBmeas hD.adapted hD.continuous hD.bdd) : Ω → ℝ) ω
         - (itoProcessCLM hB T (unifPart T n k) hBmeas
-          (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ) ω
+          (processToLp T hBmeas hD.adapted hD.continuous hD.bdd) : Ω → ℝ) ω
         - ((itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-            (deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω
+            (deltaStepLp hBmeas hD.adapted hD.bdd n) : Ω → ℝ) ω
           - (itoProcessCLM hB T (unifPart T n k) hBmeas
-            (deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω) := by
+            (deltaStepLp hBmeas hD.adapted hD.bdd n) : Ω → ℝ) ω) := by
         rw [h1, h0, ← hstep]
     _ = ((itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-            (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ) ω
+            (processToLp T hBmeas hD.adapted hD.continuous hD.bdd) : Ω → ℝ) ω
           - (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-            (deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω)
+            (deltaStepLp hBmeas hD.adapted hD.bdd n) : Ω → ℝ) ω)
         - ((itoProcessCLM hB T (unifPart T n k) hBmeas
-            (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ) ω
+            (processToLp T hBmeas hD.adapted hD.continuous hD.bdd) : Ω → ℝ) ω
           - (itoProcessCLM hB T (unifPart T n k) hBmeas
-            (deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω) := by ring
+            (deltaStepLp hBmeas hD.adapted hD.bdd n) : Ω → ℝ) ω) := by ring
     _ = (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-          (processToLp T hBmeas hδadap hδcont hδbdd
-            - deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω
+          (processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+            - deltaStepLp hBmeas hD.adapted hD.bdd n) : Ω → ℝ) ω
         - (itoProcessCLM hB T (unifPart T n k) hBmeas
-          (processToLp T hBmeas hδadap hδcont hδbdd
-            - deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω := by
+          (processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+            - deltaStepLp hBmeas hD.adapted hD.bdd n) : Ω → ℝ) ω := by
         rw [hsub1, hsub0]
 
-include hB hBmeas hδadap hδcont hδbdd hMeq in
+include hB hBmeas hD in
 /-- **Weighted error energy**: the second moment of `w·δεₖ` is at most `C_w²` cell-band
 energies of the integrand error (`|w| ≤ C_w` pointwise). -/
 private theorem weightedErrorIncr_sq_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
@@ -157,45 +151,46 @@ private theorem weightedErrorIncr_sq_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ
           * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω))) ^ 2 ∂μ
       ≤ Cw ^ 2 * ∫ z in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)) ×ˢ
             (Set.univ : Set Ω),
-          ((processToLp T hBmeas hδadap hδcont hδbdd
-              - deltaStepLp hBmeas hδadap hδbdd n :
+          ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+              - deltaStepLp hBmeas hD.adapted hD.bdd n :
                 Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
           ∂(trimMeasure_T (μ := μ) T hBmeas) := by
   -- the CLM error increment and its square integrability
   have hDmem : MemLp
       (fun ω ↦ (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-            (processToLp T hBmeas hδadap hδcont hδbdd
-              - deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω
+            (processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+              - deltaStepLp hBmeas hD.adapted hD.bdd n) : Ω → ℝ) ω
         - (itoProcessCLM hB T (unifPart T n k) hBmeas
-          (processToLp T hBmeas hδadap hδcont hδbdd
-            - deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω) 2 μ :=
+          (processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+            - deltaStepLp hBmeas hD.adapted hD.bdd n) : Ω → ℝ) ω) 2 μ :=
     (Lp.memLp (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-      (processToLp T hBmeas hδadap hδcont hδbdd
-        - deltaStepLp hBmeas hδadap hδbdd n))).sub
+      (processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+        - deltaStepLp hBmeas hD.adapted hD.bdd n))).sub
       (Lp.memLp (itoProcessCLM hB T (unifPart T n k) hBmeas
-        (processToLp T hBmeas hδadap hδcont hδbdd
-          - deltaStepLp hBmeas hδadap hδbdd n)))
+        (processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+          - deltaStepLp hBmeas hD.adapted hD.bdd n)))
   -- the energy of the CLM error increment is the band energy
   have hbandE : ∫ ω, ((itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-        (processToLp T hBmeas hδadap hδcont hδbdd
-          - deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω
+        (processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+          - deltaStepLp hBmeas hD.adapted hD.bdd n) : Ω → ℝ) ω
       - (itoProcessCLM hB T (unifPart T n k) hBmeas
-        (processToLp T hBmeas hδadap hδcont hδbdd
-          - deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω) ^ 2 ∂μ
+        (processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+          - deltaStepLp hBmeas hD.adapted hD.bdd n) : Ω → ℝ) ω) ^ 2 ∂μ
       = ∫ z in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)) ×ˢ (Set.univ : Set Ω),
-          ((processToLp T hBmeas hδadap hδcont hδbdd
-              - deltaStepLp hBmeas hδadap hδbdd n :
+          ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+              - deltaStepLp hBmeas hD.adapted hD.bdd n :
                 Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
           ∂(trimMeasure_T (μ := μ) T hBmeas) :=
     (clm_band_energy hB hBmeas T
-      (processToLp T hBmeas hδadap hδcont hδbdd - deltaStepLp hBmeas hδadap hδbdd n)
+      (processToLp T hBmeas hD.adapted hD.continuous hD.bdd - deltaStepLp hBmeas hD.adapted hD.bdd
+        n)
       (unifPart_mono T n (Nat.le_succ k))
       (unifPart_le_T hk))
   exact weighted_sq_le_of_congr hwb
-    (errorIncr_ae hB hBmeas hδadap hδcont hδbdd hMeq hk)
+    (errorIncr_ae hB hBmeas hD hk)
     hDmem.integrable_sq hbandE
 
-include hB hBmeas hδadap hδcont hδbdd hMadap hMeq
+include hB hBmeas hD
 
 /-- **Per-cell gap bound**: the absolute difference over one cell between the expectations
 of the weighted true-increment square and of the weighted rectangle square — the
@@ -212,21 +207,21 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
       ≤ 2 * |Cw| * |Dd| * Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k)
         * Real.sqrt (∫ z in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)) ×ˢ
             (Set.univ : Set Ω),
-          ((processToLp T hBmeas hδadap hδcont hδbdd
-              - deltaStepLp hBmeas hδadap hδbdd n :
+          ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+              - deltaStepLp hBmeas hD.adapted hD.bdd n :
                 Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
           ∂(trimMeasure_T (μ := μ) T hBmeas)) := by
   have huv : unifPart T n k ≤ unifPart T n (k + 1) := unifPart_mono T n (Nat.le_succ k)
   have hδm : Measurable (δ (unifPart T n k)) :=
-    ((hδadap (unifPart T n k)).measurable.mono ((natFiltration hBmeas).le _) le_rfl)
+    ((hD.adapted (unifPart T n k)).measurable.mono ((natFiltration hBmeas).le _) le_rfl)
   have hdBm : Measurable (fun ω ↦ B (unifPart T n (k + 1)) ω
       - B (unifPart T n k) ω) := (hBmeas _).sub (hBmeas _)
   have hwm' : Measurable w := hwm.mono ((natFiltration hBmeas).le _) le_rfl
   have hsmeas : Measurable (fun ω ↦ δ (unifPart T n k) ω
       * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) := hδm.mul hdBm
   have hMsub : MemLp (fun ω ↦ M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) 2 μ :=
-    (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq (unifPart T n (k + 1))).sub
-      (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq (unifPart T n k))
+    (memLp_M hB hBmeas hD (unifPart T n (k + 1))).sub
+      (memLp_M hB hBmeas hD (unifPart T n k))
   have hMsub2 : Integrable (fun ω ↦ (M (unifPart T n (k + 1)) ω
       - M (unifPart T n k) ω) ^ 2) μ := hMsub.integrable_sq
   have hdB : MemLp (fun ω ↦ B (unifPart T n (k + 1)) ω
@@ -240,13 +235,13 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
         change ‖δ (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)‖
           ≤ |(|Dd| * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω))|
         rw [Real.norm_eq_abs, abs_mul, abs_mul, abs_of_nonneg (abs_nonneg Dd)]
-        exact mul_le_mul_of_nonneg_right (le_trans (hδbdd (unifPart T n k) ω)
+        exact mul_le_mul_of_nonneg_right (le_trans (hD.bdd (unifPart T n k) ω)
           (le_abs_self Dd)) (abs_nonneg _))
   -- measurability of the true increment
   have hM1m : Measurable (M (unifPart T n (k + 1))) :=
-    ((hMadap (unifPart T n (k + 1))).measurable.mono ((natFiltration hBmeas).le _) le_rfl)
+    ((hD.adaptedM (unifPart T n (k + 1))).measurable.mono ((natFiltration hBmeas).le _) le_rfl)
   have hM0m : Measurable (M (unifPart T n k)) :=
-    ((hMadap (unifPart T n k)).measurable.mono ((natFiltration hBmeas).le _) le_rfl)
+    ((hD.adaptedM (unifPart T n k)).measurable.mono ((natFiltration hBmeas).le _) le_rfl)
   have hMsubm : Measurable (fun ω ↦ M (unifPart T n (k + 1)) ω
       - M (unifPart T n k) ω) := hM1m.sub hM0m
   -- integrability of the two weighted terms
@@ -265,7 +260,7 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
       (ae_of_all _ fun ω ↦ by
         rw [Real.norm_eq_abs, abs_mul, abs_pow, abs_mul]
         have hδ2 : |δ (unifPart T n k) ω| ≤ |Dd| :=
-          le_trans (hδbdd (unifPart T n k) ω) (le_abs_self Dd)
+          le_trans (hD.bdd (unifPart T n k) ω) (le_abs_self Dd)
         have hAB : |δ (unifPart T n k) ω| * |B (unifPart T n (k + 1)) ω
             - B (unifPart T n k) ω| ≤ |Dd| * |B (unifPart T n (k + 1)) ω
             - B (unifPart T n k) ω| :=
@@ -301,18 +296,18 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
     exact integral_congr_ae (Eventually.of_forall fun ω ↦ by ring)
   -- the Cauchy–Schwarz pairing
   have hDmem : MemLp (fun ω ↦ (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-        (processToLp T hBmeas hδadap hδcont hδbdd
-          - deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω
+        (processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+          - deltaStepLp hBmeas hD.adapted hD.bdd n) : Ω → ℝ) ω
       - (itoProcessCLM hB T (unifPart T n k) hBmeas
-        (processToLp T hBmeas hδadap hδcont hδbdd
-          - deltaStepLp hBmeas hδadap hδbdd n) : Ω → ℝ) ω) 2 μ :=
+        (processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+          - deltaStepLp hBmeas hD.adapted hD.bdd n) : Ω → ℝ) ω) 2 μ :=
     (Lp.memLp (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-      (processToLp T hBmeas hδadap hδcont hδbdd
-        - deltaStepLp hBmeas hδadap hδbdd n))).sub
+      (processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+        - deltaStepLp hBmeas hD.adapted hD.bdd n))).sub
       (Lp.memLp (itoProcessCLM hB T (unifPart T n k) hBmeas
-        (processToLp T hBmeas hδadap hδcont hδbdd
-          - deltaStepLp hBmeas hδadap hδbdd n)))
-  have haede := errorIncr_ae hB hBmeas hδadap hδcont hδbdd hMeq hk
+        (processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+          - deltaStepLp hBmeas hD.adapted hD.bdd n)))
+  have haede := errorIncr_ae hB hBmeas hD hk
   have hδεsm : AEStronglyMeasurable (fun ω ↦ M (unifPart T n (k + 1)) ω
       - M (unifPart T n k) ω
       - δ (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) μ :=
@@ -335,14 +330,14 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
             (abs_nonneg _)))
       (hMsub.add hs)
   -- the two energy factors
-  have hwde := weightedErrorIncr_sq_le hB hBmeas hδadap hδcont hδbdd hMeq hk hwb
+  have hwde := weightedErrorIncr_sq_le hB hBmeas hD hk hwb
   have htri : Real.sqrt (∫ ω, ((M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)
         + δ (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2 ∂μ)
       ≤ Real.sqrt (∫ ω, (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ)
         + Real.sqrt (∫ ω, (δ (unifPart T n k) ω
           * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2 ∂μ) :=
     sqrtIntegral_sq_add_le hMsub hs
-  have hM2le := trueIncr_sq_le hB hBmeas hδadap hδcont hδbdd hMadap hMeq huv
+  have hM2le := trueIncr_sq_le hB hBmeas hD huv
     (unifPart_le_T hk)
   have hs2le : ∫ ω, (δ (unifPart T n k) ω
       * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2 ∂μ
@@ -357,7 +352,7 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
         * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2 ≤ _
       rw [mul_pow]
       exact mul_le_mul_of_nonneg_right
-        ((sq_le_sq).mpr (le_trans (hδbdd (unifPart T n k) ω) (le_abs_self Dd))) (sq_nonneg _)
+        ((sq_le_sq).mpr (le_trans (hD.bdd (unifPart T n k) ω) (le_abs_self Dd))) (sq_nonneg _)
     · rw [integral_const_mul]
       have hΔ : ∫ ω, (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2 ∂μ
           = ((unifPart T n (k + 1) : ℝ) - unifPart T n k) :=
@@ -405,8 +400,8 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
         hpair
     _ ≤ (|Cw| * Real.sqrt (∫ z in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)) ×ˢ
               (Set.univ : Set Ω),
-            ((processToLp T hBmeas hδadap hδcont hδbdd
-                - deltaStepLp hBmeas hδadap hδbdd n :
+            ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+                - deltaStepLp hBmeas hD.adapted hD.bdd n :
                   Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
             ∂(trimMeasure_T (μ := μ) T hBmeas)))
           * Real.sqrt (∫ ω, ((M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)
@@ -418,22 +413,22 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
                         - B (unifPart T n k) ω)))) ^ 2 ∂μ)
                 ≤ Real.sqrt (Cw ^ 2 * ∫ z in Set.Ioc (unifPart T n k)
                     (unifPart T n (k + 1)) ×ˢ (Set.univ : Set Ω),
-                  ((processToLp T hBmeas hδadap hδcont hδbdd
-                      - deltaStepLp hBmeas hδadap hδbdd n :
+                  ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+                      - deltaStepLp hBmeas hD.adapted hD.bdd n :
                         Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
                   ∂(trimMeasure_T (μ := μ) T hBmeas)) := Real.sqrt_le_sqrt hwde
               _ = |Cw| * Real.sqrt (∫ z in Set.Ioc (unifPart T n k)
                     (unifPart T n (k + 1)) ×ˢ (Set.univ : Set Ω),
-                  ((processToLp T hBmeas hδadap hδcont hδbdd
-                      - deltaStepLp hBmeas hδadap hδbdd n :
+                  ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+                      - deltaStepLp hBmeas hD.adapted hD.bdd n :
                         Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
                   ∂(trimMeasure_T (μ := μ) T hBmeas)) := by
                   rw [Real.sqrt_mul (sq_nonneg Cw), Real.sqrt_sq_eq_abs])
           (Real.sqrt_nonneg _)
     _ ≤ (|Cw| * Real.sqrt (∫ z in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)) ×ˢ
               (Set.univ : Set Ω),
-            ((processToLp T hBmeas hδadap hδcont hδbdd
-                - deltaStepLp hBmeas hδadap hδbdd n :
+            ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+                - deltaStepLp hBmeas hD.adapted hD.bdd n :
                   Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
             ∂(trimMeasure_T (μ := μ) T hBmeas)))
           * (2 * |Dd| * Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) :=
@@ -442,13 +437,13 @@ private theorem cellGap_le {n k : ℕ} (hk : k < n) {w : Ω → ℝ} {Cw : ℝ}
     _ = 2 * |Cw| * |Dd| * Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k)
           * Real.sqrt (∫ z in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)) ×ˢ
               (Set.univ : Set Ω),
-            ((processToLp T hBmeas hδadap hδcont hδbdd
-                - deltaStepLp hBmeas hδadap hδbdd n :
+            ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+                - deltaStepLp hBmeas hD.adapted hD.bdd n :
                   Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
             ∂(trimMeasure_T (μ := μ) T hBmeas)) := by ring
 
 /-- **The summed gap bound** (the `hgap` witness of `quadraticSqSum_tendsto`, proved for the
-hypothesized `M` of `hMadap`, `hMeq`): the absolute difference between the summed weighted
+hypothesized `M` of `hD.adaptedM`, `hD.ae_eq`): the absolute difference between the summed weighted
 second moments and the frozen rectangle sum is at most `2·|C_w|·|D_δ|·√T` times the `L²`
 norm of the integrand error `φ − δⁿ` — per-cell Cauchy–Schwarz (`cellGap_le`), then
 finite-sum Cauchy–Schwarz against the cell lengths (telescoping to `T`) and the summed band
@@ -465,16 +460,16 @@ theorem gapSum_le (n : ℕ) (hn : 0 < n) {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
             * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)|
       ≤ 2 * |Cw| * |Dd| * Real.sqrt (T : ℝ)
         * Real.sqrt (∫ z in Set.Ioc (0:ℝ≥0) T ×ˢ (Set.univ : Set Ω),
-          ((processToLp T hBmeas hδadap hδcont hδbdd
-              - deltaStepLp hBmeas hδadap hδbdd n :
+          ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+              - deltaStepLp hBmeas hD.adapted hD.bdd n :
                 Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
           ∂(trimMeasure_T (μ := μ) T hBmeas)) := by
   -- the cell lengths and the band energies of the integrand error
   set cell : ℕ → ℝ := fun k ↦ ((unifPart T n (k + 1) : ℝ) - unifPart T n k) with hcelldef
   set bandE : ℕ → ℝ := fun k ↦ ∫ z in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)) ×ˢ
       (Set.univ : Set Ω),
-      ((processToLp T hBmeas hδadap hδcont hδbdd
-          - deltaStepLp hBmeas hδadap hδbdd n :
+      ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+          - deltaStepLp hBmeas hD.adapted hD.bdd n :
             Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
       ∂(trimMeasure_T (μ := μ) T hBmeas) with hbandEdef
   -- bridge the frozen sum to the rectangle sum (the per-cell weighted identity)
@@ -484,7 +479,7 @@ theorem gapSum_le (n : ℕ) (hn : 0 < n) {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
           * (δ (unifPart T n k) ω
             * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2 ∂μ :=
     Finset.sum_congr rfl fun k _ ↦
-      (weightedCellSq_step hB hBmeas hδadap (hwadap (unifPart T n k))).symm
+      (weightedCellSq_step hB hBmeas hD.adapted (hwadap (unifPart T n k))).symm
   -- per-cell gap bounds
   have hpercell : ∀ k ∈ Finset.range n,
       |∫ ω, w (unifPart T n k) ω
@@ -492,7 +487,7 @@ theorem gapSum_le (n : ℕ) (hn : 0 < n) {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
         - ∫ ω, w (unifPart T n k) ω * (δ (unifPart T n k) ω
             * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2 ∂μ|
         ≤ 2 * |Cw| * |Dd| * Real.sqrt (cell k) * Real.sqrt (bandE k) :=
-    fun k hk ↦ cellGap_le hB hBmeas hδadap hδcont hδbdd hMadap hMeq (Finset.mem_range.mp hk)
+    fun k hk ↦ cellGap_le hB hBmeas hD (Finset.mem_range.mp hk)
       (hwadap (unifPart T n k)) (hwbdd (unifPart T n k))
   -- the cell lengths telescope to `T`; the band energies telescope to `‖φ − δⁿ‖²`
   have hsumcell : ∑ k ∈ Finset.range n, cell k = (T : ℝ) := by
@@ -502,13 +497,13 @@ theorem gapSum_le (n : ℕ) (hn : 0 < n) {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
     rw [hnT, h0]; simp
   have hbandsum : ∑ k ∈ Finset.range n, bandE k
       = ∫ z in Set.Ioc (0:ℝ≥0) T ×ˢ (Set.univ : Set Ω),
-        ((processToLp T hBmeas hδadap hδcont hδbdd
-            - deltaStepLp hBmeas hδadap hδbdd n :
+        ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+            - deltaStepLp hBmeas hD.adapted hD.bdd n :
               Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
         ∂(trimMeasure_T (μ := μ) T hBmeas) :=
     (uniform_band_split hBmeas hn
-      (hFint := (Lp.memLp (processToLp T hBmeas hδadap hδcont hδbdd
-        - deltaStepLp hBmeas hδadap hδbdd n)).integrable_sq)).symm
+      (hFint := (Lp.memLp (processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+        - deltaStepLp hBmeas hD.adapted hD.bdd n)).integrable_sq)).symm
   -- finite-sum Cauchy–Schwarz on the cell/band pairing
   have hf2 : ∀ k : ℕ, (Real.sqrt (cell k)) ^ 2 = cell k := fun k ↦
     Real.sq_sqrt (sub_nonneg.mpr (NNReal.coe_le_coe.mpr (unifPart_mono T n (Nat.le_succ k))))
@@ -516,8 +511,8 @@ theorem gapSum_le (n : ℕ) (hn : 0 < n) {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
     Real.sq_sqrt (integral_nonneg fun z ↦ sq_nonneg _)
   have hsq : (∑ k ∈ Finset.range n, (Real.sqrt (cell k) * Real.sqrt (bandE k))) ^ 2
       ≤ (T : ℝ) * ∫ z in Set.Ioc (0:ℝ≥0) T ×ˢ (Set.univ : Set Ω),
-        ((processToLp T hBmeas hδadap hδcont hδbdd
-            - deltaStepLp hBmeas hδadap hδbdd n :
+        ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+            - deltaStepLp hBmeas hD.adapted hD.bdd n :
               Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
         ∂(trimMeasure_T (μ := μ) T hBmeas) := by
     have key := Finset.sum_mul_sq_le_sq_mul_sq (Finset.range n)
@@ -527,8 +522,8 @@ theorem gapSum_le (n : ℕ) (hn : 0 < n) {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
     exact key
   have hpair : ∑ k ∈ Finset.range n, (Real.sqrt (cell k) * Real.sqrt (bandE k))
       ≤ Real.sqrt (T : ℝ) * Real.sqrt (∫ z in Set.Ioc (0:ℝ≥0) T ×ˢ (Set.univ : Set Ω),
-        ((processToLp T hBmeas hδadap hδcont hδbdd
-            - deltaStepLp hBmeas hδadap hδbdd n :
+        ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+            - deltaStepLp hBmeas hD.adapted hD.bdd n :
               Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
         ∂(trimMeasure_T (μ := μ) T hBmeas)) := by
     have hX0 : 0 ≤ ∑ k ∈ Finset.range n, (Real.sqrt (cell k) * Real.sqrt (bandE k)) :=
@@ -538,13 +533,13 @@ theorem gapSum_le (n : ℕ) (hn : 0 < n) {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
           (Real.sqrt (cell k) * Real.sqrt (bandE k))) ^ 2) := by
           rw [Real.sqrt_sq hX0]
       _ ≤ Real.sqrt ((T : ℝ) * ∫ z in Set.Ioc (0:ℝ≥0) T ×ˢ (Set.univ : Set Ω),
-          ((processToLp T hBmeas hδadap hδcont hδbdd
-              - deltaStepLp hBmeas hδadap hδbdd n :
+          ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+              - deltaStepLp hBmeas hD.adapted hD.bdd n :
                 Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
           ∂(trimMeasure_T (μ := μ) T hBmeas)) := Real.sqrt_le_sqrt hsq
       _ = Real.sqrt (T : ℝ) * Real.sqrt (∫ z in Set.Ioc (0:ℝ≥0) T ×ˢ (Set.univ : Set Ω),
-          ((processToLp T hBmeas hδadap hδcont hδbdd
-              - deltaStepLp hBmeas hδadap hδbdd n :
+          ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+              - deltaStepLp hBmeas hD.adapted hD.bdd n :
                 Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
           ∂(trimMeasure_T (μ := μ) T hBmeas)) := by
           rw [Real.sqrt_mul (NNReal.coe_nonneg T)]
@@ -577,16 +572,16 @@ theorem gapSum_le (n : ℕ) (hn : 0 < n) {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
         rw [← Finset.mul_sum]
     _ ≤ 2 * |Cw| * |Dd| * (Real.sqrt (T : ℝ) * Real.sqrt (∫ z in Set.Ioc (0:ℝ≥0) T ×ˢ
           (Set.univ : Set Ω),
-        ((processToLp T hBmeas hδadap hδcont hδbdd
-            - deltaStepLp hBmeas hδadap hδbdd n :
+        ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+            - deltaStepLp hBmeas hD.adapted hD.bdd n :
               Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
         ∂(trimMeasure_T (μ := μ) T hBmeas))) :=
         mul_le_mul_of_nonneg_left hpair
           (mul_nonneg (mul_nonneg zero_le_two (abs_nonneg Cw)) (abs_nonneg Dd))
     _ = 2 * |Cw| * |Dd| * Real.sqrt (T : ℝ)
           * Real.sqrt (∫ z in Set.Ioc (0:ℝ≥0) T ×ˢ (Set.univ : Set Ω),
-        ((processToLp T hBmeas hδadap hδcont hδbdd
-            - deltaStepLp hBmeas hδadap hδbdd n :
+        ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+            - deltaStepLp hBmeas hD.adapted hD.bdd n :
               Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
         ∂(trimMeasure_T (μ := μ) T hBmeas)) := by ring
 
@@ -598,13 +593,7 @@ unconditional: `M` is still a hypothesized version of `δ●B` (`hMadap`, `hMeq`
 theorem quadraticSqSum_tendsto' (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t))
     {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
-    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-    (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-    {M : ℝ≥0 → Ω → ℝ}
-    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {M : ℝ≥0 → Ω → ℝ} (hD : IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {w : ℝ≥0 → Ω → ℝ} {Cw : ℝ}
     (hwadap : ∀ t, Measurable[natFiltration hBmeas t] (w t))
     (hwcont : ∀ᵐ ω ∂μ, Continuous fun s : ℝ≥0 ↦ w s ω)
@@ -614,36 +603,36 @@ theorem quadraticSqSum_tendsto' (hB : IsPreBrownianReal B μ)
           * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω) ^ 2 ∂μ)
       atTop (𝓝 (∫ s in Set.Ioc 0 T,
           (∫ ω, w s ω * (δ s ω * δ s ω) ∂μ) ∂ItoIntegralL2.timeMeasure)) := by
-  refine quadraticSqSum_tendsto hB hBmeas hδadap hδcont hδbdd hMeq hwadap hwcont hwbdd
+  refine quadraticSqSum_tendsto hB hBmeas hD hwadap hwcont hwbdd
     ⟨fun n ↦ Real.sqrt (∫ z in Set.Ioc (0:ℝ≥0) T ×ˢ (Set.univ : Set Ω),
-      ((processToLp T hBmeas hδadap hδcont hδbdd
-          - deltaStepLp hBmeas hδadap hδbdd n :
+      ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+          - deltaStepLp hBmeas hD.adapted hD.bdd n :
             Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
       ∂(trimMeasure_T (μ := μ) T hBmeas)), ?_, ?_⟩
   · -- `r n` is squeezed by `‖φ − δⁿ‖ → 0` (the band integral is at most the full norm²)
-    have htend := deltaStepLp_tendsto (T := T) hB hBmeas hδadap hδcont hδbdd
+    have htend := deltaStepLp_tendsto (T := T) hB hBmeas hD.adapted hD.continuous hD.bdd
     have hnorm := (tendsto_iff_norm_sub_tendsto_zero.mp htend).congr'
       (Eventually.of_forall fun n ↦ by rw [norm_sub_rev])
     refine squeeze_zero' (Eventually.of_forall fun n ↦ Real.sqrt_nonneg _) ?_ hnorm
     filter_upwards [] with n
     refine le_trans (Real.sqrt_le_sqrt ?_)
-      (le_of_eq (show Real.sqrt (‖(processToLp T hBmeas hδadap hδcont hδbdd
-          - deltaStepLp hBmeas hδadap hδbdd n :
+      (le_of_eq (show Real.sqrt (‖(processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+          - deltaStepLp hBmeas hD.adapted hD.bdd n :
             Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))‖ ^ 2)
-        = ‖(processToLp T hBmeas hδadap hδcont hδbdd
-          - deltaStepLp hBmeas hδadap hδbdd n :
+        = ‖(processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+          - deltaStepLp hBmeas hD.adapted hD.bdd n :
             Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))‖ from
         Real.sqrt_sq (norm_nonneg _)))
     have hsqint : Integrable (fun z ↦
-        ((processToLp T hBmeas hδadap hδcont hδbdd
-            - deltaStepLp hBmeas hδadap hδbdd n :
+        ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+            - deltaStepLp hBmeas hD.adapted hD.bdd n :
               Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2)
         (trimMeasure_T (μ := μ) T hBmeas) :=
-      (Lp.memLp (processToLp T hBmeas hδadap hδcont hδbdd
-        - deltaStepLp hBmeas hδadap hδbdd n)).integrable_sq
+      (Lp.memLp (processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+        - deltaStepLp hBmeas hD.adapted hD.bdd n)).integrable_sq
     have hintband : IntegrableOn (fun z ↦
-        ((processToLp T hBmeas hδadap hδcont hδbdd
-            - deltaStepLp hBmeas hδadap hδbdd n :
+        ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+            - deltaStepLp hBmeas hD.adapted hD.bdd n :
               Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2)
         (Set.Ioc (0:ℝ≥0) T ×ˢ (Set.univ : Set Ω)) (trimMeasure_T (μ := μ) T hBmeas) :=
       hsqint.mono_measure Measure.restrict_le_self
@@ -653,34 +642,34 @@ theorem quadraticSqSum_tendsto' (hB : IsPreBrownianReal B μ)
     have hbandms : MeasurableSet (Set.Ioc (0:ℝ≥0) T ×ˢ (Set.univ : Set Ω)) :=
       MeasurableSet.prod (measurableSet_Ioc (α := ℝ≥0)) MeasurableSet.univ
     have hintInd : Integrable ((Set.Ioc (0:ℝ≥0) T ×ˢ (Set.univ : Set Ω)).indicator
-        (fun z ↦ ((processToLp T hBmeas hδadap hδcont hδbdd
-            - deltaStepLp hBmeas hδadap hδbdd n :
+        (fun z ↦ ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+            - deltaStepLp hBmeas hD.adapted hD.bdd n :
               Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2))
         (trimMeasure_T (μ := μ) T hBmeas) :=
       (integrable_indicator_iff (μ := trimMeasure_T (μ := μ) T hBmeas)
         (f := fun z : ℝ≥0 × Ω ↦
-          ((processToLp T hBmeas hδadap hδcont hδbdd
-            - deltaStepLp hBmeas hδadap hδbdd n :
+          ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+            - deltaStepLp hBmeas hD.adapted hD.bdd n :
               Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2)
         hbandmsP).mpr hintband
     calc ∫ z in Set.Ioc (0:ℝ≥0) T ×ˢ (Set.univ : Set Ω),
-        ((processToLp T hBmeas hδadap hδcont hδbdd
-            - deltaStepLp hBmeas hδadap hδbdd n :
+        ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+            - deltaStepLp hBmeas hD.adapted hD.bdd n :
               Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
         ∂(trimMeasure_T (μ := μ) T hBmeas)
         = ∫ z, (Set.Ioc (0:ℝ≥0) T ×ˢ (Set.univ : Set Ω)).indicator
-            (fun z ↦ ((processToLp T hBmeas hδadap hδcont hδbdd
-              - deltaStepLp hBmeas hδadap hδbdd n :
+            (fun z ↦ ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+              - deltaStepLp hBmeas hD.adapted hD.bdd n :
                 Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2) z
           ∂(trimMeasure_T (μ := μ) T hBmeas) :=
           (integral_indicator (μ := trimMeasure_T (μ := μ) T hBmeas)
             (f := fun z : ℝ≥0 × Ω ↦
-              ((processToLp T hBmeas hδadap hδcont hδbdd
-                - deltaStepLp hBmeas hδadap hδbdd n :
+              ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+                - deltaStepLp hBmeas hD.adapted hD.bdd n :
                   Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2)
             hbandmsP).symm
-      _ ≤ ∫ z, ((processToLp T hBmeas hδadap hδcont hδbdd
-            - deltaStepLp hBmeas hδadap hδbdd n :
+      _ ≤ ∫ z, ((processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+            - deltaStepLp hBmeas hD.adapted hD.bdd n :
               Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 × Ω → ℝ) z ^ 2
           ∂(trimMeasure_T (μ := μ) T hBmeas) :=
           integral_mono hintInd hsqint (fun z ↦ by
@@ -688,11 +677,11 @@ theorem quadraticSqSum_tendsto' (hB : IsPreBrownianReal B μ)
             · rw [Set.indicator_of_mem hz]
             · rw [Set.indicator_of_notMem hz]
               exact sq_nonneg _)
-      _ = ‖(processToLp T hBmeas hδadap hδcont hδbdd
-            - deltaStepLp hBmeas hδadap hδbdd n :
+      _ = ‖(processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+            - deltaStepLp hBmeas hD.adapted hD.bdd n :
               Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))‖ ^ 2 :=
-          (lp_two_norm_sq (processToLp T hBmeas hδadap hδcont hδbdd
-            - deltaStepLp hBmeas hδadap hδbdd n)).symm
-  · exact fun n hn ↦ gapSum_le hB hBmeas hδadap hδcont hδbdd hMadap hMeq n hn hwadap hwbdd
+          (lp_two_norm_sq (processToLp T hBmeas hD.adapted hD.continuous hD.bdd
+            - deltaStepLp hBmeas hD.adapted hD.bdd n)).symm
+  · exact fun n hn ↦ gapSum_le hB hBmeas hD n hn hwadap hwbdd
 
 end MathFin.ItoDriftConditional

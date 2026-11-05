@@ -713,13 +713,7 @@ theorem hitoid_constructed_terminal
     (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
     {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
     {δ : ℝ≥0 → Ω → ℝ}
-    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-    {Dd : ℝ} (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-    {M : ℝ≥0 → Ω → ℝ}
-    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
     (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
@@ -731,14 +725,14 @@ theorem hitoid_constructed_terminal
     ∫ ω, f (X T ω) ∂μ
       = ∫ ω, f (X (0:ℝ≥0) ω) ∂μ
         + ∫ x in (0)..(T:ℝ), constructedGenIntegrandExp μ X β δ f' f'' x := by
-  have hident := ItoDriftConditional.itoDrift_expectation_identity_adapted hB hBmeas hδadap
-    hδcont hδbdd hMadap hMeq hβadap hβcont hβbdd c (Eventually.of_forall hXcont) hXrel
+  have hident := ItoDriftConditional.itoDrift_expectation_identity_adapted hB hBmeas hD hβadap
+    hβcont hβbdd c (Eventually.of_forall hXcont) hXrel
     hf hf' hf'' hg1 hg2 hg3
   rw [hident, timeMeasure_Ioc_eq_interval]
   rfl
 
 /-- **Band form of `hitoid` on the open band `(0, ↑T)`**, the form the marginal-flow core
-consumes (`=ᶠ[𝓝 t]` for `t` in the band), proved from the horizon-`T` pinning `hMeq` alone.
+consumes (`=ᶠ[𝓝 t]` for `t` in the band), proved from the horizon-`T` pinning `hD.ae_eq` alone.
 That the same `M` represents the CLM Itô integral at every horizon `τ ≤ T` is
 `ae_eq_itoProcessCLM_min` (cross-horizon consistency), used through the **frozen
 reversion** `t ↦ M (min t τ)`:
@@ -761,13 +755,7 @@ theorem hitoid_constructed_band
     (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
     {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
     {δ : ℝ≥0 → Ω → ℝ}
-    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-    {Dd : ℝ} (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-    {M : ℝ≥0 → Ω → ℝ}
-    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
     (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
@@ -789,11 +777,11 @@ theorem hitoid_constructed_band
   set Xfrz : ℝ≥0 → Ω → ℝ :=
     fun t ω ↦ c + AdaptedDrift.driftPath β t ω + Mfrz t ω with hXfrz
   -- `Mfrz` represents the τ-horizon CLM process at every time (the consistency lemma)
-  have hMeqτ := ae_eq_itoProcessCLM_min hB hBmeas hδadap hδcont hδbdd hMeq
+  have hMeqτ := ae_eq_itoProcessCLM_min hB hBmeas hD.adapted hD.continuous hD.bdd hD.ae_eq
     (Real.toNNReal s) hτT
   -- the reversion is adapted (monotone filtration through `min`)
   have hMadapτ : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (Mfrz t) := fun t ↦
-    StronglyMeasurable.mono (hMadap (min t (Real.toNNReal s)))
+    StronglyMeasurable.mono (hD.adaptedM (min t (Real.toNNReal s)))
       ((natFiltration hBmeas).mono (min_le_left t (Real.toNNReal s)))
   -- path continuity: `M` is along `X` (via `hXrel`), and `min` is continuous
   have hcontM : ∀ ω, Continuous (fun u : ℝ≥0 ↦ M u ω) := by
@@ -819,10 +807,12 @@ theorem hitoid_constructed_band
     funext ω
     simp only [hXfrz, hMfrz, hXrel t, min_eq_left ht]
   -- the adapted identity, re-run at the interior horizon for the reversion
-  have hident := ItoDriftConditional.itoDrift_expectation_identity_adapted hB hBmeas hδadap
-    hδcont hδbdd hMadapτ hMeqτ hβadap hβcont hβbdd c (Eventually.of_forall hXfrzcont)
+  have hDτ : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas (Real.toNNReal s) δ Dd Mfrz :=
+    ⟨hD.adapted, hD.continuous, hD.bdd, hMadapτ, hMeqτ⟩
+  have hident := ItoDriftConditional.itoDrift_expectation_identity_adapted hB hBmeas hDτ hβadap
+    hβcont hβbdd c (Eventually.of_forall hXfrzcont)
     (fun t => rfl) hf hf'
-    hf'' hg1 hg2 hg3 (T := Real.toNNReal s) (M := Mfrz) (X := Xfrz)
+    hf'' hg1 hg2 hg3 (X := Xfrz)
   -- the time-band integrand transfers to the generator integrand of `X`
   have hbandeq : ∫ s2 in Set.Ioc (0:ℝ≥0) (Real.toNNReal s),
       ((∫ ω, f' (Xfrz s2 ω) * β s2 ω ∂μ)
@@ -859,7 +849,7 @@ transferred) rather than the `hitoid` hypothesis. This is the computation whose
 uniqueness-up-to-marginals content is Gyöngy's theorem; the mimicking diffusion's
 *existence* is not proved (see the module docstring). The horizon consistency of the CLM
 integral (`itoProcessCLM_consist`/`ae_eq_itoProcessCLM_min`) means this theorem needs only
-the same horizon-`T` pinning `hMeq` as the terminal identity. -/
+the same horizon-`T` pinning `hD.ae_eq` as the terminal identity. -/
 theorem marginal_flow_weak_equation_constructed
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
@@ -868,13 +858,7 @@ theorem marginal_flow_weak_equation_constructed
     (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
     {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
     {δ : ℝ≥0 → Ω → ℝ}
-    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-    {Dd : ℝ} (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-    {M : ℝ≥0 → Ω → ℝ}
-    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
     (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
@@ -894,14 +878,14 @@ theorem marginal_flow_weak_equation_constructed
     have h2lt : ((Real.toNNReal t : ℝ)) < (T:ℝ) := NNReal.coe_lt_coe.mpr htT
     rwa [h1] at h2lt
   refine hasDerivAt_marginal_flow_core
-    (constructedCoeffData hBmeas hβadap hβcont hβbdd hδadap hδcont hδbdd hMadap c
+    (constructedCoeffData hBmeas hβadap hβcont hβbdd hD.adapted hD.continuous hD.bdd hD.adaptedM c
       hXcont hXrel)
     hf hf' h2 hg1 hg2 (constructedGenIntegrandExp μ X β δ f' f'') ?_ ?_ t ht htlT
-  · exact constructedGenIntegrandExp_eq hBmeas hβadap hβcont hβbdd hδadap hδbdd hMadap c
+  · exact constructedGenIntegrandExp_eq hBmeas hβadap hβcont hβbdd hD.adapted hD.bdd hD.adaptedM c
       hXrel hf hf' h2 hg1 hg2
   · intro s hs
-    have hband := hitoid_constructed_band hB hBmeas hβadap hβcont hβbdd hδadap hδcont hδbdd
-      hMadap hMeq c hXcont hXrel hf hf' hf'' hg1 hg2 hg3 hs
+    have hband := hitoid_constructed_band hB hBmeas hβadap hβcont hβbdd hD c hXcont hXrel hf hf'
+      hf'' hg1 hg2 hg3 hs
     -- the instance's time-0 point is `reindexed X 0 = X ⟨0⁺⟩`; `Real.toNNReal 0 = 0`
     have h0 : (0:ℝ≥0) = Real.toNNReal 0 := (Real.toNNReal_zero).symm
     rw [h0] at hband
@@ -1005,13 +989,7 @@ theorem marginal_flow_weak_equation_fn_constructed
     (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
     {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
     {δ : ℝ≥0 → Ω → ℝ}
-    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-    {Dd : ℝ} (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-    {M : ℝ≥0 → Ω → ℝ}
-    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
     (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
@@ -1046,8 +1024,8 @@ theorem marginal_flow_weak_equation_fn_constructed
         = f'' (X (Real.toNNReal t) ω) * bfn t (X (Real.toNNReal t) ω)
       rw [(hbfn t).2 ω])
   rw [← e1, ← e2]
-  exact marginal_flow_weak_equation_constructed hB hBmeas hβadap hβcont hβbdd hδadap hδcont
-    hδbdd hMadap hMeq c hXcont hXrel hf hf' h2 hf'' hg1 hg2 hg3 t ht htT
+  exact marginal_flow_weak_equation_constructed hB hBmeas hβadap hβcont hβbdd hD c hXcont hXrel hf
+    hf' h2 hf'' hg1 hg2 hg3 t ht htT
 
 /-- The congruence transport at the level of the constructed generator integrand:
 `constructedGenIntegrandExp` — the Ω-level conditional
@@ -1181,13 +1159,7 @@ private theorem hitoid_constructed_fn_Ioc
     (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
     {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
     {δ : ℝ≥0 → Ω → ℝ}
-    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-    {Dd : ℝ} (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-    {M : ℝ≥0 → Ω → ℝ}
-    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
     (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
@@ -1208,12 +1180,13 @@ private theorem hitoid_constructed_fn_Ioc
   have htr : ∀ x : ℝ, constructedGenIntegrandExp μ X β δ g' g'' x
       = (∫ ω, g' (X (Real.toNNReal x) ω) * afn x (X (Real.toNNReal x) ω) ∂μ)
         + 1 / 2 * (∫ ω, g'' (X (Real.toNNReal x) ω) * bfn x (X (Real.toNNReal x) ω) ∂μ) :=
-    fun x => constructedGenIntegrandExp_fn hBmeas hβadap hβcont hβbdd hδadap hδcont hδbdd
-      hMadap c hXcont hXrel hafnRep hbfnRep hg1 hg2 hg3 hb1 hb2 x
+    fun x => constructedGenIntegrandExp_fn hBmeas hβadap hβcont hβbdd hD.adapted hD.continuous
+      hD.bdd
+      hD.adaptedM c hXcont hXrel hafnRep hbfnRep hg1 hg2 hg3 hb1 hb2 x
   rcases lt_or_eq_of_le hs.2 with hlt | heq
   · -- open band: the band identity plus integrand transport
-    have hband := hitoid_constructed_band hB hBmeas hβadap hβcont hβbdd hδadap hδcont hδbdd
-      hMadap hMeq c hXcont hXrel hg1 hg2 hg4 hb1 hb2 hb3 ⟨hs.1, hlt⟩
+    have hband := hitoid_constructed_band hB hBmeas hβadap hβcont hβbdd hD c hXcont hXrel hg1 hg2
+      hg4 hb1 hb2 hb3 ⟨hs.1, hlt⟩
     have hI : (∫ x in (0)..s, constructedGenIntegrandExp μ X β δ g' g'' x)
         = (∫ x in (0)..s, ((∫ ω, g' (X (Real.toNNReal x) ω)
             * afn x (X (Real.toNNReal x) ω) ∂μ)
@@ -1224,8 +1197,8 @@ private theorem hitoid_constructed_fn_Ioc
   · -- the horizon: the terminal identity plus the same transport
     subst heq
     rw [Real.toNNReal_coe]
-    have hterm := hitoid_constructed_terminal hB hBmeas hβadap hβcont hβbdd hδadap hδcont
-      hδbdd hMadap hMeq c hXcont hXrel hg1 hg2 hg4 hb1 hb2 hb3
+    have hterm := hitoid_constructed_terminal hB hBmeas hβadap hβcont hβbdd hD c hXcont hXrel hg1
+      hg2 hg4 hb1 hb2 hb3
     have hI : (∫ x in (0)..(T:ℝ), constructedGenIntegrandExp μ X β δ g' g'' x)
         = (∫ x in (0)..(T:ℝ), ((∫ ω, g' (X (Real.toNNReal x) ω)
             * afn x (X (Real.toNNReal x) ω) ∂μ)
@@ -1282,13 +1255,7 @@ theorem gyongy_mimicry_gated
     (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
     {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
     {δ : ℝ≥0 → Ω → ℝ}
-    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-    {Dd : ℝ} (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-    {M : ℝ≥0 → Ω → ℝ}
-    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
     (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
@@ -1320,7 +1287,7 @@ theorem gyongy_mimicry_gated
     ∫ ω, f (Y t ω) ∂ν = ∫ ω, f (X (Real.toNNReal t) ω) ∂μ := by
   -- the X-side state maps are measurable (a field of the constructed instance)
   have hXm : ∀ s : ℝ, Measurable fun ω => X (Real.toNNReal s) ω := fun s =>
-    (constructedCoeffData hBmeas hβadap hβcont hβbdd hδadap hδcont hδbdd hMadap c
+    (constructedCoeffData hBmeas hβadap hβcont hβbdd hD.adapted hD.continuous hD.bdd hD.adaptedM c
       hXcont hXrel).hXmeas s
   have hfmeas : Measurable f := h2.continuous.measurable
   -- both law flows are probability flows
@@ -1363,12 +1330,13 @@ theorem gyongy_mimicry_gated
     refine ⟨hηprob, fun g g' g'' g''' C1 C2 C3 hgd1 hgd2 hgd4 hgb1 hgb2 hgb3 s hs => ?_⟩
     beta_reduce
     have hgd3 : ContDiff ℝ 2 g := contDiff_two_of_hasDerivAt_chain hgd1 hgd2 hgd4
-    have hx := hitoid_constructed_fn_Ioc hB hBmeas hβadap hβcont hβbdd hδadap hδcont hδbdd
-      hMadap hMeq c hXcont hXrel hafnRep hbfnRep g g' g'' g''' hgd1 hgd2 hgd3 hgd4 hgb1 hgb2
+    have hx := hitoid_constructed_fn_Ioc hB hBmeas hβadap hβcont hβbdd hD c hXcont hXrel hafnRep
+      hbfnRep g g' g'' g''' hgd1 hgd2 hgd3 hgd4 hgb1 hgb2
       hgb3 hs
     rw [show (0:ℝ≥0) = Real.toNNReal (0:ℝ) from Real.toNNReal_zero.symm] at hx
-    have hxi := intervalIntegrable_constructed_fn hBmeas hβadap hβcont hβbdd hδadap hδcont
-      hδbdd hMadap c hXcont hXrel hafnRep hbfnRep hgd1 hgd2 hgd3 hgb1 hgb2 0 s
+    have hxi := intervalIntegrable_constructed_fn hBmeas hβadap hβcont hβbdd hD.adapted
+      hD.continuous
+      hD.bdd hD.adaptedM c hXcont hXrel hafnRep hbfnRep hgd1 hgd2 hgd3 hgb1 hgb2 0 s
     have hgm : Measurable g := hgd3.continuous.measurable
     have hgd' : Differentiable ℝ g' := fun x => (hgd2 x).differentiableAt
     have hgm' : Measurable g' := hgd'.continuous.measurable
@@ -1434,13 +1402,7 @@ theorem gyongy_mimicry_const
     (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
     {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
     {δ : ℝ≥0 → Ω → ℝ}
-    (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-    (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-    {Dd : ℝ} (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-    {M : ℝ≥0 → Ω → ℝ}
-    (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-    (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-      (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+    {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
     (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
@@ -1467,7 +1429,7 @@ theorem gyongy_mimicry_const
     (t : ℝ) (ht : 0 < t) (htT : t ≤ (T:ℝ)) :
     ∫ ω, f (Y t ω) ∂ν = ∫ ω, f (X (Real.toNNReal t) ω) ∂μ :=
   gyongy_mimicry_gated (afn := fun _ _ ↦ b) (bfn := fun _ _ ↦ v) hB hBmeas hβadap hβcont hβbdd
-    hδadap hδcont hδbdd hMadap hMeq c hXcont hXrel Y hYmeas (fun _ ↦ measurable_const)
+    hD c hXcont hXrel Y hYmeas (fun _ ↦ measurable_const)
     (fun _ ↦ measurable_const) hafnRep hbfnRep hY0law hyflow
     (fun _ _ hρ hη h0 ↦ weakForwardUniqueConst hρ hη h0) h2 t ht htT
 

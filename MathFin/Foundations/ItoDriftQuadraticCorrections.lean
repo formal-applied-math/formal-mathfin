@@ -168,15 +168,9 @@ section Cross
 
 variable (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
   {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
-  (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
-  (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
-  (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
-  {M : ℝ≥0 → Ω → ℝ}
-  (hMadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (M t))
-  (hMeq : ∀ t, M t =ᵐ[μ] (itoProcessCLM hB T t hBmeas
-    (processToLp T hBmeas hδadap hδcont hδbdd) : Ω → ℝ))
+  {M : ℝ≥0 → Ω → ℝ} (hD : IsAdaptedItoDrift hB hBmeas T δ Dd M)
 
-include hB hBmeas hδadap hδcont hδbdd hMadap hMeq
+include hB hBmeas hD
 
 set_option maxHeartbeats 1600000 in
 -- a long estimate: elaborating the whole proof exceeds the default budget
@@ -240,13 +234,13 @@ theorem quadCrossSum_tendsto {β : ℝ≥0 → Ω → ℝ} {X : ℝ≥0 → Ω �
           rw [Real.norm_eq_abs]
           exact hdIb ω)
     have htImem : MemLp tI 2 μ :=
-      (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq
+      (memLp_M hB hBmeas hD
         (unifPart T n (k + 1))).sub
-        (memLp_M hB hBmeas hδadap hδcont hδbdd hMeq (unifPart T n k))
+        (memLp_M hB hBmeas hD (unifPart T n k))
     -- the mean-integrability inputs
     have hnorm1 : ∫ ω, |tI ω| ∂μ ≤ Real.sqrt (∫ ω, tI ω ^ 2 ∂μ) :=
       integral_abs_le_sqrt_integral_sq htImem
-    have htI2 := trueIncr_sq_le hB hBmeas hδadap hδcont hδbdd hMadap hMeq
+    have htI2 := trueIncr_sq_le hB hBmeas hD
       (unifPart_mono T n (Nat.le_succ k)) (unifPart_le_T (Nat.lt_iff_add_one_le.mp hk))
     have hsqrtT : Real.sqrt (∫ ω, tI ω ^ 2 ∂μ) ≤ |Dd| * Real.sqrt
         ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
