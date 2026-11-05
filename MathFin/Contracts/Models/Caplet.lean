@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.BlackScholes.Forward
 public import MathFin.Contracts.Models.ShortRate
 public import MathFin.Foundations.ForwardMeasure
 public import MathFin.Futures.Black76

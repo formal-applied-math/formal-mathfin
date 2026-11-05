@@ -130,6 +130,71 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-11-05 — corpus 779, modules 709 — the backlog closed on main, read before it lands
+
+Scope: #418, the CDS half of #367 and the backlogs of the two 2026-11-04 entries, in four areas
+(pricing and FTAP, fixed income, the Itô stack, risk and the American put) worked in parallel and
+merged into one tree. Two read-only reviewers read the merged diff; their findings were executed
+before it reached main, each change built, the final no-argument build and lint green.
+
+### The standing first pass: prose against statement
+
+A new corpus description cited `mf-ftap-discrete-complete` (existence of an EMM) as the discrete
+instance of "replication pins the pricing measure", whose instance is `mf-ftap-two-discrete`; the
+Brownian half named no entry. The tree-Snell entry called the general envelope "the smallest
+supermartingale above the payoff", which the Lean proves only at the exercise times and the horizon.
+The CDS protection contract was "the contract whose value is `Cox.protectionLeg`", true under the
+Cox default time at a flat rate; the general value is an identity of Bochner integrals, which now says
+both sides are `0` off integrability. In the Itô stack, ten docstrings still named the threaded
+hypotheses the bundle replaced (`hMeq`, `hMadap`) or narrated stage layouts that had moved, and one
+"stated once" was false (a third `lp_two_norm_sq` sat in `WienerIntegralL2`). All restated; three
+bridges rows had their new sentences in the status column (and one an unescaped `|` that split the
+table since 2026-11-04), repaired.
+
+### Upgrades executed
+
+- **Replication pins the measure, once.** `ReplicationPricing.measure_eq_of_replicates`: two
+  gains-neutral measures agree on every event whose indicator is replicated. The finite market's
+  `IsEMM.measure_eq_of_isCompleteMarket` and the Brownian `measure_eq_of_pricesGainsAtZero` are its
+  instances (2026-11-04 backlog 7), and the private copies in `MarketCompleteness` are gone.
+- **The hedge is priced by the contract.** `exists_hedge_eq_value`: in the complete tree the capital
+  of the replication of a European contract is its `Contract.value` (lens 1 of 2026-11-04).
+- **The tree's Snell envelope is a Mathlib `Supermartingale`**, frozen at the horizon (lens 2).
+- **A payment at a random time.** `Contract.payAtHit` pays at Mathlib's `hittingAfter` on the
+  observed path, so CDS protection is a contract paying at default: worth `(1 − R)·𝔼[D(τ)1{τ ≤ T}]`,
+  `Cox.protectionLeg` under the Cox time, the limit of the grid legs (#367). `Contract.FixedDated`
+  carries the one restriction a random date brings: integrability is proved for fixed-date contracts.
+- **The forward measure in Foundations**, the Wiener forward-measure law beside the Wiener integral,
+  so the GSR bond price no longer imports a timing-adjustment file; the GSR put at `σ₁ = σ₂` is the
+  Vasicek put (`valueDisc_bondPut_gsr_self`).
+- **The drift stack's hypotheses as two structures.** `IsAdaptedIntegrand` (δ adapted, continuous,
+  bounded) and `IsAdaptedItoDrift` extending it with the version `M`, with a named integrand; five
+  arguments threaded through about 25 theorems and their callers become one. `clm_band_energy` sits
+  beside `itoProcessCLM_norm_sq` and is Pythagoras for the martingale; the two-band split is one
+  `setIntegral_Ioc_prod_add`; `lp_two_norm_sq` is stated once; `stepSum_pow4_le` is its own module.
+- **Risk.** Covariance Cauchy–Schwarz from the library's Hölder lemma, in Foundations; Gaussian VaR
+  subadditivity a corollary, a third discriminant derivation deleted. `DiscreteVaR` takes a
+  `StdSimplex`, built with a new `StdSimplex.prod` (absent from Mathlib, an upstream candidate).
+
+Closed as already done, the boxes stale: the freeze lemma, `SimpleStrategy.toDiscrete`,
+`bond_mul_capletPayoff`, `SwapModel` through `HasBondPrice`, the CDS mesh limit,
+`martingale_iff_setIntegral_eq` at a σ-finite filtration (Mathlib still has only the ℕ-indexed form).
+Declined with reason: the `itoProcessCLM` density proofs (the engine's own is irreducible, the
+corollary already one line); a C² preamble bundle (its files carry different hypothesis subsets);
+the classical track's `Coe` (`Tangency` needs it) and canonical restatements (inlining them
+re-threads the parameter list).
+
+### Ranked backlog
+
+1. `stepSum_pow4_le`: 500 lines at `maxHeartbeats 1600000`, now in its own module but still one
+   proof; one lemma per idea (the Young dominations as a Hölder `MemLp.integrable_mul` step, `hY4mem`)
+   should drop the heartbeat bump.
+2. The CDS premium leg as a contract: the tower has no continuous payment stream.
+3. `snellAux_supermartingale`'s pathwise clause, kept because `bermudanPrice_snell_minimal` and a
+   benchmark state pathwise hypotheses; restate them a.e. and drop it.
+4. `Foundations/FiniteMeasureCauchySchwarz` now also holds covariance lemmas under
+   `IsProbabilityMeasure`; `StdSimplex.prod` and `lp_two_norm_sq` are upstream candidates.
+
 ## 2026-11-04 — corpus 773, modules 703 — the pin bump (BrownianMotion 497e5e2, Mathlib e91b128), read before it lands
 
 Scope: the port to Lean v4.35.0, Mathlib e91b128 and BrownianMotion 497e5e2. One read-only
