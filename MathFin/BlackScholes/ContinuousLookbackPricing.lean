@@ -161,7 +161,10 @@ argument (the library has no construction of the running minimum's law to take e
 against); it is a direct algebraic argument from the transcribed closed form. This is **not** a
 counterpart of `lookback_payoff_ge_vanilla` (`Lookback.lean`), which is a different, same-strike
 statement about the running *maximum* (`max(S−K,0) ≤ max(M−K,0)` given `S ≤ M`) — the two share
-only the theme that a lookback value dominates a vanilla one. -/
+only the theme that a lookback value dominates a vanilla one. **At `r = 0`** both sides use the
+same Lean division-by-zero convention for `lookbackFloatingPrice`'s `σ²/(2r)` factor, so the
+inequality degenerates to an equality (`0 ≤ 0`); this says nothing about the true zero-carry
+limit, which `lookbackFloatingPrice` does not compute (see its own docstring). -/
 theorem lookbackFloatingCall_ge_bsV {S m r σ T : ℝ} (hm : 0 < m) (hS : m ≤ S) (hσ : 0 < σ)
     (hT : 0 < T) :
     bsV m r σ S T ≤ lookbackFloatingPrice 1 S m r 0 σ T := by
