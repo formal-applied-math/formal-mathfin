@@ -400,6 +400,21 @@
         "formalization_status": "reduced_core",
         "formalization_scope": "Reduced core. Re-export of MathFin.bboDownIn_add_DownOut and MathFin.bboUpIn_add_UpOut (MathFin/BlackScholes/BinaryBarrierOption.lean), plus MathFin.bboB1_eq_Phi_bsd2 and MathFin.value_digitalCall_eq_bboB1. The Rubinstein–Reiner 16-branch closed form is transcribed, not derived: what is proved is the in–out identity branch-by-branch across all sixteen (barrier type, call/put, strike-vs-barrier) cases — the closed-form counterpart of knockIn_add_knockOut_eq_vanilla, not derived from it — and, call side only, that under BSCallHyp at the risk-neutral drift μ = (r − σ²/2)/σ² the Black–Scholes value of the digital call contract Contracts.digitalCall equals e^{−rT}·B₁ (through Contracts.BlackScholes.value_digitalCall). The knock-in/knock-out terms are not proved to be prices; the barrier density is not proved. Main's precedent for transcribed barriers proving no more than this is reduced_core (Heynen–Kat, Stulz). Axioms-clean."
       }
+    },
+    {
+      "id": "mf-continuous-lookback-floating-strike",
+      "name": "Continuous-Monitoring Floating-Strike Lookback Option",
+      "domain": "mathematical_finance",
+      "description": "Goldman, Sosin & Gatto's continuous-monitoring floating-strike lookback closed form (call on the running minimum, put on the running maximum), transcribed in Haug's cost-of-carry form: with no dividend, the transcribed call closed form is at least the vanilla Black-Scholes call struck at the running minimum, proved directly from the closed form via a Mills-ratio monotonicity argument on the one term with a removable singularity at zero carry. The closed form itself is transcribed, not derived: that it equals the discounted expected lookback payoff needs the joint law of a drifted Brownian motion and its running extremum (the reflection principle), which the library does not have.",
+      "code": {
+        "lean": "import MathFin.BlackScholes.ContinuousLookbackPricing\n\nopen MathFin\n\n/-- **The floating-strike lookback call dominates the vanilla call struck at the running\nminimum.** Re-exports `MathFin.lookbackFloatingCall_ge_bsV`. -/\ntheorem continuous_lookback_floating_call_ge_bsV {S m r σ T : ℝ} (hm : 0 < m) (hS : m ≤ S)\n    (hσ : 0 < σ) (hT : 0 < T) :\n    bsV m r σ S T ≤ lookbackFloatingPrice 1 S m r 0 σ T :=\n  MathFin.lookbackFloatingCall_ge_bsV hm hS hσ hT\n"
+      },
+      "metadata": {
+        "reference": "Goldman, Sosin & Gatto, \"Path Dependent Options: 'Buy at the Low, Sell at the High'\", J. Finance 34(5) (1979), 1111-1127; Haug, The Complete Guide to Option Pricing Formulas, 2nd ed. (2007), ch. 4, \"Floating-Strike Lookback Options\"",
+        "difficulty": "intermediate",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Reduced core. Re-export of MathFin.lookbackFloatingCall_ge_bsV (MathFin/BlackScholes/ContinuousLookbackPricing.lean). The Goldman-Sosin-Gatto closed form (lookbackFloatingPrice, QuantLib's AnalyticContinuousFloatingLookbackEngine::A) is transcribed, not derived: what is proved is that, with no dividend, the transcribed call price dominates the vanilla Black-Scholes call struck at the running minimum (bsV), proved directly from the closed form rather than via any payoff-dominance argument (not a counterpart of Lookback.lean's lookback_payoff_ge_vanilla, which is a different, same-strike statement about the running maximum). The proof isolates the carry term with a removable singularity at zero carry and shows it has the same sign as the rate via a Mills-ratio monotonicity argument (neg_mul_Phi_le_gaussianPDFReal, reused from a tail-bound role into a derivative-sign role). At zero carry (r = q, e.g. r = 0 in the no-dividend instance proved here) lookbackFloatingPrice takes Lean's division-by-zero value 0 for its sigma^2/(2(r-q)) factor rather than the true removable-singularity limit, so the inequality there degenerates to an equality and says nothing about the real zero-carry price. Fixed-strike and partial-time variants are out of scope. Not proved to be a price. Axioms-clean."
+      }
     }
   ]
 }

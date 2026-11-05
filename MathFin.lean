@@ -504,6 +504,7 @@ import MathFin.BlackScholes.Heston
 -- deterministic variance
 import MathFin.BlackScholes.HestonSmallVolOfVol
 import MathFin.BlackScholes.Lookback
+import MathFin.BlackScholes.ContinuousLookbackPricing
 import MathFin.BlackScholes.BarrierParity
 import MathFin.BlackScholes.BinaryBarrierOption
 -- Also consumes the bivariate normal CDF (Foundations/BivariateNormalCDF),
