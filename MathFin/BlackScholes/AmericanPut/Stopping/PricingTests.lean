@@ -40,7 +40,7 @@ theorem pricingTestKernel_eq_brownian (F : ℝ × ℝ → ℝ) (k h x : ℝ) (T 
     pricingTestKernel F k h x T =
       fun z => brownianPriceKernel (fun y t => F (y,t)) 1 k h (Real.sqrt 2) x T z.1 z.2 := by
   funext z
-  simp [pricingTestKernel,brownianPriceKernel,Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)]
+  simp [pricingTestKernel,brownianPriceKernel]
 
 theorem pricingTestKernel_generator {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 2 F)
     (k h x : ℝ) (T : ℝ≥0) :
@@ -55,7 +55,7 @@ theorem pricingTestKernel_generator {F : ℝ × ℝ → ℝ} (hF : ContDiff ℝ 
       (x+(k-h-(Real.sqrt 2)^2/2)*0+Real.sqrt 2*0,(Real.sqrt 2)^2/2*((T : ℝ)-0)) :=
     hF.differentiable (by norm_num) _
   rw [(brownianPriceKernel_hasDeriv_time (K := 1) hd).deriv,brownianPriceKernel_deriv2_space]
-  simp only [Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num),div_self (show (2 : ℝ) ≠ 0 by norm_num),
+  simp only [Real.sq_sqrt zero_le_two,div_self (show (2 : ℝ) ≠ 0 by norm_num),
     mul_zero,add_zero,sub_zero,Real.exp_zero,one_mul,mul_one]
   ring
 

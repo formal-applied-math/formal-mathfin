@@ -511,13 +511,13 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.DiscreteVaR.finiteES_one_bond
 
-/-- info: 'MathFin.DiscreteVaR.oneQ_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.DiscreteVaR.oneL' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.DiscreteVaR.oneQ_nonneg
+#print axioms MathFin.DiscreteVaR.oneL
 
-/-- info: 'MathFin.DiscreteVaR.oneQ_sum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.DiscreteVaR.oneQ' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.DiscreteVaR.oneQ_sum
+#print axioms MathFin.DiscreteVaR.oneQ
 
 /-- info: 'MathFin.Dupire.dupire_pointwise' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

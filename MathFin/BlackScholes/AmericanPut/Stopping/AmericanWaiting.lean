@@ -88,9 +88,7 @@ theorem canonicalPrice_wait {k h : ℝ} (hk : 0 ≤ k) (u T : ℝ≥0) (x : ℝ)
       canonicalPrice k h y (t : ℝ) := by
     simp only [canonicalPrice,Real.toNNReal_coe]
     exact (brownianUsualAmericanPut_eq_raw_of_pos (by norm_num) hk (Real.exp_pos y) t).symm
-  simp only
-      [hprice,Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num),div_self (show (2 : ℝ) ≠ 0 by norm_num)]
-      at he
+  simp only [hprice,Real.sq_sqrt zero_le_two,div_self (show (2 : ℝ) ≠ 0 by norm_num)] at he
   exact he
 
 /-- The actual price waits: dynamic programming (`canonicalPrice_wait`) in the form

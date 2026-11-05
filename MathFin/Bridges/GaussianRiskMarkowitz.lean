@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.RiskMeasures.GaussianValueAtRisk
+public import MathFin.RiskMeasures.VaRSuperadditivity
 public import MathFin.Portfolio.CovariancePSD
 public import MathFin.Portfolio.Equicorrelation
 
@@ -42,10 +43,11 @@ minimum-variance portfolio there (`isMinOn_valueAtRisk_iff_isMinOn_portfolioVarN
 known textbook facts, not new finance.
 
 On the linear space of portfolio losses VaR is also **subadditive** at every level `α ≥ 1/2`
-(`valueAtRisk_portfolio_add_le`, QRM Exercise 8.4). The reason is the triangle inequality for the
-portfolio standard deviation `√(wᵀ Σ w)` (`sqrt_portfolioVarN_add_le`), which holds for every
-positive-semidefinite kernel by the discriminant form of Cauchy–Schwarz. Outside the Gaussian
-world subadditivity fails (`RiskMeasures/` superadditivity examples).
+(`valueAtRisk_portfolio_add_le`, QRM Exercise 8.4). Two portfolio losses of a Gaussian vector
+are a jointly Gaussian pair (`hasGaussianLaw_portfolio_pair`), so this is the pair theorem
+`valueAtRisk_add_le_of_hasGaussianLaw`, which rests on the subadditivity of the standard deviation
+(`sqrt_variance_add_le`). Outside the Gaussian world subadditivity fails (`RiskMeasures/`
+superadditivity examples).
 
 The general elliptical case of Exercise 8.6 is covered by the location–scale theorems once the
 family hypothesis (every portfolio loss is `m + s Z` in law for one standardized `Z`) is
@@ -58,7 +60,7 @@ the instance proved.
   principle.
 * `valueAtRisk_le_iff_of_map_eq_affine`, `expectedShortfall_le_iff_of_map_eq_affine`: within a
   location–scale family and at equal means, the risk measures order losses by scale.
-* `sqrt_portfolioVarN_add_le`: the portfolio standard deviation is subadditive for any PSD kernel.
+* `hasGaussianLaw_portfolio_pair`: two portfolio losses of a Gaussian vector are jointly Gaussian.
 * `hasLaw_portfolio_gaussianReal`: `⟨w, X⟩ ~ N(∑ wᵢ E Xᵢ, wᵀ Σ w)` for a Gaussian vector `X`.
 * `valueAtRisk_portfolio_gaussian`, `expectedShortfall_portfolio_gaussian`: the closed forms.
 * `valueAtRisk_portfolio_le_iff`, `expectedShortfall_portfolio_le_iff`: VaR, ES and variance order
@@ -142,46 +144,20 @@ theorem expectedShortfall_le_iff_of_map_eq_affine (hZ : Integrable Z Q) (hs : 0 
 
 end LocationScale
 
-/-! ### The portfolio standard deviation is subadditive -/
-
-/-- **Diversification never adds standard deviation**: for any kernel whose Markowitz form is
-nonnegative, `√(Var(w + w')) ≤ √(Var(w)) + √(Var(w'))`. The form `t ↦ Var(w + t w')` is a
-nonnegative quadratic in `t`, so its discriminant is nonpositive, which is Cauchy–Schwarz for the
-kernel. -/
-theorem sqrt_portfolioVarN_add_le {ι : Type*} (s : Finset ι) (σ : ι → ι → ℝ)
-    (hpsd : ∀ v, 0 ≤ portfolioVarN s v σ) (w w' : ι → ℝ) :
-    √(portfolioVarN s (w + w') σ) ≤ √(portfolioVarN s w σ) + √(portfolioVarN s w' σ) := by
-  set a := portfolioVarN s w' σ
-  set c := portfolioVarN s w σ
-  set b := ∑ i ∈ s, ∑ j ∈ s, (w i * w' j + w' i * w j) * σ i j
-  have hquad (t : ℝ) : portfolioVarN s (w + t • w') σ = a * (t * t) + b * t + c := by
-    simp only [a, b, c, portfolioVarN, Pi.add_apply, Pi.smul_apply, smul_eq_mul, Finset.sum_mul,
-      ← Finset.sum_add_distrib]
-    exact Finset.sum_congr rfl fun i _ ↦ Finset.sum_congr rfl fun j _ ↦ by ring
-  have hnn (t : ℝ) : 0 ≤ a * (t * t) + b * t + c := hquad t ▸ hpsd (w + t • w')
-  have hdisc : b ^ 2 ≤ 4 * a * c := by
-    have := discrim_le_zero hnn
-    rw [discrim] at this
-    linarith
-  have ha : 0 ≤ a := hpsd w'
-  have hc : 0 ≤ c := hpsd w
-  have hb : b ≤ 2 * (√c * √a) :=
-    calc b ≤ |b| := le_abs_self b
-      _ = √(b ^ 2) := (Real.sqrt_sq_eq_abs b).symm
-      _ ≤ √(4 * a * c) := Real.sqrt_le_sqrt hdisc
-      _ = 2 * (√c * √a) := by
-        rw [show (4 : ℝ) * a * c = 2 ^ 2 * (c * a) by ring, Real.sqrt_mul (by positivity),
-          Real.sqrt_sq zero_le_two, Real.sqrt_mul hc]
-  have hsum : portfolioVarN s (w + w') σ = a + b + c := by simpa using hquad 1
-  rw [Real.sqrt_le_left (by positivity), hsum, add_sq, Real.sq_sqrt hc, Real.sq_sqrt ha]
-  linarith
-
 /-! ### Gaussian portfolios -/
 
 section Portfolio
 
 variable {ι : Type*} [Fintype ι] {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
   {X : ι → Ω → ℝ} {α : ℝ}
+
+/-- **Two portfolio losses of a Gaussian vector are jointly Gaussian**: `(∑ wᵢ Xᵢ, ∑ w'ᵢ Xᵢ)` is
+the image of the Gaussian vector `X` under a linear map. -/
+theorem hasGaussianLaw_portfolio_pair (hX : HasGaussianLaw (fun ω ↦ (X · ω)) P) (w w' : ι → ℝ) :
+    HasGaussianLaw (fun ω ↦ (∑ i, w i * X i ω, ∑ i, w' i * X i ω)) P := by
+  simpa using hX.map_fun
+    ((∑ i, w i • ContinuousLinearMap.proj (R := ℝ) (φ := fun _ : ι ↦ ℝ) i).prod
+      (∑ i, w' i • ContinuousLinearMap.proj (R := ℝ) (φ := fun _ : ι ↦ ℝ) i))
 
 /-- **A Gaussian portfolio loss**: if the risk-factor vector `X` is Gaussian, the portfolio loss
 `∑ wᵢ Xᵢ` has law `N(∑ wᵢ E Xᵢ, wᵀ Σ w)`, with `Σ` the covariance kernel of `X`. -/
@@ -190,13 +166,7 @@ theorem hasLaw_portfolio_gaussianReal (hX : HasGaussianLaw (fun ω ↦ (X · ω)
       (gaussianReal (∑ i, w i * P[X i])
         (portfolioVarN Finset.univ w fun i j ↦ cov[X i, X j; P]).toNNReal) P := by
   have := hX.isProbabilityMeasure
-  have hL : HasGaussianLaw (fun ω ↦ ∑ i, w i * X i ω) P := by
-    have h := hX.map_fun (∑ i, w i • ContinuousLinearMap.proj (R := ℝ) (φ := fun _ : ι ↦ ℝ) i)
-    have heq : (fun ω ↦ (∑ i, w i • ContinuousLinearMap.proj (R := ℝ) (φ := fun _ : ι ↦ ℝ) i)
-        (X · ω)) = fun ω ↦ ∑ i, w i * X i ω := by
-      ext ω
-      simp
-    rwa [heq] at h
+  have hL := (hasGaussianLaw_portfolio_pair hX w w).fst
   refine ⟨hL.aemeasurable, ?_⟩
   rw [hL.map_eq_gaussianReal,
     portfolioVarN_covariance_eq_variance Finset.univ w X fun i _ ↦ (hX.eval i).memLp_two]
@@ -319,19 +289,9 @@ theorem valueAtRisk_portfolio_add_le (hX : HasGaussianLaw (fun ω ↦ (X · ω))
     (hα : α ∈ Ico (1 / 2) 1) (w w' : ι → ℝ) :
     valueAtRisk (fun ω ↦ ∑ i, w i * X i ω + ∑ i, w' i * X i ω) P α ≤
       valueAtRisk (fun ω ↦ ∑ i, w i * X i ω) P α +
-        valueAtRisk (fun ω ↦ ∑ i, w' i * X i ω) P α := by
-  have hα' : α ∈ Ioo 0 1 := ⟨by linarith [hα.1], hα.2⟩
-  have hsum : (fun ω ↦ ∑ i, w i * X i ω + ∑ i, w' i * X i ω) =
-      fun ω ↦ ∑ i, (w + w') i * X i ω := by
-    ext ω
-    simp [add_mul, Finset.sum_add_distrib]
-  have hz : 0 ≤ PhiInv α := (PhiInv_nonneg_iff hα').2 hα.1
-  have htri := sqrt_portfolioVarN_add_le Finset.univ (fun i j ↦ cov[X i, X j; P])
-    (portfolioVarN_gaussian_nonneg hX) w w'
-  rw [hsum, valueAtRisk_portfolio_gaussian hX _ hα', valueAtRisk_portfolio_gaussian hX _ hα',
-    valueAtRisk_portfolio_gaussian hX _ hα']
-  simp only [Pi.add_apply, add_mul, Finset.sum_add_distrib]
-  linarith [mul_le_mul_of_nonneg_right htri hz]
+        valueAtRisk (fun ω ↦ ∑ i, w' i * X i ω) P α :=
+  valueAtRisk_add_le_of_hasGaussianLaw (hasGaussianLaw_portfolio_pair hX w w')
+    ⟨by linarith [hα.1], hα.2⟩ hα.1
 
 /-- **The diversification floor for VaR** (QRM Exercise 6.16): if `d` jointly Gaussian losses have
 a common mean `m`, a common standard deviation `σ` and a common correlation `ρ`, their average

@@ -959,7 +959,7 @@
         "reference": "QRM Exercise Book Ex. 8.4",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Subadditivity of the portfolio standard deviation for a PSD covariance kernel and Φ⁻¹(α) ≥ 0. Lives in MathFin/Bridges/GaussianRiskMarkowitz.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Two portfolio losses of a Gaussian vector are a jointly Gaussian pair, so this is the pair theorem (VaR = E + sd Φ⁻¹(α) with sd subadditive and Φ⁻¹(α) ≥ 0). Lives in MathFin/Bridges/GaussianRiskMarkowitz.lean. Axioms-clean."
       }
     },
     {
@@ -1032,14 +1032,14 @@
       "description": "For square-integrable X, Y on a probability space: cov(X, Y) ≤ √Var X · √Var Y.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.StandardDeviationPrinciple\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem covariance_le_sqrt_mul_sqrt_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {X : Ω → ℝ} {Y : Ω → ℝ} (hX : MemLp X 2 P) (hY : MemLp Y 2 P) :\n    cov[X, Y; P] ≤ √Var[X; P] * √Var[Y; P] :=\n  MathFin.covariance_le_sqrt_mul_sqrt hX hY\n\n"
+        "lean": "import MathFin.Foundations.FiniteMeasureCauchySchwarz\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem covariance_le_sqrt_mul_sqrt_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {X : Ω → ℝ} {Y : Ω → ℝ} (hX : MemLp X 2 P) (hY : MemLp Y 2 P) :\n    cov[X, Y; P] ≤ √Var[X; P] * √Var[Y; P] :=\n  MathFin.covariance_le_sqrt_mul_sqrt hX hY\n\n"
       },
       "metadata": {
         "chapter": 8,
         "reference": "QRM Exercise Book Ex. 8.11 context",
         "difficulty": "basic",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Discriminant of the nonnegative quadratic t ↦ Var(X + tY). Lives in MathFin/RiskMeasures/StandardDeviationPrinciple.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Cauchy–Schwarz in expectation (Hölder at exponents 2, 2) at the centred variables X − E X, Y − E Y. Lives in MathFin/Foundations/FiniteMeasureCauchySchwarz.lean. Axioms-clean."
       }
     },
     {

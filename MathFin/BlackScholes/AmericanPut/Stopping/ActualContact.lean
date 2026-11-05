@@ -20,7 +20,7 @@ Optimality and the dynamic programming principle are not assumed.
 
 ## Result
 
-Public entry points include `classicalLogSpot_canonical`, `normalizedRate_sqrt_two` (both `simp`),
+Public entry points include `classicalLogSpot_canonical` (`simp`),
 `canonicalContactRule`, `canonicalContactRule_contact`, `canonicalContactRule_price_eq`,
 `canonicalContactRule_continuation_before`.
 -/
@@ -39,12 +39,7 @@ is `x + (k-h-1)*t + Real.sqrt 2 * W t`. -/
 @[simp] theorem classicalLogSpot_canonical (W : ℝ≥0 → Ω → ℝ) (k h x : ℝ) (t : ℝ≥0) (ω : Ω) :
     classicalLogSpot W 1 k h (Real.sqrt 2) (Real.exp x) t ω =
       x+(k-h-1)*(t : ℝ)+Real.sqrt 2*W t ω := by
-  simp only [classicalLogSpot,div_one,Real.log_exp,Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)]
-  ring
-
-/-- At volatility `Real.sqrt 2` the normalized rate is the rate itself. -/
-@[simp] theorem normalizedRate_sqrt_two (r : ℝ) : normalizedRate r (Real.sqrt 2) = r := by
-  rw [normalizedRate,Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)]
+  simp only [classicalLogSpot,div_one,Real.log_exp,Real.sq_sqrt zero_le_two]
   ring
 
 variable [MeasurableSpace Ω] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}

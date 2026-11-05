@@ -8,7 +8,7 @@ module
 public import Mathlib
 public import MathFin.RiskMeasures.RiskClosedForms
 public import MathFin.RiskMeasures.GaussianValueAtRisk
-public import MathFin.RiskMeasures.StandardDeviationPrinciple
+public import MathFin.Foundations.FiniteMeasureCauchySchwarz
 
 /-!
 # Value-at-risk is not subadditive
