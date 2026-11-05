@@ -12,42 +12,40 @@ public import MathFin.BlackScholes.SABRImpliedVol
 # SABR chain-rule Greeks (at-the-money)
 
 Hagan, Kumar, Lesniewski & Woodward, "Managing Smile Risk," *Wilmott Magazine*,
-September 2002, pp. 84-108, §2 discusses that since the SABR implied vol `σ_B(K, f)`
-is itself a function of the forward `f` and of `α`, a European option's genuine price
-sensitivities ("Delta", "Vega") combine the ordinary Black-Scholes sensitivity with the
-*vol smile's own movement*, via the chain rule:
+September 2002, pp. 84-108, §3.2 ("Managing smile risk"): since the SABR implied vol
+`σ_B(K, f)` is itself a function of the forward `f` and of `α`, a European option
+`V = BS(f, K, σ_B(K, f), t_ex)` (their eq. 3.5) has genuine price sensitivities that combine
+the ordinary Black-Scholes sensitivity with the *vol smile's own movement*, via the chain
+rule — their eq. 3.9 (the Δ risk) and eq. 3.6 (the vega risk, in `α`):
 
 `Δ_SABR = Δ_BS + Λ_BS · ∂σ_B/∂f`,   `Λ_SABR^α = Λ_BS · ∂σ_B/∂α`
 
 where `Δ_BS`, `Λ_BS` are the ordinary Black-Scholes delta/vega evaluated at `σ = σ_B(K, f)`.
-This is standard practitioner folklore attached to the paper (see e.g. Hagan et al.'s
-later "Managing Vol Surfaces," and West, "The Dynamics of the SABR Smile," *Wilmott*
-2005) rather than a numbered display in the 2002 paper itself.
 
 **What is proved here, and what is not (read this before citing the theorems below).**
-The genuine Hagan chain rule needs `∂σ_B(K, f)/∂f` at a FIXED strike `K` as `f` varies —
-`sabrImpliedVol`'s general formula (`SABRImpliedVol.lean` eq. 2.17a) differentiated in its
-*second* argument. That formula's `z / x(z)` factor is `0/0` exactly at `K = f`, and
-`SABRImpliedVol.lean` resolves only the removable *limit* there
-(`tendsto_sabrImpliedVol_atm`, from `x'(0) = 1`). Whether `z / x(z)` is *differentiable*
-at `z = 0` additionally needs `x''(0)` (the second derivative of `sabrX` there), which is
-not established in this repository — so the fixed-strike Delta at the ATM point `K = f`
-itself is not provable from the existing substrate without new work.
+Eq. 3.9 needs `∂σ_B(K, f)/∂f` at a FIXED strike `K` as `f` varies — `sabrImpliedVol`'s
+general formula (`SABRImpliedVol.lean` eq. 2.17a) differentiated in its *second* argument.
+That is not attempted here. At `K = f` the formula's `z / x(z)` factor is `0/0`, which Lean
+evaluates to `0`, so the literal `f ↦ sabrImpliedVol K f ⋯` is not even continuous at
+`f = K` (`SABRImpliedVol.lean` resolves only the *limit* there, `tendsto_sabrImpliedVol_atm`,
+from `x'(0) = 1`); a fixed-strike Delta at `K = f` would first need the ATM value redefined
+by that limit, and then `x''(0)` (the second derivative of `sabrX` at `0`, not established in
+this repository). Away from `K = f` (where `z ≠ 0`) no singularity arises, but the chain rule
+through eq. 2.17a's `(f·K)^((1-β)/2)`, `log(f/K)` and `z / x(z)` factors is left as future
+work.
 
-What **is** proved here is the chain rule applied to `sabrATMVol` (eq. 2.18, the paper's
-own ATM closed form) *read as a function of the forward alone* — i.e. the sensitivity of
-the ATM-vol curve itself (`f ↦ σ_ATM(f)`, the "backbone" of `SABRImpliedVol.lean`
-§"The backbone law", generalized from its log-log slope to the plain derivative) combined
-with the Black-Scholes Greeks via a genuine total-derivative (`HasFDerivAt`-level) argument,
-not just formula-splicing. This is a well-defined, useful risk quantity (sticky-ATM/backbone
-delta and vega), but it is **not** the same object as Hagan's fixed-strike chain rule
-restricted to `K = f`: that general formula moves the *strike* together with the forward
-as `f` varies, since the closed form `sabrATMVol` has no separate strike argument, whereas
-the genuine Hagan Delta holds the strike `K` of the actual option fixed while only `f`
-moves. The general, fixed-strike case away from `K = f` (where `z ≠ 0`, so the removable
-singularity above does not arise) is not attempted here either; it would need a chain rule
-through `sabrImpliedVol`'s `(f·K)^((1-β)/2)` and `log(f/K)` factors in addition to `z/x(z)`,
-left as future work.
+What **is** proved here is the chain rule for the Black call with its strike held FIXED at
+`K = f` and the spot `s` moving, priced at the *ATM-vol curve evaluated at the spot*,
+`σ_ATM(s) = sabrATMVol s α β ρ ν tex` (eq. 2.18, the paper's own ATM closed form, read as a
+function of the forward alone — the "backbone" of `SABRImpliedVol.lean` §"The backbone law",
+generalized from its log-log slope to the plain derivative), via a genuine total-derivative
+(`HasFDerivAt`-level) argument, not just formula-splicing. This is a well-defined, useful
+risk quantity (the Delta under a "vol re-marks along the backbone" convention: the
+strike-`K` option is re-marked at the ATM vol of the new forward), but it is **not** eq. 3.9
+restricted to `K = f`: eq. 3.9 differentiates the fixed-strike smile `f ↦ σ_B(K, f)`,
+whereas the theorem below differentiates the ATM curve `f ↦ σ_B(f, f)`; the two curves agree
+at `f = K` but their slopes there differ by the smile's ATM strike-slope. Nor is it eq. 3.10
+(the Δ with `σ_ATM` held fixed).
 
 ## Main definitions / results
 
@@ -63,9 +61,9 @@ left as future work.
 * `hasDerivAt_sabrATMVol_F`, `hasDerivAt_sabrATMVol_alpha` — the real derivatives of the
   closed form `sabrATMVol` (eq. 2.18) in `f` and in `α` respectively.
 * `sabrATMVol_bsV_delta_chainRule`, `sabrATMVol_bsV_vega_chainRule` — the two combined:
-  the derivative of `f ↦ bsV f 0 (sabrATMVol f α β ρ ν tex) f tex` (spot *and* strike both
-  at the money, both equal to the moving `f`) and of `a ↦ bsV f 0 (sabrATMVol f a β ρ ν
-  tex) f tex` (spot/strike fixed at `f`, only `α` moving).
+  the derivative at `s = f` of `s ↦ bsV f 0 (sabrATMVol s α β ρ ν tex) s tex` (strike fixed
+  at `f`, spot `s` and the vol curve's argument moving) and of `a ↦ bsV f 0 (sabrATMVol f a
+  β ρ ν tex) f tex` (spot/strike fixed at `f`, only `α` moving).
 -/
 
 @[expose] public section
@@ -238,12 +236,12 @@ theorem hasDerivAt_sabrATMVol_alpha {f β ρ ν tex : ℝ} (α : ℝ) :
 
 /-! ### The combined chain-rule Greeks -/
 
-/-- **The SABR ATM chain-rule Delta**: the derivative, in the forward `f`, of the Black
-call priced at the ATM strike `K = f` with vol `σ_ATM(f) = sabrATMVol f α β ρ ν tex` —
-spot, strike, AND the vol's own forward-dependence all tracking `f` together — equals
-`Δ_BS + Λ_BS · ∂σ_ATM/∂f`. See the file docstring for exactly what this is (and is not)
-relative to Hagan's general fixed-strike chain rule. `hσ` (vol positivity) is a standing
-domain hypothesis, as for `sabrATMVol_bsV_gt_backbone_bsV` above. -/
+/-- **The SABR ATM chain-rule Delta**: the derivative at spot `s = f` of the Black call
+with strike held fixed at `K = f`, priced at spot `s` with the ATM vol curve evaluated at
+that spot, `σ_ATM(s) = sabrATMVol s α β ρ ν tex` — spot and the vol's own forward-dependence
+moving together, strike fixed — equals `Δ_BS + Λ_BS · ∂σ_ATM/∂f`. See the file docstring
+for exactly what this is (and is not) relative to Hagan's eq. 3.9. `hσ` (vol positivity) is
+a standing domain hypothesis, as for `sabrATMVol_bsV_gt_backbone_bsV` above. -/
 theorem sabrATMVol_bsV_delta_chainRule {f α β ρ ν tex : ℝ} (hf : 0 < f)
     (hσ : 0 < sabrATMVol f α β ρ ν tex) (htex : 0 < tex) :
     HasDerivAt (fun s ↦ bsV f 0 (sabrATMVol s α β ρ ν tex) s tex)
