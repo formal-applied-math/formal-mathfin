@@ -15,13 +15,15 @@ Kahalé, "An arbitrage-free interpolation of volatilities" (*Risk*, 17(5), 2004,
 poses and solves: given finitely many market-quoted call prices at increasing strikes that are
 *already* free of static arbitrage, build a continuum of prices between them — an interpolant —
 that is itself free of static arbitrage everywhere, not only at the quoted strikes. His published
-construction uses a `C²` piecewise-polynomial scheme obtained via two nested non-linear
-minimisations; the original is a paywalled *Risk Magazine* article, and the secondary literature
-that discusses it (Fengler, *Arbitrage-Free Smoothing of the Implied Volatility Surface*,
-Quantitative Finance 9(4), 2009; Le Floc'h, arXiv:2004.08650) describes the scheme only
-qualitatively — "piecewise convex polynomials", "two embedded non-linear minimisations", "not
-proven to converge" — without reproducing its equations. None of that is enough to transcribe
-faithfully, so this file does not attempt the `C²` scheme.
+construction interpolates the prices on each strike interval by a convex piece of Black–Scholes
+form plus an affine term, reaching class `C²` through two nested non-linear minimisations; the
+original is a paywalled *Risk Magazine* article, and the secondary literature that discusses it
+(Fengler, *Arbitrage-Free Smoothing of the Implied Volatility Surface*, Quantitative Finance
+9(4), 2009: "piecewise convex polynomials that have the form of the Black Scholes valuation
+formula with an additive linear term"; Le Floc'h, arXiv:2004.08650: "two embedded non-linear
+minimizations", "not proven ... converges") names the shape of the pieces but does not reproduce
+the equations that pin them down. None of that is enough to transcribe faithfully, so this file
+does not attempt the `C²` scheme.
 
 **What is formalised instead.** The static no-arbitrage conditions Kahalé's interpolant must
 preserve — convexity in the strike (no butterfly arbitrage) and monotonicity (no vertical-spread
@@ -41,7 +43,9 @@ quotes) extends to a function that is convex and non-increasing on the whole str
 `piecewiseLinear_eq_segment`). **Not formalised**: Kahalé's `C²` construction itself, any
 smoothness beyond piecewise-linearity, and any extrapolation outside `[K 0, K n]` — the
 asymptotic conditions `IsNormalizedCallPrice` also carries (the limits at strike `0` and at
-infinity) are a separate, unrelated concern this file says nothing about.
+infinity) are a separate, unrelated concern this file says nothing about. Nor are the price
+bounds of `IsNormalizedCallPrice` (`intrinsic_le`, `le_one`) assumed on the quotes or derived
+for the interpolant: `IsArbitrageFreeQuotes` is the convexity-and-monotonicity trace only.
 
 ## Main definitions and results
 
