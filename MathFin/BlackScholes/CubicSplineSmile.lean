@@ -17,12 +17,12 @@ imposing the natural boundary conditions `M 0 = M n = 0`, to a linear system in 
 unknown interior second derivatives (*moments*) `M 1, …, M (n-1)`. The system formalized
 here is the normalized moment form of J. Stoer & R. Bulirsch, *Introduction to Numerical
 Analysis*, 3rd ed. (Springer, 2002), §2.4.2: dividing each row of the standard natural-
-spline system by `h (i-1) + h i` and writing `M = 2c` turns the textbook's diagonal
-`2(h (i-1) + h i)` into a constant diagonal `2` with off-diagonal weights `μ i, λ i ≥ 0`
-summing to `1`. Existence and uniqueness of the natural cubic spline is R. L. Burden &
-J. D. Faires, *Numerical Analysis*, 9th ed. (2011), Theorem 3.11; the strict-diagonal-
-dominance step formalized here is the same nonsingularity argument that theorem's proof
-uses, run on the normalized system.
+spline system (stated on the same unknowns `M i`, with diagonal `2(h (i-1) + h i)`) by
+`h (i-1) + h i` turns that diagonal into a constant `2` with off-diagonal weights
+`μ i, λ i ≥ 0` summing to `1`. Existence and uniqueness of the natural cubic spline is
+R. L. Burden & J. D. Faires, *Numerical Analysis*, 9th ed. (2011), Theorem 3.11; the
+strict-diagonal-dominance step formalized here is the same nonsingularity argument that
+theorem's proof uses, run on the normalized system.
 Distinct from the parametric SVI smile already in the repository
 (`MathFin.BlackScholes.SVI`): this is a pillar-interpolation scheme, not a functional form.
 
