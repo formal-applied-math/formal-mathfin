@@ -14,8 +14,15 @@ public import MathFin.BlackScholes.SVI.Reduction
 A natural cubic spline interpolating values `y 0, …, y n` at strictly increasing pillars
 `x 0 < ⋯ < x n` (e.g. an FX/equity vol smile sampled at pillar deltas) reduces, after
 imposing the natural boundary conditions `M 0 = M n = 0`, to a linear system in the
-unknown interior second derivatives (*moments*) `M 1, …, M (n-1)`: R. L. Burden & J. D.
-Faires, *Numerical Analysis*, 9th ed. (2011), §3.5, the construction behind Theorem 3.11.
+unknown interior second derivatives (*moments*) `M 1, …, M (n-1)`. The system formalized
+here is the normalized moment form of J. Stoer & R. Bulirsch, *Introduction to Numerical
+Analysis*, 3rd ed. (Springer, 2002), §2.4.2: dividing each row of the standard natural-
+spline system by `h (i-1) + h i` and writing `M = 2c` turns the textbook's diagonal
+`2(h (i-1) + h i)` into a constant diagonal `2` with off-diagonal weights `μ i, λ i ≥ 0`
+summing to `1`. Existence and uniqueness of the natural cubic spline is R. L. Burden &
+J. D. Faires, *Numerical Analysis*, 9th ed. (2011), Theorem 3.11; the strict-diagonal-
+dominance step formalized here is the same nonsingularity argument that theorem's proof
+uses, run on the normalized system.
 Distinct from the parametric SVI smile already in the repository
 (`MathFin.BlackScholes.SVI`): this is a pillar-interpolation scheme, not a functional form.
 
@@ -33,10 +40,11 @@ Distinct from the parametric SVI smile already in the repository
   it matches the pillar values `y i`, `y (i+1)` exactly at both ends of each piece
   `[x i, x (i+1)]`, for *any* moment sequence (the interpolation property does not depend
   on which system the moments solve).
-* `svi_pillar_interpSpline_eq` — the pillar-interpolation reading that connects this
-  generic scheme to the parametric SVI smile already in the repository: if the pillar
-  values are samples of an SVI slice's total variance at the pillar log-strikes, the
-  spline reproduces that sampled value exactly at both pillars of each piece.
+* `svi_pillar_interpSpline_eq`, `svi_pillar_moments_unique` — the connection to the
+  parametric SVI smile already in the repository: if the pillar values are samples of an
+  SVI slice's total variance at the pillar log-strikes, the spline reproduces that sampled
+  value exactly at both pillars of each piece, and the natural-spline moment system for
+  those SVI-sampled pillars has exactly one solution.
 
 ## Scope
 
@@ -186,11 +194,12 @@ theorem momentMatrix_dominant {n : ℕ} (x : ℕ → ℝ) (hn : 2 ≤ n)
     _ = 1 := hsum1
     _ < 2 := by norm_num
 
-/-- **Uniqueness of the natural cubic spline's interior moments** (Burden & Faires,
-*Numerical Analysis*, 9th ed., §3.5/Theorem 3.11): the moment system's coefficient matrix
-is a unit. A strictly row diagonally dominant real matrix has nonzero determinant
-(`det_ne_zero_of_sum_row_lt_diag`, Mathlib's `Gershgorin.lean`), hence is a unit
-(`Matrix.isUnit_iff_isUnit_det`). -/
+/-- **Uniqueness of the natural cubic spline's interior moments** (the nonsingularity step
+behind Burden & Faires, *Numerical Analysis*, 9th ed. (2011), Theorem 3.11, run on the
+normalized moment system of Stoer & Bulirsch, *Introduction to Numerical Analysis*, 3rd
+ed. (2002), §2.4.2): the moment system's coefficient matrix is a unit. A strictly row
+diagonally dominant real matrix has nonzero determinant (`det_ne_zero_of_sum_row_lt_diag`,
+Mathlib's `Gershgorin.lean`), hence is a unit (`Matrix.isUnit_iff_isUnit_det`). -/
 theorem momentMatrix_invertible {n : ℕ} (x : ℕ → ℝ) (hn : 2 ≤ n)
     (hgap : ∀ i < n, x i < x (i + 1)) :
     IsUnit (momentMatrix x n) := by
@@ -217,8 +226,9 @@ theorem exists_unique_moments {n : ℕ} (x y : ℕ → ℝ) (hn : 2 ≤ n)
 
 /-- The standard piecewise-cubic formula on the piece `[x i, x (i+1)]`, built from the gap,
 the two pillar values and the two candidate moments `Mi = M i`, `Mi1 = M (i+1)`
-(Burden & Faires, *Numerical Analysis*, 9th ed., §3.5, eq. (3.12)). Defined for any moment
-sequence `M`, independent of which linear system (if any) it solves. -/
+(Stoer & Bulirsch, *Introduction to Numerical Analysis*, 3rd ed. (2002), §2.4.2, the
+moment form of the natural cubic spline piece). Defined for any moment sequence `M`,
+independent of which linear system (if any) it solves. -/
 noncomputable def interpSpline (x y : ℕ → ℝ) (M : ℕ → ℝ) (i : ℕ) (t : ℝ) : ℝ :=
   M i * (x (i + 1) - t) ^ 3 / (6 * gap x i) + M (i + 1) * (t - x i) ^ 3 / (6 * gap x i) +
     (y i / gap x i - M i * gap x i / 6) * (x (i + 1) - t) +
@@ -256,6 +266,18 @@ theorem svi_pillar_interpSpline_eq (p : SVI.Params) (x M : ℕ → ℝ) {i : ℕ
       interpSpline x (fun j => SVI.variance p (x j)) M i (x (i + 1)) =
         SVI.variance p (x (i + 1)) :=
   ⟨interpSpline_left_eq x _ M hgap, interpSpline_right_eq x _ M hgap⟩
+
+/-- **Unique natural-spline moments for an SVI-sampled smile.** Specializing
+`exists_unique_moments` to pillar values `y j = MathFin.SVI.variance p (x j)` sampled from a
+raw-SVI slice: the natural cubic spline interpolating an SVI smile's own pillar samples has
+exactly one moment vector, for any strictly increasing pillars `x` and any SVI parameters
+`p`. -/
+theorem svi_pillar_moments_unique {n : ℕ} (p : SVI.Params) (x : ℕ → ℝ) (hn : 2 ≤ n)
+    (hgap : ∀ i < n, x i < x (i + 1)) :
+    ∃! M : Fin (n - 1) → ℝ,
+      (momentMatrix x n).mulVec M =
+        fun j : Fin (n - 1) => rhs x (fun k => SVI.variance p (x k)) ((j : ℕ) + 1) :=
+  exists_unique_moments x (fun k => SVI.variance p (x k)) hn hgap
 
 end CubicSpline
 end MathFin

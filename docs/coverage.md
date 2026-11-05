@@ -42,11 +42,17 @@ One `full` entry in `benchmarks/black_scholes.json`. Corpus 779 → 780.
   gives nonzero determinant, hence the system has exactly one solution for any data and
   pillars. The same file's `interpSpline_left_eq`/`interpSpline_right_eq` show the
   standard piecewise-cubic formula matches the pillar values exactly at both ends of each
-  piece for *any* candidate moment sequence, and `svi_pillar_interpSpline_eq` connects the
-  scheme to the repository's parametric SVI smile (`MathFin.BlackScholes.SVI`): pillar
-  values sampled from an SVI slice's total variance interpolate exactly at the pillars.
-  Reference: R. L. Burden & J. D. Faires, *Numerical Analysis*, 9th ed. (2011), §3.5 and
-  Theorem 3.11. SCOPE: does not construct a single global function glued across all
+  piece for *any* candidate moment sequence, and `svi_pillar_interpSpline_eq`/
+  `svi_pillar_moments_unique` connect the scheme to the repository's parametric SVI smile
+  (`MathFin.BlackScholes.SVI`): pillar values sampled from an SVI slice's total variance
+  interpolate exactly at the pillars, and the moment system for those SVI-sampled pillars
+  also has exactly one solution.
+  Reference: the nonsingularity step is formalized on the normalized moment system of
+  J. Stoer & R. Bulirsch, *Introduction to Numerical Analysis*, 3rd ed. (2002), §2.4.2;
+  existence and uniqueness of the natural cubic spline itself is R. L. Burden &
+  J. D. Faires, *Numerical Analysis*, 9th ed. (2011), Theorem 3.11 — the same
+  nonsingularity argument, run on that normalized system. SCOPE: does not construct a
+  single global function glued across all
   pieces and does not prove global `C²` matching of one-sided derivatives at interior
   knots (left to future work).
 

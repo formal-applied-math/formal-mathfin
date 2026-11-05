@@ -2266,10 +2266,10 @@
     },
     "mf-cubic-spline-moments-unique": {
       "benchmark_file": "black_scholes.json",
-      "date": "2026-11-05",
-      "elapsed_s": 4.2,
-      "input_hash": "7bb76d82572ed61afbbd72957dc2b7dfecd69705ba4fcbe06f30e69451788d35",
-      "verified_at_commit": "6801b1b9"
+      "date": "2026-11-06",
+      "elapsed_s": 3.6,
+      "input_hash": "0e014e97b080858c6733761063ffc38adcd3c18c2542c1d7a20cce07a071f5dc",
+      "verified_at_commit": "43526406"
     },
     "mf-cva-gaussian-exposure": {
       "benchmark_file": "credit.json",
