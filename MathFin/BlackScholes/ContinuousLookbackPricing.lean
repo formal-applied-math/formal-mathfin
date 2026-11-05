@@ -17,7 +17,7 @@ minimum of the path on `[0, T]`) or `M − S_T` (put, `M` the running maximum). 
 transcribes the continuous-monitoring closed form for its price — Goldman, Sosin & Gatto,
 "Path Dependent Options: 'Buy at the Low, Sell at the High'", *J. Finance* 34(5) (1979),
 1111–1127, in the cost-of-carry form of Haug, *The Complete Guide to Option Pricing Formulas*,
-2nd ed. (2007), pp. 61–62 ("Floating Strike Lookback Options") — and proves a reduction of the
+2nd ed. (2007), ch. 4, "Floating Strike Lookback Options" — and proves a reduction of the
 transcribed closed form to the already-built vanilla Black–Scholes call (`bsV`,
 `BlackScholes/PDE.lean`).
 
@@ -40,8 +40,11 @@ formula transcribed here — and the partial-time variants need the bivariate no
 correlated-window machinery (as in `PartialTimeBarrierOption.lean`). Neither is built in this
 file. **This is also a transcription, not a derivation**: that the formula equals the discounted
 expected lookback payoff needs the joint law of a drifted Brownian motion and its running
-extremum (the reflection principle), which the library does not have; `Lookback.lean` proves only
-the static payoff bound `max(S−K,0) ≤ max(M−K,0)`.
+extremum (the reflection principle) — specifically, a closed form for that law linking it to
+this file's `Φ`/power-function expression. `Lookback.lean` proves the static payoff bound
+`max(S−K,0) ≤ max(M−K,0)` and its discounted-expectation form `bsV_le_lookbackCall` (valid for
+*any* a.s.-dominating `M`, with `M`'s law unused); neither links to a closed form for the running
+extremum's law, which is the piece this file's transcription route sidesteps.
 
 ## Main results
 
@@ -161,10 +164,14 @@ argument (the library has no construction of the running minimum's law to take e
 against); it is a direct algebraic argument from the transcribed closed form. This is **not** a
 counterpart of `lookback_payoff_ge_vanilla` (`Lookback.lean`), which is a different, same-strike
 statement about the running *maximum* (`max(S−K,0) ≤ max(M−K,0)` given `S ≤ M`) — the two share
-only the theme that a lookback value dominates a vanilla one. **At `r = 0`** both sides use the
-same Lean division-by-zero convention for `lookbackFloatingPrice`'s `σ²/(2r)` factor, so the
-inequality degenerates to an equality (`0 ≤ 0`); this says nothing about the true zero-carry
-limit, which `lookbackFloatingPrice` does not compute (see its own docstring). -/
+only the theme that a lookback value dominates a vanilla one. **At `r = 0`** `lookbackFloatingPrice`'s
+`σ²/(2r)` factor takes Lean's division-by-zero value `0`, so the two sides coincide exactly (the
+inequality's gap is `0`, not a genuine strict comparison); this says nothing about the true
+zero-carry limit, which `lookbackFloatingPrice` does not compute (see its own docstring). The
+ordering hypothesis `hS : m ≤ S` is the economically meaningful regime (the running minimum is at
+most the current spot) but is not needed by the algebra below, which only uses `0 < S`
+(`hSpos`, derived from `hm`/`hS`) and would equally go through with `hSpos` as a direct
+hypothesis. -/
 theorem lookbackFloatingCall_ge_bsV {S m r σ T : ℝ} (hm : 0 < m) (hS : m ≤ S) (hσ : 0 < σ)
     (hT : 0 < T) :
     bsV m r σ S T ≤ lookbackFloatingPrice 1 S m r 0 σ T := by
