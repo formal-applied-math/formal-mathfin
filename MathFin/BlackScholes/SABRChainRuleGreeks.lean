@@ -27,10 +27,11 @@ Eq. 3.9 needs `∂σ_B(K, f)/∂f` at a FIXED strike `K` as `f` varies — `sabr
 general formula (`SABRImpliedVol.lean` eq. 2.17a) differentiated in its *second* argument.
 That is not attempted here. At `K = f` the formula's `z / x(z)` factor is `0/0`, which Lean
 evaluates to `0`, so the literal `f ↦ sabrImpliedVol K f ⋯` is not even continuous at
-`f = K` (`SABRImpliedVol.lean` resolves only the *limit* there, `tendsto_sabrImpliedVol_atm`,
-from `x'(0) = 1`); a fixed-strike Delta at `K = f` would first need the ATM value redefined
-by that limit, and then `x''(0)` (the second derivative of `sabrX` at `0`, not established in
-this repository). Away from `K = f` (where `z ≠ 0`) no singularity arises, but the chain rule
+`f = K` (`SABRImpliedVol.lean` resolves only the `K → f` *limit* there,
+`tendsto_sabrImpliedVol_atm`, from `x'(0) = 1`); a fixed-strike Delta at `K = f` would
+first need the ATM value redefined by that limit, and then `x''(0)` (the second
+derivative of `sabrX` at `0`, not established in this repository). Away from `K = f`
+(where `z ≠ 0`) no singularity arises, but the chain rule
 through eq. 2.17a's `(f·K)^((1-β)/2)`, `log(f/K)` and `z / x(z)` factors is left as future
 work.
 
@@ -79,7 +80,7 @@ function `v`, so they are stated here as standalone additions to the Black-Schol
 Greeks toolkit (`PDE.lean`, `HigherGreeks.lean`) and then instantiated at `sabrATMVol`
 below. -/
 
-/-- **The sticky-vol Delta chain rule**: if the implied vol used to price a call is
+/-- **The vol-curve Delta chain rule**: if the implied vol used to price a call is
 itself a differentiable function `v` of the spot/forward — substituted for *both*
 arguments of `bsV` simultaneously, `s ↦ bsV K r (v s) s τ` — the price's derivative at
 `S` is `Δ_BS + Λ_BS · v'`, the ordinary Black-Scholes delta and vega (both evaluated at
@@ -147,7 +148,7 @@ theorem hasDerivAt_bsV_S_chainRule {K r : ℝ} (hK : 0 < K) {S σ τ : ℝ} (hS 
   convert hh using 1
   ring
 
-/-- **The sticky-vol Vega chain rule**: if the spot/forward is held FIXED and the vol
+/-- **The vol-parameter Vega chain rule**: if the spot/forward is held FIXED and the vol
 moves only through some other parameter `a` (e.g. `α`), the price's derivative in `a` is
 just the ordinary Black-Scholes vega times the vol's own sensitivity, `Λ_BS · v'` — the
 plain one-variable chain rule through `hasDerivAt_bsV_sigma` (no bivariate argument
