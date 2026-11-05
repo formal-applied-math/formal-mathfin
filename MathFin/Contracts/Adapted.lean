@@ -33,9 +33,10 @@ reified payoff from integrable pieces (`Integrable.pos_part`, `.sub`,
 `.const_mul`), which carry their own measurability.
 
 `Contract.integrable_pathPV_of_bounded` is the consumer `measurable_eval` was waiting for: in a
-model whose every coordinate is bounded, every contract's discounted payoff is integrable against
-any finite measure. Measurability comes from `measurable_eval`, and the bound from
-`Payoff.exists_bound_eval`, a structural induction like the others. A finite-state model such as
+model whose every coordinate is bounded, the discounted payoff of every contract that pays at fixed
+dates (`Contract.FixedDated`) is integrable against any finite measure. Measurability comes from
+`measurable_eval`, and the bound from `Payoff.exists_bound_eval`, a structural induction like the
+others. A finite-state model such as
 the binomial tree is bounded, so there `Contract.value_both` needs no per-instrument
 integrability lemma (`Contracts/Models/Binomial.lean`).
 
@@ -72,7 +73,7 @@ integrability lemma (`Contracts/Models/Binomial.lean`).
 * `Payoff.exists_bound_eval` — against a model with bounded coordinates, a payoff is bounded
   (a nonnegative power by `Real.abs_rpow_le_abs_rpow`).
 * `Contract.integrable_pathPV_of_bounded` — against a finite measure and a measurable, bounded
-  model, every contract's discounted payoff is integrable.
+  model, the discounted payoff of every fixed-date contract is integrable.
 
 ## Source
 
@@ -228,14 +229,17 @@ theorem Payoff.exists_bound_eval (e : Payoff ι) {X : ι → ℝ≥0 → Ω → 
       exact ⟨C ^ (p : ℝ), fun ω ↦ (Real.abs_rpow_le_abs_rpow _ _).trans
         (Real.rpow_le_rpow (abs_nonneg _) (hC ω) p.2)⟩
 
-/-- **A bounded model prices every contract.** Against a finite measure and a measurable model
-whose every coordinate is bounded, every contract's discounted payoff is integrable, so
-`Contract.value_both` applies to any two contracts with no further hypothesis. A finite-state
-model such as the binomial tree is bounded; a lognormal one is not, and there each instrument's
-integrability is proved on its own (`Contracts/Models/BlackScholes.lean`). -/
+/-- **A bounded model prices every fixed-date contract.** Against a finite measure and a measurable
+model whose every coordinate is bounded, every contract that pays at fixed dates
+(`Contract.FixedDated`) has an integrable discounted payoff, so `Contract.value_both` applies to
+any two of them with no further hypothesis. A finite-state model such as the binomial tree is
+bounded; a lognormal one is not, and there each instrument's integrability is proved on its own
+(`Contracts/Models/BlackScholes.lean`). A `payAtHit` is excluded: the hitting time of a
+measurable process need not be measurable, and an unbounded discount factor evaluated at a random
+date need not be integrable. -/
 theorem Contract.integrable_pathPV_of_bounded {Q : Measure Ω} [IsFiniteMeasure Q]
     (D : ℝ≥0 → ℝ) {X : ι → ℝ≥0 → Ω → ℝ} (hXm : ∀ i t, Measurable (X i t))
-    (hXb : ∀ i t, ∃ C, ∀ ω, |X i t ω| ≤ C) (c : Contract ι) :
+    (hXb : ∀ i t, ∃ C, ∀ ω, |X i t ω| ≤ C) {c : Contract ι} (hc : c.FixedDated) :
     Integrable (fun ω ↦ c.pathPV D (fun i t ↦ X i t ω)) Q := by
   induction c with
   | zero => simp [Contract.pathPV, Contract.cashflows]
@@ -245,9 +249,10 @@ theorem Contract.integrable_pathPV_of_bounded {Q : Measure Ω} [IsFiniteMeasure 
         List.sum_cons, List.sum_nil, add_zero]
       exact (Integrable.of_bound (a.measurable_eval X hXm).aestronglyMeasurable C
         (.of_forall hC)).const_mul _
+  | payAtHit i A a => exact False.elim hc
   | both a b ha hb =>
       simp only [Contract.pathPV_both]
-      exact ha.add hb
-  | scale r a ha => simpa only [Contract.pathPV_scale] using ha.const_mul r
+      exact (ha hc.1).add (hb hc.2)
+  | scale r a ha => simpa only [Contract.pathPV_scale] using (ha hc).const_mul r
 
 end MathFin.Contracts

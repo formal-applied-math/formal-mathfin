@@ -7,8 +7,8 @@ module
 
 public import Mathlib
 public import MathFin.FixedIncome.GSRPiecewiseVol
-public import MathFin.FixedIncome.TimingAdjustment
 public import MathFin.FixedIncome.VasicekBondPriceAt
+public import MathFin.Foundations.WienerIntegralForwardMeasure
 
 /-!
 # The GSR bond price at a time `t > 0`

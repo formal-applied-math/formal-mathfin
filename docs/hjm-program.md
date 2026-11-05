@@ -290,7 +290,7 @@ rule). File splits may consolidate if a node proves small.
 - Björk, *Arbitrage Theory in Continuous Time*, 3rd ed., ch. 23–25 (HJM, short
   rate, Musiela).
 - Filipović, *Term-Structure Models: A Graduate Course*.
-- In-repo: `Foundations/Numeraire`, `FixedIncome/ForwardMeasure`,
+- In-repo: `Foundations/Numeraire`, `Foundations/ForwardMeasure`,
   `FixedIncome/ForwardRate`, `FixedIncome/VasicekBondPrice`,
   `Foundations/ItoFormulaGBM`, `Foundations/ItoIntegralCLM`,
   `Foundations/ExtendOfNormIsometry`, `Foundations/PoissonCompensatedIntegralOperator`.

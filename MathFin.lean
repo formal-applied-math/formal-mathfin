@@ -105,6 +105,8 @@ import MathFin.Foundations.GirsanovConstantTheta
 import MathFin.Foundations.SimpleDoleansExponential
 import MathFin.Foundations.GirsanovSimpleTheta
 import MathFin.Foundations.Numeraire
+-- The T-forward measure: the zero-coupon bond as numéraire (change-of-numéraire instance)
+import MathFin.Foundations.ForwardMeasure
 import MathFin.Foundations.BrownianQuadraticVariation
 -- The uniform partition of [0, T] (and [s, t]): the one equipartition of the Itô stack
 import MathFin.Foundations.UnifPart
@@ -636,7 +638,7 @@ import MathFin.FixedIncome.VasicekMarketPriceOfRisk
 import MathFin.FixedIncome.VasicekZeroMeanReversionLimit
 -- CIR loadings: B solves the Riccati equation, A solves A' = −κθB
 import MathFin.FixedIncome.CIRRiccati
--- The T-forward measure: the zero-coupon bond as numéraire (change-of-numéraire instance)
+-- The Black–Scholes forward price under the T-forward measure
 import MathFin.FixedIncome.ForwardMeasure
 -- Inflation is FX: the zero-coupon inflation swap and the YoY convexity
 import MathFin.FixedIncome.Inflation
@@ -893,6 +895,8 @@ import MathFin.FixedIncome.VasicekYieldNelsonSiegel
 import MathFin.Foundations.GaussianPairLinearLaw
 import MathFin.Foundations.GaussianPartialMoments
 import MathFin.Foundations.WienerIntegralExpMoment
+-- The law of a Wiener-represented rate under the forward measure of a Wiener-represented account
+import MathFin.Foundations.WienerIntegralForwardMeasure
 import MathFin.Foundations.WienerIntegralGirsanov
 import MathFin.RiskMeasures.CreditRiskPlus
 import MathFin.RiskMeasures.OneFactorCopula

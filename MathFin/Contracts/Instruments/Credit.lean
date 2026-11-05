@@ -10,10 +10,16 @@ public import MathFin.Contracts.Instruments.FixedIncome
 /-!
 # A credit default swap, as a contract
 
-A payment at the random default time `τ` is not a `Contract`: `pay` fixes its date. What the
-tower can express is the CDS on a payment grid `t 0 ≤ t 1 ≤ … ≤ t n`, with the credit event
-observed through the default indicator process `N u = 1{τ ≤ u}`, the single underlying `()` of the
-scenario (`Contracts/Models/DefaultTime.lean` supplies it from a default time). Then
+The credit event is observed through the default indicator process `N u = 1{τ ≤ u}`, the single
+underlying `()` of the scenario (`Contracts/Models/DefaultTime.lean` supplies it from a default
+time `τ`). `N` enters `[1, ∞)` exactly at `τ`, and `Contract.payAtHit` pays at the first time an
+observed underlying enters a set, so a payment at the default time is a contract:
+
+* the **protection leg paid at the default time** pays the loss `1 − R` at `τ` if `τ ≤ T`
+  (`cdsProtectionAtDefault`), the contract whose value is `Cox.protectionLeg`.
+
+The tower otherwise pays at fixed dates, so the CDS is also written on a payment grid
+`t 0 ≤ t 1 ≤ … ≤ t n`:
 
 * the **premium leg** pays the spread `s` on each accrual period `[tᵢ, tᵢ₊₁]` if the name has
   survived to the payment date, `s · (tᵢ₊₁ − tᵢ) · (1 − N tᵢ₊₁)` at `tᵢ₊₁` (`cdsPremiumLeg`);
@@ -22,14 +28,15 @@ scenario (`Contracts/Models/DefaultTime.lean` supplies it from a default time). 
   happens, `(1 − R) · (N tᵢ₊₁ − N tᵢ)` at `tᵢ₊₁` (`cdsProtectionLeg`);
 * the **protection buyer** receives the protection leg and pays the premium leg (`cdsBuyer`).
 
-Both are `payFlows`, so their path value is a finite sum (`pathPV_cdsPremiumLeg`,
+The grid legs are `payFlows`, so their path value is a finite sum (`pathPV_cdsPremiumLeg`,
 `pathPV_cdsProtectionLeg`). Default is paid at the end of its period, not at `τ`: the grid
-contract is the discretisation of the continuous legs `Cox.premiumLeg`, `Cox.protectionLeg`, not
-those legs.
+protection leg is the discretisation of `cdsProtectionAtDefault`
+(`Contracts/Models/DefaultTimeMesh.lean` proves the limit). There is no continuous premium
+stream in the tower, so the premium leg exists only on the grid.
 
 ## Main definitions
 
-* `cdsPremiumLeg`, `cdsProtectionLeg`, `cdsBuyer`.
+* `cdsProtectionAtDefault`, `cdsPremiumLeg`, `cdsProtectionLeg`, `cdsBuyer`.
 
 ## Main results
 
@@ -41,6 +48,12 @@ those legs.
 open scoped NNReal
 
 namespace MathFin.Contracts
+
+/-- The **protection leg paid at the default time**: `(1 − R)·N_T` is paid at the first time the
+default indicator `N` reaches `1`, that is at `τ`, and nothing if the name never defaults.
+`N_T = 1{τ ≤ T}`, so the loss `1 − R` is paid at `τ` exactly when default happens by `T`. -/
+noncomputable def cdsProtectionAtDefault (T : ℝ≥0) (R : ℝ) : Contract Unit :=
+  .payAtHit () (Set.Ici 1) (.mul (.const (1 - R)) (.obs () T))
 
 /-- The **premium leg** of a CDS at spread `s` on the grid `t`: at `t (i + 1)`, for `i < n`, pay
 `s · (t (i + 1) − t i)` if no default has happened by then, i.e. times `1 − N (t (i + 1))`

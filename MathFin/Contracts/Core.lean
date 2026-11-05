@@ -22,6 +22,16 @@ separates them, which is what lets `Contracts/Models/BlackScholes.lean` price a 
 call by *composing* two European call values rather than by evaluating a third
 integral.
 
+## Payments at a random date
+
+`Contract.pay` fixes its date. `Contract.payAtHit i A amount` pays at the first time the observed
+underlying `i` enters the set `A` (`Scenario.hitTime`, Mathlib's `hittingAfter` of the observed
+path), which is how a payment at a default time is written: the underlying is the default
+indicator `1{τ ≤ u}` and `A = [1, ∞)`. The model-free results below hold for every contract; the
+integrability theorem of `Contracts/Adapted.lean` is for `Contract.FixedDated` ones, since a
+hitting time of an arbitrary path is not measurable and an unbounded discount factor evaluated at
+it need not be integrable.
+
 ## Deliberately absent
 
 Branching contracts (`ifThen`), currency, and the lifecycle layer (outstanding
@@ -99,10 +109,23 @@ noncomputable def Payoff.eval (s : Scenario ι) : Payoff ι → ℝ
   | .indicatorLt a b => if eval s a < eval s b then 1 else 0
   | .rpow a p => eval s a ^ (p : ℝ)
 
+/-- The first time the observed underlying `i` of a scenario lies in `A`: Mathlib's
+`hittingAfter` of the process `u ↦ s i u` at time `0`, which is `⊤` if it never does. It is the
+infimum of the times at which the observation is in `A`, so it is attained when the path is right
+continuous and `A` closed. -/
+noncomputable def Scenario.hitTime (s : Scenario ι) (i : ι) (A : Set ℝ) : WithTop ℝ≥0 :=
+  MeasureTheory.hittingAfter (fun u (s : Scenario ι) ↦ s i u) A 0 s
+
 /-- A contract: what gets paid, when, built from `Payoff`s by combination. -/
 inductive Contract (ι : Type*) where
   | zero
   | pay (t : ℝ≥0) (amount : Payoff ι)
+  /-- A payment at a random date: `amount` is paid at the first time the observed underlying `i`
+  lies in `A` (`Scenario.hitTime`), and nothing is paid if it never does. After the `when` of
+  Peyton Jones, Eber and Seward (2000), with the event reduced to an observed underlying entering a
+  set. `amount` is observed at its own fixed dates, as in `pay`. That the date is a stopping time
+  of a model's filtration is not asserted here. -/
+  | payAtHit (i : ι) (A : Set ℝ) (amount : Payoff ι)
   | both (a b : Contract ι)
   | scale (c : ℝ) (a : Contract ι)
 
@@ -112,14 +135,42 @@ noncomputable def Contract.cashflows (s : Scenario ι) :
     Contract ι → List (ℝ≥0 × ℝ)
   | .zero => []
   | .pay t a => [(t, a.eval s)]
+  | .payAtHit i A a =>
+      WithTop.recTopCoe (C := fun _ ↦ List (ℝ≥0 × ℝ)) [] (fun τ ↦ [(τ, a.eval s)])
+        (s.hitTime i A)
   | .both a b => cashflows s a ++ cashflows s b
   | .scale c a => (cashflows s a).map fun p ↦ (p.1, c * p.2)
+
+/-- A contract **pays at fixed dates** if it contains no `payAtHit`: the dates of its cashflows
+are then the same in every scenario. -/
+def Contract.FixedDated : Contract ι → Prop
+  | .zero => True
+  | .pay _ _ => True
+  | .payAtHit _ _ _ => False
+  | .both a b => a.FixedDated ∧ b.FixedDated
+  | .scale _ a => a.FixedDated
 
 /-- The present value of a `Contract` along one scenario path, given a
 discount factor `D : ℝ≥0 → ℝ`. -/
 noncomputable def Contract.pathPV (D : ℝ≥0 → ℝ) (s : Scenario ι)
     (c : Contract ι) : ℝ :=
   ((c.cashflows s).map fun p ↦ D p.1 * p.2).sum
+
+/-- **A payment at the hitting time**, when the underlying does hit `A`, at the time `τ`: the
+discounted amount at `τ`. -/
+theorem Contract.pathPV_payAtHit_of_eq (D : ℝ≥0 → ℝ) (s : Scenario ι) {i : ι} {A : Set ℝ}
+    {τ : ℝ≥0} (a : Payoff ι) (h : s.hitTime i A = τ) :
+    (Contract.payAtHit i A a).pathPV D s = D τ * a.eval s := by
+  simp only [pathPV, cashflows, h]
+  change (([(τ, a.eval s)] : List (ℝ≥0 × ℝ)).map fun p ↦ D p.1 * p.2).sum = _
+  simp
+
+/-- **A payment at the hitting time is nothing** if the underlying never hits `A`. -/
+theorem Contract.pathPV_payAtHit_of_eq_top (D : ℝ≥0 → ℝ) (s : Scenario ι) {i : ι} {A : Set ℝ}
+    (a : Payoff ι) (h : s.hitTime i A = ⊤) : (Contract.payAtHit i A a).pathPV D s = 0 := by
+  simp only [pathPV, cashflows, h]
+  change (([] : List (ℝ≥0 × ℝ)).map fun p ↦ D p.1 * p.2).sum = 0
+  simp
 
 theorem Contract.pathPV_both (D : ℝ≥0 → ℝ) (s : Scenario ι)
     (a b : Contract ι) :

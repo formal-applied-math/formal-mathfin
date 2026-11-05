@@ -22,10 +22,11 @@ the continuous legs of `FixedIncome/Cox.lean` as the mesh `max (tᵢ₊₁ − t
 and so the protection buyer's CDS contract converges to `Cox.protectionLeg − Cox.premiumLeg`, and
 the grid par spread to `Cox.cdsFairSpreadTV`.
 
-The statement is about the deterministic values of the legs, so no pay-at-a-stopping-time
-combinator is needed: the contract tower never prices a payment at `τ` itself, and the limit is
-taken in the numbers the grid contract is worth (`value_cdsBuyer_coxDefaultTime`). A `Contract`
-that pays at `τ` is not built here.
+The limit is taken in the numbers the grid contract is worth (`value_cdsBuyer_coxDefaultTime`).
+The grid protection leg also converges to the *contract* that pays at the default time: its values
+tend to the value of `cdsProtectionAtDefault` (`Contract.payAtHit`), which is `Cox.protectionLeg`
+(`tendsto_value_cdsProtectionLeg_coxDefaultTime`). The premium leg has no such contract, since the
+tower has no continuous payment stream.
 
 The core is deterministic: a right-endpoint Riemann–Stieltjes sum of a continuous `g` against a
 continuous density `f` differs from `∫ g f` by at most `ε ∫ |f|` once `g` oscillates by at most
@@ -41,7 +42,8 @@ continuous density `f` differs from `∫ g f` by at most `ε ∫ |f|` once `g` o
 * `exists_cdsLossesGrid_close`, `exists_cdsAnnuityGrid_close` — the ε–δ form: for every `ε` there is
   a mesh bound `δ` under which every grid is within `ε` of the continuous leg.
 * `tendsto_cdsLossesGrid`, `tendsto_cdsAnnuityGrid`, `tendsto_cdsParSpreadGrid`,
-  `tendsto_value_cdsBuyer_coxDefaultTime` — the limits along grids whose mesh tends to zero.
+  `tendsto_value_cdsBuyer_coxDefaultTime`, `tendsto_value_cdsProtectionLeg_coxDefaultTime` — the
+  limits along grids whose mesh tends to zero.
 -/
 
 @[expose] public section
@@ -254,7 +256,8 @@ continuous positive intensity `h` (`hdiv`: the cumulative hazard diverges), the 
 CDS on the grids `t k` of `[0, T]`, discounted at the flat rate `r` (`D u = e^{−ru}`), is worth
 `(1 − R)·cdsLossesGrid − s·cdsAnnuityGrid` (`value_cdsBuyer_coxDefaultTime`), which tends to
 `Cox.protectionLeg R r h T − Cox.premiumLeg s r h T` as the mesh tends to zero. The limit is a
-statement about the values: no contract pays at the default time `τ` itself. -/
+statement about the values, `Cox.protectionLeg` and `Cox.premiumLeg`: the first is the value of
+`cdsProtectionAtDefault` (`tendsto_value_cdsProtectionLeg_coxDefaultTime`). -/
 theorem tendsto_value_cdsBuyer_coxDefaultTime (hh : Continuous h) (hpos : ∀ s, 0 < h s)
     (hdiv : Filter.Tendsto (cumHazard h) Filter.atTop Filter.atTop) {ξ : Ω → ℝ}
     (hξmeas : Measurable ξ) (hξlaw : Measure.map ξ μ = expMeasure 1) (r s R : ℝ) {T : ℝ}
@@ -266,6 +269,25 @@ theorem tendsto_value_cdsBuyer_coxDefaultTime (hh : Continuous h) (hpos : ∀ s,
   simp only [value_cdsBuyer_coxDefaultTime hh hpos hdiv hξmeas hξlaw, protectionLeg, premiumLeg]
   exact ((tendsto_cdsLossesGrid hh hpos r T hgrid hδ).const_mul (1 - R)).sub
     ((tendsto_cdsAnnuityGrid hh r hT hgrid hδ).const_mul s)
+
+/-- **The grid protection leg converges to the protection leg paid at the default time.** Under the
+Cox default time, the values of the grid contracts `cdsProtectionLeg (t k) R (n k)`, each paying
+`(1 − R)` at the end of the period in which default happens, tend to the value of the contract
+`cdsProtectionAtDefault T R`, which pays `(1 − R)` at the default time itself, as the mesh of the
+grids of `[0, T]` goes to zero. -/
+theorem tendsto_value_cdsProtectionLeg_coxDefaultTime (hh : Continuous h) (hpos : ∀ s, 0 < h s)
+    (hdiv : Filter.Tendsto (cumHazard h) Filter.atTop Filter.atTop) {ξ : Ω → ℝ}
+    (hξmeas : Measurable ξ) (hξlaw : Measure.map ξ μ = expMeasure 1) (r R : ℝ) {T : ℝ≥0}
+    {t : ℕ → ℕ → ℝ≥0} {n : ℕ → ℕ} {δ : ℕ → ℝ}
+    (hgrid : ∀ k, IsGridOfMesh (t k) (n k) T (δ k)) (hδ : Tendsto δ atTop (𝓝 0)) :
+    Tendsto (fun k ↦ (cdsProtectionLeg (t k) R (n k)).value μ (fun u : ℝ≥0 ↦ Real.exp (-(r * u)))
+      (defaultIndicator (coxDefaultTime h ξ))) atTop
+      (𝓝 ((cdsProtectionAtDefault T R).value μ (fun u : ℝ≥0 ↦ Real.exp (-(r * u)))
+        (defaultIndicator (coxDefaultTime h ξ)))) := by
+  rw [value_cdsProtectionAtDefault_coxDefaultTime hh hpos hdiv hξmeas hξlaw, protectionLeg]
+  simp only [value_cdsProtectionLeg (measurable_coxDefaultTime hh hpos hξmeas)
+    (measureReal_coxDefaultTime_le hh hpos hdiv hξmeas hξlaw)]
+  exact (tendsto_cdsLossesGrid hh hpos r T hgrid hδ).const_mul (1 - R)
 
 end Contract
 
