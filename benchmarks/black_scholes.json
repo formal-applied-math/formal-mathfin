@@ -1665,6 +1665,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, MathFin/BlackScholes/HestonSmallVolOfVol.lean. Builds on the pre-existing Heston.lean Riccati closed forms (hestonA, hestonBv) and FixedIncome/VasicekBondPrice.lean (vasicekIntegratedMean, vasicekBondB, and the nonnegativity lemma vasicekIntegratedMean_nonneg) for the xi=0 total variance; the A-flow limit is proved via its FTC-integral form, avoiding the closed form's own 2*kappa*theta/xi^2 cancellation. Scope inherited from Heston.lean: the real moment transform 0 < u < 1 at the Riccati level, not the complex characteristic function or the identification of the profile with E[e^{u log S_T}] for an actual Heston process. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-shout-floor-g-strict-mono",
+      "name": "Shout-Floor Scaled ATM Put e^{q tau} P(tau) Is Strictly Increasing (Dai-Kwok-Wu Lemma 2.1(i))",
+      "description": "For r <= q and sigma > 0, the ATM Black-Scholes put with continuous dividend yield q, P(tau) = shoutFloorAtmPut r q sigma tau, scaled by e^{q*tau}, is strictly increasing in tau on (0, infinity). This is a *supporting* calculus lemma (Dai-Kwok-Wu's Lemma 2.1, case (i)) behind their Theorem 3.1(i), the shout-floor option's pricing identity R(S, tau) = S * P(tau) for r <= q; the pricing identity itself, which needs the library's optimal-stopping substrate applied to the unbounded discounted-stock martingale, is not proved by this entry.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.ShoutFloorMonotonicity\n\nopen MathFin\n\n/-- Dai-Kwok-Wu (2004) Lemma 2.1(i): for `r <= q` and `sigma > 0`, the ATM Black-Scholes put\nwith dividend yield `q`, `P(tau) = shoutFloorAtmPut r q sigma tau`, scaled by `e^{q*tau}`, is\nstrictly increasing in `tau` on `(0, infinity)`. -/\ntheorem shout_floor_g_strict_mono_thm {r q σ : ℝ} (hrq : r ≤ q) (hσ : 0 < σ) :\n    StrictMonoOn (fun t ↦ Real.exp (q * t) * MathFin.shoutFloorAtmPut r q σ t) (Set.Ioi 0) :=\n  MathFin.shoutFloor_g_strictMonoOn hrq hσ\n"
+      },
+      "metadata": {
+        "chapter": null,
+        "reference": "Dai, Kwok & Wu (2004), \"Optimal Shouting Policies of Options with Strike Reset Right,\" Mathematical Finance 14(3), 383-401, Lemma 2.1(i), p. 386",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, MathFin/BlackScholes/ShoutFloorMonotonicity.lean. Proves exactly Lemma 2.1(i): via the paper's own Appendix A reduction (g(tau) = e^{q*tau}*P(tau) equals the ordinary no-dividend ATM put at the shifted rate r-q, shoutFloor_g_eq_bsP), g's derivative is a direct instance of the library's existing hasDerivAt_bsP_tau -- a strictly positive first term plus a nonnegative second term when r <= q. Does NOT prove Theorem 3.1(i) (the shout-floor value R(S, tau) = S * P(tau)): that needs (a) the shout-floor value as the stoppingValue of the discounted reward on the library's Brownian model, and (b) optional stopping for the unbounded nonnegative discounted-stock martingale e^{-(r-q)t} S_t, which the library's bounded-supermartingale verification (expected_stoppedValue_le_initial, MathFin/BlackScholes/AmericanPut/Stopping/GridSampling.lean) does not cover as stated. Axioms-clean."
+      }
     }
   ]
 }

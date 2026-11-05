@@ -918,3 +918,7 @@ import MathFin.FixedIncome.KeyRateDuration
 -- Weak uniqueness for the constant-coefficient integrated weak forward equation, via
 -- the characteristic-function/Groenwall method
 import MathFin.Foundations.WeakForwardUniqueness
+-- Dai-Kwok-Wu (2004) Lemma 2.1(i): the shout-floor's scaled ATM put e^{qτ}P(τ) is
+-- strictly increasing in τ when r ≤ q (NOT their Theorem 3.1 pricing identity — see the
+-- module docstring for what is still missing for that)
+import MathFin.BlackScholes.ShoutFloorMonotonicity
