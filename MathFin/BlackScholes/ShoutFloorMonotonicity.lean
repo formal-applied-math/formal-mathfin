@@ -13,7 +13,7 @@ public import MathFin.BlackScholes.DividendsGreeks
 
 **Scope disclaimer**: this file proves one *supporting* calculus lemma from
 Dai, Kwok & Wu (2004), "Optimal Shouting Policies of Options with Strike Reset
-Right," *Mathematical Finance* 14(3), 383-401 — **Lemma 2.1, case (i)** (p. 387).
+Right," *Mathematical Finance* 14(3), 383-401 — **Lemma 2.1, case (i)** (p. 386).
 It is **not** their Theorem 3.1 (the shout-floor pricing formula itself).
 Theorem 3.1 identifies the shout-floor value `R(S, τ)` with the ATM-put value
 `S · P(τ)` via a free-boundary / optimal-stopping argument (shout as soon as
