@@ -49,15 +49,17 @@ the static payoff bound `max(S−K,0) ≤ max(M−K,0)`.
 * `lookbackFloatingCall_ge_bsV`: **the reduction**. With no dividend (`q = 0`, so `b = r`) and the
   running minimum already at or below the spot (`0 < m ≤ S`), the transcribed floating-strike
   call closed form is at least the vanilla Black–Scholes call struck at the running minimum:
-  `bsV m r σ S T ≤ lookbackFloatingPrice 1 S m r 0 σ T`. This is the closed-form counterpart of
-  `Lookback.lean`'s payoff bound (the floating lookback call's payoff `S_T − min` dominates the
-  vanilla call payoff `max(S_T − m, 0)`, since the running minimum over `[0,T]` is at most `m`):
-  here the *closed-form price itself* is shown to dominate, directly from the transcribed
-  formula, not from the payoff inequality. The proof isolates the one term that could break the
-  bound — `(S/m)^{−2r/σ²}·Φ(−a₁ + 2r√T/σ) − e^{rT}·Φ(−a₁)`, the term with a removable singularity
-  at `r = 0` — and shows it always has the same sign as `r`, via a Mills-ratio monotonicity
-  argument reusing `neg_mul_Phi_le_gaussianPDFReal` (`Foundations/NormalTail.lean`) in a new role:
-  there it bounds a normal tail, here it supplies a derivative sign.
+  `bsV m r σ S T ≤ lookbackFloatingPrice 1 S m r 0 σ T`. This is proved directly from the
+  transcribed closed form (not via any payoff-dominance argument), by isolating the one term that
+  could break the bound — `(S/m)^{−2r/σ²}·Φ(−a₁ + 2r√T/σ) − e^{rT}·Φ(−a₁)`, the term with a
+  removable singularity at `r = 0` — and showing it always has the same sign as `r`, via a
+  Mills-ratio monotonicity argument reusing `neg_mul_Phi_le_gaussianPDFReal`
+  (`Foundations/NormalTail.lean`) in a new role: there it bounds a normal tail, here it supplies a
+  derivative sign. **Not a counterpart of `Lookback.lean`'s `lookback_payoff_ge_vanilla`**: that
+  lemma is a same-strike fixed-strike statement (`max(S−K,0) ≤ max(M−K,0)` given `S ≤ M`, the
+  running *maximum*); this theorem is a floating-strike statement about the running *minimum*,
+  with no `max(·,0)` on either side, proved independently. The two share only the theme that a
+  lookback value dominates a vanilla one, not a derivation route or a payoff identity.
 -/
 
 @[expose] public section
@@ -151,11 +153,15 @@ theorem lookbackTiltGap_mul_self_sign {x r k d : ℝ} (hx : 0 < x) (hk : k = x *
 /-! ### The headline reduction -/
 
 /-- **The floating-strike lookback call closed form dominates the vanilla call struck at the
-running minimum**, with no dividend (`q = 0`, so `b = r`). This is the closed-form counterpart of
-`lookback_payoff_ge_vanilla` (`Lookback.lean`): the floating lookback call's payoff `S_T − min`
-dominates the vanilla call payoff `max(S_T − m, 0)` once the running minimum so far is `m`
-(future lows can only lower `min` further, never raise it above `m`), and here the transcribed
-*price* is shown to inherit that dominance, directly from the closed form. -/
+running minimum**, with no dividend (`q = 0`, so `b = r`). Informally: the floating lookback
+call's payoff `S_T − min` dominates the vanilla call payoff `max(S_T − m, 0)` once the running
+minimum so far is `m` (future lows can only lower `min` further, never raise it above `m`), so the
+price inequality is the expected direction — but the proof below does not go through that payoff
+argument (the library has no construction of the running minimum's law to take expectations
+against); it is a direct algebraic argument from the transcribed closed form. This is **not** a
+counterpart of `lookback_payoff_ge_vanilla` (`Lookback.lean`), which is a different, same-strike
+statement about the running *maximum* (`max(S−K,0) ≤ max(M−K,0)` given `S ≤ M`) — the two share
+only the theme that a lookback value dominates a vanilla one. -/
 theorem lookbackFloatingCall_ge_bsV {S m r σ T : ℝ} (hm : 0 < m) (hS : m ≤ S) (hσ : 0 < σ)
     (hT : 0 < T) :
     bsV m r σ S T ≤ lookbackFloatingPrice 1 S m r 0 σ T := by
