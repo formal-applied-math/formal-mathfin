@@ -359,6 +359,8 @@ import MathFin.Foundations.FTAPTwoState
 import MathFin.DeFi.ConstantProductAMM
 -- DeFi/AMM group: Uniswap v2/v3 mechanics (impermanent loss, TWAP, fee invariant, v3 real reserves)
 import MathFin.DeFi.UniswapMechanics
+-- Historical-simulation VaR for a Uniswap v3 concentrated-liquidity position
+import MathFin.DeFi.ConcentratedLiquidityVaR
 -- DeFi/lending group: Aave kinked-rate + health factor, Compound cToken exchange rate
 import MathFin.DeFi.Aave
 import MathFin.DeFi.Compound
