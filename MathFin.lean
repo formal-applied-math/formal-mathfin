@@ -918,3 +918,7 @@ import MathFin.FixedIncome.KeyRateDuration
 -- Weak uniqueness for the constant-coefficient integrated weak forward equation, via
 -- the characteristic-function/Groenwall method
 import MathFin.Foundations.WeakForwardUniqueness
+-- SABR ATM chain-rule Delta/Vega (Hagan et al. 2002, eqs. 3.6/3.9): a genuine bivariate
+-- Frechet-derivative chain rule through the Black-Scholes price, instantiated at the
+-- ATM closed-form vol curve (not the general fixed-strike formula -- see file docstring)
+import MathFin.BlackScholes.SABRChainRuleGreeks
