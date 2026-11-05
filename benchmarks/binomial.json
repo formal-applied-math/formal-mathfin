@@ -465,6 +465,38 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. snell_ae_eq_snellEnvelope and snellEnvelope_discounted_bermudanPrice (MathFin/Binomial/PathMeasure.lean): the first by induction on the steps left, the conditional expectation of the recursion being the node average (condExp_flipFiltration_succ), which turns the tree's pathwise recursion snell into the general one (Foundations/SnellEnvelope.lean) almost surely; the second composes it with snellAux_eq_discounted_bermudanPrice (Binomial/SnellEnvelope.lean). The agreement is almost sure under coinFlipMeasure q, at times k ≤ N, with exercise times {i | N − i ∈ E} (E counts the steps still to go); the payoff must be adapted to the flips (PathAdaptedAt). Axioms-clean."
       }
+    },
+    {
+      "id": "mf-binomial-complete-hedge-capital-is-value",
+      "name": "In the Complete Binomial Tree the Hedge's Capital Is the Contract's Value",
+      "domain": "mathematical_finance",
+      "description": "For the N-period CRR market on the first N coin flips under no arbitrage (BinomialNoArb u d rho, S_0 > 0) and any real-world law of i.i.d. Bernoulli(p) flips with 0 < p < 1, take a European contract that pays g of the underlying at a time T falling on step N (T / h = N). Its discounted payoff, read as a claim on the first N flips (the path padded by false), equals P-a.s. the contract's value, Contract.value under the risk-neutral coin flips coinFlipMeasure q with q = crrUpProb u d rho, plus the discounted gains of a bounded predictable strategy in the discounted spot. The strategy is not given in closed form: it is the one the completeness of the market (mf-binomial-multi-period-complete) produces, and only its initial capital is identified, as the value.",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.BinomialCompleteMarket\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.Contracts.Binomial\n\n/-- In the complete `N`-period tree the capital of the replicating strategy of a European\ncontract's discounted payoff is the contract's value under the risk-neutral coin flips. -/\ntheorem binomial_complete_hedge_capital_is_value {S₀ u d ρ h : ℝ} {q : ℝ≥0} (hS₀ : 0 < S₀)\n    (hna : BinomialNoArb u d ρ) {p : ℝ≥0} (hp0 : 0 < p) (hp1 : p < 1) (hq : q ≤ 1)\n    (hqcrr : crrUpProb u d ρ = q) {T : ℝ≥0} {N : ℕ} (hTN : (T : ℝ) / h = N) {a : Payoff Unit}\n    {g : ℝ → ℝ} (hg : ∀ s : Scenario Unit, a.eval s = g (s () T)) :\n    ∃ φ : ℕ → (Fin N → Bool) → ℝ,\n      (∀ t < N, StronglyMeasurable[horizonFiltration N t] (φ (t + 1))) ∧\n      (∃ K : ℝ, ∀ n ≤ N, ∀ x, ‖φ n x‖ ≤ K) ∧\n      (fun x ↦ (Contract.pay T a).pathPV (discount ρ h)\n          (scenarioAt (assets S₀ u d h) (padFlips N x)))\n        =ᵐ[horizonMeasure N p hp1.le] fun x ↦\n          (Contract.pay T a).value (coinFlipMeasure q hq) (discount ρ h) (assets S₀ u d h)\n            + martingaleTransform φ (horizonSpot N S₀ u d ρ) N x :=\n  exists_hedge_eq_value hS₀ hna hp0 hp1 hq hqcrr hTN hg\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Harrison and Pliska, Martingales and stochastic integrals in the theory of continuous trading, Stoch. Proc. Appl. 11 (1981); Shreve, Stochastic Calculus for Finance I, Section 5.4 (second fundamental theorem of asset pricing)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. exists_hedge_eq_value in MathFin/Contracts/Models/BinomialCompleteMarket.lean: the completeness of the tree (isCompleteMarket_horizonSpot) supplies a capital x and a strategy for the claim; the risk-neutral law horizonMeasure N (crrUpProb u d rho) is an equivalent martingale measure (isEMM_horizonSpot) under which the gains are a fair game (IsEMM.integrable_and_integral_gains), so replication prices the claim at x (integral_eq_of_replicates), and that price is the contract's value because the law of the first N flips under coinFlipMeasure q is horizonMeasure N q and the claim is a function of them. Scope: a single cash flow (Contract.pay) maturing exactly on the horizon step N, paying a function of the spot; the strategy is existential (the explicit delta hedge on the infinite path space is pathPV_eq_value_add_gains, Contracts/Models/Binomial.lean). Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-binomial-snell-supermartingale",
+      "name": "The Binomial Tree's Snell Envelope Is a Supermartingale",
+      "domain": "mathematical_finance",
+      "description": "On the coin-flip path space with the law of i.i.d. Bernoulli(q) flips and the natural flip filtration, for a payoff process Z adapted to the flips, the tree's explicit pathwise Snell envelope snell E q Z N, frozen at the horizon N (k maps to snell E q Z N (min k N)), is a Mathlib Supermartingale for the flip filtration under coinFlipMeasure q. No optimal stopping time is exhibited, and the minimality of the envelope is not part of this entry (mf-binomial-snell-is-snell-envelope identifies it with the library's general envelope, which is the smallest supermartingale above the payoff).",
+      "code": {
+        "lean": "import MathFin.Binomial.PathMeasure\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- The tree's pathwise Snell envelope, frozen at the horizon `N`, is a Mathlib supermartingale\nfor the flip filtration under `coinFlipMeasure q`. -/\ntheorem binomial_snell_supermartingale {q : ℝ≥0} (hq : q ≤ 1) {E : Set ℕ}\n    {Z : ℕ → (ℕ → Bool) → ℝ} (hZ : ∀ n, PathAdaptedAt n (Z n)) (N : ℕ) :\n    Supermartingale (fun k ↦ snell E (q : ℝ) Z N (min k N)) flipFiltration\n      (coinFlipMeasure q hq) :=\n  supermartingale_snell hq hZ N\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "D. Lamberton and B. Lapeyre, Introduction to Stochastic Calculus Applied to Finance, 2nd ed., Chapman & Hall/CRC (2008), §2.2 (the Snell envelope); S. E. Shreve, Stochastic Calculus for Finance I, Springer (2004), Ch. 4 (American derivative securities on the binomial tree)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. supermartingale_snell (MathFin/Binomial/PathMeasure.lean): at every time the frozen pathwise envelope agrees almost surely with the library's snellEnvelope (snell_ae_eq_snellEnvelope, and past the horizon snellEnvelope_after_horizon), which is a supermartingale (snellEnvelope_supermartingale, Foundations/SnellEnvelope.lean); adaptedness and integrability come from the envelope depending only on the first k flips. The freezing at the horizon is needed because past it the pathwise snell is the payoff again. The payoff must be adapted to the flips (PathAdaptedAt); no-arbitrage is not assumed. Axioms-clean."
+      }
     }
   ]
 }

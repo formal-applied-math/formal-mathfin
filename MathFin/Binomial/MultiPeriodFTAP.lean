@@ -33,7 +33,8 @@ arbitrage (`binomialNoArb_of_noArbitrage`). Together:
 The martingale measure is unique (`IsEMM.eq_horizonMeasure`, `existsUnique_isEMM_horizonSpot`),
 and so, by the Second FTAP (`ftap_two`, `Foundations/FTAPComplete.lean`), the market is complete
 (`isCompleteMarket_horizonSpot`): every claim on the paths is replicated by a predictable strategy
-in the discounted spot.
+in the discounted spot. That strategy's capital is the contract's value when the claim is a European
+contract's (`Contracts/Models/BinomialCompleteMarket.lean`).
 Node by node, on the atom `{y | y agrees with x on the first t flips}` of `ℱₜ`
 (`horizonAtom`), the martingale property in set-integral form gives
 `∫_A (S_{t+1} − S_t) dQ = 0`; on `A` the increment is `S_t(x) (e^{-r} u − 1)` or

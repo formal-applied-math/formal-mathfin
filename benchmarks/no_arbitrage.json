@@ -383,6 +383,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.covered_eq_uncovered_interest_parity (MathFin/FixedIncome/FxForwardParity.lean), composing covered_interest_parity (from forward_price_from_no_arbitrage) with uncovered_interest_parity (from expected_terminal_eq_forward, MathFin/BlackScholes/Forward.lean, the Gaussian MGF, at drift r_d − r_f, the hypothesis of garman_kohlhagen_call_formula). SCOPE: the finite-state market and the lognormal model are separate hypotheses sharing spot and rates; that one model realizes both is not constructed. The uncovered-parity half is risk-neutral (pricing-measure) only: uncovered parity under the physical measure is an economic hypothesis and is not formalized. K plays no part in the conclusion; it is carried because BSCallHyp requires K > 0. The uncovered-parity half is the same expected_terminal_eq_forward as mf-forward-price (benchmarks/black_scholes.json), at drift r_d − r_f instead of a generic r."
       }
+    },
+    {
+      "id": "mf-replication-determines-pricing-measure",
+      "name": "Replication Determines the Pricing Measure (Abstract Second FTAP, Easy Direction)",
+      "domain": "mathematical_finance",
+      "description": "Let Gains be a class of terminal gains and Q1, Q2 probability measures dominated by P under which every gain is integrable with mean zero (gains-neutral). If the indicator of every event of a sigma-algebra G is P-a.s. equal to an initial wealth x plus a gain from Gains (the market is complete for G), then Q1 and Q2 agree on G. The abstract argument behind 'complete implies the pricing measure is unique': replicate the indicator, and every gains-neutral measure gives the event the initial wealth. It is the one argument of both the discrete market (mf-ftap-discrete-complete, whose gains are martingale transforms, neutral under any equivalent martingale measure) and the Brownian market (whose gains are terminal Ito integrals, neutral by hypothesis); it asserts no existence of a hedge or of a measure.",
+      "code": {
+        "lean": "import MathFin.Foundations.ReplicationPricing\n\nopen MeasureTheory\nopen MathFin\n\n/-- Two gains-neutral probability measures dominated by `P` agree on every event of `𝓖` whose\nindicator is replicated, `P`-a.s., by an initial wealth plus a gain. -/\ntheorem replication_determines_pricing_measure {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} {Q₁ Q₂ : Measure Ω} [IsProbabilityMeasure Q₁] [IsProbabilityMeasure Q₂]\n    (h₁ : Q₁ ≪ P) (h₂ : Q₂ ≪ P) {Gains : Set (Ω → ℝ)}\n    (hg₁ : ∀ G ∈ Gains, Integrable G Q₁ ∧ ∫ ω, G ω ∂Q₁ = 0)\n    (hg₂ : ∀ G ∈ Gains, Integrable G Q₂ ∧ ∫ ω, G ω ∂Q₂ = 0) {𝓖 : MeasurableSpace Ω}\n    (h𝓖 : 𝓖 ≤ mΩ) (hcomplete : ∀ A, MeasurableSet[𝓖] A →\n      ∃ x, ∃ G ∈ Gains, A.indicator (1 : Ω → ℝ) =ᵐ[P] fun ω ↦ x + G ω)\n    {A : Set Ω} (hA : MeasurableSet[𝓖] A) : Q₁ A = Q₂ A :=\n  measure_eq_of_replicates h₁ h₂ hg₁ hg₂ h𝓖 hcomplete hA\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Harrison and Pliska, Martingales and stochastic integrals in the theory of continuous trading, Stoch. Proc. Appl. 11 (1981); Shreve, Stochastic Calculus for Finance II, Section 5.4 (market completeness and uniqueness of the risk-neutral measure)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. measure_eq_of_replicates in MathFin/Foundations/ReplicationPricing.lean, from integral_eq_of_replicates: transport the almost-sure replication along Q << P, integrate, and read the measure of the event off the indicator. Abstract: the class Gains and the neutrality of the two measures are hypotheses, discharged in the discrete market by IsEMM.integrable_and_integral_gains (Foundations/FTAP.lean) and in the Brownian market by pricesGainsAtZero_self and the hypothesis PricesGainsAtZero (Foundations/MarketCompleteness.lean). Axioms-clean."
+      }
     }
   ]
 }

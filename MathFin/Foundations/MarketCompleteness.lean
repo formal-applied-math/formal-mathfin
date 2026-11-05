@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.MartingaleRepresentation
 public import MathFin.Foundations.ContinuousMarket
+public import MathFin.Foundations.ReplicationPricing
 
 /-!
 # Market completeness: replication, superreplication, and the pricing measure
@@ -53,6 +54,9 @@ condition*: `pricesGainsAtZero_of_gains_martingale` derives it from a gains proc
 With it the conclusion is sharper than uniqueness. `measure_eq_of_pricesGainsAtZero` shows every
 gains-neutral measure dominated by `μ` agrees with `μ` on `𝓕ᴮ_T` — `μ` *is* the pricing measure
 — and `emm_unique_of_complete` is the two-measure corollary landed on `ContinuousMarket.IsEMM`.
+Both are the argument of `ReplicationPricing.lean`, the one the discrete market's
+`IsEMM.measure_eq_of_isCompleteMarket` is also an instance of: replicate the indicator, and every
+gains-neutral measure gives the event the initial wealth.
 Of the four fields of `IsEMM` that corollary consumes `isProb` and `ac`; `martingale` is what
 would supply `PricesGainsAtZero` in a theory with `∫ φ dS`, and rides along unused so the
 statement stays in the vocabulary a reader looks it up under.
@@ -206,18 +210,6 @@ theorem pricesGainsAtZero_of_gains_martingale (T : ℝ≥0) (hBmeas : ∀ t, Mea
     (integral_congr_ae (hterm φ)).symm.trans
       (integral_eq_zero_of_martingale_zero_start (hmart φ) (hzero φ) T)⟩
 
-/-- **A replicated claim is worth its initial wealth** under any measure that prices the traded
-gains at zero: transport the replication a.e. equality along `Q ≪ μ`, then integrate. -/
-private theorem integral_eq_of_replicates (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    {Q : Measure Ω} [IsProbabilityMeasure Q] (hQ : Q ≪ μ)
-    (hg : PricesGainsAtZero hB T hBmeas Q) {x : ℝ}
-    {φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)} {H : Ω → ℝ}
-    (hrep : Replicates hB T hBmeas x φ H) :
-    ∫ ω, H ω ∂Q = x := by
-  obtain ⟨hint, h0⟩ := hg φ
-  rw [integral_congr_ae (Filter.Eventually.filter_mono hQ.ae_le hrep),
-    integral_add (integrable_const x) hint, h0, integral_const, probReal_univ, one_smul, add_zero]
-
 /-- **Every gains-neutral measure prices every claim at the reference expectation.** Completeness
 supplies a replicating strategy; the strategy's gains are worth zero under `Q`, so only the
 initial wealth `𝔼_μ[H]` survives. -/
@@ -227,35 +219,33 @@ theorem integral_eq_of_pricesGainsAtZero (hBmeas : ∀ t, Measurable (B t))
     (hHmeas : AEStronglyMeasurable[ItoIntegralL2.natFiltration hBmeas T] (⇑H) μ) :
     ∫ ω, H ω ∂Q = ∫ ω, H ω ∂μ := by
   obtain ⟨φ, hφ, -⟩ := exists_replicating_strategy hB hBmeas hBcont T H hHmeas
-  exact integral_eq_of_replicates hB T hBmeas hQ hg hφ
-
-/-- Anything a.e. equal to the indicator of `A` integrates to `ν A`. -/
-private theorem integral_eq_measure_toReal {ν : Measure Ω} {A : Set Ω}
-    (hA : MeasurableSet A) {f : Ω → ℝ} (hf : f =ᵐ[ν] A.indicator fun _ ↦ (1 : ℝ)) :
-    ∫ ω, f ω ∂ν = (ν A).toReal := by
-  rw [integral_congr_ae hf, integral_indicator hA]
-  simp [Measure.real]
+  exact integral_eq_of_replicates hQ (hg φ).1 (hg φ).2 hφ
 
 /-- **`μ` is the pricing measure.** A probability measure dominated by `μ` that prices the traded
-gains at zero agrees with `μ` on the whole of `𝓕ᴮ_T`: apply the claim-level statement to the
-indicator of the event, which is a bounded `𝓕ᴮ_T`-measurable claim. -/
+gains at zero agrees with `μ` on the whole of `𝓕ᴮ_T`. This is `measure_eq_of_replicates`
+(`ReplicationPricing.lean`, shared with the discrete market) for the class of terminal Itô
+integrals, applied to `Q` and to `μ` itself, which prices them at zero (`pricesGainsAtZero_self`);
+completeness is the replication of the indicator of every `𝓕ᴮ_T`-event, a bounded `𝓕ᴮ_T`-measurable
+claim (`exists_replicating_strategy`). -/
 theorem measure_eq_of_pricesGainsAtZero (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) {Q : Measure Ω}
     [IsProbabilityMeasure Q] (hQ : Q ≪ μ) (hg : PricesGainsAtZero hB T hBmeas Q) {A : Set Ω}
     (hA : MeasurableSet[ItoIntegralL2.natFiltration hBmeas T] A) :
-    Q A = μ A := by
-  have hA' : MeasurableSet A := (ItoIntegralL2.natFiltration hBmeas).le T A hA
-  have hmem : MemLp (A.indicator fun _ ↦ (1 : ℝ)) 2 μ :=
-    memLp_indicator_const 2 hA'.nullMeasurableSet 1 (Or.inr (measure_ne_top μ A))
-  have hclaim := integral_eq_of_pricesGainsAtZero hB hBmeas hBcont T hQ hg
-    (hmem.toLp (A.indicator fun _ ↦ (1 : ℝ)))
-    ((stronglyMeasurable_const.indicator hA).aestronglyMeasurable.congr hmem.coeFn_toLp.symm)
-  have h : (Q A).toReal = (μ A).toReal :=
-    ((integral_eq_measure_toReal (ν := Q) hA'
-        (Filter.Eventually.filter_mono hQ.ae_le hmem.coeFn_toLp)).symm.trans hclaim).trans
-      (integral_eq_measure_toReal (ν := μ) hA' hmem.coeFn_toLp)
-  rw [← ENNReal.ofReal_toReal (measure_ne_top Q A),
-    ← ENNReal.ofReal_toReal (measure_ne_top μ A), h]
+    Q A = μ A :=
+  measure_eq_of_replicates hQ Measure.AbsolutelyContinuous.rfl
+    (Gains := Set.range fun φ ↦ (itoIntegralCLM_T hB T hBmeas φ : Ω → ℝ))
+    (by rintro _ ⟨φ, rfl⟩; exact hg φ)
+    (by rintro _ ⟨φ, rfl⟩; exact pricesGainsAtZero_self hB T hBmeas φ)
+    ((ItoIntegralL2.natFiltration hBmeas).le T)
+    (fun A hA ↦ by
+      have hmem : MemLp (A.indicator fun _ ↦ (1 : ℝ)) 2 μ :=
+        memLp_indicator_const 2 ((ItoIntegralL2.natFiltration hBmeas).le T A hA).nullMeasurableSet
+          1 (Or.inr (measure_ne_top μ A))
+      obtain ⟨φ, hφ, -⟩ := exists_replicating_strategy hB hBmeas hBcont T
+        (hmem.toLp (A.indicator fun _ ↦ (1 : ℝ)))
+        ((stronglyMeasurable_const.indicator hA).aestronglyMeasurable.congr
+          hmem.coeFn_toLp.symm)
+      exact ⟨_, _, ⟨φ, rfl⟩, hmem.coeFn_toLp.symm.trans hφ⟩) hA
 
 /-- **EMM uniqueness from completeness** — the second FTAP in the direction completeness gives.
 Two equivalent martingale measures for the discounted price `S` that price the traded gains at

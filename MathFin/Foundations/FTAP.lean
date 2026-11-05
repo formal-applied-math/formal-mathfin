@@ -10,6 +10,7 @@ public import MathFin.Foundations.EquivMeasure
 public import MathFin.Foundations.MartingaleFrozen
 public import MathFin.Foundations.MartingaleTransform
 public import MathFin.Foundations.NoArbitrageCore
+public import MathFin.Foundations.ReplicationPricing
 
 /-!
 # FTAP (Theorem 2.6.7), forward (⇒) direction: EMM ⇒ no arbitrage
@@ -30,9 +31,12 @@ general probability space and up to a finite horizon `T`.
 * `IsEMM.noArbitrage` — the forward theorem: `IsEMM` ⇒ `NoArbitrage`.
 * `IsCompleteMarket 𝓕 P S T` — every bounded `𝓕 T`-claim is replicated, `P`-a.s., by a bounded
   predictable strategy from some initial wealth: `H = x + martingaleTransform φ S T`.
+* `tradedGains 𝓕 S T` — the terminal gains `martingaleTransform φ S T` of those strategies; under
+  an equivalent martingale measure they are a fair game (`IsEMM.integrable_and_integral_gains`).
 * `IsEMM.measure_eq_of_isCompleteMarket` — the second FTAP's easy direction: in a complete market
-  two equivalent martingale measures agree on `𝓕 T`. The converse, on a finite space, is
-  `ftap_two` (`FTAPComplete.lean`).
+  two equivalent martingale measures agree on `𝓕 T`. It is `measure_eq_of_replicates`
+  (`ReplicationPricing.lean`), shared with the Brownian market, for the class `tradedGains`. The
+  converse, on a finite space, is `ftap_two` (`FTAPComplete.lean`).
 
 The finite-Ω market of `FTAPDiscrete.lean` and the one-period market of
 `FTAPOnePeriodVector.lean` (a two-step filtration with `𝓕 0 = ⊥`) are instances: their forward
@@ -78,6 +82,20 @@ def IsCompleteMarket (𝓕 : Filtration ℕ m0) (P : Measure Ω) (S : ℕ → Ω
   ∀ H : Ω → ℝ, StronglyMeasurable[𝓕 T] H → (∃ C : ℝ, ∀ ω, |H ω| ≤ C) →
     ∃ (x : ℝ) (φ : ℕ → Ω → F), (∀ t < T, StronglyMeasurable[𝓕 t] (φ (t + 1))) ∧
       (∃ K : ℝ, ∀ n ≤ T, ∀ ω, ‖φ n ω‖ ≤ K) ∧ H =ᵐ[P] fun ω ↦ x + martingaleTransform φ S T ω
+
+/-- The **terminal gains** up to the horizon `T`: `martingaleTransform φ S T` for the bounded
+predictable strategies `φ` of `NoArbitrage` and `IsCompleteMarket`. -/
+def tradedGains (𝓕 : Filtration ℕ m0) (S : ℕ → Ω → F) (T : ℕ) : Set (Ω → ℝ) :=
+  {G | ∃ φ : ℕ → Ω → F, (∀ t < T, StronglyMeasurable[𝓕 t] (φ (t + 1))) ∧
+    (∃ K : ℝ, ∀ n ≤ T, ∀ ω, ‖φ n ω‖ ≤ K) ∧ G = martingaleTransform φ S T}
+
+omit [CompleteSpace F] in
+/-- The transform of the price by a bounded predictable strategy is one of its terminal gains. -/
+theorem martingaleTransform_mem_tradedGains {𝓕 : Filtration ℕ m0} {S : ℕ → Ω → F} {T : ℕ}
+    {φ : ℕ → Ω → F} (hpred : ∀ t < T, StronglyMeasurable[𝓕 t] (φ (t + 1)))
+    (hbdd : ∃ K : ℝ, ∀ n ≤ T, ∀ ω, ‖φ n ω‖ ≤ K) :
+    martingaleTransform φ S T ∈ tradedGains 𝓕 S T :=
+  ⟨φ, hpred, hbdd, rfl⟩
 
 namespace IsEMM
 
@@ -167,36 +185,30 @@ theorem noArbitrage (h : IsEMM 𝓕 P S T Q) : NoArbitrage 𝓕 P S T := by
   rw [← hVT]
   exact h.ac' (martingale_nonneg_terminal_ae_zero hV hV0 (by rw [hVT]; exact h.ac.ae_le hV_nonneg))
 
-/-- **Replication prices the claim**: if a bounded predictable strategy replicates the indicator of
-`A` from initial wealth `x`, `P`-a.s., then every equivalent martingale measure gives `A` the
-probability `x`. -/
-theorem measureReal_eq_of_replicates (h : IsEMM 𝓕 P S T Q) {A : Set Ω} (hA : MeasurableSet A)
-    {x : ℝ} {φ : ℕ → Ω → F} (hφ_pred : ∀ t < T, StronglyMeasurable[𝓕 t] (φ (t + 1)))
-    (hφ_bdd : ∃ K : ℝ, ∀ n ≤ T, ∀ ω, ‖φ n ω‖ ≤ K)
-    (hrep : A.indicator (1 : Ω → ℝ) =ᵐ[P] fun ω ↦ x + martingaleTransform φ S T ω) :
-    Q.real A = x := by
+/-- **Fair game, as a class**: under an equivalent martingale measure every terminal gain of a
+bounded predictable strategy is `Q`-integrable with `Q`-mean zero. This is the neutrality
+`measure_eq_of_replicates` asks of the class of gains. -/
+theorem integrable_and_integral_gains (h : IsEMM 𝓕 P S T Q) {G : Ω → ℝ}
+    (hG : G ∈ tradedGains 𝓕 S T) : Integrable G Q ∧ ∫ ω, G ω ∂Q = 0 := by
   have := h.isProb
-  obtain ⟨V, hV, -, hVT⟩ := h.exists_martingale_gains hφ_pred hφ_bdd
-  have hint : Integrable (martingaleTransform φ S T) Q := hVT ▸ hV.integrable T
-  rw [← integral_indicator_one hA, integral_congr_ae (h.ac.ae_le hrep),
-    integral_add (integrable_const x) hint, integral_const,
-    h.integral_martingaleTransform hφ_pred hφ_bdd]
-  simp
+  obtain ⟨φ, hpred, hbdd, rfl⟩ := hG
+  obtain ⟨V, hV, -, hVT⟩ := h.exists_martingale_gains hpred hbdd
+  exact ⟨hVT ▸ hV.integrable T, h.integral_martingaleTransform hpred hbdd⟩
 
 /-- **Second FTAP, `complete ⇒ unique`**: in a complete market any two equivalent martingale
-measures agree on `𝓕 T`. Replicate the indicator of the event; both measures give it the
-initial wealth of the replicating strategy (`measureReal_eq_of_replicates`). -/
+measures agree on `𝓕 T`. This is `measure_eq_of_replicates` for the class of gains of bounded
+predictable strategies, neutral under every equivalent martingale measure
+(`integrable_and_integral_gains`), and completeness is the replication of every indicator. -/
 theorem measure_eq_of_isCompleteMarket {Q₁ Q₂ : Measure Ω} (hc : IsCompleteMarket 𝓕 P S T)
     (h₁ : IsEMM 𝓕 P S T Q₁) (h₂ : IsEMM 𝓕 P S T Q₂) {A : Set Ω} (hA : MeasurableSet[𝓕 T] A) :
     Q₁ A = Q₂ A := by
   have := h₁.isProb
   have := h₂.isProb
+  refine measure_eq_of_replicates h₁.ac h₂.ac (fun _ ↦ h₁.integrable_and_integral_gains)
+    (fun _ ↦ h₂.integrable_and_integral_gains) (𝓕.le T) (fun A hA ↦ ?_) hA
   obtain ⟨x, φ, hpred, hbdd, hrep⟩ := hc (A.indicator 1) (stronglyMeasurable_const.indicator hA)
     ⟨1, fun ω ↦ by by_cases hω : ω ∈ A <;> simp [hω]⟩
-  have hA' : MeasurableSet A := 𝓕.le T A hA
-  exact (ENNReal.toReal_eq_toReal_iff' (measure_ne_top _ _) (measure_ne_top _ _)).1
-    ((h₁.measureReal_eq_of_replicates hA' hpred hbdd hrep).trans
-      (h₂.measureReal_eq_of_replicates hA' hpred hbdd hrep).symm)
+  exact ⟨x, _, martingaleTransform_mem_tradedGains hpred hbdd, hrep⟩
 
 end IsEMM
 

@@ -51,6 +51,8 @@ library's other probabilistic form of the price, `binomialPrice_eq_integral_conv
   (`Foundations/SnellEnvelope.lean`) of the same payoff for the flip filtration under
   `coinFlipMeasure`: `snell` is its explicit form, computed by the node-average conditional
   expectation (`condExp_flipFiltration_succ`).
+* `supermartingale_snell` — the pathwise `snell`, frozen at the horizon, is a Mathlib
+  `Supermartingale` for `flipFiltration` under `coinFlipMeasure`.
 * `snellEnvelope_discounted_bermudanPrice` — the Snell envelope of the discounted payoff
   `e^{−rn} g(Sₙ)` is, at every time `k ≤ N` and almost surely, the discounted `bermudanPrice`.
 -/
@@ -463,6 +465,33 @@ theorem snell_ae_eq_snellEnvelope (hZ : ∀ n, PathAdaptedAt n (Z n)) {N k : ℕ
       snellEnvelope (coinFlipMeasure q hq) flipFiltration {i | N - i ∈ E} Z N k := by
   rw [snellEnvelope, min_eq_left hk]
   exact snellAux_ae_eq_snellEnvelopeAux hq hZ N (N - k) k (by omega)
+
+/-- **The tree's Snell envelope is a Mathlib supermartingale.** For a payoff process adapted to the
+flips, `k ↦ snell E q Z N (min k N)`, the pathwise envelope frozen at the horizon `N`, is a
+`Supermartingale` for `flipFiltration` under `coinFlipMeasure q`: it is almost surely the library's
+`snellEnvelope` at every time (`snell_ae_eq_snellEnvelope`), which is one
+(`snellEnvelope_supermartingale`), and it is adapted and integrable because it depends only on the
+first `k` flips. Past `N` the pathwise `snell` is the payoff again, so the freezing is needed. -/
+theorem supermartingale_snell (hZ : ∀ n, PathAdaptedAt n (Z n)) (N : ℕ) :
+    Supermartingale (fun k ↦ snell E (q : ℝ) Z N (min k N)) flipFiltration
+      (coinFlipMeasure q hq) := by
+  have hZ' : ∀ i, Integrable (Z i) (coinFlipMeasure q hq) := fun i ↦ (hZ i).integrable hq
+  have key (k : ℕ) : snell E (q : ℝ) Z N (min k N) =ᵐ[coinFlipMeasure q hq]
+      snellEnvelope (coinFlipMeasure q hq) flipFiltration {i | N - i ∈ E} Z N k := by
+    rcases le_total k N with hk | hk
+    · rw [min_eq_left hk]
+      exact snell_ae_eq_snellEnvelope hq hZ hk
+    · rw [min_eq_right hk, snellEnvelope_after_horizon hk]
+      simpa only [snellEnvelope_after_horizon le_rfl] using
+        snell_ae_eq_snellEnvelope hq (E := E) hZ le_rfl
+  have hsuper := snellEnvelope_supermartingale (P := coinFlipMeasure q hq)
+    (𝓕 := flipFiltration) (X := {i | N - i ∈ E})
+    (fun n ↦ (stronglyMeasurable_flipFiltration_iff.2 (hZ n)).measurable) hZ' N
+  refine ⟨fun k ↦ stronglyMeasurable_flipFiltration_iff.2 ?_, fun i j hij ↦ ?_, fun k ↦ ?_⟩
+  · exact (pathAdaptedAt_snellAux (E := E) (q := (q : ℝ)) hZ (N - min k N) (min k N)).mono
+      (min_le_left k N)
+  · exact (condExp_congr_ae (key j)).trans_le ((hsuper.2.1 i j hij).trans_eq (key i).symm)
+  · exact (hsuper.integrable k).congr (key k).symm
 
 /-- **The Bermudan price is the Snell envelope of the discounted payoff.** Under i.i.d.
 `Bernoulli(crrUpProb u d r)` flips, the Snell envelope (`snellEnvelope`) of the discounted
