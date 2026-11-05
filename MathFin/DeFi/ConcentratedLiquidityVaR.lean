@@ -39,10 +39,11 @@ already-proved Uniswap v3 virtual-reserve curve (`MathFin/DeFi/UniswapMechanics.
 
 ## Main results
 
-* `v3PositionValue_smul_liquidity`: `v3PositionValue` is positively homogeneous of degree 1 in the
-  liquidity `L` — `realReserveX`/`realReserveY` are literally linear in `L`, and the price-range
-  case split does not depend on it.
-* `clHistoricalVaR_smul_liquidity`: historical VaR inherits that homogeneity — scaling the
+* `v3PositionValue_smul_liquidity`: `v3PositionValue` is linear in the liquidity `L` — for any real
+  `c` (not just `c ≥ 0`) — since `realReserveX`/`realReserveY` are literally linear in `L`, and the
+  price-range case split does not depend on it.
+* `clHistoricalVaR_smul_liquidity`: historical VaR inherits that linearity restricted to `c ≥ 0`
+  (positive homogeneity, the sign restriction VaR itself needs) — scaling the
   liquidity deployed to a range by a nonnegative factor (holding the range and the historical
   scenarios fixed) scales its historical-simulation VaR by the same factor, via
   `MathFin.DiscreteVaR.finiteVaR_const_mul`.
