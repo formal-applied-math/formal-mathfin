@@ -515,7 +515,10 @@ split by area. What each bridge proves, by area:
   vanilla leg identified with the digital call contract's value
   (`mf-partial-time-barrier-down-add-up`, `mf-binary-barrier-inout-parity`, both `reduced_core`).
   `MargrabeGrounding`'s two existential theorems no longer claim to derive their hypothesis: they
-  now exhibit the measure and driver.
+  now exhibit the measure and driver. The Goldman–Sosin–Gatto continuous floating-strike lookback
+  closed form dominates the vanilla call struck at the running minimum, via a Mills-ratio
+  monotonicity argument on its removable-singularity carry term
+  (`mf-continuous-lookback-floating-strike`, `reduced_core`).
 - **Structural** (`black_scholes.json`, `binomial.json`). The American put is at least the
   Black–Scholes(–Merton) put (`mf-american-put-ge-bsm-european-put`; the early-exercise premium's
   positivity is not proved); its value is unchanged by null-set horizon changes
