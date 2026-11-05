@@ -41,15 +41,15 @@ For an integrable loss and `α ∈ (0, 1)`, the dual representation of ES over b
 
 * `finiteVaR_eq_valueAtRisk`, `finiteES_eq_expectedShortfall`: for `α ∈ (0, 1)`, the finite forms
   agree with the general definitions at the law `∑ i, q i • δ_i`.
+* `finiteVaR_eq_value_min`: for `α ∈ (0, 1]`, VaR at a finite law is attained at a loss value.
+* `finiteVaR_le_of_forall_le`: a uniform cap on every outcome's loss caps VaR the same way.
 * `finiteVaR_const_mul`: positive homogeneity,
   `finiteVaR q (fun i ↦ c * L i) α = c * finiteVaR q L α` for `c ≥ 0`, inherited from
   `valueAtRisk_const_mul` through the bridge (needs no `MeasurableSpace` on `ι` in its statement,
   only in the proof, which borrows one locally).
-* `finiteVaR_eq_value_min`: for `α ∈ (0, 1]`, VaR at a finite law is attained at a loss value.
-* `finiteVaR_le_of_forall_le`: a uniform cap on every outcome's loss caps VaR the same way.
-* `uniformWeights`: the equal-`1/n`-weights `StdSimplex` on `n` observations.
 * `finiteVaR_two_point`: for `α ∈ (0, 1]`, VaR of a loss that is `0` with mass `a` and `c > 0` with
   mass `1 - a`.
+* `uniformWeights`: the equal-`1/n`-weights `StdSimplex` on `n` observations.
 * `finiteVaR_one_bond`, `finiteVaR_two_halves`: `VaR₀.₉₅` is `0` for the single bond and `50`
   for the split position.
 * `finiteVaR_subadditivity_fails`: on the joint space of the two half-bonds, the halves' `VaR₀.₉₅`
