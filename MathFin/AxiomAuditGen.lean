@@ -351,6 +351,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.tendsto_value_cdsBuyer_coxDefaultTime
 
+/-- info: 'MathFin.Contracts.tendsto_value_cdsProtectionLeg_coxDefaultTime' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.tendsto_value_cdsProtectionLeg_coxDefaultTime
+
 /-- info: 'MathFin.Contracts.valueAtRisk_loss_europeanCall_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.valueAtRisk_loss_europeanCall_le
@@ -358,6 +362,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.Contracts.valueDisc_bondPut_gsr' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.valueDisc_bondPut_gsr
+
+/-- info: 'MathFin.Contracts.valueDisc_bondPut_gsr_self' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.valueDisc_bondPut_gsr_self
 
 /-- info: 'MathFin.Contracts.valueDisc_bondPut_hullWhite' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -426,6 +434,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.Contracts.value_cdsBuyer_coxDefaultTime' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.value_cdsBuyer_coxDefaultTime
+
+/-- info: 'MathFin.Contracts.value_cdsProtectionAtDefault_coxDefaultTime' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.value_cdsProtectionAtDefault_coxDefaultTime
 
 /-- info: 'MathFin.Contracts.value_europeanCall_sub_put_of_martingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

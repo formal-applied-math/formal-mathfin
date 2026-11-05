@@ -168,7 +168,7 @@ contains only the translation. Everything about the tree is in `Binomial/`:
 - `crrProb_mem_Icc` is new in `Binomial/CRRConvergence.lean`. It was proved inline twice in
   `Binomial/CRRCharFun.lean`, and both copies now call it.
 
-Every contract is integrable in the tree, because the model is bounded. That is a general fact,
+Every fixed-date contract (`Contract.FixedDated`, no `payAtHit`) is integrable in the tree, because the model is bounded. That is a general fact,
 `Contract.integrable_pathPV_of_bounded` in `Contracts/Adapted.lean`, and it gives
 `Payoff.measurable_eval` its first consumer. So the capped call is priced by composition with no
 integrability lemma of its own.

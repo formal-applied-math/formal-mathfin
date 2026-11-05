@@ -8,6 +8,7 @@ module
 public import MathFin.Contracts.Instruments.Credit
 public import MathFin.Contracts.Pricing
 public import MathFin.FixedIncome.Cox
+public import MathFin.FixedIncome.CVA
 
 /-!
 # The credit default swap priced against a default time
@@ -29,7 +30,12 @@ discrete analogues of `Cox.cdsAnnuity`, `Cox.cdsLosses` and `Cox.cdsFairSpreadTV
 The Cox default time of `FixedIncome/Cox.lean`, built by inverting a unit-exponential clock
 through the cumulative hazard, has `S = hazardSurvival h` (`cox_cdf_timeVarying`), so under it the
 CDS contract is worth the grid legs of the hazard curve (`value_cdsBuyer_coxDefaultTime`). Against
-the continuous legs: with no discounting the grid losses on any grid from `0` to `T` telescope to
+the continuous legs. The protection leg paid at `τ` itself is the contract
+`cdsProtectionAtDefault` (`Contract.payAtHit` on the default indicator): its value is
+`(1 − R)·𝔼[D(τ)·1{τ ≤ T}]` (`value_cdsProtectionAtDefault`), which under the Cox default time is
+`Cox.protectionLeg` (`value_cdsProtectionAtDefault_coxDefaultTime`, by
+`CVA.protectionLeg_eq_integral_coxDefaultTime`). With no discounting the grid losses on any grid
+from `0` to `T` telescope to
 the default probability `1 − S(T)`, which is `Cox.cdsLosses 0 h T`
 (`cdsLossesGrid_one_eq_cdsLosses`). With
 discounting the grid legs converge to the continuous ones as the mesh goes to zero
@@ -44,6 +50,8 @@ discounting the grid legs converge to the continuous ones as the mesh goes to ze
 
 * `value_cdsPremiumLeg`, `value_cdsProtectionLeg`, `value_cdsBuyer`, `value_cdsBuyer_eq_zero_iff`.
 * `value_cdsBuyer_coxDefaultTime`, `cdsLossesGrid_one_eq_cdsLosses`.
+* `hitTime_defaultIndicator`, `pathPV_cdsProtectionAtDefault`, `value_cdsProtectionAtDefault`,
+  `value_cdsProtectionAtDefault_coxDefaultTime` — the protection leg paid at the default time.
 -/
 
 @[expose] public section
@@ -165,6 +173,59 @@ theorem value_cdsBuyer_eq_zero_iff (hτ : Measurable τ)
 
 end Value
 
+/-! ### The protection leg paid at the default time -/
+
+section AtDefault
+
+variable {μ : Measure Ω}
+
+private theorem defaultIndicator_mem_Ici (τ : Ω → ℝ) (ω : Ω) (u : ℝ≥0) :
+    defaultIndicator τ () u ω ∈ Set.Ici (1 : ℝ) ↔ τ ω ≤ u := by
+  by_cases h : τ ω ≤ u <;> norm_num [defaultIndicator, Set.indicator, h]
+
+/-- **The default indicator hits `[1, ∞)` at the default time**: the first time the observed
+process `N u = 1{τ ≤ u}` reaches `1` is `τ`, or `0` if `τ` is negative. -/
+theorem hitTime_defaultIndicator (τ : Ω → ℝ) (ω : Ω) :
+    (scenarioAt (defaultIndicator τ) ω).hitTime () (Set.Ici 1) = ((τ ω).toNNReal : ℝ≥0) := by
+  have hset : {i : ℝ≥0 | 0 ≤ i ∧ scenarioAt (defaultIndicator τ) ω () i ∈ Set.Ici (1 : ℝ)}
+      = Set.Ici (τ ω).toNNReal := by
+    ext i
+    rw [Set.mem_ofPred_eq, scenarioAt, defaultIndicator_mem_Ici, Set.mem_Ici,
+      Real.toNNReal_le_iff_le_coe]
+    exact ⟨fun h ↦ h.2, fun h ↦ ⟨zero_le, h⟩⟩
+  have hex : ∃ j : ℝ≥0, 0 ≤ j ∧ scenarioAt (defaultIndicator τ) ω () j ∈ Set.Ici (1 : ℝ) :=
+    ⟨(τ ω).toNNReal, zero_le, (defaultIndicator_mem_Ici τ ω _).2 (Real.le_coe_toNNReal _)⟩
+  rw [Scenario.hitTime, MeasureTheory.hittingAfter_def]
+  beta_reduce
+  simp only [hex, ↓reduceIte]
+  rw [hset, csInf_Ici]
+
+/-- **The path value of the protection leg paid at the default time**: `(1 − R)` discounted at
+`τ`, if default happens by `T`. -/
+theorem pathPV_cdsProtectionAtDefault (D : ℝ≥0 → ℝ) (τ : Ω → ℝ) (T : ℝ≥0) (R : ℝ) (ω : Ω) :
+    (cdsProtectionAtDefault T R).pathPV D (scenarioAt (defaultIndicator τ) ω)
+      = D (τ ω).toNNReal * ((1 - R) * defaultIndicator τ () T ω) := by
+  rw [cdsProtectionAtDefault,
+    Contract.pathPV_payAtHit_of_eq _ _ _ (hitTime_defaultIndicator τ ω)]
+  simp [Payoff.eval, scenarioAt]
+
+/-- **The protection leg paid at the default time is worth `(1 − R)·𝔼[D(τ)·1{τ ≤ T}]`**, for any
+pricing measure, default time and discount curve (`D` is read at `τ` made nonnegative). -/
+theorem value_cdsProtectionAtDefault (D : ℝ≥0 → ℝ) (τ : Ω → ℝ) (T : ℝ≥0)
+    (R : ℝ) :
+    (cdsProtectionAtDefault T R).value μ D (defaultIndicator τ)
+      = (1 - R) * ∫ ω, (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal) (τ ω) ∂μ := by
+  rw [Contract.value, ← integral_const_mul]
+  refine integral_congr_ae (ae_of_all _ fun ω ↦ ?_)
+  beta_reduce
+  rw [pathPV_cdsProtectionAtDefault]
+  by_cases h : τ ω ≤ T
+  · simp [defaultIndicator, Set.indicator, h]
+    ring
+  · simp [defaultIndicator, Set.indicator, h]
+
+end AtDefault
+
 section Cox
 
 open MathFin.Cox
@@ -214,6 +275,38 @@ theorem cdsLossesGrid_one_eq_cdsLosses (hh : Continuous h) (t : ℕ → ℝ≥0)
   rw [cdsLossesGrid_one, h0, NNReal.coe_zero, hazardSurvival_at_zero, cdsLosses]
   simp only [zero_mul, neg_zero, Real.exp_zero, one_mul]
   exact (defaultDensity_antideriv hh _).symm
+
+/-! ### The protection leg paid at the Cox default time -/
+
+omit [IsProbabilityMeasure μ] in
+/-- **The Cox default time is a.s. positive**: its law has no atom at `0`,
+`μ(τ ≤ 0) = 1 − S(0) = 0`. -/
+theorem ae_pos_coxDefaultTime (hh : Continuous h) (hpos : ∀ s, 0 < h s)
+    (hdiv : Filter.Tendsto (cumHazard h) Filter.atTop Filter.atTop) {ξ : Ω → ℝ}
+    (hξmeas : Measurable ξ) (hξlaw : Measure.map ξ μ = expMeasure 1) :
+    ∀ᵐ ω ∂μ, 0 < coxDefaultTime h ξ ω := by
+  have h0 := cox_cdf_timeVarying (μ := μ) hh hpos hdiv hξmeas hξlaw (le_refl (0 : ℝ))
+  rw [hazardSurvival_at_zero, ENNReal.ofReal_one, tsub_self] at h0
+  filter_upwards [measure_eq_zero_iff_ae_notMem.1 h0] with ω hω
+  exact not_le.1 hω
+
+/-- **The protection leg paid at the default time, under the Cox default time, is the continuous
+protection leg `Cox.protectionLeg`**: for a continuous positive intensity `h` with divergent
+cumulative hazard, the contract that pays `1 − R` at the first time the default indicator reaches
+`1`, if that is by `T`, discounted at the flat rate `r` (`D u = e^{−ru}`), is worth
+`(1 − R) ∫₀ᵀ e^{−rs} h(s) S(s) ds`. -/
+theorem value_cdsProtectionAtDefault_coxDefaultTime (hh : Continuous h) (hpos : ∀ s, 0 < h s)
+    (hdiv : Filter.Tendsto (cumHazard h) Filter.atTop Filter.atTop) {ξ : Ω → ℝ}
+    (hξmeas : Measurable ξ) (hξlaw : Measure.map ξ μ = expMeasure 1) (r R : ℝ) (T : ℝ≥0) :
+    (cdsProtectionAtDefault T R).value μ (fun u : ℝ≥0 ↦ Real.exp (-(r * u)))
+        (defaultIndicator (coxDefaultTime h ξ))
+      = protectionLeg R r h T := by
+  rw [value_cdsProtectionAtDefault,
+    CVA.protectionLeg_eq_integral_coxDefaultTime hh hpos hdiv hξmeas hξlaw R r T.coe_nonneg]
+  congr 1
+  refine integral_congr_ae ?_
+  filter_upwards [ae_pos_coxDefaultTime hh hpos hdiv hξmeas hξlaw] with ω hω
+  simp only [Set.indicator, Set.mem_Iic, Real.coe_toNNReal _ hω.le]
 
 end Cox
 

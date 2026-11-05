@@ -28,7 +28,8 @@ tree itself (the path measure, the spot's measurability and bound, the CRR seque
 A single cash flow paying `g` of the spot at a maturity `T` that falls on step `N` is worth the
 backward-induction price `binomialPrice u d ρ g N S₀` (`value_pay_eq_binomialPrice`); this is
 `binomialPrice_eq_integral_coinFlipMeasure`, which writes the tree price as an expectation over
-paths. Every contract is integrable here, because the spot after finitely many flips is bounded
+paths. Every fixed-date contract is integrable here, because the spot after finitely many flips
+is bounded
 (`integrable_pathPV`), so a composed instrument is priced by composition with no integrability
 side conditions to prove.
 
@@ -45,7 +46,7 @@ discounted spot (`pathPV_eq_value_add_gains`). The strategy comes from the tree
 ## Main results
 
 * `Binomial.value_pay_eq_binomialPrice` — a European payoff is worth its tree price.
-* `Binomial.integrable_pathPV` — every contract's discounted payoff is integrable.
+* `Binomial.integrable_pathPV` — every fixed-date contract's discounted payoff is integrable.
 * `Binomial.value_europeanCall`, `value_europeanPut`, `value_digitalCall` — each is the tree
   price of its payoff.
 * `Binomial.value_forward` — under no-arbitrage the forward is worth `S₀ − K e^{−ρN}`.
@@ -102,13 +103,13 @@ theorem value_pay_eq_binomialPrice (hqcrr : crrUpProb u d ρ = q) (S₀ : ℝ) {
   simp only [hg, scenarioAt, assets, discount, hTN, Nat.floor_natCast]
   exact integral_const_mul _ _
 
-/-- **Every contract is integrable in the binomial model**, under any law of the flips: the spot
-after finitely many flips is measurable and bounded (`measurable_spotPath`, `abs_spotPath_le`),
-so `Contract.integrable_pathPV_of_bounded` applies. -/
-theorem integrable_pathPV (S₀ u d h : ℝ) (D : ℝ≥0 → ℝ) (c : Contract Unit) :
+/-- **Every fixed-date contract is integrable in the binomial model**, under any law of the flips:
+the spot after finitely many flips is measurable and bounded (`measurable_spotPath`,
+`abs_spotPath_le`), so `Contract.integrable_pathPV_of_bounded` applies. -/
+theorem integrable_pathPV (S₀ u d h : ℝ) (D : ℝ≥0 → ℝ) {c : Contract Unit} (hc : c.FixedDated) :
     Integrable (fun ω ↦ c.pathPV D (scenarioAt (assets S₀ u d h) ω)) (coinFlipMeasure q hq) :=
   Contract.integrable_pathPV_of_bounded D (fun _ _ ↦ measurable_spotPath ..)
-    (fun _ t ↦ ⟨_, abs_spotPath_le S₀ u d ⌊(t : ℝ) / h⌋₊⟩) c
+    (fun _ t ↦ ⟨_, abs_spotPath_le S₀ u d ⌊(t : ℝ) / h⌋₊⟩) hc
 
 variable (hqcrr : crrUpProb u d ρ = q) (S₀ K : ℝ) {T : ℝ≥0} {N : ℕ} (hTN : (T : ℝ) / h = N)
 include hqcrr hTN
@@ -144,14 +145,16 @@ theorem value_forward (hna : BinomialNoArb u d ρ) :
   ring
 
 /-- **The capped call's binomial value, by composition**: the difference of two call values.
-Unlike its Black–Scholes counterpart it needs no integrability argument, since every contract is
-integrable in this model (`integrable_pathPV`). -/
+Unlike its Black–Scholes counterpart it needs no integrability argument, since every fixed-date
+contract is integrable in this model (`integrable_pathPV`). -/
 theorem value_cappedCall (K₂ : ℝ) :
     (cappedCall K K₂ T).value (coinFlipMeasure q hq) (discount ρ h) (assets S₀ u d h)
       = binomialPrice u d ρ (fun S ↦ max (S - K) 0) N S₀
         - binomialPrice u d ρ (fun S ↦ max (S - K₂) 0) N S₀ := by
-  rw [cappedCall, Contract.value_both _ _ _ _ _ (integrable_pathPV hq S₀ u d h _ _)
-    (integrable_pathPV hq S₀ u d h _ _), Contract.value_scale,
+  rw [cappedCall, Contract.value_both _ _ _ _ _
+    (integrable_pathPV hq S₀ u d h _ (c := europeanCall K T) trivial)
+    (integrable_pathPV hq S₀ u d h _ (c := .scale (-1) (europeanCall K₂ T)) trivial),
+    Contract.value_scale,
     value_europeanCall hq hqcrr S₀ K hTN, value_europeanCall hq hqcrr S₀ K₂ hTN]
   ring
 
@@ -197,7 +200,8 @@ lemma binomialPrice_callPut_parity {u d r K : ℝ} (h : BinomialNoArb u d r) (n 
   have hTN : (((n : ℝ≥0) : ℝ)) / 1 = n := by simp
   have := value_europeanCall_eq_put_add_forward (K := K) (T := (n : ℝ≥0))
     (coinFlipMeasure _ hq) (Binomial.discount r 1) (Binomial.assets S u d 1)
-    (Binomial.integrable_pathPV hq S u d 1 _ _) (Binomial.integrable_pathPV hq S u d 1 _ _)
+    (Binomial.integrable_pathPV hq S u d 1 _ (c := europeanPut K n) trivial)
+    (Binomial.integrable_pathPV hq S u d 1 _ (c := forward K n) trivial)
   rw [Binomial.value_europeanCall hq rfl S K hTN, Binomial.value_europeanPut hq rfl S K hTN,
     Binomial.value_forward hq rfl S K hTN h] at this
   rw [this, show -(n : ℝ) * r = -(r * n) by ring]

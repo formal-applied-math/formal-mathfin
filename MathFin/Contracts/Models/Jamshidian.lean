@@ -41,6 +41,8 @@ property (`HasBondPrice.integral_discount_mul`), `𝔼^{T₀}[P(T₀, T₁)] = P
 * `valueDisc_bondPut_gsr` — the put in the two-piece GSR model: `r_{T₀}` is Gaussian under `Q^{T₀}`
   with the variance `gsrShortRateV` of `FixedIncome/GSRBondPriceAt.lean`, and the coefficient
   `A(T₀, T₁)` of the bond, which depends on `T₀` and `T₁` separately, never enters.
+* `valueDisc_bondPut_gsr_self` — at one volatility `σ₁ = σ₂` the GSR put is the Vasicek put
+  (`zeroCurve_gsr_self`, `gsrShortRateV_self`).
 * `valueDisc_caplet_hullWhite`, `valueDisc_caplet_vasicek`, `valueDisc_caplet_gsr` — the caplet of
   `valueDisc_caplet_eq_bondPut`, `(1 + δK)` such puts at strike `1/(1 + δK)`.
 
@@ -390,6 +392,41 @@ theorem valueDisc_caplet_gsr (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Measura
   rw [valueDisc_caplet_eq_bondPut h hK hint]
   exact congrArg _ (valueDisc_bondPut_gsr hB hBm r₀ θ σ1 σ2 hκ h0 hT hTstar hσ1 hσ2 h.bond_eq
     (one_div_pos.2 hK))
+
+/-! ### One volatility: the GSR put is the Vasicek put -/
+
+omit [IsProbabilityMeasure μ] in
+/-- **The zero curve of the one-volatility GSR model is Vasicek's**: the integrated rates agree
+almost surely (`gsrIntegratedRate_self_ae`), so every `𝔼[D T]` does. -/
+theorem zeroCurve_gsr_self (hB : IsPreBrownianReal B μ) (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ)
+    (Tstar T : ℝ≥0) :
+    zeroCurve μ (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ σ hκ Tstar)) T
+      = zeroCurve μ (shortRateDiscount (vasicekIntegratedRate hB r₀ θ σ hκ)) T :=
+  integral_congr_ae <| (gsrIntegratedRate_self_ae hB r₀ θ σ hκ Tstar T).mono fun ω h ↦ by
+    simp only [shortRateDiscount, h]
+
+/-- **The GSR put at `σ₁ = σ₂` is the Vasicek put.** With one volatility `σ` on both sides of the
+breakpoint `T*`, the GSR put of `valueDisc_bondPut_gsr` is worth the closed form of
+`valueDisc_bondPut_vasicek`: the zero curve is Vasicek's (`zeroCurve_gsr_self`) and the variance of
+`r_{T₀}` is `σ²(1 − e^{−2κT₀})/(2κ)` (`gsrShortRateV_self`), whatever `T*`. -/
+theorem valueDisc_bondPut_gsr_self (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Measurable (B s))
+    (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) {Tstar : ℝ≥0} (h0 : 0 < T₀) (hT : T₀ < T₁)
+    (hTstar : Tstar ≤ T₁) (hσ : σ ≠ 0)
+    (hb : X b T₀ =ᵐ[μ] bondPrice μ (Filtration.natural B fun s ↦ (hBm s).stronglyMeasurable)
+      (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ σ hκ Tstar)) T₀ T₁) {k : ℝ} (hk : 0 < k) :
+    (bondPut b T₀ k).valueDisc μ (shortRateDiscount (gsrIntegratedRate hB r₀ θ σ σ hκ Tstar)) X
+      = zeroCurve μ (shortRateDiscount (vasicekIntegratedRate hB r₀ θ σ hκ)) T₀ * k
+          * Phi (-bsd2 (zeroCurve μ (shortRateDiscount (vasicekIntegratedRate hB r₀ θ σ hκ)) T₁
+              / zeroCurve μ (shortRateDiscount (vasicekIntegratedRate hB r₀ θ σ hκ)) T₀) k 0
+            (vasicekBondB κ ((T₁ - T₀ : ℝ≥0) : ℝ)
+              * Real.sqrt (vasicekSDEVariance σ κ T₀)) 1)
+        - zeroCurve μ (shortRateDiscount (vasicekIntegratedRate hB r₀ θ σ hκ)) T₁
+          * Phi (-bsd1 (zeroCurve μ (shortRateDiscount (vasicekIntegratedRate hB r₀ θ σ hκ)) T₁
+              / zeroCurve μ (shortRateDiscount (vasicekIntegratedRate hB r₀ θ σ hκ)) T₀) k 0
+            (vasicekBondB κ ((T₁ - T₀ : ℝ≥0) : ℝ)
+              * Real.sqrt (vasicekSDEVariance σ κ T₀)) 1) := by
+  rw [valueDisc_bondPut_gsr hB hBm r₀ θ σ σ hκ h0 hT hTstar hσ hσ hb hk]
+  simp only [zeroCurve_gsr_self hB r₀ θ σ hκ Tstar, gsrShortRateV_self, NNReal.coe_sub hT.le]
 
 end GaussianShortRate
 
