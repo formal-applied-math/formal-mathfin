@@ -2,9 +2,10 @@ name: docs site
 
 # The documentation site (docs/specs/2026-11-05-library-practices-design.md §7), generated from
 # the `decl-index` artifact that `build` uploads, so it shows exactly the library main built:
-# module pages with every public declaration's statement, docstring, source link and used-by
-# list, a subject browse, the bibliography and a search. Pure stdlib (tools/verify/docs_site.py);
-# no Lean here.
+# the map of the library, section and module pages (every public declaration's statement with
+# linked names, docstring, source and used-by), the blueprint graph, the corpus by status, the
+# subjects, the bibliography and a search. The generator is pure stdlib
+# (tools/verify/docs_site.py, assets in tools/verify/site_assets/); no Lean here.
 #
 # Requires GitHub Pages with source "GitHub Actions" (repository settings → Pages).
 

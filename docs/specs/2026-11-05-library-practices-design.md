@@ -212,6 +212,25 @@ per-declaration statement + docstring + source link + used-by, Tags/JEL browse, 
 index. doc-gen4 is spiked first (it documents every imported module, Mathlib included, which may
 be prohibitive on a runner); if it is, the index-driven site is the site, not a fallback.
 
+Delivered 2026-11-06 as the index-driven site (`tools/verify/docs_site.py`, assets in
+`tools/verify/site_assets/`, published by `docs-site.yml`). Every page is drawn from the library's
+own records, so the site cannot drift from the library:
+
+- **Home**: the map of the library — its sections as a graph (sized by declarations, an edge
+  for each section whose modules import another's, foundations at the centre) with a table
+  view — and the blueprint landmarks, the proved results the most other results build on.
+- **Section pages**: the section's module graph (imports, transitively reduced) and its modules.
+- **Module pages**: docstring, subject chips, the import neighbourhood, the corpus entries that
+  formalize it, and every public declaration — its statement with each name linked (library
+  names to their page, upstream names to Mathlib's docs), docstring, source and used-by.
+- **Blueprint**: the proved spine and the frontier nodes on it as a dependency graph, each node
+  opening its statement, declaration and issues; the unconnected frontier by area.
+- **Corpus** by area and status (stacked bars with a table view), **Subjects** (JEL and MSC
+  counts), **References** with the modules that cite each work, and a ranked search.
+
+Graphs are Cytoscape (dagre layout), math is KaTeX; both load from cdnjs/jsdelivr. The generator
+itself stays pure stdlib.
+
 ### The blueprint as the program's map (FLT, Carleson) — delivered 2026-11-06
 
 The blueprint and the issue tracker are one system, always connected (the maintainer's
