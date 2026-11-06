@@ -77,6 +77,8 @@ jobs:
         env:
           MOD: ${{ inputs.trace_module }}
         run: |
+          echo "== mathfin_shake --explain $MOD"
+          lake exe mathfin_shake --explain --trace --add-public --keep-implied "$MOD" 2>&1 | head -300 || true
           f="$(echo "$MOD" | sed 's|\.|/|g').lean"
           python3 - "$f" <<'PY'
           import sys
