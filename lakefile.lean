@@ -89,6 +89,12 @@ lean_exe mathfin_index where
   root := `MathFinTools.Index
   supportInterpreter := true
 
+-- `lake shake` without its indirect-use over-approximation (see MathFinTools/Shake.lean); the
+-- import-shake workflow runs it to narrow the library's imports.
+lean_exe mathfin_shake where
+  root := `MathFinTools.Shake
+  supportInterpreter := true
+
 -- hanwenzhu/LeanArchitect: blueprint extraction directly from Lean source.
 -- `@[blueprint]`-annotated (or post-hoc `attribute [blueprint]`-tagged)
 -- declarations are exported with auto-inferred dependency edges via the

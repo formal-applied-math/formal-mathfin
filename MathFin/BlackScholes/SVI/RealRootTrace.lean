@@ -5,8 +5,10 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.SVI.TraceForm
 public import MathFin.Init
+public import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.RingTheory.Trace.Basic
+public import Mathlib.Analysis.Normed.Field.Basic
 
 /-! # Traces at a repeated real root
 

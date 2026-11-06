@@ -198,6 +198,17 @@ touched, so dot notation becomes the search (`h.price_eq`, not `price_eq_of_isEM
 `whole_mathlib_imports` down. Whether narrower closures bring kernel replay under the 16 GB
 runner is measured after, not promised.
 
+Delivered 2026-11-06: no module imports Mathlib whole (`whole_mathlib_imports` 0). Two rounds:
+`lake shake` narrowed 182 modules, and the other 177 came back as a block of a dozen unrelated
+Mathlib leaves. The block is shake's own: Mathlib marks every module that registers a
+`positivity`, `norm_num`, `inclusion` or `echelon` extension as an *extra reverse use* (extension
+use is not tracked), and shake keeps such a module in every file whose imports reach it.
+`lake exe mathfin_shake` (`MathFinTools/Shake.lean`, Lake's shake with that preservation limited
+to the library's own modules) narrowed the rest. Where a file relied on an upstream extension the
+rebuild failed and the file names the module (`BlackLitterman`: `Positivity.Basic`, kept with a
+note); `WienerIntegralL2`'s endpoint identity, which needed Mathlib's whole simp set, is now
+proved by cases on `min` and `max`.
+
 ### 6d. Metamath's two practices
 
 - **Used-by pages** — the docs site (§7) shows each declaration's `used_by`.
@@ -211,6 +222,25 @@ A GitHub Pages site generated from `decl-index.json` + module docstrings: per-mo
 per-declaration statement + docstring + source link + used-by, Tags/JEL browse, and the search
 index. doc-gen4 is spiked first (it documents every imported module, Mathlib included, which may
 be prohibitive on a runner); if it is, the index-driven site is the site, not a fallback.
+
+Delivered 2026-11-06 as the index-driven site (`tools/verify/docs_site.py`, assets in
+`tools/verify/site_assets/`, published by `docs-site.yml`). Every page is drawn from the library's
+own records, so the site cannot drift from the library:
+
+- **Home**: the map of the library — its sections as a graph (sized by declarations, an edge
+  for each section whose modules import another's, foundations at the centre) with a table
+  view — and the blueprint landmarks, the proved results the most other results build on.
+- **Section pages**: the section's module graph (imports, transitively reduced) and its modules.
+- **Module pages**: docstring, subject chips, the import neighbourhood, the corpus entries that
+  formalize it, and every public declaration — its statement with each name linked (library
+  names to their page, upstream names to Mathlib's docs), docstring, source and used-by.
+- **Blueprint**: the proved spine and the frontier nodes on it as a dependency graph, each node
+  opening its statement, declaration and issues; the unconnected frontier by area.
+- **Corpus** by area and status (stacked bars with a table view), **Subjects** (JEL and MSC
+  counts), **References** with the modules that cite each work, and a ranked search.
+
+Graphs are Cytoscape (dagre layout), math is KaTeX; both load from cdnjs/jsdelivr. The generator
+itself stays pure stdlib.
 
 ### The blueprint as the program's map (FLT, Carleson) — delivered 2026-11-06
 
@@ -296,7 +326,7 @@ requirement, 2026-11-06). The link is stored once, in the issue: a body line
   search. `docs-site.yml` publishes it after each green build on main. `docgen-spike.yml` is the
   dispatch-only doc-gen4 measurement; the spike's verdict decides whether doc-gen4 ever replaces
   the generated site.
-- **Import narrowing.** `import-shake.yml` runs `lake shake --fix --add-public --keep-implied`
+- **Import narrowing.** `import-shake.yml` runs `lake exe mathfin_shake --fix --add-public --keep-implied`
   over the library's modules, not the umbrella (shake would prune the umbrella's re-exports).
   It rebuilds the result, lowers the ratchet and commits. Snippets that saw a Mathlib name only
   through a module's whole-Mathlib re-export surface in the next ledger sweep.

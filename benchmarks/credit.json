@@ -205,7 +205,7 @@
       "description": "Under constant hazard h with recovery R, the fair CDS spread c = h · (1 − R), via leg equality.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.Credit\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem cds_leg_equality_thm (h R factor c : ℝ) (h_factor_ne : factor ≠ 0) :\n    c * factor = (1 - R) * h * factor ↔ c = MathFin.cdsFairSpread h R :=\n  MathFin.cds_leg_equality h R factor c h_factor_ne\n"
+        "lean": "import MathFin.FixedIncome.Credit\n\nopen Real\nopen MathFin\n\ntheorem cds_leg_equality_thm (h R factor c : ℝ) (h_factor_ne : factor ≠ 0) :\n    c * factor = (1 - R) * h * factor ↔ c = MathFin.cdsFairSpread h R :=\n  MathFin.cds_leg_equality h R factor c h_factor_ne\n"
       },
       "metadata": {
         "chapter": 12,

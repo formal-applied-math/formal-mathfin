@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.AsianGeometricN
 public import MathFin.BlackScholes.PDE
 

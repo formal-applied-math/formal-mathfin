@@ -6,7 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Tactic.LinearCombination
 
 /-! # Lifting a square root of −1 through a nilpotent
 

@@ -8,6 +8,8 @@ module
 public import MathFin.Foundations.GaussianMoments
 public import MathFin.Foundations.QuadraticVariationL2  -- shake: keep (used through `open`)
 public import MathFin.Foundations.DiscreteIto
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ReduceModChar
 
 /-! # The Itô–Taylor remainder: the cubic bound and Brownian sixth moments
 

@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Probability.Distributions.Gaussian.Real
 
 /-!
 # Gaussian VaR and CVaR closed forms

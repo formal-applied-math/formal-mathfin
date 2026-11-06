@@ -6,7 +6,8 @@ Authors: Yang Ye, Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.LinearAlgebra.Matrix.PosDef
 
 /-!
 # KKT conditions for a convex QP with linear inequality constraints

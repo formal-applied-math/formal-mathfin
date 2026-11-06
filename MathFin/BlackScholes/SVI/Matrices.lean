@@ -5,8 +5,11 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.SVI.Polynomial
 public import MathFin.Init
+public import Mathlib.Algebra.Polynomial.RuleOfSigns
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Basic
+public import Mathlib.Algebra.Polynomial.Derivative
+public import Mathlib.Basic.Real.Basic
 
 /-! # The certificate matrices
 

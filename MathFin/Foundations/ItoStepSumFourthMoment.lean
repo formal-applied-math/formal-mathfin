@@ -8,6 +8,7 @@ module
 public import MathFin.Foundations.ItoIntegralL2
 public import MathFin.Foundations.QuadraticVariationL2
 public import MathFin.Foundations.GaussianMoments
+public import Mathlib.Tactic.Polynomial.Basic
 
 /-! # The fourth moment of a bounded adapted Brownian sum
 

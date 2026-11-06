@@ -6,7 +6,7 @@ Authors: Yang Ye
 module
 
 public import MathFin.FixedIncome.MacaulayModified
-public import Mathlib
+public import Mathlib.Analysis.SpecialFunctions.Pow.Continuity
 
 /-!
 # Clean price and accrued interest, on- and between-coupon dates

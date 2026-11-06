@@ -6,7 +6,8 @@ Authors: Robert Martin
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Probability.Martingale.Basic
+public import Mathlib.Topology.Separation.CompletelyRegular
 
 /-! # Stopping a discrete process when its conditional drift first becomes nonzero
 

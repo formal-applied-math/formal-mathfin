@@ -8,6 +8,7 @@ module
 public import MathFin.Foundations.CarrMadan
 public import MathFin.Foundations.GyongyMimicry
 public import MathFin.BlackScholes.CallSpreadDigital
+public import Mathlib.Analysis.Distribution.AEEqOfIntegralContDiff
 
 
 /-!

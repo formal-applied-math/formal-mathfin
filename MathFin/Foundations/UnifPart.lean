@@ -6,7 +6,10 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.RCLike.Basic
+public import Mathlib.Analysis.SpecificLimits.Basic
 
 /-!
 # The uniform partition of `[0, T]`

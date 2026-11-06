@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.SVI.ProductSignature
 public import MathFin.BlackScholes.SVI.TraceForm
+public import Mathlib.RingTheory.Trace.Basic
 
 /-! # Weighted trace forms of associated polynomials
 

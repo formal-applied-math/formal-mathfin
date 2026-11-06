@@ -6,7 +6,8 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Probability.Martingale.Basic
 
 /-!
 # The Snell envelope on a filtered probability space

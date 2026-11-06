@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.FixedIncome.DurationSensitivity
+public import Mathlib.Analysis.Calculus.Deriv.Mul
 
 /-!
 # Convexity as the second derivative of bond price (first-principles)

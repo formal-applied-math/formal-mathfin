@@ -9,6 +9,8 @@ module
 -- `QuadraticVariationL2`; this file's own surface needs only:
 public import MathFin.Foundations.ItoSquaringIdentity
 public import MathFin.Foundations.QuadraticVariationL2
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ReduceModChar
 
 /-! # Itô's lemma for `f(x) = x²` — the L² continuous-time form
 

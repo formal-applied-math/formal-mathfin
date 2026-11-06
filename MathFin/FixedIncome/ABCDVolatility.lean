@@ -6,7 +6,8 @@ Authors: Yang Ye
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 /-!
 # ABCD instantaneous volatility — closed-form integrated variance

@@ -6,7 +6,10 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Analysis.Convex.Continuous
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.RCLike.Lemmas
+public import Mathlib.MeasureTheory.Function.L1Space.Integrable
 
 /-!
 # Coherent risk measures: the four axioms of Artzner, Delbaen, Eber and Heath

@@ -6,7 +6,8 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Algebra.BigOperators.Field
+public import Mathlib.Analysis.Normed.Field.Basic
 
 /-!
 # Macaulay vs modified duration under discrete compounding

@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.CIRRiccati
 public import MathFin.FixedIncome.VasicekBondPrice
 

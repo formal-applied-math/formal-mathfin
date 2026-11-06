@@ -449,7 +449,7 @@
       "description": "Under discrete annual compounding (1 + y ≠ 0), the modified duration numerator equals the Macaulay duration numerator divided by (1+y). This is the algebraic core of the price-sensitivity identity -dP/dy = D_mod · P with D_mod = D_mac / (1+y); that derivative identity is not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.MacaulayModified\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem modifiedNumerator_eq_macaulayNumerator_div_thm {ι : Type*}\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (y : ℝ) (hy : 1 + y ≠ 0) :\n    MathFin.modifiedNumerator s t c y =\n      MathFin.macaulayNumerator s t c y / (1 + y) :=\n  MathFin.modifiedNumerator_eq_macaulayNumerator_div s t c y hy\n"
+        "lean": "import MathFin.FixedIncome.MacaulayModified\n\nopen Real\nopen MathFin\n\ntheorem modifiedNumerator_eq_macaulayNumerator_div_thm {ι : Type*}\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (y : ℝ) (hy : 1 + y ≠ 0) :\n    MathFin.modifiedNumerator s t c y =\n      MathFin.macaulayNumerator s t c y / (1 + y) :=\n  MathFin.modifiedNumerator_eq_macaulayNumerator_div s t c y hy\n"
       },
       "metadata": {
         "chapter": 11,
@@ -497,7 +497,7 @@
       "description": "The closed form r(t) = θ + (r₀ - θ)·e^{-κt} solves the deterministic part of the Vasicek SDE dr/dt = κ(θ - r(t)). Exhibits exponential mean reversion to θ at rate κ.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.Vasicek\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem vasicekDeterministic_solves_ODE_thm (r₀ θ κ t : ℝ) :\n    HasDerivAt (MathFin.vasicekDeterministic r₀ θ κ)\n      (κ * (θ - MathFin.vasicekDeterministic r₀ θ κ t)) t :=\n  MathFin.vasicekDeterministic_solves_ODE r₀ θ κ t\n"
+        "lean": "import MathFin.FixedIncome.Vasicek\n\nopen Real\nopen MathFin\n\ntheorem vasicekDeterministic_solves_ODE_thm (r₀ θ κ t : ℝ) :\n    HasDerivAt (MathFin.vasicekDeterministic r₀ θ κ)\n      (κ * (θ - MathFin.vasicekDeterministic r₀ θ κ t)) t :=\n  MathFin.vasicekDeterministic_solves_ODE r₀ θ κ t\n"
       },
       "metadata": {
         "chapter": 12,
@@ -518,7 +518,7 @@
       "description": "At t = log(2)/κ the gap between r(t) and θ has closed to half its initial value.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.Vasicek\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem vasicekDeterministic_at_halfLife_thm (r₀ θ κ : ℝ) (hκ : 0 < κ) :\n    MathFin.vasicekDeterministic r₀ θ κ (MathFin.meanReversionHalfLife κ) - θ =\n      (r₀ - θ) / 2 :=\n  MathFin.vasicekDeterministic_at_halfLife r₀ θ κ hκ\n"
+        "lean": "import MathFin.FixedIncome.Vasicek\n\nopen Real\nopen MathFin\n\ntheorem vasicekDeterministic_at_halfLife_thm (r₀ θ κ : ℝ) (hκ : 0 < κ) :\n    MathFin.vasicekDeterministic r₀ θ κ (MathFin.meanReversionHalfLife κ) - θ =\n      (r₀ - θ) / 2 :=\n  MathFin.vasicekDeterministic_at_halfLife r₀ θ κ hκ\n"
       },
       "metadata": {
         "chapter": 12,

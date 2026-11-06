@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Probability.Martingale.Basic
 
 /-!
 # The Bayes change-of-measure martingale engine

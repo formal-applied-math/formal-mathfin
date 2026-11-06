@@ -6,6 +6,7 @@ Authors: Yang Ye
 module
 
 public import MathFin.FixedIncome.DurationSensitivity
+public import Mathlib.Analysis.Calculus.Deriv.Shift
 
 /-!
 # Key-rate partials sum to the parallel-shift derivative

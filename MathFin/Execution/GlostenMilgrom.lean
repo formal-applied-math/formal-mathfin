@@ -6,7 +6,8 @@ Authors: Alfredo Garcia
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.MeasureTheory.Function.ConditionalExpectation.Basic
 
 /-!
 # Glosten-Milgrom adverse-selection bid-ask spread

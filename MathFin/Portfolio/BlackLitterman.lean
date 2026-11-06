@@ -6,7 +6,10 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Tactic.Positivity.Basic  -- shake: keep (positivity extensions)
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.Ring.RingNF
 
 /-!
 # Black-Litterman one-dimensional Bayesian update

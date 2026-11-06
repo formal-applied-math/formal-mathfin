@@ -6,7 +6,8 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Algebra.Order.Chebyshev
 
 /-!
 # Concentration risk: Herfindahl–Hirschman Index (HHI)

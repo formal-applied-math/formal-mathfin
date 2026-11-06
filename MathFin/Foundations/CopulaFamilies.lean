@@ -6,7 +6,8 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.Copula
-public import Mathlib
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.MeasureTheory.Integral.Pi
 
 /-!
 # Copula families: Farlie–Gumbel–Morgenstern and Clayton

@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Analysis.Complex.Exponential
 
 /-!
 # Arrow-Debreu state prices and the linear pricing functional

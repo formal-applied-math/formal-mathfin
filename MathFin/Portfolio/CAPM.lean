@@ -6,7 +6,9 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Algebra.BigOperators.Field
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Tactic.FieldSimp
 
 /-!
 # Capital Asset Pricing Model (CAPM)

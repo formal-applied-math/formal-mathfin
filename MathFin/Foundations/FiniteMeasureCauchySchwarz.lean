@@ -6,7 +6,8 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Probability.Moments.Variance
 
 /-! # Cauchy–Schwarz in expectation
 

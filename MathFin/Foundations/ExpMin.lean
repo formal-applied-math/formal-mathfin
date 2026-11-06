@@ -6,7 +6,8 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Probability.Distributions.Exponential
+public import Mathlib.Probability.Independence.Basic
 
 /-!
 # Minimum of independent exponentials (Appendix B.2)

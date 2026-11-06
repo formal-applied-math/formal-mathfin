@@ -3,13 +3,13 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-module  -- shake: keep-all (`simp_all` closes the bracket-identity cases with Mathlib's simp set)
+module
 
-public import Mathlib
-public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.ExtendOfNormIsometry
 public import MathFin.Foundations.LpMulIsometry
 public import MathFin.Foundations.GaussianMoments
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
 
 /-!
 # Wiener integral on L²([0, T])
@@ -181,15 +181,11 @@ lemma min_sub_min_sub_min_add_min_eq_max_zero
     ((min t v : ℝ≥0) : ℝ) - ((min t u : ℝ≥0) : ℝ) -
       ((min s v : ℝ≥0) : ℝ) + ((min s u : ℝ≥0) : ℝ) =
         max 0 ((min (t : ℝ) v) - (max (s : ℝ) u)) := by
+  have hst : (s : ℝ) ≤ t := mod_cast hst
+  have huv : (u : ℝ) ≤ v := mod_cast huv
   push_cast
-  have hsR : (s : ℝ) ≤ t := by exact_mod_cast hst
-  have huR : (u : ℝ) ≤ v := by exact_mod_cast huv
-  rcases le_total (s : ℝ) u with hsu | hsu
-  all_goals rcases le_total (t : ℝ) u with htu | htu
-  all_goals rcases le_total (t : ℝ) v with htv | htv
-  all_goals rcases le_total (s : ℝ) v with hsv | hsv
-  all_goals simp_all
-  all_goals nlinarith
+  simp only [min_def, max_def]
+  split_ifs <;> linarith
 
 /-- Covariance identity for BM increments:
 `E[(B_t - B_s)(B_v - B_u)] = vol((s, t] ∩ (u, v])`,

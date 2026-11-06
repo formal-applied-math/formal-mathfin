@@ -7,7 +7,9 @@ module
 
 public import MathFin.BlackScholes.PDE
 public import MathFin.BlackScholes.GreekSigns
-public import Mathlib
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Smooth.Flat
 
 /-!
 # Spot-direction convexity of the Black–Scholes call

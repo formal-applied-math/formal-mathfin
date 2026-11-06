@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.HullWhiteCalibration
 public import MathFin.FixedIncome.VasicekBondPriceAt
 

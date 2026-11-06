@@ -6,7 +6,9 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Portfolio.CAPMEquilibrium
-public import Mathlib
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # Risk-parity portfolios from the log-barrier Lagrangian (first-principles)

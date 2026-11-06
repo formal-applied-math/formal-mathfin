@@ -294,7 +294,7 @@
       "description": "On the CRR binomial tree with BinomialNoArb, for every early-exercise step set E, the European price binomialPrice is at most the Bermudan price bermudanPrice E, which is at most the American price americanPrice, at every number of steps and every spot (all three are the one Bellman recursion bermudanPrice at E = empty, E, univ).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.Bermudan\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem bermudan_sandwich_thm {u d r : ℝ} (h : BinomialNoArb u d r)\n    (g : ℝ → ℝ) (E : Set ℕ) (n : ℕ) (S : ℝ) :\n    binomialPrice u d r g n S ≤ bermudanPrice E u d r g n S ∧\n      bermudanPrice E u d r g n S ≤ americanPrice u d r g n S :=\n  MathFin.binomialPrice_le_bermudanPrice_le_americanPrice h g E n S\n"
+        "lean": "import MathFin.Binomial.Bermudan\n\nopen Real\nopen MathFin\n\ntheorem bermudan_sandwich_thm {u d r : ℝ} (h : BinomialNoArb u d r)\n    (g : ℝ → ℝ) (E : Set ℕ) (n : ℕ) (S : ℝ) :\n    binomialPrice u d r g n S ≤ bermudanPrice E u d r g n S ∧\n      bermudanPrice E u d r g n S ≤ americanPrice u d r g n S :=\n  MathFin.binomialPrice_le_bermudanPrice_le_americanPrice h g E n S\n"
       },
       "metadata": {
         "chapter": 14,
@@ -388,7 +388,7 @@
       "description": "Under no-arbitrage, the risk-neutral measure in the single-period binomial is uniquely determined by the martingale condition.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.SecondFTAP\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem second_FTAP_single_period_thm {u d r : ℝ} (h : MathFin.BinomialNoArb u d r) :\n    ∃! q : ℝ, q * u + (1 - q) * d = Real.exp r :=\n  MathFin.second_FTAP_single_period h\n"
+        "lean": "import MathFin.Binomial.SecondFTAP\n\nopen Real\nopen MathFin\n\ntheorem second_FTAP_single_period_thm {u d r : ℝ} (h : MathFin.BinomialNoArb u d r) :\n    ∃! q : ℝ, q * u + (1 - q) * d = Real.exp r :=\n  MathFin.second_FTAP_single_period h\n"
       },
       "metadata": {
         "chapter": 7,
@@ -409,7 +409,7 @@
       "description": "Andre's reflection principle for ±1 random-walk paths: the number of length-n paths that touch a barrier a > 0 and end at b ≤ a equals the number of all paths ending at the reflected endpoint 2a − b. The combinatorial backbone of barrier-option counting in the binomial tree; the hitting condition on the reflected side is discharged by a discrete intermediate-value theorem.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.PathReflection\n\n/-- **Andre's reflection principle, counting form** (1887). For ±1 walks of\n    length `n` (paths `Fin n → Bool`), a barrier `a > 0`, and an endpoint\n    `b ≤ a`: the number of paths that touch the barrier and end at `b` equals\n    the number of ALL paths ending at the reflected endpoint `2a − b` — the\n    hitting condition on the reflected side is automatic by the discrete IVT,\n    since `2a − b ≥ a`. This is the counting backbone of barrier-option\n    pricing in the binomial tree. Re-exports\n    `MathFin.reflectionPrincipleEquivBelow` through `Nat.card_congr`. -/\ntheorem reflection_principle_count {n : ℕ} (a b : ℤ) (ha : 0 < a) (hb : b ≤ a) :\n    Nat.card {ω : Fin n → Bool // MathFin.HitsLevel a ω ∧ MathFin.walkPos ω n = b} =\n    Nat.card {ω : Fin n → Bool // MathFin.walkPos ω n = 2 * a - b} :=\n  Nat.card_congr (MathFin.reflectionPrincipleEquivBelow a b ha hb)"
+        "lean": "import MathFin.Binomial.PathReflection\nimport Mathlib.SetTheory.Cardinal.Finite\n\n/-- **Andre's reflection principle, counting form** (1887). For ±1 walks of\n    length `n` (paths `Fin n → Bool`), a barrier `a > 0`, and an endpoint\n    `b ≤ a`: the number of paths that touch the barrier and end at `b` equals\n    the number of ALL paths ending at the reflected endpoint `2a − b` — the\n    hitting condition on the reflected side is automatic by the discrete IVT,\n    since `2a − b ≥ a`. This is the counting backbone of barrier-option\n    pricing in the binomial tree. Re-exports\n    `MathFin.reflectionPrincipleEquivBelow` through `Nat.card_congr`. -/\ntheorem reflection_principle_count {n : ℕ} (a b : ℤ) (ha : 0 < a) (hb : b ≤ a) :\n    Nat.card {ω : Fin n → Bool // MathFin.HitsLevel a ω ∧ MathFin.walkPos ω n = b} =\n    Nat.card {ω : Fin n → Bool // MathFin.walkPos ω n = 2 * a - b} :=\n  Nat.card_congr (MathFin.reflectionPrincipleEquivBelow a b ha hb)"
       },
       "metadata": {
         "chapter": 14,

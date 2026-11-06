@@ -7,7 +7,10 @@ module
 
 public import MathFin.Init
 public import BrownianMotion.Gaussian.Moment
-public import Mathlib
+public import Mathlib.Probability.BrownianMotion.Basic
+public import Mathlib.Probability.Distributions.Gaussian.HasGaussianLaw.Basic
+public import Mathlib.Probability.Distributions.Gaussian.IsGaussianProcess.Basic
+public import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
 # Gaussian moments

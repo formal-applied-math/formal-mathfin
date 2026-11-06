@@ -8,6 +8,8 @@ module
 public import MathFin.Foundations.ItoIntegralRiemannBridgeAdapted
 public import MathFin.Foundations.ItoIntegralAgainstMartingale
 public import MathFin.Foundations.ItoIntegralCovariation
+public import Mathlib.Algebra.Order.Archimedean.Real.Hom
+public import Mathlib.Order.SuccPred.IntervalSucc
 
 /-! # Freezing an adapted integrand on a partition
 

@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Analysis.SpecialFunctions.Log.Basic
 
 /-!
 # Reduced-form credit risk under constant hazard rate

@@ -5,7 +5,6 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.BrownianMartingale
 public import MathFin.Foundations.Numeraire
 public import MathFin.Foundations.WienerIntegralExpMoment

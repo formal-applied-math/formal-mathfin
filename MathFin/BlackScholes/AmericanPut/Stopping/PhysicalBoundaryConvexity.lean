@@ -7,6 +7,8 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.ActualBoundaryNormalization
 public import MathFin.BlackScholes.AmericanPut.Stopping.ActualStockConvexity
+public import Mathlib.RingTheory.Etale.Weakly
+public import Mathlib.RingTheory.TotallySplit
 
 /-! # Convexity of the actual American put option boundary in physical units
 

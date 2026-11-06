@@ -6,7 +6,8 @@ Authors: Yang Ye
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
+public import Mathlib.Probability.Distributions.Cauchy
 
 /-!
 # The Student-t law

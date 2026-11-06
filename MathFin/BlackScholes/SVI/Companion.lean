@@ -6,6 +6,9 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.SVI.Denominators
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Minpoly
+public import Mathlib.RingTheory.AdjoinRoot
+public import Mathlib.RingTheory.Trace.Defs
 
 /-! # The companion matrix is multiplication by the root
 

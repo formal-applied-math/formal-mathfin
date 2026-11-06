@@ -5,7 +5,6 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianModel
 public import Mathlib.Analysis.SpecificLimits.Basic
 public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Init

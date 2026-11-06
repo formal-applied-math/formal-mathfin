@@ -6,7 +6,11 @@ Authors: Yang Ye, Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.Deriv.Prod
+public import Mathlib.Analysis.ODE.Gronwall
+public import Mathlib.MeasureTheory.Measure.CharacteristicFunction.Basic
 
 /-!
 # Weak uniqueness for the constant-coefficient forward equation

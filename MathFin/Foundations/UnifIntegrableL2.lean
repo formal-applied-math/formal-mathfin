@@ -6,7 +6,9 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.MeasureTheory.Function.L2Space
+public import Mathlib.MeasureTheory.Function.UniformIntegrable
 
 /-!
 # Bounded in `L²` ⟹ uniformly integrable in `L¹` (a finite-measure Vitali producer)

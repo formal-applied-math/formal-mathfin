@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.ObstacleComparison
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
+public import Mathlib.Analysis.Calculus.Deriv.Inv
 
 /-!
 # A shrinking-strip subsolution for the expiry estimate

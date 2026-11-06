@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.DriftProcessPredictable
 public import MathFin.Foundations.ItoProcessPredictable
+public import Mathlib.Topology.MetricSpace.Contracting
 
 /-! # SDE existence/uniqueness via Picard on `E` (build)
 

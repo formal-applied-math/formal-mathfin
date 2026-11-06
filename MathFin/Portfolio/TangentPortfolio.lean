@@ -6,7 +6,9 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.LinearAlgebra.Matrix.Notation
+public import Mathlib.Tactic.Ring.RingNF
 
 /-!
 # Tangent portfolio (two-asset closed form, FOC)

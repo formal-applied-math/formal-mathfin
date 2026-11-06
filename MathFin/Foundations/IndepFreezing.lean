@@ -6,7 +6,10 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.MeasureTheory.Function.ConditionalExpectation.PullOut
+public import Mathlib.Probability.ConditionalExpectation
+public import Mathlib.Probability.HasLaw
+public import Mathlib.Probability.Independence.Integration
 
 /-!
 # Freezing an independent variable

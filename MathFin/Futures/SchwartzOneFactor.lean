@@ -5,7 +5,6 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.Vasicek
 public import MathFin.FixedIncome.VasicekSDEGaussian
 

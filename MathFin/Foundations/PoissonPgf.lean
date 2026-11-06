@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Probability.Distributions.Poisson.Basic
 
 /-!
 # The Poisson probability generating function

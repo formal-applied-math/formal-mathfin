@@ -6,7 +6,9 @@ Authors: Robert Martin
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Algebra.Polynomial.RuleOfSigns
+public import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Analysis.Matrix.Spectrum
 
 /-! # Descartes' rule of signs when every root is real
 

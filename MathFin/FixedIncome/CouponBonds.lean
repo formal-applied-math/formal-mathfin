@@ -6,7 +6,6 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.FixedIncome.ZCB
-public import Mathlib
 
 /-!
 # Coupon bonds, annuities, and rate-curve identities

@@ -7,7 +7,10 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.Problem
 public import Mathlib.Analysis.Calculus.Deriv.Slope
-public import Mathlib.MeasureTheory.Integral.DominatedConvergence
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-! # Bounded logarithmic put-payoff difference quotients
 

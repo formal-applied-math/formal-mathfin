@@ -6,7 +6,8 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Geometry.Convex.ConvexSpace.Defs
+public import Mathlib.GroupTheory.GroupAction.Ring
 
 /-!
 # The product of two standard simplices

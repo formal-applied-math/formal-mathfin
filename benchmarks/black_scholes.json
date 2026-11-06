@@ -1407,7 +1407,7 @@
       "description": "min(max(S - K₁, 0), K₂ - K₁) = max(S - K₁, 0) - max(S - K₂, 0). Pure pointwise algebra via case split on S.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.BlackScholes.CappedCall\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem capped_call_eq_bull_spread_thm (S K₁ K₂ : ℝ) (h : K₁ ≤ K₂) :\n    min (max (S - K₁) 0) (K₂ - K₁) = max (S - K₁) 0 - max (S - K₂) 0 :=\n  MathFin.cappedCall_eq_bull_spread S K₁ K₂ h\n"
+        "lean": "import MathFin.BlackScholes.CappedCall\n\nopen Real\nopen MathFin\n\ntheorem capped_call_eq_bull_spread_thm (S K₁ K₂ : ℝ) (h : K₁ ≤ K₂) :\n    min (max (S - K₁) 0) (K₂ - K₁) = max (S - K₁) 0 - max (S - K₂) 0 :=\n  MathFin.cappedCall_eq_bull_spread S K₁ K₂ h\n"
       },
       "metadata": {
         "chapter": 14,

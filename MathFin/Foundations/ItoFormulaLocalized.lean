@@ -7,6 +7,8 @@ module
 
 public import MathFin.Foundations.ItoFormulaTD
 public import MathFin.Foundations.BrownianExpMoment
+public import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+public import Mathlib.Tactic.Polynomial.Basic
 
 /-! # Localized (exponential-growth) time-dependent Itô formula
 

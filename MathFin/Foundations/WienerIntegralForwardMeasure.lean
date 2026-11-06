@@ -5,8 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
-public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.Esscher
 public import MathFin.Foundations.ForwardMeasure
 public import MathFin.Foundations.WienerIntegralExpMoment

@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.SVI.CriticalPoints
 public import Mathlib.LinearAlgebra.QuadraticForm.Signature
+public import Mathlib.Analysis.RCLike.Lemmas
 
 /-! # Signature of a rank-one form
 

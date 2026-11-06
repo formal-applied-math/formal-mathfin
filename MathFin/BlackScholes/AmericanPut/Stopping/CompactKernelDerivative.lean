@@ -5,8 +5,8 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.HeatBoundarySmoothing
 public import MathFin.Init
+public import Mathlib.Analysis.Calculus.ParametricIntegral
 
 /-! # Differentiation of a continuous compact-data kernel integral
 

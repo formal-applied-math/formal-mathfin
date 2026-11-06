@@ -9,7 +9,6 @@ public import MathFin.Foundations.PoissonCompensatedSimpleIntegrand
 public import MathFin.Foundations.ExtendOfNormIsometry
 public import MathFin.Foundations.LpMulIsometry
 public import MathFin.Foundations.PoissonCompensatedBilinear
-public import Mathlib
 
 /-!
 # The compensated-Poisson integral operator on marked simple integrands

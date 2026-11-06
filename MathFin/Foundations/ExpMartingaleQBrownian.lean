@@ -5,8 +5,12 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.BrownianMartingale
 public import MathFin.Foundations.Esscher
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.MeasureTheory.Function.ConditionalExpectation.PullOut
+public import Mathlib.Probability.Independence.CharacteristicFunction
+public import Mathlib.Probability.Independence.Process.HasIndepIncrements.Basic
+public import Mathlib.Probability.Process.Adapted
 
 /-!
 # Brownian increment laws from an exponential martingale

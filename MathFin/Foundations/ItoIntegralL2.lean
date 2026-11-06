@@ -5,12 +5,15 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
 public import BrownianMotion.StochasticIntegral.SimpleProcess
 public import MathFin.Foundations.ItoIsometryAdapted
 public import MathFin.Foundations.LpMulIsometry
 public import BrownianMotion.StochasticIntegral.Predictable
+public import Mathlib.RingTheory.PiTensorProduct
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ReduceModChar
+public import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # The L²-adapted Itô isometry, anchored on Degenne's `SimpleProcess`

@@ -6,7 +6,8 @@ Authors: Robert Martin
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Analysis.Normed.Order.Lattice
+public import Mathlib.Topology.Semicontinuity.Basic
 
 /-! # First contact for a continuous scalar profile
 

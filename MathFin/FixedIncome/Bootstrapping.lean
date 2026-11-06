@@ -10,7 +10,7 @@ public import MathFin.FixedIncome.FRA
 public import MathFin.FixedIncome.InterestRateSwap
 public import MathFin.FixedIncome.ZCB
 public import MathFin.FixedIncome.YieldCurve
-public import Mathlib
+public import Mathlib.Analysis.SpecialFunctions.Log.Base
 
 /-!
 # Curve bootstrapping by bracketing search

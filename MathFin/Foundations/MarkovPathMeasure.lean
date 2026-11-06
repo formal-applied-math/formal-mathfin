@@ -6,7 +6,9 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.CategoryTheory.Countable
+public import Mathlib.Probability.Kernel.IonescuTulcea.Traj
+public import Mathlib.Probability.ProbabilityMassFunction.Basic
 
 /-!
 # The path distribution of a Markov chain (Saporito Theorem 1.1.2)

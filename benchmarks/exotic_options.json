@@ -67,7 +67,7 @@
       "description": "At the chooser date t, max(C_t, P_t) = C_t + max(0, K·e^{-r(T-t)} - S_t). Hence a chooser = long call (strike K, mat. T) + long put-payoff at date t with adjusted strike.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.BlackScholes.Chooser\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem chooser_via_pcp_thm (C P S K_disc : ℝ) (hPCP : C - P = S - K_disc) :\n    max C P = C + max 0 (K_disc - S) :=\n  MathFin.chooser_via_pcp _ _ _ _ hPCP\n"
+        "lean": "import MathFin.BlackScholes.Chooser\n\nopen Real\nopen MathFin\n\ntheorem chooser_via_pcp_thm (C P S K_disc : ℝ) (hPCP : C - P = S - K_disc) :\n    max C P = C + max 0 (K_disc - S) :=\n  MathFin.chooser_via_pcp _ _ _ _ hPCP\n"
       },
       "metadata": {
         "chapter": 14,

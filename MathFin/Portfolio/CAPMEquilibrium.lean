@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Portfolio.CAPM
+public import Mathlib.Algebra.Order.Archimedean.Real.Basic
 
 /-!
 # CAPM from market equilibrium (first-principles derivation)

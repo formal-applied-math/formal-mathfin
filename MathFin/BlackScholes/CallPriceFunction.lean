@@ -6,7 +6,8 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Analysis.Convex.Slope
+public import Mathlib.Topology.Algebra.Ring.Real
 
 /-! # Call price functions
 

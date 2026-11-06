@@ -7,7 +7,7 @@ module
 
 public import MathFin.Foundations.ConvexDuality
 public import MathFin.RiskMeasures.Coherent
-public import Mathlib
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # Coherent risk measures: the Artzner–Delbaen–Eber–Heath representation (finite state)

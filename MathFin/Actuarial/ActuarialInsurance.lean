@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Basic.Real.Basic
 
 -- pointers: MathFin/Actuarial/Insurance.lean
 -- main-module: MathFin/Actuarial/ActuarialInsurance.lean

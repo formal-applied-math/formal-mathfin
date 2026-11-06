@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.ItoIntegralLocality
 public import MathFin.Foundations.PredictableDensityGeneral
+public import Mathlib.CategoryTheory.Countable
 
 /-! # The Itô integral against an Itô integral, and the chain rule
 

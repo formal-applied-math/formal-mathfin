@@ -6,7 +6,9 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.Probability.Distributions.Gaussian.Real
+public import Mathlib.Topology.Separation.CompletelyRegular
 
 /-!
 # Standard normal primitives: CDF, tail, and the Gaussian MGF

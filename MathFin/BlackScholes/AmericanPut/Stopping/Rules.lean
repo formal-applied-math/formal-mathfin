@@ -6,7 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Probability.Process.Stopping
 
 /-!
 # Admissible stopping rules and the value of an optimal stopping problem

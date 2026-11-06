@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.ItoIntegralCovariation
 public import MathFin.Foundations.WienerExponentialTotality
+public import Mathlib.Algebra.Order.Archimedean.Real.Hom
 
 /-!
 # The martingale representation theorem on the Brownian filtration

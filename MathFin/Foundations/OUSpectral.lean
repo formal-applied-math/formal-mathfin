@@ -6,7 +6,13 @@ Authors: Yang Ye
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.RingTheory.Polynomial.Hermite.Basic
+public import Mathlib.Algebra.Polynomial.AlgebraMap
+public import Mathlib.Algebra.Polynomial.Eval.SMul
+public import Mathlib.Analysis.Calculus.Deriv.Pow
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # The OU generator on polynomials: the Hermite eigenlayer

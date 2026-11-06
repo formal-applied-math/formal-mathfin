@@ -6,7 +6,9 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Probability.Distributions.Poisson.Basic
+public import Mathlib.Probability.IdentDistrib
+public import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
 # Thinning (splitting) of a Poisson count: the binomial-marking factorisation

@@ -764,7 +764,7 @@
       "description": "For two assets, the risk-parity weights w₁ = σ₂/(σ₁+σ₂), w₂ = σ₁/(σ₁+σ₂) make each asset contribute equally to portfolio variance — independent of correlation.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Portfolio.RiskParity\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem risk_parity_equal_contribution_thm (σ₁ σ₂ ρ : ℝ) (hσ : σ₁ + σ₂ ≠ 0) :\n    let w₁ := MathFin.riskParityWeightTwo σ₁ σ₂\n    let w₂ := MathFin.riskParityWeightTwo σ₂ σ₁\n    w₁ * (w₁ * σ₁^2 + w₂ * ρ * σ₁ * σ₂) =\n      w₂ * (w₁ * ρ * σ₁ * σ₂ + w₂ * σ₂^2) :=\n  MathFin.risk_parity_equal_contribution σ₁ σ₂ ρ hσ\n"
+        "lean": "import MathFin.Portfolio.RiskParity\n\nopen Real\nopen MathFin\n\ntheorem risk_parity_equal_contribution_thm (σ₁ σ₂ ρ : ℝ) (hσ : σ₁ + σ₂ ≠ 0) :\n    let w₁ := MathFin.riskParityWeightTwo σ₁ σ₂\n    let w₂ := MathFin.riskParityWeightTwo σ₂ σ₁\n    w₁ * (w₁ * σ₁^2 + w₂ * ρ * σ₁ * σ₂) =\n      w₂ * (w₁ * ρ * σ₁ * σ₂ + w₂ * σ₂^2) :=\n  MathFin.risk_parity_equal_contribution σ₁ σ₂ ρ hσ\n"
       },
       "metadata": {
         "chapter": 10,
@@ -785,7 +785,7 @@
       "description": "Posterior mean in the 1D Black-Litterman update equals (s₁²π + s₀²Q)/(s₀²+s₁²), the precision-weighted combination of prior π and view Q.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Portfolio.BlackLitterman\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\ntheorem blackLitterman_mean_eq_precision_weighted_thm\n    (π Q s0sq s1sq : ℝ) (h₀ : 0 < s0sq) (h₁ : 0 < s1sq) :\n    MathFin.posteriorMean1d π Q s0sq s1sq =\n      (π / s0sq + Q / s1sq) / (1 / s0sq + 1 / s1sq) :=\n  MathFin.blackLitterman_mean_eq_precision_weighted π Q s0sq s1sq h₀ h₁\n"
+        "lean": "import MathFin.Portfolio.BlackLitterman\n\nopen MathFin\n\ntheorem blackLitterman_mean_eq_precision_weighted_thm\n    (π Q s0sq s1sq : ℝ) (h₀ : 0 < s0sq) (h₁ : 0 < s1sq) :\n    MathFin.posteriorMean1d π Q s0sq s1sq =\n      (π / s0sq + Q / s1sq) / (1 / s0sq + 1 / s1sq) :=\n  MathFin.blackLitterman_mean_eq_precision_weighted π Q s0sq s1sq h₀ h₁\n"
       },
       "metadata": {
         "chapter": 10,
@@ -806,7 +806,7 @@
       "description": "Posterior variance s₀²s₁²/(s₀²+s₁²) = 1/(1/s₀² + 1/s₁²): precision (1/variance) is additive in independent gaussian updates.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Portfolio.BlackLitterman\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem blackLitterman_var_eq_inv_sum_precision_thm\n    (s0sq s1sq : ℝ) (h₀ : 0 < s0sq) (h₁ : 0 < s1sq) :\n    MathFin.posteriorVariance1d s0sq s1sq = 1 / (1 / s0sq + 1 / s1sq) :=\n  MathFin.blackLitterman_var_eq_inv_sum_precision s0sq s1sq h₀ h₁\n"
+        "lean": "import MathFin.Portfolio.BlackLitterman\n\nopen Real\nopen MathFin\n\ntheorem blackLitterman_var_eq_inv_sum_precision_thm\n    (s0sq s1sq : ℝ) (h₀ : 0 < s0sq) (h₁ : 0 < s1sq) :\n    MathFin.posteriorVariance1d s0sq s1sq = 1 / (1 / s0sq + 1 / s1sq) :=\n  MathFin.blackLitterman_var_eq_inv_sum_precision s0sq s1sq h₀ h₁\n"
       },
       "metadata": {
         "chapter": 10,
@@ -827,7 +827,7 @@
       "description": "The squared Sharpe ratio Sh²(w) has a critical point (HasDerivAt = 0) at weight w iff the cross-product condition r₂·(Σw)₁ = r₁·(Σw)₂ holds — the genuine first-order condition derived from HasDerivAt of Sh² (not an algebraic identity). Non-degeneracy: variance ≠ 0, expected excess return ≠ 0.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Portfolio.SharpeFOCDerivation\n\nopen MeasureTheory ProbabilityTheory Real\nopen MathFin\n\ntheorem sharpe_foc_via_calculus_thm\n    (w r₁ r₂ σ₁ σ₂ ρ : ℝ)\n    (hV : MathFin.varianceTwo w σ₁ σ₂ ρ ≠ 0)\n    (hE : MathFin.expectedReturnTwo w r₁ r₂ ≠ 0) :\n    HasDerivAt (fun w' => MathFin.sharpeSqTwo w' r₁ r₂ σ₁ σ₂ ρ) 0 w ↔\n      r₂ * MathFin.marginalVarOne w σ₁ σ₂ ρ = r₁ * MathFin.marginalVarTwo w σ₁ σ₂ ρ :=\n  MathFin.sharpeSqTwo_critical_iff_crossProduct_FOC w r₁ r₂ σ₁ σ₂ ρ hV hE\n"
+        "lean": "import MathFin.Portfolio.SharpeFOCDerivation\n\nopen Real\nopen MathFin\n\ntheorem sharpe_foc_via_calculus_thm\n    (w r₁ r₂ σ₁ σ₂ ρ : ℝ)\n    (hV : MathFin.varianceTwo w σ₁ σ₂ ρ ≠ 0)\n    (hE : MathFin.expectedReturnTwo w r₁ r₂ ≠ 0) :\n    HasDerivAt (fun w' => MathFin.sharpeSqTwo w' r₁ r₂ σ₁ σ₂ ρ) 0 w ↔\n      r₂ * MathFin.marginalVarOne w σ₁ σ₂ ρ = r₁ * MathFin.marginalVarTwo w σ₁ σ₂ ρ :=\n  MathFin.sharpeSqTwo_critical_iff_crossProduct_FOC w r₁ r₂ σ₁ σ₂ ρ hV hE\n"
       },
       "metadata": {
         "chapter": 10,
@@ -851,7 +851,7 @@
       "description": "If Σw = λ · μ_excess for some scalar λ, then w satisfies the cross-product Sharpe FOC: r_j · (Σw)_i = r_i · (Σw)_j.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Portfolio.TangentPortfolio\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem isTangent_of_proportional_thm {ι : Type*}\n    (s : Finset ι) (μ_excess : ι → ℝ) (Sg : ι → ι → ℝ) (w : ι → ℝ) (lam : ℝ)\n    (h : ∀ i ∈ s, (∑ k ∈ s, Sg i k * w k) = lam * μ_excess i) :\n    MathFin.IsTangentPortfolioN s μ_excess Sg w :=\n  MathFin.isTangent_of_proportional s μ_excess Sg w lam h\n"
+        "lean": "import MathFin.Portfolio.TangentPortfolio\n\nopen Real\nopen MathFin\n\ntheorem isTangent_of_proportional_thm {ι : Type*}\n    (s : Finset ι) (μ_excess : ι → ℝ) (Sg : ι → ι → ℝ) (w : ι → ℝ) (lam : ℝ)\n    (h : ∀ i ∈ s, (∑ k ∈ s, Sg i k * w k) = lam * μ_excess i) :\n    MathFin.IsTangentPortfolioN s μ_excess Sg w :=\n  MathFin.isTangent_of_proportional s μ_excess Sg w lam h\n"
       },
       "metadata": {
         "chapter": 10,

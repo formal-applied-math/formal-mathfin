@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.ItoIntegralAgainstMartingale
 public import BrownianMotion.StochasticIntegral.StochasticIntegral
+public import Mathlib.MeasureTheory.Order.Group.Lattice
 
 /-! # The integral against an Itô integral is a stochastic integral, in BrownianMotion's sense
 

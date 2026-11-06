@@ -23,7 +23,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Algebra.Order.Archimedean.Real.Basic
 
 /-!
 # FTAP both directions, two-state market (after Nagy 2026)

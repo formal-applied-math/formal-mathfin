@@ -6,7 +6,9 @@ Authors: Yang Ye
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # Nelson-Siegel-Svensson yield-curve parametrization

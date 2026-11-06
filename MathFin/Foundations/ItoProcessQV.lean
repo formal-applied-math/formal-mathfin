@@ -5,8 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.QuadraticVariationL2
+public import Mathlib.Algebra.Order.Chebyshev
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Quadratic variation of an Itô process: the drift contributes nothing

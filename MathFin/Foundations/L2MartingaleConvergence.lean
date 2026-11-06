@@ -7,7 +7,7 @@ module
 
 public import MathFin.Foundations.DoobLpMaximalInequality
 public import BrownianMotion.StochasticIntegral.UniformIntegrable
-public import Mathlib
+public import Mathlib.Probability.Martingale.Convergence
 
 /-!
 # L²-bounded discrete martingales converge in L²

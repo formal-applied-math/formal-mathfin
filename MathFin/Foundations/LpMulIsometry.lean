@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.MeasureTheory.Function.L2Space
 
 /-! # Multiplication by `f` as an isometry `L²(f²·ν) → L²(ν)`
 

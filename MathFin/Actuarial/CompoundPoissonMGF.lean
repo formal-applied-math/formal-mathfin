@@ -7,7 +7,7 @@ module
 
 public import MathFin.Foundations.IndepFreezing
 public import MathFin.Foundations.PoissonPgf
-public import Mathlib
+public import Mathlib.Probability.Moments.Basic
 
 /-!
 # The compound-Poisson aggregate-loss MGF

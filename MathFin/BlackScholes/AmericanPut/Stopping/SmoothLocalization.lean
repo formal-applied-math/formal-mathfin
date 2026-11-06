@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.CandidatePDE
 public import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+public import Mathlib.RingTheory.Finiteness.Prod
 
 /-!
 # Compact smooth localization of the Brownian-coordinate price

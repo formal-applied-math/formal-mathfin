@@ -9,7 +9,8 @@ public import MathFin.Binomial.Model
 public import MathFin.Binomial.American
 public import MathFin.Binomial.Bermudan
 public import MathFin.Binomial.CRRClosedForm
-public import Mathlib
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Smooth.Flat
 
 /-!
 # Merton 1973 in the binomial tree

@@ -5,11 +5,11 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Bridges.GaussianGirsanov
 public import MathFin.FixedIncome.VasicekBondPrice
 public import MathFin.FixedIncome.VasicekSDEGaussian
 public import MathFin.Foundations.WienerIntegralGirsanov
+public import Mathlib.Algebra.Ring.IsFormallyReal
 
 /-!
 # Vasicek short rate under a constant market price of risk

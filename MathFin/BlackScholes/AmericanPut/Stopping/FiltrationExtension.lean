@@ -6,7 +6,9 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.LocalizationTimes
-public import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Probability.Martingale.Basic
+public import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
 /-! # Bounded continuous supermartingales under filtration extension
 

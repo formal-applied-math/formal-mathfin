@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Probability.Martingale.Basic
 
 /-!
 # No-arbitrage core: a nonnegative zero-mean payoff vanishes

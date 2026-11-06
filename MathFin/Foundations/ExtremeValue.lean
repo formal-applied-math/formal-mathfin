@@ -6,7 +6,8 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
+public import Mathlib.Probability.Distributions.Exponential
 
 /-!
 # Extreme value theory: the GEV family and maximum domains of attraction

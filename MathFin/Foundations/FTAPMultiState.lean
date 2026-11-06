@@ -10,6 +10,7 @@ public import MathFin.Foundations.ConvexSeparation
 public import MathFin.Foundations.FTAPOnePeriodVector
 public import MathFin.Foundations.StatePrices
 public import Mathlib.Probability.ProbabilityMassFunction.Constructions
+public import Mathlib.Analysis.Normed.Lp.MeasurableSpace
 
 /-!
 # Multi-state FTAP (both directions)

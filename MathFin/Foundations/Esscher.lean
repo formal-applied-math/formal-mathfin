@@ -6,7 +6,10 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Analysis.Analytic.IsolatedZeros
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.MeasureTheory.Measure.Tilted
+public import Mathlib.Probability.Distributions.Gaussian.Real
 
 /-!
 # The Esscher transform of a law on `ℝ`

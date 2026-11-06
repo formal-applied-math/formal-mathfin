@@ -6,7 +6,8 @@ Authors: Raphael Coelho, Yang Ye
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.SpecificLimits.Basic
 
 /-!
 # The bisection method

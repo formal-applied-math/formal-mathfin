@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
 public import MathFin.Init
+public import Mathlib.Probability.Process.Stopping
 
 /-!
 # Paths of a stopped process

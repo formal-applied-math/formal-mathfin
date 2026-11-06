@@ -15,7 +15,9 @@ here with thanks and with the author's kind permission.
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Analysis.Normed.Order.Lattice
+public import Mathlib.MeasureTheory.Constructions.BorelSpace.Order
+public import Mathlib.Probability.ConditionalProbability
 
 /-!
 # The survival model: age-at-death random variable and conditional survival

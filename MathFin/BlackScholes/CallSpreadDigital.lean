@@ -6,7 +6,9 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Analysis.Calculus.ParametricIntegral
+public import Mathlib.Topology.Separation.CompletelyRegular
+public import Mathlib.Topology.Algebra.Group.Order
 
 /-!
 # Call spreads tend to the digital, so call prices determine the law

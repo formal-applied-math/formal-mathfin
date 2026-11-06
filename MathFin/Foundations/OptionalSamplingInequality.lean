@@ -6,7 +6,11 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.Probability.Martingale.Centering
+public import Mathlib.Probability.Martingale.OptionalSampling
+public import Mathlib.Topology.Separation.CompletelyRegular
 
 /-!
 # Optional sampling inequality for submartingales (bounded stopping times)

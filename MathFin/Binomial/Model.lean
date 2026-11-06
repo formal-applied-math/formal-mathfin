@@ -6,7 +6,9 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import Mathlib.Algebra.CharP.Defs
+public import Mathlib.Analysis.Complex.Exponential
+public import Mathlib.Tactic.LinearCombination
 
 /-!
 # Binomial-tree option pricing (Cox-Ross-Rubinstein style)
