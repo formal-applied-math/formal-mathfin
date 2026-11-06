@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (919 MathFin constants, 29 upstream). Citations
+  corpus (916 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -1550,10 +1550,6 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.covariance_eq_integral_cdf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.covariance_eq_integral_cdf
-
-/-- info: 'MathFin.covariance_fst_snd_bivariateNormalLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.covariance_fst_snd_bivariateNormalLaw
 
 /-- info: 'MathFin.covariance_gaussianPair' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3551,10 +3547,6 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.varianceSwap_log_eq_QV_limit_value
 
-/-- info: 'MathFin.variance_fst_bivariateNormalLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.variance_fst_bivariateNormalLaw
-
 /-- info: 'MathFin.variance_gaussianPair' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.variance_gaussianPair
@@ -3570,10 +3562,6 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.variance_singleIndex_portfolio' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.variance_singleIndex_portfolio
-
-/-- info: 'MathFin.variance_snd_bivariateNormalLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.variance_snd_bivariateNormalLaw
 
 /-- info: 'MathFin.variance_terminal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3619,6 +3607,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.weakForwardUniqueConst
 
+/-- info: 'MathFin.willowBeta_bivariateNormal_moments' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.willowBeta_bivariateNormal_moments
+
 /-- info: 'MathFin.willowBeta_eq_sqrt_div' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.willowBeta_eq_sqrt_div
@@ -3626,10 +3618,6 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.willowBeta_eq_sqrt_div'' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.willowBeta_eq_sqrt_div'
-
-/-- info: 'MathFin.willowBeta_sq_le_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.willowBeta_sq_le_one
 
 /-- info: 'MathFin.willowMarginal_crossMoment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
