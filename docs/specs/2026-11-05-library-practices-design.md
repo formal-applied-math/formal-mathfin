@@ -198,6 +198,17 @@ touched, so dot notation becomes the search (`h.price_eq`, not `price_eq_of_isEM
 `whole_mathlib_imports` down. Whether narrower closures bring kernel replay under the 16 GB
 runner is measured after, not promised.
 
+Delivered 2026-11-06: no module imports Mathlib whole (`whole_mathlib_imports` 0). Two rounds:
+`lake shake` narrowed 182 modules, and the other 177 came back as a block of a dozen unrelated
+Mathlib leaves. The block is shake's own: Mathlib marks every module that registers a
+`positivity`, `norm_num`, `inclusion` or `echelon` extension as an *extra reverse use* (extension
+use is not tracked), and shake keeps such a module in every file whose imports reach it.
+`lake exe mathfin_shake` (`MathFinTools/Shake.lean`, Lake's shake with that preservation limited
+to the library's own modules) narrowed the rest. Where a file relied on an upstream extension the
+rebuild failed and the file names the module (`BlackLitterman`: `Positivity.Basic`, kept with a
+note); `WienerIntegralL2`'s endpoint identity, which needed Mathlib's whole simp set, is now
+proved by cases on `min` and `max`.
+
 ### 6d. Metamath's two practices
 
 - **Used-by pages** — the docs site (§7) shows each declaration's `used_by`.
@@ -315,7 +326,7 @@ requirement, 2026-11-06). The link is stored once, in the issue: a body line
   search. `docs-site.yml` publishes it after each green build on main. `docgen-spike.yml` is the
   dispatch-only doc-gen4 measurement; the spike's verdict decides whether doc-gen4 ever replaces
   the generated site.
-- **Import narrowing.** `import-shake.yml` runs `lake shake --fix --add-public --keep-implied`
+- **Import narrowing.** `import-shake.yml` runs `lake exe mathfin_shake --fix --add-public --keep-implied`
   over the library's modules, not the umbrella (shake would prune the umbrella's re-exports).
   It rebuilds the result, lowers the ratchet and commits. Snippets that saw a Mathlib name only
   through a module's whole-Mathlib re-export surface in the next ledger sweep.
