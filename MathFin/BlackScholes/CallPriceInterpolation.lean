@@ -63,9 +63,10 @@ for the interpolant: `IsArbitrageFreeQuotes` is the convexity-and-monotonicity t
   two endpoint quotes (so it is genuinely the piecewise-linear interpolant, not merely some
   convex function agreeing with the data at the knots).
 * `isArbitrageFreeQuotes_of_isNormalizedCallPrice`: the trace a genuine arbitrage-free call price
-  function (`IsNormalizedCallPrice`) leaves on finitely many increasing strikes satisfies
-  `IsArbitrageFreeQuotes` — real market quotes sampled from one automatically do. (One direction
-  only: `IsArbitrageFreeQuotes` carries no price bounds, so it is weaker than being such a trace.)
+  function (`IsNormalizedCallPrice`) leaves on finitely many positive, increasing strikes
+  satisfies `IsArbitrageFreeQuotes` — real market quotes sampled from one automatically do. (One
+  direction only: `IsArbitrageFreeQuotes` carries no price bounds, so it is weaker than being
+  such a trace.)
 -/
 
 @[expose] public section
@@ -267,31 +268,27 @@ private theorem piecewiseLinear_spec (K C : ℕ → ℝ) : ∀ n, 1 ≤ n →
           (Icc (K 0) (K (m' + 1))) := fun x hx ↦ by rw [hdef, ite_eq_left hx.2]
       have hconv' : ConvexOn ℝ (Icc (K 0) (K (m' + 1))) (piecewiseLinear K C (m' + 2)) :=
         hconv.congr heqOn_old
-      have hanti' : AntitoneOn (piecewiseLinear K C (m' + 2)) (Icc (K 0) (K (m' + 1))) := by
-        intro p hp q hq' hpq
-        rw [← heqOn_old hp, ← heqOn_old hq']
-        exact hanti hp hq' hpq
+      have hanti' : AntitoneOn (piecewiseLinear K C (m' + 2)) (Icc (K 0) (K (m' + 1))) :=
+        hanti.congr heqOn_old
       have hjump_glue : ∀ y ∈ Ico (K 0) (K (m' + 1)),
           (piecewiseLinear K C (m' + 2) (K (m' + 1)) - piecewiseLinear K C (m' + 2) y) /
             (K (m' + 1) - y) ≤ sl := by
         intro y hy
         rw [hfb, ← heqOn_old ⟨hy.1, hy.2.le⟩]
+        have hKmm1 : K m' < K (m' + 1) :=
+          hq.strikes_mono (mem_Iic.2 (by omega)) (mem_Iic.2 (by omega)) (by omega)
         by_cases hcase : K m' ≤ y
         · -- y ∈ [K m', K (m'+1)): the IH's own last piece is affine, so the secant is exactly
           -- the discrete slope between the last two knots, which no_butterfly bounds by `sl`
           have heq := hseg m' (by omega) y ⟨hcase, hy.2.le⟩
           have hbf := hq.no_butterfly m' (by omega)
-          have hd : (0 : ℝ) < K (m' + 1) - K m' :=
-            sub_pos.2 (hq.strikes_mono (mem_Iic.2 (by omega)) (mem_Iic.2 (by omega)) (by omega))
           have hy' : (0 : ℝ) < K (m' + 1) - y := by linarith [hy.2]
           have hkey : (C (m' + 1) - piecewiseLinear K C (m' + 1) y) / (K (m' + 1) - y) =
               (C (m' + 1) - C m') / (K (m' + 1) - K m') := by
-            rw [heq]; field_simp [hy'.ne', hd.ne']; ring
+            rw [heq]; field_simp [hy'.ne', (sub_pos.2 hKmm1).ne']; ring
           rw [hkey]; exact hbf
         · -- y < K m': the IH's convexity gives the secant bound via its own last secant
           replace hcase : y < K m' := not_le.mp hcase
-          have hKmm1 : K m' < K (m' + 1) :=
-            hq.strikes_mono (mem_Iic.2 (by omega)) (mem_Iic.2 (by omega)) (by omega)
           have hmem : y ∈ Icc (K 0) (K (m' + 1)) := ⟨hy.1, hy.2.le⟩
           have hnmem : K (m' + 1) ∈ Icc (K 0) (K (m' + 1)) :=
             ⟨(hq.strikes_mono.monotoneOn (mem_Iic.2 (by omega)) (mem_Iic.2 (by omega))
@@ -310,10 +307,8 @@ private theorem piecewiseLinear_spec (K C : ℕ → ℝ) : ∀ n, 1 ≤ n →
       refine ⟨?_, ?_, ?_, ?_⟩
       · exact convexOn_glue h0n hconv' hjump_glue haffine_glue
       · have hright_anti : AntitoneOn (piecewiseLinear K C (m' + 2))
-            (Icc (K (m' + 1)) (K (m' + 2))) := by
-          intro p hp q hq' hpq
-          rw [haffine p hp, haffine q hq']
-          exact antitoneOn_affine_of_nonpos hslnp _ hp hq' hpq
+            (Icc (K (m' + 1)) (K (m' + 2))) :=
+          (antitoneOn_affine_of_nonpos hslnp _).congr (fun z hz ↦ (haffine z hz).symm)
         exact antitoneOn_glue h0n.le hKn.le hanti' hright_anti
       · intro i hi
         rcases Nat.lt_or_ge i (m' + 2) with hi' | hi'
@@ -370,9 +365,9 @@ theorem piecewiseLinear_eq_segment (K C : ℕ → ℝ) {n : ℕ} (hn : 1 ≤ n)
 /-! ### The bridge to the continuous no-arbitrage conditions
 
 `IsArbitrageFreeQuotes` is not an ad hoc discretisation: the trace a genuine arbitrage-free call
-price function (`IsNormalizedCallPrice`, Roper's Theorem 2.1) leaves on any finite increasing set
-of strikes satisfies it. Real market quotes sampled from such a surface automatically
-satisfy the hypotheses this file's interpolant needs. -/
+price function (`IsNormalizedCallPrice`, Roper's Theorem 2.1) leaves on any finite set of
+positive, increasing strikes satisfies it. Real market quotes sampled from such a surface
+automatically satisfy the hypotheses this file's interpolant needs. -/
 
 /-- Sampling a normalised (arbitrage-free) call price function at finitely many positive,
 increasing strikes produces arbitrage-free quotes. -/
