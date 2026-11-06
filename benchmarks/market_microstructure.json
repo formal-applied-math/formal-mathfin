@@ -8,7 +8,7 @@
       "description": "The closed-form Almgren-Chriss trajectory X(t) = X_0 · sinh(κ(T-t))/sinh(κT) satisfies the Euler-Lagrange equation X''(t) = κ² · X(t) at every t. No condition on sinh(κT) is needed: under Lean's x/0 = 0 the degenerate closed form is the zero path, which satisfies the equation too.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Foundations.AlmgrenChriss\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem almgrenChrissPath_satisfies_EL_thm (X_0 κ T t : ℝ) :\n    HasDerivAt (deriv (MathFin.almgrenChrissPath X_0 κ T))\n      (κ^2 * MathFin.almgrenChrissPath X_0 κ T t) t :=\n  MathFin.almgrenChrissPath_satisfies_EL X_0 κ T t\n"
+        "lean": "import MathFin.Foundations.AlmgrenChriss\n\nopen Real\nopen MathFin\n\ntheorem almgrenChrissPath_satisfies_EL_thm (X_0 κ T t : ℝ) :\n    HasDerivAt (deriv (MathFin.almgrenChrissPath X_0 κ T))\n      (κ^2 * MathFin.almgrenChrissPath X_0 κ T t) t :=\n  MathFin.almgrenChrissPath_satisfies_EL X_0 κ T t\n"
       },
       "metadata": {
         "chapter": 16,

@@ -1465,7 +1465,7 @@
       "description": "For a covariance kernel with variance v ≥ 0 and common covariance ρv (ρ ≤ 1) and fully invested weights, the portfolio variance is at least ρv (the identity Var(w) = v((1 − ρ)·HHI(w) + ρ) is `portfolioVarN_equicorrelated_of_sum_eq_one`).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Bridges.EquicorrelationConcentration\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem mul_le_portfolioVarN_equicorrelated_thm {ι : Type*} [DecidableEq ι] {s : Finset ι} {w : ι → ℝ} {σ : ι → ι → ℝ} {v : ℝ} {ρ : ℝ} (h_var : ∀ i ∈ s, σ i i = v) (h_cov : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → σ i j = ρ * v) (h_sum : ∑ i ∈ s, w i = 1) (hv : 0 ≤ v) (hρ : ρ ≤ 1) :\n    ρ * v ≤ portfolioVarN s w σ :=\n  MathFin.mul_le_portfolioVarN_equicorrelated h_var h_cov h_sum hv hρ\n\n"
+        "lean": "import MathFin.Bridges.EquicorrelationConcentration\n\nopen Set Filter Topology\nopen MathFin\n\ntheorem mul_le_portfolioVarN_equicorrelated_thm {ι : Type*} [DecidableEq ι] {s : Finset ι} {w : ι → ℝ} {σ : ι → ι → ℝ} {v : ℝ} {ρ : ℝ} (h_var : ∀ i ∈ s, σ i i = v) (h_cov : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → σ i j = ρ * v) (h_sum : ∑ i ∈ s, w i = 1) (hv : 0 ≤ v) (hρ : ρ ≤ 1) :\n    ρ * v ≤ portfolioVarN s w σ :=\n  MathFin.mul_le_portfolioVarN_equicorrelated h_var h_cov h_sum hv hρ\n\n"
       },
       "metadata": {
         "chapter": 6,
