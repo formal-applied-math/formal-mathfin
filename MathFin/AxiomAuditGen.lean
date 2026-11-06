@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (905 MathFin constants, 29 upstream). Citations
+  corpus (909 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -1139,6 +1139,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.annuityValue_closed_form
 
+/-- info: 'MathFin.antitoneOn_piecewiseLinear' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.antitoneOn_piecewiseLinear
+
 /-- info: 'MathFin.asianGeom_driver_hasLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.asianGeom_driver_hasLaw
@@ -1530,6 +1534,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.convexOn_jumpDiffusionCallPrice_strike' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.convexOn_jumpDiffusionCallPrice_strike
+
+/-- info: 'MathFin.convexOn_piecewiseLinear' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.convexOn_piecewiseLinear
 
 /-- info: 'MathFin.copulaOf_comp_strictMono' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -2998,6 +3006,14 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.payerSwapValue_zcb_eq_zero_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.payerSwapValue_zcb_eq_zero_iff
+
+/-- info: 'MathFin.piecewiseLinear_eq_knot' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.piecewiseLinear_eq_knot
+
+/-- info: 'MathFin.piecewiseLinear_eq_segment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.piecewiseLinear_eq_segment
 
 /-- info: 'MathFin.portfolioVarN_covariance_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

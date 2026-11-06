@@ -517,6 +517,8 @@ import MathFin.BlackScholes.StrikeConvexity
 import MathFin.BlackScholes.SpotConvexity
 import MathFin.BlackScholes.PriceBounds
 import MathFin.BlackScholes.CallPriceFunction
+-- Piecewise-linear arbitrage-free interpolation of a finite quoted call-price smile
+import MathFin.BlackScholes.CallPriceInterpolation
 -- Phase 13 additions:
 -- Quanto correction derived from a joint-Gaussian FX model (Girsanov-grounded)
 import MathFin.BlackScholes.QuantoGrounding
