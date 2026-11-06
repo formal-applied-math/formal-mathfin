@@ -152,15 +152,18 @@ class DeclIndex:
         """(public names the environment has and the textual index lacks,
         names the textual index has and the environment lacks).
 
-        Structure fields and instances are left out: the textual index resolves the
-        constants a benchmark proof cites by name, and Lean generates those two kinds
-        (fields from the structure, instance names from the instance's type), so they are
-        cited through the structure or found by instance search, never by a written name.
+        Structure fields, instances and attribute parsers are left out: the textual index
+        resolves the constants a benchmark proof cites by name, and Lean generates those
+        three kinds (fields from the structure, instance names from the instance's type,
+        `Lean.Parser.Attr.*` from `register_grind_attr` and its kin), so they are cited
+        through the structure, found by instance search or written as an attribute, never
+        by a written name.
         """
         structures = {d.name for d in self.decls.values() if d.kind == "structure"}
         env_names = {d.name for d in self.decls.values()
                      if not d.private and "instance" not in d.attrs
-                     and d.name.rsplit(".", 1)[0] not in structures}
+                     and d.name.rsplit(".", 1)[0] not in structures
+                     and not d.name.startswith("Lean.Parser.Attr.")}
         all_env = {_user_name(n) for n in self.decls}
         return env_names - textual_names, textual_names - all_env
 

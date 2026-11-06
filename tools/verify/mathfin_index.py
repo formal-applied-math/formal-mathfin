@@ -105,7 +105,7 @@ class Decl:
     protected: bool  # `protected`: not reachable by its last component alone
 
 
-_MODIFIERS = r"(?:(?:private|protected|noncomputable|nonrec|partial|unsafe|public|scoped)\s+)*"
+_MODIFIERS = r"(?:(?:private|protected|noncomputable|nonrec|partial|unsafe|public|scoped|meta)\s+)*"
 _ATTRS = r"(?:@\[[^\]]*\]\s*)*"
 _DECL_RE = re.compile(
     r"^\s*" + _ATTRS + r"(?P<mods>" + _MODIFIERS + r")"
@@ -172,7 +172,7 @@ def declaration_index() -> dict[str, Decl]:
 # A declaration start, to bound a proof body: everything from a declaration's
 # top-level `:=` up to the next declaration is proof position.
 DECL_START_RE = re.compile(
-    r"(?m)^\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+)*"
+    r"(?m)^\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+|meta\s+)*"
     r"(?:theorem|lemma|def|abbrev|instance|example)\b")
 
 _OPEN, _CLOSE = "([{", ")]}"

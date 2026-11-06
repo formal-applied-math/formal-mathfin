@@ -12,6 +12,7 @@ from pathlib import Path
 
 from tools.verify import decl_diff
 from tools.verify.decl_index import DeclIndex
+from tools.verify.mathfin_index import _file_declarations
 
 
 def _rec(name, kind="theorem", h="1", private=False, mathfin=True, uses=(), doc=None,
@@ -48,6 +49,22 @@ def test_mathlib_shaped_private(tmp_path: Path) -> None:
         _rec("MathFin.public", mathfin=False, h="3"),
     ])
     assert [d.short_name for d in idx.mathlib_shaped_private()] == ["MathFin.helper"]
+
+
+def test_textual_drift_skips_generated_names(tmp_path: Path) -> None:
+    """Attribute parsers are generated, not written: they are not drift."""
+    idx = _index(tmp_path, [_rec("MathFin.a"), _rec("Lean.Parser.Attr.pricing", kind="def"),
+                            _rec("MathFin.b", h="2")])
+    assert idx.textual_drift({"MathFin.a"}) == ({"MathFin.b"}, set())
+
+
+def test_textual_index_reads_meta_declarations(tmp_path: Path) -> None:
+    """`meta def` (a positivity extension) is a declaration like any other."""
+    f = tmp_path / "X.lean"
+    f.write_text("namespace Mathlib.Meta.Positivity\n"
+                 "@[positivity _]\nmeta def evalPhi : PositivityExt := sorry\n"
+                 "end Mathlib.Meta.Positivity\n")
+    assert [d.name for d in _file_declarations(f)] == ["Mathlib.Meta.Positivity.evalPhi"]
 
 
 def test_find_ranks_name_over_doc(tmp_path: Path) -> None:
