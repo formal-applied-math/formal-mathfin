@@ -344,14 +344,15 @@ requirement, 2026-11-06). The link is stored once, in the issue: a body line
   statement mentions no MathFin constant; the host-side approximation, which reads statements
   as text, found 170 of them. Two are upstream lemmas under a local name and are
   gone: `obsTimes_append_le` is core's `List.forall_mem_append`, and `disjoint_prod_time` is
-  `Set.disjoint_prod`. The other 168 are public, under names that say what they prove
-  (`condExp_func_increment` → `IsFilteredPreBrownian.condExp_comp_increment_eq_const`,
-  `integral_lin_comb3` → `setIntegral_const_mul_sub_const_mul_add_const_mul`, …), each with a
-  docstring. Making them public exposed a second copy:
-  `PointwiseBracket`'s private increment lemma was the Brownian-martingale one at the natural
-  filtration, so `PointwiseBracket` now imports it and the copy is deleted. The next index
-  shows the remainder the text scan missed, which gets the same treatment. A private lemma
-  that mentions a MathFin constant is a file-local helper and stays private.
+  `Set.disjoint_prod`. The others are public, under names that say what they prove
+  (`integral_lin_comb3` → `setIntegral_const_mul_sub_const_mul_add_const_mul`,
+  `callPayoff_le_exp` → `abs_max_exp_sub_zero_le_exp`, …), each with a docstring. Making them
+  public exposed a second copy: `PointwiseBracket`'s private increment lemma
+  (`condExp_func_increment`) was the Brownian-martingale one at the natural filtration, so
+  `PointwiseBracket` now imports `IsFilteredPreBrownian.condExp_comp_increment_eq_const` and
+  the copy is deleted. The index's first run found 24 the text scan had missed (a docstring
+  or `omit … in` on the line above `private`); they are public too, and the count is zero. A
+  private lemma that mentions a MathFin constant is a file-local helper and stays private.
 - **Heartbeat bumps stay at their baseline (9).** Each is a long proof (89 to 614 lines) that
   needs splitting into lemmas, and that work needs Lean in the loop. The count can only fall.
 
