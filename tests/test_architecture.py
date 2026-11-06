@@ -49,7 +49,7 @@ def _modules() -> dict[str, list[str]]:
         if path.name.startswith("."):  # tool temp files (`ledger verify --exec`), not modules
             continue
         name = _module_name(path)
-        if name in AGGREGATORS or name.startswith("MathFin.Blueprint."):
+        if name in AGGREGATORS:
             continue
         mods[name] = IMPORT_RE.findall(path.read_text(encoding="utf-8"))
     return mods

@@ -1,0 +1,11 @@
+{
+  "_doc": "Debt counts that may fall and may not rise (tools/verify/ratchet.py). Lower with `python3 -m tools.verify.ratchet update`; never edit a value upward.",
+  "baseline": {
+    "max_heartbeats": 9,
+    "whole_mathlib_imports": 359,
+    "long_files": 0,
+    "nolints": 24,
+    "modules_without_tags": 705,
+    "modules_without_references": 683
+  }
+}

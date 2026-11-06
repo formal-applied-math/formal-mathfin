@@ -37,7 +37,9 @@ no extra config needed.
 
 Before opening a PR use the PR template (`.github/PULL_REQUEST_TEMPLATE.md`).
 The CI pipeline runs `pytest tests/ -q` → `python3 -m tools.verify.ledger status` →
-`lake build` in that order. A red gate at any step blocks merge.
+`lake build` → the declaration index and its ratchet checks, in that order. A red gate at any
+step blocks merge. The run summary lists the declarations the PR adds, removes, renames, and
+whose statements it changes: a golf or refactor PR should change no statement.
 
 ## Adding a theorem
 
