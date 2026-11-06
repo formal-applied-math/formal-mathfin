@@ -8,7 +8,7 @@ module
 public import MathFin.BlackScholes.PDE
 public import MathFin.BlackScholes.PutGreeks
 public import MathFin.Foundations.NormalTail
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Implied volatility: uniqueness, and existence above a reference volatility

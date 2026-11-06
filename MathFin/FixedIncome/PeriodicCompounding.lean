@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.FixedIncome.ZCB
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Periodic compounding against the continuously compounded bond

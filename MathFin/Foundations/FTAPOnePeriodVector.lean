@@ -8,7 +8,7 @@ module
 public import MathFin.Foundations.EquivMeasure
 public import MathFin.Foundations.FTAP
 public import MathFin.Foundations.NoArbitrageCore
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # One-period FTAP on a general probability space (finite-dimensional market)

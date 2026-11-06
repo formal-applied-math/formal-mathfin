@@ -8,7 +8,7 @@ module
 public import MathFin.Foundations.DoobLpMaximalInequality
 public import BrownianMotion.StochasticIntegral.UniformIntegrable
 public import BrownianMotion.StochasticIntegral.DoobLp
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Lp continuous-martingale convergence (Theorem 4.3.10, Saporito)

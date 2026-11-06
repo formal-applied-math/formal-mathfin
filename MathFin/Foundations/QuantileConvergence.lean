@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.Quantile
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Convergence of quantiles and of empirical distribution functions

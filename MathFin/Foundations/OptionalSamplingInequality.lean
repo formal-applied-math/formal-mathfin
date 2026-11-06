@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Optional sampling inequality for submartingales (bounded stopping times)

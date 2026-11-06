@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Portfolio.Markowitz
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # N-asset Markowitz portfolio variance (sum form)

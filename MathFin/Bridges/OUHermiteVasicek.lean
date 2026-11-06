@@ -5,7 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.ShakeScaffold
 public import MathFin.Foundations.OUSpectral
 public import MathFin.Foundations.GaussianMoments
 public import MathFin.FixedIncome.VasicekSDEGaussian

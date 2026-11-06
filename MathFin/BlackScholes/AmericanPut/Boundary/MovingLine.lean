@@ -6,7 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.Init
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Exact change to coordinates relative to a decreasing straight line

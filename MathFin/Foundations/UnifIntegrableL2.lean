@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Bounded in `L²` ⟹ uniformly integrable in `L¹` (a finite-measure Vitali producer)

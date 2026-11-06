@@ -6,7 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.Init
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Selecting a negative-intercept concave tangent

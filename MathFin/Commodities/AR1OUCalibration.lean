@@ -5,7 +5,7 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.ShakeScaffold
 public import MathFin.FixedIncome.VasicekSDE
 public import MathFin.FixedIncome.Vasicek
 public import MathFin.FixedIncome.VasicekSDEGaussian

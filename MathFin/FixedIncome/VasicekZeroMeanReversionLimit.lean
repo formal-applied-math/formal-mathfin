@@ -5,7 +5,7 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
+public import MathFin.ShakeScaffold
 public import MathFin.FixedIncome.VasicekBondPrice
 public import MathFin.FixedIncome.VasicekMarketPriceOfRisk
 

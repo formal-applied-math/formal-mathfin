@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Sharpe ratio and Kelly criterion

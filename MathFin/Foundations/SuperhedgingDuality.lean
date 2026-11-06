@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.FTAPMultiState
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # The fundamental superhedging bound

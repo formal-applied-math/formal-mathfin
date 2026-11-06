@@ -6,7 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.Init
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # A two-sided Cauchy comparison lemma for a factored real ODE

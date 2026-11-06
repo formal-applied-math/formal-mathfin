@@ -5,7 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.ShakeScaffold
 public import BrownianMotion.Gaussian.BrownianMotion
 public import BrownianMotion.StochasticIntegral.SimpleProcess
 public import MathFin.Foundations.ItoIsometryAdapted

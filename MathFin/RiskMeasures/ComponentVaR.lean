@@ -9,7 +9,7 @@ public import MathFin.Portfolio.MarkowitzNAsset
 public import MathFin.Portfolio.CovariancePSD
 public import MathFin.Portfolio.RiskParityFOC
 public import MathFin.Bridges.GaussianRiskMarkowitz
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Component and marginal Value-at-Risk (the Euler allocation)

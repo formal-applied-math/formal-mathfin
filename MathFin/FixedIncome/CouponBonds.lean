@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.FixedIncome.ZCB
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Coupon bonds, annuities, and rate-curve identities

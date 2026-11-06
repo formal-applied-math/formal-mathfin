@@ -6,7 +6,7 @@ Authors: Robert Martin, Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Directional derivatives of plane functions

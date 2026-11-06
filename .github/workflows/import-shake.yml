@@ -1,10 +1,16 @@
 name: import shake
 
 # Narrow the library's imports on a runner (docs/specs/2026-11-05-library-practices-design.md
-# §6c). 359 modules `public import Mathlib` whole; `lake shake` reads the built `.olean`s,
-# finds which modules each file actually needs, and rewrites its import list. It needs the
-# whole library built, which is runner work under the memory doctrine (CLAUDE.md), so it runs
-# here and commits the result to the branch it was dispatched on.
+# §6c). `lake shake` reads the built `.olean`s, finds which modules each file actually needs, and
+# rewrites its import list. It needs the whole library built, which is runner work under the
+# memory doctrine (CLAUDE.md), so it runs here and commits the result to the branch it was
+# dispatched on.
+#
+# Shake also counts every module whose extension a tactic consulted (`norm_num`, `positivity`,
+# `simp` record them all), so a module importing Mathlib whole is "narrowed" to a block of number
+# theory, combinatorics and `Sheaves.Init` that hides what it uses. `MathFin/ShakeScaffold.lean`,
+# when present, is Mathlib without those modules: a branch points the whole-Mathlib modules at it,
+# shake replaces it by what each file uses, and this workflow deletes it before the rebuild.
 #
 # Flags: `--add-public` makes a replacement import `public` when what it replaces was in the
 # public closure, so a downstream module keeps seeing what it saw; `--keep-implied` keeps an
@@ -61,10 +67,19 @@ jobs:
 
       - name: Shake the library's imports
         run: |
-          mods=$(git ls-files 'MathFin/*.lean' | grep -v -E '^MathFin/(AxiomAudit|AxiomAuditGen|Blueprint)\.lean$' \
+          mods=$(git ls-files 'MathFin/*.lean' | grep -v -E '^MathFin/(AxiomAudit|AxiomAuditGen|Blueprint|ShakeScaffold)\.lean$' \
             | sed -e 's/\.lean$//' -e 's|/|.|g')
           lake shake --fix --add-public --keep-implied $mods
           git diff --stat | tail -1
+
+      - name: Remove the scaffold
+        run: |
+          if [ -f MathFin/ShakeScaffold.lean ]; then
+            git rm -q MathFin/ShakeScaffold.lean
+            if git grep -n 'MathFin.ShakeScaffold' -- MathFin; then
+              echo "::error::modules still import the scaffold (a keep annotation?)"; exit 1
+            fi
+          fi
 
       - name: Build the narrowed library
         run: lake build
@@ -81,7 +96,7 @@ jobs:
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add MathFin ratchet.json
+          git add -A MathFin ratchet.json
           git commit \
             -m "chore(imports): narrow the library's imports with lake shake" \
             -m "import-shake.yml: 'lake shake --fix --add-public --keep-implied' over every library module, then a full 'lake build' of the result. The ratchet's whole_mathlib_imports is lowered to match."

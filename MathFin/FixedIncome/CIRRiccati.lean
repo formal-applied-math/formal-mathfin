@@ -6,7 +6,7 @@ Authors: Alfredo Garcia
 module
 
 public import MathFin.Init
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # The CIR loadings solve their term-structure equations

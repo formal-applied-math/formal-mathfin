@@ -6,7 +6,7 @@ Authors: Yang Ye, Raphael Coelho
 module
 
 public import MathFin.Portfolio.CovariancePSD
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Basel SA-CCR: exposure at default and effective notional aggregation

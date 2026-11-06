@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.PoissonCompensatedIsometryAdapted
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # The marked simple integrand as a vector space

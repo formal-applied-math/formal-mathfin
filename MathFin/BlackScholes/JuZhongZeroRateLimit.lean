@@ -5,7 +5,7 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
+public import MathFin.ShakeScaffold
 public import MathFin.BlackScholes.DividendsGreeks
 public import MathFin.BlackScholes.JumpDiffusionMixing
 public import MathFin.FixedIncome.VasicekZeroMeanReversionLimit

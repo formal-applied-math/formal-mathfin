@@ -10,7 +10,7 @@ public import MathFin.Foundations.MartingaleTransform
 public import MathFin.Foundations.FTAP
 public import MathFin.Foundations.FTAPOnePeriod
 public import MathFin.Foundations.NoArbitrageCore
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Discrete-time FTAP on a finite probability space (scalar, finite horizon)

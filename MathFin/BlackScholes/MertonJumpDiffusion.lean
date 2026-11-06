@@ -9,7 +9,7 @@ public import MathFin.BlackScholes.Call
 public import MathFin.BlackScholes.Put
 public import MathFin.Foundations.PoissonPgf
 public import MathFin.BlackScholes.PDE
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Merton (1976) jump-diffusion option pricing: the Poisson-mixture series

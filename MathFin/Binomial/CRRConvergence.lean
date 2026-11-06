@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Binomial.Model
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Cox-Ross-Rubinstein convergence to Black-Scholes

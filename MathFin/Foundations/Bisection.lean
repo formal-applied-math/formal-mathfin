@@ -6,7 +6,7 @@ Authors: Raphael Coelho, Yang Ye
 module
 
 public import MathFin.Init
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # The bisection method

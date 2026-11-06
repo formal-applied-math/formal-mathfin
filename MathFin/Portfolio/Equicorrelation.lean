@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Portfolio.CovariancePSD
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # The equicorrelation matrix: when is a common correlation admissible?

@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.DerivOfDeriv
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Almgren-Chriss optimal execution (deterministic closed form)

@@ -7,7 +7,7 @@ module
 
 public import MathFin.BlackScholes.PDE
 public import MathFin.BlackScholes.GreekSigns
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Spot-direction convexity of the Black–Scholes call

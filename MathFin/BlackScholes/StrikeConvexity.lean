@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.BlackScholes.PutGreeks
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Strike-direction convexity at every scale

@@ -5,7 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.ShakeScaffold
 public import MathFin.FixedIncome.VasicekBondPrice
 public import MathFin.FixedIncome.VasicekSDEGaussian
 public import MathFin.Foundations.WienerIntegralFiltration

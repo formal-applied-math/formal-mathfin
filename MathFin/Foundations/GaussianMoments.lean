@@ -7,7 +7,7 @@ module
 
 public import MathFin.Init
 public import BrownianMotion.Gaussian.Moment
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Gaussian moments

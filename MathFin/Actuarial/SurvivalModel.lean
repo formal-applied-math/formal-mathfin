@@ -15,7 +15,7 @@ here with thanks and with the author's kind permission.
 module
 
 public import MathFin.Init
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # The survival model: age-at-death random variable and conditional survival

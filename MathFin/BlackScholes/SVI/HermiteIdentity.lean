@@ -10,7 +10,7 @@ public import MathFin.BlackScholes.SVI.RealIrreducibles
 public import MathFin.BlackScholes.SVI.RealRootSignature
 public import MathFin.BlackScholes.SVI.TraceSignature
 public import MathFin.BlackScholes.SVI.QuotientProduct
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-! # Hermite's trace-form identity
 

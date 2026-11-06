@@ -6,7 +6,7 @@ Authors: Yang Ye, Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # KKT conditions for a convex QP with linear inequality constraints

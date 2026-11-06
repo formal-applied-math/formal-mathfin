@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.PoissonCompensatedIntegralL2
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # The Itô–Lévy isometry in `L²`-norm form

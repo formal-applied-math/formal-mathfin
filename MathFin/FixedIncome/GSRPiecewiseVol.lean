@@ -5,7 +5,7 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.ShakeScaffold
 public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.WienerIntegralGaussian
 public import MathFin.Foundations.WienerIntegralExpMoment

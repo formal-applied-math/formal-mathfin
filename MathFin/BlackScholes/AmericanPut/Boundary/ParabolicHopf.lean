@@ -6,7 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.ParabolicMaximum
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Terminal-time boundary derivative from an explicit parabolic barrier

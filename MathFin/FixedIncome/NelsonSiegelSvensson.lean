@@ -6,7 +6,7 @@ Authors: Yang Ye
 module
 
 public import MathFin.Init
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Nelson-Siegel-Svensson yield-curve parametrization

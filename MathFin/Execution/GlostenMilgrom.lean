@@ -6,7 +6,7 @@ Authors: Alfredo Garcia
 module
 
 public import MathFin.Init
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Glosten-Milgrom adverse-selection bid-ask spread

@@ -6,7 +6,7 @@ Authors: Yang Ye, Raphael Coelho
 module
 
 public import MathFin.Foundations.NoArbitrageDerivations
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Fisher/Sraffa own-rate-of-interest identity

@@ -6,7 +6,7 @@ Authors: Yang Ye, Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Weak uniqueness for the constant-coefficient forward equation

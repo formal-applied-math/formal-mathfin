@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.DerivOfDeriv
-public import Mathlib
+public import MathFin.ShakeScaffold
 
 /-!
 # Fixed-income basics under a deterministic short rate
