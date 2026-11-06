@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.HeatBoundarySmoothing
+public import MathFin.Init
 
 /-! # Differentiation of a continuous compact-data kernel integral
 

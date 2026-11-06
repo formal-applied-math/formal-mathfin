@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.Coordinates
+public import MathFin.Init
 
 /-!
 # The normalized American-put problem: coordinates, payoff, operator

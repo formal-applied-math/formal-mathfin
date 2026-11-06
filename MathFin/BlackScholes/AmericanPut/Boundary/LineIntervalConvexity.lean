@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.ContinuousContact
+public import MathFin.Init
 
 /-! # Derivative-free convexity from negative-intercept line intervals
 

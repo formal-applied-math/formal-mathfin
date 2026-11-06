@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.SVI.Polynomial
+public import MathFin.Init
 
 /-! # The certificate matrices
 

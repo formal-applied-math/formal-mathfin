@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
+public import MathFin.Init
 
 /-!
 # Paths of a stopped process

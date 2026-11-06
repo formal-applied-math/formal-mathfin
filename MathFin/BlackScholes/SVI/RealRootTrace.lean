@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.SVI.TraceForm
+public import MathFin.Init
 
 /-! # Traces at a repeated real root
 
