@@ -181,15 +181,11 @@ lemma min_sub_min_sub_min_add_min_eq_max_zero
     ((min t v : ℝ≥0) : ℝ) - ((min t u : ℝ≥0) : ℝ) -
       ((min s v : ℝ≥0) : ℝ) + ((min s u : ℝ≥0) : ℝ) =
         max 0 ((min (t : ℝ) v) - (max (s : ℝ) u)) := by
+  have hst : (s : ℝ) ≤ t := mod_cast hst
+  have huv : (u : ℝ) ≤ v := mod_cast huv
   push_cast
-  have hsR : (s : ℝ) ≤ t := by exact_mod_cast hst
-  have huR : (u : ℝ) ≤ v := by exact_mod_cast huv
-  rcases le_total (s : ℝ) u with hsu | hsu
-  all_goals rcases le_total (t : ℝ) u with htu | htu
-  all_goals rcases le_total (t : ℝ) v with htv | htv
-  all_goals rcases le_total (s : ℝ) v with hsv | hsv
-  all_goals simp_all
-  all_goals nlinarith
+  simp only [min_def, max_def]
+  split_ifs <;> linarith
 
 /-- Covariance identity for BM increments:
 `E[(B_t - B_s)(B_v - B_u)] = vol((s, t] ∩ (u, v])`,
