@@ -130,6 +130,93 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-11-06 — corpus 779, modules 710 — library practices (#439), read before it lands
+
+Scope: #439, the library-practices program (`docs/specs/2026-11-05-library-practices-design.md`):
+the declaration index, one ratchet, one host-side library model, one doc standard on every module,
+one bibliography, `MathFin/Init.lean`, the blueprint ↔ issues link, and the debt the index found.
+Three read-only reviewers: the lemmas this branch made public (lenses 2, 3, 6), the Lean structure
+it changed (`IsEMM`, the twelve removed duplicates, the `pricing` set, the renames; lenses 1, 4,
+5), and 85 rewritten module docstrings against their statements (lenses 7, 8 and the first pass).
+Their findings were adjudicated against the code, executed, and built before the branch landed.
+
+### The standing first pass: prose against statement
+
+The doc standard put a `## Main results` list in every module, about 170 of them written this
+session, which is a great deal of new prose to read against statements. Seven bullets said more
+than the theorem: a balance equation over abstract reals read as a hazard-model theorem
+(`cdsFairSpread_TV_cash_flow_balance`); a conditional-expectation identity as "is a martingale"
+(`condExp_itoProcessCLM_min`); the binomial representation without its second martingale's
+nondegeneracy and `0 < q < 1`; the jump-diffusion martingale criterion without `S₀ ≠ 0` and
+integrable `e^J`, and its MGF without `∫ e^{θx} dν < ∞` (the junk-value case); a consistency
+witness read as a nontrivial density, where it is `Q = μ`; and a one-period zero-mean identity as
+a martingale. All are restated. One flagged bullet was dismissed: the Glosten–Milgrom average does
+go through `integral_condExp`. Seven modules still had bare name lists under Main results (`Cox`,
+`HullWhiteCalibration`, `Bootstrapping`, `CMS`, `UniswapMechanics`, `MarshallOlkin`,
+`ConvexDuality`); they are bullets now, hypotheses included. Beyond the bullets:
+`martingale_comp_monotone` claimed to be the sampling bridge of the forward FTAP, which uses
+`IsEMM.sampled`, and the `pricing` set promised discounting and forward-price lemmas it never held.
+
+### Upgrades executed
+
+- **One-liners inline, upstream by name.** The index's count of Mathlib-shaped private lemmas went
+  193 → 0, but the first resolution made every one public, and the coherence panel found 52 thin
+  wrappers, 9 upstream copies and 4 duplicates among them. Publishing a one-liner trades a hidden
+  helper for a public wrapper. 26 are gone: 23 written inline (`by positivity`, `fun_prop`,
+  `rw [abs_div, abs_two]`, `.pos_part`, …), `hasDerivAt_const_mul` and
+  `intervalIntegral.continuous_primitive` called by name, and `absolutelyContinuous_of_pos`
+  folded into `eq_empty_of_pos_singleton`. 34 stay, each for a stated reason (a rewrite handle in
+  `rw` lists, an upstream lemma outside the file's imports, an ascription longer than the lemma).
+  The spec and `decl_index.mathlib_shaped_private` now name the three resolutions.
+- **One `L²` increment.** `memLp_increment` (`GaussianMoments`, beside `hasLaw_increment`): for
+  any two times, `B t − B s ∈ L²(μ)`. It replaces `WienerIntegralL2.memLp_increment_two` (on a
+  `StepIndex`) and `PointwiseBracket.memLp_increment` (with an order hypothesis it never used).
+- **The `pricing` set holds what grind can use.** `mertonTerm_parity` and `margrabe_parity` were
+  tagged with no example. Pinned, both failed: each is stated as a difference (`call − put = …`),
+  so grind's only pattern is that difference, which a rearranged goal never contains. Both are
+  untagged, and the set's description now says what it holds (parity on the closed forms, the
+  trees' risk-neutral probabilities).
+- **Renames finished.** `memLp_uncurry_trim_T` → `memLp_uncurry_trimMeasure`,
+  `assembly_isometry_T` → `norm_itoAssemblyHorizon` (their objects were renamed in this branch);
+  `max_zero_sub_eq_self` (a Mathlib alias) → `max_zero_sub_max_neg_zero_eq_self`, the name the
+  rest of the library uses.
+
+Confirmed and fine: the one `IsEMM` over `[LinearOrder ι]` (no restated ℕ or ℝ≥0 lemma survives),
+the twelve duplicates went to the copies every user imports, the `PointwiseBracket` increment
+merge, and the `TwoState`/`MultiState`/`Horizon` renames.
+
+### Ranked backlog
+
+1. **The Brownian increment kernels at `IsFilteredPreBrownian`.** Mean zero and variance of an
+   increment given `𝓕_s` are derived inline in `squareSubTime_isMartingale`, again in
+   `PointwiseBracket.condExp_increment_eq_zero`/`_sq`, and a third time in
+   `integral_sq_increment`. State `IsFilteredPreBrownian.condExp_increment_eq_zero` and `_sq`
+   once, and make the others instances.
+2. **The exponential survival function, once.** `expMeasure_real_Ioi` (`MarshallOlkin`),
+   `expMeasure_Ioi` (`ExpMin`, its `ofReal` form) and `expClock_Ioi`/`_Iic` (`Cox`, at rate 1)
+   state it three times; the survivor belongs in a module the other two import.
+3. **The kept wrappers.** The six chain-rule shims in `WeakForwardUniqueness` are
+   `HasDerivAt.cos`/`.sin` of `hasDerivAt_const_mul` plus `congr_deriv (by ring)`;
+   `martingale_norm_submartingale` and `iSup_rpow_of_monotone` are BrownianMotion's
+   `Martingale.submartingale_norm` and `ENNReal.rpow_iSup` once `DoobLpMaximalInequality` imports
+   it; the four `Lp.const` helpers in `MartingaleRepresentation` vanish if constants are written
+   `Lp.const 2 μ c`; `convexOn_inv_shift` is `convexOn_zpow (-1)` after a translation. Each needs
+   Lean in the loop.
+4. **`IsEMM.sampled` and `sampledFiltration` at a monotone `t : κ → ι`**, beside the already
+   general `IsEMM.increment`; and the vector, general-`Ω` form of `isEMM_one_iff_onePeriod`, which
+   retires the hand-built two-step filtration in `noArbitrage_of_isEMM`.
+5. **First principles.** `emm_unique_of_complete` uses only `IsEquivProbMeasure` of its `IsEMM`
+   argument; state it there.
+6. **Names.** `OnePeriodVector.IsEMM` shadows the unified `IsEMM` inside its namespace; the
+   `Horizon` suffix next to unsuffixed `trimMeasure`/`itoIsometry` hides which objects are the
+   horizon ones; `band_overlap_real`, `min_gt_iInter` and `upperPartialMoment_sub` say nothing
+   about their statements; the MatrixSignature `toQuadraticForm'` lemmas are upstream candidates
+   that will collide when Mathlib adds them.
+7. **Merton and Margrabe parity in price form.** `bsP_eq_bsV` states the put as a function of the
+   call, which gives grind a pattern; restate `mertonTerm_parity` and `margrabe_parity` the same
+   way and tag them, with a pinned example each.
+8. **The nine heartbeat bumps** (89 to 614 lines each): one lemma per idea, with Lean in the loop.
+
 ## 2026-11-05 — corpus 779, modules 709 — the backlog closed on main, read before it lands
 
 Scope: #418, the CDS half of #367 and the backlogs of the two 2026-11-04 entries, in four areas
