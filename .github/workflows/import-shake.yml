@@ -28,6 +28,11 @@ name: import shake
 
 on:
   workflow_dispatch:
+    inputs:
+      trace_module:
+        description: "diagnose instead: elaborate this module (e.g. MathFin.Performance.Ratios) with trace.extraModUses and print what it records, and why"
+        required: false
+        default: ""
 
 concurrency:
   group: import-shake-${{ github.ref }}
@@ -67,7 +72,23 @@ jobs:
           lint: "false"
           use-mathlib-cache: "false"
 
+      - name: Trace a module's recorded elaboration uses
+        if: inputs.trace_module != ''
+        env:
+          MOD: ${{ inputs.trace_module }}
+        run: |
+          f="$(echo "$MOD" | sed 's|\.|/|g').lean"
+          python3 - "$f" <<'PY'
+          import sys
+          p = sys.argv[1]
+          s = open(p, encoding="utf-8").read()
+          s = s.replace("@[expose] public section", "@[expose] public section\n\nset_option trace.extraModUses true", 1)
+          open(p, "w", encoding="utf-8").write(s)
+          PY
+          lake env lean "$f" 2>&1 | grep -o "recording .*" | sort | uniq -c | sort -rn | head -400
+
       - name: Shake the library's imports
+        if: inputs.trace_module == ''
         run: |
           mods=$(git ls-files 'MathFin/*.lean' | grep -v -E '^MathFin/(AxiomAudit|AxiomAuditGen|Blueprint|ShakeScaffold)\.lean$' \
             | sed -e 's/\.lean$//' -e 's|/|.|g')
@@ -77,6 +98,7 @@ jobs:
           git diff -U0 -- MathFin | grep -E '^\+(public )?import' | sort | uniq -c | sort -rn | head -25
 
       - name: Remove the scaffold
+        if: inputs.trace_module == ''
         run: |
           if [ -f MathFin/ShakeScaffold.lean ]; then
             git rm -qf MathFin/ShakeScaffold.lean
@@ -86,14 +108,17 @@ jobs:
           fi
 
       - name: Build the narrowed library
+        if: inputs.trace_module == ''
         run: lake build
 
       - name: Python gates and the lowered ratchet
+        if: inputs.trace_module == ''
         run: |
           python3 -m tools.verify.ratchet update
           python3 -m tools.verify.ratchet show | grep whole_mathlib_imports
 
       - name: Commit
+        if: inputs.trace_module == ''
         run: |
           if git diff --quiet -- MathFin ratchet.json; then
             echo "imports already minimal — nothing to commit"; exit 0
