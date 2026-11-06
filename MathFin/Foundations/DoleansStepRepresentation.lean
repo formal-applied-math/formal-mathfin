@@ -251,7 +251,7 @@ feed. Stated for the exponential of the *increment sum* with an arbitrary scale 
 which is what makes the induction step go through: the square of the `(n+1)`-fold
 exponential is the `n`-fold one at scale `2c` times a single lognormal factor, and
 Cauchy–Schwarz (`MemLp.integrable_mul`) multiplies them. -/
-private lemma memLp_exp_stepSum (hBmeas : ∀ t, Measurable (B t)) (s : ℕ → ℝ≥0) (h : ℕ → ℝ) :
+lemma memLp_exp_stepSum (hBmeas : ∀ t, Measurable (B t)) (s : ℕ → ℝ≥0) (h : ℕ → ℝ) :
     ∀ (m : ℕ) (c : ℝ), MemLp (fun ω ↦ Real.exp (c *
       ∑ k ∈ Finset.range m, h k * (B (s (k + 1)) ω - B (s k) ω))) 2 μ := by
   have hmeas (m : ℕ) (c : ℝ) : AEStronglyMeasurable (fun ω ↦ Real.exp (c *

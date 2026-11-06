@@ -73,7 +73,7 @@ include hB hBmeas
 omit hBmeas in
 /-- Third moment of a Brownian increment: `E[(B_{t₁} − B_{t₀})³] = 0` for `t₀ ≤ t₁`
 (the law-transfer of the vanishing odd Gaussian moment). -/
-private theorem integral_increment_pow3
+theorem integral_increment_pow3
     {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) :
     ∫ ω, (B t₁ ω - B t₀ ω) ^ 3 ∂μ = 0 := by
   have hv : nndist (t₁ : ℝ) (t₀ : ℝ) = t₁ - t₀ := by

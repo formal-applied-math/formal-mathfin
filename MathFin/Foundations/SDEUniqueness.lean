@@ -134,7 +134,7 @@ lemma sq_intervalIntegral_le {f : ℝ → ℝ} {s : ℝ} (hs : 0 ≤ s)
 the time-integrated state energy:
 `𝔼[(∫₀ˢ(μ(Xᵤ)−μ(Yᵤ)))²] ≤ Lμ²·s·∫₀ˢ 𝔼[(Xᵤ−Yᵤ)²]`. This *derives* the drift hypothesis of
 `sde_pathwise_uniqueness` (with `Cdrift = Lμ²`), so the drift term is not assumed but proven. -/
-private lemma drift_energy_le {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
+lemma drift_energy_le {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
     [IsProbabilityMeasure μ] {μ_coef : ℝ → ℝ} {Lμ : ℝ≥0} (hμ : LipschitzWith Lμ μ_coef)
     {X Y : ℝ → Ω → ℝ} {s : ℝ} (hs : 0 ≤ s)
     (hfL2 : ∀ᵐ ω ∂μ,

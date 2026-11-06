@@ -158,7 +158,7 @@ lemma fTrunc_hasDerivAt_xx (hf_xx : ∀ t x, HasDerivAt (fun u ↦ f_x t u) (f_x
 /-! ### Constant bounds on the truncated partials -/
 
 /-- `|a·b| ≤ A·B` from `|a| ≤ A` and `|b| ≤ B`. -/
-private lemma abs_mul_le_of {a b A B : ℝ} (ha : |a| ≤ A) (hb : |b| ≤ B) : |a * b| ≤ A * B := by
+lemma abs_mul_le_mul_of_abs_le {a b A B : ℝ} (ha : |a| ≤ A) (hb : |b| ≤ B) : |a * b| ≤ A * B := by
   rw [abs_mul]; exact mul_le_mul ha hb (abs_nonneg _) (le_trans (abs_nonneg _) ha)
 
 /-- A jointly-continuous `g` is bounded after both arguments pass through the cutoff `φₙ` (which
@@ -180,13 +180,13 @@ lemma fTruncT_bdd (S : SmoothTrunc) (N : ℕ)
     (hcont : Continuous fun p : ℝ × ℝ ↦ f_t p.1 p.2) :
     ∃ C : ℝ, ∀ t x, |fTruncT f_t S N t x| ≤ C := by
   obtain ⟨B, hB⟩ := exists_bound_cut S N hcont
-  exact ⟨B * S.M₁, fun t x ↦ abs_mul_le_of (hB t x) (S.cutD1_bdd N t)⟩
+  exact ⟨B * S.M₁, fun t x ↦ abs_mul_le_mul_of_abs_le (hB t x) (S.cutD1_bdd N t)⟩
 
 lemma fTruncX_bdd (S : SmoothTrunc) (N : ℕ)
     (hcont : Continuous fun p : ℝ × ℝ ↦ f_x p.1 p.2) :
     ∃ C : ℝ, ∀ t x, |fTruncX f_x S N t x| ≤ C := by
   obtain ⟨B, hB⟩ := exists_bound_cut S N hcont
-  exact ⟨B * S.M₁, fun t x ↦ abs_mul_le_of (hB t x) (S.cutD1_bdd N x)⟩
+  exact ⟨B * S.M₁, fun t x ↦ abs_mul_le_mul_of_abs_le (hB t x) (S.cutD1_bdd N x)⟩
 
 lemma fTruncXX_bdd (S : SmoothTrunc) (N : ℕ)
     (hf_x_cont : Continuous fun p : ℝ × ℝ ↦ f_x p.1 p.2)
@@ -197,8 +197,9 @@ lemma fTruncXX_bdd (S : SmoothTrunc) (N : ℕ)
   refine ⟨Bxx * (S.M₁ * S.M₁) + Bx * S.M₂, fun t x ↦ ?_⟩
   unfold fTruncXX
   refine (abs_add_le _ _).trans (add_le_add ?_ ?_)
-  · exact abs_mul_le_of (hBxx t x) (abs_mul_le_of (S.cutD1_bdd N x) (S.cutD1_bdd N x))
-  · exact abs_mul_le_of (hBx t x) (S.cutD2_bdd N x)
+  · exact abs_mul_le_mul_of_abs_le (hBxx t x)
+      (abs_mul_le_mul_of_abs_le (S.cutD1_bdd N x) (S.cutD1_bdd N x))
+  · exact abs_mul_le_mul_of_abs_le (hBx t x) (S.cutD2_bdd N x)
 
 /-! ### Joint continuity of the partials -/
 

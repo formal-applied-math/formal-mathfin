@@ -82,7 +82,7 @@ variable {α : Type*} {mα : MeasurableSpace α} {μ : Measure α} [IsProbabilit
   {A B : Set α}
 
 /-- An indicator is square integrable. -/
-private lemma memLp_indicator_one (hA : MeasurableSet A) : MemLp (A.indicator (1 : α → ℝ)) 2 μ :=
+lemma memLp_indicator_one (hA : MeasurableSet A) : MemLp (A.indicator (1 : α → ℝ)) 2 μ :=
   memLp_indicator_const 2 hA.nullMeasurableSet 1 (Or.inr (measure_ne_top _ _))
 
 /-- **Covariance of two indicators**: `cov(𝟙_A, 𝟙_B) = P(A ∩ B) − P(A) P(B)`. -/

@@ -76,7 +76,7 @@ and an increment `Δ` with law `𝒩(0,v)` independent of `𝓕_r`, and any `A �
 the joint law factorizes (`indepFun_iff_map_prod_eq_prod_map_map`) and Fubini
 (`integral_prod`) freezes `c`, leaving the inner Gaussian MGF `∫ exp(c·z) d𝒩(0,v) =
 exp(½c²v)` (`integral_exp_mul_gaussianReal_zero`). -/
-private lemma condExp_exp_adapted_freeze_setIntegral
+lemma condExp_exp_adapted_freeze_setIntegral
     {c : Ω → ℝ} {r : ℝ≥0} (hc_frf : Measurable[(𝓕 r : MeasurableSpace Ω)] c)
     {K : ℝ} (hK : ∀ ω, |c ω| ≤ K)
     {Δ : Ω → ℝ} (hΔ_meas : Measurable Δ) {v : ℝ≥0} (hΔlaw : HasLaw Δ (gaussianReal 0 v) P)
@@ -305,7 +305,7 @@ include hX in
 omit [IsProbabilityMeasure P] [SigmaFiniteFiltration P 𝓕] in
 /-- Integrability of an increment cell factor `exp(c·(X_q − X_p) − ½c²(q−p))` for a bounded
 multiplier and `p ≤ q` — the increment `X_q − X_p` is Gaussian, dominated by two Gaussian MGFs. -/
-private lemma integrable_cellIncrement {c : Ω → ℝ} (hc_meas : Measurable c) {K : ℝ}
+lemma integrable_cellIncrement {c : Ω → ℝ} (hc_meas : Measurable c) {K : ℝ}
     (hK : ∀ ω, |c ω| ≤ K) (p q : ℝ≥0) (hpq : p ≤ q) :
     Integrable (fun ω ↦ Real.exp (c ω * (X q ω - X p ω)
       - (c ω) ^ 2 * (NNReal.toReal q - NNReal.toReal p) / 2)) P := by

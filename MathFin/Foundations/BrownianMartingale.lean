@@ -332,7 +332,7 @@ variable {Ω β : Type*} {mΩ : MeasurableSpace Ω}
 /-- Key set identity: for continuous adapted `X` and open `A`, the set
 `{ω | hittingAfter X A 0 ω < i}` equals the countable union over nonnegative
 rationals `q < i` of `{ω | X (q : ℝ) ω ∈ A}`. -/
-private lemma hittingAfter_lt_eq_iUnion_rationals
+lemma hittingAfter_lt_eq_iUnion_rationals
     [TopologicalSpace β]
     {X : ℝ → Ω → β} {A : Set β}
     (hX_cont : ∀ ω, Continuous (fun t ↦ X t ω)) (hA_open : IsOpen A)
@@ -385,7 +385,8 @@ private lemma hittingAfter_lt_eq_iUnion_rationals
   · rintro ⟨q, hq_nn, hq_lt, hXq⟩
     exact ⟨(q : ℝ), ⟨hq_nn, hq_lt⟩, hXq⟩
 
-private lemma measurableSet_hittingAfter_lt_of_open
+/-- For continuous adapted `X` and open `A`, `{hittingAfter X A 0 < i}` is `𝓕 i`-measurable. -/
+lemma measurableSet_hittingAfter_lt_of_open
     [TopologicalSpace β] [MeasurableSpace β] [BorelSpace β]
     {𝓕 : Filtration ℝ mΩ} {X : ℝ → Ω → β} {A : Set β}
     (hX_cont : ∀ ω, Continuous (fun t ↦ X t ω)) (hX_adapted : Adapted 𝓕 X)

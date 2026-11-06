@@ -238,7 +238,7 @@ theorem tendsto_sabrZ {f α β ν : ℝ} (hf : 0 < f) (hα : α ≠ 0) (hν : ν
 
 /-- The factors of eq. 2.17a other than `z / x(z)` are continuous in `K` at `K = f`
 (`f > 0`). -/
-private theorem sabrImpliedVol_rest_continuousAt {f α β ρ ν tex : ℝ} (hf : 0 < f) :
+theorem sabrImpliedVol_rest_continuousAt {f α β ρ ν tex : ℝ} (hf : 0 < f) :
     ContinuousAt (fun K ↦ α / ((f * K) ^ ((1 - β) / 2) *
       (1 + (1 - β) ^ 2 / 24 * Real.log (f / K) ^ 2
         + (1 - β) ^ 4 / 1920 * Real.log (f / K) ^ 4)) *

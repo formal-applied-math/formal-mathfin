@@ -96,7 +96,7 @@ noncomputable def itoSimpleProcess (hBmeas : ∀ t, Measurable (B t))
 no longer wrapped in `WithTop`, this is Mathlib's definition of
 `stoppedProcess` unfolded — the `untopA` bookkeeping the old pin needed is
 gone. -/
-private lemma stoppedProcess_const_coe (u s : ℝ≥0) (ω : Ω) :
+lemma stoppedProcess_const_coe (u s : ℝ≥0) (ω : Ω) :
     stoppedProcess B (fun _ : Ω ↦ u) s ω = B (min s u) ω := rfl
 
 /-- **Explicit truncated increment-sum**:

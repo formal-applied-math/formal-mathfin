@@ -321,7 +321,7 @@ the isometry kernel (`integral_adapted_mul_increment_mul_increment`). -/
 
 /-- Integrability of `h · ΔB · ΔB'` for `h` bounded (the products that appear
 when splitting the rectangle pairing). -/
-private lemma integrable_bdd_two_increment (hB : IsPreBrownianReal B μ)
+lemma integrable_bdd_two_increment (hB : IsPreBrownianReal B μ)
     {h : Ω → ℝ} (hhm : Measurable h)
     {C : ℝ} (hhb : ∀ ω, |h ω| ≤ C) (a b c d : ℝ≥0) :
     Integrable (fun ω ↦ h ω * ((B b ω - B a ω) * (B d ω - B c ω))) μ := by
@@ -357,7 +357,7 @@ theorem integral_adapted_mul_increment_mul_increment
       (Filter.Eventually.of_forall fun ω ↦ by ring)
 
 /-- Pairing identity, oriented case `s ≤ s'`. -/
-private lemma rect_increment_pairing_aux
+lemma integral_mul_increment_mul_increment_eq_of_le
     (hF : IsFilteredPreBrownian B 𝓕 μ) {f g : Ω → ℝ} {s t s' t' : ℝ≥0}
     (hf : Measurable[𝓕 s] f) (hg : Measurable[𝓕 s'] g)
     {Cf Cg : ℝ} (hfb : ∀ ω, |f ω| ≤ Cf) (hgb : ∀ ω, |g ω| ≤ Cg)
@@ -434,11 +434,11 @@ theorem rect_increment_pairing
     ∫ ω, (f ω * (B t ω - B s ω)) * (g ω * (B t' ω - B s' ω)) ∂μ =
       (∫ ω, f ω * g ω ∂μ) * max 0 ((min (t : ℝ) t') - max (s : ℝ) s') := by
   rcases le_total s s' with h | h
-  · exact rect_increment_pairing_aux hF hf hg hfb hgb hst hst' h
+  · exact integral_mul_increment_mul_increment_eq_of_le hF hf hg hfb hgb hst hst' h
   · rw [show (∫ ω, (f ω * (B t ω - B s ω)) * (g ω * (B t' ω - B s' ω)) ∂μ)
           = ∫ ω, (g ω * (B t' ω - B s' ω)) * (f ω * (B t ω - B s ω)) ∂μ from
         integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by ring),
-        rect_increment_pairing_aux hF hg hf hgb hfb hst' hst h]
+        integral_mul_increment_mul_increment_eq_of_le hF hg hf hgb hfb hst' hst h]
     congr 1
     · exact integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by ring)
     · rw [min_comm (t' : ℝ) t, max_comm (s' : ℝ) s]

@@ -127,11 +127,13 @@ theorem bsV_eq_feynmanU {K r σ S τ : ℝ}
   simp only [id_eq] at hcf
   rw [hcf, bsV, neg_mul]
 
-private lemma callPayoff_continuous (K : ℝ) :
+/-- The call payoff `ξ ↦ max (exp ξ - K) 0` is continuous. -/
+lemma continuous_max_exp_sub_zero (K : ℝ) :
     Continuous (fun ξ ↦ max (Real.exp ξ - K) 0) :=
   (Real.continuous_exp.sub continuous_const).max continuous_const
 
-private lemma callPayoff_le_exp {K : ℝ} (hK : 0 < K) (z : ℝ) :
+/-- For `0 < K`, `|max (exp z - K) 0| ≤ exp z`. -/
+lemma abs_max_exp_sub_zero_le_exp {K : ℝ} (hK : 0 < K) (z : ℝ) :
     |max (Real.exp z - K) 0| ≤ Real.exp z := by
   rw [abs_of_nonneg (le_max_right _ _)]
   exact max_le (by linarith) (Real.exp_nonneg z)
@@ -160,7 +162,7 @@ private lemma hasDerivAt_bsV_S_fk {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) 
             * S⁻¹)) S := by
   have ht₀ : (0 : ℝ) < σ ^ 2 * τ := by positivity
   have hchain :=
-    (hasDerivAt_feynmanU_x ht₀ (callPayoff_continuous K) (callPayoff_le_exp hK)
+    (hasDerivAt_feynmanU_x ht₀ (continuous_max_exp_sub_zero K) (abs_max_exp_sub_zero_le_exp hK)
         (Real.log S + (r - σ ^ 2 / 2) * τ)).comp S
       ((Real.hasDerivAt_log hS.ne').add_const ((r - σ ^ 2 / 2) * τ))
   refine (hchain.const_mul (Real.exp (-(r * τ)))).congr_of_eventuallyEq ?_
@@ -198,7 +200,8 @@ private lemma hasDerivAt_bsV_tau_fk {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     convert h2 using 1
     ring
   have hfk := hasDerivAt_feynmanU_comp (h := fun ξ ↦ max (Real.exp ξ - K) 0)
-    (callPayoff_continuous K) (callPayoff_le_exp hK) (α := σ ^ 2) (β := r - σ ^ 2 / 2)
+    (continuous_max_exp_sub_zero K) (abs_max_exp_sub_zero_le_exp hK) (α := σ ^ 2)
+    (β := r - σ ^ 2 / 2)
     (x₀ := Real.log S) hσ2 hτ
   refine (hexp.mul hfk).congr_of_eventuallyEq ?_
   filter_upwards [isOpen_Ioi.mem_nhds hτ] with τ' hτ'
@@ -224,8 +227,8 @@ private lemma hasDerivAt_bsV_SS_fk {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
                   * heatKernel (σ ^ 2 * τ) (z - (Real.log S + (r - σ ^ 2 / 2) * τ))))) / S ^ 2))
                       S := by
   have ht₀ : (0 : ℝ) < σ ^ 2 * τ := by positivity
-  have hg := (hasDerivAt_feynmanU_xx ht₀ (callPayoff_continuous K) (callPayoff_le_exp hK)
-      (Real.log S + (r - σ ^ 2 / 2) * τ)).comp S
+  have hg := (hasDerivAt_feynmanU_xx ht₀ (continuous_max_exp_sub_zero K)
+      (abs_max_exp_sub_zero_le_exp hK) (Real.log S + (r - σ ^ 2 / 2) * τ)).comp S
     ((Real.hasDerivAt_log hS.ne').add_const ((r - σ ^ 2 / 2) * τ))
   have hprod := (hg.mul (hasDerivAt_inv hS.ne')).const_mul (Real.exp (-(r * τ)))
   have hSne : S ≠ 0 := hS.ne'
@@ -252,7 +255,7 @@ private lemma integrable_payoff_mul_dtK {t : ℝ} (ht : 0 < t) {K : ℝ} (hK : 0
     Integrable (fun z ↦ max (Real.exp z - K) 0
       * (heatKernel t (z - x) * ((z - x) ^ 2 - t) / (2 * t ^ 2))) volume := by
   apply ((integrable_exp_mul_poly_heatKernel ht x t).const_mul (1 / (2 * t ^ 2))).mono'
-  · exact ((callPayoff_continuous K).mul
+  · exact ((continuous_max_exp_sub_zero K).mul
       (((continuous_heatKernel t).comp (continuous_id.sub continuous_const)).mul
         (((continuous_id.sub continuous_const).pow 2).sub continuous_const)
         |>.div_const _)).aestronglyMeasurable
@@ -269,7 +272,7 @@ private lemma integrable_payoff_mul_dtK {t : ℝ} (ht : 0 < t) {K : ℝ} (hK : 0
     apply mul_le_mul_of_nonneg_left _ (by positivity : (0:ℝ) ≤ 1 / (2 * t ^ 2))
     calc |max (Real.exp z - K) 0| * (heatKernel t (z - x) * |(z - x) ^ 2 - t|)
         ≤ Real.exp z * (heatKernel t (z - x) * ((z - x) ^ 2 + t)) := by
-          refine mul_le_mul (callPayoff_le_exp hK z) ?_ (mul_nonneg hKnn (abs_nonneg _))
+          refine mul_le_mul (abs_max_exp_sub_zero_le_exp hK z) ?_ (mul_nonneg hKnn (abs_nonneg _))
             (Real.exp_nonneg z)
           exact mul_le_mul_of_nonneg_left habs hKnn
       _ = Real.exp z * (((z - x) ^ 2 + t) * heatKernel t (z - x)) := by ring
@@ -279,7 +282,7 @@ private lemma integrable_payoff_mul_dxK {t : ℝ} (ht : 0 < t) {K : ℝ} (hK : 0
     Integrable (fun z ↦ max (Real.exp z - K) 0
       * ((z - x) / t * heatKernel t (z - x))) volume := by
   apply ((integrable_exp_mul_poly_heatKernel ht x 1).const_mul (1 / t)).mono'
-  · exact ((callPayoff_continuous K).mul
+  · exact ((continuous_max_exp_sub_zero K).mul
       (((continuous_id.sub continuous_const).div_const t).mul
         ((continuous_heatKernel t).comp (continuous_id.sub continuous_const)))).aestronglyMeasurable
   · refine ae_of_all _ fun z ↦ ?_
@@ -292,7 +295,7 @@ private lemma integrable_payoff_mul_dxK {t : ℝ} (ht : 0 < t) {K : ℝ} (hK : 0
     have habs : |z - x| ≤ (z - x) ^ 2 + 1 := by
       nlinarith [sq_nonneg (|z - x| - 1), sq_abs (z - x), abs_nonneg (z - x)]
     apply mul_le_mul_of_nonneg_left _ (by positivity : (0:ℝ) ≤ 1 / t)
-    refine mul_le_mul (callPayoff_le_exp hK z) ?_ (mul_nonneg (abs_nonneg _) hKnn)
+    refine mul_le_mul (abs_max_exp_sub_zero_le_exp hK z) ?_ (mul_nonneg (abs_nonneg _) hKnn)
         (Real.exp_nonneg z)
     exact mul_le_mul_of_nonneg_right habs hKnn
 

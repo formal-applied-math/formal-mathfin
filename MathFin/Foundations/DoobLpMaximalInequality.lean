@@ -408,7 +408,7 @@ private lemma holder_apply
          = ofReal(min fstar K^(p-1) / (p-1))`.
     Identical to `lintegral_rpow_sub_two_mul_indicator_le` but with an extra `t ≤ K` constraint,
     which makes the inner Ioc become `Ioc 0 (min fstar K)`. -/
-private lemma inner_t_integral_truncated
+lemma lintegral_rpow_sub_two_mul_indicator_truncated
     {fstar K p : ℝ} (hfstar : 0 ≤ fstar) (hK : 0 < K) (hp : 1 < p) :
     ∫⁻ t in Set.Ioi (0:ℝ), ENNReal.ofReal (t ^ (p - 2)) *
         ((Set.Iic K).indicator (fun _ ↦ (1 : ℝ≥0∞)) t *
@@ -524,7 +524,8 @@ private lemma fubini_swap_truncated
   rw [lintegral_lintegral_swap hSwap_meas]
   apply lintegral_congr_ae
   filter_upwards with ω
-  -- Pointwise: rewrite indicator product, pull out ofReal(f_n ω), use inner_t_integral_truncated.
+  -- Pointwise: rewrite indicator product, pull out ofReal(f_n ω), use
+  -- lintegral_rpow_sub_two_mul_indicator_truncated.
   have h_pointwise : ∀ t,
       (Set.Ioi (0:ℝ) ∩ Set.Iic K).indicator
           (fun s ↦ ENNReal.ofReal (s ^ (p - 2)) *
@@ -559,7 +560,7 @@ private lemma fubini_swap_truncated
           Set.indicator_of_notMem ht_pos, mul_zero]
   simp_rw [h_pointwise]
   rw [lintegral_const_mul']
-  · -- Convert to setLIntegral on Ioi 0, then apply inner_t_integral_truncated.
+  · -- Convert to setLIntegral on Ioi 0, then apply lintegral_rpow_sub_two_mul_indicator_truncated.
     have h_unfold :
         ∫⁻ t, (Set.Ioi (0:ℝ)).indicator
             (fun s ↦ ENNReal.ofReal (s ^ (p - 2)) *
@@ -572,7 +573,7 @@ private lemma fubini_swap_truncated
                 (fun _ ↦ (1 : ℝ≥0∞)) t) := by
       rw [← lintegral_indicator measurableSet_Ioi]
     rw [h_unfold]
-    rw [inner_t_integral_truncated (runMax_nonneg hnonneg n ω) hK hp]
+    rw [lintegral_rpow_sub_two_mul_indicator_truncated (runMax_nonneg hnonneg n ω) hK hp]
   · exact ENNReal.ofReal_ne_top
 
 /-- Truncated layer-cake bound: for `Z_K = min (runMax f n) K`,

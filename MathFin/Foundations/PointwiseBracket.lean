@@ -170,7 +170,7 @@ theorem condExp_increment_sq (hB : IsPreBrownianReal B μ)
 
 omit [IsProbabilityMeasure μ] in
 /-- A Brownian increment lies in `L²(μ)`. -/
-private theorem memLp_increment (hB : IsPreBrownianReal B μ) {u v : ℝ≥0} (huv : u ≤ v) :
+theorem memLp_increment (hB : IsPreBrownianReal B μ) {u v : ℝ≥0} (huv : u ≤ v) :
     MemLp (fun ω ↦ B v ω - B u ω) 2 μ := by
   have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hL : HasLaw (B v - B u) (gaussianReal 0 (v - u)) μ := hasLaw_increment hB huv

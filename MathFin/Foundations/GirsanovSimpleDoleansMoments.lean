@@ -120,7 +120,7 @@ variable {P : Measure Ω} [IsProbabilityMeasure P] {𝓕 : Filtration ℝ≥0 m�
 
 /-- The adapted, bounded rescaled multiplier `r·c` — the shared side-condition bundle for
 `simpleDoleansExp_isMartingale`/`integral_eq_one` at scales `r`. -/
-private lemma scaled_adapted_bounded {s : ℕ → ℝ≥0} {c : ℕ → Ω → ℝ}
+lemma stronglyMeasurable_mul_and_abs_mul_le {s : ℕ → ℝ≥0} {c : ℕ → Ω → ℝ}
     (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (r : ℝ) :
     (∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (fun ω ↦ r * c i ω))
@@ -147,7 +147,7 @@ lemma quad_integral_simpleDoleans_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {T : ℝ≥0} (hNT : T ≤ s N) :
     ∫ ω, (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) ^ 4 ∂P
       ≤ Real.exp (6 * K ^ 2 * (T : ℝ)) := by
-  obtain ⟨h4m, h4b⟩ := scaled_adapted_bounded (𝓕 := 𝓕) hc hc_bdd (-4)
+  obtain ⟨h4m, h4b⟩ := stronglyMeasurable_mul_and_abs_mul_le (𝓕 := 𝓕) hc hc_bdd (-4)
   have hmean : ∫ ω, simpleDoleansExp (X := X) s (fun i ω ↦ (-4 : ℝ) * c i ω) N T ω ∂P = 1 :=
     simpleDoleansExp_integral_eq_one (X := X) s hs _ h4m h4b N T
   have hint4 : Integrable (fun ω ↦ simpleDoleansExp (X := X) s
@@ -178,7 +178,7 @@ lemma sq_integral_simpleDoleans_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {T : ℝ≥0} (hNT : T ≤ s N) :
     ∫ ω, (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) ^ 2 ∂P
       ≤ Real.exp (K ^ 2 * (T : ℝ)) := by
-  obtain ⟨h2m, h2b⟩ := scaled_adapted_bounded (𝓕 := 𝓕) hc hc_bdd (-2)
+  obtain ⟨h2m, h2b⟩ := stronglyMeasurable_mul_and_abs_mul_le (𝓕 := 𝓕) hc hc_bdd (-2)
   have hmean : ∫ ω, simpleDoleansExp (X := X) s (fun i ω ↦ (-2 : ℝ) * c i ω) N T ω ∂P = 1 :=
     simpleDoleansExp_integral_eq_one (X := X) s hs _ h2m h2b N T
   have hint2 : Integrable (fun ω ↦ simpleDoleansExp (X := X) s
@@ -206,7 +206,7 @@ lemma memLp_simpleDoleans_two {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0
     (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {T : ℝ≥0} (hNT : T ≤ s N) :
     MemLp (fun ω ↦ simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) 2 P := by
-  obtain ⟨h2m, h2b⟩ := scaled_adapted_bounded (𝓕 := 𝓕) hc hc_bdd (-2)
+  obtain ⟨h2m, h2b⟩ := stronglyMeasurable_mul_and_abs_mul_le (𝓕 := 𝓕) hc hc_bdd (-2)
   have hZmeas := measurable_simpleDoleans (X := X) (P := P) hs hc hc_bdd N T
   have hint2 : Integrable (fun ω ↦ simpleDoleansExp (X := X) s
       (fun i ω ↦ (-2 : ℝ) * c i ω) N T ω) P :=
@@ -226,7 +226,7 @@ lemma integrable_simpleDoleans_four {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0
     (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {T : ℝ≥0} (hNT : T ≤ s N) :
     Integrable (fun ω ↦ (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) ^ 4) P := by
-  obtain ⟨h4m, h4b⟩ := scaled_adapted_bounded (𝓕 := 𝓕) hc hc_bdd (-4)
+  obtain ⟨h4m, h4b⟩ := stronglyMeasurable_mul_and_abs_mul_le (𝓕 := 𝓕) hc hc_bdd (-4)
   have hint4 : Integrable (fun ω ↦ simpleDoleansExp (X := X) s
       (fun i ω ↦ (-4 : ℝ) * c i ω) N T ω) P :=
     (simpleDoleansExp_isMartingale (X := X) (P := P) s hs _ h4m h4b N).integrable T

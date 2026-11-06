@@ -128,7 +128,7 @@ omit hB in
 times `i` and `j` of the single-interval contribution `t ↦ B_{v∧t} − B_{u∧t}` is
 the Brownian increment over `[u∨i, (u∨i)∨(v∧j)]` — so it is a martingale
 difference past `𝓕_i`. (`B` is an arbitrary path here; pure `min`/`max` algebra.) -/
-private lemma clamped_increment_eq {u v i j : ℝ≥0} (huv : u ≤ v) (hij : i ≤ j)
+lemma clamped_increment_eq {u v i j : ℝ≥0} (huv : u ≤ v) (hij : i ≤ j)
     (ω : Ω) :
     (B (min v j) ω - B (min u j) ω) - (B (min v i) ω - B (min u i) ω)
       = B (max (max u i) (min v j)) ω - B (max u i) ω := by

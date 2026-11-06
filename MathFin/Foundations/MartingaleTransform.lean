@@ -133,7 +133,7 @@ end Increment
 
 omit [CompleteSpace F] in
 /-- Each summand `⟪A_{k+1}(ω), M_{k+1}(ω) − M_k(ω)⟫` is `𝓕 n`-measurable when `k < n`. -/
-private lemma summand_stronglyMeasurable
+lemma stronglyMeasurable_inner_succ_sub
     (hM : Martingale M 𝓕 μ) (hA : StronglyAdapted 𝓕 (fun n ↦ A (n + 1)))
     (n k : ℕ) (hk : k < n) :
     StronglyMeasurable[𝓕 n] (fun ω ↦ ⟪A (k + 1) ω, M (k + 1) ω - M k ω⟫_ℝ) :=
@@ -147,10 +147,10 @@ private lemma martingaleTransform_adapted
     (hM : Martingale M 𝓕 μ) (hA : StronglyAdapted 𝓕 (fun n ↦ A (n + 1))) :
     StronglyAdapted 𝓕 (martingaleTransform A M) := fun n ↦
   Finset.stronglyMeasurable_fun_sum (m := 𝓕 n) (M := ℝ) (Finset.range n) fun k hk ↦
-    summand_stronglyMeasurable hM hA n k (Finset.mem_range.mp hk)
+    stronglyMeasurable_inner_succ_sub hM hA n k (Finset.mem_range.mp hk)
 
 /-- Each summand is integrable (bounded `A` paired with an integrable martingale increment). -/
-private lemma integrable_summand
+lemma integrable_inner_succ_sub
     (hM : Martingale M 𝓕 μ) (hA : StronglyAdapted 𝓕 (fun n ↦ A (n + 1)))
     (hA_bdd : ∃ K : ℝ, ∀ᵐ ω ∂μ, ∀ n, ‖A n ω‖ ≤ K) (k : ℕ) :
     Integrable (fun ω ↦ ⟪A (k + 1) ω, M (k + 1) ω - M k ω⟫_ℝ) μ :=
@@ -162,7 +162,7 @@ private lemma integrable_martingaleTransform
     (hM : Martingale M 𝓕 μ) (hA : StronglyAdapted 𝓕 (fun n ↦ A (n + 1)))
     (hA_bdd : ∃ K : ℝ, ∀ᵐ ω ∂μ, ∀ n, ‖A n ω‖ ≤ K) (n : ℕ) :
     Integrable (martingaleTransform A M n) μ :=
-  integrable_finsetSum _ fun k _ ↦ integrable_summand hM hA hA_bdd k
+  integrable_finsetSum _ fun k _ ↦ integrable_inner_succ_sub hM hA hA_bdd k
 
 variable [IsFiniteMeasure μ]
 

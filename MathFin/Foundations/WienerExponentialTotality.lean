@@ -87,7 +87,7 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilit
 /-- `exp(c·∑ᵢ λᵢ B_{tᵢ}) ∈ L²(μ)`: induct on the finite sum, at every *scale* `c` at once.
 The square of the `(insert a s)`-exponential is the `s`-exponential at twice the scale times
 one lognormal marginal factor, and Cauchy–Schwarz (`MemLp.integrable_mul`) multiplies them. -/
-private lemma memLp_exp_linear (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
+lemma memLp_exp_linear (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     {ι : Type*} (t : ι → ℝ≥0) (lam : ι → ℝ) (S : Finset ι) :
     ∀ c : ℝ, MemLp (fun ω ↦ Real.exp (c * ∑ i ∈ S, lam i * B (t i) ω)) 2 μ := by
   classical
@@ -271,7 +271,7 @@ vector `X = (B_{τᵢ})ᵢ` into `ℝ^ι`. Orthogonality says the two moment-gen
 that licenses analytic continuation (`eqOn_complexMGF_of_mgf'`). Evaluated at `z = i` that gives
 equal characteristic functions along every continuous linear form, and
 `Measure.ext_of_charFunDual` turns it into equality of the two pushforwards. -/
-private lemma setIntegral_eq_zero_of_iSup_comap (hB : IsPreBrownianReal B μ)
+lemma setIntegral_eq_zero_of_iSup_comap (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {ι : Type*} [Fintype ι] (τ : ι → ℝ≥0)
     {f : Ω → ℝ} (hfL2 : MemLp f 2 μ)
     (hperp : ∀ lam : ι → ℝ, ∫ ω, f ω * Real.exp (∑ i, lam i * B (τ i) ω) ∂μ = 0)
