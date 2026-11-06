@@ -814,6 +814,8 @@ import MathFin.Execution.RollSpread
 import MathFin.BlackScholes.AmericanPut.Stopping.PhysicalBoundaryConvexity
 import MathFin.BlackScholes.AmericanPut.Stopping.PlanePartial
 import MathFin.BlackScholes.AmericanPut.Stopping.AEHorizonValue
+import MathFin.BlackScholes.AmericanPut.Stopping.AugmentedValue
+import MathFin.BlackScholes.AmericanPut.Stopping.LocalPriceIto
 -- The American put exercise boundary tends to the strike at expiry
 import MathFin.BlackScholes.AmericanPut.Stopping.ActualBoundaryExpiryLimit
 -- The Andersen-Lake-Offengenden QD+ fixed-point quadrature integrand's endpoint
