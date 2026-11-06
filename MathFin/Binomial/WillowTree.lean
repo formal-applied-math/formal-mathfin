@@ -5,7 +5,9 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
+public import MathFin.Foundations.BivariateNormalCDF
+public import Mathlib.Analysis.Real.Sqrt
+public import Mathlib.Tactic.FieldSimp
 
 /-!
 # The willow tree lattice: moment and marginal constraints
@@ -26,39 +28,66 @@ satisfy, with `β k = √(t k / t (k+1))`,
 together with the marginal constraint `∑ i, q i * P k i j = q j`. The conditional
 constraints are exactly those of a Brownian motion read at two grid times: for
 `t' = (1 + α) t` the de-correlation coefficient `1 / √(1 + α)` equals `√(t / t')`, the
-correlation of a Brownian motion at times `t` and `t'`, and the Brownian bridge relations
-`E[W_{t'} | W_t = w] = (t / t') w` and `E[W_{t'}^2 | W_t = w] = w^2 + t' - t` become, in
-the standardized variables `z`, precisely the two moment rows above (Curran 2001, *Willow
-Power: Optimizing Derivative Pricing Trees*, ALGO Research Quarterly 4(4); the constraint
-system as stated follows Ho 2000, *Willow Tree*, MSc thesis, University of British
-Columbia).
+correlation of a Brownian motion at times `t` and `t'`, and the Brownian bridge
+relations `E[W_{t'} | W_t = w] = (t / t') w` and `E[W_{t'}^2 | W_t = w] = w^2 + t' - t`
+become, in the standardized variables `z`, precisely the two moment rows above.
 
-This file proves the formalizable core of the construction:
+## Main definitions
 
-1. the `β` identity `1 / √(1 + α) = √(t / t')` when `t' = (1 + α) t` (`willowBeta`,
-   `willowBeta_eq_sqrt_div`, and its grid instantiation `willowBeta_eq_sqrt_div'`);
-2. **moment propagation**: a chain started at a marginal `q` of mass `1`, mean `0` and
-   second moment `1` keeps mass `1`, mean `0` and second moment `1` at every step, for
-   *any* family of transition matrices satisfying the row constraints — an induction on
-   the step that needs neither the marginal constraint nor non-negativity of the entries
-   (`willowMarginal_mass`, `willowMarginal_mean`, `willowMarginal_secondMoment`);
-3. **marginal preservation**: with the marginal constraint added, the marginal at *every*
-   step is the same discrete law `q` (`willowMarginal_eq`);
-4. the **cross moment** of the chain at two consecutive steps: `E[Z_k Z_{k+1}] = β k`,
-   and in the unstandardized variables `X k = √(t k) * Z k` the cross moment across
-   `[t k, t (k+1)]` is `t k` — the Brownian value, and the de-correlation the
-   construction is named for (`willowMarginal_crossMoment`, `willowScaled_secondMoment`,
-   `willowScaled_crossMoment`).
+* `willowBeta` — Curran's de-correlation coefficient `1 / √(1 + α)`.
+* `WillowMomentConstraints` — the three row constraints above, bundled as a predicate on
+  a family of transition matrices. No non-negativity is required of the entries: the
+  moment statements below are insensitive to it (it is the linear program's business,
+  not the induction's).
+* `willowMarginal P q k` — the chain's marginal at step `k`, the initial law `q` rolled
+  forward through `P 0, …, P (k-1)`.
 
-Nothing here touches the linear program that *finds* such a matrix (feasibility, the
-objective, entry non-negativity): the statements are unconditional in the matrix `P`,
-which is what makes them usable against any solver output. No claim is made about prices
-computed on the lattice.
+## Main results
+
+* `willowBeta_eq_sqrt_div`, `willowBeta_eq_sqrt_div'` — the `β` identity
+  `1 / √(1 + α) = √(t / t')` when `t' = (1 + α) t`, and its grid instantiation.
+* `willowMarginal_mass`, `willowMarginal_mean`, `willowMarginal_secondMoment` —
+  **moment propagation**: a chain started at a marginal of mass `1`, mean `0` and unit
+  second moment keeps mass `1`, mean `0` and unit second moment at every step, for *any*
+  family of transition matrices satisfying the row constraints — an induction needing
+  neither the marginal constraint nor non-negativity of the entries.
+* `willowMarginal_eq` — **marginal preservation**: with the marginal constraint added,
+  the marginal at every step is the same discrete law `q`.
+* `willowMarginal_crossMoment`, `willowScaled_secondMoment`, `willowScaled_crossMoment` —
+  the cross moments: `E[Z_k Z_{k+1}] = β k`, and in the unstandardized variables
+  `X k = √(t k) * Z k` the second moment is `t k` and the cross moment across
+  `[t k, t (k+1)]` is `t k` — the Brownian values, and the de-correlation the
+  construction is named for.
+* `willowBeta_sq_le_one`, `willowBeta_bivariateNormal_moments` — **feasibility**: an
+  honest (non-negative, summing-to-one) transition row forces `β k ^ 2 ≤ 1`, the
+  lattice-side analogue of `sq_le_one_of_covariance_unit` for a correlated Gaussian
+  pair; and for such a coefficient the standard bivariate normal law
+  `bivariateNormalLaw (β k)` — the pair whose conditional moments the row constraints
+  encode — has unit variances and covariance `β k`.
+
+Nothing here touches the linear program that *finds* such a matrix (feasibility of the
+full system, the objective, sparsity): the statements are unconditional in the matrix
+`P`, which is what makes them usable against any solver output. No claim is made about
+prices computed on the lattice.
+
+## References
+
+* [M. Curran, *Willow Power: Optimizing Derivative Pricing Trees*][Curran2001],
+  ALGO Research Quarterly 4(4) (December 2001).
+* [A. C. T. Ho, *Willow Tree*][Ho2000], MSc thesis in Mathematics, University of British
+  Columbia (2000) — the constraint system as stated.
+
+## Tags
+
+willow tree, lattice, recombining tree, transition matrix, moment matching,
+de-correlation, Markov chain, Brownian motion, MSC 60G15, JEL G13
 -/
 
 @[expose] public section
 
 namespace MathFin
+
+open MeasureTheory ProbabilityTheory
 
 /-- **Curran's de-correlation coefficient**: for a grid step widening time by the factor
 `1 + α`, the willow tree pairs times `t` and `t' = (1 + α) t` through `β = 1 / √(1 + α)`,
@@ -287,5 +316,45 @@ theorem willowScaled_crossMoment (hP : WillowMomentConstraints z β P)
     _ = t k := by
         rw [hβ k, willowMarginal_secondMoment hP hq hq2, mul_one,
           sqrt_mul_sqrt_div' (ht k) (ht1 k)]
+
+/-- **Feasibility of the de-correlation coefficient**: if a willow transition row is an
+honest probability row (non-negative entries summing to one), then `β k ^ 2 ≤ 1` — the
+coefficient is a bona fide correlation. The conditional second moment exceeds the square
+of the conditional mean because the conditional variance `1 - β k ^ 2` of the
+standardized Brownian increment is non-negative; this is the lattice-side analogue of
+`sq_le_one_of_covariance_unit` for a correlated Gaussian pair. -/
+theorem willowBeta_sq_le_one {z : Fin n → ℝ} {β : ℕ → ℝ} {P : ℕ → Fin n → Fin n → ℝ}
+    (hP : WillowMomentConstraints z β P) (k : ℕ) (i : Fin n) (hrow : ∀ j, 0 ≤ P k i j) :
+    β k ^ 2 ≤ 1 := by
+  have hcs := Finset.sum_mul_sq_le_sq_mul_sq Finset.univ
+    (fun j : Fin n => √(P k i j) * z j) (fun j : Fin n => √(P k i j))
+  have hL : ∑ j : Fin n, (√(P k i j) * z j) * √(P k i j)
+      = ∑ j : Fin n, P k i j * z j := by
+    refine Finset.sum_congr rfl fun j _ => ?_
+    rw [mul_assoc, mul_comm (z j) (√(P k i j)), ← mul_assoc, Real.mul_self_sqrt (hrow j)]
+  have hR1 : ∑ j : Fin n, (√(P k i j) * z j) ^ 2 = ∑ j : Fin n, P k i j * z j ^ 2 :=
+    Finset.sum_congr rfl fun j _ => by rw [mul_pow, Real.sq_sqrt (hrow j)]
+  have hR2 : ∑ j : Fin n, (√(P k i j)) ^ 2 = ∑ j : Fin n, P k i j :=
+    Finset.sum_congr rfl fun j _ => Real.sq_sqrt (hrow j)
+  rw [hL, hR1, hR2, hP.mean k i] at hcs
+  have hsq : (β k * z i) ^ 2 = β k ^ 2 * z i ^ 2 := by ring
+  rw [hsq, hP.secondMoment k i, hP.rowStochastic k i, mul_one] at hcs
+  linarith
+
+/-- **The willow pair's second-order system is the bivariate normal's**: an honest
+transition row forces `β k ^ 2 ≤ 1`, and for a coefficient in that range the standard
+bivariate normal law `bivariateNormalLaw (β k)` — the standardized pair whose
+conditional moments the LP's row constraints encode — has unit variances and covariance
+`β k`. -/
+theorem willowBeta_bivariateNormal_moments {z : Fin n → ℝ} {β : ℕ → ℝ}
+    {P : ℕ → Fin n → Fin n → ℝ}
+    (hP : WillowMomentConstraints z β P) (k : ℕ) (i : Fin n) (hrow : ∀ j, 0 ≤ P k i j) :
+    β k ^ 2 ≤ 1
+      ∧ Var[(Prod.fst : ℝ × ℝ → ℝ); bivariateNormalLaw (β k)] = 1
+      ∧ Var[(Prod.snd : ℝ × ℝ → ℝ); bivariateNormalLaw (β k)] = 1
+      ∧ cov[Prod.fst, Prod.snd; bivariateNormalLaw (β k)] = β k :=
+  ⟨willowBeta_sq_le_one hP k i hrow,
+    variance_fst_bivariateNormalLaw (willowBeta_sq_le_one hP k i hrow),
+    variance_snd_bivariateNormalLaw _, covariance_fst_snd_bivariateNormalLaw _⟩
 
 end MathFin

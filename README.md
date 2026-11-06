@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 779 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 744 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 782 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 747 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 17 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the

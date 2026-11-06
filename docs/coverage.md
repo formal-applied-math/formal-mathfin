@@ -26,6 +26,35 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The willow tree: the beta identity and moment/marginal preservation (2026-11-06)
+
+One `full` entry in `benchmarks/binomial.json`. Corpus 781 → 782.
+
+- **`mf-willow-tree-moment-marginal-constraints`** (MathFin/Binomial/WillowTree.lean):
+  Curran's willow tree prices against a Brownian motion with a time-inhomogeneous
+  Markov chain on a fixed node set with a fixed discrete marginal — the lattice has a
+  constant node count per step and widens like `sqrt(t)` only through the scaling
+  `X_k = sqrt(t_k) Z_k`. The module proves the construction's formalizable core:
+  the beta identity `1/sqrt(1 + alpha) = sqrt(t_k/t_{k+1})` for the de-correlation
+  coefficient on a grid with `t_{k+1} = (1 + alpha_k) t_k` (`willowBeta_eq_sqrt_div`,
+  `willowBeta_eq_sqrt_div'`); the moment-propagation induction — any family of
+  row-stochastic transition matrices satisfying the conditional first/second moment
+  rows `sum_j P_k(i,j) z_j = beta_k z_i`, `sum_j P_k(i,j) z_j^2 = beta_k^2 z_i^2 +
+  (1 - beta_k^2)` keeps a chain started at mean 0, unit second moment at mass 1, mean 0
+  and unit second moment at every step, needing neither the marginal constraint
+  `qP = q` nor non-negative entries (`willowMarginal_mass`, `willowMarginal_mean`,
+  `willowMarginal_secondMoment`); marginal preservation — under `qP = q` the marginal
+  at every step is the same law `q` (`willowMarginal_eq`); and the cross moments
+  `E[Z_k Z_{k+1}] = beta_k` and `E[X_k X_{k+1}] = t_k` in the scaled variables — the
+  Brownian covariance the constraint system encodes (`willowMarginal_crossMoment`,
+  `willowScaled_secondMoment`, `willowScaled_crossMoment`). Cited: Curran, Willow
+  Power: Optimizing Derivative Pricing Trees, ALGO Research Quarterly 4(4) (2001);
+  Ho, Willow Tree, MSc thesis, UBC (2000); the constraint set as implemented in the
+  open-source willowtree package (`willowtree/lp.py`). The linear program that finds
+  admissible transition matrices is disclosed out of scope; nothing is claimed about
+  lattice prices. Axioms-clean, `full`.
+
+
 ### Removable singularities in two stochastic-vol smile models (2026-11-01)
 
 Three `full` entries in `benchmarks/black_scholes.json`. Corpus 754 → 757.
