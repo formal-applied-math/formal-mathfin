@@ -95,8 +95,8 @@ which is `√(t / t')` (`willowBeta_eq_sqrt_div`) — the correlation of a Brown
 read at `t` and `t'`. -/
 noncomputable def willowBeta (α : ℝ) : ℝ := 1 / √(1 + α)
 
-/-- **The `β` identity of the willow tree**: if `t' = (1 + α) * t` with `t > 0`, then
-`1 / √(1 + α) = √(t / t')`. -/
+/-- **The `β` identity of the willow tree**: if `0 < 1 + α` and `t' = (1 + α) * t`
+with `t > 0`, then `1 / √(1 + α) = √(t / t')`. -/
 theorem willowBeta_eq_sqrt_div {t t' α : ℝ} (hα : 0 < 1 + α) (ht : 0 < t)
     (ht' : t' = (1 + α) * t) : willowBeta α = √(t / t') := by
   rw [willowBeta, ht']
