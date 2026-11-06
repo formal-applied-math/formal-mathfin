@@ -8,6 +8,7 @@ module
 public import MathFin.BlackScholes.AmericanPut.Boundary.Comparison
 public import MathFin.BlackScholes.AmericanPut.Boundary.SingleCrossing
 public import MathFin.BlackScholes.AmericanPut.Boundary.ContinuousBoundaryProblem
+public import Mathlib.Algebra.Ring.IsFormallyReal
 
 /-!
 # Initial single-interval geometry for the straight-line comparison

@@ -5,10 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.ExchangeOption
 public import MathFin.Bridges.GaussianGirsanov
 public import MathFin.Foundations.GaussianPairLinearLaw
+public import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Probability.Independence.Integration
 
 /-!
 # The Margrabe ratio from a joint two-GBM model

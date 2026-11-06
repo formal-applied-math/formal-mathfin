@@ -6,7 +6,6 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.DriftRiemannConvergence
-public import MathFin.Foundations.ItoProcessPredictable
 
 /-! # The drift of an Itô process with adapted coefficients
 

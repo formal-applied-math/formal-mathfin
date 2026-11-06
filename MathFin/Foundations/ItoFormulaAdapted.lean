@@ -8,7 +8,7 @@ module
 public import MathFin.Foundations.AdaptedQuadraticVariation
 public import MathFin.Foundations.AdaptedRiemannStieltjes
 public import MathFin.Foundations.AdaptedDrift
-public import MathFin.Foundations.ItoFormulaRemainder
+public import MathFin.Foundations.ItoProcessPredictable
 
 /-! # The Itô process with adapted coefficients, and the convergences behind its Itô formula
 

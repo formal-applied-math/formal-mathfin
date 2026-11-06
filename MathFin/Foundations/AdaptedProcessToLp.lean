@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoIntegralCLM
 public import BrownianMotion.StochasticIntegral.Predictable
+public import MathFin.Foundations.ItoIntegralHorizonDense
 
 /-!
 # Realizing a bounded adapted continuous process as an Itô-integrand class (the σ-realization)

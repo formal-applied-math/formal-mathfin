@@ -5,8 +5,12 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Binomial.Model
+public import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
+public import Mathlib.Tactic.Polynomial.Basic
 
 /-!
 # Cox-Ross-Rubinstein convergence to Black-Scholes

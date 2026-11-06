@@ -9,7 +9,6 @@ public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.WienerIntegralGaussian
 public import MathFin.Foundations.WienerIntegralExpMoment
-public import MathFin.Foundations.BrownianMartingale
 public import MathFin.FixedIncome.VasicekBondPrice
 
 /-!

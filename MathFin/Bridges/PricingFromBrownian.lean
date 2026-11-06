@@ -5,10 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Bridges.BSCallHypFromBrownian
 public import MathFin.BlackScholes.Put
-public import MathFin.BlackScholes.Forward
 public import MathFin.BlackScholes.Digital
 public import MathFin.BlackScholes.PowerCall
 public import MathFin.BlackScholes.StockNumeraire

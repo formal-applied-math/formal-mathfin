@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.DeFi.Aave
 public import MathFin.DeFi.Dai
 public import MathFin.FixedIncome.KMVMerton

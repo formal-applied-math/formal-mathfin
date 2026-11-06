@@ -6,7 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.Verification
-public import MathFin.BlackScholes.AmericanPut.Boundary.ContinuousBoundaryProblem
+public import MathFin.BlackScholes.AmericanPut.Boundary.Problem
 
 /-!
 # The discounted classical-price candidate

@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.ZCB
 
 -- pointers: MathFin/FixedIncome/ZCB.lean

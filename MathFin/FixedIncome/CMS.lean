@@ -5,11 +5,12 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.InterestRateSwap
 public import MathFin.Foundations.CarrMadan
 public import MathFin.Foundations.Numeraire
 public import MathFin.FixedIncome.ConvexitySensitivity
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Convex.Integral
 
 /-!
 # The CMS par-rate functional: convexity, the annuity measure, a Jensen gap

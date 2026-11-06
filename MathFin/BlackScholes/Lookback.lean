@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.PDE
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # Lookback call lower bound

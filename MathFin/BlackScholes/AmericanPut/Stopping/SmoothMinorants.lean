@@ -7,6 +7,9 @@ module
 
 public import Mathlib.Geometry.Manifold.SmoothApprox
 public import MathFin.BlackScholes.AmericanPut.Stopping.LocalizationTimes
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ReduceModChar
 
 /-! # Uniformly bounded smooth compact minorants of a continuous payoff
 

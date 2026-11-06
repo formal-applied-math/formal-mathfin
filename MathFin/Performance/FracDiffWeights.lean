@@ -5,8 +5,8 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.Estimation
+public import Mathlib.Analysis.Analytic.Binomial
 
 /-!
 # Fractional-differentiation weight recursion

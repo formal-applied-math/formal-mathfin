@@ -7,7 +7,7 @@ module
 
 public import MathFin.Foundations.ItoFormulaAdaptedProcess
 public import MathFin.Foundations.ItoFormulaCutoff
-public import MathFin.Foundations.LevyCharacterization
+public import MathFin.Foundations.BoundedLocalMartingale
 
 /-! # Summit C — the unrestricted-`C²` Itô formula as a local martingale
 

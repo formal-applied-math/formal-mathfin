@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.RiskMeasures.BernoulliMixture
 public import MathFin.Foundations.GaussianCopula
 

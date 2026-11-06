@@ -6,7 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.ActualNormalization
-public import MathFin.BlackScholes.AmericanPut.Stopping.ActualStockConvexity
+public import MathFin.BlackScholes.AmericanPut.Stopping.PositiveExerciseBoundary
 
 /-! # Physical-unit identification of the actual exercise boundary
 

@@ -5,7 +5,6 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.Rules
 public import MathFin.Foundations.ItoLemma2D
 
 /-!

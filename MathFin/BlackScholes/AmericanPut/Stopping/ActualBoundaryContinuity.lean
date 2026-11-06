@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.ContinuationSlice
 public import MathFin.BlackScholes.AmericanPut.Stopping.BoundarySemicontinuity
+public import MathFin.BlackScholes.AmericanPut.Stopping.PositiveExerciseBoundary
 
 /-! # Continuity of the actual exercise boundary
 

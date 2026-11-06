@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.DeFi.UniswapMechanics
 public import MathFin.BlackScholes.Forward
 

@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.CompactHeatFlow
+public import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 
 /-! # Heat smoothing of continuous, not necessarily differentiable, data
 

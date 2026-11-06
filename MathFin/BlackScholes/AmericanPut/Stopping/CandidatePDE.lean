@@ -5,8 +5,9 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.ClassicalContact
 public import MathFin.BlackScholes.AmericanPut.Boundary.DividendProblem
+public import MathFin.BlackScholes.AmericanPut.Stopping.ClassicalCandidate
+public import Mathlib.Analysis.Calculus.Deriv.Prod
 
 /-!
 # The Brownian-coordinate PDE of the discounted classical-price candidate

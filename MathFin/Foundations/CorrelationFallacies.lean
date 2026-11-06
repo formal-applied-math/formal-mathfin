@@ -5,8 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.NormalQuantile
+public import Mathlib.Probability.Distributions.Gaussian.HasGaussianLaw.Basic
+public import Mathlib.Probability.Distributions.Gaussian.HasGaussianLaw.Independence
+public import Mathlib.Probability.Independence.Integration
+public import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
 # Normal margins and zero correlation determine neither independence nor normality

@@ -5,9 +5,9 @@ Authors: Robert Martin, Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
 public import MathFin.Foundations.MartingaleSetIntegral
 public import MathFin.Foundations.StoppedProcessPaths
+public import BrownianMotion.StochasticIntegral.LocalMartingale
 
 /-!
 # Bounded local martingales and smaller filtrations

@@ -5,7 +5,6 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.GarmanNormalForm
 public import MathFin.BlackScholes.ExchangeOption
 public import MathFin.BlackScholes.MargrabeGrounding

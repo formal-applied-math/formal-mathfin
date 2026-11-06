@@ -5,9 +5,12 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.ConvexDuality
 public import MathFin.RiskMeasures.Coherent
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.RingTheory.PiTensorProduct
+public import Mathlib.Tactic.Polynomial.Basic
+public import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Coherent risk measures: the Artzner–Delbaen–Eber–Heath representation (finite state)

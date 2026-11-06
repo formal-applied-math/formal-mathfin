@@ -7,7 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianHeatFlow
 public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianTransition
-public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianVerification
+public import MathFin.BlackScholes.AmericanPut.Stopping.ClassicalContact
 
 /-! # Waiting in physical time and price coordinates: the supermartingale step
 

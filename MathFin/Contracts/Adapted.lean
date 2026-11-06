@@ -6,6 +6,9 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Contracts.Core
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
+public import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # A payoff is measurable, adapted to its observation times, and integrable in a bounded model

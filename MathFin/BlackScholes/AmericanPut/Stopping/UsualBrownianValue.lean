@@ -6,7 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.CompletedSpace
-public import MathFin.BlackScholes.AmericanPut.Stopping.AugmentedValue
+public import MathFin.BlackScholes.AmericanPut.Stopping.ClassicalSupermartingale
 
 /-!
 # The American value on the completed usual Brownian filtration

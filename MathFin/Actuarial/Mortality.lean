@@ -5,8 +5,12 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.ExponentialDiscount
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
+public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Force of mortality and survival functions

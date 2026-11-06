@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.ExerciseGeometry
+public import Mathlib.Analysis.Calculus.DerivativeTest
 
 /-!
 # Spatial test functions at exercise contact

@@ -8,6 +8,10 @@ module
 public import MathFin.BlackScholes.AmericanPut.Boundary.Problem
 public import Mathlib.Analysis.Calculus.Deriv.Slope
 public import Mathlib.MeasureTheory.Integral.DominatedConvergence
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ReduceModChar
 
 /-! # Bounded logarithmic put-payoff difference quotients
 

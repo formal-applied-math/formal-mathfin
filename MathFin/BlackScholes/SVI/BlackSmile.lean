@@ -6,8 +6,8 @@ Authors: Robert Martin, Raphael Coelho
 module
 
 public import MathFin.BlackScholes.ForwardSmile
-public import MathFin.BlackScholes.SVI.Derivatives
 public import MathFin.Foundations.GaussianCDFDeriv
+public import MathFin.BlackScholes.SVI.Reduction
 
 /-! # The Black call with an SVI smile
 

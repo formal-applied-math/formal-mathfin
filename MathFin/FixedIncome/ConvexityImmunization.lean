@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.DerivOfDeriv
 public import MathFin.FixedIncome.Immunization
 public import MathFin.FixedIncome.ZCB

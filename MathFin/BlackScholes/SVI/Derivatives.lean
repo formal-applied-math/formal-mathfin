@@ -6,6 +6,8 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.SVI.Reduction
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 /-! # The derivatives of raw SVI variance
 

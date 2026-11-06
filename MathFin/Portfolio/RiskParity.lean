@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Portfolio.Markowitz
 public import MathFin.Portfolio.RiskParityFOC
 

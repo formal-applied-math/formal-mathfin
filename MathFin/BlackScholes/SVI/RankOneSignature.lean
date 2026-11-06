@@ -5,8 +5,8 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.SVI.MatrixSignature
 public import MathFin.BlackScholes.SVI.CriticalPoints
+public import Mathlib.LinearAlgebra.QuadraticForm.Signature
 
 /-! # Signature of a rank-one form
 

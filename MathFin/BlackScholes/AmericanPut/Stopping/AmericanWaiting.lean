@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.DelayedGrid
+public import MathFin.BlackScholes.AmericanPut.Stopping.UsualGridMarkov
 
 /-! # The deterministic waiting inequality for the actual American value
 

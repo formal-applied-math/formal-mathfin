@@ -5,7 +5,6 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Portfolio.MarkowitzNAsset
 public import MathFin.Portfolio.CovariancePSD
 public import MathFin.Portfolio.CAPM

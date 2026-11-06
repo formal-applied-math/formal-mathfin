@@ -6,7 +6,8 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.LinearPriceComparison
-public import MathFin.BlackScholes.AmericanPut.Stopping.ActualSmoothComparison
+public import MathFin.BlackScholes.AmericanPut.Stopping.CanonicalPrice
+public import MathFin.BlackScholes.AmericanPut.Stopping.SmoothPricingComparison
 
 /-! # Constructed smooth evolution for continuous initial price data
 

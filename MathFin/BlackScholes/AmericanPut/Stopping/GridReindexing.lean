@@ -6,7 +6,6 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.BermudanConvergence
-public import MathFin.BlackScholes.AmericanPut.Stopping.DiscreteStoppingValue
 
 /-! # Reindexing capped physical-time exercise grids
 

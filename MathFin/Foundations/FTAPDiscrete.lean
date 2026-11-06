@@ -5,13 +5,14 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.ConvexSeparation
 public import MathFin.Foundations.MartingaleTransform
 public import MathFin.Foundations.FTAP
 public import MathFin.Foundations.FTAPOnePeriod
 public import MathFin.Foundations.NoArbitrageCore
-public import MathFin.Foundations.ContinuousMarket
+public import Mathlib.Algebra.Order.Archimedean.Real.Hom
+public import Mathlib.Probability.ProbabilityMassFunction.Integrals
+public import Mathlib.RingTheory.PiTensorProduct
 
 /-!
 # Discrete-time FTAP on a finite probability space (scalar, finite horizon)

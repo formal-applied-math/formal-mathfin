@@ -5,10 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.RiskMeasures.ValueAtRisk
 public import MathFin.RiskMeasures.AcceptanceSet
 public import MathFin.RiskMeasures.Coherent
+public import Mathlib.Topology.Separation.CompletelyRegular
 
 /-!
 # Expected shortfall is coherent: the Rockafellar–Uryasev theorem for every integrable loss

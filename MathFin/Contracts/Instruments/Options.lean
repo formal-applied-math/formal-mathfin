@@ -7,6 +7,7 @@ module
 
 public import MathFin.Contracts.Pricing
 public import MathFin.BlackScholes.CappedCall
+public import Mathlib.RingTheory.PiTensorProduct
 
 /-!
 # Options, as contracts

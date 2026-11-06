@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.NormalQuantile
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # Bernoulli mixture models of portfolio credit risk

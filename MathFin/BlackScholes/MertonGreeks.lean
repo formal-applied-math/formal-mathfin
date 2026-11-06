@@ -5,11 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.MertonDominance
 public import MathFin.Foundations.DerivOfDeriv
 public import MathFin.Foundations.NormalQuantile
 public import MathFin.Foundations.NormalTail
+public import Mathlib.Analysis.Calculus.SmoothSeries
 
 /-!
 # The Merton jump-diffusion Greeks

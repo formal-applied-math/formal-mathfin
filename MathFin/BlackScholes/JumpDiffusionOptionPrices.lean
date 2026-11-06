@@ -5,11 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.JumpDiffusionProcess
 public import MathFin.BlackScholes.JumpImpliedVol
 public import MathFin.Foundations.IndepFreezing
-public import MathFin.Foundations.NoArbitrageDerivations
 
 /-!
 # Option prices at intermediate dates in a jump-diffusion

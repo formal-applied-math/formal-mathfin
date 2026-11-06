@@ -5,9 +5,10 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.BivariateNormalCDF
 public import MathFin.Foundations.HoeffdingCovariance
+public import Mathlib.LinearAlgebra.Matrix.Stochastic
+public import Mathlib.Topology.Sheaves.Presheaf
 
 /-!
 # CreditMetrics rating transitions

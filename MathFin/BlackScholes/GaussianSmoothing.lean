@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.JumpDiffusionMixing
+public import MathFin.Foundations.GaussianMoments
 
 /-!
 # Gaussian smoothing of the Black–Scholes price

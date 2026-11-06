@@ -5,10 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.RiskMeasures.ExpectedShortfall
-public import MathFin.RiskMeasures.GaussianValueAtRisk
 public import MathFin.RiskMeasures.RockafellarUryasev
+public import MathFin.Foundations.NormalQuantile
+public import Mathlib.Probability.Distributions.Gaussian.HasGaussianLaw.Basic
 
 /-!
 # Expected shortfall of a Gaussian loss

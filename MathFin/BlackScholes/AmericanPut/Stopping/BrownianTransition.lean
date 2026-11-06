@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.IndepFreezing
 public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianHeatFlow
+public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianModel
 
 /-! # Conditional Brownian transitions in the raw natural filtration
 

@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoIntegralBrownian
 public import MathFin.Foundations.BrownianMartingale
 
 /-! # Exponential moments of Brownian marginals

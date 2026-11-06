@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.JumpDiffusionMixing
+public import Mathlib.Probability.Independence.InfinitePi
 
 /-!
 # The canonical jump-diffusion model

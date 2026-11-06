@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.Problem
+public import MathFin.BlackScholes.AmericanPut.Boundary.Coordinates
 
 /-! # The classical put contract with a continuous exercise boundary
 

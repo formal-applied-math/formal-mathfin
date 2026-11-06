@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ExpMartingaleQBrownian
+public import BrownianMotion.Gaussian.BrownianMotion
 
 /-!
 # Brownian motion from an exponential martingale

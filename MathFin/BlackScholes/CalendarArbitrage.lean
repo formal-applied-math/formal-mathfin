@@ -5,9 +5,10 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.ImpliedVolatility
 public import MathFin.BlackScholes.SVI.BlackScholesBridge
+public import Mathlib.MeasureTheory.Function.ConditionalExpectation.CondJensen
+public import Mathlib.Probability.Martingale.Basic
 
 /-!
 # Calendar arbitrage: Gatheral–Jacquier Lemma 2.1

@@ -5,10 +5,15 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.EquivMeasure
 public import MathFin.Foundations.FTAP
 public import MathFin.Foundations.NoArbitrageCore
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # One-period FTAP on a general probability space (finite-dimensional market)

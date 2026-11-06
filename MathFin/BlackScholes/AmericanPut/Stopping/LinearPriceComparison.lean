@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianHeatFlow
 public import MathFin.BlackScholes.AmericanPut.Stopping.ContinuousHeatSmoothing
+public import MathFin.BlackScholes.AmericanPut.Boundary.WindowComparison
 
 /-!
 # Gaussian evolution of a smooth test payoff stays below the classical price

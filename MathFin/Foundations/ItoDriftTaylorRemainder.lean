@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.ItoDriftIncrementEnergy
 public import MathFin.Foundations.ItoDriftMomentBounds
+public import MathFin.Foundations.AdaptedDrift
 
 /-! # The Taylor remainder of the adapted Itô–drift identity (the discrete route, stage 5f)
 

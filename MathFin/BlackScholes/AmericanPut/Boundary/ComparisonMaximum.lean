@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.ComparisonTail
 public import MathFin.BlackScholes.AmericanPut.Boundary.ParabolicMaximum
+public import MathFin.BlackScholes.AmericanPut.Boundary.GaugeTransform
 
 /-!
 # Maximum principle for the actual normalized comparison difference

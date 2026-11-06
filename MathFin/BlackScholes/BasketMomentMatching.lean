@@ -5,7 +5,6 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.GarmanNormalForm
 public import MathFin.Foundations.GaussianPairLinearLaw
 

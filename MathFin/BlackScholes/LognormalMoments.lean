@@ -5,10 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.BlackScholes.Forward
-public import MathFin.BlackScholes.PowerOption
 
 /-!
 # Second moment and variance of the terminal asset price

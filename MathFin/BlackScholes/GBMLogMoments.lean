@@ -5,9 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.Foundations.ItoLemma
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # The law of the Black–Scholes log-return

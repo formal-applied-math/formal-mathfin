@@ -6,7 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.SampledRules
-public import MathFin.BlackScholes.AmericanPut.Stopping.UsualGridMarkov
+public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianBellman
 
 /-! # Optimal finite-grid exercise after a deterministic waiting time
 

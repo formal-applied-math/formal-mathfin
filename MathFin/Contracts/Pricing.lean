@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Contracts.Core
+public import Mathlib.Probability.Martingale.Basic
 
 /-!
 # Pricing a contract: value, its linearity, and the martingale seam

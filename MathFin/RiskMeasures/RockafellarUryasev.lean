@@ -5,10 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.RiskMeasures.Gaussian
 public import MathFin.Foundations.StandardNormal
 public import MathFin.Foundations.GaussianPartialMoments
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # The Rockafellar–Uryasev variational characterization of Gaussian CVaR

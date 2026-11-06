@@ -5,7 +5,7 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.PricingTests
+public import MathFin.BlackScholes.AmericanPut.Stopping.CompactLocalization
 
 /-! # Parabolic comparison from smooth pricing tests
 

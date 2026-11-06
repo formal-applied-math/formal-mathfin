@@ -5,11 +5,12 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Portfolio.CAPMEquilibrium
 public import MathFin.Portfolio.ConvexQPKKT
 public import MathFin.Portfolio.CovariancePSD
 public import MathFin.Portfolio.Markowitz
+public import MathFin.Portfolio.TangentPortfolio
+public import Mathlib.Tactic.Polynomial.Basic
 
 /-!
 # N-asset Markowitz from constrained-variance Lagrangian (first principles)

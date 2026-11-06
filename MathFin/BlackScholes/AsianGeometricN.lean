@@ -9,6 +9,7 @@ public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.WienerIntegralIndicator
 public import MathFin.BlackScholes.Call
+public import MathFin.Foundations.WienerIntegralGaussian
 
 /-!
 # The geometric-average Asian option: `n` averaging dates, closed-form price

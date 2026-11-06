@@ -6,8 +6,8 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.MartingaleRepresentation
-public import MathFin.Foundations.ContinuousMarket
 public import MathFin.Foundations.ReplicationPricing
+public import MathFin.Foundations.EquivMartingaleMeasure
 
 /-!
 # Market completeness: replication, superreplication, and the pricing measure

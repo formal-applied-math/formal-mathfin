@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Binomial.American
 public import MathFin.Binomial.SnellEnvelope
 

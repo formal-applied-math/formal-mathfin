@@ -5,7 +5,7 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Boundary.GaugeTransform
+public import MathFin.BlackScholes.AmericanPut.Boundary.ComparisonShape
 
 /-!
 # Uniform right-hand control of the comparison difference

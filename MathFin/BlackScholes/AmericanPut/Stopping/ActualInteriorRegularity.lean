@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.PricingDirichlet
+public import MathFin.BlackScholes.AmericanPut.Stopping.ActualSmoothComparison
 
 /-! # Interior regularity and PDE of the actual American stopping price
 

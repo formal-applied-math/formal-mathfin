@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
-public import MathFin.Foundations.PoissonCompensatedBilinear
+public import MathFin.Foundations.PoissonCompensatedIsometryAdapted
+public import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # The marked simple integrand as a vector space

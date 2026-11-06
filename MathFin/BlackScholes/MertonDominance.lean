@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.MertonJumpDiffusion
 public import MathFin.BlackScholes.SpotConvexity
 public import MathFin.BlackScholes.ImpliedVolatility

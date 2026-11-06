@@ -5,7 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoSquaringIdentity
+public import MathFin.Foundations.DiscreteIto
 
 /-! # Polynomial Itô remainders — item 3 of the Itô-lemma chain
 

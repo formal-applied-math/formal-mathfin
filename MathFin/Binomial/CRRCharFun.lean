@@ -5,9 +5,13 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Binomial.DriftLimit
 public import MathFin.Contracts.Models.Binomial
+public import Mathlib.Algebra.Order.Archimedean.Real.Hom
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.MeasureTheory.Measure.LevyConvergence
+public import Mathlib.Probability.Distributions.Gaussian.Real
+public import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
 # CRR characteristic-function convergence (the CLT heart of CRR → Black–Scholes)

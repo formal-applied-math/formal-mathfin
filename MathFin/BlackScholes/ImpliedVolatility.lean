@@ -5,10 +5,11 @@ Authors: Raphael Coelho, Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.PDE
 public import MathFin.BlackScholes.PutGreeks
 public import MathFin.Foundations.NormalTail
+public import Mathlib.RingTheory.Etale.Weakly
+public import Mathlib.RingTheory.TotallySplit
 
 /-!
 # Implied volatility: uniqueness, and existence above a reference volatility

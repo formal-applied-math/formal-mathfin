@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Portfolio.CovariancePSD
+public import Mathlib.Tactic.Polynomial.Basic
 
 /-!
 # The equicorrelation matrix: when is a common correlation admissible?

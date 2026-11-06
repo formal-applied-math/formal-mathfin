@@ -5,10 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.JumpDiffusionMerton
 public import MathFin.BlackScholes.JumpDiffusionBrownian
 public import MathFin.Foundations.Esscher
+public import Mathlib.Algebra.Ring.IsFormallyReal
 
 /-!
 # The Esscher transform of a jump-diffusion

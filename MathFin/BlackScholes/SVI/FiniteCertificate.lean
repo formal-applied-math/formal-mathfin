@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.SVI.DegreeProgram
 public import MathFin.BlackScholes.SVI.SignatureProgram
+public import MathFin.BlackScholes.SVI.MatrixCertificate
 
 /-! # The certificate as a fixed finite program
 

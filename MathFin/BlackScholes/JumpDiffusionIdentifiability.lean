@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.JumpDiffusionProcess
 public import MathFin.Foundations.Esscher
+public import Mathlib.Algebra.Ring.IsFormallyReal
 
 /-!
 # The law at one date determines the drift, the Gaussian variance and the Lévy measure

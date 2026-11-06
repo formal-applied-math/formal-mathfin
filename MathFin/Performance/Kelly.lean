@@ -5,8 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Performance.Ratios
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Topology.Separation.CompletelyRegular
 
 /-!
 # Multi-period Kelly criterion and Kelly fraction bounds

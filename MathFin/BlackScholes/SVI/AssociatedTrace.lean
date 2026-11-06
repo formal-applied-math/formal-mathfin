@@ -5,7 +5,8 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.SVI.QuotientProduct
+public import MathFin.BlackScholes.SVI.ProductSignature
+public import MathFin.BlackScholes.SVI.TraceForm
 
 /-! # Weighted trace forms of associated polynomials
 

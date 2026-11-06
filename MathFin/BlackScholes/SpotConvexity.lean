@@ -5,9 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.PDE
 public import MathFin.BlackScholes.GreekSigns
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.RingTheory.Etale.Weakly
+public import Mathlib.RingTheory.TotallySplit
 
 /-!
 # Spot-direction convexity of the Black–Scholes call

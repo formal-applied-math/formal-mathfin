@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Execution.GlostenMilgrom
+public import Mathlib.Probability.Kernel.Condexp
 
 /-!
 # Glosten–Milgrom quotes as conditional expectations

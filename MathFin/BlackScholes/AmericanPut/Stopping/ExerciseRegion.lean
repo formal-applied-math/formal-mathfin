@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.SpotShape
+public import Mathlib.Analysis.Convex.Continuous
 
 /-!
 # The in-the-money exercise threshold defined from the stopping value

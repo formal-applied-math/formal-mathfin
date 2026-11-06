@@ -5,11 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.BlackScholes.Put
 public import MathFin.BlackScholes.PutGreeks
 public import MathFin.BlackScholes.PDE
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # The no-arbitrage rectangle for European call/put prices

@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.EquivMeasure
 public import MathFin.Foundations.FTAP
 public import MathFin.Foundations.MartingaleFrozen

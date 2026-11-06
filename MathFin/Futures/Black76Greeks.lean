@@ -5,8 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
-public import MathFin.Futures.Black76
 public import MathFin.BlackScholes.PDE
 public import MathFin.BlackScholes.HigherGreeks
 

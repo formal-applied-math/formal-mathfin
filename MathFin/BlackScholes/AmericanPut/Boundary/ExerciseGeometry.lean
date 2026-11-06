@@ -6,7 +6,6 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.DividendProblem
-public import MathFin.BlackScholes.AmericanPut.Boundary.ParabolicMaximum
 
 /-!
 # Exercise-boundary calculus from the classical pricing contract

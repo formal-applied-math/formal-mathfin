@@ -5,9 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Portfolio.CAPM
-public import MathFin.Portfolio.TangentPortfolio
 
 /-!
 # CAPM from market equilibrium (first-principles derivation)

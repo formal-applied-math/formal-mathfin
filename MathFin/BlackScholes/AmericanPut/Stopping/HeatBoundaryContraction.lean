@@ -5,9 +5,8 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.HeatBoundaryEquation
 public import Mathlib.Topology.ContinuousMap.Bounded.Normed
-public import Mathlib.Topology.MetricSpace.Contracting
+public import MathFin.BlackScholes.AmericanPut.Stopping.HeatBoundaryExtension
 
 /-! # Strict finite-time contraction of cross-boundary heat propagation
 

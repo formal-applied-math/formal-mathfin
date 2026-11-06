@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.StrikeGreeks
 public import MathFin.BlackScholes.StrikeConvexity
 public import MathFin.BlackScholes.Call

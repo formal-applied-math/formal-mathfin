@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.BivariateNormalCDF
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # Hoeffding's covariance identity

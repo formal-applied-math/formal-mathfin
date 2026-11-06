@@ -5,8 +5,8 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.PeriodicCompounding
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # Aave v2: kinked interest-rate model, health factor, liquidity index

@@ -5,13 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Actuarial.CompoundPoissonMGF
 public import MathFin.BlackScholes.Forward
 public import MathFin.BlackScholes.PriceBounds
 public import MathFin.BlackScholes.SpotConvexity
 public import MathFin.Foundations.AffineMinorant
-public import MathFin.Foundations.GaussianMoments
 public import MathFin.Foundations.IndepFreezing
 public import MathFin.Foundations.NormalQuantile
 

@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.FirstContact
 public import MathFin.BlackScholes.AmericanPut.Stopping.ClassicalCandidate
+public import MathFin.BlackScholes.AmericanPut.Boundary.ContinuousBoundaryProblem
 
 /-!
 # The first-contact rule of a put envelope

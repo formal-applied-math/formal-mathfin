@@ -6,6 +6,8 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Contracts.Instruments.Options
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
 
 /-!
 # The forward and put–call parity in every risk-neutral model

@@ -5,9 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.RiskMeasures.Gaussian
-public import MathFin.RiskMeasures.CoherentAxioms
+public import MathFin.Foundations.NormalQuantile
 
 /-!
 # Gaussian VaR/CVaR additivity at perfect positive correlation

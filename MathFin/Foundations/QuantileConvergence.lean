@@ -5,8 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.Quantile
+public import Mathlib.Probability.StrongLaw
+public import Mathlib.Tactic.ENatToNat
 
 /-!
 # Convergence of quantiles and of empirical distribution functions

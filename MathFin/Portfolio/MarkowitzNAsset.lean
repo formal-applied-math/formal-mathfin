@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Portfolio.Markowitz
+public import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # N-asset Markowitz portfolio variance (sum form)

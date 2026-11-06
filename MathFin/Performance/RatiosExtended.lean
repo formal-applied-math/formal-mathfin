@@ -5,9 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Performance.Ratios
 public import MathFin.Portfolio.CAPM
+public import Mathlib.Probability.Moments.Variance
 
 /-!
 # Extended performance ratios: Sortino, Treynor, Information, gain-to-pain, upside capture

@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.ForwardMeasure
 public import MathFin.BlackScholes.Forward
 

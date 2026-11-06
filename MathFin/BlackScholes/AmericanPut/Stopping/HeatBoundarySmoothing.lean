@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.FlatHeatKernel
 public import MathFin.BlackScholes.AmericanPut.Stopping.HeatBoundaryExtension
+public import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 
 /-! # Interior smoothing of continuous compact boundary data
 

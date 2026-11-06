@@ -5,7 +5,6 @@ Authors: Raphael Coelho, Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.PDE
 public import MathFin.BlackScholes.PutGreeks
 

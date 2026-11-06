@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.CompactKernelDerivative
 public import MathFin.BlackScholes.AmericanPut.Stopping.PlanePartial
+public import MathFin.BlackScholes.AmericanPut.Stopping.HeatBoundarySmoothing
 
 /-! # Heat equation for the continuous compact-data boundary integral
 

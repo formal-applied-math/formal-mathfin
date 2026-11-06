@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.BrownianMartingale
+public import Mathlib.MeasureTheory.Order.Group.Lattice
 
 /-!
 # The simple Doléans exponential — the martingale foundation of adapted Girsanov (Track α)

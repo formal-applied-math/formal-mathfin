@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.PlaneIto
 public import MathFin.BlackScholes.AmericanPut.Boundary.DividendProblem
+public import MathFin.BlackScholes.AmericanPut.Stopping.SmoothLocalization
 
 /-!
 # Zero-drift smooth Ito localizations of the classical price

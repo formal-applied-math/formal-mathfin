@@ -5,8 +5,8 @@ Authors: Raphael Coelho, Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.Vasicek
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # Vasicek SDE terminal-distribution form (stated, not derived) (phase 41)

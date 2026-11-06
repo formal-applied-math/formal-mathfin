@@ -5,11 +5,11 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.GarmanNormalForm
 public import MathFin.BlackScholes.ExchangeOption
 public import MathFin.BlackScholes.MargrabeGrounding
 public import MathFin.Foundations.BivariateNormalCDF
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # Stulz (1982): the two-asset rainbow (max/min) closed form

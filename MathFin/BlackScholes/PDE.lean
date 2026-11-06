@@ -5,10 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.Foundations.GaussianCDFDeriv
 public import MathFin.Foundations.DerivOfDeriv
+public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 /-!
 # Black–Scholes PDE — forward direction

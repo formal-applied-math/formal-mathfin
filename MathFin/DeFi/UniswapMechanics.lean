@@ -5,8 +5,8 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.DeFi.ConstantProductAMM
+public import Mathlib.Algebra.Ring.IsFormallyReal
 
 /-!
 # Uniswap v2/v3 AMM mechanics: impermanent loss, TWAP, fee invariant,

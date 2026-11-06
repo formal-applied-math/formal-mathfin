@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.StationaryPutCap
+public import MathFin.BlackScholes.AmericanPut.Stopping.UpperSupportComparison
 
 /-! # A strictly positive exercise threshold for the actual stopping value
 

@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.CandidatePDE
+public import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 
 /-!
 # Compact smooth localization of the Brownian-coordinate price

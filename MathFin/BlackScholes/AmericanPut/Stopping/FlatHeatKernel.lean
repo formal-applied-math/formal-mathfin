@@ -9,6 +9,7 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.HeatBoundaryKernel
 public import Mathlib.Analysis.SpecialFunctions.SmoothTransition
 public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import Mathlib.Analysis.Calculus.LocalExtr.Basic
+public import Mathlib.Algebra.Ring.IsFormallyReal
 
 /-! # Smooth causal extension of the heat boundary kernel
 

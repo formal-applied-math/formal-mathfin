@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.HeatPricingTransform
+public import MathFin.BlackScholes.AmericanPut.Stopping.IntervalHeatBoundary
 
 /-!
 # Constructed fixed-interval pricing-equation boundary correction

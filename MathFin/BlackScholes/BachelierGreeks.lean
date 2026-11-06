@@ -5,9 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.Bachelier
-public import MathFin.BlackScholes.PDE
+public import MathFin.Foundations.DerivOfDeriv
+public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 /-!
 # Bachelier model Greeks

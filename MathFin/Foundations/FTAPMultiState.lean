@@ -5,11 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.FTAPTwoState
 public import MathFin.Foundations.ConvexSeparation
 public import MathFin.Foundations.FTAPOnePeriodVector
 public import MathFin.Foundations.StatePrices
+public import Mathlib.Probability.ProbabilityMassFunction.Constructions
 
 /-!
 # Multi-state FTAP (both directions)

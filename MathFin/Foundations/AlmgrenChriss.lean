@@ -5,8 +5,13 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.DerivOfDeriv
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
+public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Almgren-Chriss optimal execution (deterministic closed form)

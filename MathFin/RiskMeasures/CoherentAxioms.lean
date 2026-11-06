@@ -5,9 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.RiskMeasures.Gaussian
 public import MathFin.RiskMeasures.GaussianExpectedShortfall
+public import MathFin.RiskMeasures.GaussianValueAtRisk
 
 /-!
 # Coherence of Gaussian value-at-risk and expected shortfall

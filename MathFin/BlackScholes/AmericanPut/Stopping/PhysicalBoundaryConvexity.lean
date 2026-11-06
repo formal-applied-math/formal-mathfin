@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.ActualBoundaryNormalization
+public import MathFin.BlackScholes.AmericanPut.Stopping.ActualStockConvexity
 
 /-! # Convexity of the actual American put option boundary in physical units
 

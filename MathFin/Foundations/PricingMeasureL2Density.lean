@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.MarketCompletenessInPrice
+public import MathFin.Foundations.MartingaleTransform
 
 /-! # The pricing measure, from a square-integrable density
 

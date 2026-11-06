@@ -5,10 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
-public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.BlackScholes.Call
 public import MathFin.BlackScholes.Bachelier
+public import Mathlib.Probability.BrownianMotion.Basic
 
 /-!
 # Bridge: `BSCallHyp` / `BachelierHyp` from a Brownian motion

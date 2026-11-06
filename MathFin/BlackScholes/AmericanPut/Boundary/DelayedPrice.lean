@@ -5,7 +5,7 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Boundary.ObstacleComparison
+public import MathFin.BlackScholes.AmericanPut.Boundary.DividendProblem
 
 /-! # A clamped time delay of the price
 

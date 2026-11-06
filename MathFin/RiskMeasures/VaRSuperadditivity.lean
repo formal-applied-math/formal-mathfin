@@ -5,10 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.RiskMeasures.RiskClosedForms
 public import MathFin.RiskMeasures.GaussianValueAtRisk
 public import MathFin.Foundations.FiniteMeasureCauchySchwarz
+public import Mathlib.Analysis.SpecialFunctions.Sqrt
+public import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
 # Value-at-risk is not subadditive

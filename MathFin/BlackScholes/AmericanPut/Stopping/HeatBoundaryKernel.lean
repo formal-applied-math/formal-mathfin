@@ -5,9 +5,9 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.ContinuousHeatSmoothing
 public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
+public import MathFin.BlackScholes.AmericanPut.Stopping.CompactHeatFlow
 
 /-! # The half-line heat boundary kernel
 

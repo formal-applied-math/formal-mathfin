@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.DelayedPrice
 public import MathFin.BlackScholes.AmericanPut.Boundary.LocalizationBarrier
+public import MathFin.BlackScholes.AmericanPut.Boundary.ObstacleComparison
 
 /-!
 # More time remaining cannot reduce the price

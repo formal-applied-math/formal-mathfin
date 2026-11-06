@@ -5,9 +5,9 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.PlaneIto
 public import MathFin.Foundations.BoundedLocalMartingale
 public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianVerification
+public import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
 
 /-!
 # Bounded stopped-candidate promotion and raw-filtration transfer

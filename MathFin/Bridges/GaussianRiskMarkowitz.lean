@@ -5,11 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.RiskMeasures.GaussianValueAtRisk
 public import MathFin.RiskMeasures.VaRSuperadditivity
 public import MathFin.Portfolio.CovariancePSD
 public import MathFin.Portfolio.Equicorrelation
+public import Mathlib.Probability.Distributions.Gaussian.Fernique
 
 /-!
 # Bridge: for Gaussian risk factors, VaR and ES rank portfolios as Markowitz does

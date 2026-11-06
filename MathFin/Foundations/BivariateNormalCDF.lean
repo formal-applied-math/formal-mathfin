@@ -5,9 +5,11 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.NormalQuantile
 public import MathFin.Foundations.BivariateGaussian
+public import Mathlib.Probability.Distributions.Gaussian.CharFun
+public import Mathlib.Probability.Distributions.Gaussian.Fernique
+public import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
 # The standard bivariate normal CDF `N₂(a, b; r)`

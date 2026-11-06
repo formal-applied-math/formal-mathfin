@@ -5,7 +5,7 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.Verification
+public import MathFin.BlackScholes.AmericanPut.Stopping.GridSampling
 
 /-!
 # Ordered bounded continuous-time optional sampling

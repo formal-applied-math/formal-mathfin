@@ -5,10 +5,11 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.PDE
 public import MathFin.Foundations.DerivOfDeriv
 public import MathFin.Foundations.GaussianCDFDeriv
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Algebra.Ring.IsFormallyReal
 
 /-!
 # Local-volatility skew of a tilted smile: Dupire's ratio and the rule of two (eq 10.8)

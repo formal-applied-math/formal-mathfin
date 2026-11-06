@@ -5,12 +5,13 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.StandardNormal
 public import MathFin.BlackScholes.Put
 public import MathFin.BlackScholes.PutGreeks
-public import MathFin.BlackScholes.LognormalMoments
-public import MathFin.Foundations.GaussianMoments
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Probability.CentralLimitTheorem
+public import Mathlib.Probability.Independence.InfinitePi
+public import Mathlib.Probability.StrongLaw
 
 /-!
 # Monte Carlo pricing of the European put

@@ -5,9 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.Call
-public import MathFin.BlackScholes.Forward
 
 /-!
 # Delta as stock-numeraire probability: `Φ(d_1) = Q^(S)(S_T > K)`

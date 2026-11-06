@@ -5,8 +5,8 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.BreedenLitzenberger
+public import Mathlib.Algebra.Ring.IsFormallyReal
 
 /-!
 # LSV leverage-posterior core

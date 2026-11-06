@@ -5,7 +5,8 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.MaturityContinuity
+public import MathFin.BlackScholes.AmericanPut.Stopping.LocalizationTimes
+public import MathFin.BlackScholes.AmericanPut.Stopping.SpotShape
 
 /-! # Large-spot decay of the actual stopping supremum
 

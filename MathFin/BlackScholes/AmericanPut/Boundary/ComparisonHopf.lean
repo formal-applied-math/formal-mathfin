@@ -7,8 +7,9 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.ParabolicHopf
 public import MathFin.BlackScholes.AmericanPut.Boundary.MovingLine
-public import MathFin.BlackScholes.AmericanPut.Boundary.ComparisonMaximum
 public import MathFin.BlackScholes.AmericanPut.Boundary.ComparisonCoefficients
+public import MathFin.BlackScholes.AmericanPut.Boundary.ComparisonTail
+public import MathFin.BlackScholes.AmericanPut.Boundary.GaugeTransform
 
 /-!
 # The terminal barrier applied to the actual comparison

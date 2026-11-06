@@ -5,9 +5,8 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.DiscreteStoppingValue
-public import MathFin.BlackScholes.AmericanPut.Stopping.AmericanValue
 public import MathFin.Foundations.ContinuousMarket
+public import MathFin.BlackScholes.AmericanPut.Stopping.Rules
 
 /-!
 # Discrete rules sampled at arbitrary deterministic increasing times

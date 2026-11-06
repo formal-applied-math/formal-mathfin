@@ -5,7 +5,6 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.HazardCurve
 public import MathFin.BlackScholes.Bachelier
 public import MathFin.FixedIncome.DefaultDensity

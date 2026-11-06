@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.ObstacleComparison
+public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 /-!
 # A shrinking-strip subsolution for the expiry estimate

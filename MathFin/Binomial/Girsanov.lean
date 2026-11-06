@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Binomial.Model
 public import MathFin.Binomial.PathMeasure
 public import MathFin.Foundations.EquivMeasure

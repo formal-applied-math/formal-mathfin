@@ -5,8 +5,8 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.PositiveExerciseBoundary
 public import Mathlib.Analysis.Calculus.Deriv.Slope
+public import MathFin.BlackScholes.AmericanPut.Stopping.ActualInteriorRegularity
 
 /-! # Excluding an instantaneous interval of continuation
 

@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.DriftProcessPredictable
+public import MathFin.Foundations.ItoProcessPredictable
 
 /-! # SDE existence/uniqueness via Picard on `E` (build)
 

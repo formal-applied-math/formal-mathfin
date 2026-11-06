@@ -5,7 +5,6 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.SmoothLocalization
 public import MathFin.Foundations.ItoFormulaUnrestrictedLocMart
 public import MathFin.BlackScholes.AmericanPut.Stopping.PlanePartial
 

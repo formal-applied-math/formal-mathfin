@@ -7,6 +7,8 @@ module
 
 public import MathFin.BlackScholes.JumpDiffusionProcess
 public import MathFin.Foundations.StandardNormal
+public import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
 # The density of a jump-diffusion log-return

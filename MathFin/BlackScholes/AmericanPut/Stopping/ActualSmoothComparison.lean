@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.SmoothPricingComparison
+public import MathFin.BlackScholes.AmericanPut.Stopping.PricingTests
 
 /-! # Local smooth comparison and identification for the actual stopping price
 

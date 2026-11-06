@@ -5,11 +5,11 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.PoissonInterarrival
 public import MathFin.FixedIncome.Credit
 public import MathFin.FixedIncome.HazardCurve
 public import MathFin.FixedIncome.CDSTimeVarying
+public import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
 # Cox-intensity credit: survival, default density, CDS legs and fair spread

@@ -5,8 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.FiniteMeasureCauchySchwarz
+public import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.Analysis.ODE.Gronwall
+public import Mathlib.Order.CompletePartialOrder
 
 /-! # Pathwise uniqueness for SDEs via Grönwall
 

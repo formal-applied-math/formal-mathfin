@@ -8,8 +8,7 @@ module
 public import MathFin.Foundations.GirsanovSimpleTheta
 public import MathFin.Foundations.AdaptedProcessToLp
 public import MathFin.Foundations.ItoIntegralProcess
-public import MathFin.Foundations.ItoIntegralRiemannBridgeAdapted
-public import MathFin.Foundations.UnifIntegrableL2
+public import MathFin.Foundations.ItoIntegralBrownian
 
 /-! # Marshalling a `SimpleProcess` into single-partition `(s,c)` form (Girsanov Rung 1, Route B)
 

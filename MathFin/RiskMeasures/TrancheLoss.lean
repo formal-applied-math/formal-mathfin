@@ -5,9 +5,9 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.RiskMeasures.VasicekIRB
 public import MathFin.Foundations.BivariateNormalCDF
+public import Mathlib.MeasureTheory.Order.Group.Lattice
 
 /-!
 # Tranche losses in the large homogeneous portfolio

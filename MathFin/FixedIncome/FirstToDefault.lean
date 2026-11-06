@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.ExpMin
 public import MathFin.FixedIncome.Credit
 

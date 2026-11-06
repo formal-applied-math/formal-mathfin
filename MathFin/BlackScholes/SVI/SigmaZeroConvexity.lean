@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.SVI.SigmaZeroDerivatives
 public import MathFin.BlackScholes.SVI.ConvexKink
+public import MathFin.BlackScholes.SVI.BlackScholesBridge
 
 /-! # Convexity of the call at zero scale
 

@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.BlackScholes.JumpDiffusionProcess
+public import Mathlib.Probability.Moments.Tilted
 
 /-!
 # The moments of a jump-diffusion log-return

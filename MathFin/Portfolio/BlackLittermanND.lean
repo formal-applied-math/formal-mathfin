@@ -5,9 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Portfolio.BlackLitterman
 public import MathFin.Portfolio.ConvexQPKKT
+public import Mathlib.Tactic.Polynomial.Basic
 
 /-!
 # N-dimensional Black-Litterman posterior (matrix form)

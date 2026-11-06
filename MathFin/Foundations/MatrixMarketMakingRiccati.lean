@@ -5,8 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.MarketMakingRiccati
+public import Mathlib.Algebra.Order.Archimedean.Real.Hom
+public import Mathlib.Analysis.Calculus.Deriv.Prod
+public import Mathlib.Analysis.Matrix.Normed
+public import Mathlib.Analysis.Matrix.Spectrum
 
 /-!
 # Multi-asset market making — the matrix Riccati closed form

@@ -5,8 +5,9 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.LocalPriceIto
 public import Mathlib.Geometry.Manifold.PartitionOfUnity
+public import MathFin.BlackScholes.AmericanPut.Stopping.CandidatePDE
+public import MathFin.BlackScholes.AmericanPut.Stopping.PlaneIto
 
 /-!
 # Smooth price extensions around compact interior sets

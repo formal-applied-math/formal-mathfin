@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.SVI.Matrices
 public import MathFin.BlackScholes.SVI.SignVariations
+public import Mathlib.LinearAlgebra.QuadraticForm.Signature
 
 /-! # Signature of a symmetric matrix from its characteristic polynomial
 

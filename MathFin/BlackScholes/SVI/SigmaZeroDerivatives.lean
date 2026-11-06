@@ -5,7 +5,7 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.SVI.BlackScholesBridge
+public import MathFin.BlackScholes.SVI.BlackSmile
 
 /-! # The zero-scale slice and its derivatives
 

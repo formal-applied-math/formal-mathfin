@@ -5,8 +5,9 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Performance.LabelUniqueness
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.Probability.BrownianMotion.Basic
 
 /-!
 # Purged train/test interval disjointness

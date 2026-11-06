@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoIntegralCLM
 public import MathFin.Foundations.LpMulIsometry
+public import MathFin.Foundations.ItoIntegralHorizonDense
 
 /-! # Simple processes are dense in the bracket-weighted predictable `L²`
 

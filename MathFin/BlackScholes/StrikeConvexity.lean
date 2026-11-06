@@ -5,9 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
-public import MathFin.BlackScholes.StrikeGreeks
-public import MathFin.BlackScholes.GreekSigns
+public import MathFin.BlackScholes.PutGreeks
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.RingTheory.Etale.Weakly
+public import Mathlib.RingTheory.TotallySplit
 
 /-!
 # Strike-direction convexity at every scale

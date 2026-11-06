@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoProcessPredictable
 public import MathFin.Foundations.FiniteMeasureCauchySchwarz
+public import MathFin.Foundations.ItoIntegralProcessContinuousModification
 
 /-! # Predictability and `L²` assembly of the drift process (SDE-existence keystone II)
 

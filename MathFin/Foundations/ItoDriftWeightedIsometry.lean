@@ -6,6 +6,7 @@ Authors: Yang Ye, Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoDriftIncrementEnergy
+public import MathFin.Foundations.ItoDriftExpectation
 
 /-! # The weighted increment isometry of an adapted Itô integral (the discrete route, stage 4)
 

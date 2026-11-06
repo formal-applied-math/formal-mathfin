@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.HeatBoundaryContraction
+public import Mathlib.Topology.MetricSpace.Contracting
 
 /-! # Solving the coupled boundary-input equations
 

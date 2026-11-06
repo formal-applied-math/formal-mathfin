@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.RiskMeasures.VonNeumannMorgenstern
 public import MathFin.RiskMeasures.AcceptanceSet
 public import MathFin.Performance.Ratios

@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.GridNormalization
+public import MathFin.BlackScholes.AmericanPut.Stopping.ShrinkingGrids
 
 /-! # Physical-unit identification of the actual normalized stopping price
 

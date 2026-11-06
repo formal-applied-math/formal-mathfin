@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.WienerIntegralIndicator
+public import MathFin.Foundations.WienerIntegralGaussian
 
 /-!
 # Exponential moments of a Wiener integral

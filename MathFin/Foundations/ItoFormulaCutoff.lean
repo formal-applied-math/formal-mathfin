@@ -6,7 +6,6 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoFormulaLocalized
-public import MathFin.Foundations.ItoFormulaProcess
 public import MathFin.Foundations.ExitTime
 
 /-! # The double cutoff of Summit C, and the capped exit-time localizer

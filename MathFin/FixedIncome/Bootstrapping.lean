@@ -5,12 +5,14 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.Bisection
 public import MathFin.FixedIncome.FRA
 public import MathFin.FixedIncome.InterestRateSwap
 public import MathFin.FixedIncome.ZCB
 public import MathFin.FixedIncome.YieldCurve
+public import Mathlib.Analysis.SpecialFunctions.Log.Base
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Curve bootstrapping by bracketing search

@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.RiskMeasures.GaussianValueAtRisk
 public import MathFin.Foundations.GaussianMoments
 public import MathFin.Foundations.ItoLemma2D

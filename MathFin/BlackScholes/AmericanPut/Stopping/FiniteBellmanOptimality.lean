@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.DiscreteContactMartingale
 public import MathFin.Foundations.SnellEnvelope
+public import Mathlib.Probability.Martingale.OptionalStopping
 
 /-! # First-contact attainment of the finite Snell envelope (the Bellman recursion)
 

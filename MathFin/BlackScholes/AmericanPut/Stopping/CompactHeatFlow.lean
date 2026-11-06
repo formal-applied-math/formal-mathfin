@@ -5,8 +5,8 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Boundary.WindowComparison
 public import MathFin.Foundations.FeynmanKacHeatEquation
+public import Mathlib.Analysis.Calculus.ContDiff.Convolution
 
 /-!
 # Smooth heat evolution of compactly supported test payoffs

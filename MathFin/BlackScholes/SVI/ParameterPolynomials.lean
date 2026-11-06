@@ -5,8 +5,8 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.SVI.MatrixCertificate
-public import Mathlib
+public import MathFin.BlackScholes.SVI.ClearedSignature
+public import MathFin.BlackScholes.SVI.Polynomial
 
 /-! # The certificate over the ring of parameter polynomials
 

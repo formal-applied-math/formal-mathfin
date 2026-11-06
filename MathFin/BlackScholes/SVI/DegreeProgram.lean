@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.SVI.SignFormula
+public import Std.Tactic.BVDecide.Normalize.Prop
 
 /-! # Reading the degree by sign queries
 

@@ -5,7 +5,6 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.Forward
 public import MathFin.Foundations.NoArbitrageDerivations
 

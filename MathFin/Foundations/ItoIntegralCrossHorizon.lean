@@ -10,7 +10,6 @@ public import MathFin.Foundations.ItoIntegralProcess
 public import MathFin.Foundations.AdaptedProcessToLp
 public import MathFin.Foundations.ItoIntegralL2
 public import MathFin.Foundations.ItoIntegralCLM
-public import MathFin.Foundations.ItoIntegralProcessL2Infinite
 public import MathFin.Foundations.ItoIntegralLocality
 
 /-! # Cross-horizon consistency of the CLM Itô integral

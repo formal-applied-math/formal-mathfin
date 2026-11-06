@@ -7,7 +7,6 @@ module
 
 public import MathFin.Contracts.Models.GSRBond
 public import MathFin.Contracts.Models.HullWhiteBond
-public import MathFin.Contracts.Models.VasicekBond
 public import MathFin.BlackScholes.Put
 public import MathFin.FixedIncome.TimingAdjustment
 

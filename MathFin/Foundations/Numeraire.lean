@@ -5,9 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.ChangeOfMeasure
 public import MathFin.Foundations.EquivMeasure
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
 
 /-!
 # The change of numéraire

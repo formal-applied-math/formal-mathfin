@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Actuarial.Mortality
 public import MathFin.FixedIncome.ZCB
 

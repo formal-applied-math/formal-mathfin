@@ -5,7 +5,7 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.ShrinkingGrids
+public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianBellman
 
 /-! # Exact strike and time rescaling of finite-grid American put prices
 

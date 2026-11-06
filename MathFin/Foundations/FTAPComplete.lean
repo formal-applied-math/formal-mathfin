@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.FTAPDiscrete
+public import Mathlib.Tactic.Polynomial.Basic
 
 /-!
 # Second FTAP on a finite probability space: complete ⟺ unique equivalent martingale measure

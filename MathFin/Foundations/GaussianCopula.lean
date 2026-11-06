@@ -5,10 +5,10 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.Sklar
 public import MathFin.Foundations.NormalQuantile
 public import MathFin.Foundations.BivariateNormalCDF
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # The one-factor Gaussian copula

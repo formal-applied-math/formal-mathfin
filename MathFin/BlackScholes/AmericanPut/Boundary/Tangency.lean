@@ -8,6 +8,7 @@ module
 public import MathFin.BlackScholes.AmericanPut.Boundary.ComparisonHopf
 public import MathFin.BlackScholes.AmericanPut.Boundary.DividendProblem
 public import MathFin.BlackScholes.AmericanPut.Boundary.TangentGeometry
+public import MathFin.BlackScholes.AmericanPut.Boundary.ComparisonMaximum
 
 /-!
 # Geometric assembly of the terminal rectangle

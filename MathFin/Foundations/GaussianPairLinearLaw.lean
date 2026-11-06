@@ -5,9 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.BivariateNormalCDF
-public import MathFin.Foundations.GaussianMoments
 
 /-!
 # Linear combinations of a correlated standard Gaussian pair

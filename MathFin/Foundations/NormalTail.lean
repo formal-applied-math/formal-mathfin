@@ -7,6 +7,8 @@ module
 
 public import MathFin.Foundations.NormalQuantile
 public import MathFin.Foundations.GaussianPartialMoments
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Real.Pi.Bounds
 
 /-! # The left tail of the standard normal
 

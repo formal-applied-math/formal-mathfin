@@ -5,8 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.Quantile
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ENatToNat
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Value-at-risk and expected shortfall of a general loss

@@ -5,8 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.ErlangSum
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.Probability.Distributions.Poisson.Basic
 
 /-!
 # The Poisson marginal law from the arrival-time construction

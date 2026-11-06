@@ -5,7 +5,6 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.HazardCurve
 public import MathFin.FixedIncome.Cox
 

@@ -5,9 +5,7 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.BivariateNormalCDF
-public import MathFin.BlackScholes.BarrierParity
 public import MathFin.BlackScholes.Call
 public import MathFin.BlackScholes.HeynenKatTwoAssetBarrier
 

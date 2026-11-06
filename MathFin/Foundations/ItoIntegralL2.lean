@@ -8,9 +8,9 @@ module
 public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
 public import BrownianMotion.StochasticIntegral.SimpleProcess
-public import BrownianMotion.StochasticIntegral.L2M
 public import MathFin.Foundations.ItoIsometryAdapted
 public import MathFin.Foundations.LpMulIsometry
+public import BrownianMotion.StochasticIntegral.Predictable
 
 /-!
 # The L²-adapted Itô isometry, anchored on Degenne's `SimpleProcess`

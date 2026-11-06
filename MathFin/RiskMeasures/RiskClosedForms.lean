@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.RiskMeasures.ValueAtRisk
+public import Mathlib.Probability.Distributions.Pareto
 
 /-!
 # Closed forms for value-at-risk and expected shortfall: exponential and Pareto losses

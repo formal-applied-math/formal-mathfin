@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.StatePrices
 public import MathFin.Foundations.FTAPTwoState
 public import MathFin.Bridges.ConvexPricingFunctional

@@ -5,20 +5,15 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoFormulaItoProcess
-public import MathFin.Foundations.ItoDriftExpectation
 public import MathFin.Foundations.ItoIntegralProcessGeneral
 public import MathFin.Foundations.AdaptedProcessToLp
 public import MathFin.Foundations.ItoIntegralRiemannBridgeAdapted
-public import MathFin.Foundations.WeightedQuadraticVariation
-public import MathFin.Foundations.ItoFormulaRemainder
 public import MathFin.Foundations.DiscreteIto
 public import MathFin.Foundations.ItoIntegralProcessIsometry
 public import MathFin.Foundations.ItoIsometryAdapted
 public import MathFin.Foundations.ItoIntegralBrownian
 public import MathFin.Foundations.QuadraticVariationL2
 public import MathFin.Foundations.GaussianMoments
-public import MathFin.Foundations.AdaptedDrift
 public import MathFin.Foundations.MartingaleTransform
 
 /-! # The increment energy of an adapted Itô integral (the discrete route, stages 2–3)

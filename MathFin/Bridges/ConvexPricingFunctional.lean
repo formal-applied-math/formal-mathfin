@@ -5,8 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
-public import MathFin.Foundations.StatePrices
 public import MathFin.BlackScholes.StrikeConvexity
 
 /-!

@@ -5,8 +5,9 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.NoArbitrageDerivations
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
 
 /-!
 # Fisher/Sraffa own-rate-of-interest identity

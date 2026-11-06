@@ -5,13 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.Chooser
 public import MathFin.BlackScholes.PDE
 public import MathFin.BlackScholes.PutGreeks
 public import MathFin.BlackScholes.GaussianSmoothing
 public import MathFin.BlackScholes.GBMLogMoments
-public import MathFin.Foundations.GaussianPairLinearLaw
 
 /-!
 # Chooser option as call-plus-put portfolio, priced in Black–Scholes

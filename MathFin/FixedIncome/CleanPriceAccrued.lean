@@ -5,8 +5,9 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.MacaulayModified
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Clean price and accrued interest, on- and between-coupon dates

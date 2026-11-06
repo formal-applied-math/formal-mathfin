@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.IndepFreezing
 

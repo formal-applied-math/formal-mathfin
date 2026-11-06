@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Binomial.CRRConvergence
+public import Mathlib.Algebra.Order.Ring.Star
 
 /-!
 # CRR drift limit (Phase 3 closeout)

@@ -5,10 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Actuarial.ActuarialInsurance
 public import MathFin.Foundations.FiniteMeasureCauchySchwarz
 public import MathFin.RiskMeasures.GaussianExpectedShortfall
+public import MathFin.RiskMeasures.GaussianValueAtRisk
 
 /-!
 # The standard-deviation principle: everything but monotonicity

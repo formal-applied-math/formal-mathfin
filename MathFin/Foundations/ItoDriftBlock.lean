@@ -5,8 +5,8 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoDriftWeightedIsometry
 public import MathFin.Foundations.AdaptedDrift
+public import MathFin.Foundations.ItoDriftExpectation
 
 /-! # The drift block of the adapted Itô–drift identity (the discrete route, stage 5d)
 

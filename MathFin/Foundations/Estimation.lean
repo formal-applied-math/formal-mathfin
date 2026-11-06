@@ -5,9 +5,10 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.GaussianMoments
 public import MathFin.Foundations.GaussianPartialMoments
+public import Mathlib.MeasureTheory.Measure.LogLikelihoodRatio
+public import Mathlib.Probability.Independence.Integration
 
 /-!
 # Estimation: Gaussian variance-ratio divergence and realised-volatility bias

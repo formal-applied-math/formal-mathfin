@@ -5,10 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Binomial.CRRConvergence
 public import MathFin.Binomial.DriftLimit
 public import MathFin.Binomial.CRRCharFun
+public import Mathlib.MeasureTheory.Order.Group.Lattice
 
 /-!
 # Mean and variance of the CRR log-return law, and their Black–Scholes limits

@@ -5,8 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.FTAPMultiState
+public import Mathlib.RingTheory.PiTensorProduct
+public import Mathlib.Tactic.Monotonicity.Lemmas
+public import Mathlib.Topology.Sheaves.Presheaf
 
 /-!
 # The fundamental superhedging bound

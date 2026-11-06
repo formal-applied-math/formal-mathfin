@@ -7,7 +7,7 @@ module
 
 public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
-public import MathFin.Foundations.WienerIntegralGaussian
+public import MathFin.Foundations.WienerIntegralL2
 
 /-!
 # The Wiener integral of a step indicator is the increment

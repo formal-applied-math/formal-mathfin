@@ -5,7 +5,6 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.IntervalHeatBoundary
 public import MathFin.BlackScholes.AmericanPut.Stopping.SmoothPricingComparison
 public import MathFin.BlackScholes.AmericanPut.Boundary.GaugeTransform
 

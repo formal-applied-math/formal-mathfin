@@ -5,8 +5,8 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.AmericanValue
-public import MathFin.BlackScholes.AmericanPut.Stopping.LocalizationTimes
+public import MathFin.BlackScholes.AmericanPut.Stopping.Reward
+public import MathFin.BlackScholes.AmericanPut.Stopping.Rules
 
 /-!
 # Stability of stopping rewards under small maturity changes

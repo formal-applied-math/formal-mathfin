@@ -5,8 +5,12 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.MacaulayModified
+public import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Duration as price sensitivity (first-principles derivation)

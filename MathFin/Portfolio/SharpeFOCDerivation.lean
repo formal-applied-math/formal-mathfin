@@ -5,10 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
-public import MathFin.Portfolio.TangentPortfolio
 public import MathFin.Portfolio.Markowitz
 public import MathFin.Performance.Ratios
+public import Mathlib.Algebra.Ring.IsFormallyReal
 
 /-!
 # Markowitz cross-product FOC derived from Sharpe-ratio maximization

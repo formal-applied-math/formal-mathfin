@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.SVI.RealRootTrace
 public import MathFin.BlackScholes.SVI.RankOneSignature
+public import MathFin.BlackScholes.SVI.TraceForm
 
 /-! # A repeated real root contributes one sign
 

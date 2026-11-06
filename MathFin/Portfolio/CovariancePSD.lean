@@ -5,9 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Portfolio.MarkowitzNAsset
 public import MathFin.Portfolio.CAPMEquilibrium
+public import Mathlib.Probability.Moments.Variance
 
 /-!
 # Covariance kernels are positive semidefinite (the self-dot variance identity)

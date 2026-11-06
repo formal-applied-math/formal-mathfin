@@ -5,7 +5,7 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.UpperSupportComparison
+public import MathFin.BlackScholes.AmericanPut.Stopping.SmoothPricingComparison
 
 /-! # A stationary payoff-matching upper barrier
 

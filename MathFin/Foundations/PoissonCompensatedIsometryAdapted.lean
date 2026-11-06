@@ -5,9 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.PoissonRandomMeasure
 public import MathFin.Foundations.IndepIsometryKernel
+public import Mathlib.Probability.Process.Filtration
 
 /-!
 # The compensated-Poisson isometry kernel (increment-independence cornerstone)

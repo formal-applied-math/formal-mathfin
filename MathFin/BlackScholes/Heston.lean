@@ -6,6 +6,7 @@ Authors: Yang Ye
 module
 
 public import MathFin.FixedIncome.CIRRiccati
+public import Mathlib.Algebra.Ring.IsFormallyReal
 
 /-!
 # The Heston affine transform at the generator/PDE level (2D)

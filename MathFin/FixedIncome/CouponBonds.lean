@@ -5,8 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.ZCB
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Coupon bonds, annuities, and rate-curve identities

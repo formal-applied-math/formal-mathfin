@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.ItoDriftWeightedIsometry
 public import MathFin.Foundations.FiniteMeasureCauchySchwarz
+public import MathFin.Foundations.AdaptedDrift
 
 /-! # The quadratic corrections of the adapted Itô–drift identity (the discrete route, stage 5e)
 

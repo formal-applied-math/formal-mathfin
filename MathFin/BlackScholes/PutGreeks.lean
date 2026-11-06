@@ -5,9 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.PDE
-public import MathFin.BlackScholes.Put
 
 /-!
 # Black–Scholes put Greeks

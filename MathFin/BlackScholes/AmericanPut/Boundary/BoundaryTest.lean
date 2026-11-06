@@ -6,6 +6,8 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.OneSidedContact
+public import MathFin.BlackScholes.AmericanPut.Boundary.ParabolicMaximum
+public import Mathlib.Analysis.Calculus.Deriv.Prod
 
 /-!
 # Parabolic test functions at the exercise boundary

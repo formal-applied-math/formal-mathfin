@@ -5,8 +5,8 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.CompactHeatFlow
-public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianModel
+public import BrownianMotion.Gaussian.BrownianMotion
+public import MathFin.Foundations.FeynmanKacHeatEquation
 
 /-! # Heat evolution as an actual Brownian expectation, including time zero
 

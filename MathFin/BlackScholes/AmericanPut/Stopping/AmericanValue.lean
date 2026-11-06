@@ -6,6 +6,8 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.Reward
+public import MathFin.BlackScholes.AmericanPut.Stopping.Rules
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # The continuous-time American put value as a supremum over stopping rules

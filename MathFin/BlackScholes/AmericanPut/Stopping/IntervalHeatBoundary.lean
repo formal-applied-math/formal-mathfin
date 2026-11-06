@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.CoupledHeatBoundary
 public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
+public import MathFin.BlackScholes.AmericanPut.Stopping.HeatBoundaryEquation
 
 /-!
 # Two-sided heat boundary correction on a finite interval

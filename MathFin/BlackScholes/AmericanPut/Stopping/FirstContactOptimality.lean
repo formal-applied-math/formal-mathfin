@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.OrderedSampling
 public import MathFin.BlackScholes.AmericanPut.Stopping.VanishingGap
+public import MathFin.BlackScholes.AmericanPut.Stopping.Verification
 
 /-! # Optimal first contact from a bounded supermartingale and nearly optimal rules
 

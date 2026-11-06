@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.NormalTail
 public import MathFin.BlackScholes.Call
+public import Mathlib.Algebra.Ring.IsFormallyReal
 
 /-! # Endpoint limits of the QD+ fixed-point integrands
 

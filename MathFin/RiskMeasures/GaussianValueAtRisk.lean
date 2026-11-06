@@ -5,10 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.RiskMeasures.ValueAtRisk
 public import MathFin.RiskMeasures.Gaussian
 public import MathFin.Foundations.NormalQuantile
+public import Mathlib.Probability.Distributions.Gaussian.HasGaussianLaw.Basic
 
 /-!
 # Value-at-risk of a Gaussian loss
