@@ -766,7 +766,7 @@
         },
         "metadata": {
           "chapter": 9,
-          "reference": "Curran, Willow Power: Optimizing Derivative Pricing Trees, ALGO Research Quarterly 4(4) (December 2001); Ho, Willow Tree, MSc thesis in Mathematics, University of British Columbia (2000) (the constraint system as stated); the constraint set as implemented in the open-source willowtree package (willowtree/lp.py)",
+          "reference": "Curran, Willow Power: Optimizing Derivative Pricing Trees, ALGO Research Quarterly 4(4), 2001; Ho, Willow Tree, MSc thesis in Mathematics, University of British Columbia (2000) (the constraint system as stated); the constraint set as implemented in the open-source willowtree package (willowtree/lp.py)",
           "citations": [
             {
               "key": "Curran2001"

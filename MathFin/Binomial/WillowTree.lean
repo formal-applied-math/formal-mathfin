@@ -73,7 +73,7 @@ prices computed on the lattice.
 ## References
 
 * [M. Curran, *Willow Power: Optimizing Derivative Pricing Trees*][Curran2001],
-  ALGO Research Quarterly 4(4) (December 2001).
+  ALGO Research Quarterly 4(4), 2001.
 * [A. C. T. Ho, *Willow Tree*][Ho2000], MSc thesis in Mathematics, University of British
   Columbia (2000) — the constraint system as stated.
 
@@ -277,8 +277,9 @@ theorem willowMarginal_crossMoment (hP : WillowMomentConstraints z β P)
 
 /-- **The scaled chain's second moment**: in the unstandardized variables
 `X k = √(t k) * Z k` on an initially unit-variance willow chain, the marginal second
-moment (equal to the variance, the mean being zero) at step `k` is `t k` — the Brownian
-marginal variance at the grid time. -/
+moment at step `k` is `t k` — the Brownian marginal variance at the grid time. (It is
+the variance as well whenever the marginal mean is zero, which `willowMarginal_mean`
+gives under its own hypothesis; this theorem needs only the second moment.) -/
 theorem willowScaled_secondMoment (hP : WillowMomentConstraints z β P)
     (hq : ∑ i, q i = 1) (hq2 : ∑ i, q i * z i ^ 2 = 1)
     (t : ℕ → ℝ) (ht : ∀ k, 0 ≤ t k) (k : ℕ) :
