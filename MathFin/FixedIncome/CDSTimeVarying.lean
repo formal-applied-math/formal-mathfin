@@ -71,7 +71,7 @@ survival probability, MSC 91G40, JEL G12
 
 namespace MathFin
 
-open Real MeasureTheory intervalIntegral Finset
+open Real Finset
 
 /-- **CDS time-varying fair-spread cash-flow balance**. With time-varying
 hazard `h : ℝ → ℝ`, constant recovery `R`, and discount rate `r`, the

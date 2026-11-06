@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
+public import Mathlib.Tactic.Positivity.Basic  -- shake: keep (`positivity` on sums: an extension, untracked by shake)
 public import Mathlib.Algebra.Order.Floor.Extended
 public import Mathlib.Analysis.SpecialFunctions.Bernstein
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
