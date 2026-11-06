@@ -149,43 +149,32 @@ noncomputable def willowMarginal (P : ℕ → Fin n → Fin n → ℝ) (q : Fin 
 @[simp] theorem willowMarginal_succ (k : ℕ) :
     willowMarginal P q (k + 1) = fun j => ∑ i, willowMarginal P q k i * P k i j := rfl
 
-/-- A weighted double sum rolls up into the weighted row pairings. -/
-private theorem sum_weighted_rows (w : Fin n → ℝ) (g : Fin n → Fin n → ℝ) (h : Fin n → ℝ) :
-    ∑ j, (∑ i, w i * g i j) * h j = ∑ i, w i * ∑ j, g i j * h j := by
+/-- Rolling the weighted rows of one willow transition matrix up against a test
+vector: the marginal-weighted column sums equal the weighted row pairings. -/
+private theorem willowMarginal_roll (P : ℕ → Fin n → Fin n → ℝ) (q : Fin n → ℝ) (k : ℕ)
+    (h : Fin n → ℝ) :
+    ∑ j, (∑ i, willowMarginal P q k i * P k i j) * h j
+      = ∑ i, willowMarginal P q k i * ∑ j, P k i j * h j := by
   simp only [Finset.sum_mul]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => ?_
-  rw [Finset.mul_sum Finset.univ (fun j => g i j * h j) (w i)]
+  rw [Finset.mul_sum Finset.univ (fun j => P k i j * h j) (willowMarginal P q k i)]
   exact Finset.sum_congr rfl fun j _ => mul_assoc _ _ _
-
-/-- A scalar factor pulls out of a weighted finite sum. -/
-private theorem sum_pull_scalar (w : Fin n → ℝ) (a : ℝ) (f : Fin n → ℝ) :
-    ∑ i, w i * (a * f i) = a * ∑ i, w i * f i := by
-  have h : ∑ i, w i * (a * f i) = ∑ i, a * (w i * f i) :=
-    Finset.sum_congr rfl fun i _ => mul_left_comm _ _ _
-  rw [h, Finset.mul_sum]
-
-/-- An affine per-row identity transfers to the marginals. -/
-private theorem sum_affine (w : Fin n → ℝ) (a b : ℝ) (f : Fin n → ℝ) :
-    ∑ i, w i * (a * f i + b) = a * ∑ i, w i * f i + b * ∑ i, w i := by
-  have hsplit : ∑ i, w i * (a * f i + b) = ∑ i, (w i * (a * f i) + w i * b) :=
-    Finset.sum_congr rfl fun i _ => by ring
-  have hconst : ∑ i, w i * b = b * ∑ i, w i := by
-    rw [Finset.mul_sum]
-    exact Finset.sum_congr rfl fun i _ => by ring
-  rw [hsplit, Finset.sum_add_distrib, sum_pull_scalar, hconst]
 
 /-- The next marginal has total mass `1` as soon as the current one does. -/
 theorem willowMarginal_mass_succ (hP : WillowMomentConstraints z β P) (k : ℕ)
     (h : ∑ i, willowMarginal P q k i = 1) :
     ∑ j, willowMarginal P q (k + 1) j = 1 := by
-  have h2 : ∑ j, ∑ i, willowMarginal P q k i * P k i j
-      = ∑ i, willowMarginal P q k i * ∑ j, P k i j := by
-    rw [Finset.sum_comm]
-    exact Finset.sum_congr rfl fun i _ => (Finset.mul_sum _ _ _).symm
+  have h1 : ∑ j, (∑ i, willowMarginal P q k i * P k i j)
+      = ∑ j, (∑ i, willowMarginal P q k i * P k i j) * 1 :=
+    Finset.sum_congr rfl fun j _ => (mul_one _).symm
+  have h2 : ∀ i : Fin n, ∑ j, P k i j * 1 = 1 := fun i => by
+    rw [Finset.sum_congr rfl fun j _ => mul_one (P k i j)]
+    exact hP.rowStochastic k i
   simp only [willowMarginal_succ]
-  rw [h2, Finset.sum_congr rfl fun i _ => by rw [hP.rowStochastic k i]]
-  simp only [mul_one, h]
+  rw [h1, willowMarginal_roll P q k (fun _ => (1 : ℝ))]
+  rw [Finset.sum_congr rfl fun i _ => by rw [h2 i, mul_one]]
+  simp only [h]
 
 /-- **Mass preservation**: the willow marginal has total mass `1` at every step, for any
 family of transition matrices satisfying the row-stochasticity constraint. -/
@@ -199,8 +188,12 @@ theorem willowMarginal_mass (hP : WillowMomentConstraints z β P) (hq : ∑ i, q
 theorem willowMarginal_mean_succ (hP : WillowMomentConstraints z β P) (k : ℕ) :
     ∑ j, willowMarginal P q (k + 1) j * z j = β k * ∑ i, willowMarginal P q k i * z i := by
   simp only [willowMarginal_succ]
-  rw [sum_weighted_rows]
-  exact (Finset.sum_congr rfl fun i _ => by rw [hP.mean k i]).trans (sum_pull_scalar _ _ _)
+  rw [willowMarginal_roll P q k z]
+  refine (Finset.sum_congr rfl fun i _ => by rw [hP.mean k i]).trans ?_
+  have h2 : ∑ i, willowMarginal P q k i * (β k * z i)
+      = ∑ i, β k * (willowMarginal P q k i * z i) :=
+    Finset.sum_congr rfl fun i _ => mul_left_comm _ _ _
+  rw [h2, Finset.mul_sum]
 
 /-- The next marginal's second moment is `β k ^ 2` times the current one, plus the
 standardized Brownian increment variance `(1 - β k ^ 2)` times the current mass. -/
@@ -209,9 +202,26 @@ theorem willowMarginal_secondMoment_succ (hP : WillowMomentConstraints z β P) (
       = β k ^ 2 * ∑ i, willowMarginal P q k i * z i ^ 2
         + (1 - β k ^ 2) * ∑ i, willowMarginal P q k i := by
   simp only [willowMarginal_succ]
-  rw [sum_weighted_rows]
-  exact (Finset.sum_congr rfl fun i _ => by rw [hP.secondMoment k i]).trans
-    (sum_affine _ _ _ _)
+  rw [willowMarginal_roll P q k (fun j => z j ^ 2)]
+  have h2 : ∑ i, willowMarginal P q k i * ∑ j, P k i j * z j ^ 2
+      = ∑ i, willowMarginal P q k i * (β k ^ 2 * z i ^ 2 + (1 - β k ^ 2)) :=
+    Finset.sum_congr rfl fun i _ => by rw [hP.secondMoment k i]
+  have hsplit : ∑ i, willowMarginal P q k i * (β k ^ 2 * z i ^ 2 + (1 - β k ^ 2))
+      = ∑ i, (willowMarginal P q k i * (β k ^ 2 * z i ^ 2)
+        + willowMarginal P q k i * (1 - β k ^ 2)) :=
+    Finset.sum_congr rfl fun i _ => by ring
+  rw [h2, hsplit, Finset.sum_add_distrib]
+  have hpull1 : ∑ i, willowMarginal P q k i * (β k ^ 2 * z i ^ 2)
+      = β k ^ 2 * ∑ i, willowMarginal P q k i * z i ^ 2 := by
+    have h3 : ∑ i, willowMarginal P q k i * (β k ^ 2 * z i ^ 2)
+        = ∑ i, β k ^ 2 * (willowMarginal P q k i * z i ^ 2) :=
+      Finset.sum_congr rfl fun i _ => mul_left_comm _ _ _
+    rw [h3, Finset.mul_sum]
+  have hpull2 : ∑ i, willowMarginal P q k i * (1 - β k ^ 2)
+      = (1 - β k ^ 2) * ∑ i, willowMarginal P q k i := by
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl fun i _ => by ring
+  rw [hpull1, hpull2]
 
 /-- **Mean propagation**: a willow chain started at a mean-zero marginal keeps mean zero
 at every step, for any family of transition matrices satisfying the conditional first
@@ -283,12 +293,6 @@ theorem willowScaled_secondMoment (hP : WillowMomentConstraints z β P)
         exact Finset.sum_congr rfl fun j _ => mul_left_comm _ _ _
     _ = t k := by rw [willowMarginal_secondMoment hP hq hq2, mul_one]
 
-/-- `√a * √(a / b) * √b = a` for `0 ≤ a` and `0 < b`. -/
-private theorem sqrt_mul_sqrt_div' {a b : ℝ} (ha : 0 ≤ a) (hb : 0 < b) :
-    √a * √(a / b) * √b = a := by
-  rw [Real.sqrt_div' a (le_of_lt hb), mul_div_assoc', Real.mul_self_sqrt ha,
-    div_mul_cancel₀ _ (Real.sqrt_ne_zero'.mpr hb)]
-
 /-- **The scaled chain's cross moment**: in the unstandardized variables
 `X k = √(t k) * Z k`, the cross moment across the step `[t k, t (k+1)]` is
 `E[X_k X_{k+1}] = t k` — exactly the Brownian covariance at two grid times, which is the
@@ -315,7 +319,8 @@ theorem willowScaled_crossMoment (hP : WillowMomentConstraints z β P)
         rw [Finset.mul_sum]
     _ = t k := by
         rw [hβ k, willowMarginal_secondMoment hP hq hq2, mul_one,
-          sqrt_mul_sqrt_div' (ht k) (ht1 k)]
+          Real.sqrt_div' _ (le_of_lt (ht1 k)), mul_div_assoc', Real.mul_self_sqrt (ht k),
+          div_mul_cancel₀ _ (Real.sqrt_ne_zero'.mpr (ht1 k))]
 
 /-- **Feasibility of the de-correlation coefficient**: if a willow transition row is an
 honest probability row (non-negative entries summing to one), then `β k ^ 2 ≤ 1` — the
