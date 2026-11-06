@@ -101,6 +101,8 @@ two classes coexist; neither file changes the other, and `IsEMM` is shared.
 ## References
 
 * [Delbaen and Schachermayer][DelbaenSchachermayer]
+* [H. Föllmer and A. Schied, *Stochastic Finance: An Introduction in Discrete Time*][FollmerSchied],
+  §5.2
 * [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], Ch 5
 
 ## Tags

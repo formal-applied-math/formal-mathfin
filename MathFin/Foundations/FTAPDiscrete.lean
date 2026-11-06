@@ -73,7 +73,7 @@ and the `d`-asset generalisation are out of scope here.
 ## References
 
 * [H. Föllmer and A. Schied, *Stochastic Finance: An Introduction in Discrete Time*][FollmerSchied],
-  §1.2 and §5.2; §5.2
+  §1.2 and §5.2
 * [J. M. Harrison and S. R. Pliska, *Martingales and stochastic integrals in the theory of
   continuous trading*][HarrisonPliska1981]
 * [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], §5.4
