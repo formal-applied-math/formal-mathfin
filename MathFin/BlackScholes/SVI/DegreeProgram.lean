@@ -13,6 +13,22 @@ Part of the SVI polynomial-sign certificate (#174).
 
 A sign program that finds the degree and leading sign of the numerator polynomial from the signs
 of its coefficients, as polynomials in the parameters (`degreeProgram_eval`).
+
+## Main definitions
+
+* `degreeProgram`: a sign program that scans the coefficients of `universalPolynomial` from index
+  `n` down and returns the first nonzero index with its sign.
+
+## Main results
+
+* `universalCoefficient_eval`: evaluating the `r`-th coefficient of `universalPolynomial` at the
+  parameters `p` gives `(polynomial p).coeff r`.
+* `degreeProgram_eval`: if `(polynomial p).natDegree ≤ n`, then `degreeProgram n` evaluates at `p`
+  to the degree and the sign of the leading coefficient of `polynomial p`.
+
+## Tags
+
+sign program, polynomial degree, leading coefficient sign, SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

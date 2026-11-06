@@ -68,6 +68,11 @@ moment-generating function is propagated cell by cell, and no ODE for
 martingales is `LevyCharacterization`, which uses the stopped clock `t ∧ τ` for `A`. The conclusion
 that `M` is a Brownian motion is `isQBrownianMotion_of_expMartingale` applied to
 `isExpQMartingale`; independence of `M_t − M_s` from `𝓕_s` is `ExpMartingaleBrownian`.
+
+## Tags
+
+exponential martingale, Lévy characterization, slow clock, bracket, Brownian motion,
+characteristic function, MSC 60G44, MSC 60J65, MSC 60E10
 -/
 
 @[expose] public section

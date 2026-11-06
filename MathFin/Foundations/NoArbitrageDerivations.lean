@@ -33,7 +33,7 @@ A general claim with payoff `g : ι → ℝ` has time-0 price `Λ(g) := statePri
 functional, and its linearity lemmas (`statePricePricing_add`, `_smul`, `_const`) are what the
 derivations below use. The state prices are an EMM scaled by the discount factor: the bridge
 `exists_statePrices_of_hasEMM` (`Foundations/FTAPMultiState.lean`) produces `q` with the bond
-and stock constraints from `HasEMM_multi_state`.
+and stock constraints from `HasEMMMultiState`.
 
 ## Why this is "first principles"
 
@@ -53,11 +53,15 @@ parity. The proof is two lines:
 
 The same template gives the forward price `F = S_0 / DF`.
 
-## Results
+## Main results
 
-* `max_sub_max_neg`: `max x 0 - max (-x) 0 = x` (the payoff identity).
 * `putCall_parity_from_no_arbitrage`: the parity derivation.
 * `forward_price_from_no_arbitrage`: the forward price characterisation.
+
+## Tags
+
+put–call parity, forward price, state prices, linear pricing functional,
+static no-arbitrage relations, cost of carry, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -65,15 +69,6 @@ The same template gives the forward price `F = S_0 / DF`.
 namespace MathFin
 
 open Finset
-
-/-- **Payoff identity**: `max(x, 0) - max(-x, 0) = x`.
-
-This is the pointwise algebraic fact that turns into put-call parity when
-passed through a linear pricing functional. It is Mathlib's
-`max_zero_sub_max_neg_zero_eq_self`, cited rather than re-proved; kept
-under its finance name as the named conceptual pivot of this file. -/
-lemma max_sub_max_neg (x : ℝ) : max x 0 - max (-x) 0 = x :=
-  max_zero_sub_max_neg_zero_eq_self x
 
 /-- **Put-call parity from no-arbitrage** (first-principles derivation).
 
@@ -88,7 +83,7 @@ price `S_0 = statePricePricing s q S`, the call price
 The proof has *no reference to the Black-Scholes formula*. It uses only:
 * linearity of the pricing functional `statePricePricing s q`,
 * the pointwise payoff identity `max(S - K, 0) - max(K - S, 0) = S - K`
-  (`max_sub_max_neg`),
+  (`max_zero_sub_max_neg_zero_eq_self`),
 * the bond and stock pricing constraints.
 
 Specialisation to the BS model recovers `bsP_eq_bsV` (currently proved
@@ -104,7 +99,7 @@ theorem putCall_parity_from_no_arbitrage
   -- pointwise: `max(S i − K, 0) + (−1) · max(K − S i, 0) = S i + (−K)`
   have h_payoff : (fun i ↦ max (S i - K) 0 + (-1) * max (K - S i) 0) = fun i ↦ S i + (-K) :=
     funext fun i ↦ by
-      have h := max_sub_max_neg (S i - K)
+      have h := max_zero_sub_max_neg_zero_eq_self (S i - K)
       rw [show -(S i - K) = K - S i from by ring] at h
       linarith
   calc statePricePricing s q (fun i ↦ max (S i - K) 0)

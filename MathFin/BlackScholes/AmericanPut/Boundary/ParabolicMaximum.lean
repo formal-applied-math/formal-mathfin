@@ -5,6 +5,7 @@ Authors: Robert Martin
 -/
 module
 
+public import MathFin.Init
 public import Mathlib.Analysis.Calculus.DerivativeTest
 public import Mathlib.Topology.Order.Compact
 
@@ -15,10 +16,28 @@ This module proves, rather than assumes, the elementary maximum principle
 needed in Steps 4 and 5. The terminal time is included. The moving left boundary
 needs continuity, not a bounded velocity at expiry.
 
-## Result
+## Main definitions
 
-Public entry points include `second_deriv_nonpos_at_local_max`, `deriv_nonneg_at_left_max`,
-`movingStrip`, `movingStrip_isCompact`.
+* `movingStrip`: the closed space-time strip `{a ≤ t ≤ T, b t ≤ x ≤ R}` with a moving left
+  endpoint `b` and fixed right end `R`.
+
+## Main results
+
+* `second_deriv_nonpos_at_local_max`, `deriv_nonneg_at_left_max`: a continuous function has
+  nonpositive second derivative at a local maximum, and a function differentiable at `t` that
+  is maximal there from the left has nonnegative derivative at `t`.
+* `movingStrip_isCompact`: for `b` continuous on `[a, T]` with `b ≤ R`, `movingStrip b R a T` is
+  compact.
+* `strict_parabolic_maximum`: on a compact `movingStrip`, if `u` is continuous, differentiable in
+  time and satisfies the strict inequality `u_t < u_xx + D u_x` at interior points, and
+  `u ≤ 0` initially and on both lateral edges, then `u ≤ 0` on the whole strip.
+* `parabolic_maximum`: the same conclusion under the weak inequality `u_t ≤ u_xx + D u_x`, with
+  compactness derived from the continuity of `b`.
+
+## Tags
+
+parabolic maximum principle, weak maximum principle, moving strip, local maximum, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

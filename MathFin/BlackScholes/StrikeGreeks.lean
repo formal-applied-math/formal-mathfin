@@ -27,7 +27,7 @@ The clean closed forms come from the magic identity
 `S · ϕ(d₁) = K · e^{-rτ} · ϕ(d₂)` (`bs_identity`) which collapses the
 `d₁`-derivative contribution.
 
-Results:
+## Main results
 
 * `hasDerivAt_bsd1_K`, `hasDerivAt_bsd2_K`: `∂_K d_i = −1/(K σ √τ)`.
 * `hasDerivAt_bsV_K`: `∂_K bsV = −e^{-rτ} · Φ(d₂)`.
@@ -36,6 +36,16 @@ Results:
   `bsCashDigital = e^{-rτ} · Φ(d₂)` is `−e^{-rτ} · ϕ(d₂) / (K σ √τ)`.
 * `hasDerivAt_deriv_bsV_K`: `∂²_K bsV = e^{-rτ} · ϕ(d₂) / (K σ √τ)`, for the price itself: the
   first strike derivative is minus the digital.
+
+## References
+
+* [F. Black and M. Scholes, *The pricing of options and corporate liabilities*][BlackScholes1973]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 26.1; Ch 12.8; Ch 17
+
+## Tags
+
+strike derivative, dual delta, implied density, digital option, Breeden–Litzenberger, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

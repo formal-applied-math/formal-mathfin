@@ -16,10 +16,20 @@ itself is smooth across exercise. The compact-support hypothesis gives joint
 smoothness; scaling extends MathFin's kernel-side heat equation to arbitrary
 compactly supported continuous data.
 
-## Result
+## Main results
 
-Public entry points include `contDiffOn_compact_parameter_integral`, `heatKernel_smoothAt`,
-`compact_heatFlow_contDiff`, `compact_exponential_bound`.
+* `contDiffOn_compact_parameter_integral`: if `H` is `C²` on `U ×ˢ univ` and vanishes in the
+  integration variable off a compact set, then `z ↦ ∫ y, H z y` is `C²` on the open set `U`.
+* `heatKernel_smoothAt`: for `0 < t`, the heat kernel is `C^∞` jointly in `(t, x)` at `(t, x)`.
+* `compact_heatFlow_contDiff`: for compactly supported `C²` `f`, the heat evolution `feynmanU f`
+  is `C²` on `{t > 0}`.
+* `compact_exponential_bound`: a continuous compactly supported `f` has some `C > 0` with
+  `|f x| ≤ C*exp x` for all `x`.
+
+## Tags
+
+heat evolution, compact support, smooth test payoff, heat kernel, comparison functions, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

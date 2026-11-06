@@ -41,13 +41,19 @@ The existing constant-hazard derivation specialises to a single rate `h`
 for all time; this file gives the general cash-flow balance that holds for
 any deterministic hazard curve.
 
-## Results
+## Main results
 
-* `cdsFairSpread_TV_cash_flow_balance`: fair-spread iff cash-flow balance,
-  for time-varying hazard with constant recovery.
+* `cdsFairSpread_TV_cash_flow_balance`: for a nonzero annuity, the balance equation
+  `c · annuity = (1 − R) · losses` solved for the spread; the hazard enters only through the two
+  legs (`Cox.cdsFairSpreadTV_balances` is the Cox-model instance).
 * `survival_product_eq_exp_sum`: multi-period survival factorisation,
   i.e. `∏ exp(−h_i Δt_i) = exp(−∑ h_i Δt_i)` (a direct `Real.exp_sum`
   application stated in finance variables).
+
+## Tags
+
+credit default swap, CDS spread, hazard rate, protection leg, premium leg, fair spread,
+survival probability, MSC 91G40, JEL G12
 -/
 
 @[expose] public section

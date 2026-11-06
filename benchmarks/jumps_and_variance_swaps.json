@@ -13,6 +13,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Demeterfi-Derman-Kamal log-replication setup (More Than You Ever Wanted to Know About Volatility Swaps 1999)",
+        "citations": [
+          {
+            "key": "DemeterfiDermanKamalZou1999"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via S_0 cancellation + Real.exp_sub + Real.log_exp + ring. Lives in MathFin/BlackScholes/VarianceSwap.lean. Axioms-clean."
@@ -29,6 +34,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Log moment of risk-neutral discount factor (Demeterfi-Derman-Kamal 1999)",
+        "citations": [
+          {
+            "key": "DemeterfiDermanKamalZou1999"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: rewrite via algebraic identity, then linearity of integral + integral_id_gaussianReal (mean = 0) + integral_const on a probability measure. Lives in MathFin/BlackScholes/VarianceSwap.lean. Axioms-clean."
@@ -45,6 +55,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Variance swap fair strike via log-replication (Demeterfi-Derman-Kamal 1999; Carr-Madan 1998)",
+        "citations": [
+          {
+            "key": "DemeterfiDermanKamalZou1999"
+          },
+          {
+            "key": "CarrMadan1998"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: log-moment integral identity + (2/T)·(σ²T/2) = σ² via field_simp. Lives in MathFin/BlackScholes/VarianceSwap.lean. Axioms-clean."
@@ -61,6 +79,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Variance swap fair strike as realized variance (Demeterfi-Derman-Kamal 1999); drift-immunity of quadratic variation",
+        "citations": [
+          {
+            "key": "DemeterfiDermanKamalZou1999"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: the GBM log-price is an Itô process with constant-slope drift, so Foundations/ItoProcessQV (equipartition QV → σ²T in L² with explicit 1/n rates) applies with the drift parameter arbitrary and absent from the limit. Strengthens the phase-34 expectation-level limit (VarianceSwapLimit) to L² concentration for every drift. Lives in MathFin/Foundations/VarianceSwapDriftImmunity.lean. Axioms-clean."
@@ -77,6 +100,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "citations": [
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. mertonCallPrice is defined as ∫ n, mertonCallTerm n ∂(poissonMeasure Λ) — an honest expectation over the jump count — and the textbook Poisson-weighted series falls out of Mathlib's integral_poissonMeasure. Each term is separately proved equal to a discounted conditional expected payoff (mertonCallTerm_eq_integral, bs_call_formula on (ℝ, gaussianReal 0 1)). Terminal-mixture-law formalization; the compound-Poisson jump SDE dynamics are upstream-gated and not claimed. Lives in MathFin/BlackScholes/MertonJumpDiffusion.lean. Axioms-clean."
@@ -93,6 +121,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976) risk-neutral drift compensation; Poisson probability generating function",
+        "citations": [
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via the new Poisson pgf E[x^N] = e^{Λ(x-1)} (Foundations/PoissonPgf.lean, absent from Mathlib) at x = 1+k: the compensator e^{-kΛ} cancels e^{kΛ} exactly. No hypotheses — the identity is exact for all real k and all rates Λ. Lives in MathFin/BlackScholes/MertonJumpDiffusion.lean. Axioms-clean."
@@ -109,6 +142,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "citations": [
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: integral_sub on the mixture (integrability from the sandwich bounds 0 ≤ C_n ≤ spot_n, 0 ≤ P_n ≤ Ke^{-rT} with the weighted spots a convergent exponential series), term-wise BS parity via Φ(x)+Φ(-x)=1, then the spot-recombination identity. Lives in MathFin/BlackScholes/MertonJumpDiffusion.lean. Axioms-clean."
@@ -125,6 +163,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "citations": [
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof in two reductions: (1) per-term vol-monotonicity (bsV_strictMonoOn_sigma, vega > 0) lowers the jump vol to δ = 0; (2) at δ = 0 the mixture dominates bsV by the supporting-tangent bound bsV_spot_tangent_le, from the spot-direction strict convexity bsV_spot_strictConvexOn (gamma > 0, second-derivative test, SpotConvexity.lean — the spot-side counterpart of bsV_strike_strictConvexOn), and the tangent's linear term integrates to zero by the compensation identity integral_mertonSpot. Lives in MathFin/BlackScholes/MertonDominance.lean. Axioms-clean."
@@ -141,6 +184,12 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), eq. (16) — the λ′ = λ(1+k) form of the jump-diffusion series",
+        "citations": [
+          {
+            "key": "Merton1976",
+            "locator": "eq. (16)"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof driven by one structural identity: the rate-shift invariance bsV K r σ (S·e^{cτ}) τ = e^{cτ}·bsV K (r+c) σ S τ (bsV_spot_exp_rate_shift, pure d₁/d₂ algebra) applied at c_n = r_n − r so that e^{c_n T} = e^{−kΛ}(1+k)ⁿ is exactly the compensated jump growth, plus the weight absorption e^{−Λ}Λⁿ/n!·e^{−kΛ}(1+k)ⁿ = e^{−Λ′}Λ′ⁿ/n!. No constraints on σ, δ, r. Lives in MathFin/BlackScholes/MertonClassicDisplay.lean. Axioms-clean."
@@ -157,6 +206,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "citations": [
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, an instance of the general jump-diffusion (JumpDiffusionHyp.call_eq_mertonCallPrice, MathFin/BlackScholes/JumpDiffusionMerton.lean). The general-law formula (JumpDiffusionHyp.call_poisson_mixture, mf-merton-general-jump-law) writes the call as the Poisson(Λ) mixture of the Black–Scholes price averaged over the jump part −kΛ + ∑_{i<n} Jᵢ. With Gaussian jumps the sum of n of them is N(n(log(1+k) − δ²/2), nδ²) (hasLaw_sum_range_gaussianReal), and Gaussian smoothing (integral_bsV_mul_exp_gaussianReal_of_sq, mf-bs-gaussian-smoothing) with mertonVol_sq_mul turns each average into the Black–Scholes price at mertonSpot n and mertonVol n, which is mertonCallTerm n (mertonCallTerm_eq_bsV). Merton's model has no hypothesis bundle of its own: its formulas are instances of JumpDiffusionHyp, whose jump sizes are a.e.-measurable (IdentDistrib carries it). Terminal-law scope. Axioms-clean."
@@ -173,9 +227,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "citations": [
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof (JumpDiffusionHyp.put_eq_mertonPutPrice, MathFin/BlackScholes/JumpDiffusionMerton.lean). The put payoff is the call payoff minus the forward plus the strike ((K − S)⁺ = (S − K)⁺ − S + K, max_sub_max_neg), so the put is the call (mf-merton-call-formula) minus the discounted forward S₀ (mf-merton-discounted-terminal) plus Ke^{−rT}, which is mertonPutPrice by merton_put_call_parity. Terminal-law scope. Axioms-clean."
+        "formalization_scope": "Full formal proof (JumpDiffusionHyp.put_eq_mertonPutPrice, MathFin/BlackScholes/JumpDiffusionMerton.lean). The put payoff is the call payoff minus the forward plus the strike ((K − S)⁺ = (S − K)⁺ − S + K, Mathlib's max_zero_sub_max_neg_zero_eq_self), so the put is the call (mf-merton-call-formula) minus the discounted forward S₀ (mf-merton-discounted-terminal) plus Ke^{−rT}, which is mertonPutPrice by merton_put_call_parity. Terminal-law scope. Axioms-clean."
       }
     },
     {
@@ -189,6 +248,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "citations": [
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof (JumpDiffusionHyp.discounted_terminal_merton, MathFin/BlackScholes/JumpDiffusionMerton.lean). The general discounted-terminal formula (JumpDiffusionHyp.discounted_terminal) gives S₀·exp(−κ + Λ(E[e^{J₀}] − 1)); with Merton's Gaussian log-jumps E[e^{J₀}] = 1 + k (the lognormal mean, integral_exp_mertonJump) and κ = kΛ, so the exponent is 0. The terminal-date expectation only. Axioms-clean."
@@ -205,6 +269,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; issue #129",
+        "citations": [
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: the Poisson series of Black–Scholes prices is differentiated term by term on S > 0 (hasDerivAt_tsum_of_isPreconnected); each term is the Black–Scholes delta (hasDerivAt_bsV_S) through the chain rule S ↦ S·cₙ, bounded by wₙcₙ, and ∑ₙ wₙcₙ = 1 (hasSum_weights_mul_mertonSpot_one, the Poisson pgf at 1 + k). The bounds are Summable.tsum_pos and Summable.tsum_lt_tsum with Φ ∈ (0, 1) on the no-jump term. Lives in MathFin/BlackScholes/MertonGreeks.lean. Axioms-clean."
@@ -221,6 +290,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; issue #129",
+        "citations": [
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: the delta series is differentiated term by term on (S/2, ∞), each term being the Black–Scholes gamma formula (hasDerivAt_Phi_bsd1_S) through S ↦ S·cₙ, bounded by wₙcₙ/((S/2)σ√T) since ϕ ≤ 1 and σₙ ≥ σ (hasDerivAt_mertonDelta). The delta series is ∂C/∂S on all of S > 0, so hasDerivAt_deriv_of_eventually states the result for deriv C. Positivity: every term is nonnegative and the no-jump term is positive. Lives in MathFin/BlackScholes/MertonGreeks.lean. Axioms-clean."
@@ -237,6 +311,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; issue #129",
+        "citations": [
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: each term is the Black–Scholes vega (hasDerivAt_bsV_sigma) composed with σ ↦ σₙ = √(σ² + nδ²/T), whose derivative is σ/σₙ (hasDerivAt_mertonVol_sigma); on σ > 0 each term's derivative is at most wₙ S cₙ √T, since ϕ ≤ 1 and σ ≤ σₙ, and those sum to S√T, so the series is differentiated term by term. Lives in MathFin/BlackScholes/MertonGreeks.lean. Axioms-clean."
@@ -253,6 +332,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; issue #129",
+        "citations": [
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof from the Greeks: strictMonoOn_of_deriv_pos with the delta (hasDerivAt_mertonCallPrice_spot, mertonDelta_pos) gives the strict increase; the derivative of the price is the delta on all of (0, ∞), and it strictly increases by the same lemma applied to the gamma (hasDerivAt_deriv_mertonCallPrice_spot, mertonGamma_pos), so StrictMonoOn.strictConvexOn_of_deriv gives strict convexity. Lives in MathFin/BlackScholes/MertonGreeks.lean. Axioms-clean."
@@ -269,6 +353,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; issue #129",
+        "citations": [
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: strictMonoOn_of_deriv_pos with the vega (hasDerivAt_mertonCallPrice_sigma, mertonVega_pos) on σ ∈ (0, ∞). Lives in MathFin/BlackScholes/MertonGreeks.lean. Axioms-clean."
@@ -285,6 +374,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "Merton1976"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The payoff is integrable because it is dominated by the discounted terminal price, a constant times e^{σ√T·Z}·e^Y, a product of independent integrable factors (integrable_jumpDiffusion_terminal). Independence makes the joint law the product of the marginals, so the freezing lemma (integral_comp_prodMk_of_indepFun) integrates over Z first. With Y frozen at y the terminal price is bsTerminal (S₀e^y) (mul_exp_add_eq_bsTerminal), and bs_call_formula prices it as bsV K r σ (S₀e^y) T (integral_bsCall_payoff_eq_bsV). Terminal-law scope. Lives in MathFin/BlackScholes/JumpDiffusionMixing.lean. Axioms-clean."
@@ -301,6 +398,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "Merton1976"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The model's hypotheses (N independent of (Z, J), Z of J) re-associate to Z independent of (N, J) (indepFun_prodMk_of_indepFun_prodMk), so the jump part Y = −κ + ∑_{i<N} Jᵢ is independent of Z and E[e^{-rT}S_T] = S₀·E[e^Y] (jumpDiffusion_discounted_terminal). E[e^Y] = e^{−κ}·E[exp(∑_{i<N} Jᵢ)] = e^{−κ + Λ(E[e^{J₀}] − 1)} is the compound-Poisson MGF at 1 (compoundPoisson_mgf_of_indepFun), and S₀e^x = S₀ iff x = 0. Terminal-date expectation only. Lives in MathFin/BlackScholes/JumpDiffusionMixing.lean. Axioms-clean."
@@ -317,6 +422,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "Merton1976"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The hypotheses re-associate to Z independent of (N, J) (indepFun_prodMk_of_indepFun_prodMk), so the jump part −κ + ∑_{i<N} Jᵢ is independent of Z, its exponential is integrable (its integral, the compound-Poisson MGF at 1, is positive), and the mixing formula (jumpDiffusion_call_eq_integral_bsV) gives the first identity (JumpDiffusionHyp.call_eq_integral_bsV). The averaged price C_BS(S₀e^{−κ + ∑_{i<N} Jᵢ}) lies between 0 and S₀e^{−κ + ∑_{i<N} Jᵢ}, so it is integrable, hence integrable against the product of the laws of the count and the jump sizes, which are independent (integrable_comp_prodMk_iff_of_indepFun); the freezing lemma (integral_comp_prodMk_of_indepFun) then integrates out the count, giving the second identity (JumpDiffusionHyp.call_poisson_mixture). Terminal-law scope. Lives in MathFin/BlackScholes/JumpDiffusionMixing.lean. Axioms-clean."
@@ -333,6 +446,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "Merton1976"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Lower bound: the mixing formula (jumpDiffusion_call_eq_integral_bsV) rewrites the price as E[C_BS(S₀e^Y)]; the tangent of the convex Black–Scholes price at S₀ (bsV_spot_tangent_le, the non-strict form of bsV_spot_tangent_lt, from the strict convexity bsV_spot_strictConvexOn) lies below it, and S₀e^Y has mean S₀, so Jensen's inequality through a supporting line (le_integral_of_affine_le, Foundations/AffineMinorant.lean) gives C_BS(S₀) ≤ E[C_BS(S₀e^Y)] (bsV_le_jumpDiffusion_call). Upper bound: (S_T − K)⁺ ≤ S_T pointwise and E[e^{-rT}S_T] = S₀E[e^Y] (jumpDiffusion_call_le, jumpDiffusion_discounted_terminal). Merton's lognormal case, with the volatility and the spot channels separated, is bsV_le_mertonCallPrice (mf-merton-dominance), whose spot channel now uses the same lemma. Lives in MathFin/BlackScholes/JumpDiffusionMixing.lean. Axioms-clean."
@@ -349,6 +470,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models)",
+        "citations": [
+          {
+            "key": "Merton1976"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Lower bound: the mixing formula (jumpDiffusion_call_eq_integral_bsV) rewrites C as E[C_BS(S₀e^Y)]; the Black–Scholes price lies strictly above its tangent at S₀ away from S₀ (bsV_spot_tangent_lt, from bsV_spot_strictConvexOn), and S₀e^Y = S₀ exactly where Y = 0, which fails with positive probability; strict Jensen through a supporting line (lt_integral_of_affine_lt, Foundations/AffineMinorant.lean) gives C_BS(S₀) < C (bsV_lt_jumpDiffusion_call). Upper bound: e^{-rT}(S_T − K)⁺ < e^{-rT}S_T everywhere, so the two integrals differ: the integral is strictly monotone (integral_lt_integral_of_ae_le_of_not_ae_eq, Foundations/AffineMinorant.lean, also behind lt_integral_of_affine_lt), and E[e^{-rT}S_T] = S₀E[e^Y] = S₀ (jumpDiffusion_call_lt, jumpDiffusion_discounted_terminal). The strict form of mf-jump-diffusion-call-dominates-bs. Lives in MathFin/BlackScholes/JumpImpliedVol.lean. Axioms-clean."
@@ -365,6 +494,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models)",
+        "citations": [
+          {
+            "key": "Merton1976"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The strict bounds C_BS(S₀; σ) < C < S₀ (bsV_lt_jumpDiffusion_call, jumpDiffusion_call_lt) put C where exists_impliedVol_gt_of_bsV_lt applies: the Black–Scholes price is continuous and strictly increasing in the volatility and tends to S₀ as σ → ∞ (tendsto_bsV_sigma_atTop), so C = bsV(σ_imp) for exactly one positive σ_imp, and σ_imp > σ (jumpDiffusion_impliedVol_gt). Each statement concerns one strike and one maturity. Lives in MathFin/BlackScholes/JumpImpliedVol.lean. Axioms-clean."
@@ -381,6 +518,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models)",
+        "citations": [
+          {
+            "key": "Merton1976"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. At the compensator the jump part Y = −κ + ∑_{i<N} Jᵢ has E[e^Y] = 1 (JumpDiffusionHyp.integral_exp_jumpPart) and is independent of Z (JumpDiffusionHyp.indepFun_jumpPart). It is not almost surely 0 (JumpDiffusionHyp.not_jumpPart_ae_eq_zero): if it were, the event {N = 0}, of probability e^{−Λ} > 0, would force κ = 0, and then the event {N = 1} ∩ {J₀ ≠ 0}, of probability Λe^{−Λ}·Q(J₀ ≠ 0) because N is independent of the jump sizes, would be null, so J₀ = 0 almost surely. The single-jump-part theorem (jumpDiffusion_impliedVol_gt, mf-jump-diffusion-implied-vol-above-sigma) then applies (JumpDiffusionHyp.impliedVol_gt). Terminal-law scope. Lives in MathFin/BlackScholes/JumpImpliedVol.lean. Axioms-clean."
@@ -397,6 +542,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The coordinates have the factor laws (measurePreserving_fst, measurePreserving_snd, measurePreserving_eval_infinitePi). The first coordinate is independent of the other two (indepFun_prod); the count is independent of the sizes because their joint law, the second factor, is the product of their laws (indepFun_iff_hasLaw_prodMk_prod); indepFun_prodMk_of_indepFun_prodMk re-associates the two into the model's form. The jump sizes are mutually independent because their joint law is the product ν^ℕ of their laws (iIndepFun_iff_map_fun_eq_infinitePi_map). Single-date model. Lives in MathFin/BlackScholes/JumpDiffusionCanonical.lean. Axioms-clean."
@@ -413,6 +563,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "Merton1976"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The jump sizes are i.i.d., so their joint law is the infinite product of their common law (JumpDiffusionHyp.map_jumps, from iIndepFun.map_fun_eq_infinitePi_map and IdentDistrib.map_eq). Merton's formula for a general jump law (JumpDiffusionHyp.call_poisson_mixture, mf-merton-general-jump-law) then has its inner expectation over the jump sizes rewritten as an integral against that law (integral_map) (JumpDiffusionHyp.call_eq_integral_infinitePi). Terminal-law scope. Lives in MathFin/BlackScholes/JumpDiffusionCanonical.lean. Axioms-clean."
@@ -429,6 +587,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. It is the case θ = 1 of integral_exp_const_mul_jumpDiffusionIncrementLaw (mf-jump-diffusion-levy-exponent): on the canonical model (jumpDiffusionHyp_canonical, with expected jump count Λτ) the moment-generating function of the log-return is the Gaussian one times the compound-Poisson one, by independence (JumpDiffusionHyp.mgf_logReturn, from compoundPoisson_mgf_of_indepFun of Actuarial/CompoundPoissonMGF.lean and Mathlib's mgf_gaussianReal and IndepFun.mgf_add'). Lives in MathFin/BlackScholes/JumpDiffusionProcess.lean. Axioms-clean."
@@ -445,6 +608,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models); Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          },
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The increment over [s, t] has exponential moment e^{(b + σ²/2 + Λ(E[e^J] − 1))(t − s)} (JumpDiffusionProcess.integral_exp_increment, from integral_exp_jumpDiffusionIncrementLaw). At the compensated drift this is e^{r(t − s)}, and the exponential martingale of independent increments (martingale_exp_sub_of_indep_increments, Foundations/ExpMartingaleIndepIncrements.lean) makes e^{X_t − rt} a martingale; scaling by S₀ gives the discounted price (Martingale.smul). Conversely a martingale has constant mean (integral_condExp), and the mean at t = 1 is S₀e^{b + σ²/2 + Λ(E[e^J] − 1) − r}, so the exponent vanishes. The process is assumed through its defining properties (adapted, started at 0, increments independent of the past with the stated law); path regularity is not used; such a process is constructed only without jumps (Λ = 0: jumpDiffusionProcess_brownian, mf-jump-diffusion-brownian-no-jumps). Lives in MathFin/BlackScholes/JumpDiffusionProcess.lean. Axioms-clean."
@@ -461,6 +632,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. On the canonical model (jumpDiffusionMeasure: a standard normal sample, a Poisson count and i.i.d. jump sizes) the log-return is a function of the three coordinates. θ times it is the log-return with characteristics (θb, θσ) at the jump sizes multiplied by θ (const_mul_jumpDiffusionLogReturn): the drift and the Gaussian coefficient scale inside the log-return, and multiplying every jump size of the canonical model by θ gives the canonical model with jump law ν ∘ (θ·)⁻¹ (jumpDiffusionMeasure_map_jumps, stated for any measurable map of the jumps, from Mathlib's Measure.map_prod_map and Measure.infinitePi_map_pi). On the process the same scaling makes θX a JumpDiffusionProcess with the scaled characteristics (JumpDiffusionProcess.const_mul). Lives in MathFin/BlackScholes/JumpDiffusionExponent.lean. Axioms-clean."
@@ -477,6 +653,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. On the canonical model the log-return is bτ + σ√τ·Z + ∑_{i<N} Jᵢ with Z independent of the compound sum (JumpDiffusionHyp.Z_indep_jumps). Its moment-generating function at θ is e^{θbτ} (Mathlib's mgf_const_add) times the Gaussian moment-generating function e^{σ²θ²τ/2} (mgf_const_mul, mgf_gaussianReal) times, by independence (IndepFun.mgf_add'), the compound-Poisson moment-generating function e^{Λτ(∫ e^{θx} dν − 1)} (compoundPoisson_mgf_of_indepFun, the aggregate-loss MGF of Actuarial/CompoundPoissonMGF.lean): JumpDiffusionHyp.mgf_logReturn. The case θ = 1 (mf-jump-diffusion-log-return-mgf) is a corollary. The exponent is the definition jumpDiffusionExponent, which the statement writes out; mgf_id_jumpDiffusionIncrementLaw and cgf_id_jumpDiffusionIncrementLaw restate the result with Mathlib's mgf and cgf. Lives in MathFin/BlackScholes/JumpDiffusionProcess.lean. Axioms-clean."
@@ -493,6 +674,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. θX is a jump-diffusion with drift θb, volatility coefficient θσ, the same rate and jump law ν ∘ (θ·)⁻¹ (JumpDiffusionProcess.const_mul, from jumpDiffusionIncrementLaw_map_const_mul). For it the discounted-price criterion (JumpDiffusionProcess.martingale_iff) at S₀ = 1 and the rate κ(θ) holds, since κ(θ) − (θσ)²/2 − Λ(∫ eˣ d(ν ∘ (θ·)⁻¹) − 1) = θb. So e^{−κ(θ)t}e^{θX_t} is a martingale (JumpDiffusionProcess.martingale_exp_const_mul_sub). The same file restates the discounted-price criterion as κ(1) = r (JumpDiffusionProcess.martingale_iff_exponent_one). The process is assumed through its defining properties; path regularity is not used; such a process is constructed only without jumps (jumpDiffusionProcess_brownian). Lives in MathFin/BlackScholes/JumpDiffusionExponent.lean. Axioms-clean."
@@ -509,6 +695,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The payoff is f(X_T) with f(x) = e^{−r(T−t)}(S₀eˣ)^p, so its conditional expectation is ∫ f(X_t + y) dμ_{T−t}(y) over the remaining log-return law (JumpDiffusionProcess.condExp_comp, mf-jump-diffusion-payoff-every-date). (S₀e^{x+y})^p = (S₀eˣ)^p·e^{py} (Real.mul_rpow, Real.exp_mul), and ∫ e^{py} dμ_{T−t} = e^{κ(p)(T−t)} (integral_exp_const_mul_jumpDiffusionIncrementLaw, mf-jump-diffusion-levy-exponent). The payoff is integrable because e^{pX_T} is (JumpDiffusionProcess.integrable_exp_const_mul, through the scaled process). The p-th power is Real.rpow, and S₀ > 0 keeps its base positive. The process is assumed through its defining properties; such a process is constructed only without jumps (jumpDiffusionProcess_brownian). Lives in MathFin/BlackScholes/JumpDiffusionExponent.lean. Axioms-clean."
@@ -525,6 +716,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes; Gerber & Shiu (1994), Option pricing by Esscher transforms, Transactions of the Society of Actuaries 46, 99-191",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          },
+          {
+            "key": "GerberShiu1994"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. A probability law whose moment-generating function is finite near 0 equals each finite measure with the same moment-generating function near 0 (measure_eq_of_mgf_id_eventuallyEq in MathFin/Foundations/Esscher.lean: the complex moment-generating functions agree on a vertical strip by the identity theorem, hence on the imaginary axis, where they are the characteristic functions; Mathlib's analyticOnNhd_complexMGF, AnalyticOnNhd.eqOn_of_preconnected_of_frequently_eq, complexMGF_id_mul_I, Measure.ext_of_charFun). For u near 0, ν has the exponential moment of order u + θ, so the log-return law of the tilted characteristics has the moment of order u (integrable_exp_mul_jumpDiffusionIncrementLaw with integrable_exp_mul_tilted_const_mul), and both moment-generating functions are e^{(κ(u + θ) − κ(θ))τ}: the tilted law's is a ratio of moments (mgf_id_tilted_const_mul, Mathlib's integral_exp_tilted at linear exponents) with κ the Laplace exponent (mgf_id_jumpDiffusionIncrementLaw, mf-jump-diffusion-levy-exponent), and κ(u + θ) − κ(θ) is the Laplace exponent of the tilted characteristics at u (jumpDiffusionExponent_tilted). jumpMoment ν θ is ∫ e^{θx} dν as a nonnegative real. Lives in MathFin/BlackScholes/JumpDiffusionEsscher.lean. Axioms-clean."
@@ -541,6 +740,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes; Gerber & Shiu (1994), Option pricing by Esscher transforms, Transactions of the Society of Actuaries 46, 99-191",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          },
+          {
+            "key": "GerberShiu1994"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The tilted law is the log-return law of the tilted characteristics (jumpDiffusionIncrementLaw_tilted, mf-jump-diffusion-esscher-transform), so the integral is the call price function of those characteristics (integral_call_tilted_eq_jumpDiffusionCallPrice). Their Laplace exponent at 1 is κ(θ + 1) − κ(θ) (jumpDiffusionExponent_tilted), so the Esscher condition is their compensated drift (compensated_tilted_iff, through the criterion κ(1) = r of compensated_iff_exponent_one), and Merton's formula for a general jump law applies (jumpDiffusionCallPrice_eq_merton, the price-function form behind mf-jump-diffusion-merton-intermediate-date). The existence of an Esscher parameter is not proved, and the change of measure acts on the law at one date. Lives in MathFin/BlackScholes/JumpDiffusionEsscher.lean. Axioms-clean."
@@ -557,6 +764,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Gerber & Shiu (1994), Option pricing by Esscher transforms, Transactions of the Society of Actuaries 46, 99-191; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "GerberShiu1994"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. κ(1 + θ) − κ(θ) = b + σ²/2 + σ²θ + Λ(∫ e^{(1+θ)x} dν − ∫ e^{θx} dν) (jumpDiffusionExponent_one_add_sub). The jump part is nondecreasing in θ: for θ ≤ θ' the difference of integrands (e^{θ'x} − e^{θx})(eˣ − 1) is nonnegative, both factors having the sign of x (monotone_integral_exp_one_add_sub, by integral_mono). So the map is strictly increasing (StrictMono.add_monotone), continuous (continuous_jumpDiffusionExponent, from Mathlib's continuous_mgf) and unbounded in both directions (Filter.tendsto_atTop_add_right_of_le' and tendsto_atBot_add_right_of_ge'); Continuous.surjective gives a solution, unique by strict monotonicity. Without jumps the solution is (r − b − σ²/2)/σ² (jumpDiffusionExponent_zero_esscher, mf-black-scholes-esscher-pricing). Lives in MathFin/BlackScholes/JumpDiffusionEsscher.lean. Axioms-clean."
@@ -573,6 +788,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Gerber & Shiu (1994), Option pricing by Esscher transforms, Transactions of the Society of Actuaries 46, 99-191; Merton (1976), Option pricing when underlying stock returns are discontinuous, Journal of Financial Economics 3, 125-144",
+        "citations": [
+          {
+            "key": "GerberShiu1994"
+          },
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The tilted log-return law is the log-return law of the tilted characteristics (jumpDiffusionIncrementLaw_tilted, mf-jump-diffusion-esscher-transform). The tilted Gaussian log-jump law has its mean shifted by θδ² (gaussianReal_tilted_const_mul, gir-gaussian-esscher-tilt), which is Merton's log-jump law at the jump mean (1 + k)e^{θδ²} − 1 (mertonJump_tilted, by Real.log_mul and Real.log_exp). The Esscher condition is the compensated drift of the tilted model (compensated_tilted_iff with integral_exp_mertonJump), so Merton's 1976 series for the price function applies (jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice, also cited by mf-jump-diffusion-merton-1976-every-date). Lives in MathFin/BlackScholes/JumpDiffusionEsscher.lean. Axioms-clean."
@@ -589,6 +812,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Gerber & Shiu (1994), Option pricing by Esscher transforms, Transactions of the Society of Actuaries 46, 99-191; Black & Scholes (1973), The pricing of options and corporate liabilities, Journal of Political Economy 81, 637-654",
+        "citations": [
+          {
+            "key": "GerberShiu1994"
+          },
+          {
+            "key": "BlackScholes1973"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The Esscher condition is a computation: at jump rate 0, κ(θ + 1) − κ(θ) = b + σ²/2 + σ²θ, and σ²·(r − b − σ²/2)/σ² = r − b − σ²/2 (jumpDiffusionExponent_zero_esscher, by div_mul_cancel₀). Without jumps the log-return law is N(bτ, σ²τ) (jumpDiffusionIncrementLaw_zero), and tilting it by e^{θy} gives N((b + θσ²)τ, σ²τ) (jumpDiffusionIncrementLaw_zero_tilted, from gaussianReal_tilted_const_mul, gir-gaussian-esscher-tilt); no moment of the jump law is needed. At θ = (r − b − σ²/2)/σ² the drift is r − σ²/2, and the call integrated against the law with that drift is the Black–Scholes formula (jumpDiffusionCallPrice_zero). Lives in MathFin/BlackScholes/JumpDiffusionEsscher.lean. Axioms-clean."
@@ -605,6 +836,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Sato (1999), Lévy Processes and Infinitely Divisible Distributions; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "Sato1999"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Where ∫ e^{ux} dν < ∞, κ(u) = bu + σ²u²/2 + ∫ (e^{ux} − 1) Π(dx) with Π the Lévy measure Λν restricted to x ≠ 0, the integrand vanishing at 0 (jumpDiffusionExponent_eq_levy). Equal laws have equal moment-generating functions, so κ₁ = κ₂ near 0 (eventually_jumpDiffusionExponent_eq, from mgf_id_jumpDiffusionIncrementLaw). The second difference κ(u + s) + κ(u − s) − 2κ(u) cancels the drift and is the moment-generating function at u of the finite measure σ²s²·δ₀ + 2(cosh(sx) − 1)·Λν (secondDifferenceMeasure, mgf_id_secondDifferenceMeasure, from Mathlib's integral_withDensity_eq_integral_smul and integral_dirac). Two finite measures whose moment-generating functions are finite and agree near 0 are equal (measure_eq_of_mgf_id_eventuallyEq in MathFin/Foundations/Esscher.lean, the identity theorem for Mathlib's complex moment-generating function), so the two second-difference measures are equal. Their atoms at 0 are σᵢ²s², because the kernel vanishes at 0 (secondDifferenceMeasure_singleton_zero): so σ₁² = σ₂². Off 0 they are the kernel times the Lévy measures (restrict_compl_zero_secondDifferenceMeasure); dividing by 2(cosh(sx) − 1), which vanishes only at 0, recovers Π (Mathlib's withDensity_inv_same), and κ at one u ≠ 0 then gives b. Conversely, equal drifts, Gaussian variances and Π give κ₁ = κ₂ near 0, and the same uniqueness gives equal laws. Lives in MathFin/BlackScholes/JumpDiffusionIdentifiability.lean. Axioms-clean."
@@ -621,6 +860,17 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes; Gerber & Shiu (1994), Option pricing by Esscher transforms, Transactions of the Society of Actuaries 46, 99-191; Merton (1976), Option pricing when underlying stock returns are discontinuous, Journal of Financial Economics 3, 125-144",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          },
+          {
+            "key": "GerberShiu1994"
+          },
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Q_E ≪ P and P ≪ Q_E are Mathlib's tilted_absolutelyContinuous and absolutelyContinuous_tilted, the latter with the exponential moment of order θ of P (integrable_exp_mul_jumpDiffusionIncrementLaw). Q_M ≪ P and P ≪ Q_M are jumpDiffusionIncrementLaw_absolutelyContinuous, static Girsanov on the Gaussian factor: on the canonical model the drift c is the drift b with the standard normal sample moved by m = (c − b)√τ/σ, and N(m, 1) is the Esscher tilt of N(0, 1) (gaussianReal_tilted_const_mul), absolutely continuous with respect to it; products and pushforwards keep absolute continuity (Mathlib's AbsolutelyContinuous.prod and AbsolutelyContinuous.map), and exchanging b and c gives the other direction. The forwards: Q_E is the jump-diffusion law with drift b + θσ², rate Λm(θ) and jump law ν tilted by e^{θx} (jumpDiffusionIncrementLaw_tilted), whose drift is its compensated drift (compensated_tilted_iff), and integral_exp_jumpDiffusionIncrementLaw gives e^{rτ} for both laws. For (iii): θ ≠ 0, because at θ = 0 the Esscher condition is κ(1) = r, which says the physical drift is compensated (compensated_iff_exponent_one). If the call prices agreed at every strike, Q_E and Q_M would be equal (measure_eq_of_integral_call_eq, mf-call-prices-determine-law). Their Lévy measures would then agree off 0 (jumpDiffusionIncrementLaw_eq_iff, mf-jump-diffusion-identifiability). The Esscher transform multiplies the Lévy measure by e^{θx} (smul_tilted_eq_withDensity, from ofReal_integral_exp_smul_tilted in MathFin/Foundations/Esscher.lean), so e^{θx} = 1 for ν-almost every x ≠ 0 (Mathlib's withDensity_eq_iff_of_sigmaFinite). That forces x = 0 there, while ν, not being the point mass at 0, charges ℝ \\ {0} (Mathlib's hasLaw_dirac_of_ae_eq): a contradiction. Lives in MathFin/BlackScholes/JumpDiffusionIncompleteness.lean. Axioms-clean."
@@ -637,6 +887,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes; Merton (1976), Option pricing when underlying stock returns are discontinuous, Journal of Financial Economics 3, 125-144",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          },
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. No atoms (nullSingletonClass_jumpDiffusionIncrementLaw): with σ ≠ 0 the law is f(y) dy (jumpDiffusionIncrementLaw_eq_withDensity, mf-jump-diffusion-density), and a measure with a density against Lebesgue measure has no atoms (Mathlib's nullSingletonClass_withDensity instance). The price Seʸ is injective in y, so it has no atom at K, and the general strike derivative applies (hasDerivAt_integral_call, mf-call-strike-derivative) with the discount factor carried along (HasDerivAt.const_mul). The digital price is e^{−rτ}P(Se^Y > K) (jumpDiffusionDigitalPrice_eq). Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean, the no-atom lemma in MathFin/BlackScholes/JumpDiffusionDensity.lean. Axioms-clean."
@@ -653,6 +911,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Hull, Options, Futures, and Other Derivatives; Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
+        "citations": [
+          {
+            "key": "Hull"
+          },
+          {
+            "key": "BreedenLitzenberger1978"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Two derivatives of one function at K are compared (Mathlib's HasDerivAt.unique). One is −D, from hasDerivAt_jumpDiffusionCallPrice_strike (mf-jump-diffusion-digital-strike-derivative); the forward is finite because without jumps the law is Gaussian (integrable_exp_jumpDiffusionIncrementLaw_zero, from jumpDiffusionIncrementLaw_zero and integrable_exp_gaussianReal). The other is −e^{−rτ}Φ(d₂), from hasDerivAt_bsV_K (mf-bsV-K-deriv), transported by HasDerivAt.congr_of_eventuallyEq because on the neighbourhood k > 0 of K the call price function is bsV (jumpDiffusionCallPrice_zero). No Gaussian integral of the indicator is computed. Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean. Axioms-clean."
@@ -669,6 +935,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, Journal of Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "Merton1976"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Given the jumps (n, j), the log-return bτ + σ√τ·z + ∑_{i<n} jᵢ is an affine image of the standard normal sample z, so its law is N(bτ + ∑_{i<n} jᵢ, σ²τ) (Mathlib's gaussianReal_map_const_mul and gaussianReal_map_const_add); by Measure.prod_apply_symm the log-return law is the mixture of these Gaussian laws over Poisson(Λτ) ⊗ ν^ℕ (jumpDiffusionIncrementLaw_apply, valid for every σ). For σ ≠ 0 each Gaussian law is φ(y) dy (gaussianReal_apply), and Tonelli (lintegral_lintegral_swap) moves the mixture inside, giving the density f; the mixed densities are bounded by 1/√(2πσ²τ) (gaussianPDFReal_le_inv_sqrt), hence integrable, so the lower integral is ofReal of the integral (ofReal_integral_eq_lintegral_ofReal). Continuity is dominated convergence with the same bound (continuous_of_dominated). The corollary that the law has no atoms (nullSingletonClass_jumpDiffusionIncrementLaw, via Mathlib's nullSingletonClass_withDensity) is stated in mf-jump-diffusion-digital-strike-derivative. Lives in MathFin/BlackScholes/JumpDiffusionDensity.lean. Axioms-clean."
@@ -685,9 +959,17 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models); Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          },
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Pointwise c(x − K)⁺ = c(K − x)⁺ + (cx − cK), from the payoff identity (x − K)⁺ − (K − x)⁺ = x − K (max_sub_max_neg, Foundations/NoArbitrageDerivations.lean, the identity behind the finite-state put–call parity). Integrated against the log-return law, the forward term has mean S·e^{(b + σ²/2 + Λ(∫ eˣ dν − 1) − r)τ} (integral_exp_jumpDiffusionIncrementLaw), and every term is integrable because e^Y is (integrable_exp_jumpDiffusionIncrementLaw) (jumpDiffusionCallPrice_eq). At the compensated drift the exponent is 0 (jumpDiffusionCallPrice_eq_of_compensated). Lives in MathFin/BlackScholes/JumpDiffusionOptionPrices.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Pointwise c(x − K)⁺ = c(K − x)⁺ + (cx − cK), from the payoff identity (x − K)⁺ − (K − x)⁺ = x − K (Mathlib's max_zero_sub_max_neg_zero_eq_self, the identity behind the finite-state put–call parity). Integrated against the log-return law, the forward term has mean S·e^{(b + σ²/2 + Λ(∫ eˣ dν − 1) − r)τ} (integral_exp_jumpDiffusionIncrementLaw), and every term is integrable because e^Y is (integrable_exp_jumpDiffusionIncrementLaw) (jumpDiffusionCallPrice_eq). At the compensated drift the exponent is 0 (jumpDiffusionCallPrice_eq_of_compensated). Lives in MathFin/BlackScholes/JumpDiffusionOptionPrices.lean. Axioms-clean."
       }
     },
     {
@@ -701,6 +983,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models)",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Write f(X_T) = g(X_t, X_T − X_t) with g(x, y) = f(x + y). X_t is 𝓕_t-measurable (adapted), and the increment X_T − X_t is independent of 𝓕_t with law μ_{T−t} (JumpDiffusionProcess.indep, .law), so the conditional freezing lemma (condExp_comp_prodMk_of_indep, Foundations/IndepFreezing.lean; Shreve's independence lemma, ce-conditional-freezing-lemma) gives E[g(X_t, X_T − X_t) | 𝓕_t] = ∫ g(X_t, y) dμ_{T−t}(y) for any strongly measurable, Banach-valued g with g(X_t, X_T − X_t) integrable (JumpDiffusionProcess.condExp_comp_prodMk, which also covers forward-start payoffs); the European payoff is its case g(x, y) = f(x + y) (JumpDiffusionProcess.condExp_comp). The process is assumed through its defining properties; path regularity is not used. Lives in MathFin/BlackScholes/JumpDiffusionOptionPrices.lean. Axioms-clean."
@@ -717,6 +1004,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models)",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The put payoff is f(X_T) with f(x) = e^{−r(T−t)}(K − S₀eˣ)⁺, measurable and, since S₀ ≥ 0, bounded by e^{−r(T−t)}·max(K, 0), hence integrable without any moment of the jumps. Given 𝓕_t a payoff f(X_T) averages over the increment with X_t frozen (JumpDiffusionProcess.condExp_comp, mf-jump-diffusion-payoff-every-date: X_t is 𝓕_t-measurable, and the increment X_T − X_t is independent of 𝓕_t with the log-return law over T − t, so the conditional freezing lemma condExp_comp_prodMk_of_indep applies, Foundations/IndepFreezing.lean), which is the put price function at S₀e^{X_t} (JumpDiffusionProcess.condExp_put). The process is assumed through its defining properties; path regularity is not used. Lives in MathFin/BlackScholes/JumpDiffusionOptionPrices.lean. Axioms-clean."
@@ -733,6 +1025,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models)",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The call payoff is f(X_T) with f(x) = e^{−r(T−t)}(S₀eˣ − K)⁺, measurable and integrable because e^{X_T} is (JumpDiffusionProcess.integrable_exp, from the increment's exponential moment, which needs ∫ eˣ dν < ∞). Given 𝓕_t a payoff f(X_T) averages over the increment with X_t frozen (JumpDiffusionProcess.condExp_comp, mf-jump-diffusion-payoff-every-date, through the conditional freezing lemma condExp_comp_prodMk_of_indep, Foundations/IndepFreezing.lean), which is the call price function at S₀e^{X_t} (JumpDiffusionProcess.condExp_call); no put–call detour. The process is assumed through its defining properties; path regularity is not used. Lives in MathFin/BlackScholes/JumpDiffusionOptionPrices.lean. Axioms-clean."
@@ -749,6 +1046,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models)",
+        "citations": [
+          {
+            "key": "Merton1976"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The conditional value of the call is the call price function C(S_t, T − t) for any drift (JumpDiffusionProcess.condExp_call, mf-jump-diffusion-call-intermediate-date). The price function integrates the payoff against the log-return law over τ = T − t, which is by definition the image of the canonical model N(0,1) ⊗ Poisson(Λτ) ⊗ ν^ℕ (jumpDiffusionIncrementLaw, integral_map). The canonical coordinates satisfy JumpDiffusionHyp (jumpDiffusionHyp_canonical, mf-jump-diffusion-model-exists); at the compensated drift the log-return is the exponent of jumpDiffusionTerminal with κ = Λτ(∫ eˣ dν − 1), so JumpDiffusionHyp.call_eq_integral_infinitePi (mf-jump-diffusion-call-law-invariance) turns the price function into the Poisson(Λτ) mixture of Black–Scholes prices (jumpDiffusionCallPrice_eq_merton). The positivity hypotheses are those of the Black–Scholes mixing formula. The process is assumed through its defining properties; such a process is constructed only without jumps (Λ = 0: jumpDiffusionProcess_brownian, mf-jump-diffusion-brownian-no-jumps). Lives in MathFin/BlackScholes/JumpDiffusionOptionPrices.lean. Axioms-clean."
@@ -765,6 +1070,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models); Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          },
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The conditional value of the call is the call price function C(S_t, T − t) (JumpDiffusionProcess.condExp_call, mf-jump-diffusion-call-intermediate-date). At the compensated drift the price function is the call of the canonical model with expected jump count Λ(T − t) (jumpDiffusionCallPrice_eq_canonical), whose first jump size has law ν and so is not almost surely 0 when ν is not δ₀ (hasLaw_dirac_of_ae_eq). The compound-Poisson implied-volatility theorem (JumpDiffusionHyp.impliedVol_gt, mf-compound-poisson-implied-vol-above-sigma) then gives the unique implied volatility above σ (jumpDiffusionCallPrice_impliedVol_gt). The statement holds path by path, almost surely; a measurable choice of the implied volatility as a random variable is not constructed. The process is assumed through its defining properties; no such process is constructed. Lives in MathFin/BlackScholes/JumpDiffusionOptionPrices.lean. Axioms-clean."
@@ -781,6 +1094,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models)",
+        "citations": [
+          {
+            "key": "Merton1976"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The conditional value of the call is the call price function at S_t and T − t (JumpDiffusionProcess.condExp_call, mf-jump-diffusion-call-intermediate-date). At the compensated drift the price function is the call of the canonical model with expected jump count Λτ (jumpDiffusionCallPrice_eq_canonical); the jump law has E[e^J] = 1 + k (integral_exp_gaussianReal), so the compensator is kΛτ and Merton's formula from the general jump-diffusion (JumpDiffusionHyp.call_eq_mertonCallPrice, mf-merton-call-formula) gives mertonCallPrice (jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice, JumpDiffusionProcess.condExp_call_eq_mertonCallPrice). The put follows from the two put–call parities, C − P = S − Ke^{−rτ} for the price functions at the compensated drift (jumpDiffusionCallPrice_eq_of_compensated) and for Merton's series (merton_put_call_parity), with the put conditioned by JumpDiffusionProcess.condExp_put (jumpDiffusionPutPrice_gaussian_eq_mertonPutPrice, JumpDiffusionProcess.condExp_put_eq_mertonPutPrice). The process is assumed through its defining properties; such a process is constructed only without jumps (Λ = 0: jumpDiffusionProcess_brownian, mf-jump-diffusion-brownian-no-jumps). Lives in MathFin/BlackScholes/JumpDiffusionMerton.lean. Axioms-clean."
@@ -797,6 +1118,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models)",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The Poisson law of rate 0 is the point mass at 0 (poissonMeasure_zero, from poissonMeasure_singleton), so on the canonical model the count vanishes almost surely and the log-return is bτ + σ√τ·Z, which is N(bτ, σ²τ) (gaussianReal_const_mul, gaussianReal_const_add). For the Brownian log-price the increment b(t − s) + σ(B_t − B_s) is a measurable function of the Brownian increment, so it is independent of 𝓕_s (IsFilteredPreBrownian.indep, indep_of_indep_of_le_left), with law N(b(t − s), σ²(t − s)) (hasLaw_increment). The witness uses the Brownian motion constructed in the BrownianMotion dependency with its natural filtration (brownian_filtered, BlackScholes/AmericanPut/Stopping/BrownianModel.lean). Lives in MathFin/BlackScholes/JumpDiffusionBrownian.lean. Axioms-clean."
@@ -813,6 +1139,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Black & Scholes (1973), The pricing of options and corporate liabilities, J. Political Economy 81, 637-654",
+        "citations": [
+          {
+            "key": "BlackScholes1973"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. X_t = (r − σ²/2)t + σB_t is a JumpDiffusionProcess with rate 0 (IsFilteredPreBrownian.jumpDiffusionProcess, mf-jump-diffusion-brownian-no-jumps), so JumpDiffusionProcess.condExp_call and condExp_put give the price functions at S_t and T − t. With no jumps the log-return is N((r − σ²/2)τ, σ²τ) (jumpDiffusionIncrementLaw_zero); standardized it drives the Black–Scholes terminal price, so the price functions are the Black–Scholes formulas (bs_call_formula through integral_bsCall_payoff_eq_bsV, and bs_put_formula: jumpDiffusionCallPrice_zero, jumpDiffusionPutPrice_zero). Lives in MathFin/BlackScholes/JumpDiffusionBrownian.lean. Axioms-clean."
@@ -829,6 +1160,14 @@
       "metadata": {
         "chapter": 14,
         "reference": "Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "BreedenLitzenberger1978"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The first strike derivative is minus the digital price at every strike (hasDerivAt_jumpDiffusionCallPrice_strike, mf-jump-diffusion-digital-strike-derivative), so deriv C = −D. For k > 0 the digital price is e^{−rτ}P(Y > log(k/S)) (jumpDiffusionDigitalPrice_eq). For a law f(y) dy with f ≥ 0 integrable and continuous at a, the tail x ↦ P(Y > x) = ∫ f − ∫_{(−∞, a]} f − ∫_a^x f has derivative −f(a) (hasDerivAt_measureReal_Ioi_withDensity, from Mathlib's intervalIntegral.integral_hasDerivAt_right). Applied with the continuous density of the log-return (jumpDiffusionIncrementLaw_eq_withDensity, continuous_jumpDiffusionDensity; f integrates to 1) and the chain rule through k ↦ log(k/S), whose derivative is 1/K, it gives ∂D/∂K = −e^{−rτ}f(log(K/S))/K (hasDerivAt_jumpDiffusionDigitalPrice_strike). Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean, the tail lemma in MathFin/BlackScholes/JumpDiffusionDensity.lean. Axioms-clean."
@@ -845,6 +1184,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
+        "citations": [
+          {
+            "key": "BreedenLitzenberger1978"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Two derivatives at K of the function deriv C, with C the call price function, are compared (Mathlib's HasDerivAt.unique). One is e^{−rτ}f(log(K/S))/K, from breedenLitzenberger_jumpDiffusion (mf-breeden-litzenberger-jump-diffusion); the forward is finite because without jumps the law is Gaussian (integrable_exp_jumpDiffusionIncrementLaw_zero). The other is e^{−rτ}·lognormalTerminalPDF, from breedenLitzenberger (mf-breeden-litzenberger), transported because on the neighbourhood k > 0 of K the call price is bsV (jumpDiffusionCallPrice_zero), so the first derivatives agree near K (Mathlib's Filter.EventuallyEq.deriv_eq). Cancelling e^{−rτ} gives the identity; no Gaussian algebra is done. Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean. Axioms-clean."
@@ -861,6 +1205,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
+        "citations": [
+          {
+            "key": "Merton1976"
+          },
+          {
+            "key": "BreedenLitzenberger1978"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The Poisson series of Black–Scholes prices is differentiated term by term on K > 0 (Mathlib's hasDerivAt_tsum_of_isPreconnected): each term's strike derivative is minus wₙ times a Black–Scholes digital bsCashDigital (hasDerivAt_bsV_K, mf-bsV-K-deriv), at most wₙe^{−rT} in absolute value, and the Poisson weights sum to one (Mathlib's hasSum_one_poissonMeasure). The digital series mertonDigitalPrice = ∑ₙ wₙ·bsCashDigital is differentiated the same way on (K/2, ∞): each term's strike derivative is minus wₙ times the discounted lognormal density formula (hasDerivAt_bsCashDigital_K, mf-cash-digital-strike), and each term's derivative is at most wₙe^{−rT}/((K/2)σ√T) in absolute value because ϕ ≤ 1 and σₙ ≥ σ (le_mertonVol). The digital series is −∂C/∂K on all of K > 0, so hasDerivAt_deriv_of_eventually gives the second derivative of the price, as for the Merton gamma (mf-merton-gamma). Lives in MathFin/BlackScholes/MertonStrikeGreeks.lean. Axioms-clean."
@@ -877,6 +1229,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "Merton1976"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Two derivatives of one function at K are compared (Mathlib's HasDerivAt.unique). One is −D, from hasDerivAt_jumpDiffusionCallPrice_strike (mf-jump-diffusion-digital-strike-derivative); the forward is finite because the Gaussian jump law has an exponential moment (integrable_exp_jumpDiffusionIncrementLaw, integrable_exp_gaussianReal). The other is −mertonDigitalPrice, from hasDerivAt_mertonCallPrice_strike (mf-merton-strike-derivatives), transported by HasDerivAt.congr_of_eventuallyEq because on the neighbourhood (0, ∞) of K the call price function is Merton's series (jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice, mf-jump-diffusion-merton-1976-every-date). Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean. Axioms-clean."
@@ -893,6 +1253,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
+        "citations": [
+          {
+            "key": "Merton1976"
+          },
+          {
+            "key": "BreedenLitzenberger1978"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Set r = b + σ²/2 + Λk, so that b is the compensated drift for r. Two derivatives at K of the digital price function discounted at r are compared (Mathlib's HasDerivAt.unique). One is −e^{−rτ}f(log(K/S))/K, from hasDerivAt_jumpDiffusionDigitalPrice_strike (mf-breeden-litzenberger-jump-diffusion). The other is −e^{−rτ}·mertonTerminalPDF, from hasDerivAt_mertonDigitalPrice_strike (mf-merton-strike-derivatives), transported because on the neighbourhood (0, ∞) of K the digital price function is Merton's digital series (jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice, mf-jump-diffusion-merton-digital). Cancelling e^{−rτ} gives the identity; no Gaussian convolution is computed. Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean. Axioms-clean."
@@ -909,6 +1277,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The call price function is e^{−rτ} times the undiscounted call price of the price Seʸ (jumpDiffusionCallPrice_eq_mul_integral), and multiplying by e^{−rτ} ≠ 0 does not change differentiability (DifferentiableAt.const_mul, both ways). The undiscounted call price is differentiable at K iff the price has no atom at K (differentiableAt_integral_call_iff, mf-call-strike-differentiable-iff-no-atom), and {y : Seʸ = K} = {log(K/S)}. Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean. Axioms-clean."
@@ -925,6 +1298,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes; Merton (1976), Option pricing when underlying stock returns are discontinuous, Journal of Financial Economics 3, 125-144",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          },
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The atom: given the jumps the log-return law is N(bτ + ∑_{i<n} jᵢ, σ²τ) (jumpDiffusionIncrementLaw_apply), a point mass when σ = 0 (Mathlib's gaussianReal_zero_var); on the event {n = 0}, of Poisson(Λτ) ⊗ ν^ℕ-measure e^{−Λτ} (Measure.prod_prod, poissonMeasure_singleton), the point mass sits at bτ, and lintegral_mono bounds the mixture below (ofReal_exp_le_jumpDiffusionIncrementLaw_singleton). The kink: the call price function is differentiable at K exactly when the law has no atom at log(K/S) (differentiableAt_jumpDiffusionCallPrice_strike_iff, mf-jump-diffusion-call-differentiable-iff), and at K = Se^{bτ} that point is bτ. Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean, the atom in MathFin/BlackScholes/JumpDiffusionDensity.lean. Axioms-clean."
@@ -941,6 +1322,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
+        "citations": [
+          {
+            "key": "BreedenLitzenberger1978"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. On a measurable set A, the left side is ∫ over the preimage of A of f(y) dy. The map y ↦ Seʸ is injective with derivative Seʸ and maps that preimage onto A ∩ (0, ∞) (Set.image_preimage_eq_inter_range, the range being (0, ∞)), so Mathlib's lintegral_image_eq_lintegral_abs_deriv_mul turns the right side ∫_{A ∩ (0, ∞)} f(log(K/S))/K dK into ∫ over the preimage of Seʸ · f(y)/(Seʸ) dy. Lives in MathFin/BlackScholes/JumpDiffusionDensity.lean. Axioms-clean."
@@ -957,6 +1343,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes; Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          },
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The log-return law is f(y) dy (jumpDiffusionIncrementLaw_eq_withDensity, mf-jump-diffusion-density) and the change of variables y ↦ Seʸ maps it to f(log(K/S))/K dK on (0, ∞) (map_mul_exp_withDensity, mf-price-law-change-of-variables). Lives in MathFin/BlackScholes/JumpDiffusionDensity.lean. Axioms-clean."
@@ -973,6 +1367,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "Breeden & Litzenberger (1978), Prices of state-contingent claims implicit in option prices, Journal of Business 51, 621-651",
+        "citations": [
+          {
+            "key": "BreedenLitzenberger1978"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The law of the price has the density f(log(K/S))/K on (0, ∞) (jumpDiffusionIncrementLaw_map_mul_exp, mf-jump-diffusion-price-law), and at every K > 0 that density is lognormalTerminalPDF (jumpDiffusionDensity_div_eq_lognormalTerminalPDF, mf-black-scholes-lognormal-density), so the two measures agree (Mathlib's withDensity_congr_ae). The integral is the mass of the image of a probability measure (lintegral_eq_one_of_map_eq_withDensity); the formula is nonnegative because ϕ ≥ 0 (lognormalTerminalPDF_nonneg). Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean. Axioms-clean."
@@ -989,6 +1388,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "citations": [
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The law of the price has the density f(log(K/S))/K on (0, ∞) (jumpDiffusionIncrementLaw_map_mul_exp, mf-jump-diffusion-price-law), and at every K > 0 that density is mertonTerminalPDF (jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF, mf-jump-diffusion-merton-density), so the two measures agree (Mathlib's withDensity_congr_ae). The integral is the mass of the image of a probability measure (lintegral_eq_one_of_map_eq_withDensity); the mixture is nonnegative term by term (mertonTerminalPDF_nonneg, from lognormalTerminalPDF_nonneg). Lives in MathFin/BlackScholes/JumpDiffusionDigital.lean. Axioms-clean."
@@ -1002,6 +1406,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "Merton1976"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Positivity: the density is the integral, against the probability measure Poisson(Λτ) ⊗ ν^ℕ, of a normal density with variance σ²τ ≠ 0 (jumpDiffusionVariance_ne_zero), positive everywhere (Mathlib's gaussianPDFReal_pos); its support is everything, so Mathlib's integral_pos_iff_support_of_nonneg applies (jumpDiffusionDensity_pos). The interval: the event is the preimage of (k₁, k₂) under y ↦ Seʸ, so its probability is the mass of (k₁, k₂) under the law of the price (jumpDiffusionIncrementLaw_map_mul_exp), the integral over (k₁, k₂) ⊆ (0, ∞) of the positive density f(log(K/S))/K (Mathlib's setLIntegral_pos_iff, Real.volume_Ioo) (jumpDiffusionIncrementLaw_price_mem_Ioo_ne_zero). Lives in MathFin/BlackScholes/JumpDiffusionDensity.lean. Axioms-clean."
@@ -1018,6 +1430,17 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1973), Theory of rational option pricing, Bell Journal of Economics and Management Science 4, 141-183; Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "Merton1973"
+          },
+          {
+            "key": "Merton1976"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The call price is e^{−rτ} times the undiscounted call price of the price Seʸ (jumpDiffusionCallPrice_eq_mul_integral), which is convex under any law with a finite mean (convexOn_integral_call, mf-call-price-convex-in-strike) and strictly convex on (0, ∞) when the law charges every interval of positive strikes (strictConvexOn_integral_call, with jumpDiffusionIncrementLaw_price_mem_Ioo_ne_zero). A positive multiple of a strictly convex function is strictly convex (StrictConvexOn.smul, stated in the library: Mathlib has only ConvexOn.smul). No strike derivative is taken (convexOn_jumpDiffusionCallPrice_strike, strictConvexOn_jumpDiffusionCallPrice_strike). Lives in MathFin/BlackScholes/JumpDiffusionStrikeConvexity.lean. Axioms-clean."
@@ -1034,6 +1457,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Black & Scholes (1973), The pricing of options and corporate liabilities, J. Political Economy 81, 637-654; Merton (1973), Theory of rational option pricing, Bell Journal of Economics and Management Science 4, 141-183",
+        "citations": [
+          {
+            "key": "BlackScholes1973"
+          },
+          {
+            "key": "Merton1973"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. On (0, ∞) the jump-diffusion call price with jump rate 0 and drift r − σ²/2 is bsV (jumpDiffusionCallPrice_zero), and it is strictly convex there (strictConvexOn_jumpDiffusionCallPrice_strike, mf-jump-diffusion-call-convex-strike); Mathlib's StrictConvexOn.congr transfers it (bsV_strike_strictConvexOn). No strike derivative is taken. The spot side, mf-bs-call-strictly-convex-in-spot, is the second-derivative test. Lives in MathFin/BlackScholes/JumpDiffusionStrikeConvexity.lean. Axioms-clean."
@@ -1050,6 +1481,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "citations": [
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. With τ = T and the jump rate Λ/T the expected jump count is (Λ/T)·T = Λ, and on (0, ∞) the jump-diffusion call price is Merton's series (jumpDiffusionCallPrice_gaussian_eq_mertonCallPrice); the forward is finite because the Gaussian jump law has an exponential moment (integrable_exp_jumpDiffusionIncrementLaw, integrable_exp_gaussianReal). So strictConvexOn_jumpDiffusionCallPrice_strike (mf-jump-diffusion-call-convex-strike) transfers through StrictConvexOn.congr (mertonCallPrice_strictConvexOn_strike). No derivative of the series is taken. Lives in MathFin/BlackScholes/JumpDiffusionStrikeConvexity.lean. Axioms-clean."
@@ -1066,6 +1502,17 @@
       "metadata": {
         "chapter": 9,
         "reference": "Demeterfi, Derman, Kamal & Zou (1999), More than you ever wanted to know about volatility swaps, Goldman Sachs Quantitative Strategies Research Notes; Carr & Wu (2009), Variance risk premiums, Review of Financial Studies 22, 1311-1341; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "DemeterfiDermanKamalZou1999"
+          },
+          {
+            "key": "CarrWu2009"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Pointwise, log(Se^{rτ}/(Se^y)) = rτ − y (Mathlib's mul_div_mul_left, Real.exp_sub, Real.log_exp) and (Se^y − Se^{rτ})/(Se^{rτ}) = e^{−rτ}e^y − 1 (sub_div, div_self, Real.exp_neg, inv_mul_eq_div); the expectation splits by linearity (integral_add, integral_sub, integral_const_mul, integral_const) (integral_logContract). When ∫ eʸ dμ = e^{rτ} the exponential is integrable (Mathlib's Integrable.of_integral_ne_zero) and the defect e^{−rτ}E[e^Y] − 1 is 0 (integral_logContract_of_integral_exp). Lives in MathFin/BlackScholes/VarianceSwap.lean; the Black–Scholes identity varianceSwap_fairStrike is the Λ = 0 case of jumpDiffusion_logContract (MathFin/BlackScholes/JumpDiffusionVarianceSwap.lean). Axioms-clean."
@@ -1082,6 +1529,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The log-return law inherits the exponential moments of the jumps (integrableExpSet_id_subset_jumpDiffusionIncrementLaw, zero_mem_interior_integrableExpSet_jumpDiffusionIncrementLaw), and near 0 its cumulant generating function is κ(θ)τ (cgf_id_jumpDiffusionIncrementLaw_eventuallyEq, from cgf_id_jumpDiffusionIncrementLaw); these live in MathFin/BlackScholes/JumpDiffusionProcess.lean. The mean is the derivative of the cgf at 0 (Mathlib's deriv_cgf_zero, deriv_mul_const_field); κ'(θ) = b + σ²θ + ΛM'(θ), with M the jump law's moment-generating function (hasDerivAt_jumpDiffusionExponent, Mathlib's differentiableAt_mgf), and M'(0) = E[J] (deriv_mgf_zero), so κ'(0) = b + ΛE[J] (deriv_jumpDiffusionExponent_zero) (integral_id_jumpDiffusionIncrementLaw). The hypothesis on the moment-generating function is the one the cumulant route needs; the mean itself needs only E|J| < ∞, which is not formalized. Lives in MathFin/BlackScholes/JumpDiffusionMoments.lean. Axioms-clean."
@@ -1098,6 +1550,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Mathlib's variance_tilted_mul at 0 (tilted_const') makes the variance the second derivative at 0 of the cumulant generating function, which near 0 is κ(θ)τ (cgf_id_jumpDiffusionIncrementLaw_eventuallyEq, Filter.EventuallyEq.iteratedDeriv_eq); Mathlib's iteratedDeriv_mul_const_field takes out τ, and κ''(0) = σ² + ΛE[J²] (iteratedDeriv_two_jumpDiffusionExponent_zero: near 0, κ' = b + σ²θ + ΛM', hasDerivAt_jumpDiffusionExponent, and M''(0) = E[J²], Mathlib's hasDerivAt_iteratedDeriv_mgf) (variance_id_jumpDiffusionIncrementLaw). The second moment is the variance plus the squared mean (Mathlib's variance_eq_sub, with memLp_of_mem_interior_integrableExpSet; mf-jump-diffusion-log-return-mean) (integral_sq_jumpDiffusionIncrementLaw). The hypothesis on the moment-generating function is the one the cumulant route needs; the variance itself needs only E[J²] < ∞, which is not formalized. Lives in MathFin/BlackScholes/JumpDiffusionMoments.lean. Axioms-clean."
@@ -1114,6 +1571,17 @@
       "metadata": {
         "chapter": 9,
         "reference": "Demeterfi, Derman, Kamal & Zou (1999), More than you ever wanted to know about volatility swaps, Goldman Sachs Quantitative Strategies Research Notes; Carr & Wu (2009), Variance risk premiums, Review of Financial Studies 22, 1311-1341; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "DemeterfiDermanKamalZou1999"
+          },
+          {
+            "key": "CarrWu2009"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. At the compensated drift the forward is the mean of S_τ, E[e^Y] = e^{rτ} (integral_exp_jumpDiffusionIncrementLaw_of_compensated, from integral_exp_jumpDiffusionIncrementLaw, mf-jump-diffusion-log-return-mgf), so the log contract has expected payoff rτ − E[Y] under any such law (integral_logContract_of_integral_exp, mf-log-contract-any-law), and E[Y] = (b + ΛE[J])τ (integral_id_jumpDiffusionIncrementLaw, mf-jump-diffusion-log-return-mean); so (2/τ)(rτ − E[Y]) = σ² + 2Λ(E[e^J] − 1 − E[J]) (jumpDiffusion_logContract). The compensated drift is a hypothesis hb : b = r − σ²/2 − Λ(E[e^J] − 1), the convention of JumpDiffusionOptionPrices.lean. Lives in MathFin/BlackScholes/JumpDiffusionVarianceSwap.lean. Axioms-clean."
@@ -1130,6 +1598,17 @@
       "metadata": {
         "chapter": 9,
         "reference": "Demeterfi, Derman, Kamal & Zou (1999), More than you ever wanted to know about volatility swaps, Goldman Sachs Quantitative Strategies Research Notes; Carr & Wu (2009), Variance risk premiums, Review of Financial Studies 22, 1311-1341; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "DemeterfiDermanKamalZou1999"
+          },
+          {
+            "key": "CarrWu2009"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Subtract the variance (variance_id_jumpDiffusionIncrementLaw, mf-jump-diffusion-log-return-variance) from the log contract (jumpDiffusion_logContract, mf-jump-diffusion-log-contract) and split the jump integral (Mathlib's integral_sub, integral_div), the jump law having moments of every order (integrable_pow_of_mem_interior_integrableExpSet) (jumpDiffusion_logContract_sub_variance). The bias is not shown to be nonzero for a general jump law: its integrand has the sign of x, so a two-sided jump law can cancel it. Lives in MathFin/BlackScholes/JumpDiffusionVarianceSwap.lean. Axioms-clean."
@@ -1146,6 +1625,17 @@
       "metadata": {
         "chapter": 9,
         "reference": "Demeterfi, Derman, Kamal & Zou (1999), More than you ever wanted to know about volatility swaps, Goldman Sachs Quantitative Strategies Research Notes; Carr & Wu (2009), Variance risk premiums, Review of Financial Studies 22, 1311-1341; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "DemeterfiDermanKamalZou1999"
+          },
+          {
+            "key": "CarrWu2009"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. eˣ − (1 + x + x²/2) is strictly increasing on (−∞, 0], its derivative eˣ − (1 + x) being positive off 0 (Mathlib's Real.add_one_lt_exp, strictMonoOn_of_deriv_pos, interior_Iic), and vanishes at 0, so eˣ < 1 + x + x²/2 for x < 0 (Real.exp_lt_quadratic_of_neg) and eˣ ≤ 1 + x + x²/2 for x ≤ 0 (Real.exp_le_quadratic_of_nonpos), the reverses of Mathlib's Real.quadratic_le_exp_of_nonneg. Jumps ≤ 0 give e^J ≤ 1, so E[e^J] < ∞ (integrable_exp_of_ae_nonpos, Mathlib's Integrable.of_bound). The jump bias (jumpDiffusion_logContract_sub_variance) is then 2Λ times the integral of a function that is ≤ 0 ν-almost everywhere (Mathlib's integral_nonpos_of_ae) (jumpDiffusion_logContract_le_variance); its negation is ≥ 0 and positive on {J < 0}, so its integral is positive (Mathlib's integral_pos_iff_support_of_nonneg_ae, measure_mono_null) (jumpDiffusion_logContract_lt_variance). The sign needs one-signed jumps: the bias integrand has the sign of x. Lives in MathFin/BlackScholes/JumpDiffusionVarianceSwap.lean. Axioms-clean."
@@ -1162,6 +1652,20 @@
       "metadata": {
         "chapter": 9,
         "reference": "Demeterfi, Derman, Kamal & Zou (1999), More than you ever wanted to know about volatility swaps, Goldman Sachs Quantitative Strategies Research Notes; Carr & Wu (2009), Variance risk premiums, Review of Financial Studies 22, 1311-1341; Cont & Tankov (2004), Financial Modelling with Jump Processes; Broadie & Jain (2008), The effect of jumps and discrete sampling on volatility and variance swaps, International Journal of Theoretical and Applied Finance 11, 761-797",
+        "citations": [
+          {
+            "key": "DemeterfiDermanKamalZou1999"
+          },
+          {
+            "key": "CarrWu2009"
+          },
+          {
+            "key": "ContTankov2004"
+          },
+          {
+            "key": "BroadieJain2008"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. For any process whose increments X_t − X_s have laws μ(t − s) depending only on t − s, all steps of the equipartition have length T/(n + 1) in ℝ≥0 (add_div, add_tsub_cancel_left), so E[∑ f(ΔX)] is n + 1 times ∫ f dμ(T/(n + 1)) for any f integrable under every μ τ (Mathlib's HasLaw.integral_comp, integral_finsetSum, Finset.sum_const) (integral_sum_comp_increment_equipartition). For the jump-diffusion the increment laws are the log-return laws (JumpDiffusionProcess.law), with moments of every order (integrable_pow_of_mem_interior_integrableExpSet), and E[Y²] = (σ² + ΛE[J²])τ + ((b + ΛE[J])τ)² (integral_sq_jumpDiffusionIncrementLaw, mf-jump-diffusion-log-return-variance) (JumpDiffusionProcess.integral_sum_sq_increment_equipartition); the drift term is a constant over n + 1 (tendsto_one_div_add_atTop_nhds_zero_nat) (JumpDiffusionProcess.tendsto_integral_sum_sq_increment_equipartition). Only the increment laws of JumpDiffusionProcess are used. The Black–Scholes counterparts are expected_bsLogPrice_equipartition_sum and tendsto_expected_bsLogPrice_equipartition_sum. Not formalized: arbitrary partitions, and the L² limit, which with jumps is the random quadratic variation σ²T + Σ_{i≤N_T} J_i² rather than a constant. The process is assumed through its defining properties; such a process is constructed only without jumps (Λ = 0: jumpDiffusionProcess_brownian, mf-jump-diffusion-brownian-no-jumps), so for Λ > 0 the statement is conditional on a process the library does not build. Lives in MathFin/BlackScholes/JumpDiffusionVarianceSwap.lean. Axioms-clean."
@@ -1178,6 +1682,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cont & Tankov (2004), Financial Modelling with Jump Processes (exponential Lévy models); Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          },
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The increment over [0, t] has the law jumpDiffusionIncrementLaw b σ Λ ν (t − 0) (JumpDiffusionProcess.law, tsub_zero), and X_0 = 0 almost surely (JumpDiffusionProcess.zero), so X_t agrees almost everywhere with X_t − X_0 (Mathlib's HasLaw.congr) (JumpDiffusionProcess.hasLaw). The exponential moment of X_t is read off it (JumpDiffusionProcess.integral_exp, through Mathlib's HasLaw.integral_comp). The process is assumed through its defining properties; such a process is constructed only without jumps (Λ = 0: jumpDiffusionProcess_brownian, mf-jump-diffusion-brownian-no-jumps), so for Λ > 0 the statement is conditional on a process the library does not build. Lives in MathFin/BlackScholes/JumpDiffusionProcess.lean. Axioms-clean."
@@ -1194,6 +1706,17 @@
       "metadata": {
         "chapter": 9,
         "reference": "Demeterfi, Derman, Kamal & Zou (1999), More than you ever wanted to know about volatility swaps, Goldman Sachs Quantitative Strategies Research Notes; Carr & Wu (2009), Variance risk premiums, Review of Financial Studies 22, 1311-1341; Cont & Tankov (2004), Financial Modelling with Jump Processes",
+        "citations": [
+          {
+            "key": "DemeterfiDermanKamalZou1999"
+          },
+          {
+            "key": "CarrWu2009"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The martingale hypothesis gives b = r − σ²/2 − Λ(E[e^J] − 1) (JumpDiffusionProcess.martingale_iff); X_T has the law jumpDiffusionIncrementLaw b σ Λ ν T (JumpDiffusionProcess.hasLaw), so the expected payoff under P is the integral against that law (Mathlib's HasLaw.integral_comp, the payoff being measurable by fun_prop), which jumpDiffusion_logContract evaluates (JumpDiffusionProcess.integral_logContract_of_martingale). The process is assumed through its defining properties; such a process is constructed only without jumps (Λ = 0: jumpDiffusionProcess_brownian, mf-jump-diffusion-brownian-no-jumps), so for Λ > 0 the statement is conditional on a process the library does not build. Lives in MathFin/BlackScholes/JumpDiffusionVarianceSwap.lean. Axioms-clean."
@@ -1210,6 +1733,20 @@
       "metadata": {
         "chapter": 9,
         "reference": "Demeterfi, Derman, Kamal & Zou (1999), More than you ever wanted to know about volatility swaps, Goldman Sachs Quantitative Strategies Research Notes; Carr & Wu (2009), Variance risk premiums, Review of Financial Studies 22, 1311-1341; Cont & Tankov (2004), Financial Modelling with Jump Processes; Broadie & Jain (2008), The effect of jumps and discrete sampling on volatility and variance swaps, International Journal of Theoretical and Applied Finance 11, 761-797",
+        "citations": [
+          {
+            "key": "DemeterfiDermanKamalZou1999"
+          },
+          {
+            "key": "CarrWu2009"
+          },
+          {
+            "key": "ContTankov2004"
+          },
+          {
+            "key": "BroadieJain2008"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The log contract under P is σ² + 2ΛE[e^J − 1 − J] (JumpDiffusionProcess.integral_logContract_of_martingale, mf-jump-diffusion-log-contract-on-process) and the expected realized variance (σ² + ΛE[J²])T + (b + ΛE[J])²T²/(n + 1) (JumpDiffusionProcess.integral_sum_sq_increment_equipartition, mf-jump-diffusion-realized-variance); splitting the bias integral (Mathlib's integral_sub, integral_div) and field_simp give the identity at every n (JumpDiffusionProcess.logContract_sub_realizedVariance_of_martingale), and the discrete-sampling term tends to 0 (tendsto_one_div_add_atTop_nhds_zero_nat) (JumpDiffusionProcess.tendsto_logContract_sub_realizedVariance_of_martingale). Not formalized: the bias being nonzero for a general jump law (its integrand has the sign of x, so a two-sided jump law can cancel it), and the realized variance itself rather than its expectation. The process is assumed through its defining properties; such a process is constructed only without jumps (Λ = 0: jumpDiffusionProcess_brownian, mf-jump-diffusion-brownian-no-jumps), so for Λ > 0 the statement is conditional on a process the library does not build. Lives in MathFin/BlackScholes/JumpDiffusionVarianceSwap.lean. Axioms-clean."
@@ -1226,6 +1763,20 @@
       "metadata": {
         "chapter": 9,
         "reference": "Demeterfi, Derman, Kamal & Zou (1999), More than you ever wanted to know about volatility swaps, Goldman Sachs Quantitative Strategies Research Notes; Carr & Wu (2009), Variance risk premiums, Review of Financial Studies 22, 1311-1341; Cont & Tankov (2004), Financial Modelling with Jump Processes; Broadie & Jain (2008), The effect of jumps and discrete sampling on volatility and variance swaps, International Journal of Theoretical and Applied Finance 11, 761-797",
+        "citations": [
+          {
+            "key": "DemeterfiDermanKamalZou1999"
+          },
+          {
+            "key": "CarrWu2009"
+          },
+          {
+            "key": "ContTankov2004"
+          },
+          {
+            "key": "BroadieJain2008"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. From the identity at every n (JumpDiffusionProcess.logContract_sub_realizedVariance_of_martingale), with E[e^J] < ∞ from J ≤ 0 (integrable_exp_of_ae_nonpos): the discrete-sampling term (b + ΛE[J])²T/(n + 1) is ≥ 0 (positivity), and the jump bias is ≤ 0 (integral_jumpBias_nonpos) (JumpDiffusionProcess.logContract_le_realizedVariance_of_martingale), and < 0 when Λ > 0 and ν{J < 0} ≠ 0 (integral_jumpBias_neg) (JumpDiffusionProcess.logContract_lt_realizedVariance_of_martingale). The process is assumed through its defining properties; such a process is constructed only without jumps (Λ = 0: jumpDiffusionProcess_brownian, mf-jump-diffusion-brownian-no-jumps), so for Λ > 0 the statement is conditional on a process the library does not build. Lives in MathFin/BlackScholes/JumpDiffusionVarianceSwap.lean. Axioms-clean."
@@ -1242,6 +1793,20 @@
       "metadata": {
         "chapter": 9,
         "reference": "Demeterfi, Derman, Kamal & Zou (1999), More than you ever wanted to know about volatility swaps, Goldman Sachs Quantitative Strategies Research Notes; Carr & Wu (2009), Variance risk premiums, Review of Financial Studies 22, 1311-1341; Cont & Tankov (2004), Financial Modelling with Jump Processes; Black & Scholes (1973), The pricing of options and corporate liabilities, Journal of Political Economy 81, 637-654",
+        "citations": [
+          {
+            "key": "DemeterfiDermanKamalZou1999"
+          },
+          {
+            "key": "CarrWu2009"
+          },
+          {
+            "key": "ContTankov2004"
+          },
+          {
+            "key": "BlackScholes1973"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. X_t = (r − σ²/2)t + σB_t is a JumpDiffusionProcess with rate 0 (IsFilteredPreBrownian.jumpDiffusionProcess) whose discounted price is a martingale (JumpDiffusionProcess.martingale_iff at Λ = 0); the jump law is irrelevant at Λ = 0, and N(0, 1) is used, which has every exponential moment (Mathlib's integrableExpSet_id_gaussianReal). The two conjuncts are JumpDiffusionProcess.integral_logContract_of_martingale and JumpDiffusionProcess.logContract_sub_realizedVariance_of_martingale with the jump terms erased (NNReal.coe_zero, zero_mul) (IsFilteredPreBrownian.logContract_realizedVariance). The library's earlier Black–Scholes realized variance, expected_bsLogPrice_equipartition_sum, is stated on ℝ time for a BrownianQuadraticVariation driver and is not derived from this. Lives in MathFin/BlackScholes/JumpDiffusionVarianceSwap.lean. Axioms-clean."
@@ -1258,6 +1823,23 @@
       "metadata": {
         "chapter": 9,
         "reference": "Demeterfi, Derman, Kamal & Zou (1999), More than you ever wanted to know about volatility swaps, Goldman Sachs Quantitative Strategies Research Notes; Carr & Wu (2009), Variance risk premiums, Review of Financial Studies 22, 1311-1341; Cont & Tankov (2004), Financial Modelling with Jump Processes; Broadie & Jain (2008), The effect of jumps and discrete sampling on volatility and variance swaps, International Journal of Theoretical and Applied Finance 11, 761-797; Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "citations": [
+          {
+            "key": "DemeterfiDermanKamalZou1999"
+          },
+          {
+            "key": "CarrWu2009"
+          },
+          {
+            "key": "ContTankov2004"
+          },
+          {
+            "key": "BroadieJain2008"
+          },
+          {
+            "key": "Merton1976"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The Gaussian jump law has every exponential moment (Mathlib's integrableExpSet_id_gaussianReal). Its exponential moment is 1 + k (integral_exp_mertonJump), which makes b = r − σ²/2 − Λk the compensated drift (mertonJump_compensated); its mean is log(1 + k) − δ²/2 (Mathlib's integral_id_gaussianReal) and its second moment the variance δ² plus the squared mean (variance_id_gaussianReal, variance_eq_sub). jumpDiffusion_logContract and variance_id_jumpDiffusionIncrementLaw then give the two values (mertonJump_logContract_variance). Lives in MathFin/BlackScholes/JumpDiffusionVarianceSwap.lean. Axioms-clean."
@@ -1277,6 +1859,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "Variance swap form equivalence (Phase 45; Demeterfi-Derman-Kamal 1999)",
+        "citations": [
+          {
+            "key": "DemeterfiDermanKamalZou1999"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full derivation re-exported from MathFin/BlackScholes/VarianceSwapEquivalence.lean: the log-payoff static-replication strike equals σ² (varianceSwap_log_contribution) and the realised-variance equipartition sum tends to σ²·T (tendsto_expected_bsLogPrice_equipartition_sum, Phase 34). Both conjuncts are genuine functionals. No axioms beyond Mathlib defaults. Wires the previously-orphan Phase-45 bridge (bridges.md row 45) to the corpus."
@@ -1292,6 +1879,15 @@
       },
       "metadata": {
         "reference": "R. C. Merton, Option pricing when underlying stock returns are discontinuous, Journal of Financial Economics 3 (1976) 125–144; Saporito, Theorem 3.3.10 (thinning)",
+        "citations": [
+          {
+            "key": "Merton1976"
+          },
+          {
+            "key": "Saporito",
+            "locator": "Theorem 3.3.10"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.JumpDiffusionHyp.jumpCounts_split (MathFin/BlackScholes/JumpDiffusionThinning.lean): PoissonThinning.thinned_streams_of_iid_marks to measurable modifications of the jump sizes (they are only a.e.-measurable, JumpDiffusionHyp.aemeasurable_J; the counts and their independence are unchanged on a null set) with the fields N_law, J_indep, J_ident and the lemma N_indep_J of JumpDiffusionHyp (MathFin/BlackScholes/JumpDiffusionMixing.lean). SCOPE: the jump count at one horizon; the time structure of the jump-diffusion process is not used."

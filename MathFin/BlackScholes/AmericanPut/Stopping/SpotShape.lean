@@ -14,10 +14,17 @@ For each stopping rule the discounted put payoff is decreasing and convex in
 initial spot. Integration and the supremum preserve these properties. These
 results concern price shape in spot, not exercise-boundary curvature in time.
 
-## Result
+## Main results
 
-Public entry points include `putReward_antitone`, `putReward_convex`, `value_antitone_spot`,
-`value_convexOn_spot`.
+* `putReward_antitone`, `putReward_convex`: for each rule and path, the reward is antitone and
+  convex in the initial spot.
+* `value_antitone_spot`, `value_convexOn_spot`: for `0 ≤ K`, `0 ≤ r` and jointly measurable `W`,
+  the American put value is antitone and convex in the spot on `[0,∞)`.
+
+## Tags
+
+convexity in spot, monotonicity in spot, American put value, price shape, stopping value, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

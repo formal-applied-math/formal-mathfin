@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -33,15 +34,34 @@ with `D = σ_1² − 2 ρ σ_1 σ_2 + σ_2²`,
 makes both the location of the minimum (at `w*`) and its value (`V_min`)
 immediate, and avoids any explicit calculus.
 
-Results:
+## Main definitions
 
-* `covTwo`, `portfolioVarTwo_eq_dotProduct`: the two-asset covariance matrix, and
-  `Var(w)` as its quadratic form at the weights `(w, 1 − w)`.
-* `portfolioVarTwo_eq_quad`: the factorization above.
-* `portfolioVarTwo_at_minVarWeight`: `Var(w*) = V_min`.
+* `portfolioVarTwo`: the variance `w² σ₁² + (1 − w)² σ₂² + 2 w (1 − w) ρ σ₁ σ₂` of the mix with
+  weight `w` on asset 1 and `1 − w` on asset 2.
+* `covTwo`: the two-asset covariance matrix `!![σ₁², ρσ₁σ₂; ρσ₁σ₂, σ₂²]`.
+* `minVarDenom`, `minVarWeightTwo`, `minPortfolioVarTwo`: the denominator
+  `D = σ₁² − 2ρσ₁σ₂ + σ₂²`, the weight `w* = (σ₂² − ρσ₁σ₂) / D` and the value
+  `V_min = σ₁²σ₂²(1 − ρ²) / D`.
+
+## Main results
+
+* `portfolioVarTwo_eq_dotProduct`: `Var(w)` as the quadratic form of `covTwo` at the weights
+  `(w, 1 − w)`.
+* `portfolioVarTwo_eq_quad`: for `D ≠ 0`, `Var(w) = D (w − w*)² + V_min`.
+* `portfolioVarTwo_at_minVarWeight`: for `D ≠ 0`, `Var(w*) = V_min`.
 * `portfolioVarTwo_ge_min`: `Var(w) ≥ V_min` for every `w`, given `D > 0`.
 * `minPortfolioVarTwo_perfect_anticorr`: at `ρ = -1` the closed form `V_min`
-  is zero; it is the minimum variance when `D > 0` (perfect hedge).
+  is zero (by `portfolioVarTwo_ge_min` it is the minimum variance whenever `D > 0`: a perfect
+  hedge).
+
+## References
+
+* [K. Bodie and Marcus, *Investments*][BodieKaneMarcus], Ch 7
+
+## Tags
+
+Markowitz, mean-variance, minimum variance portfolio, two-asset portfolio, efficient frontier,
+diversification, MSC 91G10, JEL G11
 -/
 
 @[expose] public section

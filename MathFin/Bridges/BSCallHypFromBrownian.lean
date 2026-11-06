@@ -48,13 +48,18 @@ The `Foundations/` BM machinery (`BrownianMotion.Gaussian.BrownianMotion`,
 makes the connection explicit — any BM construction (via `IsPreBrownianReal`)
 discharges the BS / Bachelier hypothesis automatically.
 
-## Results
+## Main results
 
 * `scaled_isPreBrownian_eval_law`: the core scaling identity for pre-
   Brownian motion under `· / √T`.
 * `BSCallHyp.of_isPreBrownian`: BS hypothesis from a pre-Brownian motion.
 * `BachelierHyp.of_isPreBrownian`: Bachelier hypothesis from a pre-Brownian
   motion (same scaled `Z`).
+
+## Tags
+
+Brownian motion, Gaussian scaling, Black–Scholes hypothesis, Bachelier model, pre-Brownian motion,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

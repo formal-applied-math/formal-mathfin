@@ -13,6 +13,7 @@
       "metadata": {
         "chapter": 9,
         "reference": "AM-GM inequality (two-element case)",
+        "citations": [],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via nlinarith on (a-b)² ≥ 0 and Real.sqrt monotonicity. Lives in MathFin/BlackScholes/AsianInequality.lean. Axioms-clean."
@@ -29,6 +30,15 @@
       "metadata": {
         "chapter": 16,
         "reference": "Asian options: geometric vs arithmetic (Kemna-Vorst 1990; Hull Ch 26.13)",
+        "citations": [
+          {
+            "key": "KemnaVorst1990"
+          },
+          {
+            "key": "Hull",
+            "locator": "Ch 26.13"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via AM-GM + max monotonicity. Lives in MathFin/BlackScholes/AsianInequality.lean. Axioms-clean."
@@ -45,6 +55,7 @@
       "metadata": {
         "chapter": 16,
         "reference": "AM-GM inequality (equal-weight n-element case)",
+        "citations": [],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: equal-weight specialization of Real.geom_mean_le_arith_mean_weighted plus multiplication by n. Lives in MathFin/BlackScholes/AsianInequality.lean. Axioms-clean."
@@ -61,6 +72,15 @@
       "metadata": {
         "chapter": 14,
         "reference": "Chooser options (Hull 26.7, Rubinstein 1991)",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "26.7"
+          },
+          {
+            "key": "Rubinstein1991"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -77,6 +97,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "In-out barrier parity (Hull, barrier options)",
+        "citations": [
+          {
+            "key": "Hull"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -93,6 +118,12 @@
       "metadata": {
         "chapter": 14,
         "reference": "Lookback option lower bound (Hull 26.8)",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "26.8"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -109,6 +140,14 @@
       "metadata": {
         "chapter": 10,
         "reference": "Change of numéraire (Geman–El Karoui–Rochet); Margrabe (1978) exchange option in the S²-numéraire",
+        "citations": [
+          {
+            "key": "GemanElKarouiRochet1995"
+          },
+          {
+            "key": "Margrabe1978"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.exchangeOption_numeraire_price (MathFin/BlackScholes/ExchangeOption.lean): the exchange option's value in the S²-numéraire equals its value under the reference measure Q, as an instance of the general changeOfNumeraire law (Foundations/Numeraire.lean) at X = the exchange payoff, N = S², B ≡ 1, composed with the existing exchange_payoff_eq_ratio. Needs no integrability hypothesis, only strict positivity S²_T > 0. NOTE: ExchangeOption and GarmanNormalForm otherwise contain NO withDensity measure (their numéraire content is payoff algebra / d₁-d₂ closed form), so this is the one genuine measure-level numéraire instance they support — not a fabricated wrapper. No axioms beyond Mathlib defaults."
@@ -125,6 +164,7 @@
       "metadata": {
         "chapter": 13,
         "reference": "Geometric-average Asian option; the log geometric average is Gaussian with the Brownian covariance-sum variance",
+        "citations": [],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin.BlackScholes.AsianGeometric (asianGeom_driver_hasLaw). The two-date geometric-Asian log-driver (B_s + B_t)/2 has law N(0, (3s+t)/4). Route: (B_s + B_t)/2 = int 1/2*(1_{(0,s]} + 1_{(0,t]}) dB is a single Wiener integral of a deterministic step kernel, using the new foundational identity wienerIntegralLp_stepIndicator (MathFin.Foundations.WienerIntegralIndicator: int 1_{(s,t]} dB = B_t - B_s, from LinearMap.extendOfNorm_eq on the single-basis coefficient); so wienerIntegralLp_hasLaw_gaussian gives the centred Gaussian law, its variance the kernel L2-norm computed on the Omega-side through the Brownian covariance integral_mul_eval (int B_u * B_v = min(u,v)) plus zero-start B_0 = 0 a.s. (from int B_0^2 = 0). Same 'sum of Brownian values as a Wiener integral of a step kernel' route as the Vasicek bond price for the integrated rate; here the kernel is a sum of indicators. Honest scope: two dates (matching the AM-GM entry mf-asian-geom-le-arith-two); the n-date extension is the Finset covariance sum (1/n^2) sum sum min(t_i, t_j), unblocked by the same crux. Axioms-clean: [propext, Classical.choice, Quot.sound]."
@@ -141,6 +181,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "Kemna-Vorst 1990; geometric Asian options",
+        "citations": [
+          {
+            "key": "KemnaVorst1990"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: n-date generalization via the Wiener step-kernel + Brownian covariance. Re-export from MathFin. Axioms-clean."
@@ -157,6 +202,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "Kemna-Vorst 1990",
+        "citations": [
+          {
+            "key": "KemnaVorst1990"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: reduction to one effective BS driver + bs_call_formula. Re-export from MathFin. Axioms-clean."
@@ -173,6 +223,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "Reiner 1992; quanto via change of measure",
+        "citations": [
+          {
+            "key": "Reiner1992"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: FX Esscher tilt + independent-normal decomposition + Gaussian MGF cross-term. Re-export from MathFin. Axioms-clean."
@@ -189,6 +244,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "A. G. Z. Kemna and A. C. F. Vorst, A pricing method for options based on average asset values, Journal of Banking & Finance 14 (1990) 113–129",
+        "citations": [
+          {
+            "key": "KemnaVorst1990"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.geomAsianN_bsV_le_arith (MathFin/BlackScholes/AsianInequality.lean), which integrates the pointwise AM–GM payoff bound asian_payoff_geom_le_arith_n against the closed-form geometric-Asian price geomAsianN_call_price. SCOPE: GBM driven by a pre-Brownian motion, n ≥ 1 sampling dates, positive log-driver variance; the arithmetic-Asian price itself is not computed."
@@ -205,6 +265,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "E. Reiner and M. Rubinstein, Breaking down the barriers, Risk 4(8) (1991) 28–35",
+        "citations": [
+          {
+            "key": "ReinerRubinstein1991"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.knockIn_add_knockOut_eq_bsV (MathFin/BlackScholes/BarrierParity.lean): in–out parity knockIn_add_knockOut_eq_vanilla with the vanilla leg priced by integral_bsCall_payoff_eq_bsV. SCOPE: any measurable event A stands for the barrier-hit event; the law of the running extremum is not used and no barrier closed form is derived."
@@ -221,6 +286,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "M. B. Goldman, H. B. Sosin and M. A. Gatto, Path dependent options: buy at the low, sell at the high, Journal of Finance 34(5) (1979) 1111–1127",
+        "citations": [
+          {
+            "key": "GoldmanSosinGatto1979"
+          }
+        ],
         "difficulty": "introductory",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.bsV_le_lookbackCall (MathFin/BlackScholes/Lookback.lean): integral_bsCall_payoff_eq_bsV plus integral_mono_ae over the payoff bound lookback_payoff_ge_vanilla. SCOPE: M is any a.s. dominating variable with integrable call payoff (taken as hypotheses); the running maximum of GBM is not constructed."
@@ -237,6 +307,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "D. Brigo, F. Mercurio, F. Rapisarda and R. Scotti, Approximated moment-matching dynamics for basket-options pricing, Quantitative Finance 4(1) (2004) 1–16",
+        "citations": [
+          {
+            "key": "BrigoMercurioRapisardaScotti2004"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.basketMomentMatchPrice_single_eq_integral (MathFin/BlackScholes/BasketMomentMatching.lean): basketEffVol_single and bsV_eq_bsVGarman_standard give bsV, then integral_bsCall_payoff_eq_bsV. SCOPE: n = 1 only; the approximation error for n ≥ 2 is not studied."
@@ -253,6 +328,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "M. Levy, Pricing European average rate currency options, Journal of International Money and Finance 11(5) (1992) 474–491",
+        "citations": [
+          {
+            "key": "Levy1992"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Combines MathFin.integral_basket_eq_basketM1 and MathFin.integral_basket_sq_eq_basketM2 (MathFin/BlackScholes/BasketMomentMatching.lean); the cross-moments come from integral_exp_linear_gaussianPair (MathFin/Foundations/GaussianPairLinearLaw.lean). SCOPE: pairwise joint Gaussianity of the drivers is a hypothesis; the moment-matched price is not compared with the true basket price."
@@ -269,6 +349,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "M. Rubinstein, Options for the undecided, Risk 4(4) (1991) 43",
+        "citations": [
+          {
+            "key": "Rubinstein1991"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.chooser_price_eq_expected_payoff (MathFin/BlackScholes/ChooserComposition.lean): put–call parity at t₁, bs_put_formula, and integral_discounted_bsV_at_date (the discounted call price averaged over the lognormal law of S_{t₁} via integral_bsV_mul_exp_gaussianReal_of_sq). SCOPE: the chooser-date option values are taken to be the Black–Scholes price functions of S_{t₁}; the conditional-expectation (Markov) step is not re-derived."
@@ -285,6 +370,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "R. Heynen and H. Kat, Crossing barriers, Risk 7(6) (1994) 46–51",
+        "citations": [
+          {
+            "key": "HeynenKat1994a"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "reduced_core",
         "formalization_scope": "Reduced core. Re-export of MathFin.heynenKatA_call_rho_zero_eq_bsV (MathFin/BlackScholes/HeynenKatTwoAssetBarrier.lean): heynenKatA_rho_zero plus hkD1 = bsd1, hkD2 = bsd2 at b₁ = r. SCOPE: an identity between closed forms at ρ = 0 and b₁ = r. NOT PROVED: that heynenKatA is the discounted expected knock-out payoff (needs the joint law of one GBM and the running extremum of a second), and the probabilistic reading of the barrier factor."
@@ -301,6 +391,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "E. Kirk, Correlation in the energy markets, in Managing Energy Price Risk, Risk Publications (1995) 71–78",
+        "citations": [
+          {
+            "key": "Kirk1995"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.kirkSpreadPrice_zero_eq_expected (MathFin/BlackScholes/KirkSpreadApproximation.lean): kirkSpreadPrice_zero_eq_margrabe composed with margrabe_exchange_price (MathFin/BlackScholes/MargrabeGrounding.lean). SCOPE: the zero-strike case, where the spread payoff is the exchange payoff; Kirk's accuracy for K ≠ 0 is not addressed. Joint Gaussianity of the drivers is a hypothesis."
@@ -317,6 +412,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "R. M. Stulz, Options on the minimum or the maximum of two risky assets: analysis and applications, Journal of Financial Economics 10 (1982) 161–185",
+        "citations": [
+          {
+            "key": "Stulz1982"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "reduced_core",
         "formalization_scope": "Reduced core. Re-export of MathFin.tendsto_stulzCallMax_zero_strike_betterOfTwo (MathFin/BlackScholes/StulzTwoAssetRainbow.lean): the closed-form limit tendsto_stulzCallMax_zero_strike (using tendsto_bivariateNormalCDF_atTop_fst, MathFin/Foundations/BivariateNormalCDF.lean) composed with integral_betterOfTwo (MathFin/BlackScholes/MargrabeGrounding.lean). SCOPE: the K ↓ 0 limit only; it checks stulzD and stulzEffVol. NOT PROVED: Stulz's pricing identity for K > 0 (the closed form as the discounted expected payoff), and the parameters ρ₁, ρ₂, which drop out in the limit."
@@ -333,6 +433,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "W. Margrabe, The value of an option to exchange one asset for another, Journal of Finance 33(1) (1978) 177–186",
+        "citations": [
+          {
+            "key": "Margrabe1978"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.margrabe_exchange_price (MathFin/BlackScholes/MargrabeGrounding.lean): the second driver splits into its regression on the normalized spread and an independent residual (HasGaussianLaw.indepFun_of_covariance_eq_zero); the residual factor has mean 1 (integral_exp_linear_gaussianPair) and the spread factor is the ratio call under an Esscher tilt, priced by margrabe_price_via_call. SCOPE: joint Gaussianity of the two standard-normal drivers is a hypothesis; the two assets share the rate r and pay no dividends."
@@ -348,6 +453,14 @@
       },
       "metadata": {
         "reference": "W. Margrabe, The value of an option to exchange one asset for another, Journal of Finance 33(1) (1978) 177–186; R. Stulz, Options on the minimum or the maximum of two risky assets, Journal of Financial Economics 10(2) (1982) 161–185",
+        "citations": [
+          {
+            "key": "Margrabe1978"
+          },
+          {
+            "key": "Stulz1982"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.integral_betterOfTwo (MathFin/BlackScholes/MargrabeGrounding.lean): max(x, y) = y + max(x − y, 0), the discounted second asset has expectation S²₀ (discounted_terminal_eq_S0), and the exchange part is margrabe_exchange_price. SCOPE: zero strike only (Stulz's call on the maximum for K > 0 is not derived, see mf-stulz-call-max-zero-strike); joint Gaussianity of the two standard-normal drivers is a hypothesis; the two assets share the rate r and pay no dividends."
@@ -364,6 +477,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "W. Margrabe, The value of an option to exchange one asset for another, Journal of Finance 33(1) (1978) 177–186",
+        "citations": [
+          {
+            "key": "Margrabe1978"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.normalizedSpread_hasLaw_std (MathFin/BlackScholes/MargrabeGrounding.lean): Gaussianity of a linear image of the pair, variance 1 from margrabe_effective_variance. SCOPE: the law of the normalized spread only; Margrabe's price as the discounted expected exchange payoff is not part of this entry."
@@ -380,6 +498,15 @@
       "metadata": {
         "chapter": 14,
         "reference": "Haug, The Complete Guide to Option Pricing Formulas, 2nd ed. (2007), ch. 4, \"Partial-Time Single-Asset Barrier Options\"; Heynen & Kat, \"Partial barrier options\", Journal of Financial Engineering 3 (1994)",
+        "citations": [
+          {
+            "key": "Haug2007",
+            "locator": "ch. 4"
+          },
+          {
+            "key": "HeynenKat1994b"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "reduced_core",
         "formalization_scope": "Reduced core. Re-export of MathFin.ptCA_down_add_up and MathFin.ptCA_down_monitored_full_life (MathFin/BlackScholes/PartialTimeBarrierOption.lean). The Haug/Heynen–Kat start-window closed form ptCA and the full-life down-and-out closed form ptDownOutCall are both transcribed, not derived: what is proved is (1) the collapse CA(1) + CA(−1) = ptDownOutCall for 0 ≤ t₁ ≤ T, via bivariateNormalCDF_flip_snd, and (2) at t₁ = T with X ≥ H, CA(1) = ptDownOutCall, via bivariateNormalCDF_one. Neither expression is proved to be the expected discounted payoff of a barrier option; the barrier density (the reflection-principle step behind the transcribed N₂ terms) is not proved. Main's precedent for transcribed barriers proving no more than this is reduced_core (Heynen–Kat, Stulz). Axioms-clean."
@@ -396,6 +523,15 @@
       "metadata": {
         "chapter": 14,
         "reference": "Rubinstein & Reiner, Risk 4(9) (1991); Haug, The Complete Guide to Option Pricing Formulas, 2nd ed. (2007), ch. 4, \"Binary Barrier Options\"",
+        "citations": [
+          {
+            "key": "RubinsteinReiner1991"
+          },
+          {
+            "key": "Haug2007",
+            "locator": "ch. 4"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "reduced_core",
         "formalization_scope": "Reduced core. Re-export of MathFin.bboDownIn_add_DownOut and MathFin.bboUpIn_add_UpOut (MathFin/BlackScholes/BinaryBarrierOption.lean), plus MathFin.bboB1_eq_Phi_bsd2 and MathFin.value_digitalCall_eq_bboB1. The Rubinstein–Reiner 16-branch closed form is transcribed, not derived: what is proved is the in–out identity branch-by-branch across all sixteen (barrier type, call/put, strike-vs-barrier) cases — the closed-form counterpart of knockIn_add_knockOut_eq_vanilla, not derived from it — and, call side only, that under BSCallHyp at the risk-neutral drift μ = (r − σ²/2)/σ² the Black–Scholes value of the digital call contract Contracts.digitalCall equals e^{−rT}·B₁ (through Contracts.BlackScholes.value_digitalCall). The knock-in/knock-out terms are not proved to be prices; the barrier density is not proved. Main's precedent for transcribed barriers proving no more than this is reduced_core (Heynen–Kat, Stulz). Axioms-clean."

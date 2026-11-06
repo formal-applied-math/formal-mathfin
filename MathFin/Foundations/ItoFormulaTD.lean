@@ -11,10 +11,10 @@ public import MathFin.Foundations.ItoIntegralRiemannBridgeTD
 
 /-! # Time-dependent Itô formula in `L²` (named-limit + CLM-identified)
 
-Summit A′: the time-dependent analogue of `ito_formula_L2_bddDeriv`, of which that is the `f_t = 0` case.
-For `f(t, x)` of class `C^{1,2}` with the displayed bounded higher partials,
+Summit A′: the time-dependent analogue of `ito_formula_L2_bddDeriv`, of which that is the `f_t = 0`
+case. For `f(t, x)` of class `C^{1,2}` with the displayed bounded higher partials,
 
-  `f(T, B_T) − f(0, B_0) =ᵐ[μ] itoIntegralCLM_T gfx + ∫₀ᵀ (f_t + ½ f_xx)(s, B_s) ds`,
+  `f(T, B_T) − f(0, B_0) =ᵐ[μ] itoIntegralCLM gfx + ∫₀ᵀ (f_t + ½ f_xx)(s, B_s) ds`,
 
 where `gfx` is the trim-`L²` realization of `s ↦ f_x(s, B_s)` — the classical
 `df = f_x dB + (f_t + ½ f_xx) dt` in integrated `L²` form.
@@ -22,8 +22,10 @@ where `gfx` is the trim-`L²` realization of `s ↦ f_x(s, B_s)` — the classic
 The assembly mirrors the time-independent one, with one extra vanishing term. The discrete
 2D Itô formula (`discrete_ito_formula_2d`) makes, along the uniform partition of `[0,T]`,
 
-  `Isumₙ − (f(T,B_T) − f(0,B_0) − ∫f_t ds − ½∫f_xx ds)
-     = −(Tsumₙ − ∫f_t ds) − ½(QVₙ − ∫f_xx ds) − Remₙ`,
+```
+Isumₙ − (f(T,B_T) − f(0,B_0) − ∫f_t ds − ½∫f_xx ds)
+  = −(Tsumₙ − ∫f_t ds) − ½(QVₙ − ∫f_xx ds) − Remₙ,
+```
 
 in which the unbounded boundary term cancels, so the `L²` estimate only ever sees three
 vanishing terms: the drift Riemann sums (`tendsto_riemann_L2_process`, with the joint
@@ -31,12 +33,32 @@ continuity of `f_t` *derived* from its bounded partials — `f_tt, f_tx` bounded
 `f_t` jointly Lipschitz), the weighted quadratic variation with the adapted weight
 `f_xx(·, B)` (`tendsto_weighted_qv_process`), and the 2D Itô–Taylor remainder
 (`tendsto_ito_remainder_td`). The CLM identification then runs through the
-time-dependent Riemann ↔ CLM bridge (`itoIntegralCLM_T_of_bdd_cont_td` at `φ = f_x`):
-both the named limit and `itoIntegralCLM_T gfx` are the `L²`-limit of the same sums
+time-dependent Riemann ↔ CLM bridge (`itoIntegralCLM_of_bdd_cont_td` at `φ = f_x`):
+both the named limit and `itoIntegralCLM gfx` are the `L²`-limit of the same sums
 `∑ f_x(tₖ, B_{tₖ})·ΔBₖ`, so they coincide a.e.
 
 Unbounded coefficients (e.g. GBM's exponential value function) remain honestly out of
 scope — the same named gap as the time-independent layer.
+
+## Main results
+
+* `continuous_uncurry_of_bdd_partials`: a two-variable function with bounded time and space
+  partial derivatives is jointly continuous.
+* `ito_formula_td_L2`: for `f(t,x)` with the `C^{1,2}`-with-bounds package, the uniform-partition
+  sums `∑ f_x(t_k, B_{t_k}) ΔB_k` converge in `L²(μ)` to
+  `f(T, B_T) − f(0, B_0) − ∫₀ᵀ f_t(s, B_s) ds − ½ ∫₀ᵀ f_xx(s, B_s) ds`.
+* `ito_formula_td_L2_bddDeriv`: with `f_x` also jointly continuous and bounded, there is an Itô
+  `L²` integrand `gfx =ᵐ [f_x(·, B_·)]` with
+  `f(T, B_T) − f(0, B_0) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ (f_t + ½ f_xx)(s, B_s) ds`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 7.1.2
+
+## Tags
+
+Itô formula, Itô lemma, time-dependent function, space-time function, L² Itô formula,
+Brownian motion, MSC 60H05, MSC 60J65
 -/
 
 @[expose] public section
@@ -81,11 +103,11 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
 include hB
 
 /-- **Time-dependent Itô formula in `L²` (named-limit form).** For `f(t, x)` with the
-`C^{1,2}`-with-bounds package (`f_t, f_tt, f_tx` and `f_x, f_xx, f_xxx`, with `f_t, f_xx,
-f_tt, f_tx, f_xxx` bounded and `f_xx` jointly continuous), the uniform-partition
+`C^{1,2}`-with-bounds package (`f_t, f_tt, f_tx` and `f_x, f_xx, f_xxx`, with
+`f_t, f_xx, f_tt, f_tx, f_xxx` bounded and `f_xx` jointly continuous), the uniform-partition
 Riemann–Itô sums `∑ f_x(tₖ, B_{tₖ})·ΔBₖ` converge in `L²(μ)` to
-`f(T, B_T) − f(0, B_0) − ∫₀ᵀ f_t(s, B_s) ds − ½∫₀ᵀ f_xx(s, B_s) ds`. No bound on `f_x`
-is needed: the discrete identity cancels the boundary term before any estimate. -/
+`f(T, B_T) − f(0, B_0) − ∫₀ᵀ f_t(s, B_s) ds − ½∫₀ᵀ f_xx(s, B_s) ds`. No bound on `f_x` is needed:
+the discrete identity cancels the boundary term before any estimate. -/
 theorem ito_formula_td_L2
     (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ B s ω))
     (T : ℝ≥0) {f f_t f_x f_xx f_tt f_tx f_xxx : ℝ → ℝ → ℝ}
@@ -253,7 +275,7 @@ theorem ito_formula_td_L2
 integrand `gfx` with
 
   `gfx =ᵐ [f_x(·, B_·)]`  and
-  `f(T, B_T) − f(0, B_0) =ᵐ[μ] itoIntegralCLM_T gfx + ∫₀ᵀ (f_t + ½f_xx)(s, B_s) ds`.
+  `f(T, B_T) − f(0, B_0) =ᵐ[μ] itoIntegralCLM gfx + ∫₀ᵀ (f_t + ½f_xx)(s, B_s) ds`.
 
 The first conjunct is what makes the second a *formula* rather than a decomposition: the
 stochastic term is not merely some Itô integral, it is the integral of `f_x(s, B_s)`. -/
@@ -273,10 +295,10 @@ theorem ito_formula_td_L2_bddDeriv
     (hbd_xx : ∀ t x, |f_xx t x| ≤ C2)
     (hbd_tt : ∀ t x, |f_tt t x| ≤ Ctt) (hbd_tx : ∀ t x, |f_tx t x| ≤ Ctx)
     (hbd_xxx : ∀ t x, |f_xxx t x| ≤ Cxxx) :
-    ∃ gfx : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      (⇑gfx =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦ f_x z.1 (B z.1 z.2)) ∧
+    ∃ gfx : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
+      (⇑gfx =ᵐ[trimMeasure (μ := μ) T hBmeas] fun z ↦ f_x z.1 (B z.1 z.2)) ∧
       (fun ω ↦ f T (B T ω) - f 0 (B 0 ω)) =ᵐ[μ]
-        (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gfx) ω
+        (fun ω ↦ (itoIntegralCLM hB T hBmeas gfx) ω
           + ∫ s in Set.Ioc 0 T,
               (f_t s (B s ω) + (1 / 2) * f_xx s (B s ω)) ∂ItoIntegralL2.timeMeasure) := by
   have hCt0 : 0 ≤ Ct := le_trans (abs_nonneg _) (hbd_t 0 0)
@@ -295,7 +317,7 @@ theorem ito_formula_td_L2_bddDeriv
     hf_xx_cont.comp ((NNReal.continuous_coe).prodMk (hBcont ω))
   -- the bridge: `gfx` is the trim-`L²` realization of `s ↦ f_x(s, B_s)`
   obtain ⟨gfx, hgfx_eq, hgfx⟩ :=
-    itoIntegralCLM_T_of_bdd_cont_td hB hBmeas hBcont hf_x_cont hbd_x T
+    itoIntegralCLM_of_bdd_cont_td hB hBmeas hBcont hf_x_cont hbd_x T
   refine ⟨gfx, hgfx_eq, ?_⟩
   set I : Ω → ℝ := fun ω ↦ f T (B T ω) - f 0 (B 0 ω)
     - ∫ s in Set.Ioc 0 T, f_t s (B s ω) ∂ItoIntegralL2.timeMeasure
@@ -341,9 +363,9 @@ theorem ito_formula_td_L2_bddDeriv
       atTop (𝓝 (hI_memLp.toLp I)) :=
     tendsto_iff_norm_sub_tendsto_zero.mpr (tendsto_norm_toLp_sub' hRmem hI_memLp hcoreI)
   -- both are the `L²` limit of the same sums ⇒ they coincide
-  have huniq : hI_memLp.toLp I = itoIntegralCLM_T hB T hBmeas gfx :=
+  have huniq : hI_memLp.toLp I = itoIntegralCLM hB T hBmeas gfx :=
     tendsto_nhds_unique hcore_Lp hgfx
-  have hae : I =ᵐ[μ] (itoIntegralCLM_T hB T hBmeas gfx) := by
+  have hae : I =ᵐ[μ] (itoIntegralCLM hB T hBmeas gfx) := by
     rw [← huniq]; exact (hI_memLp.coeFn_toLp).symm
   filter_upwards [hae] with ω hω
   rw [hI] at hω
@@ -369,7 +391,7 @@ theorem ito_formula_td_L2_bddDeriv
       = (∫ s in Set.Ioc 0 T, f_t s (B s ω) ∂ItoIntegralL2.timeMeasure)
         + (1 / 2) * ∫ s in Set.Ioc 0 T, f_xx s (B s ω) ∂ItoIntegralL2.timeMeasure := by
     rw [integral_add h1 h2, integral_const_mul]
-  change f T (B T ω) - f 0 (B 0 ω) = (itoIntegralCLM_T hB T hBmeas gfx) ω
+  change f T (B T ω) - f 0 (B 0 ω) = (itoIntegralCLM hB T hBmeas gfx) ω
     + ∫ s in Set.Ioc 0 T,
         (f_t s (B s ω) + (1 / 2) * f_xx s (B s ω)) ∂ItoIntegralL2.timeMeasure
   rw [hsplit]

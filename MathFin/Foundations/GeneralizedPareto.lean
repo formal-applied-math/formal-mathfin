@@ -39,15 +39,33 @@ here. This file proves the properties that make the GPD a consistent model for e
   `e(u) = E[X − u | X > u] = (β + ξu)/(1 − ξ)` (`integral_sub_cond_gpdMeasure`, MFE
   Exercise 5.19(b)), which is what a sample mean-excess plot is inspected for.
 
+## Main definitions
+
+* `gpdTail`: the tail function `Ḡ_{ξ,β}(x) = (1 + ξx/β)^{−1/ξ}` (`e^{−x/β}` for `ξ = 0`), equal to
+  `1` for `x ≤ 0` and to `0` beyond the right endpoint `−β/ξ` when `ξ < 0`.
+* `gpdCDF`: the distribution function `G_{ξ,β} = 1 − Ḡ_{ξ,β}`.
+* `gpdMeasure`: the law `GPD(ξ, β)` of `β(e^{ξE} − 1)/ξ` (`β E` for `ξ = 0`) for a standard
+  exponential variable `E`.
+
 ## Main results
 
-* `gpdTail`, `gpdCDF`: the GPD tail and distribution functions.
 * `tendsto_gpdCDF_pow`, `gpdCDF_inMDA`: `G_{ξ,β} ∈ MDA(H_ξ)`.
 * `gpdTail_add`, `gpdCDF_excess`: threshold stability for distribution functions.
 * `gpdMeasure`, `cdf_gpdMeasure`, `quantile_gpdMeasure`: the GPD law and its quantiles.
 * `setIntegral_quantile_gpdMeasure`, `integral_id_gpdMeasure`: tail averages and the mean.
 * `map_cond_gpdMeasure`, `integral_sub_cond_gpdMeasure`: excesses of the GPD law and the
   mean excess function.
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Section 5.2.1
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 5.16; Ex. 5.19(b)
+
+## Tags
+
+generalized Pareto distribution, peaks over threshold, mean excess function, expected shortfall,
+tail risk, MSC 62G30, MSC 91G70, JEL G32
 -/
 
 @[expose] public section

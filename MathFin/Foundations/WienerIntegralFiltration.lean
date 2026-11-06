@@ -29,9 +29,14 @@ they are checked on step indicators, where the integral is a Brownian increment:
 increments `B_{s∧t}` are `𝓕_t`-measurable, and the remainders `B_{s∨t} − B_t` are increments of
 the post-`t` process, independent of `𝓕_t` (`shift_indep_natural`).
 
+## Main definitions
+
+* `kernelRestrict`: the continuous linear restriction of a kernel `f ∈ L²((0, T])` to `(0, t]`.
+* `stepClip`: the step `(s ∧ t, u ∧ t]` of a step `(s, u]`, the part seen by time `t`.
+* `postσ`: the σ-algebra of the post-`t` increments `ω ↦ (B_{t+s} − B_t)_s`.
+
 ## Main results
 
-* `kernelRestrict` — restriction of a kernel on `(0, T]` to `(0, t]`, a continuous linear map.
 * `mem_lpMeas_of_stepIndicator` — a continuous linear image of kernels is `m`-measurable as soon
   as the images of the step indicators are.
 * `wienerIntegralLp_past_mem_lpMeas`, `wienerIntegralLp_future_mem_lpMeas` — the past part is
@@ -39,6 +44,18 @@ the post-`t` process, independent of `𝓕_t` (`shift_indep_natural`).
   independent of `𝓕_t`.
 * `condExp_exp_wienerIntegralLp` — the conditional Laplace transform
   `𝔼[e^{a + b∫₀ᵗ h dB − c∫₀ᵀ f dB} | 𝓕_t] = e^{a + b∫₀ᵗ h dB − c∫₀ᵗ f dB}·e^{c²∫_t^T f²/2}`.
+
+## References
+
+* [I. Karatzas and S. E. Shreve, *Brownian Motion and Stochastic Calculus*][KaratzasShreve1991],
+  section 3.2
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], Theorem
+  4.4.9
+
+## Tags
+
+Wiener integral, conditional Laplace transform, independent of the past, deterministic kernel,
+Gaussian short rate, conditional exponential moment, MSC 60H05, MSC 60G15, MSC 91G30
 -/
 
 @[expose] public section
@@ -150,7 +167,8 @@ lemma wienerIncrementLp_mem_lpMeas (hB : IsPreBrownianReal B μ)
     (h2 : StronglyMeasurable[m] (B i.1.2)) :
     wienerIncrementLp B hB i ∈ lpMeas ℝ ℝ m 2 μ := by
   rw [mem_lpMeas_iff_aestronglyMeasurable]
-  exact (h2.sub h1).aestronglyMeasurable.congr (MemLp.coeFn_toLp (memLp_increment_two hB i)).symm
+  exact (h2.sub h1).aestronglyMeasurable.congr
+    (MemLp.coeFn_toLp (memLp_increment hB i.1.1 i.1.2)).symm
 
 variable [IsProbabilityMeasure μ]
 
@@ -193,8 +211,8 @@ lemma wienerIntegralLp_future_step_mem_lpMeas (hB : IsPreBrownianReal B μ) (htT
   refine ((stronglyMeasurable_postσ (B := B) (t := t) (i.1.2 - t)).sub
     (stronglyMeasurable_postσ (B := B) (t := t) (i.1.1 - t))).aestronglyMeasurable.congr ?_
   filter_upwards [Lp.coeFn_sub (wienerIncrementLp B hB i) (wienerIncrementLp B hB (stepClip t i)),
-    MemLp.coeFn_toLp (memLp_increment_two hB i),
-    MemLp.coeFn_toLp (memLp_increment_two hB (stepClip t i))] with ω h1 h2 h3
+    MemLp.coeFn_toLp (memLp_increment hB i.1.1 i.1.2),
+    MemLp.coeFn_toLp (memLp_increment hB (stepClip t i).1.1 (stepClip t i).1.2)] with ω h1 h2 h3
   rw [h1, Pi.sub_apply]
   change _ = (wienerIncrementLp B hB i : Ω → ℝ) ω - _
   rw [show (wienerIncrementLp B hB i : Ω → ℝ) ω = B i.1.2 ω - B i.1.1 ω from h2,

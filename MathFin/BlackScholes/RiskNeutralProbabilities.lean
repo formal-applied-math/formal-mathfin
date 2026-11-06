@@ -46,10 +46,15 @@ measure w.r.t. the risk-neutral measure) — is formalised in
 * `gaussianReal_Ioi_toReal` — right-tail probability:
   `(gaussianReal 0 1 (Ioi a)).toReal = Φ(−a)`.
 
-## Result
+## Main results
 
 * `riskNeutralProb_S_T_gt_K`: `Q(S_T > K) = Φ(bsd2 S_0 K r σ T)`. The
   probabilistic interpretation of `Φ(d_2)` in the BS formula.
+
+## Tags
+
+risk-neutral exercise probability, in-the-money probability, d2 interpretation, Black–Scholes,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -20,7 +20,7 @@ bounded **predictable** market price of risk `θ` — the honest domain of the I
 no continuity assumed. The route (Route B) is the density-approximation front half over the
 spine-free architecture:
 
-* approximate `θ̂ ∈ Lp 2 (trimMeasure_T T)` by clamped, marshalled simple processes `Ṽⁿ`
+* approximate `θ̂ ∈ Lp 2 (trimMeasure T)` by clamped, marshalled simple processes `Ṽⁿ`
   (`SimpleProcessPartition`), each in single-partition `(sⁿ, cⁿ)` form so the simple exponential
   martingale identity `isExpQMartingale_BthetaSimple` applies per `n`;
 * the three functionals of the integrand converge as `Ṽⁿ → θ̂` in `E`: the stochastic integral
@@ -34,6 +34,36 @@ spine-free architecture:
 
 The limit drift is the genuinely-`𝓕`-adapted `driftContinuousMod θ̂` (a.e. equal to the honest
 integral `∫₀ᵘθds`), so no fresh predictable-progressive-measurability lemma is needed.
+
+## Main definitions
+
+* `contDoleansExp`: the Doléans density `exp(−W − ½∫₀ᵀθ² ds)` for a given Itô-integral
+  representative `W`.
+* `itoIntPred`: the Itô integral `∫₀ᵀ θ dB` of a bounded predictable `θ`, as a chosen
+  `Lp`-representative of `itoIntegralCLM θ̂`.
+* `ZTpred`: the predictable Doléans density, `contDoleansExp` of `itoIntPred` and `θ̂`.
+* `BthetaPred`: the drift-corrected process `B^θ_u = B_u + driftContinuousMod θ̂ u`.
+
+## Main results
+
+* `Btheta_isQBrownianMotion_predictable_of_bdd`: for a bounded predictable `θ` and `T`, `B^θ`
+  is `IsBrownianOn` `[0, T]` under `Q = μ.withDensity Z_T`; path continuity is not stated.
+* `Btheta_isQBrownianMotion_predictable`: the same conclusion with the approximating sequence
+  of simple processes supplied as a hypothesis.
+* `isExpQMartingale_BthetaPredictable`: the exponential-martingale data for `B^θ` under `Q`,
+  given such an approximating sequence.
+* `integral_ZTpred_eq_one`, `isProbabilityMeasure_predGirsanov`: `∫ Z_T = 1`, and `Q` is a
+  probability measure, given such an approximating sequence.
+* `memLp_ZTpred_two`: `Z_T` is in `L²(μ)`, given such an approximating sequence.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 9.1.8
+
+## Tags
+
+Girsanov theorem, predictable market price of risk, density approximation, Doléans exponential,
+drift-corrected Brownian motion, MSC 60H05, MSC 60J65, MSC 91G20
 -/
 
 @[expose] public section
@@ -195,7 +225,7 @@ omit [IsProbabilityMeasure μ] in
 a nonnegative, integrable `Dₙ` whose `μ`-mean vanishes, then `fₙ → g` in measure. The single
 convergence principle behind both the marshalled drift and the marshalled quadratic variation: each
 is an `∫₀ᵗ`-functional of the integrand controlled — via interval Cauchy–Schwarz — by the common
-`L²`-slice energy `Dₙ = ∫₀ᵀ(⇑Ṽⁿ − ⇑θ̂)²`, and `∫_μ Dₙ = ‖simpleAssembly_T Ṽⁿ − θ̂‖² → 0`. -/
+`L²`-slice energy `Dₙ = ∫₀ᵀ(⇑Ṽⁿ − ⇑θ̂)²`, and `∫_μ Dₙ = ‖simpleAssemblyHorizon Ṽⁿ − θ̂‖² → 0`. -/
 lemma tendstoInMeasure_of_ae_dist_le_sqrt {f : ℕ → Ω → ℝ} {g : Ω → ℝ} {D : ℕ → Ω → ℝ} {K : ℝ}
     (hK : 0 ≤ K) (hDnn : ∀ n, 0 ≤ᵐ[μ] D n) (hDint : ∀ n, Integrable (D n) μ)
     (hD0 : Tendsto (fun n ↦ ∫ ω, D n ω ∂μ) atTop (𝓝 0))
@@ -315,13 +345,13 @@ sequence `V n → θ̂` in the integrand `L²`, the elementary drifts `driftSimp
 clamped marshalled approximants converge in `μ`-measure to the genuinely-`𝓕`-adapted limit drift
 `driftContinuousMod θ̂ u` (a.e. the honest `∫₀ᵘθds`). The pathwise interval Cauchy–Schwarz
 `|∫₀ᵘ(⇑Ṽⁿ − ⇑θ̂)|² ≤ u·∫₀ᵀ(⇑Ṽⁿ − ⇑θ̂)²` dominates the drift difference by `√(u·Dₙ)`, and the ω-slice
-energy `Dₙ = ∫₀ᵀ(⇑Ṽⁿ − ⇑θ̂)²` decays in `L¹(μ)` (`= ‖simpleAssembly_T Ṽⁿ − θ̂‖² → 0`), hence in
+energy `Dₙ = ∫₀ᵀ(⇑Ṽⁿ − ⇑θ̂)²` decays in `L¹(μ)` (`= ‖simpleAssemblyHorizon Ṽⁿ − θ̂‖² → 0`), hence in
 measure. -/
 lemma tendstoInMeasure_marshalDrift (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd)))
     {u : ℝ≥0} (huT : u ≤ T) :
     TendstoInMeasure μ (fun n ↦ driftSimpleProcess hBmeas
@@ -340,16 +370,17 @@ lemma tendstoInMeasure_marshalDrift (T : ℝ≥0)
   have hDint : ∀ n, Integrable (D n) μ :=
     fun n ↦ (drift_slice_sq_integrable T hBmeas θhat (W n)).integral_prod_right
   have hD0 : Tendsto (fun n ↦ ∫ ω, D n ω ∂μ) atTop (𝓝 0) := by
-    have heq : ∀ n, (∫ ω, D n ω ∂μ) = ‖simpleAssembly_T (μ := μ) T hBmeas (W n) - θhat‖ ^ 2 :=
+    have heq : ∀ n, (∫ ω, D n ω ∂μ) = ‖simpleAssemblyHorizon (μ := μ) T hBmeas (W n) - θhat‖ ^ 2 :=
       fun n ↦ drift_slice_energy_eq T hBmeas θhat (W n)
     simp_rw [heq]
-    have h0 : Tendsto (fun n ↦ ‖simpleAssembly_T (μ := μ) T hBmeas (W n) - θhat‖) atTop (𝓝 0) :=
+    have h0 : Tendsto (fun n ↦ ‖simpleAssemblyHorizon (μ := μ) T hBmeas (W n) - θhat‖) atTop
+        (𝓝 0) :=
       tendsto_iff_norm_sub_tendsto_zero.mp
         (tendsto_simpleAssembly_marshalStepSP T hBmeas hpred hC hbdd V hV)
     simpa using h0.pow 2
   -- `θ̂` sliced is `L²` a.e.
-  have hg_prod : MemLp (⇑θhat) 2 ((timeMeasure_T T).prod μ) := memLp_prod_of_lp T hBmeas θhat
-  have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s ↦ ⇑θhat (s, ω)) 2 (timeMeasure_T T) := by
+  have hg_prod : MemLp (⇑θhat) 2 ((timeMeasureHorizon T).prod μ) := memLp_prod_of_lp T hBmeas θhat
+  have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s ↦ ⇑θhat (s, ω)) 2 (timeMeasureHorizon T) := by
     filter_upwards [hg_prod.aestronglyMeasurable.prodMk_right,
       hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
     exact (memLp_two_iff_integrable_sq hω1).mpr hω2
@@ -393,11 +424,11 @@ approximating sequence `V n → θ̂`, the discrete quadratic variations `∑ c�
 marshalled approximants (the drift half of the marshalled Doléans exponent) converge in `μ`-measure
 to `∫₀ᵀ(⇑θ̂)² ds`. Writing `Q − L = 2∫step·(step − θ̂) − Dₙ` and using the deterministic bound
 `|step| ≤ C` on `(0,T]`, `|Q − L| ≤ 2C√T·√(Dₙ) + Dₙ` (finite-measure `L¹ ≤ L²`), which vanishes in
-`L¹(μ)` since `∫Dₙ = ‖simpleAssembly_T Ṽⁿ − θ̂‖² → 0` and `∫√Dₙ ≤ √(∫Dₙ)`. -/
+`L¹(μ)` since `∫Dₙ = ‖simpleAssemblyHorizon Ṽⁿ − θ̂‖² → 0` and `∫√Dₙ ≤ √(∫Dₙ)`. -/
 lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
     TendstoInMeasure μ
       (fun n ↦ simpleQuadVar (marshalPart hBmeas T (V n).val)
@@ -417,15 +448,16 @@ lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
   have hDint : ∀ n, Integrable (D n) μ :=
     fun n ↦ (drift_slice_sq_integrable T hBmeas θhat (W n)).integral_prod_right
   have hD0 : Tendsto (fun n ↦ ∫ ω, D n ω ∂μ) atTop (𝓝 0) := by
-    have heq : ∀ n, (∫ ω, D n ω ∂μ) = ‖simpleAssembly_T (μ := μ) T hBmeas (W n) - θhat‖ ^ 2 :=
+    have heq : ∀ n, (∫ ω, D n ω ∂μ) = ‖simpleAssemblyHorizon (μ := μ) T hBmeas (W n) - θhat‖ ^ 2 :=
       fun n ↦ drift_slice_energy_eq T hBmeas θhat (W n)
     simp_rw [heq]
-    have h0 : Tendsto (fun n ↦ ‖simpleAssembly_T (μ := μ) T hBmeas (W n) - θhat‖) atTop (𝓝 0) :=
+    have h0 : Tendsto (fun n ↦ ‖simpleAssemblyHorizon (μ := μ) T hBmeas (W n) - θhat‖) atTop (𝓝 0)
+        :=
       tendsto_iff_norm_sub_tendsto_zero.mp
         (tendsto_simpleAssembly_marshalStepSP T hBmeas hpred hC hbdd V hV)
     simpa using h0.pow 2
-  have hg_prod : MemLp (⇑θhat) 2 ((timeMeasure_T T).prod μ) := memLp_prod_of_lp T hBmeas θhat
-  have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s ↦ ⇑θhat (s, ω)) 2 (timeMeasure_T T) := by
+  have hg_prod : MemLp (⇑θhat) 2 ((timeMeasureHorizon T).prod μ) := memLp_prod_of_lp T hBmeas θhat
+  have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s ↦ ⇑θhat (s, ω)) 2 (timeMeasureHorizon T) := by
     filter_upwards [hg_prod.aestronglyMeasurable.prodMk_right,
       hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
     exact (memLp_two_iff_integrable_sq hω1).mpr hω2
@@ -605,12 +637,12 @@ lemma setIntegral_withDensity_ofReal {Z : Ω → ℝ} (hZ : AEStronglyMeasurable
   rw [ENNReal.toReal_ofReal (hZpos ω), smul_eq_mul, mul_comm]
 
 /-- The predictable Itô integral `∫₀ᵀ θ dB` as a genuine function — a chosen `Lp`-representative of
-the CLM value `itoIntegralCLM_T θ̂`. Predictable counterpart of `itoIntCont` (they agree:
+the CLM value `itoIntegralCLM θ̂`. Predictable counterpart of `itoIntCont` (they agree:
 `itoIntPred_eq_itoIntCont`). -/
 noncomputable def itoIntPred (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) :
     Ω → ℝ :=
-  ⇑(itoIntegralCLM_T hB T hBmeas (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))
+  ⇑(itoIntegralCLM hB T hBmeas (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))
 
 /-- The predictable limit Doléans density `Z_T = exp(−∫₀ᵀθdB − ½∫₀ᵀθ̂²ds)` — the `contDoleansExp` of
 the predictable Itô integral and the sliced `L²` integrand realization `θ̂`. -/
@@ -652,7 +684,7 @@ with the quadratic variation's (`tendstoInMeasure_marshalQuadVar`), and `exp(−
 lemma tendsto_ZTpred_ae_subseq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ}
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd)))
     (ns : ℕ → ℕ) (hns : Tendsto ns atTop atTop) :
     ∃ ms : ℕ → ℕ, StrictMono ms ∧ ∀ᵐ ω ∂μ, Tendsto (fun k ↦
@@ -669,7 +701,7 @@ lemma tendsto_ZTpred_ae_subseq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) 
   have hstoch : TendstoInMeasure μ (fun n ↦ simpleStochSum (X := B)
       (marshalPart hBmeas T (V n).val)
       (fun i ω ↦ clampM C (marshalMult hBmeas T (V n).val i ω)) (N n) T) atTop
-      (⇑(itoIntegralCLM_T hB T hBmeas θhat)) := by
+      (⇑(itoIntegralCLM hB T hBmeas θhat)) := by
     refine TendstoInMeasure.congr (fun n ↦ ?_) EventuallyEq.rfl
       (tendstoInMeasure_marshalStochSum hB T hBmeas hpred hC hbdd V hV)
     exact ae_of_all _ fun ω ↦
@@ -683,7 +715,7 @@ lemma tendsto_ZTpred_ae_subseq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) 
   refine ⟨ms, hms, ?_⟩
   filter_upwards [hstochae, hquadae] with ω hωs hωq
   have hZeq : ZTpred hB T hBmeas hpred hbdd ω
-      = Real.exp (-(⇑(itoIntegralCLM_T hB T hBmeas θhat) ω)
+      = Real.exp (-(⇑(itoIntegralCLM hB T hBmeas θhat) ω)
         - 2⁻¹ * ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑θhat (s, ω)) ^ 2 ∂timeMeasure) := by
     simp only [ZTpred, contDoleansExp, itoIntPred, ← hθhat]
   rw [hZeq]
@@ -721,7 +753,7 @@ the approximant densities: each `Zⁿ ∈ L²` (`memLp_simpleDoleans_two`), `∫
 lemma memLp_ZTpred_two (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ}
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
     MemLp (ZTpred hB T hBmeas hpred hbdd) 2 μ := by
   have hC : 0 ≤ C := nonneg_of_bdd μ hbdd
@@ -756,7 +788,7 @@ include hB in
 lemma memLp_ZTpred_one (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ}
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
     MemLp (ZTpred hB T hBmeas hpred hbdd) 1 μ :=
   (memLp_ZTpred_two hB hBmeas T hpred hbdd V hV).mono_exponent (by norm_num)
@@ -770,7 +802,7 @@ to `exp(a·B^θ − ½a²·)·Z_T` a.e. -/
 lemma tendsto_fnPred_ae_subseq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ}
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd)))
     (a : ℝ) {u : ℝ≥0} (huT : u ≤ T) (ns : ℕ → ℕ) (hns : Tendsto ns atTop atTop) :
     ∃ ms : ℕ → ℕ, ∀ᵐ ω ∂μ, Tendsto (fun k ↦
@@ -818,7 +850,7 @@ include hB in
 lemma memLp_gpred_one (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ}
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd)))
     (a : ℝ) {u : ℝ≥0} (huT : u ≤ T) :
     MemLp (fun ω ↦ Real.exp (a * BthetaPred (μ := μ) T hBmeas hpred hbdd u ω - a ^ 2 * (u : ℝ) / 2)
@@ -862,7 +894,7 @@ include hB in
 lemma integral_ZTpred_eq_one (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ}
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
     ∫ ω, ZTpred hB T hBmeas hpred hbdd ω ∂μ = 1 := by
   have hC : 0 ≤ C := nonneg_of_bdd μ hbdd
@@ -905,7 +937,7 @@ positive, unit-mean, `L¹` density `Z_T`. -/
 lemma isProbabilityMeasure_predGirsanov (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ}
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
     IsProbabilityMeasure (μ.withDensity fun ω ↦
       ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)) := by
@@ -931,7 +963,7 @@ The front half is the marshalled density approximation of a predictable `θ` by 
 theorem isExpQMartingale_BthetaPredictable (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ}
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
     IsExpQMartingale (μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω))
       (natFiltration hBmeas) (BthetaPred (μ := μ) T hBmeas hpred hbdd) T := by
@@ -1041,7 +1073,7 @@ bounded-predictable case (Rung 1), strengthening the bounded-adapted-continuous
 theorem Btheta_isQBrownianMotion_predictable (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ}
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
     IsBrownianOn (μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)) T
       (BthetaPred (μ := μ) T hBmeas hpred hbdd) := by

@@ -16,9 +16,15 @@ a constant short rate `r`:
 
   `B(t, T) = exp(-(r · (T - t)))`.
 
-Results:
+## Main definitions
+
+* `zcb`: the continuous-compounding zero-coupon bond price `zcb r t T = exp (-(r * (T - t)))`
+  under a constant short rate `r`.
+
+## Main results
 
 * `zcb_at_maturity`: `B(T, T) = 1`.
+* `zcb_pos`: `B(t, T) > 0`; `positivity` proves it (`evalZcb`).
 * `zcb_yield_eq_rate`: under a constant `r`, the yield-to-maturity equals `r`.
 * `hasDerivAt_zcb_r`: `∂_r B(t, T) = -(T - t) · B(t, T)` — the bond duration is
   the time-to-maturity.
@@ -28,6 +34,15 @@ Results:
 
 The model is purely deterministic; the Vasicek / CIR / HJM stochastic versions
 would need Itô calculus.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 4.2; 4.8; 4.9
+
+## Tags
+
+zero-coupon bond, bond duration, bond convexity, constant short rate, yield to maturity, JEL G12,
+MSC 91G30
 -/
 
 @[expose] public section
@@ -44,7 +59,7 @@ lemma zcb_at_maturity (r T : ℝ) : zcb r T T = 1 := by
   unfold zcb
   rw [sub_self, mul_zero, neg_zero, Real.exp_zero]
 
-/-- The bond is positive. -/
+/-- The bond is positive. `positivity` proves it (`evalZcb`). -/
 lemma zcb_pos (r t T : ℝ) : 0 < zcb r t T := Real.exp_pos _
 
 /-- Yield-to-maturity for a ZCB under a constant rate equals the rate. -/
@@ -96,3 +111,18 @@ lemma zcb_convexity_eq_time_to_maturity_sq (t T r : ℝ) :
   field_simp
 
 end MathFin
+
+namespace Mathlib.Meta.Positivity
+open Lean.Meta Qq
+
+/-- Extension for the `positivity` tactic: a zero-coupon bond price `zcb r t T` is positive. -/
+@[positivity MathFin.zcb _ _ _]
+meta def evalZcb : PositivityExt where eval {u α} _ pα? e :=
+  match pα? with | none => pure .none | some _ => do
+  match u, α, e with
+  | 0, ~q(ℝ), ~q(MathFin.zcb $r $t $T) =>
+    assertInstancesCommute
+    pure (.positive q(MathFin.zcb_pos $r $t $T))
+  | _, _, _ => throwError "not zcb"
+
+end Mathlib.Meta.Positivity

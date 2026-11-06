@@ -44,9 +44,13 @@ fraction of the atom at `VaR_α(X)` needed to make up mass `1 − α`. The value
 `ES_α(X) = (1 − α)⁻¹ (E[X·𝟙{X > q}] + q·(1 − α − P(X > q)))` at `q = VaR_α(X)` is the formula of
 Acerbi and Tasche (`expectedShortfall_eq_acerbiTasche`).
 
+## Main definitions
+
+* `rockafellarUryasev`: the objective `c ↦ c + (1 − α)⁻¹ E[(X − c)⁺]` of a loss `X` at level
+  `α`.
+
 ## Main results
 
-* `rockafellarUryasev`: the objective `c ↦ c + (1 − α)⁻¹ E[(X − c)⁺]`.
 * `isLeast_rockafellarUryasev`: `ES_α(X)` is its minimum; `rockafellarUryasev_valueAtRisk`: the
   minimum is attained at `VaR_α(X)`.
 * `expectedShortfall_add_le`: subadditivity of ES.
@@ -57,6 +61,21 @@ Acerbi and Tasche (`expectedShortfall_eq_acerbiTasche`).
 * `expectedShortfall_isLUB_representingSet`: on a finite probability space ES is a coherent risk
   measure of `RiskMeasures/AcceptanceSet.lean`, so the finite representation theorem
   `coherentRisk_isLUB` applies to it.
+
+## References
+
+* [C. Acerbi and D. Tasche, *On the coherence of expected shortfall*][AcerbiTasche2002]
+* [P. Artzner et al., *Coherent measures of risk*][ArtznerDelbaenEberHeath1999]
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Proposition 8.13; Section 8.1; Section 8.1.3; Section 8.2
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 2.6, 8.2(c); Ex. 8.19; Ex. 8.2(a); Ex. 8.2(b)
+* [Rockafellar and Uryasev (2000)][RockafellarUryasev2000]
+* [Rockafellar and Uryasev (2002)][RockafellarUryasev2002]
+
+## Tags
+
+expected shortfall, conditional VaR, Rockafellar-Uryasev, tail risk, Acerbi-Tasche,
+coherent risk measure, Basel III, dual representation, MSC 91G70, JEL G32
 -/
 
 @[expose] public section

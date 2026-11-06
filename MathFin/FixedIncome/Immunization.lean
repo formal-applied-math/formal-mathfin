@@ -26,10 +26,13 @@ A portfolio is **first-order immunized** against a liability `L(r)` with duratio
 `D_L` if the duration-weighted asset value matches that of the liability, in
 which case `∂(P − L)/∂r = 0` at the current rate.
 
-Results:
+## Main definitions
 
-* `bondPortfolioValue`: definition.
-* `bondPortfolioDur`: duration-times-value (`D_P · P`).
+* `bondPortfolioValue`: the value of a zero-coupon bond portfolio at rate `r`.
+* `bondPortfolioDur`: the duration-times-value `D_P · P` of the bond portfolio.
+
+## Main results
+
 * `hasDerivAt_bondPortfolioValue_r`: `∂P/∂r = −D_P · P`.
 * `bondPortfolio_single_bond_dur`: a single-bond portfolio's duration-value
   equals `w · (T − t) · exp(−r·(T − t))`, recovering the ZCB result in
@@ -37,6 +40,17 @@ Results:
 * `bondPortfolio_immunization_first_order`: when the duration-weighted asset
   and liability values match, the net portfolio's first-order rate sensitivity
   is zero.
+
+## References
+
+* [Fabozzi, *Fixed Income Mathematics*][FabozziFIM], Ch 5
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], Ch 4
+* [Redington (1952)][Redington1952]
+
+## Tags
+
+bond immunization, duration matching, asset–liability management, zero-coupon bond portfolio,
+interest rate risk, Redington, MSC 91G30, JEL G11, JEL G12
 -/
 
 @[expose] public section

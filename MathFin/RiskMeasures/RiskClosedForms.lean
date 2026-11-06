@@ -35,6 +35,13 @@ Every quantile below is read off the CDF through `quantile_eq_iff`: `quantile μ
 when `p ≤ F(a)` and `F(x) < p` for `x < a`. Mathlib records the Pareto CDF only as an integral of
 its density; `cdf_paretoMeasure_of_le` evaluates it.
 
+## Main definitions
+
+* `lomaxMeasure`: the Lomax (Pareto type II) law `Pa(θ, κ)`, the type-I Pareto law of scale `κ`
+  and shape `θ` shifted to the origin, with `F(x) = 1 − (κ/(κ + x))^θ` on `[0, ∞)`.
+* `medianShortfall`: the median of the law of a loss `X` conditioned on exceeding its
+  value-at-risk, `F⁻¹_{X | X > VaR_α(X)}(1/2)`.
+
 ## Main results
 
 * `valueAtRisk_eq_iff`: a VaR is characterised by the CDF (from `quantile_eq_iff` in
@@ -44,13 +51,24 @@ its density; `cdf_paretoMeasure_of_le` evaluates it.
 * `tendsto_expectedShortfall_div_valueAtRisk_expMeasure`: `ES_α/VaR_α → 1` (light tail).
 * `cdf_paretoMeasure_of_le`, `cdf_paretoMeasure_of_lt`, `quantile_paretoMeasure`: the type-I
   Pareto CDF and quantile.
-* `expectedShortfall_of_hasLaw_paretoMeasure`: `ES_α = r/(r − 1)·VaR_α` for type-I Pareto.
-* `lomaxMeasure`, `cdf_lomaxMeasure`, `valueAtRisk_of_hasLaw_lomaxMeasure`,
-  `expectedShortfall_of_hasLaw_lomaxMeasure`: the Lomax law and its closed forms.
-* `tendsto_expectedShortfall_div_valueAtRisk_lomaxMeasure`: `ES_α/VaR_α → θ/(θ − 1)` (heavy
-  tail).
-* `medianShortfall`, `medianShortfall_eq_valueAtRisk`: the median of the loss beyond `VaR_α` is
-  `VaR_{(1+α)/2}` for a continuous distribution function.
+* `expectedShortfall_of_hasLaw_paretoMeasure`: `ES_α = r/(r − 1)·VaR_α` for type-I Pareto with
+  `r > 1`.
+* `cdf_lomaxMeasure`, `valueAtRisk_of_hasLaw_lomaxMeasure`,
+  `expectedShortfall_of_hasLaw_lomaxMeasure`: the Lomax CDF and closed forms.
+* `tendsto_expectedShortfall_div_valueAtRisk_lomaxMeasure`: for `θ > 1`, `ES_α/VaR_α → θ/(θ − 1)`
+  as `α → 1` (heavy tail).
+* `medianShortfall_eq_valueAtRisk`: the median of the loss beyond `VaR_α` is `VaR_{(1+α)/2}` for a
+  continuous distribution function.
+
+## References
+
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 2.12(a); Ex. 2.12(d); Ex. 2.23(a); Ex. 2.23(c); Ex.
+  2.29(b)
+
+## Tags
+
+VaR closed form, exponential loss, Pareto loss, Lomax distribution, heavy tails, median shortfall,
+light tail, tail risk, MSC 91G70, MSC 60E05, JEL G32
 -/
 
 @[expose] public section
@@ -81,11 +99,6 @@ lemma expectedShortfall_eq_of_valueAtRisk_eq {f : ℝ → ℝ}
     expectedShortfall X P α = (1 - α)⁻¹ * ∫ u in Ioo α 1, f u := by
   rw [expectedShortfall, setIntegral_congr_fun measurableSet_Ioo hf]
 
-/-- A set integral over `(α, 1)` is the interval integral from `α` to `1`. -/
-private lemma setIntegral_Ioo_eq_intervalIntegral (hα : α ≤ 1) (f : ℝ → ℝ) :
-    ∫ u in Ioo α 1, f u = ∫ u in α..1, f u := by
-  rw [intervalIntegral.integral_of_le hα, integral_Ioc_eq_integral_Ioo]
-
 /-! ### The exponential law -/
 
 /-- **VaR of an exponential loss**: `VaR_α(X) = −log(1 − α)/λ` for `X ~ Exp(λ)`. -/
@@ -101,14 +114,15 @@ theorem expectedShortfall_of_hasLaw_expMeasure {r : ℝ} (hr : 0 < r)
   have hr' : r ≠ 0 := hr.ne'
   rw [expectedShortfall_eq_of_valueAtRisk_eq fun u hu ↦
       valueAtRisk_of_hasLaw_expMeasure hr hX ⟨hα.1.trans hu.1, hu.2⟩,
-    setIntegral_Ioo_eq_intervalIntegral hα.2.le, intervalIntegral.integral_div,
+    ← integral_Ioc_eq_integral_Ioo, ← intervalIntegral.integral_of_le hα.2.le,
+    intervalIntegral.integral_div,
     intervalIntegral.integral_neg, intervalIntegral.integral_comp_sub_left log 1,
     sub_self, integral_log]
   field_simp
   ring
 
 /-- As the level `α` rises to `1`, the tail mass `1 − α` falls to `0` from above. -/
-private lemma tendsto_one_sub_nhdsLT_one : Tendsto (fun α : ℝ ↦ 1 - α) (𝓝[<] 1) (𝓝[>] 0) := by
+lemma tendsto_one_sub_nhdsLT_one : Tendsto (fun α : ℝ ↦ 1 - α) (𝓝[<] 1) (𝓝[>] 0) := by
   refine tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _ ?_
     (eventually_nhdsWithin_of_forall fun _ hα ↦ show (0 : ℝ) < _ from sub_pos.2 hα)
   have h : Tendsto (fun α : ℝ ↦ 1 - α) (𝓝 1) (𝓝 (1 - 1)) :=
@@ -116,17 +130,15 @@ private lemma tendsto_one_sub_nhdsLT_one : Tendsto (fun α : ℝ ↦ 1 - α) (�
   rw [sub_self] at h
   exact h.mono_left nhdsWithin_le_nhds
 
-/-- `−log(1 − α) → ∞` as `α → 1⁻`. -/
-private lemma tendsto_neg_log_one_sub : Tendsto (fun α ↦ -log (1 - α)) (𝓝[<] 1) atTop :=
-  tendsto_neg_atBot_atTop.comp (tendsto_log_nhdsGT_zero.comp tendsto_one_sub_nhdsLT_one)
-
 /-- **Light tail**: for an exponential loss the shortfall-to-quantile ratio tends to `1`,
 `ES_α/VaR_α → 1` as `α → 1⁻` (QRM Exercise Book, Exercise 2.23 a)). -/
 theorem tendsto_expectedShortfall_div_valueAtRisk_expMeasure {r : ℝ} (hr : 0 < r)
     (hX : HasLaw X (expMeasure r) P) :
     Tendsto (fun α ↦ expectedShortfall X P α / valueAtRisk X P α) (𝓝[<] 1) (𝓝 1) := by
   have hlim : Tendsto (fun α ↦ 1 + (-log (1 - α))⁻¹) (𝓝[<] 1) (𝓝 1) := by
-    simpa using tendsto_neg_log_one_sub.inv_tendsto_atTop.const_add 1
+    have h : Tendsto (fun α ↦ -log (1 - α)) (𝓝[<] 1) atTop :=
+      tendsto_neg_atBot_atTop.comp (tendsto_log_nhdsGT_zero.comp tendsto_one_sub_nhdsLT_one)
+    simpa using h.inv_tendsto_atTop.const_add 1
   refine hlim.congr' ?_
   filter_upwards [Ioo_mem_nhdsLT (zero_lt_one' ℝ)] with α hα
   have hlog : log (1 - α) ≠ 0 := (log_neg (sub_pos.2 hα.2) (by linarith [hα.1])).ne
@@ -198,12 +210,12 @@ theorem quantile_paretoMeasure (ht : 0 < t) (hr : 0 < r) (hp : p ∈ Ioo 0 1) :
 
 /-- `∫_α^1 (1 − u)^{−1/r} du = r/(r − 1)·(1 − α)^{1 − 1/r}` for `r > 1`: the Pareto quantile is
 integrable up to level `1` exactly when the mean is finite. -/
-private lemma integral_one_sub_rpow (hα : α < 1) (hr : 1 < r) :
+lemma integral_one_sub_rpow (hα : α < 1) (hr : 1 < r) :
     ∫ u in Ioo α 1, (1 - u) ^ (-r⁻¹) = r / (r - 1) * (1 - α) ^ (1 - r⁻¹) := by
   have hr0 : r ≠ 0 := (zero_lt_one.trans hr).ne'
   have hexp : -1 < -r⁻¹ := neg_lt_neg (inv_lt_one_of_one_lt₀ hr)
   have hne : -r⁻¹ + 1 ≠ 0 := by linarith
-  rw [setIntegral_Ioo_eq_intervalIntegral hα.le,
+  rw [← integral_Ioc_eq_integral_Ioo, ← intervalIntegral.integral_of_le hα.le,
     intervalIntegral.integral_comp_sub_left (fun x ↦ x ^ (-r⁻¹)) 1, sub_self,
     integral_rpow (Or.inl hexp), zero_rpow hne, sub_zero, show -r⁻¹ + 1 = 1 - r⁻¹ by ring]
   have hr1 : r - 1 ≠ 0 := by linarith

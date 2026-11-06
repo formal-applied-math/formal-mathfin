@@ -72,6 +72,17 @@ the instance proved.
   (QRM Ex. 8.4).
 * `valueAtRisk_equal_weight_equicorrelated`: the VaR of an equally weighted equicorrelated
   Gaussian portfolio, `m + σ √(ρ + (1 − ρ)/d) Φ⁻¹(α)` (QRM Ex. 6.16).
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Section 8.2
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 8.4; Ex. 8.6
+
+## Tags
+
+value-at-risk, expected shortfall, location–scale family, Markowitz, subadditivity,
+elliptical distributions, MSC 91G70, MSC 91G10, JEL G32
 -/
 
 @[expose] public section

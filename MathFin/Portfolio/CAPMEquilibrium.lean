@@ -58,6 +58,26 @@ not derive the SML from a market-equilibrium argument. This file does:
 given the equilibrium hypothesis (`h_FOC`, which itself follows from
 optimal portfolio choice via `Portfolio.TangentPortfolio`), the CAPM
 pricing identity is a *consequence*, not a definition.
+
+## Main definitions
+
+* `marginalVariance`: the marginal variance contribution `(Σw)_i = ∑_k Sg(i, k)·w(k)`.
+* `portfolioVariance`: `w · (Σw)`.
+* `portfolioReturn`: `w · μ = ∑_i w(i)·μ(i)`.
+
+## Main results
+
+* `CAPM_from_market_equilibrium`: if `w_M` satisfies the tangent-portfolio cross-product
+  condition `μ_excess k · (Σw_M)_j = μ_excess j · (Σw_M)_k` on `s` and its variance is nonzero,
+  then `μ_excess i = ((Σw_M)_i / Var(R_M)) · μ_M`.
+* `expectedReturn_eq_SML_from_equilibrium`: with weights summing to one, the same condition for
+  `μ − r_f` gives `μ i = securityMarketLine r_f β_i (∑ w_M k · μ k)` with
+  `β_i = (Σw_M)_i / Var(R_M)`.
+
+## Tags
+
+capital asset pricing model, market equilibrium, tangent portfolio, security market line,
+market portfolio, beta pricing, MSC 91G10, JEL G12, JEL D53
 -/
 
 @[expose] public section

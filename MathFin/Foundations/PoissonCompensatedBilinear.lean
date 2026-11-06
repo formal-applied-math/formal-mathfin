@@ -33,6 +33,29 @@ Built on our own `PoissonRandomMeasure` / `PoissonCompensatedIsometryAdapted` (P
 consulted from `cgarryZA/LevyStochCalc`, Apache-2.0, cited — a rendering of Applebaum 2009 Def.
 2.3.1; the proofs are ours). Reference: Applebaum, *Lévy Processes and Stochastic Calculus*, CUP
 2009, Thm 4.2.3.
+
+## Main results
+
+* `ae_count_ne_top`: the count `N(·, B)` is almost surely finite when `ν̂ B ≠ ⊤`.
+* `compensated_add_of_disjoint`: `Ñ(X ∪ Y) = Ñ(X) + Ñ(Y)` almost surely for disjoint
+  finite-intensity `X`, `Y`.
+* `compensated_mul_compensated_disjoint`: `𝔼[Ñ(X)·Ñ(Y)] = 0` for disjoint measurable `X`, `Y`
+  with `Y` of finite intensity.
+* `compensated_covariance`: `𝔼[Ñ(C)·Ñ(D)] = ν̂(C ∩ D)` for measurable finite-intensity `C`, `D`.
+* `integral_adapted_bilinear_future`: for `φ` integrable and adapted at `s`, and `C`, `D` in the
+  region after `s`, `𝔼[φ·Ñ(C)·Ñ(D)] = 𝔼[φ]·ν̂(C ∩ D)`.
+* `integral_bilinear_pairing`: for bounded `φa` adapted at `sa ≤ sb` and `φb` adapted at `sb`,
+  `𝔼[φa Ñ((sa, ta] × Aa) · φb Ñ((sb, tb] × Ab)] = 𝔼[φa φb]·ν̂` of the box intersection.
+
+## References
+
+* [Applebaum (2009)][Applebaum2009], Thm 4.2.3
+* [*cgarryZA/LevyStochCalc*][LevyStochCalc], cited axiom #6
+
+## Tags
+
+compensated Poisson random measure, orthogonal martingale measure, covariance of Poisson counts,
+Lévy process, independent scattering, MSC 60G55, MSC 60G51, MSC 60H05
 -/
 
 @[expose] public section

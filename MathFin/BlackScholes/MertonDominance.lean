@@ -39,9 +39,18 @@ argument. Both channels consume the existing structural layer (vega
 positivity, gamma convexity, the pgf recombination identity); nothing new
 is assumed.
 
-## Main result
+## Main results
 
 * `bsV_le_mertonCallPrice` : `bsV K r σ S₀ T ≤ mertonCallPrice S₀ K r σ T k δ Λ`.
+
+## References
+
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976]
+
+## Tags
+
+Merton jump-diffusion, jump risk, price dominance, Black–Scholes lower bound,
+convexity of call price, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

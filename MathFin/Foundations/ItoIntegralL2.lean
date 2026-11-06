@@ -18,7 +18,7 @@ public import MathFin.Foundations.LpMulIsometry
 This file establishes the **Itô isometry for adapted simple processes** — the substantive
 analytic content of the L² Itô integral — built on Degenne's
 `BrownianMotion.StochasticIntegral` objects (the maximally-coherent choice). The Itô integral
-*operator* itself (the CLM `itoIntegralCLM_T`) is assembled from this isometry in
+*operator* itself (the CLM `itoIntegralCLM`) is assembled from this isometry in
 `ItoIntegralCLM.lean`; the *discrete* isometry core is `ItoIsometryAdapted.lean`. The cornerstone
 is that the cross-terms vanish by the **weak Markov property** (`rect_increment_pairing`,
 from `ItoIsometryAdapted.lean`), *not* by deterministic covariance — the precise distinction
@@ -26,9 +26,26 @@ between the Itô integral (random adapted integrands) and the Wiener integral (d
 integrands, `WienerIntegralL2.lean`). Degenne's `SimpleProcess` allows *overlapping*
 intervals, which is exactly why `rect_increment_pairing` is the right tool.
 
-## Results
+## Main definitions
 
-* `natFiltration` — the natural Brownian filtration `𝓕ᴮ_t = σ(B_u : u ≤ t)`.
+* `natFiltration`: the natural Brownian filtration `𝓕ᴮ_t = σ(B_u : u ≤ t)`.
+* `itoSimple`: the elementary Itô integral of a simple process `V` at the terminal time,
+  `∑ₚ V(p) · (B_{p.2} − B_{p.1})`.
+* `itoSimpleLp`: that integral as an element of `Lp ℝ 2 μ`.
+* `itoAssembly`: the elementary Itô integral as a linear map `SimpleProcess →ₗ[ℝ] Lp ℝ 2 μ`.
+* `timeMeasure`: Lebesgue measure on the time axis `ℝ≥0`.
+* `elemIntegrand`: the elementary integrand `Z · 1_{(a,b]}`, a bounded weight on `Ω` switched on
+  over a time band.
+* `rectTerm`: the contribution `𝟙_{(p.1,p.2]}(t) · V(p)(ω)` of one interval `p` to the uncurried
+  simple process.
+* `simpleProcessL2`: the embedding of a simple process into the predictable `L²` space, as the
+  class of its uncurried version.
+* `simpleAssembly`: that embedding as a linear map.
+
+## Main results
+
+* `SimpleProcess.coe_finset_sum` — Degenne's `coe_add`, summed over a `Finset`: the coercion
+  of a finite sum of simple processes is the sum of the coercions (an upstream candidate).
 * `elemIntegrand` — the elementary integrand `Z·1_{(a,b]}`, and `rectTerm` its instance at a
   simple process's band; `uncurry_ae_eq_sum_rectTerm_of_ae_fst_ne_zero` decomposes a simple
   process into its bands for **any** measure charging the time origin nothing, which is what
@@ -48,9 +65,28 @@ simple processes into the predictable `L²`, density of those embeddings (via
 `generateFrom_eq_predictable`), and `LinearMap.extendOfNorm`. This is the foundation of a
 continuous-time Itô-*calculus* layer (Itô's lemma, SDEs). The full resume-plan is in
 `docs/archive/ito-integral-clm-deferred.md`.
+
+## Tags
+
+Itô isometry, simple processes, elementary Itô integral, natural filtration, stochastic integral,
+weak Markov property, MSC 60H05, MSC 60G44, MSC 60J65
 -/
 
 @[expose] public section
+
+namespace ProbabilityTheory.SimpleProcess
+
+variable {ι Ω E : Type*} [LinearOrder ι] [OrderBot ι] {mΩ : MeasurableSpace Ω}
+  [NormedAddCommGroup E] [MeasurableSpace E] [NormedSpace ℝ E] [BorelSpace E]
+  [SecondCountableTopology E] {𝓕 : MeasureTheory.Filtration ι mΩ}
+
+/-- The coercion of a finite sum of simple processes is the sum of the coercions: `coe_zero` and
+`coe_add` make the coercion an additive map, and `map_sum` sums it. -/
+theorem coe_finset_sum {κ : Type*} (s : Finset κ) (W : κ → SimpleProcess E 𝓕) :
+    ⇑(∑ k ∈ s, W k) = ∑ k ∈ s, ⇑(W k) :=
+  map_sum (⟨⟨fun V ↦ ⇑V, coe_zero⟩, coe_add⟩ : SimpleProcess E 𝓕 →+ ι → Ω → E) W s
+
+end ProbabilityTheory.SimpleProcess
 
 namespace MathFin
 namespace ItoIntegralL2
@@ -65,7 +101,8 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 noncomputable def natFiltration (hBmeas : ∀ t, Measurable (B t)) : Filtration ℝ≥0 mΩ :=
   Filtration.natural B (fun t ↦ (hBmeas t).stronglyMeasurable)
 
-/-- `B` is adapted to its own natural filtration (Mathlib's `Filtration.stronglyAdapted_natural`). -/
+/-- `B` is adapted to its own natural filtration
+(Mathlib's `Filtration.stronglyAdapted_natural`). -/
 theorem stronglyAdapted_natFiltration (hBmeas : ∀ t, Measurable (B t)) :
     StronglyAdapted (natFiltration hBmeas) B :=
   Filtration.stronglyAdapted_natural _

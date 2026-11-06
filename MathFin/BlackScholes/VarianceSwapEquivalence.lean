@@ -39,7 +39,7 @@ Both being equal to σ² is a structural identity of the BS model: the
 agrees with *two distinct empirical / replication-based measurements* of
 volatility.
 
-## Results
+## Main results
 
 * `varianceSwap_log_eq_QV_limit_value`: the **genuine two-functional
   agreement** — the log-payoff form equals `σ²` AND the realised-variance
@@ -50,6 +50,16 @@ volatility.
 The full equivalence at the *random-variable* level (showing both functionals
 coincide on the path of `S_t`, not just on their values) would require the
 continuous Itô-to-log identity, which is gated.
+
+## References
+
+* [Demeterfi et al., *More than you ever wanted to know about volatility
+  swaps*][DemeterfiDermanKamalZou1999]
+
+## Tags
+
+variance swap, realised variance, quadratic variation, log-payoff replication, fair variance strike,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

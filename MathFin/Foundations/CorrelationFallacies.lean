@@ -31,14 +31,27 @@ So margins together with the correlation do not determine the joint law. Two var
 standard normal and uncorrelated without being independent, and without their sum being normal.
 Such a pair exists (`exists_gaussian_uncorrelated_not_indepFun`).
 
+## Main definitions
+
+* `rademacher`: the law of a fair random sign, `±1` each with probability `1/2`.
+
 ## Main results
 
-* `rademacher`: the law of a fair random sign.
 * `rademacher_mconv_of_map_neg`: a random sign times an independent symmetric variable has the
   same law as the variable.
 * `hasLaw_mul_gaussianReal`, `covariance_mul_eq_zero`, `not_indepFun_mul`,
   `not_hasLaw_add_mul_gaussianReal`, `not_hasGaussianLaw_prod`: the counterexample.
 * `exists_gaussian_uncorrelated_not_indepFun`: the counterexample is realized.
+
+## References
+
+* [Embrechts, McNeil and Straumann (2002)][EmbrechtsMcNeilStraumann2002]
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 6.1, 6.18
+
+## Tags
+
+correlation fallacy, uncorrelated not independent, joint normality, dependence,
+Embrechts–McNeil–Straumann, random sign, MSC 62H05, MSC 60E05, MSC 91G70
 -/
 
 @[expose] public section
@@ -92,7 +105,7 @@ private lemma ae_eq_one_or_neg_one (hV : HasLaw V rademacher P) :
 omit [IsProbabilityMeasure P] in
 /-- `HasLaw` transfers the mass of a preimage; Mathlib's `HasLaw.measureReal_eq` is stated for
 set-builder events, and the proofs below work with preimages. -/
-private lemma measureReal_preimage_of_hasLaw {X : Ω → ℝ} {μ : Measure ℝ} (hX : HasLaw X μ P)
+lemma measureReal_preimage_of_hasLaw {X : Ω → ℝ} {μ : Measure ℝ} (hX : HasLaw X μ P)
     {s : Set ℝ} (hs : MeasurableSet s) : P.real (X ⁻¹' s) = μ.real s := by
   rw [← map_measureReal_apply_of_aemeasurable hX.aemeasurable hs, hX.map_eq]
 
@@ -130,7 +143,7 @@ private lemma ae_abs_mul_eq (hV : HasLaw V rademacher P) :
   rcases hω with h1 | h1 <;> simp [h1]
 
 /-- The standard normal law puts mass strictly between `0` and `1` on `[-1, 1]`. -/
-private lemma gaussianReal_Icc_mem_Ioo :
+lemma gaussianReal_Icc_mem_Ioo :
     (gaussianReal 0 1).real (Icc (-1) 1) ∈ Ioo 0 1 := by
   have := nullSingletonClass_gaussianReal (μ := 0) (v := 1) one_ne_zero
   have hIoc : (gaussianReal 0 1).real (Icc (-1) 1) = Phi 1 - Phi (-1) := by

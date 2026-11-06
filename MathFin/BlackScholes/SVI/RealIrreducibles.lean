@@ -13,6 +13,16 @@ public import Mathlib
 Part of the SVI polynomial-sign certificate (#174).
 
 A monic irreducible real polynomial is linear or a positive quadratic `(X − a)² + b²`.
+
+## Main results
+
+* `monic_real_irreducible_cases`: a monic irreducible `p : ℝ[X]` is either `X - C c` or
+  `positiveQuadratic a b` with `b ≠ 0`.
+
+## Tags
+
+irreducible real polynomials, fundamental theorem of algebra, linear or quadratic factors, SVI,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

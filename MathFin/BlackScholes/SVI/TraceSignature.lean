@@ -15,6 +15,17 @@ Part of the SVI polynomial-sign certificate (#174).
 
 Taking the matrix of a form in any basis preserves its signature, so the Hermite matrix test
 reduces to the trace form on the quotient.
+
+## Main results
+
+* `matrixSignature_toMatrix`: the matrix of a bilinear form in any basis `Fin n → V` has
+  `matrixSignature` equal to the `formSignature` of the form's quadratic map.
+* `hermite_signature_eq_trace_signature`: for `f ≠ 0`, `signatureTest (hermite f q f.natDegree)`
+  equals the signature of `weightedTraceForm f q`.
+
+## Tags
+
+Hermite matrix, trace form, signature invariance, change of basis, SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

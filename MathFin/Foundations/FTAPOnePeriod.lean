@@ -36,10 +36,27 @@ generalisation is `Foundations/FTAPOnePeriodVector.lean`; the general-Ω **multi
 Dalang–Morton–Willinger theorem (which glues one-period conditional markets and needs a
 measurable selection theorem) is not formalised.
 
+## Main definitions
+
+* `NoArbitrage`: any scalar position `θ` whose gain `θ · Y` is `P`-a.e. nonnegative has
+  `θ · Y = 0` a.e.
+* `IsEMM`: `Q ~ P`, `Y` is `Q`-integrable and `E_Q[Y] = 0`; the vector notion
+  `OnePeriodVector.IsEMM` at `F = ℝ`.
+
 ## Main results
 
 * `MathFin.OnePeriod.ftap_one_period`
 * `MathFin.OnePeriod.noArbitrage_iff_vector`
+
+## References
+
+* [H. Föllmer and A. Schied, *Stochastic Finance: An Introduction in Discrete Time*][FollmerSchied],
+  §1.2
+
+## Tags
+
+fundamental theorem of asset pricing, one-period model, no arbitrage, Föllmer–Schied,
+equivalent martingale measure, JEL G13, MSC 91G20
 -/
 
 @[expose] public section

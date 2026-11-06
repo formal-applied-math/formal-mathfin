@@ -30,12 +30,13 @@ import datetime as _dt
 import hashlib
 import json
 import os
-import re
 import socket
 import subprocess
 import sys
 import time
 from pathlib import Path
+
+from . import library
 
 REPO = Path(__file__).resolve().parents[2]
 LEDGER_PATH = REPO / "verification_ledger.json"
@@ -70,20 +71,11 @@ def _pin_bytes(path: Path) -> bytes:
     ]
     return json.dumps(manifest, sort_keys=True).encode()
 
-MATHFIN_IMPORT_RE = re.compile(
-    r"^\s*(?:public\s+)?import(?:\s+all)?\s+(MathFin(?:\.[A-Za-z0-9_]+)*)\s*$",
-    re.MULTILINE,
-)
-
 DAEMON_HOST = "127.0.0.1"
 DAEMON_PORT = 7878
 
 
 # ---------------------------------------------------------------- inputs
-
-def _module_path(module: str) -> Path:
-    return REPO / (module.replace(".", "/") + ".lean")
-
 
 def _sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -109,19 +101,19 @@ class InputHasher:
     def _imports_of(self, path: Path) -> list[str]:
         if path not in self._file_imports:
             text = path.read_text(encoding="utf-8")
-            self._file_imports[path] = MATHFIN_IMPORT_RE.findall(text)
+            self._file_imports[path] = library.library_imports(text)
         return self._file_imports[path]
 
     def closure(self, code: str) -> list[tuple[str, str]]:
         """Transitive MathFin modules imported by a snippet: (module, sha)."""
         seen: dict[str, str] = {}
-        frontier = MATHFIN_IMPORT_RE.findall(code)
+        frontier = library.library_imports(code)
         missing: list[str] = []
         while frontier:
             module = frontier.pop()
             if module in seen:
                 continue
-            path = _module_path(module)
+            path = library.module_path(module, REPO)
             if not path.is_file():
                 missing.append(module)
                 seen[module] = "MISSING"
@@ -275,7 +267,7 @@ def cmd_verify(args) -> int:
     # a repeat import-set ~0.1s vs ~60-80s for a fresh one, so ordering by
     # import set amortizes env construction maximally.
     targets.sort(key=lambda item: (
-        tuple(sorted(MATHFIN_IMPORT_RE.findall(item[2]))) or ("~mathlib-only",),
+        tuple(sorted(library.library_imports(item[2]))) or ("~mathlib-only",),
         item[0], item[1],
     ))
     if args.shard:

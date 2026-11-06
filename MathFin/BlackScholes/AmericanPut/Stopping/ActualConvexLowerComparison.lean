@@ -16,10 +16,22 @@ in exercise: smooth fit and the exercise-side test give negative curvature.
 In continuation the pricing PDE rules out a positive space-time maximum.
 No boundary time derivative is used.
 
-## Result
+## Main results
 
-Public entry points include `canonicalPrice_spatial_test_in_exercise`,
-`canonicalPrice_no_positive_convex_lower_max`, `convex_subsolution_le_canonicalPrice_on_strip`.
+* `canonicalPrice_spatial_test_in_exercise`: for `0 < k`, `0 ≤ h ≤ k`, `0 < t` and `x` in the
+  exercise region, a `C²` test `F` at `x` whose difference with the price has a local maximum at
+  `x` has `F'' x ≤ -exp x`.
+* `canonicalPrice_no_positive_convex_lower_max`: a `C²` space-time test `U` that is spatially
+  convex at `(x, t)`, is a pricing subsolution there, and exceeds the price there cannot have
+  `U - canonicalPrice` at a spatial local maximum and a backward-in-time maximum at `(x, t)`.
+* `convex_subsolution_le_canonicalPrice_on_strip`: a compact two-sided strip carrying a
+  continuous `U` that is `C²`, spatially convex and a pricing subsolution inside, and lies below
+  the price on the initial and side edges, lies below `canonicalPrice` on the whole strip.
+
+## Tags
+
+convex subsolution, comparison, smooth fit, maximum principle, American price, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

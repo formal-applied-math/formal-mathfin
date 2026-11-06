@@ -16,10 +16,25 @@ This adapter derives the three partial derivatives (`f_t`, `f_x`, `f_xx`) requir
 theorem from one joint C2 hypothesis. The resulting local martingale uses the
 upstream null-augmented Brownian filtration, explicitly, not the raw filtration.
 
-## Result
+## Main definitions
 
-Public entry points include `planeGenerator` and `plane_ito_localMartingale` (the partials
-`planePartial` live in `PlanePartial`).
+* `planeGenerator`: the operator
+  `planePartial G (1,0) z + (1/2) * planePartial (planePartial G (0,1)) (0,1) z`, the time
+  derivative plus half the second space derivative.
+
+## Main results
+
+* `planeGenerator_eq_partials`: for `G` of class `C²`, `planeGenerator G (t,w)` is `∂ₜ G` plus
+  `1/2` times `∂ₓₓ G` at `(t,w)`.
+* `plane_ito_localMartingale`: for a continuous-path pre-Brownian `W` and `G` of class `C²`,
+  there is a continuous local martingale `M` for the augmented Brownian filtration such that
+  for every `t`, `G (t, W t) - G (0, W 0)` equals `M t` plus the time integral of
+  `planeGenerator G` along the path, almost surely.
+
+## Tags
+
+Itô formula, C2 function, local martingale, space-time function, Brownian filtration, MSC 60G40,
+MSC 60H05
 -/
 
 @[expose] public section

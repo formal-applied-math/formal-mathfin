@@ -5,6 +5,7 @@ Authors: Alfredo Garcia
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -28,12 +29,32 @@ The level loading `A(T) = (2κθ/σ²) · log(2γ e^{(κ+γ)T/2} / D(T))` solves
 Only these equations are proved. The bond price `𝔼[exp(−∫₀ᵀ r_s ds)]` needs the affine
 (Feynman–Kac) framework, which is not formalized.
 
+## Main definitions
+
+* `cirGamma`: `γ = √(κ² + 2σ²)`.
+* `cirDenom`: `D(T) = (γ + κ)(e^{γT} − 1) + 2γ`.
+* `cirBondB`: the CIR rate loading `B(T) = 2(e^{γT} − 1) / D(T)`.
+* `cirBondA`: the CIR level loading in log form,
+  `A(T) = (2κθ/σ²) · log(2γ e^{(κ+γ)T/2} / D(T))`.
+
 ## Main results
 
 * `cirBondB_zero`: `B(0) = 0`.
 * `hasDerivAt_cirBondB`: `B' = 1 − κB − ½σ²B²` at every `T`, for `κ² + 2σ² > 0`.
 * `cirBondA_zero`: `A(0) = 0`.
 * `hasDerivAt_cirBondA`: `A' = −κθB` at every `T`, for `σ ≠ 0`.
+
+## References
+
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  §3.2.3
+* [J. C. Cox, J. E. Ingersoll and S. A. Ross, *A theory of the term structure of interest
+  rates*][CoxIngersollRoss1985]
+
+## Tags
+
+Cox–Ingersoll–Ross, CIR model, Riccati equation, affine bond price, square-root diffusion,
+short rate, MSC 91G30, MSC 60J60, JEL E43
 -/
 
 @[expose] public section

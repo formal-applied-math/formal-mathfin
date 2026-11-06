@@ -27,6 +27,21 @@ faces of `K ↦ max(S − K, 0)`. Both structural facts are recorded in
 The same convexity, applied infinitesimally rather than discretely, yields
 non-negativity of the second `K`-derivative of the European call price —
 i.e. the Breeden-Litzenberger implied PDF.
+
+## Main results
+
+* `bull_call_spread_payoff_le`: for `K₁ ≤ K₂`, `max (S - K₂) 0 ≤ max (S - K₁) 0`.
+* `butterfly_payoff_nonneg`: `0 ≤ max (S - K₁) 0 - 2 * max (S - (K₁ + K₃) / 2) 0 + max (S - K₃) 0`.
+  Both are payoff inequalities at expiry, not statements about prices.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 11.5
+
+## Tags
+
+bull spread, butterfly spread, static arbitrage, call payoff, Breeden–Litzenberger, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

@@ -45,15 +45,25 @@ powered terminal is a standard BS terminal with adjusted spot and
 volatility. The whole derivation goes via `bs_call_formula` with no
 additional Gaussian work.
 
-## Results
+## Main definitions
 
-* `bsPowerTerminal`: `(S_T)^a` as a function of the standard-normal sample.
-* `bsPowerEffectiveSpot`: `S_0^a · exp((a−1)rT + a(a−1)/2 σ²T)`.
+* `bsPowerTerminal`: the powered terminal price `(S_T)^a` as a function of the standard-normal
+  sample.
+* `bsPowerEffectiveSpot`: the effective spot `S₀^a · exp((a−1)rT + a(a−1)/2 · σ²T)`, the spot at
+  which `(S_T)^a` is a Black–Scholes terminal with volatility `aσ`.
+
+## Main results
+
 * `bsPowerTerminal_eq_bsTerminal_effective`: the structural reduction
   identity.
 * `bsCallHyp_powered`: lift of `BSCallHyp` to the effective-spot /
   effective-volatility setup.
 * `bs_power_call_formula`: the closed-form discounted price.
+
+## Tags
+
+powered call option, power option, effective spot, effective volatility, lognormal terminal,
+Black–Scholes, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

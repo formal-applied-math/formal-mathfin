@@ -28,7 +28,7 @@ one-period discrete form is `F = S·(1 + r_d)/(1 + r_f)`.
 
 **Uncovered interest parity**, in its risk-neutral form: under the domestic
 risk-neutral measure of the Garman–Kohlhagen model (the lognormal hypothesis
-`BSCallHyp` with drift `r_d - r_f`, as in `garman_kohlhagen_call_formula`),
+`BSCallHyp` with drift `r_d - r_f`, as in `bs_dividends_call_formula` at `q = r_f`),
 the expected terminal spot is the same `S·e^{(r_d - r_f)T}`
 (`uncovered_interest_parity`, from `expected_terminal_eq_forward`). This is a
 statement about the pricing measure; the economists' UIP, the same equation
@@ -36,9 +36,13 @@ under the physical measure, is an empirical hypothesis and is not claimed
 here. The two parities agree (`covered_eq_uncovered_interest_parity`): the
 forward a static market prices to zero is the model's expected spot.
 
-## Result
+## Main definitions
 
-* `fxForward`: the CIP forward rate `S · exp((r_d - r_f) · T)`.
+* `fxForward`: the covered-interest-parity FX forward rate `F(0, T) = S · exp((r_d - r_f) · T)`
+  with continuous compounding.
+
+## Main results
+
 * `covered_interest_parity`: the zero-value forward is `fxForward`, derived
   from `forward_price_from_no_arbitrage`;
   `covered_interest_parity_discrete`: the one-period form
@@ -47,6 +51,16 @@ forward a static market prices to zero is the model's expected spot.
   Garman–Kohlhagen risk-neutral hypothesis.
 * `covered_eq_uncovered_interest_parity`: the CIP forward equals the
   risk-neutral expected spot.
+
+## References
+
+* [Garman and Kohlhagen, *Foreign currency option values*][GarmanKohlhagen1983]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull]
+
+## Tags
+
+covered interest parity, uncovered interest parity, FX forward, Garman–Kohlhagen, foreign exchange,
+interest rate differential, MSC 91G20, JEL F31, JEL G13
 -/
 
 @[expose] public section

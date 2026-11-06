@@ -28,6 +28,14 @@ The cylinder probabilities `q^{#up}(1 − q)^{#down}` are not assumed: they come
 library's other probabilistic form of the price, `binomialPrice_eq_integral_convPow`
 (`Binomial/CRRCharFun.lean`), integrates over the law of the terminal log-return instead.
 
+## Main definitions
+
+* `coinMeasure`: the law of one `Bernoulli(q)` flip on `Bool`.
+* `coinFlipMeasure`: the law of i.i.d. `Bernoulli(q)` flips on `ℕ → Bool`, the infinite product of
+  `coinMeasure`.
+* `flips`: the first `N` flips of a path.
+* `flipFiltration`: the natural filtration of the coin flips, `ℱₙ = σ(ω₀, …, ω_{n−1})`.
+
 ## Main results
 
 * `coinFlipMeasure_cylinder` — the first `n + 1` flips of a path have probability
@@ -38,9 +46,9 @@ library's other probabilistic form of the price, `binomialPrice_eq_integral_conv
 * `binomialPrice_eq_integral_coinFlipMeasure` — the price as an expectation over paths.
 * `measurable_spotPath`, `abs_spotPath_le` — the spot after `k` flips is a measurable, bounded
   function of the path.
-* `flipFiltration` — the natural filtration of the flips, `ℱₙ = σ(ω₀, …, ω_{n−1})`;
-  `stronglyMeasurable_flipFiltration_iff` identifies its measurable functions with the
-  library's `PathAdaptedAt` (they depend only on the first `n` flips).
+* `stronglyMeasurable_flipFiltration_iff` — a real function is `ℱₙ`-strongly measurable for
+  `flipFiltration` exactly when it is the library's `PathAdaptedAt n` (it depends only on the
+  first `n` flips).
 * `martingale_of_oneStep` — a path process adapted to the flips whose node averages
   `q M_{n+1}(…,↑) + (1 − q) M_{n+1}(…,↓) = M_n` close up is a Mathlib `Martingale` under
   `coinFlipMeasure q`; the independence of the flips comes from `iIndepFun_infinitePi`.
@@ -55,6 +63,20 @@ library's other probabilistic form of the price, `binomialPrice_eq_integral_conv
   `Supermartingale` for `flipFiltration` under `coinFlipMeasure`.
 * `snellEnvelope_discounted_bermudanPrice` — the Snell envelope of the discounted payoff
   `e^{−rn} g(Sₙ)` is, at every time `k ≤ N` and almost surely, the discounted `bermudanPrice`.
+
+## References
+
+* [J. C. Cox, S. A. Ross and M. Rubinstein, *Option pricing: a simplified
+  approach*][CoxRossRubinstein1979]
+* [D. Lamberton and B. Lapeyre, *Introduction to Stochastic Calculus Applied to
+  Finance*][LambertonLapeyre2008], §2.2
+* [S. E. Shreve, *Stochastic Calculus for Finance I: The Binomial Asset Pricing Model*][ShreveSCFI],
+  Ch. 4; §2.4
+
+## Tags
+
+coin-flip measure, risk-neutral expectation, Bernoulli product measure, Snell envelope, path space,
+binomial filtration, MSC 91G20, MSC 60G42, JEL G13
 -/
 
 @[expose] public section

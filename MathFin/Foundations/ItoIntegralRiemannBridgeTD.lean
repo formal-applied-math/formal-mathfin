@@ -12,13 +12,24 @@ public import MathFin.Foundations.ItoIntegralRiemannBridgeAdapted
 Generalizes the Riemann ↔ CLM bridge for an integrand `φ ∘ B` (the case of `φ` constant in time)
 to a **time-dependent** integrand `(s, ω) ↦ φ(s, B_s ω)` for bounded jointly continuous
 `φ : ℝ → ℝ → ℝ`. The uniform-partition Riemann–Itô sums `∑ φ(tₖ, B_{tₖ})·ΔBₖ` converge
-in `L²(μ)` to the genuine continuous Itô integral `itoIntegralCLM_T gφ`, where `gφ` is
+in `L²(μ)` to the genuine continuous Itô integral `itoIntegralCLM gφ`, where `gφ` is
 the trim-`L²` realization of `s ↦ φ(s, B_s)`.
 
-Like the `φ ∘ B` case, this is the adapted bridge (`itoIntegralCLM_T_of_bdd_adapted_cont`)
+Like the `φ ∘ B` case, this is the adapted bridge (`itoIntegralCLM_of_bdd_adapted_cont`)
 at the integrand `θ s ω = φ(s, B_s ω)`: the time slot is the *deterministic* node, so `θ` is
 adapted and bounded, and `s ↦ φ(s, B_s ω)` is continuous by joint continuity composed with
 `s ↦ (s, B_s ω)`. The time-dependent Itô formula consumes this at `φ = f_x`.
+
+## Main results
+
+* `itoIntegralCLM_of_bdd_cont_td`: for bounded jointly continuous `φ : ℝ → ℝ → ℝ`, the
+  uniform-partition Riemann–Itô sums `∑ φ(t_k, B_{t_k}) ΔB_k` converge in `L²(μ)` to
+  `itoIntegralCLM gφ`, where `gφ =ᵐ [φ(·, B_·)]`.
+
+## Tags
+
+Riemann–Itô sums, time-dependent integrand, Itô integral, stochastic integral, convergence in L²,
+MSC 60H05, MSC 60J65
 -/
 
 @[expose] public section
@@ -37,21 +48,21 @@ include hB
 
 /-- **Riemann ↔ CLM bridge, time-dependent integrand.** For bounded jointly continuous
 `φ : ℝ → ℝ → ℝ`, the uniform-partition Riemann–Itô sums `∑ φ(tₖ, B_{tₖ})·ΔBₖ` converge
-in `L²(μ)` to `itoIntegralCLM_T gφ`, where `gφ` is the trim-`L²` realization of
+in `L²(μ)` to `itoIntegralCLM gφ`, where `gφ` is the trim-`L²` realization of
 `s ↦ φ(s, B_s)` (`processToLp` of the adapted continuous bounded process), with
 `gφ =ᵐ [φ(·, B_·)]`. -/
-theorem itoIntegralCLM_T_of_bdd_cont_td (hBmeas : ∀ t, Measurable (B t))
+theorem itoIntegralCLM_of_bdd_cont_td (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ B s ω))
     {φ : ℝ → ℝ → ℝ} (hφ_cont : Continuous fun p : ℝ × ℝ ↦ φ p.1 p.2)
     {C : ℝ} (hφ_bdd : ∀ t x, |φ t x| ≤ C) (T : ℝ≥0) :
-    ∃ gφ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      (⇑gφ =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦ φ z.1 (B z.1 z.2)) ∧
+    ∃ gφ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
+      (⇑gφ =ᵐ[trimMeasure (μ := μ) T hBmeas] fun z ↦ φ z.1 (B z.1 z.2)) ∧
       Tendsto (fun n ↦ (memLp_riemannσ (θ := fun s ω ↦ φ s (B s ω)) hB hBmeas
             (fun t ↦ stronglyMeasurable_comp_eval hBmeas
               (hφ_cont.comp (continuous_const.prodMk continuous_id)).measurable t)
             (fun _ _ ↦ hφ_bdd _ _) T n).toLp
           (riemannσ (B := B) (fun s ω ↦ φ s (B s ω)) T n))
-        atTop (𝓝 (itoIntegralCLM_T hB T hBmeas gφ)) := by
+        atTop (𝓝 (itoIntegralCLM hB T hBmeas gφ)) := by
   have hadap (t : ℝ≥0) : StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)]
       (fun ω ↦ φ t (B t ω)) :=
     stronglyMeasurable_comp_eval hBmeas
@@ -61,7 +72,7 @@ theorem itoIntegralCLM_T_of_bdd_cont_td (hBmeas : ∀ t, Measurable (B t))
   exact ⟨processToLp (μ := μ) (σ := fun s ω ↦ φ s (B s ω)) T hBmeas hadap hcont
       (fun _ _ ↦ hφ_bdd _ _),
     processToLp_coeFn (σ := fun s ω ↦ φ s (B s ω)) T hBmeas hadap hcont (fun _ _ ↦ hφ_bdd _ _),
-    itoIntegralCLM_T_of_bdd_adapted_cont (θ := fun s ω ↦ φ s (B s ω)) hB hBmeas hadap hcont
+    itoIntegralCLM_of_bdd_adapted_cont (θ := fun s ω ↦ φ s (B s ω)) hB hBmeas hadap hcont
       (fun _ _ ↦ hφ_bdd _ _) T⟩
 
 end ItoIntegralRiemannBridgeTD

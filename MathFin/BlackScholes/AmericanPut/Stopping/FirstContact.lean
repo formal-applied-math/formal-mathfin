@@ -14,10 +14,27 @@ The first zero by a fixed horizon is an admissible stopping rule if the
 process vanishes at that horizon. The proof uses compact minima and measurable
 infima, not a usual-filtration or continuous-time debut theorem assumption.
 
-## Result
+## Main definitions
 
-Public entry points include `measurable_zero_hit`, `firstContactTime`, `firstContactTime_mem`,
-`firstContactTime_le_iff`.
+* `firstContactTime`: the infimum of the times `t ≤ T` at which `Z t ω` vanishes.
+* `firstContactRule`: the first contact time as a bounded stopping rule, for a nonnegative
+  continuous adapted `Z` that vanishes at the horizon `T`.
+
+## Main results
+
+* `measurable_zero_hit`: for a nonnegative continuous adapted `Z` and `u ≤ t`, the event that
+  `Z` vanishes somewhere on `[0, u]` is `𝓕 t`-measurable.
+* `firstContactTime_mem`: if `Z` is continuous and vanishes at `T`, then the first contact time
+  is at most `T` and `Z` vanishes there.
+* `firstContactTime_le_iff`: under the same hypotheses, first contact is at most `t` iff `Z`
+  vanishes somewhere on `[0, min t T]`.
+* `firstContactTime_pos_before`: for nonnegative continuous `Z` vanishing at `T`, `Z` is strictly
+  positive before the first contact time.
+
+## Tags
+
+first hitting time, debut, stopping time, continuous adapted process, first zero, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

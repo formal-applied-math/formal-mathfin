@@ -16,10 +16,21 @@ spatial test, this excludes a nonnegative contact maximum of subsolution minus p
 No time derivative or second spatial derivative of the price at contact is
 assumed.
 
-## Result
+## Main results
 
-Public entry points include `curve_hasDeriv`, `boundary_test_time_nonneg`,
-`boundary_test_residual_pos`.
+* `curve_hasDeriv`: chain rule along a curve: if `U` is differentiable at `(b t, t)` and `b` at
+  `t`, then `s ↦ U (b s) s` has derivative `∂ₜU + b'(t) ∂ₓU` at `t`.
+* `boundary_test_time_nonneg`: for a `DividendPutSolution` and a test function `U` with payoff
+  slope `−eˣ` in space at `(b t, t)` and a backward maximum of `U − p` along the boundary,
+  the time derivative of `U (b t)` at `t` is nonnegative.
+* `boundary_test_residual_pos`: if moreover `U` is `C²` in space with a local spatial maximum of
+  `U − p` at `b t` and `p ≤ U` there, then the residual `∂ₜU − L U` at `(b t, t)` is strictly
+  positive, so `U` is not a subsolution at such a contact maximum.
+
+## Tags
+
+contact maximum, smooth fit, test function, parabolic test, moving boundary, subsolution, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

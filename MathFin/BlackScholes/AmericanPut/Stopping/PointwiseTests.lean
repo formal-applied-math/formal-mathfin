@@ -13,10 +13,26 @@ Shrinking driver rectangles places both a local touching inequality and a
 hypothetical strict wrong generator sign on the entire stopped trajectory.
 Strict drift then contradicts the integrated test inequality.
 
-## Result
+## Main results
 
-Public entry points include `exists_driverRectangle_subset`, `exists_continuationRectangle_in_nhds`,
-`canonicalPrice_upper_pointwise_test`, `canonicalPrice_lower_pointwise_test`.
+* `exists_driverRectangle_subset`: every neighbourhood `U` of `(0,0)` contains a `driverRectangle`
+  with half-width `R ≤ R₀` and duration `δ ≤ δ₀`, both positive.
+* `exists_continuationRectangle_in_nhds`: from a point of the canonical continuation region
+  (`0 ≤ k`), every neighbourhood of `(0,0)` contains a driver rectangle whose continuation
+  rectangle lies in the continuation region and has positive duration `δ < T`.
+* `canonicalPrice_upper_pointwise_test`, `canonicalPrice_lower_pointwise_test`: at a point of the
+  continuation region (`0 ≤ k`), a compactly supported `C²` test `G` equal to the price at
+  `(0,0)` and touching the discounted price from above (resp. below) near `(0,0)` has
+  `0 ≤ planeGenerator G (0,0)` (resp. `≤ 0`).
+* `canonicalPrice_upper_generator_test`, `canonicalPrice_lower_generator_test`: the same two
+  inequalities for any `C²` test `F`, without compact support.
+* `exists_compact_test`, `planeGenerator_congr`: a `C²` function agrees near any point with a
+  compactly supported `C²` function, and the generator at a point depends only on the germ.
+
+## Tags
+
+pointwise generator test, touching test, driver rectangle, strict drift, continuation price,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

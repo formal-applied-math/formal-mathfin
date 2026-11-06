@@ -23,10 +23,31 @@ The facts here follow from the contract alone: the boundary lies below the strik
 contact set before expiry is the half-line below the boundary (so the boundary of a given
 price is unique), and the price is smooth near each continuation point.
 
-## Result
+## Main definitions
 
-Public entry points include `ContinuousBoundaryPutSolution`, `boundary_nonpos`,
-`contact_iff`, `contact_in_stock_units`, `boundary_unique`, `price_contDiffAt`.
+* `ContinuousBoundaryPutSolution`: a classical normalized put solution `p` with continuous exercise
+  boundary `b`, for `0 < k` and `0 ≤ h ≤ k`, in `(log spot, time remaining)` coordinates. It asks
+  for the put envelope, `b 0 = 0`, smoothness of `p` in the continuation region, `p` equal to
+  `1 − eˣ` for `x ≤ b t`, the pricing equation for `x > b t`, right smooth fit with right
+  gradient trace at `b t`, and decay as `x → ∞`. It is a solution predicate: existence is not
+  proved.
+
+## Main results
+
+* `boundary_nonpos`: for a `ContinuousBoundaryPutSolution` and `t > 0`, `b t ≤ 0` (the boundary
+  lies below the strike).
+* `contact_iff`: for `t > 0`, `p x t` equals the put payoff exactly when `x ≤ b t`.
+* `contact_in_stock_units`: for `0 < K`, `0 < S` and `t > 0`, the same contact condition in
+  stock units: `K · p (log (S / K)) t = max (K − S) 0` iff `S ≤ K e^{b t}`.
+* `boundary_unique`: two boundaries `b`, `r` for the same price `p` agree at every `t ≥ 0`
+  (uniqueness of the threshold for a fixed price, not of the PDE solution).
+* `price_contDiffAt`: at every `(x, t)` with `t > 0` and `b t < x`, the price is `C^∞` as a
+  function of `(x, t)`.
+
+## Tags
+
+classical put solution, continuous exercise boundary, contact set, smooth fit,
+free boundary problem, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

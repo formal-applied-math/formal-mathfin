@@ -40,10 +40,37 @@ factor's randomness. The Fubini step reduces the claim to the kernel
   `FixedIncome/Cox.lean` (a unit-exponential clock inverted through `∫₀ᵗ h`), the protection leg is
   the expectation `(1 − R)·E[e^{−rτ}·1{τ ≤ T}]`; here the CDF is derived, not hypothesized.
 
+## Main definitions
+
+* `expectedExposure`: the expected positive exposure `EE(s) = E_ν[V_s⁺]`.
+* `cva`: unilateral CVA on the product space, `LGD · E[1{τ ≤ T} · D(τ) · V_τ⁺]`, with the exposure
+  on the first factor and the default time on the second.
+
+## Main results
+
+* `integral_exposure_eq`: for exposure independent of a default time with continuous hazard
+  `h ≥ 0`, `E[1{τ ≤ T} D(τ) V_τ⁺] = ∫₀ᵀ D(s) · EE(s) · λ(s)Q(s) ds`, for measurable `D`, jointly
+  measurable `V`, `T ≥ 0` and a joint-integrability hypothesis.
+* `expectedExposure_gaussian`: for `Z ~ N(0,1)` and `b, s > 0`,
+  `E[(a + b√s·Z)⁺] = a·Φ(d) + b√s·φ(d)` with `d = a/(b√s)`.
+* `cva_gaussian`: CVA with Gaussian exposure `V_s = m(s) + σ(s)√s·Z` independent of the default
+  time, for measurable bounded `D`, `m`, `σ` with `σ > 0` and `T ≥ 0`; the value depends on `V`
+  only through `EE`.
+* `cva_one_eq_protectionLeg`: the CVA of the constant unit exposure discounted by `e^{−rs}` equals
+  `Cox.protectionLeg R r h T`.
+* `protectionLeg_eq_integral_coxDefaultTime`: for `h` continuous and positive with `∫₀ᵗ h → ∞`,
+  `Cox.protectionLeg R r h T = (1 − R)·E[e^{−rτ}·1{τ ≤ T}]` for the Cox default time `τ`.
+
 ## References
 
-* J. C. Hull, *Options, Futures, and Other Derivatives* (the credit-risk chapter: CVA).
-* S. Bagaria, *Notes on Fixed Income Derivative Pricing* (lecture notes), ch. 16.
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull] (the credit-risk chapter: CVA).
+* [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 16.
+* [D. Lando, *Credit Risk Modeling*][Lando2004], ch. 5
+
+## Tags
+
+credit valuation adjustment, expected exposure, counterparty risk, wrong-way risk, default time,
+CDS protection leg, Gaussian exposure, MSC 91G40, JEL G32, JEL G33
 -/
 
 @[expose] public section

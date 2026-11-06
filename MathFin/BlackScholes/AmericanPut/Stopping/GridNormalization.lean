@@ -12,10 +12,22 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.ShrinkingGrids
 The deterministic Bellman recursion only sees log drift and Gaussian variance
 over each step. Both are unchanged by the Black--Scholes normalization.
 
-## Result
+## Main results
 
-Public entry points include `cappedGridTime_scale`, `brownianGridMarkovAux_scale`,
-`discountedLogPayoff_scale`, `brownianGridPrice_scale`.
+* `cappedGridTime_scale`: `cappedGridTime (a*T) (a*δ) i = a * cappedGridTime T δ i`.
+* `brownianGridMarkovAux_scale`: for `0 ≤ K`, drift and variance rescaled by `a` and rewards
+  related by `Z i (x+d) = K * Z' i x`, the grid recursion for `Z` at `x+d` is `K` times that
+  for `Z'` on the grid scaled by `a`.
+* `discountedLogPayoff_scale`: for `0 < K` and `k*a = r`, the discounted log payoff at
+  `x + log K` is `K` times the strike-`1`, rate-`k` payoff at time `a*t`.
+* `brownianGridPrice_scale`: for `0 < K`, `0 < a`, `k*a = r`, `h*a = q` and `2*a = σ^2`, the
+  grid price at `x + log K` is `K` times the strike-`1`, volatility-`√2` price on the grid
+  scaled by `a`.
+
+## Tags
+
+rescaling, normalization, Bellman recursion, finite-grid American put, Black–Scholes scaling,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

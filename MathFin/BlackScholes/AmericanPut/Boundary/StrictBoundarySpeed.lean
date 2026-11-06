@@ -18,9 +18,16 @@ slanted left edge lies strictly in continuation before terminal contact. The
 proved terminal Hopf barrier then contradicts the zero spatial derivative.
 Combined with weak log curvature, this excludes zero speed everywhere.
 
-## Result
+## Main results
 
-Public entry points include `boundary_no_flat_tail`, `boundary_deriv_neg`.
+* `boundary_no_flat_tail`: for a `DividendPutSolution` and `A > 0`, `b` is not constant on
+  `[A, ∞)`.
+* `boundary_deriv_neg`: for every `t > 0`, `deriv b t < 0`.
+
+## Tags
+
+boundary speed, no flat tail, Hopf barrier, strictly decreasing boundary, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

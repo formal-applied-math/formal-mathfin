@@ -41,6 +41,28 @@ laws equal (`measure_eq_of_integral_call_eq`). Equal laws have equal Lévy measu
 
 The statement is about laws at one date. The process-level changes of measure behind the two laws,
 equivalent martingale measures for the price process, are not formalized here.
+
+## Main results
+
+* `jumpDiffusionIncrementLaw_absolutelyContinuous`: for `σ ≠ 0` and `τ > 0`, the log-return law
+  with drift `b'` is absolutely continuous with respect to the one with drift `b`, so a change of
+  drift gives an equivalent law.
+* `exists_call_esscher_ne_merton`: for `σ ≠ 0`, nontrivial jumps, an Esscher parameter `θ` with the
+  stated exponential moments, and a physical drift `b` different from the compensated drift `c`, at
+  every date `τ > 0` the Esscher law and the Merton law are both equivalent to the physical law and
+  both compensated, and for every spot `S > 0` some strike `K > 0` gives different discounted call
+  prices under them.
+
+## References
+
+* [Cont and Tankov, *Financial Modelling with Jump Processes*][ContTankov2004]
+* [Gerber and Shiu, *Option pricing by Esscher transforms*][GerberShiu1994]
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976]
+
+## Tags
+
+incomplete market, non-unique pricing measure, Esscher law, equivalent martingale measures,
+call price ambiguity, jump risk, MSC 91G20, MSC 91G80, JEL G13
 -/
 
 @[expose] public section

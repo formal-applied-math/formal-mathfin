@@ -30,10 +30,19 @@ This is the multi-asset analogue of `MargrabeGrounding` — the correction is *e
 correlation, not assumed. It consumes only the standard-normal MGF and the independence
 factorisation of the expectation.
 
-## Main result
+## Main results
 
 * `quantoForward_of_gaussian` — the density-weighted foreign expectation of the foreign
   terminal equals `quantoForward`, deriving the `−ρ σ_S σ_FX` drift adjustment.
+
+## References
+
+* [Reiner (1992)][Reiner1992]
+
+## Tags
+
+quanto option, quanto adjustment, foreign exchange correlation, change of measure, drift adjustment,
+MSC 91G20, JEL G13, JEL F31
 -/
 
 @[expose] public section

@@ -24,6 +24,33 @@ i.e., `bsd1 / bsd2` evaluated at the effective rate `r − q`.
 Derivation: apply `bs_call_formula` with rate parameter `r − q`, then
 multiply through by the additional discount `e^{-qT}` (since the discount on
 the LHS uses the actual rate `r`, not the drift `r − q`).
+
+The **Garman–Kohlhagen** FX call is the same theorem read with `r = r_d` (domestic rate) and
+`q = r_f` (foreign rate): the foreign currency accrues `r_f` to its holder as a dividend yield.
+
+## Main definitions
+
+* `quantoForward`: the quanto-adjusted forward `S_0 · exp((r_dom − ρ σ_S σ_FX) T)`.
+
+## Main results
+
+* `bs_dividends_call_formula`: under `BSCallHyp` at the effective rate `r − q`, the expected
+  discounted call payoff `∫ e^{−rT} · max (S_T − K) 0 ∂Q` equals
+  `S_0 e^{−qT} Φ(d₁) − K e^{−rT} Φ(d₂)`, with `d₁, d₂` evaluated at `r − q`.
+* `bs_dividends_price_eq_bsVGarman`: the same expected payoff equals `bsVGarman` at spot
+  `S_0 e^{−qT}` and discount factor `e^{−rT}`.
+* `quanto_correction_factor`: for `S_0 > 0`,
+  `quantoForward / (S_0 e^{r_dom T}) = exp(−ρ σ_S σ_FX T)`.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 17.1; 17.3; 31.4
+* [Reiner (1992)][Reiner1992]
+
+## Tags
+
+continuous dividend yield, Black–Scholes–Merton, effective rate, dividend-paying asset,
+cost of carry, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -41,6 +68,8 @@ expected payoff of the European call is
   `S_0 · e^{-qT} · Φ(d₁) − K · e^{-rT} · Φ(d₂)`,
 
 with `d_i = bsdi S_0 K (r − q) σ T`.
+
+At `r = r_d`, `q = r_f` it is the Garman–Kohlhagen FX call.
 
 Proof: factor `e^{-rT} = e^{-qT} · e^{-(r−q)T}` to apply `bs_call_formula`. -/
 theorem bs_dividends_call_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
@@ -79,20 +108,6 @@ theorem bs_dividends_price_eq_bsVGarman {Ω : Type*} {mΩ : MeasurableSpace Ω}
       = bsVGarman (S_0 * Real.exp (-(q * T))) K (Real.exp (-(r * T))) σ T := by
   rw [bs_dividends_call_formula h]
   exact bs_dividends_RHS_eq_bsVGarman S_0 K r q σ T h.S_0_pos h.K_pos
-
-/-- **Garman-Kohlhagen FX option pricing formula** for a European call on a
-foreign currency. Identical to the dividends formula with `q = r_f` (the foreign
-risk-free rate); the domestic rate `r_d` plays the role of `r`. The two payment
-streams (foreign currency yields `r_f` continuously to the holder, domestic
-funding costs `r_d`) net to an effective drift `r_d − r_f`. -/
-theorem garman_kohlhagen_call_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    {Q : Measure Ω} [IsProbabilityMeasure Q]
-    {S_0 K r_d r_f σ T : ℝ} {Z : Ω → ℝ}
-    (h : BSCallHyp Q S_0 K (r_d - r_f) σ T Z) :
-    ∫ ω, Real.exp (-r_d * T) * max (bsTerminal S_0 (r_d - r_f) σ T (Z ω) - K) 0 ∂Q
-      = S_0 * Real.exp (-(r_f * T)) * Phi (bsd1 S_0 K (r_d - r_f) σ T)
-        - K * Real.exp (-(r_d * T)) * Phi (bsd2 S_0 K (r_d - r_f) σ T) :=
-  bs_dividends_call_formula (q := r_f) h
 
 /-! ## Quanto correction (folded from `Quanto.lean`)
 

@@ -38,6 +38,40 @@ same moment-generating function near `0`, hence equal measures
 (`measure_eq_of_mgf_id_eventuallyEq`).
 Their atoms at `0` give `σ²`. Off `0`, dividing by `2(cosh(sx) − 1)`, which vanishes only at `0`,
 gives `Π`. Then `κ` at one point gives `b`.
+
+## Main definitions
+
+* `coshKernel`: the second-difference kernel `2(cosh(sx) − 1)`, as a nonnegative real density.
+* `secondDifferenceMeasure`: the measure `σ²s² · δ₀ + 2(cosh(sx) − 1) · Λν`, whose
+  moment-generating function at `u` is the second difference of the Laplace exponent with
+  step `s`.
+
+## Main results
+
+* `coshKernel_eq_zero_iff`: for `s ≠ 0` the kernel vanishes only at `0`.
+* `jumpDiffusionExponent_eq_levy`: wherever `∫ e^{ux} dν < ∞`,
+  `κ(u) = bu + σ²u²/2 + ∫ (e^{ux} − 1) dΠ`, with `Π` the measure `Λν` restricted to `x ≠ 0`.
+* `mgf_id_secondDifferenceMeasure`: where `ν` has the exponential moments of orders `u + s`,
+  `u − s` and `u`, `κ(u + s) + κ(u − s) − 2κ(u)` is the moment-generating function at `u` of
+  `secondDifferenceMeasure σ s Λ ν`.
+* `secondDifferenceMeasure_singleton_zero`: its atom at `0` is `σ²s²`.
+* `restrict_compl_zero_secondDifferenceMeasure`: off `0` it is the kernel times the Lévy
+  measure.
+* `eventually_jumpDiffusionExponent_eq`: equal log-return laws at a date `τ > 0` have equal
+  Laplace exponents near `0`, when the jump laws have exponential moments near `0`.
+* `jumpDiffusionIncrementLaw_eq_iff`: for jump laws with moment-generating functions finite
+  near `0` and `τ > 0`, two log-return laws agree iff the drifts agree, the Gaussian variances
+  `σ²` agree and the Lévy measures `Λν` agree off `0`.
+
+## References
+
+* [Cont and Tankov, *Financial Modelling with Jump Processes*][ContTankov2004]
+* [Sato, *Lévy Processes and Infinitely Divisible Distributions*][Sato1999]
+
+## Tags
+
+identifiability, Lévy measure, calibration from one date, moment generating function,
+drift and variance recovery, MSC 60G51, MSC 91G20, MSC 62F10
 -/
 
 @[expose] public section

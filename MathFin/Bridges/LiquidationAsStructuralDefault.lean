@@ -26,7 +26,7 @@ under `Q` and the collateral value at `T` is `bsTerminal C₀ μ σ T (Z ·)`. I
 used as the collateral's drift, so `Q` may be the physical measure (drift `μ`) or the
 risk-neutral one (`μ = r`). The strike slot carries the barrier.
 
-## Results
+## Main results
 
 * `bsTerminal_lt_iff`: the shortfall region `S_T(z) < K ↔ z < −d₂`, the strict mirror of
   `bsTerminal_gt_K_iff`.
@@ -41,6 +41,17 @@ The event is checked at the single date `T`. Protocols liquidate at the first ti
 is crossed, a first-passage event before `T` whose probability this file does not compute. The
 debt is a fixed number at `T` (accrue it first, e.g. with
 `Dai.debt_mul_zcb_log_eq`); only one collateral asset is risky.
+
+## References
+
+* [Aave, *Aave Protocol V2 whitepaper*][Aave2020], §5
+* [R. C. Merton, *On the pricing of corporate debt: the risk structure of interest
+  rates*][Merton1974]
+
+## Tags
+
+Merton structural model, default probability, DeFi lending, liquidation, health factor, KMV,
+MSC 91G40, MSC 91G80, JEL G33
 -/
 
 @[expose] public section

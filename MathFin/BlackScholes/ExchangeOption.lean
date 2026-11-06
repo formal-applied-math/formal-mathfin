@@ -45,7 +45,13 @@ measure, a standard-normal driver drives the actual ratio `S¹_T/S²_T` (that `Q
 under the model measure: `margrabe_exchange_price` shows that `margrabePrice` is the
 discounted expected exchange payoff.
 
-## Results
+## Main definitions
+
+* `margrabeD1`, `margrabeD2`: `d₁ = (log(S¹₀/S²₀) + σ²T/2) / (σ√T)` and `d₂ = d₁ − σ√T`, with
+  `σ` the effective volatility of the log-spread.
+* `margrabePrice`: the exchange-option price `S¹₀ · Φ(d₁) − S²₀ · Φ(d₂)`.
+
+## Main results
 
 * `margrabe_variance_sub`: `Var[L₁ − L₂] = Var L₁ + Var L₂ − 2·cov(L₁, L₂)`.
 * `margrabe_effective_variance`: substituting `σ₁²T, σ₂²T, ρσ₁σ₂T` gives the
@@ -55,6 +61,17 @@ discounted expected exchange payoff.
 * `margrabe_parity`: `Margrabe(S¹,S²) − Margrabe(S²,S¹) = S¹ − S²`.
 * `margrabe_price_via_call`: the exchange option is a `bs_call_formula` call
   on the ratio (price-level reduction).
+
+## References
+
+* [H. Geman, N. El Karoui and J. C. Rochet, *Changes of numéraire, changes of probability measure
+  and option pricing*][GemanElKarouiRochet1995]
+* [W. Margrabe, *The value of an option to exchange one asset for another*][Margrabe1978]
+
+## Tags
+
+Margrabe, exchange option, change of numeraire, effective volatility, two-asset option, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

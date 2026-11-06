@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -30,6 +31,7 @@ themselves are Mathlib's `geometric_hahn_banach_compact_closed` and
 `geometric_hahn_banach_point_closed`.
 
 ## API at this pin
+
 The cone is a `C : Set (ι → ℝ)` carrying `Convex ℝ C`, `IsClosed C`, and homogeneity
 `∀ x ∈ C, ∀ c ≥ 0, c • x ∈ C`. There is no `ConvexCone.dual` constant at this pin, but
 `ProperCone`/`PointedCone` *are* live, and Mathlib's `ProperCone.hyperplane_separation`
@@ -39,8 +41,17 @@ from `geometric_hahn_banach_compact_closed`. Consuming it — packaging `C` as a
 upgrade; the explicit `Set` representation is a historical choice, not a forced one.
 
 ## Main results
-* `MathFin.exists_pos_separating_of_cone_disjoint_simplex`
-* `MathFin.exists_separating_of_not_mem_cone`
+
+* `MathFin.exists_pos_separating_of_cone_disjoint_simplex`: for a convex, closed cone `C` in
+  `ι → ℝ` (`ι` finite) that contains no point of the standard simplex, there exists `q` with
+  every coordinate positive and `∑ q i * v i ≤ 0` for all `v ∈ C`.
+* `MathFin.exists_separating_of_not_mem_cone`: for a convex, closed cone `C` containing `0` and a
+  point `x₀ ∉ C`, there exists `p` with `∑ p i * v i ≤ 0` on `C` and `0 < ∑ p i * x₀ i`.
+
+## Tags
+
+Hahn–Banach separation, convex cone, no arbitrage, coherent risk measure, pricing functional,
+separating hyperplane, MSC 90C25, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -50,7 +61,7 @@ namespace MathFin
 
 /-- A continuous linear functional on `ι → ℝ` equals its `∑ wᵢ · f(eᵢ)` expansion on the
 standard basis. Shared atom of the two cone-separation theorems below. -/
-private lemma functional_eq_sum_single {ι : Type*} [Fintype ι] [DecidableEq ι]
+lemma functional_eq_sum_single {ι : Type*} [Fintype ι] [DecidableEq ι]
     (f : StrongDual ℝ (ι → ℝ)) (w : ι → ℝ) :
     f w = ∑ i, w i * f (Pi.single i 1) := by
   have hwsum : w = ∑ i, w i • Pi.single i (1 : ℝ) := by
@@ -66,7 +77,7 @@ private lemma functional_eq_sum_single {ι : Type*} [Fintype ι] [DecidableEq ι
 /-- A functional bounded below by a negative `u` on a cone `C` is nonnegative on `C`: a ray
 `c ∈ C` with `f c < 0` is unbounded below on `C` (scale by `(u-1)/f c ≥ 0`), contradicting the
 bound. Shared atom of the two cone-separation theorems below. -/
-private lemma functional_nonneg_on_cone {ι : Type*} {C : Set (ι → ℝ)}
+lemma functional_nonneg_on_cone {ι : Type*} {C : Set (ι → ℝ)}
     (hCcone : ∀ ⦃x⦄, x ∈ C → ∀ ⦃c : ℝ⦄, 0 ≤ c → c • x ∈ C)
     {f : StrongDual ℝ (ι → ℝ)} {u : ℝ} (hu : u < 0) (hlb : ∀ y ∈ C, u < f y) :
     ∀ c ∈ C, 0 ≤ f c := by

@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -22,6 +23,18 @@ with the formula near the point, and so do their derivatives there.
 * `deriv_deriv_nonneg_of_convexOn`: the converse direction of the second-derivative test. A
   convex function's second derivative is non-negative on an open set where it is
   differentiable.
+
+## Main results
+
+* `hasDerivAt_deriv_param_of_eventually`: if `F s` has derivative `g s` at `y` for all `s` near
+  `x` and `g` has derivative `g'` at `x`, then `s ↦ deriv (F s) y` has derivative `g'` at `x`.
+* `deriv_deriv_nonneg_of_convexOn`: a function convex on an open set `S` and differentiable at
+  every point of `S` has `0 ≤ deriv (deriv f) x` for `x ∈ S`.
+
+## Tags
+
+gamma, second derivative, convexity test, Greeks, sensitivity, differentiation of formula,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

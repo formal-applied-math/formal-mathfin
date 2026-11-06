@@ -25,6 +25,29 @@ where `d = (S_0 - K) / (σ √T)`, `Φ` and `ϕ` are the standard normal CDF and
 PDF. The proof is a HasLaw transfer to the standard normal, where the payoff is
 `σ √T · (z + d)⁺`, followed by the standard-normal stop-loss transform
 `integral_max_sub_mul_gaussianPDFReal` in `Foundations/GaussianPartialMoments`.
+
+## Main definitions
+
+* `BachelierHyp`: the Bachelier risk-neutral hypothesis: `0 < K`, `0 < σ`, `0 < T` and `Z` standard
+  normal under `Q` (the terminal price is then `bachelierTerminal S_0 σ T (Z ω)`).
+* `bachelierD`: the dimensionless distance to the strike `d = (S_0 - K) / (σ √T)`.
+* `bachelierTerminal`: the terminal price as a function of the driver, `S_0 + σ √T · z`.
+
+## Main results
+
+* `bachelier_call_formula`: under `BachelierHyp`, the expected European call payoff
+  `E_Q[max (S_T - K) 0]` equals `(S_0 - K) * Φ d + σ * √T * ϕ d` with `d = bachelierD S_0 K σ T`.
+
+## References
+
+* [Bachelier (1900)][Bachelier1900]
+* [F. Black, *The pricing of commodity contracts*][Black1976]
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006]
+
+## Tags
+
+Bachelier model, arithmetic Brownian motion, normal model, negative rates, call price,
+stop-loss transform, MSC 91G20, MSC 60J65, JEL G13
 -/
 
 @[expose] public section

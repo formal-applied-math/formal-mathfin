@@ -26,12 +26,23 @@ algebraic fact:
   no-arbitrage (`d < e^r < u`), the unique solution is the risk-neutral
   up-probability `crrUpProb u d r = (e^r − d) / (u − d)`.
 
-So in the single-period binomial: **no-arbitrage ⟹ unique EMM ⟺ completeness**.
+So in the single-period binomial, no-arbitrage gives a unique EMM (`second_FTAP_single_period`)
+and every claim is replicated (`replicating_portfolio_cost`).
 
-## Result
+## Main results
 
 * `second_FTAP_single_period`: under `BinomialNoArb u d r`, the risk-neutral
   up-probability `q` is uniquely determined.
+
+## References
+
+* [J. M. Harrison and S. R. Pliska, *Martingales and stochastic integrals in the theory of
+  continuous trading*][HarrisonPliska1981]
+
+## Tags
+
+second fundamental theorem, market completeness, unique martingale measure,
+risk-neutral probability, replication, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

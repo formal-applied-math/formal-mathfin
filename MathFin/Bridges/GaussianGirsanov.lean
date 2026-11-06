@@ -47,6 +47,33 @@ This is the static (single-Gaussian) Girsanov theorem, at one date. The
 process-level Girsanov theorem, for constant, simple, bounded adapted and
 bounded predictable `θ`, is in `Foundations/GirsanovConstantTheta.lean`
 through `Foundations/GirsanovPredictableTheta.lean`.
+
+## Main results
+
+* `gaussianReal_withDensity_esscher`: tilting `N(0, 1)` by the density `exp (c x - c²/2)` gives
+  `N(c, 1)`.
+* `map_withDensity_comp`: for measurable `W` and a density `g ∘ W` factoring through it,
+  `(P.withDensity (g ∘ W)).map W = (P.map W).withDensity g`.
+* `hasLaw_esscher_tilt`: if `W` is `N(0, 1)` under `P`, it is `N(c, 1)` under `P` tilted by
+  `exp (c W - c²/2)`.
+* `esscherTilt_isProbabilityMeasure`, `esscherTilt_isEquivProbMeasure`: the tilted measure is a
+  probability measure, and equivalent to `P`.
+* `BSCallHyp.exists_of_physical`: for a standard normal driver `W` under `P`, the tilted measure
+  `Q` is a probability measure under which `W - c` satisfies `BSCallHyp`.
+* `bsTerminal_physical_eq_riskNeutral`: for `σ ≠ 0` and `T ≥ 0`, the terminal value at drift `μ`
+  and driver `w` equals the terminal value at drift `r` and driver `w - (r - μ)√T/σ`.
+* `discounted_terminal_eq_S0_of_physical`: for that `Q`, the discounted terminal value
+  `exp (-rT) * bsTerminal S_0 r σ T (W - c)` has `Q`-integral `S_0`.
+* `bs_call_formula_of_physical`: for that `Q`, the discounted call payoff on
+  `bsTerminal S_0 r σ T (W - c)` has `Q`-integral `S_0 Φ(d₁) - K e^{-rT} Φ(d₂)`.
+* `discounted_physical_terminal_eq_S0`: for `σ, T, S_0 > 0` and a standard normal driver `W`,
+  some probability measure `Q` gives the asset with physical drift `μ` discounted terminal
+  value with `Q`-integral `S_0` (the proof takes the shift `c = (r - μ)√T/σ`).
+
+## Tags
+
+Girsanov theorem, Esscher transform, risk-neutral measure, market price of risk, change of measure,
+equivalent martingale measure, MSC 91G20, MSC 60H30, JEL G13
 -/
 
 @[expose] public section

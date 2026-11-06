@@ -28,7 +28,14 @@ These are transcribed from QuantLib's `qdfpamericanengine.cpp`. At the endpoint 
 A Gauss–Lobatto rule samples this endpoint, so it needs the one-sided limit. This file
 computes it over an abstract boundary `B`, with no fixed-point or pricing content.
 
-## Results
+## Main definitions
+
+* `qdfpK12`: fixed-point equation A, the `K₁ + K₂` integrand after the substitution
+  `m = τ (1 + y)² / 4`, built from an arbitrary real function `B`.
+* `qdfpK3`: fixed-point equation A, the `K₃` integrand after the same substitution.
+* `qdfpNi`, `qdfpDi`: fixed-point equation B, the numerator and denominator integrands.
+
+## Main results
 
 * `b = B τ`, `B` differentiable at `τ` with `0 < B τ`: `K₁₂ → e^{qτ} (√τ/σ)/√(2π)`,
   `K₃ → e^{rτ} (√τ/σ)/√(2π)`, `nᵢ → ½ e^{rτ}`, `dᵢ → ½ e^{qτ}`
@@ -46,8 +53,15 @@ computes it over an abstract boundary `B`, with no fixed-point or pricing conten
 
 ## References
 
-* J. Healy, *Pricing American options under negative rates*, arXiv:2109.15157, §5.1
+* [J. Healy, *Pricing American options under negative rates*][Healy2021], §5.1
   (restates the fixed-point equations and the substitution `y = -1 + 2 √((τ - u)/τ)`).
+* [Andersen, Lake and Offengenden, *High-performance American option
+  pricing*][AndersenLakeOffengenden2016]
+
+## Tags
+
+QD+ method, American put, exercise boundary, fixed-point integral equation, Gauss–Lobatto,
+negative rates, MSC 91G60, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

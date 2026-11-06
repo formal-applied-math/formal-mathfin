@@ -11,12 +11,12 @@ public import MathFin.BlackScholes.CappedCall
 /-!
 # Options, as contracts
 
-The instruments: the European call and put, the cash-or-nothing digital, the forward, the
-capped call and the power call, each a `Contract Unit` written in the payoff language of `Contracts/Core.lean`; the exchange option is a
-`Contract (Fin 2)` on two underlyings.
-Nothing here assumes a model. What is proved is what the instruments pay, along every scenario,
-and what follows for their values in every model through the linearity of `Contract.value`.
-Their prices in a particular model live in that model's file (`Contracts/Models/BlackScholes.lean`).
+The instruments: the European call and put, the cash-or-nothing digital, the forward, the capped
+call and the power call, each a `Contract Unit` written in the payoff language of
+`Contracts/Core.lean`; the exchange option is a `Contract (Fin 2)` on two underlyings. Nothing here
+assumes a model. What is proved is what the instruments pay, along every scenario, and what follows
+for their values in every model through the linearity of `Contract.value`. Their prices in a
+particular model live in that model's file (`Contracts/Models/BlackScholes.lean`).
 
 The capped call is *defined* by composition, as a long call at `K₁` and a short call at `K₂`;
 `cappedCall_payoff_eq` is what earns it the name: for `K₁ ≤ K₂` it pays
@@ -61,6 +61,16 @@ denotational identity.
 No code is copied from `lean_contracts`; every definition and proof here is
 written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 §6 for the full credit line.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 12.3
+
+## Tags
+
+European option, digital option, capped call, chooser option, power call, exchange option,
+geometric Asian, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -113,13 +123,13 @@ noncomputable def geomAsianCall (K : ℝ) (T : ℝ≥0) {n : ℕ} (τ : Fin n �
   .pay T (.max (.sub (.rpow (.obsProd () (List.ofFn τ)) (n : ℝ≥0)⁻¹) (.const K)) (.const 0))
 
 /-- The reified simple chooser option, by static replication. At the chooser date `t₁ ≤ T` the
-holder takes the more valuable of the call and the put, `max (C_{t₁}, P_{t₁})`; put–call parity
-at `t₁` (`MathFin.chooserPayoff_decompose_BS`) writes that as `C_{t₁} + max (K e^{−r(T−t₁)} −
-S_{t₁}, 0)`. The first term is what a call struck at `K` maturing at `T` is worth at `t₁`, the
-second pays at `t₁`, so the chooser is the call at `K, T` together with a put maturing at `t₁`
-struck at `K e^{−r(T−t₁)}`. The payoff language has no node for the conditional value at `t₁`,
-so this is the replicating portfolio, not the holder's choice written as a payoff; the rate `r`
-enters only through the put's strike. -/
+holder takes the more valuable of the call and the put, `max (C_{t₁}, P_{t₁})`; put–call parity at
+`t₁` (`MathFin.chooserPayoff_decompose_BS`) writes that as
+`C_{t₁} + max (K e^{−r(T−t₁)} − S_{t₁}, 0)`. The first term is what a call struck at `K` maturing at
+`T` is worth at `t₁`, the second pays at `t₁`, so the chooser is the call at `K, T` together with a
+put maturing at `t₁` struck at `K e^{−r(T−t₁)}`. The payoff language has no node for the conditional
+value at `t₁`, so this is the replicating portfolio, not the holder's choice written as a payoff;
+the rate `r` enters only through the put's strike. -/
 noncomputable def chooser (K r : ℝ) (T t₁ : ℝ≥0) : Contract Unit :=
   .both (europeanCall K T) (europeanPut (K * Real.exp (-(r * ((T : ℝ) - t₁)))) t₁)
 

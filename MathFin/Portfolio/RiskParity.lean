@@ -23,16 +23,29 @@ and correlation `ρ`, the risk-parity weights under the budget constraint
 The independence from correlation is the surprising feature: only the
 relative volatilities matter for equal-risk allocation.
 
-Results:
+## Main definitions
 
-* `riskParityWeightTwo`: definition `σ₂ / (σ₁ + σ₂)`.
+* `riskParityWeightTwo`: the two-asset risk-parity weight `σ₂ / (σ₁ + σ₂)` on asset 1.
+
+## Main results
+
 * `risk_parity_equal_contribution`: at the RP weights, the two assets'
   contributions to portfolio variance are equal.
 * `isRiskParity_two_iff`: with the covariance matrix `covTwo` (`Portfolio/Markowitz.lean`)
   and the risk-parity predicate `IsRiskParity` (`Portfolio/RiskParityFOC.lean`), a long-only
   budget portfolio has equal risk contributions iff `w₁ = σ₂ / (σ₁ + σ₂)`, for every `ρ`:
-  the closed form is the only long-only two-asset risk-parity portfolio (when `σ₁ ≠ σ₂`, a
-  budget portfolio with a short leg, `w₁σ₁ = −w₂σ₂`, also equalises contributions).
+  the closed form is the only long-only two-asset risk-parity portfolio (not formalised: when
+  `σ₁ ≠ σ₂`, a budget portfolio with a short leg, `w₁σ₁ = −w₂σ₂`, also equalises contributions).
+
+## References
+
+* [Maillard, Roncalli and Te"iletche, *The properties of equally weighted risk contribution
+  portfolios*][MaillardRoncalliTeiletche2010], §2
+
+## Tags
+
+risk parity, equal risk contribution, inverse volatility weights, two-asset portfolio,
+variance contribution, MSC 91G10, JEL G11
 -/
 
 @[expose] public section

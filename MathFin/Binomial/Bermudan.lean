@@ -22,15 +22,27 @@ sets `Eur ⊆ Berm ⊆ Amer`, `sup_Eur v ≤ sup_Berm v ≤ sup_Amer v`. We give
 discrete-time finite version using `Finset.sup'`, which is what the binomial
 tree directly produces.
 
-Results:
+## Main results
 
-* `bermudan_sandwich`: `Eur ⊆ Berm ⊆ Amer ⇒ sup_Eur ≤ sup_Berm ≤ sup_Amer`
+* `bermudan_sandwich`: `Eur ⊆ Berm ⊆ Amer ⇒ sup_Eur ≤ sup_Berm ≤ sup_Amer` (`Eur` nonempty)
   (both inequalities, via `Finset.sup'_mono`) — the abstract optimal-stopping form.
-* `bermudanPrice_mono`: the genuine CRR-tree price `bermudanPrice E` (`Binomial/Model.lean`,
-  the one recursion with `E = ∅` European and `E = univ` American) is monotone in the
-  early-exercise step set `E`, as an instance of Snell minimality.
-* `binomialPrice_le_bermudanPrice_le_americanPrice`: the sandwich as an actual
-  discounted-expectation price ordering (not an abstract `sup'` over a free value).
+* `bermudanPrice_mono`: under `BinomialNoArb`, the genuine CRR-tree price `bermudanPrice E`
+  (`Binomial/Model.lean`, the one recursion with `E = ∅` European and `E = univ` American) is
+  monotone in the early-exercise step set `E`, as an instance of Snell minimality.
+* `binomialPrice_le_bermudanPrice_le_americanPrice`: under `BinomialNoArb`, the sandwich as an
+  actual discounted-expectation price ordering (not an abstract `sup'` over a free value).
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 11.5; 26.6
+* [Rogers and Williams][RogersWilliams], Vol 2
+* [S. E. Shreve, *Stochastic Calculus for Finance I: The Binomial Asset Pricing Model*][ShreveSCFI],
+  4.4
+
+## Tags
+
+Bermudan option, exercise dates, European American ordering, optimal stopping, Snell envelope,
+option price bounds, MSC 91G20, MSC 60G40, JEL G13
 -/
 
 @[expose] public section

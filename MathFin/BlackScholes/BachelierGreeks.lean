@@ -23,6 +23,22 @@ where `d = (S − K)/(σ √T)`, we derive four Greeks:
 These parallel the Black–Scholes Greeks but with much simpler algebra
 (no exponential, no log). All cancellation goes through the identity
 `(S − K)/(σ √T) = d`.
+
+## Main definitions
+
+* `bachelierV`: the Bachelier call price `(S - K) Φ d + σ √T ϕ d` with `d = (S - K) / (σ √T)`, as a
+  function of the spot `S`.
+
+## Main results
+
+* `hasDerivAt_bachelierV_S`: delta, `∂V/∂S = Φ d`, for `0 < σ` and `0 < T`.
+* `hasDerivAt_deriv_bachelierV_S`: gamma, `∂²V/∂S² = ϕ d / (σ √T)`, for `0 < σ` and `0 < T`.
+* `hasDerivAt_bachelierV_sigma`: vega, `∂V/∂σ = √T · ϕ d`, for `0 < T` and `0 < σ`.
+* `hasDerivAt_bachelierV_T`: theta, `∂V/∂T = σ · ϕ d / (2 √T)`, for `0 < σ` and `0 < T`.
+
+## Tags
+
+Bachelier model, Greeks, delta, gamma, vega, theta, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

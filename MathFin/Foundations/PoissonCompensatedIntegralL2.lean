@@ -30,6 +30,22 @@ Design mirrors our continuous Itô `ito_isometry_discrete`; the PRM kernel is fr
 `Foundations/PoissonCompensatedIsometryAdapted` (PRM field shape consulted from
 `cgarryZA/LevyStochCalc`, cited). LevyStochCalc states this isometry as its cited axiom #6; here it
 is proved. References: Applebaum, *Lévy Processes and Stochastic Calculus*, CUP 2009, Thm 4.2.3.
+
+## Main results
+
+* `compensated_simple_isometry`: for a monotone time grid `t` with `0 ≤ t 0`, disjoint
+  finite-intensity marks `A l`, and `L²` coefficients `φ j l` adapted at `t j`,
+  `𝔼[(∑ⱼ∑ₗ φⱼₗ Ñ((tⱼ, tⱼ₊₁] × Aₗ))²] = ∑ⱼ∑ₗ 𝔼[φⱼₗ²]·(tⱼ₊₁ − tⱼ)·ν(Aₗ).toReal`.
+
+## References
+
+* [Applebaum (2009)][Applebaum2009], Thm 4.2.3
+* [*cgarryZA/LevyStochCalc*][LevyStochCalc], cited axiom #6
+
+## Tags
+
+Itô–Lévy isometry, compensated Poisson integral, jump process integral,
+simple predictable integrand, Lévy stochastic calculus, MSC 60G51, MSC 60H05, MSC 60G55
 -/
 
 @[expose] public section

@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -37,15 +38,28 @@ The Vasicek/OU mean-reversion has a characteristic *half-life*
 to half its initial value. Independent of `r₀` and `θ`; only the rate `κ`
 matters. (Folded from the former `MeanReversionHalfLife.lean`.)
 
-Results:
+## Main definitions
 
-* `vasicekDeterministic`: definition `θ + (r₀ − θ) e^{−κt}`.
+* `vasicekDeterministic`: the deterministic short-rate solution `r(t) = θ + (r₀ − θ) e^{−κt}`.
+* `meanReversionHalfLife`: the half-life of mean-reverting decay at rate `κ`, the time at which
+  the gap from the long-run mean is half its initial value.
+
+## Main results
+
 * `vasicekDeterministic_at_zero`: `r(0) = r₀`.
 * `vasicekDeterministic_solves_ODE`: `dr/dt = κ(θ − r(t))`.
 * `vasicekDeterministic_tendsto_mean`: `r(t) → θ` as `t → ∞` (for `κ > 0`).
-* `meanReversionHalfLife`: `log 2 / κ`.
 * `vasicekDeterministic_at_halfLife`: at `t = log 2 / κ`, the gap is half
   the initial gap.
+
+## References
+
+* [O. Vasicek, *An equilibrium characterization of the term structure*][Vasicek1977]
+
+## Tags
+
+Vasicek model, mean reversion, Ornstein–Uhlenbeck, half-life, short rate, long-run mean, MSC 91G30,
+JEL E43
 -/
 
 @[expose] public section

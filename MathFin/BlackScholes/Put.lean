@@ -23,6 +23,21 @@ completing-the-square on the left-tail integral.
 We also derive **put-call parity**
 `C − P = S_0 − K · e^{-rT}` as a corollary using the call formula and
 `Phi_add_Phi_neg`.
+
+## Main results
+
+* `bs_put_formula`: under `BSCallHyp`, the discounted expected put payoff is
+  `K·e^{−rT}·Φ(−d₂) − S₀·Φ(−d₁)`.
+* `bs_put_call_parity`: under `BSCallHyp`, `C − P = S₀ − K·e^{−rT}`.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 11.4; 16.6
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], 4.5
+
+## Tags
+
+European put, put–call parity, Black–Scholes put price, risk-neutral pricing, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

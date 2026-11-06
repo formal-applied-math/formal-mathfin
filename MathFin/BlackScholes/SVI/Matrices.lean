@@ -12,7 +12,27 @@ public import MathFin.BlackScholes.SVI.Polynomial
 Part of the SVI polynomial-sign certificate (#174).
 
 Explicit denominator-free matrix constructions. Their correctness as a
-root-counting certificate is proved in MatrixCertificate.lean. -/
+root-counting certificate is proved in MatrixCertificate.lean.
+
+## Main definitions
+
+* `scaledCompanion`: `ℓ` times the companion matrix of `f / ℓ`, with `ℓ = leadingCoeff f`.
+* `clearedHermite`: the Hermite matrix of `f` with weight `q` built from `scaledCompanion` and
+  powers of the leading coefficient, so that no division by it occurs.
+* `signatureTest`: the sign variations of `M.charpoly` minus those of `M.charpoly.comp (-X)`.
+* `certificateMatrices`: the four cleared Hermite matrices of `P'` with weights `X²P²`, `XP²`,
+  `X²P`, `XP`.
+* `matrixCountFour`: the signed combination of the four signature tests.
+
+## Main results
+
+* `clearedHermite_symmetric`: `clearedHermite f q n` is symmetric.
+* `exponent_bound`: for `n ≤ 9`, `i, j < n` and `r ≤ 22`, `i + j + r ≤ 38`.
+
+## Tags
+
+Hermite matrices, root counting certificate, denominator-free, SVI, MSC 91G20, JEL G13
+-/
 
 @[expose] public section
 

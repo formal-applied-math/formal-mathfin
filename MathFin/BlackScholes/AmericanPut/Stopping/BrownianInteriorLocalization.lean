@@ -15,10 +15,25 @@ The sequence is explicit and converges pathwise. This module reduces contact
 martingality to the interior local properties. `ContactMartingale` subsequently
 proves the interior martingale properties from the PDE and Ito's formula.
 
-## Result
+## Main definitions
 
-Public entry points include `brownianInteriorRule`, `brownianInteriorRule_tendsto`,
-`brownian_contact_martingale_of_interior_localMartingales`.
+* `brownianInteriorRule`: the `n`-th interior localization rule of the constructed Brownian model,
+  `interiorRule` applied to the classical gap of the candidate price `p`.
+
+## Main results
+
+* `brownianInteriorRule_tendsto`: for a `DividendPutSolution` at the normalized rates, `0 < K`
+  and `0 < S`, the times of the interior rules converge on every path to the time of
+  `brownianClassicalContactRule`.
+* `brownian_contact_martingale_of_interior_localMartingales`: under the same hypotheses and
+  `0 ≤ r`, if the candidate stopped at each interior rule is a local martingale in
+  `brownianAugFiltration`, then the candidate stopped at the classical contact rule is a
+  martingale in `brownianFiltration` under `gaussianLimit`.
+
+## Tags
+
+interior approximation, first-contact rule, contact martingale, localization, stopping time,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

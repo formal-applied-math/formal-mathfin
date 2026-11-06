@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -33,6 +34,15 @@ the jump-compensated conditional spots average back to the true spot
 * `PoissonPgf.tsum_poisson_weights_mul_pow` — the `tsum` form.
 * `PoissonPgf.integral_pow_poissonMeasure` — the pgf `E[x^N] = e^{r(x−1)}`.
 * `PoissonPgf.integrable_pow_poissonMeasure` — `n ↦ xⁿ` is integrable against `Poisson(r)`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Ch 3
+
+## Tags
+
+probability generating function, Poisson distribution, Poisson mixture, jump compensation,
+Merton jump diffusion, MSC 60E10, MSC 60G55
 -/
 
 @[expose] public section

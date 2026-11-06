@@ -43,16 +43,37 @@ loss (`strictlyElicits_pinballLoss`); expected shortfall is not elicitable
 (`not_isElicitable_expectedShortfall`). Whether the expectile is a coherent risk measure for
 `α ≥ 1/2` is not treated here.
 
+## Main definitions
+
+* `expectileGap`: the gap `α E[(Y − e)⁺] − (1 − α) E[(e − Y)⁺]`, whose root is the expectile.
+* `expectile`: the `α`-expectile of `Y`, the infimum of the thresholds with a nonpositive gap.
+* `expectileLoss`: the asymmetric squared loss `α ((y − e)⁺)² + (1 − α) ((e − y)⁺)²` of a
+  forecast `e` for an outcome `y`.
+
 ## Main results
 
-* `expectileGap`: `α E[(Y − e)⁺] − (1 − α) E[(e − Y)⁺]`.
 * `expectileGap_sub_le`: the gap falls at rate at least `min(α, 1 − α)`.
-* `existsUnique_expectileGap_eq_zero`: the expectile exists and is unique.
-* `expectile`: the `α`-expectile, and `expectileGap_expectile`.
+* `existsUnique_expectileGap_eq_zero`: for integrable `Y` and `α ∈ (0, 1)`, the gap has a unique
+  root.
+* `expectileGap_expectile`: for integrable `Y` and `α ∈ (0, 1)`, the expectile is that root.
 * `expectile_mono`: expectiles are nondecreasing in the level.
 * `expectile_half`: the `1/2`-expectile is the mean.
-* `expectileLoss`, `expectileLoss_ge`: the asymmetric squared loss and its strong convexity.
-* `strictlyElicits_expectileLoss`: the asymmetric squared loss strictly elicits the expectile.
+* `expectileLoss_ge`: a strong-convexity inequality for the asymmetric squared loss.
+* `strictlyElicits_expectileLoss`: the asymmetric squared loss strictly elicits the expectile on
+  the probability laws with a finite second moment.
+
+## References
+
+* [T. Gneiting, *Making and evaluating point forecasts*][Gneiting2011]
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Section 8.2.6
+* [W. K. Newey and J. L. Powell, *Asymmetric least squares estimation and testing*][NeweyPowell1987]
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 8.13; Ex. 8.13, 8.14
+
+## Tags
+
+expectile, asymmetric least squares, Newey-Powell, asymmetric squared loss, risk measure,
+elicitability, MSC 91G70, MSC 62F10, JEL G32
 -/
 
 @[expose] public section
@@ -74,10 +95,6 @@ the unique root of the gap for an integrable `Y` and `α ∈ (0, 1)` (`expectile
 noncomputable def expectile (α : ℝ) (Y : Ω → ℝ) (P : Measure Ω) : ℝ :=
   sInf {e | expectileGap α Y P e ≤ 0}
 
-private lemma integrable_max_sub (hY : Integrable Y P) (e : ℝ) :
-    Integrable (fun ω ↦ max (Y ω - e) 0) P :=
-  (hY.sub (integrable_const e)).pos_part
-
 /-- The gap in terms of the upper partial moment alone:
 `(2α − 1)·E[(Y − e)⁺] + (1 − α)(E[Y] − e)`, from `(e − y)⁺ = (y − e)⁺ − (y − e)`. -/
 lemma expectileGap_eq (hY : Integrable Y P) (e : ℝ) :
@@ -91,18 +108,21 @@ lemma expectileGap_eq (hY : Integrable Y P) (e : ℝ) :
     · rw [max_eq_right (sub_nonpos.2 h), max_eq_left (sub_nonneg.2 h)]
       ring
   have hYe : Integrable (fun ω ↦ Y ω - e) P := hY.sub (integrable_const e)
-  rw [expectileGap, hpt, integral_sub (integrable_max_sub hY e) hYe,
+  have hM : Integrable (fun ω ↦ max (Y ω - e) 0) P := hYe.pos_part
+  rw [expectileGap, hpt, integral_sub hM hYe,
     integral_sub hY (integrable_const e), integral_const, probReal_univ, one_smul]
   ring
 
 /-- The upper partial moment `e ↦ E[(Y − e)⁺]` is antitone and falls by at most the increment. -/
-private lemma upperPartialMoment_sub (hY : Integrable Y P) {e e' : ℝ} (h : e ≤ e') :
+lemma upperPartialMoment_sub (hY : Integrable Y P) {e e' : ℝ} (h : e ≤ e') :
     0 ≤ (∫ ω, max (Y ω - e) 0 ∂P) - ∫ ω, max (Y ω - e') 0 ∂P ∧
       (∫ ω, max (Y ω - e) 0 ∂P) - ∫ ω, max (Y ω - e') 0 ∂P ≤ e' - e := by
-  rw [← integral_sub (integrable_max_sub hY e) (integrable_max_sub hY e')]
+  have hM (e : ℝ) : Integrable (fun ω ↦ max (Y ω - e) 0) P :=
+    (hY.sub (integrable_const e)).pos_part
+  rw [← integral_sub (hM e) (hM e')]
   refine ⟨integral_nonneg fun ω ↦ sub_nonneg.2 (max_le_max (by linarith) le_rfl), ?_⟩
   calc ∫ ω, (max (Y ω - e) 0 - max (Y ω - e') 0) ∂P ≤ ∫ _, (e' - e) ∂P :=
-        integral_mono ((integrable_max_sub hY e).sub (integrable_max_sub hY e'))
+        integral_mono ((hM e).sub (hM e'))
           (integrable_const _) fun ω ↦ sub_le_iff_le_add.2 <|
             max_le (by linarith [le_max_left (Y ω - e') 0])
               (by linarith [le_max_right (Y ω - e') 0])

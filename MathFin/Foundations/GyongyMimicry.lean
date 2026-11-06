@@ -47,13 +47,25 @@ consistency of the CLM integral (`ae_eq_itoProcessCLM_min`,
 `itoProcessCLM_consist`), and the drift-path layer
 (`AdaptedDrift.driftPath` and its measurability/continuity lemmas).
 
-## Result
+## Main definitions
+
+* `BoundedCoeffData`: processes `X, β, δ` with `|β| ≤ B`, `|δ| ≤ D`, each measurable at every
+  time and continuous in time almost surely; the Itô relation between them is not a field.
+* `sigmaGen`: `σ(X_t)`, the pullback of the Borel σ-algebra along `X t`.
+* `driftCoeff`, `diffCoeffSq`: the Gyöngy coefficients `a_t = 𝔼[β_t | σ(X_t)]` and
+  `b²_t = 𝔼[δ_t² | σ(X_t)]`.
+* `generatorIntegrand`: `f'(X_s) β_s + ½ f''(X_s) δ_s²`, the drift term of Itô's formula for
+  `f(X_s)`.
+* `reindexed`: the real-time reindexing `s ↦ X (max s 0)` of an `ℝ≥0`-indexed process.
+* `constructedCoeffData`: the `BoundedCoeffData` instance for the constructed process
+  `X = c + ∫β + M`, reindexed to real time.
+* `constructedGenIntegrandExp`: the expected generator integrand of the constructed process on
+  the real time axis.
+
+## Main results
 
 Public API (all in namespace `MathFin.GyongyMimicry`):
 
-* `BoundedCoeffData` — bounded, path-continuous `X, β, δ` (the Itô relation is not a field);
-* `sigmaGen`, `driftCoeff`, `diffCoeffSq` — the conditioning σ-algebra and the Gyöngy
-  coefficients as conditional expectations;
 * `tower_identity`, `expectation_beta_eq_a`, `expectation_deltaSq_eq_b2` — the
   generator-matching identities;
 * `continuous_marginal_integrand` — the derivative/expectation interchange (proved);
@@ -77,7 +89,12 @@ Public API (all in namespace `MathFin.GyongyMimicry`):
 
 Supporting lemmas (`integrable_testβ`, `integrable_testδsq`, `hasDerivAt_marginal_flow_core`,
 `constructedGenIntegrandExp_eq`, `exists_coeffFn_comp`, `hitoid_constructed_fn_Ioc`,
-`intervalIntegrable_constructed_fn`, `contDiff_two_of_hasDerivAt_chain`) are `private`.
+`intervalIntegrable_constructed_fn`) are `private`.
+
+## Tags
+
+Gyöngy theorem, mimicking theorem, Markovian projection, local volatility, forward equation,
+Fokker–Planck, marginal distributions, MSC 60J60, MSC 60H30, MSC 91G20
 -/
 
 @[expose] public section
@@ -147,7 +164,7 @@ theorem continuous_f2_of_contDiff2 {f f' f'' : ℝ → ℝ} (h2 : ContDiff ℝ 2
 
 /-- `ContDiff ℝ 2 g` follows from the three-step `HasDerivAt` chain `g, g', g'', g'''`: the
 converse of `continuous_f2_of_contDiff2`. -/
-private lemma contDiff_two_of_hasDerivAt_chain {g g' g'' g''' : ℝ → ℝ}
+lemma contDiff_two_of_hasDerivAt_chain {g g' g'' g''' : ℝ → ℝ}
     (h1 : ∀ x, HasDerivAt g (g' x) x) (h2 : ∀ x, HasDerivAt g' (g'' x) x)
     (h3 : ∀ x, HasDerivAt g'' (g''' x) x) : ContDiff ℝ 2 g := by
   have hderivg : deriv g = g' := funext fun x => (h1 x).deriv

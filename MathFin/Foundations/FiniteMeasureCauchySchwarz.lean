@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-! # Cauchy–Schwarz in expectation
@@ -25,6 +26,23 @@ covariance, `cov(X, Y) ≤ √Var X · √Var Y` (`covariance_le_sqrt_mul_sqrt`)
 `Var(X + Y)` makes the standard deviation subadditive (`sqrt_variance_add_le`). Mathlib has the
 covariance calculus but neither inequality. Consumed by the standard-deviation principle and the
 Gaussian VaR subadditivity.
+
+## Main results
+
+* `integral_abs_mul_le_sqrt_mul_sqrt`: `∫|f·g| ≤ √(∫ f²)·√(∫ g²)` for `f, g` in `L²(ν)`.
+* `sq_integral_le_measureReal_mul`: `(∫ f)² ≤ ν(univ)·∫ f²` on a finite measure.
+* `integral_abs_le_sqrt_integral_sq`: `∫|f| ≤ √(∫ f²)` on a probability measure.
+* `covariance_le_sqrt_mul_sqrt`: `cov(X, Y) ≤ √Var X · √Var Y` for `X, Y` in `L²(P)`.
+* `sqrt_variance_add_le`: `√Var(X + Y) ≤ √Var X + √Var Y` for `X, Y` in `L²(P)`.
+
+## References
+
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 8.11
+
+## Tags
+
+Cauchy–Schwarz inequality, Hölder inequality, covariance bound, standard deviation subadditivity,
+L2 bound, MSC 60E15, MSC 28A25
 -/
 
 @[expose] public section

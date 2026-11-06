@@ -5,6 +5,7 @@ Authors: Raphael Coelho, Yang Ye
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -32,7 +33,14 @@ its midpoint within `(hi − lo) / 2ⁿ⁺¹` of it.
 The iteration is a noncomputable definition over `ℝ`. Floating-point rounding
 and stopping rules are out of scope.
 
-## Result
+## Main definitions
+
+* `bisectStep`: one bisection step toward `f x = C` on a bracket: evaluate `f` at the midpoint and
+  keep the half whose endpoints still straddle `C`.
+* `bisect`: the `n`-th bisection bracket from `(a, b)`.
+* `bisectMid`: the `n`-th bisection estimate, the midpoint of the `n`-th bracket.
+
+## Main results
 
 * `bisectStep`, `bisect`, `bisectMid`: one step, the `n`-th bracket, and the
   `n`-th estimate (the midpoint of the `n`-th bracket, counted from `n = 0`);
@@ -44,6 +52,11 @@ and stopping rules are out of scope.
 * `bisectMid_mem_Icc`: at a threshold `σ ∈ [lo, hi]`, every estimate lies in `[lo, hi]`.
 * `abs_bisectMid_sub_le`, `tendsto_bisectMid`: the `n`-th estimate is within
   `(hi − lo) / 2ⁿ⁺¹` of `σ`, and the estimates converge to `σ`.
+
+## Tags
+
+bisection method, root finding, implied volatility solver, threshold, interval halving, JEL C63,
+MSC 65M06
 -/
 
 @[expose] public section

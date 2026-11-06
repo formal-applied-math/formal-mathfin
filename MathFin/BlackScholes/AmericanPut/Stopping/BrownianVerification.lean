@@ -15,10 +15,24 @@ The contact rule is constructed, not hypothesized. Actual-boundary curvature
 still depends on proving the candidate supermartingale and its first-contact
 stopped martingale, as well as existence of the classical pair.
 
-## Result
+## Main definitions
 
-Public entry points include `brownianClassicalContactRule`,
-`brownian_price_identification_of_martingales`, `brownian_boundary_curvature_of_martingales`.
+* `brownianClassicalContactRule`: the classical first-contact rule `classicalContactRule`,
+  instantiated on the constructed Brownian model and its raw natural filtration.
+
+## Main results
+
+* `brownian_price_identification_of_martingales`: for a `DividendPutSolution` with `0 < K`,
+  `0 ≤ r`, `0 < S`, if the discounted candidate is a supermartingale and its stop at the
+  contact rule is a martingale, the Brownian American put equals `K*p` at the initial state.
+* `brownian_boundary_curvature_of_martingales`: for `0 < K`, `0 ≤ r`, `0 < σ`, if the two
+  martingale hypotheses hold for every maturity and spot, the exercise boundary has strictly
+  positive second derivative at every `τ > 0`.
+
+## Tags
+
+verification obligations, contact rule, price identification, boundary curvature, supermartingale,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

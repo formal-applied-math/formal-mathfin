@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -39,6 +40,14 @@ process `n ↦ A (n + 1)` is `ℱ`-strongly-adapted, i.e. `A (n + 1)` is
 `Foundations/SnellDoobDecomposition.lean` applies the uniqueness half to the finite-horizon Snell
 envelope `snellEnvelope` (`Foundations/SnellEnvelope.lean`) at `X = univ`, whose compensator is a.e.
 nonincreasing and constant on the continuation region.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 2.2.12
+
+## Tags
+
+Doob decomposition, predictable part, martingale part, compensator, uniqueness, MSC 60G42, MSC 60G48
 -/
 
 @[expose] public section

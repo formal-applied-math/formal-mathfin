@@ -18,6 +18,32 @@ For `σ > 0`, positive variance and a nonconstant numerator polynomial (of degre
 `0`, and the absence of positive critical points at which the polynomial is negative
 (`svi_finite_critical_criterion`). `four_query_count`: on any finite set, a signed combination of
 four Tarski queries equals four times the number of points `c > 0` with `P c < 0`.
+
+## Main definitions
+
+* `tarskiQuery`: the Tarski query of `q` on a finite set of points, the sum of the signs of its
+  values.
+* `criticalRoots`: the distinct critical points of a polynomial, `P.derivative.roots.toFinset`.
+* `badCriticalCount`: the number of distinct critical points `c > 0` of `P` at which `P` is
+  negative.
+
+## Main results
+
+* `durrleman_eq_derivatives`: for `σ > 0`, `durrleman p k` is the expression built from the first
+  and second derivatives of the variance.
+* `svi_critical_value_criterion`: for `σ > 0`, positive variance and a nonconstant numerator
+  polynomial, `durrleman p k ≥ 0` for all `k` iff the leading coefficient is positive, the value at
+  `0` is nonnegative and no positive critical point has a negative value.
+* `four_query_count`: on any finite set, a signed combination of four Tarski queries equals
+  `4` times the number of points `c > 0` with `P c < 0`.
+* `badCriticalCount_eq_zero_iff`: for `0 < deg P`, `badCriticalCount P = 0` iff no positive critical
+  point of `P` has a negative value.
+* `svi_finite_critical_criterion`: the criterion of `svi_critical_value_criterion` with the last
+  condition replaced by `badCriticalCount (polynomial p) = 0`.
+
+## Tags
+
+Durrleman condition, critical points, Tarski query, SVI butterfly arbitrage, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

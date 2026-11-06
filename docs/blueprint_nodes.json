@@ -340,7 +340,7 @@
   "title": "∫₀ᵀ B dB = ½(B_T² − B₀² − T)",
   "text":
   "The CLM's first genuine consumer: $\\int_0^T B\\,dB$ computed\n  *through the abstract integral*, agreeing with the quadratic-variation limit —\n  the clamp-truncation + isometry-Cauchy template any unbounded-coefficient\n  consumer would reuse.",
-  "name": "MathFin.ItoIntegralBrownian.itoIntegralCLM_T_brownian",
+  "name": "MathFin.ItoIntegralBrownian.itoIntegralCLM_brownian",
   "module": "MathFin.Foundations.ItoIntegralBrownian",
   "line": 379,
   "leanOk": true,
@@ -386,7 +386,7 @@
   "title": "Continuous Itô integral (CLM on [0,T])",
   "text":
   "The discrete isometry extended to a continuous linear isometry\n  on predictable $L^2$ integrands over $[0,T]$, via density of simple processes\n  (Dynkin π-λ on predictable rectangles) and `LinearMap.extendOfNorm`.",
-  "name": "MathFin.ItoIntegralCLM.itoIntegralCLM_T",
+  "name": "MathFin.ItoIntegralCLM.itoIntegralCLM",
   "module": "MathFin.Foundations.ItoIntegralCLM",
   "line": 663,
   "leanOk": true,

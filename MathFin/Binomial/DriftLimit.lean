@@ -29,9 +29,22 @@ characteristic-function/Lévy route plus put-call parity.
   as `h → 0`. Uses the algebraic identity
   `e^{σh} + e^{-σh} − 2 = e^{−σh} · (e^{σh} − 1)²` to reduce to existing
   `tendsto_exp_sub_one_div`.
-* `crr_drift_limit_h` / `crr_drift_limit_n`: the headline
+* `tendsto_crr_drift_quotient` / `crr_drift_limit_n`: the headline
   `n · (2 p_n − 1) · σ √(T/n) → (r − σ²/2) T`, in `h`-parametrised and
   `n`-indexed form.
+
+## References
+
+* [J. C. Cox, S. A. Ross and M. Rubinstein, *Option pricing: a simplified
+  approach*][CoxRossRubinstein1979]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 13.4; 21.1
+* [S. E. Shreve, *Stochastic Calculus for Finance I: The Binomial Asset Pricing Model*][ShreveSCFI],
+  3.2
+
+## Tags
+
+Cox–Ross–Rubinstein, drift limit, risk-neutral drift, binomial to Black–Scholes, log-return mean,
+MSC 91G20, MSC 60F05, JEL G13
 -/
 
 @[expose] public section
@@ -134,26 +147,10 @@ lemma tendsto_crr_drift_quotient {σ : ℝ} (hσ : σ ≠ 0) (r : ℝ) :
   · simp [hden0]
   · field_simp
 
-/-- **CRR drift limit** (continuous form): the substantive analytic content of
-the drift correspondence.
-
-For `σ ≠ 0`, as `h → 0` (`h ≠ 0`):
-  `(2 e^{r h²} − e^{σh} − e^{−σh}) / (h · (e^{σh} − e^{−σh})) → (r − σ²/2) / σ`.
-
-To extract the textbook `n · (2 p_n − 1) · σ √(T/n) → (r − σ²/2) T` form,
-substitute `h = √(T/n)`, multiply by `σT`, and use `n · √(T/n) · √(T/n) = T`.
-That n-indexed form is completed below in `crr_drift_limit_n`. -/
-theorem crr_drift_limit_h {σ : ℝ} (hσ : σ ≠ 0) (r : ℝ) :
-    Tendsto (fun h : ℝ ↦
-        (2 * Real.exp (r * h^2) - Real.exp (σ * h) - Real.exp (-(σ * h)))
-          / (h * (Real.exp (σ * h) - Real.exp (-(σ * h)))))
-      (𝓝[≠] 0) (𝓝 ((r - σ^2 / 2) / σ)) :=
-  tendsto_crr_drift_quotient hσ r
-
 /-- **CRR drift limit (textbook n-form)**: as `n → ∞`,
 `n · (2 p_n − 1) · σ · √(T/n) → (r − σ²/2) · T`.
 
-The substitution `h_n = √(T/n)` reduces this to `crr_drift_limit_h` scaled by
+The substitution `h_n = √(T/n)` reduces this to `tendsto_crr_drift_quotient` scaled by
 `σ T`, using the algebraic identity `n · (√(T/n))² = T`. -/
 theorem crr_drift_limit_n {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
     Tendsto (fun n : ℕ ↦

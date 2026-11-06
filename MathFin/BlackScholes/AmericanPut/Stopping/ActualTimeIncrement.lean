@@ -15,10 +15,28 @@ price is in exercise: the later continuation slope is strictly greater than
 the exercise slope. Both slices are therefore smooth at a candidate positive
 space-time maximum, and the pricing PDE excludes it.
 
-## Result
+## Main definitions
 
-Public entry points include `canonicalTimeIncrement`, `canonicalTimeIncrement_continuous`,
-`canonicalTimeIncrement_spatial_deriv`, `canonicalTimeIncrement_contDiffAt`.
+* `canonicalTimeIncrement`: the increment `canonicalPrice k h x (t+δ) - canonicalPrice k h x t` of
+  the canonical price over a time step `δ`.
+
+## Main results
+
+* `canonicalTimeIncrement_continuous`: for `0 ≤ k`, the time increment is jointly continuous.
+* `canonicalTimeIncrement_spatial_deriv`: for `0 < k`, `0 ≤ h ≤ k`, `0 ≤ δ` and `0 < t`, the
+  spatial derivative of the increment is the difference of those of the price at `t + δ` and `t`.
+* `canonicalTimeIncrement_contDiffAt`, `canonicalTimeIncrement_equation`: under those hypotheses
+  and `x` above the log boundary at `t`, the increment is `C²` near `(x, t)` and satisfies the
+  pricing equation `u_t = u_xx + (k-h-1) u_x - k u` there.
+* `canonicalTimeIncrement_positive_max_continuation`: a positive local spatial maximum of the
+  increment at `x` can occur only above the log boundary at `t`.
+* `canonicalTimeIncrement_no_positive_max`: the increment has no point `(x, t)` that is a local
+  spatial maximum and a backward-in-time maximum with positive value.
+
+## Tags
+
+time increment, maximum principle, pricing PDE, continuation slope, American put, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

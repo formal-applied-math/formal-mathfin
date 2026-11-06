@@ -18,10 +18,27 @@ strictly exceeds it; no optimal-stopping assertion is assumed and no PDE is used
 description of the contact set by an exercise boundary (`classicalGap_zero_iff`,
 `classicalContactRule_continuation`) additionally needs `ContinuousBoundaryPutSolution`.
 
-## Result
+## Main definitions
 
-Public entry points include `classicalCandidate_adapted`, `frozenPutReward`,
-`frozenPutReward_adapted`, `frozenPutReward_continuous`, `classicalContactRule_price_eq`.
+* `frozenPutReward`: the put reward for exercise at the deterministic time `min t T`, frozen once
+  `t` passes maturity.
+* `classicalGap`: the gap `classicalCandidate - frozenPutReward` between the discounted classical
+  price and the discounted payoff.
+* `classicalContactRule`: the rule that exercises at the first zero of `classicalGap`.
+
+## Main results
+
+* `classicalCandidate_adapted`, `frozenPutReward_adapted`: for an adapted `W`, the candidate (for
+  a `PutEnvelope p`) and the frozen put reward are adapted.
+* `frozenPutReward_continuous`: for continuous paths of `W`, the frozen put reward is
+  continuous in time.
+* `classicalContactRule_price_eq`: for a `PutEnvelope p`, adapted continuous `W`, `0 < K` and
+  `0 < S`, at the first-contact time the price `p` equals the put payoff.
+
+## Tags
+
+first contact, contact rule, price-payoff gap, put envelope, stopping rule, MSC 60G40, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

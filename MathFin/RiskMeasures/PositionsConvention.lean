@@ -31,6 +31,17 @@ library.
 * `isCoherentRiskMeasure_neg_iff`: the four ADEH axioms for positions, written out, are
   equivalent to `IsCoherentRiskMeasure P (fun L ↦ ρ (-L))`, for any finite measure `P` with
   `P {i} ≠ 0` for every state `i`.
+
+## References
+
+* [P. Artzner et al., *Coherent measures of risk*][ArtznerDelbaenEberHeath1999]
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Definition 2.18
+
+## Tags
+
+coherent risk measure, positions convention, Artzner-Delbaen-Eber-Heath, sign convention,
+gains and losses, MSC 91G70, JEL G32
 -/
 
 @[expose] public section

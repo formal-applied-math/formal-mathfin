@@ -14,6 +14,19 @@ Part of the SVI polynomial-sign certificate (#174).
 For `f ≠ 0`, `companion f f.natDegree` is the matrix of multiplication by the class of `X` in
 `ℝ[X]/(f)`, in the power basis, with no irreducibility or squarefreeness assumed. Its
 characteristic polynomial is `f` made monic, and traces of its powers are algebra traces.
+
+## Main results
+
+* `companion_eq_leftMulMatrix`: for `f ≠ 0`, `companion f f.natDegree` is the matrix of
+  multiplication by `AdjoinRoot.root f` in the power basis of `AdjoinRoot f`.
+* `companion_charpoly`: its characteristic polynomial is `f * C f.leadingCoeff⁻¹`.
+* `trace_companion_pow_eq_algebraTrace`: the trace of its `r`-th power is the algebra trace of
+  `(AdjoinRoot.root f)^r`.
+
+## Tags
+
+companion matrix, characteristic polynomial, trace of powers, quotient algebra, SVI, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

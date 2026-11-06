@@ -39,7 +39,7 @@ strict monotonicity in vol (`bsV_strictMonoOn_sigma`), convexity in strike
 (`bsV_strike_convexOn`), and a call non-increasing in the dividend yield (`antitone_bsVDiv_q`,
 `DividendsGreeks.lean`). Monotonicity in spot, strike and rate is not stated as such.
 
-## Results
+## Main results
 
 * `bsV_delta_nonneg`, `bsV_delta_le_one`: `Φ(d_1) ∈ [0, 1]` (`∂_S V` by `hasDerivAt_bsV_S`).
 * `bsV_gamma_pos`: the gamma formula, `∂²_S V` by `hasDerivAt_deriv_bsV_S`, is `> 0`.
@@ -54,6 +54,11 @@ strict monotonicity in vol (`bsV_strictMonoOn_sigma`), convexity in strike
   sign is `bsV_vega_pos`. Put theta has no unconditional sign: for `r > 0` a deep
   in-the-money put has positive calendar theta (`Θ_put → r K e^{−rτ}` as `S → 0`; not
   formalized here).
+
+## Tags
+
+Greeks, delta gamma vega, sign of sensitivities, option sensitivities, monotonicity of price,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -13,6 +13,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Compositional contract semantics (Peyton Jones, Eber & Seward 2000). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "PeytonJonesEberSeward2000"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Contract.pathPV_both in MathFin/Contracts/Core.lean: pathPV, defined as the discounted sum over a contract's List (ℝ≥0 × ℝ) cashflows, is additive over Contract.both by List.sum distributing over List.append. Unconditional -- no integrability or measure-theoretic hypothesis, since pathPV is a finite list sum along one fixed scenario, not yet an integral. Stated for a generic index type ι -- this lemma is not itself restricted to a single asset; the corpus's BlackScholes/CappedCall entries below instantiate ι = Unit for a single-asset market observed only at T. Payoff is a finite inductive, so any payoff kernel it can express is over a finite observation grid; the Payoff/Contract language has no calendar, business-day convention, market-disruption, corporate-action or issuer-credit node at any instantiation, so this is never a legal instrument and none of that content is claimed. Axioms-clean."
@@ -29,6 +37,15 @@
       "metadata": {
         "chapter": 9,
         "reference": "Adapted stochastic integrands (Shreve, Stochastic Calculus for Finance II, ch. 3-4). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "ShreveSCFII",
+            "locator": "ch. 3-4"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Payoff.measurable_eval_of_obsTimes_le in MathFin/Contracts/Adapted.lean, by structural induction on the eight Payoff constructors (six of them binary), threading Measurable.add/.sub/.mul/.max/.min and Measurable.ite through Filtration.mono. obsTimes is computed syntactically by walking the payoff tree and is a deliberate over-approximation (e.g. mul (const 0) (obs i t) evaluates to 0 on every scenario yet obsTimes still lists t), so the theorem is a sufficient, not necessary, adaptedness criterion. Stated for a generic index type ι -- this lemma is not itself restricted to a single asset; the corpus's BlackScholes/CappedCall entries below instantiate ι = Unit for a single-asset market observed only at T. Payoff is a finite inductive, so any payoff kernel it can express is over a finite observation grid; the Payoff/Contract language has no calendar, business-day convention, market-disruption, corporate-action or issuer-credit node at any instantiation, so this is never a legal instrument and none of that content is claimed. Axioms-clean."
@@ -45,6 +62,19 @@
       "metadata": {
         "chapter": 9,
         "reference": "Linearity of arbitrage-free pricing (the law of one price; Hull 1.1, Shreve ch. 5). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "1.1"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "ch. 5"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Contract.value_both in MathFin/Contracts/Pricing.lean, by MeasureTheory.integral_add applied through pathPV_both. Carries explicit Integrable hypotheses on each summand's discounted pathPV under Q; no linearity is claimed without them, unlike the unconditional value_scale direction. Stated for a generic index type ι -- this lemma is not itself restricted to a single asset; the corpus's BlackScholes/CappedCall entries below instantiate ι = Unit for a single-asset market observed only at T. Payoff is a finite inductive, so any payoff kernel it can express is over a finite observation grid; the Payoff/Contract language has no calendar, business-day convention, market-disruption, corporate-action or issuer-credit node at any instantiation, so this is never a legal instrument and none of that content is claimed. Axioms-clean."
@@ -61,6 +91,15 @@
       "metadata": {
         "chapter": 9,
         "reference": "Risk-neutral pricing of asset delivery (Shreve 5.2, martingale pricing). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "ShreveSCFII",
+            "locator": "5.2"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Contract.value_deliverAsset in MathFin/Contracts/Pricing.lean. The contract observes and pays the asset only at the single time T (Contract.pay T (Payoff.obs () T)); the discount curve is fixed to the constant 1 (undiscounted) and the model to a single asset (fun _ => S). Hypotheses are Martingale S 𝓕 Q and [IsProbabilityMeasure Q] -- deliberately not the library's IsEMM bundle, since this argument never touches the mutual-absolute-continuity content (ac/ac') that distinguishes an equivalent martingale measure from a bare martingale measure. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
@@ -77,6 +116,19 @@
       "metadata": {
         "chapter": 9,
         "reference": "Black-Scholes European call formula (Hull 15.6, Shreve 4.5). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "15.6"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "4.5"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. value_europeanCall in MathFin/Contracts/Models/BlackScholes.lean: Contract.value_pay unfolds Contract.value on a single pay node to the discounted payoff integral, then MathFin.bs_call_formula closes it directly -- no new Black-Scholes content, the whole content is the reduction. BlackScholes.assets is constant in t and equal to the terminal log-normal price bsTerminal at every time (no path is supplied), under the BSCallHyp integrability/law hypothesis bundle the underlying closed form already requires. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
@@ -93,6 +145,19 @@
       "metadata": {
         "chapter": 9,
         "reference": "Black-Scholes European put formula (Hull 16.6, Shreve 4.5). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "16.6"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "4.5"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. value_europeanPut in MathFin/Contracts/Models/BlackScholes.lean: the same Contract.value_pay reduction as the call, closed by MathFin.bs_put_formula -- no new Black-Scholes content, the whole content is the reduction. BlackScholes.assets is constant in t and equal to the terminal log-normal price bsTerminal at every time (no path is supplied), under the BSCallHyp integrability/law hypothesis bundle the underlying closed form already requires. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
@@ -109,6 +174,15 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cash-or-nothing digital option pricing (Hull 26.4). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "26.4"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. value_digitalCall in MathFin/Contracts/Models/BlackScholes.lean: the same Contract.value_pay reduction, closed by MathFin.bs_cash_or_nothing_formula -- no new Black-Scholes content, the whole content is the reduction. BlackScholes.assets is constant in t and equal to the terminal log-normal price bsTerminal at every time (no path is supplied), under the BSCallHyp integrability/law hypothesis bundle the underlying closed form already requires. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
@@ -125,6 +199,15 @@
       "metadata": {
         "chapter": 9,
         "reference": "Capped call / bull spread decomposition (Hull 12.3). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "12.3"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. cappedCall_payoff_eq in MathFin/Contracts/Instruments/Options.lean: for K1 <= K2, the composed contract cappedCall K1 K2 T -- built from a long europeanCall K1 T and a short europeanCall K2 T via Contract.both/Contract.scale -- has the same pathPV as the capped-call payoff min(max(S - K1, 0), K2 - K1), by cappedCall_eq_bull_spread transported from a pointwise real identity to the contract's pathPV. This is a payoff-level identity only: no Contract.value, no integral, no integrability hypothesis anywhere in the statement. The Black-Scholes pricing result for this same contract is a separate theorem, value_cappedCall, published as mf-contract-capped-call-value -- this entry does not witness it. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
@@ -141,6 +224,15 @@
       "metadata": {
         "chapter": 9,
         "reference": "Capped call / bull spread decomposition (Hull 12.3). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "12.3"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. value_cappedCall in MathFin/Contracts/Models/BlackScholes.lean: cappedCall K1 K2 T's Contract.value under the single-asset Black-Scholes model is exactly the difference of the two value_europeanCall closed forms, by Contract.value_both and Contract.value_scale applied to value_europeanCall twice and closed by ring -- Contract.value is never unfolded and no integral is touched a third time. The Integrable hypotheses Contract.value_both needs are discharged internally by integrable_europeanCall_pathPV (the positive part of S_T − K, with the terminal asset price bsTerminal integrable as a function of a standard normal), so the caller supplies only the BSCallHyp bundle each leg's value_europeanCall already needs -- a real strengthening over the bare linearity lemma, which would otherwise leave two Integrable side-conditions for the caller. Payoff kernels over a finite observation grid, single-asset, observing only at T. Not a legal instrument: calendars, business-day conventions, market disruption, corporate actions and issuer credit are absent from the model and not claimed. Axioms-clean."
@@ -157,6 +249,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Contract.integrable_pathPV_of_bounded in MathFin/Contracts/Adapted.lean: structural induction over the fixed-date contracts (zero, pay, both, scale; the payAtHit constructor is excluded by Contract.FixedDated), with each pay leg bounded by Payoff.exists_bound_eval (a structural induction over Payoff: each binary constructor combines two bounds, an indicator is bounded by 1) and measurable by Payoff.measurable_eval, then Integrable.of_bound. Requires every coordinate X i t to be bounded uniformly in the outcome, at every time; the binomial tree satisfies this, lognormal models do not. A payment at a hitting time (Contract.payAtHit) is excluded: the hitting time of a measurable process need not be measurable, and an unbounded discount factor evaluated at a random date need not be integrable. Axioms-clean."
@@ -173,6 +270,18 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cox, Ross and Rubinstein, Option pricing: a simplified approach (J. Financial Economics, 1979); Shreve, Stochastic Calculus for Finance I, ch. 1-2. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "CoxRossRubinstein1979"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "ch. 1-2"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Binomial.value_pay_eq_binomialPrice in MathFin/Contracts/Models/Binomial.lean: Contract.value_pay reduces the contract's value to the integral of its discounted payoff, the hypothesis hg identifies that payoff with g of the spot after N flips, and binomialPrice_eq_integral_coinFlipMeasure (MathFin/Binomial/PathMeasure.lean, the tree price as an expectation over Ionescu-Tulcea coin-flip paths) closes it. The payoff must depend on the underlying at T only; path-dependent payoffs are expressible in the model but not priced here. Single underlying. Axioms-clean."
@@ -189,6 +298,18 @@
       "metadata": {
         "chapter": 9,
         "reference": "Capped call / bull spread decomposition (Hull 12.3); Cox, Ross and Rubinstein (1979). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "12.3"
+          },
+          {
+            "key": "CoxRossRubinstein1979"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Binomial.value_cappedCall in MathFin/Contracts/Models/Binomial.lean: Contract.value_both and Contract.value_scale split the composed contract, Binomial.integrable_pathPV discharges both integrability side conditions (the spot after finitely many flips is measurable and bounded, so Contract.integrable_pathPV_of_bounded applies to every fixed-date contract), and Binomial.value_europeanCall prices each leg. The same contract term is priced in Black-Scholes by mf-contract-capped-call-value. Single underlying, observing only at T. Axioms-clean."
@@ -205,6 +326,18 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cox, Ross and Rubinstein (1979); Shreve, Stochastic Calculus for Finance I, Theorem 1.2.2. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "CoxRossRubinstein1979"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "Theorem 1.2.2"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Binomial.pathPV_eq_value_add_gains in MathFin/Contracts/Models/Binomial.lean: Binomial.value_pay_eq_binomialPrice identifies the contract's value with the tree price, and binomialPrice_replication (MathFin/Binomial/MartingaleRepresentation.lean, the discrete martingale representation) supplies the strategy; the contract's pathPV at T is e^(-rho N) g(S_N). European payoffs of the underlying at T only. Axioms-clean."
@@ -221,6 +354,18 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cox, Ross and Rubinstein, Option pricing: a simplified approach (J. Financial Economics, 1979); Hull, Options, Futures and Other Derivatives, ch. 13. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "CoxRossRubinstein1979"
+          },
+          {
+            "key": "Hull",
+            "locator": "ch. 13"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. tendsto_binomial_value_europeanCall in MathFin/Contracts/Models/BinomialLimit.lean composes three proved results: Binomial.value_europeanCall (each tree value is the n-step tree price, using T / (T/n) = n), binomialPrice_call_tendsto_bs_closed (MathFin/Binomial/CRRCharFun.lean and CRRClosedForm.lean: the CRR call prices converge to the Black-Scholes closed form, by characteristic functions, Levy continuity and put-call parity), and BlackScholes.value_europeanCall (that closed form is the Black-Scholes value of the same contract). The condition |r| sqrt(T) < sigma makes every tree with n >= 1 arbitrage-free (binomialNoArb_crr) and, with the degenerate n = 0 tree, keeps every up-probability in [0, 1] (crrProb_mem_Icc). European call only; no rate of convergence. Axioms-clean."
@@ -237,6 +382,19 @@
       "metadata": {
         "chapter": 5,
         "reference": "Hull, Options, Futures, and Other Derivatives, ch. 5 (forward prices); Shreve, Stochastic Calculus for Finance II, Section 5.6.2. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "ch. 5"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "Section 5.6.2"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. value_forward_of_martingale in MathFin/Contracts/Parity.lean: the martingale property between 0 and T (Martingale.condExp_ae_eq through integral_condExp) gives E_Q[D(T) X(T)] = S0 (integral_discounted_of_martingale), and value_forward_of_integral prices the forward from that mean. BlackScholes.value_forward is an instance of value_forward_of_integral. Axioms-clean."
@@ -253,6 +411,18 @@
       "metadata": {
         "chapter": 11,
         "reference": "Stoll, The relationship between put and call option prices, J. Finance 24 (1969); Hull, Options, Futures, and Other Derivatives, ch. 11. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Stoll1969"
+          },
+          {
+            "key": "Hull",
+            "locator": "ch. 11"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. value_europeanCall_sub_put_of_martingale in MathFin/Contracts/Parity.lean: the pathwise identity call = put + forward (value_europeanCall_eq_put_add_forward), the put's integrability from the discounted underlying's (integrable_europeanPut_pathPV, by cases on D(T) = 0), and the forward's value value_forward_of_martingale. Axioms-clean."
@@ -269,6 +439,15 @@
       "metadata": {
         "chapter": 2,
         "reference": "Fabozzi, Bond Markets, Analysis, and Strategies, ch. 2. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "FabozziBMAS",
+            "locator": "ch. 2"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. fixedFlows, pathPV_fixedFlows_yieldDiscount and Contract.value_eq_of_pathPV_eq in MathFin/Contracts/Instruments/FixedIncome.lean: the contract's present value is sum_i D(t_i) c_i (pathPV_fixedFlows, by induction on the schedule), and at D = (1 + y)^(-tau) each term is c_i / (1 + y)^(t_i) (Real.rpow_neg, Real.rpow_natCast). A contract that observes nothing is worth its present value under any probability measure. Integer payment times only, matching bondPriceDisc. Axioms-clean."
@@ -285,6 +464,15 @@
       "metadata": {
         "chapter": 2,
         "reference": "Fabozzi, Bond Markets, Analysis, and Strategies, ch. 2. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "FabozziBMAS",
+            "locator": "ch. 2"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. pathPV_fixedFlows_zcb in MathFin/Contracts/Instruments/FixedIncome.lean: pathPV_fixedFlows termwise against the definition of annuityValue (MathFin/FixedIncome/CouponBonds.lean). Flat continuously compounded curve only. Axioms-clean."
@@ -301,6 +489,19 @@
       "metadata": {
         "chapter": 7,
         "reference": "Hull, Options, Futures, and Other Derivatives, ch. 7; Brigo and Mercurio, Interest Rate Models, Section 1.5. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "ch. 7"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "Section 1.5"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. value_payerSwap in MathFin/Contracts/Instruments/FixedIncome.lean: the floating leg's coupons delta fraForwardRate (P(T_i)) (P(T_(i+1))) delta discount to P(T_i) - P(T_(i+1)) and telescope to P(T_0) - P(T_n) (pathPV_floatingLeg, by induction); the fixed leg is K times annuity (pathPV_fixedLeg); payerSwapValue is MathFin/FixedIncome/InterestRateSwap.lean's. Deterministic curve only: the floating rates are the curve's forward rates, known in advance. Axioms-clean."
@@ -317,6 +518,15 @@
       "metadata": {
         "chapter": 7,
         "reference": "Hull, Options, Futures, and Other Derivatives, ch. 7. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "ch. 7"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. value_payerSwap_eq_zero_iff in MathFin/Contracts/Instruments/FixedIncome.lean: value_payerSwap, then payerSwapValue_eq_zero_iff (MathFin/FixedIncome/InterestRateSwap.lean). Deterministic curve only. Axioms-clean."
@@ -333,6 +543,18 @@
       "metadata": {
         "chapter": 2,
         "reference": "Artzner, Delbaen, Eber and Heath, Coherent measures of risk, Math. Finance 9 (1999); McNeil, Frey and Embrechts, Quantitative Risk Management (2015), Section 2.3. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 2.3"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. expectedShortfall_loss_both_le in MathFin/Contracts/Risk.lean: the book's loss is the sum of the positions' losses (Contract.pathPV_both), and expected shortfall is subadditive (expectedShortfall_add_le, MathFin/RiskMeasures/ExpectedShortfall.lean). Contract.loss p c = p - pathPV is the loss of the position bought at p. Axioms-clean."
@@ -349,6 +571,15 @@
       "metadata": {
         "chapter": 2,
         "reference": "McNeil, Frey and Embrechts, Quantitative Risk Management (2015), Section 2.2. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 2.2"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. valueAtRisk_loss_europeanCall_le in MathFin/Contracts/Risk.lean: valueAtRisk_loss_le_of_nonneg (valueAtRisk_mono against the constant loss p, and valueAtRisk_const, MathFin/RiskMeasures/ValueAtRisk.lean) applied to the call's nonnegative discounted payoff. Axioms-clean."
@@ -365,6 +596,22 @@
       "metadata": {
         "chapter": 9,
         "reference": "Cox, Ross and Rubinstein (1979); Shreve, Stochastic Calculus for Finance I, Theorem 1.2.2; McNeil, Frey and Embrechts, Quantitative Risk Management (2015), Section 2.2. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "CoxRossRubinstein1979"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "Theorem 1.2.2"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 2.2"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Binomial.valueAtRisk_hedged_eq_zero in MathFin/Contracts/Risk.lean: Binomial.pathPV_eq_value_add_gains makes the hedged loss identically 0, and valueAtRisk_const, expectedShortfall_const (MathFin/RiskMeasures/ValueAtRisk.lean) evaluate a constant loss. European payoffs of the underlying at T only. Axioms-clean."
@@ -381,6 +628,15 @@
       "metadata": {
         "chapter": 2,
         "reference": "Brigo and Mercurio, Interest Rate Models: Theory and Practice, 2nd ed. (2006), sec. 1.2. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "sec. 1.2"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Contract.valueDisc, zeroCurve and valueDisc_fixedFlows_eq_value in MathFin/Contracts/Models/ShortRate.lean: the path PV of fixedFlows is sum_i D(t_i) c_i (pathPV_fixedFlows), the integral of the finite sum splits (integral_finsetSum, integral_mul_const), and the result is value_fixedFlows on the curve t -> E_Q[D t]. Contracts whose cash flows depend on the scenario are not covered. Axioms-clean."
@@ -397,6 +653,18 @@
       "metadata": {
         "chapter": 2,
         "reference": "Vasicek, An equilibrium characterization of the term structure, J. Financial Economics 5 (1977); Brigo and Mercurio (2006), sec. 3.2.1. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Vasicek1977"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "sec. 3.2.1"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. valueDisc_fixedFlows_vasicek in MathFin/Contracts/Models/ShortRate.lean: valueDisc_fixedFlows_of_zeroCurve_eq at the curve A(t) exp(-B(t) r0), which is vasicekBondPrice_affine (the Gaussian Laplace transform of the integrated rate). Integrability of each discount factor follows from its integral being positive (Integrable.of_integral_ne_zero). The integrated rate is taken in its Wiener representation (vasicekIntegratedRate); it is not derived here as the time integral of a solution of the Vasicek SDE. Time-0 prices only; P(t, T) for t > 0 is not formalized. Axioms-clean."
@@ -413,6 +681,18 @@
       "metadata": {
         "chapter": 2,
         "reference": "Hull and White, Pricing interest-rate-derivative securities, Rev. Financial Studies 3(4) (1990); Brigo and Mercurio (2006), sec. 3.3. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "HullWhite1990"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "sec. 3.3"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. valueDisc_fixedFlows_hullWhite in MathFin/Contracts/Models/ShortRate.lean: valueDisc_fixedFlows_of_zeroCurve_eq at the curve HullWhite.bondA(t) exp(-B(t) r0), which is HullWhite.bondPrice_affine. Integrability of each discount factor follows from its integral being positive. The forcing theta is a given continuous function; its calibration to an initial curve is HullWhiteCalibration's, not used here. Time-0 prices only. Axioms-clean."
@@ -429,6 +709,15 @@
       "metadata": {
         "chapter": 2,
         "reference": "Andersen and Piterbarg, Interest Rate Modeling, vol. 2 (2010), ch. 10. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "AndersenPiterbarg2010",
+            "locator": "ch. 10"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. valueDisc_fixedFlows_gsr in MathFin/Contracts/Models/ShortRate.lean: valueDisc_fixedFlows_of_zeroCurve_eq at the curve exp(-M(t) + gsrBondV(t)/2), which is gsrBondPrice_eq, valid for t >= T*. Integrability of each discount factor follows from its integral being positive. Two volatility pieces only. Time-0 prices only. Axioms-clean."
@@ -445,6 +734,19 @@
       "metadata": {
         "chapter": 7,
         "reference": "Hull, Options, Futures, and Other Derivatives, ch. 7; Brigo and Mercurio, Interest Rate Models, Section 1.5. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "ch. 7"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "Section 1.5"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. value_payerSwap_one_eq_fraValue in MathFin/Contracts/Instruments/FixedIncome.lean: value_payerSwap at n = 1 (floating coupon discounts to P(T_0) - P(T_1), fixed leg is K times the one-term annuity delta P(T_1)), matched with fraValue_forwardRate_eq_discount_difference from MathFin/FixedIncome/FRA.lean. Deterministic curve only: the forward rate is the curve's, known in advance, so the contract is a swap with one accrual period rather than a payoff on a floating rate observed at the reset date. Axioms-clean."
@@ -461,6 +763,22 @@
       "metadata": {
         "chapter": 9,
         "reference": "Power options (Zhang, Exotic Options, 2nd ed.); Black-Scholes European call formula (Hull 15.6, Shreve 4.5). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "ZhangExoticOptions"
+          },
+          {
+            "key": "Hull",
+            "locator": "15.6"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "4.5"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. value_powerCall in MathFin/Contracts/Models/BlackScholes.lean: Contract.value_pay unfolds the single pay node, Real.rpow_natCast identifies the evaluated rpow payoff (exponent the natural a, read as an NNReal) with bsPowerTerminal, and MathFin.bs_power_call_formula closes it -- no new Black-Scholes content. Natural-number exponents only (the closed form is stated for natural a, although the rpow node carries any nonnegative real exponent). BlackScholes.assets is the terminal log-normal price at every time; the BSCallHyp bundle is the one the underlying closed form requires. Not a legal instrument. Axioms-clean."
@@ -477,6 +795,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Margrabe, The value of an option to exchange one asset for another, J. Finance 33(1) (1978). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Margrabe1978"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. value_exchangeOption in MathFin/Contracts/Models/BlackScholesExchange.lean: Contract.value_pay unfolds the single pay node and MathFin.margrabe_exchange_price (MathFin/BlackScholes/MargrabeGrounding.lean) closes it -- no new Margrabe content. The statement is under the model measure, not the S2-numeraire measure. BlackScholes.assets₂ reads the two terminals at every time (no path). Not a legal instrument. Axioms-clean."
@@ -493,6 +819,25 @@
       "metadata": {
         "chapter": 9,
         "reference": "Geometric-average Asian options (Kemna-Vorst 1990; Zhang, Exotic Options, 2nd ed.); Black-Scholes European call formula (Hull 15.6, Shreve 4.5). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "KemnaVorst1990"
+          },
+          {
+            "key": "ZhangExoticOptions"
+          },
+          {
+            "key": "Hull",
+            "locator": "15.6"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "4.5"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. value_geomAsianCall in MathFin/Contracts/Models/BlackScholesAsian.lean: Contract.value_pay unfolds the single pay node, the observation product (Payoff.obsProd over the dates) under rpow at 1/n is rewritten as the product of per-date powers by Real.finsetProd_rpow, and MathFin.geomAsianN_call_price closes it -- no new Black-Scholes content. The model BlackScholes.pathAssets is the geometric Brownian path S_u = S_0 exp((r - sigma^2/2) u + sigma B_u) for a pre-Brownian B (IsPreBrownianReal), added with this entry. The payoff is paid once at maturity T on the n listed dates (all <= T); the closed form is the effective-spot, effective-volatility reduction of geomAsianN_call_price, and needs the log-driver variance V_n > 0 (a degenerate set of dates is excluded). Not a legal instrument. Axioms-clean."
@@ -509,6 +854,25 @@
       "metadata": {
         "chapter": 9,
         "reference": "Rubinstein, Options for the Undecided, Risk 1991 (simple chooser); Zhang, Exotic Options, 2nd ed.; Black-Scholes European call and put formulas (Hull 15.6, Shreve 4.5). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Rubinstein1991"
+          },
+          {
+            "key": "ZhangExoticOptions"
+          },
+          {
+            "key": "Hull",
+            "locator": "15.6"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "4.5"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. value_chooser in MathFin/Contracts/Models/BlackScholesChooser.lean: Contract.value_both splits the portfolio, Contract.value_pay unfolds the two single cash flows, the geometric Brownian path at a positive date is bsTerminal of the standardised Brownian value (pathAssets_eq_bsTerminal), bs_call_formula and bs_put_formula price the legs, and chooserPrice_expanded identifies the sum with chooserPrice. The contract chooser K r T t1 is the static replicating portfolio, not the chooser written as a payoff: the holder's choice max(C_t1, P_t1) needs the conditional value of the call at t1, which Payoff cannot express. That the portfolio replicates the chooser is put-call parity at t1 (MathFin.chooser_via_pcp, chooserPayoff_decompose_BS), and that the call's value at t1 is its Black-Scholes price is the Markov step, neither re-derived here (MathFin.chooser_price_eq_expected_payoff prices the chooser-date payoff with the same assumption). No ordering of t1 and T is needed for the identity; the contract is a chooser when t1 <= T. Not a legal instrument. Axioms-clean."
@@ -525,6 +889,19 @@
       "metadata": {
         "chapter": 16,
         "reference": "S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 16; D. Lando, Credit Risk Modeling (2004), ch. 5. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "BagariaFIDP",
+            "locator": "ch. 16"
+          },
+          {
+            "key": "Lando2004",
+            "locator": "ch. 5"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. The CDS is cdsBuyer in MathFin/Contracts/Instruments/Credit.lean, two payFlows schedules (the protection leg and the negated premium leg) observing the default indicator process. value_cdsBuyer in MathFin/Contracts/Models/DefaultTime.lean: each leg's path value is a finite sum (pathPV_payFlows), the indicators are integrable with mean Q(tau <= u) = 1 - S(u), and Contract.value_both and value_scale combine the legs. measureReal_coxDefaultTime_le supplies Q(tau <= u) = 1 - hazardSurvival h u from cox_cdf_timeVarying (FixedIncome/Cox.lean). The contract is the discretisation of Cox.premiumLeg and Cox.protectionLeg, not those legs: the tower pays at fixed dates, so default is paid at the end of its period and the premium accrued within it is not paid. With no discounting the grid losses equal Cox.cdsLosses 0 h T on any grid with t 0 = 0, at its last date t n (cdsLossesGrid_one_eq_cdsLosses); with discounting at a flat rate, the grid legs converge to the continuous ones as the mesh shrinks (mf-contract-cds-mesh-convergence, MathFin/Contracts/Models/DefaultTimeMesh.lean). The protection leg paid at the default time itself is the separate contract cdsProtectionAtDefault (Contract.payAtHit), valued in mf-contract-cds-protection-at-default. Also proved in the same module, not in this entry: the buyer's CDS has value zero exactly at the grid par spread (1 - R) losses / annuity (value_cdsBuyer_eq_zero_iff). Recovery is a constant; the discount factor is deterministic. Not a legal instrument. Axioms-clean."
@@ -541,6 +918,23 @@
       "metadata": {
         "chapter": 9,
         "reference": "Hull, Options, Futures and Other Derivatives, ch. 29 (caplets as puts on zero-coupon bonds, Black's model for caplets); Brigo and Mercurio, Interest Rate Models, 2nd ed., sections 1.4 and 1.5; Musiela and Rutkowski, Martingale Methods in Financial Modelling, ch. 12. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "ch. 29"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "sections 1.4 and 1.5"
+          },
+          {
+            "key": "MusielaRutkowski",
+            "locator": "ch. 12"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. valueDisc_caplet_eq_bondPut in MathFin/Contracts/Models/Caplet.lean: HasBondPrice.integral_discount_mul turns E[D T1 * Y] into E[D T0 * P * Y] for an F T0-measurable Y by condExp_mul_of_stronglyMeasurable_left and integral_condExp, using D T0 * P = E[D T1 | F T0] a.e.; the pointwise identity P * delta * (L - K)^+ = (1 - (1 + delta K) P)^+ follows from delta L = 1/P - 1 and P > 0. SCOPE: bondPrice is defined for any stochastic discount factor, but the entry assumes (does not derive) that the observed bond process equals it a.e.; D is a hypothesis; the Vasicek instance is mf-contract-caplet-vasicek (P(t,T) at t > 0 is mf-contract-bond-price-vasicek and mf-contract-bond-price-hullwhite). The simple rate is an observed process tied to the bond by hypothesis, since Payoff has no division. Axioms-clean."
@@ -557,6 +951,23 @@
       "metadata": {
         "chapter": 9,
         "reference": "Hull, Options, Futures and Other Derivatives, ch. 29 (caplets as puts on zero-coupon bonds, Black's model for caplets); Brigo and Mercurio, Interest Rate Models, 2nd ed., sections 1.4 and 1.5; Musiela and Rutkowski, Martingale Methods in Financial Modelling, ch. 12. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "ch. 29"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "sections 1.4 and 1.5"
+          },
+          {
+            "key": "MusielaRutkowski",
+            "locator": "ch. 12"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. valueDisc_cap (via Contract.valueDisc_payFlows in MathFin/Contracts/Models/ShortRate.lean, a finite sum of integrals with integrable terms) and valueDisc_cap_eq_bondPuts (each caplet by valueDisc_caplet_eq_bondPut) in MathFin/Contracts/Models/Caplet.lean. SCOPE: as for mf-contract-caplet-bond-put, the bond prices are assumed to be the conditional expectations of D and the rates are observed processes tied to them; no short-rate model is instantiated. Axioms-clean."
@@ -573,6 +984,23 @@
       "metadata": {
         "chapter": 9,
         "reference": "Hull, Options, Futures and Other Derivatives, ch. 29 (caplets as puts on zero-coupon bonds, Black's model for caplets); Brigo and Mercurio, Interest Rate Models, 2nd ed., sections 1.4 and 1.5; Musiela and Rutkowski, Martingale Methods in Financial Modelling, ch. 12. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "ch. 29"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "sections 1.4 and 1.5"
+          },
+          {
+            "key": "MusielaRutkowski",
+            "locator": "ch. 12"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. valueDisc_caplet_black76_forwardRate in MathFin/Contracts/Models/Caplet.lean: forwardMeasure_price (change of numeraire, MathFin/FixedIncome/ForwardMeasure.lean) turns E[D T1 * Y] into P(0,T1) * E^{T1}[Y]; black_futures_formula (MathFin/Futures/Black76.lean) prices the call on the lognormal rate; BondModel.integral_libor_forward identifies the mean F of the lognormal with the zero curve's forward rate, from the bond tower property and the forward-measure identity. SCOPE: lognormality of l(T0) under Q', the standard Black-76 assumption, is a hypothesis; the Vasicek and Hull-White bond prices at t > 0 are in the library (mf-contract-bond-price-vasicek, mf-contract-bond-price-hullwhite) but do not supply the lognormality, since in those models the bond, not the simple forward rate, is lognormal. The time parameter T of the lognormal is free (the Black variance time), not tied to T0. Axioms-clean."
@@ -589,6 +1017,18 @@
       "metadata": {
         "chapter": 12,
         "reference": "Vasicek 1977 short-rate model; Brigo and Mercurio, Interest Rate Models, 2nd ed., section 3.2.1 (P(t,T) = A(t,T) exp(-B(t,T) r(t))). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Vasicek1977"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "section 3.2.1"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. bondPrice_vasicek in MathFin/Contracts/Models/VasicekBond.lean: bondPrice is the conditional expectation of D T over D t (Contracts/Models/Caplet.lean), and the Vasicek discount factor is the Hull-White one at constant forcing kappa*theta (HullWhite.bondRate_const, HullWhite.bondA_const, HullWhite.integratedRate_const), so the claim is bondPrice_hullWhite (mf-contract-bond-price-hullwhite) at constant forcing; the F_t-known factor exp(-int_0^t r) cancels there. SCOPE: Vasicek only (constant theta) here; the two-piece GSR is mf-contract-bond-price-gsr. The integrated and short rates are carried in their Wiener representations and the measure is read as the pricing measure, as in mf-vasicek-bond-price. This entry gives the bond price P(t,T) a closed form; it does not derive the lognormality of the forward rate under the forward measure that mf-contract-caplet-black76 assumes (the affine form makes the bond price, not the simple forward rate, the lognormal object in Vasicek: the caplet there is a sum of Black bond puts, mf-contract-caplet-vasicek). Axioms-clean."
@@ -605,6 +1045,18 @@
       "metadata": {
         "chapter": 12,
         "reference": "Hull and White, Pricing interest-rate-derivative securities, Rev. Financial Studies 3 (1990); Brigo and Mercurio, Interest Rate Models, 2nd ed., section 3.3.1 (P(t,T) = A(t,T) exp(-B(t,T) r(t))). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "HullWhite1990"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "section 3.3.1"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. bondPrice_hullWhite in MathFin/Contracts/Models/HullWhiteBond.lean: bondPrice is the conditional expectation of D T over D t, and the conditional expectation of the Hull-White discount factor is HullWhite.bondRate_condExp (mf-hullwhite-bond-price-at-t); the F_t-known factor exp(-int_0^t r) cancels. Vasicek (mf-contract-bond-price-vasicek) is its constant-forcing instance. SCOPE: continuous forcing theta; the two-piece GSR is mf-contract-bond-price-gsr. The integrated and short rates are carried in their Wiener representations and the measure is read as the pricing measure. Axioms-clean."
@@ -621,6 +1073,18 @@
       "metadata": {
         "chapter": 12,
         "reference": "Jamshidian, An Exact Bond Option Formula, J. Finance 44 (1989); Brigo and Mercurio, Interest Rate Models, 2nd ed., section 3.2 (bond options in Vasicek and Hull-White). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Jamshidian1989"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "section 3.2"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. valueDisc_bondPut_vasicek in MathFin/Contracts/Models/Jamshidian.lean: the Vasicek integrated rate is the Hull-White one at constant forcing kappa*theta (HullWhite.bondRate_const), and the Hull-White put (mf-contract-bond-put-hullwhite) applies. The short rate and its integral are carried in their Wiener representations (that they solve the SDE and the time-order swap are cited, not proved) and the measure is read as the pricing measure; the underlying b is hypothesised to be almost surely the bond price bondPrice (its affine form is proved in the bond-price entry), the put pays at its expiry T0 (it is not a put on a bond paid later), and strike k > 0, sigma != 0, 0 < T0 < T1 are needed for the lognormal to be non-degenerate. The Black formula enters with the standard deviation of ln P(T0,T1) as volatility at unit time; it is not claimed that the simple forward rate is lognormal (it is a shifted lognormal in Vasicek, a remark not formalized). Axioms-clean."
@@ -637,6 +1101,18 @@
       "metadata": {
         "chapter": 12,
         "reference": "Jamshidian, An Exact Bond Option Formula, J. Finance 44 (1989); Brigo and Mercurio, Interest Rate Models, 2nd ed., section 3.2 (bond options in Vasicek and Hull-White). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Jamshidian1989"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "section 3.2"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. valueDisc_caplet_vasicek in MathFin/Contracts/Models/Jamshidian.lean: valueDisc_caplet_eq_bondPut (mf-contract-caplet-bond-put) turns the caplet into (1 + delta K) bond puts, and valueDisc_bondPut_vasicek (mf-contract-bond-put-vasicek) prices the put. SCOPE: this is not a Black-76 caplet and does not claim the hypothesis of mf-contract-caplet-black76: in Vasicek the simple forward rate (1/P - 1)/delta of a lognormal bond is a shifted lognormal, not a lognormal (a remark, not formalized); the closed form comes from the bond put. BondModel and the integrability of the discounted caplet payoff are hypotheses, as in mf-contract-caplet-bond-put. The short rate and its integral are carried in their Wiener representations (that they solve the SDE and the time-order swap are cited, not proved) and the measure is read as the pricing measure; the underlying b is hypothesised to be almost surely the bond price bondPrice (its affine form is proved in the bond-price entry), the put pays at its expiry T0 (it is not a put on a bond paid later), and strike k > 0, sigma != 0, 0 < T0 < T1 are needed for the lognormal to be non-degenerate. Axioms-clean."
@@ -653,6 +1129,18 @@
       "metadata": {
         "chapter": 12,
         "reference": "Jamshidian, An Exact Bond Option Formula, J. Finance 44 (1989); Brigo and Mercurio, Interest Rate Models, 2nd ed., section 3.2 (bond options in Vasicek and Hull-White). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Jamshidian1989"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "section 3.2"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. valueDisc_caplet_hullWhite in MathFin/Contracts/Models/Jamshidian.lean: valueDisc_caplet_eq_bondPut (mf-contract-caplet-bond-put) turns the caplet into (1 + delta K) bond puts, and valueDisc_bondPut_hullWhite (mf-contract-bond-put-hullwhite) prices the put. SCOPE: this is not a Black-76 caplet and does not claim the hypothesis of mf-contract-caplet-black76: in Hull-White the simple forward rate (1/P - 1)/delta of a lognormal bond is a shifted lognormal, not a lognormal (a remark, not formalized); the closed form comes from the bond put. BondModel and the integrability of the discounted caplet payoff are hypotheses, as in mf-contract-caplet-bond-put. The short rate and its integral are carried in their Wiener representations (that they solve the SDE and the time-order swap are cited, not proved) and the measure is read as the pricing measure; strike 1/(1 + delta K) > 0, sigma != 0, 0 < T0 < T1 are needed for the lognormal to be non-degenerate. Axioms-clean."
@@ -669,6 +1157,22 @@
       "metadata": {
         "chapter": 12,
         "reference": "Jamshidian, An Exact Bond Option Formula, J. Finance 44 (1989); Brigo and Mercurio, Interest Rate Models, 2nd ed., section 3.3 (bond options with time-dependent volatility); the GSR parametrisation with piecewise-constant volatility as in QuantLib's Gsr model. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Jamshidian1989"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "section 3.3"
+          },
+          {
+            "key": "QuantLib",
+            "locator": "Gsr model"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. valueDisc_bondPut_gsr in MathFin/Contracts/Models/Jamshidian.lean: under the T0-forward measure (forwardMeasure of the bank account 1/D T0) the short rate r_{T0} is Gaussian with variance gsrShortRateV (gsrShortRate_hasLaw_forwardMeasure in MathFin/FixedIncome/GSRBondPriceAt.lean, from hasLaw_forwardMeasure_wienerIntegralLp, the law of a Wiener-represented rate under the forward measure of a Wiener-represented bank account, of which HullWhite.shortRate_hasLaw_forwardMeasure is the other instance; the mean shift is minus an L2 inner product that never enters the price), the bond is A(T0,T1)*exp(-B(T1-T0) r_{T0}) almost surely (bondPrice_gsr, mf-contract-bond-price-gsr) and so lognormal; HasBondPrice.valueDisc_bondPut_gaussian prices the put (through valueDisc_bondPut_wiener, shared with Hull-White) by the change of numeraire and bs_put_formula and identifies the mean of the lognormal with P(0,T1)/P(0,T0) by the tower property, so the time-dependent coefficient A drops out. The variance is the closed form gsrShortRateV (gsrShortKernel_integral_sq_eq), positive for T0 > 0 and sigma1, sigma2 != 0 (gsrShortRateV_pos). SCOPE: two volatility pieces with Tstar <= T1, constant kappa and theta. The short rate and its integral are carried in their Wiener representations (that they solve the SDE and the time-order swap are cited, not proved) and the measure is read as the pricing measure; the underlying b is hypothesised to be almost surely the bond price bondPrice, the put pays at its expiry T0, and strike k > 0 is needed for the lognormal to be non-degenerate. P(0,T) is left as zeroCurve; for T >= Tstar it is exp(-M(T) + gsrBondV/2) by gsrBondPrice_eq. Axioms-clean."
@@ -685,6 +1189,22 @@
       "metadata": {
         "chapter": 12,
         "reference": "Jamshidian, An Exact Bond Option Formula, J. Finance 44 (1989); Brigo and Mercurio, Interest Rate Models, 2nd ed., section 3.3 (bond options with time-dependent volatility); the GSR parametrisation with piecewise-constant volatility as in QuantLib's Gsr model. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Jamshidian1989"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "section 3.3"
+          },
+          {
+            "key": "QuantLib",
+            "locator": "Gsr model"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. valueDisc_bondPut_gsr_self in MathFin/Contracts/Models/Jamshidian.lean: the two-piece GSR put (valueDisc_bondPut_gsr, mf-contract-bond-put-gsr) at sigma1 = sigma2 = sigma, with two substitutions. The GSR short-rate variance gsrShortRateV is the Vasicek variance sigma^2 (1 - e^{-2 kappa T0})/(2 kappa) whatever the breakpoint (gsrShortRateV_self in MathFin/FixedIncome/GSRBondPriceAt.lean), and the GSR zero curve is the Vasicek one, because the GSR kernel is sigma times the Vasicek integrated kernel and the Wiener integral is linear, so the integrated GSR rate is almost surely the integrated Vasicek rate (gsrIntegratedRate_self_ae in MathFin/FixedIncome/GSRPiecewiseVol.lean, zeroCurve_gsr_self). SCOPE: as for mf-contract-bond-put-gsr (the Wiener representations of the short rate are the model, the measure is read as the pricing measure, b is hypothesised to be almost surely the GSR bond price, the put pays at T0); the left side is the put in the GSR model and the right side the Vasicek closed form of mf-contract-bond-put-vasicek, but the hypothesis on b is the GSR bond price (not the Vasicek one of mf-contract-bond-put-vasicek). Tstar <= T1 is the hypothesis of the GSR put and is not needed by the Vasicek one. Axioms-clean."
@@ -701,6 +1221,22 @@
       "metadata": {
         "chapter": 12,
         "reference": "Jamshidian, An Exact Bond Option Formula, J. Finance 44 (1989); Brigo and Mercurio, Interest Rate Models, 2nd ed., section 3.3 (bond options with time-dependent volatility); the GSR parametrisation with piecewise-constant volatility as in QuantLib's Gsr model. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Jamshidian1989"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "section 3.3"
+          },
+          {
+            "key": "QuantLib",
+            "locator": "Gsr model"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. valueDisc_caplet_gsr in MathFin/Contracts/Models/Jamshidian.lean: valueDisc_caplet_eq_bondPut (mf-contract-caplet-bond-put) turns the caplet into (1 + delta K) bond puts, and valueDisc_bondPut_gsr (mf-contract-bond-put-gsr) prices the put. SCOPE: this is not a Black-76 caplet and does not claim the hypothesis of mf-contract-caplet-black76: in the GSR model the simple forward rate of a lognormal bond is a shifted lognormal (a remark, not a theorem here). The BondModel, the integrability of the discounted payoff and 1 + delta K > 0 are hypotheses; two volatility pieces with Tstar <= T1; the measure is read as the pricing measure. Axioms-clean."
@@ -717,6 +1253,18 @@
       "metadata": {
         "chapter": 12,
         "reference": "Jamshidian, An Exact Bond Option Formula, J. Finance 44 (1989); Brigo and Mercurio, Interest Rate Models, 2nd ed., section 3.2 (bond options in Vasicek and Hull-White). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Jamshidian1989"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "section 3.2"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. valueDisc_bondPut_hullWhite in MathFin/Contracts/Models/Jamshidian.lean: under the T0-forward measure (forwardMeasure of the bank account 1/D T0) the short rate r_{T0} is Gaussian with the Vasicek variance (HullWhite.shortRate_hasLaw_forwardMeasure), the bond is a*exp(-B(T1-T0) r_{T0}) almost surely (bondPrice_hullWhite, mf-contract-bond-price-hullwhite) and so lognormal; valueDisc_bondPut_wiener (the plumbing for any integrated short rate in Wiener representation) and HasBondPrice.valueDisc_bondPut_gaussian price the put by the change of numeraire (forwardMeasure_price) and bs_put_formula, and identify the mean of the lognormal with P(0,T1)/P(0,T0) by the tower property (no computation with the affine coefficients). The short rate and its integral are carried in their Wiener representations (that they solve the SDE and the time-order swap are cited, not proved) and the measure is read as the pricing measure; the underlying b is hypothesised to be almost surely the bond price bondPrice (its affine form is proved in the bond-price entry), the put pays at its expiry T0 (it is not a put on a bond paid later), and strike k > 0, sigma != 0, 0 < T0 < T1 are needed for the lognormal to be non-degenerate. Axioms-clean."
@@ -733,6 +1281,22 @@
       "metadata": {
         "chapter": 9,
         "reference": "Hagan, Convexity Conundrums: Pricing CMS Swaps, Caps and Floors, Wilmott Magazine (March 2003), 38-44; Brigo and Mercurio, Interest Rate Models, 2nd ed., sections 1.6 and 13.8; Musiela and Rutkowski, Martingale Methods in Financial Modelling, ch. 13. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hagan2003"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "sections 1.6 and 13.8"
+          },
+          {
+            "key": "MusielaRutkowski",
+            "locator": "ch. 13"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. valueDisc_cmsCaplet in MathFin/Contracts/Models/CMS.lean, an instance of valueDisc_pay_swapRate: the annuity-measure pricing identity annuityMeasure_price (MathFin/FixedIncome/CMS.lean, a change of numeraire) applied to the annuity-settled payoff g(S); the annuity repricing condition that makes Q^A a probability measure is derived from the tower property of the conditional expectation (SwapModel.integral_annuity_mul). The floorlet and swaplet are the same theorem for other g. SCOPE: The swap rate is an observed underlying tied to the bond prices by the SwapModel hypothesis rate_eq (Payoff has no division node, by design: a quotient by a possibly zero annuity would be a junk value); no term-structure model is asserted. The payment is at the fixing date T0; a CMS rate paid at a later date Tp needs the Tp-forward measure and is not covered. Axioms-clean."
@@ -749,6 +1313,22 @@
       "metadata": {
         "chapter": 9,
         "reference": "Hagan, Convexity Conundrums: Pricing CMS Swaps, Caps and Floors, Wilmott Magazine (March 2003), 38-44; Brigo and Mercurio, Interest Rate Models, 2nd ed., sections 1.6 and 13.8; Musiela and Rutkowski, Martingale Methods in Financial Modelling, ch. 13. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hagan2003"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "sections 1.6 and 13.8"
+          },
+          {
+            "key": "MusielaRutkowski",
+            "locator": "ch. 13"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. SwapModel.integral_swapRate in MathFin/Contracts/Models/CMS.lean: annuityMeasure_price for S = the swap rate, then A(T0) S = 1 - P(T0,Tn) almost surely and the tower property E[D T0 P(T0,Tn)] = P(0,Tn) (HasBondPrice.integral_discount, for each bond of the SwapModel). SCOPE: The swap rate is an observed underlying tied to the bond prices by the SwapModel hypothesis rate_eq (Payoff has no division node, by design: a quotient by a possibly zero annuity would be a junk value); no term-structure model is asserted. The payment is at the fixing date T0; a CMS rate paid at a later date Tp needs the Tp-forward measure and is not covered. Axioms-clean."
@@ -765,6 +1345,22 @@
       "metadata": {
         "chapter": 9,
         "reference": "Hagan, Convexity Conundrums: Pricing CMS Swaps, Caps and Floors, Wilmott Magazine (March 2003), 38-44; Brigo and Mercurio, Interest Rate Models, 2nd ed., sections 1.6 and 13.8; Musiela and Rutkowski, Martingale Methods in Financial Modelling, ch. 13. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hagan2003"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "sections 1.6 and 13.8"
+          },
+          {
+            "key": "MusielaRutkowski",
+            "locator": "ch. 13"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. SwapModel.valueDisc_cmsSwaplet_eq in MathFin/Contracts/Models/CMS.lean, from valueDisc_cmsSwaplet, SwapModel.integral_swapRate and A(0) E^A[1/A(T0)] = P(0,T0) (SwapModel.annuity0_mul_integral_inv). SCOPE: The swap rate is an observed underlying tied to the bond prices by the SwapModel hypothesis rate_eq (Payoff has no division node, by design: a quotient by a possibly zero annuity would be a junk value); no term-structure model is asserted. The payment is at the fixing date T0; a CMS rate paid at a later date Tp needs the Tp-forward measure and is not covered. Axioms-clean."
@@ -781,6 +1377,22 @@
       "metadata": {
         "chapter": 9,
         "reference": "Hagan, Convexity Conundrums: Pricing CMS Swaps, Caps and Floors, Wilmott Magazine (March 2003), 38-44; Brigo and Mercurio, Interest Rate Models, 2nd ed., sections 1.6 and 13.8; Musiela and Rutkowski, Martingale Methods in Financial Modelling, ch. 13. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hagan2003"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "sections 1.6 and 13.8"
+          },
+          {
+            "key": "MusielaRutkowski",
+            "locator": "ch. 13"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. SwapModel.zeroCurve_mul_forwardSwapRate_le_valueDisc_cmsSwaplet in MathFin/Contracts/Models/CMS.lean: SwapModel.valueDisc_cmsSwaplet_eq, the affine relation S = (1+C)/A - 1/delta almost surely, and the nonnegativity of the variance (ProbabilityTheory.variance_nonneg) of 1/A(T0) under Q^A. The hypothesis that all bond prices but the last are constants is restrictive: only the last discount factor is random. SCOPE: The swap rate is an observed underlying tied to the bond prices by the SwapModel hypothesis rate_eq (Payoff has no division node, by design: a quotient by a possibly zero annuity would be a junk value); no term-structure model is asserted. The payment is at the fixing date T0; a CMS rate paid at a later date Tp needs the Tp-forward measure and is not covered. Axioms-clean."
@@ -797,6 +1409,22 @@
       "metadata": {
         "chapter": 9,
         "reference": "Hagan, Convexity Conundrums: Pricing CMS Swaps, Caps and Floors, Wilmott Magazine (March 2003), 38-44; Brigo and Mercurio, Interest Rate Models, 2nd ed., sections 1.6 and 13.8; Musiela and Rutkowski, Martingale Methods in Financial Modelling, ch. 13. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hagan2003"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "sections 1.6 and 13.8"
+          },
+          {
+            "key": "MusielaRutkowski",
+            "locator": "ch. 13"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. SwapModel.cmsCurveRate_integral_le_forwardSwapRate in MathFin/Contracts/Models/CMS.lean: cmsCurveRate_jensenGap_nonneg (MathFin/FixedIncome/CMS.lean, Jensen's inequality under the annuity measure) with the annuity-measure mean of the swap rate identified as the forward swap rate (SwapModel.integral_swapRate). The hypothesis that all bond prices but the last are constants is restrictive: only the last discount factor is random. SCOPE: The swap rate is an observed underlying tied to the bond prices by the SwapModel hypothesis rate_eq (Payoff has no division node, by design: a quotient by a possibly zero annuity would be a junk value); no term-structure model is asserted. The payment is at the fixing date T0; a CMS rate paid at a later date Tp needs the Tp-forward measure and is not covered. Axioms-clean."
@@ -813,6 +1441,22 @@
       "metadata": {
         "chapter": 9,
         "reference": "Hagan, Convexity Conundrums: Pricing CMS Swaps, Caps and Floors, Wilmott Magazine (March 2003), 38-44; Brigo and Mercurio, Interest Rate Models, 2nd ed., sections 1.6 and 13.8; Musiela and Rutkowski, Martingale Methods in Financial Modelling, ch. 13. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hagan2003"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "sections 1.6 and 13.8"
+          },
+          {
+            "key": "MusielaRutkowski",
+            "locator": "ch. 13"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. valueDisc_payerSwaption in MathFin/Contracts/Models/CMS.lean: the payoff is A(T0)(S - K)^+ almost surely, the annuity-settled payoff of annuityMeasure_price. The swaption is stated on the bond prices (no division); the swap rate enters through rate_eq. SCOPE: The swap rate is an observed underlying tied to the bond prices by the SwapModel hypothesis rate_eq (Payoff has no division node, by design: a quotient by a possibly zero annuity would be a junk value); no term-structure model is asserted. The payment is at the fixing date T0; a CMS rate paid at a later date Tp needs the Tp-forward measure and is not covered. Axioms-clean."
@@ -829,6 +1473,22 @@
       "metadata": {
         "chapter": 9,
         "reference": "Hagan, Convexity Conundrums: Pricing CMS Swaps, Caps and Floors, Wilmott Magazine (March 2003), 38-44; Brigo and Mercurio, Interest Rate Models, 2nd ed., sections 1.6 and 13.8; Musiela and Rutkowski, Martingale Methods in Financial Modelling, ch. 13. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hagan2003"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "sections 1.6 and 13.8"
+          },
+          {
+            "key": "MusielaRutkowski",
+            "locator": "ch. 13"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. valueDisc_payerSwaption_black_forwardSwapRate in MathFin/Contracts/Models/CMS.lean: valueDisc_payerSwaption, then black_futures_formula (MathFin/Futures/Black76.lean) on Q^A, and discounted_terminal_eq_S0 with SwapModel.integral_swapRate to identify F as the forward swap rate. SCOPE: The swap rate is an observed underlying tied to the bond prices by the SwapModel hypothesis rate_eq (Payoff has no division node, by design: a quotient by a possibly zero annuity would be a junk value); no term-structure model is asserted. The payment is at the fixing date T0; a CMS rate paid at a later date Tp needs the Tp-forward measure and is not covered. Axioms-clean."
@@ -845,6 +1505,22 @@
       "metadata": {
         "chapter": 12,
         "reference": "Hull and White, Pricing interest-rate-derivative securities, Rev. Financial Studies 3 (1990); Brigo and Mercurio, Interest Rate Models, 2nd ed., section 3.3.1 (P(t,T) = A(t,T) exp(-B(t,T) r(t))); the GSR parametrisation with piecewise-constant volatility as in QuantLib's Gsr model. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "HullWhite1990"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "section 3.3.1"
+          },
+          {
+            "key": "QuantLib",
+            "locator": "Gsr model"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. bondPrice_gsr in MathFin/Contracts/Models/GSRBond.lean: bondPrice is the conditional expectation of D T over D t (Contracts/Models/Caplet.lean), and the conditional expectation of the GSR discount factor is gsrBondPrice_condExp (mf-gsr-bond-price-at-t); the F_t-known factor exp(-int_0^t r) cancels, as in mf-contract-bond-price-hullwhite. SCOPE: two volatility pieces with Tstar <= T, constant kappa and theta. The integrated and short rates are carried in their Wiener representations and the measure is read as the pricing measure. The GSR zero-coupon bond put (Jamshidian) is mf-contract-bond-put-gsr. Axioms-clean."
@@ -861,6 +1537,19 @@
       "metadata": {
         "chapter": 16,
         "reference": "S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 16; D. Lando, Credit Risk Modeling (2004), ch. 5. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "BagariaFIDP",
+            "locator": "ch. 16"
+          },
+          {
+            "key": "Lando2004",
+            "locator": "ch. 5"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. tendsto_cdsLossesGrid in MathFin/Contracts/Models/DefaultTimeMesh.lean, from exists_cdsLossesGrid_close: a right-endpoint Riemann-Stieltjes sum of the continuous discount e^{-rs} against the continuous default density h S differs from the integral by at most epsilon times the integral of the density once the discount oscillates by at most epsilon on each cell (abs_sum_mul_integral_sub_integral_le; uniform continuity of the discount on [0, T]), the cell integrals of the density being S(t_i) - S(t_(i+1)) (DefaultDensity.integral_defaultDensity). SCOPE: a flat rate r, a continuous strictly positive hazard h, and grids that are monotone from 0 to T; no integrability beyond continuity is needed because the density integrates to 1 - S(T) <= 1. This is a statement about the deterministic grid sums, not about a contract; the grid protection leg as a contract converges to the contract paying at the default time in mf-contract-cds-protection-grid-limit. Axioms-clean."
@@ -877,6 +1566,19 @@
       "metadata": {
         "chapter": 16,
         "reference": "S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 16; D. Lando, Credit Risk Modeling (2004), ch. 5. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "BagariaFIDP",
+            "locator": "ch. 16"
+          },
+          {
+            "key": "Lando2004",
+            "locator": "ch. 5"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. tendsto_value_cdsBuyer_coxDefaultTime in MathFin/Contracts/Models/DefaultTimeMesh.lean: value_cdsBuyer_coxDefaultTime (mf-contract-cds-cox-default-time) gives the grid value (1 - R) cdsLossesGrid - s cdsAnnuityGrid, and the two grid sums converge to Cox.cdsLosses and Cox.cdsAnnuity (tendsto_cdsLossesGrid, mf-contract-cds-losses-mesh-limit; tendsto_cdsAnnuityGrid, the same Riemann-Stieltjes bound for the continuous integrand e^{-rs} S(s)); Cox.protectionLeg and Cox.premiumLeg are (1 - R) times the first and s times the second. Also proved in the module, not in this entry: the grid par spread converges to Cox.cdsFairSpreadTV (tendsto_cdsParSpreadGrid, for T > 0). SCOPE: a flat discount rate; a deterministic recovery R and spread s; grids monotone from 0 to T with steps at most delta_k -> 0. The limit is a value, the continuous legs Cox.protectionLeg and Cox.premiumLeg. The protection leg is also the value of a contract paying at the default time (cdsProtectionAtDefault, mf-contract-cds-protection-at-default, and the grid protection leg converges to it in mf-contract-cds-protection-grid-limit); the tower has no continuous premium stream, so the premium leg has no such contract. Not a legal instrument. Axioms-clean."
@@ -893,6 +1595,22 @@
       "metadata": {
         "chapter": 16,
         "reference": "S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 16; D. Lando, Credit Risk Modeling (2004), ch. 5. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied. The payment at a hitting time follows the `when` of S. Peyton Jones, J.-M. Eber and J. Seward, Composing contracts (2000).",
+        "citations": [
+          {
+            "key": "BagariaFIDP",
+            "locator": "ch. 16"
+          },
+          {
+            "key": "Lando2004",
+            "locator": "ch. 5"
+          },
+          {
+            "key": "Bilokon2026"
+          },
+          {
+            "key": "PeytonJonesEberSeward2000"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. The contract is cdsProtectionAtDefault in MathFin/Contracts/Instruments/Credit.lean, a Contract.payAtHit (MathFin/Contracts/Core.lean) on the default-indicator underlying with the set [1, infinity) and the payoff (1 - R) N_T: it pays at the first time the observed path enters the set (Scenario.hitTime, Mathlib's hittingAfter), nothing if never. hitTime_defaultIndicator in MathFin/Contracts/Models/DefaultTime.lean identifies that time with tau (or 0 if tau is negative), so value_cdsProtectionAtDefault gives the value (1 - R) E[D(tau) 1{tau <= T}] for any default time and discount curve, as an identity of Bochner integrals (no integrability is assumed there, so both sides are 0 when the integrand is not integrable; under the Cox default time the discount factor is bounded and the integrand is integrable), and CVA.protectionLeg_eq_integral_coxDefaultTime (FixedIncome/CVA.lean, from the Cox CDF of cox_cdf_timeVarying and the default density) identifies it with Cox.protectionLeg; the Cox default time is almost surely positive (ae_pos_coxDefaultTime), which removes the negative-tau convention. SCOPE: the premium leg is not a contract paying at a random time (the tower has no continuous payment stream), so only the protection leg is covered; recovery is a constant, the discount factor is deterministic and flat, and the default indicator is observed as the model of the single underlying. The hitting time is the infimum of the times at which the observed path enters the set; for the default indicator it is attained. Not a legal instrument. Axioms-clean."
@@ -909,6 +1627,22 @@
       "metadata": {
         "chapter": 16,
         "reference": "S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 16; D. Lando, Credit Risk Modeling (2004), ch. 5. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied. The payment at a hitting time follows the `when` of S. Peyton Jones, J.-M. Eber and J. Seward, Composing contracts (2000).",
+        "citations": [
+          {
+            "key": "BagariaFIDP",
+            "locator": "ch. 16"
+          },
+          {
+            "key": "Lando2004",
+            "locator": "ch. 5"
+          },
+          {
+            "key": "Bilokon2026"
+          },
+          {
+            "key": "PeytonJonesEberSeward2000"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. tendsto_value_cdsProtectionLeg_coxDefaultTime in MathFin/Contracts/Models/DefaultTimeMesh.lean: the value of the contract paying at the default time is Cox.protectionLeg (value_cdsProtectionAtDefault_coxDefaultTime, mf-contract-cds-protection-at-default), the grid protection leg is worth (1 - R) cdsLossesGrid (value_cdsProtectionLeg, with the Cox survival function), and the grid losses converge to Cox.cdsLosses (tendsto_cdsLossesGrid, mf-contract-cds-losses-mesh-limit; a Riemann-Stieltjes bound for the continuous discount against the continuous default density). SCOPE: a flat discount rate, a deterministic recovery R, grids monotone from 0 to T with steps at most delta_k -> 0, a continuous strictly positive hazard h. Only the protection leg: the premium leg has no contract paying at a random time in the tower (its continuous limit is a value, mf-contract-cds-mesh-convergence). Not a legal instrument. Axioms-clean."

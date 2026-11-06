@@ -27,6 +27,15 @@ For a filtered pre-Brownian motion `X`, the following are martingales w.r.t. the
 
 * `IsFilteredPreBrownian.squareSubTime_isMartingale`
 * `IsFilteredPreBrownian.waldExponential_isMartingale`
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Proposition 4.3.6; Remark 5.1.6; Theorem 5.1.5
+
+## Tags
+
+Wald exponential, exponential martingale, Brownian motion, Doléans exponential, martingale,
+MSC 60J65, MSC 60G44
 -/
 
 @[expose] public section
@@ -93,7 +102,7 @@ lemma indep_comap_of_eq_comp_increment {s t : ℝ≥0} (hst : s ≤ t) {Z : Ω �
 conditional expectation of `φ ∘ (X_t − X_s)` given `𝓕 s` is a.e. the constant
 `c`. Captures the "increment is independent of the past, so functions of it
 behave like deterministic constants under conditional expectation" pattern. -/
-private lemma condExp_func_increment {s t : ℝ≥0} (hst : s ≤ t)
+lemma condExp_comp_increment_eq_const {s t : ℝ≥0} (hst : s ≤ t)
     (h_meas_diff : Measurable (fun ω ↦ X t ω - X s ω))
     {φ : ℝ → ℝ} (hφ : Measurable φ) {c : ℝ}
     (h_int_eq : ∫ ω, φ (X t ω - X s ω) ∂P = c) :
@@ -166,11 +175,12 @@ theorem squareSubTime_isMartingale :
   -- (the increment is independent of `𝓕 s`).
   have h_condDiff :
       P[fun ω ↦ X t ω - X s ω | (𝓕 s : MeasurableSpace Ω)] =ᵐ[P] fun _ ↦ (0 : ℝ) :=
-    condExp_func_increment hst h_meas_diff measurable_id h_int_diff_zero
+    condExp_comp_increment_eq_const hst h_meas_diff measurable_id h_int_diff_zero
   have h_condDiffSq :
       P[fun ω ↦ (X t ω - X s ω) ^ 2 | (𝓕 s : MeasurableSpace Ω)]
         =ᵐ[P] fun _ ↦ ((t : ℝ) - (s : ℝ)) :=
-    condExp_func_increment hst h_meas_diff (measurable_id.pow_const 2) h_int_diff_sq_zero
+    condExp_comp_increment_eq_const hst h_meas_diff (measurable_id.pow_const 2)
+      h_int_diff_sq_zero
   -- Pull-out for the cross term.
   have h_cross_eq :
       (fun ω ↦ X s ω * (X t ω - X s ω)) = (X s) * (fun ω ↦ X t ω - X s ω) := rfl
@@ -322,7 +332,7 @@ variable {Ω β : Type*} {mΩ : MeasurableSpace Ω}
 /-- Key set identity: for continuous adapted `X` and open `A`, the set
 `{ω | hittingAfter X A 0 ω < i}` equals the countable union over nonnegative
 rationals `q < i` of `{ω | X (q : ℝ) ω ∈ A}`. -/
-private lemma hittingAfter_lt_eq_iUnion_rationals
+lemma hittingAfter_lt_eq_iUnion_rationals
     [TopologicalSpace β]
     {X : ℝ → Ω → β} {A : Set β}
     (hX_cont : ∀ ω, Continuous (fun t ↦ X t ω)) (hA_open : IsOpen A)
@@ -375,7 +385,8 @@ private lemma hittingAfter_lt_eq_iUnion_rationals
   · rintro ⟨q, hq_nn, hq_lt, hXq⟩
     exact ⟨(q : ℝ), ⟨hq_nn, hq_lt⟩, hXq⟩
 
-private lemma measurableSet_hittingAfter_lt_of_open
+/-- For continuous adapted `X` and open `A`, `{hittingAfter X A 0 < i}` is `𝓕 i`-measurable. -/
+lemma measurableSet_hittingAfter_lt_of_open
     [TopologicalSpace β] [MeasurableSpace β] [BorelSpace β]
     {𝓕 : Filtration ℝ mΩ} {X : ℝ → Ω → β} {A : Set β}
     (hX_cont : ∀ ω, Continuous (fun t ↦ X t ω)) (hX_adapted : Adapted 𝓕 X)

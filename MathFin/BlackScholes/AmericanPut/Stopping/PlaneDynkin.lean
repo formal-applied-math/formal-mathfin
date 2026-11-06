@@ -13,10 +13,33 @@ These are test-function results, not differentiability assumptions on the
 American price. The residual includes its nonzero generator integral. Continuous
 paths upgrade fixed-time Itô identities before any random-time substitution.
 
-## Result
+## Main definitions
 
-Public entry points include `planeDrift`, `planeResidual`, `planeGenerator_continuous`,
-`planeDrift_continuous`.
+* `planeDrift`: the time integral `∫ s in Ioc 0 t, planeGenerator G (s, brownian s ω)` of the
+  generator along the Brownian path.
+* `planeResidual`: the increment of `G` along the Brownian path with its drift subtracted,
+  `G (t, brownian t ω) - G (0, brownian 0 ω) - planeDrift G t ω`.
+
+## Main results
+
+* `planeGenerator_continuous`, `planeDrift_continuous`, `planeResidual_continuous`: for `G` of
+  class `C²`, the generator is continuous on the plane, and the drift and the residual are
+  continuous in time along every path.
+* `planeResidual_localMartingale`: for `G` of class `C²`, the residual is a local martingale for
+  the augmented Brownian filtration under `gaussianLimit`.
+* `planeResidual_stopped_martingale`: if `G` and its generator are bounded on `[0,T]`, the
+  residual stopped at a rule bounded by `T` is a martingale.
+* `planeResidual_expected_stopped_zero`: under the same bounds, the residual at the rule has
+  expectation `0`.
+* `plane_dynkin_boundedRule`: under the same bounds, Dynkin's identity
+  `E[G (θ, B θ)] = G (0,0) + E[planeDrift G θ]` for a rule `θ` bounded by `T`.
+* `plane_dynkin_compact`: Dynkin's identity for a compactly supported `C²` function, which
+  discharges both boundedness conditions.
+
+## Tags
+
+Dynkin formula, compensated Itô process, stopping, generator integral, test function, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

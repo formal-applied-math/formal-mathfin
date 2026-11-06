@@ -16,6 +16,24 @@ Part of the SVI polynomial-sign certificate (#174).
 and discount factor normalised to one. `fullCertificateFormula_iff_bsSmile_convex`: the finite
 sign formula holds exactly when `σ > 0`, `b ≥ 0`, `ρ² ≤ 1`, the variance is positive, and that
 price is convex in the strike.
+
+## Main definitions
+
+* `bsSmile`: `MathFin.bsV` with the SVI volatility substituted strike by strike, spot, maturity and
+  discount factor normalised to one.
+
+## Main results
+
+* `blackCall_eq_bsSmile`: for `K > 0` and positive variance at `log K`, the forward-normalised Black
+  call `blackCall p K` equals `bsSmile p K`.
+* `bsSmile_convex_iff`: for `σ > 0` and positive variance, `bsSmile p` is convex on `(0, ∞)` iff
+  `durrleman p k ≥ 0` for all `k`.
+* `fullCertificateFormula_iff_bsSmile_convex`: the finite sign formula holds iff `σ > 0`, `b ≥ 0`,
+  `ρ² ≤ 1`, the variance is positive and `bsSmile p` is convex on `(0, ∞)`.
+
+## Tags
+
+SVI smile, convex call price, butterfly arbitrage, Durrleman condition, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

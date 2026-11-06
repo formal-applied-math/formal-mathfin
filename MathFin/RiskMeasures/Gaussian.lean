@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -21,7 +22,13 @@ at the current pin does not ship a clean `Φ⁻¹` API. All identities below are
 algebraic; the only Mathlib facts used are `gaussianPDFReal` and the field /
 ring tactics.
 
-Results:
+## Main definitions
+
+* `gaussianVaR`: the Gaussian VaR `μ + σ z` of a loss `L ~ N(μ, σ²)` at the quantile
+  `z = Φ⁻¹(α)`.
+* `gaussianCVaR`: the Gaussian CVaR `μ + σ ϕ(z) / (1 − α)` at the quantile `z` and level `α`.
+
+## Main results
 
 * `gaussianVaR_affine`: `VaR(a·L + b) = a · VaR(L) + b` for `a ≥ 0`.
 * `gaussianCVaR_affine`: `CVaR(a·L + b) = a · CVaR(L) + b` for `a ≥ 0`.
@@ -30,6 +37,16 @@ Results:
 * `gaussianCVaR_sub_VaR`: `CVaR − VaR = σ · (ϕ(z)/(1−α) − z)`.
 * `gaussianVaR_volatility_scaling`: under iid time aggregation
   (`σ_T = σ · √T`), `VaR_α(L_T) = T · μ + σ · √T · z`.
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Ch 2; Ch 2.2.4; Ch 2.3
+
+## Tags
+
+Gaussian VaR, Gaussian CVaR, normal quantile, parametric VaR, variance-covariance method,
+square-root-of-time, MSC 91G70, JEL G32
 -/
 
 @[expose] public section

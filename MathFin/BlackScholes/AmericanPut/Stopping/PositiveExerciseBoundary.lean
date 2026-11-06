@@ -13,11 +13,35 @@ A constructed stationary supersolution bounds the actual price. At low stock
 prices it equals the payoff, forcing exercise and a positive threshold. No
 smooth fit or free-boundary regularity is assumed.
 
-## Result
+## Main definitions
 
-Public entry points include `canonicalPrice_le_stationaryPutCap`,
-`canonicalPrice_contact_below_stationary_join`, `canonicalStockBoundary_uniform_pos`,
-`canonicalStockBoundary_pos`.
+* `canonicalLogBoundary`: the logarithmic exercise boundary of the canonical price at rates `k`, `h`
+  and remaining time `t`.
+
+## Main results
+
+* `canonicalPrice_le_stationaryPutCap`: for `0 < k`, `0 ≤ h ≤ k` and parameters `m > 0`,
+  `d < 0` with `exp d = m/(1+m)` and `0 ≤ k + (k-h-1) m - m²`, the canonical price is at most the
+  stationary cap `stationaryPutCap m d` at every `x` and every `t ≥ 0`.
+* `canonicalPrice_contact_below_stationary_join`: under the same hypotheses, for `x ≤ d` and
+  `t ≥ 0` the canonical price equals the payoff.
+* `canonicalStockBoundary_uniform_pos`: for `0 < k`, `0 ≤ h ≤ k`, there is `A > 0` with the stock
+  boundary at least `A` for all `t ≥ 0`.
+* `canonicalStockBoundary_pos`, `zeroDividend_canonicalStockBoundary_pos`: the stock boundary is
+  positive at each `t ≥ 0` (for `h = 0` assuming only `0 < k`).
+* `exp_canonicalLogBoundary`, `canonicalLogBoundary_initial`, `canonicalLogBoundary_neg`: the
+  exponential of the log-boundary is the stock boundary, the log-boundary is `0` at `t = 0` and is
+  negative for `t > 0`.
+* `canonicalPrice_contact_iff_logBoundary`: for `t > 0`, the canonical price equals the payoff
+  exactly when `x ≤ canonicalLogBoundary k h t`.
+* `canonicalPrice_value_matching`: at the log-boundary, the price equals the payoff `1 - exp`.
+* `canonicalContinuationRegion_eq_logBoundary`: the continuation region is
+  `{z | 0 < z.2 ∧ canonicalLogBoundary k h z.2 < z.1}`.
+
+## Tags
+
+positive exercise threshold, stationary supersolution, low stock prices, exercise boundary,
+American put, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

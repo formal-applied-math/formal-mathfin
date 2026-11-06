@@ -9,6 +9,7 @@ public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.ExtendOfNormIsometry
 public import MathFin.Foundations.LpMulIsometry
+public import MathFin.Foundations.GaussianMoments
 
 /-!
 # Wiener integral on L²([0, T])
@@ -35,18 +36,35 @@ standard density / `LinearMap.extendOfNorm` construction.
    `Lp.ae_eq_zero_of_forall_setIntegral_eq_zero`.
 5. `LinearMap.extendOfNorm` yields the CLM `wienerIntegralLp`, an isometry.
 
+## Main definitions
+
+* `StepIndex`: a pair `(s, t)` with `s ≤ t ≤ T`, representing the step interval `(s, t]`.
+* `stepIndicatorLp`: the indicator `𝟙_{(lo, hi]}` as an element of `L²((0, T])`.
+* `wienerIncrementLp`: the Brownian increment `B_hi − B_lo` as an element of `Lp ℝ 2 μ`.
+* `stepAssembly`, `wienerAssembly`: the linear maps from finitely supported coefficients on
+  `StepIndex T` to step functions and to Wiener increments.
+* `wienerIntegralLp`: the Wiener integral as a continuous linear map
+  `L²((0, T]) →L[ℝ] Lp ℝ 2 μ`, the norm-continuous extension of `wienerAssembly` along
+  `stepAssembly`; `wienerIntegralLp_norm` and `wienerIntegralLp_integral_sq` give the isometry.
+
 ## Main results
 
 * `wiener_assembly_isometry`: the step-function Itô isometry on
   `StepIndex T →₀ ℝ`.
 * `stepAssembly_denseRange`: step indicators span a dense subspace of
   `Lp ℝ 2 (volume.restrict (Set.Ioc 0 T))`.
-* `wienerIntegralLp`: the Wiener integral as a `ContinuousLinearMap` from
-  `Lp ℝ 2 (volume.restrict (Set.Ioc 0 T))` to `Lp ℝ 2 μ`, via
-  `LinearMap.extendOfNorm`.
 * `wienerIntegralLp_norm`: the Itô isometry `‖wienerIntegralLp f‖ = ‖f‖`.
 * `wienerIntegralLp_integral_sq`: the Itô isometry in integral form,
   `∫ ω, (I f ω)² ∂μ = ∫ s in (0, T], (f s)² ∂volume`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 6.2.5
+
+## Tags
+
+Wiener integral, Itô isometry, step functions, L2 construction, Brownian motion integral,
+density of step functions, MSC 60H05, MSC 60J65, MSC 60G15
 -/
 
 @[expose] public section
@@ -117,15 +135,10 @@ noncomputable def stepIndicatorLp (T : ℝ≥0) (i : StepIndex T) :
     Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) :=
   indicatorConstLp 2 i.measurableSet_interval i.restrict_interval_ne_top (1 : ℝ)
 
-/-- The Wiener increment `B(hi) - B(lo)` is in `L²(μ)`. -/
-lemma memLp_increment_two (hB : IsPreBrownianReal B μ) {T : ℝ≥0} (i : StepIndex T) :
-    MemLp (fun ω ↦ B i.1.2 ω - B i.1.1 ω) 2 μ :=
-  hB.isGaussianProcess.hasGaussianLaw_sub.memLp_two
-
 /-- The Wiener increment `B(hi) - B(lo)` as an element of `Lp ℝ 2 μ`. -/
 noncomputable def wienerIncrementLp (B : ℝ≥0 → Ω → ℝ)
     (hB : IsPreBrownianReal B μ) {T : ℝ≥0} (i : StepIndex T) : Lp ℝ 2 μ :=
-  (memLp_increment_two hB i).toLp _
+  (memLp_increment hB i.1.1 i.1.2).toLp _
 
 variable [IsProbabilityMeasure μ]
 
@@ -163,7 +176,7 @@ lemma integral_mul_eval (hB : IsPreBrownianReal B μ) (s t : ℝ≥0) :
   exact h_cov
 
 /-- Endpoint arithmetic for the covariance of two ordered Brownian increments. -/
-private lemma covariance_increment_arithmetic
+lemma min_sub_min_sub_min_add_min_eq_max_zero
     (s t u v : ℝ≥0) (hst : s ≤ t) (huv : u ≤ v) :
     ((min t v : ℝ≥0) : ℝ) - ((min t u : ℝ≥0) : ℝ) -
       ((min s v : ℝ≥0) : ℝ) + ((min s u : ℝ≥0) : ℝ) =
@@ -221,7 +234,7 @@ lemma covariance_increment_aux (hB : IsPreBrownianReal B μ)
     linarith [e1, e2, e3]
   rw [h_lhs, integral_mul_eval hB t v, integral_mul_eval hB t u,
       integral_mul_eval hB s v, integral_mul_eval hB s u]
-  exact covariance_increment_arithmetic s t u v hst huv
+  exact min_sub_min_sub_min_add_min_eq_max_zero s t u v hst huv
 
 /-! ### The key isometry on finitely supported coefficients -/
 
@@ -241,8 +254,8 @@ private lemma inner_wienerIncrementLp_eq (hB : IsPreBrownianReal B μ)
         (⟪(wienerIncrementLp B hB i : Ω → ℝ) ω,
           (wienerIncrementLp B hB j : Ω → ℝ) ω⟫_ℝ : ℝ) =
         (B i.1.2 ω - B i.1.1 ω) * (B j.1.2 ω - B j.1.1 ω) := by
-      filter_upwards [MemLp.coeFn_toLp (memLp_increment_two hB i),
-                       MemLp.coeFn_toLp (memLp_increment_two hB j)]
+      filter_upwards [MemLp.coeFn_toLp (memLp_increment hB i.1.1 i.1.2),
+                       MemLp.coeFn_toLp (memLp_increment hB j.1.1 j.1.2)]
         with ω hωI hωJ
       rw [show (wienerIncrementLp B hB i : Ω → ℝ) ω = B i.1.2 ω - B i.1.1 ω from hωI,
           show (wienerIncrementLp B hB j : Ω → ℝ) ω = B j.1.2 ω - B j.1.1 ω from hωJ]

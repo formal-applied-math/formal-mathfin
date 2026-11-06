@@ -16,11 +16,24 @@ These are function-level results for the constructed stopping value, without
 a classical-solution or boundary-smoothness premise. In particular, strict
 convexity does not assert existence or positivity of classical second derivatives.
 
-## Result
+## Main results
 
-Public entry points include `canonicalLogBoundary_strictAntiOn`,
-`canonicalStockBoundary_strictAntiOn`, `canonicalStockBoundary_strictConvexOn`,
-`canonicalLogBoundary_locallyLipschitzOn`.
+* `canonicalLogBoundary_strictAntiOn`: for `0 < k` and `0 ≤ h ≤ k`, the log boundary is strictly
+  decreasing on `(0, ∞)`.
+* `canonicalStockBoundary_strictAntiOn`, `canonicalStockBoundary_strictConvexOn`: under the same
+  hypotheses, the stock boundary is strictly decreasing and strictly convex on `(0, ∞)`.
+* `canonicalLogBoundary_locallyLipschitzOn`, `canonicalStockBoundary_locallyLipschitzOn`: under
+  the same hypotheses, both boundaries are locally Lipschitz on `(0, ∞)`.
+* `zeroDividend_canonicalLogBoundary_strictAntiOn`,
+  `zeroDividend_canonicalStockBoundary_strictConvexOn`,
+  `liuRange_canonicalLogBoundary_strictAntiOn`, `liuRange_canonicalStockBoundary_strictConvexOn`:
+  the strict decrease and strict stock convexity for `0 < k` with no dividend, and for
+  `h + 1 ≤ k`.
+
+## Tags
+
+stock boundary convexity, strictly decreasing boundary, Lipschitz boundary, exercise boundary,
+American put, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

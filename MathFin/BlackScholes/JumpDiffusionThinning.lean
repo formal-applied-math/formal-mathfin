@@ -12,16 +12,27 @@ public import MathFin.Foundations.PoissonThinning
 # Thinning the jumps of a Merton-type jump-diffusion
 
 `JumpDiffusionHyp Q Λ Z N J` (`BlackScholes/JumpDiffusionMixing.lean`) is a Merton-type
-jump-diffusion at a fixed horizon (any i.i.d. jump law, Merton's Gaussian jumps among them): a standard normal diffusion sample `Z`, a `Poisson(Λ)` jump count `N` and
-i.i.d. log-jump sizes `J 0, J 1, …`, the count independent of the sizes. Sorting the jumps by a
-measurable set `A` of sizes (for instance `A = (0, ∞)`, the up-jumps) is a thinning of the Poisson
-count by i.i.d. marks, so `PoissonThinning.thinned_streams_of_iid_marks` applies: the number of
-jumps with size in `A` and the number with size in `Aᶜ` are independent Poisson counts with means
-`Λ·P(J₀ ∈ A)` and `Λ·P(J₀ ∉ A)`.
+jump-diffusion at a fixed horizon (any i.i.d. jump law, Merton's Gaussian jumps among them): a
+standard normal diffusion sample `Z`, a `Poisson(Λ)` jump count `N` and i.i.d. log-jump sizes
+`J 0, J 1, …`, the count independent of the sizes. Sorting the jumps by a measurable set `A` of
+sizes (for instance `A = (0, ∞)`, the up-jumps) is a thinning of the Poisson count by i.i.d. marks,
+so `PoissonThinning.thinned_streams_of_iid_marks` applies: the number of jumps with size in `A` and
+the number with size in `Aᶜ` are independent Poisson counts with means `Λ·P(J₀ ∈ A)` and
+`Λ·P(J₀ ∉ A)`.
 
 ## Main results
 
 * `JumpDiffusionHyp.jumpCounts_split`
+
+## References
+
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976]
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 3.3.10
+
+## Tags
+
+Poisson thinning, up-jumps and down-jumps, splitting a Poisson process, jump-diffusion,
+independent Poisson counts, MSC 60G55, MSC 60G51, MSC 91G20
 -/
 
 @[expose] public section

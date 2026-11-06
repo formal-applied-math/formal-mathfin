@@ -61,6 +61,21 @@ operator cancellation `−(r−σ²/2) − ½σ² + r = 0`, on top of the in-pla
 derivatives are heat-kernel integrals; the theorem also identifies them with the closed-form Greeks
 of `BlackScholes/PDE.lean` (`hasDerivAt_bsV_tau`, `hasDerivAt_bsV_S`, `hasDerivAt_deriv_bsV_S`),
 by uniqueness of the derivative. The benchmark `sc-bs-pde-feynman-kac` re-exports it.
+
+## Main results
+
+* `bsV_eq_feynmanU`: for `S, K, σ, τ > 0`, the Black–Scholes call value is the Feynman–Kac heat flow
+  `feynmanU` of the payoff `e^{−rτ}(e^ξ − K)⁺` at time `σ²τ` and point
+  `log S + (r − σ²/2)τ`.
+* `bsV_eq_discount_feynmanU`: the same value written as `e^{−rτ}` times the heat flow of
+  `(e^ξ − K)⁺`.
+* `bsV_satisfies_bs_pde_via_feynmanKac`: the derivatives `V_τ`, `V_S`, `V_SS` of the call value
+  exist and satisfy `−V_τ + ½σ²S²·V_SS + rS·V_S − rV = 0`, derived through the heat equation.
+
+## Tags
+
+Feynman–Kac, Black–Scholes PDE, probabilistic representation, heat equation, diffusion generator,
+MSC 91G20, MSC 60H30, MSC 35K10
 -/
 
 @[expose] public section
@@ -112,11 +127,8 @@ theorem bsV_eq_feynmanU {K r σ S τ : ℝ}
   simp only [id_eq] at hcf
   rw [hcf, bsV, neg_mul]
 
-private lemma callPayoff_continuous (K : ℝ) :
-    Continuous (fun ξ ↦ max (Real.exp ξ - K) 0) :=
-  (Real.continuous_exp.sub continuous_const).max continuous_const
-
-private lemma callPayoff_le_exp {K : ℝ} (hK : 0 < K) (z : ℝ) :
+/-- For `0 < K`, `|max (exp z - K) 0| ≤ exp z`. -/
+lemma abs_max_exp_sub_zero_le_exp {K : ℝ} (hK : 0 < K) (z : ℝ) :
     |max (Real.exp z - K) 0| ≤ Real.exp z := by
   rw [abs_of_nonneg (le_max_right _ _)]
   exact max_le (by linarith) (Real.exp_nonneg z)
@@ -145,7 +157,9 @@ private lemma hasDerivAt_bsV_S_fk {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) 
             * S⁻¹)) S := by
   have ht₀ : (0 : ℝ) < σ ^ 2 * τ := by positivity
   have hchain :=
-    (hasDerivAt_feynmanU_x ht₀ (callPayoff_continuous K) (callPayoff_le_exp hK)
+    (hasDerivAt_feynmanU_x ht₀
+        (by fun_prop : Continuous (fun ξ : ℝ ↦ max (Real.exp ξ - K) 0))
+        (abs_max_exp_sub_zero_le_exp hK)
         (Real.log S + (r - σ ^ 2 / 2) * τ)).comp S
       ((Real.hasDerivAt_log hS.ne').add_const ((r - σ ^ 2 / 2) * τ))
   refine (hchain.const_mul (Real.exp (-(r * τ)))).congr_of_eventuallyEq ?_
@@ -183,7 +197,9 @@ private lemma hasDerivAt_bsV_tau_fk {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     convert h2 using 1
     ring
   have hfk := hasDerivAt_feynmanU_comp (h := fun ξ ↦ max (Real.exp ξ - K) 0)
-    (callPayoff_continuous K) (callPayoff_le_exp hK) (α := σ ^ 2) (β := r - σ ^ 2 / 2)
+    (by fun_prop : Continuous (fun ξ : ℝ ↦ max (Real.exp ξ - K) 0))
+    (abs_max_exp_sub_zero_le_exp hK) (α := σ ^ 2)
+    (β := r - σ ^ 2 / 2)
     (x₀ := Real.log S) hσ2 hτ
   refine (hexp.mul hfk).congr_of_eventuallyEq ?_
   filter_upwards [isOpen_Ioi.mem_nhds hτ] with τ' hτ'
@@ -209,8 +225,9 @@ private lemma hasDerivAt_bsV_SS_fk {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
                   * heatKernel (σ ^ 2 * τ) (z - (Real.log S + (r - σ ^ 2 / 2) * τ))))) / S ^ 2))
                       S := by
   have ht₀ : (0 : ℝ) < σ ^ 2 * τ := by positivity
-  have hg := (hasDerivAt_feynmanU_xx ht₀ (callPayoff_continuous K) (callPayoff_le_exp hK)
-      (Real.log S + (r - σ ^ 2 / 2) * τ)).comp S
+  have hg := (hasDerivAt_feynmanU_xx ht₀
+      (by fun_prop : Continuous (fun ξ : ℝ ↦ max (Real.exp ξ - K) 0))
+      (abs_max_exp_sub_zero_le_exp hK) (Real.log S + (r - σ ^ 2 / 2) * τ)).comp S
     ((Real.hasDerivAt_log hS.ne').add_const ((r - σ ^ 2 / 2) * τ))
   have hprod := (hg.mul (hasDerivAt_inv hS.ne')).const_mul (Real.exp (-(r * τ)))
   have hSne : S ≠ 0 := hS.ne'
@@ -237,7 +254,7 @@ private lemma integrable_payoff_mul_dtK {t : ℝ} (ht : 0 < t) {K : ℝ} (hK : 0
     Integrable (fun z ↦ max (Real.exp z - K) 0
       * (heatKernel t (z - x) * ((z - x) ^ 2 - t) / (2 * t ^ 2))) volume := by
   apply ((integrable_exp_mul_poly_heatKernel ht x t).const_mul (1 / (2 * t ^ 2))).mono'
-  · exact ((callPayoff_continuous K).mul
+  · exact ((by fun_prop : Continuous (fun ξ : ℝ ↦ max (Real.exp ξ - K) 0)).mul
       (((continuous_heatKernel t).comp (continuous_id.sub continuous_const)).mul
         (((continuous_id.sub continuous_const).pow 2).sub continuous_const)
         |>.div_const _)).aestronglyMeasurable
@@ -254,7 +271,7 @@ private lemma integrable_payoff_mul_dtK {t : ℝ} (ht : 0 < t) {K : ℝ} (hK : 0
     apply mul_le_mul_of_nonneg_left _ (by positivity : (0:ℝ) ≤ 1 / (2 * t ^ 2))
     calc |max (Real.exp z - K) 0| * (heatKernel t (z - x) * |(z - x) ^ 2 - t|)
         ≤ Real.exp z * (heatKernel t (z - x) * ((z - x) ^ 2 + t)) := by
-          refine mul_le_mul (callPayoff_le_exp hK z) ?_ (mul_nonneg hKnn (abs_nonneg _))
+          refine mul_le_mul (abs_max_exp_sub_zero_le_exp hK z) ?_ (mul_nonneg hKnn (abs_nonneg _))
             (Real.exp_nonneg z)
           exact mul_le_mul_of_nonneg_left habs hKnn
       _ = Real.exp z * (((z - x) ^ 2 + t) * heatKernel t (z - x)) := by ring
@@ -264,7 +281,7 @@ private lemma integrable_payoff_mul_dxK {t : ℝ} (ht : 0 < t) {K : ℝ} (hK : 0
     Integrable (fun z ↦ max (Real.exp z - K) 0
       * ((z - x) / t * heatKernel t (z - x))) volume := by
   apply ((integrable_exp_mul_poly_heatKernel ht x 1).const_mul (1 / t)).mono'
-  · exact ((callPayoff_continuous K).mul
+  · exact ((by fun_prop : Continuous (fun ξ : ℝ ↦ max (Real.exp ξ - K) 0)).mul
       (((continuous_id.sub continuous_const).div_const t).mul
         ((continuous_heatKernel t).comp (continuous_id.sub continuous_const)))).aestronglyMeasurable
   · refine ae_of_all _ fun z ↦ ?_
@@ -277,7 +294,7 @@ private lemma integrable_payoff_mul_dxK {t : ℝ} (ht : 0 < t) {K : ℝ} (hK : 0
     have habs : |z - x| ≤ (z - x) ^ 2 + 1 := by
       nlinarith [sq_nonneg (|z - x| - 1), sq_abs (z - x), abs_nonneg (z - x)]
     apply mul_le_mul_of_nonneg_left _ (by positivity : (0:ℝ) ≤ 1 / t)
-    refine mul_le_mul (callPayoff_le_exp hK z) ?_ (mul_nonneg (abs_nonneg _) hKnn)
+    refine mul_le_mul (abs_max_exp_sub_zero_le_exp hK z) ?_ (mul_nonneg (abs_nonneg _) hKnn)
         (Real.exp_nonneg z)
     exact mul_le_mul_of_nonneg_right habs hKnn
 

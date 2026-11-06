@@ -38,17 +38,32 @@ structure every copula shares.
   multidimensional version of `MeasureTheory.Measure.ext_of_Iic`, and it is what makes a copula
   unique in Sklar's theorem.
 
+## Main definitions
+
+* `IsCopula`: a probability measure on `ι → ℝ` whose every coordinate is uniform on `(0, 1)`.
+* `independenceCopula`: the law `Π` of a vector of independent uniforms.
+* `comonotoneCopula`: the law `M` of `(U, …, U)` for a single uniform `U`.
+* `countermonotoneCopula`: the law `W` of `(U, 1 − U)`, in dimension two.
+
 ## Main results
 
-* `IsCopula`: probability measures on `ℝ^ι` with uniform coordinates.
 * `IsCopula.measureReal_coord_le`: each coordinate is uniform, `C(vᵢ ≤ t) = t` on `[0, 1]`.
 * `IsCopula.ae_mem_Ioo`: almost every point of a copula lies in the open cube `(0, 1)^ι`.
 * `IsCopula.measureReal_Iic_le`, `IsCopula.sum_sub_le_measureReal_Iic`: the Fréchet–Hoeffding
   bounds.
 * `ext_of_measure_Iic_pi`: joint distribution functions determine probability laws on `ℝ^ι`.
-* `independenceCopula`, `comonotoneCopula`, `countermonotoneCopula`: `Π`, `M` and `W`, each proved
-  to be a copula, with its distribution function computed.
 * `not_exists_isCopula_frechetLower`: for `d ≥ 3` the lower Fréchet bound is not a copula.
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Section 7.1.2; Theorem 7.7
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 7.3
+
+## Tags
+
+Fréchet–Hoeffding bounds, comonotonicity, countermonotonicity, independence copula,
+dependence modelling, MSC 62H05, MSC 91G70, JEL C02
 -/
 
 @[expose] public section

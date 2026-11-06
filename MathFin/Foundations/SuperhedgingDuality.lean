@@ -16,8 +16,8 @@ every **martingale probability vector** `q` — `q ≥ 0`, `∑ q = 1`, every as
 `q`-fair (`martingaleProbVectors z`) — prices a claim at most its super-replication cost:
 `∑ qₙ Yₙ ≤ x` for any cost-`x` portfolio `θ` that dominates `Y` in every state. A martingale
 probability vector may vanish on some states; the equivalent martingale measures
-(`HasEMM_multi_state`, `Foundations/FTAPMultiState.lean`) are exactly its strictly positive members
-(`hasEMM_multi_state_iff_exists_pos_mem`), so the bound holds for every EMM in particular.
+(`HasEMMMultiState`, `Foundations/FTAPMultiState.lean`) are exactly its strictly positive members
+(`hasEMMMultiState_iff_exists_pos_mem`), so the bound holds for every EMM in particular.
 
 Two consequences:
 
@@ -36,12 +36,29 @@ reverse, separation-based direction; it requires closedness of the super-replica
 generated cone: Mathlib has `PointedCone.DualFG` but no Minkowski–Weyl and no
 `PointedCone.isClosed_span_of_finite`. That one lemma is the whole remaining cost.
 
+## Main definitions
+
+* `martingaleProbVectors`: the probability vectors `q ≥ 0`, `∑ q = 1`, under which every asset's
+  excess return in `z` has expectation zero.
+* `SuperReplicates`: `(x, θ)` super-replicates the claim `Y`, i.e. cost `x` plus the portfolio
+  `θ` dominates `Y` in every state.
+
 ## Main results
-* `MathFin.martingaleProbVectors`, `MathFin.SuperReplicates`
+
 * `MathFin.emm_le_superReplication` — the fundamental bound, over all martingale probability vectors
-* `MathFin.hasEMM_multi_state_iff_exists_pos_mem` — the EMMs are the strictly positive ones
+* `MathFin.hasEMMMultiState_iff_exists_pos_mem` — the EMMs are the strictly positive ones
 * `MathFin.martingalePrice_eq_of_replicates` — the law of one price
 * `MathFin.exists_pos_price_le_superReplication` — the bound is non-vacuous under no arbitrage
+
+## References
+
+* [H. Föllmer and A. Schied, *Stochastic Finance: An Introduction in Discrete Time*][FollmerSchied],
+  §1.3
+
+## Tags
+
+superhedging, super-replication, law of one price, martingale probability vector,
+fundamental theorem of asset pricing, superhedging price, MSC 91G20, MSC 90C05, JEL G13
 -/
 
 @[expose] public section
@@ -55,7 +72,7 @@ variable {M N : ℕ}
 `q ≥ 0`, `∑ q = 1`, under which every asset's excess return is fair (prices to zero). These are
 the martingale measures on the `N` states. They need not be *equivalent* ones: `q` may vanish on a
 state. The equivalent martingale measures are the strictly positive members
-(`hasEMM_multi_state_iff_exists_pos_mem`). -/
+(`hasEMMMultiState_iff_exists_pos_mem`). -/
 def martingaleProbVectors (z : Fin M → Fin N → ℝ) : Set (Fin N → ℝ) :=
   {q | (∀ n, 0 ≤ q n) ∧ (∑ n, q n = 1) ∧ ∀ m, ∑ n, q n * z m n = 0}
 
@@ -89,10 +106,10 @@ theorem emm_le_superReplication (z : Fin M → Fin N → ℝ) (Y : Fin N → ℝ
         rw [Finset.sum_add_distrib, ← Finset.sum_mul, hq_sum, one_mul, hcross, add_zero]
 
 /-- **The EMMs are the strictly positive martingale probability vectors.** An equivalent
-martingale measure of the finite-state market (`HasEMM_multi_state`) is exactly a member of
+martingale measure of the finite-state market (`HasEMMMultiState`) is exactly a member of
 `martingaleProbVectors z` charging every state. -/
-theorem hasEMM_multi_state_iff_exists_pos_mem (z : Fin M → Fin N → ℝ) :
-    HasEMM_multi_state z ↔ ∃ q ∈ martingaleProbVectors z, ∀ n, 0 < q n :=
+theorem hasEMMMultiState_iff_exists_pos_mem (z : Fin M → Fin N → ℝ) :
+    HasEMMMultiState z ↔ ∃ q ∈ martingaleProbVectors z, ∀ n, 0 < q n :=
   ⟨fun ⟨q, hpos, hsum, hfair⟩ ↦ ⟨q, ⟨fun n ↦ (hpos n).le, hsum, hfair⟩, hpos⟩,
    fun ⟨q, ⟨_, hsum, hfair⟩, hpos⟩ ↦ ⟨q, hpos, hsum, hfair⟩⟩
 
@@ -116,12 +133,12 @@ multi-state FTAP (`hasEMM_multi_of_not_hasArbitrage`) supplies an equivalent mar
 `∑ qₙ Yₙ` of any claim `Y` is at most every super-replication cost of `Y`. So no claim can be
 super-replicated arbitrarily cheaply. -/
 theorem exists_pos_price_le_superReplication [NeZero N] (z : Fin M → Fin N → ℝ)
-    (hNA : ¬ HasArbitrage_multi_state z) :
+    (hNA : ¬ HasArbitrageMultiState z) :
     ∃ q ∈ martingaleProbVectors z, (∀ n, 0 < q n) ∧
       ∀ (Y : Fin N → ℝ) (x : ℝ) (θ : Fin M → ℝ), SuperReplicates z Y x θ →
         ∑ n, q n * Y n ≤ x := by
   obtain ⟨q, hq, hpos⟩ :=
-    (hasEMM_multi_state_iff_exists_pos_mem z).mp (hasEMM_multi_of_not_hasArbitrage z hNA)
+    (hasEMMMultiState_iff_exists_pos_mem z).mp (hasEMM_multi_of_not_hasArbitrage z hNA)
   exact ⟨q, hq, hpos, fun Y _ _ hsr ↦ emm_le_superReplication z Y hq hsr⟩
 
 end MathFin

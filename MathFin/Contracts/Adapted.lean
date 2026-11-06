@@ -95,6 +95,16 @@ results have no counterpart in the source.
 No code is copied from `lean_contracts`; every definition and proof here is
 written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 §6 for the full credit line.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], ch. 3-4
+
+## Tags
+
+payoff measurability, adapted payoff, filtration, observation times, integrability, MSC 91G20,
+MSC 60G07, JEL G13
 -/
 
 @[expose] public section
@@ -159,15 +169,6 @@ theorem Payoff.aemeasurable_eval {μ : Measure Ω} (e : Payoff ι) (X : ι → �
   have hX'meas : ∀ i t, Measurable (X' i t) := fun i t ↦ (hX i t).measurable_mk
   exact (Payoff.measurable_eval e X' hX'meas).aemeasurable.congr (heq e).symm
 
-/-- If a hypothesis `∀ t ∈ l₁ ++ l₂, t ≤ u` holds, it holds on each summand
-separately. Stated on the raw list (rather than on `Payoff.add`'s `obsTimes`)
-so it is reusable, unconditionally, across all six binary constructors. -/
-private theorem obsTimes_append_le {u : ℝ≥0} {l₁ l₂ : List ℝ≥0}
-    (h : ∀ t ∈ l₁ ++ l₂, t ≤ u) :
-    (∀ t ∈ l₁, t ≤ u) ∧ (∀ t ∈ l₂, t ≤ u) :=
-  ⟨fun t ht ↦ h t (List.mem_append.mpr (.inl ht)),
-    fun t ht ↦ h t (List.mem_append.mpr (.inr ht))⟩
-
 /-- Evaluating a payoff against a filtration-adapted model `X` is adapted to
 `𝓕 u`, as soon as every time the payoff observes is dated no later than `u`.
 This is the theorem that will make a `Payoff` a legitimate stochastic-integral
@@ -185,17 +186,17 @@ theorem Payoff.measurable_eval_of_obsTimes_le
   | const c => exact measurable_const
   | obs i t => exact (hX i t).mono (𝓕.mono (hle t (by simp [obsTimes]))) le_rfl
   | add a b ha hb =>
-      obtain ⟨hl, hr⟩ := obsTimes_append_le hle; exact (ha hl).add (hb hr)
+      obtain ⟨hl, hr⟩ := List.forall_mem_append.1 hle; exact (ha hl).add (hb hr)
   | sub a b ha hb =>
-      obtain ⟨hl, hr⟩ := obsTimes_append_le hle; exact (ha hl).sub (hb hr)
+      obtain ⟨hl, hr⟩ := List.forall_mem_append.1 hle; exact (ha hl).sub (hb hr)
   | mul a b ha hb =>
-      obtain ⟨hl, hr⟩ := obsTimes_append_le hle; exact (ha hl).mul (hb hr)
+      obtain ⟨hl, hr⟩ := List.forall_mem_append.1 hle; exact (ha hl).mul (hb hr)
   | max a b ha hb =>
-      obtain ⟨hl, hr⟩ := obsTimes_append_le hle; exact (ha hl).max (hb hr)
+      obtain ⟨hl, hr⟩ := List.forall_mem_append.1 hle; exact (ha hl).max (hb hr)
   | min a b ha hb =>
-      obtain ⟨hl, hr⟩ := obsTimes_append_le hle; exact (ha hl).min (hb hr)
+      obtain ⟨hl, hr⟩ := List.forall_mem_append.1 hle; exact (ha hl).min (hb hr)
   | indicatorLt a b ha hb =>
-      obtain ⟨hl, hr⟩ := obsTimes_append_le hle
+      obtain ⟨hl, hr⟩ := List.forall_mem_append.1 hle
       exact Measurable.ite (measurableSet_lt (ha hl) (hb hr)) measurable_const measurable_const
   | rpow a p ha => exact (ha hle).pow_const _
 

@@ -14,10 +14,22 @@ over a fixed finite horizon. Hence even varying stopping rules eventually
 have zero payoff as their initial spots tend to infinity. Bounded convergence
 and nearly optimal rules transfer this fact to the American supremum.
 
-## Result
+## Main results
 
-Public entry points include `putReward_eventually_zero`, `expectedReward_tendsto_zero_spot`,
-`americanPutValue_spot_seq_decay`, `americanPutValue_spot_decay`.
+* `putReward_eventually_zero`: along continuous paths, spots `S n → ∞` and rules bounded by `T`,
+  the reward is eventually `0` at each `ω`.
+* `expectedReward_tendsto_zero_spot`: for `0 ≤ K`, `0 ≤ r`, nonnegative spots `S n → ∞` and
+  any rules `θ n`, the expected rewards tend to `0`.
+* `americanPutValue_spot_seq_decay`, `americanPutValue_spot_decay`: for `0 ≤ K`, `0 ≤ r`,
+  continuous jointly measurable paths, the American put value tends to `0` as the spot tends to
+  `∞` (along nonnegative sequences, and as a limit in the spot).
+* `americanPutValue_spot_decay_uniform`: for `T` and `ε > 0`, eventually in the spot the value is
+  in `[0,ε)` simultaneously for all maturities `t ≤ T`.
+
+## Tags
+
+large spot decay, American put value, geometric Brownian motion, nearly optimal rules, spot limit,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

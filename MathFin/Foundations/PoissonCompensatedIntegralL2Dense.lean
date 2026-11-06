@@ -35,6 +35,23 @@ CLM over the *characterised* predictable `L²` (their axiom #6 in full generalit
 marked-predictable `σ`-algebra + density argument built from scratch for the PRM filtration — a
 declared, deferred Summit. Reference: Applebaum, *Lévy Processes and Stochastic Calculus*, CUP 2009,
 Thm 4.2.3.
+
+## Main results
+
+* `simpleIntegrand_sq_integral`: for the grid integrand `H(ω, z) = ∑ⱼ∑ₗ φⱼₗ(ω)·𝟙_{(tⱼ,tⱼ₊₁]×Aₗ}(z)`
+  with `L²` coefficients, `∫ H² d(P ⊗ ν̂) = ∑ⱼ∑ₗ 𝔼[φⱼₗ²]·(tⱼ₊₁ − tⱼ)·ν(Aₗ).toReal`.
+* `compensated_integral_isometry`: for adapted `L²` coefficients, the squared compensated integral
+  of `H` has `𝔼[(∑ⱼ∑ₗ φⱼₗ Ñ((tⱼ, tⱼ₊₁] × Aₗ))²] = ∫ H² d(P ⊗ ν̂)`.
+
+## References
+
+* [Applebaum (2009)][Applebaum2009], Thm 4.2.3
+* [*cgarryZA/LevyStochCalc*][LevyStochCalc], cited axiom #6
+
+## Tags
+
+Itô–Lévy isometry, L2 norm identity, compensated Poisson integral, reference intensity measure,
+jump integrand, MSC 60G51, MSC 60H05, MSC 60G55
 -/
 
 @[expose] public section

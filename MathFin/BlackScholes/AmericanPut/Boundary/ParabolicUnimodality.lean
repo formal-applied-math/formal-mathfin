@@ -7,11 +7,22 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.ParabolicValley
 
-/-! # Removing smoothing from the three-point maximum principle 
-## Result
+/-! # Removing smoothing from the three-point maximum principle
 
-Public entry points include `three_point_bound_of_positive_superlevels`,
-`parabolic_three_point_bound`.
+## Main results
+
+* `three_point_bound_of_positive_superlevels`: if every positive superlevel set
+  `{x ∈ S | ε < F x}` is order-connected, then for `x ≤ y ≤ z` in `S`,
+  `min (F x) (F z) ≤ max (F y) 0`.
+* `parabolic_three_point_bound`: for `U` solving `U_t = U_xx + D U_x` in the interior of a
+  `movingStrip b R 0 T` with `U ≤ 0` on both lateral edges and the three-point bound at time
+  `0`, the three-point bound `min (U x t) (U z t) ≤ max (U y t) 0` holds at every time
+  `t ∈ [0, T]`.
+
+## Tags
+
+three-point maximum principle, positive superlevel sets, smoothing removal, unimodality, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

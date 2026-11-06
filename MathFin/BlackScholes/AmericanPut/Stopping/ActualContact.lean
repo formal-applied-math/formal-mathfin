@@ -18,11 +18,33 @@ lemmas here only restate the classical ones in the normalized conventions
 (`x + (k-h-1)*t + Real.sqrt 2 * W t` for the log spot, remaining time `T - t`).
 Optimality and the dynamic programming principle are not assumed.
 
-## Result
+## Main definitions
 
-Public entry points include `classicalLogSpot_canonical` (`simp`),
-`canonicalContactRule`, `canonicalContactRule_contact`, `canonicalContactRule_price_eq`,
-`canonicalContactRule_continuation_before`.
+* `canonicalContactRule`: the first-contact rule for the actual price `canonicalPrice` at strike
+  `1`, rate `k`, dividend `h`, volatility `√2` and spot `eˣ`: it stops at the first zero of the
+  gap between the discounted price and the discounted payoff.
+* `canonicalDiscountedPrice`: the discounted actual price along the Brownian log-state.
+* `brownianUsualActualContactRule`: `canonicalContactRule` for the Brownian motion on the
+  completed usual Brownian space.
+
+## Main results
+
+* `classicalLogSpot_canonical`: at strike `1`, volatility `√2` and spot `eˣ`, the classical log
+  spot is `x + (k-h-1) t + √2 W t`.
+* `canonicalContactRule_price_eq`: for `0 ≤ k` and a continuous-path adapted `W`, at the rule's
+  stopping time the actual price at the log state and remaining time equals the put payoff.
+* `canonicalContactRule_continuation_before`: before the stopping time, the log state with
+  remaining time lies in `canonicalContinuationRegion`.
+* `canonicalContactRule_exercise_before_expiry`: if the rule stops before `T`, the spot at the
+  stopping time is at most the stock boundary at the remaining time.
+* `canonicalContactRule_contact`, `canonicalContactRule_reward_lt`: for the Brownian motion,
+  the discounted actual price equals the discounted reward at the stopping time, and strictly
+  exceeds it before then.
+
+## Tags
+
+first contact, contact rule, stopping rule, payoff contact, American put, MSC 60G40, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

@@ -22,16 +22,28 @@ integrable the term-structure of credit spreads is the time-averaged hazard:
 
   `c(T) = -log(S(T)) / T = H(T) / T = (1/T) · ∫₀^T h(u) du`.
 
-Results:
+## Main definitions
 
-* `cumHazard`: `∫₀^t h(u) du`.
-* `hazardSurvival`: `exp(-cumHazard h t)`.
+* `cumHazard`: the cumulative hazard `H(t) = ∫₀^t h(u) du` of a deterministic hazard function `h`.
+* `hazardSurvival`: the survival probability `S(t) = exp(-H(t))` under a time-varying hazard.
+
+## Main results
+
 * `hazardSurvival_at_zero`: `S(0) = 1`.
 * `hazardSurvival_pos`: positive.
 * `cumHazard_const`: `H(t) = h₀ · t` for constant `h`.
 * `hazardSurvival_eq_const_survival`: matches `survivalProbability` for
   constant `h`.
 * `creditSpread_eq_time_avg_hazard`: `c(T) = H(T) / T`.
+
+## References
+
+* [D. Lando, *Credit Risk Modeling*][Lando2004]
+
+## Tags
+
+hazard curve, cumulative hazard, survival probability, time-varying intensity,
+credit spread term structure, default intensity, MSC 91G40, JEL G12
 -/
 
 @[expose] public section

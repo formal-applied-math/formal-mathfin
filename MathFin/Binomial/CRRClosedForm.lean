@@ -18,6 +18,27 @@ This file chains it to the literal Black–Scholes closed form
 `S₀·Φ(d₁) − K·e^{−rT}·Φ(d₂)`, via the BS put formula (`bs_put_formula`,
 instantiated on the terminal law `N((r−σ²/2)T, σ²T)` through the standardisation
 `Z = (· − (r−σ²/2)T)/(σ√T)`) and the CDF symmetry `Φ(−x) = 1 − Φ(x)`.
+
+## Main results
+
+* `exp_neg_mul_integral_put_gaussian_eq`: for `σ, T, S₀, K > 0`, the discounted put expectation
+  under `N((r − σ²/2)T, σ²T)` equals the Black–Scholes put value.
+* `binomialPrice_call_tendsto_bs_closed`: for `σ, T, S₀, K > 0`, if the CRR tree is
+  arbitrage-free for every size `n > 0`, its `n`-step call price tends to
+  `S₀ · Φ(d₁) − K · e^{−rT} · Φ(d₂)`.
+
+## References
+
+* [J. C. Cox, S. A. Ross and M. Rubinstein, *Option pricing: a simplified
+  approach*][CoxRossRubinstein1979]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 21.1
+* [S. E. Shreve, *Stochastic Calculus for Finance I: The Binomial Asset Pricing Model*][ShreveSCFI],
+  3.2
+
+## Tags
+
+Cox–Ross–Rubinstein, Black–Scholes formula, put–call parity, binomial convergence, call price limit,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

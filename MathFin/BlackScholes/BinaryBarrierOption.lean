@@ -51,6 +51,18 @@ QuantLib's 16-branch `switch` (barrier type × call/put × strike-vs-barrier) se
 16 branches are transcribed verbatim below as `bboDownInAlpha`/`bboDownOutAlpha` (both share
 `η = 1`) and `bboUpInAlpha`/`bboUpOutAlpha` (both share `η = −1`).
 
+## Main definitions
+
+* `bboPhiOf`: the sign `φ`, equal to `1` for a call and `-1` for a put.
+* `bboX1`, `bboX2`, `bboY1`, `bboY2`: the exponents of the four terms, struck at `X` (`x₁`), at the
+  barrier `H` (`x₂`), at the reflected log `log (H²/(S X))` (`y₁`) and at `log (H/S)` (`y₂`).
+* `bboHS2mu`: the factor `(H/S)^{2μ}`, written as `exp (2μ · log (H/S))`.
+* `bboB1`, `bboB2`, `bboB3`, `bboB4`: the four building blocks `B₁` to `B₄` of the Rubinstein and
+  Reiner binary-barrier formulas.
+* `bboDownInAlpha`, `bboDownOutAlpha`, `bboUpInAlpha`, `bboUpOutAlpha`: the knock-in and knock-out
+  `α`-factors for a down or up barrier (before the discount and payoff scale), each selected from
+  `B₁` to `B₄` by `isCall` and the strike-barrier comparison `xGeH`.
+
 ## Main results
 
 * `bboDownIn_add_DownOut`: knock-in + knock-out, same direction/type/regime, collapses to the
@@ -83,6 +95,16 @@ already-knocked-in/knocked-out spot guards `AnalyticBinaryBarrierEngine::calcula
 crossed the barrier, a `DownIn`/`UpIn` re-priced as a plain vanilla digital via
 `AnalyticEuropeanEngine` once it has), are all out of scope — this file formalizes exactly
 `payoffAtExpiry`'s own closed form, for a spot strictly on the live side of the barrier.
+
+## References
+
+* [Haug, *The Complete Guide to Option Pricing Formulas*][Haug2007], ch. 4
+* [Rubinstein and Reiner (1991)][RubinsteinReiner1991]
+
+## Tags
+
+digital barrier option, Rubinstein–Reiner, cash-or-nothing, knock-in knock-out, exotic option,
+closed-form pricing, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

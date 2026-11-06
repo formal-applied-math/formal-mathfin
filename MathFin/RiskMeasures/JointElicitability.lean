@@ -31,8 +31,8 @@ with `𝒢₂' = G₂`. It is strictly consistent for `(VaR_α, ES_α)` if `G₁
 strictly increasing and strictly convex; the paper remarks after Corollary 5.5 that `G₁ = 0` is
 allowed. The paper uses the **profit** sign convention: `VaR_α(F) = F⁻¹(α)` is the lower
 `α`-quantile and `ES_α(F) = α⁻¹ ∫₀^α VaR_u(F) du` (its (5.1)) averages the *lower* tail, so
-`ES_α ≤ VaR_α`. That lower-tail functional is `lowerExpectedShortfall` here. It is the reflection of the
-loss-convention `expectedShortfall` of `RiskMeasures/ValueAtRisk.lean`, which averages the upper
+`ES_α ≤ VaR_α`. That lower-tail functional is `lowerExpectedShortfall` here. It is the reflection of
+the loss-convention `expectedShortfall` of `RiskMeasures/ValueAtRisk.lean`, which averages the upper
 tail: `lowerExpectedShortfall_eq_neg_expectedShortfall`.
 
 ## The member proved
@@ -44,11 +44,16 @@ score is `exp e · (e − E[Y] + α⁻¹ E[S_α(v, Y)]) − exp e`. The `v`-part
 quantile (`strictlyElicits_pinballLoss`), with minimum value `−ES_α`; what remains,
 `exp e · (e − ES_α − 1)`, is minimized only at `e = ES_α` by `1 + t < exp t`.
 
+## Main definitions
+
+* `fisslerZiegelScore`: the Fissler–Ziegel score for `(VaR_α, ES_α)` in the profit convention,
+  equation (5.5) of Fissler–Ziegel (2016), for functions `G₁, G₂, 𝒢₂, a`.
+* `fisslerZiegelExpScore`: its member with `G₁ = 0`, `𝒢₂ = G₂ = exp` and `a = 0`.
+* `lowerExpectedShortfall`: the lower-tail expected shortfall `α⁻¹ ∫₀^α VaR_u(μ) du`, the mean of
+  the worst `α`-fraction of outcomes in the profit convention.
+
 ## Main results
 
-* `fisslerZiegelScore`: the scoring family (5.5), verbatim.
-* `fisslerZiegelExpScore`: its member `G₁ = 0`, `𝒢₂ = exp`, `a = 0`.
-* `lowerExpectedShortfall`: the lower-tail expected shortfall (5.1) of the paper.
 * `lowerExpectedShortfall_eq_neg_expectedShortfall`: `ES^{lower}_α(μ) = −ES_{1−α}(−Y)` for
   `Y ~ μ`, bridging to the loss-convention `expectedShortfall`.
 * `strictlyElicits_fisslerZiegelExpScore`: for `α ∈ (0, 1)` the member strictly elicits, in the
@@ -58,6 +63,16 @@ quantile (`strictlyElicits_pinballLoss`), with minimum value `−ES_α`; what re
 * `isElicitable_quantile_lowerExpectedShortfall`: the pair is jointly elicitable. Joint
   elicitability is elicitability at value type `ℝ × ℝ`, so `IsElicitable.apply_mixture` gives
   the convexity of the joint level sets (Fissler–Ziegel 2016, Proposition 2.14).
+
+## References
+
+* [T. Fissler and J. F. Ziegel, *Higher order elicitability and Osband's
+  principle*][FisslerZiegel2016], Corollary 5.5
+
+## Tags
+
+joint elicitability, Fissler-Ziegel, VaR and ES, scoring function, backtesting expected shortfall,
+Osband's principle, MSC 91G70, MSC 62F10, JEL G32
 -/
 
 @[expose] public section
@@ -70,11 +85,13 @@ variable {α : ℝ}
 
 /-! ### The Fissler–Ziegel scoring family -/
 
-/-- The **Fissler–Ziegel score** for `(VaR_α, ES_α)`, equation (5.5) of Fissler–Ziegel (2016),
-in their profit sign convention, for a forecast pair `x = (x₁, x₂)` of VaR and ES and an outcome
-`y`:
-`(𝟙{y ≤ x₁} − α) G₁(x₁) − 𝟙{y ≤ x₁} G₁(y) + G₂(x₂)(x₂ − x₁ + α⁻¹ 𝟙{y ≤ x₁}(x₁ − y))
-− 𝒢₂(x₂) + a(y)`. Their Corollary 5.5 requires `𝒢₂' = G₂`. -/
+/-- The **Fissler–Ziegel score** for `(VaR_α, ES_α)`, equation (5.5) of Fissler–Ziegel (2016), in
+their profit sign convention, for a forecast pair `x = (x₁, x₂)` of VaR and ES and an outcome `y`:
+```
+(𝟙{y ≤ x₁} − α) G₁(x₁) − 𝟙{y ≤ x₁} G₁(y)
+  + G₂(x₂)(x₂ − x₁ + α⁻¹ 𝟙{y ≤ x₁}(x₁ − y)) − 𝒢₂(x₂) + a(y).
+```
+Their Corollary 5.5 requires `𝒢₂' = G₂`. -/
 noncomputable def fisslerZiegelScore (G₁ G₂ 𝒢₂ a : ℝ → ℝ) (α : ℝ) (x : ℝ × ℝ) (y : ℝ) : ℝ :=
   ((if y ≤ x.1 then 1 else 0) - α) * G₁ x.1 - (if y ≤ x.1 then 1 else 0) * G₁ y +
     G₂ x.2 * (x.2 - x.1 + α⁻¹ * (if y ≤ x.1 then 1 else 0) * (x.1 - y)) - 𝒢₂ x.2 + a y

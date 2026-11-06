@@ -10,7 +10,7 @@ public import MathFin.Foundations.LpMulIsometry
 
 /-! # Simple processes are dense in the bracket-weighted predictable `L²`
 
-`ItoIntegralCLM.simpleAssembly_T_denseRange` puts the simple processes densely inside
+`ItoIntegralCLM.simpleAssemblyHorizon_denseRange` puts the simple processes densely inside
 `L²(trim_T)`. The Itô integral against `M = φ●B` lives on the **weighted** space
 `L²(φ²·trim_T)` instead — `φ²ds` being the bracket `d⟨M⟩` — and its characterisation as *the*
 stochastic integral, as well as the passage from simple strategies to general ones, both need
@@ -35,15 +35,30 @@ So the weight is handled where it is cheap — inside the integrand — and the 
 theory is used once, unchanged. `setIntegral_eq_zero_of_orthogonal_pred` was weakened from an
 `L²` class to an integrable function for exactly this call; `h` is `L¹` and generally not `L²`.
 
-## Result
+## Main definitions
+
+* `simpleAssemblyOfMeasure`: the embedding of the bounded simple processes into `L²(ν)` for an
+  arbitrary finite measure `ν` on the predictable σ-algebra, the analogue of `simpleAssemblyHorizon`
+  with the trim measure replaced by `ν`.
+
+## Main results
 
 * `memLp_uncurry_of_isFiniteMeasure` — a simple process is `L²` for *any* finite predictable
   measure, since `SimpleProcess.coe_bounded` bounds it uniformly.
-* `simpleAssemblyOfMeasure` — the resulting embedding, the weighted analogue of `simpleAssembly_T`.
 * `isFiniteMeasure_sqWeight` — `f²·trim_T` is finite exactly because `f ∈ L²(trim_T)`.
-* `inner_simpleAssemblyOfMeasure_iocSP_T` — the rectangle inner product, where the weight moves
+* `inner_simpleAssemblyOfMeasure_iocSPHorizon` — the rectangle inner product, where the weight moves
   from the measure into the integrand.
 * `simpleAssembly_sqWeight_denseRange` — the density theorem.
+
+## References
+
+* [I. Karatzas and S. E. Shreve, *Brownian Motion and Stochastic Calculus*][KaratzasShreve1991],
+  3.2.5
+
+## Tags
+
+density of simple processes, weighted predictable L2, bracket-weighted space,
+stochastic integral construction, predictable rectangles, MSC 60H05, MSC 60G07
 -/
 
 @[expose] public section
@@ -71,7 +86,7 @@ lemma memLp_uncurry_of_isFiniteMeasure (hBmeas : ∀ t, Measurable (B t))
   exact MemLp.of_bound V.isStronglyPredictable.aestronglyMeasurable C
     (Eventually.of_forall fun z ↦ hC z.1 z.2)
 
-/-- **The weighted simple-process embedding**, the analogue of `simpleAssembly_T` with the
+/-- **The weighted simple-process embedding**, the analogue of `simpleAssemblyHorizon` with the
 trim measure replaced by an arbitrary finite predictable `ν`. -/
 noncomputable def simpleAssemblyOfMeasure (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (ν : @Measure (ℝ≥0 × Ω)
@@ -106,14 +121,14 @@ lemma coeFn_simpleAssemblyOfMeasure (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
 omit [IsProbabilityMeasure μ] in
 /-- `f²·trim_T` is a finite measure exactly when `f ∈ L²(trim_T)`: its total mass is `‖f‖²`. -/
 lemma isFiniteMeasure_sqWeight (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    {f : ℝ≥0 × Ω → ℝ} (hfL2 : MemLp f 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    IsFiniteMeasure (sqWeight (trimMeasure_T (μ := μ) T hBmeas) f) := by
+    {f : ℝ≥0 × Ω → ℝ} (hfL2 : MemLp f 2 (trimMeasure (μ := μ) T hBmeas)) :
+    IsFiniteMeasure (sqWeight (trimMeasure (μ := μ) T hBmeas) f) := by
   refine ⟨?_⟩
-  have hlt : ∫⁻ z, ‖f z‖ₑ ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) < ⊤ := by
+  have hlt : ∫⁻ z, ‖f z‖ₑ ^ 2 ∂(trimMeasure (μ := μ) T hBmeas) < ⊤ := by
     have h := hfL2.eLpNorm_lt_top
     rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by norm_num) (by norm_num)
       hfL2.aestronglyMeasurable] at h
-    have h2 : (∫⁻ z, ‖f z‖ₑ ^ ((2 : ℝ≥0∞).toReal) ∂(trimMeasure_T (μ := μ) T hBmeas)) ≠ ⊤ := by
+    have h2 : (∫⁻ z, ‖f z‖ₑ ^ ((2 : ℝ≥0∞).toReal) ∂(trimMeasure (μ := μ) T hBmeas)) ≠ ⊤ := by
       intro htop
       rw [htop] at h
       simp [ENNReal.top_rpow_of_pos] at h
@@ -132,32 +147,32 @@ omit [IsProbabilityMeasure μ] in
 /-- The inner product of the rectangle simple process against `g`, taken in the weighted
 space, is a set-integral of `f²·g` against `trim_T`. This is where the weight moves from the
 measure into the integrand. -/
-lemma inner_simpleAssemblyOfMeasure_iocSP_T (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+lemma inner_simpleAssemblyOfMeasure_iocSPHorizon (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     {f : ℝ≥0 × Ω → ℝ}
     (hf : Measurable[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable] f)
-    [IsFiniteMeasure (sqWeight (trimMeasure_T (μ := μ) T hBmeas) f)]
+    [IsFiniteMeasure (sqWeight (trimMeasure (μ := μ) T hBmeas) f)]
     {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) {F : Set Ω}
     (hF : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas) a] F)
-    (g : Lp ℝ 2 (sqWeight (trimMeasure_T (μ := μ) T hBmeas) f)) :
-    ⟪simpleAssemblyOfMeasure T hBmeas (sqWeight (trimMeasure_T (μ := μ) T hBmeas) f)
-        (iocSP_T hBmeas hab hbT hF), g⟫_ℝ
-      = ∫ z in Set.Ioc a b ×ˢ F, f z ^ 2 * g z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
+    (g : Lp ℝ 2 (sqWeight (trimMeasure (μ := μ) T hBmeas) f)) :
+    ⟪simpleAssemblyOfMeasure T hBmeas (sqWeight (trimMeasure (μ := μ) T hBmeas) f)
+        (iocSPHorizon hBmeas hab hbT hF), g⟫_ℝ
+      = ∫ z in Set.Ioc a b ×ˢ F, f z ^ 2 * g z ∂(trimMeasure (μ := μ) T hBmeas) := by
   set 𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas
   let : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
   have hRpred : MeasurableSet (Set.Ioc a b ×ˢ F) :=
     MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := 𝓕) a b hF
   rw [L2.inner_def]
-  have h_ae : ∀ᵐ z ∂(sqWeight (trimMeasure_T (μ := μ) T hBmeas) f),
-      (⟪(simpleAssemblyOfMeasure T hBmeas (sqWeight (trimMeasure_T (μ := μ) T hBmeas) f)
-            (iocSP_T hBmeas hab hbT hF) : ℝ≥0 × Ω → ℝ) z,
+  have h_ae : ∀ᵐ z ∂(sqWeight (trimMeasure (μ := μ) T hBmeas) f),
+      (⟪(simpleAssemblyOfMeasure T hBmeas (sqWeight (trimMeasure (μ := μ) T hBmeas) f)
+            (iocSPHorizon hBmeas hab hbT hF) : ℝ≥0 × Ω → ℝ) z,
         (g : ℝ≥0 × Ω → ℝ) z⟫_ℝ : ℝ)
         = (Set.Ioc a b ×ˢ F).indicator (fun z ↦ (g : ℝ≥0 × Ω → ℝ) z) z := by
     filter_upwards [coeFn_simpleAssemblyOfMeasure T hBmeas
-      (sqWeight (trimMeasure_T (μ := μ) T hBmeas) f) (iocSP_T hBmeas hab hbT hF)] with z hz
-    have hSA : (simpleAssemblyOfMeasure T hBmeas (sqWeight (trimMeasure_T (μ := μ) T hBmeas) f)
-        (iocSP_T hBmeas hab hbT hF) : ℝ≥0 × Ω → ℝ) z
+      (sqWeight (trimMeasure (μ := μ) T hBmeas) f) (iocSPHorizon hBmeas hab hbT hF)] with z hz
+    have hSA : (simpleAssemblyOfMeasure T hBmeas (sqWeight (trimMeasure (μ := μ) T hBmeas) f)
+        (iocSPHorizon hBmeas hab hbT hF) : ℝ≥0 × Ω → ℝ) z
           = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z := by
-      rw [hz, uncurry_iocSP_T_eq hBmeas hab hbT hF]
+      rw [hz, uncurry_iocSPHorizon_eq hBmeas hab hbT hF]
     rw [hSA]
     change (g : ℝ≥0 × Ω → ℝ) z * (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z = _
     by_cases hz_in : z ∈ Set.Ioc a b ×ˢ F
@@ -177,16 +192,16 @@ core takes an integrable function rather than an `L²` class. -/
 theorem simpleAssembly_sqWeight_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     {f : ℝ≥0 × Ω → ℝ}
     (hf : Measurable[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable] f)
-    [IsFiniteMeasure (sqWeight (trimMeasure_T (μ := μ) T hBmeas) f)] :
+    [IsFiniteMeasure (sqWeight (trimMeasure (μ := μ) T hBmeas) f)] :
     DenseRange (simpleAssemblyOfMeasure T hBmeas
-      (sqWeight (trimMeasure_T (μ := μ) T hBmeas) f)) := by
+      (sqWeight (trimMeasure (μ := μ) T hBmeas) f)) := by
   set 𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas
   let : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
   suffices h_orth_bot : (LinearMap.range (simpleAssemblyOfMeasure T hBmeas
-      (sqWeight (trimMeasure_T (μ := μ) T hBmeas) f)))ᗮ = ⊥ by
+      (sqWeight (trimMeasure (μ := μ) T hBmeas) f)))ᗮ = ⊥ by
     rw [denseRange_iff_closure_range,
         ← LinearMap.coe_range (simpleAssemblyOfMeasure T hBmeas
-          (sqWeight (trimMeasure_T (μ := μ) T hBmeas) f)),
+          (sqWeight (trimMeasure (μ := μ) T hBmeas) f)),
         ← Submodule.topologicalClosure_coe,
         Submodule.topologicalClosure_eq_top_iff.mpr h_orth_bot, Submodule.top_coe]
   rw [Submodule.eq_bot_iff]
@@ -196,21 +211,21 @@ theorem simpleAssembly_sqWeight_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measur
   have hgmeas : Measurable[𝓕.predictable] (g : ℝ≥0 × Ω → ℝ) :=
     (Lp.stronglyMeasurable g).measurable
   have hh_meas : AEStronglyMeasurable (fun z ↦ f z ^ 2 * (g : ℝ≥0 × Ω → ℝ) z)
-      (trimMeasure_T (μ := μ) T hBmeas) :=
+      (trimMeasure (μ := μ) T hBmeas) :=
     (((hf.pow_const 2).mul hgmeas)).aestronglyMeasurable
-  have hlint : ∫⁻ z, ‖f z ^ 2 * (g : ℝ≥0 × Ω → ℝ) z‖ₑ ∂(trimMeasure_T (μ := μ) T hBmeas)
-      = ∫⁻ z, ‖(g : ℝ≥0 × Ω → ℝ) z‖ₑ ∂(sqWeight (trimMeasure_T (μ := μ) T hBmeas) f) := by
+  have hlint : ∫⁻ z, ‖f z ^ 2 * (g : ℝ≥0 × Ω → ℝ) z‖ₑ ∂(trimMeasure (μ := μ) T hBmeas)
+      = ∫⁻ z, ‖(g : ℝ≥0 × Ω → ℝ) z‖ₑ ∂(sqWeight (trimMeasure (μ := μ) T hBmeas) f) := by
     rw [lintegral_sqWeight hf]
     refine lintegral_congr fun z ↦ ?_
     rw [enorm_mul, enorm_pow]
   have hh_int : Integrable (fun z ↦ f z ^ 2 * (g : ℝ≥0 × Ω → ℝ) z)
-      (trimMeasure_T (μ := μ) T hBmeas) := by
+      (trimMeasure (μ := μ) T hBmeas) := by
     refine ⟨hh_meas, ?_⟩
     rw [HasFiniteIntegral, hlint]
     exact ((Lp.memLp g).integrable one_le_two).2
   -- orthogonality on every basic predictable rectangle
   have h_orth : ∀ R ∈ predictableRect (mΩ := mΩ) hBmeas,
-      ∫ z in R, f z ^ 2 * (g : ℝ≥0 × Ω → ℝ) z ∂(trimMeasure_T (μ := μ) T hBmeas) = 0 := by
+      ∫ z in R, f z ^ 2 * (g : ℝ≥0 × Ω → ℝ) z ∂(trimMeasure (μ := μ) T hBmeas) = 0 := by
     intro R hR
     rcases hR with ⟨F₀, hF₀, rfl⟩ | ⟨a, b, _hab, F, hF, rfl⟩
     · have h_R_pred : MeasurableSet[𝓕.predictable] ({(⊥ : ℝ≥0)} ×ˢ F₀) :=
@@ -237,19 +252,19 @@ theorem simpleAssembly_sqWeight_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measur
       rw [h_inter, show max a 0 = a from max_eq_left bot_le]
       by_cases hab' : a ≤ min b T
       · have hbT' : min b T ≤ T := min_le_right _ _
-        rw [← inner_simpleAssemblyOfMeasure_iocSP_T T hBmeas hf hab' hbT' hF g]
-        exact h_mem _ ⟨iocSP_T hBmeas hab' hbT' hF, rfl⟩
+        rw [← inner_simpleAssemblyOfMeasure_iocSPHorizon T hBmeas hf hab' hbT' hF g]
+        exact h_mem _ ⟨iocSPHorizon hBmeas hab' hbT' hF, rfl⟩
       · push Not at hab'
         rw [Set.Ioc_eq_empty (not_lt.mpr hab'.le), Set.empty_prod, setIntegral_empty]
   -- π-λ core, then a.e. vanishing, then transfer back across the weight
   have hh0 : (fun z ↦ f z ^ 2 * (g : ℝ≥0 × Ω → ℝ) z)
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] 0 :=
+      =ᵐ[trimMeasure (μ := μ) T hBmeas] 0 :=
     hh_int.ae_eq_zero_of_forall_setIntegral_eq_zero
       (fun s hs _ ↦ setIntegral_eq_zero_of_orthogonal_pred T hBmeas hh_int h_orth s hs)
   refine (Lp.eq_zero_iff_ae_eq_zero (f := g)).mpr ?_
   filter_upwards [(withDensity_absolutelyContinuous
-      (trimMeasure_T (μ := μ) T hBmeas) (fun z ↦ ‖f z‖ₑ ^ 2)).ae_le hh0,
-    sqWeight_ae_ne_zero (ν := trimMeasure_T (μ := μ) T hBmeas) hf] with z hz hfz
+      (trimMeasure (μ := μ) T hBmeas) (fun z ↦ ‖f z‖ₑ ^ 2)).ae_le hh0,
+    sqWeight_ae_ne_zero (ν := trimMeasure (μ := μ) T hBmeas) hf] with z hz hfz
   have : f z ^ 2 ≠ 0 := pow_ne_zero 2 hfz
   simpa [this] using hz
 

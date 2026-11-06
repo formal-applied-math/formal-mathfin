@@ -14,11 +14,23 @@ The shrinking square-root barrier is compared directly with the stopping
 price using its positive spatial curvature. No classical boundary regularity,
 European asymptotic, or boundary convexity is assumed.
 
-## Result
+## Main results
 
-Public entry points include `expiryBarrier_le_canonicalPrice`,
-`canonicalPrice_exists_expiryBarrier_window`, `canonicalLogBoundary_exists_sqrt_upper_bound`,
-`canonicalLogBoundary_below_linear_eventually`.
+* `expiryBarrier_le_canonicalPrice`: for `0 < k`, `0 ≤ h ≤ k`, `T ≤ 1` and
+  `(|k - h - 1| + k) √T ≤ 1/4`, the expiry barrier lies below the actual price on the strip
+  `-√t ≤ x ≤ √t`, `t ≤ T`.
+* `canonicalPrice_exists_expiryBarrier_window`: for `0 < k` and `0 ≤ h ≤ k` there is some
+  `T > 0` for which that comparison holds.
+* `canonicalLogBoundary_exists_sqrt_upper_bound`: for `0 < k` and `0 ≤ h ≤ k` there is some
+  `T > 0` with log boundary below `-√t / 64` for `0 < t ≤ T`.
+* `canonicalLogBoundary_below_linear_eventually`, `canonicalLogBoundary_ratio_tendsto_atBot`:
+  for `0 < k` and `0 ≤ h ≤ k`, near expiry the log boundary is below `-M t` for each `M`, and
+  `canonicalLogBoundary k h t / t` tends to `-∞` as `t → 0+`.
+
+## Tags
+
+near expiry, boundary below lines, square-root barrier, exercise boundary asymptotics, American put,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

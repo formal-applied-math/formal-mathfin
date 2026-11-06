@@ -56,6 +56,12 @@ replaced by martingale ones.
   pathwise (`ItoFormulaAdapted.eventually_abs_sub_unifPart_lt`, Heine–Cantor on `[s, t]`), so
   `E[δⁿ] → 0` by dominated convergence (`tendsto_integral_maxIncr_pow`).
 
+## Main definitions
+
+* `IsSlowClock`: a process `A` with `A₀ = 0` and `0 ≤ A_q − A_p ≤ q − p` for `p ≤ q`.
+* `maxIncr`: the largest increment of `M` over the cells of the uniform partition of `[s, t]`
+  into `n` cells.
+
 ## Main results
 
 * `integral_mul_increment_eq_zero` — a martingale increment is orthogonal to every bounded
@@ -72,8 +78,14 @@ replaced by martingale ones.
 ## Scope
 
 Everything is for a **bounded** `M` (`|M| ≤ K`) with **every** path continuous, and along the
-uniform partition of `[s, t]`; the bracket is any slow clock, deterministic or not. The per-partition identities and bounds hold for any monotone
-partition; only the limits are stated for the uniform one.
+uniform partition of `[s, t]`; the bracket is any slow clock, deterministic or not. The
+per-partition identities and bounds hold for any monotone partition; only the limits are stated for
+the uniform one.
+
+## Tags
+
+quadratic variation, squared increments, Lévy characterization, slow clock, martingale,
+mean-square convergence, MSC 60G44, MSC 60J65, MSC 60G42
 -/
 
 @[expose] public section
@@ -422,9 +434,10 @@ theorem tendsto_maxIncr (hcont : ∀ ω, Continuous fun t ↦ M t ω) (s t : ℝ
     with n hn
   refine lt_of_le_of_lt ?_ (half_lt_self hε)
   have hε2 : 0 ≤ ε / 2 := (half_pos hε).le
-  calc maxIncr M s t n ω ≤ ((ε / 2).toNNReal : ℝ) := NNReal.coe_le_coe.2 (Finset.sup_le fun k hk ↦ by
-        rw [← NNReal.coe_le_coe, coe_nnnorm, Real.coe_toNNReal _ hε2, Real.norm_eq_abs]
-        exact (hn k (mem_range.1 hk)).le)
+  calc maxIncr M s t n ω ≤ ((ε / 2).toNNReal : ℝ) :=
+        NNReal.coe_le_coe.2 (Finset.sup_le fun k hk ↦ by
+          rw [← NNReal.coe_le_coe, coe_nnnorm, Real.coe_toNNReal _ hε2, Real.norm_eq_abs]
+          exact (hn k (mem_range.1 hk)).le)
     _ = ε / 2 := Real.coe_toNNReal _ hε2
 
 /-- Every positive moment of the largest increment tends to `0` (dominated convergence, with the

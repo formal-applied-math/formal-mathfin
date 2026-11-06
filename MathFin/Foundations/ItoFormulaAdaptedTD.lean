@@ -52,6 +52,34 @@ defined, they are limits in probability of the same sums.
 
 `ItoFormulaAdaptedUnbounded` removes the bounds on `σ` and `b`, and `ItoFormulaAdaptedProcess`
 states the formula as an identity of processes (all `t` at once, almost surely).
+
+## Main results
+
+* `ito_formula_adapted_td_local_le`: for `X = adaptedItoProcess`, `t ≤ T` and `f(t, x)` with
+  jointly continuous `f_t`, `f_x`, `f_xx`, the sums `∑ f_x(tₖ, X_{tₖ})(M_{tₖ₊₁} − M_{tₖ})` on
+  uniform partitions of `[0, t]` converge in measure to
+  `f(t, X_t) − f(0, x₀) − ∫₀ᵗ (f_t + f_x b + ½ f_xx σ²)(s, X_s) ds`.
+* `ito_formula_adapted_local_le`: the same for a `C²` function `f(x)`.
+* `ito_formula_adapted_td_against`: with `f_t`, `f_x`, `f_xx` bounded, almost surely
+  `f(T, X_T) − f(0, x₀) = ∫₀ᵀ f_x(s, X_s) dM_s + ∫₀ᵀ (f_t + f_x b + ½ f_xx σ²)(s, X_s) ds`,
+  the first integral taken against `M = σ●B`.
+* `ito_formula_adapted`: for `f ∈ C²` with `f'`, `f''` bounded, the same identity at
+  `f(X_T) − f(x₀)` with the `L²` Itô integral of `f'(X)·σ`.
+* `ito_formula_td_of_tendsto`: the pathwise identity `f(T, x_T) − f(0, x_0) = E + D + I + ½ W`,
+  given convergent Riemann sums along uniform partitions and bounded squared-increment sums.
+* `tendstoInMeasure_riemannStieltjes_itoIntegral`: for continuous bounded `f'`, the
+  Riemann–Stieltjes sums converge in measure to the `L²` Itô integral of `f'(X)·σ`.
+
+## References
+
+* [I. Karatzas and S. E. Shreve, *Brownian Motion and Stochastic Calculus*][KaratzasShreve1991],
+  Theorem 3.3.3; Theorem 3.3.6
+* [Revuz and Yor, *Continuous Martingales and Brownian Motion*][RevuzYor], Proposition IV.2.13
+
+## Tags
+
+Itô formula, Itô lemma, time-dependent function, Itô process, localisation,
+convergence in probability, MSC 60H05, MSC 60H10, MSC 60J60
 -/
 
 @[expose] public section
@@ -244,7 +272,7 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilit
   {σ : ℝ≥0 → Ω → ℝ}
   (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (σ t))
   (hcont : ∀ ω, Continuous (fun t : ℝ≥0 ↦ σ t ω)) {C : ℝ} (hbdd : ∀ t ω, |σ t ω| ≤ C)
-  (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {b : ℝ≥0 → Ω → ℝ}
+  (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {b : ℝ≥0 → Ω → ℝ}
   (hb_adap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (b t))
   (hb_cont : ∀ ω, Continuous fun s ↦ b s ω) {Cb : ℝ} (hb_bdd : ∀ s ω, |b s ω| ≤ Cb) (x₀ : ℝ)
 
@@ -288,8 +316,8 @@ theorem ae_itoContinuousMod_eq_of_le {t : ℝ≥0} (ht : t ≤ T) :
 variable {T hBmeas x₀} in
 /-- Two Itô processes with the same start and drift whose martingale parts agree on a set of
 times agree there. -/
-theorem adaptedItoProcess_eq_of_eqOn {T' : ℝ≥0} {φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)}
-    {φ' : Lp ℝ 2 (trimMeasure_T (μ := μ) T' hBmeas)} {ω : Ω} {S : Set ℝ≥0}
+theorem adaptedItoProcess_eq_of_eqOn {T' : ℝ≥0} {φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)}
+    {φ' : Lp ℝ 2 (trimMeasure (μ := μ) T' hBmeas)} {ω : Ω} {S : Set ℝ≥0}
     (h : ∀ s ∈ S, itoContinuousMod T' hBmeas φ' s ω = itoContinuousMod T hBmeas φ s ω)
     {s : ℝ≥0} (hs : s ∈ S) :
     adaptedItoProcess T' hBmeas φ' x₀ b s ω = adaptedItoProcess T hBmeas φ x₀ b s ω := by
@@ -606,7 +634,7 @@ theorem ito_formula_adapted {f f' f'' : ℝ → ℝ} (hf : ∀ x, HasDerivAt f (
     (hf1 : ∀ x, |f' x| ≤ C₁) (hf2 : ∀ x, |f'' x| ≤ C₂) :
     (fun ω ↦ f (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd)
         x₀ b T ω) - f x₀) =ᵐ[μ] fun ω ↦
-      itoIntegralCLM_T hB T hBmeas (processToLpPredictable T hBmeas
+      itoIntegralCLM hB T hBmeas (processToLpPredictable T hBmeas
           (comp_adaptedItoProcess_mul_isStronglyPredictable hB T hBmeas hBcont hadap hcont
             (processToLp (μ := μ) T hBmeas hadap hcont hbdd) hb_adap hb_cont hb_bdd x₀
             (Differentiable.continuous fun x ↦ (hf' x).differentiableAt))
@@ -645,7 +673,7 @@ theorem tendstoInMeasure_riemannStieltjes_itoIntegral {f' : ℝ → ℝ} (hf'c :
             (unifPart T n (k + 1)) ω
           - itoContinuousMod T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd)
             (unifPart T n k) ω)) atTop
-      (itoIntegralCLM_T hB T hBmeas (processToLpPredictable T hBmeas
+      (itoIntegralCLM hB T hBmeas (processToLpPredictable T hBmeas
         (comp_adaptedItoProcess_mul_isStronglyPredictable hB T hBmeas hBcont hadap hcont
           (processToLp (μ := μ) T hBmeas hadap hcont hbdd) hb_adap hb_cont hb_bdd x₀ hf'c)
         (abs_comp_mul_le hf1 hbdd _))) := by

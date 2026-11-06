@@ -17,7 +17,7 @@ sell event. This file identifies the quote process with Mathlib's conditional ex
 given the σ-algebra the trade direction generates, `σ(B) = generateFrom {B}`, and reads off the
 martingale property of one trade.
 
-## Results
+## Main results
 
 * `generateFrom_singleton_compl`: a set and its complement generate the same σ-algebra.
 * `condExp_payoff_eq_quote`: `μ[V | σ(B)]` is, `μ`-a.e., the ask on `B` and the bid on `Bᶜ`.
@@ -35,6 +35,16 @@ martingale property of one trade.
 One trade. The quotes are posited as the conditioned integrals (as in `GlostenMilgrom`); the
 zero-profit derivation of the competitive market maker, and the sequence of trades along which
 Glosten–Milgrom prices form a martingale, are not formalized.
+
+## References
+
+* [L. R. Glosten and P. R. Milgrom, *Bid, ask and transaction prices in a specialist market with
+  heterogeneously informed traders*][GlostenMilgrom1985]
+
+## Tags
+
+Glosten–Milgrom model, market maker quotes, conditional expectation, bid–ask spread,
+adverse selection, martingale, MSC 91B26, MSC 60G42, JEL D82
 -/
 
 @[expose] public section

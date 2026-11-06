@@ -53,6 +53,39 @@ the model (as in `bondPrice_vasicek`). The caplet is *not* priced as a Black-76 
 models: the forward LIBOR `L = (1/P − 1)/δ` of a lognormal bond is a shifted lognormal (a remark,
 not a theorem here), so the hypothesis of `valueDisc_caplet_black76` is not claimed and not used;
 the caplet is `(1 + δK)` bond puts, which are Black puts on the lognormal bond.
+
+## Main results
+
+* `HasBondPrice.integral_bond_forward`: under the `T₀`-forward measure, the expectation of the
+  bond `X b T₀` is `zeroCurve Q D T₁ / zeroCurve Q D T₀`.
+* `HasBondPrice.valueDisc_bondPut_gaussian`: if the bond is `a * exp (-(β r))` almost surely under
+  the `T₀`-forward measure, with `r` Gaussian of variance `v > 0` there, the put on the bond
+  struck at `k` is worth `P(0, T₀) k Φ(-d₂) - P(0, T₁) Φ(-d₁)`, with `d₁`, `d₂` the Black-Scholes
+  quantities at forward `P(0, T₁)/P(0, T₀)`, rate `0` and volatility `β√v`.
+* `valueDisc_bondPut_wiener`: the same price for an integrated short rate in Wiener
+  representation `R T = M T + c T * ∫₀ᵀ g_T dB`.
+* `valueDisc_bondPut_hullWhite`, `valueDisc_bondPut_vasicek`: the Hull-White and Vasicek bond
+  puts (`σ ≠ 0`, `0 < T₀ < T₁`), with volatility `vasicekBondB κ (T₁ - T₀)` times the standard
+  deviation of `r_{T₀}`.
+* `valueDisc_bondPut_gsr`: the bond put in the two-piece GSR model with volatilities `σ1`, `σ2`.
+* `valueDisc_bondPut_gsr_self`, `zeroCurve_gsr_self`: at `σ1 = σ2` the GSR zero curve and bond put
+  are the Vasicek ones.
+* `valueDisc_caplet_hullWhite`, `valueDisc_caplet_vasicek`, `valueDisc_caplet_gsr`: in a
+  `BondModel` for each of these models, the caplet is worth `1 + δK` bond puts struck at
+  `1/(1 + δK)`, each priced as above. The caplet is not priced as a Black-76 caplet.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  section 3.2; section 3.3
+* [Jamshidian, *An exact bond option formula*][Jamshidian1989]
+* [The QuantLib contributors, *QuantLib*][QuantLib], Gsr model
+
+## Tags
+
+Jamshidian decomposition, bond put, caplet pricing, Hull–White model, Vasicek model,
+forward measure, Gaussian short rate, MSC 91G30, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

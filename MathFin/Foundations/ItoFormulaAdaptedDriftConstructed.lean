@@ -28,7 +28,7 @@ continuous and `f'`, `f''` bounded.
 
 Route: `ItoFormulaAdapted.ito_formula_adapted` gives the pathwise a.e. decomposition
 `f(X_T) − f c =ᵐ ∫₀ᵀ f'(X)·δ dB + ∫₀ᵀ (f'(X)·β + ½·f''(X)·δ²) ds`; integrating, the stochastic
-term dies by centering (`integral_itoIntegralCLM_T` — the Itô integral at any `L²` class has
+term dies by centering (`integral_itoIntegralCLM` — the Itô integral at any `L²` class has
 mean zero), and the drift integral crosses the expectation by `integral_integral_swap` at the
 bounded predictable weight `f'(X)·β + ½·f''(X)·δ²`. Its product integrability is
 `band_integrable` below (predictability gives product-measurability, boundedness gives
@@ -69,7 +69,7 @@ Hypothesis comparison with `ItoDriftConditional.itoDrift_expectation_identity_ad
   the predictability lemmas for `adaptedItoProcess` need. The discrete route's only extra reach
   is a `B` without everywhere-continuous paths.
 
-## Result
+## Main results
 
 * `itoDrift_expectation_identity_adaptedItoProcess` — the identity at the horizon `T`, with no
   hypothesized `M` but with `hBcont` (headline);
@@ -84,6 +84,16 @@ Hypothesis comparison with `ItoDriftConditional.itoDrift_expectation_identity_ad
   band (the hypothesis of the Fubini interchange).
 
 The constant-coefficient case is `ito_drift_expectation_identity` in `ItoDriftExpectation`.
+
+## References
+
+* [B. Oksendal, *Stochastic Differential Equations*][Oksendal2003], §7.4
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Ch 7
+
+## Tags
+
+Itô formula in expectation, Itô process, pathwise Itô formula, centering, Fubini,
+random coefficients, MSC 60H05, MSC 60H10
 -/
 
 @[expose] public section
@@ -195,7 +205,7 @@ theorem itoDrift_expectation_identity_adaptedItoProcess (hB : IsPreBrownianReal 
     (comp_adaptedItoProcess_mul_isStronglyPredictable hB T hBmeas hBcont hδadap hδcont φ hβadap
       hβcont hβbdd c hf'c) (abs_comp_mul_le hg1 hδbdd _)
   -- the pathwise formula, mul form
-  have hformula : (fun ω ↦ f (X T ω) - f c) =ᵐ[μ] fun ω ↦ (itoIntegralCLM_T hB T hBmeas ψ : Ω → ℝ) ω
+  have hformula : (fun ω ↦ f (X T ω) - f c) =ᵐ[μ] fun ω ↦ (itoIntegralCLM hB T hBmeas ψ : Ω → ℝ) ω
       + ∫ s in Set.Ioc 0 T, g s ω ∂ItoIntegralL2.timeMeasure :=
     (ito_formula_adapted hB T hBmeas hBcont hδadap hδcont hδbdd hβadap hβcont hβbdd
       c hf hf' hf''c hg1 hg2).trans (ae_of_all _ fun ω ↦ by simp only [pow_two]; rfl)
@@ -228,7 +238,7 @@ theorem itoDrift_expectation_identity_adaptedItoProcess (hB : IsPreBrownianReal 
       = ∫ s in Set.Ioc (0 : ℝ≥0) T, (∫ ω, g s ω ∂μ) ∂ItoIntegralL2.timeMeasure := by
     have h := integral_congr_ae hformula
     rw [integral_sub hint_f (integrable_const _), integral_add ((Lp.memLp _).integrable one_le_two)
-      hDint, integral_itoIntegralCLM_T, zero_add] at h
+      hDint, integral_itoIntegralCLM, zero_add] at h
     simpa using h.trans hfub
   rw [← sub_eq_iff_eq_add', hmain]
   refine setIntegral_congr_fun measurableSet_Ioc fun s _ ↦ ?_
@@ -289,7 +299,7 @@ the modification property `itoContinuousMod_modification`; after it, the CLM pro
 its terminal value (`itoProcessCLM_eq_terminal_of_ge`, `itoProcessCLM_terminal_eq`). -/
 theorem itoContinuousMod_min_ae_eq_itoProcessCLM (hB : IsPreBrownianReal B μ)
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (t : ℝ≥0) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (t : ℝ≥0) :
     itoContinuousMod T hBmeas φ (min t T) =ᵐ[μ] (itoProcessCLM hB T t hBmeas φ : Ω → ℝ) := by
   rcases le_total t T with htT | hTt
   · rw [min_eq_left htT]

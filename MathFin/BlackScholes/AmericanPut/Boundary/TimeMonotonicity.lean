@@ -16,10 +16,26 @@ localization supersolution. At a positive contact the delayed price is in
 continuation, so local obstacle comparison applies. The localization is then
 removed pointwise. No time monotonicity is assumed in the pricing contract.
 
-## Result
+## Main definitions
 
-Public entry points include `dividendSpatialOperator_sub_const_mul`, `penalizedDelay`,
-`penalizedDelay_local_subsolution`, `penalizedDelay_le_price`.
+* `penalizedDelay`: the price delayed by `a` (`delayedPrice`) minus `ε` times the localization
+  barrier.
+
+## Main results
+
+* `dividendSpatialOperator_sub_const_mul`: for `F`, `G` that are `C²` at `x`, the dividend
+  spatial operator of `F - ε G` is that of `F` minus `ε` times that of `G`.
+* `penalizedDelay_local_subsolution`: for a `DividendPutSolution`, `0 < ε` and `0 < t`, wherever
+  the price is below `penalizedDelay`, the latter is `C²` and its time derivative is at most the
+  dividend spatial operator applied to it.
+* `penalizedDelay_le_price`, `delayedPrice_le_price`: for `0 ≤ a` and `0 ≤ T`, the delayed price
+  (penalized by any `ε > 0`, or not) is at most the price.
+* `price_mono_time`: for a `DividendPutSolution`, `p x s ≤ p x t` whenever `0 ≤ s ≤ t`.
+
+## Tags
+
+price monotone in maturity, time delay, localization supersolution, obstacle comparison, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

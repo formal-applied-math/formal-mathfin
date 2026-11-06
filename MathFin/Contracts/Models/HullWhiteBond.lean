@@ -25,6 +25,18 @@ with the same proof; Vasicek is the constant forcing (`HullWhite.bondRate_const`
 ## Main results
 
 * `bondPrice_hullWhite` — `bondPrice` in the Hull–White model, almost surely.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  section 3.3.1
+* [J. Hull and A. White, *Pricing interest-rate-derivative securities*][HullWhite1990]
+
+## Tags
+
+Hull–White model, zero-coupon bond price, affine term structure, short rate, Wiener integral,
+MSC 91G30, JEL E43, JEL G12
 -/
 
 @[expose] public section

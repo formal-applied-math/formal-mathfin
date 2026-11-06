@@ -14,6 +14,21 @@ Part of the SVI polynomial-sign certificate (#174).
 
 A quadratic form equivalent to its negative has signature zero, so a quotient component
 containing a square root of `−1` contributes nothing to the trace-form signature.
+
+## Main definitions
+
+* `imaginaryMulEquiv`: multiplication by `u` with `u² = -1`, as a real-linear equivalence of `A`.
+
+## Main results
+
+* `formSignature_eq_zero_of_equivalent_neg`: a real quadratic form equivalent to its negative has
+  signature `0`.
+* `weightedTraceForm_signature_zero_of_imaginary`: if `AdjoinRoot f` contains `u` with
+  `u² = -1`, the signature of `weightedTraceForm f q` is `0`.
+
+## Tags
+
+trace form signature, complex roots, hyperbolic quadratic form, SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -34,6 +34,11 @@ to deterministic `t`. That bridge is deferred to a follow-up: see the
 * `discreteTaylorRemainder_sq` — the Taylor remainder for `f = x²` is `0`.
 * `discrete_squaring_identity` — the pathwise identity
   `X_N² − X_0² = 2·∑ X_k·ΔX_k + ∑ (ΔX_k)²`.
+
+## Tags
+
+discrete Itô formula, squaring identity, telescoping sum, quadratic variation, Itô lemma, MSC 60H05,
+MSC 60G44
 -/
 
 @[expose] public section

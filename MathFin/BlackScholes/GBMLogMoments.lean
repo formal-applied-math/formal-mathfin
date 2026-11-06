@@ -27,14 +27,27 @@ The mean is the drift that Itô's formula gives `log S` for GBM with drift `r`: 
 number: the Itô drift is computed algebraically from `f = log`, and the mean from the Gaussian
 law. This file does not prove Itô's formula for `log S`.
 
+## Main definitions
+
+* `bsLogReturn`: the log-return `(r − σ²/2) T + σ √T Z` as a function of the standard normal
+  sample `Z`.
+
 ## Main results
 
-* `bsLogReturn`: definition `(r − σ²/2)·T + σ·√T·Z`.
 * `bsLogReturn_eq`: `log(bsTerminal S₀ r σ T Z / S₀) = bsLogReturn r σ T Z`.
 * `bsLogReturn_hasLaw`: `bsLogReturn r σ T Z ~ N((r − σ²/2)T, σ²T)` under `BSCallHyp`.
 * `bsLogReturn_mean`: `E_Q[bsLogReturn] = (r − σ²/2)·T`.
 * `bsLogReturn_variance`: `Var_Q[bsLogReturn] = σ²T`.
 * `bsLogReturn_mean_eq_itoDrift`: the mean is `T` times the Itô drift of `log S`.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], §15.1
+
+## Tags
+
+geometric Brownian motion, log-return distribution, Gaussian log-return, lognormal model,
+normal law, MSC 60J65, MSC 91G20
 -/
 
 @[expose] public section

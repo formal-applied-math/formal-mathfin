@@ -43,17 +43,42 @@ With `RiskMeasures/ExpectedShortfall.lean` this gives one half of each side of t
 trade-off: expected shortfall is coherent but not elicitable, while value-at-risk is elicitable.
 Its failure of subadditivity is proved in `RiskMeasures/VaRSuperadditivity.lean`.
 
+## Main definitions
+
+* `StrictlyElicits`: the scoring function `S` strictly elicits the functional `T` on a class `C`
+  of laws, i.e. `T μ` is the unique minimizer of `x ↦ ∫ S(x, y) dμ(y)` for every `μ ∈ C`.
+* `IsElicitable`: some scoring function strictly elicits `T` on `C`.
+* `pinballLoss`: the pinball loss `(𝟙{y ≤ x} − α)(x − y)` of a quantile forecast `x` against a
+  realized loss `y`.
+* `esLevelWitness`, `esLevelMixture`: the two-point law `((1 + α)/2) δ₋₁ + ((1 − α)/2) δ₁` and
+  the mixture `(1 − α) δ₀ + α · esLevelWitness α` used to show that expected shortfall is not
+  elicitable.
+
 ## Main results
 
-* `StrictlyElicits`, `IsElicitable`: strict consistency of a scoring function, and elicitability.
-* `StrictlyElicits.apply_mixture`: elicitable functionals have convex level sets.
-* `pinballLoss`, `integral_pinballLoss`: the pinball loss and its expectation.
+* `StrictlyElicits.apply_mixture`: on a class closed under the mixture, a strictly elicited
+  functional is constant on mixtures of laws with equal values (convex level sets).
+* `integral_pinballLoss`: the expected pinball loss in terms of `rockafellarUryasev`.
 * `integral_pinballLoss_valueAtRisk_le`: VaR minimizes the expected pinball loss.
 * `rockafellarUryasev_sub_expectedShortfall`: the exact Rockafellar–Uryasev excess.
-* `expectedShortfall_lt_rockafellarUryasev`: VaR is the unique minimizer when the quantile is
-  unique.
-* `strictlyElicits_pinballLoss`: the pinball loss strictly elicits the `α`-quantile.
-* `not_isElicitable_expectedShortfall`: `ES_α` is not elicitable, for every `α ∈ (0, 1)`.
+* `expectedShortfall_lt_rockafellarUryasev`: when the quantile is unique, `ES_α < RU(c)` for every
+  `c ≠ VaR_α`, so VaR is the unique minimizer of the Rockafellar–Uryasev function.
+* `strictlyElicits_pinballLoss`: the pinball loss strictly elicits the `α`-quantile on the laws
+  with a finite mean and a unique `α`-quantile.
+* `not_isElicitable_expectedShortfall`: for `α ∈ (0, 1)`, `ES_α` is not elicitable on any class of
+  laws containing `δ₀`, `esLevelWitness α` and `esLevelMixture α`.
+
+## References
+
+* [T. Gneiting, *Making and evaluating point forecasts*][Gneiting2011]
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Section 9.3
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 9.5(c); Ex. 9.5, 9.16
+
+## Tags
+
+elicitability, pinball loss, quantile loss, scoring function, backtesting, VaR vs ES,
+forecast comparison, MSC 91G70, MSC 62F10, JEL G32
 -/
 
 @[expose] public section
@@ -212,7 +237,7 @@ theorem rockafellarUryasev_sub_expectedShortfall (hX : Integrable X P) (hα : α
 
 /-- A nonnegative integrand that is at least `δ > 0` on a nondegenerate interval inside the
 domain has a positive integral. -/
-private lemma setIntegral_pos_of_ge {f : ℝ → ℝ} {s : Set ℝ} (hf : IntegrableOn f s)
+lemma setIntegral_pos_of_ge_on_Ioo {f : ℝ → ℝ} {s : Set ℝ} (hf : IntegrableOn f s)
     (hf0 : ∀ u ∈ s, 0 ≤ f u) {a b δ : ℝ} (hab : a < b) (hsub : Ioo a b ⊆ s) (hδ : 0 < δ)
     (hfδ : ∀ u ∈ Ioo a b, δ ≤ f u) (hs : MeasurableSet s) : 0 < ∫ u in s, f u := by
   calc (0 : ℝ) < ∫ _ in Ioo a b, δ := by
@@ -249,8 +274,9 @@ theorem expectedShortfall_lt_rockafellarUryasev (hX : Integrable X P) (hα : α 
       obtain ⟨c', hcc', hc'q⟩ := exists_between hcq
       have hF : P.real {ω | X ω ≤ c'} < α := (lt_valueAtRisk_iff hX' hα).1 hc'q
       have hF0 : 0 ≤ P.real {ω | X ω ≤ c'} := measureReal_nonneg
-      refine add_pos_of_pos_of_nonneg (setIntegral_pos_of_ge (a := max 0 (P.real {ω | X ω ≤ c'}))
-        (b := α) hlo (fun _ _ ↦ le_max_right _ _) (max_lt hα.1 hF)
+      refine add_pos_of_pos_of_nonneg (setIntegral_pos_of_ge_on_Ioo
+        (a := max 0 (P.real {ω | X ω ≤ c'})) (b := α) hlo (fun _ _ ↦ le_max_right _ _)
+        (max_lt hα.1 hF)
         (fun u hu ↦ ⟨(le_max_left 0 _).trans_lt hu.1, hu.2.le⟩)
         (sub_pos.2 hcc') (fun u hu ↦ ?_) measurableSet_Ioc) hhi0
       have hu' : u ∈ Ioo 0 1 := ⟨(le_max_left 0 _).trans_lt hu.1, hu.2.trans hα.2⟩
@@ -261,7 +287,7 @@ theorem expectedShortfall_lt_rockafellarUryasev (hX : Integrable X P) (hα : α 
       obtain ⟨x, hqx, hxc⟩ := exists_between hcq
       have hF : α < P.real {ω | X ω ≤ x} := huniq x hqx
       have hF1 : P.real {ω | X ω ≤ x} ≤ 1 := measureReal_le_one
-      refine add_pos_of_nonneg_of_pos hlo0 (setIntegral_pos_of_ge (a := α)
+      refine add_pos_of_nonneg_of_pos hlo0 (setIntegral_pos_of_ge_on_Ioo (a := α)
         (b := min (P.real {ω | X ω ≤ x}) 1) hhi
         (fun _ _ ↦ le_max_right _ _) (lt_min hF hα.2)
         (fun u hu ↦ ⟨hu.1, hu.2.trans_le (min_le_right _ _)⟩) (sub_pos.2 hxc) (fun u hu ↦ ?_)
@@ -303,11 +329,12 @@ theorem strictlyElicits_pinballLoss (hα : α ∈ Ioo 0 1) :
 /-! ### Expected shortfall is not elicitable -/
 
 /-- A scaled point mass integrates every real function. -/
-private lemma integrable_smul_dirac (f : ℝ → ℝ) (c : ℝ≥0) (a : ℝ) :
+lemma integrable_smul_dirac (f : ℝ → ℝ) (c : ℝ≥0) (a : ℝ) :
     Integrable f (c • Measure.dirac a) :=
   (integrable_dirac enorm_lt_top).smul_measure_nnreal
 
-private lemma integral_smul_dirac (f : ℝ → ℝ) (c : ℝ≥0) (a : ℝ) :
+/-- The integral against a scaled point mass is the scaled evaluation. -/
+lemma integral_smul_dirac (f : ℝ → ℝ) (c : ℝ≥0) (a : ℝ) :
     ∫ y, f y ∂(c • Measure.dirac a) = c * f a := by
   rw [integral_smul_nnreal_measure, integral_dirac, NNReal.smul_def, smul_eq_mul]
 

@@ -37,6 +37,32 @@ form the credit layer uses: `P(τ ≤ a) = 1 − exp(−∫₀ᵃ h)` for `a ≥
 The single exponential holds for a deterministic intensity only. With a stochastic intensity `Λ`
 the survival probability is the mixture `E[exp(−Λ_t)]` (`Cox.cox_mixing_survival`), which is not
 `exp(−E[Λ_t])` in general; that case is not covered here.
+
+## Main results
+
+* `survivalFromForce_eq_hazardSurvival`: `survivalFromForce μ t = hazardSurvival μ t`, by `rfl`;
+  the two names denote one function.
+* `gompertz_cumHazard`: for `c ≠ 0`, the cumulative hazard of `u ↦ B * exp (c * u)` is
+  `(B/c) * (exp (c * t) - 1)`.
+* `survivalFunction_eq_hazardSurvival`: if a measurable lifetime `τ` has
+  `P(τ ≤ a) = 1 - hazardSurvival h a` for `a ≥ 0` with `h ≥ 0`, its actuarial survival function
+  equals `hazardSurvival h` for `t ≥ 0`.
+* `survive_eq_exp_neg_integral`: under those hypotheses and `h` continuous, `ₜpₓ` of `τ` is
+  `exp (-∫ s in x..x + t, h s)` for `x, t ≥ 0`.
+* `hasDerivAt_survivalFunction`: under the same hypotheses, the survival function has derivative
+  `-(h t * survivalFunction P τ t)` at `t > 0`.
+* `survive_coxDefaultTime`: for `h` continuous and positive with cumulative hazard tending to
+  `∞`, and `ξ` unit exponential, the Cox default time has `ₜpₓ = exp (-∫ s in x..x + t, h s)`.
+
+## References
+
+* [D. C. M. Dickson, M. R. Hardy and H. R. Waters, *Actuarial Mathematics for Life Contingent
+  Risks*][DicksonHardyWaters2013], §§2.3–2.4
+
+## Tags
+
+force of mortality, hazard rate, survival function, reduced-form credit, Cox default time,
+life table, MSC 91G40, MSC 91G05, JEL G22
 -/
 
 @[expose] public section

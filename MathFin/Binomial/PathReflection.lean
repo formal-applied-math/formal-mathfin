@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -31,7 +32,7 @@ pricing in the binomial tree.
 
 This file formalises **both halves**: the algebraic core (the
 path-position identity and involution) *and* the hitting-time bijection
-itself (`reflectionPrincipleEquiv`, `reflectionPrincipleEquiv_below`), with
+itself (`reflectionPrincipleEquiv`, `reflectionPrincipleEquivBelow`), with
 the discrete IVT (`HitsLevel_of_walkPos_endpoint_ge`) discharging the
 redundant hitting condition on the reflected side. The counting form is
 wired to the corpus as `mf-reflection-principle-counting`.
@@ -45,28 +46,42 @@ negated step-by-step by reflection. The prefix contributes `walkPos ω τ`
 to both sides, and the suffix-sign-flip is what produces the
 `2 · walkPos ω τ − walkPos ω k` form.
 
-## Results
+## Main definitions
 
-* `walkStep`: step value (`+1`/`−1` from a Boolean).
-* `walkPos`: position of the walk at time `k`.
-* `reflectAfter`: flip every step at index `≥ τ`.
+* `walkStep`, `walkPos`: the step `±1` of a flip and the position of the walk at time `k`, the sum
+  of the first `k` steps.
+* `reflectAfter`: the path that agrees with `ω` before time `τ` and flips every step from `τ` on.
+* `hittingSet`, `HitsLevel`: the times `k ≤ n` at which the walk is at level `a`, and the
+  predicate that this set is nonempty.
+* `firstHit`: the first hitting time of level `a` on a path that hits it.
+* `reflectAtFirstHit`: reflection after the first hitting time of `a`.
+* `reflectionPrincipleEquiv`: the bijection between paths that hit `a` and end at `b`, and paths
+  that hit `a` and end at `2a − b`, given by `reflectAtFirstHit a`.
+* `hitsLevelEquivAbove`: for `0 < a ≤ b`, the paths that hit `a` and end at `b` are in
+  bijection with the paths that end at `b`.
+* `reflectionPrincipleEquivBelow`: for `0 < a` and `b ≤ a`, the paths that hit `a` and end at
+  `b` are in bijection with the paths that end at `2a − b`.
+
+## Main results
+
 * `reflectAfter_involutive`: reflection at fixed `τ` is its own inverse.
 * `walkPos_reflectAfter_le`: positions at `k ≤ τ` are unchanged.
 * `walkPos_reflectAfter_ge`: positions at `k ≥ τ` reflect through
   `walkPos ω τ`.
 * `walkPos_reflectAfter_endpoint`: endpoint statement: if the original
   hits `a` at `τ` and ends at `b`, the reflected ends at `2a − b`.
-* `HitsLevel` / `firstHit` (+ `firstHit?`): the barrier-hit predicate and
-  the first hitting time.
-* `reflectAtFirstHit` (+ involutivity): reflection at the first hit.
+* `reflectAtFirstHit_involutive`: reflection at the first hit is its own inverse.
 * `HitsLevel_of_walkPos_endpoint_ge`: discrete IVT — a walk ending at or
   above a level `a ≥ 0` has hit `a`.
-* `reflectionPrincipleEquiv`: paths hitting `a` ending at `b` ≃ paths
-  hitting `a` ending at `2a − b` (André's bijection, an involution).
-* `reflectionPrincipleEquiv_below`: for `0 < a`, `b ≤ a` — paths hitting
-  `a` ending at `b` ≃ *all* paths ending at `2a − b` (hitting condition on
-  the right discharged by the IVT): the counting form used in barrier
-  pricing.
+
+## References
+
+* [André (1887)][Andre1887]
+
+## Tags
+
+reflection principle, André, random walk, first hitting time, barrier option, ballot problem,
+MSC 60G50, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -506,7 +521,7 @@ between `{ω : hits a, ends at b}` and `{ω : ends at b}` for `b ≥ a > 0`.
 
 By the IVT, `walkPos ω n = b ≥ a > 0` automatically implies `HitsLevel a ω`,
 so the `HitsLevel` condition is redundant. -/
-noncomputable def hitsLevel_inhabited_above (a b : ℤ) (ha : 0 < a) (hb : a ≤ b) :
+noncomputable def hitsLevelEquivAbove (a b : ℤ) (ha : 0 < a) (hb : a ≤ b) :
     {ω : Fin n → Bool // HitsLevel a ω ∧ walkPos ω n = b} ≃
     {ω : Fin n → Bool // walkPos ω n = b} where
   toFun ω := ⟨ω.val, ω.property.2⟩
@@ -525,12 +540,12 @@ at-`(2a − b)` (no hitting condition on the right, by IVT, since `2a − b ≥ 
 This is the form actually used in barrier-option pricing: the LHS is "paths
 that touch the barrier and end at `b`," the RHS is the simple endpoint
 distribution at `2a − b`. -/
-noncomputable def reflectionPrincipleEquiv_below
+noncomputable def reflectionPrincipleEquivBelow
     (a b : ℤ) (ha : 0 < a) (hb : b ≤ a) :
     {ω : Fin n → Bool // HitsLevel a ω ∧ walkPos ω n = b} ≃
     {ω : Fin n → Bool // walkPos ω n = 2 * a - b} :=
   (reflectionPrincipleEquiv (n := n) a b).trans
-    (hitsLevel_inhabited_above a (2 * a - b) ha (by linarith))
+    (hitsLevelEquivAbove a (2 * a - b) ha (by linarith))
 
 /-! ## `firstHit?` (Option-returning) for ergonomic downstream use
 

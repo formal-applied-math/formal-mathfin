@@ -45,6 +45,16 @@ pgf across independent sectors.
   `((1 − p) / (1 − p·z)) ^ a`.
 * `poissonMeasure_real_compl_singleton_zero`: `PD_i = 1 − e^{−λ_i}`, i.e.
   `P(N_i ≠ 0) = 1 − e^{−λ_i}` for `N_i ∼ Poisson(λ_i)`.
+
+## References
+
+* [N. L. Johnson, S. Kotz and N. Balakrishnan, *Continuous Univariate Distributions,
+  Vol.~1*][JohnsonKotzBalakrishnan1994], ch. 17
+
+## Tags
+
+CreditRisk+, Poisson–Gamma mixture, negative binomial, probability generating function,
+default count, sector risk factor, MSC 91G40, MSC 60E10, JEL G32
 -/
 
 @[expose] public section

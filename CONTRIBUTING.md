@@ -37,7 +37,9 @@ no extra config needed.
 
 Before opening a PR use the PR template (`.github/PULL_REQUEST_TEMPLATE.md`).
 The CI pipeline runs `pytest tests/ -q` → `python3 -m tools.verify.ledger status` →
-`lake build` in that order. A red gate at any step blocks merge.
+`lake build` → the declaration index and its ratchet checks, in that order. A red gate at any
+step blocks merge. The run summary lists the declarations the PR adds, removes, renames, and
+whose statements it changes: a golf or refactor PR should change no statement.
 
 ## Adding a theorem
 
@@ -115,8 +117,14 @@ The CI pipeline runs `pytest tests/ -q` → `python3 -m tools.verify.ledger stat
 - Default to no comments. Add one only when the *why* is non-obvious (a
   hidden invariant, a workaround for a specific Mathlib bug, behaviour that
   would surprise a reader). Identifiers should carry the *what*.
-- File headers follow Mathlib convention: copyright + license + authors +
-  short docstring + `## Result` section listing the public lemmas. Put your
+- File headers follow Mathlib convention: copyright + license + authors, then a
+  module docstring in Mathlib's layout: `# Title`, a summary, `## Main definitions`
+  and/or `## Main results` listing the public declarations, then `## References`
+  (keys of `docs/references.bib`, as `* [Author, *Title*][Key], §2.3`) and `## Tags`
+  (search terms, then subject codes from `docs/subjects.toml`, e.g. `JEL G13, MSC 91G20`).
+  `python3 -m tools.verify.doc_standard` checks the layout; a new module that lacks a
+  section raises a ratchet count and fails CI. A module that imports no other library
+  module starts with `public import MathFin.Init`. Put your
   own name on both the `Copyright` and the `Authors:` line: the copyright to
   your contribution is yours, and a header copied from a neighbouring module
   carries someone else's name.

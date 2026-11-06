@@ -25,7 +25,7 @@ process `X_t = X₀ + b·t + σ·B_t`:
   `𝔼[f(X_T)] = 𝔼[f(X₀ + b·0 + σ·B₀)] + ∫₀ᵀ 𝔼[f'(X_s)·b + ½·f''(X_s)·σ²] ds`,
 
   the expectation form of Itô's formula: integrating the pathwise formula kills the stochastic
-  term by centering (`integral_itoIntegralCLM_T`) and interchanges the drift integral with the
+  term by centering (`integral_itoIntegralCLM`) and interchanges the drift integral with the
   expectation by `expectation_pathIntegral_eq`. For `f` three times differentiable with
   `f'`, `f''`, `f'''` bounded, the exponential-growth hypotheses of `ito_formula_itoProcess`
   hold at `λ = 0`.
@@ -38,6 +38,21 @@ the Itô integral of `δ` and an almost surely path-continuous `X = c + ∫ β +
 the expectation of the pathwise formula `ItoFormulaAdapted.ito_formula_adapted` for the process
 the library constructs, with no hypothesized `M`; that module also shows the constructed process
 meets the hypotheses of the first proof when every path of `B` is continuous.
+
+## Main results
+
+* `expectation_pathIntegral_eq`: `𝔼[∫₀ᵀ w(s, ω) ds] = ∫₀ᵀ 𝔼[w(s, ·)] ds` for `w` with
+  measurable sections, almost surely continuous paths and `|w| ≤ C`.
+* `frozenRiemann_tendsto`: the left-endpoint Riemann sums of the mean function of such a family
+  converge to its time integral.
+* `ito_drift_expectation_identity`: for `X_t = X₀ + b·t + σ·B_t` with `B` a pre-Brownian motion
+  with continuous paths and `f` three times differentiable with `f'`, `f''`, `f'''` bounded,
+  `𝔼[f(X_T)] = 𝔼[f(X₀ + σ·B₀)] + ∫₀ᵀ 𝔼[f'(X_s)·b + ½·f''(X_s)·σ²] ds`.
+
+## Tags
+
+expectation form of Itô formula, Itô process, Dynkin formula, constant coefficients,
+Fubini interchange, Itô drift identity, MSC 60H05, MSC 60J60, MSC 60H30
 -/
 
 @[expose] public section
@@ -187,9 +202,9 @@ with `f'`, `f''`, `f'''` bounded,
   `𝔼[f(X_T)] = 𝔼[f(X₀ + b·0 + σ·B₀)] + ∫₀ᵀ 𝔼[f'(X_s)·b + ½·f''(X_s)·σ²] ds`.
 
 Route: `ito_formula_itoProcess` (the pathwise a.e. Itô formula) gives
-`f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ g(s,·) ds` with the stochastic term the genuine
+`f(X_T) − f(X₀) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ g(s,·) ds` with the stochastic term the genuine
 Itô integral of `σ·f'(X_·)`; integrating kills the stochastic term by centering
-(`integral_itoIntegralCLM_T`) and interchanges the drift integral with the expectation by
+(`integral_itoIntegralCLM`) and interchanges the drift integral with the expectation by
 `expectation_pathIntegral_eq`. The derivative bounds instantiate the exponential-growth
 hypotheses of `ito_formula_itoProcess` at `λ = 0`. -/
 theorem ito_drift_expectation_identity
@@ -304,8 +319,8 @@ theorem ito_drift_expectation_identity
   obtain ⟨gfx, _, hId⟩ := ito_formula_itoProcess hB hBmeas hBcont T X₀ b σ hf' hf'' hf'''
     (lam := 0) (C := max C1 (max C2 C3)) (by norm_num : (0 : ℝ) ≤ 0) hb1 hb2 hb3
   -- the stochastic term is integrable (an L² element under a probability measure)
-  have hsto_int : Integrable (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gfx) ω) μ :=
-    (Lp.memLp (itoIntegralCLM_T hB T hBmeas gfx)).integrable one_le_two
+  have hsto_int : Integrable (fun ω ↦ (itoIntegralCLM hB T hBmeas gfx) ω) μ :=
+    (Lp.memLp (itoIntegralCLM hB T hBmeas gfx)).integrable one_le_two
   -- the drift term is integrable (bounded path integral)
   have hdrift_int : Integrable (fun ω ↦ ∫ s in Set.Ioc 0 T, g s ω
       ∂ItoIntegralL2.timeMeasure) μ :=
@@ -321,14 +336,14 @@ theorem ito_drift_expectation_identity
         = ∫ ω, (f (X₀ + b * (T : ℝ) + σ * B T ω)
             - f (X₀ + b * (0 : ℝ) + σ * B 0 ω)) ∂μ := by
           rw [integral_sub (hfX_int T) hfX0]
-      _ = ∫ ω, (itoIntegralCLM_T hB T hBmeas gfx) ω
+      _ = ∫ ω, (itoIntegralCLM hB T hBmeas gfx) ω
             + ∫ s in Set.Ioc 0 T, g s ω ∂ItoIntegralL2.timeMeasure ∂μ :=
           MeasureTheory.integral_congr_ae hId
-      _ = ∫ ω, (itoIntegralCLM_T hB T hBmeas gfx) ω ∂μ
+      _ = ∫ ω, (itoIntegralCLM hB T hBmeas gfx) ω ∂μ
             + ∫ ω, (∫ s in Set.Ioc 0 T, g s ω ∂ItoIntegralL2.timeMeasure) ∂μ :=
           integral_add hsto_int hdrift_int
       _ = ∫ ω, (∫ s in Set.Ioc 0 T, g s ω ∂ItoIntegralL2.timeMeasure) ∂μ := by
-          rw [integral_itoIntegralCLM_T hB T hBmeas gfx, zero_add]
+          rw [integral_itoIntegralCLM hB T hBmeas gfx, zero_add]
       _ = ∫ s in Set.Ioc 0 T, (∫ ω, g s ω ∂μ) ∂ItoIntegralL2.timeMeasure :=
           expectation_pathIntegral_eq hg_meas (ae_of_all _ hg_cont) hG0 hg_bdd T
   linarith [hmain]

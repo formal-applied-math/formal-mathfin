@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib.Probability.Martingale.Basic
 
 /-!
@@ -18,6 +19,16 @@ the characterisation of conditional expectation by set integrals
 `Martingale.setIntegral_eq` as the converse, and the way the
 library's continuous-time martingales (the exponential martingales, the stopped price of an
 equivalent martingale measure, promoted local martingales) are built.
+
+## Main results
+
+* `martingale_iff_setIntegral_eq`: a process is a martingale iff it is adapted, integrable, and
+  for `i ≤ j` its set integrals over `𝒢 i`-measurable sets agree at times `i` and `j`.
+
+## Tags
+
+martingale characterisation, set integral identity, continuous-time martingale,
+conditional expectation, martingale property, MSC 60G44, MSC 60G48
 -/
 
 @[expose] public section

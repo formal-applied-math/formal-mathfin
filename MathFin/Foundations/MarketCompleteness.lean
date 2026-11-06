@@ -22,8 +22,8 @@ duality, and uniqueness of the pricing measure.
 
 ## The strategy class
 
-Hedges are the **Itô-integrable predictable** integrands `Lp ℝ 2 (trimMeasure_T T)`, the domain
-of `itoIntegralCLM_T` — strictly wider than `ContinuousMarket.SimpleStrategy`. The widening is
+Hedges are the **Itô-integrable predictable** integrands `Lp ℝ 2 (trimMeasure T)`, the domain
+of `itoIntegralCLM` — strictly wider than `ContinuousMarket.SimpleStrategy`. The widening is
 forced, not chosen: the hedge the representation theorem returns is a general predictable
 process, and a general `L²` claim is not the terminal value of any piecewise-constant holding,
 so a completeness statement over simple strategies would have no witnesses. `ContinuousMarket`
@@ -53,7 +53,7 @@ condition*: `pricesGainsAtZero_of_gains_martingale` derives it from a gains proc
 
 With it the conclusion is sharper than uniqueness. `measure_eq_of_pricesGainsAtZero` shows every
 gains-neutral measure dominated by `μ` agrees with `μ` on `𝓕ᴮ_T` — `μ` *is* the pricing measure
-— and `emm_unique_of_complete` is the two-measure corollary landed on `ContinuousMarket.IsEMM`.
+— and `emm_unique_of_complete` is the two-measure corollary landed on `IsEMM`.
 Both are the argument of `ReplicationPricing.lean`, the one the discrete market's
 `IsEMM.measure_eq_of_isCompleteMarket` is also an instance of: replicate the indicator, and every
 gains-neutral measure gives the event the initial wealth.
@@ -78,20 +78,38 @@ direction needing a Farkas/closedness fact unavailable at this pin. The two equa
 structurally different reasons — separation there, martingale representation here — and neither
 implies the other.
 
-## Result
+## Main definitions
 
-* `Replicates` — the replication predicate: initial wealth plus an Itô integral is the claim.
+* `Replicates`: the strategy `φ ∈ L²(trimMeasure T)` replicates the claim `H` from initial wealth
+  `x` when `x + ∫₀ᵀ φ dB = H` almost everywhere.
+* `superReplicationPrice`: the least initial wealth from which some Itô-integrable strategy
+  dominates `H` at the horizon.
+* `PricesGainsAtZero`: a measure `Q` for which every terminal Itô integral against `B` on `[0, T]`
+  is `Q`-integrable with zero `Q`-mean.
+
+## Main results
+
 * `exists_replicating_strategy` — **completeness**: every `L²` `𝓕ᴮ_T`-claim is replicated from
   its price `𝔼_μ[H]`, by a unique hedge.
-* `superReplicationPrice` — least initial wealth from which some strategy dominates the claim.
 * `superReplication_eq_emm_price` — superreplication duality: that price is `𝔼_μ[H]`.
-* `PricesGainsAtZero` — the traded gains are a fair game under `Q`.
 * `pricesGainsAtZero_self` — `μ` prices its own traded gains at zero.
 * `pricesGainsAtZero_of_gains_martingale` — the textbook hypothesis implies it.
 * `integral_eq_of_pricesGainsAtZero` — every such measure prices every replicable claim at
   `𝔼_μ[H]`.
 * `measure_eq_of_pricesGainsAtZero` — and agrees with `μ` on `𝓕ᴮ_T`.
-* `emm_unique_of_complete` — **EMM uniqueness from completeness**, on `ContinuousMarket.IsEMM`.
+* `emm_unique_of_complete` — **EMM uniqueness from completeness**, on `IsEMM`: two EMMs that both
+  satisfy `PricesGainsAtZero` agree on `𝓕ᴮ_T` (that hypothesis is not derived from `IsEMM`).
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Ch 9
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], 5.3;
+  5.4
+
+## Tags
+
+market completeness, second fundamental theorem of asset pricing, replication, superreplication,
+unique pricing measure, Brownian filtration, MSC 91G20, MSC 60H05, JEL G13
 -/
 
 @[expose] public section
@@ -114,8 +132,8 @@ file leaves `S` behind: the discounted price *is* `B` (a Bachelier-type market),
 units held and `∫₀ᵀ φ dB` is what holding them earns — the general `S` returns only in
 `emm_unique_of_complete`, where it is *not* identified with `B`. -/
 def Replicates (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (x : ℝ)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (H : Ω → ℝ) : Prop :=
-  H =ᵐ[μ] fun ω ↦ x + itoIntegralCLM_T hB T hBmeas φ ω
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (H : Ω → ℝ) : Prop :=
+  H =ᵐ[μ] fun ω ↦ x + itoIntegralCLM hB T hBmeas φ ω
 
 /-- **The Brownian market is complete.** Every square-integrable `𝓕ᴮ_T`-claim is replicated from
 initial wealth `𝔼_μ[H]`, and the hedge is unique. This is the terminal martingale representation
@@ -124,7 +142,7 @@ integrand it produces has zero mean, and the integrand *is* the hedge. -/
 theorem exists_replicating_strategy (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) (H : Lp ℝ 2 μ)
     (hHmeas : AEStronglyMeasurable[ItoIntegralL2.natFiltration hBmeas T] (⇑H) μ) :
-    ∃! φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
+    ∃! φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
       Replicates hB T hBmeas (∫ ω, H ω ∂μ) φ (⇑H) :=
   exists_itoIntegral_representation hB hBmeas hBcont T H hHmeas
 
@@ -134,21 +152,21 @@ theorem exists_replicating_strategy (hBmeas : ∀ t, Measurable (B t))
 Itô-integrable strategy dominates `H` at the horizon. -/
 noncomputable def superReplicationPrice (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (H : Ω → ℝ) : ℝ :=
-  sInf {x : ℝ | ∃ φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-    H ≤ᵐ[μ] fun ω ↦ x + itoIntegralCLM_T hB T hBmeas φ ω}
+  sInf {x : ℝ | ∃ φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
+    H ≤ᵐ[μ] fun ω ↦ x + itoIntegralCLM hB T hBmeas φ ω}
 
 /-- **No superreplication cost undercuts the price.** Integrating `H ≤ x + ∫₀ᵀ φ dB` kills the
-Itô integral (`integral_itoIntegralCLM_T`) and leaves `𝔼_μ[H] ≤ x`. -/
+Itô integral (`integral_itoIntegralCLM`) and leaves `𝔼_μ[H] ≤ x`. -/
 private theorem integral_le_of_superReplicates (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (H : Lp ℝ 2 μ) {x : ℝ} {φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)}
-    (hφ : (⇑H) ≤ᵐ[μ] fun ω ↦ x + itoIntegralCLM_T hB T hBmeas φ ω) :
+    (H : Lp ℝ 2 μ) {x : ℝ} {φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)}
+    (hφ : (⇑H) ≤ᵐ[μ] fun ω ↦ x + itoIntegralCLM hB T hBmeas φ ω) :
     ∫ ω, H ω ∂μ ≤ x := by
-  have hgain : Integrable (itoIntegralCLM_T hB T hBmeas φ) μ :=
-    (Lp.memLp (itoIntegralCLM_T hB T hBmeas φ)).integrable one_le_two
-  have hdom : Integrable (fun ω ↦ x + itoIntegralCLM_T hB T hBmeas φ ω) μ :=
+  have hgain : Integrable (itoIntegralCLM hB T hBmeas φ) μ :=
+    (Lp.memLp (itoIntegralCLM hB T hBmeas φ)).integrable one_le_two
+  have hdom : Integrable (fun ω ↦ x + itoIntegralCLM hB T hBmeas φ ω) μ :=
     (integrable_const x).add hgain
   have h := integral_mono_ae ((Lp.memLp H).integrable one_le_two) hdom hφ
-  rwa [integral_add (integrable_const x) hgain, integral_itoIntegralCLM_T, integral_const,
+  rwa [integral_add (integrable_const x) hgain, integral_itoIntegralCLM, integral_const,
     probReal_univ, one_smul, add_zero] at h
 
 /-- **Superreplication duality in continuous time.** The least initial wealth from which an
@@ -159,12 +177,12 @@ theorem superReplication_eq_emm_price (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) (H : Lp ℝ 2 μ)
     (hHmeas : AEStronglyMeasurable[ItoIntegralL2.natFiltration hBmeas T] (⇑H) μ) :
     superReplicationPrice hB T hBmeas (⇑H) = ∫ ω, H ω ∂μ := by
-  have hlb (x : ℝ) (hx : ∃ φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      (⇑H) ≤ᵐ[μ] fun ω ↦ x + itoIntegralCLM_T hB T hBmeas φ ω) : ∫ ω, H ω ∂μ ≤ x :=
+  have hlb (x : ℝ) (hx : ∃ φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
+      (⇑H) ≤ᵐ[μ] fun ω ↦ x + itoIntegralCLM hB T hBmeas φ ω) : ∫ ω, H ω ∂μ ≤ x :=
     integral_le_of_superReplicates hB T hBmeas H hx.choose_spec
   obtain ⟨φ, hφ, -⟩ := exists_replicating_strategy hB hBmeas hBcont T H hHmeas
-  have hmem : ∃ ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      (⇑H) ≤ᵐ[μ] fun ω ↦ (∫ ω, H ω ∂μ) + itoIntegralCLM_T hB T hBmeas ψ ω :=
+  have hmem : ∃ ψ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
+      (⇑H) ≤ᵐ[μ] fun ω ↦ (∫ ω, H ω ∂μ) + itoIntegralCLM hB T hBmeas ψ ω :=
     ⟨φ, Filter.EventuallyEq.le hφ⟩
   exact le_antisymm (csInf_le ⟨_, hlb⟩ hmem) (le_csInf ⟨_, hmem⟩ hlb)
 
@@ -173,22 +191,22 @@ theorem superReplication_eq_emm_price (hBmeas : ∀ t, Measurable (B t))
 /-- `Q` **prices the traded gains at zero**: every terminal Itô integral against `B` on `[0,T]`
 is `Q`-integrable with zero `Q`-mean. This is what it means for the strategy class to be a fair
 game under `Q`, and it is what a stochastic integral against the price process would deliver
-from `ContinuousMarket.IsEMM`. -/
+from `IsEMM`. -/
 def PricesGainsAtZero (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (Q : Measure Ω) : Prop :=
-  ∀ φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-    Integrable (itoIntegralCLM_T hB T hBmeas φ) Q ∧
-      ∫ ω, itoIntegralCLM_T hB T hBmeas φ ω ∂Q = 0
+  ∀ φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
+    Integrable (itoIntegralCLM hB T hBmeas φ) Q ∧
+      ∫ ω, itoIntegralCLM hB T hBmeas φ ω ∂Q = 0
 
 /-- **The hypothesis has a witness**: the reference measure prices its own traded gains at zero,
 the Itô integral being centered. -/
 theorem pricesGainsAtZero_self (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
     PricesGainsAtZero hB T hBmeas μ := fun φ ↦
-  ⟨(Lp.memLp (itoIntegralCLM_T hB T hBmeas φ)).integrable one_le_two,
-    integral_itoIntegralCLM_T hB T hBmeas φ⟩
+  ⟨(Lp.memLp (itoIntegralCLM hB T hBmeas φ)).integrable one_le_two,
+    integral_itoIntegralCLM hB T hBmeas φ⟩
 
 /-- A `Q`-martingale started at `0` has zero mean at every time: condition down to time `0`,
 where `integral_condExp` preserves the mean. -/
-private theorem integral_eq_zero_of_martingale_zero_start {Q : Measure Ω} [IsFiniteMeasure Q]
+theorem integral_eq_zero_of_martingale_zero_start {Q : Measure Ω} [IsFiniteMeasure Q]
     {𝓖 : Filtration ℝ≥0 mΩ} {V : ℝ≥0 → Ω → ℝ} (hV : Martingale V 𝓖 Q) (hV0 : V 0 =ᵐ[Q] 0)
     (t : ℝ≥0) : ∫ ω, V t ω ∂Q = 0 := by
   rw [← integral_condExp (𝓖.le 0), integral_congr_ae ((hV.2 0 t zero_le).trans hV0)]
@@ -201,10 +219,10 @@ construction supplies them — in this repo `itoProcessCLM`, in a theory with `�
 self-financing wealth of the hedge. -/
 theorem pricesGainsAtZero_of_gains_martingale (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     {Q : Measure Ω} [IsFiniteMeasure Q]
-    {V : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) → ℝ≥0 → Ω → ℝ}
+    {V : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) → ℝ≥0 → Ω → ℝ}
     (hmart : ∀ φ, Martingale (V φ) (ItoIntegralL2.natFiltration hBmeas) Q)
     (hzero : ∀ φ, V φ 0 =ᵐ[Q] 0)
-    (hterm : ∀ φ, V φ T =ᵐ[Q] itoIntegralCLM_T hB T hBmeas φ) :
+    (hterm : ∀ φ, V φ T =ᵐ[Q] itoIntegralCLM hB T hBmeas φ) :
     PricesGainsAtZero hB T hBmeas Q := fun φ ↦
   ⟨((hmart φ).integrable T).congr (hterm φ),
     (integral_congr_ae (hterm φ)).symm.trans
@@ -233,7 +251,7 @@ theorem measure_eq_of_pricesGainsAtZero (hBmeas : ∀ t, Measurable (B t))
     (hA : MeasurableSet[ItoIntegralL2.natFiltration hBmeas T] A) :
     Q A = μ A :=
   measure_eq_of_replicates hQ Measure.AbsolutelyContinuous.rfl
-    (Gains := Set.range fun φ ↦ (itoIntegralCLM_T hB T hBmeas φ : Ω → ℝ))
+    (Gains := Set.range fun φ ↦ (itoIntegralCLM hB T hBmeas φ : Ω → ℝ))
     (by rintro _ ⟨φ, rfl⟩; exact hg φ)
     (by rintro _ ⟨φ, rfl⟩; exact pricesGainsAtZero_self hB T hBmeas φ)
     ((ItoIntegralL2.natFiltration hBmeas).le T)
@@ -256,8 +274,8 @@ module docstring for why this replaces the `S`-only statement, and for the conve
 theorem emm_unique_of_complete (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) {S : ℝ≥0 → Ω → ℝ}
     {Q₁ Q₂ : Measure Ω}
-    (h₁ : ContinuousMarket.IsEMM (ItoIntegralL2.natFiltration hBmeas) μ S T Q₁)
-    (h₂ : ContinuousMarket.IsEMM (ItoIntegralL2.natFiltration hBmeas) μ S T Q₂)
+    (h₁ : IsEMM (ItoIntegralL2.natFiltration hBmeas) μ S T Q₁)
+    (h₂ : IsEMM (ItoIntegralL2.natFiltration hBmeas) μ S T Q₂)
     (hg₁ : PricesGainsAtZero hB T hBmeas Q₁) (hg₂ : PricesGainsAtZero hB T hBmeas Q₂)
     {A : Set Ω} (hA : MeasurableSet[ItoIntegralL2.natFiltration hBmeas T] A) :
     Q₁ A = Q₂ A :=

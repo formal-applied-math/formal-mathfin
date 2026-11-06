@@ -18,11 +18,33 @@ filtration by `StoppingRule.toGridIndexRule` and back in physical time by
 that of the sampled rule, not a separate argument. No Brownian law, usual-filtration property or
 PDE solution is needed here.
 
-## Result
+## Main definitions
 
-Public entry points include `exerciseGrid`, `zero_mem_exerciseGrid`, `maturity_mem_exerciseGrid`,
-`cappedGridTime`, `cappedGridFiltration`, `StoppingRule.toGridIndexRule`,
-`StoppingRule.toPhysicalRule`, `StoppingRule.roundUp`.
+* `cappedGridTime`: the `i`-th grid time `i*δ`, capped at the horizon `T`.
+* `exerciseGrid`: the finite set of exercise times `cappedGridTime T δ i` for `i ≤ ⌈T/δ⌉₊`.
+* `cappedGridFiltration`: the continuous filtration sampled at the capped grid times.
+* `StoppingRule.toGridIndexRule`: a rule read as a rule for `cappedGridFiltration`, indexed by the
+  first capped grid time at or after `θ.time ω` and bounded by `⌈T/δ⌉₊`.
+* `StoppingRule.toPhysicalRule`: a rule for `cappedGridFiltration` read back in physical time,
+  stopping at the capped grid time `cappedGridTime T δ (η.time ω)`.
+* `StoppingRule.roundUp`: the rule `θ` rounded up to the next multiple of `δ` and capped at
+  maturity: the rule sampled on the capped grid and read back in physical time.
+
+## Main results
+
+* `zero_mem_exerciseGrid`: `0` is an exercise-grid time.
+* `maturity_mem_exerciseGrid`: for `0 < δ`, the maturity `T` is an exercise-grid time.
+* `StoppingRule.roundUp_mem_grid`, `StoppingRule.le_roundUp`: for `0 < δ`, the rounded-up rule
+  takes values in the grid and is never earlier than `θ`.
+* `StoppingRule.roundUp_time_tendsto`: as the step `gridStep n` shrinks, the rounded-up time of
+  each path tends to `θ.time ω`.
+* `expectedReward_roundUp_tendsto`: for measurable `W` with continuous paths, `0 ≤ K`, `0 ≤ r`,
+  `0 ≤ S`, the expected put reward at the rounded-up rules tends to that at `θ`.
+
+## Tags
+
+exercise grid, Bermudan rule, rounding up, stopping time admissibility, sampled filtration,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -56,12 +56,23 @@ converge almost surely to the closed forms `bsP` and `bsV` (`consistency_canonic
 still hypothesizes its draws, `Measure.pi` giving only the law of one draw. Variance reduction
 and multi-dimensional closed forms are future layers.
 
-## Result
+## Main definitions
+
+* `payoff`: the discounted European put payoff `e^{−rT} · max(K − S_T(z), 0)` as a function of the
+  standard-normal draw `z`.
+* `estimator`: the Monte Carlo estimator, the sample mean of `n` discounted put payoffs.
+* `mcCallPayoff`: the discounted European call payoff `e^{−rT} · max(S_T(z) − K, 0)`.
+* `mcCallMean`: the Monte Carlo estimator for the call, the sample mean of `n` discounted call
+  payoffs.
+* `multiGauss`: the `d`-dimensional standard Gaussian, the product of `d` standard normals on
+  `Fin d → ℝ`.
+* `canonicalEnsemble`: the canonical sample space of sequences `ℕ → ℝ` under the product of
+  countably many standard normals.
+
+## Main results
 
 Public API (all in `namespace MathFin.MonteCarlo`):
 
-* `payoff` — the discounted European put payoff as a function of the draw;
-* `estimator` — the sample-mean Monte Carlo estimator over `n` draws;
 * `payoff_le` — the discounted-strike pointwise bound `payoff ≤ e^{-rT}·K`;
 * `integrable_payoff`, `memLp2_payoff` — the strong-law (`L¹`) and CLT (`L²`)
   integrability of the sampled payoff;
@@ -80,7 +91,6 @@ Call layer (the unbounded case `C(z) = e^{-rT}·max(S_T(z) − K, 0)`, where the
 constant bound is unavailable: `L¹` comes from the positive part of an integrable function,
 `L²` from domination through the discounted terminal):
 
-* `mcCallPayoff` — the discounted European call payoff as a function of the draw;
 * `integrable_sq_terminal` — the Gaussian law-transfer
   integrability engines (`exp(c·Z)` integrable under a standard-normal law; `S_T²`
   integrable) that replace boundedness for the unbounded payoff;
@@ -91,7 +101,6 @@ constant bound is unavailable: `L¹` comes from the positive part of an integrab
   `memLp2_mcCallPayoff` — its `L²` integrability, by domination;
 * `mean_mcCallPayoff_eq_bsCall` — the call bridge
   `𝔼[C] = S₀·Φ(d₁) − K·e^{-rT}·Φ(d₂)`;
-* `mcCallMean` — the sample-mean Monte Carlo estimator for the call;
 * `mc_call_consistency` — a.s. convergence of the call estimator to the
   Black–Scholes call price under **pairwise** independence;
   `mc_call_consistency_iid` — the full-independence specialization;
@@ -104,8 +113,6 @@ constant bound is unavailable: `L¹` comes from the positive part of an integrab
 
 Multi-dimensional seed:
 
-* `multiGauss` — the `d`-dimensional standard Gaussian as Mathlib's `Measure.pi`
-  product of `d` standard normals (with an `IsProbabilityMeasure` instance);
 * `multiGauss_hasLaw_joint` — the joint bridge: the joint vector of `d` independent
   standard normals has the product law `multiGauss d` (Mathlib's `iIndepFun.hasLaw_pi`);
 * `multiD_consistency` — the Etemadi strong law for pairwise-independent vector draws
@@ -123,8 +130,18 @@ Canonical ensemble:
 * `mc_call_clt_canonical` — `√n·(mcCallMean n − bsV) ⇒ 𝓝(0, Var(C))` on that space.
 
 Supporting lemmas (nonnegativity, measurability, law/independence transfer through
-the payoff map, the integral-linearity workhorse `integral_lin_comb3`, the estimator
-algebra `inv_sqrt_mul_sub_eq` — and their call-side mirrors) are `private`.
+the payoff map — and their call-side mirrors) are `private`; the general facts they rest on, the
+integral-linearity workhorse `setIntegral_const_mul_sub_const_mul_add_const_mul`, the estimator
+algebra `inv_sqrt_mul_sub_eq` and `aestronglyMeasurable_comp_of_hasLaw`, are public.
+
+## References
+
+* [P. Glasserman, *Monte Carlo Methods in Financial Engineering*][Glasserman2003], §1.1; §1.1.2
+
+## Tags
+
+Monte Carlo, European put, law of large numbers, estimator consistency, simulation pricing,
+standard normal sample, MSC 91G60, MSC 65C05, JEL C63
 -/
 
 @[expose] public section
@@ -314,7 +331,7 @@ theorem clt_library (h : BSCallHyp μ S_0 K r σ T (Z 0))
 
 /-- The algebraic identity equating the library CLT integrand with the desk
 estimator: `(√n)⁻¹·(s − n·m) = √n·(s/n − m)`. -/
-private lemma inv_sqrt_mul_sub_eq (s m n : ℝ) (hn : 0 ≤ n) :
+lemma inv_sqrt_mul_sub_eq (s m n : ℝ) (hn : 0 ≤ n) :
     (Real.sqrt n)⁻¹ * (s - n * m) = Real.sqrt n * (s / n - m) := by
   rcases eq_or_lt_of_le hn with h0 | hpos
   · subst h0
@@ -354,10 +371,9 @@ section Moments
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
   {S_0 K r σ T : ℝ} {Z : Ω → ℝ}
 
-/-- A general three-term linearity lemma for integrals over a measurable set —
+/-- A general three-term linearity lemma for set integrals —
 the workhorse of the truncated-second-moment computation. -/
-private lemma integral_lin_comb3 {s : Set ℝ} (_hs : MeasurableSet s)
-    {f₁ f₂ f₃ : ℝ → ℝ}
+lemma setIntegral_const_mul_sub_const_mul_add_const_mul {s : Set ℝ} {f₁ f₂ f₃ : ℝ → ℝ}
     (h₁ : IntegrableOn f₁ s volume) (h₂ : IntegrableOn f₂ s volume)
     (h₃ : IntegrableOn f₃ s volume) (b₁ b₂ b₃ : ℝ) :
     ∫ z in s, (b₁ * f₁ z - b₂ * f₂ z + b₃ * f₃ z)
@@ -474,7 +490,7 @@ theorem secondMoment_payoff (h : BSCallHyp μ S_0 K r σ T Z) :
     intro z _
     exact (exp_mul_gaussianPDFReal_zero_one (2 * ν_log) z).symm
   -- Step 6: linearity of the integral
-  rw [integral_lin_comb3 measurableSet_Iic hint_pdf hint_eν hint_e2ν
+  rw [setIntegral_const_mul_sub_const_mul_add_const_mul hint_pdf hint_eν hint_e2ν
       (K ^ 2) (2 * K * (S_0 * Real.exp μ_log)) (S_0 ^ 2 * Real.exp (2 * μ_log))]
   -- Step 7: the three Gaussian primitives
   rw [show ∫ z in Set.Iic (-d_2), gaussianPDFReal 0 1 z = Phi (-d_2) from by
@@ -594,7 +610,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
 omit [IsProbabilityMeasure μ] in
 /-- Law-transfer of a.e. strong measurability: if `Z` has law `ν` and `g` is a.e.
 strongly measurable for `ν`, then `g ∘ Z` is a.e. strongly measurable. -/
-private lemma aestronglyMeasurable_comp_of_hasLaw (hZ : HasLaw Z (gaussianReal 0 1) μ)
+lemma aestronglyMeasurable_comp_of_hasLaw (hZ : HasLaw Z (gaussianReal 0 1) μ)
     {g : ℝ → ℝ} (hg : AEStronglyMeasurable g (gaussianReal 0 1)) :
     AEStronglyMeasurable (fun ω ↦ g (Z ω)) μ :=
   ((HasLaw.comp (Y := g)
@@ -969,7 +985,7 @@ theorem secondMoment_callPayoff (h : BSCallHyp μ S_0 K r σ T Z) :
     intro z _
     exact (exp_mul_gaussianPDFReal_zero_one (2 * ν_log) z).symm
   -- Step 6: linearity of the integral
-  rw [integral_lin_comb3 measurableSet_Ioi hint_e2ν hint_eν hint_pdf
+  rw [setIntegral_const_mul_sub_const_mul_add_const_mul hint_e2ν hint_eν hint_pdf
       (S_0 ^ 2 * Real.exp (2 * μ_log)) (2 * K * (S_0 * Real.exp μ_log)) (K ^ 2)]
   -- Step 7: the three Gaussian primitives — now the `Ioi` siblings
   rw [show ∫ z in Set.Ioi (-d_2), Real.exp (2 * ν_log * z) * gaussianPDFReal 0 1 z

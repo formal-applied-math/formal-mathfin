@@ -2,6 +2,12 @@
 
 <!-- One paragraph: what theorem / doc / tooling change does this add, and why. -->
 
+<!-- The blueprint node(s) this delivers or advances, on its own line (a bot reads it).
+If it delivers a frontier node, tag the declaration in MathFin/Blueprint.lean with the same
+label and remove the entry from docs/blueprint_frontier.toml in this PR. -->
+
+Blueprint: thm:<node-label>
+
 ## Checklist
 
 ### Attribution

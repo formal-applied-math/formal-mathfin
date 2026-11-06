@@ -39,6 +39,29 @@ The continuous-time L² statement (dropping the remainder in the partition
 limit via the third-moment bound) is deferred; the discrete identity +
 the GBM partials are the algebraic and analytic content that the limit
 argument consumes.
+
+## Main definitions
+
+* `discreteTaylorRemainder2D`: the deviation of `f(t_{k+1}, X_{k+1}) − f(t_k, X_k)` from its
+  first-order-in-time, second-order-in-space Taylor expansion around `(t_k, X_k)`.
+* `itoDrift2D`: the 2D Itô drift coefficient `f_t + μ_X f_x + ½ σ_X² f_xx`.
+* `gbmValue`: the exponential value function `S(t, x) = S₀ exp((μ − ½σ²) t + σ x)`.
+
+## Main results
+
+* `discrete_ito_formula_2d`: along a time grid and a space path, `f(t_N, X_N) − f(t_0, X_0)` is
+  `∑ f_t Δt + ∑ f_x ΔX + ½ ∑ f_xx (ΔX)² + ∑ R_k`, with `R_k` the 2D discrete Taylor remainder.
+* `itoDrift2D_no_time`: with `f_t = 0`, `itoDrift2D` is the 1D `itoDrift`.
+* `hasDerivAt_gbmValue_space`, `hasDerivAt_gbmValue_time`, `hasDerivAt_gbmValue_space_space`: the
+  partials of `gbmValue` are `σ S`, `(μ − ½σ²) S` and `σ² S`.
+* `gbm_solves_sde`: with `HasDerivAt` partials of `gbmValue` and generator `(μ_X, σ_X) = (0, 1)`,
+  the 2D Itô drift is `μ S` and the diffusion coefficient is `σ S`. This is coefficient matching,
+  not a pathwise SDE solution.
+
+## Tags
+
+Itô lemma, time-dependent function, geometric Brownian motion, SDE for stock price, Itô correction,
+discrete Itô formula, MSC 60H05, MSC 60H10, JEL G13
 -/
 
 @[expose] public section

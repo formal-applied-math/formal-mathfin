@@ -29,9 +29,15 @@ its tree price plus the gains of a predictable strategy in the discounted spot.
 ## Main results
 
 * `discountedTreeValue_step`, `discountedSpot_step` — both are one-step martingales under the
-  risk-neutral up-probability.
+  risk-neutral up-probability (the node-average identity; `discountedSpot_step` needs
+  `BinomialNoArb`).
 * `discountedSpot_update_ne` — under no-arbitrage and `S₀ ≠ 0` the two children of a node have
   different discounted spots (the non-degeneracy the hedge ratio divides by).
+
+## Tags
+
+discounted price martingale, backward induction, replicating strategy, risk-neutral probability,
+binomial tree, delta hedging, MSC 91G20, MSC 60G42, JEL G13
 -/
 
 @[expose] public section

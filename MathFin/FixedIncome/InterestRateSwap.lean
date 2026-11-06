@@ -16,12 +16,35 @@ public import MathFin.FixedIncome.ZCB
 -- new-defs: annuity, payerSwapValue, parSwapRate
 
 /-!
-Vanilla interest-rate swap: the annuity, the payer-swap value, the par swap
+# Vanilla interest-rate swap
+
+The annuity, the payer-swap value, the par swap
 rate, and the par identity — the swap is worth zero iff the fixed rate is the
 par rate. The identity is pure annuity algebra, proved for any nonzero annuity
 and instantiated on the `zcb` curve, where positivity of the discount factors
 is a theorem (`zcb_pos`), not an assumption. The annuity here is the numéraire
 `A` consumed by `blackPayerSwaption` in `MathFin/Futures/Black76.lean`.
+
+## Main definitions
+
+* `annuity`: the fixed-leg PV01 `A = δ · ∑ i ∈ s, P i` of a payment schedule `s` with daycount
+  fraction `δ`.
+* `payerSwapValue`: the payer-swap value, the floating leg `P₀ − Pₙ` minus the fixed leg `K · A`.
+* `parSwapRate`: the par swap rate `S = (P₀ − Pₙ) / A`.
+
+## Main results
+
+* `annuity_pos`: the annuity of a nonempty schedule with positive daycount and positive discount
+  factors is positive.
+* `payerSwapValue_eq_zero_iff`: for a nonzero annuity `A`, the payer swap is worth zero iff
+  `K = parSwapRate P0 Pn A`.
+* `payerSwapValue_zcb_eq_zero_iff`: the same par identity on the `zcb` curve, for `δ > 0` and a
+  nonempty schedule.
+
+## Tags
+
+interest rate swap, par swap rate, payer swap, annuity factor, swap valuation, fixed leg, MSC 91G30,
+JEL G13
 -/
 
 set_option autoImplicit false

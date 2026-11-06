@@ -24,12 +24,26 @@ sigmoid returns exactly `2p − 1`, the Kelly fraction of an even-money bet
 (`kellyFraction p 1`, `Performance/Ratios.lean`). López de Prado's probability-based size
 `2Φ(z) − 1` (ch. 10) is a different map and is not treated here.
 
+## Main definitions
+
+* `betSize`: the bet-sizing sigmoid `m(x) = x / √(w + x²)` with width parameter `w`.
+
 ## Main results
 
 * `betSize_odd`: `m w (-x) = -m w x`.
 * `betSize_mem_Ioo`: `m w x ∈ (-1, 1)` for `w > 0`.
 * `betSize_strictMono`: `w > 0 → StrictMono (m w ·)`.
 * `betSize_sqrt_mul_zScore`: `m w (√w · z) = kellyFraction p 1 = 2p − 1` for `0 < p < 1`.
+
+## References
+
+* [J. L. Kelly, *A new interpretation of information rate*][Kelly1956]
+* [López de Prado, *Advances in Financial Machine Learning*][LopezDePrado2018], ch. 10
+
+## Tags
+
+bet sizing, López de Prado, sigmoid, Kelly criterion, machine learning for finance, MSC 91G10,
+JEL G11
 -/
 
 @[expose] public section
@@ -55,7 +69,7 @@ theorem betSize_mem_Ioo {w : ℝ} (hw : 0 < w) (x : ℝ) : betSize w x ∈ Set.I
 
 /-- Core monotonicity step: for `0 ≤ p < q` and `w > 0`,
 `p · √(w+q²) < q · √(w+p²)`. -/
-private theorem betSize_core {w : ℝ} (hw : 0 < w) {p q : ℝ} (hp : 0 ≤ p) (hpq : p < q) :
+theorem mul_sqrt_add_sq_lt_of_nonneg {w : ℝ} (hw : 0 < w) {p q : ℝ} (hp : 0 ≤ p) (hpq : p < q) :
     p * Real.sqrt (w + q ^ 2) < q * Real.sqrt (w + p ^ 2) := by
   have hq : 0 < q := lt_of_le_of_lt hp hpq
   have hs1pos : 0 < Real.sqrt (w + p ^ 2) := Real.sqrt_pos.mpr (by positivity)
@@ -68,12 +82,12 @@ private theorem betSize_core {w : ℝ} (hw : 0 < w) {p q : ℝ} (hp : 0 ≤ p) (
 
 /-- The key cross-multiplied inequality behind strict monotonicity, for any
 reals `a < b` (not just nonnegative ones). -/
-private theorem betSize_cross {w : ℝ} (hw : 0 < w) {a b : ℝ} (hab : a < b) :
+theorem mul_sqrt_add_sq_lt {w : ℝ} (hw : 0 < w) {a b : ℝ} (hab : a < b) :
     a * Real.sqrt (w + b ^ 2) < b * Real.sqrt (w + a ^ 2) := by
   rcases le_total 0 a with ha | ha
-  · exact betSize_core hw ha hab
+  · exact mul_sqrt_add_sq_lt_of_nonneg hw ha hab
   · rcases le_total b 0 with hb | hb
-    · have := betSize_core hw (by linarith : (0:ℝ) ≤ -b) (by linarith : -b < -a)
+    · have := mul_sqrt_add_sq_lt_of_nonneg hw (by linarith : (0:ℝ) ≤ -b) (by linarith : -b < -a)
       have ha2 : (-a) ^ 2 = a ^ 2 := by ring
       have hb2 : (-b) ^ 2 = b ^ 2 := by ring
       rw [ha2, hb2] at this
@@ -94,7 +108,7 @@ theorem betSize_strictMono {w : ℝ} (hw : 0 < w) : StrictMono (betSize w) := by
   have hs1pos : 0 < Real.sqrt (w + a ^ 2) := Real.sqrt_pos.mpr (by positivity)
   have hs2pos : 0 < Real.sqrt (w + b ^ 2) := Real.sqrt_pos.mpr (by positivity)
   rw [betSize, betSize, div_lt_div_iff₀ hs1pos hs2pos]
-  exact betSize_cross hw hab
+  exact mul_sqrt_add_sq_lt hw hab
 
 /-- **The sigmoid of the probability z-score is the even-money Kelly fraction.** For a
 predicted win probability `0 < p < 1`, let `z = (p − ½)/√(p(1 − p))` be the z-statistic of

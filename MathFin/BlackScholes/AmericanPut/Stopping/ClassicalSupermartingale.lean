@@ -17,10 +17,19 @@ waiting inequality (`DividendPutSolution.putWaiting`) give the supermartingale
 contact martingale comes from the PDE. Existence of a pair satisfying that contract is a
 separate obligation.
 
-## Result
+## Main results
 
-Public entry points include `brownian_price_identification`, `brownian_boundary_curvature`,
-`brownian_boundary_eq_classical`.
+* `brownian_price_identification`: for a `DividendPutSolution` with `0 < K`, `0 ≤ r`, `0 < S`
+  and `0 < σ`, the Brownian American put equals `K*p (log (S/K)) (σ^2/2*T)`.
+* `brownian_boundary_curvature`: under the same hypotheses on `K`, `r`, `σ`, the exercise boundary
+  has strictly positive second derivative at every `τ > 0`.
+* `brownian_boundary_eq_classical`: for `τ > 0`, the Brownian exercise boundary at `τ` is
+  `K*exp (b (σ^2/2*τ))`, the classical free boundary.
+
+## Tags
+
+supermartingale, price identification, verification, classical solution, stopping value, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

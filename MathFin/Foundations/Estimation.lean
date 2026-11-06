@@ -46,13 +46,35 @@ The drift statements here take a single `B_T ∼ N(0, T)` and the endpoint estim
 pre-Brownian motion with drift, on an equally spaced grid, reduces to this endpoint form is
 `hasLaw_fracDiff_one_driftEstimator` in `Performance/FracDiffWeights.lean`.
 
+## Main results
+
+* `kl_gaussianReal_var_ratio`: the integral of the log-likelihood ratio `llr` of `N(0, r·v)` against
+  `N(0, v)`, taken under `N(0, r·v)`, is `(r − 1 − ln r) / 2`, for `v ≠ 0` and `r ≠ 0`.
+* `abs_klVarRatio_sub_sq_le`: for `|r − 1| ≤ 1/2`, `(r − 1 − ln r)/2` differs from
+  `(r − 1)²/4` by at most `|r − 1|³`.
+* `integral_sum_sq_noisy_increments`: with increments of second moment `σ²·Δt` observed through
+  mean-zero noise of second moment `η²` (independence hypotheses as stated), the noisy realised
+  sum of squares has expectation `σ²T + 2nη²`, where `T = n·Δt`.
+* `sqrtBias_oneSided`: for a nonnegative, integrable, nondegenerate `Y` with `E[Y] = σ²` and
+  `σ > 0`, `E[√Y] < σ`.
+* `sqrtBias_absGaussianSample`, `integral_abs_gaussianReal`: for `Z ∼ N(0, v)` with `v ≠ 0`,
+  `E|Z| < √v`; and `E|Z| = √(2v/π)`.
+* `drift_se_endpoint_hasLaw`, `drift_se_endpoint_var`: for `X_t = μt + σB_t` with `B_T ∼ N(0, T)`,
+  the endpoint estimator `(X_T − X_0)/T` has law `N(μ, σ²/T)` and variance `σ²/T`.
+
 ## References
 
-* T. M. Cover and J. A. Thomas, *Elements of Information Theory*, 2nd ed., Wiley, 2006.
-* L. Zhang, P. A. Mykland and Y. Aït-Sahalia, "A tale of two time scales: determining
-  integrated volatility with noisy high-frequency data", *Journal of the American Statistical
-  Association* 100 (2005), 1394–1411.
-* A. Wald, *Sequential Analysis*, Wiley, 1947.
+* [T. M. Cover and J. A. Thomas, *Elements of Information Theory*][CoverThomas2006].
+* [L. Zhang, P. A. Mykland and Y. Aït-Sahalia, *A tale of two time scales: determining
+  integrated volatility with noisy high-frequency data*][ZhangMyklandAitSahalia2005].
+* [A. Wald, *Sequential Analysis*][Wald1947].
+* [N. L. Johnson, S. Kotz and N. Balakrishnan, *Continuous Univariate Distributions,
+  Vol.~1*][JohnsonKotzBalakrishnan1994], ch. 13
+
+## Tags
+
+Kullback–Leibler divergence, realised volatility, microstructure noise, variance ratio,
+estimator bias, MSC 62F10, MSC 62P05, JEL C58
 -/
 
 @[expose] public section
@@ -70,7 +92,7 @@ section KL
 /-- Pointwise identity: the log of the pdf ratio between `N(0, r·v)` and `N(0, v)` is
 the quadratic `−½·ln r + x²(r−1)/(2rv)` (completing-the-square algebra, the
 one-observation form of the D-term). -/
-private lemma log_ratio_gaussianPDFReal_eq {r v : ℝ≥0} (hv : v ≠ 0) (hr : r ≠ 0) (x : ℝ) :
+lemma log_ratio_gaussianPDFReal_eq {r v : ℝ≥0} (hv : v ≠ 0) (hr : r ≠ 0) (x : ℝ) :
     Real.log (gaussianPDFReal 0 (r * v) x / gaussianPDFReal 0 v x) =
       -(Real.log (r : ℝ)) / 2 + x ^ 2 * ((r : ℝ) - 1) / (2 * (r : ℝ) * (v : ℝ)) := by
   have hvpc : 0 < v := hv.bot_lt

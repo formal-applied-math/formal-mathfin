@@ -16,6 +16,17 @@ The fourth moment of the true increment over a uniform cell (`trueIncr_pow4_le`,
 `trueIncr_pow4_integrable`) from the step-sum recursion `stepSum_pow4_le`, passed to the true
 increment through the step approximants' `L²` convergence and Fatou, and the cube bound
 `trueIncr_pow3_le` by Cauchy–Schwarz interpolation.
+
+## Main results
+
+* `trueIncr_pow4_integrable`: the increment `M_{tₖ₊₁} − M_{tₖ}` over a uniform cell is in `L⁴`.
+* `trueIncr_pow4_le`: `𝔼[(M_{tₖ₊₁} − M_{tₖ})⁴] ≤ 3·(Dd²·(tₖ₊₁ − tₖ))²`.
+* `trueIncr_pow3_le`: `𝔼|M_{tₖ₊₁} − M_{tₖ}|³ ≤ √(3·(Dd²·(tₖ₊₁ − tₖ))³)`.
+
+## Tags
+
+fourth moment, third moment, Fatou lemma, Itô integral increments, moment estimates,
+discrete Itô formula, MSC 60H05, MSC 60E15
 -/
 
 @[expose] public section
@@ -92,9 +103,9 @@ private theorem trueIncr_pow4_lintegral_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk 
         =ᵐ[μ] itoSimpleProcess hBmeas (stepσ hBmeas hD.adapted hD.bdd T (n * 2 ^ p)).val t := by
     intro p t
     rw [show (deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p))
-          = simpleAssembly_T (μ := μ) T hBmeas
+          = simpleAssemblyHorizon (μ := μ) T hBmeas
             (stepσ hBmeas hD.adapted hD.bdd T (n * 2 ^ p)) from rfl,
-      itoProcessCLM_simpleAssembly_T hB T t hBmeas
+      itoProcessCLM_simpleAssemblyHorizon hB T t hBmeas
         (stepσ hBmeas hD.adapted hD.bdd T (n * 2 ^ p))]
     exact (memLp_itoSimpleProcess hB hBmeas
       (stepσ hBmeas hD.adapted hD.bdd T (n * 2 ^ p)).val t).coeFn_toLp
@@ -167,7 +178,7 @@ private theorem trueIncr_pow4_lintegral_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk 
     have hFp : Tendsto (fun p : ℕ ↦
         ‖(deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
           - hD.integrand :
-            Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))‖) atTop (𝓝 0) :=
+            Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))‖) atTop (𝓝 0) :=
       (tendsto_iff_norm_sub_tendsto_zero.mp hsub).comp hemb
     refine squeeze_zero' (Eventually.of_forall fun _p ↦ norm_nonneg _)
       (Eventually.of_forall fun p ↦ ?_)
@@ -205,7 +216,7 @@ private theorem trueIncr_pow4_lintegral_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk 
               - hD.integrand)‖ := norm_sub_le _ _
       _ ≤ ‖(deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
               - hD.integrand :
-              Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))‖ * 2 := by
+              Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))‖ * 2 := by
           have h1 := itoProcessCLM_norm_le hB T (unifPart T n (k + 1)) hBmeas
             (deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
               - hD.integrand)
@@ -214,13 +225,13 @@ private theorem trueIncr_pow4_lintegral_le {n : ℕ} (hn : 0 < n) (k : ℕ) (hk 
               - hD.integrand)
           have h3 : ‖(deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
                 - hD.integrand :
-                Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))‖ * 2
+                Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))‖ * 2
               = ‖(deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
                   - hD.integrand :
-                  Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))‖
+                  Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))‖
               + ‖(deltaStepLp hBmeas hD.adapted hD.bdd (n * 2 ^ p)
                   - hD.integrand :
-                  Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))‖ := by ring
+                  Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))‖ := by ring
           rw [h3]
           exact add_le_add h1 h2
       _ = _ := rfl

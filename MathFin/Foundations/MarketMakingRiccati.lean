@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -46,6 +47,36 @@ calculus it needs, so what is missing is the construction itself); and deriving 
 intensity sup (it is defined by its known closed form from Guéant [18] /
 Guéant–Lehalle–Fernandez-Tapia [20]). The multi-asset **approximate** matrix Riccati is now
 discharged in `MatrixMarketMakingRiccati`.
+
+## Main definitions
+
+* `riccatiCoeff`: the scalar Riccati coefficient `a(t) = Â · tanh (Â · (T − t))`.
+* `expIntensityQuote`: the exponential-intensity quote map `δ̃(p) = p + c`.
+* `quoteConstA`, `quoteConstB`: the constants `c = log (1 + γ z / k) / (γ z)` (CARA objective) and
+  `c = 1 / k` (risk-adjusted objective).
+* `mmQuoteBid`, `mmQuoteAsk`: the greedy bid and ask quotes `δ̃(2A(t)q + A(t)z + B(t))` and
+  `δ̃(−2A(t)q + A(t)z − B(t))`.
+
+## Main results
+
+* `hasDerivAt_tanh`: `tanh' x = 1 − tanh² x`.
+* `riccatiCoeff_terminal`, `hasDerivAt_riccatiCoeff`: `a(T) = 0` and `a' = a² − Â²`.
+* `valueFunction_satisfies_approxHJ`: if `A`, `B`, `C` have the stated derivatives, the quadratic
+  ansatz `−A(s) q² − B(s) q − C(s)` has time-derivative equal to the approximate
+  Hamilton–Jacobi right-hand side, for `z > 0`.
+* `mmHalfSpread_const`: `(δ̌ᵃ + δ̌ᵇ)/2 = A(t)·z + c`, independent of the inventory `q`.
+* `mmSkew_linear`: `(δ̌ᵃ − δ̌ᵇ)/2 = −2·A(t)·q − B(t)`.
+
+## References
+
+* [Bergault et al., *Closed-form approximations in multi-asset market
+  making*][BergaultEtAlMarketMaking], Prop. 1; §3.3.3
+* [Guéant, Lehalle and Fernandez-Tapia][GueantLehalleFernandezTapia]
+
+## Tags
+
+Avellaneda–Stoikov, market making, Riccati equation, Hamilton–Jacobi–Bellman, optimal quotes,
+inventory risk, bid-ask spread, MSC 91G80, MSC 49L20, JEL G14
 -/
 
 @[expose] public section

@@ -42,11 +42,17 @@ shared `balance` recurrence; the level-payment one, by induction on
 `levelPaymentBalance` directly, through the one-period annuity identity
 `annuityValue_succ_mul_exp_sub` (`CouponBonds.lean`).
 
-## Result
+## Main definitions
 
-* `bulletPrincipal`, `equalPrincipalPayment` — the two principal-payment
-  schedules.
-* `balance` — the shared balance recurrence `B_n = B_{n-1} - P_n` (as a fold).
+* `balance`: the outstanding balance after `n` periods, given an initial balance `B₀` and a
+  principal-payment schedule `P : ℕ → ℝ`.
+* `bulletPrincipal`: the bullet schedule, with the entire balance repaid in period `N`.
+* `equalPrincipalPayment`: the equal-principal schedule, a constant payment `B₀ / N` every period.
+* `levelPaymentBalance`: the level-payment balance, with interest at period rate `i` accruing on
+  the outstanding balance before the payment `A` is made.
+
+## Main results
+
 * `balance_bullet_lt`, `balance_bullet_eq` — the bullet closed form.
 * `balance_equalPrincipal` — the equal-principal closed form
   `B_n = B_0 · (1 - n / N)`.
@@ -55,6 +61,15 @@ shared `balance` recurrence; the level-payment one, by induction on
 * `levelPaymentBalance_eq_annuityValue`, `levelPaymentBalance_eq_zero` — the
   balance after `n` level payments is `annuityValue (N - n) A r Δt`, and zero
   at `N`.
+
+## References
+
+* [Fabozzi, *Bond Markets, Analysis and Strategies*][FabozziBMAS]
+
+## Tags
+
+loan amortization, mortgage, bullet loan, level payment, equal principal, outstanding balance,
+annuity, MSC 91G30, JEL G21
 -/
 
 @[expose] public section

@@ -15,10 +15,25 @@ A single globally C2 compactly supported function agrees with the price on a
 neighborhood of a whole compact subset of continuation. This strengthens the
 pointwise localization used by the local Ito calculation.
 
-## Result
+## Main definitions
 
-Public entry points include `exists_compact_set_localization`, `kernelContinuation`,
-`kernelContinuation_isOpen`, `brownianPriceKernel_compact_localization`.
+* `kernelContinuation`: the set of `(t,w)` with `t < T` at which the price kernel's spatial argument
+  `x₀ + (r-q-σ^2/2)*t + σ*w` lies strictly above the boundary value `b (σ^2/2*(T-t))`.
+
+## Main results
+
+* `exists_compact_set_localization`: a `C²` function on an open set `U` agrees, on a
+  neighbourhood of any compact `C ⊆ U`, with some globally `C²`, compactly supported function.
+* `kernelContinuation_isOpen`: for a `DividendPutSolution` and `0 < σ`, `kernelContinuation` is
+  open.
+* `brownianPriceKernel_compact_localization`: for a `DividendPutSolution` in normalized rates,
+  `0 < σ` and a compact `C` inside `kernelContinuation`, some `C²` compactly supported `G`
+  agrees with the price kernel near `C` and has `planeGenerator G = 0` on `C`.
+
+## Tags
+
+smooth extension, compact localization, continuation region, Itô calculus, cutoff, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

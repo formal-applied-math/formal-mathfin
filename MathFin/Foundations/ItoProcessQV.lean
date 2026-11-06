@@ -35,10 +35,19 @@ explicit rates:
 Time- or state-dependent `σ` requires the stochastic-integral-as-process
 layer (Summit B); the drift-immunity mechanism is identical.
 
-## Main result
+## Main results
 
 * `ItoProcessQV.tendsto_qv_ito_process` — `∑ₖ (ΔXₖ)² → σ²T` in `L²`
   (Theorem 7.4.5 in the constant-`σ` regime, fully derived).
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 7.4.5
+
+## Tags
+
+quadratic variation, Itô process, drift immunity, mean-square convergence, realized variance,
+MSC 60H05, MSC 60J65, MSC 60G44
 -/
 
 @[expose] public section

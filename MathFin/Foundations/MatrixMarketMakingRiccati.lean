@@ -67,6 +67,33 @@ forms (matrix variation-of-parameters / integrals) and the general-`d` value-fun
 that the approximate value function approximates the true one; and the construction of `Â` as a
 matrix square root (in §2 `Â` enters by its defining relation `Â·Â = γ • (D₊^{½}ΣD₊^{½})`, so the
 content is the change of variables, not matrix-square-root existence).
+
+## Main definitions
+
+* `matrixRiccatiCoeff`: for a Hermitian `Â = U diag(λ) Uᴴ`, the matrix
+  `U · diag (riccatiCoeff (λᵢ) T t) · Uᴴ`.
+* `mmMatrixValueCoeff`: the matrix `½ • (D₊^{-½} · a(t) · D₊^{-½})` with `D₊ = diagonal d` and
+  `a = matrixRiccatiCoeff`.
+
+## Main results
+
+* `matrixRiccatiCoeff_terminal`, `matrixRiccatiCoeff_isHermitian`: `a(T) = 0`, and `a(t)` is
+  Hermitian.
+* `hasDerivAt_matrixRiccatiCoeff`: `a' = a·a − Â·Â`.
+* `matrixRiccatiCoeff_spectral_sq`: `Â · Â = U · diag (λᵢ²) · Uᴴ`.
+* `mmMatrixValueCoeff_terminal`: `A(T) = 0`.
+* `hasDerivAt_mmMatrixValueCoeff`: for `d > 0`, any matrix `cov` and `Â · Â` equal to
+  `γ • (√D₊ · cov · √D₊)`, the coefficient satisfies `A' = 2 • (A · D₊ · A) − (γ/2) • cov`.
+
+## References
+
+* [Bergault et al., *Closed-form approximations in multi-asset market
+  making*][BergaultEtAlMarketMaking], Proposition 2, Eq. 11
+
+## Tags
+
+multi-asset market making, matrix Riccati equation, Avellaneda–Stoikov, spectral reduction,
+Hermitian functional calculus, inventory risk, MSC 91G80, MSC 49L20, JEL G14
 -/
 
 @[expose] public section

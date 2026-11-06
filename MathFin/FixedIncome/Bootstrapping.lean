@@ -32,7 +32,7 @@ The module layers:
   is at most half the interval per step, and the estimates converge.
 * **A threshold bridge** (private) — the engine's hypothesis
   (`∀ x ∈ [lo, hi], f x < C ↔ x < σ`) is produced from an affine function with
-  positive slope (`threshold_affine`).
+  positive slope (`mul_sub_lt_neg_iff`).
 * **The affine bootstrap step** — `affineStep_err` / `affineStep_tendsto` /
   `affineStep_value_err` / `affineStep_stepBudget`: bisection, from a bracket
   containing the root `(a − c)/b`, of an increasing rearrangement `x ↦ b·x − a`
@@ -112,40 +112,56 @@ Boundary: `MathFin/FixedIncome/YieldCurve.lean` owns the closed-form
 proves that bisection on the swap lands within `(hi − lo)/2^{n+1}` of the closed-form root, for a
 bracket containing it (`swapBootstrap_recovers_couponBondFactor`).
 
-## Result
+## Main definitions
 
-Public definitions: `boot` (the bootstrapped curve), `fraChain` and
-`swapChain` (the FRA and swap strips as `boot` instruments). The bisection
-engine (`bisectStep`, `bisect`, `bisectMid`) is imported from
-`MathFin.Foundations.Bisection`.
+* `boot`: the bootstrapped curve, a list of discount factors after the first `i` instruments, the
+  head being the newest.
+* `fraChain`: the FRA strip as a `boot` instrument, instrument `i` being the FRA with fixed rate
+  `K i` that reads the new discount factor `x`.
+* `swapChain`: the swap strip as a `boot` instrument, instrument `i` being the spot-starting
+  payer swap maturing at the new discount factor.
 
-Public lemmas (all in `namespace MathFin.Bootstrapping`):
+## Main results
 
-* `affineStep_err`, `affineStep_tendsto`, `affineStep_value_err`,
-  `affineStep_stepBudget` — the affine bootstrap step, its repricing bound,
-  and its step budget;
-* `fraValue_affine_of_newUnknown`, `fraValue_newUnknown_eq_quote_iff`,
-  `fraValue_affine_zcb`, `strictAntiOn_fraValue`, `fraThreshold`,
-  `fraStep_err`, `fraStep_tendsto`, `fraRoot_parForward`,
-  `fraRoot_agrees_with_pin` — the FRA layer;
-* `payerSwapValue_affine_of_newUnknown`, `strictAnti_payerSwapValue`,
-  `swapThreshold`, `swapStep_err`, `swapStep_tendsto`, `swapRoot_is_par`,
-  `payerSwapValue_affine_lastCoupon`,
-  `payerSwapValue_affine_lastCoupon_annuity`,
-  `strictAnti_payerSwapValue_lastCoupon`, `swapLastCouponThreshold`,
-  `swapStep_lastCoupon_err`, `payerSwapValue_lastCoupon_eq_zero_iff_couponBond`,
-  `swapBootstrap_recovers_couponBondFactor` — the payer-swap layer and its agreement with
-  the closed-form coupon-bond bootstrap;
-* `boot_length`, `boot_succ_ne_nil`, `boot_step_err`, `boot_reprices_all` —
-  the induction over instruments;
-* `boot_reprices_fraChain`, `boot_reprices_swapChain` — the FRA and swap strips
-  inside the induction;
-* `fraBootstrap_flatCurve` — the flat-curve capstone.
+* `affineStep_err`: for `b > 0` and a root `(a − c)/b` in `[lo, hi]`, bisection on `b·x − a`
+  at target `−c` is within `(hi − lo)/2^{n+1}` of that root after `n` steps.
+* `fraValue_affine_of_newUnknown`, `fraValue_newUnknown_eq_quote_iff`: for `δ ≠ 0`, the FRA value
+  at the bootstrapped forward rate is `p − (1 + δK)·x` (for `x ≠ 0`); for `x > 0` and
+  `1 + δK > 0` it equals the quote `c` if and only if `x = (p − c)/(1 + δK)`.
+* `strictAntiOn_fraValue`, `fraStep_err`: for `δ ≠ 0` and `1 + δK > 0`, the FRA value is
+  strictly decreasing on `x > 0`, and bisection from a bracket `[lo, hi]` with `lo > 0`
+  containing `(p − c)/(1 + δK)` lands within `(hi − lo)/2^{n+1}` of it.
+* `swapRoot_is_par`, `strictAnti_payerSwapValue`, `swapStep_err`: for `A ≠ 0` the root
+  `P0 − K·A` of the payer swap has par rate `K`; the swap value is strictly decreasing in the
+  new factor with no positivity condition, and bisection on it lands within `(hi − lo)/2^{n+1}`
+  of the root when a bracket contains it.
+* `payerSwapValue_lastCoupon_eq_zero_iff_couponBond`: the last-coupon swap has zero value at `x`
+  if and only if `x` satisfies the coupon-bond pricing equation with coupon `K·δ` and face `1`.
+* `swapBootstrap_recovers_couponBondFactor`: for `1 + K·δ > 0`, if `x` solves that
+  coupon-bond equation and lies in `[lo, hi]`, bisection on the last-coupon swap lands within
+  `(hi − lo)/2^{n+1}` of `x`.
+* `boot_length`, `boot_step_err`: `boot` returns `i` factors after `i` instruments, and at step
+  `i` its new factor is within `(hi i − lo i)/2^{n+1}` of the threshold root `σ`, given the
+  threshold shape of the solving function on the bracket and `σ` in the bracket.
+* `boot_reprices_all`: for `b > 0` and a solving function affine `a − b·x` on the bracket
+  with root in the bracket, the repriced instrument `i` is within `b·(hi i − lo i)/2^{n+1}`
+  of its quote `c i`.
+* `boot_reprices_fraChain`, `boot_reprices_swapChain`: the same repricing bound for the FRA strip
+  (`δ ≠ 0`, `1 + δ·K i > 0`, `lo i > 0`) and the swap strip (`1 + K i·δ > 0`), each given that the
+  root lies in the step's bracket.
+* `fraBootstrap_flatCurve`: for `δ ≠ 0`, a fixed rate equal to the flat-curve forward rate and
+  a bracket with `lo > 0` containing the true later discount factor, bisection at zero quote
+  recovers it within `(hi − lo)/2^{n+1}`.
 
-Supporting declarations: the `@[simp]` unfolding equations `fraChain_cons` and
-`swapChain_cons`; and, `private`, the threshold bridge `threshold_affine`, the
-slope-weighted residual `abs_affine_sub_eq`, the coupon-sum identity
-`sum_const_mul_eq_annuity` and the unfolding lemma `boot_succ`.
+## References
+
+* [P. S. Hagan and G. West, *Interpolation methods for curve construction*][HaganWest2006], §2
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], ch. 4 and ch. 7
+
+## Tags
+
+curve bootstrapping, bisection, discount factors, FRA, swap rate, yield curve construction,
+par swap, MSC 91G30, MSC 91G60, JEL E43
 -/
 
 set_option autoImplicit false
@@ -160,13 +176,13 @@ open Filter Topology
 
 /-- The threshold property is *global* for an affine function with positive
 slope: `b·x − a` crosses the level `−c` exactly at the root `x = (a − c)/b`. -/
-private theorem threshold_affine (a b c x : ℝ) (hb : 0 < b) :
+theorem mul_sub_lt_neg_iff (a b c x : ℝ) (hb : 0 < b) :
     b * x - a < -c ↔ x < (a - c) / b := by
   rw [lt_div_iff₀ hb, mul_comm x b]
   constructor <;> intro h <;> linarith
 
 /-- The slope-weighted residual: for `b > 0`, `|a − b·m − c| = b · |m − (a − c)/b|`. -/
-private theorem abs_affine_sub_eq (a b c m : ℝ) (hb : 0 < b) :
+theorem abs_sub_mul_sub_eq_mul_abs (a b c m : ℝ) (hb : 0 < b) :
     |a - b * m - c| = b * |m - (a - c) / b| := by
   have : a - b * m - c = b * ((a - c) / b - m) := by field_simp; ring
   rw [this, abs_mul, abs_of_pos hb, abs_sub_comm]
@@ -180,12 +196,12 @@ theorem affineStep_err (a b c lo hi : ℝ) (hb : 0 < b) (hσ : (a - c) / b ∈ S
     (n : ℕ) :
     |bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n - (a - c) / b|
       ≤ (hi - lo) / 2 ^ (n + 1) :=
-  abs_bisectMid_sub_le (fun x _ ↦ threshold_affine a b c x hb) hσ n
+  abs_bisectMid_sub_le (fun x _ ↦ mul_sub_lt_neg_iff a b c x hb) hσ n
 
 /-- Convergence form of the affine bootstrap step. -/
 theorem affineStep_tendsto (a b c lo hi : ℝ) (hb : 0 < b) (hσ : (a - c) / b ∈ Set.Icc lo hi) :
     Tendsto (bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi) atTop (𝓝 ((a - c) / b)) :=
-  tendsto_bisectMid (fun x _ ↦ threshold_affine a b c x hb) hσ
+  tendsto_bisectMid (fun x _ ↦ mul_sub_lt_neg_iff a b c x hb) hσ
 
 /-- **Repricing bound.** The instrument value `a − b·x` at the bisection
 estimate is within `b·(hi − lo)/2^{n+1}` of the quote `c` — the slope-weighed
@@ -194,7 +210,7 @@ theorem affineStep_value_err (a b c lo hi : ℝ) (hb : 0 < b)
     (hσ : (a - c) / b ∈ Set.Icc lo hi) (n : ℕ) :
     |a - b * bisectMid (fun x : ℝ ↦ b * x - a) (-c) lo hi n - c|
       ≤ b * ((hi - lo) / 2 ^ (n + 1)) := by
-  rw [abs_affine_sub_eq _ _ _ _ hb]
+  rw [abs_sub_mul_sub_eq_mul_abs _ _ _ _ hb]
   exact mul_le_mul_of_nonneg_left (affineStep_err a b c lo hi hb hσ n) hb.le
 
 /-- **Step budget.** Some number `n ≤ ⌈log₂ (b·(hi − lo)/ε)⌉` of bisection steps
@@ -290,7 +306,7 @@ theorem fraThreshold (p δ K c lo hi : ℝ) (hδ : δ ≠ 0) (hpos : 0 < 1 + δ 
     -(fraValue δ x (fraForwardRate p x δ) K) < -c ↔ x < (p - c) / (1 + δ * K) := by
   have hx0 : x ≠ 0 := (lt_of_lt_of_le hlo hx.1).ne'
   rw [fraValue_affine_of_newUnknown p δ K x hδ hx0, neg_sub]
-  exact threshold_affine p (1 + δ * K) c x hpos
+  exact mul_sub_lt_neg_iff p (1 + δ * K) c x hpos
 
 /-- **FRA bootstrap step.** Bisection of the negated FRA value at the negated
 quote computes the later discount factor to within `(hi − lo)/2^{n+1}`. -/
@@ -369,7 +385,7 @@ theorem swapThreshold (P0 K A c lo hi : ℝ) (x : ℝ) (_hx : x ∈ Set.Icc lo h
     change P0 - x - K * A = P0 - K * A - x
     ring
   rw [h, neg_sub]
-  simpa only [one_mul, div_one] using threshold_affine (P0 - K * A) 1 c x one_pos
+  simpa only [one_mul, div_one] using mul_sub_lt_neg_iff (P0 - K * A) 1 c x one_pos
 
 /-- **Swap bootstrap step**, known schedule: bisection of the negated value at
 the negated quote computes the new discount factor to within
@@ -423,7 +439,7 @@ theorem swapLastCouponThreshold (P0 K A₀ δ c lo hi : ℝ) (hpos : 0 < 1 + K *
     (_hx : x ∈ Set.Icc lo hi) :
     -(payerSwapValue P0 x K (A₀ + δ * x)) < -c ↔ x < (P0 - K * A₀ - c) / (1 + K * δ) := by
   rw [payerSwapValue_affine_lastCoupon, neg_sub]
-  exact threshold_affine _ _ _ x hpos
+  exact mul_sub_lt_neg_iff _ _ _ x hpos
 
 /-- Bootstrap step for the last-coupon swap. -/
 theorem swapStep_lastCoupon_err (P0 K A₀ δ c lo hi : ℝ) (hpos : 0 < 1 + K * δ)
@@ -564,11 +580,11 @@ theorem boot_reprices_all (V : ℕ → List ℝ → ℝ) (c lo hi : ℕ → ℝ)
       -(V i (x :: p)) < -(c i) ↔ x < (a i p - c i) / b i p := by
     intro x hx
     rw [hV x hx, neg_sub]
-    exact threshold_affine (a i p) (b i p) (c i) x hb
+    exact mul_sub_lt_neg_iff (a i p) (b i p) (c i) x hb
   have hstep : |bisectMid (fun x : ℝ ↦ -(V i (x :: p))) (-(c i)) (lo i) (hi i) n
       - (a i p - c i) / b i p| ≤ (hi i - lo i) / 2 ^ (n + 1) :=
     abs_bisectMid_sub_le hthr hσ n
-  rw [hV _ (bisectMid_mem_Icc hthr hσ n), abs_affine_sub_eq _ _ _ _ hb]
+  rw [hV _ (bisectMid_mem_Icc hthr hσ n), abs_sub_mul_sub_eq_mul_abs _ _ _ _ hb]
   exact mul_le_mul_of_nonneg_left hstep hb.le
 
 /-! #### The file's instruments inside the induction

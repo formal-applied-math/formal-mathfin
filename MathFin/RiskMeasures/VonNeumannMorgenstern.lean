@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -80,6 +81,35 @@ that construction will be checked.
 Likewise the converse of `prefersEU_affine_invariant` — that two utilities
 representing the same preference *must* differ by a positive affine map — needs
 the same calibration argument and belongs with it.
+
+## Main definitions
+
+* `mix`: the compound lottery `α p + (1 − α) q`.
+* `expectedUtility`: the expected utility `∑ i ∈ s, p i * u i` of the lottery `p` over the support
+  `s`.
+* `prefersEU`: `p` is weakly preferred to `q` when `EU(q) ≤ EU(p)`.
+
+## Main results
+
+* `expectedUtility_mix`: expected utility is affine in the mixture,
+  `EU(α p + (1 − α) q) = α EU(p) + (1 − α) EU(q)`.
+* `prefersEU_total`, `prefersEU_trans`, `prefersEU_refl`: the expected-utility preference is
+  complete, transitive and reflexive.
+* `prefersEU_independence`, `prefersEU_strict_independence`: mixing a common lottery into both
+  sides preserves a weak preference at any weight `α ≥ 0`, and a strict one at any `α > 0`.
+* `prefersEU_continuity`: if `p ≻ q ≻ r` some strict mixture of `p` and `r` has the same
+  expected utility as `q`.
+* `prefersEU_affine_invariant`: for probability vectors the preference is unchanged by a
+  positive affine rescaling `a u + b` of the utility.
+
+## References
+
+* [von Neumann and Morgenstern, *Theory of Games and Economic Behavior*][VonNeumannMorgenstern1944]
+
+## Tags
+
+von Neumann-Morgenstern, expected utility, lotteries, independence axiom, Archimedean axiom,
+utility uniqueness, preference axioms, MSC 91B16, MSC 91B06, JEL D81
 -/
 
 @[expose] public section

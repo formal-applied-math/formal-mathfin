@@ -27,6 +27,11 @@ steps, both proved here with zero rates, for maturities `t > 0`.
    non-decreasing in maturity at every strike iff total variance is non-decreasing in maturity
    at every log-moneyness.
 
+## Main definitions
+
+* `totalVarianceCall`: the zero-rate, unit-maturity Black–Scholes call `bsV K 0 (√w) S 1` at
+  strike `K` and spot (forward) `S`, parametrised by total variance `w = σ²T`.
+
 ## Main results
 
 * `integral_posPart_sub_mono_of_martingale`: `s ≤ t → E[(X_s − L)⁺] ≤ E[(X_t − L)⁺]`.
@@ -47,6 +52,16 @@ results the total variance is assumed positive on maturities `t > 0` and the mon
 `w(k, t) → 0` as `t → 0⁺`, such as the flat `w = σ²t`, are covered. The local-variance
 characterisation (crossed total-variance lines ⟺ negative local variance) is not formalised
 here.
+
+## References
+
+* [Gatheral and Jacquier, *Arbitrage-free SVI volatility surfaces*][GatheralJacquier2014], Section
+  2.1, Lemma 2.1
+
+## Tags
+
+calendar spread arbitrage, total variance surface, Gatheral–Jacquier, SVI,
+implied volatility surface, static arbitrage, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

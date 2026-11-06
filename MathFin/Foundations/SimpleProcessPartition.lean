@@ -15,18 +15,47 @@ public import MathFin.Foundations.UnifIntegrableL2
 
 The simple-θ Girsanov theorem `MathFin.isExpQMartingale_BthetaSimple` consumes a **single monotone
 partition** `s : ℕ → ℝ≥0` with `𝓕_{s i}`-measurable multipliers `c : ℕ → Ω → ℝ`. The Itô-integral
-density family (`ItoIntegralL2.simpleAssembly`, dense by `simpleAssembly_T_denseRange`) is indexed
-by `ProbabilityTheory.SimpleProcess`, whose `value : (ℝ≥0 × ℝ≥0) →₀ (Ω → ℝ)` is a `Finsupp` over
-**arbitrary overlapping intervals**. This file marshals the latter into the former: sort all
+density family (`ItoIntegralL2.simpleAssembly`, dense by `simpleAssemblyHorizon_denseRange`) is
+indexed by `ProbabilityTheory.SimpleProcess`, whose `value : (ℝ≥0 × ℝ≥0) →₀ (Ω → ℝ)` is a `Finsupp`
+over **arbitrary overlapping intervals**. This file marshals the latter into the former: sort all
 interval endpoints into a common partition, and read the per-cell multiplier off the process value.
 
 The payoff (downstream): a bounded predictable θ is approximated in `L²` by clamped simple processes
-`Vⁿ` (free from `simpleAssembly_T_denseRange` + `clampSP`), each marshalled to `(sⁿ, cⁿ)`, so the
-simple exponential-martingale identity passes to the limit exactly as in the continuous-adapted
+`Vⁿ` (free from `simpleAssemblyHorizon_denseRange` + `clampSP`), each marshalled to `(sⁿ, cⁿ)`, so
+the simple exponential-martingale identity passes to the limit exactly as in the continuous-adapted
 case.
 
 This module builds the partition side first: the endpoint set and the monotone partition
 `marshalPart`.
+
+## Main definitions
+
+* `marshalEndpoints`: the finite set of cell boundaries of a simple process on `[0, T]`: `0`, `T`
+  and every endpoint of every interval in its support.
+* `marshalPart`: the monotone partition read off the sorted endpoint set, clamped to `T` beyond
+  its last point.
+* `marshalMult`: the per-cell multiplier, the sum of the values of the intervals covering the cell.
+* `marshalStepSP`: the clamped marshalled step process
+  `∑ᵢ clampM C (marshalMult i) · 𝟙_{(sᵢ, sᵢ₊₁]}`.
+
+## Main results
+
+* `stronglyMeasurable_marshalMult`: each per-cell multiplier is `𝓕_{sᵢ}`-measurable.
+* `marshalStochExp_eq`: the marshalled stochastic exponent equals the elementary Itô integral
+  of `V`.
+* `marshalDrift_eq`: the marshalled drift equals the elementary drift of `V`.
+* `tendsto_simpleAssembly_marshalStepSP`: the clamped marshalled approximants of a bounded
+  predictable `θ` converge to `θ̂` in the integrand `L²`.
+* `tendsto_itoAssembly_marshalStepSP`: their Itô integrals converge to `∫θ dB`.
+* `tendstoInMeasure_marshalStochSum`: the clamped stochastic exponents converge in measure to
+  `∫θ dB`.
+* `exists_subseq_marshalStochSum_ae`: every subsequence has a further subsequence along which
+  the clamped stochastic exponents converge almost surely.
+
+## Tags
+
+simple process, common partition, Girsanov theorem, predictable approximation, interval endpoints,
+step process, MSC 60H05, MSC 60G44
 -/
 
 @[expose] public section
@@ -400,7 +429,8 @@ lemma uncurry_marshalStepSP (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
           (Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))).indicator
             (fun _ ↦ clampM C (marshalMult hBmeas T V i ω)) s := by
   change ⇑(marshalStepSP hBmeas T V hle hC N).val s ω = _
-  rw [marshalStepSP, AddSubmonoidClass.coe_finsetSum, coe_finsetSum_apply,
+  rw [marshalStepSP, AddSubmonoidClass.coe_finsetSum, SimpleProcess.coe_finset_sum,
+    Finset.sum_apply, Finset.sum_apply,
     ← Finset.sum_attach (Finset.range N) (fun i ↦
       (Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))).indicator
         (fun _ ↦ clampM C (marshalMult hBmeas T V i ω)) s)]
@@ -508,14 +538,14 @@ section Convergence
 
 variable {μ : Measure Ω} [IsProbabilityMeasure μ]
 
-/-- On `trimMeasure_T` (supported on `(0, T] × Ω`), the uncurried clamped marshalled process equals
+/-- On `trimMeasure` (supported on `(0, T] × Ω`), the uncurried clamped marshalled process equals
 `clampM C (⇑V)`. -/
 lemma uncurry_marshalStepSP_ae_eq_clamp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (hle : ∀ p ∈ V.value.support, p.2 ≤ T)
     {C : ℝ} (hC : 0 ≤ C) {N : ℕ} (hmpN : marshalPart hBmeas T V N = T) :
     Function.uncurry ⇑(marshalStepSP hBmeas T V hle hC N).val
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦ clampM C (Function.uncurry ⇑V z) := by
-  have hsupp := ae_fst_mem_Ioc_trimMeasure_T (μ := μ) T hBmeas
+      =ᵐ[trimMeasure (μ := μ) T hBmeas] fun z ↦ clampM C (Function.uncurry ⇑V z) := by
+  have hsupp := ae_fst_mem_Ioc_trimMeasure (μ := μ) T hBmeas
   filter_upwards [hsupp] with z hz
   exact uncurry_marshalStepSP_eq_clamp hBmeas T V hle hC hmpN hz.1 hz.2 z.2
 
@@ -528,17 +558,17 @@ lemma norm_simpleAssembly_marshalStepSP_sub_le (hBmeas : ∀ t, Measurable (B t)
     {C : ℝ} (hC : 0 ≤ C) {N : ℕ} (hmpN : marshalPart hBmeas T V N = T)
     {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ)
     (hbdd : ∀ t ω, |θ t ω| ≤ C) :
-    ‖simpleAssembly_T (μ := μ) T hBmeas (marshalStepSP hBmeas T V hle hC N)
+    ‖simpleAssemblyHorizon (μ := μ) T hBmeas (marshalStepSP hBmeas T V hle hC N)
         - processToLpPredictable (μ := μ) T hBmeas hpred hbdd‖
-      ≤ ‖simpleAssembly_T (μ := μ) T hBmeas ⟨V, hle⟩
+      ≤ ‖simpleAssemblyHorizon (μ := μ) T hBmeas ⟨V, hle⟩
         - processToLpPredictable (μ := μ) T hBmeas hpred hbdd‖ := by
-  have hf1 := memLp_uncurry_trim_T (μ := μ) T hBmeas (marshalStepSP hBmeas T V hle hC N).val
-  have hfV := memLp_uncurry_trim_T (μ := μ) T hBmeas V
+  have hf1 := memLp_uncurry_trimMeasure (μ := μ) T hBmeas (marshalStepSP hBmeas T V hle hC N).val
+  have hfV := memLp_uncurry_trimMeasure (μ := μ) T hBmeas V
   have hg := memLp_uncurry_of_bdd_predictable (μ := μ) T hBmeas hpred hbdd
-  have hLHS : simpleAssembly_T (μ := μ) T hBmeas (marshalStepSP hBmeas T V hle hC N)
+  have hLHS : simpleAssemblyHorizon (μ := μ) T hBmeas (marshalStepSP hBmeas T V hle hC N)
       - processToLpPredictable (μ := μ) T hBmeas hpred hbdd
       = hf1.toLp _ - hg.toLp _ := rfl
-  have hRHS : simpleAssembly_T (μ := μ) T hBmeas ⟨V, hle⟩
+  have hRHS : simpleAssemblyHorizon (μ := μ) T hBmeas ⟨V, hle⟩
       - processToLpPredictable (μ := μ) T hBmeas hpred hbdd
       = hfV.toLp _ - hg.toLp _ := rfl
   rw [hLHS, hRHS, ← MemLp.toLp_sub hf1 hg, ← MemLp.toLp_sub hfV hg, Lp.norm_toLp, Lp.norm_toLp]
@@ -559,9 +589,9 @@ theorem tendsto_simpleAssembly_marshalStepSP (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
-    Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas
+    Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas
         (marshalStepSP hBmeas T (V n).val (V n).property hC
           ((marshalEndpoints hBmeas T (V n).val).card - 1))) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd)) := by
@@ -572,40 +602,40 @@ theorem tendsto_simpleAssembly_marshalStepSP (T : ℝ≥0)
     (marshalPart_card_sub_one hBmeas T (V n).val (V n).property) hpred hbdd
 
 /-- **The clamped approximant's Itô integral converges to `∫θ dB`.** Given a raw approximating
-sequence `V n → θ̂` in the integrand `L²` (from `simpleAssembly_T_denseRange`), the *clamped*
-marshalled Itô integrals `itoAssembly_T (marshalStepSP (V n))` converge in `L²(μ)` to
-`itoIntegralCLM_T θ̂ = ∫θ dB`. Proof: the contraction gives
-`simpleAssembly_T (marshalStepSP (V n)) → θ̂` (`tendsto_simpleAssembly_marshalStepSP`), then the CLM
-is continuous and agrees with the elementary integral on simple processes. The predictable analogue
-of `tendstoInMeasure_riemannσ`'s `L²` input. -/
+sequence `V n → θ̂` in the integrand `L²` (from `simpleAssemblyHorizon_denseRange`), the *clamped*
+marshalled Itô integrals `itoAssemblyHorizon (marshalStepSP (V n))` converge in `L²(μ)` to
+`itoIntegralCLM θ̂ = ∫θ dB`. Proof: the contraction gives
+`simpleAssemblyHorizon (marshalStepSP (V n)) → θ̂` (`tendsto_simpleAssembly_marshalStepSP`), then
+the CLM is continuous and agrees with the elementary integral on simple processes. The predictable
+analogue of `tendstoInMeasure_riemannσ`'s `L²` input. -/
 theorem tendsto_itoAssembly_marshalStepSP (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
-    Tendsto (fun n ↦ itoAssembly_T hB T hBmeas
+    Tendsto (fun n ↦ itoAssemblyHorizon hB T hBmeas
         (marshalStepSP hBmeas T (V n).val (V n).property hC
           ((marshalEndpoints hBmeas T (V n).val).card - 1)))
-      atTop (𝓝 (itoIntegralCLM_T hB T hBmeas
+      atTop (𝓝 (itoIntegralCLM hB T hBmeas
         (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) := by
   have hbridge (W : TBoundedSP T hBmeas) :
-      itoIntegralCLM_T hB T hBmeas (simpleAssembly_T (μ := μ) T hBmeas W)
-        = itoAssembly_T hB T hBmeas W :=
-    itoIntegralCLM_T_simpleAssembly_T hB T hBmeas W
+      itoIntegralCLM hB T hBmeas (simpleAssemblyHorizon (μ := μ) T hBmeas W)
+        = itoAssemblyHorizon hB T hBmeas W :=
+    itoIntegralCLM_simpleAssemblyHorizon hB T hBmeas W
   simpa only [Function.comp_def, hbridge] using
-    ((itoIntegralCLM_T hB T hBmeas).continuous.tendsto _).comp
+    ((itoIntegralCLM hB T hBmeas).continuous.tendsto _).comp
       (tendsto_simpleAssembly_marshalStepSP T hBmeas hpred hC hbdd V hV)
 
 /-- **A raw approximating sequence for `θ̂`.** From the density of the simple-process embedding,
-there is a sequence `V : ℕ → TBoundedSP` with `simpleAssembly_T (V n) → θ̂`. -/
+there is a sequence `V : ℕ → TBoundedSP` with `simpleAssemblyHorizon (V n) → θ̂`. -/
 lemma exists_approxSeq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) :
     ∃ V : ℕ → TBoundedSP T hBmeas,
-      Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+      Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas (V n)) atTop
         (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd)) := by
   obtain ⟨x, hx_mem, hx_tendsto⟩ := mem_closure_iff_seq_limit.mp
-    (simpleAssembly_T_denseRange (μ := μ) T hBmeas
+    (simpleAssemblyHorizon_denseRange (μ := μ) T hBmeas
       (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))
   choose V hV using hx_mem
   exact ⟨V, by simpa only [hV] using hx_tendsto⟩
@@ -618,12 +648,12 @@ theorem tendstoInMeasure_marshalStochSum (hB : IsPreBrownianReal B μ) (T : ℝ�
     (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
     TendstoInMeasure μ (fun n ↦ itoSimple hBmeas
         (marshalStepSP hBmeas T (V n).val (V n).property hC
           ((marshalEndpoints hBmeas T (V n).val).card - 1)).val) atTop
-      (⇑(itoIntegralCLM_T hB T hBmeas (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) := by
+      (⇑(itoIntegralCLM hB T hBmeas (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) := by
   refine TendstoInMeasure.congr (fun n ↦ ?_) EventuallyEq.rfl
     (tendstoInMeasure_of_tendsto_Lp
       (tendsto_itoAssembly_marshalStepSP hB T hBmeas hpred hC hbdd V hV))
@@ -637,18 +667,18 @@ theorem exists_subseq_marshalStochSum_ae (hB : IsPreBrownianReal B μ) (T : ℝ�
     (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd)))
     (ns : ℕ → ℕ) (hns : Tendsto ns atTop atTop) :
     ∃ ms : ℕ → ℕ, StrictMono ms ∧ ∀ᵐ ω ∂μ, Tendsto (fun k ↦ itoSimple hBmeas
         (marshalStepSP hBmeas T (V (ns (ms k))).val (V (ns (ms k))).property hC
           ((marshalEndpoints hBmeas T (V (ns (ms k))).val).card - 1)).val ω) atTop
-      (𝓝 (⇑(itoIntegralCLM_T hB T hBmeas
+      (𝓝 (⇑(itoIntegralCLM hB T hBmeas
         (processToLpPredictable (μ := μ) T hBmeas hpred hbdd)) ω)) := by
   have hconv : TendstoInMeasure μ (fun k ↦ itoSimple hBmeas
       (marshalStepSP hBmeas T (V (ns k)).val (V (ns k)).property hC
         ((marshalEndpoints hBmeas T (V (ns k)).val).card - 1)).val) atTop
-      (⇑(itoIntegralCLM_T hB T hBmeas (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :=
+      (⇑(itoIntegralCLM hB T hBmeas (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :=
     fun ε hε ↦ (tendstoInMeasure_marshalStochSum hB T hBmeas hpred hC hbdd V hV ε hε).comp hns
   obtain ⟨ms, hms, hae⟩ := hconv.exists_seq_tendsto_ae
   exact ⟨ms, hms, hae⟩

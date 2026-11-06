@@ -1192,7 +1192,7 @@ Two entries added, both `full`: `ce-conditional-freezing-lemma` and
   call (for `∫ eˣ dν < ∞`, any `S₀` and `K`) are instances. The call no longer goes through
   put–call parity, the put no longer needs `K ≥ 0`, and the call no longer needs `S₀, K ≥ 0`.
 - Coherence: put–call parity of the price functions comes from the payoff identity
-  `max_sub_max_neg` of the finite-state parity (`Foundations/NoArbitrageDerivations.lean`). The
+  `max_zero_sub_max_neg_zero_eq_self` (Mathlib), the identity behind the finite-state parity. The
   canonical model's count–size independence comes from Mathlib's
   `indepFun_iff_hasLaw_prodMk_prod`; the repo's measure-preserving pull-back lemma is deleted.
   `[IsProbabilityMeasure P]` is derived from the process (`JumpDiffusionProcess.isProbabilityMeasure`)
@@ -2088,7 +2088,7 @@ prior corpus audit, not a verification of this addition.
 > was pair identity → density of the post-`a` generators → ε-extension, roughly 800 lines. It was
 > dropped: the identity *is* the Itô isometry localised. A conditional-expectation identity is an
 > identity of `𝓕_a`-set integrals; on such a set `𝟙_F` is a bounded `𝓕_a`-measurable factor, so
-> `itoIntegralCLM_T_smulAdapted` folds it back inside the integral, `𝟙_F² = 𝟙_F` costs nothing,
+> `itoIntegralCLM_smulAdapted` folds it back inside the integral, `𝟙_F² = 𝟙_F` costs nothing,
 > and both set-integrals meet at `∫_{(a,b]×F} φ² d trim_T` — one side by the isometry, the other
 > by Tonelli through the trim. About 200 lines, no density argument and no ε. The band generators
 > and conditional Brownian kernels from part 1 stay: they state the classical facts the general
@@ -2102,7 +2102,7 @@ prior corpus audit, not a verification of this addition.
 > (`𝔼[(M_b−M_a)² | 𝓕_a] = 𝔼[⟨M⟩_b − ⟨M⟩_a | 𝓕_a]`) was the next rung on this seam and landed
 > 2026-08-27 (entry above); an *adapted* bracket process, and any pathwise quadratic variation,
 > stay unclaimed. Supporting change:
-> `itoIntegralCLM_T_bandRestrict` (`∫ 𝟙_{(a,b]}·φ dB = M_b − M_a`) extracted from
+> `itoIntegralCLM_bandRestrict` (`∫ 𝟙_{(a,b]}·φ dB = M_b − M_a`) extracted from
 > `itoIntegralAgainst_elementary`, which now consumes it.
 >
 > **FIXED — the CRR→BS convergence theorems were vacuous as stated
@@ -2199,7 +2199,7 @@ prior corpus audit, not a verification of this addition.
 >   adaptedness pointwise; `pricePath`, built from `Lp` classes, supplies only its a.e. version,
 >   so `PricingMeasureL2Density`'s martingale hypothesis had **no exhibited witness**. The
 >   statements are now carried on an abstract adapted `S` agreeing a.e. with the price — the form
->   `ContinuousMarket.IsEMM` already used, for the same reason — and
+>   `IsEMM` already used, for the same reason — and
 >   `exists_density_price_martingale` supplies the witness via `pricePathCondExp`, the price
 >   rebuilt from `μ[· | 𝓕_t]`. This is the price-side counterpart of `pricesGainsAtZero_self`.
 >   Nothing in the gate stack could see this: the theorem was true, axiom-clean and green.
@@ -2220,7 +2220,7 @@ prior corpus audit, not a verification of this addition.
 > **2026-08-16 — the chain rule, the integral against a price, and the pricing measure
 > (353 → 358).** For a predictable `L²` driver `φ` and `M = φ●B`, the integrands
 > square-integrable against `M` are the bracket-weighted `L²(φ²·trim_T)`, and
-> `ItoIntegralAgainstMartingale.itoIntegralAgainstCLM` is `itoIntegralCLM_T` precomposed with
+> `ItoIntegralAgainstMartingale.itoIntegralAgainstCLM` is `itoIntegralCLM` precomposed with
 > multiplication by `φ`. Both factors are isometries, so `‖∫ψ dM‖ = ‖ψ‖_{L²(⟨M⟩)}` — the Itô
 > isometry against `M`, and the reason the weighted space is the right domain. Five entries:
 > `sc-ito-chain-rule` (`∫ψ dM = ∫ψφ dB`), `sc-ito-integral-band`
@@ -2261,9 +2261,9 @@ prior corpus audit, not a verification of this addition.
 > the downside-performance-metrics work of
 > [#173](https://github.com/formal-applied-math/formal-mathfin/pull/173) and the von Neumann–Morgenstern
 > lotteries of [#178](https://github.com/formal-applied-math/formal-mathfin/pull/178).
-> `itoIntegralCLM_T` was already a `LinearIsometry` from the predictable `L²(dt⊗dμ)` integrands into
+> `itoIntegralCLM` was already a `LinearIsometry` from the predictable `L²(dt⊗dμ)` integrands into
 > `L²(μ)`. `MathFin/Foundations/MartingaleRepresentation.lean` identifies its image exactly:
-> `itoIntegralCLM_T_surjective_onto_centered` says the Itô integrals together with the constants
+> `itoIntegralCLM_surjective_onto_centered` says the Itô integrals together with the constants
 > exhaust `lpMeas ℝ ℝ 𝓕ᴮ_T 2 μ`, and `itoIsometryEquiv` bundles the isometry as an equivalence onto
 > the centered part. The route is orthogonal decomposition against the (closed, because isometric)
 > range, plus totality of the step-integrand Doléans exponentials
@@ -2272,7 +2272,7 @@ prior corpus audit, not a verification of this addition.
 > σ-algebras of `BrownianCylinderGeneration`, whose supremum is the natural filtration
 > (`iSup_cylinderFiltration_eq_natFiltration`). No Malliavin calculus and no adapted-integrand Itô
 > formula. Centering, `𝔼[∫₀ᵀ φ dB] = 0`, is proved a floor down as
-> `ItoIntegralProcessGeneral.integral_itoIntegralCLM_T`, not assumed.
+> `ItoIntegralProcessGeneral.integral_itoIntegralCLM`, not assumed.
 > **`gir-thm-9.3.4` flips `reduced_core → full`** (14 → 13 reduced cores): it had been a `Prop`
 > structure whose conclusion was a bundled field read off by projection, and it now re-exports
 > `martingale_representation`, the process form the entry states.
@@ -2329,12 +2329,12 @@ prior corpus audit, not a verification of this addition.
 > **The audit that followed** (2026-08-07, corpus unchanged). Two overstatements in one day stopped
 > being a one-off, so the class was swept repo-wide. `sc-thm-7.1.1` had the identical defect one tower
 > over — description writing `∫₀ᵗ f'(B_s) dB_s` over an `∃ gf'` — now fixed through
-> `itoIntegralCLM_T_of_bdd_cont → ito_formula_L2_bddDeriv → _mk`. Four descriptions corrected where
+> `itoIntegralCLM_of_bdd_cont → ito_formula_L2_bddDeriv → _mk`. Four descriptions corrected where
 > they claimed the textbook theorem and the entry delivers less (`cm-thm-4.3.10` no `L^p` convergence,
 > `sc-thm-8.2.5` uniqueness not existence, `sc-thm-7.4.5` constant `σ`, `sc-thm-9.2.1` the Feynman–Kac
 > identification not PDE uniqueness). The README's landmark row for `ito_formula_unrestricted` was
 > rendering a local-martingale theorem as an integral identity. And
-> `ae_fst_mem_Ioc_trimMeasure_T` existed six times across five files; five retired. The mechanical
+> `ae_fst_mem_Ioc_trimMeasure` existed six times across five files; five retired. The mechanical
 > slice is now gated (`test_prose_does_not_outrun_statement`, negative-controlled against the three
 > conjuncts it exists to protect); the judgment slice is a standing first pass in the values-review
 > protocol and in `CLAUDE.md`.
@@ -2549,7 +2549,7 @@ prior corpus audit, not a verification of this addition.
 > (2) **binomial barrier/lookback** via the reflection principle — the counting identity
 > `mf-barrier-reflection-count` and the running-maximum law `mf-barrier-maximal-distribution`
 > (`#{max ≥ a} = 2·#{end > a} + #{end = a}`), consuming the previously-stranded
-> `reflectionPrincipleEquiv_below`, `Binomial/BarrierReflection`; (3) the **Girsanov-grounded quanto
+> `reflectionPrincipleEquivBelow`, `Binomial/BarrierReflection`; (3) the **Girsanov-grounded quanto
 > forward** `mf-quanto-forward-grounded` — the `−ρ σ_S σ_FX` drift adjustment *derived* from a
 > joint-Gaussian FX model + change of measure rather than posited, `BlackScholes/QuantoGrounding`;
 > and (4) the **compound-Poisson aggregate-loss MGF** `mf-compound-poisson-mgf` (`reduced_core → full`),
@@ -2651,7 +2651,7 @@ prior corpus audit, not a verification of this addition.
 > `DriftProcessModification.driftContinuousMod_eq_setIntegral` proves `driftContinuousMod g t ω =
 > ∫₀ᵗ ⇑g(s,ω) ds` a.e. for every `t ≤ T` — the elementary drifts `∫₀ᵗ Vₙ ds` converge to
 > `driftContinuousMod`, and the ω-slice energies `Dₙ(ω) = ∫₀ᵀ(⇑Vₙ − ⇑g)² ds` decay in `L¹(μ)`
-> (`= ‖simpleAssembly_T Vₙ − g‖²`), so a subsequence has `Dₙₖ(ω) → 0` a.e., whence the interval
+> (`= ‖simpleAssemblyHorizon Vₙ − g‖²`), so a subsequence has `Dₙₖ(ω) → 0` a.e., whence the interval
 > Cauchy–Schwarz `|∫₀ᵗ(⇑Vₙₖ − ⇑g)| ≤ √(T·Dₙₖ(ω)) → 0` matches the two limits.
 > `SDEPathwise.sde_pathwise_drift_eq_setIntegral` specializes it to `b∘X`, so the strong solution's drift
 > term is the recognizable SDE integral `∫₀ᵗ b(X_s(ω)) ds`, not merely an abstract limit. All axiom-clean.
@@ -2702,7 +2702,7 @@ prior corpus audit, not a verification of this addition.
 > **The strong solution of `dX = b(X)dt + σ(X)dB` is now constructed as a Picard fixed point.**
 > `Foundations/SDEExistence.picardMap_exists_unique_fixedPoint` (entry `sde-picard-existence-uniqueness`,
 > **`full`**) builds the Picard iterate `Φ(X) = η + ∫₀ᵗ b(X)ds + ∫₀ᵗ σ(X)dB` as a self-map of the
-> predictable `L²` space `E = Lp 2 (trimMeasure_T T)` — its diffusion term the *actual* Itô integral
+> predictable `L²` space `E = Lp 2 (trimMeasure T)` — its diffusion term the *actual* Itô integral
 > assembled in the tower — proves the a priori contraction estimate `‖Φ X − Φ Y‖ ≤ (T·L_b + √T·L_σ)‖X − Y‖`
 > (drift operator norm `T` × Cauchy–Schwarz, Itô operator norm `√T` × the isometry), and obtains existence
 > **and** uniqueness of the fixed point via Banach's theorem. **Honest scope:** the `L²`/`E` formulation,
@@ -2817,12 +2817,12 @@ prior corpus audit, not a verification of this addition.
 > formula decomposes `f(X)` for a general `C³` exp-growth `f` against a constant-coefficient Itô
 > process** `X_t = X₀ + b·t + σ B_t` (`Foundations/ItoFormulaItoProcess.lean`,
 > `sc-ito-formula-ito-process`, **`full`**),
-> `f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds`, `gfx =ᵐ [σ·f'(X_·)]`. Earlier:
+> `f(X_T) − f(X₀) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds`, `gfx =ᵐ [σ·f'(X_·)]`. Earlier:
 > **Geometric Brownian motion is decomposed by the genuine continuous
 > Itô integral** (`Foundations/ItoFormulaGBM.lean`, entries `sc-ito-formula-gbm` and
 > `sc-discounted-gbm-ito`, both **`full`**) — the **first pricing-ward consumer of the analytic
 > Itô tower**, which until now had *none* (GBM/BS pricing ran via separate algebraic towers and
-> the Wald exponential). `ito_formula_gbm` gives `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ m·Ŝ ds` with `gfx =ᵐ [σ·Ŝ(·)]`
+> the Wald exponential). `ito_formula_gbm` gives `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ m·Ŝ ds` with `gfx =ᵐ [σ·Ŝ(·)]`
 > for the GBM value `Ŝ(t)=S₀ exp((m−σ²/2)t+σ B_t)`, the stochastic term the *real* Itô integral.
 > The route is the classic one — **localization in time**: the GBM value is `t`-exponential (fails
 > the localized formula's `t`-uniform growth), so the localized formula is applied to the
@@ -2841,7 +2841,7 @@ prior corpus audit, not a verification of this addition.
 > antiderivative), the cutoff `fₙ=f(t,φₙ(x))` through `cutoff_bddDeriv`, then `n→∞` — boundary
 > and drift converge in `L²(μ)` (Brownian marginals have every exponential moment,
 > `BrownianExpMoment`; the drift dominator is the new base stone `pathIntegral_expGrowth_memLp`),
-> so `aₙ=itoIntegralCLM_T gfxₙ` is Cauchy, the Itô **isometry** transfers Cauchy-ness to the
+> so `aₙ=itoIntegralCLM gfxₙ` is Cauchy, the Itô **isometry** transfers Cauchy-ness to the
 > integrands, completeness gives the witness, CLM **continuity** identifies the limit, and an
 > a.e.-identification pass names it (`gfx =ᵐ [f_x(·,B_·)]`).
 > Axioms-clean `[propext, Classical.choice, Quot.sound]`. Earlier:
@@ -2913,8 +2913,8 @@ prior corpus audit, not a verification of this addition.
 > **Summit B / B1b round (2026-06-12).** The **general-integrand** Itô integral
 > `(φ●B)_t = ∫₀ᵗ φ dB` for a general predictable `φ ∈ L2Predictable[0,T]`, as a
 > continuous L² martingale on `[0,T]` (`Foundations/ItoIntegralProcessGeneral.lean`).
-> It extends B1a (simple integrands) by density along the *same* `simpleAssembly_T`
-> embedding that builds the terminal CLM `itoIntegralCLM_T`, so the bridge to B1a
+> It extends B1a (simple integrands) by density along the *same* `simpleAssemblyHorizon`
+> embedding that builds the terminal CLM `itoIntegralCLM`, so the bridge to B1a
 > is definitional (`extendOfNorm_eq`). The key identity
 > `(φ●B)_t = E[∫₀ᵀ φ dB | 𝓕_t]` (the `condExpL2` projection of the terminal
 > integral) yields the L² martingale property (condExp tower), a.e.-adaptedness,
@@ -3070,7 +3070,7 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > (Summit A′): `f(T,B_T) − f(0,B₀) = ∫₀ᵀ f_x(s,B_s) dB_s +
 > ∫₀ᵀ (f_t + ½f_xx)(s,B_s) ds` a.e., the classical `df = f_x dB +
 > (f_t + ½f_xx) dt`, with the stochastic integral the genuine
-> `itoIntegralCLM_T`. The three Summit-A limit arguments redone with
+> `itoIntegralCLM`. The three Summit-A limit arguments redone with
 > `(t,x)`-dependence: `WeightedQuadraticVariation` generalized to bounded
 > **adapted weight processes** (the fluctuation engine never cared the
 > weight was `g(B_s)`; `tendsto_riemann_L2_process` exported standalone for
@@ -3209,11 +3209,11 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 
 > **Summit A — continuous-time Itô formula (2026-06-02).** Promoted `sc-thm-7.1.1`
 > (Itô's Formula) `reduced_core`→`full`: the bounded-derivative continuous-time L² Itô
-> formula `f(B_T)−f(B_0) = itoIntegralCLM_T gf' + ½∫₀ᵀ f″(B_s) ds` is now *derived* from
+> formula `f(B_T)−f(B_0) = itoIntegralCLM gf' + ½∫₀ᵀ f″(B_s) ds` is now *derived* from
 > foundational primitives, with the stochastic integral the genuine continuous Itô integral
-> `itoIntegralCLM_T gf'` (the L²-limit of the Riemann–Itô sums). The proof chain (Summit A):
+> `itoIntegralCLM gf'` (the L²-limit of the Riemann–Itô sums). The proof chain (Summit A):
 > `tendsto_weighted_qv` (weighted quadratic variation) + `tendsto_ito_remainder` (vanishing
-> Itô–Taylor remainder) + `itoIntegralCLM_T_of_bdd_cont` (Riemann↔CLM bridge), assembled in
+> Itô–Taylor remainder) + `itoIntegralCLM_of_bdd_cont` (Riemann↔CLM bridge), assembled in
 > `ito_formula_L2_bddDeriv`. Scope: `f ∈ C³` with bounded `f′,f″,f‴` — a faithful but
 > strictly C³-bounded specialization of the C² textbook statement (the gap to unrestricted
 > C² is Summit C localization, not yet formalized). All four Summit-A theorems are
@@ -3221,11 +3221,11 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > 4→5 full, 7→6 reduced.
 
 > **Engine→pricing coherence — deliberate stop (2026-06-03).** The continuous Itô
-> engine `itoIntegralCLM_T` has its flagship consumer (`itoIntegralCLM_T_brownian`:
+> engine `itoIntegralCLM` has its flagship consumer (`itoIntegralCLM_brownian`:
 > `∫₀ᵀ B dB = ½(B_T²−B₀²−T)` through the CLM), and the operational continuous-time
 > pricing result — the discounted GBM is a `Q`-martingale (`discountedGBM_isMartingale`,
 > via the Wald exponential) — is already proved (an AxiomAudit-pinned library theorem). The one *missing* link, identifying the
-> discounted price *with* the engine (`e^{−rt}S_t = S₀ + itoIntegralCLM_T(σ·e^{−r·}S_·)`),
+> discounted price *with* the engine (`e^{−rt}S_t = S₀ + itoIntegralCLM(σ·e^{−r·}S_·)`),
 > was scoped and **declined**: the GBM exponential is unbounded, so it is not a short
 > argument but a second keystone (~400 lines — a parallel clamp-truncation layer plus the
 > martingale-difference L² limit `∑σM_{t_k}ΔB → M_T−1`). It would yield an *alternative

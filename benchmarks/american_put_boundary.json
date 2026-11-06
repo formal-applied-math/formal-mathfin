@@ -12,6 +12,11 @@
       "metadata": {
         "alignment_source": "Robert Martin, AmericanPutConvexity, https://github.com/robertmartin8/AmericanPutConvexity/tree/9b2b208520341a63b64eef43c1ecb3c5708a8e63",
         "reference": "Robert Martin, Log-convexity of the exercise boundary of an American put option; source development https://github.com/robertmartin8/AmericanPutConvexity/tree/9b2b208520341a63b64eef43c1ecb3c5708a8e63; MathFin issue #175.",
+        "citations": [
+          {
+            "key": "MartinAmericanPutConvexity"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Derived from the concrete stopping-value definition, not from an assumed classical free-boundary solution or a convexity specification. Admissible rules are all stopping times of the constructed completed usual Brownian filtration with values pointwise bounded by the horizon; AEHorizonValue proves equality with the value and threshold obtained from extended stopping times bounded by the horizon only almost surely. The value uses GBM with drift r-q and discount rate r. The proof derives the normalized boundary and its line-interval property using a straight-line comparison, a parabolic three-point argument and a terminal barrier, then proves geometric convexity and rescales to physical units. Covers q=0 and q=r as well as 0<q<r, only at positive time-to-expiry. Does not assert universality over arbitrary probability-space representations, C2 regularity, strict log-convexity, or a result for q>r.",
@@ -33,6 +38,11 @@
       "metadata": {
         "alignment_source": "Robert Martin, AmericanPutConvexity, https://github.com/robertmartin8/AmericanPutConvexity/tree/9b2b208520341a63b64eef43c1ecb3c5708a8e63",
         "reference": "Robert Martin, Log-convexity of the exercise boundary of an American put option; source development https://github.com/robertmartin8/AmericanPutConvexity/tree/9b2b208520341a63b64eef43c1ecb3c5708a8e63; MathFin issue #175.",
+        "citations": [
+          {
+            "key": "MartinAmericanPutConvexity"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Derived for the same actual stopping boundary as the logarithmic-convexity entry. The proof first obtains nonstrict convexity of the logarithmic boundary using only its nonincrease. A terminal barrier excludes a flat tail, so convexity and nonincrease imply strict decrease; strict convexity of the exponential then yields strict convexity of the stock-price boundary. The physical-unit theorem assumes only K>0, r>0, sigma>0 and 0<=q<=r. Its domain is positive time-to-expiry. No boundary-smoothness premise is imposed, and no classical second-derivative or q>r conclusion is claimed.",
@@ -54,6 +64,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "N. Ju and R. Zhong, \"An approximate formula for pricing American options\", Journal of Derivatives 7(2) (1999), 31-40; M. Li, \"Analytical approximations for the critical stock prices of American options: a performance comparison\", MPRA Paper 15018 (2009), the restatement of the formulas used here.",
+        "citations": [
+          {
+            "key": "JuZhong1999"
+          },
+          {
+            "key": "Li2009"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, identically in the critical price S* and spot S, for every sigma != 0, T != 0 and r != 0. Pure algebra: alpha*(X/hA) = (alpha*X)/hA holds in Lean even when hA = 0, so no hypothesis on hA or on 1 - chi is needed. The statement is an identity between two Lean transcriptions of the Ju-Zhong formulas (juValueRaw, juValue); it is not tied to an American option price or to QuantLib's code, the formulas are transcribed rather than derived, and nothing is stated at r = 0. Lives in MathFin/BlackScholes/JuZhongZeroRateLimit.lean. Axioms-clean.",
@@ -71,6 +89,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "N. Ju and R. Zhong, \"An approximate formula for pricing American options\", Journal of Derivatives 7(2) (1999), 31-40; M. Li, \"Analytical approximations for the critical stock prices of American options: a performance comparison\", MPRA Paper 15018 (2009), the restatement of the formulas used here.",
+        "citations": [
+          {
+            "key": "JuZhong1999"
+          },
+          {
+            "key": "Li2009"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, conditional on continuity of the critical price at 0+ with a positive limit S0 (hSk, hS0), and on the two side conditions hA(0, S0) != 0 and 1 - chi(0, S0, S) != 0 (hA0, hchi0 above), The critical price's existence, uniqueness and continuity (the BAW Newton fixed point) are not derived; Sk is an arbitrary input function, so the statement is about the two Lean transcriptions juValueRaw and juValue, not about American option prices. Lives in MathFin/BlackScholes/JuZhongZeroRateLimit.lean. Axioms-clean.",
@@ -88,6 +114,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Andersen, Lake & Offengenden, \"High-performance American option pricing\", Journal of Computational Finance (2016); the 0 < r, 0 <= q <= r cell of the expiry limit of the boundary (the other cells, including the r < 0, q < r double-boundary case, are treated in Andersen & Lake, \"Fast American Option Pricing: The Double-Boundary Case\" (2021) and are not covered here).",
+        "citations": [
+          {
+            "key": "AndersenLakeOffengenden2016"
+          },
+          {
+            "key": "AndersenLake2021"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, MathFin/BlackScholes/AmericanPut/Stopping/ActualBoundaryExpiryLimit.lean (tendsto_brownianUsualExerciseBoundary_expiry), a corollary composing the existing American-put boundary convexity stack's continuity-at-expiry result (canonicalStockBoundary_continuousAt) with its normalization lemmas. Covers only the cell 0 < r, 0 <= q <= r. Axioms-clean. LIMITS: only 0 < r, 0 <= q <= r; the q > r > 0, q < 0 and negative-rate cells (including the double-boundary case) are not treated.",
@@ -105,6 +139,15 @@
       "metadata": {
         "chapter": 9,
         "reference": "Healy, \"Pricing American options under negative rates\", arXiv:2109.15157, §5.1 (restates the fixed-point equations of Andersen, Lake & Offengenden, \"High-performance American option pricing\", Journal of Computational Finance (2016)).",
+        "citations": [
+          {
+            "key": "Healy2021",
+            "locator": "§5.1"
+          },
+          {
+            "key": "AndersenLakeOffengenden2016"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, MathFin/BlackScholes/AmericanQDPlusLimits.lean (tendsto_qdfpK12_endpoint), over an abstract boundary B rather than Andersen-Lake's specific boundary formula. The sibling integrands K3, ni, di have matching endpoint-limit theorems in the same file (tendsto_qdfpK3_endpoint, tendsto_qdfpNi_endpoint, tendsto_qdfpDi_endpoint), and each has an off-diagonal (b != B(tau)) counterpart tending to 0 or a step function instead. Axioms-clean. LIMITS: purely the one-sided limit of the printed quadrature integrand; no claim about the fixed-point iteration's convergence, the boundary B itself, or American-option pricing accuracy.",
@@ -122,6 +165,15 @@
       "metadata": {
         "chapter": 9,
         "reference": "Healy, \"Pricing American options under negative rates\", arXiv:2109.15157, §5.1 (restates the fixed-point equations of Andersen, Lake & Offengenden, \"High-performance American option pricing\", Journal of Computational Finance (2016)).",
+        "citations": [
+          {
+            "key": "Healy2021",
+            "locator": "§5.1"
+          },
+          {
+            "key": "AndersenLakeOffengenden2016"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, MathFin/BlackScholes/AmericanQDPlusLimits.lean (tendsto_qdfpK12_endpoint_holder, not_tendsto_qdfpK12_endpoint_holder), bundled here as a conjunction of the two theorems for a single benchmark entry. The continuous boundary B(s) = b*exp(-c*sqrt(tau-s)) is an explicit counterexample, not a generic continuous boundary; the claim is only that continuity alone does not pin down the differentiable-case endpoint value. Axioms-clean.",
@@ -139,6 +191,12 @@
       "metadata": {
         "alignment_source": "MathFin",
         "reference": "Verification theorem for optimal stopping (Peskir and Shiryaev, Optimal Stopping and Free-Boundary Problems, Ch. I): the stopped value process of an optimal rule is a martingale; MathFin values-review backlog item 1.",
+        "citations": [
+          {
+            "key": "PeskirShiryaev2006",
+            "locator": "Ch. I"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "The reward process W and the parameters K, r, q, sigma, S are arbitrary: only the contact identity U(theta) = putReward at theta is used. The forward direction is the ordered optional-sampling argument (every earlier bounded rule has the same mean, then pasting two observation times on a past event gives the set-integral criterion for a martingale); the reverse direction is bounded continuous-path optional stopping for a martingale. Boundedness and path continuity of U are required by both directions; dominating the reward by U is not."

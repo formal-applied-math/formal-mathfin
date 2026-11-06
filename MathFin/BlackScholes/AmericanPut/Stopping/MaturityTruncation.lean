@@ -8,11 +8,30 @@ module
 public import MathFin.BlackScholes.AmericanPut.Stopping.AmericanValue
 public import MathFin.BlackScholes.AmericanPut.Stopping.LocalizationTimes
 
-/-! # Stability of stopping rewards under small maturity changes 
-## Result
+/-!
+# Stability of stopping rewards under small maturity changes
 
-Public entry points include `StoppingRule.truncate`, `continuous_reward_truncation`,
-`putReward_time_continuous`, `expectedReward_truncate_tendsto`.
+## Main definitions
+
+* `StoppingRule.truncate`: the rule `θ` capped at the new horizon `U`, stopping at
+  `min (θ.time ω) U`.
+
+## Main results
+
+* `continuous_reward_truncation`: for continuous `f` and maturities `Tn → T` with `s n ≤ Tn n`,
+  `f (s n) - f (min (s n) T)` tends to `0`.
+* `putReward_time_continuous`: for continuous paths, the put reward at a constant time is
+  continuous in that time.
+* `expectedReward_truncate_tendsto`: for `0 ≤ K`, `0 ≤ r`, `0 ≤ S`, continuous jointly measurable
+  paths, maturities `Tn → T` and rules `θ n` for `Tn n`, the expected reward of `θ n` minus that
+  of its truncation to `T` tends to `0`.
+* `expectedReward_fixed_truncate_tendsto`: under the same hypotheses, for a fixed rule `θ` for
+  `T`, the expected reward of its truncations to `Tn n` converges to that of `θ`.
+
+## Tags
+
+maturity change, truncated stopping rule, reward continuity, expected reward, horizon, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

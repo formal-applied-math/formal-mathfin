@@ -39,21 +39,38 @@ The finite weighted sum `spectralRiskFinite s φ Q = ∑ᵢ φᵢ Qᵢ` carries 
 invariance, monotonicity and convex combinations in the weights. With `Qₖ = ES_{αₖ}(X)` it is the
 mixture of expected shortfalls above.
 
+## Main definitions
+
+* `spectralRiskMeasure`: the spectral risk measure `ρ_φ(X) = ∫₀¹ φ(u) · VaR_u(X) du` with
+  spectrum `φ`.
+* `esSpectrum`: the expected-shortfall spectrum `(1 − α)⁻¹ 𝟙_{(α, 1)}`, uniform weight on the
+  levels above `α`.
+* `spectralRiskFinite`: the finite spectral sum `∑ᵢ φᵢ Qᵢ` of values `Q` with weights `φ`.
+
 ## Main results
 
-* `spectralRiskFinite`, `spectralRisk_translation`, `spectralRisk_mono`,
+* `spectralRisk_translation`, `spectralRisk_mono`,
   `spectralRisk_convex_combination_normalized`, `spectralRisk_convex_combination`: the finite
   weighted sum and its algebra.
 * `isCoherentRiskMeasure_spectralRiskFinite_expectedShortfall`: a convex combination of expected
   shortfalls is a coherent risk measure.
 * `spectralRiskFinite_expectedShortfall_isLUB_representingSet`: on a finite space the mixture is
   the supremum of expected loss over its representing set.
-* `spectralRiskMeasure`, `esSpectrum`.
 * `spectralRiskMeasure_one`: the constant spectrum gives the mean.
 * `spectralRiskMeasure_esSpectrum`: the expected-shortfall spectrum gives expected shortfall.
 * `spectralRiskMeasure_sum_esSpectrum`: a step spectrum gives the mixture of expected shortfalls.
 * `isCoherentRiskMeasure_spectralRiskMeasure_sum_esSpectrum`: step-spectrum spectral risk
   measures are coherent.
+
+## References
+
+* [C. Acerbi, *Spectral measures of risk: A coherent representation of subjective risk
+  aversion*][Acerbi2002], Theorem 4.1
+
+## Tags
+
+spectral risk measure, Acerbi, risk aversion spectrum, expected shortfall mixture,
+coherent risk measure, quantile weighting, MSC 91G70, JEL G32
 -/
 
 @[expose] public section

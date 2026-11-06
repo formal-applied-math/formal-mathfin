@@ -59,6 +59,31 @@ instance of `WienerIntegralL2.covariance_increment_aux` — the single
 shared increment-covariance lemma. Unifying onto the package's
 `SimpleProcess`/`L2Predictable` remains deferred to a structural pass of the
 simple-process layer.
+
+## Main results
+
+* `adapted_indepFun_increment`: an `𝓕_{t₀}`-measurable integrand is independent of the forward
+  increment `B_{t₁} − B_{t₀}`.
+* `integral_adapted_mul_increment`: for `φ` adapted to `𝓕_{t₀}`,
+  `E[φ · (B_{t₁} − B_{t₀})] = 0`.
+* `integral_adapted_sq_mul_increment_sq`: for `φ` adapted to `𝓕_{t₀}`,
+  `E[φ² · (B_{t₁} − B_{t₀})²] = E[φ²] · (t₁ − t₀)`.
+* `memLp_adapted_mul_increment`: for `φ` adapted to `𝓕_{t₀}` and in `L²`,
+  `φ · (B_{t₁} − B_{t₀})` is in `L²`.
+* `integral_cross_increment_bilinear_eq_zero`: for adapted integrand families `φ`, `ψ` and
+  `j < k`, `E[(φⱼ ΔBⱼ)(ψₖ ΔBₖ)] = 0`.
+* `ito_isometry_discrete_bilinear`: `E[(Σₖ φₖ ΔBₖ)(Σₖ ψₖ ΔBₖ)] = Σₖ E[φₖ ψₖ] (t_{k+1} − t_k)`.
+* `ito_isometry_discrete`: `E[(Σₖ φₖ ΔBₖ)²] = Σₖ E[φₖ²] (t_{k+1} − t_k)` for adapted `L²`
+  integrand families.
+* `ito_isometry_brownian_self`: the discrete isometry for `φₖ = B(tₖ)`, with only measurability
+  hypotheses.
+* `rect_increment_pairing`: for `f` `𝓕_s`-measurable and `g` `𝓕_{s'}`-measurable, both bounded,
+  `E[f (B_t − B_s) · g (B_{t'} − B_{s'})] = E[f g] · vol((s,t] ∩ (s',t'])`.
+
+## Tags
+
+Itô isometry, adapted integrand, martingale difference, independent increments, stochastic integral,
+Wiener integral, MSC 60H05, MSC 60J65, MSC 60G44
 -/
 
 @[expose] public section
@@ -296,7 +321,7 @@ the isometry kernel (`integral_adapted_mul_increment_mul_increment`). -/
 
 /-- Integrability of `h · ΔB · ΔB'` for `h` bounded (the products that appear
 when splitting the rectangle pairing). -/
-private lemma integrable_bdd_two_increment (hB : IsPreBrownianReal B μ)
+lemma integrable_bdd_two_increment (hB : IsPreBrownianReal B μ)
     {h : Ω → ℝ} (hhm : Measurable h)
     {C : ℝ} (hhb : ∀ ω, |h ω| ≤ C) (a b c d : ℝ≥0) :
     Integrable (fun ω ↦ h ω * ((B b ω - B a ω) * (B d ω - B c ω))) μ := by
@@ -332,7 +357,7 @@ theorem integral_adapted_mul_increment_mul_increment
       (Filter.Eventually.of_forall fun ω ↦ by ring)
 
 /-- Pairing identity, oriented case `s ≤ s'`. -/
-private lemma rect_increment_pairing_aux
+lemma integral_mul_increment_mul_increment_eq_of_le
     (hF : IsFilteredPreBrownian B 𝓕 μ) {f g : Ω → ℝ} {s t s' t' : ℝ≥0}
     (hf : Measurable[𝓕 s] f) (hg : Measurable[𝓕 s'] g)
     {Cf Cg : ℝ} (hfb : ∀ ω, |f ω| ≤ Cf) (hgb : ∀ ω, |g ω| ≤ Cg)
@@ -409,11 +434,11 @@ theorem rect_increment_pairing
     ∫ ω, (f ω * (B t ω - B s ω)) * (g ω * (B t' ω - B s' ω)) ∂μ =
       (∫ ω, f ω * g ω ∂μ) * max 0 ((min (t : ℝ) t') - max (s : ℝ) s') := by
   rcases le_total s s' with h | h
-  · exact rect_increment_pairing_aux hF hf hg hfb hgb hst hst' h
+  · exact integral_mul_increment_mul_increment_eq_of_le hF hf hg hfb hgb hst hst' h
   · rw [show (∫ ω, (f ω * (B t ω - B s ω)) * (g ω * (B t' ω - B s' ω)) ∂μ)
           = ∫ ω, (g ω * (B t' ω - B s' ω)) * (f ω * (B t ω - B s ω)) ∂μ from
         integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by ring),
-        rect_increment_pairing_aux hF hg hf hgb hfb hst' hst h]
+        integral_mul_increment_mul_increment_eq_of_le hF hg hf hgb hfb hst' hst h]
     congr 1
     · exact integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by ring)
     · rw [min_comm (t' : ℝ) t, max_comm (s' : ℝ) s]

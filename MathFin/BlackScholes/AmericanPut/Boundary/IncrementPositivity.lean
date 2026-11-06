@@ -16,10 +16,19 @@ flat boundary tail, this supplies a positive seed and then positivity at every
 interior point at each later time. Smooth fit still forces a zero derivative
 at any boundary shared by the two time slices.
 
-## Result
+## Main results
 
-Public entry points include `incrementGauge_pos_above_strike`, `incrementGauge_pos_on_flat_tail`,
-`incrementGauge_fit_of_same_boundary`.
+* `incrementGauge_pos_above_strike`: for a `DividendPutSolution`, `δ > 0`, `x > 0` and `t > 0`,
+  `incrementGauge p k h δ x t` is strictly positive.
+* `incrementGauge_pos_on_flat_tail`: if `b` is constant on `[A, ∞)` with `A > 0`, then
+  `incrementGauge p k h δ x t > 0` for `δ > 0`, `x > b A` and `t > A`.
+* `incrementGauge_fit_of_same_boundary`: if `b (t + δ) = b t` with `0 ≤ δ` and `t > 0`, then
+  `incrementGauge p k h δ` vanishes at `b t` and has zero spatial derivative there.
+
+## Tags
+
+time increment, strict positivity, flat tail, smooth fit, price increment, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

@@ -5,6 +5,7 @@ Authors: Robert Martin
 -/
 module
 
+public import MathFin.Init
 public import Mathlib.Analysis.Convex.Deriv
 
 /-! # Right derivative trace of a convex function
@@ -12,9 +13,14 @@ public import Mathlib.Analysis.Convex.Deriv
 The derivative is squeezed between a boundary secant and a secant whose
 endpoints both approach the boundary. No second derivative is required.
 
-## Result
+## Main results
 
-Public entry points include `convex_deriv_tendsto_right`.
+* `convex_deriv_tendsto_right`: if `f` is convex on `[b, ∞)`, has right derivative `d` at `b`
+  and is differentiable on `(b, ∞)`, then `deriv f x → d` as `x ↓ b`.
+
+## Tags
+
+convex function, right derivative, secant slopes, derivative limit, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

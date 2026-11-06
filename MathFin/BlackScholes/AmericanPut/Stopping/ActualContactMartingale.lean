@@ -13,10 +13,20 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.OptimalStoppedMartingale
 These are properties of the constructed stopping value. Classical regularity,
 smooth fit and the PDE are not assumptions.
 
-## Result
+## Main results
 
-Public entry points include `brownianUsualActualContactRule_value_preserving`,
-`brownianUsualActualContactRule_martingale`, `canonicalPrice_contact_meanValue`.
+* `brownianUsualActualContactRule_value_preserving`: for `0 ≤ k`, the expected discounted actual
+  price at the first-contact time equals its expected initial value.
+* `brownianUsualActualContactRule_martingale`: for `0 ≤ k`, the discounted actual price stopped
+  at the first-contact time is a martingale for the usual Brownian filtration.
+* `canonicalPrice_contact_meanValue`: for `0 ≤ k` and any stopping rule `η` on the usual
+  Brownian space, the expected discounted actual price at `η` capped at first contact equals
+  `canonicalPrice k h x T`.
+
+## Tags
+
+first contact, stopped martingale, mean-value property, optimal stopping, American put, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

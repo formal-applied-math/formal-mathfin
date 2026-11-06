@@ -27,10 +27,20 @@ This file used to duplicate the MGF computation. Following the principle
 "one theorem, many corollaries", we now delegate `secondMoment_terminal` to
 `nthMoment_terminal` and only do the n=2 algebraic simplification here.
 
-Results:
+## Main results
 
 * `secondMoment_terminal`: `E_Q[S_T²] = S_0² · exp(2rT + σ²T)`.
 * `variance_terminal`: `Var_Q[S_T] = S_0² · exp(2rT) · (exp(σ²T) − 1)`.
+
+## References
+
+* [K. Bodie and Marcus, *Investments*][BodieKaneMarcus], Ch 21
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], Ch 14.7
+
+## Tags
+
+lognormal distribution, second moment, variance of terminal price, geometric Brownian motion,
+risk-neutral moments, MSC 60E05, MSC 91G20
 -/
 
 @[expose] public section

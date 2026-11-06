@@ -53,6 +53,46 @@ function layer the upstream CLT is itself built on: `charFun`, `charFun_conv`,
 `charFun_dirac`, `charFun_gaussianReal`, Lévy continuity
 (`ProbabilityMeasure.tendsto_of_tendsto_charFun`), and `tendsto_one_add_pow_exp_of_tendsto`
 (the same `(1+aₙ)ⁿ → exp` lemma Mathlib's own `Poisson/PoissonLimitThm` uses).
+
+## Main definitions
+
+* `crrStepCharFun`: the characteristic function of one CRR risk-neutral log-return increment.
+* `convPow`: the `n`-fold additive convolution power of a measure on `ℝ`.
+* `crrStepMeasure`: the law of one CRR risk-neutral log-return increment, mass `pₙ` at `+σ√Δt`
+  and `1 − pₙ` at `−σ√Δt`.
+* `crrRowProbMeasure`: the `n`-step CRR log-return law, the `n`-fold convolution of
+  `crrStepMeasure`, as a `ProbabilityMeasure`.
+* `bsLimitProbMeasure`: the Gaussian `N((r − σ²/2)T, σ²T)` as a `ProbabilityMeasure`.
+
+## Main results
+
+* `crr_charFun_pow_tendsto`: for `σ, T > 0`, `crrStepCharFun r σ T n t ^ n` converges to
+  `exp(i t (r − σ²/2) T − ½ t² σ² T)`; `crr_charFun_pow_tendsto_gaussian` states the limit as
+  the characteristic function of the Gaussian.
+* `charFun_convPow`: the characteristic function of `convPow ν n` is the `n`-th power of that
+  of `ν`.
+* `crr_tendsto_gaussian_inDistribution`: for `σ, T > 0` and `crrProb` a probability for every
+  `n`, the `n`-step CRR log-return laws converge weakly to the Gaussian
+  `N((r − σ²/2)T, σ²T)`.
+* `binomialPrice_eq_integral_convPow`: for `0 ≤ crrProb ≤ 1` and `S > 0`, the `k`-step binomial
+  price of a measurable payoff bounded on `(0, ∞)` is the discounted integral of the payoff at
+  `S · eˣ` against `convPow (crrStepMeasure …) k`.
+* `binomialPrice_call_tendsto_bs`: for `σ, T, S₀ > 0` and no-arbitrage at every step, the `n`-step
+  CRR call price tends to `e^{−rT} · E[(K − S₀eˣ)₊] + (S₀ − K e^{−rT})`, the expectation under
+  `N((r − σ²/2)T, σ²T)`.
+
+## References
+
+* [J. C. Cox, S. A. Ross and M. Rubinstein, *Option pricing: a simplified
+  approach*][CoxRossRubinstein1979]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 21.1
+* [S. E. Shreve, *Stochastic Calculus for Finance I: The Binomial Asset Pricing Model*][ShreveSCFI],
+  3.2
+
+## Tags
+
+Cox–Ross–Rubinstein, characteristic function, Lévy continuity, central limit theorem,
+binomial to Black–Scholes, triangular array, MSC 91G20, MSC 60F05, JEL G13
 -/
 
 @[expose] public section
@@ -106,11 +146,6 @@ lemma tendsto_one_sub_cos_div_sq :
 
 /-! ### The per-step CRR characteristic function -/
 
-/-- Real → complex exponential: `exp(↑x · I) = cos x + (sin x) i`. -/
-private lemma cexp_ofReal_mul_I (x : ℝ) :
-    Complex.exp (↑x * I) = ↑(Real.cos x) + ↑(Real.sin x) * I := by
-  rw [Complex.exp_mul_I, ← Complex.ofReal_cos, ← Complex.ofReal_sin]
-
 /-- The characteristic function of one CRR risk-neutral log-return increment,
 evaluated at `t`: `φₙ(t) = pₙ e^{i (σ√Δt) t} + (1−pₙ) e^{i (−σ√Δt) t}`,
 with `Δt = T/n` and `pₙ = crrProb`. -/
@@ -128,7 +163,8 @@ lemma crrStepCharFun_eq (r σ T : ℝ) (n : ℕ) (t : ℝ) :
   unfold crrStepCharFun
   rw [mul_comm I (↑(σ * Real.sqrt (T / n) * t)),
       mul_comm I (↑(-(σ * Real.sqrt (T / n)) * t)),
-      cexp_ofReal_mul_I, cexp_ofReal_mul_I,
+      Complex.exp_mul_I, Complex.exp_mul_I, ← Complex.ofReal_cos, ← Complex.ofReal_cos,
+      ← Complex.ofReal_sin, ← Complex.ofReal_sin,
       show (-(σ * Real.sqrt (T / n)) * t) = -(σ * Real.sqrt (T / n) * t) from by ring,
       Real.cos_neg, Real.sin_neg]
   push_cast
@@ -140,7 +176,7 @@ variable {σ T r : ℝ}
 
 /-- For `t ≠ 0`, the rescaled angle `θₙ = σ √(T/n) · t` tends to `0` through
 nonzero values — so it can feed the punctured-neighbourhood trig limits. -/
-private lemma tendsto_crrAngle_punctured (hσ : 0 < σ) (hT : 0 < T) {t : ℝ} (ht : t ≠ 0) :
+lemma tendsto_crrAngle_punctured (hσ : 0 < σ) (hT : 0 < T) {t : ℝ} (ht : t ≠ 0) :
     Tendsto (fun n : ℕ ↦ σ * Real.sqrt (T / n) * t) atTop (𝓝[≠] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
   · have h0 : Tendsto (fun n : ℕ ↦ Real.sqrt (T / n)) atTop (𝓝 0) := by
@@ -155,7 +191,7 @@ private lemma tendsto_crrAngle_punctured (hσ : 0 < σ) (hT : 0 < T) {t : ℝ} (
 
 /-- **Real part of `n(φₙ−1)`**: `n (cos θₙ − 1) → −½ σ² t² T`, with
 `θₙ = σ√(T/n) t`. Uses `n θₙ² = σ² t² T` (exact, `n ≥ 1`) and `(1−cos u)/u² → ½`. -/
-private lemma tendsto_n_mul_cos_sub_one (hσ : 0 < σ) (hT : 0 < T) {t : ℝ} (ht : t ≠ 0) :
+lemma tendsto_n_mul_cos_sub_one (hσ : 0 < σ) (hT : 0 < T) {t : ℝ} (ht : t ≠ 0) :
     Tendsto (fun n : ℕ ↦ (n : ℝ) * (Real.cos (σ * Real.sqrt (T / n) * t) - 1))
       atTop (𝓝 (-(σ ^ 2 * t ^ 2 * T) / 2)) := by
   have hθ := tendsto_crrAngle_punctured hσ hT ht

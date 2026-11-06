@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -18,6 +19,25 @@ For `(X, Y)` jointly Gaussian with means `μ_X, μ_Y`, `Var Y = σ_Y² > 0` and
 The hypotheses do not ask that `Var X = σ_X²` or `|ρ| < 1`: only the covariance of `X` with `Y`
 enters. The standard bivariate normal law of `Foundations/BivariateNormalCDF.lean` satisfies them
 (`bivariateGaussianHyp_bivariateNormalLaw`), giving `E[X | Y] = r Y` there.
+
+## Main definitions
+
+* `BivariateGaussianHyp`: the hypotheses of the conditional-expectation formula for a pair
+  `(X, Y)` with means `μ_X, μ_Y`, `Var Y = σ_Y² > 0` and `Cov(X, Y) = ρ σ_X σ_Y`.
+
+## Main results
+
+* `conditional_expectation_formula`: under `BivariateGaussianHyp`,
+  `E[X | σ(Y)] = μ_X + (ρ σ_X / σ_Y) (Y − μ_Y)` almost surely.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem B.1.3(2)
+
+## Tags
+
+conditional expectation, jointly Gaussian, regression coefficient, correlation, bivariate normal,
+MSC 60E05, MSC 60G15
 -/
 
 @[expose] public section

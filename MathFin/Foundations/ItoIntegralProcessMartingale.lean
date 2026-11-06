@@ -17,7 +17,28 @@ L²-continuous. The conditional martingale-difference `condExp_adapted_mul_incre
 `μ[φ·ΔB | 𝓕_{t₀}] = 0` as a reusable lemma; the martingale property itself is
 established directly, applying that same set-integral characterisation per
 `𝓕_s`-set. Pathwise continuity and general (non-simple) integrands are later
-milestones. -/
+milestones.
+
+## Main results
+
+* `itoSimpleProcess_adaptedAt`: `(V●B)_t` is `𝓕_t`-measurable.
+* `condExp_adapted_mul_increment`: for a bounded `φ` adapted at `t₀ ≤ t₁`, the conditional
+  expectation of `φ · (B_{t₁} − B_{t₀})` given `𝓕_{t₀}` vanishes.
+* `itoSimpleProcess_isMartingale`: `t ↦ (V●B)_t` is a martingale, `μ[(V●B)_j | 𝓕_i] = (V●B)_i`
+  for `i ≤ j`.
+* `itoSimpleProcess_isometry_time`: `E[(V●B)_t²]` is the predictable-rectangle double sum with
+  every interval endpoint truncated at `t`.
+* `itoSimpleProcessLp_l2_continuous`: `t ↦ (V●B)_t` is continuous into `Lp ℝ 2 μ`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Ch 7
+
+## Tags
+
+Itô integral martingale, martingale difference, simple integrand, stochastic integral,
+L² continuity, MSC 60G44, MSC 60H05
+-/
 
 @[expose] public section
 
@@ -107,7 +128,7 @@ omit hB in
 times `i` and `j` of the single-interval contribution `t ↦ B_{v∧t} − B_{u∧t}` is
 the Brownian increment over `[u∨i, (u∨i)∨(v∧j)]` — so it is a martingale
 difference past `𝓕_i`. (`B` is an arbitrary path here; pure `min`/`max` algebra.) -/
-private lemma clamped_increment_eq {u v i j : ℝ≥0} (huv : u ≤ v) (hij : i ≤ j)
+lemma clamped_increment_eq {u v i j : ℝ≥0} (huv : u ≤ v) (hij : i ≤ j)
     (ω : Ω) :
     (B (min v j) ω - B (min u j) ω) - (B (min v i) ω - B (min u i) ω)
       = B (max (max u i) (min v j)) ω - B (max u i) ω := by

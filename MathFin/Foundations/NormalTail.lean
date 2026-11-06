@@ -12,6 +12,17 @@ public import MathFin.Foundations.GaussianPartialMoments
 
 Three facts about `Φ` and the standard normal density `φ` used to bound option prices far from
 the money: `Φ(x) → 0` as `x → −∞`, the Mills bound `−x·Φ(x) ≤ φ(x)`, and `φ ≤ 1`.
+
+## Main results
+
+* `tendsto_Phi_atBot`, `tendsto_Phi_atTop`: `Φ(x) → 0` as `x → −∞` and `Φ(x) → 1` as `x → +∞`.
+* `neg_mul_Phi_le_gaussianPDFReal`: `−x·Φ(x) ≤ φ(x)` for all `x`.
+* `gaussianPDFReal_zero_one_le_one`: the standard normal density is at most `1`.
+
+## Tags
+
+Mills ratio, normal tail bound, Gaussian tail, deep out-of-the-money option,
+standard normal density, MSC 60E15, MSC 91G20
 -/
 
 @[expose] public section

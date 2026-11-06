@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-! # Localisation in the sample space
@@ -31,6 +32,28 @@ on all of `Ω`. This file collects what that needs, without stopping times.
 * **Reading a process at a random level** (`measurableSet_forall_abs_le`,
   `measurable_apply_countable`): for continuous paths "bounded by `R` on `[0, T]`" is an event, and
   `ω ↦ f (n ω) ω` is measurable for a measurable `n` with countably many values.
+
+## Main results
+
+* `tendstoInMeasure_of_ae_eqOn`, `tendstoInMeasure_of_eqOn`: convergence in measure is local, on a
+  sequence of events whose complements have measure tending to `0`.
+* `ae_eq_of_tendstoInMeasure_of_eqOn`: two sequences converging in measure that agree on an event
+  have limits that agree almost everywhere on it.
+* `ae_forall_eq_of_continuousOn`: two processes with a.e. continuous paths on `[0, T]` that agree
+  a.e. at each time of `[0, T]` agree on all of `[0, T]` almost surely.
+* `ae_forall_eq_of_continuousOn_of_antitone`: the same on a shrinking family of events, up to a
+  random time.
+* `ae_forall_eq_of_tendstoInMeasure`: two such processes that are, at each time, limits in measure
+  of the same sequence are indistinguishable on `[0, T]`.
+* `measurableSet_forall_abs_le`: for a process with continuous paths, "stays in `[−R, R]` on
+  `[0, T]`" is an event.
+* `tendsto_measure_compl_abs_le`, `tendsto_measure_compl_abs_le_of_stronglyAdapted`: the measure
+  of the complement of `{∀ t ∈ [0, T], |X t| ≤ N}` tends to `0` as `N → ∞`.
+
+## Tags
+
+convergence in measure, localisation, continuous paths, indistinguishable processes, modification,
+sample space event, MSC 60G07, MSC 28A25
 -/
 
 @[expose] public section

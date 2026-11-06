@@ -15,9 +15,15 @@ but its value and spatial derivative vanish at the shared exercise boundary.
 The explicit terminal Hopf barrier contradicts this. Boundary time derivatives
 are not used.
 
-## Result
+## Main results
 
-Public entry points include `canonicalLogBoundary_no_flat_tail`.
+* `canonicalLogBoundary_no_flat_tail`: for `0 < k`, `0 ≤ h ≤ k` and `A > 0`, the actual log
+  boundary is not constant on `[A, ∞)`.
+
+## Tags
+
+flat tail, Hopf barrier, exercise boundary, boundary speed, American put, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

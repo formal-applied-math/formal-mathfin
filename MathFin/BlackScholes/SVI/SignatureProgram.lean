@@ -16,6 +16,27 @@ degree exactly `n` (`variationProgram_eval`), the characteristic sign-variation 
 `signatureTest` of each of the four specialised universal matrices (`signatureProgram_eval`), and
 their combination, which on the degree branch `n = (polynomial p).derivative.natDegree` evaluates
 to `matrixCountFour (polynomial p)` (`countProgram_eval`).
+
+## Main definitions
+
+* `symbolicCoeffList`: the coefficients of a parameter-ring polynomial from degree `n` down to `0`.
+* `variationProgram`: the sign program computing the sign variations of `Q` read at degree `n`.
+* `signatureProgram`: the sign program computing the signature test of the `i`-th universal
+  matrix at size `n`.
+* `countProgram`: the sign program combining the four signature tests as `a + b - c - d`.
+
+## Main results
+
+* `variationProgram_eval`: if the specialisation of `Q` at `p` has degree exactly `n`, the program
+  evaluates to its number of sign variations.
+* `signatureProgram_eval`: `signatureProgram n i` evaluates at `p` to `signatureTest` of the
+  specialised universal matrix.
+* `countProgram_eval`: at `n = (polynomial p).derivative.natDegree`, `countProgram n` evaluates at
+  `p` to `matrixCountFour (polynomial p)`.
+
+## Tags
+
+sign program, matrix signature, characteristic polynomial, Hermite matrices, SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

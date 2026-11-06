@@ -14,6 +14,24 @@ Part of the SVI polynomial-sign certificate (#174).
 The companion matrix `companion f n`, the Hermite matrix `hermite f q n` of traces of
 `q·Xⁱ⁺ʲ`, and the factor `leadingCoeff^38`, positive when the leading coefficient is nonzero, which
 clears every denominator for `n ≤ 9` and `q.natDegree ≤ 22` (`clearedHermite_eq_smul`).
+
+## Main definitions
+
+* `companion`: the companion matrix of `f` at size `n`, normalised by the leading coefficient.
+* `hermite`: the Hermite matrix of `f` with weight `q` at size `n`; entry `(i, j)` is
+  `∑ᵣ qᵣ·tr(Cⁱ⁺ʲ⁺ʳ)` for the companion matrix `C`.
+
+## Main results
+
+* `trace_companion_pow`: `tr(Cʳ) = leadingCoeff⁻¹ ^ r · tr(scaledCompanion ^ r)`.
+* `clear_scalar_power`: for `ℓ ≠ 0` and `r ≤ 38`, `ℓ^38 · (ℓ⁻¹)^r = ℓ^(38 - r)`.
+* `clearedHermite_eq_smul`: for `leadingCoeff ≠ 0`, `n ≤ 9` and `q.natDegree ≤ 22`,
+  `clearedHermite f q n = leadingCoeff^38 • hermite f q n`.
+* `clearing_factor_pos`: `0 < leadingCoeff^38` when the leading coefficient is nonzero.
+
+## Tags
+
+Hermite matrix, companion matrix, clearing denominators, SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

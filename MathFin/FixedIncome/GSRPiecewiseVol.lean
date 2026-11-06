@@ -53,10 +53,18 @@ of the solution of the GSR short-rate SDE (the SDE solution plus the time-order 
 modelling bridge, cited, not derived here. Everything downstream of the representation is
 derived.
 
+## Main definitions
+
+* `gsrSigma`: the two-piece piecewise-constant volatility, `σ₁` on `(-∞, T*]` and `σ₂` on
+  `(T*, ∞)`.
+* `gsrKernel`, `gsrKernelLp`: the Vasicek integrated kernel weighted by the piecewise volatility,
+  and the same kernel as an element of `L²((0, T])`.
+* `gsrBondV`: the closed-form variance `σ₁²·(F(T*) - F(0)) + σ₂²·(F(T) - F(T*))`.
+* `gsrBondVIoc`: the variance over a window `(a, T]`.
+* `gsrIntegratedRate`: the integrated short rate, defined by its Wiener representation.
+
 ## Main results
 
-* `gsrSigma`, `gsrKernel` — the two-piece volatility and the σ-weighted kernel.
-* `gsrBondV` — the closed-form variance `σ₁²·V(0,T*) + σ₂²·V(T*,T)`.
 * `gsrKernel_integral_sq_eq` — the core calculus fact: the kernel's squared `L²` norm
   over `(0,T]` equals `gsrBondV` (`κ > 0`, `0 ≤ T* ≤ T`).
 * `gsrIntegratedRate_hasLaw_gaussian` — the integrated short rate, in its Wiener
@@ -67,6 +75,17 @@ derived.
 * `gsrBondV_self`, `gsrIntegratedRate_self_ae` — **GSR with one volatility is Vasicek**: at
   `σ₁ = σ₂ = σ` the variance is `σ²·vasicekBondV` and the integrated GSR rate is almost surely
   the integrated Vasicek rate `vasicekIntegratedRate`.
+
+## References
+
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  §3.3
+* [The QuantLib contributors, *QuantLib*][QuantLib], Gsr model
+
+## Tags
+
+Gaussian short rate, GSR model, piecewise-constant volatility, Hull–White, Vasicek model,
+bond price, Wiener integral, MSC 91G30, MSC 60H05, JEL E43
 -/
 
 @[expose] public section

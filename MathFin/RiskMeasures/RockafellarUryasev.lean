@@ -41,15 +41,29 @@ The expected-shortfall integral is the standard-normal stop-loss transform
 `E[(Z − z)⁺] = ϕ(z) − z(1 − Φ(z))` (`integral_max_sub_mul_gaussianPDFReal`), built in
 `Foundations/GaussianPartialMoments` from the truncated first moment and the tail mass.
 
-## Results
+## Main definitions
 
-* `integral_shortfall_gaussian`: affine-loss expected shortfall closed form.
+* `ruObjective`: the Rockafellar–Uryasev objective `g(c) = c + E[(L − c)⁺] / (1 − α)` of a
+  Gaussian loss `L = μ + σ Z`.
+
+## Main results
+
+* `integral_shortfall_gaussian`: for `σ > 0`, the closed form of `E[(μ + σ Z − c)⁺]`.
 * `ruObjective_at_gaussianVaR`: `g(VaR_α) = CVaR_α` (the minimum value).
 * `gaussianCVaR_le_ruObjective`: `g(c) ≥ CVaR_α` for every `c` (minimality).
 * `gaussianCVaR_isLeast_ruObjective`: the packaged R-U theorem —
   `CVaR_α = min_c g(c)`, attained at `VaR_α`.
 * `gaussianCVaR_eq_VaR_plus_tail_term`: the algebraic additive decomposition
   `CVaR = VaR + σ·(ϕ(z)/(1−α) − z)` (the original scope of this file).
+
+## References
+
+* [Rockafellar and Uryasev (2000)][RockafellarUryasev2000]
+
+## Tags
+
+Rockafellar-Uryasev, CVaR minimization, variational characterization, Gaussian CVaR,
+stop-loss transform, expected shortfall, MSC 91G70, MSC 90C25, JEL G32
 -/
 
 @[expose] public section

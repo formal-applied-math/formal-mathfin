@@ -26,6 +26,35 @@ For continuous paths the exit times escape to infinity (each path is bounded on 
 `[0,T]`), so `exitTime N ↑ ⊤` as `N → ∞` — a genuine `IsLocalizingSequence`. This is the gating
 piece for the unrestricted-`C³` Itô formula (Summit C): it localizes the bounded-derivative
 process formula to general `C³` `f`.
+
+## Main definitions
+
+* `exitTime`: the exit time `inf {t : N ≤ |B_t ω|}` of a process from `(−N, N)`, valued in
+  `WithTop ℝ≥0` (`⊤` if `|B|` never reaches `N`).
+
+## Main results
+
+* `exitTime_le_iff`: for a process with continuous paths, `exitTime B N ω ≤ i` iff
+  `|B_s ω| ≥ N` for some `s ≤ i`.
+* `isStoppingTime_exitTime_of_measurable`, `isStoppingTime_exitTime`: for a continuous adapted
+  process the exit time is a stopping time, and for a continuous process with measurable sections
+  it is one for the raw Brownian filtration.
+* `exitTime_mono`, `exitTime_tendsto_top`: exit times increase with `N` and tend to `⊤`.
+* `isLocalizingSequence_exitTime_of_measurable`, `isLocalizingSequence_exitTime`: the exit times
+  form a localizing sequence.
+* `abs_le_of_le_exitTime`: up to a positive exit time the path stays in `[−N, N]`.
+* `martingale_stoppedProcess_of_ae_eq`: if an adapted right-continuous `B` agrees almost surely
+  with a right-continuous martingale `M` on `[0, τ]` when `τ > 0`, then `B` stopped at `τ` (zeroed
+  on `{τ = 0}`) is a martingale.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Prop. 4.3.6
+
+## Tags
+
+exit time, stopping time, localizing sequence, localization, hitting time, Itô formula, MSC 60G40,
+MSC 60J65
 -/
 
 @[expose] public section
@@ -46,7 +75,7 @@ noncomputable def exitTime (B : ℝ≥0 → Ω → ℝ) (N : ℕ) : Ω → WithT
 
 /-- A rational time `Real.toNNReal q ≤ i` within `δ` of any `s ≤ i` (approaching from below, so the
 constraint `≤ i` is automatic). The boundary case `s = 0` is handled by `q = 0`. -/
-private lemma exists_rat_time_below {i s : ℝ≥0} (hsi : s ≤ i) {δ : ℝ} (hδ : 0 < δ) :
+lemma exists_rat_time_below {i s : ℝ≥0} (hsi : s ≤ i) {δ : ℝ} (hδ : 0 < δ) :
     ∃ q : ℚ, Real.toNNReal q ≤ i ∧ dist (Real.toNNReal q) s < δ := by
   rcases eq_or_lt_of_le (zero_le: (0 : ℝ≥0) ≤ s) with hs0 | hs0
   · refine ⟨0, ?_, ?_⟩
@@ -155,7 +184,8 @@ theorem isStoppingTime_exitTime_of_measurable {𝓕 : Filtration ℝ≥0 mΩ}
 theorem isStoppingTime_exitTime (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (N : ℕ) :
     IsStoppingTime (ItoIntegralL2.natFiltration hBmeas) (exitTime B N) :=
-  isStoppingTime_exitTime_of_measurable (fun t ↦ (ItoIntegralL2.stronglyAdapted_natFiltration hBmeas t).measurable) hBcont N
+  isStoppingTime_exitTime_of_measurable
+      (fun t ↦ (ItoIntegralL2.stronglyAdapted_natFiltration hBmeas t).measurable) hBcont N
 
 /-- **The exit times increase with `N`** (the closed exterior shrinks, so the hit comes later or
 never): `N ≤ M → exitTime N ω ≤ exitTime M ω`, pointwise in `ω`. -/
@@ -209,7 +239,8 @@ theorem isLocalizingSequence_exitTime (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) :
     IsLocalizingSequence (augFiltration (μ := μ) hBmeas) (fun N ↦ exitTime B N) μ :=
   isLocalizingSequence_exitTime_of_measurable (fun t ↦
-    (ItoIntegralL2.stronglyAdapted_natFiltration hBmeas t).measurable.mono le_sup_left le_rfl) hBcont
+    (ItoIntegralL2.stronglyAdapted_natFiltration hBmeas t).measurable.mono le_sup_left le_rfl)
+        hBcont
 
 /-- **The path stays confined up to the exit time.** On `{s ≤ τ_N}` with `0 < s`, `|B_s| ≤ N`:
 for `u < s ≤ τ_N` the exit has not happened (`|B_u| < N`), and left-continuity carries the bound

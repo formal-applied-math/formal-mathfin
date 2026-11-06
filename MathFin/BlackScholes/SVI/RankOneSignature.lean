@@ -14,6 +14,22 @@ Part of the SVI polynomial-sign certificate (#174).
 
 `formSignature Q` is `sigPos Q − sigNeg Q`. If `Q x = a·(l x)²` for a nonzero linear form `l`, the
 signature is the sign of `a` (`formSignature_rankOne`).
+
+## Main definitions
+
+* `formSignature`: the signature `sigPos Q - sigNeg Q` of a real quadratic form.
+
+## Main results
+
+* `sigPos_eq_zero_of_nonpos`, `one_le_sigPos_of_pos`: `sigPos Q = 0` if `Q ≤ 0` everywhere, and
+  `1 ≤ sigPos Q` if `Q v > 0` for some `v`.
+* `sigPos_le_one_of_rankOne`: if `Q x = a * (l x)²` for a linear form `l`, then `sigPos Q ≤ 1`.
+* `formSignature_rankOne`: if `Q x = a * (l x)²` and `l v ≠ 0` for some `v`, then
+  `formSignature Q = sign a`, with `a = 0` allowed.
+
+## Tags
+
+rank-one quadratic form, signature of a form, SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

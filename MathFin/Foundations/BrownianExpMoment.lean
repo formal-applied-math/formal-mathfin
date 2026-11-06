@@ -25,6 +25,19 @@ These are the integrability base stones the exponential-growth Itô formula
 exponential moment, together with Tonelli, controls the `L²` norm of path
 integrals of exponential-growth integrands. `GaussianMoments` holds the
 *polynomial* moments; this file holds the exponential ones.
+
+## Main results
+
+* `integral_exp_mul_eval`: `∫ exp(c · B_s) ∂μ = exp(c² s / 2)` for a pre-Brownian motion `B`.
+* `integrable_exp_mul_eval`, `memLp_exp_mul_eval`: `exp(c · B_s)` is integrable and in `L²(μ)`.
+* `memLp_exp_incr`: `exp(c · (B_v − B_u))` is in `L²(μ)`.
+* `memLp_exp_abs_eval`, `integrable_exp_abs_eval`: `exp(c · |B_s|)` is in `L²(μ)` and integrable.
+* `integral_exp_abs_eval_le`: `∫ exp(c · |B_s|) ∂μ ≤ 2 · exp(c² s / 2)`.
+
+## Tags
+
+exponential moment, moment generating function, Gaussian marginal, lognormal, Brownian motion,
+MSC 60J65, MSC 60E10
 -/
 
 @[expose] public section
@@ -36,7 +49,7 @@ open scoped NNReal
 
 /-- Pointwise: `exp(c|x|) ≤ exp(cx) + exp(−cx)` (the absolute value picks the larger
 exponent; the other summand is nonnegative). -/
-private lemma exp_abs_le_add (c x : ℝ) :
+lemma exp_mul_abs_le_add (c x : ℝ) :
     Real.exp (c * |x|) ≤ Real.exp (c * x) + Real.exp (-c * x) := by
   rcases le_total 0 x with hx | hx
   · rw [abs_of_nonneg hx]; exact le_add_of_nonneg_right (Real.exp_nonneg _)
@@ -85,7 +98,7 @@ lemma memLp_exp_abs_eval (s : ℝ≥0) (c : ℝ) :
   simp only [Pi.add_apply]
   rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg (Real.exp_nonneg _),
     abs_of_nonneg (by positivity : (0 : ℝ) ≤ Real.exp (c * B s ω) + Real.exp (-c * B s ω))]
-  exact exp_abs_le_add c (B s ω)
+  exact exp_mul_abs_le_add c (B s ω)
 
 /-- `exp(c · (B_v − B_u)) ∈ L²(μ)`: an increment has a second exponential moment too.
 The increment is not a marginal, so the law transfer does not apply to it directly;
@@ -123,13 +136,13 @@ lemma integrable_exp_abs_eval (s : ℝ≥0) (c : ℝ) :
     ((Real.continuous_exp.comp (continuous_const.mul continuous_abs)).measurable.comp_aemeasurable
       (hB.hasLaw_eval s).aemeasurable).aestronglyMeasurable
     (ae_of_all _ fun ω ↦ by
-      rw [Real.norm_eq_abs, abs_of_nonneg (Real.exp_nonneg _)]; exact exp_abs_le_add c (B s ω))
+      rw [Real.norm_eq_abs, abs_of_nonneg (Real.exp_nonneg _)]; exact exp_mul_abs_le_add c (B s ω))
 
 /-- Uniform exponential-moment bound: `∫ exp(c · |B_s|) ∂μ ≤ 2 · exp(c² s / 2)`. -/
 lemma integral_exp_abs_eval_le (s : ℝ≥0) (c : ℝ) :
     ∫ ω, Real.exp (c * |B s ω|) ∂μ ≤ 2 * Real.exp (c ^ 2 * (s : ℝ) / 2) := by
   have hbnd : ∀ ω, Real.exp (c * |B s ω|)
-      ≤ Real.exp (c * B s ω) + Real.exp (-c * B s ω) := fun ω ↦ exp_abs_le_add c (B s ω)
+      ≤ Real.exp (c * B s ω) + Real.exp (-c * B s ω) := fun ω ↦ exp_mul_abs_le_add c (B s ω)
   have hlhs_int : Integrable (fun ω ↦ Real.exp (c * |B s ω|)) μ := integrable_exp_abs_eval hB s c
   have hsum_int : Integrable (fun ω ↦ Real.exp (c * B s ω) + Real.exp (-c * B s ω)) μ :=
     (integrable_exp_mul_eval hB s c).add (integrable_exp_mul_eval hB s (-c))

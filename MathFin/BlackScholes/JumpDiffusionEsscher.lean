@@ -53,6 +53,44 @@ equivalent to it: for `σ ≠ 0`, when the physical drift is not already compens
 measure's law is another, and the two price some call differently (`exists_call_esscher_ne_merton`,
 under its moment conditions). Without a Gaussian part (`σ = 0`) the existence of an Esscher
 parameter is not proved.
+
+## Main definitions
+
+* `jumpMoment`: the exponential moment `m(θ) = ∫ e^{θx} dν` of a jump law, as a nonnegative
+  real (`0` where the integral is infinite).
+
+## Main results
+
+* `jumpDiffusionIncrementLaw_tilted`: for `θ` in the interior of the exponentially integrable
+  set of `ν`, the Esscher transform of the log-return law is the log-return law with drift
+  `b + θσ²`, rate `Λ m(θ)` and jump law `ν.tilted (θ * ·)`.
+* `smul_tilted_eq_withDensity`: tilting multiplies the Lévy measure by `e^{θx}`.
+* `compensated_tilted_iff`: the tilted characteristics are at their compensated drift iff
+  `κ(θ + 1) − κ(θ) = r`, with `κ` the Laplace exponent.
+* `existsUnique_esscher`: for `σ ≠ 0` and a jump law with every exponential moment, exactly one
+  `θ` satisfies `κ(1 + θ) − κ(θ) = r`.
+* `integral_call_tilted_eq_jumpDiffusionCallPrice`: the discounted call integrated against the
+  tilted law is the call price function of the tilted characteristics.
+* `integral_call_tilted_eq_merton`: at an Esscher parameter, it is the Poisson mixture of
+  Black–Scholes prices over jumps of law `ν.tilted (θ * ·)`.
+* `integral_call_tilted_eq_mertonCallPrice`: with Merton's log-jumps `N(log(1 + k) − δ²/2, δ²)`
+  and `σ > 0`, at an Esscher parameter it is `mertonCallPrice` with jump mean
+  `(1 + k) e^{θδ²} − 1` and expected jump count `Λ m(θ) τ` (`mertonJump_tilted`).
+* `jumpDiffusionExponent_zero_esscher`, `integral_call_tilted_zero_eq_bsV`: without jumps
+  `θ = (r − b − σ²/2)/σ²` solves the Esscher equation, and the call integrated against the tilted
+  law is the Black–Scholes price.
+
+## References
+
+* [F. Black and M. Scholes, *The pricing of options and corporate liabilities*][BlackScholes1973]
+* [Cont and Tankov, *Financial Modelling with Jump Processes*][ContTankov2004]
+* [Gerber and Shiu, *Option pricing by Esscher transforms*][GerberShiu1994]
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976]
+
+## Tags
+
+Esscher transform, exponential tilting, jump-diffusion, equivalent martingale measure,
+Laplace exponent, MSC 91G20, MSC 60G51, JEL G13
 -/
 
 @[expose] public section

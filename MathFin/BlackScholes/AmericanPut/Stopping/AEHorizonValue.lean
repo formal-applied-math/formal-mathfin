@@ -14,10 +14,37 @@ null set. Clipping at maturity gives a pointwise bounded rule with the same
 reward almost everywhere. Consequently the stopping value and exercise
 threshold are unchanged. No PDE or boundary regularity is used.
 
-## Result
+## Main definitions
 
-Public entry points include `aeStoppingValue`, `aeStoppingValue_eq`, `aeAmericanPutValue`,
-`aeAmericanPutValue_eq` and `aeExerciseThreshold_eq`.
+* `AEBoundedRule`: a stopping time for `𝓕`, valued in `WithTop ℝ≥0`, that is bounded by the
+  horizon `T` only `P`-almost surely.
+* `AEBoundedRule.finiteTime`: the stopping time read in `ℝ≥0`; its value at infinity is
+  immaterial because infinity occurs only on a null set.
+* `AEBoundedRule.clip`: the rule truncated at the horizon, a pointwise bounded `StoppingRule`.
+* `toAEBoundedRule`: a pointwise bounded rule read as an almost-surely bounded one.
+* `aeStoppingValue`: the supremum of the expected payoffs of a process over almost-surely bounded
+  rules.
+* `aeAmericanPutValue`: `aeStoppingValue` of the discounted put payoff process.
+* `aeExerciseThreshold`: the supremum of the spots `S ∈ [0, K]` at which `aeAmericanPutValue`
+  equals the immediate payoff `K − S`.
+
+## Main results
+
+* `clip_integral`: clipping an almost-surely bounded rule at the horizon does not change the
+  expected payoff of any process.
+* `aeStoppingValue_eq`: `aeStoppingValue P 𝓕 Z T = stoppingValue P 𝓕 Z T`.
+* `aeAmericanPutValue_eq`: `aeAmericanPutValue` is `americanPutValue`.
+* `aeExerciseThreshold_eq`: `aeExerciseThreshold` is `exerciseThreshold`.
+
+## References
+
+* [G. Peskir and A. Shiryaev, *Optimal Stopping and Free-Boundary Problems*][PeskirShiryaev2006],
+  Ch. I
+
+## Tags
+
+almost-sure stopping time, finite horizon, exercise threshold, stopping value, clipping at maturity,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

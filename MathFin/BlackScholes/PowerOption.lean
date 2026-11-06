@@ -29,9 +29,19 @@ rest is the standard HasLaw transfer from `Z` to `gaussianReal 0 1`.
 The moment itself, `nthMoment_terminal`, lives in `BlackScholes/Forward.lean` (its `n = 1`
 case is the forward price); this file discounts it.
 
-Results:
+## Main results
 
 * `powerForward_price`: discounted power-forward price.
+
+## References
+
+* [Heynen and Kat (1996)][HeynenKat1996]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 26.10
+
+## Tags
+
+power option, power forward, lognormal moment, moment generating function, Gaussian MGF, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

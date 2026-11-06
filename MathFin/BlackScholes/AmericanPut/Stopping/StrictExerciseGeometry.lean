@@ -15,10 +15,35 @@ entire nonnegative-spot contact set. Its strict positivity is not assumed or
 proved here; the later `PositiveExerciseBoundary` module derives it from the
 actual interior PDE and a stationary upper barrier.
 
-## Result
+## Main definitions
 
-Public entry points include `threshold_lt_strike_of_price_pos`, `value_contact_iff_le_threshold`,
-`value_strict_continuation_iff`, `canonicalStockBoundary`.
+* `canonicalStockBoundary`: the exercise threshold `brownianUsualExerciseBoundary` in the canonical
+  normalization `K = 1`, `σ = √2`, at the maturity `t.toNNReal`.
+* `canonicalContinuationRegion`: an open continuation domain defined from the actual price, before
+  any PDE or positive/smooth logarithmic boundary has been established.
+
+## Main results
+
+* `threshold_lt_strike_of_price_pos`: for `0 ≤ K`, `0 ≤ r`, `W 0 = 0` almost surely and a positive
+  value at spot `K`, the exercise threshold is below the strike.
+* `value_contact_iff_le_threshold`: for `0 < K`, `0 ≤ r`, `W 0 = 0` almost surely and positive
+  value at every positive spot, at spot `S ≥ 0` the value equals the payoff exactly when
+  `S ≤ exerciseThreshold`.
+* `value_strict_continuation_iff`: under the same hypotheses, the value strictly exceeds the
+  payoff exactly when `exerciseThreshold < S`.
+* `canonicalStockBoundary_lt_one`, `canonicalStockBoundary_nonneg`,
+  `canonicalStockBoundary_initial`: for `0 ≤ k`, the canonical boundary is below `1` for
+  `t > 0`, is nonnegative, and equals `1` at `t = 0`.
+* `canonicalPrice_contact_iff`, `canonicalPrice_strict_continuation_iff`: for `0 ≤ k` and
+  `t > 0`, the canonical price equals the payoff exactly when `exp x ≤ canonicalStockBoundary`,
+  and strictly exceeds it exactly when `canonicalStockBoundary < exp x`.
+* `canonicalContinuationRegion_isOpen`, `canonicalContinuationRegion_eq`: for `0 ≤ k`, the
+  continuation region is open and equals `{z | 0 < z.2 ∧ canonicalStockBoundary k h z.2 < exp z.1}`.
+
+## Tags
+
+exercise region, continuation region, contact set, exercise threshold, out-of-the-money, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

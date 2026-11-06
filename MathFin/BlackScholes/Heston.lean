@@ -21,13 +21,12 @@ functions `f : ℝ → ℝ → ℝ` is
 (`hestonGenerator`; the cross term `ρ ξ v ∂_xv` is the new 2D piece, carrying the
 correlation; at the generator level it is pure calculus).
 
-The recipe is Bagaria ch. 14, Prop 14.5 (invariance test `Lu/u ∈
-span{gᵢ}`) and eq. 14.4 (`L e^(φ+ψx) = [μ(x)(ψ + ½ v(x) ψ²)] e^(φ+ψx)`). The 2D
-reading-off: with exponent-gradient `(Bx, Bv) = (u, ψ)`, the bracket of the generator
-lemma below is `(c₀ + c₁ v)` with the **x-coefficient identically zero** — the third
-Riccati equation `Bx' = 0` (the log-spot gradient is conserved). Matching
-`∂_t Φ + LΦ = 0` (the *backward* pricing equation; Bagaria's Calc 14.6 states the
-forward form `∂_t u = Lu`, same matching with negated coefficients, the flip
+The recipe is Bagaria ch. 14, Prop 14.5 (invariance test `Lu/u ∈ span{gᵢ}`) and eq. 14.4 (`L
+e^(φ+ψx) = [μ(x)(ψ + ½ v(x) ψ²)] e^(φ+ψx)`). The 2D reading-off: with exponent-gradient
+`(Bx, Bv) = (u, ψ)`, the bracket of the generator lemma below is `(c₀ + c₁ v)` with the
+**x-coefficient identically zero** — the third Riccati equation `Bx' = 0` (the log-spot gradient is
+conserved). Matching `∂_t Φ + LΦ = 0` (the *backward* pricing equation; Bagaria's Calc 14.6 states
+the forward form `∂_t u = Lu`, same matching with negated coefficients, the flip
 `affineBondPrice_solves_pde` in `FixedIncome/AffineTermStructurePDE` also makes) gives the
 **calendar-time** system
 
@@ -38,11 +37,10 @@ maturity time `τ = T − t` the `Bv`-equation is the constant-forced Riccati
 
 `b̂' = ½(u² − u) + (ρξu − κ) b̂ + ½ξ² b̂²`,  `b̂(0) = 0`  (`hasDerivAt_hestonBv`),
 
-the Calc 14.6 ψ-equation `ψ' = bψ + ½dψ²` plus the constant `½(u² − u)` produced by
-the x-row of the drift (the coupling `−v/2` of variance into log-spot); `â' = ru +
-κθ b̂` (`hasDerivAt_hestonA`). The real moment `M(u) = E[e^{u log S_T}]` is the
-transform at real `u`; the characteristic function is the same system at `iu` — the
-complex route is out of scope here.
+the Calc 14.6 ψ-equation `ψ' = bψ + ½dψ²` plus the constant `½(u² − u)` produced by the x-row of the
+drift (the coupling `−v/2` of variance into log-spot); `â' = ru + κθ b̂` (`hasDerivAt_hestonA`). The
+real moment `M(u) = E[e^{u log S_T}]` is the transform at real `u`; the characteristic function is
+the same system at `iu` — the complex route is out of scope here.
 
 The closed forms are the Möbius members
 
@@ -75,6 +73,50 @@ needs no Feller-type condition).
 proved: it needs a Heston process (existence of the square-root SDE, unbounded
 coefficients) and the 2D correlated Itô formula, neither of which the library has. This
 module is the generator/PDE level only.
+
+## Main definitions
+
+* `expAffine`, `expAffine2`: the exponential-affine families `e^(φ + ψ x)` and
+  `e^(A + Bx·x + Bv·v)`.
+* `hestonGenerator`: the generator
+  `Lf = (r − v/2) ∂_x f + κ(θ − v) ∂_v f + (v/2) ∂_xx f + ρξv ∂_xv f + (ξ²v/2) ∂_vv f` on test
+  functions of (log-spot, variance).
+* `hestonGamma`: the root `γ = √((κ − ρξu)² + ξ²(u − u²))`.
+* `hestonBvDenom`: the Möbius denominator `D(τ) = (γ + κ − ρξu)e^{γτ} + (γ − κ + ρξu)`.
+* `hestonBv`: the closed form `b̂(τ) = (u² − u)(e^{γτ} − 1) / D(τ)`.
+* `hestonA`: the closed form `â(τ) = ruτ + (2κθ/ξ²)[((γ + κ − ρξu)/2)τ − log(D(τ)/(2γ))]`.
+* `hestonProfile`: the candidate transform profile `e^{A(t) + u·x + B(t)·v}`.
+
+## Main results
+
+* `hestonGenerator_expAffine2`: the generator applied to `expAffine2 A Bx Bv` is an affine
+  function of `v` times `expAffine2 A Bx Bv`.
+* `hestonBracket_xFree`: the multiplier `L E / E` depends on `v` alone.
+* `hestonGamma_eq_cirGamma`: for `0 ≤ u ≤ 1`, `hestonGamma` is `cirGamma` at mean reversion
+  `κ − ρξu` and volatility `ξ√((u − u²)/2)`.
+* `hestonBvDenom_pos`: for `ξ ≠ 0` and `0 < u < 1`, `D(τ) > 0` for every real `τ`.
+* `hasDerivAt_hestonBv`: for `ξ ≠ 0` and `0 < u < 1`, `hestonBv` solves the Riccati equation
+  `b̂' = (u² − u)/2 + (ρξu − κ) b̂ + (ξ²/2) b̂²` with `b̂(0) = 0` (`hestonBv_at_zero`).
+* `hasDerivAt_hestonA`: under the same hypotheses, `â' = r u + κθ b̂`.
+* `hasDerivAt_hestonBvCalendar`, `hasDerivAt_hestonACalendar`: the same flows in calendar time
+  `t ↦ b̂(T − t)`, `t ↦ â(T − t)`.
+* `hestonProfile_pde`: for any `A, B` solving the calendar-time Riccati system,
+  `∂_t Φ + LΦ = 0` for `Φ = hestonProfile`.
+* `hestonTransform_pde`, `hestonTransform_terminal`: for `ξ ≠ 0` and `0 < u < 1`, the profile
+  built from `hestonA` and `hestonBv` solves `∂_t Φ + LΦ = 0` and equals `e^{u x}` at `t = T`.
+  The identification of the profile with `E[e^{u log S_T}]` for a Heston process is not
+  proved.
+
+## References
+
+* [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 14, Prop 14.5
+* [Heston, *A closed-form solution for options with stochastic volatility with applications to bond
+  and currency options*][Heston1993]
+
+## Tags
+
+Heston model, stochastic volatility, affine transform, Riccati equation, characteristic function,
+generator PDE, MSC 91G20, MSC 60J60, JEL G13
 -/
 
 @[expose] public section

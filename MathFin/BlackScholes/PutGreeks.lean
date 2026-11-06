@@ -21,9 +21,13 @@ derive the five standard Greeks. The strategy is **put-call parity**:
 derivative combinator applied to the corresponding call Greek + simple
 constant/identity derivatives + put-call symmetry `Φ(d) + Φ(-d) = 1`.
 
+## Main definitions
+
+* `bsP`: the Black–Scholes European put price as a function of the spot `S` and the time to
+  maturity `τ`, `K · e^{−rτ} · Φ(−d₂) − S · Φ(−d₁)`.
+
 ## Main results
 
-* `bsP` — the BS European put price as a function of `(S, τ)`.
 * `bsP_eq_bsV` — put-call parity for the price functions.
 * `hasDerivAt_bsP_S` — δ_P = Φ(d₁) − 1.
 * `hasDerivAt_deriv_bsP_S` — γ_P = ϕ(d₁) / (S σ √τ) (same as call gamma), from the
@@ -31,6 +35,14 @@ constant/identity derivatives + put-call symmetry `Φ(d) + Φ(-d) = 1`.
 * `hasDerivAt_bsP_tau` — θ_P in `τ`-form.
 * `hasDerivAt_bsP_sigma` — vega_P = S ϕ(d₁) √τ (same as call vega).
 * `hasDerivAt_bsP_r` — ρ_P = -K τ e^{-rτ} Φ(-d₂).
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 19.4; 19.6; 19.7
+
+## Tags
+
+put delta, put gamma, put theta, put vega, put rho, option sensitivities, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -44,6 +56,7 @@ noncomputable def bsP (K r σ : ℝ) (S τ : ℝ) : ℝ :=
   K * Real.exp (-(r * τ)) * Phi (-bsd2 S K r σ τ) - S * Phi (-bsd1 S K r σ τ)
 
 /-- **Put-call parity** (price form): `bsP = bsV − S + K · e^{-rτ}`. -/
+@[pricing =]
 lemma bsP_eq_bsV (K r σ S τ : ℝ) :
     bsP K r σ S τ = bsV K r σ S τ - S + K * Real.exp (-(r * τ)) := by
   unfold bsP bsV

@@ -7,10 +7,18 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.Verification
 
-/-! # Ordered bounded continuous-time optional sampling 
-## Result
+/-!
+# Ordered bounded continuous-time optional sampling
 
-Public entry points include `expected_stoppedValue_le_of_le`.
+## Main results
+
+* `expected_stoppedValue_le_of_le`: for a bounded continuous supermartingale `U` on a finite
+  measure and stopping rules `θ ≤ η` (pointwise) bounded by `T`, `E[U η] ≤ E[U θ]`.
+
+## Tags
+
+optional sampling, continuous-time supermartingale, ordered stopping times, bounded stopping,
+MSC 60G40, MSC 60G44
 -/
 
 @[expose] public section

@@ -15,6 +15,23 @@ Part of the SVI polynomial-sign certificate (#174).
 `certificateProgram` branches only on signs of parameter polynomials, and `certificateFormula`
 is its expansion into a `SignFormula`. For `σ > 0`, `b ≥ 0`, `ρ² ≤ 1` and under the variance gate,
 it is equivalent to `g(k) ≥ 0` for every `k` (`certificateFormula_iff`).
+
+## Main definitions
+
+* `certificateProgram`: a fixed finite sign program that branches only on signs of parameter
+  polynomials.
+* `certificateFormula`: the expansion of `certificateProgram` into a `SignFormula`.
+
+## Main results
+
+* `certificateProgram_eval`: `certificateProgram` evaluates at `p` to
+  `decide (matrixCertificate (polynomial p))`.
+* `certificateFormula_iff`: for `σ > 0`, `b ≥ 0`, `1 - ρ² ≥ 0` and `varianceGate p`,
+  `certificateFormula` holds iff `durrleman p k ≥ 0` for every `k`.
+
+## Tags
+
+sign program, Durrleman condition, raw SVI, certificate formula, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

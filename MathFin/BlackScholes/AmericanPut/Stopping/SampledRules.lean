@@ -9,10 +9,18 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.DiscreteStoppingValue
 public import MathFin.BlackScholes.AmericanPut.Stopping.AmericanValue
 public import MathFin.Foundations.ContinuousMarket
 
-/-! # Discrete rules sampled at arbitrary deterministic increasing times 
-## Result
+/-!
+# Discrete rules sampled at arbitrary deterministic increasing times
 
-Public entry points include `StoppingRule.toSampledRule`.
+## Main definitions
+
+* `StoppingRule.toSampledRule`: a discrete rule `η` for `ContinuousMarket.sampledFiltration 𝓕 hs`
+  read back in continuous time as `ω ↦ s (η.time ω)`, with horizon `s N`.
+
+## Tags
+
+sampled stopping rule, discrete rules, deterministic times, increasing times, MSC 60G40, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

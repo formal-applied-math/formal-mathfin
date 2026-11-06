@@ -27,6 +27,26 @@ i.e. `S_0` times the **Wald exponential** `exp(σ X_t − σ² t / 2)`, which is
 (`ProbabilityTheory.IsFilteredPreBrownian.waldExponential_isMartingale`). Hence the
 discounted price is a martingale — directly, with no further stochastic-calculus
 machinery.
+
+## Main results
+
+* `discountedGBM_isMartingale`: the discounted risk-neutral geometric Brownian motion
+  `e^{−rt} S_0 exp((r − σ²/2)t + σ X_t)`, driven by a filtered pre-Brownian motion `X`, is a
+  martingale.
+* `discountedGBM_isEMM`: for every horizon `T`, `P` is an equivalent martingale measure (`IsEMM`)
+  for that process, with `Q = P`.
+* `discountedGBM_noArbitrageSimple`: there is no arbitrage among simple strategies trading the
+  discounted process up to `T`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Ch 9
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], Ch 5
+
+## Tags
+
+fundamental theorem of asset pricing, risk-neutral measure, equivalent martingale measure,
+Black–Scholes, discounted price martingale, geometric Brownian motion, JEL G13, MSC 91G20
 -/
 
 @[expose] public section
@@ -66,13 +86,13 @@ theorem discountedGBM_isMartingale (S_0 r σ : ℝ) :
 /-- **The discounted GBM is an equivalent martingale measure — with `Q = P`.** When `P` is the
 risk-neutral measure (the driver `X` is a `P`-pre-Brownian), the discounted price `e^{−rt} S_t` is
 already a `P`-martingale, so `P` is trivially its own EMM for it, at every horizon `T`: an instance
-of the model-agnostic `ContinuousMarket.IsEMM` frame at `F = ℝ`. (The physical-measure Girsanov EMM
+of the model-agnostic `IsEMM` frame at `F = ℝ`. (The physical-measure Girsanov EMM
 `Q ≠ P` is a martingale measure only on `[0, T]`: `bs_discounted_isEMM`.) -/
 theorem discountedGBM_isEMM [IsProbabilityMeasure P] (S_0 r σ : ℝ) (T : ℝ≥0) :
-    ContinuousMarket.IsEMM 𝓕 P
+    IsEMM 𝓕 P
       (fun (t : ℝ≥0) ω ↦ Real.exp (-r * t) *
         (S_0 * Real.exp ((r - σ ^ 2 / 2) * t + σ * X t ω))) T P :=
-  ContinuousMarket.IsEMM.of_martingale (discountedGBM_isMartingale S_0 r σ)
+  IsEMM.of_martingale (discountedGBM_isMartingale S_0 r σ)
     Measure.AbsolutelyContinuous.rfl Measure.AbsolutelyContinuous.rfl T
 
 /-- **No simple-strategy arbitrage for the discounted GBM under its risk-neutral measure.** The

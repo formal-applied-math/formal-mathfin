@@ -13,11 +13,23 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.DiscreteStoppingValue
 Both conversions preserve the original filtration's information at the actual
 exercise time. The possibly shorter last interval and maturity zero are included.
 
-## Result
+## Main definitions
 
-Public entry points include `rounded_grid_time_eq`, `StoppingRule.toGridIndexRule_time`,
-`gridReward`, `gridValue_eq_discreteValue`. The capped grid and the two conversions
-(`StoppingRule.toGridIndexRule`, `StoppingRule.toPhysicalRule`) are in `FiniteExerciseGrid`.
+* `gridReward`: the put reward collected at the deterministic capped grid time `min (i*δ) T`.
+
+## Main results
+
+* `rounded_grid_time_eq`: for `0 < δ` and `t` in the exercise grid, rounding `t` up to a
+  multiple of `δ` and capping at `T` returns `t`.
+* `StoppingRule.toGridIndexRule_time`: for `0 < δ` and a rule `θ` valued in the exercise grid,
+  reading `θ` as a grid-index rule and back gives `θ.time`.
+* `gridValue_eq_discreteValue`: for `0 < δ`, the grid American put value is the discrete
+  `stoppingValue` of the grid reward on `cappedGridFiltration` with horizon `⌈T/δ⌉₊`.
+
+## Tags
+
+grid reindexing, capped grid, physical time, discrete value, exercise grid, MSC 60G40, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

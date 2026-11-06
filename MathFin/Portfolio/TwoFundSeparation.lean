@@ -24,15 +24,30 @@ combined portfolio formed as `α · tangent + (1 − α) · risk-free` satisfies
 
 These are the algebraic content of Tobin's two-fund separation theorem.
 
-Results:
+## Main definitions
 
-* `cmlMean`, `cmlStdev`: the (mean, std) of a CML portfolio at weight `α`.
+* `cmlMean`: the expected return `α μ_t + (1 − α) r_f` of the mix of the tangent portfolio at
+  weight `α` and the risk-free asset.
+* `cmlStdev`: the standard deviation `α σ_t` of that mix.
+
+## Main results
+
 * `cml_equation`: `μ_combined = r_f + Sharpe_t · σ_combined` on the CML.
 * `cml_sharpeRatio_invariant`: Sharpe is preserved along the CML.
 * `cml_weight_recovers_stdev` / `cml_weight_unique`: the weight
   `α = σ_p / σ_t` reproduces `σ_p`, and any weight attaining `σ_p` equals
   it — existence and uniqueness of the decomposition weight.
 * `cml_mean_at_stdev`: mean recovery `μ_p = r_f + σ_p · Sharpe_t` at that weight.
+
+## References
+
+* [K. Bodie and Marcus, *Investments*][BodieKaneMarcus], Ch 9.2
+* [Tobin (1958)][Tobin1958]
+
+## Tags
+
+capital market line, two-fund separation, Tobin separation, tangent portfolio, risk-free asset,
+Sharpe ratio, MSC 91G10, JEL G11, JEL G12
 -/
 
 @[expose] public section

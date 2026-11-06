@@ -18,6 +18,27 @@ denominator-free matrices equals four times the number of distinct positive crit
 a negative value (`matrixCountFour_eq`). `matrixCertificate`, a root-free predicate covering every
 degree branch, is equivalent to nonnegativity on `(0, ∞)` for degree at most ten
 (`matrixCertificate_iff`).
+
+## Main definitions
+
+* `matrixCertificate`: for a real polynomial `P`, `0 ≤ P.coeff 0` if `P` is constant, and
+  otherwise `0 < P.leadingCoeff`, `0 ≤ P.coeff 0` and `matrixCountFour P = 0`.
+
+## Main results
+
+* `matrixCountFour_eq`: for `natDegree ≤ 10` and `natDegree ≠ 0`, `matrixCountFour P` equals
+  `4 * badCriticalCount P`.
+* `matrixCertificate_iff_criticalCertificate`: for `natDegree ≤ 10`, `matrixCertificate P` iff
+  `criticalCertificate P`.
+* `matrixCertificate_iff`: for `natDegree ≤ 10`, `matrixCertificate P` iff `P.eval t ≥ 0` for
+  every `t > 0`.
+* `svi_matrixCertificate_iff`: for `σ > 0`, `b ≥ 0`, `1 - ρ² ≥ 0` and `varianceGate p`,
+  `matrixCertificate (polynomial p)` iff `durrleman p k ≥ 0` for every `k`.
+
+## Tags
+
+determinant certificate, critical point count, Hermite matrix, positivity on half-line, SVI,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

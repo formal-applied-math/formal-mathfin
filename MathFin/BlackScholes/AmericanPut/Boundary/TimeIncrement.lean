@@ -16,10 +16,30 @@ Both time slices are in continuation whenever the earlier one is. Dividing
 their difference by a positive stationary profile removes the discount term.
 Nonnegativity follows from the proved price monotonicity, not an assumption.
 
-## Result
+## Main definitions
 
-Public entry points include `timeIncrement`, `incrementGauge`, `incrementDrift`,
-`timeIncrement_continuousOn`.
+* `timeIncrement`: the increment `p x (t + δ) − p x t` of the price over a time step `δ`.
+* `incrementGauge`: the time increment divided by the stationary profile.
+* `incrementDrift`: the first-order coefficient `k − h − 1 + 2 · logSlope (profile (k − h − 1) k) x`
+  of the equation satisfied by `incrementGauge`.
+
+## Main results
+
+* `timeIncrement_continuousOn`, `incrementGauge_continuousOn`: for a `DividendPutSolution` and
+  `0 ≤ δ`, the increment and its gauge are continuous on `{t ≥ 0}`.
+* `timeIncrement_contDiffAt`, `incrementGauge_contDiffAt`: for `0 ≤ δ`, `0 < t` and `b t < x`,
+  both are `C²` near `(x, t)`.
+* `timeIncrement_equation`: at such `(x, t)` the time derivative of the increment equals the
+  dividend spatial operator applied to the increment.
+* `incrementGauge_equation`: at such `(x, t)` the time derivative of the gauge equals its second
+  space derivative plus `incrementDrift k h x` times its first.
+* `incrementGauge_nonneg`: for `0 ≤ δ` and `0 ≤ t`, the gauge is nonnegative.
+* `incrementGauge_initial_pos`: for `0 < δ` and `0 < x`, the gauge is positive at `t = 0`.
+* `incrementDrift_bounded`: for `0 < k`, `incrementDrift k h` is bounded.
+
+## Tags
+
+time increment, price monotonicity, stationary profile, discount term, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

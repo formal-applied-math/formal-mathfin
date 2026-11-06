@@ -13,10 +13,18 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.UsualBrownianValue
 No classical PDE solution, boundary regularity, or existence of an optimal
 stopping rule is assumed. Nearly optimal admissible rules suffice.
 
-## Result
+## Main results
 
-Public entry points include `americanPutValue_continuous_horizon`,
-`brownianAmericanPut_continuous_horizon`, `brownianUsualAmericanPut_continuous_horizon`.
+* `americanPutValue_continuous_horizon`: for jointly measurable continuous-path `W`, `0 ≤ K`,
+  `0 ≤ r`, `0 ≤ S`, the American put value is continuous in the maturity.
+* `brownianAmericanPut_continuous_horizon`, `brownianUsualAmericanPut_continuous_horizon`: the
+  same continuity in maturity for the Brownian American put, on the raw and on the usual
+  filtration, for `0 ≤ K`, `0 ≤ r`, `0 ≤ S`.
+
+## Tags
+
+continuity in maturity, stopping supremum, nearly optimal rules, American put value,
+horizon continuity, MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

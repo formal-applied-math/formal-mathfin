@@ -32,12 +32,28 @@ is
 (`JumpDiffusionHyp.call_eq_integral_infinitePi`), Merton's formula for a general jump law with
 the expectation over the jump sizes written against their law.
 
+## Main definitions
+
+* `jumpDiffusionMeasure`: the canonical law on `ℝ × ℕ × (ℕ → ℝ)`, the product of `N(0, 1)`,
+  `Poisson(Λ)` and the i.i.d. product `ν^ℕ`: a diffusion sample, a jump count and the log-jump
+  sizes.
+
 ## Main results
 
 * `jumpDiffusionHyp_canonical`: the coordinates of `ℝ × ℕ × (ℕ → ℝ)` under
   `N(0, 1) ⊗ Poisson(Λ) ⊗ ν^ℕ` satisfy `JumpDiffusionHyp`, and each jump size has law `ν`.
 * `JumpDiffusionHyp.call_eq_integral_infinitePi`: the call as an integral against `Poisson(Λ)`
   and `ν^ℕ`.
+
+## References
+
+* [Cont and Tankov, *Financial Modelling with Jump Processes*][ContTankov2004]
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976]
+
+## Tags
+
+jump-diffusion model, Poisson jump count, compound Poisson, log-jump sizes, Merton model,
+independence hypotheses, MSC 91G20, MSC 60G51, JEL G13
 -/
 
 @[expose] public section

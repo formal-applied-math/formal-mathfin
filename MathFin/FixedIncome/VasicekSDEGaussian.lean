@@ -33,12 +33,27 @@ This is the **first consumer of the deterministic-integrand Itô tower in the
 FixedIncome layer** — the analytic Wiener/Itô machinery becomes load-bearing in
 a pricing module, closing the two-tower gap for the Vasicek short rate.
 
+## Main definitions
+
+* `vasicekKernel`, `vasicekKernelLp`: the diffusion kernel `s ↦ e^{−κ(T−s)}`, and the same kernel
+  as an element of `L²((0, T])`.
+* `vasicekKernelSqAntideriv`: the antiderivative `u ↦ e^{−2κ(T−u)}/(2κ)` of the squared kernel.
+* `vasicekDiffusionTerm`: the Vasicek diffusion term `σ ∫₀ᵀ e^{−κ(T−s)} dB_s`.
+
 ## Main results
 
-* `vasicekDiffusionTerm`: the genuine stochastic term `σ ∫₀ᵗ e^{−κ(t−s)} dB_s`.
 * `vasicekKernel_integral_sq`: `∫₀ᵀ (e^{−κ(T−s)})² ds = (1 − e^{−2κT})/(2κ)`.
 * `vasicekShortRate_hasLaw_gaussian`: the genuine terminal short rate
   `mean + σ ∫₀ᵀ e^{−κ(T−s)} dB_s` has law `N(vasicekSDEMean, vasicekSDEVariance)`.
+
+## References
+
+* [O. Vasicek, *An equilibrium characterization of the term structure*][Vasicek1977]
+
+## Tags
+
+Vasicek model, Ornstein–Uhlenbeck, Wiener integral, Gaussian law, short rate,
+Itô integral of deterministic integrand, MSC 60H10, MSC 91G30, MSC 60G15
 -/
 
 @[expose] public section

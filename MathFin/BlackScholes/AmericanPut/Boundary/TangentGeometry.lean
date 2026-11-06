@@ -5,6 +5,7 @@ Authors: Robert Martin
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -14,9 +15,14 @@ Local negative curvature puts a smooth function strictly below its tangent on
 both sides. This is a real-calculus theorem, independent of any parabolic or
 financial assumptions.
 
-## Result
+## Main results
 
-Public entry points include `eventually_lt_tangent_of_second_deriv_neg`.
+* `eventually_lt_tangent_of_second_deriv_neg`: if `b` is smooth on `(0, ∞)`, `T > 0` and
+  `deriv (deriv b) T < 0`, then `b t < b T + deriv b T · (t − T)` for all `t ≠ T` near `T`.
+
+## Tags
+
+concave tangent, second derivative, local curvature, tangent line, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

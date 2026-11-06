@@ -14,10 +14,31 @@ Only exercise opportunities are discretized; the underlying stochastic process
 and filtration are unchanged. No optimal-rule or dynamic-programming premise
 is needed for this approximation theorem.
 
-## Result
+## Main definitions
 
-Public entry points include `gridAmericanPutValue`, `expectedReward_le_gridValue`,
-`gridValue_tendsto_americanValue`.
+* `gridAmericanPutValue`: the supremum of the expected discounted put reward over the rules that
+  exercise only on the grid `exerciseGrid T δ`.
+* `canonicalGridPrice`: the finite-grid counterpart of `canonicalPrice`, taken on the completed
+  usual Brownian filtration at strike `1`, rate `k` and dividend `h`.
+
+## Main results
+
+* `gridValue_le_value`, `expectedReward_le_gridValue`, `gridValue_nonneg`: for measurable `W`,
+  `0 ≤ K`, `0 ≤ r`, `0 ≤ S`, the grid value is at most `americanPutValue`, at least the expected
+  reward of every grid rule, and nonnegative.
+* `payoff_le_gridValue`, `european_expectation_le_gridValue`: the grid value is at least the
+  immediate payoff (if `W 0 = 0` almost surely) and, for `0 < δ`, the European expectation.
+* `gridValue_tendsto_americanValue`: for measurable `W` with continuous paths, the grid values at
+  meshes `gridStep n` tend to `americanPutValue`.
+* `americanValue_eq_sup_gridValues`: under the same hypotheses, `americanPutValue` is the
+  supremum of those grid values.
+* `canonicalGridPrice_tendsto`: for `0 ≤ k`, `canonicalGridPrice k h x t n` tends to
+  `canonicalPrice k h x t`.
+
+## Tags
+
+Bermudan approximation, exercise grid, American put, discretization, stopping value limit,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

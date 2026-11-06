@@ -14,6 +14,22 @@ Part of the SVI polynomial-sign certificate (#174).
 
 For a positive quadratic `(X − a)² + b²`, `b ≠ 0`, the quotient by any power contains a square
 root of `−1`, so its weighted trace form has signature zero.
+
+## Main definitions
+
+* `positiveQuadratic`: the quadratic `(X - C a)² + C (b²)` over `ℝ`.
+
+## Main results
+
+* `positiveQuadratic_degree`: `positiveQuadratic a b` has `natDegree` `2`.
+* `quadraticRoot_has_imaginary`: for `b ≠ 0` and `r > 0`, `AdjoinRoot ((positiveQuadratic a b)^r)`
+  contains `u` with `u ^ 2 = -1`.
+* `weightedTraceForm_quadratic_signature`: for `b ≠ 0` and `r > 0`, the weighted trace form of
+  `(positiveQuadratic a b)^r` with any weight `q` has signature `0`.
+
+## Tags
+
+conjugate pair roots, trace form signature, irreducible quadratic, SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

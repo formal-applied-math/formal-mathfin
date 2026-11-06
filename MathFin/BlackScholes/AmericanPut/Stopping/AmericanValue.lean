@@ -15,10 +15,30 @@ The nonempty bounded payoff-value set is proved explicitly. Elementary value
 bounds, immediate exercise, the terminal payoff, and maturity monotonicity
 follow from the actual stopping rules. No PDE identification is asserted.
 
-## Result
+## Main definitions
 
-Public entry points include `putRewardAt`, `americanPutValue`, `expectedReward_le_strike`,
-`expectedReward_le_value`.
+* `putRewardAt`: the discounted put payoff process `t ↦ putReward W K r q σ S (fun _ => t)`.
+* `americanPutValue`: the `stoppingValue` of the discounted put payoff process `putRewardAt` over
+  the stopping rules bounded by the horizon `T`.
+
+## Main results
+
+* `expectedReward_le_strike`, `expectedReward_le_value`: for measurable `W`, `0 ≤ K`, `0 ≤ r`,
+  `0 ≤ S` and a rule `θ` bounded by `T`, the expected put reward is at most `K` and at most
+  `americanPutValue`.
+* `exists_expectedReward_gt_value_sub`: for `ε > 0`, some bounded rule has expected reward
+  exceeding the value minus `ε`.
+* `value_le_strike`, `value_nonneg`: under the same hypotheses, `0 ≤ americanPutValue ≤ K`.
+* `payoff_le_value`, `value_at_expiry`: if `W 0 = 0` almost surely, the value is at least
+  `max (K - S) 0`, and equals it at horizon `0`.
+* `value_mono_horizon`: the value is monotone in the horizon.
+* `european_expectation_le_value`: the expected reward at the deterministic maturity rule is at
+  most the American value.
+
+## Tags
+
+American put value, optimal stopping, supremum over stopping times, value function,
+maturity monotonicity, MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

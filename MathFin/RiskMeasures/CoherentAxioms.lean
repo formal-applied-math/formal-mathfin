@@ -51,13 +51,25 @@ In `gaussianVaR_subadditive` and `gaussianCVaR_subadditive` the correlation `ρ`
 `valueAtRisk_add_le_of_hasGaussianLaw` and `gaussianCVaR_sd_add_le` are the statements at the
 correlation a pair actually has.
 
-Results:
+## Main results
 
 * `gaussianCVaR_sd_add_le`: the closed-form CVaR of a jointly Gaussian pair is subadditive, with
   the exact volatility of the sum; a corollary of the coherence of expected shortfall.
 * `joint_stdev_le`: `√(σ₁² + 2 ρ σ₁ σ₂ + σ₂²) ≤ σ₁ + σ₂` for `ρ ≤ 1` and `σ_i ≥ 0`.
 * The parameter formulas listed above, and the four random-variable theorems that consume the
   translation and homogeneity ones.
+
+## References
+
+* [C. Acerbi and D. Tasche, *On the coherence of expected shortfall*][AcerbiTasche2002]
+* [P. Artzner et al., *Coherent measures of risk*][ArtznerDelbaenEberHeath1999]
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Ch 2.3
+
+## Tags
+
+coherence of VaR, expected shortfall coherence, Gaussian VaR, subadditivity,
+jointly Gaussian losses, translation invariance, MSC 91G70, JEL G32
 -/
 
 @[expose] public section
@@ -170,7 +182,7 @@ theorem gaussianCVaR_sd_add_le (h : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) 
 /-! ### The random-variable side: the affine images of a Gaussian loss -/
 
 /-- A Gaussian loss, as the law `N(E X, Var X)` of `RiskMeasures/Gaussian.lean`. -/
-private lemma hasLaw_gaussianReal_of_hasGaussianLaw (hX : HasGaussianLaw X P) :
+lemma hasLaw_gaussianReal_of_hasGaussianLaw (hX : HasGaussianLaw X P) :
     HasLaw X (gaussianReal P[X] Var[X; P].toNNReal) P :=
   ⟨hX.aemeasurable, hX.map_eq_gaussianReal⟩
 

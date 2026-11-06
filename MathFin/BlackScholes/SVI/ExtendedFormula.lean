@@ -17,6 +17,35 @@ Part of the SVI polynomial-sign certificate (#174).
 `extendedCertificateFormula` adds the zero-scale branch, two quadratic sign tests, to the smooth
 formula. `extendedCertificateFormula_iff_bsSmile_convex`: it holds exactly when `σ ≥ 0`, `b ≥ 0`,
 `ρ² ≤ 1`, the variance is positive, and the SVI-smiled Black–Scholes call is convex in strike.
+
+## Main definitions
+
+* `zeroAtom`: the sign formula "`f` is zero".
+* `quadraticRayFormula`: a finite sign formula for a quadratic being nonnegative on a closed ray.
+* `sigmaZeroBranchFormula`, `sigmaZeroFormula`: the sign formulas for one wing and for the
+  zero-scale slice `σ = 0`.
+* `extendedCertificateFormula`: the smooth determinant branch together with the zero-scale
+  branch.
+
+## Main results
+
+* `zeroAtom_eval`, `quadraticRayFormula_eval`, `sigmaZeroBranchFormula_eval`: what each formula
+  evaluates to.
+* `sigmaZeroFormula_eval`: `sigmaZeroFormula` holds iff `σ = 0`, `a > 0`, `b ≥ 0`, `1 - ρ² ≥ 0` and
+  `sigmaZeroCertificate p`.
+* `sigmaZeroFormula_iff_bsSmile_convex`: `sigmaZeroFormula` holds iff `σ = 0`, `b ≥ 0`,
+  `1 - ρ² ≥ 0`, the variance is positive, and `bsSmile p` is convex on `(0, ∞)`.
+* `extendedCertificateFormula_iff_bsSmile_convex`: `extendedCertificateFormula` holds iff
+  `σ ≥ 0`, `b ≥ 0`, `1 - ρ² ≥ 0`, the variance is positive, and `bsSmile p` is convex on
+  `(0, ∞)`.
+
+## References
+
+* [R. Martin, *A polynomial-sign certificate for butterfly-free raw SVI*][MartinButterflyFreeSVI]
+
+## Tags
+
+raw SVI, zero-scale branch, butterfly arbitrage, sign formula, convex call price, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

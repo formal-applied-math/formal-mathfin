@@ -19,9 +19,19 @@ These modular implications retain explicit interval and speed arguments.
 argument for strict stock curvature. The actual stopping-value identification
 is separate from these classical-contract results.
 
-## Result
+## Main results
 
-Public entry points include `dividend_curvature_of_comparison_inputs`, `stock_curvature_of_comparison_inputs`.
+* `dividend_curvature_of_comparison_inputs`: for a `DividendPutSolution`, if every
+  `straightDifference` with `0 < c`, `d < 0` has an order-connected positive set to the right of
+  the boundary at each `t > 0`, then `b''(t) ≥ 0` for all `t > 0`.
+* `stock_curvature_of_comparison_inputs`: under the same interval hypothesis and strictly
+  negative boundary speed, for `0 < E`, `0 < σ` and `T < expiry` the stock-price boundary
+  `stockBoundary E σ expiry b` has strictly positive second derivative at `T`.
+
+## Tags
+
+boundary curvature, convexity of exercise boundary, stock curvature, comparison argument,
+dividend-paying put, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

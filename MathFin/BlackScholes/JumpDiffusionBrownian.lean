@@ -35,6 +35,36 @@ Brownian motion:
   of the call and the put given `𝓕_t` are the Black–Scholes prices at the current price `S_t` and
   the remaining maturity `T − t`. With no jumps the price functions are the Black–Scholes formulas
   (`jumpDiffusionCallPrice_zero`, `jumpDiffusionPutPrice_zero`).
+
+## Main results
+
+* `jumpDiffusionIncrementLaw_zero`: at jump rate `0` the log-return over `τ` has law
+  `N(bτ, σ²τ)`, whatever the jump law.
+* `jumpDiffusionCallPrice_zero`, `jumpDiffusionPutPrice_zero`: at rate `0` and drift
+  `r − σ²/2`, for `S, K, σ, τ > 0`, the jump-diffusion call and put price functions are the
+  Black–Scholes formulas `bsV K r σ S τ` and `K e^{−rτ} Φ(−d₂) − S Φ(−d₁)`.
+* `IsFilteredPreBrownian.jumpDiffusionProcess`: for a filtered pre-Brownian motion `B`, the
+  log-price `b t + σ B_t` is a `JumpDiffusionProcess` with rate `0`, for any jump law.
+* `IsFilteredPreBrownian.martingale_discounted_iff`: for `S₀ ≠ 0`, the discounted price
+  `e^{−rt} S₀ e^{bt + σB_t}` is a martingale iff `b = r − σ²/2`.
+* `IsFilteredPreBrownian.condExp_call_eq_bsV`, `IsFilteredPreBrownian.condExp_put_eq_bsPut`:
+  at drift `r − σ²/2`, `S₀, K, σ > 0` and `t < T`, the conditional value of the discounted call
+  (put) payoff given `𝓕_t` is the Black–Scholes price at the current price `S_t` and remaining
+  maturity `T − t`.
+* `jumpDiffusionProcess_brownian`: on the path space of the constructed Brownian motion the
+  log-price `b t + σ B_t` is a `JumpDiffusionProcess` with rate `0`.
+
+## References
+
+* [F. Black and M. Scholes, *The pricing of options and corporate liabilities*][BlackScholes1973]
+* [Cont and Tankov, *Financial Modelling with Jump Processes*][ContTankov2004]
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Ch 9
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], Ch 5
+
+## Tags
+
+Brownian motion with drift, jump-diffusion, zero jump rate, Poisson process, log-price process,
+MSC 91G20, MSC 60G51
 -/
 
 @[expose] public section

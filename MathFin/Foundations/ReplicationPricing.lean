@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -33,6 +34,18 @@ It has two instances, which differ only in what makes the gains neutral:
 * `measureReal_eq_of_replicates` — the indicator case: `Q A = x`.
 * `measure_eq_of_replicates` — two gains-neutral probability measures `≪ P` agree on every event
   of `𝓖` whose indicator is replicated.
+
+## References
+
+* [J. M. Harrison and S. R. Pliska, *Martingales and stochastic integrals in the theory of
+  continuous trading*][HarrisonPliska1981]
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], Section
+  5.4
+
+## Tags
+
+replication, law of one price, gains-neutral measure, unique pricing measure, complete market,
+initial wealth, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

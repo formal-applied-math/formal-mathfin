@@ -37,13 +37,17 @@ Expanding the Fisher identity gives the familiar linear approximation
 equality for real numbers, so the "approximation" enters only when `b · i`
 is treated as second-order-small and dropped.
 
+## Main definitions
+
+* `fisherMoneyRate`: the money rate `(1 + b)(1 + i) - 1` from an own rate `b` and a price-change
+  rate `i`.
+* `sraffaOwnRate`: Sraffa's implied own rate `((1 + m)^T * S / F)^(1/T) - 1` from the financing
+  rate `m`, spot `S`, forward `F` and maturity `T`.
+
 ## Main results
 
-* `fisherMoneyRate`: the money rate `r` defined as `(1+b)(1+i) − 1`, so that
-  Fisher's identity `1 + r = (1+b)(1+i)` holds by definition.
 * `fisher_linear_approx_error`: `fisherMoneyRate b i − (b + i) = b * i`, the
   exact statement underlying `r ≈ b + i` for small `b, i`.
-* `sraffaOwnRate`: Sraffa's implied own rate `b` from spot/forward/financing/time.
 * `sraffaOwnRate_spec`: `(1 + sraffaOwnRate m S F T)^T = (1+m)^T · S / F`
   for `T ≠ 0` and `(1+m)^T · S / F ≥ 0`, the defining equation Sraffa's formula
   inverts.
@@ -52,6 +56,16 @@ is treated as second-order-small and dropped.
 * `fisherMoneyRate_sraffaOwnRate_one`: over one period, Fisher's identity holds with the
   own rate implied by Sraffa's formula and the forward premium `F/S − 1` as the rate of
   change of the money price: `fisherMoneyRate (sraffaOwnRate m S F 1) (F/S − 1) = m`.
+
+## References
+
+* [J. M. Keynes, *The General Theory of Employment, Interest and Money*][Keynes1936], ch. 17
+* [P. Sraffa, *Dr.~Hayek on money and capital*][Sraffa1932]
+
+## Tags
+
+own rate of interest, Fisher equation, Sraffa, Keynes, cost of carry, forward price, MSC 91G30,
+JEL E43, JEL Q02
 -/
 
 @[expose] public section

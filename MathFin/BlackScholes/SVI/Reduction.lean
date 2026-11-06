@@ -5,6 +5,7 @@ Authors: Robert Martin
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-! # Raw SVI and the rationalised Durrleman condition
@@ -13,7 +14,33 @@ Part of the SVI polynomial-sign certificate (#174).
 
 Rationalization of the smooth raw-SVI Durrleman expression.
 The first and second slope expressions are explicit; their identification with
-analytic derivatives is proved in Derivatives.lean. -/
+analytic derivatives is proved in Derivatives.lean.
+
+## Main definitions
+
+* `Params`: the five raw SVI parameters `(a, b, ρ, m, σ)`, with no sign conditions built in.
+* `variance`: raw SVI total variance `a + b(ρ(k - m) + √((k - m)² + σ²))` at log-strike `k`.
+* `slope`, `curvature`: the explicit first and second derivatives of `variance`.
+* `durrleman`: Durrleman's function `(1 - k w'/(2w))² - (w'²/4)(1/w + 1/4) + w''/2`.
+* `strike`: the log-strike `K p t / (2t)` parametrised by `t > 0`.
+* `numerator`: the rationalised Durrleman numerator, a polynomial in `t`.
+
+## Main results
+
+* `variance_at_strike`, `slope_at_strike`, `curvature_at_strike`: for `σ > 0` and `t > 0`, the
+  values of `variance`, `slope` and `curvature` at `strike p t`.
+* `durrleman_at_strike`: for `σ > 0`, `t > 0` and `A p t ≠ 0`,
+  `durrleman p (strike p t) = numerator p t / (16σ (A p t)² (D t)³)`.
+* `sign_at_strike`: for `σ > 0` and positive variance at `strike p t`,
+  `durrleman p (strike p t) ≥ 0` iff `numerator p t ≥ 0`.
+* `strike_surjective`: for `σ > 0`, every `k` is `strike p t` for some `t > 0`.
+* `durrleman_nonneg_iff`: for `σ > 0` and positive variance everywhere, `durrleman p k ≥ 0` for all
+  `k` iff `numerator p t ≥ 0` for all `t > 0`.
+
+## Tags
+
+raw SVI, Durrleman condition, rationalization, variance slope, MSC 91G20, JEL G13
+-/
 
 @[expose] public section
 

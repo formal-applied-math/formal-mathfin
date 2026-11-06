@@ -36,6 +36,11 @@ the precise reason the quadratic variation is `t` and not, say, `0`. For the uni
 ## Main results
 
 * `integral_increment_pow4` — `E[(B_{t₁} − B_{t₀})⁴] = 3(t₁ − t₀)²`.
+
+## Tags
+
+quadratic variation of Brownian motion, mean-square convergence, Gaussian kurtosis,
+squared increments, Itô formula second-order term, MSC 60J65, MSC 60H05
 -/
 
 @[expose] public section

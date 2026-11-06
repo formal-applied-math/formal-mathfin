@@ -30,10 +30,24 @@ statements:
 per-period accrual index satisfies. The DeFi protocol modules (`DeFi/Compound`, `DeFi/Dai`,
 `DeFi/Aave`) instantiate these lemmas for their accrual indices.
 
+## Main results
+
+* `eq_mul_pow_of_succ`: if `I (n + 1) = I n · c` for every `n`, then `I n = I 0 · c ^ n`.
+* `one_add_pow_mul_zcb_log`: for `y > −1`, `(1 + y) ^ n · zcb (log (1 + y)) 0 n = 1`, so periodic
+  compounding at `y` is continuous compounding at the rate `log (1 + y)`.
+* `one_add_mul_pow_le_inv_zcb`: for `r t ≥ −1`, `(1 + r t) ^ n ≤ (zcb r 0 (n t))⁻¹`.
+* `tendsto_one_add_div_pow_inv_zcb`: `(1 + r T / n) ^ n` tends to `(zcb r 0 T)⁻¹ = exp (r T)` as
+  `n → ∞`.
+
 ## References
 
-* J. C. Hull, *Options, Futures, and Other Derivatives*, §4.2 (measuring interest rates;
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], §4.2 (measuring interest rates;
   continuous compounding and the conversion between compounding frequencies).
+
+## Tags
+
+compound interest, continuous compounding, periodic compounding, effective rate, zero-coupon bond,
+exponential limit, MSC 91G30, JEL G12
 -/
 
 @[expose] public section

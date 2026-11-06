@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -25,14 +26,30 @@ This is structurally identical to the ZCB-yield identity in `ZCB.lean`
 rate. The continuous-time stochastic-intensity model (Cox process / doubly
 stochastic Poisson) is gated on the Itô integral and is not formalized here.
 
-Results:
+## Main definitions
 
-* `survivalProbability`: definition.
+* `survivalProbability`: the survival probability `exp(-(h · (T - t)))` under a constant hazard
+  rate `h`.
+* `cdsFairSpread`: the fair CDS spread `c = h · (1 − R)` under constant hazard with recovery `R`.
+
+## Main results
+
 * `survival_at_zero`: `S(T, T) = 1`.
 * `survival_pos`: survival probability is positive.
 * `creditSpread_eq_hazard`: under constant hazard, spread equals hazard.
 * `survival_strictAnti_of_pos_hazard`: positive hazard → strictly decreasing
   survival in horizon `T`.
+
+## References
+
+* [Duffie and Singleton (1999)][DuffieSingleton1999]
+* [Jarrow and Turnbull][JarrowTurnbull]
+* [D. Lando, *Credit Risk Modeling*][Lando2004], Ch 5
+
+## Tags
+
+reduced-form credit risk, hazard rate, default intensity, credit spread, survival probability,
+constant intensity, MSC 91G40, JEL G12
 -/
 
 @[expose] public section

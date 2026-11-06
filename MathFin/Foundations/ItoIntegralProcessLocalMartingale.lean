@@ -50,6 +50,22 @@ a true martingale, so the local-martingale statement is the canonical *framing*
 that connects to the localized theory; the genuinely new content here is the
 pathwise continuity. The general-integrand pathwise local martingale needs a
 continuous modification of the `L²` limit and remains the next gate.
+
+## Main results
+
+* `itoSimpleProcess_pathContinuous`: for continuous Brownian paths, each path
+  `t ↦ (V ● B)_t ω` of the elementary Itô integral is continuous.
+* `itoSimpleProcess_isLocalMartingale`: for continuous Brownian paths, the elementary Itô integral
+  `(V ● B)` is an `IsLocalMartingale`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Ch 7
+
+## Tags
+
+continuous local martingale, path continuity, simple integrand, Itô integral, sample paths,
+MSC 60G44, MSC 60H05
 -/
 
 @[expose] public section

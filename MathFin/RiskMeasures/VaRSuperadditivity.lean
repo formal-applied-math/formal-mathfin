@@ -45,7 +45,8 @@ framework replaced VaR by ES.
   `α ≤ 1 − p`.
 * `valueAtRisk_sum_bernoulli_superadditive_iff`: the exact superadditivity region for `d`
   independent Bernoulli losses.
-* `valueAtRisk_sum_bernoulli_of_card_two`: two loans, portfolio VaR `1`, single-loan VaR `0`.
+* `valueAtRisk_sum_bernoulli_of_card_two`: two loans, for `(1 − p)² < α ≤ 1 − p`: portfolio VaR
+  `1`, single-loan VaR `0`.
 * `cdf_conv`: the CDF of a convolution is `∫ F_ν(x − a) dμ(a)`.
 * `cdf_conv_paretoMeasure_half`: the sum of two independent `Pareto(1, 1/2)` losses has CDF
   `1 − 2√(x − 1)/x` on `[2, ∞)`.
@@ -54,6 +55,17 @@ framework replaced VaR by ES.
   level `α ≥ 1/2`, for every correlation.
 * `valueAtRisk_add_le_iff_of_hasGaussianLaw`: for a Gaussian pair with correlation `< 1`,
   subadditivity holds iff `α ≥ 1/2`.
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Ch 2.3; Example 2.25
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 2.20, 2.27; Ex. 2.22; Ex. 2.28
+
+## Tags
+
+VaR not subadditive, superadditivity, diversification paradox, independent defaults,
+infinite-mean Pareto, Gaussian VaR subadditivity, Basel III, MSC 91G70, MSC 60E15, JEL G32
 -/
 
 @[expose] public section
@@ -104,13 +116,8 @@ theorem valueAtRisk_of_bernoulli {Z : Ω → ℝ} (hZ : Measurable Z) (h01 : ∀
         _ = 1 - p := hzero
         _ < α := not_le.1 h
 
-/-- A sum of `{0, 1}` losses is nonnegative. -/
-private lemma sum_nonneg_of_bernoulli (h01 : ∀ i ω, Y i ω = 0 ∨ Y i ω = 1) (ω : Ω) :
-    0 ≤ ∑ i, Y i ω :=
-  Finset.sum_nonneg fun i _ ↦ by rcases h01 i ω with h | h <;> simp [h]
-
 /-- Below level `1` the portfolio loss vanishes exactly when no loss occurs. -/
-private lemma setOf_sum_le_eq_iInter (h01 : ∀ i ω, Y i ω = 0 ∨ Y i ω = 1) {x : ℝ}
+lemma setOf_sum_le_eq_iInter (h01 : ∀ i ω, Y i ω = 0 ∨ Y i ω = 1) {x : ℝ}
     (hx0 : 0 ≤ x) (hx1 : x < 1) :
     {ω | ∑ i, Y i ω ≤ x} = ⋂ i, {ω | Y i ω = 0} := by
   ext ω
@@ -122,7 +129,7 @@ private lemma setOf_sum_le_eq_iInter (h01 : ∀ i ω, Y i ω = 0 ∨ Y i ω = 1)
   linarith
 
 /-- With independent losses, no default occurs with probability `(1 − p)^d`. -/
-private lemma measureReal_iInter_eq_zero (hmeas : ∀ i, Measurable (Y i))
+lemma measureReal_iInter_setOf_eq_zero_eq_pow (hmeas : ∀ i, Measurable (Y i))
     (h01 : ∀ i ω, Y i ω = 0 ∨ Y i ω = 1) (hp : ∀ i, P.real {ω | Y i ω = 1} = p)
     (hind : iIndepFun Y P) :
     P.real (⋂ i, {ω | Y i ω = 0}) = (1 - p) ^ Fintype.card ι := by
@@ -138,12 +145,15 @@ private lemma one_le_valueAtRisk_sum (hmeas : ∀ i, Measurable (Y i))
     1 ≤ valueAtRisk (fun ω ↦ ∑ i, Y i ω) P α := by
   have hS : AEMeasurable (fun ω ↦ ∑ i, Y i ω) P :=
     (Finset.measurable_sum _ fun i _ ↦ hmeas i).aemeasurable
+  have hnn (ω : Ω) : 0 ≤ ∑ i, Y i ω :=
+    Finset.sum_nonneg fun i _ ↦ by rcases h01 i ω with h | h <;> simp [h]
   refine le_of_forall_lt fun x hx ↦ (lt_valueAtRisk_iff hS hα).2 ?_
   rcases lt_or_ge x 0 with hx0 | hx0
   · rw [show {ω | ∑ i, Y i ω ≤ x} = ∅ from eq_empty_of_forall_notMem fun ω hω ↦
-      (hx0.trans_le (sum_nonneg_of_bernoulli h01 ω)).not_ge hω, measureReal_empty]
+      (hx0.trans_le (hnn ω)).not_ge hω, measureReal_empty]
     exact hα.1
-  · rwa [setOf_sum_le_eq_iInter h01 hx0 hx, measureReal_iInter_eq_zero hmeas h01 hp hind]
+  · rwa [setOf_sum_le_eq_iInter h01 hx0 hx,
+      measureReal_iInter_setOf_eq_zero_eq_pow hmeas h01 hp hind]
 
 /-- **VaR is superadditive for independent defaults exactly on `((1 − p)^d, 1 − p]`**
 (QRM Exercise Book, Exercises 2.20 and 2.27). For `d` independent `{0, 1}`-valued losses that
@@ -163,7 +173,8 @@ theorem valueAtRisk_sum_bernoulli_superadditive_iff (hmeas : ∀ i, Measurable (
       zero_lt_one.trans_le (one_le_valueAtRisk_sum hmeas h01 hp hind hα h)⟩
     -- at `α ≤ (1 − p)^d` the portfolio VaR is `0`
     refine (valueAtRisk_le_iff hS hα).2 ?_
-    rw [setOf_sum_le_eq_iInter h01 le_rfl zero_lt_one, measureReal_iInter_eq_zero hmeas h01 hp hind]
+    rw [setOf_sum_le_eq_iInter h01 le_rfl zero_lt_one,
+      measureReal_iInter_setOf_eq_zero_eq_pow hmeas h01 hp hind]
     exact hle
   · simp only [h1p, ↓reduceIte, Finset.sum_const, Finset.card_univ, nsmul_eq_mul, mul_one,
       and_false, iff_false, not_lt]
@@ -242,7 +253,7 @@ theorem cdf_conv (μ ν : Measure ℝ) [IsProbabilityMeasure μ] [IsProbabilityM
     ENNReal.toReal_ofReal (integral_nonneg fun _ ↦ cdf_nonneg ν _)]
 
 /-- Integrals against the Pareto law are integrals against its density. -/
-private lemma integral_paretoMeasure {t r : ℝ} (ht : 0 ≤ t) (hr : 0 ≤ r) (f : ℝ → ℝ) :
+lemma integral_paretoMeasure {t r : ℝ} (ht : 0 ≤ t) (hr : 0 ≤ r) (f : ℝ → ℝ) :
     ∫ a, f a ∂paretoMeasure t r = ∫ a, paretoPDFReal t r a * f a := by
   have hm : Measurable (paretoPDF t r) := (measurable_paretoPDFReal t r).ennreal_ofReal
   rw [paretoMeasure, integral_withDensity_eq_integral_toReal_smul hm
@@ -252,7 +263,7 @@ private lemma integral_paretoMeasure {t r : ℝ} (ht : 0 ≤ t) (hr : 0 ≤ r) (
   rw [paretoPDF, ENNReal.toReal_ofReal (paretoPDFReal_nonneg ht hr a), smul_eq_mul]
 
 /-- The antiderivative of the convolution integrand of `cdf_conv_paretoMeasure_half`. -/
-private lemma hasDerivAt_convAntideriv {x a : ℝ} (ha : 0 < a) (hxa : 0 < x - a) :
+lemma hasDerivAt_convAntideriv {x a : ℝ} (ha : 0 < a) (hxa : 0 < x - a) :
     HasDerivAt (fun a ↦ -(√a)⁻¹ + √(x - a) / (x * √a))
       ((1 - (√(x - a))⁻¹) / (2 * a * √a)) a := by
   have hu : 0 < √a := sqrt_pos.2 ha

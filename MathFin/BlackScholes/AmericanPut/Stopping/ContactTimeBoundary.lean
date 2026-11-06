@@ -16,10 +16,20 @@ nearby initial log price. The boundary moves in the favorable direction as
 remaining maturity decreases. This gives almost-sure convergence of the actual
 first-contact times, not an assumption of probabilistic boundary regularity.
 
-## Result
+## Main results
 
-Public entry points include `brownianUsualActualContactTime_le_of_downcrossing`,
-`brownianUsualActualContactTime_tendsto_of_germ`, `brownianUsualActualContactTime_tendsto_boundary`.
+* `brownianUsualActualContactTime_le_of_downcrossing`: for `0 < k`, `0 ≤ h ≤ k` and `s < T`, if the
+  log state at `s` is at or below the canonical log boundary, the actual contact time is `≤ s`.
+* `brownianUsualActualContactTime_tendsto_of_germ`: for `0 < T` and a path in
+  `brownianNegativeGerm`, the contact time tends to `0` as the initial log state tends to
+  `canonicalLogBoundary k h T`.
+* `brownianUsualActualContactTime_tendsto_boundary`: the same convergence holds for almost every
+  path of the completed Gaussian limit.
+
+## Tags
+
+contact times, Brownian excursion, exercise boundary, almost-sure convergence, optimal stopping,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -13,6 +13,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "Markowitz mean-variance frontier, two-asset case (Bodie-Kane-Marcus Ch 7)",
+        "citations": [
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 7"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via field_simp + ring on the polynomial identity. Lives in MathFin/Portfolio/Markowitz.lean. Axioms-clean."
@@ -29,6 +35,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "Markowitz minimum-variance closed form (Bodie-Kane-Marcus Ch 7)",
+        "citations": [
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 7"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, immediate from the variance factorization at w = w*. Lives in MathFin/Portfolio/Markowitz.lean. Axioms-clean."
@@ -45,6 +57,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "Markowitz mean-variance frontier as a lower envelope (Bodie-Kane-Marcus Ch 7)",
+        "citations": [
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 7"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof from the variance factorization plus sq_nonneg + linarith. Lives in MathFin/Portfolio/Markowitz.lean. Axioms-clean."
@@ -61,6 +79,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "Markowitz perfect-hedge identity (Bodie-Kane-Marcus Ch 7)",
+        "citations": [
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 7"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The numerator (1 - ρ²) vanishes at ρ = -1. Lives in MathFin/Portfolio/Markowitz.lean. Axioms-clean."
@@ -77,6 +101,15 @@
       "metadata": {
         "chapter": 12,
         "reference": "CAPM (Sharpe 1964; Bodie-Kane-Marcus Ch 9)",
+        "citations": [
+          {
+            "key": "Sharpe1964"
+          },
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 9"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof from div_self. Lives in MathFin/Portfolio/CAPM.lean. Axioms-clean."
@@ -93,6 +126,15 @@
       "metadata": {
         "chapter": 12,
         "reference": "CAPM (Sharpe 1964; Bodie-Kane-Marcus Ch 9)",
+        "citations": [
+          {
+            "key": "Sharpe1964"
+          },
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 9"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof from zero_div. Lives in MathFin/Portfolio/CAPM.lean. Axioms-clean."
@@ -109,6 +151,12 @@
       "metadata": {
         "chapter": 12,
         "reference": "CAPM beta linearity (Bodie-Kane-Marcus Ch 9.3)",
+        "citations": [
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 9.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via bilinearity of covariance, axiomatized as `(w₁·c₁ + w₂·c₂)/v = w₁·c₁/v + w₂·c₂/v`. Lives in MathFin/Portfolio/CAPM.lean. Axioms-clean."
@@ -125,6 +173,12 @@
       "metadata": {
         "chapter": 12,
         "reference": "CAPM beta linearity for portfolios (Bodie-Kane-Marcus Ch 9.3)",
+        "citations": [
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 9.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via Finset.sum_div + mul_div_assoc. Lives in MathFin/Portfolio/CAPM.lean. Axioms-clean."
@@ -141,6 +195,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "Markowitz portfolio variance scaling (Bodie-Kane-Marcus Ch 7)",
+        "citations": [
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 7"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof from Finset.mul_sum + ring on the double sum. Lives in MathFin/Portfolio/MarkowitzNAsset.lean. Axioms-clean."
@@ -157,6 +217,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "Uncorrelated-asset portfolio variance (Bodie-Kane-Marcus Ch 7.2)",
+        "citations": [
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 7.2"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via inner-sum collapse Finset.sum_ite_eq' on the diagonal. Lives in MathFin/Portfolio/MarkowitzNAsset.lean. Axioms-clean."
@@ -173,6 +239,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "Diversification under iid assets (Bodie-Kane-Marcus Ch 7.4)",
+        "citations": [
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 7.4"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via diagonal collapse + Finset.sum_const + nsmul_eq_mul. Lives in MathFin/Portfolio/MarkowitzNAsset.lean. Axioms-clean."
@@ -189,6 +261,15 @@
       "metadata": {
         "chapter": 11,
         "reference": "Positive-semidefinite covariance (Bodie-Kane-Marcus Ch 7; Markowitz 1952)",
+        "citations": [
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 7"
+          },
+          {
+            "key": "Markowitz1952"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the PSD property is DERIVED, not assumed. portfolioVarN_covariance_nonneg (Portfolio/CovariancePSD.lean) proves the Markowitz quadratic form with the genuine covariance kernel cov(R_i, R_j) of L2 random returns equals Var[sum w_i R_i] >= 0 — the self-dot variance identity, via Mathlib's variance_sum' (variance of a sum = double sum of covariances) with covariance_smul_left/right peeling the weights. Replaces the former conclusion-in-hypothesis form (PSD assumed, instantiated at w). Axioms-clean."
@@ -205,6 +286,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "Two-asset specialization of the n-asset Markowitz variance (Bodie-Kane-Marcus Ch 7.3)",
+        "citations": [
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 7.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via Finset.univ on Fin 2 expansion + ring. Lives in MathFin/Portfolio/MarkowitzNAsset.lean. Axioms-clean."
@@ -221,6 +308,15 @@
       "metadata": {
         "chapter": 15,
         "reference": "Sharpe ratio (Sharpe 1966; Bodie-Kane-Marcus Ch 10)",
+        "citations": [
+          {
+            "key": "Sharpe1966"
+          },
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 10"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via field_simp on the definition. Lives in MathFin/Performance/Ratios.lean. Axioms-clean."
@@ -237,6 +333,16 @@
       "metadata": {
         "chapter": 15,
         "reference": "Sharpe ratio time scaling (Bodie-Kane-Marcus Ch 5.5; Hull Ch 14 vol annualization)",
+        "citations": [
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 5.5"
+          },
+          {
+            "key": "Hull",
+            "locator": "Ch 14"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via T = √T·√T rewrite + field_simp. Lives in MathFin/Performance/Ratios.lean. Axioms-clean."
@@ -253,6 +359,14 @@
       "metadata": {
         "chapter": 15,
         "reference": "Kelly criterion (Kelly 1956; Thorp 2006)",
+        "citations": [
+          {
+            "key": "Kelly1956"
+          },
+          {
+            "key": "Thorp2006"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via HasDerivAt.log composition + field_simp on the polynomial identity at f*. Lives in MathFin/Performance/Ratios.lean. Axioms-clean."
@@ -269,6 +383,15 @@
       "metadata": {
         "chapter": 12,
         "reference": "Capital Market Line (Tobin 1958; Bodie-Kane-Marcus Ch 9.2)",
+        "citations": [
+          {
+            "key": "Tobin1958"
+          },
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 9.2"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via field_simp + ring on the definitions. Lives in MathFin/Portfolio/TwoFundSeparation.lean. Axioms-clean."
@@ -285,6 +408,15 @@
       "metadata": {
         "chapter": 12,
         "reference": "Two-fund separation theorem (Tobin 1958; Bodie-Kane-Marcus Ch 9.2)",
+        "citations": [
+          {
+            "key": "Tobin1958"
+          },
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 9.2"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via field_simp + ring. Lives in MathFin/Portfolio/TwoFundSeparation.lean. Axioms-clean."
@@ -301,6 +433,11 @@
       "metadata": {
         "chapter": 12,
         "reference": "Two-fund separation decomposition (Tobin 1958)",
+        "citations": [
+          {
+            "key": "Tobin1958"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via field_simp. Lives in MathFin/Portfolio/TwoFundSeparation.lean. Axioms-clean."
@@ -317,6 +454,12 @@
       "metadata": {
         "chapter": 12,
         "reference": "Capital Market Line — return as function of risk (Bodie-Kane-Marcus Ch 9.2)",
+        "citations": [
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 9.2"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via field_simp + ring. Lives in MathFin/Portfolio/TwoFundSeparation.lean. Axioms-clean."
@@ -333,6 +476,15 @@
       "metadata": {
         "chapter": 15,
         "reference": "Sortino ratio (Sortino-van der Meer 1991; Bodie-Kane-Marcus Ch 10)",
+        "citations": [
+          {
+            "key": "SortinoVanDerMeer1991"
+          },
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 10"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via field_simp. Lives in MathFin/Performance/RatiosExtended.lean. Axioms-clean."
@@ -349,6 +501,11 @@
       "metadata": {
         "chapter": 15,
         "reference": "Sortino ratio (Sortino-van der Meer 1991)",
+        "citations": [
+          {
+            "key": "SortinoVanDerMeer1991"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via ring_nf. Lives in MathFin/Performance/RatiosExtended.lean. Axioms-clean."
@@ -365,6 +522,15 @@
       "metadata": {
         "chapter": 15,
         "reference": "Treynor ratio (Treynor 1965; Bodie-Kane-Marcus Ch 10)",
+        "citations": [
+          {
+            "key": "Treynor1965"
+          },
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "Ch 10"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via field_simp. Lives in MathFin/Performance/RatiosExtended.lean. Axioms-clean."
@@ -381,6 +547,11 @@
       "metadata": {
         "chapter": 15,
         "reference": "Information ratio (Grinold-Kahn 1999, Active Portfolio Management)",
+        "citations": [
+          {
+            "key": "GrinoldKahn1999"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via field_simp. Lives in MathFin/Performance/RatiosExtended.lean. Axioms-clean."
@@ -397,6 +568,11 @@
       "metadata": {
         "chapter": 15,
         "reference": "Tracking error decomposition (Grinold-Kahn 1999)",
+        "citations": [
+          {
+            "key": "GrinoldKahn1999"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via ring. Lives in MathFin/Performance/RatiosExtended.lean. Axioms-clean."
@@ -413,6 +589,11 @@
       "metadata": {
         "chapter": 15,
         "reference": "Tracking error bound from Cauchy-Schwarz (Grinold-Kahn 1999)",
+        "citations": [
+          {
+            "key": "GrinoldKahn1999"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via nlinarith on the algebraic identity. Lives in MathFin/Performance/RatiosExtended.lean. Axioms-clean."
@@ -429,6 +610,14 @@
       "metadata": {
         "chapter": 15,
         "reference": "Omega ratio (Keating-Shadwick 2002); maximum drawdown and Calmar ratio (Young 1991)",
+        "citations": [
+          {
+            "key": "KeatingShadwick2002"
+          },
+          {
+            "key": "Young1991"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Finite-state Omega ratio with normalized nonnegative weights, finite-path maximum drawdown (the largest decline below the running peak, Mathlib's partialSups; the largest chronological peak-to-trough loss), and positive-scaling Calmar invariance. Lives in MathFin/Performance/DownsideMetrics.lean. Axioms-clean."
@@ -445,6 +634,14 @@
       "metadata": {
         "chapter": 15,
         "reference": "Relative (percentage) drawdown, e.g. C. Bacon, Practical Portfolio Performance Measurement and Attribution, 2nd ed. (2008); absolute maximum drawdown and Calmar ratio (Young 1991)",
+        "citations": [
+          {
+            "key": "Bacon2008"
+          },
+          {
+            "key": "Young1991"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Running peak is partialSups; positive scaling commutes with it because multiplication by c > 0 is an order isomorphism (OrderIso.mulLeft₀ + map_partialSups). The Lean results hold over any locally-finite-order-bot time index; the snippet instantiates Fin n to contrast with MathFin.maximumDrawdown. Lives in MathFin/Performance/RelativeDrawdown.lean. Axioms-clean."
@@ -461,6 +658,14 @@
       "metadata": {
         "chapter": 15,
         "reference": "Multi-period Kelly aggregation (Kelly 1956; Thorp 2006)",
+        "citations": [
+          {
+            "key": "Kelly1956"
+          },
+          {
+            "key": "Thorp2006"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal derivation (reduced_core -> full, 2026-06-06, repairing the definitional-rfl demotion of the same morning): the n-period iid model is now actual measure theory — one period's wealth multiplier is the two-point law kellyReturnMeasure p b f (win 1+f*b w.p. p, lose to 1-f w.p. 1-p), n periods are its n-fold product Measure.pi, and E[sum_i log R_i] = n * kellyGrowth p b f is COMPUTED via linearity of expectation: integral_finsetSum + the measure-preserving coordinate evaluations of the product measure (measurePreserving_eval) + the one-period evaluation integral_log_kellyReturnMeasure. The compounded-wealth reading is log(prod R_i) = sum log R_i. Lives in MathFin/Performance/Kelly.lean. Axioms-clean."
@@ -477,6 +682,14 @@
       "metadata": {
         "chapter": 15,
         "reference": "Multi-period Kelly myopia (Thorp 2006; MacLean-Thorp-Ziemba 2010)",
+        "citations": [
+          {
+            "key": "Thorp2006"
+          },
+          {
+            "key": "MacLeanThorpZiemba2010"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via const_mul on single-period first-order condition. Lives in MathFin/Performance/Kelly.lean. Axioms-clean."
@@ -493,6 +706,11 @@
       "metadata": {
         "chapter": 15,
         "reference": "Kelly fraction bounds (Kelly 1956)",
+        "citations": [
+          {
+            "key": "Kelly1956"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via div_lt_one + nlinarith. Lives in MathFin/Performance/Kelly.lean. Axioms-clean."
@@ -509,6 +727,11 @@
       "metadata": {
         "chapter": 15,
         "reference": "Kelly fraction zero at break-even (Thorp 2006)",
+        "citations": [
+          {
+            "key": "Thorp2006"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via div_eq_zero_iff + linarith. Lives in MathFin/Performance/Kelly.lean. Axioms-clean."
@@ -525,6 +748,11 @@
       "metadata": {
         "chapter": 15,
         "reference": "Kelly fraction sign (Thorp 2006)",
+        "citations": [
+          {
+            "key": "Thorp2006"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via lt_div_iff + linarith. Lives in MathFin/Performance/Kelly.lean. Axioms-clean."
@@ -541,6 +769,11 @@
       "metadata": {
         "chapter": 10,
         "reference": "Risk parity (Maillard-Roncalli-Teiletche 2010)",
+        "citations": [
+          {
+            "key": "MaillardRoncalliTeiletche2010"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -557,6 +790,11 @@
       "metadata": {
         "chapter": 10,
         "reference": "Black-Litterman 1992 (posterior via gaussian conjugacy)",
+        "citations": [
+          {
+            "key": "BlackLitterman1992"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -573,6 +811,11 @@
       "metadata": {
         "chapter": 10,
         "reference": "Black-Litterman 1992 (posterior precision additivity)",
+        "citations": [
+          {
+            "key": "BlackLitterman1992"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -589,6 +832,14 @@
       "metadata": {
         "chapter": 10,
         "reference": "Tangent portfolio (Markowitz 1952, Sharpe 1964)",
+        "citations": [
+          {
+            "key": "Markowitz1952"
+          },
+          {
+            "key": "Sharpe1964"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full derivation: the FOC is the critical-point condition of the squared Sharpe ratio, proved via HasDerivAt + derivative-uniqueness + numerator factorisation (MathFin.sharpeSqTwo_critical_iff_crossProduct_FOC). Axioms-clean."
@@ -605,6 +856,14 @@
       "metadata": {
         "chapter": 10,
         "reference": "N-asset tangent portfolio (Markowitz 1952, Sharpe 1964; matrix-inverse characterisation)",
+        "citations": [
+          {
+            "key": "Markowitz1952"
+          },
+          {
+            "key": "Sharpe1964"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -621,6 +880,11 @@
       "metadata": {
         "chapter": 10,
         "reference": "Numéraire portfolio / benchmark approach (Long 1990; Platen); Kelly growth-optimal criterion",
+        "citations": [
+          {
+            "key": "Long1990"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.kellyNumeraire_isRiskNeutral (MathFin/Performance/KellyNumeraire.lean): the growth-optimal (Kelly) portfolio, used as numéraire, deflates the physical measure into the EMM. Consumes the Kelly fraction kellyFraction and its first-order optimality (kellyGrowth_deriv_at_kelly): 1 + f*·b = p·(b+1), so the GOP-deflated win-probability p/W*₊ = 1/(b+1) is p-independent — the fair-odds risk-neutral probability. HONEST SCOPE: the discrete, two-outcome market — the fully elementary shadow of the continuous Long/Platen benchmark theorem (deflated prices are P-martingales, EMM density ∝ 1/N*), which needs a state-price-density / market model absent from the Itô tower. No axioms beyond Mathlib defaults."
@@ -637,6 +901,7 @@
       "metadata": {
         "chapter": 0,
         "reference": "Add the gain-to-pain ratio and prove it is nonnegative",
+        "citations": [],
         "difficulty": "good-first",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof in MathFin/Performance/RatiosExtended.lean (autoformalized statement, leanstral proof, human-refined at review). Re-export from MathFin. Axioms-clean. Introduces definitions: gainToPain (new-defs review class).",
@@ -664,6 +929,7 @@
       "metadata": {
         "chapter": 0,
         "reference": "Add the upside-capture ratio and prove positive homogeneity in the portfolio return",
+        "citations": [],
         "difficulty": "small",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof in MathFin/Performance/RatiosExtended.lean (autoformalized statement, leanstral proof, human-refined at review). Re-export from MathFin. Axioms-clean. Introduces definitions: upCapture (new-defs review class).",
@@ -691,6 +957,16 @@
       "metadata": {
         "chapter": 11,
         "reference": "Merton, An Analytic Derivation of the Efficient Portfolio Frontier, J. Financial and Quantitative Analysis 7(4) (1972), §II; Boyd and Vandenberghe, Convex Optimization (2004), §5.5.3",
+        "citations": [
+          {
+            "key": "Merton1972",
+            "locator": "§II"
+          },
+          {
+            "key": "BoydVandenberghe2004",
+            "locator": "§5.5.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.portfolioVariance_le_of_lagrangian_FOC (MathFin/Portfolio/MarkowitzLagrangian.lean), proved as an instance of the KKT sufficiency theorem kkt_sufficient_of_eq (MathFin/Portfolio/ConvexQPKKT.lean) for the QP min ½ wᵀΣw with the equality constraints 1·w = 1, μ·w = m. SCOPE: sufficiency of the first-order condition for a global minimum among feasible portfolios; positive semidefiniteness of Σ is a hypothesis; necessity (every minimiser satisfies the FOC) and the closed-form frontier are not proved."
@@ -707,6 +983,15 @@
       "metadata": {
         "chapter": 11,
         "reference": "Markowitz, Portfolio Selection, J. Finance 7(1) (1952) 77–91; Merton, An Analytic Derivation of the Efficient Portfolio Frontier, J. Financial and Quantitative Analysis 7(4) (1972), §II",
+        "citations": [
+          {
+            "key": "Markowitz1952"
+          },
+          {
+            "key": "Merton1972",
+            "locator": "§II"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.variance_le_of_lagrangian_FOC (MathFin/Portfolio/MarkowitzLagrangian.lean): posSemidef_covariance derives Matrix.PosSemidef of the covariance matrix from covariance_kernel_psd (MathFin/Portfolio/CovariancePSD.lean), portfolioVarN_covariance_eq_variance identifies the quadratic form with Var[∑ wᵢ Rᵢ], and portfolioVariance_le_of_lagrangian_FOC (KKT sufficiency) gives the inequality. SCOPE: sufficiency only; the means μ are given numbers (not required to be E[Rᵢ]); square-integrability on a finite measure is assumed."
@@ -723,6 +1008,15 @@
       "metadata": {
         "chapter": 11,
         "reference": "Markowitz, Portfolio Selection, J. Finance 7(1) (1952) 77–91; Bodie, Kane and Marcus, Investments, ch. 7 (portfolios of two risky assets)",
+        "citations": [
+          {
+            "key": "Markowitz1952"
+          },
+          {
+            "key": "BodieKaneMarcus",
+            "locator": "ch. 7"
+          }
+        ],
         "difficulty": "introductory",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.portfolioVarTwo_eq_variance (MathFin/Portfolio/MarkowitzLagrangian.lean), from the self-dot identity portfolioVarN_covariance_eq_variance (MathFin/Portfolio/CovariancePSD.lean) on Fin 2 with covariance_self and covariance_comm. SCOPE: σ₁, σ₂, ρ enter only through the three moment hypotheses; the sign of σᵢ and |ρ| ≤ 1 are not assumed."
@@ -739,6 +1033,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "Merton, An Analytic Derivation of the Efficient Portfolio Frontier, J. Financial and Quantitative Analysis 7(4) (1972), §II (minimum-variance portfolio)",
+        "citations": [
+          {
+            "key": "Merton1972",
+            "locator": "§II"
+          }
+        ],
         "difficulty": "introductory",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.marginalVariance_minVarWeightTwo (MathFin/Portfolio/MarkowitzLagrangian.lean), on the covariance matrix covTwo (MathFin/Portfolio/Markowitz.lean). SCOPE: an algebraic identity for D ≠ 0; that w* minimises the variance is the separate result portfolioVarTwo_ge_min (D > 0). The corollary isConstrainedVarianceCriticalPoint_minVarWeightTwo (critical point under the budget constraint) is not part of this entry's statement."
@@ -755,6 +1055,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "Maillard, Roncalli and Teïletche, The Properties of Equally Weighted Risk Contribution Portfolios, J. Portfolio Management 36(4) (2010) 60–70, §2 (two-asset case)",
+        "citations": [
+          {
+            "key": "MaillardRoncalliTeiletche2010",
+            "locator": "§2"
+          }
+        ],
         "difficulty": "introductory",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.isRiskParity_two_iff (MathFin/Portfolio/RiskParity.lean), using the risk-parity predicate IsRiskParity (MathFin/Portfolio/RiskParityFOC.lean) and covTwo (MathFin/Portfolio/Markowitz.lean). The key step is RC₁ − RC₂ = (w₁σ₁ − w₂σ₂)(w₁σ₁ + w₂σ₂). SCOPE: two assets, long-only weights; the N-asset existence and uniqueness of the equal-risk-contribution portfolio are not proved."
@@ -771,6 +1077,14 @@
       "metadata": {
         "chapter": 11,
         "reference": "Theil and Goldberger, On Pure and Mixed Statistical Estimation in Economics, International Economic Review 2(1) (1961) 65–78; Black and Litterman, Global Portfolio Optimization, Financial Analysts Journal 48(5) (1992) 28–43",
+        "citations": [
+          {
+            "key": "TheilGoldberger1961"
+          },
+          {
+            "key": "BlackLitterman1992"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.IsBLPosteriorMean.blLoss_le (MathFin/Portfolio/BlackLittermanND.lean): blLoss_eq_qpObj writes the loss as the convex QP objective with Hessian the posterior precision, and the unconstrained case of kkt_sufficient_of_eq (MathFin/Portfolio/ConvexQPKKT.lean) applies. SCOPE: minimisation given a solution of the normal equation; the normal equation is the definition of IsBLPosteriorMean, and the Bayesian (Gaussian-conjugate) derivation of the posterior is not formalized."
@@ -787,6 +1101,11 @@
       "metadata": {
         "chapter": 11,
         "reference": "Sharpe, A Simplified Model for Portfolio Analysis, Management Science 9(2) (1963) 277–293",
+        "citations": [
+          {
+            "key": "Sharpe1963"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.variance_singleIndex_portfolio (MathFin/Portfolio/SingleIndexModel.lean): covariance_singleIndex derives cov(Rᵢ, Rⱼ) = singleIndexKernel by bilinearity of covariance, portfolioVarN_covariance_eq_variance (MathFin/Portfolio/CovariancePSD.lean) gives the variance of the portfolio return, and portfolioVarN_singleIndex_eq evaluates the kernel's quadratic form. SCOPE: uncorrelatedness (not independence) is assumed; the large-n diversification limit is a separate result."
@@ -803,6 +1122,14 @@
       "metadata": {
         "chapter": 11,
         "reference": "Sharpe, A Simplified Model for Portfolio Analysis, Management Science 9(2) (1963) 277–293; Sharpe, Capital Asset Prices, J. Finance 19(3) (1964) 425–442",
+        "citations": [
+          {
+            "key": "Sharpe1963"
+          },
+          {
+            "key": "Sharpe1964"
+          }
+        ],
         "difficulty": "introductory",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.beta_singleIndex (MathFin/Portfolio/SingleIndexModel.lean), with beta the CAPM ratio of MathFin/Portfolio/CAPM.lean, by covariance_add_left, covariance_smul_left and covariance_self. SCOPE: identifies the regression loading with the CAPM beta; it does not prove the CAPM pricing relation."
@@ -819,6 +1146,15 @@
       "metadata": {
         "chapter": 10,
         "reference": "López de Prado, Advances in Financial Machine Learning, Wiley (2018), ch. 10 (§10.3 bet sizing from predicted probabilities, §10.6 the sigmoid function); Kelly, A New Interpretation of Information Rate, Bell System Technical Journal 35 (1956) 917–926",
+        "citations": [
+          {
+            "key": "LopezDePrado2018",
+            "locator": "ch. 10"
+          },
+          {
+            "key": "Kelly1956"
+          }
+        ],
         "difficulty": "introductory",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.betSize_sqrt_mul_zScore (MathFin/Performance/BetSizeSigmoid.lean), with kellyFraction from MathFin/Performance/Ratios.lean: w + w z² = w/(4p(1 − p)), so √w·z/√(w + w z²) = 2p − 1. SCOPE: even-money odds only; the identity is algebraic and says nothing about the optimality of the sigmoid size; the Gaussian size 2Φ(z) − 1 is not treated."
@@ -835,6 +1171,15 @@
       "metadata": {
         "chapter": 10,
         "reference": "López de Prado, Advances in Financial Machine Learning, Wiley (2018), ch. 5, §5.4; Hosking, Fractional Differencing, Biometrika 68(1) (1981) 165–176",
+        "citations": [
+          {
+            "key": "LopezDePrado2018",
+            "locator": "ch. 5, §5.4"
+          },
+          {
+            "key": "Hosking1981"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.hasSum_fracDiffWeight_mul_pow (MathFin/Performance/FracDiffWeights.lean): fracDiffWeight_eq_choose identifies the weights with (−1)ᵏ Ring.choose d k, and Mathlib's Real.one_add_rpow_hasFPowerSeriesOnBall_zero gives the series of (1 + y)^d at y = −x. SCOPE: scalar argument |x| < 1; convergence of the differenced series of a time series and the decay of the weights are not proved."
@@ -851,6 +1196,16 @@
       "metadata": {
         "chapter": 10,
         "reference": "Merton, On Estimating the Expected Return on the Market, J. Financial Economics 8(4) (1980) 323–361, §I; López de Prado, Advances in Financial Machine Learning, Wiley (2018), ch. 5",
+        "citations": [
+          {
+            "key": "Merton1980",
+            "locator": "§I"
+          },
+          {
+            "key": "LopezDePrado2018",
+            "locator": "ch. 5"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.hasLaw_fracDiff_one_driftEstimator (MathFin/Performance/FracDiffWeights.lean): fracDiff_one_succ (d = 1 is the first difference), Finset.sum_range_sub (telescoping), Mathlib's IsPreBrownianReal.hasLaw_sub (B_T − B_0 ∼ N(0, T)) and drift_se_endpoint_hasLaw (MathFin/Foundations/Estimation.lean). SCOPE: equally spaced grid on [0, T], drift and volatility constant; only d = 1 enters; estimators for other d are not treated."
@@ -867,6 +1222,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "Johnson, Kotz and Balakrishnan, Continuous Univariate Distributions, Vol. 1, 2nd ed., Wiley (1994), ch. 13 (mean deviation of the normal distribution)",
+        "citations": [
+          {
+            "key": "JohnsonKotzBalakrishnan1994",
+            "locator": "ch. 13"
+          }
+        ],
         "difficulty": "introductory",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.integral_abs_gaussianReal (MathFin/Foundations/Estimation.lean): for v = 1, Mathlib's integral_comp_abs and the truncated first moment integral_id_mul_gaussianPDFReal_Ioi (MathFin/Foundations/GaussianPartialMoments.lean) give E|Z| = 2φ(0); a general v by gaussianReal_map_const_mul. SCOPE: the one-sample (n = 1) case of the square-root bias."
@@ -883,6 +1244,16 @@
       "metadata": {
         "chapter": 10,
         "reference": "López de Prado, Advances in Financial Machine Learning, Wiley (2018), ch. 7, §7.4 (purging); Karatzas and Shreve, Brownian Motion and Stochastic Calculus, 2nd ed., Springer (1991), §2.1 (independent increments)",
+        "citations": [
+          {
+            "key": "LopezDePrado2018",
+            "locator": "ch. 7, §7.4"
+          },
+          {
+            "key": "KaratzasShreve1991",
+            "locator": "§2.1"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.indepFun_of_purged (MathFin/Performance/PurgedCV.lean): lt_or_lt_of_not_overlapsTest turns survival of purging into strict separation of the spans, and IsSpanLabel.indepFun_of_le applies Mathlib's weak Markov property IsPreBrownianReal.indepFun_shift. SCOPE: labels are measurable functions of the increment family (B u − B s)_{s,u ∈ span} (IsSpanLabel) over deterministic spans; the conclusion is pairwise independence; features, embargo and joint independence of folds are not treated."
@@ -899,6 +1270,14 @@
       "metadata": {
         "chapter": 11,
         "reference": "Mean–variance portfolio selection in risk-penalized form and its mean–standard-deviation tradeoff, the standard penalty equivalence (Markowitz, 'Portfolio Selection', J. Finance 7(1), 1952); KKT sufficiency for convex quadratic programs (Boyd & Vandenberghe, Convex Optimization, 2004)",
+        "citations": [
+          {
+            "key": "Markowitz1952"
+          },
+          {
+            "key": "BoydVandenberghe2004"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.pricedReturn_le_of_kkt (MathFin/Portfolio/PosSemidefCauchySchwarz.lean), with pricedReturn unfolded in the statement. Stationarity turns the return gap into t₁(x₁'Σy − x₁'Σx₁) plus complementary-slackness terms, nonpositive at feasible y (kkt_complementary_term_nonneg, MathFin/Portfolio/ConvexQPKKT.lean); the cross term is bounded by Cauchy–Schwarz for the PSD form (posSemidef_cauchySchwarz). The right side's charge is t₁√(x₁'Σx₁)² = t₁·x₁'Σx₁. x₁'s own feasibility is not assumed. SCOPE: sufficiency only; KKT necessity is not proved."

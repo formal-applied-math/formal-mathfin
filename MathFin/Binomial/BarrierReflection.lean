@@ -12,21 +12,40 @@ public import MathFin.Binomial.PathReflection
 # Barrier-option counting via the reflection principle
 
 `Binomial/PathReflection.lean` builds André's reflection bijection
-`reflectionPrincipleEquiv_below : {ω // hit a ∧ end = b} ≃ {ω // end = 2a − b}` (for
+`reflectionPrincipleEquivBelow : {ω // hit a ∧ end = b} ≃ {ω // end = 2a − b}` (for
 `0 < a`, `b ≤ a`) and notes that *"the `Fintype.card` identity is their immediate corollary
 and is not separately stated here."* This file states it — the counting backbone of
 binomial barrier-option pricing — and derives the **maximal-distribution identity**, the
 running-maximum law that prices the knock-in.
 
+## Main definitions
+
+* `reflectHitLtGt`: the equivalence between paths that hit `a` and end below `a`, and paths that
+  hit `a` and end above `a`.
+* `hitAboveEquiv`: for `0 < a`, paths that hit `a` and end above `a` are in bijection with paths
+  ending above `a`.
+* `hitAtEquiv`: for `0 < a`, paths that hit `a` and end at `a` are in bijection with paths
+  ending at `a`.
+
 ## Main results
 
-* `reflection_principle_card` — `#{hit a, end b} = #{end 2a−b}` (the counting form of the
-  bijection), and its finance reading `barrierDigital_knockIn_reflection`: a cash-or-nothing
-  up-and-in digital equals the vanilla digital at the reflected level.
+* `reflection_principle_card` — for `0 < a`, `b ≤ a`, `#{hit a, end b} = #{end 2a−b}` (the
+  counting form of the bijection), and its finance reading `barrierDigital_knockIn_reflection`:
+  under the symmetric tree, a cash-or-nothing up-and-in digital at terminal `b ≤ a` equals the
+  vanilla digital at the reflected level.
 * `binomial_maximal_distribution_card` — the running-maximum distribution
   `#{ω : max ≥ a} = 2·#{end > a} + #{end = a}` (`a > 0`), the discrete
   `P(max ≥ a) = 2P(S_n > a) + P(S_n = a)` — obtained by trichotomising the hit-set and
   reflecting the below-barrier endpoints onto the above-barrier ones.
+
+## References
+
+* [André (1887)][Andre1887]
+
+## Tags
+
+barrier option, reflection principle, running maximum, knock-in, André reflection, lattice paths,
+MSC 91G20, MSC 60G50, JEL G13
 -/
 
 @[expose] public section
@@ -39,11 +58,11 @@ variable {n : ℕ}
 
 /-- **Counting form of André's reflection principle.** For a barrier `0 < a` and terminal
 `b ≤ a`, the number of `n`-step ±1 paths that touch `a` and finish at `b` equals the number
-that finish at `2a − b`. Immediate from `reflectionPrincipleEquiv_below`. -/
+that finish at `2a − b`. Immediate from `reflectionPrincipleEquivBelow`. -/
 theorem reflection_principle_card (a b : ℤ) (ha : 0 < a) (hb : b ≤ a) :
     Nat.card {ω : Fin n → Bool // HitsLevel a ω ∧ walkPos ω n = b}
       = Nat.card {ω : Fin n → Bool // walkPos ω n = 2 * a - b} :=
-  Nat.card_congr (reflectionPrincipleEquiv_below a b ha hb)
+  Nat.card_congr (reflectionPrincipleEquivBelow a b ha hb)
 
 /-- **Barrier cash-or-nothing knock-in = vanilla digital at the reflected level** (symmetric
 tree). Under the symmetric `q = 1/2` binomial measure (each path weight `2⁻ⁿ`), the up-and-in

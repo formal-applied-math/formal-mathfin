@@ -14,10 +14,18 @@ A stationary maximum on the exercise side suffices for a second-derivative
 bound on a smooth test function. The price itself need not be twice
 differentiable across the free boundary.
 
-## Result
+## Main results
 
-Public entry points include `second_deriv_nonpos_at_left_stationary_max`,
-`spatial_test_at_boundary`.
+* `second_deriv_nonpos_at_left_stationary_max`: if `F` is continuous at `x` with `F' x = 0` and
+  `F y ≤ F x` for `y` just to the left of `x`, then `F'' x ≤ 0`.
+* `spatial_test_at_boundary`: for a `DividendPutSolution`, `t > 0`, a test function `F` that is
+  `C²` at `b t` and has a local maximum of `F − p ·t` there, one has `F' (b t) = −e^{b t}` and
+  `F'' (b t) ≤ −e^{b t}`.
+
+## Tags
+
+one-sided test, stationary maximum, second-derivative bound, exercise side, smooth test function,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

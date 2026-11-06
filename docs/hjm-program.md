@@ -103,7 +103,7 @@ and Lévy towers (`Foundations/ExtendOfNormIsometry.lean`):
 | tower | integral CLM | file |
 |---|---|---|
 | Wiener | `wienerIntegralLp : Lp ℝ 2 (Ioc 0 T) →L[ℝ] Lp ℝ 2 μ` | `WienerIntegralL2` |
-| Itô | `itoIntegralCLM_T : L²(predictable) →L[ℝ] Lp ℝ 2 μ` | `ItoIntegralCLM` |
+| Itô | `itoIntegralCLM : L²(predictable) →L[ℝ] Lp ℝ 2 μ` | `ItoIntegralCLM` |
 | Lévy | `itoLevyIntegralL2 : levyClosure N →L[ℝ] Lp ℝ 2 P` | `PoissonCompensatedIntegralOperator` |
 
 So stochastic Fubini is **one tower-agnostic primitive + one-line instances** —
@@ -183,7 +183,7 @@ G2 #156 · G3 #157 · G4 #158 (umbrella #138).
   represented by `s ↦ ∫_A φ(s,u) du`) — the one analytic step, maybe already in
   Mathlib. No wrapper, no typeclass. **the keystone.** *(foundations · ready · full)*
 - **F3 · `sc-stochastic-fubini-ito`** — the one-line Itô instance of F1 at
-  `I := itoIntegralCLM_T`: `∫_A (∫_0^T φ dW) du = ∫_0^T (∫_A φ du) dW`. *(foundations · ready · full)*
+  `I := itoIntegralCLM`: `∫_A (∫_0^T φ dW) du = ∫_0^T (∫_A φ du) dW`. *(foundations · ready · full)*
 - **F4 · `sc-stochastic-fubini-ito-process`** — the pathwise all-`t` lift on
   `ItoIntegralProcess` (continuous modification). the form HJM's bond dynamics
   need. *(foundations · blocked-design · full)*

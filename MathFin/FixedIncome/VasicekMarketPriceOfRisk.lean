@@ -45,6 +45,19 @@ Both Girsanov results come from the Cameron–Martin shift `wienerIntegralLp_has
 under `Q_λ` every Wiener integral `∫₀ᵀ f dB` is `N(−λ∫₀ᵀ f, ∫₀ᵀ f²)`. The joint law of
 `(B_T, ∫₀ᵀ e^{−κ(T−s)} dB_s)` is not needed. The mean shift is `−λσ∫₀ᵀ e^{−κ(T−s)} ds = −λσ·B(T)`
 for `r_T`, and `−λσ∫₀ᵀ g = −λσ(T − B(T))/κ` for the integrated rate.
+
+## References
+
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  §3.2.1
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], Thm.
+  5.2.3
+* [O. Vasicek, *An equilibrium characterization of the term structure*][Vasicek1977]
+
+## Tags
+
+market price of risk, Vasicek model, risk-neutral measure, Cameron–Martin, Esscher transform,
+risk-adjusted mean, MSC 91G30, MSC 60H30, JEL E43
 -/
 
 @[expose] public section

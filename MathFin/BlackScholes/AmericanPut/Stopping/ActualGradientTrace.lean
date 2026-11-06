@@ -15,10 +15,32 @@ stock gradient trace. The exponential coordinate change gives the log-price
 trace required by the classical pricing contract. Boundary smoothness is not
 assumed here.
 
-## Result
+## Main definitions
 
-Public entry points include `canonicalStockPrice`, `canonicalStockPrice_exp`,
-`canonicalStockPrice_eq_log`, `canonicalStockPrice_convexOn`.
+* `canonicalStockPrice`: the actual stopping value in normalized stock price `S` instead of log
+  spot, `brownianUsualAmericanPut 1 k h √2 S t`.
+
+## Main results
+
+* `canonicalStockPrice_exp`, `canonicalStockPrice_eq_log`: the stock-coordinate price at `exp x`
+  is `canonicalPrice k h x t`, and at `S > 0` it is `canonicalPrice k h (log S) t`.
+* `canonicalStockPrice_convexOn`: for `0 ≤ k`, the price is convex in the stock on `[0, ∞)`.
+* `canonicalStockPrice_smooth_fit`: for `0 < k`, `0 ≤ h ≤ k` and `0 < t`, the price has right
+  derivative `-1` at the stock boundary.
+* `canonicalPrice_differentiableAt_continuation`,
+  `canonicalStockPrice_differentiableAt_continuation`: for `0 ≤ k` and `0 < t`,
+  the price is differentiable in space strictly inside the continuation region.
+* `canonicalStockPrice_gradient_trace`: for `0 < k`, `0 ≤ h ≤ k` and `0 < t`, the stock derivative
+  tends to `-1` as the stock decreases to the boundary from above.
+* `canonicalPrice_gradient_trace`, `zeroDividend_canonicalPrice_gradient_trace`,
+  `liuRange_canonicalPrice_gradient_trace`: the log-price derivative tends to
+  `-exp (canonicalLogBoundary k h t)` as `x` decreases to the log boundary, for `0 ≤ h ≤ k`, for
+  no dividend, and for `h + 1 ≤ k`.
+
+## Tags
+
+gradient trace, smooth fit, convexity in stock price, log-price, continuation side, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

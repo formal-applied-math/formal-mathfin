@@ -27,7 +27,26 @@ this engine composed with `bandExtend T`, and inherits all three.
 
 On the dense simple integrands the process is B1a's discrete process
 (`condExp_itoSimple_eq`, `condExp_itoIntegralL2_simple`, `itoProcessL2Inf_simpleAssembly_ae`),
-and density transfers the start `(f●B)_0 = 0` (`itoProcessL2Inf_zero_time`). -/
+and density transfers the start `(f●B)_0 = 0` (`itoProcessL2Inf_zero_time`).
+
+## Main definitions
+
+* `itoProcessL2Inf`: the unbounded-horizon Itô process `(f●B)_t = E[∫₀^∞ f dB | 𝓕_t]`, the
+  conditional-expectation projection of `itoIntegralL2 f` onto `𝓕_t`.
+
+## Main results
+
+* `itoProcessL2Inf_isMartingale`: for `i ≤ j`, `E[(f●B)_j | 𝓕_i] =ᵐ (f●B)_i`.
+* `itoProcessL2Inf_aeStronglyMeasurable`: `(f●B)_t` is almost everywhere `𝓕_t`-measurable.
+* `itoProcessL2Inf_norm_le`: `‖(f●B)_t‖ ≤ ‖f‖`.
+* `condExp_itoSimple_eq`: for `T`-bounded `V`, `μ[itoSimple V | 𝓕_t] = (V●B)_t`.
+* `itoProcessL2Inf_zero_time`: `(f●B)_0 = 0`.
+
+## Tags
+
+Itô integral process, infinite horizon, L² martingale, conditional expectation, stochastic integral,
+MSC 60H05, MSC 60G44
+-/
 
 @[expose] public section
 
