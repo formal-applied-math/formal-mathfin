@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.LpMulIsometry
 public import MathFin.Foundations.ItoIntegralHorizonDense
+public import Mathlib.Algebra.Ring.IsFormallyReal
 
 /-! # Simple processes are dense in the bracket-weighted predictable `L²`
 

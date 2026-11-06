@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoIntegralProcess
+public import Mathlib.Tactic.Polynomial.Basic
 
 /-! # The Itô integral process is an adapted L² martingale (B1a)
 

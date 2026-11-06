@@ -5,11 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
-public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.ExtendOfNormIsometry
 public import MathFin.Foundations.LpMulIsometry
 public import MathFin.Foundations.GaussianMoments
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
 
 /-!
 # Wiener integral on L²([0, T])

@@ -9,6 +9,7 @@ module
 public import MathFin.Foundations.ItoIntegralCLM
 public import MathFin.Foundations.ItoFormulaSquaredL2
 public import MathFin.Foundations.ItoRiemannSum
+public import Mathlib.Algebra.Ring.IsFormallyReal
 
 /-!
 # The Itô integral of Brownian motion: `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` via the CLM

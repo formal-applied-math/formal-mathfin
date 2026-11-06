@@ -5,10 +5,10 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.WienerIntegralGaussian
 public import MathFin.Foundations.WienerIntegralExpMoment
 public import MathFin.FixedIncome.VasicekBondPrice
+public import Mathlib.Order.CompletePartialOrder
 
 /-!
 # GSR (Gaussian short rate) with two-piece piecewise-constant volatility

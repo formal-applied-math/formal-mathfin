@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.ItoIntegralProcessGeneral
 public import MathFin.Foundations.LpMulIsometry
+public import Mathlib.Probability.CondVar
 
 /-! # The time-indexed Itô isometry for the general Itô integral (B1b)
 

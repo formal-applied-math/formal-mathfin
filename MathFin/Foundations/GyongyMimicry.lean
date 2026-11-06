@@ -14,6 +14,7 @@ public import MathFin.Foundations.AdaptedDrift
 public import MathFin.Foundations.ItoIntegralCrossHorizon
 public import MathFin.Foundations.ItoFormulaAdaptedDrift
 public import MathFin.Foundations.WeakForwardUniqueness
+public import Mathlib.MeasureTheory.Function.FactorsThrough
 
 /-! # Gyöngy mimicry — the generator-matching core and the weak forward equation
 

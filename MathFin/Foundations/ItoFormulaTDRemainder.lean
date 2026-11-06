@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.ItoFormulaRemainder
 public import MathFin.Foundations.ItoLemma2D
+public import Mathlib.Algebra.Order.Chebyshev
 
 /-! # The time-dependent Itô–Taylor remainder vanishes in `L²`
 

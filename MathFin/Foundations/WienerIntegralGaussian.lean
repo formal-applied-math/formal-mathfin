@@ -5,8 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.WienerIntegralL2
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.Tactic.ReduceModChar
+public import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # The Wiener integral of a deterministic integrand is Gaussian

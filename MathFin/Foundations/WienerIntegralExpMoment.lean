@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.WienerIntegralIndicator
 public import MathFin.Foundations.WienerIntegralGaussian
 
