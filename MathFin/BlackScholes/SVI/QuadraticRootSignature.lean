@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.SVI.NilpotentSquareRoot
 public import MathFin.BlackScholes.SVI.ImaginaryTraceSignature
+public import Mathlib.Algebra.Order.Ring.Star
 
 /-! # A conjugate pair contributes zero signature
 

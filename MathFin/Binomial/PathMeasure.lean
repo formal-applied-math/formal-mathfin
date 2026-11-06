@@ -9,6 +9,10 @@ public import MathFin.Binomial.EuropeanReplication
 public import MathFin.Binomial.SnellEnvelope
 public import MathFin.Foundations.SnellEnvelope
 public import MathFin.Foundations.MarkovPathMeasure
+public import Mathlib.Probability.ConditionalExpectation
+public import Mathlib.Probability.Distributions.Bernoulli
+public import Mathlib.Probability.Independence.InfinitePi
+public import Mathlib.Topology.Separation.CompletelyRegular
 
 /-!
 # The binomial price as an expectation over coin-flip paths

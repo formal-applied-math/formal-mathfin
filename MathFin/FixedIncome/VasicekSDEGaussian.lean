@@ -5,7 +5,6 @@ Authors: Raphael Coelho, Yang Ye
 -/
 module
 
-public import MathFin.ShakeScaffold
 public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.WienerIntegralGaussian
 public import MathFin.FixedIncome.VasicekSDE

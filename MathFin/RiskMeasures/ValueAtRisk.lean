@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.Quantile
-public import MathFin.ShakeScaffold
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # Value-at-risk and expected shortfall of a general loss

@@ -7,7 +7,6 @@ module
 
 public import MathFin.Foundations.ChangeOfMeasure
 public import MathFin.Foundations.EquivMeasure
-public import MathFin.ShakeScaffold
 
 /-!
 # The change of numéraire

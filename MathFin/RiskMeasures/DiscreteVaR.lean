@@ -7,7 +7,6 @@ module
 
 public import MathFin.Foundations.StdSimplexProd
 public import MathFin.RiskMeasures.ValueAtRisk
-public import MathFin.ShakeScaffold
 
 /-!
 # Value-at-risk and expected shortfall at a finite law

@@ -6,7 +6,6 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ConvexDuality
-public import MathFin.ShakeScaffold
 
 /-!
 # Separating-functional kernel for the finite Fundamental Theorem of Asset Pricing

@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Portfolio.CAPMEquilibrium
-public import MathFin.ShakeScaffold
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
 
 /-!
 # Risk-parity portfolios from the log-barrier Lagrangian (first-principles)

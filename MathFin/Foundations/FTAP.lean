@@ -10,7 +10,6 @@ public import MathFin.Foundations.MartingaleFrozen
 public import MathFin.Foundations.MartingaleTransform
 public import MathFin.Foundations.NoArbitrageCore
 public import MathFin.Foundations.ReplicationPricing
-public import MathFin.ShakeScaffold
 
 /-!
 # FTAP (Theorem 2.6.7), forward (⇒) direction: EMM ⇒ no arbitrage

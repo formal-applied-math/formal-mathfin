@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.SVI.QuadraticRootSignature
+public import Mathlib.Analysis.Complex.Polynomial.Basic
 
 /-! # Monic irreducible real polynomials
 

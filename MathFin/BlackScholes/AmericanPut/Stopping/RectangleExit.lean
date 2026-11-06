@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.FirstContact
+public import Mathlib.MeasureTheory.Order.Group.Lattice
 
 /-!
 # Admissible exit from a backward space-time rectangle

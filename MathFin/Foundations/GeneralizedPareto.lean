@@ -7,7 +7,7 @@ module
 
 public import MathFin.Foundations.ExtremeValue
 public import MathFin.Foundations.Quantile
-public import MathFin.ShakeScaffold
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # The generalized Pareto distribution

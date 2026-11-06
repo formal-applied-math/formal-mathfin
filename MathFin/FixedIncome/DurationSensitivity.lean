@@ -6,7 +6,8 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.FixedIncome.MacaulayModified
-public import MathFin.ShakeScaffold
+public import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
 
 /-!
 # Duration as price sensitivity (first-principles derivation)

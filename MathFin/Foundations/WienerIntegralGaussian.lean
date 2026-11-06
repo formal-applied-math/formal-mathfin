@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.ShakeScaffold
 public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.WienerIntegralL2
 

@@ -6,7 +6,6 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ExponentialDiscount
-public import MathFin.ShakeScaffold
 
 /-!
 # Force of mortality and survival functions

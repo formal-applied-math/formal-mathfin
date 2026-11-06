@@ -6,8 +6,8 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.DerivOfDeriv
-public import MathFin.ShakeScaffold
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
 
 /-!
 # Almgren-Chriss optimal execution (deterministic closed form)

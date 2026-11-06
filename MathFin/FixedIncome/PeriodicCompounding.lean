@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.FixedIncome.ZCB
-public import MathFin.ShakeScaffold
+public import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
 
 /-!
 # Periodic compounding against the continuously compounded bond

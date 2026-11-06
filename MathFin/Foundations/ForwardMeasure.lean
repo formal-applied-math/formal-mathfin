@@ -6,7 +6,6 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.Numeraire
-public import MathFin.ShakeScaffold
 
 /-!
 # The T-forward measure — the zero-coupon bond as numéraire

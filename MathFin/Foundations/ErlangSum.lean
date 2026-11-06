@@ -6,7 +6,19 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import MathFin.ShakeScaffold
+public import Mathlib.Algebra.Order.Floor.Extended
+public import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.CategoryTheory.Category.Init
+public import Mathlib.Combinatorics.Matroid.Init
+public import Mathlib.Combinatorics.SimpleGraph.Init
+public import Mathlib.Combinatorics.SimpleGraph.Regularity.Bound
+public import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.Geometry.Euclidean.Altitude
+public import Mathlib.NumberTheory.ArithmeticFunction.VonMangoldt
+public import Mathlib.NumberTheory.Height.Basic
+public import Mathlib.Probability.Distributions.Exponential
+public import Mathlib.Probability.Independence.Basic
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Basic
 
 /-!
 # Sums of iid exponentials are Erlang: the Gamma convolution identity

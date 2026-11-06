@@ -8,7 +8,11 @@ module
 public import MathFin.Foundations.EquivMeasure
 public import MathFin.Foundations.FTAP
 public import MathFin.Foundations.NoArbitrageCore
-public import MathFin.ShakeScaffold
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.ParametricIntegral
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
+public import Mathlib.Order.CompletePartialOrder
 
 /-!
 # One-period FTAP on a general probability space (finite-dimensional market)

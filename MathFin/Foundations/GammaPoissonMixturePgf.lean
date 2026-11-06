@@ -6,7 +6,8 @@ Authors: Yang Ye, Raphael Coelho
 module
 
 public import MathFin.Foundations.PoissonPgf
-public import MathFin.ShakeScaffold
+public import Mathlib.Probability.Distributions.Gamma
+public import Mathlib.Probability.Moments.Basic
 
 /-!
 # CreditRisk+ sector probability-generating function (Poisson–Gamma mixture)

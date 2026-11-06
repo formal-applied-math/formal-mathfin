@@ -6,7 +6,6 @@ Authors: Alfredo Garcia
 module
 
 public import MathFin.Execution.GlostenMilgrom
-public import MathFin.ShakeScaffold
 
 /-!
 # A model satisfying the Glosten-Milgrom hypotheses

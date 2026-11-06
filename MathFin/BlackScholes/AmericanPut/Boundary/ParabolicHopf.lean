@@ -6,7 +6,18 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.ParabolicMaximum
-public import MathFin.ShakeScaffold
+public import Mathlib.Algebra.Order.Floor.Extended
+public import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.CategoryTheory.Category.Init
+public import Mathlib.Combinatorics.Matroid.Init
+public import Mathlib.Combinatorics.SimpleGraph.Init
+public import Mathlib.Combinatorics.SimpleGraph.Regularity.Bound
+public import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.Geometry.Euclidean.Altitude
+public import Mathlib.NumberTheory.ArithmeticFunction.VonMangoldt
+public import Mathlib.NumberTheory.Height.Basic
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Basic
 
 /-!
 # Terminal-time boundary derivative from an explicit parabolic barrier

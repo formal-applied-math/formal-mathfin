@@ -6,7 +6,6 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.FTAPDiscrete
-public import MathFin.ShakeScaffold
 
 /-!
 # Second FTAP on a finite probability space: complete ⟺ unique equivalent martingale measure

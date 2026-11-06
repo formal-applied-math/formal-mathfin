@@ -6,7 +6,8 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Binomial.Model
-public import MathFin.ShakeScaffold
+public import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
 
 /-!
 # Cox-Ross-Rubinstein convergence to Black-Scholes

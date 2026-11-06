@@ -7,7 +7,6 @@ module
 
 public import MathFin.Portfolio.BlackLitterman
 public import MathFin.Portfolio.ConvexQPKKT
-public import MathFin.ShakeScaffold
 
 /-!
 # N-dimensional Black-Litterman posterior (matrix form)

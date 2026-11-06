@@ -6,7 +6,6 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.PoissonCompensatedIsometryAdapted
-public import MathFin.ShakeScaffold
 
 /-!
 # The compensated Poisson random measure is an orthogonal martingale measure

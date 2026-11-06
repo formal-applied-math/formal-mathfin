@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.ShakeScaffold
 public import MathFin.FixedIncome.GSRPiecewiseVol
 public import MathFin.FixedIncome.VasicekBondPriceAt
 public import MathFin.Foundations.WienerIntegralForwardMeasure

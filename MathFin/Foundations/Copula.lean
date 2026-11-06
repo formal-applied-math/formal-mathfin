@@ -6,7 +6,6 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.Quantile
-public import MathFin.ShakeScaffold
 
 /-!
 # Copulas

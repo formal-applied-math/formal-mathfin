@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.SVI.TraceForm
 public import MathFin.BlackScholes.SVI.ProductSignature
+public import Mathlib.RingTheory.Trace.Basic
 
 /-! # The Chinese remainder theorem for trace forms
 

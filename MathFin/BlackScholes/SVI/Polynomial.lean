@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.SVI.Reduction
+public import Mathlib.Algebra.Order.Ring.Star
 
 /-! # The numerator as a polynomial
 
