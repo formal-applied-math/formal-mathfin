@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.GaussianMoments
-public import MathFin.Foundations.QuadraticVariationL2
+public import MathFin.Foundations.QuadraticVariationL2  -- shake: keep (used through `open`)
 public import MathFin.Foundations.DiscreteIto
 
 /-! # The Itô–Taylor remainder: the cubic bound and Brownian sixth moments
