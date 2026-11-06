@@ -7,7 +7,7 @@ module
 
 public import MathFin.Foundations.DerivOfDeriv
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
-public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # Almgren-Chriss optimal execution (deterministic closed form)

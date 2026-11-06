@@ -13,6 +13,7 @@ public import Mathlib.Analysis.Calculus.ParametricIntegral
 public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
 public import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
 public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 
 /-!
 # One-period FTAP on a general probability space (finite-dimensional market)

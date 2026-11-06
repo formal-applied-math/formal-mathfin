@@ -7,6 +7,7 @@ module
 
 public import MathFin.Binomial.Model
 public import MathFin.Binomial.FlipPaths
+public meta import Lean.Meta.Tactic.NormCast
 
 /-!
 # Snell envelope characterization of `bermudanPrice` — scalar and path-space

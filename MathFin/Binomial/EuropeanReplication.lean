@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Binomial.SnellEnvelope
+public import Mathlib.Analysis.Normed.Field.Basic
 
 /-!
 # The discounted tree value and the discounted spot, as one-step martingales

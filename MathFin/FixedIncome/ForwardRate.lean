@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ExponentialDiscount
+public import Mathlib.Analysis.Calculus.Deriv.Mul
 
 /-!
 # Forward rate from a non-flat spot-rate curve

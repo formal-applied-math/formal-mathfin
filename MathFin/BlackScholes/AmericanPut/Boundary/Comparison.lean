@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.ODEComparison
+public import Mathlib.Analysis.Calculus.Deriv.Inv
 
 /-!
 # Straight-line comparison for the dividend-paying American put

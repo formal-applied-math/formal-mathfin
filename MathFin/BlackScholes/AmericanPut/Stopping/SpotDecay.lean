@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.LocalizationTimes
 public import MathFin.BlackScholes.AmericanPut.Stopping.SpotShape
+public import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
 /-! # Large-spot decay of the actual stopping supremum
 

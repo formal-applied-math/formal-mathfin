@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ConvexDuality
+public import Mathlib.Analysis.RCLike.Lemmas
 
 /-!
 # Separating-functional kernel for the finite Fundamental Theorem of Asset Pricing

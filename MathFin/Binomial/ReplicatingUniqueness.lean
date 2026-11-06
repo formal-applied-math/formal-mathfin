@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Binomial.Model
+public import Mathlib.Analysis.Normed.Field.Basic
 
 /-!
 # Uniqueness of the binomial replicating portfolio, and the law of one price

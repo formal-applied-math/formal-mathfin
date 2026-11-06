@@ -6,20 +6,10 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib.Algebra.Order.Floor.Extended
 public import Mathlib.Analysis.Analytic.IsolatedZeros
 public import Mathlib.Analysis.CStarAlgebra.Classes
-public import Mathlib.CategoryTheory.Category.Init
-public import Mathlib.Combinatorics.Matroid.Init
-public import Mathlib.Combinatorics.SimpleGraph.Init
-public import Mathlib.Combinatorics.SimpleGraph.Regularity.Bound
-public import Mathlib.Data.Nat.Choose.Multinomial
-public import Mathlib.Geometry.Euclidean.Altitude
 public import Mathlib.MeasureTheory.Measure.Tilted
-public import Mathlib.NumberTheory.ArithmeticFunction.VonMangoldt
-public import Mathlib.NumberTheory.Height.Basic
 public import Mathlib.Probability.Distributions.Gaussian.Real
-public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Basic
 
 /-!
 # The Esscher transform of a law on `ℝ`

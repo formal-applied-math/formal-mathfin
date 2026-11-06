@@ -7,9 +7,10 @@ module
 
 public import MathFin.Foundations.FiniteMeasureCauchySchwarz
 public import Mathlib.Algebra.Ring.IsFormallyReal
-public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
 public import Mathlib.Analysis.ODE.Gronwall
 public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
+public import Mathlib.MeasureTheory.Integral.Prod
 
 /-! # Pathwise uniqueness for SDEs via Grönwall
 

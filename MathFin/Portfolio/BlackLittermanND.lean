@@ -7,6 +7,7 @@ module
 
 public import MathFin.Portfolio.BlackLitterman
 public import MathFin.Portfolio.ConvexQPKKT
+public import Mathlib.Logic.Equiv.PartialEquiv
 
 /-!
 # N-dimensional Black-Litterman posterior (matrix form)

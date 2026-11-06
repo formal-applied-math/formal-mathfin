@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.Foundations.ItoLemma2D
+public import Mathlib.MeasureTheory.Function.L1Space.Integrable
 
 /-!
 # Discounted stopped put payoff for dividend-paying geometric Brownian motion

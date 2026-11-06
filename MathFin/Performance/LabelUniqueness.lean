@@ -6,18 +6,9 @@ Authors: Yang Ye
 module
 
 public import MathFin.Init
-public import Mathlib.Algebra.Order.Floor.Extended
-public import Mathlib.Analysis.SpecialFunctions.Bernstein
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
-public import Mathlib.CategoryTheory.Category.Init
-public import Mathlib.Combinatorics.Matroid.Init
-public import Mathlib.Combinatorics.SimpleGraph.Init
-public import Mathlib.Combinatorics.SimpleGraph.Regularity.Bound
-public import Mathlib.Data.Nat.Choose.Multinomial
-public import Mathlib.Geometry.Euclidean.Altitude
-public import Mathlib.NumberTheory.ArithmeticFunction.VonMangoldt
-public import Mathlib.NumberTheory.Height.Basic
-public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Basic
+public import Mathlib.Algebra.Order.Archimedean.Real.Basic
+public import Mathlib.Algebra.Order.BigOperators.Group.Finset
+public import Mathlib.Data.Fintype.BigOperators
 
 /-!
 # Per-observation uniqueness bound for overlapping-label samples

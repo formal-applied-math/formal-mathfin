@@ -6,7 +6,9 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.DerivOfDeriv
-public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.Analysis.SpecialFunctions.Log.Basic
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # Fixed-income basics under a deterministic short rate

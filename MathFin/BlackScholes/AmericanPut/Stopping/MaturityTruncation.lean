@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.Reward
 public import MathFin.BlackScholes.AmericanPut.Stopping.Rules
+public import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
 /-!
 # Stability of stopping rewards under small maturity changes

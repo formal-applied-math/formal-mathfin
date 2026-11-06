@@ -6,6 +6,8 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Binomial.PathReflection
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.SetTheory.Cardinal.Finite
 
 /-!
 # Barrier-option counting via the reflection principle

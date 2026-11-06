@@ -11,6 +11,7 @@ public import Mathlib.Algebra.Order.Star.Real
 public import Mathlib.MeasureTheory.Function.Floor
 public import Mathlib.Order.CompletePartialOrder
 public import Mathlib.Probability.Martingale.OptionalStopping
+public import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
 /-!
 # Sampling continuous-time stopping rules on a uniform grid

@@ -8,7 +8,9 @@ module
 -- `import Mathlib` comes transitively through `ItoLemma`; this file's surface
 -- needs only the `Real.exp` chain rule + `Finset` sum lemmas it already pulls.
 public import MathFin.Foundations.ItoLemma
-public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-! # Itô's lemma for `f(t, x)` — time-dependent (2D), items 4 & 5
 

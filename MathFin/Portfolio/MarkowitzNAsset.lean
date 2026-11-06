@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Portfolio.Markowitz
+public import Mathlib.Logic.Equiv.PartialEquiv
 
 /-!
 # N-asset Markowitz portfolio variance (sum form)

@@ -6,19 +6,9 @@ Authors: Robert Martin
 module
 
 public import MathFin.Init
-public import Mathlib.Algebra.Order.Floor.Extended
 public import Mathlib.Algebra.Ring.IsFormallyReal
-public import Mathlib.Analysis.SpecialFunctions.Bernstein
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
-public import Mathlib.CategoryTheory.Category.Init
-public import Mathlib.Combinatorics.SimpleGraph.Init
-public import Mathlib.Combinatorics.SimpleGraph.Regularity.Bound
-public import Mathlib.Data.Nat.Choose.Multinomial
-public import Mathlib.Geometry.Euclidean.Altitude
-public import Mathlib.NumberTheory.ArithmeticFunction.VonMangoldt
-public import Mathlib.NumberTheory.Height.Basic
 public import Mathlib.RingTheory.Trace.Basic
-public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Basic
+public import Mathlib.Analysis.Normed.Field.Basic
 
 /-! # Traces at a repeated real root
 

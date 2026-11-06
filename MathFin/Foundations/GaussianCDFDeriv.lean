@@ -6,7 +6,6 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.StandardNormal
-public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
 
 /-!
 # Derivative of the standard normal CDF: `Φ'(x) = ϕ(x)`

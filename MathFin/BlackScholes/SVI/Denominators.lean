@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.SVI.Matrices
+public import Mathlib.Analysis.Normed.Field.Basic
 
 /-! # Companion and Hermite matrices, and their denominators
 

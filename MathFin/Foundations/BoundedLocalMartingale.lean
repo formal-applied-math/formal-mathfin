@@ -8,6 +8,7 @@ module
 public import MathFin.Foundations.MartingaleSetIntegral
 public import MathFin.Foundations.StoppedProcessPaths
 public import BrownianMotion.StochasticIntegral.LocalMartingale
+public import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
 /-!
 # Bounded local martingales and smaller filtrations
