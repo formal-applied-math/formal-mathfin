@@ -6,13 +6,13 @@ name: import shake
 # memory doctrine (CLAUDE.md), so it runs here and commits the result to the branch it was
 # dispatched on.
 #
-# The shake is `lake exe mathfin_shake` (MathFinTools/Shake.lean): `lake shake` without its
-# indirect-use over-approximation, under which a module that puts an attribute on a common
-# constant counts as needed by every file referencing it, so a whole-Mathlib module is "narrowed"
-# to a block of unrelated Mathlib leaves that hides what it uses. `MathFin/ShakeScaffold.lean`,
-# when present, is Mathlib without the leaves an earlier round found: a branch points the
-# whole-Mathlib modules at it, shake replaces it by what each file uses, and this workflow
-# deletes it before the rebuild.
+# The shake is `lake exe mathfin_shake` (MathFinTools/Shake.lean): `lake shake` except that an
+# upstream module's extra reverse use is not preserved downstream. Mathlib marks every module that
+# registers a `positivity`/`norm_num` extension that way (extension use is not tracked), so under
+# `lake shake` a whole-Mathlib file is "narrowed" to a block of unrelated Mathlib leaves that
+# hides what it uses. A file that does rely on an upstream extension fails the rebuild below and
+# names the module itself. `MathFin/ShakeScaffold.lean`, when present, is a temporary stand-in
+# for Mathlib that a branch points modules at; this workflow deletes it before the rebuild.
 #
 # Flags: `--add-public` makes a replacement import `public` when what it replaces was in the
 # public closure, so a downstream module keeps seeing what it saw; `--keep-implied` keeps an

@@ -19,16 +19,15 @@ meta import Lean.Parser.Module
 
 ## MathFin's change
 
-`lake shake` also counts *indirect* module uses: when a module puts an attribute (`simp`,
-`positivity`, `aesop`, …) on a constant it does not declare, a file referencing that constant is
-taken to need the module, if the module is anywhere in the file's transitive imports. Against
-`import Mathlib` that makes every file referencing a common constant need every leaf module of
-Mathlib that tags it, so shake answers with a block of a dozen unrelated leaves (Euclidean
-altitudes, the von Mangoldt function, matroids) behind which the real imports hide; peeling one
-block exposes the next. Here a module counts only through a constant it declares, an expression
-reference, or a recorded elaboration use (`recordExtraModUse`) that no indirect use explains.
-When that drops a module a `simp` call did need, the narrowed build fails and the file names the
-module itself.
+A module that registers a `positivity`, `norm_num`, `inclusion` or `echelon` extension records an
+*extra reverse use* (`recordExtraRevUseOfCurrentModule`): since the use of an extension at a call
+site is not tracked, `lake shake` preserves such a module in every file whose imports reach it.
+Against `import Mathlib` that keeps every Mathlib leaf that registers one, so a whole-Mathlib file
+is "narrowed" to a block of a dozen unrelated leaves (Euclidean altitudes, the von Mangoldt
+function, multinomials), behind which the imports it uses hide. Here only the selected packages'
+own modules are preserved that way (`MathFin.Init`'s `shake: keep-downstream` included). A file
+that did rely on an upstream extension (a `positivity` or `norm_num` call that needs it) fails
+the narrowed build and names the module itself.
 
 `lake exe mathfin_shake` takes `lake shake`'s flags (`--fix --add-public --keep-implied
 --keep-public --keep-prefix --explain --trace`) and module names. The import-shake workflow runs it.
@@ -271,27 +270,19 @@ def getDepConstName? (s : State) (ref : Name) : Option Name := do
 def calcNeeds (s : State) (i : ModuleIdx) : Needs := Id.run do
   let env := s.env
   let mut needs := default
-  -- modules that an attribute on a referenced constant would make "needed" (MathFin's change)
-  let mut indirect : Std.HashSet ModuleIdx := {}
   for ci in env.header.moduleData[i]!.constants do
     -- Added guard for cases like `structure` that are still exported even if private
     let pubCI? := guard (!isPrivateName ci.name) *> (env.setExporting true).find? ci.name
     let k := { isExported := pubCI?.isSome, isMeta := isDeclMeta' env ci.name }
     needs := visitExpr k ci.type needs
-    indirect := collectIndirect ci.type indirect
     if let some e := ci.value? (allowOpaque := true) then
       -- type and value has identical visibility under `meta`
       let k := if k.isMeta then k else
         if pubCI?.any (·.hasValue (allowOpaque := true)) then .pub else .priv
       needs := visitExpr k e needs
-      indirect := collectIndirect e indirect
 
   for use in getExtraModUses env i do
     let j : Nat := env.getModuleIdx? use.module |>.get!
-    -- an elaboration use that an indirect use explains, of a module none of whose constants is
-    -- referenced, is the indirect use again: skip it (MathFin's change)
-    if indirect.contains j && !NeedsKind.all.any (needs.has · j) then
-      continue
     needs := needs.union { use with } {j}
 
   return needs
@@ -306,15 +297,10 @@ where
           let k := { k with isMeta := k.isMeta && !isDeclMeta' env c }
           if j != i then
             deps := deps.union k {j}
+            for (indMod : Nat) in s.indirectModUses[c]?.getD #[] do
+              if s.transDeps[i]!.has k indMod then
+                deps := deps.union k {indMod}
       return deps
-  /-- The modules recorded as indirect uses of the constants in `e`. -/
-  collectIndirect (e : Expr) (acc : Std.HashSet ModuleIdx) : Std.HashSet ModuleIdx :=
-    Lean.Expr.foldConsts e acc fun c acc => Id.run do
-      let mut acc := acc
-      if let some c := getDepConstName? s c then
-        for (indMod : Nat) in s.indirectModUses[c]?.getD #[] do
-          acc := acc.insert indMod
-      return acc
 
 abbrev Explanations := Std.HashMap (ModuleIdx × NeedsKind) (Option (Name × Name))
 
@@ -351,6 +337,9 @@ where
         if let some j := env.getModuleIdxFor? c then
           let k := { k with isMeta := k.isMeta && !isDeclMeta' env c }
           deps := addExplanation j k name c deps
+        for indMod in s.indirectModUses[c]?.getD #[] do
+          if s.transDeps[i]!.has k indMod then
+            deps := addExplanation indMod k name (`_indirect ++ c) deps
       return deps
   addExplanation (j : ModuleIdx) (k : NeedsKind) (use def_ : Name) (deps : Explanations) : Explanations :=
     if
@@ -442,7 +431,9 @@ def visitModule (pkgs : Array Name) (srcSearchPath : SearchPath)
     (i : Nat) (needs : Needs) (headerStx : TSyntax ``Parser.Module.header) (args : Args)
     (addOnly := false) : StateT State IO Unit := do
   let modName := (← get).modNames[i]!
-  if isExtraRevModUse (← get).env i then
+  -- MathFin's change: an upstream module's extra reverse use (an untracked extension
+  -- registration) is not preserved downstream; see the module docstring
+  if pkgs.any (·.isPrefixOf modName) && isExtraRevModUse (← get).env i then
     modify fun s => { s with preserve := s.preserve.union (if args.addPublic then .pub else .priv) {i} }
     if args.trace then
       IO.eprintln s!"Preserving `{modName}` because of recorded extra rev use"
