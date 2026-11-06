@@ -7,6 +7,7 @@ module
 
 public import MathFin.Init
 public import MathFin.ShakeScaffold
+public import Mathlib.RingTheory.Polynomial.Hermite.Basic
 
 /-!
 # The OU generator on polynomials: the Hermite eigenlayer

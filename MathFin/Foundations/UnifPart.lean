@@ -7,6 +7,7 @@ module
 
 public import MathFin.Init
 public import MathFin.ShakeScaffold
+public import Mathlib.Tactic.NormNum.RealSqrt
 
 /-!
 # The uniform partition of `[0, T]`

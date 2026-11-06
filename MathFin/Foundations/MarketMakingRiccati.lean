@@ -7,6 +7,7 @@ module
 
 public import MathFin.Init
 public import MathFin.ShakeScaffold
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 
 /-!
 # Single-asset market making — closed-form (Riccati) approximation

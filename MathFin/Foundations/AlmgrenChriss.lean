@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.DerivOfDeriv
 public import MathFin.ShakeScaffold
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 
 /-!
 # Almgren-Chriss optimal execution (deterministic closed form)
