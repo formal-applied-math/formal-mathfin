@@ -5,7 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoIntegralBrownian
+public import MathFin.Foundations.ItoIntegralBrownian  -- shake: keep (used through `open`)
 public import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
 
 /-! # Exit times of a continuous process — the localization toolkit
