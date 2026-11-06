@@ -70,6 +70,20 @@ Berthold and Elsman (2015) and Annenkov (2018).
 No code is copied from `lean_contracts`; every definition and proof here is
 written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 §6 for the full credit line.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [J. C. Cox, S. A. Ross and M. Rubinstein, *Option pricing: a simplified
+  approach*][CoxRossRubinstein1979]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 12.3
+* [S. E. Shreve, *Stochastic Calculus for Finance I: The Binomial Asset Pricing Model*][ShreveSCFI],
+  Theorem 1.2.2; ch. 1-2
+
+## Tags
+
+binomial tree, Cox–Ross–Rubinstein, replicating strategy, risk-neutral probability, coin-flip paths,
+MSC 91G20, MSC 60G42, JEL G13
 -/
 
 @[expose] public section

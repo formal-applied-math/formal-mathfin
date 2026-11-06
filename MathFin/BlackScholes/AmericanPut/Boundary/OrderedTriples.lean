@@ -7,11 +7,24 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.ParabolicMaximum
 
-/-! # Compact ordered equal-time triples in a moving strip 
-## Result
+/-! # Compact ordered equal-time triples in a moving strip
 
-Public entry points include `sameTimeTriple`, `orderedTriples`, `orderedTriples_isCompact`,
-`sameTimeTriple_mem`.
+## Main definitions
+
+* `SpaceTimeTriple`: three space-time points, each a pair `(x, t)`.
+* `sameTimeTriple`: the triple of `x`, `y`, `z` at a common time `t`.
+* `orderedTriples`: the triples of points of a set `Q` that share a time and have weakly
+  increasing spatial coordinates.
+
+## Main results
+
+* `orderedTriples_isCompact`: if `Q` is compact, so is `orderedTriples Q`.
+* `sameTimeTriple_mem`: for `a ≤ t ≤ T` and `b t ≤ x ≤ y ≤ z ≤ R`, `sameTimeTriple x y z t` lies in
+  `orderedTriples` of `movingStrip b R a T`.
+
+## Tags
+
+ordered triples, compact set, moving strip, same-time triples, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

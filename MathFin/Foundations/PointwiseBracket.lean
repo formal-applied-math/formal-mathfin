@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Foundations.BrownianMartingale
 public import MathFin.Foundations.ItoIntegralAgainstMartingale
 public import MathFin.Foundations.GaussianMoments
 
@@ -24,7 +25,7 @@ is *for*, now conditionally — what `norm_sq_increment_eq_bracket` delivered un
 
 An identity between conditional expectations of two integrable variables is an identity of their
 `𝓕_a`-set integrals, and on such a set the Itô integral already localises. For `F ∈ 𝓕_a` the
-indicator `𝟙_F` is a bounded `𝓕_a`-measurable factor, so `itoIntegralCLM_T_smulAdapted` folds
+indicator `𝟙_F` is a bounded `𝓕_a`-measurable factor, so `itoIntegralCLM_smulAdapted` folds
 `𝟙_F·(M_b − M_a)` back into a *single* Itô integral, that of `𝟙_F·𝟙_{(a,b]}·φ`. The isometry then
 reads its second moment straight off the integrand — squaring the indicator costs nothing —
 
@@ -73,6 +74,40 @@ is `⟨M⟩_{t∧T}` as a genuine adapted process (`bracketProcess_adapted`, axi
 still constructed nowhere is a *pathwise* quadratic variation — and it cannot currently be
 imported either, since BM's `predQuadVariation` routes through the `sorry`-backed
 `IsLocalSubmartingale.doob_meyer`.
+
+## Main definitions
+
+* `bracketRep`: the pathwise bracket increment `ω ↦ ∫_{(a,b]} φ(u, ω)² du`, on the `Lp` class's
+  own representative of `φ`.
+* `bandGen`: the single-band generator `Z·1_{(c,d]}` as a predictable class in
+  `L²(trimMeasure T)`, for bounded `𝓕_c`-measurable `Z`.
+
+## Main results
+
+* `condExp_band_second_moment`: for `M = φ●B` on `[0, T]` and `a ≤ b ≤ T`,
+  `μ[(M_b − M_a)² | 𝓕_a] =ᵐ μ[bracketRep φ a b | 𝓕_a]`.
+* `condExp_bandGen_second_moment`: for `Z` bounded and `𝓕_c`-measurable and `a ≤ c ≤ d ≤ b ≤ T`,
+  the integral process of `Z·1_{(c,d]}` has `μ[(M_b − M_a)² | 𝓕_a] =ᵐ (d − c)·μ[Z² | 𝓕_a]`.
+* `condExp_increment_eq_zero`, `condExp_increment_sq`: `μ[B_v − B_u | 𝓕_u] =ᵐ 0` and
+  `μ[(B_v − B_u)² | 𝓕_u] =ᵐ v − u`.
+* `condExp_increment_sq_of_adapted`: for `Z` measurable at `c` and `a ≤ c ≤ d`,
+  `μ[(Z·(B_d − B_c))² | 𝓕_a] =ᵐ (d − c)·μ[Z² | 𝓕_a]`, given integrability.
+* `setIntegral_bracketRep`, `setIntegral_sq_increment`: on an `𝓕_a`-set `F`, the integrals of the
+  bracket increment and of the squared increment both equal `∫_{(a,b]×F} φ²` against the trim
+  measure.
+* `eval_bandGen`: the terminal Itô integral of `bandGen` is `Z·(B_d − B_c)`.
+* `bracketRep_nonneg`, `bracketRep_add`: the bracket increment is nonnegative and additive over
+  adjacent bands, almost everywhere.
+
+## References
+
+* [I. Karatzas and S. E. Shreve, *Brownian Motion and Stochastic Calculus*][KaratzasShreve1991], 3.2
+* [Revuz and Yor, *Continuous Martingales and Brownian Motion*][RevuzYor], IV.1
+
+## Tags
+
+quadratic variation process, conditional second moment, Itô isometry, predictable bracket,
+conditional isometry, Brownian increments, MSC 60H05, MSC 60G44
 -/
 
 @[expose] public section
@@ -100,25 +135,6 @@ private instance instSigmaFiniteTrimNatFiltration {hBmeas : ∀ t, Measurable (B
 
 /-! ### The conditional Brownian kernels -/
 
-/-- Functions of a Brownian increment condition on the past as constants: if
-`∫ φ(B_v − B_u) dμ = c` then `μ[φ(B_v − B_u) | 𝓕_u] =ᵐ c`. Independence of the increment
-from `𝓕_u` (`IsFilteredPreBrownian.indep`) via `condExp_indep_eq`. -/
-private theorem condExp_func_increment (hB : IsPreBrownianReal B μ)
-    (hBmeas : ∀ t, Measurable (B t)) {u v : ℝ≥0} (huv : u ≤ v)
-    {φ : ℝ → ℝ} (hφ : Measurable φ) {c : ℝ}
-    (h_int : ∫ ω, φ (B v ω - B u ω) ∂μ = c) :
-    (μ[fun ω ↦ φ (B v ω - B u ω) | natFiltration hBmeas u]) =ᵐ[μ] fun _ ↦ c := by
-  have hd : Measurable (fun ω ↦ B v ω - B u ω) := (hBmeas v).sub (hBmeas u)
-  have hcomp : Measurable[
-      MeasurableSpace.comap (fun ω ↦ B v ω - B u ω) (borel ℝ)]
-      (fun ω ↦ φ (B v ω - B u ω)) :=
-    hφ.comp (Measurable.of_comap_le le_rfl)
-  obtain ⟨hFB⟩ : Nonempty (IsFilteredPreBrownian B (natFiltration hBmeas) μ) :=
-    ⟨hB.isFilteredPreBrownian hBmeas⟩
-  have hindep := condExp_indep_eq hd.comap_le ((natFiltration hBmeas).le u)
-    hcomp.stronglyMeasurable (hFB.indep u v huv)
-  rwa [h_int] at hindep
-
 omit [IsProbabilityMeasure μ] in
 /-- **Kernel 1**: the increment has zero conditional mean — `μ[B_v − B_u | 𝓕_u] =ᵐ 0`. -/
 theorem condExp_increment_eq_zero (hB : IsPreBrownianReal B μ)
@@ -129,7 +145,9 @@ theorem condExp_increment_eq_zero (hB : IsPreBrownianReal B μ)
   have hint : ∫ ω, (B v ω - B u ω) ∂μ = 0 := by
     have h_eq : (fun ω ↦ B v ω - B u ω) = (B v - B u : Ω → ℝ) := rfl
     rw [h_eq, hL.integral_eq, integral_id_gaussianReal]
-  exact condExp_func_increment hB hBmeas huv measurable_id hint
+  have := hB.isFilteredPreBrownian hBmeas
+  exact IsFilteredPreBrownian.condExp_comp_increment_eq_const huv
+    ((hBmeas v).sub (hBmeas u)) measurable_id hint
 
 omit [IsProbabilityMeasure μ] in
 /-- **Kernel 2**: the squared increment conditions on the elapsed time —
@@ -146,7 +164,9 @@ theorem condExp_increment_sq (hB : IsPreBrownianReal B μ)
       simpa [Function.comp] using hL.integral_comp (f := fun x : ℝ ↦ x ^ 2) (by fun_prop)
     rw [h_change, integral_sq_gaussianReal]
     exact NNReal.coe_sub huv
-  exact condExp_func_increment hB hBmeas huv (measurable_id.pow_const 2) hint
+  have := hB.isFilteredPreBrownian hBmeas
+  exact IsFilteredPreBrownian.condExp_comp_increment_eq_const huv
+    ((hBmeas v).sub (hBmeas u)) (measurable_id.pow_const 2) hint
 
 omit [IsProbabilityMeasure μ] in
 /-- A Brownian increment lies in `L²(μ)`. -/
@@ -224,8 +244,8 @@ theorem coeFn_bandAssembly {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     {c d : ℝ≥0} (hcd : c ≤ d) (hdT : d ≤ T)
     {Z : Ω → ℝ} (hZm : Measurable[natFiltration hBmeas c] Z) {C : ℝ}
     (hZb : ∀ ω, |Z ω| ≤ C) :
-    ⇑(simpleAssembly_T (μ := μ) T hBmeas (stepSP hBmeas hcd hdT hZm hZb))
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas]
+    ⇑(simpleAssemblyHorizon (μ := μ) T hBmeas (stepSP hBmeas hcd hdT hZm hZb))
+      =ᵐ[trimMeasure (μ := μ) T hBmeas]
         fun p ↦ (Set.Ioc c d).indicator (fun _ ↦ (1 : ℝ)) p.1 * Z p.2 := by
   refine (MemLp.coeFn_toLp (memLp_uncurry_trim_T T hBmeas
     (stepSP hBmeas hcd hdT hZm hZb).val)).trans
@@ -256,18 +276,18 @@ noncomputable def bandGen (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     {c d : ℝ≥0} (hcd : c ≤ d) (hdT : d ≤ T)
     {Z : Ω → ℝ} (hZm : Measurable[natFiltration hBmeas c] Z) (C : ℝ)
     (hZb : ∀ ω, |Z ω| ≤ C) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
-  simpleAssembly_T (μ := μ) T hBmeas (stepSP hBmeas hcd hdT hZm hZb)
+    Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) :=
+  simpleAssemblyHorizon (μ := μ) T hBmeas (stepSP hBmeas hcd hdT hZm hZb)
 
 /-- Band generators vanish before their left endpoint. -/
 theorem bandGen_support {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     {c d : ℝ≥0} (hcd : c ≤ d) (hdT : d ≤ T)
     {Z : Ω → ℝ} (hZm : Measurable[natFiltration hBmeas c] Z) (C : ℝ)
     (hZb : ∀ ω, |Z ω| ≤ C) :
-    ∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), p.1 ≤ c →
+    ∀ᵐ p ∂(trimMeasure (μ := μ) T hBmeas), p.1 ≤ c →
       (bandGen (μ := μ) T hBmeas hcd hdT hZm C hZb : ℝ≥0 × Ω → ℝ) p = 0 := by
     filter_upwards [coeFn_bandAssembly (T := T) hBmeas hcd hdT hZm hZb] with p hcoe hpc
-    change ⇑(simpleAssembly_T (μ := μ) T hBmeas (stepSP hBmeas hcd hdT hZm hZb)) p = 0
+    change ⇑(simpleAssemblyHorizon (μ := μ) T hBmeas (stepSP hBmeas hcd hdT hZm hZb)) p = 0
     rw [hcoe]
     show (Set.Ioc c d).indicator (fun _ ↦ (1 : ℝ)) p.1 * Z p.2 = 0
     rw [Set.indicator_of_notMem
@@ -279,10 +299,10 @@ theorem bandGen_support_after {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     {c d : ℝ≥0} (hcd : c ≤ d) (hdT : d ≤ T)
     {Z : Ω → ℝ} (hZm : Measurable[natFiltration hBmeas c] Z) (C : ℝ)
     (hZb : ∀ ω, |Z ω| ≤ C) :
-    ∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), d < p.1 →
+    ∀ᵐ p ∂(trimMeasure (μ := μ) T hBmeas), d < p.1 →
       (bandGen (μ := μ) T hBmeas hcd hdT hZm C hZb : ℝ≥0 × Ω → ℝ) p = 0 := by
   filter_upwards [coeFn_bandAssembly (T := T) hBmeas hcd hdT hZm hZb] with p hcoe hpd
-  change ⇑(simpleAssembly_T (μ := μ) T hBmeas (stepSP hBmeas hcd hdT hZm hZb)) p = 0
+  change ⇑(simpleAssemblyHorizon (μ := μ) T hBmeas (stepSP hBmeas hcd hdT hZm hZb)) p = 0
   rw [hcoe]
   show (Set.Ioc c d).indicator (fun _ ↦ (1 : ℝ)) p.1 * Z p.2 = 0
   rw [Set.indicator_of_notMem
@@ -294,9 +314,9 @@ theorem eval_bandGen (hB : IsPreBrownianReal B μ) (T : ℝ≥0) (hBmeas : ∀ t
     {c d : ℝ≥0} (hcd : c ≤ d) (hdT : d ≤ T)
     {Z : Ω → ℝ} (hZm : Measurable[natFiltration hBmeas c] Z) (C : ℝ)
     (hZb : ∀ ω, |Z ω| ≤ C) :
-    ⇑(itoIntegralCLM_T hB T hBmeas (bandGen (μ := μ) T hBmeas hcd hdT hZm C hZb))
+    ⇑(itoIntegralCLM hB T hBmeas (bandGen (μ := μ) T hBmeas hcd hdT hZm C hZb))
       =ᵐ[μ] fun ω ↦ Z ω * (B d ω - B c ω) := by
-  rw [bandGen, itoIntegralCLM_T_simpleAssembly_T hB T hBmeas
+  rw [bandGen, itoIntegralCLM_simpleAssemblyHorizon hB T hBmeas
     (stepSP hBmeas hcd hdT hZm hZb)]
   refine (MemLp.coeFn_toLp (memLp_itoSimple hB hBmeas
     (stepSP hBmeas hcd hdT hZm hZb).val)).trans
@@ -310,13 +330,13 @@ theorem eval_bandGen (hB : IsPreBrownianReal B μ) (T : ℝ≥0) (hBmeas : ∀ t
 cannot be, because it integrates `ω` out; it is *not* claimed here to be adapted (see the
 module's honest scope). -/
 noncomputable def bracketRep (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (a b : ℝ≥0) (ω : Ω) : ℝ :=
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (a b : ℝ≥0) (ω : Ω) : ℝ :=
   ∫ u in Set.Ioc a b, ((φ : ℝ≥0 × Ω → ℝ) (u, ω)) ^ 2 ∂timeMeasure
 
 /-- The squared representative cut to the rectangle `(a,b] × F`: the one explicitly written
 integrand of this file, and the only function ω-sections are ever taken of. -/
 private noncomputable def bandSq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (a b : ℝ≥0) (F : Set Ω) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (a b : ℝ≥0) (F : Set Ω) :
     ℝ≥0 × Ω → ℝ :=
   (Set.Ioc a b ×ˢ F).indicator fun z ↦ ((φ : ℝ≥0 × Ω → ℝ) z) ^ 2
 
@@ -324,7 +344,7 @@ omit [IsProbabilityMeasure μ] in
 /-- The ω-section of `bandSq` at a sample point of `F`: the band indicator of the squared time
 section. Every section statement below is this identity plus a case on `ω ∈ F`. -/
 private theorem bandSq_section (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (a b : ℝ≥0) {F : Set Ω} {ω : Ω}
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (a b : ℝ≥0) {F : Set Ω} {ω : Ω}
     (hω : ω ∈ F) (u : ℝ≥0) :
     bandSq (μ := μ) T hBmeas φ a b F (u, ω)
       = (Set.Ioc a b).indicator (fun u' ↦ ((φ : ℝ≥0 × Ω → ℝ) (u', ω)) ^ 2) u := by
@@ -336,23 +356,23 @@ private theorem bandSq_section (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 
 /-- The band `(a,b]` sits inside the horizon, so the time measure may be restricted to it
 directly. The one place `b ≤ T` is used. -/
-private theorem restrict_timeMeasure_T (T : ℝ≥0) {a b : ℝ≥0} (hbT : b ≤ T) :
-    (timeMeasure_T T).restrict (Set.Ioc a b) = timeMeasure.restrict (Set.Ioc a b) := by
-  rw [timeMeasure_T, Measure.restrict_restrict measurableSet_Ioc, Set.Ioc_inter_Ioc,
+private theorem restrict_timeMeasureHorizon (T : ℝ≥0) {a b : ℝ≥0} (hbT : b ≤ T) :
+    (timeMeasureHorizon T).restrict (Set.Ioc a b) = timeMeasure.restrict (Set.Ioc a b) := by
+  rw [timeMeasureHorizon, Measure.restrict_restrict measurableSet_Ioc, Set.Ioc_inter_Ioc,
     max_eq_left (show (0 : ℝ≥0) ≤ a from bot_le), min_eq_left hbT]
 
 omit [IsProbabilityMeasure μ] in
 /-- The ω-section integral of `bandSq`: the band integral on `F`, zero off it. Pointwise in `ω`,
 so it serves both the set-integral identity and the integrability of `bracketRep`. -/
 private theorem integral_section_bandSq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {a b : ℝ≥0} (hbT : b ≤ T)
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {a b : ℝ≥0} (hbT : b ≤ T)
     (F : Set Ω) (ω : Ω) :
-    ∫ u, bandSq (μ := μ) T hBmeas φ a b F (u, ω) ∂(timeMeasure_T T)
+    ∫ u, bandSq (μ := μ) T hBmeas φ a b F (u, ω) ∂(timeMeasureHorizon T)
       = F.indicator (fun ω' ↦ bracketRep (μ := μ) T hBmeas φ a b ω') ω := by
   by_cases hω : ω ∈ F
   · rw [Set.indicator_of_mem hω]
     simp only [bandSq_section T hBmeas φ a b hω]
-    rw [integral_indicator measurableSet_Ioc, restrict_timeMeasure_T T hbT, bracketRep]
+    rw [integral_indicator measurableSet_Ioc, restrict_timeMeasureHorizon T hbT, bracketRep]
   · have hpt : ∀ u : ℝ≥0, bandSq (μ := μ) T hBmeas φ a b F (u, ω) = 0 := fun u ↦ by
       rw [bandSq, Set.indicator_of_notMem (show (u, ω) ∉ Set.Ioc a b ×ˢ F from fun h ↦ hω h.2)]
     simp only [hpt, integral_zero, Set.indicator_of_notMem hω]
@@ -360,9 +380,9 @@ private theorem integral_section_bandSq (T : ℝ≥0) (hBmeas : ∀ t, Measurabl
 omit [IsProbabilityMeasure μ] in
 /-- `bandSq` is a product-integrable function: it is `φ²` cut down to a predictable rectangle. -/
 private theorem integrable_bandSq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (a b : ℝ≥0) {F : Set Ω}
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (a b : ℝ≥0) {F : Set Ω}
     (hF : MeasurableSet[natFiltration hBmeas a] F) :
-    Integrable (bandSq (μ := μ) T hBmeas φ a b F) ((timeMeasure_T T).prod μ) :=
+    Integrable (bandSq (μ := μ) T hBmeas φ a b F) ((timeMeasureHorizon T).prod μ) :=
   (memLp_prod_of_lp T hBmeas φ).integrable_sq.indicator
     ((natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod _
       (MeasureTheory.measurableSet_predictable_Ioc_prod a b hF))
@@ -370,12 +390,12 @@ private theorem integrable_bandSq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t
 /-- The band integral of `φ²` is `μ`-integrable: Fubini applied to `bandSq` over the whole
 sample space. -/
 theorem integrable_bracketRep (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {a b : ℝ≥0} (hbT : b ≤ T) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {a b : ℝ≥0} (hbT : b ≤ T) :
     Integrable (bracketRep (μ := μ) T hBmeas φ a b) μ :=
   (integrable_bandSq T hBmeas φ a b
     (MeasurableSet.univ (α := Ω))).integral_prod_right.congr
     (Filter.Eventually.of_forall fun ω ↦ by
-      change ∫ u, bandSq (μ := μ) T hBmeas φ a b Set.univ (u, ω) ∂(timeMeasure_T T)
+      change ∫ u, bandSq (μ := μ) T hBmeas φ a b Set.univ (u, ω) ∂(timeMeasureHorizon T)
           = bracketRep (μ := μ) T hBmeas φ a b ω
       rw [integral_section_bandSq T hBmeas φ hbT Set.univ ω,
         Set.indicator_of_mem (Set.mem_univ ω)])
@@ -383,20 +403,20 @@ theorem integrable_bracketRep (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 omit [IsProbabilityMeasure μ] in
 /-- The pathwise bracket increment is nonnegative — it is an integral of a square. -/
 theorem bracketRep_nonneg (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (a b : ℝ≥0) (ω : Ω) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (a b : ℝ≥0) (ω : Ω) :
     0 ≤ bracketRep (μ := μ) T hBmeas φ a b ω :=
   integral_nonneg fun _ ↦ sq_nonneg _
 
 /-- For a.e. `ω` the squared section is integrable on the band — the ω-side of the product
 integrability of `bandSq`, and the one hypothesis splitting a band in two needs. -/
 private theorem ae_integrableOn_section (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {a b : ℝ≥0} (hbT : b ≤ T) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {a b : ℝ≥0} (hbT : b ≤ T) :
     ∀ᵐ ω ∂μ, IntegrableOn (fun u ↦ ((φ : ℝ≥0 × Ω → ℝ) (u, ω)) ^ 2) (Set.Ioc a b) timeMeasure := by
   filter_upwards [(integrable_bandSq (μ := μ) T hBmeas φ a b
     (MeasurableSet.univ (α := Ω))).swap.prod_right_ae] with ω hω
   change Integrable (fun u ↦ ((φ : ℝ≥0 × Ω → ℝ) (u, ω)) ^ 2)
     (timeMeasure.restrict (Set.Ioc a b))
-  rw [← restrict_timeMeasure_T T hbT]
+  rw [← restrict_timeMeasureHorizon T hbT]
   exact (integrable_indicator_iff measurableSet_Ioc).mp
     (hω.congr (Filter.Eventually.of_forall
       (bandSq_section T hBmeas φ a b (Set.mem_univ ω))))
@@ -405,7 +425,7 @@ private theorem ae_integrableOn_section (T : ℝ≥0) (hBmeas : ∀ t, Measurabl
 of `(a,c]`. This is what makes `t ↦ bracketRep 0 t` a process whose increments are the objects
 the conditional identity below is about. -/
 theorem bracketRep_add (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {a b c : ℝ≥0}
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {a b c : ℝ≥0}
     (hab : a ≤ b) (hbc : b ≤ c) (hcT : c ≤ T) :
     ∀ᵐ ω ∂μ, bracketRep (μ := μ) T hBmeas φ a b ω + bracketRep (μ := μ) T hBmeas φ b c ω
       = bracketRep (μ := μ) T hBmeas φ a c ω := by
@@ -420,7 +440,7 @@ theorem bracketRep_add (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 
 /-- Monotone in the band, a.e.: the increments are nonnegative and additive. -/
 theorem bracketRep_mono (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {a b c : ℝ≥0}
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {a b c : ℝ≥0}
     (hab : a ≤ b) (hbc : b ≤ c) (hcT : c ≤ T) :
     ∀ᵐ ω ∂μ, bracketRep (μ := μ) T hBmeas φ a b ω ≤ bracketRep (μ := μ) T hBmeas φ a c ω := by
   filter_upwards [bracketRep_add T hBmeas φ hab hbc hcT] with ω hω
@@ -433,11 +453,11 @@ theorem bracketRep_mono (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 integral of `φ²` over `(a,b] × F` — Fubini for the product measure, then `integral_trim`, which
 a strongly predictable integrand crosses for free. -/
 theorem setIntegral_bracketRep (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {a b : ℝ≥0} (hbT : b ≤ T)
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {a b : ℝ≥0} (hbT : b ≤ T)
     {F : Set Ω} (hF : MeasurableSet[natFiltration hBmeas a] F) :
     ∫ ω in F, bracketRep (μ := μ) T hBmeas φ a b ω ∂μ
       = ∫ z in Set.Ioc a b ×ˢ F, ((φ : ℝ≥0 × Ω → ℝ) z) ^ 2
-          ∂(trimMeasure_T (μ := μ) T hBmeas) := by
+          ∂(trimMeasure (μ := μ) T hBmeas) := by
   have hRpred : MeasurableSet[(natFiltration (mΩ := mΩ) hBmeas).predictable]
       (Set.Ioc a b ×ˢ F) :=
     MeasureTheory.measurableSet_predictable_Ioc_prod a b hF
@@ -448,49 +468,49 @@ theorem setIntegral_bracketRep (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   calc ∫ ω in F, bracketRep (μ := μ) T hBmeas φ a b ω ∂μ
       = ∫ ω, F.indicator (fun ω' ↦ bracketRep (μ := μ) T hBmeas φ a b ω') ω ∂μ :=
         (integral_indicator ((natFiltration hBmeas).le a F hF)).symm
-    _ = ∫ ω, ∫ u, bandSq (μ := μ) T hBmeas φ a b F (u, ω) ∂(timeMeasure_T T) ∂μ := by
+    _ = ∫ ω, ∫ u, bandSq (μ := μ) T hBmeas φ a b F (u, ω) ∂(timeMeasureHorizon T) ∂μ := by
         simp only [integral_section_bandSq T hBmeas φ hbT F]
-    _ = ∫ z, bandSq (μ := μ) T hBmeas φ a b F z ∂((timeMeasure_T T).prod μ) := by
+    _ = ∫ z, bandSq (μ := μ) T hBmeas φ a b F z ∂((timeMeasureHorizon T).prod μ) := by
         rw [integral_prod _ hint]
         exact integral_integral_swap hint.swap
-    _ = ∫ z, bandSq (μ := μ) T hBmeas φ a b F z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
-        rw [show trimMeasure_T (μ := μ) T hBmeas
-            = ((timeMeasure_T T).prod μ).trim
+    _ = ∫ z, bandSq (μ := μ) T hBmeas φ a b F z ∂(trimMeasure (μ := μ) T hBmeas) := by
+        rw [show trimMeasure (μ := μ) T hBmeas
+            = ((timeMeasureHorizon T).prod μ).trim
                 (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod from rfl,
           integral_trim _ hgsm]
     _ = ∫ z in Set.Ioc a b ×ˢ F, ((φ : ℝ≥0 × Ω → ℝ) z) ^ 2
-          ∂(trimMeasure_T (μ := μ) T hBmeas) := integral_indicator hRpred
+          ∂(trimMeasure (μ := μ) T hBmeas) := integral_indicator hRpred
 
 /-- **Isometry side.** The `𝓕_a`-set integral of the squared increment is the *same* rectangle
 integral. `𝟙_F` is bounded and `𝓕_a`-measurable and the band integrand vanishes on `[0,a]`, so
-`itoIntegralCLM_T_smulAdapted` folds it inside the integral; the isometry then turns the norm of
+`itoIntegralCLM_smulAdapted` folds it inside the integral; the isometry then turns the norm of
 `𝟙_F·𝟙_{(a,b]}·φ` into the rectangle integral, `𝟙_F² = 𝟙_F` costing nothing on either side. -/
 theorem setIntegral_sq_increment (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {a b : ℝ≥0} (hab : a ≤ b)
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {a b : ℝ≥0} (hab : a ≤ b)
     {F : Set Ω} (hF : MeasurableSet[natFiltration hBmeas a] F) :
-    ∫ ω in F, (⇑(itoIntegralCLM_T hB T hBmeas (bandRestrict (μ := μ) T a b hBmeas φ)) ω) ^ 2 ∂μ
+    ∫ ω in F, (⇑(itoIntegralCLM hB T hBmeas (bandRestrict (μ := μ) T a b hBmeas φ)) ω) ^ 2 ∂μ
       = ∫ z in Set.Ioc a b ×ˢ F, ((φ : ℝ≥0 × Ω → ℝ) z) ^ 2
-          ∂(trimMeasure_T (μ := μ) T hBmeas) := by
+          ∂(trimMeasure (μ := μ) T hBmeas) := by
   set Zf : Ω → ℝ := F.indicator (fun _ ↦ (1 : ℝ)) with hZf
   have hZm : Measurable[natFiltration hBmeas a] Zf := measurable_const.indicator hF
   have hZb : ∀ ω, |Zf ω| ≤ 1 := fun ω ↦ by by_cases h : ω ∈ F <;> simp [hZf, h]
   set χ := bandRestrict (μ := μ) T a b hBmeas φ with hχdef
-  have hχ0 : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), p.1 ≤ a → (χ : ℝ≥0 × Ω → ℝ) p = 0 :=
+  have hχ0 : ∀ᵐ p ∂(trimMeasure (μ := μ) T hBmeas), p.1 ≤ a → (χ : ℝ≥0 × Ω → ℝ) p = 0 :=
     bandRestrict_eq_zero_of_le T a b hab hBmeas φ
   set ψ := smulAdapted T a hBmeas Zf hZm 1 hZb χ with hψdef
   have hRpred : MeasurableSet[(natFiltration (mΩ := mΩ) hBmeas).predictable]
       (Set.Ioc a b ×ˢ F) :=
     MeasureTheory.measurableSet_predictable_Ioc_prod a b hF
-  have hL : ‖itoIntegralCLM_T hB T hBmeas ψ‖ ^ 2
-      = ∫ ω in F, (⇑(itoIntegralCLM_T hB T hBmeas χ) ω) ^ 2 ∂μ := by
+  have hL : ‖itoIntegralCLM hB T hBmeas ψ‖ ^ 2
+      = ∫ ω in F, (⇑(itoIntegralCLM hB T hBmeas χ) ω) ^ 2 ∂μ := by
     rw [lp_two_norm_sq, ← integral_indicator ((natFiltration hBmeas).le a F hF)]
     refine integral_congr_ae ?_
-    filter_upwards [itoIntegralCLM_T_smulAdapted hB T a hBmeas Zf hZm 1 hZb χ hχ0] with ω hω
+    filter_upwards [itoIntegralCLM_smulAdapted hB T a hBmeas Zf hZm 1 hZb χ hχ0] with ω hω
     rw [hω, hZf]
     by_cases h : ω ∈ F <;> simp [h]
   have hR : ‖ψ‖ ^ 2 = ∫ z in Set.Ioc a b ×ˢ F, ((φ : ℝ≥0 × Ω → ℝ) z) ^ 2
-      ∂(trimMeasure_T (μ := μ) T hBmeas) := by
+      ∂(trimMeasure (μ := μ) T hBmeas) := by
     rw [lp_two_norm_sq, ← integral_indicator hRpred]
     refine integral_congr_ae ?_
     filter_upwards [coeFn_smulAdapted T a hBmeas Zf hZm 1 hZb χ hχ0,
@@ -498,7 +518,7 @@ theorem setIntegral_sq_increment (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     rw [e1, e2, hZf]
     by_cases hz1 : z.1 ∈ Set.Ioc a b <;> by_cases hz2 : z.2 ∈ F <;>
       simp [Set.mem_prod, hz1, hz2]
-  rw [← hL, ← hR, itoIntegralCLM_T_norm]
+  rw [← hL, ← hR, itoIntegralCLM_norm]
 
 /-! ### The conditional second moment -/
 
@@ -515,24 +535,24 @@ Both sides are compared through their `𝓕_a`-set integrals, which meet at the 
 `setIntegral_bracketRep` by Tonelli. -/
 theorem condExp_band_second_moment (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) :
     (μ[fun ω ↦ (⇑(itoProcessCLM hB T b hBmeas φ) ω
         - ⇑(itoProcessCLM hB T a hBmeas φ) ω) ^ 2 | natFiltration hBmeas a])
       =ᵐ[μ] (μ[bracketRep (μ := μ) T hBmeas φ a b | natFiltration hBmeas a]) := by
-  have hcoe : ⇑(itoIntegralCLM_T hB T hBmeas (bandRestrict (μ := μ) T a b hBmeas φ))
+  have hcoe : ⇑(itoIntegralCLM hB T hBmeas (bandRestrict (μ := μ) T a b hBmeas φ))
       =ᵐ[μ] fun ω ↦ ⇑(itoProcessCLM hB T b hBmeas φ) ω
         - ⇑(itoProcessCLM hB T a hBmeas φ) ω := by
-    rw [itoIntegralCLM_T_bandRestrict (hB := hB) T hBmeas φ hab hbT]
+    rw [itoIntegralCLM_bandRestrict (hB := hB) T hBmeas φ hab hbT]
     exact Lp.coeFn_sub _ _
   have hXeq : (fun ω ↦ (⇑(itoProcessCLM hB T b hBmeas φ) ω
         - ⇑(itoProcessCLM hB T a hBmeas φ) ω) ^ 2)
       =ᵐ[μ] fun ω ↦
-        (⇑(itoIntegralCLM_T hB T hBmeas (bandRestrict (μ := μ) T a b hBmeas φ)) ω) ^ 2 := by
+        (⇑(itoIntegralCLM hB T hBmeas (bandRestrict (μ := μ) T a b hBmeas φ)) ω) ^ 2 := by
     filter_upwards [hcoe] with ω hω
     rw [hω]
   refine (condExp_congr_ae hXeq).trans ?_
   refine (ae_eq_condExp_of_forall_setIntegral_eq ((natFiltration hBmeas).le a)
-    ((Lp.memLp (itoIntegralCLM_T hB T hBmeas
+    ((Lp.memLp (itoIntegralCLM hB T hBmeas
       (bandRestrict (μ := μ) T a b hBmeas φ))).integrable_sq)
     (fun s _ _ ↦ integrable_condExp.integrableOn) (fun s hs _ ↦ ?_)
     stronglyMeasurable_condExp.aestronglyMeasurable).symm
@@ -586,11 +606,11 @@ theorem itoProcessCLM_bandGen_eq_increment (hB : IsPreBrownianReal B μ) (T : �
     (hZb : ∀ ω, |Z ω| ≤ C) {t : ℝ≥0} (hdt : d ≤ t) (htT : t ≤ T) :
     ⇑(itoProcessCLM hB T t hBmeas (bandGen (μ := μ) T hBmeas hcd hdT hZm C hZb))
       =ᵐ[μ] fun ω ↦ Z ω * (B d ω - B c ω) := by
-  have hafter : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), t < p.1 →
+  have hafter : ∀ᵐ p ∂(trimMeasure (μ := μ) T hBmeas), t < p.1 →
       (bandGen (μ := μ) T hBmeas hcd hdT hZm C hZb : ℝ≥0 × Ω → ℝ) p = 0 := by
     filter_upwards [bandGen_support_after hBmeas hcd hdT hZm C hZb] with p hp hpt
     exact hp (hdt.trans_lt hpt)
-  rw [← itoIntegralCLM_T_eq_itoProcessCLM_of_vanishes_after (hB := hB) T t htT hBmeas _ hafter]
+  rw [← itoIntegralCLM_eq_itoProcessCLM_of_vanishes_after (hB := hB) T t htT hBmeas _ hafter]
   exact eval_bandGen hB T hBmeas hcd hdT hZm C hZb
 
 omit [IsProbabilityMeasure μ] in

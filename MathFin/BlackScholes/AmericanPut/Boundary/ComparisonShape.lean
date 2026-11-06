@@ -17,10 +17,29 @@ parabolic evolution preserves that shape, or initialize a zero count at positive
 times. The initial difference formula is only identified with the American-price
 difference where the expiry payoff is zero (`x>0`).
 
-## Result
+## Main definitions
 
-Public entry points include `slopeGap`, `slopeGap_differentiable`, `slopeGap_deriv_pos_at_zero`,
-`initialRatio_between_le_max`.
+* `slopeGap`: the gap `logSlope f z − logSlope g z − 1` between the two logarithmic slopes.
+* `initialDifference`: the initial normalized difference `−1 + eˣ g(x − d) / f(x − d)`.
+* `normalizedDifference`: the difference `(p x t − price f g c d x t) / f (x + c t − d)` between a
+  price `p` and the comparison, divided by the profile `f`.
+
+## Main results
+
+* `slopeGap_differentiable`, `slopeGap_deriv_pos_at_zero`: for `ProfileData` profiles `f`, `g` of
+  the comparison, `slopeGap f g` is differentiable; if `α = k − h − 1` and `0 < c`, its
+  derivative is strictly positive at every zero.
+* `initialRatio_between_le_max`: under the same hypotheses, `initialRatio f g` at a middle point
+  is at most the larger of its values at the two outer points.
+* `straight_initial_superlevel_ordConnected`: for `0 < k`, `0 ≤ h`, `0 < c`, `−1 < ε`, the set
+  `{x > 0 | ε < initialDifference …}` for the explicit straight profiles is order-connected.
+* `normalizedDifference_initial_superlevel`: the same order-connectedness for
+  `normalizedDifference` of a `ContinuousBoundaryPutSolution` at time `0`, on `x > 0`.
+
+## Tags
+
+initial shape, single interval, slope gap, comparison difference, exercise boundary, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

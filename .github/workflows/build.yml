@@ -87,8 +87,9 @@ jobs:
       # PR's declaration diff read (docs/specs/2026-11-05-library-practices-design.md §2).
       - name: Declaration index
         run: |
-          lake exe mathfin_index decl-index.json
+          lake exe mathfin_index decl-index.json 4
           python3 -m tools.verify.ratchet check --index decl-index.json
+          python3 -m tools.verify.decl_index check decl-index.json
           python3 -m tools.verify.decl_index report decl-index.json >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload declaration index

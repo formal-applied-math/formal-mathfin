@@ -36,13 +36,18 @@ The existing infrastructure stops at "the closed form satisfies the FOC".
 This file derives the FOC itself from a maximization problem — closing the
 loop between the optimization-theoretic and algebraic perspectives.
 
-## Results
+## Main definitions
 
-* `expectedReturnTwo`, `varianceTwo`, `marginalVarOne`, `marginalVarTwo`,
-  `sharpeSqTwo`: definitions (`varianceTwo` is `portfolioVarTwo` of
-  `Portfolio/Markowitz.lean` with the weight as first argument).
-* `sharpeSqTwo_eq_sharpeRatio_sq`: `Sh²(w)` is the squared `sharpeRatio` of the portfolio
-  return (zero risk-free rate) at volatility `√V(w)`.
+* `expectedReturnTwo`: the two-asset expected return `w r₁ + (1 − w) r₂`.
+* `varianceTwo`: the two-asset variance as a function of the weight `w` on asset 1
+  (`portfolioVarTwo` of `Portfolio/Markowitz.lean` with the weight as first argument).
+* `marginalVarOne`, `marginalVarTwo`: the components `(Σw)₁`, `(Σw)₂` of the marginal variance.
+* `sharpeSqTwo`: the squared Sharpe ratio `E(w)² / V(w)` as a function of `w`.
+
+## Main results
+
+* `sharpeSqTwo_eq_sharpeRatio_sq`: for `V(w) ≥ 0`, `Sh²(w)` is the squared `sharpeRatio` of the
+  portfolio return (zero risk-free rate) at volatility `√V(w)`.
 * `varianceTwo_eq_w_dot_Sigma_w`: `V = w · (Σw)₁ + (1 − w) · (Σw)₂` (the
   self-dot identity).
 * `hasDerivAt_varianceTwo`: `V'(w) = 2 · ((Σw)₁ − (Σw)₂)`.
@@ -50,6 +55,16 @@ loop between the optimization-theoretic and algebraic perspectives.
   factors through `r₁ (Σw)₂ − r₂ (Σw)₁`.
 * `sharpeSqTwo_critical_iff_crossProduct_FOC`: critical-point
   characterisation (`E ≠ 0, V > 0` regime).
+
+## References
+
+* [H. Markowitz, *Portfolio selection*][Markowitz1952]
+* [Sharpe, *Capital asset prices*][Sharpe1964]
+
+## Tags
+
+Sharpe ratio maximization, tangent portfolio, first-order condition, Markowitz,
+maximum Sharpe portfolio, MSC 91G10, JEL G11
 -/
 
 @[expose] public section

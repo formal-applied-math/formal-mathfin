@@ -12,10 +12,26 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.FiltrationExtension
 Original measurable integrals are unchanged, and bounded supermartingales lift
 to the same filtration regarded inside the completed ambient space.
 
-## Result
+## Main definitions
 
-Public entry points include `completedMeasure`, `ambient_le_completion`, `completion_trim_original`,
-`integral_completion_original`.
+* `completedMeasurableSpace`: the `P`-completion of the ambient σ-algebra: the sets that agree
+  `P`-almost everywhere with a measurable set.
+* `completedMeasure`: the completion of `P`, read as a measure on the completed σ-algebra.
+* `completedAmbientFiltration`: the same filtration `𝓕`, regarded as a filtration of the completed
+  ambient σ-algebra.
+
+## Main results
+
+* `ambient_le_completion`: the ambient σ-algebra is contained in the completed one.
+* `completion_trim_original`: restricting the completed measure to the ambient σ-algebra
+  gives back `P`.
+* `integral_completion_original`: a strongly measurable `f` has the same integral against the
+  completed measure as against `P`.
+
+## Tags
+
+completion of probability space, null sets, supermartingale lifting, ambient measure, filtration,
+MSC 60G40, MSC 60G44
 -/
 
 @[expose] public section

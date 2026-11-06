@@ -90,14 +90,14 @@ attribute [blueprint "def:ito-integral-clm" (title := "Continuous Itô integral 
   (statement := /-- The discrete isometry extended to a continuous linear isometry
   on predictable $L^2$ integrands over $[0,T]$, via density of simple processes
   (Dynkin π-λ on predictable rectangles) and `LinearMap.extendOfNorm`. -/)]
-  MathFin.ItoIntegralCLM.itoIntegralCLM_T
+  MathFin.ItoIntegralCLM.itoIntegralCLM
 
 attribute [blueprint "thm:ito-integral-brownian" (title := "∫₀ᵀ B dB = ½(B_T² − B₀² − T)")
   (statement := /-- The CLM's first genuine consumer: $\int_0^T B\,dB$ computed
   *through the abstract integral*, agreeing with the quadratic-variation limit —
   the clamp-truncation + isometry-Cauchy template any unbounded-coefficient
   consumer would reuse. -/)]
-  MathFin.ItoIntegralBrownian.itoIntegralCLM_T_brownian
+  MathFin.ItoIntegralBrownian.itoIntegralCLM_brownian
 
 attribute [blueprint "thm:discrete-ito" (title := "Discrete Itô formula (pathwise)")
   (statement := /-- The exact pathwise identity

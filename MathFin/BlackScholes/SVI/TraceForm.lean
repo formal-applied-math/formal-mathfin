@@ -13,6 +13,24 @@ Part of the SVI polynomial-sign certificate (#174).
 
 `weightedTraceForm f q` is `(x, y) ↦ tr(q·x·y)` on `ℝ[X]/(f)`, nilpotents included, and the
 Hermite matrix is its matrix in the power basis.
+
+## Main definitions
+
+* `weightedTraceForm`: the bilinear form `(x, y) ↦ tr(q·x·y)` on `AdjoinRoot f`, nilpotents
+  included.
+
+## Main results
+
+* `weightedTraceForm_apply`: `weightedTraceForm f q x y` is the algebra trace of
+  `aeval (root f) q * x * y`.
+* `hermite_entry_eq_trace`: for `f ≠ 0`, the `(i, j)` entry of `hermite f q f.natDegree` is the
+  algebra trace of `q(root f) * (root f)^(i + j)`.
+* `hermite_eq_traceForm_matrix`: for `f ≠ 0`, `hermite f q f.natDegree` is the matrix of
+  `weightedTraceForm f q` in the power basis.
+
+## Tags
+
+weighted trace form, Hermite matrix, quotient algebra, SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

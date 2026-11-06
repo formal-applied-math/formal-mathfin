@@ -25,7 +25,13 @@ and the time-zero value of the corresponding forward-rate agreement is
 
 `V = δ * P(0,T₂) * (F - K)`.
 
-## Results
+## Main definitions
+
+* `fraForwardRate`: the simple forward rate implied by discount factors `P₁`, `P₂` over an accrual
+  period of length `δ`.
+* `fraValue`: the time-zero value of a forward-rate agreement.
+
+## Main results
 
 * `fraValue_forwardRate_eq_discount_difference` expands the FRA value to
   `P(0,T₁) - P(0,T₂) - δ * P(0,T₂) * K`.
@@ -33,6 +39,11 @@ and the time-zero value of the corresponding forward-rate agreement is
   library's zero-coupon-bond curve.
 * `fraValue_zcb_eq_zero_iff` proves that the FRA has zero value exactly at the
   simple forward rate, with denominator nonvanishing derived from `zcb_pos`.
+
+## Tags
+
+forward rate agreement, simple forward rate, FRA value, discount factor, zero-coupon curve,
+MSC 91G30, JEL G13
 -/
 
 set_option autoImplicit false

@@ -27,6 +27,16 @@ quantile, where neither continuity nor strictness holds in general.
 * `valueAtRisk_mem_Icc_of_bracket`: a CDF bracket `P(X ≤ lo) < α ≤ P(X ≤ hi)` brackets VaR.
 * `abs_bisectMid_sub_valueAtRisk_le`: the `n`-th estimate is within `(hi − lo)/2^{n+1}` of VaR.
 * `tendsto_bisectMid_valueAtRisk`: bisection on the distribution function converges to VaR.
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Chapter 9
+
+## Tags
+
+VaR computation, bisection method, quantile numerical, distribution function threshold,
+root finding, MSC 91G60, MSC 91G70, JEL C63
 -/
 
 @[expose] public section

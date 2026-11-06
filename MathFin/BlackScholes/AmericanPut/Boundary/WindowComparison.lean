@@ -15,10 +15,24 @@ needed to compare a linear pricing evolution of a later price slice against
 the American candidate. The boundary contact is tested one-sidedly, without
 assuming second differentiability of the price across the free boundary.
 
-## Result
+## Main results
 
-Public entry points include `DividendPutSolution.obstacle_comparison_window`,
-`localization_penalty_subsolution`, `DividendPutSolution.obstacle_comparison_unbounded_window`.
+* `DividendPutSolution.obstacle_comparison_window`: for `0 ≤ a`, a test function `U` continuous on
+  `[L, R] × [a, T]` that is `C²` and a subsolution wherever it exceeds the price in the open
+  window, and lies below the price at the initial and side edges, stays below the price on the
+  whole window.
+* `localization_penalty_subsolution`: for `0 ≤ k` and `0 ≤ ε`, subtracting `ε` times the
+  localization barrier from a `C²` pointwise subsolution `U` at `(x, t)` keeps it a pointwise
+  subsolution there.
+* `DividendPutSolution.obstacle_comparison_unbounded_window`: for `0 ≤ a`, a test function `U`
+  bounded above by `C` on `[a, T]`, continuous, and `C²` subsolution wherever it exceeds the
+  price, starting below the price at time `a`, stays below the price for all `x` and
+  `t ∈ [a, T]`.
+
+## Tags
+
+obstacle comparison, arbitrary initial time, window comparison, unbounded window, free boundary,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

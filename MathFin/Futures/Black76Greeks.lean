@@ -22,6 +22,30 @@ Greeks evaluated at `r = 0` and post-multiplied by the discount factor `e^{-rT}`
   formula-level `hasDerivAt_blackV_FF`.
 * `hasDerivAt_deriv_deriv_blackV_F` — speed = e^{-rT} · (-ϕ(d₁) (d₁ + σ√T) / (F² σ² T)).
 * `hasDerivAt_blackV_sigma` — vega = e^{-rT} · F · ϕ(d₁) · √T.
+
+## Main definitions
+
+* `blackV`: the Black-76 futures call price `e^{−rT}·bsV(K, 0, σ, F, T)` as a function of
+  `(F, σ, T)` and the discount rate `r`.
+
+## Main results
+
+* `hasDerivAt_blackV_F`: delta, `∂_F V_B = e^{−rT} Φ(d₁)`.
+* `hasDerivAt_deriv_blackV_F`: gamma, `∂²_F V_B = e^{−rT} ϕ(d₁) / (F σ √T)`.
+* `hasDerivAt_deriv_deriv_blackV_F`: speed, the third `F`-derivative of `V_B`.
+* `hasDerivAt_blackV_sigma`: vega, `∂_σ V_B = e^{−rT} F ϕ(d₁) √T`.
+* `hasDerivAt_blackV_r`: rho, `∂_r V_B = −T · V_B`.
+* `hasDerivAt_blackV_T`: the `T`-derivative of `V_B`, `−r V_B + e^{−rT} σ F ϕ(d₁) / (2√T)`.
+
+These hold for `K, σ, F, T > 0` (rho for all reals).
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 17.6
+
+## Tags
+
+Black-76 model, futures option, delta, gamma, vega, speed, option sensitivities, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

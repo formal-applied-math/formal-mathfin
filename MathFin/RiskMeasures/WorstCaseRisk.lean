@@ -13,14 +13,29 @@ public import MathFin.RiskMeasures.AcceptanceSet
 
 The most conservative coherent risk measure of losses, `worstCase L = maxᵢ Lᵢ`, is a concrete
 instance of `IsCoherentRiskMeasure` on a finite state space under any measure that charges every
-state (so almost-sure order is the pointwise order); counting measure is the model case. Its Artzner–Delbaen–Eber–Heath
-representation (from `coherentRisk_isLUB`) specialises to the supremum of expected loss over the
-*entire* probability simplex — making the abstract representation tangible: the worst case over
-states equals the worst case over all mixtures of states.
+state (so almost-sure order is the pointwise order); counting measure is the model case. Its
+Artzner–Delbaen–Eber–Heath representation (from `coherentRisk_isLUB`) specialises to the supremum of
+expected loss over the *entire* probability simplex — making the abstract representation tangible:
+the worst case over states equals the worst case over all mixtures of states.
+
+## Main definitions
+
+* `worstCase`: the worst-case loss `maxᵢ Lᵢ` over a finite nonempty state space.
 
 ## Main results
-* `MathFin.worstCase_isCoherent` — worst-case loss satisfies the four ADEH axioms
+
+* `MathFin.worstCase_isCoherent` — under a measure charging every state, worst-case loss
+  satisfies the four ADEH axioms
 * `MathFin.worstCase_isLUB` — its representation is the sup over the probability simplex
+
+## References
+
+* [P. Artzner et al., *Coherent measures of risk*][ArtznerDelbaenEberHeath1999]
+
+## Tags
+
+worst-case loss, maximum loss, coherent risk measure, scenario-based risk,
+representation over simplex, MSC 91G70, JEL G32
 -/
 
 @[expose] public section

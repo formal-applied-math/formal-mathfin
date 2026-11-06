@@ -22,15 +22,30 @@ Because `Φ` is continuous and strictly increasing, the generalized inverse of
 `Φ⁻¹ (Φ x) = x` for every `x`. The quantile of a general Gaussian law then follows from
 equivariance under the affine map `z ↦ m + σ z` (`quantile_gaussianReal`).
 
+## Main definitions
+
+* `PhiInv`: the standard normal quantile function `Φ⁻¹`, the generalized inverse of `Φ`.
+
 ## Main results
 
-* `continuous_Phi`, `strictMono_Phi`, `Phi_mem_Ioo`: `Φ` is a continuous increasing bijection
-  `ℝ → (0, 1)`; `measurable_Phi` is its `fun_prop` measurability.
-* `PhiInv`: the standard normal quantile function.
+* `continuous_Phi`, `strictMono_Phi`, `Phi_mem_Ioo`: `Φ` is continuous, strictly increasing
+  and takes values in `(0, 1)`. Its automation: `continuous_Phi` and `measurable_Phi` are
+  `fun_prop` lemmas, `Phi_lt_Phi` / `Phi_le_Phi` are `gcongr` lemmas, and `positivity` proves
+  `0 < Φ x` (`Phi_pos`, `evalPhi`).
 * `Phi_PhiInv`, `PhiInv_Phi`: the two inverse identities.
 * `PhiInv_one_sub`: symmetry, `Φ⁻¹(1 − p) = −Φ⁻¹(p)`.
 * `PhiInv_nonneg_iff`, `PhiInv_pos_iff`: `Φ⁻¹(p)` has the sign of `p − 1/2`.
 * `quantile_gaussianReal`: the `p`-quantile of `N(m, σ²)` is `m + σ Φ⁻¹(p)`.
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Example 2.11
+
+## Tags
+
+inverse normal CDF, probit function, Gaussian quantile, normal percentile, value-at-risk quantile,
+MSC 60E05, MSC 62G30
 -/
 
 @[expose] public section
@@ -48,7 +63,7 @@ lemma cdf_gaussianReal_zero_one : ⇑(cdf (gaussianReal 0 1)) = Phi := by
   rw [cdf_eq_real, Phi_def, measureReal_def]
 
 /-- `Φ` is continuous. -/
-lemma continuous_Phi : Continuous Phi :=
+@[fun_prop] lemma continuous_Phi : Continuous Phi :=
   continuous_iff_continuousAt.2 fun x ↦ (hasDerivAt_Phi x).continuousAt
 
 /-- `Φ` is measurable. -/
@@ -62,6 +77,15 @@ lemma strictMono_Phi : StrictMono Phi :=
 lemma Phi_mem_Ioo (x : ℝ) : Phi x ∈ Ioo 0 1 :=
   ⟨(Phi_nonneg (x - 1)).trans_lt (strictMono_Phi (sub_one_lt x)),
     (strictMono_Phi (lt_add_one x)).trans_le (Phi_le_one _)⟩
+
+/-- `Φ` is positive. `positivity` proves it (`evalPhi`). -/
+lemma Phi_pos (x : ℝ) : 0 < Phi x := (Phi_mem_Ioo x).1
+
+/-- `Φ` is strictly increasing, in the form `gcongr` uses. -/
+@[gcongr] lemma Phi_lt_Phi {x y : ℝ} (h : x < y) : Phi x < Phi y := strictMono_Phi h
+
+/-- `Φ` is increasing, in the form `gcongr` uses. -/
+@[gcongr] lemma Phi_le_Phi {x y : ℝ} (h : x ≤ y) : Phi x ≤ Phi y := strictMono_Phi.monotone h
 
 /-- `Φ(0) = 1/2`, by symmetry. -/
 lemma Phi_zero : Phi 0 = 1 / 2 := by
@@ -131,3 +155,18 @@ theorem quantile_gaussianReal (m : ℝ) (v : ℝ≥0) (hp : p ∈ Ioo 0 1) :
         PhiInv, add_comm]
 
 end MathFin
+
+namespace Mathlib.Meta.Positivity
+open Lean.Meta Qq
+
+/-- Extension for the `positivity` tactic: the standard normal CDF `Φ` is positive. -/
+@[positivity MathFin.Phi _]
+meta def evalPhi : PositivityExt where eval {u α} _ pα? e :=
+  match pα? with | none => pure .none | some _ => do
+  match u, α, e with
+  | 0, ~q(ℝ), ~q(MathFin.Phi $a) =>
+    assertInstancesCommute
+    pure (.positive q(MathFin.Phi_pos $a))
+  | _, _, _ => throwError "not Phi"
+
+end Mathlib.Meta.Positivity

@@ -36,13 +36,19 @@ decay factor appearing in `vasicekSDEMean`, and `ouSigmaSqFromVar` inverts
 `vasicekSDEVariance` for `σ²` given an observed residual variance. The last section ties
 it to the OU law.
 
+## Main definitions
+
+* `ouPhiFromK`: the AR(1) discount factor `φ = exp (-(k Δt))` from the OU speed `k`.
+* `kFromPhi`: the OU speed `-log φ / Δt` from `φ`.
+* `ouSigmaSqFromVar`: `σ² = 2k Var(resid) / (1 - exp (-2kΔt))` from the fitted residual variance.
+* `ouStepResidual`: the AR(1) residual `(r_Δt - θ) - φ (r₀ - θ)` of one Vasicek/OU step from a
+  deterministic start `r₀`, with `φ = ouPhiFromK k Δt`.
+
 ## Main results
 
 * `ouPhiFromK`, `kFromPhi` : the `φ ↔ k` dictionary: `kFromPhi ∘ ouPhiFromK`
   is the identity for `Δt ≠ 0` (`kFromPhi_ouPhiFromK`), and `ouPhiFromK ∘ kFromPhi`
   is the identity on `φ > 0` for `Δt ≠ 0` (`ouPhiFromK_kFromPhi`).
-* `ouSigmaSqFromVar` : the implied diffusion coefficient from a fitted AR(1)
-  residual variance.
 * `ouPhiFromK_halfLife` : the decay factor at `FixedIncome.Vasicek`'s existing
   `meanReversionHalfLife` (`ln 2 / k`) is `1/2`, for `k ≠ 0`.
 * `ouSigmaSqFromVar_vasicekSDEVariance` : `ouSigmaSqFromVar` recovers `σ²` from
@@ -54,6 +60,15 @@ it to the OU law.
   has law `N(0, vasicekSDEVariance σ k Δt)`, for `k > 0`.
 * `ouSigmaSqFromVar_variance_ouStepResidual` : `ouSigmaSqFromVar` applied to the variance
   of that residual returns `σ²`, for `k, Δt > 0`.
+
+## References
+
+* [P. Glasserman, *Monte Carlo Methods in Financial Engineering*][Glasserman2003], §3.3
+
+## Tags
+
+AR(1) process, Ornstein–Uhlenbeck, mean reversion speed, half-life, parameter calibration, Vasicek,
+MSC 62M10, MSC 91G30, JEL C22
 -/
 
 @[expose] public section

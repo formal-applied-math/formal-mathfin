@@ -57,6 +57,15 @@ The Wiener integral is the `extendOfNorm` closure of the elementary integral
   gaussianReal 0 (‖f‖²).toNNReal`.
 * `wienerIntegralLp_hasLaw_gaussian`: the `HasLaw` form with the variance in
   integral shape `(∫₀ᵀ f²).toNNReal`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Ch 6/7
+
+## Tags
+
+Wiener integral, Gaussian law, deterministic integrand, Ornstein–Uhlenbeck, Vasicek model,
+characteristic function, MSC 60H05, MSC 60G15, MSC 60J65
 -/
 
 @[expose] public section

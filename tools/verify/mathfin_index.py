@@ -35,7 +35,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
-MATHFIN_DIR = Path("MathFin")
+from tools.verify import library
 
 # The kinds `cited_theorems` keeps. (The generated audit pins every cited
 # constant, defs included; the tests reason about theorems.)
@@ -161,7 +161,7 @@ def _file_declarations(path: Path) -> list[Decl]:
 def declaration_index() -> dict[str, Decl]:
     """Every public declaration in ``MathFin/``, by fully qualified name."""
     index: dict[str, Decl] = {}
-    for path in sorted(MATHFIN_DIR.rglob("*.lean")):
+    for path in library.modules(aggregators=True):
         for decl in _file_declarations(path):
             index.setdefault(decl.name, decl)
     return index

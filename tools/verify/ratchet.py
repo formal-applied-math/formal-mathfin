@@ -25,50 +25,34 @@ import json
 import re
 from pathlib import Path
 
+from . import doc_standard, library
 from .mathfin_index import strip_comments
 
 RATCHET_FILE = Path("ratchet.json")
-MATHFIN_DIR = Path("MathFin")
 LONG_FILE_LINES = 1500  # Mathlib's `linter.style.longFile` default
-
-# Generated or aggregating files: their size and imports are the job they do.
-GENERATED = frozenset({"MathFin/AxiomAudit.lean", "MathFin/AxiomAuditGen.lean",
-                       "MathFin/Blueprint.lean"})
+LINE_LIMIT = 100  # Mathlib's `linter.style.longLine`
 
 _HEARTBEATS = re.compile(r"\bset_option\s+maxHeartbeats\b")
 _WHOLE_MATHLIB = re.compile(r"^(?:public\s+)?import\s+Mathlib\s*$", re.M)
-_MODULE_DOC = re.compile(r"/-!(.*?)-/", re.S)
-
-
-def _sources() -> list[Path]:
-    return sorted(p for p in MATHFIN_DIR.rglob("*.lean") if str(p) not in GENERATED)
-
-
-def _module_doc(src: str) -> str:
-    m = _MODULE_DOC.search(src)
-    return m.group(1) if m else ""
 
 
 def source_metrics() -> dict[str, int]:
-    heartbeats = whole = long_files = no_tags = no_refs = 0
-    for p in _sources():
+    heartbeats = whole = long_files = long_lines = 0
+    for p in library.modules():  # aggregators: size and imports are their job
         src = p.read_text(encoding="utf-8")
         code = strip_comments(src)
         heartbeats += len(_HEARTBEATS.findall(code))
         whole += bool(_WHOLE_MATHLIB.search(code))
         long_files += src.count("\n") + 1 > LONG_FILE_LINES
-        doc = _module_doc(src)
-        no_tags += not re.search(r"^##\s+Tags\b", doc, re.M)
-        no_refs += not re.search(r"^##\s+References\b", doc, re.M)
+        long_lines += sum(len(line) > LINE_LIMIT for line in src.split("\n"))
     nolints = len(json.loads(Path("scripts/nolints.json").read_text(encoding="utf-8")))
     return {
         "max_heartbeats": heartbeats,
         "whole_mathlib_imports": whole,
         "long_files": long_files,
+        "long_lines": long_lines,
         "nolints": nolints,
-        "modules_without_tags": no_tags,
-        "modules_without_references": no_refs,
-    }
+    } | doc_standard.coverage(doc_standard.all_docs())
 
 
 def index_metrics(index_path: str | Path) -> dict[str, int]:

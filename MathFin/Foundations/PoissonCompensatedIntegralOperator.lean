@@ -27,6 +27,38 @@ pairing `integral_bilinear_pairing`, and the `extendOfNorm` CLM are built on the
 ## Provenance
 
 Mirrors the continuous `ItoIntegralL2` assembly; the compensated-integral content is our own.
+
+## Main definitions
+
+* `intSum`, `intSumLp`: the elementary compensated integral `∑_b φ_b · Ñ(box b)` of a marked
+  simple integrand `V`, as a function and as a class in `L²(P)`.
+* `intAssembly`: the elementary compensated integral as a linear map
+  `levySimpleModule N →ₗ[ℝ] L²(P)`.
+* `embFun`, `embLp`: the integrand `∑_b φ_b · 𝟙_{box b}`, as a function on `Ω × (ℝ × E)` and as a
+  class in `L²(P ⊗ ν̂)`.
+* `emb`: the integrand embedding as a linear map `levySimpleModule N →ₗ[ℝ] L²(P ⊗ ν̂)`.
+* `levyClosure`: the `L²(P ⊗ ν̂)` closure of the range of `emb`.
+* `embCorestrict`: `emb` corestricted to `levyClosure`.
+* `itoLevyIntegralL2`: the continuous linear extension of the elementary integral to
+  `levyClosure N →L[ℝ] L²(P)`.
+
+## Main results
+
+* `assembly_isometry`: `‖intAssembly N V‖ = ‖emb N V‖` for every marked simple integrand `V`.
+* `embCorestrict_denseRange`: the marked simple integrands are dense in `levyClosure N`.
+* `itoLevyIntegralL2_norm`: `‖itoLevyIntegralL2 N H‖ = ‖H‖` for every `H` in `levyClosure N`.
+* `intSum_sq_integral`, `embFun_sq_integral`: the squared norms of `intSum` and `embFun` expand
+  as double sums over the box family.
+
+## References
+
+* [Applebaum (2009)][Applebaum2009], Thm 4.2.3
+* [*cgarryZA/LevyStochCalc*][LevyStochCalc], cited axiom #6
+
+## Tags
+
+compensated Poisson integral, marked simple integrands, elementary integral,
+Itô–Lévy integral operator, Lévy stochastic integral, MSC 60G51, MSC 60H05, MSC 60G55
 -/
 
 @[expose] public section

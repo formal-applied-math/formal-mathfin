@@ -99,6 +99,18 @@ private lemmas. `ratchet.json` holds one baseline per debt count (heartbeat bump
 whole-`Mathlib` imports, long files, nolints, doc-section coverage, and the index's
 duplicates and Mathlib-shaped privates): `tests/test_ratchet.py` and `build.yml` fail when a
 count rises; `python3 -m tools.verify.ratchet update` lowers a baseline and never raises one.
+**One doc standard** (`tools/verify/doc_standard.py`, gated in `test_values`): every module
+docstring has Mathlib's layout — `# Title`, `## Main definitions` / `## Main results`,
+`## References` keyed to `docs/references.bib` (`* [Author, *Title*][Key], §2.3`), `## Tags`
+(search terms + JEL/MSC codes from the controlled vocabulary `docs/subjects.toml`; the HF
+dataset exports them as each entry's `subjects`). Missing sections are ratchet counts.
+**`MathFin/Init.lean`** is imported by every module (a module importing no library module
+imports it directly; `test_architecture`): it holds the library's attributes, so far the grind
+set `pricing` (`@[pricing =]` on parity/discounting/tree identities, `grind [pricing]`, pinned
+in `MathFinTest/Automation.lean`). Notation is `scoped` or `local`, never global
+(`test_notation_is_scoped`; `docs/design.md` §5). The docs site (`docs-site.yml`,
+`tools/verify/docs_site.py`) is generated from main's `decl-index`; import narrowing runs on a
+runner (`import-shake.yml`, dispatch-only, commits to the branch).
 **The blueprint and the issues are always connected** (`docs/blueprint.md`): every open
 math issue (`type:proof`, `type:research`, `open-problem`, `frontier`) carries a body line
 `Blueprint: <label>` naming the node it advances; a result not on the blueprint gets a

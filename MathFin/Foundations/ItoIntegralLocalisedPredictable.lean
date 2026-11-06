@@ -42,6 +42,45 @@ integral is adapted.
 
 Not here: integrands with paths not almost surely continuous, the local martingale for the
 unaugmented natural filtration, and `T = ∞`.
+
+## Main definitions
+
+* `denseIcc`: a countable dense subset of `[0, t]`.
+* `denseLevel`: the least integer bounding a path on `denseIcc t`, and `0` when there is none.
+* `clipPredMod`: the continuous Itô integral of the predictable integrand clipped to `[−N, N]`.
+* `predItoIntegral`: the Itô integral of a predictable, possibly unbounded integrand meant for
+  paths almost surely continuous on `[0, T]`; at time `t`, on each path, the continuous Itô
+  integral of `σ` clipped at the path's level on `[0, t]`.
+
+## Main results
+
+* `ae_clipPredMod_eq`: for `n ≤ N`, almost surely, the clipped integrals agree at every `t ≤ T`
+  up to which `σ` stays in `[−n, n]`.
+* `stronglyAdapted_predItoIntegral`: `predItoIntegral` is adapted.
+* `ae_continuousOn_predItoIntegral`: almost every path of `predItoIntegral` is continuous on
+  `[0, T]`.
+* `tendstoInMeasure_riemannσ_predItoIntegral`: for `t ≤ T`, the left-point Riemann–Itô sums on
+  the uniform partitions of `[0, t]` converge in probability to `predItoIntegral t`.
+* `ae_predItoIntegral_congr`: integrands that are almost surely the same path on `[0, T]` have
+  integrals that are almost surely the same path.
+* `ae_predItoIntegral_eq_localItoIntegral`: for an adapted integrand with every path continuous,
+  `predItoIntegral` agrees with `localItoIntegral` up to indistinguishability on `[0, T]`.
+* `tendstoInMeasure_riemannStieltjes_localItoIntegral`: Riemann–Stieltjes sums against
+  `M = localItoIntegral σ` converge in probability to `∫ w σ dB` for a predictable `w` with almost
+  surely continuous paths.
+* `exists_continuous_localMartingale_predItoIntegral`: for a predictable integrand with almost
+  surely continuous paths there is a process, almost surely equal to `predItoIntegral` at every
+  `t ≤ T`, that is a continuous local martingale.
+
+## References
+
+* [Revuz and Yor, *Continuous Martingales and Brownian Motion*][RevuzYor], Proposition IV.2.13;
+  Proposition IV.2.4
+
+## Tags
+
+Itô integral, predictable integrand, stochastic integral, local martingale, Riemann–Stieltjes sums,
+limit in probability, MSC 60H05, MSC 60G44
 -/
 
 @[expose] public section

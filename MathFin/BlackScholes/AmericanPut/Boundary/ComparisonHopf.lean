@@ -18,10 +18,24 @@ from the pricing contract. A positive backward rectangle is then impossible.
 The rectangle is constructed in `Tangency` using the interval invariant,
 which is proved in `ComparisonUnimodality`; neither is a pricing-contract field.
 
-## Result
+## Main definitions
 
-Public entry points include `lineDifference`, `lineDifference_continuousOn`,
-`lineDifference_contDiffAt`, `lineDifference_equation`.
+* `lineDifference`: `straightDifference p k h c d` read in coordinates relative to the moving
+  line `y ↦ y + (d − c t)`.
+
+## Main results
+
+* `lineDifference_continuousOn`: for a `ContinuousBoundaryPutSolution`, `lineDifference` is
+  continuous on `{(y, t) | 0 ≤ t}`.
+* `lineDifference_contDiffAt`: it is `C^∞` at every `(y, t)` with `t > 0` whose spot lies
+  strictly to the right of the boundary, `b t < y + (d − c t)`.
+* `lineDifference_equation`: at such points it satisfies the drifted heat-type equation
+  `∂ₜw = w_yy + (k − h − 1 − c + 2 · logSlope (profile (k − h − 1 − c) k) y) · w_y`.
+
+## Tags
+
+Hopf lemma, terminal barrier, comparison difference, backward rectangle, contact derivative,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

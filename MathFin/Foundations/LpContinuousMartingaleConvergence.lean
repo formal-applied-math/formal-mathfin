@@ -68,6 +68,36 @@ surely to an integrable `M_∞`; for `p > 1` it also converges in `L^p`.
   real time). Both require cadlag paths, which this file does not assume —
   only right-continuity. The in-measure form is the canonical conclusion
   for right-continuous martingales.
+
+## Main definitions
+
+* `discreteSample`: the sample `n ↦ M n` of a continuous-time process at the natural times.
+* `natTimeSubfiltration`: the filtration `k ↦ 𝓕 k` at the natural times.
+* `discreteSampleLimit`: the almost-sure limit of the discrete sample, from Mathlib's
+  `Filtration.limitProcess`.
+* `shiftedFiltration`: the filtration `t ↦ 𝓕 (n + t)` on `ℝ≥0`.
+* `incrementProc`: the increment process `Y_n t = M (n + t) − M n`.
+
+## Main results
+
+* `lp_continuous_martingale_converges_at_naturals`: a martingale bounded in `Lᵖ` (`p ≥ 1`) on a
+  finite measure space has an integrable `M_inf` with `M n → M_inf` almost surely along the
+  natural times.
+* `lp_continuous_martingale_tendsto_eLpNorm_at_naturals`: for `p > 1` and an `Lᵖ` bound `R`,
+  `M n → discreteSampleLimit` in `Lᵖ` along the natural times.
+* `lp_continuous_martingale_tendstoInMeasure`: for `p > 1` and right-continuous paths,
+  `M t → discreteSampleLimit` in measure as `t → ∞` over real times.
+* `lp_continuous_martingale_full`: for `p > 1` and right-continuous paths, an integrable `M_inf`
+  with a.s. convergence along the natural times and convergence in measure over real times.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 4.3.10
+
+## Tags
+
+martingale convergence theorem, Lp-bounded martingale, Doob maximal inequality,
+continuous martingale, Vitali, almost sure convergence, MSC 60G44, MSC 60G42, MSC 60F15
 -/
 
 @[expose] public section
@@ -103,7 +133,7 @@ private lemma discreteSample_martingale
     exact hM.2 (i : ℝ) (j : ℝ) hij'
 
 /-- L^1-norm bound from L^p-norm bound on a finite measure space (Hölder). -/
-private lemma eLpNorm_one_le_of_eLpNorm_p
+lemma eLpNorm_one_le_of_eLpNorm_p
     {μ : Measure Ω} {f : Ω → ℝ} {p : ℝ} (hp : 1 ≤ p)
     {R : ℝ} (hR : eLpNorm f (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R)
     (hfm : AEStronglyMeasurable f μ) :
@@ -301,7 +331,7 @@ private lemma incrementProc_isRightContinuous
   exact h_f_rc.comp h_shift_cont.continuousWithinAt h_mapsto
 
 /-- L^p triangle: `eLpNorm (M_(n+1) - M_n) p μ → 0` from step 5 + reindex. -/
-private lemma eLpNorm_increment_p_tendsto_zero
+lemma eLpNorm_increment_p_tendsto_zero
     {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
     {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 < p)
     (hM : Martingale M 𝓕 μ)
@@ -349,7 +379,7 @@ private lemma eLpNorm_increment_p_tendsto_zero
     (tendsto_const_nhds (x := (0 : ℝ≥0∞))) h_rhs (fun _ ↦ zero_le) h_triangle
 
 /-- L^1 triangle: `eLpNorm (M_(n+1) - M_n) 1 μ → 0` via Hölder from `p → 0`. -/
-private lemma eLpNorm_increment_one_tendsto_zero
+lemma eLpNorm_increment_one_tendsto_zero
     {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
     {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 < p)
     (hM : Martingale M 𝓕 μ)
@@ -385,7 +415,7 @@ private lemma eLpNorm_increment_one_tendsto_zero
     (tendsto_const_nhds (x := (0 : ℝ≥0∞))) h_bound_tendsto (fun _ ↦ zero_le) h_holder
 
 /-- The increment's `L^1` integral, in real-valued form. -/
-private lemma integral_norm_increment_tendsto_zero
+lemma integral_norm_increment_tendsto_zero
     {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
     {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 < p)
     (hM : Martingale M 𝓕 μ)
@@ -408,7 +438,7 @@ private lemma integral_norm_increment_tendsto_zero
   simpa using h_toReal
 
 /-- The L^1 integrability of each increment (each is in L^p, p > 1, on a finite measure space). -/
-private lemma increment_integrable
+lemma integrable_increment_of_eLpNorm_le
     {μ : Measure Ω} [IsFiniteMeasure μ]
     {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 < p)
     (hbound : ∀ t, eLpNorm (M t) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R) (n : ℕ) :
@@ -442,7 +472,7 @@ private lemma sup_increment_measure_tendsto_zero
       change ‖M ((n : ℝ) + ((1 : ℝ≥0) : ℝ)) ω - _‖ = _
       rw [NNReal.coe_one]
     rw [h_endpoint]
-    exact setIntegral_le_integral (increment_integrable hp hbound n).norm
+    exact setIntegral_le_integral (integrable_increment_of_eLpNorm_le hp hbound n).norm
       (Filter.Eventually.of_forall fun _ ↦ norm_nonneg _)
   -- ε * μ.real S → 0 by sandwich with integral_norm_increment_tendsto_zero
   have h_int := integral_norm_increment_tendsto_zero hp hM hbound

@@ -8,11 +8,35 @@ module
 public import MathFin.BlackScholes.AmericanPut.Stopping.CoupledHeatBoundary
 public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 
-/-! # Two-sided heat boundary correction on a finite interval 
-## Result
+/-!
+# Two-sided heat boundary correction on a finite interval
 
-Public entry points include `exists_boundary_time_cutoff`, `intervalHeatCorrection`,
-`intervalHeatCorrection_continuous`, `intervalHeatCorrection_smoothAt`.
+## Main definitions
+
+* `intervalHeatCorrection`: the two-sided correction on `[0,L]`: the half-line extension of `f₀` at
+  depth `x` plus that of `f₁` at depth `L - x`.
+
+## Main results
+
+* `exists_boundary_time_cutoff`: for any `a, T`, there is a compactly supported bounded
+  continuous cutoff `χ`, `‖χ‖ ≤ 1`, equal to `1` on `[a,T]` and `0` beyond `a + D` for some
+  `D ≥ 0`.
+* `intervalHeatCorrection_continuous`: for bounded continuous `f₀`, `f₁`, the correction is
+  jointly continuous in `(x,t)`.
+* `intervalHeatCorrection_smoothAt`, `intervalHeatCorrection_equation`: for continuous compactly
+  supported `f₀`, `f₁` and `0 < x < L`, the correction is `C^∞` at `(x,t)` and satisfies
+  `∂ₜ u = (1/2) ∂ₓₓ u` there.
+* `exists_interval_heat_boundary_solution`: for continuous compactly supported `g₀`, `g₁`
+  vanishing up to time `a` and `0 < L`, there exists a continuous `V` vanishing for `t ≤ a`,
+  with boundary values `g₀`, `g₁` at `x = 0, L` on `[a,T]`, `C^∞` and solving the heat equation
+  in the open strip `0 < x < L`.
+* `exists_interval_heat_boundary_solution_continuous`: the same existence statement for merely
+  continuous `g₀`, `g₁` (compact support is no longer assumed).
+
+## Tags
+
+finite interval, heat equation, boundary correction, two-sided boundary, time cutoff, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

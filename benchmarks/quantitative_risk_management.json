@@ -13,6 +13,16 @@
       "metadata": {
         "chapter": 7,
         "reference": "MFE (2015) Proposition 7.2 / Appendix A.1.2; QRM Exercise Book Ex. 7.2 context",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Proposition 7.2 / Appendix A.1.2"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 7.2"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Proved from the Galois connection with the CDF and Measure.ext_of_Iic. Lives in MathFin/Foundations/Quantile.lean. Axioms-clean."
@@ -29,6 +39,16 @@
       "metadata": {
         "chapter": 2,
         "reference": "MFE (2015) Appendix A.1.2 (generalized inverse); QRM Exercise Book Ex. 2.6",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Appendix A.1.2"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 2.6"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Right-continuity of the CDF (StieltjesFunction) keeps the infimum in the set. Lives in MathFin/Foundations/Quantile.lean. Axioms-clean."
@@ -45,6 +65,16 @@
       "metadata": {
         "chapter": 7,
         "reference": "MFE (2015) Proposition 7.2; QRM Exercise Book Ex. 7.2",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Proposition 7.2"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 7.2"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. F ∘ quantile μ is the identity on (0, 1) for continuous F; transported along the quantile transform. Lives in MathFin/Foundations/Quantile.lean. Axioms-clean."
@@ -61,6 +91,16 @@
       "metadata": {
         "chapter": 2,
         "reference": "MFE (2015) Proposition A.3; QRM Exercise Book Ex. 2.21",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Proposition A.3"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 2.21"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Both sides have the same lower sets, via the Galois connection and closedness of {h ≤ y}. Lives in MathFin/Foundations/Quantile.lean. Axioms-clean."
@@ -77,6 +117,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "MFE (2015) Example 2.11",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Example 2.11"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. N(m, v) is the affine image of N(0, 1); quantile equivariance. Lives in MathFin/Foundations/NormalQuantile.lean. Axioms-clean."
@@ -93,6 +139,16 @@
       "metadata": {
         "chapter": 7,
         "reference": "MFE (2015) Proposition 7.20; QRM Exercise Book Ex. 2.8",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Proposition 7.20"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 2.8"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Three applications of VaR equivariance under monotone lower-semicontinuous maps. Lives in MathFin/RiskMeasures/ValueAtRisk.lean. Axioms-clean."
@@ -109,6 +165,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "QRM Exercise Book Ex. 2.8",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 2.8"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Instance of comonotone additivity. Lives in MathFin/RiskMeasures/ValueAtRisk.lean. Axioms-clean."
@@ -125,6 +187,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "MFE (2015) Example 2.11",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Example 2.11"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Law invariance of VaR plus the Gaussian quantile. Lives in MathFin/RiskMeasures/GaussianValueAtRisk.lean. Axioms-clean."
@@ -141,6 +209,18 @@
       "metadata": {
         "chapter": 8,
         "reference": "Rockafellar–Uryasev (2000, 2002); MFE (2015) Section 8.2",
+        "citations": [
+          {
+            "key": "RockafellarUryasev2000"
+          },
+          {
+            "key": "RockafellarUryasev2002"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 8.2"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Pointwise certificate (q(u) − c)⁺ ≥ (q(u) − c)·1{u > α} in quantile coordinates; exact at c = q(α). Lives in MathFin/RiskMeasures/ExpectedShortfall.lean. Axioms-clean."
@@ -157,6 +237,19 @@
       "metadata": {
         "chapter": 8,
         "reference": "Acerbi–Tasche (2002); MFE (2015) Section 8.1; QRM Exercise Book Ex. 2.6, 8.2(c)",
+        "citations": [
+          {
+            "key": "AcerbiTasche2002"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 8.1"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 2.6, 8.2(c)"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Rockafellar–Uryasev objective of X + Y at VaR_α(X) + VaR_α(Y) and (a + b)⁺ ≤ a⁺ + b⁺. Lives in MathFin/RiskMeasures/ExpectedShortfall.lean. Axioms-clean."
@@ -173,6 +266,18 @@
       "metadata": {
         "chapter": 8,
         "reference": "Artzner–Delbaen–Eber–Heath (1999); Acerbi–Tasche (2002); MFE (2015) Section 8.1",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          },
+          {
+            "key": "AcerbiTasche2002"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 8.1"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Bundles monotonicity, translation, homogeneity (quantile equivariance) and subadditivity (Rockafellar–Uryasev). Lives in MathFin/RiskMeasures/ExpectedShortfall.lean. Axioms-clean."
@@ -189,6 +294,19 @@
       "metadata": {
         "chapter": 8,
         "reference": "Acerbi–Tasche (2002); MFE (2015) Proposition 8.13; QRM Exercise Book Ex. 8.19",
+        "citations": [
+          {
+            "key": "AcerbiTasche2002"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Proposition 8.13"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 8.19"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The Rockafellar–Uryasev objective at q with (X − q)⁺ = (X − q)·1{X > q}. Lives in MathFin/RiskMeasures/ExpectedShortfall.lean. Axioms-clean."
@@ -205,6 +323,15 @@
       "metadata": {
         "chapter": 8,
         "reference": "Acerbi–Tasche (2002); MFE (2015) Proposition 8.13",
+        "citations": [
+          {
+            "key": "AcerbiTasche2002"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Proposition 8.13"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. A continuous CDF gives F(VaR_α) = α, so P(X > VaR_α) = 1 − α and the correction term of the Acerbi–Tasche formula is zero. The hypothesis is continuity of the CDF of the law of X, not a density. Lives in MathFin/RiskMeasures/ExpectedShortfall.lean. Axioms-clean."
@@ -221,6 +348,16 @@
       "metadata": {
         "chapter": 8,
         "reference": "MFE (2015) Section 8.1.3; QRM Exercise Book Ex. 8.2(a)",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 8.1.3"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 8.2(a)"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Upper bound by the Rockafellar–Uryasev objective; the maximizer is constructed as a function of X: (1−α)⁻¹ on {X > q} plus a fraction of the atom at q, making g(x)(x − q) = (1−α)⁻¹(x − q)⁺. Lives in MathFin/RiskMeasures/ExpectedShortfall.lean. Axioms-clean."
@@ -237,6 +374,12 @@
       "metadata": {
         "chapter": 8,
         "reference": "QRM Exercise Book Ex. 8.2(b)",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 8.2(b)"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. From the dual representation: raising α enlarges the set of admissible densities. Lives in MathFin/RiskMeasures/ExpectedShortfall.lean. Axioms-clean."
@@ -253,6 +396,15 @@
       "metadata": {
         "chapter": 8,
         "reference": "Artzner–Delbaen–Eber–Heath (1999); MFE (2015) Section 8.1.3 (finite state)",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 8.1.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. ES coherence (expectedShortfall_isCoherentRiskMeasure, in the library's loss-convention structure IsCoherentRiskMeasure) plugged into the finite-state ADEH theorem coherentRisk_isLUB. Lives in MathFin/RiskMeasures/ExpectedShortfall.lean. The representing set is that of the acceptance set {Z : ES_α(Z) ≤ 0}; the dual representation over densities bounded by (1 − α)⁻¹ is the separate theorem isGreatest_integral_mul_expectedShortfall, and their identification is not proved. Axioms-clean."
@@ -269,6 +421,16 @@
       "metadata": {
         "chapter": 2,
         "reference": "MFE (2015) Example 2.14; QRM Exercise Book Ex. 2.17",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Example 2.14"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 2.17"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The law-side and density-side Rockafellar–Uryasev objectives coincide, so the general minimum (ES) equals the Gaussian minimum computed in RockafellarUryasev.lean. Lives in MathFin/RiskMeasures/GaussianExpectedShortfall.lean. Axioms-clean."
@@ -285,6 +447,12 @@
       "metadata": {
         "chapter": 9,
         "reference": "Numerical quantile computation; MFE (2015) Chapter 9 context",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Chapter 9"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. VaR is the threshold of the CDF against α (Galois connection), which is what Foundations/Bisection.lean converges under. Lives in MathFin/RiskMeasures/ValueAtRiskBisection.lean. Axioms-clean."
@@ -301,6 +469,16 @@
       "metadata": {
         "chapter": 2,
         "reference": "QRM Exercise Book Ex. 2.20, 2.27; MFE (2015) Example 2.25",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 2.20, 2.27"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Example 2.25"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Exact VaR values of each loan and of the portfolio from the Galois connection and independence. Lives in MathFin/RiskMeasures/VaRSuperadditivity.lean. Axioms-clean."
@@ -317,6 +495,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "QRM Exercise Book Ex. 2.28",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 2.28"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Convolution CDF 1 − 2√(x − 1)/x on [2, ∞) computed from the laws; compared at 2·VaR_α(L₁). Lives in MathFin/RiskMeasures/VaRSuperadditivity.lean. Axioms-clean."
@@ -333,6 +517,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "QRM Exercise Book Ex. 2.22",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 2.22"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Gaussian VaR of each loss and of the sum, and the sign of Φ⁻¹(α). Lives in MathFin/RiskMeasures/VaRSuperadditivity.lean. Axioms-clean."
@@ -349,6 +539,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "QRM Exercise Book Ex. 2.12(a)",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 2.12(a)"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Quantile of the exponential law and its integral over (α, 1). Lives in MathFin/RiskMeasures/RiskClosedForms.lean. Axioms-clean."
@@ -365,6 +561,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "QRM Exercise Book Ex. 2.23(a)",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 2.23(a)"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. From the exponential closed forms. Lives in MathFin/RiskMeasures/RiskClosedForms.lean. Axioms-clean."
@@ -381,6 +583,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "QRM Exercise Book Ex. 2.12(d)",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 2.12(d)"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Lomax law built as a measure, its quantile, and the integral of the quantile over (α, 1). Lives in MathFin/RiskMeasures/RiskClosedForms.lean. Axioms-clean."
@@ -397,6 +605,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "QRM Exercise Book Ex. 2.23(c)",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 2.23(c)"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. From the Lomax closed forms. Lives in MathFin/RiskMeasures/RiskClosedForms.lean. Axioms-clean."
@@ -413,6 +627,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "QRM Exercise Book Ex. 2.29(b)",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 2.29(b)"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Conditional CDF in terms of F and the Galois connection. Lives in MathFin/RiskMeasures/RiskClosedForms.lean. Axioms-clean."
@@ -429,6 +649,19 @@
       "metadata": {
         "chapter": 9,
         "reference": "Gneiting (2011); MFE (2015) Section 9.3; QRM Exercise Book Ex. 9.5, 9.16",
+        "citations": [
+          {
+            "key": "Gneiting2011"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 9.3"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 9.5, 9.16"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Expected pinball loss = (1 − α)·(Rockafellar–Uryasev objective) − (1 − α)E[Y]; uniqueness from an exact excess formula. Lives in MathFin/RiskMeasures/Elicitability.lean. Axioms-clean."
@@ -445,6 +678,19 @@
       "metadata": {
         "chapter": 9,
         "reference": "Gneiting (2011); MFE (2015) Section 9.3; QRM Exercise Book Ex. 9.5(c)",
+        "citations": [
+          {
+            "key": "Gneiting2011"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 9.3"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 9.5(c)"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Elicitable functionals have convex level sets (mixture argument); the three ES values are pinned by a Rockafellar–Uryasev threshold and an explicit dual density. Lives in MathFin/RiskMeasures/Elicitability.lean. Axioms-clean."
@@ -461,6 +707,16 @@
       "metadata": {
         "chapter": 7,
         "reference": "QRM Exercise Book Ex. 7.3; MFE (2015) Section 7.1.2",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 7.3"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 7.1.2"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The events {Uᵢ ≤ 1/2} would be pairwise null with mass 1/2 each. Lives in MathFin/Foundations/Copula.lean. Axioms-clean."
@@ -477,6 +733,12 @@
       "metadata": {
         "chapter": 7,
         "reference": "MFE (2015) Theorem 7.7",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Theorem 7.7"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Union bound on the complements of the coordinate events. Lives in MathFin/Foundations/Copula.lean (upper bound: IsCopula.measureReal_Iic_le). Axioms-clean."
@@ -493,6 +755,15 @@
       "metadata": {
         "chapter": 7,
         "reference": "Sklar (1959); MFE (2015) Theorem 7.3",
+        "citations": [
+          {
+            "key": "Sklar1959"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Theorem 7.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Probability integral transform on each coordinate. Lives in MathFin/Foundations/Sklar.lean. Axioms-clean."
@@ -509,6 +780,19 @@
       "metadata": {
         "chapter": 7,
         "reference": "Sklar (1959); MFE (2015) Theorem 7.3; QRM Exercise Book Ex. 7.2",
+        "citations": [
+          {
+            "key": "Sklar1959"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Theorem 7.3"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 7.2"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. {X_i ≤ x_i} and {F_i(X_i) ≤ F_i(x_i)} agree almost surely. Lives in MathFin/Foundations/Sklar.lean. Non-continuous margins are not covered. Axioms-clean."
@@ -525,6 +809,15 @@
       "metadata": {
         "chapter": 7,
         "reference": "Sklar (1959); MFE (2015) Theorem 7.3",
+        "citations": [
+          {
+            "key": "Sklar1959"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Theorem 7.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Continuous margins have range ⊇ (0, 1); joint distribution functions on (0, 1)^ι determine the law. Lives in MathFin/Foundations/Sklar.lean. Axioms-clean."
@@ -541,6 +834,12 @@
       "metadata": {
         "chapter": 7,
         "reference": "MFE (2015) Proposition 7.7",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Proposition 7.7"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The probability-integral transforms are unchanged. Lives in MathFin/Foundations/Sklar.lean. Axioms-clean."
@@ -557,6 +856,12 @@
       "metadata": {
         "chapter": 7,
         "reference": "QRM Exercise Book Ex. 7.19(a)",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 7.19(a)"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Density 1 + θ(1 − 2u)(1 − 2v) for |θ| ≤ 1; a negative rectangle mass otherwise. Lives in MathFin/Foundations/CopulaFamilies.lean. Axioms-clean."
@@ -573,6 +878,12 @@
       "metadata": {
         "chapter": 7,
         "reference": "QRM Exercise Book Ex. 7.19(d)",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 7.19(d)"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Integral of uv against the FGM density. Lives in MathFin/Foundations/CopulaFamilies.lean. Axioms-clean."
@@ -589,6 +900,12 @@
       "metadata": {
         "chapter": 7,
         "reference": "QRM Exercise Book Ex. 7.17(b)",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 7.17(b)"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Real analysis of the closed form; the Clayton measure itself is not constructed here. Lives in MathFin/Foundations/CopulaFamilies.lean. Axioms-clean."
@@ -605,6 +922,15 @@
       "metadata": {
         "chapter": 7,
         "reference": "Höffding (1940); MFE (2015) Lemma 7.27",
+        "citations": [
+          {
+            "key": "Hoeffding1940"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Lemma 7.27"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Independent copy on the product space and Fubini, via ∫(1{s < a} − 1{s < b}) ds = a − b. Lives in MathFin/Foundations/HoeffdingCovariance.lean. Axioms-clean."
@@ -621,6 +947,12 @@
       "metadata": {
         "chapter": 7,
         "reference": "QRM Exercise Book Ex. 7.14",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 7.14"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Hoeffding's identity. Lives in MathFin/Foundations/HoeffdingCovariance.lean. Axioms-clean."
@@ -637,6 +969,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "QRM Exercise Book Ex. 11.7",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 11.7"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. cov(1_A, 1_B) = P(A∩B) − P(A)P(B) and P(A∩B) ≤ min. Lives in MathFin/Foundations/HoeffdingCovariance.lean (lower bound le_covariance_indicator_one). Axioms-clean."
@@ -653,6 +991,15 @@
       "metadata": {
         "chapter": 7,
         "reference": "Marshall–Olkin (1967); QRM Exercise Book Ex. 7.23",
+        "citations": [
+          {
+            "key": "MarshallOlkin1967"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 7.23"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Independence of the three shocks. Lives in MathFin/Foundations/MarshallOlkin.lean. Axioms-clean."
@@ -669,6 +1016,12 @@
       "metadata": {
         "chapter": 10,
         "reference": "QRM Exercise Book Ex. 7.23; MathFin FixedIncome/FirstToDefault (independent case)",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 7.23"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. min(X₁, X₂) = min(T₁, T₂, T₃); a machine-checked instance of the FirstToDefault docstring's claim that default correlation lowers the FtD spread. Lives in MathFin/Foundations/MarshallOlkin.lean. Axioms-clean."
@@ -685,6 +1038,15 @@
       "metadata": {
         "chapter": 6,
         "reference": "Embrechts–McNeil–Straumann (2002); QRM Exercise Book Ex. 6.1, 6.18",
+        "citations": [
+          {
+            "key": "EmbrechtsMcNeilStraumann2002"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 6.1, 6.18"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. P(Z + VZ = 0) = 1/2 rules out every Gaussian law. Lives in MathFin/Foundations/CorrelationFallacies.lean. Axioms-clean."
@@ -701,6 +1063,16 @@
       "metadata": {
         "chapter": 5,
         "reference": "QRM Exercise Book Ex. 5.23(a); MFE (2015) Section 5.1",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 5.23(a)"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 5.1"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Logarithmic comparison n log a ~ −n(1 − a). Lives in MathFin/Foundations/ExtremeValue.lean. Axioms-clean."
@@ -717,6 +1089,16 @@
       "metadata": {
         "chapter": 5,
         "reference": "QRM Exercise Book Ex. 5.10; MFE (2015) Section 5.1.1",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 5.10"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 5.1.1"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Algebra of the GEV distribution function, all three types. Lives in MathFin/Foundations/ExtremeValue.lean. Axioms-clean."
@@ -733,6 +1115,12 @@
       "metadata": {
         "chapter": 5,
         "reference": "QRM Exercise Book Ex. 5.23(b)",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 5.23(b)"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Poisson-approximation lemma. Lives in MathFin/Foundations/ExtremeValue.lean. Axioms-clean."
@@ -749,6 +1137,12 @@
       "metadata": {
         "chapter": 5,
         "reference": "QRM Exercise Book Ex. 5.16",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 5.16"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Explicit normalizing sequences and the Poisson-approximation lemma. Lives in MathFin/Foundations/GeneralizedPareto.lean. Axioms-clean."
@@ -765,6 +1159,16 @@
       "metadata": {
         "chapter": 5,
         "reference": "QRM Exercise Book Ex. 5.19(b); MFE (2015) Section 5.2.1",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 5.19(b)"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 5.2.1"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Conditional law of the excess is again GPD (threshold stability). Lives in MathFin/Foundations/GeneralizedPareto.lean. Axioms-clean."
@@ -781,6 +1185,12 @@
       "metadata": {
         "chapter": 5,
         "reference": "QRM Exercise Book Ex. 5.26",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 5.26"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Poisson generating function E[G(x)^N] = exp(−λḠ(x)) (Foundations/PoissonPgf.lean). Lives in MathFin/Foundations/PoissonMaxima.lean. Axioms-clean."
@@ -797,6 +1207,12 @@
       "metadata": {
         "chapter": 9,
         "reference": "van der Vaart (1998) Lemma 21.2",
+        "citations": [
+          {
+            "key": "VanDerVaart1998",
+            "locator": "Lemma 21.2"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Galois connection and liminf of measures. Lives in MathFin/Foundations/QuantileConvergence.lean. Axioms-clean."
@@ -813,6 +1229,16 @@
       "metadata": {
         "chapter": 11,
         "reference": "QRM Exercise Book Ex. 11.11(a); MFE (2015) Section 11.2",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 11.11(a)"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 11.2"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Independence and Fubini over the factor. Lives in MathFin/RiskMeasures/BernoulliMixture.lean. Axioms-clean."
@@ -829,6 +1255,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "QRM Exercise Book Ex. 11.4(a), 11.11(b)",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 11.4(a), 11.11(b)"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. π₂ − π₁² = Var(Q). Lives in MathFin/RiskMeasures/BernoulliMixture.lean. Axioms-clean."
@@ -845,6 +1277,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "QRM Exercise Book Ex. 11.4(a), 11.9",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 11.4(a), 11.9"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. π₂ and π₁ are the second and first moments of p(F) (oneFactor_measureReal_iInter_default), and π₂ − π₁² = Var(p(F)). Lives in MathFin/RiskMeasures/BernoulliMixture.lean. Axioms-clean."
@@ -861,6 +1299,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "QRM Exercise Book Ex. 11.2(c), 11.9",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 11.2(c), 11.9"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The asset return is N(0, 1). Lives in MathFin/RiskMeasures/BernoulliMixture.lean. Axioms-clean."
@@ -877,6 +1321,19 @@
       "metadata": {
         "chapter": 11,
         "reference": "Vasicek (2002); MFE (2015) Section 11.3.2; QRM Exercise Book Ex. 11.16, 11.17",
+        "citations": [
+          {
+            "key": "Vasicek2002"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 11.3.2"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 11.16, 11.17"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The loss fraction is an empirical CDF evaluated at a factor-dependent point; almost surely the empirical CDF converges at every point at once (Etemadi's strong law at rationals plus a monotone squeeze). Lives in MathFin/RiskMeasures/VasicekIRB.lean. Axioms-clean."
@@ -893,6 +1350,18 @@
       "metadata": {
         "chapter": 11,
         "reference": "Vasicek (2002); Gordy (2003); MFE (2015) Section 11.3.2",
+        "citations": [
+          {
+            "key": "Vasicek2002"
+          },
+          {
+            "key": "Gordy2003"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 11.3.2"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Almost-sure convergence of the loss fraction, quantile convergence, and VaR of p(F) by equivariance. Lives in MathFin/RiskMeasures/VasicekIRB.lean. Axioms-clean."
@@ -909,6 +1378,12 @@
       "metadata": {
         "chapter": 6,
         "reference": "QRM Exercise Book Ex. 6.26",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 6.26"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Quadratic form (1 − ρ)∑wᵢ² + ρ(∑wᵢ)². Lives in MathFin/Portfolio/Equicorrelation.lean. Axioms-clean."
@@ -925,6 +1400,16 @@
       "metadata": {
         "chapter": 8,
         "reference": "QRM Exercise Book Ex. 8.6; MFE (2015) Section 8.2",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 8.6"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 8.2"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Location–scale principle: VaR_α(⟨w, X⟩) = mean + √(wᵀΣw)·Φ⁻¹(α). Lives in MathFin/Bridges/GaussianRiskMarkowitz.lean. Axioms-clean."
@@ -941,6 +1426,12 @@
       "metadata": {
         "chapter": 8,
         "reference": "QRM Exercise Book Ex. 8.6",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 8.6"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Location–scale principle for ES. Lives in MathFin/Bridges/GaussianRiskMarkowitz.lean. Axioms-clean."
@@ -957,6 +1448,12 @@
       "metadata": {
         "chapter": 8,
         "reference": "QRM Exercise Book Ex. 8.4",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 8.4"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Two portfolio losses of a Gaussian vector are a jointly Gaussian pair, so this is the pair theorem (VaR = E + sd Φ⁻¹(α) with sd subadditive and Φ⁻¹(α) ≥ 0). Lives in MathFin/Bridges/GaussianRiskMarkowitz.lean. Axioms-clean."
@@ -973,6 +1470,12 @@
       "metadata": {
         "chapter": 6,
         "reference": "QRM Exercise Book Ex. 6.16; generalizes Bridges/ConcentrationVariance",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 6.16"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Var(w) = v((1 − ρ)HHI + ρ) with HHI ≥ 0. Lives in MathFin/Bridges/EquicorrelationConcentration.lean. Axioms-clean."
@@ -989,6 +1492,16 @@
       "metadata": {
         "chapter": 9,
         "reference": "MFE (2015) Example 9.4; QRM Exercise Book Ex. 3.16, 9.13",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Example 9.4"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 3.16, 9.13"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The loss is an affine image of the N(0, h) Brownian increment. Lives in MathFin/Bridges/SquareRootOfTime.lean. Axioms-clean."
@@ -1005,6 +1518,16 @@
       "metadata": {
         "chapter": 8,
         "reference": "MFE (2015) Section 8.2.6; QRM Exercise Book Ex. 8.13, 8.14",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 8.2.6"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 8.13, 8.14"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The gap falls at rate ≥ min(α, 1 − α) and is continuous; intermediate value theorem. Lives in MathFin/RiskMeasures/Expectile.lean. Axioms-clean."
@@ -1021,6 +1544,12 @@
       "metadata": {
         "chapter": 8,
         "reference": "QRM Exercise Book Ex. 8.13",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 8.13"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Raising the level raises the gap pointwise, moving its unique root right. Lives in MathFin/RiskMeasures/Expectile.lean. Axioms-clean."
@@ -1037,6 +1566,12 @@
       "metadata": {
         "chapter": 8,
         "reference": "QRM Exercise Book Ex. 8.11 context",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 8.11"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Cauchy–Schwarz in expectation (Hölder at exponents 2, 2) at the centred variables X − E X, Y − E Y. Lives in MathFin/Foundations/FiniteMeasureCauchySchwarz.lean. Axioms-clean."
@@ -1053,6 +1588,12 @@
       "metadata": {
         "chapter": 8,
         "reference": "QRM Exercise Book Ex. 8.11, 2.19",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 8.11, 2.19"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Subadditivity of the standard deviation via covariance Cauchy–Schwarz. Lives in MathFin/RiskMeasures/StandardDeviationPrinciple.lean (translation invariance and homogeneity alongside). Axioms-clean."
@@ -1069,6 +1610,12 @@
       "metadata": {
         "chapter": 8,
         "reference": "QRM Exercise Book Ex. 8.11",
+        "citations": [
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 8.11"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Mean −q and variance q(1 − q) of the two-point loss. Lives in MathFin/RiskMeasures/StandardDeviationPrinciple.lean. Axioms-clean."
@@ -1085,6 +1632,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "CreditMetrics Technical Document (J.P. Morgan 1997), ch. 6",
+        "citations": [
+          {
+            "key": "CreditMetrics1997",
+            "locator": "ch. 6"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. P^k row-stochastic via Mathlib's rowStochastic submonoid; (P^(k+1)) i d ≥ (P^k) i d · P d d. Lives in MathFin/RiskMeasures/CreditMetrics.lean. Axioms-clean."
@@ -1101,6 +1654,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "CreditMetrics Technical Document (J.P. Morgan 1997), ch. 6",
+        "citations": [
+          {
+            "key": "CreditMetrics1997",
+            "locator": "ch. 6"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof that the threshold buckets partition ℝ, so bucket probabilities under any probability law sum to one. The N(0,1) case is thresholdMatrix_mem_rowStochastic at gaussianReal 0 1. The converse, calibration z = Φ⁻¹(cumulative row sums) reproducing a given row-stochastic matrix, is thresholdMatrix_gaussianThresholds (mf-creditmetrics-threshold-calibration). The default covariance of two obligors with bivariate normal returns is covariance_indicator_default_gaussianThresholds (mf-creditmetrics-default-covariance). Joint migration of several obligors to buckets other than Default is not formalized. Lives in MathFin/RiskMeasures/CreditMetrics.lean. Axioms-clean."
@@ -1117,6 +1676,11 @@
       "metadata": {
         "chapter": 2,
         "reference": "MFE (2015)",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The kernel is written as a Gamma mixture of Gaussian kernels (Mathlib's integral_rpow_mul_exp_neg_mul_Ioi), the two integrals are exchanged (integral_integral_swap, integrability via integrable_prod_iff'), and the inner Gaussian and outer Gamma integrals are evaluated with integral_gaussian and Gamma_eq_integral. Lives in MathFin/Foundations/StudentT.lean. Axioms-clean."
@@ -1133,6 +1697,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "MFE (2015) Example 2.15",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Example 2.15"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: VaR commutes with the monotone continuous map x ↦ μ + σx (valueAtRisk_comp) and depends on T only through its law. The quantile t_ν⁻¹(α) is the generic quantile of the Student-t law (it solves F_ν(q) = α, cdf_studentTMeasure_quantile); no closed form for it is given (none exists for general ν). Lives in MathFin/RiskMeasures/StudentTValueAtRisk.lean. Axioms-clean."
@@ -1149,6 +1719,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "MFE (2015) Example 2.15",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Example 2.15"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure: valueAtRisk_le_expectedShortfall at the integrable loss μ + σT (HasLaw.integrable with integrable_id_studentTMeasure, ν > 1). The closed-form reading, quantile_studentTMeasure_le_expectedShortfall_closedForm, applies the same inequality to the identity under the law and rewrites with the Student-t VaR and ES theorems. Lives in MathFin/RiskMeasures/StudentTValueAtRisk.lean. Axioms-clean."
@@ -1165,6 +1741,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "MFE (2015) Example 2.15",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Example 2.15"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The law has a continuous cdf, so the Acerbi–Tasche formula (expectedShortfall_eq_acerbiTasche) reduces ES of the standard loss to the tail first moment ∫_q^∞ t g_ν(t) dt / (1 − α); that integral is evaluated by the fundamental theorem of calculus with antiderivative −(ν/(ν−1)) C_ν⁻¹ (1 + t²/ν)^((1−ν)/2). Translation invariance and positive homogeneity of ES give the location-scale form. Lives in MathFin/RiskMeasures/StudentTValueAtRisk.lean. Axioms-clean."
@@ -1181,6 +1763,11 @@
       "metadata": {
         "chapter": 2,
         "reference": "MFE (2015)",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts"
+          }
+        ],
         "difficulty": "basic",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: at ν = 1 the kernel is (1 + x²)⁻¹ and its integral is π (Mathlib's integral_univ_inv_one_add_sq), so the two densities agree pointwise. Lives in MathFin/Foundations/StudentT.lean. Axioms-clean."

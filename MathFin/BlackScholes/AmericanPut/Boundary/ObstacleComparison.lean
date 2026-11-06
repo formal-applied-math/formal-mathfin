@@ -15,11 +15,28 @@ are independent of the exercise boundary and may meet at expiry. A contact
 on the exercise boundary is handled by the one-sided test-function argument,
 not by asserting that the price has a classical PDE there.
 
-## Result
+## Main definitions
 
-Public entry points include `twoSidedStrip`, `twoSidedStrip_isCompact`,
-`DividendPutSolution.no_positive_max_off_boundary`,
-`DividendPutSolution.obstacle_comparison_of_local_tests`.
+* `twoSidedStrip`: the closed space-time strip `{0 ≤ t ≤ T, L t ≤ x ≤ R t}` between two moving
+  endpoints.
+
+## Main results
+
+* `twoSidedStrip_isCompact`: for continuous `L`, `R` with `L ≤ R` on `[0, T]`, `twoSidedStrip L R T`
+  is compact (also when its width vanishes).
+* `DividendPutSolution.no_positive_max_off_boundary`: at `t > 0` and `x ≠ b t`, a test function
+  `U`, `C²` at `(x, t)`, cannot satisfy `p x t < U x t`, a spatial local maximum and a backward
+  time maximum of `U − p`, and the subsolution inequality `U_t ≤ L U` at once.
+* `DividendPutSolution.obstacle_comparison_of_local_tests`: on a compact `twoSidedStrip L R T`, if
+  `U` is continuous, is `C²` and a subsolution wherever `p < U`, and `U ≤ p` at time `0` and on
+  both lateral curves, then `U ≤ p` throughout the strip.
+* `DividendPutSolution.obstacle_comparison`: the same conclusion when `U` is `C²` and a
+  subsolution at every interior point of the strip.
+
+## Tags
+
+obstacle problem, comparison principle, subsolution, exercise obstacle, free boundary, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -77,6 +77,18 @@ chained through `integral_condExp`), not an unconditional integral congruence.
 No code is copied from `lean_contracts`; every definition and proof here is
 written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 §6 for the full credit line.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 1.1
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], 5.2;
+  ch. 5
+
+## Tags
+
+contract pricing, risk-neutral valuation, pricing measure, martingale pricing, discounted payoff,
+cash flow valuation, MSC 91G20, MSC 60G44, JEL G13
 -/
 
 @[expose] public section

@@ -55,9 +55,15 @@ This is what was missing in the previously-shipped `KMVMerton.lean`,
 new variable names. The honest content is "the formula is parameterised
 by `(A, DF)`", which is exactly what this file says.
 
-## Results
+## Main definitions
 
-* `gbsd1`, `gbsd2`, `bsVGarman`: Garman-normal definitions.
+* `gbsd1`, `gbsd2`: `d₁ = (log(A/(K·DF)) + σ²T/2) / (σ√T)` and `d₂ = d₁ − σ√T`.
+* `bsVGarman`: the Garman-normalised call price `A · Φ(d₁) − K · DF · Φ(d₂)`, where `A` is the
+  present value of one unit of the asset at maturity and `DF` the discount factor for cash at
+  maturity.
+
+## Main results
+
 * `bsd1_eq_gbsd1_standard`, `bsd2_eq_gbsd2_standard`: standard BS d_1/d_2
   match the Garman form at `DF = e^{−rτ}`.
 * `bsV_eq_bsVGarman_standard`: **`bsV` is `bsVGarman`** at the standard BS
@@ -67,6 +73,11 @@ by `(A, DF)`", which is exactly what this file says.
 * `bs_dividends_RHS_eq_bsVGarman`: the closed-form RHS of
   `bs_dividends_call_formula` equals `bsVGarman` at `A = S · e^{−qT}`,
   `DF = e^{−rT}`.
+
+## Tags
+
+Garman normal form, generalized Black–Scholes, cost of carry, unified closed form, discount factor,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

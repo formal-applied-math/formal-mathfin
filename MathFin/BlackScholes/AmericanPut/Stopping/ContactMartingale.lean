@@ -14,10 +14,19 @@ Interior Ito representations, stopping stability, bounded promotion and the
 contact-time limit discharge the contact-martingale verification obligation.
 The global supermartingale property is separate.
 
-## Result
+## Main results
 
-Public entry points include `localMartingale_stopped_indicator`,
-`brownianInteriorRule_martingale`, `brownianClassicalContactRule_martingale`.
+* `localMartingale_stopped_indicator`: for a local martingale `M` and a stopping time `θ`, the
+  process `M` stopped at `θ` and set to `0` on `{θ = 0}` is a local martingale.
+* `brownianInteriorRule_martingale`: for a `DividendPutSolution` with `0 < K`, `0 ≤ r`, `0 < S`,
+  `0 < σ`, the candidate stopped at the `n`-th interior localization rule is a martingale.
+* `brownianClassicalContactRule_martingale`: under the same hypotheses, the candidate stopped at
+  the classical first-contact rule is a martingale in the Brownian filtration.
+
+## Tags
+
+contact martingale, stopped martingale, Itô representation, first contact, verification, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

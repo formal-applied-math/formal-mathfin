@@ -14,7 +14,7 @@ For an **arbitrary bounded adapted continuous** process `θ : ℝ≥0 → Ω →
 the general adapted Girsanov theorem needs (the market price of risk is a genuine adapted process,
 not a function of `B_s` alone) — the uniform-partition Riemann–Itô sums `riemannσ θ T n =
 ∑_{k<n} θ(tₖ)·(B_{t_{k+1}} − B_{tₖ})` (`ItoRiemannSum`) converge in `L²(μ)` to
-`itoIntegralCLM_T (processToLp θ)` — the genuine continuous Itô integral of the σ-realization
+`itoIntegralCLM (processToLp θ)` — the genuine continuous Itô integral of the σ-realization
 `processToLp θ` (`AdaptedProcessToLp`). This is the one bridge: the integrand
 `(s, B_s) ↦ φ(s, B_s)` of `ItoIntegralRiemannBridgeTD` is a special case of it, and `φ ∘ B` the
 case of that which is constant in time.
@@ -27,8 +27,13 @@ path continuity.
 
 ## Main results
 
-* `itoIntegralCLM_T_of_bdd_adapted_cont` — `∑ θ(tₖ)·ΔBₖ → itoIntegralCLM_T (processToLp θ)` in `L²`.
+* `itoIntegralCLM_of_bdd_adapted_cont` — `∑ θ(tₖ)·ΔBₖ → itoIntegralCLM (processToLp θ)` in `L²`.
 * `tendstoInMeasure_riemannσ` — the same, in measure.
+
+## Tags
+
+Riemann–Itô sums, adapted integrand, Itô integral, stochastic integral, convergence in L²,
+left-endpoint sums, MSC 60H05, MSC 60G44
 -/
 
 @[expose] public section
@@ -44,18 +49,6 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilit
   {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
 
 include hB
-
-omit hB in
-/-- The simple-process coercion is additive over a finite sum (pointwise). -/
-lemma coe_finsetSum_apply {ι' : Type*} (hBmeas : ∀ t, Measurable (B t)) (s : Finset ι')
-    (W : ι' → SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (i : ℝ≥0) (ω : Ω) :
-    ⇑(∑ k ∈ s, W k) i ω = ∑ k ∈ s, ⇑(W k) i ω := by
-  classical
-  induction s using Finset.induction with
-  | empty => simp
-  | insert a s ha ih =>
-    rw [Finset.sum_insert ha, SimpleProcess.coe_add, Pi.add_apply, Pi.add_apply, ih,
-      Finset.sum_insert ha]
 
 omit hB in
 /-- On `(0,T]`, the cell-indicator sum collapses to the unique containing cell's value,
@@ -161,7 +154,8 @@ lemma uncurry_stepσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω →
       = ∑ k ∈ Finset.range n, (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator
           (fun _ ↦ θ (unifPart T n k) ω) s := by
   change ⇑(stepσ hBmeas hadap hbdd T n).val s ω = _
-  rw [stepσ, AddSubmonoidClass.coe_finsetSum, coe_finsetSum_apply,
+  rw [stepσ, AddSubmonoidClass.coe_finsetSum, SimpleProcess.coe_finset_sum, Finset.sum_apply,
+    Finset.sum_apply,
     ← Finset.sum_attach (Finset.range n) (fun k ↦
       (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator
         (fun _ ↦ θ (unifPart T n k) ω) s)]
@@ -195,40 +189,40 @@ lemma tendsto_uncurry_stepσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 �
 
 /-- **Riemann ↔ CLM bridge, adapted case.** For a bounded (`|θ| ≤ C`) adapted (`𝓕`-measurable in
 each `t`) continuous (every path `s ↦ θ_s ω`) integrand, the uniform-partition Riemann–Itô sums
-`∑ θ(tₖ)·ΔBₖ` converge in `L²(μ)` to `itoIntegralCLM_T (processToLp θ)`. -/
-theorem itoIntegralCLM_T_of_bdd_adapted_cont (hBmeas : ∀ t, Measurable (B t))
+`∑ θ(tₖ)·ΔBₖ` converge in `L²(μ)` to `itoIntegralCLM (processToLp θ)`. -/
+theorem itoIntegralCLM_of_bdd_adapted_cont (hBmeas : ∀ t, Measurable (B t))
     {θ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     (hcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ θ s ω))
     {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) :
     Tendsto (fun n ↦ (memLp_riemannσ hB hBmeas hadap hbdd T n).toLp (riemannσ (B := B) θ T n))
-      atTop (𝓝 (itoIntegralCLM_T hB T hBmeas
+      atTop (𝓝 (itoIntegralCLM hB T hBmeas
         (processToLp (μ := μ) T hBmeas hadap hcont hbdd))) := by
   set f : ℕ → ℝ≥0 × Ω → ℝ := fun n ↦ Function.uncurry ⇑(stepσ hBmeas hadap hbdd T n).val with hf
   set gθ_fn : ℝ≥0 × Ω → ℝ := Function.uncurry θ with hgθ
-  have hf_memLp : ∀ n, MemLp (f n) 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+  have hf_memLp : ∀ n, MemLp (f n) 2 (trimMeasure (μ := μ) T hBmeas) :=
     fun n ↦ memLp_uncurry_trim_T T hBmeas _
-  have hgθ_memLp : MemLp gθ_fn 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+  have hgθ_memLp : MemLp gθ_fn 2 (trimMeasure (μ := μ) T hBmeas) :=
     memLp_uncurry_of_bdd_adapted_cont T hBmeas hadap hcont hbdd
-  -- `trimMeasure_T` is supported on `(0,T] × Ω`
-  have hsupp := ae_fst_mem_Ioc_trimMeasure_T (μ := μ) T hBmeas
+  -- `trimMeasure` is supported on `(0,T] × Ω`
+  have hsupp := ae_fst_mem_Ioc_trimMeasure (μ := μ) T hBmeas
   -- the uncurried step functions converge a.e. to `θ` (cell collapse + path continuity)
-  have hae_conv : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas),
+  have hae_conv : ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas),
       Tendsto (fun n ↦ f n z) atTop (𝓝 (gθ_fn z)) := by
     filter_upwards [hsupp] with z hz
     exact tendsto_uncurry_stepσ hBmeas hadap hbdd T hz (hcont z.2).continuousWithinAt
   -- uniform bound `|f n| ≤ C` a.e.
-  have hf_bdd : ∀ n, ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), |f n z| ≤ C := fun n ↦ by
+  have hf_bdd : ∀ n, ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas), |f n z| ≤ C := fun n ↦ by
     filter_upwards [hsupp] with z hz
     exact abs_uncurry_stepσ_le hBmeas hadap hbdd T n hz z.2
   -- L² convergence of the integrals (dominated convergence, bound `(2C)²`)
-  have hint : Tendsto (fun n ↦ ∫ z, (f n z - gθ_fn z) ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas))
+  have hint : Tendsto (fun n ↦ ∫ z, (f n z - gθ_fn z) ^ 2 ∂(trimMeasure (μ := μ) T hBmeas))
       atTop (𝓝 0) := by
-    have hlim : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas),
+    have hlim : ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas),
         Tendsto (fun n ↦ (f n z - gθ_fn z) ^ 2) atTop (𝓝 ((fun _ ↦ (0 : ℝ)) z)) := by
       filter_upwards [hae_conv] with z hz
       simpa using ((hz.sub_const (gθ_fn z)).pow 2)
-    have hbnd : ∀ n, ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas),
+    have hbnd : ∀ n, ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas),
         ‖(f n z - gθ_fn z) ^ 2‖ ≤ (2 * C) ^ 2 := by
       intro n
       filter_upwards [hf_bdd n, hsupp] with z hzb hz
@@ -243,26 +237,26 @@ theorem itoIntegralCLM_T_of_bdd_adapted_cont (hBmeas : ∀ t, Measurable (B t))
     simpa using this
   have hLp : Tendsto (fun n ↦ (hf_memLp n).toLp (f n)) atTop (𝓝 (hgθ_memLp.toLp gθ_fn)) :=
     tendsto_iff_norm_sub_tendsto_zero.mpr (tendsto_norm_toLp_sub' hf_memLp hgθ_memLp hint)
-  have key : ∀ n, itoIntegralCLM_T hB T hBmeas ((hf_memLp n).toLp (f n))
+  have key : ∀ n, itoIntegralCLM hB T hBmeas ((hf_memLp n).toLp (f n))
       = (memLp_riemannσ hB hBmeas hadap hbdd T n).toLp (riemannσ (B := B) θ T n) := fun n ↦
-    itoIntegralCLM_T_stepσ hB hBmeas hadap hbdd T n
+    itoIntegralCLM_stepσ hB hBmeas hadap hbdd T n
   have htarget : hgθ_memLp.toLp gθ_fn = processToLp (μ := μ) T hBmeas hadap hcont hbdd := rfl
   rw [← htarget]
   exact (Filter.tendsto_congr key).mp
-    (((itoIntegralCLM_T hB T hBmeas).continuous.tendsto _).comp hLp)
+    (((itoIntegralCLM hB T hBmeas).continuous.tendsto _).comp hLp)
 
 /-- **The Riemann–Itô sums converge in measure to `∫₀ᵀ θ dB`.** From the `L²` convergence
-`itoIntegralCLM_T_of_bdd_adapted_cont` via `tendstoInMeasure_of_tendsto_Lp`, transported from the
+`itoIntegralCLM_of_bdd_adapted_cont` via `tendstoInMeasure_of_tendsto_Lp`, transported from the
 `Lp` classes to the `riemannσ` functions. -/
 theorem tendstoInMeasure_riemannσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     (hcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) :
     TendstoInMeasure μ (fun n ↦ riemannσ (B := B) θ T n) atTop
-      ⇑(itoIntegralCLM_T hB T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd)) := by
+      ⇑(itoIntegralCLM hB T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd)) := by
   refine TendstoInMeasure.congr
     (fun n ↦ (memLp_riemannσ hB hBmeas hadap hbdd T n).coeFn_toLp) EventuallyEq.rfl ?_
   exact tendstoInMeasure_of_tendsto_Lp
-    (itoIntegralCLM_T_of_bdd_adapted_cont hB hBmeas hadap hcont hbdd T)
+    (itoIntegralCLM_of_bdd_adapted_cont hB hBmeas hadap hcont hbdd T)
 
 end ItoIntegralRiemannBridge
 end MathFin

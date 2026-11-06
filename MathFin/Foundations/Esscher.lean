@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -39,6 +40,30 @@ that are not probability laws. The Gaussian tilt gives the static Girsanov chang
 (`gaussianReal_withDensity_esscher`, its case `N(0, 1)`), the change of drift of a jump-diffusion
 law (`jumpDiffusionIncrementLaw_absolutelyContinuous`), the no-jump tilt
 (`jumpDiffusionIncrementLaw_zero_tilted`) and Merton's tilted jumps (`mertonJump_tilted`).
+
+## Main results
+
+* `mgf_id_tilted_const_mul`: for the Esscher-tilted law `μ_θ = μ.tilted (θ * ·)`,
+  `mgf id μ_θ u = mgf id μ (u + θ) / mgf id μ θ`.
+* `integral_exp_mul_tilted_const_mul`, `integrable_exp_mul_tilted_const_mul`: the same identity on
+  `∫ e^{ux}`, and integrability of `e^{ux}` under `μ_θ` when `e^{θx}` and `e^{(u+θ)x}` are
+  `μ`-integrable.
+* `measure_eq_of_mgf_id_eventuallyEq`, `measure_eq_of_mgf_id_eq`: a finite measure on `ℝ` is
+  determined by its moment-generating function near `0` (when `0` is interior to the set of
+  integrable exponents), and by that function when every exponential moment exists.
+* `ofReal_integral_exp_smul_tilted`: when `e^f` is `μ`-integrable, `(∫ e^f dμ)·μ.tilted f` is
+  the measure with density `e^f` against `μ`.
+* `gaussianReal_tilted_const_mul`: tilting `N(m, v)` by `e^{θx}` gives `N(m + θ v, v)`.
+
+## References
+
+* [Esscher, *On the probability function in the collective theory of risk*][Esscher1932]
+* [Gerber and Shiu, *Option pricing by Esscher transforms*][GerberShiu1994]
+
+## Tags
+
+Esscher transform, exponential tilting, Gerber–Shiu, pricing measure, Gaussian tilt,
+moment generating function, MSC 60E10, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

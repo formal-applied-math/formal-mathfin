@@ -39,6 +39,15 @@ The classic display weights terms by the adjusted intensity `Λ' = Λ(1+k)`
 with a shifted rate `r_n`; that form regroups the factor `(1+k)^n` from our
 conditional spot into the weight — term-by-term the same series.
 
+## Main definitions
+
+* `mertonSpot`: the jump-compensated conditional spot after `n` jumps, `S₀ · e^{−kΛ} · (1+k)^n`.
+* `mertonVol`: the conditional volatility given `n` jumps, `√(σ² + nδ²/T)`.
+* `mertonCallTerm`, `mertonPutTerm`: the `n`-jump conditional Black–Scholes call and put values at
+  the conditional spot and volatility.
+* `mertonCallPrice`, `mertonPutPrice`: the Merton (1976) call and put prices, the expectation of the
+  conditional values over the Poisson jump count.
+
 ## Main results
 
 * `mertonCallTerm_eq_integral` / `mertonPutTerm_eq_integral` — each series
@@ -67,6 +76,15 @@ formalizes: the conditional-lognormal-given-Poisson-count mixture, exactly
 parallel to how `BSCallHyp` *hypothesizes* the lognormal terminal law for
 the diffusion-only model. The compound-Poisson *process* (jump SDE dynamics,
 `S_t` as a càdlàg semimartingale) is upstream-gated and not claimed.
+
+## References
+
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976]
+
+## Tags
+
+Merton jump-diffusion, Poisson mixture, lognormal jumps, option pricing with jumps,
+series of Black–Scholes prices, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -310,6 +328,7 @@ theorem integral_mertonSpot (S_0 k : ℝ) (Λ : ℝ≥0) :
 
 /-- **Term-wise put–call parity** for the conditional values: pure
 `Φ(x) + Φ(−x) = 1` algebra, no hypotheses. -/
+@[pricing]
 theorem mertonTerm_parity (S_0 K r σ T k δ : ℝ) (Λ : ℝ≥0) (n : ℕ) :
     mertonCallTerm S_0 K r σ T k δ Λ n - mertonPutTerm S_0 K r σ T k δ Λ n
       = mertonSpot S_0 k Λ n - K * rexp (-r * T) := by

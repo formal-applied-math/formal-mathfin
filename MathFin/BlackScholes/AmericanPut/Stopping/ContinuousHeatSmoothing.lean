@@ -12,10 +12,16 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.CompactHeatFlow
 A smooth cutoff is placed on the kernel factor in the convolution theorem.
 No derivatives of the initial datum are taken.
 
-## Result
+## Main results
 
-Public entry points include `compact_continuous_heatFlow_smooth`,
-`compact_continuous_heatFlow_contDiff`.
+* `compact_continuous_heatFlow_smooth`: for continuous compactly supported `f`, the heat
+  evolution `feynmanU f` is `C^∞` on `{t > 0}`.
+* `compact_continuous_heatFlow_contDiff`: in particular it is `C²` there.
+
+## Tags
+
+heat smoothing, continuous data, convolution, smooth cutoff, heat kernel, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

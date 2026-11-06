@@ -12,6 +12,12 @@
       "metadata": {
         "chapter": 9,
         "reference": "Theorem 9.1.7",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 9.1.7"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "reduced_core",
         "formalization_scope": "Lean specification (structure spec): the structure carries `T_pos`, a uniform L¹ bound on `Z` standing in for the Novikov integrability hypothesis — the genuine condition E[exp(½∫₀ᵀ θ² ds)] < ∞ requires the stochastic integral ∫θ dB, and no θ or B appears in the structure — and the conclusion `Martingale Z 𝓕 μ` as a field; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation. Marked `reduced_core` to remain honest: a real proof requires the Itô-integral / Doléans–Dade machinery currently outside Mathlib at the pinned toolchain."
@@ -28,9 +34,15 @@
       "metadata": {
         "chapter": 9,
         "reference": "Theorem 9.1.8",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 9.1.8"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Derivation from primitives (full). MathFin.Btheta_isQBrownianMotion_adapted (re-exported here) proves, for a bounded (|θ| ≤ C), 𝓕-adapted, path-continuous θ, under Q = μ.withDensity(exp(−∫₀ᵀθdB − ½∫₀ᵀθ²ds)) with the drift-corrected process B^θ_u = B_u + ∫₀ᵘθds: (i) B^θ_0 = 0 Q-a.s.; (ii) B^θ_t − B^θ_s ~ N(0, t−s) under Q for s ≤ t ≤ T; (iii) independent increments on [0,T] in Mathlib's sense (HasIndepIncrements: for any t₀ ≤ … ≤ tₙ ≤ T the increments of B^θ are jointly Q-independent). Together (i)–(iii) fix every finite-dimensional law of B^θ under Q on [0,T] to that of a standard Brownian motion; neither path continuity of B^θ nor independence of its increments from the filtration is stated. The two infrastructure pieces this entry was previously gated on are both landed: the σ-realization processToLp (bounded adapted continuous integrand as an L² predictable class, feeding the Itô-integral CLM isometry itoIntegralCLM_T) and the L²→L¹ density-convergence endpoint (tendsto_setIntegral_of_tendstoInMeasure_of_sq_bound, reached via the a.e.-subsequence engine). The route is spine-free: rather than build a continuous Doléans stochastic exponential and prove it a martingale (a Novikov-flavoured crux), the simple-θ exponential-martingale identity isExpQMartingale_BthetaSimple (on the uniform-partition approximants c⁽ⁿ⁾_i = θ(tᵢ)) is passed to the limit — the stochastic exponent Wⁿ = ∑θ(tᵢ)ΔBᵢ → ∫θdB in L² (brick b), the drift parts converge everywhere (the drift Riemann lemmas), and the mixed-time set-integral limit goes through the a.e.-subsequence endpoint with a route-A L⁴/AM-GM uniform L² bound — then isQBrownianMotion_of_expMartingale reads off (i)–(iii), with no adapted-integrand Itô formula. The FULLY GENERAL continuous case (L²/progressive θ under Novikov, unbounded) remains reduced_core at sc-thm-9.1.8. See docs/plans/2026-07-06-girsanov-track-alpha.md brick α4."
+        "formalization_scope": "Derivation from primitives (full). MathFin.Btheta_isQBrownianMotion_adapted (re-exported here) proves, for a bounded (|θ| ≤ C), 𝓕-adapted, path-continuous θ, under Q = μ.withDensity(exp(−∫₀ᵀθdB − ½∫₀ᵀθ²ds)) with the drift-corrected process B^θ_u = B_u + ∫₀ᵘθds: (i) B^θ_0 = 0 Q-a.s.; (ii) B^θ_t − B^θ_s ~ N(0, t−s) under Q for s ≤ t ≤ T; (iii) independent increments on [0,T] in Mathlib's sense (HasIndepIncrements: for any t₀ ≤ … ≤ tₙ ≤ T the increments of B^θ are jointly Q-independent). Together (i)–(iii) fix every finite-dimensional law of B^θ under Q on [0,T] to that of a standard Brownian motion; neither path continuity of B^θ nor independence of its increments from the filtration is stated. The two infrastructure pieces this entry was previously gated on are both landed: the σ-realization processToLp (bounded adapted continuous integrand as an L² predictable class, feeding the Itô-integral CLM isometry itoIntegralCLM) and the L²→L¹ density-convergence endpoint (tendsto_setIntegral_of_tendstoInMeasure_of_sq_bound, reached via the a.e.-subsequence engine). The route is spine-free: rather than build a continuous Doléans stochastic exponential and prove it a martingale (a Novikov-flavoured crux), the simple-θ exponential-martingale identity isExpQMartingale_BthetaSimple (on the uniform-partition approximants c⁽ⁿ⁾_i = θ(tᵢ)) is passed to the limit — the stochastic exponent Wⁿ = ∑θ(tᵢ)ΔBᵢ → ∫θdB in L² (brick b), the drift parts converge everywhere (the drift Riemann lemmas), and the mixed-time set-integral limit goes through the a.e.-subsequence endpoint with a route-A L⁴/AM-GM uniform L² bound — then isQBrownianMotion_of_expMartingale reads off (i)–(iii), with no adapted-integrand Itô formula. The FULLY GENERAL continuous case (L²/progressive θ under Novikov, unbounded) remains reduced_core at sc-thm-9.1.8. See docs/plans/2026-07-06-girsanov-track-alpha.md brick α4."
       }
     },
     {
@@ -44,6 +56,12 @@
       "metadata": {
         "chapter": 9,
         "reference": "Theorem 9.1.8",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 9.1.8"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Derivation from primitives (full). MathFin.Btheta_isQBrownianMotion_predictable_of_bdd (re-exported here) proves, for a bounded (|θ| ≤ C), 𝓕-predictable θ — the honest domain of the Itô L² integral, dropping the path-continuity of gir-thm-9.1.8 — three properties of B^θ under Q on [0,T]: (i) zero start, (ii) N(0, t−s) increments, (iii) independent increments (HasIndepIncrements: for any t₀ ≤ … ≤ tₙ ≤ T the increments are jointly Q-independent). Together (i)–(iii) fix every finite-dimensional law of B^θ under Q on [0,T] to that of a standard Brownian motion; neither path continuity of B^θ nor independence of its increments from the filtration is stated. Under Q = μ.withDensity(exp(−∫₀ᵀθdB − ½∫₀ᵀθ²ds)) the drift-corrected process is B^θ_u = B_u + driftContinuousMod θ̂ u, where driftContinuousMod θ̂ is the genuinely-𝓕-adapted modification of the honest drift ∫₀ᵘθds (so IsExpQMartingale.adapted holds with strong, not merely a.e., measurability). The front half is the density-approximation over marshalled clamped simple processes (SimpleProcessPartition): θ is approximated in L² by dense simple processes marshalled into single-partition (s,c) form, so the simple-θ identity isExpQMartingale_BthetaSimple applies per n; the stochastic integral ∑cᵢΔB → ∫θdB, the drift ∑cᵢΔτ → ∫₀ᵘθds, and the quadratic variation ∑cᵢ²Δτ → ∫₀ᵀθ²ds all converge in μ-measure (via the drift-modification tower's L²-slice energy identity), fused through a common a.e.-subsequence (exists_subseq_tendsto_ae₂). The uniform L⁴/L² moment bounds (GirsanovSimpleDoleansMoments, partition-generic) feed the a.e.-subsequence set-integral engine tendsto_setIntegral_of_subseq_ae_of_sq_bound and a generic Fatou-L² limit (memLp_two_of_subseq_ae_of_sq_bound), exactly as in the continuous case, and isQBrownianMotion_of_expMartingale reads off (i)–(iii) — no continuous Doléans exponential, no Novikov crux, no adapted-integrand Itô formula. The FULLY GENERAL continuous case (L²/progressive θ under Novikov, unbounded) remains reduced_core at sc-thm-9.1.8."
@@ -60,6 +78,12 @@
       "metadata": {
         "chapter": 9,
         "reference": "Section 9.4 (BS pricing)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Section 9.4"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the Black-Scholes European call pricing formula. Wraps MathFin.bs_call_formula, which derives E_Q[e^{-rT} max(S_T - K, 0)] = S_0 Phi(d_1) - K e^{-rT} Phi(d_2) from primitives: HasLaw.integral_comp (transfer ∫_Q to ∫_(gaussianReal 0 1)), integral_gaussianReal_eq_integral_smul (convert to ∫ with gaussianPDFReal), max_payoff_eq_indicator + integral_indicator (restrict to {z > -d_2}), integral_exp_mul_gaussianPDFReal_Ioi (completing-the-square, ∫ exp(σ√T z) pdf(0,1,z) = exp(σ²T/2) Phi(d_1)), gaussianReal_Ioi_toReal (∫ pdf = Phi(d_2)), and the BS martingale algebra (r-σ²/2)T + σ²T/2 = rT. Lives at MathFin/BlackScholes/Call.lean (~340 lines, Phi infrastructure + completing-the-square + shifted-tail integral + main theorem). No upstream Itô calculus / Girsanov machinery required — pure Gaussian integration. Axioms-clean per #print axioms: depends only on propext, Classical.choice, Quot.sound."
@@ -76,6 +100,16 @@
       "metadata": {
         "chapter": 9,
         "reference": "Risk-neutral pricing / first FTAP, continuous time (Saporito Ch 9; Shreve II Ch 5)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Ch 9"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "Ch 5"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The discounted price e^{−rt}·S_t = S₀·exp(σX_t − σ²t/2) is S₀ • (Wald exponential), and IsFilteredPreBrownian.waldExponential_isMartingale (MathFin/Foundations/BrownianMartingale.lean, the exponential martingale of independent increments, martingale_exp_sub_of_indep_increments, with the Gaussian MGF) plus Martingale.smul give the martingale property — no further stochastic-calculus machinery. Continuous-time analogue of the discrete binomial EMM (Binomial/SecondFTAP.lean). Lives in MathFin/Foundations/ContinuousFTAP.lean. Axioms-clean."
@@ -92,6 +126,16 @@
       "metadata": {
         "chapter": 9,
         "reference": "Risk-neutral pricing / first FTAP, continuous time (Saporito Ch 9; Shreve II Ch 5)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Ch 9"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "Ch 5"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. X_t = bt + σB_t is a JumpDiffusionProcess with rate 0 (IsFilteredPreBrownian.jumpDiffusionProcess), so JumpDiffusionProcess.martingale_iff applies with Λ = 0, where the compensated drift r − σ²/2 − Λ(∫eˣdν − 1) is r − σ²/2 (IsFilteredPreBrownian.martingale_discounted_iff). The 'if' direction is also discountedGBM_isMartingale (Foundations/ContinuousFTAP.lean), proved there from the Wald martingale; this entry adds the converse. Lives in MathFin/BlackScholes/JumpDiffusionBrownian.lean. Axioms-clean."
@@ -108,6 +152,16 @@
       "metadata": {
         "chapter": 9,
         "reference": "Girsanov / abstract change of measure (Saporito Ch 9; Shreve II Ch 5.2)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Ch 9"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "Ch 5.2"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof re-exported from MathFin/Foundations/ChangeOfMeasure.lean. For Q = P.withDensity(ENNReal.ofReal Z_T), the identity ∫_A D_t dQ = ∫_A Z_t D_t dP = ∫_A Z_s D_s dP = ∫_A D_s dQ. The outer equalities are the Bayes pull-out: for A ∈ 𝓕_s ⊆ 𝓕_u and D_u 𝓕_u-measurable, ∫_A D_u Z_T dP = ∫_A D_u·P[Z_T|𝓕_u] dP = ∫_A D_u Z_u dP by the Z-martingale property (condExp_mul_of_stronglyMeasurable_left + setIntegral_condExp); the middle is the Z·D martingale set-integral (Martingale.setIntegral_eq). withDensity conversion via setIntegral_withDensity_eq_setIntegral_toReal_smul. Axioms-clean: propext, Classical.choice, Quot.sound."
@@ -124,6 +178,16 @@
       "metadata": {
         "chapter": 9,
         "reference": "Girsanov change of measure / risk-neutral pricing (Saporito Ch 9; Shreve II Ch 5.2-5.4)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Ch 9"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "Ch 5.2"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof re-exported from MathFin/Foundations/Girsanov.lean. Instantiates the change-of-measure engine (changeOfMeasure_setIntegral_eq) with two Wald exponentials: the Girsanov density Z = exp(−θX − ½θ²·) = waldExponential(−θ) and the product Z·D = S_0·exp((σ−θ)X − ½(σ−θ)²·) = S_0·waldExponential(σ−θ), both P-martingales by IsFilteredPreBrownian.waldExponential_isMartingale (using μ−r = σθ). Adaptedness of D via continuous-comp of the adapted X_u; the one new estimate is the mixed-time integrability of D_u·Z_T, handled by AM-GM exp(σX_u)exp(−θX_T) ≤ exp(2σX_u)+exp(−2θX_T), each Gaussian-MGF-integrable (integrable_exp_mul_gaussianReal). Does NOT claim the distributional Girsanov (drift-corrected process is Q-Brownian). Axioms-clean: propext, Classical.choice, Quot.sound."
@@ -135,11 +199,21 @@
       "description": "The Girsanov measure Q = P.withDensity(exp(−θX_T − ½θ²T)), θ = (μ−r)/σ, is an equivalent martingale measure of the continuous-market frame at the horizon T for the discounted Black-Scholes price S_0·exp((μ−r−σ²/2)t + σX_t) under physical drift μ: Q is a probability measure mutually absolutely continuous with P, and the price stopped at T is a Q-martingale for the Brownian filtration. The martingale property holds on [0,T] only, which is why the notion carries the horizon; the forward FTAP for simple strategies trading up to T then applies to it.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Foundations.Girsanov\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\n/-- **The Black–Scholes Girsanov measure is an equivalent martingale measure up to `T`.** With\n    physical drift `μ`, rate `r`, volatility `σ ≠ 0` and `θ = (μ − r)/σ`, the measure\n    `Q = P.withDensity(exp(−θX_T − ½θ²T))` is a probability measure equivalent to `P` under which\n    the discounted price `S_0·exp((μ − r − σ²/2)t + σX_t)`, stopped at `T`, is a martingale: an\n    instance of the continuous-market frame `ContinuousMarket.IsEMM` at the horizon `T`.\n    Re-exports `MathFin.bs_discounted_isEMM`. -/\ntheorem bs_emm_horizon\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]\n    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]\n    {X : ℝ≥0 → Ω → ℝ} [IsFilteredPreBrownian X 𝓕 P]\n    (S_0 r μ σ : ℝ) (hσ : σ ≠ 0) (T : ℝ≥0) :\n    MathFin.ContinuousMarket.IsEMM 𝓕 P\n      (fun (t : ℝ≥0) ω => S_0 * Real.exp ((μ - r - σ ^ 2 / 2) * (t : ℝ) + σ * X t ω)) T\n      (P.withDensity fun ω => ENNReal.ofReal\n        (Real.exp (-((μ - r) / σ) * X T ω - ((μ - r) / σ) ^ 2 * (T : ℝ) / 2))) :=\n  MathFin.bs_discounted_isEMM S_0 r μ σ hσ T\n"
+        "lean": "import MathFin.Foundations.Girsanov\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\n/-- **The Black–Scholes Girsanov measure is an equivalent martingale measure up to `T`.** With\n    physical drift `μ`, rate `r`, volatility `σ ≠ 0` and `θ = (μ − r)/σ`, the measure\n    `Q = P.withDensity(exp(−θX_T − ½θ²T))` is a probability measure equivalent to `P` under which\n    the discounted price `S_0·exp((μ − r − σ²/2)t + σX_t)`, stopped at `T`, is a martingale: an\n    instance of the continuous-market frame `IsEMM` at the horizon `T`.\n    Re-exports `MathFin.bs_discounted_isEMM`. -/\ntheorem bs_emm_horizon\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]\n    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]\n    {X : ℝ≥0 → Ω → ℝ} [IsFilteredPreBrownian X 𝓕 P]\n    (S_0 r μ σ : ℝ) (hσ : σ ≠ 0) (T : ℝ≥0) :\n    MathFin.IsEMM 𝓕 P\n      (fun (t : ℝ≥0) ω => S_0 * Real.exp ((μ - r - σ ^ 2 / 2) * (t : ℝ) + σ * X t ω)) T\n      (P.withDensity fun ω => ENNReal.ofReal\n        (Real.exp (-((μ - r) / σ) * X T ω - ((μ - r) / σ) ^ 2 * (T : ℝ) / 2))) :=\n  MathFin.bs_discounted_isEMM S_0 r μ σ hσ T\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Girsanov change of measure / risk-neutral pricing (Saporito Ch 9; Shreve II Ch 5.2-5.4)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Ch 9"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "Ch 5.2"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, in MathFin/Foundations/Girsanov.lean. Equivalence: the density exp(−θX_T − ½θ²T) is positive (absolutelyContinuous_withDensity_ofReal gives P ≪ Q, Q ≪ P is withDensity_absolutelyContinuous) and Q is a probability measure (girsanovMeasure_isProbabilityMeasure: unit mean from the Wald exponential martingale). Martingale: the set-integral identity bs_discounted_isQMartingale on s ≤ t ≤ T, plus adaptedness and Q-integrability (under Q the drift-corrected X_t + θt has law N(0,t), Btheta_map_eq_gaussianReal, so the discounted price is S_0 times a Gaussian exponential), assembled by martingale_stopped_of_setIntegral_eq. HONEST SCOPE: the martingale property is on [0,T] only (the stopped process), not on all of ℝ≥0; constant market price of risk θ; the distributional Girsanov statement is not part of this entry. Axioms-clean."
@@ -151,14 +225,20 @@
       "description": "Corollary 9.3.4: every square-integrable martingale M on the Brownian filtration is its initial value plus an Itô integral process, M_t = M_0 + ∫₀ᵗ φ dB for every t ≤ T, with a predictable L² integrand φ.",
       "domain": "stochastic_calculus",
       "code": {
-        "lean": "import MathFin.Foundations.MartingaleRepresentation\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.ItoIntegralProcessGeneral\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM\nopen scoped NNReal ENNReal\n\n/-- Corollary 9.3.4 (martingale representation, process form): every square-integrable\n    martingale `M` on the Brownian filtration is its initial value plus an Itô-integral\n    process — `M_t = M₀ + ∫₀ᵗ φ dB` for every `t ≤ T`, with a predictable `L²`\n    integrand `φ`. That `M₀` is a.e. constant is not assumed: it is the representation\n    read at `t = 0`, where the integral process vanishes. Re-export of\n    `MathFin.martingale_representation`\n    (`MathFin/Foundations/MartingaleRepresentation.lean`). -/\ntheorem martingale_representation_process_form\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0)\n    (M : ℝ≥0 → Ω → ℝ) (hM : Martingale M (natFiltration hBmeas) μ)\n    (hMT : MemLp (M T) 2 μ) :\n    ∃ φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),\n      ∀ t ≤ T, M t =ᵐ[μ] fun ω ↦ M 0 ω + itoProcessCLM hB T t hBmeas φ ω :=\n  MathFin.martingale_representation hB hBmeas hBcont T M hM hMT\n"
+        "lean": "import MathFin.Foundations.MartingaleRepresentation\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.ItoIntegralProcessGeneral\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM\nopen scoped NNReal ENNReal\n\n/-- Corollary 9.3.4 (martingale representation, process form): every square-integrable\n    martingale `M` on the Brownian filtration is its initial value plus an Itô-integral\n    process — `M_t = M₀ + ∫₀ᵗ φ dB` for every `t ≤ T`, with a predictable `L²`\n    integrand `φ`. That `M₀` is a.e. constant is not assumed: it is the representation\n    read at `t = 0`, where the integral process vanishes. Re-export of\n    `MathFin.martingale_representation`\n    (`MathFin/Foundations/MartingaleRepresentation.lean`). -/\ntheorem martingale_representation_process_form\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0)\n    (M : ℝ≥0 → Ω → ℝ) (hM : Martingale M (natFiltration hBmeas) μ)\n    (hMT : MemLp (M T) 2 μ) :\n    ∃ φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),\n      ∀ t ≤ T, M t =ᵐ[μ] fun ω ↦ M 0 ω + itoProcessCLM hB T t hBmeas φ ω :=\n  MathFin.martingale_representation hB hBmeas hBcont T M hM hMT\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Corollary 9.3.4",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Corollary 9.3.4"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof (promoted from reduced_core 2026-08-06; the previous entry was a Prop-structure whose conclusion was a bundled field read off by projection). Re-export of MathFin.martingale_representation (MathFin/Foundations/MartingaleRepresentation.lean). The derivation: the terminal Itô integral phi -> int_0^T phi dB is an isometry (ItoIntegralCovariation.itoIsometry_T) whose range is therefore closed, hence orthogonally complemented in L^2(mu); a centered F^B_T-measurable F splits as y + z with y in the range and z orthogonal to it, and z inherits both F^B_T-measurability and centering. Every step-integrand Doleans exponential minus one lies in the range (DoleansStepRepresentation.stepDoleans_sub_one_mem_range), so z is orthogonal to all of them, and the Wiener-exponential totality theorem (WienerExponentialTotality.eq_zero_of_orthogonal_stepDoleans) forces z = 0. That gives the terminal form exists_itoIntegral_representation (F = E[F] + int_0^T phi dB for a UNIQUE phi, uniqueness being injectivity of an isometry); the process form here spreads it over every t <= T because (phi.B)_t is exactly the F_t-conditional expectation of the terminal integral (itoProcessCLM_eq_condExpL2), and M_0 is the representation read at t = 0 rather than an assumption. Centering, E[int_0^T phi dB] = 0, is proved one floor down (ItoIntegralProcessGeneral.integral_itoIntegralCLM_T), not assumed. Finite horizon [0,T], L^2 integrands, real scalar Brownian motion. Axioms-clean."
+        "formalization_scope": "Full formal proof (promoted from reduced_core 2026-08-06; the previous entry was a Prop-structure whose conclusion was a bundled field read off by projection). Re-export of MathFin.martingale_representation (MathFin/Foundations/MartingaleRepresentation.lean). The derivation: the terminal Itô integral phi -> int_0^T phi dB is an isometry (ItoIntegralCovariation.itoIsometry) whose range is therefore closed, hence orthogonally complemented in L^2(mu); a centered F^B_T-measurable F splits as y + z with y in the range and z orthogonal to it, and z inherits both F^B_T-measurability and centering. Every step-integrand Doleans exponential minus one lies in the range (DoleansStepRepresentation.stepDoleans_sub_one_mem_range), so z is orthogonal to all of them, and the Wiener-exponential totality theorem (WienerExponentialTotality.eq_zero_of_orthogonal_stepDoleans) forces z = 0. That gives the terminal form exists_itoIntegral_representation (F = E[F] + int_0^T phi dB for a UNIQUE phi, uniqueness being injectivity of an isometry); the process form here spreads it over every t <= T because (phi.B)_t is exactly the F_t-conditional expectation of the terminal integral (itoProcessCLM_eq_condExpL2), and M_0 is the representation read at t = 0 rather than an assumption. Centering, E[int_0^T phi dB] = 0, is proved one floor down (ItoIntegralProcessGeneral.integral_itoIntegralCLM), not assumed. Finite horizon [0,T], L^2 integrands, real scalar Brownian motion. Axioms-clean."
       }
     },
     {
@@ -167,14 +247,24 @@
       "description": "Martingale representation, submodule form: the range of the terminal Itô integral φ ↦ ∫₀ᵀ φ dB, joined with the constants, is exactly the 𝓕ᴮ_T-measurable part of L²(μ) — equivalently, the Itô isometry is onto the centered 𝓕ᴮ_T-measurable subspace.",
       "domain": "stochastic_calculus",
       "code": {
-        "lean": "import MathFin.Foundations.MartingaleRepresentation\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM\nopen scoped NNReal ENNReal\n\n/-- Martingale representation, submodule form: the range of the terminal Itô integral\n    `φ ↦ ∫₀ᵀ φ dB`, joined with the constants, is exactly the `𝓕ᴮ_T`-measurable part\n    of `L²(μ)`. Equivalently the Itô isometry is onto the centered `𝓕ᴮ_T`-measurable\n    subspace. Re-export of `MathFin.itoIntegralCLM_T_surjective_onto_centered`\n    (`MathFin/Foundations/MartingaleRepresentation.lean`). -/\ntheorem itoIntegralCLM_T_range_sup_constants\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) :\n    LinearMap.range (itoIntegralCLM_T hB T hBmeas).toLinearMap\n        ⊔ (ℝ ∙ Lp.const 2 μ (1 : ℝ))\n      = lpMeas ℝ ℝ (natFiltration hBmeas T) 2 μ :=\n  MathFin.itoIntegralCLM_T_surjective_onto_centered hB hBmeas hBcont T\n"
+        "lean": "import MathFin.Foundations.MartingaleRepresentation\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM\nopen scoped NNReal ENNReal\n\n/-- Martingale representation, submodule form: the range of the terminal Itô integral\n    `φ ↦ ∫₀ᵀ φ dB`, joined with the constants, is exactly the `𝓕ᴮ_T`-measurable part\n    of `L²(μ)`. Equivalently the Itô isometry is onto the centered `𝓕ᴮ_T`-measurable\n    subspace. Re-export of `MathFin.itoIntegralCLM_surjective_onto_centered`\n    (`MathFin/Foundations/MartingaleRepresentation.lean`). -/\ntheorem itoIntegralCLM_range_sup_constants\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) :\n    LinearMap.range (itoIntegralCLM hB T hBmeas).toLinearMap\n        ⊔ (ℝ ∙ Lp.const 2 μ (1 : ℝ))\n      = lpMeas ℝ ℝ (natFiltration hBmeas T) 2 μ :=\n  MathFin.itoIntegralCLM_surjective_onto_centered hB hBmeas hBcont T\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Martingale representation, surjectivity of the Itô isometry (Saporito Ch 9; Karatzas–Shreve 3.4)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Ch 9"
+          },
+          {
+            "key": "KaratzasShreve1991",
+            "locator": "3.4"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.itoIntegralCLM_T_surjective_onto_centered (MathFin/Foundations/MartingaleRepresentation.lean). This is the exact identification of the Itô isometry's IMAGE, the content behind the representation theorem: the inclusion <= is that the terminal integral is F^B_T-measurable (itoIntegralCLM_T_mem_lpMeas, via the integral PROCESS being adapted) and constants are measurable for every sigma-algebra; the inclusion >= is the representation theorem applied to F - E[F]. Surjectivity is a TOTALITY statement about the range, proved by orthogonal decomposition against the closed range plus the Wiener-exponential totality theorem — no Malliavin calculus, no Ito formula for adapted integrands. The same fact is packaged as MathFin.itoIsometryEquiv, a LinearIsometryEquiv from the predictable L^2 integrands onto MathFin.centeredBrownianL2 (the F^B_T-measurable subspace intersected with the orthogonal complement of the constants). Finite horizon [0,T], real scalar Brownian motion. Axioms-clean."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.itoIntegralCLM_surjective_onto_centered (MathFin/Foundations/MartingaleRepresentation.lean). This is the exact identification of the Itô isometry's IMAGE, the content behind the representation theorem: the inclusion <= is that the terminal integral is F^B_T-measurable (itoIntegralCLM_mem_lpMeas, via the integral PROCESS being adapted) and constants are measurable for every sigma-algebra; the inclusion >= is the representation theorem applied to F - E[F]. Surjectivity is a TOTALITY statement about the range, proved by orthogonal decomposition against the closed range plus the Wiener-exponential totality theorem — no Malliavin calculus, no Ito formula for adapted integrands. The same fact is packaged as MathFin.itoIsometryEquiv, a LinearIsometryEquiv from the predictable L^2 integrands onto MathFin.centeredBrownianL2 (the F^B_T-measurable subspace intersected with the orthogonal complement of the constants). Finite horizon [0,T], real scalar Brownian motion. Axioms-clean."
       }
     },
     {
@@ -183,14 +273,24 @@
       "description": "Every square-integrable 𝓕ᴮ_T-claim H is the terminal wealth 𝔼_μ[H] + ∫₀ᵀ φ dB of an Itô-integrable strategy φ, and the hedge φ is unique — the finance reading of the martingale representation theorem.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Foundations.MarketCompleteness\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM\nopen scoped NNReal ENNReal\n\n/-- Completeness of the Brownian market: every square-integrable `𝓕ᴮ_T`-claim `H` is\n    the terminal wealth `𝔼_μ[H] + ∫₀ᵀ φ dB` of an Itô-integrable strategy `φ`, and `φ`\n    is unique. The initial wealth is forced to be the reference expectation because\n    the Itô integral is centered. Re-export of\n    `MathFin.exists_replicating_strategy`\n    (`MathFin/Foundations/MarketCompleteness.lean`), stated with the `Replicates`\n    predicate unfolded. -/\ntheorem exists_unique_replicating_strategy\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) (H : Lp ℝ 2 μ)\n    (hHmeas : AEStronglyMeasurable[natFiltration hBmeas T] (⇑H) μ) :\n    ∃! φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),\n      (⇑H) =ᵐ[μ] fun ω ↦ (∫ x, H x ∂μ) + itoIntegralCLM_T hB T hBmeas φ ω :=\n  MathFin.exists_replicating_strategy hB hBmeas hBcont T H hHmeas\n"
+        "lean": "import MathFin.Foundations.MarketCompleteness\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM\nopen scoped NNReal ENNReal\n\n/-- Completeness of the Brownian market: every square-integrable `𝓕ᴮ_T`-claim `H` is\n    the terminal wealth `𝔼_μ[H] + ∫₀ᵀ φ dB` of an Itô-integrable strategy `φ`, and `φ`\n    is unique. The initial wealth is forced to be the reference expectation because\n    the Itô integral is centered. Re-export of\n    `MathFin.exists_replicating_strategy`\n    (`MathFin/Foundations/MarketCompleteness.lean`), stated with the `Replicates`\n    predicate unfolded. -/\ntheorem exists_unique_replicating_strategy\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) (H : Lp ℝ 2 μ)\n    (hHmeas : AEStronglyMeasurable[natFiltration hBmeas T] (⇑H) μ) :\n    ∃! φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),\n      (⇑H) =ᵐ[μ] fun ω ↦ (∫ x, H x ∂μ) + itoIntegralCLM hB T hBmeas φ ω :=\n  MathFin.exists_replicating_strategy hB hBmeas hBcont T H hHmeas\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Market completeness in continuous time (Saporito Ch 9; Shreve II 5.3)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Ch 9"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "5.3"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.exists_replicating_strategy (MathFin/Foundations/MarketCompleteness.lean), whose statement is the Replicates predicate; the snippet states it unfolded so the conclusion is visible rather than projected. Completeness IS the martingale representation theorem read as a trading statement: the hedge is the representing integrand and the price is the reference expectation, because the Ito integral is centered. SCOPE, stated honestly. (1) The strategy class is the Ito-integrable predictable integrands Lp R 2 (trimMeasure_T T) — the domain of itoIntegralCLM_T, strictly wider than ContinuousMarket.SimpleStrategy; the widening is forced, since a general L^2 claim is not the terminal value of any piecewise-constant holding. (2) The traded gain is the Ito integral against B itself: the discounted price IS the driving Brownian motion (a Bachelier-type market), so phi counts units held. A general discounted price S would need the stochastic integral int phi dS, whose absence Foundations/ContinuousMarket records as deliberate. (3) mu is the model's reference measure; MathFin.measure_eq_of_pricesGainsAtZero (corpus entry gir-pricing-measure-unique) is what shows it is the pricing measure on F^B_T, and only among measures satisfying the explicit gains-neutrality hypothesis PricesGainsAtZero — that is not the unconditional second FTAP, see that entry. The companion MathFin.superReplication_eq_emm_price adds the continuous-time superreplication duality — least initial wealth from which some Ito-integrable strategy dominates H equals E_mu[H] — which does NOT close the finite-state Farkas gap recorded in Foundations/SuperhedgingDuality. Axioms-clean."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.exists_replicating_strategy (MathFin/Foundations/MarketCompleteness.lean), whose statement is the Replicates predicate; the snippet states it unfolded so the conclusion is visible rather than projected. Completeness IS the martingale representation theorem read as a trading statement: the hedge is the representing integrand and the price is the reference expectation, because the Ito integral is centered. SCOPE, stated honestly. (1) The strategy class is the Ito-integrable predictable integrands Lp R 2 (trimMeasure T) — the domain of itoIntegralCLM, strictly wider than ContinuousMarket.SimpleStrategy; the widening is forced, since a general L^2 claim is not the terminal value of any piecewise-constant holding. (2) The traded gain is the Ito integral against B itself: the discounted price IS the driving Brownian motion (a Bachelier-type market), so phi counts units held. A general discounted price S would need the stochastic integral int phi dS, whose absence Foundations/ContinuousMarket records as deliberate. (3) mu is the model's reference measure; MathFin.measure_eq_of_pricesGainsAtZero (corpus entry gir-pricing-measure-unique) is what shows it is the pricing measure on F^B_T, and only among measures satisfying the explicit gains-neutrality hypothesis PricesGainsAtZero — that is not the unconditional second FTAP, see that entry. The companion MathFin.superReplication_eq_emm_price adds the continuous-time superreplication duality — least initial wealth from which some Ito-integrable strategy dominates H equals E_mu[H] — which does NOT close the finite-state Farkas gap recorded in Foundations/SuperhedgingDuality. Axioms-clean."
       }
     },
     {
@@ -204,6 +304,16 @@
       "metadata": {
         "chapter": 9,
         "reference": "Uniqueness of the pricing measure under completeness — the second FTAP's complete ⟹ unique direction (Saporito Ch 9, Shreve II 5.4), here under an explicit gains-neutrality hypothesis rather than from IsEMM alone",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Ch 9"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "5.4"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of exactly what it says: uniqueness of the pricing measure on the Brownian filtration, FOR MEASURES THAT PRICE THE TRADED GAINS AT ZERO. Re-export of MathFin.measure_eq_of_pricesGainsAtZero (MathFin/Foundations/MarketCompleteness.lean). Derivation: completeness replicates the indicator of A from initial wealth mu(A); the hedge's gains are worth zero under Q by hypothesis, so Q(A) = mu(A). WHAT THIS IS NOT. It is NOT the unconditional second FTAP, and it does NOT follow from IsEMM alone. The textbook argument needs the replicating wealth process to be a stochastic integral against the PRICE S, hence a martingale under every EMM; the wealth process built by martingale representation is an integral against B, and nothing in IsEMM S Q makes int_0^T phi dB a Q-fair game (S and B share only a filtration). The missing link is the stochastic integral int phi dS, absent by design. So the fair-game step is HYPOTHESISED as PricesGainsAtZero Q. That hypothesis is sound and non-circular, not spurious: mu itself satisfies it (pricesGainsAtZero_self, so nothing is vacuous), and it is implied by the textbook gains-martingale condition (pricesGainsAtZero_of_gains_martingale, from a Q-martingale gains process started at 0). The IsEMM-flavoured corollary MathFin.emm_unique_of_complete consumes only the isProb and ac fields of IsEMM and still takes PricesGainsAtZero as a hypothesis; its martingale field rides along unused, so the statement stays in the vocabulary a reader looks it up under. SCOPE: only complete ==> unique is delivered. The converse (unique ==> complete) needs the Jacod-Yor extreme-point characterisation of the set of martingale measures and is out of scope. Axioms-clean."
@@ -220,6 +330,7 @@
       "metadata": {
         "chapter": 9,
         "reference": "Girsanov, distributional side (constant θ, marginal law)",
+        "citations": [],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof (constant θ, marginal level). Re-exports MathFin.Btheta_map_eq_gaussianReal (MathFin/Foundations/GirsanovConstantTheta.lean): under Q = P.withDensity(exp(−θ X_T − ½θ² T)) the drift-corrected marginal B^θ_t = X_t + θ t has law N(0, t). Derived from primitives — the Bayes change-of-measure engine (changeOfMeasure_setIntegral_eq) fed two Wald exponentials Wald(−θ), Wald(a−θ) gives the Q-MGF exp(½ t a²); Mathlib's complex-MGF machinery (integrableExpSet_eq_of_mgf transfers the full-line integrable-exponential set from the Gaussian, eqOn_complexMGF_of_mgf upgrades the real-MGF match to a complex-MGF match on ℂ, Measure.ext_of_complexMGF_eq reads off the law). No adapted-integrand Itô formula required. This is the constant-θ marginal law. gir-const-theta-qbm (full) adds zero start, N(0, t−s) increments and independent increments (HasIndepIncrements), via iIndepFun_iff_charFun_pi on the joint Gaussian law of successive increments. The bounded adapted cases are gir-simple-adapted, gir-thm-9.1.8 and gir-thm-9.1.8-predictable (full). Axioms-clean."
@@ -236,6 +347,7 @@
       "metadata": {
         "chapter": 9,
         "reference": "Girsanov, distributional side (constant θ, increment laws of B^θ under Q)",
+        "citations": [],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof (constant θ; zero start, Gaussian increments, independent increments). Re-exports MathFin.Btheta_isQBrownianMotion (MathFin/Foundations/GirsanovConstantTheta.lean): under Q = P.withDensity(exp(−θ X_T − ½θ² T)) the drift-corrected process B^θ_t = X_t + θ t has (i) zero start B^θ_0 = 0 a.e. Q, (ii) Gaussian increments B^θ_t − B^θ_s ~ N(0, t−s) for s ≤ t ≤ T (Btheta_increment_map_eq_gaussianReal), and (iii) independent increments on [0,T] in Mathlib's sense (HasIndepIncrements: for any t₀ ≤ … ≤ tₙ ≤ T the increments are jointly Q-independent). Together (i)–(iii) fix every finite-dimensional law of B^θ under Q on [0,T] to that of a standard Brownian motion; neither path continuity of B^θ nor independence of its increments from the filtration is stated. All three are read off in one application of the process-agnostic exponential characterization MathFin.isQBrownianMotion_of_expMartingale (MathFin/Foundations/ExpMartingaleQBrownian.lean), fed the constant-θ exponential martingale exp(a·B^θ − ½a²·) (expBtheta_isQMartingale, from the Bayes engine changeOfMeasure_setIntegral_eq + two Wald exponentials) packaged as IsExpQMartingale. Independence is the genuinely new piece over gir-const-theta-marginal: it is proved via Mathlib's iIndepFun_iff_charFun_pi — the joint characteristic function of n successive increments at w is the charFun-at-1 of the Gaussian law of the linear combination ∑ wₖ·Iₖ, obtained from the joint-MGF factorisation by induction on n (each step a conditional-expectation pull-out, condExp_mul_of_stronglyMeasurable_left), so it factors into the marginal Gaussian characteristic functions (charFun_gaussianReal). No adapted-integrand Itô formula required. The bounded adapted cases, with the same three properties, are gir-simple-adapted, gir-thm-9.1.8 and gir-thm-9.1.8-predictable (all full). Axioms-clean."
@@ -252,6 +364,7 @@
       "metadata": {
         "chapter": 9,
         "reference": "Girsanov, distributional side (simple/piecewise-constant adapted θ, increment laws of B^θ under Q)",
+        "citations": [],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof (simple/piecewise-constant adapted θ; zero start, Gaussian increments, independent increments). Re-exports MathFin.Btheta_simple_isQBrownianMotion (MathFin/Foundations/GirsanovSimpleTheta.lean): for a partition s (s 0 = 0, T ≤ s N) with 𝓕_{s i}-measurable, uniformly bounded multipliers c, under Q = P.withDensity(E^{−c}_T) the drift-corrected process B^θ_t = X_t + ∑_i c_i (s_{i+1}∧t − s_i∧t) has (i) zero start, (ii) Gaussian increments N(0, t−s), and (iii) independent increments on [0,T] (HasIndepIncrements) — one application of the process-agnostic exponential characterization MathFin.isQBrownianMotion_of_expMartingale (MathFin/Foundations/ExpMartingaleQBrownian.lean) to the simple-θ exponential martingale (isExpQMartingale_BthetaSimple), with NO characteristic-function chain re-derived (the payoff of the abstraction over constant θ). The exponential martingale is fed to the Bayes change-of-measure engine via two new pieces beyond constant θ: the simple Girsanov spine simple_spine (E^{−c}·exp(a·B^θ − ½a²·) = exp(a·X_0)·E^{a−c}, a.e. E^{−c}·D =ᵐ E^{a−c}, the tilted simple Doléans density), and the mixed-time integrability integrable_expBthetaSimple_mul_density (D_u·Z_T ∈ L¹ via Hölder: D_u ∈ L² by the Gaussian MGF with the drift bounded by K·u, and Z_T ∈ L² because Z_T² = E^{−2c}_T·exp(∑ c_i²Δτ_i) with ∑ c_i²Δτ_i ≤ K²T). Together (i)–(iii) fix every finite-dimensional law of B^θ under Q on [0,T] to that of a standard Brownian motion; neither path continuity of B^θ nor independence of its increments from the filtration is stated. This is the bounded adapted case for simple θ (strictly beyond gir-const-theta-qbm); bounded continuous adapted and bounded predictable θ are gir-thm-9.1.8 and gir-thm-9.1.8-predictable (full, same three properties), and general θ under Novikov's condition is the reduced core sc-thm-9.1.8. Axioms-clean."
@@ -268,6 +381,12 @@
       "metadata": {
         "chapter": 9,
         "reference": "Optional-sampling / discrete trace of a continuous-time martingale (Shreve II Ch 5)",
+        "citations": [
+          {
+            "key": "ShreveSCFII",
+            "locator": "Ch 5"
+          }
+        ],
         "difficulty": "medium",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. A standalone reusable structural lemma: the sampled filtration sampledFiltration 𝓕 ht (n ↦ 𝓕(t n)) is monotone with le' from 𝓕's own; adaptedness is hS.1 (t n) and the tower is hS.2 (t i) (t j) (ht hij) — both restrict Martingale (a bare And on this pin, .1/.2) along t. Kept as a general primitive (not consumed by the direct term-by-term forward FTAP proof) for sampled-model instances and the eventual meaning-2 development. Lives in MathFin/Foundations/ContinuousMarket.lean. Axioms-clean."
@@ -284,6 +403,15 @@
       "metadata": {
         "chapter": 9,
         "reference": "First FTAP, forward direction, continuous time (Delbaen–Schachermayer; Shreve II Ch 5)",
+        "citations": [
+          {
+            "key": "DelbaenSchachermayer"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "Ch 5"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the forward direction against SIMPLE strategies trading up to the EMM's horizon T (meaning-1 scope; general admissible strategies / NFLVR / the converse are meaning-2, deliberately out of scope). The EMM is a martingale on [0,T] (the process stopped at T is a Q-martingale), so the same statement covers a Q-martingale on all of ℝ≥0 at every T. Proof: a simple strategy sampled at its own trading dates is a discrete predictable strategy for the sampled price, which is a discrete EMM for the sampled filtration (IsEMM.sampled, from martingale_min_iff); its gains are the martingale transform of the sampled price by the holdings (SimpleStrategy.toDiscrete, SimpleStrategy.gains_eq_martingaleTransform), so the vector-valued discrete forward theorem MathFin.IsEMM.noArbitrage (the F-valued martingaleTransform, Theorem 2.2.9) applies. Lives in MathFin/Foundations/ContinuousMarket.lean. Axioms-clean."
@@ -295,11 +423,21 @@
       "description": "A concrete instance of the continuous-market EMM frame at F = ℝ: when P is the risk-neutral measure (the driver X is a P-pre-Brownian), the discounted geometric Brownian motion e^{−rt}S_t is already a P-martingale on all of ℝ≥0, so P is trivially its own equivalent martingale measure for it, at every horizon T.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Foundations.ContinuousFTAP\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- The discounted GBM is a `ContinuousMarket.IsEMM` instance with `Q = P`. Re-export of\n    `MathFin.discountedGBM_isEMM`. -/\ntheorem discounted_gbm_isEMM\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    {𝓕 : Filtration ℝ≥0 mΩ} {X : ℝ≥0 → Ω → ℝ}\n    [IsFilteredPreBrownian X 𝓕 P] [IsProbabilityMeasure P] (S_0 r σ : ℝ) (T : ℝ≥0) :\n    MathFin.ContinuousMarket.IsEMM 𝓕 P\n      (fun (t : ℝ≥0) ω => Real.exp (-r * t) *\n        (S_0 * Real.exp ((r - σ ^ 2 / 2) * t + σ * X t ω))) T P :=\n  MathFin.discountedGBM_isEMM S_0 r σ T\n"
+        "lean": "import MathFin.Foundations.ContinuousFTAP\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- The discounted GBM is an `IsEMM` instance with `Q = P`. Re-export of\n    `MathFin.discountedGBM_isEMM`. -/\ntheorem discounted_gbm_isEMM\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    {𝓕 : Filtration ℝ≥0 mΩ} {X : ℝ≥0 → Ω → ℝ}\n    [IsFilteredPreBrownian X 𝓕 P] [IsProbabilityMeasure P] (S_0 r σ : ℝ) (T : ℝ≥0) :\n    MathFin.IsEMM 𝓕 P\n      (fun (t : ℝ≥0) ω => Real.exp (-r * t) *\n        (S_0 * Real.exp ((r - σ ^ 2 / 2) * t + σ * X t ω))) T P :=\n  MathFin.discountedGBM_isEMM S_0 r σ T\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Risk-neutral pricing, equivalent martingale measure, continuous time (Saporito Ch 9; Shreve II Ch 5)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Ch 9"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "Ch 5"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Packages discountedGBM_isMartingale as the frame's IsEMM at F = ℝ and any horizon T (IsEMM.of_martingale: a martingale on all of ℝ≥0 stopped at T is a martingale): isProb from IsProbabilityMeasure P, ac/ac' = AbsolutelyContinuous.rfl (Q = P). HONEST SCOPE: uses Q = P (the risk-neutral measure is given). The physical-measure Girsanov EMM Q ≠ P is the horizon-T instance gir-bs-emm-horizon. Lives in MathFin/Foundations/ContinuousFTAP.lean. Axioms-clean."
@@ -316,6 +454,12 @@
       "metadata": {
         "chapter": 9,
         "reference": "First FTAP, forward direction, Black–Scholes model (Shreve II Ch 5)",
+        "citations": [
+          {
+            "key": "ShreveSCFII",
+            "locator": "Ch 5"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The frame's forward FTAP isEMM_noArbitrageSimple applied to discountedGBM_isEMM: a one-line corollary giving no simple-strategy arbitrage for the risk-neutral discounted GBM. Non-vacuous (for σ ≠ 0 the discounted GBM is a genuine non-constant martingale). Lives in MathFin/Foundations/ContinuousFTAP.lean. Axioms-clean."
@@ -327,11 +471,21 @@
       "description": "For the discounted price S = S₀ + (σ●B) with σ ≠ 0 a.e., every square-integrable 𝓕ᴮ_T-claim is the terminal wealth 𝔼_μ[H] + ∫₀ᵀ ψ dS of a unique holding ψ in the price itself, rather than of an integrand against the driver B.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Foundations.MarketCompletenessInPrice\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM MathFin.ItoIntegralAgainstMartingale\nopen MathFin.MarketCompletenessInPrice\nopen scoped NNReal ENNReal\n\n/-- **Completeness, as a holding in the price.** For the discounted price `S = S₀ + (σ●B)`\n    with volatility a.e. nonzero, every square-integrable `𝓕ᴮ_T`-claim is the terminal wealth\n    `𝔼_μ[H] + ∫₀ᵀ ψ dS` of a **unique** holding `ψ` in `S` — not merely of an integrand\n    against the driver `B`. Only `σ ≠ 0` a.e. is required, no uniform lower bound: the\n    bracket-weighted norm rescales, `‖ψ‖_{L²(⟨S⟩)} = ‖φ‖`. Re-export of\n    `MathFin.MarketCompletenessInPrice.exists_replicating_strategy_in_price`. -/\ntheorem exists_unique_replicating_holding_in_price\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0)\n    (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))\n    (hσ : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), (σ : ℝ≥0 × Ω → ℝ) z ≠ 0)\n    (H : Lp ℝ 2 μ)\n    (hHmeas : AEStronglyMeasurable[natFiltration hBmeas T] (⇑H) μ) :\n    ∃! ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas σ),\n      (⇑H) =ᵐ[μ] fun ω ↦ (∫ x, H x ∂μ)\n        + (itoIntegralAgainstCLM hB T hBmeas σ ψ : Ω → ℝ) ω :=\n  MathFin.MarketCompletenessInPrice.exists_replicating_strategy_in_price\n    (hB := hB) hBmeas hBcont T σ hσ H hHmeas\n"
+        "lean": "import MathFin.Foundations.MarketCompletenessInPrice\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM MathFin.ItoIntegralAgainstMartingale\nopen MathFin.MarketCompletenessInPrice\nopen scoped NNReal ENNReal\n\n/-- **Completeness, as a holding in the price.** For the discounted price `S = S₀ + (σ●B)`\n    with volatility a.e. nonzero, every square-integrable `𝓕ᴮ_T`-claim is the terminal wealth\n    `𝔼_μ[H] + ∫₀ᵀ ψ dS` of a **unique** holding `ψ` in `S` — not merely of an integrand\n    against the driver `B`. Only `σ ≠ 0` a.e. is required, no uniform lower bound: the\n    bracket-weighted norm rescales, `‖ψ‖_{L²(⟨S⟩)} = ‖φ‖`. Re-export of\n    `MathFin.MarketCompletenessInPrice.exists_replicating_strategy_in_price`. -/\ntheorem exists_unique_replicating_holding_in_price\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0)\n    (σ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))\n    (hσ : ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas), (σ : ℝ≥0 × Ω → ℝ) z ≠ 0)\n    (H : Lp ℝ 2 μ)\n    (hHmeas : AEStronglyMeasurable[natFiltration hBmeas T] (⇑H) μ) :\n    ∃! ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas σ),\n      (⇑H) =ᵐ[μ] fun ω ↦ (∫ x, H x ∂μ)\n        + (itoIntegralAgainstCLM hB T hBmeas σ ψ : Ω → ℝ) ω :=\n  MathFin.MarketCompletenessInPrice.exists_replicating_strategy_in_price\n    (hB := hB) hBmeas hBcont T σ hσ H hHmeas\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Market completeness expressed in the traded asset (Shreve II 5.3; Karatzas–Shreve 1.6)",
+        "citations": [
+          {
+            "key": "ShreveSCFII",
+            "locator": "5.3"
+          },
+          {
+            "key": "KaratzasShreve1991",
+            "locator": "1.6"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.MarketCompletenessInPrice.exists_replicating_strategy_in_price. Derivation: martingale representation supplies the hedge phi against B, surjectivity of multiplication by sigma rewrites it as sigma.psi, and the chain rule turns the integral of psi against S back into the integral of phi against B; uniqueness is injectivity of an isometry. SCOPE, stated honestly. (1) The price is DRIFTLESS by construction, S = S0 + (sigma-dot-B) — the discounted price under the reference measure. A drift term is additive and is not built here. (2) The nondegeneracy hypothesis is only sigma != 0 a.e., NOT a uniform lower bound; that is a genuine weakening, since the bracket-weighted norm rescales the holding. (3) Nothing here asserts that the wealth process is a martingale under any second measure; that is the separate gir-pricing-measure-density. (4) The holding class is the integrands square-integrable against the bracket d<S> = sigma^2 ds, wider than piecewise-constant strategies."
@@ -343,11 +497,17 @@
       "description": "For S = S₀ + (σ●B) with σ ≠ 0 a.e.: a probability measure Q = D·μ with D ∈ L²(μ), under which an adapted process agreeing a.e. with the price is a martingale, agrees with μ on the whole of 𝓕ᴮT. The gains-neutrality that the earlier uniqueness statement assumed is here derived from that martingale property.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Foundations.PricingMeasureL2Density\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM\nopen MathFin.MarketCompletenessInPrice MathFin.PricingMeasureL2Density\nopen scoped NNReal ENNReal\n\n/-- **`μ` is the pricing measure, under a square-integrable density.** For the discounted\n    price `S = S₀ + (σ●B)` with `σ ≠ 0` a.e.: a probability measure `Q = D·μ` with\n    `D ∈ L²(μ)`, under which an adapted version of the price is a martingale, agrees with\n    `μ` on the whole of `𝓕ᴮ_T`. The gains-neutrality that\n    `measure_eq_of_pricesGainsAtZero` had to assume is here a CONSEQUENCE, so the\n    hypothesis is discharged rather than posited. The martingale hypothesis is carried on\n    an abstract adapted `S` agreeing a.e. with the price, which is the form in which it has\n    a witness. Re-export of `MathFin.PricingMeasureL2Density.measure_eq_of_density`. -/\ntheorem pricing_measure_eq_of_sq_integrable_density\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0)\n    (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))\n    (hσ : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), (σ : ℝ≥0 × Ω → ℝ) z ≠ 0) {S₀ : ℝ}\n    {D : Lp ℝ 2 μ} (hD : ∀ᵐ ω ∂μ, 0 ≤ (D : Ω → ℝ) ω)\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    (hQ : Q = μ.withDensity fun ω ↦ ENNReal.ofReal ((D : Ω → ℝ) ω))\n    {S : ℝ≥0 → Ω → ℝ} (hSmod : ∀ t ≤ T, S t =ᵐ[μ] pricePath hB T hBmeas S₀ σ t)\n    (hmart : Martingale S (natFiltration hBmeas) Q)\n    {A : Set Ω} (hA : MeasurableSet[natFiltration hBmeas T] A) :\n    Q A = μ A :=\n  MathFin.PricingMeasureL2Density.measure_eq_of_density\n    (hB := hB) hBmeas hBcont T σ hσ hD hQ hSmod hmart hA\n"
+        "lean": "import MathFin.Foundations.PricingMeasureL2Density\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM\nopen MathFin.MarketCompletenessInPrice MathFin.PricingMeasureL2Density\nopen scoped NNReal ENNReal\n\n/-- **`μ` is the pricing measure, under a square-integrable density.** For the discounted\n    price `S = S₀ + (σ●B)` with `σ ≠ 0` a.e.: a probability measure `Q = D·μ` with\n    `D ∈ L²(μ)`, under which an adapted version of the price is a martingale, agrees with\n    `μ` on the whole of `𝓕ᴮ_T`. The gains-neutrality that\n    `measure_eq_of_pricesGainsAtZero` had to assume is here a CONSEQUENCE, so the\n    hypothesis is discharged rather than posited. The martingale hypothesis is carried on\n    an abstract adapted `S` agreeing a.e. with the price, which is the form in which it has\n    a witness. Re-export of `MathFin.PricingMeasureL2Density.measure_eq_of_density`. -/\ntheorem pricing_measure_eq_of_sq_integrable_density\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0)\n    (σ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))\n    (hσ : ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas), (σ : ℝ≥0 × Ω → ℝ) z ≠ 0) {S₀ : ℝ}\n    {D : Lp ℝ 2 μ} (hD : ∀ᵐ ω ∂μ, 0 ≤ (D : Ω → ℝ) ω)\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    (hQ : Q = μ.withDensity fun ω ↦ ENNReal.ofReal ((D : Ω → ℝ) ω))\n    {S : ℝ≥0 → Ω → ℝ} (hSmod : ∀ t ≤ T, S t =ᵐ[μ] pricePath hB T hBmeas S₀ σ t)\n    (hmart : Martingale S (natFiltration hBmeas) Q)\n    {A : Set Ω} (hA : MeasurableSet[natFiltration hBmeas T] A) :\n    Q A = μ A :=\n  MathFin.PricingMeasureL2Density.measure_eq_of_density\n    (hB := hB) hBmeas hBcont T σ hσ hD hQ hSmod hmart hA\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Uniqueness of the equivalent martingale measure on a Brownian filtration — the second FTAP's complete ⟹ unique direction (Shreve II 5.4), here under a square-integrable density",
+        "citations": [
+          {
+            "key": "ShreveSCFII",
+            "locator": "5.4"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.PricingMeasureL2Density.measure_eq_of_density. This STRENGTHENS gir-pricing-measure-unique, which assumed PricesGainsAtZero: here that condition is a CONSEQUENCE of the price being a Q-martingale plus a square-integrable density, so the hypothesis is discharged. Derivation: the functional psi -> E_Q[integral of psi against S] is an inner product against the density composed with an isometry, hence continuous; it vanishes on a band because that integral is Z.(S_b - S_a), a bounded predictable weight against a Q-martingale increment; hence on simple processes by linearity and the Lp band decomposition; hence everywhere by density; then the existing measure_eq_of_pricesGainsAtZero applies. SCOPE, stated honestly. (1) The density hypothesis is Q = mu.withDensity (ENNReal.ofReal . D) with D in L^2(mu) and D >= 0 a.e. — square integrability is what makes the functional continuous and is not removable by this argument. (2) sigma != 0 a.e. is used, to convert gains against S into gains against B. (3) The price is driftless. (4) Only the direction complete implies unique is delivered; the converse needs the Jacod-Yor extreme-point characterisation and is untouched. (5) This is uniqueness ON THE BROWNIAN SIGMA-ALGEBRA 𝓕^B_T, i.e. Q agrees with mu there; it says nothing about Q off that sigma-algebra. (6) The martingale hypothesis is on an ABSTRACT adapted S agreeing a.e. with pricePath at each time up to T, not on pricePath itself: Martingale requires adaptedness on the nose and pricePath, being built from Lp classes, is only a.e. adapted. MarketCompletenessInPrice.pricePathCondExp is the witness, so the hypothesis is satisfiable rather than empty."
@@ -364,6 +524,14 @@
       "metadata": {
         "chapter": 9,
         "reference": "Esscher (1932), On the probability function in the collective theory of risk, Skandinavisk Aktuarietidskrift 15, 175-195; Gerber & Shiu (1994), Option pricing by Esscher transforms, Transactions of the Society of Actuaries 46, 99-191",
+        "citations": [
+          {
+            "key": "Esscher1932"
+          },
+          {
+            "key": "GerberShiu1994"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The Gaussian N(m + θv, v) has every exponential moment (Mathlib's integrable_exp_mul_gaussianReal), and a probability law on ℝ with that property equals each finite measure with the same moment-generating function (measure_eq_of_mgf_id_eq, from Mathlib's eqOn_complexMGF_of_mgf and Measure.ext_of_complexMGF_id_eq); the tilted law is finite (Mathlib's isZeroOrProbabilityMeasure_tilted). The tilted moment of order u is ∫ e^{(u + θ)x} / ∫ e^{θx} (mgf_id_tilted_const_mul, which is Mathlib's integral_exp_tilted at linear exponents), and with Mathlib's mgf_id_gaussianReal both moment-generating functions are e^{(m + θv)u + vu²/2}. The same MGF identification gives the Gaussian increments of the exponential-martingale characterization of Brownian motion (ExpMartingaleQBrownian). Lives in MathFin/Foundations/Esscher.lean. Axioms-clean."

@@ -32,13 +32,23 @@ exercise-boundary results (`bsPDiv_le_brownianAmericanPut`,
 Not proved here: that the inequality is strict (a positive early-exercise premium), or any
 optimal-stopping characterization of the value.
 
-## Results
+## Main results
 
 * `maturityReward_eq_bsPDiv`: the expected discounted payoff of exercise at `T` is `bsPDiv`.
 * `bsPDiv_le_americanPutValue`: the American put value over any filtration dominates `bsPDiv`.
 * `bsPDiv_le_brownianAmericanPut`, `bsPDiv_le_brownianUsualAmericanPut`: the constructed
   Brownian model on its raw and on its usual filtration.
 * `bsP_le_brownianUsualAmericanPut`: without dividends, the Black–Scholes put `bsP`.
+
+## References
+
+* [I. Karatzas and S. E. Shreve, *Methods of Mathematical Finance*][KaratzasShreve1998], §2.5
+* [R. C. Merton, *Theory of rational option pricing*][Merton1973]
+
+## Tags
+
+American put, European put lower bound, early exercise, stopping rules, optimal stopping, MSC 91G20,
+MSC 60G40, JEL G13
 -/
 
 @[expose] public section

@@ -37,6 +37,17 @@ distributed Bernoulli losses (same shared `p`), is `valueAtRisk_sum_bernoulli_su
 For an integrable loss and `α ∈ (0, 1)`, the dual representation of ES over bounded densities is
 `isGreatest_integral_mul_expectedShortfall` (`RiskMeasures/ExpectedShortfall.lean`).
 
+## Main definitions
+
+* `finiteVaR`: value-at-risk at a finite law, `inf {x | α ≤ ∑_{L i ≤ x} qᵢ}`, for a loss `L` and
+  a bundled probability vector `q`.
+* `finiteES`: expected shortfall at a finite law, `(1 − α)⁻¹ ∫_α^1 finiteVaR q L u du`.
+* `finiteLaw`: the law `∑ᵢ qᵢ • δᵢ` of a probability vector, a probability measure.
+* `condTailMean`: the `q`-weighted mean of `L` over the tail event `{i | finiteVaR q L α ≤ L i}`,
+  divided by the tail mass.
+* `oneQ`, `oneL`, `jointQ`, `halfL₁`, `halfL₂`: the data of the worked example, a single `$100`
+  bond defaulting with probability `1/25` against two independent `$50` bonds.
+
 ## Main results
 
 * `finiteVaR_eq_valueAtRisk`, `finiteES_eq_expectedShortfall`: for `α ∈ (0, 1)`, the finite forms
@@ -47,7 +58,7 @@ For an integrable loss and `α ∈ (0, 1)`, the dual representation of ES over b
 * `finiteVaR_one_bond`, `finiteVaR_two_halves`: `VaR₀.₉₅` is `0` for the single bond and `50`
   for the split position.
 * `finiteVaR_subadditivity_fails`: on the joint space of the two half-bonds, the halves' `VaR₀.₉₅`
-  sum to less than the total's (the values are `0`, `0` and `50`).
+  sum to less than the total's (which is `50` by `finiteVaR_two_halves`).
   `valueAtRisk_finiteLaw_subadditivity_fails` states the same failure for the library's
   `valueAtRisk` at the law `∑ p, jointQ p • δ_p`.
 * `finiteVaR_counterexample_window`: for the two half-bonds and `α ∈ (0, 1]`, subadditivity fails
@@ -57,6 +68,15 @@ For an integrable loss and `α ∈ (0, 1)`, the dual representation of ES over b
   so the conditional tail mean is `E[L] = 4`.
 * `isGreatest_finiteES_one_bond`: for the single bond, `ES₀.₉₅` is the greatest `E[Z·L]` over
   densities `0 ≤ Z ≤ (1 − 19/20)⁻¹` with `E[Z] = 1`.
+
+## References
+
+* [C. Acerbi and D. Tasche, *On the coherence of expected shortfall*][AcerbiTasche2002]
+
+## Tags
+
+value at risk, expected shortfall, finite loss distribution, VaR subadditivity failure,
+bond portfolio example, conditional tail mean, MSC 91G70, JEL G32
 -/
 
 @[expose] public section

@@ -5,6 +5,7 @@ Authors: Robert Martin
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -14,10 +15,27 @@ This formalizes the calculus reduction in Step 1, conditional on the stated
 near-expiry ratio limit. The limit itself is not assumed in the pricing model
 and remains to be derived from the actual American/European value comparison.
 
-## Result
+## Main definitions
 
-Public entry points include `tangentIntercept`, `tangentIntercept_hasDeriv`,
-`boundaryRatio_hasDeriv`, `negative_stays_negative_of_deriv_nonpos`.
+* `tangentIntercept`: the value at `0` of the tangent to `b` at `t`, `b t − t · deriv b t`.
+
+## Main results
+
+* `tangentIntercept_hasDeriv`: for `b` smooth on `(0, ∞)` and `0 < t`, the tangent intercept
+  `tangentIntercept b` has derivative `-t * b''(t)` at `t`.
+* `boundaryRatio_hasDeriv`: under the same hypotheses, `s ↦ b s / s` has derivative
+  `-tangentIntercept b t / t ^ 2` at `t`.
+* `negative_stays_negative_of_deriv_nonpos`: if `D` is differentiable on `(0, ∞)` and
+  `deriv D t ≤ 0` wherever `D t < 0`, then `D a < 0` with `0 < a ≤ T` gives `D T < 0`.
+* `exists_negative_intercept_before`: if `b` is smooth on `(0, ∞)` and `b t / t → -∞` as
+  `t → 0+`, every `T > 0` has some `s ∈ (0, T)` with negative tangent intercept.
+* `curvature_nonneg_of_negative_intercepts`: under the same two hypotheses, if `b'' ≥ 0` at every
+  `t > 0` whose tangent intercept is negative, then `b'' ≥ 0` at every `t > 0`.
+
+## Tags
+
+tangent intercept, negative intercept, boundary ratio, concave boundary, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

@@ -24,13 +24,28 @@ rate.
 The identity holds for every `E`; the value is a drawdown fraction only where the running peak
 is positive.
 
+## Main definitions
+
+* `relativeDrawdown`: `1 − E t / max_{s ≤ t} E s`, the fraction of the running peak lost by time
+  `t`, with the peak `partialSups E`.
+* `maxRelativeDrawdown`: the largest relative drawdown at any `s ≤ t`.
+
 ## Main results
 
-* `relativeDrawdown_const_mul`: the relative drawdown of `c E` equals that of `E`.
+* `relativeDrawdown_const_mul`: for `c > 0`, the relative drawdown of `c E` equals that of `E`.
 * `maxRelativeDrawdown_const_mul`: hence so does the maximum relative drawdown up to any time.
 * `partialSups_mul_relativeDrawdown_le_maximumDrawdown`: on a finite path the two notions are
-  tied: the relative drawdown at `t`, scaled back up by a nonzero running peak, is the
-  absolute decline `max_{s ≤ t} E s − E t`, which is at most `maximumDrawdown E`.
+  tied: the relative drawdown at `t`, scaled back up by the running peak `partialSups E t`, is
+  at most `maximumDrawdown E`.
+
+## References
+
+* [C. Bacon, *Practical Portfolio Performance Measurement and Attribution*][Bacon2008]
+* [Young (1991)][Young1991]
+
+## Tags
+
+relative drawdown, running peak, scale invariance, equity curve, drawdown, MSC 91G10, JEL G11
 -/
 
 @[expose] public section

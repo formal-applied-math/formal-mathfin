@@ -14,10 +14,18 @@ Preserve the conditional expectation identities by dominated convergence on
 earlier measurable events. This is the limit step for interior stopping times
 approaching first contact; no martingale property is assumed for the limit.
 
-## Result
+## Main results
 
-Public entry points include `martingale_of_bounded_limits`,
-`stoppedCandidate_martingale_of_rule_limit`.
+* `martingale_of_bounded_limits`: an adapted process `X` that is, at each time, the almost-sure
+  limit of martingales `Y n`, with `X` and all `Y n` uniformly bounded by `C`, is a martingale.
+* `stoppedCandidate_martingale_of_rule_limit`: for a `DividendPutSolution`, continuous adapted
+  paths, `0 ≤ K`, `0 ≤ r`, and stopping rules `θn n` converging almost surely to `θ`, if the
+  classical candidate stopped at each `θn n` is a martingale, so is the one stopped at `θ`.
+
+## Tags
+
+bounded martingale limits, dominated convergence, stopping-rule approximation,
+conditional expectation, martingale, MSC 60G40, MSC 60G44
 -/
 
 @[expose] public section

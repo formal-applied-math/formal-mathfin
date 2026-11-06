@@ -16,10 +16,25 @@ Strict monotonicity of the smooth detector forces spatial maxima at its two
 endpoints and a spatial minimum in the middle at a positive contact maximum.
 The equation without a zero-order term then gives incompatible time signs.
 
-## Result
+## Main definitions
 
-Public entry points include `second_deriv_nonneg_at_local_min`, `valleyOnTriple`,
-`valleyOnTriple_continuousOn`, `parabolic_smoothValley_nonpos`.
+* `valleyOnTriple`: the smooth valley detector `smoothValley δ` of `U` at the three points of an
+  ordered triple, less the time penalty `η · t` taken at the first point.
+
+## Main results
+
+* `second_deriv_nonneg_at_local_min`: a continuous function has nonnegative second derivative at
+  a local minimum.
+* `valleyOnTriple_continuousOn`: for `U` continuous on `Q`, `valleyOnTriple U δ η` is continuous
+  on `orderedTriples Q`.
+* `parabolic_smoothValley_nonpos`: for `δ, η > 0` and `U` solving `U_t = U_xx + D U_x` in the
+  interior of a `movingStrip b R 0 T`, with `U ≤ 0` on both lateral edges and the three-point
+  bound at time `0`, `valleyOnTriple U δ η ≤ 0` on every ordered triple of the strip.
+
+## Tags
+
+positive valley, maximum principle, ordered triple, parabolic equation, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

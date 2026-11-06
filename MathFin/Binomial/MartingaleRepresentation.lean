@@ -41,8 +41,23 @@ needs none, so it is stated once, here.
 
 * `binomial_martingale_representation` — every martingale of the flip filtration is its initial
   value plus the `martingaleTransform` of a predictable hedge.
-* `binomialPrice_replication` — the tree price of a European claim is the initial capital of a
-  hedge: the representation applied to the discounted tree value and the discounted spot.
+* `binomialPrice_replication` — under `BinomialNoArb` and `S₀ ≠ 0`, the tree price of a European
+  claim is the initial capital of a hedge: the representation applied to the discounted tree value
+  and the discounted spot.
+
+## References
+
+* [J. C. Cox, S. A. Ross and M. Rubinstein, *Option pricing: a simplified
+  approach*][CoxRossRubinstein1979]
+* [J. M. Harrison and S. R. Pliska, *Martingales and stochastic integrals in the theory of
+  continuous trading*][HarrisonPliska1981]
+* [S. E. Shreve, *Stochastic Calculus for Finance I: The Binomial Asset Pricing Model*][ShreveSCFI],
+  Theorem 1.2.2
+
+## Tags
+
+martingale representation, market completeness, replication, predictable strategy,
+martingale transform, second fundamental theorem, MSC 91G20, MSC 60G42, JEL G13
 -/
 
 @[expose] public section

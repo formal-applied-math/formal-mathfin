@@ -293,13 +293,13 @@ namespace MathFin.AxiomAudit
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ItoIntegralCLM.assembly_isometry_T
 
-/-- info: 'MathFin.ItoIntegralCLM.simpleAssembly_T_denseRange' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.ItoIntegralCLM.simpleAssemblyHorizon_denseRange' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.ItoIntegralCLM.simpleAssembly_T_denseRange
+#print axioms MathFin.ItoIntegralCLM.simpleAssemblyHorizon_denseRange
 
-/-- info: 'MathFin.ItoIntegralCLM.itoIntegralCLM_T_norm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.ItoIntegralCLM.itoIntegralCLM_norm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.ItoIntegralCLM.itoIntegralCLM_T_norm
+#print axioms MathFin.ItoIntegralCLM.itoIntegralCLM_norm
 
 /-! ## Unbounded-horizon `[0,∞)` Itô integral CLM (Summit B / B2) -/
 
@@ -319,9 +319,9 @@ namespace MathFin.AxiomAudit
 
 /-! ## Keystone `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` through the CLM (its first genuine consumer) -/
 
-/-- info: 'MathFin.ItoIntegralBrownian.itoIntegralCLM_T_brownian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.ItoIntegralBrownian.itoIntegralCLM_brownian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.ItoIntegralBrownian.itoIntegralCLM_T_brownian
+#print axioms MathFin.ItoIntegralBrownian.itoIntegralCLM_brownian
 
 /-! ## Discrete squaring identity (the pathwise Itô keystone) -/
 
@@ -473,9 +473,9 @@ namespace MathFin.AxiomAudit
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.tendsto_ito_remainder_td
 
-/-- info: 'MathFin.ItoIntegralRiemannBridgeTD.itoIntegralCLM_T_of_bdd_cont_td' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.ItoIntegralRiemannBridgeTD.itoIntegralCLM_of_bdd_cont_td' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.ItoIntegralRiemannBridgeTD.itoIntegralCLM_T_of_bdd_cont_td
+#print axioms MathFin.ItoIntegralRiemannBridgeTD.itoIntegralCLM_of_bdd_cont_td
 
 /-- info: 'MathFin.ito_formula_td_L2_bddDeriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -498,7 +498,7 @@ until now had none — GBM/BS pricing ran via separate algebraic towers and the 
 exponential). The localized formula, applied to the *time-localized* GBM exponent
 `(t,x) ↦ S₀ exp((m−σ²/2)·φₙ(t) + σx)` (identity on `[0,T]`, globally bounded so the
 exp-growth hypotheses hold uniformly in time), yields `ito_formula_gbm`:
-`Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ m·Ŝ ds`. Setting `m = 0`
+`Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ m·Ŝ ds`. Setting `m = 0`
 (`discountedGBM_eq_itoIntegral`) makes the drift vanish — the Itô-integral content of the
 discounted-GBM martingale, grounding it on the continuous Itô integral rather than the Wald
 exponential. -/
@@ -515,7 +515,7 @@ exponential. -/
 
 `ItoFormulaItoProcess.lean`: generalizes the GBM decomposition from the exponential value
 function to an arbitrary `C³` exponential-growth `f`. For `X_t = X₀ + b·t + σ B_t`,
-`ito_formula_itoProcess` gives `f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds`
+`ito_formula_itoProcess` gives `f(X_T) − f(X₀) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds`
 — i.e. `∫ f'(X) dX + ½∫ f''(X)σ² ds`, the diffusion the genuine Itô integral. Same
 time-localization of the `b·t` exponent as the GBM case; constant coefficients keep the
 diffusion integrand a function of `B`. -/
@@ -1205,9 +1205,9 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.WienerIntegralL2.wiener_assembly_isometry
 
-/-- info: 'MathFin.ItoIntegralCLM.itoIntegralCLM_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.ItoIntegralCLM.itoIntegralCLM' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.ItoIntegralCLM.itoIntegralCLM_T
+#print axioms MathFin.ItoIntegralCLM.itoIntegralCLM
 
 /-- info: 'MathFin.discrete_ito_formula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1233,9 +1233,9 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 -- bijection (Binomial/PathReflection.lean), wired to the corpus as
 -- `mf-reflection-principle-counting`.
 
-/-- info: 'MathFin.reflectionPrincipleEquiv_below' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.reflectionPrincipleEquivBelow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.reflectionPrincipleEquiv_below
+#print axioms MathFin.reflectionPrincipleEquivBelow
 
 -- Summit B / B1a (2026-06-10): the elementary Itô integral, viewed as a process
 -- `t ↦ (V●B)_t`, is an adapted L² martingale
@@ -1278,7 +1278,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 
 -- Summit B / B1b (2026-06-12): the GENERAL-integrand Itô integral
 -- `(φ●B)_t = ∫₀ᵗ φ dB` for `φ ∈ L2Predictable[0,T]`, built by extending B1a's
--- t-process along the dense `simpleAssembly_T` (`Foundations/ItoIntegralProcessGeneral.lean`).
+-- t-process along the dense `simpleAssemblyHorizon` (`Foundations/ItoIntegralProcessGeneral.lean`).
 -- The key identity `(φ●B)_t = E[∫₀ᵀ φ dB | 𝓕_t]` gives the L² martingale property,
 -- a.e.-adaptedness, the contraction and terminal Itô isometry, and L²-continuity.
 -- The explicit time-indexed isometry E[(φ●B)_t²] = ∫₀ᵗ E[φ²] ds is deferred.
@@ -1315,27 +1315,27 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #print axioms MathFin.ItoIntegralProcessGeneral.itoProcessCLM_norm_sq
 
 -- Covariation of Itô integrals (2026-06-23): the BILINEAR Itô isometry. The Itô
--- integral, bundled as a `LinearIsometry` (`itoIsometry_T`), preserves the
+-- integral, bundled as a `LinearIsometry` (`itoIsometry`), preserves the
 -- L²-inner product (`LinearIsometry.inner_map_map`, polarization of the norm
 -- isometry), giving `𝔼[(∫φ dB)(∫ψ dB)] = ⟪φ, ψ⟫` and, on the diagonal, the Itô
 -- isometry itself (`Foundations/ItoIntegralCovariation.lean`). The bilinear
 -- completion of B1 and the covariance backbone for covariance-swap pricing.
 
-/-- info: 'MathFin.ItoIntegralCovariation.itoIsometry_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.ItoIntegralCovariation.itoIsometry' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.ItoIntegralCovariation.itoIsometry_T
+#print axioms MathFin.ItoIntegralCovariation.itoIsometry
 
-/-- info: 'MathFin.ItoIntegralCovariation.inner_itoIntegralCLM_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.ItoIntegralCovariation.inner_itoIntegralCLM' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.ItoIntegralCovariation.inner_itoIntegralCLM_T
+#print axioms MathFin.ItoIntegralCovariation.inner_itoIntegralCLM
 
-/-- info: 'MathFin.ItoIntegralCovariation.covariation_itoIntegralCLM_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.ItoIntegralCovariation.covariation_itoIntegralCLM' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.ItoIntegralCovariation.covariation_itoIntegralCLM_T
+#print axioms MathFin.ItoIntegralCovariation.covariation_itoIntegralCLM
 
-/-- info: 'MathFin.ItoIntegralCovariation.variance_itoIntegralCLM_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.ItoIntegralCovariation.variance_itoIntegralCLM' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.ItoIntegralCovariation.variance_itoIntegralCLM_T
+#print axioms MathFin.ItoIntegralCovariation.variance_itoIntegralCLM
 
 -- Continuous modification of the general-integrand Itô process (2026-06-26): the
 -- first PATHWISE-regularity result for the general integrand and the tower→pricing
@@ -1478,7 +1478,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #print axioms MathFin.bs_discounted_isQMartingale
 
 -- The same measure as an equivalent martingale measure of the continuous-market frame, at the
--- horizon `T` (`ContinuousMarket.IsEMM`).
+-- horizon `T` (`IsEMM`).
 /-- info: 'MathFin.bs_discounted_isEMM' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.bs_discounted_isEMM
@@ -1642,7 +1642,7 @@ the predictable-measurable convergence set) are unique in measure on the finite 
 The drift term of the pathwise solution, refined from the abstract `limUnder` to the recognizable
 integral. `driftContinuousMod_eq_setIntegral` proves `driftContinuousMod g t ω = ∫₀ᵗ ⇑g(s,ω) ds` a.e.
 for every `t ≤ T`: the elementary drifts `∫₀ᵗ Vₙ ds` converge to `driftContinuousMod` (Layer 2), and the
-ω-slice energies `Dₙ(ω) = ∫₀ᵀ(⇑Vₙ − ⇑g)² ds` decay in `L¹(μ)` (`= ‖simpleAssembly_T Vₙ − g‖²`,
+ω-slice energies `Dₙ(ω) = ∫₀ᵀ(⇑Vₙ − ⇑g)² ds` decay in `L¹(μ)` (`= ‖simpleAssemblyHorizon Vₙ − g‖²`,
 `drift_slice_energy_eq`, Tonelli through the trim↔product transfer), so a subsequence has `Dₙₖ(ω) → 0`
 a.e., whence the interval Cauchy–Schwarz `|∫₀ᵗ(⇑Vₙₖ − ⇑g)| ≤ √(T·Dₙₖ(ω)) → 0` matches the limits.
 `sde_pathwise_drift_eq_setIntegral` specializes it to `b∘X`, giving the strong solution's drift as
@@ -1756,8 +1756,8 @@ A model-agnostic continuous-market frame (`Foundations/ContinuousMarket.lean`): 
 martingale measure** for a discounted price process precludes arbitrage against **simple**
 (piecewise-constant, predictable, bounded) strategies — the honest, economically transparent
 meaning-1 scope (general admissible strategies, NFLVR, and the converse are the deferred
-Delbaen–Schachermayer meaning-2). The notion carries a horizon `T`, like the discrete `IsEMM`: `S`
-is a `Q`-martingale on `[0, T]`. The forward theorem is the discrete one: a simple strategy is a
+Delbaen–Schachermayer meaning-2). The notion is the one `IsEMM`, at time `ℝ≥0`, with its horizon
+`T`: `S` is a `Q`-martingale on `[0, T]`. The forward theorem is the discrete one: a simple strategy is a
 discrete predictable strategy for the price sampled at its own dates (`martingale_comp_monotone`),
 its gains are the `F`-valued martingale transform (Theorem 2.2.9), and `IsEMM.noArbitrage`
 (closing through `ae_zero_of_nonneg_of_integral_zero`) applies. Instantiated at `F = ℝ` by the discounted GBM under its risk-neutral measure (`Q = P`,
@@ -1782,7 +1782,7 @@ the Girsanov measure `bs_discounted_isEMM` (a martingale measure on `[0, T]` onl
 
 /-! ### Martingale representation, and the completeness it buys
 
-The Itô integral `φ ↦ ∫₀ᵀ φ dB` is an isometry (`itoIsometry_T`, audited above); these theorems
+The Itô integral `φ ↦ ∫₀ᵀ φ dB` is an isometry (`itoIsometry`, audited above); these theorems
 identify its IMAGE exactly as the centered `𝓕ᴮ_T`-measurable part of `L²(μ)`. Surjectivity of an
 isometry is a *totality* statement about its range, and it is proved as one: the range is closed
 (the isometric image of a complete space) hence orthogonally complemented, so a centered
@@ -1792,7 +1792,7 @@ puts `D − 1` in the range, centering kills the leftover `1`), and Wiener-expon
 (`eq_zero_of_orthogonal_stepDoleans`) forces `z = 0`. No Malliavin calculus, no adapted-integrand
 Itô formula.
 
-* `itoIntegralCLM_T_surjective_onto_centered` — submodule form: range ⊔ constants = `lpMeas 𝓕ᴮ_T`.
+* `itoIntegralCLM_surjective_onto_centered` — submodule form: range ⊔ constants = `lpMeas 𝓕ᴮ_T`.
 * `exists_itoIntegral_representation` — terminal form, with a UNIQUE integrand (injectivity of an
   isometry).
 * `martingale_representation` — process form (corpus `gir-thm-9.3.4`): `M t =ᵐ M 0 + (φ●B)_t` for
@@ -1813,9 +1813,9 @@ proved facts, `pricesGainsAtZero_self` (μ satisfies it, so nothing is vacuous) 
 `pricesGainsAtZero_of_gains_martingale` (the textbook gains-martingale condition implies it). Only
 `complete ⟹ unique` is delivered; the Jacod–Yor converse is out of scope. -/
 
-/-- info: 'MathFin.itoIntegralCLM_T_surjective_onto_centered' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.itoIntegralCLM_surjective_onto_centered' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.itoIntegralCLM_T_surjective_onto_centered
+#print axioms MathFin.itoIntegralCLM_surjective_onto_centered
 
 /-- info: 'MathFin.exists_itoIntegral_representation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -2014,7 +2014,7 @@ the bracket increment the *pathwise* `∫_a^b φ_u(ω)² du` (`bracketRep`) rath
 
 The identity is the Itô isometry localised. A conditional-expectation identity between integrable
 variables is an identity of `𝓕_a`-set integrals; on such a set `𝟙_F` is a bounded
-`𝓕_a`-measurable factor, so `itoIntegralCLM_T_smulAdapted` — the `𝓕_a`-linearity built for the
+`𝓕_a`-measurable factor, so `itoIntegralCLM_smulAdapted` — the `𝓕_a`-linearity built for the
 *first* moment — folds it back inside one Itô integral, of `𝟙_F·𝟙_{(a,b]}·φ`, and squaring costs
 nothing because `𝟙_F² = 𝟙_F`. Tonelli through the trim takes the other side to the same rectangle
 integral `∫_{(a,b]×F} φ²`. No density argument and no ε-extension.

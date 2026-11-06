@@ -15,9 +15,17 @@ patch to any prescribed interior point at a strictly later time. The tube
 stays inside the spatial half-line. The result is derived from an explicit
 barrier and weak comparison, not imported as a PDE axiom.
 
-## Result
+## Main results
 
-Public entry points include `positive_later_of_positive_point`.
+* `positive_later_of_positive_point`: let `U` be continuous on `(β, ∞) × [a, T]` and `C²` in the
+  interior, solve `U_t = U_xx + D U_x` with `|D| ≤ M` there, and be nonnegative on
+  `(β, ∞) × [a, T]`. If `U x a > 0` at some `x > β` and `a < T`, then `U y T > 0` for every
+  `y > β`.
+
+## Tags
+
+strong positivity, positivity propagation, parabolic tube, weak comparison, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

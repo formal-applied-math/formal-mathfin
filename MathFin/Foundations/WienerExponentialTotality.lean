@@ -61,12 +61,17 @@ what the counterexample needs; `B ≡ 0` will not do, since it makes `𝓕_T = �
 for the right reason.) Brownianness enters twice: at `B₀ = 0` (Step A's telescope) and at the
 Gaussian tails (Step B's open `integrableExpSet`).
 
-## Result
+## Main results
 
 * `integral_mul_exp_linear_eq_zero` — Step A: orthogonality to the whole step-Doléans family
   already forces orthogonality to `exp(∑ᵢ λᵢ B_{tᵢ})` for every finite family of times in
   `[0,T]` and every real `λ`.
 * `eq_zero_of_orthogonal_stepDoleans` — the totality theorem.
+
+## Tags
+
+martingale representation theorem, totality of exponentials, Doléans exponential, Cramér–Wold,
+Lévy upward theorem, Laplace transform uniqueness, MSC 60H05, MSC 60J65, MSC 60G44
 -/
 
 @[expose] public section
@@ -233,7 +238,7 @@ theorem integral_mul_exp_linear_eq_zero (hB : IsPreBrownianReal B μ)
 omit [IsProbabilityMeasure μ] in
 /-- Integration against the density `ofReal ∘ f` is integration of the positive part of `f`
 against the integrand: `∫ g d(f⁺·μ) = ∫ f⁺·g dμ`. -/
-private lemma integral_withDensity_ofReal_eq {f : Ω → ℝ} (hf : AEMeasurable f μ) (g : Ω → ℝ) :
+lemma integral_withDensity_ofReal_eq {f : Ω → ℝ} (hf : AEMeasurable f μ) (g : Ω → ℝ) :
     ∫ ω, g ω ∂(μ.withDensity fun ω ↦ ENNReal.ofReal (f ω))
       = ∫ ω, max (f ω) 0 * g ω ∂μ := by
   have hnn : AEMeasurable (fun ω ↦ (f ω).toNNReal) μ :=
@@ -244,7 +249,7 @@ private lemma integral_withDensity_ofReal_eq {f : Ω → ℝ} (hf : AEMeasurable
 
 omit [IsProbabilityMeasure μ] in
 /-- Integrability against the density `ofReal ∘ f`, in the same positive-part form. -/
-private lemma integrable_withDensity_ofReal_iff {f : Ω → ℝ} (hf : AEMeasurable f μ) (g : Ω → ℝ) :
+lemma integrable_withDensity_ofReal_iff {f : Ω → ℝ} (hf : AEMeasurable f μ) (g : Ω → ℝ) :
     Integrable g (μ.withDensity fun ω ↦ ENNReal.ofReal (f ω))
       ↔ Integrable (fun ω ↦ max (f ω) 0 * g ω) μ := by
   have hnn : AEMeasurable (fun ω ↦ (f ω).toNNReal) μ :=

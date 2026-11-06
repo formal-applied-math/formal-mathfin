@@ -17,7 +17,7 @@ conclusion across the identification:
 
 * `itoIntCont` is `itoIntPred` at the predictable realization of `θ`
   (`itoIntPred_eq_itoIntCont`, by `rfl`: both are the Itô integral of the class of `θ` in
-  `Lp ℝ 2 (trimMeasure_T T)`);
+  `Lp ℝ 2 (trimMeasure T)`);
 * the predictable density `ZTpred` agrees `μ`-a.e. with `contDoleansExp` of the continuous `θ`
   (`ZTpred_ae_eq_contDoleansExp`), because the representative `θ̂` of the class of `θ` equals `θ` on
   almost every `ω`-slice (`processToLpPredictable_ae_slice`);
@@ -28,10 +28,36 @@ conclusion across the identification:
   (`IsBrownianOn.congr_modification`).
 
 For a bounded adapted continuous `θ`, under `Q = μ.withDensity Z_T` with the Doléans density
-`Z_T = exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds)`, the drift-corrected process `B^θ_u = B_u + ∫₀ᵘθ ds`
-starts at `0`, has `N(0,t−s)` increments, and has independent increments (`HasIndepIncrements`)
-on `[0,T]`, which together fix every finite-dimensional law of `B^θ` under `Q` on `[0,T]` to that of a standard
+`Z_T = exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds)`, the drift-corrected process `B^θ_u = B_u + ∫₀ᵘθ ds` starts at
+`0`, has `N(0,t−s)` increments, and has independent increments (`HasIndepIncrements`) on `[0,T]`,
+which together fix every finite-dimensional law of `B^θ` under `Q` on `[0,T]` to that of a standard
 Brownian motion; path continuity is not stated.
+
+## Main definitions
+
+* `contDrift`: the pathwise drift `∫₀ᵘ θ_s ds` against `timeMeasure`.
+* `BthetaCont`: the drift-corrected process `B^θ_u = B_u + ∫₀ᵘ θ_s ds`.
+* `itoIntCont`: the Itô integral `∫₀ᵀ θ dB` of a bounded adapted continuous `θ`, as a chosen
+  `Lp`-representative.
+
+## Main results
+
+* `Btheta_isQBrownianMotion_adapted`: for a bounded adapted path-continuous `θ`, `B^θ` is
+  `IsBrownianOn` `[0, T]` under `Q = μ.withDensity Z_T` with `Z_T` the Doléans density
+  `contDoleansExp`. Path continuity is not part of the conclusion.
+* `itoIntPred_eq_itoIntCont`: the continuous Itô integral is the predictable one (by `rfl`).
+* `ZTpred_ae_eq_contDoleansExp`: the predictable density `ZTpred` equals `contDoleansExp` of
+  `itoIntCont` and `θ`, `μ`-a.e.
+* `BthetaPred_ae_eq_BthetaCont`: for `u ≤ T`, `BthetaPred` agrees a.e. with `BthetaCont` at `u`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 9.1.8
+
+## Tags
+
+Girsanov theorem, adapted market price of risk, Doléans exponential,
+drift-corrected Brownian motion, Novikov-type bound, MSC 60H05, MSC 60J65, MSC 91G20
 -/
 
 @[expose] public section
@@ -56,12 +82,12 @@ noncomputable def BthetaCont (B θ : ℝ≥0 → Ω → ℝ) (u : ℝ≥0) (ω :
 variable (hB : IsPreBrownianReal B μ)
 
 /-- The Itô integral `∫₀ᵀ θ dB` as a genuine function — the chosen `Lp`-representative of
-`itoIntegralCLM_T (processToLp θ)`. -/
+`itoIntegralCLM (processToLp θ)`. -/
 noncomputable def itoIntCont (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     (hcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) :
     Ω → ℝ :=
-  ⇑(itoIntegralCLM_T hB T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd))
+  ⇑(itoIntegralCLM hB T hBmeas (processToLp (μ := μ) T hBmeas hadap hcont hbdd))
 
 section Bridge
 
@@ -70,7 +96,7 @@ variable (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
   (hcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0)
 
 /-- **The continuous Itô integral is the predictable one.** A continuous adapted `θ` is
-predictable, and its two realizations in `Lp ℝ 2 (trimMeasure_T T)` are the same class. -/
+predictable, and its two realizations in `Lp ℝ 2 (trimMeasure T)` are the same class. -/
 theorem itoIntPred_eq_itoIntCont :
     itoIntPred hB T hBmeas (isStronglyPredictable_of_bdd_adapted_cont hBmeas hadap hcont) hbdd
       = itoIntCont hB hBmeas hadap hcont hbdd T := rfl

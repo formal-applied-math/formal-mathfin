@@ -61,6 +61,21 @@ operator cancellation `−(r−σ²/2) − ½σ² + r = 0`, on top of the in-pla
 derivatives are heat-kernel integrals; the theorem also identifies them with the closed-form Greeks
 of `BlackScholes/PDE.lean` (`hasDerivAt_bsV_tau`, `hasDerivAt_bsV_S`, `hasDerivAt_deriv_bsV_S`),
 by uniqueness of the derivative. The benchmark `sc-bs-pde-feynman-kac` re-exports it.
+
+## Main results
+
+* `bsV_eq_feynmanU`: for `S, K, σ, τ > 0`, the Black–Scholes call value is the Feynman–Kac heat flow
+  `feynmanU` of the payoff `e^{−rτ}(e^ξ − K)⁺` at time `σ²τ` and point
+  `log S + (r − σ²/2)τ`.
+* `bsV_eq_discount_feynmanU`: the same value written as `e^{−rτ}` times the heat flow of
+  `(e^ξ − K)⁺`.
+* `bsV_satisfies_bs_pde_via_feynmanKac`: the derivatives `V_τ`, `V_S`, `V_SS` of the call value
+  exist and satisfy `−V_τ + ½σ²S²·V_SS + rS·V_S − rV = 0`, derived through the heat equation.
+
+## Tags
+
+Feynman–Kac, Black–Scholes PDE, probabilistic representation, heat equation, diffusion generator,
+MSC 91G20, MSC 60H30, MSC 35K10
 -/
 
 @[expose] public section

@@ -38,7 +38,35 @@ The next layer, built on `memLp_itoSimpleProcess` here, now delivers all four
 of adaptedness, pathwise continuity, the martingale property and the
 time-indexed isometry: see `ItoIntegralProcessIsometry`
 (`itoSimpleProcess_isometry_time`), `ItoIntegralProcessContinuousModification`
-and `ItoIntegralProcessMartingale`. -/
+and `ItoIntegralProcessMartingale`.
+
+## Main definitions
+
+* `itoSimpleProcess`: the process-level elementary Itô integral of a simple process `V` against
+  `B` at finite time `t`, Degenne's `SimpleProcess.integral` at the deterministic stopping time
+  `t`.
+* `itoSimpleProcessLp`: the process Itô integral at time `t` as an element of `Lp ℝ 2 μ`.
+
+## Main results
+
+* `itoSimpleProcess_apply`: the explicit truncated increment sum
+  `(V ● B)_t ω = ∑_p V(p)(ω) · (B_{p.2∧t}(ω) − B_{p.1∧t}(ω))`.
+* `itoSimpleProcess_add`, `itoSimpleProcess_smul`: the process Itô integral is additive and
+  homogeneous in the simple process.
+* `itoSimpleProcess_zero_time`: at `t = 0` the process is `0`.
+* `itoSimpleProcess_eq_itoSimple`: at any `t` past all interval right endpoints the process equals
+  the terminal Itô integral `itoSimple V`.
+* `memLp_itoSimpleProcess`: `(V ● B)_t` is in `L²(μ)` at every time `t`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Ch 7
+
+## Tags
+
+Itô integral process, simple processes, elementary stochastic integral, stopped process,
+L² martingale, MSC 60H05, MSC 60G44
+-/
 
 @[expose] public section
 

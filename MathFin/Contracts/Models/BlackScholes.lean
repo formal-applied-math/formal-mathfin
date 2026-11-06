@@ -64,6 +64,18 @@ proves.
 No code is copied from `lean_contracts`; every definition and proof here is
 written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 §6 for the full credit line.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 12.3; 15.6; 16.6; 26.4
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], 4.5
+* [Zhang, *Exotic Options*][ZhangExoticOptions]
+
+## Tags
+
+Black–Scholes model, contract pricing, capped call, digital call, power call, lognormal, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

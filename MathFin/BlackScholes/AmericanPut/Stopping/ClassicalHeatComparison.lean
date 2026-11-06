@@ -13,10 +13,20 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.SmoothMinorants
 Smooth compact minorants and dominated convergence remove the test-payoff
 restriction. No smoothness across the exercise boundary is assumed.
 
-## Result
+## Main results
 
-Public entry points include `brownianHeatFlow_tendsto_of_bounded`,
-`linearPriceEvolution_le_classical_of_continuous`, `DividendPutSolution.putWaiting`.
+* `brownianHeatFlow_tendsto_of_bounded`: if continuous `m n` are uniformly bounded and converge
+  pointwise to `f`, then `brownianHeatFlow (m n) t x` tends to `brownianHeatFlow f t x`.
+* `linearPriceEvolution_le_classical_of_continuous`: for a `DividendPutSolution`, `0 ≤ a` and
+  continuous `f` with `0 ≤ f ≤ p · a`, the Gaussian evolution of `f` from `a` is at most `p`
+  on `[a, T]`.
+* `DividendPutSolution.putWaiting`: a `DividendPutSolution` satisfies `PutWaiting`: its price
+  dominates the Gaussian evolution of its own time-`a` slice.
+
+## Tags
+
+Gaussian comparison, compact minorants, dominated convergence, linear price evolution, put waiting,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

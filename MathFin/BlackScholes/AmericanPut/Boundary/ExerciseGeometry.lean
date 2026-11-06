@@ -15,10 +15,22 @@ Smooth fit and the exercise formula give an ordinary spatial derivative at
 the boundary, although no second derivative across it is asserted. Positivity
 then excludes a boundary at the strike at any positive time.
 
-## Result
+## Main results
 
-Public entry points include `price_hasDerivAt_boundary`, `boundary_neg`,
-`boundary_forcing_pos`.
+* `price_hasDerivAt_boundary`: for a `DividendPutSolution` and `t > 0`, the price has spatial
+  derivative `−e^{b t}` at `b t` (both one-sided derivatives agree); no joint or second-order
+  smoothness across the boundary is asserted.
+* `boundary_neg`: for `t > 0`, `b t < 0`.
+* `boundary_forcing_pos`: for `t > 0`, `0 < k − h · e^{b t}`.
+* `price_eventuallyEq_exercise`, `price_contDiffAt_exercise`: for `t > 0` and `x < b t`, the price
+  equals `1 − eˣ` in a neighbourhood of `(x, t)` and is `C^∞` there.
+* `price_supersolution_off_boundary`: for `t > 0` and `x ≠ b t`, the price is `C^∞` at `(x, t)`
+  and its spatial operator is at most its time derivative.
+
+## Tags
+
+smooth fit, exercise boundary, boundary below strike, spatial derivative at boundary, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

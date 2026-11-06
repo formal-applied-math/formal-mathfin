@@ -11,9 +11,9 @@ public import MathFin.Foundations.ItoIntegralHorizonDense
 # Infinite-horizon Itô integral on `[0,∞)` as a continuous linear isometry
 
 This file builds the unbounded-horizon Itô integral (the horizon-`T` one,
-`ItoIntegralCLM.itoIntegralCLM_T`, is its restriction to the band `(0,T]`), reusing the
-finite-horizon density machinery of `ItoIntegralHorizonDense` via σ-finite exhaustion, delivering the Itô integral on all of `[0,∞)` as a
-continuous linear map
+`ItoIntegralCLM.itoIntegralCLM`, is its restriction to the band `(0,T]`), reusing the finite-horizon
+density machinery of `ItoIntegralHorizonDense` via σ-finite exhaustion, delivering the Itô integral
+on all of `[0,∞)` as a continuous linear map
 
 `itoIntegralL2 : Lp ℝ 2 trim_full →L[ℝ] Lp ℝ 2 μ`
 
@@ -37,8 +37,8 @@ exhaustion of the time axis:
 * a function `g ∈ L²(trim_full)` orthogonal to every rectangle indicator has
   vanishing set-integral over every rectangle (`itoOrthRect`);
 * on each finite frame `Fₙ = Ioc 0 (n+1) ×ˢ univ` the trimmed measure restricts
-  to the *finite* `ItoIntegralCLM.trimMeasure_T (n+1)`
-  (`ItoIntegralCLM.trimMeasure_T_eq_restrict`), so the finite-horizon
+  to the *finite* `ItoIntegralCLM.trimMeasure (n+1)`
+  (`ItoIntegralCLM.trimMeasure_eq_restrict`), so the finite-horizon
   π-λ-induction lemma `ItoIntegralCLM.setIntegral_eq_zero_of_orthogonal_pred`
   applies and forces `g =ᵐ 0` on `Fₙ`;
 * the frames cover all of `Ioi 0 ×ˢ univ`, whose complement `{0} ×ˢ univ` is
@@ -52,6 +52,28 @@ exhaustion of the time axis:
 Pure consumption of the finite-horizon layer + Degenne's `SimpleProcess`
 infrastructure; nothing of the π-system or the isometry is reproved. This closes
 the unbounded-horizon gap recorded in `docs/archive/ito-integral-clm-deferred.md`.
+
+## Main definitions
+
+* `itoIntegralL2`: the unbounded-horizon Itô integral `Lp ℝ 2 trim_full →L[ℝ] Lp ℝ 2 μ`, the
+  extension of `itoAssembly` along the dense `simpleAssembly`.
+
+## Main results
+
+* `simpleAssembly_denseRange`: the image of `simpleAssembly` is dense in the predictable `L²`.
+* `itoIntegralL2_norm`: the unbounded-horizon Itô isometry, `‖itoIntegralL2 f‖ = ‖f‖` for every
+  `f ∈ Lp 2 trim_full`.
+* `itoIntegralL2_simpleAssembly`: on a simple process the `[0,∞)` integral is the explicit
+  increment sum `itoSimpleLp V`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Ch 7
+
+## Tags
+
+Itô integral, infinite horizon, stochastic integral, Itô isometry, σ-finite exhaustion,
+predictable integrands, MSC 60H05, MSC 60G07
 -/
 
 @[expose] public section
@@ -71,7 +93,7 @@ include hB
 
 omit hB [IsProbabilityMeasure μ] in
 /-- The simple process realising the indicator of `Ioc a b ×ˢ F` (`F ∈ ℱₐ`), via
-upstream `ElementaryPredictableSet.IocProd.indicator`. Unlike `iocSP_T` there is
+upstream `ElementaryPredictableSet.IocProd.indicator`. Unlike `iocSPHorizon` there is
 no horizon bound: this is a plain `SimpleProcess`, not a member of the
 `T`-bounded submodule. -/
 private noncomputable def iocSP (hBmeas : ∀ t, Measurable (B t)) (a b : ℝ≥0) {F : Set Ω}
@@ -167,8 +189,8 @@ private lemma itoOrthRect (hBmeas : ∀ t, Measurable (B t))
 omit hB in
 /-- A function `g` orthogonal to the range of `simpleAssembly` is a.e. zero. The
 σ-finite exhaustion uses finite frames `Φ n = Ioc 0 (n+1) ×ˢ univ`: on each, the
-trim measure restricts to the *finite* `ItoIntegralCLM.trimMeasure_T (n+1)`
-(`trimMeasure_T_eq_restrict`), where the finite-horizon π-λ-induction lemma
+trim measure restricts to the *finite* `ItoIntegralCLM.trimMeasure (n+1)`
+(`trimMeasure_eq_restrict`), where the finite-horizon π-λ-induction lemma
 `ItoIntegralCLM.setIntegral_eq_zero_of_orthogonal_pred` forces `g =ᵐ 0`. The
 frames cover `Ioi 0 ×ˢ univ`, whose complement `{0} ×ˢ univ` is `trim_full`-null
 (`timeMeasure {0} = 0`). -/
@@ -198,26 +220,26 @@ private lemma aezeroOfOrth (hBmeas : ∀ t, Measurable (B t))
       =ᵐ[((timeMeasure.prod μ).trim
         (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod).restrict (Φ n)] 0 := by
     intro n
-    have h_bridge : ItoIntegralCLM.trimMeasure_T (μ := μ) ((n : ℝ≥0) + 1) hBmeas
+    have h_bridge : ItoIntegralCLM.trimMeasure (μ := μ) ((n : ℝ≥0) + 1) hBmeas
         = ((timeMeasure.prod μ).trim
           (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod).restrict (Φ n) :=
-      ItoIntegralCLM.trimMeasure_T_eq_restrict (μ := μ) ((n : ℝ≥0) + 1) hBmeas
+      ItoIntegralCLM.trimMeasure_eq_restrict (μ := μ) ((n : ℝ≥0) + 1) hBmeas
     rw [← h_bridge]
-    -- view `g` as a member of `Lp 2 (trimMeasure_T (n+1))`
+    -- view `g` as a member of `Lp 2 (trimMeasure (n+1))`
     have hmemn : MemLp (g : ℝ≥0 × Ω → ℝ) 2
-        (ItoIntegralCLM.trimMeasure_T (μ := μ) ((n : ℝ≥0) + 1) hBmeas) := by
+        (ItoIntegralCLM.trimMeasure (μ := μ) ((n : ℝ≥0) + 1) hBmeas) := by
       rw [h_bridge]; exact (Lp.memLp g).restrict (Φ n)
     set gₙ := hmemn.toLp (g : ℝ≥0 × Ω → ℝ)
     have hgn_coe : (gₙ : ℝ≥0 × Ω → ℝ)
-        =ᵐ[ItoIntegralCLM.trimMeasure_T (μ := μ) ((n : ℝ≥0) + 1) hBmeas]
+        =ᵐ[ItoIntegralCLM.trimMeasure (μ := μ) ((n : ℝ≥0) + 1) hBmeas]
           (g : ℝ≥0 × Ω → ℝ) := hmemn.coeFn_toLp
-    -- orthogonality of `g` transfers to `trimMeasure_T (n+1)`
+    -- orthogonality of `g` transfers to `trimMeasure (n+1)`
     have h_transfer_g : ∀ R ∈ ItoIntegralCLM.predictableRect (mΩ := mΩ) hBmeas,
         ∫ z in R, (g : ℝ≥0 × Ω → ℝ) z
-          ∂(ItoIntegralCLM.trimMeasure_T (μ := μ) ((n : ℝ≥0) + 1) hBmeas) = 0 := by
+          ∂(ItoIntegralCLM.trimMeasure (μ := μ) ((n : ℝ≥0) + 1) hBmeas) = 0 := by
       intro R hR
       have h_eq : ∫ z in R, (g : ℝ≥0 × Ω → ℝ) z
-            ∂(ItoIntegralCLM.trimMeasure_T (μ := μ) ((n : ℝ≥0) + 1) hBmeas)
+            ∂(ItoIntegralCLM.trimMeasure (μ := μ) ((n : ℝ≥0) + 1) hBmeas)
           = ∫ z in R ∩ Φ n, (g : ℝ≥0 × Ω → ℝ) z ∂((timeMeasure.prod μ).trim
               (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod) := by
         rw [h_bridge]
@@ -234,12 +256,12 @@ private lemma aezeroOfOrth (hBmeas : ∀ t, Measurable (B t))
     -- transfer to `gₙ`, then apply the finite-horizon lemma
     have h_transfer : ∀ R ∈ ItoIntegralCLM.predictableRect (mΩ := mΩ) hBmeas,
         ∫ z in R, (gₙ : ℝ≥0 × Ω → ℝ) z
-          ∂(ItoIntegralCLM.trimMeasure_T (μ := μ) ((n : ℝ≥0) + 1) hBmeas) = 0 := by
+          ∂(ItoIntegralCLM.trimMeasure (μ := μ) ((n : ℝ≥0) + 1) hBmeas) = 0 := by
       intro R hR
       rw [setIntegral_congr_ae (hRpred R hR) (hgn_coe.mono fun z hz _ ↦ hz)]
       exact h_transfer_g R hR
     have hgn0 : (gₙ : ℝ≥0 × Ω → ℝ)
-        =ᵐ[ItoIntegralCLM.trimMeasure_T (μ := μ) ((n : ℝ≥0) + 1) hBmeas] 0 :=
+        =ᵐ[ItoIntegralCLM.trimMeasure (μ := μ) ((n : ℝ≥0) + 1) hBmeas] 0 :=
       Lp.ae_eq_zero_of_forall_setIntegral_eq_zero gₙ
         (by norm_num : (2 : ℝ≥0∞) ≠ 0) (by norm_num : (2 : ℝ≥0∞) ≠ ∞)
         (fun _ _ _ ↦ ((Lp.memLp gₙ).integrable one_le_two).integrableOn)

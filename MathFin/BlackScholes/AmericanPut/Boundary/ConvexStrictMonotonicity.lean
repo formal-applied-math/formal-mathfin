@@ -5,14 +5,23 @@ Authors: Robert Martin
 -/
 module
 
+public import MathFin.Init
 public import Mathlib.Analysis.Convex.Slope
 public import Mathlib.Analysis.Convex.SpecificFunctions.Basic
 
-/-! # Strict decrease and strict exponential convexity without derivatives 
-## Result
+/-! # Strict decrease and strict exponential convexity without derivatives
 
-Public entry points include `strictAntiOn_of_convex_antitone_no_flat_tail`,
-`strictConvexOn_exp_of_convex_injective`.
+## Main results
+
+* `strictAntiOn_of_convex_antitone_no_flat_tail`: a convex antitone function on `(0, ∞)` that has
+  no constant tail `[A, ∞)` is strictly antitone there.
+* `strictConvexOn_exp_of_convex_injective`: if `b` is convex and injective on `s`, then
+  `t ↦ exp (b t)` is strictly convex on `s`.
+
+## Tags
+
+strict monotonicity, strict convexity, convex antitone function, flat tail, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

@@ -5,6 +5,7 @@ Authors: Robert Martin
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-! # Nonnegativity of a quadratic on a ray
@@ -13,6 +14,18 @@ Part of the SVI polynomial-sign certificate (#174).
 
 A real quadratic is nonnegative on a closed ray exactly when a finite list of polynomial sign
 conditions on its coefficients holds (`quadratic_nonneg_ray_iff`).
+
+## Main results
+
+* `quadratic_nonneg_ray_zero_iff`: `u x² + v x + z ≥ 0` for all `x ≥ 0` iff `u ≥ 0`, `z ≥ 0` and
+  either `u = 0 ∧ v ≥ 0` or `u > 0` with `v ≥ 0` or `4uz - v² ≥ 0`.
+* `quadratic_nonneg_ray_iff`: `u w² + v w + z ≥ 0` for all `w ≥ a` iff `u ≥ 0`,
+  `u a² + v a + z ≥ 0` and either `u = 0 ∧ v ≥ 0` or `u > 0` with `v + 2ua ≥ 0` or
+  `4uz - v² ≥ 0`.
+
+## Tags
+
+quadratic nonnegativity, closed ray, sign conditions, SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -20,7 +33,8 @@ conditions on its coefficients holds (`quadratic_nonneg_ray_iff`).
 namespace MathFin
 namespace SVI
 
-private theorem quadratic_leading_nonneg (u v z : ℝ)
+/-- A quadratic nonnegative on `[0, ∞)` has nonnegative leading coefficient. -/
+theorem quadratic_leading_nonneg (u v z : ℝ)
     (h : ∀ x : ℝ, 0 ≤ x → 0 ≤ u*x^2+v*x+z) : 0 ≤ u := by
   by_contra hu
   have hu : u < 0 := lt_of_not_ge hu
@@ -40,7 +54,8 @@ private theorem quadratic_leading_nonneg (u v z : ℝ)
   have hux : 0 ≤ (-u)*x := mul_nonneg (by linarith) (by linarith)
   nlinarith
 
-private theorem affine_nonneg_slope (v z : ℝ)
+/-- An affine function nonnegative on `[0, ∞)` has nonnegative slope. -/
+theorem affine_nonneg_slope (v z : ℝ)
     (h : ∀ x : ℝ, 0 ≤ x → 0 ≤ v*x+z) : 0 ≤ v := by
   by_contra hv
   have hv : v < 0 := lt_of_not_ge hv

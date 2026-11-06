@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -22,6 +23,24 @@ This is the change-of-measure ritual shared by the equivalent-martingale-measure
 in the one-period FTAP files (`FTAPOnePeriod.lean`, `FTAPOnePeriodVector.lean`): each builds its
 fair density (a logistic Esscher weight, or a `(1+‖Y‖)⁻¹` tempering for the `L¹` reduction),
 normalises it, and then needs exactly `IsEquivProbMeasure P Q`.
+
+## Main definitions
+
+* `IsEquivProbMeasure`: `Q` is a probability measure with `Q ≪ P` and `P ≪ Q`.
+
+## Main results
+
+* `absolutelyContinuous_withDensity_ofReal`: an a.e. strictly positive density makes `P`
+  absolutely continuous with respect to `P.withDensity (ofReal g)`.
+* `isEquivProbMeasure_withDensity_of_isProbabilityMeasure`: `P.withDensity (ofReal g)` for an a.e.
+  strictly positive density `g` is equivalent to `P` as soon as it is a probability measure.
+* `isEquivProbMeasure_withDensity`: for a strictly positive, `P`-integrable `g` with `∫ g ∂P = 1`,
+  `P.withDensity (ofReal g)` is an equivalent probability measure.
+
+## Tags
+
+equivalent probability measure, mutual absolute continuity, density, withDensity,
+equivalent martingale measure, MSC 28A25, MSC 91G20
 -/
 
 @[expose] public section
@@ -42,7 +61,7 @@ theorem absolutelyContinuous_withDensity_ofReal {Ω : Type*} {mΩ : MeasurableSp
 
 /-- `Q` is an **equivalent probability measure** for `P`: a probability measure with the same null
 sets, `Q ≪ P` and `P ≪ Q`. The prefix shared by every equivalent-martingale-measure structure of
-the library (`ContinuousMarket.IsEMM`, `IsEMM`, `OnePeriodVector.IsEMM`), which `extend` it. -/
+the library (`IsEMM`, at every time index, and `OnePeriodVector.IsEMM`), which `extend` it. -/
 structure IsEquivProbMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω} (P Q : Measure Ω) : Prop where
   isProb : IsProbabilityMeasure Q
   ac : Q ≪ P

@@ -45,6 +45,34 @@ bounded, so weak convergence applies directly; parity lifts it to the call).
 What this file provides is the **classical analytic CRR↔BS correspondence**
 on the mean and variance of one log-return increment — the substantive
 textbook computations feeding that limit.
+
+## Main definitions
+
+* `crrStep`: the step size `Δt = T / n`.
+* `crrUp`, `crrDown`: the up- and down-factors `exp(±σ √(T/n))`.
+* `crrPerStepRate`: the per-step rate `r · T / n`.
+* `crrProb`: the CRR risk-neutral up-probability `(e^{rΔt} − d_n) / (u_n − d_n)`.
+
+## Main results
+
+* `binomialNoArb_crr`: if `|r| · √T < σ` and `T > 0`, the CRR parameters satisfy
+  `BinomialNoArb` for every `n > 0`.
+* `crrProb_mem_Icc`: given no-arbitrage at every step `n > 0`, `crrProb r σ T n ∈ [0, 1]` for
+  every `n`.
+* `crr_one_step_martingale`: when `d_n < u_n`, `p_n · u_n + (1 − p_n) · d_n = e^{rΔt}`.
+* `crrProb_tendsto_half`: for `σ, T > 0`, `crrProb r σ T n → 1/2`.
+* `crr_variance_limit`: for `σ, T > 0`, `4 σ² T · p_n (1 − p_n) → σ² T`.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 21.1
+* [S. E. Shreve, *Stochastic Calculus for Finance I: The Binomial Asset Pricing Model*][ShreveSCFI],
+  1.2; 3.2
+
+## Tags
+
+Cox–Ross–Rubinstein, Black–Scholes limit, risk-neutral probability, up-down factors,
+binomial convergence, variance limit, MSC 91G20, MSC 60F05, JEL G13
 -/
 
 @[expose] public section
@@ -198,7 +226,8 @@ lemma tendsto_exp_sub_one_div (c : ℝ) :
     simp [Real.exp_zero]
   exact h_slope.congr' (Eventually.of_forall h_eq)
 
-private lemma tendsto_sq_nhdsWithin_ne_zero :
+/-- Squaring maps punctured neighbourhoods of `0` into punctured neighbourhoods of `0`. -/
+lemma tendsto_sq_nhdsNE_zero :
     Tendsto (fun h : ℝ ↦ h^2) (𝓝[≠] 0) (𝓝[≠] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
   · have h_cont : Continuous (fun h : ℝ ↦ h^2) := by continuity
@@ -213,7 +242,7 @@ private lemma tendsto_sq_nhdsWithin_ne_zero :
     Composition of `tendsto_exp_sub_one_div` with `h ↦ h²`. -/
 lemma tendsto_exp_sq_sub_one_div_sq (c : ℝ) :
     Tendsto (fun h : ℝ ↦ (Real.exp (c * h^2) - 1) / h^2) (𝓝[≠] 0) (𝓝 c) :=
-  (tendsto_exp_sub_one_div c).comp tendsto_sq_nhdsWithin_ne_zero
+  (tendsto_exp_sub_one_div c).comp tendsto_sq_nhdsNE_zero
 
 /-- `(e^{c · h²} − 1) / h → 0` as `h → 0` (`h ≠ 0`).
     Equals `h · ((e^{c·h²} − 1)/h²) → 0 · c = 0`. -/
@@ -233,7 +262,7 @@ lemma tendsto_exp_sq_sub_one_div_h (c : ℝ) :
   field_simp
 
 /-- `(e^{σ h} − 1)/h − (e^{-σ h} − 1)/h = (e^{σ h} − e^{-σ h})/h`. -/
-private lemma exp_diff_sub_eq (σ h : ℝ) :
+lemma exp_sub_one_div_sub_exp_neg_sub_one_div (σ h : ℝ) :
     (Real.exp (σ * h) - 1) / h - (Real.exp (-(σ * h)) - 1) / h
       = (Real.exp (σ * h) - Real.exp (-(σ * h))) / h := by
   rw [← sub_div]
@@ -255,7 +284,7 @@ lemma tendsto_sinh_div (σ : ℝ) :
   rw [h_target] at h_diff
   refine h_diff.congr' ?_
   filter_upwards with h
-  exact exp_diff_sub_eq σ h
+  exact exp_sub_one_div_sub_exp_neg_sub_one_div σ h
 
 /-! ### CRR probability limit: `p_n → 1/2` -/
 
@@ -330,7 +359,7 @@ theorem crrProb_tendsto_half {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
                   = (Real.exp (r * h^2) - Real.exp (-(σ * h))) / h := by
       rw [← sub_div]
       congr 1; ring
-    rw [h_num_eq, exp_diff_sub_eq σ h]
+    rw [h_num_eq, exp_sub_one_div_sub_exp_neg_sub_one_div σ h]
     field_simp
   -- Step 3: compose with h_n = √(T/n) → 0+
   have h_h_n_tendsto : Tendsto (fun n : ℕ ↦ Real.sqrt (crrStep T n)) atTop (𝓝[≠] 0) := by

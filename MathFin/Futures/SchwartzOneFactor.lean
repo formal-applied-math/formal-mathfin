@@ -39,18 +39,30 @@ This formalizes only the constant-parameter Schwartz (1997) model; Hull's
 time-dependent level `q(t)` (the Hull–White-form drift calibrated to the
 quoted futures curve) is out of scope.
 
-## References
+## Main definitions
 
-* E. S. Schwartz, *The Stochastic Behavior of Commodity Prices: Implications for Valuation
-  and Hedging*, Journal of Finance 52 (1997).
-* J. C. Hull, *Options, Futures, and Other Derivatives* (the time-dependent `q(t)` extension).
+* `schwartzFuturesPrice`: the Schwartz one-factor futures price, defined as the closed form
+  `exp(m_T + v_T / 2)` from the initial log spot `x₀`, long-run log level `θ`, speed `κ`,
+  volatility `σ` and maturity `T`.
 
 ## Main results
 
-* `schwartzFuturesPrice` — the closed form `exp(m_T + v_T / 2)`.
 * `schwartzFuturesPrice_eq_integral` — it equals `E[S_T]` for the log spot in its
   Wiener representation (the SDE bridge is cited, not proven).
-* `tendsto_schwartzFuturesPrice_atTop` — the long-maturity flattening limit.
+* `tendsto_schwartzFuturesPrice_atTop` — for `κ > 0`, the long-maturity flattening limit
+  `exp(θ + σ²/(4κ))`.
+
+## References
+
+* [E. S. Schwartz, *The Stochastic Behavior of Commodity Prices: Implications for Valuation
+  and Hedging*][Schwartz1997].
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull] (the time-dependent `q(t)`
+  extension).
+
+## Tags
+
+Schwartz model, commodity futures, mean-reverting spot, Ornstein-Uhlenbeck, convenience yield,
+futures curve, MSC 91G20, MSC 60J60, JEL Q02
 -/
 
 @[expose] public section

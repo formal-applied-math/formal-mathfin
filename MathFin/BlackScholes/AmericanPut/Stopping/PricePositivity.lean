@@ -12,10 +12,20 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.CanonicalPrice
 The deterministic maturity rule already has positive expected put payoff.
 This proves price positivity without a classical PDE or optimal stopping rule.
 
-## Result
+## Main results
 
-Public entry points include `gaussian_put_integral_pos`, `brownian_put_maturity_reward_pos`,
-`brownianAmericanPut_pos`, `brownianUsualAmericanPut_pos`.
+* `gaussian_put_integral_pos`: for `0 < K`, `0 ≤ r`, `0 < σ`, `0 < S` and `0 < T`, the discounted
+  put payoff has positive integral against the Gaussian `N(0,T)`.
+* `brownian_put_maturity_reward_pos`: under the same hypotheses, the expected reward of the
+  deterministic maturity rule is positive.
+* `brownianAmericanPut_pos`, `brownianUsualAmericanPut_pos`: under the same hypotheses, the
+  Brownian American put value, on the raw and on the usual filtration, is positive.
+* `canonicalPrice_pos`: for `0 ≤ k` and `t > 0`, the canonical price is positive.
+
+## Tags
+
+price positivity, Gaussian terminal law, American put value, maturity rule, strictly positive price,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

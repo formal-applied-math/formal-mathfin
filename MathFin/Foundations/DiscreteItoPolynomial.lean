@@ -42,6 +42,14 @@ application (recursion for `E[B_t^n]`, variance-of-variance, etc.).
   `R = 4a·(b − a)³ + (b − a)⁴`.
 * `discrete_cubing_identity` — the pathwise `X_N³ − X_0³` decomposition
   along any partition: `2·∑ X_k²·ΔX_k`, `1·∑ X_k·(ΔX_k)²` and `∑ (ΔX_k)³`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Ch 7
+
+## Tags
+
+Itô's lemma, polynomial remainder, Taylor expansion, discrete cubing, MSC 60H05, MSC 60J65
 -/
 
 @[expose] public section

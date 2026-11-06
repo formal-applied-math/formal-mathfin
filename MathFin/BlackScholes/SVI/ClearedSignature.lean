@@ -17,6 +17,20 @@ factor) times the Hermite matrix when `leadingCoeff ≠ 0`, the size is `n ≤ 9
 degree at most `22`, has the same signature test (`clearedHermite_signature`).
 `certificateMatrix_signature` specialises this to the four certificate matrices of a nonconstant
 polynomial of degree at most ten.
+
+## Main results
+
+* `hermite_symmetric`: the Hermite matrix `hermite f q n` is symmetric.
+* `clearedHermite_signature`: for `leadingCoeff ≠ 0`, `n ≤ 9` and `q.natDegree ≤ 22`, the cleared
+  matrix has the same `signatureTest` as `hermite f q n`.
+* `derivative_size_bound`, `weight_size_bound`: for `natDegree ≤ 10`, the derivative has degree at
+  most `9` and the four weights have degree at most `22`.
+* `certificateMatrix_signature`: for a nonconstant `P` of degree at most ten, each of the four
+  certificate matrices has the same `signatureTest` as the corresponding Hermite matrix.
+
+## Tags
+
+Hermite matrix, signature test, cleared denominators, SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -21,13 +21,22 @@ The put price's second `K`-derivative matches the call's:
 since `bsP(K) − bsV(K) = K · e^{-rτ} − S` is linear in `K`. A clean expression
 of put-call symmetry at the strike-convexity level.
 
-Results:
+## Main results
 
 * `hasDerivAt_bsP_KK`: the K-derivative of `e^{-rτ} · Φ(−d₂)` is
   `e^{-rτ} · ϕ(d₂) / (K σ √τ)` (PDF evenness `gaussianPDFReal_zero_one_neg` now lives
   in `Foundations.StandardNormal`).
 * `hasDerivAt_deriv_bsP_K`: `∂²_K bsP = e^{-rτ} · ϕ(d₂) / (K σ √τ)`, for the price
   itself.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], Ch 12.8
+
+## Tags
+
+strike convexity, Breeden–Litzenberger, put price second derivative, implied density, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

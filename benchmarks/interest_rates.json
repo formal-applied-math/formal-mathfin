@@ -13,6 +13,12 @@
       "metadata": {
         "chapter": 10,
         "reference": "Continuous-compounding ZCB (Hull 4.2)",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "4.2"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
@@ -29,6 +35,12 @@
       "metadata": {
         "chapter": 10,
         "reference": "Yield-to-maturity for ZCB (Hull 4.2)",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "4.2"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via log of exp + algebraic simplification. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
@@ -45,6 +57,12 @@
       "metadata": {
         "chapter": 10,
         "reference": "Macaulay/Modified Duration for ZCB (Hull 4.8)",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "4.8"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: the rate derivative ∂_r B = −(T − t)·B of the price itself (hasDerivAt_zcb_r) substituted into −∂_r B / B. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
@@ -61,6 +79,12 @@
       "metadata": {
         "chapter": 10,
         "reference": "Bond convexity for ZCB (Hull 4.9)",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "4.9"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: the second rate-derivative of the price itself, ∂²_r B = (T − t)²·B (hasDerivAt_deriv_zcb_r, via hasDerivAt_deriv_of_eventually in Foundations/DerivOfDeriv.lean), divided by B. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
@@ -77,6 +101,15 @@
       "metadata": {
         "chapter": 14,
         "reference": "Bond portfolio duration (Fabozzi, Fixed Income Mathematics; Hull Ch 4)",
+        "citations": [
+          {
+            "key": "FabozziFIM"
+          },
+          {
+            "key": "Hull",
+            "locator": "Ch 4"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof from HasDerivAt.sum on the per-bond exponential derivative. Lives in MathFin/FixedIncome/Immunization.lean. Axioms-clean."
@@ -93,6 +126,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "Single ZCB duration as a degenerate portfolio (Fabozzi, Fixed Income Mathematics)",
+        "citations": [
+          {
+            "key": "FabozziFIM"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in MathFin/FixedIncome/Immunization.lean. Axioms-clean."
@@ -109,6 +147,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "Single ZCB price as a degenerate portfolio (Fabozzi, Fixed Income Mathematics)",
+        "citations": [
+          {
+            "key": "FabozziFIM"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in MathFin/FixedIncome/Immunization.lean. Axioms-clean."
@@ -125,6 +168,15 @@
       "metadata": {
         "chapter": 14,
         "reference": "Redington immunization (Redington 1952; Fabozzi, Fixed Income Mathematics Ch 5)",
+        "citations": [
+          {
+            "key": "Redington1952"
+          },
+          {
+            "key": "FabozziFIM",
+            "locator": "Ch 5"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof from rate-sensitivity of A and L plus duration matching. Lives in MathFin/FixedIncome/Immunization.lean. Axioms-clean."
@@ -141,6 +193,16 @@
       "metadata": {
         "chapter": 14,
         "reference": "Annuity formula (Fabozzi, Fixed Income Mathematics Ch 2; Hull Ch 4.5)",
+        "citations": [
+          {
+            "key": "FabozziFIM",
+            "locator": "Ch 2"
+          },
+          {
+            "key": "Hull",
+            "locator": "Ch 4.5"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via term rewriting exp(-r(i+1)Δt) = exp(-rΔt)·exp(-rΔt)^i, geom_sum_eq, and field_simp. Lives in MathFin/FixedIncome/CouponBonds.lean. Axioms-clean."
@@ -157,6 +219,16 @@
       "metadata": {
         "chapter": 14,
         "reference": "Forward/spot rate consistency (Hull Ch 4.7; Fabozzi Ch 3)",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "Ch 4.7"
+          },
+          {
+            "key": "FabozziFIM",
+            "locator": "Ch 3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: log(exp(-r(T-t))) = -r(T-t), so -log = r(T-t), with derivative r in T. Lives in MathFin/FixedIncome/CouponBonds.lean. Axioms-clean."
@@ -173,6 +245,15 @@
       "metadata": {
         "chapter": 14,
         "reference": "YTM monotonicity → uniqueness (Fabozzi, Fixed Income Mathematics; Hull Ch 4)",
+        "citations": [
+          {
+            "key": "FabozziFIM"
+          },
+          {
+            "key": "Hull",
+            "locator": "Ch 4"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via Finset.sum_lt_sum_of_nonempty and Real.exp_lt_exp on each summand. Lives in MathFin/FixedIncome/CouponBonds.lean. Axioms-clean."
@@ -189,6 +270,12 @@
       "metadata": {
         "chapter": 14,
         "reference": "Bond convexity (Fabozzi, Fixed Income Mathematics Ch 5)",
+        "citations": [
+          {
+            "key": "FabozziFIM",
+            "locator": "Ch 5"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via HasDerivAt.sum on the per-bond exponential second derivative. Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
@@ -205,6 +292,12 @@
       "metadata": {
         "chapter": 14,
         "reference": "Bond convexity (Fabozzi, Fixed Income Mathematics Ch 5)",
+        "citations": [
+          {
+            "key": "FabozziFIM",
+            "locator": "Ch 5"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, stated for the portfolio value itself: the r-derivative of minus the duration-times-value (hasDerivAt_neg_bondPortfolioDur_r, by negating the duration derivative) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since −D_P·P is ∂P/∂r at every r (hasDerivAt_bondPortfolioValue_r). Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
@@ -221,6 +314,12 @@
       "metadata": {
         "chapter": 14,
         "reference": "Single ZCB convexity as a degenerate portfolio (Fabozzi Ch 5)",
+        "citations": [
+          {
+            "key": "FabozziFIM",
+            "locator": "Ch 5"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
@@ -237,6 +336,16 @@
       "metadata": {
         "chapter": 14,
         "reference": "Second-order Redington immunization (Fabozzi Ch 5; Hull Ch 4.11)",
+        "citations": [
+          {
+            "key": "FabozziFIM",
+            "locator": "Ch 5"
+          },
+          {
+            "key": "Hull",
+            "locator": "Ch 4.11"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, stated for the surplus A − L itself: the second derivative of each side is its convexity-times-value (hasDerivAt_neg_bondPortfolioDur_r, the r-derivative of −Dur·P), so matching those makes the r-derivative of the dollar-duration gap vanish. That is transported to `deriv` of the surplus by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since the dollar-duration gap is ∂(A − L)/∂r at every r (hasDerivAt_bondPortfolioValue_r on each side). Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
@@ -253,6 +362,16 @@
       "metadata": {
         "chapter": 14,
         "reference": "Yield curve bootstrapping (Fabozzi, Fixed Income Mathematics Ch 9; Hull Ch 4.6)",
+        "citations": [
+          {
+            "key": "FabozziFIM",
+            "locator": "Ch 9"
+          },
+          {
+            "key": "Hull",
+            "locator": "Ch 4.6"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via field_simp + linarith on the pricing equation. Lives in MathFin/FixedIncome/YieldCurve.lean. Axioms-clean."
@@ -269,6 +388,12 @@
       "metadata": {
         "chapter": 14,
         "reference": "Yield curve bootstrapping base case (Fabozzi Ch 9)",
+        "citations": [
+          {
+            "key": "FabozziFIM",
+            "locator": "Ch 9"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via field_simp. Lives in MathFin/FixedIncome/YieldCurve.lean. Axioms-clean."
@@ -285,6 +410,12 @@
       "metadata": {
         "chapter": 14,
         "reference": "Two-bond bootstrap step (Fabozzi Ch 9)",
+        "citations": [
+          {
+            "key": "FabozziFIM",
+            "locator": "Ch 9"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via field_simp + ring. Lives in MathFin/FixedIncome/YieldCurve.lean. Axioms-clean."
@@ -301,6 +432,12 @@
       "metadata": {
         "chapter": 14,
         "reference": "Bootstrap inversion identity (Fabozzi Ch 9)",
+        "citations": [
+          {
+            "key": "FabozziFIM",
+            "locator": "Ch 9"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via field_simp + ring on the pricing equation. Lives in MathFin/FixedIncome/YieldCurve.lean. Axioms-clean."
@@ -317,6 +454,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "Macaulay vs Modified duration (Fabozzi 4.3)",
+        "citations": [
+          {
+            "key": "FabozziFIM",
+            "locator": "4.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -333,6 +476,16 @@
       "metadata": {
         "chapter": 11,
         "reference": "Forward rate from spot rate (Fabozzi 5.2, Hull 4.7)",
+        "citations": [
+          {
+            "key": "FabozziFIM",
+            "locator": "5.2"
+          },
+          {
+            "key": "Hull",
+            "locator": "4.7"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -349,6 +502,11 @@
       "metadata": {
         "chapter": 12,
         "reference": "Vasicek 1977 short-rate model (deterministic part)",
+        "citations": [
+          {
+            "key": "Vasicek1977"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -365,6 +523,11 @@
       "metadata": {
         "chapter": 12,
         "reference": "Mean-reversion half-life (Vasicek 1977, Ornstein-Uhlenbeck)",
+        "citations": [
+          {
+            "key": "Vasicek1977"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -381,6 +544,11 @@
       "metadata": {
         "chapter": 15,
         "reference": "Black model for swaptions (Black 1976 specialisation)",
+        "citations": [
+          {
+            "key": "Black1976"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -397,6 +565,11 @@
       "metadata": {
         "chapter": 12,
         "reference": "Vasicek 1977 short-rate model (terminal distribution, derived from the SDE via the Wiener integral)",
+        "citations": [
+          {
+            "key": "Vasicek1977"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin.FixedIncome.VasicekSDEGaussian (vasicekShortRate_hasLaw_gaussian). DERIVES the Vasicek terminal Gaussian law (previously posited as closed-form defs in VasicekSDE.lean) for the short rate in its Wiener representation, the textbook solution of the SDE (that it solves the SDE is cited, not proved): the diffusion term sigma * (Wiener integral of e^{-kappa(T-s)}) is Gaussian by the deterministic-integrand Wiener-Gaussian theorem (sc-wiener-integral-gaussian); the variance is fixed by the FTC integral int_0^T e^{-2kappa(T-s)} ds = (1-e^{-2kappa T})/(2kappa) (vasicekKernel_integral_sq, antiderivative e^{-2kappa(T-s)}/(2kappa)); the affine map x |-> mean + sigma*x transports the law N(0, var) to N(vasicekSDEMean, vasicekSDEVariance) via gaussianReal_const_mul / gaussianReal_const_add with the NNReal variance algebra. First consumer of the deterministic-integrand Ito tower in FixedIncome -- the two-tower bridge. Axioms-clean: [propext, Classical.choice, Quot.sound]."
@@ -413,6 +586,11 @@
       "metadata": {
         "chapter": 12,
         "reference": "Vasicek 1977 short-rate model; the affine zero-coupon bond price P(0,T) = A(T)·exp(-B(T)·r₀)",
+        "citations": [
+          {
+            "key": "Vasicek1977"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin.FixedIncome.VasicekBondPrice (vasicekBondPrice_affine). The Vasicek zero-coupon bond price P(0,T) = E[exp(-int_0^T r_s ds)] as the Gaussian Laplace transform of the integrated short rate, collapsing to the affine term structure P = A(T)*exp(-B(T)*r0), B(T) = (1-e^{-kappa T})/kappa. The integrated rate int_0^T r_s ds = M(T) + sigma*int_0^T g dB is carried in its Wiener representation (integrated OU kernel g(u) = (1-e^{-kappa(T-u)})/kappa; the deterministic time-order swap is the modelling bridge, cited not proven -- parity with the OU-solution model of mf-vasicek-sde-terminal-gaussian). Its Gaussian law N(M, sigma^2 V) follows from wienerIntegralLp_hasLaw_gaussian + the FTC variance integral int_0^T g^2 = V(T) (vasicekIntegratedKernel_integral_sq, antiderivative u/kappa^2 - 2e^{-kappa(T-u)}/kappa^3 + e^{-2kappa(T-u)}/(2kappa^3)); the bond price exp(-M + sigma^2 V/2) is the Wiener bond-price lemma integral_exp_neg_add_mul_wienerIntegralLp (MathFin/Foundations/WienerIntegralExpMoment.lean) at m = M(T), c = sigma, f = g. Second consumer of the deterministic-integrand Wiener tower in FixedIncome. Axioms-clean: [propext, Classical.choice, Quot.sound]."
@@ -429,6 +607,15 @@
       "metadata": {
         "chapter": 12,
         "reference": "O. Vasicek, An equilibrium characterization of the term structure, J. Financial Economics 5(2) (1977) 177-188 (the closed-form bond price taken to its kappa -> 0+ limit). The small-mean-reversion branch of QuantLib's Vasicek::A (vasicek.cpp, PR #2599) computes this limit numerically.",
+        "citations": [
+          {
+            "key": "Vasicek1977"
+          },
+          {
+            "key": "QuantLib",
+            "locator": "Vasicek::A (vasicek.cpp, PR #2599)"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof on the closed form exp(-M(T) + sigma^2*V(T)/2) of mf-vasicek-bond-price. Lives in MathFin/FixedIncome/VasicekZeroMeanReversionLimit.lean: tendsto_vasicekBondB_zero_meanReversion (B(T) -> T) and the quantitative cancellation abs_vasicekBondV_sub_le (|V(T) - T^3/3| <= 10*|kappa|*T^4 for |2*kappa*T| <= 1, from the cubic Taylor remainder of exp) give tendsto_vasicekBondV_zero_meanReversion (V(T) -> T^3/3) and tendsto_vasicekIntegratedMean_zero_meanReversion (M(T) -> r0*T), composed into tendsto_vasicekBondPrice_zero_meanReversion. SCOPE: a limit of the closed form, not a convergence statement about the underlying random variables integral_0^T r_s^kappa ds as kappa -> 0+; no convergence of the short-rate processes themselves is claimed. The kappa = 0 substitution (Lean's x/0 = 0) gives the different, wrong value exp(-theta*T) (vasicekBondPrice_closedForm_zero_meanReversion), stated in the same file as a contrast, not as part of this entry's claim. Axioms-clean."
@@ -445,6 +632,11 @@
       "metadata": {
         "chapter": 12,
         "reference": "O. Vasicek, An equilibrium characterization of the term structure, J. Financial Economics 5(2) (1977) 177-188.",
+        "citations": [
+          {
+            "key": "Vasicek1977"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Lives in MathFin/FixedIncome/VasicekZeroMeanReversionLimit.lean: brownianBondPrice_eq prices the driftless model r_s = r0 + sigma*B_s directly, via the Wiener bond-price lemma integral_exp_neg_add_mul_wienerIntegralLp on the integrated kernel u -> T - u (brownianIntegratedKernelLp, with integral of its square T^3/3 by brownianIntegratedKernelLp_integral_sq); tendsto_vasicekBondPrice_brownianBondPrice composes this with tendsto_vasicekBondPrice_zero_meanReversion. SCOPE: the driftless model's integrated rate is carried in its Wiener representation integral_0^T (r0 + sigma*B_s) ds = r0*T + sigma*integral_0^T (T-u) dB_u; the time-order-swap identity behind this (integral_0^T B_s ds = integral_0^T (T-u) dB_u) is the same cited, not proved, modelling bridge used by vasicekIntegratedRate elsewhere in this corpus. Axioms-clean."
@@ -461,6 +653,15 @@
       "metadata": {
         "chapter": 12,
         "reference": "Cox, Ingersoll and Ross 1985, A Theory of the Term Structure of Interest Rates; the affine loadings (Brigo–Mercurio §3.2.3)",
+        "citations": [
+          {
+            "key": "CoxIngersollRoss1985"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "§3.2.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.cirBondB_zero and MathFin.hasDerivAt_cirBondB (FixedIncome/CIRRiccati.lean). SCOPE. Only the term-structure equation is verified; the bond price P = E[exp(-int_0^T r_s ds)] needs the affine (Feynman-Kac) framework, which is not formalized."
@@ -477,6 +678,15 @@
       "metadata": {
         "chapter": 12,
         "reference": "Cox, Ingersoll and Ross 1985, A Theory of the Term Structure of Interest Rates; the affine loadings (Brigo–Mercurio §3.2.3)",
+        "citations": [
+          {
+            "key": "CoxIngersollRoss1985"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "§3.2.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.cirBondA_zero and MathFin.hasDerivAt_cirBondA (FixedIncome/CIRRiccati.lean). A is the log-form level loading of P = exp(A - B*r0), so A(0) = 0. SCOPE. sigma != 0 is needed because the factor 2*kappa*theta/sigma^2 divides by sigma^2. Only the term-structure equation is verified; the bond price needs the affine (Feynman-Kac) framework, which is not formalized."
@@ -492,6 +702,11 @@
       },
       "metadata": {
         "reference": "Cox, Ingersoll and Ross 1985 (the CIR mean); the squared-OU representation at the Feller boundary 2kθ = (2s)²",
+        "citations": [
+          {
+            "key": "CoxIngersollRoss1985"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, MathFin/FixedIncome/CIRSquaredOU.lean. Each OU fluctuation is the Vasicek short rate of MathFin/FixedIncome/VasicekSDEGaussian.lean at mean level 0, speed k/2, volatility s, so its law N(x0 e^{-kt/2}, (s²/k)(1 − e^{-kt})) is vasicekShortRate_hasLaw_gaussian; the second moment is m² + v from that law, and the mean of V is the sum of the two second moments. Per-time random variables only: no path regularity is claimed, and that V solves dV = k(θ − V)dt + 2s√V dW is not proved (it needs B1, B2 independent, which the mean computation does not use). Axioms-clean."
@@ -508,6 +723,11 @@
       "metadata": {
         "chapter": 10,
         "reference": "The T-forward measure (Geman-El Karoui-Rochet); the forward price as the bond-numeraire expectation of the spot",
+        "citations": [
+          {
+            "key": "GemanElKarouiRochet1995"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin.FixedIncome.ForwardMeasure (forwardMeasure_bs_expected_terminal). The T-forward measure Q^T (zero-coupon bond P(.,T) as numeraire) satisfies E^{Q^T}[S_T] = S_0*e^{rT} = S_0/P(0,T) = F(0,T), the no-arbitrage forward price. forwardMeasure Q B is the library's one T-forward measure, a numeraireMeasure instance for a general bank account B (N_T = P(T,T) = 1, N_0 = P(0,T) = E^Q[1/B_T], reference B_T, B_0 = 1) on the change-of-numeraire engine (MathFin.changeOfNumeraire, no integrability hypothesis); this entry is its constant-rate instance B = e^{rT}. forwardMeasure_price gives P(0,T)*E^{Q^T}[X] = E^Q[X/B_T] for any claim, and combined with the discounted-terminal EMM property discounted_terminal_eq_S0 yields the forward price of the BS terminal. HONEST SCOPE: in the constant-rate ZCB the density dQ^T/dQ = 1 so Q^T = Q coincides with the risk-neutral measure (the construction generalizes verbatim to a stochastic short rate where Q^T != Q). Natural next numeraire instance after the stock and S^2-numeraires. Axioms-clean: [propext, Classical.choice, Quot.sound]."
@@ -524,6 +744,7 @@
       "metadata": {
         "chapter": 0,
         "reference": "Formalize the vanilla interest-rate swap value and par swap rate S = (P(0,T₀)−P(0,Tₙ))/(δ·Σ P(0,Tᵢ))",
+        "citations": [],
         "difficulty": "small",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof in MathFin/FixedIncome/InterestRateSwap.lean (magistral-drafted statement, leanstral proof, human-refined at review). The par identity payerSwapValue = 0 ↔ K = parSwapRate is proved abstractly for any nonzero annuity (payerSwapValue_eq_zero_iff) and instantiated on the zcb curve with positivity discharged by zcb_pos + annuity_pos rather than assumed. Re-export from MathFin. Axioms-clean. Introduces definitions: annuity, payerSwapValue, parSwapRate (new-defs review class).",
@@ -553,6 +774,7 @@
       "metadata": {
         "chapter": 0,
         "reference": "Forward-rate agreement: F = (P(0,T₁)/P(0,T₂)−1)/δ and V = δ·P(0,T₂)·(F−K)",
+        "citations": [],
         "difficulty": "small",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof in MathFin/FixedIncome/FRA.lean. The generic FRA algebra is instantiated on the existing deterministic zcb curve. The discount-factor denominator is proved nonzero from zcb_pos; only the nonzero accrual period is assumed. The benchmark re-exports both the expanded value identity and the fair-rate zero-value equivalence. Axioms-clean.",
@@ -577,6 +799,12 @@
       "metadata": {
         "chapter": 9,
         "reference": "Black-76 caplet/floorlet parity (Hull 29.2)",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "29.2"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof in MathFin/Futures/Black76.lean. Derived by application of swaption_payer_receiver_parity rather than re-running the Phi-symmetry argument: blackCaplet_eq_blackPayerSwaption records that the caplet is the payer swaption's formula with the accrual factor where the annuity sits. The caplet and floorlet price definitions are exercised through this identity and the ledger; they carry no separate benchmark entry, since price-equals-definition closes by rfl. Re-export from MathFin. Axioms-clean."
@@ -592,6 +820,12 @@
       },
       "metadata": {
         "reference": "J. C. Hull, Options, Futures, and Other Derivatives (10th ed., Pearson, 2018), ch. 4 (the bootstrap method for zero rates) and ch. 7 (valuing a swap as a pair of bonds)",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "ch. 4 and ch. 7"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.Bootstrapping.payerSwapValue_lastCoupon_eq_zero_iff_couponBond and MathFin.Bootstrapping.swapBootstrap_recovers_couponBondFactor (MathFin/FixedIncome/Bootstrapping.lean). The closed-form root comes from MathFin.bootstrap_solve (MathFin/FixedIncome/YieldCurve.lean) and the bisection bound from MathFin.Bootstrapping.swapStep_lastCoupon_err. SCOPE: one bootstrap step; the earlier discount factors P are given, the bracket [lo, hi] containing x is a hypothesis, and 1 + K·δ > 0 is assumed."
@@ -607,6 +841,12 @@
       },
       "metadata": {
         "reference": "P. S. Hagan and G. West, Interpolation Methods for Curve Construction, Applied Mathematical Finance 13(2) (2006), 89–129, §2 (bootstrapping the curve instrument by instrument)",
+        "citations": [
+          {
+            "key": "HaganWest2006",
+            "locator": "§2"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.Bootstrapping.boot_reprices_swapChain (MathFin/FixedIncome/Bootstrapping.lean), the swap strip run through the induction boot_reprices_all with the bisection engine of MathFin/Foundations/Bisection.lean. SCOPE: the per-step bracket condition, stated at the prefix the recursion feeds in, is a hypothesis; the error bound is per step for a fixed bisection budget n; convergence of the curve as n → ∞ and joint solves are not formalized."
@@ -622,6 +862,14 @@
       },
       "metadata": {
         "reference": "C. R. Nelson and A. F. Siegel, Parsimonious Modeling of Yield Curves, Journal of Business 60(4) (1987), 473–489; O. Vasicek, An Equilibrium Characterization of the Term Structure, Journal of Financial Economics 5 (1977), 177–188",
+        "citations": [
+          {
+            "key": "NelsonSiegel1987"
+          },
+          {
+            "key": "Vasicek1977"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.vasicekYield_eq_nssSlope (MathFin/FixedIncome/VasicekYieldNelsonSiegel.lean), from MathFin.vasicekBondPrice_eq (MathFin/FixedIncome/VasicekBondPrice.lean) and the identities vasicekBondB κ τ / τ = nssSlope (κτ) and V(T)/T = (1 − 2s(κT) + s(2κT))/κ². SCOPE: the bond price is the expectation under the probability measure carrying the Brownian motion (read as the pricing measure; no change of measure); the integrated short rate is carried in its Wiener representation, as in mf-vasicek-bond-price."
@@ -637,6 +885,15 @@
       },
       "metadata": {
         "reference": "O. Vasicek, An Equilibrium Characterization of the Term Structure, Journal of Financial Economics 5 (1977), 177–188; D. Brigo and F. Mercurio, Interest Rate Models — Theory and Practice (2nd ed., Springer, 2006), §3.2.1",
+        "citations": [
+          {
+            "key": "Vasicek1977"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "§3.2.1"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.tendsto_vasicekYield_nhdsGT_zero and MathFin.tendsto_vasicekYield_atTop (MathFin/FixedIncome/VasicekYieldNelsonSiegel.lean), combining MathFin.vasicekYield_eq_nssSlope with the slope-factor limits tendsto_nssSlope_nhdsNE_zero and tendsto_nssSlope_atTop (MathFin/FixedIncome/NelsonSiegelSvensson.lean). SCOPE: same measure and Wiener-representation conventions as mf-vasicek-bond-price; maturities range over ℝ≥0 and the short end is the limit through T > 0."
@@ -652,6 +909,15 @@
       },
       "metadata": {
         "reference": "R. Rebonato, Modern Pricing of Interest-Rate Derivatives: The LIBOR Market Model and Beyond (Princeton University Press, 2002), the abcd instantaneous-volatility parametrization; D. Brigo and F. Mercurio, Interest Rate Models — Theory and Practice (2nd ed., Springer, 2006), ch. 6",
+        "citations": [
+          {
+            "key": "Rebonato2002"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "ch. 6"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.abcdWienerIntegral_hasLaw (MathFin/Bridges/ABCDBlack76.lean): MathFin.WienerIntegralL2.wienerIntegralLp_hasLaw_gaussian (MathFin/Foundations/WienerIntegralGaussian.lean) applied to the L² class of u ↦ abcdVol a b c d (T − u), with ∫_{(0,T]} f(T − u)² du = v(T) by the substitution τ = T − u and MathFin.abcdVol_sq_integral_zero (MathFin/FixedIncome/ABCDVolatility.lean). SCOPE: c ≠ 0 (the closed form divides by c)."
@@ -667,6 +933,14 @@
       },
       "metadata": {
         "reference": "F. Black, The Pricing of Commodity Contracts, Journal of Financial Economics 3 (1976), 167–179; R. Rebonato, Modern Pricing of Interest-Rate Derivatives: The LIBOR Market Model and Beyond (Princeton University Press, 2002), caplet volatility as the root-mean-square of the instantaneous volatility",
+        "citations": [
+          {
+            "key": "Black1976"
+          },
+          {
+            "key": "Rebonato2002"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.abcdForward_call_eq_black76 (MathFin/Bridges/ABCDBlack76.lean): the ABCD Wiener integral is N(0, v(T)) (abcdWienerIntegral_hasLaw), its standardisation is the standard normal of BSCallHyp at σ̄ = √(v(T)/T), and MathFin.black_futures_formula (MathFin/Futures/Black76.lean) prices the call. SCOPE: the forward is taken in solved form (its SDE is cited, not proved); the expectation is under the probability measure carrying the Brownian motion, read as the forward measure, with no change of measure built; discounting is the e^{−rT} factor of black_futures_formula; a caplet's accrual δ and payment-date discount factor P(0, T + δ) are not modelled."
@@ -682,6 +956,11 @@
       },
       "metadata": {
         "reference": "D. Duffie and R. Kan, A Yield-Factor Model of Interest Rates, Mathematical Finance 6(4) (1996), 379–406",
+        "citations": [
+          {
+            "key": "DuffieKan1996"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.affineBondPrice_solves_pde (MathFin/FixedIncome/AffineTermStructurePDE.lean). SCOPE: the implication from the Riccati equations at τ to the pricing PDE at (τ, r), by differentiating the exponential-affine form; the Feynman–Kac identification of u with E[exp(−∫r)] is not proved here, and the entry takes the loadings' derivatives as hypotheses."
@@ -697,6 +976,15 @@
       },
       "metadata": {
         "reference": "J. C. Cox, J. E. Ingersoll and S. A. Ross, A Theory of the Term Structure of Interest Rates, Econometrica 53(2) (1985), 385–407; D. Brigo and F. Mercurio, Interest Rate Models — Theory and Practice (2nd ed., Springer, 2006), §3.2.3",
+        "citations": [
+          {
+            "key": "CoxIngersollRoss1985"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "§3.2.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.cirBondPrice_solves_pde (MathFin/FixedIncome/AffineTermStructurePDE.lean): MathFin.affineBondPrice_solves_pde at (α, β) = (0, σ²), fed by MathFin.hasDerivAt_cirBondA and MathFin.hasDerivAt_cirBondB (MathFin/FixedIncome/CIRRiccati.lean). SCOPE: the closed form solves the PDE; the CIR process and the identification of the closed form with E[exp(−∫r)] are not formalized; σ ≠ 0 because A divides by σ²."
@@ -712,6 +1000,14 @@
       },
       "metadata": {
         "reference": "O. Vasicek, An Equilibrium Characterization of the Term Structure, Journal of Financial Economics 5 (1977), 177–188; D. Duffie and R. Kan, A Yield-Factor Model of Interest Rates, Mathematical Finance 6(4) (1996), 379–406",
+        "citations": [
+          {
+            "key": "Vasicek1977"
+          },
+          {
+            "key": "DuffieKan1996"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.vasicekBondPrice_affine (MathFin/FixedIncome/VasicekBondPrice.lean) and MathFin.vasicekBondPrice_solves_pde (MathFin/FixedIncome/AffineTermStructurePDE.lean), the latter being MathFin.affineBondPrice_solves_pde at (α, β) = (σ², 0) with hasDerivAt_vasicekBondB (B' = 1 − κB), hasDerivAt_vasicekBondV (V' = B²) and hasDerivAt_log_vasicekBondA. SCOPE: the expectation is under the probability measure carrying the Brownian motion, with the integrated rate in its Wiener representation (as in mf-vasicek-bond-price); the PDE is verified for the closed form, which the first conjunct identifies with the expectation at (T, r₀). The PDE is not derived from the process by Itô's formula."
@@ -727,6 +1023,11 @@
       },
       "metadata": {
         "reference": "P. S. Hagan, Convexity Conundrums: Pricing CMS Swaps, Caps, and Floors, Wilmott Magazine (March 2003), 38–44",
+        "citations": [
+          {
+            "key": "Hagan2003"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.CMS.parSwapRate_update_eq and MathFin.CMS.cmsCurveRate_convexOn (MathFin/FixedIncome/CMS.lean). SCOPE: convexity of the par rate in one discount factor with the others fixed, on [0, ∞); the CMS convexity adjustment E^{T_p}[S_T] − S_0, which needs the change of measure to the payment-date forward measure and a curve model, is not formalized."
@@ -742,6 +1043,14 @@
       },
       "metadata": {
         "reference": "P. Carr and D. Madan, Towards a Theory of Volatility Trading, in R. Jarrow (ed.), Volatility (Risk Books, 1998), 417–427; P. S. Hagan, Convexity Conundrums: Pricing CMS Swaps, Caps, and Floors, Wilmott Magazine (March 2003), 38–44",
+        "citations": [
+          {
+            "key": "CarrMadan1998"
+          },
+          {
+            "key": "Hagan2003"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.CMS.cmsCurveRate_spanning (MathFin/FixedIncome/CMS.lean), an instance of MathFin.carrMadan_spanning (MathFin/Foundations/CarrMadan.lean). SCOPE: the spanning identity on a compact strike range [L, U] with L > −C, in the discount factor rather than the swap rate; the unbounded-strike limit and the CMS convexity adjustment are not formalized."
@@ -757,6 +1066,15 @@
       },
       "metadata": {
         "reference": "G. A. Pavliotis, Stochastic Processes and Applications (Springer, 2014), ch. 4 (the Ornstein–Uhlenbeck process: Hermite polynomials as eigenfunctions of its generator); O. Vasicek, An Equilibrium Characterization of the Term Structure, Journal of Financial Economics 5 (1977), 177–188",
+        "citations": [
+          {
+            "key": "Pavliotis2014",
+            "locator": "ch. 4"
+          },
+          {
+            "key": "Vasicek1977"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "reduced_core",
         "formalization_scope": "Reduced core. Re-export of MathFin.integral_scaledHermite_vasicekShortRate (MathFin/Bridges/OUHermiteVasicek.lean), computed from MathFin.vasicekShortRate_hasLaw_gaussian (MathFin/FixedIncome/VasicekSDEGaussian.lean) and the Gaussian moments of MathFin/Foundations/GaussianMoments.lean, with the modes of MathFin/Foundations/OUSpectral.lean. SCOPE: n ≤ 2 only (the general mode needs Gaussian integration by parts or the Hermite generating function); the identification of ouGen with the generator of the Vasicek process is not formalized; the short rate starts at a deterministic r₀ and is carried in its Wiener representation."
@@ -773,6 +1091,16 @@
       "metadata": {
         "chapter": 12,
         "reference": "S. E. Shreve, Stochastic Calculus for Finance II (Springer, 2004), Thm. 4.4.9 (Itô integral of a deterministic integrand is normal); D. Brigo & F. Mercurio, Interest Rate Models — Theory and Practice, 2nd ed. (Springer, 2006), §3.2.1 and §3.3 (Gaussian short-rate bond prices)",
+        "citations": [
+          {
+            "key": "ShreveSCFII",
+            "locator": "Thm. 4.4.9"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "§3.2.1 and §3.3"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.WienerIntegralL2.integral_exp_neg_add_mul_wienerIntegralLp (MathFin/Foundations/WienerIntegralExpMoment.lean). SCOPE: the exponential moment of m + c·W(f) for the Wiener integral W of a deterministic L² kernel, from its Gaussian law N(0, ∫f²) (wienerIntegralLp_map_eq_gaussianReal) and the Gaussian MGF. Hypotheses: IsPreBrownianReal B μ, μ a probability measure. It is the shared step of vasicekBondPrice_eq, HullWhite.bondPrice_eq and gsrBondPrice_eq; for those models the Wiener representation of the integrated short rate (SDE solution, time-order swap) is a cited modelling input, not proved."
@@ -789,6 +1117,16 @@
       "metadata": {
         "chapter": 12,
         "reference": "QuantLib, Gsr one-factor Gaussian short-rate model with piecewise-constant volatility; D. Brigo & F. Mercurio, Interest Rate Models — Theory and Practice, 2nd ed. (Springer, 2006), §3.3 (Gaussian short-rate bond prices)",
+        "citations": [
+          {
+            "key": "QuantLib",
+            "locator": "Gsr model"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "§3.3"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.gsrBondPrice_eq (MathFin/FixedIncome/GSRPiecewiseVol.lean). SCOPE: two volatility pieces with one breakpoint, constant κ and θ; the general finitely-many-pieces GSR is not formalized. The integrated rate is defined by its Wiener representation (gsrIntegratedRate); that it integrates the GSR SDE solution is cited, not proved. The same module proves that with σ₁ = σ₂ = σ the GSR integrated rate is a.s. the Vasicek integrated rate (gsrIntegratedRate_self_ae) and gsrBondV = σ²·vasicekBondV (gsrBondV_self)."
@@ -805,6 +1143,15 @@
       "metadata": {
         "chapter": 12,
         "reference": "J. Hull & A. White, Pricing interest-rate-derivative securities, Rev. Financial Studies 3 (1990) 573–592; D. Brigo & F. Mercurio, Interest Rate Models — Theory and Practice, 2nd ed. (Springer, 2006), §3.3 (fitting the initial term structure)",
+        "citations": [
+          {
+            "key": "HullWhite1990"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "§3.3"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.HullWhite.reprices_curve (MathFin/FixedIncome/HullWhiteCalibration.lean). SCOPE: time-0 bond prices only (P(t,T) for t > 0 is mf-hullwhite-bond-price-at-t, which this entry does not use); f0 ∈ C¹, κ > 0, r₀ = f(0,0). The short rate and its integral are Wiener representations (integratedRate, bondRate); that they solve the HW SDE and the time-order swap are cited, not proved. The bond price is the Wiener bond-price lemma (integral_exp_neg_add_mul_wienerIntegralLp); the θ-formula is shown sufficient for repricing, not unique."
@@ -821,6 +1168,15 @@
       "metadata": {
         "chapter": 12,
         "reference": "O. Vasicek, An equilibrium characterization of the term structure, J. Financial Economics 5 (1977) 177–188 (constant market price of risk); S. E. Shreve, Stochastic Calculus for Finance II (Springer, 2004), Thm. 5.2.3 (Girsanov, one dimension)",
+        "citations": [
+          {
+            "key": "Vasicek1977"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "Thm. 5.2.3"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.vasicekShortRate_hasLaw_girsanov (MathFin/FixedIncome/VasicekMarketPriceOfRisk.lean), from the Cameron–Martin shift MathFin.WienerIntegralL2.wienerIntegralLp_hasLaw_girsanov (MathFin/Foundations/WienerIntegralGirsanov.lean). SCOPE: constant λ; terminal law only. The short rate is its Wiener representation; that it solves the Vasicek SDE is cited, not proved. Hypothesis: IsPreBrownianReal B μ (no filtration needed for the law)."
@@ -837,6 +1193,15 @@
       "metadata": {
         "chapter": 12,
         "reference": "O. Vasicek, An equilibrium characterization of the term structure, J. Financial Economics 5 (1977) 177–188 (bond price with a constant market price of risk); D. Brigo & F. Mercurio, Interest Rate Models — Theory and Practice, 2nd ed. (Springer, 2006), §3.2.1",
+        "citations": [
+          {
+            "key": "Vasicek1977"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "§3.2.1"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.vasicekBondPrice_girsanov (MathFin/FixedIncome/VasicekMarketPriceOfRisk.lean); the closed form of the right side is vasicekBondPrice_eq. SCOPE: constant λ, time-0 bond price. The integrated rate is its Wiener representation (vasicekIntegratedRate); the SDE solution and the time-order swap are cited, not proved."
@@ -853,6 +1218,15 @@
       "metadata": {
         "chapter": 12,
         "reference": "H. Geman, N. El Karoui & J.-C. Rochet, Changes of numéraire, changes of probability measure and option pricing, J. Appl. Probab. 32 (1995) 443–458; D. Brigo & F. Mercurio, Interest Rate Models — Theory and Practice, 2nd ed. (Springer, 2006), §3.3 (Hull–White under the forward measure)",
+        "citations": [
+          {
+            "key": "GemanElKarouiRochet1995"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "§3.3"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.HullWhite.integral_shortRate_sub_forwardMeasure (MathFin/FixedIncome/TimingAdjustment.lean). SCOPE: the instantaneous short rate r_S; its S-forward law comes from the numéraire step futuresForwardBasis_of_integral_mul_exp_neg with the Wiener covariance identity integral_exp_mul_exp_neg_wienerIntegralLp. Term-rate futures and daily margining are not modelled; the futures/forward-rate readings of the two expectations are textbook identifications. The short rate and its integral are Wiener representations; the SDE solution and the time-order swap are cited, not proved."
@@ -869,6 +1243,15 @@
       "metadata": {
         "chapter": 12,
         "reference": "H. Geman, N. El Karoui & J.-C. Rochet, Changes of numéraire, changes of probability measure and option pricing, J. Appl. Probab. 32 (1995) 443–458 (E^T[r_T] = f(0,T)); D. Brigo & F. Mercurio, Interest Rate Models — Theory and Practice, 2nd ed. (Springer, 2006), §3.3",
+        "citations": [
+          {
+            "key": "GemanElKarouiRochet1995"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "§3.3"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.HullWhite.forwardMeasure_shortRate_mean_eq_forwardCurve (MathFin/FixedIncome/TimingAdjustment.lean). SCOPE: f0 ∈ C¹, κ > 0, r₀ = f(0,0), the calibrated θ of HullWhite.theta. The general identity E^T[r_T] = f(0,T) for an arbitrary short-rate model is not formalized; this is the Hull–White instance. The short rate and its integral are Wiener representations; the SDE solution and the time-order swap are cited, not proved."
@@ -885,6 +1268,16 @@
       "metadata": {
         "chapter": 12,
         "reference": "S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 8 (Hull–White bond reconstitution) and ch. 17 §17.4 (year-on-year inflation convexity); D. Brigo & F. Mercurio, Interest Rate Models — Theory and Practice, 2nd ed. (Springer, 2006), §3.3",
+        "citations": [
+          {
+            "key": "BagariaFIDP",
+            "locator": "ch. 8"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "§3.3"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.Inflation.Convexity.integral_exp_hwD_forwardMeasure (MathFin/FixedIncome/Inflation.lean). SCOPE: the normalisation E^{Q^S}[exp(D − b(r_S − f(0,S)))] = 1 with D = hwD b Var(r_S), under the calibrated Hull–White S-forward measure (MathFin.forwardMeasure at the bank account exp(∫₀ˢ r)). The reconstitution formula for P(S,T), and the two-curve Jarrow–Yildirim dynamics behind the YoY convexity, are not derived. The short rate is its Wiener representation; the SDE solution and the time-order swap are cited, not proved."
@@ -901,6 +1294,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "Key-rate duration (Ho, 'Key Rate Durations: Measures of Interest Rate Risks', J. Fixed Income 2(2), 1992)",
+        "citations": [
+          {
+            "key": "Ho1992"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc, via sum_keyRate_partials_eq_deriv_bondPriceDisc (MathFin/FixedIncome/KeyRateDuration.lean). Each partial exists by hasDerivAt_bondPriceKeyRate_update (from hasDerivAt_coupon_term); for any such witnesses their sum is the derivative along the parallel shift k + ε·1 (hasDerivAt_bondPriceKeyRate_parallel, which holds on any curve), and on a flat curve that shift is a move of the yield, whose derivative is hasDerivAt_bondPriceDisc — uniqueness of derivatives identifies the two sums. SCOPE: one key rate per cashflow, annual compounding, integer tenors; interpolated key-rate nodes (hat-function bases) are not modelled."
@@ -917,6 +1315,14 @@
       "metadata": {
         "chapter": 14,
         "reference": "Clean and dirty bond prices, accrued interest (Fabozzi, Bond Markets, Analysis and Strategies; Hull, Options, Futures, and Other Derivatives)",
+        "citations": [
+          {
+            "key": "FabozziBMAS"
+          },
+          {
+            "key": "Hull"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.tendsto_cleanPrice_coupon_date (MathFin/FixedIncome/CleanPriceAccrued.lean): the limit of the dirty price (tendsto_dirtyPrice_coupon_date, continuity of f ↦ (1+y)^f) minus the limit of the accrued interest. SCOPE: street-convention dirty price with flat yield, integer periods, accrued interest linear in the period fraction; day-count conventions are not modelled."
@@ -933,6 +1339,14 @@
       "metadata": {
         "chapter": 14,
         "reference": "Clean and dirty bond prices, accrued interest (Fabozzi, Bond Markets, Analysis and Strategies; Hull, Options, Futures, and Other Derivatives)",
+        "citations": [
+          {
+            "key": "FabozziBMAS"
+          },
+          {
+            "key": "Hull"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.tendsto_dirtyPrice_coupon_date (MathFin/FixedIncome/CleanPriceAccrued.lean): continuity of f ↦ (1+y)^f (Real.continuousAt_const_rpow) and the end-of-period value dirtyPrice_one_eq, which splits the coupon off a sum of bondPriceDisc terms. SCOPE: street-convention dirty price with flat yield and integer periods."
@@ -949,6 +1363,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "Forward on a coupon-bearing asset (Hull, Options, Futures, and Other Derivatives, forward price of an asset providing known income)",
+        "citations": [
+          {
+            "key": "Hull"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.bondForwardPrice_from_no_arbitrage (MathFin/FixedIncome/BondForward.lean), which is forward_price_from_no_arbitrage (MathFin/Foundations/NoArbitrageDerivations.lean) applied with the coupon-stripped bond P₀ − Σ Df·CF as the spot. SCOPE: finite state space; the coupon dates in s are the caller's (the range (0, t_fe] is not enforced)."
@@ -965,6 +1384,11 @@
       "metadata": {
         "chapter": 14,
         "reference": "Level-payment (mortgage) amortization (Fabozzi, Bond Markets, Analysis and Strategies, fixed-rate level-payment mortgages)",
+        "citations": [
+          {
+            "key": "FabozziBMAS"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.levelPaymentBalance_eq_annuityValue (MathFin/FixedIncome/LoanAmortization.lean): induction on n, unfolding levelPaymentBalance directly against the one-period annuity identity annuityValue_succ_mul_exp_sub, A_{m+1}·e^{rΔt} − A = A_m, for annuityValue (MathFin/FixedIncome/CouponBonds.lean). SCOPE: constant rate, continuously-compounded discounting matched to the period rate."
@@ -981,6 +1405,15 @@
       "metadata": {
         "chapter": 12,
         "reference": "Vasicek 1977 short-rate model; Brigo and Mercurio, Interest Rate Models, 2nd ed., section 3.2.1 (the bond price P(t,T) = A(t,T) exp(-B(t,T) r(t)))",
+        "citations": [
+          {
+            "key": "Vasicek1977"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "section 3.2.1"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. vasicekBondPrice_condExp in MathFin/FixedIncome/VasicekBondPriceAt.lean, from the conditional Laplace transform of the Wiener integral (condExp_exp_wienerIntegralLp, mf-wiener-conditional-laplace) at the integrated kernel g_T: restricted to (0,t] it is g_t + B(T-t) e^{-kappa(t-.)} (kernelRestrict_vasicekIntegratedKernelLp), so the past part of the discount depends on the past only through the Wiener integral of e^{-kappa(t-.)}, which is (r_t - mean)/sigma; the independent remainder has the exponential moments of a centred Gaussian of variance int_t^T g_T^2 = V(T-t) (integral_sq_vasicekIntegratedKernelLp_Ioc), and the mean shift is the identity M(t) - M(T) = -theta (tau - B(tau)) - B(tau) m_t (vasicekIntegratedMean_sub). SCOPE: the integrated rate and the short rate are carried in their Wiener representations (as in mf-vasicek-bond-price; that they solve the SDE and the time-order swap are cited, not proved); the measure is read as the pricing measure; the filtration is the natural one of B. Vasicek only (constant theta) here: the Hull-White bond price at t > 0 is mf-hullwhite-bond-price-at-t (the two share condExp_exp_neg_integratedRate); the two-piece GSR is mf-gsr-bond-price-at-t. Axioms-clean."
@@ -997,6 +1430,15 @@
       "metadata": {
         "chapter": 12,
         "reference": "Hull and White, Pricing interest-rate-derivative securities, Rev. Financial Studies 3 (1990); Brigo and Mercurio, Interest Rate Models, 2nd ed., section 3.3.1 (the bond price P(t,T))",
+        "citations": [
+          {
+            "key": "HullWhite1990"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "section 3.3.1"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. HullWhite.bondRate_condExp in MathFin/FixedIncome/HullWhiteBondPriceAt.lean, from condExp_exp_neg_integratedRate (MathFin/FixedIncome/VasicekBondPriceAt.lean, the lift of the proof of vasicekBondPrice_condExp to the mean identity M(t) - M(T) = -c - B(T-t) m between the deterministic parts), itself the instance at the kernel sigma*g_T of condExp_exp_neg_wienerIntegralLp, the conditional Laplace transform of the Wiener integral (condExp_exp_wienerIntegralLp, mf-wiener-conditional-laplace) for a kernel that splits as f' + b*h on (0,t]. The Hull-White mean identity is HullWhite.integratedMean_sub: int_0^T alpha - int_0^t alpha = B(T-t) alpha(t) + int_t^T theta(s) B(T-s) ds, from the splitting B(T-s) = B(t-s) + e^{-kappa(t-s)} B(T-t). SCOPE: continuous forcing theta (needed for the integrated mean in B-form); the integrated rate and the short rate are carried in their Wiener representations (that they solve the SDE and the time-order swap are cited, not proved); the measure is read as the pricing measure; the filtration is the natural one of B. The two-piece GSR is mf-gsr-bond-price-at-t. Axioms-clean."
@@ -1013,6 +1455,19 @@
       "metadata": {
         "chapter": 12,
         "reference": "Hull and White, Pricing interest-rate-derivative securities, Rev. Financial Studies 3 (1990); Brigo and Mercurio, Interest Rate Models, 2nd ed., section 3.3.1 (the bond price P(t,T)); the GSR parametrisation with piecewise-constant volatility as in QuantLib's Gsr model",
+        "citations": [
+          {
+            "key": "HullWhite1990"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "section 3.3.1"
+          },
+          {
+            "key": "QuantLib",
+            "locator": "Gsr model"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. gsrBondPrice_condExp in MathFin/FixedIncome/GSRBondPriceAt.lean, the instance of condExp_exp_neg_wienerIntegralLp (MathFin/FixedIncome/VasicekBondPriceAt.lean; the conditional Laplace transform of the Wiener integral, mf-wiener-conditional-laplace, for a kernel that splits as f' + b*h on (0,t]) at the GSR kernel sigma(u) g_T(u). Its three inputs: the kernel seen from t, sigma g_T = sigma g_t + B(T-t) sigma e^{-kappa(t-.)} on (0,t] (kernelRestrict_gsrKernelLp); the variance of the remainder int_t^T (sigma g_T)^2 = gsrBondVIoc (integral_sq_gsrKernelLp_Ioc, gsrKernel_integral_sq_Ioc_eq, splitting the window at max t Tstar); and the mean identity of the Vasicek model (vasicekIntegratedMean_sub), unchanged because only the volatility is piecewise. SCOPE: two volatility pieces with a breakpoint Tstar <= T, constant mean reversion kappa > 0 and constant level theta (the time-varying-level generalization is not combined with the piecewise volatility); the integrated rate and the short rate are carried in their Wiener representations (that they solve the SDE and the time-order swap are cited, not proved); the measure is read as the pricing measure; the filtration is the natural one of B. Axioms-clean."

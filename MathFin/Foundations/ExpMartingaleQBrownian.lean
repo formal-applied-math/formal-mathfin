@@ -41,18 +41,29 @@ predictable-`θ` Girsanov drift-corrected processes each need only supply their 
 exponential martingale (via the Bayes change-of-measure engine) and then instantiate this
 one theorem.
 
-## Main definitions and results
+## Main definitions
 
-* `MathFin.IsExpQMartingale` — the hypothesis bundle (adapted, zero-start, exp-martingale).
+* `IsExpQMartingale`: the characterization data on a process `Y` under `Q`: adapted, starting at
+  `0` almost surely, and for every `a : ℝ` the set-integral martingale identity for
+  `exp(a·Y_t − ½a²t)` on `[0, T]` (integrability is not a field).
+* `IsBrownianOn`: under `Q`, `Y` starts at `0` almost surely, has `N(0, t − s)` increments and
+  independent increments (`HasIndepIncrements`) on `[0, T]`; these fix the finite-dimensional
+  laws of a Brownian motion, but path continuity is not part of it.
+
+## Main results
+
 * `MathFin.map_eq_gaussianReal_of_expMartingale` — the marginal law `Q.map Y_t = N(0,t)`.
 * `MathFin.increment_map_eq_gaussianReal_of_expMartingale` — the increment law `N(0,t−s)`.
 * `MathFin.increments_iIndepFun_of_expMartingale` — successive increments are jointly
   `Q`-independent.
 * `MathFin.hasIndepIncrements_of_expMartingale` — `Y` has independent increments on `[0,T]`.
-* `MathFin.IsBrownianOn` — the three properties packaged: the finite-dimensional laws of a
-  Brownian motion on `[0,T]`.
 * `MathFin.isQBrownianMotion_of_expMartingale` — `IsExpQMartingale Q 𝓕 Y T → IsBrownianOn Q T Y`.
 * `MathFin.IsBrownianOn.congr_modification` — invariance under a modification.
+
+## Tags
+
+Girsanov theorem, Lévy characterization, exponential martingale, Brownian increments,
+moment generating function, Q-Brownian motion, MSC 60J65, MSC 60G44
 -/
 
 @[expose] public section
@@ -93,7 +104,7 @@ variable {Q : Measure Ω} [IsProbabilityMeasure Q] {𝓕 : Filtration ℝ≥0 m�
 moment-generating function `a ↦ exp(v·a²/2)` of `N(0,v)` under `Q`, its law is `N(0,v)`:
 `N(0,v)` has every exponential moment, so its moment-generating function determines it
 (`measure_eq_of_mgf_id_eq`). -/
-private theorem map_eq_gaussianReal_of_mgf {X : Ω → ℝ} (hX : AEMeasurable X Q) {v : ℝ≥0}
+theorem map_eq_gaussianReal_of_mgf {X : Ω → ℝ} (hX : AEMeasurable X Q) {v : ℝ≥0}
     (hmgf : ∀ a, mgf X Q a = Real.exp (v * a ^ 2 / 2)) : Q.map X = gaussianReal 0 v := by
   refine Eq.symm (measure_eq_of_mgf_id_eq integrable_exp_mul_gaussianReal ?_)
   rw [mgf_id_gaussianReal, mgf_id_map hX]
@@ -144,7 +155,7 @@ private theorem integrable_expY (h : IsExpQMartingale Q 𝓕 Y T) (a : ℝ) {u :
 omit [IsProbabilityMeasure Q] in
 /-- **Cauchy–Schwarz for exponentials.** If `exp(2f)` and `exp(2g)` are `Q`-integrable, so is
 `exp(f)·exp(g)`: `exp f` and `exp g` are then in `L²(Q)`. -/
-private theorem integrable_exp_mul_exp {f g : Ω → ℝ} (hf : Measurable f) (hg : Measurable g)
+theorem integrable_exp_mul_exp {f g : Ω → ℝ} (hf : Measurable f) (hg : Measurable g)
     (hf2 : Integrable (fun ω ↦ Real.exp (2 * f ω)) Q)
     (hg2 : Integrable (fun ω ↦ Real.exp (2 * g ω)) Q) :
     Integrable (fun ω ↦ Real.exp (f ω) * Real.exp (g ω)) Q := by
@@ -180,9 +191,10 @@ private theorem condExp_expY (h : IsExpQMartingale Q 𝓕 Y T) (a : ℝ) {s t : 
     hsm.aestronglyMeasurable).symm
   exact (h.martingale a hst htT hA).symm
 
-/-- **Conditional `Q`-MGF of the increment.** `𝔼_Q[exp(a·(Y_t − Y_s))|𝓕_s] = exp(½a²(t−s))` a.e.,
-deterministic. Pull the `𝓕_s`-measurable factor `exp(½a²t − a·Y_s)` out of `condExp_expY`. -/
-private theorem condExp_Y_increment (h : IsExpQMartingale Q 𝓕 Y T) (a : ℝ) {s t : ℝ≥0}
+/-- **Conditional moment-generating function of an increment.**
+`𝔼_Q[exp(a·(Y_t − Y_s)) | 𝓕_s] = exp(½a²(t−s))` a.e., deterministic: pull the `𝓕_s`-measurable
+factor `exp(½a²t − a·Y_s)` out of `condExp_expY`. -/
+theorem IsExpQMartingale.condExp_exp_increment (h : IsExpQMartingale Q 𝓕 Y T) (a : ℝ) {s t : ℝ≥0}
     (hst : s ≤ t) (htT : t ≤ T) :
     Q[fun ω ↦ Real.exp (a * (Y t ω - Y s ω)) | 𝓕 s]
       =ᵐ[Q] fun _ ↦ Real.exp (a ^ 2 * ((t : ℝ) - (s : ℝ)) / 2) := by
@@ -222,11 +234,11 @@ private theorem condExp_Y_increment (h : IsExpQMartingale Q 𝓕 Y T) (a : ℝ) 
   congr 1; ring
 
 /-- **Unconditional `Q`-MGF of the increment.** `𝔼_Q[exp(a·(Y_t − Y_s))] = exp(½a²(t−s))` — the
-tower property on the deterministic conditional MGF `condExp_Y_increment`. -/
+tower property on the deterministic conditional MGF `IsExpQMartingale.condExp_exp_increment`. -/
 private theorem Y_increment_mgf (h : IsExpQMartingale Q 𝓕 Y T) (a : ℝ) {s t : ℝ≥0} (hst : s ≤ t)
     (htT : t ≤ T) :
     ∫ ω, Real.exp (a * (Y t ω - Y s ω)) ∂Q = Real.exp (a ^ 2 * ((t : ℝ) - (s : ℝ)) / 2) := by
-  rw [← integral_condExp (𝓕.le s), integral_congr_ae (condExp_Y_increment h a hst htT),
+  rw [← integral_condExp (𝓕.le s), integral_congr_ae (h.condExp_exp_increment a hst htT),
     integral_const, show Q.real Set.univ = 1 from by simp, one_smul]
 
 /-- **Increment law.** `Q.map (Y_t − Y_s) = N(0, t−s)`: the unconditional increment MGF
@@ -259,8 +271,8 @@ reals `a`, `exp(∑_{k<n} a_k·(Y_{t_{k+1}} − Y_{t_k}))` is `Q`-integrable, wi
 `∏_{k<n} exp(½a_k²(t_{k+1} − t_k))`. Induction on `n`: the first `n` increments are
 `𝓕_{t_n}`-measurable, so they factor out of the conditional expectation given `𝓕_{t_n}`, and the
 conditional MGF of the last one is the deterministic `exp(½a_n²(t_{n+1} − t_n))`
-(`condExp_Y_increment`). Integrability comes along the induction, by Cauchy–Schwarz
-(`integrable_exp_mul_exp`). -/
+(`IsExpQMartingale.condExp_exp_increment`). Integrability comes along the induction, by
+Cauchy–Schwarz (`integrable_exp_mul_exp`). -/
 private theorem Y_increments_mgf_range (h : IsExpQMartingale Q 𝓕 Y T) {t : ℕ → ℝ≥0}
     (ht : Monotone t) (htT : ∀ k, t k ≤ T) (n : ℕ) (a : ℕ → ℝ) :
     Integrable (fun ω ↦ Real.exp (∑ k ∈ Finset.range n, a k * (Y (t (k + 1)) ω - Y (t k) ω))) Q ∧
@@ -298,7 +310,7 @@ private theorem Y_increments_mgf_range (h : IsExpQMartingale Q 𝓕 Y T) {t : �
           refine integral_congr_ae ?_
           filter_upwards [condExp_mul_of_stronglyMeasurable_left
               (m := (𝓕 (t n) : MeasurableSpace Ω)) he1 h12 he2,
-            condExp_Y_increment h (a n) htn (htT (n + 1))] with ω hp hc
+            h.condExp_exp_increment (a n) htn (htT (n + 1))] with ω hp hc
           rw [hp, Pi.mul_apply]
           exact congrArg (e1 ω * ·) hc
       _ = (∫ ω, e1 ω ∂Q) * Real.exp (a n ^ 2 * ((t (n + 1) : ℝ) - (t n : ℝ)) / 2) :=

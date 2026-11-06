@@ -73,7 +73,7 @@ the drift primitive (`AdaptedDrift.driftPath` reused, with its adaptedness
 `stronglyMeasurable_driftPath`, from `Foundations/AdaptedDrift`), the drift
 block, the two quadratic corrections and the Taylor-remainder convergence.
 
-## Result
+## Main results
 
 All public names are in the namespace `MathFin.ItoDriftConditional`.
 
@@ -95,6 +95,11 @@ The supporting layers are the modules `ItoDriftIncrementEnergy`, `ItoDriftWeight
 `ItoDriftGapDecay`, `ItoStepSumFourthMoment`, `ItoDriftMomentBounds`, `ItoDriftBlock`,
 `ItoDriftQuadraticCorrections` and `ItoDriftTaylorRemainder`; this file is the assembly of
 `itoDrift_expectation_identity_adapted` from them.
+
+## Tags
+
+Itô formula in expectation, Itô process, random coefficients, discrete Itô formula, Dynkin formula,
+adapted drift, MSC 60H05, MSC 60H10, MSC 60J60
 -/
 
 @[expose] public section

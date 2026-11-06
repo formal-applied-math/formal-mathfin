@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-! # Call price functions
@@ -20,6 +21,25 @@ such a function is nonincreasing and tends to `1` at strike `0`
 Neither direction of the correspondence with random variables is proved here. Of the forward
 direction, the convexity holds for any law with a finite mean (`convexOn_integral_call`, in
 `StrikeConvexity.lean`).
+
+## Main definitions
+
+* `IsNormalizedCallPrice`: the single-maturity conditions on a function `C` of the strike, with
+  the forward normalised to one. `C` is convex and nonincreasing on `(0, ∞)`, satisfies
+  `max (1 − K) 0 ≤ C K ≤ 1`, tends to `1` at strike `0⁺` and to `0` at large strikes.
+
+## Main results
+
+* `ConvexOn.antitoneOn_Ioi_of_le`: a convex function on `Ioi a` that is bounded above is
+  nonincreasing.
+* `IsNormalizedCallPrice.of_convexOn`: convexity on `(0, ∞)`, the bounds `max (1 − K) 0 ≤ C K ≤ 1`
+  and the limit `0` at infinity give `IsNormalizedCallPrice C`; monotonicity and the limit `1`
+  at strike `0⁺` are derived.
+
+## Tags
+
+call price in strike, convexity in strike, Roper, arbitrage-free surface,
+implied volatility surface, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

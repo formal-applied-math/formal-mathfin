@@ -16,16 +16,17 @@ Market Protocol", v1.0, February 2019): §2.3 Interest Rate Model (utilization,
 affine borrow rate), §3.1 cToken Contracts (exchange rate) and §3.2.1 Market Dynamics
 (interest-rate index, reserve-factor accrual).
 
-## Results
+## Main definitions
 
-* `utilization`: `U = Borrows / (Cash + Borrows)`, matching the whitepaper's
-  §2.3 definition exactly. (The deployed `BaseJumpRateModelV2` contract nets
-  reserves out of the denominator, `Borrows / (Cash + Borrows − Reserves)`;
-  this file follows the whitepaper, not that later on-chain refinement.)
+* `utilization`: `borrows / (cash + borrows)`.
+* `borrowRate`: the affine rate `base + slope * U`.
+* `exchangeRate`: the cToken rate `(cash + borrows - reserves) / totalSupply`.
+
+## Main results
+
 * `utilization_mem_Icc`: for nonnegative cash and borrows, `U ∈ [0, 1]`.
 * `borrowRate`, `borrowRate_monotone`: the affine rate `r = base + slope · U`,
   monotone in `U` when `slope ≥ 0`.
-* `exchangeRate`: `(Cash + Borrows − Reserves) / TotalSupply`.
 * `exchangeRate_mono`: over one accrual period, with cash and a positive total
   supply unchanged, the exchange rate does not decrease, **under the explicit
   hypothesis that the reserve-factor cut does not exceed the accrued
@@ -39,6 +40,16 @@ affine borrow rate), §3.1 cToken Contracts (exchange rate) and §3.2.1 Market D
   at a constant rate it is `Index_0 · (1 + r t)^n`, never above continuous compounding
   `Index_0 / zcb r 0 (n t)`, and accruing a horizon `T` in `n` equal periods converges to
   `Index_0 / zcb r 0 T`. Rates that change between periods are not covered.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], §4.2
+* [R. Leshner and G. Hayes, *Compound: The Money Market Protocol*][LeshnerHayes2019], §3.2.1
+
+## Tags
+
+Compound protocol, money market, utilization rate, cToken, exchange rate, borrow index, lending,
+MSC 91G80, JEL G23
 -/
 
 @[expose] public section

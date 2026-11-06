@@ -17,7 +17,28 @@ L²-continuous. The conditional martingale-difference `condExp_adapted_mul_incre
 `μ[φ·ΔB | 𝓕_{t₀}] = 0` as a reusable lemma; the martingale property itself is
 established directly, applying that same set-integral characterisation per
 `𝓕_s`-set. Pathwise continuity and general (non-simple) integrands are later
-milestones. -/
+milestones.
+
+## Main results
+
+* `itoSimpleProcess_adaptedAt`: `(V●B)_t` is `𝓕_t`-measurable.
+* `condExp_adapted_mul_increment`: for a bounded `φ` adapted at `t₀ ≤ t₁`, the conditional
+  expectation of `φ · (B_{t₁} − B_{t₀})` given `𝓕_{t₀}` vanishes.
+* `itoSimpleProcess_isMartingale`: `t ↦ (V●B)_t` is a martingale, `μ[(V●B)_j | 𝓕_i] = (V●B)_i`
+  for `i ≤ j`.
+* `itoSimpleProcess_isometry_time`: `E[(V●B)_t²]` is the predictable-rectangle double sum with
+  every interval endpoint truncated at `t`.
+* `itoSimpleProcessLp_l2_continuous`: `t ↦ (V●B)_t` is continuous into `Lp ℝ 2 μ`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Ch 7
+
+## Tags
+
+Itô integral martingale, martingale difference, simple integrand, stochastic integral,
+L² continuity, MSC 60G44, MSC 60H05
+-/
 
 @[expose] public section
 

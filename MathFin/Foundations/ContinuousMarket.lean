@@ -20,11 +20,11 @@ pricing (FTAP), parametric over a finite-dimensional real inner-product-space-va
 discounted price process `S : ℝ≥0 → Ω → F`. The Black–Scholes model (`ContinuousFTAP.lean`)
 instantiates it at `F = ℝ`; a multi-asset model would instantiate at `F = Fin n → ℝ`.
 
-* `IsEMM 𝓕 P S T Q` — `Q` is an equivalent martingale measure for `S` up to the horizon `T`:
-  `Q ≈ P` (mutual absolute continuity) and `S` is a `Q`-martingale w.r.t. the filtration `𝓕` on
-  `{t ≤ T}`, i.e. the process stopped at `T` is a `Q`-martingale. This is the discrete
-  `MathFin.IsEMM` (`FTAP.lean`) with `ℝ≥0` for `ℕ`, and `IsEMM.sampled` restricts it to one; it
-  is what an equivalent measure obtained by a density change on `𝓕_T` can be: the Girsanov/Esscher
+* `IsEMM 𝓕 P S T Q` (`EquivMartingaleMeasure.lean`, one notion for every time index) at time
+  `ℝ≥0`: `Q ≈ P` (mutual absolute continuity) and `S` is a `Q`-martingale w.r.t. the filtration
+  `𝓕` on `{t ≤ T}`, i.e. the process stopped at `T` is a `Q`-martingale. `IsEMM.sampled` takes it
+  to time `ℕ` along a schedule. It is what an equivalent measure obtained by a density change on
+  `𝓕_T` can be: the Girsanov/Esscher
   measure makes the discounted Black–Scholes price a martingale on `[0, T]` and no further
   (`bs_discounted_isEMM`). A martingale on all of `ℝ≥0` is an EMM at every horizon.
 * `SimpleStrategy 𝓕 F` — a piecewise-constant, predictable, bounded trading strategy:
@@ -72,6 +72,42 @@ so a completeness statement over `SimpleStrategy` would have no witnesses. `Simp
 remains the right class *here*, where the whole point is that the forward no-arbitrage
 conclusion needs no stochastic integration at all — a finite sum of predictable increments. The
 two classes coexist; neither file changes the other, and `IsEMM` is shared.
+
+## Main definitions
+
+* `SimpleStrategy`: finitely many trading dates `time 0 ≤ ⋯ ≤ time N` with bounded holdings
+  `hold i` over `(time i, time i+1]`, each strongly measurable for `𝓕 (time i)`.
+* `SimpleStrategy.gains`: the terminal gains `∑ᵢ ⟪hold i, S (time (i+1)) − S (time i)⟫` of a
+  simple strategy against a price process `S`.
+* `NoArbitrageSimple`: no simple strategy trading up to `T` has `P`-a.s. nonnegative gains that
+  are positive on a `P`-non-null set.
+* `sampledFiltration`: the `ℕ`-filtration `n ↦ 𝓕 (t n)` obtained by sampling a filtration along a
+  monotone schedule `t`.
+* `SimpleStrategy.schedule`, `SimpleStrategy.toDiscrete`: a strategy's trading dates as a
+  schedule, and the strategy read as a discrete holding process.
+
+## Main results
+
+* `martingale_stopped_of_setIntegral_eq`: a process adapted and `Q`-integrable on `{t ≤ T}` that
+  satisfies the set-integral martingale identity there is a martingale once stopped at `T`.
+* `martingale_comp_monotone`: a `Q`-martingale sampled along a monotone schedule is a discrete
+  `Q`-martingale for the sampled filtration.
+* `SimpleStrategy.gains_eq_martingaleTransform`: the gains of a simple strategy are the discrete
+  martingale transform of the sampled price by `toDiscrete`.
+* `IsEMM.sampled`: a continuous-time `IsEMM`, sampled along a monotone schedule, is a
+  discrete-time `IsEMM`.
+* `isEMM_noArbitrageSimple`: if `IsEMM 𝓕 P S T Q` holds, there is no simple-strategy arbitrage
+  up to `T` (the forward direction only).
+
+## References
+
+* [Delbaen and Schachermayer][DelbaenSchachermayer]
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], Ch 5
+
+## Tags
+
+equivalent martingale measure, no arbitrage, simple strategy, fundamental theorem of asset pricing,
+self-financing, JEL G13, MSC 91G20, MSC 60G44
 -/
 
 @[expose] public section
@@ -84,15 +120,6 @@ open scoped NNReal InnerProductSpace
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
   {𝓕 : Filtration ℝ≥0 mΩ}
   {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F] [FiniteDimensional ℝ F]
-
-/-- `Q` is an **equivalent martingale measure (EMM) up to the horizon `T`** for the discounted
-price process `S`: `Q` is a probability measure mutually absolutely continuous with `P`
-(`Q ≈ P`), and `S` is a `Q`-martingale w.r.t. the filtration `𝓕` on `{t ≤ T}` — stated as the
-process `t ↦ S (min t T)` stopped at the horizon being a `Q`-martingale. A `Q`-martingale on all
-of `ℝ≥0` is an EMM for every `T`. -/
-structure IsEMM (𝓕 : Filtration ℝ≥0 mΩ) (P : Measure Ω) (S : ℝ≥0 → Ω → F) (T : ℝ≥0)
-    (Q : Measure Ω) : Prop extends IsEquivProbMeasure P Q where
-  martingale : Martingale (fun t ↦ S (min t T)) 𝓕 Q
 
 /-- **The way an EMM's martingale is built.** A process that is `𝓕`-adapted and `Q`-integrable on
 `{t ≤ T}` and satisfies the set-integral martingale identity there is a martingale once stopped at
@@ -234,50 +261,21 @@ theorem gains_eq_martingaleTransform (S : ℝ≥0 → Ω → F) :
 
 end SimpleStrategy
 
-namespace IsEMM
-
-variable {S : ℝ≥0 → Ω → F} {T : ℝ≥0} {Q : Measure Ω}
-
-/-- **A martingale on all of `ℝ≥0` is an EMM at every horizon**, when its measure is an equivalent
-probability measure. -/
-theorem of_martingale [IsProbabilityMeasure Q] (hS : Martingale S 𝓕 Q) (hQP : Q ≪ P)
-    (hPQ : P ≪ Q) (T : ℝ≥0) : IsEMM 𝓕 P S T Q :=
-  ⟨⟨inferInstance, hQP, hPQ⟩, martingale_stopped_of_setIntegral_eq (fun t _ ↦ hS.1 t)
-    (fun t _ ↦ hS.integrable t) fun _ _ hst _ _ hA ↦ (hS.setIntegral_eq hst hA).symm⟩
-
-/-- Before the horizon the price is `𝓕`-adapted. -/
-theorem adapted (h : IsEMM 𝓕 P S T Q) {t : ℝ≥0} (ht : t ≤ T) :
-    StronglyMeasurable[𝓕 t] (S t) :=
-  have := h.isProb
-  (martingale_min_iff.mp h.martingale).1 t ht
-
-/-- Before the horizon the price is `Q`-integrable. -/
-theorem integrable (h : IsEMM 𝓕 P S T Q) {t : ℝ≥0} (ht : t ≤ T) : Integrable (S t) Q :=
-  have := h.isProb
-  (martingale_min_iff.mp h.martingale).2.1 t ht
-
-/-- **The martingale property before the horizon**: `Q[S t | 𝓕 s] = S s` for `s ≤ t ≤ T`. -/
-theorem condExp_eq (h : IsEMM 𝓕 P S T Q) {s t : ℝ≥0} (hst : s ≤ t)
-    (ht : t ≤ T) : Q[S t | 𝓕 s] =ᵐ[Q] S s :=
-  have := h.isProb
-  ((martingale_min_iff.mp h.martingale).2.2 hst ht).symm
-
+variable {S : ℝ≥0 → Ω → F} {T : ℝ≥0} {Q : Measure Ω} in
 /-- **A continuous-time EMM, sampled, is a discrete-time EMM.** If `Q` is an equivalent
 martingale measure up to `T` for the discounted price `S` in continuous time, then along
 any monotone schedule `t 0 ≤ t 1 ≤ ⋯` whose first `T' + 1` dates lie in `[0, T]` it is an
 equivalent martingale measure, at the discrete horizon `T'`, for the sampled price `n ↦ S (t n)`
 and the sampled filtration `n ↦ 𝓕 (t n)`. General Ω; the sampled martingale is built from the
 three consequences of `IsEMM` before the horizon (`martingale_min_iff`). -/
-theorem sampled (h : IsEMM 𝓕 P S T Q) {t : ℕ → ℝ≥0} (ht : Monotone t) (T' : ℕ)
-    (hT' : t T' ≤ T) :
+theorem _root_.MathFin.IsEMM.sampled (h : IsEMM 𝓕 P S T Q) {t : ℕ → ℝ≥0} (ht : Monotone t)
+    (T' : ℕ) (hT' : t T' ≤ T) :
     MathFin.IsEMM (sampledFiltration 𝓕 ht) P (fun n ↦ S (t n)) T' Q :=
   have := h.isProb
   ⟨h.toIsEquivProbMeasure, martingale_min_iff.mpr
     ⟨fun n hn ↦ h.adapted (t := t n) ((ht hn).trans hT'),
       fun n hn ↦ h.integrable (t := t n) ((ht hn).trans hT'),
       fun m n hmn hnT' ↦ (h.condExp_eq (s := t m) (t := t n) (ht hmn) ((ht hnT').trans hT')).symm⟩⟩
-
-end IsEMM
 
 /-- **Forward continuous first FTAP: an equivalent martingale measure precludes simple-strategy
 arbitrage.** If `Q` is an EMM for the discounted price `S` up to `T`, then no simple strategy

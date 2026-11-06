@@ -41,11 +41,19 @@ its first downstream use: deriving the per-increment expectation of the
 *log-price* (with drift), the building block for the realised-variance /
 QV-style derivation of the variance-swap fair strike.
 
-## Results
+## Main definitions
 
-* `bsLogPrice`: definition `log S_0 + (r − σ²/2)·t + σ · B_t`.
+* `bsLogPrice`: the Black–Scholes log-price process `X_t = log S₀ + (r − σ²/2)·t + σ·B_t`.
+
+## Main results
+
 * `expected_bsLogPrice_sq_increment`: the per-increment QV identity for
   BS log-price.
+
+## Tags
+
+variance swap, quadratic variation, log-price, Black–Scholes, fair strike, Demeterfi–Derman–Kamal,
+MSC 91G20, MSC 60J65, JEL G13
 -/
 
 @[expose] public section

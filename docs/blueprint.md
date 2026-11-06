@@ -529,16 +529,16 @@ has variance equal to the sum of its per-period variances.
 
 ### Continuous Itô integral as a CLM on `[0,T]` ✅
 The discrete Itô isometry (`assembly_isometry`) extended to a continuous linear
-isometry `itoIntegralCLM_T : Lp ℝ 2 (timeMeasure_T ⊗ μ).trim 𝓕.predictable →L[ℝ]
-Lp ℝ 2 μ` with `itoIntegralCLM_T_norm`. Density of T-bounded simple processes
-(`simpleAssembly_T_denseRange`) is proved by Dynkin's π-λ theorem on the basic
+isometry `itoIntegralCLM : Lp ℝ 2 (timeMeasureHorizon ⊗ μ).trim 𝓕.predictable →L[ℝ]
+Lp ℝ 2 μ` with `itoIntegralCLM_norm`. Density of T-bounded simple processes
+(`simpleAssemblyHorizon_denseRange`) is proved by Dynkin's π-λ theorem on the basic
 predictable rectangles (`isPiSystem_predictableRect`,
 `generateFrom_predictableRect`), reducing orthogonality to `∫_R g dμ = 0` for
 every basic rect `R = (a, b] × F` with `F ∈ ℱ_a`, then to all measurable sets
 via `setIntegral_eq_zero_of_orthogonal_pred`, and finally to `g = 0` via
 `Lp.ae_eq_zero_of_forall_setIntegral_eq_zero`. The CLM falls out of
 `LinearMap.extendOfNorm`. Its first genuine consumer is
-`itoIntegralCLM_T_brownian`: `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` *through the CLM* —
+`itoIntegralCLM_brownian`: `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` *through the CLM* —
 bridging the abstract integral to the concrete quadratic-variation limit, and
 itself the template (clamp-truncation + isometry-Cauchy completion) any
 unbounded-coefficient consumer would reuse.
@@ -583,7 +583,7 @@ partition-limit Itô formula now **exists** as Summit A (`ito_formula_L2_bddDeri
 the L² Itô formula for `C³` functions with *bounded* derivatives), but it does not
 directly reach GBM, whose exponential has *unbounded* derivatives. Bridging the
 engine to GBM needs an unbounded-coefficient lift — a second keystone in the shape
-of `itoIntegralCLM_T_brownian` (clamp-truncation + a martingale-difference L²
+of `itoIntegralCLM_brownian` (clamp-truncation + a martingale-difference L²
 limit `∑ σM_{t_k} ΔB → M_T − 1`), or Summit-C localization. This is **deliberately
 not built**: the operational result it would prove — *the discounted GBM is a
 `Q`-martingale* — is already established directly via the Wald exponential

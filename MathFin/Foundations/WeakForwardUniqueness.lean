@@ -5,6 +5,7 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -26,6 +27,27 @@ for constant coefficients. The proof pairs both flows against `cos(ξ·)` and `s
 pairing differences solve a linear system with zero initial value, which Grönwall's
 inequality forces to vanish, so the flows have equal characteristic functions
 (`MeasureTheory.Measure.ext_of_charFun`).
+
+## Main definitions
+
+* `IsWeakForwardFlow`: a flow of probability measures `ρ` solves, on `[0, T]`, the integrated
+  weak forward equation with coefficient functions `afn`, `bfn`, tested against `g` with
+  bounded first three derivatives, with interval-integrable generator integrand.
+
+## Main results
+
+* `weakForwardUniqueConst`: two flows solving `IsWeakForwardFlow` with the same constant
+  coefficients `b` and `v` and the same initial law coincide at every time `s ∈ (0, T]`.
+
+## References
+
+* [I. Karatzas and S. E. Shreve, *Brownian Motion and Stochastic Calculus*][KaratzasShreve1991]
+* [Stroock and Varadhan, *Multidimensional Diffusion Processes*][StroockVaradhan1979]
+
+## Tags
+
+Fokker–Planck equation, weak forward equation, uniqueness of flows, Gyöngy mimicking,
+characteristic function, Grönwall inequality, MSC 60J60, MSC 60E10, MSC 35K10
 -/
 
 @[expose] public section
@@ -70,7 +92,8 @@ private lemma IsWeakForwardFlow.const_identity {b v T : ℝ} {ρ : ℝ → Measu
     funext fun r => by rw [integral_mul_const, integral_mul_const]; ring
   simpa only [hw] using hρ.2 g g' g'' g''' C1 C2 C3 h1 h2 h3 hb1 hb2 hb3 s hs
 
-private lemma abs_half (v : ℝ) : |v / 2| = |v| / 2 := by rw [abs_div]; norm_num
+/-- `|v / 2| = |v| / 2`. -/
+lemma abs_div_two_eq (v : ℝ) : |v / 2| = |v| / 2 := by rw [abs_div]; norm_num
 
 /-! ### The pairing layer
 
@@ -80,8 +103,8 @@ pairing Lipschitz-continuous in time. -/
 
 /-- The pairing of a bounded function against a probability measure is
 bounded by the sup bound. -/
-private lemma abs_pairing_le {μ : Measure ℝ} (hμ : IsProbabilityMeasure μ) {g : ℝ → ℝ} {C : ℝ}
-    (hg : ∀ x, |g x| ≤ C) : |∫ y, g y ∂μ| ≤ C := by
+lemma abs_integral_le_of_forall_abs_le {μ : Measure ℝ} (hμ : IsProbabilityMeasure μ) {g : ℝ → ℝ}
+    {C : ℝ} (hg : ∀ x, |g x| ≤ C) : |∫ y, g y ∂μ| ≤ C := by
   simpa using norm_integral_le_of_norm_le_const (μ := μ) (f := g) (ae_of_all μ hg)
 
 /-- The increment of an admissible pairing over an interval, both endpoints in
@@ -136,7 +159,7 @@ private lemma pairing_increment {b v T : ℝ} {ρ : ℝ → Measure ℝ}
 
 /-- The pairing of an admissible test is Lipschitz in time on `[0, T]`: the
 pairing increment is an interval integral of an integrand bounded by
-`|b| * C1 + |v| / 2 * C2` (via `abs_pairing_le` on each of the two pieces). -/
+`|b| * C1 + |v| / 2 * C2` (via `abs_integral_le_of_forall_abs_le` on each of the two pieces). -/
 private lemma abs_pairing_lipschitz {b v T : ℝ} {ρ : ℝ → Measure ℝ}
     (hρ : IsWeakForwardFlow (fun _ _ ↦ b) (fun _ _ ↦ v) T ρ)
     {g g' g'' g''' : ℝ → ℝ} {C1 C2 C3 : ℝ}
@@ -149,13 +172,13 @@ private lemma abs_pairing_lipschitz {b v T : ℝ} {ρ : ℝ → Measure ℝ}
   rw [pairing_increment hρ h1 h2 h3 hb1 hb2 hb3 hs₀ hs, ← Real.norm_eq_abs]
   refine intervalIntegral.norm_integral_le_of_norm_le_const (fun r _ => ?_)
   rw [Real.norm_eq_abs]
-  have hb1' : |∫ y, g' y ∂(ρ r)| ≤ C1 := abs_pairing_le (hρ.1 r) hb1
-  have hb2' : |∫ y, g'' y ∂(ρ r)| ≤ C2 := abs_pairing_le (hρ.1 r) hb2
+  have hb1' : |∫ y, g' y ∂(ρ r)| ≤ C1 := abs_integral_le_of_forall_abs_le (hρ.1 r) hb1
+  have hb2' : |∫ y, g'' y ∂(ρ r)| ≤ C2 := abs_integral_le_of_forall_abs_le (hρ.1 r) hb2
   calc |b * ∫ y, g' y ∂(ρ r) + v / 2 * ∫ y, g'' y ∂(ρ r)|
       ≤ |b * ∫ y, g' y ∂(ρ r)| + |v / 2 * ∫ y, g'' y ∂(ρ r)| := abs_add_le _ _
     _ = |b| * |∫ y, g' y ∂(ρ r)| + |v / 2| * |∫ y, g'' y ∂(ρ r)| := by rw [abs_mul, abs_mul]
     _ ≤ |b| * C1 + |v| / 2 * C2 := by
-        rw [abs_half]
+        rw [abs_div_two_eq]
         exact add_le_add (mul_le_mul_of_nonneg_left hb1' (abs_nonneg b))
           (mul_le_mul_of_nonneg_left hb2' (by positivity))
 
@@ -187,7 +210,7 @@ private lemma diff_pairing_lipschitz {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
 /-- A function Lipschitz on `[0, T]` (with a known-nonnegative constant) is continuous
 there: the `ε`-`δ` argument shared by every Lipschitz-from-a-pairing-identity bound in
 this file. -/
-private lemma continuousOn_of_lipschitzOn_Icc {f : ℝ → ℝ} {T L : ℝ}
+lemma continuousOn_Icc_of_abs_sub_le_mul_abs_sub {f : ℝ → ℝ} {T L : ℝ}
     (hLip : ∀ s₀ s, s₀ ∈ Set.Icc (0 : ℝ) T → s ∈ Set.Icc (0 : ℝ) T →
       |f s - f s₀| ≤ L * |s - s₀|) :
     ContinuousOn f (Set.Icc 0 T) :=
@@ -197,14 +220,14 @@ private lemma continuousOn_of_lipschitzOn_Icc {f : ℝ → ℝ} {T L : ℝ}
 /-- The generator's linear combination against a frequency, bounded by the sup-norm: the
 shared triangle-inequality step behind both components of `hFbound` in `pairing_cos_sin_eq`
 (the `ℝ × ℝ` Grönwall bound `‖F' x‖ ≤ K * ‖F x‖`). -/
-private lemma abs_genLinComb_le (b v ξ p q : ℝ) :
+lemma abs_mul_add_mul_sq_le_mul_max (b v ξ p q : ℝ) :
     |b * ξ * p + v / 2 * ξ ^ 2 * q| ≤ (|b| * |ξ| + |v| / 2 * ξ ^ 2) * max |p| |q| := by
   have hp : |p| ≤ max |p| |q| := le_max_left _ _
   have hq : |q| ≤ max |p| |q| := le_max_right _ _
   calc |b * ξ * p + v / 2 * ξ ^ 2 * q|
       ≤ |b * ξ * p| + |v / 2 * ξ ^ 2 * q| := abs_add_le _ _
     _ = |b| * |ξ| * |p| + |v| / 2 * ξ ^ 2 * |q| := by
-        rw [abs_mul, abs_mul, abs_mul, abs_mul, abs_half, abs_of_nonneg (sq_nonneg ξ)]
+        rw [abs_mul, abs_mul, abs_mul, abs_mul, abs_div_two_eq, abs_of_nonneg (sq_nonneg ξ)]
     _ ≤ |b| * |ξ| * max |p| |q| + |v| / 2 * ξ ^ 2 * max |p| |q| :=
         add_le_add (mul_le_mul_of_nonneg_left hp (by positivity))
           (mul_le_mul_of_nonneg_left hq (by positivity))
@@ -218,40 +241,46 @@ other, with no new functions appearing — the algebraic fact that drives the
 Volterra system in `pairing_cos_sin_eq`. -/
 
 /-- The inner linear map `y ↦ ξ * y` of every chain-rule step below. -/
-private lemma hasDerivAt_linMul (ξ x : ℝ) : HasDerivAt (fun y : ℝ => ξ * y) ξ x := by
+lemma hasDerivAt_const_mul_id (ξ x : ℝ) : HasDerivAt (fun y : ℝ => ξ * y) ξ x := by
   simpa using (hasDerivAt_id x).const_mul ξ
 
-private lemma hasDerivAt_cosMul (ξ x : ℝ) :
+/-- The derivative of `x ↦ cos (ξ * x)` is `-ξ * sin (ξ * x)`. -/
+lemma hasDerivAt_cos_const_mul (ξ x : ℝ) :
     HasDerivAt (fun x => Real.cos (ξ * x)) (-ξ * Real.sin (ξ * x)) x :=
-  ((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_linMul ξ x)).congr_deriv (by ring)
+  ((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_const_mul_id ξ x)).congr_deriv (by ring)
 
-private lemma hasDerivAt_negSinMul (ξ x : ℝ) :
+/-- The derivative of `x ↦ -ξ * sin (ξ * x)` is `-ξ ^ 2 * cos (ξ * x)`. -/
+lemma hasDerivAt_neg_mul_sin_const_mul (ξ x : ℝ) :
     HasDerivAt (fun x => -ξ * Real.sin (ξ * x)) (-ξ ^ 2 * Real.cos (ξ * x)) x :=
-  (((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_linMul ξ x)).const_mul (-ξ)).congr_deriv
+  (((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_const_mul_id ξ x)).const_mul (-ξ)).congr_deriv
     (by ring)
 
-private lemma hasDerivAt_negCosSqMul (ξ x : ℝ) :
+/-- The derivative of `x ↦ -ξ ^ 2 * cos (ξ * x)` is `ξ ^ 3 * sin (ξ * x)`. -/
+lemma hasDerivAt_neg_sq_mul_cos_const_mul (ξ x : ℝ) :
     HasDerivAt (fun x => -ξ ^ 2 * Real.cos (ξ * x)) (ξ ^ 3 * Real.sin (ξ * x)) x :=
-  (((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_linMul ξ x)).const_mul
+  (((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_const_mul_id ξ x)).const_mul
     (-ξ ^ 2)).congr_deriv (by ring)
 
-private lemma hasDerivAt_sinMul (ξ x : ℝ) :
+/-- The derivative of `x ↦ sin (ξ * x)` is `ξ * cos (ξ * x)`. -/
+lemma hasDerivAt_sin_const_mul (ξ x : ℝ) :
     HasDerivAt (fun x => Real.sin (ξ * x)) (ξ * Real.cos (ξ * x)) x :=
-  ((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_linMul ξ x)).congr_deriv (by ring)
+  ((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_const_mul_id ξ x)).congr_deriv (by ring)
 
-private lemma hasDerivAt_cosMulScaled (ξ x : ℝ) :
+/-- The derivative of `x ↦ ξ * cos (ξ * x)` is `-ξ ^ 2 * sin (ξ * x)`. -/
+lemma hasDerivAt_mul_cos_const_mul (ξ x : ℝ) :
     HasDerivAt (fun x => ξ * Real.cos (ξ * x)) (-ξ ^ 2 * Real.sin (ξ * x)) x :=
-  (((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_linMul ξ x)).const_mul ξ).congr_deriv
+  (((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_const_mul_id ξ x)).const_mul ξ).congr_deriv
     (by ring)
 
-private lemma hasDerivAt_negSinSqMul (ξ x : ℝ) :
+/-- The derivative of `x ↦ -ξ ^ 2 * sin (ξ * x)` is `-ξ ^ 3 * cos (ξ * x)`. -/
+lemma hasDerivAt_neg_sq_mul_sin_const_mul (ξ x : ℝ) :
     HasDerivAt (fun x => -ξ ^ 2 * Real.sin (ξ * x)) (-ξ ^ 3 * Real.cos (ξ * x)) x :=
-  (((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_linMul ξ x)).const_mul
+  (((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_const_mul_id ξ x)).const_mul
     (-ξ ^ 2)).congr_deriv (by ring)
 
 /-- The sup bounds for the `cos(ξ·)` derivative chain, bundled: `C1 = |ξ|`, `C2 = ξ²`,
 `C3 = |ξ|³`. -/
-private lemma abs_cosChain_bounds (ξ : ℝ) :
+lemma abs_cos_derivative_chain_le (ξ : ℝ) :
     (∀ y : ℝ, |(-ξ) * Real.sin (ξ * y)| ≤ |ξ|) ∧
     (∀ y : ℝ, |(-ξ ^ 2) * Real.cos (ξ * y)| ≤ ξ ^ 2) ∧
     (∀ y : ℝ, |ξ ^ 3 * Real.sin (ξ * y)| ≤ |ξ| ^ 3) := by
@@ -263,8 +292,8 @@ private lemma abs_cosChain_bounds (ξ : ℝ) :
     exact (mul_le_mul_of_nonneg_left (Real.abs_sin_le_one _) (by positivity)).trans_eq (mul_one _)
 
 /-- The sup bounds for the `sin(ξ·)` derivative chain, bundled: same constants as
-`abs_cosChain_bounds`. -/
-private lemma abs_sinChain_bounds (ξ : ℝ) :
+`abs_cos_derivative_chain_le`. -/
+lemma abs_sin_derivative_chain_le (ξ : ℝ) :
     (∀ y : ℝ, |ξ * Real.cos (ξ * y)| ≤ |ξ|) ∧
     (∀ y : ℝ, |(-ξ ^ 2) * Real.sin (ξ * y)| ≤ ξ ^ 2) ∧
     (∀ y : ℝ, |(-ξ ^ 3) * Real.cos (ξ * y)| ≤ |ξ| ^ 3) := by
@@ -284,7 +313,9 @@ sees the germ of the function within the target set, so continuity on `[0,
 T]` already supplies everything `integral_hasDerivWithinAt_right` needs at
 the one-sided filters `Ici x` / `Ioi x`. -/
 
-private lemma hasDerivWithinAt_Ici_of_continuousOn {h : ℝ → ℝ} {x T : ℝ}
+/-- The primitive `u ↦ ∫ r in 0..u, h r` of a function continuous on `[0, T]` has right derivative
+`h x` at each `x ∈ [0, T)`. -/
+lemma hasDerivWithinAt_Ici_of_continuousOn {h : ℝ → ℝ} {x T : ℝ}
     (hcont : ContinuousOn h (Set.Icc 0 T)) (hx0 : 0 ≤ x) (hxT : x < T) :
     HasDerivWithinAt (fun u => ∫ r in (0 : ℝ)..u, h r) (h x) (Set.Ici x) x := by
   have hmemx : x ∈ Set.Icc (0 : ℝ) T := ⟨hx0, hxT.le⟩
@@ -306,7 +337,7 @@ with derivative the (continuous) generator value: combines
 `hasDerivWithinAt_Ici_of_continuousOn` (the primitive's own derivative) with the
 `=ᶠ[𝓝[Ici x] x]` transfer from the primitive identity — the shared step behind both
 `hCderiv` and `hSderiv` in `hasDerivWithinAt_cosPairing_sinPairing`. -/
-private lemma hasDerivWithinAt_of_volterra_primitive {g h : ℝ → ℝ} {x T : ℝ}
+lemma hasDerivWithinAt_of_volterra_primitive {g h : ℝ → ℝ} {x T : ℝ}
     (hcont : ContinuousOn h (Set.Icc 0 T)) (hx0 : 0 ≤ x) (hxT : x < T)
     (hprim : ∀ s ∈ Set.Icc (0 : ℝ) T, g s = g 0 + ∫ r in (0 : ℝ)..s, h r) :
     HasDerivWithinAt g (h x) (Set.Ici x) x := by
@@ -353,16 +384,16 @@ private lemma hasDerivWithinAt_cosPairing_sinPairing {b v T : ℝ} {μ : ℝ →
       (b * ξ * (∫ y, Real.cos (ξ * y) ∂(μ x)) - v / 2 * ξ ^ 2 * (∫ y, Real.sin (ξ * y) ∂(μ x)))
       (Set.Ici x) x := by
   have hT : 0 < T := hx0.trans_lt hxT
-  obtain ⟨hb1, hb2, hb3⟩ := abs_cosChain_bounds ξ
-  obtain ⟨hb1', hb2', hb3'⟩ := abs_sinChain_bounds ξ
+  obtain ⟨hb1, hb2, hb3⟩ := abs_cos_derivative_chain_le ξ
+  obtain ⟨hb1', hb2', hb3'⟩ := abs_sin_derivative_chain_le ξ
   have hCcont : ContinuousOn (fun s => ∫ y, Real.cos (ξ * y) ∂(μ s)) (Set.Icc 0 T) :=
-    continuousOn_of_lipschitzOn_Icc fun s₀ s hs₀ hs =>
-      abs_pairing_lipschitz hμ (hasDerivAt_cosMul ξ) (hasDerivAt_negSinMul ξ)
-        (hasDerivAt_negCosSqMul ξ) hb1 hb2 hb3 hs₀ hs
+    continuousOn_Icc_of_abs_sub_le_mul_abs_sub fun s₀ s hs₀ hs =>
+      abs_pairing_lipschitz hμ (hasDerivAt_cos_const_mul ξ) (hasDerivAt_neg_mul_sin_const_mul ξ)
+        (hasDerivAt_neg_sq_mul_cos_const_mul ξ) hb1 hb2 hb3 hs₀ hs
   have hScont : ContinuousOn (fun s => ∫ y, Real.sin (ξ * y) ∂(μ s)) (Set.Icc 0 T) :=
-    continuousOn_of_lipschitzOn_Icc fun s₀ s hs₀ hs =>
-      abs_pairing_lipschitz hμ (hasDerivAt_sinMul ξ) (hasDerivAt_cosMulScaled ξ)
-        (hasDerivAt_negSinSqMul ξ) hb1' hb2' hb3' hs₀ hs
+    continuousOn_Icc_of_abs_sub_le_mul_abs_sub fun s₀ s hs₀ hs =>
+      abs_pairing_lipschitz hμ (hasDerivAt_sin_const_mul ξ) (hasDerivAt_mul_cos_const_mul ξ)
+        (hasDerivAt_neg_sq_mul_sin_const_mul ξ) hb1' hb2' hb3' hs₀ hs
   set h : ℝ → ℝ := fun r => -b * ξ * (∫ y, Real.sin (ξ * y) ∂(μ r))
       - v / 2 * ξ ^ 2 * (∫ y, Real.cos (ξ * y) ∂(μ r)) with hhdef
   set k : ℝ → ℝ := fun r => b * ξ * (∫ y, Real.cos (ξ * y) ∂(μ r))
@@ -373,13 +404,14 @@ private lemma hasDerivWithinAt_cosPairing_sinPairing {b v T : ℝ} {μ : ℝ →
     rw [hkdef]; exact (continuousOn_const.mul hCcont).sub (continuousOn_const.mul hScont)
   have hCprim : ∀ s ∈ Set.Icc (0 : ℝ) T,
       (∫ y, Real.cos (ξ * y) ∂(μ s)) = (∫ y, Real.cos (ξ * y) ∂(μ 0)) + ∫ r in (0 : ℝ)..s, h r :=
-    pairing_volterra_primitive hμ hT (hasDerivAt_cosMul ξ) (hasDerivAt_negSinMul ξ)
-      (hasDerivAt_negCosSqMul ξ) hb1 hb2 hb3 h fun r => by
+    pairing_volterra_primitive hμ hT (hasDerivAt_cos_const_mul ξ)
+      (hasDerivAt_neg_mul_sin_const_mul ξ)
+      (hasDerivAt_neg_sq_mul_cos_const_mul ξ) hb1 hb2 hb3 h fun r => by
         simp only [hhdef, integral_const_mul]; ring
   have hSprim : ∀ s ∈ Set.Icc (0 : ℝ) T,
       (∫ y, Real.sin (ξ * y) ∂(μ s)) = (∫ y, Real.sin (ξ * y) ∂(μ 0)) + ∫ r in (0 : ℝ)..s, k r :=
-    pairing_volterra_primitive hμ hT (hasDerivAt_sinMul ξ) (hasDerivAt_cosMulScaled ξ)
-      (hasDerivAt_negSinSqMul ξ) hb1' hb2' hb3' k fun r => by
+    pairing_volterra_primitive hμ hT (hasDerivAt_sin_const_mul ξ) (hasDerivAt_mul_cos_const_mul ξ)
+      (hasDerivAt_neg_sq_mul_sin_const_mul ξ) hb1' hb2' hb3' k fun r => by
         simp only [hkdef, integral_const_mul]; ring
   have hCderiv : HasDerivWithinAt (fun s => ∫ y, Real.cos (ξ * y) ∂(μ s)) (h x) (Set.Ici x) x :=
     hasDerivWithinAt_of_volterra_primitive hhcont hx0 hxT hCprim
@@ -400,8 +432,8 @@ private lemma pairing_cos_sin_eq {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
     ∀ s ∈ Set.Icc (0 : ℝ) T,
       (∫ y, Real.cos (ξ * y) ∂(ρ s) = ∫ y, Real.cos (ξ * y) ∂(η s)) ∧
       (∫ y, Real.sin (ξ * y) ∂(ρ s) = ∫ y, Real.sin (ξ * y) ∂(η s)) := by
-  obtain ⟨hb1, hb2, hb3⟩ := abs_cosChain_bounds ξ
-  obtain ⟨hb1', hb2', hb3'⟩ := abs_sinChain_bounds ξ
+  obtain ⟨hb1, hb2, hb3⟩ := abs_cos_derivative_chain_le ξ
+  obtain ⟨hb1', hb2', hb3'⟩ := abs_sin_derivative_chain_le ξ
   set K : ℝ := |b| * |ξ| + |v| / 2 * ξ ^ 2 with hKdef
   set U : ℝ → ℝ := fun s => (∫ y, Real.cos (ξ * y) ∂(ρ s)) - ∫ y, Real.cos (ξ * y) ∂(η s)
     with hUdef
@@ -410,17 +442,19 @@ private lemma pairing_cos_sin_eq {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
   have hUlip : ∀ s₀ s, s₀ ∈ Set.Icc (0 : ℝ) T → s ∈ Set.Icc (0 : ℝ) T →
       |U s - U s₀| ≤ 2 * K * |s - s₀| := by
     intro s₀ s hs₀ hs
-    have := diff_pairing_lipschitz hρ hη (hasDerivAt_cosMul ξ) (hasDerivAt_negSinMul ξ)
-      (hasDerivAt_negCosSqMul ξ) hb1 hb2 hb3 hs₀ hs
+    have := diff_pairing_lipschitz hρ hη (hasDerivAt_cos_const_mul ξ)
+      (hasDerivAt_neg_mul_sin_const_mul ξ)
+      (hasDerivAt_neg_sq_mul_cos_const_mul ξ) hb1 hb2 hb3 hs₀ hs
     simpa only [hUdef, hKdef] using this
   have hWlip : ∀ s₀ s, s₀ ∈ Set.Icc (0 : ℝ) T → s ∈ Set.Icc (0 : ℝ) T →
       |W s - W s₀| ≤ 2 * K * |s - s₀| := by
     intro s₀ s hs₀ hs
-    have := diff_pairing_lipschitz hρ hη (hasDerivAt_sinMul ξ) (hasDerivAt_cosMulScaled ξ)
-      (hasDerivAt_negSinSqMul ξ) hb1' hb2' hb3' hs₀ hs
+    have := diff_pairing_lipschitz hρ hη (hasDerivAt_sin_const_mul ξ)
+      (hasDerivAt_mul_cos_const_mul ξ)
+      (hasDerivAt_neg_sq_mul_sin_const_mul ξ) hb1' hb2' hb3' hs₀ hs
     simpa only [hWdef, hKdef] using this
-  have hUcont : ContinuousOn U (Set.Icc 0 T) := continuousOn_of_lipschitzOn_Icc hUlip
-  have hWcont : ContinuousOn W (Set.Icc 0 T) := continuousOn_of_lipschitzOn_Icc hWlip
+  have hUcont : ContinuousOn U (Set.Icc 0 T) := continuousOn_Icc_of_abs_sub_le_mul_abs_sub hUlip
+  have hWcont : ContinuousOn W (Set.Icc 0 T) := continuousOn_Icc_of_abs_sub_le_mul_abs_sub hWlip
   set F : ℝ → ℝ × ℝ := fun s => (U s, W s) with hFdef
   set F' : ℝ → ℝ × ℝ := fun x => (-b * ξ * W x - v / 2 * ξ ^ 2 * U x,
       b * ξ * U x - v / 2 * ξ ^ 2 * W x) with hF'def
@@ -450,12 +484,12 @@ private lemma pairing_cos_sin_eq {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
     · have heq : (-b * ξ * W x - v / 2 * ξ ^ 2 * U x)
           = b * ξ * (-W x) + v / 2 * ξ ^ 2 * (-U x) := by ring
       rw [heq]
-      have hb := abs_genLinComb_le b v ξ (-W x) (-U x)
+      have hb := abs_mul_add_mul_sq_le_mul_max b v ξ (-W x) (-U x)
       rwa [abs_neg, abs_neg, max_comm, ← hKdef] at hb
     · have heq : (b * ξ * U x - v / 2 * ξ ^ 2 * W x) = b * ξ * U x + v / 2 * ξ ^ 2 * (-W x) := by
         ring
       rw [heq]
-      have hb := abs_genLinComb_le b v ξ (U x) (-W x)
+      have hb := abs_mul_add_mul_sq_le_mul_max b v ξ (U x) (-W x)
       rwa [abs_neg, ← hKdef] at hb
   have hFzero := eq_zero_of_abs_deriv_le_mul_abs_self_of_eq_zero_right hFcont hFderiv hF0 hFbound
   intro s hs
@@ -470,7 +504,7 @@ private lemma pairing_cos_sin_eq {b v T : ℝ} {ρ η : ℝ → Measure ℝ}
 /-- The characteristic function of a probability measure, split into its real/imaginary
 `cos`/`sin` pairings: the shared computation behind both sides of `weakForwardUniqueConst`'s
 `charFun` comparison (applied once to `ρ s`, once to `η s`). -/
-private lemma charFun_eq_cos_add_sin_mul_I {μ : Measure ℝ} [IsProbabilityMeasure μ] (ξ : ℝ) :
+lemma charFun_eq_cos_add_sin_mul_I {μ : Measure ℝ} [IsProbabilityMeasure μ] (ξ : ℝ) :
     charFun μ ξ = ((∫ x, Real.cos (ξ * x) ∂μ : ℝ) : ℂ)
       + ((∫ x, Real.sin (ξ * x) ∂μ : ℝ) : ℂ) * Complex.I := by
   have hexp : ∀ x : ℝ, Complex.exp ((ξ : ℂ) * (x : ℂ) * Complex.I)

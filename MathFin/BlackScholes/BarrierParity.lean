@@ -29,18 +29,36 @@ We first name the present-value functional the library had only ever written
 inline — `discountedValue D Q g = D · E_Q[g]` — so the barrier values are thin,
 honest specialisations of it and the parity reads as an identity about *values*.
 
-## Results
+## Main definitions
 
-* `discountedValue`: `D · E_Q[g]`, the discounted risk-neutral value functional.
-* `discountedValue_eq_contract_value`: it is `Contract.value` of the contract that pays the
-  observed variable `g` at time `0`, so the barrier values are values in the contracts tower.
-* `knockInValue` / `knockOutValue` / `vanillaValue`: the three barrier values.
+* `discountedValue`: the discounted risk-neutral value `D · E_Q[g]` of a payoff `g` under the
+  measure `Q` and discount factor `D`.
+* `knockInValue`: the value of an option that pays `f` only on the barrier-hit event `A`.
+* `knockOutValue`: the value of an option that pays `f` only off the barrier-hit event, that is on
+  the complement `Aᶜ`.
+* `vanillaValue`: the discounted expected payoff `f`, paid on every path.
+
+## Main results
+
+* `discountedValue_eq_contract_value`: `discountedValue` is `Contract.value` of the contract that
+  pays the observed variable `g` at time `0`, so the barrier values are values in the contracts
+  tower.
 * `barrier_payoff_partition`: the pathwise split `𝟙_A·f + 𝟙_{Aᶜ}·f = f`.
 * `knockIn_add_knockOut_eq_vanilla`: in–out parity `V_in + V_out = V_vanilla`.
 * `knockIn_add_knockOut_eq_bsV`: for a call under the Black–Scholes lognormal hypothesis,
   the knock-in and knock-out values sum to the Black–Scholes price `bsV`, for any measurable
   barrier event. So a closed form for either leg gives the other as `bsV` minus it; no
   closed form for either leg is proved here.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull]
+* [E. Reiner and M. Rubinstein, *Breaking down the barriers*][ReinerRubinstein1991]
+
+## Tags
+
+in–out parity, barrier option, knock-in, knock-out, vanilla decomposition, discounted value,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

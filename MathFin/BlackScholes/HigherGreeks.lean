@@ -30,6 +30,26 @@ With `ϕ'(z) = -z · ϕ(z)`, each formula is one chain rule plus one product, qu
 scalar rule. Volga's uses the shortcut `∂_σ d₁ = -d₂/σ` (`hasDerivAt_bsd1_sigma_clean`
 below), which compresses an otherwise messy quotient-rule expression; vanna's uses
 `∂_S d₁` and collapses via `σ√τ − d₁ = -d₂`.
+
+## Main results
+
+All for `K, σ, S, τ > 0`.
+
+* `hasDerivAt_S_deriv_bsV_sigma`: vanna, `∂/∂S (∂V/∂σ) = −ϕ(d₁) d₂ / σ`.
+* `hasDerivAt_deriv_bsV_sigma`: volga, `∂²V/∂σ² = S ϕ(d₁) √τ d₁ d₂ / σ`.
+* `hasDerivAt_tau_deriv_bsV_S`: charm, `∂/∂τ (∂V/∂S) = ϕ(d₁) ((r + σ²/2)τ − log(S/K)) / (2στ√τ)`.
+* `hasDerivAt_deriv_deriv_bsV_S`: speed, `∂³V/∂S³ = −ϕ(d₁) (d₁ + σ√τ) / (S² σ² τ)`.
+* `hasDerivAt_bsV_SSS`: the `S`-derivative of the gamma formula `ϕ(d₁) / (S σ √τ)`, which is
+  the speed formula.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 19.4
+* [Wystup (2002)][Wystup2002]
+
+## Tags
+
+vanna, volga, vomma, speed, third-order Greeks, higher-order sensitivities, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

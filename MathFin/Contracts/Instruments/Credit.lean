@@ -42,6 +42,11 @@ stream in the tower, so the premium leg exists only on the grid.
 ## Main results
 
 * `pathPV_cdsPremiumLeg`, `pathPV_cdsProtectionLeg`.
+
+## Tags
+
+credit default swap, CDS premium leg, protection leg, default indicator, accrual grid, MSC 91G40,
+JEL G12, JEL G33
 -/
 
 @[expose] public section
@@ -78,7 +83,8 @@ noncomputable def cdsBuyer (t : ℕ → ℝ≥0) (s R : ℝ) (n : ℕ) : Contrac
 leg is worth `∑ D(tᵢ₊₁) · s (tᵢ₊₁ − tᵢ) (1 − σ () tᵢ₊₁)`. -/
 theorem pathPV_cdsPremiumLeg (D : ℝ≥0 → ℝ) (σ : Scenario Unit) (t : ℕ → ℝ≥0) (s : ℝ) (n : ℕ) :
     (cdsPremiumLeg t s n).pathPV D σ
-      = ∑ i ∈ Finset.range n, D (t (i + 1)) * (s * ((t (i + 1) : ℝ) - t i) * (1 - σ () (t (i + 1)))) := by
+      = ∑ i ∈ Finset.range n, D (t (i + 1)) *
+          (s * ((t (i + 1) : ℝ) - t i) * (1 - σ () (t (i + 1)))) := by
   simp [cdsPremiumLeg, pathPV_payFlows, Payoff.eval]
 
 /-- Along a scenario `σ` whose observation at `u` is the default indicator `σ () u`, the

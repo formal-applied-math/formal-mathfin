@@ -13,6 +13,18 @@ public import MathFin.Foundations.ItoDriftMomentBounds
 `taylorRemainderSum_tendsto`: the expected sum of Taylor remainders of the discrete Itô formula
 tends to `0`, by the cubic Taylor bound `abs_discreteTaylorRemainder_le` and the third-moment
 estimate `trueIncr_pow3_le`.
+
+## Main results
+
+* `taylorRemainderSum_tendsto`: for `X t = c + driftPath β t + M t` and `f` three times
+  differentiable with `f'''` bounded, the expected sum of the discrete Taylor remainders along
+  uniform partitions tends to `0`.
+* `remainderCell_integrable`: each cell's discrete Taylor remainder is integrable.
+
+## Tags
+
+Taylor remainder, Itô formula, third-moment estimate, discrete Itô formula, cubic bound, MSC 60H05,
+MSC 60H10
 -/
 
 @[expose] public section

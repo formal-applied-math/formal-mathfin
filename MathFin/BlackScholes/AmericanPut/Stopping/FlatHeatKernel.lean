@@ -16,10 +16,22 @@ The exponential decay at zero elapsed time absorbs every real power. This
 allows the boundary kernel to be extended smoothly by zero at nonpositive
 elapsed times, away from the spatial boundary.
 
-## Result
+## Main definitions
 
-Public entry points include `flatRpow`, `flatRpow_zero`, `flatRpow_smooth`,
-`flatRpow_neg_three_halves`.
+* `flatRpow`: the real power `t^p` damped by the smooth glue `expNegInvGlue`, hence zero for
+  `t ≤ 0`.
+* `causalHeatBoundaryKernel`: a causal rewriting of the heat boundary kernel through `flatRpow`,
+  namely `(x^2)⁻¹ * (2/√π) * flatRpow (-3/2) (2*(t/x^2))`.
+
+## Main results
+
+* `flatRpow_zero`: `flatRpow p t = 0` for `t ≤ 0`.
+* `flatRpow_smooth`: `flatRpow p` is `C^∞`.
+* `flatRpow_neg_three_halves`: for `0 < t`, `flatRpow (-3/2) t = (t*√t)⁻¹ * exp (-t⁻¹)`.
+
+## Tags
+
+heat boundary kernel, smooth extension, flat function, causal kernel, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -39,6 +39,16 @@ whatever the law of a compensated jump part that is not almost surely `0`.
 
 Each statement concerns one strike and one maturity: the implied volatility exceeds `σ` at every
 strike, but nothing is said about how it varies across strikes (the shape of the smile).
+
+## References
+
+* [Cont and Tankov, *Financial Modelling with Jump Processes*][ContTankov2004]
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976]
+
+## Tags
+
+implied volatility with jumps, volatility lift, Black–Scholes lower bound, jump risk,
+strict inequality, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

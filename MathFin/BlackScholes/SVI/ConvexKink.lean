@@ -5,6 +5,7 @@ Authors: Robert Martin
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-! # Convexity across a kink
@@ -13,6 +14,15 @@ Part of the SVI polynomial-sign certificate (#174).
 
 Two convex pieces whose one-sided derivatives jump upwards at the junction form a convex
 function (`convexOn_Ioi_of_convex_pieces`). Used for the zero-scale SVI slice.
+
+## Main results
+
+* `convexOn_Ioi_of_convex_pieces`: if `f` is convex on `(0, J]` and on `[J, ∞)`, and the left
+  derivative `dl` at `J` is at most the right derivative `dr`, then `f` is convex on `(0, ∞)`.
+
+## Tags
+
+convexity across a kink, one-sided derivatives, convex pieces, SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -21,7 +31,8 @@ namespace MathFin
 namespace SVI
 open Set
 
-private lemma secant_join_lower {f : ℝ → ℝ} {x y z L : ℝ}
+/-- If two adjacent secant slopes are both at least `L`, so is the joined secant slope. -/
+lemma secant_join_lower {f : ℝ → ℝ} {x y z L : ℝ}
     (hxy : x < y) (hyz : y < z)
     (h₁ : L ≤ (f y - f x) / (y - x)) (h₂ : L ≤ (f z - f y) / (z - y)) :
     L ≤ (f z-f x)/(z-x) := by
@@ -30,7 +41,8 @@ private lemma secant_join_lower {f : ℝ → ℝ} {x y z L : ℝ}
   rw [le_div_iff₀ (sub_pos.mpr (hxy.trans hyz))]
   nlinarith
 
-private lemma secant_join_upper {f : ℝ → ℝ} {x y z L : ℝ}
+/-- If two adjacent secant slopes are both at most `L`, so is the joined secant slope. -/
+lemma secant_join_upper {f : ℝ → ℝ} {x y z L : ℝ}
     (hxy : x < y) (hyz : y < z)
     (h₁ : (f y - f x) / (y - x) ≤ L) (h₂ : (f z - f y) / (z - y) ≤ L) :
     (f z-f x)/(z-x) ≤ L := by

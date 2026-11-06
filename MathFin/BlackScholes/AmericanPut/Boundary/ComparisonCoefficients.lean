@@ -15,10 +15,25 @@ characteristic roots. The Riccati equation bounds its derivative. Consequently
 the normalized drift and its first space/time derivatives are globally bounded.
 No derivative of the unknown exercise boundary enters these bounds.
 
-## Result
+## Main definitions
 
-Public entry points include `rootProfile_slope_bounds`, `profile_slope_bounds`,
-`profile_slope_and_deriv_bounded`, `normalizedDrift`.
+* `normalizedDrift`: the drift `α + 2 · logSlope f (x + c t − d)` of the normalized comparison
+  equation.
+
+## Main results
+
+* `rootProfile_slope_bounds`: for `0 < u` and `v < 0`, the log slope of `rootProfile u v` lies
+  strictly between `v` and `u` at every point.
+* `profile_slope_bounds`: for `0 < ρ`, the log slope of `profile β ρ` lies strictly between
+  `negativeRoot β ρ` and `positiveRoot β ρ`.
+* `profile_slope_and_deriv_bounded`: for `0 < ρ`, some `B > 0` bounds both the log slope of
+  `profile β ρ` and its derivative in absolute value, everywhere. (The statement concerns the
+  profile's log slope, the ingredient of `normalizedDrift`, not `normalizedDrift` itself.)
+
+## Tags
+
+characteristic roots, Riccati equation, normalized drift, bounded coefficients, comparison equation,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

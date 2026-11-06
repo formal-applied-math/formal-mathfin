@@ -53,6 +53,17 @@ images of a Gaussian pair are independent, `HasGaussianLaw.indepFun_of_covarianc
   under the model measure `P`.
 * `integral_betterOfTwo` — the better-of-two payoff `max(S¹_T, S²_T)` is worth
   `S²₀ + margrabePrice`.
+
+## References
+
+* [W. Margrabe, *The value of an option to exchange one asset for another*][Margrabe1978]
+* [R. M. Stulz, *Options on the minimum or the maximum of two risky assets: analysis and
+  applications*][Stulz1982]
+
+## Tags
+
+Margrabe formula, joint geometric Brownian motions, correlated assets, exchange option,
+effective volatility, ratio of prices, MSC 91G20, MSC 60G15, JEL G13
 -/
 
 @[expose] public section

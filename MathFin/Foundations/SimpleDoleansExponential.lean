@@ -15,7 +15,7 @@ of risk `θ` of the general Girsanov theorem (`gir-thm-9.1.8`) is **adapted** (p
 dependent), so the Doléans density `exp(∫θ dB − ½∫θ² ds)` has a *random* multiplier in
 each partition cell. The constant-θ Wald exponential (`waldExponential_isMartingale`)
 freezes each increment against a **deterministic** function of the past
-(`condExp_func_increment` via `condExp_indep_eq`); the adapted case needs the same
+(`IsFilteredPreBrownian.condExp_comp_increment_eq_const`); the adapted case needs the same
 freezing against an `𝓕_r`-measurable **random** multiplier `c`.
 
 This file proves that genuinely new estimate:
@@ -33,6 +33,31 @@ factorizes (`indepFun_iff_map_prod_eq_prod_map_map`), and Fubini (`integral_prod
 Everything else in Track α (the running exponential's martingale property α2, the simple-θ
 Girsanov α3) reuses the constant-θ apparatus in `GirsanovConstantTheta.lean` once this
 brick lands.
+
+## Main definitions
+
+* `cellExp`: the single-cell Doléans exponential over `(a, b]` with multiplier `c`, clamped to
+  `[0, t]`.
+* `simpleDoleansExp`: the running simple Doléans exponential over the first `N` cells of a
+  partition `s` with multipliers `d`.
+
+## Main results
+
+* `condExp_exp_adapted_mul_increment`: the conditional MGF of a Brownian increment against a
+  bounded `𝓕_r`-measurable multiplier `c`.
+* `condExp_expCell_eq_one`: the normalised cell factor `exp(c·(X_t − X_r) − c²(t − r)/2)` has
+  conditional expectation `1` given `𝓕_r`.
+* `cellExp_isMartingale`: the single-cell exponential over `(a, b]` is a `P`-martingale for a
+  bounded `𝓕_a`-measurable multiplier.
+* `mul_cellExp_isMartingale`: appending one cell to a martingale frozen after `p` gives a
+  martingale.
+* `simpleDoleansExp_isMartingale`: for a monotone partition and uniformly bounded adapted
+  multipliers, the simple Doléans exponential is a `P`-martingale.
+
+## Tags
+
+Doléans exponential, Girsanov theorem, exponential martingale, freezing lemma, market price of risk,
+Wald exponential, MSC 60G44, MSC 60H05, MSC 91G20
 -/
 
 @[expose] public section

@@ -15,11 +15,10 @@ public import MathFin.FixedIncome.FRA
 # Bonds and swaps, as contracts
 
 A schedule of payments is a contract: `payFlows t a n` pays the payoff `a i` at `t i` for each
-`i < n`, worth `∑ D(tᵢ) · aᵢ` along a scenario (`pathPV_payFlows`); `fixedFlows t c n` is the case of
-constant payoffs, `c i` at `t i`. Along every scenario its present value is `∑ D(tᵢ) cᵢ`
+`i < n`, worth `∑ D(tᵢ) · aᵢ` along a scenario (`pathPV_payFlows`); `fixedFlows t c n` is the case
+of constant payoffs, `c i` at `t i`. Along every scenario its present value is `∑ D(tᵢ) cᵢ`
 (`pathPV_fixedFlows`), and since it observes nothing its value in every model is that same sum
-(`value_fixedFlows`). The library's
-fixed-income prices are instances:
+(`value_fixedFlows`). The library's fixed-income prices are instances:
 
 * a coupon bond discounted at a yield `y`, with integer payment times, is `bondPriceDisc`
   (`pathPV_fixedFlows_yieldDiscount`), the price the durations and convexities of
@@ -64,6 +63,19 @@ Berthold and Elsman (2015) and Annenkov (2018).
 No code is copied from `lean_contracts`; every definition and proof here is
 written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 §6 for the full credit line.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  Section 1.5
+* [Fabozzi, *Bond Markets, Analysis and Strategies*][FabozziBMAS], ch. 2
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], ch. 7
+
+## Tags
+
+coupon bond, interest rate swap, par swap rate, forward rate agreement, annuity, floating leg,
+MSC 91G30, JEL E43, JEL G12
 -/
 
 @[expose] public section

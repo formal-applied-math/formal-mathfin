@@ -18,10 +18,18 @@ that would be a local maximum of a nonpositive derivative.
 This last observation is sufficient for the log-curvature contradiction. It
 does not assert a strictly negative boundary speed at every positive time.
 
-## Result
+## Main results
 
-Public entry points include `boundary_antitoneOn`, `boundary_deriv_nonpos`,
-`boundary_deriv_neg_of_curvature_neg`, `price_mono_time`.
+* `boundary_antitoneOn`: for a `DividendPutSolution`, the exercise boundary is antitone on
+  `[0, ∞)`.
+* `boundary_deriv_nonpos`: at every time `t > 0`, the boundary derivative is nonpositive.
+* `boundary_deriv_neg_of_curvature_neg`: at a time `t > 0` where the second derivative of the
+  boundary is negative, the first derivative is strictly negative.
+
+## Tags
+
+boundary monotonicity, nonincreasing exercise boundary, boundary speed, log curvature,
+price monotone in time, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

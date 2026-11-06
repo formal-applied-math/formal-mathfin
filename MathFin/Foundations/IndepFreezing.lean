@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -60,6 +61,16 @@ prices of `BlackScholes/JumpDiffusionOptionPrices.lean`).
 * `indepFun_prodMk_of_indepFun_prodMk`: if `X` is independent of `(Y, W)` and `Y` of `W`, then
   `Y` is independent of `(X, W)`. Mutual independence of three variables can be stated with any
   of them split off first.
+
+## References
+
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], Lemma
+  2.3.4
+
+## Tags
+
+freezing lemma, independence lemma, Shreve, law of total expectation, Poisson mixture,
+conditional expectation, independent random variables, MSC 60E05, MSC 28A25, MSC 91G20
 -/
 
 @[expose] public section

@@ -20,10 +20,19 @@ American value is separate. Strict logarithmic curvature is not asserted.
 The modular stock-curvature consequence below takes strict speed as an argument;
 `StrictBoundarySpeed` proves it and `StockConclusion` supplies the final result.
 
-## Result
+## Main results
 
-Public entry points include `dividend_log_curvature`, `dividend_curvature_claim`,
-`zeroDividend_weak_curvature_claim`, `liuRange_curvature_claim`.
+* `dividend_log_curvature`: for every `DividendPutSolution`, the exercise boundary satisfies
+  `0 ≤ b''(t)` for all `t > 0` (weak, not strict, logarithmic curvature).
+* `dividend_curvature_claim`, `zeroDividend_weak_curvature_claim`, `liuRange_curvature_claim`:
+  the same weak curvature claim as the closed statements `DividendCurvatureClaim`, its
+  zero-dividend case `ZeroDividendWeakCurvatureClaim` and its case `h + 1 ≤ k`
+  `LiuRangeCurvatureClaim`.
+
+## Tags
+
+log curvature, exercise boundary convexity, maximum principle, classical solution, Liu range,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

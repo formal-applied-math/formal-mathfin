@@ -17,10 +17,28 @@ convention: at expiry the unrestricted contact set is all nonnegative spots.
 Strict positivity and separation from the strike at positive maturity are
 not asserted by these elementary results.
 
-## Result
+## Main definitions
 
-Public entry points include `exerciseSet`, `exerciseThreshold`, `value_at_zero_spot`,
-`value_continuousOn_spot`.
+* `exerciseSet`: the in-the-money contact set: the spots `S` in `[0,K]` at which the American put
+  value equals the immediate payoff `K - S`.
+* `exerciseThreshold`: the supremum of `exerciseSet`.
+
+## Main results
+
+* `value_at_zero_spot`: for `0 ≤ K`, `0 ≤ r`, the American put at spot `0` is worth `K`.
+* `value_continuousOn_spot`: for `0 ≤ K`, `0 ≤ r`, the American put value is continuous in
+  the spot on `[0, ∞)`.
+* `exerciseSet_eq_interval`, `threshold_bounds`: for `0 ≤ K`, `0 ≤ r`, `exerciseSet` is the
+  interval `[0, exerciseThreshold]`, and the threshold lies in `[0, K]`.
+* `threshold_at_expiry`, `threshold_antitone_horizon`: the threshold at expiry is `K`, and the
+  threshold is antitone in the horizon.
+
+All of these assume a measurable `W` with `W 0 = 0` a.s.
+
+## Tags
+
+exercise region, exercise threshold, contact set, in-the-money, American put, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

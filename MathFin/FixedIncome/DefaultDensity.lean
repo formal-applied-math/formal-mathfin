@@ -45,9 +45,36 @@ Scope: deterministic, *continuous* hazard (the bootstrapped piecewise-constant c
 §16.4 is not covered); `τ` is not constructed here, and the stochastic-intensity (Cox
 mixing) density is not treated.
 
+## Main definitions
+
+* `defaultDensity`: the default-time density `f(t) = λ(t)·Q(t) = λ(t)·exp(−∫₀ᵗ λ)` of a
+  deterministic hazard curve `h`.
+* `lawDensity`: the density of the law of `τ` as an `ℝ≥0∞`-valued function, `f` on `[0, ∞)` and
+  zero on `(−∞, 0)`.
+
+## Main results
+
+* `hasDerivAt_hazardSurvival`: `−dQ/dt = λ·Q`, for a locally integrable hazard `h` continuous at
+  `t`.
+* `integral_defaultDensity`, `integral_defaultDensity_zero`: `∫ₐᵇ f = Q(a) − Q(b)` and
+  `∫₀ᵀ f = 1 − Q(T)` for a continuous hazard.
+* `map_eq_withDensity`: for a continuous nonnegative hazard `h` and an a.e.-measurable `τ` with CDF
+  `P(τ ≤ a) = 1 − Q(a)` on `[0, ∞)`, the law of `τ` is `volume.withDensity (lawDensity h)`.
+* `integral_comp_eq`: under the same hypotheses, `E[g(τ)] = ∫_{[0,∞)} f(s)·g(s) ds` for
+  measurable `g`.
+* `integral_indicator_Iic_eq`: under the same hypotheses, `E[D(τ)·1{τ ≤ T}] = ∫₀ᵀ D(s)·λ(s)·Q(s) ds`
+  for measurable `D` and `T ≥ 0`.
+* `expMeasure_eq_withDensity`: for constant hazard `λ > 0`, `lawDensity` reproduces Mathlib's
+  exponential law.
+
 ## References
 
-* S. Bagaria, *Notes on Fixed Income Derivative Pricing* (lecture notes), ch. 16.
+* [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 16.
+
+## Tags
+
+default density, hazard rate, survival function, protection leg, default time law, CDS pricing,
+MSC 91G40, MSC 60E05, JEL G12
 -/
 
 @[expose] public section

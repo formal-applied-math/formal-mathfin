@@ -28,6 +28,11 @@ continuous path, which is `⟨M⟩`-almost everywhere, and they are bounded by t
 Itô isometry against `M` carries that to the integrals. No freezing of `φ` is involved, so `φ`
 needs no path regularity.
 
+## Main definitions
+
+* `weightLp`: the bounded predictable weight `w` as a class in `L²(⟨M⟩)`, the integrand of
+  `∫ w dM`.
+
 ## Main results
 
 * `tendsto_integral_sq_riemannStieltjes_sub` — the sums converge to `∫ w dM` in mean square.
@@ -36,6 +41,11 @@ needs no path regularity.
   surely.
 * `coeFn_mulLI_weightLp`, `itoIntegralAgainst_weightLp` — the limit is `∫ χ dB`, where `χ` is the
   class of `φ·w`; and any predictable `L²` class equal to `φ·w` almost everywhere will do.
+
+## Tags
+
+Riemann–Stieltjes sum, Itô integral, Itô isometry, stochastic integral, Itô formula, MSC 60H05,
+MSC 60G44
 -/
 
 @[expose] public section
@@ -52,7 +62,7 @@ open scoped NNReal ENNReal
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-  (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {w : ℝ≥0 → Ω → ℝ}
+  (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {w : ℝ≥0 → Ω → ℝ}
   (hw_pred : IsStronglyPredictable (natFiltration hBmeas) w)
   (hw_cont : ∀ᵐ ω ∂μ, ContinuousOn (fun s ↦ w s ω) (Set.Icc 0 T)) {Cw : ℝ}
   (hw_bdd : ∀ s ω, |w s ω| ≤ Cw)
@@ -186,12 +196,12 @@ omit [IsProbabilityMeasure μ] in
 (`itoIntegralAgainstCLM_apply`), with `χ` the image of the weight's class under multiplication by
 `φ`, and that `χ` is `φ·w` almost everywhere. The weight's class is `w` wherever `φ ≠ 0`. -/
 theorem coeFn_mulLI_weightLp :
-    ⇑(mulLI (trimMeasure_T (μ := μ) T hBmeas) (Lp.stronglyMeasurable φ).measurable
+    ⇑(mulLI (trimMeasure (μ := μ) T hBmeas) (Lp.stronglyMeasurable φ).measurable
         (weightLp T hBmeas φ hw_pred hw_bdd))
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦ (φ : ℝ≥0 × Ω → ℝ) z * w z.1 z.2 := by
+      =ᵐ[trimMeasure (μ := μ) T hBmeas] fun z ↦ (φ : ℝ≥0 × Ω → ℝ) z * w z.1 z.2 := by
   filter_upwards [coeFn_mulLI _ (Lp.stronglyMeasurable φ).measurable
       (weightLp T hBmeas φ hw_pred hw_bdd),
-    (ae_withDensity_iff (μ := trimMeasure_T (μ := μ) T hBmeas)
+    (ae_withDensity_iff (μ := trimMeasure (μ := μ) T hBmeas)
       (measurable_sqDensity (Lp.stronglyMeasurable φ).measurable)).1
       (coeFn_weightLp T hBmeas φ hw_pred hw_bdd)] with z hz hc
   rw [hz]
@@ -201,10 +211,10 @@ theorem coeFn_mulLI_weightLp :
 
 /-- **The limit is an Itô integral against `B`**: `∫ w dM = ∫ χ dB` for any predictable `L²`
 class `χ` equal to `φ·w` almost everywhere. -/
-theorem itoIntegralAgainst_weightLp (χ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
-    (hχ : ⇑χ =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦ (φ : ℝ≥0 × Ω → ℝ) z * w z.1 z.2) :
+theorem itoIntegralAgainst_weightLp (χ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
+    (hχ : ⇑χ =ᵐ[trimMeasure (μ := μ) T hBmeas] fun z ↦ (φ : ℝ≥0 × Ω → ℝ) z * w z.1 z.2) :
     itoIntegralAgainstCLM hB T hBmeas φ (weightLp T hBmeas φ hw_pred hw_bdd)
-      = itoIntegralCLM_T hB T hBmeas χ := by
+      = itoIntegralCLM hB T hBmeas χ := by
   rw [itoIntegralAgainstCLM_apply]
   congr 1
   exact Lp.ext ((coeFn_mulLI_weightLp T hBmeas φ hw_pred hw_bdd).trans hχ.symm)

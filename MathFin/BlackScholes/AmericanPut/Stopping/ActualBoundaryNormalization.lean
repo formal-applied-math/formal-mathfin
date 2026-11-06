@@ -13,10 +13,21 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.ActualStockConvexity
 The threshold is identified from payoff contact after exact stopping-price
 normalization. No classical solution or boundary smoothness is assumed.
 
-## Result
+## Main results
 
-Public entry points include `brownianUsualExerciseBoundary_eq_scaled_canonical` and
-`brownianUsualLogBoundary_normalization`.
+* `brownianUsualExerciseBoundary_normalization`: for `0 < K`, `0 < r`, `0 ≤ q ≤ r`, `0 < σ` and
+  `0 < τ`, the exercise boundary of the usual Brownian space at remaining time `τ` is
+  `K * exp` of the canonical log boundary at the normalized rates `2r/σ²`, `2q/σ²` and time
+  `σ²/2 * τ`.
+* `brownianUsualExerciseBoundary_eq_scaled_canonical`: under the same hypotheses it equals `K`
+  times the canonical stock boundary at those normalized parameters.
+* `brownianUsualLogBoundary_normalization`: under the same hypotheses, the log of the boundary
+  over `K` is the canonical log boundary at those normalized parameters.
+
+## Tags
+
+physical units, scaling, exercise boundary, payoff contact, normalization, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section
@@ -26,20 +37,12 @@ namespace MathFin.BlackScholes.AmericanPut.Stopping
 open Set Filter MeasureTheory ProbabilityTheory Boundary
 open scoped NNReal Topology
 
-theorem normalized_rates_admissible {r q σ : ℝ} (hr : 0 < r)
-    (hq : 0 ≤ q) (hqr : q ≤ r) (hσ : 0 < σ) :
-    0 < normalizedRate r σ ∧ 0 ≤ normalizedRate q σ ∧
-      normalizedRate q σ ≤ normalizedRate r σ := by
-  unfold normalizedRate
-  exact ⟨by positivity,by positivity,
-    div_le_div_of_nonneg_right (mul_le_mul_of_nonneg_left hqr (by norm_num)) (sq_nonneg σ)⟩
-
 theorem brownianUsualExerciseBoundary_normalization {K r q σ : ℝ}
     (hK : 0 < K) (hr : 0 < r) (hq : 0 ≤ q) (hqr : q ≤ r) (hσ : 0 < σ)
     {τ : ℝ} (hτ : 0 < τ) :
     brownianUsualExerciseBoundary K r q σ τ.toNNReal =
       K*Real.exp (canonicalLogBoundary (normalizedRate r σ) (normalizedRate q σ) (σ^2/2*τ)) := by
-  obtain ⟨hk,hh,hhk⟩ := normalized_rates_admissible hr hq hqr hσ
+  obtain ⟨hk,hh,hhk⟩ := Boundary.normalized_dividend_regime hr hq hqr hσ
   let b := canonicalLogBoundary (normalizedRate r σ) (normalizedRate q σ)
   let B := K*Real.exp (b (σ^2/2*τ))
   have ht : 0 < σ^2/2*τ := by positivity
@@ -78,7 +81,7 @@ theorem brownianUsualExerciseBoundary_eq_scaled_canonical {K r q σ : ℝ}
     {τ : ℝ} (hτ : 0 < τ) :
     brownianUsualExerciseBoundary K r q σ τ.toNNReal =
       K*canonicalStockBoundary (normalizedRate r σ) (normalizedRate q σ) (σ^2/2*τ) := by
-  obtain ⟨hk,hh,hhk⟩ := normalized_rates_admissible hr hq hqr hσ
+  obtain ⟨hk,hh,hhk⟩ := Boundary.normalized_dividend_regime hr hq hqr hσ
   rw [brownianUsualExerciseBoundary_normalization hK hr hq hqr hσ hτ,
     exp_canonicalLogBoundary hk hh hhk (by positivity)]
 

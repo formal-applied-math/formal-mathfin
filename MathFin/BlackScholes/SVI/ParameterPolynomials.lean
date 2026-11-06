@@ -18,6 +18,35 @@ fixed-size denominator-cleared Hermite matrices of its derivative (`universalMat
 `certificateMatrices (polynomial p) i` only on the degree branch
 `n = (polynomial p).derivative.natDegree` (`universalMatrices_eval`), and likewise their
 characteristic coefficients (`determinantCoefficient_eval`).
+
+## Main definitions
+
+* `ParameterRing`: the ring `ℝ[a, b, ρ, m, σ]`, `MvPolynomial (Fin 5) ℝ`.
+* `parameterEval`: evaluation of a parameter polynomial at the parameters `p`.
+* `universalPolynomial`: the numerator polynomial with coefficients in `ParameterRing`.
+* `universalWeights`, `universalMatrices`: the four weights `X²P²`, `XP²`, `X²P`, `XP` and the
+  four fixed-size Hermite matrices of the derivative, with entries in `ParameterRing`.
+* `fixedCompanion`, `fixedHermite`: companion and Hermite matrices of a fixed size `n` over any
+  commutative ring, with the leading coefficient read at index `n`.
+* `determinantCoefficient`: the coefficients of the characteristic polynomials of
+  `universalMatrices`, as parameter polynomials.
+
+## Main results
+
+* `universalPolynomial_eval`: mapping `universalPolynomial` by `parameterEval p` gives
+  `polynomial p`.
+* `fixedHermite_eq_cleared`: if `f.natDegree = n` and `q.natDegree ≤ 22`, then
+  `fixedHermite f q n = clearedHermite f q n`.
+* `universalWeights_eval`: the weights map to `X²P²`, `XP²`, `X²P`, `XP` for `P = polynomial p`.
+* `universalMatrices_eval`: at size `n = (polynomial p).derivative.natDegree`, the matrices map
+  to `certificateMatrices (polynomial p) i`.
+* `determinantCoefficient_eval`: at that size, `determinantCoefficient` evaluates to the
+  coefficient `r` of the characteristic polynomial of `certificateMatrices (polynomial p) i`.
+
+## Tags
+
+multivariate polynomial ring, universal Hermite matrices, SVI parameter polynomials, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

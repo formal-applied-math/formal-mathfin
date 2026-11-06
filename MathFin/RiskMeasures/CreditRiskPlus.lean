@@ -32,6 +32,21 @@ the Gamma moment-generating function at `M_X(t) − 1`.
 Scope: the statement is the iterated (mixture) integral. A random sector count `N` with this
 conditional law, the sector loss `L` as a random variable, the portfolio across independent sectors
 and CreditRisk+'s loss-banding recursion are not constructed.
+
+## Main results
+
+* `integral_compoundPoisson_mgf_gammaMeasure`: for i.i.d. losses `Xᵢ`, `a, r > 0` and
+  `M_X(t) < r + 1`, the compound-Poisson MGF `∫ n, M_{∑_{i<n} Xᵢ}(t) dPoisson(λ)` integrated
+  against `Gamma(a, r)` in `λ` is `(r / (r − (M_X(t) − 1)))^a`.
+
+## References
+
+* [Credit Suisse First Boston, *CreditRisk+: A Credit Risk Management Framework*][CSFB1997]
+
+## Tags
+
+CreditRisk+, Poisson-Gamma mixture, compound Poisson, sector loss, moment generating function,
+actuarial credit risk model, MSC 91G40, MSC 60E10, JEL G32
 -/
 
 @[expose] public section

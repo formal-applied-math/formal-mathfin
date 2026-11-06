@@ -16,10 +16,26 @@ rule the reward is measurable and, for nonnegative rates and spot, lies in
 `[0,K]`. Its integrability follows without any optional-stopping assumption.
 The process need only be jointly measurable for these elementary facts.
 
-## Result
+## Main definitions
 
-Public entry points include `putReward`, `putReward_measurable`, `putReward_nonneg`,
-`putReward_le_strike`.
+* `putReward`: the put payoff `max (K - gbmValue S (r-q) σ (θ ω) (W (θ ω) ω)) 0` at the stopped
+  stock value, discounted by `exp (-r * θ ω)`.
+
+## Main results
+
+* `putReward_measurable`: for jointly measurable `W` and measurable `θ`, the reward is
+  measurable.
+* `putReward_nonneg`, `putReward_le_strike`: the reward is nonnegative, and at most `K` when
+  `0 ≤ K`, `0 ≤ r`, `0 ≤ S`.
+* `putReward_integrable`: for such parameters, jointly measurable `W`, measurable `θ` and a
+  finite measure, the reward is integrable.
+* `putReward_zero_ae`: if `W 0 = 0` almost surely, the reward at the rule stopping at time `0`
+  is almost surely `max (K - S) 0`.
+
+## Tags
+
+put payoff, discounted reward, geometric Brownian motion, dividend yield, stopped payoff, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

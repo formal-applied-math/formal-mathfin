@@ -15,10 +15,27 @@ strictly negative speed. These give strictly positive stock curvature in
 calendar time and in time remaining. Actual stopping-value identification is
 still a separate obligation; strict logarithmic curvature is not asserted.
 
-## Result
+## Main definitions
 
-Public entry points include `dividend_stock_curvature`,
-`remainingTimeBoundary`, `deriv2_comp_neg`.
+* `remainingTimeBoundary`: the stock-price boundary in time remaining, `E · exp (b (σ² τ / 2))`.
+
+## Main results
+
+* `dividend_stock_curvature`: for a `DividendPutSolution`, `0 < E`, `0 < σ` and `T < expiry`, the
+  stock-price boundary `stockBoundary E σ expiry b` has strictly positive second derivative at
+  `T`.
+* `deriv2_comp_neg`: the second derivative of `y ↦ f (−y)` at `x` is that of `f` at `−x`.
+* `dividend_remainingTime_curvature`, `liuRange_remainingTime_curvature`: for `0 < E`, `0 < σ` and
+  `τ > 0`, `remainingTimeBoundary E σ b` has strictly positive second derivative at `τ`
+  (the second under the extra, unused hypothesis `h + 1 ≤ k`).
+* `dividend_boundary_conclusions`: for a `DividendPutSolution`, `0 < E` and `0 < σ`, one has
+  `b' < 0` and `b'' ≥ 0` for all `t > 0`, and strictly positive second derivative of
+  `remainingTimeBoundary E σ b` for all `τ > 0`.
+
+## Tags
+
+stock boundary curvature, strict convexity, exercise boundary, remaining time boundary, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

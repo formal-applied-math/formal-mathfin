@@ -24,6 +24,13 @@ differentiated term by term because the Black–Scholes delta and the normal den
 and the weights `wₙcₙ` sum to one, which is the compensation identity `E[mertonSpot(N)] = S` at
 `S = 1`.
 
+## Main definitions
+
+* `mertonDelta`: `∑ₙ wₙ cₙ Φ(d₁ⁿ)`, the Poisson mixture of Black–Scholes deltas at the conditional
+  spots, each with its factor `cₙ`.
+* `mertonGamma`: `∑ₙ wₙ cₙ ϕ(d₁ⁿ)/(S σₙ √T)`, the corresponding mixture of gammas.
+* `mertonVega`: `∑ₙ wₙ S cₙ ϕ(d₁ⁿ) √T · σ/σₙ`, the corresponding mixture of vegas.
+
 ## Main results
 
 * `hasDerivAt_mertonCallPrice_spot`: the delta is `mertonDelta = ∑ₙ wₙ cₙ Φ(d₁ⁿ)`, where `d₁ⁿ`
@@ -41,6 +48,15 @@ and the weights `wₙcₙ` sum to one, which is the compensation identity `E[mer
   `mertonCallPrice_strictMonoOn_sigma`: the signs of the Greeks as the shape of the price. On
   `(0, ∞)` the call price strictly increases and is strictly convex in the spot, and strictly
   increases in the diffusion volatility.
+
+## References
+
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976]
+
+## Tags
+
+Merton jump-diffusion, delta and gamma, Poisson mixture, term-by-term differentiation,
+Greeks with jumps, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -26,6 +27,29 @@ conditional expectation, agrees with it almost surely (`snell_ae_eq_snellEnvelop
 * `snellEnvelope_le_supermartingale` — it is the smallest one dominating the reward at the
   exercise times and at the horizon.
 * `snellEnvelopeAux_const_mul` — it is positively homogeneous in the reward.
+
+## Main definitions
+
+* `snellEnvelopeAux`: the Snell recursion with `n` steps left from time `i`, taking
+  `max (Z i) 𝔼[· | 𝓕 i]` at exercise times in `X` and the bare conditional expectation elsewhere.
+* `snellEnvelope`: the Snell envelope of a reward `Z` for horizon `N` and exercise set `X`
+  (`X = univ` is the American envelope, a finite `X` the Bermudan one).
+
+## Main results
+
+* `snellEnvelope_succ_of_mem`, `snellEnvelope_succ_of_notMem`: the backward recursion, with and
+  without exercise, for `i < N`.
+* `snellEnvelope_dominates`: the envelope dominates the reward at exercise times and past the
+  horizon.
+* `snellEnvelope_supermartingale`: the envelope is a supermartingale.
+* `snellEnvelope_le_supermartingale`: minimality, the envelope lies a.s. below any supermartingale
+  dominating the reward a.s. at the exercise times up to the horizon.
+* `snellEnvelope_integrable`, `snellEnvelope_stronglyAdapted`: integrability and adaptedness.
+
+## Tags
+
+Snell envelope, optimal stopping, American option, Bermudan option, early exercise,
+backward recursion, smallest supermartingale, MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

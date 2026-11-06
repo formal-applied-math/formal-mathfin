@@ -12,13 +12,13 @@ public import BrownianMotion.StochasticIntegral.Predictable
 # Horizon-`T` simple processes are dense in the predictable `L²`
 
 This file is the density engine under the Itô integral: the bounded-horizon embedding of
-adapted simple step processes (`simpleAssembly_T`), its isometry (`assembly_isometry_T`), and
-its density in `Lp ℝ 2 trimMeasure_T` (`simpleAssembly_T_denseRange`). The Itô integral itself
-(`itoIntegralL2`, then `itoIntegralCLM_T` as its restriction to the band) is built on it in
+adapted simple step processes (`simpleAssemblyHorizon`), its isometry (`assembly_isometry_T`), and
+its density in `Lp ℝ 2 trimMeasure` (`simpleAssemblyHorizon_denseRange`). The Itô integral itself
+(`itoIntegralL2`, then `itoIntegralCLM` as its restriction to the band) is built on it in
 `ItoIntegralL2Dense` and `ItoIntegralCLM`.
 
-Here `trimMeasure_T = ((timeMeasure_T T).prod μ).trim 𝓕.predictable_le_prod` and
-`timeMeasure_T T = timeMeasure.restrict (Ioc 0 T)`. The construction mirrors
+Here `trimMeasure = ((timeMeasureHorizon T).prod μ).trim 𝓕.predictable_le_prod` and
+`timeMeasureHorizon T = timeMeasure.restrict (Ioc 0 T)`. The construction mirrors
 `WienerIntegralL2.lean` line-for-line at the orthogonal-complement layer.
 
 ## Mathematical thesis
@@ -48,13 +48,13 @@ Consumes upstream (all from
 Adds (the genuinely new content of this file):
 
 * `predictableRect` — the basic-rectangle family generating the predictable
-  σ-algebra. T enters at the measure layer (`trimMeasure_T`), not here.
+  σ-algebra. T enters at the measure layer (`trimMeasure`), not here.
 * `isPiSystem_predictableRect` — closure under non-empty intersection.
 * `setIntegral_eq_zero_of_orthogonal_pred` — π-λ-induction set-integral
   vanishing, for any *integrable* `g` (not merely an `L²` class: the weighted
   density argument of `PredictableDensityGeneral` applies it to `g·w`, which is
   only `L¹`).
-* `simpleAssembly_T_denseRange` — density of the existing simple-process
+* `simpleAssemblyHorizon_denseRange` — density of the existing simple-process
   assembly's range, in the restricted trim `L²`.
 
 ## Conventions
@@ -66,9 +66,39 @@ Adds (the genuinely new content of this file):
 
 The `ℝ≥0` (unbounded-horizon) Itô CLM is built on top of this file in
 `MathFin/Foundations/ItoIntegralL2Dense.lean` (`itoIntegralL2`), by σ-finite
-exhaustion of the time axis: each finite frame restricts to a `trimMeasure_T`,
+exhaustion of the time axis: each finite frame restricts to a `trimMeasure`,
 so `setIntegral_eq_zero_of_orthogonal_pred` (de-privatised for that reuse) and
 the `predictableRect` π-system are the bridges it consumes.
+
+## Main definitions
+
+* `timeMeasureHorizon`: the restriction of `timeMeasure` to `Ioc 0 T`, of total mass `T`.
+*  `trimMeasure`: the product measure `timeMeasureHorizon T ⊗ μ`, trimmed to the predictable
+  σ-algebra of the natural Brownian filtration; the `L²` domain of the CLM.
+* `predictableRect`: a basic predictable rectangle, `{⊥} ×ˢ F₀` or `Ioc a b ×ˢ F`.
+* `TBoundedSP`: the submodule of simple processes whose intervals all have right endpoint `≤ T`.
+* `simpleProcessL2Horizon`: a simple process's `L²` class in the `T`-restricted trim.
+* `simpleAssemblyHorizon`: the `T`-restricted simple-process `L²` embedding, as a linear map.
+* `itoAssemblyHorizon`: the Itô assembly composed with the inclusion `TBoundedSP T ↪ SimpleProcess`.
+* `iocSPHorizon`: the `T`-bounded simple process representing the indicator of `Ioc a b × F`.
+
+## Main results
+
+* `trimMeasure_eq_restrict`: the `T`-restricted predictable trim equals the restriction of the
+  full predictable trim to `Ioc 0 T × univ`.
+* `generateFrom_predictableRect`: the basic predictable rectangles generate the predictable
+  σ-algebra.
+* `assembly_isometry_T`: the Itô isometry on `T`-bounded simple processes, inherited from the full
+  isometry through the trim-norm equality.
+* `setIntegral_eq_zero_of_orthogonal_pred`: a `g ∈ L²(trim_T)` whose set integral over every basic
+  predictable rectangle vanishes has vanishing set integral over every predictable set.
+* `simpleAssemblyHorizon_denseRange`: the image of `simpleAssemblyHorizon` is dense in
+    `Lp 2 trim_T`.
+
+## Tags
+
+density of simple processes, simple processes, predictable rectangles, π–λ theorem,
+Itô integral construction, predictable sigma-algebra, MSC 60H05, MSC 60G07
 -/
 
 @[expose] public section
@@ -86,19 +116,19 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω}
 
 /-- The restriction of `timeMeasure` (the σ-finite Lebesgue pushforward to
 `ℝ≥0`, defined in `ItoIntegralL2.lean`) to `Ioc 0 T`. Finite of total mass `T`. -/
-noncomputable def timeMeasure_T (T : ℝ≥0) : Measure ℝ≥0 :=
+noncomputable def timeMeasureHorizon (T : ℝ≥0) : Measure ℝ≥0 :=
   ItoIntegralL2.timeMeasure.restrict (Set.Ioc 0 T)
 
-/-- `timeMeasure_T T` has finite total mass `T`. The acceptance of bounded
+/-- `timeMeasureHorizon T` has finite total mass `T`. The acceptance of bounded
 horizon is precisely that this instance exists; the unbounded `timeMeasure`
 is only σ-finite. -/
-instance (T : ℝ≥0) : IsFiniteMeasure (timeMeasure_T T) := by
+instance (T : ℝ≥0) : IsFiniteMeasure (timeMeasureHorizon T) := by
   refine ⟨?_⟩
-  rw [timeMeasure_T, Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
+  rw [timeMeasureHorizon, Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
       ItoIntegralL2.timeMeasure_Ioc]
   exact ENNReal.ofReal_lt_top
 
-/-- The product measure `timeMeasure_T T ⊗ μ`, trimmed to the predictable
+/-- The product measure `timeMeasureHorizon T ⊗ μ`, trimmed to the predictable
 σ-algebra of the natural Brownian filtration. The `L²`-domain of the CLM.
 
 Reuses Degenne's `Filtration.predictable_le_prod` (upstream `L2M.lean` L27),
@@ -107,9 +137,9 @@ which is exactly the σ-algebra hypothesis `extendOfNorm` consumes.
 The return type is left implicit so the σ-algebra is the predictable one (the
 `trim` result), not the default `Prod.instMeasurableSpace` — annotating the
 return type would force the default and cause an `Application type mismatch`. -/
-noncomputable def trimMeasure_T (T : ℝ≥0)
+noncomputable def trimMeasure (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) :=
-  ((timeMeasure_T T).prod μ).trim
+  ((timeMeasureHorizon T).prod μ).trim
     (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod
 
 /-! ### Basic predictable rectangles: the π-system
@@ -133,7 +163,7 @@ and `(⊥ : ℝ≥0) = 0`) or `Ioc a b ×ˢ F` (`F ∈ ℱₐ`, `a < b`). This i
 `Filtration.predictableRectangles` at our natural filtration — the family was
 upstreamed to BrownianMotion, so we consume it rather than restate it, and get
 `IsSetSemiring` (strictly more than the π-system this tower needs) for free. No
-`T` constraint at the σ-algebra level: T enters only via `timeMeasure_T`. -/
+`T` constraint at the σ-algebra level: T enters only via `timeMeasureHorizon`. -/
 noncomputable def predictableRect (hBmeas : ∀ t, Measurable (B t)) :
     Set (Set (ℝ≥0 × Ω)) :=
   (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictableRectangles
@@ -182,7 +212,7 @@ theorem generateFrom_predictableRect (hBmeas : ∀ t, Measurable (B t)) :
 
 /-! ### Phase 4: T-restricted simple-process embedding
 
-The bridge `trimMeasure_T = trim_full.restrict (Ioc 0 T × univ)` lets us reuse
+The bridge `trimMeasure = trim_full.restrict (Ioc 0 T × univ)` lets us reuse
 `ItoIntegralL2.memLp_uncurry_trim` (the full-trim `L²` claim) by simply
 restricting to `[0,T] × Ω`. T-bounded simple processes (intervals ≤ T) form a
 submodule of `SimpleProcess`; on this submodule, the existing Itô isometry
@@ -194,26 +224,26 @@ full predictable trim to `Ioc 0 T × univ`. Proof: `prod_restrict_eq_prod_univ`
 moves the time-restrict out of the product, then `restrict_trim` swaps `restrict`
 and `trim` (legal because `Ioc 0 T × univ` is a basic predictable rectangle, hence
 predictable-measurable). -/
-lemma trimMeasure_T_eq_restrict (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
-    trimMeasure_T (μ := μ) T hBmeas =
+lemma trimMeasure_eq_restrict (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
+    trimMeasure (μ := μ) T hBmeas =
       ((ItoIntegralL2.timeMeasure.prod μ).trim
         (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod).restrict
         (Set.Ioc 0 T ×ˢ Set.univ) := by
   set 𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas
-  change ((timeMeasure_T T).prod μ).trim 𝓕.predictable_le_prod = _
-  unfold timeMeasure_T
+  change ((timeMeasureHorizon T).prod μ).trim 𝓕.predictable_le_prod = _
+  unfold timeMeasureHorizon
   rw [Measure.restrict_prod_eq_prod_univ,
       ← MeasureTheory.restrict_trim 𝓕.predictable_le_prod _
         (MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := 𝓕) 0 T MeasurableSet.univ)]
 
 /-- **The `T`-trim lives on `(0, T] × Ω`**: trim-a.e. `z`, the time coordinate `z.1` lies in
-`Ioc 0 T`. The pointwise reading of `trimMeasure_T_eq_restrict` — a restriction charges nothing
+`Ioc 0 T`. The pointwise reading of `trimMeasure_eq_restrict` — a restriction charges nothing
 outside the set it restricts to. What an integrand does past the horizon is therefore invisible
 to the trim, so a time cutoff that is the identity on `[0, T]` may be erased from any
 trim-a.e. statement. -/
-lemma ae_fst_mem_Ioc_trimMeasure_T (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
-    ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), z.1 ∈ Set.Ioc 0 T := by
-  rw [trimMeasure_T_eq_restrict]
+lemma ae_fst_mem_Ioc_trimMeasure (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
+    ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas), z.1 ∈ Set.Ioc 0 T := by
+  rw [trimMeasure_eq_restrict]
   exact (ae_restrict_mem (MeasureTheory.measurableSet_predictable_Ioc_prod
     (𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas) 0 T MeasurableSet.univ)).mono
     fun _ hz ↦ hz.1
@@ -224,23 +254,23 @@ variable (hB : IsPreBrownianReal B μ)
 `ItoIntegralL2.memLp_uncurry_trim` via the bridge + `MemLp.restrict`. -/
 lemma memLp_uncurry_trim_T (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)) :
-    MemLp (Function.uncurry ⇑V) 2 (trimMeasure_T (μ := μ) T hBmeas) := by
-  rw [trimMeasure_T_eq_restrict]
+    MemLp (Function.uncurry ⇑V) 2 (trimMeasure (μ := μ) T hBmeas) := by
+  rw [trimMeasure_eq_restrict]
   exact (ItoIntegralL2.memLp_uncurry_trim hBmeas V).restrict _
 
 omit [IsProbabilityMeasure μ] in
 /-- An `L²` class of the predictable trim is `L²` of the product measure itself: the trim only
 coarsens the σ-algebra, so `MemLp` lifts through `memLp_of_memLp_trim`. -/
 lemma memLp_prod_of_lp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    MemLp (⇑φ) 2 ((timeMeasure_T T).prod μ) :=
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
+    MemLp (⇑φ) 2 ((timeMeasureHorizon T).prod μ) :=
   memLp_of_memLp_trim (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod
     (Lp.memLp φ)
 
 /-- The simple process's `L²` class in the T-restricted trim. -/
-noncomputable def simpleProcessL2_T (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+noncomputable def simpleProcessL2Horizon (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+    Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) :=
   (memLp_uncurry_trim_T T hBmeas V).toLp (Function.uncurry ⇑V)
 
 /-! ### T-bounded simple processes -/
@@ -288,7 +318,7 @@ fibre `{0} × Ω` has measure zero in `timeMeasure.prod μ`). Pure
 measure-theoretic equality — `IsPreBrownianReal B μ` is not needed. -/
 private lemma eLpNorm_uncurry_trim_T_eq_trim (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (V : TBoundedSP T hBmeas) :
-    eLpNorm (Function.uncurry ⇑V.val) 2 (trimMeasure_T (μ := μ) T hBmeas)
+    eLpNorm (Function.uncurry ⇑V.val) 2 (trimMeasure (μ := μ) T hBmeas)
       = eLpNorm (Function.uncurry ⇑V.val) 2
           ((ItoIntegralL2.timeMeasure.prod μ).trim
             (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod) := by
@@ -329,10 +359,10 @@ private lemma eLpNorm_uncurry_trim_T_eq_trim (T : ℝ≥0) (hBmeas : ∀ t, Meas
       · intro ⟨⟨_, hle⟩, _⟩
         exact absurd hle (not_le.mpr htT)
   -- Chain: trim_T → restrict (bridge) → indicator (lemma, .symm) → uncurry V (a.e.).
-  calc eLpNorm (Function.uncurry ⇑V.val) 2 (trimMeasure_T (μ := μ) T hBmeas)
+  calc eLpNorm (Function.uncurry ⇑V.val) 2 (trimMeasure (μ := μ) T hBmeas)
       = eLpNorm (Function.uncurry ⇑V.val) 2
           (((ItoIntegralL2.timeMeasure.prod μ).trim 𝓕.predictable_le_prod).restrict
-            (Set.Ioc 0 T ×ˢ Set.univ)) := by rw [trimMeasure_T_eq_restrict]
+            (Set.Ioc 0 T ×ˢ Set.univ)) := by rw [trimMeasure_eq_restrict]
     _ = eLpNorm ((Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)).indicator (Function.uncurry ⇑V.val)) 2
           ((ItoIntegralL2.timeMeasure.prod μ).trim 𝓕.predictable_le_prod) :=
         (MeasureTheory.eLpNorm_indicator_eq_eLpNorm_restrict hS_pred.nullMeasurableSet).symm
@@ -342,28 +372,28 @@ private lemma eLpNorm_uncurry_trim_T_eq_trim (T : ℝ≥0) (hBmeas : ∀ t, Meas
 
 /-- The T-restricted simple-process `L²` norm equals the full-trim norm for
 T-bounded `V`. -/
-private lemma simpleProcessL2_T_norm_eq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+private lemma simpleProcessL2Horizon_norm_eq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (V : TBoundedSP T hBmeas) :
-    ‖simpleProcessL2_T (μ := μ) T hBmeas V.val‖
+    ‖simpleProcessL2Horizon (μ := μ) T hBmeas V.val‖
       = ‖ItoIntegralL2.simpleProcessL2 (μ := μ) hBmeas V.val‖ := by
   have h := eLpNorm_uncurry_trim_T_eq_trim (μ := μ) T hBmeas V
-  unfold simpleProcessL2_T ItoIntegralL2.simpleProcessL2
+  unfold simpleProcessL2Horizon ItoIntegralL2.simpleProcessL2
   rw [Lp.norm_toLp, Lp.norm_toLp, h]
 
 /-- **The T-restricted simple-process `L²` embedding** as a linear map. -/
-noncomputable def simpleAssembly_T (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
-    TBoundedSP T hBmeas →ₗ[ℝ] Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) where
-  toFun V := simpleProcessL2_T T hBmeas V.val
+noncomputable def simpleAssemblyHorizon (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
+    TBoundedSP T hBmeas →ₗ[ℝ] Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) where
+  toFun V := simpleProcessL2Horizon T hBmeas V.val
   map_add' V W := by
-    change simpleProcessL2_T T hBmeas ((V + W).val) = _
-    rw [Submodule.coe_add, simpleProcessL2_T, simpleProcessL2_T, simpleProcessL2_T,
+    change simpleProcessL2Horizon T hBmeas ((V + W).val) = _
+    rw [Submodule.coe_add, simpleProcessL2Horizon, simpleProcessL2Horizon, simpleProcessL2Horizon,
         ← MemLp.toLp_add (memLp_uncurry_trim_T T hBmeas V.val)
           (memLp_uncurry_trim_T T hBmeas W.val)]
     congr 1
     exact ItoIntegralL2.uncurry_coe_add hBmeas V.val W.val
   map_smul' c V := by
-    change simpleProcessL2_T T hBmeas ((c • V).val) = _
-    rw [Submodule.coe_smul, simpleProcessL2_T, simpleProcessL2_T, RingHom.id_apply,
+    change simpleProcessL2Horizon T hBmeas ((c • V).val) = _
+    rw [Submodule.coe_smul, simpleProcessL2Horizon, simpleProcessL2Horizon, RingHom.id_apply,
         ← MemLp.toLp_const_smul c (memLp_uncurry_trim_T T hBmeas V.val)]
     congr 1
     exact ItoIntegralL2.uncurry_coe_smul hBmeas c V.val
@@ -371,7 +401,7 @@ noncomputable def simpleAssembly_T (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B 
 /-- The Itô assembly composed with the inclusion `TBoundedSP T ↪ SimpleProcess`.
 For T-bounded `V`, the discrete Itô integral `∑ V(p)(B_{p.2}−B_{p.1})`
 automatically lives in `[0,T]`. -/
-noncomputable def itoAssembly_T (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+noncomputable def itoAssemblyHorizon (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) :
     TBoundedSP T hBmeas →ₗ[ℝ] Lp ℝ 2 μ :=
   (ItoIntegralL2.itoAssembly hB hBmeas).comp (TBoundedSP T hBmeas).subtype
@@ -380,10 +410,10 @@ noncomputable def itoAssembly_T (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
 isometry (`ItoIntegralL2.assembly_isometry`) via the trim-norm equality. -/
 theorem assembly_isometry_T (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) (V : TBoundedSP T hBmeas) :
-    ‖itoAssembly_T hB T hBmeas V‖ = ‖simpleAssembly_T (μ := μ) T hBmeas V‖ := by
+    ‖itoAssemblyHorizon hB T hBmeas V‖ = ‖simpleAssemblyHorizon (μ := μ) T hBmeas V‖ := by
   change ‖ItoIntegralL2.itoAssembly hB hBmeas V.val‖
-      = ‖simpleProcessL2_T (μ := μ) T hBmeas V.val‖
-  rw [simpleProcessL2_T_norm_eq T hBmeas V]
+      = ‖simpleProcessL2Horizon (μ := μ) T hBmeas V.val‖
+  rw [simpleProcessL2Horizon_norm_eq T hBmeas V]
   exact ItoIntegralL2.assembly_isometry hB hBmeas V.val
 
 /-! ### Phase 5: Set-integral vanishing on the orthogonal complement
@@ -396,32 +426,32 @@ Phase 3). The total-integral step uses that `Ioc 0 T × univ` is a basic
 rectangle (when `T > 0`) and supports `trim_T` fully; for `T = 0`, `trim_T` is
 the zero measure and the total integral is trivially zero. -/
 
-/-- `trimMeasure_T` is a finite measure (product of `timeMeasure_T` — bounded
+/-- `trimMeasure` is a finite measure (product of `timeMeasureHorizon` — bounded
 by `T` — and the probability measure `μ`, then trimmed). -/
 instance (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
-    IsFiniteMeasure (trimMeasure_T (μ := μ) T hBmeas) := by
-  unfold trimMeasure_T
+    IsFiniteMeasure (trimMeasure (μ := μ) T hBmeas) := by
+  unfold trimMeasure
   infer_instance
 
 /-- The heart of the density argument, reused by the unbounded-horizon CLM
 (`ItoIntegralL2Dense`): a function `g ∈ L²(trim_T)` whose set-integral over every
 basic predictable rectangle vanishes has vanishing set-integral over every
 predictable-measurable set. Dynkin's π-λ theorem over `predictableRect`; the
-total-integral step uses finiteness of `trimMeasure_T`. -/
+total-integral step uses finiteness of `trimMeasure`. -/
 lemma setIntegral_eq_zero_of_orthogonal_pred (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t))
     {g : ℝ≥0 × Ω → ℝ}
-    (hg_int : Integrable g (trimMeasure_T (μ := μ) T hBmeas))
+    (hg_int : Integrable g (trimMeasure (μ := μ) T hBmeas))
     (h_orth : ∀ R ∈ predictableRect (mΩ := mΩ) hBmeas,
-      ∫ z in R, g z ∂(trimMeasure_T (μ := μ) T hBmeas) = 0)
+      ∫ z in R, g z ∂(trimMeasure (μ := μ) T hBmeas) = 0)
     (s : Set (ℝ≥0 × Ω))
     (hs : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable] s) :
-    ∫ z in s, g z ∂(trimMeasure_T (μ := μ) T hBmeas) = 0 := by
+    ∫ z in s, g z ∂(trimMeasure (μ := μ) T hBmeas) = 0 := by
   set 𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas
   -- Total integral vanishes: trim_T is supported on `Ioc 0 T × univ`. For
   -- `T > 0` the rect is in `predictableRect` (orthogonality); for `T = 0`
   -- trim_T is zero.
-  have h_total : ∫ z, g z ∂(trimMeasure_T (μ := μ) T hBmeas) = 0 := by
+  have h_total : ∫ z, g z ∂(trimMeasure (μ := μ) T hBmeas) = 0 := by
     by_cases hT : 0 < T
     · -- `T > 0`: split ∫ univ into ∫_S + ∫_Sᶜ; both vanish.
       have hR : Set.Ioc 0 T ×ˢ (Set.univ : Set Ω) ∈ predictableRect (mΩ := mΩ) hBmeas :=
@@ -431,34 +461,34 @@ lemma setIntegral_eq_zero_of_orthogonal_pred (T : ℝ≥0)
       -- Sᶜ has zero trim_T-measure: trim_T = trim_full.restrict S, so trim_T Sᶜ = trim_full(Sᶜ∩S) =
       -- 0.
       have hSc_null :
-          (trimMeasure_T (μ := μ) T hBmeas) (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω))ᶜ = 0 := by
-        rw [trimMeasure_T_eq_restrict,
+          (trimMeasure (μ := μ) T hBmeas) (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω))ᶜ = 0 := by
+        rw [trimMeasure_eq_restrict,
             Measure.restrict_apply (MeasurableSet.compl hS_pred),
             Set.compl_inter_self]
         exact measure_empty
       have h_int_Sc : ∫ z in (Set.Ioc 0 T ×ˢ Set.univ)ᶜ, g z
-          ∂(trimMeasure_T (μ := μ) T hBmeas) = 0 :=
+          ∂(trimMeasure (μ := μ) T hBmeas) = 0 :=
         setIntegral_measure_zero g hSc_null
       have h_int_S := h_orth _ hR
       have h_split := integral_add_compl
-        (μ := trimMeasure_T (μ := μ) T hBmeas) (f := g) hS_pred hg_int
+        (μ := trimMeasure (μ := μ) T hBmeas) (f := g) hS_pred hg_int
       linarith
     · -- `T = 0`: trim_T is the zero measure.
       push Not at hT
       have hT0 : T = 0 := le_antisymm hT bot_le
-      have h_zero : trimMeasure_T (μ := μ) T hBmeas = 0 := by
+      have h_zero : trimMeasure (μ := μ) T hBmeas = 0 := by
         subst hT0
-        unfold trimMeasure_T timeMeasure_T
+        unfold trimMeasure timeMeasureHorizon
         rw [Set.Ioc_self, Measure.restrict_empty, Measure.zero_prod,
             MeasureTheory.zero_trim]
       -- Extract `g` as a standalone function to avoid the motive issue.
       let gf : ℝ≥0 × Ω → ℝ := (g : ℝ≥0 × Ω → ℝ)
-      change ∫ z, gf z ∂(trimMeasure_T (μ := μ) T hBmeas) = 0
+      change ∫ z, gf z ∂(trimMeasure (μ := μ) T hBmeas) = 0
       rw [h_zero]
       exact integral_zero_measure gf
   -- π-system induction over `predictableRect` (Phase 2 + Phase 3).
   refine MeasurableSpace.induction_on_inter
-    (C := fun s _ ↦ ∫ z in s, g z ∂(trimMeasure_T (μ := μ) T hBmeas) = 0)
+    (C := fun s _ ↦ ∫ z in s, g z ∂(trimMeasure (μ := μ) T hBmeas) = 0)
     (h_eq := (generateFrom_predictableRect hBmeas).symm)
     (h_inter := isPiSystem_predictableRect hBmeas)
     (empty := setIntegral_empty)
@@ -467,28 +497,28 @@ lemma setIntegral_eq_zero_of_orthogonal_pred (T : ℝ≥0)
   · -- Complement: `∫ g = ∫_S g + ∫_Sᶜ g`; total is zero, S piece is zero, so Sᶜ piece is zero.
     intro S hS hPS
     have h_split := integral_add_compl
-      (μ := trimMeasure_T (μ := μ) T hBmeas) (f := g) hS hg_int
+      (μ := trimMeasure (μ := μ) T hBmeas) (f := g) hS hg_int
     linarith
   · -- Disjoint countable union.
     intro f hf hfm hf_zero
     rw [integral_iUnion hfm hf hg_int.integrableOn]
     simp [hf_zero]
 
-/-! ### Phase 6: Density of `simpleAssembly_T` and the CLM
+/-! ### Phase 6: Density of `simpleAssemblyHorizon` and the CLM
 
-The image of `simpleAssembly_T : TBoundedSP T →ₗ[ℝ] Lp ℝ 2 trim_T` is dense.
-Proof: orthogonal-complement argument. Take `g ⊥ range(simpleAssembly_T)`.
+The image of `simpleAssemblyHorizon : TBoundedSP T →ₗ[ℝ] Lp ℝ 2 trim_T` is dense.
+Proof: orthogonal-complement argument. Take `g ⊥ range(simpleAssemblyHorizon)`.
 For each basic predictable rect `R` we construct a T-bounded SP `V_R` such that
-`⟪simpleAssembly_T V_R, g⟫ = ∫_R g d trim_T`. Orthogonality gives the integral
+`⟪simpleAssemblyHorizon V_R, g⟫ = ∫_R g d trim_T`. Orthogonality gives the integral
 zero; Phase 5 extends to all measurable sets; `ae_eq_zero_of_forall_setIntegral`
-concludes `g = 0`. The CLM `itoIntegralCLM_T` is then the `extendOfNorm` of
-`itoAssembly_T` along the (now dense) `simpleAssembly_T`. -/
+concludes `g = 0`. The CLM `itoIntegralCLM` is then the `extendOfNorm` of
+`itoAssemblyHorizon` along the (now dense) `simpleAssemblyHorizon`. -/
 
 /-- The T-bounded SimpleProcess representing the indicator of `Ioc a b × F`,
 built from upstream `ElementaryPredictableSet.IocProd.indicator`. We require
 `a ≤ b` (so the IocProd's index set `I` is `{(a, b)}`) and `b ≤ T` (so the only
 interval is in `[0, T]`). -/
-noncomputable def iocSP_T {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
+noncomputable def iocSPHorizon {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) {F : Set Ω}
     (hF : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas) a] F) :
     TBoundedSP T hBmeas :=
@@ -506,13 +536,13 @@ noncomputable def iocSP_T {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     rcases h_in_I with rfl
     exact hbT⟩
 
-/-- The uncurry of `iocSP_T hab hbT hF` agrees pointwise with `(Ioc a b × F).indicator 1`.
+/-- The uncurry of `iocSPHorizon hab hbT hF` agrees pointwise with `(Ioc a b × F).indicator 1`.
 Public because `PredictableDensityGeneral` needs it to run the same rectangle argument
 against the bracket-weighted measure. -/
-lemma uncurry_iocSP_T_eq {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
+lemma uncurry_iocSPHorizon_eq {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) {F : Set Ω}
     (hF : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas) a] F) :
-    Function.uncurry ⇑(iocSP_T hBmeas hab hbT hF : TBoundedSP T hBmeas).val
+    Function.uncurry ⇑(iocSPHorizon hBmeas hab hbT hF : TBoundedSP T hBmeas).val
       = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) := by
   funext ⟨t, ω⟩
   change ⇑((ElementaryPredictableSet.IocProd a b hF).indicator (1 : ℝ)) t ω
@@ -521,14 +551,14 @@ lemma uncurry_iocSP_T_eq {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
       ElementaryPredictableSet.coe_IocProd a b hF]
   rfl
 
-/-- Inner product of `simpleAssembly_T (iocSP_T ...)` with `g` equals the
+/-- Inner product of `simpleAssemblyHorizon (iocSPHorizon ...)` with `g` equals the
 set-integral of `g` over the rectangle. -/
-private lemma inner_simpleAssembly_T_iocSP_T {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
+private lemma inner_simpleAssemblyHorizon_iocSPHorizon {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) {F : Set Ω}
     (hF : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas) a] F)
-    (g : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    ⟪simpleAssembly_T (μ := μ) T hBmeas (iocSP_T hBmeas hab hbT hF), g⟫_ℝ
-      = ∫ z in Set.Ioc a b ×ˢ F, g z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
+    (g : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
+    ⟪simpleAssemblyHorizon (μ := μ) T hBmeas (iocSPHorizon hBmeas hab hbT hF), g⟫_ℝ
+      = ∫ z in Set.Ioc a b ×ˢ F, g z ∂(trimMeasure (μ := μ) T hBmeas) := by
   set 𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas
   -- The Lp inner product takes its typeclass MeasurableSpace from trim_T's σ-alg
   -- (which is predictable, not the default product σ-alg). Make it explicit so
@@ -539,19 +569,20 @@ private lemma inner_simpleAssembly_T_iocSP_T {T : ℝ≥0} (hBmeas : ∀ t, Meas
   -- real inner product convention `⟪x, y⟫_ℝ = y * x`).
   have h_coe := MemLp.coeFn_toLp
     (memLp_uncurry_trim_T (μ := μ) T hBmeas
-      (iocSP_T hBmeas hab hbT hF : TBoundedSP T hBmeas).val)
-  have h_uncurry_eq := uncurry_iocSP_T_eq hBmeas hab hbT hF
-  have h_ae_eq : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas),
-      (⟪(simpleAssembly_T (μ := μ) T hBmeas (iocSP_T hBmeas hab hbT hF) : ℝ≥0 × Ω → ℝ) z,
+      (iocSPHorizon hBmeas hab hbT hF : TBoundedSP T hBmeas).val)
+  have h_uncurry_eq := uncurry_iocSPHorizon_eq hBmeas hab hbT hF
+  have h_ae_eq : ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas),
+      (⟪(simpleAssemblyHorizon (μ := μ) T hBmeas (iocSPHorizon hBmeas hab hbT hF) : ℝ≥0 × Ω → ℝ) z,
         (g : ℝ≥0 × Ω → ℝ) z⟫_ℝ : ℝ)
         = (Set.Ioc a b ×ˢ F).indicator (fun z ↦ (g : ℝ≥0 × Ω → ℝ) z) z := by
     filter_upwards [h_coe] with z hz
-    -- Rewrite simpleAssembly_T V into uncurry V via h_coe; then uncurry V via h_uncurry_eq.
+    -- Rewrite simpleAssemblyHorizon V into uncurry V via h_coe; then uncurry V via h_uncurry_eq.
     have hSA_eq :
-        (simpleAssembly_T (μ := μ) T hBmeas (iocSP_T hBmeas hab hbT hF) : ℝ≥0 × Ω → ℝ) z
+        (simpleAssemblyHorizon (μ := μ) T hBmeas (iocSPHorizon hBmeas hab hbT hF) : ℝ≥0 × Ω → ℝ) z
           = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z := by
-      calc (simpleAssembly_T (μ := μ) T hBmeas (iocSP_T hBmeas hab hbT hF) : ℝ≥0 × Ω → ℝ) z
-          = Function.uncurry ⇑(iocSP_T hBmeas hab hbT hF : TBoundedSP T hBmeas).val z := hz
+      calc (simpleAssemblyHorizon (μ := μ) T hBmeas (iocSPHorizon hBmeas hab hbT hF) :
+            ℝ≥0 × Ω → ℝ) z
+          = Function.uncurry ⇑(iocSPHorizon hBmeas hab hbT hF : TBoundedSP T hBmeas).val z := hz
         _ = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z := by rw [h_uncurry_eq]
     rw [hSA_eq]
     -- Real inner product: ⟪x, y⟫_ℝ = y * x for x, y : ℝ.
@@ -565,18 +596,17 @@ private lemma inner_simpleAssembly_T_iocSP_T {T : ℝ≥0} (hBmeas : ∀ t, Meas
   exact integral_indicator
     (MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := 𝓕) a b hF)
 
-/-! ### Density of `simpleAssembly_T` -/
+/-! ### Density of `simpleAssemblyHorizon` -/
 
-/-- Bridge lemma: integrating any `g : Lp 2 trim_T` over a predictable-measurable
-`R` equals the integral over `R ∩ (Ioc 0 T × univ)`. The complement of
-`Ioc 0 T × univ` is `trim_T`-null because `trim_T = trim_full.restrict
-(Ioc 0 T × univ)`. -/
+/-- Bridge lemma: integrating any `g : Lp 2 trim_T` over a predictable-measurable `R` equals the
+integral over `R ∩ (Ioc 0 T × univ)`. The complement of `Ioc 0 T × univ` is `trim_T`-null because
+`trim_T = trim_full.restrict (Ioc 0 T × univ)`. -/
 lemma setIntegral_eq_setIntegral_inter_supp {T : ℝ≥0}
     (hBmeas : ∀ t, Measurable (B t))
     (g : ℝ≥0 × Ω → ℝ) (R : Set (ℝ≥0 × Ω))
     (hR : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable] R) :
-    ∫ z in R, g z ∂(trimMeasure_T (μ := μ) T hBmeas) =
-      ∫ z in R ∩ (Set.Ioc 0 T ×ˢ Set.univ), g z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
+    ∫ z in R, g z ∂(trimMeasure (μ := μ) T hBmeas) =
+      ∫ z in R ∩ (Set.Ioc 0 T ×ˢ Set.univ), g z ∂(trimMeasure (μ := μ) T hBmeas) := by
   set 𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas
   -- Reset the typeclass to predictable σ-alg locally (trim_T's natural σ-alg).
   let : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
@@ -584,30 +614,30 @@ lemma setIntegral_eq_setIntegral_inter_supp {T : ℝ≥0}
     MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := 𝓕) 0 T MeasurableSet.univ
   -- (trim_T).restrict R = (trim_full.restrict S).restrict R = trim_full.restrict (R ∩ S)
   -- and (trim_T).restrict (R ∩ S) = trim_full.restrict ((R ∩ S) ∩ S) = trim_full.restrict (R ∩ S).
-  have h1 : (trimMeasure_T (μ := μ) T hBmeas).restrict R
-      = (trimMeasure_T (μ := μ) T hBmeas).restrict (R ∩ Set.Ioc 0 T ×ˢ Set.univ) := by
-    rw [trimMeasure_T_eq_restrict,
+  have h1 : (trimMeasure (μ := μ) T hBmeas).restrict R
+      = (trimMeasure (μ := μ) T hBmeas).restrict (R ∩ Set.Ioc 0 T ×ˢ Set.univ) := by
+    rw [trimMeasure_eq_restrict,
         Measure.restrict_restrict hR,
         Measure.restrict_restrict (hR.inter hS_pred),
         Set.inter_assoc, Set.inter_self]
-  change ∫ z, g z ∂((trimMeasure_T (μ := μ) T hBmeas).restrict R)
-      = ∫ z, g z ∂((trimMeasure_T (μ := μ) T hBmeas).restrict (R ∩ Set.Ioc 0 T ×ˢ Set.univ))
+  change ∫ z, g z ∂((trimMeasure (μ := μ) T hBmeas).restrict R)
+      = ∫ z, g z ∂((trimMeasure (μ := μ) T hBmeas).restrict (R ∩ Set.Ioc 0 T ×ˢ Set.univ))
   rw [h1]
 
-/-- **Density**: the image of `simpleAssembly_T` is dense in `Lp 2 trim_T`.
-Proof outline: take `g ⊥ range(simpleAssembly_T)`. For every basic predictable
+/-- **Density**: the image of `simpleAssemblyHorizon` is dense in `Lp 2 trim_T`.
+Proof outline: take `g ⊥ range(simpleAssemblyHorizon)`. For every basic predictable
 rect `R`, derive `∫_R g d trim_T = 0`:
 * For the bot piece `{0} × F₀`: subset of `{0} × univ`, which is `trim_T`-null.
 * For `Ioc a b × F`: reduce to `Ioc a (min b T) × F` via the bridge, then apply
   orthogonality (when non-empty) or get `∫_∅ = 0` (when degenerate).
 Phase 5 extends to all predictable-measurable sets; `Lp.ae_eq_zero` concludes. -/
-theorem simpleAssembly_T_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
-    DenseRange (simpleAssembly_T (μ := μ) T hBmeas) := by
+theorem simpleAssemblyHorizon_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
+    DenseRange (simpleAssemblyHorizon (μ := μ) T hBmeas) := by
   set 𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas
   suffices h_orth_bot :
-      (LinearMap.range (simpleAssembly_T (μ := μ) T hBmeas))ᗮ = ⊥ by
+      (LinearMap.range (simpleAssemblyHorizon (μ := μ) T hBmeas))ᗮ = ⊥ by
     rw [denseRange_iff_closure_range,
-        ← LinearMap.coe_range (simpleAssembly_T (μ := μ) T hBmeas),
+        ← LinearMap.coe_range (simpleAssemblyHorizon (μ := μ) T hBmeas),
         ← Submodule.topologicalClosure_coe,
         Submodule.topologicalClosure_eq_top_iff.mpr h_orth_bot, Submodule.top_coe]
   rw [Submodule.eq_bot_iff]
@@ -615,7 +645,7 @@ theorem simpleAssembly_T_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
   rw [Submodule.mem_orthogonal] at h_mem
   -- For every basic predictable rect R, ∫_R g d trim_T = 0.
   have h_orth : ∀ R ∈ predictableRect (mΩ := mΩ) hBmeas,
-      ∫ z in R, g z ∂(trimMeasure_T (μ := μ) T hBmeas) = 0 := by
+      ∫ z in R, g z ∂(trimMeasure (μ := μ) T hBmeas) = 0 := by
     intro R hR
     rcases hR with ⟨F₀, hF₀, rfl⟩ | ⟨a, b, _hab, F, hF, rfl⟩
     · -- Bot: ∫_{{0} × F₀} g = 0 because {0} × F₀ ⊆ {0} × univ ⊆ (Ioc 0 T × univ)ᶜ
@@ -648,10 +678,10 @@ theorem simpleAssembly_T_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
       rw [hmax]
       -- Now: ∫_{Ioc a (min b T) × F} g d trim_T = 0
       by_cases hab' : a ≤ min b T
-      · -- Build iocSP_T at (a, min b T, F): T-bounded with b' = min b T ≤ T.
+      · -- Build iocSPHorizon at (a, min b T, F): T-bounded with b' = min b T ≤ T.
         have hbT' : min b T ≤ T := min_le_right _ _
-        have h_set := inner_simpleAssembly_T_iocSP_T (μ := μ) hBmeas hab' hbT' hF g
-        have h_inner := h_mem _ ⟨iocSP_T hBmeas hab' hbT' hF, rfl⟩
+        have h_set := inner_simpleAssemblyHorizon_iocSPHorizon (μ := μ) hBmeas hab' hbT' hF g
+        have h_inner := h_mem _ ⟨iocSPHorizon hBmeas hab' hbT' hF, rfl⟩
         rw [← h_set]
         exact h_inner
       · -- a > min b T: Ioc a (min b T) = ∅, so R_T = ∅.

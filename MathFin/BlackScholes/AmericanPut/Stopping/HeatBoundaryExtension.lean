@@ -16,10 +16,23 @@ bounded continuous data. `HeatBoundaryEquation` proves interior smoothness and
 the PDE for compact continuous data. `IntervalHeatBoundary` constructs the
 finite-interval heat correction; assembly in pricing coordinates is separate.
 
-## Result
+## Main definitions
 
-Public entry points include `heatBoundaryExtension`, `heatBoundaryExtension_integrable`,
-`heatBoundaryExtension_continuous`, `heatBoundaryExtension_boundary`.
+* `heatBoundaryExtension`: the extension of the boundary datum `g` to depth `x`, as the
+  fixed-density integral `∫ s in Ioi 0, heatBoundaryKernel s 1 * g (t - x^2*s)`.
+
+## Main results
+
+* `heatBoundaryExtension_integrable`, `heatBoundaryExtension_continuous`: for continuous bounded
+  `g`, the defining integrand is integrable and the extension is jointly continuous in `(x, t)`.
+* `heatBoundaryExtension_boundary`: at depth `0` the extension is the datum, `g t`.
+* `heatBoundaryExtension_causal`: if `g` vanishes up to time `a`, the extension vanishes there
+  at every depth.
+
+## Tags
+
+heat boundary extension, half-line, boundary trace, causality, Dirichlet data, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

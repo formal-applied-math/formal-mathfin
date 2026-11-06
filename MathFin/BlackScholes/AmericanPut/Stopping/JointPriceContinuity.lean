@@ -8,11 +8,21 @@ module
 public import MathFin.BlackScholes.AmericanPut.Stopping.MaturityContinuity
 public import Mathlib.Analysis.Convex.Continuous
 
-/-! # Joint spot/maturity continuity, derived from the stopping supremum 
-## Result
+/-!
+# Joint spot/maturity continuity, derived from the stopping supremum
 
-Public entry points include `americanPutValue_uniform_spot_lipschitz`,
-`americanPutValue_joint_continuousAt`.
+## Main results
+
+* `americanPutValue_uniform_spot_lipschitz`: for `0 ≤ K`, `0 ≤ r`, `0 < S` and jointly measurable
+  `W`, the American put value is Lipschitz in the spot on the ball of radius `S/4` around `S`,
+  with constant `2K/(S/4)`, at fixed maturity `T`.
+* `americanPutValue_joint_continuousAt`: for the same hypotheses and continuous paths, the
+  value is jointly continuous in (spot, maturity) at `(S,T)`.
+
+## Tags
+
+joint continuity, spot Lipschitz, maturity continuity, American put value, stopping supremum,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

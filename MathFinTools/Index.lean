@@ -115,31 +115,45 @@ def record (env : Environment) (simps : SimpTheorems) (isIndexed : Name → Bool
     ("uses", toJson (uses.toArray.qsort Name.lt)),
     ("attrs", Json.arr attrs)]
 
-def run : MetaM Json := do
+/-- The indexed declarations, sorted. -/
+def indexedNames (env : Environment) : Array Name :=
+  (env.constants.map₁.fold (init := #[]) fun acc n ci =>
+    if indexed env n ci then acc.push n else acc).qsort Name.lt
+
+/-- The records of one slice of the declarations. -/
+def records (names : Array Name) (isIndexed : Name → Bool) : MetaM (Array Json) := do
   let env ← getEnv
   let simps := simpExtension.getState env
-  let names := env.constants.map₁.fold (init := #[]) fun acc n ci =>
-    if indexed env n ci then acc.push n else acc
-  let names := names.qsort Name.lt
-  let set : NameHashSet := names.foldl (·.insert ·) {}
-  let mut out := #[]
-  for n in names do
-    if let some ci := env.find? n then
-      out := out.push (← record env simps set.contains n ci)
-  return Json.mkObj [("toolchain", Lean.versionString), ("decls", Json.arr out)]
+  names.filterMapM fun n => do
+    let some ci := env.find? n | return none
+    return some (← record env simps isIndexed n ci)
 
 end MathFinTools.Index
 
 open MathFinTools.Index in
+/-- `lake exe mathfin_index OUT.json [JOBS]`: pretty-printing the statements is the cost, so
+the declarations are split into `JOBS` slices (default 4) elaborated on separate threads over
+the same, immutable environment. -/
 unsafe def main (args : List String) : IO UInt32 := do
   let some outPath := args.head?
-    | IO.eprintln "usage: lake exe mathfin_index OUT.json"; return 2
+    | IO.eprintln "usage: lake exe mathfin_index OUT.json [JOBS]"; return 2
+  let jobs := max 1 ((args[1]?.bind String.toNat?).getD 4)
   initSearchPath (← findSysroot)
   Lean.enableInitializersExecution
   let env ← importModules #[{ module := `MathFin }] {} (trustLevel := 1024) (loadExts := true)
   let ctx : Core.Context := {
     fileName := "<mathfin_index>", fileMap := default, maxHeartbeats := 0,
     options := ({} : Options).setBool `pp.universes false }
-  let (json, _) ← (run.run' {} {}).toIO ctx { env }
+  let names := indexedNames env
+  let set : NameHashSet := names.foldl (·.insert ·) {}
+  let size := (names.size + jobs - 1) / jobs
+  let tasks ← (List.range jobs).toArray.mapM fun j =>
+    IO.asTask (prio := .dedicated) do
+      let slice := names.extract (j * size) ((j + 1) * size)
+      return (← ((records slice set.contains).run' {} {}).toIO ctx { env }).1
+  let mut out : Array Json := #[]
+  for t in tasks do
+    out := out ++ (← IO.ofExcept (← IO.wait t))
+  let json := Json.mkObj [("toolchain", Lean.versionString), ("decls", Json.arr out)]
   IO.FS.writeFile outPath (json.compress ++ "\n")
   return 0

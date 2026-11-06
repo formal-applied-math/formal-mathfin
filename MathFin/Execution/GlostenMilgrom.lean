@@ -5,6 +5,7 @@ Authors: Alfredo Garcia
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -60,7 +61,14 @@ hypotheses cannot be jointly satisfied without `0 < θ < 1`.
 A model satisfying all of them — so the theorem is not vacuous — is in
 `MathFin.Execution.GlostenMilgromModel`.
 
-## Results
+## Main definitions
+
+* `payoff`: the two-valued asset, `VL + indicator H (VH - VL)`, equal to `VH` on the high event
+  `H` and `VL` off it.
+* `postBuy`, `postSell`: the posterior probability that the value is high after a buy,
+  `(1 + p) θ / (1 + p (2θ - 1))`, and after a sell, `(1 - p) θ / (1 - p (2θ - 1))`.
+
+## Main results
 
 * `two_mul_cond_buy_high`, `two_mul_cond_buy_low_add`: the trade probabilities,
   derived from the trader mix.
@@ -77,9 +85,13 @@ A model satisfying all of them — so the theorem is not vacuous — is in
 
 ## References
 
-* L. R. Glosten and P. R. Milgrom, *Bid, ask and transaction prices in a
-  specialist market with heterogeneously informed traders*, Journal of
-  Financial Economics 14 (1985) 71-100.
+* [L. R. Glosten and P. R. Milgrom, *Bid, ask and transaction prices in a
+  specialist market with heterogeneously informed traders*][GlostenMilgrom1985].
+
+## Tags
+
+Glosten–Milgrom model, bid–ask spread, adverse selection, market maker, informed trader,
+market microstructure, Bayesian updating, MSC 91B26, JEL D82, JEL G14
 -/
 
 @[expose] public section

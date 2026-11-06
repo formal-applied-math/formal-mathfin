@@ -5,6 +5,7 @@ Authors: Yang Ye
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -20,10 +21,18 @@ every `ν > 0` by Mathlib's Japanese-bracket bound `integrable_rpow_neg_one_add_
 constant is then computed, `C_ν = √(νπ) Γ(ν/2) / Γ((ν+1)/2)`, by writing the kernel as a Gamma
 mixture of Gaussian kernels and exchanging the integrals, so the density is the textbook one.
 
+## Main definitions
+
+* `studentTKernel`: the unnormalised kernel `k_ν(x) = (1 + x²/ν)^(-(ν+1)/2)`.
+* `studentTNormConst`: the normalising constant `C_ν = ∫ k_ν` (equal to
+  `√(νπ) Γ(ν/2) / Γ((ν+1)/2)` for `ν > 0`, by `studentTNormConst_eq`).
+* `studentTPDFReal`, `studentTPDF`: the density `k_ν / C_ν`, real- and `ℝ≥0∞`-valued.
+* `studentTMeasure`: the standard Student-t law, `volume.withDensity (studentTPDF ν)`; a
+  probability measure for `ν > 0`.
+
 ## Main results
 
-* `studentTMeasure ν`: the Student-t law, a probability measure for `ν > 0`
-  (`isProbabilityMeasure_studentTMeasure`).
+* `isProbabilityMeasure_studentTMeasure`: the Student-t law is a probability measure for `ν > 0`.
 * `studentTNormConst_eq`, `studentTPDFReal_eq`: the normalizing constant and the density in
   closed form, `g_ν(x) = Γ((ν+1)/2) / (√(νπ) Γ(ν/2)) · (1 + x²/ν)^(-(ν+1)/2)`.
 * `studentTMeasure_one`: at `ν = 1` it is Mathlib's standard Cauchy law `cauchyMeasure 0 1`.
@@ -31,6 +40,16 @@ mixture of Gaussian kernels and exchanging the integrals, so the density is the 
 * `setIntegral_Ioi_mul_studentTPDFReal`: the tail first moment
   `∫_q^∞ t g_ν(t) dt = g_ν(q) (ν + q²)/(ν − 1)` for `ν > 1`, the integral behind the
   McNeil–Frey–Embrechts expected-shortfall closed form.
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts]
+
+## Tags
+
+Student-t distribution, heavy tails, Cauchy distribution, expected shortfall, degrees of freedom,
+Gamma mixture, MSC 60E05, MSC 91G70
 -/
 
 @[expose] public section
@@ -47,7 +66,8 @@ variable {ν : ℝ}
 /-- The unnormalized Student-t kernel `k_ν(x) = (1 + x²/ν)^(-(ν+1)/2)`. -/
 noncomputable def studentTKernel (ν x : ℝ) : ℝ := (1 + x ^ 2 / ν) ^ (-(ν + 1) / 2)
 
-private lemma one_add_sq_div_pos (hν : 0 < ν) (x : ℝ) : 0 < 1 + x ^ 2 / ν := by positivity
+/-- For `ν > 0`, `1 + x ^ 2 / ν` is positive. -/
+lemma one_add_sq_div_pos (hν : 0 < ν) (x : ℝ) : 0 < 1 + x ^ 2 / ν := by positivity
 
 lemma studentTKernel_pos (hν : 0 < ν) (x : ℝ) : 0 < studentTKernel ν x :=
   rpow_pos_of_pos (one_add_sq_div_pos hν x) _
@@ -87,7 +107,7 @@ private lemma studentTKernel_eq_integral (hν : 0 < ν) (x : ℝ) :
 
 /-- The inner Gaussian integral: integrating the mixture integrand over `x` gives
 `u^(s−1) e^(−u) √(π/(u/ν))`. -/
-private lemma integral_mixture_x (hν : 0 < ν) (u : ℝ) :
+lemma integral_rpow_mul_exp_neg_mul_one_add_sq_div (hν : 0 < ν) (u : ℝ) :
     ∫ x, u ^ ((ν + 1) / 2 - 1) * exp (-((1 + x ^ 2 / ν) * u)) =
       u ^ ((ν + 1) / 2 - 1) * exp (-u) * √(π / (u / ν)) := by
   rw [← integral_gaussian (u / ν), ← integral_const_mul]
@@ -99,7 +119,7 @@ private lemma integral_mixture_x (hν : 0 < ν) (u : ℝ) :
 
 /-- The outer integrand, rearranged: for `u > 0`,
 `u^(s−1) e^(−u) √(π/(u/ν)) = √(νπ) · e^(−u) u^(ν/2−1)`, the Gamma integrand at `ν/2`. -/
-private lemma mixture_x_eq {u : ℝ} (hu : 0 < u) :
+lemma rpow_mul_exp_mul_sqrt_pi_div_eq {u : ℝ} (hu : 0 < u) :
     u ^ ((ν + 1) / 2 - 1) * exp (-u) * √(π / (u / ν)) =
       √(ν * π) * (exp (-u) * u ^ (ν / 2 - 1)) := by
   have hsq : √(π / (u / ν)) = √(ν * π) * u ^ (-(1 / 2) : ℝ) := by
@@ -129,7 +149,7 @@ theorem studentTNormConst_eq (hν : 0 < ν) :
     · refine ((GammaIntegral_convergent (half_pos hν)).const_mul √(ν * π)).congr
         ((ae_restrict_iff' measurableSet_Ioi).2 (ae_of_all _ fun u (hu : 0 < u) ↦ ?_))
       simp only [Function.uncurry_apply_pair, f]
-      rw [← mixture_x_eq hu, ← integral_mixture_x hν u]
+      rw [← rpow_mul_exp_mul_sqrt_pi_div_eq hu, ← integral_rpow_mul_exp_neg_mul_one_add_sq_div hν u]
       exact integral_congr_ae (ae_of_all _ fun x ↦ (norm_of_nonneg (by positivity)).symm)
   calc studentTNormConst ν
       = (Gamma ((ν + 1) / 2))⁻¹ * ∫ x, ∫ u in Ioi 0, f x u := by
@@ -140,7 +160,7 @@ theorem studentTNormConst_eq (hν : 0 < ν) :
     _ = (Gamma ((ν + 1) / 2))⁻¹ * ∫ u in Ioi 0, √(ν * π) * (exp (-u) * u ^ (ν / 2 - 1)) := by
         congr 1
         refine setIntegral_congr_fun measurableSet_Ioi fun u (hu : 0 < u) ↦ ?_
-        rw [integral_mixture_x hν u, mixture_x_eq hu]
+        rw [integral_rpow_mul_exp_neg_mul_one_add_sq_div hν u, rpow_mul_exp_mul_sqrt_pi_div_eq hu]
     _ = √(ν * π) * Gamma (ν / 2) / Gamma ((ν + 1) / 2) := by
         rw [integral_const_mul, ← Gamma_eq_integral (half_pos hν)]
         field_simp

@@ -29,10 +29,25 @@ and almost surely, and on a finite space that implies the pointwise order, which
 separation uses. The representing vectors `q` are scenarios and need not be absolutely continuous
 with respect to `P` in any sense the statement tracks.
 
+## Main definitions
+
+* `representingSet`: the probability vectors `q` (`qᵢ ≥ 0`, `∑ qᵢ = 1`) with `∑ qᵢ Zᵢ ≤ 0` for
+  every acceptable loss `Z` (`ρ Z ≤ 0`), the densities that separate the acceptance cone.
+
 ## Main results
+
 * `MathFin.IsCoherentRiskMeasure.acceptance_closed`, `.convex_acceptance`, `.cone`: the acceptance
   set `{L | ρ L ≤ 0}` is a closed convex cone.
 * `MathFin.coherentRisk_isLUB` — the representation
+
+## References
+
+* [P. Artzner et al., *Coherent measures of risk*][ArtznerDelbaenEberHeath1999]
+
+## Tags
+
+coherent risk measure, Artzner-Delbaen-Eber-Heath, acceptance set, dual representation,
+Hahn-Banach separation, representing measures, MSC 91G70, MSC 91G80, JEL G32
 -/
 
 @[expose] public section
@@ -82,7 +97,7 @@ def representingSet {ι : Type*} [Fintype ι] (ρ : (ι → ℝ) → ℝ) : Set 
   {q | (∀ i, 0 ≤ q i) ∧ (∑ i, q i = 1) ∧ ∀ Z ∈ {Y : ι → ℝ | ρ Y ≤ 0}, ∑ i, q i * Z i ≤ 0}
 
 /-- A probability vector prices a shifted loss at the shifted price. -/
-private lemma sum_mul_add_const {ι : Type*} [Fintype ι] {q : ι → ℝ} (hq : ∑ i, q i = 1)
+lemma sum_mul_add_const_of_sum_eq_one {ι : Type*} [Fintype ι] {q : ι → ℝ} (hq : ∑ i, q i = 1)
     (L : ι → ℝ) (m : ℝ) : ∑ i, q i * (L i + m) = ∑ i, q i * L i + m := by
   simp [mul_add, Finset.sum_add_distrib, ← Finset.sum_mul, hq]
 
@@ -102,7 +117,7 @@ theorem coherentRisk_isLUB {ι : Type*} [Fintype ι] [MeasurableSpace ι]
     have hmem : (fun i ↦ L i + -ρ L) ∈ {Y : ι → ℝ | ρ Y ≤ 0} :=
       ((hρ.add_const .of_finite _).trans (add_neg_cancel _)).le
     have := hq _ hmem
-    rw [sum_mul_add_const hq₁] at this
+    rw [sum_mul_add_const_of_sum_eq_one hq₁] at this
     linarith
   · intro b hb
     by_contra hlt
@@ -132,7 +147,7 @@ theorem coherentRisk_isLUB {ι : Type*} [Fintype ι] [MeasurableSpace ι]
     have hpos : 0 < ∑ i, p i / S * (L i + -b) := by
       simp_rw [div_mul_eq_mul_div, ← Finset.sum_div]
       exact div_pos hp_pos hS
-    rw [sum_mul_add_const hq₁] at hpos
+    rw [sum_mul_add_const_of_sum_eq_one hq₁] at hpos
     linarith
 
 end MathFin

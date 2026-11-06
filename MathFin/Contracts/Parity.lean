@@ -20,7 +20,7 @@ the underlying's.
 
 That fact holds in every model whose discounted price `t ↦ D(t) X(t)` is a `Q`-martingale
 starting from the constant `S₀`, with `D(0) = 1` (`integral_discounted_of_martingale`). This is
-the risk-neutral condition of `ContinuousMarket.IsEMM`, which asks for the martingale and also
+the risk-neutral condition of `IsEMM`, which asks for the martingale and also
 for `Q ≈ P`; only the martingale is needed here. In that case neither the forward nor the
 parity takes an integrability hypothesis (`value_forward_of_martingale`,
 `value_europeanCall_sub_put_of_martingale`).
@@ -48,6 +48,19 @@ Berthold and Elsman (2015) and Annenkov (2018).
 No code is copied from `lean_contracts`; every definition and proof here is
 written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 §6 for the full credit line.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], ch. 11; ch. 5
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], Section
+  5.6.2
+* [Stoll, *The relationship between put and call option prices*][Stoll1969]
+
+## Tags
+
+put–call parity, forward price, risk-neutral pricing, discounted martingale, model-free pricing,
+call minus put, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

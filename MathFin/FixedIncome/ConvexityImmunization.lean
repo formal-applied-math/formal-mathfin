@@ -29,15 +29,29 @@ vanish (`Immunization.lean`), and matching convexity-times-value makes
 `∂²(A − L)/∂r²` vanish, so together they leave the surplus flat to second order
 at the current rate.
 
-Results:
+## Main definitions
 
-* `bondPortfolioConv`: convexity-times-value `Conv_P · P`.
+* `bondPortfolioConv`: the convexity-times-value `Conv_P · P` of the bond portfolio,
+  `∑_i w_i · (T_i − t)² · exp(−r(T_i − t))`.
+
+## Main results
+
 * `hasDerivAt_bondPortfolioDur_r`: `∂_r (Dur_P · P) = −Conv_P · P`.
 * `hasDerivAt_neg_bondPortfolioDur_r`: `∂_r (−Dur_P · P) = Conv_P · P`.
 * `hasDerivAt_deriv_bondPortfolioValue_r`: `∂²P/∂r² = Conv_P · P`, for the value
   itself.
 * `bondPortfolio_immunization_second_order`: matching convexity-times-value gives
   `∂² (A − L)/∂r² = 0`, for the surplus itself.
+
+## References
+
+* [Fabozzi, *Fixed Income Mathematics*][FabozziFIM], Ch 5
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], Ch 4.11
+
+## Tags
+
+second-order immunization, bond convexity, duration matching, asset–liability management,
+bond portfolio, rate sensitivity, MSC 91G30, JEL G11, JEL G12
 -/
 
 @[expose] public section

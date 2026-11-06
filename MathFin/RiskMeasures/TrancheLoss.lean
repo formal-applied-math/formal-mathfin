@@ -38,15 +38,31 @@ standard normal independent of `F`, reads `(Φ(T) − Φ(k))⁺` as the conditio
 `P(√ρ F + √(1 − ρ) ε ≤ Φ⁻¹(π)) − P(√ρ F + √(1 − ρ) ε ≤ Φ⁻¹(π), ε ≤ k)`. The first term is `π`;
 the second is `N₂` at correlation `√(1 − ρ)`, since `√(1 − (√(1 − ρ))²) = √ρ`.
 
+## Main definitions
+
+* `tranchePayoff`: the loss `((L − a)⁺ − (L − d)⁺)/(d − a)` of the tranche `[a, d]` as a fraction
+  of its notional, when the portfolio loss fraction is `L`.
+
 ## Main results
 
-* `tranchePayoff`, `tranchePayoff_mem_Icc`, `monotone_tranchePayoff`: for `a < d` the tranche loss
+* `tranchePayoff_mem_Icc`, `monotone_tranchePayoff`: for `a < d` the tranche loss
   lies in `[0, 1]` and is nondecreasing in the portfolio loss.
 * `integral_posPart_oneFactorPD_sub`: the LHP stop-loss closed form.
 * `integral_tranchePayoff_oneFactorPD`: the LHP tranche expected loss as a difference of two
   bivariate normal CDFs.
 * `tendsto_integral_tranchePayoff_oneFactorLossFraction`: the finite-pool tranche expected loss
   converges to the LHP closed form.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], ch. 25
+* [O. Vasicek, *Loan portfolio value*][Vasicek2002]
+
+## Tags
+
+CDO tranche, tranche expected loss, large homogeneous portfolio, attachment and detachment,
+stop-loss, Vasicek model, bivariate normal, structured credit, MSC 91G40, MSC 60E05, JEL G24,
+JEL G32
 -/
 
 @[expose] public section

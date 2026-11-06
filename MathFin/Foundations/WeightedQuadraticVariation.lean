@@ -29,6 +29,26 @@ proof splits the difference into
   by dominated convergence (`|·| ≤ C·T`). Exported standalone as
   `tendsto_riemann_L2_process` — the time-dependent Itô formula also consumes it for the
   `∑ f_t·Δtₖ → ∫₀ᵀ f_t(s,B_s) ds` drift term.
+
+## Main results
+
+* `tendsto_riemann_continuous`: left-endpoint Riemann sums of a continuous bounded `h : ℝ≥0 → ℝ`
+  along `unifPart T n` converge to its integral.
+* `tendsto_riemann_L2_process`: left-endpoint Riemann sums of a bounded continuous-path process
+  converge in `L²` to its pathwise integral over `(0, T]`.
+* `tendsto_weighted_qv_process`: for a bounded adapted weight process `w` with continuous paths,
+  `∑ₖ w_{tₖ}(ΔBₖ)²` along the uniform partition converges in `L²(μ)` to `∫₀ᵀ w_s ds`.
+* `tendsto_weighted_qv_process_of_ae_continuous`: the same when the paths of `w` are continuous
+  on `[0, T]` only almost surely.
+* `measurable_pathIntegral`, `memLp_pathIntegral_process`: the pathwise integral of a bounded
+  measurable process with continuous paths is measurable and in `L²(μ)`.
+* `exists_continuous_version_of_ae_continuousOn`: a bounded measurable weight with a.s.
+  continuous paths on `[0, T]` has a version continuous on every path.
+
+## Tags
+
+weighted quadratic variation, Itô formula, second-order term, Riemann sum convergence,
+squared Brownian increments, mean-square limit, MSC 60H05, MSC 60J65
 -/
 
 @[expose] public section
@@ -357,7 +377,7 @@ omit hB in
 /-- The pathwise integral inherits the Riemann sums' uniform bound `C·T`
 (`abs_riemann_weight_sum_le` carried to the limit). The shared bound core of the `L²`
 Riemann lemmas below and of `memLp_pathIntegral_process`. -/
-private theorem abs_pathIntegral_le
+theorem abs_pathIntegral_le
     {w : ℝ≥0 → Ω → ℝ} (hw_cont : ∀ ω, Continuous fun s ↦ w s ω)
     {C : ℝ} (hC0 : 0 ≤ C) (hw_bdd : ∀ s ω, |w s ω| ≤ C) (T : ℝ≥0) (ω : Ω) :
     |∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure| ≤ C * T :=

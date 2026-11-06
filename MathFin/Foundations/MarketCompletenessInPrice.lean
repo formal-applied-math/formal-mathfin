@@ -55,14 +55,29 @@ measurable *by construction*, and `(σ●B)_t` is a.e. equal to it — that is
 adapted martingale version, and downstream statements can be made about an abstract adapted `S`
 with this as the witness.
 
-## Result
+## Main definitions
 
-* `pricePath` — the discounted price `S₀ + (σ●B)`.
+* `pricePath`: the discounted price `S_t = S₀ + (σ●B)_t` with volatility `σ ∈ L²(trimMeasure T)`.
+* `pricePathCondExp`: the same price with the representative `S₀ + μ[(σ●B)_T | 𝓕_t]`, which is
+  `𝓕_t`-strongly measurable by construction.
+
+## Main results
+
 * `pricePath_sub` — its increments are the Itô integral's, which is why `∫ψ dS := ∫ψ dM`.
 * `exists_replicating_strategy_in_price` — every square-integrable `𝓕ᴮ_T`-claim is the
   terminal wealth of a **unique** holding in the price.
 * `pricePathCondExp`, `pricePathCondExp_ae_eq`, `pricePathCondExp_isMartingale`, and
   `exists_adapted_price_martingale` — the adapted version, and the witness it provides.
+
+## References
+
+* [I. Karatzas and S. E. Shreve, *Brownian Motion and Stochastic Calculus*][KaratzasShreve1991], 1.6
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], 5.3
+
+## Tags
+
+replication in the price, complete market, hedging strategy, martingale representation,
+discounted price, stochastic integral against price, MSC 91G20, MSC 60H05, JEL G13
 -/
 
 @[expose] public section
@@ -80,14 +95,14 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilit
 /-- The discounted price driven by `B` with volatility `σ`: `S_t = S₀ + (σ●B)_t`. -/
 noncomputable def pricePath (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) (S₀ : ℝ)
-    (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 → Ω → ℝ :=
+    (σ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) : ℝ≥0 → Ω → ℝ :=
   fun t ω ↦ S₀ + (itoProcessCLM hB T t hBmeas σ : Ω → ℝ) ω
 
 /-- **The price's increments are the Itô integral's.** The initial value cancels, so a
 Riemann–Stieltjes sum against `S` is one against `M = σ●B` — which is why integrating against
 the price is `ItoIntegralAgainstMartingale`'s integral and needs no separate construction. -/
 theorem pricePath_sub (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (S₀ : ℝ)
-    (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (s t : ℝ≥0) (ω : Ω) :
+    (σ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (s t : ℝ≥0) (ω : Ω) :
     pricePath hB T hBmeas S₀ σ t ω - pricePath hB T hBmeas S₀ σ s ω
       = (itoProcessCLM hB T t hBmeas σ : Ω → ℝ) ω
           - (itoProcessCLM hB T s hBmeas σ : Ω → ℝ) ω := by
@@ -102,8 +117,8 @@ Martingale representation supplies the hedge `φ` against `B`; surjectivity of m
 injectivity of an isometry. -/
 theorem exists_replicating_strategy_in_price (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0)
-    (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
-    (hσ : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), (σ : ℝ≥0 × Ω → ℝ) z ≠ 0)
+    (σ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
+    (hσ : ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas), (σ : ℝ≥0 × Ω → ℝ) z ≠ 0)
     (H : Lp ℝ 2 μ)
     (hHmeas : AEStronglyMeasurable[ItoIntegralL2.natFiltration hBmeas T] (⇑H) μ) :
     ∃! ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas σ),
@@ -113,9 +128,9 @@ theorem exists_replicating_strategy_in_price (hBmeas : ∀ t, Measurable (B t))
   -- the type ascription matters: `exists_mulLI_eq` produces the `sqWeight` form, which is
   -- `bracketMeasure` only up to unfolding, and instance search does not unfold it
   obtain ⟨ψ, hψ⟩ : ∃ ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas σ),
-      mulLI (trimMeasure_T (μ := μ) T hBmeas) (Lp.stronglyMeasurable σ).measurable ψ = φ :=
+      mulLI (trimMeasure (μ := μ) T hBmeas) (Lp.stronglyMeasurable σ).measurable ψ = φ :=
     exists_mulLI_eq (Lp.stronglyMeasurable σ).measurable hσ φ
-  have hval : itoIntegralAgainstCLM hB T hBmeas σ ψ = itoIntegralCLM_T hB T hBmeas φ := by
+  have hval : itoIntegralAgainstCLM hB T hBmeas σ ψ = itoIntegralCLM hB T hBmeas φ := by
     rw [itoIntegralAgainstCLM_apply, hψ]
   refine ⟨ψ, ?_, ?_⟩
   · change (⇑H) =ᵐ[μ] fun ω ↦ (∫ ω, H ω ∂μ)
@@ -148,16 +163,16 @@ as `pricePath` up to a null set (`pricePathCondExp_ae_eq`), but built from `μ[�
 `𝓕_t`-strongly measurable by construction rather than merely a.e. so. -/
 noncomputable def pricePathCondExp (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) (S₀ : ℝ)
-    (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) : ℝ≥0 → Ω → ℝ :=
-  fun t ω ↦ S₀ + (μ[⇑(itoIntegralCLM_T hB T hBmeas σ) | ItoIntegralL2.natFiltration hBmeas t]) ω
+    (σ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) : ℝ≥0 → Ω → ℝ :=
+  fun t ω ↦ S₀ + (μ[⇑(itoIntegralCLM hB T hBmeas σ) | ItoIntegralL2.natFiltration hBmeas t]) ω
 
 /-- **It is the same price.** `(σ●B)_t` is the `𝓕_t`-projection of the terminal integral
 (`itoProcessCLM_eq_condExpL2`), and the `L²` projection agrees a.e. with the conditional
 expectation. -/
 theorem pricePathCondExp_ae_eq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (S₀ : ℝ)
-    (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (t : ℝ≥0) :
+    (σ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (t : ℝ≥0) :
     pricePathCondExp hB T hBmeas S₀ σ t =ᵐ[μ] pricePath hB T hBmeas S₀ σ t := by
-  have h := (Lp.memLp (itoIntegralCLM_T hB T hBmeas σ)).condExpL2_ae_eq_condExp
+  have h := (Lp.memLp (itoIntegralCLM hB T hBmeas σ)).condExpL2_ae_eq_condExp
     (𝕜 := ℝ) ((ItoIntegralL2.natFiltration hBmeas).le t)
   rw [Lp.toLp_coeFn] at h
   filter_upwards [h] with ω hω
@@ -167,17 +182,17 @@ theorem pricePathCondExp_ae_eq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) 
 /-- **The adapted price is a martingale**, being a constant plus a conditional-expectation
 process. -/
 theorem pricePathCondExp_isMartingale (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (S₀ : ℝ)
-    (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (σ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     Martingale (pricePathCondExp hB T hBmeas S₀ σ) (ItoIntegralL2.natFiltration hBmeas) μ :=
   (martingale_const (ItoIntegralL2.natFiltration hBmeas) μ S₀).add
-    (martingale_condExp (⇑(itoIntegralCLM_T hB T hBmeas σ))
+    (martingale_condExp (⇑(itoIntegralCLM hB T hBmeas σ))
       (ItoIntegralL2.natFiltration hBmeas) μ)
 
 /-- **The price has an adapted martingale version.** This is what makes a hypothesis of the form
 "`S` is an adapted `Q`-martingale agreeing a.e. with the price" satisfiable rather than empty —
 at `Q = μ` the witness is `pricePathCondExp`. -/
 theorem exists_adapted_price_martingale (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (S₀ : ℝ)
-    (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (σ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     ∃ S : ℝ≥0 → Ω → ℝ, Martingale S (ItoIntegralL2.natFiltration hBmeas) μ
       ∧ ∀ t, S t =ᵐ[μ] pricePath hB T hBmeas S₀ σ t :=
   ⟨pricePathCondExp hB T hBmeas S₀ σ, pricePathCondExp_isMartingale T hBmeas S₀ σ,

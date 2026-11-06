@@ -26,7 +26,7 @@ discount factor `exp(−H(T))`. The calculus lemma `hasDerivAt_T_mul_spotRate`
 supplies `H'`, and `forwardRate_eq_neg_log_discount` routes it through the
 principle to express the result in terms of the actual bond price `P(T)`.
 
-Result:
+## Main results
 
 * `hasDerivAt_T_mul_spotRate`: the forward-rate derivative formula
   `d/dT (T·R(T)) = R(T) + T·R'(T)` — this *is* the non-flat-curve forward rate
@@ -34,6 +34,16 @@ Result:
 * `forwardRate_eq_neg_log_discount`: forward rate as `−d/dT log P(T)` with the
   actual discount factor `P(T) = exp(−T · R(T))`, via the
   `ExponentialDiscount` principle.
+
+## References
+
+* [Fabozzi, *Fixed Income Mathematics*][FabozziFIM], 5.2
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 4.7
+
+## Tags
+
+instantaneous forward rate, spot rate curve, zero-coupon yield, term structure,
+log-derivative of bond price, MSC 91G30, JEL E43
 -/
 
 @[expose] public section

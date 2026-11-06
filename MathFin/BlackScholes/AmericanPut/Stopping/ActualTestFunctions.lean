@@ -14,10 +14,35 @@ The American price is only known continuous here. Its rectangle mean-value
 identity and the independently proved test-function Dynkin identity give signs
 of expected generator integrals for tests touching from above or below.
 
-## Result
+## Main definitions
 
-Public entry points include `brownianLogState_adapted`, `rawRectangleExitRule`,
-`rawRectangleExitRule_time`, `canonicalDiscountedPlane`.
+* `rawRectangleExitRule`: the rectangle exit rule of `actualRectangleExitRule`, built on the raw
+  Brownian filtration.
+* `canonicalDiscountedPlane`: the discounted canonical price as a function of
+  `z = (elapsed time, Brownian value)`.
+* `driverRectangle`: the set of `z` with `0 ≤ z.1 ≤ δ` and `|(k − h − 1) z.1 + √2 z.2| ≤ R`.
+
+## Main results
+
+* `canonicalDiscountedPlane_path`: for `s ≤ T`, the discounted plane function at
+  `(s, brownian s ω)` is the discounted actual price at time `s`.
+* `rawRectangleExit_path_mem_ae`: for `R > 0` and `δ > 0`, almost surely the raw exit time is
+  positive and the path `(s, brownian s)` stays in `driverRectangle k h R δ` up to it.
+* `canonicalPrice_rectangle_meanValue_raw`: for `0 ≤ k`, `δ ≤ T` and a rectangle inside the
+  continuation region, the expected discounted price at the raw exit time is
+  `canonicalPrice k h x T`.
+* `canonicalPrice_rectangle_upper_test`, `canonicalPrice_rectangle_lower_test`: for such a
+  rectangle and a compactly supported `C²` function `G` with `G (0, 0) = canonicalPrice k h x T`,
+  if `G` dominates (resp. is dominated by) the discounted price at the exit time almost surely,
+  the expected generator integral `planeDrift G` at the exit time is `≥ 0` (resp. `≤ 0`).
+* `canonicalPrice_rectangle_upper_test_of_patch`, `canonicalPrice_rectangle_lower_test_of_patch`:
+  the same two conclusions when the domination holds on all of `driverRectangle k h R δ`, for
+  `R > 0` and `δ > 0`.
+
+## Tags
+
+test function, Dynkin identity, generator integral, mean-value identity, American price, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

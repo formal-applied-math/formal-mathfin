@@ -49,6 +49,34 @@ Results (`κ > 0`, `0 < u < 1`; limits are `ξ → 0`, `ξ ≠ 0`):
 `E[e^{u log S_T}]` for a Heston process (`Heston.lean` does not prove it either). The
 algebra is the same under `u ↦ iz`: QuantLib's `D = √((κ − iρσz)² + (z² + iz)σ²)` is
 `hestonGamma` at `u = iz`.
+
+## Main results
+
+* `continuous_hestonBv_volOfVol`: for `κ > 0` and `0 < u < 1`, `(ξ, τ) ↦ hestonBv κ ξ ρ u τ` is
+  jointly continuous, across `ξ = 0`.
+* `hestonBv_zero_volOfVol`, `tendsto_hestonBv_smallVolOfVol`: at `ξ = 0` the flow is
+  `((u² − u)/2) · B(τ)`, `B(τ) = (1 − e^{−κτ})/κ`, and `b̂ → ` that value as `ξ → 0`.
+* `hestonA_zero_volOfVol`: Lean's value of `hestonA` at `ξ = 0` is `r u τ`; this is not the
+  limit as `ξ → 0`.
+* `hestonA_eq_integral`: for `ξ ≠ 0`, `â(τ) = ∫₀^τ (r u + κθ b̂(s)) ds`.
+* `tendsto_hestonA_smallVolOfVol`: as `ξ → 0` with `ξ ≠ 0`,
+  `â(τ) → r u τ + θ ((u² − u)/2) (τ − B(τ))`.
+* `tendsto_hestonProfile_smallVolOfVol`: as `ξ → 0` with `ξ ≠ 0`, the Heston profile tends to
+  `exp(u x + r u (T − t) + ((u² − u)/2) W)`, with `W` the integrated Vasicek mean.
+* `tendsto_hestonProfile_smallVolOfVol_blackScholes`: for `v, θ ≥ 0` and `t ≤ T`, the profile
+  tends to `mgf id (gaussianReal (x + r(T − t) − W/2) W) u`, the lognormal log-spot moment.
+  This is a limit of the Riccati-level profile, not of a Heston process.
+
+## References
+
+* [Heston, *A closed-form solution for options with stochastic volatility with applications to bond
+  and currency options*][Heston1993]
+* [The QuantLib contributors, *QuantLib*][QuantLib], AnalyticHestonEngine::chF
+
+## Tags
+
+Heston model, vanishing vol-of-vol, stochastic volatility, Riccati equation, Black–Scholes limit,
+MSC 91G20, MSC 60J60, JEL G13
 -/
 
 @[expose] public section

@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib.Probability.Martingale.OptionalStopping
 public import Mathlib.MeasureTheory.Function.ConditionalExpectation.CondJensen
 public import Mathlib.Analysis.SpecialFunctions.Pow.Integral
@@ -22,6 +23,11 @@ For a non-negative submartingale `f : ℕ → Ω → ℝ` and `p > 1`,
 
 This is the strong-type companion to `MeasureTheory.maximal_ineq`
 (the weak-type / level-set form of Doob's maximal inequality).
+
+## Main definitions
+
+* `enormSup`: the all-time envelope `⨆ₖ ‖f k ω‖ₑ` of a sequence, in `ℝ≥0∞`.
+* `dominator`: the real-valued envelope `(enormSup f ω).toReal`.
 
 ## Main results
 
@@ -45,6 +51,14 @@ The proof follows the standard textbook argument:
    `min f* K` and letting `K → ∞` via monotone convergence) handles the
    case where `A = ∞` a priori.
 
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 2.4.6
+
+## Tags
+
+Doob maximal inequality, submartingale, layer cake, Hölder inequality, running maximum, MSC 60G42,
+MSC 60E15
 -/
 
 @[expose] public section
@@ -121,7 +135,7 @@ private lemma A_le_layer_integral
   exact layer_integrand_bound hsub hnonneg n ht
 
 /-- Inner integral evaluation: `∫⁻ t in Ioc 0 f, ofReal(t^(p-2)) = ofReal(f^(p-1)/(p-1))`. -/
-private lemma lintegral_rpow_Ioc
+lemma lintegral_rpow_Ioc
     {f p : ℝ} (hf : 0 < f) (hp : 1 < p) :
     ∫⁻ t in Set.Ioc (0:ℝ) f, ENNReal.ofReal (t^(p-2)) =
       ENNReal.ofReal (f^(p-1)/(p-1)) := by
@@ -141,7 +155,7 @@ private lemma lintegral_rpow_Ioc
 
 /-- Pointwise inner integral: for `fstar ≥ 0`, integrating `t^(p-2)` against
     the indicator `𝟙{0 < t ≤ fstar}` evaluates to `fstar^(p-1)/(p-1)`. -/
-private lemma inner_t_integral
+lemma lintegral_rpow_sub_two_mul_indicator_le
     {fstar p : ℝ} (hfstar : 0 ≤ fstar) (hp : 1 < p) :
     ∫⁻ t in Set.Ioi (0:ℝ), ENNReal.ofReal (t ^ (p - 2)) *
         {t : ℝ | t ≤ fstar}.indicator (fun _ ↦ (1 : ℝ≥0∞)) t
@@ -199,7 +213,7 @@ private lemma inner_t_integral
     Proof: rewrite the inner set-integral as an indicator-weighted full
     integral; apply `MeasureTheory.lintegral_lintegral_swap` to swap the
     order of integration; then evaluate the inner `t`-integral pointwise
-    via `inner_t_integral`. -/
+    via `lintegral_rpow_sub_two_mul_indicator_le`. -/
 private lemma fubini_swap
     [IsFiniteMeasure μ] {𝒢 : Filtration ℕ m0} {f : ℕ → Ω → ℝ} {p : ℝ}
     (hsub : Submartingale f 𝒢 μ) (hnonneg : ∀ n ω, 0 ≤ f n ω)
@@ -286,7 +300,8 @@ private lemma fubini_swap
   -- For each ω, the inner is the integral over Ioi 0 of
   --   ofReal(t^(p-2)) * 𝟙{t ≤ runMax f n ω} * ofReal(f n ω)
   -- = ofReal(f n ω) * (∫⁻ t in Ioi 0, ofReal(t^(p-2)) * 𝟙{t ≤ fstar ω})
-  -- = ofReal(f n ω) * ofReal((runMax f n ω)^(p-1) / (p-1))  [inner_t_integral]
+  -- = ofReal(f n ω) * ofReal((runMax f n ω)^(p-1) / (p-1))
+  --   [lintegral_rpow_sub_two_mul_indicator_le]
   apply lintegral_congr_ae
   filter_upwards with ω
   -- Reduce the inner integral.
@@ -323,7 +338,7 @@ private lemma fubini_swap
       · rw [Set.indicator_of_notMem ht, Set.indicator_of_notMem ht, mul_zero]
     simp_rw [h_pointwise]
     rw [lintegral_const_mul']
-    · -- The inner lintegral matches inner_t_integral.
+    · -- The inner lintegral matches lintegral_rpow_sub_two_mul_indicator_le.
       have h_eq :
           ∫⁻ t, (Set.Ioi (0:ℝ)).indicator
               (fun s ↦ ENNReal.ofReal (s ^ (p - 2)) *
@@ -334,7 +349,7 @@ private lemma fubini_swap
                   {s : ℝ | s ≤ runMax f n ω}.indicator
                     (fun _ ↦ (1 : ℝ≥0∞)) t := by
         rw [← lintegral_indicator measurableSet_Ioi]
-      rw [h_eq, inner_t_integral (runMax_nonneg hnonneg n ω) hp]
+      rw [h_eq, lintegral_rpow_sub_two_mul_indicator_le (runMax_nonneg hnonneg n ω) hp]
     · exact ENNReal.ofReal_ne_top
   rw [h_inner_simp]
 
@@ -391,7 +406,7 @@ private lemma holder_apply
 /-- Truncated inner t-integral: for `fstar ≥ 0` and `K > 0`,
        `∫⁻ t in Ioi 0, t^(p-2) ⋅ 𝟙{0 < t ≤ K ∧ t ≤ fstar}
          = ofReal(min fstar K^(p-1) / (p-1))`.
-    Identical to `inner_t_integral` but with an extra `t ≤ K` constraint,
+    Identical to `lintegral_rpow_sub_two_mul_indicator_le` but with an extra `t ≤ K` constraint,
     which makes the inner Ioc become `Ioc 0 (min fstar K)`. -/
 private lemma inner_t_integral_truncated
     {fstar K p : ℝ} (hfstar : 0 ≤ fstar) (hK : 0 < K) (hp : 1 < p) :
@@ -421,7 +436,7 @@ private lemma inner_t_integral_truncated
               fun h ↦ hK' (h.trans (min_le_right _ _))),
           zero_mul]
   simp_rw [h_eq]
-  exact inner_t_integral (le_min hfstar hK.le) hp
+  exact lintegral_rpow_sub_two_mul_indicator_le (le_min hfstar hK.le) hp
 
 /-- Truncated Fubini swap. Analog of `fubini_swap` but with the outer
     `t`-integral restricted to `Ioc 0 K`, producing
@@ -820,7 +835,7 @@ private lemma holder_step
 
 /-- Conversion lemma: for a non-negative `f : Ω → ℝ` and `1 < p`,
     `eLpNorm f (ofReal p) μ = (∫⁻ ω, ofReal(f ω ^ p) ∂μ)^(1/p)`. -/
-private lemma eLpNorm_eq_lintegral_ofReal_pow
+lemma eLpNorm_eq_lintegral_ofReal_pow
     {f : Ω → ℝ} (hf : AEStronglyMeasurable f μ) (hf_nn : ∀ ω, 0 ≤ f ω) {p : ℝ}
     (hp : 1 < p) :
     eLpNorm f (ENNReal.ofReal p) μ
@@ -988,7 +1003,7 @@ theorem maximal_ineq_Lp
 /-- The norm process of a Banach-valued martingale is a non-negative submartingale.
 Internal lemma used to derive the Banach version of Doob's L^p inequality from the
 real-valued case via Jensen (`MeasureTheory.norm_condExp_le`). -/
-private lemma martingale_norm_submartingale
+lemma martingale_norm_submartingale
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
     {𝒢 : Filtration ℕ m0} {f : ℕ → Ω → E} (hf : Martingale f 𝒢 μ) :
     Submartingale (fun n ω ↦ ‖f n ω‖) 𝒢 μ := by
@@ -1061,16 +1076,18 @@ lemma measurable_enormSup (hf : ∀ k, Measurable (f k)) : Measurable (enormSup 
   Measurable.iSup fun k ↦ (hf k).enorm
 
 /-- Each `f k` of a martingale is measurable for the ambient σ-algebra. -/
-private lemma measurable_of_martingale (hf : Martingale f 𝒢 μ) (k : ℕ) : Measurable (f k) :=
+lemma measurable_of_martingale (hf : Martingale f 𝒢 μ) (k : ℕ) : Measurable (f k) :=
   ((hf.stronglyMeasurable k).mono (𝒢.le k)).measurable
 
-private lemma iSup_rpow_atTop_nat {g : ℕ → ℝ≥0∞} (hg : Monotone g) (hp : 0 ≤ p) :
+/-- A nonnegative real power commutes with the supremum of a monotone sequence in `ℝ≥0∞`. -/
+lemma iSup_rpow_of_monotone {g : ℕ → ℝ≥0∞} (hg : Monotone g) (hp : 0 ≤ p) :
     (⨆ n, g n) ^ p = ⨆ n, (g n) ^ p :=
   tendsto_nhds_unique
     ((ENNReal.continuous_rpow_const.tendsto _).comp (tendsto_atTop_iSup hg))
     (tendsto_atTop_iSup fun _ _ hmn ↦ ENNReal.monotone_rpow_of_nonneg hp (hg hmn))
 
-private lemma ofReal_finset_sup' {ι : Type*} {s : Finset ι} (hs : s.Nonempty) (g : ι → ℝ) :
+/-- `ENNReal.ofReal` commutes with the supremum over a nonempty finset. -/
+lemma ofReal_finset_sup' {ι : Type*} {s : Finset ι} (hs : s.Nonempty) (g : ι → ℝ) :
     ENNReal.ofReal (s.sup' hs g) = s.sup' hs (fun i ↦ ENNReal.ofReal (g i)) :=
   Finset.apply_sup'_eq_sup'_comp hs ENNReal.ofReal ENNReal.ofReal_max
 
@@ -1121,7 +1138,7 @@ lemma lintegral_enormSup_rpow_le [IsFiniteMeasure μ] (hp : 1 < p) (hf : Marting
     ((ENNReal.continuous_rpow_const.measurable.comp
       (measurable_runMaxNorm hf n).ennreal_ofReal)).aemeasurable
   rw [show (fun ω ↦ enormSup f ω ^ p) = fun ω ↦ ⨆ n, g n ω ^ p from
-    funext fun ω ↦ by rw [← iSup_ofReal_runMaxNorm, iSup_rpow_atTop_nat (hg_mono ω) hp_pos.le]]
+    funext fun ω ↦ by rw [← iSup_ofReal_runMaxNorm, iSup_rpow_of_monotone (hg_mono ω) hp_pos.le]]
   rw [lintegral_iSup' h_meas (Filter.Eventually.of_forall fun ω _ _ hmn ↦
       ENNReal.monotone_rpow_of_nonneg hp_pos.le (hg_mono ω hmn))]
   refine iSup_le fun n ↦ ?_

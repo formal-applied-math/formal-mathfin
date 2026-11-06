@@ -16,10 +16,19 @@ agree; no independent identification of boundaries is assumed. The final
 curvature transfer still has an explicit price-identification hypothesis.
 That hypothesis and classical-solution existence are not proved here.
 
-## Result
+## Main results
 
-Public entry points include `threshold_eq_of_price_identification`,
-`brownian_boundary_curvature_of_price_identification`.
+* `threshold_eq_of_price_identification`: for a `DividendPutSolution` with `0 < K`, `0 ≤ r`,
+  `0 < t`, a measurable `W` with `W 0 = 0` a.s., and the American put value at horizon `T`
+  equal to `K*p (log (S/K)) t` for all `S > 0`, the exercise threshold is `K*exp (b t)`.
+* `brownian_boundary_curvature_of_price_identification`: for a `DividendPutSolution` with
+  `0 < K`, `0 ≤ r`, `0 < σ` and the Brownian American put equal to `K*p` for all positive
+  times and spots, the exercise boundary has positive second derivative at every `τ > 0`.
+
+## Tags
+
+price identification, exercise threshold, classical solution, boundary curvature, stopping value,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

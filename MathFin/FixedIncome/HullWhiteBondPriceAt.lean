@@ -33,6 +33,17 @@ from the splitting `B(T − s) = B(t − s) + e^{−κ(t−s)} B(T − t)` of th
 * `integratedMean_sub` — the increment of the integrated deterministic part.
 * `bondA_shift` — the coefficient `A_t` is `exp(−∫_t^T θ(s) B(T − s) ds + σ²V(T − t)/2)`.
 * `bondRate_condExp` — the conditional discount factor, affine in `r_t`.
+
+## References
+
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  section 3.3.1
+* [J. Hull and A. White, *Pricing interest-rate-derivative securities*][HullWhite1990]
+
+## Tags
+
+Hull–White model, conditional bond price, affine term structure, time-dependent drift, short rate,
+zero-coupon bond, MSC 91G30, JEL E43
 -/
 
 @[expose] public section

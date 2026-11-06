@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib.Probability.Martingale.Basic
 public import Mathlib.MeasureTheory.Function.ConditionalExpectation.PullOut
 public import Mathlib.Analysis.InnerProductSpace.Basic
@@ -19,6 +20,28 @@ The price `M` and the holding `A` take values in a real inner-product space `F`,
 gain is the pairing `⟪A_{k+1}, M_{k+1} − M_k⟫` (a portfolio of several assets against the vector
 of their price increments), so the transform is real-valued. The scalar theorem is the case
 `F = ℝ`, where `⟪a, b⟫ = a * b` (`Real.inner_apply`): `A_{k+1} * (M_{k+1} − M_k)`.
+
+## Main definitions
+
+* `martingaleTransform`: the discrete stochastic integral
+  `(A · M)_n = ∑_{k<n} ⟪A_{k+1}, M_{k+1} − M_k⟫` for `A`, `M` valued in a real inner-product space.
+
+## Main results
+
+* `martingaleTransform_real`: for `F = ℝ` the transform is `∑_{k<n} A_{k+1} * (M_{k+1} − M_k)`.
+* `integral_inner_sub_eq_zero`: a bounded `𝓖 s`-measurable weight `φ` against a martingale
+  increment has zero mean, `∫ ⟪φ, N t − N s⟫ dμ = 0` for `s ≤ t`.
+* `martingaleTransform_isMartingale`: the transform of a martingale `M` by a bounded process `A`
+  with `A (n + 1)` adapted is a martingale (Theorem 2.2.9).
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 2.2.9
+
+## Tags
+
+martingale transform, discrete stochastic integral, predictable strategy, self-financing gains,
+betting system, MSC 60G42, MSC 91G20
 -/
 
 @[expose] public section

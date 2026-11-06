@@ -13,10 +13,34 @@ The parameter hypotheses are exactly positive strike, risk-free interest rate an
 nonnegative dividend yield at most the risk-free interest rate. The time variable is time-to-expiry.
 These are convex-function results; classical second-derivative existence is not asserted.
 
-## Result
+## Main results
 
-Public entry points include `brownianUsualLogBoundary_convexOn`,
-`brownianUsualStockBoundary_strictConvexOn`, and `brownianUsualStockBoundary_strictAntiOn`.
+* `brownianUsualLogBoundary_convexOn`: for `0 < K`, `0 < r`, `0 ≤ q ≤ r` and `0 < σ`, the
+  logarithm of the (strike-normalised) usual-filtration exercise boundary is convex in
+  time-to-expiry on `(0,∞)`.
+* `brownianUsualStockBoundary_strictConvexOn`, `brownianUsualStockBoundary_strictAntiOn`: under the
+  same hypotheses, the exercise boundary in stock units is strictly convex and strictly
+  decreasing in time-to-expiry on `(0,∞)`.
+* `brownianUsualStockBoundary_locallyLipschitzOn`, `brownianUsualLogBoundary_locallyLipschitzOn`:
+  under the same hypotheses, the boundary and its logarithm are locally Lipschitz on `(0,∞)`.
+* `zeroDividend_brownianUsualLogBoundary_convexOn`,
+  `zeroDividend_brownianUsualStockBoundary_strictConvexOn`: the convexity results for `q = 0`
+  with only `0 < K`, `0 < r`, `0 < σ`.
+* `liuRange_brownianUsualLogBoundary_convexOn`,
+  `liuRange_brownianUsualStockBoundary_strictConvexOn`: the same convexity results for
+  `0 ≤ q` and `q + σ²/2 ≤ r`, with `0 < K` and `0 < σ`.
+* `convexOn_positive_time_rescale`, `strictConvexOn_positive_rescale`: the rescaling lemmas
+  `t ↦ f (a t)` (and `K f (a t)`) preserve (strict) convexity on `(0,∞)` for `0 < a`, `0 < K`.
+
+## References
+
+* [R. Martin, *Log-convexity of the exercise boundary of an American put
+  option*][MartinAmericanPutConvexity]
+
+## Tags
+
+physical units, exercise boundary convexity, dividend yield, time to expiry, American put,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -46,7 +70,7 @@ theorem brownianUsualLogBoundary_convexOn {K r q σ : ℝ}
     (hK : 0 < K) (hr : 0 < r) (hq : 0 ≤ q) (hqr : q ≤ r) (hσ : 0 < σ) :
     ConvexOn ℝ (Ioi 0)
       (fun τ : ℝ => Real.log (brownianUsualExerciseBoundary K r q σ τ.toNNReal/K)) := by
-  obtain ⟨hk,hh,hhk⟩ := normalized_rates_admissible hr hq hqr hσ
+  obtain ⟨hk,hh,hhk⟩ := Boundary.normalized_dividend_regime hr hq hqr hσ
   apply (convexOn_positive_time_rescale (canonicalLogBoundary_convexOn hk hh hhk)
     (by positivity : 0 < σ^2/2)).congr
   intro τ hτ
@@ -56,7 +80,7 @@ theorem brownianUsualStockBoundary_strictConvexOn {K r q σ : ℝ}
     (hK : 0 < K) (hr : 0 < r) (hq : 0 ≤ q) (hqr : q ≤ r) (hσ : 0 < σ) :
     StrictConvexOn ℝ (Ioi 0)
       (fun τ : ℝ => brownianUsualExerciseBoundary K r q σ τ.toNNReal) := by
-  obtain ⟨hk,hh,hhk⟩ := normalized_rates_admissible hr hq hqr hσ
+  obtain ⟨hk,hh,hhk⟩ := Boundary.normalized_dividend_regime hr hq hqr hσ
   apply (strictConvexOn_positive_rescale (canonicalStockBoundary_strictConvexOn hk hh hhk)
     hK (by positivity : 0 < σ^2/2)).congr
   intro τ hτ
@@ -65,7 +89,7 @@ theorem brownianUsualStockBoundary_strictConvexOn {K r q σ : ℝ}
 theorem brownianUsualStockBoundary_strictAntiOn {K r q σ : ℝ}
     (hK : 0 < K) (hr : 0 < r) (hq : 0 ≤ q) (hqr : q ≤ r) (hσ : 0 < σ) :
     StrictAntiOn (fun τ : ℝ => brownianUsualExerciseBoundary K r q σ τ.toNNReal) (Ioi 0) := by
-  obtain ⟨hk,hh,hhk⟩ := normalized_rates_admissible hr hq hqr hσ
+  obtain ⟨hk,hh,hhk⟩ := Boundary.normalized_dividend_regime hr hq hqr hσ
   intro s hs t ht hst
   change brownianUsualExerciseBoundary K r q σ t.toNNReal <
     brownianUsualExerciseBoundary K r q σ s.toNNReal

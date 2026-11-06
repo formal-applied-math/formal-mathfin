@@ -59,6 +59,40 @@ are continuous only almost surely; that module proves the two agree up to indist
   dense set (`denseLevel`) and no predictable `L²` embedding (`processToLpPredictable`).
 * The dependency runs this way: the predictable module imports this one and its local-martingale
   companion, so the identification would first move the whole predictable construction below them.
+
+## Main definitions
+
+* `clip`: the process `σ` clipped to `[−N, N]`.
+* `pathLevel`: the least integer bounding a path on `[0, T]`, and `0` when there is none.
+* `clipItoMod`: the continuous Itô integral of the integrand clipped to `[−N, N]`.
+* `localItoIntegral`: the Itô integral of a continuous adapted, possibly unbounded integrand; at
+  time `t`, on each path, the continuous Itô integral of `σ` clipped at the path's level on
+  `[0, t]`.
+
+## Main results
+
+* `ae_clipItoMod_eq`: for `n ≤ N`, almost surely, the clipped integrals `M^n_t` and `M^N_t` agree
+  at every `t ≤ T` up to which `σ` stays in `[−n, n]`.
+* `stronglyAdapted_localItoIntegral`: `localItoIntegral` is adapted.
+* `ae_continuousOn_localItoIntegral`: almost every path of `localItoIntegral` is continuous on
+  `[0, T]`.
+* `tendstoInMeasure_riemannσ_localItoIntegral`: for `t ≤ T`, the left-point Riemann–Itô sums on
+  the uniform partitions of `[0, t]` converge in probability to `localItoIntegral t`.
+* `ae_localItoIntegral_eq_of_le`: the integral does not depend on the horizon, built at horizons
+  `T ≤ T'` it is almost surely the same path on `[0, T]`.
+* `ae_localItoIntegral_eq_itoContinuousMod`: for a bounded integrand it is almost surely the same
+  path on `[0, T]` as `itoContinuousMod`.
+
+## References
+
+* [I. Karatzas and S. E. Shreve, *Brownian Motion and Stochastic Calculus*][KaratzasShreve1991],
+  Section 3.2.D
+* [Revuz and Yor, *Continuous Martingales and Brownian Motion*][RevuzYor], Proposition IV.2.13
+
+## Tags
+
+Itô integral, unbounded integrand, stochastic integral, localisation, limit in probability,
+Riemann sums, clipping, MSC 60H05, MSC 60G44
 -/
 
 @[expose] public section

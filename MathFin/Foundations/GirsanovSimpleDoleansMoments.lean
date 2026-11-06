@@ -31,6 +31,28 @@ The two structural identities behind them, generic in the multiplier scale `r`:
   variation `∑ cᵢ² Δτᵢ` of the simple integrand;
 * `simpleDoleansExp_scaled_eq` — `E^{r·c}_T = exp(r·∑cᵢΔXᵢ − ½r²·∑cᵢ²Δτᵢ)`, the log-linearity that
   turns every `Lᵖ` power into a rescaled Doléans density times an `exp` of the quadratic variation.
+
+## Main definitions
+
+* `simpleStochSum`: the discrete Itô sum `∑_{i<N} cᵢ (X_{s_{i+1}∧T} − X_{s_i∧T})` of a simple
+  integrand.
+* `simpleQuadVar`: the discrete quadratic variation `∑_{i<N} cᵢ² (s_{i+1}∧T − s_i∧T)`.
+
+## Main results
+
+* `simpleDoleansExp_scaled_eq`: `E^{r·c}_T = exp(r·∑cᵢΔXᵢ − ½r²·∑cᵢ²Δτᵢ)`.
+* `simpleQuadVar_le`: `simpleQuadVar ≤ K²·T` for multipliers bounded by `K` on a partition
+  covering `[0, T]`.
+* `quad_integral_simpleDoleans_le`, `sq_integral_simpleDoleans_le`: `∫ (Z_{−c})⁴ ≤ exp(6K²T)`
+  and `∫ (Z_{−c})² ≤ exp(K²T)` for the simple Doléans density.
+* `quad_integral_driftExp_le`: `∫ (D_u)⁴ ≤ exp(4|a|KT)·𝔼[exp(4a·X_u)]` for the drift-corrected
+  exponential `D_u`.
+* `sq_integral_mixedProduct_le`: `∫ (D_u·Z_T)² ≤ ½(exp(4|a|KT)·𝔼[exp(4a·X_u)] + exp(6K²T))`.
+
+## Tags
+
+Girsanov theorem, Doléans exponential, moment bounds, simple integrand, quadratic variation,
+fourth moment, MSC 60H05, MSC 60G44
 -/
 
 @[expose] public section

@@ -47,17 +47,40 @@ one place a hypothesis is genuinely load-bearing is
 `one_le_gainToPain_iff`, where `0 < ∑ r⁻` is what makes the quotient
 comparable to `1` at all.
 
-Results:
+## Main definitions
 
-* `sortinoRatio`, `sortinoRatio_scale_invariant`, `sortinoRatio_translation`.
-* `treynorRatio`, `treynorRatio_scale_invariant`, `treynorRatio_eq_sharpeRatio_mul` (Treynor
+* `sortinoRatio`: `(μ − target) / σ_down`, with `σ_down` the downside semi-deviation.
+* `treynorRatio`: `(μ − r_f) / β`.
+* `informationRatio`: `(μ_p − μ_b) / σ_active`, with `σ_active` the tracking error.
+* `trackingErrorSq`: `σ_p² − 2·cov + σ_b²`.
+* `gainToPain`: over a finite period set, the total of the positive parts of the returns over the
+  total of the negative parts.
+* `upCapture`: over the up-market periods, the portfolio gains `∑ p` over the benchmark gains
+  `∑ b`.
+
+## Main results
+
+* `sortinoRatio_scale_invariant`, `sortinoRatio_translation`.
+* `treynorRatio_scale_invariant`, `treynorRatio_eq_sharpeRatio_mul` (Treynor
   is Sharpe rescaled by `σ / β`) and `treynorRatio_eq_of_jensenAlpha_eq_zero` (on the security
   market line every asset has the market's Treynor ratio).
-* `informationRatio`, `informationRatio_scale_invariant`.
-* `trackingErrorSq`, `trackingErrorSq_self`, `trackingErrorSq_ge_diff_sq`,
+* `informationRatio_scale_invariant`.
+* `trackingErrorSq_self`, `trackingErrorSq_ge_diff_sq`,
   `trackingErrorSq_eq_variance_sub`.
-* `gainToPain`, `gainToPain_nonneg`, `one_le_gainToPain_iff`.
-* `upCapture`, `upCapture_smul`.
+* `gainToPain_nonneg`, `one_le_gainToPain_iff`.
+* `upCapture_smul`.
+
+## References
+
+* [K. Bodie and Marcus, *Investments*][BodieKaneMarcus], Ch 10
+* [Grinold and Kahn, *Active Portfolio Management*][GrinoldKahn1999]
+* [Sortino and van der Meer (1991)][SortinoVanDerMeer1991]
+* [Treynor (1965)][Treynor1965]
+
+## Tags
+
+Sortino ratio, Treynor ratio, information ratio, tracking error, gain-to-pain ratio, upside capture,
+performance attribution, MSC 91G10, JEL G11
 -/
 
 @[expose] public section

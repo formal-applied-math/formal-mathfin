@@ -12,9 +12,16 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.HeatBoundarySmoothing
 Only the kernel is differentiated. Compactness supplies a uniform local bound
 on its derivative, so the datum needs continuity but no derivatives.
 
-## Result
+## Main results
 
-Public entry points include `compact_kernelIntegral_hasDeriv`.
+* `compact_kernelIntegral_hasDeriv`: for continuous compactly supported `g` and a kernel `F`
+  with derivative `F'` in `x` on an open set, with `F`, `F'` jointly continuous there, the
+  integral `∫ F x y * g y` has derivative `∫ F' x y * g y` at each `x` in the set.
+
+## Tags
+
+kernel integral, differentiation under the integral, compact data, heat kernel derivative,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

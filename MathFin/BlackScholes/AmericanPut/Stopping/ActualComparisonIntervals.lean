@@ -16,11 +16,27 @@ The single-positive-interval principle and terminal contact obstruction now
 hold for the constructed price and boundary, without a classical-solution
 premise or any time differentiability of the boundary.
 
-## Result
+## Main results
 
-Public entry points include `canonicalStraightDifference_superlevel_interval`,
-`canonicalStraightDifference_positive_interval`, `canonicalLogBoundary_no_return_contact`,
-`zeroDividend_canonicalStraightDifference_positive_interval`.
+* `canonicalStraightDifference_superlevel_interval`: for `0 < k`, `0 ≤ h ≤ k`, `0 < c`, `d ≤ 0`,
+  `0 < t` and `0 ≤ ε`, the set of `x` above the log boundary at `t` where the straight-line
+  difference of the actual price exceeds `ε` is order-connected.
+* `canonicalStraightDifference_positive_interval`,
+  `zeroDividend_canonicalStraightDifference_positive_interval`,
+  `liuRange_canonicalStraightDifference_positive_interval`: the same for strict positivity,
+  under `0 ≤ h ≤ k`, under no dividend, and under `h + 1 ≤ k`.
+* `canonicalLogBoundary_no_return_contact`: under the same parameter hypotheses with `0 < a`,
+  there are no `a < T < U` with contact with the line at `T`, boundary strictly below the line on
+  `[a, T)` and strictly below it again at `U`.
+* `canonicalLogBoundary_below_line_time_interval`,
+  `zeroDividend_canonicalLogBoundary_below_line_time_interval`,
+  `liuRange_canonicalLogBoundary_below_line_time_interval`: the set of `t > 0` where the log
+  boundary lies strictly below the line `d - c t` is order-connected, in the same three regimes.
+
+## Tags
+
+single positive interval, terminal contact, straight-line comparison, exercise boundary,
+stopping value, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

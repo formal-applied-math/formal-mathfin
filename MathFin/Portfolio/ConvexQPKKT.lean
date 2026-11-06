@@ -5,6 +5,7 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -67,9 +68,12 @@ stated feasibility-preservation claim is actually a theorem. That the smallest
 such ratio is the *maximum* feasible step (a longer step leaves the feasible
 set) is not proved.
 
-## Results
+## Main definitions
 
-* `qpObj`: the QP objective `c ⬝ᵥ x + ½ x ⬝ᵥ (C *ᵥ x)`.
+* `qpObj`: the convex QP objective `f(x) = c ⬝ᵥ x + ½ x ⬝ᵥ (C *ᵥ x)`.
+
+## Main results
+
 * `qp_grad_expansion`: the exact quadratic expansion
   `qpObj c C y - qpObj c C x = (y-x) ⬝ᵥ (c + C *ᵥ x) + ½ (y-x) ⬝ᵥ (C *ᵥ (y-x))`
   — the algebraic core of convexity, valid for any symmetric `C`.
@@ -78,6 +82,11 @@ set) is not proved.
   multipliers of either sign.
 * `kkt_point_unique_of_posDef`: uniqueness of the feasible KKT point under `C ≻ 0`.
 * `feasible_step_preserved`: the ratio-test feasibility-preservation lemma.
+
+## Tags
+
+Karush-Kuhn-Tucker, KKT conditions, convex quadratic programming, complementary slackness,
+constrained optimization, global optimality, MSC 90C25, JEL C61
 -/
 
 @[expose] public section

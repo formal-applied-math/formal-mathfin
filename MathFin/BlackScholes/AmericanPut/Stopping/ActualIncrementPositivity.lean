@@ -16,10 +16,31 @@ These results use the stopping value's proved time monotonicity, continuation
 PDE, and spatial smooth fit. No time differentiability of the boundary is
 assumed. The stationary positive profile removes the discount term.
 
-## Result
+## Main definitions
 
-Public entry points include `canonicalIncrementGauge`, `canonicalIncrementGauge_continuous`,
-`canonicalIncrementGauge_contDiffAt`, `canonicalIncrementGauge_equation`.
+* `canonicalIncrementGauge`: the canonical time increment divided by the stationary profile
+  `profile (k − h − 1) k x`.
+
+## Main results
+
+* `canonicalIncrementGauge_continuous`: for `0 < k`, the gauge is jointly continuous.
+* `canonicalIncrementGauge_contDiffAt`, `canonicalIncrementGauge_equation`: for `0 < k`,
+  `0 ≤ h ≤ k`, `0 ≤ δ`, `0 < t` and `x` above the log boundary at `t`, the gauge is `C²` near
+  `(x, t)` and its time derivative is its second space derivative plus `incrementDrift k h x`
+  times its first.
+* `canonicalIncrementGauge_nonneg`: for `0 < k` and `0 ≤ δ`, the gauge is nonnegative.
+* `canonicalIncrementGauge_initial_pos`, `canonicalIncrementGauge_pos_above_strike`: for
+  `0 < k`, `0 ≤ h ≤ k`, `0 < δ` and `0 < x`, the gauge is positive at `t = 0` and at every
+  `t > 0`.
+* `canonicalIncrementGauge_pos_on_flat_tail`: if the log boundary is constant from `A` on, the
+  gauge is positive for `x` above that constant and `t > A`.
+* `canonicalIncrementGauge_fit_of_same_boundary`: if the log boundary at `t + δ` equals the one
+  at `t`, the gauge vanishes at it and has derivative `0` there in space.
+
+## Tags
+
+time increment, strict positivity, stationary profile, time monotonicity, American price, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

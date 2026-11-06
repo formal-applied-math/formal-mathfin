@@ -73,6 +73,17 @@ formulas
   the discounted expected call payoff is `e^{−rT} · f · (2Φ(σ_ATM √T / 2) − 1)`. This
   is Black's formula evaluated at eq. 2.18's vol; it does not show that the SABR model
   itself produces this price.
+
+## References
+
+* [F. Black, *The pricing of commodity contracts*][Black1976]
+* [Hagan et al., *Managing smile risk*][HaganKumarLesniewskiWoodward2002], eq. 2.18; eqs. 2.17a-c
+  and 2.18; section 3 and eq. 2.18
+
+## Tags
+
+SABR model, Hagan formula, implied volatility asymptotics, managing smile risk, backbone,
+stochastic volatility, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

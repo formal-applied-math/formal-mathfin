@@ -41,18 +41,28 @@ uniform budget `b_i = RC_i = Var(w)/2`. For the budget `b_i = 1/N` the solution
 is that portfolio rescaled, since `RC_i(t·w) = t²·RC_i(w)`; the rescaling is not
 formalized here.
 
-## Results
+## Main definitions
 
-* `riskContribution`: `RC_i(w) := w_i · (Σw)_i`.
+* `riskContribution`: the contribution `wᵢ (Σw)ᵢ` of asset `i` to the portfolio variance.
+* `IsRiskParity`: all assets have the same risk contribution.
+* `IsRiskBudgetPortfolio`: each asset's risk contribution equals a prescribed budget `bᵢ`.
+* `logBarrierObj`: the log-barrier objective `(1/2) wᵀ Σ w − ∑ᵢ bᵢ log wᵢ` whose critical points
+  are the risk-budget portfolios.
+
+## Main results
+
 * `sum_riskContribution_eq_variance`: `∑ RC_i = w^T Σ w`.
-* `IsRiskParity`: equal `RC_i` across all assets.
-* `IsRiskBudgetPortfolio`: each `RC_i` matches a prescribed budget `b_i`.
 * `isRiskBudget_of_log_barrier_FOC` (forward derivation): FOC `(Σw)_i =
   b_i / w_i` ⟹ risk-budget property.
 * `isRiskParity_of_uniform_log_barrier_FOC`: specialisation with uniform
   budget ⟹ risk parity.
 * `isRiskParity_iff_cross_product`: equivalent cross-product
   characterisation.
+
+## Tags
+
+risk parity, risk budgeting, log-barrier, equal risk contribution, Roncalli, first-order condition,
+convex programme, MSC 91G10, MSC 90C25, JEL G11
 -/
 
 @[expose] public section

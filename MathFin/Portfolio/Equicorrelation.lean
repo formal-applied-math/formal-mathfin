@@ -40,18 +40,31 @@ The probabilistic reading (`neg_inv_le_and_le_one_of_covariance`) follows from
 a common pairwise covariance `ρ σ²` have a PSD covariance kernel, and that kernel is `σ²` times
 the equicorrelation matrix. So their common correlation satisfies `−1/(d − 1) ≤ ρ ≤ 1`.
 
+## Main definitions
+
+* `equicorrelationMatrix`: the `n × n` matrix with `1` on the diagonal and the common
+  correlation `ρ` off it, `(1 − ρ)·I + ρ·J`.
+
 ## Main results
 
-* `equicorrelationMatrix`: ones on the diagonal, `ρ` off it.
 * `dotProduct_mulVec_eq_portfolioVarN`: Mathlib's matrix quadratic form is the Markowitz double
   sum.
 * `portfolioVarN_equicorrelation`: `wᵀ E w = (1 − ρ) ∑ wᵢ² + ρ (∑ wᵢ)²`.
-* `posSemidef_equicorrelationMatrix_iff`: PSD `⟺ −1/(d − 1) ≤ ρ ≤ 1` (QRM Ex. 6.26).
+* `posSemidef_equicorrelationMatrix_iff`: for `d ≥ 2`, PSD `⟺ −1/(d − 1) ≤ ρ ≤ 1` (QRM Ex. 6.26).
 * `portfolioVarN_equicorrelation_equal_weights`: the equal-weight variance `ρ + (1 − ρ)/d`, the
   diversification floor of QRM Ex. 6.16.
 * `portfolioVarN_covariance_eq_mul_equicorrelation`: an equicorrelated covariance kernel is `σ²`
   times the equicorrelation matrix.
 * `neg_inv_le_and_le_one_of_covariance`: the bound for a common correlation of random variables.
+
+## References
+
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 6.26
+
+## Tags
+
+equicorrelation matrix, common correlation, exchangeable model, admissible correlation,
+positive semidefinite, diversification, MSC 91G10, MSC 62H05, JEL G11
 -/
 
 @[expose] public section

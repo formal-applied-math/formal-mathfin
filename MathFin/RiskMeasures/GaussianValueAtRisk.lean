@@ -27,6 +27,16 @@ form is the value-at-risk of the law: for a loss `X ~ N(m, σ²)`,
 * `Phi_eq_iff`: `Φ z = α ↔ z = Φ⁻¹ α` for `α ∈ (0, 1)`.
 * `valueAtRisk_of_hasLaw_gaussianReal`: `VaR_α(X) = gaussianVaR m σ (Φ⁻¹ α)` for `X ~ N(m, σ²)`.
 * `valueAtRisk_of_hasGaussianLaw`: the same for any Gaussian `X`, in terms of `E X` and `Var X`.
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Example 2.11
+
+## Tags
+
+Gaussian VaR, normal quantile, inverse normal CDF, value at risk closed form, normal loss,
+MSC 91G70, MSC 60E05, JEL G32
 -/
 
 @[expose] public section

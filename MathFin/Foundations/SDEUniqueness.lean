@@ -22,7 +22,7 @@ integral equations (the initial condition `η` cancels) and taking `L²` norms,
 * the **diffusion** term is controlled by the **Itô isometry** — supplied here as the honest
   hypothesis `hIso` (an equality/inequality that the genuine Itô integral satisfies; in this
   library it is `MathFin.ItoIntegralProcessGeneral.itoProcessCLM_norm_sq` /
-  `variance_itoIntegralCLM_T`) — and the Lipschitz bound on `σ`, giving `≤ 2Lσ² ∫₀ᵗ g`.
+  `variance_itoIntegralCLM`) — and the Lipschitz bound on `σ`, giving `≤ 2Lσ² ∫₀ᵗ g`.
 
 Together `g t ≤ K ∫₀ᵗ g` with `K = 2(t·Lμ² + Lσ²)`, and Grönwall (in the `a = 0` form
 `eq_zero_of_abs_deriv_le_mul_abs_self_of_eq_zero_right`, fed the primitive `G t = ∫₀ᵗ g`)
@@ -33,6 +33,29 @@ delivered separately (and, at the current toolchain, conditionally in the `L²` 
 `MathFin.SDEExistence.picardMap_exists_unique_fixedPoint`. The diffusion operator enters through
 an abstract `Iσ` whose only assumed property is the isometric energy bound `hIso` — a genuine
 theorem about the Itô integral, not the uniqueness conclusion in disguise.
+
+## Main definitions
+
+* `IsL2SolutionPair`: two `L²` strong solutions of `dZ = μ(Z)dt + σ(Z)dB`, `Z₀ = η` with a shared
+  driver, packaged with the regularity the energy argument uses.
+
+## Main results
+
+* `gronwall_zero_of_le_const_mul_integral`: Grönwall in integral form with `a = 0`: a nonnegative
+  `g`, continuous on `[0,∞)`, with `g t ≤ K · ∫₀ᵗ g` on `[0, b]` vanishes there.
+* `sde_pathwise_uniqueness`: the `L²`-energy Grönwall argument showing two solutions agree almost
+  surely at every time, under the drift and diffusion bounds taken as hypotheses.
+* `IsL2SolutionPair.uniqueness`: two `L²` strong solutions sharing a driver agree almost surely
+  at every time.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 8.2.5
+
+## Tags
+
+pathwise uniqueness, Grönwall inequality, stochastic differential equation, Itô isometry,
+Lipschitz coefficients, strong solution, MSC 60H10, MSC 60H05
 -/
 
 @[expose] public section
@@ -98,7 +121,7 @@ theorem gronwall_zero_of_le_const_mul_integral {g : ℝ → ℝ} {K b : ℝ}
 
 /-- **Cauchy–Schwarz in time** (interval-integral form): `(∫₀ˢ f)² ≤ s·∫₀ˢ f²` for `0 ≤ s`,
 given `f ∈ L²` on `(0,s]`. -/
-private lemma sq_intervalIntegral_le {f : ℝ → ℝ} {s : ℝ} (hs : 0 ≤ s)
+lemma sq_intervalIntegral_le {f : ℝ → ℝ} {s : ℝ} (hs : 0 ≤ s)
     (hf : MemLp f 2 (volume.restrict (Set.Ioc 0 s))) :
     (∫ u in (0:ℝ)..s, f u) ^ 2 ≤ s * ∫ u in (0:ℝ)..s, (f u) ^ 2 := by
   have hcs := sq_integral_le_measureReal_mul hf

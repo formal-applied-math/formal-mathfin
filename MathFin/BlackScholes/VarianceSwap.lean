@@ -31,7 +31,7 @@ from `expected_terminal_eq_forward` (`Forward.lean`). Under BS lognormal dynamic
 variance swap rate equals the squared volatility, which is the relationship that makes BS implied
 volatility a "risk-neutral expected variance".
 
-Results:
+## Main results
 
 * `log_forward_div_bsTerminal_eq`: `log(F/S_T) = σ² T / 2 − σ √T · z`.
 * `integral_log_forward_div_bsTerminal_eq`:
@@ -49,6 +49,19 @@ Model-free, for any law of the log-return `Y` with `S_T = S_0e^Y`, `S_0 > 0`, `E
   jump-diffusion at the compensated drift it differs from half the variance by
   `ΛT·E[e^J − 1 − J − J²/2]` (`jumpDiffusion_logContract_sub_variance`,
   `JumpDiffusionVarianceSwap.lean`).
+
+## References
+
+* [P. Carr and D. Madan, *Towards a theory of volatility trading*][CarrMadan1998]
+* [Carr and Wu, *Variance risk premiums*][CarrWu2009]
+* [Cont and Tankov, *Financial Modelling with Jump Processes*][ContTankov2004]
+* [Demeterfi et al., *More than you ever wanted to know about volatility
+  swaps*][DemeterfiDermanKamalZou1999]
+
+## Tags
+
+variance swap, fair strike, log contract, Demeterfi–Derman–Kamal, static replication, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

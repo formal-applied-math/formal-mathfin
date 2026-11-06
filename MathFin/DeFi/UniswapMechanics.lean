@@ -10,6 +10,7 @@ public import MathFin.DeFi.ConstantProductAMM
 
 /-!
 # Uniswap v2/v3 AMM mechanics: impermanent loss, TWAP, fee invariant,
+
 v3 real-reserves curve
 
 This file extends the constant-product AMM formalization
@@ -32,7 +33,23 @@ This file formalises further closed-form results about automated
 market makers, building on the constant-product substrate in
 `ConstantProductAMM.lean`.
 
-## Results
+## Main definitions
+
+* `impermanentLossReservesX`, `impermanentLossReservesY`: the rebalanced reserves
+  `√(x0² / r)` and `√(y0² r)` after the external price moves by the factor `r`.
+* `impermanentLoss`: the closed form `2 √r / (1 + r) - 1`.
+* `twapAccumulator`, `twap`: the running sum `∑_{i ≤ t} p i` of a price series and the quotient
+  of its increment by `t2 - t1`.
+* `harmonicMean`: `|s| / ∑ i ∈ s, 1 / q i`.
+* `swapOutputWithFee`: `swapOutput x y (γ * Δx)`, the swap output when only `γ Δx` is credited.
+* `lpFeeShare`: `1 - √(k1 / k2)`.
+* `realReserveX`, `realReserveY`: the in-range real reserves `L (1/√P - 1/√p_b)` and
+  `L (√P - √p_a)` of a Uniswap v3 position.
+* `v3PositionValue`: the value in token Y of a v3 position with liquidity `L` and range
+  `[a, b]` in square-root price `s`, piecewise below, inside and above the range.
+* `tickPrice`: `1.0001 ^ i` for an integer tick `i`.
+
+## Main results
 
 * `impermanentLossReservesX/Y`, `impermanentLossReserves_invariant`,
   `impermanentLossReserves_price`, `impermanentLoss_eq`: the **impermanent
@@ -78,6 +95,17 @@ market makers, building on the constant-product substrate in
   `integral_discounted_v3PositionValue_le` in `MathFin/Bridges/UniswapV3CoveredCallPrice.lean`.
 * `tickPrice`, `tickPrice_ratio`: the v3 tick price `p(i) = 1.0001^i` and
   its per-tick ratio.
+
+## References
+
+* [H. Adams et al., *Uniswap v3 Core*][AdamsEtAl2021], §2 (eq. 2.2) and §6.4.1 (eqs. 6.29-6.30)
+* [L. Heimbach, E. Schertenleib and R. Wattenhofer, *Risks and returns of Uniswap V3 liquidity
+  providers*][HeimbachSchertenlebWattenhofer2022]
+
+## Tags
+
+impermanent loss, Uniswap v3, TWAP, concentrated liquidity, liquidity provider, AMM fee,
+covered call, MSC 91G80, JEL G23
 -/
 
 @[expose] public section

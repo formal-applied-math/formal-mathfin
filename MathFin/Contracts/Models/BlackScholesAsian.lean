@@ -29,6 +29,20 @@ geometric mean of the path values.
 
 * `BlackScholes.value_geomAsianCall` — `geomAsianCall K T τ` is worth the call price at the
   effective spot `geomAsianEffSpot` and volatility `geomAsianEffVol`.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 15.6
+* [A. G. Z. Kemna and A. C. F. Vorst, *A pricing method for options based on average asset
+  values*][KemnaVorst1990]
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], 4.5
+* [Zhang, *Exotic Options*][ZhangExoticOptions]
+
+## Tags
+
+geometric Asian option, path-dependent option, geometric Brownian motion, Black–Scholes path,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

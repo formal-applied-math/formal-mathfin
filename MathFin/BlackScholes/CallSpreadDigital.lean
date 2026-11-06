@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -40,6 +41,29 @@ form. The digital price `e^{−rτ}Φ(d₂)` follows from it through `hasDerivAt
 (`jumpDiffusionDigitalPrice_zero`), the same value that `bs_cash_or_nothing_formula` computes as a
 Gaussian integral. The second-order form, the lognormal density as the second strike derivative of
 `bsV`, is in `BlackScholes/BreedenLitzenberger.lean`.
+
+## Main results
+
+* `abs_call_payoff_sub_le`: `|(x − k₁)⁺ − (x − k₂)⁺| ≤ |k₁ − k₂|`.
+* `tendsto_call_spread`: for a measurable integrable `X` under a finite measure, the bull-call
+  spread `(C(K) − C(K + h))/h` tends to `μ {K < X}` as `h ↓ 0`.
+* `tendsto_call_spread_left`: the spread `(C(K − h) − C(K))/h` tends to `μ {K ≤ X}` as `h ↓ 0`.
+* `hasDerivAt_integral_call`: if `μ {X = K} = 0`, the call price `k ↦ ∫ (X − k)⁺` has derivative
+  `−μ {K < X}` at `K`.
+* `differentiableAt_integral_call_iff`: the call price is differentiable at `K` iff
+  `μ {X = K} = 0`.
+* `measure_eq_of_integral_call_eq`: two probability laws of a log-return, each with `∫ eʸ < ∞`,
+  whose call prices `∫ (S·eʸ − K)⁺` agree at every strike `K > 0`, are equal.
+
+## References
+
+* [Breeden and Litzenberger, *Prices of state-contingent claims implicit in option
+  prices*][BreedenLitzenberger1978]
+
+## Tags
+
+call spread, digital option, law from call prices, bull spread, strike derivative, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

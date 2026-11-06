@@ -37,6 +37,35 @@ the Wiener integral of the indicator of the whole window `(0, T]`
 (`eval_ae_eq_wienerIntegralLp_stepIndicator`), with `⟪𝟙_{(0,T]}, f⟫ = ∫₀ᵀ f` and
 `‖𝟙_{(0,T]}‖² = T`. These identities feed the Girsanov shift of
 `Foundations/WienerIntegralGirsanov`.
+
+## Main definitions
+
+* `StepIndex.whole`: the step index of the whole window `(0, T]`.
+
+## Main results
+
+* `integral_exp_mul_wienerIntegralLp`: `𝔼[exp(c·∫₀ᵀ f dB)] = exp(c²‖f‖²/2)` for a
+  deterministic kernel `f ∈ L²((0, T])`.
+* `integral_exp_neg_add_mul_wienerIntegralLp`: `𝔼[exp(−(m + c·∫₀ᵀ f dB))] = exp(−m + c²·∫₀ᵀ f²/2)`
+  for constants `m` and `c`.
+* `integral_exp_mul_exp_neg_wienerIntegralLp`: for two kernels `f`, `g`,
+  `𝔼[e^{a + c₁∫f dB}·e^{−(b + c₂∫g dB)}]` is the product of the two expectations times
+  `exp(−c₁c₂⟪f, g⟫)`.
+* `wienerIntegralLp_smul_ae`, `wienerIntegralLp_smul_add_smul_ae`: the Wiener integral is
+  homogeneous and linear almost surely.
+* `eval_ae_eq_wienerIntegralLp_stepIndicator`: `B_T` is a.s. the Wiener integral of `𝟙_{(0, T]}`.
+
+## References
+
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  §3.2.1 and §3.3
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], Thm.
+  4.4.9
+
+## Tags
+
+Wiener integral, exponential moment, zero-coupon bond price, Gaussian short rate, Vasicek model,
+Hull–White model, bond-price lemma, MSC 60H05, MSC 91G30, JEL E43
 -/
 
 @[expose] public section

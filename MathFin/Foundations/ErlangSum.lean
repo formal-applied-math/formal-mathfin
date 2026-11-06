@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -35,6 +36,15 @@ holds for every real `a > 0` by completing the constant.
   nonempty finset `s`, the law of `∑ i ∈ s, X i` is `gammaMeasure s.card r`.
 * `sum_iidExp_law_gammaMeasure` — the textbook form: the sum of all `n ≥ 1`
   coordinates has law `Erlang(n, r) = gammaMeasure n r`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 3.3.8
+
+## Tags
+
+Erlang distribution, Gamma convolution, exponential waiting times, Poisson process arrival time,
+sum of exponentials, MSC 60E05, MSC 60G55
 -/
 
 @[expose] public section
@@ -53,7 +63,7 @@ variable {a r : ℝ}
 /-- Pointwise (away from `x = 0`): the product of the `Gamma(a,r)` density at
 `x` and the `Exp(r)` density at `z − x` collapses, after the exponentials
 merge, to a constant multiple of `x^(a−1)` supported on `(0, z]`. -/
-private lemma pdf_mul_eq (ha : 0 < a) (hr : 0 < r) {z x : ℝ} (hx : x ≠ 0) :
+lemma gammaPDF_mul_exponentialPDF_sub_of_ne_zero (ha : 0 < a) (hr : 0 < r) {z x : ℝ} (hx : x ≠ 0) :
     gammaPDF a r x * exponentialPDF r (z - x)
       = ENNReal.ofReal ((Set.Ioc 0 z).indicator
           (fun t ↦ r ^ (a + 1) / Gamma a * Real.exp (-(r * z)) * t ^ (a - 1)) x) := by
@@ -82,7 +92,7 @@ private lemma pdf_mul_eq (ha : 0 < a) (hr : 0 < r) {z x : ℝ} (hx : x ≠ 0) :
         ENNReal.ofReal_zero]
 
 /-- The elementary Beta-degenerate integral: `∫_{(0,z]} x^(a−1) dx = z^a / a`. -/
-private lemma setIntegral_rpow_Ioc (ha : 0 < a) {z : ℝ} (hz : 0 ≤ z) :
+lemma setIntegral_rpow_sub_one_Ioc (ha : 0 < a) {z : ℝ} (hz : 0 ≤ z) :
     ∫ x in Set.Ioc 0 z, x ^ (a - 1) = z ^ a / a := by
   rw [← intervalIntegral.integral_of_le hz,
     integral_rpow (Or.inl (by linarith)),
@@ -91,7 +101,7 @@ private lemma setIntegral_rpow_Ioc (ha : 0 < a) {z : ℝ} (hz : 0 ≤ z) :
 
 /-- **Density convolution identity.** For `a, r > 0` and every `z`,
 `∫ gammaPDF a r x · exponentialPDF r (z−x) dx = gammaPDF (a+1) r z`. -/
-private lemma lintegral_gammaPDF_mul_exponentialPDF
+lemma lintegral_gammaPDF_mul_exponentialPDF
     (ha : 0 < a) (hr : 0 < r) (z : ℝ) :
     ∫⁻ x, gammaPDF a r x * exponentialPDF r (z - x) = gammaPDF (a + 1) r z := by
   rcases lt_or_ge z 0 with hz | hz
@@ -114,7 +124,7 @@ private lemma lintegral_gammaPDF_mul_exponentialPDF
             ((Set.Ioc 0 z).indicator (fun t ↦ c * t ^ (a - 1)) x) := by
           refine lintegral_congr_ae ?_
           filter_upwards [h0] with x hx
-          exact pdf_mul_eq ha hr hx
+          exact gammaPDF_mul_exponentialPDF_sub_of_ne_zero ha hr hx
       _ = ∫⁻ x, (Set.Ioc 0 z).indicator
             (fun t ↦ ENNReal.ofReal (c * t ^ (a - 1))) x := by
           refine lintegral_congr fun x ↦ ?_
@@ -131,7 +141,7 @@ private lemma lintegral_gammaPDF_mul_exponentialPDF
           have : (0 : ℝ) ≤ x ^ (a - 1) := Real.rpow_nonneg hx.1.le _
           positivity
       _ = ENNReal.ofReal (c * (z ^ a / a)) := by
-          rw [integral_const_mul, setIntegral_rpow_Ioc ha hz]
+          rw [integral_const_mul, setIntegral_rpow_sub_one_Ioc ha hz]
       _ = gammaPDF (a + 1) r z := by
           rw [gammaPDF_of_nonneg hz]
           congr 1

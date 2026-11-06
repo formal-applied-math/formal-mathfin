@@ -29,6 +29,10 @@ This is the existence result `JumpImpliedVol.lean` needs. Existence for every
 price in the no-arbitrage range would also need the `σ → 0` limit, which is not
 proved.
 
+## Main definitions
+
+* `newtonStep`: the Newton–Raphson step `σ − f σ / f' σ`.
+
 ## Main results
 
 * `bsV_strictMonoOn_sigma`: the BS call price `σ ↦ V(K, r, σ, S, T)` is
@@ -40,6 +44,17 @@ proved.
 * `exists_impliedVol_gt_of_bsV_lt`: a price strictly between the Black–Scholes
   price at `σ₀ > 0` and the spot has a unique positive implied volatility, and it
   exceeds `σ₀`.
+
+## References
+
+* [J. Gatheral, *The Volatility Surface: A Practitioner's Guide*][Gatheral2006]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 19.10
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], 4.5
+
+## Tags
+
+implied volatility, uniqueness of implied volatility, strict monotonicity in volatility,
+Newton step, no-arbitrage price range, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

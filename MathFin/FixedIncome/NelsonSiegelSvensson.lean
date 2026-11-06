@@ -5,6 +5,7 @@ Authors: Yang Ye
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -30,9 +31,14 @@ recovery. (Only continuity on `(0, ∞)` is proved here; at `τ = 0` the Lean
 definition takes Lean's `x / 0 = 0` junk value, and the short end is stated
 as a limit.)
 
+## Main definitions
+
+* `nssSlope`: the Nelson-Siegel slope factor `s(x) = (1 - e^{-x}) / x`.
+* `nssYield`: the Nelson-Siegel-Svensson closed-form yield curve
+  `y(τ) = β₀ + β₁·s(τ/l₁) + β₂·(s(τ/l₁) - e^{-τ/l₁}) + β₃·(s(τ/l₂) - e^{-τ/l₂})`.
+
 ## Main results
 
-* `nssSlope`, `nssYield` — the slope factor `s` and the Svensson closed form.
 * `continuousOn_nssYield` — `y` is continuous on `(0, ∞)` (the economically
   meaningful domain: no coupon bond or discount factor is quoted at `τ = 0`).
 * `tendsto_nssSlope_nhdsNE_zero` — the core calculus fact underlying the
@@ -53,10 +59,14 @@ Vasicek zero yield in these factors.
 
 ## References
 
-* C. R. Nelson, A. F. Siegel, *Parsimonious Modeling of Yield Curves*, Journal of Business 60
-  (1987).
-* L. E. O. Svensson, *Estimating and Interpreting Forward Interest Rates: Sweden 1992–1994*,
-  NBER Working Paper 4871 (1994).
+* [C. R. Nelson, A. F. Siegel, *Parsimonious Modeling of Yield Curves*][NelsonSiegel1987].
+* [L. E. O. Svensson, *Estimating and Interpreting Forward Interest Rates: Sweden
+  1992–1994*][Svensson1994].
+
+## Tags
+
+Nelson–Siegel, Svensson, yield curve fitting, level slope curvature, parametric yield curve,
+zero-coupon yield, MSC 91G30, JEL E43
 -/
 
 @[expose] public section
@@ -113,7 +123,7 @@ theorem tendsto_nssSlope_nhdsNE_zero :
 /-- Dividing by a nonzero constant tends to `0` through nonzero values as the
 numerator tends to `0` through nonzero values (used to transport the `𝓝[≠] 0`
 short-end limit of `nssSlope` and `exp` along `τ ↦ τ/l`). -/
-private theorem tendsto_div_const_nhdsNE_zero {c : ℝ} (hc : c ≠ 0) :
+theorem tendsto_div_const_nhdsNE_zero {c : ℝ} (hc : c ≠ 0) :
     Tendsto (fun x : ℝ ↦ x / c) (𝓝[≠] (0 : ℝ)) (𝓝[≠] (0 : ℝ)) := by
   rw [tendsto_nhdsWithin_iff]
   refine ⟨?_, ?_⟩
@@ -125,7 +135,7 @@ private theorem tendsto_div_const_nhdsNE_zero {c : ℝ} (hc : c ≠ 0) :
     exact div_ne_zero hx hc
 
 /-- `exp(-τ/l) → 1` as `τ → 0` through nonzero values. -/
-private theorem tendsto_exp_neg_div_const_nhdsNE_zero {c : ℝ} (hc : c ≠ 0) :
+theorem tendsto_exp_neg_div_const_nhdsNE_zero {c : ℝ} (hc : c ≠ 0) :
     Tendsto (fun τ : ℝ ↦ Real.exp (-(τ / c))) (𝓝[≠] (0 : ℝ)) (𝓝 1) := by
   have hdiv : Tendsto (fun τ : ℝ ↦ -(τ / c)) (𝓝[≠] (0 : ℝ)) (𝓝 0) := by
     simpa using ((tendsto_div_const_nhdsNE_zero hc).mono_right nhdsWithin_le_nhds).neg

@@ -37,12 +37,20 @@ algebraically. `FixedIncome.DurationSensitivity` (phase 21) derives
 by deriving `d²P/dy² = ConvNum` — i.e., bond convexity is *literally* the
 second derivative of price, not a separately-defined moment.
 
-## Results
+## Main definitions
 
-* `convexityNumerator`: `∑ t_i · (t_i + 1) · c_i / (1 + y)^{t_i + 2}`.
+* `convexityNumerator`: the convexity numerator `∑ t_i · (t_i + 1) · c_i / (1 + y)^{t_i + 2}`.
+
+## Main results
+
 * `hasDerivAt_modifiedNumerator`: `d/dy [ModNum(y)] = −ConvNum(y)`.
 * `hasDerivAt_bondPriceDisc_secondDeriv`: `d²P/dy² = ConvNum(y)` (stated as
   the derivative of `P'(y) = −ModNum(y)`).
+
+## Tags
+
+bond convexity, second derivative of price, yield Taylor expansion, price–yield curve, coupon bond,
+interest rate sensitivity, MSC 91G30, JEL G12
 -/
 
 @[expose] public section

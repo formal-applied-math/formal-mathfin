@@ -32,11 +32,20 @@ This file derives the marginal from the construction:
   theorem of calculus applied to `Φ_k(u) = (ru)ᵏ e^{−ru}/k!`, whose
   derivative telescopes to exactly `γ_k − γ_{k+1}`.
 
-## Main result
+## Main results
 
 * `PoissonCounting.map_count_eq_poissonMeasure` — for iid `Exp(r)`
   interarrivals and the counting process they generate,
   `N t ∼ Poisson(r·t)` (Theorem 3.3.5, fully derived).
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 3.3.5
+
+## Tags
+
+Poisson process, counting process, Erlang distribution, Gamma distribution, interarrival times,
+Poisson marginal law, MSC 60G55, MSC 60E05
 -/
 
 @[expose] public section
@@ -52,7 +61,8 @@ variable {r t : ℝ}
 
 /-! ### Integrability of the Gamma density on `[0, t]` -/
 
-private lemma continuousOn_gammaPDFReal {a : ℝ} (ha : 1 ≤ a) (r : ℝ) :
+/-- The Gamma density of shape `a ≥ 1` is continuous on `[0, ∞)`. -/
+lemma continuousOn_gammaPDFReal {a : ℝ} (ha : 1 ≤ a) (r : ℝ) :
     ContinuousOn (gammaPDFReal a r) (Set.Ici 0) := by
   have hform : ContinuousOn
       (fun x : ℝ ↦ r ^ a / Real.Gamma a * x ^ (a - 1) * rexp (-(r * x)))
@@ -63,7 +73,8 @@ private lemma continuousOn_gammaPDFReal {a : ℝ} (ha : 1 ≤ a) (r : ℝ) :
   exact hform.congr fun x hx ↦ by
     rw [gammaPDFReal, ite_eq_left (Set.mem_Ici.mp hx)]
 
-private lemma intervalIntegrable_gammaPDFReal {a : ℝ} (ha : 1 ≤ a) (ht : 0 ≤ t) :
+/-- The Gamma density of shape `a ≥ 1` is interval integrable on `[0, t]`. -/
+lemma intervalIntegrable_gammaPDFReal {a : ℝ} (ha : 1 ≤ a) (ht : 0 ≤ t) :
     IntervalIntegrable (gammaPDFReal a r) volume 0 t := by
   refine ContinuousOn.intervalIntegrable ?_
   refine (continuousOn_gammaPDFReal ha r).mono ?_
@@ -74,7 +85,7 @@ private lemma intervalIntegrable_gammaPDFReal {a : ℝ} (ha : 1 ≤ a) (ht : 0 �
 
 /-- For shape `a ≥ 1`, the `Gamma(a, r)` measure of `Iic t` is the interval
 integral of its density over `[0, t]` (the density vanishes on negatives). -/
-private lemma gammaMeasure_Iic {a : ℝ} (ha : 1 ≤ a) (hr : 0 < r) (ht : 0 ≤ t) :
+lemma gammaMeasure_Iic {a : ℝ} (ha : 1 ≤ a) (hr : 0 < r) (ht : 0 ≤ t) :
     gammaMeasure a r (Set.Iic t)
       = ENNReal.ofReal (∫ s in (0:ℝ)..t, gammaPDFReal a r s) := by
   have hInt : IntegrableOn (gammaPDFReal a r) (Set.Icc 0 t) volume :=
@@ -94,7 +105,7 @@ private lemma gammaMeasure_Iic {a : ℝ} (ha : 1 ≤ a) (hr : 0 < r) (ht : 0 ≤
 
 /-- The telescoping antiderivative: on `s ≥ 0`, `Φ_k(u) = (ru)ᵏ e^{−ru}/k!`
 has derivative `γ_k(s) − γ_{k+1}(s)` (Gamma densities of natural shapes). -/
-private lemma hasDerivAt_gamma_antideriv {k : ℕ} (hk : k ≠ 0)
+lemma hasDerivAt_gamma_antideriv {k : ℕ} (hk : k ≠ 0)
     {s : ℝ} (hs : 0 ≤ s) :
     HasDerivAt (fun u : ℝ ↦ (r * u) ^ k * rexp (-(r * u)) / k !)
       (gammaPDFReal k r s - gammaPDFReal (k + 1 : ℕ) r s) s := by
@@ -140,7 +151,7 @@ private lemma hasDerivAt_gamma_antideriv {k : ℕ} (hk : k ≠ 0)
 `∫₀ᵗ γ_k − ∫₀ᵗ γ_{k+1} = e^{−rt} (rt)ᵏ / k!` — the Poisson pmf appears as
 the telescoping gap between consecutive Erlang CDFs (a formal calculus
 identity; no positivity of `r` is needed). -/
-private lemma integral_gammaPDFReal_sub_succ (ht : 0 ≤ t)
+lemma integral_gammaPDFReal_sub_succ (ht : 0 ≤ t)
     {k : ℕ} (hk : k ≠ 0) :
     (∫ s in (0:ℝ)..t, gammaPDFReal k r s)
         - ∫ s in (0:ℝ)..t, gammaPDFReal (k + 1 : ℕ) r s
@@ -160,7 +171,7 @@ private lemma integral_gammaPDFReal_sub_succ (ht : 0 ≤ t)
 
 /-- The base case against zero: `∫₀ᵗ γ_1 = 1 − e^{−rt}` (the exponential
 CDF). -/
-private lemma integral_gammaPDFReal_one (ht : 0 ≤ t) :
+lemma integral_gammaPDFReal_one (ht : 0 ≤ t) :
     ∫ s in (0:ℝ)..t, gammaPDFReal 1 r s = 1 - rexp (-(r * t)) := by
   have hderiv : ∀ s ∈ Set.uIcc (0:ℝ) t,
       HasDerivAt (fun u : ℝ ↦ -rexp (-(r * u))) (gammaPDFReal 1 r s) s := by

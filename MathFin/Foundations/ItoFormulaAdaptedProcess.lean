@@ -39,6 +39,32 @@ Along the way: the level of a continuous path is left-continuous in time
 
 Not here: a random starting point, `T = ∞`, and Itô's formula for a continuous semimartingale not
 built from `B`.
+
+## Main results
+
+* `ito_formula_adapted_unbounded_process`: for `X = localItoProcess` with continuous adapted
+  `σ`, `b` and `f(t, x)` with jointly continuous `f_t`, `f_x`, `f_xx`, almost surely, for all
+  `t ∈ [0, T]` at once,
+  `f(t, X_t) = f(0, x₀) + ∫₀ᵗ (f_t + f_x b + ½ f_xx σ²)(s, X_s) ds + (∫ f_x(·, X) σ dB)_t`.
+* `ito_formula_adapted_unbounded_C2_process`: the same identity for `f(x)` twice differentiable
+  with `f''` continuous.
+* `exists_localMartingale_ito_formula`: `f(t, X_t)` minus its drift integral has a version `Y`
+  with continuous paths that is a local martingale for the null-augmented Brownian filtration.
+* `isStronglyPredictable_localItoProcess`, `ae_continuousOn_localItoProcess`: `X` is predictable
+  and almost every path is continuous on `[0, T]`.
+* `continuous_uncurry_of_continuous_partials`: a function with jointly continuous partials is
+  jointly continuous.
+
+## References
+
+* [I. Karatzas and S. E. Shreve, *Brownian Motion and Stochastic Calculus*][KaratzasShreve1991],
+  Theorem 3.3.6
+* [Revuz and Yor, *Continuous Martingales and Brownian Motion*][RevuzYor], Theorem IV.3.3
+
+## Tags
+
+Itô formula, Itô lemma, local martingale, unbounded coefficients, identity of processes,
+stochastic integral, MSC 60H05, MSC 60G44, MSC 60H10
 -/
 
 @[expose] public section

@@ -12,10 +12,20 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.DelayedGrid
 Optimal delayed-grid rules and dominated convergence prove one direction of
 continuous-time dynamic programming, without assuming an optimal continuous rule.
 
-## Result
+## Main results
 
-Public entry points include `brownianAmericanPut_wait_integral`, `brownianLogState_integral`,
-`brownianAmericanPut_wait`, `canonicalPrice_wait`, `canonicalPrice_putWaiting`.
+* `brownianAmericanPut_wait_integral`: for `0 ≤ K` and `0 ≤ r`, the expected discounted American
+  put value at horizon `T`, from the log state at time `u`, is at most the value at `u + T`.
+* `brownianLogState_integral`: for continuous `f`, the expectation of `f` at the log state at time
+  `u` is the heat flow of `f` at variance `σ² u` and point `x + β u`.
+* `brownianAmericanPut_wait`, `canonicalPrice_wait`: the discounted heat flow of the value (resp.
+  of `canonicalPrice`) at horizon `T` is at most the value at `u + T`, for `0 ≤ r` (resp. `0 ≤ k`).
+* `canonicalPrice_putWaiting`: for `0 ≤ k`, `canonicalPrice k h` satisfies `PutWaiting k h`.
+
+## Tags
+
+waiting inequality, dynamic programming, delayed rules, dominated convergence, American put,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib.Probability.Martingale.Basic
 
 /-!
@@ -16,11 +17,23 @@ A process `S` that is a martingale only up to a horizon `T` (adapted and integra
 arises so (`martingale_min_iff`). Past the horizon the frozen process is constant, and the
 constant `S T` is `𝓕 T ⊆ 𝓕 s`-measurable, so it is its own conditional expectation.
 
-This is the vocabulary of the horizon-`T` equivalent martingale measures, discrete
-(`MathFin.IsEMM`) and continuous (`MathFin.ContinuousMarket.IsEMM`): the hypothesis there is the
+This is the vocabulary of the horizon-`T` equivalent martingale measure `MathFin.IsEMM`
+(`EquivMartingaleMeasure.lean`), discrete and continuous: the hypothesis there is the
 frozen martingale, and the three consequences read off it (adaptedness, integrability and the
 martingale identity before the horizon) are the forward direction of `martingale_min_iff`. On
 `ℕ` the identity need only be given one step at a time (`martingale_min_of_condExp_succ`).
+
+## Main results
+
+* `martingale_min_iff`: `t ↦ S (min t T)` is a martingale for `𝓕` iff `S` is adapted and
+  integrable on `{t ≤ T}` and `S s = E[S t | 𝓕 s]` for `s ≤ t ≤ T` (finite measure).
+* `martingale_min_of_condExp_succ`: on `ℕ`, adaptedness and integrability up to `T` and the
+  one-step identity `S t = E[S (t+1) | 𝓕 t]` for `t < T` make `n ↦ S (min n T)` a martingale.
+
+## Tags
+
+martingale up to a horizon, stopped martingale, frozen process, equivalent martingale measure,
+finite horizon martingale, MSC 60G44, MSC 60G48
 -/
 
 @[expose] public section

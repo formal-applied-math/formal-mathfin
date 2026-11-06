@@ -24,6 +24,15 @@ interarrival times) is not proved.
 
 * `PoissonSuperposition.map_add_count_eq_poissonMeasure` — the merged count has
   `Poisson((r₁ + r₂)·t)` law at every time `t ≥ 0`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 3.3.9
+
+## Tags
+
+superposition of Poisson processes, merged arrival stream, sum of independent Poisson,
+counting process, interarrival times, MSC 60G55, MSC 60E05
 -/
 
 @[expose] public section

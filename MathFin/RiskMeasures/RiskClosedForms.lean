@@ -35,6 +35,13 @@ Every quantile below is read off the CDF through `quantile_eq_iff`: `quantile μ
 when `p ≤ F(a)` and `F(x) < p` for `x < a`. Mathlib records the Pareto CDF only as an integral of
 its density; `cdf_paretoMeasure_of_le` evaluates it.
 
+## Main definitions
+
+* `lomaxMeasure`: the Lomax (Pareto type II) law `Pa(θ, κ)`, the type-I Pareto law of scale `κ`
+  and shape `θ` shifted to the origin, with `F(x) = 1 − (κ/(κ + x))^θ` on `[0, ∞)`.
+* `medianShortfall`: the median of the law of a loss `X` conditioned on exceeding its
+  value-at-risk, `F⁻¹_{X | X > VaR_α(X)}(1/2)`.
+
 ## Main results
 
 * `valueAtRisk_eq_iff`: a VaR is characterised by the CDF (from `quantile_eq_iff` in
@@ -44,13 +51,24 @@ its density; `cdf_paretoMeasure_of_le` evaluates it.
 * `tendsto_expectedShortfall_div_valueAtRisk_expMeasure`: `ES_α/VaR_α → 1` (light tail).
 * `cdf_paretoMeasure_of_le`, `cdf_paretoMeasure_of_lt`, `quantile_paretoMeasure`: the type-I
   Pareto CDF and quantile.
-* `expectedShortfall_of_hasLaw_paretoMeasure`: `ES_α = r/(r − 1)·VaR_α` for type-I Pareto.
-* `lomaxMeasure`, `cdf_lomaxMeasure`, `valueAtRisk_of_hasLaw_lomaxMeasure`,
-  `expectedShortfall_of_hasLaw_lomaxMeasure`: the Lomax law and its closed forms.
-* `tendsto_expectedShortfall_div_valueAtRisk_lomaxMeasure`: `ES_α/VaR_α → θ/(θ − 1)` (heavy
-  tail).
-* `medianShortfall`, `medianShortfall_eq_valueAtRisk`: the median of the loss beyond `VaR_α` is
-  `VaR_{(1+α)/2}` for a continuous distribution function.
+* `expectedShortfall_of_hasLaw_paretoMeasure`: `ES_α = r/(r − 1)·VaR_α` for type-I Pareto with
+  `r > 1`.
+* `cdf_lomaxMeasure`, `valueAtRisk_of_hasLaw_lomaxMeasure`,
+  `expectedShortfall_of_hasLaw_lomaxMeasure`: the Lomax CDF and closed forms.
+* `tendsto_expectedShortfall_div_valueAtRisk_lomaxMeasure`: for `θ > 1`, `ES_α/VaR_α → θ/(θ − 1)`
+  as `α → 1` (heavy tail).
+* `medianShortfall_eq_valueAtRisk`: the median of the loss beyond `VaR_α` is `VaR_{(1+α)/2}` for a
+  continuous distribution function.
+
+## References
+
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 2.12(a); Ex. 2.12(d); Ex. 2.23(a); Ex. 2.23(c); Ex.
+  2.29(b)
+
+## Tags
+
+VaR closed form, exponential loss, Pareto loss, Lomax distribution, heavy tails, median shortfall,
+light tail, tail risk, MSC 91G70, MSC 60E05, JEL G32
 -/
 
 @[expose] public section
@@ -82,7 +100,7 @@ lemma expectedShortfall_eq_of_valueAtRisk_eq {f : ℝ → ℝ}
   rw [expectedShortfall, setIntegral_congr_fun measurableSet_Ioo hf]
 
 /-- A set integral over `(α, 1)` is the interval integral from `α` to `1`. -/
-private lemma setIntegral_Ioo_eq_intervalIntegral (hα : α ≤ 1) (f : ℝ → ℝ) :
+lemma setIntegral_Ioo_eq_intervalIntegral (hα : α ≤ 1) (f : ℝ → ℝ) :
     ∫ u in Ioo α 1, f u = ∫ u in α..1, f u := by
   rw [intervalIntegral.integral_of_le hα, integral_Ioc_eq_integral_Ioo]
 
@@ -108,7 +126,7 @@ theorem expectedShortfall_of_hasLaw_expMeasure {r : ℝ} (hr : 0 < r)
   ring
 
 /-- As the level `α` rises to `1`, the tail mass `1 − α` falls to `0` from above. -/
-private lemma tendsto_one_sub_nhdsLT_one : Tendsto (fun α : ℝ ↦ 1 - α) (𝓝[<] 1) (𝓝[>] 0) := by
+lemma tendsto_one_sub_nhdsLT_one : Tendsto (fun α : ℝ ↦ 1 - α) (𝓝[<] 1) (𝓝[>] 0) := by
   refine tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _ ?_
     (eventually_nhdsWithin_of_forall fun _ hα ↦ show (0 : ℝ) < _ from sub_pos.2 hα)
   have h : Tendsto (fun α : ℝ ↦ 1 - α) (𝓝 1) (𝓝 (1 - 1)) :=
@@ -117,7 +135,7 @@ private lemma tendsto_one_sub_nhdsLT_one : Tendsto (fun α : ℝ ↦ 1 - α) (�
   exact h.mono_left nhdsWithin_le_nhds
 
 /-- `−log(1 − α) → ∞` as `α → 1⁻`. -/
-private lemma tendsto_neg_log_one_sub : Tendsto (fun α ↦ -log (1 - α)) (𝓝[<] 1) atTop :=
+lemma tendsto_neg_log_one_sub : Tendsto (fun α ↦ -log (1 - α)) (𝓝[<] 1) atTop :=
   tendsto_neg_atBot_atTop.comp (tendsto_log_nhdsGT_zero.comp tendsto_one_sub_nhdsLT_one)
 
 /-- **Light tail**: for an exponential loss the shortfall-to-quantile ratio tends to `1`,
@@ -198,7 +216,7 @@ theorem quantile_paretoMeasure (ht : 0 < t) (hr : 0 < r) (hp : p ∈ Ioo 0 1) :
 
 /-- `∫_α^1 (1 − u)^{−1/r} du = r/(r − 1)·(1 − α)^{1 − 1/r}` for `r > 1`: the Pareto quantile is
 integrable up to level `1` exactly when the mean is finite. -/
-private lemma integral_one_sub_rpow (hα : α < 1) (hr : 1 < r) :
+lemma integral_one_sub_rpow (hα : α < 1) (hr : 1 < r) :
     ∫ u in Ioo α 1, (1 - u) ^ (-r⁻¹) = r / (r - 1) * (1 - α) ^ (1 - r⁻¹) := by
   have hr0 : r ≠ 0 := (zero_lt_one.trans hr).ne'
   have hexp : -1 < -r⁻¹ := neg_lt_neg (inv_lt_one_of_one_lt₀ hr)

@@ -4,8 +4,13 @@
     "max_heartbeats": 9,
     "whole_mathlib_imports": 359,
     "long_files": 0,
-    "nolints": 24,
-    "modules_without_tags": 705,
-    "modules_without_references": 683
+    "nolints": 0,
+    "modules_without_tags": 0,
+    "private_mathlib_shaped": 193,
+    "duplicate_statements": 12,
+    "modules_without_main_results": 0,
+    "modules_without_main_definitions": 0,
+    "modules_with_uncited_sources": 0,
+    "long_lines": 0
   }
 }

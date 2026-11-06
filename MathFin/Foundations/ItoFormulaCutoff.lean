@@ -32,6 +32,29 @@ ds` being a local martingale localised by `sigmaSeq`, is `ito_formula_unrestrict
 (`ItoFormulaUnrestrictedLocMart`). It is derived from the process formula for an Itô process with
 unbounded coefficients (`exists_localMartingale_ito_formula`) at `σ = 1`, `b = 0`, not from this
 cutoff.
+
+## Main definitions
+
+* `fTrunc`: the double cutoff `fTrunc N (t, x) = f(φₙ t, φₙ x)`, which confines `f` to a compact
+  square.
+* `fTruncT`, `fTruncX`, `fTruncXX`: the partials of `fTrunc` in closed form by the chain rule.
+* `sigmaSeq`: the exit time of `B` from `[−N, N]` capped at the level, `σ_N = min(τ_N, N)`.
+
+## Main results
+
+* `fTrunc_hasDerivAt_t`, `fTrunc_hasDerivAt_x`, `fTrunc_hasDerivAt_xx`: `fTruncT`, `fTruncX`
+  and `fTruncXX` are the partials of `fTrunc`.
+* `fTruncT_bdd`, `fTruncX_bdd`, `fTruncXX_bdd`: for jointly continuous partials of `f`, each of
+  these is globally bounded.
+* `fTrunc_eq_of`: for `|s|, |y| ≤ N`, `fTrunc N (s, y) = f(s, y)`; likewise the partials.
+* `isLocalizingSequence_sigma`: for `B` with continuous paths, `sigmaSeq B` is a localizing
+  sequence for the null-augmented Brownian filtration.
+* `continuous_timeMeasure_primitive`: for continuous `h`, `t ↦ ∫_{(0,t]} h` is continuous.
+
+## Tags
+
+cutoff function, localisation, exit time, localizing sequence, Itô formula, local martingale,
+MSC 60H05, MSC 60G44, MSC 60G40
 -/
 
 @[expose] public section

@@ -5,12 +5,23 @@ Authors: Robert Martin
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
-/-! # First-contact stability from a vanishing nonnegative gap 
-## Result
+/-!
+# First-contact stability from a vanishing nonnegative gap
 
-Public entry points include `min_time_tendsto_firstContact`, `exists_subseq_gap_tendsto_zero`.
+## Main results
+
+* `min_time_tendsto_firstContact`: for continuous `g` positive before `τ`, if `g (s n) → 0` then
+  `min (s n) τ → τ`.
+* `exists_subseq_gap_tendsto_zero`: for integrable nonnegative `G n` whose integrals tend to
+  `0`, some strictly increasing subsequence tends to `0` almost surely.
+
+## Tags
+
+first contact stability, vanishing gap, subsequence, nonnegative gap, stopping time convergence,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

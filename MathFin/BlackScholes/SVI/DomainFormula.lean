@@ -14,6 +14,27 @@ Part of the SVI polynomial-sign certificate (#174).
 `fullCertificateFormula`, a finite Boolean combination of signs of polynomials in the five
 parameters, holds exactly when `σ > 0`, `b ≥ 0`, `ρ² ≤ 1`, the variance is positive at every
 log-strike and `g(k) ≥ 0` for every `k` (`fullCertificateFormula_iff`).
+
+## Main definitions
+
+* `positiveAtom`, `nonnegativeAtom`: the sign formulas "`f` is positive" and "`f` is zero or
+  positive" for a parameter polynomial `f`.
+* `domainFormula`: the sign formula for `σ > 0`, `b ≥ 0`, `ρ² ≤ 1` together with the variance gate.
+* `fullCertificateFormula`: `domainFormula` conjoined with `certificateFormula`.
+
+## Main results
+
+* `positiveAtom_eval`, `nonnegativeAtom_eval`: the atoms evaluate to `0 < parameterEval p f` and
+  `0 ≤ parameterEval p f`.
+* `domainFormula_iff`: `domainFormula` holds iff `0 < σ`, `0 ≤ b`, `0 ≤ 1 - ρ²` and
+  `varianceGate p`.
+* `fullCertificateFormula_iff`: `fullCertificateFormula` holds iff `σ > 0`, `b ≥ 0`, `1 - ρ² ≥ 0`,
+  the variance is positive at every `k`, and `durrleman p k ≥ 0` for every `k`.
+
+## Tags
+
+raw SVI parameters, Durrleman condition, sign formula, quantifier elimination, butterfly arbitrage,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

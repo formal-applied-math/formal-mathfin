@@ -48,6 +48,11 @@ acceptable exactly when its expected log-growth `kellyGrowth p b f` (`Performanc
 nonnegative (`acceptableUnderUtility_log_iff_kellyGrowth`). The counterexample above is a Kelly bet
 on a fair coin at odds `2`: the fraction `1/4` has positive growth, the fraction `3/4` negative.
 
+## Main definitions
+
+* `acceptableUnderUtility`: a position `X` on a finite state space with probability vector `p`
+  is acceptable under utility `u` at wealth `W` when `u(W) ≤ E[u(W + X)]`.
+
 ## Main results
 
 * `acceptableUnderUtility_convex`, `acceptableUnderUtility_monotone_translation`,
@@ -56,6 +61,17 @@ on a fair coin at odds `2`: the fraction `1/4` has positive growth, the fraction
 * `acceptableUnderUtility_log_iff_kellyGrowth`.
 * `not_exists_isCoherentRiskMeasure_log_acceptance`: the log-utility acceptance set of the fair
   coin is the acceptance set of no coherent risk measure.
+
+## References
+
+* [P. Artzner et al., *Coherent measures of risk*][ArtznerDelbaenEberHeath1999]
+* [H. Föllmer and A. Schied, *Convex measures of risk and trading constraints*][FollmerSchied2002]
+* [J. L. Kelly, *A new interpretation of information rate*][Kelly1956]
+
+## Tags
+
+acceptance set, expected utility, convex risk measure, Föllmer-Schied, log utility, Kelly criterion,
+risk aversion, MSC 91B16, MSC 91G70, JEL D81
 -/
 
 @[expose] public section
@@ -185,7 +201,8 @@ scaling (`IsCoherentRiskMeasure.cone`), so it is not the set of losses of accept
 Log utility is concave on positive wealth, and both positions keep wealth positive: risk aversion
 makes an acceptance set convex (`acceptableUnderUtility_convex`), not a cone. -/
 theorem not_exists_isCoherentRiskMeasure_log_acceptance :
-    ¬∃ (P : MeasureTheory.Measure (Fin 2)) (_ : MeasureTheory.IsFiniteMeasure P) (ρ : (Fin 2 → ℝ) → ℝ),
+    ¬∃ (P : MeasureTheory.Measure (Fin 2)) (_ : MeasureTheory.IsFiniteMeasure P)
+        (ρ : (Fin 2 → ℝ) → ℝ),
       IsCoherentRiskMeasure P ρ ∧
       ∀ L, ρ L ≤ 0 ↔ acceptableUnderUtility Finset.univ ![1 / 2, 1 / 2] Real.log 1 (-L) := by
   rintro ⟨P, _, ρ, hρ, hA⟩

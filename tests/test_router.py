@@ -2,6 +2,7 @@ import json
 import re
 from pathlib import Path
 
+from tools.verify import library
 from tools.verify.models import Backend, Domain
 from tools.verify.router import Router
 
@@ -100,11 +101,11 @@ def _iter_theorems():
 # No deliberately-private modules exist; add any future one here with a comment.
 MODULE_PRIVATE_ALLOWLIST: set = set()
 
-MODULE_HEADER_RE = re.compile(r"^module\s*$", re.MULTILINE)
+MODULE_HEADER_RE = re.compile(r"^module\s*(?:--.*)?$", re.MULTILINE)  # `module -- shake: …` too
 
 
 def test_mathfin_module_files_expose_public_section() -> None:
-    for path in Path("MathFin").rglob("*.lean"):
+    for path in library.modules(aggregators=True):
         if str(path) in MODULE_PRIVATE_ALLOWLIST:
             continue
         text = path.read_text()
@@ -132,7 +133,7 @@ def test_tooling_packages_not_imported_by_library() -> None:
         re.MULTILINE,
     )
     allowed = {Path("MathFin/Blueprint.lean")}
-    for path in Path("MathFin").rglob("*.lean"):
+    for path in library.modules(aggregators=True):
         if path in allowed:
             continue
         m = tooling_import_re.search(path.read_text())

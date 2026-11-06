@@ -15,11 +15,30 @@ Ordered optional sampling gives equality at every earlier rule. Pasting two
 observation times on a past event then gives equality of the corresponding set
 integrals, which is exactly the martingale criterion.
 
-## Result
+## Main definitions
 
-Public entry points include `StoppingRule.binary`,
-`expected_value_eq_before_optimal_rule`, `stopped_martingale_of_expected_value_eq`,
-`expectedReward_eq_initial_iff_stopped_martingale`.
+* `StoppingRule.binary`: the two-valued rule stopping at `i` on the event `A ∈ 𝓕 i` and at `j` off
+  it.
+
+## Main results
+
+* `expected_value_eq_before_optimal_rule`: for a bounded continuous supermartingale `U` and a
+  rule `τ` with `E[U τ] = E[U 0]`, every rule `η ≤ τ` also has `E[U η] = E[U 0]`.
+* `stopped_martingale_of_expected_value_eq`: for such `U` and `τ`, the stopped process
+  `U (min t τ)` is a martingale.
+* `expectedReward_eq_initial_iff_stopped_martingale`: if `U` meets the put reward at `θ` almost
+  surely, the expected reward at `θ` equals `E[U 0]` if and only if `U` stopped at `θ` is a
+  martingale.
+
+## References
+
+* [G. Peskir and A. Shiryaev, *Optimal Stopping and Free-Boundary Problems*][PeskirShiryaev2006],
+  Ch. I
+
+## Tags
+
+optional sampling, stopped supermartingale, value-preserving rule, martingale criterion,
+optimal stopping, MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -25,6 +26,22 @@ is `≤ ε` once `C ≥ M/ε` — uniformly in `i`.
 The intended use is the `L²→L¹` limit of Girsanov Doléans densities `Z⁽ⁿ⁾_T`, whose uniform bound
 `∫ (Z⁽ⁿ⁾)² ≤ exp(K²T)` comes from the `Z² = E^{−2c}·exp(∑ c²Δτ)` identity; this lemma is the piece
 that lets convergence in measure upgrade to `L¹` (hence `∫ Z⁽ⁿ⁾ → ∫ Z`, delivering unit mean).
+
+## Main results
+
+* `unifIntegrable_one_of_sq_integral_le`: a family in `L²` with a uniform bound
+  `∫ (f i)² ≤ M` on second moments is uniformly integrable in `L¹`.
+* `tendsto_setIntegral_of_tendstoInMeasure_of_sq_bound`: on a finite measure, an `L²`-bounded
+  sequence converging in measure to `g ∈ L¹` has set integrals converging to those of `g`.
+* `tendsto_setIntegral_of_subseq_ae_of_sq_bound`: the same conclusion from the a.e.-subsequence
+  principle in place of convergence in measure.
+* `memLp_two_of_subseq_ae_of_sq_bound`: an a.e.-subsequence limit of an `L²`-bounded sequence of
+  measurable functions is in `L²` (Fatou).
+
+## Tags
+
+uniform integrability, Vitali convergence, Chebyshev truncation, second-moment bound,
+L1 convergence, MSC 28A25, MSC 60E15
 -/
 
 @[expose] public section

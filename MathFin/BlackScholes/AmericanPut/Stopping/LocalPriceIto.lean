@@ -16,9 +16,19 @@ generator is zero nearby and whose compensated Brownian evaluation is a
 genuine local martingale. Compact-region assembly and transfer to the raw
 filtration are proved subsequently in `InteriorIto` and `ContactMartingale`.
 
-## Result
+## Main results
 
-Public entry points include `brownianPriceKernel_localization_zero_drift`, `local_price_ito`.
+* `brownianPriceKernel_localization_zero_drift`: for a `DividendPutSolution`, `0 < σ`, `t < T` and
+  a continuation point `(t,w)`, there is a compactly supported `C²` function `G` equal to the
+  Brownian price kernel near `(t,w)` with `planeGenerator G = 0` near `(t,w)`.
+* `local_price_ito`: for a continuous-path pre-Brownian `W`, under the same hypotheses, such a `G`
+  exists together with a continuous local martingale `M` with `G(s,W s) - G(0,W 0)` equal almost
+  surely to `M s` plus the time integral of `planeGenerator G` along the path, for every `s`.
+
+## Tags
+
+Itô formula, local martingale, zero-drift localization, continuation point, compensated Brownian,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

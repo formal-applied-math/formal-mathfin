@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -25,10 +26,26 @@ i.e. the marginal variance contributions are proportional to the marginal
 excess returns. We verify the closed-form `w^T` satisfies this FOC by direct
 algebra.
 
-Result:
+## Main definitions
 
-* `tangentWeightTwo`: closed-form weight.
+* `tangentWeightTwo`: the closed-form two-asset tangent weight
+  `(σ₂² r₁ − ρσ₁σ₂ r₂) / (σ₂² r₁ + σ₁² r₂ − ρσ₁σ₂ (r₁ + r₂))` on asset 1.
+* `IsTangentPortfolioN`: the `n`-asset cross-product first-order condition, in which the
+  marginal-variance vector `Σw` is parallel to the excess-return vector.
+
+## Main results
+
 * `tangentTwo_satisfies_FOC`: the FOC identity at the tangent weight.
+
+## References
+
+* [H. Markowitz, *Portfolio selection*][Markowitz1952]
+* [Sharpe, *Capital asset prices*][Sharpe1964]
+
+## Tags
+
+tangent portfolio, maximum Sharpe ratio, two-asset portfolio, first-order condition,
+optimal risky portfolio, MSC 91G10, JEL G11
 -/
 
 @[expose] public section

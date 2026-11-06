@@ -13,6 +13,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "Schwartz (1997), 'The Stochastic Behavior of Commodity Prices: Implications for Valuation and Hedging,' Journal of Finance",
+        "citations": [
+          {
+            "key": "Schwartz1997"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, for the constant-parameter Schwartz (1997) model with κ > 0, that E[exp(ln S_T)] = exp(m_T + v_T/2) for the log spot in its Wiener representation, under an arbitrary probability measure read as the pricing measure; that the futures price equals E^Q[S_T] is the textbook identification, not proved. Hull's time-dependent level q(t) (the Hull-White-form drift calibrated to the quoted futures curve) is out of scope. The log spot is carried in its Wiener representation (the OU solution representation of vasicekShortRate_hasLaw_gaussian) -- that this representation solves the SDE is cited, not proven here (mf-vasicek-sde-terminal-gaussian rests on the same representation). Lives in MathFin/Futures/SchwartzOneFactor.lean. Axioms-clean."
@@ -28,6 +33,12 @@
       },
       "metadata": {
         "reference": "P. Glasserman, Monte Carlo Methods in Financial Engineering (Springer, 2003), §3.3 (Gaussian short-rate models: the exact one-step transition of the Vasicek short rate)",
+        "citations": [
+          {
+            "key": "Glasserman2003",
+            "locator": "§3.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.ouStepResidual_hasLaw and MathFin.ouSigmaSqFromVar_variance_ouStepResidual (MathFin/Commodities/AR1OUCalibration.lean), from MathFin.vasicekShortRate_hasLaw_gaussian (MathFin/FixedIncome/VasicekSDEGaussian.lean) and MathFin.ouSigmaSqFromVar_vasicekSDEVariance. SCOPE: one step from a deterministic start, the rate in its Wiener representation (its SDE cited, not proved); the multi-step AR(1) with independent innovations needs the OU Markov transition law and is not formalized; no estimator is analysed."
@@ -43,6 +54,15 @@
       },
       "metadata": {
         "reference": "J. C. Hull, Options, Futures, and Other Derivatives (10th ed., Pearson, 2018), ch. 5 (commodity futures: storage costs and convenience yields); H. Working, The Theory of Price of Storage, American Economic Review 39 (1949), 1254–1262",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "ch. 5"
+          },
+          {
+            "key": "Working1949"
+          }
+        ],
         "difficulty": "introductory",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.storageForward_from_no_arbitrage (MathFin/Commodities/TheoryOfStorage.lean), from MathFin.forward_price_from_no_arbitrage (MathFin/Foundations/NoArbitrageDerivations.lean) applied to the claim S_T − C + Y. SCOPE: finite state space; storage cost and convenience yield are deterministic amounts paid at delivery (a proportional or stochastic convenience yield is not covered); the pricing of the stored commodity at S₀ is a hypothesis."
@@ -58,6 +78,14 @@
       },
       "metadata": {
         "reference": "N. Kaldor, Speculation and Economic Stability, Review of Economic Studies 7 (1939), 1–27; H. Working, The Theory of Price of Storage, American Economic Review 39 (1949), 1254–1262",
+        "citations": [
+          {
+            "key": "Kaldor1939"
+          },
+          {
+            "key": "Working1949"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.storageForward_at_availability (MathFin/Commodities/TheoryOfStorage.lean): MathFin.storageForward_from_no_arbitrage at DF = 1 with the kink identity Y(A) = S(A) − Sbar (convenienceYield_eq_storageSpotPrice_sub). SCOPE: finite state space, zero rates, deterministic storage cost and convenience yield paid at delivery; the pricing of the stored commodity at S(A) is a hypothesis."
@@ -73,6 +101,15 @@
       },
       "metadata": {
         "reference": "P. Sraffa, Dr. Hayek on Money and Capital, Economic Journal 42(165) (1932), 42–53; J. M. Keynes, The General Theory of Employment, Interest and Money (1936), ch. 17",
+        "citations": [
+          {
+            "key": "Sraffa1932"
+          },
+          {
+            "key": "Keynes1936",
+            "locator": "ch. 17"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.sraffaOwnRate_eq_of_no_arbitrage (MathFin/Commodities/FisherSraffaOwnRate.lean), from MathFin.forward_price_from_no_arbitrage (MathFin/Foundations/NoArbitrageDerivations.lean) applied to the in-kind claim (1 + b)^T·S_T. SCOPE: finite state space; compounding by real powers (1 + m)^T and (1 + b)^T with m, b > −1 and T ≠ 0; the pricing of the in-kind loan at S₀ is a hypothesis."

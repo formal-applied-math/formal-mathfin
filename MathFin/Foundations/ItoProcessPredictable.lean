@@ -12,7 +12,7 @@ public import BrownianMotion.StochasticIntegral.Predictable
 /-! # Predictability and `L²` assembly of the Itô process (the SDE-existence keystone)
 
 To run a Picard iteration for the SDE `dX = b(X)dt + σ(X)dB` inside the
-predictable `L²` space `E := Lp ℝ 2 (trimMeasure_T T)`, the Itô term
+predictable `L²` space `E := Lp ℝ 2 (trimMeasure T)`, the Itô term
 `t ↦ (φ ● B)_t`, assembled as a *space-time* function, must itself be
 **predictable** — otherwise the iterate cannot be fed back through the Itô
 integral (whose integrand domain is the predictable `L²` space). This is the
@@ -33,11 +33,11 @@ that *defines* `itoContinuousMod` (`StronglyMeasurable.limUnder`), so
 `itoContinuousMod` is predictable, and in particular adapted, for the natural
 filtration itself; no augmentation is needed.
 
-* `itoSimpleProcess_continuous` — every path `t ↦ (V ● B)_t ω` is continuous.
+* path continuity is `ItoIntegralProcess.itoSimpleProcess_pathContinuous`, consumed here.
 * `itoSimpleProcess_isStronglyPredictable` — the elementary integral is predictable.
 * `itoContinuousMod_isStronglyPredictable` — the general assembled process is predictable.
 * `memLp_itoContinuousMod` — the assembled process is `L²` in the predictable trim measure.
-* `itoProcessAssembled` — it, packaged as an element of `Lp ℝ 2 (trimMeasure_T T)` (the space
+* `itoProcessAssembled` — it, packaged as an element of `Lp ℝ 2 (trimMeasure T)` (the space
   a Picard iterate for the SDE lands in).
 * `itoProcessAssembled_norm_sq` — the energy identity
   `‖itoProcessAssembled φ‖²_E = ∫₀ᵀ ‖(φ●B)_t‖² dt` (the contraction workhorse for the SDE fixed
@@ -45,6 +45,28 @@ filtration itself; no augmentation is needed.
 * `itoProcessAssembled_add` / `itoProcessAssembled_sub` — linearity of the assembled process (as an
   `Lp` class), so the contraction difference reduces to the energy identity via `itoProcessCLM`'s
   linearity.
+
+## Main definitions
+
+* `itoProcessAssembled`: the space-time function `(t,ω) ↦ (φ ● B)_t(ω)`, the continuous
+  modification, as an element of `Lp ℝ 2 (trimMeasure T)`.
+
+## Main results
+
+* `itoSimpleProcess_isStronglyPredictable`: the elementary Itô integral is predictable as a
+  space-time function.
+* `itoContinuousMod_isStronglyPredictable`: the assembled Itô process `itoContinuousMod` is
+  predictable.
+* `memLp_itoContinuousMod`: `itoContinuousMod` is in `L²` for the predictable trim measure.
+* `itoProcessAssembled_norm_sq`: `‖itoProcessAssembled φ‖² = ∫₀ᵀ ‖(φ ● B)_t‖² dt`.
+* `itoProcessAssembled_norm_le`: `‖itoProcessAssembled φ‖ ≤ √T · ‖φ‖`.
+* `itoProcessAssembled_add`, `itoProcessAssembled_sub`: the assembled Itô process is additive and
+  subtractive in the integrand.
+
+## Tags
+
+predictable process, Picard iteration, SDE existence, stochastic differential equation,
+Itô integral, left-continuous adapted, MSC 60H10, MSC 60H05, MSC 60G07
 -/
 
 @[expose] public section
@@ -61,22 +83,6 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 
 include hB
 
-omit [IsProbabilityMeasure μ] hB in
-/-- **Path continuity of the elementary Itô integral.** For every `ω`, the path
-`t ↦ (V ● B)_t ω` is continuous: by `itoSimpleProcess_apply` it is a finite sum
-`∑_p V(p)(ω) · (B_{p.2 ∧ t}(ω) − B_{p.1 ∧ t}(ω))` of continuous functions of `t`
-(Brownian path continuity `hBcont`, composed with the continuous clamp
-`t ↦ min c t`). -/
-theorem itoSimpleProcess_continuous (hBmeas : ∀ t, Measurable (B t))
-    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
-    (V : SimpleProcess ℝ (natFiltration hBmeas)) (ω : Ω) :
-    Continuous (fun t : ℝ≥0 ↦ itoSimpleProcess hBmeas V t ω) := by
-  simp_rw [itoSimpleProcess_apply hBmeas V, Finsupp.sum]
-  refine continuous_finsetSum _ (fun p _ ↦ ?_)
-  refine Continuous.const_mul ?_ _
-  exact ((hBcont ω).comp (continuous_const.min continuous_id)).sub
-    ((hBcont ω).comp (continuous_const.min continuous_id))
-
 omit [IsProbabilityMeasure μ] in
 /-- **The elementary Itô integral is predictable** as a space-time function. It is
 genuinely (every `ω`) continuous — hence left-continuous — and genuinely adapted
@@ -90,7 +96,8 @@ theorem itoSimpleProcess_isStronglyPredictable (hBmeas : ∀ t, Measurable (B t)
     IsStronglyPredictable (natFiltration hBmeas) (itoSimpleProcess hBmeas V) := by
   apply MeasureTheory.StronglyAdapted.isStronglyPredictable_of_leftContinuous
   · exact (itoSimpleProcess_isMartingale hB hBmeas V).1
-  · exact fun ω a ↦ (itoSimpleProcess_continuous hBmeas hBcont V ω).continuousWithinAt
+  · exact fun ω a ↦
+      (ItoIntegralProcess.itoSimpleProcess_pathContinuous hBmeas hBcont V ω).continuousWithinAt
 
 /-- **The assembled Itô process is predictable** (general integrand). By
 construction `itoContinuousMod` is the pointwise `limUnder` of the elementary
@@ -101,7 +108,7 @@ be pinned to the predictable one before invoking the limit lemma, which would
 otherwise synthesize the default product σ-algebra.) -/
 theorem itoContinuousMod_isStronglyPredictable (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     IsStronglyPredictable (natFiltration hBmeas) (itoContinuousMod T hBmeas φ) := by
   rw [IsStronglyPredictable]
   have hrw : (Function.uncurry (itoContinuousMod T hBmeas φ))
@@ -122,11 +129,11 @@ drops the trim, then Tonelli splits the product and each time-slice is bounded b
 `itoProcessCLM_norm_le`). -/
 theorem memLp_itoContinuousMod (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    MemLp (Function.uncurry (itoContinuousMod T hBmeas φ)) 2 (trimMeasure_T (μ := μ) T hBmeas) := by
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
+    MemLp (Function.uncurry (itoContinuousMod T hBmeas φ)) 2 (trimMeasure (μ := μ) T hBmeas) := by
   have hpred := itoContinuousMod_isStronglyPredictable hB T hBmeas hBcont φ
-  rw [memLp_iff, show trimMeasure_T (μ := μ) T hBmeas
-        = ((timeMeasure_T T).prod μ).trim (natFiltration hBmeas).predictable_le_prod from rfl,
+  rw [memLp_iff, show trimMeasure (μ := μ) T hBmeas
+        = ((timeMeasureHorizon T).prod μ).trim (natFiltration hBmeas).predictable_le_prod from rfl,
       eLpNorm_trim _ hpred,
       eLpNorm_lt_top_iff_lintegral_rpow_enorm_lt_top (by norm_num) (by norm_num)
         (hpred.mono (natFiltration hBmeas).predictable_le_prod).aestronglyMeasurable,
@@ -150,8 +157,8 @@ theorem memLp_itoContinuousMod (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     exact ENNReal.ofReal_le_ofReal (itoProcessCLM_norm_le hB T t hBmeas φ)
   refine lt_of_le_of_lt
     (lintegral_mono_ae (g := fun _ ↦ (ENNReal.ofReal ‖φ‖) ^ (2 : ℝ≥0∞).toReal) ?_) ?_
-  · have hsub : ∀ᵐ t ∂(timeMeasure_T T), t ≤ T := by
-      rw [timeMeasure_T]
+  · have hsub : ∀ᵐ t ∂(timeMeasureHorizon T), t ≤ T := by
+      rw [timeMeasureHorizon]
       filter_upwards [ae_restrict_mem measurableSet_Ioc] with t ht using ht.2
     filter_upwards [hsub] with t htT using key t htT
   · rw [lintegral_const]
@@ -160,11 +167,11 @@ theorem memLp_itoContinuousMod (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 
 /-- **The assembled Itô process as an element of the predictable `L²` space `E`.**
 The space-time function `(t,ω) ↦ (φ ● B)_t(ω)` (the continuous modification), packaged as a
-class in `Lp ℝ 2 (trimMeasure_T T)` — the object a Picard iterate for the SDE lands in. -/
+class in `Lp ℝ 2 (trimMeasure T)` — the object a Picard iterate for the SDE lands in. -/
 noncomputable def itoProcessAssembled (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
+    Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) :=
   (memLp_itoContinuousMod hB T hBmeas hBcont φ).toLp
       (Function.uncurry (itoContinuousMod T hBmeas φ))
 
@@ -176,34 +183,35 @@ into `∫₀ᵀ ‖itoProcessCLM T t φ‖² dt`. Paired with `itoProcessCLM_nor
 contraction consumes. -/
 theorem itoProcessAssembled_norm_sq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     ‖itoProcessAssembled hB T hBmeas hBcont φ‖ ^ 2
-      = ∫ t, ‖itoProcessCLM hB T t hBmeas φ‖ ^ 2 ∂(timeMeasure_T T) := by
+      = ∫ t, ‖itoProcessCLM hB T t hBmeas φ‖ ^ 2 ∂(timeMeasureHorizon T) := by
   have hpred := itoContinuousMod_isStronglyPredictable hB T hBmeas hBcont φ
   have hmem := memLp_itoContinuousMod hB T hBmeas hBcont φ
   have hmem_prod : MemLp (Function.uncurry (itoContinuousMod T hBmeas φ)) 2
-      ((timeMeasure_T T).prod μ) :=
+      ((timeMeasureHorizon T).prod μ) :=
     memLp_of_memLp_trim (natFiltration hBmeas).predictable_le_prod hmem
   have hint : Integrable (fun z ↦ (Function.uncurry (itoContinuousMod T hBmeas φ) z) ^ 2)
-      ((timeMeasure_T T).prod μ) := by
+      ((timeMeasureHorizon T).prod μ) := by
     refine (hmem_prod.integrable_mul hmem_prod).congr ?_
     filter_upwards with z
     rw [Pi.mul_apply, pow_two]
   have hcoe : ⇑(itoProcessAssembled hB T hBmeas hBcont φ)
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] Function.uncurry (itoContinuousMod T hBmeas φ) :=
+      =ᵐ[trimMeasure (μ := μ) T hBmeas] Function.uncurry (itoContinuousMod T hBmeas φ) :=
     hmem.coeFn_toLp
   have htrim : (∫ z, (Function.uncurry (itoContinuousMod T hBmeas φ) z) ^ 2
-        ∂(trimMeasure_T (μ := μ) T hBmeas))
-      = ∫ z, (Function.uncurry (itoContinuousMod T hBmeas φ) z) ^ 2 ∂((timeMeasure_T T).prod μ) :=
-    (integral_trim (μ := (timeMeasure_T T).prod μ)
+        ∂(trimMeasure (μ := μ) T hBmeas))
+      = ∫ z, (Function.uncurry (itoContinuousMod T hBmeas φ) z) ^ 2
+          ∂((timeMeasureHorizon T).prod μ) :=
+    (integral_trim (μ := (timeMeasureHorizon T).prod μ)
       (natFiltration hBmeas).predictable_le_prod (hpred.pow 2)).symm
   rw [lp_two_norm_sq,
       integral_congr_ae (g := fun z ↦ (Function.uncurry (itoContinuousMod T hBmeas φ) z) ^ 2)
         (by filter_upwards [hcoe] with z hz; rw [hz]),
       htrim, integral_prod _ hint]
   refine integral_congr_ae ?_
-  have hsub : ∀ᵐ t ∂(timeMeasure_T T), t ≤ T := by
-    rw [timeMeasure_T]
+  have hsub : ∀ᵐ t ∂(timeMeasureHorizon T), t ≤ T := by
+    rw [timeMeasureHorizon]
     filter_upwards [ae_restrict_mem measurableSet_Ioc] with t ht using ht.2
   filter_upwards [hsub] with t htT
   rw [lp_two_norm_sq]
@@ -218,22 +226,22 @@ and each `[0,t]`-energy is `≤` the full energy `‖φ‖²` (the Itô isometry
 time-integral is `≤ T‖φ‖²`. The `√T` (vs the drift's `T`) is the contraction workhorse. -/
 theorem itoProcessAssembled_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     ‖itoProcessAssembled hB T hBmeas hBcont φ‖ ≤ Real.sqrt (T : ℝ) * ‖φ‖ := by
-  have hφsq : Integrable (fun z ↦ (φ z) ^ 2) (trimMeasure_T (μ := μ) T hBmeas) :=
+  have hφsq : Integrable (fun z ↦ (φ z) ^ 2) (trimMeasure (μ := μ) T hBmeas) :=
     (Lp.memLp φ).integrable_sq
   have hsq : ‖itoProcessAssembled hB T hBmeas hBcont φ‖ ^ 2 ≤ (T : ℝ) * ‖φ‖ ^ 2 := by
     rw [itoProcessAssembled_norm_sq]
-    have hpt : ∀ᵐ t ∂(timeMeasure_T T),
+    have hpt : ∀ᵐ t ∂(timeMeasureHorizon T),
         ‖itoProcessCLM hB T t hBmeas φ‖ ^ 2 ≤ ‖φ‖ ^ 2 := by
       filter_upwards [ae_restrict_mem (μ := timeMeasure) measurableSet_Ioc] with t ht
       rw [itoProcessCLM_norm_sq hB ht.2 hBmeas φ, lp_two_norm_sq]
       exact setIntegral_le_integral hφsq (ae_of_all _ fun z ↦ sq_nonneg _)
-    calc ∫ t, ‖itoProcessCLM hB T t hBmeas φ‖ ^ 2 ∂(timeMeasure_T T)
-        ≤ ∫ _t, ‖φ‖ ^ 2 ∂(timeMeasure_T T) :=
+    calc ∫ t, ‖itoProcessCLM hB T t hBmeas φ‖ ^ 2 ∂(timeMeasureHorizon T)
+        ≤ ∫ _t, ‖φ‖ ^ 2 ∂(timeMeasureHorizon T) :=
           integral_mono_of_nonneg (ae_of_all _ fun _ ↦ sq_nonneg _) (integrable_const _) hpt
       _ = (T : ℝ) * ‖φ‖ ^ 2 := by
-          rw [integral_const, timeMeasure_T, measureReal_def, Measure.restrict_apply_univ,
+          rw [integral_const, timeMeasureHorizon, measureReal_def, Measure.restrict_apply_univ,
             timeMeasure_Ioc,
             ENNReal.toReal_ofReal (by rw [NNReal.coe_zero, sub_zero]; exact T.coe_nonneg),
             NNReal.coe_zero, sub_zero, smul_eq_mul]
@@ -246,7 +254,7 @@ identity + `itoProcessCLM`'s `map_add`); the per-time a.e. equalities lift to an
 the trimmed product (`Measure.ae_prod_iff_ae_ae` + `ae_eq_trim_of_stronglyMeasurable`). -/
 theorem itoProcessAssembled_add (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
-    (φ ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (φ ψ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     itoProcessAssembled hB T hBmeas hBcont (φ + ψ)
       = itoProcessAssembled hB T hBmeas hBcont φ + itoProcessAssembled hB T hBmeas hBcont ψ := by
   have hpredφ := itoContinuousMod_isStronglyPredictable hB T hBmeas hBcont φ
@@ -259,7 +267,7 @@ theorem itoProcessAssembled_add (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
         + Function.uncurry (itoContinuousMod T hBmeas ψ)) :=
     StronglyMeasurable.add hpredφ hpredψ
   have hkey : Function.uncurry (itoContinuousMod T hBmeas (φ + ψ))
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas]
+      =ᵐ[trimMeasure (μ := μ) T hBmeas]
         (Function.uncurry (itoContinuousMod T hBmeas φ)
           + Function.uncurry (itoContinuousMod T hBmeas ψ)) := by
     refine hpredS'.ae_eq_trim_of_stronglyMeasurable
@@ -271,8 +279,8 @@ theorem itoProcessAssembled_add (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
       measurableSet_eq_fun (hpredS'.mono (natFiltration hBmeas).predictable_le_prod).measurable
         (hgSM.mono (natFiltration hBmeas).predictable_le_prod).measurable
     rw [Filter.EventuallyEq, Measure.ae_prod_iff_ae_ae hset]
-    have hsub : ∀ᵐ t ∂(timeMeasure_T T), t ≤ T := by
-      rw [timeMeasure_T]
+    have hsub : ∀ᵐ t ∂(timeMeasureHorizon T), t ≤ T := by
+      rw [timeMeasureHorizon]
       filter_upwards [ae_restrict_mem measurableSet_Ioc] with t ht using ht.2
     filter_upwards [hsub] with t htT
     filter_upwards [itoContinuousMod_modification hB T hBmeas hBcont (φ + ψ) htT,
@@ -283,13 +291,13 @@ theorem itoProcessAssembled_add (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     simp only [Function.uncurry, Pi.add_apply]
     rw [hωS, map_add, hωadd, Pi.add_apply, ← hωφ, ← hωψ]
   have hcoeS : ⇑(itoProcessAssembled hB T hBmeas hBcont (φ + ψ))
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] Function.uncurry (itoContinuousMod T hBmeas (φ + ψ)) :=
+      =ᵐ[trimMeasure (μ := μ) T hBmeas] Function.uncurry (itoContinuousMod T hBmeas (φ + ψ)) :=
     (memLp_itoContinuousMod hB T hBmeas hBcont (φ + ψ)).coeFn_toLp
   have hcoeφ : ⇑(itoProcessAssembled hB T hBmeas hBcont φ)
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] Function.uncurry (itoContinuousMod T hBmeas φ) :=
+      =ᵐ[trimMeasure (μ := μ) T hBmeas] Function.uncurry (itoContinuousMod T hBmeas φ) :=
     (memLp_itoContinuousMod hB T hBmeas hBcont φ).coeFn_toLp
   have hcoeψ : ⇑(itoProcessAssembled hB T hBmeas hBcont ψ)
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] Function.uncurry (itoContinuousMod T hBmeas ψ) :=
+      =ᵐ[trimMeasure (μ := μ) T hBmeas] Function.uncurry (itoContinuousMod T hBmeas ψ) :=
     (memLp_itoContinuousMod hB T hBmeas hBcont ψ).coeFn_toLp
   refine Lp.ext ?_
   filter_upwards [hcoeS, hkey, hcoeφ, hcoeψ,
@@ -303,7 +311,7 @@ theorem itoProcessAssembled_add (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 whose energy is `∫₀ᵀ ‖itoProcessCLM T t (σ∘X − σ∘Y)‖² dt`). -/
 theorem itoProcessAssembled_sub (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
-    (φ ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (φ ψ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     itoProcessAssembled hB T hBmeas hBcont (φ - ψ)
       = itoProcessAssembled hB T hBmeas hBcont φ - itoProcessAssembled hB T hBmeas hBcont ψ := by
   have hpredφ := itoContinuousMod_isStronglyPredictable hB T hBmeas hBcont φ
@@ -316,7 +324,7 @@ theorem itoProcessAssembled_sub (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
         - Function.uncurry (itoContinuousMod T hBmeas ψ)) :=
     StronglyMeasurable.sub hpredφ hpredψ
   have hkey : Function.uncurry (itoContinuousMod T hBmeas (φ - ψ))
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas]
+      =ᵐ[trimMeasure (μ := μ) T hBmeas]
         (Function.uncurry (itoContinuousMod T hBmeas φ)
           - Function.uncurry (itoContinuousMod T hBmeas ψ)) := by
     refine hpredS'.ae_eq_trim_of_stronglyMeasurable
@@ -328,8 +336,8 @@ theorem itoProcessAssembled_sub (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
       measurableSet_eq_fun (hpredS'.mono (natFiltration hBmeas).predictable_le_prod).measurable
         (hgSM.mono (natFiltration hBmeas).predictable_le_prod).measurable
     rw [Filter.EventuallyEq, Measure.ae_prod_iff_ae_ae hset]
-    have hsub : ∀ᵐ t ∂(timeMeasure_T T), t ≤ T := by
-      rw [timeMeasure_T]
+    have hsub : ∀ᵐ t ∂(timeMeasureHorizon T), t ≤ T := by
+      rw [timeMeasureHorizon]
       filter_upwards [ae_restrict_mem measurableSet_Ioc] with t ht using ht.2
     filter_upwards [hsub] with t htT
     filter_upwards [itoContinuousMod_modification hB T hBmeas hBcont (φ - ψ) htT,
@@ -340,13 +348,13 @@ theorem itoProcessAssembled_sub (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     simp only [Function.uncurry, Pi.sub_apply]
     rw [hωS, map_sub, hωsub, Pi.sub_apply, ← hωφ, ← hωψ]
   have hcoeS : ⇑(itoProcessAssembled hB T hBmeas hBcont (φ - ψ))
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] Function.uncurry (itoContinuousMod T hBmeas (φ - ψ)) :=
+      =ᵐ[trimMeasure (μ := μ) T hBmeas] Function.uncurry (itoContinuousMod T hBmeas (φ - ψ)) :=
     (memLp_itoContinuousMod hB T hBmeas hBcont (φ - ψ)).coeFn_toLp
   have hcoeφ : ⇑(itoProcessAssembled hB T hBmeas hBcont φ)
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] Function.uncurry (itoContinuousMod T hBmeas φ) :=
+      =ᵐ[trimMeasure (μ := μ) T hBmeas] Function.uncurry (itoContinuousMod T hBmeas φ) :=
     (memLp_itoContinuousMod hB T hBmeas hBcont φ).coeFn_toLp
   have hcoeψ : ⇑(itoProcessAssembled hB T hBmeas hBcont ψ)
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] Function.uncurry (itoContinuousMod T hBmeas ψ) :=
+      =ᵐ[trimMeasure (μ := μ) T hBmeas] Function.uncurry (itoContinuousMod T hBmeas ψ) :=
     (memLp_itoContinuousMod hB T hBmeas hBcont ψ).coeFn_toLp
   refine Lp.ext ?_
   filter_upwards [hcoeS, hkey, hcoeφ, hcoeψ,

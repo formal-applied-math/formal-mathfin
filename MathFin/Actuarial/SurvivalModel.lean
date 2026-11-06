@@ -14,6 +14,7 @@ here with thanks and with the author's kind permission.
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -39,6 +40,15 @@ For readers coming from the AFP entry, our declarations line up with its `Surviv
 `survive`↔`survive` (`$p_{t&x}`), `die`↔`die` (`$q_{t&x}`), `survivalFunction_zero`↔`ccdfX_0_1`,
 `survive_zero`↔`ccdfTx_0_1`, `survive_eq_survivalFunction_ratio`↔`ccdfTx_ccdfX`.
 
+## Main definitions
+
+* `alive`: the event `{X > x}` that a life with age at death `X` reaches age `x`.
+* `futureLifetime`: the future lifetime `T(x) = X − x` of a life aged `x`.
+* `survivalFunction`: the survival function `S_X(t) = P(X > t)`.
+* `survive`: the probability `tpₓ = P(X > x + t ∣ X > x)` that a life aged `x` survives `t` more
+  years.
+* `die`: the probability `tqₓ = 1 − tpₓ` that a life aged `x` dies within `t` years.
+
 ## Main results
 
 * `survivalFunction_zero` — `S_X(0) = 1` (`X > 0` a.e.).
@@ -47,6 +57,15 @@ For readers coming from the AFP entry, our declarations line up with its `Surviv
 * `survive_zero` — `₀pₓ = 1` for a life alive at `x`.
 * `survive_eq_survivalFunction_ratio` — `tpₓ = S_X(x+t) / S_X(x)` for `t ≥ 0`, the survival-ratio
   keystone: the conditional-probability definition of `survive` collapses to the ratio.
+
+## References
+
+* [Y. Ito, *AFP Actuarial Mathematics*][ItoAFPActuarial]
+
+## Tags
+
+age at death, future lifetime, survival function, life table, conditional survival, life-contingent,
+MSC 91G05, MSC 62P05, JEL G22
 -/
 
 @[expose] public section

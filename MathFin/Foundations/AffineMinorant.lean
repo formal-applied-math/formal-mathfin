@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -26,6 +27,11 @@ is strict: the gap `f(X) − line(X)` is nonnegative and positive with positive 
 * `integral_lt_integral_of_ae_le_of_not_ae_eq`: the integral is strictly monotone; the strict
   inequality above, and the strict upper bound of a jump-diffusion call
   (`BlackScholes/JumpImpliedVol.lean`), both go through it.
+
+## Tags
+
+Jensen's inequality, supporting line, convexity, strict inequality, convex price in spot, MSC 60E15,
+MSC 28A25
 -/
 
 @[expose] public section

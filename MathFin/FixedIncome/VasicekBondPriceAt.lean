@@ -44,6 +44,17 @@ independent of the past, with the exponential moments of a centred Gaussian of v
   alone; the Hull–White bond price (`FixedIncome/HullWhiteBondPriceAt.lean`) is its other
   instance.
 * `vasicekBondPrice_condExp` — the conditional discount factor, affine in `r_t`.
+
+## References
+
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  section 3.2.1
+* [O. Vasicek, *An equilibrium characterization of the term structure*][Vasicek1977]
+
+## Tags
+
+Vasicek model, conditional bond price, time-homogeneous, affine term structure, short rate,
+Markov property, MSC 91G30, MSC 60H05, JEL E43
 -/
 
 @[expose] public section

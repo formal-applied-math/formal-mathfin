@@ -5,6 +5,7 @@ Authors: Robert Martin
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-! # First contact for a continuous scalar profile
@@ -13,9 +14,15 @@ Selecting the first nonnegative point gives a full interval of strict
 negativity before contact. No differentiability or isolated-contact premise
 is needed.
 
-## Result
+## Main results
 
-Public entry points include `exists_first_nonnegative_contact`.
+* `exists_first_nonnegative_contact`: if `f` is continuous on `[a, m]` with `f a < 0 ≤ f m`,
+  there is `T ∈ (a, m]` with `f T = 0` and `f < 0` on `[a, T)`.
+
+## Tags
+
+first contact, continuous function, first nonnegative point, contact point, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

@@ -150,9 +150,19 @@ class DeclIndex:
 
     def textual_drift(self, textual_names: set[str]) -> tuple[set[str], set[str]]:
         """(public names the environment has and the textual index lacks,
-        names the textual index has and the environment lacks)."""
-        env_names = {d.name for d in self.decls.values() if not d.private}
-        return env_names - textual_names, textual_names - {_user_name(n) for n in self.decls}
+        names the textual index has and the environment lacks).
+
+        Structure fields and instances are left out: the textual index resolves the
+        constants a benchmark proof cites by name, and Lean generates those two kinds
+        (fields from the structure, instance names from the instance's type), so they are
+        cited through the structure or found by instance search, never by a written name.
+        """
+        structures = {d.name for d in self.decls.values() if d.kind == "structure"}
+        env_names = {d.name for d in self.decls.values()
+                     if not d.private and "instance" not in d.attrs
+                     and d.name.rsplit(".", 1)[0] not in structures}
+        all_env = {_user_name(n) for n in self.decls}
+        return env_names - textual_names, textual_names - all_env
 
 
 # ----------------------------------------------------------------- report
@@ -183,10 +193,26 @@ def report(idx: DeclIndex, limit: int = 20) -> str:
     return "\n".join(out) + "\n"
 
 
+def check(idx: DeclIndex) -> list[str]:
+    """Problems that fail the build: the textual index has drifted from the environment."""
+    from .mathfin_index import declaration_index
+
+    env_only, text_only = idx.textual_drift(set(declaration_index()))
+    return ([f"textual index misses `{n}`" for n in sorted(env_only)]
+            + [f"textual index has `{n}`, which the environment lacks" for n in sorted(text_only)])
+
+
 if __name__ == "__main__":
     import sys
 
-    if len(sys.argv) != 3 or sys.argv[1] != "report":
-        print("usage: python3 -m tools.verify.decl_index report decl-index.json")
+    if len(sys.argv) != 3 or sys.argv[1] not in ("report", "check"):
+        print("usage: python3 -m tools.verify.decl_index {report,check} decl-index.json")
         raise SystemExit(2)
-    print(report(DeclIndex.load(sys.argv[2])), end="")
+    idx = DeclIndex.load(sys.argv[2])
+    if sys.argv[1] == "report":
+        print(report(idx), end="")
+        raise SystemExit(0)
+    problems = check(idx)
+    for m in problems:
+        print(m)
+    raise SystemExit(1 if problems else 0)

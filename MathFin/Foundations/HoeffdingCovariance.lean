@@ -54,6 +54,18 @@ inclusion–exclusion. The identity is stated for the law of `(X, Y)` on `ℝ²`
 * `variance_indicator_one`, `covariance_indicator_one_le`, `le_covariance_indicator_one`,
   `covariance_indicator_one_of_subset`, `covariance_indicator_one_of_union_eq_univ`,
   `correlation_indicator_one_le`, `le_correlation_indicator_one`: default-correlation bounds.
+
+## References
+
+* [Höffding (1940)][Hoeffding1940]
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Lemma 7.27
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 11.7; Ex. 7.14
+
+## Tags
+
+Hoeffding covariance identity, Fréchet–Hoeffding bounds, joint distribution function,
+comonotonicity, default correlation, correlation bounds, dependence, MSC 62H05, MSC 60E15, JEL G32
 -/
 
 @[expose] public section
@@ -193,7 +205,8 @@ private lemma abs_layer (a s : ℝ) :
   · simp [layer, h0, ha, h0.not_gt, ha.not_ge]
   · simp [layer, h0, ha, h0.not_gt, ha.not_gt]
 
-private lemma integrable_indicator_Ico (a b : ℝ) :
+/-- The indicator of a bounded interval `[a, b)` is integrable. -/
+lemma integrable_indicator_Ico (a b : ℝ) :
     Integrable ((Ico a b).indicator (1 : ℝ → ℝ)) :=
   (integrableOn_const (by simp)).integrable_indicator measurableSet_Ico
 
@@ -337,7 +350,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbability
 
 omit [IsProbabilityMeasure P] in
 /-- Square integrability of `X` and `Y` transfers to the coordinates of their joint law. -/
-private lemma memLp_fst_snd_map (hX : MemLp X 2 P) (hY : MemLp Y 2 P) :
+lemma memLp_fst_snd_map (hX : MemLp X 2 P) (hY : MemLp Y 2 P) :
     MemLp Prod.fst 2 (P.map fun ω ↦ (X ω, Y ω)) ∧ MemLp Prod.snd 2 (P.map fun ω ↦ (X ω, Y ω)) :=
   have hZ := hX.aemeasurable.prodMk hY.aemeasurable
   ⟨(memLp_map_measure_iff measurable_fst.aestronglyMeasurable hZ).2 hX,
@@ -345,7 +358,7 @@ private lemma memLp_fst_snd_map (hX : MemLp X 2 P) (hY : MemLp Y 2 P) :
 
 omit [IsProbabilityMeasure P] in
 /-- The Hoeffding integrand of the joint law of `(X, Y)`, written in terms of `X` and `Y`. -/
-private lemma cdf_sub_mul_map (hX : AEMeasurable X P) (hY : AEMeasurable Y P) (p : ℝ × ℝ) :
+lemma cdf_sub_mul_map (hX : AEMeasurable X P) (hY : AEMeasurable Y P) (p : ℝ × ℝ) :
     (P.map fun ω ↦ (X ω, Y ω)).real (Iic p)
         - (P.map fun ω ↦ (X ω, Y ω)).real (Prod.fst ⁻¹' Iic p.1)
           * (P.map fun ω ↦ (X ω, Y ω)).real (Prod.snd ⁻¹' Iic p.2)

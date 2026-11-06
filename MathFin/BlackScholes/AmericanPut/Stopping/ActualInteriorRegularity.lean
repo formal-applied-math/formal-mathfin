@@ -13,11 +13,22 @@ Local Dirichlet solutions are constructed from continuous price data and then
 identified by comparison. No classical solution or price derivative is assumed.
 This does not establish smooth fit or free-boundary regularity.
 
-## Result
+## Main results
 
-Public entry points include `exists_canonicalContinuation_cylinder`,
-`canonicalPrice_locally_eq_smooth_solution`, `canonicalPrice_contDiffAt`,
-`canonicalPrice_contDiffOn`.
+* `exists_canonicalContinuation_cylinder`: for `0 ≤ k`, every point of the continuation region
+  lies in an open rectangle `(L, R) × (a, T)` contained in the region.
+* `canonicalPrice_locally_eq_smooth_solution`: for `0 ≤ k`, near each continuation point the
+  actual price agrees with some `C^∞` function `F` with `pricingOperator k h F = 0` there.
+* `canonicalPrice_contDiffAt`, `canonicalPrice_contDiffOn`: for `0 ≤ k`, the actual price is
+  `C^∞` at each continuation point and on the continuation region.
+* `canonicalPrice_pricingOperator`, `canonicalPrice_continuation_pde`: for `0 ≤ k`, the pricing
+  operator of the actual price vanishes at each continuation point, that is, the time derivative
+  is `u_xx + (k-h-1) u_x - k u`.
+
+## Tags
+
+interior regularity, Dirichlet problem, pricing PDE, smoothness of price, continuation region,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

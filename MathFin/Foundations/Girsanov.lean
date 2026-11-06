@@ -43,7 +43,7 @@ motion, `gir-thm-9.1.8`) is strictly stronger: `GirsanovConstantTheta` for const
 for bounded predictable `θ`.
 
 That is the martingale property as a set-integral identity. `bs_discounted_isEMM` packages it as an
-equivalent martingale measure of the model-agnostic frame `ContinuousMarket.IsEMM`, at the horizon
+equivalent martingale measure of the model-agnostic frame `IsEMM`, at the horizon
 `T` of the density: `Q ≈ P` (the density `exp(−θ X_T − ½θ² T)` is positive and integrates to `1`)
 and the discounted price stopped at `T` is a `Q`-martingale. The horizon is part of the statement,
 not an artefact: past `T` the discounted price is not a `Q`-martingale, and the frame's forward FTAP
@@ -53,6 +53,16 @@ not an artefact: past `T` the discounted price is not a `Q`-martingale, and the 
 
 * `MathFin.bs_discounted_isQMartingale`
 * `MathFin.bs_discounted_isEMM`
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Ch 9
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], Ch 5.2
+
+## Tags
+
+Girsanov theorem, risk-neutral measure, market price of risk, Black–Scholes,
+equivalent martingale measure, Doléans exponential, JEL G13, MSC 91G20, MSC 60G44
 -/
 
 @[expose] public section
@@ -104,7 +114,7 @@ theorem bs_discounted_isEMM
     {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
     {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
     (S_0 r μ σ : ℝ) (hσ : σ ≠ 0) (T : ℝ≥0) :
-    ContinuousMarket.IsEMM 𝓕 P
+    IsEMM 𝓕 P
       (fun (t : ℝ≥0) ω ↦ S_0 * Real.exp ((μ - r - σ ^ 2 / 2) * (t : ℝ) + σ * X t ω)) T
       (P.withDensity fun ω ↦ ENNReal.ofReal
         (Real.exp (-((μ - r) / σ) * X T ω - ((μ - r) / σ) ^ 2 * (T : ℝ) / 2))) := by
@@ -113,7 +123,8 @@ theorem bs_discounted_isEMM
       (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) :=
     girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
   have hmeasX (u : ℝ≥0) : Measurable (X u) := ((hX.stronglyAdapted u).mono (𝓕.le u)).measurable
-  have hcont (t : ℝ≥0) : Continuous fun x : ℝ ↦ S_0 * Real.exp ((μ - r - σ ^ 2 / 2) * (t : ℝ) + σ * x) := by
+  have hcont (t : ℝ≥0) : Continuous fun x : ℝ ↦ S_0 * Real.exp
+      ((μ - r - σ ^ 2 / 2) * (t : ℝ) + σ * x) := by
     fun_prop
   refine ⟨isEquivProbMeasure_withDensity_of_isProbabilityMeasure P
       (Real.measurable_exp.comp (((hmeasX T).const_mul (-θ)).sub_const _)).aemeasurable
@@ -128,7 +139,8 @@ theorem bs_discounted_isEMM
       integrable_exp_mul_gaussianReal σ
     have hg : Integrable (fun x : ℝ ↦ S_0 * Real.exp (σ * x - σ ^ 2 * (t : ℝ) / 2))
         (gaussianReal 0 t) := by
-      refine (hexp.const_mul (S_0 * Real.exp (-(σ ^ 2 * (t : ℝ) / 2)))).congr (ae_of_all _ fun x ↦ ?_)
+      refine (hexp.const_mul (S_0 * Real.exp (-(σ ^ 2 * (t : ℝ) / 2)))).congr
+          (ae_of_all _ fun x ↦ ?_)
       beta_reduce
       rw [show σ * x - σ ^ 2 * (t : ℝ) / 2 = -(σ ^ 2 * (t : ℝ) / 2) + σ * x by ring, Real.exp_add]
       ring

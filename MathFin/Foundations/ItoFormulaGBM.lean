@@ -16,11 +16,25 @@ exponential-growth) value function `f(t, x) = exp(σx)` gives the Itô decomposi
 
   `exp(σ B_T) − exp(σ B_0) =ᵐ ∫₀ᵀ σ·exp(σ B_s) dB_s + ∫₀ᵀ ½σ²·exp(σ B_s) ds`,
 
-with the stochastic integral the genuine continuous Itô integral `itoIntegralCLM_T`. This is
+with the stochastic integral the genuine continuous Itô integral `itoIntegralCLM`. This is
 the **first pricing-ward consumer of the analytic Itô tower** (which until now had none): the
 diffusion `exp(σ B)` is decomposed by the real Itô integral, not an algebraic drift or a heat
 kernel. It is the rung from which the discounted-GBM martingale — whose `−σ²/2` Itô correction
 makes the drift vanish — is to be re-grounded on the Itô integral.
+
+## Main results
+
+* `ito_formula_expBrownian`: for `B` pre-Brownian with continuous paths, there is
+  `gfx =ᵐ σ·exp(σB_·)` in the Itô-integrand space with
+  `exp(σ B_T) − exp(σ B_0) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ ½σ²·exp(σ B_s) ds`.
+* `ito_formula_gbm`: for `Ŝ(t) = S₀ exp((m − σ²/2)t + σ B_t)`, there is `gfx =ᵐ σ·Ŝ` with
+  `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ m·Ŝ(s) ds`.
+* `discountedGBM_eq_itoIntegral`: the case `m = 0`, where the increment is a pure Itô integral.
+
+## Tags
+
+geometric Brownian motion, exponential of Brownian motion, Itô formula, lognormal model,
+stock price dynamics, Itô correction, MSC 60H05, MSC 60J65, JEL G13
 -/
 
 @[expose] public section
@@ -36,17 +50,17 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
 include hB
 
 /-- **Itô formula for `exp(σ·B)`.** For a pre-Brownian motion `B` with continuous paths,
-`exp(σ B_T) − exp(σ B_0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ ½σ²·exp(σ B_s) ds`, where the
+`exp(σ B_T) − exp(σ B_0) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ ½σ²·exp(σ B_s) ds`, where the
 trim-`L²` integrand is named: `gfx =ᵐ [σ·exp(σ B_·)]`. The instantiation of
 `ito_formula_td_localized` at the time-independent exponential-growth value function
 `f(t, x) = exp(σx)` (whose partials `f_x = σ exp(σx)`, `f_xx = σ² exp(σx)` are unbounded —
 out of reach of the bounded-derivative formula — but of exponential growth). -/
 theorem ito_formula_expBrownian (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) (σ : ℝ) :
-    ∃ gfx : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      (⇑gfx =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦ σ * Real.exp (σ * B z.1 z.2)) ∧
+    ∃ gfx : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
+      (⇑gfx =ᵐ[trimMeasure (μ := μ) T hBmeas] fun z ↦ σ * Real.exp (σ * B z.1 z.2)) ∧
       (fun ω ↦ Real.exp (σ * B T ω) - Real.exp (σ * B 0 ω)) =ᵐ[μ]
-        (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gfx) ω
+        (fun ω ↦ (itoIntegralCLM hB T hBmeas gfx) ω
           + ∫ s in Set.Ioc 0 T, (1 / 2) * (σ ^ 2 * Real.exp (σ * B s ω))
               ∂ItoIntegralL2.timeMeasure) := by
   -- the exponential-growth bound constant `C = |σ|³ + σ² + |σ|` dominates every partial
@@ -99,9 +113,9 @@ theorem ito_formula_expBrownian (hBmeas : ∀ t, Measurable (B t))
 /-- **Itô formula for geometric Brownian motion.** For the GBM value function
 `Ŝ(t) = S₀ exp((m − σ²/2)t + σ B_t)`,
 
-  `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ m·Ŝ(s) ds`,
+  `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ m·Ŝ(s) ds`,
 
-with the genuine continuous Itô integral `itoIntegralCLM_T` carrying the diffusion, **named**:
+with the genuine continuous Itô integral `itoIntegralCLM` carrying the diffusion, **named**:
 `gfx =ᵐ [σ·Ŝ(·)]`. So the decomposition is `dŜ = σŜ dB + mŜ dt`, coefficients and all. The
 **`f = S₀·exp` special case of `ito_formula_itoProcess`** — the Itô process
 `X_t = (m−σ²/2)t + σ B_t` (`X₀ = 0`, drift `b = m−σ²/2`): there `f' = f'' = S₀·exp`, so the general
@@ -111,12 +125,12 @@ drift `f'(X)·b + ½f''(X)·σ² = S₀ exp(X)·(m−σ²/2) + ½σ²·S₀ exp(
 grounding it on the continuous Itô integral rather than the explicit Wald exponential. -/
 theorem ito_formula_gbm (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) (S₀ m σ : ℝ) :
-    ∃ gfx : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      (⇑gfx =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦
+    ∃ gfx : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
+      (⇑gfx =ᵐ[trimMeasure (μ := μ) T hBmeas] fun z ↦
         σ * (S₀ * Real.exp ((m - σ ^ 2 / 2) * z.1 + σ * B z.1 z.2))) ∧
       (fun ω ↦ S₀ * Real.exp ((m - σ ^ 2 / 2) * (T : ℝ) + σ * B T ω)
               - S₀ * Real.exp ((m - σ ^ 2 / 2) * (0 : ℝ) + σ * B 0 ω)) =ᵐ[μ]
-        (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gfx) ω
+        (fun ω ↦ (itoIntegralCLM hB T hBmeas gfx) ω
           + ∫ s in Set.Ioc 0 T, m * (S₀ * Real.exp ((m - σ ^ 2 / 2) * (s : ℝ) + σ * B s ω))
               ∂ItoIntegralL2.timeMeasure) := by
   -- `f = S₀·exp` has every exponential moment bound with `C = |S₀|`, `lam = 1`
@@ -143,7 +157,7 @@ theorem ito_formula_gbm (hBmeas : ∀ t, Measurable (B t))
 `ito_formula_gbm` at the risk-neutral drift `m = 0`: the discounted geometric Brownian motion
 `Ŝ(t) = S₀ exp(−(σ²/2)·t + σ B_t)` satisfies
 
-  `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx`     with     `gfx =ᵐ [σ·Ŝ(·)]`,
+  `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM gfx`     with     `gfx =ᵐ [σ·Ŝ(·)]`,
 
 the drift vanishing because the localization drift `−σ²/2` exactly cancels the Itô second-order
 correction `½σ²`. This is the **Itô-integral content of the discounted-GBM martingale**
@@ -156,12 +170,12 @@ discounted price is `σ Ŝ`, so a reader can *state* the diffusion coefficient, 
 that one exists. Without it the theorem says the increment is some Itô integral and stops. -/
 theorem discountedGBM_eq_itoIntegral (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) (S₀ σ : ℝ) :
-    ∃ gfx : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      (⇑gfx =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦
+    ∃ gfx : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
+      (⇑gfx =ᵐ[trimMeasure (μ := μ) T hBmeas] fun z ↦
         σ * (S₀ * Real.exp (-(σ ^ 2 / 2) * z.1 + σ * B z.1 z.2))) ∧
       (fun ω ↦ S₀ * Real.exp (-(σ ^ 2 / 2) * (T : ℝ) + σ * B T ω)
               - S₀ * Real.exp (σ * B 0 ω)) =ᵐ[μ]
-        (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gfx) ω) := by
+        (fun ω ↦ (itoIntegralCLM hB T hBmeas gfx) ω) := by
   obtain ⟨gfx, hname, hgfx⟩ := ito_formula_gbm hB hBmeas hBcont T S₀ 0 σ
   simp only [zero_sub] at hname
   refine ⟨gfx, hname, ?_⟩

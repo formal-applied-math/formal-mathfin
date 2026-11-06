@@ -49,15 +49,35 @@ The statements hold for every `π` and every `ρ < 1` (with Lean's `√ρ = 0` f
 reading needs `π ∈ (0, 1)`, where `π` is each obligor's default probability
 (`oneFactor_measureReal_default`), and `ρ ∈ [0, 1)`, where `ρ` is the asset correlation.
 
+## Main definitions
+
+* `oneFactorLossFraction`: the fraction of the first `m` obligors of the one-factor Gaussian
+  threshold model whose asset value `√ρ F + √(1 − ρ) εᵢ` is at most `Φ⁻¹(π)`.
+* `asrfQuantile`: the asymptotic single-risk-factor quantile
+  `Φ((Φ⁻¹(π) + √ρ Φ⁻¹(α)) / √(1 − ρ))`, the Basel IRB worst-case default rate at confidence `α`.
+
 ## Main results
 
 * `tendsto_valueAtRisk_of_tendsto_ae`: VaR converges along almost-sure convergence to a loss with
   a strict quantile.
-* `oneFactorLossFraction`, `asrfQuantile`: the portfolio loss fraction and the IRB formula.
 * `oneFactorLossFraction_eq_empiricalCDF`: the loss fraction is an empirical CDF at a random point.
 * `tendsto_oneFactorLossFraction_ae`: `L_m → p(F)` almost surely.
 * `valueAtRisk_oneFactorPD`: `VaR_α(p(F)) = asrfQuantile π ρ α`.
 * `tendsto_valueAtRisk_oneFactorLossFraction`: **the IRB formula is the limit of `VaR_α(L_m)`**.
+
+## References
+
+* [Gordy (2003)][Gordy2003]
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Section 11.3.2
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 11.16, 11.17
+* [O. Vasicek, *Loan portfolio value*][Vasicek2002]
+
+## Tags
+
+Basel IRB formula, Vasicek model, asymptotic single risk factor, Gordy, large portfolio limit,
+worst-case default rate, regulatory capital, one-factor model, MSC 91G40, MSC 60F15, JEL G28,
+JEL G32
 -/
 
 @[expose] public section
@@ -143,7 +163,7 @@ private lemma continuous_asrfProfile : Continuous fun z ↦ Phi ((PhiInv π + �
 
 omit [IsProbabilityMeasure P] in
 /-- The negated standard normal factor is standard normal (Mathlib's `gaussianReal_neg`). -/
-private lemma hasLaw_neg_standard {F : Ω → ℝ} (hF : HasLaw F (gaussianReal 0 1) P) :
+lemma hasLaw_neg_standard {F : Ω → ℝ} (hF : HasLaw F (gaussianReal 0 1) P) :
     HasLaw (fun ω ↦ -F ω) (gaussianReal 0 1) P := by
   have h := gaussianReal_neg hF
   rw [neg_zero] at h

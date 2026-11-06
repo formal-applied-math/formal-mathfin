@@ -911,7 +911,7 @@ sorry`.
   `↑(min p t)`, not `min ↑p ↑t` — a coe-inward statement fails to unify downstream,
   and a co-occurring "stuck metavariable" is a *symptom* of the cast mismatch, not a
   separate problem. Fix the cast, not the instance.
-- **Name derived measures/σ-algebras** (`trimMeasure_T`, a predictable σ-algebra) as
+- **Name derived measures/σ-algebras** (`trimMeasure`, a predictable σ-algebra) as
   defs; never inline `(P.trim …)` in a statement — the inlined form carries a
   σ-algebra-instance mismatch the named def avoids.
 - **State Lp-class facts in `=ᵐ`/`condExp` form, not pointwise.** For a process whose
@@ -989,7 +989,7 @@ Itô integrand by a merely `𝓕_a`-measurable `Z` is *not* predictable. Predict
 band `(0,a]`, not just `{0}`, so no a.e.-equal predictable representative exists either. The statement
 is false, not just hard. The repair multiplies by `afterFactor a Z (t,ω) = 𝟙_{a<t}·Z ω` instead, which
 *is* predictable (`Ioi a ×ˢ F` for `F ∈ 𝓕_a` is a generating predictable rectangle) and stays a total
-CLM on the whole of `Lp ℝ 2 (trimMeasure_T …)`. Totality matters mechanically: `DenseRange.equalizer`
+CLM on the whole of `Lp ℝ 2 (trimMeasure …)`. Totality matters mechanically: `DenseRange.equalizer`
 equalizes on the whole space, so the operator can't be defined only on a supported-after-`a` subspace —
 the support hypothesis has to live on the *characterizing* lemma (`coeFn_smulAdapted`, which takes
 `hφ : ∀ᵐ p, p.1 ≤ a → φ p = 0` and is then invisible against the naive `Z p.2 * φ p`) rather than on
@@ -1002,7 +1002,7 @@ Extracted along the way: `mulBddCLM` — multiplication by a bounded measurable 
 ### An unbounded multiplier, without truncation machinery
 
 The obvious route to extend the bounded-`Z` result to unbounded `Z` is `clampM` plus dominated
-convergence. `itoIntegralCLM_T_smulAdapted_of_memLp` (`Foundations/ItoIntegralLocality.lean`) doesn't
+convergence. `itoIntegralCLM_smulAdapted_of_memLp` (`Foundations/ItoIntegralLocality.lean`) doesn't
 do that: for each `M : ℕ`, let `A = {|Z| ≤ M} ∈ 𝓕_a` and apply the *bounded* theorem twice — once
 factoring `𝟙_A` (bound `1`) against the sample-side integrand, once factoring `𝟙_A · Z` (bound `M`)
 against the trim-side one. The two scaled results coincide a.e. (both reduce to `𝟙_{a<t}·𝟙_A·Z·φ`), so
@@ -1092,7 +1092,7 @@ than an arbitrary one. An audit of the remaining scratch statements against that
 exactly one more defect: `itoIsometryEquiv_T` (shipped as `itoIsometryEquiv` — an
 underscore in a `def` name is a `lake lint` error; the terminal-integral isometry `φ ↦ ∫₀ᵀ φ dB`,
 which plainly does not exist without a Brownian motion to integrate against). Everything else was
-clean because it happened to mention `itoIntegralCLM_T hB` or similar and picked the variable up
+clean because it happened to mention `itoIntegralCLM hB` or similar and picked the variable up
 that way.
 
 ### Its twin: an isolation probe can only falsify
@@ -1188,8 +1188,8 @@ theory. A localizing family that is eventually inert pointwise is usually identi
 
 ### A trim measure erases a time cutoff
 
-`ae_fst_mem_Ioc_trimMeasure_T` (`Foundations/ItoIntegralHorizonDense.lean`): trim-a.e. `z`, `z.1 ∈ Ioc 0 T`, the
-pointwise reading of `trimMeasure_T_eq_restrict`. That is what lets `ito_formula_itoProcess` state its
+`ae_fst_mem_Ioc_trimMeasure` (`Foundations/ItoIntegralHorizonDense.lean`): trim-a.e. `z`, `z.1 ∈ Ioc 0 T`, the
+pointwise reading of `trimMeasure_eq_restrict`. That is what lets `ito_formula_itoProcess` state its
 integrand as `σ·f'(X₀ + b·z.1 + σ·B)` although the localized formula hands back
 `σ·f'(X₀ + b·φₙ(z.1) + σ·B)`: past the horizon the trim charges nothing, and inside it `φₙ = id`. The
 same erasure applies to any time-localized construction whose statement lives on the trim.
@@ -1231,7 +1231,7 @@ that is why they compose with our trims at all.
 
 ### Grep the statement before writing the lemma
 
-`ae_fst_mem_Ioc_trimMeasure_T` — "trim-a.e. `z`, `z.1 ∈ Ioc 0 T`" — existed **six** times when the
+`ae_fst_mem_Ioc_trimMeasure` — "trim-a.e. `z`, `z.1 ∈ Ioc 0 T`" — existed **six** times when the
 2026-08-07 audit looked: a `private lemma` in `ItoIntegralLocality`, four inline `have`s
 (`ItoIntegralRiemannBridge` since retired, `…TD`, `…Adapted`, `SimpleProcessPartition`), and the public one added the
 day before in `ItoIntegralCLM` by someone who did not check. Five are now retired.
@@ -1275,7 +1275,7 @@ From the chain-rule phase (`ItoIntegralAgainstMartingale`, `LpMulIsometry`,
 ### Build the integral against `M` by transport, not by a second `extendOfNorm`
 
 The integrands square-integrable against `M = φ●B` live on the bracket-weighted `L²(φ²·ν)`, and
-`ψ ↦ ψφ` is an isometry from there into `L²(ν)`. So `∫· dM := itoIntegralCLM_T ∘ (mulLI φ)` has the
+`ψ ↦ ψφ` is an isometry from there into `L²(ν)`. So `∫· dM := itoIntegralCLM ∘ (mulLI φ)` has the
 right domain *and* the right isometry with no new analysis. The from-scratch alternative needs the
 conditional bracket identity `𝔼[(M_t − M_s)² | 𝓕_s] = 𝔼[⟨M⟩_t − ⟨M⟩_s | 𝓕_s]`, which the tower does
 not have. **The transport proves what the from-scratch construction would have assumed.**
@@ -1333,12 +1333,12 @@ occurrence of the pattern`):
 
 ### Instance search does not unfold a `def` either
 
-`bracketMeasure T hBmeas φ` is `sqWeight (trimMeasure_T …) ⇑φ` by `rfl`, and an
+`bracketMeasure T hBmeas φ` is `sqWeight (trimMeasure …) ⇑φ` by `rfl`, and an
 `IsFiniteMeasure (sqWeight …)` instance is *not* found for the `bracketMeasure` form. Supply it with a
 local `haveI` at the one call site rather than duplicating the instance. Relatedly, pin the σ-algebra
 by giving the `def` an explicit return type: `sqWeight` applied to a trimmed measure will otherwise
 resolve its `MeasurableSpace` by instance search to `Prod.instMeasurableSpace` and mismatch — the same
-trap `trimMeasure_T`'s own docstring warns about.
+trap `trimMeasure`'s own docstring warns about.
 
 ### De-privatising is a free audit
 
@@ -1372,7 +1372,7 @@ Two fixes, both cheap:
   `itoProcessCLM_eq_condExpL2`, an identity the tower was already built on. `martingale_condExp` then
   hands over the martingale property.
 * **State the theorem over an abstract adapted `S`** plus `∀ t ≤ T, S t =ᵐ[μ] price t`. This is what
-  `ContinuousMarket.IsEMM` already does, for exactly this reason; instantiating it with an `Lp`
+  `IsEMM` already does, for exactly this reason; instantiating it with an `Lp`
   coercion is the regression to watch for.
 
 Ship both: the abstract statement, and a `∃ S, Martingale S 𝓕 μ ∧ …` witness beside it. The repo's
@@ -1632,7 +1632,7 @@ becomes a *bounded `𝓕_a`-measurable factor*, exactly what such a lemma consum
 
 ```lean
 -- 𝟙_F·(M_b − M_a) is not "a product"; it is again a single Itô integral
-itoIntegralCLM_T_smulAdapted … : ⇑(J (smulAdapted T a hBmeas 𝟙_F … (bandRestrict T a b φ)))
+itoIntegralCLM_smulAdapted … : ⇑(J (smulAdapted T a hBmeas 𝟙_F … (bandRestrict T a b φ)))
                                    =ᵐ[μ] fun ω ↦ 𝟙_F ω * ⇑(J (bandRestrict T a b φ)) ω
 ```
 
@@ -1646,7 +1646,7 @@ refinement for free, and the density argument that built `T` never has to be re-
 
 ### Tonelli through a trim: keep each a.e. argument on its native side
 
-`trimMeasure_T` is `(ρ ⊗ μ).trim` onto the predictable σ-algebra, and its `Lp` classes carry an
+`trimMeasure` is `(ρ ⊗ μ).trim` onto the predictable σ-algebra, and its `Lp` classes carry an
 honest `StronglyMeasurable[predictable]` representative (`Lp.stronglyMeasurable`), so
 `integral_trim` crosses to the product measure for free and `integral_prod` +
 `integral_integral_swap` finish. That much is mechanical; the trap is ω-**sections**.

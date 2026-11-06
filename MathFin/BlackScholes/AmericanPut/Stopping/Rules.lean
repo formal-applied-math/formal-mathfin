@@ -5,6 +5,7 @@ Authors: Robert Martin
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -21,11 +22,36 @@ stopping value and the value over a finite exercise grid are this one definition
 payoffs, indices and classes. As a bare `sSup` it is `0` for an empty class or an unbounded set
 of expected payoffs; the lemmas carry the nonemptiness, integrability and bound they need.
 
-## Result
+## Main definitions
 
-Public entry points include `StoppingRule`, `StoppingRule.measurable_time`, `StoppingRule.minimum`,
-`stoppingValue`, `integral_le_stoppingValue`, `stoppingValue_le`,
-`exists_lt_of_lt_stoppingValue`.
+* `StoppingRule`: a stopping time for the filtration `𝓕` with values in the index `ι` (never `⊤`),
+  bounded pointwise by the horizon `T`.
+* `StoppingRule.constant`, `StoppingRule.zero`: the deterministic rule that stops at a fixed time
+  `s ≤ T`, and the rule that stops at time `0`.
+* `StoppingRule.extend`: the same stopping time presented against a larger horizon `U ≥ T`.
+* `StoppingRule.minimum`: the rule that stops at the first of `θ` and `η`, keeping the horizon of
+  `θ`.
+* `StoppingRule.ofWithTop`: a `WithTop`-valued stopping time bounded by the finite horizon, as a
+  `StoppingRule`.
+* `StoppingRule.valuedIn`: the rules whose stopping times take values in a set `G`.
+* `stoppingValue`: the supremum of the expected stopped payoff `∫ Z (θ.time ω) ω ∂P` over a class
+  `R` of rules with horizon `T` (all of them by default).
+
+## Main results
+
+* `StoppingRule.measurable_time`: the time of a stopping rule is measurable (for a Borel
+  second-countable order-topology index).
+* `integral_le_stoppingValue`: if the expected payoffs over the class `R` are bounded above by
+  `C`, each member's expected payoff is at most `stoppingValue`.
+* `stoppingValue_le`: for a nonempty class whose expected payoffs are at most `C`,
+  `stoppingValue ≤ C`.
+* `exists_lt_of_lt_stoppingValue`: if `a < stoppingValue` and the class is nonempty, some rule has
+  expected payoff above `a`.
+
+## Tags
+
+stopping rule, stopping time, optimal stopping value, supremum of expected payoff, admissible rule,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

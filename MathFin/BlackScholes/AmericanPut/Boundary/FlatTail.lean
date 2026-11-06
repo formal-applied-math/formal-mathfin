@@ -13,9 +13,15 @@ public import MathFin.BlackScholes.AmericanPut.Boundary.ComparisonConclusion
 This is a consequence of the now-proved weak log curvature and boundary
 monotonicity. The separate parabolic exclusion is proved in `StrictBoundarySpeed`.
 
-## Result
+## Main results
 
-Public entry points include `boundary_deriv_monoOn`, `boundary_flat_tail_of_zero_speed`.
+* `boundary_deriv_monoOn`: for a `DividendPutSolution`, `deriv b` is monotone on `(0, ∞)`.
+* `boundary_flat_tail_of_zero_speed`: if `T > 0` and `deriv b T = 0`, then `b t = b T` for all
+  `t ≥ T`.
+
+## Tags
+
+flat boundary, zero speed, boundary derivative, log curvature, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

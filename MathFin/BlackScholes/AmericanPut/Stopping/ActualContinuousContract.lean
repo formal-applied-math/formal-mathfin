@@ -13,11 +13,19 @@ public import MathFin.BlackScholes.AmericanPut.Boundary.ContinuousBoundaryProble
 Every field is proved for the usual-filtration stopping value. Unlike the
 classical assembly, this theorem has no remaining boundary-smoothness premise.
 
-## Result
+## Main results
 
-Public entry points include `canonicalPrice_continuousBoundaryPutSolution`,
-`zeroDividend_canonicalPrice_continuousBoundaryPutSolution`,
-`liuRange_canonicalPrice_continuousBoundaryPutSolution`.
+* `canonicalPrice_continuousBoundaryPutSolution`: for `0 < k` and `0 ≤ h ≤ k`, the actual price
+  `canonicalPrice k h` with the actual log boundary `canonicalLogBoundary k h` is a
+  `ContinuousBoundaryPutSolution`.
+* `zeroDividend_canonicalPrice_continuousBoundaryPutSolution`,
+  `liuRange_canonicalPrice_continuousBoundaryPutSolution`: the same for `0 < k` with no
+  dividend, and for `0 ≤ h` with `h + 1 ≤ k`.
+
+## Tags
+
+continuous boundary, pricing contract, classical solution, stopping value, American put, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

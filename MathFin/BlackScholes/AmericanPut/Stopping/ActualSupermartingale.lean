@@ -16,10 +16,24 @@ not from an assumed classical solution. Its supermartingale property is the gene
 (`brownianClassicalCandidate_supermartingale`) for an envelope that waits, with dynamic
 programming supplying the waiting inequality.
 
-## Result
+## Main results
 
-Public entry points include `canonicalDiscountedPrice`, `canonicalDiscountedPrice_apply`,
-`canonicalDiscountedPrice_initial`, `canonicalDiscountedPrice_supermartingale`.
+* `canonicalDiscountedPrice_apply`: the discounted actual price at time `t` is
+  `exp (-k min t T)` times `canonicalPrice` at the Brownian log state at `min t T` and remaining
+  time `T - min t T`.
+* `canonicalDiscountedPrice_initial`: at time `0` it is almost surely `canonicalPrice k h x T`.
+* `canonicalDiscountedPrice_dominates`, `canonicalDiscountedPrice_bound`: for `0 ≤ k`, it
+  dominates the frozen put reward and has norm at most `1`.
+* `canonicalDiscountedPrice_continuous`, `canonicalDiscountedPrice_adapted`: for `0 ≤ k`, it has
+  continuous paths and is adapted to the Brownian filtration.
+* `canonicalDiscountedPrice_supermartingale`, `canonicalDiscountedPrice_usual_supermartingale`:
+  for `0 ≤ k`, it is a supermartingale for the Brownian filtration, and for the usual filtration
+  with the completed measure.
+
+## Tags
+
+supermartingale, Snell envelope, dynamic programming, discounted American price, waiting inequality,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

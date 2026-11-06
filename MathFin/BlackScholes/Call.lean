@@ -71,6 +71,32 @@ risk-neutral lognormal hypothesis:
   - `bsd1`, `bsd2`, `bsTerminal` definitions.
   - `bsd2_eq`, `bsTerminal_gt_K_iff`, `max_payoff_eq_indicator` helpers.
   - `bs_call_formula` main theorem.
+
+## Main definitions
+
+* `BSCallHyp`: the risk-neutral lognormal hypothesis. It records `0 < S_0`, `0 < K`, `0 < σ`,
+  `0 < T` and that `Z` has the standard normal law `gaussianReal 0 1` under `Q`.
+* `bsTerminal`: the terminal price `S_T(z) = S_0 · exp((r − σ²/2)T + σ√T · z)` as a function of
+  the standard normal sample `z`.
+* `bsd1`, `bsd2`: `d₁ = (log(S_0/K) + (r + σ²/2)T) / (σ√T)` and `d₂ = d₁ − σ√T`.
+
+## Main results
+
+* `bs_call_formula`: under `BSCallHyp Q S_0 K r σ T Z`, the discounted expected call payoff
+  `∫ e^{−rT} · max (S_T(Z) − K) 0 ∂Q` equals `S_0 · Φ(d₁) − K · e^{−rT} · Φ(d₂)`.
+* `bsTerminal_gt_K_iff`: for positive `S_0, K, σ, T`, `S_T(z) > K ↔ z > −d₂`.
+* `integrable_bsTerminal`, `integrable_bsCall_payoff`, `integrable_bsPut_payoff`: the terminal
+  price and the discounted call and put payoffs are integrable when `Z` has the standard normal
+  law.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Section 9.4
+
+## Tags
+
+Black–Scholes formula, European call, risk-neutral pricing, lognormal model, option pricing,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -16,10 +16,20 @@ The initial shape, boundary signs, uniform right truncation and interior
 smoothness have all been proved from the pricing contract. No Sturm theorem
 or initial spatial derivative trace is a premise of this route.
 
-## Result
+## Main results
 
-Public entry points include `straightDifference_three_point_bound`,
-`straightDifference_superlevel_interval`, `straightDifference_positive_interval`.
+* `straightDifference_three_point_bound`: for a `ContinuousBoundaryPutSolution`, `0 < c`,
+  `d ≤ 0`, `t > 0` and `b t ≤ x ≤ y ≤ z`, the minimum of `straightDifference` at `x` and `z` is
+  at most the maximum of its value at `y` and `0`.
+* `straightDifference_superlevel_interval`: for `0 ≤ ε`, the set of `x > b t` with
+  `ε < straightDifference p k h c d x t` is order-connected.
+* `straightDifference_positive_interval`: the case `ε = 0`, the positive set to the right of the
+  boundary is order-connected.
+
+## Tags
+
+three-point maximum principle, positive interval, zero-number, unimodality, comparison difference,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

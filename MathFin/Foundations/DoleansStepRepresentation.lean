@@ -32,14 +32,14 @@ live one floor down, in `ItoIntegralLocality`.
 
 *Locality in time* is what converts the Itô formula's *terminal* identity
 `∫₀ᵀ φ dB = M_T − 1` into one for the inner increment `M_b − M_a` the telescoping needs:
-`itoIntegralCLM_T_restrictAfterCLM` says that restricting an integrand to `(u,T]`
+`itoIntegralCLM_restrictAfterCLM` says that restricting an integrand to `(u,T]`
 subtracts exactly `(φ●B)_u` from its integral, and `(φ●B)_u` is the `𝓕_u`-conditional
 expectation of `∫₀ᵀ φ dB` — which, `M` being Wald's martingale, is `M_u − 1`. Cutting
 the integrand at `a` and at `b` and subtracting gives the band integrand of
 `constDoleans_band_mem_range`.
 
 *The sample-side form of the integrand hypothesis* is what lets `Eₙ` — unbounded — be
-pulled inside. `itoIntegralCLM_T_smul_of_memLp` accepts `Eₙ·∫φ dB ∈ L²(μ)` in place of
+pulled inside. `itoIntegralCLM_smul_of_memLp` accepts `Eₙ·∫φ dB ∈ L²(μ)` in place of
 `Eₙ·φ ∈ L²(trim)`, and after rewriting along the band identity that requirement is
 exactly `Dₙ₊₁ − Dₙ ∈ L²(μ)`. So the only moment fact this file needs is that every step
 Doléans exponential has a second moment (`memLp_stepDoleansExp`) — proved by writing it
@@ -52,15 +52,22 @@ version *naming* the integrand as `s ↦ σ·exp(σB_s − ½σ²s)`, to feed th
 hypothesis directly, and at the time that was not derivable from the tower's exported
 API: every link of the chain
 
-  `cutoff_bddDeriv → ito_formula_td_localized → ito_formula_itoProcess →
-   ito_formula_gbm → discountedGBM_eq_itoIntegral`
+```
+cutoff_bddDeriv → ito_formula_td_localized → ito_formula_itoProcess → ito_formula_gbm
+  → discountedGBM_eq_itoIntegral
+```
 
 was a bare existential. The chain now carries the naming conjunct throughout, so the named
 form is one `obtain` away should a consumer want it. This file still does not: the
 sample-side transfer never needed the integrand's identity, only its integral's second
 moment, and stating what a proof does not use is what the `∃` here honestly records.
 
-## Result
+## Main definitions
+
+* `stepDoleansExp`: the Doléans exponential `∏ₖ exp(hₖ(B_{sₖ₊₁} − B_{sₖ}) − ½hₖ²(sₖ₊₁ − sₖ))`
+  of a deterministic step integrand, over the first `N` cells.
+
+## Main results
 
 * `constDoleans_sub_one_mem_range` — the constant-`σ` Doléans exponential, minus one, is an
   Itô integral over `[0,T]`.
@@ -68,9 +75,13 @@ moment, and stating what a proof does not use is what the `∃` here honestly re
   an integrand supported on `(a,b]`, and the two support clauses come with it.
 * `constDoleans_shift_sub_one_mem_range` — that band renormalised by the `𝓕_a`-measurable
   `1/M_a`, giving `M_T/M_a − 1`.
-* `stepDoleansExp` — the Doléans exponential of a deterministic step integrand.
 * `stepDoleans_sub_one_mem_range` — **the theorem**: that exponential, minus one, lies in the
   range of `∫₀ᵀ · dB`.
+
+## Tags
+
+Doléans exponential, martingale representation, Itô integral, Wiener exponential, step integrand,
+telescoping, MSC 60H05, MSC 60G44
 -/
 
 @[expose] public section
@@ -92,9 +103,9 @@ include hB
 at `S₀ = 1`, with `B 0 =ᵐ 0`: `exp(σB_T − σ²T/2) − 1 = ∫₀ᵀ σ·exp(σB_s − σ²s/2) dB_s`. -/
 theorem constDoleans_sub_one_mem_range (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) (σ : ℝ) :
-    ∃ φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
+    ∃ φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
       (fun ω ↦ Real.exp (σ * B T ω - σ ^ 2 * (T : ℝ) / 2) - 1)
-        =ᵐ[μ] ⇑(itoIntegralCLM_T hB T hBmeas φ) := by
+        =ᵐ[μ] ⇑(itoIntegralCLM hB T hBmeas φ) := by
   obtain ⟨gfx, -, hgfx⟩ := discountedGBM_eq_itoIntegral hB hBmeas hBcont T 1 σ
   refine ⟨gfx, ?_⟩
   filter_upwards [hgfx, ItoIntegralBrownian.eval_zero_ae hB hBmeas] with ω hω h0
@@ -112,12 +123,12 @@ integrand switched off past `b`. -/
 theorem constDoleans_band_mem_range (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (a b T : ℝ≥0) (hab : a ≤ b) (hbT : b ≤ T)
     (σ : ℝ) :
-    ∃ φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      (∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), p.1 ≤ a → φ p = 0) ∧
-      (∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), b < p.1 → φ p = 0) ∧
+    ∃ φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
+      (∀ᵐ p ∂(trimMeasure (μ := μ) T hBmeas), p.1 ≤ a → φ p = 0) ∧
+      (∀ᵐ p ∂(trimMeasure (μ := μ) T hBmeas), b < p.1 → φ p = 0) ∧
       (fun ω ↦ Real.exp (σ * B b ω - σ ^ 2 * (b : ℝ) / 2)
           - Real.exp (σ * B a ω - σ ^ 2 * (a : ℝ) / 2))
-        =ᵐ[μ] ⇑(itoIntegralCLM_T hB T hBmeas φ) := by
+        =ᵐ[μ] ⇑(itoIntegralCLM hB T hBmeas φ) := by
   have : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
   obtain ⟨ψ, hψ⟩ := constDoleans_sub_one_mem_range hB hBmeas hBcont T σ
   have haT : a ≤ T := hab.trans hbT
@@ -126,9 +137,9 @@ theorem constDoleans_band_mem_range (hBmeas : ∀ t, Measurable (B t))
       ⇑(itoProcessCLM hB T u hBmeas ψ)
         =ᵐ[μ] fun ω ↦ Real.exp (σ * B u ω - σ ^ 2 * (u : ℝ) / 2) - 1 := by
     have hcondExpL2 : ⇑(itoProcessCLM hB T u hBmeas ψ)
-        =ᵐ[μ] μ[⇑(itoIntegralCLM_T hB T hBmeas ψ) | natFiltration hBmeas u] := by
+        =ᵐ[μ] μ[⇑(itoIntegralCLM hB T hBmeas ψ) | natFiltration hBmeas u] := by
       rw [itoProcessCLM_eq_condExpL2 hB T u hBmeas ψ]
-      have h := (Lp.memLp (itoIntegralCLM_T hB T hBmeas ψ)).condExpL2_ae_eq_condExp
+      have h := (Lp.memLp (itoIntegralCLM hB T hBmeas ψ)).condExpL2_ae_eq_condExp
         (𝕜 := ℝ) ((natFiltration hBmeas).le u)
       rwa [Lp.toLp_coeFn] at h
     refine hcondExpL2.trans ((condExp_congr_ae hψ.symm).trans ?_)
@@ -143,12 +154,12 @@ theorem constDoleans_band_mem_range (hBmeas : ∀ t, Measurable (B t))
       ite_eq_right (not_lt.mpr (hpa.trans hab)), sub_self]
   · filter_upwards [hcut, hcuta, hcutb] with p h1 h2 h3 hpb
     rw [h1, Pi.sub_apply, h2, h3, ite_eq_left (lt_of_le_of_lt hab hpb), ite_eq_left hpb, sub_self]
-  · rw [map_sub, itoIntegralCLM_T_restrictAfterCLM hB T a haT hBmeas ψ,
-      itoIntegralCLM_T_restrictAfterCLM hB T b hbT hBmeas ψ]
-    filter_upwards [Lp.coeFn_sub (itoIntegralCLM_T hB T hBmeas ψ - itoProcessCLM hB T a hBmeas ψ)
-        (itoIntegralCLM_T hB T hBmeas ψ - itoProcessCLM hB T b hBmeas ψ),
-      Lp.coeFn_sub (itoIntegralCLM_T hB T hBmeas ψ) (itoProcessCLM hB T a hBmeas ψ),
-      Lp.coeFn_sub (itoIntegralCLM_T hB T hBmeas ψ) (itoProcessCLM hB T b hBmeas ψ),
+  · rw [map_sub, itoIntegralCLM_restrictAfterCLM hB T a haT hBmeas ψ,
+      itoIntegralCLM_restrictAfterCLM hB T b hbT hBmeas ψ]
+    filter_upwards [Lp.coeFn_sub (itoIntegralCLM hB T hBmeas ψ - itoProcessCLM hB T a hBmeas ψ)
+        (itoIntegralCLM hB T hBmeas ψ - itoProcessCLM hB T b hBmeas ψ),
+      Lp.coeFn_sub (itoIntegralCLM hB T hBmeas ψ) (itoProcessCLM hB T a hBmeas ψ),
+      Lp.coeFn_sub (itoIntegralCLM hB T hBmeas ψ) (itoProcessCLM hB T b hBmeas ψ),
       hproc a haT, hproc b hbT] with ω h1 h2 h3 ha hb
     rw [h1, Pi.sub_apply, h2, h3, Pi.sub_apply, Pi.sub_apply, ha, hb]
     ring
@@ -159,10 +170,10 @@ factor `1/M_a = exp(−σB_a + σ²a/2)`, which is exactly what turns the increm
 `M_T − M_a` into `M_T/M_a − 1`. -/
 theorem constDoleans_shift_sub_one_mem_range (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (a T : ℝ≥0) (haT : a ≤ T) (σ : ℝ) :
-    ∃ φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      (∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), p.1 ≤ a → φ p = 0) ∧
+    ∃ φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
+      (∀ᵐ p ∂(trimMeasure (μ := μ) T hBmeas), p.1 ≤ a → φ p = 0) ∧
       (fun ω ↦ Real.exp (σ * (B T ω - B a ω) - σ ^ 2 * ((T : ℝ) - (a : ℝ)) / 2) - 1)
-        =ᵐ[μ] ⇑(itoIntegralCLM_T hB T hBmeas φ) := by
+        =ᵐ[μ] ⇑(itoIntegralCLM hB T hBmeas φ) := by
   obtain ⟨χ, hχ0, -, hχval⟩ :=
     constDoleans_band_mem_range hB hBmeas hBcont a T T haT le_rfl σ
   have halg (ω : Ω) : Real.exp (-(σ * B a ω) + σ ^ 2 * (a : ℝ) / 2) *
@@ -181,7 +192,7 @@ theorem constDoleans_shift_sub_one_mem_range (hBmeas : ∀ t, Measurable (B t))
       exact (measurable_iff_comap_le.mpr le_rfl).mono hle le_rfl
     exact Real.measurable_exp.comp (((hBa.const_mul σ).neg).add_const _)
   have hZI : MemLp (fun ω ↦ Real.exp (-(σ * B a ω) + σ ^ 2 * (a : ℝ) / 2) *
-      itoIntegralCLM_T hB T hBmeas χ ω) 2 μ := by
+      itoIntegralCLM hB T hBmeas χ ω) 2 μ := by
     have hsrc : MemLp (fun ω ↦ Real.exp (σ * (B T ω - B a ω)
         - σ ^ 2 * ((T : ℝ) - (a : ℝ)) / 2) - 1) 2 μ := by
       refine (memLp_congr_ae ?_).mp
@@ -195,7 +206,7 @@ theorem constDoleans_shift_sub_one_mem_range (hBmeas : ∀ t, Measurable (B t))
     filter_upwards [hχval] with ω hω
     rw [← hω]
     exact (halg ω).symm
-  obtain ⟨ψ, hψcoe, hψval⟩ := itoIntegralCLM_T_smul_of_memLp hB T a hBmeas _ hZm χ hχ0 hZI
+  obtain ⟨ψ, hψcoe, hψval⟩ := itoIntegralCLM_smul_of_memLp hB T a hBmeas _ hZm χ hχ0 hZI
   refine ⟨ψ, ?_, ?_⟩
   · filter_upwards [hψcoe, hχ0] with p hp h0 hpa
     rw [hp, h0 hpa, mul_zero]
@@ -205,9 +216,9 @@ theorem constDoleans_shift_sub_one_mem_range (hBmeas : ∀ t, Measurable (B t))
 /-! ### The step Doléans exponential -/
 
 /-- The Doléans exponential of a deterministic step integrand
-`h = Σ hₖ·1_{(sₖ, sₖ₊₁]}` over a monotone partition, evaluated at the horizon.
-It is the simple Doléans exponential `simpleDoleansExp` with constant multipliers, read at
-`s N` (`stepDoleansExp_eq_simpleDoleansExp`). `B` is explicit: Task 4 instantiates it at a `B` that the
+`h = Σ hₖ·1_{(sₖ, sₖ₊₁]}` over a monotone partition, evaluated at the horizon. It is the simple
+Doléans exponential `simpleDoleansExp` with constant multipliers, read at `s N`
+(`stepDoleansExp_eq_simpleDoleansExp`). `B` is explicit: Task 4 instantiates it at a `B` that the
 statement of the orthogonality hypothesis does not otherwise pin down. -/
 noncomputable def stepDoleansExp (B : ℝ≥0 → Ω → ℝ) (s : ℕ → ℝ≥0) (h : ℕ → ℝ)
     (N : ℕ) (ω : Ω) : ℝ :=
@@ -296,21 +307,21 @@ private lemma measurable_stepDoleansExp (hBmeas : ∀ t, Measurable (B t)) {s : 
 
 /-- **The induction.** `Dₙ₊₁ − Dₙ = Eₙ·(M_{sₙ₊₁} − M_{sₙ})` with `Eₙ = Dₙ/M_{sₙ}`
 `𝓕_{sₙ}`-measurable: the band integrand of `constDoleans_band_mem_range` supplies the
-increment, `itoIntegralCLM_T_smul_of_memLp` pulls `Eₙ` inside, and the running
+increment, `itoIntegralCLM_smul_of_memLp` pulls `Eₙ` inside, and the running
 integrand stays switched off past `sₙ₊₁` so the next step's `𝓕`-linearity applies. -/
 private theorem stepDoleans_aux (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (T : ℝ≥0) {s : ℕ → ℝ≥0} (hs : Monotone s)
     (h : ℕ → ℝ) : ∀ n : ℕ, s n ≤ T →
-      ∃ φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-        (∀ᵐ p ∂(trimMeasure_T (μ := μ) T hBmeas), s n < p.1 → φ p = 0) ∧
-        (fun ω ↦ stepDoleansExp B s h n ω - 1) =ᵐ[μ] ⇑(itoIntegralCLM_T hB T hBmeas φ) := by
+      ∃ φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
+        (∀ᵐ p ∂(trimMeasure (μ := μ) T hBmeas), s n < p.1 → φ p = 0) ∧
+        (fun ω ↦ stepDoleansExp B s h n ω - 1) =ᵐ[μ] ⇑(itoIntegralCLM hB T hBmeas φ) := by
   intro n
   induction n with
   | zero =>
     intro _
     refine ⟨0, ?_, ?_⟩
     · filter_upwards [Lp.coeFn_zero (E := ℝ) (p := 2)
-        (μ := trimMeasure_T (μ := μ) T hBmeas)] with p hp _
+        (μ := trimMeasure (μ := μ) T hBmeas)] with p hp _
       simpa using hp
     · have h0 : (fun ω : Ω ↦ stepDoleansExp B s h 0 ω - 1) = fun _ ↦ (0 : ℝ) := by
         funext ω
@@ -356,18 +367,18 @@ private theorem stepDoleans_aux (hBmeas : ∀ t, Measurable (B t))
         (Real.measurable_exp.comp (((hBsn.const_mul (h n)).neg).add_const _))
     have hZI : MemLp (fun ω ↦ (stepDoleansExp B s h n ω *
         Real.exp (-(h n * B (s n) ω) + h n ^ 2 * (s n : ℝ) / 2)) *
-        itoIntegralCLM_T hB T hBmeas χ ω) 2 μ := by
+        itoIntegralCLM hB T hBmeas χ ω) 2 μ := by
       refine (memLp_congr_ae ?_).mp ((memLp_stepDoleansExp hB hBmeas s h (n + 1)).sub
         (memLp_stepDoleansExp hB hBmeas s h n))
       filter_upwards [hχval] with ω hω
       rw [Pi.sub_apply, ← hω, halg ω]
-    obtain ⟨ψ, hψcoe, hψval⟩ := itoIntegralCLM_T_smul_of_memLp hB T (s n) hBmeas _ hZm χ hχ0 hZI
+    obtain ⟨ψ, hψcoe, hψval⟩ := itoIntegralCLM_smul_of_memLp hB T (s n) hBmeas _ hZm χ hχ0 hZI
     refine ⟨φ + ψ, ?_, ?_⟩
     · filter_upwards [Lp.coeFn_add φ ψ, hφsupp, hψcoe, hχ1] with p hadd hf hg hc hpb
       rw [hadd, Pi.add_apply, hf (lt_of_le_of_lt hstep hpb), hg, hc hpb, mul_zero, add_zero]
     · rw [map_add]
-      filter_upwards [Lp.coeFn_add (itoIntegralCLM_T hB T hBmeas φ)
-          (itoIntegralCLM_T hB T hBmeas ψ), hφval, hψval, hχval] with ω hadd hf hg hc
+      filter_upwards [Lp.coeFn_add (itoIntegralCLM hB T hBmeas φ)
+          (itoIntegralCLM hB T hBmeas ψ), hφval, hψval, hχval] with ω hadd hf hg hc
       rw [hadd, Pi.add_apply, ← hf, hg, ← hc, halg ω]
       ring
 
@@ -380,9 +391,9 @@ theorem stepDoleans_sub_one_mem_range (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (T : ℝ≥0)
     (s : ℕ → ℝ≥0) (hs : Monotone s) (h : ℕ → ℝ) (N : ℕ)
     (hsN : s N = T) :
-    ∃ φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
+    ∃ φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
       (fun ω ↦ stepDoleansExp B s h N ω - 1)
-        =ᵐ[μ] ⇑(itoIntegralCLM_T hB T hBmeas φ) :=
+        =ᵐ[μ] ⇑(itoIntegralCLM hB T hBmeas φ) :=
   let ⟨φ, _, hval⟩ := stepDoleans_aux hB hBmeas hBcont T hs h N hsN.le
   ⟨φ, hval⟩
 

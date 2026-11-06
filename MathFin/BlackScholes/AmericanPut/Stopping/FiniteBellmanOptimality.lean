@@ -10,10 +10,23 @@ public import MathFin.Foundations.SnellEnvelope
 
 /-! # First-contact attainment of the finite Snell envelope (the Bellman recursion)
 
-## Result
+## Main definitions
 
-Public entry points include `snellContact`, `snellContact_le`,
-`snellContact_stopping`, `snellContact_contact`.
+* `snellContact`: the first index in `[0,N]` at which the Snell envelope meets the reward, that is
+  at which `snellEnvelope P 𝓕 Set.univ Z N i - Z (min i N)` vanishes.
+
+## Main results
+
+* `snellContact_le`, `snellContact_stopping`: the first-contact index is at most `N`, and for
+  an adapted `Z` it is a stopping time.
+* `snellContact_contact`: at the first-contact index the Snell envelope equals the reward `Z`.
+* `snellContact_optimal`: for adapted integrable `Z`, no stopping time bounded by `N` has larger
+  expected reward `∫ Z (τ ω)` than the first-contact index.
+
+## Tags
+
+Snell envelope, first-contact attainment, Bellman recursion, optimal stopping, finite horizon,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

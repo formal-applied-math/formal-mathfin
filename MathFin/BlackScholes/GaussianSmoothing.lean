@@ -35,6 +35,15 @@ series (`BlackScholes/JumpDiffusionMerton.lean`).
 * `integral_bsV_mul_exp_gaussianReal_of_sq`: `∫ C_BS(Se^x; σ) dN(m, v) = C_BS(Se^{m + v/2}; σ')`
   for any `σ' > 0` with `σ'²T = σ²T + v`.
 * `integral_bsV_mul_exp_gaussianReal`: the same with `σ' = √(σ² + v/T)`.
+
+## References
+
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976]
+
+## Tags
+
+lognormal mixture, random volatility, averaging over spot, Gaussian convolution,
+variance adjustment, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -19,10 +19,39 @@ contract is proved in `Stopping/ClassicalSupermartingale` and `Stopping/UsualBro
 The CCJZ zero-dividend contract `NormalizedPutSolution k p b` is by definition the case
 `h = 0`, so every result proved for `DividendPutSolution` applies to it as stated.
 
-## Result
+## Main definitions
 
-Public entry points include `DividendPutSolution`, `NormalizedPutSolution`,
-`normalized_dividend_regime`, `liu_condition_normalization`, `DividendCurvatureClaim`.
+* `DividendPutSolution`: `ContinuousBoundaryPutSolution k h p b` with the boundary `b` smooth on
+  `(0, ∞)`.
+* `NormalizedPutSolution`: the zero-dividend contract, `DividendPutSolution k 0 p b`.
+* `NormalizedCurvatureClaim`: the proposition that every `NormalizedPutSolution` has
+  `0 < deriv (deriv b) t` for `t > 0`. Stated as a definition, not proved here.
+* `NormalizedExistenceClaim`: the proposition that a `NormalizedPutSolution` exists for every
+  `k > 0`. Stated as a definition, not proved here.
+* `DividendCurvatureClaim`: the proposition that every `DividendPutSolution` has
+  `0 ≤ deriv (deriv b) t` for `t > 0`.
+* `ZeroDividendWeakCurvatureClaim`, `LiuRangeCurvatureClaim`: the same weak curvature conclusion
+  for `NormalizedPutSolution`, and for `DividendPutSolution` with `h + 1 ≤ k`.
+
+## Main results
+
+* `normalized_dividend_regime`: for `0 < r`, `0 ≤ q ≤ r` and `0 < σ`, the normalized rates satisfy
+  `0 < k(r)` and `0 ≤ k(q) ≤ k(r)`.
+* `liu_condition_normalization`: for `0 < σ`, `k(q) + 1 ≤ k(r)` holds iff `q + σ²/2 ≤ r`.
+* `boundary_hasDerivAt`, `boundary_hasDerivAt_deriv`: for a `DividendPutSolution` and `t > 0`, the
+  boundary and its derivative are differentiable at `t`.
+* `stock_curvature_of_log_curvature`: a reduction only: strictly positive log curvature of the
+  boundary at the normalized time of `T` gives strictly positive curvature of the stock
+  boundary at `T` (for `0 < E`, `0 < σ`, `T < expiry`).
+* `dividendCurvature_specializations`, `publishedCurvature_implies_weak`: the weak curvature claim
+  `DividendCurvatureClaim` implies its zero-dividend and Liu-range cases, and the strict claim
+  `NormalizedCurvatureClaim` implies `ZeroDividendWeakCurvatureClaim`. Neither claim is proved
+  here.
+
+## Tags
+
+dividend-paying put, classical solution, zero-dividend case, boundary curvature claim,
+Liu condition, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -32,6 +61,8 @@ namespace MathFin.BlackScholes.AmericanPut.Boundary
 open Set
 open scoped ContDiff
 
+/-- **The admissible dividend regime, normalized.** For `0 ≤ q ≤ r` and `σ > 0` the normalized
+rates satisfy `0 < k(r)`, `0 ≤ k(q) ≤ k(r)` (`normalizedRate x σ = 2x/σ²`). -/
 theorem normalized_dividend_regime {r q σ : ℝ}
     (hr : 0 < r) (hq : 0 ≤ q) (hqr : q ≤ r) (hσ : 0 < σ) :
     0 < normalizedRate r σ ∧ 0 ≤ normalizedRate q σ ∧

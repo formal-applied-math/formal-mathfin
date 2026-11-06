@@ -38,13 +38,20 @@ gives the moment-matched basket price — literally the ordinary BS closed
 form, parameterised by the matched moments, in the same spirit as Kirk's
 spread approximation, which is BS parameterised by its pseudo-asset.
 
-## Results
+## Main definitions
 
-* `basketM1`, `basketM2`: the matched first and second moments.
-* `basketEffVol`: the moment-matched effective volatility
-  `√(log(M₂/M₁²)/T)`.
-* `basketMomentMatchPrice`: the approximate basket call price, `bsVGarman`
-  at `A = DF·M₁`, the matched `σ_eff`.
+* `basketM1`: the matched first moment `M₁ = ∑ᵢ wᵢ Fᵢ`, the basket forward's mean.
+* `basketM2`: the matched second moment `M₂ = ∑ᵢ∑ⱼ wᵢwⱼFᵢFⱼ · e^{ρᵢⱼσᵢσⱼT}`.
+* `basketEffVol`: the moment-matched effective volatility, solving `M₂ = M₁² · e^{σ_eff²T}` for
+  `σ_eff`.
+* `basketMomentMatchPrice`: the moment-matching basket call price, an approximation: the
+  Black–Scholes closed form at `A = DF · M₁`, discount factor `DF` and the matched effective
+  volatility.
+* `basketLognormalFactor`: the unit-mean lognormal factor `e^{σ√T·w - σ²T/2}` of one asset of the
+  basket at its standard-normal driver `w`.
+
+## Main results
+
 * `basketEffVol_single`: **consistency check** — with a single asset
   (`n = 1`, weight `1`, self-correlation `1`; `F ≠ 0`, `T > 0`, `σ ≥ 0`), the
   matched effective vol is exactly the asset's own vol `σ`. A one-asset basket
@@ -56,6 +63,17 @@ spread approximation, which is BS parameterised by its pseudo-asset.
 * `integral_basket_eq_basketM1`, `integral_basket_sq_eq_basketM2`: `M₁` and `M₂` are the
   first and second moments of the basket in the joint lognormal model above. That the
   matched lognormal prices an `n ≥ 2` basket well is not claimed.
+
+## References
+
+* [D. Brigo et al., *Approximated moment-matching dynamics for basket-options
+  pricing*][BrigoMercurioRapisardaScotti2004]
+* [M. Levy, *Pricing European average rate currency options*][Levy1992]
+
+## Tags
+
+basket option, moment matching, lognormal approximation, correlated assets, effective volatility,
+sum of lognormals, MSC 91G20, MSC 91G60, JEL G13
 -/
 
 @[expose] public section

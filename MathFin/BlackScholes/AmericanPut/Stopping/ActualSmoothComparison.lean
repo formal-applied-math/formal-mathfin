@@ -12,10 +12,24 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.SmoothPricingComparison
 Existence of a smooth Dirichlet solution is not assumed silently: the final
 identification theorem takes that comparator and its PDE/boundary data explicitly.
 
-## Result
+## Main results
 
-Public entry points include `pricingOperator_neg`, `canonicalPrice_smooth_subsolution`,
-`neg_canonicalPrice_smooth_subsolution`, `canonicalPrice_le_smooth_on_cylinder`.
+* `pricingOperator_neg`: the pricing operator is odd:
+  `pricingOperator k h (-F) = -pricingOperator k h F`.
+* `canonicalPrice_smooth_subsolution`, `neg_canonicalPrice_smooth_subsolution`: for `0 ≤ k`, the
+  actual price and its negative are `SmoothPricingSubsolutionOn` the continuation region.
+* `canonicalPrice_le_smooth_on_cylinder`, `smooth_le_canonicalPrice_on_cylinder`: for `0 ≤ k` and
+  a cylinder `(L, R) × (a, T)` inside the continuation region, an `F` continuous on the closed
+  cylinder and `C²` inside it with `pricingOperator k h F ≥ 0` (resp. `≤ 0`) lies above (resp.
+  below) the actual price on the closed cylinder if it does on the bottom and sides.
+* `canonicalPrice_eq_smooth_on_cylinder`: such an `F` with `pricingOperator k h F = 0` and
+  the actual price's data on the bottom and sides equals the actual price on the closed
+  cylinder.
+
+## Tags
+
+smooth comparison, Dirichlet solution, identification, local comparison, American price, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

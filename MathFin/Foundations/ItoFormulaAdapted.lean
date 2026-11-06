@@ -40,6 +40,30 @@ on the uniform partition of `[0, T]` by the discrete formula into sums that conv
   (`eventually_abs_sub_unifPart_lt`).
 
 The limits in measure hold almost surely along a common subsequence of partitions.
+
+## Main definitions
+
+* `adaptedItoProcess`: the Itô process `X_t = x₀ + ∫₀ᵗ b ds + ∫₀ᵗ φ dB`, the pathwise drift
+  integral plus the continuous modification, at horizon `T`, of the stochastic integral.
+
+## Main results
+
+* `adaptedItoProcess_ae_eq`: for `t ≤ T`, the process equals `x₀ + driftPath b t` plus the Itô
+  integral `itoProcessCLM`, almost surely.
+* `ae_continuousOn_adaptedItoProcess`: almost every path is continuous on `[0, T]`.
+* `adaptedItoProcess_isStronglyPredictable`: the process is predictable for the natural
+  filtration of `B`.
+* `tendstoInMeasure_riemannStieltjes`: for a bounded, predictable, a.s. continuous weight `w`, the
+  Riemann–Stieltjes sums `∑ₖ w(tₖ)(M_{tₖ₊₁} − M_{tₖ})` against `M = φ●B` converge in measure to
+  the integral of `w` against `M`.
+* `tendstoInMeasure_weighted_qv_adapted`: for bounded adapted continuous weights `w` and a process
+  `X = X₀ + A + ∫σ dB` with Lipschitz `A`, `∑ₖ w(tₖ)(ΔXₖ)²` converges in measure to
+  `∫₀ᵀ w_s σ_s² ds`.
+
+## Tags
+
+Itô formula, Itô process, adapted coefficients, Riemann–Stieltjes sums, convergence in measure,
+stochastic integral, MSC 60H05, MSC 60H10, MSC 60J60
 -/
 
 @[expose] public section
@@ -140,7 +164,7 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilit
 `M`, for any process `M` that agrees with the Itô integral process almost surely at each time
 of `[0, T]`: the mean-square convergence `tendsto_itoIntegralAgainst_stepσ`, read on the
 sums. -/
-theorem tendstoInMeasure_riemannStieltjes (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+theorem tendstoInMeasure_riemannStieltjes (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
     {M : ℝ≥0 → Ω → ℝ} (hM : ∀ t ≤ T, M t =ᵐ[μ] itoProcessCLM hB T t hBmeas φ)
     {w : ℝ≥0 → Ω → ℝ} (hw_pred : IsStronglyPredictable (natFiltration hBmeas) w)
     (hw_cont : ∀ᵐ ω ∂μ, ContinuousOn (fun s ↦ w s ω) (Icc 0 T)) {Cw : ℝ}
@@ -211,7 +235,7 @@ theorem tendstoInMeasure_weighted_qv_adapted {X A : ℝ≥0 → Ω → ℝ} {X�
 
 /-! ### The process -/
 
-variable (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {b : ℝ≥0 → Ω → ℝ}
+variable (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {b : ℝ≥0 → Ω → ℝ}
   (hb_adap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (b t))
   (hb_cont : ∀ ω, Continuous fun s ↦ b s ω) {Cb : ℝ} (hb_bdd : ∀ s ω, |b s ω| ≤ Cb) (x₀ : ℝ)
 

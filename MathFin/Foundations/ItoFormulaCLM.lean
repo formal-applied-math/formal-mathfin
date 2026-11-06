@@ -11,11 +11,27 @@ public import MathFin.Foundations.ItoFormulaTD
 
 For `f ∈ C³` with bounded `f′, f″, f‴`,
 
-  `f(B_T) − f(B_0) =ᵐ[μ] itoIntegralCLM_T gf' + ½∫₀ᵀ f″(B_s) ds`,
+  `f(B_T) − f(B_0) =ᵐ[μ] itoIntegralCLM gf' + ½∫₀ᵀ f″(B_s) ds`,
 
 where `gf'` is the Itô-`L²` realization of `s ↦ f′(B_s)`. This is the `f(t, x) = f(x)`
 (`f_t = 0`) instance of the time-dependent formula `ito_formula_td_L2_bddDeriv`
 (`ItoFormulaTD`); there is no separate time-independent proof.
+
+## Main results
+
+* `ito_formula_L2_bddDeriv`: for `f ∈ C³` with `f'`, `f''`, `f'''` bounded and `B` with
+  continuous paths, there is an Itô-`L²` integrand `gf' =ᵐ f'(B_·)` with
+  `f(B_T) − f(B_0) =ᵐ itoIntegralCLM gf' + ½∫₀ᵀ f''(B_s) ds`.
+* `ito_formula_L2_bddDeriv_mk`: the same for the continuous modification `IsPreBrownianReal.mk X`
+  of any pre-Brownian `X`, with no path-continuity hypothesis.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 7.1.1
+
+## Tags
+
+Itô formula, Itô lemma, L² Itô formula, Brownian motion, stochastic integral, MSC 60H05, MSC 60J65
 -/
 
 @[expose] public section
@@ -33,7 +49,7 @@ include hB
 /-- **CLM-identified bounded-derivative Itô formula in `L²`.** For `f ∈ C³` with `|f′| ≤ C₁`,
 `|f″| ≤ C₂`, `|f‴| ≤ C₃`, there is an Itô-`L²` integrand `gf'` with
 
-  `gf' =ᵐ [f′(B_·)]`  and  `f(B_T) − f(B_0) =ᵐ[μ] itoIntegralCLM_T gf' + ½∫₀ᵀ f″(B_s) ds`.
+  `gf' =ᵐ [f′(B_·)]`  and  `f(B_T) − f(B_0) =ᵐ[μ] itoIntegralCLM gf' + ½∫₀ᵀ f″(B_s) ds`.
 
 The first conjunct is what makes the second the Itô *formula* rather than a decomposition into
 some Itô integral. It is the time-independent case of `ito_formula_td_L2_bddDeriv`. -/
@@ -44,10 +60,10 @@ theorem ito_formula_L2_bddDeriv
     (hf'' : ∀ x, HasDerivAt f'' (f''' x) x)
     {C1 : ℝ} (hf1 : ∀ x, |f' x| ≤ C1) {C2 : ℝ} (hf2 : ∀ x, |f'' x| ≤ C2)
     {C3 : ℝ} (hf3 : ∀ x, |f''' x| ≤ C3) :
-    ∃ gf' : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      (⇑gf' =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦ f' (B z.1 z.2)) ∧
+    ∃ gf' : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
+      (⇑gf' =ᵐ[trimMeasure (μ := μ) T hBmeas] fun z ↦ f' (B z.1 z.2)) ∧
       (fun ω ↦ f (B T ω) - f (B 0 ω)) =ᵐ[μ]
-        (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gf') ω
+        (fun ω ↦ (itoIntegralCLM hB T hBmeas gf') ω
           + (1 / 2) * ∫ s in Set.Ioc 0 T, f'' (B s ω) ∂ItoIntegralL2.timeMeasure) := by
   obtain ⟨gf', hname, hae⟩ := ito_formula_td_L2_bddDeriv hB hBmeas hBcont T
     (f := fun _ ↦ f) (f_t := fun _ _ ↦ 0) (f_x := fun _ ↦ f') (f_xx := fun _ ↦ f'')
@@ -74,12 +90,12 @@ theorem ito_formula_L2_bddDeriv_mk {X : ℝ≥0 → Ω → ℝ} (hX : IsPreBrown
     (hf'' : ∀ x, HasDerivAt f'' (f''' x) x)
     {C1 : ℝ} (hf1 : ∀ x, |f' x| ≤ C1) {C2 : ℝ} (hf2 : ∀ x, |f'' x| ≤ C2)
     {C3 : ℝ} (hf3 : ∀ x, |f''' x| ≤ C3) :
-    ∃ gf' : Lp ℝ 2 (trimMeasure_T (μ := μ) T (fun t ↦ IsPreBrownianReal.measurable_mk (h := hX) t)),
-      (⇑gf' =ᵐ[trimMeasure_T (μ := μ) T (fun t ↦ IsPreBrownianReal.measurable_mk (h := hX) t)]
+    ∃ gf' : Lp ℝ 2 (trimMeasure (μ := μ) T (fun t ↦ IsPreBrownianReal.measurable_mk (h := hX) t)),
+      (⇑gf' =ᵐ[trimMeasure (μ := μ) T (fun t ↦ IsPreBrownianReal.measurable_mk (h := hX) t)]
         fun z ↦ f' (IsPreBrownianReal.mk (h := hX) X z.1 z.2)) ∧
       (fun ω ↦ f (IsPreBrownianReal.mk (h := hX) X T ω) -
           f (IsPreBrownianReal.mk (h := hX) X 0 ω)) =ᵐ[μ]
-        (fun ω ↦ (itoIntegralCLM_T (hX.isBrownianReal_mk).toIsPreBrownianReal T
+        (fun ω ↦ (itoIntegralCLM (hX.isBrownianReal_mk).toIsPreBrownianReal T
                     (fun t ↦ IsPreBrownianReal.measurable_mk (h := hX) t) gf') ω
           + (1 / 2) * ∫ s in Set.Ioc 0 T,
               f'' (IsPreBrownianReal.mk (h := hX) X s ω) ∂ItoIntegralL2.timeMeasure) :=

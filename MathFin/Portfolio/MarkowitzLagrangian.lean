@@ -51,9 +51,14 @@ For symmetric `Σ` this is the vanishing of `d/dt [(1/2) (w + t δw)^T Σ (w + t
 `quadratic_form_perturb_linear_coeff` identifies `(Σw)^T δw` as the linear coefficient of
 that polynomial in `t` (no derivative statement is proved).
 
-## Results
+## Main definitions
 
-* `IsConstrainedVarianceCriticalPoint`: the variational definition.
+* `IsConstrainedVarianceCriticalPoint`: `w` is a critical point of `(1/2) wᵀ Σ w` under the
+  budget constraint `1ᵀ w = 1` and the return constraint `μᵀ w = m`, in the variational form:
+  `(Σw)ᵀ δw = 0` for every perturbation `δw` orthogonal to `1` and `μ`.
+
+## Main results
+
 * `isCriticalPoint_of_lagrangian_FOC` (forward direction): if `Σw = lam_1 ·
   1 + lam_2 · μ` componentwise, then `w` is a constrained-variance critical
   point. *Proof*: direct algebra — substitute the FOC, use the
@@ -69,12 +74,12 @@ that polynomial in `t` (no derivative statement is proved).
 * `posSemidef_covariance`, `variance_le_of_lagrangian_FOC`: the same for the covariance
   matrix of square-integrable random returns, whose positive semidefiniteness is derived
   (`covariance_kernel_psd`), stated for the variance of the portfolio return itself.
-* Two assets: `portfolioVariance_covTwo` and `portfolioVarTwo_eq_variance` identify the
-  closed form `portfolioVarTwo` (`Portfolio/Markowitz.lean`) with this file's
-  `portfolioVariance` and with `Var[w R₁ + (1 − w) R₂]`;
-  `marginalVariance_minVarWeightTwo` shows that at the minimum-variance weight each asset's
-  marginal variance equals `V_min`, so (`isConstrainedVarianceCriticalPoint_minVarWeightTwo`)
-  that weight satisfies the budget-only Lagrangian FOC with multiplier `V_min`.
+* Two assets: `portfolioVariance_covTwo` and `portfolioVarTwo_eq_variance` identify the closed form
+  `portfolioVarTwo` (`Portfolio/Markowitz.lean`) with this file's `portfolioVariance` and with
+  `Var[w R₁ + (1 − w) R₂]`; `marginalVariance_minVarWeightTwo` shows that at the minimum-variance
+  weight each asset's marginal variance equals `V_min` (for `D ≠ 0`), so
+  (`isConstrainedVarianceCriticalPoint_minVarWeightTwo`) that weight satisfies the budget-only
+  Lagrangian FOC with multiplier `V_min`.
 
 ## What is *not* in this file
 
@@ -92,6 +97,18 @@ semidefinite `Σ`, a global minimiser.
 `Portfolio/MarkowitzNAsset.lean` the n-asset variance identities. This file derives the
 optimality of Lagrangian-FOC weights from the constrained variance-minimization problem,
 for N assets with budget and target-return constraints (the standard textbook setup).
+
+## References
+
+* [K. Bodie and Marcus, *Investments*][BodieKaneMarcus], ch. 7
+* [Boyd and Vandenberghe, *Convex Optimization*][BoydVandenberghe2004], §5.5.3
+* [H. Markowitz, *Portfolio selection*][Markowitz1952]
+* [R. C. Merton, *An analytic derivation of the efficient portfolio frontier*][Merton1972], §II
+
+## Tags
+
+Markowitz, mean-variance optimization, Lagrangian, first-order condition, two-fund separation,
+minimum variance, constrained optimization, MSC 91G10, MSC 90C25, JEL G11
 -/
 
 @[expose] public section

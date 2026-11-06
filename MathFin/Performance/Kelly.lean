@@ -36,7 +36,12 @@ Additionally:
 * **`kellyFraction = 0 iff break-even`**: `f* = 0` iff `p(b+1) = 1`.
 * **`kellyFraction > 0 iff favorable bet`**: `f* > 0` iff `p(b+1) > 1`.
 
-Results:
+## Main definitions
+
+* `kellyReturnMeasure`: one Kelly period's wealth-multiplier law, `1 + f·b` with probability `p`
+  and `1 − f` with probability `1 − p`.
+
+## Main results
 
 * `integral_log_kellyReturnMeasure`: one period's expected log-multiplier is
   exactly `kellyGrowth p b f`.
@@ -48,6 +53,17 @@ Results:
   vanishes at the single-period `kellyFraction p b`.
 * `kellyFraction_lt_one`, `kellyFraction_eq_zero_iff`, `kellyFraction_pos_iff`:
   bounds and sign analysis of the Kelly fraction.
+
+## References
+
+* [J. L. Kelly, *A new interpretation of information rate*][Kelly1956]
+* [MacLean, Thorp and Ziemba (2010)][MacLeanThorpZiemba2010]
+* [Thorp (2006)][Thorp2006]
+
+## Tags
+
+Kelly criterion, growth-optimal, log utility, expected log-wealth, myopic investment,
+optimal bet size, MSC 91G10, MSC 91B16, JEL G11
 -/
 
 @[expose] public section

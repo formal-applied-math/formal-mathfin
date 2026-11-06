@@ -32,10 +32,20 @@ or the Hermite generating function, neither of which is available here. That `ou
 infinitesimal generator of the Vasicek process is not proved; the decay is computed from the
 explicit Gaussian law.
 
-## Main result
+## Main results
 
 * `integral_scaledHermite_vasicekShortRate` — `𝔼[q_n(r_T − θ)] = e^{−nκT}·q_n(r₀ − θ)` for
   `n ≤ 2`, `κ > 0`, `s ≠ 0`, `2κs² = σ²`.
+
+## References
+
+* [G. A. Pavliotis, *Stochastic Processes and Applications*][Pavliotis2014], ch. 4
+* [O. Vasicek, *An equilibrium characterization of the term structure*][Vasicek1977]
+
+## Tags
+
+Ornstein–Uhlenbeck, Hermite polynomials, Vasicek model, generator eigenfunctions, mean reversion,
+MSC 91G30, MSC 60J60, JEL E43
 -/
 
 @[expose] public section
@@ -51,7 +61,7 @@ private theorem hermiteReal_one : hermiteReal 1 = X := by
   simp [hermiteReal]
 
 /-- `𝔼[(c + Y)/s] = c/s` for `Y ~ N(0, v)`. -/
-private theorem integral_add_div_gaussianReal (c s : ℝ) (v : ℝ≥0) :
+theorem integral_add_div_gaussianReal (c s : ℝ) (v : ℝ≥0) :
     ∫ x, (c + x) / s ∂(gaussianReal 0 v) = c / s := by
   have h1 : Integrable (fun x : ℝ ↦ x) (gaussianReal 0 v) :=
     (memLp_id_gaussianReal 1).integrable (by norm_num)
@@ -59,7 +69,7 @@ private theorem integral_add_div_gaussianReal (c s : ℝ) (v : ℝ≥0) :
   simp
 
 /-- `𝔼[(c + Y)²] = c² + v` for `Y ~ N(0, v)`. -/
-private theorem integral_add_sq_gaussianReal (c : ℝ) (v : ℝ≥0) :
+theorem integral_add_sq_gaussianReal (c : ℝ) (v : ℝ≥0) :
     ∫ x, (c + x) ^ 2 ∂(gaussianReal 0 v) = c ^ 2 + v := by
   have h1 : Integrable (fun x : ℝ ↦ x) (gaussianReal 0 v) :=
     (memLp_id_gaussianReal 1).integrable (by norm_num)
@@ -74,7 +84,7 @@ private theorem integral_add_sq_gaussianReal (c : ℝ) (v : ℝ≥0) :
   simp
 
 /-- `(c + Y)²` is integrable for `Y ~ N(0, v)`. -/
-private theorem integrable_add_sq_gaussianReal (c : ℝ) (v : ℝ≥0) :
+theorem integrable_add_sq_gaussianReal (c : ℝ) (v : ℝ≥0) :
     Integrable (fun x : ℝ ↦ (c + x) ^ 2) (gaussianReal 0 v) := by
   have h1 : Integrable (fun x : ℝ ↦ x) (gaussianReal 0 v) :=
     (memLp_id_gaussianReal 1).integrable (by norm_num)

@@ -22,6 +22,32 @@ variance `w(k)`: `dpl k (w k)`, `dmi k (w k)` and `blackForm k (w k)` are used d
 Gaussian density cancellation is `exp_mul_pdf_dmi` at `w(k)`.
 `durrleman_eq_one_add_smileDelta` relates Durrleman's function to the denominator deformation
 `1 + smileDelta` of Dupire's ratio.
+
+## Main definitions
+
+* `rootVariance`: the square root `√w(k)` of the SVI total variance.
+* `dmiSlope`: the explicit derivative of `d₋` in log-strike.
+* `blackDelta`: the derivative of the Black call `blackForm k (w k)` in log-strike divided by `eᵏ`,
+  the smile term minus `Φ(d₋)`.
+* `blackCall`: the forward-normalised Black call as a function of the positive strike ratio.
+
+## Main results
+
+* `dpl_eq_rootVariance`, `dmi_eq_rootVariance`: `d₊ = −k/√w + √w/2` and `d₋ = −k/√w − √w/2` at the
+  SVI total variance `w`.
+* `rootVariance_hasDerivAt`, `dmi_hasDerivAt`, `dpl_hasDerivAt`: the derivatives of `√w`, `d₋` and
+  `d₊` in log-strike, given the derivative of the variance and `w > 0`.
+* `blackForm_hasDerivAt`: the log-strike derivative of the Black call `blackForm k (w k)` is
+  `eᵏ · blackDelta p k`.
+* `blackDelta_hasDerivAt`: given the derivatives of the variance and of its slope and `w > 0`, the
+  derivative of `blackDelta` is the Gaussian factor `ϕ(d₋)/√w` times `durrleman p k`.
+* `durrleman_eq_one_add_smileDelta`: where the SVI slice and the tilted surface of `ForwardSmile`
+  share total variance, slope and curvature, `durrleman p k = 1 + smileDelta σ ψ₁ T₀ ε k T`.
+
+## Tags
+
+SVI smile, Black call, Durrleman function, Dupire local volatility, total variance, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section
@@ -130,9 +156,9 @@ theorem blackDelta_hasDerivAt (p : Params) (k : ℝ)
   ring
 
 /-- **`1 + smileDelta` is Durrleman's function.** The denominator deformation `1 + δ` of Dupire's
-ratio on the tilted surface (`smileDelta`) has the algebraic form of Durrleman's `g`: at a log-strike
-where the SVI slice and the tilted surface have the same total variance, slope and curvature
-(`w'' = 2(εψ₁/√(T+T₀))²T`, the surface's constant `∂_kk w`), with the variance nonzero,
+ratio on the tilted surface (`smileDelta`) has the algebraic form of Durrleman's `g`: at a
+log-strike where the SVI slice and the tilted surface have the same total variance, slope and
+curvature (`w'' = 2(εψ₁/√(T+T₀))²T`, the surface's constant `∂_kk w`), with the variance nonzero,
 `durrleman p k = 1 + smileDelta σ ψ₁ T₀ ε k T`. -/
 theorem durrleman_eq_one_add_smileDelta (p : Params) {σ ψ₁ T₀ ε k T : ℝ}
     (hw : variance p k = ForwardSmile.totalVar σ ψ₁ T₀ ε k T)

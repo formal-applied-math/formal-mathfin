@@ -33,6 +33,16 @@ two results of `Foundations/` to it.
 
 * `snellEnvelope_doob_decomposition`
 * `condExp_stoppedValue_le_snellEnvelope`
+
+## References
+
+* [D. Lamberton and B. Lapeyre, *Introduction to Stochastic Calculus Applied to
+  Finance*][LambertonLapeyre2008], §2.2; §2.3
+
+## Tags
+
+Snell envelope, American option, Doob decomposition, optional sampling, optimal stopping,
+early exercise, supermartingale compensator, MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

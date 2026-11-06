@@ -12,6 +12,12 @@
       "metadata": {
         "appendix": "B.1",
         "reference": "Theorem B.1.2(1)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem B.1.2(1)"
+          }
+        ],
         "difficulty": "foundational",
         "formalization_status": "library_wrapper",
         "formalization_scope": "Lean library wrapper of Mathlib master `Mathlib.Probability.Distributions.Gaussian.Multivariate.measurePreserving_eval_multivariateGaussian`. The textbook formulation X = D·W + μ matches `multivariateGaussian μ S` with S = D·Dᵀ; the marginal-is-Gaussian conclusion is exactly the `map_eq` field of the measure-preserving statement. Requires Lean v4.30+ (multivariateGaussian landed at v4.29.0-rc6)."
@@ -28,6 +34,12 @@
       "metadata": {
         "appendix": "B.1",
         "reference": "Theorem B.1.2(3)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem B.1.2(3)"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "library_wrapper",
         "formalization_scope": "Direct Lean wrapper around an existing library theorem closely matching the benchmark statement."
@@ -44,6 +56,12 @@
       "metadata": {
         "appendix": "B.1",
         "reference": "Theorem B.1.3(2)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem B.1.3(2)"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Real Lean derivation of Theorem B.1.3(2). The hypotheses (joint Gaussianity of (X,Y), marginal means, Var Y, Cov(X,Y)) are bundled in `BivariateGaussianHyp`; the conditional-expectation conclusion is *derived* (not a structural field) via orthogonal regression β = ρσ_X/σ_Y, linear-CLM transfer of joint Gaussianity to (X − βY, Y), Cov(X − βY, Y) = 0 ⇒ independence via `HasGaussianLaw.indepFun_of_covariance_eq_zero`, `condExp_indep_eq` for the orthogonal residual, `condExp_of_stronglyMeasurable` for the σ(Y)-measurable estimator, and `condExp_add`/`condExp_sub` linearity. Proof lives in `MathFin/Foundations/BivariateGaussian.lean` (~240 lines).",
@@ -61,6 +79,12 @@
       "metadata": {
         "appendix": "B.2",
         "reference": "B.2 (Memoryless)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "B.2"
+          }
+        ],
         "difficulty": "foundational",
         "formalization_status": "full",
         "formalization_scope": "Faithful formal statement/proof for the benchmark theorem as encoded, using Mathlib exponential CDF infrastructure."
@@ -77,6 +101,12 @@
       "metadata": {
         "appendix": "B.2",
         "reference": "B.2 (Min of Exponentials)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "B.2"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Survival-function identity for the minimum of jointly independent exponentials, derived from joint independence (iIndepFun.meas_iInter) and individual exponential laws (exp_law + expMeasure CDF formula). At the survival-function (CDF) level, matching the precedent of dist-exp-memoryless. The structure no longer axiomatizes the minimum's distribution as a field; the conclusion is derived."
@@ -92,6 +122,12 @@
       },
       "metadata": {
         "reference": "Poisson generating function E[x^N] = e^{r(x-1)} (standard; e.g. Saporito Ch 3 toolbox)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Ch 3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof for every real x: the weighted series ∑ e^{-r} rⁿ/n! xⁿ is the exponential series at r·x rescaled by e^{-r} (NormedSpace.expSeries_div_hasSum_exp, the same route Mathlib uses for the pmf normalisation), then integral_poissonMeasure converts the expectation to the series. Lives in MathFin/Foundations/PoissonPgf.lean. Axioms-clean."

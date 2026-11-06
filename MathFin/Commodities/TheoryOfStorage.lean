@@ -57,10 +57,16 @@ with `f⁻¹(A*) = Sbar` is
 for `a_ref, p_ref, Sbar > 0` and `ε ≠ 0` (`kinkPoint_spec`); that it is the
 only crossing is not stated.
 
+## Main definitions
+
+* `storageSpotPrice`: the canonical-storage spot price `max Sbar (invDemand A)` at availability
+  `A`, for any `invDemand : ℝ → ℝ`.
+* `convenienceYield`: `max (invDemand A - Sbar) 0`.
+* `invDemandIsoelastic`: the isoelastic inverse demand for storage `p_ref * (a_ref/A)^ε`.
+* `kinkPoint`: the availability at which the isoelastic curve meets the floor `Sbar`.
+
 ## Main results
 
-* `storageSpotPrice`, `convenienceYield`: the two kinked functions, generic
-  in the inverse demand-for-storage curve `f⁻¹ : ℝ → ℝ`.
 * `convenienceYield_eq_storageSpotPrice_sub` : `Y(A) = S(A) − Sbar`.
 * `carry_identity_at_availability` : `(Sbar + C) − S(A) = C − Y(A)`, the
   cost-of-carry identity at the kink functions
@@ -76,9 +82,14 @@ only crossing is not stated.
 
 ## References
 
-* N. Kaldor, "Speculation and economic stability", *Review of Economic Studies* 7 (1939), 1–27.
-* H. Working, "The theory of price of storage", *American Economic Review* 39 (1949),
-  1254–1262.
+* [N. Kaldor, *Speculation and economic stability*][Kaldor1939].
+* [H. Working, *The theory of price of storage*][Working1949].
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], ch. 5
+
+## Tags
+
+theory of storage, convenience yield, Kaldor–Working, cost of carry, backwardation,
+commodity forward, MSC 91G20, JEL Q02, JEL G13
 -/
 
 @[expose] public section

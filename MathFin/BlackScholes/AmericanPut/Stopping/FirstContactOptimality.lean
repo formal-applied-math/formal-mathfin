@@ -14,10 +14,18 @@ The initial expected supermartingale value is approached by admissible rewards.
 This forces their expected nonnegative gaps to zero. A subsequence and continuity
 then recover the expected value at first contact by ordered optional sampling.
 
-## Result
+## Main results
 
-Public entry points include `expected_firstContact_eq_initial`,
-`firstContact_expectedReward_eq_initial`.
+* `expected_firstContact_eq_initial`: let `U` be a bounded continuous supermartingale and `Z` a
+  bounded continuous measurable process with `Z ≤ U` on `[0, T]`. If a rule `τ` has `Z < U`
+  before `τ` and rules `θ n` have `E Z (θ n) → E U 0`, then `E U (τ) = E U 0`.
+* `firstContact_expectedReward_eq_initial`: under the same hypotheses, if also `U = Z` a.e.
+  at `τ`, then `E Z (τ) = E U 0`.
+
+## Tags
+
+optimal stopping, first contact, supermartingale, optional sampling, nearly optimal rules,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -13,6 +13,21 @@ The per-cell weighted second-moment identity `weightedCellSq_step` on the left-e
 approximants, the energy of the true increment `trueIncr_sq_le`, and the summed weighted
 increment isometry `quadraticSqSum_tendsto` (with its gap hypothesis `hgap`, which
 `ItoDriftGapDecay` discharges).
+
+## Main results
+
+* `weightedCellSq_step`: for an `𝓕_{tₖ}`-measurable weight `w`,
+  `𝔼[w·(δ(tₖ)·ΔBₖ)²] = 𝔼[w·δ(tₖ)²]·(tₖ₊₁ − tₖ)`.
+* `stepIncr_stepCLM_ae`: over a uniform cell, the increment of the step-approximant process is
+  almost surely the single rectangle `δ(tₖ)·ΔBₖ`.
+* `trueIncr_sq_le`: `𝔼[(M_v − M_u)²] ≤ Dd²·(v − u)` for `u ≤ v ≤ T`.
+* `quadraticSqSum_tendsto`: the sums `∑ₖ 𝔼[w(tₖ)(ΔMₖ)²]` converge to `∫₀ᵀ 𝔼[w_s δ_s²] ds`,
+  given a gap bound `hgap` as hypothesis.
+
+## Tags
+
+weighted isometry, quadratic variation, Itô integral, increment isometry,
+left-endpoint approximation, MSC 60H05, MSC 60G44
 -/
 
 @[expose] public section
@@ -129,19 +144,19 @@ space-time function is the sum of its uniform cell integrals (iterated
 `setIntegral_Ioc_prod_add` over the nested left endpoints). -/
 lemma uniform_band_split (hBmeas : ∀ t, Measurable (B t)) {T : ℝ≥0} {n : ℕ}
     (hn : 0 < n) {F : ℝ≥0 × Ω → ℝ}
-    (hFint : Integrable F (trimMeasure_T (μ := μ) T hBmeas)) :
+    (hFint : Integrable F (trimMeasure (μ := μ) T hBmeas)) :
     ∫ z in Set.Ioc (0:ℝ≥0) T ×ˢ (Set.univ : Set Ω), F z
-        ∂(trimMeasure_T (μ := μ) T hBmeas)
+        ∂(trimMeasure (μ := μ) T hBmeas)
       = ∑ k ∈ Finset.range n,
           ∫ z in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)) ×ˢ (Set.univ : Set Ω),
-            F z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
+            F z ∂(trimMeasure (μ := μ) T hBmeas) := by
   have hTn : unifPart T n n = T := unifPart_self T hn.ne'
   have key : ∀ m : ℕ, m ≤ n →
       ∫ z in Set.Ioc (0:ℝ≥0) (unifPart T n m) ×ˢ (Set.univ : Set Ω), F z
-          ∂(trimMeasure_T (μ := μ) T hBmeas)
+          ∂(trimMeasure (μ := μ) T hBmeas)
         = ∑ k ∈ Finset.range m,
             ∫ z in Set.Ioc (unifPart T n k) (unifPart T n (k + 1)) ×ˢ (Set.univ : Set Ω),
-              F z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
+              F z ∂(trimMeasure (μ := μ) T hBmeas) := by
     intro m
     induction m with
     | zero => intro _; simp [unifPart_zero]
@@ -161,23 +176,23 @@ theorem stepIncr_stepCLM_ae (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measu
     (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
     (hδbdd : ∀ t ω, |δ t ω| ≤ Dd) {n k : ℕ} (hk : k < n) :
     (fun ω ↦ (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-          (simpleAssembly_T (μ := μ) T hBmeas (stepσ hBmeas hδadap hδbdd T n)) : Ω → ℝ) ω
+          (simpleAssemblyHorizon (μ := μ) T hBmeas (stepσ hBmeas hδadap hδbdd T n)) : Ω → ℝ) ω
       - (itoProcessCLM hB T (unifPart T n k) hBmeas
-          (simpleAssembly_T (μ := μ) T hBmeas (stepσ hBmeas hδadap hδbdd T n)) : Ω → ℝ) ω)
+          (simpleAssemblyHorizon (μ := μ) T hBmeas (stepσ hBmeas hδadap hδbdd T n)) : Ω → ℝ) ω)
       =ᵐ[μ] (fun ω ↦ δ (unifPart T n k) ω
           * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) := by
   have hcoe : ∀ t : ℝ≥0,
       (itoProcessCLM hB T t hBmeas
-          (simpleAssembly_T (μ := μ) T hBmeas (stepσ hBmeas hδadap hδbdd T n)) : Ω → ℝ)
+          (simpleAssemblyHorizon (μ := μ) T hBmeas (stepσ hBmeas hδadap hδbdd T n)) : Ω → ℝ)
         =ᵐ[μ] itoSimpleProcess hBmeas (stepσ hBmeas hδadap hδbdd T n).val t := by
     intro t
-    rw [itoProcessCLM_simpleAssembly_T hB T t hBmeas (stepσ hBmeas hδadap hδbdd T n)]
+    rw [itoProcessCLM_simpleAssemblyHorizon hB T t hBmeas (stepσ hBmeas hδadap hδbdd T n)]
     exact (memLp_itoSimpleProcess hB hBmeas (stepσ hBmeas hδadap hδbdd T n).val t).coeFn_toLp
   filter_upwards [hcoe (unifPart T n (k + 1)), hcoe (unifPart T n k)] with ω h2 h3
   show (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas
-        (simpleAssembly_T (μ := μ) T hBmeas (stepσ hBmeas hδadap hδbdd T n)) : Ω → ℝ) ω
+        (simpleAssemblyHorizon (μ := μ) T hBmeas (stepσ hBmeas hδadap hδbdd T n)) : Ω → ℝ) ω
       - (itoProcessCLM hB T (unifPart T n k) hBmeas
-        (simpleAssembly_T (μ := μ) T hBmeas (stepσ hBmeas hδadap hδbdd T n)) : Ω → ℝ) ω
+        (simpleAssemblyHorizon (μ := μ) T hBmeas (stepσ hBmeas hδadap hδbdd T n)) : Ω → ℝ) ω
     = δ (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)
   rw [h2, h3, itoSimpleProcess_stepσ_incr hBmeas hδadap hδbdd T hk ω]
 

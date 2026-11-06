@@ -14,13 +14,32 @@ B1b built the general Itô integral `(φ●B)_t = ∫₀ᵗ φ dB` and proved it
 L² martingale, with the contraction `‖(φ●B)_t‖ ≤ ‖φ‖` and the terminal isometry
 `‖(φ●B)_T‖ = ‖φ‖`. This file proves the **explicit time-indexed Itô isometry**
 
-`E[(φ●B)_t²] = ∫_{(0,t]×Ω} φ² d(trimMeasure_T T)`  (= `∫₀ᵗ E[φ_s²] ds`),
+`E[(φ●B)_t²] = ∫_{(0,t]×Ω} φ² d(trimMeasure T)`  (= `∫₀ᵗ E[φ_s²] ds`),
 
 the L²-energy law that B1b deferred. On a simple process `V` the LHS is B1a's
 `itoSimpleProcess_isometry_time` (the t-capped predictable-rectangle double sum);
 the RHS is the same double sum, via a **band-restricted** version of
 `ItoIntegralL2.integral_rectTerm_mul` (the time integral picks up an `∩ (0,t]`).
-The general case follows by density. -/
+The general case follows by density.
+
+## Main results
+
+* `itoProcessCLM_norm_sq`: for `t ≤ T` and a predictable `φ ∈ L²([0,T])`,
+  `E[(φ●B)_t²] = ∫_{(0,t]×Ω} φ² d(trimMeasure T)`.
+* `setIntegral_Ioc_prod_add`: the band integral of an integrable space-time function is additive
+  over adjacent time bands.
+* `clm_band_energy`: for `u ≤ v ≤ T`, `𝔼[((φ●B)_v − (φ●B)_u)²]` is the band energy
+  `∫_{(u,v]×Ω} φ² d(trimMeasure T)`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Ch 7
+
+## Tags
+
+time-indexed Itô isometry, Itô isometry, energy identity, stochastic integral, L² martingale,
+MSC 60H05, MSC 60G44
+-/
 
 @[expose] public section
 
@@ -82,7 +101,7 @@ overlap intersected with `(0,t]`). These are equal: both measure the length of
 `(p.1,p.2] ∩ (q.1,q.2] ∩ (0,t]`. When the joint overlap is nonempty its left endpoint
 `max p.1 q.1 < t`, so the individual `∧t`-truncations on the left are inert; when empty,
 both clamp to `0`. -/
-private lemma band_overlap_real (P1 P2 Q1 Q2 T : ℝ) :
+lemma band_overlap_real (P1 P2 Q1 Q2 T : ℝ) :
     max 0 (min (min P2 T) (min Q2 T) - max (min P1 T) (min Q1 T))
       = max 0 (min (min P2 Q2) T - max P1 Q1) := by
   -- The right endpoints coincide unconditionally: `(P2∧T)∧(Q2∧T) = (P2∧Q2)∧T`.
@@ -107,56 +126,56 @@ omit hB in
 /-- **Restricting the horizon-`T` predictable measure to the `(0,t]` band gives the
 horizon-`t` measure** (for `t ≤ T`). Both are restrictions of the same full predictable
 trim; `band_t ∩ band_T = band_t`. This lets the time-indexed energy
-`∫_{(0,t]} · d(trimMeasure_T T)` collapse to a plain integral against `trimMeasure_T t`. -/
-private lemma trimMeasure_T_restrict_band {t T : ℝ≥0} (htT : t ≤ T)
+`∫_{(0,t]} · d(trimMeasure T)` collapse to a plain integral against `trimMeasure t`. -/
+private lemma trimMeasure_restrict_band {t T : ℝ≥0} (htT : t ≤ T)
     (hBmeas : ∀ u, Measurable (B u)) :
-    (trimMeasure_T (μ := μ) T hBmeas).restrict (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω))
-      = trimMeasure_T (μ := μ) t hBmeas := by
-  rw [trimMeasure_T_eq_restrict T hBmeas,
+    (trimMeasure (μ := μ) T hBmeas).restrict (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω))
+      = trimMeasure (μ := μ) t hBmeas := by
+  rw [trimMeasure_eq_restrict T hBmeas,
       Measure.restrict_restrict_of_subset
         (Set.prod_mono (Set.Ioc_subset_Ioc le_rfl htT) subset_rfl),
-      trimMeasure_T_eq_restrict t hBmeas]
+      trimMeasure_eq_restrict t hBmeas]
 
 omit hB in
 /-- **Dropping the horizon-`t` predictable trim** to the untrimmed product over the
-`(0,t]` band. `trimMeasure_T t = ((timeMeasure.restrict (0,t]) ⊗ μ).trim`; `integral_trim`
+`(0,t]` band. `trimMeasure t = ((timeMeasure.restrict (0,t]) ⊗ μ).trim`; `integral_trim`
 removes the trim (legal for predictable-strongly-measurable `f`) and
 `Measure.restrict_prod_eq_prod_univ` moves the time-restriction out to a band on the
 product. -/
-private lemma integral_trimMeasure_T {t : ℝ≥0} (hBmeas : ∀ u, Measurable (B u))
+private lemma integral_trimMeasure {t : ℝ≥0} (hBmeas : ∀ u, Measurable (B u))
     {f : ℝ≥0 × Ω → ℝ}
     (hf : StronglyMeasurable[(natFiltration hBmeas).predictable] f) :
-    ∫ z, f z ∂(trimMeasure_T (μ := μ) t hBmeas)
+    ∫ z, f z ∂(trimMeasure (μ := μ) t hBmeas)
       = ∫ z in (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)), f z ∂(timeMeasure.prod μ) := by
-  rw [show trimMeasure_T (μ := μ) t hBmeas
-        = ((timeMeasure_T t).prod μ).trim (natFiltration hBmeas).predictable_le_prod from rfl,
+  rw [show trimMeasure (μ := μ) t hBmeas
+        = ((timeMeasureHorizon t).prod μ).trim (natFiltration hBmeas).predictable_le_prod from rfl,
       integral_trim (natFiltration hBmeas).predictable_le_prod hf,
-      show ((timeMeasure_T t).prod μ : Measure (ℝ≥0 × Ω))
+      show ((timeMeasureHorizon t).prod μ : Measure (ℝ≥0 × Ω))
           = (timeMeasure.prod μ).restrict (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)) from by
-        rw [timeMeasure_T, Measure.restrict_prod_eq_prod_univ]]
+        rw [timeMeasureHorizon, Measure.restrict_prod_eq_prod_univ]]
 
 omit [IsProbabilityMeasure μ] in
 /-- **Time-indexed energy of a simple process (RHS form).** For `t ≤ T`, the
 predictable `L²`-energy of `uncurry V` over the `(0,t]` band equals the truncated
 predictable-rectangle double sum: collapse band+trim to the horizon-`t` measure
-(`trimMeasure_T_restrict_band`), drop the trim (`integral_trimMeasure_T`), then expand the
+(`trimMeasure_restrict_band`), drop the trim (`integral_trimMeasure`), then expand the
 square and Fubini-factorise each cross-term (`integral_rectTerm_mul_band`). Mirrors
 `ItoIntegralL2.simpleProcessL2_norm_sq` with the band cap. -/
 private lemma band_integral_uncurry_sq {t T : ℝ≥0} (htT : t ≤ T)
     (hBmeas : ∀ u, Measurable (B u)) (V : SimpleProcess ℝ (natFiltration hBmeas)) :
     ∫ z in (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)),
-        (Function.uncurry ⇑V z) ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas)
+        (Function.uncurry ⇑V z) ^ 2 ∂(trimMeasure (μ := μ) T hBmeas)
       = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
           (∫ ω, V.value p ω * V.value q ω ∂μ)
             * max 0 ((min (min (p.2 : ℝ) q.2) (t : ℝ)) - max (p.1 : ℝ) q.1) := by
   have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   -- (A) collapse band+trim to the horizon-`t` measure, then drop the trim.
-  rw [trimMeasure_T_restrict_band htT]
+  rw [trimMeasure_restrict_band htT]
   simp only [pow_two]
   have hsm : StronglyMeasurable[(natFiltration hBmeas).predictable]
       (fun z ↦ Function.uncurry ⇑V z * Function.uncurry ⇑V z) :=
     V.isStronglyPredictable.mul V.isStronglyPredictable
-  rw [integral_trimMeasure_T hBmeas hsm]
+  rw [integral_trimMeasure hBmeas hsm]
   -- (B) expand the square into the rectangle double sum and integrate termwise.
   have hint : ∀ p ∈ V.value.support, ∀ q ∈ V.value.support,
       Integrable (fun z ↦ rectTerm hBmeas V p z * rectTerm hBmeas V q z) (timeMeasure.prod μ) :=
@@ -184,7 +203,7 @@ private lemma itoSimpleProcessLp_band_isometry {t T : ℝ≥0} (htT : t ≤ T)
     (hBmeas : ∀ u, Measurable (B u)) (V : SimpleProcess ℝ (natFiltration hBmeas)) :
     ‖itoSimpleProcessLp (μ := μ) hB hBmeas V t‖ ^ 2
       = ∫ z in (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)),
-          (Function.uncurry ⇑V z) ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) := by
+          (Function.uncurry ⇑V z) ^ 2 ∂(trimMeasure (μ := μ) T hBmeas) := by
   rw [band_integral_uncurry_sq hB htT hBmeas V]
   have hLHS : ‖itoSimpleProcessLp (μ := μ) hB hBmeas V t‖ ^ 2
       = ∫ ω, (itoSimpleProcess hBmeas V t ω) ^ 2 ∂μ := by
@@ -199,8 +218,8 @@ private lemma itoSimpleProcessLp_band_isometry {t T : ℝ≥0} (htT : t ≤ T)
   exact band_overlap_real _ _ _ _ _
 
 omit hB in
-/-- `(0,t]×Ω` is measurable for the predictable σ-algebra carried by `trimMeasure_T`. -/
-private lemma measurableSet_band (t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)) :
+/-- `(0,t]×Ω` is measurable for the predictable σ-algebra carried by `trimMeasure`. -/
+lemma measurableSet_band (t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)) :
     MeasurableSet[(natFiltration hBmeas).predictable] (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)) :=
   MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := natFiltration hBmeas) 0 t
     MeasurableSet.univ
@@ -208,9 +227,9 @@ private lemma measurableSet_band (t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)
 omit [IsProbabilityMeasure μ] hB in
 /-- Truncation to the `(0,t]`-band keeps `L²`. -/
 private lemma memLp_truncBand (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     MemLp ((Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)).indicator (φ : ℝ≥0 × Ω → ℝ)) 2
-      (trimMeasure_T (μ := μ) T hBmeas) :=
+      (trimMeasure (μ := μ) T hBmeas) :=
   (Lp.memLp φ).indicator (measurableSet_band t hBmeas).nullMeasurableSet
 
 omit [IsProbabilityMeasure μ] hB in
@@ -221,8 +240,8 @@ via `eLpNorm_indicator_le`). The general time-indexed isometry reads
 `‖itoProcessCLM T t φ‖² = ‖truncCLM T t φ‖²` — both sides continuous in `φ`, equal on the
 dense simple processes. -/
 private noncomputable def truncCLM (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) →L[ℝ]
-      Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+    Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) →L[ℝ]
+      Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) :=
   LinearMap.mkContinuous
     { toFun := fun φ ↦ (memLp_truncBand T t hBmeas φ).toLp
         ((Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)).indicator (φ : ℝ≥0 × Ω → ℝ))
@@ -257,10 +276,10 @@ omit [IsProbabilityMeasure μ] hB in
 its value is `𝟙_{(0,t]} · φ`, whose squared `L²`-norm integrates `φ²` over the band. This is
 the continuous RHS the general isometry equalises against. -/
 private lemma truncCLM_norm_sq (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     ‖truncCLM (μ := μ) T t hBmeas φ‖ ^ 2
       = ∫ z in (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)), (φ z) ^ 2
-          ∂(trimMeasure_T (μ := μ) T hBmeas) := by
+          ∂(trimMeasure (μ := μ) T hBmeas) := by
   rw [lp_two_norm_sq, ← integral_indicator (measurableSet_band t hBmeas)]
   refine integral_congr_ae ?_
   filter_upwards [(memLp_truncBand T t hBmeas φ).coeFn_toLp] with z hz
@@ -277,21 +296,21 @@ and they agree on the dense simple processes (`itoSimpleProcessLp_band_isometry`
 everywhere (`DenseRange.equalizer`). This is the deferred L²-energy law completing B1b's isometry
 — the per-`t` refinement of the terminal `itoProcessCLM_norm_terminal`. -/
 theorem itoProcessCLM_norm_sq {t T : ℝ≥0} (htT : t ≤ T) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     ‖itoProcessCLM hB T t hBmeas φ‖ ^ 2
       = ∫ z in (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)), (φ z) ^ 2
-          ∂(trimMeasure_T (μ := μ) T hBmeas) := by
+          ∂(trimMeasure (μ := μ) T hBmeas) := by
   rw [← truncCLM_norm_sq T t hBmeas φ]
-  refine congrFun (DenseRange.equalizer (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
+  refine congrFun (DenseRange.equalizer (simpleAssemblyHorizon_denseRange (μ := μ) T hBmeas)
     ((continuous_pow 2).comp (itoProcessCLM hB T t hBmeas).continuous.norm)
     ((continuous_pow 2).comp (truncCLM (μ := μ) T t hBmeas).continuous.norm)
     (funext fun V ↦ ?_)) φ
   simp only [Function.comp_apply]
-  rw [itoProcessCLM_simpleAssembly_T, truncCLM_norm_sq,
+  rw [itoProcessCLM_simpleAssemblyHorizon, truncCLM_norm_sq,
       itoSimpleProcessLp_band_isometry hB htT hBmeas V.val]
   refine integral_congr_ae ?_
   filter_upwards [ae_restrict_of_ae (memLp_uncurry_trim_T T hBmeas V.val).coeFn_toLp] with z hz
-  rw [show (simpleAssembly_T (μ := μ) T hBmeas V : ℝ≥0 × Ω → ℝ) z
+  rw [show (simpleAssemblyHorizon (μ := μ) T hBmeas V : ℝ≥0 × Ω → ℝ) z
         = Function.uncurry ⇑V.val z from hz]
 
 
@@ -300,11 +319,11 @@ omit hB [IsProbabilityMeasure μ] in
 integral over `(a,c] × Ω` of the predictable trim measure is the sum of the integrals over the
 adjacent bands `(a,b] × Ω` and `(b,c] × Ω`. -/
 theorem setIntegral_Ioc_prod_add {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t)) {F : ℝ≥0 × Ω → ℝ}
-    (hF : Integrable F (trimMeasure_T (μ := μ) T hBmeas)) {a b c : ℝ≥0} (hab : a ≤ b)
+    (hF : Integrable F (trimMeasure (μ := μ) T hBmeas)) {a b c : ℝ≥0} (hab : a ≤ b)
     (hbc : b ≤ c) :
-    ∫ z in Set.Ioc a c ×ˢ (Set.univ : Set Ω), F z ∂(trimMeasure_T (μ := μ) T hBmeas)
-      = ∫ z in Set.Ioc a b ×ˢ (Set.univ : Set Ω), F z ∂(trimMeasure_T (μ := μ) T hBmeas)
-        + ∫ z in Set.Ioc b c ×ˢ (Set.univ : Set Ω), F z ∂(trimMeasure_T (μ := μ) T hBmeas) := by
+    ∫ z in Set.Ioc a c ×ˢ (Set.univ : Set Ω), F z ∂(trimMeasure (μ := μ) T hBmeas)
+      = ∫ z in Set.Ioc a b ×ˢ (Set.univ : Set Ω), F z ∂(trimMeasure (μ := μ) T hBmeas)
+        + ∫ z in Set.Ioc b c ×ˢ (Set.univ : Set Ω), F z ∂(trimMeasure (μ := μ) T hBmeas) := by
   rw [← Set.Ioc_union_Ioc_eq_Ioc hab hbc, Set.union_prod]
   exact setIntegral_union (Set.Disjoint.set_prod_left (Set.Ioc_disjoint_Ioc_of_le le_rfl) _ _)
     (measurableSet_predictable_Ioc_prod b c MeasurableSet.univ) hF.integrableOn hF.integrableOn
@@ -312,24 +331,24 @@ theorem setIntegral_Ioc_prod_add {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t)
 /-- **The band-energy law of the Itô integral process**: the `L²` energy of the increment of
 `(φ●B)` over a band `(u,v]`, `v ≤ T`, is the band energy of the integrand,
 
-  `𝔼[((φ●B)_v − (φ●B)_u)²] = ∫_{(u,v]×Ω} φ² d(trimMeasure_T T)`.
+  `𝔼[((φ●B)_v − (φ●B)_u)²] = ∫_{(u,v]×Ω} φ² d(trimMeasure T)`.
 
 Pythagoras for the martingale `itoProcessCLM` (`(φ●B)_u` is the conditional expectation of
 `(φ●B)_v`: `condVar_ae_eq_condExp_sq_sub_sq_condExp`), then the time-indexed isometry
 `itoProcessCLM_norm_sq` at `v` and at `u` and the band additivity `setIntegral_Ioc_prod_add`. -/
 theorem clm_band_energy (hBmeas : ∀ t, Measurable (B t)) {T : ℝ≥0}
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
     ∫ ω, ((itoProcessCLM hB T v hBmeas φ : Ω → ℝ) ω
         - (itoProcessCLM hB T u hBmeas φ : Ω → ℝ) ω) ^ 2 ∂μ
       = ∫ z in Set.Ioc u v ×ˢ (Set.univ : Set Ω), (φ z) ^ 2
-          ∂(trimMeasure_T (μ := μ) T hBmeas) := by
+          ∂(trimMeasure (μ := μ) T hBmeas) := by
   set A := itoProcessCLM hB T v hBmeas φ
   set b := itoProcessCLM hB T u hBmeas φ
   have hm := (natFiltration hBmeas).le u
   have hmart : μ[(A : Ω → ℝ) | natFiltration hBmeas u] =ᵐ[μ] (b : Ω → ℝ) :=
     itoIntegralProcessGen_isMartingale hB T hBmeas φ huv
   have hnrm (w : ℝ≥0) (hw : w ≤ T) : ∫ ω, (itoProcessCLM hB T w hBmeas φ : Ω → ℝ) ω ^ 2 ∂μ
-      = ∫ z in Set.Ioc 0 w ×ˢ (Set.univ : Set Ω), (φ z) ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) :=
+      = ∫ z in Set.Ioc 0 w ×ˢ (Set.univ : Set Ω), (φ z) ^ 2 ∂(trimMeasure (μ := μ) T hBmeas) :=
     (lp_two_norm_sq _).symm.trans (itoProcessCLM_norm_sq hB hw hBmeas φ)
   have hpyth : ∫ ω, ((A : Ω → ℝ) ω - μ[(A : Ω → ℝ) | natFiltration hBmeas u] ω) ^ 2 ∂μ
       = ∫ ω, (A : Ω → ℝ) ω ^ 2 ∂μ - ∫ ω, μ[(A : Ω → ℝ) | natFiltration hBmeas u] ω ^ 2 ∂μ := by

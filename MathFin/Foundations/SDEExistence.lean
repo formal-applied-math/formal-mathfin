@@ -11,7 +11,7 @@ public import MathFin.Foundations.DriftProcessPredictable
 
 The strong solution of `dX = b(X)dt + σ(X)dB`, `X₀ = η` is the fixed point of the Picard iterate
 `Φ(X)_t = η + ∫₀ᵗ b(X_s) ds + ∫₀ᵗ σ(X_s) dB_s`, built as a self-map of the predictable `L²` space
-`E := Lp ℝ 2 (trimMeasure_T T)`. Both analytic terms already land back in `E` — the drift as a
+`E := Lp ℝ 2 (trimMeasure T)`. Both analytic terms already land back in `E` — the drift as a
 genuine CLM `driftProcessAssembled : E →L[ℝ] E`, the Itô term as the element-valued linear map
 `itoProcessAssembled : E → E` (built from a continuous modification, so *not* a CLM — its linearity
 is re-established a.e.). This file wires them into the Picard map, proves the contraction estimate
@@ -37,6 +37,32 @@ survives the outer time-integral). The `driftProcessAssembled_norm_le` (`≤ T�
 The remaining bridge to the benchmark `sc-thm-8.2.5` (its `ℝ`-time, pointwise-per-`t`,
 `intervalIntegral`-drift, opaque-`Iσ` shape) and the all-`T` extension (a Bielecki weighted
 norm) are the next steps.
+
+## Main definitions
+
+* `lipComp`: the composition `f ∘ X ∈ E` of a Lipschitz `f : ℝ → ℝ` with a process `X` in the
+  predictable `L²` space `E`, centred at `f 0`.
+* `picardMap`: the Picard iterate
+  `Φ(X) = η + driftProcessAssembled(b∘X) + itoProcessAssembled(σ∘X)`, a self-map of `E`.
+* `picardSolution`: the fixed point of `picardMap` given by Banach's theorem when it is a
+  contraction.
+
+## Main results
+
+* `lipComp_sub_norm_le`: `lipComp` is `L`-Lipschitz in `X` for the `E`-norm.
+* `picardMap_contraction`: `‖Φ(X) − Φ(Y)‖ ≤ (T·L_b + √T·L_σ)·‖X − Y‖`.
+* `picardMap_contractingWith`: `picardMap` is a contraction on `E` once `T·L_b + √T·L_σ < 1`.
+* `picardMap_exists_unique_fixedPoint`: in that regime `picardSolution` is a fixed point of the
+  Picard map and the only one in `E`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Thm 8.2.5
+
+## Tags
+
+stochastic differential equation, strong solution, Picard iteration, Banach fixed point,
+Lipschitz coefficients, existence and uniqueness, MSC 60H10, MSC 60H05
 -/
 
 @[expose] public section
@@ -65,8 +91,8 @@ predictable process `X ∈ E`: `f(0)·1 + (f − f 0)∘X`. The centered part la
 added back as a genuine element of `E` (finite measure). -/
 noncomputable def lipComp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (f : ℝ → ℝ) (L : ℝ≥0) (hf : LipschitzWith L f)
-    (X : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+    (X : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
+    Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) :=
   Lp.const 2 _ (f 0) + (lipschitz_sub_const hf).compLp (by simp) X
 
 /-- **The composition is `L`-Lipschitz in `X`** — the constant `f 0` cancels in the
@@ -74,7 +100,7 @@ difference, and `LipschitzWith.norm_compLp_sub_le` bounds the centered part. Thi
 per-coefficient Lipschitz factor of the Picard contraction. -/
 theorem lipComp_sub_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     {f : ℝ → ℝ} {L : ℝ≥0} (hf : LipschitzWith L f)
-    (X Y : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (X Y : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     ‖lipComp T hBmeas f L hf X - lipComp T hBmeas f L hf Y‖ ≤ (L : ℝ) * ‖X - Y‖ := by
   rw [lipComp, lipComp, add_sub_add_left_eq_sub]
   exact (lipschitz_sub_const hf).norm_compLp_sub_le (by simp) X Y
@@ -84,9 +110,9 @@ a self-map of `E`. Its fixed point is the strong solution of the SDE. -/
 noncomputable def picardMap (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     {b σ : ℝ → ℝ} {Lb Lσ : ℝ≥0} (hb : LipschitzWith Lb b) (hσ : LipschitzWith Lσ σ)
-    (η_E : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
-    (X : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+    (η_E : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
+    (X : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
+    Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) :=
   η_E + driftProcessAssembled T hBmeas (lipComp T hBmeas b Lb hb X)
       + itoProcessAssembled hB T hBmeas hBcont (lipComp T hBmeas σ Lσ hσ X)
 
@@ -97,7 +123,7 @@ For `T` small this constant is `< 1`, giving a contraction. -/
 theorem picardMap_contraction (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     {b σ : ℝ → ℝ} {Lb Lσ : ℝ≥0} (hb : LipschitzWith Lb b) (hσ : LipschitzWith Lσ σ)
-    (η_E X Y : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (η_E X Y : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     ‖picardMap hB T hBmeas hBcont hb hσ η_E X - picardMap hB T hBmeas hBcont hb hσ η_E Y‖
       ≤ ((T : ℝ) * Lb + Real.sqrt (T : ℝ) * Lσ) * ‖X - Y‖ := by
   have hdrift : driftProcessAssembled (μ := μ) T hBmeas (lipComp T hBmeas b Lb hb X)
@@ -142,7 +168,7 @@ condition on the horizon `T` given the Lipschitz constants). Packages
 theorem picardMap_contractingWith (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     {b σ : ℝ → ℝ} {Lb Lσ : ℝ≥0} (hb : LipschitzWith Lb b) (hσ : LipschitzWith Lσ σ)
-    (η_E : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+    (η_E : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
     (hc : (T : ℝ) * Lb + Real.sqrt (T : ℝ) * Lσ < 1) :
     ContractingWith (Real.toNNReal ((T : ℝ) * Lb + Real.sqrt (T : ℝ) * Lσ))
       (picardMap hB T hBmeas hBcont hb hσ η_E) := by
@@ -158,9 +184,9 @@ complete, nonempty metric space). -/
 noncomputable def picardSolution (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     {b σ : ℝ → ℝ} {Lb Lσ : ℝ≥0} (hb : LipschitzWith Lb b) (hσ : LipschitzWith Lσ σ)
-    (η_E : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+    (η_E : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
     (hc : (T : ℝ) * Lb + Real.sqrt (T : ℝ) * Lσ < 1) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+    Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) :=
   (picardMap_contractingWith hB T hBmeas hBcont hb hσ η_E hc).fixedPoint _
 
 /-- **Existence + uniqueness** of the strong solution: `picardSolution` is a fixed point of
@@ -169,7 +195,7 @@ strong solution in `E` under the contraction condition. -/
 theorem picardMap_exists_unique_fixedPoint (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     {b σ : ℝ → ℝ} {Lb Lσ : ℝ≥0} (hb : LipschitzWith Lb b) (hσ : LipschitzWith Lσ σ)
-    (η_E : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+    (η_E : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
     (hc : (T : ℝ) * Lb + Real.sqrt (T : ℝ) * Lσ < 1) :
     ∃! X, picardMap hB T hBmeas hBcont hb hσ η_E X = X := by
   refine ⟨picardSolution hB T hBmeas hBcont hb hσ η_E hc, ?_, fun Y hY ↦ ?_⟩

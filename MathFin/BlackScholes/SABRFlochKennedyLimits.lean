@@ -46,6 +46,33 @@ What is *not* formalized: the full Le Floc'h–Kennedy vol (the `ω₀` correcti
 the expansion from the SABR dynamics; and how well it approximates the true SABR implied vol.
 The definitions below are the closed forms as printed, so at `β = 1` / `ν = 0` they take Lean's
 junk values (`x / 0 = 0`); the theorems are about the limits, not those values.
+
+## Main definitions
+
+* `sabrFKY`: the normalizing transform `y(k) = −(F^{1−β} − k^{1−β})/(1−β)`, as printed.
+* `sabrFKDint`: the distance `Dint` as a function of `y`, as printed.
+* `sabrFKOmega0`: the leading-order volatility `ω₀ = log(F/k)/Dint`.
+
+## Main results
+
+* `tendsto_sabrFKY_beta_one`: for `F, k > 0`, `y(k) → −log(F/k)` as `β → 1` with `β ≠ 1`.
+* `sabrFKDint_eq_sabrX`: `Dint = ν⁻¹ · x(−νy/α)`, with `x` Hagan's function `sabrX`.
+* `tendsto_sabrFKDint_nu_zero`: for `ρ ≠ 1`, `Dint → −y/α` as `ν → 0` with `ν ≠ 0`.
+* `tendsto_sabrFKOmega0_nu_zero`: for `α ≠ 0`, `ρ ≠ 1` and `y ≠ 0`, `ω₀ → −α·log(F/k)/y` as
+  `ν → 0` with `ν ≠ 0`.
+
+## References
+
+* [Hagan et al., *Managing smile risk*][HaganKumarLesniewskiWoodward2002]
+* [F. Le Floc'h and G. Kennedy, *Explicit SABR calibration through simple
+  expansions*][LeFlochKennedy2014]
+* [The QuantLib contributors, *QuantLib*][QuantLib], ql/termstructures/volatility/sabr.cpp
+  (SabrFlochKennedyVolatility)
+
+## Tags
+
+SABR model, Le Floc'h–Kennedy, implied volatility expansion, lognormal SABR, vol-of-vol limit,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -59,15 +59,28 @@ cash-flow balance `cdsFairSpread_TV_cash_flow_balance`
 annuity-positivity discharged by `cdsAnnuity_pos`; its own docstring discloses
 this.
 
-## Result
+## Main definitions
+
+* `riskyAnnuity`: the risky annuity `∫₀ᵀ e^{−rs} e^{−lam·s} ds` at constant intensity `lam` and
+  discount rate `r`.
+* `coxDefaultTime`: the Cox default time, a unit-exponential clock inverted through the cumulative
+  hazard `Λ`.
+* `cdsAnnuity`: the risky annuity `∫₀ᵀ e^{−rs} S(s) ds` under deterministic intensity `h`.
+* `cdsLosses`: the default-density integral `∫₀ᵀ e^{−rs} h(s) S(s) ds` under deterministic
+  intensity `h`.
+* `premiumLeg`, `protectionLeg`: the CDS premium leg at spread `c` and protection leg at
+  recovery `R`.
+* `cdsFairSpreadTV`: the time-varying fair spread `(1−R) · losses / annuity`.
+
+## Main results
 
 Public definitions: `riskyAnnuity`, `coxDefaultTime`, `cdsAnnuity`, `cdsLosses`,
 `premiumLeg`, `protectionLeg`, `cdsFairSpreadTV`.
 
 Public lemmas (all in `namespace MathFin.Cox`):
 
-* `defaultSurvival_const`, `defaultTimeLaw_const` — the first-arrival laws in
-  credit variables;
+* `defaultSurvival_const` — the first-arrival survival law in credit variables (the law of
+  the default time itself is `PoissonInterarrival.map_firstArrival_eq_expMeasure`);
 * `riskyAnnuity_eq`, `riskyAnnuity_pos`, `protectionLeg_const`,
   `cdsLegs_balance_const`, `cdsFairSpread_const_balances` — the
   constant-intensity legs and balance;
@@ -84,9 +97,14 @@ Public lemmas (all in `namespace MathFin.Cox`):
 
 Supporting lemmas (`hazardSurvival_eq_exp`, `cumHazard_zero`,
 `cumHazard_nonneg`, `cumHazard_deriv`, `cumHazard_continuous`,
-`expClock_null_neg`, `expClock_nonneg_ae`, `expClock_Iic`, `expClock_Ioi`,
 `invFun_on_halfline`, `coxDefaultTime_survSet`, `coxDefaultTime_cdfSet`,
-`hazardSurvival_continuous`) are `private`.
+`hazardSurvival_continuous`) are `private`; the unit-exponential-clock facts
+`expClock_null_neg`, `expClock_nonneg_ae`, `expClock_Iic`, `expClock_Ioi` are public.
+
+## Tags
+
+Cox process, intensity model, default time, reduced-form credit, hazard rate, CDS fair spread,
+doubly stochastic, MSC 91G40, MSC 60G55, JEL G12
 -/
 
 @[expose] public section
@@ -116,21 +134,6 @@ theorem defaultSurvival_const {rate : ℝ≥0} {N : ℝ → Ω → ℕ}
     μ {ω | t < τ ω} = ENNReal.ofReal (rexp (-((rate : ℝ) * t))) := by
   rw [hτfirst ht]
   exact PoissonInterarrival.survival_eq hmeas hzero hincr ht
-
-/-- **Law of the default time under constant intensity**: the first arrival is
-exponentially distributed — `τ ∼ Exp(rate)`. Consumes
-`PoissonInterarrival.map_firstArrival_eq_expMeasure`. -/
-theorem defaultTimeLaw_const [IsProbabilityMeasure μ] {rate : ℝ≥0} (hrate : 0 < rate)
-    {N : ℝ → Ω → ℕ}
-    (hmeas : ∀ t, Measurable (N t)) (hzero : ∀ ω, N 0 ω = 0)
-    (hincr : ∀ ⦃s t : ℝ⦄, 0 ≤ s → (hst : s ≤ t) →
-      Measure.map (fun ω ↦ N t ω - N s ω) μ
-        = poissonMeasure (rate * ⟨t - s, sub_nonneg.mpr hst⟩))
-    {τ : Ω → ℝ} (hτmeas : Measurable τ) (hτnn : ∀ ω, 0 ≤ τ ω)
-    (hτfirst : ∀ ⦃t : ℝ⦄, 0 ≤ t → {ω | t < τ ω} = {ω | N t ω = 0}) :
-    μ.map τ = expMeasure rate :=
-  PoissonInterarrival.map_firstArrival_eq_expMeasure hrate hmeas hzero hincr
-    hτmeas hτnn hτfirst
 
 end FirstArrival
 
@@ -274,7 +277,7 @@ theorem cumHazard_surjOn_Ici {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s
 
 /-- **CDF of the unit exponential clock**: for `ν = Exp(1)` and `x ≥ 0`,
 `ν(−∞, x] = 1 − e^{−x}`. -/
-private theorem expClock_Iic {x : ℝ} (hx : 0 ≤ x) :
+theorem expClock_Iic {x : ℝ} (hx : 0 ≤ x) :
     expMeasure 1 (Set.Iic x) = ENNReal.ofReal (1 - rexp (-x)) := by
   have : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
   rw [← ENNReal.ofReal_toReal (measure_ne_top _ _),
@@ -285,7 +288,7 @@ private theorem expClock_Iic {x : ℝ} (hx : 0 ≤ x) :
 
 /-- **Tail of the unit exponential clock**: for `ν = Exp(1)` and `x ≥ 0`,
 `ν(x, ∞) = e^{−x}`. -/
-private theorem expClock_Ioi {x : ℝ} (hx : 0 ≤ x) :
+theorem expClock_Ioi {x : ℝ} (hx : 0 ≤ x) :
     expMeasure 1 (Set.Ioi x) = ENNReal.ofReal (rexp (-x)) := by
   have : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
   have hset : Set.Ioi x = (Set.Iic x)ᶜ := by
@@ -301,7 +304,7 @@ private theorem expClock_Ioi {x : ℝ} (hx : 0 ≤ x) :
   ring
 
 /-- The unit exponential clock is almost surely nonnegative. -/
-private theorem expClock_null_neg {ξ : Ω → ℝ} (hξmeas : Measurable ξ)
+theorem expClock_null_neg {ξ : Ω → ℝ} (hξmeas : Measurable ξ)
     (hξlaw : Measure.map ξ μ = expMeasure 1) : μ {ω | ξ ω < 0} = 0 := by
   have : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
   rw [show {ω | ξ ω < 0} = ξ ⁻¹' Set.Iio 0 from rfl,
@@ -313,7 +316,7 @@ private theorem expClock_null_neg {ξ : Ω → ℝ} (hξmeas : Measurable ξ)
   norm_num
 
 /-- Almost-sure nonnegativity of the clock. -/
-private theorem expClock_nonneg_ae {ξ : Ω → ℝ} (hξmeas : Measurable ξ)
+theorem expClock_nonneg_ae {ξ : Ω → ℝ} (hξmeas : Measurable ξ)
     (hξlaw : Measure.map ξ μ = expMeasure 1) : ∀ᵐ ω ∂μ, 0 ≤ ξ ω := by
   rw [ae_iff]
   simp only [not_le]

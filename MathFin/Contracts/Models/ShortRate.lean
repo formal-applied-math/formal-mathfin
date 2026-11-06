@@ -69,6 +69,20 @@ Berthold and Elsman (2015) and Annenkov (2018).
 No code is copied from `lean_contracts`; every definition and proof here is
 written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 §6 for the full credit line.
+
+## References
+
+* [Andersen and Piterbarg, *Interest Rate Modeling*][AndersenPiterbarg2010], ch. 10
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  sec. 1.2; sec. 3.2.1; sec. 3.3
+* [J. Hull and A. White, *Pricing interest-rate-derivative securities*][HullWhite1990]
+* [O. Vasicek, *An equilibrium characterization of the term structure*][Vasicek1977]
+
+## Tags
+
+stochastic discount factor, zero curve, coupon bond pricing, Vasicek model, Hull–White model,
+Gaussian short rate, contract valuation, MSC 91G30, MSC 91G20, JEL E43
 -/
 
 @[expose] public section

@@ -35,6 +35,25 @@ martingale (`martingale_stoppedProcess_of_ae_eq`).
 
 Not here: the local martingale for the unaugmented natural filtration (the repaired
 representative is not adapted to it), and `T = ∞`.
+
+## Main results
+
+* `martingale_itoLocalMod`: the continuous Itô integral, frozen at `T` and zeroed off a co-null
+  set of the null σ-algebra, is a martingale for the null-augmented Brownian filtration.
+* `exists_continuous_localMartingale_localItoIntegral`: for a continuous adapted integrand there
+  is a process, almost surely equal to `localItoIntegral` at every `t ≤ T`, with continuous paths
+  that is a local martingale localised by the exit times of the integrand.
+
+## References
+
+* [I. Karatzas and S. E. Shreve, *Brownian Motion and Stochastic Calculus*][KaratzasShreve1991],
+  Section 3.2.D
+* [Revuz and Yor, *Continuous Martingales and Brownian Motion*][RevuzYor], Chapter IV, §2
+
+## Tags
+
+local martingale, Itô integral, stochastic integral, exit time, localizing sequence,
+null-augmented filtration, MSC 60G44, MSC 60H05, MSC 60G40
 -/
 
 @[expose] public section
@@ -57,7 +76,7 @@ include hB hBcont in
 continuous Itô integral is predictable (`itoContinuousMod_isStronglyPredictable`) and `G` is a set
 of the augmentation; its martingale identity is `condExp_itoLocalMod`. -/
 theorem martingale_itoLocalMod {G : Set Ω} (hG : MeasurableSet[nullsAlg mΩ μ] G) (hGc : μ Gᶜ = 0)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     Martingale (fun t ω ↦ itoLocalMod G T t hBmeas φ ω) (augFiltration (μ := μ) hBmeas) μ :=
   ⟨fun i ↦ (((itoContinuousMod_isStronglyPredictable hB T hBmeas hBcont φ).stronglyAdapted
       (min i T)).mono (((natFiltration hBmeas).mono (min_le_left i T)).trans le_sup_left)).indicator

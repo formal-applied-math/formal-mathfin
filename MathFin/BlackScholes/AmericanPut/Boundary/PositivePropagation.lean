@@ -16,9 +16,19 @@ decaying polynomial bump. Weak comparison transports its positivity to the
 interior at later times. Moving-line coordinates allow the patch to travel.
 No strong maximum principle is assumed.
 
-## Result
+## Main results
 
-Public entry points include `positive_rectangle_of_positive_bottom`, `positive_straight_tube`.
+* `positive_rectangle_of_positive_bottom`: let `U` be continuous on `[0, L] × [a, T]` and `C²`
+  inside with `U_xx + D U_x ≤ U_t` and `|D| ≤ M`. If `U > 0` on the bottom edge and `U ≥ 0` on
+  both lateral edges, then `U > 0` at every `(x, t)` with `0 < x < L` and `a ≤ t ≤ T`.
+* `positive_straight_tube`: the same positivity conclusion along the tube
+  `x ↦ x + (d − c t)`, where `U` solves the equation `U_t = U_xx + D U_x` there with
+  `|D| ≤ M`, is positive on the bottom edge and nonnegative on the tube.
+
+## Tags
+
+positivity propagation, parabolic tube, weak comparison, positive patch, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

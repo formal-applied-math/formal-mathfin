@@ -13,11 +13,17 @@ public import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
 Right continuation and adjoining ambient-measurable null sets preserve the
 supermartingale property. Completing the ambient measure space is separate.
 
-## Result
+## Main results
 
-Public entry points include `supermartingale_of_setIntegral_ge` and
-`bounded_continuous_supermartingale_rightCont`; the null augmentation itself is
-`MathFin.ItoLocalMartingale.nullAugmentation`.
+* `supermartingale_of_setIntegral_ge`: an adapted integrable process with
+  `∫_s U j ≤ ∫_s U i` for `i ≤ j` and `s ∈ 𝓕 i` is a supermartingale.
+* `bounded_continuous_supermartingale_rightCont`: a supermartingale with continuous paths and
+  a uniform bound is also a supermartingale for the right-continuous filtration `𝓕.rightCont`.
+
+## Tags
+
+right continuation, null augmentation, supermartingale, filtration enlargement, usual conditions,
+MSC 60G40, MSC 60G44
 -/
 
 @[expose] public section

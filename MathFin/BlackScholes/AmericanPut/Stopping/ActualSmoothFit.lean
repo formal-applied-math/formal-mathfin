@@ -13,11 +13,22 @@ Optimality supplies an upper bound on the price quotient using the same rule
 at the boundary spot. Payoff domination supplies the lower bound. The two
 quotients have the same limit, proving the actual boundary derivative.
 
-## Result
+## Main results
 
-Public entry points include `canonicalPrice_slope_le_contactSlope`,
-`canonicalPrice_slope_ge_payoff`, `canonicalPrice_slope_tendsto_boundary`,
-`canonicalPrice_smooth_fit`.
+* `canonicalPrice_slope_le_contactSlope`: for `0 ≤ k` and `b < x`, the spatial slope of the actual
+  price between `b` and `x` is at most the expectation of `actualContactSlope`.
+* `canonicalPrice_slope_ge_payoff`: for `0 < k`, `0 ≤ h ≤ k`, `0 < t` and `x` above the log
+  boundary, the payoff slope from the boundary to `x` is at most the price slope.
+* `canonicalPrice_slope_tendsto_boundary`: for `0 < k` and `0 ≤ h ≤ k`, the price slope from
+  the log boundary tends to `-exp (canonicalLogBoundary k h T)` as `x` decreases to it.
+* `canonicalPrice_smooth_fit`, `zeroDividend_canonicalPrice_smooth_fit`: for `0 < k` and `0 < t`
+  (with `0 ≤ h ≤ k`, or no dividend), the price has right derivative
+  `-exp (canonicalLogBoundary k h t)` at the log boundary.
+
+## Tags
+
+smooth fit, boundary derivative, price quotient, optimal stopping, American put, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

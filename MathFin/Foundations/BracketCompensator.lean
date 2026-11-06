@@ -45,6 +45,30 @@ with a limit of sums along partitions. `bracketProcess` is adapted and a.e. nond
 not claimed continuous, and `M² − ⟨M⟩` is delivered as the conditional identity, not as a bundled
 `Martingale` structure (the `Lp`-valued `M` supplies only a.e. adaptedness, which `Martingale`
 does not accept — see `MarketCompletenessInPrice.pricePathCondExp` for the standing workaround).
+
+## Main definitions
+
+* `bracketProcess`: the bracket as a process, `⟨M⟩_t = ∫₀^{t∧T} φ_u(ω)² du`, clamped at `T`.
+
+## Main results
+
+* `measurable_bracketRep`: the bracket increment over `(a, b]` is measurable for `𝓕_b`.
+* `bracketProcess_adapted`: the bracket process is adapted.
+* `bracketProcess_mono`: the bracket process is almost surely nondecreasing on `[0, T]`.
+* `condExp_sq_sub_bracket`: for `M = φ●B` and `a ≤ b ≤ T`,
+  `μ[M_b² − ⟨M⟩_b | 𝓕_a] =ᵐ M_a² − ⟨M⟩_a`, the martingale identity for `M² − ⟨M⟩` on `[0, T]`
+  (no `Martingale` statement is formed).
+
+## References
+
+* [I. Karatzas and S. E. Shreve, *Brownian Motion and Stochastic Calculus*][KaratzasShreve1991], 1.5
+  / 3.2
+* [Revuz and Yor, *Continuous Martingales and Brownian Motion*][RevuzYor], IV.1
+
+## Tags
+
+quadratic variation, predictable compensator, bracket process, square-integrable martingale,
+Doob–Meyer, MSC 60G44, MSC 60H05
 -/
 
 @[expose] public section
@@ -129,7 +153,7 @@ omit [IsProbabilityMeasure μ] in
 /-- The squared representative clamped to the band is `Borel(ℝ≥0) ⊗ 𝓕_b`-measurable: the trace
 statement, read through preimages of the indicator. -/
 private theorem measurable_bandSqClamped (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (a b : ℝ≥0) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (a b : ℝ≥0) :
     Measurable[bandAlg (mΩ := mΩ) hBmeas b]
       ((Set.Ioc a b ×ˢ (Set.univ : Set Ω)).indicator
         fun z ↦ ((φ : ℝ≥0 × Ω → ℝ) z) ^ 2) := by
@@ -157,7 +181,7 @@ private theorem measurable_bandSqClamped (T : ℝ≥0) (hBmeas : ∀ t, Measurab
 /-- Integrating the time variable out of a `Borel(ℝ≥0) ⊗ m`-measurable integrand leaves an
 `m`-measurable function of the sample. Stated for a bare `m` on a bare type, so that no `μ`- or
 `mΩ`-typed term is in scope while the ambient instance is swapped. -/
-private theorem measurable_integral_section {Ω' : Type*} (m : MeasurableSpace Ω')
+theorem measurable_integral_section {Ω' : Type*} (m : MeasurableSpace Ω')
     (g : ℝ≥0 × Ω' → ℝ)
     (hg : Measurable[@Prod.instMeasurableSpace ℝ≥0 Ω' _ m] g) :
     Measurable[m] fun ω ↦ ∫ u, g (u, ω) ∂ItoIntegralL2.timeMeasure := by
@@ -169,7 +193,7 @@ omit [IsProbabilityMeasure μ] in
 where it is product-measurable at `b` (`measurable_bandSqClamped`), then integrate the time
 variable out. No hypothesis relating `b` to `T`: the band is what it is. -/
 theorem measurable_bracketRep (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (a b : ℝ≥0) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (a b : ℝ≥0) :
     Measurable[natFiltration hBmeas b] (bracketRep (μ := μ) T hBmeas φ a b) := by
   have hfun : bracketRep (μ := μ) T hBmeas φ a b
       = fun ω ↦ ∫ u, (Set.Ioc a b ×ˢ (Set.univ : Set Ω)).indicator
@@ -195,26 +219,26 @@ theorem measurable_bracketRep (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 /-- **The bracket as a process**: `⟨M⟩_t = ∫₀^{t∧T} φ_u(ω)² du`. Clamped at `T` because the
 representative of `φ` carries no information past the horizon. -/
 noncomputable def bracketProcess (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (t : ℝ≥0) (ω : Ω) : ℝ :=
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (t : ℝ≥0) (ω : Ω) : ℝ :=
   bracketRep (μ := μ) T hBmeas φ 0 (min t T) ω
 
 omit [IsProbabilityMeasure μ] in
 /-- `bracketProcess` unfolded — the clamped bracket increment from the origin. -/
 theorem bracketProcess_def (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (t : ℝ≥0) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (t : ℝ≥0) :
     bracketProcess (μ := μ) T hBmeas φ t = bracketRep (μ := μ) T hBmeas φ 0 (min t T) := rfl
 
 omit [IsProbabilityMeasure μ] in
 /-- On `[0,T]` the process is the bracket increment from the origin. -/
 theorem bracketProcess_eq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {t : ℝ≥0} (htT : t ≤ T) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {t : ℝ≥0} (htT : t ≤ T) :
     bracketProcess (μ := μ) T hBmeas φ t = bracketRep (μ := μ) T hBmeas φ 0 t := by
   rw [bracketProcess_def, min_eq_left htT]
 
 omit [IsProbabilityMeasure μ] in
 /-- **The bracket process is adapted** — the point of this file's first half. -/
 theorem bracketProcess_adapted (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     Adapted (natFiltration hBmeas) (bracketProcess (μ := μ) T hBmeas φ) := by
   intro t
   exact (measurable_bracketRep T hBmeas φ 0 (min t T)).mono
@@ -223,7 +247,7 @@ theorem bracketProcess_adapted (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 omit [IsProbabilityMeasure μ] in
 /-- The bracket process starts at zero. -/
 @[simp] theorem bracketProcess_zero (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (ω : Ω) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (ω : Ω) :
     bracketProcess (μ := μ) T hBmeas φ 0 ω = 0 := by
   change bracketRep (μ := μ) T hBmeas φ 0 (min 0 T) ω = 0
   rw [min_eq_left (show (0 : ℝ≥0) ≤ T from bot_le), bracketRep, Set.Ioc_self,
@@ -232,7 +256,7 @@ omit [IsProbabilityMeasure μ] in
 /-- The bracket process is a.e. nondecreasing: its increments are the nonnegative
 `bracketRep`. -/
 theorem bracketProcess_mono (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {s t : ℝ≥0} (hst : s ≤ t) (htT : t ≤ T) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {s t : ℝ≥0} (hst : s ≤ t) (htT : t ≤ T) :
     ∀ᵐ ω ∂μ, bracketProcess (μ := μ) T hBmeas φ s ω
       ≤ bracketProcess (μ := μ) T hBmeas φ t ω := by
   rw [bracketProcess_eq T hBmeas φ (hst.trans htT), bracketProcess_eq T hBmeas φ htT]
@@ -254,7 +278,7 @@ off the conditional expectation only because `⟨M⟩_a` is now **adapted**
 (`measurable_bracketRep`) — the step this file's first half exists for. -/
 theorem condExp_sq_sub_bracket (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) :
     (μ[fun ω ↦ (⇑(itoProcessCLM hB T b hBmeas φ) ω) ^ 2
         - bracketProcess (μ := μ) T hBmeas φ b ω | natFiltration hBmeas a])
       =ᵐ[μ] fun ω ↦ (⇑(itoProcessCLM hB T a hBmeas φ) ω) ^ 2

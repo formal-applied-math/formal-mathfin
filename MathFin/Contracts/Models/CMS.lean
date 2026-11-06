@@ -32,8 +32,8 @@ and to the annuity, as `BondModel` does for the forward rate of a caplet.
 ## What is not here
 
 The swap rate is tied to the bond prices by a hypothesis (`rate_eq`) and the bond prices by
-`hasBondPrice`; no term-structure model is asserted. Payments at `T₀` only: a CMS rate paid at a later
-date `Tₚ` needs the change of measure to the `Tₚ`-forward measure.
+`hasBondPrice`; no term-structure model is asserted. Payments at `T₀` only: a CMS rate paid at a
+later date `Tₚ` needs the change of measure to the `Tₚ`-forward measure.
 
 ## Main definitions
 
@@ -44,6 +44,19 @@ date `Tₚ` needs the change of measure to the `Tₚ`-forward measure.
 * `SwapModel.integral_annuity_mul`,
   `SwapModel.isProbabilityMeasure`, `valueDisc_pay_swapRate`, `valueDisc_cmsCaplet`,
   `valueDisc_cmsFloorlet`, `valueDisc_cmsSwaplet`, `SwapModel.integral_swapRate`.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  sections 1.6 and 13.8
+* [P. S. Hagan, *Convexity conundrums: pricing CMS swaps, caps, and floors*][Hagan2003]
+* [Musiela and Rutkowski, *Martingale Methods in Financial Modelling*][MusielaRutkowski], ch. 13
+
+## Tags
+
+constant maturity swap, CMS caplet, annuity measure, swap measure, par swap rate, swaption,
+MSC 91G30, JEL G12, JEL E43
 -/
 
 @[expose] public section
@@ -124,7 +137,8 @@ omit [IsProbabilityMeasure Q] in
 theorem SwapModel.integrable_annuity_mul (h : SwapModel Q 𝓕 D X σ b T n δ) :
     Integrable (fun ω ↦ CMS.annuityRandom δ (swapCurve X b (T 0)) (Finset.Icc 1 n) ω
       * D (T 0) ω) Q := by
-  have := (integrable_finsetSum _ fun i hi ↦ (h.hasBondPrice i hi).integrable_discount_mul).const_mul δ
+  have := (integrable_finsetSum _ fun i hi ↦
+      (h.hasBondPrice i hi).integrable_discount_mul).const_mul δ
   refine this.congr (ae_of_all _ fun ω ↦ ?_)
   simp only [CMS.annuityRandom, annuity, swapCurve]
   rw [mul_assoc, Finset.sum_mul]
@@ -141,7 +155,8 @@ theorem SwapModel.integral_annuity_mul (h : SwapModel Q 𝓕 D X σ b T n δ) :
     rw [mul_assoc, Finset.sum_mul]
     exact congrArg _ (Finset.sum_congr rfl fun i _ ↦ mul_comm _ _)
   simp_rw [e]
-  rw [integral_const_mul, integral_finsetSum _ fun i hi ↦ (h.hasBondPrice i hi).integrable_discount_mul,
+  rw [integral_const_mul, integral_finsetSum _ fun i hi ↦
+      (h.hasBondPrice i hi).integrable_discount_mul,
     annuity]
   exact congrArg _ (Finset.sum_congr rfl fun i hi ↦ (h.hasBondPrice i hi).integral_discount)
 
@@ -330,9 +345,9 @@ theorem SwapModel.valueDisc_cmsSwaplet_eq (h : SwapModel Q 𝓕 D X σ b T n δ)
 
 /-- **The convexity adjustment of a CMS swaplet paid at its fixing date is nonnegative.** If the
 bond prices other than `P(T₀, Tₙ)` are known constants, the swap rate is affine in the reciprocal
-annuity, `S = (1 + C)/A − 1/δ` (`C = Σ c i`, `1 + C ≥ 0`), so `Cov^A(S, 1/A) = (1 + C) Var^A(1/A)
-≥ 0`: the swaplet is worth at least `P(0, T₀)` times the forward swap rate. The reciprocal annuity
-is assumed square-integrable under the annuity measure. -/
+annuity, `S = (1 + C)/A − 1/δ` (`C = Σ c i`, `1 + C ≥ 0`), so
+`Cov^A(S, 1/A) = (1 + C) Var^A(1/A) ≥ 0`: the swaplet is worth at least `P(0, T₀)` times the forward
+swap rate. The reciprocal annuity is assumed square-integrable under the annuity measure. -/
 theorem SwapModel.zeroCurve_mul_forwardSwapRate_le_valueDisc_cmsSwaplet
     (h : SwapModel Q 𝓕 D X σ b T n δ)
     (hc : ∀ i ∈ (Finset.Icc 1 n).erase n, ∀ᵐ ω ∂Q, X (b i) (T 0) ω = c i)

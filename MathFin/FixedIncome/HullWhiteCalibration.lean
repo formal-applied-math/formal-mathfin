@@ -64,7 +64,19 @@ pointwise expansion of `θ(s)·B(t−s)` (`integral_theta_B`) — no Fubini anyw
 pointwise congruences, linearity, and one `intervalIntegral.integral_comp_sub_left`
 reflection.
 
-## Result
+## Main definitions
+
+* `deterministic`: the Hull–White deterministic solution
+  `α(t) = e^{−κt}·(r₀ + ∫₀ᵗ e^{κs} θ(s) ds)` with `α(0) = r₀`.
+* `integratedRate`: the Hull–White short rate in its Wiener representation.
+* `integratedMean`, `bondRate`: the deterministic part `∫₀ᵗ α(s) ds` of the integrated short rate,
+  and the integrated short rate `∫₀ᵗ α + σ·∫₀ᵗ g(u) dB_u` in Wiener representation.
+* `bondA`: the affine coefficient `A(T) = exp(−∫₀ᵀ θ(s)·B(T−s) ds + σ²·V(T)/2)`.
+* `theta`: the calibrated drift `θ(t)`, given by the calibration formula.
+* `calibAlpha`: the closed form `β(t) = f(0,t) + (σ²/2κ²)·(1 − e^{−κt})²`, the initial forward
+  plus the convexity correction.
+
+## Main results
 
 Public definitions: `deterministic`, `integratedRate`,
 `integratedMean`, `bondRate`, `bondA`, `theta`, `calibAlpha` (the diffusion kernel
@@ -91,7 +103,19 @@ Public lemmas (all in `namespace MathFin.HullWhite`):
   `calibIntegratedMean`, `reprices_curve` — the calibration `θ`-formula and the
   exact repricing of the initial forward curve.
 
-Supporting lemmas (`forcing_integral_continuous`, `calib_deriv_eq`, `calibVar_key`) are `private`.
+Supporting lemma `calibVar_key` is `private`; the general facts
+`continuous_intervalIntegral_exp_mul_mul` and `calib_deriv_eq` are public.
+
+## References
+
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  §3.3
+* [J. Hull and A. White, *Pricing interest-rate-derivative securities*][HullWhite1990]
+
+## Tags
+
+Hull–White model, curve calibration, extended Vasicek, forward rate curve, mean reversion,
+Gaussian short rate, affine bond price, MSC 91G30, MSC 60H10, JEL E43
 -/
 
 @[expose] public section
@@ -325,7 +349,7 @@ lemma integral_exp_neg_eq_bondB (κ t : ℝ) (hκ : κ ≠ 0) :
 
 /-- Continuity of the partial-solution integral `s ↦ ∫₀ˢ e^{κu}θ(u) du` (from the
 FTC: it is differentiable, hence continuous). -/
-private lemma forcing_integral_continuous (θ : ℝ → ℝ) (hθ : Continuous θ) (κ : ℝ) :
+lemma continuous_intervalIntegral_exp_mul_mul (θ : ℝ → ℝ) (hθ : Continuous θ) (κ : ℝ) :
     Continuous (fun x : ℝ ↦ ∫ u in (0 : ℝ)..x, Real.exp (κ * u) * θ u) := by
   have hI : ∀ s : ℝ, HasDerivAt (fun x : ℝ ↦ ∫ u in (0 : ℝ)..x, Real.exp (κ * u) * θ u)
       (Real.exp (κ * s) * θ s) s := by
@@ -381,7 +405,7 @@ lemma beta_integral (θ : ℝ → ℝ) (hθ : Continuous θ) (κ t : ℝ) (hκ :
         * (∫ u in (0 : ℝ)..s, Real.exp (κ * u) * θ u)) volume 0 t := by
     apply Continuous.intervalIntegrable
     exact (by fun_prop : Continuous (fun x : ℝ ↦ Real.exp (-(κ * x)))).mul
-      (forcing_integral_continuous θ hθ κ)
+      (continuous_intervalIntegral_exp_mul_mul θ hθ κ)
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun s _ ↦ hG s) hint]
   have h0 : (1 / κ) * ((∫ u in (0 : ℝ)..0, θ u)
       - Real.exp (-(κ * 0)) * (∫ u in (0 : ℝ)..0, Real.exp (κ * u) * θ u)) = 0 := by
@@ -444,7 +468,7 @@ lemma integratedMean_eq (θ : ℝ → ℝ) (hθ : Continuous θ) (κ r₀ t : �
         (fun s : ℝ ↦ r₀ * Real.exp (-(κ * s)))).intervalIntegrable 0 t
     · exact ((by fun_prop : Continuous
         (fun x : ℝ ↦ Real.exp (-(κ * x)))).mul
-        (forcing_integral_continuous θ hθ κ)).intervalIntegrable 0 t
+        (continuous_intervalIntegral_exp_mul_mul θ hθ κ)).intervalIntegrable 0 t
   rw [integratedMean, hsplitint, hadd, intervalIntegral.integral_const_mul,
     integral_exp_neg_eq_bondB κ t hκ, hbeta]
 
@@ -535,7 +559,7 @@ noncomputable def calibAlpha (f0 : ℝ → ℝ) (κ σ : ℝ) (t : ℝ) : ℝ :=
 /-- The pointwise algebra behind the calibrated ODE: with `E = e^{−κt}`,
 `(1 − E²) − (1 − E)² = 2E(1 − E)` — the identity that converts the `−2κt`
 exponent of the θ-formula into the `(1 − e^{−κt})²` of β. -/
-private lemma calib_deriv_eq (d v E κ σ : ℝ) (hκ : κ ≠ 0) :
+lemma calib_deriv_eq (d v E κ σ : ℝ) (hκ : κ ≠ 0) :
     d + (σ ^ 2 / (2 * κ ^ 2)) * (2 * (1 - E) * (κ * E))
       = d + κ * v + (σ ^ 2 / (2 * κ)) * (1 - E ^ 2)
         - κ * (v + (σ ^ 2 / (2 * κ ^ 2)) * (1 - E) ^ 2) := by

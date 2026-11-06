@@ -56,6 +56,51 @@ price has a kink at the strike `Se^{bτ}`: `differentiableAt_jumpDiffusionCallPr
 `not_differentiableAt_jumpDiffusionCallPrice_strike`. The one-sided strike derivatives there follow
 from `tendsto_call_spread` and `tendsto_call_spread_left` applied to `Seʸ`; they are not stated for
 `jumpDiffusionCallPrice`.
+
+## Main definitions
+
+* `jumpDiffusionDigitalPrice`: the price function of the cash-or-nothing digital in a
+  jump-diffusion, `e^{−rτ} P(S eʸ > K)` with `Y` the log-return over `τ`
+  (`jumpDiffusionDigitalPrice_eq`).
+
+## Main results
+
+* `hasDerivAt_jumpDiffusionCallPrice_strike`: for `σ ≠ 0`, `τ > 0`, `S > 0` and a finite
+  forward, the call price function has strike derivative minus the digital price.
+* `hasDerivAt_jumpDiffusionDigitalPrice_strike`: for `σ ≠ 0`, `τ > 0`, `S > 0` and `K > 0`, the
+  strike derivative of the digital price is `−e^{−rτ} f(log(K/S))/K`, with `f` the log-return
+  density.
+* `breedenLitzenberger_jumpDiffusion`: under the same hypotheses, the second strike derivative
+  of the call price is `e^{−rτ} f(log(K/S))/K`.
+* `jumpDiffusionDigitalPrice_zero`, `jumpDiffusionDensity_div_eq_lognormalTerminalPDF`: without
+  jumps, at drift `r − σ²/2`, the digital price is `e^{−rτ} Φ(d₂)` and the density of the price
+  is `lognormalTerminalPDF`.
+* `jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice`,
+  `jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF`: with log-jumps
+  `N(log(1 + k) − δ²/2, δ²)`, the digital price (at the compensated drift) is `mertonDigitalPrice`
+  and the price density (at any drift) is `mertonTerminalPDF`.
+* `jumpDiffusionIncrementLaw_zero_map_mul_exp`, `jumpDiffusionIncrementLaw_gaussian_map_mul_exp`:
+  the law of the price `S eʸ` has density `lognormalTerminalPDF` (no jumps) and
+  `mertonTerminalPDF` (Gaussian log-jumps) on `(0, ∞)`.
+* `lintegral_lognormalTerminalPDF_eq_one`, `lintegral_mertonTerminalPDF_eq_one`: both density
+  formulas integrate to one over `(0, ∞)`.
+* `differentiableAt_jumpDiffusionCallPrice_strike_iff`: with a finite forward, the call price is
+  differentiable in the strike iff the log-return law has no atom at `log(K/S)`.
+* `not_differentiableAt_jumpDiffusionCallPrice_strike`: at `σ = 0`, with a finite forward, the
+  call price is not differentiable in the strike at `S e^{bτ}`.
+
+## References
+
+* [Breeden and Litzenberger, *Prices of state-contingent claims implicit in option
+  prices*][BreedenLitzenberger1978]
+* [Cont and Tankov, *Financial Modelling with Jump Processes*][ContTankov2004]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull]
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976]
+
+## Tags
+
+digital option with jumps, Breeden–Litzenberger, jump-diffusion, risk-neutral density, atomless law,
+MSC 91G20, MSC 60G51, JEL G13
 -/
 
 @[expose] public section

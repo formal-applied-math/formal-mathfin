@@ -23,6 +23,21 @@ of `juquadraticengine.cpp` (the fix for a NaN at `r = 0`) computes `ρ = α/h`, 
 (`DR ≥ 1 ∧ DR ≥ DQ` ⇒ European price). The formulas here are transcribed from that file and
 from the source equations; `φ = 1` is a call, `φ = −1` a put.
 
+## Main definitions
+
+* `juAlpha`, `juBeta`, `juH`: `α = 2r/σ²`, `N = 2(r − q)/σ²` and `h = 1 − e^{−rT}`.
+* `juRho`: `ρ = α/h`, extended at `r = 0` by its limit `2/(σ²T)`.
+* `juRoot`, `juLambda`: `√((N − 1)² + 4ρ)` and `q_QD = (−(N − 1) + φ√((N − 1)² + 4ρ))/2`, with
+  `φ = 1` for a call and `φ = −1` for a put.
+* `juVE`: the European price `φ (S e^{−qT} Φ(φd₁) − K e^{−rT} Φ(φd₂))`; `juVE_one` and
+  `juVE_neg_one` identify it with `bsVDiv` and `bsPDiv`.
+* `juHA`: `hA = φ (S* − K) − V_E(S*)`.
+* `juValueRaw`: the pre-fix Ju–Zhong price on the continuation region, with `α/h` computed
+  directly; its coefficients are `juRootRaw`, `juLambdaRaw`, `juLambdaPrime`, `juVEhRaw`,
+  `juBRaw`, `juCRaw`, `juChiRaw`.
+* `juValue`: the post-fix, limit-stable price `V_E(S) + hA (S/S*)^{q_QD} / (1 − χ)`; its
+  coefficients are `juAlphaLambdaPrime`, `juAlphaVEh`, `juB`, `juC`, `juChi`.
+
 ## Main results
 
 * `tendsto_juAlpha_div_juH_zero_rate`, `continuousAt_juRho_zero` — the removable singularity
@@ -61,14 +76,18 @@ from the source equations; `φ = 1` is a call, `φ = −1` a put.
 
 ## References
 
-* N. Ju and R. Zhong, "An approximate formula for pricing American options", *Journal of
-  Derivatives* 7(2) (1999), 31–40.
-* G. Barone-Adesi and R. E. Whaley, "Efficient analytic approximation of American option
-  values", *Journal of Finance* 42(2) (1987), 301–320 (the critical-price equation).
-* M. Li, "Analytical approximations for the critical stock prices of American options: a
-  performance comparison", MPRA Paper 15018 (2009), §II.B, eqs. (27)–(34) with the notation of
+* [N. Ju and R. Zhong, *An approximate formula for pricing American options*][JuZhong1999].
+* [G. Barone-Adesi and R. E. Whaley, *Efficient analytic approximation of American option
+  values*][BaroneAdesiWhaley1987] (the critical-price equation).
+* [M. Li, *Analytical approximations for the critical stock prices of American options: a
+  performance comparison*][Li2009], §II.B, eqs. (27)–(34) with the notation of
   eqs. (1)–(13). This restatement is the one used for the formulas here.
-* QuantLib, `ql/pricingengines/vanilla/juquadraticengine.cpp`.
+* [QuantLib, `ql/pricingengines/vanilla/juquadraticengine.cpp`][QuantLibJuQuadratic].
+
+## Tags
+
+Ju–Zhong, quadratic approximation, American option approximation, Barone-Adesi–Whaley,
+zero interest rate limit, MSC 91G20, MSC 35R35, JEL G13
 -/
 
 @[expose] public section
@@ -361,18 +380,19 @@ theorem tendsto_juValueRaw_zero_rate {φ K q σ T S S₀ : ℝ} {Sk : ℝ → �
 
 /-! ### `V_E` is the Black–Scholes–Merton price -/
 
-private lemma exp_q_mul_exp_rq (q r T : ℝ) :
+/-- Discount factors multiply: `e^{-qT} · e^{-(r-q)T} = e^{-rT}`. -/
+lemma exp_neg_mul_mul_exp_neg_sub_mul (q r T : ℝ) :
     Real.exp (-(q * T)) * Real.exp (-((r - q) * T)) = Real.exp (-(r * T)) := by
   rw [← Real.exp_add]; ring_nf
 
 /-- The call (`φ = 1`) European price is `bsVDiv`. -/
 lemma juVE_one (K q σ T r S : ℝ) : juVE 1 K q σ T r S = bsVDiv K r q σ S T := by
-  rw [juVE, bsVDiv, bsV, ← exp_q_mul_exp_rq q r T]
+  rw [juVE, bsVDiv, bsV, ← exp_neg_mul_mul_exp_neg_sub_mul q r T]
   ring_nf
 
 /-- The put (`φ = −1`) European price is `bsPDiv`. -/
 lemma juVE_neg_one (K q σ T r S : ℝ) : juVE (-1) K q σ T r S = bsPDiv K r q σ S T := by
-  rw [juVE, bsPDiv, bsP, ← exp_q_mul_exp_rq q r T]
+  rw [juVE, bsPDiv, bsP, ← exp_neg_mul_mul_exp_neg_sub_mul q r T]
   simp only [neg_one_mul]
   ring
 
@@ -422,8 +442,7 @@ theorem bawPut_no_positive_root_zero_rate {K q σ T S : ℝ} (hK : 0 < K) (hσ :
     rw [bsPDiv_eq_bsVDiv, bsVDiv]
     simp only [zero_mul, neg_zero, Real.exp_zero, mul_one]
     nlinarith
-  have hΦ : 0 < Phi (bsd1 S K (0 - q) σ T) :=
-    (Phi_nonneg _).trans_lt (strictMono_Phi (sub_one_lt _))
+  have hΦ : 0 < Phi (bsd1 S K (0 - q) σ T) := by positivity
   have hnum : 0 < 1 - Real.exp (-(q * T)) * Phi (-bsd1 S K (0 - q) σ T) := by
     have h0 := Phi_nonneg (-bsd1 S K (0 - q) σ T)
     rw [Phi_neg] at h0 ⊢

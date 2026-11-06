@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -23,10 +24,15 @@ to import the pricing layer — a layering inversion. Hoisting them here lets
 `Call`/`Forward` and the Foundations Gaussian files all build on a common,
 pricing-free base.
 
+## Main definitions
+
+* `Phi`: the standard normal CDF, `Φ(x) = P(Z ≤ x)` for `Z ~ N(0, 1)`, as the real value of
+  `gaussianReal 0 1 (Iic x)`.
+
 ## Main results
 
-* `Phi` — the standard normal CDF `Φ(x) = P(Z ≤ x)`, with `Phi_neg`,
-  `Phi_add_Phi_neg`, `Phi_le_one`, `Phi_eq_integral`.
+* `Phi_neg`, `Phi_add_Phi_neg`, `Phi_le_one`, `Phi_eq_integral` — the reflection `Φ(−x) = 1 − Φ(x)`,
+  the bound `Φ ≤ 1`, and `Φ` as an integral of the density.
 * `setIntegral_gaussianPDFReal_eq_toReal` — the `∫ pdf = N(s).toReal` bridge
   every closed-form Gaussian integral factors through.
 * `gaussianPDFReal_zero_one_neg` — evenness of the standard-normal density
@@ -37,6 +43,11 @@ pricing-free base.
   `∫_{Ioi a} exp(c·z)·pdf = exp(c²/2)·Φ(c − a)` (the asset-payoff primitive).
 * `integral_exp_mul_gaussianPDFReal_univ` — the standard-normal MGF
   `∫ exp(c·z)·pdf = exp(c²/2)`.
+
+## Tags
+
+standard normal CDF, Gaussian tail, moment generating function, completing the square,
+normal distribution function, Black–Scholes building block, MSC 60E05, MSC 60E10, MSC 91G20
 -/
 
 @[expose] public section

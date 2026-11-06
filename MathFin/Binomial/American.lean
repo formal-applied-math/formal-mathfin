@@ -26,6 +26,27 @@ This is the exercise-everywhere case of the tree's one recursion `bermudanPrice`
 European ≤ American ordering (`Binomial/Bermudan.lean`), all apply to it.
 
 This file defines `americanPrice`, with the one-step Bellman equation `americanPrice_succ`.
+
+## Main definitions
+
+* `americanPrice`: the American option price in the binomial tree, the Bellman recursion taking
+  at each step the larger of the intrinsic payoff and the discounted risk-neutral continuation.
+
+## Main results
+
+* `americanPrice_zero`: with no steps remaining, the price is the intrinsic payoff `g S`.
+* `americanPrice_succ`: one-step Bellman equation `V_{n+1}(S) = max(g(S), continuation)`.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 21.5
+* [S. E. Shreve, *Stochastic Calculus for Finance I: The Binomial Asset Pricing Model*][ShreveSCFI],
+  4.4
+
+## Tags
+
+American option, early exercise, Bellman equation, binomial tree, dynamic programming,
+optimal exercise, MSC 91G20, MSC 49L20, JEL G13
 -/
 
 @[expose] public section

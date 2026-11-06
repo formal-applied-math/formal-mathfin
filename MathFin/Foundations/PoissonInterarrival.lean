@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -29,9 +30,19 @@ and this file derives exactly that:
 ## Main results
 
 * `PoissonInterarrival.survival_eq` — `μ {N t = 0} = e^{−rate t}`.
-* `PoissonInterarrival.survival_factorizes` — the memoryless property.
+* `PoissonInterarrival.survival_factorizes` — `μ {N t = 0} = μ {N s = 0} * μ {N t - N s = 0}`
+  for `s ≤ t`, the factorisation behind the memoryless property.
 * `PoissonInterarrival.map_firstArrival_eq_expMeasure` —
   `τ ∼ Exp(rate)`, fully derived.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Proposition 3.3.6
+
+## Tags
+
+Poisson process, first arrival time, exponential distribution, memoryless property, waiting time,
+survival function, MSC 60G55, MSC 60E05
 -/
 
 @[expose] public section

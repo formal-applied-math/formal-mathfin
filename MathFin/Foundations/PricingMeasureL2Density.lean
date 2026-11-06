@@ -50,7 +50,7 @@ generality for its own sake — it is the only form in which the hypothesis has 
 representatives are only *a.e.* `𝓕_t`-measurable, so `Martingale (pricePath …) 𝓕 Q` is a
 hypothesis nothing is known to satisfy. `MarketCompletenessInPrice.pricePathCondExp` is the
 witness at `Q = μ`, and `exists_density_price_martingale` below assembles it: the theorems here
-are about a nonempty situation. It is also the form `ContinuousMarket.IsEMM` already uses, for
+are about a nonempty situation. It is also the form `IsEMM` already uses, for
 the same reason.
 
 ## Scope
@@ -60,15 +60,32 @@ is a hypothesis of the form `Q = μ.withDensity (ENNReal.ofReal ∘ D)` for `D �
 than a statement about `Measure.rnDeriv` — the same condition for `Q ≪ μ`, phrased so the
 change-of-measure step is the `withDensity` transfer already in `LpMulIsometry`'s neighbourhood.
 
-## Result
+## Main definitions
+
+* `gainsFunctional`: the map `ψ ↦ 𝔼_Q[∫ψ dS]` as a continuous linear functional on `L²(⟨S⟩)`,
+  for `Q` with a square-integrable density `D` against `μ`.
+
+## Main results
 
 * `integral_eq_inner_density` — `𝔼_Q[X] = ⟪D, X⟫` for `X ∈ L²(μ)`.
-* `gainsFunctional` — `ψ ↦ 𝔼_Q[∫ψ dS]`, as a continuous linear functional.
-* `gainsFunctional_eq_zero` — it vanishes, by band → simple → dense.
-* `pricesGainsAtZero_of_density` — **the hypothesis becomes a conclusion**.
-* `measure_eq_of_density` — `Q` agrees with `μ` on `𝓕ᴮ_T`.
+* `gainsFunctional_eq_zero` — it vanishes when the price is a `Q`-martingale, by band → simple
+  → dense.
+* `pricesGainsAtZero_of_density` — for `σ ≠ 0` a.e. and a `Q`-martingale price, **the hypothesis
+  becomes a conclusion**.
+* `measure_eq_of_density` — under the same hypotheses and continuous paths of `B`, `Q` agrees
+  with `μ` on `𝓕ᴮ_T`.
 * `exists_density_price_martingale` — **the hypotheses have a witness**, so none of the above is
   vacuous.
+
+## References
+
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], 5.4
+
+## Tags
+
+unique pricing measure, equivalent martingale measure, square-integrable density,
+gains priced at zero, second fundamental theorem of asset pricing, Radon–Nikodym density, MSC 91G20,
+MSC 60G44, JEL G13
 -/
 
 @[expose] public section
@@ -124,12 +141,12 @@ theorem integrable_of_density {D : Lp ℝ 2 μ} (hD : ∀ᵐ ω ∂μ, 0 ≤ (D 
 /-- `ψ ↦ 𝔼_Q[∫ψ dS]`, as a continuous linear functional on `L²(⟨S⟩)`: the integral against `S`
 is an isometry, and the `Q`-integral is an inner product against the density. -/
 noncomputable def gainsFunctional (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
-    (hBmeas : ∀ t, Measurable (B t)) (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+    (hBmeas : ∀ t, Measurable (B t)) (σ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
     (D : Lp ℝ 2 μ) : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas σ) →L[ℝ] ℝ :=
   (innerSL ℝ D).comp (itoIntegralAgainstCLM hB T hBmeas σ)
 
 theorem gainsFunctional_apply (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (D : Lp ℝ 2 μ)
+    (σ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (D : Lp ℝ 2 μ)
     (ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas σ)) :
     gainsFunctional hB T hBmeas σ D ψ = ⟪D, itoIntegralAgainstCLM hB T hBmeas σ ψ⟫_ℝ := rfl
 
@@ -137,7 +154,7 @@ theorem gainsFunctional_apply (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 price is `Z·(S_b − S_a)`, a predictable weight against a `Q`-martingale increment. The band's
 endpoints lie below the horizon, which is where the modification hypothesis is used. -/
 theorem gainsFunctional_bandLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {S₀ : ℝ}
+    (σ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {S₀ : ℝ}
     {D : Lp ℝ 2 μ} (hD : ∀ᵐ ω ∂μ, 0 ≤ (D : Ω → ℝ) ω)
     {Q : Measure Ω} [IsProbabilityMeasure Q]
     (hQ : Q = μ.withDensity fun ω ↦ ENNReal.ofReal ((D : Ω → ℝ) ω))
@@ -170,7 +187,7 @@ theorem gainsFunctional_bandLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 
 /-- **The functional vanishes on every simple process**, being the finite sum of its bands. -/
 theorem gainsFunctional_simpleAssembly (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {S₀ : ℝ}
+    (σ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {S₀ : ℝ}
     {D : Lp ℝ 2 μ} (hD : ∀ᵐ ω ∂μ, 0 ≤ (D : Ω → ℝ) ω)
     {Q : Measure Ω} [IsProbabilityMeasure Q]
     (hQ : Q = μ.withDensity fun ω ↦ ENNReal.ofReal ((D : Ω → ℝ) ω))
@@ -185,14 +202,14 @@ theorem gainsFunctional_simpleAssembly (T : ℝ≥0) (hBmeas : ∀ t, Measurable
 
 /-- **The functional vanishes.** It is continuous and zero on a dense set. -/
 theorem gainsFunctional_eq_zero (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {S₀ : ℝ}
+    (σ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {S₀ : ℝ}
     {D : Lp ℝ 2 μ} (hD : ∀ᵐ ω ∂μ, 0 ≤ (D : Ω → ℝ) ω)
     {Q : Measure Ω} [IsProbabilityMeasure Q]
     (hQ : Q = μ.withDensity fun ω ↦ ENNReal.ofReal ((D : Ω → ℝ) ω))
     {S : ℝ≥0 → Ω → ℝ} (hSmod : ∀ t ≤ T, S t =ᵐ[μ] pricePath hB T hBmeas S₀ σ t)
     (hmart : Martingale S (ItoIntegralL2.natFiltration hBmeas) Q) :
     gainsFunctional hB T hBmeas σ D = 0 := by
-  have : IsFiniteMeasure (sqWeight (trimMeasure_T (μ := μ) T hBmeas) (⇑σ)) :=
+  have : IsFiniteMeasure (sqWeight (trimMeasure (μ := μ) T hBmeas) (⇑σ)) :=
     instIsFiniteMeasureBracketMeasure (μ := μ) T hBmeas σ
   refine ContinuousLinearMap.ext fun ψ ↦ ?_
   refine congrFun (DenseRange.equalizer
@@ -208,8 +225,8 @@ which the price is a martingale prices the traded gains at zero — the conditio
 `MarketCompleteness.emm_unique_of_complete` had to assume. The bridge from gains against `S` to
 gains against `B` is surjectivity of multiplication by `σ`, which is where `σ ≠ 0` is used. -/
 theorem pricesGainsAtZero_of_density (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
-    (hσ : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), (σ : ℝ≥0 × Ω → ℝ) z ≠ 0) {S₀ : ℝ}
+    (σ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
+    (hσ : ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas), (σ : ℝ≥0 × Ω → ℝ) z ≠ 0) {S₀ : ℝ}
     {D : Lp ℝ 2 μ} (hD : ∀ᵐ ω ∂μ, 0 ≤ (D : Ω → ℝ) ω)
     {Q : Measure Ω} [IsProbabilityMeasure Q]
     (hQ : Q = μ.withDensity fun ω ↦ ENNReal.ofReal ((D : Ω → ℝ) ω))
@@ -220,9 +237,9 @@ theorem pricesGainsAtZero_of_density (T : ℝ≥0) (hBmeas : ∀ t, Measurable (
   refine ⟨integrable_of_density hD hQ _, ?_⟩
   -- every `B`-integrand is `σψ` for some holding `ψ` in the price
   obtain ⟨ψ, hψ⟩ : ∃ ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas σ),
-      mulLI (trimMeasure_T (μ := μ) T hBmeas) (Lp.stronglyMeasurable σ).measurable ψ = φ :=
+      mulLI (trimMeasure (μ := μ) T hBmeas) (Lp.stronglyMeasurable σ).measurable ψ = φ :=
     exists_mulLI_eq (Lp.stronglyMeasurable σ).measurable hσ φ
-  have hval : itoIntegralAgainstCLM hB T hBmeas σ ψ = itoIntegralCLM_T hB T hBmeas φ := by
+  have hval : itoIntegralAgainstCLM hB T hBmeas σ ψ = itoIntegralCLM hB T hBmeas φ := by
     rw [itoIntegralAgainstCLM_apply, hψ]
   have h0 := DFunLike.congr_fun
     (gainsFunctional_eq_zero (hB := hB) T hBmeas σ hD hQ hSmod hmart) ψ
@@ -234,8 +251,8 @@ which the price is a martingale agrees with `μ` on the whole of `𝓕ᴮ_T`. Th
 `MarketCompleteness.measure_eq_of_pricesGainsAtZero` with its hypothesis discharged. -/
 theorem measure_eq_of_density (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0)
-    (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
-    (hσ : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), (σ : ℝ≥0 × Ω → ℝ) z ≠ 0) {S₀ : ℝ}
+    (σ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
+    (hσ : ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas), (σ : ℝ≥0 × Ω → ℝ) z ≠ 0) {S₀ : ℝ}
     {D : Lp ℝ 2 μ} (hD : ∀ᵐ ω ∂μ, 0 ≤ (D : Ω → ℝ) ω)
     {Q : Measure Ω} [IsProbabilityMeasure Q]
     (hQ : Q = μ.withDensity fun ω ↦ ENNReal.ofReal ((D : Ω → ℝ) ω))
@@ -257,7 +274,7 @@ worth stating because the martingale hypothesis is the one that could silently h
 witness: `Martingale` demands adaptedness, and the `Lp`-valued `pricePath` supplies only its
 a.e. version. -/
 theorem exists_density_price_martingale (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (S₀ : ℝ)
-    (σ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (σ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     ∃ (D : Lp ℝ 2 μ) (S : ℝ≥0 → Ω → ℝ),
       (∀ᵐ ω ∂μ, 0 ≤ (D : Ω → ℝ) ω)
         ∧ μ = μ.withDensity (fun ω ↦ ENNReal.ofReal ((D : Ω → ℝ) ω))

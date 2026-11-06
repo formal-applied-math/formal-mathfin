@@ -50,6 +50,19 @@ for every `𝓕ᵉ_{t₀}`-measurable `Y`. This is the simple Markov property at
 * `condExp_shift_eq_integral_gaussianLimit` — the Markov property in conditional-expectation
   form: given `𝓕ᵉ_{t₀}`, a functional of the past and the future increment path is
   integrated against `gaussianLimit` in its future argument.
+
+## References
+
+* [I. Karatzas and S. E. Shreve, *Brownian Motion and Stochastic Calculus*][KaratzasShreve1991],
+  §2.5
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 5.1.4
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], Lemma
+  2.3.4
+
+## Tags
+
+Markov property, independent increments, natural filtration, restart afresh, Brownian motion,
+MSC 60J65, MSC 60J60
 -/
 
 @[expose] public section

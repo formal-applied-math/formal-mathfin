@@ -8,11 +8,29 @@ module
 public import MathFin.BlackScholes.AmericanPut.Stopping.SampledRules
 public import MathFin.BlackScholes.AmericanPut.Stopping.UsualGridMarkov
 
-/-! # Optimal finite-grid exercise after a deterministic waiting time 
-## Result
+/-! # Optimal finite-grid exercise after a deterministic waiting time
 
-Public entry points include `delayedGridTime`, `delayedGridTime_mono`, `delayedGridFiltration`,
-`delayedGridReward`.
+## Main definitions
+
+* `delayedGridTime`: the `i`-th capped grid time delayed by a waiting time,
+  `u + cappedGridTime T δ i`.
+* `delayedGridFiltration`: the Brownian filtration sampled along the delayed grid times.
+* `delayedGridReward`: the discounted put reward from spot `exp x`, exercised at the deterministic
+  time `delayedGridTime u T δ i`.
+
+## Main results
+
+* `delayedGridTime_mono`: the delayed grid times are monotone in the index.
+* `delayedGrid_snellEnvelope_ae_eq`: for `0 ≤ K` and `0 ≤ r`, the Snell envelope of the delayed
+  grid reward at index `0` equals a.e. the discounted `brownianGridPrice` at the log state
+  at the delay `u`.
+* `delayedGridPrice_le_american`: for `0 ≤ K`, `0 ≤ r` and `0 < δ`, the expected discounted grid
+  price at the delay `u` is at most the Brownian American put with horizon `u + T`.
+
+## Tags
+
+exercise grid, deterministic delay, finite-grid rule, filtration, Bermudan exercise, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

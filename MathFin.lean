@@ -40,6 +40,7 @@
 -/
 
 -- Foundations
+import MathFin.Init
 import MathFin.Foundations.StandardNormal
 import MathFin.Foundations.DoobDecomposition
 import MathFin.Foundations.SnellDoobDecomposition

@@ -20,12 +20,20 @@ the keystone `∫ B dB`, `θ s ω = clamp_m(B_s ω)` for its truncation, `θ s �
 `θ s ω = φ(s, B_s ω)` for the bounded-continuous bridges, an adapted continuous process for the
 general bridge, and the integrands of the localised and predictable integrals.
 
+## Main definitions
+
+* `riemannσ`: the uniform-partition Riemann–Itô sum
+  `riemannσ θ T n ω = ∑_{k<n} θ(t_k, ω) · (B_{t_{k+1}}(ω) − B_{t_k}(ω))`.
+
 ## Main results
 
-* `riemannσ` — the sum.
 * `riemannσ_congr` — it depends only on the integrand on `[0, T]`.
 * `riemannσ_sub` — it is linear in the integrand.
 * `memLp_riemannσ` — for a bounded adapted integrand the sum is in `L²`.
+
+## Tags
+
+Riemann–Itô sum, left-endpoint sum, uniform partition, stochastic integral, Itô integral, MSC 60H05
 -/
 
 @[expose] public section

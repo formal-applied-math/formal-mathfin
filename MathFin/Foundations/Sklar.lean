@@ -41,14 +41,30 @@ The existence and uniqueness halves assume continuous margins. For general margi
 exists, but the construction needs the randomized distributional transform, and uniqueness holds
 only on the product of the ranges of the `Fᵢ`. Neither is formalized here.
 
+## Main definitions
+
+* `copulaOf`: the copula of a random vector `X` under `P`, the joint law of its
+  probability-integral transforms `Uᵢ = Fᵢ(Xᵢ)`.
+
 ## Main results
 
-* `copulaOf`: the joint law of the probability-integral transforms of a random vector.
 * `isCopula_copulaOf`, `measureReal_le_eq_copulaOf`: Sklar's theorem, existence (continuous
   margins).
 * `eq_copulaOf_of_measureReal_le`: Sklar's theorem, uniqueness (continuous margins).
 * `hasLaw_quantile_coord`, `measureReal_quantile_le_eq`: the converse of Sklar's theorem.
 * `copulaOf_comp_strictMono`: the copula is invariant under strictly increasing transformations.
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Proposition 7.7; Theorem 7.3
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 7.2
+* [Sklar (1959)][Sklar1959]
+
+## Tags
+
+Sklar's theorem, copula, marginal distributions, probability integral transform,
+dependence structure, copula invariance, MSC 62H05, MSC 60E05, MSC 91G70
 -/
 
 @[expose] public section

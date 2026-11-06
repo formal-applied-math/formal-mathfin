@@ -5,6 +5,7 @@ Authors: Yang Ye
 -/
 module
 
+public import MathFin.Init
 public import Mathlib
 
 /-!
@@ -43,10 +44,34 @@ This file proves the eigenidentities by induction on `Polynomial.hermite_succ`
   swirl as a stochastic process, and the Laguerre/Jacobi rows of the Pearson table
   (no Laguerre or Jacobi polynomials are available in the library).
 
+## Main definitions
+
+* `ouGen`: the operator `p ↦ -(κ • X) * p' + (σ²/2) • p''` on real polynomials.
+* `hermiteReal`: the probabilists' Hermite polynomial `He_n` over `ℝ`.
+* `scaledHermite`: `He_n(x/s)`, as `hermiteReal n` composed with `X ↦ s⁻¹ • X`.
+
+## Main results
+
+* `ouGen_hermite`: `ouGen 1 (√2) (He_n) = -n • He_n`.
+* `ouGen_scaledHermite`, `eval_ouGen_scaledHermite`: if `2κs² = σ²` and `s ≠ 0`, then
+  `L He_n(x/s) = -nκ · He_n(x/s)`, as polynomials and pointwise.
+* `ouGen_derivative`, `ouGen_X_mul`: the commutators of `ouGen` with differentiation and with
+  multiplication by `X`.
+* `gaussianNoFlux_ou`: at `2κs² = σ²`, `σ²/2 · π'(x) = -(κx) · π(x)` for `π(x) = exp(-x²/(2s²))`.
+* `twoMode_rate_ge_slowest`: for `l₁ ≤ l₂` and positive weights, the effective decay rate of a
+  two-exponential mixture is at least `l₁`.
+* `swirl_isotropy`: a symmetric `2×2` solution `Σ` of `AΣ + ΣAᵀ = I` for the swirl matrix
+  `A = [[1, θ], [-θ, 1]]` equals `I/2`.
+
 ## References
 
-* S. Bagaria, *Notes on Fixed Income Derivative Pricing* (lecture notes), ch. 14 ("the chapter"
+* [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 14 ("the chapter"
   throughout; eq./Calc/Ex. numbers are as there); the estimation bias is from its ch. 20.
+
+## Tags
+
+Ornstein–Uhlenbeck process, Hermite polynomials, generator eigenfunctions, spectral decomposition,
+mean reversion, Vasicek model, MSC 60J60, MSC 91G30, JEL E43
 -/
 
 @[expose] public section

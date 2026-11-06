@@ -19,6 +19,17 @@ For `f ≠ 0`, the signature of the weighted trace form on `ℝ[X]/(f)` is the s
 over the distinct real roots `c` of `f` (`weightedTraceForm_signature`), with no squarefreeness
 assumed. `hermite_signature` is the same identity for the sign-variation test of the Hermite matrix
 `hermite f q f.natDegree`.
+
+## Main results
+
+* `weightedTraceForm_signature`: for `f ≠ 0`, the signature of the weighted trace form on
+  `ℝ[X]/(f)` is `∑ c ∈ f.roots.toFinset, sign (q.eval c)`, the sum over distinct real roots.
+* `hermite_signature`: for `f ≠ 0`, `signatureTest (hermite f q f.natDegree)` equals the same sum.
+
+## Tags
+
+Hermite quadratic form, real root counting, trace form signature, Sylvester inertia, SVI, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section
@@ -40,7 +51,8 @@ private theorem unit_trace_signature (f q : ℝ[X]) (hf : IsUnit f) :
   rw [hd] at hp hn
   simp [formSignature, ← sigPos_neg, Nat.eq_zero_of_le_zero hp, Nat.eq_zero_of_le_zero hn]
 
-private theorem roots_unit (f : ℝ[X]) (hf : IsUnit f) : f.roots = 0 := by
+/-- A unit polynomial has no roots. -/
+theorem roots_eq_zero_of_isUnit (f : ℝ[X]) (hf : IsUnit f) : f.roots = 0 := by
   apply Multiset.card_eq_zero.mp
   exact Nat.eq_zero_of_le_zero ((card_roots' f).trans_eq (natDegree_eq_zero_of_isUnit hf))
 
@@ -60,7 +72,7 @@ theorem weightedTraceForm_signature (f q : ℝ[X]) (hf : f ≠ 0) :
   classical
   induction f using UniqueFactorizationMonoid.induction_on_coprime with
   | h0 => exact (hf rfl).elim
-  | @h1 f hu => simp [unit_trace_signature f q hu, roots_unit f hu]
+  | @h1 f hu => simp [unit_trace_signature f q hu, roots_eq_zero_of_isUnit f hu]
   | @hpr p r hp =>
     by_cases hr : r = 0
     · subst r

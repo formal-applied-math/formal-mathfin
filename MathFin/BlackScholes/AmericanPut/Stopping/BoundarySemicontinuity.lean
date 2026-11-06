@@ -14,10 +14,23 @@ Continuity of the price in maturity makes the threshold upper semicontinuous.
 Together with its monotonicity this proves continuity from shorter maturities.
 Continuity from longer maturities is not asserted by this argument.
 
-## Result
+## Main results
 
-Public entry points include `threshold_upperSemicontinuous`, `threshold_continuousWithinAt_left`,
-`brownianExerciseBoundary_upperSemicontinuous`, `brownianUsualExerciseBoundary_upperSemicontinuous`.
+* `threshold_upperSemicontinuous`: for measurable `W` with continuous paths, `W 0 = 0` almost
+  surely, `0 ≤ K` and `0 ≤ r`, the exercise threshold is upper semicontinuous in maturity.
+* `threshold_continuousWithinAt_left`: under the same hypotheses, it is continuous within
+  `Iic T` at every `T`, that is, from shorter maturities.
+* `brownianExerciseBoundary_upperSemicontinuous`,
+  `brownianUsualExerciseBoundary_upperSemicontinuous`: for `0 ≤ K` and `0 ≤ r`, the Brownian
+  exercise boundaries are upper semicontinuous.
+* `canonicalStockBoundary_antitone`, `canonicalStockBoundary_upperSemicontinuous`,
+  `canonicalStockBoundary_continuousWithinAt_left`: for `0 ≤ k`, the canonical stock boundary is
+  antitone, upper semicontinuous, and continuous from the left at every `T`.
+
+## Tags
+
+upper semicontinuity, exercise threshold, left continuity, free boundary, American put, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

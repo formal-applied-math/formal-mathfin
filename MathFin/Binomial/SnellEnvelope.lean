@@ -61,17 +61,36 @@ and the European price process as the competitor.
 The remaining classical form — `americanPrice = sup over stopping times τ of
 E^Q[e^{−rτ} g(S_τ)]` — is downstream work on top of this file's path layer.
 
-## Results
+## Main definitions
+
+* `spotPath`: the spot path `S_k(ω) = S₀ · ∏_{i<k} (u if ωᵢ else d)` along a coin-flip path.
+* `snellAux`: the Snell envelope of a payoff process `Z` indexed by remaining steps `j` and
+  time `k`, with exercise allowed at the steps in `E`.
+* `snell`: the Snell envelope over horizon `N`, indexed by absolute time `k`.
+
+## Main results
 
 * `bermudanPrice_le_of_supermartingale_dominating`, `bermudanPrice_is_snell_envelope`:
-  the scalar characterization.
-* `spotPath`, `snellAux`, `snell`: the path-space objects.
+  the scalar characterization, under `BinomialNoArb`.
 * `snellAux_ge_payoff` / `snellAux_supermartingale` / `pathAdaptedAt_snellAux` /
-  `snellAux_le_of_supermartingale_of_ge`: the four Snell clauses on paths.
+  `snellAux_le_of_supermartingale_of_ge`: the four Snell clauses on paths (minimality for
+  `q ∈ [0, 1]`).
 * `crrUpProb_average_discounted`: the discounted node average, the one-period price at a node.
 * `snellAux_eq_discounted_bermudanPrice`: the identification theorem.
 * `discounted_bermudanPrice_supermartingale`, `discounted_intrinsic_le_bermudanPrice`,
-  `bermudanPrice_snell_minimal`: the price corollaries on paths.
+  `bermudanPrice_snell_minimal`: the price corollaries on paths (minimality under
+  `BinomialNoArb`).
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 21.5
+* [S. E. Shreve, *Stochastic Calculus for Finance I: The Binomial Asset Pricing Model*][ShreveSCFI],
+  4.4
+
+## Tags
+
+Snell envelope, optimal stopping, American option, Bellman recursion, supermartingale,
+early exercise, MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

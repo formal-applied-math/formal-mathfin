@@ -40,19 +40,36 @@ holds with `Z` as above, and the risk-neutral pricing formula
 
 is just two-state algebra. We make this discrete Girsanov-machinery explicit.
 
-## Results
+## Main definitions
 
-* `binomialRN`: the two-valued RN derivative.
+* `binomialRN`: the one-flip Radon–Nikodym derivative `dQ/dP`, equal to `q / p` on an up-flip and
+  `(1 − q) / (1 − p)` on a down-flip.
+* `binomialDensity`: the density process `Z_n(ω) = ∏_{i<n} binomialRN p q (ωᵢ)`.
+
+## Main results
+
 * `weight_mul_binomialRN`: the one-flip identity `P(b) · Z(b) = Q(b)` that everything below
   multiplies or sums.
-* `binomialRN_expectation_one`: `E^P[Z] = 1` (RN normalisation).
-* `binomial_riskNeutral_via_RN`: discrete pricing identity
+* `binomialRN_expectation_one`: for `p ≠ 0, 1`, `E^P[Z] = 1` (RN normalisation).
+* `binomial_riskNeutral_via_RN`: for `p ≠ 0, 1`, the discrete pricing identity
   `E^Q[V_T] = E^P[Z · V_T] = p · Z_up · V_u + (1 − p) · Z_down · V_d`.
-* `map_flips_coinFlipMeasure_eq_withDensity`: **the change of measure on `n` flips.** The law
+* `map_flips_coinFlipMeasure_eq_withDensity`: **the change of measure on `n` flips.** For
+  `0 < p < 1` and `q ≤ 1`, the law
   of the first `n` flips under `Bernoulli(q)` is the law under `Bernoulli(p)` with density
   `∏ᵢ Z(xᵢ)`; `coinFlipMeasure_apply_eq_lintegral` states it on `ℱₙ`, and
   `integral_comp_flips_eq` as `E^Q[F] = E^P[Z_n · F]`.
-* `martingale_binomialDensity`: the density process `Z_n = ∏_{i<n} Z(ωᵢ)` is a `P`-martingale.
+* `martingale_binomialDensity`: for `0 < p < 1`, the density process `Z_n = ∏_{i<n} Z(ωᵢ)` is a
+  `P`-martingale.
+
+## References
+
+* [S. E. Shreve, *Stochastic Calculus for Finance I: The Binomial Asset Pricing Model*][ShreveSCFI],
+  Ch 1
+
+## Tags
+
+discrete Girsanov, change of measure, Radon–Nikodym derivative, risk-neutral measure,
+density process, binomial model, MSC 91G20, MSC 60G42, JEL G13
 -/
 
 @[expose] public section

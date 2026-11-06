@@ -59,6 +59,31 @@ instance of `WienerIntegralL2.covariance_increment_aux` — the single
 shared increment-covariance lemma. Unifying onto the package's
 `SimpleProcess`/`L2Predictable` remains deferred to a structural pass of the
 simple-process layer.
+
+## Main results
+
+* `adapted_indepFun_increment`: an `𝓕_{t₀}`-measurable integrand is independent of the forward
+  increment `B_{t₁} − B_{t₀}`.
+* `integral_adapted_mul_increment`: for `φ` adapted to `𝓕_{t₀}`,
+  `E[φ · (B_{t₁} − B_{t₀})] = 0`.
+* `integral_adapted_sq_mul_increment_sq`: for `φ` adapted to `𝓕_{t₀}`,
+  `E[φ² · (B_{t₁} − B_{t₀})²] = E[φ²] · (t₁ − t₀)`.
+* `memLp_adapted_mul_increment`: for `φ` adapted to `𝓕_{t₀}` and in `L²`,
+  `φ · (B_{t₁} − B_{t₀})` is in `L²`.
+* `integral_cross_increment_bilinear_eq_zero`: for adapted integrand families `φ`, `ψ` and
+  `j < k`, `E[(φⱼ ΔBⱼ)(ψₖ ΔBₖ)] = 0`.
+* `ito_isometry_discrete_bilinear`: `E[(Σₖ φₖ ΔBₖ)(Σₖ ψₖ ΔBₖ)] = Σₖ E[φₖ ψₖ] (t_{k+1} − t_k)`.
+* `ito_isometry_discrete`: `E[(Σₖ φₖ ΔBₖ)²] = Σₖ E[φₖ²] (t_{k+1} − t_k)` for adapted `L²`
+  integrand families.
+* `ito_isometry_brownian_self`: the discrete isometry for `φₖ = B(tₖ)`, with only measurability
+  hypotheses.
+* `rect_increment_pairing`: for `f` `𝓕_s`-measurable and `g` `𝓕_{s'}`-measurable, both bounded,
+  `E[f (B_t − B_s) · g (B_{t'} − B_{s'})] = E[f g] · vol((s,t] ∩ (s',t'])`.
+
+## Tags
+
+Itô isometry, adapted integrand, martingale difference, independent increments, stochastic integral,
+Wiener integral, MSC 60H05, MSC 60J65, MSC 60G44
 -/
 
 @[expose] public section

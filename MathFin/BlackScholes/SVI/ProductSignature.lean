@@ -14,6 +14,22 @@ Part of the SVI polynomial-sign certificate (#174).
 The signature of a weighted sum of squares is the sum of the signs of its weights, equivalent
 forms have equal signatures, and the signature is additive over orthogonal products, degenerate
 forms included (`formSignature_prod`).
+
+## Main definitions
+
+* `formProd`: the orthogonal product of two quadratic forms, `(x, y) ↦ Q x + R y` on `V × W`.
+
+## Main results
+
+* `formSignature_weightedSumSquares`: the signature of `weightedSumSquares ℝ w` is
+  `∑ i, sign (w i)`.
+* `formSignature_eq_of_equivalent`: equivalent real quadratic forms have equal signature.
+* `formSignature_prod`: for finite-dimensional `V`, `W`, the signature of `formProd Q R` is the
+  sum of the signatures of `Q` and `R`, degenerate forms included.
+
+## Tags
+
+quadratic form signature, orthogonal product, sum of squares signature, SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
