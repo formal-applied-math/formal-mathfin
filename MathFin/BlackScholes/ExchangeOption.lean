@@ -162,7 +162,6 @@ Foundation-certain: swapping the two assets sends `d₁ ↦ −d₂` and `d₂ �
 (the `σ²T/(σ√T) = σ√T` identity), and `Φ(x) + Φ(−x) = 1` (the same symmetry
 `Phi_add_Phi_neg` that drives put-call parity) collapses the rest. No
 probability machinery, no assumed moments — pure algebra on the closed form. -/
-@[pricing]
 theorem margrabe_parity (S1 S2 σ T : ℝ)
     (hS1 : 0 < S1) (hS2 : 0 < S2) (hσ : σ ≠ 0) (hT : 0 < T) :
     margrabePrice S1 S2 σ T - margrabePrice S2 S1 σ T = S1 - S2 := by

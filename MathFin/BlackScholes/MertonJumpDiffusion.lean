@@ -328,7 +328,6 @@ theorem integral_mertonSpot (S_0 k : ℝ) (Λ : ℝ≥0) :
 
 /-- **Term-wise put–call parity** for the conditional values: pure
 `Φ(x) + Φ(−x) = 1` algebra, no hypotheses. -/
-@[pricing]
 theorem mertonTerm_parity (S_0 K r σ T k δ : ℝ) (Λ : ℝ≥0) (n : ℕ) :
     mertonCallTerm S_0 K r σ T k δ Λ n - mertonPutTerm S_0 K r σ T k δ Λ n
       = mertonSpot S_0 k Λ n - K * rexp (-r * T) := by

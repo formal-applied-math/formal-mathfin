@@ -21,10 +21,9 @@ the automation its users need.
 
 ## Main definitions
 
-* `pricing`: the library's grind set for pricing identities: put–call parity (the closed forms,
-  Merton's terms, Margrabe's exchange) and the risk-neutral probabilities of the trees. Tag a
-  lemma `@[pricing =]` (or with any other grind modifier) and close goals with
-  `grind [pricing]`. Kept separate from the
+* `pricing`: the library's grind set for pricing identities: put–call parity on the closed
+  forms and the risk-neutral probabilities of the trees. Tag a lemma `@[pricing =]` (or with
+  any other grind modifier) and close goals with `grind [pricing]`. Kept separate from the
   global `grind` set so that a finance identity never slows an unrelated `grind` call.
   `MathFinTest/Automation.lean` pins what it closes.
 
