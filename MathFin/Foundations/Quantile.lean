@@ -6,7 +6,6 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib.Order.CompletePartialOrder
 public import Mathlib.Probability.Distributions.Exponential
 public import Mathlib.Probability.HasLaw
 

@@ -6,7 +6,6 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
-public import Mathlib.Algebra.Order.Star.Real
 public import Mathlib.Probability.Distributions.Gaussian.Real
 
 /-!

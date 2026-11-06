@@ -7,7 +7,6 @@ module
 
 public import MathFin.Performance.Ratios
 public import Mathlib.Algebra.Order.Star.Real
-public import Mathlib.Topology.Separation.CompletelyRegular
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
 /-!

@@ -6,9 +6,10 @@ Authors: Yang Ye
 module
 
 public import MathFin.Init
-public import Mathlib.Algebra.Order.Archimedean.Real.Basic
 public import Mathlib.Algebra.Order.BigOperators.Group.Finset
 public import Mathlib.Data.Fintype.BigOperators
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Tactic.NormNum.Ineq
 
 /-!
 # Per-observation uniqueness bound for overlapping-label samples

@@ -6,7 +6,6 @@ Authors: Robert Martin
 module
 
 public import MathFin.Init
-public import Mathlib.Order.CompletePartialOrder
 public import Mathlib.Analysis.Calculus.Deriv.Inv
 public import Mathlib.Analysis.Calculus.Deriv.MeanValue
 public import Mathlib.Analysis.InnerProductSpace.Basic

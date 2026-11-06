@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.PoissonPgf
 public import MathFin.Foundations.GeneralizedPareto
+public import Mathlib.Order.CompletePartialOrder
 
 /-!
 # The maximum of a Poisson number of losses
