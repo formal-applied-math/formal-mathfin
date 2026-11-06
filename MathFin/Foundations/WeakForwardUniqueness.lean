@@ -92,20 +92,11 @@ private lemma IsWeakForwardFlow.const_identity {b v T : ℝ} {ρ : ℝ → Measu
     funext fun r => by rw [integral_mul_const, integral_mul_const]; ring
   simpa only [hw] using hρ.2 g g' g'' g''' C1 C2 C3 h1 h2 h3 hb1 hb2 hb3 s hs
 
-/-- `|v / 2| = |v| / 2`. -/
-lemma abs_div_two_eq (v : ℝ) : |v / 2| = |v| / 2 := by rw [abs_div]; norm_num
-
 /-! ### The pairing layer
 
 Against a probability measure, the pairing with a bounded function is bounded
 by the sup bound; the integrated identity then makes every admissible
 pairing Lipschitz-continuous in time. -/
-
-/-- The pairing of a bounded function against a probability measure is
-bounded by the sup bound. -/
-lemma abs_integral_le_of_forall_abs_le {μ : Measure ℝ} (hμ : IsProbabilityMeasure μ) {g : ℝ → ℝ}
-    {C : ℝ} (hg : ∀ x, |g x| ≤ C) : |∫ y, g y ∂μ| ≤ C := by
-  simpa using norm_integral_le_of_norm_le_const (μ := μ) (f := g) (ae_of_all μ hg)
 
 /-- The increment of an admissible pairing over an interval, both endpoints in
 `[0, T]`: the difference of pairings is the oriented integral of the pairing
@@ -159,7 +150,7 @@ private lemma pairing_increment {b v T : ℝ} {ρ : ℝ → Measure ℝ}
 
 /-- The pairing of an admissible test is Lipschitz in time on `[0, T]`: the
 pairing increment is an interval integral of an integrand bounded by
-`|b| * C1 + |v| / 2 * C2` (via `abs_integral_le_of_forall_abs_le` on each of the two pieces). -/
+`|b| * C1 + |v| / 2 * C2` (via `norm_integral_le_of_norm_le_const` on each of the two pieces). -/
 private lemma abs_pairing_lipschitz {b v T : ℝ} {ρ : ℝ → Measure ℝ}
     (hρ : IsWeakForwardFlow (fun _ _ ↦ b) (fun _ _ ↦ v) T ρ)
     {g g' g'' g''' : ℝ → ℝ} {C1 C2 C3 : ℝ}
@@ -172,13 +163,16 @@ private lemma abs_pairing_lipschitz {b v T : ℝ} {ρ : ℝ → Measure ℝ}
   rw [pairing_increment hρ h1 h2 h3 hb1 hb2 hb3 hs₀ hs, ← Real.norm_eq_abs]
   refine intervalIntegral.norm_integral_le_of_norm_le_const (fun r _ => ?_)
   rw [Real.norm_eq_abs]
-  have hb1' : |∫ y, g' y ∂(ρ r)| ≤ C1 := abs_integral_le_of_forall_abs_le (hρ.1 r) hb1
-  have hb2' : |∫ y, g'' y ∂(ρ r)| ≤ C2 := abs_integral_le_of_forall_abs_le (hρ.1 r) hb2
+  haveI := hρ.1 r
+  have hb1' : |∫ y, g' y ∂(ρ r)| ≤ C1 := by
+    simpa using norm_integral_le_of_norm_le_const (μ := ρ r) (f := g') (ae_of_all _ hb1)
+  have hb2' : |∫ y, g'' y ∂(ρ r)| ≤ C2 := by
+    simpa using norm_integral_le_of_norm_le_const (μ := ρ r) (f := g'') (ae_of_all _ hb2)
   calc |b * ∫ y, g' y ∂(ρ r) + v / 2 * ∫ y, g'' y ∂(ρ r)|
       ≤ |b * ∫ y, g' y ∂(ρ r)| + |v / 2 * ∫ y, g'' y ∂(ρ r)| := abs_add_le _ _
     _ = |b| * |∫ y, g' y ∂(ρ r)| + |v / 2| * |∫ y, g'' y ∂(ρ r)| := by rw [abs_mul, abs_mul]
     _ ≤ |b| * C1 + |v| / 2 * C2 := by
-        rw [abs_div_two_eq]
+        rw [show |v / 2| = |v| / 2 by rw [abs_div, abs_two]]
         exact add_le_add (mul_le_mul_of_nonneg_left hb1' (abs_nonneg b))
           (mul_le_mul_of_nonneg_left hb2' (by positivity))
 
@@ -227,7 +221,8 @@ lemma abs_mul_add_mul_sq_le_mul_max (b v ξ p q : ℝ) :
   calc |b * ξ * p + v / 2 * ξ ^ 2 * q|
       ≤ |b * ξ * p| + |v / 2 * ξ ^ 2 * q| := abs_add_le _ _
     _ = |b| * |ξ| * |p| + |v| / 2 * ξ ^ 2 * |q| := by
-        rw [abs_mul, abs_mul, abs_mul, abs_mul, abs_div_two_eq, abs_of_nonneg (sq_nonneg ξ)]
+        rw [abs_mul, abs_mul, abs_mul, abs_mul, show |v / 2| = |v| / 2 by rw [abs_div, abs_two],
+          abs_of_nonneg (sq_nonneg ξ)]
     _ ≤ |b| * |ξ| * max |p| |q| + |v| / 2 * ξ ^ 2 * max |p| |q| :=
         add_le_add (mul_le_mul_of_nonneg_left hp (by positivity))
           (mul_le_mul_of_nonneg_left hq (by positivity))
@@ -240,42 +235,38 @@ generator `b · (·)' + v/2 · (·)''` maps each to a linear combination of the
 other, with no new functions appearing — the algebraic fact that drives the
 Volterra system in `pairing_cos_sin_eq`. -/
 
-/-- The inner linear map `y ↦ ξ * y` of every chain-rule step below. -/
-lemma hasDerivAt_const_mul_id (ξ x : ℝ) : HasDerivAt (fun y : ℝ => ξ * y) ξ x := by
-  simpa using (hasDerivAt_id x).const_mul ξ
-
 /-- The derivative of `x ↦ cos (ξ * x)` is `-ξ * sin (ξ * x)`. -/
 lemma hasDerivAt_cos_const_mul (ξ x : ℝ) :
     HasDerivAt (fun x => Real.cos (ξ * x)) (-ξ * Real.sin (ξ * x)) x :=
-  ((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_const_mul_id ξ x)).congr_deriv (by ring)
+  ((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_const_mul ξ)).congr_deriv (by ring)
 
 /-- The derivative of `x ↦ -ξ * sin (ξ * x)` is `-ξ ^ 2 * cos (ξ * x)`. -/
 lemma hasDerivAt_neg_mul_sin_const_mul (ξ x : ℝ) :
     HasDerivAt (fun x => -ξ * Real.sin (ξ * x)) (-ξ ^ 2 * Real.cos (ξ * x)) x :=
-  (((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_const_mul_id ξ x)).const_mul (-ξ)).congr_deriv
+  (((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_const_mul ξ)).const_mul (-ξ)).congr_deriv
     (by ring)
 
 /-- The derivative of `x ↦ -ξ ^ 2 * cos (ξ * x)` is `ξ ^ 3 * sin (ξ * x)`. -/
 lemma hasDerivAt_neg_sq_mul_cos_const_mul (ξ x : ℝ) :
     HasDerivAt (fun x => -ξ ^ 2 * Real.cos (ξ * x)) (ξ ^ 3 * Real.sin (ξ * x)) x :=
-  (((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_const_mul_id ξ x)).const_mul
+  (((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_const_mul ξ)).const_mul
     (-ξ ^ 2)).congr_deriv (by ring)
 
 /-- The derivative of `x ↦ sin (ξ * x)` is `ξ * cos (ξ * x)`. -/
 lemma hasDerivAt_sin_const_mul (ξ x : ℝ) :
     HasDerivAt (fun x => Real.sin (ξ * x)) (ξ * Real.cos (ξ * x)) x :=
-  ((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_const_mul_id ξ x)).congr_deriv (by ring)
+  ((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_const_mul ξ)).congr_deriv (by ring)
 
 /-- The derivative of `x ↦ ξ * cos (ξ * x)` is `-ξ ^ 2 * sin (ξ * x)`. -/
 lemma hasDerivAt_mul_cos_const_mul (ξ x : ℝ) :
     HasDerivAt (fun x => ξ * Real.cos (ξ * x)) (-ξ ^ 2 * Real.sin (ξ * x)) x :=
-  (((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_const_mul_id ξ x)).const_mul ξ).congr_deriv
+  (((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_const_mul ξ)).const_mul ξ).congr_deriv
     (by ring)
 
 /-- The derivative of `x ↦ -ξ ^ 2 * sin (ξ * x)` is `-ξ ^ 3 * cos (ξ * x)`. -/
 lemma hasDerivAt_neg_sq_mul_sin_const_mul (ξ x : ℝ) :
     HasDerivAt (fun x => -ξ ^ 2 * Real.sin (ξ * x)) (-ξ ^ 3 * Real.cos (ξ * x)) x :=
-  (((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_const_mul_id ξ x)).const_mul
+  (((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_const_mul ξ)).const_mul
     (-ξ ^ 2)).congr_deriv (by ring)
 
 /-- The sup bounds for the `cos(ξ·)` derivative chain, bundled: `C1 = |ξ|`, `C2 = ξ²`,

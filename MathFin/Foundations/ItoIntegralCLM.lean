@@ -134,7 +134,7 @@ lemma restrictToBand_simpleAssembly (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B
     _ =ᵐ[trimMeasure (μ := μ) T hBmeas] Function.uncurry ⇑V :=
         (MemLp.coeFn_toLp (memLp_uncurry_trim hBmeas V)).filter_mono (ae_mono hmono)
     _ =ᵐ[trimMeasure (μ := μ) T hBmeas] ⇑(simpleProcessL2Horizon (μ := μ) T hBmeas V) :=
-        (MemLp.coeFn_toLp (memLp_uncurry_trim_T T hBmeas V)).symm
+        (MemLp.coeFn_toLp (memLp_uncurry_trimMeasure T hBmeas V)).symm
 
 /-! ### Extension by zero: the isometric section of `restrictToBand`
 
@@ -255,7 +255,7 @@ lemma bandExtend_simpleAssemblyHorizon (T : ℝ≥0) (hBmeas : ∀ u, Measurable
       simpleAssembly hBmeas V.val := by
   refine Lp.ext ?_
   filter_upwards [bandExtend_coeFn T hBmeas (simpleAssemblyHorizon (μ := μ) T hBmeas V),
-    indicator_band_ae_eq T hBmeas (memLp_uncurry_trim_T (μ := μ) T hBmeas V.val).coeFn_toLp,
+    indicator_band_ae_eq T hBmeas (memLp_uncurry_trimMeasure (μ := μ) T hBmeas V.val).coeFn_toLp,
     (memLp_uncurry_trim (μ := μ) hBmeas V.val).coeFn_toLp,
     ae_fst_ne_zero_trim hBmeas] with z h1 h2 h3 h0
   refine h1.trans (h2.trans (Eq.trans ?_ h3.symm))

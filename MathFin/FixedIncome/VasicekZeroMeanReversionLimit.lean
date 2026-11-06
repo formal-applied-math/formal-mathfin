@@ -164,22 +164,13 @@ lemma abs_vasicekBondV_sub_le {κ T : ℝ} (hκ : κ ≠ 0) (hsmall : |2 * κ * 
         linarith
     _ = 10 * |κ| * |T| ^ 4 * (2 * |κ| ^ 3) := by rw [abs_mul]; ring
 
-/-- A continuous function of `κ` vanishing at `0` tends to `0` along `κ → 0⁺`. -/
-lemma tendsto_nhdsGT_zero_of_continuous {f : ℝ → ℝ} (hf : Continuous f) (h0 : f 0 = 0) :
-    Tendsto f (𝓝[>] 0) (𝓝 0) :=
-  (hf.tendsto' 0 0 h0).mono_left nhdsWithin_le_nhds
-
 /-- **A linear error bound gives the limit.** If `|f κ − L| ≤ C·|κ|` for `κ → 0⁺` eventually,
 then `f κ → L`. Both limits below are this squeeze, fed by an explicit Taylor bound. -/
 lemma tendsto_nhdsGT_zero_of_abs_sub_le {f : ℝ → ℝ} {L C : ℝ}
     (h : ∀ᶠ κ in 𝓝[>] (0 : ℝ), |f κ - L| ≤ C * |κ|) : Tendsto f (𝓝[>] 0) (𝓝 L) :=
   tendsto_sub_nhds_zero_iff.mp <| squeeze_zero_norm' (by simpa only [Real.norm_eq_abs] using h)
-    (tendsto_nhdsGT_zero_of_continuous (by fun_prop) (by simp))
-
-/-- `|c·κ| ≤ 1` for `κ → 0⁺` eventually: the regime of the Taylor bounds below. -/
-lemma eventually_nhdsGT_abs_mul_le_one (c : ℝ) : ∀ᶠ κ in 𝓝[>] (0 : ℝ), |c * κ| ≤ 1 :=
-  (tendsto_nhdsGT_zero_of_continuous (f := fun κ ↦ |c * κ|) (by fun_prop) (by simp)).eventually
-    (ge_mem_nhds one_pos)
+    (Filter.Tendsto.mono_left (Continuous.tendsto' (by fun_prop) 0 0 (by simp))
+      nhdsWithin_le_nhds)
 
 /-- **`V(T) → T³/3` as `κ → 0⁺`** — the genuine three-term cancellation limit. The terms
 `T/κ²`, `−2(1 − e^{−κT})/κ³` and `(1 − e^{−2κT})/(2κ³)` of `vasicekBondV` each diverge
@@ -188,7 +179,9 @@ explicit bound `abs_vasicekBondV_sub_le` and a squeeze. -/
 theorem tendsto_vasicekBondV_zero_meanReversion (T : ℝ) :
     Tendsto (fun κ ↦ vasicekBondV κ T) (𝓝[>] 0) (𝓝 (T ^ 3 / 3)) :=
   tendsto_nhdsGT_zero_of_abs_sub_le (C := 10 * T ^ 4) <| by
-    filter_upwards [eventually_nhdsGT_abs_mul_le_one (2 * T), self_mem_nhdsWithin] with κ hs hκ
+    filter_upwards [(((by fun_prop : Continuous fun κ : ℝ ↦ |2 * T * κ|).tendsto' 0 0
+      (by simp)).mono_left (nhdsWithin_le_nhds : 𝓝[>] (0 : ℝ) ≤ 𝓝 0)).eventually
+        (ge_mem_nhds one_pos), self_mem_nhdsWithin] with κ hs hκ
     exact (abs_vasicekBondV_sub_le hκ.ne' (by rwa [show 2 * κ * T = 2 * T * κ by ring])).trans_eq
       (by ring)
 
@@ -332,7 +325,9 @@ kernel (`integral_vasicekIntegratedKernel`), which carries the Girsanov mean shi
 theorem tendsto_vasicekBondB_secondOrder_zero_meanReversion (T : ℝ) :
     Tendsto (fun κ ↦ (T - vasicekBondB κ T) / κ) (𝓝[>] 0) (𝓝 (T ^ 2 / 2)) :=
   tendsto_nhdsGT_zero_of_abs_sub_le (C := |T| ^ 3) <| by
-    filter_upwards [eventually_nhdsGT_abs_mul_le_one T, self_mem_nhdsWithin] with κ hs hκ
+    filter_upwards [(((by fun_prop : Continuous fun κ : ℝ ↦ |T * κ|).tendsto' 0 0
+      (by simp)).mono_left (nhdsWithin_le_nhds : 𝓝[>] (0 : ℝ) ≤ 𝓝 0)).eventually
+        (ge_mem_nhds one_pos), self_mem_nhdsWithin] with κ hs hκ
     exact (abs_vasicekBondB_secondOrder_sub_le hκ.ne' (by rwa [mul_comm])).trans_eq (by ring)
 
 section Girsanov

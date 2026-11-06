@@ -167,7 +167,8 @@ lemma wienerIncrementLp_mem_lpMeas (hB : IsPreBrownianReal B μ)
     (h2 : StronglyMeasurable[m] (B i.1.2)) :
     wienerIncrementLp B hB i ∈ lpMeas ℝ ℝ m 2 μ := by
   rw [mem_lpMeas_iff_aestronglyMeasurable]
-  exact (h2.sub h1).aestronglyMeasurable.congr (MemLp.coeFn_toLp (memLp_increment_two hB i)).symm
+  exact (h2.sub h1).aestronglyMeasurable.congr
+    (MemLp.coeFn_toLp (memLp_increment hB i.1.1 i.1.2)).symm
 
 variable [IsProbabilityMeasure μ]
 
@@ -210,8 +211,8 @@ lemma wienerIntegralLp_future_step_mem_lpMeas (hB : IsPreBrownianReal B μ) (htT
   refine ((stronglyMeasurable_postσ (B := B) (t := t) (i.1.2 - t)).sub
     (stronglyMeasurable_postσ (B := B) (t := t) (i.1.1 - t))).aestronglyMeasurable.congr ?_
   filter_upwards [Lp.coeFn_sub (wienerIncrementLp B hB i) (wienerIncrementLp B hB (stepClip t i)),
-    MemLp.coeFn_toLp (memLp_increment_two hB i),
-    MemLp.coeFn_toLp (memLp_increment_two hB (stepClip t i))] with ω h1 h2 h3
+    MemLp.coeFn_toLp (memLp_increment hB i.1.1 i.1.2),
+    MemLp.coeFn_toLp (memLp_increment hB (stepClip t i).1.1 (stepClip t i).1.2)] with ω h1 h2 h3
   rw [h1, Pi.sub_apply]
   change _ = (wienerIncrementLp B hB i : Ω → ℝ) ω - _
   rw [show (wienerIncrementLp B hB i : Ω → ℝ) ω = B i.1.2 ω - B i.1.1 ω from h2,

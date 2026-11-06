@@ -134,13 +134,6 @@ theorem tendsto_div_const_nhdsNE_zero {c : ℝ} (hc : c ≠ 0) :
     simp only [Set.mem_compl_iff, Set.mem_singleton_iff] at hx ⊢
     exact div_ne_zero hx hc
 
-/-- `exp(-τ/l) → 1` as `τ → 0` through nonzero values. -/
-theorem tendsto_exp_neg_div_const_nhdsNE_zero {c : ℝ} (hc : c ≠ 0) :
-    Tendsto (fun τ : ℝ ↦ Real.exp (-(τ / c))) (𝓝[≠] (0 : ℝ)) (𝓝 1) := by
-  have hdiv : Tendsto (fun τ : ℝ ↦ -(τ / c)) (𝓝[≠] (0 : ℝ)) (𝓝 0) := by
-    simpa using ((tendsto_div_const_nhdsNE_zero hc).mono_right nhdsWithin_le_nhds).neg
-  simpa [Function.comp_def] using (Real.continuous_exp.tendsto (0 : ℝ)).comp hdiv
-
 /-- **Short-end limit**: as `τ → 0 (through nonzero values)`, the Svensson curve tends to `β₀ + β₁`.
 The slope and level stay (`s(τ/lᵢ) → 1`), both curvature terms vanish
 (`s(τ/lᵢ) - e^{-τ/lᵢ} → 1 - 1 = 0`), since `τ/lᵢ → 0` and `e^{-τ/lᵢ} → 1`. -/
@@ -153,8 +146,11 @@ theorem tendsto_nssYield_nhdsNE_zero (β₀ β₁ β₂ β₃ l₁ l₂ : ℝ)
     tendsto_nssSlope_nhdsNE_zero.comp hdiv1
   have hs2 : Tendsto (fun τ : ℝ ↦ nssSlope (τ / l₂)) (𝓝[≠] (0 : ℝ)) (𝓝 1) :=
     tendsto_nssSlope_nhdsNE_zero.comp hdiv2
-  have he1 := tendsto_exp_neg_div_const_nhdsNE_zero hl₁
-  have he2 := tendsto_exp_neg_div_const_nhdsNE_zero hl₂
+  have he (c : ℝ) : Tendsto (fun τ : ℝ ↦ Real.exp (-(τ / c))) (𝓝[≠] (0 : ℝ)) (𝓝 1) :=
+    ((Real.continuous_exp.comp (continuous_id.div_const c).neg).tendsto' 0 1 (by simp)).mono_left
+      nhdsWithin_le_nhds
+  have he1 := he l₁
+  have he2 := he l₂
   have h : Tendsto (nssYield β₀ β₁ β₂ β₃ l₁ l₂) (𝓝[≠] (0 : ℝ))
       (𝓝 (β₀ + β₁ * 1 + β₂ * (1 - 1) + β₃ * (1 - 1))) := by
     unfold nssYield

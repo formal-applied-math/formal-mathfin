@@ -12,8 +12,9 @@ public import BrownianMotion.StochasticIntegral.Predictable
 # Horizon-`T` simple processes are dense in the predictable `L²`
 
 This file is the density engine under the Itô integral: the bounded-horizon embedding of
-adapted simple step processes (`simpleAssemblyHorizon`), its isometry (`assembly_isometry_T`), and
-its density in `Lp ℝ 2 trimMeasure` (`simpleAssemblyHorizon_denseRange`). The Itô integral itself
+adapted simple step processes (`simpleAssemblyHorizon`), its isometry
+(`norm_itoAssemblyHorizon`), and its density in `Lp ℝ 2 trimMeasure`
+(`simpleAssemblyHorizon_denseRange`). The Itô integral itself
 (`itoIntegralL2`, then `itoIntegralCLM` as its restriction to the band) is built on it in
 `ItoIntegralL2Dense` and `ItoIntegralCLM`.
 
@@ -88,8 +89,8 @@ the `predictableRect` π-system are the bridges it consumes.
   full predictable trim to `Ioc 0 T × univ`.
 * `generateFrom_predictableRect`: the basic predictable rectangles generate the predictable
   σ-algebra.
-* `assembly_isometry_T`: the Itô isometry on `T`-bounded simple processes, inherited from the full
-  isometry through the trim-norm equality.
+* `norm_itoAssemblyHorizon`: the Itô isometry on `T`-bounded simple processes, inherited from
+  the full isometry through the trim-norm equality.
 * `setIntegral_eq_zero_of_orthogonal_pred`: a `g ∈ L²(trim_T)` whose set integral over every basic
   predictable rectangle vanishes has vanishing set integral over every predictable set.
 * `simpleAssemblyHorizon_denseRange`: the image of `simpleAssemblyHorizon` is dense in
@@ -252,7 +253,7 @@ variable (hB : IsPreBrownianReal B μ)
 
 /-- `uncurry V ∈ L²` in the T-restricted trim. Mirrors
 `ItoIntegralL2.memLp_uncurry_trim` via the bridge + `MemLp.restrict`. -/
-lemma memLp_uncurry_trim_T (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+lemma memLp_uncurry_trimMeasure (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)) :
     MemLp (Function.uncurry ⇑V) 2 (trimMeasure (μ := μ) T hBmeas) := by
   rw [trimMeasure_eq_restrict]
@@ -271,7 +272,7 @@ lemma memLp_prod_of_lp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 noncomputable def simpleProcessL2Horizon (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)) :
     Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) :=
-  (memLp_uncurry_trim_T T hBmeas V).toLp (Function.uncurry ⇑V)
+  (memLp_uncurry_trimMeasure T hBmeas V).toLp (Function.uncurry ⇑V)
 
 /-! ### T-bounded simple processes -/
 
@@ -387,14 +388,14 @@ noncomputable def simpleAssemblyHorizon (T : ℝ≥0) (hBmeas : ∀ t, Measurabl
   map_add' V W := by
     change simpleProcessL2Horizon T hBmeas ((V + W).val) = _
     rw [Submodule.coe_add, simpleProcessL2Horizon, simpleProcessL2Horizon, simpleProcessL2Horizon,
-        ← MemLp.toLp_add (memLp_uncurry_trim_T T hBmeas V.val)
-          (memLp_uncurry_trim_T T hBmeas W.val)]
+        ← MemLp.toLp_add (memLp_uncurry_trimMeasure T hBmeas V.val)
+          (memLp_uncurry_trimMeasure T hBmeas W.val)]
     congr 1
     exact ItoIntegralL2.uncurry_coe_add hBmeas V.val W.val
   map_smul' c V := by
     change simpleProcessL2Horizon T hBmeas ((c • V).val) = _
     rw [Submodule.coe_smul, simpleProcessL2Horizon, simpleProcessL2Horizon, RingHom.id_apply,
-        ← MemLp.toLp_const_smul c (memLp_uncurry_trim_T T hBmeas V.val)]
+        ← MemLp.toLp_const_smul c (memLp_uncurry_trimMeasure T hBmeas V.val)]
     congr 1
     exact ItoIntegralL2.uncurry_coe_smul hBmeas c V.val
 
@@ -408,7 +409,7 @@ noncomputable def itoAssemblyHorizon (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
 
 /-- **The T-restricted Itô isometry on simple processes.** Inherits the full
 isometry (`ItoIntegralL2.assembly_isometry`) via the trim-norm equality. -/
-theorem assembly_isometry_T (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+theorem norm_itoAssemblyHorizon (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) (V : TBoundedSP T hBmeas) :
     ‖itoAssemblyHorizon hB T hBmeas V‖ = ‖simpleAssemblyHorizon (μ := μ) T hBmeas V‖ := by
   change ‖ItoIntegralL2.itoAssembly hB hBmeas V.val‖
@@ -568,7 +569,7 @@ private lemma inner_simpleAssemblyHorizon_iocSPHorizon {T : ℝ≥0} (hBmeas : �
   -- The L² inner product unfolds to ∫ ⟪f z, g z⟫_ℝ = ∫ g z * f z (Mathlib's
   -- real inner product convention `⟪x, y⟫_ℝ = y * x`).
   have h_coe := MemLp.coeFn_toLp
-    (memLp_uncurry_trim_T (μ := μ) T hBmeas
+    (memLp_uncurry_trimMeasure (μ := μ) T hBmeas
       (iocSPHorizon hBmeas hab hbT hF : TBoundedSP T hBmeas).val)
   have h_uncurry_eq := uncurry_iocSPHorizon_eq hBmeas hab hbT hF
   have h_ae_eq : ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas),

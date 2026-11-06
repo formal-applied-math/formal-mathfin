@@ -117,7 +117,11 @@ class DeclIndex:
         )
 
     def mathlib_shaped_private(self) -> list[IndexedDecl]:
-        """Private theorems whose statement mentions no MathFin constant."""
+        """Private theorems whose statement mentions no MathFin constant.
+
+        Each is resolved by calling the upstream lemma that states it, by inlining it where it
+        is a one- or two-step application of upstream, or, for a genuine fact, by making it
+        public under a name that says what it proves; never by publishing a one-liner."""
         return sorted(
             (d for d in self.theorems() if d.private and not d.type_uses_mathfin),
             key=lambda d: (d.module, d.line),

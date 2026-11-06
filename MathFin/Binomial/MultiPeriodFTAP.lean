@@ -203,15 +203,6 @@ section NoArbitrage
 
 variable {T : ℕ} {S₀ u d r : ℝ}
 
-/-- Mutual absolute continuity from full support: a measure charging every point dominates every
-measure on a measurable-singleton space. -/
-lemma absolutelyContinuous_of_pos {Ω : Type*} [MeasurableSpace Ω] {μ ν : Measure Ω}
-    (h : ∀ x, 0 < ν {x}) : μ ≪ ν := by
-  intro s hs
-  by_contra hne
-  obtain ⟨x, hx⟩ : s.Nonempty := Set.nonempty_iff_ne_empty.2 fun hs' ↦ hne (by rw [hs']; simp)
-  exact (h x).not_ge ((measure_mono (Set.singleton_subset_iff.2 hx)).trans_eq hs)
-
 /-- On a full-support space, a.e. equality is pointwise equality. -/
 lemma eq_of_ae_eq_of_pos {Ω : Type*} [MeasurableSpace Ω]
     {μ : Measure Ω} (hμ : ∀ x, 0 < μ {x}) {f g : Ω → ℝ} (h : f =ᵐ[μ] g) (x : Ω) :
@@ -238,8 +229,11 @@ theorem isEMM_horizonSpot (h : BinomialNoArb u d r) (S₀ : ℝ) {p q : ℝ≥0}
     rw [hqcrr] at this
     exact_mod_cast this
   refine .of_condExp_succ
-    ⟨inferInstance, absolutelyContinuous_of_pos (horizonMeasure_pos T hp0 hp1),
-      absolutelyContinuous_of_pos (horizonMeasure_pos T hq0 hq1')⟩
+    ⟨inferInstance,
+      fun s hs ↦ by
+        rw [eq_empty_of_pos_singleton (horizonMeasure_pos T hp0 hp1) hs, measure_empty],
+      fun s hs ↦ by
+        rw [eq_empty_of_pos_singleton (horizonMeasure_pos T hq0 hq1') hs, measure_empty]⟩
     (fun t _ ↦ stronglyAdapted_horizonSpot t) (fun t _ ↦ Integrable.of_finite) fun t ht ↦ ?_
   refine ae_eq_condExp_of_forall_setIntegral_eq ((horizonFiltration T).le t) Integrable.of_finite
     (fun s _ _ ↦ Integrable.of_finite.integrableOn) (fun s hs _ ↦ ?_)

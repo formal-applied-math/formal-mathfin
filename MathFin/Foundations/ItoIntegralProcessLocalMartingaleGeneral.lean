@@ -39,7 +39,8 @@ everywhere-continuous local-martingale upgrade in
   `m₁`.
 * `supermartingale_nullAugmentation`: a supermartingale stays one under the null augmentation of
   its filtration.
-* `condExp_itoProcessCLM_min`: the `L²` Itô process frozen at `T` is a martingale.
+* `condExp_itoProcessCLM_min`: the `L²` Itô process frozen at `T` satisfies the martingale
+  identity `E[M_{j∧T} | 𝓕_i] = M_{i∧T}` a.e. for `i ≤ j`.
 * `condExp_itoLocalMod`: `itoLocalMod` satisfies the martingale identity on the null
   augmentation, for any co-null `G`.
 * `exists_continuous_localMartingale_modification`: the general-integrand Itô process on `[0,T]`

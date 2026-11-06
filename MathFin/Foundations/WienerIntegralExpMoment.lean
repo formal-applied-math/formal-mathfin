@@ -125,7 +125,7 @@ step indicator is the increment (`wienerIntegralLp_stepIndicator`), and `B_0 = 0
 lemma eval_ae_eq_wienerIntegralLp_stepIndicator (hB : IsPreBrownianReal B μ) (T : ℝ≥0) :
     ∀ᵐ ω ∂μ, B T ω = wienerIntegralLp B hB T (stepIndicatorLp T (StepIndex.whole T)) ω := by
   rw [wienerIntegralLp_stepIndicator]
-  filter_upwards [(memLp_increment_two hB (StepIndex.whole T)).coeFn_toLp,
+  filter_upwards [(memLp_increment hB (StepIndex.whole T).1.1 (StepIndex.whole T).1.2).coeFn_toLp,
     hB.eval_zero_ae_eq_zero] with ω h h0
   rw [show (wienerIncrementLp B hB (StepIndex.whole T) : Ω → ℝ) ω = B T ω - B 0 ω from h, h0,
     sub_zero]

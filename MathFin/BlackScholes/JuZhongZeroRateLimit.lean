@@ -380,19 +380,18 @@ theorem tendsto_juValueRaw_zero_rate {φ K q σ T S S₀ : ℝ} {Sk : ℝ → �
 
 /-! ### `V_E` is the Black–Scholes–Merton price -/
 
-/-- Discount factors multiply: `e^{-qT} · e^{-(r-q)T} = e^{-rT}`. -/
-lemma exp_neg_mul_mul_exp_neg_sub_mul (q r T : ℝ) :
-    Real.exp (-(q * T)) * Real.exp (-((r - q) * T)) = Real.exp (-(r * T)) := by
-  rw [← Real.exp_add]; ring_nf
-
 /-- The call (`φ = 1`) European price is `bsVDiv`. -/
 lemma juVE_one (K q σ T r S : ℝ) : juVE 1 K q σ T r S = bsVDiv K r q σ S T := by
-  rw [juVE, bsVDiv, bsV, ← exp_neg_mul_mul_exp_neg_sub_mul q r T]
+  have hd : Real.exp (-(q * T)) * Real.exp (-((r - q) * T)) = Real.exp (-(r * T)) := by
+    rw [← Real.exp_add]; ring_nf
+  rw [juVE, bsVDiv, bsV, ← hd]
   ring_nf
 
 /-- The put (`φ = −1`) European price is `bsPDiv`. -/
 lemma juVE_neg_one (K q σ T r S : ℝ) : juVE (-1) K q σ T r S = bsPDiv K r q σ S T := by
-  rw [juVE, bsPDiv, bsP, ← exp_neg_mul_mul_exp_neg_sub_mul q r T]
+  have hd : Real.exp (-(q * T)) * Real.exp (-((r - q) * T)) = Real.exp (-(r * T)) := by
+    rw [← Real.exp_add]; ring_nf
+  rw [juVE, bsPDiv, bsP, ← hd]
   simp only [neg_one_mul]
   ring
 

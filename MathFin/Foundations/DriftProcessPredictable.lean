@@ -344,7 +344,7 @@ theorem driftSimpleProcessLp_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (
   set 𝓕 := natFiltration (mΩ := mΩ) hBmeas
   have hpredD := driftSimpleProcess_isStronglyPredictable hBmeas V.val
   have hmemD := memLp_uncurry_driftSimpleProcess (μ := μ) T hBmeas V.val
-  have hmemV := memLp_uncurry_trim_T (μ := μ) T hBmeas V.val
+  have hmemV := memLp_uncurry_trimMeasure (μ := μ) T hBmeas V.val
   -- both `E`-norms², via `lp_two_norm_sq` + `coeFn_toLp` + `integral_trim`, as product integrals.
   have hnorm : ∀ (g : ℝ≥0 → Ω → ℝ)
       (hg : MemLp (Function.uncurry g) 2 (trimMeasure (μ := μ) T hBmeas)),

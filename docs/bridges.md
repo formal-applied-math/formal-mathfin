@@ -264,7 +264,7 @@ reinvents, the Mathlib / BrownianMotion-package machinery:
   (integrand `id → φ(t, ·)`) as the `θ s ω = φ(s, B_s ω)` case of the adapted bridge
   (`ItoIntegralRiemannBridgeAdapted.itoIntegralCLM_of_bdd_adapted_cont`, one Riemann–Itô sum
   `riemannσ` in `ItoRiemannSum.lean`), reusing the entire `stepSP` / `simpleAssemblyHorizon` /
-  `itoIntegralCLM` CLM stack; the trim-L² limit reuses `memLp_uncurry_trim_T` + Mathlib's
+  `itoIntegralCLM` CLM stack; the trim-L² limit reuses `memLp_uncurry_trimMeasure` + Mathlib's
   `aestronglyMeasurable_of_tendsto_ae` / `tendsto_integral_of_dominated_convergence`.
 - **A-core / A4** `ItoFormulaTD.lean` / `ItoFormulaCLM.lean` — assemble `DiscreteIto.discrete_ito_formula_2d`
   with A1/A2/A3 via uniqueness of L² limits; `ito_formula_L2_bddDeriv` is the `f_t = 0` case.

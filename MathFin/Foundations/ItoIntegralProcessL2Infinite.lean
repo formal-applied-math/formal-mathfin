@@ -193,10 +193,10 @@ lemma clampSP_simpleProcessL2Horizon (T : ℝ≥0) (hBmeas : ∀ u, Measurable (
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
     simpleProcessL2Horizon (μ := μ) T hBmeas (clampSP T hBmeas V)
       = simpleProcessL2Horizon (μ := μ) T hBmeas V := by
-  refine Lp.ext ((MemLp.coeFn_toLp (memLp_uncurry_trim_T T hBmeas (clampSP T hBmeas V))).trans
+  refine Lp.ext ((MemLp.coeFn_toLp (memLp_uncurry_trimMeasure T hBmeas (clampSP T hBmeas V))).trans
     ((?_ : Function.uncurry ⇑(clampSP T hBmeas V)
         =ᵐ[trimMeasure (μ := μ) T hBmeas] Function.uncurry ⇑V).trans
-      (MemLp.coeFn_toLp (memLp_uncurry_trim_T T hBmeas V)).symm))
+      (MemLp.coeFn_toLp (memLp_uncurry_trimMeasure T hBmeas V)).symm))
   rw [trimMeasure_eq_restrict]
   refine Filter.eventuallyEq_of_mem
     (self_mem_ae_restrict (MeasureTheory.measurableSet_predictable_Ioc_prod

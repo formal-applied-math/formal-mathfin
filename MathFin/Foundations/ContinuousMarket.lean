@@ -183,8 +183,8 @@ omit [FiniteDimensional ℝ F] in
 Sampling `S` at the increasing times `t 0 ≤ t 1 ≤ ⋯` gives a martingale w.r.t. the sampled
 filtration `sampledFiltration 𝓕 ht`: adaptedness and the tower property both restrict along
 `t`. A general, standalone structural lemma (the discrete-time trace of a continuous-time
-martingale), benchmarked as `gir-martingale-reindex`. It is the sampling bridge of the forward
-theorem `isEMM_noArbitrageSimple` below and of `IsEMM.sampled` (`FTAPDiscrete.lean`). -/
+martingale), benchmarked as `gir-martingale-reindex`. `IsEMM.sampled` is its counterpart for a
+martingale stopped at the horizon, and is what `isEMM_noArbitrageSimple` uses. -/
 theorem martingale_comp_monotone {Q : Measure Ω} {S : ℝ≥0 → Ω → F}
     (hS : Martingale S 𝓕 Q) {t : ℕ → ℝ≥0} (ht : Monotone t) :
     Martingale (fun n ↦ S (t n)) (sampledFiltration 𝓕 ht) Q :=

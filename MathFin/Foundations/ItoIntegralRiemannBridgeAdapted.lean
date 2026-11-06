@@ -201,7 +201,7 @@ theorem itoIntegralCLM_of_bdd_adapted_cont (hBmeas : ∀ t, Measurable (B t))
   set f : ℕ → ℝ≥0 × Ω → ℝ := fun n ↦ Function.uncurry ⇑(stepσ hBmeas hadap hbdd T n).val with hf
   set gθ_fn : ℝ≥0 × Ω → ℝ := Function.uncurry θ with hgθ
   have hf_memLp : ∀ n, MemLp (f n) 2 (trimMeasure (μ := μ) T hBmeas) :=
-    fun n ↦ memLp_uncurry_trim_T T hBmeas _
+    fun n ↦ memLp_uncurry_trimMeasure T hBmeas _
   have hgθ_memLp : MemLp gθ_fn 2 (trimMeasure (μ := μ) T hBmeas) :=
     memLp_uncurry_of_bdd_adapted_cont T hBmeas hadap hcont hbdd
   -- `trimMeasure` is supported on `(0,T] × Ω`

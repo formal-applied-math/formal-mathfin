@@ -66,15 +66,12 @@ variable {ν : ℝ}
 /-- The unnormalized Student-t kernel `k_ν(x) = (1 + x²/ν)^(-(ν+1)/2)`. -/
 noncomputable def studentTKernel (ν x : ℝ) : ℝ := (1 + x ^ 2 / ν) ^ (-(ν + 1) / 2)
 
-/-- For `ν > 0`, `1 + x ^ 2 / ν` is positive. -/
-lemma one_add_sq_div_pos (hν : 0 < ν) (x : ℝ) : 0 < 1 + x ^ 2 / ν := by positivity
-
 lemma studentTKernel_pos (hν : 0 < ν) (x : ℝ) : 0 < studentTKernel ν x :=
-  rpow_pos_of_pos (one_add_sq_div_pos hν x) _
+  rpow_pos_of_pos (by positivity : 0 < 1 + x ^ 2 / ν) _
 
 lemma continuous_studentTKernel (hν : 0 < ν) : Continuous (studentTKernel ν) :=
   (by fun_prop : Continuous fun x : ℝ ↦ 1 + x ^ 2 / ν).rpow_const
-    fun x ↦ Or.inl (one_add_sq_div_pos hν x).ne'
+    fun x ↦ Or.inl (by positivity : 0 < 1 + x ^ 2 / ν).ne'
 
 /-- The kernel is integrable for every `ν > 0`: it is the Japanese bracket `(1 + ‖y‖²)^(-r/2)`
 with `r = ν + 1 > 1 = dim ℝ`, at `y = x/√ν`. -/
@@ -100,7 +97,7 @@ lemma studentTNormConst_pos (hν : 0 < ν) : 0 < studentTNormConst ν :=
 private lemma studentTKernel_eq_integral (hν : 0 < ν) (x : ℝ) :
     studentTKernel ν x = (Gamma ((ν + 1) / 2))⁻¹ *
       ∫ u in Ioi 0, u ^ ((ν + 1) / 2 - 1) * exp (-((1 + x ^ 2 / ν) * u)) := by
-  have hb := one_add_sq_div_pos hν x
+  have hb : 0 < 1 + x ^ 2 / ν := by positivity
   rw [integral_rpow_mul_exp_neg_mul_Ioi (by linarith) hb, studentTKernel, one_div,
     inv_rpow hb.le, ← rpow_neg hb.le, neg_div]
   field_simp
@@ -249,7 +246,7 @@ lemma integrable_mul_studentTPDFReal (hν : 1 < ν) :
   have h := ((integrable_rpow_neg_one_add_norm_sq (E := ℝ) (μ := volume) (r := ν)
     (by simpa using hν)).comp_div (sqrt_pos.2 hν0).ne').const_mul (√ν / studentTNormConst ν)
   refine h.mono' (by fun_prop) (ae_of_all _ fun x ↦ ?_)
-  have hb := one_add_sq_div_pos hν0 x
+  have hb : 0 < 1 + x ^ 2 / ν := by positivity
   have h1 : |x| ≤ √ν * (1 + x ^ 2 / ν) ^ (1 / 2 : ℝ) := by
     rw [← sqrt_eq_rpow, ← sqrt_mul hν0.le, ← sqrt_sq_eq_abs]
     refine sqrt_le_sqrt ?_
@@ -276,7 +273,7 @@ theorem setIntegral_Ioi_mul_studentTPDFReal (hν : 1 < ν) (q : ℝ) :
   set c := -(ν / (ν - 1)) / studentTNormConst ν
   have hderiv (t : ℝ) : HasDerivAt (fun t ↦ c * (1 + t ^ 2 / ν) ^ ((1 - ν) / 2))
       (t * studentTPDFReal ν t) t := by
-    have hb := one_add_sq_div_pos hν0 t
+    have hb : 0 < 1 + t ^ 2 / ν := by positivity
     have h := (((hasDerivAt_pow 2 t).div_const ν).const_add 1).rpow_const
       (p := (1 - ν) / 2) (Or.inl hb.ne') |>.const_mul c
     refine h.congr_deriv ?_
@@ -291,7 +288,7 @@ theorem setIntegral_Ioi_mul_studentTPDFReal (hν : 1 < ν) (q : ℝ) :
     simpa [show -((ν - 1) / 2) = (1 - ν) / 2 by ring] using this.const_mul c
   rw [integral_Ioi_of_hasDerivAt_of_tendsto (hderiv q).continuousAt.continuousWithinAt
     (fun t _ ↦ hderiv t) (integrable_mul_studentTPDFReal hν).integrableOn hlim]
-  have hb := one_add_sq_div_pos hν0 q
+  have hb : 0 < 1 + q ^ 2 / ν := by positivity
   rw [studentTPDFReal, studentTKernel, show (1 - ν) / 2 = -(ν + 1) / 2 + 1 by ring,
     rpow_add_one hb.ne']
   simp only [c]

@@ -248,7 +248,8 @@ theorem kkt_sufficient_of_eq {c : ι → ℝ} {C : Matrix ι ι ℝ} (hpsd : C.P
   rw [hstat, Fintype.sum_sum_type, ← Finset.sum_add_distrib, ← Finset.sum_neg_distrib]
   refine Finset.sum_congr rfl fun k _ ↦ ?_
   simp only [Sum.elim_inl, Sum.elim_inr, Pi.neg_apply, smul_neg]
-  rw [show ν k • a k = (max (ν k) 0 - max (-ν k) 0) • a k by rw [max_zero_sub_eq_self],
+  rw [show ν k • a k = (max (ν k) 0 - max (-ν k) 0) • a k by
+        rw [max_zero_sub_max_neg_zero_eq_self],
     sub_smul]
   abel
 

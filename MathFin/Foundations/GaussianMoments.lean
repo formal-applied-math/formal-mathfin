@@ -201,6 +201,12 @@ lemma hasLaw_increment {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
       abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr hst))]
   rw [← hv]; exact hL
 
+/-- A pre-Brownian increment `B t − B s` lies in `L²(μ)`, for any two times. -/
+lemma memLp_increment {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
+    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (s t : ℝ≥0) :
+    MemLp (fun ω ↦ B t ω - B s ω) 2 μ :=
+  hB.isGaussianProcess.hasGaussianLaw_sub.memLp_two
+
 /-! ### Sums and standardization of Gaussian variables -/
 
 /-- A sum of `n` independent `N(m, v)` variables is `N(n·m, n·v)`. -/

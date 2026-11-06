@@ -309,7 +309,7 @@ theorem itoProcessCLM_norm_sq {t T : ℝ≥0} (htT : t ≤ T) (hBmeas : ∀ u, M
   rw [itoProcessCLM_simpleAssemblyHorizon, truncCLM_norm_sq,
       itoSimpleProcessLp_band_isometry hB htT hBmeas V.val]
   refine integral_congr_ae ?_
-  filter_upwards [ae_restrict_of_ae (memLp_uncurry_trim_T T hBmeas V.val).coeFn_toLp] with z hz
+  filter_upwards [ae_restrict_of_ae (memLp_uncurry_trimMeasure T hBmeas V.val).coeFn_toLp] with z hz
   rw [show (simpleAssemblyHorizon (μ := μ) T hBmeas V : ℝ≥0 × Ω → ℝ) z
         = Function.uncurry ⇑V.val z from hz]
 

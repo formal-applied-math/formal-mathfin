@@ -9,6 +9,7 @@ public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.ExtendOfNormIsometry
 public import MathFin.Foundations.LpMulIsometry
+public import MathFin.Foundations.GaussianMoments
 
 /-!
 # Wiener integral on L²([0, T])
@@ -134,15 +135,10 @@ noncomputable def stepIndicatorLp (T : ℝ≥0) (i : StepIndex T) :
     Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) :=
   indicatorConstLp 2 i.measurableSet_interval i.restrict_interval_ne_top (1 : ℝ)
 
-/-- The Wiener increment `B(hi) - B(lo)` is in `L²(μ)`. -/
-lemma memLp_increment_two (hB : IsPreBrownianReal B μ) {T : ℝ≥0} (i : StepIndex T) :
-    MemLp (fun ω ↦ B i.1.2 ω - B i.1.1 ω) 2 μ :=
-  hB.isGaussianProcess.hasGaussianLaw_sub.memLp_two
-
 /-- The Wiener increment `B(hi) - B(lo)` as an element of `Lp ℝ 2 μ`. -/
 noncomputable def wienerIncrementLp (B : ℝ≥0 → Ω → ℝ)
     (hB : IsPreBrownianReal B μ) {T : ℝ≥0} (i : StepIndex T) : Lp ℝ 2 μ :=
-  (memLp_increment_two hB i).toLp _
+  (memLp_increment hB i.1.1 i.1.2).toLp _
 
 variable [IsProbabilityMeasure μ]
 
@@ -258,8 +254,8 @@ private lemma inner_wienerIncrementLp_eq (hB : IsPreBrownianReal B μ)
         (⟪(wienerIncrementLp B hB i : Ω → ℝ) ω,
           (wienerIncrementLp B hB j : Ω → ℝ) ω⟫_ℝ : ℝ) =
         (B i.1.2 ω - B i.1.1 ω) * (B j.1.2 ω - B j.1.1 ω) := by
-      filter_upwards [MemLp.coeFn_toLp (memLp_increment_two hB i),
-                       MemLp.coeFn_toLp (memLp_increment_two hB j)]
+      filter_upwards [MemLp.coeFn_toLp (memLp_increment hB i.1.1 i.1.2),
+                       MemLp.coeFn_toLp (memLp_increment hB j.1.1 j.1.2)]
         with ω hωI hωJ
       rw [show (wienerIncrementLp B hB i : Ω → ℝ) ω = B i.1.2 ω - B i.1.1 ω from hωI,
           show (wienerIncrementLp B hB j : Ω → ℝ) ω = B j.1.2 ω - B j.1.1 ω from hωJ]

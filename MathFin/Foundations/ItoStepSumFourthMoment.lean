@@ -61,10 +61,6 @@ theorem young34 (a b : ℝ) : |a| ^ 3 * |b| ≤ 3 * a ^ 4 / 4 + b ^ 4 / 4 := by
     linarith
   linarith
 
-/-- Young's pointwise inequality, the symmetric instance `|a|·|b|³ ≤ a⁴/4 + 3b⁴/4`. -/
-theorem young134 (a b : ℝ) : |a| * |b| ^ 3 ≤ a ^ 4 / 4 + 3 * b ^ 4 / 4 := by
-  linarith [young34 b a, mul_comm (abs b ^ 3) (abs a)]
-
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
   {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
 
@@ -314,9 +310,8 @@ theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ : ℕ �
                 φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 4
               + 3 / 4 * (φ N ω * (B (s (N + 1)) ω - B (s N) ω)) ^ 4
           rw [Real.norm_eq_abs, abs_mul, abs_pow]
-          have hy := young134 (∑ k ∈ Finset.range N,
-            φ k ω * (B (s (k + 1)) ω - B (s k) ω))
-            (φ N ω * (B (s (N + 1)) ω - B (s N) ω))
+          have hy := young34 (φ N ω * (B (s (N + 1)) ω - B (s N) ω))
+            (∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω))
           linarith)
     have hintZY2 : Integrable (fun ω ↦ (∑ k ∈ Finset.range N,
           φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 2

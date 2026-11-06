@@ -45,8 +45,8 @@ to the growth-optimal portfolio and the physical measure becomes risk-neutral.
 * `kellyDeflatedProb_win`, `kellyDeflatedProb_lose` — the GOP-deflated probabilities
   `q₊ = 1/(b+1)`, `q₋ = b/(b+1)`.
 * `kellyDeflatedProb_sum_one` — `q₊ + q₋ = 1` (a probability measure).
-* `kellyNumeraire_isRiskNeutral` — `q₊·b + q₋·(−1) = 0`: the bet is a martingale under
-  the GOP-deflated measure. The (discrete) numéraire-portfolio ⟹ EMM identity.
+* `kellyNumeraire_isRiskNeutral` — `q₊·b + q₋·(−1) = 0`: under the GOP-deflated probabilities
+  the one-period bet has zero mean, the numéraire-portfolio ⟹ EMM identity in one period.
 
 ## References
 

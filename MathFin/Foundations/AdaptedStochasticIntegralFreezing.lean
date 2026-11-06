@@ -142,7 +142,7 @@ theorem coeFn_cellIntegrand (n : ℕ) (k : {x // x ∈ Finset.range n}) :
     coeFn_bandRestrict T (unifPart T n k.1) (unifPart T n (k.1 + 1))
       (unifPart_mono T n (Nat.le_succ k.1)) hBmeas (processToLp T hBmeas hadap hcont hbdd),
     processToLp_coeFn T hBmeas hadap hcont hbdd,
-    (memLp_uncurry_trim_T T hBmeas (cellStep T hBmeas hadap hbdd n k).val).coeFn_toLp]
+    (memLp_uncurry_trimMeasure T hBmeas (cellStep T hBmeas hadap hbdd n k).val).coeFn_toLp]
     with z hsub hband hφ hstep
   rw [cellIntegrand, hsub, Pi.sub_apply, hband, hφ]
   rw [show (simpleAssemblyHorizon T hBmeas (cellStep T hBmeas hadap hbdd n k) : ℝ≥0 × Ω → ℝ) z

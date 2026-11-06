@@ -123,38 +123,35 @@ bracket containing it (`swapBootstrap_recovers_couponBondFactor`).
 
 ## Main results
 
-Public definitions: `boot` (the bootstrapped curve), `fraChain` and
-`swapChain` (the FRA and swap strips as `boot` instruments). The bisection
-engine (`bisectStep`, `bisect`, `bisectMid`) is imported from
-`MathFin.Foundations.Bisection`.
-
-Public lemmas (all in `namespace MathFin.Bootstrapping`):
-
-* `affineStep_err`, `affineStep_tendsto`, `affineStep_value_err`,
-  `affineStep_stepBudget` — the affine bootstrap step, its repricing bound,
-  and its step budget;
-* `fraValue_affine_of_newUnknown`, `fraValue_newUnknown_eq_quote_iff`,
-  `fraValue_affine_zcb`, `strictAntiOn_fraValue`, `fraThreshold`,
-  `fraStep_err`, `fraStep_tendsto`, `fraRoot_parForward`,
-  `fraRoot_agrees_with_pin` — the FRA layer;
-* `payerSwapValue_affine_of_newUnknown`, `strictAnti_payerSwapValue`,
-  `swapThreshold`, `swapStep_err`, `swapStep_tendsto`, `swapRoot_is_par`,
-  `payerSwapValue_affine_lastCoupon`,
-  `payerSwapValue_affine_lastCoupon_annuity`,
-  `strictAnti_payerSwapValue_lastCoupon`, `swapLastCouponThreshold`,
-  `swapStep_lastCoupon_err`, `payerSwapValue_lastCoupon_eq_zero_iff_couponBond`,
-  `swapBootstrap_recovers_couponBondFactor` — the payer-swap layer and its agreement with
-  the closed-form coupon-bond bootstrap;
-* `boot_length`, `boot_succ_ne_nil`, `boot_step_err`, `boot_reprices_all` —
-  the induction over instruments;
-* `boot_reprices_fraChain`, `boot_reprices_swapChain` — the FRA and swap strips
-  inside the induction;
-* `fraBootstrap_flatCurve` — the flat-curve capstone.
-
-Supporting declarations: the `@[simp]` unfolding equations `fraChain_cons` and
-`swapChain_cons`; and, `private`, the threshold bridge `mul_sub_lt_neg_iff`, the
-slope-weighted residual `abs_sub_mul_sub_eq_mul_abs`, the coupon-sum identity
-`sum_const_mul_eq_annuity` and the unfolding lemma `boot_succ`.
+* `affineStep_err`: for `b > 0` and a root `(a − c)/b` in `[lo, hi]`, bisection on `b·x − a`
+  at target `−c` is within `(hi − lo)/2^{n+1}` of that root after `n` steps.
+* `fraValue_affine_of_newUnknown`, `fraValue_newUnknown_eq_quote_iff`: for `δ ≠ 0`, the FRA value
+  at the bootstrapped forward rate is `p − (1 + δK)·x` (for `x ≠ 0`); for `x > 0` and
+  `1 + δK > 0` it equals the quote `c` if and only if `x = (p − c)/(1 + δK)`.
+* `strictAntiOn_fraValue`, `fraStep_err`: for `δ ≠ 0` and `1 + δK > 0`, the FRA value is
+  strictly decreasing on `x > 0`, and bisection from a bracket `[lo, hi]` with `lo > 0`
+  containing `(p − c)/(1 + δK)` lands within `(hi − lo)/2^{n+1}` of it.
+* `swapRoot_is_par`, `strictAnti_payerSwapValue`, `swapStep_err`: for `A ≠ 0` the root
+  `P0 − K·A` of the payer swap has par rate `K`; the swap value is strictly decreasing in the
+  new factor with no positivity condition, and bisection on it lands within `(hi − lo)/2^{n+1}`
+  of the root when a bracket contains it.
+* `payerSwapValue_lastCoupon_eq_zero_iff_couponBond`: the last-coupon swap has zero value at `x`
+  if and only if `x` satisfies the coupon-bond pricing equation with coupon `K·δ` and face `1`.
+* `swapBootstrap_recovers_couponBondFactor`: for `1 + K·δ > 0`, if `x` solves that
+  coupon-bond equation and lies in `[lo, hi]`, bisection on the last-coupon swap lands within
+  `(hi − lo)/2^{n+1}` of `x`.
+* `boot_length`, `boot_step_err`: `boot` returns `i` factors after `i` instruments, and at step
+  `i` its new factor is within `(hi i − lo i)/2^{n+1}` of the threshold root `σ`, given the
+  threshold shape of the solving function on the bracket and `σ` in the bracket.
+* `boot_reprices_all`: for `b > 0` and a solving function affine `a − b·x` on the bracket
+  with root in the bracket, the repriced instrument `i` is within `b·(hi i − lo i)/2^{n+1}`
+  of its quote `c i`.
+* `boot_reprices_fraChain`, `boot_reprices_swapChain`: the same repricing bound for the FRA strip
+  (`δ ≠ 0`, `1 + δ·K i > 0`, `lo i > 0`) and the swap strip (`1 + K i·δ > 0`), each given that the
+  root lies in the step's bracket.
+* `fraBootstrap_flatCurve`: for `δ ≠ 0`, a fixed rate equal to the flat-curve forward rate and
+  a bracket with `lo > 0` containing the true later discount factor, bisection at zero quote
+  recovers it within `(hi − lo)/2^{n+1}`.
 
 ## References
 

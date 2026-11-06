@@ -126,19 +126,6 @@ theorem integrable_increment
   rw [h_map]
   exact (memLp_id_gaussianReal 1).integrable (by norm_num)
 
-/-- Endpoint inequality for the equipartition: `k t / (n + 1) ≤ (k + 1) t / (n + 1)`
-when `0 ≤ t`. -/
-lemma equipartition_endpoint_le {t : ℝ} (ht : 0 ≤ t) (n k : ℕ) :
-    (k : ℝ) * t / (n + 1) ≤ ((k : ℝ) + 1) * t / (n + 1) := by
-  have hn : (0 : ℝ) < (n : ℝ) + 1 := by positivity
-  rw [div_le_div_iff_of_pos_right hn]
-  nlinarith
-
-/-- Left endpoint of the `k`-th equipartition cell is nonnegative when `0 ≤ t`. -/
-lemma equipartition_start_nonneg {t : ℝ} (ht : 0 ≤ t) (n k : ℕ) :
-    (0 : ℝ) ≤ (k : ℝ) * t / (n + 1) :=
-  div_nonneg (mul_nonneg (Nat.cast_nonneg k) ht) (by positivity)
-
 /-- Expectation of the squared-increment sum along the equipartition:
 `∫ Σ_k (B_{(k+1)t/(n+1)} − B_{kt/(n+1)})² ∂μ = n t / (n + 1)`. -/
 private lemma integral_sum_sq_equipartition (hB : BrownianQuadraticVariation μ B)
@@ -146,14 +133,15 @@ private lemma integral_sum_sq_equipartition (hB : BrownianQuadraticVariation μ 
     ∫ ω, ∑ k ∈ Finset.range n,
         (B (((k : ℝ) + 1) * t / (n + 1)) ω - B ((k : ℝ) * t / (n + 1)) ω) ^ 2 ∂μ
       = n * t / (n + 1) := by
-  rw [integral_finsetSum _
-    (fun k _ ↦ hB.integrable_sq_increment (equipartition_start_nonneg ht n k)
-      (equipartition_endpoint_le ht n k))]
+  have hstart (k : ℕ) : (0 : ℝ) ≤ (k : ℝ) * t / (n + 1) := by positivity
+  have hend (k : ℕ) : (k : ℝ) * t / (n + 1) ≤ ((k : ℝ) + 1) * t / (n + 1) := by
+    rw [div_le_div_iff_of_pos_right (by positivity : (0 : ℝ) < (n : ℝ) + 1)]
+    nlinarith
+  rw [integral_finsetSum _ (fun k _ ↦ hB.integrable_sq_increment (hstart k) (hend k))]
   have hsum : ∀ k ∈ Finset.range n,
       ∫ ω, (B (((k : ℝ) + 1) * t / (n + 1)) ω - B ((k : ℝ) * t / (n + 1)) ω) ^ 2 ∂μ
         = t / (n + 1) := fun k _ ↦ by
-    rw [hB.integral_sq_increment (equipartition_start_nonneg ht n k)
-      (equipartition_endpoint_le ht n k)]
+    rw [hB.integral_sq_increment (hstart k) (hend k)]
     field_simp
     ring
   rw [Finset.sum_congr rfl hsum, Finset.sum_const, Finset.card_range, nsmul_eq_mul]

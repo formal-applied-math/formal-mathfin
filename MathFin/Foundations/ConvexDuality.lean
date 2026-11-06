@@ -42,8 +42,11 @@ upgrade; the explicit `Set` representation is a historical choice, not a forced 
 
 ## Main results
 
-* `MathFin.exists_pos_separating_of_cone_disjoint_simplex`
-* `MathFin.exists_separating_of_not_mem_cone`
+* `MathFin.exists_pos_separating_of_cone_disjoint_simplex`: for a convex, closed cone `C` in
+  `ι → ℝ` (`ι` finite) that contains no point of the standard simplex, there exists `q` with
+  every coordinate positive and `∑ q i * v i ≤ 0` for all `v ∈ C`.
+* `MathFin.exists_separating_of_not_mem_cone`: for a convex, closed cone `C` containing `0` and a
+  point `x₀ ∉ C`, there exists `p` with `∑ p i * v i ≤ 0` on `C` and `0 < ∑ p i * x₀ i`.
 
 ## Tags
 

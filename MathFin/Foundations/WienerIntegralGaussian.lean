@@ -108,7 +108,7 @@ lemma wienerAssembly_coeFn (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
         =ᵐ[μ] fun ω ↦ x i • (B i.1.2 ω - B i.1.1 ω) := by
     intro i _
     filter_upwards [Lp.coeFn_smul (x i) (wienerIncrementLp B hB i),
-      MemLp.coeFn_toLp (memLp_increment_two hB i)] with ω hsmul htoLp
+      MemLp.coeFn_toLp (memLp_increment hB i.1.1 i.1.2)] with ω hsmul htoLp
     rw [hsmul]
     simp only [Pi.smul_apply]
     rw [show (wienerIncrementLp B hB i : Ω → ℝ) ω = B i.1.2 ω - B i.1.1 ω from htoLp]
@@ -151,7 +151,7 @@ lemma wienerAssembly_integral_zero (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
   have hsum : ∫ ω, ∑ i ∈ x.support, x i • (B i.1.2 ω - B i.1.1 ω) ∂μ
       = ∑ i ∈ x.support, ∫ ω, x i • (B i.1.2 ω - B i.1.1 ω) ∂μ :=
     integral_finsetSum x.support
-      (fun i _ ↦ Integrable.smul (x i) ((memLp_increment_two hB i).integrable one_le_two))
+      (fun i _ ↦ Integrable.smul (x i) ((memLp_increment hB i.1.1 i.1.2).integrable one_le_two))
   rw [hsum]
   refine Finset.sum_eq_zero (fun i _ ↦ ?_)
   rw [integral_smul,

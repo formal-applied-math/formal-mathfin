@@ -99,11 +99,6 @@ lemma expectedShortfall_eq_of_valueAtRisk_eq {f : ℝ → ℝ}
     expectedShortfall X P α = (1 - α)⁻¹ * ∫ u in Ioo α 1, f u := by
   rw [expectedShortfall, setIntegral_congr_fun measurableSet_Ioo hf]
 
-/-- A set integral over `(α, 1)` is the interval integral from `α` to `1`. -/
-lemma setIntegral_Ioo_eq_intervalIntegral (hα : α ≤ 1) (f : ℝ → ℝ) :
-    ∫ u in Ioo α 1, f u = ∫ u in α..1, f u := by
-  rw [intervalIntegral.integral_of_le hα, integral_Ioc_eq_integral_Ioo]
-
 /-! ### The exponential law -/
 
 /-- **VaR of an exponential loss**: `VaR_α(X) = −log(1 − α)/λ` for `X ~ Exp(λ)`. -/
@@ -119,7 +114,8 @@ theorem expectedShortfall_of_hasLaw_expMeasure {r : ℝ} (hr : 0 < r)
   have hr' : r ≠ 0 := hr.ne'
   rw [expectedShortfall_eq_of_valueAtRisk_eq fun u hu ↦
       valueAtRisk_of_hasLaw_expMeasure hr hX ⟨hα.1.trans hu.1, hu.2⟩,
-    setIntegral_Ioo_eq_intervalIntegral hα.2.le, intervalIntegral.integral_div,
+    ← integral_Ioc_eq_integral_Ioo, ← intervalIntegral.integral_of_le hα.2.le,
+    intervalIntegral.integral_div,
     intervalIntegral.integral_neg, intervalIntegral.integral_comp_sub_left log 1,
     sub_self, integral_log]
   field_simp
@@ -134,17 +130,15 @@ lemma tendsto_one_sub_nhdsLT_one : Tendsto (fun α : ℝ ↦ 1 - α) (𝓝[<] 1)
   rw [sub_self] at h
   exact h.mono_left nhdsWithin_le_nhds
 
-/-- `−log(1 − α) → ∞` as `α → 1⁻`. -/
-lemma tendsto_neg_log_one_sub : Tendsto (fun α ↦ -log (1 - α)) (𝓝[<] 1) atTop :=
-  tendsto_neg_atBot_atTop.comp (tendsto_log_nhdsGT_zero.comp tendsto_one_sub_nhdsLT_one)
-
 /-- **Light tail**: for an exponential loss the shortfall-to-quantile ratio tends to `1`,
 `ES_α/VaR_α → 1` as `α → 1⁻` (QRM Exercise Book, Exercise 2.23 a)). -/
 theorem tendsto_expectedShortfall_div_valueAtRisk_expMeasure {r : ℝ} (hr : 0 < r)
     (hX : HasLaw X (expMeasure r) P) :
     Tendsto (fun α ↦ expectedShortfall X P α / valueAtRisk X P α) (𝓝[<] 1) (𝓝 1) := by
   have hlim : Tendsto (fun α ↦ 1 + (-log (1 - α))⁻¹) (𝓝[<] 1) (𝓝 1) := by
-    simpa using tendsto_neg_log_one_sub.inv_tendsto_atTop.const_add 1
+    have h : Tendsto (fun α ↦ -log (1 - α)) (𝓝[<] 1) atTop :=
+      tendsto_neg_atBot_atTop.comp (tendsto_log_nhdsGT_zero.comp tendsto_one_sub_nhdsLT_one)
+    simpa using h.inv_tendsto_atTop.const_add 1
   refine hlim.congr' ?_
   filter_upwards [Ioo_mem_nhdsLT (zero_lt_one' ℝ)] with α hα
   have hlog : log (1 - α) ≠ 0 := (log_neg (sub_pos.2 hα.2) (by linarith [hα.1])).ne
@@ -221,7 +215,7 @@ lemma integral_one_sub_rpow (hα : α < 1) (hr : 1 < r) :
   have hr0 : r ≠ 0 := (zero_lt_one.trans hr).ne'
   have hexp : -1 < -r⁻¹ := neg_lt_neg (inv_lt_one_of_one_lt₀ hr)
   have hne : -r⁻¹ + 1 ≠ 0 := by linarith
-  rw [setIntegral_Ioo_eq_intervalIntegral hα.le,
+  rw [← integral_Ioc_eq_integral_Ioo, ← intervalIntegral.integral_of_le hα.le,
     intervalIntegral.integral_comp_sub_left (fun x ↦ x ^ (-r⁻¹)) 1, sub_self,
     integral_rpow (Or.inl hexp), zero_rpow hne, sub_zero, show -r⁻¹ + 1 = 1 - r⁻¹ by ring]
   have hr1 : r - 1 ≠ 0 := by linarith

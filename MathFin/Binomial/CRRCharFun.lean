@@ -146,11 +146,6 @@ lemma tendsto_one_sub_cos_div_sq :
 
 /-! ### The per-step CRR characteristic function -/
 
-/-- Real → complex exponential: `exp(↑x · I) = cos x + (sin x) i`. -/
-lemma exp_ofReal_mul_I_eq_cos_add_sin_mul_I (x : ℝ) :
-    Complex.exp (↑x * I) = ↑(Real.cos x) + ↑(Real.sin x) * I := by
-  rw [Complex.exp_mul_I, ← Complex.ofReal_cos, ← Complex.ofReal_sin]
-
 /-- The characteristic function of one CRR risk-neutral log-return increment,
 evaluated at `t`: `φₙ(t) = pₙ e^{i (σ√Δt) t} + (1−pₙ) e^{i (−σ√Δt) t}`,
 with `Δt = T/n` and `pₙ = crrProb`. -/
@@ -168,7 +163,8 @@ lemma crrStepCharFun_eq (r σ T : ℝ) (n : ℕ) (t : ℝ) :
   unfold crrStepCharFun
   rw [mul_comm I (↑(σ * Real.sqrt (T / n) * t)),
       mul_comm I (↑(-(σ * Real.sqrt (T / n)) * t)),
-      exp_ofReal_mul_I_eq_cos_add_sin_mul_I, exp_ofReal_mul_I_eq_cos_add_sin_mul_I,
+      Complex.exp_mul_I, Complex.exp_mul_I, ← Complex.ofReal_cos, ← Complex.ofReal_cos,
+      ← Complex.ofReal_sin, ← Complex.ofReal_sin,
       show (-(σ * Real.sqrt (T / n)) * t) = -(σ * Real.sqrt (T / n) * t) from by ring,
       Real.cos_neg, Real.sin_neg]
   push_cast

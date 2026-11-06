@@ -43,8 +43,9 @@ any deterministic hazard curve.
 
 ## Main results
 
-* `cdsFairSpread_TV_cash_flow_balance`: fair-spread iff cash-flow balance,
-  for time-varying hazard with constant recovery.
+* `cdsFairSpread_TV_cash_flow_balance`: for a nonzero annuity, the balance equation
+  `c · annuity = (1 − R) · losses` solved for the spread; the hazard enters only through the two
+  legs (`Cox.cdsFairSpreadTV_balances` is the Cox-model instance).
 * `survival_product_eq_exp_sum`: multi-period survival factorisation,
   i.e. `∏ exp(−h_i Δt_i) = exp(−∑ h_i Δt_i)` (a direct `Real.exp_sum`
   application stated in finance variables).

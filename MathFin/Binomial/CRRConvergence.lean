@@ -261,14 +261,6 @@ lemma tendsto_exp_sq_sub_one_div_h (c : ℝ) :
   have h_sq_ne : h^2 ≠ 0 := pow_ne_zero 2 hh_ne
   field_simp
 
-/-- `(e^{σ h} − 1)/h − (e^{-σ h} − 1)/h = (e^{σ h} − e^{-σ h})/h`. -/
-lemma exp_sub_one_div_sub_exp_neg_sub_one_div (σ h : ℝ) :
-    (Real.exp (σ * h) - 1) / h - (Real.exp (-(σ * h)) - 1) / h
-      = (Real.exp (σ * h) - Real.exp (-(σ * h))) / h := by
-  rw [← sub_div]
-  congr 1
-  ring
-
 /-- `(e^{σ h} − e^{-σ h}) / h → 2σ` as `h → 0` (`h ≠ 0`). -/
 lemma tendsto_sinh_div (σ : ℝ) :
     Tendsto (fun h : ℝ ↦ (Real.exp (σ * h) - Real.exp (-(σ * h))) / h)
@@ -284,7 +276,7 @@ lemma tendsto_sinh_div (σ : ℝ) :
   rw [h_target] at h_diff
   refine h_diff.congr' ?_
   filter_upwards with h
-  exact exp_sub_one_div_sub_exp_neg_sub_one_div σ h
+  ring
 
 /-! ### CRR probability limit: `p_n → 1/2` -/
 
@@ -359,7 +351,9 @@ theorem crrProb_tendsto_half {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
                   = (Real.exp (r * h^2) - Real.exp (-(σ * h))) / h := by
       rw [← sub_div]
       congr 1; ring
-    rw [h_num_eq, exp_sub_one_div_sub_exp_neg_sub_one_div σ h]
+    have h_den_eq : (Real.exp (σ * h) - 1) / h - (Real.exp (-(σ * h)) - 1) / h
+                  = (Real.exp (σ * h) - Real.exp (-(σ * h))) / h := by ring
+    rw [h_num_eq, h_den_eq]
     field_simp
   -- Step 3: compose with h_n = √(T/n) → 0+
   have h_h_n_tendsto : Tendsto (fun n : ℕ ↦ Real.sqrt (crrStep T n)) atTop (𝓝[≠] 0) := by

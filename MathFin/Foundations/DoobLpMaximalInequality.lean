@@ -1076,10 +1076,6 @@ noncomputable def enormSup (f : ℕ → Ω → ℝ) (ω : Ω) : ℝ≥0∞ := �
 lemma measurable_enormSup (hf : ∀ k, Measurable (f k)) : Measurable (enormSup f) :=
   Measurable.iSup fun k ↦ (hf k).enorm
 
-/-- Each `f k` of a martingale is measurable for the ambient σ-algebra. -/
-lemma measurable_of_martingale (hf : Martingale f 𝒢 μ) (k : ℕ) : Measurable (f k) :=
-  ((hf.stronglyMeasurable k).mono (𝒢.le k)).measurable
-
 /-- A nonnegative real power commutes with the supremum of a monotone sequence in `ℝ≥0∞`. -/
 lemma iSup_rpow_of_monotone {g : ℕ → ℝ≥0∞} (hg : Monotone g) (hp : 0 ≤ p) :
     (⨆ n, g n) ^ p = ⨆ n, (g n) ^ p :=
@@ -1107,7 +1103,8 @@ private lemma iSup_ofReal_runMaxNorm (f : ℕ → Ω → ℝ) (ω : Ω) :
 
 private lemma measurable_runMaxNorm (hf : Martingale f 𝒢 μ) (n : ℕ) :
     Measurable (runMaxNorm f n) :=
-  Finset.measurable_range_sup'' (n := n) fun k _ ↦ (measurable_of_martingale hf k).norm
+  Finset.measurable_range_sup'' (n := n) fun k _ ↦
+    ((hf.stronglyMeasurable k).mono (𝒢.le k)).measurable.norm
 
 private lemma lintegral_ofReal_runMaxNorm_rpow_le [IsFiniteMeasure μ] (hp : 1 < p)
     (hf : Martingale f 𝒢 μ)
@@ -1159,7 +1156,8 @@ lemma enormSup_lt_top_ae [IsFiniteMeasure μ] (hp : 1 < p) (hf : Martingale f �
     (hbound : ∀ n, eLpNorm (f n) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R) :
     ∀ᵐ ω ∂μ, enormSup f ω < ⊤ := by
   have hp_pos : 0 < p := lt_trans zero_lt_one hp
-  filter_upwards [ae_lt_top ((measurable_enormSup (measurable_of_martingale hf)).pow_const p)
+  filter_upwards [ae_lt_top ((measurable_enormSup fun k ↦
+      ((hf.stronglyMeasurable k).mono (𝒢.le k)).measurable).pow_const p)
     (enormSup_rpow_lintegral_lt_top hp hf hbound).ne] with ω hω
   exact (ENNReal.rpow_lt_top_iff_of_pos hp_pos).mp hω
 
@@ -1174,7 +1172,8 @@ lemma dominator_memLp [IsFiniteMeasure μ] (hp : 1 < p) (hf : Martingale f 𝒢 
     MemLp (dominator f) (ENNReal.ofReal p) μ := by
   have hp_pos : 0 < p := lt_trans zero_lt_one hp
   have hmeas : AEStronglyMeasurable (dominator f) μ :=
-    (measurable_dominator (measurable_of_martingale hf)).aestronglyMeasurable
+    (measurable_dominator fun k ↦
+      ((hf.stronglyMeasurable k).mono (𝒢.le k)).measurable).aestronglyMeasurable
   rw [memLp_iff, eLpNorm_eq_lintegral_rpow_enorm_toReal (by simp [hp_pos]) ENNReal.ofReal_ne_top
     hmeas, ENNReal.toReal_ofReal hp_pos.le]
   refine ENNReal.rpow_lt_top_of_nonneg (by positivity) (lt_of_le_of_lt ?_

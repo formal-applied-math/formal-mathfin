@@ -106,7 +106,11 @@ only with the daemon down (Memory doctrine rule 1).
   `max_sub_max_neg`, `positivePart_sub_negativePart` → `max_zero_sub_max_neg_zero_eq_self`;
   `measurableSet_timeBand` → `measurableSet_band`.
 - **Mathlib-shaped private lemmas** — `private` and `type_uses_mathfin = false`: a general
-  lemma hidden from search and reuse; a `Foundations/` or upstream candidate.
+  lemma hidden from search and reuse; a `Foundations/` or upstream candidate. Each one resolves
+  one of three ways: upstream already has it (call that), it is a one- or two-step application
+  of upstream (write it inline where it is used), or it is a genuine fact (make it public under
+  a name that says what it proves). Publishing a one-liner trades a hidden helper for a public
+  wrapper, which the coherence lens forbids.
 - **Metrics** — leaf fraction (runbook 01), dead ends (public, no `used_by`, not cited by the
   corpus), attribute coverage of hub definitions.
 
@@ -155,8 +159,8 @@ Every module docstring has the Mathlib layout, with two sections we do not yet u
 One module every MathFin module imports (CSLib's `Cslib.Init`, checked by a test). It holds the
 library's Lean-level conventions so that adding one later needs no new sweep:
 
-- `register_grind_attr pricing` — the curated grind set for pricing identities (parity,
-  discounting, forward prices), CSLib's per-domain grind sets;
+- `register_grind_attr pricing` — the curated grind set for pricing identities (put–call
+  parity, the trees' risk-neutral probabilities), CSLib's per-domain grind sets;
 - any MathFin attribute or scoped notation (policy below).
 
 **Notation policy** (a new section of `design.md`, CSLib's `NOTATION.md`): notation shared across

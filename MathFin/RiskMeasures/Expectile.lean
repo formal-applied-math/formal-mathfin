@@ -95,11 +95,6 @@ the unique root of the gap for an integrable `Y` and `α ∈ (0, 1)` (`expectile
 noncomputable def expectile (α : ℝ) (Y : Ω → ℝ) (P : Measure Ω) : ℝ :=
   sInf {e | expectileGap α Y P e ≤ 0}
 
-/-- For integrable `Y`, the call payoff `max (Y - e) 0` is integrable. -/
-lemma integrable_max_sub (hY : Integrable Y P) (e : ℝ) :
-    Integrable (fun ω ↦ max (Y ω - e) 0) P :=
-  (hY.sub (integrable_const e)).pos_part
-
 /-- The gap in terms of the upper partial moment alone:
 `(2α − 1)·E[(Y − e)⁺] + (1 − α)(E[Y] − e)`, from `(e − y)⁺ = (y − e)⁺ − (y − e)`. -/
 lemma expectileGap_eq (hY : Integrable Y P) (e : ℝ) :
@@ -113,7 +108,8 @@ lemma expectileGap_eq (hY : Integrable Y P) (e : ℝ) :
     · rw [max_eq_right (sub_nonpos.2 h), max_eq_left (sub_nonneg.2 h)]
       ring
   have hYe : Integrable (fun ω ↦ Y ω - e) P := hY.sub (integrable_const e)
-  rw [expectileGap, hpt, integral_sub (integrable_max_sub hY e) hYe,
+  have hM : Integrable (fun ω ↦ max (Y ω - e) 0) P := hYe.pos_part
+  rw [expectileGap, hpt, integral_sub hM hYe,
     integral_sub hY (integrable_const e), integral_const, probReal_univ, one_smul]
   ring
 
@@ -121,10 +117,12 @@ lemma expectileGap_eq (hY : Integrable Y P) (e : ℝ) :
 lemma upperPartialMoment_sub (hY : Integrable Y P) {e e' : ℝ} (h : e ≤ e') :
     0 ≤ (∫ ω, max (Y ω - e) 0 ∂P) - ∫ ω, max (Y ω - e') 0 ∂P ∧
       (∫ ω, max (Y ω - e) 0 ∂P) - ∫ ω, max (Y ω - e') 0 ∂P ≤ e' - e := by
-  rw [← integral_sub (integrable_max_sub hY e) (integrable_max_sub hY e')]
+  have hM (e : ℝ) : Integrable (fun ω ↦ max (Y ω - e) 0) P :=
+    (hY.sub (integrable_const e)).pos_part
+  rw [← integral_sub (hM e) (hM e')]
   refine ⟨integral_nonneg fun ω ↦ sub_nonneg.2 (max_le_max (by linarith) le_rfl), ?_⟩
   calc ∫ ω, (max (Y ω - e) 0 - max (Y ω - e') 0) ∂P ≤ ∫ _, (e' - e) ∂P :=
-        integral_mono ((integrable_max_sub hY e).sub (integrable_max_sub hY e'))
+        integral_mono ((hM e).sub (hM e'))
           (integrable_const _) fun ω ↦ sub_le_iff_le_add.2 <|
             max_le (by linarith [le_max_left (Y ω - e') 0])
               (by linarith [le_max_right (Y ω - e') 0])

@@ -48,14 +48,25 @@ Section 7.2.2; Marshall and Olkin 1967). In Lean the clocks are `T 0`, `T 1`, `T
 
 ## Main results
 
-* `marshallOlkin_survival`, `hasLaw_marshallOlkin_fst`, `hasLaw_marshallOlkin_snd`.
-* `marshallOlkinCopula`, `marshallOlkin_survival_eq_copula`.
-* `marshallOlkin_survival_gt_mul`: positive quadrant dependence.
-* `marshallOlkin_diagonal_pos`: the joint law charges the diagonal (a singular component).
-* `covariance_indicator_marshallOlkin`: the covariance of the two default indicators.
-* `marshallOlkin_firstToDefault_survival`, `marshallOlkin_firstToDefault_spread`,
-  `marshallOlkin_single_name_spread_fst`, `marshallOlkin_single_name_spread_snd`,
-  `marshallOlkin_firstToDefault_spread_lt`.
+For independent exponential clocks `T i` of positive rates `rate i`:
+
+* `marshallOlkin_survival`: for `s, t ≥ 0`,
+  `P(X₁ > s, X₂ > t) = exp(−λ₁ s − λ₂ t − λ₃ max(s, t))`.
+* `hasLaw_marshallOlkin_fst`, `hasLaw_marshallOlkin_snd`: `X₁ ~ Exp(λ₁ + λ₃)` and
+  `X₂ ~ Exp(λ₂ + λ₃)`.
+* `marshallOlkin_survival_eq_copula`: for `s, t ≥ 0`, the joint survival probability equals
+  `marshallOlkinCopula` (with `αⱼ = λ₃/(λⱼ + λ₃)`) at the two marginal survival probabilities.
+* `marshallOlkin_survival_gt_mul`: for `s, t > 0`, the joint survival probability is strictly
+  larger than the product of the marginal ones.
+* `marshallOlkin_diagonal_pos`: `P(X₁ = X₂) > 0`.
+* `covariance_indicator_marshallOlkin`: for `s, t ≥ 0`, `Cov(𝟙{X₁ ≤ s}, 𝟙{X₂ ≤ t})` is
+  `exp(−(λ₁+λ₃)s − (λ₂+λ₃)t)·(exp(λ₃ min(s, t)) − 1)`.
+* `marshallOlkin_firstToDefault_survival`: for `t ≥ 0`, `P(min(X₁, X₂) > t) = exp(−(λ₁+λ₂+λ₃)t)`.
+* `marshallOlkin_firstToDefault_spread`, `marshallOlkin_single_name_spread_fst`,
+  `marshallOlkin_single_name_spread_snd`: for `t > 0`, `−log P(·)/t` equals `λ₁+λ₂+λ₃` for the
+  first-to-default time and `λ₁+λ₃`, `λ₂+λ₃` for the single names.
+* `marshallOlkin_firstToDefault_spread_lt`: for `t > 0`, the first-to-default spread is strictly
+  below the sum of the two single-name spreads.
 
 ## References
 

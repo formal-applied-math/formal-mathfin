@@ -161,14 +161,6 @@ private lemma monotone_asrfProfile (hρ : ρ < 1) :
 private lemma continuous_asrfProfile : Continuous fun z ↦ Phi ((PhiInv π + √ρ * z) / √(1 - ρ)) :=
   continuous_Phi.comp (by fun_prop)
 
-omit [IsProbabilityMeasure P] in
-/-- The negated standard normal factor is standard normal (Mathlib's `gaussianReal_neg`). -/
-lemma hasLaw_neg_standard {F : Ω → ℝ} (hF : HasLaw F (gaussianReal 0 1) P) :
-    HasLaw (fun ω ↦ -F ω) (gaussianReal 0 1) P := by
-  have h := gaussianReal_neg hF
-  rw [neg_zero] at h
-  exact h
-
 private lemma oneFactorPD_eq (f : ℝ) :
     oneFactorPD π ρ f = Phi ((PhiInv π + √ρ * -f) / √(1 - ρ)) := by
   rw [oneFactorPD, mul_neg, ← sub_eq_add_neg]
@@ -179,7 +171,7 @@ profile `h` applied to the standard normal `−F`, and VaR commutes with `h`. -/
 theorem valueAtRisk_oneFactorPD {F : Ω → ℝ} (hF : HasLaw F (gaussianReal 0 1) P) (hρ : ρ < 1)
     (hα : α ∈ Ioo 0 1) :
     valueAtRisk (fun ω ↦ oneFactorPD π ρ (F ω)) P α = asrfQuantile π ρ α := by
-  have hG := hasLaw_neg_standard hF
+  have hG : HasLaw (fun ω ↦ -F ω) (gaussianReal 0 1) P := by simpa using gaussianReal_neg hF
   simp_rw [oneFactorPD_eq]
   rw [valueAtRisk_comp (h := fun z ↦ Phi ((PhiInv π + √ρ * z) / √(1 - ρ))) hG.aemeasurable
     (monotone_asrfProfile hρ) continuous_asrfProfile.lowerSemicontinuous hα,
@@ -195,8 +187,9 @@ theorem lt_measureReal_oneFactorPD_le {F : Ω → ℝ} (hF : HasLaw F (gaussianR
   obtain ⟨z, hzx, hz⟩ := (((continuous_asrfProfile (π := π) (ρ := ρ)).tendsto (PhiInv α)).eventually
     (gt_mem_nhds hx) |>.filter_mono nhdsWithin_le_nhds |>.and
       (self_mem_nhdsWithin (s := Ioi (PhiInv α)))).exists
+  have hG : HasLaw (fun ω ↦ -F ω) (gaussianReal 0 1) P := by simpa using gaussianReal_neg hF
   have hNz : P.real {ω | -F ω ≤ z} = Phi z := by
-    rw [(hasLaw_neg_standard hF).measureReal_eq (p := (· ≤ z)) measurableSet_Iic,
+    rw [hG.measureReal_eq (p := (· ≤ z)) measurableSet_Iic,
       ← cdf_gaussianReal_zero_one, cdf_eq_real]
     rfl
   calc α = Phi (PhiInv α) := (Phi_PhiInv hα).symm

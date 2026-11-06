@@ -116,11 +116,6 @@ theorem valueAtRisk_of_bernoulli {Z : Ω → ℝ} (hZ : Measurable Z) (h01 : ∀
         _ = 1 - p := hzero
         _ < α := not_le.1 h
 
-/-- A sum of `{0, 1}` losses is nonnegative. -/
-lemma sum_nonneg_of_zero_or_one (h01 : ∀ i ω, Y i ω = 0 ∨ Y i ω = 1) (ω : Ω) :
-    0 ≤ ∑ i, Y i ω :=
-  Finset.sum_nonneg fun i _ ↦ by rcases h01 i ω with h | h <;> simp [h]
-
 /-- Below level `1` the portfolio loss vanishes exactly when no loss occurs. -/
 lemma setOf_sum_le_eq_iInter (h01 : ∀ i ω, Y i ω = 0 ∨ Y i ω = 1) {x : ℝ}
     (hx0 : 0 ≤ x) (hx1 : x < 1) :
@@ -150,10 +145,12 @@ private lemma one_le_valueAtRisk_sum (hmeas : ∀ i, Measurable (Y i))
     1 ≤ valueAtRisk (fun ω ↦ ∑ i, Y i ω) P α := by
   have hS : AEMeasurable (fun ω ↦ ∑ i, Y i ω) P :=
     (Finset.measurable_sum _ fun i _ ↦ hmeas i).aemeasurable
+  have hnn (ω : Ω) : 0 ≤ ∑ i, Y i ω :=
+    Finset.sum_nonneg fun i _ ↦ by rcases h01 i ω with h | h <;> simp [h]
   refine le_of_forall_lt fun x hx ↦ (lt_valueAtRisk_iff hS hα).2 ?_
   rcases lt_or_ge x 0 with hx0 | hx0
   · rw [show {ω | ∑ i, Y i ω ≤ x} = ∅ from eq_empty_of_forall_notMem fun ω hω ↦
-      (hx0.trans_le (sum_nonneg_of_zero_or_one h01 ω)).not_ge hω, measureReal_empty]
+      (hx0.trans_le (hnn ω)).not_ge hω, measureReal_empty]
     exact hα.1
   · rwa [setOf_sum_le_eq_iInter h01 hx0 hx,
       measureReal_iInter_setOf_eq_zero_eq_pow hmeas h01 hp hind]

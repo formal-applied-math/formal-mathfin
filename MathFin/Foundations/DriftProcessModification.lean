@@ -93,7 +93,7 @@ lemma simpleAssemblyHorizon_norm_sq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
     ‖simpleAssemblyHorizon (μ := μ) T hBmeas W‖ ^ 2
       = ∫ ω, ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑W.val s ω) ^ 2 ∂timeMeasure ∂μ := by
   set 𝓕 := natFiltration (mΩ := mΩ) hBmeas
-  have hmemV := memLp_uncurry_trim_T (μ := μ) T hBmeas W.val
+  have hmemV := memLp_uncurry_trimMeasure (μ := μ) T hBmeas W.val
   have hpredV := W.val.isStronglyPredictable
   have hmemV_prod : MemLp (Function.uncurry ⇑W.val) 2 ((timeMeasureHorizon T).prod μ) :=
     memLp_of_memLp_trim 𝓕.predictable_le_prod hmemV
@@ -142,7 +142,7 @@ lemma drift_maximal_prob (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (W : T
     μ.real {ω | ε ≤ ⨆ i : Set.Iic T, |driftSimpleProcess hBmeas W.val (i : ℝ≥0) ω|}
       ≤ (ε ^ 2)⁻¹ * ((T : ℝ) * ‖simpleAssemblyHorizon (μ := μ) T hBmeas W‖ ^ 2) := by
   set 𝓕 := natFiltration (mΩ := mΩ) hBmeas
-  have hmemV := memLp_uncurry_trim_T (μ := μ) T hBmeas W.val
+  have hmemV := memLp_uncurry_trimMeasure (μ := μ) T hBmeas W.val
   have hmemV_prod : MemLp (Function.uncurry ⇑W.val) 2 ((timeMeasureHorizon T).prod μ) :=
     memLp_of_memLp_trim 𝓕.predictable_le_prod hmemV
   have hintV := hmemV_prod.integrable_sq
@@ -390,7 +390,7 @@ theorem drift_slice_energy_eq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
         ⇑(simpleAssemblyHorizon (μ := μ) T hBmeas W) - ⇑g := Lp.coeFn_sub _ _
     have h2 : ⇑(simpleAssemblyHorizon (μ := μ) T hBmeas W)
         =ᵐ[trimMeasure (μ := μ) T hBmeas] Function.uncurry ⇑W.val :=
-      (memLp_uncurry_trim_T (μ := μ) T hBmeas W.val).coeFn_toLp
+      (memLp_uncurry_trimMeasure (μ := μ) T hBmeas W.val).coeFn_toLp
     filter_upwards [h1, h2] with z hz1 hz2
     rw [hz1, Pi.sub_apply, hz2]; rfl
   have hcoe_prod : ⇑h =ᵐ[(timeMeasureHorizon T).prod μ] fun z ↦ ⇑W.val z.1 z.2 - ⇑g z :=
@@ -422,7 +422,7 @@ theorem drift_slice_sq_integrable (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t
   set h := simpleAssemblyHorizon (μ := μ) T hBmeas W - g with hh
   have h2 : ⇑(simpleAssemblyHorizon (μ := μ) T hBmeas W)
       =ᵐ[trimMeasure (μ := μ) T hBmeas] Function.uncurry ⇑W.val :=
-    (memLp_uncurry_trim_T (μ := μ) T hBmeas W.val).coeFn_toLp
+    (memLp_uncurry_trimMeasure (μ := μ) T hBmeas W.val).coeFn_toLp
   have hcoe_trim : ⇑h =ᵐ[trimMeasure (μ := μ) T hBmeas] fun z ↦ ⇑W.val z.1 z.2 - ⇑g z := by
     filter_upwards [Lp.coeFn_sub (simpleAssemblyHorizon (μ := μ) T hBmeas W) g, h2] with z hz1 hz2
     rw [hz1, Pi.sub_apply, hz2]; rfl

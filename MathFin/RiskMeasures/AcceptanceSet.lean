@@ -96,11 +96,6 @@ end IsCoherentRiskMeasure
 def representingSet {ι : Type*} [Fintype ι] (ρ : (ι → ℝ) → ℝ) : Set (ι → ℝ) :=
   {q | (∀ i, 0 ≤ q i) ∧ (∑ i, q i = 1) ∧ ∀ Z ∈ {Y : ι → ℝ | ρ Y ≤ 0}, ∑ i, q i * Z i ≤ 0}
 
-/-- A probability vector prices a shifted loss at the shifted price. -/
-lemma sum_mul_add_const_of_sum_eq_one {ι : Type*} [Fintype ι] {q : ι → ℝ} (hq : ∑ i, q i = 1)
-    (L : ι → ℝ) (m : ℝ) : ∑ i, q i * (L i + m) = ∑ i, q i * L i + m := by
-  simp [mul_add, Finset.sum_add_distrib, ← Finset.sum_mul, hq]
-
 /-- **Coherent-risk representation (Artzner–Delbaen–Eber–Heath, finite state).** A coherent risk
 measure `ρ` of losses is the supremum of expected loss over its representing probability vectors:
 `ρ L` is the least upper bound of `{∑ qᵢ Lᵢ | q ∈ representingSet ρ}`. The upper bound is
@@ -112,12 +107,16 @@ theorem coherentRisk_isLUB {ι : Type*} [Fintype ι] [MeasurableSpace ι]
     (hρ : IsCoherentRiskMeasure P ρ) (L : ι → ℝ) :
     IsLUB ((fun q ↦ ∑ i, q i * L i) '' representingSet ρ) (ρ L) := by
   classical
+  -- a probability vector prices a shifted loss at the shifted price
+  have hshift {q : ι → ℝ} (hq : ∑ i, q i = 1) (L : ι → ℝ) (m : ℝ) :
+      ∑ i, q i * (L i + m) = ∑ i, q i * L i + m := by
+    simp [mul_add, Finset.sum_add_distrib, ← Finset.sum_mul, hq]
   constructor
   · rintro _ ⟨q, ⟨-, hq₁, hq⟩, rfl⟩
     have hmem : (fun i ↦ L i + -ρ L) ∈ {Y : ι → ℝ | ρ Y ≤ 0} :=
       ((hρ.add_const .of_finite _).trans (add_neg_cancel _)).le
     have := hq _ hmem
-    rw [sum_mul_add_const_of_sum_eq_one hq₁] at this
+    rw [hshift hq₁] at this
     linarith
   · intro b hb
     by_contra hlt
@@ -147,7 +146,7 @@ theorem coherentRisk_isLUB {ι : Type*} [Fintype ι] [MeasurableSpace ι]
     have hpos : 0 < ∑ i, p i / S * (L i + -b) := by
       simp_rw [div_mul_eq_mul_div, ← Finset.sum_div]
       exact div_pos hp_pos hS
-    rw [sum_mul_add_const_of_sum_eq_one hq₁] at hpos
+    rw [hshift hq₁] at hpos
     linarith
 
 end MathFin

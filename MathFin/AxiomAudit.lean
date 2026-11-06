@@ -289,9 +289,9 @@ namespace MathFin.AxiomAudit
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ItoIntegralCLM.generateFrom_predictableRect
 
-/-- info: 'MathFin.ItoIntegralCLM.assembly_isometry_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.ItoIntegralCLM.norm_itoAssemblyHorizon' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.ItoIntegralCLM.assembly_isometry_T
+#print axioms MathFin.ItoIntegralCLM.norm_itoAssemblyHorizon
 
 /-- info: 'MathFin.ItoIntegralCLM.simpleAssemblyHorizon_denseRange' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1758,7 +1758,7 @@ martingale measure** for a discounted price process precludes arbitrage against 
 meaning-1 scope (general admissible strategies, NFLVR, and the converse are the deferred
 Delbaen–Schachermayer meaning-2). The notion is the one `IsEMM`, at time `ℝ≥0`, with its horizon
 `T`: `S` is a `Q`-martingale on `[0, T]`. The forward theorem is the discrete one: a simple strategy is a
-discrete predictable strategy for the price sampled at its own dates (`martingale_comp_monotone`),
+discrete predictable strategy for the price sampled at its own dates (`IsEMM.sampled`),
 its gains are the `F`-valued martingale transform (Theorem 2.2.9), and `IsEMM.noArbitrage`
 (closing through `ae_zero_of_nonneg_of_integral_zero`) applies. Instantiated at `F = ℝ` by the discounted GBM under its risk-neutral measure (`Q = P`,
 `discountedGBM_isMartingale` a `P`-martingale on all of `ℝ≥0`, hence an EMM at every horizon) and by

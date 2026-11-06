@@ -106,7 +106,7 @@ docstring has Mathlib's layout — `# Title`, `## Main definitions` / `## Main r
 dataset exports them as each entry's `subjects`). Missing sections are ratchet counts.
 **`MathFin/Init.lean`** is imported by every module (a module importing no library module
 imports it directly; `test_architecture`): it holds the library's attributes, so far the grind
-set `pricing` (`@[pricing =]` on parity/discounting/tree identities, `grind [pricing]`, pinned
+set `pricing` (`@[pricing =]` on parity and tree identities, `grind [pricing]`, pinned
 in `MathFinTest/Automation.lean`). Notation is `scoped` or `local`, never global
 (`test_notation_is_scoped`; `docs/design.md` §5). The docs site (`docs-site.yml`,
 `tools/verify/docs_site.py`) is generated from main's `decl-index`; import narrowing runs on a

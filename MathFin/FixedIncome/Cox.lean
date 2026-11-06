@@ -74,32 +74,29 @@ this.
 
 ## Main results
 
-Public definitions: `riskyAnnuity`, `coxDefaultTime`, `cdsAnnuity`, `cdsLosses`,
-`premiumLeg`, `protectionLeg`, `cdsFairSpreadTV`.
-
-Public lemmas (all in `namespace MathFin.Cox`):
-
-* `defaultSurvival_const` — the first-arrival survival law in credit variables (the law of
-  the default time itself is `PoissonInterarrival.map_firstArrival_eq_expMeasure`);
-* `riskyAnnuity_eq`, `riskyAnnuity_pos`, `protectionLeg_const`,
-  `cdsLegs_balance_const`, `cdsFairSpread_const_balances` — the
-  constant-intensity legs and balance;
-* `cumHazard_strictMono`, `cumHazard_surjOn_Ici` — monotonicity and
-  surjectivity of the cumulative hazard;
-* `cox_survival_timeVarying`, `cox_cdf_timeVarying` — the survival and CDF
-  identities of the clock-inverted default time; `measurable_coxDefaultTime` — its
-  measurability;
-* `cdsAnnuity_pos`, `defaultDensity_antideriv`, `clockTail_eq_defaultDensity`,
-  `cdsFairSpreadTV_balances`, `cdsAnnuity_eq_riskyAnnuity`,
-  `cdsLosses_eq_riskyAnnuity_mul`, `cdsFairSpreadTV_const`,
-  `cox_defaultProb_density` — the time-varying CDS layer;
-* `cox_mixing_survival`, `cox_mixed_survival` — the restricted-Cox mixing identity.
-
-Supporting lemmas (`hazardSurvival_eq_exp`, `cumHazard_zero`,
-`cumHazard_nonneg`, `cumHazard_deriv`, `cumHazard_continuous`,
-`invFun_on_halfline`, `coxDefaultTime_survSet`, `coxDefaultTime_cdfSet`,
-`hazardSurvival_continuous`) are `private`; the unit-exponential-clock facts
-`expClock_null_neg`, `expClock_nonneg_ae`, `expClock_Iic`, `expClock_Ioi` are public.
+* `defaultSurvival_const`: if `τ` is the first arrival of a counting process with Poisson
+  increments of rate `rate`, then `P(τ > t) = e^{−rate·t}` for `t ≥ 0`.
+* `riskyAnnuity_eq`, `riskyAnnuity_pos`: the constant-intensity risky annuity equals
+  `(1 − e^{−(r+λ)T})/(r+λ)` when `r + λ ≠ 0`, and is positive for `T > 0`.
+* `cdsLegs_balance_const`: for `T > 0`, premium and protection legs at constant intensity
+  balance if and only if `c = cdsFairSpread λ R`.
+* `cumHazard_strictMono`, `cumHazard_surjOn_Ici`: for `h` continuous and positive, the cumulative
+  hazard is strictly increasing; if it also tends to `∞`, it takes every value `y ≥ 0` at some
+  `s ≥ 0`.
+* `cox_survival_timeVarying`, `cox_cdf_timeVarying`: for `h` continuous, positive, with divergent
+  cumulative hazard and a unit-exponential `ξ`, the Cox time satisfies `P(τ > t) = e^{−Λ(t)}`
+  and `P(τ ≤ a) = 1 − e^{−Λ(a)}` for `t, a ≥ 0`.
+* `measurable_coxDefaultTime`: for `h` continuous and positive and `ξ` measurable, the Cox
+  default time is measurable.
+* `cox_defaultProb_density`: under the same hypotheses, `P(τ ≤ a) = ∫₀ᵃ h(s)·S(s) ds` for
+  `a ≥ 0` (undiscounted).
+* `cdsAnnuity_pos`, `cdsFairSpreadTV_balances`: for `h` continuous and `T > 0`, the time-varying
+  annuity is positive, and the premium and protection legs balance if and only if
+  `c = cdsFairSpreadTV r h R T`.
+* `cdsFairSpreadTV_const`: for `T > 0`, the time-varying fair spread at constant intensity `λ`
+  equals `cdsFairSpread λ R`.
+* `cox_mixed_survival`: on the product of a path space with an `Exp(1)` clock, for a measurable
+  nonnegative `Λ` and a `τ` with `t < τ ↔ Λ_t < clock`, `P(τ > t) = ∫ e^{−Λ_t} dμ₁`.
 
 ## Tags
 

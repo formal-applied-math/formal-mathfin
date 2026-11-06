@@ -49,7 +49,8 @@ martingale has constant mean, and the mean at time `1` is `S₀e^{b + σ²/2 + �
 ## Main results
 
 * `integral_exp_const_mul_jumpDiffusionIncrementLaw`, `mgf_id_jumpDiffusionIncrementLaw`,
-  `cgf_id_jumpDiffusionIncrementLaw`: its moment-generating function `e^{κ(θ)τ}`.
+  `cgf_id_jumpDiffusionIncrementLaw`: for `θ` with `∫ e^{θx} dν < ∞`, its moment-generating
+  function is `e^{κ(θ)τ}`.
 * `integrableExpSet_id_subset_jumpDiffusionIncrementLaw`,
   `zero_mem_interior_integrableExpSet_jumpDiffusionIncrementLaw`,
   `cgf_id_jumpDiffusionIncrementLaw_eventuallyEq`: the jumps' exponential moments pass to the
@@ -59,8 +60,8 @@ martingale has constant mean, and the mean at time `1` is `S₀e^{b + σ²/2 + �
 * `integral_exp_jumpDiffusionIncrementLaw_of_compensated`: at the compensated drift the forward is
   the mean, `∫ eʸ = e^{rτ}`.
 * `JumpDiffusionProcess.hasLaw`: `X_t` has the log-return law over `t`.
-* `JumpDiffusionProcess.martingale_iff`: the discounted price is a martingale if and only if the
-  drift is compensated.
+* `JumpDiffusionProcess.martingale_iff`: for `S₀ ≠ 0` and integrable `e^J`, the discounted price
+  is a martingale if and only if the drift is compensated, `b = r − σ²/2 − Λ(𝔼[e^J] − 1)`.
 
 ## References
 

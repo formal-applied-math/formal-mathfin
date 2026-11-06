@@ -51,50 +51,34 @@ market makers, building on the constant-product substrate in
 
 ## Main results
 
-* `impermanentLossReservesX/Y`, `impermanentLossReserves_invariant`,
-  `impermanentLossReserves_price`, `impermanentLoss_eq`: the **impermanent
-  loss closed form** `IL(r) = 2√r/(1+r) - 1` for a constant-product LP
-  (`x0, y0, r > 0`), derived (not merely asserted) from the post-price-move
-  reserve split — the defined reserves satisfy both defining equations
-  (`x1*y1 = x0*y0` and `y1/x1 = r*y0/x0`), not just the first.
-* `impermanentLoss_eq_neg_sq`, `impermanentLoss_nonpos`, `impermanentLoss_eq_zero_iff`: the
-  loss is `−(√r − 1)²/(1 + r)`, so it is never positive and vanishes exactly at `r = 1`
-  (AM–GM, `2√r ≤ 1 + r`). Fees are not modelled. The expected LP value under a lognormal price
-  is in `MathFin/Bridges/ConstantProductLPLognormal.lean`.
-* `twapAccumulator`, `twap`, `twapAccumulator_sub_eq_sum`, `twap_eq_average`:
-  the **Uniswap v2 TWAP** over unit time steps, defined as
-  `p_{t1,t2} = (a_{t2} - a_{t1})/(t2 - t1)`; the accumulator difference
-  telescopes to the window sum, so for `t1 ≤ t2` the TWAP is
-  `(∑_{t1 < i ≤ t2} p_i)/(t2 - t1)`.
-* `harmonicMean`, `harmonicMean_reciprocal_eq_arithmeticMean`: the
-  **reciprocal caveat** — the arithmetic mean of an A-in-B price series is
-  the reciprocal of the *harmonic* mean of the B-in-A series. That it
-  generally differs from the reciprocal of the B-in-A *arithmetic* mean (the
-  AM–HM inequality) is not stated here.
-* `swapOutputWithFee`, `fee_invariant_growth`: the Uniswap v2 **fee
-  invariant** `x0·y0 ≤ (x0 + Δx)(y0 - Δy)`, where `Δy = swapOutput x0 y0
-  (γ·Δx)` is computed from the fee-discounted input (γ the fee retention
-  rate; positive reserves and input, `0 < γ ≤ 1`), and `lpFeeShare`, the
-  candidate LP value-growth share
-  `f = 1 - √(k1/k2)` (only shown nonnegative here, see its docstring).
-* `realReserveX/Y`, `realReserves_curve`: the Uniswap v3 **real-reserves
-  curve** `(x + L/√p_b)(y + L√p_a) = L²` (v3 whitepaper §2, eq. 2.2): the
-  real reserves of an in-range position, shifted by `L/√p_b` and `L√p_a`
-  (that is, the virtual reserves `L/√P` and `L√P`), have constant product.
-* `v3PositionValue`: the value, in token Y, of a v3 position at any square-root price `s`:
-  all token X below the range, the in-range reserves inside, all token Y above (v3 whitepaper
-  §6.4.1, eqs. 6.29–6.30). `v3PositionValue_at_lower`, `v3PositionValue_at_upper`: the two
-  boundary cases, all X at `s = √p_a` and all Y at `s = √p_b`; `v3PositionValue_nonneg`.
+* `impermanentLossReserves_invariant`, `impermanentLossReserves_price`: for `x0, y0, r > 0`, the
+  rebalanced reserves have product `x0·y0` and price `y1/x1 = r·y0/x0`.
+* `impermanentLoss_eq`: for `x0, y0, r > 0`, the value of the rebalanced reserves at the moved
+  price over the value of the held reserves, minus one, equals `impermanentLoss r`.
+* `impermanentLoss_eq_neg_sq`, `impermanentLoss_nonpos`, `impermanentLoss_eq_zero_iff`: for
+  `r ≥ 0`, `IL(r) = −(√r − 1)²/(1 + r)`, it is never positive, and it vanishes if and only if
+  `r = 1`. Fees are not modelled.
+* `twapAccumulator_sub_eq_sum`, `twap_eq_average`: for `t1 ≤ t2`, the accumulator difference is
+  the window sum `∑_{t1 < i ≤ t2} p_i`, so `twap p t1 t2` is that sum over `t2 − t1` (a genuine
+  average only for `t1 < t2`).
+* `harmonicMean_reciprocal_eq_arithmeticMean`: the reciprocal of the harmonic mean of `1/p` over
+  `s` is the arithmetic mean of `p`. The AM–HM inequality is not stated.
+* `fee_invariant_growth`: for `x0, y0, Δx > 0` and `0 < γ ≤ 1`,
+  `x0·y0 ≤ (x0 + Δx)(y0 − Δy)` with `Δy` computed from the fee-discounted input `γ·Δx`.
+* `realReserves_curve`: for positive `√P` and `√p_b`, the in-range real reserves, shifted by
+  `L/√p_b` and `L√p_a`, have product `L²`.
+* `v3PositionValue_at_lower`, `v3PositionValue_at_upper`, `v3PositionValue_nonneg`: the position
+  is worth all token X at `s = a`, all token Y at `s = b` (for `a < b`), and is nonnegative for
+  `L ≥ 0` and `0 < a ≤ b`.
 * `v3PositionValue_eq_coveredCall_of_le`, `v3PositionValue_eq_coveredCall_of_lt`,
-  `coveredCall_sub_v3PositionValue`, `v3PositionValue_le_coveredCall`: **a v3 position is a
-  covered call, less a smoothing term.** With `x_max = realReserveX L √p_a √p_b` the position's
-  full X holding, the payoff `x_max · (s² − max (s² − K) 0)` of `x_max` units of X and a short
-  call struck at the geometric-mean price `K = √(p_a p_b)` equals the position's value outside
-  the range and exceeds it inside by exactly `min (L(s − √p_a)²/√p_a) (L(√p_b − s)²/√p_b)`.
-  Fees are not modelled. The resulting Black–Scholes price bound is
-  `integral_discounted_v3PositionValue_le` in `MathFin/Bridges/UniswapV3CoveredCallPrice.lean`.
-* `tickPrice`, `tickPrice_ratio`: the v3 tick price `p(i) = 1.0001^i` and
-  its per-tick ratio.
+  `v3PositionValue_le_coveredCall`: with `0 < a ≤ b`, the position's value equals the covered-call
+  payoff `x_max·(s² − max (s² − a·b) 0)` for `0 ≤ s ≤ a` and for `s > b`, and is bounded above
+  by it for every `s ≥ 0`.
+* `coveredCall_sub_v3PositionValue`: for `L ≥ 0` and `a < s ≤ b`, the covered-call payoff
+  exceeds the position's value by exactly `min (L(s − a)²/a) (L(b − s)²/b)`. The resulting
+  Black–Scholes price bound is `integral_discounted_v3PositionValue_le` in
+  `MathFin/Bridges/UniswapV3CoveredCallPrice.lean`.
+* `tickPrice_ratio`: `tickPrice (i + 1) / tickPrice i = 1.0001`.
 
 ## References
 

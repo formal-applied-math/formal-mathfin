@@ -74,8 +74,8 @@ change-of-measure step is the `withDensity` transfer already in `LpMulIsometry`'
   becomes a conclusion**.
 * `measure_eq_of_density` — under the same hypotheses and continuous paths of `B`, `Q` agrees
   with `μ` on `𝓕ᴮ_T`.
-* `exists_density_price_martingale` — **the hypotheses have a witness**, so none of the above is
-  vacuous.
+* `exists_density_price_martingale` — the hypotheses are satisfiable, by `Q = μ` (density `1`)
+  and a martingale version of the price path; this shows consistency, not a nontrivial `Q`.
 
 ## References
 

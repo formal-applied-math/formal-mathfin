@@ -91,7 +91,8 @@ theorem geomAsianN_driver_hasLaw (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
   have hmem : ∀ i, MemLp (B (τ i)) 2 μ := fun i ↦
     (hB.isGaussianProcess.hasGaussianLaw_eval (τ i)).memLp_two
   have hincr : ∀ i, (wienerIncrementLp B hB (idx i) : Ω → ℝ)
-      =ᵐ[μ] fun ω ↦ B (τ i) ω - B 0 ω := fun i ↦ (memLp_increment_two hB (idx i)).coeFn_toLp
+      =ᵐ[μ] fun ω ↦ B (τ i) ω - B 0 ω := fun i ↦
+        (memLp_increment hB (idx i).1.1 (idx i).1.2).coeFn_toLp
   -- The Wiener integral's coeFn is `(1/n) ∑ᵢ B_{τᵢ}` a.e. (zero start).
   have hD : (fun ω ↦ wienerIntegralLp B hB T f ω) =ᵐ[μ] fun ω ↦ (∑ i, B (τ i) ω) / n := by
     rw [hf_eq]

@@ -123,7 +123,7 @@ lemma ae_simpleAssemblyHorizon_iocSPHorizon (T : ℝ≥0) (hBmeas : ∀ t, Measu
       (simpleAssemblyHorizon (μ := μ) T hBmeas
         (iocSPHorizon hBmeas i.2.1 i.2.2 (F := Set.univ) MeasurableSet.univ) : ℝ≥0 × Ω → ℝ) z =
       (Set.Ioc i.1.1 i.1.2 ×ˢ (Set.univ : Set Ω)).indicator (fun _ ↦ (1 : ℝ)) z := by
-  filter_upwards [MemLp.coeFn_toLp (memLp_uncurry_trim_T (μ := μ) T hBmeas
+  filter_upwards [MemLp.coeFn_toLp (memLp_uncurry_trimMeasure (μ := μ) T hBmeas
       (iocSPHorizon hBmeas i.2.1 i.2.2 (F := Set.univ) MeasurableSet.univ).val)] with z hz
   calc _ = Function.uncurry
           ⇑(iocSPHorizon hBmeas i.2.1 i.2.2 (F := Set.univ) MeasurableSet.univ).val z :=

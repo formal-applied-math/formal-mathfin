@@ -562,8 +562,8 @@ lemma norm_simpleAssembly_marshalStepSP_sub_le (hBmeas : ∀ t, Measurable (B t)
         - processToLpPredictable (μ := μ) T hBmeas hpred hbdd‖
       ≤ ‖simpleAssemblyHorizon (μ := μ) T hBmeas ⟨V, hle⟩
         - processToLpPredictable (μ := μ) T hBmeas hpred hbdd‖ := by
-  have hf1 := memLp_uncurry_trim_T (μ := μ) T hBmeas (marshalStepSP hBmeas T V hle hC N).val
-  have hfV := memLp_uncurry_trim_T (μ := μ) T hBmeas V
+  have hf1 := memLp_uncurry_trimMeasure (μ := μ) T hBmeas (marshalStepSP hBmeas T V hle hC N).val
+  have hfV := memLp_uncurry_trimMeasure (μ := μ) T hBmeas V
   have hg := memLp_uncurry_of_bdd_predictable (μ := μ) T hBmeas hpred hbdd
   have hLHS : simpleAssemblyHorizon (μ := μ) T hBmeas (marshalStepSP hBmeas T V hle hC N)
       - processToLpPredictable (μ := μ) T hBmeas hpred hbdd

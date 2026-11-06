@@ -169,14 +169,6 @@ theorem condExp_increment_sq (hB : IsPreBrownianReal B μ)
     ((hBmeas v).sub (hBmeas u)) (measurable_id.pow_const 2) hint
 
 omit [IsProbabilityMeasure μ] in
-/-- A Brownian increment lies in `L²(μ)`. -/
-theorem memLp_increment (hB : IsPreBrownianReal B μ) {u v : ℝ≥0} (huv : u ≤ v) :
-    MemLp (fun ω ↦ B v ω - B u ω) 2 μ := by
-  have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  have hL : HasLaw (B v - B u) (gaussianReal 0 (v - u)) μ := hasLaw_increment hB huv
-  exact hL.memLp (memLp_id_gaussianReal 2)
-
-omit [IsProbabilityMeasure μ] in
 /-- **Kernel 3 (adapted diagonal)**: an `𝓕_c`-measurable coefficient times a squared
 increment conditions on the elapsed time —
 `μ[χ·(B_d−B_c)² | 𝓕_a] =ᵐ (d−c) · μ[χ | 𝓕_a]` for `a ≤ c ≤ d`. Tower through `𝓕_c`,
@@ -191,7 +183,7 @@ theorem condExp_adapted_mul_increment_sq (hB : IsPreBrownianReal B μ)
     (μ[fun ω ↦ χ ω * (B d ω - B c ω) ^ 2 | natFiltration hBmeas a])
       =ᵐ[μ] fun ω ↦ ((d : ℝ) - c) * (μ[χ | natFiltration hBmeas a]) ω := by
   have hsq_int : Integrable (fun ω ↦ (B d ω - B c ω) ^ 2) μ :=
-    (memLp_increment hB hcd).integrable_sq
+    (memLp_increment hB c d).integrable_sq
   have hinner : (μ[fun ω ↦ χ ω * (B d ω - B c ω) ^ 2 | natFiltration hBmeas c])
       =ᵐ[μ] fun ω ↦ χ ω * ((d : ℝ) - c) :=
     (condExp_mul_of_stronglyMeasurable_left hχm hint hsq_int).trans
@@ -224,7 +216,7 @@ theorem condExp_adapted_mul_increment_zero (hB : IsPreBrownianReal B μ)
   have hinner : (μ[fun ω ↦ X ω * (B v ω - B u ω) | natFiltration hBmeas u])
       =ᵐ[μ] fun _ ↦ (0 : ℝ) :=
     (condExp_mul_of_stronglyMeasurable_left hXm hint
-      ((memLp_increment hB huv).integrable one_le_two)).trans
+      ((memLp_increment hB u v).integrable one_le_two)).trans
       (by filter_upwards [condExp_increment_eq_zero hB hBmeas huv] with ω hω
           show (X * μ[fun ω ↦ B v ω - B u ω | natFiltration hBmeas u]) ω = 0
           rw [Pi.mul_apply, hω, mul_zero])
@@ -247,7 +239,7 @@ theorem coeFn_bandAssembly {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     ⇑(simpleAssemblyHorizon (μ := μ) T hBmeas (stepSP hBmeas hcd hdT hZm hZb))
       =ᵐ[trimMeasure (μ := μ) T hBmeas]
         fun p ↦ (Set.Ioc c d).indicator (fun _ ↦ (1 : ℝ)) p.1 * Z p.2 := by
-  refine (MemLp.coeFn_toLp (memLp_uncurry_trim_T T hBmeas
+  refine (MemLp.coeFn_toLp (memLp_uncurry_trimMeasure T hBmeas
     (stepSP hBmeas hcd hdT hZm hZb).val)).trans
     (Filter.Eventually.of_forall fun p ↦ ?_)
   obtain ⟨t, ω⟩ := p
@@ -645,7 +637,7 @@ theorem condExp_bandGen_second_moment (hB : IsPreBrownianReal B μ) (T : ℝ≥0
       (Eventually.of_forall fun ω ↦ by
         simpa [Real.norm_eq_abs] using hZb ω) : MemLp Z 2 μ).integrable_sq
   have hint : Integrable (fun ω ↦ (Z ω * (B d ω - B c ω)) ^ 2) μ :=
-    (MemLp.mul (hf := hZinf) (hφ := memLp_increment hB hcd)).integrable_sq.congr
+    (MemLp.mul (hf := hZinf) (hφ := memLp_increment hB c d)).integrable_sq.congr
       (Filter.Eventually.of_forall fun ω ↦ by
         change (((fun ω ↦ B d ω - B c ω) * Z) ω) ^ 2 = (Z ω * (B d ω - B c ω)) ^ 2
         rw [Pi.mul_apply, mul_comm])

@@ -39,8 +39,9 @@ needs none, so it is stated once, here.
 
 ## Main results
 
-* `binomial_martingale_representation` — every martingale of the flip filtration is its initial
-  value plus the `martingaleTransform` of a predictable hedge.
+* `binomial_martingale_representation` — for `0 < q < 1` and a martingale `S` whose up and down
+  values differ at every node, every martingale of the flip filtration is its initial value plus
+  the `martingaleTransform` of a predictable hedge against `S`.
 * `binomialPrice_replication` — under `BinomialNoArb` and `S₀ ≠ 0`, the tree price of a European
   claim is the initial capital of a hedge: the representation applied to the discounted tree value
   and the discounted spot.

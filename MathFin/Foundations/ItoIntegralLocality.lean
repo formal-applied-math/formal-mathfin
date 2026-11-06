@@ -469,10 +469,10 @@ private lemma simpleAssemblyHorizon_afterStepSP (T a : ℝ≥0) (hBmeas : ∀ t,
     simpleAssemblyHorizon (μ := μ) T hBmeas (afterStepSP T a hBmeas Z hZm C hZb V)
       = smulAdaptedCLM T a hBmeas Z hZm C hZb (simpleAssemblyHorizon (μ := μ) T hBmeas V) := by
   refine Lp.ext ?_
-  filter_upwards [(memLp_uncurry_trim_T (μ := μ) T hBmeas
+  filter_upwards [(memLp_uncurry_trimMeasure (μ := μ) T hBmeas
       (afterStepSP T a hBmeas Z hZm C hZb V).val).coeFn_toLp,
     coeFn_smulAdaptedCLM T a hBmeas Z hZm C hZb (simpleAssemblyHorizon (μ := μ) T hBmeas V),
-    (memLp_uncurry_trim_T (μ := μ) T hBmeas V.val).coeFn_toLp,
+    (memLp_uncurry_trimMeasure (μ := μ) T hBmeas V.val).coeFn_toLp,
     ae_fst_ne_zero (μ := μ) T hBmeas] with p e1 e2 e3 hp
   rw [show (simpleAssemblyHorizon (μ := μ) T hBmeas (afterStepSP T a hBmeas Z hZm C hZb V) :
         ℝ≥0 × Ω → ℝ) p
