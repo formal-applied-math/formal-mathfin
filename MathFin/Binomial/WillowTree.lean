@@ -177,7 +177,8 @@ theorem willowMarginal_mass_succ (hP : WillowMomentConstraints z β P) (k : ℕ)
   simp only [h]
 
 /-- **Mass preservation**: the willow marginal has total mass `1` at every step, for any
-family of transition matrices satisfying the row-stochasticity constraint. -/
+family of transition matrices satisfying the row constraints (bundled as
+`WillowMomentConstraints`; the proof uses only row stochasticity). -/
 theorem willowMarginal_mass (hP : WillowMomentConstraints z β P) (hq : ∑ i, q i = 1) (k : ℕ) :
     ∑ j, willowMarginal P q k j = 1 := by
   induction k with
@@ -224,8 +225,9 @@ theorem willowMarginal_secondMoment_succ (hP : WillowMomentConstraints z β P) (
   rw [hpull1, hpull2]
 
 /-- **Mean propagation**: a willow chain started at a mean-zero marginal keeps mean zero
-at every step, for any family of transition matrices satisfying the conditional first
-moment constraint. No marginal constraint and no non-negativity are needed. -/
+at every step, for any family of transition matrices satisfying the row constraints
+(the proof uses only the conditional first moment constraint). No marginal constraint
+and no non-negativity are needed. -/
 theorem willowMarginal_mean (hP : WillowMomentConstraints z β P)
     (hq0 : ∑ i, q i * z i = 0) (k : ℕ) :
     ∑ j, willowMarginal P q k j * z j = 0 := by
@@ -235,9 +237,10 @@ theorem willowMarginal_mean (hP : WillowMomentConstraints z β P)
 
 /-- **Second-moment propagation**: a willow chain started at a marginal of unit second
 moment keeps unit second moment at every step, for any family of transition matrices
-satisfying the conditional second moment constraint. This is the variance-on-track
-induction: combined with the scaling `√(t k)` it keeps the chain's marginal variance at
-`t k` (`willowScaled_secondMoment`). -/
+satisfying the row constraints (the proof uses the conditional second moment constraint
+for the recursion and row stochasticity for the unit mass its constant term is weighted
+by). This is the variance-on-track induction: combined with the scaling `√(t k)` it
+keeps the chain's marginal variance at `t k` (`willowScaled_secondMoment`). -/
 theorem willowMarginal_secondMoment (hP : WillowMomentConstraints z β P)
     (hq : ∑ i, q i = 1) (hq2 : ∑ i, q i * z i ^ 2 = 1) (k : ℕ) :
     ∑ j, willowMarginal P q k j * z j ^ 2 = 1 := by
@@ -262,8 +265,9 @@ theorem willowMarginal_eq (hmarg : ∀ k j, ∑ i, q i * P k i j = q j) (k : ℕ
     exact hmarg k j
 
 /-- **Cross moment**: the willow chain's standardized cross moment across one step is
-its de-correlation coefficient, `E[Z_k Z_{k+1}] = β k` — under any family of transition
-matrices satisfying the conditional first moment constraint. -/
+its de-correlation coefficient, `E[Z_k Z_{k+1}] = β k`. The proof uses all three row
+constraints: the first-moment row collapses the inner sum to `β k * z i`, and the
+propagated unit second moment (`willowMarginal_secondMoment`) closes it. -/
 theorem willowMarginal_crossMoment (hP : WillowMomentConstraints z β P)
     (hq : ∑ i, q i = 1) (hq2 : ∑ i, q i * z i ^ 2 = 1) (k : ℕ) :
     ∑ i, willowMarginal P q k i * z i * ∑ j, P k i j * z j = β k := by
@@ -279,7 +283,7 @@ theorem willowMarginal_crossMoment (hP : WillowMomentConstraints z β P)
 `X k = √(t k) * Z k` on an initially unit-variance willow chain, the marginal second
 moment at step `k` is `t k` — the Brownian marginal variance at the grid time. (It is
 the variance as well whenever the marginal mean is zero, which `willowMarginal_mean`
-gives under its own hypothesis; this theorem needs only the second moment.) -/
+gives under its own hypotheses.) -/
 theorem willowScaled_secondMoment (hP : WillowMomentConstraints z β P)
     (hq : ∑ i, q i = 1) (hq2 : ∑ i, q i * z i ^ 2 = 1)
     (t : ℕ → ℝ) (ht : ∀ k, 0 ≤ t k) (k : ℕ) :
