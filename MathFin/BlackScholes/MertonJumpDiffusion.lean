@@ -9,9 +9,7 @@ public import MathFin.BlackScholes.Call
 public import MathFin.BlackScholes.Put
 public import MathFin.Foundations.PoissonPgf
 public import MathFin.BlackScholes.PDE
-public import Mathlib.Algebra.Order.Star.Real
-public import Mathlib.RingTheory.PiTensorProduct
-public import Mathlib.Tactic.Monotonicity.Lemmas
+public import Mathlib
 
 /-!
 # Merton (1976) jump-diffusion option pricing: the Poisson-mixture series

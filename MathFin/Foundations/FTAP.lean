@@ -10,9 +10,7 @@ public import MathFin.Foundations.MartingaleFrozen
 public import MathFin.Foundations.MartingaleTransform
 public import MathFin.Foundations.NoArbitrageCore
 public import MathFin.Foundations.ReplicationPricing
-public import Mathlib.Tactic.Basify
-public import Mathlib.Tactic.ENatToNat
-public import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib
 
 /-!
 # FTAP (Theorem 2.6.7), forward (⇒) direction: EMM ⇒ no arbitrage

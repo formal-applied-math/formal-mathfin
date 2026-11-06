@@ -6,9 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.BlackScholes.PutGreeks
-public import Mathlib.Algebra.Order.Star.Real
-public import Mathlib.RingTheory.Etale.Weakly
-public import Mathlib.RingTheory.TotallySplit
+public import Mathlib
 
 /-!
 # Strike-direction convexity at every scale

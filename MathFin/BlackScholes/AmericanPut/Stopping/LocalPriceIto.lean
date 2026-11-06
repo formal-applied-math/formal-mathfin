@@ -26,6 +26,11 @@ filtration are proved subsequently in `InteriorIto` and `ContactMartingale`.
   exists together with a continuous local martingale `M` with `G(s,W s) - G(0,W 0)` equal almost
   surely to `M s` plus the time integral of `planeGenerator G` along the path, for every `s`.
 
+## References
+
+* [R. Martin, *Log-convexity of the exercise boundary of an American put
+  option*][MartinAmericanPutConvexity]
+
 ## Tags
 
 Itô formula, local martingale, zero-drift localization, continuation point, compensated Brownian,

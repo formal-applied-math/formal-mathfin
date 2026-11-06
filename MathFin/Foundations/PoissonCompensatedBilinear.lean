@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.PoissonCompensatedIsometryAdapted
-public import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib
 
 /-!
 # The compensated Poisson random measure is an orthogonal martingale measure

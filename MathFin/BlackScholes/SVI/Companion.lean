@@ -6,10 +6,6 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.SVI.Denominators
-public import Mathlib.RingTheory.WittVector.IsPoly
-public import Mathlib.Tactic.Basify
-public import Mathlib.Tactic.ENatToNat
-public import Mathlib.Tactic.ReduceModChar
 
 /-! # The companion matrix is multiplication by the root
 

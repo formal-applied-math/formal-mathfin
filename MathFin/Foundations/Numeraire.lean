@@ -7,8 +7,7 @@ module
 
 public import MathFin.Foundations.ChangeOfMeasure
 public import MathFin.Foundations.EquivMeasure
-public import Mathlib.Tactic.Basify
-public import Mathlib.Tactic.ENatToNat
+public import Mathlib
 
 /-!
 # The change of numéraire

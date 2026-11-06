@@ -6,10 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Portfolio.CAPMEquilibrium
-public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
-public import Mathlib.RingTheory.WittVector.IsPoly
-public import Mathlib.Tactic.Polynomial.Basic
-public import Mathlib.Tactic.ReduceModChar
+public import Mathlib
 
 /-!
 # Risk-parity portfolios from the log-barrier Lagrangian (first-principles)

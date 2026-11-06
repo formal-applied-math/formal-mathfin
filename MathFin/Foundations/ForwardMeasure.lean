@@ -6,8 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.Numeraire
-public import Mathlib.RingTheory.WittVector.IsPoly
-public import Mathlib.Tactic.ReduceModChar
+public import Mathlib
 
 /-!
 # The T-forward measure — the zero-coupon bond as numéraire

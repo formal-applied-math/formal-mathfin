@@ -7,7 +7,7 @@ module
 
 public import MathFin.Foundations.StdSimplexProd
 public import MathFin.RiskMeasures.ValueAtRisk
-public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib
 
 /-!
 # Value-at-risk and expected shortfall at a finite law

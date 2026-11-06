@@ -6,8 +6,6 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.FirstContact
-public import Mathlib.MeasureTheory.Order.Group.Lattice
-public import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Interior stopping-time approximations to first contact

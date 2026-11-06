@@ -9,8 +9,7 @@ public import MathFin.Binomial.Model
 public import MathFin.Binomial.American
 public import MathFin.Binomial.Bermudan
 public import MathFin.Binomial.CRRClosedForm
-public import Mathlib.RingTheory.Etale.Weakly
-public import Mathlib.RingTheory.TotallySplit
+public import Mathlib
 
 /-!
 # Merton 1973 in the binomial tree

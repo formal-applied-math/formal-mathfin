@@ -7,9 +7,6 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.PositiveBump
 public import MathFin.BlackScholes.AmericanPut.Boundary.MovingLine
-public import MathFin.BlackScholes.AmericanPut.Boundary.ParabolicMaximum
-public import Mathlib.Tactic.Basify
-public import Mathlib.Tactic.ENatToNat
 
 /-!
 # Propagation of a positive patch along a straight parabolic tube

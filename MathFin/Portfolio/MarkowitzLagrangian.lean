@@ -10,7 +10,7 @@ public import MathFin.Portfolio.ConvexQPKKT
 public import MathFin.Portfolio.CovariancePSD
 public import MathFin.Portfolio.Markowitz
 public import MathFin.Portfolio.TangentPortfolio
-public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib
 
 /-!
 # N-asset Markowitz from constrained-variance Lagrangian (first principles)

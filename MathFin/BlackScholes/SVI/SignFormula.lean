@@ -6,7 +6,6 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.SVI.ParameterPolynomials
-public import Std.Tactic.BVDecide.Normalize.BitVec
 
 /-! # Sign formulas and sign programs
 

@@ -6,13 +6,7 @@ Authors: Yang Ye, Raphael Coelho
 module
 
 public import MathFin.Foundations.PoissonPgf
-public import Mathlib.Probability.Distributions.Gamma
-public import Mathlib.Probability.Moments.Basic
-public import Mathlib.RingTheory.WittVector.IsPoly
-public import Mathlib.Tactic.Basify
-public import Mathlib.Tactic.ENatToNat
-public import Mathlib.Tactic.Polynomial.Basic
-public import Mathlib.Tactic.ReduceModChar
+public import Mathlib
 
 /-!
 # CreditRisk+ sector probability-generating function (Poisson–Gamma mixture)

@@ -8,7 +8,6 @@ module
 public import MathFin.Foundations.SnellEnvelope
 public import MathFin.Foundations.DoobDecomposition
 public import MathFin.Foundations.OptionalSamplingInequality
-public import Mathlib.Tactic.ENatToNat
 
 /-!
 # Doob decomposition and optional sampling of the finite-horizon Snell envelope

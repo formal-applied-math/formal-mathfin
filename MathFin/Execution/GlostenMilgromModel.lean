@@ -6,7 +6,7 @@ Authors: Alfredo Garcia
 module
 
 public import MathFin.Execution.GlostenMilgrom
-public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib
 
 /-!
 # A model satisfying the Glosten-Milgrom hypotheses

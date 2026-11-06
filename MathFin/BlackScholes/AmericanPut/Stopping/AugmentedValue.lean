@@ -36,6 +36,13 @@ be confused with completing that space by all subsets of null sets.
 * `brownianRightAugAmericanPut_eq_raw`: given such a `DividendPutSolution`, `0 < K`, `0 ≤ r`,
   `0 < σ` and `0 < S`, the right-augmented value equals `brownianAmericanPut`.
 
+## References
+
+* [R. Martin, *Log-convexity of the exercise boundary of an American put
+  option*][MartinAmericanPutConvexity]
+* [G. Peskir and A. Shiryaev, *Optimal Stopping and Free-Boundary Problems*][PeskirShiryaev2006],
+  Ch. I
+
 ## Tags
 
 filtration augmentation, right-continuous filtration, null sets, usual conditions, American value,

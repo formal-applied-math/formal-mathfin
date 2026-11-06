@@ -6,7 +6,6 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.SVI.Reduction
-public import Std.Tactic.BVDecide.Normalize.Prop
 
 /-! # Positive variance as a polynomial gate
 

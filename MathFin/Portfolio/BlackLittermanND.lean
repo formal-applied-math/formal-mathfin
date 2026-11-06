@@ -7,7 +7,7 @@ module
 
 public import MathFin.Portfolio.BlackLitterman
 public import MathFin.Portfolio.ConvexQPKKT
-public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib
 
 /-!
 # N-dimensional Black-Litterman posterior (matrix form)

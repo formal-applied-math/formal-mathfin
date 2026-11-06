@@ -6,10 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.FixedIncome.ZCB
-public import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
-public import Mathlib.RingTheory.WittVector.IsPoly
-public import Mathlib.Tactic.Polynomial.Basic
-public import Mathlib.Tactic.ReduceModChar
+public import Mathlib
 
 /-!
 # Periodic compounding against the continuously compounded bond

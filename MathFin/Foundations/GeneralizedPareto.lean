@@ -7,9 +7,7 @@ module
 
 public import MathFin.Foundations.ExtremeValue
 public import MathFin.Foundations.Quantile
-public import Mathlib.Algebra.Order.Star.Real
-public import Mathlib.RingTheory.PiTensorProduct
-public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib
 
 /-!
 # The generalized Pareto distribution

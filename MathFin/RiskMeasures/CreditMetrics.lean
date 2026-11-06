@@ -7,8 +7,7 @@ module
 
 public import MathFin.Foundations.BivariateNormalCDF
 public import MathFin.Foundations.HoeffdingCovariance
-public import Mathlib.LinearAlgebra.Matrix.Stochastic
-public import Mathlib.Topology.Sheaves.Presheaf
+public import Mathlib
 
 /-!
 # CreditMetrics rating transitions

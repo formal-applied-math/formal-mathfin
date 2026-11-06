@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.PoissonCompensatedIntegralL2
-public import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib
 
 /-!
 # The Itô–Lévy isometry in `L²`-norm form

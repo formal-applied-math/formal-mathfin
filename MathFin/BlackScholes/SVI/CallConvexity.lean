@@ -7,8 +7,6 @@ module
 
 public import MathFin.BlackScholes.SVI.BlackSmile
 public import MathFin.BlackScholes.SVI.DomainFormula
-public import Mathlib.RingTheory.Etale.Weakly
-public import Mathlib.RingTheory.TotallySplit
 
 /-! # Durrleman's condition is convexity of the call in strike
 
