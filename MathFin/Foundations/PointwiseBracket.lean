@@ -145,7 +145,7 @@ theorem condExp_increment_eq_zero (hB : IsPreBrownianReal B μ)
   have hint : ∫ ω, (B v ω - B u ω) ∂μ = 0 := by
     have h_eq : (fun ω ↦ B v ω - B u ω) = (B v - B u : Ω → ℝ) := rfl
     rw [h_eq, hL.integral_eq, integral_id_gaussianReal]
-  have := hB.isFilteredPreBrownian hBmeas
+  have : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
   exact IsFilteredPreBrownian.condExp_comp_increment_eq_const huv
     ((hBmeas v).sub (hBmeas u)) measurable_id hint
 
@@ -164,7 +164,7 @@ theorem condExp_increment_sq (hB : IsPreBrownianReal B μ)
       simpa [Function.comp] using hL.integral_comp (f := fun x : ℝ ↦ x ^ 2) (by fun_prop)
     rw [h_change, integral_sq_gaussianReal]
     exact NNReal.coe_sub huv
-  have := hB.isFilteredPreBrownian hBmeas
+  have : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
   exact IsFilteredPreBrownian.condExp_comp_increment_eq_const huv
     ((hBmeas v).sub (hBmeas u)) (measurable_id.pow_const 2) hint
 

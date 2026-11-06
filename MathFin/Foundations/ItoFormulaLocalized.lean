@@ -279,8 +279,8 @@ lemma cut_hasDerivAt (S : SmoothTrunc) (n : ℕ) (x : ℝ) :
   have heq : S.cutD1 n x = ((n : ℝ) + 1) * (S.φ' (x / ((n : ℝ) + 1)) * (1 / ((n : ℝ) + 1))) := by
     rw [cutD1]; field_simp
   rw [heq]
-  exact ((S.hasDeriv₁ (x / ((n : ℝ) + 1))).comp x (hasDerivAt_div_nat_add_one n x))
-    .const_mul ((n : ℝ) + 1)
+  exact HasDerivAt.const_mul ((n : ℝ) + 1)
+    ((S.hasDeriv₁ (x / ((n : ℝ) + 1))).comp x (hasDerivAt_div_nat_add_one n x))
 
 lemma cutD1_hasDerivAt (S : SmoothTrunc) (n : ℕ) (x : ℝ) :
     HasDerivAt (S.cutD1 n) (S.cutD2 n x) x := by
@@ -294,8 +294,8 @@ lemma cutD2_hasDerivAt (S : SmoothTrunc) (n : ℕ) (x : ℝ) :
   have heq : S.cutD3 n x = S.φ''' (x / ((n : ℝ) + 1)) * (1 / ((n : ℝ) + 1)) / ((n : ℝ) + 1) := by
     rw [cutD3]; field_simp
   rw [heq]
-  exact ((S.hasDeriv₃ (x / ((n : ℝ) + 1))).comp x (hasDerivAt_div_nat_add_one n x))
-    .div_const ((n : ℝ) + 1)
+  exact HasDerivAt.div_const
+    ((S.hasDeriv₃ (x / ((n : ℝ) + 1))).comp x (hasDerivAt_div_nat_add_one n x)) ((n : ℝ) + 1)
 
 lemma cutD1_bdd (S : SmoothTrunc) (n : ℕ) (x : ℝ) : |S.cutD1 n x| ≤ S.M₁ := S.bdd₁ _
 

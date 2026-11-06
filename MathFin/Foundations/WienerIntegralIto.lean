@@ -126,7 +126,7 @@ lemma ae_simpleAssemblyHorizon_iocSPHorizon (T : ℝ≥0) (hBmeas : ∀ t, Measu
   filter_upwards [MemLp.coeFn_toLp (memLp_uncurry_trim_T (μ := μ) T hBmeas
       (iocSPHorizon hBmeas i.2.1 i.2.2 (F := Set.univ) MeasurableSet.univ).val)] with z hz
   calc _ = Function.uncurry
-      ⇑(iocSPHorizon hBmeas i.2.1 i.2.2 (F := Set.univ) MeasurableSet.univ).val z :=
+          ⇑(iocSPHorizon hBmeas i.2.1 i.2.2 (F := Set.univ) MeasurableSet.univ).val z :=
         hz
     _ = _ := by rw [uncurry_iocSPHorizon_eq]
 

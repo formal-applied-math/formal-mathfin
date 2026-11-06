@@ -434,10 +434,10 @@ theorem tendsto_maxIncr (hcont : ∀ ω, Continuous fun t ↦ M t ω) (s t : ℝ
     with n hn
   refine lt_of_le_of_lt ?_ (half_lt_self hε)
   have hε2 : 0 ≤ ε / 2 := (half_pos hε).le
-  calc maxIncr M s t n ω ≤ ((ε / 2).toNNReal : ℝ) := NNReal.coe_le_coe.2
-      (Finset.sup_le fun k hk ↦ by
-        rw [← NNReal.coe_le_coe, coe_nnnorm, Real.coe_toNNReal _ hε2, Real.norm_eq_abs]
-        exact (hn k (mem_range.1 hk)).le)
+  calc maxIncr M s t n ω ≤ ((ε / 2).toNNReal : ℝ) :=
+        NNReal.coe_le_coe.2 (Finset.sup_le fun k hk ↦ by
+          rw [← NNReal.coe_le_coe, coe_nnnorm, Real.coe_toNNReal _ hε2, Real.norm_eq_abs]
+          exact (hn k (mem_range.1 hk)).le)
     _ = ε / 2 := Real.coe_toNNReal _ hε2
 
 /-- Every positive moment of the largest increment tends to `0` (dominated convergence, with the
