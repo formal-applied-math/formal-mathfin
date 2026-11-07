@@ -54,6 +54,12 @@ namespace StochasticFubini
 variable {A S : Type*} {mA : MeasurableSpace A} {mS : MeasurableSpace S}
   {ν : Measure A} {m : Measure S}
 
+/-- **Joint integrability** of a family of representatives `ψ : A → S → ℝ` on the product
+`ν ⊗ m`. An abbreviation so that the product `σ`-algebra is the one of the implicit `mS`
+(not the instance on a type such as `ℝ≥0 × Ω` that already carries the predictable one). -/
+abbrev JointIntegrable (ψ : A → S → ℝ) (ν : Measure A) (m : Measure S) : Prop :=
+  Integrable (Function.uncurry ψ) (ν.prod m)
+
 /-- On a finite measure space the set integral over a measurable `s` commutes with the `Lp`-valued
 parameter integral: the set integral is the continuous linear functional `⟪1_s, ·⟫`. -/
 lemma setIntegral_integral_lp [IsFiniteMeasure m] (φ : A → Lp ℝ 2 m) (hφ : Integrable φ ν)
@@ -75,9 +81,10 @@ lemma setIntegral_integral_lp [IsFiniteMeasure m] (φ : A → Lp ℝ 2 m) (hφ :
 `φ u` and `(u, x) ↦ ψ u x` is jointly integrable (on a finite `m` this follows from joint
 square-integrability). -/
 theorem coeFn_integral_ae_eq [IsFiniteMeasure m] [SFinite ν] (φ : A → Lp ℝ 2 m)
-    (hφ : Integrable φ ν) (ψ : A → S → ℝ) (hψ : Integrable (Function.uncurry ψ) (ν.prod m))
+    (hφ : Integrable φ ν) (ψ : A → S → ℝ) (hψ : JointIntegrable ψ ν m)
     (hφψ : ∀ u, ⇑(φ u) =ᵐ[m] ψ u) :
     ⇑(∫ u, φ u ∂ν) =ᵐ[m] fun x ↦ ∫ u, ψ u x ∂ν := by
+  replace hψ : Integrable (Function.uncurry ψ) (ν.prod m) := hψ
   refine ae_eq_of_forall_setIntegral_eq_of_sigmaFinite (fun s _ _ ↦ ?_) (fun s _ _ ↦ ?_)
     fun s hs _ ↦ ?_
   · exact ((Lp.memLp _).integrable one_le_two).integrableOn
@@ -99,7 +106,7 @@ family of representatives of `φ`, and `g ∈ Lp ℝ 2 m` represents the integra
 integral of the parameter integral. -/
 theorem stochFubini_ofCLM {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
     [IsFiniteMeasure m] [SFinite ν] (I : Lp ℝ 2 m →L[ℝ] F) (φ : A → Lp ℝ 2 m)
-    (hφ : Integrable φ ν) (ψ : A → S → ℝ) (hψ : Integrable (Function.uncurry ψ) (ν.prod m))
+    (hφ : Integrable φ ν) (ψ : A → S → ℝ) (hψ : JointIntegrable ψ ν m)
     (hφψ : ∀ u, ⇑(φ u) =ᵐ[m] ψ u) (g : Lp ℝ 2 m) (hg : ⇑g =ᵐ[m] fun x ↦ ∫ u, ψ u x ∂ν) :
     ∫ u, I (φ u) ∂ν = I g := by
   rw [I.integral_comp_comm hφ]

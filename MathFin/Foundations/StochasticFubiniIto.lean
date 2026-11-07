@@ -53,7 +53,7 @@ represents `s ↦ ∫ u, ψ u s ∂ν`, then `∫ u, (∫ φ u dB) dν(u) = ∫ 
 theorem stochFubini_ito (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) (φ : A → Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
     (hφ : Integrable φ ν) (ψ : A → ℝ≥0 × Ω → ℝ)
-    (hψ : Integrable (Function.uncurry ψ) (ν.prod (trimMeasure (μ := μ) T hBmeas)))
+    (hψ : JointIntegrable ψ ν (trimMeasure (μ := μ) T hBmeas))
     (hφψ : ∀ u, ⇑(φ u) =ᵐ[trimMeasure (μ := μ) T hBmeas] ψ u)
     (g : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
     (hg : ⇑g =ᵐ[trimMeasure (μ := μ) T hBmeas] fun s ↦ ∫ u, ψ u s ∂ν) :
@@ -69,13 +69,14 @@ open ProbabilityTheory WienerIntegralL2
 variable {A Ω : Type*} {mA : MeasurableSpace A} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
   [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} {ν : Measure A} [SFinite ν]
 
+omit [IsProbabilityMeasure μ] in
 /-- **Stochastic Fubini for the Wiener integral on `[0,T]`**: the parameter integral of the
 Wiener integrals `∫ u, wienerIntegralLp (φ u) ∂ν` is the Wiener integral of any `g ∈ L²(Ioc 0 T)`
 representing `s ↦ ∫ u, ψ u s ∂ν`. -/
 theorem stochFubini_wiener (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (φ : A → Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ)))) (hφ : Integrable φ ν)
     (ψ : A → ℝ → ℝ)
-    (hψ : Integrable (Function.uncurry ψ) (ν.prod (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ)))))
+    (hψ : JointIntegrable ψ ν (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))))
     (hφψ : ∀ u, ⇑(φ u) =ᵐ[volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))] ψ u)
     (g : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))))
     (hg : ⇑g =ᵐ[volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))] fun s ↦ ∫ u, ψ u s ∂ν) :

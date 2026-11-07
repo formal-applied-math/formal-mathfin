@@ -926,3 +926,5 @@ import MathFin.Foundations.StochasticFubini
 import MathFin.Foundations.StochasticFubiniIto
 -- The Heath–Jarrow–Morton model bundle: forward curve, bond, short rate, bank account
 import MathFin.FixedIncome.HJM
+-- Fixed cash flows in the HJM model: the discount factor, and pricing off the initial bond curve
+import MathFin.Contracts.Models.HJMBond
