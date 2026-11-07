@@ -13,10 +13,10 @@ public import MathFin.Foundations.NoArbitrageLocal
 
 The multi-period fundamental theorem of asset pricing on a general probability space with
 finitely many assets (`F = EuclideanSpace ℝ (Fin d)`; the reduction and pasting below use only that
-`F` is an inner-product space) and a finite horizon: no arbitrage if and only if there is an equivalent
-martingale measure. The standard proof (Föllmer–Schied, *Stochastic Finance*, §5.2; Rogers 1994;
-Kabanov–Stricker 2001) has three steps. This file assembles the first two with the third
-isolated as one precisely stated hypothesis.
+`F` is an inner-product space) and a finite horizon: no arbitrage if and only if there is an
+equivalent martingale measure. The standard proof (Föllmer–Schied, *Stochastic Finance*, §5.2;
+Rogers 1994; Kabanov–Stricker 2001) has three steps. This file assembles the first two with the
+third isolated as one precisely stated hypothesis.
 
 1. **Reduction** (`NoArbitrageLocal.lean`): multi-period no arbitrage is equivalent to no
    arbitrage in each one-period market conditional on `𝓕 t` (`noArbitrage_iff_noArbitrageLocal`).

@@ -43,6 +43,7 @@ Picard fixed point of `SDEExistence`); only that it solves the equation.
 
 * [F. Black and M. Scholes, *The pricing of options and corporate liabilities*][BlackScholes1973]
 * [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], 4.4
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
 
 ## Tags
 

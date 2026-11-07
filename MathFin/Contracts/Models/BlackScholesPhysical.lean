@@ -30,7 +30,14 @@ For each date `u ≤ H`, `B^θ_u = W_u + θu` almost surely (the drift of a cons
 `Contract.value_congr_ae` its value in the physical market under `Q` is its value in
 `pathAssets S₀ r σ B^θ`, which the existing contract theorems give in closed form. The identity is
 almost sure at each date, not pathwise, and only for dates `≤ H`: past `H` the process `B^θ` has
-frozen drift, which is why the contracts below carry the hypothesis that their dates lie in `[0, H]`.
+frozen drift, which is why the contracts below carry the hypothesis that their dates lie in
+`[0, H]`.
+
+## Main definitions
+
+* `BlackScholes.constGirsanovMeasure`: the horizon-`H` Girsanov measure `Z_H·μ` of a constant
+  market price of risk `θ`.
+* `BlackScholes.constBtheta`: the drift-corrected process `B^θ` of that `θ`.
 
 ## Main results
 
@@ -48,6 +55,11 @@ frozen drift, which is why the contracts below carry the hypothesis that their d
 * [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 9.1.8
 * [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
 * [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], 5.2
+* [F. Black and M. Scholes, *The pricing of options and corporate liabilities*][BlackScholes1973]
+* [A. G. Z. Kemna and A. C. F. Vorst, *A pricing method for options based on average asset
+  values*][KemnaVorst1990]
+* [M. Rubinstein, *Options for the undecided*][Rubinstein1991]
+* [Zhang, *Exotic Options*][ZhangExoticOptions]
 
 ## Tags
 
@@ -179,7 +191,8 @@ theorem value_europeanCall_physical {S_0 K m r σ : ℝ} {T H : ℝ≥0} (hTH : 
   have hB := isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
   have hfix : (europeanCall K T).FixedDated := by simp [europeanCall, Contract.FixedDated]
   rw [Contract.value_congr_ae (Q := constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
-      (X := pathAssets S_0 m σ W) (Y := pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H))
+      (X := pathAssets S_0 m σ W)
+      (Y := pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H))
       (europeanCall K T) hfix (fun p hp ↦ by
         rw [obsList_europeanCall, List.mem_singleton] at hp
         subst hp
@@ -209,7 +222,8 @@ theorem value_chooser_physical {S_0 K m r σ : ℝ} {T t₁ H : ℝ≥0} (hTH : 
   have hB := isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
   have hfix : (chooser K r T t₁).FixedDated := by
     simp [chooser, europeanCall, europeanPut, Contract.FixedDated]
-  rw [Contract.value_congr_ae (Y := pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H))
+  rw [Contract.value_congr_ae
+      (Y := pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H))
       (chooser K r T t₁) hfix (fun p hp ↦ by
         simp only [chooser, europeanCall, europeanPut, Contract.obsList, Payoff.obsList,
           europeanCallPayoff, List.append_nil, List.nil_append, List.mem_append,
@@ -235,7 +249,8 @@ theorem value_geomAsianCall_physical {S_0 K m r σ : ℝ} {T H : ℝ≥0} {n : �
   have := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
   have hB := isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
   have hfix : (geomAsianCall K T τ).FixedDated := by simp [geomAsianCall, Contract.FixedDated]
-  rw [Contract.value_congr_ae (Y := pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H))
+  rw [Contract.value_congr_ae
+      (Y := pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H))
       (geomAsianCall K T τ) hfix (fun p hp ↦ by
         simp only [geomAsianCall, Contract.obsList, Payoff.obsList, obsList_obsProd,
           List.append_nil, List.nil_append, List.map_ofFn, List.mem_ofFn] at hp

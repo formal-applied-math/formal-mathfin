@@ -44,6 +44,7 @@ the integral of the delta against the discounted stock.
 * [F. Black and M. Scholes, *The pricing of options and corporate liabilities*][BlackScholes1973]
 * [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
 * [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], 4.5
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 15.6
 
 ## Tags
 

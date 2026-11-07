@@ -42,6 +42,7 @@ A schedule of fixed cash flows sees the model only through the zero curve `𝔼[
 * [Heath–Jarrow–Morton, *Bond pricing and the term structure*][HeathJarrowMorton1992], §2
 * [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
   sec. 5.1
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
 
 ## Tags
 
@@ -67,7 +68,8 @@ noncomputable def _root_.MathFin.HJM.HJMModel.discount (M : HJMModel μ hB hBmea
   shortRateDiscount fun t ω ↦ ∫ s in Set.Ioc 0 t, M.shortRate s ω ∂timeMeasure
 
 /-- The HJM discount factor is the inverse of the bank account. -/
-theorem _root_.MathFin.HJM.HJMModel.discount_eq_inv_bankAccount (M : HJMModel μ hB hBmeas H) (t : ℝ≥0) (ω : Ω) :
+theorem _root_.MathFin.HJM.HJMModel.discount_eq_inv_bankAccount (M : HJMModel μ hB hBmeas H)
+    (t : ℝ≥0) (ω : Ω) :
     M.discount t ω = (M.bankAccount t ω)⁻¹ := by
   rw [HJMModel.discount, shortRateDiscount, HJMModel.bankAccount, Real.exp_neg]
 

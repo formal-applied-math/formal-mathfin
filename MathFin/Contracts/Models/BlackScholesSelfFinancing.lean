@@ -47,6 +47,7 @@ its drift integral plus the Brownian integral of `Δ σ S`.
 
 * [F. Black and M. Scholes, *The pricing of options and corporate liabilities*][BlackScholes1973]
 * [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], §4.5
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
 
 ## Tags
 
@@ -140,7 +141,8 @@ theorem europeanCall_selfFinancing {μ : Measure Ω} [IsProbabilityMeasure μ] {
       H' s ω = deltaHedgeIntegrand K r σ S_0 T (ψ s) (B s ω) := ⟨_, fun _ _ ↦ rfl⟩
   have hcomp : Continuous fun p : ℝ × ℝ ↦ deltaHedgeIntegrand K r σ S_0 T (ψ p.1) p.2 :=
     continuous_deltaHedgeIntegrand_comp hK hσ hS₀ hψc hψT
-  have hHa : ∀ t : ℝ≥0, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (H' t) := by
+  have hHa : ∀ t : ℝ≥0,
+      StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (H' t) := by
     intro t
     have hg : Continuous fun x : ℝ ↦ deltaHedgeIntegrand K r σ S_0 T (ψ t) x :=
       hcomp.comp (Continuous.prodMk continuous_const continuous_id)

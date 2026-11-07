@@ -194,7 +194,8 @@ theorem ae_predItoIntegral_add {θ₁ θ₂ θ₃ : ℝ≥0 → Ω → ℝ}
     (h : ∀ᵐ ω ∂μ, ∀ s ∈ Icc 0 T, θ₃ s ω = θ₁ s ω + θ₂ s ω) :
     ∀ᵐ ω ∂μ, ∀ t ∈ Icc 0 T,
       predItoIntegral (μ := μ) T hBmeas hp₃ t ω
-        = predItoIntegral (μ := μ) T hBmeas hp₁ t ω + predItoIntegral (μ := μ) T hBmeas hp₂ t ω := by
+        = predItoIntegral (μ := μ) T hBmeas hp₁ t ω
+          + predItoIntegral (μ := μ) T hBmeas hp₂ t ω := by
   refine ae_forall_eq_of_tendstoInMeasure (T := T)
     (Y := fun t ω ↦ predItoIntegral (μ := μ) T hBmeas hp₃ t ω)
     (Y' := fun t ω ↦ predItoIntegral (μ := μ) T hBmeas hp₁ t ω
