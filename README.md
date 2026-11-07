@@ -40,7 +40,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 - **Itô's formula.** For $`f(t,x)`$ with continuous $`f`$, $`\partial_t f`$, $`\partial_x f`$ and
   $`\partial_x^2 f`$, and no growth condition, the process
   $`f(t,B_t) - f(0,B_0) - \int_0^t \big(\partial_t f + \tfrac12 \partial_x^2 f\big)(s,B_s)\,ds`$
-  is a continuous local martingale
+  is a continuous local martingale for the augmented Brownian filtration
   ([`ito_formula_unrestricted`](MathFin/Foundations/ItoFormulaUnrestrictedLocMart.lean)). For an
   Itô process $`X = x_0 + \int b\,ds + \int \sigma\,dB`$ with continuous adapted coefficients and
   no bounds on them or on $`f`$, almost surely, at every $`t \le T`$ at once,
@@ -77,11 +77,14 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   the $`L^2`$ space of predictable processes on $`[0,T]`$ when $`T L_b + \sqrt{T} L_\sigma < 1`$
   ([`picardMap_exists_unique_fixedPoint`](MathFin/Foundations/SDEExistence.lean)).
 
-- **Fundamental theorem of asset pricing.** A finite-horizon market with one risky asset on a finite
-  probability space of full support has no arbitrage if and only if it has an equivalent martingale
-  measure ([`ftap_discrete`](MathFin/Foundations/FTAPDiscrete.lean)); the one-period theorem holds
-  on any probability space with finitely many assets
-  ([`ftap_one_period_vector`](MathFin/Foundations/FTAPOnePeriodVector.lean)).
+- **Fundamental theorem of asset pricing.** A discrete-time, finite-horizon market with one
+  discounted risky asset on a finite probability space of full support has no arbitrage if and only
+  if it has an equivalent martingale measure
+  ([`ftap_discrete`](MathFin/Foundations/FTAPDiscrete.lean)); the one-period theorem holds on any
+  probability space with finitely many assets
+  ([`ftap_one_period_vector`](MathFin/Foundations/FTAPOnePeriodVector.lean)). In continuous time
+  only the easy direction is proved: an equivalent martingale measure precludes arbitrage by
+  simple strategies.
 
 - **Coherent risk measures.** On a finite state space a coherent risk measure of losses is
   $`\rho(L) = \sup_{q \in \mathcal{Q}_\rho} \mathbb{E}_q[L]`$, the supremum over the probability
@@ -90,8 +93,10 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   come from the cone-separation lemmas in
   [`ConvexDuality.lean`](MathFin/Foundations/ConvexDuality.lean).
 
-- **The Black–Scholes PDE from Feynman–Kac.** The call price is a heat-kernel integral, and the
-  PDE follows from the heat equation for the kernel, without differentiating the closed form
+- **The Black–Scholes PDE from Feynman–Kac.** The call price is a heat-kernel (Gaussian) integral
+  of the payoff, and the PDE for the closed-form price follows from the heat equation for the
+  kernel, without differentiating the closed form. This is the Gaussian-integral form of
+  Feynman–Kac; no SDE enters
   ([`bsV_satisfies_bs_pde_via_feynmanKac`](MathFin/BlackScholes/PDEFromFeynmanKac.lean)).
 
 - **Jump-diffusions.** Let $`X`$ be adapted, start at $`0`$, and have increments over $`\tau`$
@@ -101,13 +106,16 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   price $`e^{-rt} S_0 e^{X_t}`$ is a martingale exactly when
   $`b = r - \sigma^2/2 - \Lambda\big(\int e^x\,d\nu - 1\big)`$
   ([`JumpDiffusionProcess.martingale_iff`](MathFin/BlackScholes/JumpDiffusionProcess.lean)). With
-  Gaussian jumps and $`\sigma, S_0, K > 0`$, the conditional value of the call at every date
-  before maturity is then Merton's 1976 series
+  Gaussian jumps and $`\sigma, S_0, K > 0`$, at that drift and reading $`P`$ as the pricing
+  measure, the conditional discounted payoff of the call at every date before maturity is Merton's
+  1976 series
   ([`condExp_call_eq_mertonCallPrice`](MathFin/BlackScholes/JumpDiffusionMerton.lean)).
 
-- **The American put.** A supermartingale dominating the discounted reward bounds the value, and a
-  stopping rule attaining its initial value is optimal
-  ([`value_eq_of_attained`](MathFin/BlackScholes/AmericanPut/Stopping/Verification.lean)). With
+- **The American put.** A bounded continuous supermartingale dominating the discounted reward
+  bounds the value, and a stopping rule whose expected reward equals its initial value attains it
+  ([`value_eq_of_attained`](MathFin/BlackScholes/AmericanPut/Stopping/Verification.lean); a
+  verification principle, the supermartingale is a hypothesis). Separately, for the value defined
+  as the supremum over stopping times of the completed Brownian filtration, with
   $`r > 0`$ and dividend yield $`0 \le q \le r`$, the early-exercise boundary $`B(\tau)`$ is
   strictly convex in the time to expiry and $`\log(B(\tau)/K)`$ is convex
   ([`PhysicalBoundaryConvexity.lean`](MathFin/BlackScholes/AmericanPut/Stopping/PhysicalBoundaryConvexity.lean),
@@ -129,12 +137,14 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   - in any model whose discounted price is a martingale from $`S_0`$, a call less a put is worth
     the forward, $`S_0 - K D(T)`$
     ([`value_europeanCall_sub_put_of_martingale`](MathFin/Contracts/Parity.lean));
-  - the power call, the exchange option and the geometric Asian call are worth their Black–Scholes
-    closed forms, and the chooser's replicating portfolio is worth Rubinstein's
+  - when the pricing measure makes the log-price Gaussian, the power call, the exchange option
+    (jointly Gaussian drivers) and the geometric Asian call (averaging over finitely many dates)
+    are worth their Black–Scholes closed forms, and the chooser's replicating portfolio is worth Rubinstein's
     ([`Contracts/Models/`](MathFin/Contracts/Models)).
 
-- **Interest rates.** In Vasicek and in Hull–White with continuous forcing, discounting by
-  $`e^{-\int_0^t r_s\,ds}`$:
+- **Interest rates.** In Vasicek and in Hull–White with continuous forcing, with the short rate
+  and its time integral taken in their Wiener-integral representation and the Brownian measure
+  read as the pricing measure, discounting by $`e^{-\int_0^t r_s\,ds}`$:
   - the bond price at $`t`$ is $`A_t(T-t)\,e^{-B(T-t)\,r_t}`$ almost surely
     ([`bondPrice_hullWhite`](MathFin/Contracts/Models/HullWhiteBond.lean));
   - the bond put is a Black put on the bond, which is lognormal under the forward measure
@@ -160,7 +170,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 | Lattice models | binomial replication, American and Bermudan options via the Snell envelope, Cox–Ross–Rubinstein convergence, André's reflection principle |
 | Fixed income and credit | bonds, duration and convexity, immunization, yield curves, forward rates, FRAs, swaps, caps and caplets, swaptions and CMS under the annuity measure, the forward measure, Vasicek, Hull–White and GSR, Jamshidian's bond options, hazard rates, CDS, CVA, first-to-default, KMV–Merton |
 | Portfolio theory | Markowitz, CAPM, two-fund separation, the tangency portfolio, risk parity, Black–Litterman; Sharpe, Sortino, Treynor and information ratios; the Kelly criterion |
-| Risk measures | the quantile function; value-at-risk and expected shortfall for every law: Rockafellar–Uryasev, coherence of ES, its dual representation, VaR superadditivity, elicitability (VaR yes, ES no), expectiles; coherent and spectral risk measures, expected utility, concentration indices |
+| Risk measures | the quantile function; value-at-risk and expected shortfall for every law: Rockafellar–Uryasev, coherence of ES, its dual representation, failure of VaR subadditivity (the exact range for independent defaults; infinite-mean Pareto), elicitability of VaR by the pinball loss and non-elicitability of ES, expectiles; coherent and spectral risk measures, expected utility, concentration indices |
 | Dependence and extremes | copulas and Sklar's theorem (continuous margins), Fréchet–Hoeffding bounds, Hoeffding's covariance identity, Marshall–Olkin common shocks; GEV and GPD domains of attraction, maxima of Poisson-many losses |
 | Credit portfolios | Bernoulli mixtures, the one-factor Gaussian threshold model, and the Basel IRB formula as the limit of portfolio VaR |
 | Market microstructure | Avellaneda–Stoikov market making, the Glosten–Milgrom spread |
@@ -192,6 +202,9 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   $`S = S_0 + \int_0^t \sigma\,dB`$ with $`\sigma \neq 0`$ almost everywhere, a probability
   measure with square-integrable density with respect to $`P`$, under which $`S`$ is a
   martingale, agrees with $`P`$ on $`\mathcal{F}^B_T`$.
+- Prices in the continuous-time models are discounted expectations under a pricing measure fixed
+  by the model. Replication is proved in the binomial tree and, through martingale representation,
+  for square-integrable claims on the Brownian filtration.
 - Martingale representation proves that a hedge exists and is unique, but does not identify it;
   that needs the Clark–Ocone formula
   ([#182](https://github.com/formal-applied-math/formal-mathfin/issues/182), open).
@@ -216,7 +229,9 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 - The multi-period fundamental theorem and the representation of coherent risk measures are proved
   on finite probability spaces only.
 - Bond options and caplets are priced in Vasicek and in Hull–White with continuous forcing, where
-  the bond prices are derived. Elsewhere the observed bond is a hypothesis of the model bundle, and
+  the bond prices are derived from the Wiener-integral representation of the short rate. That this
+  representation solves the short-rate SDE, and the swap of time integrals behind the integrated
+  rate, are cited, not proved. Elsewhere the observed bond is a hypothesis of the model bundle, and
   so is the lognormality behind the Black-76 caplet and Black's swaption formula. The CMS
   adjustment is exact for payment at the fixing date. Its sign is proved only when every bond but
   the last is known at the fixing date.

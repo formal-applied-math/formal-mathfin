@@ -316,7 +316,7 @@
     },
     {
       "id": "mf-binomial-girsanov-RN-norm",
-      "name": "Discrete Girsanov: E^P[dQ/dP] = 1",
+      "name": "Single-Period Binomial Density Normalization: E^P[dQ/dP] = 1",
       "description": "In a single-period binomial, the Radon-Nikodym derivative Z = dQ/dP satisfies E^P[Z] = 1.",
       "domain": "mathematical_finance",
       "code": {
