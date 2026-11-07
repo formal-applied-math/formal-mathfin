@@ -83,7 +83,6 @@ noncomputable def constGirsanovMeasure (θ : ℝ) (H : ℝ≥0) : Measure Ω :=
   μ.withDensity fun ω ↦ ENNReal.ofReal
     (ZTpred hW H hWmeas (isStronglyPredictable_const hWmeas θ) (abs_const_le θ) ω)
 
-include hW in
 /-- The drift-corrected process `B^θ_u = W_u + driftContinuousMod θ̂ u` of the constant market
 price of risk `θ` (`BthetaPred` for the constant integrand). -/
 noncomputable def constBtheta (θ : ℝ) (H : ℝ≥0) (u : ℝ≥0) (ω : Ω) : ℝ :=
@@ -103,7 +102,7 @@ include hW in
 `θ`, under `Q = Z_H·μ` the process `B^θ` is an `𝓕`-pre-Brownian motion on all of `ℝ≥0`
 (`Btheta_isFilteredPreBrownian_predictable_of_bdd`). -/
 theorem isFilteredPreBrownian_constBtheta (θ : ℝ) (H : ℝ≥0) :
-    IsFilteredPreBrownian (constBtheta hW hWmeas θ H) (natFiltration hWmeas)
+    IsFilteredPreBrownian (constBtheta (μ := μ) hWmeas θ H) (natFiltration hWmeas)
       (constGirsanovMeasure hW hWmeas θ H) :=
   Btheta_isFilteredPreBrownian_predictable_of_bdd hW hWmeas
     (isStronglyPredictable_const hWmeas θ) (abs_const_le θ) H
@@ -111,7 +110,7 @@ theorem isFilteredPreBrownian_constBtheta (θ : ℝ) (H : ℝ≥0) :
 include hW in
 /-- `B^θ` is a pre-Brownian motion under `Q`, the hypothesis the contract theorems take. -/
 theorem isPreBrownianReal_constBtheta (θ : ℝ) (H : ℝ≥0) :
-    IsPreBrownianReal (constBtheta hW hWmeas θ H) (constGirsanovMeasure hW hWmeas θ H) :=
+    IsPreBrownianReal (constBtheta (μ := μ) hWmeas θ H) (constGirsanovMeasure hW hWmeas θ H) :=
   (isFilteredPreBrownian_constBtheta hW hWmeas θ H).toIsPreBrownianReal
 
 include hW in
@@ -120,7 +119,7 @@ include hW in
 (`driftContinuousMod_eq_setIntegral`) and the integrand `θ̂` is `θ` for almost every `s` on almost
 every path (`processToLpPredictable_ae_slice`). -/
 theorem constBtheta_drift_ae (θ : ℝ) (H : ℝ≥0) {u : ℝ≥0} (hu : u ≤ H) :
-    ∀ᵐ ω ∂μ, constBtheta hW hWmeas θ H u ω = W u ω + θ * (u : ℝ) := by
+    ∀ᵐ ω ∂μ, constBtheta (μ := μ) hWmeas θ H u ω = W u ω + θ * (u : ℝ) := by
   filter_upwards [driftContinuousMod_eq_setIntegral H hWmeas
       (processToLpPredictable (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas θ)
         (abs_const_le θ)) hu,
@@ -142,7 +141,7 @@ date `u ≤ H`, the physical price `S₀ exp((m − σ²/2)u + σ W_u)` is `Q`-a
 theorem pathAssets_physical_ae_eq {S_0 m r σ : ℝ} (hσ : σ ≠ 0) (H : ℝ≥0) {u : ℝ≥0} (hu : u ≤ H) :
     ∀ᵐ ω ∂(constGirsanovMeasure hW hWmeas ((m - r) / σ) H),
       pathAssets S_0 m σ W () u ω
-        = pathAssets S_0 r σ (constBtheta hW hWmeas ((m - r) / σ) H) () u ω := by
+        = pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H) () u ω := by
   have hae := (withDensity_absolutelyContinuous μ _).ae_le
     (constBtheta_drift_ae hW hWmeas ((m - r) / σ) H hu)
   filter_upwards [hae] with ω hω
@@ -179,22 +178,22 @@ theorem value_europeanCall_physical {S_0 K m r σ : ℝ} {T H : ℝ≥0} (hTH : 
   have hB := isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
   have hfix : (europeanCall K T).FixedDated := by simp [europeanCall, Contract.FixedDated]
   rw [Contract.value_congr_ae (Q := constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
-      (X := pathAssets S_0 m σ W) (Y := pathAssets S_0 r σ (constBtheta hW hWmeas ((m - r) / σ) H))
+      (X := pathAssets S_0 m σ W) (Y := pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H))
       (europeanCall K T) hfix (fun p hp ↦ by
         rw [obsList_europeanCall, List.mem_singleton] at hp
         subst hp
         exact pathAssets_physical_ae_eq hW hWmeas hσ.ne' H hTH),
     Contract.value_congr_ae (Q := constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
-      (X := pathAssets S_0 r σ (constBtheta hW hWmeas ((m - r) / σ) H))
+      (X := pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H))
       (Y := assets S_0 r σ T
-        (fun ω ↦ constBtheta hW hWmeas ((m - r) / σ) H T ω / Real.sqrt T))
+        (fun ω ↦ constBtheta (μ := μ) hWmeas ((m - r) / σ) H T ω / Real.sqrt T))
       (europeanCall K T) hfix (fun p hp ↦ by
         rw [obsList_europeanCall, List.mem_singleton] at hp
         subst hp
         exact .of_forall fun ω ↦ pathAssets_eq_bsTerminal _ hT S_0 r σ ω)]
   refine value_europeanCall ?_
   simpa using BSCallHyp.of_isPreBrownian (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
-    (constBtheta hW hWmeas ((m - r) / σ) H) hB hS₀ hK hσ hT
+    (constBtheta (μ := μ) hWmeas ((m - r) / σ) H) hB hS₀ hK hσ hT
 
 include hW in
 /-- **The chooser on the physical asset** is worth the chooser price
@@ -209,7 +208,7 @@ theorem value_chooser_physical {S_0 K m r σ : ℝ} {T t₁ H : ℝ≥0} (hTH : 
   have hB := isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
   have hfix : (chooser K r T t₁).FixedDated := by
     simp [chooser, europeanCall, europeanPut, Contract.FixedDated]
-  rw [Contract.value_congr_ae (Y := pathAssets S_0 r σ (constBtheta hW hWmeas ((m - r) / σ) H))
+  rw [Contract.value_congr_ae (Y := pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H))
       (chooser K r T t₁) hfix (fun p hp ↦ by
         simp only [chooser, europeanCall, europeanPut, Contract.obsList, Payoff.obsList,
           europeanCallPayoff, List.append_nil, List.nil_append, List.mem_append,
@@ -235,7 +234,7 @@ theorem value_geomAsianCall_physical {S_0 K m r σ : ℝ} {T H : ℝ≥0} {n : �
   haveI := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
   have hB := isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
   have hfix : (geomAsianCall K T τ).FixedDated := by simp [geomAsianCall, Contract.FixedDated]
-  rw [Contract.value_congr_ae (Y := pathAssets S_0 r σ (constBtheta hW hWmeas ((m - r) / σ) H))
+  rw [Contract.value_congr_ae (Y := pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H))
       (geomAsianCall K T τ) hfix (fun p hp ↦ by
         simp only [geomAsianCall, Contract.obsList, Payoff.obsList, obsList_obsProd,
           List.append_nil, List.nil_append, List.map_ofFn, List.mem_ofFn] at hp
