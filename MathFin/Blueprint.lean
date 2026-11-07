@@ -38,6 +38,10 @@ import MathFin.FixedIncome.CVA
 import MathFin.FixedIncome.FxForwardParity
 import MathFin.BlackScholes.JumpDiffusionProcess
 import MathFin.BlackScholes.JumpDiffusionVarianceSwap
+import MathFin.Foundations.Numeraire
+import MathFin.Foundations.SnellEnvelope
+import MathFin.Foundations.MarshallOlkin
+import MathFin.FixedIncome.KeyRateDuration
 import Architect
 
 /-!
@@ -399,3 +403,33 @@ attribute [blueprint "thm:unilateral-cva" (title := "Unilateral CVA, Gaussian ex
   \varphi(d_s)]\,h(s)Q(s)\,ds$, $d_s = m(s)/(\sigma(s)\sqrt s)$. Only the marginal laws of
   the exposure enter; no exposure dynamics are modelled. -/)]
   MathFin.CVA.cva_gaussian
+
+attribute [blueprint "def:numeraire-measure" (title := "Numéraire measure as a Radon–Nikodym change")
+  (statement := /-- $Q^N = Q$ with density $(N_T B_0)/(N_0 B_T)$. When $N_T, B_T > 0$ and
+  $\mathbb{E}^Q[N_T/B_T] = N_0/B_0$ it is a probability measure equivalent to $Q$
+  (`numeraireMeasure_isEquivProbMeasure`). -/)]
+  MathFin.numeraireMeasure
+
+attribute [blueprint "thm:snell-envelope" (title := "Snell envelope: the smallest dominating supermartingale")
+  (statement := /-- For an integrable reward with exercise dates $X$ and horizon $N$ on a
+  discrete-time filtered probability space, the Snell envelope lies almost surely below every
+  supermartingale that dominates the reward at the exercise dates and at $N$: it is the
+  smallest such supermartingale (it is one, and dominates the reward, by
+  `snellEnvelope_supermartingale` and `snellEnvelope_dominates`). The first-contact time
+  attains it in expectation (`snellContact_expected_payoff`). -/)]
+  MathFin.snellEnvelope_le_supermartingale
+
+attribute [blueprint "thm:marshall-olkin" (title := "Marshall–Olkin first-to-default")
+  (statement := /-- With independent exponential clocks $T_0, T_1, T_2$ of positive rates and
+  default times $\min(T_0,T_2)$, $\min(T_1,T_2)$ (a common shock $T_2$), the first default
+  survives past $t \ge 0$ with probability $e^{-(\lambda_0+\lambda_1+\lambda_2)t}$. The
+  default-indicator covariance is `covariance_indicator_marshallOlkin`; it is not normalised
+  to a correlation. -/)]
+  MathFin.marshallOlkin_firstToDefault_survival
+
+attribute [blueprint "thm:key-rate-duration" (title := "Key-rate durations sum to the parallel shift")
+  (statement := /-- For a coupon bond on a curve of annually compounded key rates, at a flat
+  curve $k \equiv y$ with $1 + y \ne 0$, the key-rate partial derivatives of the price sum to
+  the derivative of the flat-yield price: $\sum_j \partial P/\partial k_j = dP/dy$ (dollar
+  durations; divide by $-P$ for durations). -/)]
+  MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc

@@ -158,13 +158,6 @@ uses = ["thm:one-factor-copula-default"]
 area = "credit"
 
 [[node]]
-label = "thm:marshall-olkin"
-title = "Marshall–Olkin defaults"
-statement = "Default correlation and first-to-default from the exponential minimum."
-uses = []
-area = "credit"
-
-[[node]]
 label = "thm:merton-credit-spread"
 title = "Merton structural credit spread"
 statement = "The Merton credit spread s(T) in closed form."
@@ -237,7 +230,7 @@ area = "fixed-income"
 [[node]]
 label = "thm:cir-bond-loadings"
 title = "CIR bond-price loadings"
-statement = "The CIR loadings solve a linear ODE and give the CIR forward curve."
+statement = "The CIR loadings solve the Riccati system B' = 1 − κB − σ²B²/2, A' = −κθB, and give the CIR forward curve."
 uses = ["thm:affine-term-structure"]
 area = "fixed-income"
 
@@ -298,25 +291,11 @@ uses = ["thm:hjm-drift-condition"]
 area = "fixed-income"
 
 [[node]]
-label = "thm:key-rate-duration"
-title = "Key-rate duration"
-statement = "Key-rate durations sum to the effective duration."
-uses = []
-area = "fixed-income"
-
-[[node]]
 label = "thm:lmm-forward-martingale"
 title = "LIBOR market model forward martingale"
 statement = "Forward LIBOR is a martingale under its own forward measure."
 uses = ["def:numeraire-measure"]
 area = "fixed-income"
-
-[[node]]
-label = "def:numeraire-measure"
-title = "Numéraire measure as a Radon–Nikodym change"
-statement = "numeraireMeasure has Radon–Nikodym derivative numeraireDensity with respect to Q and is absolutely continuous (equivalent for positive numéraires)."
-uses = []
-area = "foundations"
 
 [[node]]
 label = "def:real-erf"
@@ -484,13 +463,6 @@ label = "thm:semistatic-ftap"
 title = "Semistatic FTAP with entropy"
 statement = "A semistatic no-arbitrage criterion for the existence of an equivalent martingale measure of finite entropy calibrated to option prices (open problem)."
 uses = ["thm:dmw-ftap", "thm:carr-madan"]
-area = "foundations"
-
-[[node]]
-label = "thm:snell-envelope"
-title = "Snell envelope and optimal stopping"
-statement = "The Snell envelope is the smallest supermartingale dominating the payoff, attained by the largest optimal time, characterising optimal stopping."
-uses = []
 area = "foundations"
 
 [[node]]

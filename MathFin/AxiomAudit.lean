@@ -2320,4 +2320,17 @@ bounded-coefficient process class. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.CVA.cva_gaussian
 
+/-- info: 'MathFin.numeraireMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.numeraireMeasure
+/-- info: 'MathFin.snellEnvelope_le_supermartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.snellEnvelope_le_supermartingale
+/-- info: 'MathFin.marshallOlkin_firstToDefault_survival' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.marshallOlkin_firstToDefault_survival
+/-- info: 'MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc
+
 end MathFin.AxiomAudit
