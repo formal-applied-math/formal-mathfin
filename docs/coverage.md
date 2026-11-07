@@ -50,8 +50,8 @@ lagged formalization.yaml by the two entries of the previous batch — to the re
   `qP = q` the marginal at every step is the same law `q` (`willowMarginal_eq`); the
   cross moments `E[Z_k Z_{k+1}] = beta_k` and `E[X_k X_{k+1}] = t_k` in the scaled
   variables on a grid with `beta_k = sqrt(t_k/t_{k+1})` — the Brownian covariance the
-  constraint system encodes (`willowMarginal_crossMoment`, `willowScaled_secondMoment`,
-  `willowScaled_crossMoment`); the join — the chain's standardized cross moment is the
+  constraint system encodes (`willowMarginal_crossMoment`; the scaled second moment
+  `willowScaled_secondMoment`; the cross moment `willowScaled_crossMoment`); the join — the chain's standardized cross moment is the
   construction's own `willowBeta` coefficient once `beta_k` is tied to the grid
   (`willowMarginal_crossMoment_eq_willowBeta`); and the correlation bound — an honest
   (non-negative, summing-to-one) transition row forces `beta_k^2 <= 1`, and at such a

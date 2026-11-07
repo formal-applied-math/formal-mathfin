@@ -111,7 +111,9 @@ junk value `0`.) -/
 noncomputable def willowBeta (α : ℝ) : ℝ := 1 / √(1 + α)
 
 /-- **The `β` identity of the willow tree**: if `0 < 1 + α` and `t' = (1 + α) * t`
-with `t > 0`, then `1 / √(1 + α) = √(t / t')`. -/
+with `t > 0`, then `1 / √(1 + α) = √(t / t')`. The hypotheses keep both sides in the
+meaningful range (`willowBeta` takes the junk value `0` outside it); the identity's
+algebra survives without them. -/
 theorem willowBeta_eq_sqrt_div {t t' α : ℝ} (hα : 0 < 1 + α) (ht : 0 < t)
     (ht' : t' = (1 + α) * t) : willowBeta α = √(t / t') := by
   rw [willowBeta, ht']
@@ -121,7 +123,8 @@ theorem willowBeta_eq_sqrt_div {t t' α : ℝ} (hα : 0 < 1 + α) (ht : 0 < t)
 /-- **The `β` identity on a time grid**: with `α` computed from consecutive grid times as
 in the willow tree construction, `α k = (t (k+1) - t k) / t k`, the de-correlation
 coefficient is `√(t k / t (k+1))`. Only the two times it pairs are required to be
-positive — a willow grid may start at `t 0 = 0`. -/
+positive — a willow grid may start at `t 0 = 0` — and `htk1` earns its place in the
+proof (the positivity it feeds `div_pos`). -/
 theorem willowBeta_eq_sqrt_div' {t : ℕ → ℝ} (k : ℕ) (htk : 0 < t k)
     (htk1 : 0 < t (k + 1)) :
     willowBeta ((t (k + 1) - t k) / t k) = √(t k / t (k + 1)) := by
