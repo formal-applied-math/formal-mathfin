@@ -15,10 +15,27 @@ The exit rule is constructed from the log-price path, independently of any PDE.
 For rectangles inside continuation it precedes contact, so the actual-price
 martingale gives an exact local exit representation.
 
-## Result
+## Main definitions
 
-Public entry points include `brownianLogState_continuous`, `brownianLogState_usual_adapted`,
-`actualRectangleExitRule`, `actualRectangleExitTime`.
+* `actualRectangleExitRule`: the exit rule from the rectangle of spatial half-width `R` and
+  duration `δ` for the Brownian log-state started at `x`, on the completed usual filtration.
+* `actualRectangleExitTime`: the stopping time of `actualRectangleExitRule`.
+
+## Main results
+
+* `actualRectangleExit_boundary_ae`: for `R > 0` and `δ > 0`, almost surely the exit time is
+  positive, the log state at that time is within `R` of `x`, and either it is at distance `R`
+  or the exit time is `δ`.
+* `actualRectangleExit_le_contact`: for `0 ≤ k` and a rectangle inside the continuation region,
+  the exit time is at most the first-contact time on every path.
+* `canonicalPrice_rectangle_meanValue`: for `0 ≤ k`, `δ ≤ T` and a rectangle inside the
+  continuation region, the expected discounted actual price at the rectangle exit equals
+  `canonicalPrice k h x T`.
+
+## Tags
+
+mean-value property, rectangle exit, local martingale, continuation region, stopping rule,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

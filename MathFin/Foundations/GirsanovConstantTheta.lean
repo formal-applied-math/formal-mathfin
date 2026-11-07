@@ -48,6 +48,11 @@ adapted-integrand Itô formula.
 * `MathFin.expBtheta_isQMartingale` — the exponential `Q`-martingale above.
 * `MathFin.Btheta_isQBrownianMotion` — zero start, `N(0,t−s)` increments and independent
   increments of `B^θ` under `Q` on `[0,T]`.
+
+## Tags
+
+Girsanov theorem, constant market price of risk, Wald exponential, drift-corrected Brownian motion,
+Bayes rule, risk-neutral measure, MSC 60J65, MSC 60G44, MSC 91G20
 -/
 
 @[expose] public section

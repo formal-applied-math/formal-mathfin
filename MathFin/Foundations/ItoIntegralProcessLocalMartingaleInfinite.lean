@@ -22,6 +22,32 @@ null-augmented filtration. Its martingale property is the **global** `itoProcess
 transported across the augmentation by `condExp_sup_nulls` — no horizon clamp is needed (unlike the
 `[0,T]` follow-on), because the unbounded-horizon process is genuinely a martingale on the whole
 half-line.
+
+## Main definitions
+
+* `horizonProc`: the per-horizon (`T = n`) everywhere-continuous local-martingale modification
+  of the `[0,n]`-band-restricted integrand.
+* `gluedProc`: the glued unbounded-horizon process, reading at time `t` the horizon `⌈t⌉₊ + 1`
+  restricted to the good set `G`.
+
+## Main results
+
+* `horizonProc_agree`: for `m ≤ n`, the two horizon processes agree almost surely as paths on
+  `[0,m)`.
+* `exists_continuous_martingale_modification_infinite`: the unbounded-horizon Itô process has a
+  modification, at every `t`, with everywhere-continuous paths on `ℝ≥0` that is a `Martingale`
+  for the null-augmented Brownian filtration.
+* `exists_continuous_localMartingale_modification_infinite`: the same modification statement, with
+  `IsLocalMartingale` in place of `Martingale`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Ch 7
+
+## Tags
+
+continuous local martingale, gluing modifications, infinite horizon, Itô integral,
+null-augmented filtration, MSC 60G44, MSC 60H05
 -/
 
 @[expose] public section

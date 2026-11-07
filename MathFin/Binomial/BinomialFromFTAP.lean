@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.FTAPTwoState
 public import MathFin.Bridges.PricingKernel
 public import MathFin.Binomial.ReplicatingUniqueness
@@ -19,7 +18,7 @@ against the replicating portfolio. `Foundations/FTAPTwoState.lean` builds, from 
 a two-state excess-return market `(z_up, z_down)`, the backward-FTAP martingale weights
 `emmWeightUp = −z_down/(z_up − z_down)` and `emmWeightDown = z_up/(z_up − z_down)` (after Nagy,
 SSRN 6336503, 2026, Thm 7.3), and `Bridges/PricingKernel.lean` discounts them into state prices
-and the linear pricing functional `pricingKernel_two_state`.
+and the linear pricing functional `pricingKernelTwoState`.
 
 This file connects the two. Under `BinomialNoArb u d r` the binomial excess returns
 `z_up = u − e^r > 0`, `z_down = d − e^r < 0` satisfy the FTAP sign condition, the FTAP weights
@@ -33,14 +32,27 @@ every replicating portfolio costs the FTAP state-price value of the claim
 Scope: one period, two states; the definition of `binomialOptionPriceOnePeriod` is unchanged,
 and what is proved is that it agrees with the kernel built from the FTAP weights.
 
-## Results
+## Main results
 
 * `binomial_excess_return_signs`, `binomial_emm_exists`, `binomial_no_arbitrage`: the FTAP
   sign condition, an EMM, and no arbitrage for the binomial excess-return market.
 * `binomial_q_eq_emm`, `binomial_emmWeightDown_eq`: the FTAP weights are `q` and `1 − q`.
 * `binomialOptionPriceOnePeriod_eq_pricingKernel`: the binomial price is the two-state
-  pricing kernel `pricingKernel_two_state (u − e^r) (d − e^r) r`.
-* `binomial_replication_cost_eq_pricingKernel`: every replicating portfolio costs that price.
+  pricing kernel `pricingKernelTwoState (u − e^r) (d − e^r) r`.
+* `binomial_replication_cost_eq_pricingKernel`: for `S₀ > 0` and `BinomialNoArb`, every
+  replicating portfolio costs that price.
+
+## References
+
+* [J. M. Harrison and S. R. Pliska, *Martingales and stochastic integrals in the theory of
+  continuous trading*][HarrisonPliska1981]
+* [S. E. Shreve, *Stochastic Calculus for Finance I: The Binomial Asset Pricing Model*][ShreveSCFI],
+  §1.1
+
+## Tags
+
+fundamental theorem of asset pricing, state prices, pricing kernel, risk-neutral probability,
+law of one price, two-state market, MSC 91G20, MSC 91G10, JEL G12
 -/
 
 @[expose] public section
@@ -59,7 +71,7 @@ binomial excess-return market). Under `BinomialNoArb`, the excess-return
 vector `(u − e^r, d − e^r)` satisfies the sign condition of Nagy's
 backward FTAP (Theorem 7.3), so an EMM exists. -/
 theorem binomial_emm_exists {u d r : ℝ} (h : BinomialNoArb u d r) :
-    HasEMM_two_state (u - Real.exp r) (d - Real.exp r) :=
+    HasEMMTwoState (u - Real.exp r) (d - Real.exp r) :=
   emm_of_signs (u - Real.exp r) (d - Real.exp r)
     (binomial_excess_return_signs h).1 (binomial_excess_return_signs h).2
 
@@ -83,7 +95,7 @@ theorem binomial_emmWeightDown_eq {u d r : ℝ} (h : BinomialNoArb u d r) :
 `BinomialNoArb` ⟹ no portfolio can produce a sure non-negative excess
 return with at least one strictly positive outcome. -/
 theorem binomial_no_arbitrage {u d r : ℝ} (h : BinomialNoArb u d r) :
-    ¬ HasArbitrage_two_state (u - Real.exp r) (d - Real.exp r) :=
+    ¬ HasArbitrageTwoState (u - Real.exp r) (d - Real.exp r) :=
   noArbitrage_of_emm _ _ (binomial_emm_exists h)
 
 /-- **The one-period binomial price is the FTAP pricing kernel.** Under `BinomialNoArb`, the
@@ -93,21 +105,21 @@ discounted backward-FTAP weights of the excess returns `(u − e^r, d − e^r)`.
 theorem binomialOptionPriceOnePeriod_eq_pricingKernel {u d r : ℝ} (h : BinomialNoArb u d r)
     (V_u V_d : ℝ) :
     binomialOptionPriceOnePeriod u d r V_u V_d =
-      pricingKernel_two_state (u - Real.exp r) (d - Real.exp r) r V_u V_d := by
-  simp only [pricingKernel_two_state, statePricePricing, statePrices_two_state,
+      pricingKernelTwoState (u - Real.exp r) (d - Real.exp r) r V_u V_d := by
+  simp only [pricingKernelTwoState, statePricePricing, statePricesTwoState,
     Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
     binomial_q_eq_emm, binomial_emmWeightDown_eq h, binomialOptionPriceOnePeriod]
   ring
 
 /-- **Law of one price, FTAP form.** Under `BinomialNoArb` and `S₀ > 0`, every portfolio
 `(Δ, B)` replicating `(V_u, V_d)` costs the FTAP state-price value of the claim:
-`Δ·S₀ + B = pricingKernel_two_state (u − e^r) (d − e^r) r V_u V_d`. Combines the uniqueness
+`Δ·S₀ + B = pricingKernelTwoState (u − e^r) (d − e^r) r V_u V_d`. Combines the uniqueness
 of the replicating portfolio (`binomial_replication_cost_eq_price`) with
 `binomialOptionPriceOnePeriod_eq_pricingKernel`. -/
 theorem binomial_replication_cost_eq_pricingKernel {S₀ u d r V_u V_d Δ B : ℝ} (hS₀ : 0 < S₀)
     (h : BinomialNoArb u d r) (h_up : Δ * (S₀ * u) + B * Real.exp r = V_u)
     (h_down : Δ * (S₀ * d) + B * Real.exp r = V_d) :
-    Δ * S₀ + B = pricingKernel_two_state (u - Real.exp r) (d - Real.exp r) r V_u V_d :=
+    Δ * S₀ + B = pricingKernelTwoState (u - Real.exp r) (d - Real.exp r) r V_u V_d :=
   (binomial_replication_cost_eq_price hS₀ h h_up h_down).trans
     (binomialOptionPriceOnePeriod_eq_pricingKernel h V_u V_d)
 

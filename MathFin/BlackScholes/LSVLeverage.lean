@@ -5,8 +5,8 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.BreedenLitzenberger
+public import Mathlib.Algebra.Ring.IsFormallyReal
 
 /-!
 # LSV leverage-posterior core
@@ -55,12 +55,48 @@ stochastic-process hypotheses:
   branch, is proved in `Bridges/LSVPosteriorConditionalExpectation.lean`
   (`cointossM_comp_ae_eq_condExp`, `cointossPostHi_comp_ae_eq_condExp`).
 
+## Main definitions
+
+* `cointossVLo`, `cointossVHi`: the branch variances `29/400 ∓ λ/20` of the coin-toss example.
+* `cointossPhi`: the branch density, the Black–Scholes lognormal terminal density with spot `F`,
+  zero rate and unit maturity at volatility `σ`, evaluated at the strike `K`.
+* `cointossPostHi`: the posterior weight of the high branch at strike `K` under equal priors,
+  `φ_hi(K)/(φ_lo(K) + φ_hi(K))`.
+* `cointossM`: the posterior mean of the variance at strike `K`,
+  `(v_lo φ_lo(K) + v_hi φ_hi(K))/(φ_lo(K) + φ_hi(K))`.
+
+## Main results
+
+* `lsv_pinned_product`: for a posterior variance `m > 0`, the leverage `σ_loc / √m` satisfies
+  `L² · m = σ_loc²`.
+* `lsv_leverage_of_m_one`, `lsv_leverage_switches_off`: if `m = 1` the leverage is `σ_loc`; if
+  `σ_loc > 0` and `m = σ_loc²` the leverage is `1`.
+* `cointoss_family_mean`: for every `λ`, the two branch variances average to `29/400`.
+* `cointoss_endpoint_l0_pinned`, `cointoss_endpoint_l0_quarter`: at `λ = 0` the pinned product holds
+  with `m = 29/400`, and at `σ_loc = 1/4` the squared leverage is `25/29`.
+* `cointoss_posterior_atm_lt_half`: at the money, for `σ_lo < σ_hi`, the posterior weight of the
+  high branch is below `1/2`.
+* `cointossM_atm_lt_uncond`: at the money the posterior variance is below the unconditional mean
+  `(v_lo + v_hi)/2`.
+* `cointoss_posterior_wing_limit_atTop`, `cointoss_posterior_wing_limit_atZero`: the posterior
+  weight of the high branch tends to `1` as the strike tends to `∞` and to `0⁺`.
+* `cointossM_wing_limit_atTop`: the posterior variance tends to `v_hi` as `K → ∞`.
+* `cointossM_nonconstant`: the posterior variance is not constant in the strike.
+* `cointossPostHi_eq_strike_convexity`, `cointossM_eq_strike_convexity`: the posterior weight and
+  posterior variance are ratios of second strike derivatives of the branch call prices
+  `bsV K 0 σ F 1`.
+
 ## References
 
-* I. Gyöngy, "Mimicking the one-dimensional marginal distributions of processes having an Itô
-  differential", *Probability Theory and Related Fields* 71 (1986), 501–516.
-* J. Guyon and P. Henry-Labordère, "Being particular about calibration", *Risk*, January 2012.
-* S. Bagaria, *Notes on Fixed Income Derivative Pricing* (lecture notes), ch. 11.
+* [I. Gyöngy, *Mimicking the one-dimensional marginal distributions of processes having an Itô
+  differential*][Gyongy1986].
+* [J. Guyon and P. Henry-Labordère, *Being particular about calibration*][GuyonHenryLabordere2012].
+* [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 11.
+
+## Tags
+
+local stochastic volatility, leverage function, Gyöngy mimicking, particle calibration,
+conditional variance, Dupire calibration, MSC 91G20, MSC 60J60, JEL G13
 -/
 
 @[expose] public section

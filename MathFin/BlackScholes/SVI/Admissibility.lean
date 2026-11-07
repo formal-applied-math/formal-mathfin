@@ -14,6 +14,24 @@ Part of the SVI polynomial-sign certificate (#174).
 `varianceGate`, a condition on signs of polynomials in the parameters, is equivalent to the SVI
 variance being positive at every log-strike (`varianceGate_iff`), for `σ > 0`, `b ≥ 0`,
 `ρ² ≤ 1`. The cases `b = 0` and `ρ = ±1` are included.
+
+## Main definitions
+
+* `varianceGate`: the polynomial positive-variance gate, `b = 0 ∧ 0 < a` or
+  `0 < b ∧ (0 ≤ a ∨ a² < b²σ²(1 − ρ²))`.
+
+## Main results
+
+* `quadratic_pos_iff`: for `α, γ ≥ 0` with `α + γ > 0`, `αt² + 2at + γ > 0` for all `t > 0` iff
+  `0 ≤ a` or `a² < αγ`.
+* `variance_pos_iff_A_pos`: for `σ > 0`, the SVI variance is positive at every log-strike iff `A`
+  is positive at every `t > 0`.
+* `varianceGate_iff`: for `σ > 0`, `b ≥ 0` and `ρ² ≤ 1`, `varianceGate` holds iff the variance is
+  positive at every log-strike.
+
+## Tags
+
+positive variance, raw SVI, polynomial sign gate, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

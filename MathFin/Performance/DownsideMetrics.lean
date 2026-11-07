@@ -12,6 +12,39 @@ public import MathFin.Performance.Ratios
 
 Finite-state Omega ratio, maximum drawdown of a finite price path, and the
 positive-scaling invariance of the Calmar ratio.
+
+## Main definitions
+
+* `FiniteReturnModel`: a finite return model, nonnegative probability weights of total mass one.
+* `finiteExpectedReturn`: the expected return of a finite return model.
+* `omegaUpside`, `omegaDownside`: the expected gain above and the expected shortfall below a
+  threshold.
+* `omegaRatio`: the Omega ratio at a threshold in a finite state space.
+* `maximumDrawdown`: the largest decline of a finite price path below its running peak.
+* `calmarRatio`: the annual return divided by the maximum drawdown.
+
+## Main results
+
+* `omega_upside_sub_downside`: expected upside minus expected downside is the mean excess return.
+* `omegaRatio_nonneg`: the finite-state Omega ratio is nonnegative.
+* `omegaRatio_threshold_identity`: when the expected downside is nonzero,
+  `omegaRatio − 1 = (𝔼[R] − threshold) / omegaDownside`.
+* `sub_le_maximumDrawdown`: every chronological peak-to-trough decline `E s − E t`, `s ≤ t`, is at
+  most `maximumDrawdown E`.
+* `maximumDrawdown_nonneg`, `maximumDrawdown_scale`: nonnegativity, and positive homogeneity for
+  scaling by `c ≥ 0`.
+* `calmarRatio_scale_invariant`: the Calmar ratio is unchanged by a common scaling `c > 0`.
+* `downsideMetrics_bundle`: one conjunction collecting the Omega, drawdown and Calmar facts.
+
+## References
+
+* [Keating and Shadwick (2002)][KeatingShadwick2002]
+* [Young (1991)][Young1991]
+
+## Tags
+
+Omega ratio, maximum drawdown, Calmar ratio, downside risk, performance measurement, MSC 91G10,
+JEL G11
 -/
 
 @[expose] public section
@@ -47,15 +80,6 @@ noncomputable def omegaRatio {ι : Type*} [Fintype ι]
     (m : FiniteReturnModel ι) (threshold : ℝ) : ℝ :=
   omegaUpside m threshold / omegaDownside m threshold
 
-private theorem positivePart_sub_negativePart (x : ℝ) :
-    max x 0 - max (-x) 0 = x := by
-  by_cases hx : 0 ≤ x
-  · rw [max_eq_left hx, max_eq_right (neg_nonpos.mpr hx)]
-    ring
-  · have hx0 : x ≤ 0 := le_of_not_ge hx
-    rw [max_eq_right hx0, max_eq_left (neg_nonneg.mpr hx0)]
-    ring
-
 /-- Expected upside minus expected downside equals mean excess return. -/
 theorem omega_upside_sub_downside {ι : Type*} [Fintype ι]
     (m : FiniteReturnModel ι) (threshold : ℝ) :
@@ -71,7 +95,7 @@ theorem omega_upside_sub_downside {ι : Type*} [Fintype ι]
           intro i _
           rw [← mul_sub]
           congr 1
-          simpa only [neg_sub] using positivePart_sub_negativePart (m.outcome i - threshold)
+          simpa only [neg_sub] using max_zero_sub_max_neg_zero_eq_self (m.outcome i - threshold)
     _ = ∑ i, (m.weight i * m.outcome i - threshold * m.weight i) := by
           apply Finset.sum_congr rfl
           intro i _

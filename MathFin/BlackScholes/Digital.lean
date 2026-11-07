@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.Call
 
 /-!
@@ -25,6 +24,23 @@ as the vanilla call: HasLaw transfer to standard normal, `1_{S_T > K}` on
 
 The standard decomposition `Call = AssetDigital − K · CashDigital` is
 also proved as a corollary.
+
+## Main results
+
+* `bs_cash_or_nothing_formula`: under `BSCallHyp`, the discounted expected payoff of the
+  cash-or-nothing call (`1` if `S_T > K`) is `e^{−rT} · Φ(d₂)`.
+* `bs_asset_or_nothing_formula`: under `BSCallHyp`, the discounted expected payoff of the
+  asset-or-nothing call (`S_T` if `S_T > K`) is `S_0 · Φ(d₁)`.
+* `bs_call_eq_asset_minus_K_cash`: under `BSCallHyp`, the discounted expected call payoff is the
+  asset-or-nothing value minus `K` times the cash-or-nothing value.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 26.1
+
+## Tags
+
+digital option, binary option, cash-or-nothing, asset-or-nothing, Black–Scholes, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

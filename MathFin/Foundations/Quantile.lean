@@ -5,7 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Probability.Distributions.Exponential
+public import Mathlib.Probability.HasLaw
 
 /-!
 # The quantile function of a law on `ℝ`
@@ -35,9 +37,13 @@ with the facts that make it the right object.
 In risk management `quantile μ α` is the value-at-risk at level `α` of a loss with law `μ`
 (`RiskMeasures/ValueAtRisk.lean`).
 
+## Main definitions
+
+* `quantile`: the generalized inverse `quantile μ p = inf {x | p ≤ cdf μ x}` of the CDF of a law
+  `μ` on `ℝ`, meaningful for `p ∈ (0, 1)`.
+
 ## Main results
 
-* `quantile`: the generalized inverse of the CDF.
 * `quantile_le_iff`, `lt_quantile_iff`: the Galois connection with the CDF.
 * `le_cdf_quantile`: `p ≤ F (quantile μ p)`, from right-continuity of `F`.
 * `monotoneOn_quantile`, `aemeasurable_quantile`: monotone, hence measurable, on `(0, 1)`.
@@ -51,6 +57,18 @@ In risk management `quantile μ α` is the value-at-risk at level `α` of a loss
 * `cdf_quantile`, `hasLaw_cdf`: the probability integral transform.
 * `quantile_cdf`: `quantile μ (F x) = x` when `F` is strictly increasing.
 * `quantile_map`: equivariance under monotone lower-semicontinuous maps.
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Appendix A.1.2; Proposition 7.2; Proposition 7.2 / Appendix A.1.2;
+  Proposition A.3
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 2.21; Ex. 2.6; Ex. 7.2
+
+## Tags
+
+generalized inverse CDF, quantile function, probability integral transform, quantile transform,
+value-at-risk, Galois connection, MSC 62G30, MSC 60E05, MSC 91G70
 -/
 
 @[expose] public section

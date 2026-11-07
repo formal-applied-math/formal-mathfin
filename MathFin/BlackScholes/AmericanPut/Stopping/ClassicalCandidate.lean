@@ -6,7 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.Verification
-public import MathFin.BlackScholes.AmericanPut.Boundary.ContinuousBoundaryProblem
+public import MathFin.BlackScholes.AmericanPut.Boundary.Problem
 
 /-!
 # The discounted classical-price candidate
@@ -18,10 +18,24 @@ results apply to any such price, classical or the stopping value itself. Superma
 contact-rule martingale property are NOT asserted here; they are the remaining
 stochastic verification obligations.
 
-## Result
+## Main definitions
 
-Public entry points include `classicalLogSpot`, `classicalCandidate`, `scaled_classical_payoff`,
-`classicalCandidate_bounds`, `classicalCandidate_norm_le`.
+* `classicalLogSpot`: the strike-normalized log spot `log (S/K) + (r-q-σ^2/2)*t + σ*W t ω`.
+* `classicalCandidate`: the discounted classical price `K*p` along the log spot, frozen at maturity
+  (evaluated at `min t T`).
+
+## Main results
+
+* `scaled_classical_payoff`: for `0 < K`, `0 < S`, `K` times the put payoff at the
+  strike-normalized log spot is the put payoff `max (K - S_t) 0` of the geometric Brownian value.
+* `classicalCandidate_bounds`: for a `PutEnvelope p`, `0 ≤ K` and `0 ≤ r`, the candidate lies
+  between `0` and `K`.
+* `classicalCandidate_norm_le`: under the same hypotheses, its norm is at most `K`.
+
+## Tags
+
+discounted price, put envelope, payoff domination, classical price, frozen at maturity, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

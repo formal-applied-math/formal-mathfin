@@ -7,6 +7,8 @@ module
 
 public import MathFin.BlackScholes.SVI.BlackSmile
 public import MathFin.BlackScholes.SVI.DomainFormula
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Smooth.Flat
 
 /-! # Durrleman's condition is convexity of the call in strike
 
@@ -15,6 +17,28 @@ Part of the SVI polynomial-sign certificate (#174).
 The second strike derivative of the SVI-smiled Black call is computed (`blackCall_deriv2`), and
 for `σ > 0` and positive variance its convexity on `(0, ∞)` is equivalent to `g(k) ≥ 0` for every
 `k` (`blackCall_convex_iff`).
+
+## Main definitions
+
+* `strikeDelta`: the first strike derivative of `blackCall`, `blackDelta p (log K)`.
+* `strikeDensity`: the second strike derivative of `blackCall`, a positive Gaussian factor times
+  Durrleman's function.
+
+## Main results
+
+* `blackCall_deriv2`: for `σ > 0` and positive variance, the second derivative of `blackCall p` in
+  strike `K > 0` equals `strikeDensity p K`.
+* `strikeDensity_nonneg_iff`: `0 ≤ strikeDensity p K` iff `0 ≤ durrleman p (log K)`.
+* `blackCall_convex_iff`: for `σ > 0` and positive variance, `blackCall p` is convex on `(0, ∞)`
+  iff `0 ≤ durrleman p k` for every `k`.
+* `certificateFormula_iff_call_convex`: on `σ > 0`, `b ≥ 0`, `1 - ρ² ≥ 0` and the variance gate,
+  the finite sign formula `certificateFormula` holds iff `blackCall p` is convex on `(0, ∞)`.
+* `fullCertificateFormula_iff_call_convex`: `fullCertificateFormula` holds iff the parameters
+  satisfy the domain conditions and `blackCall p` is convex on `(0, ∞)`.
+
+## Tags
+
+Durrleman condition, call convexity in strike, butterfly arbitrage, SVI smile, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

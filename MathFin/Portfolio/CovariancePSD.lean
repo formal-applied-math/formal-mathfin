@@ -5,9 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Portfolio.MarkowitzNAsset
 public import MathFin.Portfolio.CAPMEquilibrium
+public import Mathlib.Probability.Moments.Variance
 
 /-!
 # Covariance kernels are positive semidefinite (the self-dot variance identity)
@@ -27,7 +27,7 @@ collapses the Markowitz double sum onto a single variance,
 and a variance is non-negative. The quadratic form is non-negative *because it
 IS a variance* — that is why covariance matrices are PSD.
 
-## Results
+## Main results
 
 * `portfolioVarN_covariance_eq_variance`: the Markowitz quadratic form with the
   genuine covariance kernel equals the variance of the portfolio return.
@@ -36,6 +36,16 @@ IS a variance* — that is why covariance matrices are PSD.
 * `portfolioVarN_covariance_nonneg`: the capstone non-negativity.
 * `portfolioVariance_eq_portfolioVarN`: bridge to the `marginalVariance` naming;
   `portfolioVariance_covariance_nonneg`: the same non-negativity there.
+
+## References
+
+* [K. Bodie and Marcus, *Investments*][BodieKaneMarcus], Ch 7
+* [H. Markowitz, *Portfolio selection*][Markowitz1952]
+
+## Tags
+
+covariance matrix, positive semidefinite, portfolio variance, Markowitz, variance of a sum,
+quadratic form, MSC 91G10, MSC 62H05, JEL G11
 -/
 
 @[expose] public section

@@ -5,8 +5,8 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.Estimation
+public import Mathlib.Analysis.Analytic.Binomial
 
 /-!
 # Fractional-differentiation weight recursion
@@ -35,6 +35,11 @@ built from these first differences telescopes to the endpoint estimator of
 `Foundations/Estimation.lean`, so its law is `N(μ, σ²/T)` for every number of observations
 (`hasLaw_fracDiff_one_driftEstimator`). Only the case `d = 1` enters there.
 
+## Main definitions
+
+* `fracDiffWeight`: the fractional-differentiation weights `w₀ = 1`, `w_{k+1} = −w_k (d − k)/(k+1)`.
+* `fracDiff`: the expanding-window fractionally differenced series `∑_{k ≤ t} wₖ X_{t−k}`.
+
 ## Main results
 
 * `fracDiffWeight_eq_prod`: `fracDiffWeight d k = (-1)^k * ∏ i ∈ range k, (d-i)/(i+1)`.
@@ -46,6 +51,17 @@ built from these first differences telescopes to the endpoint estimator of
   difference.
 * `hasLaw_fracDiff_one_driftEstimator`: the first-difference drift estimator of a Brownian
   motion with drift has law `N(μ, σ²/T)`, whatever the sampling frequency.
+
+## References
+
+* [Hosking, *Fractional differencing*][Hosking1981]
+* [López de Prado, *Advances in Financial Machine Learning*][LopezDePrado2018], ch. 5; ch. 5, §5.4
+* [R. C. Merton, *On estimating the expected return on the market*][Merton1980], §I
+
+## Tags
+
+fractional differentiation, binomial series, López de Prado, stationarity, drift estimator,
+long memory, MSC 62M10, MSC 60G22, JEL C22
 -/
 
 @[expose] public section
@@ -83,7 +99,7 @@ theorem abs_fracDiffWeight_succ (d : ℝ) (k : ℕ) :
 
 /-- `(k + 1) · C(d, k + 1) = C(d, k) · (d - k)`: the ratio recursion of Mathlib's
 generalized binomial coefficient, the case `n = k + 1` of `Ring.choose_smul_choose`. -/
-private lemma succ_mul_ringChoose_succ (d : ℝ) (k : ℕ) :
+lemma succ_mul_ringChoose_succ (d : ℝ) (k : ℕ) :
     ((k : ℝ) + 1) * Ring.choose d (k + 1) = Ring.choose d k * (d - k) := by
   have h := Ring.choose_smul_choose d (Nat.le_add_right k 1)
   rw [Nat.choose_succ_self_right, Nat.add_sub_cancel_left, Ring.choose_one_right,

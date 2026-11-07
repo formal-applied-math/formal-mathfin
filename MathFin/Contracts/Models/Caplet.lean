@@ -54,6 +54,19 @@ hypothesis.
   `bond_mul_capletPayoff`, `valueDisc_caplet_eq_bondPut`, `valueDisc_cap`,
   `valueDisc_cap_eq_bondPuts`, `valueDisc_caplet_black76`, `BondModel.integral_libor_forward`,
   `valueDisc_caplet_black76_forwardRate`.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  sections 1.4 and 1.5
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], ch. 29
+* [Musiela and Rutkowski, *Martingale Methods in Financial Modelling*][MusielaRutkowski], ch. 12
+
+## Tags
+
+caplet, interest rate cap, LIBOR, Black-76, forward measure, bond put, forward rate, MSC 91G30,
+JEL G13, JEL E43
 -/
 
 @[expose] public section

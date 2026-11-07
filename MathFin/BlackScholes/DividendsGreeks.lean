@@ -5,7 +5,6 @@ Authors: Raphael Coelho, Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.PDE
 public import MathFin.BlackScholes.PutGreeks
 
@@ -16,11 +15,13 @@ For the dividends-adjusted call price `V_q(S, σ, T) = S e^{-qT} Φ(d₁') − K
 with `d_i' = bsdi S K (r-q) σ T`, we identify `V_q = e^{-qT} · bsV(K, r-q, σ, S, T)`
 and derive the Greeks via existing call Greeks at effective drift `r − q`.
 
+## Main definitions
+
+* `bsVDiv`: the dividend-adjusted call closed form `e^{−qτ} · bsV K (r − q) σ S τ`.
+* `bsPDiv`: the dividend-adjusted put closed form `e^{−qτ} · bsP K (r − q) σ S τ`.
+
 ## Main results
 
-* `bsVDiv` — the dividend-adjusted call closed form, defined as `e^{-qτ} · bsV(K, r-q, σ, S, τ)`.
-  Its unfolding is the right-hand side of `bs_dividends_call_formula` (`Dividends.lean`), the
-  discounted expected payoff under drift `r − q`; no lemma here states that for `bsVDiv`.
 * `hasDerivAt_bsVDiv_S` — δ_q = e^{-qT} · Φ(d₁').
 * `hasDerivAt_deriv_bsVDiv_S` — γ_q = e^{-qT} · ϕ(d₁') / (S σ √τ), from the
   formula-level `hasDerivAt_bsVDiv_SS`.
@@ -35,6 +36,15 @@ and derive the Greeks via existing call Greeks at effective drift `r − q`.
 * `hasDerivAt_bsPDiv_q`, `bsPDiv_psi_nonneg` — put psi `∂_q P_q = S τ e^{-qτ} Φ(−d₁')`, and
   that formula is `≥ 0` for `S, τ ≥ 0`; `monotone_bsPDiv_q` — so, for `K, σ, τ, S > 0`, the put
   price is non-decreasing in `q`.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 17.1
+
+## Tags
+
+dividend yield, Black–Scholes–Merton, option Greeks, effective drift, sensitivities, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

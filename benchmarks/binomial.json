@@ -13,6 +13,15 @@
       "metadata": {
         "chapter": 9,
         "reference": "Single-period binomial replication (Cox-Ross-Rubinstein 1979; Shreve I 1.2)",
+        "citations": [
+          {
+            "key": "CoxRossRubinstein1979"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "1.2"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of all three statements: portfolio cost, up-state payoff, down-state payoff. Lives in MathFin/Binomial/Model.lean. Axioms-clean. Multi-period backward induction (binomialPrice) also defined and proved consistent; CRR convergence to BS is upstream."
@@ -29,6 +38,16 @@
       "metadata": {
         "chapter": 9,
         "reference": "CRR parameterization, one-step martingale (Hull 21.1, Shreve I 1.2)",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "21.1"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "1.2"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Pure algebraic identity following from the definitions of crrUp, crrDown, crrPerStepRate, crrProb. Lives in MathFin/Binomial/CRRConvergence.lean. Axioms-clean."
@@ -45,6 +64,16 @@
       "metadata": {
         "chapter": 9,
         "reference": "CRR convergence (analytic step), Hull 21.1, Shreve I 3.2",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "21.1"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "3.2"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Substantial: ~80 lines using difference-quotient limits (e^{cx}-1)/x → c via hasDerivAt_iff_tendsto_slope, plus quotient-of-limits arithmetic to show p(h) → 1/2 as h → 0, plus composition with h_n = √(T/n). Implies the variance limit. Lives in MathFin/Binomial/CRRConvergence.lean. Axioms-clean. The full distributional convergence binomialPrice → bs_call_price is now proved: see mf-crr-gaussian-limit and mf-crr-bs-call-convergence."
@@ -61,6 +90,16 @@
       "metadata": {
         "chapter": 9,
         "reference": "CRR variance convergence (Hull 21.1, Shreve I 3.2)",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "21.1"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "3.2"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Direct corollary of crrProb_tendsto_half via 4 p_n (1 - p_n) → 4 · (1/2) · (1/2) = 1, then const_mul to get σ² T. Lives in MathFin/Binomial/CRRConvergence.lean. Axioms-clean."
@@ -77,6 +116,19 @@
       "metadata": {
         "chapter": 9,
         "reference": "CRR to BS distributional convergence (Cox-Ross-Rubinstein 1979; Hull 21.1, Shreve I 3.2)",
+        "citations": [
+          {
+            "key": "CoxRossRubinstein1979"
+          },
+          {
+            "key": "Hull",
+            "locator": "21.1"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "3.2"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The per-step CRR charFun is computed exactly from the two-point step law; its n-th power converges to the Gaussian charFun (crr_charFun_pow_tendsto_gaussian, via real cos/sin splitting of the complex exponential and second-order asymptotics of the CRR parameters); charFun_convPow identifies the n-step row law's charFun as that power; and Lévy's continuity theorem (ProbabilityMeasure.tendsto_of_tendsto_charFun) upgrades charFun convergence to weak convergence of the bundled ProbabilityMeasures. Lives in MathFin/Binomial/CRRCharFun.lean (crr_tendsto_gaussian_inDistribution). Axioms-clean."
@@ -93,6 +145,19 @@
       "metadata": {
         "chapter": 9,
         "reference": "CRR to BS call-price convergence (Cox-Ross-Rubinstein 1979; Hull 21.1, Shreve I 3.2)",
+        "citations": [
+          {
+            "key": "CoxRossRubinstein1979"
+          },
+          {
+            "key": "Hull",
+            "locator": "21.1"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "3.2"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the headline CRR→BS convergence. Chain: binomialPrice_eq_integral_convPow identifies the binomial price with a discounted expectation against the n-fold convolution row law; the bounded put payoff passes to the limit under weak convergence (the distributional CLT of mf-crr-gaussian-limit); binomial put-call parity (binomialPrice_callPut_parity) lifts the limit to the unbounded call — no uniform-integrability/Vitali machinery needed; exp_neg_mul_integral_put_gaussian_eq instantiates bs_put_formula on the limiting Gaussian N((r−σ²/2)T, σ²T) through the standardisation Z = (· − (r−σ²/2)T)/(σ√T), and Phi_neg lands the literal closed form. Lives in MathFin/Binomial/CRRCharFun.lean + MathFin/Binomial/CRRClosedForm.lean. Axioms-clean. \n\n2026-08-20 correction: the hypothesis was previously `∀ n, BinomialNoArb …`, quantified over every n including n = 0. That is UNSATISFIABLE — at n = 0, crrStep T 0 = T/0 = 0, so u = d = 1 and BinomialNoArb 1 1 0 demands Real.exp 0 < 1 — which made the theorem vacuously true and its content empty, though the proof never exploited that. The hypothesis is now restricted to 0 < n, which is all the limit consumes (the proof already worked eventually-in-n; only the 0 ≤ p ≤ 1 bound needed n = 0, and that survives via crrProb_zero). MathFin.binomialNoArb_crr proves the restricted hypothesis holds whenever |r|·√T < σ."
@@ -109,6 +174,12 @@
       "metadata": {
         "chapter": 9,
         "reference": "American option intrinsic bound (Shreve I 4.4)",
+        "citations": [
+          {
+            "key": "ShreveSCFI",
+            "locator": "4.4"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the dominance clause of the Snell characterization at path level — the discounted intrinsic payoff e^{-rk}*g(S_k(omega)) is dominated by the discounted American value along every path, proved through the identification theorem snellAux_eq_discounted_bermudanPrice (an induction over the tree, Binomial/SnellEnvelope.lean), not by le_max on the Bellman definition. Honest scope: this clause is the elementary corner of the characterization; the depth lives in the sibling clauses (supermartingale property, adaptedness, minimality over arbitrary path-processes) proved in the same module — see mf-american-supermartingale. Axioms-clean."
@@ -125,6 +196,16 @@
       "metadata": {
         "chapter": 9,
         "reference": "American supermartingale property (Shreve I 4.4, Hull 21.5)",
+        "citations": [
+          {
+            "key": "ShreveSCFI",
+            "locator": "4.4"
+          },
+          {
+            "key": "Hull",
+            "locator": "21.5"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the genuine path-process supermartingale property of the discounted American value X_k(omega) = e^{-rk}*americanPrice(N-k, S_k(omega)) on coin-flip paths — q*X_{k+1}(up) + (1-q)*X_{k+1}(down) <= X_k, the explicit node-average form of E[X_{k+1}|F_k] (which on a finite tree IS the conditional expectation; same pathwise idiom as Binomial/MartingaleRepresentation.lean). Proved via the identification theorem snellAux_eq_discounted_bermudanPrice (the scalar Bellman recursion is the Markov instance of the path-space Snell envelope) in Binomial/SnellEnvelope.lean, where the FULL Snell characterization lives: payoff dominance, supermartingale, adaptedness (pathAdaptedAt clauses), and minimality over arbitrary path-processes (bermudanPrice_snell_minimal). Replaces the former le_max-on-the-Bellman-def shadow. Axioms-clean. The entry is the American case E = univ of discounted_bermudanPrice_supermartingale, which holds for every early-exercise step set."
@@ -141,6 +222,16 @@
       "metadata": {
         "chapter": 9,
         "reference": "American ≥ European (Hull 11.5, Shreve I 4.4)",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "11.5"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "4.4"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: monotonicity of the tree price in the early-exercise step set (bermudanPrice_mono, Binomial/Bermudan.lean) for the sets empty subset univ, i.e. European = bermudanPrice with E empty and American = bermudanPrice with E = univ. The monotonicity is an instance of Snell minimality: the American price is a supermartingale dominating the payoff at maturity, so it dominates the European envelope. Axioms-clean."
@@ -152,11 +243,21 @@
       "description": "For σ ≠ 0, (2 e^{rh²} − e^{σh} − e^{−σh}) / (h · (e^{σh} − e^{−σh})) → (r − σ²/2)/σ as h → 0 (h ≠ 0). Substantive analytic content of the CRR-to-BS drift correspondence: it is the step behind the textbook drift limit n · (2 p_n − 1) · σ√(T/n) → (r − σ²/2)T (substitute h_n = √(T/n) and scale by σT), which is not itself stated in this entry.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.DriftLimit\n\nopen MathFin Filter\nopen scoped Topology\n\ntheorem crr_drift_quotient_thm {σ : ℝ} (hσ : σ ≠ 0) (r : ℝ) :\n    Tendsto (fun h : ℝ =>\n        (2 * Real.exp (r * h^2) - Real.exp (σ * h) - Real.exp (-(σ * h)))\n          / (h * (Real.exp (σ * h) - Real.exp (-(σ * h)))))\n      (𝓝[≠] 0) (𝓝 ((r - σ^2 / 2) / σ)) :=\n  MathFin.crr_drift_limit_h hσ r\n"
+        "lean": "import MathFin.Binomial.DriftLimit\n\nopen MathFin Filter\nopen scoped Topology\n\ntheorem crr_drift_quotient_thm {σ : ℝ} (hσ : σ ≠ 0) (r : ℝ) :\n    Tendsto (fun h : ℝ =>\n        (2 * Real.exp (r * h^2) - Real.exp (σ * h) - Real.exp (-(σ * h)))\n          / (h * (Real.exp (σ * h) - Real.exp (-(σ * h)))))\n      (𝓝[≠] 0) (𝓝 ((r - σ^2 / 2) / σ)) :=\n  MathFin.tendsto_crr_drift_quotient hσ r\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "CRR drift convergence (Hull 21.1, Shreve I 3.2)",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "21.1"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "3.2"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the h-form drift quotient limit. Building blocks: tendsto_exp_sym_sub_two_div_sq (via the algebraic identity e^{σh} + e^{-σh} - 2 = e^{-σh}(e^{σh} - 1)², reducing to existing tendsto_exp_sub_one_div); tendsto_crr_numerator_div_sq (combines with the existing tendsto_exp_sq_sub_one_div_sq); tendsto_sinh_div for the denominator. The n → ∞ form n · (2 p_n − 1) · σ√(T/n) → (r − σ²/2)T is the obvious substitution h = √(T/n) scaled by σT, deferred as routine algebra (the Lean expression for the substitution is intricate, the analytic content is identical to the h-form proven here). Lives in MathFin/Binomial/DriftLimit.lean. Axioms-clean."
@@ -173,9 +274,18 @@
       "metadata": {
         "chapter": 9,
         "reference": "CRR drift correspondence to BS (Cox-Ross-Rubinstein 1979; Hull 13.4)",
+        "citations": [
+          {
+            "key": "CoxRossRubinstein1979"
+          },
+          {
+            "key": "Hull",
+            "locator": "13.4"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Substitutes h_n = √(T/n) into the h-form crr_drift_limit_h, scales by σT, and closes the algebraic residual via linear_combination over the identity n · (√(T/n))² = T. Lives in MathFin/Binomial/DriftLimit.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Substitutes h_n = √(T/n) into the h-form tendsto_crr_drift_quotient, scales by σT, and closes the algebraic residual via linear_combination over the identity n · (√(T/n))² = T. Lives in MathFin/Binomial/DriftLimit.lean. Axioms-clean."
       }
     },
     {
@@ -184,11 +294,21 @@
       "description": "On the CRR binomial tree with BinomialNoArb, for every early-exercise step set E, the European price binomialPrice is at most the Bermudan price bermudanPrice E, which is at most the American price americanPrice, at every number of steps and every spot (all three are the one Bellman recursion bermudanPrice at E = empty, E, univ).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.Bermudan\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem bermudan_sandwich_thm {u d r : ℝ} (h : BinomialNoArb u d r)\n    (g : ℝ → ℝ) (E : Set ℕ) (n : ℕ) (S : ℝ) :\n    binomialPrice u d r g n S ≤ bermudanPrice E u d r g n S ∧\n      bermudanPrice E u d r g n S ≤ americanPrice u d r g n S :=\n  MathFin.binomialPrice_le_bermudanPrice_le_americanPrice h g E n S\n"
+        "lean": "import MathFin.Binomial.Bermudan\n\nopen Real\nopen MathFin\n\ntheorem bermudan_sandwich_thm {u d r : ℝ} (h : BinomialNoArb u d r)\n    (g : ℝ → ℝ) (E : Set ℕ) (n : ℕ) (S : ℝ) :\n    binomialPrice u d r g n S ≤ bermudanPrice E u d r g n S ∧\n      bermudanPrice E u d r g n S ≤ americanPrice u d r g n S :=\n  MathFin.binomialPrice_le_bermudanPrice_le_americanPrice h g E n S\n"
       },
       "metadata": {
         "chapter": 14,
         "reference": "Bermudan sandwich (Hull 26.6, Rogers-Williams Vol 2)",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "26.6"
+          },
+          {
+            "key": "RogersWilliams",
+            "locator": "Vol 2"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the price-tree sandwich binomialPrice <= bermudanPrice E <= americanPrice (binomialPrice_le_bermudanPrice_le_americanPrice, Binomial/Bermudan.lean), from monotonicity of bermudanPrice in the exercise set (bermudanPrice_mono), itself an instance of Snell minimality (bermudanPrice_le_of_supermartingale_dominating). The abstract Finset.sup' form (bermudan_sandwich) is a separate lemma not stated in this entry. Axioms-clean."
@@ -205,6 +325,12 @@
       "metadata": {
         "chapter": 7,
         "reference": "Discrete-time Girsanov / measure change (Shreve I, Ch 1)",
+        "citations": [
+          {
+            "key": "ShreveSCFI",
+            "locator": "Ch 1"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -221,6 +347,11 @@
       "metadata": {
         "chapter": 7,
         "reference": "Discrete martingale representation / market completeness (Harrison-Pliska 1981)",
+        "citations": [
+          {
+            "key": "HarrisonPliska1981"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. oneStep_of_martingale (MathFin/Binomial/PathMeasure.lean) turns a Martingale of flipFiltration under coinFlipMeasure q into the node-average identity on every path (condExp_flipFiltration_succ: the conditional expectation is the node average because the next flip is independent of the past; the almost-sure identity is pointwise because every cylinder has positive probability for 0 < q < 1); then the pathwise delta hedge repr_one_step (hedge = (delta M)/(delta S), MathFin/Binomial/FlipPaths.lean) telescopes. Lives in MathFin/Binomial/MartingaleRepresentation.lean. The space is the infinite coin-flip paths; flipFiltration is the pullback of the finite-horizon filtration of the multi-period market. Axioms-clean."
@@ -237,6 +368,15 @@
       "metadata": {
         "chapter": 7,
         "reference": "Cox, Ross and Rubinstein (1979); Shreve, Stochastic Calculus for Finance I, Theorem 1.2.2 (replication in the N-period binomial model)",
+        "citations": [
+          {
+            "key": "CoxRossRubinstein1979"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "Theorem 1.2.2"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. binomialPrice_replication in MathFin/Binomial/MartingaleRepresentation.lean: binomial_martingale_representation applied to two Mathlib martingales of flipFiltration under coinFlipMeasure (crrUpProb u d r), the discounted tree value stopped at N (martingale_discountedTreeValue, from binomialPrice_succ) and the discounted spot (martingale_discountedSpot, from crrUpProb_mul_up_add), with nondegeneracy from d < u and S0 != 0. The strategy is the representation's node-wise delta. European payoffs of the terminal spot only; the identity is pathwise, with no measure on paths. Axioms-clean."
@@ -248,11 +388,16 @@
       "description": "Under no-arbitrage, the risk-neutral measure in the single-period binomial is uniquely determined by the martingale condition.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.SecondFTAP\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem second_FTAP_single_period_thm {u d r : ℝ} (h : MathFin.BinomialNoArb u d r) :\n    ∃! q : ℝ, q * u + (1 - q) * d = Real.exp r :=\n  MathFin.second_FTAP_single_period h\n"
+        "lean": "import MathFin.Binomial.SecondFTAP\n\nopen Real\nopen MathFin\n\ntheorem second_FTAP_single_period_thm {u d r : ℝ} (h : MathFin.BinomialNoArb u d r) :\n    ∃! q : ℝ, q * u + (1 - q) * d = Real.exp r :=\n  MathFin.second_FTAP_single_period h\n"
       },
       "metadata": {
         "chapter": 7,
         "reference": "Second Fundamental Theorem of Asset Pricing (Harrison-Pliska 1981, single-period)",
+        "citations": [
+          {
+            "key": "HarrisonPliska1981"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -264,14 +409,19 @@
       "description": "Andre's reflection principle for ±1 random-walk paths: the number of length-n paths that touch a barrier a > 0 and end at b ≤ a equals the number of all paths ending at the reflected endpoint 2a − b. The combinatorial backbone of barrier-option counting in the binomial tree; the hitting condition on the reflected side is discharged by a discrete intermediate-value theorem.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.PathReflection\n\n/-- **Andre's reflection principle, counting form** (1887). For ±1 walks of\n    length `n` (paths `Fin n → Bool`), a barrier `a > 0`, and an endpoint\n    `b ≤ a`: the number of paths that touch the barrier and end at `b` equals\n    the number of ALL paths ending at the reflected endpoint `2a − b` — the\n    hitting condition on the reflected side is automatic by the discrete IVT,\n    since `2a − b ≥ a`. This is the counting backbone of barrier-option\n    pricing in the binomial tree. Re-exports\n    `MathFin.reflectionPrincipleEquiv_below` through `Nat.card_congr`. -/\ntheorem reflection_principle_count {n : ℕ} (a b : ℤ) (ha : 0 < a) (hb : b ≤ a) :\n    Nat.card {ω : Fin n → Bool // MathFin.HitsLevel a ω ∧ MathFin.walkPos ω n = b} =\n    Nat.card {ω : Fin n → Bool // MathFin.walkPos ω n = 2 * a - b} :=\n  Nat.card_congr (MathFin.reflectionPrincipleEquiv_below a b ha hb)"
+        "lean": "import MathFin.Binomial.PathReflection\nimport Mathlib.SetTheory.Cardinal.Finite\n\n/-- **Andre's reflection principle, counting form** (1887). For ±1 walks of\n    length `n` (paths `Fin n → Bool`), a barrier `a > 0`, and an endpoint\n    `b ≤ a`: the number of paths that touch the barrier and end at `b` equals\n    the number of ALL paths ending at the reflected endpoint `2a − b` — the\n    hitting condition on the reflected side is automatic by the discrete IVT,\n    since `2a − b ≥ a`. This is the counting backbone of barrier-option\n    pricing in the binomial tree. Re-exports\n    `MathFin.reflectionPrincipleEquivBelow` through `Nat.card_congr`. -/\ntheorem reflection_principle_count {n : ℕ} (a b : ℤ) (ha : 0 < a) (hb : b ≤ a) :\n    Nat.card {ω : Fin n → Bool // MathFin.HitsLevel a ω ∧ MathFin.walkPos ω n = b} =\n    Nat.card {ω : Fin n → Bool // MathFin.walkPos ω n = 2 * a - b} :=\n  Nat.card_congr (MathFin.reflectionPrincipleEquivBelow a b ha hb)"
       },
       "metadata": {
         "chapter": 14,
         "reference": "Andre (1887) reflection principle; barrier-option path counting in the binomial tree",
+        "citations": [
+          {
+            "key": "Andre1887"
+          }
+        ],
         "difficulty": "medium",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof in MathFin/Binomial/PathReflection.lean: the reflectAtFirstHit involution, the reflected-endpoint identity, the discrete IVT (HitsLevel_of_walkPos_endpoint_ge), and the bijection reflectionPrincipleEquiv_below; the snippet re-exports the counting identity via Nat.card_congr."
+        "formalization_scope": "Full formal proof in MathFin/Binomial/PathReflection.lean: the reflectAtFirstHit involution, the reflected-endpoint identity, the discrete IVT (HitsLevel_of_walkPos_endpoint_ge), and the bijection reflectionPrincipleEquivBelow; the snippet re-exports the counting identity via Nat.card_congr."
       }
     },
     {
@@ -285,9 +435,14 @@
       "metadata": {
         "chapter": 13,
         "reference": "Andre 1887; barrier-option counting",
+        "citations": [
+          {
+            "key": "Andre1887"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via reflectionPrincipleEquiv_below. Re-export from MathFin. Axioms-clean."
+        "formalization_scope": "Full formal proof via reflectionPrincipleEquivBelow. Re-export from MathFin. Axioms-clean."
       }
     },
     {
@@ -301,6 +456,7 @@
       "metadata": {
         "chapter": 13,
         "reference": "Reflection principle; barrier/lookback pricing",
+        "citations": [],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: trichotomy of the hit-set + reflection of below-barrier endpoints. Re-export from MathFin. Axioms-clean."
@@ -317,6 +473,15 @@
       "metadata": {
         "chapter": 1,
         "reference": "J. C. Cox, S. A. Ross and M. Rubinstein, Option pricing: a simplified approach, Journal of Financial Economics 7 (1979) 229–263; S. E. Shreve, Stochastic Calculus for Finance I, Springer (2004), §2.4",
+        "citations": [
+          {
+            "key": "CoxRossRubinstein1979"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "§2.4"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.binomialPrice_eq_integral_coinFlipMeasure (MathFin/Binomial/PathMeasure.lean). coinFlipMeasure q is Measure.infinitePi of Mathlib's bernoulliMeasure on Bool; the probability of the first N flips being x is ∏ Bernoulli(q)(x_i), from Measure.infinitePi_pi (coinFlipMeasure_cylinder); the integral of a function of N flips is the finite sum over the 2^N sequences (integral_comp_flips), and the backward recursion unrolls into the same sum (binomialPrice_eq_sum). SCOPE: European payoffs of the terminal spot; American prices and path-dependent payoffs are not covered."
@@ -328,14 +493,23 @@
       "domain": "mathematical_finance",
       "description": "In the one-period binomial model with S₀ > 0 and 0 < d < e^r < u, the portfolio replicating a claim (V_u, V_d) is unique, and every portfolio (Δ, B) paying V_u in the up state and V_d in the down state costs ΔS₀ + B = e^{−r}(qV_u + (1−q)V_d), q = (e^r − d)/(u − d). This price equals the two-state pricing-kernel value whose state prices e^{−r}·(−z_d, z_u)/(z_u − z_d) are the discounted backward-FTAP martingale weights of the excess returns z_u = u − e^r, z_d = d − e^r. One period, two states.",
       "code": {
-        "lean": "import MathFin.Binomial.BinomialFromFTAP\n\nopen MathFin\n\n/-- **Law of one price, one-period binomial.** Re-export of\n`MathFin.binomial_replicatingPortfolio_unique`, `binomial_replication_cost_eq_price` and\n`binomial_replication_cost_eq_pricingKernel`. -/\ntheorem binomial_law_of_one_price {S₀ u d r V_u V_d : ℝ} (hS₀ : 0 < S₀)\n    (h : BinomialNoArb u d r) :\n    (∃! p : ℝ × ℝ, p.1 * (S₀ * u) + p.2 * Real.exp r = V_u ∧\n        p.1 * (S₀ * d) + p.2 * Real.exp r = V_d) ∧\n    ∀ Δ B : ℝ, Δ * (S₀ * u) + B * Real.exp r = V_u → Δ * (S₀ * d) + B * Real.exp r = V_d →\n      Δ * S₀ + B = binomialOptionPriceOnePeriod u d r V_u V_d ∧\n        Δ * S₀ + B = pricingKernel_two_state (u - Real.exp r) (d - Real.exp r) r V_u V_d :=\n  ⟨binomial_replicatingPortfolio_unique hS₀ h, fun _ _ h_up h_down ↦\n    ⟨binomial_replication_cost_eq_price hS₀ h h_up h_down,\n      binomial_replication_cost_eq_pricingKernel hS₀ h h_up h_down⟩⟩\n"
+        "lean": "import MathFin.Binomial.BinomialFromFTAP\n\nopen MathFin\n\n/-- **Law of one price, one-period binomial.** Re-export of\n`MathFin.binomial_replicatingPortfolio_unique`, `binomial_replication_cost_eq_price` and\n`binomial_replication_cost_eq_pricingKernel`. -/\ntheorem binomial_law_of_one_price {S₀ u d r V_u V_d : ℝ} (hS₀ : 0 < S₀)\n    (h : BinomialNoArb u d r) :\n    (∃! p : ℝ × ℝ, p.1 * (S₀ * u) + p.2 * Real.exp r = V_u ∧\n        p.1 * (S₀ * d) + p.2 * Real.exp r = V_d) ∧\n    ∀ Δ B : ℝ, Δ * (S₀ * u) + B * Real.exp r = V_u → Δ * (S₀ * d) + B * Real.exp r = V_d →\n      Δ * S₀ + B = binomialOptionPriceOnePeriod u d r V_u V_d ∧\n        Δ * S₀ + B = pricingKernelTwoState (u - Real.exp r) (d - Real.exp r) r V_u V_d :=\n  ⟨binomial_replicatingPortfolio_unique hS₀ h, fun _ _ h_up h_down ↦\n    ⟨binomial_replication_cost_eq_price hS₀ h h_up h_down,\n      binomial_replication_cost_eq_pricingKernel hS₀ h h_up h_down⟩⟩\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "S. E. Shreve, Stochastic Calculus for Finance I: The Binomial Asset Pricing Model, Springer (2004), §1.1; J. M. Harrison and S. R. Pliska, Martingales and stochastic integrals in the theory of continuous trading, Stoch. Proc. Appl. 11 (1981) 215–260",
+        "citations": [
+          {
+            "key": "ShreveSCFI",
+            "locator": "§1.1"
+          },
+          {
+            "key": "HarrisonPliska1981"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.binomial_replicatingPortfolio_unique and binomial_replication_cost_eq_price (MathFin/Binomial/ReplicatingUniqueness.lean) and binomial_replication_cost_eq_pricingKernel (MathFin/Binomial/BinomialFromFTAP.lean). Uniqueness is the nonzero determinant S₀(u − d)e^r; the kernel identity rests on binomial_q_eq_emm and binomial_emmWeightDown_eq (the FTAPTwoState weights are q and 1 − q) and pricingKernel_two_state (Bridges/PricingKernel). SCOPE: one period, two states; the multi-period tree is not covered here."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.binomial_replicatingPortfolio_unique and binomial_replication_cost_eq_price (MathFin/Binomial/ReplicatingUniqueness.lean) and binomial_replication_cost_eq_pricingKernel (MathFin/Binomial/BinomialFromFTAP.lean). Uniqueness is the nonzero determinant S₀(u − d)e^r; the kernel identity rests on binomial_q_eq_emm and binomial_emmWeightDown_eq (the FTAPTwoState weights are q and 1 − q) and pricingKernelTwoState (Bridges/PricingKernel). SCOPE: one period, two states; the multi-period tree is not covered here."
       }
     },
     {
@@ -349,6 +523,15 @@
       "metadata": {
         "chapter": 9,
         "reference": "S. E. Shreve, Stochastic Calculus for Finance I: The Binomial Asset Pricing Model, Springer (2004), §4.5; R. C. Merton, Theory of Rational Option Pricing, Bell J. Econ. Manag. Sci. 4(1) (1973) 141–183",
+        "citations": [
+          {
+            "key": "ShreveSCFI",
+            "locator": "§4.5"
+          },
+          {
+            "key": "Merton1973"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.americanCallPrice_eq_binomialPrice (MathFin/Binomial/MertonAmericanCallTree.lean): the case E = univ of bermudanCallPrice_eq_binomialPrice, proved by the Snell minimality of bermudanPrice E against the European price process (a martingale above the payoff, by induction from call_one_period_continuation_dominates_intrinsic), and bermudanPrice_mono for the exercise sets empty subset E (Binomial/Bermudan). SCOPE: the discrete tree, no dividends, r ≥ 0, K ≥ 0. The continuous-time American = European statement is not part of this entry (mf-merton-1973-no-early-exercise proves the strict dominance bsV > S₀ − K only)."
@@ -365,6 +548,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "J. C. Cox, S. A. Ross and M. Rubinstein, Option pricing: a simplified approach, J. Financial Econ. 7 (1979) 229–263",
+        "citations": [
+          {
+            "key": "CoxRossRubinstein1979"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.crr_americanCall_tendsto_bs (MathFin/Binomial/MertonAmericanCallTree.lean): for n ≥ 1 the American and European CRR prices agree (americanCallPrice_eq_binomialPrice, the per-step rate rT/n being nonnegative), and the European prices converge to the closed form (binomialPrice_call_tendsto_bs_closed, Binomial/CRRClosedForm). SCOPE: convergence of tree prices; no continuous-time optimal-stopping value is involved."
@@ -381,6 +569,11 @@
       "metadata": {
         "chapter": 9,
         "reference": "J. C. Cox, S. A. Ross and M. Rubinstein, Option pricing: a simplified approach, J. Financial Econ. 7 (1979) 229–263",
+        "citations": [
+          {
+            "key": "CoxRossRubinstein1979"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.crrRowLaw_moments_tendsto (MathFin/Binomial/CRRDiscreteIto.lean). General lemmas there: bounded support propagates through convolution powers (ae_abs_le_convPow), and convPow ν k has mean k·E_ν[X] and variance k·Var_ν(X) (integral_id_convPow, variance_convPow, via Mathlib's integral_conv and variance_eq_sub). The CRR step has mean (2p_n − 1)σ√(T/n) and variance 4p_n(1 − p_n)σ²T/n; the limits are crr_drift_limit_n and crr_variance_limit. No no-arbitrage hypothesis: p_n → 1/2, so the step law is a probability measure for large n. SCOPE: first two moments; higher moments and rates are not covered."
@@ -397,6 +590,15 @@
       "metadata": {
         "chapter": 9,
         "reference": "Harrison and Pliska, Martingales and stochastic integrals in the theory of continuous trading, Stoch. Proc. Appl. 11 (1981); Shreve, Stochastic Calculus for Finance I, Section 5.4 (fundamental theorems of asset pricing)",
+        "citations": [
+          {
+            "key": "HarrisonPliska1981"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "Section 5.4"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. isEMM_horizonSpot in MathFin/Binomial/MultiPeriodFTAP.lean: the Mathlib Martingale of the discounted spot under coinFlipMeasure (martingale_discountedSpot, MathFin/Binomial/PathMeasure.lean) is pulled back to the finite space Fin T -> Bool, where the filtration horizonFiltration T has the path-space flipFiltration as its preimage under flips T (comap_flips_horizonFiltration); equivalence of the two measures is full support from the cylinder formula. Single risky asset, finite horizon T, finite sample space; the real-world law is any i.i.d. Bernoulli(p) with 0 < p < 1. Says an EMM exists; uniqueness is mf-binomial-multi-period-emm-unique. Axioms-clean."
@@ -413,6 +615,15 @@
       "metadata": {
         "chapter": 9,
         "reference": "Harrison and Pliska, Martingales and stochastic integrals in the theory of continuous trading, Stoch. Proc. Appl. 11 (1981); Shreve, Stochastic Calculus for Finance I, Section 5.4 (fundamental theorems of asset pricing)",
+        "citations": [
+          {
+            "key": "HarrisonPliska1981"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "Section 5.4"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. noArbitrage_horizonSpot_iff in MathFin/Binomial/MultiPeriodFTAP.lean. Forward: isEMM_horizonSpot plus ftap_discrete (MathFin/Foundations/FTAPDiscrete.lean). Converse: binomialNoArb_of_noArbitrage, a first-period buy-and-hold or short-and-hold arbitrage, which uses S_0 > 0, d < u and at least one period; the standing hypotheses 0 < d < u are model assumptions (u = d gives a deterministic market with no arbitrage and no d < e^r < u). Single risky asset, finite horizon, finite sample space. Does not claim uniqueness of the EMM. Axioms-clean."
@@ -429,6 +640,15 @@
       "metadata": {
         "chapter": 9,
         "reference": "Harrison and Pliska, Martingales and stochastic integrals in the theory of continuous trading, Stoch. Proc. Appl. 11 (1981); Shreve, Stochastic Calculus for Finance I, Section 5.4 (fundamental theorems of asset pricing)",
+        "citations": [
+          {
+            "key": "HarrisonPliska1981"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "Section 5.4"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. existsUnique_isEMM_horizonSpot in MathFin/Binomial/MultiPeriodFTAP.lean: existence is isEMM_horizonSpot; uniqueness is IsEMM.eq_horizonMeasure. Node by node, on the atom A of F_t of paths agreeing with x on the first t flips, the martingale property in set-integral form gives the integral over A of S_{t+1} - S_t equal to zero; there the increment is S_t(x)(e^{-r}u - 1) or S_t(x)(e^{-r}d - 1) according to flip t, which with Q(A) = Q(A and up) + Q(A and down) forces Q(A and up) = crrUpProb * Q(A) (IsEMM.real_atom_flip, using S_0 > 0 and d > 0 for S_t(x) > 0). Induction on the prefix length gives each atom the product probability (IsEMM.real_horizonAtom), and at t = T the atoms are the paths. Single risky asset, finite horizon T, finite sample space, standing hypotheses S_0 > 0 and BinomialNoArb. The uniqueness proof uses only the probability and martingale fields of IsEMM, not the equivalence with the real-world law. Uniqueness of the EMM is what the second fundamental theorem equates with completeness; replication of contingent claims is the separate entry mf-binomial-multi-period-complete. Axioms-clean."
@@ -445,6 +665,15 @@
       "metadata": {
         "chapter": 9,
         "reference": "Harrison and Pliska, Martingales and stochastic integrals in the theory of continuous trading, Stoch. Proc. Appl. 11 (1981); Shreve, Stochastic Calculus for Finance I, Section 5.4 (second fundamental theorem of asset pricing)",
+        "citations": [
+          {
+            "key": "HarrisonPliska1981"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "Section 5.4"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. isCompleteMarket_horizonSpot in MathFin/Binomial/MultiPeriodFTAP.lean: the unique equivalent martingale measure (existsUnique_isEMM_horizonSpot) and the finite-space second FTAP (ftap_two, Foundations/FTAPComplete.lean, with no arbitrage from noArbitrage_horizonSpot and 𝓕 T the full σ-algebra, horizonFiltration_horizon) give completeness. Completeness is the library definition IsCompleteMarket, replication by bounded predictable strategies of every bounded 𝓕 T-measurable claim, not a weaker notion; the replicating strategy is not given in closed form here (the node-wise delta hedge on paths is binomial_martingale_representation, Binomial/MartingaleRepresentation.lean, which is stated on the infinite path space and is not used in this proof). Single risky asset, finite horizon T, finite sample space, standing hypotheses S_0 > 0 and BinomialNoArb. Axioms-clean."
@@ -461,6 +690,16 @@
       "metadata": {
         "chapter": 9,
         "reference": "D. Lamberton and B. Lapeyre, Introduction to Stochastic Calculus Applied to Finance, 2nd ed., Chapman & Hall/CRC (2008), §2.2 (the Snell envelope); S. E. Shreve, Stochastic Calculus for Finance I, Springer (2004), Ch. 4 (American derivative securities on the binomial tree)",
+        "citations": [
+          {
+            "key": "LambertonLapeyre2008",
+            "locator": "§2.2"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "Ch. 4"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. snell_ae_eq_snellEnvelope and snellEnvelope_discounted_bermudanPrice (MathFin/Binomial/PathMeasure.lean): the first by induction on the steps left, the conditional expectation of the recursion being the node average (condExp_flipFiltration_succ), which turns the tree's pathwise recursion snell into the general one (Foundations/SnellEnvelope.lean) almost surely; the second composes it with snellAux_eq_discounted_bermudanPrice (Binomial/SnellEnvelope.lean). The agreement is almost sure under coinFlipMeasure q, at times k ≤ N, with exercise times {i | N − i ∈ E} (E counts the steps still to go); the payoff must be adapted to the flips (PathAdaptedAt). Axioms-clean."
@@ -477,6 +716,15 @@
       "metadata": {
         "chapter": 9,
         "reference": "Harrison and Pliska, Martingales and stochastic integrals in the theory of continuous trading, Stoch. Proc. Appl. 11 (1981); Shreve, Stochastic Calculus for Finance I, Section 5.4 (second fundamental theorem of asset pricing)",
+        "citations": [
+          {
+            "key": "HarrisonPliska1981"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "Section 5.4"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. exists_hedge_eq_value in MathFin/Contracts/Models/BinomialCompleteMarket.lean: the completeness of the tree (isCompleteMarket_horizonSpot) supplies a capital x and a strategy for the claim; the risk-neutral law horizonMeasure N (crrUpProb u d rho) is an equivalent martingale measure (isEMM_horizonSpot) under which the gains are a fair game (IsEMM.integrable_and_integral_gains), so replication prices the claim at x (integral_eq_of_replicates), and that price is the contract's value because the law of the first N flips under coinFlipMeasure q is horizonMeasure N q and the claim is a function of them. Scope: a single cash flow (Contract.pay) maturing exactly on the horizon step N, paying a function of the spot; the strategy is existential (the explicit delta hedge on the infinite path space is pathPV_eq_value_add_gains, Contracts/Models/Binomial.lean). Axioms-clean."
@@ -493,6 +741,16 @@
       "metadata": {
         "chapter": 9,
         "reference": "D. Lamberton and B. Lapeyre, Introduction to Stochastic Calculus Applied to Finance, 2nd ed., Chapman & Hall/CRC (2008), §2.2 (the Snell envelope); S. E. Shreve, Stochastic Calculus for Finance I, Springer (2004), Ch. 4 (American derivative securities on the binomial tree)",
+        "citations": [
+          {
+            "key": "LambertonLapeyre2008",
+            "locator": "§2.2"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "Ch. 4"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. supermartingale_snell (MathFin/Binomial/PathMeasure.lean): at every time the frozen pathwise envelope agrees almost surely with the library's snellEnvelope (snell_ae_eq_snellEnvelope, and past the horizon snellEnvelope_after_horizon), which is a supermartingale (snellEnvelope_supermartingale, Foundations/SnellEnvelope.lean); adaptedness and integrability come from the envelope depending only on the first k flips. The freezing at the horizon is needed because past it the pathwise snell is the payoff again. The payoff must be adapted to the flips (PathAdaptedAt); no-arbitrage is not assumed. Axioms-clean."

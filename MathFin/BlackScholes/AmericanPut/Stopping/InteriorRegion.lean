@@ -15,10 +15,30 @@ The frozen price/payoff gap is extended continuously to the whole time/driver
 plane only to define closed compact regions. Smoothness is used exclusively
 inside continuation, where physical time is strictly below maturity.
 
-## Result
+## Main definitions
 
-Public entry points include `planeClassicalGap`, `planeClassicalGap_continuous`,
-`planeClassicalGap_eq`, `interiorRegion`.
+* `planeClassicalGap`: the classical price/payoff gap on the time/driver plane, at time
+  `z.1.toNNReal` and driver frozen at `z.2`.
+* `interiorRegion`: the plane points with time in `[0,T]`, driver in `[-(n+1), n+1]`, gap at least
+  `localizationEps n`, and at least that much maturity left.
+
+## Main results
+
+* `planeClassicalGap_continuous`: for a `DividendPutSolution`, the plane gap is continuous.
+* `planeClassicalGap_eq`: for `t ≤ T`, the plane gap at `(t, W t ω)` is `classicalGap W … t ω`.
+* `interiorRegion_isCompact`: for a `DividendPutSolution`, the interior region is compact.
+* `interiorRegion_subset_continuation`: for `0 < K`, `0 < S`, `0 < σ`, the interior region lies
+  in the continuation region `kernelContinuation`.
+* `brownianInteriorRule_mem_region`: when the Brownian interior rule is positive, the trajectory
+  `(t, brownian t ω)` stays in the interior region for all `t` up to the rule.
+* `brownianInteriorRule_smooth_extension`: for `0 < K`, `0 < S`, `0 < σ`, there is a compactly
+  supported `C²` function `G` that equals the classical candidate along the trajectory up to a
+  positive interior rule, with `planeGenerator G = 0` there.
+
+## Tags
+
+compact region, continuation region, price-payoff gap, stopped trajectories, time-driver plane,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

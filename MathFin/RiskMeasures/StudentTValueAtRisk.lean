@@ -5,7 +5,6 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.StudentT
 public import MathFin.RiskMeasures.ExpectedShortfall
 
@@ -39,6 +38,16 @@ at the Student-t loss (`valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasu
   `VaR_α(μ + σ T) ≤ ES_α(μ + σ T)`.
 * `quantile_studentTMeasure_le_expectedShortfall_closedForm`: the same inequality between the
   two closed forms, `q ≤ g_ν(q)/(1 − α) · (ν + q²)/(ν − 1)`.
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Example 2.15
+
+## Tags
+
+Student-t VaR, heavy-tailed loss, t distribution, expected shortfall closed form,
+McNeil-Frey-Embrechts, location-scale loss, MSC 91G70, MSC 60E05, JEL G32
 -/
 
 @[expose] public section

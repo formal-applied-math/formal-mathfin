@@ -5,10 +5,15 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.EquivMeasure
 public import MathFin.Foundations.FTAP
 public import MathFin.Foundations.NoArbitrageCore
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.ParametricIntegral
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 
 /-!
 # One-period FTAP on a general probability space (finite-dimensional market)
@@ -54,18 +59,38 @@ continuous-time notion restricts to it:
 * the scalar `OnePeriod.IsEMM` (`Foundations/FTAPOnePeriod.lean`) is defined as this notion
   at `F = ℝ`, and its no-arbitrage condition is this one at `F = ℝ`
   (`OnePeriod.noArbitrage_iff_vector`);
-* the finite-state `HasEMM_multi_state` (`Foundations/FTAPMultiState.lean`) holds iff this
+* the finite-state `HasEMMMultiState` (`Foundations/FTAPMultiState.lean`) holds iff this
   notion has a witness on `Ω = Fin N` with the asset returns as an `ℝᴹ`-valued `Y`
-  (`hasEMM_multi_state_iff_exists_isEMM`);
+  (`hasEMMMultiState_iff_exists_isEMM`);
 * the discrete-time `MathFin.IsEMM` at horizon `1` with trivial `𝓕 0`
   (`Foundations/FTAPDiscrete.lean`) is the scalar one for `Y = S 1 − S 0`
   (`isEMM_one_iff_onePeriod`);
-* a continuous-time `ContinuousMarket.IsEMM` gives this notion for every increment
-  `S t − S s` (`ContinuousMarket.IsEMM.increment`, in `Foundations/FTAPDiscrete.lean`).
+* a continuous-time `IsEMM` gives this notion for every increment
+  `S t − S s` (`IsEMM.increment`, in `Foundations/FTAPDiscrete.lean`).
 
-## Main result
+## Main definitions
+
+* `NoArbitrage`: any constant portfolio `θ ∈ F` whose gain `⟪θ, Y⟫` is `P`-a.e. nonnegative has
+  `⟪θ, Y⟫ = 0` a.e.
+* `IsEMM`: `Q ~ P`, `Y` is `Q`-integrable and `E_Q[Y] = 0 ∈ F`.
+* `gainsKernel`: the subspace `{θ : ⟪θ, Y⟫ = 0 a.e.}` of portfolios with a.e. zero gain.
+* `softplus`, `logistic`: `log (1 + eᵘ)` and its derivative `eᵘ / (1 + eᵘ)`.
+* `potential`: the softplus potential `θ ↦ ∫ softplus ⟪θ, Y⟫ ∂P`, whose minimiser's first-order
+  condition produces the equivalent martingale measure.
+
+## Main results
 
 * `MathFin.OnePeriodVector.ftap_one_period_vector`
+
+## References
+
+* [H. Föllmer and A. Schied, *Stochastic Finance: An Introduction in Discrete Time*][FollmerSchied],
+  §1.2
+
+## Tags
+
+fundamental theorem of asset pricing, softplus potential, d-asset market, no arbitrage,
+logistic tilt, Dalang–Morton–Willinger, JEL G13, MSC 91G20, MSC 90C25
 -/
 
 @[expose] public section

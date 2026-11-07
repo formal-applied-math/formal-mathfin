@@ -50,6 +50,18 @@ as the mesh goes to zero (`Contracts/Models/DefaultTimeMesh.lean`).
 * `value_cdsBuyer_coxDefaultTime`, `cdsLossesGrid_one_eq_cdsLosses`.
 * `hitTime_defaultIndicator`, `pathPV_cdsProtectionAtDefault`, `value_cdsProtectionAtDefault`,
   `value_cdsProtectionAtDefault_coxDefaultTime` — the protection leg paid at the default time.
+
+## References
+
+* [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 16
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [D. Lando, *Credit Risk Modeling*][Lando2004], ch. 5
+* [S. Peyton Jones, J. M. Eber and J. Seward, *Composing contracts*][PeytonJonesEberSeward2000]
+
+## Tags
+
+credit default swap, default time, survival probability, par spread, Cox process, hazard rate,
+protection leg, MSC 91G40, JEL G12, JEL G33
 -/
 
 @[expose] public section

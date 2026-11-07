@@ -14,10 +14,23 @@ A bounded continuous terminal payoff has an explicit continuous martingale of
 conditional values. Lifting that martingale through completion, null augmentation,
 and right continuation proves the usual-filtration transition without any PDE.
 
-## Result
+## Main definitions
 
-Public entry points include `brownianTerminalValue`, `brownianTerminalValue_at_maturity`,
-`brownianTerminalValue_bound`, `brownianTerminalValue_continuous`.
+* `brownianTerminalValue`: the `brownianHeatFlow` of `f` over the remaining time
+  `σ^2*(T - min t T)`, started from the log state at `min t T` shifted by `β*(T - min t T)`.
+
+## Main results
+
+* `brownianTerminalValue_at_maturity`: for `T ≤ t`, the terminal value is the payoff `f` of the
+  log state at `T`.
+* `brownianTerminalValue_bound`: if `‖f‖ ≤ C` everywhere, so is the terminal value.
+* `brownianTerminalValue_continuous`: for continuous bounded `f`, the terminal value is
+  continuous in `t` along every path.
+
+## Tags
+
+usual filtration, completion, right continuation, conditional values, terminal payoff, MSC 60G40,
+MSC 60J65
 -/
 
 @[expose] public section

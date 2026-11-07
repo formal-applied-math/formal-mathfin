@@ -17,10 +17,34 @@ property, and instantiate the finite-horizon American value. No existence of
 a PDE solution is assumed or proved here. Equality with a value defined using
 the usual augmented filtration is a separate verification obligation.
 
-## Result
+## Main definitions
 
-Public entry points include `brownianFiltration`, `brownian_filtered`, `brownian_adapted`,
-`brownianAmericanPut`.
+* `brownianFiltration`: the natural filtration of the constructed Brownian motion on the path space
+  `ℝ≥0 → ℝ`.
+* `brownianAmericanPut`: the finite-horizon American put value of the constructed Brownian model,
+  taken over the rules of the raw natural filtration `brownianFiltration`.
+* `brownianExerciseBoundary`: the in-the-money contact threshold of the actual Brownian stopping
+  value; it is not assumed positive or smooth.
+
+## Main results
+
+* `brownian_filtered`, `brownian_adapted`: the constructed Brownian motion is a filtered
+  pre-Brownian motion for `brownianFiltration` under `gaussianLimit`, and is adapted to it.
+* `brownianAmericanPut_bounds`, `brownianAmericanPut_at_expiry`,
+  `brownianAmericanPut_mono_horizon`: for `0 ≤ K`, `0 ≤ r`, `0 ≤ S`, the value lies between
+  `max (K - S) 0` and `K`, equals `max (K - S) 0` at horizon `0`, and is monotone in the horizon.
+* `brownianAmericanPut_convexOn_spot`, `brownianAmericanPut_continuousOn_spot`: for `0 ≤ K` and
+  `0 ≤ r`, the value is convex and continuous in the spot on `[0, ∞)`.
+* `brownianExerciseBoundary_bounds`, `brownianExerciseBoundary_at_expiry`,
+  `brownianExerciseBoundary_antitone`: for `0 ≤ K` and `0 ≤ r`, the boundary lies in `[0, K]`, is
+  `K` at horizon `0` and is antitone in the horizon.
+* `brownianExerciseBoundary_contact_set`: the spots in `[0, K]` where the value equals `K - S`
+  are exactly `[0, brownianExerciseBoundary K r q σ T]`.
+
+## Tags
+
+Brownian filtration, natural filtration, American put model, geometric Brownian motion,
+stopping value, MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

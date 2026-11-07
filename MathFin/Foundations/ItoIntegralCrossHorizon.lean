@@ -10,13 +10,12 @@ public import MathFin.Foundations.ItoIntegralProcess
 public import MathFin.Foundations.AdaptedProcessToLp
 public import MathFin.Foundations.ItoIntegralL2
 public import MathFin.Foundations.ItoIntegralCLM
-public import MathFin.Foundations.ItoIntegralProcessL2Infinite
 public import MathFin.Foundations.ItoIntegralLocality
 
 /-! # Cross-horizon consistency of the CLM Itô integral
 
-MathFin constructs the Itô integral per horizon: `itoIntegralCLM_T` and `itoProcessCLM`
-live over `trimMeasure_T T`. Each finite horizon is related to the infinite-horizon process
+MathFin constructs the Itô integral per horizon: `itoIntegralCLM` and `itoProcessCLM`
+live over `trimMeasure T`. Each finite horizon is related to the infinite-horizon process
 (`ItoIntegralProcessL2Infinite.itoProcessL2Inf_eq_itoProcessCLM`), but there is no direct
 lemma between two *finite* horizons. A process `M` that represents the CLM integral at
 horizon `T` should represent it at *every* smaller horizon `τ ≤ T` — this module proves that
@@ -24,17 +23,17 @@ consistency directly, for the σ-realization `processToLp δ` of a bounded, adap
 path-continuous `δ` in the process form:
 
 * `itoProcessCLM_eq_terminal_of_ge` — the CLM process freezes at its horizon:
-  `itoProcessCLM hB T t φ = itoIntegralCLM_T hB T hBmeas φ` for `t ≥ T` — the terminal value
+  `itoProcessCLM hB T t φ = itoIntegralCLM hB T hBmeas φ` for `t ≥ T` — the terminal value
   is `𝓕_T ⊆ 𝓕_t`-measurable (`itoProcessCLM_terminal_eq`), so the `𝓕_t`-projection fixes it;
 * `itoIntegralCLM_cross_horizon` — **the consistency kernel**: an integrand carried by
   `(0,τ] × Ω` integrates to the *same* `L²` random variable at horizon `τ` and at
   horizon `T ≥ τ`. Both are the infinite-horizon integral of the integrand extended by zero
-  (`itoIntegralCLM_T_apply`), and the two extensions by zero are the same
+  (`itoIntegralCLM_apply`), and the two extensions by zero are the same
   class of the same function (`bandExtend_toLp_ae_eq`);
 * `itoProcessCLM_consist` — the process form: for `t ≤ τ ≤ T` the T-horizon CLM
   process of `processToLp δ` at `t` and the τ-horizon one agree (band-truncate the integrand
   to `(0,t]`, where `itoProcessCLM_eq_zero_of_vanishes_before` and
-  `itoIntegralCLM_T_eq_itoProcessCLM_of_vanishes_after` make the process value a
+  `itoIntegralCLM_eq_itoProcessCLM_of_vanishes_after` make the process value a
   terminal integral, then apply the kernel);
 * `ae_eq_itoProcessCLM_of_le` / `ae_eq_itoProcessCLM_of_horizon_le` /
   `ae_eq_itoProcessCLM_min` — the horizon-consistency corollaries:
@@ -43,12 +42,12 @@ path-continuous `δ` in the process form:
   is frozen, so `M τ` represents it at every `t ≥ τ`, and the frozen reversion
   `t ↦ M (min t τ)` represents it at every time).
 
-## Result
+## Main results
 
 Public API (all in `namespace MathFin`):
 
 * `itoProcessCLM_eq_terminal_of_ge` — the CLM process freezes at its horizon:
-  `itoProcessCLM hB T t φ = itoIntegralCLM_T hB T hBmeas φ` for `t ≥ T`;
+  `itoProcessCLM hB T t φ = itoIntegralCLM hB T hBmeas φ` for `t ≥ T`;
 * `itoIntegralCLM_cross_horizon` — the consistency kernel: an integrand carried by
   `(0, τ] × Ω` integrates to the *same* `L²` random variable at horizon `τ` and at
   horizon `T ≥ τ`;
@@ -64,6 +63,11 @@ Public API (all in `namespace MathFin`):
 process at every time `τ ≤ T` of its horizon.
 
 Supporting lemmas (the band truncation `bandIic` and its `L²` membership) are `private`.
+
+## Tags
+
+horizon consistency, Itô integral, stochastic integral, frozen process, consistency of integrals,
+MSC 60H05, MSC 60G44
 -/
 
 @[expose] public section
@@ -103,7 +107,7 @@ private theorem memLp_bandIic (hBmeas : ∀ t, Measurable (B t))
     (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
     (hδbdd : ∀ t ω, |δ t ω| ≤ Dd)
     (t σ : ℝ≥0) :
-    MemLp (bandIic δ t) 2 (trimMeasure_T (μ := μ) σ hBmeas) := by
+    MemLp (bandIic δ t) 2 (trimMeasure (μ := μ) σ hBmeas) := by
   set 𝓕 := natFiltration (mΩ := mΩ) hBmeas with h𝓕
   have hunc : StronglyMeasurable[𝓕.predictable] (Function.uncurry δ) :=
     isStronglyPredictable_of_bdd_adapted_cont hBmeas hδadap hδcont
@@ -120,13 +124,13 @@ private theorem memLp_bandIic (hBmeas : ∀ t, Measurable (B t))
     exact le_trans (abs_nonneg _) (hδbdd 0 z.2)
 
 /-- **The CLM process freezes at its horizon.** For `t ≥ T` the general CLM integral
-process `itoProcessCLM hB T t φ` equals the terminal integral `itoIntegralCLM_T φ`: the
+process `itoProcessCLM hB T t φ` equals the terminal integral `itoIntegralCLM φ`: the
 terminal integral is the process at `T` (`itoProcessCLM_terminal_eq`), hence `𝓕_T`-measurable,
 hence `𝓕_t`-measurable, so the `𝓕_t`-projection that defines the process fixes it. -/
 theorem itoProcessCLM_eq_terminal_of_ge (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {T t : ℝ≥0} (hTt : T ≤ t)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    itoProcessCLM hB T t hBmeas φ = itoIntegralCLM_T hB T hBmeas φ := by
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
+    itoProcessCLM hB T t hBmeas φ = itoIntegralCLM hB T hBmeas φ := by
   have : Fact ((natFiltration hBmeas t : MeasurableSpace Ω) ≤ mΩ) :=
     ⟨(natFiltration hBmeas).le t⟩
   rw [itoProcessCLM_eq_condExpL2, ← itoProcessCLM_terminal_eq hB T hBmeas φ]
@@ -137,15 +141,15 @@ theorem itoProcessCLM_eq_terminal_of_ge (hB : IsPreBrownianReal B μ)
 integrates to the *same* `L²` random variable at horizon `τ` and at horizon `T ≥ τ`.
 
 Both are the infinite-horizon integral `itoIntegralL2` of the integrand extended by zero
-(`itoIntegralCLM_T_apply`), and the two extensions by zero are the same
+(`itoIntegralCLM_apply`), and the two extensions by zero are the same
 class of the same function (`bandExtend_toLp_ae_eq`). -/
 theorem itoIntegralCLM_cross_horizon (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {τ T : ℝ≥0} (hτT : τ ≤ T)
     {g : ℝ≥0 × Ω → ℝ} (hg0 : ∀ z : ℝ≥0 × Ω, τ < z.1 → g z = 0)
-    (hgmτ : MemLp g 2 (trimMeasure_T (μ := μ) τ hBmeas))
-    (hgmT : MemLp g 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    itoIntegralCLM_T hB τ hBmeas (hgmτ.toLp g) = itoIntegralCLM_T hB T hBmeas (hgmT.toLp g) := by
-  rw [itoIntegralCLM_T_apply, itoIntegralCLM_T_apply]
+    (hgmτ : MemLp g 2 (trimMeasure (μ := μ) τ hBmeas))
+    (hgmT : MemLp g 2 (trimMeasure (μ := μ) T hBmeas)) :
+    itoIntegralCLM hB τ hBmeas (hgmτ.toLp g) = itoIntegralCLM hB T hBmeas (hgmT.toLp g) := by
+  rw [itoIntegralCLM_apply, itoIntegralCLM_apply]
   congr 1
   exact Lp.ext ((bandExtend_toLp_ae_eq τ hBmeas hg0 hgmτ).trans
     (bandExtend_toLp_ae_eq T hBmeas
@@ -156,7 +160,7 @@ of a bounded, adapted, path-continuous `δ` and `t ≤ τ ≤ T`, the T-horizon 
 and the τ-horizon CLM process at `t` agree as `L²` random variables.
 Route: band-truncate the integrand to `(0,t]` — `itoProcessCLM_eq_zero_of_vanishes_before`
 kills the band tail in the process value and
-`itoIntegralCLM_T_eq_itoProcessCLM_of_vanishes_after` makes the truncated process value a
+`itoIntegralCLM_eq_itoProcessCLM_of_vanishes_after` makes the truncated process value a
 terminal integral — then apply the cross-horizon kernel. -/
 theorem itoProcessCLM_consist (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {t τ T : ℝ≥0} (htτ : t ≤ τ) (hτT : τ ≤ T)
@@ -167,16 +171,16 @@ theorem itoProcessCLM_consist (hB : IsPreBrownianReal B μ)
     (itoProcessCLM hB T t hBmeas (processToLp T hBmeas hδadap hδcont hδbdd) : Lp ℝ 2 μ)
       = (itoProcessCLM hB τ t hBmeas (processToLp τ hBmeas hδadap hδcont hδbdd) : Lp ℝ 2 μ) := by
   classical
-  have hmemσ : ∀ σ : ℝ≥0, MemLp (bandIic δ t) 2 (trimMeasure_T (μ := μ) σ hBmeas) :=
+  have hmemσ : ∀ σ : ℝ≥0, MemLp (bandIic δ t) 2 (trimMeasure (μ := μ) σ hBmeas) :=
     fun σ ↦ memLp_bandIic hBmeas hδadap hδcont hδbdd t σ
   -- the process value at `t` only sees the `(0,t]` band of the integrand
   have hband : ∀ σ : ℝ≥0, t ≤ σ →
       itoProcessCLM hB σ t hBmeas (processToLp σ hBmeas hδadap hδcont hδbdd)
-        = itoIntegralCLM_T hB σ hBmeas (MemLp.toLp (bandIic δ t) (hmemσ σ)) := by
+        = itoIntegralCLM hB σ hBmeas (MemLp.toLp (bandIic δ t) (hmemσ σ)) := by
     intro σ hσ
     have hzero : itoProcessCLM hB σ t hBmeas ((processToLp σ hBmeas hδadap hδcont hδbdd
         - MemLp.toLp (bandIic δ t) (hmemσ σ) :
-          Lp ℝ 2 (trimMeasure_T (μ := μ) σ hBmeas))) = 0 := by
+          Lp ℝ 2 (trimMeasure (μ := μ) σ hBmeas))) = 0 := by
       refine itoProcessCLM_eq_zero_of_vanishes_before hB σ t hσ hBmeas
         (processToLp σ hBmeas hδadap hδcont hδbdd
           - MemLp.toLp (bandIic δ t) (hmemσ σ)) ?_
@@ -188,17 +192,17 @@ theorem itoProcessCLM_consist (hB : IsPreBrownianReal B μ)
     have hsplit := map_sub (itoProcessCLM hB σ t hBmeas)
       (processToLp σ hBmeas hδadap hδcont hδbdd) (MemLp.toLp (bandIic δ t) (hmemσ σ))
     rw [hzero, eq_comm, sub_eq_zero] at hsplit
-    have hvanish : ∀ᵐ p ∂(trimMeasure_T (μ := μ) σ hBmeas), t < p.1 →
+    have hvanish : ∀ᵐ p ∂(trimMeasure (μ := μ) σ hBmeas), t < p.1 →
         MemLp.toLp (bandIic δ t) (hmemσ σ) p = 0 := by
       filter_upwards [MemLp.coeFn_toLp (hmemσ σ)] with p hp hpt
       rw [hp, bandIic_of_gt hpt]
-    have hterm := itoIntegralCLM_T_eq_itoProcessCLM_of_vanishes_after hB σ t hσ hBmeas
+    have hterm := itoIntegralCLM_eq_itoProcessCLM_of_vanishes_after hB σ t hσ hBmeas
       (MemLp.toLp (bandIic δ t) (hmemσ σ)) hvanish
     rw [hsplit, ← hterm]
   calc (itoProcessCLM hB T t hBmeas (processToLp T hBmeas hδadap hδcont hδbdd) : Lp ℝ 2 μ)
-      = itoIntegralCLM_T hB T hBmeas (MemLp.toLp (bandIic δ t) (hmemσ T)) :=
+      = itoIntegralCLM hB T hBmeas (MemLp.toLp (bandIic δ t) (hmemσ T)) :=
         hband T (htτ.trans hτT)
-    _ = itoIntegralCLM_T hB τ hBmeas (MemLp.toLp (bandIic δ t) (hmemσ τ)) :=
+    _ = itoIntegralCLM hB τ hBmeas (MemLp.toLp (bandIic δ t) (hmemσ τ)) :=
         (itoIntegralCLM_cross_horizon hB hBmeas hτT
           (fun z hz ↦ bandIic_of_gt (lt_of_le_of_lt htτ hz)) (hmemσ τ) (hmemσ T)).symm
     _ = (itoProcessCLM hB τ t hBmeas (processToLp τ hBmeas hδadap hδcont hδbdd) : Lp ℝ 2 μ) :=

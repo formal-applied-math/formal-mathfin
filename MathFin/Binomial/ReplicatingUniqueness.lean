@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Binomial.Model
+public import Mathlib.Analysis.Normed.Field.Basic
 
 /-!
 # Uniqueness of the binomial replicating portfolio, and the law of one price
@@ -32,12 +32,17 @@ of the martingale measure and completeness are not stated here (`Binomial.Second
 one-period uniqueness of `q`; `Binomial.BinomialFromFTAP` identifies the price with the
 FTAP pricing kernel).
 
-## Results
+## Main results
 
 * `binomial_replicatingPortfolio_unique`: the replicating portfolio `(Δ, B)` is uniquely
   determined by the target payoffs `(V_u, V_d)`.
 * `binomial_replication_cost_eq_price`: any portfolio replicating `(V_u, V_d)` costs
   `binomialOptionPriceOnePeriod u d r V_u V_d`.
+
+## Tags
+
+replicating portfolio, law of one price, delta and bond, no arbitrage, one-period binomial,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

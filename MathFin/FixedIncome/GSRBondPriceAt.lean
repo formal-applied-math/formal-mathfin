@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.GSRPiecewiseVol
 public import MathFin.FixedIncome.VasicekBondPriceAt
 public import MathFin.Foundations.WienerIntegralForwardMeasure
@@ -29,9 +28,18 @@ It is the instance of `condExp_exp_neg_wienerIntegralLp` (`FixedIncome/VasicekBo
 the GSR kernel: the Vasicek mean identity is unchanged, and the kernel seen from `t` splits as
 `σ(u) g_T(u) = σ(u) g_t(u) + B(T − t)·σ(u) e^{−κ(t−u)}` on `(0, t]`.
 
+## Main definitions
+
+* `gsrShortKernel`, `gsrShortKernelLp`: the GSR short-rate kernel `u ↦ σ(u)·e^{−κ(t−u)}`, and
+  the same kernel as an element of `L²((0, t])`.
+* `gsrShortRate`: the GSR short rate `r_t = m_t + ∫₀ᵗ σ(u) e^{−κ(t−u)} dB_u` in its Wiener
+  representation.
+* `gsrBondA`: the GSR affine coefficient `A(t, T) = exp(−θ(τ − B(τ)) + Var_{(t,T]}/2)` with
+  `τ = T − t`.
+* `gsrShortRateV`: the GSR short-rate variance `∫₀ᵗ σ(u)² e^{−2κ(t−u)} du` in closed form.
+
 ## Main results
 
-* `gsrShortKernel`, `gsrShortRate` — the piecewise-weighted short-rate kernel and the short rate.
 * `kernelRestrict_gsrKernelLp` — the GSR kernel seen from `t`.
 * `integral_sq_gsrKernelLp_Ioc` — the variance of the remainder.
 * `gsrBondPrice_condExp` — the conditional discount factor, affine in `r_t`.
@@ -41,6 +49,18 @@ the GSR kernel: the Vasicek mean identity is unchanged, and the kernel seen from
   the pricing measure and under the `t`-forward measure (the same variance, the mean shifted by
   minus the covariance with `∫₀ᵗ r`): the input of the bond put
   (`Contracts/Models/Jamshidian.lean`).
+
+## References
+
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  section 3.3.1
+* [J. Hull and A. White, *Pricing interest-rate-derivative securities*][HullWhite1990]
+* [The QuantLib contributors, *QuantLib*][QuantLib], Gsr model
+
+## Tags
+
+Gaussian short rate, GSR model, conditional bond price, piecewise volatility, affine bond price,
+forward measure, MSC 91G30, MSC 60G15, JEL E43
 -/
 
 @[expose] public section

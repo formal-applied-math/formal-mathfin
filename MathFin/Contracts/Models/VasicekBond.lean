@@ -24,6 +24,18 @@ It is the Hull–White price (`bondPrice_hullWhite`) at the constant forcing `θ
 ## Main results
 
 * `bondPrice_vasicek` — `bondPrice` in the Vasicek model, almost surely.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  section 3.2.1
+* [O. Vasicek, *An equilibrium characterization of the term structure*][Vasicek1977]
+
+## Tags
+
+Vasicek model, bond price, affine term structure, conditional expectation, short rate,
+zero-coupon bond, MSC 91G30, JEL E43
 -/
 
 @[expose] public section

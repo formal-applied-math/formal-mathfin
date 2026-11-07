@@ -7,17 +7,27 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianHeatFlow
 public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianTransition
-public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianVerification
+public import MathFin.BlackScholes.AmericanPut.Stopping.ClassicalContact
 
 /-! # Waiting in physical time and price coordinates: the supermartingale step
 
 The step is generic: it needs `PutEnvelope p` and `PutWaiting`, whoever supplies them.
 
-## Result
+## Main results
 
-Public entry points include `PutWaiting.physical_transition`,
-`classicalCandidate_condExp_le_before_maturity`,
-`brownianClassicalCandidate_supermartingale`.
+* `PutWaiting.physical_transition`: for `PutWaiting p`, `0 ≤ K`, `0 < σ` and times `i ≤ j ≤ T`,
+  the discounted Gaussian evolution of the time-`j` slice of `p` from `i` is at most the
+  discounted time-`i` value `K*p`.
+* `classicalCandidate_condExp_le_before_maturity`: for a `PutEnvelope` and `PutWaiting` price,
+  `0 ≤ K`, `0 < σ` and `i ≤ j ≤ T`, the conditional expectation of the candidate at `j` given
+  the Brownian filtration at `i` is a.e. at most its value at `i`.
+* `brownianClassicalCandidate_supermartingale`: for a `PutEnvelope` and `PutWaiting` price with
+  `0 ≤ K`, `0 ≤ r` and `0 < σ`, the candidate is a supermartingale in the Brownian filtration.
+
+## Tags
+
+supermartingale step, put waiting, physical time, conditional expectation, American put, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

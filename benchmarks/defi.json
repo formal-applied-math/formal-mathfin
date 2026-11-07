@@ -12,6 +12,16 @@
       },
       "metadata": {
         "reference": "R. Leshner and G. Hayes, Compound: The Money Market Protocol, v1.0 (February 2019), §3.2.1 Market Dynamics (Index_{a,n} = Index_{a,(n-1)} * (1 + r * t)); J. C. Hull, Options, Futures, and Other Derivatives, §4.2 (continuous compounding)",
+        "citations": [
+          {
+            "key": "LeshnerHayes2019",
+            "locator": "§3.2.1"
+          },
+          {
+            "key": "Hull",
+            "locator": "§4.2"
+          }
+        ],
         "difficulty": "introductory",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.DeFi.Compound.borrowIndex_le_inv_zcb and MathFin.DeFi.Compound.tendsto_borrowIndex (MathFin/DeFi/Compound.lean), which instantiate MathFin.one_add_mul_pow_le_inv_zcb and MathFin.tendsto_one_add_div_pow_inv_zcb (MathFin/FixedIncome/PeriodicCompounding.lean) against the library's zero-coupon bond zcb (MathFin/FixedIncome/ZCB.lean). SCOPE: constant rate only; the index recurrence is a hypothesis, as in the whitepaper; the limit is Mathlib's (1 + t/n)^n -> exp t. Per-block rates that change with utilization, and the reserve-factor split, are not covered."
@@ -27,6 +37,19 @@
       },
       "metadata": {
         "reference": "MakerDAO, The Maker Protocol: MakerDAO's Multi-Collateral Dai (MCD) System (2020), risk parameter 'Stability Fee'; MakerDAO technical documentation, Rates Module (Jug: per-second rate compounded over elapsed seconds by drip); J. C. Hull, Options, Futures, and Other Derivatives, §4.2 (continuous compounding)",
+        "citations": [
+          {
+            "key": "MakerDAO2020"
+          },
+          {
+            "key": "MakerDAOTechDocs",
+            "locator": "Rates Module"
+          },
+          {
+            "key": "Hull",
+            "locator": "§4.2"
+          }
+        ],
         "difficulty": "introductory",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.DeFi.Dai.debt_mul_zcb_log_eq (MathFin/DeFi/Dai.lean), which applies MathFin.one_add_pow_mul_zcb_log (MathFin/FixedIncome/PeriodicCompounding.lean) to the closed form debt n = debt 0 * (1 + fee)^n. SCOPE: the per-period fee is constant and the compounding recurrence is a hypothesis; a period is any unit (a second for the MCD Jug). Fixed-point rounding of the on-chain rpow is not modelled."
@@ -42,6 +65,15 @@
       },
       "metadata": {
         "reference": "Aave, Aave Protocol V2 whitepaper (2020), §5 Formal Definitions (health factor; HF < 1 can be liquidated); R. C. Merton, On the pricing of corporate debt: the risk structure of interest rates, J. Finance 29 (1974) 449-470",
+        "citations": [
+          {
+            "key": "Aave2020",
+            "locator": "§5"
+          },
+          {
+            "key": "Merton1974"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.prob_healthFactorV1_lt_one_eq_kmvPD (MathFin/Bridges/LiquidationAsStructuralDefault.lean): the liquidation set {HF < 1} is rewritten to {C_T < (B+F)/LT} (MathFin.DeFi.Aave.healthFactorV1_lt_one_iff) and its probability computed by MathFin.prob_bsTerminal_lt_eq_kmvPD (the strict shortfall region z < -d2, the standard normal's null singletons, Phi_def, kmvDistanceToDefault_eq_bsd2). SCOPE: terminal check at T only (protocols liquidate at the first crossing, a first-passage probability not computed here); debt and fees fixed at T; single collateral asset; the multi-asset healthFactorV2 is not covered."
@@ -57,6 +89,11 @@
       },
       "metadata": {
         "reference": "L. Heimbach, E. Schertenleib, R. Wattenhofer, Risks and Returns of Uniswap V3 Liquidity Providers, Proc. 4th ACM Conference on Advances in Financial Technologies (AFT 2022), arXiv:2205.08904 (impermanent loss of a constant-product position, the v2 formula as the full-range case)",
+        "citations": [
+          {
+            "key": "HeimbachSchertenlebWattenhofer2022"
+          }
+        ],
         "difficulty": "introductory",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.DeFi.impermanentLoss_eq, impermanentLoss_eq_neg_sq, impermanentLoss_nonpos and impermanentLoss_eq_zero_iff (MathFin/DeFi/UniswapMechanics.lean). The rebalanced reserves satisfy both the invariant and the new-price equation (impermanentLossReserves_invariant, impermanentLossReserves_price); the sign is AM-GM, 2 sqrt r <= 1 + r, via sqrt(r)^2 = r. SCOPE: fee-free pool at the external price; that the rebalanced reserves are the only positive solution is not stated."
@@ -72,6 +109,12 @@
       },
       "metadata": {
         "reference": "H. Adams, N. Zinsmeister, M. Salem, R. Keefer, D. Robinson, Uniswap v3 Core (2021), §2 (eq. 2.2, real reserves) and §6.4.1 (eqs. 6.29-6.30, token amounts below, inside and above the range)",
+        "citations": [
+          {
+            "key": "AdamsEtAl2021",
+            "locator": "§2 (eq. 2.2) and §6.4.1 (eqs. 6.29-6.30)"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.DeFi.v3PositionValue_at_lower, v3PositionValue_at_upper, v3PositionValue_eq_coveredCall_of_le, v3PositionValue_eq_coveredCall_of_lt, v3PositionValue_le_coveredCall and coveredCall_sub_v3PositionValue (MathFin/DeFi/UniswapMechanics.lean). The value is defined from the v3 reserve formulas realReserveX/realReserveY in the three price regimes; the in-range gaps come from two algebraic identities (realReserveX_mul_sq_sub_inRange, realReserveX_mul_mul_sub_inRange). SCOPE: values in token Y at a given price; fees, ticks and the pricing of the call are not modelled."
@@ -87,6 +130,14 @@
       },
       "metadata": {
         "reference": "G. Angeris, H.-T. Kao, R. Chiang, C. Noyes, T. Chitra, An analysis of Uniswap markets, Cryptoeconomic Systems 1(1) (2021); J. Milionis, C. C. Moallemi, T. Roughgarden, A. L. Zhang, Automated Market Making and Loss-Versus-Rebalancing (2022), arXiv:2208.06046 (constant-product rate sigma^2/8)",
+        "citations": [
+          {
+            "key": "AngerisKaoChiangNoyesChitra2021"
+          },
+          {
+            "key": "MilionisMoallemiRoughgardenZhang2022"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.integral_lpValue_eq_exp_mul_integral_hodlValue (MathFin/Bridges/ConstantProductLPLognormal.lean): the LP value is 2 y0 sqrt(r) (MathFin.DeFi.lpPortfolioValue_eq), sqrt of a lognormal factor is lognormal with half the volatility (sqrt_bsTerminal_one, Real.exp_half), and both expectations are the library's forward identity expected_terminal_eq_forward (MathFin/BlackScholes/Forward.lean); the general-drift formula E[LP_T] = 2 y0 exp((mu/2 - sigma^2/8) T) is integral_lpValue_lognormal. SCOPE: fee-free pool assumed at the external price at T; deposit at the pool price; values in token Y, undiscounted; fees and the path of arbitrage trades are not modelled."
@@ -102,6 +153,12 @@
       },
       "metadata": {
         "reference": "G. Angeris, H.-T. Kao, R. Chiang, C. Noyes, T. Chitra, An analysis of Uniswap markets, Cryptoeconomic Systems 1(1) (2021), §2.1 (optimal arbitrage; no-arbitrage bound (3), which at zero fee says the pool price equals the reference price)",
+        "citations": [
+          {
+            "key": "AngerisKaoChiangNoyesChitra2021",
+            "locator": "§2.1"
+          }
+        ],
         "difficulty": "introductory",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.DeFi.arbitragePresent_iff (MathFin/DeFi/ConstantProductAMM.lean), from exists_profitable_swap_iff and exists_profitable_reverse_swap_iff: a swap of size D > 0 is profitable iff P (x + D) < y (resp. y + D < P x), and such a D exists iff P x < y (resp. y < P x). arbitragePresent is defined as internalPrice x y ≠ P. SCOPE: fee-free pool, one swap at a time; the optimal arbitrage size and the fee band of Angeris et al. are not formalized."
@@ -117,6 +174,15 @@
       },
       "metadata": {
         "reference": "H. Adams, N. Zinsmeister, M. Salem, R. Keefer, D. Robinson, Uniswap v3 Core (2021), §6.4.1 (eqs. 6.29-6.30, position token amounts); F. Black and M. Scholes, The pricing of options and corporate liabilities, J. Political Economy 81 (1973) 637-654",
+        "citations": [
+          {
+            "key": "AdamsEtAl2021",
+            "locator": "§6.4.1 (eqs. 6.29-6.30)"
+          },
+          {
+            "key": "BlackScholes1973"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.integral_discounted_v3PositionValue_le (MathFin/Bridges/UniswapV3CoveredCallPrice.lean): the pointwise covered-call bound MathFin.DeFi.v3PositionValue_le_coveredCall at s = sqrt(S_T), integral_mono (the position value is measurable and bounded by x_max * ab), then discounted_terminal_eq_S0 (MathFin/BlackScholes/Forward.lean) and bs_call_formula (MathFin/BlackScholes/Call.lean). SCOPE: an upper bound, not the price; the position is held to T with no fees, no rebalancing and Y as the numeraire; the expected in-range gap is not computed."

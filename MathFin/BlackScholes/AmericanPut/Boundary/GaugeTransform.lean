@@ -14,10 +14,29 @@ Dividing a pricing-equation solution by the positive line profile removes the
 zero-order term. Smoothness is required only locally at the point in question,
 not across the exercise boundary or at expiry.
 
-## Result
+## Main definitions
 
-Public entry points include `deriv2_mul_at`, `shiftedProfile_hasDeriv_x`, `shiftedProfile_deriv2_x`,
-`shiftedProfile_hasDeriv_t`.
+* `gauge`: the quotient `u x t / f (x + c t − d)` of a function `u` by the shifted profile `f`.
+
+## Main results
+
+* `deriv2_mul_at`: Leibniz rule for the second derivative of a product of two functions that
+  are `C²` at `x`.
+* `shiftedProfile_hasDeriv_x`, `shiftedProfile_deriv2_x`, `shiftedProfile_hasDeriv_t`: for a
+  `ProfileData` profile `f`, the space and time derivatives of `f (x + c t − d)`.
+* `gauge_equation`: if `u` is `C²` in space at `x`, differentiable in time at `t` and solves the
+  pricing equation with drift `α` and rate `k` at `(x, t)`, then `gauge u f c d` satisfies the
+  equation with no zero-order term and drift `α + 2 f'/f` there.
+* `normalizedDifference_continuousOn`: for a `ContinuousBoundaryPutSolution` and `ProfileData`
+  profiles `f`, `g`, `normalizedDifference` is continuous on `{t ≥ 0}`.
+* `normalizedDifference_equation`: at every `(x, t)` with `t > 0` and `b t < x`,
+  `normalizedDifference` satisfies the gauge equation with drift
+  `k − h − 1 + 2 f'/f` (evaluated at `x + c t − d`).
+
+## Tags
+
+gauge transformation, positive profile, zero-order term, pricing equation, ratio transform,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

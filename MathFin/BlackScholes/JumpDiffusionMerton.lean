@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.GaussianSmoothing
 public import MathFin.BlackScholes.JumpDiffusionOptionPrices
 public import MathFin.BlackScholes.MertonJumpDiffusion
@@ -47,6 +46,16 @@ date before maturity is Merton's 1976 formula at the current price and the remai
 * `jumpDiffusionPutPrice_gaussian_eq_mertonPutPrice` and
   `JumpDiffusionProcess.condExp_put_eq_mertonPutPrice`: the same for the put and `mertonPutPrice`,
   through the two put–call parities.
+
+## References
+
+* [Cont and Tankov, *Financial Modelling with Jump Processes*][ContTankov2004]
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976]
+
+## Tags
+
+Merton jump-diffusion, Poisson series, lognormal jumps, jump-adjusted volatility,
+option pricing with jumps, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -75,7 +84,7 @@ lemma mertonJump_compensated {k : ℝ} (hk : -1 < k) (δ : ℝ) {r b σ : ℝ} {
 /-- **Put–call parity for discounted payoffs.** For an integrable terminal price `S` under a
 probability measure, the discounted put payoff `D(K − S)⁺` has expectation
 `𝔼[D(S − K)⁺] − 𝔼[D·S] + D·K`: pointwise the put payoff is the call payoff minus the forward plus
-the strike (`max_sub_max_neg`). -/
+the strike (`max_zero_sub_max_neg_zero_eq_self`). -/
 lemma integral_discounted_put_payoff {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}
     [IsProbabilityMeasure Q] {S : Ω → ℝ} (hS : Integrable S Q) (D K : ℝ) :
     ∫ ω, D * max (K - S ω) 0 ∂Q
@@ -85,7 +94,7 @@ lemma integral_discounted_put_payoff {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q 
   have hfwd : Integrable (fun ω ↦ D * S ω) Q := hS.const_mul D
   have hpar (ω : Ω) : D * max (K - S ω) 0
       = D * max (S ω - K) 0 - (D * S ω - D * K) := by
-    have hx := max_sub_max_neg (S ω - K)
+    have hx := max_zero_sub_max_neg_zero_eq_self (S ω - K)
     rw [neg_sub] at hx
     linear_combination -D * hx
   have hfwd' : Integrable (fun ω ↦ D * S ω - D * K) Q := hfwd.sub (integrable_const _)
@@ -161,9 +170,9 @@ theorem discounted_terminal_merton (h : JumpDiffusionHyp Q Λ Z N J) {k δ : ℝ
 /-- **Merton's put formula from the general jump-diffusion.** With log-jumps
 `Jᵢ ∼ N(log(1 + k) − δ²/2, δ²)` and the compensator `κ = kΛ`, the put is Merton's series
 `mertonPutPrice`: the put payoff is the call payoff minus the forward and plus the strike
-(`max_sub_max_neg`), so the put is the call (`call_eq_mertonCallPrice`) minus the discounted
-forward `S₀` (`discounted_terminal_merton`) plus `Ke^{−rT}`, which is `mertonPutPrice` by
-`merton_put_call_parity`. -/
+(`max_zero_sub_max_neg_zero_eq_self`), so the put is the call (`call_eq_mertonCallPrice`)
+minus the discounted forward `S₀` (`discounted_terminal_merton`) plus `Ke^{−rT}`, which is
+`mertonPutPrice` by `merton_put_call_parity`. -/
 theorem put_eq_mertonPutPrice (h : JumpDiffusionHyp Q Λ Z N J) {k δ : ℝ} (hk : -1 < k)
     (hJ : HasLaw (J 0) (gaussianReal (Real.log (1 + k) - δ ^ 2 / 2) (δ ^ 2).toNNReal) Q)
     {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :

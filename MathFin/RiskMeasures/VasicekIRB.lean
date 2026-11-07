@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.QuantileConvergence
 public import MathFin.RiskMeasures.BernoulliMixture
 public import MathFin.RiskMeasures.ValueAtRisk
@@ -49,15 +48,35 @@ The statements hold for every `π` and every `ρ < 1` (with Lean's `√ρ = 0` f
 reading needs `π ∈ (0, 1)`, where `π` is each obligor's default probability
 (`oneFactor_measureReal_default`), and `ρ ∈ [0, 1)`, where `ρ` is the asset correlation.
 
+## Main definitions
+
+* `oneFactorLossFraction`: the fraction of the first `m` obligors of the one-factor Gaussian
+  threshold model whose asset value `√ρ F + √(1 − ρ) εᵢ` is at most `Φ⁻¹(π)`.
+* `asrfQuantile`: the asymptotic single-risk-factor quantile
+  `Φ((Φ⁻¹(π) + √ρ Φ⁻¹(α)) / √(1 − ρ))`, the Basel IRB worst-case default rate at confidence `α`.
+
 ## Main results
 
 * `tendsto_valueAtRisk_of_tendsto_ae`: VaR converges along almost-sure convergence to a loss with
   a strict quantile.
-* `oneFactorLossFraction`, `asrfQuantile`: the portfolio loss fraction and the IRB formula.
 * `oneFactorLossFraction_eq_empiricalCDF`: the loss fraction is an empirical CDF at a random point.
 * `tendsto_oneFactorLossFraction_ae`: `L_m → p(F)` almost surely.
 * `valueAtRisk_oneFactorPD`: `VaR_α(p(F)) = asrfQuantile π ρ α`.
 * `tendsto_valueAtRisk_oneFactorLossFraction`: **the IRB formula is the limit of `VaR_α(L_m)`**.
+
+## References
+
+* [Gordy (2003)][Gordy2003]
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Section 11.3.2
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 11.16, 11.17
+* [O. Vasicek, *Loan portfolio value*][Vasicek2002]
+
+## Tags
+
+Basel IRB formula, Vasicek model, asymptotic single risk factor, Gordy, large portfolio limit,
+worst-case default rate, regulatory capital, one-factor model, MSC 91G40, MSC 60F15, JEL G28,
+JEL G32
 -/
 
 @[expose] public section
@@ -141,14 +160,6 @@ private lemma monotone_asrfProfile (hρ : ρ < 1) :
 private lemma continuous_asrfProfile : Continuous fun z ↦ Phi ((PhiInv π + √ρ * z) / √(1 - ρ)) :=
   continuous_Phi.comp (by fun_prop)
 
-omit [IsProbabilityMeasure P] in
-/-- The negated standard normal factor is standard normal (Mathlib's `gaussianReal_neg`). -/
-private lemma hasLaw_neg_standard {F : Ω → ℝ} (hF : HasLaw F (gaussianReal 0 1) P) :
-    HasLaw (fun ω ↦ -F ω) (gaussianReal 0 1) P := by
-  have h := gaussianReal_neg hF
-  rw [neg_zero] at h
-  exact h
-
 private lemma oneFactorPD_eq (f : ℝ) :
     oneFactorPD π ρ f = Phi ((PhiInv π + √ρ * -f) / √(1 - ρ)) := by
   rw [oneFactorPD, mul_neg, ← sub_eq_add_neg]
@@ -159,7 +170,10 @@ profile `h` applied to the standard normal `−F`, and VaR commutes with `h`. -/
 theorem valueAtRisk_oneFactorPD {F : Ω → ℝ} (hF : HasLaw F (gaussianReal 0 1) P) (hρ : ρ < 1)
     (hα : α ∈ Ioo 0 1) :
     valueAtRisk (fun ω ↦ oneFactorPD π ρ (F ω)) P α = asrfQuantile π ρ α := by
-  have hG := hasLaw_neg_standard hF
+  have hG : HasLaw (fun ω ↦ -F ω) (gaussianReal 0 1) P := by
+    have h := gaussianReal_neg hF
+    rw [neg_zero] at h
+    exact h
   simp_rw [oneFactorPD_eq]
   rw [valueAtRisk_comp (h := fun z ↦ Phi ((PhiInv π + √ρ * z) / √(1 - ρ))) hG.aemeasurable
     (monotone_asrfProfile hρ) continuous_asrfProfile.lowerSemicontinuous hα,
@@ -175,8 +189,12 @@ theorem lt_measureReal_oneFactorPD_le {F : Ω → ℝ} (hF : HasLaw F (gaussianR
   obtain ⟨z, hzx, hz⟩ := (((continuous_asrfProfile (π := π) (ρ := ρ)).tendsto (PhiInv α)).eventually
     (gt_mem_nhds hx) |>.filter_mono nhdsWithin_le_nhds |>.and
       (self_mem_nhdsWithin (s := Ioi (PhiInv α)))).exists
+  have hG : HasLaw (fun ω ↦ -F ω) (gaussianReal 0 1) P := by
+    have h := gaussianReal_neg hF
+    rw [neg_zero] at h
+    exact h
   have hNz : P.real {ω | -F ω ≤ z} = Phi z := by
-    rw [(hasLaw_neg_standard hF).measureReal_eq (p := (· ≤ z)) measurableSet_Iic,
+    rw [hG.measureReal_eq (p := (· ≤ z)) measurableSet_Iic,
       ← cdf_gaussianReal_zero_one, cdf_eq_real]
     rfl
   calc α = Phi (PhiInv α) := (Phi_PhiInv hα).symm

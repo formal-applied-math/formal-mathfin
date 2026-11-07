@@ -5,7 +5,6 @@ Authors: Raphael Coelho, Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.BlackScholes.GarmanNormalForm
 
@@ -28,6 +27,36 @@ This is identical to `bs_call_formula` specialized to `r = 0` in the
 BS-drift, then post-discounted by `e^{-rT}` (the discount-rate is now
 **independent** of the underlying's drift). The proof is therefore a
 direct algebraic specialization.
+
+## Main definitions
+
+* `blackPayerSwaption`: `A · [F Φ(d₁) − K Φ(d₂)]` with `d_i = bsd_i F K 0 σ T`.
+* `blackReceiverSwaption`: `A · [K Φ(−d₂) − F Φ(−d₁)]`.
+* `blackCaplet`: `α · [F Φ(d₁) − K Φ(d₂)]`, the accrual-scaled Black-76 call on the forward
+  rate `F`.
+* `blackFloorlet`: `α · [K Φ(−d₂) − F Φ(−d₁)]`, the put counterpart.
+
+## Main results
+
+* `black_futures_formula`: under `BSCallHyp Q F K 0 σ T Z`, the discounted expected futures-call
+  payoff is `e^{−rT}(F Φ(d₁) − K Φ(d₂))`.
+* `black_futures_price_eq_bsVGarman`: that price is an instance of `bsVGarman`.
+* `black_futures_formula_atm`: at `K = F` it equals `e^{−rT} F (2Φ(σ√T/2) − 1)`.
+* `swaption_payer_receiver_parity`: `blackPayerSwaption − blackReceiverSwaption = A (F − K)`.
+* `caplet_floorlet_parity`: `blackCaplet − blackFloorlet = α (F − K)`.
+* `blackPayerSwaption_eq_bsVGarman`: for `A > 0`, the payer swaption is `bsVGarman (F·A) K A σ T`.
+* `blackCaplet_eq_blackPayerSwaption`, `blackFloorlet_eq_blackReceiverSwaption`: the caplet and
+  floorlet are the payer and receiver swaption with the accrual `α` in place of the annuity.
+
+## References
+
+* [F. Black, *The pricing of commodity contracts*][Black1976]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 18.7; 29.2
+
+## Tags
+
+Black-76, Black formula, options on futures, futures option pricing, lognormal futures,
+European call on futures, MSC 91G20, JEL G13, JEL Q02
 -/
 
 @[expose] public section

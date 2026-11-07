@@ -12,6 +12,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Proposition 2.1.5(2)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Proposition 2.1.5(2)"
+          }
+        ],
         "difficulty": "foundational",
         "formalization_status": "library_wrapper",
         "formalization_scope": "Direct Lean wrapper around an existing library theorem closely matching the benchmark statement."
@@ -28,6 +34,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Proposition 2.1.11(6)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Proposition 2.1.11(6)"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "library_wrapper",
         "formalization_scope": "Direct Lean wrapper around an existing library theorem closely matching the benchmark statement."
@@ -44,6 +56,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Proposition 2.1.11(7)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Proposition 2.1.11(7)"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "library_wrapper",
         "formalization_scope": "Direct Lean wrapper around an existing library theorem closely matching the benchmark statement."
@@ -60,6 +78,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Proposition 2.1.11(8)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Proposition 2.1.11(8)"
+          }
+        ],
         "difficulty": "foundational",
         "formalization_status": "library_wrapper",
         "formalization_scope": "Direct Lean wrapper around an existing library theorem closely matching the benchmark statement."
@@ -76,6 +100,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Proposition 2.1.11(9)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Proposition 2.1.11(9)"
+          }
+        ],
         "difficulty": "intermediate",
         "lean_status": "library_wrapper",
         "lean_note": "Wraps Mathlib's ConvexOn.map_condExp_le_of_finiteDimensional at E = ℝ. The former in-repo explicit-subgradient derivation (Foundations/CondExpJensen.lean) was removed in the 2026-06-03 audit: Mathlib's CondJensen proves the textbook statement from bare convexity (no subgradient API needed), and the subgradient version (bounded g ⇒ Lipschitz φ only) was strictly weaker.",
@@ -94,6 +124,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Shreve, Stochastic Calculus for Finance II, Lemma 2.3.4 (independence lemma), unconditional form",
+        "citations": [
+          {
+            "key": "ShreveSCFII",
+            "locator": "Lemma 2.3.4"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: independence makes the joint law the product of the marginal laws (Mathlib's IndepFun.map_prod_eq_prod_map_map), then the integral against the product measure is an iterated integral (integral_prod), and the inner integral is transported back along Y (integral_map). Holds for any value space of X; integrable_prod_map_of_countable checks the product integrability one value at a time when X is countable-valued. The conditional form is ce-conditional-freezing-lemma. Lives in MathFin/Foundations/IndepFreezing.lean. Axioms-clean."
@@ -110,6 +146,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Shreve, Stochastic Calculus for Finance II, Lemma 2.3.4 (independence lemma)",
+        "citations": [
+          {
+            "key": "ShreveSCFII",
+            "locator": "Lemma 2.3.4"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. On each event s ∈ 𝒢 the joint law of (X, Y) under P restricted to s is the law of X there times the law of Y: on rectangles, P(s ∩ X⁻¹A ∩ Y⁻¹B) = P(s ∩ X⁻¹A)·P(Y⁻¹B) because s ∩ X⁻¹A ∈ 𝒢 is independent of Y⁻¹B, and a measure on a product is determined by rectangles (Measure.prod_eq; map_restrict_prodMk_of_indep). So g is integrable against that product, and Fubini (integral_prod) with integral_map gives ∫_s g(X, Y) dP = ∫_s G(X) dP on every s ∈ 𝒢. G(X) is 𝒢-measurable (the section integral of a strongly measurable g is strongly measurable, StronglyMeasurable.integral_prod_right'), so it is the conditional expectation (ae_eq_condExp_of_forall_setIntegral_eq). Mathlib's condExp_prod_ae_eq_integral_condDistrib conditions on σ(X) through the conditional distribution; here the σ-algebra is any 𝒢 for which X is measurable and of which Y is independent, and the kernel is the law of Y. Lives in MathFin/Foundations/IndepFreezing.lean. Axioms-clean."

@@ -5,7 +5,12 @@ Authors: Robert Martin
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.Deriv.Polynomial
+public import Mathlib.Analysis.Polynomial.Basic
+public import Mathlib.Analysis.Calculus.LocalExtr.Basic
+public import Mathlib.Topology.Algebra.Polynomial
 
 /-! # Nonnegativity of a polynomial on the positive half-line
 
@@ -15,6 +20,26 @@ A nonconstant real polynomial is nonnegative on `(0, ∞)` exactly when its lead
 positive, its constant term is nonnegative, and it has no critical point `c > 0` with a negative
 value (`polynomial_nonneg_criterion`). `four_sign_selector` is the sign identity behind the four
 Tarski queries.
+
+## Main definitions
+
+* `sign`: the sign of a real number as an integer, `1`, `-1` or `0`.
+
+## Main results
+
+* `exists_negative_critical`: a negative value of `P` at `x ∈ (0, R)`, with `P(0) ≥ 0` and
+  `P(R) ≥ 0`, forces a critical point `c ∈ (0, R)` with `P(c) < 0`.
+* `nonneg_iff_no_negative_critical`: for positive leading coefficient and `P(0) ≥ 0`, `P` is
+  nonnegative on `(0, ∞)` iff it has no critical point `c > 0` with `P(c) < 0`.
+* `polynomial_nonneg_criterion`: a nonconstant `P` is nonnegative on `(0, ∞)` iff its leading
+  coefficient is positive, `P(0) ≥ 0`, and it has no critical point `c > 0` with `P(c) < 0`.
+* `four_sign_selector`: `sign (c²v²) + sign (cv²) - sign (c²v) - sign (cv)` is `4` if `c > 0` and
+  `v < 0`, and `0` otherwise.
+
+## Tags
+
+polynomial nonnegativity, critical point criterion, Tarski query, positive half-line, SVI,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -7,6 +7,8 @@ module
 
 public import MathFin.BlackScholes.JumpDiffusionProcess
 public import MathFin.Foundations.StandardNormal
+public import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
 # The density of a jump-diffusion log-return
@@ -38,6 +40,42 @@ arbitrary and needs no moment condition.
 
 The option prices built on these facts are in `BlackScholes/JumpDiffusionDigital.lean`: the strike
 derivatives of the call and the digital, and Breeden–Litzenberger with jumps.
+
+## Main definitions
+
+* `jumpDiffusionDensity`: the density of the jump-diffusion log-return over `τ`, the mixture of
+  the normal densities `φ(y; bτ + ∑_{i<n} jᵢ, σ²τ)` over `Poisson(Λτ) ⊗ ν^ℕ`.
+
+## Main results
+
+* `jumpDiffusionIncrementLaw_apply`: the log-return law is a mixture of Gaussian laws
+  `N(bτ + ∑_{i<n} jᵢ, σ²τ)` over the jump count `n` and sizes `j`, for every `σ`.
+* `jumpDiffusionIncrementLaw_eq_withDensity`: for `σ ≠ 0` and `τ > 0` the law is
+  `jumpDiffusionDensity y dy`.
+* `continuous_jumpDiffusionDensity`, `jumpDiffusionDensity_pos`: the density is continuous, and
+  positive when `σ ≠ 0` and `τ > 0`, for any jump law.
+* `nullSingletonClass_jumpDiffusionIncrementLaw`: for `σ ≠ 0` and `τ > 0` the law has no atoms.
+* `ofReal_exp_le_jumpDiffusionIncrementLaw_singleton`: at `σ = 0` the law has an atom at `bτ` of
+  mass at least `e^{−Λτ}`.
+* `hasDerivAt_measureReal_Ioi_withDensity`: for a law `f(y) dy` with `f ≥ 0` integrable and
+  continuous at `a`, the tail `x ↦ P(Y > x)` has derivative `−f(a)` at `a`.
+* `map_mul_exp_withDensity`: if `Y` has law `f(y) dy` and `S > 0`, then `S eʸ` has density
+  `f(log(K/S))/K` on `(0, ∞)`.
+* `jumpDiffusionIncrementLaw_map_mul_exp`, `jumpDiffusionIncrementLaw_price_mem_Ioo_ne_zero`:
+  for `σ ≠ 0`, `τ > 0` and `S > 0`, the price `S eʸ` has density `f(log(K/S))/K` on `(0, ∞)`,
+  and charges every interval `(k₁, k₂)` with `0 ≤ k₁ < k₂`.
+
+## References
+
+* [Breeden and Litzenberger, *Prices of state-contingent claims implicit in option
+  prices*][BreedenLitzenberger1978]
+* [Cont and Tankov, *Financial Modelling with Jump Processes*][ContTankov2004]
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976]
+
+## Tags
+
+density of log-return, Gaussian mixture, Poisson mixture, jump-diffusion, Lévy process density,
+MSC 60G51, MSC 91G20, MSC 60E05
 -/
 
 @[expose] public section

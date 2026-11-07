@@ -5,7 +5,12 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.Probability.Martingale.Centering
+public import Mathlib.Probability.Martingale.OptionalSampling
+public import Mathlib.Topology.Separation.CompletelyRegular
 
 /-!
 # Optional sampling inequality for submartingales (bounded stopping times)
@@ -36,7 +41,7 @@ Adding the two statements yields the theorem. The submartingale inequality is
 thus exhibited as the shadow of the martingale equality under the upward
 drift `A` — nothing else.
 
-## Results
+## Main results
 
 * `submartingale_optional_sampling`: the optional sampling inequality
   `f_σ ≤ᵐ μ[f_τ | ℱ_σ]` for bounded stopping times `σ ≤ τ`.
@@ -53,6 +58,15 @@ Doob-decomposition route — strictly more generally than this file: `τ ⊓ σ`
 instead of `ℝ`. So this derivation is no longer an upstream-donation candidate, and
 delegating to upstream is an open upgrade (its general-index version is still `sorry`,
 the `ℕ`-indexed one is not).
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 2.3.6
+
+## Tags
+
+optional sampling theorem, optional stopping, submartingale, Doob decomposition,
+bounded stopping times, compensator, MSC 60G42, MSC 60G40
 -/
 
 @[expose] public section

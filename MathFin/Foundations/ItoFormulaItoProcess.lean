@@ -17,7 +17,7 @@ and a `C³` function `f` of at-most-exponential growth, the Itô formula reads
 
   `f(X_T) − f(X₀) =ᵐ ∫₀ᵀ f'(X_s)·σ dB_s + ∫₀ᵀ (f'(X_s)·b + ½ f''(X_s)·σ²) ds`,
 
-where the stochastic term is the genuine continuous Itô integral `itoIntegralCLM_T`. Grouping
+where the stochastic term is the genuine continuous Itô integral `itoIntegralCLM`. Grouping
 `∫ f'(X)·b ds + ∫ f'(X)·σ dB = ∫ f'(X) dX` exhibits the classical shape
 `f(X_T) − f(X₀) = ∫ f'(X) dX + ½∫ f''(X)·σ² ds`.
 
@@ -30,6 +30,17 @@ inner map `(t, x) ↦ X₀ + b·φₙ(t) + σx` (`φₙ = SmoothTrunc.cut n`, `n
 integrand `f'(X_s)·σ` a function of `B_s`, which the tower handles directly; general adapted
 coefficients (the full semimartingale Itô formula, needing the Itô integral against random
 integrands) remain the open frontier.
+
+## Main results
+
+* `ito_formula_itoProcess`: for `X_t = X₀ + b·t + σ·B_t` and `f ∈ C³` with `f'`, `f''`, `f'''`
+  of exponential growth `C·exp(λ|x|)`, there is `gfx =ᵐ σ·f'(X_·)` in the Itô-integrand space
+  with `f(X_T) − f(X₀) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ (f'(X_s)·b + ½·f''(X_s)·σ²) ds`.
+
+## Tags
+
+Itô formula, Itô process, drift and diffusion, constant coefficients, exponential growth,
+stochastic integral, MSC 60H05, MSC 60H10, MSC 60J60
 -/
 
 @[expose] public section
@@ -48,10 +59,10 @@ include hB
 function `f` whose derivatives are of at-most-exponential growth (`|f^{(k)} x| ≤ C·exp(λ|x|)`,
 `k = 1,2,3`),
 
-  `f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X_s)·b + ½·f''(X_s)·σ²) ds`,
+  `f(X_T) − f(X₀) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ (f'(X_s)·b + ½·f''(X_s)·σ²) ds`,
 
 with the trim-`L²` integrand `gfx` **named**: `gfx =ᵐ [σ·f'(X_·)]`, the diffusion coefficient
-of `X`, carried by the genuine continuous Itô integral `itoIntegralCLM_T`. Together with the
+of `X`, carried by the genuine continuous Itô integral `itoIntegralCLM`. Together with the
 drift's `f'(X_s)·b` term this is `f(X_T) − f(X₀) = ∫₀ᵀ f'(X_s) dX_s + ½∫₀ᵀ f''(X_s)·σ² ds`. The
 instantiation of `ito_formula_td_localized` at the time-localized inner map
 `(t, x) ↦ X₀ + b·φₙ(t) + σx`; the time cutoff `φₙ` erases itself from the naming conjunct
@@ -65,11 +76,11 @@ theorem ito_formula_itoProcess (hBmeas : ∀ t, Measurable (B t))
     (hg' : ∀ x, |f' x| ≤ C * Real.exp (lam * |x|))
     (hg'' : ∀ x, |f'' x| ≤ C * Real.exp (lam * |x|))
     (hg''' : ∀ x, |f''' x| ≤ C * Real.exp (lam * |x|)) :
-    ∃ gfx : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      (⇑gfx =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦
+    ∃ gfx : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
+      (⇑gfx =ᵐ[trimMeasure (μ := μ) T hBmeas] fun z ↦
         σ * f' (X₀ + b * z.1 + σ * B z.1 z.2)) ∧
       (fun ω ↦ f (X₀ + b * (T : ℝ) + σ * B T ω) - f (X₀ + b * (0 : ℝ) + σ * B 0 ω)) =ᵐ[μ]
-        (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gfx) ω
+        (fun ω ↦ (itoIntegralCLM hB T hBmeas gfx) ω
           + ∫ s in Set.Ioc 0 T,
               (f' (X₀ + b * (s : ℝ) + σ * B s ω) * b
                 + (1 / 2) * (f'' (X₀ + b * (s : ℝ) + σ * B s ω) * σ ^ 2))
@@ -233,7 +244,7 @@ theorem ito_formula_itoProcess (hBmeas : ∀ t, Measurable (B t))
   -- reduce off `[0, T]`: the cutoff is the identity, with unit slope
   refine ⟨gfx, ?_, ?_⟩
   · -- the trim charges only `(0, T] × Ω`, where `φₙ = id`, so the cutoff leaves the integrand
-    filter_upwards [hname, ae_fst_mem_Ioc_trimMeasure_T (μ := μ) T hBmeas] with z hz hmem
+    filter_upwards [hname, ae_fst_mem_Ioc_trimMeasure (μ := μ) T hBmeas] with z hz hmem
     have hzn : (z.1 : ℝ) ≤ (n : ℝ) := le_trans (by exact_mod_cast hmem.2) hTn
     rw [hz, S.cut_eq_id_of_abs_le (x := (z.1 : ℝ))
       (by rw [abs_of_nonneg (NNReal.coe_nonneg z.1)]; linarith)]

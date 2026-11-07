@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.ItoIntegralAgainstMartingale
 public import BrownianMotion.StochasticIntegral.StochasticIntegral
+public import Mathlib.MeasureTheory.Order.Group.Lattice
 
 /-! # The integral against an Itô integral is a stochastic integral, in BrownianMotion's sense
 
@@ -48,7 +49,20 @@ BrownianMotion's `uniformIntegrable_of_dominated_singleton` and Vitali's theorem
 (`tendsto_Lp_finite_of_tendsto_ae`), which need `1 ≤ p` and a finite measure. Here it is proved
 directly, for every `p < ∞` and every measure (`tendsto_eLpNorm_sub_of_dominated_convergence`).
 
-## Result
+## Main definitions
+
+* `IsPredictableVersion`: `X'` is a predictable square-integrable version of the process `X`.
+* `domain`: the processes with a predictable square-integrable version, the domain of the
+  integral against `M = φ●B`.
+* `integrandLp`: the `L²(⟨M⟩)` class of a process in the domain.
+* `integrator`: `M = φ●B` stopped at `T`, `t ↦ M_{t ∧ T}`.
+* `sIntegral`: the integral against `M` on processes, obtained by integrating the `L²(⟨M⟩)` class
+  of the process.
+* `Agree`: the processes in both domains on which `sIntegral` and another extension `I'` agree.
+* `IsOtherExtension`: another Riemann–Stieltjes extension, taken as a hypothesis.
+* `cut`: a function of `(t, ω)` switched off after time `K`, as a process.
+
+## Main results
 
 * `isStochasticIntegral` — **the characterisation**: the integral against `M` is an
   `IsStochasticIntegral` for `M` stopped at `T`.
@@ -58,6 +72,15 @@ directly, for every `p < ∞` and every measure (`tendsto_eLpNorm_sub_of_dominat
   with this one on the common domain.
 * `sIntegral_band`, `sIntegral_bottomBand` — the elementary values, on processes.
 * `tendsto_eLpNorm_sub_of_dominated_convergence` — dominated convergence in `L^p`, `p < ∞`.
+
+## References
+
+* [J. van Winden, *BrownianMotion*][BrownianMotionLean], IsStochasticIntegral
+
+## Tags
+
+stochastic integral characterisation, Riemann–Stieltjes extension, dominated convergence,
+uniqueness of stochastic integral, Dynkin monotone class, Itô integral, MSC 60H05, MSC 60G44
 -/
 
 @[expose] public section
@@ -129,12 +152,12 @@ The exceptional set then sits inside `ℝ≥0 × N` for a `μ`-null `N`. That pr
 predictable, the natural filtration not being complete, which is why the predictability of the
 set itself is assumed: it is what lets the trim be computed as the product measure. -/
 theorem ae_bracketMeasure_of_ae_forall (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {q : ℝ≥0 × Ω → Prop}
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {q : ℝ≥0 × Ω → Prop}
     (hq : MeasurableSet[(natFiltration (mΩ := mΩ) hBmeas).predictable] {z | q z})
     (h : ∀ᵐ ω ∂μ, ∀ t, q (t, ω)) :
     ∀ᵐ z ∂(bracketMeasure (μ := μ) T hBmeas φ), q z := by
-  have hnull : trimMeasure_T (μ := μ) T hBmeas {z | ¬ q z} = 0 := by
-    unfold trimMeasure_T
+  have hnull : trimMeasure (μ := μ) T hBmeas {z | ¬ q z} = 0 := by
+    unfold trimMeasure
     rw [trim_measurableSet_eq _
       (show MeasurableSet[(natFiltration (mΩ := mΩ) hBmeas).predictable] {z | ¬ q z} from hq.compl)]
     refine measure_mono_null (t := Set.univ ×ˢ {ω | ¬ ∀ t, q (t, ω)})
@@ -144,7 +167,7 @@ theorem ae_bracketMeasure_of_ae_forall (T : ℝ≥0) (hBmeas : ∀ t, Measurable
 
 /-! ### The domain: processes with a predictable square-integrable version -/
 
-variable (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+variable (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
 
 /-- `X'` is a **predictable square-integrable version** of the process `X`: predictable as a
 function of `(t, ω)`, square-integrable against the bracket `⟨M⟩`, and indistinguishable from
@@ -206,7 +229,7 @@ noncomputable def sIntegral (hB : IsPreBrownianReal B μ) : (ℝ≥0 → Ω → 
 Read off `trim_T` through the density. -/
 theorem ae_fst_mem_Ioc_bracketMeasure :
     ∀ᵐ z ∂(bracketMeasure (μ := μ) T hBmeas φ), z.1 ∈ Set.Ioc 0 T :=
-  (withDensity_absolutelyContinuous _ _).ae_le (ae_fst_mem_Ioc_trimMeasure_T T hBmeas)
+  (withDensity_absolutelyContinuous _ _).ae_le (ae_fst_mem_Ioc_trimMeasure T hBmeas)
 
 /-! ### The elementary processes -/
 

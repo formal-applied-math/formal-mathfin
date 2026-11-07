@@ -20,7 +20,7 @@ the underlying's.
 
 That fact holds in every model whose discounted price `t ↦ D(t) X(t)` is a `Q`-martingale
 starting from the constant `S₀`, with `D(0) = 1` (`integral_discounted_of_martingale`). This is
-the risk-neutral condition of `ContinuousMarket.IsEMM`, which asks for the martingale and also
+the risk-neutral condition of `IsEMM`, which asks for the martingale and also
 for `Q ≈ P`; only the martingale is needed here. In that case neither the forward nor the
 parity takes an integrability hypothesis (`value_forward_of_martingale`,
 `value_europeanCall_sub_put_of_martingale`).
@@ -48,6 +48,19 @@ Berthold and Elsman (2015) and Annenkov (2018).
 No code is copied from `lean_contracts`; every definition and proof here is
 written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 §6 for the full credit line.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], ch. 11; ch. 5
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], Section
+  5.6.2
+* [Stoll, *The relationship between put and call option prices*][Stoll1969]
+
+## Tags
+
+put–call parity, forward price, risk-neutral pricing, discounted martingale, model-free pricing,
+call minus put, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -68,7 +81,9 @@ theorem integrable_forward_pathPV [IsFiniteMeasure Q]
     List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero, mul_sub]
   exact hX.sub (integrable_const _)
 
-private theorem integrable_underlying (hX : Integrable (fun ω ↦ D T * X () T ω) Q)
+/-- If the discounted underlying is integrable and the discount factor is nonzero, so is the
+underlying. -/
+theorem integrable_of_integrable_discount_mul (hX : Integrable (fun ω ↦ D T * X () T ω) Q)
     (hD : D T ≠ 0) : Integrable (X () T) Q := by
   simpa [← mul_assoc, inv_mul_cancel₀ hD] using hX.const_mul (D T)⁻¹
 
@@ -80,7 +95,8 @@ theorem integrable_europeanPut_pathPV [IsFiniteMeasure Q]
     List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero]
   rcases eq_or_ne (D T) 0 with hD | hD
   · simp [hD]
-  · exact ((integrable_const K).sub (integrable_underlying hX hD)).pos_part.const_mul _
+  · exact ((integrable_const K).sub
+      (integrable_of_integrable_discount_mul hX hD)).pos_part.const_mul _
 
 /-- The call's discounted payoff is integrable whenever the discounted underlying is. -/
 theorem integrable_europeanCall_pathPV [IsFiniteMeasure Q]
@@ -90,7 +106,8 @@ theorem integrable_europeanCall_pathPV [IsFiniteMeasure Q]
     scenarioAt, List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero]
   rcases eq_or_ne (D T) 0 with hD | hD
   · simp [hD]
-  · exact ((integrable_underlying hX hD).sub (integrable_const K)).pos_part.const_mul _
+  · exact ((integrable_of_integrable_discount_mul hX hD).sub
+      (integrable_const K)).pos_part.const_mul _
 
 /-- **The forward's value in any model** in which the discounted underlying at `T` is integrable
 with mean `S₀`: the forward struck at `K` is worth `S₀ − K D(T)`. -/

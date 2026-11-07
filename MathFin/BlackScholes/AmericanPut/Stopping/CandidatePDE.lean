@@ -5,8 +5,9 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.ClassicalContact
 public import MathFin.BlackScholes.AmericanPut.Boundary.DividendProblem
+public import MathFin.BlackScholes.AmericanPut.Stopping.ClassicalCandidate
+public import Mathlib.Analysis.Calculus.Deriv.Prod
 
 /-!
 # The Brownian-coordinate PDE of the discounted classical-price candidate
@@ -16,10 +17,25 @@ turn the normalized pricing equation into `F_t + (1/2) F_ww = 0`.
 All differentiability statements are local to continuation. No smoothness at
 the exercise boundary, or martingale consequence of Ito's formula, is assumed.
 
-## Result
+## Main definitions
 
-Public entry points include `brownianPriceKernel`, `affinePrice_hasDeriv_time`,
-`brownianPriceKernel_hasDeriv_time`, `brownianPriceKernel_deriv_space`.
+* `brownianPriceKernel`: the discounted classical price `K*p` read in physical time `t` and Brownian
+  coordinate `w`: log spot `x₀ + (r-q-σ^2/2)*t + σ*w`, remaining normalized time `σ^2/2*(T-t)`,
+  discount `exp (-r*t)`.
+
+## Main results
+
+* `affinePrice_hasDeriv_time`: if `p` is differentiable at the point, the time derivative of
+  `p` along an affine space-time path is given by the chain rule in its two partials.
+* `brownianPriceKernel_hasDeriv_time`: if `p` is differentiable at the point, the kernel has
+  the time derivative `exp (-r*t)*K*(β*p_x - σ^2/2*p_τ - r*p)`, `β = r-q-σ^2/2`.
+* `brownianPriceKernel_deriv_space`: the space derivative of the kernel is
+  `exp (-r*t)*K*σ*p_x`.
+
+## Tags
+
+Brownian coordinate, pricing equation, heat equation, discounted price, continuation region,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.GaussianMoments
 
 /-!
@@ -20,12 +19,25 @@ This is the L¹ form of `[B, B]_t = t` (Saporito Theorem 6.1.1). It does
 not require independence of increments or continuity of paths — purely a
 marginal moment computation via `variance_id_gaussianReal`.
 
+## Main definitions
+
+* `BrownianQuadraticVariation`: the hypotheses on a real-indexed process `B` (measurable sections
+  and Gaussian increments `B t − B s ∼ N(0, t − s)`) that suffice for the `L¹` quadratic-variation
+  identity.
+
 ## Main results
 
-* `BrownianQuadraticVariation` — hypotheses (measurability + Gaussian
-  increments) sufficient for the expectation identity.
 * `BrownianQuadraticVariation.qv_equals_t` — the squared-increment-sum
   expectations along the equipartition of `[0, t]` tend to `t`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 6.1.1
+
+## Tags
+
+quadratic variation, squared increments, Wiener process, [B, B]_t = t, Gaussian increments,
+MSC 60J65, MSC 60H05
 -/
 
 @[expose] public section
@@ -58,7 +70,7 @@ theorem measurable_increment (hB : BrownianQuadraticVariation μ B)
   (hB.measurable t).sub (hB.measurable s)
 
 /-- Integrability of `x²` under any centered real Gaussian. -/
-private lemma integrable_sq_gaussianReal_zero (v : ℝ≥0) :
+lemma integrable_sq_gaussianReal_zero (v : ℝ≥0) :
     Integrable (fun x : ℝ ↦ x ^ 2) (gaussianReal 0 v) := by
   have h_lp : MemLp (id : ℝ → ℝ) 2 (gaussianReal 0 v) := memLp_id_gaussianReal 2
   exact h_lp.integrable_sq
@@ -113,19 +125,6 @@ theorem integrable_increment
   rw [h_map]
   exact (memLp_id_gaussianReal 1).integrable (by norm_num)
 
-/-- Endpoint inequality for the equipartition: `k t / (n + 1) ≤ (k + 1) t / (n + 1)`
-when `0 ≤ t`. -/
-private lemma equipartition_endpoint_le {t : ℝ} (ht : 0 ≤ t) (n k : ℕ) :
-    (k : ℝ) * t / (n + 1) ≤ ((k : ℝ) + 1) * t / (n + 1) := by
-  have hn : (0 : ℝ) < (n : ℝ) + 1 := by positivity
-  rw [div_le_div_iff_of_pos_right hn]
-  nlinarith
-
-/-- Left endpoint of the `k`-th equipartition cell is nonnegative when `0 ≤ t`. -/
-private lemma equipartition_start_nonneg {t : ℝ} (ht : 0 ≤ t) (n k : ℕ) :
-    (0 : ℝ) ≤ (k : ℝ) * t / (n + 1) :=
-  div_nonneg (mul_nonneg (Nat.cast_nonneg k) ht) (by positivity)
-
 /-- Expectation of the squared-increment sum along the equipartition:
 `∫ Σ_k (B_{(k+1)t/(n+1)} − B_{kt/(n+1)})² ∂μ = n t / (n + 1)`. -/
 private lemma integral_sum_sq_equipartition (hB : BrownianQuadraticVariation μ B)
@@ -133,21 +132,22 @@ private lemma integral_sum_sq_equipartition (hB : BrownianQuadraticVariation μ 
     ∫ ω, ∑ k ∈ Finset.range n,
         (B (((k : ℝ) + 1) * t / (n + 1)) ω - B ((k : ℝ) * t / (n + 1)) ω) ^ 2 ∂μ
       = n * t / (n + 1) := by
-  rw [integral_finsetSum _
-    (fun k _ ↦ hB.integrable_sq_increment (equipartition_start_nonneg ht n k)
-      (equipartition_endpoint_le ht n k))]
+  have hstart (k : ℕ) : (0 : ℝ) ≤ (k : ℝ) * t / (n + 1) := by positivity
+  have hend (k : ℕ) : (k : ℝ) * t / (n + 1) ≤ ((k : ℝ) + 1) * t / (n + 1) := by
+    rw [div_le_div_iff_of_pos_right (by positivity : (0 : ℝ) < (n : ℝ) + 1)]
+    nlinarith
+  rw [integral_finsetSum _ (fun k _ ↦ hB.integrable_sq_increment (hstart k) (hend k))]
   have hsum : ∀ k ∈ Finset.range n,
       ∫ ω, (B (((k : ℝ) + 1) * t / (n + 1)) ω - B ((k : ℝ) * t / (n + 1)) ω) ^ 2 ∂μ
         = t / (n + 1) := fun k _ ↦ by
-    rw [hB.integral_sq_increment (equipartition_start_nonneg ht n k)
-      (equipartition_endpoint_le ht n k)]
+    rw [hB.integral_sq_increment (hstart k) (hend k)]
     field_simp
     ring
   rw [Finset.sum_congr rfl hsum, Finset.sum_const, Finset.card_range, nsmul_eq_mul]
   field_simp
 
 /-- Real-analysis fact: `n t / (n + 1) → t` as `n → ∞`. -/
-private lemma tendsto_nt_div_succ (t : ℝ) :
+lemma tendsto_nt_div_succ (t : ℝ) :
     Filter.Tendsto (fun n : ℕ ↦ (n : ℝ) * t / ((n : ℝ) + 1)) atTop (nhds t) := by
   have h_eq : ∀ n : ℕ, (n : ℝ) * t / ((n : ℝ) + 1) = t - t / ((n : ℝ) + 1) := by
     intro n

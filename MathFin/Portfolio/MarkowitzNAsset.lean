@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Portfolio.Markowitz
+public import Mathlib.Logic.Equiv.PartialEquiv
 
 /-!
 # N-asset Markowitz portfolio variance (sum form)
@@ -20,9 +20,13 @@ We avoid the matrix-algebra layer (`Matrix.mulVec`, `Matrix.PosDef`) and work
 directly with sums — this keeps the file lightweight while still covering the
 core textbook identities.
 
-Results:
+## Main definitions
 
-* `portfolioVarN`: definition.
+* `portfolioVarN`: the `n`-asset portfolio variance `∑_{i,j ∈ s} wᵢ wⱼ σᵢⱼ`, a double sum over a
+  finite index set `s` against a kernel `σ`.
+
+## Main results
+
 * `portfolioVarN_smul`: scaling `Var(c · w) = c² · Var(w)`.
 * `portfolioVarN_diag`: when `σ` is diagonal (`σ_{ij} = 0` for `i ≠ j`),
   `Var(w) = ∑ w_i² · σ_{ii}`.
@@ -32,6 +36,15 @@ Results:
   quadratic form, then `Var(w) ≥ 0`.
 * `portfolioVarN_two_asset_compat`: when the index set has cardinality 2,
   the double sum is the two-asset `portfolioVarTwo` of `Markowitz.lean`.
+
+## References
+
+* [K. Bodie and Marcus, *Investments*][BodieKaneMarcus], Ch 7; Ch 7.2; Ch 7.3; Ch 7.4
+
+## Tags
+
+Markowitz, portfolio variance, covariance matrix, n-asset portfolio, diversification, MSC 91G10,
+JEL G11
 -/
 
 @[expose] public section

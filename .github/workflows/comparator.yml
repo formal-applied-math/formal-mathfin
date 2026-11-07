@@ -1,0 +1,62 @@
+name: comparator
+
+# Judge Solution.lean against Challenge.lean with Lean's own comparator (`lake comparator`, in
+# core since v4.35.0; it replaces the standalone leanprover/comparator). Comparator checks that
+# each theorem named in `comparator.json` proves the same statement as the Mathlib-only
+# Challenge, uses no axiom outside `propext`, `Quot.sound`, `Classical.choice`, and is accepted
+# by the kernel. `--paranoid` also runs every external checker bundled with Lean
+# (leanchecker-paranoid, lean4lean, nanoda, con-leche, con-ron), so the verdict needs every one
+# of them, not only Lean's kernel. The project is built and exported inside a `bwrap` sandbox.
+#
+# Runs on pull requests and pushes to main that change the Challenge, the Solution, the config or
+# the modules the Solution uses, monthly, and on demand. docs/palomar.md records the registry submission this backs.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "47 5 1 * *"   # the 1st of each month, 05:47 UTC
+  push:
+    branches: [main]
+    paths:
+      - Challenge.lean
+      - Solution.lean
+      - comparator.json
+      - MathFin/RiskMeasures/**
+      - lean-toolchain
+      - lake-manifest.json
+  pull_request:
+    paths:
+      - Challenge.lean
+      - Solution.lean
+      - comparator.json
+      - MathFin/RiskMeasures/**
+      - lean-toolchain
+      - lake-manifest.json
+      - .github/workflows/comparator.yml
+
+concurrency:
+  group: comparator-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  comparator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sandbox (bubblewrap, unprivileged user namespaces)
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq bubblewrap
+          # Ubuntu 24.04 restricts unprivileged user namespaces through AppArmor; bwrap needs them.
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+
+      - name: Lean + Mathlib cache
+        uses: leanprover/lean-action@v1
+        with:
+          build: "false"
+          lint: "false"
+          use-mathlib-cache: "true"
+
+      - name: Judge the Solution against the Challenge (all bundled kernels)
+        run: lake comparator --config comparator.json --paranoid

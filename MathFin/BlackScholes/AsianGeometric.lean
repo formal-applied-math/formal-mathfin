@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.AsianGeometricN
 
 /-!
@@ -27,6 +26,11 @@ integral of a step kernel; here the dates are `![s, t]` and the covariance sum i
 ## Main results
 
 * `asianGeom_driver_hasLaw` — `(B_s + B_t)/2 ~ N(0, (3s+t)/4)` for `s ≤ t`.
+
+## Tags
+
+geometric Asian option, average price option, Wiener integral, lognormal, Gaussian average,
+effective variance, MSC 91G20, MSC 60J65, JEL G13
 -/
 
 @[expose] public section

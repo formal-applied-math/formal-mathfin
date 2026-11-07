@@ -5,7 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Tactic.Linarith.Frontend
+public import Mathlib.Tactic.Ring.RingNF
 
 /-!
 # Chooser option
@@ -21,11 +24,20 @@ a long put-payoff at the chooser date with strike `K · e^{-r(T-t)}`.
 Both lemmas are pure real-number algebra; the financial content is the
 identification of the second piece as a put at the chooser date.
 
-Results:
+## Main results
 
 * `chooser_payoff_decompose`: `max C P = C + max 0 (P - C)`.
 * `chooser_via_pcp`: under `C - P = S - K_disc`,
   `max C P = C + max 0 (K_disc - S)`.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 26.7
+* [M. Rubinstein, *Options for the undecided*][Rubinstein1991]
+
+## Tags
+
+chooser option, as-you-like-it option, put–call parity, exotic option, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

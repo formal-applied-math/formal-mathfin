@@ -5,7 +5,7 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Boundary.GaugeTransform
+public import MathFin.BlackScholes.AmericanPut.Boundary.ComparisonShape
 
 /-!
 # Uniform right-hand control of the comparison difference
@@ -14,10 +14,28 @@ Explicit exponential bounds imply convergence to -1 uniformly for ALL `t>=0`
 when `c>0` and `d<=0`. No decay rate for the American price is assumed: its
 elementary bounds `0<=p<=1` suffice.
 
-## Result
+## Main definitions
 
-Public entry points include `rootProfile_exp_lower`, `rootProfile_exp_upper`, `leadingWeight`,
-`leadingWeight_pos`.
+* `leadingWeight`: the coefficient `−negativeRoot / (positiveRoot − negativeRoot)` of the growing
+  exponential in a profile.
+* `growthRate`: the growth rate `positiveRoot β ρ`, or `0` when `ρ = 0`.
+* `straightDifference`: `normalizedDifference` for the explicit profiles of rates `k` and `h`.
+
+## Main results
+
+* `rootProfile_exp_lower`, `rootProfile_exp_upper`: for `0 < u` and `v < 0`, `rootProfile u v z`
+  is at least `(−v / (u − v)) e^{u z}` for all `z`, and at most `e^{u z}` for `z ≥ 0`.
+* `leadingWeight_pos`: for `0 < ρ`, `leadingWeight β ρ` is positive.
+* `straightDifference_uniform_tail`: for a `ContinuousBoundaryPutSolution`, `0 < c`, `d ≤ 0` and
+  `0 < ε`, there is `X > 0` such that `|straightDifference p k h c d x t + 1| < ε` for all
+  `x ≥ X` and all `t ≥ 0`.
+* `straightDifference_right_negative`: under the same hypotheses, there is a single `X > 0` with
+  `straightDifference p k h c d x t < 0` for all `x ≥ X` and `t ≥ 0`.
+
+## Tags
+
+exponential bounds, uniform tail control, characteristic roots, comparison difference,
+right-hand tail, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

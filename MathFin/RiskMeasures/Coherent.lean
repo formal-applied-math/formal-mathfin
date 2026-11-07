@@ -5,7 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Analysis.Convex.Continuous
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.RCLike.Lemmas
+public import Mathlib.MeasureTheory.Function.L1Space.Integrable
 
 /-!
 # Coherent risk measures: the four axioms of Artzner, Delbaen, Eber and Heath
@@ -34,13 +38,23 @@ every function is integrable and the order is still implied by the pointwise ord
 finite-state theory (`IsCoherentRiskMeasure.mono_of_le`, `IsCoherentRiskMeasure.continuous`) needs
 no support hypothesis.
 
+## Main definitions
+
+* `IsCoherentRiskMeasure`: the four axioms of a coherent risk measure `ρ` of losses on a measure
+  space `(Ω, P)`: almost-sure monotonicity, translation `ρ (X + m) = ρ X + m`, positive
+  homogeneity `ρ (c X) = c ρ X` for `c ≥ 0`, and subadditivity.
+
 ## Main results
 
-* `IsCoherentRiskMeasure`: the four axioms.
 * `IsCoherentRiskMeasure.rho_zero`: `ρ 0 = 0`.
 * `IsCoherentRiskMeasure.convexOn`: `ρ` is convex on the integrable losses.
 * `IsCoherentRiskMeasure.mono_of_le`, `IsCoherentRiskMeasure.continuous`: on a finite state space
   `ρ` is pointwise-monotone and continuous.
+
+## Tags
+
+coherent risk measure, Artzner-Delbaen-Eber-Heath, subadditivity, translation invariance,
+positive homogeneity, monotonicity, capital requirement, MSC 91G70, JEL G32
 -/
 
 @[expose] public section

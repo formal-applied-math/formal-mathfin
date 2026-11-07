@@ -41,12 +41,25 @@ martingale on `[0, T)`. Applying the localized Itô formula to `f` needs exponen
 bounds on `f` and its partials up to third order, uniformly in time, and a localization away
 from `t = T`, where `bsV` is not differentiable in `τ`.
 
-## Results
+## Main definitions
 
-* `discountedCallBrownian`: the discounted call value in the Brownian coordinate.
+* `discountedCallBrownian`: the discounted Black–Scholes call value in the Brownian coordinate,
+  `f(t, x) = e^{−rt} · bsV K r σ (S₀·exp((r − σ²/2)t + σx)) (T − t)`.
+
+## Main results
+
 * `discountedCallBrownian_eq_heatFlow`: its heat-flow (Feynman–Kac) form for `t < T`.
 * `hasDerivAt_discountedCallBrownian_x`: `f_x = σ · e^{−rt} S · Φ(d₁)`.
 * `discountedCallBrownian_heat_equation`: `f_t + ½ f_xx = 0` for `t < T`.
+
+## References
+
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], §4.5
+
+## Tags
+
+Black–Scholes PDE, Itô formula, Brownian coordinate, self-financing hedge, discounted option value,
+delta hedging, MSC 91G20, MSC 60H05, JEL G13
 -/
 
 @[expose] public section

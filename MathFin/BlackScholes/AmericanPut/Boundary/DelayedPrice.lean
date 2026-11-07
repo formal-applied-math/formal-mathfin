@@ -5,7 +5,7 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Boundary.ObstacleComparison
+public import MathFin.BlackScholes.AmericanPut.Boundary.DividendProblem
 
 /-! # A clamped time delay of the price
 
@@ -14,10 +14,26 @@ exceeds the payoff, its delayed time is positive and it is in continuation.
 Thus the pricing equation and local smoothness are available exactly where
 an obstacle comparison can have a positive contact.
 
-## Result
+## Main definitions
 
-Public entry points include `delayedPrice`, `delayedPrice_eventuallyEq`, `delayedPrice_continuous`,
-`delayedPrice_initial`.
+* `delayedPrice`: the price on a clock delayed by `a` and clamped at zero, `p x (max (t − a) 0)`.
+
+## Main results
+
+* `delayedPrice_eventuallyEq`: for `a < t`, near `(x, t)` the delayed price equals the
+  time-shifted price `p x (t − a)`.
+* `delayedPrice_continuous`: for a `DividendPutSolution` and any `a`, `delayedPrice p a` is jointly
+  continuous.
+* `delayedPrice_initial`: for `0 ≤ a`, the delayed price at time `0` is the put payoff.
+* `delayedPrice_above_payoff`: where the delayed price strictly exceeds the payoff at `(x, t)`,
+  one has `a < t` and `b (t − a) < x`.
+* `delayedPrice_equation`: for `a < t` and `b (t − a) < x`, the time derivative of the delayed
+  price is the dividend spatial operator applied to it.
+
+## Tags
+
+time delay, price comparison, obstacle comparison, continuation region, delayed price, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

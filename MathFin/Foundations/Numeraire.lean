@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.ChangeOfMeasure
 public import MathFin.Foundations.EquivMeasure
 
@@ -45,20 +44,35 @@ and the forward/annuity numéraires of the Garman normal form
 (`BlackScholes.GarmanNormalForm`) are further instances — each recovered by
 choosing `B`, `N` and reading off the density.
 
+## Main definitions
+
+* `numeraireDensity`: the `[0, ∞]`-valued Radon–Nikodym derivative `(N_T · B₀) / (N₀ · B_T)`.
+* `numeraireMeasure`: the measure `Q^N = Q.withDensity` of that density.
+
 ## Main results
 
-* `MathFin.numeraireMeasure` — the tilted measure `Q^N = Q.withDensity(dQ^N/dQ)`.
 * `MathFin.numeraireMeasure_isEquivProbMeasure` — `Q^N` is a probability measure
   equivalent to `Q` (`Q^N ≪ Q` and `Q ≪ Q^N`), under the martingale/normalization
   condition `𝔼^Q[N_T/B_T] = N₀/B₀`; `numeraireMeasure_isProbabilityMeasure` is its first
   component.
 * `MathFin.changeOfNumeraire` — price invariance
   `N₀·𝔼^{Q^N}[X/N_T] = B₀·𝔼^Q[X/B_T]`.
-* `MathFin.changeOfNumeraire_setIntegral_eq` — the **dynamic** change of numéraire:
-  if `t ↦ (B₀/N₀)(X_t/B_t)` is a `Q`-martingale then `X/N` has the set-integral
-  martingale property under `Q^N`. Obtained by instantiating the Bayes engine
-  `changeOfMeasure_setIntegral_eq` at density process `Z_t = (N_t·B₀)/(N₀·B_t)` and
-  payoff `D_t = X_t/N_t` — wiring the numéraire seam to the Girsanov engine.
+* `MathFin.changeOfNumeraire_setIntegral_eq` — the **dynamic** change of numéraire: if
+  `t ↦ (B₀/N₀)(X_t/B_t)` and `t ↦ (B₀/N₀)(N_t/B_t)` are `Q`-martingales (and the mixed product is
+  integrable) then `X/N` has the set-integral martingale property under `Q^N`. Obtained by
+  instantiating the Bayes engine `changeOfMeasure_setIntegral_eq` at density process
+  `Z_t = (N_t·B₀)/(N₀·B_t)` and payoff `D_t = X_t/N_t` — wiring the numéraire seam to the Girsanov
+  engine.
+
+## References
+
+* [H. Geman, N. El Karoui and J. C. Rochet, *Changes of numéraire, changes of probability measure
+  and option pricing*][GemanElKarouiRochet1995]
+
+## Tags
+
+change of numéraire, numeraire measure, Radon–Nikodym density, risk-neutral measure,
+forward measure, price invariance, Geman–El Karoui–Rochet, MSC 91G20, MSC 60G44, JEL G13
 -/
 
 @[expose] public section

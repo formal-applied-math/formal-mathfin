@@ -13,9 +13,15 @@ Stock-price convexity bounds the derivative below by the secant from the
 exercise boundary. Strict price/payoff separation makes that bound strictly
 greater than -1 in stock coordinates, hence greater than -exp(x) in log spot.
 
-## Result
+## Main results
 
-Public entry points include `canonicalPrice_spatial_deriv_gt_exercise`.
+* `canonicalPrice_spatial_deriv_gt_exercise`: for `0 < k`, `0 ≤ h ≤ k`, `0 < t` and `x` above the
+  log boundary at `t`, the spatial derivative of the actual price exceeds `-exp x`.
+
+## Tags
+
+continuation slope, exercise slope, strict separation, convexity, American put, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

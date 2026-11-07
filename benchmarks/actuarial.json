@@ -13,6 +13,11 @@
       "metadata": {
         "chapter": 11,
         "reference": "Annuity-due formula (Bowers et al., Actuarial Mathematics)",
+        "citations": [
+          {
+            "key": "BowersEtAl"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -29,6 +34,11 @@
       "metadata": {
         "chapter": 11,
         "reference": "Gompertz mortality law (Bowers et al., Actuarial Mathematics)",
+        "citations": [
+          {
+            "key": "BowersEtAl"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -45,6 +55,7 @@
       "metadata": {
         "chapter": 11,
         "reference": "Compound Poisson MGF (Cramér-Lundberg actuarial theory)",
+        "citations": [],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: n-claim iid-sum MGF (iIndepFun.mgf_sum) composed with the Poisson pgf (integral_pow_poissonMeasure). Re-export from MathFin. Axioms-clean."
@@ -61,6 +72,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "Compound Poisson MGF (Cramér-Lundberg actuarial theory); e.g. Klugman-Panjer-Willmot, Loss Models, Thm 9.3",
+        "citations": [
+          {
+            "key": "KlugmanPanjerWillmot",
+            "locator": "Thm 9.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: integrating out the independent Poisson count (integral_comp_of_hasLaw_of_countable, the freezing lemma for a countable variable), with E[exp(t·∑_{i<n} Xᵢ)] = M_X(t)ⁿ for each n (mgf_range_sum_of_iid, integrable by integrable_exp_mul_sum_range_of_iid) and n ↦ M_X(t)ⁿ integrable against Poisson(λ) (PoissonPgf.integrable_pow_poissonMeasure), then the mixture form compoundPoisson_mgf. The claim MGF must be finite at t (hint): otherwise E[exp(tS)] = +∞ when λ > 0, which the Bochner mgf records as 0, and the identity fails. Lives in MathFin/Actuarial/CompoundPoissonMGF.lean, on MathFin/Foundations/IndepFreezing.lean. Axioms-clean."
@@ -77,6 +94,11 @@
       "metadata": {
         "chapter": 11,
         "reference": "Yosuke Ito, AFP Actuarial Mathematics, Survival_Model (ccdfTx_ccdfX)",
+        "citations": [
+          {
+            "key": "ItoAFPActuarial"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, our own design: the conditional survival probability, defined via Mathlib's conditional measure cond, collapses to the survival-function ratio through cond_apply and the sub-event alive(x+t) ⊆ alive(x). The AFP entry (Ito, Actuarial Mathematics, Survival_Model) was consulted as a source and is cited. Axioms-clean.",
@@ -98,6 +120,11 @@
       "metadata": {
         "chapter": 11,
         "reference": "Yosuke Ito, AFP Actuarial Mathematics, Survival_Model (ccdfX_0_1)",
+        "citations": [
+          {
+            "key": "ItoAFPActuarial"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, our own design: X > 0 a.e. makes {X > 0} an ae-full event, so P{X>0} = 1 via measure_congr on the ae-equality to univ. The AFP entry (Ito, Actuarial Mathematics, Survival_Model) was consulted as a source and is cited. Axioms-clean.",
@@ -119,6 +146,7 @@
       "metadata": {
         "chapter": 0,
         "reference": "Formalize the classical loaded premium principles (expected-value, variance, standard-deviation) and their nonnegative-loading bounds",
+        "citations": [],
         "difficulty": "small",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof in MathFin/Actuarial/ActuarialInsurance.lean (magistral-drafted statement, leanstral proof, human-refined at review). Each principle carries its own named bound (expectedValuePremium_ge_mean, variancePremium_ge_mean, stdDevPremium_ge_mean — one-term mul_nonneg certificates); premium_ge_mean bundles them. Re-export from MathFin. Axioms-clean. Introduces definitions: expectedValuePremium, variancePremium, stdDevPremium (new-defs review class).",
@@ -148,6 +176,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "D. C. M. Dickson, M. R. Hardy and H. R. Waters, Actuarial Mathematics for Life Contingent Risks, 2nd ed., Cambridge University Press (2013), Chapter 5 (annuities)",
+        "citations": [
+          {
+            "key": "DicksonHardyWaters2013",
+            "locator": "Chapter 5"
+          }
+        ],
         "difficulty": "introductory",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.lifeAnnuityDue_const (MathFin/Actuarial/Insurance.lean). lifeAnnuityDue r μ n := Σ_{k<n} zcb r 0 k · survivalFromForce μ k, with zcb from MathFin/FixedIncome/ZCB.lean and survivalFromForce from MathFin/Actuarial/Mortality.lean; the closed form is the annuity-due geometric sum annuityDue_closed_form at v = e^{−(r+m)}. SCOPE: constant force of mortality and flat rate; the probabilistic reading of the sum as an expected present value is not proved."

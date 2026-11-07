@@ -5,7 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
+public import Mathlib.Probability.Distributions.Exponential
 
 /-!
 # Extreme value theory: the GEV family and maximum domains of attraction
@@ -41,15 +43,33 @@ The generalized Pareto family and its domain of attraction are in
 `Foundations/GeneralizedPareto.lean`, and the Poisson–GPD–GEV link is in
 `Foundations/PoissonMaxima.lean`.
 
+## Main definitions
+
+* `gevCDF`: the standard generalized extreme value distribution function `H_ξ`, with the Gumbel
+  case `exp(−e^{−x})` at `ξ = 0`.
+* `InMDA`: `F` lies in the maximum domain of attraction of `H`, i.e. `F(cₙ x + dₙ)ⁿ → H(x)` for
+  some constants `cₙ > 0` and `dₙ`.
+* `gevNormScale`, `gevNormLoc`: the max-stability normalizing constants `nᶻ` and `(nᶻ − 1)/ξ`
+  (`log n` at `ξ = 0`), with `z = ξ`.
+
 ## Main results
 
-* `gevCDF`: the standard GEV distribution function `H_ξ`.
-* `InMDA`: `F` lies in the maximum domain of attraction of `H`.
 * `tendsto_pow_iff_tendsto_mul_one_sub`: `aₙⁿ → e^{−τ} ↔ n (1 − aₙ) → τ` for `aₙ ≥ 0`.
 * `tendsto_pow_iff_tendsto_nat_mul_tail`: MFE Exercise 5.23(a) for a distribution function.
 * `gevNormScale`, `gevNormLoc`, `one_add_mul_gevNorm`: the max-stability normalization.
 * `gevCDF_max_stable`, `gevCDF_inMDA`: max-stability of the GEV family.
 * `tendsto_cdf_expMeasure_pow_gumbel`, `cdf_expMeasure_inMDA`: exponential ∈ MDA(Gumbel).
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Section 5.1; Section 5.1.1
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 5.10; Ex. 5.23(a); Ex. 5.23(b)
+
+## Tags
+
+extreme value theory, generalized extreme value, Gumbel, Fréchet,
+domain of attraction, block maxima, MSC 62G30, MSC 60E05, JEL G32
 -/
 
 @[expose] public section

@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.ContinuationSlice
 public import MathFin.BlackScholes.AmericanPut.Stopping.BoundarySemicontinuity
+public import MathFin.BlackScholes.AmericanPut.Stopping.PositiveExerciseBoundary
 
 /-! # Continuity of the actual exercise boundary
 
@@ -14,11 +15,23 @@ The slice-forcing argument excludes downward jumps. Together with the already
 proved upper semicontinuity and monotonicity, it gives full continuity, including
 expiry. No smooth-fit or free-boundary differentiability assumption is used.
 
-## Result
+## Main results
 
-Public entry points include `canonicalStockBoundary_exists_later_gt`,
-`canonicalStockBoundary_continuousAt`, `canonicalStockBoundary_continuousOn`,
-`canonicalLogBoundary_continuousAt`.
+* `canonicalStockBoundary_exists_later_gt`: for `0 < k` and `0 ≤ h ≤ k`, any level `u` below the
+  stock boundary at a maturity `a ≥ 0` is exceeded by the boundary at some later maturity.
+* `canonicalStockBoundary_continuousAt`, `canonicalStockBoundary_continuousOn`: for `0 < k` and
+  `0 ≤ h ≤ k`, the stock boundary is continuous at every `a ≥ 0` and on `[0, ∞)`.
+* `canonicalLogBoundary_continuousAt`, `canonicalLogBoundary_continuousOn`: the same for the
+  log boundary.
+* `canonicalLogBoundary_antitoneOn`: under the same hypotheses the log boundary is antitone on
+  `[0, ∞)`.
+* `zeroDividend_canonicalLogBoundary_continuousOn`: for `0 < k` and no dividend, the log
+  boundary is continuous on `[0, ∞)`.
+
+## Tags
+
+exercise boundary continuity, upper semicontinuity, free boundary, American put boundary,
+no downward jumps, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

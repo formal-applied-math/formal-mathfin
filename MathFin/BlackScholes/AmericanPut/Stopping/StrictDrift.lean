@@ -7,11 +7,24 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.ActualTestFunctions
 
-/-! # Strict signs of stopped generator integrals 
-## Result
+/-!
+# Strict signs of stopped generator integrals
 
-Public entry points include `integral_pos_of_ae_pos`, `planeDrift_pos`, `planeDrift_neg`,
-`expected_rectangle_drift_pos`.
+## Main results
+
+* `integral_pos_of_ae_pos`: an integrable function that is almost surely positive, on a nonzero
+  measure, has a positive integral.
+* `planeDrift_pos`, `planeDrift_neg`: for `G` of class `C²` and `t > 0`, if the generator is
+  positive (resp. negative) along the Brownian path up to time `t`, the drift at `t` is positive
+  (resp. negative).
+* `expected_rectangle_drift_pos`, `expected_rectangle_drift_neg`: for `R > 0`, `δ > 0` and a
+  compactly supported `C²` function `G` whose generator is positive (resp. negative) on the
+  driver rectangle, the expected drift at the rectangle exit rule is positive (resp. negative).
+
+## Tags
+
+strict drift, generator integral, stopped integral, positive expectation, rectangle drift,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -5,9 +5,9 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.ContinuousHeatSmoothing
 public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
+public import MathFin.BlackScholes.AmericanPut.Stopping.CompactHeatFlow
 
 /-! # The half-line heat boundary kernel
 
@@ -15,10 +15,22 @@ For diffusivity 1/2 the boundary kernel is H(t,x)=x*K(t,x)/t.
 This file proves its positive-time PDE and exact temporal normalization.
 It does not yet construct a finite-interval boundary solution.
 
-## Result
+## Main definitions
 
-Public entry points include `heatBoundaryKernel`, `heatKernel_hasDeriv_time`,
-`heatKernel_hasDeriv_space`, `heatBoundaryKernel_smoothAt`.
+* `heatBoundaryKernel`: the half-line heat boundary kernel `H(t,x) = x/t * heatKernel t x`.
+
+## Main results
+
+* `heatKernel_hasDeriv_time`, `heatKernel_hasDeriv_space`: for `0 < t`, the explicit time and space
+  derivatives of `heatKernel`.
+* `heatBoundaryKernel_smoothAt`: for `0 < t`, the boundary kernel is `C^∞` at `(t, x)`.
+* `heatBoundaryKernel_equation`: for `0 < t`, `∂_t H = (1/2) ∂_xx H`.
+* `heatBoundaryKernel_integral`: for `0 < x`, `∫ t in Ioi 0, H t x = 1`.
+
+## Tags
+
+heat boundary kernel, half-line, Dirichlet problem, temporal normalization, heat equation,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.StandardNormal
 public import MathFin.Foundations.GaussianCDFDeriv
 
@@ -25,6 +24,19 @@ of the library are built from:
 The Bachelier call (`BlackScholes/Bachelier`), the Rockafellar–Uryasev characterisation of
 Gaussian CVaR (`RiskMeasures/RockafellarUryasev`) and the normal tail bounds
 (`Foundations/NormalTail`) are all read off these four facts.
+
+## Main results
+
+* `integrable_id_mul_gaussianPDFReal_volume`: `z ↦ z·ϕ(z)` is integrable.
+* `integral_id_mul_gaussianPDFReal_Ioi`: `∫_(a,∞) z·ϕ(z) dz = ϕ(a)`.
+* `integral_gaussianPDFReal_Ioi`: `∫_(a,∞) ϕ = 1 − Φ(a)`.
+* `integral_max_sub_mul_gaussianPDFReal`: `∫ max (x − z) 0 · ϕ(x) dx = ϕ(z) − z·(1 − Φ(z))`,
+  the stop-loss transform of `N(0, 1)`.
+
+## Tags
+
+truncated normal moment, stop-loss transform, normal tail, Bachelier model, Gaussian CVaR,
+expected shortfall, MSC 60E05, MSC 91G70, JEL G13
 -/
 
 @[expose] public section

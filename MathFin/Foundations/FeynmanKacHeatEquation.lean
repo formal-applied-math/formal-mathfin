@@ -5,8 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
-public import BrownianMotion.Gaussian.BrownianMotion
+public import MathFin.Init
+public import Mathlib.Analysis.Calculus.Deriv.Prod
+public import Mathlib.Analysis.Calculus.ParametricIntegral
+public import Mathlib.Analysis.SpecialFunctions.Sqrt
+public import Mathlib.Probability.BrownianMotion.Basic
 
 /-!
 # Feynman–Kac for the heat equation
@@ -27,6 +30,13 @@ This proof does **not** use Itô calculus. The mechanism is:
    `∂_t pdf(t, y) = (1/2) ∂²_y pdf(t, y)` (pure calculus).
 3. Differentiating under the integral sign passes the PDE through to `u`.
 
+## Main definitions
+
+* `heatKernel`: `K(t, y) = (2π t)^{-1/2} · exp(−y² / (2 t))`, defined for all `t : ℝ`; the
+  statements about it assume `0 < t`.
+* `feynmanU`: `feynmanU g t x = ∫ z, g z · K(t, z − x) dz`, the heat-kernel form of
+  `E[g(x + B_t)]`.
+
 ## Main results
 
 * `heatConvolution_eq_add_integral_deriv` — the integrated heat-equation form
@@ -41,6 +51,15 @@ This proof does **not** use Itô calculus. The mechanism is:
   `∂_t u = ½ ∂_xx u` (every derivative falls on the kernel; `h` needs only the growth
   bound). These make the heat flow load-bearing for the Black–Scholes PDE
   (`BlackScholes/PDEFromFeynmanKac.lean`, benchmark `sc-bs-pde-feynman-kac`).
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 9.2.1
+
+## Tags
+
+Feynman–Kac formula, heat equation, heat kernel, parabolic PDE, Black–Scholes PDE,
+Gaussian convolution, MSC 60H30, MSC 35K10, JEL G13
 -/
 
 @[expose] public section
@@ -519,7 +538,7 @@ lemma heatKernel_temporal_le {t s : ℝ} (ht : 0 < t) (hs_lo : t / 2 < s) (hs_hi
 `|w² − s| / (2 s²) ≤ 2 (w² + 3t/2) / t²`. The polynomial factor of the time-derivative domination,
 shared verbatim (modulo the centring `w = y` vs `w = z−x`) by `hasDerivAt_phi` and
 `hasDerivAt_feynmanU_t`. -/
-private lemma sq_sub_div_le {t s : ℝ} (ht : 0 < t) (hs_lo : t / 2 < s) (hs_hi : s < 3 * t / 2)
+lemma sq_sub_div_le {t s : ℝ} (ht : 0 < t) (hs_lo : t / 2 < s) (hs_hi : s < 3 * t / 2)
     (w : ℝ) : |w ^ 2 - s| / (2 * s ^ 2) ≤ 2 * (w ^ 2 + 3 * t / 2) / t ^ 2 := by
   have hs_pos : 0 < s := by linarith
   have habs : |w ^ 2 - s| ≤ w ^ 2 + 3 * t / 2 := by
@@ -555,7 +574,7 @@ lemma heatKernel_loc_le {v₀ v x x₀ δ : ℝ} (hv₀ : 0 < v₀)
 `v ∈ (v₀/2, 3v₀/2)` with the centre shifted by `≤ d` (`|W − W₀| ≤ d`), the moving denominator is
 absorbed into the fixed `v₀`: `|W²−v|/(2v²) ≤ 2(2W₀²+2d²+3v₀/2)/v₀²`. Isolated as its own lemma so
 the `nlinarith` elaborates without the heartbeat blow-up that defeats it inline. -/
-private lemma curve_sq_ratio_le {v₀ v W W₀ d : ℝ} (hv₀ : 0 < v₀) (hvlo : v₀ / 2 < v)
+lemma curve_sq_ratio_le {v₀ v W W₀ d : ℝ} (hv₀ : 0 < v₀) (hvlo : v₀ / 2 < v)
     (hvhi : v < 3 * v₀ / 2) (hW : |W - W₀| ≤ d) (hd : 0 ≤ d) :
     |W ^ 2 - v| / (2 * v ^ 2) ≤ 2 * (2 * W₀ ^ 2 + 2 * d ^ 2 + 3 * v₀ / 2) / v₀ ^ 2 := by
   have hvpos : 0 < v := by linarith
@@ -571,7 +590,7 @@ private lemma curve_sq_ratio_le {v₀ v W W₀ d : ℝ} (hv₀ : 0 < v₀) (hvlo
 
 /-- **Curve linear-ratio bound** (the `∂_x`-kernel polynomial factor). Companion to
 `curve_sq_ratio_le`: `|W|/v ≤ 2(W₀²+1+d)/v₀` on `v > v₀/2` with `|W − W₀| ≤ d`. -/
-private lemma curve_abs_ratio_le {v₀ v W W₀ d : ℝ} (hv₀ : 0 < v₀) (hvlo : v₀ / 2 < v)
+lemma curve_abs_ratio_le {v₀ v W W₀ d : ℝ} (hv₀ : 0 < v₀) (hvlo : v₀ / 2 < v)
     (hW : |W - W₀| ≤ d) (hd : 0 ≤ d) :
     |W| / v ≤ 2 * (W₀ ^ 2 + 1 + d) / v₀ := by
   have hvpos : 0 < v := by linarith

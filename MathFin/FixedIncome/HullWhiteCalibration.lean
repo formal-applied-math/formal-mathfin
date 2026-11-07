@@ -5,7 +5,6 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.WienerIntegralGaussian
 public import MathFin.Foundations.WienerIntegralExpMoment
 public import MathFin.FixedIncome.VasicekBondPrice
@@ -64,34 +63,50 @@ pointwise expansion of `θ(s)·B(t−s)` (`integral_theta_B`) — no Fubini anyw
 pointwise congruences, linearity, and one `intervalIntegral.integral_comp_sub_left`
 reflection.
 
-## Result
+## Main definitions
 
-Public definitions: `deterministic`, `integratedRate`,
-`integratedMean`, `bondRate`, `bondA`, `theta`, `calibAlpha` (the diffusion kernel
-is `vasicekKernel`/`vasicekKernelLp` of `VasicekSDEGaussian`, reused, not redefined).
+* `deterministic`: the Hull–White deterministic solution
+  `α(t) = e^{−κt}·(r₀ + ∫₀ᵗ e^{κs} θ(s) ds)` with `α(0) = r₀`.
+* `integratedRate`: the Hull–White short rate in its Wiener representation.
+* `integratedMean`, `bondRate`: the deterministic part `∫₀ᵗ α(s) ds` of the integrated short rate,
+  and the integrated short rate `∫₀ᵗ α + σ·∫₀ᵗ g(u) dB_u` in Wiener representation.
+* `bondA`: the affine coefficient `A(T) = exp(−∫₀ᵀ θ(s)·B(T−s) ds + σ²·V(T)/2)`.
+* `theta`: the calibrated drift `θ(t)`, given by the calibration formula.
+* `calibAlpha`: the closed form `β(t) = f(0,t) + (σ²/2κ²)·(1 − e^{−κt})²`, the initial forward
+  plus the convexity correction.
 
-Public lemmas (all in `namespace MathFin.HullWhite`):
+## Main results
 
-* `deterministic_at_zero`, `deterministic_solves_ODE`, `deterministic_const`,
-  `deterministic_const_closed_form`, `deterministic_const_tendsto`,
-  `deterministic_add_exponential`, `deterministic_eq_of_solves_ODE`,
-  `deterministic_eq_add_exp_of_solves_ODE` —
-  the deterministic part;
-* `integratedRate_hasLaw_gaussian` — the short rate's Gaussian law with the Vasicek
-  variance;
-* `integral_exp_pos_const`, `integral_exp_neg_eq_bondB`, `beta_integral`,
-  `integral_theta_B`, `integratedMean_eq` — the scalar-integral identities behind the
-  affine coefficients;
-* `bondPrice_eq`, `bondPrice_affine` — the exponential-Gaussian bond moment and its
-  time-0 affine form with `vasicekBondB` reused verbatim;
-* `integratedMean_const`, `bondRate_const` — constant forcing `κθ_v` is the Vasicek model at
-  level `θ_v`;
-* `theta_continuous`, `calibAlpha_solves_ODE`, `mean_eq_forward`, `calibMean`,
-  `calibMean_eq_forward`, `var_eq_interval`, `calibCorrection_integral`,
-  `calibIntegratedMean`, `reprices_curve` — the calibration `θ`-formula and the
-  exact repricing of the initial forward curve.
+* `deterministic_solves_ODE`, `deterministic_eq_of_solves_ODE`: for continuous `θ`, the
+  deterministic part solves `α' = θ − κα`, and any everywhere-differentiable solution `α` of that
+  ODE coincides with `deterministic θ κ (α 0)`.
+* `integratedRate_hasLaw_gaussian`: for `κ > 0`, the integrated short rate at time `t` has the
+  Gaussian law with mean `deterministic θ κ r₀ t` and the Vasicek variance.
+* `bondPrice_eq`, `bondPrice_affine`: for `κ > 0`, `𝔼[exp(−bondRate T)]` equals
+  `exp(−integratedMean T + σ²·vasicekBondV κ T/2)`, which for continuous `θ` is the affine form
+  `bondA·exp(−B(T)·r₀)`.
+* `integratedMean_const`, `bondRate_const`: for `κ ≠ 0` (respectively `κ > 0`), constant forcing
+  `κθ` gives the Vasicek integrated mean (respectively the Vasicek integrated rate).
+* `calibAlpha_solves_ODE`, `mean_eq_forward`: for `f0` of class `C¹` and `κ ≠ 0`, `calibAlpha`
+  solves the Hull–White ODE under `theta f0 κ σ`, and the deterministic part started at
+  `f0 0` equals `f0(t) + (σ²/2κ²)(1 − e^{−κt})²`.
+* `calibMean_eq_forward`: for `κ > 0`, the expected short rate under `theta` equals
+  `f0(t) + (σ²/2κ²)(1 − e^{−κt})²`.
+* `calibIntegratedMean`: for `κ > 0`, the integrated mean under `theta` equals
+  `∫₀ᵀ f0 + (σ²/2)·vasicekBondV κ T`.
+* `reprices_curve`: for `f0` of class `C¹`, `κ > 0` and `r₀ = f0 0`,
+  `𝔼[exp(−bondRate T)] = exp(−∫₀ᵀ f0)`.
 
-Supporting lemmas (`forcing_integral_continuous`, `calib_deriv_eq`, `calibVar_key`) are `private`.
+## References
+
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  §3.3
+* [J. Hull and A. White, *Pricing interest-rate-derivative securities*][HullWhite1990]
+
+## Tags
+
+Hull–White model, curve calibration, extended Vasicek, forward rate curve, mean reversion,
+Gaussian short rate, affine bond price, MSC 91G30, MSC 60H10, JEL E43
 -/
 
 @[expose] public section
@@ -323,18 +338,6 @@ lemma integral_exp_neg_eq_bondB (κ t : ℝ) (hκ : κ ≠ 0) :
   field_simp
   ring
 
-/-- Continuity of the partial-solution integral `s ↦ ∫₀ˢ e^{κu}θ(u) du` (from the
-FTC: it is differentiable, hence continuous). -/
-private lemma forcing_integral_continuous (θ : ℝ → ℝ) (hθ : Continuous θ) (κ : ℝ) :
-    Continuous (fun x : ℝ ↦ ∫ u in (0 : ℝ)..x, Real.exp (κ * u) * θ u) := by
-  have hI : ∀ s : ℝ, HasDerivAt (fun x : ℝ ↦ ∫ u in (0 : ℝ)..x, Real.exp (κ * u) * θ u)
-      (Real.exp (κ * s) * θ s) s := by
-    intro s
-    have hfc : Continuous (fun u : ℝ ↦ Real.exp (κ * u) * θ u) := by fun_prop
-    exact intervalIntegral.integral_hasDerivAt_right (hfc.intervalIntegrable 0 s)
-      (hfc.stronglyMeasurableAtFilter volume (nhds s)) hfc.continuousAt
-  exact Differentiable.continuous (fun x ↦ (hI x).differentiableAt)
-
 /-- **The forcing integral** (the antiderivative route; the integral lives on the
 triangle `0 ≤ u ≤ s ≤ t`):
 `∫₀ᵗ e^{−κs}·(∫₀ˢ e^{κu}θ(u) du) ds = (1/κ)·(∫₀ᵗ θ − e^{−κt}·∫₀ᵗ e^{κu}θ(u) du)`.
@@ -379,9 +382,10 @@ lemma beta_integral (θ : ℝ → ℝ) (hθ : Continuous θ) (κ t : ℝ) (hκ :
   have hint : IntervalIntegrable
       (fun s : ℝ ↦ Real.exp (-(κ * s))
         * (∫ u in (0 : ℝ)..s, Real.exp (κ * u) * θ u)) volume 0 t := by
+    have hfc : Continuous (fun u : ℝ ↦ Real.exp (κ * u) * θ u) := by fun_prop
     apply Continuous.intervalIntegrable
     exact (by fun_prop : Continuous (fun x : ℝ ↦ Real.exp (-(κ * x)))).mul
-      (forcing_integral_continuous θ hθ κ)
+      (intervalIntegral.continuous_primitive (fun a b ↦ hfc.intervalIntegrable a b) 0)
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun s _ ↦ hG s) hint]
   have h0 : (1 / κ) * ((∫ u in (0 : ℝ)..0, θ u)
       - Real.exp (-(κ * 0)) * (∫ u in (0 : ℝ)..0, Real.exp (κ * u) * θ u)) = 0 := by
@@ -442,9 +446,11 @@ lemma integratedMean_eq (θ : ℝ → ℝ) (hθ : Continuous θ) (κ r₀ t : �
     refine intervalIntegral.integral_add ?_ ?_
     · exact (by fun_prop : Continuous
         (fun s : ℝ ↦ r₀ * Real.exp (-(κ * s)))).intervalIntegrable 0 t
-    · exact ((by fun_prop : Continuous
-        (fun x : ℝ ↦ Real.exp (-(κ * x)))).mul
-        (forcing_integral_continuous θ hθ κ)).intervalIntegrable 0 t
+    · have hfc : Continuous (fun u : ℝ ↦ Real.exp (κ * u) * θ u) := by fun_prop
+      have hcont : Continuous (fun x : ℝ ↦ ∫ u in (0 : ℝ)..x, Real.exp (κ * u) * θ u) :=
+        intervalIntegral.continuous_primitive (fun a b ↦ hfc.intervalIntegrable a b) 0
+      exact ((by fun_prop : Continuous
+        (fun x : ℝ ↦ Real.exp (-(κ * x)))).mul hcont).intervalIntegrable 0 t
   rw [integratedMean, hsplitint, hadd, intervalIntegral.integral_const_mul,
     integral_exp_neg_eq_bondB κ t hκ, hbeta]
 
@@ -532,16 +538,6 @@ rate is `calibMean_eq_forward` (for `κ > 0`). -/
 noncomputable def calibAlpha (f0 : ℝ → ℝ) (κ σ : ℝ) (t : ℝ) : ℝ :=
   f0 t + (σ ^ 2 / (2 * κ ^ 2)) * (1 - Real.exp (-(κ * t))) ^ 2
 
-/-- The pointwise algebra behind the calibrated ODE: with `E = e^{−κt}`,
-`(1 − E²) − (1 − E)² = 2E(1 − E)` — the identity that converts the `−2κt`
-exponent of the θ-formula into the `(1 − e^{−κt})²` of β. -/
-private lemma calib_deriv_eq (d v E κ σ : ℝ) (hκ : κ ≠ 0) :
-    d + (σ ^ 2 / (2 * κ ^ 2)) * (2 * (1 - E) * (κ * E))
-      = d + κ * v + (σ ^ 2 / (2 * κ)) * (1 - E ^ 2)
-        - κ * (v + (σ ^ 2 / (2 * κ ^ 2)) * (1 - E) ^ 2) := by
-  field_simp
-  ring
-
 /-- `theta` is continuous for a `C¹` curve — `deriv f0` is continuous by
 `contDiff_one_iff_deriv`. -/
 lemma theta_continuous (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ σ : ℝ) :
@@ -552,9 +548,10 @@ lemma theta_continuous (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ σ : ℝ
 
 /-- **The calibrated β solves the HW ODE** (verified by differentiation): with `f0` a `C¹` curve,
 `β(t) = f(0,t) + (σ²/2κ²)(1 − e^{−κt})²` satisfies
-`β'(t) = θ(t) − κ·β(t)` pointwise for `θ = theta f0 κ σ`. Chain rule on β plus
-`calib_deriv_eq`; this is what makes the θ-formula a calibration (sufficient for exact
-repricing, `reprices_curve`; uniqueness of `θ` is not proved). -/
+`β'(t) = θ(t) − κ·β(t)` pointwise for `θ = theta f0 κ σ`. Chain rule on β plus the
+pointwise algebra `(1 − E²) − (1 − E)² = 2E(1 − E)` (`E = e^{−κt}`); this is what makes the
+θ-formula a calibration (sufficient for exact repricing, `reprices_curve`; uniqueness of `θ` is
+not proved). -/
 theorem calibAlpha_solves_ODE (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ σ : ℝ)
     (hκ : κ ≠ 0) (t : ℝ) :
     HasDerivAt (calibAlpha f0 κ σ) (theta f0 κ σ t - κ * calibAlpha f0 κ σ t) t := by
@@ -587,7 +584,8 @@ theorem calibAlpha_solves_ODE (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ �
       = deriv f0 t + (σ ^ 2 / (2 * κ ^ 2)) * (2 * (1 - Real.exp (-(κ * t)))
           * (κ * Real.exp (-(κ * t)))) := by
     simp only [theta, calibAlpha, hE2]
-    exact (calib_deriv_eq (deriv f0 t) (f0 t) (Real.exp (-(κ * t))) κ σ hκ).symm
+    field_simp
+    ring
   rw [hval]
   exact hfd.add hcm
 

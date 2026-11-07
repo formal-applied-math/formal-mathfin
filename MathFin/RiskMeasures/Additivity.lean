@@ -5,9 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.RiskMeasures.Gaussian
-public import MathFin.RiskMeasures.CoherentAxioms
+public import MathFin.Foundations.NormalQuantile
 
 /-!
 # Gaussian VaR/CVaR additivity at perfect positive correlation
@@ -17,10 +16,20 @@ At `ρ = 1`, the joint-gaussian standard deviation becomes
 `RiskMeasures.CoherentAxioms` is sharpened to equality. This is the extremal
 case where diversification provides no benefit.
 
-Results:
+## Main results
 
 * `gaussianVaR_additive_at_rho_one`: at `ρ = 1`, VaR is additive.
 * `gaussianCVaR_additive_at_rho_one`: at `ρ = 1`, CVaR is additive.
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Ch 8
+
+## Tags
+
+VaR additivity, CVaR additivity, perfect correlation, Gaussian risk, diversification benefit,
+MSC 91G70, JEL G32
 -/
 
 @[expose] public section

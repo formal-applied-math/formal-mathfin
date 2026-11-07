@@ -7,13 +7,33 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.GridReindexing
 public import MathFin.BlackScholes.AmericanPut.Stopping.ActualContact
+public import MathFin.BlackScholes.AmericanPut.Stopping.DiscreteStoppingValue
 
 /-! # Snell envelope (the Bellman recursion) and attained optimality on physical exercise grids
 
-## Result
+## Main definitions
 
-Public entry points include `gridReward_adapted`, `gridReward_integrable`, `optimalGridRule`,
-`gridValue_eq_integral_snellEnvelope`.
+* `optimalGridRule`: the Snell first-contact rule for the grid rewards, carried back to physical
+  grid times.
+* `canonicalOptimalGridRule`: the optimal grid rule of the canonical model (strike `1`, rates `k`
+  and `h`, volatility `√2`, spot `exp x`, horizon `t.toNNReal`) at grid step `gridStep n`.
+* `canonicalOptimalGridTime`: the exercise time of the canonical optimal grid rule.
+
+## Main results
+
+* `gridReward_adapted`, `gridReward_integrable`: for an adapted `W`, the grid reward is adapted
+  to `cappedGridFiltration`; for measurable `W` and `0 ≤ K`, `0 ≤ r`, `0 ≤ S` it is integrable.
+* `gridValue_eq_integral_snellEnvelope`: for measurable adapted `W`, `0 ≤ K`, `0 ≤ r`,
+  `0 ≤ S` and `0 < δ`, the grid American put value is the expected Snell envelope at index `0`.
+* `optimalGridRule_attains_value`: under the same hypotheses, the expected put reward at
+  `optimalGridRule` equals the grid American put value.
+* `canonicalOptimalGridRule_payoffs_tendsto`: for `0 ≤ k`, the expected payoffs of the canonical
+  optimal grid rules converge to `canonicalPrice k h x t` as the grid is refined.
+
+## Tags
+
+Snell envelope, Bellman recursion, exercise grid, optimal grid rule, Bermudan American put,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

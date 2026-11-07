@@ -5,9 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
-public import BrownianMotion.Gaussian.BrownianMotion
-public import MathFin.Foundations.WienerIntegralGaussian
+public import MathFin.Foundations.WienerIntegralL2
 
 /-!
 # The Wiener integral of a step indicator is the increment
@@ -27,6 +25,16 @@ assembly maps are `Finsupp.linearCombination` of their respective generators. Th
 the piece that lets a finite sum of Brownian values `∑ᵢ B_{tᵢ}` be read as a single
 Wiener integral of the deterministic step kernel `∑ᵢ 𝟙_{(0,tᵢ]}` — the route the
 geometric-average Asian option (and any BM-value basket) takes to its Gaussian law.
+
+## Main results
+
+* `wienerIntegralLp_stepIndicator`: the Wiener integral of a step indicator is the Brownian
+  increment, `∫ 𝟙_{(lo, hi]} dB = B_hi − B_lo`.
+
+## Tags
+
+Wiener integral, Brownian increment, step indicator, isometry extension, geometric Asian option,
+step kernel, MSC 60H05, MSC 60J65
 -/
 
 @[expose] public section

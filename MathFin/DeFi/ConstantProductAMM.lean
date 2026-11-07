@@ -34,7 +34,15 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Algebra.EuclideanDomain.Basic
+public import Mathlib.Algebra.EuclideanDomain.Field
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Inv
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # Constant-product AMM (after Pusceddu-Bartoletti 2024)
@@ -82,9 +90,15 @@ role for an automated market maker: the execution rate `y/(x+Δx)` depends on
 the trade size (an analogy only; no formal link to the Almgren-Chriss model is
 made here).
 
-## Results
+## Main definitions
 
-* `swapOutput`: definition `y · Δx / (x + Δx)`.
+* `swapOutput`: the output `y * Δx / (x + Δx)` of token Y for an input `Δx` of token X at
+  reserves `(x, y)`.
+* `internalPrice`: the reserve ratio `y / x`.
+* `arbitragePresent`: the pool's internal price differs from an oracle price.
+
+## Main results
+
 * `swap_preserves_invariant`: constant-product invariance under swap.
 * `swap_output_pos`: `Δy > 0` when input is positive.
 * `swap_output_lt_y`: `Δy < y` (cannot drain pool).
@@ -92,18 +106,21 @@ made here).
 * `marginal_exchange_rate`: the average rate `Δy / Δx = y / (x + Δx)`.
 * `hasDerivAt_swapOutput`, `hasDerivAt_swapOutput_zero`: the marginal rate,
   and the internal price as the marginal rate at zero size.
-* `internalPrice`, `arbitragePresent`: internal price `y / x` and the
-  oracle-divergence predicate (definitions).
 * `exists_profitable_swap_iff`, `exists_profitable_reverse_swap_iff`,
   `arbitragePresent_iff`: price divergence is equivalent to the existence of a
   profitable swap at oracle prices.
 
 ## References
 
-* G. Angeris, H.-T. Kao, R. Chiang, C. Noyes, T. Chitra, "An analysis of
-  Uniswap markets", *Cryptoeconomic Systems* 1(1) (2021), §2.1 (optimal
+* [G. Angeris, H.-T. Kao, R. Chiang, C. Noyes, T. Chitra, *An analysis of
+  Uniswap markets*][AngerisKaoChiangNoyesChitra2021], §2.1 (optimal
   arbitrage; the no-arbitrage bound (3), which at zero fee says the pool
   price equals the reference price).
+
+## Tags
+
+automated market maker, Uniswap v2, constant product invariant, swap, arbitrage,
+decentralized exchange, marginal price, MSC 91G80, JEL G23
 -/
 
 @[expose] public section

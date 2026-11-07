@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.AsianGeometricN
 public import MathFin.BlackScholes.PDE
 
@@ -30,7 +29,7 @@ form, the Black–Scholes call `bsV` at an effective spot and volatility
 (`geomAsianN_call_price`, `BlackScholes/AsianGeometricN.lean`), so the arithmetic Asian
 call, which has no closed form, is bounded below by that `bsV` value.
 
-Results:
+## Main results
 
 * `am_gm_two`: `√(a · b) ≤ (a + b) / 2` for `a, b ≥ 0` — Mathlib's
   `Real.geom_mean_le_arith_mean2_weighted` at weights `1/2`, bridged from
@@ -42,6 +41,17 @@ Results:
 * `geomAsianN_bsV_le_arith`: the price-level bound — the closed-form geometric-Asian
   price `bsV K r σ_G Ŝ₀ T` is at most the discounted expected arithmetic-Asian payoff
   of the Black–Scholes GBM sampled at the same dates.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], Ch 26.13
+* [A. G. Z. Kemna and A. C. F. Vorst, *A pricing method for options based on average asset
+  values*][KemnaVorst1990]
+
+## Tags
+
+Asian option, arithmetic average, geometric average, AM–GM inequality, price bound,
+average price option, MSC 91G20, MSC 60E15, JEL G13
 -/
 
 @[expose] public section

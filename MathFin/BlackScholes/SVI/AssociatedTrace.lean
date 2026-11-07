@@ -5,7 +5,9 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.SVI.QuotientProduct
+public import MathFin.BlackScholes.SVI.ProductSignature
+public import MathFin.BlackScholes.SVI.TraceForm
+public import Mathlib.RingTheory.Trace.Basic
 
 /-! # Weighted trace forms of associated polynomials
 
@@ -13,6 +15,16 @@ Part of the SVI polynomial-sign certificate (#174).
 
 Replacing the defining polynomial by an associate gives an equivalent weighted trace form, hence
 the same signature.
+
+## Main results
+
+* `weightedTraceForm_associated_equivalent`: if `f` and `g` are associated, the weighted trace forms
+  of `f` and `g` against `q` are equivalent quadratic maps.
+* `weightedTraceForm_associated_signature`: they have the same signature.
+
+## Tags
+
+Hermite trace form, associated polynomial, signature, SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.ConvexDuality
+public import Mathlib.Analysis.RCLike.Lemmas
 
 /-!
 # Separating-functional kernel for the finite Fundamental Theorem of Asset Pricing
@@ -33,6 +33,11 @@ The underlying separation is the cone root `MathFin.exists_pos_separating_of_con
   nonzero vector (the second FTAP's dual certificate of incompleteness).
 * `MathFin.exists_pos_add_mul_pos` — strictly positive weights stay strictly positive after a
   small perturbation in any direction.
+
+## Tags
+
+separating hyperplane, no arbitrage, state prices, equivalent martingale measure, finite-state FTAP,
+standard simplex, MSC 90C25, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

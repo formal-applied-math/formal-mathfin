@@ -14,10 +14,19 @@ Fixed-time almost-sure Ito identities cannot simply be evaluated at a random
 time. A countable dense set and path continuity justify that step here, after
 the drift has been proved zero on the entire interior-stopped trajectory.
 
-## Result
+## Main results
 
-Public entry points include `ae_eq_through_positive_time`,
-`brownianInteriorRule_ito_representation`.
+* `ae_eq_through_positive_time`: if two continuous-path processes agree almost surely at each fixed
+  time before `θ`, then almost surely, when `0 < θ`, they agree at every time `t ≤ θ`.
+* `brownianInteriorRule_ito_representation`: for `0 < K`, `0 < S`, `0 < σ` and a
+  `DividendPutSolution`, there is a continuous local martingale `M` for the Brownian augmented
+  filtration such that, almost surely, the classical candidate stopped at the interior rule,
+  minus its time-`0` value, equals `M` stopped at the rule (on `{0 < θ}`) at all times.
+
+## Tags
+
+Itô representation, interior stopping, path continuity, zero drift, stopped trajectory, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -52,8 +61,9 @@ theorem brownianInteriorRule_ito_representation {p : ℝ → ℝ → ℝ} {b : �
     ∃ M : ℝ≥0 → (ℝ≥0 → ℝ) → ℝ, (∀ ω, Continuous (fun t => M t ω)) ∧
       IsLocalMartingale M brownianAugFiltration gaussianLimit ∧
       (fun t ω => {ω | 0 < θ.time ω}.indicator (fun ω => M (min t (θ.time ω)) ω) ω)
-        ≡ᵐ[gaussianLimit] fun t ω => classicalCandidate brownian K r q σ S p T (min t (θ.time ω)) ω -
-          classicalCandidate brownian K r q σ S p T 0 ω := by
+        ≡ᵐ[gaussianLimit] fun t ω =>
+          classicalCandidate brownian K r q σ S p T (min t (θ.time ω)) ω -
+            classicalCandidate brownian K r q σ S p T 0 ω := by
   classical
   let θ := brownianInteriorRule (K := K) (S := S) hp T n
   obtain ⟨G,hG,_,hpath⟩ := brownianInteriorRule_smooth_extension hp hK hS hσ T n

@@ -6,7 +6,6 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.DriftRiemannConvergence
-public import MathFin.Foundations.ItoProcessPredictable
 
 /-! # The drift of an Itô process with adapted coefficients
 
@@ -22,6 +21,30 @@ stands, with no modification:
 * for each `ω` and each bounded `g : ℝ≥0 → ℝ` continuous on `[0, T]`, its Riemann–Stieltjes
   sums converge: `∑ₖ g(tₖ)·(A_{tₖ₊₁} − A_{tₖ}) → ∫₀ᵀ g_s b_s ds`
   (`tendsto_sum_mul_driftPath_sub`), the drift half of the formula's first-order term.
+
+## Main definitions
+
+* `driftPath`: the drift path `A_t(ω) = ∫₀ᵗ b_s(ω) ds`, the pathwise integral of the drift
+  rate `b` against `timeMeasure`.
+
+## Main results
+
+The rate `b` is bounded and continuous in time throughout, and adapted to the Brownian
+filtration for the measurability results.
+
+* `driftPath_sub`: the increment of the drift path over `(s, t]` is the integral of the rate
+  over `(s, t]`.
+* `abs_driftPath_sub_le`: the drift path is Lipschitz in time, with the bound of the rate as
+  constant.
+* `continuous_driftPath`: the drift path is continuous.
+* `stronglyMeasurable_driftPath`, `driftPath_isStronglyPredictable`: `A_t` is measurable for the
+  Brownian filtration at time `t`, and the drift path is predictable.
+* `tendsto_sum_mul_driftPath_sub`: for each `ω` and each bounded `g` continuous on `[0, T]`, the
+  sums `∑ₖ g(tₖ)·(A_{tₖ₊₁} − A_{tₖ})` along the uniform partitions converge (to `∫₀ᵀ g_s b_s ds`).
+
+## Tags
+
+Itô process, drift, Riemann–Stieltjes sum, predictable process, Itô formula, MSC 60H05, MSC 60G07
 -/
 
 @[expose] public section

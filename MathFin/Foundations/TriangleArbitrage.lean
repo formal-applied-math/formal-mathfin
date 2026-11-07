@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.FTAPMultiState
 
 /-!
@@ -22,7 +21,7 @@ negative multiple being the reverse conversion at the reciprocal rate; there is 
 spread and no transaction cost. An **arbitrage** is a combination of trades whose net
 holding is non-negative in every currency and positive in one.
 
-That is `HasArbitrage_multi_state` of `Foundations/FTAPMultiState.lean`, with the currencies
+That is `HasArbitrageMultiState` of `Foundations/FTAPMultiState.lean`, with the currencies
 as the coordinates in place of states of the world. The multi-state FTAP is a statement
 about a subspace of `ℝ³` and the standard simplex (Stiemke's alternative), so it applies
 whatever the coordinates mean; its strictly positive `q` is then a vector of consistent
@@ -34,13 +33,31 @@ is a theorem: for positive `S_AB`, `S_BC`, `TriangleNoArb ↔ S_AB · S_BC · S_
 positive currency values `q` with `q_A = S_AB q_B`, `q_B = S_BC q_C`, `q_C = S_CA q_A`); the
 reverse direction prices with `q ∝ (S_AB S_BC, S_BC, 1)` and applies the forward half.
 
-## Results
+## Main definitions
 
-* `triangleTrades`, `TriangleNoArb`
+* `triangleTrades`: the three conversion trades `A → B`, `B → C`, `C → A` of the currency
+  triangle, as net holdings in `(A, B, C)`.
+* `TriangleNoArb`: no frictionless combination of the three conversion trades has a net holding
+  that is nonnegative and not identically zero.
+
+## Main results
+
 * `prod_eq_one_of_triangleNoArb` — no arbitrage forces `S_AB · S_BC · S_CA = 1` (any signs)
 * `triangleNoArb_iff` — for positive `S_AB`, `S_BC`: no arbitrage ⟺ `S_AB · S_BC · S_CA = 1`
 * `triangleNoArb_solve_third` — for positive `S_AB`, `S_BC`, exactly one `S_CA` allows no
-  arbitrage, namely `1 / (S_AB · S_BC)`
+  arbitrage (it is `1 / (S_AB · S_BC)`, by `triangleNoArb_iff`)
+
+## References
+
+* [Y. Aiba et al., *Triangular arbitrage as an interaction among foreign exchange
+  rates*][AibaEtAl2002]
+* [H. Föllmer and A. Schied, *Stochastic Finance: An Introduction in Discrete Time*][FollmerSchied],
+  §1.2
+
+## Tags
+
+triangular arbitrage, cross rate, foreign exchange, currency arbitrage, no-arbitrage exchange rates,
+round trip, MSC 91G20, JEL F31, JEL G13
 -/
 
 @[expose] public section
@@ -57,7 +74,7 @@ def triangleTrades (S_AB S_BC S_CA : ℝ) : Fin 3 → Fin 3 → ℝ :=
 a net holding that is non-negative in every currency and positive in one. The cross-rate
 identity `S_AB · S_BC · S_CA = 1` is the theorem `triangleNoArb_iff`. -/
 def TriangleNoArb (S_AB S_BC S_CA : ℝ) : Prop :=
-  ¬ HasArbitrage_multi_state (triangleTrades S_AB S_BC S_CA)
+  ¬ HasArbitrageMultiState (triangleTrades S_AB S_BC S_CA)
 
 /-- **No arbitrage forces the cross-rate identity**, whatever the signs of the rates. The
 multi-state FTAP gives strictly positive currency values `q` pricing each trade at zero:

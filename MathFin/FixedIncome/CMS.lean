@@ -5,11 +5,12 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.InterestRateSwap
 public import MathFin.Foundations.CarrMadan
 public import MathFin.Foundations.Numeraire
 public import MathFin.FixedIncome.ConvexitySensitivity
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Convex.Integral
 
 /-!
 # The CMS par-rate functional: convexity, the annuity measure, a Jensen gap
@@ -78,27 +79,47 @@ forward measure — is not formalized. The spanning is the compact-strike-range 
 swap-rate functional is *not* a log payoff, so the seed consumes `carrMadan_spanning` — the shared
 core of which `carrMadan_log_spanning` is the log instance (its proof is one instantiation).
 
-## Result
+## Main definitions
 
-Public definitions: `cmsCurveRate`, `annuityRandom`, `annuityMeasure`.
+* `cmsCurveRate`: the par swap rate of a curve whose final discount factor is `x`, all other
+  discount factors fixed.
+* `annuityRandom`: the random annuity `A_T(ω) = δ · ∑_{i ∈ s} P(ω, T_i)` at the fixing date.
+* `annuityMeasure`: the annuity measure `Qᴬ`, the change-of-numéraire measure with the annuity
+  `A_T` in the numéraire seat.
 
-Public lemmas (all in `namespace MathFin.CMS`):
+## Main results
 
-* `parSwapRate_update_eq`, `payerSwapValue_update_eq_zero_iff` — the bridges
-  from the curve update to the swap layer;
-* `hasDerivAt_cmsCurveRate`, `hasDerivAt_cmsCurveRate'`, `cmsCurveRate_convexOn`
-  — first and second derivatives and convexity of the rate functional;
-* `annuityMeasure_isProbabilityMeasure`, `annuityMeasure_price` — the annuity
-  measure and its fair-value identity;
-* `cmsCurveRate_jensenGap_nonneg`, `cmsCurveRate_jensenGap_sub_nonneg` — the Jensen gap of the
-  rate functional under `Qᴬ` is nonnegative;
-* `cmsCurveRate_spanning`, `cmsCurveRate_strip_nonneg`,
-  `convexityNumerator_nonneg` — the replication identity, the tangent-line
-  inequality, and the bond-convexity sign.
+* `parSwapRate_update_eq`, `payerSwapValue_update_eq_zero_iff`: for `n ∈ s`, the par rate of the
+  curve with factor `n` replaced by `x` is `cmsCurveRate`; for `δ > 0`, `x > 0` and positive
+  factors, the payer swap on that curve has zero value if and only if `K = cmsCurveRate ...`.
+* `hasDerivAt_cmsCurveRate`, `cmsCurveRate_convexOn`: for `δ ≠ 0` and `C + x ≠ 0` the rate has
+  derivative `−(P₀+C)/(δ(C+x)²)` at `x`; for `δ > 0`, `C > 0` and `0 ≤ P₀ + C` it is convex on
+  `[0, ∞)`.
+* `annuityMeasure_isProbabilityMeasure`: with positive `D`, `δ`, `A₀` and curve factors, and the
+  annuity repricing condition `𝔼^Q[D·A_T] = A₀` as a hypothesis, `Qᴬ` is a probability measure.
+* `annuityMeasure_price`: with positive `D`, `δ`, `A₀` and curve factors, and a measurable
+  annuity, `A₀·𝔼^{Qᴬ}[S] = 𝔼^Q[D·S·A_T]` (the normalization is not needed for this identity).
+* `cmsCurveRate_jensenGap_nonneg`, `cmsCurveRate_jensenGap_sub_nonneg`: under the positivity
+  hypotheses, the repricing condition and `δ > 0`, `C > 0`, `0 ≤ P₀ + C`, for any nonnegative `W`
+  with `W` and `S ∘ W` `Qᴬ`-integrable and `𝔼^{Qᴬ}[W] = x₀`, `S(x₀) ≤ 𝔼^{Qᴬ}[S(W)]`; `W` is
+  not tied to the curve and `S(x₀)` is not shown to be today's par rate.
+* `cmsCurveRate_spanning`: for `δ > 0`, `−C < L ≤ κ ≤ U` and `S ∈ [L, U]`, the rate at `S`
+  equals its value at `κ`, plus the tangent term, plus put and call strips weighted by
+  `2(P₀+C)/(δ(C+K)³)` (Carr–Madan; no sign condition on `P₀ + C`).
+* `cmsCurveRate_strip_nonneg`: with `δ > 0` and `0 ≤ P₀ + C`, the rate lies above its tangent at
+  `κ` on `[L, U]` (`−C < L ≤ κ ≤ U`).
+* `convexityNumerator_nonneg`: for `1 + y > 0` and nonnegative cash flows, the bond convexity
+  numerator is nonnegative (a standalone bond fact, not linked to the CMS rate).
 
-Supporting lemmas (`annuity_update_eq`, `cmsCurveRate_eq`,
-`differentiableOn_cmsCurveRate`, `continuousOn_cmsCurveRate`,
-`convexOn_inv_shift`, `annuityRandom_pos`) are `private`.
+## References
+
+* [P. Carr and D. Madan, *Towards a theory of volatility trading*][CarrMadan1998]
+* [P. S. Hagan, *Convexity conundrums: pricing CMS swaps, caps, and floors*][Hagan2003]
+
+## Tags
+
+constant maturity swap, convexity adjustment, annuity measure, swap measure, Jensen gap,
+par swap rate, Carr–Madan replication, MSC 91G30, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -239,7 +260,7 @@ private theorem continuousOn_cmsCurveRate (P0 δ C : ℝ) (hδ : 0 < δ) (hC : 0
 half-line — the convexity engine behind the CMS rate's convexity. The two-point
 inequality `(u(C+x)+v(C+y))⁻¹ ≤ u(C+x)⁻¹ + v(C+y)⁻¹` is the AM–GM identity
 `(ua+vb)(u/a+v/b) − 1 = uv(a−b)²/(ab) ≥ 0` for `a, b > 0`, `u + v = 1`. -/
-private theorem convexOn_inv_shift (C : ℝ) (hC : 0 < C) :
+theorem convexOn_inv_shift (C : ℝ) (hC : 0 < C) :
     ConvexOn ℝ (Set.Ici (0 : ℝ)) (fun x : ℝ ↦ (C + x)⁻¹) := by
   refine ⟨convex_Ici 0, fun x hx y hy u v hu hv huv ↦ ?_⟩
   change (C + (u * x + v * y))⁻¹ ≤ u * (C + x)⁻¹ + v * (C + y)⁻¹

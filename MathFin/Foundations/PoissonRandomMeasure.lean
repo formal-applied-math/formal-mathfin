@@ -5,7 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.Probability.Distributions.Poisson.Basic
 
 /-!
 # Poisson random measure and the compensated increment
@@ -31,6 +34,28 @@ The `PoissonRandomMeasure` structure's field shape is consulted from
 the isometry developed on top (see `PoissonCompensatedIsometryAdapted` / `…IntegralL2`) is our
 own — LevyStochCalc states that isometry as its cited axiom #6, we prove it. References:
 Applebaum, *Lévy Processes and Stochastic Calculus*, CUP 2009, Def. 2.3.1 / Thm 4.2.3.
+
+## Main definitions
+
+* `referenceIntensity`: the product measure `Leb[0, ∞) ⊗ ν` on the time-mark space `ℝ × E`.
+* `PoissonRandomMeasure`: a family of counting measures `N ω` on `ℝ × E` that are measurable in
+  `ω`, with `N(·, B) ∼ Poisson(ν̂ B)` for finite-intensity `B`, and counts on regions disjoint
+  from `D` independent of the count on `D`.
+* `PoissonRandomMeasure.compensated`: the compensated increment `Ñ(B) = N(B) − ν̂(B)`.
+* `poissonMeasureENN`: the Poisson law pushed to `ℝ≥0∞`.
+
+## Main results
+
+* `poissonMeasure_integral_id`, `poissonMeasure_integral_sq`: the Poisson mean `r` and second
+  moment `r² + r`.
+* `compensated_integral_zero`: `𝔼[Ñ(B)] = 0` for measurable `B` of finite intensity.
+* `compensated_integral_sq`: `𝔼[Ñ(B)²] = ν̂(B)` for measurable `B` of finite intensity.
+* `memLp_compensated`: `Ñ(D) ∈ L²(P)` for measurable `D` of finite intensity.
+
+## Tags
+
+Poisson random measure, compensated measure, Lévy-driven calculus, mark intensity, Applebaum,
+jump measure, MSC 60G55, MSC 60G51
 -/
 
 @[expose] public section

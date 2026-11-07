@@ -7,13 +7,34 @@ module
 
 public import MathFin.BlackScholes.SVI.SigmaZeroDerivatives
 public import MathFin.BlackScholes.SVI.ConvexKink
+public import MathFin.BlackScholes.SVI.BlackScholesBridge
 
 /-! # Convexity of the call at zero scale
 
 Part of the SVI polynomial-sign certificate (#174).
 
 The σ = 0 Black-price convexity bridge, including the nonnegative
-first-derivative jump at the kink. No smoothness at the kink is assumed. -/
+first-derivative jump at the kink. No smoothness at the kink is assumed.
+
+## Main results
+
+* `sigmaZero_blackCall_hasDerivAt`, `sigmaZero_strikeDelta_hasDerivAt`: at `σ = 0`, away from the
+  kink `log K = m` and with positive variance, `blackCall p` has derivative `strikeDelta p K` and
+  `strikeDelta p` has derivative `strikeDensity p K` at `K`.
+* `sigmaZero_blackCall_hasDerivWithinAt_left`, `sigmaZero_blackCall_hasDerivWithinAt_right`: at
+  `σ = 0` and `a > 0`, the one-sided derivatives of `blackCall p` at `exp m` are
+  `branchDelta p (leftSlope p) m` and `branchDelta p (rightSlope p) m`.
+* `sigmaZero_delta_jump`: the jump `branchDelta p (rightSlope p) m - branchDelta p (leftSlope p) m`
+  equals `gaussianPDFReal 0 1 (dmi m w) * b / rootVariance p m` with `w = variance p m`.
+* `sigmaZero_delta_jump_nonneg`: for `b ≥ 0` and `variance p m > 0`, the jump is nonnegative.
+* `sigmaZero_blackCall_convex_iff`: for `σ = 0`, `b ≥ 0` and `variance p k > 0` for all `k`,
+  `blackCall p` is convex on `(0, ∞)` iff `durrleman p k ≥ 0` for every `k ≠ m`.
+* `sigmaZero_bsSmile_convex_iff`: the same equivalence for `bsSmile p`.
+
+## Tags
+
+zero-scale SVI, call convexity at kink, one-sided derivative jump, MSC 91G20, JEL G13
+-/
 
 @[expose] public section
 
@@ -26,8 +47,8 @@ theorem sigmaZero_blackCall_hasDerivAt (p : Params) (hs : p.sigma = 0)
     (K : ℝ) (hK : 0 < K) (hk : Real.log K ≠ p.m)
     (hw : 0 < variance p (Real.log K)) :
     HasDerivAt (blackCall p) (strikeDelta p K) K := by
-  have h := (blackForm_hasDerivAt p (Real.log K) (sigmaZero_variance_hasDerivAt p hs _ hk) hw).comp K
-    (Real.hasDerivAt_log (ne_of_gt hK))
+  have h := (blackForm_hasDerivAt p (Real.log K)
+    (sigmaZero_variance_hasDerivAt p hs _ hk) hw).comp K (Real.hasDerivAt_log (ne_of_gt hK))
   convert h using 1 <;> try rfl
   simp only [Real.exp_log hK, strikeDelta]
   field_simp

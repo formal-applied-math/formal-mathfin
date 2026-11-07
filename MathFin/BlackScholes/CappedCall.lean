@@ -5,7 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Tactic.Linarith.Frontend
+public import Mathlib.Tactic.Ring.RingNF
 
 /-!
 # Capped call payoff decomposition
@@ -18,9 +21,18 @@ is capped at `K₂ − K₁`. Algebraically this equals the bull-call spread
 
 so a capped call is replicated by a long call at `K₁` and a short call at `K₂`.
 
-Result:
+## Main results
 
 * `cappedCall_eq_bull_spread`: case-by-case over `S` vs `K₁, K₂`.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 11.2
+
+## Tags
+
+capped call, bull call spread, payoff decomposition, static replication, option strategy, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

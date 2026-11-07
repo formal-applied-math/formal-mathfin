@@ -5,8 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.Copula
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.MeasureTheory.Integral.Pi
 
 /-!
 # Copula families: Farlie–Gumbel–Morgenstern and Clayton
@@ -36,6 +37,14 @@ construction) is **not** proved here.
 computed on its copula (MFE Definition 7.33). Under a copula it equals `12 E[U₀U₁] − 3`
 (`IsCopula.spearmanRho_eq`).
 
+## Main definitions
+
+* `spearmanRho`: Spearman's rank correlation of a bivariate copula.
+* `fgmDensity`: the Farlie–Gumbel–Morgenstern density `1 + θ(1 − 2u)(1 − 2v)`.
+* `fgmCopula`: the Farlie–Gumbel–Morgenstern copula, the law with density `fgmDensity θ` against
+  the independence copula.
+* `claytonCopulaFun`: the Clayton copula function `C_θ(u, v) = (u^{−θ} + v^{−θ} − 1)^{−1/θ}`.
+
 ## Main results
 
 * `IsCopula.spearmanRho_eq`: `ρ_S = 12 E[U₀U₁] − 3` for every bivariate copula.
@@ -44,6 +53,15 @@ computed on its copula (MFE Definition 7.33). Under a copula it equals `12 E[U�
 * `spearmanRho_fgmCopula`: `ρ_S = θ/3`.
 * `tendsto_claytonCopulaFun_diag_div`: Clayton lower tail dependence `λ_l = 2^{−1/θ}`.
 * `tendsto_claytonCopulaFun_zero`, `tendsto_claytonCopulaFun_atTop`: the limits `Π` and `M`.
+
+## References
+
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 7.17(b); Ex. 7.19(a); Ex. 7.19(d)
+
+## Tags
+
+Farlie–Gumbel–Morgenstern copula, Clayton copula, tail dependence, Spearman's rho, rank correlation,
+Archimedean copula, MSC 62H05, MSC 91G70
 -/
 
 @[expose] public section

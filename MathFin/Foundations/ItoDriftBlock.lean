@@ -5,8 +5,8 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoDriftWeightedIsometry
 public import MathFin.Foundations.AdaptedDrift
+public import MathFin.Foundations.ItoDriftExpectation
 
 /-! # The drift block of the adapted Itô–drift identity (the discrete route, stage 5d)
 
@@ -14,6 +14,20 @@ public import MathFin.Foundations.AdaptedDrift
 formula converges to `∫₀ᵀ 𝔼[f'(X_s)·β_s] ds`, by pathwise Riemann–Stieltjes sums
 (`AdaptedDrift.tendsto_sum_mul_driftPath_sub`), dominated convergence and the Fubini
 interchange `expectation_pathIntegral_eq`.
+
+## Main results
+
+* `driftSum_expect_tendsto`: for bounded adapted path-continuous `β`, adapted `X` with a.s.
+  continuous paths and bounded continuous `g`, the expectations of the drift sums
+  `∑ₖ g(X_{tₖ})·(driftPath β tₖ₊₁ − driftPath β tₖ)` over uniform partitions of `[0, T]`
+  converge to `𝔼[∫₀ᵀ g(X_s) β_s ds]`.
+* `driftBlock_tendsto`: under the same hypotheses, the sums of the expectations converge to
+  `∫₀ᵀ 𝔼[g(X_s) β_s] ds`.
+
+## Tags
+
+Itô formula, drift term, Riemann–Stieltjes sums, Fubini interchange, dominated convergence,
+discrete Itô formula, MSC 60H05, MSC 60H10
 -/
 
 @[expose] public section

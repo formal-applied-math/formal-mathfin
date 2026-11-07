@@ -5,7 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 /-!
 # The exponential-discount / cumulative-rate principle
@@ -42,7 +43,13 @@ The proof is one step: `log(exp(x)) = x` (Mathlib `Real.log_exp`). The
 derivative-of-`H` hypothesis carries through unchanged. We record this
 identity as `rate_eq_neg_log_deriv` below.
 
-## Results
+## Main definitions
+
+* `cumulativeIntensity`: the cumulative `∫₀ᵗ r(u) du` of a rate `r : ℝ → ℝ`.
+* `survivalFromIntensity`: `S(t) = exp(−∫₀ᵗ r(u) du)`, the survival (or discount) factor of a
+  rate.
+
+## Main results
 
 * `rate_eq_neg_log_deriv`: if `H` has derivative `H'(t)` at `t`, then
   `-d/dt log(exp(-H(t))) = H'(t)` at `t`. This is the universal
@@ -51,6 +58,11 @@ identity as `rate_eq_neg_log_deriv` below.
   intensity starts at `1` and the intensity is its negative log-derivative.
 * `discount_pos`: `exp(-H) > 0` always (so all five discount/survival
   quantities are positive).
+
+## Tags
+
+discount factor, hazard rate, force of mortality, survival probability, forward rate,
+cumulative rate, MSC 91G30, JEL E43, JEL G12
 -/
 
 @[expose] public section

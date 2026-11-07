@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.ExpMin
 public import MathFin.FixedIncome.Credit
 
@@ -40,6 +39,24 @@ The probabilistic content (joint independence → product of survivals →
 exponential at the summed rate) lives upstream in `ExpMin.lean`; this file
 deliberately adds *no* new measure theory, only the load-bearing bridge from
 that law to the credit-pricing layer.
+
+## Main results
+
+* `firstToDefault_survival`: for jointly independent measurable default times `τ_i ∼ Exp(rates i)`
+  with positive rates and `t ≥ 0`, `P(min_i τ_i > t)` is the constant-hazard survival probability
+  at the summed intensity `∑ i, rates i`.
+* `firstToDefault_spread_eq_sum_hazards`: under the same hypotheses and `t > 0`, the spread
+  `-log P(min_i τ_i > t) / t` equals `∑ i, rates i`.
+
+## References
+
+* [Duffie and Singleton (2003)][DuffieSingleton2003]
+* [D. Lando, *Credit Risk Modeling*][Lando2004], Ch 5
+
+## Tags
+
+first-to-default, basket default swap, minimum of exponentials, basket intensity, credit spread,
+independent defaults, MSC 91G40, JEL G12
 -/
 
 @[expose] public section

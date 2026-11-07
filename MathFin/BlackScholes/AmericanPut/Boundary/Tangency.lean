@@ -8,6 +8,7 @@ module
 public import MathFin.BlackScholes.AmericanPut.Boundary.ComparisonHopf
 public import MathFin.BlackScholes.AmericanPut.Boundary.DividendProblem
 public import MathFin.BlackScholes.AmericanPut.Boundary.TangentGeometry
+public import MathFin.BlackScholes.AmericanPut.Boundary.ComparisonMaximum
 
 /-!
 # Geometric assembly of the terminal rectangle
@@ -19,11 +20,26 @@ positive point, continuity, and order connectedness construct the rectangle
 prohibited by the checked Hopf argument. Only the final differential-curvature
 corollary uses the stronger classical contract.
 
-## Result
+## Main results
 
-Public entry points include `lineDifference_on_line_pos`,
-`no_contact_of_past_line_below_and_terminal_positive`, `no_isolated_contact_of_positive_intervals`,
-`curvature_nonneg_of_tangent_intervals`.
+* `lineDifference_on_line_pos`: for a `ContinuousBoundaryPutSolution`, if `t > 0` and the
+  line `x = d − c t` lies strictly to the right of the boundary at `t`, then
+  `lineDifference p k h c d 0 t` (the difference on the line) is positive.
+* `no_contact_of_past_line_below_and_terminal_positive`: if the line touches the boundary at a
+  time `T`, lies strictly right of it on `[A, T)` (`0 < A`), the difference is positive at some
+  point right of the boundary at `T`, and positive sets are order-connected at all times, we
+  get a contradiction.
+* `no_isolated_contact_of_positive_intervals`: for `0 < c`, `d ≤ 0`, `T > 0`, the line cannot
+  touch the boundary at `T` while lying strictly right of it at all nearby times `t ≠ T`, when
+  positive sets of the difference are order-connected at all times.
+* `curvature_nonneg_of_tangent_intervals`: for a `DividendPutSolution` with `deriv b T < 0` and
+  nonpositive tangent intercept at `T > 0`, if positive sets of the difference along the tangent
+  line are order-connected at all times, then `0 ≤ deriv (deriv b) T`.
+
+## Tags
+
+tangent intervals, terminal rectangle, isolated contact, boundary curvature, Hopf argument,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

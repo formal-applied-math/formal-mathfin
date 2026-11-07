@@ -12,6 +12,12 @@
       "metadata": {
         "chapter": 5,
         "reference": "Definition 5.1.1",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Definition 5.1.1"
+          }
+        ],
         "difficulty": "foundational",
         "formalization_status": "full",
         "formalization_scope": "Faithful Lean encoding of the standard Brownian motion definition on the time axis t ≥ 0 (ℝ≥0): zero start, N(0, t − s) increments for s ≤ t (which makes them stationary), jointly independent increments over any t₀ ≤ ⋯ ≤ tₙ (Mathlib's HasIndepIncrements), and a.s. continuous paths. Restated 2026-09-25: the previous structure was indexed by ℝ, so its increment law also constrained negative times, and it required independence of two increments at a time only."
@@ -28,6 +34,12 @@
       "metadata": {
         "chapter": 5,
         "reference": "Theorem 5.1.5",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 5.1.5"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "library_wrapper",
         "formalization_scope": "library_wrapper: single-line re-export of ProbabilityTheory.IsPreBrownianReal.isMartingale from the BrownianMotion (Degenne) package; statement matches. Its axioms are pinned in MathFin/AxiomAuditGen.lean: propext, Classical.choice, Quot.sound, checked at every build.",
@@ -50,6 +62,12 @@
       "metadata": {
         "chapter": 5,
         "reference": "Theorem 5.1.7",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 5.1.7"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "reduced_core",
         "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at the pinned toolchain."
@@ -66,6 +84,12 @@
       "metadata": {
         "chapter": 5,
         "reference": "Theorem 5.3.2",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 5.3.2"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "library_wrapper",
         "formalization_scope": "Lean library wrapper of BrownianMotion's `ProbabilityTheory.IsPreBrownianReal.memHolder_mk` (`RemyDegenne/brownian-motion`), whose axioms are pinned in MathFin/AxiomAuditGen.lean: propext, Classical.choice, Quot.sound, checked at every build. The textbook claim \"almost every BM path is locally α-Hölder for every α ∈ (0, 1/2)\" follows from Degenne's lemma, which says that every path of the continuous modification `h.mk B` (not just almost every one) is locally β-Hölder for every β ∈ (0, 1/2). For a Brownian motion, whose paths are a.s. continuous, `IsBrownianReal.mk_ae_forall_eq` says that B and `h.mk B` agree at every time for almost every ω, which carries the claim over to B; that step is not part of this entry. The underlying proof uses the Kolmogorov-Chentsov theorem (`BrownianMotion.Continuity.KolmogorovChentsov`), which is the result the textbook implicitly invokes.",
@@ -89,6 +113,12 @@
       "metadata": {
         "chapter": 5,
         "reference": "Corollary 5.3.4",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Corollary 5.3.4"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "reduced_core",
         "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at the pinned toolchain."
@@ -105,6 +135,12 @@
       "metadata": {
         "chapter": 5,
         "reference": "Theorem 5.1.4",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 5.1.4"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "The textbook σ-algebra statement (shifted process is pre-Brownian AND independent of the natural filtration at t0), upgraded in MathFin.Foundations.BrownianMarkov from Degenne's function-valued indepFun_shift via Filtration.natural_eq_comap + IndepFun_iff_Indep. Previous entry stated only the pairwise increment independence its own docstring conceded was weaker. Axioms-clean.",
@@ -127,6 +163,12 @@
       "metadata": {
         "chapter": 5,
         "reference": "Remark 5.1.6",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Remark 5.1.6"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Real Lean derivation of Theorem 5.1.6 (square version) in MathFin/Foundations/BrownianMartingale.lean. The structure BrownianMartingaleHyp encodes pre-Brownian + adaptedness + independence-of-past-from-future-increment hypotheses; square_minus_time_is_martingale derives the martingale property of B_t² − t via condExp_add (linearity), condExp_mul_of_stronglyMeasurable_left (pull-out of B_s), condExp_indep_eq (collapse of independent quantities to their integrals), and the second-moment computation ∫ x² ∂(gaussianReal 0 v) = v derived from variance_id_gaussianReal + variance_of_integral_eq_zero."
@@ -143,6 +185,12 @@
       "metadata": {
         "chapter": 5,
         "reference": "Remark 5.1.6",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Remark 5.1.6"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Real Lean derivation of Remark 5.1.6 (Wald exponential) in MathFin/Foundations/BrownianMartingale.lean, as the exponential martingale of the process αB (MathFin.martingale_exp_sub_of_indep_increments, mart-exp-indep-increments) with ψ(t) = α²t/2: αB is adapted; its increment α(B_t − B_s) is a function of B_t − B_s, hence independent of 𝓕_s (indep_of_indep_of_le_left on the generated σ-algebras); B_t − B_s ~ N(0, t − s), so E[exp(α(B_t − B_s))] = exp(α²(t − s)/2) by the Gaussian MGF (mgf_id_gaussianReal through integral_exp_mul_gaussianReal_zero); exp(αB_t) is integrable via HasLaw + integrable_exp_mul_gaussianReal. The general lemma does the pull-out (condExp_mul_of_stronglyMeasurable_left) and the independence step (condExp_indep_eq)."
@@ -159,6 +207,12 @@
       "metadata": {
         "chapter": 5,
         "reference": "Proposition 5.1.2",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Proposition 5.1.2"
+          }
+        ],
         "difficulty": "foundational",
         "formalization_status": "library_wrapper",
         "formalization_scope": "Lean library wrapper of Mathlib's `ProbabilityTheory.IsGaussianProcess.isPreBrownianReal_of_covariance` (`Mathlib/Probability/BrownianMotion/Basic.lean`; the result moved there from Degenne's BrownianMotion), whose axioms are pinned in MathFin/AxiomAuditGen.lean: propext, Classical.choice, Quot.sound, checked at every build. The textbook claim \"centered Gaussian process with covariance min(s,t) is a Brownian motion\" is exactly what `IsPreBrownianReal` packages (modulo path continuity, separately addressed by Kolmogorov-Chentsov in `bm-thm-5.3.2`). The previous structural reduced_core encoding was replaced by this direct library wrap.",
@@ -182,6 +236,12 @@
       "metadata": {
         "chapter": 5,
         "reference": "Theorem 5.3.5",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 5.3.5"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "reduced_core",
         "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at the pinned toolchain."

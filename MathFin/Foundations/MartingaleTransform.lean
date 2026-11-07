@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib.Probability.Martingale.Basic
 public import Mathlib.MeasureTheory.Function.ConditionalExpectation.PullOut
 public import Mathlib.Analysis.InnerProductSpace.Basic
@@ -19,6 +20,28 @@ The price `M` and the holding `A` take values in a real inner-product space `F`,
 gain is the pairing `⟪A_{k+1}, M_{k+1} − M_k⟫` (a portfolio of several assets against the vector
 of their price increments), so the transform is real-valued. The scalar theorem is the case
 `F = ℝ`, where `⟪a, b⟫ = a * b` (`Real.inner_apply`): `A_{k+1} * (M_{k+1} − M_k)`.
+
+## Main definitions
+
+* `martingaleTransform`: the discrete stochastic integral
+  `(A · M)_n = ∑_{k<n} ⟪A_{k+1}, M_{k+1} − M_k⟫` for `A`, `M` valued in a real inner-product space.
+
+## Main results
+
+* `martingaleTransform_real`: for `F = ℝ` the transform is `∑_{k<n} A_{k+1} * (M_{k+1} − M_k)`.
+* `integral_inner_sub_eq_zero`: a bounded `𝓖 s`-measurable weight `φ` against a martingale
+  increment has zero mean, `∫ ⟪φ, N t − N s⟫ dμ = 0` for `s ≤ t`.
+* `martingaleTransform_isMartingale`: the transform of a martingale `M` by a bounded process `A`
+  with `A (n + 1)` adapted is a martingale (Theorem 2.2.9).
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 2.2.9
+
+## Tags
+
+martingale transform, discrete stochastic integral, predictable strategy, self-financing gains,
+betting system, MSC 60G42, MSC 91G20
 -/
 
 @[expose] public section
@@ -110,7 +133,7 @@ end Increment
 
 omit [CompleteSpace F] in
 /-- Each summand `⟪A_{k+1}(ω), M_{k+1}(ω) − M_k(ω)⟫` is `𝓕 n`-measurable when `k < n`. -/
-private lemma summand_stronglyMeasurable
+lemma stronglyMeasurable_inner_succ_sub
     (hM : Martingale M 𝓕 μ) (hA : StronglyAdapted 𝓕 (fun n ↦ A (n + 1)))
     (n k : ℕ) (hk : k < n) :
     StronglyMeasurable[𝓕 n] (fun ω ↦ ⟪A (k + 1) ω, M (k + 1) ω - M k ω⟫_ℝ) :=
@@ -124,10 +147,10 @@ private lemma martingaleTransform_adapted
     (hM : Martingale M 𝓕 μ) (hA : StronglyAdapted 𝓕 (fun n ↦ A (n + 1))) :
     StronglyAdapted 𝓕 (martingaleTransform A M) := fun n ↦
   Finset.stronglyMeasurable_fun_sum (m := 𝓕 n) (M := ℝ) (Finset.range n) fun k hk ↦
-    summand_stronglyMeasurable hM hA n k (Finset.mem_range.mp hk)
+    stronglyMeasurable_inner_succ_sub hM hA n k (Finset.mem_range.mp hk)
 
 /-- Each summand is integrable (bounded `A` paired with an integrable martingale increment). -/
-private lemma integrable_summand
+lemma integrable_inner_succ_sub
     (hM : Martingale M 𝓕 μ) (hA : StronglyAdapted 𝓕 (fun n ↦ A (n + 1)))
     (hA_bdd : ∃ K : ℝ, ∀ᵐ ω ∂μ, ∀ n, ‖A n ω‖ ≤ K) (k : ℕ) :
     Integrable (fun ω ↦ ⟪A (k + 1) ω, M (k + 1) ω - M k ω⟫_ℝ) μ :=
@@ -139,7 +162,7 @@ private lemma integrable_martingaleTransform
     (hM : Martingale M 𝓕 μ) (hA : StronglyAdapted 𝓕 (fun n ↦ A (n + 1)))
     (hA_bdd : ∃ K : ℝ, ∀ᵐ ω ∂μ, ∀ n, ‖A n ω‖ ≤ K) (n : ℕ) :
     Integrable (martingaleTransform A M n) μ :=
-  integrable_finsetSum _ fun k _ ↦ integrable_summand hM hA hA_bdd k
+  integrable_finsetSum _ fun k _ ↦ integrable_inner_succ_sub hM hA hA_bdd k
 
 variable [IsFiniteMeasure μ]
 

@@ -5,8 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
-public import MathFin.Foundations.StatePrices
 public import MathFin.BlackScholes.StrikeConvexity
 
 /-!
@@ -55,7 +53,7 @@ the consequences had to be true.
 Almost everything in the previous 13 phases of this library is of the first
 kind. This module is one example of the second kind.
 
-## Results
+## Main results
 
 * `statePricePricing_convexOn`: linear pricing with non-negative weights
   preserves convexity in any parameter.
@@ -64,6 +62,11 @@ kind. This module is one example of the second kind.
 * `callPrice_finiteState_butterfly_nonneg`: butterfly non-negativity at
   the *price* level (discrete second-difference of the price), whose
   infinitesimal face is `∂²_K ≥ 0`.
+
+## Tags
+
+state prices, convexity preservation, butterfly spread, finite-state market, Arrow–Debreu,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

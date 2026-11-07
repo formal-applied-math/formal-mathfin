@@ -2,6 +2,7 @@ import json
 import re
 from pathlib import Path
 
+from tools.verify import library
 from tools.verify.models import Backend, Domain
 from tools.verify.router import Router
 
@@ -100,11 +101,11 @@ def _iter_theorems():
 # No deliberately-private modules exist; add any future one here with a comment.
 MODULE_PRIVATE_ALLOWLIST: set = set()
 
-MODULE_HEADER_RE = re.compile(r"^module\s*$", re.MULTILINE)
+MODULE_HEADER_RE = re.compile(r"^module\s*(?:--.*)?$", re.MULTILINE)  # `module -- shake: …` too
 
 
 def test_mathfin_module_files_expose_public_section() -> None:
-    for path in Path("MathFin").rglob("*.lean"):
+    for path in library.modules(aggregators=True):
         if str(path) in MODULE_PRIVATE_ALLOWLIST:
             continue
         text = path.read_text()
@@ -121,7 +122,8 @@ def test_mathfin_module_files_expose_public_section() -> None:
 def test_tooling_packages_not_imported_by_library() -> None:
     """Soundness boundary for ``ledger.PIN_EXCLUDED_PACKAGES``: tooling-only
     Lake deps (LeanArchitect's ``Architect``) may be imported ONLY by the
-    blueprint leaf modules (``MathFin/Blueprint*``), which no benchmark entry
+    blueprint leaf module (``MathFin/Blueprint.lean``) and the tooling exes under
+    ``MathFinTools/``, which no benchmark entry
     can reach. If this import ever spreads into a proof module, the ledger's
     pin-hash exclusion becomes unsound — the fix is to remove the package
     from PIN_EXCLUDED_PACKAGES (restaling the corpus, as it then must)."""
@@ -130,8 +132,8 @@ def test_tooling_packages_not_imported_by_library() -> None:
         r"(Architect|Hammer|Duper|Auto|PremiseSelection)\b",
         re.MULTILINE,
     )
-    allowed = {Path("MathFin/Blueprint.lean"), Path("MathFin/Blueprint/Export.lean")}
-    for path in Path("MathFin").rglob("*.lean"):
+    allowed = {Path("MathFin/Blueprint.lean")}
+    for path in library.modules(aggregators=True):
         if path in allowed:
             continue
         m = tooling_import_re.search(path.read_text())
@@ -141,7 +143,7 @@ def test_tooling_packages_not_imported_by_library() -> None:
                 "library/benchmark code must never depend on the scout "
                 "toolchain (see ledger.PIN_EXCLUDED_PACKAGES; hammer pilot "
                 "files live under tests/, Architect only in "
-                "MathFin/Blueprint*.lean)."
+                "MathFin/Blueprint.lean and MathFinTools/)."
             )
 
 

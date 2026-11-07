@@ -6,6 +6,8 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.SVI.Reduction
+public import Mathlib.Algebra.Order.Ring.Star
+public import Mathlib.Tactic.ComputeDegree
 
 /-! # The numerator as a polynomial
 
@@ -13,6 +15,23 @@ Part of the SVI polynomial-sign certificate (#174).
 
 `polynomial p` is a real polynomial of degree at most ten whose value at every real `t` is
 `numerator p t`, with its coefficients of degree `0` and `10` computed (the latter may vanish).
+
+## Main definitions
+
+* `polyD`: the polynomial `1 + X²`.
+* `polyA`, `polyB`, `polyK`: polynomials whose values are `A p`, `B p` and `K p`.
+* `polynomial`: the rationalised Durrleman numerator as a real polynomial in `t`.
+
+## Main results
+
+* `eval_polynomial`: `(polynomial p).eval t = numerator p t` for every `t`.
+* `degree_le_ten`: `(polynomial p).natDegree ≤ 10`.
+* `coeff_zero`: `(polynomial p).coeff 0 = b²σ³(1-ρ)²(4 - b²(1-ρ)²)`.
+* `coeff_ten`: `(polynomial p).coeff 10 = b²σ³(1+ρ)²(4 - b²(1+ρ)²)`.
+
+## Tags
+
+Durrleman numerator, SVI numerator polynomial, degree ten polynomial, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

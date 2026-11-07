@@ -14,6 +14,29 @@ Part of the SVI polynomial-sign certificate (#174).
 `SignFormula` is a finite negation-free combination (and, or, constants) of atoms "the polynomial
 `f` in the parameters has sign `s`". `SignProgram α` is a finite decision tree branching three ways
 on such signs, with leaves in `α`; a Boolean program expands to a formula with the same value.
+
+## Main definitions
+
+* `SignFormula`: a finite combination (and, or, constants) of atoms "the parameter polynomial `f`
+  has sign `s`".
+* `SignFormula.eval`: the truth value of a sign formula at the parameters `p`.
+* `SignProgram α`: a finite decision tree that branches on signs of parameter polynomials, with
+  leaves in `α`.
+* `SignProgram.bind`, `SignProgram.eval`: sequencing, and the result of running a program at `p`.
+* `SignProgram.toFormula`: the sign formula with the same value as a Boolean sign program.
+* `signQuery`, `signListProgram`: the programs returning the sign of one parameter polynomial and
+  the signs of a list of them.
+
+## Main results
+
+* `SignProgram.eval_bind`: `(s.bind k).eval p = (k (s.eval p)).eval p`.
+* `SignProgram.eval_toFormula`: `s.toFormula.eval p = s.eval p` for a Boolean program `s`.
+* `signQuery_eval`, `signListProgram_eval`: the programs evaluate to the signs of
+  `parameterEval p f`.
+
+## Tags
+
+sign formula, decision tree, sign program, semialgebraic condition, SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

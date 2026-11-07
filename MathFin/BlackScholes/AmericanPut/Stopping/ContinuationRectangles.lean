@@ -7,10 +7,24 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.StrictExerciseGeometry
 
-/-! # Closed backward rectangles inside the actual continuation region 
-## Result
+/-! # Closed backward rectangles inside the actual continuation region
 
-Public entry points include `InContinuationRectangle`, `exists_continuationRectangle`.
+## Main definitions
+
+* `InContinuationRectangle`: every point `(y, T-s)` with `|y-x| ≤ R` and `s ≤ δ` lies in the
+  canonical continuation region, i.e. the closed backward rectangle at `(x,T)` of spatial radius `R`
+  and time depth `δ` is inside continuation.
+
+## Main results
+
+* `exists_continuationRectangle`: for `0 ≤ k` and a point `(x, T)` of the canonical continuation
+  region, there are `R > 0` and `0 < δ < T` with the closed backward rectangle of radius `R` and
+  depth `δ` inside the region.
+
+## Tags
+
+continuation region, backward rectangle, space-time rectangle, American put, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

@@ -5,9 +5,11 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.NormalQuantile
 public import MathFin.Foundations.BivariateGaussian
+public import Mathlib.Probability.Distributions.Gaussian.CharFun
+public import Mathlib.Probability.Distributions.Gaussian.Fernique
+public import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
 # The standard bivariate normal CDF `N₂(a, b; r)`
@@ -27,9 +29,18 @@ characteristic-function `Measure.ext_of_charFunDual` with `IsGaussian.charFunDua
 this says that a centred Gaussian law with unit variances and covariance `r` is
 `bivariateNormalLaw r` (`eq_bivariateNormalLaw`). The swap symmetry is derived from it.
 
+## Main definitions
+
+* `stdNormalPair`: the law `N(0,1) ⊗ N(0,1)` of two independent standard normals on `ℝ × ℝ`.
+* `stdNormalVec`: the law of a vector of independent standard normals indexed by a finite type.
+* `choleskyPair`: the continuous linear map `(z₁, z₂) ↦ (r z₂ + √(1 − r²) z₁, z₂)`.
+* `bivariateNormalLaw`: the law of the Cholesky pair; for `r² ≤ 1` the standard bivariate normal
+  law with correlation `r`.
+* `bivariateNormalCDF`: `N₂(a, b; r) = P(X ≤ a, Y ≤ b)` for the Cholesky pair `(X, Y)`.
+* `gaussianPair`: the Cholesky pair shifted and scaled, coordinate `i` being `μᵢ + σᵢ Zᵢ`.
+
 ## Main results
 
-* `bivariateNormalCDF`: `N₂(a, b; r)`, and `bivariateNormalLaw r`, the law of `(X, Y)`.
 * `stdNormalPair`, `map_linear_stdNormalPair`: `c Z₁ + d Z₂ ∼ N(0, c² + d²)`.
 * `stdNormalVec ι`: the law `N(0, 1)^ι` of a vector of independent standard normals, and its
   `IsGaussian` instance (Mathlib's `iIndepFun.hasGaussianLaw`). Pushed to
@@ -68,6 +79,15 @@ standard bivariate normal with correlation `r` (it degenerates to the law of `(r
 
 Mathlib's `ProbabilityTheory.multivariateGaussian` lives on `EuclideanSpace ℝ (Fin 2)` rather
 than `ℝ × ℝ`; the identification of `bivariateNormalLaw r` with it is not stated here.
+
+## References
+
+* [P. Billingsley, *Probability and Measure*][Billingsley1995], §29
+
+## Tags
+
+bivariate normal distribution, Cholesky construction, correlation, Gaussian vector,
+two-asset option, joint distribution function, MSC 60E05, MSC 60G15, JEL C02
 -/
 
 @[expose] public section
@@ -262,7 +282,7 @@ lemma map_snd_bivariateNormalLaw (r : ℝ) :
 /-! ### A Gaussian law on `ℝ²` is determined by its first two moments -/
 
 /-- `L q = L(1, 0) q₁ + L(0, 1) q₂` for a continuous linear functional on `ℝ²`. -/
-private lemma strongDual_apply_eq (L : StrongDual ℝ (ℝ × ℝ)) (q : ℝ × ℝ) :
+lemma strongDual_prod_apply (L : StrongDual ℝ (ℝ × ℝ)) (q : ℝ × ℝ) :
     L q = L (1, 0) * q.1 + L (0, 1) * q.2 := by
   have : q = q.1 • ((1 : ℝ), (0 : ℝ)) + q.2 • ((0 : ℝ), (1 : ℝ)) := by ext <;> simp
   conv_lhs => rw [this]
@@ -270,12 +290,12 @@ private lemma strongDual_apply_eq (L : StrongDual ℝ (ℝ × ℝ)) (q : ℝ × 
   ring
 
 /-- The mean of a law on `ℝ²` with integrable coordinates is the pair of coordinate means. -/
-private lemma integral_id_eq_pair {μ : Measure (ℝ × ℝ)} (h₁ : Integrable Prod.fst μ)
+lemma integral_id_prod_eq {μ : Measure (ℝ × ℝ)} (h₁ : Integrable Prod.fst μ)
     (h₂ : Integrable Prod.snd μ) : μ[id] = (∫ q, q.1 ∂μ, ∫ q, q.2 ∂μ) :=
   integral_pair h₁ h₂
 
 /-- The variance of `a X + b Y` from the second moments of the coordinates. -/
-private lemma variance_linear_of_memLp {μ : Measure (ℝ × ℝ)} [IsFiniteMeasure μ]
+lemma variance_linear_of_memLp {μ : Measure (ℝ × ℝ)} [IsFiniteMeasure μ]
     (h₁ : MemLp Prod.fst 2 μ) (h₂ : MemLp Prod.snd 2 μ) (a b : ℝ) :
     Var[fun q ↦ a * q.1 + b * q.2; μ] = a ^ 2 * Var[Prod.fst; μ]
       + 2 * a * b * cov[Prod.fst, Prod.snd; μ] + b ^ 2 * Var[Prod.snd; μ] := by
@@ -285,13 +305,13 @@ private lemma variance_linear_of_memLp {μ : Measure (ℝ × ℝ)} [IsFiniteMeas
 
 /-- The variance of a continuous linear functional on `ℝ²` from the second moments of the
 coordinates. -/
-private lemma variance_strongDual {μ : Measure (ℝ × ℝ)} [IsFiniteMeasure μ]
+lemma variance_strongDual {μ : Measure (ℝ × ℝ)} [IsFiniteMeasure μ]
     (h₁ : MemLp Prod.fst 2 μ) (h₂ : MemLp Prod.snd 2 μ) (L : StrongDual ℝ (ℝ × ℝ)) :
     Var[L; μ] = L (1, 0) ^ 2 * Var[Prod.fst; μ]
       + 2 * L (1, 0) * L (0, 1) * cov[Prod.fst, Prod.snd; μ] + L (0, 1) ^ 2 * Var[Prod.snd; μ] := by
   set a := L (1, 0)
   set b := L (0, 1)
-  have hL : ⇑L = fun q ↦ a * q.1 + b * q.2 := funext (strongDual_apply_eq L)
+  have hL : ⇑L = fun q ↦ a * q.1 + b * q.2 := funext (strongDual_prod_apply L)
   rw [hL, variance_linear_of_memLp h₁ h₂]
 
 /-- **A Gaussian law on `ℝ²` with standardized coordinates is the Cholesky law.** If `μ` is
@@ -308,8 +328,8 @@ theorem eq_bivariateNormalLaw {μ : Measure (ℝ × ℝ)} [IsGaussian μ] {r : �
   have m₂ : MemLp Prod.snd 2 μ := by
     simpa using IsGaussian.memLp_dual μ (ContinuousLinearMap.snd ℝ ℝ ℝ) 2 (by simp)
   have hmean : μ[id] = (bivariateNormalLaw r)[id] := by
-    rw [integral_id_eq_pair (m₁.integrable one_le_two) (m₂.integrable one_le_two),
-      integral_id_eq_pair ((memLp_fst_bivariateNormalLaw r).integrable one_le_two)
+    rw [integral_id_prod_eq (m₁.integrable one_le_two) (m₂.integrable one_le_two),
+      integral_id_prod_eq ((memLp_fst_bivariateNormalLaw r).integrable one_le_two)
         ((memLp_snd_bivariateNormalLaw r).integrable one_le_two),
       h₁, h₂, integral_fst_bivariateNormalLaw, integral_snd_bivariateNormalLaw]
   refine Measure.ext_of_charFunDual (funext fun L ↦ ?_)

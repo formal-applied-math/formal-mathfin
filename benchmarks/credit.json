@@ -13,6 +13,14 @@
       "metadata": {
         "chapter": 17,
         "reference": "Reduced-form credit risk (Duffie-Singleton 1999; Lando 2004)",
+        "citations": [
+          {
+            "key": "DuffieSingleton1999"
+          },
+          {
+            "key": "Lando2004"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof from exp(0) = 1. Lives in MathFin/FixedIncome/Credit.lean. Axioms-clean."
@@ -29,6 +37,11 @@
       "metadata": {
         "chapter": 17,
         "reference": "Reduced-form credit risk (Duffie-Singleton 1999)",
+        "citations": [
+          {
+            "key": "DuffieSingleton1999"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof from Real.exp_pos. Lives in MathFin/FixedIncome/Credit.lean. Axioms-clean."
@@ -45,6 +58,12 @@
       "metadata": {
         "chapter": 17,
         "reference": "Reduced-form credit pricing under constant hazard (Lando 2004 Ch 5)",
+        "citations": [
+          {
+            "key": "Lando2004",
+            "locator": "Ch 5"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via Real.log_exp + field_simp. Lives in MathFin/FixedIncome/Credit.lean. Axioms-clean."
@@ -61,6 +80,15 @@
       "metadata": {
         "chapter": 17,
         "reference": "First-to-default baskets under independent reduced-form intensities (Lando 2004 Ch 5; Duffie-Singleton 2003)",
+        "citations": [
+          {
+            "key": "Lando2004",
+            "locator": "Ch 5"
+          },
+          {
+            "key": "DuffieSingleton2003"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: Foundations/ExpMin.minimum_survival (minimum of jointly independent exponentials survives at the summed rate) bridged into the Credit.lean vocabulary — the basket survival probability IS survivalProbability (Σ rates) 0 t (firstToDefault_survival), and the spread reading follows by creditSpread_eq_hazard. Lives in MathFin/FixedIncome/FirstToDefault.lean. Axioms-clean."
@@ -77,6 +105,11 @@
       "metadata": {
         "chapter": 17,
         "reference": "Reduced-form credit risk: survival monotonicity (Lando 2004)",
+        "citations": [
+          {
+            "key": "Lando2004"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via Real.exp_lt_exp on increasing argument. Lives in MathFin/FixedIncome/Credit.lean. Axioms-clean."
@@ -93,6 +126,11 @@
       "metadata": {
         "chapter": 12,
         "reference": "Time-varying hazard credit (Lando, Credit Risk Modeling)",
+        "citations": [
+          {
+            "key": "Lando2004"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -109,6 +147,11 @@
       "metadata": {
         "chapter": 12,
         "reference": "Hazard curve and credit spread (Lando, Credit Risk Modeling)",
+        "citations": [
+          {
+            "key": "Lando2004"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. The snippet exports both directions honestly split: the spread identity −log S(T)/T = H(T)/T is definitional given S := exp(−H) (Real.log_exp), and the substantive content is the FTC recovery hazard_eq_neg_log_deriv_survival (h(t) = −d/dt log S(t) for continuous h), also exported. Axioms-clean."
@@ -125,6 +168,11 @@
       "metadata": {
         "chapter": 12,
         "reference": "Merton 1974 structural credit; KMV (Moody's) commercial implementation",
+        "citations": [
+          {
+            "key": "Merton1974"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full derivation: kmvPD = 1 − Q({V_T > F}) via MathFin.kmvPD_eq_one_sub_survival_probability, which routes through riskNeutralProb_S_T_gt_K (the genuine BS risk-neutral exercise probability). Axioms-clean."
@@ -141,6 +189,11 @@
       "metadata": {
         "chapter": 12,
         "reference": "Merton 1974 / KMV survival probability",
+        "citations": [
+          {
+            "key": "Merton1974"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the genuinely probabilistic survival statement Q({V_T > F}).toReal = Phi(distance-to-default), via MathFin.survival_probability_eq_Phi_distanceToDefault, which routes the no-default event's measure through riskNeutralProb_S_T_gt_K (the lognormal tail computation) and kmvDistanceToDefault_eq_bsd2. Replaces the former algebraic CDF-symmetry shadow (1 - Phi(-DD) = Phi(DD)). Complements mf-kmv-merton-pd (the PD identification) on the survival side. Axioms-clean."
@@ -152,11 +205,16 @@
       "description": "Under constant hazard h with recovery R, the fair CDS spread c = h · (1 − R), via leg equality.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.Credit\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem cds_leg_equality_thm (h R factor c : ℝ) (h_factor_ne : factor ≠ 0) :\n    c * factor = (1 - R) * h * factor ↔ c = MathFin.cdsFairSpread h R :=\n  MathFin.cds_leg_equality h R factor c h_factor_ne\n"
+        "lean": "import MathFin.FixedIncome.Credit\n\nopen Real\nopen MathFin\n\ntheorem cds_leg_equality_thm (h R factor c : ℝ) (h_factor_ne : factor ≠ 0) :\n    c * factor = (1 - R) * h * factor ↔ c = MathFin.cdsFairSpread h R :=\n  MathFin.cds_leg_equality h R factor c h_factor_ne\n"
       },
       "metadata": {
         "chapter": 12,
         "reference": "CDS pricing under constant hazard with recovery (Jarrow-Turnbull)",
+        "citations": [
+          {
+            "key": "JarrowTurnbull"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the iff-characterisation c·factor = (1−R)·h·factor ⟺ c = (1−R)·h. `factor` is an abstract common annuity factor (both legs proportional to the same factor); the closed-form annuity computation (1−e^{−(r+h)T})/(r+h) is module prose, not Lean. Re-export from MathFin. Axioms-clean."
@@ -173,6 +231,15 @@
       "metadata": {
         "chapter": 11,
         "reference": "J. Hull and A. White, \"Valuation of a CDO and an n-th to default CDS without Monte Carlo simulation\", Journal of Derivatives 12(2) (2004) (the one-factor Gaussian copula model); QRM Exercise Book Ex. 11.9 (joint default probabilities of the one-factor model)",
+        "citations": [
+          {
+            "key": "HullWhite2004"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 11.9"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.oneFactor_measureReal_iInter_default_eq_gaussianFactorCopula (MathFin/RiskMeasures/OneFactorCopula.lean). SCOPE: both sides are shown equal to the mixture integral ∫ p(x)ⁿ dN(0,1)(x) (oneFactor_measureReal_iInter_default, applied once on the given space and once on the canonical factor space where Sklar's theorem gives the copula). Only the diagonal point (π, …, π) and identical default probabilities are covered; heterogeneous thresholds are not stated."
@@ -189,6 +256,15 @@
       "metadata": {
         "chapter": 11,
         "reference": "O. Vasicek, \"Loan portfolio value\", Risk 15(12) (2002); QRM Exercise Book Ex. 11.9 (k = 2)",
+        "citations": [
+          {
+            "key": "Vasicek2002"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 11.9"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.oneFactor_measureReal_inter_default (MathFin/RiskMeasures/OneFactorCopula.lean). SCOPE: the mixture formula gives ∫ p(x)² dN(0,1)(x) (oneFactor_measureReal_iInter_default with a two-element group); integral_oneFactorPD_sq identifies it with N₂ through the pair law of the one-factor Gaussian latent vector at loading √ρ (measureReal_gaussianFactorVec_le, from map_pair_gaussianFactorVec). The default correlation (N₂ − π²)/(π(1 − π)) is not stated separately."
@@ -205,6 +281,11 @@
       "metadata": {
         "chapter": 7,
         "reference": "J. Hull and A. White, \"Valuation of a CDO and an n-th to default CDS without Monte Carlo simulation\", Journal of Derivatives 12(2) (2004) (correlation aᵢaⱼ in the one-factor model)",
+        "citations": [
+          {
+            "key": "HullWhite2004"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.map_pair_gaussianFactorVec (MathFin/Foundations/GaussianCopula.lean). SCOPE: the pair is a continuous linear image of the Gaussian factors, hence Gaussian (Mathlib's isGaussian_map); its coordinates are centred with unit variance and covariance ρ² (covariance_gaussianFactorVec); eq_bivariateNormalLaw identifies the law. The bivariate normal law is the library's Cholesky construction bivariateNormalLaw on ℝ × ℝ."
@@ -221,6 +302,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "CreditMetrics Technical Document (J.P. Morgan 1997), ch. 8 (asset-return thresholds of a rating transition matrix)",
+        "citations": [
+          {
+            "key": "CreditMetrics1997",
+            "locator": "ch. 8"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.thresholdMatrix_gaussianThresholds (MathFin/RiskMeasures/CreditMetrics.lean). SCOPE: the threshold of a cumulative probability c is ⊥ for c ≤ 0, ⊤ for c ≥ 1 and Φ⁻¹(c) otherwise (gaussianThreshold), so zero-probability buckets are handled; the standard normal mass between consecutive thresholds is the difference of cumulative sums. One obligor's marginal migration; the ordering of ratings is the threshold order (lowest returns first)."
@@ -237,6 +324,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "CreditMetrics Technical Document (J.P. Morgan 1997), ch. 8 (joint default probability from asset correlation)",
+        "citations": [
+          {
+            "key": "CreditMetrics1997",
+            "locator": "ch. 8"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.covariance_indicator_default_gaussianThresholds (MathFin/RiskMeasures/CreditMetrics.lean). SCOPE: the lowest calibrated bucket is (−∞, Φ⁻¹(P i 0)] (ratingBucket_gaussianThresholds_zero); the covariance of two indicators is P(A ∩ B) − P(A)P(B) (covariance_indicator_one, MathFin/Foundations/HoeffdingCovariance.lean); the joint default probability is N₂ (measureReal_default_prod_gaussianThresholds) and the margins are standard normal. Only joint default is covered; joint migration to other buckets is not stated. The asset correlation r is a parameter, not estimated."
@@ -253,6 +346,15 @@
       "metadata": {
         "chapter": 7,
         "reference": "Marshall–Olkin (1967); QRM Exercise Book Ex. 7.23",
+        "citations": [
+          {
+            "key": "MarshallOlkin1967"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 7.23"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.covariance_indicator_marshallOlkin (MathFin/Foundations/MarshallOlkin.lean). SCOPE: the covariance of the two indicators is computed on the joint law of (X₁, X₂) by covariance_indicator_one and measureReal_inter_sub_mul_compl (MathFin/Foundations/HoeffdingCovariance.lean), then read off the joint survival function marshallOlkin_survival and the exponential margins. The correlation of X₁ and X₂ themselves is not stated."
@@ -269,6 +371,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "N. L. Johnson, S. Kotz and N. Balakrishnan, Continuous Univariate Distributions, Vol. 1, 2nd ed. (1994), ch. 17 (gamma distributions)",
+        "citations": [
+          {
+            "key": "JohnsonKotzBalakrishnan1994",
+            "locator": "ch. 17"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.GammaPoissonMixturePgf.mgf_id_gammaMeasure (MathFin/Foundations/GammaPoissonMixturePgf.lean). SCOPE: the Gamma density times exp(sλ) is the Gamma integrand at rate r − s, integrated by Mathlib's integral_rpow_mul_exp_neg_mul_Ioi. Only s < r; the MGF is infinite otherwise, which is not stated."
@@ -285,6 +393,11 @@
       "metadata": {
         "chapter": 11,
         "reference": "Credit Suisse First Boston, CreditRisk+: A Credit Risk Management Framework (1997), sector analysis with gamma-distributed default rates",
+        "citations": [
+          {
+            "key": "CSFB1997"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof in mixture form. Re-export of MathFin.integral_compoundPoisson_mgf_gammaMeasure (MathFin/RiskMeasures/CreditRiskPlus.lean). SCOPE: the n-loss MGF is M_X(t)ⁿ (mgf_range_sum_of_iid, MathFin/Actuarial/CompoundPoissonMGF.lean) and the Poisson–Gamma sector pgf (integral_integral_pow_poissonMeasure_gammaMeasure, MathFin/Foundations/GammaPoissonMixturePgf.lean) is evaluated at z = M_X(t). The random sector count with this conditional law, the sector loss as a random variable, the portfolio across sectors and the loss-banding recursion are not constructed."
@@ -301,6 +414,16 @@
       "metadata": {
         "chapter": 16,
         "reference": "S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 16, eq. 16.2; D. Lando, Credit Risk Modeling (2004), ch. 5",
+        "citations": [
+          {
+            "key": "BagariaFIDP",
+            "locator": "ch. 16, eq. 16.2"
+          },
+          {
+            "key": "Lando2004",
+            "locator": "ch. 5"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.protectionLeg_eq_integral_coxDefaultTime (MathFin/FixedIncome/CVA.lean). SCOPE: the default time is constructed (Cox.coxDefaultTime), its CDF is derived (Cox.cox_cdf_timeVarying) and its measurability is proved (Cox.measurable_coxDefaultTime); the expectation is then integrated against the default density (DefaultDensity.integral_indicator_Iic_eq). Deterministic, continuous hazard and flat discount rate only; the premium leg as an expectation, stochastic intensities and the piecewise-constant bootstrapped curve are not covered."
@@ -317,6 +440,15 @@
       "metadata": {
         "chapter": 16,
         "reference": "J. C. Hull, Options, Futures, and Other Derivatives (the credit-risk chapter: CVA); S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 16, eq. 16.2",
+        "citations": [
+          {
+            "key": "Hull"
+          },
+          {
+            "key": "BagariaFIDP",
+            "locator": "ch. 16, eq. 16.2"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.cva_gaussian (MathFin/FixedIncome/CVA.lean). SCOPE: the no-wrong-way-risk reduction integral_exposure_eq (Fubini on the product measure and the default density) and the Gaussian expected exposure expectedExposure_gaussian (from the Bachelier call formula). The law of τ enters through a hypothesized CDF; for a constructed default time see mf-cds-protection-leg-expectation. Exposure is one Gaussian driver scaled by √s, so only the marginal laws Vₛ ∼ N(m(s), σ(s)²s) are modelled."
@@ -333,6 +465,11 @@
       "metadata": {
         "chapter": 11,
         "reference": "O. Vasicek, \"Loan portfolio value\", Risk 15(12) (2002)",
+        "citations": [
+          {
+            "key": "Vasicek2002"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.integral_posPart_oneFactorPD_sub (MathFin/RiskMeasures/TrancheLoss.lean). SCOPE: writing K = Φ(k), the payoff (Φ(T(F)) − Φ(k))⁺ is the conditional probability of {k < ε ≤ T(F)} given F; Fubini on N(0,1) ⊗ N(0,1) turns the expectation into π minus a bivariate normal CDF. Concerns the limiting loss fraction p(F); the finite-pool statement is mf-lhp-tranche-loss-limit."
@@ -349,6 +486,15 @@
       "metadata": {
         "chapter": 11,
         "reference": "O. Vasicek, \"Loan portfolio value\", Risk 15(12) (2002); J. C. Hull, Options, Futures, and Other Derivatives, ch. 25 (the one-factor model for tranches)",
+        "citations": [
+          {
+            "key": "Vasicek2002"
+          },
+          {
+            "key": "Hull",
+            "locator": "ch. 25"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.tendsto_integral_tranchePayoff_oneFactorLossFraction (MathFin/RiskMeasures/TrancheLoss.lean). SCOPE: dominated convergence (the tranche loss lies in [0, 1]) along the almost-sure large-portfolio limit tendsto_oneFactorLossFraction_ae, whose limit expectation is the LHP closed form integral_tranchePayoff_oneFactorPD. Undiscounted, single period, homogeneous pool, zero recovery: the pool loss is the fraction of the first m names that default (oneFactorLossFraction)."
@@ -365,6 +511,12 @@
       "metadata": {
         "chapter": 11,
         "reference": "D. C. M. Dickson, M. R. Hardy and H. R. Waters, Actuarial Mathematics for Life Contingent Risks, 2nd ed. (2013), §§2.3–2.4 (the force of mortality; actuarial notation)",
+        "citations": [
+          {
+            "key": "DicksonHardyWaters2013",
+            "locator": "§§2.3–2.4"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.survive_eq_exp_neg_integral (MathFin/Bridges/SurvivalUnification.lean). SCOPE: the survival function of τ is the credit curve hazardSurvival h (survivalFunction_eq_hazardSurvival) and ₜpₓ is the survival ratio (SurvivalModel.survive_eq_survivalFunction_ratio); the interval integral splits. The law of τ is hypothesized; survive_coxDefaultTime shows the hypotheses hold for the constructed Cox default time when h is positive with ∫₀ᵗ h → ∞. Deterministic hazard only."
@@ -380,6 +532,11 @@
       },
       "metadata": {
         "reference": "J. C. Hull, Options, Futures, and Other Derivatives (CVA/exposure chapter): expected negative exposure",
+        "citations": [
+          {
+            "key": "Hull"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.expectedNegativeExposure_gaussian (MathFin/RiskMeasures/ExposureMeasures.lean): the identity ENE = EE − E[V_s] (expectedNegativeExposure_eq_sub_integral, from (-x)⁺ = x⁺ − x and integral linearity) composed with the Gaussian expected exposure CVA.expectedExposure_gaussian. SCOPE: the single-Gaussian-driver model of mf-cva-gaussian-exposure; only the marginal law of V_s enters."
@@ -395,6 +552,11 @@
       },
       "metadata": {
         "reference": "J. C. Hull, Options, Futures, and Other Derivatives (CVA/exposure chapter): expected exposure",
+        "citations": [
+          {
+            "key": "Hull"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.expectedExposure_of_hasLaw_gaussianReal (MathFin/RiskMeasures/ExposureMeasures.lean): the identity on a standard normal space has law N(0, 1), so z ↦ m + √v z has law N(m, v) (gaussianReal_const_add, gaussianReal_const_mul); integrating max(·, 0) through both laws (HasLaw.integral_comp) reduces EE to CVA.expectedExposure_gaussian, the Bachelier call at b = √v, s = 1. SCOPE: one fixed time s; the law of V_s is a hypothesis; v = 0 is excluded."
@@ -410,6 +572,11 @@
       },
       "metadata": {
         "reference": "J. C. Hull, Options, Futures, and Other Derivatives (CVA/exposure chapter): potential future exposure",
+        "citations": [
+          {
+            "key": "Hull"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.potentialFutureExposure_of_hasLaw_gaussianReal (MathFin/RiskMeasures/ExposureMeasures.lean): potentialFutureExposure_eq_max gives VaR_α(V_s⁺) = max(VaR_α(V_s), 0), since x ↦ max x 0 is monotone and continuous (MathFin.valueAtRisk_comp), and valueAtRisk_of_hasLaw_gaussianReal evaluates VaR_α(V_s). The module also states the instance V_s = m + σ√s Z of the CVA exposure model (potentialFutureExposure_gaussian). SCOPE: one fixed time s; the law of V_s is a hypothesis."
@@ -425,6 +592,14 @@
       },
       "metadata": {
         "reference": "McNeil, Frey, Embrechts, Quantitative Risk Management (netting of credit exposures); J. C. Hull, Options, Futures, and Other Derivatives (netting agreements)",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts"
+          },
+          {
+            "key": "Hull"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.integral_posPart_finsetSum_le (MathFin/RiskMeasures/ExposureMeasures.lean). SCOPE: the inequality for integrable real-valued exposures sharing one measure; no netting-set or collateral mechanics."
@@ -440,6 +615,11 @@
       },
       "metadata": {
         "reference": "J. C. Hull, Options, Futures, and Other Derivatives (collateralized exposure / CSAs)",
+        "citations": [
+          {
+            "key": "Hull"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.collateralizedExposure_brownian_gaussian (MathFin/RiskMeasures/CollateralizedExposureBrownian.lean). The law of the increment comes from hasLaw_increment (the finite-dimensional Gaussian laws of the pre-Brownian motion), standardized to a unit-normal driver by hasLaw_sub_div_of_gaussianReal; CVA.expectedExposure_gaussian at mean zero gives the closed form. SCOPE: one collateral lag Δ, one Brownian driver; no margin-call dynamics beyond the fixed lag."
@@ -455,6 +635,11 @@
       },
       "metadata": {
         "reference": "J. C. Hull, Options, Futures, and Other Derivatives (bilateral CVA/DVA)",
+        "citations": [
+          {
+            "key": "Hull"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.dva_eq_integral_expectedNegativeExposure (MathFin/FixedIncome/DVA.lean): the no-wrong-way-risk reduction CVA.integral_exposure_eq at −V, whose expected exposure is expectedNegativeExposure V. The module also gives the Gaussian closed form dva_gaussian, from cva_gaussian at −V via gaussianReal_neg. SCOPE: the bank's own default is independent of the exposure; the bank's and the counterparty's defaults are not jointly modelled."

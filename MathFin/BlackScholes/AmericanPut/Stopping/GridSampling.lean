@@ -7,6 +7,11 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.Rules
 public import MathFin.Foundations.ContinuousMarket
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.MeasureTheory.Function.Floor
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.Probability.Martingale.OptionalStopping
+public import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
 /-!
 # Sampling continuous-time stopping rules on a uniform grid
@@ -15,10 +20,27 @@ Rounding is upwards, so the rounded index is a stopping time for the sampled
 filtration. No right-continuity or usual augmentation of the filtration is
 assumed.
 
-## Result
+## Main definitions
 
-Public entry points include `gridFiltration`, `gridIndex`, `gridIndex_le_iff`, `gridIndex_stopping`,
-`isStoppingTime_sampledFiltration`, `gridTime_mono`, `expected_gridValue_tendsto`.
+* `gridFiltration`: the continuous filtration sampled at the uniform grid times `i*δ`.
+* `gridIndex`: the first grid index at or after a rule's time, `⌈θ.time ω/δ⌉₊`.
+* `gridStep`: the mesh `(n+1)⁻¹` of the `n`-th grid refinement.
+
+## Main results
+
+* `gridIndex_le_iff`: for `0 < δ`, `gridIndex θ δ ω ≤ i` iff `θ.time ω ≤ i*δ`.
+* `gridIndex_stopping`, `isStoppingTime_sampledFiltration`: the grid index of a rule is a stopping
+  time of the sampled filtration (the latter for any monotone schedule and any index satisfying
+  the same equivalence).
+* `gridTime_mono`: the grid times `i*δ` are monotone in `i`.
+* `expected_gridValue_tendsto`: for a bounded continuous supermartingale `U`, the expectation of
+  `U` at the rounded-up grid times of `θ` tends to its expectation at `θ.time` as the mesh
+  `gridStep n` shrinks.
+
+## Tags
+
+sampled filtration, rounded stopping rule, exercise grid, discretization, stopping time, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

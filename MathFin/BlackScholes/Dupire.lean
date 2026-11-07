@@ -8,6 +8,7 @@ module
 public import MathFin.Foundations.CarrMadan
 public import MathFin.Foundations.GyongyMimicry
 public import MathFin.BlackScholes.CallSpreadDigital
+public import Mathlib.Analysis.Distribution.AEEqOfIntegralContDiff
 
 
 /-!
@@ -49,6 +50,52 @@ distributional form, with no density, no Tanaka formula, and no regularity hypot
   diffusion (`GyongyMimicry.BoundedCoeffData`); the lognormal flat-vol check (Ex. 9.2) is
   therefore outside this module's bounded-coefficient class.
 * Existence of the local-vol diffusion that reproduces `C` (`GyongyMimicry.gyongy_mimicry_gated`).
+
+## Main definitions
+
+* `callSurface`: the call-price surface `C(s, K) = 𝔼[(X_{s⁺} − K)⁺]` of an `ℝ≥0`-indexed price
+  process `X` under `μ`, with zero rates.
+
+## Main results
+
+* `span_of_vanish_left`: if `f'' = φ` with `φ` continuous and zero on `(−∞, L]`, and
+  `f L = f' L = 0`, then `f S = ∫ K, φ K * (S − K)⁺` for every `S`.
+* `call_spanning_compactSupport`: for a smooth compactly supported `ψ`, its double primitive
+  `f_ψ` has bounded `f'`, `ψ`, `f'''`, is `C²`, and equals the call book `∫ ψ(K) (S − K)⁺ dK`.
+* `integral_payoff_eq_integral_call`: for an integrable marginal `X_{s⁺}` and a continuous
+  compactly supported `ψ`, `𝔼[∫ ψ(K) (X_{s⁺} − K)⁺ dK] = ∫ ψ(K) C(s, K) dK`.
+* `breedenLitzenberger_weak`: for an integrable marginal and a smooth compactly supported `ψ`,
+  `∫ ψ''(K) C(s, K) dK = 𝔼[ψ(X_{s⁺})]`.
+* `forward_eq_weak_zeroRate`: for the driftless Itô process `X = c + M` with a bounded adapted
+  `δ`, the weak forward equation `d/dt 𝔼[f(X_{t⁺})] = ½ 𝔼[f''(X_{t⁺}) b̂²(t, X_{t⁺})]` on
+  `(0, T)` for test functions `f`, with `b̂²` a Borel version of `𝔼[δ_t² | X_t]`.
+* `dupire_weak`: for the same process and smooth compactly supported `ψ`,
+  `d/dT ∫ ψ(K) C(T, K) dK = ½ 𝔼[ψ(X_T) b̂²(T, X_T)]` on `(0, T)`.
+* `strikeDeriv_callSurface_eq_neg_tail`: where `K ↦ C(s, K)` has derivative `d` at `K`,
+  `d = −P(X_s > K)`.
+* `law_restrict_eq_withDensity`: on a window where `C` has strike derivatives `C_K`, `C_KK` with
+  `C_KK` continuous, the restricted law of `X_s` has density `C_KK` with respect to Lebesgue
+  measure.
+* `dupire_ae`: under regularity hypotheses on `C_K`, `C_KK`, `C_T` on a window `Ioo a b`,
+  `𝔼[δ_t² | X_t] = 2 C_T(t, X_t) / C_KK(X_t)` almost everywhere on `{X_t ∈ Ioo a b}`.
+* `dupire_pointwise_coeff`: a continuous version `v2` of `𝔼[δ_t² | X_t = ·]` on the window
+  equals `2 C_T(t, K) / C_KK(K)` at every strike with `C_KK > 0`.
+* `dupire_pointwise`: for a continuous `σloc` with `σloc(K)² K²` a version of
+  `𝔼[δ_t² | X_t = K]` on a window in `K ≥ 0`, `σloc(K)² = 2 C_T(t, K) / (K² C_KK(K))` at every
+  strike with `C_KK > 0`.
+* `dupire_localVol`: if `δ_s = v(s, X_s)` with `v(t, ·)` Borel and continuous on the window
+  (the local-volatility fixed point is assumed), `v(t, K)² = 2 C_T(t, K) / C_KK(K)` at every
+  strike with `C_KK > 0`.
+
+## References
+
+* [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 9
+* [B. Dupire, *Pricing with a smile*][Dupire1994]
+
+## Tags
+
+Dupire formula, local volatility, forward equation, Fokker–Planck, distributional derivative,
+implied volatility surface, MSC 91G20, MSC 60J60, JEL G13
 -/
 
 @[expose] public section

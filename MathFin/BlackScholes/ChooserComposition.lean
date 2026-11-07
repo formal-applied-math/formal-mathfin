@@ -5,13 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.Chooser
 public import MathFin.BlackScholes.PDE
 public import MathFin.BlackScholes.PutGreeks
 public import MathFin.BlackScholes.GaussianSmoothing
 public import MathFin.BlackScholes.GBMLogMoments
-public import MathFin.Foundations.GaussianPairLinearLaw
 
 /-!
 # Chooser option as call-plus-put portfolio, priced in Black–Scholes
@@ -39,9 +37,14 @@ is a Black–Scholes price again (`integral_bsV_mul_exp_gaussianReal_of_sq`,
 that they are the conditional expectations of the maturity payoffs given `𝓕_{t₁}` is not
 re-derived here.
 
-## Results
+## Main definitions
 
-* `chooserPrice`: definition `bsV K r σ S_0 T + bsP (K e^{−r(T−t_1)}) r σ S_0 t_1`.
+* `chooserPrice`: the closed-form chooser price `S_0 K r σ T t_1`, a call of strike `K` and
+  maturity `T` plus a put of strike `K · e^{−r(T − t_1)}` and maturity `t_1`, both priced by
+  Black–Scholes.
+
+## Main results
+
 * `chooserPayoff_decompose_BS`: specialisation of `chooser_via_pcp` with the
   BS-style discounted strike.
 * `chooser_integral_decomp`: the linearity-of-expectation step.
@@ -50,6 +53,15 @@ re-derived here.
 * `integral_discounted_bsV_at_date`: `e^{−rt}·𝔼[bsV K r σ S_t (T − t)] = bsV K r σ S₀ T`.
 * `chooser_price_eq_expected_payoff`: the chooser price is the discounted expected chooser
   payoff.
+
+## References
+
+* [M. Rubinstein, *Options for the undecided*][Rubinstein1991]
+
+## Tags
+
+chooser option, static replication, call plus put portfolio, put–call parity, exotic option,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

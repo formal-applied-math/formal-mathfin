@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.ItoProcessQV
 
 /-!
@@ -44,10 +43,21 @@ the physical measure and the risk-neutral measure alike.
   Together: the floating leg the swap *measures* (here) and the option
   portfolio that *replicates* its strike (there) identify the same `σ²`.
 
-## Main result
+## Main results
 
 * `tendsto_realizedVariance_gbm_L2` — realized variance of GBM log-returns
-  `→ σ²·T` in `L²`, uniformly in the drift parameter.
+  `→ σ²·T` in `L²` along the uniform partition, for every drift `μd`: the limit does not
+  depend on it.
+
+## References
+
+* [Demeterfi et al., *More than you ever wanted to know about volatility
+  swaps*][DemeterfiDermanKamalZou1999]
+
+## Tags
+
+variance swap, realized variance, fair strike, geometric Brownian motion, drift independence,
+mean-square convergence, MSC 91G20, MSC 60J65, JEL G13
 -/
 
 @[expose] public section

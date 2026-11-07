@@ -5,7 +5,6 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.VasicekBondPrice
 public import MathFin.FixedIncome.VasicekMarketPriceOfRisk
 
@@ -60,6 +59,13 @@ of the Wiener bond-price lemma `integral_exp_neg_add_mul_wienerIntegralLp`.
   expectation (`vasicekBondPrice_eq`, `vasicekBondPrice_girsanov_eq`); no convergence of the
   random variables `∫₀ᵀ r^κ_s ds` as `κ → 0⁺` is claimed.
 
+## Main definitions
+
+* `brownianIntegratedKernelLp`: the driftless integrated kernel `u ↦ T − u` as an element of
+  `L²((0, T])`.
+* `brownianIntegratedRate`: the integrated driftless Gaussian short rate in its Wiener
+  representation, `∫₀ᵀ (r₀ + σB_s) ds = r₀·T + σ·∫₀ᵀ (T − u) dB_u`.
+
 ## Main results
 
 * `tendsto_vasicekBondB_zero_meanReversion`: `B(T) → T` as `κ → 0` (two-sided).
@@ -73,6 +79,16 @@ of the Wiener bond-price lemma `integral_exp_neg_add_mul_wienerIntegralLp`.
 * `tendsto_vasicekBondPrice_brownianBondPrice`: the two routes agree.
 * `tendsto_vasicekBondPrice_girsanov_zero_meanReversion`: with a market price of risk `λ`, the
   limit is `exp(−r₀T + λσT²/2 + σ²T³/6)`.
+
+## References
+
+* [The QuantLib contributors, *QuantLib*][QuantLib], Vasicek::A (vasicek.cpp, PR #2599)
+* [O. Vasicek, *An equilibrium characterization of the term structure*][Vasicek1977]
+
+## Tags
+
+Vasicek model, zero-coupon bond price, vanishing mean reversion, Gaussian short rate,
+Taylor cancellation, risk-neutral pricing, MSC 91G30, JEL E43
 -/
 
 @[expose] public section
@@ -83,7 +99,7 @@ open Real Filter Topology
 
 /-- The cubic Taylor polynomial of `exp` with an explicit quartic remainder bound on `|x| ≤ 1`,
 from `Real.exp_bound` at `n = 4` (whose constant `5/96` is relaxed to `1`). -/
-private lemma abs_exp_sub_cubic_le {x : ℝ} (hx : |x| ≤ 1) :
+lemma abs_exp_sub_cubic_le {x : ℝ} (hx : |x| ≤ 1) :
     |Real.exp x - (1 + x + x ^ 2 / 2 + x ^ 3 / 6)| ≤ |x| ^ 4 := by
   have h := Real.exp_bound hx (n := 4) (by norm_num)
   norm_num [Finset.sum_range_succ, Nat.factorial] at h
@@ -93,7 +109,7 @@ private lemma abs_exp_sub_cubic_le {x : ℝ} (hx : |x| ≤ 1) :
 
 /-- The quadratic Taylor polynomial of `exp` with a cubic remainder bound on `|x| ≤ 1`, from
 `Real.exp_bound` at `n = 3` (whose constant `2/9` is relaxed to `1`). -/
-private lemma abs_exp_sub_quadratic_le {x : ℝ} (hx : |x| ≤ 1) :
+lemma abs_exp_sub_quadratic_le {x : ℝ} (hx : |x| ≤ 1) :
     |Real.exp x - (1 + x + x ^ 2 / 2)| ≤ |x| ^ 3 := by
   have h := Real.exp_bound hx (n := 3) (by norm_num)
   norm_num [Finset.sum_range_succ, Nat.factorial] at h
@@ -147,22 +163,13 @@ lemma abs_vasicekBondV_sub_le {κ T : ℝ} (hκ : κ ≠ 0) (hsmall : |2 * κ * 
         linarith
     _ = 10 * |κ| * |T| ^ 4 * (2 * |κ| ^ 3) := by rw [abs_mul]; ring
 
-/-- A continuous function of `κ` vanishing at `0` tends to `0` along `κ → 0⁺`. -/
-private lemma tendsto_nhdsGT_zero_of_continuous {f : ℝ → ℝ} (hf : Continuous f) (h0 : f 0 = 0) :
-    Tendsto f (𝓝[>] 0) (𝓝 0) :=
-  (hf.tendsto' 0 0 h0).mono_left nhdsWithin_le_nhds
-
 /-- **A linear error bound gives the limit.** If `|f κ − L| ≤ C·|κ|` for `κ → 0⁺` eventually,
 then `f κ → L`. Both limits below are this squeeze, fed by an explicit Taylor bound. -/
-private lemma tendsto_nhdsGT_zero_of_abs_sub_le {f : ℝ → ℝ} {L C : ℝ}
+lemma tendsto_nhdsGT_zero_of_abs_sub_le {f : ℝ → ℝ} {L C : ℝ}
     (h : ∀ᶠ κ in 𝓝[>] (0 : ℝ), |f κ - L| ≤ C * |κ|) : Tendsto f (𝓝[>] 0) (𝓝 L) :=
   tendsto_sub_nhds_zero_iff.mp <| squeeze_zero_norm' (by simpa only [Real.norm_eq_abs] using h)
-    (tendsto_nhdsGT_zero_of_continuous (by fun_prop) (by simp))
-
-/-- `|c·κ| ≤ 1` for `κ → 0⁺` eventually: the regime of the Taylor bounds below. -/
-private lemma eventually_abs_mul_le_one (c : ℝ) : ∀ᶠ κ in 𝓝[>] (0 : ℝ), |c * κ| ≤ 1 :=
-  (tendsto_nhdsGT_zero_of_continuous (f := fun κ ↦ |c * κ|) (by fun_prop) (by simp)).eventually
-    (ge_mem_nhds one_pos)
+    (Filter.Tendsto.mono_left (Continuous.tendsto' (by fun_prop) 0 0 (by simp))
+      nhdsWithin_le_nhds)
 
 /-- **`V(T) → T³/3` as `κ → 0⁺`** — the genuine three-term cancellation limit. The terms
 `T/κ²`, `−2(1 − e^{−κT})/κ³` and `(1 − e^{−2κT})/(2κ³)` of `vasicekBondV` each diverge
@@ -171,7 +178,9 @@ explicit bound `abs_vasicekBondV_sub_le` and a squeeze. -/
 theorem tendsto_vasicekBondV_zero_meanReversion (T : ℝ) :
     Tendsto (fun κ ↦ vasicekBondV κ T) (𝓝[>] 0) (𝓝 (T ^ 3 / 3)) :=
   tendsto_nhdsGT_zero_of_abs_sub_le (C := 10 * T ^ 4) <| by
-    filter_upwards [eventually_abs_mul_le_one (2 * T), self_mem_nhdsWithin] with κ hs hκ
+    filter_upwards [(((by fun_prop : Continuous fun κ : ℝ ↦ |2 * T * κ|).tendsto' 0 0
+      (by simp)).mono_left (nhdsWithin_le_nhds : 𝓝[>] (0 : ℝ) ≤ 𝓝 0)).eventually
+        (ge_mem_nhds one_pos), self_mem_nhdsWithin] with κ hs hκ
     exact (abs_vasicekBondV_sub_le hκ.ne' (by rwa [show 2 * κ * T = 2 * T * κ by ring])).trans_eq
       (by ring)
 
@@ -315,7 +324,9 @@ kernel (`integral_vasicekIntegratedKernel`), which carries the Girsanov mean shi
 theorem tendsto_vasicekBondB_secondOrder_zero_meanReversion (T : ℝ) :
     Tendsto (fun κ ↦ (T - vasicekBondB κ T) / κ) (𝓝[>] 0) (𝓝 (T ^ 2 / 2)) :=
   tendsto_nhdsGT_zero_of_abs_sub_le (C := |T| ^ 3) <| by
-    filter_upwards [eventually_abs_mul_le_one T, self_mem_nhdsWithin] with κ hs hκ
+    filter_upwards [(((by fun_prop : Continuous fun κ : ℝ ↦ |T * κ|).tendsto' 0 0
+      (by simp)).mono_left (nhdsWithin_le_nhds : 𝓝[>] (0 : ℝ) ≤ 𝓝 0)).eventually
+        (ge_mem_nhds one_pos), self_mem_nhdsWithin] with κ hs hκ
     exact (abs_vasicekBondB_secondOrder_sub_le hκ.ne' (by rwa [mul_comm])).trans_eq (by ring)
 
 section Girsanov

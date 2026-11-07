@@ -5,7 +5,6 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Portfolio.CovariancePSD
 
 /-!
@@ -97,11 +96,16 @@ not part of the Basel formula; the theorem says which variance the formula compu
 
 ## References
 
-* Basel Committee on Banking Supervision, *The standardised approach for measuring counterparty
-  credit risk exposures* (BCBS 279), 2014 (the EAD formula and the interest-rate effective
+* [Basel Committee on Banking Supervision, *The standardised approach for measuring counterparty
+  credit risk exposures*][BCBS279] (the EAD formula and the interest-rate effective
   notional).
-* Basel Committee on Banking Supervision, *The Basel Framework*, CRE52 (standardised approach to
-  counterparty credit risk), CRE52.57.
+* [Basel Committee on Banking Supervision, *The Basel Framework*, CRE52][BaselFrameworkCRE52],
+  CRE52.57.
+
+## Tags
+
+SA-CCR, exposure at default, counterparty credit risk, Basel III, effective notional,
+replacement cost, potential future exposure, MSC 91G40, MSC 91G70, JEL G28, JEL G32
 -/
 
 @[expose] public section

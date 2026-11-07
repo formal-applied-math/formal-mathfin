@@ -5,7 +5,6 @@ Authors: Alfredo Garcia
 -/
 module
 
-public import Mathlib
 public import MathFin.Execution.GlostenMilgrom
 
 /-!
@@ -32,14 +31,31 @@ tosses a coin.
 The witness is symbolic: it works for *every* `0 < θ < 1` and `0 < p ≤ 1`, not
 at one convenient point.
 
-## Results
+## Main definitions
 
-* `gmMeasure`, `gmHigh`, `gmBuy`, `gmInformed`: the space, and the three events.
+* `gmWeight`: the masses of the six outcomes (value high or low, trader informed or not, and an
+  uninformed trader's coin).
+* `gmMeasure`: the measure on `Fin 6` with those masses.
+* `gmHigh`, `gmBuy`, `gmInformed`: the events that the value is high, that the trader buys, and
+  that the trader is informed.
+
+## Main results
+
 * `gm_buy_inter_inf`: an informed trader buys exactly when the value is high —
   on this space, a set identity.
 * `gmMeasure_univ_eq_one`: the six masses add to one.
 * `spread_pos_witness`: the spread is strictly positive, with no
   measure-theoretic hypothesis left in front of it.
+
+## References
+
+* [L. R. Glosten and P. R. Milgrom, *Bid, ask and transaction prices in a specialist market with
+  heterogeneously informed traders*][GlostenMilgrom1985]
+
+## Tags
+
+Glosten–Milgrom model, bid–ask spread, adverse selection, finite probability space, informed trader,
+market maker, MSC 91B26, JEL D82
 -/
 
 @[expose] public section

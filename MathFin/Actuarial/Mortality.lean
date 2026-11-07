@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.ExponentialDiscount
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 
 /-!
 # Force of mortality and survival functions
@@ -32,13 +32,27 @@ We mirror `FixedIncome/HazardCurve.lean` (which formalizes the same exponential
 identity for credit hazard) — the actuarial and credit terminologies share the
 same calculus.
 
-Results:
+## Main definitions
 
-* `forceCumulative`: `∫₀^t μ(u) du`.
-* `survivalFromForce`: `S(t) := exp(-forceCumulative μ t)`.
+* `forceCumulative`: the cumulative force of mortality `∫₀^t μ(u) du`.
+* `survivalFromForce`: the survival probability `exp(−∫₀^t μ(u) du)` built from the force `μ`.
+* `IsLundbergAdjustmentCoefficient`: the adjustment-coefficient equation
+  `λ · (M(R) − 1) − c · R = 0`.
+
+## Main results
+
 * `survivalFromForce_at_zero`: `S(0) = 1`.
 * `survivalFromForce_pos`: positivity.
-* `gompertz_cumulative_force`: closed form `(B/c)·(e^{c·t} − 1)` for Gompertz.
+* `gompertz_cumulative_force`: for `c ≠ 0`, `∫₀^t B·e^{c·u} du = (B/c)·(e^{c·t} − 1)`.
+
+## References
+
+* [Bowers and others, *Actuarial Mathematics*][BowersEtAl]
+
+## Tags
+
+force of mortality, hazard rate, Gompertz law, survival function, mortality law, cumulative hazard,
+MSC 91G05, JEL G22
 -/
 
 @[expose] public section

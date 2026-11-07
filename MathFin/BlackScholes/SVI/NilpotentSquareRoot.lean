@@ -5,7 +5,8 @@ Authors: Robert Martin
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Tactic.LinearCombination
 
 /-! # Lifting a square root of −1 through a nilpotent
 
@@ -13,6 +14,15 @@ Part of the SVI polynomial-sign certificate (#174).
 
 In a commutative ring in which `2` is invertible, if `x² + 1` is nilpotent then `−1` has an exact
 square root (`exists_sq_neg_one_of_nilpotent`).
+
+## Main results
+
+* `exists_sq_neg_one_of_nilpotent`: in a nontrivial commutative ring with `2 * half = 1`, if
+  `x ^ 2 + 1` is nilpotent for some `x`, then there is `u` with `u ^ 2 = -1`.
+
+## Tags
+
+nilpotent lifting, square root of minus one, Hensel-type lifting, SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

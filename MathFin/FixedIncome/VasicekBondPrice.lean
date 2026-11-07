@@ -5,12 +5,8 @@ Authors: Raphael Coelho, Yang Ye
 -/
 module
 
-public import Mathlib
-public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.WienerIntegralGaussian
 public import MathFin.Foundations.WienerIntegralExpMoment
-public import MathFin.Foundations.BrownianMartingale
-public import MathFin.FixedIncome.VasicekSDE
 
 /-!
 # The Vasicek zero-coupon bond price — the affine term structure
@@ -48,6 +44,19 @@ derived. `∫₀ᵀ g(u) dB_u` is the Wiener integral of the *deterministic* int
 
   `V(T) = ∫₀ᵀ g(u)² du = T/κ² − 2(1 − e^{−κT})/κ³ + (1 − e^{−2κT})/(2κ³)`.
 
+## Main definitions
+
+* `vasicekBondB`: the affine coefficient `B(T) = (1 − e^{−κT})/κ`.
+* `vasicekIntegratedKernel`, `vasicekIntegratedKernelLp`: the integrated kernel
+  `g(u) = (1 − e^{−κ(T−u)})/κ`, and the same kernel as an element of `L²((0, T])`.
+* `vasicekIntegratedMean`: the deterministic mean of the integrated short rate,
+  `M(T) = r₀·B(T) + θ·(T − B(T))`.
+* `vasicekBondV`: the variance `V(T) = ∫₀ᵀ g²` of the diffusion part of the integrated short rate.
+* `vasicekIntegratedKernelSqAntideriv`: the antiderivative of `g(u)²`.
+* `vasicekIntegratedRate`: the integrated short rate in its Wiener representation,
+  `∫₀ᵀ r_s ds = M(T) + σ·∫₀ᵀ g(u) dB_u`.
+* `vasicekBondA`: the affine coefficient `A(T) = exp(−θ(T − B(T)) + σ²V(T)/2)`.
+
 ## Main results
 
 * `vasicekIntegratedKernelSqAntideriv`, `hasDerivAt_vasicekIntegratedKernelSqAntideriv`,
@@ -62,6 +71,15 @@ derived. `∫₀ᵀ g(u) dB_u` is the Wiener integral of the *deterministic* int
   instance `m = M(T)`, `c = σ`, `f = g` of the Wiener bond-price lemma
   `integral_exp_neg_add_mul_wienerIntegralLp` (`Foundations/WienerIntegralExpMoment`).
 * `vasicekBondPrice_affine` — the affine form `P(0,T) = A(T)·exp(−B(T)·r₀)`.
+
+## References
+
+* [O. Vasicek, *An equilibrium characterization of the term structure*][Vasicek1977]
+
+## Tags
+
+Vasicek model, affine term structure, zero-coupon bond price, integrated short rate,
+Wiener integral, Gaussian Laplace transform, MSC 91G30, MSC 60H05, JEL E43
 -/
 
 @[expose] public section

@@ -5,7 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Probability.Martingale.Basic
 
 /-!
 # The Bayes change-of-measure martingale engine
@@ -13,8 +14,8 @@ public import Mathlib
 The abstract heart of Girsanov's theorem, isolated from any stochastic-calculus
 machinery. Fix a finite measure `P`, a filtration `𝓕`, and a **density process**
 `Z` that is a `P`-martingale with `Z_T ≥ 0`. Let `Q := P.withDensity Z_T` be the
-tilted measure. Then a process `D` is a **`Q`-martingale on `[0, T]`** exactly when
-the product `Z · D` is a `P`-martingale:
+tilted measure. Then a process `D` is a **`Q`-martingale on `[0, T]`** when
+the product `Z · D` is a `P`-martingale (one direction; the set-integral form is proved):
 
   `∫_A D_t dQ = ∫_A Z_t D_t dP = ∫_A Z_s D_s dP = ∫_A D_s dQ`  for `A ∈ 𝓕_s`.
 
@@ -29,9 +30,19 @@ Girsanov tilt in `MathFin/Foundations/Girsanov.lean`; and, once the tower gains 
 adapted-integrand Itô formula, the general Doléans–Dade exponential) is one
 instance — supply `Z`, `D`, and the two martingale facts.
 
-## Main result
+## Main results
 
 * `MathFin.changeOfMeasure_setIntegral_eq`
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Ch 9
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], Ch 5.2
+
+## Tags
+
+Bayes rule, change of measure, density process, Radon–Nikodym, Girsanov tilt, martingale under Q,
+MSC 60G44, MSC 91G20
 -/
 
 @[expose] public section

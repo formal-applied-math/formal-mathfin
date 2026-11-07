@@ -5,7 +5,6 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.NoArbitrageDerivations
 
 /-!
@@ -34,12 +33,24 @@ finite-state market whose state prices price the bond as its pre-expiry coupons
 plus its value at `t_fe`, the forward contract paying `B(t_fe) - X` is worth
 zero exactly at `X = bondForwardPrice`.
 
-## Result
+## Main definitions
 
-* `bondForwardPrice`: the closed-form forward price
-  `(P₀ - Σ Df(t)·CF(t)) / Df(t_fe)`.
+* `bondForwardPrice`: the no-arbitrage forward price `X = (P₀ - Σ Df(t)·CF(t)) / Df(t_fe)` of a
+  coupon bond, with the coupons paid before the forward expiry `t_fe` discounted out.
+
+## Main results
+
 * `bondForwardPrice_from_no_arbitrage`: the forward price derived from
   `forward_price_from_no_arbitrage`, with the coupon-stripped bond as the asset.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull]
+
+## Tags
+
+bond forward price, cash-and-carry, coupon-bearing bond, forward contract, no-arbitrage pricing,
+state prices, MSC 91G30, JEL G13
 -/
 
 @[expose] public section

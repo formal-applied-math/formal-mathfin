@@ -5,11 +5,12 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.FTAPTwoState
 public import MathFin.Foundations.ConvexSeparation
 public import MathFin.Foundations.FTAPOnePeriodVector
 public import MathFin.Foundations.StatePrices
+public import Mathlib.Probability.ProbabilityMassFunction.Constructions
+public import Mathlib.Analysis.Normed.Lp.MeasurableSpace
 
 /-!
 # Multi-state FTAP (both directions)
@@ -58,35 +59,57 @@ the EMM. Together with the forward direction this is the biconditional
 
 ## Relation to the other EMM notions
 
-`HasEMM_multi_state` is the library's EMM notion for finite-state one-period markets.
+`HasEMMMultiState` is the library's EMM notion for finite-state one-period markets.
 
-* **Two states.** `HasEMM_two_state` and `HasArbitrage_two_state` are the `N = 2`, `M = 1`
-  cases (`hasEMM_two_state_iff_multi`, `hasArbitrage_two_state_iff_multi`), so the
-  two-state FTAP biconditional (`hasEMM_two_state_iff_not_hasArbitrage`) and Nagy's
-  opposite-signs lemma (`signs_opposite_of_not_hasArbitrage_two_state`) are instances of
+* **Two states.** `HasEMMTwoState` and `HasArbitrageTwoState` are the `N = 2`, `M = 1`
+  cases (`hasEMMTwoState_iff_multi`, `hasArbitrageTwoState_iff_multi`), so the
+  two-state FTAP biconditional (`hasEMMTwoState_iff_not_hasArbitrage`) and Nagy's
+  opposite-signs lemma (`signs_opposite_of_not_hasArbitrageTwoState`) are instances of
   the multi-state theorem.
 * **Measure form.** On `Ω = Fin N` with any full-support probability `P`, the return matrix
   is an `ℝᴹ`-valued random vector `multiStateReturn z`. An arbitrage in the matrix sense is
   exactly a failure of `OnePeriodVector.NoArbitrage`
-  (`hasArbitrage_multi_state_iff_not_noArbitrage`), and an EMM vector `q` exists iff there
-  is a measure `Q ~ P` with `OnePeriodVector.IsEMM` (`hasEMM_multi_state_iff_exists_isEMM`).
+  (`hasArbitrageMultiState_iff_not_noArbitrage`), and an EMM vector `q` exists iff there
+  is a measure `Q ~ P` with `OnePeriodVector.IsEMM` (`hasEMMMultiState_iff_exists_isEMM`).
   The latter is derived from the two FTAPs (this file's separation proof and the
   general-Ω softplus proof), so the two independent proofs are shown to agree.
 * **Martingale probability vectors.** The EMMs are the strictly positive members of
   `martingaleProbVectors z` (`Foundations/SuperhedgingDuality.lean`).
 
-## Results
+## Main definitions
 
-* `HasEMM_multi_state`: EMM existence for an N-state market with M assets.
-* `HasArbitrage_multi_state`: arbitrage definition.
+* `HasEMMMultiState`: for an excess-return matrix `z : Fin M → Fin N → ℝ` (`M` assets, `N`
+  states), there is a strictly positive probability vector `q` on the states under which every
+  asset has zero expected excess return.
+* `HasArbitrageMultiState`: there is a portfolio `θ : Fin M → ℝ` whose excess return is
+  nonnegative in every state and strictly positive in at least one.
+* `multiStateReturn`: the excess-return matrix read as a vector in `EuclideanSpace ℝ (Fin M)` in
+  each state.
+
+## Main results
+
 * `noArbitrage_of_emm_multi`: forward FTAP (EMM ⟹ no arbitrage).
 * `hasEMM_multi_of_pos_dual`: a strictly positive pricing vector normalises to an EMM.
 * `hasEMM_multi_of_not_hasArbitrage`: backward FTAP (no arbitrage ⟹ EMM).
 * `hasEMM_multi_iff_not_hasArbitrage`: the multi-state FTAP biconditional.
-* `hasEMM_two_state_iff_not_hasArbitrage`: the two-state FTAP biconditional.
-* `hasEMM_multi_state_iff_exists_isEMM`: the measure form of the finite-state EMM.
+* `hasEMMTwoState_iff_not_hasArbitrage`: the two-state FTAP biconditional.
+* `hasEMMMultiState_iff_exists_isEMM`: the measure form of the finite-state EMM, for a measure `P`
+  on `Fin N` with `P {i} ≠ 0` for every state.
 * `exists_statePrices_of_hasEMM`: an EMM for the excess return `S − S₀/DF` is the state-price
   vector `DF · q` of the no-arbitrage derivations (`Foundations/NoArbitrageDerivations.lean`).
+
+## References
+
+* [H. Föllmer and A. Schied, *Stochastic Finance: An Introduction in Discrete Time*][FollmerSchied],
+  §1.2
+* [J. M. Harrison and S. R. Pliska, *Martingales and stochastic integrals in the theory of
+  continuous trading*][HarrisonPliska1981]
+* [T. Nagy, *From Itô to Black--Scholes: A Machine-Verified Derivation in Lean 4*][Nagy2026], §7
+
+## Tags
+
+fundamental theorem of asset pricing, multi-asset market, no arbitrage, state prices,
+equivalent martingale measure, one-period model, JEL G13, MSC 91G20
 -/
 
 @[expose] public section
@@ -98,8 +121,8 @@ open Finset MeasureTheory
 /-- **EMM existence in a multi-state market** (`N` states, `M` assets):
 there exists a strictly positive probability `q : Fin N → ℝ` with `Σ q
 = 1` and `q`-weighted excess return zero for every asset. Equivalently, an
-`OnePeriodVector.IsEMM` measure exists on `Fin N` (`hasEMM_multi_state_iff_exists_isEMM`). -/
-def HasEMM_multi_state {N M : ℕ} (z : Fin M → Fin N → ℝ) : Prop :=
+`OnePeriodVector.IsEMM` measure exists on `Fin N` (`hasEMMMultiState_iff_exists_isEMM`). -/
+def HasEMMMultiState {N M : ℕ} (z : Fin M → Fin N → ℝ) : Prop :=
   ∃ q : Fin N → ℝ,
     (∀ i, 0 < q i) ∧
     (∑ i, q i) = 1 ∧
@@ -108,7 +131,7 @@ def HasEMM_multi_state {N M : ℕ} (z : Fin M → Fin N → ℝ) : Prop :=
 /-- **Arbitrage in a multi-state market**: a portfolio `θ : Fin M → ℝ`
 with `θ`-weighted excess return non-negative in every state and
 strictly positive in at least one state. -/
-def HasArbitrage_multi_state {N M : ℕ} (z : Fin M → Fin N → ℝ) : Prop :=
+def HasArbitrageMultiState {N M : ℕ} (z : Fin M → Fin N → ℝ) : Prop :=
   ∃ θ : Fin M → ℝ,
     (∀ i, 0 ≤ ∑ k, θ k * z k i) ∧
     (∃ i₀, 0 < ∑ k, θ k * z k i₀)
@@ -138,9 +161,9 @@ lemma inner_multiStateReturn {N M : ℕ} (z : Fin M → Fin N → ℝ)
 charging every state, a portfolio with non-negative payoff in every state and a
 positive payoff in some state exists iff `OnePeriodVector.NoArbitrage` fails for the return
 vector `multiStateReturn z`. -/
-theorem hasArbitrage_multi_state_iff_not_noArbitrage {N M : ℕ} (z : Fin M → Fin N → ℝ)
+theorem hasArbitrageMultiState_iff_not_noArbitrage {N M : ℕ} (z : Fin M → Fin N → ℝ)
     (P : Measure (Fin N)) (hP : ∀ i, P {i} ≠ 0) :
-    HasArbitrage_multi_state z ↔ ¬ OnePeriodVector.NoArbitrage P (multiStateReturn z) := by
+    HasArbitrageMultiState z ↔ ¬ OnePeriodVector.NoArbitrage P (multiStateReturn z) := by
   have hae (p : Fin N → Prop) : (∀ᵐ i ∂P, p i) ↔ ∀ i, p i := by
     rw [ae_iff_of_countable]
     exact forall_congr' fun i ↦ ⟨fun h ↦ h (hP i), fun h _ ↦ h⟩
@@ -156,11 +179,11 @@ theorem hasArbitrage_multi_state_iff_not_noArbitrage {N M : ℕ} (z : Fin M → 
 probability `Q` on the states, and `Q` is a one-period EMM for the return vector
 `multiStateReturn z` against itself (`E_Q[multiStateReturn z] = ∑ᵢ qᵢ · (z k i)ₖ = 0`);
 `OnePeriodVector.noArbitrage_of_isEMM` (an instance of `IsEMM.noArbitrage`) is no
-arbitrage for it, which is `¬ HasArbitrage_multi_state z` by
-`hasArbitrage_multi_state_iff_not_noArbitrage`. -/
+arbitrage for it, which is `¬ HasArbitrageMultiState z` by
+`hasArbitrageMultiState_iff_not_noArbitrage`. -/
 theorem noArbitrage_of_emm_multi {N M : ℕ} (z : Fin M → Fin N → ℝ)
-    (h_emm : HasEMM_multi_state z) :
-    ¬ HasArbitrage_multi_state z := by
+    (h_emm : HasEMMMultiState z) :
+    ¬ HasArbitrageMultiState z := by
   obtain ⟨q, hq_pos, hq_sum, hq_fair⟩ := h_emm
   let p : PMF (Fin N) := PMF.ofFintype (fun i ↦ ENNReal.ofReal (q i)) <| by
     rw [← ENNReal.ofReal_sum_of_nonneg fun i _ ↦ (hq_pos i).le, hq_sum, ENNReal.ofReal_one]
@@ -170,7 +193,7 @@ theorem noArbitrage_of_emm_multi {N M : ℕ} (z : Fin M → Fin N → ℝ)
   have hne (i : Fin N) : p.toMeasure {i} ≠ 0 := by
     rw [PMF.toMeasure_apply_singleton _ _ (measurableSet_singleton i)]
     exact (ENNReal.ofReal_pos.mpr (hq_pos i)).ne'
-  rw [hasArbitrage_multi_state_iff_not_noArbitrage z p.toMeasure hne, not_not]
+  rw [hasArbitrageMultiState_iff_not_noArbitrage z p.toMeasure hne, not_not]
   refine OnePeriodVector.noArbitrage_of_isEMM p.toMeasure (multiStateReturn z)
     (measurable_of_finite _)
     ⟨⟨inferInstance, .rfl, .rfl⟩, Integrable.of_finite, ?_⟩
@@ -184,7 +207,7 @@ theorem noArbitrage_of_emm_multi {N M : ℕ} (z : Fin M → Fin N → ℝ)
 asset's excess return is fair, divided by its total mass, is an EMM. -/
 theorem hasEMM_multi_of_pos_dual {N M : ℕ} [NeZero N] {z : Fin M → Fin N → ℝ}
     {q : Fin N → ℝ} (hq_pos : ∀ i, 0 < q i) (hq_fair : ∀ k, ∑ i, q i * z k i = 0) :
-    HasEMM_multi_state z := by
+    HasEMMMultiState z := by
   set Z : ℝ := ∑ i, q i with hZdef
   have hZ_pos : 0 < Z := Finset.sum_pos (fun i _ ↦ hq_pos i) Finset.univ_nonempty
   refine ⟨fun i ↦ q i / Z, fun i ↦ div_pos (hq_pos i) hZ_pos, ?_, fun k ↦ ?_⟩
@@ -198,8 +221,8 @@ attainable-payoff subspace `span {z k}` is disjoint from the standard simplex
 strictly-positive dual `q` with `∑ i, q i · z k i = 0` for every asset `k`;
 normalising `q` to a probability is the equivalent martingale measure. -/
 theorem hasEMM_multi_of_not_hasArbitrage {N M : ℕ} [NeZero N]
-    (z : Fin M → Fin N → ℝ) (h : ¬ HasArbitrage_multi_state z) :
-    HasEMM_multi_state z := by
+    (z : Fin M → Fin N → ℝ) (h : ¬ HasArbitrageMultiState z) :
+    HasEMMMultiState z := by
   -- The attainable-payoff subspace.
   set V : Submodule ℝ (Fin N → ℝ) := Submodule.span ℝ (Set.range z) with hVdef
   -- No arbitrage ⇒ `V` misses the standard simplex.
@@ -227,15 +250,15 @@ theorem hasEMM_multi_of_not_hasArbitrage {N M : ℕ} [NeZero N]
 arbitrage. -/
 theorem hasEMM_multi_iff_not_hasArbitrage {N M : ℕ} [NeZero N]
     (z : Fin M → Fin N → ℝ) :
-    HasEMM_multi_state z ↔ ¬ HasArbitrage_multi_state z :=
+    HasEMMMultiState z ↔ ¬ HasArbitrageMultiState z :=
   ⟨noArbitrage_of_emm_multi z, hasEMM_multi_of_not_hasArbitrage z⟩
 
 /-! ### The two-state market is the `N = 2`, `M = 1` multi-state market -/
 
 /-- **The two-state EMM is the multi-state EMM** of the one-asset, two-state matrix
 `(z_up, z_down)`. -/
-theorem hasEMM_two_state_iff_multi (z_up z_down : ℝ) :
-    HasEMM_two_state z_up z_down ↔ HasEMM_multi_state (fun _ : Fin 1 ↦ ![z_up, z_down]) := by
+theorem hasEMMTwoState_iff_multi (z_up z_down : ℝ) :
+    HasEMMTwoState z_up z_down ↔ HasEMMMultiState (fun _ : Fin 1 ↦ ![z_up, z_down]) := by
   constructor
   · rintro ⟨a, b, ha, hb, hsum, hfair⟩
     refine ⟨![a, b], fun i ↦ ?_, by simpa [Fin.sum_univ_two] using hsum,
@@ -247,9 +270,9 @@ theorem hasEMM_two_state_iff_multi (z_up z_down : ℝ) :
 
 /-- **Two-state arbitrage is multi-state arbitrage** for the one-asset, two-state matrix
 `(z_up, z_down)`: a position `θ` in the single asset is a portfolio `Fin 1 → ℝ`. -/
-theorem hasArbitrage_two_state_iff_multi (z_up z_down : ℝ) :
-    HasArbitrage_two_state z_up z_down ↔
-      HasArbitrage_multi_state (fun _ : Fin 1 ↦ ![z_up, z_down]) := by
+theorem hasArbitrageTwoState_iff_multi (z_up z_down : ℝ) :
+    HasArbitrageTwoState z_up z_down ↔
+      HasArbitrageMultiState (fun _ : Fin 1 ↦ ![z_up, z_down]) := by
   constructor
   · rintro ⟨θ, hup, hdown, hpos⟩
     refine ⟨fun _ ↦ θ, fun i ↦ ?_, ?_⟩
@@ -268,19 +291,19 @@ theorem hasArbitrage_two_state_iff_multi (z_up z_down : ℝ) :
 /-- **Two-state FTAP biconditional**: in the one-period, one-asset, two-state market an
 EMM exists iff there is no arbitrage. The `N = 2`, `M = 1` case of
 `hasEMM_multi_iff_not_hasArbitrage`. -/
-theorem hasEMM_two_state_iff_not_hasArbitrage (z_up z_down : ℝ) :
-    HasEMM_two_state z_up z_down ↔ ¬ HasArbitrage_two_state z_up z_down := by
-  rw [hasEMM_two_state_iff_multi, hasArbitrage_two_state_iff_multi]
+theorem hasEMMTwoState_iff_not_hasArbitrage (z_up z_down : ℝ) :
+    HasEMMTwoState z_up z_down ↔ ¬ HasArbitrageTwoState z_up z_down := by
+  rw [hasEMMTwoState_iff_multi, hasArbitrageTwoState_iff_multi]
   exact hasEMM_multi_iff_not_hasArbitrage _
 
 /-- **Opposite signs under no arbitrage** (Nagy 2026, Theorem 7.2): in an arbitrage-free
 two-state market whose excess returns are not both zero, one is strictly positive and the
 other strictly negative. The EMM `q_up z_up + q_down z_down = 0` with `q_up, q_down > 0`
 forces it. -/
-theorem signs_opposite_of_not_hasArbitrage_two_state {z_up z_down : ℝ}
-    (h : ¬ HasArbitrage_two_state z_up z_down) (hz : z_up ≠ 0 ∨ z_down ≠ 0) :
+theorem signs_opposite_of_not_hasArbitrageTwoState {z_up z_down : ℝ}
+    (h : ¬ HasArbitrageTwoState z_up z_down) (hz : z_up ≠ 0 ∨ z_down ≠ 0) :
     (0 < z_up ∧ z_down < 0) ∨ (z_up < 0 ∧ 0 < z_down) := by
-  obtain ⟨a, b, ha, hb, -, hfair⟩ := (hasEMM_two_state_iff_not_hasArbitrage z_up z_down).mpr h
+  obtain ⟨a, b, ha, hb, -, hfair⟩ := (hasEMMTwoState_iff_not_hasArbitrage z_up z_down).mpr h
   rcases lt_trichotomy z_up 0 with hu | hu | hu
   · exact Or.inr ⟨hu, by nlinarith [mul_pos ha (neg_pos.mpr hu)]⟩
   · subst hu
@@ -297,10 +320,10 @@ pricing every asset's excess return at zero) exists iff some `Q ~ P` makes the r
 multi-state FTAP (`hasEMM_multi_iff_not_hasArbitrage`, separation), the arbitrage bridge
 above, and the general-Ω vector FTAP (`OnePeriodVector.ftap_one_period_vector`, softplus
 potential). -/
-theorem hasEMM_multi_state_iff_exists_isEMM {N M : ℕ} [NeZero N] (z : Fin M → Fin N → ℝ)
+theorem hasEMMMultiState_iff_exists_isEMM {N M : ℕ} [NeZero N] (z : Fin M → Fin N → ℝ)
     (P : Measure (Fin N)) [IsProbabilityMeasure P] (hP : ∀ i, P {i} ≠ 0) :
-    HasEMM_multi_state z ↔ ∃ Q, OnePeriodVector.IsEMM P (multiStateReturn z) Q := by
-  rw [hasEMM_multi_iff_not_hasArbitrage, hasArbitrage_multi_state_iff_not_noArbitrage z P hP,
+    HasEMMMultiState z ↔ ∃ Q, OnePeriodVector.IsEMM P (multiStateReturn z) Q := by
+  rw [hasEMM_multi_iff_not_hasArbitrage, hasArbitrageMultiState_iff_not_noArbitrage z P hP,
     not_not]
   exact OnePeriodVector.ftap_one_period_vector P _ (measurable_of_finite _)
 
@@ -312,7 +335,7 @@ then `q = DF · p` is a strictly positive state-price vector that prices the uni
 and the asset at `S₀` — exactly the bond and stock constraints of
 `putCall_parity_from_no_arbitrage` and `forward_price_from_no_arbitrage`. -/
 theorem exists_statePrices_of_hasEMM {N : ℕ} (S : Fin N → ℝ) {DF : ℝ} (S₀ : ℝ) (hDF : 0 < DF)
-    (h : HasEMM_multi_state (M := 1) fun _ i ↦ S i - S₀ / DF) :
+    (h : HasEMMMultiState (M := 1) fun _ i ↦ S i - S₀ / DF) :
     ∃ q : Fin N → ℝ, (∀ i, 0 < q i) ∧ ∑ i, q i = DF ∧
       statePricePricing Finset.univ q S = S₀ := by
   obtain ⟨p, hp, hsum, hz⟩ := h

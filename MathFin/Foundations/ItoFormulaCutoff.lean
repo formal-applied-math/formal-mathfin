@@ -6,7 +6,6 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoFormulaLocalized
-public import MathFin.Foundations.ItoFormulaProcess
 public import MathFin.Foundations.ExitTime
 
 /-! # The double cutoff of Summit C, and the capped exit-time localizer
@@ -32,6 +31,29 @@ ds` being a local martingale localised by `sigmaSeq`, is `ito_formula_unrestrict
 (`ItoFormulaUnrestrictedLocMart`). It is derived from the process formula for an Itô process with
 unbounded coefficients (`exists_localMartingale_ito_formula`) at `σ = 1`, `b = 0`, not from this
 cutoff.
+
+## Main definitions
+
+* `fTrunc`: the double cutoff `fTrunc N (t, x) = f(φₙ t, φₙ x)`, which confines `f` to a compact
+  square.
+* `fTruncT`, `fTruncX`, `fTruncXX`: the partials of `fTrunc` in closed form by the chain rule.
+* `sigmaSeq`: the exit time of `B` from `[−N, N]` capped at the level, `σ_N = min(τ_N, N)`.
+
+## Main results
+
+* `fTrunc_hasDerivAt_t`, `fTrunc_hasDerivAt_x`, `fTrunc_hasDerivAt_xx`: `fTruncT`, `fTruncX`
+  and `fTruncXX` are the partials of `fTrunc`.
+* `fTruncT_bdd`, `fTruncX_bdd`, `fTruncXX_bdd`: for jointly continuous partials of `f`, each of
+  these is globally bounded.
+* `fTrunc_eq_of`: for `|s|, |y| ≤ N`, `fTrunc N (s, y) = f(s, y)`; likewise the partials.
+* `isLocalizingSequence_sigma`: for `B` with continuous paths, `sigmaSeq B` is a localizing
+  sequence for the null-augmented Brownian filtration.
+* `continuous_timeMeasure_primitive`: for continuous `h`, `t ↦ ∫_{(0,t]} h` is continuous.
+
+## Tags
+
+cutoff function, localisation, exit time, localizing sequence, Itô formula, local martingale,
+MSC 60H05, MSC 60G44, MSC 60G40
 -/
 
 @[expose] public section
@@ -135,7 +157,7 @@ lemma fTrunc_hasDerivAt_xx (hf_xx : ∀ t x, HasDerivAt (fun u ↦ f_x t u) (f_x
 /-! ### Constant bounds on the truncated partials -/
 
 /-- `|a·b| ≤ A·B` from `|a| ≤ A` and `|b| ≤ B`. -/
-private lemma abs_mul_le_of {a b A B : ℝ} (ha : |a| ≤ A) (hb : |b| ≤ B) : |a * b| ≤ A * B := by
+lemma abs_mul_le_mul_of_abs_le {a b A B : ℝ} (ha : |a| ≤ A) (hb : |b| ≤ B) : |a * b| ≤ A * B := by
   rw [abs_mul]; exact mul_le_mul ha hb (abs_nonneg _) (le_trans (abs_nonneg _) ha)
 
 /-- A jointly-continuous `g` is bounded after both arguments pass through the cutoff `φₙ` (which
@@ -157,13 +179,13 @@ lemma fTruncT_bdd (S : SmoothTrunc) (N : ℕ)
     (hcont : Continuous fun p : ℝ × ℝ ↦ f_t p.1 p.2) :
     ∃ C : ℝ, ∀ t x, |fTruncT f_t S N t x| ≤ C := by
   obtain ⟨B, hB⟩ := exists_bound_cut S N hcont
-  exact ⟨B * S.M₁, fun t x ↦ abs_mul_le_of (hB t x) (S.cutD1_bdd N t)⟩
+  exact ⟨B * S.M₁, fun t x ↦ abs_mul_le_mul_of_abs_le (hB t x) (S.cutD1_bdd N t)⟩
 
 lemma fTruncX_bdd (S : SmoothTrunc) (N : ℕ)
     (hcont : Continuous fun p : ℝ × ℝ ↦ f_x p.1 p.2) :
     ∃ C : ℝ, ∀ t x, |fTruncX f_x S N t x| ≤ C := by
   obtain ⟨B, hB⟩ := exists_bound_cut S N hcont
-  exact ⟨B * S.M₁, fun t x ↦ abs_mul_le_of (hB t x) (S.cutD1_bdd N x)⟩
+  exact ⟨B * S.M₁, fun t x ↦ abs_mul_le_mul_of_abs_le (hB t x) (S.cutD1_bdd N x)⟩
 
 lemma fTruncXX_bdd (S : SmoothTrunc) (N : ℕ)
     (hf_x_cont : Continuous fun p : ℝ × ℝ ↦ f_x p.1 p.2)
@@ -174,8 +196,9 @@ lemma fTruncXX_bdd (S : SmoothTrunc) (N : ℕ)
   refine ⟨Bxx * (S.M₁ * S.M₁) + Bx * S.M₂, fun t x ↦ ?_⟩
   unfold fTruncXX
   refine (abs_add_le _ _).trans (add_le_add ?_ ?_)
-  · exact abs_mul_le_of (hBxx t x) (abs_mul_le_of (S.cutD1_bdd N x) (S.cutD1_bdd N x))
-  · exact abs_mul_le_of (hBx t x) (S.cutD2_bdd N x)
+  · exact abs_mul_le_mul_of_abs_le (hBxx t x)
+      (abs_mul_le_mul_of_abs_le (S.cutD1_bdd N x) (S.cutD1_bdd N x))
+  · exact abs_mul_le_mul_of_abs_le (hBx t x) (S.cutD2_bdd N x)
 
 /-! ### Joint continuity of the partials -/
 

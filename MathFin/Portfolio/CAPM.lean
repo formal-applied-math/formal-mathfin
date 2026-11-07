@@ -5,7 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.BigOperators.Field
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Tactic.FieldSimp
 
 /-!
 # Capital Asset Pricing Model (CAPM)
@@ -14,18 +17,32 @@ CAPM at the algebraic / definitional level. Returns are modelled by their first
 two moments (`E[R_i]`, `Cov(R_i, R_M)`, `Var(R_M)`) — the same primitives used
 in the Markowitz file. This is the standard textbook treatment.
 
-Results:
+## Main definitions
 
-* `beta`: defines `β_i = Cov(R_i, R_M) / Var(R_M)`.
-* `securityMarketLine`: the equilibrium expected return `R_f + β_i (E[R_M] − R_f)`.
-* `jensenAlpha` / `jensenAlpha_eq_zero_iff`: Jensen's alpha
-  `α_i = E[R_i] − (R_f + β_i (E[R_M] − R_f))`, and the CAPM pricing identity
-  `E[R_i] = SML` ⟺ `α_i = 0` (Mathlib's `sub_eq_zero`).
+* `beta`: the CAPM beta `Cov(R, R_M) / Var(R_M)`, defined as a ratio of its two inputs.
+* `securityMarketLine`: `R_f + β (E[R_M] − R_f)`.
+* `jensenAlpha`: the excess of the expected return over the security market line,
+  `E[R] − (R_f + β (E[R_M] − R_f))`.
+
+## Main results
+
+* `jensenAlpha_eq_zero_iff`: the CAPM pricing identity `E[R_i] = SML` ⟺ `α_i = 0`
+  (Mathlib's `sub_eq_zero`).
 * `beta_linearity_two` / `beta_linearity_finset`: a portfolio's beta is the
   weighted sum of its components' betas, `β_p = ∑ w_i β_i`, by bilinearity of
   covariance (axiomatized at the algebraic level).
-* `beta_market`: the market's beta is `1`.
+* `beta_market`: the market's beta is `1` (for nonzero market variance).
 * `beta_of_riskFree`: the risk-free asset's beta is `0` (zero covariance with the market).
+
+## References
+
+* [K. Bodie and Marcus, *Investments*][BodieKaneMarcus], Ch 9.3
+* [Sharpe, *Capital asset prices*][Sharpe1964]
+
+## Tags
+
+capital asset pricing model, security market line, beta, Jensen's alpha, systematic risk, MSC 91G10,
+JEL G12
 -/
 
 @[expose] public section

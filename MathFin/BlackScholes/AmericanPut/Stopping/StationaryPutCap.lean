@@ -5,17 +5,43 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.UpperSupportComparison
+public import MathFin.BlackScholes.AmericanPut.Stopping.SmoothPricingComparison
+public import Mathlib.Tactic.Monotonicity.Lemmas
+public import Mathlib.Topology.Sheaves.Presheaf
 
 /-! # A stationary payoff-matching upper barrier
 
 This is a supersolution, not an asserted perpetual option price. Its exponential
 branch is tangent to the payoff at `d` and is an upper support even at the join.
 
-## Result
+## Main definitions
 
-Public entry points include `stationaryPutTail`, `stationaryPutCap`, `stationaryPutTail_at_join`,
-`stationaryPutCap_continuous`.
+* `stationaryPutTail`: the exponential branch `(1 - exp d) * exp (-m*(x-d))`, taking the value
+  `1 - exp d` at `x = d`.
+* `stationaryPutCap`: the intrinsic value `1 - exp x` below the join `d`, and
+  `stationaryPutTail m d` above it.
+
+## Main results
+
+* `stationaryPutTail_at_join`, `stationaryPutCap_continuous`: the tail equals `1 - exp d` at the
+  join, and the cap is continuous.
+* `stationaryPutTail_ge_intrinsic`, `stationaryPutCap_le_tail`: for `m > 0` and
+  `exp d = m/(1+m)`, the tail dominates the intrinsic value and the cap is below the tail.
+* `stationaryPutCap_ge_payoff`, `stationaryPutCap_nonneg`: for `m > 0`, `d < 0` and
+  `exp d = m/(1+m)`, the cap dominates the payoff and is nonnegative.
+* `stationaryPutTail_pricingOperator`: the pricing operator applied to the tail is
+  `k + (k-h-1) m - m²` times the tail.
+* `stationaryPutCap_upper_support`: under `0 ≤ k`, `0 ≤ h ≤ k`, `m > 0`, `d < 0`,
+  `exp d = m/(1+m)` and `0 ≤ k + (k-h-1) m - m²`, for every `z` and `ε ≥ 0` there is a function
+  `C²` at `z` that equals the cap plus `ε` at `z`, dominates it nearby, and has nonnegative
+  pricing operator at `z`.
+* `exists_stationaryPutCap_parameters`: for `0 < k`, there exist `m > 0`, `d < 0` with
+  `exp d = m/(1+m)` and `0 ≤ k + (k-h-1) m - m²`.
+
+## Tags
+
+stationary supersolution, payoff-matching barrier, perpetual put, upper barrier, smooth pasting,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

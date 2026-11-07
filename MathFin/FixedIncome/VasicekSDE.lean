@@ -5,8 +5,8 @@ Authors: Raphael Coelho, Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.Vasicek
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # Vasicek SDE terminal-distribution form (stated, not derived) (phase 41)
@@ -52,13 +52,21 @@ the BSCallHyp style. The full SDE-to-distribution derivation is the
 content of Phase 41 conceptually; the file states the closed form
 explicitly so that downstream consumers can use it without re-deriving.
 
-## Results
+## Main definitions
 
-* `vasicekSDEMean`: closed form `r_0 · e^{−κt} + θ · (1 − e^{−κt})`.
-* `vasicekSDEVariance`: closed form `σ² · (1 − e^{−2κt}) / (2κ)`.
-* `vasicekSDETerminal`: parametrised terminal `r_t(Z) = mean + √var · Z`.
+* `vasicekSDEMean`: the Vasicek mean `r_0 · e^{−κt} + θ · (1 − e^{−κt})`.
+* `vasicekSDEVariance`: the Vasicek variance `σ² · (1 − e^{−2κt}) / (2κ)`.
+* `vasicekSDETerminal`: the terminal short rate `mean + √var · Z` as a function of `Z ~ N(0, 1)`.
+
+## Main results
+
 * `vasicekSDE_variance_pos`: positivity of variance for `κ > 0`, `σ ≠ 0`.
 * `vasicekSDE_mean_at_zero`: `r_t = r_0` at `t = 0`.
+
+## Tags
+
+Vasicek model, short rate SDE, Ornstein–Uhlenbeck, terminal distribution, Gaussian short rate,
+mean reversion, MSC 91G30, MSC 60H10, JEL E43
 -/
 
 @[expose] public section

@@ -5,17 +5,37 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Boundary.DividendProblem
+public import MathFin.BlackScholes.AmericanPut.Boundary.Problem
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.Deriv.Pow
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-! # A quadratic localization supersolution
 
 Subtracting a positive multiple forces negative comparison data at distant
 spatial endpoints. It tends to zero pointwise as the multiple tends to zero.
 
-## Result
+## Main definitions
 
-Public entry points include `localizationBarrier`, `localizationBarrier_pos`,
-`localizationBarrier_contDiff`, `localizationBarrier_hasDeriv_x`.
+* `localizationBarrier`: the barrier `exp ((2 + |k − h − 1|) t) · (1 + x²)`, a quadratic in space
+  with an exponential time factor.
+
+## Main results
+
+* `localizationBarrier_pos`, `localizationBarrier_ge_quad`: `localizationBarrier k h x t` is
+  positive, and at least `1 + x²` for `t ≥ 0`.
+* `localizationBarrier_contDiff`: it is `C²` in `(x, t)`.
+* `localizationBarrier_hasDeriv_x`, `localizationBarrier_deriv2_x`,
+  `localizationBarrier_hasDeriv_t`: its explicit space and time derivatives.
+* `localizationBarrier_supersolution`: for `0 ≤ k`, the dividend spatial operator applied to the
+  barrier is at most its time derivative.
+
+## Tags
+
+quadratic supersolution, localization, comparison data, barrier function, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

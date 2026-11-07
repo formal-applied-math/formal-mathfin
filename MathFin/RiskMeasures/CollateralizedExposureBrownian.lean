@@ -5,7 +5,6 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.CVA
 public import MathFin.Foundations.GaussianMoments
 
@@ -27,9 +26,25 @@ period of risk).
   it is `σ√Δ · Z`, and `CVA.expectedExposure_gaussian` at mean `0` gives the answer, the density
   `φ(0)` scaled by the volatility of the increment.
 
+## Main definitions
+
+* `collateralizedExposure`: the exposure `max (V t − V (t − Δ)) 0` at time `t` when the
+  collateral is the process itself lagged by `Δ`, with `ℝ≥0` truncated subtraction in `t − Δ`.
+
+## Main results
+
+* `collateralizedExposure_brownian_gaussian`: for `V t = m + σ B t` with `B` a pre-Brownian
+  motion, `σ > 0` and `0 < Δ ≤ t`, `E[(V_t − V_{t−Δ})⁺] = σ√Δ · φ(0)`, with `φ(0)` the standard
+  Gaussian density at `0`. The level `m` drops out.
+
 ## References
 
-* J. C. Hull, *Options, Futures, and Other Derivatives* (collateralized exposure / CSAs).
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull] (collateralized exposure / CSAs).
+
+## Tags
+
+collateralized exposure, credit support annex, margin period of risk, counterparty credit risk,
+Brownian exposure, CVA, MSC 91G40, MSC 60J65, JEL G32
 -/
 
 @[expose] public section

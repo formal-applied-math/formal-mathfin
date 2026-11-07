@@ -5,9 +5,10 @@ Authors: Robert Martin, Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
 public import MathFin.Foundations.MartingaleSetIntegral
 public import MathFin.Foundations.StoppedProcessPaths
+public import BrownianMotion.StochasticIntegral.LocalMartingale
+public import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
 /-!
 # Bounded local martingales and smaller filtrations
@@ -19,11 +20,27 @@ No unproved upstream optional-sampling or uniform-integrability result is used.
 Adaptation to the target filtration is explicit; a local property alone is
 not silently treated as pointwise adaptation on exceptional null outcomes.
 
-## Result
+## Main results
 
-Public entry points include `martingale_smaller_filtration`,
-`locally_bounded_localMartingale_is_martingale`, `bounded_localMartingale_is_martingale`,
-`isLocalMartingale_congr_ae`.
+* `martingale_smaller_filtration`: a martingale for `𝓖` that is adapted to a smaller filtration
+  `𝓕 ≤ 𝓖` is a martingale for `𝓕`.
+* `locally_bounded_localMartingale_is_martingale`: an adapted local martingale that is bounded on
+  `[0,T]` for each `T` is a martingale.
+* `bounded_localMartingale_is_martingale`: an adapted local martingale bounded by a constant is a
+  martingale.
+* `martingale_stoppedProcess_of_locally_bounded`: an adapted continuous-path local martingale
+  stopped at a stopping time `ρ` with `⊥ < ρ` everywhere, whose stopped process is bounded on
+  `[0,T]` for each `T`, is a martingale.
+* `exists_martingale_eqOn`: a continuous-path local martingale with `X 0 = 0` almost surely has a
+  localising sequence `σ` such that each `N` has a continuous-path martingale `Y` agreeing almost
+  surely with `X` at each time `t ≤ σ N`.
+* `isLocalMartingale_congr_ae`: a process `Y` adapted with càdlàg paths and almost surely equal
+  to a local martingale `X` (`X ≡ᵐ[P] Y`) is a local martingale.
+
+## Tags
+
+local martingale, localization, dominated convergence, martingale property, smaller filtration,
+MSC 60G44, MSC 60G48
 -/
 
 @[expose] public section

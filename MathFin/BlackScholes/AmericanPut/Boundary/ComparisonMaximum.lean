@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.ComparisonTail
 public import MathFin.BlackScholes.AmericanPut.Boundary.ParabolicMaximum
+public import MathFin.BlackScholes.AmericanPut.Boundary.GaugeTransform
 
 /-!
 # Maximum principle for the actual normalized comparison difference
@@ -15,11 +16,23 @@ Nonpositive data cannot become positive, on the unbounded moving continuation
 region, even when the initial time is expiry. This proves the maximum-principle
 parts of Steps 4 and 5, not the positive-interval or zero-number invariant.
 
-## Result
+## Main results
 
-Public entry points include `straightDifference_boundary_nonpos`,
-`straightDifference_le_of_initial_le`, `straightDifference_positive_at_earlier_time`,
-`zeroDividend_le_of_initial_le`.
+* `straightDifference_boundary_nonpos`: for a `ContinuousBoundaryPutSolution`, `0 ≤ c`, `d ≤ 0`,
+  `straightDifference` is nonpositive on the exercise boundary at every time `t ≥ 0`.
+* `straightDifference_le_of_initial_le`: for `0 < c`, `d ≤ 0`, `0 ≤ a`, `0 ≤ ε`, if the
+  difference is at most `ε` on the continuation side of the time slice `a`, then it is at most
+  `ε` on the continuation side of every later slice `T ≥ a`.
+* `straightDifference_positive_at_earlier_time`: for `0 < c`, `d ≤ 0`, `0 ≤ a ≤ T`, a positive
+  value of the difference at a continuation point at time `T` yields some point `y > b a` with a
+  positive value at time `a`.
+* `zeroDividend_le_of_initial_le`: the zero-dividend case of the preservation statement, read
+  for `normalizedDifference` against the constant profile `1`.
+
+## Tags
+
+maximum principle, moving continuation region, comparison difference, nonpositive data,
+exercise boundary, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

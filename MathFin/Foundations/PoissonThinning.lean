@@ -5,7 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Probability.Distributions.Poisson.Basic
+public import Mathlib.Probability.IdentDistrib
+public import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
 # Thinning (splitting) of a Poisson count: the binomial-marking factorisation
@@ -35,6 +38,13 @@ whether `Y i` lies in a set `A`. Given `N = n` the number of the first `n` marks
 marks (a sum over the `C(n, j)` sets of `j` indices), and `N` is independent of the marks; so
 the pair of counts satisfies the marking hypothesis (`thinned_streams_of_iid_marks`).
 
+## Main definitions
+
+* `markedWeight`: the weight `e^{−r} r^{j+k}/(j+k)! · C(j+k, j) pʲ (1−p)ᵏ` of the binomially
+  marked `Poisson(r)` pair law at `(j, k)`.
+* `markedPoissonMeasure`: the measure on `ℕ × ℕ` with these weights.
+* `marksIn`: the number of the first `n` marks `Y 0, …, Y (n−1)` that lie in `A`.
+
 ## Main results
 
 * `PoissonThinning.markedPoissonMeasure_eq_prod` — the marked joint measure
@@ -48,6 +58,15 @@ the pair of counts satisfies the marking hypothesis (`thinned_streams_of_iid_mar
 * `PoissonThinning.thinned_streams_of_iid_marks` — Theorem 3.3.10 from the mechanism: for a
   `Poisson(r)` count with i.i.d. marks independent of it, the counts of marks in `A` and in
   `Aᶜ` are independent with laws `Poisson(p·r)` and `Poisson((1−p)·r)`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 3.3.10
+
+## Tags
+
+Poisson thinning, Poisson splitting, binomial marking, independent Poisson counts,
+marked Poisson process, MSC 60G55, MSC 60E05
 -/
 
 @[expose] public section

@@ -10,7 +10,7 @@ public import MathFin.Foundations.ItoIntegralRiemannBridgeAdapted
 /-! # Deterministic drift Riemann-convergence (Girsanov α4 brick b-tail)
 
 The stochastic half of the continuous Doléans exponent — `∑ θ(tₖ)·ΔBₖ → ∫₀ᵀ θ dB` in `L²` — is
-`ItoIntegralRiemannBridge.itoIntegralCLM_T_of_bdd_adapted_cont`. This file supplies the **drift
+`ItoIntegralRiemannBridge.itoIntegralCLM_of_bdd_adapted_cont`. This file supplies the **drift
 half**: for a bounded continuous real function `g` (applied per-`ω` to `s ↦ θ(s,ω)²`), the
 left-endpoint uniform-partition Riemann sums converge to the pathwise Lebesgue integral,
 
@@ -27,6 +27,11 @@ continuous Doléans exponent `−∫θdB − ½∫θ²ds`: the drift term `∑ �
   continuous integrand.
 * `tendsto_driftSq_riemannSum` — the `θ²` specialization consumed by the continuous Doléans
   exponent.
+
+## Tags
+
+Riemann sums, Doléans exponent, Girsanov theorem, drift term, dominated convergence,
+left-endpoint sums, MSC 60H05, MSC 28A25
 -/
 
 @[expose] public section

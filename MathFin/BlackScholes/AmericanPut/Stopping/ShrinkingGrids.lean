@@ -13,11 +13,23 @@ Time rescaling changes the mesh `1/(n+1)` to a constant multiple of it.
 Upward rounding and bounded convergence work for every positive mesh tending
 to zero, with no nesting assumption and no classical pricing contract.
 
-## Result
+## Main results
 
-Public entry points include `StoppingRule.roundUp_time_tendsto_of_mesh`,
-`expectedReward_roundUp_tendsto_of_mesh`, `gridValue_tendsto_americanValue_of_mesh`,
-`brownianGridPrice_tendsto_usual_of_mesh`.
+* `StoppingRule.roundUp_time_tendsto_of_mesh`: for positive meshes `δ n → 0`, the rounded-up rule
+  times converge pointwise to the original rule's time.
+* `expectedReward_roundUp_tendsto_of_mesh`: for `0 ≤ K`, `0 ≤ r`, `0 ≤ S`, continuous jointly
+  measurable paths and positive meshes `δ n → 0`, the expected reward of the rounded-up rules
+  converges to that of the original rule.
+* `gridValue_tendsto_americanValue_of_mesh`: under the same hypotheses, the value over the
+  exercise grid of mesh `δ n` converges to the American put value.
+* `brownianGridPrice_tendsto_usual_of_mesh`: for `0 ≤ K`, `0 ≤ r` and positive meshes `δ n → 0`,
+  the Brownian grid price converges to the usual-filtration Brownian American put price at
+  spot `exp x`.
+
+## Tags
+
+mesh refinement, exercise grid, Bermudan convergence, upward rounding, bounded convergence,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

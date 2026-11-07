@@ -43,10 +43,19 @@ Node by node, on the atom `{y | y agrees with x on the first t flips}` of `ℱ�
 probability (`IsEMM.real_horizonAtom`), and at `t = T` the atoms are the paths, so `Q` is
 `horizonMeasure T (crrUpProb u d r)` (`horizonMeasure_singleton`).
 
+## Main definitions
+
+* `horizonFiltration`: the filtration of the `T`-period market on `Fin T → Bool`, `ℱₙ` generated
+  by the first `n` flips and frozen from time `T`.
+* `horizonMeasure`: the real-world measure, the law of the first `T` i.i.d. `Bernoulli(q)` flips.
+* `horizonSpot`: the discounted price process of the `T`-period tree.
+* `horizonAtom`: the atom of `ℱₜ` through a path `x`, the paths agreeing with `x` on the first `t`
+  flips.
+
 ## Main results
 
-* `horizonFiltration`, `horizonMeasure`, `horizonSpot` — the market.
-* `comap_flips_horizonFiltration` — `flipFiltration` is the pullback of `horizonFiltration`.
+* `comap_flips_horizonFiltration` — at times `t ≤ T`, `flipFiltration t` is the pullback of
+  `horizonFiltration T t` along `flips T`.
 * `isEMM_horizonSpot` — under `BinomialNoArb`, `horizonMeasure (crrUpProb)` is an equivalent
   martingale measure for every real-world `horizonMeasure p`, `0 < p < 1`.
 * `noArbitrage_horizonSpot_iff` — `NoArbitrage ↔ BinomialNoArb u d r` (for `S₀ > 0`, `0 < d < u`,
@@ -57,6 +66,18 @@ probability (`IsEMM.real_horizonAtom`), and at `t = T` the atoms are the paths, 
 * `isCompleteMarket_horizonSpot_iff` — the Second FTAP for the tree: under `BinomialNoArb` the
   market is complete iff it has exactly one equivalent martingale measure.
 * `isCompleteMarket_horizonSpot` — for `S₀ > 0` both hold: the market is complete.
+
+## References
+
+* [J. M. Harrison and S. R. Pliska, *Martingales and stochastic integrals in the theory of
+  continuous trading*][HarrisonPliska1981]
+* [S. E. Shreve, *Stochastic Calculus for Finance I: The Binomial Asset Pricing Model*][ShreveSCFI],
+  Section 5.4
+
+## Tags
+
+fundamental theorem of asset pricing, equivalent martingale measure, no arbitrage,
+market completeness, Harrison–Pliska, multi-period binomial, MSC 91G20, MSC 60G42, JEL G13
 -/
 
 @[expose] public section
@@ -182,16 +203,8 @@ section NoArbitrage
 
 variable {T : ℕ} {S₀ u d r : ℝ}
 
-/-- Mutual absolute continuity from full support: a measure charging every point dominates every
-measure on a measurable-singleton space. -/
-private lemma absolutelyContinuous_of_pos {Ω : Type*} [MeasurableSpace Ω] {μ ν : Measure Ω} (h : ∀ x, 0 < ν {x}) : μ ≪ ν := by
-  intro s hs
-  by_contra hne
-  obtain ⟨x, hx⟩ : s.Nonempty := Set.nonempty_iff_ne_empty.2 fun hs' ↦ hne (by rw [hs']; simp)
-  exact (h x).not_ge ((measure_mono (Set.singleton_subset_iff.2 hx)).trans_eq hs)
-
 /-- On a full-support space, a.e. equality is pointwise equality. -/
-private lemma eq_of_ae_eq_of_pos {Ω : Type*} [MeasurableSpace Ω]
+lemma eq_of_ae_eq_of_pos {Ω : Type*} [MeasurableSpace Ω]
     {μ : Measure Ω} (hμ : ∀ x, 0 < μ {x}) {f g : Ω → ℝ} (h : f =ᵐ[μ] g) (x : Ω) :
     f x = g x := by
   by_contra hx
@@ -216,8 +229,11 @@ theorem isEMM_horizonSpot (h : BinomialNoArb u d r) (S₀ : ℝ) {p q : ℝ≥0}
     rw [hqcrr] at this
     exact_mod_cast this
   refine .of_condExp_succ
-    ⟨inferInstance, absolutelyContinuous_of_pos (horizonMeasure_pos T hp0 hp1),
-      absolutelyContinuous_of_pos (horizonMeasure_pos T hq0 hq1')⟩
+    ⟨inferInstance,
+      fun s hs ↦ by
+        rw [eq_empty_of_pos_singleton (horizonMeasure_pos T hp0 hp1) hs, measure_empty],
+      fun s hs ↦ by
+        rw [eq_empty_of_pos_singleton (horizonMeasure_pos T hq0 hq1') hs, measure_empty]⟩
     (fun t _ ↦ stronglyAdapted_horizonSpot t) (fun t _ ↦ Integrable.of_finite) fun t ht ↦ ?_
   refine ae_eq_condExp_of_forall_setIntegral_eq ((horizonFiltration T).le t) Integrable.of_finite
     (fun s _ _ ↦ Integrable.of_finite.integrableOn) (fun s hs _ ↦ ?_)

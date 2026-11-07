@@ -5,9 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.BivariateNormalCDF
-public import MathFin.Foundations.GaussianMoments
 
 /-!
 # Linear combinations of a correlated standard Gaussian pair
@@ -33,6 +31,11 @@ such as the cross-moment of a basket (`BlackScholes/BasketMomentMatching.lean`).
 * `hasLaw_bivariateNormalLaw_of_gaussianPair` — `(U, V) ~ bivariateNormalLaw ρ`.
 * `hasLaw_linear_gaussianPair` — `aU + bV ~ N(0, a² + 2abρ + b²)`.
 * `integral_exp_linear_gaussianPair` — `𝔼[e^{aU + bV}] = e^{(a² + 2abρ + b²)/2}`.
+
+## Tags
+
+correlated Gaussians, linear combination, basket option, lognormal cross-moment,
+moment generating function, bivariate normal, MSC 60E05, MSC 60G15, JEL G13
 -/
 
 @[expose] public section

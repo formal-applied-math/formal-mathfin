@@ -5,7 +5,6 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.ImpliedVolatility
 public import MathFin.Futures.Black76
 
@@ -73,6 +72,17 @@ formulas
   the discounted expected call payoff is `e^{−rT} · f · (2Φ(σ_ATM √T / 2) − 1)`. This
   is Black's formula evaluated at eq. 2.18's vol; it does not show that the SABR model
   itself produces this price.
+
+## References
+
+* [F. Black, *The pricing of commodity contracts*][Black1976]
+* [Hagan et al., *Managing smile risk*][HaganKumarLesniewskiWoodward2002], eq. 2.18; eqs. 2.17a-c
+  and 2.18; section 3 and eq. 2.18
+
+## Tags
+
+SABR model, Hagan formula, implied volatility asymptotics, managing smile risk, backbone,
+stochastic volatility, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -227,7 +237,7 @@ theorem tendsto_sabrZ {f α β ν : ℝ} (hf : 0 < f) (hα : α ≠ 0) (hν : ν
 
 /-- The factors of eq. 2.17a other than `z / x(z)` are continuous in `K` at `K = f`
 (`f > 0`). -/
-private theorem sabrImpliedVol_rest_continuousAt {f α β ρ ν tex : ℝ} (hf : 0 < f) :
+theorem sabrImpliedVol_rest_continuousAt {f α β ρ ν tex : ℝ} (hf : 0 < f) :
     ContinuousAt (fun K ↦ α / ((f * K) ^ ((1 - β) / 2) *
       (1 + (1 - β) ^ 2 / 24 * Real.log (f / K) ^ 2
         + (1 - β) ^ 4 / 1920 * Real.log (f / K) ^ 4)) *

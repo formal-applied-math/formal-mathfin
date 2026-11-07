@@ -31,6 +31,33 @@ local (`tendstoInMeasure_of_ae_eqOn`).
 The formula as an identity of processes, all `t ∈ [0, T]` at once with the stochastic integral
 of `f_x(·, X) σ`, is `ito_formula_adapted_unbounded_process` (`ItoFormulaAdaptedProcess`). Not
 here: a random starting point.
+
+## Main definitions
+
+* `localItoProcess`: the Itô process `X = x₀ + ∫ b ds + ∫ σ dB` with unbounded continuous
+  adapted coefficients, the stochastic integral being `localItoIntegral`.
+
+## Main results
+
+* `ito_formula_adapted_unbounded_le`: for `t ≤ T` and `f(t, x)` with jointly continuous
+  partials, the sums `∑ f_x(tₖ, X_{tₖ})(M_{tₖ₊₁} − M_{tₖ})` on uniform partitions of `[0, t]`
+  converge in measure to
+  `f(t, X_t) − f(0, x₀) − ∫₀ᵗ (f_t + f_x b + ½ f_xx σ²)(s, X_s) ds`.
+* `ito_formula_adapted_unbounded_C2_le`: the same for `f(x)` twice differentiable with `f''`
+  continuous.
+* `ae_localItoProcess_eq`: almost surely, where `σ` and `b` stay in `[−N, N]` up to `T`, `X` is
+  the Itô process of the coefficients clipped to `[−N, N]`.
+
+## References
+
+* [I. Karatzas and S. E. Shreve, *Brownian Motion and Stochastic Calculus*][KaratzasShreve1991],
+  Theorem 3.3.6
+* [Revuz and Yor, *Continuous Martingales and Brownian Motion*][RevuzYor], Proposition IV.2.13
+
+## Tags
+
+Itô formula, Itô lemma, unbounded coefficients, clipping, localisation, Itô process, MSC 60H05,
+MSC 60H10, MSC 60J60
 -/
 
 @[expose] public section

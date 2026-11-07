@@ -42,6 +42,15 @@ remains. A certified unification of two known textbook facts, not new finance.
 * `portfolioVarN_equicorrelated_ge`, `portfolioVarN_equicorrelated_equal_weights`: equal weights
   minimize the variance of a fully invested equicorrelated portfolio (`ρ ≤ 1`, `v ≥ 0`).
 * `mul_le_portfolioVarN_equicorrelated`: the systematic floor `ρ v ≤ Var(w)`.
+
+## References
+
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 6.16
+
+## Tags
+
+equicorrelation, Herfindahl index, minimum variance portfolio, systematic risk, diversification,
+MSC 91G10, JEL G11
 -/
 
 @[expose] public section

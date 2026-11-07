@@ -5,7 +5,11 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Boundary.Coordinates
+public import MathFin.Init
+public import Mathlib.Algebra.EuclideanDomain.Basic
+public import Mathlib.Algebra.EuclideanDomain.Field
+public import Mathlib.Analysis.Calculus.Deriv.Basic
+public import Mathlib.Analysis.SpecialFunctions.Log.Basic
 
 /-!
 # The normalized American-put problem: coordinates, payoff, operator
@@ -18,11 +22,31 @@ or the stopping value itself), the continuation region of a candidate boundary, 
 spatial operator. The contracts themselves are `ContinuousBoundaryPutSolution`,
 `DividendPutSolution` and its zero-dividend case `NormalizedPutSolution`.
 
-## Result
+## Main definitions
 
-Public entry points include `normalizedRate`, `normalizedRate_pos`, `normalizedRate_sqrt_two`
-(`simp`), `putPayoff`,
-`PutEnvelope`, `continuationRegion`, `dividendSpatialOperator`.
+* `normalizedRate`: the normalization `2 r / σ²` of a rate.
+* `putPayoff`: the strike-normalized put payoff `max (1 − eˣ) 0` in log spot.
+* `continuationRegion`: the open set `{(x, t) | 0 < t ∧ s t < x}` above a candidate boundary `s`,
+  in `(log spot, time remaining)` coordinates.
+* `dividendSpatialOperator`: the normalized spatial operator `f'' + (k − h − 1) f' − k f` with
+  dividend yield `h`.
+* `PutEnvelope`: the payoff-level properties of a put price `p`: continuity for `t ≥ 0`,
+  `p x 0 = putPayoff x`, domination of the payoff, and `p x t ≤ 1`.
+
+## Main results
+
+* `normalizedRate_pos`: for `0 < r` and `0 < σ`, `normalizedRate r σ` is positive.
+* `normalizedRate_sqrt_two`: at volatility `√2` the normalized rate is `r` (a `simp` lemma).
+* `putPayoff_nonneg`, `putPayoff_of_nonpos`: the payoff is nonnegative, and equals `1 − eˣ` for
+  `x ≤ 0`.
+* `PutEnvelope.nonneg`: for a `PutEnvelope p`, `p x t ≥ 0` for `t ≥ 0`.
+* `putPayoff_in_stock_units`: for `0 < E` and `0 < S`,
+  `E · putPayoff (log (S / E)) = max (E − S) 0`.
+
+## Tags
+
+normalized American put, free boundary problem, continuation region, put payoff, spatial operator,
+Chen–Chadam–Jiang–Zheng, MSC 35R35, MSC 91G20, JEL G13
 -/
 @[expose] public section
 

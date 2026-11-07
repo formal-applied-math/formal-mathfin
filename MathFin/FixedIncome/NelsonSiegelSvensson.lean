@@ -5,7 +5,10 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # Nelson-Siegel-Svensson yield-curve parametrization
@@ -30,9 +33,14 @@ recovery. (Only continuity on `(0, ∞)` is proved here; at `τ = 0` the Lean
 definition takes Lean's `x / 0 = 0` junk value, and the short end is stated
 as a limit.)
 
+## Main definitions
+
+* `nssSlope`: the Nelson-Siegel slope factor `s(x) = (1 - e^{-x}) / x`.
+* `nssYield`: the Nelson-Siegel-Svensson closed-form yield curve
+  `y(τ) = β₀ + β₁·s(τ/l₁) + β₂·(s(τ/l₁) - e^{-τ/l₁}) + β₃·(s(τ/l₂) - e^{-τ/l₂})`.
+
 ## Main results
 
-* `nssSlope`, `nssYield` — the slope factor `s` and the Svensson closed form.
 * `continuousOn_nssYield` — `y` is continuous on `(0, ∞)` (the economically
   meaningful domain: no coupon bond or discount factor is quoted at `τ = 0`).
 * `tendsto_nssSlope_nhdsNE_zero` — the core calculus fact underlying the
@@ -53,10 +61,14 @@ Vasicek zero yield in these factors.
 
 ## References
 
-* C. R. Nelson, A. F. Siegel, *Parsimonious Modeling of Yield Curves*, Journal of Business 60
-  (1987).
-* L. E. O. Svensson, *Estimating and Interpreting Forward Interest Rates: Sweden 1992–1994*,
-  NBER Working Paper 4871 (1994).
+* [C. R. Nelson, A. F. Siegel, *Parsimonious Modeling of Yield Curves*][NelsonSiegel1987].
+* [L. E. O. Svensson, *Estimating and Interpreting Forward Interest Rates: Sweden
+  1992–1994*][Svensson1994].
+
+## Tags
+
+Nelson–Siegel, Svensson, yield curve fitting, level slope curvature, parametric yield curve,
+zero-coupon yield, MSC 91G30, JEL E43
 -/
 
 @[expose] public section
@@ -113,7 +125,7 @@ theorem tendsto_nssSlope_nhdsNE_zero :
 /-- Dividing by a nonzero constant tends to `0` through nonzero values as the
 numerator tends to `0` through nonzero values (used to transport the `𝓝[≠] 0`
 short-end limit of `nssSlope` and `exp` along `τ ↦ τ/l`). -/
-private theorem tendsto_div_const_nhdsNE_zero {c : ℝ} (hc : c ≠ 0) :
+theorem tendsto_div_const_nhdsNE_zero {c : ℝ} (hc : c ≠ 0) :
     Tendsto (fun x : ℝ ↦ x / c) (𝓝[≠] (0 : ℝ)) (𝓝[≠] (0 : ℝ)) := by
   rw [tendsto_nhdsWithin_iff]
   refine ⟨?_, ?_⟩
@@ -123,13 +135,6 @@ private theorem tendsto_div_const_nhdsNE_zero {c : ℝ} (hc : c ≠ 0) :
   · filter_upwards [self_mem_nhdsWithin] with x hx
     simp only [Set.mem_compl_iff, Set.mem_singleton_iff] at hx ⊢
     exact div_ne_zero hx hc
-
-/-- `exp(-τ/l) → 1` as `τ → 0` through nonzero values. -/
-private theorem tendsto_exp_neg_div_const_nhdsNE_zero {c : ℝ} (hc : c ≠ 0) :
-    Tendsto (fun τ : ℝ ↦ Real.exp (-(τ / c))) (𝓝[≠] (0 : ℝ)) (𝓝 1) := by
-  have hdiv : Tendsto (fun τ : ℝ ↦ -(τ / c)) (𝓝[≠] (0 : ℝ)) (𝓝 0) := by
-    simpa using ((tendsto_div_const_nhdsNE_zero hc).mono_right nhdsWithin_le_nhds).neg
-  simpa [Function.comp_def] using (Real.continuous_exp.tendsto (0 : ℝ)).comp hdiv
 
 /-- **Short-end limit**: as `τ → 0 (through nonzero values)`, the Svensson curve tends to `β₀ + β₁`.
 The slope and level stay (`s(τ/lᵢ) → 1`), both curvature terms vanish
@@ -143,8 +148,11 @@ theorem tendsto_nssYield_nhdsNE_zero (β₀ β₁ β₂ β₃ l₁ l₂ : ℝ)
     tendsto_nssSlope_nhdsNE_zero.comp hdiv1
   have hs2 : Tendsto (fun τ : ℝ ↦ nssSlope (τ / l₂)) (𝓝[≠] (0 : ℝ)) (𝓝 1) :=
     tendsto_nssSlope_nhdsNE_zero.comp hdiv2
-  have he1 := tendsto_exp_neg_div_const_nhdsNE_zero hl₁
-  have he2 := tendsto_exp_neg_div_const_nhdsNE_zero hl₂
+  have he (c : ℝ) : Tendsto (fun τ : ℝ ↦ Real.exp (-(τ / c))) (𝓝[≠] (0 : ℝ)) (𝓝 1) :=
+    ((Real.continuous_exp.comp (continuous_id.div_const c).neg).tendsto' 0 1 (by simp)).mono_left
+      nhdsWithin_le_nhds
+  have he1 := he l₁
+  have he2 := he l₂
   have h : Tendsto (nssYield β₀ β₁ β₂ β₃ l₁ l₂) (𝓝[≠] (0 : ℝ))
       (𝓝 (β₀ + β₁ * 1 + β₂ * (1 - 1) + β₃ * (1 - 1))) := by
     unfold nssYield

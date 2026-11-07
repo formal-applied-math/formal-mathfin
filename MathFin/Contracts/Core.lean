@@ -5,7 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Probability.Process.HittingTime
 
 /-!
 # A reified payoff language
@@ -39,6 +40,22 @@ notional, termination, partial redemption). Each is additive and each waits for
 the corpus entry that forces it; see
 `docs/specs/2026-08-16-contracts-tower-design.md` §2.3.
 
+## Main definitions
+
+* `Scenario ι`: a market scenario `ι → ℝ≥0 → ℝ`, the realized value of each underlying at each
+  time.
+* `Payoff ι`: payoff formulas as data (constants, observations, `add`, `sub`, `mul`, `max`, `min`,
+  `indicatorLt`, and `rpow` with an `ℝ≥0` exponent); `Payoff.eval` interprets one against a
+  scenario.
+* `Scenario.hitTime`: the first time the observed underlying `i` lies in `A`, as Mathlib's
+  `hittingAfter` of the observed path.
+* `Contract ι`: contracts built from `zero`, `pay t amount`, `payAtHit i A amount`, `both` and
+  `scale`.
+* `Contract.cashflows`: the list of `(time, amount)` cashflows of a contract along a scenario.
+* `Contract.FixedDated`: the contract contains no `payAtHit`.
+* `Contract.pathPV`: the present value of a contract along one scenario path, for a discount
+  function `D : ℝ≥0 → ℝ`.
+
 ## Main results
 
 * `Contract.pathPV_both`, `Contract.pathPV_scale` — `pathPV` is additive over
@@ -66,6 +83,16 @@ matching `Filtration ℝ≥0 mΩ`.
 No code is copied from `lean_contracts`; every definition and proof here is
 written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 §6 for the full credit line.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [S. Peyton Jones, J. M. Eber and J. Seward, *Composing contracts*][PeytonJonesEberSeward2000]
+
+## Tags
+
+contract language, reified payoff, contract DSL, Bilokon, Peyton Jones, payment at default time,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

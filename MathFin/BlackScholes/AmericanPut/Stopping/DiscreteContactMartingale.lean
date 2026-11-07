@@ -5,12 +5,22 @@ Authors: Robert Martin
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Probability.Martingale.Basic
+public import Mathlib.Topology.Separation.CompletelyRegular
 
-/-! # Stopping a discrete process when its conditional drift first becomes nonzero 
-## Result
+/-! # Stopping a discrete process when its conditional drift first becomes nonzero
 
-Public entry points include `discrete_stopped_martingale_of_before`.
+## Main results
+
+* `discrete_stopped_martingale_of_before`: for an adapted integrable `U` and a stopping time
+  `τ` on `ℕ`, if `U` has the martingale property at every `i < τ ω`, then `U` stopped at `τ`
+  is a martingale.
+
+## Tags
+
+stopped martingale, discrete process, conditional drift, first nonzero drift, stopping time,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

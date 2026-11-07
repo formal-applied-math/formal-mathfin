@@ -51,6 +51,22 @@ Berthold and Elsman (2015) and Annenkov (2018).
 No code is copied from `lean_contracts`; every definition and proof here is
 written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 §6 for the full credit line.
+
+## References
+
+* [P. Artzner et al., *Coherent measures of risk*][ArtznerDelbaenEberHeath1999]
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [J. C. Cox, S. A. Ross and M. Rubinstein, *Option pricing: a simplified
+  approach*][CoxRossRubinstein1979]
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Section 2.2; Section 2.3
+* [S. E. Shreve, *Stochastic Calculus for Finance I: The Binomial Asset Pricing Model*][ShreveSCFI],
+  Theorem 1.2.2
+
+## Tags
+
+value at risk, expected shortfall, subadditivity, position loss, hedged position,
+risk of a derivative book, MSC 91G70, JEL G32
 -/
 
 @[expose] public section

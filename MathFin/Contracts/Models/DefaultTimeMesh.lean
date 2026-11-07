@@ -44,6 +44,18 @@ continuous density `f` differs from `∫ g f` by at most `ε ∫ |f|` once `g` o
 * `tendsto_cdsLossesGrid`, `tendsto_cdsAnnuityGrid`, `tendsto_cdsParSpreadGrid`,
   `tendsto_value_cdsBuyer_coxDefaultTime`, `tendsto_value_cdsProtectionLeg_coxDefaultTime` — the
   limits along grids whose mesh tends to zero.
+
+## References
+
+* [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 16
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [D. Lando, *Credit Risk Modeling*][Lando2004], ch. 5
+* [S. Peyton Jones, J. M. Eber and J. Seward, *Composing contracts*][PeytonJonesEberSeward2000]
+
+## Tags
+
+CDS discretization, Riemann–Stieltjes sum, hazard rate, par spread limit, continuous-time CDS,
+MSC 91G40, JEL G12
 -/
 
 @[expose] public section
@@ -86,8 +98,8 @@ lemma abs_sum_mul_integral_sub_integral_le {g f : ℝ → ℝ} (hg : Continuous 
 
 /-! ### Grids -/
 
-/-- `t` is a **grid of `[0, T]` of mesh at most `δ`** with `n` cells: monotone, from `0` to `T`, with
-every step at most `δ`. -/
+/-- `t` is a **grid of `[0, T]` of mesh at most `δ`** with `n` cells: monotone, from `0` to `T`,
+with every step at most `δ`. -/
 def IsGridOfMesh (t : ℕ → ℝ≥0) (n : ℕ) (T δ : ℝ) : Prop :=
   Monotone t ∧ t 0 = 0 ∧ (t n : ℝ) = T ∧ ∀ i < n, (t (i + 1) : ℝ) - t i ≤ δ
 
@@ -109,7 +121,7 @@ private lemma IsGridOfMesh.oscillation {t : ℕ → ℝ≥0} {n : ℕ} {T δ : �
 
 /-- A continuous `g` oscillates by at most `ε` at some scale `δ > 0` on `[0, T]`: uniform continuity
 on the compact interval. -/
-private lemma exists_oscillation_le {g : ℝ → ℝ} (hg : Continuous g) (T : ℝ) {ε : ℝ} (hε : 0 < ε) :
+lemma exists_oscillation_le {g : ℝ → ℝ} (hg : Continuous g) (T : ℝ) {ε : ℝ} (hε : 0 < ε) :
     ∃ δ > 0, ∀ x ∈ Set.Icc (0 : ℝ) T, ∀ y ∈ Set.Icc (0 : ℝ) T, |x - y| ≤ δ → |g x - g y| ≤ ε := by
   obtain ⟨δ, hδ, H⟩ := Metric.uniformContinuousOn_iff.1
     (isCompact_Icc.uniformContinuousOn_of_continuous hg.continuousOn) ε hε
@@ -117,7 +129,8 @@ private lemma exists_oscillation_le {g : ℝ → ℝ} (hg : Continuous g) (T : �
     rw [Real.dist_eq]; linarith)).le⟩
 
 /-- Convergence along grids of vanishing mesh from the ε–δ closeness: if every grid of mesh at most
-`δ` is within `ε` of `L`, then along grids `t k` of mesh at most `δ k → 0` the values tend to `L`. -/
+`δ` is within `ε` of `L`, then along grids `t k` of mesh at most `δ k → 0` the values tend to
+`L`. -/
 private lemma tendsto_of_close (Φ : (ℕ → ℝ≥0) → ℕ → ℝ) (L T : ℝ)
     (hclose : ∀ ε > 0, ∃ δ > 0, ∀ t n, IsGridOfMesh t n T δ → |Φ t n - L| ≤ ε)
     {t : ℕ → ℕ → ℝ≥0} {n : ℕ → ℕ} {δ : ℕ → ℝ} (hgrid : ∀ k, IsGridOfMesh (t k) (n k) T (δ k))
@@ -135,11 +148,11 @@ section Legs
 
 variable {h : ℝ → ℝ}
 
-/-- **The grid losses are close to the continuous losses.** For a continuous positive hazard `h`,
-a rate `r` and a horizon `T`, every `ε > 0` has a mesh bound `δ > 0` such that every grid of
-`[0, T]` of mesh at most `δ` has
-`|cdsLossesGrid D S t n − Cox.cdsLosses r h T| ≤ ε`, with `D u = e^{−ru}` and `S = hazardSurvival h`.
-The error is at most `ε` times the default probability `1 − S(T) ≤ 1`. -/
+/-- **The grid losses are close to the continuous losses.** For a continuous positive hazard `h`, a
+rate `r` and a horizon `T`, every `ε > 0` has a mesh bound `δ > 0` such that every grid of `[0, T]`
+of mesh at most `δ` has `|cdsLossesGrid D S t n − Cox.cdsLosses r h T| ≤ ε`, with `D u = e^{−ru}`
+and `S = hazardSurvival h`. The error is at most `ε` times the default probability
+`1 − S(T) ≤ 1`. -/
 theorem exists_cdsLossesGrid_close (hh : Continuous h) (hpos : ∀ s, 0 < h s) (r T : ℝ)
     {ε : ℝ} (hε : 0 < ε) :
     ∃ δ > 0, ∀ (t : ℕ → ℝ≥0) (n : ℕ), IsGridOfMesh t n T δ →
@@ -149,7 +162,8 @@ theorem exists_cdsLossesGrid_close (hh : Continuous h) (hpos : ∀ s, 0 < h s) (
     (by fun_prop) T hε
   refine ⟨δ, hδ, fun t n hgrid ↦ ?_⟩
   have key := abs_sum_mul_integral_sub_integral_le (g := fun s ↦ Real.exp (-(r * s)))
-    (f := DefaultDensity.defaultDensity h) (by fun_prop) (DefaultDensity.continuous_defaultDensity hh)
+    (f := DefaultDensity.defaultDensity h) (by fun_prop)
+        (DefaultDensity.continuous_defaultDensity hh)
     (t := fun i ↦ (t i : ℝ)) (fun i j hij ↦ NNReal.coe_le_coe.2 (hgrid.1 hij)) n
     (fun i hi s hs ↦ hgrid.oscillation hosc hi s hs)
   beta_reduce at key
@@ -169,7 +183,8 @@ theorem exists_cdsLossesGrid_close (hh : Continuous h) (hpos : ∀ s, 0 < h s) (
         abs_of_nonneg (DefaultDensity.defaultDensity_nonneg (fun s ↦ (hpos s).le) s),
       DefaultDensity.integral_defaultDensity_zero hh]
     linarith [hazardSurvival_pos h T]
-  refine (le_of_eq_of_le ?_ key).trans ((mul_le_mul_of_nonneg_left hbound hε.le).trans_eq (mul_one ε))
+  refine (le_of_eq_of_le ?_ key).trans
+      ((mul_le_mul_of_nonneg_left hbound hε.le).trans_eq (mul_one ε))
   exact congrArg abs (congrArg₂ (· - ·) hsum.symm hint.symm)
 
 /-- **The grid annuity is close to the continuous annuity**, as `exists_cdsLossesGrid_close`:
@@ -184,7 +199,8 @@ theorem exists_cdsAnnuityGrid_close (hh : Continuous h) (r : ℝ) {T : ℝ} (hT 
   have hgc : Continuous fun s ↦ Real.exp (-(r * s)) * hazardSurvival h s :=
     (by fun_prop : Continuous fun s : ℝ ↦ Real.exp (-(r * s))).mul
       (continuous_iff_continuousAt.2 fun _ ↦
-        (DefaultDensity.hasDerivAt_hazardSurvival hh.locallyIntegrable hh.continuousAt).continuousAt)
+        (DefaultDensity.hasDerivAt_hazardSurvival hh.locallyIntegrable
+            hh.continuousAt).continuousAt)
   obtain ⟨δ, hδ, hosc⟩ := exists_oscillation_le hgc T (div_pos hε (by linarith : 0 < T + 1))
   refine ⟨δ, hδ, fun t n hgrid ↦ ?_⟩
   have key := abs_sum_mul_integral_sub_integral_le hgc (f := fun _ ↦ (1 : ℝ)) continuous_const
@@ -216,7 +232,8 @@ theorem tendsto_cdsLossesGrid (hh : Continuous h) (hpos : ∀ s, 0 < h s) (r T :
     (hδ : Tendsto δ atTop (𝓝 0)) :
     Tendsto (fun k ↦ cdsLossesGrid (fun u : ℝ≥0 ↦ Real.exp (-(r * u))) (hazardSurvival h)
       (t k) (n k)) atTop (𝓝 (Cox.cdsLosses r h T)) :=
-  tendsto_of_close (fun t n ↦ cdsLossesGrid (fun u : ℝ≥0 ↦ Real.exp (-(r * u))) (hazardSurvival h) t n)
+  tendsto_of_close
+      (fun t n ↦ cdsLossesGrid (fun u : ℝ≥0 ↦ Real.exp (-(r * u))) (hazardSurvival h) t n)
     _ T (fun _ hε ↦ exists_cdsLossesGrid_close hh hpos r T hε) hgrid hδ
 
 /-- **The grid annuity converges to the continuous annuity** along grids of `[0, T]` whose mesh
@@ -226,7 +243,8 @@ theorem tendsto_cdsAnnuityGrid (hh : Continuous h) (r : ℝ) {T : ℝ} (hT : 0 �
     (hδ : Tendsto δ atTop (𝓝 0)) :
     Tendsto (fun k ↦ cdsAnnuityGrid (fun u : ℝ≥0 ↦ Real.exp (-(r * u))) (hazardSurvival h)
       (t k) (n k)) atTop (𝓝 (Cox.cdsAnnuity r h T)) :=
-  tendsto_of_close (fun t n ↦ cdsAnnuityGrid (fun u : ℝ≥0 ↦ Real.exp (-(r * u))) (hazardSurvival h) t n)
+  tendsto_of_close
+      (fun t n ↦ cdsAnnuityGrid (fun u : ℝ≥0 ↦ Real.exp (-(r * u))) (hazardSurvival h) t n)
     _ T (fun _ hε ↦ exists_cdsAnnuityGrid_close hh r hT hε) hgrid hδ
 
 /-- **The grid par spread converges to the continuous fair spread** `Cox.cdsFairSpreadTV` along

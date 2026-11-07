@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.Foundations.StandardGaussianMGF
 
@@ -37,6 +36,25 @@ condition is
 
 so `F = E_Q[S_T]`. Combined with `expected_terminal_eq_forward`, this gives
 `F = S_0 · e^{rT}`.
+
+## Main results
+
+* `nthMoment_terminal`: under `BSCallHyp`, `E_Q[S_T^n] = S_0^n · exp(n r T + n(n − 1)/2 · σ²T)`.
+* `expected_terminal_eq_forward`: under `BSCallHyp`, `E_Q[S_T] = S_0 · e^{rT}`.
+* `discounted_terminal_eq_S0`: under `BSCallHyp`, `E_Q[e^{−rT} · S_T] = S_0`.
+* `integral_bsTerminal_pow_gaussianReal`, `integral_bsTerminal_eq_forward`: the same moment and
+  forward identities as integrals against `gaussianReal 0 1`, for `0 ≤ T`.
+* `integral_discounted_bsTerminal`: for `Z` with law `gaussianReal 0 1` under `Q` and `0 ≤ T`,
+  `∫ e^{−rT} · S_T(Z) ∂Q = S_0`.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 5.6
+
+## Tags
+
+forward price, futures price, no-arbitrage forward, risk-neutral expectation, cost of carry,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

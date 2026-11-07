@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.BlackScholes.GarmanNormalForm
 
@@ -31,14 +30,23 @@ fact under three different names. We now make the Garman connection
 explicit (the unifying structural insight) and keep only the substantive
 PD-as-probability bounds.
 
-## Results
+## Main definitions
 
-* `kmvDistanceToDefault`: definition via `gbsd2` (the Garman-form `d_2`).
+* `kmvDistanceToDefault`: the distance to default in Garman normal form,
+  `d₂ = gbsd2 V F (e^{−rT}) σ_V T`, with the firm value as spot and the face debt as strike.
+* `kmvPD`: the risk-neutral probability of default `Φ(−d₂)` at maturity `T`.
+
+## Main results
+
 * `kmvDistanceToDefault_eq_bsd2`: equivalence to the BS `bsd2` (this is
   the *structural identity*, the same `d_2` from BS).
-* `kmvPD`: `Φ(−d_2^{KMV})`.
 * `kmvPD_nonneg`, `kmvPD_le_one`: probability bounds.
 * `kmv_survival_eq_Phi_d2`: `1 − PD = Φ(d_2)`.
+
+## Tags
+
+Merton model, KMV, distance to default, structural credit model, default probability, firm value,
+MSC 91G40, JEL G33, JEL G12
 -/
 
 @[expose] public section

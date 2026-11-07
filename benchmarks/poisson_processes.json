@@ -12,6 +12,12 @@
       "metadata": {
         "chapter": 3,
         "reference": "Theorem 3.3.5",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 3.3.5"
+          }
+        ],
         "difficulty": "foundational",
         "formalization_status": "full",
         "formalization_scope": "Full derivation via the interarrival construction (the route coverage.md flagged as re-earnable): hypotheses are the textbook construction (iid Exp(rate) interarrivals + the counting relation); the Poisson(rate*t) marginal is DERIVED in MathFin.Foundations.PoissonCounting by composing the Erlang arrival-time law (ErlangSum Gamma-convolution identity) with the new Gamma-CDF difference identity (FTC telescope, absent from Mathlib). Upgraded reduced_core -> full 2026-06-05."
@@ -28,6 +34,12 @@
       "metadata": {
         "chapter": 3,
         "reference": "Proposition 3.3.6",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Proposition 3.3.6"
+          }
+        ],
         "difficulty": "foundational",
         "formalization_status": "reduced_core",
         "formalization_scope": "Derived core (upgraded 2026-06-05, stays reduced_core honestly): the first interarrival time is PROVED exponential from the counting axioms (MathFin.Foundations.PoissonInterarrival: survival law P(N_t=0)=e^{-rt} read off the increment law, CDF identified against Mathlib cdf_expMeasure_eq), and the memoryless survival factorisation is PROVED from independent increments. What remains assumed-out-of-scope is the textbook claim for the WHOLE interarrival sequence (iid of all ξ_n), which requires the strong Markov property of the process - upstream-gated. Previous version was a pure statement-level spec with the conclusion as a structure field; now the named conclusions are theorems."
@@ -44,6 +56,12 @@
       "metadata": {
         "chapter": 3,
         "reference": "Theorem 3.3.9",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 3.3.9"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full derivation at increment level: the structure encodes only the textbook hypotheses (component increment laws + cross-independence); the superposition conclusion is DERIVED from Mathlib's ProbabilityTheory.IndepFun.hasLaw_add_poissonMeasure (the sum of independent Poisson variables is Poisson, itself from poissonMeasure_conv_poissonMeasure). The component increment laws are stated as HasLaw (measurable with the Poisson law): since Mathlib e91b128 a pushforward equality no longer forces measurability, so the earlier map-form hypotheses are strengthened to HasLaw and the conclusion is HasLaw too. Upgraded reduced_core -> full 2026-06-05."
@@ -60,6 +78,12 @@
       "metadata": {
         "chapter": 3,
         "reference": "Theorem 3.3.10",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 3.3.10"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full derivation at increment level: the structure encodes only the textbook marking mechanism (joint pmf of the type counts = binomial marking of the Poisson count, the first line of the textbook proof); the thinned marginal laws AND the independence of the streams are DERIVED via MathFin.Foundations.PoissonThinning (markedPoissonMeasure_eq_prod: the binomial-marking factorisation into Poisson(p r) x Poisson((1-p) r), proved pointwise from C(j+k,j)/(j+k)! = 1/(j! k!), absent from Mathlib). Upgraded reduced_core -> full 2026-06-05."
@@ -76,6 +100,12 @@
       "metadata": {
         "chapter": 3,
         "reference": "Theorem 3.3.8",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 3.3.8"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full derivation from primitives in MathFin.Foundations.ErlangSum: the Gamma-exponential convolution identity gammaMeasure_conv_expMeasure (gammaMeasure a r ∗ expMeasure r = gammaMeasure (a+1) r — no Gamma convolution exists in Mathlib; the exponential factors merge so the Beta integral degenerates to ∫x^(a−1) = z^a/a, normalised by Γ(a+1) = a·Γ(a)), then induction over the index finset via IndepFun.map_add_eq_map_conv_map. The previous entry carried the conclusion as a structure field (hypothesis-smuggled); nothing is assumed now. Axioms-clean."

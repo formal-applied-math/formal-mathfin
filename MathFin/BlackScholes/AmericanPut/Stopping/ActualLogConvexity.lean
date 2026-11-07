@@ -16,10 +16,17 @@ stopping value, without a boundary-smoothness or classical-solution premise.
 It does not assert existence of classical boundary second derivatives or
 strict logarithmic curvature.
 
-## Result
+## Main results
 
-Public entry points include `canonicalLogBoundary_convexOn`,
-`zeroDividend_canonicalLogBoundary_convexOn`, and `liuRange_canonicalLogBoundary_convexOn`.
+* `canonicalLogBoundary_convexOn`: for `0 < k` and `0 ≤ h ≤ k`, the actual log boundary is
+  convex on `(0, ∞)`.
+* `zeroDividend_canonicalLogBoundary_convexOn`, `liuRange_canonicalLogBoundary_convexOn`: the
+  same for `0 < k` with no dividend, and for `0 ≤ h` with `h + 1 ≤ k`.
+
+## Tags
+
+log boundary convexity, exercise boundary, convex boundary, American put, stopping value, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.RiskMeasures.GaussianValueAtRisk
 public import MathFin.Foundations.GaussianMoments
 public import MathFin.Foundations.ItoLemma2D
@@ -32,6 +31,17 @@ an approximation, which is the stylized-facts caveat of MFE §3.1.
 
 * `log_gbmValue_div`: the `h`-period log-return of GBM is `(μ − σ²/2)·h + σ·(B_{t+h} − B_t)`.
 * `valueAtRisk_gbm_loss`: the square-root-of-time rule for the GBM loss.
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Example 9.4
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 3.16, 9.13
+
+## Tags
+
+square-root-of-time rule, value-at-risk scaling, geometric Brownian motion, horizon scaling,
+Gaussian loss, MSC 91G70, MSC 60J65, JEL G32
 -/
 
 @[expose] public section

@@ -33,6 +33,33 @@ series at maturity `τ` and expected jump count `Λτ` are the digital price and
 price of the jump-diffusion (`jumpDiffusionDigitalPrice_gaussian_eq_mertonDigitalPrice`,
 `jumpDiffusionDensity_gaussian_div_eq_mertonTerminalPDF`, in
 `BlackScholes/JumpDiffusionDigital.lean`).
+
+## Main definitions
+
+* `mertonDigitalPrice`: `∑ₙ wₙ e^{−rT}Φ(d₂ⁿ)`, the Poisson mixture of Black–Scholes cash-or-nothing
+  prices at the conditional spots and volatilities.
+* `mertonTerminalPDF`: `∑ₙ wₙ · lognormalTerminalPDF(S·cₙ, r, σₙ, T, K)`, the Poisson mixture of
+  the lognormal density formulas at the strike `K`.
+
+## Main results
+
+* `hasDerivAt_mertonCallPrice_strike`: for `S, σ, T, K > 0` and `k > −1`, the strike derivative of
+  Merton's call price is minus Merton's digital price.
+* `hasDerivAt_mertonDigitalPrice_strike`: the strike derivative of Merton's digital price is minus
+  `e^{−rT}` times Merton's density `mertonTerminalPDF`.
+* `hasDerivAt_deriv_mertonCallPrice_strike`: `∂²C/∂K² = e^{−rT} · mertonTerminalPDF` at every
+  `K > 0`.
+
+## References
+
+* [Breeden and Litzenberger, *Prices of state-contingent claims implicit in option
+  prices*][BreedenLitzenberger1978]
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976]
+
+## Tags
+
+Merton digital, Merton density, strike derivatives, Breeden–Litzenberger, risk-neutral density,
+jump-diffusion, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

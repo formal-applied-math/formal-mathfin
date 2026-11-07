@@ -14,10 +14,18 @@ A deliberately crude square-root lower bound on the price suffices. At
 `x=-sqrt(t)/64` it exceeds intrinsic value, forcing that point into the
 continuation region. No boundary monotonicity or convexity is used.
 
-## Result
+## Main results
 
-Public entry points include `exists_boundary_sqrt_bound`, `boundary_below_linear_eventually`,
-`boundary_ratio_tendsto_atBot`.
+* `exists_boundary_sqrt_bound`: for a `DividendPutSolution`, some `T > 0` has
+  `b t < −√t / 64` for all `0 < t ≤ T`.
+* `boundary_below_linear_eventually`: for any `M`, `b t < −M t` for all sufficiently small
+  `t > 0`.
+* `boundary_ratio_tendsto_atBot`: `b t / t → −∞` as `t → 0⁺`.
+
+## Tags
+
+near expiry, ratio limit, square-root bound, exercise boundary asymptotics, continuation region,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

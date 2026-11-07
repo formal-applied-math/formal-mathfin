@@ -13,12 +13,12 @@ public import MathFin.BlackScholes.JumpDiffusionBrownian
 /-!
 # Variance swaps with jumps: the log contract against the variance
 
-In the Black–Scholes model two functionals of the price give the variance swap's fair strike
-`σ²`: the log contract of Demeterfi, Derman, Kamal and Zou, `(2/τ)·𝔼[log(F/S_τ) + (S_τ − F)/F]`
-with the forward `F = Se^{rτ}` (`varianceSwap_fairStrike`), and the expected realized
-variance (`tendsto_expected_bsLogPrice_equipartition_sum`); `VarianceSwapEquivalence.lean` records that
-they agree. With jumps they differ by the jump bias `2Λ𝔼[e^J − 1 − J − J²/2]`, which vanishes
-without jumps and, for downward jumps, is `≤ 0`, and `< 0` once `Λ > 0` and `ν{J < 0} ≠ 0`.
+In the Black–Scholes model two functionals of the price give the variance swap's fair strike `σ²`:
+the log contract of Demeterfi, Derman, Kamal and Zou, `(2/τ)·𝔼[log(F/S_τ) + (S_τ − F)/F]` with the
+forward `F = Se^{rτ}` (`varianceSwap_fairStrike`), and the expected realized variance
+(`tendsto_expected_bsLogPrice_equipartition_sum`); `VarianceSwapEquivalence.lean` records that they
+agree. With jumps they differ by the jump bias `2Λ𝔼[e^J − 1 − J − J²/2]`, which vanishes without
+jumps and, for downward jumps, is `≤ 0`, and `< 0` once `Λ > 0` and `ν{J < 0} ≠ 0`.
 
 At the compensated drift `b = r − σ²/2 − Λ(𝔼[e^J] − 1)`, for a jump law whose moment-generating
 function is finite near `0` and at `1`, `S > 0` and `τ > 0`:
@@ -74,6 +74,48 @@ jumps is not proved), both functionals are taken under one measure `P`:
 The expectations are under a measure `P` that makes the discounted price a martingale and keeps
 the characteristics `σ`, `Λ` and `ν` of `X`. A change of measure that moves `Λ` or `ν`, such as the
 Esscher transform, is not covered.
+
+## Main results
+
+* `varianceSwap_fairStrike`: in Black–Scholes the log contract on the forward `F = S₀e^{rT}`,
+  scaled as a variance rate `2/T`, has expected payoff `σ²`.
+* `jumpDiffusion_logContract`: at the compensated drift, for `𝔼[e^J] < ∞` and exponential moments
+  near `0`, the scaled log-contract payoff is `σ² + 2Λ𝔼[e^J − 1 − J]`.
+* `jumpDiffusion_logContract_sub_variance`: the log contract minus `Var[Y]/τ = σ² + Λ𝔼[J²]` is
+  the jump bias `2Λ𝔼[e^J − 1 − J − J²/2]`.
+* `jumpDiffusion_logContract_le_variance`, `jumpDiffusion_logContract_lt_variance`: with downward
+  jumps (`J ≤ 0` a.e.) the log contract is at most the variance, and strictly below it when
+  `Λ > 0` and `ν{J < 0} ≠ 0`.
+* `mertonJump_logContract_variance`: Merton's log-jumps give the log contract
+  `σ² + 2Λ(k − log(1 + k) + δ²/2)` and the variance `σ² + Λ((log(1 + k) − δ²/2)² + δ²)`.
+* `tendsto_integral_sum_sq_increment_equipartition`: the expected realized variance of a
+  jump-diffusion along equipartitions of `[0, T]` tends to `(σ² + Λ𝔼[J²])T`.
+* `logContract_sub_realizedVariance_of_martingale`: for a discounted-martingale price process, the
+  log contract minus the expected realized variance per unit time is the jump bias less a
+  nonnegative discrete-sampling term;
+  `tendsto_logContract_sub_realizedVariance_of_martingale` has limit the jump bias.
+* `logContract_le_realizedVariance_of_martingale`, `logContract_lt_realizedVariance_of_martingale`:
+  with downward (crash) jumps the log contract is below (strictly below) the sampled variance at
+  every sampling frequency.
+* `logContract_realizedVariance`: for a pre-Brownian motion, the Black–Scholes log contract has
+  expected payoff `σ²` and differs from the sampled variance only by the discrete-sampling term
+  `−(r − σ²/2)²T/(n + 1)`.
+
+## References
+
+* [F. Black and M. Scholes, *The pricing of options and corporate liabilities*][BlackScholes1973]
+* [Broadie and Jain, *The effect of jumps and discrete sampling on volatility and variance
+  swaps*][BroadieJain2008]
+* [Carr and Wu, *Variance risk premiums*][CarrWu2009]
+* [Cont and Tankov, *Financial Modelling with Jump Processes*][ContTankov2004]
+* [Demeterfi et al., *More than you ever wanted to know about volatility
+  swaps*][DemeterfiDermanKamalZou1999]
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976]
+
+## Tags
+
+variance swap, log contract, fair strike, realized variance, Demeterfi–Derman–Kamal–Zou, jump risk,
+MSC 91G20, JEL G13
 -/
 @[expose] public section
 

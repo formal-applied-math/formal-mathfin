@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.BlackScholes.JumpDiffusionProcess
+public import Mathlib.Probability.Moments.Tilted
 
 /-!
 # The moments of a jump-diffusion log-return
@@ -27,6 +28,26 @@ derivatives at `0` are the first two cumulants per unit time, `κ'(0) = b + Λ�
 The hypothesis on the moment-generating function is the one the cumulant generating function
 needs. The mean itself needs only `𝔼|J| < ∞` and the variance `𝔼[J²] < ∞`; those weaker forms are
 not formalized.
+
+## Main results
+
+* `deriv_jumpDiffusionExponent_zero`: `κ'(0) = b + Λ𝔼[J]` for a jump law with exponential moments
+  near `0`.
+* `iteratedDeriv_two_jumpDiffusionExponent_zero`: `κ''(0) = σ² + Λ𝔼[J²]` under the same condition.
+* `integral_id_jumpDiffusionIncrementLaw`: the mean of the log-return over `τ` is
+  `(b + Λ𝔼[J])τ`.
+* `variance_id_jumpDiffusionIncrementLaw`: the variance of the log-return is `(σ² + Λ𝔼[J²])τ`.
+* `integral_sq_jumpDiffusionIncrementLaw`: the second moment is the variance plus the squared mean,
+  `(σ² + Λ𝔼[J²])τ + ((b + Λ𝔼[J])τ)²`.
+
+## References
+
+* [Cont and Tankov, *Financial Modelling with Jump Processes*][ContTankov2004]
+
+## Tags
+
+cumulants, cumulant generating function, log-return moments, mean and variance, Laplace exponent,
+jump-diffusion, MSC 60G51, MSC 60E10, MSC 91G20
 -/
 
 @[expose] public section

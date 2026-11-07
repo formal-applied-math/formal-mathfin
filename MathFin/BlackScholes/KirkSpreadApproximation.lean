@@ -5,7 +5,6 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.GarmanNormalForm
 public import MathFin.BlackScholes.ExchangeOption
 public import MathFin.BlackScholes.MargrabeGrounding
@@ -43,18 +42,23 @@ exactly Margrabe at `K = 0`, for every `r` (and `S²₀ ≠ 0`). Since Margrabe'
 discounted expected exchange payoff in the two-GBM model (`margrabe_exchange_price`), Kirk's
 price is exact at `K = 0` (`kirkSpreadPrice_zero_eq_expected`).
 
-## Results
+## Main definitions
 
-* `kirkEffectiveVariance`: `σ₁² − 2ρσ₁σ₂·w + σ₂²·w²` where `w = S²₀/(S²₀+K')`
-  (`K'` is the already-discounted cash strike, `K·e^{-rT}`).
+* `kirkWeight`: the linearisation point `w = S²₀/(S²₀ + K)`.
+* `kirkEffectiveVariance`: `σ₁² − 2ρσ₁σ₂·w + σ₂²·w²`, with `w = kirkWeight S2 K`.
+* `kirkDiscountedStrike`: the discounted cash strike `K · e^{−rT}`.
+* `kirkSpreadPrice`: Kirk's approximate spread-option price, the Black–Scholes closed form at the
+  exchange leg `S¹₀` with pseudo-strike `S²₀ + K·e^{−rT}` and the effective variance (an
+  approximation, shown exact at `K = 0`).
+
+## Main results
+
 * `kirk_variance_sub_weighted`: `Var[L₁ − w·L₂] = kirkEffectiveVariance · T` for log-prices
   with variances `σᵢ²T` and covariance `ρσ₁σ₂T` — the variance identity that defines Kirk's
   effective variance.
 * `kirkEffectiveVariance_zero_eq_margrabe`: at `K' = 0` and `S²₀ ≠ 0` (so `w = 1`) Kirk's
   effective variance is exactly the Margrabe effective variance
   `σ₁² + σ₂² − 2ρσ₁σ₂`.
-* `kirkSpreadPrice`: the Kirk approximate price, `bsVGarman` at
-  `A = S¹₀`, `K' = S²₀ + K·e^{-rT}`, `DF = 1`, `σ = √σ_eff²`.
 * `kirkSpreadPrice_zero_eq_margrabe`: at `K = 0`, for every `r` and `S²₀ ≠ 0`,
   `kirkSpreadPrice` is exactly `margrabePrice` at the Margrabe volatility
   `√(σ₁² + σ₂² − 2ρσ₁σ₂)` — a price-level equality, not just a variance-level one.
@@ -62,6 +66,15 @@ price is exact at `K = 0` (`kirkSpreadPrice_zero_eq_expected`).
   (`MargrabeGrounding.lean`), Kirk's price at `K = 0` is the discounted expected spread
   payoff — so the approximation is exact at zero strike. For `K ≠ 0` no accuracy statement
   is made.
+
+## References
+
+* [E. Kirk, *Correlation in the energy markets*][Kirk1995]
+
+## Tags
+
+Kirk approximation, spread option, energy markets, crack spread, approximate closed form, MSC 91G20,
+JEL G13, JEL Q02
 -/
 
 @[expose] public section

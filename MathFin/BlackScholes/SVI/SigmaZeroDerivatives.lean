@@ -5,14 +5,40 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.SVI.BlackScholesBridge
+public import MathFin.BlackScholes.SVI.BlackSmile
 
 /-! # The zero-scale slice and its derivatives
 
 Part of the SVI polynomial-sign certificate (#174).
 
 The piecewise-affine SVI variance at σ = 0: ordinary derivatives on
-the two open wings and one-sided derivatives at their common endpoint. -/
+the two open wings and one-sided derivatives at their common endpoint.
+
+## Main definitions
+
+* `leftSlope`, `rightSlope`: the slopes `b(ρ - 1)` and `b(ρ + 1)` of the zero-scale variance left
+  and right of `m`.
+* `branchDelta`: `blackDelta` with the variance slope replaced by a constant wing slope `s`.
+
+## Main results
+
+* `sigmaZero_variance_hasDerivAt`, `sigmaZero_slope_hasDerivAt`: at `σ = 0` and `k ≠ m`, `slope`
+  and `curvature` are the derivatives of `variance` and `slope`.
+* `sigmaZero_variance_left`, `sigmaZero_variance_right`: at `σ = 0`, `variance p k` is
+  `a + leftSlope p * (k - m)` for `k ≤ m` and `a + rightSlope p * (k - m)` for `k ≥ m`.
+* `leftSlope_nonpos`, `rightSlope_nonneg`: for `b ≥ 0` and `1 - ρ² ≥ 0`, `leftSlope p ≤ 0` and
+  `0 ≤ rightSlope p`.
+* `sigmaZero_variance_ge`, `sigmaZero_variance_pos_iff`: under the same conditions at `σ = 0`,
+  `variance p k ≥ a`, and the variance is positive everywhere iff `a > 0`.
+* `sigmaZero_variance_hasDerivWithinAt_left`, `sigmaZero_variance_hasDerivWithinAt_right`: the
+  one-sided derivatives of `variance p` at `m` are `leftSlope p` and `rightSlope p`.
+* `blackForm_hasDerivWithinAt`: the log-price chain rule holds with a one-sided variance
+  derivative `s`, with derivative `exp k * branchDelta p s k`.
+
+## Tags
+
+zero-scale SVI, piecewise affine variance, one-sided derivatives, MSC 91G20, JEL G13
+-/
 
 @[expose] public section
 

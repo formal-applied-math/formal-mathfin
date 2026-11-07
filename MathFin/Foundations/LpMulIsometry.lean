@@ -5,7 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.MeasureTheory.Function.L2Space
 
 /-! # Multiplication by `f` as an isometry `L²(f²·ν) → L²(ν)`
 
@@ -16,7 +17,7 @@ into `L²(ν)`:
 
 so `‖f·ψ‖_{L²(ν)} = ‖ψ‖_{L²(f²·ν)}`. This is the analytic content behind "the Itô integral
 against `M = φ●B` is the Itô integral against `B` of `ψφ`": the bracket measure `d⟨M⟩ = φ²ds`
-is the weight, and the chain rule is this isometry composed with `itoIntegralCLM_T`.
+is the weight, and the chain rule is this isometry composed with `itoIntegralCLM`.
 
 Mathlib carries only the `p = 1` case, `withDensitySMulLI`, where the density and the
 multiplier coincide; at `p = 2` the multiplier is the *square root* of the density, which is
@@ -33,10 +34,16 @@ still well defined — on `{f ≠ 0}` the representatives agree, and on `{f = 0}
 vanish. Each linearity proof below therefore ends in a case split on `f x = 0`, exactly as
 Mathlib's `withDensitySMulLI` does. This is the step at which a naive attempt breaks.
 
-## Result
+## Main definitions
+
+* `sqWeight`: the measure `f²·ν`, with density `‖f‖ₑ²` against `ν`.
+* `mulLM`: multiplication by a measurable `f` as a linear map `L²(f²·ν) →ₗ[ℝ] L²(ν)`.
+* `mulLI`: the same map as a linear isometry `L²(f²·ν) →ₗᵢ[ℝ] L²(ν)`; `coeFn_mulLI` gives
+  `f·ψ` as its a.e. representative.
+
+## Main results
 
 * `lp_two_norm_sq` — `‖g‖² = ∫ (g a)² ∂ν` for `g : Lp ℝ 2 ν`.
-* `sqWeight` — the weighted measure `f²·ν`.
 * `lintegral_sqWeight` — the change-of-density identity for lower integrals.
 * `eLpNorm_mul_eq` — the norm identity, for a measurable function.
 * `integral_sqWeight`, `setIntegral_sqWeight` — the Bochner transfer, and its set form.
@@ -48,6 +55,11 @@ Mathlib's `withDensitySMulLI` does. This is the step at which a naive attempt br
 * `memLp_mul` — `ψ ∈ L²(f²·ν)` implies `f·ψ ∈ L²(ν)`.
 * `mulLM`, `mulLI` — the map as a linear map and as a `LinearIsometry`, with `coeFn_mulLM`
   the characterising a.e. identity.
+
+## Tags
+
+weighted L2 space, change of density, Itô integral chain rule, bracket measure,
+multiplication isometry, MSC 60H05, MSC 28A25
 -/
 
 @[expose] public section

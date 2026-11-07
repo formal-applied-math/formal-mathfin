@@ -5,7 +5,12 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.Linarith.Frontend
+public import Mathlib.Tactic.Ring.RingNF
 
 /-!
 # Yield curve bootstrapping
@@ -32,10 +37,13 @@ instruments is the search-based `boot` of `FixedIncome/Bootstrapping.lean`, wher
 `swapBootstrap_recovers_couponBondFactor` shows that bisection on a zero-value swap
 recovers the factor named by `bootstrap_solve`.
 
-Results:
+## Main definitions
 
-* `couponBondPricingEq`: the pricing equation for a coupon bond with one new
-  maturity and previously-known maturities.
+* `couponBondPricingEq`: the proposition `P = (∑ i ∈ sprev, c i * B i) + (c_last + F) * B_last`,
+  the price of a coupon bond with previously known maturities `sprev` and one new maturity.
+
+## Main results
+
 * `bootstrap_solve`: from the pricing equation, recovers `B_last` as a
   closed-form ratio.
 * `bootstrap_solve_first`: bootstrap base case for the first bond with empty
@@ -44,6 +52,16 @@ Results:
   `B_2 = (P_2 − c · B_1) / (c + F)`.
 * `bootstrap_consistency`: the bootstrapped price, plugged back into the pricing
   equation, recovers the bond price.
+
+## References
+
+* [Fabozzi, *Fixed Income Mathematics*][FabozziFIM], Ch 9
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], Ch 4.6
+
+## Tags
+
+bootstrapping, zero-coupon bond, coupon bond, discount curve, yield curve construction, JEL E43,
+MSC 91G30
 -/
 
 @[expose] public section

@@ -5,7 +5,6 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.CorrelationFallacies
 
 /-!
@@ -55,6 +54,11 @@ approximation — no `s` satisfies the hypothesis `γ = -(s/2)²` of `rollSpread
 naively evaluating `2 * Real.sqrt (-γ̂₁)` at `γ̂₁ > 0` silently yields a spread estimate of `0`
 rather than signalling that the estimator is undefined there.
 
+## Main definitions
+
+* `rollPriceChange`: the Roll trade-price change `dm + (s/2) qNow - (s/2) qPrev` from a mid-price
+  increment `dm`, a spread `s` and two consecutive trade-direction signs.
+
 ## Main results
 
 * `variance_id_rademacher`, `variance_one_of_hasLaw_rademacher`: a fair random sign has variance
@@ -66,8 +70,13 @@ rather than signalling that the estimator is undefined there.
 
 ## References
 
-* R. Roll, "A simple implicit measure of the effective bid-ask spread in an efficient market",
-  *Journal of Finance* 39 (1984), 1127–1139.
+* [R. Roll, *A simple implicit measure of the effective bid-ask spread in an efficient
+  market*][Roll1984].
+
+## Tags
+
+Roll model, bid–ask bounce, effective spread, serial covariance, spread estimator,
+market microstructure, MSC 62P05, MSC 91G70, JEL G14
 -/
 
 @[expose] public section

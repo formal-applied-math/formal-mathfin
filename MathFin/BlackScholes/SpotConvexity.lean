@@ -5,9 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.PDE
 public import MathFin.BlackScholes.GreekSigns
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Smooth.Flat
 
 /-!
 # Spot-direction convexity of the Black–Scholes call
@@ -29,7 +31,7 @@ slope = delta) is the workhorse for Jensen-type mixture bounds:
 jump-diffusion call dominates the Black–Scholes call, and `JumpImpliedVol.lean`
 consumes the strict form (`bsV_spot_tangent_lt`) to make the domination strict.
 
-## Results
+## Main results
 
 * `convexOn_call_payoff_spot`: `S ↦ max(S − K, 0)` is convex (payoff level).
 * `bsV_spot_strictConvexOn`, `bsV_spot_convexOn`: `S ↦ bsV K r σ S τ` is strictly convex, hence
@@ -37,6 +39,16 @@ consumes the strict form (`bsV_spot_tangent_lt`) to make the domination strict.
 * `bsV_spot_tangent_lt`, `bsV_spot_tangent_le`: the price lies above its tangent at any
   `S₀ > 0`, with slope delta, `bsV(S₀) + Φ(d₁(S₀))·(s − S₀) ≤ bsV(s)`, strictly away from the
   point of tangency.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull]
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], §4.5
+
+## Tags
+
+gamma positivity, price convexity in spot, convex payoff, tangent bound, Jensen mixture, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

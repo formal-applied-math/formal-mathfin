@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Init
 public import Mathlib.Probability.Independence.Integration
 public import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 
@@ -24,6 +25,19 @@ Nothing here knows where the independence comes from: the Brownian kernel
 (`ItoIsometryAdapted`) supplies it from `IsFilteredPreBrownian.indep`, the Poisson kernel
 (`PoissonCompensatedIsometryAdapted`) from `indep_of_disjoint_region`, and both then read the
 one-term facts off these three lemmas.
+
+## Main results
+
+* `IndepFun.integral_mul_comp`: if `φ` is independent of `X`, then `𝔼[φ·g(X)] = 𝔼[φ]·𝔼[g(X)]`
+  for measurable `g`.
+* `IndepFun.integral_mul_eq_zero`: if `φ` is independent of a centred `X`, then `𝔼[φ·X] = 0`.
+* `IndepFun.integral_mul_sq`: if `φ` is independent of `X`, then `𝔼[φ·X²] = 𝔼[φ]·𝔼[X²]`.
+* `IndepFun.memLp_two_mul`: the product of an independent pair in `L²` is in `L²`.
+
+## Tags
+
+Itô isometry, independent increments, martingale difference, compensated Poisson, second moment,
+orthogonality, MSC 60H05, MSC 60G51, MSC 60G55
 -/
 
 @[expose] public section

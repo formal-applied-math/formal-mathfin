@@ -5,9 +5,7 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.BivariateNormalCDF
-public import MathFin.BlackScholes.BarrierParity
 public import MathFin.BlackScholes.Call
 public import MathFin.BlackScholes.HeynenKatTwoAssetBarrier
 
@@ -64,6 +62,21 @@ start-window out-barrier **call** value (`η = 1` down, `η = −1` up) is
   `CA(η) = S·e^{(b−r)T}·(N₂(d₁, ηe₁; ηρ) − (H/S)^{2(μ+1)}·N₂(f₁, ηe₃; ηρ))`
          `− X·e^{−rT}·(N₂(d₂, ηe₂; ηρ) − (H/S)^{2μ}·N₂(f₂, ηe₄; ηρ))`.
 
+## Main definitions
+
+* `ptRho`: `ρ = √(t₁/T)`, the correlation between the barrier-window and full-life log-returns.
+* `ptMu`: `μ = (b − σ²/2)/σ²`, the drift parameter of the barrier formulas.
+* `ptD1`, `ptD2`: the Black–Scholes `d₁`, `d₂` with cost of carry `b` against the strike `X` over
+  the full life `T`.
+* `ptE1`, `ptE2`, `ptE3`, `ptE4`: the corresponding quantities against the barrier `H` over the
+  monitoring window `t₁`, with `ptE3`, `ptE4` carrying the barrier reflection term.
+* `ptF1`, `ptF2`: `d₁` and `d₂` shifted by the barrier reflection term over the full life `T`.
+* `ptCA`: the partial-time-start barrier call closed form `CA(η)` (`η = 1` down, `η = −1` up),
+  Haug's expression with the barrier live on `[0, t₁]`; not proved to be a discounted expected
+  payoff.
+* `ptDownOutCall`: the full-life down-and-out call closed form (Rubinstein–Reiner), as transcribed
+  in this file.
+
 ## Main results
 
 * `ptCA_down_add_up`: **`CA(1) + CA(−1)` collapses to a closed form with no bivariate CDF left**
@@ -84,6 +97,16 @@ start-window out-barrier **call** value (`η = 1` down, `η = −1` up) is
   term is the minimum, reducing `CA(1)` directly to `ptDownOutCall`, the closed form
   `ptCA_down_add_up` reaches.
   Both are identities between transcribed closed forms; neither is proved to be a price.
+
+## References
+
+* [Haug, *The Complete Guide to Option Pricing Formulas*][Haug2007], ch. 4
+* [Heynen and Kat, *Partial barrier options*][HeynenKat1994b]
+
+## Tags
+
+partial barrier option, Heynen–Kat, Haug closed form, barrier monitoring window, bivariate normal,
+knock-out call, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -177,11 +200,12 @@ theorem ptCA_down_add_up (S X H b r σ t1 T : ℝ) (ht1 : 0 ≤ t1) (hT : t1 ≤
 /-- **Monitoring over the whole life gives the full-life closed form.** With the barrier live on
 `[0, T]` (i.e. `t₁ = T`) and the strike dominating the barrier (`X ≥ H`, the branch where the
 down-and-out closed form holds without a min inside the payoff), the start-window value
-`ptCA 1 … T T` reduces to `ptDownOutCall`, the transcribed full-life down-and-out call closed
-form — the same `t₁`-free expression `ptCA_down_add_up` collapses to, here obtained directly:
-the correlation `ptRho T T = 1`, so `bivariateNormalCDF_one` turns each `N₂(a, b; 1)` into `Φ(min(a, b))`,
-and `X ≥ H` makes `d₁ ≤ e₁`, `f₁ ≤ e₃`, `d₂ ≤ e₂`, `f₂ ≤ e₄` (each pair differs exactly by
-`log(S/X) ≤ log(S/H)` over the same positive denominator), so every min is the `d`/`f` term. -/
+`ptCA 1 … T T` reduces to `ptDownOutCall`, the transcribed full-life down-and-out call closed form —
+the same `t₁`-free expression `ptCA_down_add_up` collapses to, here obtained directly: the
+correlation `ptRho T T = 1`, so `bivariateNormalCDF_one` turns each `N₂(a, b; 1)` into
+`Φ(min(a, b))`, and `X ≥ H` makes `d₁ ≤ e₁`, `f₁ ≤ e₃`, `d₂ ≤ e₂`, `f₂ ≤ e₄` (each pair differs
+exactly by `log(S/X) ≤ log(S/H)` over the same positive denominator), so every min is the `d`/ `f`
+term. -/
 theorem ptCA_down_monitored_full_life (S X H b r σ T : ℝ) (hS : 0 < S) (hX : 0 < X)
     (hH : 0 < H) (hXH : H ≤ X) (hσ : 0 < σ) (hT : 0 < T) :
     ptCA 1 S X H b r σ T T = ptDownOutCall S X H b r σ T := by

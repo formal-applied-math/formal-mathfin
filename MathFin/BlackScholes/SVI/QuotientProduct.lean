@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.SVI.TraceForm
 public import MathFin.BlackScholes.SVI.ProductSignature
+public import Mathlib.RingTheory.Trace.Basic
 
 /-! # The Chinese remainder theorem for trace forms
 
@@ -14,6 +15,25 @@ Part of the SVI polynomial-sign certificate (#174).
 
 For coprime `f`, `g`, `ℝ[X]/(fg)` is the product of the two quotients as algebras. If moreover
 `f, g ≠ 0`, the weighted trace form splits as an orthogonal product, so signatures add.
+
+## Main definitions
+
+* `quotientProdHom`: the canonical algebra map `ℝ[X]/(fg) → ℝ[X]/(f) × ℝ[X]/(g)`.
+* `quotientProdEquiv`: for coprime `f`, `g`, the same map as an algebra equivalence.
+
+## Main results
+
+* `quotientProdHom_bijective`: for coprime `f`, `g`, `quotientProdHom f g` is bijective.
+* `quotientProdEquiv_mk`, `quotientProdEquiv_root`: `quotientProdEquiv` sends the class of `p` to
+  the pair of classes of `p`, and the root of `f * g` to the pair of roots.
+* `weightedTraceForm_prod_equivalent`: for coprime nonzero `f`, `g`, `weightedTraceForm (f * g) q`
+  is equivalent to `formProd` of the weighted trace forms of `f` and `g`.
+* `weightedTraceForm_prod_signature`: under the same hypotheses, the signature of
+  `weightedTraceForm (f * g) q` is the sum of the signatures for `f` and `g`.
+
+## Tags
+
+Chinese remainder theorem, coprime polynomials, trace form splitting, SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

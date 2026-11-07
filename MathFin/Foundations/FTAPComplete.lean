@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.FTAPDiscrete
 
 /-!
@@ -31,6 +30,18 @@ equivalent martingale measure is **unique**.
 * `isCompleteMarket_of_unique` — a unique equivalent martingale measure makes the market complete.
 * `ftap_two` — under no arbitrage, and with full information `𝓕 T = ⊤` at the horizon, the market
   is complete iff the equivalent martingale measure is unique.
+
+## References
+
+* [H. Föllmer and A. Schied, *Stochastic Finance: An Introduction in Discrete Time*][FollmerSchied],
+  Theorem 5.30
+* [J. M. Harrison and S. R. Pliska, *Martingales and stochastic integrals in the theory of
+  continuous trading*][HarrisonPliska1981]
+
+## Tags
+
+second fundamental theorem, market completeness, unique martingale measure, replication,
+finite probability space, JEL G13, MSC 91G20
 -/
 
 @[expose] public section
@@ -56,7 +67,8 @@ theorem IsEMM.sum_mul_eq_zero_of_mem_gainsSubspace {Q : Measure Ω} (hQ : IsEMM 
 omit [Fintype Ω] in
 /-- **Second FTAP, `unique ⇒ complete`**: if the market has an equivalent martingale measure and
 only one, every claim is replicated by a predictable strategy from some initial wealth. -/
-theorem isCompleteMarket_of_unique [Finite Ω] [Nonempty Ω] (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω})
+theorem isCompleteMarket_of_unique [Finite Ω] [Nonempty Ω] (hS : StronglyAdapted 𝓕 S)
+    (hP : ∀ ω, 0 < P {ω})
     {Q₀ : Measure Ω} (h₀ : IsEMM 𝓕 P S T Q₀) (hu : ∀ Q, IsEMM 𝓕 P S T Q → Q = Q₀) :
     IsCompleteMarket 𝓕 P S T := by
   classical
@@ -104,7 +116,8 @@ omit [Fintype Ω] in
 single-asset, finite-horizon market on a finite full-support space with no arbitrage and full
 information at the horizon (`𝓕 T = ⊤`), the market is complete iff its equivalent martingale
 measure is unique. -/
-theorem ftap_two [Finite Ω] [Nonempty Ω] (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) (hT : 𝓕 T = mΩ)
+theorem ftap_two [Finite Ω] [Nonempty Ω] (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω})
+    (hT : 𝓕 T = mΩ)
     (hNA : NoArbitrage 𝓕 P S T) : IsCompleteMarket 𝓕 P S T ↔ ∃! Q, IsEMM 𝓕 P S T Q := by
   refine ⟨fun hc ↦ ?_, fun ⟨Q₀, h₀, hu⟩ ↦ isCompleteMarket_of_unique 𝓕 P S T hS hP h₀ hu⟩
   obtain ⟨Q₀, h₀⟩ := exists_isEMM_of_noArbitrage 𝓕 P S T hS hP hNA

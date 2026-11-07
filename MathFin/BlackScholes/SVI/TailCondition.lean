@@ -32,6 +32,37 @@ The left wing gets no atom of its own: the bounds and the limit at strike `0` ho
 positive variance, and whatever convexity asks of the left wing is already in the strike-convexity
 formula. What is not here is the last step of Roper's theorem, the construction of the random
 variable from such a function.
+
+## Main definitions
+
+* `butterflyFreeFormula`: the strike-convexity formula with the sign atom `2 - b(1 + ρ) > 0` of
+  the tail condition.
+
+## Main results
+
+* `asymptote_le_variance`: for `b ≥ 0`, `variance p k ≥ a + b(1 + ρ)(k - m)`.
+* `tendsto_dpl_atBot_iff`: for `b ≥ 0` and positive variance, `d₊(k) → -∞` as `k → ∞` iff
+  `b(1 + ρ) < 2`.
+* `blackCall_le_Phi_dpl`, `bsSmile_nonneg`, `one_sub_le_bsSmile`, `bsSmile_le_one`: for `K > 0` and
+  positive variance at `log K`, the smiled call is at most `Φ(d₊)`, nonnegative, at least
+  `1 - K` and at most `1`.
+* `tendsto_bsSmile_zero_iff`: for `b ≥ 0` and positive variance, `bsSmile p` tends to `0` at
+  `∞` iff `b(1 + ρ) < 2`.
+* `isNormalizedCallPrice_bsSmile_iff`: for `b ≥ 0` and positive variance, `bsSmile p` is a
+  normalised call price function iff it is convex on `(0, ∞)` and `b(1 + ρ) < 2`.
+* `butterflyFreeFormula_iff_isNormalizedCallPrice`: `butterflyFreeFormula` holds iff `σ ≥ 0`,
+  `b ≥ 0`, `1 - ρ² ≥ 0`, the variance is positive, and `bsSmile p` is a normalised call price
+  function.
+
+## References
+
+* [Gatheral and Jacquier, *Arbitrage-free SVI volatility surfaces*][GatheralJacquier2014], Lemma 2.2
+* [Roper, *Arbitrage free implied volatility surfaces*][Roper2010], Theorem 2.1
+
+## Tags
+
+SVI tail condition, butterfly arbitrage, Gatheral–Jacquier, Roper theorem, large-strike behaviour,
+arbitrage-free SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

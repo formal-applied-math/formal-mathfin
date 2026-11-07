@@ -9,12 +9,13 @@ module
 public import MathFin.Foundations.ItoIntegralCLM
 public import MathFin.Foundations.ItoFormulaSquaredL2
 public import MathFin.Foundations.ItoRiemannSum
+public import Mathlib.Algebra.Ring.IsFormallyReal
 
 /-!
 # The Itô integral of Brownian motion: `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` via the CLM
 
 This is the **keystone consumer** of the continuous Itô integral
-`ItoIntegralCLM.itoIntegralCLM_T`. Until now the library held two unconnected
+`ItoIntegralCLM.itoIntegralCLM`. Until now the library held two unconnected
 notions of `∫₀ᵀ B dB`: the abstract CLM (built at 733 LOC) and the concrete
 quadratic-variation limit `½(B_T² − B₀² − T)` (`itoSquared_L2_tendsto_div2`),
 with no theorem bridging them — and the CLM had **zero consumers**. This file
@@ -40,13 +41,37 @@ device — it is exactly how the Itô integral is defined for unbounded integran
 3. `stepσ` — the left-endpoint step process of an adapted bounded `θ` over `unifPart T n`;
    the truncated one is `stepσ` at `clampPath B M`.
 4. `itoSimple (stepσ θ) = ∑ θ(t_k)·ΔB_k` (`itoSimple_stepσ`) — at `clampPath B M` the truncated sum.
-5. CLM evaluates: `itoIntegralCLM_T (simpleAssembly_T (stepσ θ))` (`itoIntegralCLM_T_stepσ`) is that
-   sum's `L²` class (`extendOfNorm_eq` + the assembly isometry).
+5.  CLM evaluates: `itoIntegralCLM (simpleAssemblyHorizon (stepσ θ))` (`itoIntegralCLM_stepσ`) is
+   that sum's `L²` class (`extendOfNorm_eq` + the assembly isometry).
 6. The truncated sums converge in `L²` to `½(B_T² − B₀² − T)`
    (`itoSquared_L2_tendsto_div2` + the truncation error → 0).
 7. By the isometry the embeddings are Cauchy in the predictable `L²`; their limit
    `g_B` is the Itô-L² realisation of `s ↦ B_s`.
-8. `itoIntegralCLM_T g_B = ½·⟦B_T² − B₀² − T⟧` — the keystone.
+8. `itoIntegralCLM g_B = ½·⟦B_T² − B₀² − T⟧` — the keystone.
+
+## Main definitions
+
+* `clampM`: truncation of a real to `[−M, M]`.
+* `clampPath`: the Brownian path clamped to `[−m, m]`.
+* `stepSP`: the single-step simple process `φ · 𝟙_{(a,b]}` with `φ` bounded and `𝓕_a`-measurable.
+* `stepσ`: the bounded left-endpoint step process `∑_{k<n} θ(t_k) · 𝟙_{(t_k, t_{k+1}]}` of an
+  adapted `θ`.
+
+## Main results
+
+* `itoIntegralCLM_brownian`: there is an Itô `L²` integrand `gB` with
+  `itoIntegralCLM gB = ½(B_T² − B₀² − T)` (the proof takes `gB` as the `trim_T`-limit of the
+  truncated left-endpoint approximations of `s ↦ B_s`; the statement does not name it).
+* `itoIntegralCLM_stepσ`: the CLM evaluated on the bounded left-endpoint step process `stepσ`
+  is the `L²` class of the corresponding Riemann sum.
+* `tendsto_clampM_sub_sq_integral`: for `X ∈ L²(μ)`, `∫ (clamp_m(X) − X)² ∂μ → 0` as `m → ∞`.
+* `integral_truncRiemann_sub_sq`, `tendsto_integral_truncRiemann_sub_sq`: the truncation error of
+  the Riemann sum is a variance sum, and for each `n` it tends to `0` as `m → ∞`.
+
+## Tags
+
+∫ B dB, Itô integral of Brownian motion, stochastic integral, quadratic variation, Riemann sums,
+truncation, MSC 60H05, MSC 60J65
 -/
 
 @[expose] public section
@@ -252,13 +277,13 @@ lemma memLp_riemannσ_clampPath (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
   memLp_riemannσ hB hBmeas (stronglyMeasurable_clampPath hBmeas m) (abs_clampPath_le m) T n
 
 /-- **The CLM evaluated on `stepσ` is the `θ`-Riemann sum's `L²` class.** -/
-lemma itoIntegralCLM_T_stepσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+lemma itoIntegralCLM_stepσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
-    itoIntegralCLM_T hB T hBmeas
-        (simpleAssembly_T (μ := μ) T hBmeas (stepσ hBmeas hadap hbdd T n))
+    itoIntegralCLM hB T hBmeas
+        (simpleAssemblyHorizon (μ := μ) T hBmeas (stepσ hBmeas hadap hbdd T n))
       = (memLp_riemannσ hB hBmeas hadap hbdd T n).toLp (riemannσ (B := B) θ T n) := by
-  rw [itoIntegralCLM_T_simpleAssembly_T]
+  rw [itoIntegralCLM_simpleAssemblyHorizon]
   rw [itoSimpleLp]
   exact (MemLp.toLp_eq_toLp_iff _ _).mpr
     (Filter.Eventually.of_forall fun ω ↦ itoSimple_stepσ hBmeas hadap hbdd T n ω)
@@ -351,14 +376,14 @@ lemma tendsto_norm_toLp_sub {F G : ℕ → Ω → ℝ} (hF : ∀ n, MemLp (F n) 
 
 /-- **Keystone: `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` through the CLM.** There is an Itô-`L²`
 integrand `gB` — the `trim_T`-limit of the truncated left-endpoint approximations of `s ↦ Bₛ`
-— whose continuous Itô integral `itoIntegralCLM_T gB` equals `½(B_T² − B₀² − T)`. This gives the
-733-LOC `itoIntegralCLM_T` its **first genuine consumer** and bridges the abstract CLM integral
+— whose continuous Itô integral `itoIntegralCLM gB` equals `½(B_T² − B₀² − T)`. This gives the
+733-LOC `itoIntegralCLM` its **first genuine consumer** and bridges the abstract CLM integral
 to the concrete quadratic-variation limit (`itoSquared_L2_tendsto_div2`). The unbounded Gaussian
 coefficients `B_{t_k}` are handled by clamp-truncation; the truncation error vanishes by the
 unbounded-`L²` discrete isometry. -/
-theorem itoIntegralCLM_T_brownian (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
-    ∃ gB : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      itoIntegralCLM_T hB T hBmeas gB
+theorem itoIntegralCLM_brownian (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
+    ∃ gB : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
+      itoIntegralCLM hB T hBmeas gB
         = (memLp_halfD hB hBmeas T).toLp
             (fun ω ↦ (1 / 2 : ℝ) * (B T ω ^ 2 - B 0 ω ^ 2 - (T : ℝ))) := by
   set c := (memLp_halfD hB hBmeas T).toLp
@@ -402,20 +427,20 @@ theorem itoIntegralCLM_T_brownian (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥
           + dist ((memLp_riemannσ_brownian hB hBmeas T n).toLp (riemannσ (B := B) B T n)) c :=
           dist_triangle _ _ _
       _ = _ := by rw [dist_eq_norm, dist_eq_norm, hc]; simp only [one_div]
-  -- `itoIntegralCLM_T` is an isometry; the preimages are Cauchy, hence converge to `gB`.
-  have hisom : Isometry (itoIntegralCLM_T hB T hBmeas) :=
-    AddMonoidHomClass.isometry_of_norm _ (itoIntegralCLM_T_norm hB T hBmeas)
-  set x : ℕ → Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
-    fun n ↦ simpleAssembly_T (μ := μ) T hBmeas
+  -- `itoIntegralCLM` is an isometry; the preimages are Cauchy, hence converge to `gB`.
+  have hisom : Isometry (itoIntegralCLM hB T hBmeas) :=
+    AddMonoidHomClass.isometry_of_norm _ (itoIntegralCLM_norm hB T hBmeas)
+  set x : ℕ → Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) :=
+    fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas
       (stepσ hBmeas (stronglyMeasurable_clampPath hBmeas (M n)) (abs_clampPath_le (M n)) T n)
     with hxdef
-  have hax : ∀ n, itoIntegralCLM_T hB T hBmeas (x n)
+  have hax : ∀ n, itoIntegralCLM hB T hBmeas (x n)
       = (memLp_riemannσ_clampPath hB hBmeas T n (M n)).toLp
           (riemannσ (B := B) (clampPath B (M n)) T n) :=
-    fun n ↦ itoIntegralCLM_T_stepσ hB hBmeas (stronglyMeasurable_clampPath hBmeas (M n))
+    fun n ↦ itoIntegralCLM_stepσ hB hBmeas (stronglyMeasurable_clampPath hBmeas (M n))
       (abs_clampPath_le (M n)) T n
   have hxCauchy : CauchySeq x := by
-    have haC : CauchySeq (fun n ↦ itoIntegralCLM_T hB T hBmeas (x n)) := by
+    have haC : CauchySeq (fun n ↦ itoIntegralCLM hB T hBmeas (x n)) := by
       simp only [hax]; exact hA.cauchySeq
     rw [Metric.cauchySeq_iff] at haC ⊢
     intro ε hε
@@ -423,10 +448,10 @@ theorem itoIntegralCLM_T_brownian (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥
     exact ⟨N, fun mm hmm nn hnn ↦ by rw [← hisom.dist_eq]; exact hN mm hmm nn hnn⟩
   obtain ⟨gB, hgB⟩ := cauchySeq_tendsto_of_complete hxCauchy
   refine ⟨gB, ?_⟩
-  have h1 : Tendsto (fun n ↦ itoIntegralCLM_T hB T hBmeas (x n)) atTop
-      (𝓝 (itoIntegralCLM_T hB T hBmeas gB)) :=
-    ((itoIntegralCLM_T hB T hBmeas).continuous.tendsto gB).comp hgB
-  have h2 : Tendsto (fun n ↦ itoIntegralCLM_T hB T hBmeas (x n)) atTop (𝓝 c) := by
+  have h1 : Tendsto (fun n ↦ itoIntegralCLM hB T hBmeas (x n)) atTop
+      (𝓝 (itoIntegralCLM hB T hBmeas gB)) :=
+    ((itoIntegralCLM hB T hBmeas).continuous.tendsto gB).comp hgB
+  have h2 : Tendsto (fun n ↦ itoIntegralCLM hB T hBmeas (x n)) atTop (𝓝 c) := by
     simp only [hax]; exact hA
   exact tendsto_nhds_unique h1 h2
 

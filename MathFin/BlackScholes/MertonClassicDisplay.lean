@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.MertonJumpDiffusion
 
 /-!
@@ -34,11 +33,25 @@ compensated jump growth) turns each conditional value into
 No hypotheses beyond `S₀, K > 0`, `T > 0`, `k > −1` — in particular no
 constraint on `σ`, `δ`, `r`.
 
+## Main definitions
+
+* `mertonRate`: the jump-adjusted rate `r_n = r − kΛ/T + n·log(1+k)/T` of the classic display.
+
 ## Main results
 
 * `bsV_spot_exp_rate_shift` — the rate-shift identity.
 * `mertonCallTerm_eq_classic` — per-term regrouping.
 * `mertonCallPrice_eq_classic_tsum` — the classic Merton series.
+
+## References
+
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976], eq.
+  (16)
+
+## Tags
+
+Merton jump-diffusion, adjusted intensity, Poisson series, textbook form, jump compensator,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

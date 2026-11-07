@@ -5,7 +5,10 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.SVI.TraceForm
+public import MathFin.Init
+public import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.RingTheory.Trace.Basic
+public import Mathlib.Analysis.Normed.Field.Basic
 
 /-! # Traces at a repeated real root
 
@@ -13,6 +16,23 @@ Part of the SVI polynomial-sign certificate (#174).
 
 In `ℝ[X]/((X − c)ʳ)` every element differs from its value at `c` by a nilpotent, and its trace is
 `r` times that value.
+
+## Main definitions
+
+* `realRootEval`: evaluation at `c`, as an `ℝ`-algebra map `AdjoinRoot ((X - C c)^r) → ℝ` for
+  `r > 0`.
+
+## Main results
+
+* `realRootEval_mk`: `realRootEval` sends the class of `p` to `p.eval c`.
+* `realRoot_nilpotent_remainder`: every element of `AdjoinRoot ((X - C c)^r)` differs from the
+  image of its value at `c` by a nilpotent.
+* `trace_realRoot_component`: the algebra trace of `x` in `AdjoinRoot ((X - C c)^r)` is
+  `r * realRootEval c r hr x`.
+
+## Tags
+
+repeated root, nilpotent trace, quotient ring trace, SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

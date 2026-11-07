@@ -5,7 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
+public import MathFin.Init
+public import Mathlib.Probability.Process.Stopping
 
 /-!
 # Paths of a stopped process
@@ -16,6 +17,19 @@ are: the stopped time `t ∧ ρ` read back in `ℝ≥0` (`coe_untopA_min`), its 
 stopping indicator being inert when `ρ` is positive (`stoppedProcess_indicator_eq`).
 `BoundedLocalMartingale`, `LevyCharacterization` and `ItoFormulaUnrestrictedLocMart` localise by
 stopping, and share these.
+
+## Main results
+
+* `coe_untopA_min`: `min t ρ`, read back in `ℝ≥0`, is again `min t ρ` in `WithTop ℝ≥0`.
+* `continuous_untopA_min`, `untopA_min_zero`: `t ↦ t ∧ ρ` is continuous and equals `0` at `t = 0`.
+* `stoppedProcess_indicator_eq`: when every `ρ ω` is positive, the indicator `{⊥ < ρ}` inside a
+  stopped process changes nothing.
+* `continuous_stoppedProcess`: a stopped process has continuous paths when `X` does.
+
+## Tags
+
+stopped process, localisation, path continuity, stopping time, local martingale, MSC 60G40,
+MSC 60G07
 -/
 
 @[expose] public section

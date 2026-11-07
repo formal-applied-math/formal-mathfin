@@ -5,9 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.Call
-public import MathFin.BlackScholes.Forward
 
 /-!
 # Delta as stock-numeraire probability: `Φ(d_1) = Q^(S)(S_T > K)`
@@ -53,6 +51,19 @@ This closes the structural narrative on the BS formula:
 
 Each Φ is now identified with the exercise probability under one of the
 two natural numeraires (money market vs. stock).
+
+## Main results
+
+* `bsCall_asset_piece_integral`: under `BSCallHyp`, the `Q`-integral of `S_T` over the exercise
+  region `{z > -d₂}` is `S_0 * exp (r * T) * Φ(d₁)`.
+* `stockNumeraire_exercise_probability`: under `BSCallHyp`, the `Q`-integral over the exercise
+  region of the density `exp (-r * T) * S_T / S_0` is `Φ(d₁)`; this is the exercise probability
+  under the measure with that density with respect to `Q`.
+
+## Tags
+
+stock numeraire, change of numeraire, delta as probability, Radon–Nikodym density,
+exercise probability, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

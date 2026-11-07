@@ -11,7 +11,7 @@ public import MathFin.Foundations.ItoIntegralProcessLocalMartingaleInfinite
 /-! # The time-dependent Itô formula as a process — Itô's lemma as a semimartingale decomposition
 
 The terminal Itô formula `ito_formula_td_L2_bddDeriv` is a single-time statement: it decomposes
-`f(T, B_T) − f(0, B_0)` at the *fixed horizon* `T` as `itoIntegralCLM_T gfx + drift`, an `Lp 2 μ`
+`f(T, B_T) − f(0, B_0)` at the *fixed horizon* `T` as `itoIntegralCLM gfx + drift`, an `Lp 2 μ`
 element. This file lifts it to a **process identity** holding simultaneously for every `t ≤ T`:
 
   `f(t, B_t) − f(0, B_0) =ᵐ (gfx ● B)_t + ∫₀ᵗ (f_t + ½f_xx)(s, B_s) ds`,
@@ -38,6 +38,22 @@ The single new ingredient is the **canonical witness** now exposed by
 Hence at every `t ≤ T` the terminal formula at horizon `t` reads `M_t =ᵐ itoIntegralCLM_t gfxₜ`,
 and `itoIntegralCLM_t gfxₜ = (itoProcessCLM t t) gfxₜ = itoProcessL2Inf t F` — one process, all `t`.
 The martingale, continuity and local-martingale structure come for free from the `[0,∞)` tower.
+
+## Main results
+
+* `exists_fullHorizon_extension`: a horizon-`T` predictable `L²` integrand `g` extends to a
+  `[0,∞)` predictable `L²` integrand `F` whose restriction to the band is `g` (the statement
+  records only this agreement on the band, not that `F` vanishes after `T`).
+* `ito_formula_td_process`: for `f(t,x)` with the `C^{1,2}`-with-bounds package, there is a
+  `[0,∞)` predictable `L²` integrand `F` such that for every `t ≤ T`,
+  `f(t, B_t) − f(0, B_0) =ᵐ itoProcessL2Inf t F + ∫₀ᵗ (f_t + ½f_xx)(s, B_s) ds`; the process
+  `itoProcessL2Inf · F` is a martingale and has a continuous local-martingale version. That `F`
+  is `f_x(s, B_s)` on `(0,T]` is used in the proof but is not part of the conclusion.
+
+## Tags
+
+Itô lemma, semimartingale decomposition, local martingale, Itô integral process,
+time-dependent function, MSC 60H05, MSC 60G44, MSC 60J65
 -/
 
 @[expose] public section
@@ -62,10 +78,10 @@ predictability over the full product is the extension by zero of `g`'s predictab
 across the predictable rectangle `(0,T] × Ω`; the `L²` finiteness is `g`'s (the indicator only
 removes mass). -/
 lemma exists_fullHorizon_extension (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (g : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (g : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     ∃ F : Lp ℝ 2 ((timeMeasure.prod μ).trim
       (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod),
-      (⇑F : ℝ≥0 × Ω → ℝ) =ᵐ[trimMeasure_T (μ := μ) T hBmeas] ⇑g := by
+      (⇑F : ℝ≥0 × Ω → ℝ) =ᵐ[trimMeasure (μ := μ) T hBmeas] ⇑g := by
   set m := (natFiltration (mΩ := mΩ) hBmeas).predictable
   have hSpred : MeasurableSet[m] (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)) :=
     MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := natFiltration hBmeas) 0 T
@@ -73,29 +89,29 @@ lemma exists_fullHorizon_extension (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B 
   -- a predictable strongly-measurable representative of `g`
   set h : ℝ≥0 × Ω → ℝ := (Lp.aestronglyMeasurable g).mk ⇑g
   have hh_sm : StronglyMeasurable[m] h := (Lp.aestronglyMeasurable g).stronglyMeasurable_mk
-  have hgh : (⇑g : ℝ≥0 × Ω → ℝ) =ᵐ[trimMeasure_T (μ := μ) T hBmeas] h :=
+  have hgh : (⇑g : ℝ≥0 × Ω → ℝ) =ᵐ[trimMeasure (μ := μ) T hBmeas] h :=
     (Lp.aestronglyMeasurable g).ae_eq_mk
   -- the zero-extension
   set Ffn : ℝ≥0 × Ω → ℝ := (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)).indicator h with hFfn
   have hSrestrict : ((timeMeasure.prod μ).trim
         (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod).restrict
-        (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)) = trimMeasure_T (μ := μ) T hBmeas :=
-    (trimMeasure_T_eq_restrict T hBmeas).symm
+        (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)) = trimMeasure (μ := μ) T hBmeas :=
+    (trimMeasure_eq_restrict T hBmeas).symm
   have hmem : MemLp Ffn 2 ((timeMeasure.prod μ).trim
       (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod) := by
     rw [memLp_iff, hFfn, eLpNorm_indicator_eq_eLpNorm_restrict hSpred.nullMeasurableSet,
       hSrestrict, ← eLpNorm_congr_ae hgh]
     exact Lp.eLpNorm_lt_top g
   refine ⟨hmem.toLp Ffn, ?_⟩
-  have hle : trimMeasure_T (μ := μ) T hBmeas ≤ (timeMeasure.prod μ).trim
+  have hle : trimMeasure (μ := μ) T hBmeas ≤ (timeMeasure.prod μ).trim
       (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod := by
-    rw [trimMeasure_T_eq_restrict]; exact Measure.restrict_le_self
+    rw [trimMeasure_eq_restrict]; exact Measure.restrict_le_self
   calc (⇑(hmem.toLp Ffn) : ℝ≥0 × Ω → ℝ)
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] Ffn :=
+      =ᵐ[trimMeasure (μ := μ) T hBmeas] Ffn :=
         (MemLp.coeFn_toLp hmem).filter_mono (ae_mono hle)
-    _ =ᵐ[trimMeasure_T (μ := μ) T hBmeas] h := by
+    _ =ᵐ[trimMeasure (μ := μ) T hBmeas] h := by
         rw [hFfn, ← hSrestrict]; exact indicator_ae_eq_restrict hSpred.nullMeasurableSet
-    _ =ᵐ[trimMeasure_T (μ := μ) T hBmeas] ⇑g := hgh.symm
+    _ =ᵐ[trimMeasure (μ := μ) T hBmeas] ⇑g := hgh.symm
 
 /-- **The time-dependent Itô formula as a process (semimartingale decomposition).** For `f(t,x)`
 with the `C^{1,2}`-with-bounds package, there is a `[0,∞)` predictable `L²` integrand `F`
@@ -143,14 +159,14 @@ theorem ito_formula_td_process
   -- extend it to a `[0,∞)` integrand `F` agreeing with `gfx_T` (hence `[f_x]`) on `(0,T]`
   obtain ⟨F, hF_eq⟩ := exists_fullHorizon_extension T hBmeas gfxT
   have hF_fx : (⇑F : ℝ≥0 × Ω → ℝ)
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦ f_x z.1 (B z.1 z.2) := hF_eq.trans hgfxT_eq
+      =ᵐ[trimMeasure (μ := μ) T hBmeas] fun z ↦ f_x z.1 (B z.1 z.2) := hF_eq.trans hgfxT_eq
   refine ⟨F, fun t ht ↦ ?_, fun i j hij ↦ itoProcessL2Inf_isMartingale hB hBmeas F hij,
     exists_continuous_localMartingale_modification_infinite hB hBmeas hBcont (f := F)⟩
   -- the explicit horizon-`t` witness and terminal identity at `t`
   obtain ⟨gfxt, hgfxt_eq, hMt⟩ := ito_formula_td_L2_bddDeriv hB hBmeas hBcont t
     hf_t hf_tt hf_tx hf_x hf_xx hf_xxx hf_x_cont hf_xx_cont hbd_t hbd_x hbd_xx hbd_tt hbd_tx hbd_xxx
-  have hle_tT : trimMeasure_T (μ := μ) t hBmeas ≤ trimMeasure_T (μ := μ) T hBmeas := by
-    rw [trimMeasure_T_eq_restrict, trimMeasure_T_eq_restrict]
+  have hle_tT : trimMeasure (μ := μ) t hBmeas ≤ trimMeasure (μ := μ) T hBmeas := by
+    rw [trimMeasure_eq_restrict, trimMeasure_eq_restrict]
     exact Measure.restrict_mono
       (Set.prod_mono (Set.Ioc_subset_Ioc_right ht) (subset_refl _)) le_rfl
   -- the band restriction of `F` to `[0,t]` is the horizon-`t` witness `gfxₜ`
@@ -158,7 +174,7 @@ theorem ito_formula_td_process
     refine Lp.ext ((restrictToBand_coeFn t hBmeas F).trans ?_)
     exact (hF_fx.filter_mono (ae_mono hle_tT)).trans hgfxt_eq.symm
   -- the stochastic term is the Itô process `(f_x ● B)_t`
-  have hstoch_lp : itoProcessL2Inf hB t hBmeas F = itoIntegralCLM_T hB t hBmeas gfxt := by
+  have hstoch_lp : itoProcessL2Inf hB t hBmeas F = itoIntegralCLM hB t hBmeas gfxt := by
     rw [itoProcessL2Inf_eq_itoProcessCLM hB t t hBmeas (le_refl t) F, hrestr,
         itoProcessCLM_terminal_eq]
   filter_upwards [hMt] with ω hω

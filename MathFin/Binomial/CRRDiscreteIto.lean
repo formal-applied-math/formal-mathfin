@@ -5,10 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Binomial.CRRConvergence
 public import MathFin.Binomial.DriftLimit
 public import MathFin.Binomial.CRRCharFun
+public import Mathlib.MeasureTheory.Order.Group.Lattice
 
 /-!
 # Mean and variance of the CRR log-return law, and their Black–Scholes limits
@@ -30,7 +30,7 @@ integrable, and the `k`-fold convolution has mean `k·E_ν[X]` and variance `k·
 `variance_id_crrStepMeasure`), so the `n`-step moments are `n(2pₙ − 1)σ√(T/n)` and
 `4σ²T·pₙ(1 − pₙ)`, whose limits are `crr_drift_limit_n` and `crr_variance_limit`.
 
-## Results
+## Main results
 
 * `integrable_of_continuous_of_ae_abs_le`, `ae_abs_le_conv`, `ae_abs_le_convPow`: bounded
   support and integrability through convolution powers.
@@ -38,6 +38,16 @@ integrable, and the `k`-fold convolution has mean `k·E_ν[X]` and variance `k·
 * `integral_id_crrStepMeasure`, `variance_id_crrStepMeasure`: mean and variance of the CRR step.
 * `crrRowLaw_moments_tendsto`: mean and variance of the `n`-step CRR log-return law converge to
   those of `N((r − σ²/2)T, σ²T)`.
+
+## References
+
+* [J. C. Cox, S. A. Ross and M. Rubinstein, *Option pricing: a simplified
+  approach*][CoxRossRubinstein1979]
+
+## Tags
+
+log-return moments, convolution power, mean and variance, Cox–Ross–Rubinstein, weak convergence,
+moment convergence, MSC 91G20, MSC 60F05, JEL G13
 -/
 
 @[expose] public section

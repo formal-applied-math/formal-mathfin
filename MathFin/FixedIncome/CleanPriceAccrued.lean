@@ -5,8 +5,8 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.MacaulayModified
+public import Mathlib.Analysis.SpecialFunctions.Pow.Continuity
 
 /-!
 # Clean price and accrued interest, on- and between-coupon dates
@@ -38,9 +38,15 @@ with **clean price** `Clean(y, f) = Dirty(y, f) - Accrued(f)`. On a coupon
 date (`f = 0`) this collapses to the ordinary `bondPriceDisc` with zero
 accrued interest — the two pricing conventions agree exactly where they must.
 
-## Result
+## Main definitions
 
-* `dirtyPrice`, `accruedInterest`, `cleanPrice` — the three quantities.
+* `dirtyPrice`: the flat-compounded present value of the remaining cashflows, carried forward by
+  the elapsed fraction `f` of the current coupon period.
+* `accruedInterest`: the simple-interest share of the next coupon accrued over the fraction `f`.
+* `cleanPrice`: the dirty price minus the accrued interest.
+
+## Main results
+
 * `cleanPrice_eq_dirty_sub_accrued`: `Clean = Dirty - Accrued` by definition.
 * `dirtyPrice_on_coupon_date`: `Dirty(y, 0) = bondPriceDisc s t c y`.
 * `accruedInterest_on_coupon_date`: `Accrued(0) = 0`.
@@ -62,6 +68,16 @@ remaining tenor, not an `ℕ`-truncated `0`):
 * `tendsto_cleanPrice_coupon_date`: the clean price, with accrued interest
   on `c j`, tends to the new period's clean price — it is continuous across
   the coupon date. The full accrued coupon is what the dirty price sheds.
+
+## References
+
+* [Fabozzi, *Bond Markets, Analysis and Strategies*][FabozziBMAS]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull]
+
+## Tags
+
+clean price, dirty price, accrued interest, coupon bond, bond quotation, day count fraction,
+MSC 91G30, JEL G12
 -/
 
 @[expose] public section

@@ -5,7 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
 
 /-!
 # Carr–Madan static replication (spanning formula)
@@ -26,6 +29,26 @@ The proof is one integration by parts — the second-order Taylor remainder
 (`secondOrder_remainder_eq_integral`) — followed by a case split on `S` vs `κ`: in each
 case one option leg vanishes (its positive part is `0` over its strike range) and the other
 reproduces the remainder.
+
+## Main results
+
+* `carrMadan_spanning`: for `f` twice differentiable on `[L, U]` with `f''` continuous there, and
+  `L ≤ κ ≤ U`, `S ∈ [L, U]`,
+  `f S = f κ + f' κ · (S − κ) + ∫_L^κ f''(K)·(K − S)⁺ dK + ∫_κ^U f''(K)·(S − K)⁺ dK`.
+  This is the compact strike-range form; no improper integral appears.
+* `carrMadan_log_spanning`: the case `f = log` with `0 < L`, where the option weights are
+  `−1/K²`.
+
+## References
+
+* [Carr and Madan (2001)][CarrMadan2001]
+* [Demeterfi et al., *More than you ever wanted to know about volatility
+  swaps*][DemeterfiDermanKamalZou1999]
+
+## Tags
+
+static replication, spanning formula, Carr–Madan formula, variance swap replication,
+Taylor remainder, strip of options, JEL G13, MSC 91G20
 -/
 
 @[expose] public section
@@ -41,7 +64,7 @@ This is the `n = 1` case of Mathlib's `taylor_integral_remainder` (stated there 
 `ContDiffOn` + `iteratedDerivWithin`); we keep this explicit-`HasDerivAt` form because the
 spanning proof consumes `f'`, `f''` as named functions and the `iteratedDerivWithin` bridge
 would be longer than the IBP proof itself. -/
-private theorem secondOrder_remainder_eq_integral {f f' f'' : ℝ → ℝ} {κ S : ℝ}
+theorem secondOrder_remainder_eq_integral {f f' f'' : ℝ → ℝ} {κ S : ℝ}
     (hf : ∀ t ∈ Set.uIcc κ S, HasDerivAt f (f' t) t)
     (hf' : ∀ t ∈ Set.uIcc κ S, HasDerivAt f' (f'' t) t)
     (hf'' : ContinuousOn f'' (Set.uIcc κ S)) :

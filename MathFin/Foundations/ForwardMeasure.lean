@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.Numeraire
 
 /-!
@@ -42,9 +41,14 @@ change-of-numéraire identity are stated for a general bank account and carry ov
 to a stochastic short rate (where `Q^T ≠ Q`); only the concrete constant-rate instance is
 degenerate.
 
+## Main definitions
+
+* `forwardMeasure`: the `T`-forward measure `Q^T` for a bank account with terminal value `B`,
+  the change-of-numéraire measure with the zero-coupon bond as numéraire (`N_T = 1`,
+  `N_0 = 𝔼^Q[1/B]`, `B_0 = 1`).
+
 ## Main results
 
-* `forwardMeasure` — the measure `Q^T` as a `numeraireMeasure` instance.
 * `forwardMeasure_isProbabilityMeasure` — `Q^T` is a probability measure.
 * `forwardMeasure_price` — the bond-numéraire change-of-measure identity
   `P(0,T)·𝔼^{Q^T}[X] = 𝔼^Q[X/B_T]`.
@@ -52,6 +56,11 @@ degenerate.
   at the constant bank account `e^{rT}`.
 * `futuresForwardBasis_of_integral_mul_exp_neg` — the numéraire step of the futures–forward
   basis, for any law satisfying the covariance identity.
+
+## Tags
+
+T-forward measure, change of numéraire, zero-coupon bond numéraire,
+risk-neutral measure, bond as numeraire, MSC 91G30, JEL G13, JEL E43
 -/
 
 @[expose] public section

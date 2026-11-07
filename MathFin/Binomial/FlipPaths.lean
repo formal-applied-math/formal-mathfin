@@ -5,7 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.Ring.RingNF
 
 /-!
 # The pathwise language of the binomial tree
@@ -23,6 +26,26 @@ conditional expectation for the binomial filtration. This file is the measure-fr
 
 The martingale representation theorem built from it, for Mathlib's `Martingale` of the flip
 filtration, is `binomial_martingale_representation` (`Binomial/MartingaleRepresentation.lean`).
+
+## Main definitions
+
+* `PathAdaptedAt`: a function of a coin-flip path `ω : ℕ → Bool` is `n`-adapted when it depends
+  only on the first `n` flips.
+* `hedgeRatio`: the node-wise hedge ratio of `M` against `S`, the change in `M` over the change
+  in `S` across the two children of a node.
+
+## Main results
+
+* `PathAdaptedAt.fixFlip`: fixing the `n`-th flip of an `(n + 1)`-adapted function leaves an
+  `n`-adapted function.
+* `PathAdaptedAt.mono`: an `m`-adapted function is `n`-adapted for `m ≤ n`.
+* `repr_one_step`: if `M` and `S` satisfy the node-average condition with weight `q` and `S` is
+  nondegenerate at every node, then `M_{n+1} − M_n = hedgeRatio M S n ω · (S_{n+1} − S_n)`.
+
+## Tags
+
+coin-flip paths, node average, delta hedge, binomial filtration, one-period hedge,
+conditional expectation on a tree, MSC 91G20, MSC 60G42, JEL G13
 -/
 
 @[expose] public section

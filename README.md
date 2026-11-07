@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 780 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 744 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 782 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 746 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 18 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -168,20 +168,17 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Eighteen of the 780 results are reduced cores. Eleven assume a structure whose fields include the
+- Eighteen of the 782 results are reduced cores. Eleven assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, the two-dimensional Itô formula,
-  and five theorems on Markov chains. The other seven prove special cases or dominance bounds: the
-  first interarrival time of a Poisson process is exponential; Stulz's call on the maximum is
-  checked only in its zero-strike limit, and the Heynen–Kat two-asset barrier only at zero
-  correlation, neither formula being derived as an expected payoff; the Ornstein–Uhlenbeck Hermite
-  modes decay at their eigenvalues only for degree at most 2; Haug's partial-time-start barrier and
-  Rubinstein–Reiner's binary barrier are transcribed closed forms with proved identities between
-  their terms, neither derived as an expected payoff (only the binary's vanilla leg is shown to be
-  the digital call's price); the Goldman–Sosin–Gatto floating-strike lookback closed form is a
-  transcribed form shown to dominate the vanilla call struck at the running minimum, not derived
-  as an expected payoff.
+  and five theorems on Markov chains. The other six prove special cases: the first interarrival
+  time of a Poisson process is exponential; Stulz's call on the maximum is checked only in its
+  zero-strike limit, and the Heynen–Kat two-asset barrier only at zero correlation, neither formula
+  being derived as an expected payoff; the Ornstein–Uhlenbeck Hermite modes decay at their
+  eigenvalues only for degree at most 2; Haug's partial-time-start barrier and Rubinstein–Reiner's
+  binary barrier are transcribed closed forms with proved identities between their terms, neither derived
+  as an expected payoff (only the binary's vanilla leg is shown to be the digital call's price).
 - Girsanov's theorem is proved only for bounded $`\theta`$ (predictable, or adapted with continuous
   paths), and only at the level of finite-dimensional laws: neither path continuity of the new
   process nor independence of its increments from the past is stated.
@@ -249,7 +246,7 @@ dependency to its `lakefile.toml`:
 [[require]]
 name = "MathFin"
 git = "https://github.com/formal-applied-math/formal-mathfin"
-rev = "v1.8.0"
+rev = "v1.10.0"
 ```
 
 Then fetch it and the prebuilt Mathlib files:
@@ -288,11 +285,11 @@ Comparator below).
   [`Solution.lean`](Solution.lean) proves both from the library, converting the Challenge's
   positions convention to the library's loss convention with
   [`isCoherentRiskMeasure_neg_iff`](MathFin/RiskMeasures/PositionsConvention.lean).
-  [Comparator](https://github.com/leanprover/comparator), configured by
-  [`comparator.json`](comparator.json), checks that the two files state the same theorems and that
-  the proofs use only the three standard axioms. It accepted an earlier Solution at commit
-  `06f88ca`. It has not been re-run on the current one and is not part of CI; see
-  [`docs/palomar.md`](docs/palomar.md).
+  Lean's comparator (`lake comparator`), configured by [`comparator.json`](comparator.json), checks
+  that the two files state the same theorems and that the proofs use only the three standard
+  axioms. A workflow runs it with `--paranoid`, so the proofs must be accepted by every kernel
+  bundled with Lean (Lean's default and paranoid kernels, lean4lean, nanoda, con-leche and
+  con-ron), on changes to the pair and monthly; see [`docs/palomar.md`](docs/palomar.md).
 
 - **Benchmark.** Each entry in [`benchmarks/`](benchmarks) records a result's Lean statement, its
   status and its scope. The ledger runner, `tools/verify/ledger.py`, checks each entry's snippet
@@ -301,9 +298,8 @@ Comparator below).
   are published as a
   [Hugging Face dataset](https://huggingface.co/datasets/formal-applied-math/formal-mathfin-theorems).
 
-- **Kernel replay.** A workflow replays every declaration through `leanchecker`, but the full
-  Mathlib environment it loads does not fit on a 16 GB hosted runner, and the replay has not
-  completed.
+- **Kernel replay.** A monthly workflow replays every module's declarations through the Lean
+  kernel with `leanchecker`, below the elaborator.
 
 - **Provenance.** [`formalization.yaml`](formalization.yaml) describes how the library was written,
   including AI assistance and the entries drafted by an automated pipeline. The American put port

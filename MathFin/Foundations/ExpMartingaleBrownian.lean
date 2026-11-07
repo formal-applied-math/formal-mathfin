@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ExpMartingaleQBrownian
+public import BrownianMotion.Gaussian.BrownianMotion
 
 /-!
 # Brownian motion from an exponential martingale
@@ -36,8 +37,6 @@ second-order expansion, not from Itô's formula.
 
 ## Main results
 
-* `MathFin.condExp_exp_increment_of_expMartingale`: the conditional moment-generating function of
-  an increment, `𝔼_Q[exp(a·(Y_t − Y_s)) | 𝓕_s] = exp(½a²(t−s))` a.e.
 * `MathFin.indep_increment_of_expMartingale`: `Y_t − Y_s` is `Q`-independent of `𝓕_s` for
   `s ≤ t ≤ T`.
 * `MathFin.hasIndepIncrements_of_forall_expMartingale`: `HasIndepIncrements Y Q` on all of `ℝ≥0`
@@ -45,6 +44,11 @@ second-order expansion, not from Itô's formula.
 * `MathFin.isPreBrownianReal_of_expMartingale`: then `IsPreBrownianReal Y Q`.
 * `MathFin.isFilteredPreBrownian_of_expMartingale`: then `IsFilteredPreBrownian Y 𝓕 Q`.
 * `MathFin.isBrownianReal_of_expMartingale`: with a.s. continuous paths, `IsBrownianReal Y Q`.
+
+## Tags
+
+Lévy characterization, exponential martingale, Brownian motion, independent increments,
+filtered Brownian motion, MSC 60J65, MSC 60G44
 -/
 
 @[expose] public section
@@ -57,53 +61,9 @@ open scoped NNReal ENNReal
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} [IsProbabilityMeasure Q]
   {𝓕 : Filtration ℝ≥0 mΩ} {Y : ℝ≥0 → Ω → ℝ} {T : ℝ≥0}
 
-/-- **Conditional moment-generating function of an increment.**
-`𝔼_Q[exp(a·(Y_t − Y_s)) | 𝓕_s] = exp(½a²(t−s))` a.e., deterministic. The `martingale` field is
-the conditional identity `𝔼_Q[exp(a·Y_t − ½a²t) | 𝓕_s] = exp(a·Y_s − ½a²s)`
-(`ae_eq_condExp_of_forall_setIntegral_eq`), and the factor `exp(½a²t − a·Y_s)`, known at time `s`,
-comes out of the conditional expectation (`condExp_mul_of_stronglyMeasurable_left`). -/
-theorem condExp_exp_increment_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) (a : ℝ)
-    {s t : ℝ≥0} (hst : s ≤ t) (htT : t ≤ T) :
-    Q[fun ω ↦ Real.exp (a * (Y t ω - Y s ω)) | 𝓕 s]
-      =ᵐ[Q] fun _ ↦ Real.exp (a ^ 2 * ((t : ℝ) - s) / 2) := by
-  -- `f u = exp(a·Y_u − ½a²u)`, the exponential martingale
-  set f : ℝ≥0 → Ω → ℝ := fun u ω ↦ Real.exp (a * Y u ω - a ^ 2 * (u : ℝ) / 2)
-  have hf {u : ℝ≥0} (hu : u ≤ T) : Integrable (f u) Q := by
-    have hlaw : HasLaw (Y u) (gaussianReal 0 u) Q :=
-      ⟨(h.measurable u).aemeasurable, map_eq_gaussianReal_of_expMartingale h hu⟩
-    refine ((hlaw.integrable_fun_comp (integrable_exp_mul_gaussianReal a)).mul_const
-        (Real.exp (-(a ^ 2 * (u : ℝ) / 2)))).congr (.of_forall fun ω ↦ ?_)
-    simp only [f, ← Real.exp_add, sub_eq_add_neg]
-  -- functions of `Y_s` are known at time `s`
-  have hsm {g : ℝ → ℝ} (hg : Continuous g) : StronglyMeasurable[𝓕 s] fun ω ↦ g (Y s ω) :=
-    hg.comp_stronglyMeasurable (h.adapted s)
-  have hmart : Q[f t | 𝓕 s] =ᵐ[Q] f s :=
-    (ae_eq_condExp_of_forall_setIntegral_eq (𝓕.le s) (hf htT)
-      (fun _ _ _ ↦ (hf (hst.trans htT)).integrableOn)
-      (fun _ hA _ ↦ (h.martingale a hst htT hA).symm)
-      (hsm (g := fun x ↦ Real.exp (a * x - a ^ 2 * (s : ℝ) / 2))
-        (by fun_prop)).aestronglyMeasurable).symm
-  have hsplit : (fun ω ↦ Real.exp (a * (Y t ω - Y s ω)))
-      = (fun ω ↦ Real.exp (a ^ 2 * (t : ℝ) / 2 - a * Y s ω)) * f t := by
-    funext ω
-    simp only [Pi.mul_apply, f, ← Real.exp_add]
-    ring_nf
-  have hD : Integrable (fun ω ↦ Real.exp (a * (Y t ω - Y s ω))) Q :=
-    (⟨((h.measurable t).sub (h.measurable s)).aemeasurable,
-      increment_map_eq_gaussianReal_of_expMartingale h hst htT⟩ :
-        HasLaw (fun ω ↦ Y t ω - Y s ω) (gaussianReal 0 (t - s)) Q).integrable_fun_comp
-      (integrable_exp_mul_gaussianReal a)
-  rw [hsplit] at hD ⊢
-  filter_upwards [condExp_mul_of_stronglyMeasurable_left
-      (hsm (g := fun x ↦ Real.exp (a ^ 2 * (t : ℝ) / 2 - a * x)) (by fun_prop)) hD (hf htT), hmart]
-    with ω hpull hω
-  rw [hpull, Pi.mul_apply, hω]
-  simp only [f, ← Real.exp_add]
-  ring_nf
-
 /-- **Increments are independent of the past.** For `s ≤ t ≤ T`, `Y_t − Y_s` is `Q`-independent
 of `𝓕_s`. Integrating the deterministic conditional moment-generating function
-(`condExp_exp_increment_of_expMartingale`) over `A ∈ 𝓕_s` shows that the law of `Y_t − Y_s` under
+(`IsExpQMartingale.condExp_exp_increment`) over `A ∈ 𝓕_s` shows that the law of `Y_t − Y_s` under
 `Q` restricted to `A` has the moment-generating function of `Q(A)·N(0,t−s)`, hence is that measure
 (`measure_eq_of_mgf_id_eq`); on a Borel set `B` this reads
 `Q({Y_t − Y_s ∈ B} ∩ A) = Q(A)·N(0,t−s)(B) = Q(A)·Q(Y_t − Y_s ∈ B)`. -/
@@ -126,7 +86,7 @@ theorem indep_increment_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) {s t 
     funext u
     rw [mgf_id_map hD.aemeasurable, mgf_smul_measure, mgf_id_gaussianReal, mgf,
       ← setIntegral_condExp (𝓕.le s) (hexp u) hA,
-      setIntegral_congr_ae (𝓕.le s A hA) ((condExp_exp_increment_of_expMartingale h u hst
+      setIntegral_congr_ae (𝓕.le s A hA) ((h.condExp_exp_increment u hst
         htT).mono fun _ hω _ ↦ hω), setIntegral_const, NNReal.coe_sub hst, measureReal_def,
       smul_eq_mul]
     ring_nf

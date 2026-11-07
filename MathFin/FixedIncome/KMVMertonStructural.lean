@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.KMVMerton
 public import MathFin.BlackScholes.RiskNeutralProbabilities
 
@@ -27,17 +26,24 @@ debt face `F`, the no-default probability is
 
 so default probability `Q({V_T ≤ F}) = kmvPD = Phi(−bsd2)`.
 
-Additionally, the structural identity **equity = call on firm assets**
-(Merton 1974) is recorded as a direct specialisation of `bs_call_formula`
-with finance-specific variable renaming.
+The structural identity **equity = call on firm assets** (Merton 1974) needs no theorem of its
+own: limited liability makes the equity payoff `max(V_T − F, 0)`, so its discounted risk-neutral
+value is `bs_call_formula` read with `(S_0, K, σ) ↦ (V_0, F, σ_V)`.
 
-## Results
+## Main results
 
 * `kmvPD_eq_one_sub_survival_probability`: connects `kmvPD` to the actual
   risk-neutral probability `Q({V_T > F})`.
-* `merton_equity_eq_bs_call`: equity holders' value as the discounted
-  expectation of `max(V_T − F, 0)` is the BS call closed form
-  (`bs_call_formula` with `(S_0, K) ↦ (V_0, F)` and `σ ↦ σ_V`).
+
+## References
+
+* [R. C. Merton, *On the pricing of corporate debt: the risk structure of interest
+  rates*][Merton1974]
+
+## Tags
+
+Merton model, KMV, risk-neutral default probability, structural credit model, equity as call option,
+distance to default, MSC 91G40, MSC 91G20, JEL G33
 -/
 
 @[expose] public section
@@ -89,28 +95,5 @@ theorem survival_probability_eq_Phi_distanceToDefault
     (Q {ω | bsTerminal V_0 r σ_V T (Z ω) > F}).toReal =
       Phi (kmvDistanceToDefault V_0 F r σ_V T) := by
   rw [riskNeutralProb_S_T_gt_K h, kmvDistanceToDefault_eq_bsd2 V_0 F r σ_V T hV hF]
-
-/-- **Equity-as-call-on-assets structural identity** (Merton 1974). In the
-structural credit model, equity holders are protected by limited liability,
-so the equity payoff at maturity is `max(V_T − F, 0)` (debt holders are
-paid `F` first; equity gets the remainder, or nothing if `V_T < F`).
-Therefore the discounted risk-neutral expectation of the equity payoff
-equals the BS call price with `(S_0, K, σ) ↦ (V_0, F, σ_V)`.
-
-This is *not a new derivation*: it is `bs_call_formula` applied with
-finance-specific variable renaming. The first-principles content is the
-recognition that the structural credit model is *literally* a BS call
-problem — no extra mathematical machinery is needed beyond the lognormal
-hypothesis on `V_T`. -/
-theorem merton_equity_eq_bs_call
-    {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    {Q : Measure Ω} [IsProbabilityMeasure Q]
-    {V_0 F r σ_V T : ℝ} {Z : Ω → ℝ}
-    (h : BSCallHyp Q V_0 F r σ_V T Z) :
-    ∫ ω, Real.exp (-r * T) *
-        max (bsTerminal V_0 r σ_V T (Z ω) - F) 0 ∂Q =
-      V_0 * Phi (bsd1 V_0 F r σ_V T) -
-        F * Real.exp (-r * T) * Phi (bsd2 V_0 F r σ_V T) :=
-  bs_call_formula h
 
 end MathFin

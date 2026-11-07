@@ -5,11 +5,12 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Binomial.Model
 public import MathFin.Binomial.American
 public import MathFin.Binomial.Bermudan
 public import MathFin.Binomial.CRRClosedForm
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Smooth.Flat
 
 /-!
 # Merton 1973 in the binomial tree
@@ -17,8 +18,9 @@ public import MathFin.Binomial.CRRClosedForm
 Classical Merton (1973) result extended from continuous-time Black-Scholes to
 the discrete-time binomial tree.
 
-**Theorem.** In a binomial tree with no dividends (`g(S) = max(S − K, 0)`), a
-nonnegative risk-free rate `r ≥ 0` and a nonnegative strike `K ≥ 0`, the American call
+**Theorem.** In a binomial tree with no dividends (`g(S) = max(S − K, 0)`) under
+`BinomialNoArb u d r`, a nonnegative risk-free rate `r ≥ 0` and a nonnegative strike `K ≥ 0`,
+the American call
 price equals the European call price at every step `n` and every spot `S`:
 
   `americanPrice u d r g n S = binomialPrice u d r g n S`.
@@ -48,26 +50,40 @@ time the library proves that dominance but not the American = European equality;
 version of the equality is proved, and its CRR limit is the Black–Scholes call
 (`crr_americanCall_tendsto_bs`).
 
-## Results
+## Main results
 
-* `binomial_martingale_identity`: `q · u + (1 − q) · d = e^r` under no-arb.
+* `crrUpProb_mul_up_add` (`Binomial/Model.lean`): `q · u + (1 − q) · d = e^r` under no-arb.
 * `weighted_max_zero_ge`: convexity inequality for `max(·, 0)` (Jensen).
-* `call_one_period_continuation_dominates_intrinsic`: the one-period
-  continuation of the call payoff dominates the intrinsic value.
-* `call_intrinsic_le_binomialPrice`: the intrinsic value `max(S − K, 0)`
-  is bounded above by the European call's binomial price at every step
+* `call_one_period_continuation_dominates_intrinsic`: under `BinomialNoArb`, `r ≥ 0`, `K ≥ 0`,
+  the one-period continuation of the call payoff dominates the intrinsic value.
+* `call_intrinsic_le_binomialPrice`: under the same hypotheses, the intrinsic value
+  `max(S − K, 0)` is bounded above by the European call's binomial price at every step
   `n` (multi-step extension of the one-period dominance, by induction).
-* `bermudanCallPrice_eq_binomialPrice`: for every exercise set `E`, the `E`-exercise call price
+* `bermudanCallPrice_eq_binomialPrice`: under `BinomialNoArb`, `r ≥ 0`, `K ≥ 0`, for every
+  exercise set `E`, the `E`-exercise call price
   equals the European call price at every step, the European price process being a martingale
   above the payoff and hence above the Snell envelope `bermudanPrice E`; the reverse inequality is
   `bermudanPrice_mono` (`Binomial.Bermudan`) for `∅ ⊆ E`.
 * `americanCallPrice_eq_binomialPrice`: **American call = European call**
-  for the non-dividend call in the binomial tree (Merton 1973), at every
-  step `n` and every spot `S` (the case `E = univ`).
-* `crr_americanCall_tendsto_bs`: on the Cox–Ross–Rubinstein tree with `r ≥ 0`, the
-  `n`-step American call price converges to the Black–Scholes European call price
-  `S₀·Φ(d₁) − K·e^{−rT}·Φ(d₂)` (the equality above, transported along
-  `binomialPrice_call_tendsto_bs_closed`).
+  for the non-dividend call in the binomial tree (Merton 1973), under `BinomialNoArb`, `r ≥ 0`,
+  `K ≥ 0`, at every step `n` and every spot `S` (the case `E = univ`).
+* `crr_americanCall_tendsto_bs`: on the Cox–Ross–Rubinstein tree with `r ≥ 0`, `σ, T, S₀, K > 0` and
+  no-arbitrage at every step `n ≥ 1`, the `n`-step American call price converges to the
+  Black–Scholes European call price `S₀·Φ(d₁) − K·e^{−rT}·Φ(d₂)` (the equality above, transported
+  along `binomialPrice_call_tendsto_bs_closed`).
+
+## References
+
+* [J. C. Cox, S. A. Ross and M. Rubinstein, *Option pricing: a simplified
+  approach*][CoxRossRubinstein1979]
+* [R. C. Merton, *Theory of rational option pricing*][Merton1973]
+* [S. E. Shreve, *Stochastic Calculus for Finance I: The Binomial Asset Pricing Model*][ShreveSCFI],
+  §4.5
+
+## Tags
+
+Merton no early exercise, American call, non-dividend call, early exercise premium, binomial tree,
+American equals European, MSC 91G20, MSC 60G40, JEL G13
 -/
 
 @[expose] public section
@@ -75,15 +91,6 @@ version of the equality is proved, and its CRR limit is the Black–Scholes call
 namespace MathFin
 
 open Real
-
-/-- **Risk-neutral martingale identity** in the binomial tree: under
-no-arbitrage, the up-probability `q` satisfies `q · u + (1 − q) · d = e^r`.
-
-Equivalently, the discounted asset price is a Q-martingale at every step.
-Direct algebraic consequence of `crrUpProb = (e^r − d) / (u − d)`. -/
-theorem binomial_martingale_identity {u d r : ℝ} (h : BinomialNoArb u d r) :
-    crrUpProb u d r * u + (1 - crrUpProb u d r) * d = Real.exp r :=
-  crrUpProb_mul_up_add u d r h
 
 /-- **Convexity inequality for the positive part `max(·, 0)`**: for any
 real `a, b` and convex-combination weights `q, 1 − q` with `q ∈ [0, 1]`,
@@ -159,7 +166,7 @@ theorem call_one_period_continuation_ge_forward
   have h_q_lt_one : q < 1 := h_q.2
   have h_exp_pos : 0 < Real.exp (-r) := Real.exp_pos _
   -- Step 1: martingale identity gives q · u + (1 − q) · d = e^r.
-  have h_mart : q * u + (1 - q) * d = Real.exp r := binomial_martingale_identity h
+  have h_mart : q * u + (1 - q) * d = Real.exp r := crrUpProb_mul_up_add u d r h
   -- Step 2: Jensen for max-zero, with a = uS − K, b = dS − K.
   have h_conv :
       max (q * (S * u - K) + (1 - q) * (S * d - K)) 0 ≤

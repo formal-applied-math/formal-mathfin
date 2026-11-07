@@ -6,8 +6,10 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.GaussianMoments
-public import MathFin.Foundations.QuadraticVariationL2
+public import MathFin.Foundations.QuadraticVariationL2  -- shake: keep (used through `open`)
 public import MathFin.Foundations.DiscreteIto
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ReduceModChar
 
 /-! # The Itô–Taylor remainder: the cubic bound and Brownian sixth moments
 
@@ -18,6 +20,18 @@ its square is controlled by the Brownian sixth moment `E[(ΔB)⁶] = 15 (Δt)³`
 remainder along the uniform partition is shown to vanish in `L²` by
 `tendsto_ito_remainder_td` (`ItoFormulaTDRemainder`), of which the time-independent case is the
 instance `f_t = 0`.
+
+## Main results
+
+* `abs_discreteTaylorRemainder_le`: for `f ∈ C³` with `|f‴| ≤ Cf3`, the order-2 Taylor remainder
+  satisfies `|R| ≤ Cf3 · |y − x|³`.
+* `integral_increment_pow6`: `E[(B_{t₁} − B_{t₀})⁶] = 15 (t₁ − t₀)³` for `t₀ ≤ t₁`.
+* `integrable_increment_pow6`: the sixth power of a Brownian increment is integrable.
+
+## Tags
+
+Taylor remainder, Brownian sixth moment, Gaussian moments, Itô formula, discrete Itô formula,
+MSC 60H05, MSC 60J65, MSC 60E15
 -/
 
 @[expose] public section

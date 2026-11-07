@@ -13,10 +13,22 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianUsualTransition
 Finite-grid identification and convergence remove the classical-solution premise
 from raw/usual American-value equality at positive spot.
 
-## Result
+## Main results
 
-Public entry points include `brownianGridPrice_eq_usualGridValue`,
-`brownianGridPrice_tendsto_usual`, `brownianUsualAmericanPut_eq_raw_of_pos`.
+* `brownianGridPrice_eq_usualGridValue`: for `0 ≤ K`, `0 ≤ r` and mesh `δ > 0`, the raw Brownian
+  grid price equals the grid American put value computed in the usual filtration, at spot
+  `exp x`.
+* `brownianGridPrice_tendsto_usual`: for `0 ≤ K`, `0 ≤ r`, the grid prices along the meshes
+  `gridStep n` converge to the usual-filtration American put price at spot `exp x`.
+* `brownianUsualAmericanPut_eq_raw_of_pos`: for `0 ≤ K`, `0 ≤ r` and `S > 0`, with no classical
+  solution assumed, the usual and raw American put values agree.
+* `brownianGridPrice_tendsto_canonical`: for `0 ≤ k`, the normalized grid prices converge to the
+  canonical price.
+
+## Tags
+
+raw and usual filtration, finite-grid price, Snell envelope, Gaussian Markov, American put,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

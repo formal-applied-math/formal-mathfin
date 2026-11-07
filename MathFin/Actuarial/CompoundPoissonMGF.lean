@@ -5,9 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.IndepFreezing
 public import MathFin.Foundations.PoissonPgf
+public import Mathlib.Probability.Moments.Basic
 
 /-!
 # The compound-Poisson aggregate-loss MGF
@@ -40,6 +40,15 @@ This composes two genuine theorems rather than positing the algebraic shell
   `t` where the claim MGF is finite, `𝔼[exp(t·∑_{i<N} Xᵢ)] = exp(λ·(M_X(t) − 1))`.
 * `integrable_exp_mul_sum_range_of_iid` — the `n`-claim aggregate has a finite MGF at `t`
   wherever the claims do.
+
+## References
+
+* [Klugman, Panjer and Willmot, *Loss Models*][KlugmanPanjerWillmot], Thm 9.3
+
+## Tags
+
+compound Poisson, aggregate loss, moment generating function, claim count, collective risk model,
+Poisson mixture, MSC 91G05, MSC 60E10, JEL G22
 -/
 
 @[expose] public section
@@ -79,7 +88,8 @@ lemma mgf_range_sum_of_iid (t : ℝ) (X : ℕ → Ω → ℝ)
     mgf (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ t = (mgf (X 0) μ t) ^ n := by
   have hsum : (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) = ∑ i ∈ Finset.range n, X i := by
     funext ω; rw [Finset.sum_apply]
-  rw [hsum, hindep.mgf_sum₀ (fun i ↦ (hident i).aemeasurable_fst) (Finset.range n), Finset.prod_eq_pow_card fun i _ ↦
+  rw [hsum, hindep.mgf_sum₀ (fun i ↦ (hident i).aemeasurable_fst) (Finset.range n),
+      Finset.prod_eq_pow_card fun i _ ↦
     mgf_congr_of_identDistrib _ _ (hident i) t, Finset.card_range]
 
 /-- **The compound-Poisson aggregate-loss MGF, in mixture form.** For i.i.d. claim sizes `Xᵢ`,

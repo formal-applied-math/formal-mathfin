@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.HoeffdingCovariance
 
 /-!
@@ -41,16 +40,42 @@ Section 7.2.2; Marshall and Olkin 1967). In Lean the clocks are `T 0`, `T 1`, `T
   spread below this sum. The common shock is a machine-checked instance of that assertion: it
   correlates the two defaults and lowers the basket intensity by exactly `λ₃`.
 
+## Main definitions
+
+* `marshallOlkinCopula`: the bivariate copula `C(u₁, u₂) = min(u₁^{1−α₁} u₂, u₁ u₂^{1−α₂})`
+  with parameters `α₁`, `α₂`.
+
 ## Main results
 
-* `marshallOlkin_survival`, `hasLaw_marshallOlkin_fst`, `hasLaw_marshallOlkin_snd`.
-* `marshallOlkinCopula`, `marshallOlkin_survival_eq_copula`.
-* `marshallOlkin_survival_gt_mul`: positive quadrant dependence.
-* `marshallOlkin_diagonal_pos`: the joint law charges the diagonal (a singular component).
-* `covariance_indicator_marshallOlkin`: the covariance of the two default indicators.
-* `marshallOlkin_firstToDefault_survival`, `marshallOlkin_firstToDefault_spread`,
-  `marshallOlkin_single_name_spread_fst`, `marshallOlkin_single_name_spread_snd`,
-  `marshallOlkin_firstToDefault_spread_lt`.
+For independent exponential clocks `T i` of positive rates `rate i`:
+
+* `marshallOlkin_survival`: for `s, t ≥ 0`,
+  `P(X₁ > s, X₂ > t) = exp(−λ₁ s − λ₂ t − λ₃ max(s, t))`.
+* `hasLaw_marshallOlkin_fst`, `hasLaw_marshallOlkin_snd`: `X₁ ~ Exp(λ₁ + λ₃)` and
+  `X₂ ~ Exp(λ₂ + λ₃)`.
+* `marshallOlkin_survival_eq_copula`: for `s, t ≥ 0`, the joint survival probability equals
+  `marshallOlkinCopula` (with `αⱼ = λ₃/(λⱼ + λ₃)`) at the two marginal survival probabilities.
+* `marshallOlkin_survival_gt_mul`: for `s, t > 0`, the joint survival probability is strictly
+  larger than the product of the marginal ones.
+* `marshallOlkin_diagonal_pos`: `P(X₁ = X₂) > 0`.
+* `covariance_indicator_marshallOlkin`: for `s, t ≥ 0`, `Cov(𝟙{X₁ ≤ s}, 𝟙{X₂ ≤ t})` is
+  `exp(−(λ₁+λ₃)s − (λ₂+λ₃)t)·(exp(λ₃ min(s, t)) − 1)`.
+* `marshallOlkin_firstToDefault_survival`: for `t ≥ 0`, `P(min(X₁, X₂) > t) = exp(−(λ₁+λ₂+λ₃)t)`.
+* `marshallOlkin_firstToDefault_spread`, `marshallOlkin_single_name_spread_fst`,
+  `marshallOlkin_single_name_spread_snd`: for `t > 0`, `−log P(·)/t` equals `λ₁+λ₂+λ₃` for the
+  first-to-default time and `λ₁+λ₃`, `λ₂+λ₃` for the single names.
+* `marshallOlkin_firstToDefault_spread_lt`: for `t > 0`, the first-to-default spread is strictly
+  below the sum of the two single-name spreads.
+
+## References
+
+* [Marshall and Olkin (1967)][MarshallOlkin1967]
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 7.23
+
+## Tags
+
+Marshall–Olkin copula, common shock, joint default, default correlation, first-to-default,
+exponential clocks, survival copula, MSC 91G40, MSC 62H05, JEL G33
 -/
 
 @[expose] public section
@@ -74,14 +99,14 @@ lemma expMeasure_real_Ioi {r : ℝ} (hr : 0 < r) (t : ℝ) :
     · simp
 
 /-- An exponential clock outlasts any horizon with positive probability. -/
-private lemma expMeasure_Ioi_ne_zero {r : ℝ} (hr : 0 < r) (t : ℝ) : expMeasure r (Ioi t) ≠ 0 := by
+lemma expMeasure_Ioi_ne_zero {r : ℝ} (hr : 0 < r) (t : ℝ) : expMeasure r (Ioi t) ≠ 0 := by
   intro h
   have h' := expMeasure_real_Ioi hr t
   rw [measureReal_def, h, ENNReal.toReal_zero] at h'
   exact (Real.exp_pos _).ne h'
 
 /-- An exponential clock rings before a positive horizon with positive probability. -/
-private lemma expMeasure_Iic_ne_zero {r t : ℝ} (hr : 0 < r) (ht : 0 < t) :
+lemma expMeasure_Iic_ne_zero {r t : ℝ} (hr : 0 < r) (ht : 0 < t) :
     expMeasure r (Iic t) ≠ 0 := by
   have := isProbabilityMeasure_expMeasure hr
   rw [← ofReal_cdf, cdf_expMeasure_eq hr, ite_eq_left ht.le, ne_eq, ENNReal.ofReal_eq_zero, not_le,
@@ -89,7 +114,7 @@ private lemma expMeasure_Iic_ne_zero {r t : ℝ} (hr : 0 < r) (ht : 0 < t) :
   exact (Real.exp_lt_exp.2 (neg_lt_zero.2 (mul_pos hr ht))).trans_eq Real.exp_zero
 
 /-- Two laws on `ℝ` with the same survival function coincide. -/
-private lemma ext_of_real_Ioi {μ ν : Measure ℝ} [IsProbabilityMeasure μ] [IsProbabilityMeasure ν]
+lemma ext_of_measureReal_Ioi {μ ν : Measure ℝ} [IsProbabilityMeasure μ] [IsProbabilityMeasure ν]
     (h : ∀ u, μ.real (Ioi u) = ν.real (Ioi u)) : μ = ν := by
   refine Measure.ext_of_Iic _ _ fun a ↦ ?_
   have h1 : μ.real (Iic a) = ν.real (Iic a) := by
@@ -103,7 +128,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbability
 
 omit [IsProbabilityMeasure P] in
 /-- Survival of all three clocks past their own thresholds: independence factorizes it. -/
-private lemma measureReal_iInter_Ioi (hrate : ∀ i, 0 < rate i)
+lemma measureReal_iInter_Ioi_of_hasLaw_expMeasure (hrate : ∀ i, 0 < rate i)
     (hT : ∀ i, HasLaw (T i) (expMeasure (rate i)) P) (hind : iIndepFun T P) (c : Fin 3 → ℝ) :
     P.real (⋂ i, T i ⁻¹' Ioi (c i)) = ∏ i, Real.exp (-(rate i * max (c i) 0)) := by
   rw [measureReal_def, hind.meas_iInter fun i ↦ ⟨Ioi (c i), measurableSet_Ioi, rfl⟩,
@@ -115,7 +140,7 @@ private lemma measureReal_iInter_Ioi (hrate : ∀ i, 0 < rate i)
 
 omit [IsProbabilityMeasure P] in
 /-- The survival function of a minimum of two of the independent clocks. -/
-private lemma measureReal_min_gt (hrate : ∀ i, 0 < rate i)
+lemma measureReal_lt_min_of_hasLaw_expMeasure (hrate : ∀ i, 0 < rate i)
     (hT : ∀ i, HasLaw (T i) (expMeasure (rate i)) P) (hind : iIndepFun T P) {i j : Fin 3}
     (hij : i ≠ j) (u : ℝ) :
     P.real {ω | u < min (T i ω) (T j ω)}
@@ -131,28 +156,28 @@ private lemma measureReal_min_gt (hrate : ∀ i, 0 < rate i)
   ring
 
 /-- A minimum of two independent exponential clocks is exponential at the summed rate. -/
-private lemma hasLaw_min (hrate : ∀ i, 0 < rate i)
+lemma hasLaw_min_expMeasure (hrate : ∀ i, 0 < rate i)
     (hT : ∀ i, HasLaw (T i) (expMeasure (rate i)) P) (hind : iIndepFun T P) {i j : Fin 3}
     (hij : i ≠ j) :
     HasLaw (fun ω ↦ min (T i ω) (T j ω)) (expMeasure (rate i + rate j)) P := by
   have hmeas : AEMeasurable (fun ω ↦ min (T i ω) (T j ω)) P :=
     (hT i).aemeasurable.min (hT j).aemeasurable
   have := isProbabilityMeasure_expMeasure (add_pos (hrate i) (hrate j))
-  refine ⟨hmeas, ext_of_real_Ioi fun u ↦ ?_⟩
+  refine ⟨hmeas, ext_of_measureReal_Ioi fun u ↦ ?_⟩
   rw [map_measureReal_apply_of_aemeasurable hmeas measurableSet_Ioi]
-  exact measureReal_min_gt hrate hT hind hij u
+  exact measureReal_lt_min_of_hasLaw_expMeasure hrate hT hind hij u
 
 /-- **Margins of the Marshall–Olkin model**: `X₁ = min(T₁, T₃) ~ Exp(λ₁ + λ₃)`. -/
 theorem hasLaw_marshallOlkin_fst (hrate : ∀ i, 0 < rate i)
     (hT : ∀ i, HasLaw (T i) (expMeasure (rate i)) P) (hind : iIndepFun T P) :
     HasLaw (fun ω ↦ min (T 0 ω) (T 2 ω)) (expMeasure (rate 0 + rate 2)) P :=
-  hasLaw_min hrate hT hind (by decide)
+  hasLaw_min_expMeasure hrate hT hind (by decide)
 
 /-- **Margins of the Marshall–Olkin model**: `X₂ = min(T₂, T₃) ~ Exp(λ₂ + λ₃)`. -/
 theorem hasLaw_marshallOlkin_snd (hrate : ∀ i, 0 < rate i)
     (hT : ∀ i, HasLaw (T i) (expMeasure (rate i)) P) (hind : iIndepFun T P) :
     HasLaw (fun ω ↦ min (T 1 ω) (T 2 ω)) (expMeasure (rate 1 + rate 2)) P :=
-  hasLaw_min hrate hT hind (by decide)
+  hasLaw_min_expMeasure hrate hT hind (by decide)
 
 omit [IsProbabilityMeasure P] in
 /-- **Joint survival of the Marshall–Olkin model** (QRM Exercise Book Ex. 7.23): for `s, t ≥ 0`,
@@ -174,8 +199,8 @@ theorem marshallOlkin_survival (hrate : ∀ i, 0 < rate i)
     · intro h
       have h2 : max s t < T 2 ω := h 2
       exact ⟨⟨h 0, (le_max_left s t).trans_lt h2⟩, h 1, (le_max_right s t).trans_lt h2⟩
-  rw [hset, measureReal_iInter_Ioi hrate hT hind ![s, t, max s t], Fin.prod_univ_three,
-    ← Real.exp_add, ← Real.exp_add]
+  rw [hset, measureReal_iInter_Ioi_of_hasLaw_expMeasure hrate hT hind ![s, t, max s t],
+    Fin.prod_univ_three, ← Real.exp_add, ← Real.exp_add]
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, Matrix.head_cons,
     Matrix.tail_cons]
   rw [max_eq_left hs, max_eq_left ht, max_eq_left (le_max_of_le_left hs)]
@@ -199,8 +224,8 @@ theorem marshallOlkin_survival_eq_copula (hrate : ∀ i, 0 < rate i)
   have h02 : rate 0 + rate 2 ≠ 0 := (add_pos (hrate 0) (hrate 2)).ne'
   have h12 : rate 1 + rate 2 ≠ 0 := (add_pos (hrate 1) (hrate 2)).ne'
   rw [marshallOlkin_survival hrate hT hind hs ht,
-    measureReal_min_gt hrate hT hind (i := 0) (j := 2) (by decide),
-    measureReal_min_gt hrate hT hind (i := 1) (j := 2) (by decide),
+    measureReal_lt_min_of_hasLaw_expMeasure hrate hT hind (i := 0) (j := 2) (by decide),
+    measureReal_lt_min_of_hasLaw_expMeasure hrate hT hind (i := 1) (j := 2) (by decide),
     expMeasure_real_Ioi (add_pos (hrate 0) (hrate 2)),
     expMeasure_real_Ioi (add_pos (hrate 1) (hrate 2)), max_eq_left hs, max_eq_left ht,
     marshallOlkinCopula, ← Real.exp_mul, ← Real.exp_mul, ← Real.exp_add, ← Real.exp_add,
@@ -229,8 +254,8 @@ theorem marshallOlkin_survival_gt_mul (hrate : ∀ i, 0 < rate i)
     P.real {ω | s < min (T 0 ω) (T 2 ω)} * P.real {ω | t < min (T 1 ω) (T 2 ω)}
       < P.real {ω | s < min (T 0 ω) (T 2 ω) ∧ t < min (T 1 ω) (T 2 ω)} := by
   rw [marshallOlkin_survival hrate hT hind hs.le ht.le,
-    measureReal_min_gt hrate hT hind (i := 0) (j := 2) (by decide),
-    measureReal_min_gt hrate hT hind (i := 1) (j := 2) (by decide),
+    measureReal_lt_min_of_hasLaw_expMeasure hrate hT hind (i := 0) (j := 2) (by decide),
+    measureReal_lt_min_of_hasLaw_expMeasure hrate hT hind (i := 1) (j := 2) (by decide),
     expMeasure_real_Ioi (add_pos (hrate 0) (hrate 2)),
     expMeasure_real_Ioi (add_pos (hrate 1) (hrate 2)), max_eq_left hs.le, max_eq_left ht.le,
     ← Real.exp_add, Real.exp_lt_exp]
@@ -310,8 +335,8 @@ theorem covariance_indicator_marshallOlkin (hrate : ∀ i, 0 < rate i)
     map_measureReal_apply_of_aemeasurable hZ hA.compl,
     map_measureReal_apply_of_aemeasurable hZ hB.compl, e₁, e₂, e₃,
     marshallOlkin_survival hrate hT hind hs ht,
-    measureReal_min_gt hrate hT hind (i := 0) (j := 2) (by decide),
-    measureReal_min_gt hrate hT hind (i := 1) (j := 2) (by decide),
+    measureReal_lt_min_of_hasLaw_expMeasure hrate hT hind (i := 0) (j := 2) (by decide),
+    measureReal_lt_min_of_hasLaw_expMeasure hrate hT hind (i := 1) (j := 2) (by decide),
     expMeasure_real_Ioi (add_pos (hrate 0) (hrate 2)),
     expMeasure_real_Ioi (add_pos (hrate 1) (hrate 2)), max_eq_left hs, max_eq_left ht]
   have hmax : max s t = s + t - min s t := by linarith [min_add_max s t]
@@ -347,8 +372,8 @@ theorem marshallOlkin_firstToDefault_survival (hrate : ∀ i, 0 < rate i)
       exacts [h0, h1, h2]
     · intro h
       exact ⟨⟨h 0, h 2⟩, h 1, h 2⟩
-  rw [hset, measureReal_iInter_Ioi hrate hT hind (fun _ ↦ t), Fin.prod_univ_three,
-    ← Real.exp_add, ← Real.exp_add, max_eq_left ht]
+  rw [hset, measureReal_iInter_Ioi_of_hasLaw_expMeasure hrate hT hind (fun _ ↦ t),
+    Fin.prod_univ_three, ← Real.exp_add, ← Real.exp_add, max_eq_left ht]
   congr 1
   ring
 
@@ -369,7 +394,7 @@ theorem marshallOlkin_single_name_spread_fst (hrate : ∀ i, 0 < rate i)
     (hT : ∀ i, HasLaw (T i) (expMeasure (rate i)) P) (hind : iIndepFun T P) {t : ℝ}
     (ht : 0 < t) :
     -Real.log (P.real {ω | t < min (T 0 ω) (T 2 ω)}) / t = rate 0 + rate 2 := by
-  rw [measureReal_min_gt hrate hT hind (i := 0) (j := 2) (by decide),
+  rw [measureReal_lt_min_of_hasLaw_expMeasure hrate hT hind (i := 0) (j := 2) (by decide),
     expMeasure_real_Ioi (add_pos (hrate 0) (hrate 2)), max_eq_left ht.le, Real.log_exp, neg_neg,
     mul_div_assoc, div_self ht.ne', mul_one]
 
@@ -379,7 +404,7 @@ theorem marshallOlkin_single_name_spread_snd (hrate : ∀ i, 0 < rate i)
     (hT : ∀ i, HasLaw (T i) (expMeasure (rate i)) P) (hind : iIndepFun T P) {t : ℝ}
     (ht : 0 < t) :
     -Real.log (P.real {ω | t < min (T 1 ω) (T 2 ω)}) / t = rate 1 + rate 2 := by
-  rw [measureReal_min_gt hrate hT hind (i := 1) (j := 2) (by decide),
+  rw [measureReal_lt_min_of_hasLaw_expMeasure hrate hT hind (i := 1) (j := 2) (by decide),
     expMeasure_real_Ioi (add_pos (hrate 1) (hrate 2)), max_eq_left ht.le, Real.log_exp, neg_neg,
     mul_div_assoc, div_self ht.ne', mul_one]
 

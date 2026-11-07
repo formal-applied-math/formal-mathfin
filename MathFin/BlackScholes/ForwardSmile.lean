@@ -5,10 +5,11 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.PDE
 public import MathFin.Foundations.DerivOfDeriv
 public import MathFin.Foundations.GaussianCDFDeriv
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Algebra.Ring.IsFormallyReal
 
 /-!
 # Local-volatility skew of a tilted smile: Dupire's ratio and the rule of two (eq 10.8)
@@ -64,6 +65,53 @@ Gatheral form of the ratio specialized to this surface — after which the
 ε/k-extraction is elementary calculus on explicit functions. The price is the
 `bsV` of `MathFin.BlackScholes.PDE`, with `bsd1`/`bsd2` unfolded to the `(k,w)` form
 (`bsCallSmile_eq`).
+
+## Main definitions
+
+* `smileSurface`: the ε-tilted smile `σ_BS(ε, k, T) = σ + ε ψ₁ k / √(T + T₀)` in
+  log-moneyness `k = log(K/F)` at zero rates.
+* `totalVar`: the total variance `smileSurface² · T` along the surface.
+* `dpl`, `dmi`: `d₊ = (−k + w/2)/√w` and `d₋ = (−k − w/2)/√w` in `(k, w)` coordinates.
+* `blackForm`: the forward-normalised zero-rate call `Φ(d₊) − e^k Φ(d₋)`.
+* `bsCallSmile`: the call price `bsV` at strike `F e^k`, spot `F`, volatility `smileSurface` and
+  maturity `T`.
+* `dupireRatio`: Dupire's zero-rate ratio `R = 2 C_T / (C_kk − C_k)` of `bsCallSmile`, taken as
+  a definition (it is not derived from a local-volatility model here).
+* `wSlope`, `smileN`, `smileDelta`: the total-variance slope `∂_k w`, the numerator `w_T` and
+  the denominator deformation `δ` of the Gatheral form `R = w_T / (1 + δ)`.
+* `localSkew`: the closed form `ψ₁ ((3/2) T + 2 T₀) / (T + T₀)^{3/2}`.
+
+## Main results
+
+* `bsCallSmile_eq`: for `F, T > 0` and a positive surface value, `bsCallSmile` equals
+  `F · blackForm k (totalVar …)`.
+* `exp_mul_pdf_dmi`: for `w > 0`, `e^k ϕ(d₋) = ϕ(d₊)`.
+* `dupireRatio_eq`: for `F, T, T + T₀ > 0` and a positive surface value, in `(k, w)` coordinates
+  `dupireRatio = smileN / (1 + smileDelta)`.
+* `dupireRatio_k_slope`: for `F, σ, T, T₀ > 0`, the ε-derivative at `0` of the ATM `k`-slope of
+  `dupireRatio` is `2σψ₁ ((3/2)T + 2T₀) / ((T + T₀) √(T + T₀))`.
+* `dupireRatio_sqrt_slope`: for `F, σ, T, T₀ > 0`, the same derivative for `√(dupireRatio)` is
+  `localSkew ψ₁ T₀ T`.
+* `smileSurface_skew_slope`: the ε-derivative at `0` of the ATM `k`-slope of `smileSurface` is
+  `ψ₁ / √(T + T₀)`.
+* `dupireRatio_sqrt_slope_eq_mul_skew`: the first-order local ATM skew is
+  `((3/2)T + 2T₀)/(T + T₀)` times the first-order implied ATM skew.
+* `localSkew_zero`, `tendsto_localSkew_nhds_zero`: for `T₀ > 0`, `localSkew` at `T = 0`, and its
+  limit as `T → 0`, is `2 ψ₁ / √T₀`.
+* `tendsto_dupireRatio_sqrt_slope_nhdsGT_zero`: as `T → 0⁺` the first-order local ATM skew tends
+  to twice the first-order implied ATM skew at `T = 0`.
+* `tendsto_localSkew_mul_sqrt_atTop`: `localSkew ψ₁ T₀ T · √T → (3/2) ψ₁` as `T → ∞`.
+
+## References
+
+* [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 10
+* [B. Dupire, *Pricing with a smile*][Dupire1994]
+* [J. Gatheral, *The Volatility Surface: A Practitioner's Guide*][Gatheral2006], ch. 1
+
+## Tags
+
+local volatility skew, rule of two, Dupire ratio, volatility smile, total variance, skew, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

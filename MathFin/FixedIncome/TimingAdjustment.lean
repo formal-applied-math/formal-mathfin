@@ -5,7 +5,6 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.BrownianMartingale
 public import MathFin.Foundations.Numeraire
 public import MathFin.Foundations.WienerIntegralExpMoment
@@ -85,11 +84,18 @@ statements about the instantaneous short rate `r_S`, not about a futures contrac
 
 ## References
 
-* J. C. Hull, *Options, Futures, and Other Derivatives* (the chapter on convexity, timing and
-  quanto adjustments).
-* S. Bagaria, *Notes on Fixed Income Derivative Pricing* (lecture notes), ch. 8.
-* H. Geman, N. El Karoui, J.-C. Rochet, *Changes of numéraire, changes of probability measure and
-  option pricing*, J. Appl. Probab. 32 (1995) (the forward measure; `𝔼^T[r_T] = f(0,T)`).
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull] (the chapter on convexity,
+  timing and quanto adjustments).
+* [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 8.
+* [H. Geman, N. El Karoui, J.-C. Rochet, *Changes of numéraire, changes of probability measure and
+  option pricing*][GemanElKarouiRochet1995] (the forward measure; `𝔼^T[r_T] = f(0,T)`).
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  §3.3
+
+## Tags
+
+timing adjustment, futures–forward basis, convexity adjustment, change of numéraire,
+forward measure, lognormal covariance, Hull–White, MSC 91G30, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -5,7 +5,6 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.RiskMeasures.ExposureMeasures
 
 /-!
@@ -25,9 +24,13 @@ bank's and the counterparty's default times are not jointly modelled, so nothing
 correlated bilateral picture (both defaults together, wrong-way risk on either leg); that needs
 their joint law and is out of scope.
 
+## Main definitions
+
+* `dva`: the bank's own-default mirror of `cva`, taken at the bank's own default time and hazard
+  with the exposure `-V` seen from the bank's side.
+
 ## Main results
 
-* `dva`: the bank's own-default mirror of `CVA.cva`.
 * `dva_eq_integral_expectedNegativeExposure`: with the bank's default independent of the
   exposure and a deterministic continuous hazard,
   `DVA = LGD_B · ∫₀ᵀ D(s) · ENE(s) · λ(s)Q(s) ds`, the integral of the expected negative exposure
@@ -38,7 +41,12 @@ their joint law and is out of scope.
 
 ## References
 
-* J. C. Hull, *Options, Futures, and Other Derivatives* (bilateral CVA/DVA).
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull] (bilateral CVA/DVA).
+
+## Tags
+
+debt valuation adjustment, bilateral CVA, own default, expected negative exposure,
+counterparty risk, credit adjustment, MSC 91G40, JEL G32
 -/
 
 @[expose] public section

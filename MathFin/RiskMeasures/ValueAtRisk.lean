@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.Quantile
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # Value-at-risk and expected shortfall of a general loss
@@ -31,6 +31,13 @@ comonotone additivity are the three instances of that one fact.
 Subadditivity of expected shortfall, the one coherence axiom that value-at-risk lacks, is in
 `RiskMeasures/ExpectedShortfall.lean`.
 
+## Main definitions
+
+* `valueAtRisk`: the value-at-risk `VaR_α(X) = inf {x | α ≤ P(X ≤ x)}`, the `α`-quantile of the
+  law of the loss `X`.
+* `expectedShortfall`: the expected shortfall `ES_α(X) = (1 − α)⁻¹ ∫_α^1 VaR_u(X) du`, the
+  average of the value-at-risk over the levels above `α`.
+
 ## Main results
 
 * `valueAtRisk_le_iff`: `VaR_α(X) ≤ x ↔ α ≤ P(X ≤ x)`.
@@ -43,6 +50,17 @@ Subadditivity of expected shortfall, the one coherence axiom that value-at-risk 
 * `valueAtRisk_le_expectedShortfall`: `VaR_α ≤ ES_α`.
 * `expectedShortfall_add_const`, `expectedShortfall_const_mul`, `expectedShortfall_mono`.
 * `valueAtRisk_const`, `expectedShortfall_const`: a constant loss is its own VaR and ES.
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Proposition 7.20
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 2.8
+
+## Tags
+
+value at risk, expected shortfall, quantile function, VaR, confidence level, comonotone additivity,
+tail risk, MSC 91G70, MSC 60E05, JEL G32
 -/
 
 @[expose] public section

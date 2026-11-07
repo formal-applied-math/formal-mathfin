@@ -12,6 +12,11 @@
       "metadata": {
         "alignment_source": "Robert Martin, ButterflyFreeSVI, https://github.com/robertmartin8/ButterflyFreeSVI/tree/eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a",
         "reference": "Robert Martin, A polynomial-sign certificate for butterfly-free raw SVI; source development https://github.com/robertmartin8/ButterflyFreeSVI/tree/eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a; MathFin issue #174.",
+        "citations": [
+          {
+            "key": "MartinButterflyFreeSVI"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Re-export of MathFin.SVI.fullCertificateFormula_iff. The raw SVI total variance is w(k) = a + b(rho(k-m) + sqrt((k-m)^2 + sigma^2)) and Durrleman's function g is built from its actual first and second derivatives (Derivatives.lean). The formula is a SignFormula over MvPolynomial (Fin 5) R, defined structurally as the expansion of a finite sign program (degree branch, four Hermite-matrix signatures by characteristic sign variations); it is not printed as an expanded list of inequalities. Proof route: rationalise g to a degree-ten polynomial on (0, infinity); nonnegativity there iff endpoint signs and no negative critical value; count those by four Tarski queries; evaluate each by Hermite's trace-form signature identity, proved for arbitrary nonzero f without squarefreeness; clear denominators. SCOPE. Smooth case sigma > 0 only. Strictly positive variance at every finite log-strike is part of the characterised domain; slices with zero variance somewhere are excluded. No statement about calendar-spread arbitrage or about surfaces.",
@@ -33,6 +38,11 @@
       "metadata": {
         "alignment_source": "Robert Martin, ButterflyFreeSVI, https://github.com/robertmartin8/ButterflyFreeSVI/tree/eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a",
         "reference": "Robert Martin, A polynomial-sign certificate for butterfly-free raw SVI; source development https://github.com/robertmartin8/ButterflyFreeSVI/tree/eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a; MathFin issue #174.",
+        "citations": [
+          {
+            "key": "MartinButterflyFreeSVI"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Re-export of MathFin.SVI.bsSmile_convex_iff. The second strike derivative of the smiled call is computed with the smile's first and second derivatives (blackCall_deriv2) and its sign identified with that of g; bsSmile is MathFin.bsV K 0 (sqrt w(log K)) 1 1. SCOPE. sigma > 0 and positive variance are hypotheses. Normalised spot, maturity and discount; convexity on (0, infinity) only, with no statement about limits at 0 or infinity or about the call being a price under a measure.",
@@ -54,6 +64,11 @@
       "metadata": {
         "alignment_source": "Robert Martin, ButterflyFreeSVI, https://github.com/robertmartin8/ButterflyFreeSVI/tree/eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a",
         "reference": "Robert Martin, A polynomial-sign certificate for butterfly-free raw SVI; source development https://github.com/robertmartin8/ButterflyFreeSVI/tree/eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a; MathFin issue #174.",
+        "citations": [
+          {
+            "key": "MartinButterflyFreeSVI"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Re-export of MathFin.SVI.extendedCertificateFormula_iff_bsSmile_convex, the disjunction of the smooth formula (mf-svi-durrleman-sign-formula, through mf-svi-call-convex-iff-durrleman) and the zero-scale formula. The raw SVI total variance is w(k) = a + b(rho(k-m) + sqrt((k-m)^2 + sigma^2)) and Durrleman's function g is built from its actual first and second derivatives (Derivatives.lean). The formula is a SignFormula over MvPolynomial (Fin 5) R, defined structurally as the expansion of a finite sign program (degree branch, four Hermite-matrix signatures by characteristic sign variations); it is not printed as an expanded list of inequalities. Proof route: rationalise g to a degree-ten polynomial on (0, infinity); nonnegativity there iff endpoint signs and no negative critical value; count those by four Tarski queries; evaluate each by Hermite's trace-form signature identity, proved for arbitrary nonzero f without squarefreeness; clear denominators. For sigma = 0 the slice is piecewise linear; each branch reduces to a quadratic nonnegative on a ray, and convexity across the kink follows from the upward jump of the one-sided derivative. SCOPE. The characterised set is positive variance together with convexity in strike of the normalised smiled call on (0, infinity). It is not full butterfly-freeness: no tail condition is proved (the call tending to 0 at large strikes, i.e. the strict wing slope b(1+rho) < 2, or the absence of an atom at zero), and monotonicity of the call is not stated. Slices with zero variance at some log-strike are excluded (for sigma = 0 that means a > 0). Whether the formula is minimal, or how large its expansion is, is not addressed. No statement about calendar-spread arbitrage.",
@@ -75,6 +90,16 @@
       "metadata": {
         "alignment_source": "Roper (2010), Theorem 2.1; Gatheral and Jacquier (2014), Lemma 2.2; MathFin issue #174",
         "reference": "Roper, Arbitrage free implied volatility surfaces (2010), Theorem 2.1, for the call-price conditions; Gatheral and Jacquier, Arbitrage-free SVI volatility surfaces (2014), Lemma 2.2, for the tail condition; the strike-convexity certificate is Robert Martin's (MathFin issue #174, entry mf-svi-strike-convexity-sign-formula).",
+        "citations": [
+          {
+            "key": "Roper2010",
+            "locator": "Theorem 2.1"
+          },
+          {
+            "key": "GatheralJacquier2014",
+            "locator": "Lemma 2.2"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Re-export of MathFin.SVI.tendsto_dpl_atBot_iff, tendsto_bsSmile_zero_iff, butterflyFreeFormula_iff and butterflyFreeFormula_iff_isNormalizedCallPrice (MathFin/BlackScholes/SVI/TailCondition.lean). IsNormalizedCallPrice C is the structure: C convex and antitone on (0, infinity), max(1-K,0) <= C(K) <= 1 for K > 0, C -> 1 at 0+, C -> 0 at +infinity. Proof. Right of m the variance lies between its asymptote a + b(1+rho)(k-m) and that plus b|sigma|, and d_+ = (w - 2k)/(2 sqrt w); for slope below 2 the numerator falls linearly while 2 M sqrt w <= q w + M^2/q, for slope at least 2 d_+ is eventually bounded below and sqrt w is eventually above any level. The call is a Black-Scholes price at the smile's volatility, so it is nonnegative and at least 1-K (bsV_nonneg, bsV_ge_forward_lower_bound at a standard normal), and at most Phi(d_+) <= 1; the limit at zero strike is a squeeze. A convex function on (0, infinity) bounded above is antitone. For slope at least 2, Phi(d_+) stays above a positive constant while e^k Phi(d_-) <= phi(d_+)/|d_-| tends to 0 by the Mills bound, so the call does not vanish. SCOPE. (1) The entry proves the single-maturity conditions of Roper's Theorem 2.1 on the call price function (convexity, the bounds, the large-strike limit) and two consequences (monotonicity, the limit at zero strike); it does not construct the nonnegative mean-one random variable (equivalently the risk-neutral law) whose call prices these are, which is the remaining step of that theorem. (2) Gatheral-Jacquier's Lemma 2.2 states butterfly-freeness as g >= 0 together with d_+ -> -infinity; here convexity of the smiled call stands in for g >= 0, and the two are proved equivalent only for sigma > 0 (bsSmile_convex_iff). At sigma = 0 the formula characterises convexity of the call, not the sign of g. (3) Slices with zero variance at some log-strike are excluded. (4) The convexity part is the structural, unexpanded formula of mf-svi-strike-convexity-sign-formula; the tail part adds one explicit atom. (5) Strikes are positive; the forward and discount factor are normalised to one. (6) Nothing about calendar-spread arbitrage or surfaces.",

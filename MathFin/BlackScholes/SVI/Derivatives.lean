@@ -6,6 +6,12 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.SVI.Reduction
+public import Mathlib.Analysis.SpecialFunctions.Sqrt
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Inv
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-! # The derivatives of raw SVI variance
 
@@ -13,6 +19,17 @@ Part of the SVI polynomial-sign certificate (#174).
 
 For `σ > 0`, `slope` and `curvature` are the first and second derivatives of `variance` in
 log-strike.
+
+## Main results
+
+* `variance_hasDerivAt`: for `σ > 0`, `slope p k` is the derivative of `variance p` at `k`.
+* `slope_hasDerivAt`: for `σ > 0`, `curvature p k` is the derivative of `slope p` at `k`.
+* `deriv_variance`, `deriv_slope`: the same statements as `deriv (variance p) = slope p` and
+  `deriv (slope p) = curvature p`.
+
+## Tags
+
+raw SVI, variance slope, variance curvature, log-strike derivative, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

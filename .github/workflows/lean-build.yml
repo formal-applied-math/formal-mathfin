@@ -1,0 +1,42 @@
+name: lean build
+
+# A Lean-only build of a branch, without build.yml's Python gates, for work in progress whose
+# corpus entries, ledger rows and audit regeneration come later. Dispatch it on the branch:
+#   gh workflow run lean-build.yml --ref <branch> [-f targets="MathFin.X MathFin.Y"]
+# With no targets it builds the default targets. The log keeps every error (no `| tail`).
+
+on:
+  workflow_dispatch:
+    inputs:
+      targets:
+        description: "lake build targets (blank: the default targets)"
+        required: false
+        default: ""
+
+concurrency:
+  group: lean-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lean + Mathlib cache
+        uses: leanprover/lean-action@v1
+        with:
+          build: "false"
+          lint: "false"
+          use-mathlib-cache: "true"
+
+      - name: lake build
+        env:
+          TARGETS: ${{ inputs.targets }}
+        run: |
+          set -o pipefail
+          lake build $TARGETS 2>&1 | tee build.log
+      - name: Errors
+        if: always()
+        run: grep -nE '^error|error:' build.log | head -200 || true

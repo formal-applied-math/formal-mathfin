@@ -14,10 +14,21 @@ The comparator may have a jump in its second derivative. At each potential
 positive maximum it suffices to have a smooth majorant touching the comparator.
 The actual price is smooth there because the comparator dominates the payoff.
 
-## Result
+## Main results
 
-Public entry points include `canonicalPrice_no_positive_supported_max`,
-`canonicalPrice_le_of_upper_supports`.
+* `canonicalPrice_no_positive_supported_max`: for `0 < k`, at a point `z` of the continuation
+  region there is no `F`, `C²` at `z`, with `F z` strictly below the price, nonnegative pricing
+  operator at `z`, and `price - F` having a local spatial maximum at `z` that earlier times do not
+  exceed; the statement concludes `False`.
+* `canonicalPrice_le_of_upper_supports`: for `0 < k`, a continuous obstacle `U` on a cylinder
+  `[L,R] × [0,T]` above the payoff, at least the canonical price on the initial and lateral
+  boundary, and with a `C²` upper support of nonnegative pricing operator at every point of
+  `(L,R) × (0,T]`, dominates the canonical price on the whole cylinder.
+
+## Tags
+
+upper support, smooth majorant, comparison, touching comparator, American price, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

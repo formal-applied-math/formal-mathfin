@@ -5,9 +5,12 @@ Authors: Raphael Coelho, Yang Ye
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
 public import BrownianMotion.Gaussian.Moment
-public import BrownianMotion.Gaussian.BrownianMotion
+public import Mathlib.Probability.BrownianMotion.Basic
+public import Mathlib.Probability.Distributions.Gaussian.HasGaussianLaw.Basic
+public import Mathlib.Probability.Distributions.Gaussian.IsGaussianProcess.Basic
+public import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
 # Gaussian moments
@@ -19,6 +22,26 @@ variation). Kept in one place so each identity is proved exactly once.
 The fourth moment reuses Degenne's `(2n)`-th central-moment formula
 (`ProbabilityTheory.centralMoment_two_mul_gaussianReal`) rather than re-deriving the
 Gaussian integral — coherence with the upstream `brownian-motion` package.
+
+## Main results
+
+* `integral_sq_gaussianReal`, `integral_pow3_gaussianReal`, `integral_pow4_gaussianReal`,
+  `integral_pow6_gaussianReal`: the second, third, fourth and sixth moments of `N(0, v)` are
+  `v`, `0`, `3 v²` and `15 v³`.
+* `integral_sq_sub_var_sq_gaussianReal`, `integral_sq_sub_var_gaussianReal`: for `N(0, v)`,
+  `∫ (x² − v)² = 2 v²` and `∫ (x² − v) = 0`.
+* `integral_sq_of_hasLaw_gaussianReal`: `X ~ N(m, v)` gives `𝔼[X²] = m² + v`.
+* `hasLaw_increment`: for `s ≤ t`, the increment `B t − B s` of a pre-Brownian motion has law
+  `N(0, t − s)`.
+* `hasLaw_sum_range_gaussianReal`: a sum of `n` independent `N(m, v)` variables has law
+  `N(n m, n v)`.
+* `hasLaw_sub_div_of_gaussianReal`: if `X ~ N(μ, v)` with `v = s²`, `s > 0`, then
+  `(X − μ)/s ~ N(0, 1)`.
+
+## Tags
+
+Gaussian moments, fourth moment, central moments, normal distribution, variance, MSC 60E05,
+MSC 60J65
 -/
 
 @[expose] public section
@@ -179,6 +202,12 @@ lemma hasLaw_increment {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
     rw [coe_nndist, Real.dist_eq, NNReal.coe_sub hst,
       abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr hst))]
   rw [← hv]; exact hL
+
+/-- A pre-Brownian increment `B t − B s` lies in `L²(μ)`, for any two times. -/
+lemma memLp_increment {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
+    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (s t : ℝ≥0) :
+    MemLp (fun ω ↦ B t ω - B s ω) 2 μ :=
+  hB.isGaussianProcess.hasGaussianLaw_sub.memLp_two
 
 /-! ### Sums and standardization of Gaussian variables -/
 

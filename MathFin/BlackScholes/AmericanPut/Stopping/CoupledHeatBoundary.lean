@@ -6,16 +6,30 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.HeatBoundaryContraction
+public import Mathlib.Topology.MetricSpace.Contracting
 
 /-! # Solving the coupled boundary-input equations
 
 A compact time cutoff makes cross-boundary propagation a strict contraction.
 The two fixed-point equations give exact matching where that cutoff is one.
 
-## Result
+## Main definitions
 
-Public entry points include `causalBoundarySub`, `causalBoundarySub_dist`, `coupledBoundaryStep`,
-`coupledBoundaryStep_contracting`.
+* `causalBoundarySub`: the difference `f - g` of two causal boundary inputs.
+* `coupledBoundaryStep`: one step of the coupled boundary iteration, sending `p` to
+  `(g₀ - crossBoundaryCausal χ L p.2, g₁ - crossBoundaryCausal χ L p.1)`.
+
+## Main results
+
+* `causalBoundarySub_dist`: `causalBoundarySub f` is an isometry in its second argument.
+* `coupledBoundaryStep_contracting`: for `0 < L`, `0 ≤ D` and a cutoff `χ` bounded by `1` that
+  vanishes after `a + D`, `coupledBoundaryStep` is a contraction with constant
+  `boundaryArrivalMass L D`.
+
+## Tags
+
+coupled boundary equations, contraction mapping, fixed point, heat equation, boundary input,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

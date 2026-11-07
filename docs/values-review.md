@@ -130,6 +130,93 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-11-06 — corpus 779, modules 710 — library practices (#439), read before it lands
+
+Scope: #439, the library-practices program (`docs/specs/2026-11-05-library-practices-design.md`):
+the declaration index, one ratchet, one host-side library model, one doc standard on every module,
+one bibliography, `MathFin/Init.lean`, the blueprint ↔ issues link, and the debt the index found.
+Three read-only reviewers: the lemmas this branch made public (lenses 2, 3, 6), the Lean structure
+it changed (`IsEMM`, the twelve removed duplicates, the `pricing` set, the renames; lenses 1, 4,
+5), and 85 rewritten module docstrings against their statements (lenses 7, 8 and the first pass).
+Their findings were adjudicated against the code, executed, and built before the branch landed.
+
+### The standing first pass: prose against statement
+
+The doc standard put a `## Main results` list in every module, about 170 of them written this
+session, which is a great deal of new prose to read against statements. Seven bullets said more
+than the theorem: a balance equation over abstract reals read as a hazard-model theorem
+(`cdsFairSpread_TV_cash_flow_balance`); a conditional-expectation identity as "is a martingale"
+(`condExp_itoProcessCLM_min`); the binomial representation without its second martingale's
+nondegeneracy and `0 < q < 1`; the jump-diffusion martingale criterion without `S₀ ≠ 0` and
+integrable `e^J`, and its MGF without `∫ e^{θx} dν < ∞` (the junk-value case); a consistency
+witness read as a nontrivial density, where it is `Q = μ`; and a one-period zero-mean identity as
+a martingale. All are restated. One flagged bullet was dismissed: the Glosten–Milgrom average does
+go through `integral_condExp`. Seven modules still had bare name lists under Main results (`Cox`,
+`HullWhiteCalibration`, `Bootstrapping`, `CMS`, `UniswapMechanics`, `MarshallOlkin`,
+`ConvexDuality`); they are bullets now, hypotheses included. Beyond the bullets:
+`martingale_comp_monotone` claimed to be the sampling bridge of the forward FTAP, which uses
+`IsEMM.sampled`, and the `pricing` set promised discounting and forward-price lemmas it never held.
+
+### Upgrades executed
+
+- **One-liners inline, upstream by name.** The index's count of Mathlib-shaped private lemmas went
+  193 → 0, but the first resolution made every one public, and the coherence panel found 52 thin
+  wrappers, 9 upstream copies and 4 duplicates among them. Publishing a one-liner trades a hidden
+  helper for a public wrapper. 26 are gone: 23 written inline (`by positivity`, `fun_prop`,
+  `rw [abs_div, abs_two]`, `.pos_part`, …), `hasDerivAt_const_mul` and
+  `intervalIntegral.continuous_primitive` called by name, and `absolutelyContinuous_of_pos`
+  folded into `eq_empty_of_pos_singleton`. 34 stay, each for a stated reason (a rewrite handle in
+  `rw` lists, an upstream lemma outside the file's imports, an ascription longer than the lemma).
+  The spec and `decl_index.mathlib_shaped_private` now name the three resolutions.
+- **One `L²` increment.** `memLp_increment` (`GaussianMoments`, beside `hasLaw_increment`): for
+  any two times, `B t − B s ∈ L²(μ)`. It replaces `WienerIntegralL2.memLp_increment_two` (on a
+  `StepIndex`) and `PointwiseBracket.memLp_increment` (with an order hypothesis it never used).
+- **The `pricing` set holds what grind can use.** `mertonTerm_parity` and `margrabe_parity` were
+  tagged with no example. Pinned, both failed: each is stated as a difference (`call − put = …`),
+  so grind's only pattern is that difference, which a rearranged goal never contains. Both are
+  untagged, and the set's description now says what it holds (parity on the closed forms, the
+  trees' risk-neutral probabilities).
+- **Renames finished.** `memLp_uncurry_trim_T` → `memLp_uncurry_trimMeasure`,
+  `assembly_isometry_T` → `norm_itoAssemblyHorizon` (their objects were renamed in this branch);
+  `max_zero_sub_eq_self` (a Mathlib alias) → `max_zero_sub_max_neg_zero_eq_self`, the name the
+  rest of the library uses.
+
+Confirmed and fine: the one `IsEMM` over `[LinearOrder ι]` (no restated ℕ or ℝ≥0 lemma survives),
+the twelve duplicates went to the copies every user imports, the `PointwiseBracket` increment
+merge, and the `TwoState`/`MultiState`/`Horizon` renames.
+
+### Ranked backlog
+
+1. **The Brownian increment kernels at `IsFilteredPreBrownian`.** Mean zero and variance of an
+   increment given `𝓕_s` are derived inline in `squareSubTime_isMartingale`, again in
+   `PointwiseBracket.condExp_increment_eq_zero`/`_sq`, and a third time in
+   `integral_sq_increment`. State `IsFilteredPreBrownian.condExp_increment_eq_zero` and `_sq`
+   once, and make the others instances.
+2. **The exponential survival function, once.** `expMeasure_real_Ioi` (`MarshallOlkin`),
+   `expMeasure_Ioi` (`ExpMin`, its `ofReal` form) and `expClock_Ioi`/`_Iic` (`Cox`, at rate 1)
+   state it three times; the survivor belongs in a module the other two import.
+3. **The kept wrappers.** The six chain-rule shims in `WeakForwardUniqueness` are
+   `HasDerivAt.cos`/`.sin` of `hasDerivAt_const_mul` plus `congr_deriv (by ring)`;
+   `martingale_norm_submartingale` and `iSup_rpow_of_monotone` are BrownianMotion's
+   `Martingale.submartingale_norm` and `ENNReal.rpow_iSup` once `DoobLpMaximalInequality` imports
+   it; the four `Lp.const` helpers in `MartingaleRepresentation` vanish if constants are written
+   `Lp.const 2 μ c`; `convexOn_inv_shift` is `convexOn_zpow (-1)` after a translation. Each needs
+   Lean in the loop.
+4. **`IsEMM.sampled` and `sampledFiltration` at a monotone `t : κ → ι`**, beside the already
+   general `IsEMM.increment`; and the vector, general-`Ω` form of `isEMM_one_iff_onePeriod`, which
+   retires the hand-built two-step filtration in `noArbitrage_of_isEMM`.
+5. **First principles.** `emm_unique_of_complete` uses only `IsEquivProbMeasure` of its `IsEMM`
+   argument; state it there.
+6. **Names.** `OnePeriodVector.IsEMM` shadows the unified `IsEMM` inside its namespace; the
+   `Horizon` suffix next to unsuffixed `trimMeasure`/`itoIsometry` hides which objects are the
+   horizon ones; `band_overlap_real`, `min_gt_iInter` and `upperPartialMoment_sub` say nothing
+   about their statements; the MatrixSignature `toQuadraticForm'` lemmas are upstream candidates
+   that will collide when Mathlib adds them.
+7. **Merton and Margrabe parity in price form.** `bsP_eq_bsV` states the put as a function of the
+   call, which gives grind a pattern; restate `mertonTerm_parity` and `margrabe_parity` the same
+   way and tag them, with a pinned example each.
+8. **The nine heartbeat bumps** (89 to 614 lines each): one lemma per idea, with Lean in the loop.
+
 ## 2026-11-05 — corpus 779, modules 709 — the backlog closed on main, read before it lands
 
 Scope: #418, the CDS half of #367 and the backlogs of the two 2026-11-04 entries, in four areas
@@ -402,7 +489,7 @@ Vasicek forward rate is a shifted lognormal, a remark, not a theorem). No overst
 
 8. Beauty, the panel's verdicts. Exemplary, leave them: `ftap_discrete`,
    `noArbitrage_horizonSpot_iff`, `bermudanPrice` and `bermudanCallPrice_eq_binomialPrice`, the CDS
-   and cap values, `value_chooser` and parity, `itoIntegralCLM_T := itoIntegralL2 ∘ bandExtend` with
+   and cap values, `value_chooser` and parity, `itoIntegralCLM := itoIntegralL2 ∘ bandExtend` with
    its cross-horizon consistency, the adapted Girsanov proof (12 lines, one idea per transport lemma),
    and the proof of `martingale_of_setIntegral_eq`. Sound but obscured: Lévy's characterization (the
    stopped pair spelled out ~25 times, one localisation recipe three times), the local Itô formula (a
@@ -3030,7 +3117,7 @@ endpoint lemmas edit core modules that restale about thirty entries, so they are
    `M` with dominated convergence in `L²(⟨M⟩)` gives `∫ f'(X) dM = ∫ f'(X)σ dB`. That is B4 for the
    measure `⟨M⟩` in place of `trim_T`, and `simpleAssemblyOfMeasure ν` already takes a general `ν`.
    The alternative is orthogonality of the weighted defects `wₖDₖ` via
-   `itoIntegralCLM_T_smulAdapted`.
+   `itoIntegralCLM_smulAdapted`.
 4. **The partition and step-process API** (lenses 2, 3). `unifPart_zero`,
    `unifPart_self (hn : n ≠ 0)` and `unifPart_succ_sub` beside `unifPart`, replacing about sixteen
    inline copies of the endpoint facts and five of the cell length. And one public `coe_stepSP`
@@ -3102,7 +3189,7 @@ Ten findings, all fixed:
 ### Upgrades executed
 
 - **Coherence and zero slop (lenses 2, 3).** Seven re-derivations now consume the library's own
-  lemmas: `ae_fst_mem_Ioc_trimMeasure_T` (the hand-computed time bound and the separate time-origin
+  lemmas: `ae_fst_mem_Ioc_trimMeasure` (the hand-computed time bound and the separate time-origin
   argument become one `ae_fst_mem_Ioc_bracketMeasure`), `MemLp.toLp_congr`, `MemLp.toLp_add` and
   `MemLp.toLp_const_smul` (both definitional), `Lp.tendsto_Lp_iff_tendsto_eLpNorm''`,
   `tendstoInMeasure_of_tendsto_Lp`, and BrownianMotion's `measurableSet_predictable_univ_prod` with
@@ -3572,7 +3659,7 @@ Per-lens **exemplar → next upgrade**:
   representation as a consequence of the adapted-integrand Itô formula. It is not one. Surjectivity of
   an isometry onto a closed subspace is a *totality* statement about its range, and the whole proof is
   an orthogonal decomposition — no Itô formula for `f(∫θ dB)`, no pathwise quadratic variation. Second
-  exemplar, one floor down: `itoIntegralCLM_T_restrictAfterCLM`, "restricting an integrand to `(u,T]`
+  exemplar, one floor down: `itoIntegralCLM_restrictAfterCLM`, "restricting an integrand to `(u,T]`
   removes exactly the past of its integral," which is what turns the *terminal* identity an Itô formula
   hands out into an identity for an inner increment. That single lemma is what lets a Doléans
   exponential over a partition be assembled at all. *Upgrade (HIGH):* the theorem proves `φ` exists and
@@ -3585,9 +3672,9 @@ Per-lens **exemplar → next upgrade**:
   `condExpL2` used through the Hilbert API because it is *definitionally*
   `Submodule.orthogonalProjectionOnto` — neither argument is re-derived in finance clothing.
   *The finding, and it is the headline:* three separate general lemmas landed in application files and
-  each had to be moved. `itoIntegralCLM_T_simpleAssembly_T` existed in **three** copies; the locality
+  each had to be moved. `itoIntegralCLM_simpleAssemblyHorizon` existed in **three** copies; the locality
   facts sat in `DoleansStepRepresentation` when `ItoIntegralLocality` exists to hold them;
-  `itoProcessCLM_zero_time` and `integral_itoIntegralCLM_T` sat in `MartingaleRepresentation` when
+  `itoProcessCLM_zero_time` and `integral_itoIntegralCLM` sat in `MartingaleRepresentation` when
   `ItoIntegralProcessGeneral` is their floor. Three in one program is a rate. *Upgrade (HIGH):* ask the
   placement question at **dispatch**, not at review — a task brief that names the destination file for
   each general fact it expects to produce. #185 clears the residue (`mulBddCLM` vs the older hand-rolled
@@ -3610,9 +3697,9 @@ Per-lens **exemplar → next upgrade**:
   this review ranks HIGH. Dropped in `6530fae`; the hypothesis was inert (`stepDoleansExp … 0` is the
   empty product, and the worker `stepDoleans_aux` never took it).
 - **4 Architectural ingenuity.** *Exemplar:* the crown is stated as **surjectivity of an isometry the
-  library already had**, not as a bespoke theorem. `itoIsometryCentered` corestricts `itoIntegralCLM_T`
+  library already had**, not as a bespoke theorem. `itoIsometryCentered` corestricts `itoIntegralCLM`
   to `centeredBrownianL2 := lpMeas 𝓕ᴮ_T ⊓ (ℝ ∙ 1)ᗮ`, `itoIsometryCentered_surjective` closes it, and
-  `itoIsometryEquiv` is one `LinearIsometryEquiv.ofSurjective` call. So `itoIntegralCLM_T` gains a
+  `itoIsometryEquiv` is one `LinearIsometryEquiv.ofSurjective` call. So `itoIntegralCLM` gains a
   structure theorem and the library gains no parallel construction. The codomain's *definition* is the
   mathematical content. *Upgrade (MED):* `mulBddCLM` was extracted mid-proof as the general operator
   (bounded multiplication on `L²`, arbitrary measure) and instantiated twice in the same file, which is
@@ -3635,8 +3722,8 @@ Per-lens **exemplar → next upgrade**:
   becoming *binding in the plan* after it recurred, instead of being re-raised per task. *Upgrade
   (MED):* the two `lake lint` failures on underscored `def` names landed in consecutive rounds because
   the first fix swept the reported instance and not the class. The class is real and discoverable
-  without CI: every other `_T` def in this tower (`itoIsometry_T`, `trimMeasure_T`, `itoIntegralCLM_T`,
-  `simpleAssembly_T`, `itoAssembly_T`, `timeMeasure_T`) lives in a sub-namespace, and
+  without CI: every other `_T` def in this tower (`itoIsometry`, `trimMeasure`, `itoIntegralCLM`,
+  `simpleAssemblyHorizon`, `itoAssemblyHorizon`, `timeMeasureHorizon`) lives in a sub-namespace, and
   `MartingaleRepresentation` declares only `namespace MathFin`. Either sub-namespace it or record the
   rule where an author reads it before pushing.
 - **7 Concept clarity.** *Exemplar:* the docstrings record the **amendments in the artifact**, not only
@@ -3666,15 +3753,15 @@ Per-lens **exemplar → next upgrade**:
 
 **Upgrades executed this session (the program).**
 
-1. **Three general-lemma relocations** (lens 2/4): the three-way `itoIntegralCLM_T_simpleAssembly_T`
+1. **Three general-lemma relocations** (lens 2/4): the three-way `itoIntegralCLM_simpleAssemblyHorizon`
    dedup to one definition site; the locality facts into `ItoIntegralLocality`; `itoProcessCLM_zero_time`
-   (now public `@[simp]`) and `integral_itoIntegralCLM_T` into `ItoIntegralProcessGeneral`.
+   (now public `@[simp]`) and `integral_itoIntegralCLM` into `ItoIntegralProcessGeneral`.
 2. **A spurious hypothesis removed from a public signature** (lens 3/5): `hF1` gone from
    `eq_zero_of_orthogonal_stepDoleans`, which is strictly stronger than what was specified.
 3. **The crown stated as a structure theorem** on an existing isometry, plus the bundled
    `itoIsometryEquiv` (lens 4).
 4. **`mulBddCLM`** extracted as the general bounded-multiplication operator over an arbitrary measure
-   (lens 2/4); **dead API deleted** (`itoIntegralCLM_T_smulAdapted_mem_range`, zero consumers after the
+   (lens 2/4); **dead API deleted** (`itoIntegralCLM_smulAdapted_mem_range`, zero consumers after the
    route changed) (lens 3).
 5. **`PricesGainsAtZero` guarded rather than asserted**, with the hypothesis-minimal
    `measure_eq_of_pricesGainsAtZero` as the public form and `emm_unique_of_complete` as its corollary
@@ -3690,7 +3777,7 @@ Per-lens **exemplar → next upgrade**:
 
 1. **[HIGH] Ask the placement question at dispatch.** Three general lemmas in the wrong file in one
    program, and the sharpest data point is self-directed: the third copy of
-   `itoIntegralCLM_T_simpleAssembly_T` was found because **this file had already recorded it** as a LOW
+   `itoIntegralCLM_simpleAssemblyHorizon` was found because **this file had already recorded it** as a LOW
    item on 2026-07-10 (`docs/values-review.md:433`) and nobody acted on it for four weeks. The review
    model's stated failure mode is a review that finds nothing to improve. The subtler one is a review
    that finds it, ranks it, writes it down, and then does not do it. Concrete form: task briefs name the
@@ -4015,7 +4102,7 @@ built but under-consumed**, rather than adding standalone bookkeeping:
   `bs_call_formula` — the Margrabe move. Makes `wienerIntegralLp_stepIndicator` (WG.3, built 2026-07-08)
   load-bearing for a real exotic price, not just the two-date law.
 - **(B) binomial barrier/lookback** (`Binomial/BarrierReflection`): consumes the **stranded**
-  `reflectionPrincipleEquiv_below` (PathReflection's own docstring flagged "the `Fintype.card` identity is
+  `reflectionPrincipleEquivBelow` (PathReflection's own docstring flagged "the `Fintype.card` identity is
   … not separately stated here") — the exact "stranded generic" theme the 2026-07-10 panel named. Ships
   the counting identity **and** the substantive running-maximum law `#{max ≥ a} = 2·#{end>a} + #{end=a}`.
 - **(C) Girsanov-grounded quanto** (`BlackScholes/QuantoGrounding`): upgrades `mf-quanto-correction-factor`
@@ -4098,7 +4185,7 @@ every "trapped-generic" lemma below wants.
    ~180–200 net lines removed. Risk LOW via re-exports (MED-HIGH if done naively). The dedicated
    next-session item; supersedes old backlog #1.
 2. **[MED-HIGH] Lift one generic Riemann-bridge core.** `ItoIntegralRiemannBridge{,Adapted,TD}` re-roll
-   structurally identical `memLp_riemann*`/`itoSimple_step*`/`itoIntegralCLM_T_step*` for φ(B)/θ/φ(t,B);
+   structurally identical `memLp_riemann*`/`itoSimple_step*`/`itoIntegralCLM_step*` for φ(B)/θ/φ(t,B);
    one generic adapted-bounded-multiplier core, three instantiations. Feeds the Itô summits + adapted crown.
 3. **[MED] Hoist the 3 pure-analysis Taylor lemmas** (`abs_sub_le_of_hasDerivAt`, `abs_taylor1_le`,
    `abs_discreteTaylorRemainder_le`) to a generic mean-value module; the order-2 remainder re-inlines the
@@ -4106,7 +4193,7 @@ every "trapped-generic" lemma below wants.
 4. **[MED] Dedup the marshalled-convergence prologue** (`tendstoInMeasure_marshalDrift` vs `_marshalQuadVar`,
    ~22 identical lines incl. `hD0`) into a private `slice_energy_facts` helper. (Old backlog #3.)
 5. **[LOW] Small dedups/relocations:** `isCadlag_of_continuous` (triplicated private), `memLp_increment_two`
-   (dup), the `itoIntegralCLM_T_simpleAssembly_T` name-clash, and trapped-generics
+   (dup), the `itoIntegralCLM_simpleAssemblyHorizon` name-clash, and trapped-generics
    `continuous_uncurry_of_bdd_partials` / `continuous_timeMeasure_primitive` / `Lp_real_two_norm_sq` →
    generic homes.
 
@@ -4478,7 +4565,7 @@ repair (the file is a thin, honestly-derived wiring layer). The upgrades are arc
    lines (`ItoProcessPredictable:215-324`) and let the contraction use `map_sub` uniformly. Deferred:
    `itoProcessAssembled` is deliberately the pathwise-continuous modification for future SDE-path-continuity; a
    CLM's representative need not be that modification (needs an a.e.-agreement lemma). The deepest upgrade.
-2. **`timeMeasure_T_real_univ` helper** (in `ItoIntegralCLM`, beside `timeMeasure_T`) — the 7-lemma total-mass
+2. **`timeMeasureHorizon_real_univ` helper** (in `ItoIntegralCLM`, beside `timeMeasureHorizon`) — the 7-lemma total-mass
    `rw` chain is verified-triplicated across the Foundations cluster; collapse each site to one rewrite.
 3. **`lipComp`'s `L` → implicit** (consistency with `lipComp_sub_norm_le`); the stronger `opNorm_extendOfNorm_le`
    form of the drift bound; `set δb/δσ` in `picardMap_contraction` (low value — the verbosity is honest).
@@ -4561,7 +4648,7 @@ rewrite under the `fun t =>` binder, `simp only` can; and the `_stronglyAdapted`
 **Lens reads (exemplar → next upgrade).**
 - *Coherence (strong)*: no lemma re-proves upstream — the file consumes `isStronglyPredictable_of_leftContinuous`,
   `StronglyMeasurable.limUnder`, `LinearMap.extendOfNorm`, `integral_mul_le_Lp_mul_Lq_of_nonneg`,
-  `Finsupp.sum_add_index'` directly and reuses the repo's `simpleAssembly_T` / `memLp_uncurry_trim_T` /
+  `Finsupp.sum_add_index'` directly and reuses the repo's `simpleAssemblyHorizon` / `memLp_uncurry_trim_T` /
   `lp_two_norm_sq`. **Next:** factor the shared `‖toLp g‖² = ∫ (uncurry g)² ∂prod` computation (inlined here as
   `hnorm` and again in `itoProcessAssembled_norm_sq`) into one lemma both keystones consume.
 - *Architectural ingenuity (strong, one open fork)*: the CLM-via-`extendOfNorm` route is cleaner than the Itô
@@ -4895,7 +4982,7 @@ these exit times.
 
 **Scope**: `Foundations/ItoFormulaProcess.lean` (new — `ito_formula_td_process`,
 `exists_fullHorizon_extension`); the witness-exposure strengthening of
-`ItoIntegralRiemannBridgeTD.itoIntegralCLM_T_of_bdd_cont_td`; the `_explicit` core +
+`ItoIntegralRiemannBridgeTD.itoIntegralCLM_of_bdd_cont_td`; the `_explicit` core +
 thin wrapper refactor of `ItoFormulaTD.ito_formula_td_L2_bddDeriv`; the extraction of
 `itoProcessCLM_terminal_eq` into `ItoIntegralProcessGeneral`. Entry `sc-ito-formula-td-process`
 (`full`). Two-agent panel (coherence + architecture + first-principles; zero-slop + idiom +
@@ -4939,7 +5026,7 @@ formula's 2D Itô–Taylor remainder), not vestigial. Scope honest: bounded-deri
 ## 2026-06-28 — corpus 298 — the Itô formula reaches a general (constant-coefficient) Itô process
 
 **Scope.** New `Foundations/ItoFormulaItoProcess.lean` (`ito_formula_itoProcess`: the Itô formula
-`f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds` for `X_t = X₀ + b·t + σ B_t`
+`f(X_T) − f(X₀) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds` for `X_t = X₀ + b·t + σ B_t`
 and a general `C³` exponential-growth `f`); the coherence refactor lifting three `SmoothTrunc`
 lemmas (`cut_eq_id_of_abs_le`, `cutD1_eq_one_of_abs_lt`, `phi'_eq_one_of_lt`) into
 `ItoFormulaLocalized.lean` (with `cut_eventually_id` refactored to consume the first); and the
@@ -4980,7 +5067,7 @@ the clean hierarchy `ItoFormulaLocalized → ItoFormulaItoProcess → ItoFormula
 ## 2026-06-28 — corpus 297 — the Itô tower reaches pricing: GBM decomposed by the Itô integral
 
 **Scope.** New proof content in `Foundations/ItoFormulaGBM.lean`: `ito_formula_gbm` (the GBM
-Itô decomposition `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ m·Ŝ ds` via time-localization),
+Itô decomposition `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ m·Ŝ ds` via time-localization),
 `discountedGBM_eq_itoIntegral` (the `m=0` pure-Itô-integral specialization), and the plateau-slope
 lemma `SmoothTrunc.phi'_eq_one_of_lt`. Corpus entries `sc-ito-formula-gbm`, `sc-discounted-gbm-ito`
 (both `full`, axioms-clean `[propext, Classical.choice, Quot.sound]`).
@@ -5005,7 +5092,7 @@ continuity arguments, is now factored into a single `hScont` (each partial is `(
 
 **Checks that mattered.** (1) This is the **first pricing-ward consumer of the analytic Itô
 tower** — closing the standing two-tower disconnect on the Itô side: GBM is now decomposed by the
-*genuine* `itoIntegralCLM_T`, not the algebraic `ItoLemma`/`PDEFromIto` tower or the Wald
+*genuine* `itoIntegralCLM`, not the algebraic `ItoLemma`/`PDEFromIto` tower or the Wald
 exponential. (2) The route is the *classic* one and the right idea, not a hack: the GBM value is
 `t`-exponential (`exp(a·t)`, `a=m−σ²/2`), which fails the localized formula's `t`-uniform
 exp-in-`x` growth, so the formula is applied to the **time-localized** exponent
@@ -5069,7 +5156,7 @@ hyps give only *separate* differentiability, and exp-growth (unlike a global der
 which feeds `continuous_uncurry_of_bdd_partials`) does not supply joint continuity. (5)
 Consumes the right Mathlib/Degenne machinery throughout (`ContDiffBump` antiderivative,
 Gaussian MGF, `Convex.norm_image_sub_le_of_norm_hasDerivWithin_le`,
-`Finset.sum_mul_sq_le_sq_mul_sq`, `lintegral_liminf_le`, the existing `itoIntegralCLM_T_norm`
+`Finset.sum_mul_sq_le_sq_mul_sq`, `lintegral_liminf_le`, the existing `itoIntegralCLM_norm`
 isometry and `tendsto_norm_toLp_sub'` bridge); the WQV change is backward-compatible (the
 in-file callers still compile) and genuinely needed by the new lemma.
 
@@ -5707,11 +5794,11 @@ blemishes are cosmetic idiom noise and one vacuous-binder nit, none blocking.
 **Scope**: D1 — covariation of Itô integrals (the bilinear Itô isometry).
 `Foundations/ItoIntegralCovariation.lean` + umbrella import, 4 AxiomAudit pins,
 benchmark `sc-ito-covariation-bilinear-isometry` (full), roadmap/coverage notes.
-The `[0,T]` Itô CLM is bundled as a `LinearIsometry` (`itoIsometry_T`);
+The `[0,T]` Itô CLM is bundled as a `LinearIsometry` (`itoIsometry`);
 polarization (`LinearIsometry.inner_map_map`) gives `⟪∫φ dB, ∫ψ dB⟫ = ⟪φ, ψ⟫`
-(`inner_itoIntegralCLM_T`); `L2.inner_def` unfolds the μ-side to the expectation
-form `𝔼[(∫φ dB)(∫ψ dB)] = ⟪φ, ψ⟫` (`covariation_itoIntegralCLM_T`); the diagonal
-`φ = ψ` recovers the isometry (`variance_itoIntegralCLM_T`).
+(`inner_itoIntegralCLM`); `L2.inner_def` unfolds the μ-side to the expectation
+form `𝔼[(∫φ dB)(∫ψ dB)] = ⟪φ, ψ⟫` (`covariation_itoIntegralCLM`); the diagonal
+`φ = ψ` recovers the isometry (`variance_itoIntegralCLM`).
 
 **Panel**: three agents — (Mathlib/Degenne coherence + idiomatic register + zero
 slop), (concept clarity + first principles + honest scope), (inspired/beautiful
@@ -5734,7 +5821,7 @@ math + architectural ingenuity + AxiomAudit honesty floor).
 `L2.inner_def`, `RCLike.inner_apply`, `conj_trivial`, `real_inner_self_eq_norm_sq`,
 `ContinuousLinearMap.coe_coe`) were each cross-checked against ledger-verified
 sibling files that use them identically; nothing of B1's isometry is reproved
-(the bilinear law is pure polarization of `itoIntegralCLM_T_norm`); the bundled
+(the bilinear law is pure polarization of `itoIntegralCLM_norm`); the bundled
 `LinearIsometry` is novel in the repo (no other `→ₗᵢ[` for the Itô integral) and
 is the genuine reusable artifact, not a wrapper-to-inline; `mul_comm` in the
 `simpa` is load-bearing, not masking a mismatch (sibling `ItoIntegralL2Dense`
@@ -5830,7 +5917,7 @@ coherence / first-principles / architecture; inspired / elegant / honesty).
   (only the density theorem + CLM + isometry are public, as in
   `ItoIntegralCLM`/`WienerIntegralL2`). Marked `private`.
 - **MINOR (clarity)** — module doc said B2 "removes the horizon bound from
-  `itoIntegralCLM_T`"; it is a sibling CLM reusing that file's density
+  `itoIntegralCLM`"; it is a sibling CLM reusing that file's density
   machinery, not a direct extension. Reworded.
 - **MINOR (honesty, stale docs)** — `docs/coverage.md`, `docs/blueprint.md`,
   `docs/archive/roadmap-history.md`, and the deferred-doc header still listed the
@@ -5855,7 +5942,7 @@ axioms-clean; ledger 282/282 fresh; pytest 19.
 
 **Scope**: the deferred per-`t` Itô isometry, now closed —
 `MathFin/Foundations/ItoIntegralProcessIsometry.lean` (`itoProcessCLM_norm_sq`:
-`‖(φ●B)_t‖² = ∫_{(0,t]×Ω} φ² d(trimMeasure_T T)` `= ∫₀ᵗ E[φ_s²] ds`, for every
+`‖(φ●B)_t‖² = ∫_{(0,t]×Ω} φ² d(trimMeasure T)` `= ∫₀ᵗ E[φ_s²] ds`, for every
 predictable `φ ∈ L²([0,T])` and `t ≤ T`) — plus the de-privatisation of the generic
 `lp_two_norm_sq` in `ItoIntegralL2` (reused, not copied) and 1 new `full` corpus entry
 `sc-ito-general-time-isometry`. This is the refinement B1b openly deferred (the
@@ -5871,7 +5958,7 @@ de-dup). Read-only, no Lean.
    embedding at every `t`, not only the terminal; the load-bearing fact behind
    quadratic-variation / hedging-error analysis in continuous time.
 2. *Mathlib/Degenne coherence* — consumes B1a's `itoSimpleProcess_isometry_time`, the
-   repo's `integral_rectTerm_mul` / `trimMeasure_T_eq_restrict` / `simpleAssembly_T`, and
+   repo's `integral_rectTerm_mul` / `trimMeasure_eq_restrict` / `simpleAssemblyHorizon`, and
    Mathlib's `DenseRange.equalizer` / `integral_trim` / `eLpNorm_indicator_le`. The one
    hand-built object `truncCLM` is justified: Mathlib has only the *constant*-indicator
    `indicatorConstLp` and no `Lp→Lp` restriction CLM (confirmed by loogle search).
@@ -5880,7 +5967,7 @@ de-dup). Read-only, no Lean.
    this round). [fix applied: `integral_rectTerm_mul_band` made `private`.]
 4. *Architectural ingenuity* — reduce the per-`t` isometry to a band-restricted *simple*
    isometry, then transfer by density through `truncCLM`; reuses the SAME
-   `simpleAssembly_T` dense embedding, so the bridge to B1a is definitional.
+   `simpleAssemblyHorizon` dense embedding, so the bridge to B1a is definitional.
 5. *First principles* — no circularity (`truncCLM_norm_sq` assumes no isometry; the
    simple case is B1a + Fubini + the pure-ℝ overlap identity), and the statement is the
    genuine isometry — RHS a real integral against the predictable Lebesgue⊗μ measure, not
@@ -5917,7 +6004,7 @@ pytest green.
 **Scope**: this session's Summit B / B1b deliverable —
 `MathFin/Foundations/ItoIntegralProcessGeneral.lean` (the **general-integrand**
 Itô integral `(φ●B)_t = ∫₀ᵗ φ dB` for `φ ∈ L2Predictable[0,T]` as a continuous L²
-martingale on `[0,T]`: `itoProcessCLM` via `extendOfNorm` along `simpleAssembly_T`,
+martingale on `[0,T]`: `itoProcessCLM` via `extendOfNorm` along `simpleAssemblyHorizon`,
 the definitional bridge to B1a, the key identity `(φ●B)_t = condExpL2 𝓕_t
 (∫₀ᵀ φ dB)`, a.e.-adaptedness, the L² martingale property, the contraction
 `‖(φ●B)_t‖ ≤ ‖φ‖`, the terminal isometry `‖(φ●B)_T‖ = ‖φ‖`, and L²-continuity) plus
@@ -5936,20 +6023,20 @@ file + its dependencies + the corpus prose (read-only, no Lean).
 2. *Mathlib/Degenne coherence* — pure consumption: `condExpL2` +
    `MemLp.condExpL2_ae_eq_condExp`, `mem_lpMeas_iff_aestronglyMeasurable`,
    `condExp_condExp_of_le`, `DenseRange.equalizer`, `TendstoUniformly.continuous`,
-   `eLpNorm_condExp_le`, plus B1a + `itoIntegralCLM_T`. The consumed surface was
+   `eLpNorm_condExp_le`, plus B1a + `itoIntegralCLM`. The consumed surface was
    verified to exist upstream; nothing reproved.
 3. *Zero slop* — every declaration load-bearing; the two helpers
-   (`condExp_itoSimple_eq`, `itoIntegralCLM_T_simpleAssembly_T`) earn their place
+   (`condExp_itoSimple_eq`, `itoIntegralCLM_simpleAssemblyHorizon`) earn their place
    (no upstream duplicate; each discharges a real `extendOfNorm_eq`/martingale
    obligation, not a thin wrapper).
 4. *Architectural ingenuity* — `itoProcessCLM := itoProcessLM.extendOfNorm
-   simpleAssembly_T` reuses the exact recipe that builds `itoIntegralCLM_T`, making
+   simpleAssemblyHorizon` reuses the exact recipe that builds `itoIntegralCLM`, making
    the bridge to B1a definitional (`rfl` after `extendOfNorm_eq`); the key identity
    collapses martingale/adaptedness/contraction/terminal-isometry into corollaries
    of ONE identity; the t-uniform contraction reused for
    continuity-via-`TendstoUniformly`. No simpler architecture found by the panel.
 5. *First principles* — derived from B1a's martingale + the condExp tower + the
-   terminal isometry + the real `simpleAssembly_T_denseRange`; no hypothesis
+   terminal isometry + the real `simpleAssemblyHorizon_denseRange`; no hypothesis
    smuggles the conclusion (`hBmeas`, T-boundedness are honest side-conditions).
 6. *Idiomatic register* — disciplined `simp only` (always an explicit lemma list),
    `calc`/`filter_upwards`, B1a-consistent naming (`_norm_le`, `_isMartingale`,
@@ -6084,9 +6171,9 @@ since the FK/Itô/Merton headliners had four recent reviews. Machine gates green
 
 **Fixed minors (the round's main wave):**
 
-- *PricingKernel recomposed* (3 lenses converged): `statePrices_two_state` is now **defined** as
+- *PricingKernel recomposed* (3 lenses converged): `statePricesTwoState` is now **defined** as
   `e^{−rT} · emmWeight{Up,Down}` — the Phase-37 weights, newly **named** in `FTAPTwoState` and
-  consumed by `emm_of_signs` — and `pricingKernel_two_state` is defined as the two-state
+  consumed by `emm_of_signs` — and `pricingKernelTwoState` is defined as the two-state
   `statePricePricing` instance, so `_linear`/`_bond`/`_nonneg` genuinely consume `StatePrices`
   and the "via state-price linearity" docstring describes the actual proof (the round-5-era
   "via Greeks" fiction class, eliminated structurally). Phantom Results name fixed; `⟨0, by omega⟩`
@@ -6101,7 +6188,7 @@ since the FK/Itô/Merton headliners had four recent reviews. Machine gates green
 - *André's reflection principle wired* (the round's inverted-weight repair): `PathReflection.lean`'s
   stale "the hitting-time bijection is downstream work" de-staled (the bijection was *in the file*),
   Results list completed, and the counting form wired as **`mf-reflection-principle-counting`**
-  (`Nat.card_congr` over `reflectionPrincipleEquiv_below`) with a curated AxiomAudit pin — the
+  (`Nat.card_congr` over `reflectionPrincipleEquivBelow`) with a curated AxiomAudit pin — the
   library's best long-tail mathematics now has corpus existence.
 - *Coherence cites*: `herfindahl_card_inv_le_of_sum_one` now consumes Mathlib's
   `sq_sum_le_card_mul_sum_sq` (was hand-reconstructed; a pre-existing dead `have` went with it);
@@ -7070,7 +7157,7 @@ proves it, so that sentence became an understatement and was replaced.
 |---|---|---|
 | 1 | **Pathwise quadratic variation**: identify `bracketProcess` with a limit of sums along partitions — what would make "bracket" mean `[M]` rather than `∫φ²`. Multi-phase: needs an approximation argument along partitions for a general `L²` integrand, which the tower does not yet supply | unassigned |
 | 2 | Package `M² − ⟨M⟩` as a bundled `Martingale` by rebuilding `M` from `μ[· \| 𝓕_t]`, as `pricePathCondExp` does — turns the identity into the slogan | unassigned |
-| 3 | #199 — collapse `simpleAssembly_T` (carried; assessed this round as a high-regression pure refactor that should not ride with proof work) | unassigned |
+| 3 | #199 — collapse `simpleAssemblyHorizon` (carried; assessed this round as a high-regression pure refactor that should not ride with proof work) | unassigned |
 | 4 | #194 — drift term in the Itô-process price (carried; belongs to the HJM seam) | unassigned |
 | 5 | Lift `lpNorm_sq_eq_lintegral_enorm_sq` to `LpMulIsometry` when a second consumer appears (carried) | unassigned |
 
@@ -7121,7 +7208,7 @@ difference rather than letting the shared shape hide it.
   beautiful math). The design of record was polarise → generators → density → ε, roughly 800
   lines, of which about 200 were already written. It was dropped on a two-line observation: a
   conditional-expectation identity *is* an identity of `𝓕_a`-set integrals, and on such a set
-  `𝟙_F` is a bounded `𝓕_a`-measurable factor — so `itoIntegralCLM_T_smulAdapted`, the locality
+  `𝟙_F` is a bounded `𝓕_a`-measurable factor — so `itoIntegralCLM_smulAdapted`, the locality
   lemma built for the *first* moment, folds it back inside one Itô integral, and `𝟙_F² = 𝟙_F`
   makes the square free. Both sides then meet at `∫_{(a,b]×F} φ²`, one by the isometry and one by
   Tonelli. About 200 lines, and the proof states the reason rather than grinding it out.
@@ -7139,7 +7226,7 @@ difference rather than letting the shared shape hide it.
   "for a.e. ω, for a.e. u" would have forced never appears.
 * **A duplicated computation was lifted in the cleanup pass**: the four-line indicator case
   analysis and the restrict-intersect rewrite each appeared twice, and became `bandSq_section` and
-  `restrict_timeMeasure_T`.
+  `restrict_timeMeasureHorizon`.
 * **The one orphan was given a consumer rather than kept or deleted.** `bandGen_support` (the
   generator vanishes before its left endpoint) was the dropped route's entry point and had no
   reader. It is exactly the hypothesis `ItoIntegralLocality`'s time-locality consumes, so adding
@@ -7167,7 +7254,7 @@ difference rather than letting the shared shape hide it.
 | 1 | The **adapted** bracket process: `t ↦ ∫₀ᵗ φ_s² ds` progressively measurable, so the increment is `𝓕_b`-measurable and `M² − ⟨M⟩` can be stated as a martingale | unassigned |
 | 2 | **Pathwise quadratic variation**: identify `bracketRep` with a limit of sums along partitions — what would make "bracket" mean `[M]` rather than `∫φ²` | unassigned |
 | 3 | Evaluate `bracketRep` on a band generator (`= Z²·(d−c)`), which turns `condExp_bandGen_second_moment` from an independent witness into a corollary — needs the trim→product→ω-section a.e. transfer | unassigned |
-| 4 | #199 — collapse `simpleAssembly_T` (carried) | unassigned |
+| 4 | #199 — collapse `simpleAssemblyHorizon` (carried) | unassigned |
 | 5 | Regenerate `docs/blueprint.md` (carried) | next session |
 | 6 | #194 — drift term in the Itô-process price | unassigned |
 | 7 | Lift `lpNorm_sq_eq_lintegral_enorm_sq` to `LpMulIsometry` when a second consumer appears (carried) | unassigned |
@@ -7208,7 +7295,7 @@ mode this pass exists for.
 * **The generator is `stepSP`'s assembly, not an `smulAdapted` wrapper**: the first draft wrapped
   a constant-one band in `smulAdapted`, which double-scales by the coefficient; `ItoIntegralBrownian.stepSP`
   already packages the single-band process with its explicit evaluation (`itoSimple_stepSP`), so the
-  wrapper (and an entire Finsupp-surgery detour through `iocSP_T`) deleted itself.
+  wrapper (and an entire Finsupp-surgery detour through `iocSPHorizon`) deleted itself.
 * **The tower property needed a σ-finiteness shim**: `condExp_condExp_of_le` wants
   `SigmaFinite (μ.trim hm)` for natural-filtration sub-σ-algebras; supplied as a private instance
   (`isFiniteMeasure_trim` + `toSigmaFinite`). Instances with explicit leading binders are invisible
@@ -7221,7 +7308,7 @@ mode this pass exists for.
 | rank | item | owner |
 |---|---|---|
 | 1 | Pointwise bracket part 2: pair identity (disjoint/nested/partial cases via kernels + increment splitting), then density (`setIntegral_eq_zero_of_orthogonal_pred` + clip trick) and ε-extension to the headline conditional form | next session |
-| 2 | #199 — collapse `simpleAssembly_T` (carried) | unassigned |
+| 2 | #199 — collapse `simpleAssemblyHorizon` (carried) | unassigned |
 | 3 | Regenerate `docs/blueprint.md` (carried) | next session |
 | 4 | #194 — drift term in the Itô-process price | unassigned |
 | 5 | Lift `lpNorm_sq_eq_lintegral_enorm_sq` to `LpMulIsometry` when a second consumer appears | unassigned |
@@ -7237,7 +7324,7 @@ change — the new module is not yet corpus-referenced); module checks 0 errors 
 
 A one-issue proof session: `ItoIntegralAgainstMartingale.norm_sq_increment_eq_bracket` proves
 `𝔼[(M_b − M_a)²] = ⟨M⟩((a,b] × Ω)` — the unconditional second moment of an increment equals the
-bracket measure of its time band — with `itoIntegralCLM_T_bandRestrict` extracted from
+bracket measure of its time band — with `itoIntegralCLM_bandRestrict` extracted from
 `itoIntegralAgainst_elementary` (which now consumes it; it is wanted exactly twice). No corpus
 growth: 367 entries, statuses unchanged.
 
@@ -7262,7 +7349,7 @@ adapted bracket process, which this file does not construct.
 - **#200 closed** (lens 1 + lens 5): the definition's name is now backed by the theorem the
   name was borrowed for, in the exact form the tower supports.
 - **A duplicated derivation deleted**: `itoIntegralAgainst_elementary`'s inline band step became
-  `itoIntegralCLM_T_bandRestrict`; net code shrank while adding a theorem.
+  `itoIntegralCLM_bandRestrict`; net code shrank while adding a theorem.
 - **A reusable idiom surfaced as a private lemma** (`lpNorm_sq_eq_lintegral_enorm_sq`):
   `‖W‖²_{L²} = (∫⁻ ‖W‖ₑ² ∂ν).toReal`, the bridge by which a second moment meets a measure of a
   set. Kept private until a second consumer exists — if #194 or any QV work needs it, lift it to
@@ -7273,7 +7360,7 @@ adapted bracket process, which this file does not construct.
 | rank | item | owner |
 |---|---|---|
 | 1 | Pointwise bracket process `t ↦ ∫₀ᵗ φ_s² ds` (adapted, increasing) + the conditional second-moment identity — the rung above #200 | unassigned |
-| 2 | #199 — collapse `simpleAssembly_T`, fixing the dependency direction | unassigned |
+| 2 | #199 — collapse `simpleAssemblyHorizon`, fixing the dependency direction | unassigned |
 | 3 | Regenerate `docs/blueprint.md` (carried; the chain-rule tower edges are still missing) | next session |
 | 4 | #194 — drift term in the Itô-process price | unassigned |
 | 5 | Audit `trim_T`-specific lemmas for hidden measure-genericity (carried) | unassigned |
@@ -7369,7 +7456,7 @@ in the docstring that none is known. This is a five-minute question and it caugh
    `𝔼[(M_b − M_a)²] = ⟨M⟩((a,b]×Ω)`, which is reachable from the isometry today.
 2. **Coherence.** *Exemplar:* `martingale_condExp` and `martingale_const` consumed rather than
    re-derived; the adapted price is Mathlib's conditional expectation, not a bespoke object.
-   *Upgrade (MED):* `simpleAssembly_T` is now a special case of `simpleAssemblyOfMeasure` with a
+   *Upgrade (MED):* `simpleAssemblyHorizon` is now a special case of `simpleAssemblyOfMeasure` with a
    worse proof (#199) — the dependency runs the wrong way and wants a downward move.
 3. **Zero slop.** *Exemplar:* three deletions this round (a copied proof, a duplicate definition, a
    derivable hypothesis) and no additions that lacked a consumer. *Upgrade (MED):* the corpus still
@@ -7400,7 +7487,7 @@ in the docstring that none is known. This is a five-minute question and it caugh
 |---|---|---|
 | 1 | Witness check as a standing pass (lens 5) — five minutes, caught a live vacuity | next session |
 | 2 | #200 — let `bracketMeasure` earn its name | unassigned |
-| 3 | #199 — collapse `simpleAssembly_T`, fixing the dependency direction | unassigned |
+| 3 | #199 — collapse `simpleAssemblyHorizon`, fixing the dependency direction | unassigned |
 | 4 | Regenerate `docs/blueprint.md` (lens 7) | next session |
 | 5 | Audit the other `trim_T`-specific lemmas for hidden measure-genericity (lens 4) | unassigned |
 | 6 | #201 — compose project-name collision (infra; schedule with a pin bump) | unassigned |
@@ -7484,7 +7571,7 @@ is delivered; and that `Q = μ` holds **on `𝓕ᴮ_T`** and says nothing off it
 6. **Idiomatic register.** *Exemplar:* `mulLM` / `mulLI` split the linear map from its isometry
    exactly as the tower's own `itoProcessLM` / `itoProcessCLM` do. *Upgrade (LOW):* `lake lint`
    rejected `simpleAssembly_ν`; it was renamed rather than added to `nolints.json`, which is the
-   right call, but the file's siblings (`simpleAssembly_T`, `iocSP_T`) are all exemptions. The
+   right call, but the file's siblings (`simpleAssemblyHorizon`, `iocSPHorizon`) are all exemptions. The
    convention should be settled one way.
 7. **Concept clarity.** *Exemplar:* "defining `∫ψ dM` by a formula proves nothing on its own; what
    earns the name is the elementary identity" — the docstring states the epistemic status of its own
@@ -7551,11 +7638,11 @@ backlog).
    to `discountedGBM_eq_itoIntegral` states `gfx =ᵐ [the integrand]`, ending at `σ·Ŝ(·)`.
 2. **The `C²` sibling, found by the audit, not by the issue.** `sc-thm-7.1.1` had exactly the same
    defect one tower over: its description wrote `∫₀ᵗ f'(B_s) dB_s` while the statement said `∃ gf'`.
-   Fixed by carrying the conjunct through `itoIntegralCLM_T_of_bdd_cont → ito_formula_L2_bddDeriv →
+   Fixed by carrying the conjunct through `itoIntegralCLM_of_bdd_cont → ito_formula_L2_bddDeriv →
    _mk`. The TD bridge had exposed the identification since it was written; the untimed one never did.
 3. **Two forgetful wrappers merged away.** `ito_formula_td_L2_bddDeriv_explicit` + its conjunct-dropping
    wrapper are one theorem now.
-4. **`ae_fst_mem_Ioc_trimMeasure_T` existed six times.** One private lemma in `ItoIntegralLocality`,
+4. **`ae_fst_mem_Ioc_trimMeasure` existed six times.** One private lemma in `ItoIntegralLocality`,
    four inline `have`s (`ItoIntegralRiemannBridge`, `…TD`, `…Adapted`, `SimpleProcessPartition`), and
    the public one I added *yesterday* in `ItoIntegralCLM` without noticing the other five. All five
    duplicates retired.
@@ -7605,8 +7692,8 @@ entry that the structure is the hypothesis, since "specification" is doing quiet
 **6 Idiomatic register.** *Exemplar:* `{mα : MeasurableSpace α}` as a plain implicit, matching
 Mathlib's own measure-theory convention — which is *why* our helper composes with a trim measure at
 all; instance-implicit would have synthesized `Prod.instMeasurableSpace` and failed. *Upgrade (LOW):*
-`ae_fst_mem_Ioc_trimMeasure_T` is a mouthful; a Mathlib reviewer would want
-`trimMeasure_T.ae_fst_mem_Ioc` or similar once it has a namespace worth dotting into.
+`ae_fst_mem_Ioc_trimMeasure` is a mouthful; a Mathlib reviewer would want
+`trimMeasure.ae_fst_mem_Ioc` or similar once it has a namespace worth dotting into.
 
 **7 Concept clarity.** *This is the round's weak lens, and the reason the user asked for the audit.*
 Six separate places said more than their Lean did. The pattern is not carelessness, it is structural:

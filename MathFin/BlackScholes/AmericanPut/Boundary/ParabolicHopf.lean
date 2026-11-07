@@ -6,7 +6,9 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.ParabolicMaximum
-public import Mathlib
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # Terminal-time boundary derivative from an explicit parabolic barrier
@@ -16,10 +18,29 @@ The stationary barrier `eta*(exp(lam*x)-1)` is a subsolution when
 positive RIGHT derivative at its terminal left corner. No extension past the
 terminal time, spatial derivative across the boundary, or Hopf axiom is used.
 
-## Result
+## Main definitions
 
-Public entry points include `expBarrier`, `expBarrier_smooth`, `expBarrier_hasDeriv`,
-`expBarrier_deriv2`.
+* `expBarrier`: the stationary barrier `η (e^{λx} − 1)`, which vanishes at `x = 0`.
+
+## Main results
+
+* `expBarrier_smooth`, `expBarrier_hasDeriv`, `expBarrier_deriv2`: `expBarrier η lam` is smooth,
+  with first derivative `η lam e^{lam x}` and second derivative `η lam² e^{lam x}`.
+* `expBarrier_operator_nonneg`: for `0 ≤ η`, `0 ≤ lam` and `0 ≤ lam + D`, the operator
+  `∂ₓₓ + D ∂ₓ` applied to the barrier is nonnegative.
+* `exists_expBarrier_below_edges`: if `u` is positive and continuous on the bottom and right edges
+  of the rectangle `[0, L] × [a, T]`, some `η > 0` puts `expBarrier η lam` below `u` on both.
+* `terminal_hopf_of_barrier`: let `u` be continuous on the rectangle `[0, L] × [a, T]` and satisfy
+  `u_xx + D u_x ≤ u_t` in its interior, with `0 ≤ lam + D`. If `u` dominates `expBarrier η lam`
+  on the bottom and right edges, is nonnegative on the left edge, and `u 0 T = 0` with right
+  derivative `v` in `x` at `(0, T)`, then `η lam ≤ v`.
+* `terminal_hopf`: if moreover `u` is positive on the bottom and right edges and `D ≥ −M`, then
+  `v > 0`.
+
+## Tags
+
+Hopf lemma, parabolic barrier, subsolution, backward rectangle, right derivative, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

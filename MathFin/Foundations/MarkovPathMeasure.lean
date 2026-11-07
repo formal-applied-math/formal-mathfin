@@ -5,7 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.CategoryTheory.Countable
+public import Mathlib.Probability.Kernel.IonescuTulcea.Traj
+public import Mathlib.Probability.ProbabilityMassFunction.Basic
 
 /-!
 # The path distribution of a Markov chain (Saporito Theorem 1.1.2)
@@ -33,15 +36,31 @@ State space: any countable discrete `ι` (Saporito's chains are countable;
 finiteness is never needed). Probabilities are stated in `ℝ≥0∞` via `PMF` —
 the canonical Mathlib carrier for discrete laws.
 
+## Main definitions
+
+* `markovTransitionKernel`: the kernel from the history up to time `n` to the next state, which
+  reads only the last coordinate of the history and applies the one-step law `P`.
+* `markovPathMeasure`: the law of the chain `(init, P)` on `ℕ → ι`, by the Ionescu–Tulcea
+  construction from `markovTransitionKernel`.
+* `pathCylinder`: the set of trajectories that agree with `path` up to time `n`.
+
 ## Main results
 
-* `markovPathMeasure` — the chain's law on `ℕ → ι` (Ionescu–Tulcea).
 * `markovPathMeasure_cylinder` — **Theorem 1.1.2**: cylinder probabilities
   factor as `init(path 0) · ∏_{k<n} P(path k)(path (k+1))`, derived from
   the construction.
 
 `Binomial/PathMeasure.lean` uses the chain with `Bernoulli(q)` initial and transition laws as the
 law of i.i.d. coin flips, and writes the CRR binomial price as an expectation over its paths.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 1.1.2
+
+## Tags
+
+Markov chain, path distribution, Ionescu–Tulcea theorem, transition probabilities,
+cylinder probabilities, initial distribution, MSC 60J10, MSC 28A25
 -/
 
 @[expose] public section

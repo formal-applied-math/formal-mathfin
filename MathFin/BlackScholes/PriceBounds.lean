@@ -5,11 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.BlackScholes.Put
 public import MathFin.BlackScholes.PutGreeks
 public import MathFin.BlackScholes.PDE
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # The no-arbitrage rectangle for European call/put prices
@@ -56,6 +56,29 @@ from the BS formula by hand. But the *meaning* of each — bsV ≤ S says "a
 call costs less than the stock", bsP ≥ K · e^{−rT} − S says "a put costs at
 least the discounted strike minus spot", etc. — sits on the rectangle. Naming
 the rectangle makes the meaning explicit and the proofs trivial.
+
+## Main results
+
+* `noArbBox`: under `BSCallHyp`, the call and put prices lie in the rectangle
+  `max(0, S₀ − K·e^{−rT}) ≤ bsV ≤ S₀` and `max(0, K·e^{−rT} − S₀) ≤ bsP ≤ K·e^{−rT}`.
+* `bsV_nonneg`, `bsP_nonneg`: the call and put prices are nonnegative under `BSCallHyp`.
+* `bsV_le_S`, `bsP_le_K_disc`: for `S, K ≥ 0`, `bsV ≤ S` and `bsP ≤ K·e^{−rτ}`.
+* `bsV_ge_forward_lower_bound`, `bsP_ge_intrinsic_no_arb`: `S − K·e^{−rτ} ≤ bsV` and
+  `K·e^{−rτ} − S ≤ bsP`.
+* `box_spread_identity`: `(bsV(K₁) − bsP(K₁)) − (bsV(K₂) − bsP(K₂)) = (K₂ − K₁)·e^{−rτ}`.
+* `bsV_strict_gt_immediate_exercise`: for `r > 0`, `S₀ − K < bsV`.
+
+## References
+
+* [Cohen (1985)][Cohen1985]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 11.3; Ch 11.2; Ch 12.8
+* [R. C. Merton, *Theory of rational option pricing*][Merton1973]
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], 4.5
+
+## Tags
+
+no-arbitrage bounds, put–call parity, option price bounds, Merton early exercise, box spread,
+intrinsic value, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -198,11 +221,7 @@ theorem box_spread_identity (K₁ K₂ r σ S τ : ℝ) :
     (bsV K₁ r σ S τ - bsP K₁ r σ S τ) -
         (bsV K₂ r σ S τ - bsP K₂ r σ S τ) =
       (K₂ - K₁) * Real.exp (-(r * τ)) := by
-  have h₁ : bsP K₁ r σ S τ = bsV K₁ r σ S τ - S + K₁ * Real.exp (-(r * τ)) :=
-    bsP_eq_bsV K₁ r σ S τ
-  have h₂ : bsP K₂ r σ S τ = bsV K₂ r σ S τ - S + K₂ * Real.exp (-(r * τ)) :=
-    bsP_eq_bsV K₂ r σ S τ
-  linarith
+  grind [pricing]
 
 /-! ### Merton 1973: American non-dividend call equals European call -/
 

@@ -5,10 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.RiskMeasures.ExpectedShortfall
-public import MathFin.RiskMeasures.GaussianValueAtRisk
 public import MathFin.RiskMeasures.RockafellarUryasev
+public import MathFin.Foundations.NormalQuantile
+public import Mathlib.Probability.Distributions.Gaussian.HasGaussianLaw.Basic
 
 /-!
 # Expected shortfall of a Gaussian loss
@@ -32,6 +32,17 @@ supplies its meaning.
   `X ~ N(m, σ²)` with `σ > 0`.
 * `expectedShortfall_of_hasGaussianLaw`: the same for any Gaussian `X` (degenerate included), in
   terms of `E X` and `Var X`.
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Example 2.14
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 2.17
+
+## Tags
+
+Gaussian expected shortfall, normal loss, Rockafellar-Uryasev, CVaR closed form, normal law,
+MSC 91G70, MSC 60E05, JEL G32
 -/
 
 @[expose] public section

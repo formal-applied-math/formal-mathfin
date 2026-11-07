@@ -7,12 +7,33 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianHeatFlow
 public import MathFin.BlackScholes.AmericanPut.Stopping.ContinuousHeatSmoothing
+public import MathFin.BlackScholes.AmericanPut.Boundary.WindowComparison
 
-/-! # Gaussian evolution of a smooth test payoff stays below the classical price 
-## Result
+/-!
+# Gaussian evolution of a smooth test payoff stays below the classical price
 
-Public entry points include `linearPriceKernel`, `linearPriceEvolution_eventuallyEq_kernel`,
-`linearPriceKernel_contDiffAt`, `heatFlow_affine_hasDeriv`.
+## Main definitions
+
+* `linearPriceKernel`: `exp (-k*(t-a))` times the heat flow `feynmanU f (2*(t-a))`, evaluated at the
+  drifted point `x + (k-h-1)*(t-a)`.
+
+## Main results
+
+* `linearPriceEvolution_eventuallyEq_kernel`: for `f` continuous and `a < t`, the evolution
+  agrees with `linearPriceKernel` in a neighbourhood of `(x,t)`.
+* `linearPriceKernel_contDiffAt`: for `f` continuous with compact support and `a < t`, the kernel
+  is `C²` at `(x,t)`.
+* `heatFlow_affine_hasDeriv`: the time derivative of the heat flow along the drifted line
+  `x + α(s-a)`, by the chain rule, for `f` continuous with compact support and `a < t`.
+* `linearPriceKernel_equation`: for such `f` and `a < t`, the kernel's time derivative equals
+  `dividendSpatialOperator k h` applied to its spatial profile.
+* `linearPriceEvolution_le_classical`: for a `DividendPutSolution`, `0 ≤ a`, `f` `C²` with compact
+  support and `f ≤ p(·,a)`, the evolution stays below the classical price `p` on `[a,T]`.
+
+## Tags
+
+heat evolution, test payoff, linear pricing, comparison, classical price, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

@@ -5,7 +5,13 @@ Authors: Robert Martin, Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Analysis.Calculus.Deriv.Prod
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Calculus.Deriv.Comp
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # Directional derivatives of plane functions
@@ -15,10 +21,24 @@ plane, with its smoothness and its reading as the ordinary time and space deriva
 the heat-boundary equation (`HeatBoundaryEquation`) and Itô's formula for plane functions
 (`PlaneIto`).
 
-## Result
+## Main definitions
 
-Public entry points include `planePartial`, `planePartial_contDiff`, `planePartial_smoothAt`,
-`planePartial_hasDeriv_time`, `planePartial_hasDeriv_space`.
+* `planePartial`: the directional derivative `fderiv ℝ G z v` of a plane function `G` at `z` along
+  `v`.
+
+## Main results
+
+* `planePartial_contDiff`: if `G` is `C^(n+1)`, each directional derivative `planePartial G v`
+  is `C^n`.
+* `planePartial_smoothAt`: if `G` is `C^∞` at `z`, so is `planePartial G v`.
+* `planePartial_hasDeriv_time`, `planePartial_hasDeriv_space`: if `G` is differentiable at
+  `(t,w)`, its partial in the direction `(1,0)` (resp. `(0,1)`) is the ordinary derivative of
+  `s ↦ G (s,w)` (resp. `y ↦ G (t,y)`).
+
+## Tags
+
+directional derivative, partial derivatives, plane function, space-time derivative,
+Fréchet derivative, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

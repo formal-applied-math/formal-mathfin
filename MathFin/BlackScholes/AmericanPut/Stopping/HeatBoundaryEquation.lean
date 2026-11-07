@@ -7,13 +7,29 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.CompactKernelDerivative
 public import MathFin.BlackScholes.AmericanPut.Stopping.PlanePartial
+public import MathFin.BlackScholes.AmericanPut.Stopping.HeatBoundarySmoothing
 
-/-! # Heat equation for the continuous compact-data boundary integral 
-## Result
+/-! # Heat equation for the continuous compact-data boundary integral
 
-Public entry points include `boundaryKernelPlane_equation`,
-`compact_causalBoundaryIntegral_equation`, `exists_halfLine_heat_boundary_solution`; the
-directional derivatives are `planePartial` (`PlanePartial`).
+## Main definitions
+
+* `boundaryKernelPlane`: the causal heat boundary kernel as one function of the plane point
+  `z = (t,x)`.
+
+## Main results
+
+* `boundaryKernelPlane_equation`: for `x > 0`, `boundaryKernelPlane` satisfies `∂_t = (1/2) ∂_xx`
+  (in `planePartial`).
+* `compact_causalBoundaryIntegral_equation`: for continuous compactly supported `g` and `x > 0`,
+  `causalBoundaryIntegral g` satisfies the same equation.
+* `exists_halfLine_heat_boundary_solution`: for continuous compactly supported `g` vanishing up to
+  `a`, there is a continuous `V` with boundary trace `g`, zero up to time `a`, `C^∞` and solving
+  `∂_t V = (1/2) ∂_xx V` on `x > 0`.
+
+## Tags
+
+heat equation, boundary integral, half-line problem, boundary data, causal integral, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

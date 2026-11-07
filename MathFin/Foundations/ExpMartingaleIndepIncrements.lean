@@ -5,7 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Probability.ConditionalExpectation
+public import Mathlib.Probability.Martingale.Basic
 
 /-!
 # The exponential martingale of a process with independent increments
@@ -30,6 +32,16 @@ martingale of Brownian motion is the case `αX`, `ψ(t) = α²t/2`, and is deriv
 * `martingale_exp_sub_of_indep_increments`: `t ↦ e^{X_t − ψ(t)}` is an `𝓕`-martingale when each
   increment is independent of the past with `𝔼[e^{X_t − X_s}] = e^{ψ(t) − ψ(s)}` and each
   `e^{X_t}` is integrable.
+
+## References
+
+* [Cont and Tankov, *Financial Modelling with Jump Processes*][ContTankov2004]
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Remark 5.1.6
+
+## Tags
+
+exponential martingale, Lévy process, independent increments, Wald martingale, jump-diffusion,
+MSC 60G51, MSC 60G44
 -/
 
 @[expose] public section

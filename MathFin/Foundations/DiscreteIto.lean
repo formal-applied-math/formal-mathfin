@@ -23,7 +23,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.BigOperators.Ring.Finset
+public import Mathlib.Algebra.Order.Archimedean.Real.Basic
 
 /-!
 # Discrete Itô formula (phase 35, after Nagy 2026)
@@ -54,10 +56,19 @@ becomes Itô's lemma `df(X_t) = f'(X_t) dX_t + (1/2) f''(X_t) σ²(X_t) dt`.
 This file establishes the algebraic backbone; the QV identity (phase 32)
 provides the probabilistic content needed for the limit.
 
-## Results
+## Main definitions
 
-* `discreteTaylorRemainder`: definition of the per-step remainder.
+* `discreteTaylorRemainder`: the deviation of `f` across `[X_k, X_{k+1}]` from its second-order
+  Taylor expansion with `f'` and `f''` at `X_k`.
+
+## Main results
+
 * `discrete_ito_formula`: the main identity.
+
+## Tags
+
+Itô's lemma, Taylor remainder, telescoping sum, Itô correction, discrete calculus, MSC 60H05,
+MSC 91G20
 -/
 
 @[expose] public section

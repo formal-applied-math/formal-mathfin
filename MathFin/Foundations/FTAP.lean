@@ -5,8 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
-public import MathFin.Foundations.EquivMeasure
+public import MathFin.Foundations.EquivMartingaleMeasure
 public import MathFin.Foundations.MartingaleFrozen
 public import MathFin.Foundations.MartingaleTransform
 public import MathFin.Foundations.NoArbitrageCore
@@ -19,11 +18,10 @@ The discrete-time market and the one forward direction of the library's FTAP: ex
 equivalent martingale measure precludes arbitrage, via the martingale-transform argument, on a
 general probability space and up to a finite horizon `T`.
 
-* `IsEMM 𝓕 P S T Q` — `Q` is an equivalent martingale measure for the `F`-valued discounted price
-  `S` up to the horizon `T`: `Q ≈ P` and `S` frozen at `T` is a `Q`-martingale for `𝓕`. This is the
-  shape of `ContinuousMarket.IsEMM`, with `ℕ` for `ℝ≥0`; its three consequences before the
-  horizon are `IsEMM.adapted`, `.integrable` and `.condExp_eq` (`martingale_min_iff`), and the way
-  to build one from the one-step martingale identity is `IsEMM.of_condExp_succ`.
+* `IsEMM 𝓕 P S T Q` (`EquivMartingaleMeasure.lean`, for any linearly ordered time) at time `ℕ`:
+  `Q` is an equivalent martingale measure for the `F`-valued discounted price `S` up to the
+  horizon `T`. On `ℕ` one is built from the one-step martingale identity
+  (`IsEMM.of_condExp_succ`).
 * `NoArbitrage 𝓕 P S T` — no predictable strategy, bounded up to `T`, turns zero initial wealth
   into a `P`-a.s. nonnegative gain that is not `P`-a.s. zero. The price and the holdings are valued
   in a real inner-product space `F` (several assets), the gains are `⟪φ_{t+1}, S_{t+1} − S_t⟫`
@@ -41,11 +39,42 @@ general probability space and up to a finite horizon `T`.
 The finite-Ω market of `FTAPDiscrete.lean` and the one-period market of
 `FTAPOnePeriodVector.lean` (a two-step filtration with `𝓕 0 = ⊥`) are instances: their forward
 directions call this theorem. So does the continuous-time one,
-`ContinuousMarket.isEMM_noArbitrageSimple`, through `ContinuousMarket.IsEMM.sampled`. The backward
+`ContinuousMarket.isEMM_noArbitrageSimple`, through `IsEMM.sampled`. The backward
 directions are proved in the narrower settings: on a finite full-support space over a finite
 horizon (`FTAPDiscrete.lean`), for one period on a general space (`FTAPOnePeriodVector.lean`,
 with the scalar `FTAPOnePeriod.lean` its `F = ℝ` case), and for one-period finite-state
 markets (`FTAPMultiState.lean`, whose two-state case is `FTAPTwoState.lean`).
+
+## Main definitions
+
+* `NoArbitrage`: up to horizon `T`, no bounded predictable strategy turns zero initial wealth into
+  a `P`-a.s. nonnegative gain `martingaleTransform φ S T` that is not `P`-a.s. zero.
+* `IsCompleteMarket`: up to horizon `T`, every bounded `𝓕 T`-measurable claim is `P`-a.s. equal to
+  `x + martingaleTransform φ S T` for some initial wealth `x` and bounded predictable `φ`.
+* `tradedGains`: the set of terminal gains `martingaleTransform φ S T` of bounded predictable
+  strategies.
+
+## Main results
+
+* `of_condExp_succ`: an equivalent probability measure `Q` under which `S` is adapted and
+  integrable up to `T` and satisfies `S t = E_Q[S (t+1) | 𝓕 t]` for `t < T` is an `IsEMM`.
+* `exists_martingale_gains`: under an `IsEMM`, the gains of a bounded predictable strategy are the
+  terminal value of a `Q`-martingale started at `0`.
+* `integral_martingaleTransform`, `integrable_and_integral_gains`: under an `IsEMM` such gains are
+  `Q`-integrable with `Q`-mean zero.
+* `noArbitrage`: the existence of an `IsEMM` implies `NoArbitrage` (the forward direction of the
+  FTAP only).
+* `measure_eq_of_isCompleteMarket`: in a complete market any two equivalent martingale measures
+  agree on `𝓕 T`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 2.6.7
+
+## Tags
+
+fundamental theorem of asset pricing, equivalent martingale measure, no arbitrage,
+martingale transform, complete market, second FTAP, JEL G13, MSC 91G20, MSC 60G42
 -/
 
 @[expose] public section
@@ -56,15 +85,6 @@ open MeasureTheory ProbabilityTheory
 
 variable {Ω : Type*} {m0 : MeasurableSpace Ω}
   {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F] [CompleteSpace F]
-
-/-- **Equivalent martingale measure for the finite horizon `T`.** `Q` is a probability measure
-mutually absolutely continuous with `P`, and the price `S` frozen at the horizon, `n ↦ S (min n T)`,
-is a `Q`-martingale for `𝓕`: the honest finite-horizon object, since `S` need not be a
-`Q`-martingale past `T`. A `Q`-martingale on all of `ℕ` is an EMM at every horizon. At `T = 1`
-with `𝓕 0 = ⊥` this is the one-period notion for `S 1 − S 0` (`isEMM_one_iff_onePeriod`). -/
-structure IsEMM (𝓕 : Filtration ℕ m0) (P : Measure Ω) (S : ℕ → Ω → F) (T : ℕ)
-    (Q : Measure Ω) : Prop extends IsEquivProbMeasure P Q where
-  martingale : Martingale (fun n ↦ S (min n T)) 𝓕 Q
 
 /-- **No arbitrage** up to the horizon `T`: no predictable strategy `φ` (`φ (t+1)` is
 `𝓕 t`-measurable for `t < T`), bounded up to `T`, turns zero initial wealth into a `P`-a.s.
@@ -109,22 +129,6 @@ theorem of_condExp_succ (hQ : IsEquivProbMeasure P Q)
     (hmart : ∀ t < T, S t =ᵐ[Q] Q[S (t + 1) | 𝓕 t]) : IsEMM 𝓕 P S T Q :=
   have := hQ.isProb
   ⟨hQ, martingale_min_of_condExp_succ hadapt hint hmart⟩
-
-/-- Before the horizon the price is `𝓕`-adapted. -/
-theorem adapted (h : IsEMM 𝓕 P S T Q) {t : ℕ} (ht : t ≤ T) : StronglyMeasurable[𝓕 t] (S t) :=
-  have := h.isProb
-  (martingale_min_iff.mp h.martingale).1 t ht
-
-/-- Before the horizon the price is `Q`-integrable. -/
-theorem integrable (h : IsEMM 𝓕 P S T Q) {t : ℕ} (ht : t ≤ T) : Integrable (S t) Q :=
-  have := h.isProb
-  (martingale_min_iff.mp h.martingale).2.1 t ht
-
-/-- **The martingale property before the horizon**: `Q[S t | 𝓕 s] = S s` for `s ≤ t ≤ T`. -/
-theorem condExp_eq (h : IsEMM 𝓕 P S T Q) {s t : ℕ} (hst : s ≤ t) (ht : t ≤ T) :
-    Q[S t | 𝓕 s] =ᵐ[Q] S s :=
-  have := h.isProb
-  ((martingale_min_iff.mp h.martingale).2.2 hst ht).symm
 
 /-- **The gains of a bounded predictable strategy are a `Q`-martingale started at `0`.** The
 transform of the frozen price by the strategy cut off at the horizon (where the frozen price stops

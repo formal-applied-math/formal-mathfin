@@ -5,7 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.CharP.Defs
+public import Mathlib.Analysis.Complex.Exponential
+public import Mathlib.Tactic.LinearCombination
 
 /-!
 # Binomial-tree option pricing (Cox-Ross-Rubinstein style)
@@ -33,6 +36,43 @@ This file contains:
 
 The bridge to Black-Scholes (CRR convergence) is proved in
 `Binomial/CRRCharFun.lean` (`binomialPrice_call_tendsto_bs`).
+
+## Main definitions
+
+* `crrUpProb`: the risk-neutral up-probability `q = (e^r − d) / (u − d)`.
+* `BinomialNoArb`: the no-arbitrage condition `0 < d < e^r < u`.
+* `binomialOptionPriceOnePeriod`: the one-period price `e^{−r} (q · V_u + (1 − q) · V_d)`.
+* `bermudanPrice`: the tree price by backward induction with early exercise at the steps in a
+  set `E`.
+* `binomialPrice`: the European tree price, `bermudanPrice` with no exercise dates.
+
+## Main results
+
+* `crrUpProb_mem_Ioo`: under `BinomialNoArb`, `crrUpProb u d r ∈ (0, 1)`.
+* `crrUpProb_mul_up_add`: under `BinomialNoArb`, `q · u + (1 − q) · d = e^r`.
+* `replicating_portfolio_cost`: for `S₀ > 0` and `BinomialNoArb`, the portfolio with `Δ` shares
+  and bond holding `B` that matches `V_u`, `V_d` costs `binomialOptionPriceOnePeriod u d r V_u V_d`;
+  `replicating_payoff_up` and `replicating_payoff_down` give its payoffs in the two states.
+* `le_bermudanPrice`: at maturity and at every exercise date the price is at least the payoff.
+* `bermudanPrice_supermartingale`: the one-period continuation of `bermudanPrice` is at most the
+  price.
+* `binomialPrice_succ_eq_onePeriod`: the `(n + 1)`-step price is the one-period price of the two
+  `n`-step prices at `S · u` and `S · d`.
+* `binomialPrice_add`, `binomialPrice_smul`: the price is linear in the payoff.
+* `binomialPrice_const`: a constant payoff `c` has price `e^{−n r} · c`.
+* `binomialPrice_id`: under `BinomialNoArb`, the payoff `S ↦ S` has price `S` at every `n`.
+
+## References
+
+* [J. C. Cox, S. A. Ross and M. Rubinstein, *Option pricing: a simplified
+  approach*][CoxRossRubinstein1979]
+* [S. E. Shreve, *Stochastic Calculus for Finance I: The Binomial Asset Pricing Model*][ShreveSCFI],
+  1.2
+
+## Tags
+
+Cox–Ross–Rubinstein, binomial tree, risk-neutral probability, replicating portfolio,
+backward induction, one-period pricing, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -78,6 +118,7 @@ lemma BinomialNoArb.exists_nnreal_crrUpProb {u d r : ℝ} (h : BinomialNoArb u d
     (Real.coe_toNNReal _ (crrUpProb_mem_Ioo h).1.le).symm⟩
 
 /-- The probability `1 - q = (u - e^r) / (u - d)`. -/
+@[pricing =]
 lemma one_sub_crrUpProb {u d r : ℝ} (h : BinomialNoArb u d r) :
     1 - crrUpProb u d r = (u - Real.exp r) / (u - d) := by
   unfold crrUpProb
@@ -302,6 +343,7 @@ theorem binomialPrice_const (u d r c : ℝ) (_h : BinomialNoArb u d r) (n : ℕ)
 
 /-- **One-step risk-neutral martingale identity** for the binomial up-probability:
 `p · u + (1 − p) · d = eʳ`. -/
+@[pricing]
 lemma crrUpProb_mul_up_add (u d r : ℝ) (h : BinomialNoArb u d r) :
     crrUpProb u d r * u + (1 - crrUpProb u d r) * d = Real.exp r := by
   have hud : u - d ≠ 0 := sub_ne_zero.mpr h.d_lt_u.ne'

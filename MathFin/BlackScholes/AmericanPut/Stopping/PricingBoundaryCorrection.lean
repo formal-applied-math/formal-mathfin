@@ -6,12 +6,31 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.HeatPricingTransform
+public import MathFin.BlackScholes.AmericanPut.Stopping.IntervalHeatBoundary
 
-/-! # Constructed fixed-interval pricing-equation boundary correction 
-## Result
+/-!
+# Constructed fixed-interval pricing-equation boundary correction
 
-Public entry points include `pricingGauge_ne_zero`, `heatBoundaryDatum`,
-`heatBoundaryDatum_continuous`, `heatBoundaryDatum_zero`.
+## Main definitions
+
+* `heatBoundaryDatum`: the boundary datum `g` at time `a + s/2`, divided by the gauge
+  `pricingGauge k h L a X (a + s/2)`: the datum read in the heat time `s = 2*(t-a)`.
+
+## Main results
+
+* `pricingGauge_ne_zero`: the gauge never vanishes.
+* `heatBoundaryDatum_continuous`: the datum is continuous for continuous `g`.
+* `heatBoundaryDatum_zero`, `heatBoundaryDatum_rescale`: the datum vanishes for `s ≤ 0` if `g`
+  vanishes up to time `a`, and at heat time `2(t-a)` it equals `g t` over the gauge.
+* `exists_interval_pricing_boundary_solution`: for continuous `g₀`, `g₁` vanishing up to time
+  `a` and `L < R`, there is a continuous `C` vanishing for `t ≤ a`, equal to `g₀`, `g₁` on
+  `x = L, R` over `[a,T]`, `C^∞` in the open strip `L < x < R`, and solving
+  `pricingOperator k h C = 0` there.
+
+## Tags
+
+boundary correction, pricing equation, heat boundary datum, fixed interval, Dirichlet problem,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

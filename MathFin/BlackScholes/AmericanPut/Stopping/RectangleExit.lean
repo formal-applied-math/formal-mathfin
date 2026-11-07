@@ -6,12 +6,34 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.FirstContact
+public import Mathlib.MeasureTheory.Order.Group.Lattice
 
-/-! # Admissible exit from a backward space-time rectangle 
-## Result
+/-!
+# Admissible exit from a backward space-time rectangle
 
-Public entry points include `rectangleMargin`, `rectangleMargin_continuous`,
-`rectangleMargin_adapted`, `rectangleMargin_nonneg`.
+## Main definitions
+
+* `rectangleMargin`: the margin `max 0 (min (R - |X t ω - x|) (δ - t))`: how far the path still is
+  from the spatial radius `R` around `x` or from the terminal time `δ`, whichever is closer.
+* `rectangleExitRule`: the first time `rectangleMargin X x R δ` vanishes, as a rule with horizon
+  `δ`.
+
+## Main results
+
+* `rectangleMargin_continuous`, `rectangleMargin_adapted`, `rectangleMargin_nonneg`,
+  `rectangleMargin_terminal`: the margin is continuous in time for continuous paths, adapted for
+  adapted `X`, nonnegative, and zero at the terminal time `δ`.
+* `rectangleExitRule_before`: strictly before the exit rule, the path is strictly inside the
+  radius and the time is below `δ`.
+* `rectangleExitRule_pos`: if `0 < δ` and the path starts strictly inside the radius, the exit
+  rule is positive.
+* `rectangleExitRule_spatial_bound`, `rectangleExitRule_boundary`: at a positive exit time the
+  path is within the radius, and either on the spatial boundary or at time `δ`.
+
+## Tags
+
+rectangle exit, exit time, space-time rectangle, stopping rule, margin, MSC 60G40, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

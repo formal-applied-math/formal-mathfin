@@ -5,7 +5,10 @@ Authors: Robert Martin
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.Polynomial.RuleOfSigns
+public import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Analysis.Matrix.Spectrum
 
 /-! # Descartes' rule of signs when every root is real
 
@@ -15,6 +18,21 @@ For a real polynomial that splits, the number of sign variations equals the numb
 roots with multiplicity (`signVariations_eq_pos_roots`). For a real symmetric matrix this gives the
 number of positive minus the number of negative characteristic roots as the difference of the sign
 variations of `charpoly` and `charpoly.comp (-X)` (`signatureTest_eq_root_counts`).
+
+## Main results
+
+* `signVariations_pair_bound`:
+  `P.signVariations + (P.comp (-X)).signVariations + P.natTrailingDegree ≤ P.natDegree`.
+* `signVariations_eq_pos_roots`: if `P.Splits`, `P.signVariations` equals the number of positive
+  roots counted with multiplicity.
+* `signatureTest_eq_root_counts`: for a symmetric real matrix, the sign variations of `charpoly`
+  minus those of `charpoly.comp (-X)` equal the number of positive minus the number of negative
+  characteristic roots.
+
+## Tags
+
+Descartes rule of signs, sign variations, positive roots, real-rooted polynomial, SVI, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section
@@ -25,7 +43,8 @@ namespace MathFin
 namespace SVI
 open Polynomial
 
-private theorem monomial_comp_neg (n : ℕ) (a : ℝ) :
+/-- Substituting `-X` into a monomial multiplies its coefficient by `(-1)^n`. -/
+theorem monomial_comp_neg (n : ℕ) (a : ℝ) :
     (monomial n a).comp (-X) = monomial n (a * (-1)^n) := by
   rw [monomial_comp, ← C_mul_X_pow_eq_monomial]
   rw [C_mul, C_pow]
@@ -33,14 +52,16 @@ private theorem monomial_comp_neg (n : ℕ) (a : ℝ) :
   rw [neg_pow]
   ring
 
-private theorem eraseLead_comp_neg (P : ℝ[X]) :
+/-- Erasing the leading term commutes with the substitution `X ↦ -X`. -/
+theorem eraseLead_comp_neg (P : ℝ[X]) :
     (P.comp (-X)).eraseLead = P.eraseLead.comp (-X) := by
   rw [← self_sub_monomial_natDegree_leadingCoeff,
     ← self_sub_monomial_natDegree_leadingCoeff P, sub_comp, monomial_comp_neg]
   simp only [natDegree_comp, natDegree_neg, natDegree_X, one_mul,
     comp_neg_X_leadingCoeff_eq, mul_comm]
 
-private theorem trailing_eraseLead (P : ℝ[X]) (h : P.eraseLead ≠ 0) :
+/-- Erasing the leading term of a polynomial with nonzero remainder keeps its trailing degree. -/
+theorem natTrailingDegree_eraseLead (P : ℝ[X]) (h : P.eraseLead ≠ 0) :
     P.eraseLead.natTrailingDegree = P.natTrailingDegree := by
   have hd : P.eraseLead.natDegree < P.natDegree :=
     P.eraseLead_natDegree_lt_or_eraseLead_eq_zero.resolve_right h
@@ -58,7 +79,9 @@ private theorem trailing_eraseLead (P : ℝ[X]) (h : P.eraseLead ≠ 0) :
   intro hp
   simp [hp] at h
 
-private theorem sign_pair_step (x y u : ℝ) (hx : x ≠ 0) (hy : y ≠ 0) (hu : u ≠ 0) :
+/-- For nonzero `x`, `y`, `u`, exactly one of the sign-change tests for `(x, y)` and
+`(-u*x, u*y)` holds. -/
+theorem sign_pair_step (x y u : ℝ) (hx : x ≠ 0) (hy : y ≠ 0) (hu : u ≠ 0) :
     (if SignType.sign x = -SignType.sign y then 1 else 0) +
       (if SignType.sign (-u*x) = -SignType.sign (u*y) then 1 else 0) = (1 : ℕ) := by
   have hsx : SignType.sign x ≠ 0 := by simpa using hx
@@ -87,7 +110,7 @@ theorem signVariations_pair_bound (P : ℝ[X]) :
     have hd : P.eraseLead.natDegree < P.natDegree :=
       P.eraseLead_natDegree_lt_or_eraseLead_eq_zero.resolve_right he
     have hind := ih _ (hn ▸ hd) P.eraseLead rfl
-    rw [trailing_eraseLead P he] at hind
+    rw [natTrailingDegree_eraseLead P he] at hind
     have hpn : P.comp (-X) ≠ 0 := by simpa using hp
     rw [signVariations_eq_eraseLead_add_ite hp,
       signVariations_eq_eraseLead_add_ite hpn, eraseLead_comp_neg]
@@ -108,7 +131,8 @@ theorem signVariations_pair_bound (P : ℝ[X]) :
         by split <;> omega
       omega
 
-private theorem root_sign_partition (s : Multiset ℝ) :
+/-- A real multiset splits into its positive, negative and zero elements. -/
+theorem countP_pos_add_countP_neg_add_count_zero (s : Multiset ℝ) :
     s.countP (0 < ·) + s.countP (· < 0) + s.count 0 = s.card := by
   induction s using Multiset.induction_on with
   | empty => simp
@@ -130,7 +154,7 @@ theorem signVariations_eq_pos_roots (P : ℝ[X]) (hs : P.Splits) :
   simp only
       [roots_comp_neg_X, Multiset.countP_map, neg_pos, ← Multiset.countP_eq_card_filter] at hneg
   have hbound := signVariations_pair_bound P
-  have hsum := root_sign_partition P.roots
+  have hsum := countP_pos_add_countP_neg_add_count_zero P.roots
   rw [count_roots, rootMultiplicity_eq_natTrailingDegree', ← hs.natDegree_eq_card_roots] at hsum
   omega
 

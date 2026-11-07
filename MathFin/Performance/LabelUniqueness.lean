@@ -5,7 +5,11 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.Order.BigOperators.Group.Finset
+public import Mathlib.Data.Fintype.BigOperators
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Tactic.NormNum.Ineq
 
 /-!
 # Per-observation uniqueness bound for overlapping-label samples
@@ -20,12 +24,23 @@ used to justify uniqueness-weighted sampling: whenever `i`'s span actually
 contains `t`, `u_{t,i} ∈ (0, 1]`. The average uniqueness of observation `i` (the
 mean of `u_{t,i}` over `i`'s span) is not defined here.
 
+## Main definitions
+
+* `concurrency`: the number of observations whose span `[t0 i, t1 i]` contains `t`.
+* `uniqueness`: the per-observation uniqueness at `t`, `1 / c_t` if the span of `i` contains `t`
+  and `0` otherwise.
+
 ## Main results
 
 * `concurrency_pos`: `c_t > 0` whenever some span contains `t`.
 * `uniqueness_mem_Ioc`: `u_{t,i} ∈ (0, 1]` whenever `t ∈ span i`.
 * `concurrency_sumElim`: the concurrency of a pooled sample `ι ⊕ κ` is the sum of the two
   samples' concurrencies (used by `Performance/PurgedCV.lean`).
+
+## Tags
+
+overlapping labels, sample uniqueness, concurrency, López de Prado, sample weights, MSC 62M10,
+JEL C58
 -/
 
 @[expose] public section

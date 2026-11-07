@@ -5,7 +5,12 @@ Authors: Robert Martin
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Analysis.Calculus.Deriv.Prod
+public import Mathlib.Analysis.Calculus.Deriv.Comp
+public import Mathlib.Analysis.Calculus.Deriv.Shift
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # Exact change to coordinates relative to a decreasing straight line
@@ -14,10 +19,24 @@ The time chain rule changes the drift from `D` to `D-c`. Spatial first
 and second derivatives are translations. No PDE or smoothness hypothesis
 is silently added by this coordinate change.
 
-## Result
+## Main definitions
 
-Public entry points include `movingLineTransform`, `movingLineTransform_deriv_x`,
-`movingLineTransform_deriv2_x`, `movingLineTransform_hasDeriv_t`.
+* `movingLineTransform`: `V` read in coordinates moving with the line `x = d − c t`, that is
+  `V (y + (d − c t)) t`.
+
+## Main results
+
+* `movingLineTransform_deriv_x`, `movingLineTransform_deriv2_x`: the first and second spatial
+  derivatives of `movingLineTransform V c d` at `y` are those of `V` at `y + (d − c t)`.
+* `movingLineTransform_hasDeriv_t`: if `V` is differentiable at `(y + (d − c t), t)`, the time
+  derivative of the transform is `V_t − c V_x` there.
+* `movingLineTransform_equation`: if `V` solves `V_t = V_xx + D V_x` at the shifted point, the
+  transform solves the same equation with drift `D − c`.
+
+## Tags
+
+moving coordinates, straight line, change of variables, chain rule, drift shift, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

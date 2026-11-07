@@ -6,6 +6,8 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.CandidatePDE
+public import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+public import Mathlib.RingTheory.Finiteness.Prod
 
 /-!
 # Compact smooth localization of the Brownian-coordinate price
@@ -16,9 +18,18 @@ justifies availability of global smooth test functions without pretending that
 the price is globally C2 across its free boundary. `CompactLocalization`
 strengthens this to compact sets; `ContactMartingale` assembles stopped Ito.
 
-## Result
+## Main results
 
-Public entry points include `exists_compact_localization`, `brownianPriceKernel_localization`.
+* `exists_compact_localization`: if `F` is `C^∞` at `z`, a compactly supported `C²` function
+  agrees with `F` on a neighbourhood of `z`.
+* `brownianPriceKernel_localization`: for a `DividendPutSolution`, `0 < σ`, `t < T` and a
+  continuation point `(t,w)`, a compactly supported `C²` function agrees with the Brownian price
+  kernel on a neighbourhood of `(t,w)`.
+
+## Tags
+
+smooth localization, compact support, C2 extension, Brownian coordinate, continuation point,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

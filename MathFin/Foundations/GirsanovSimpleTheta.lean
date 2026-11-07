@@ -33,6 +33,11 @@ characteristic-function chain re-derived. The two ingredients specific to simple
   `L²` Hölder — `D_u ∈ L²` by the Gaussian MGF of `X_u` with the drift bounded, and `Z_T ∈ L²`
   because `Z_T² = E^{−2c}_T · exp(∑ c_i²Δτ_i)` with `∑ c_i²Δτ_i ≤ K²T`.
 
+## Main definitions
+
+* `simpleDrift`: the piecewise-constant adapted drift `∑_{i<N} cᵢ (s_{i+1}∧t − s_i∧t)` added to `X`
+  to form `B^θ_t = X_t + simpleDrift s c N t`.
+
 ## Main results
 
 * `MathFin.simpleGirsanovMeasure_isProbabilityMeasure` — `Q = P.withDensity Z_T` is a probability
@@ -41,6 +46,11 @@ characteristic-function chain re-derived. The two ingredients specific to simple
   `[0,T]`;
 * `MathFin.Btheta_simple_isQBrownianMotion` — under `Q`, `B^θ` starts at `0`, has `N(0,t−s)`
   increments, and has independent increments on `[0,T]`.
+
+## Tags
+
+Girsanov theorem, change of measure, market price of risk, Doléans exponential,
+risk-neutral measure, Brownian motion with drift, simple integrand, MSC 60H30, MSC 60J65, JEL G13
 -/
 
 @[expose] public section
@@ -238,7 +248,7 @@ lemma stronglyMeasurable_simpleDrift {s : ℕ → ℝ≥0} (hs : Monotone s) {c 
 omit [IsProbabilityMeasure P] [SigmaFiniteFiltration P 𝓕] in
 include hX in
 /-- The pre-Brownian motion starts at `0` a.e.: `X_0` has law `𝒩(0,0) = δ_0`. -/
-private theorem X0_ae_eq_zero : ∀ᵐ ω ∂P, X 0 ω = 0 := by
+theorem X0_ae_eq_zero : ∀ᵐ ω ∂P, X 0 ω = 0 := by
   have hmeasX0 : Measurable (X 0) := ((hX.stronglyAdapted 0).mono (𝓕.le 0)).measurable
   have hmap := Measure.map_apply (μ := P) hmeasX0 (measurableSet_singleton (0 : ℝ)).compl
   rw [(hX.hasLaw_eval 0).map_eq, gaussianReal_zero_var,

@@ -5,8 +5,9 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Performance.LabelUniqueness
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.Probability.BrownianMotion.Basic
 
 /-!
 # Purged train/test interval disjointness
@@ -32,6 +33,12 @@ a surviving label's uniqueness (`Performance/LabelUniqueness.lean`) is the same
 whether computed on the training sample alone or on the pooled sample
 (`uniqueness_pooled_eq_of_purged`).
 
+## Main definitions
+
+* `overlapsTest`: the purge trigger, training interval `i` starts inside, ends inside, or
+  envelops test interval `j`.
+* `IsSpanLabel`: a label determined by the increments of `X` over a span `[a, b]`.
+
 ## Main results
 
 * `overlapsTest_of_mem_of_mem`: if some point lies in both a training and a test
@@ -42,11 +49,22 @@ whether computed on the training sample alone or on the pooled sample
   every test interval.
 * `lt_or_lt_of_not_overlapsTest`: for nonempty spans, surviving purging means the
   two spans are strictly separated.
-* `IsSpanLabel`, `IsSpanLabel.indepFun_of_le`, `indepFun_of_purged`: labels determined by
+* `IsSpanLabel.indepFun_of_le`, `indepFun_of_purged`: labels determined by
   the increments of a pre-Brownian motion over separated spans are independent; after
   purging, every test label is independent of every surviving training label.
 * `uniqueness_pooled_eq_of_purged`: purging keeps test labels out of a surviving training
   label's uniqueness.
+
+## References
+
+* [I. Karatzas and S. E. Shreve, *Brownian Motion and Stochastic Calculus*][KaratzasShreve1991],
+  §2.1
+* [López de Prado, *Advances in Financial Machine Learning*][LopezDePrado2018], ch. 7, §7.4
+
+## Tags
+
+purged cross-validation, overlapping labels, information leakage, weak Markov property,
+López de Prado, time series validation, MSC 60J65, MSC 62M10, JEL C58
 -/
 
 @[expose] public section

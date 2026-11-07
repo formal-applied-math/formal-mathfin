@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.ODEComparison
+public import Mathlib.Analysis.Calculus.Deriv.Inv
 
 /-!
 # Straight-line comparison for the dividend-paying American put
@@ -14,10 +15,37 @@ The construction in Steps 2--4 of the proposed proof. All derivatives below are
 ordinary real derivatives. The profiles are explicit functions, not existence
 axioms. This file does not assert the zero-number theorem or boundary convexity.
 
-## Result
+## Main definitions
 
-Public entry points include `straightPrice_equation`, `straightPrice_fit`, and
-`straightPrice_dominates`.
+* `rootProfile`: for `u ≠ v`, the function `(u e^{vz} − v e^{uz}) / (u − v)`, with value `1` and
+  slope `0` at `0`.
+* `positiveRoot`, `negativeRoot`: the two branches `(−β ± √(β² + 4ρ)) / 2` of the roots of
+  `x² + βx − ρ = 0`.
+* `profile`: for `0 ≤ ρ`, the profile of the ODE `F'' + βF' − ρF = 0` with `F 0 = 1`,
+  `F' 0 = 0`, namely `rootProfile` at the two roots, or the constant `1` when `ρ = 0`.
+* `ProfileData`: the ODE data of a profile `F`: smooth, solves `F'' + βF' − ρF = 0`, `F 0 = 1`,
+  `F' 0 = 0` and `1 ≤ F`.
+* `price`: the straight-line comparison `f(x + ct − d) − eˣ g(x + ct − d)` in
+  `(log spot, time remaining)` coordinates.
+* `straightPrice`: `price` for the profiles of rates `k` and `h`, with line parameters `c`, `d`.
+* `excess`: the excess `f z − 1 − e^{ℓ + z} (g z − 1)` over the intrinsic expression in
+  line-relative coordinates.
+* `logSlope`: the logarithmic slope `F' z / F z`.
+* `initialRatio`: the ratio `e^{−z} f z / g z` that controls the shape of the initial difference.
+
+## Main results
+
+* `straightPrice_equation`: for `0 < k` and `0 ≤ h`, `straightPrice` solves the normalized
+  pricing equation `∂ₜu = u_xx + (k − h − 1) u_x − k u` at every point.
+* `straightPrice_fit`: for `0 < k` and `0 ≤ h`, along the line `x = d − c t` the price equals
+  the payoff `1 − eˣ` and its spatial derivative equals the payoff slope `−eˣ` (smooth fit).
+* `straightPrice_dominates`: for `0 ≤ h ≤ k`, `0 ≤ c`, `d ≤ 0`, `t ≥ 0` and `x ≤ 0`, the payoff
+  `1 − eˣ` is at most `straightPrice k h c d x t`.
+
+## Tags
+
+straight-line comparison, dividend-paying put, comparison profile, exercise boundary convexity,
+Chen–Chadam–Jiang–Zheng, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

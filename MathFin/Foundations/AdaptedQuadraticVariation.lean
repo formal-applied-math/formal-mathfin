@@ -46,12 +46,26 @@ probability, which is what identifying a limit almost surely needs.
 `X` only has to agree with `X₀ + A + σ●B` almost surely at each time of `[0, T]`, so any
 modification qualifies.
 
+## Main definitions
+
+* `cellIncrement`: the increment `ΔMₖ` of `M = σ●B` over the `k`-th cell of the uniform partition
+  of `[0, T]`, as an element of `Lp ℝ 2 μ`.
+
 ## Main results
 
 * `tendsto_weighted_qv_adapted` — the weighted statement above.
 * `tendsto_qv_adapted` — `∑ₖ (ΔXₖ)² → ∫₀ᵀ σ² ds` in `L¹(μ)`, the case `w ≡ 1`.
 * `norm_sq_increment_le` — the increment of `σ●B` over `(a, b]` has squared `L²` norm at most
   `C²·(b − a)`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 7.4.5
+
+## Tags
+
+quadratic variation, Itô process, Itô formula, realized variance, L1 convergence, MSC 60H05,
+MSC 60G44
 -/
 
 @[expose] public section
@@ -141,17 +155,17 @@ theorem norm_sq_increment_le {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) :
       (Set.Ioc a b ×ˢ (Set.univ : Set Ω)) :=
     measurableSet_predictable_Ioc_prod a b MeasurableSet.univ
   -- the density `σ²` is at most `C²`
-  have hbound : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas),
+  have hbound : ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas),
       ‖(processToLp (μ := μ) T hBmeas hadap hcont hbdd : ℝ≥0 × Ω → ℝ) z‖ₑ ^ 2
         ≤ ENNReal.ofReal (C ^ 2) := by
     filter_upwards [processToLp_coeFn (μ := μ) T hBmeas hadap hcont hbdd] with z hz
     rw [hz, Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _)]
     exact ENNReal.ofReal_le_ofReal (pow_le_pow_left₀ (abs_nonneg _) (hbdd z.1 z.2) 2)
   -- the trim measure of the band is its length
-  have htrim : trimMeasure_T (μ := μ) T hBmeas (Set.Ioc a b ×ˢ (Set.univ : Set Ω))
+  have htrim : trimMeasure (μ := μ) T hBmeas (Set.Ioc a b ×ˢ (Set.univ : Set Ω))
       = ENNReal.ofReal ((b : ℝ) - a) := by
-    unfold trimMeasure_T
-    rw [trim_measurableSet_eq _ hS, Measure.prod_prod, measure_univ, mul_one, timeMeasure_T,
+    unfold trimMeasure
+    rw [trim_measurableSet_eq _ hS, Measure.prod_prod, measure_univ, mul_one, timeMeasureHorizon,
       Measure.restrict_apply measurableSet_Ioc,
       Set.inter_eq_left.2 (Set.Ioc_subset_Ioc zero_le hbT), timeMeasure_Ioc]
   have hle : bracketMeasure (μ := μ) T hBmeas (processToLp T hBmeas hadap hcont hbdd)

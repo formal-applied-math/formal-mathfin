@@ -5,8 +5,8 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.DurationSensitivity
+public import Mathlib.Analysis.Calculus.Deriv.Shift
 
 /-!
 # Key-rate partials sum to the parallel-shift derivative
@@ -29,7 +29,12 @@ derivative under a parallel shift `k ↦ k + ε·1`. On a flat curve `k ≡ y` t
 a move of the flat yield, so the sum is `dP/dy`, the derivative `hasDerivAt_bondPriceDisc`
 computes.
 
-## Results
+## Main definitions
+
+* `bondPriceKeyRate`: the bond price with cashflow `i` discounted at its own rate `k i`, with
+  annual compounding.
+
+## Main results
 
 * `bondPriceKeyRate_update_eq`: moving the spot rate of node `j ∈ s` to `x` leaves every other
   cashflow's term unchanged (used to prove both results below).
@@ -40,6 +45,15 @@ computes.
 * `sum_keyRate_partials_eq_deriv_bondPriceDisc`, `sum_deriv_keyRate_eq_deriv_bondPriceDisc`:
   on a flat curve `k ≡ y` (`1 + y ≠ 0`), `Σⱼ ∂P/∂kⱼ = dP/dy` (`deriv (bondPriceDisc s t c) y`),
   for given partial-derivative witnesses and for the `deriv`s themselves.
+
+## References
+
+* [Ho, *Key rate durations: measures of interest rate risks*][Ho1992]
+
+## Tags
+
+key rate duration, partial duration, parallel shift, yield curve sensitivity, bond risk,
+spot rate node, MSC 91G30, JEL G12
 -/
 
 @[expose] public section

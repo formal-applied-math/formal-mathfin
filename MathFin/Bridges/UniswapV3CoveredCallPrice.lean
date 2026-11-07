@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.DeFi.UniswapMechanics
 public import MathFin.BlackScholes.Forward
 
@@ -21,7 +20,7 @@ this pointwise bound into a price bound: by `discounted_terminal_eq_S0` and `bs_
 the discounted expected value of the position at `T` is at most `x_max · (S₀ − C)`, with `C` the
 Black–Scholes call price struck at `ab`.
 
-## Results
+## Main results
 
 * `measurable_v3PositionValue`: the position value is a measurable function of `s`.
 * `integral_discounted_v3PositionValue_le`: under `BSCallHyp Q S₀ (ab) r σ T Z`,
@@ -32,6 +31,16 @@ Black–Scholes call price struck at `ab`.
 An upper bound only; the gap is the expectation of the in-range smoothing term
 (`coveredCall_sub_v3PositionValue`), which is not computed. The position is held to `T` with no
 fees and no rebalancing; token Y is the numéraire, growing at the rate `r`.
+
+## References
+
+* [H. Adams et al., *Uniswap v3 Core*][AdamsEtAl2021], §6.4.1 (eqs. 6.29-6.30)
+* [F. Black and M. Scholes, *The pricing of options and corporate liabilities*][BlackScholes1973]
+
+## Tags
+
+Uniswap v3, concentrated liquidity, covered call, liquidity provider, automated market maker,
+MSC 91G20, MSC 91G80, JEL G13
 -/
 
 @[expose] public section

@@ -7,13 +7,31 @@ module
 
 public import MathFin.Foundations.IndepFreezing
 public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianHeatFlow
+public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianModel
 
-/-! # Conditional Brownian transitions in the raw natural filtration 
-## Result
+/-! # Conditional Brownian transitions in the raw natural filtration
 
-Public entry points include `brownianLogState`, `brownian_scaled_increment_heatFlow`,
-`brownian_condExp_transition`, `IsGaussianMarkov`,
-`brownianLogState_isGaussianMarkov`.
+## Main definitions
+
+* `brownianLogState`: the log state `x + β*t + σ*B_t`, with drift `β` and volatility `σ` applied to
+  the constructed Brownian motion, started at `x`.
+* `IsGaussianMarkov`: the Gaussian Markov property of a log state `L` with drift `β` and volatility
+  `σ` in the filtration `𝓕` under `P`.
+
+## Main results
+
+* `brownian_scaled_increment_heatFlow`: for continuous `f` and `i ≤ j`, the expectation of
+  `f (x + σ (B_j - B_i))` is `brownianHeatFlow f (σ² (j - i)) x`.
+* `brownian_condExp_transition`: for continuous bounded `f`, `i ≤ j` and an `𝓕 i`-measurable
+  `X`, the conditional expectation of `f (X + σ (B_j - B_i))` given `𝓕 i` is almost surely
+  `brownianHeatFlow f (σ² (j - i)) (X ω)`.
+* `brownianLogState_isGaussianMarkov`: `brownianLogState β σ x` is `IsGaussianMarkov` in
+  `brownianFiltration` under `gaussianLimit`.
+
+## Tags
+
+Gaussian Markov, conditional transition, raw filtration, heat flow, Brownian motion, MSC 60G40,
+MSC 60J65
 -/
 
 @[expose] public section

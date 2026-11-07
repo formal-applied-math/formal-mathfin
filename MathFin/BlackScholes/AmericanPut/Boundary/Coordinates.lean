@@ -5,7 +5,12 @@ Authors: Robert Martin
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Convex.SpecificFunctions.Basic
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # Coordinates in Chen–Chadam–Jiang–Zheng (2008), Section 1
@@ -16,10 +21,26 @@ They do NOT establish that `s` is an optimal exercise boundary or that it is con
 The positive interest-rate assumption belongs to the outstanding PDE theorem;
 the coordinate change itself does not involve the rate.
 
-## Result
+## Main definitions
 
-Public entry points include `normalizedTime`, `stockBoundary`, `normalizedTime_pos`,
-`stockBoundary_expiry`.
+* `normalizedTime`: the dimensionless time remaining `σ² (expiry − T) / 2`.
+* `stockBoundary`: the stock-price boundary `E · exp (s (normalizedTime σ expiry T))` rebuilt from a
+  log-boundary `s`.
+
+## Main results
+
+* `normalizedTime_pos`: for `0 < σ` and `T < expiry`, `normalizedTime σ expiry T` is positive.
+* `stockBoundary_expiry`: if `s 0 = 0`, then `stockBoundary E σ expiry s expiry = E`.
+* `deriv2_stockBoundary_pos`: for `0 < E`, `0 < σ`, `T < expiry`, if `s` has a positive
+  derivative-of-derivative `dds` at the normalized time of `T`, then the second derivative of
+  `stockBoundary E σ expiry s` at `T` is positive (a coordinate implication only).
+* `stockBoundary_convexOn`: for `0 ≤ E`, if `s` is convex on `[0, ∞)`, then
+  `stockBoundary E σ expiry s` is convex on `(−∞, expiry]`.
+
+## Tags
+
+change of variables, normalized time, log-price coordinates, stock boundary,
+Chen–Chadam–Jiang–Zheng, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -8,10 +8,21 @@ module
 public import MathFin.BlackScholes.AmericanPut.Stopping.PricingBoundaryCorrection
 public import MathFin.BlackScholes.AmericanPut.Stopping.ContinuousPriceEvolution
 
-/-! # Constructed local pricing Dirichlet solution for continuous data 
-## Result
+/-!
+# Constructed local pricing Dirichlet solution for continuous data
 
-Public entry points include `pricingOperator_add`, `exists_pricing_dirichlet_solution`.
+## Main results
+
+* `pricingOperator_add`: the pricing operator is additive on functions that are `C²` at the point.
+* `exists_pricing_dirichlet_solution`: for a continuous `u` on the plane and `L < R`, there is a
+  continuous `F` that agrees with `u` on the initial segment `[L,R] × {a}` and on both lateral
+  sides over `[a,T]`, is `C^∞` on `(L,R) × (a,T)`, and satisfies `pricingOperator k h F = 0`
+  there.
+
+## Tags
+
+Dirichlet problem, local pricing solution, continuous data, pricing operator, existence, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

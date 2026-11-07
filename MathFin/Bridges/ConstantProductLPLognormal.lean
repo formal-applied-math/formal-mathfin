@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.DeFi.UniswapMechanics
 public import MathFin.BlackScholes.Forward
 
@@ -20,7 +19,7 @@ move is lognormal, `r = bsTerminal 1 μ σ T Z` with `Z` standard normal (`BSCal
 root is again lognormal, `√r = bsTerminal 1 (μ/2 − σ²/8) (σ/2) T Z`, and the library's forward
 identity `expected_terminal_eq_forward` (`BlackScholes/Forward.lean`) computes its expectation.
 
-## Results
+## Main results
 
 * `integral_lpValue_lognormal`: `E[LP_T] = 2 y₀ · exp ((μ/2 − σ²/8) T)`.
 * `integral_hodlValue_lognormal`: `E[HODL_T] = y₀ · (exp (μ T) + 1)`.
@@ -33,6 +32,17 @@ identity `expected_terminal_eq_forward` (`BlackScholes/Forward.lean`) computes i
 The pool is fee-free and assumed to sit at the external price at `T` (the reserves are those of
 `impermanentLossReservesX/Y`); deposit at the pool price `y₀ / x₀`. Values are in token Y and
 undiscounted. Fees, the arbitrage path between `0` and `T`, and gas are not modelled.
+
+## References
+
+* [G. Angeris et al., *An analysis of Uniswap markets*][AngerisKaoChiangNoyesChitra2021]
+* [J. Milionis et al., *Automated market making and
+  loss-versus-rebalancing*][MilionisMoallemiRoughgardenZhang2022]
+
+## Tags
+
+impermanent loss, liquidity provider, Uniswap, automated market maker, constant product,
+lognormal price, MSC 91G80, JEL G23, JEL G12
 -/
 
 @[expose] public section

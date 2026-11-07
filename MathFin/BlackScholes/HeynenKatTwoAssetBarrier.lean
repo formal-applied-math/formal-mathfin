@@ -5,7 +5,6 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.BivariateNormalCDF
 public import MathFin.BlackScholes.PutGreeks
 
@@ -34,6 +33,16 @@ barrier `H`,
 and the four knock-out prices are `A(1,-1)` (down-out call), `A(1,1)` (up-out call),
 `A(-1,-1)` (down-out put), `A(-1,1)` (up-out put).
 
+## Main definitions
+
+* `hkMu`: the risk-neutral log-drift `μ(b, σ) = b − σ²/2`.
+* `hkD1`, `hkD2`, `hkD3`, `hkD4`, `hkE1`, `hkE2`, `hkE3`, `hkE4`: the arguments `d₁, …, d₄`,
+  `e₁, …, e₄` of the bivariate normal CDFs. `d₁, d₂` are the Black–Scholes arguments of asset 1
+  against the strike `X`, and `d₃, d₄, e₃, e₄` carry the barrier-reflection shifts.
+* `heynenKatA`: Heynen and Kat's knock-out value `A(η, φ)` of an option on asset 1 knocked out
+  when asset 2 crosses the barrier `H`, as a closed-form definition. That it is a discounted
+  expected payoff is not proved.
+
 ## Main results
 
 * `heynenKatA_rho_zero`, the module's structural result: for independent assets (`ρ = 0`) every
@@ -61,6 +70,15 @@ the running extremum of a correlated second one, which the library does not have
 reflection principle is `Binomial/BarrierReflection.lean`). Knock-in values are not stated: they
 follow from in–out parity (`knockIn_add_knockOut_eq_vanilla`, `BlackScholes/BarrierParity.lean`)
 once `heynenKatA` is identified with a discounted expected payoff, which this module does not do.
+
+## References
+
+* [R. Heynen and H. Kat, *Crossing barriers*][HeynenKat1994a]
+
+## Tags
+
+two-asset barrier option, Heynen–Kat, bivariate normal, knock-out barrier, exotic option,
+cost of carry, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

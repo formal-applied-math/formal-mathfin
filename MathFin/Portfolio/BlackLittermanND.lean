@@ -5,9 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Portfolio.BlackLitterman
 public import MathFin.Portfolio.ConvexQPKKT
+public import Mathlib.Logic.Equiv.PartialEquiv
 
 /-!
 # N-dimensional Black-Litterman posterior (matrix form)
@@ -68,21 +68,37 @@ normal equation below reduces to the scalar Bayesian update behind
 makes this precise (the scalar `posteriorMean1d` is the BL posterior mean at
 `n = 1`), and the matrix form here is its N-asset generalisation.
 
-## Results
+## Main definitions
 
-* `blPosteriorPrecision`: definition `Sg_inv + Pᵀ · Om_inv · P`.
-* `blPrecisionWeightedMean`: definition `Sg_inv · π + Pᵀ · Om_inv · Q`.
-* `IsBLPosteriorMean`: variational characterisation as the normal-equation
-  solution.
-* `blPosteriorMean`: explicit form using `(posterior_precision)⁻¹`.
-* `blPosteriorMean_satisfies_normal_eq`: explicit form satisfies the
-  normal equation.
+* `blPosteriorPrecision`: the posterior precision `Sg_inv + Pᵀ·Om_inv·P`.
+* `blPrecisionWeightedMean`: the right-hand side `Sg_inv·π + Pᵀ·Om_inv·Q` of the normal equation.
+* `IsBLPosteriorMean`: `μ_post` solves the Black-Litterman normal equation.
+* `blPosteriorMean`: the explicit solution, the inverse of the posterior precision applied to
+  the precision-weighted mean (when the posterior precision is invertible).
+* `blLoss`: the Theil-Goldberger mixed-estimation loss, half the prior-precision-weighted squared
+  distance from `π` plus half the view-precision-weighted squared distance of `P·μ` from `Q`.
+
+## Main results
+
+* `blPosteriorMean_satisfies_normal_eq`: when the posterior precision is invertible, the explicit
+  form `blPosteriorMean` satisfies the normal equation `IsBLPosteriorMean`.
 * `IsBLPosteriorMean.unique`: solution to the normal equation is unique
   (when posterior precision is invertible); dot-notation `h.unique`.
-* `blLoss`, `blLoss_eq_qpObj`: the mixed-estimation loss, and its form as the convex
-  QP objective `qpObj` with Hessian the posterior precision, up to a constant.
+* `blLoss_eq_qpObj`: for symmetric `Sg_inv` and `Om_inv`, the mixed-estimation loss `blLoss` is
+  the convex QP objective `qpObj` with Hessian the posterior precision, up to a constant.
 * `IsBLPosteriorMean.blLoss_le`: a solution of the normal equation minimises `blLoss`
   when `Sg_inv` and `Om_inv` are positive semidefinite.
+
+## References
+
+* [Black and Litterman, *Global portfolio optimization*][BlackLitterman1992]
+* [Theil and Goldberger, *On pure and mixed statistical estimation in
+  economics*][TheilGoldberger1961]
+
+## Tags
+
+Black-Litterman model, posterior precision, mixed estimation, Theil-Goldberger, normal equation,
+investor views, generalized least squares, MSC 91G10, MSC 62F10, JEL G11
 -/
 
 @[expose] public section

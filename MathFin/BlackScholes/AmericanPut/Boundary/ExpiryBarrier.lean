@@ -6,6 +6,8 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.ObstacleComparison
+public import Mathlib.Analysis.SpecialFunctions.Sqrt
+public import Mathlib.Analysis.Calculus.Deriv.Inv
 
 /-!
 # A shrinking-strip subsolution for the expiry estimate
@@ -14,10 +16,30 @@ This explicit quadratic in space is used only on `|x| ≤ sqrt t`.
 Its strip collapses to `(0,0)`, where it is continuous relative to the strip.
 No European pricing formula is required.
 
-## Result
+## Main definitions
 
-Public entry points include `expiryBarrier`, `expiryBarrier_hasDeriv_x`, `expiryBarrier_deriv2_x`,
-`expiryBarrier_hasDeriv_t`.
+* `expiryBarrier`: the explicit barrier `(√t − x)² / (16 √t)`, a quadratic in `x` used on the strip
+  `|x| ≤ √t`.
+
+## Main results
+
+* `expiryBarrier_hasDeriv_x`, `expiryBarrier_deriv2_x`, `expiryBarrier_hasDeriv_t`: for `t > 0`
+  the derivatives of `expiryBarrier`: `(x − √t) / (8 √t)` and `1 / (8 √t)` in space, and
+  `(1 − x²/t) / (32 √t)` in time.
+* `expiryBarrier_bounds`: on the strip `|x| ≤ √t`, `0 ≤ expiryBarrier x t ≤ √t / 4`.
+* `expiryBarrier_subsolution`: for `0 ≤ k`, `0 < t ≤ 1`, `(|k − h − 1| + k) √t ≤ 1/4` and
+  `|x| ≤ √t`, the time derivative of the barrier is at most the dividend spatial operator
+  applied to it.
+* `expiryBarrier_le_price`: for a `DividendPutSolution` and `T ≤ 1` with
+  `(|k − h − 1| + k) √T ≤ 1/4`, the barrier is at most the price on the strip
+  `|x| ≤ √t`, `t ≤ T` (`twoSidedStrip`).
+* `exists_expiryBarrier_window`: for a `DividendPutSolution`, some `T > 0` makes that
+  barrier-below-price bound hold on the strip up to `T`.
+
+## Tags
+
+near expiry, barrier subsolution, quadratic barrier, shrinking strip, expiry estimate, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

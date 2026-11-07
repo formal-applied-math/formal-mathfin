@@ -5,14 +5,38 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.CompactHeatFlow
-public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianModel
+public import BrownianMotion.Gaussian.BrownianMotion
+public import MathFin.Foundations.FeynmanKacHeatEquation
 
-/-! # Heat evolution as an actual Brownian expectation, including time zero 
-## Result
+/-! # Heat evolution as an actual Brownian expectation, including time zero
 
-Public entry points include `brownianHeatFlow`, `brownianHeatFlow_zero`,
-`brownianHeatFlow_continuous`, `brownianHeatFlow_bound`, `PutWaiting`.
+## Main definitions
+
+* `brownianHeatFlow`: heat evolution as a Brownian expectation: the integral of `f (x + B_t)` under
+  `gaussianLimit`.
+* `linearPriceEvolution`: the heat flow of `f` over time `2*(t-a)` from the shifted point
+  `x + (k-h-1)*(t-a)`, discounted by `exp (-k*(t-a))`.
+* `PutWaiting`: a put price `p` waits at normalized rates `k`, `h` if it dominates its own
+  discounted Gaussian evolution.
+
+## Main results
+
+* `brownianHeatFlow_zero`: at time `0` the heat flow of `f` is `f`.
+* `brownianHeatFlow_continuous`, `brownianHeatFlow_bound`: for continuous `f` with `‖f‖ ≤ C`, the
+  heat flow is jointly continuous in time and space; for any `f` with `‖f‖ ≤ C`, it is bounded
+  by `C`.
+* `brownianHeatFlow_eq_kernel`: for continuous `f` and `t > 0`, it equals the Gaussian-kernel
+  integral `feynmanU f t x`.
+* `linearPriceEvolution_initial`, `linearPriceEvolution_continuous`,
+  `linearPriceEvolution_bound`: `linearPriceEvolution f k h a x a = f x`; it is jointly continuous
+  for continuous bounded `f`; and for `‖f‖ ≤ C`, `0 ≤ k` and `a ≤ t` it is at most `C`.
+* `linearPriceEvolution_eq_kernel`: for continuous `f` and `a < t`, it equals
+  `exp (-k (t-a)) * feynmanU f (2 (t-a)) (x + (k-h-1)(t-a))`.
+
+## Tags
+
+heat flow, heat equation, Brownian expectation, Gaussian semigroup, put waiting, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

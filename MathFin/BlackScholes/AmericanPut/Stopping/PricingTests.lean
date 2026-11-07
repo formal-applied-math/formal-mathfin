@@ -12,10 +12,26 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.PointwiseTests
 The actual price has not been assumed differentiable. At an interior touching
 point, derivatives below belong to the smooth test, not to the option price.
 
-## Result
+## Main definitions
 
-Public entry points include `pricingTestKernel`, `pricingTestKernel_contDiff`,
-`pricingTestKernel_eq_brownian`, `pricingTestKernel_generator`.
+* `pricingTestKernel`: the test function `F` composed with the affine space-time map
+  `z ↦ (x + (k-h-1)*z.1 + √2*z.2, T - z.1)` and discounted by `exp (-k*z.1)`.
+
+## Main results
+
+* `pricingTestKernel_contDiff`: for a `C²` test `F`, the test kernel is `C²`.
+* `pricingTestKernel_eq_brownian`: the test kernel is the Brownian price kernel of `F`
+  (viewed as a pricing function) at `σ = √2`, strike `1`.
+* `pricingTestKernel_generator`: for `C²` `F`, the generator of the kernel at `(0,0)` equals
+  `F_xx + (k-h-1) F_x - F_t - k F` at `(x,T)`.
+* `canonicalPrice_upper_pricing_test`, `canonicalPrice_lower_pricing_test`: at a point `(x,T)` of
+  the continuation region (`0 ≤ k`), a `C²` test equal to the price at that point and touching it
+  from above (resp. below) nearby satisfies `F_t ≤ F_xx + (k-h-1) F_x - k F` (resp. `≥`).
+
+## Tags
+
+smooth test, touching point, pricing inequality, log-price, remaining time, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

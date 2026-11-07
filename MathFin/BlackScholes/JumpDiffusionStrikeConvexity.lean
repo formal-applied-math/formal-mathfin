@@ -34,6 +34,29 @@ With `σ = 0` the call price is convex but has a kink at the strike `Se^{bτ}`
 (`not_differentiableAt_jumpDiffusionCallPrice_strike`). No strike derivative is taken here; the
 spot-side counterparts `bsV_spot_strictConvexOn` and `mertonCallPrice_strictConvexOn_spot` come
 from the second spot derivative.
+
+## Main results
+
+* `convexOn_jumpDiffusionCallPrice_strike`: the jump-diffusion call price is convex in the strike,
+  for any drift, any `σ` (`σ = 0` included), any jump law and a finite forward.
+* `strictConvexOn_jumpDiffusionCallPrice_strike`: for `σ ≠ 0`, `τ > 0`, `S > 0` and a finite
+  forward, it is strictly convex on `(0, ∞)` for any jump law.
+* `bsV_strike_strictConvexOn`: the Black–Scholes call price is strictly convex in the strike on
+  `(0, ∞)`, for `S, σ, τ > 0`.
+* `mertonCallPrice_strictConvexOn_strike`: Merton's call series is strictly convex in the strike on
+  `(0, ∞)`, for `S, σ, T > 0`, `k > −1` and every expected jump count `Λ`.
+
+## References
+
+* [F. Black and M. Scholes, *The pricing of options and corporate liabilities*][BlackScholes1973]
+* [Cont and Tankov, *Financial Modelling with Jump Processes*][ContTankov2004]
+* [R. C. Merton, *Theory of rational option pricing*][Merton1973]
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976]
+
+## Tags
+
+strict convexity in strike, butterfly spread, call price convexity, jump-diffusion, no-arbitrage,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

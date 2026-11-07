@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Performance.Ratios
 
 /-!
@@ -38,14 +37,24 @@ EMM. The `p`-independence is exactly the content of the Kelly first-order condit
 `1 + f*·b = p·(b+1)`, so the physical `p` cancels in the deflation. Change the numéraire
 to the growth-optimal portfolio and the physical measure becomes risk-neutral.
 
-## Results
+## Main results
+
 * `kellyGOPWealth_win`, `kellyGOPWealth_lose` — the growth-optimal terminal wealths
   `W*₊ = p(b+1)` and `W*₋ = (1-p)(b+1)/b` (the Kelly first-order condition made explicit).
 * `kellyDeflatedProb_win`, `kellyDeflatedProb_lose` — the GOP-deflated probabilities
   `q₊ = 1/(b+1)`, `q₋ = b/(b+1)`.
 * `kellyDeflatedProb_sum_one` — `q₊ + q₋ = 1` (a probability measure).
-* `kellyNumeraire_isRiskNeutral` — `q₊·b + q₋·(−1) = 0`: the bet is a martingale under
-  the GOP-deflated measure. The (discrete) numéraire-portfolio ⟹ EMM identity.
+* `kellyNumeraire_isRiskNeutral` — `q₊·b + q₋·(−1) = 0`: under the GOP-deflated probabilities
+  the one-period bet has zero mean, the numéraire-portfolio ⟹ EMM identity in one period.
+
+## References
+
+* [Long (1990)][Long1990]
+
+## Tags
+
+numéraire portfolio, growth-optimal portfolio, benchmark approach, risk-neutral probabilities,
+Kelly criterion, fair odds, MSC 91G10, MSC 91G20, JEL G12
 -/
 
 @[expose] public section

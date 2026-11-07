@@ -5,7 +5,13 @@ Authors: Robert Martin
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.Deriv.Comp
+public import Mathlib.Analysis.Calculus.Deriv.MeanValue
+public import Mathlib.Analysis.Calculus.MeanValue
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # Upward crossings and interval-shaped sublevel sets
@@ -15,10 +21,25 @@ cannot cross from nonnegative to negative as its argument increases. We prove
 this with Mathlib's scalar fencing theorem. If `R'=R*J` and `R>0`, the resulting
 sign restriction makes every strict sublevel set of `R` an interval.
 
-## Result
+## Main results
 
-Public entry points include `nonneg_right_of_upward_zeros`, `nonpos_left_of_upward_zeros`,
-`upward_zero_unique`, `value_le_right_of_nonneg_factor`.
+* `nonneg_right_of_upward_zeros`, `nonpos_left_of_upward_zeros`: for a differentiable `J` with
+  `J' > 0` at every zero, `J a ≥ 0` and `a ≤ b` give `J b ≥ 0`, and `J b ≤ 0` and `a ≤ b` give
+  `J a ≤ 0`.
+* `upward_zero_unique`: such a `J` has at most one zero.
+* `value_between_le_max_of_upward_factor`, `sublevel_ordConnected_of_upward_factor`: if `R > 0`
+  is differentiable with `R' = R J` for such a `J`, then `R y ≤ max (R x) (R z)` for
+  `x ≤ y ≤ z`, and every strict sublevel set `{x | R x < L}` is order-connected.
+* `global_min_of_upward_factor`, `no_three_equal_values_of_upward_factor`: under the same
+  hypotheses, a stationary point of `R` is a global minimum, and `R` cannot take the same value
+  at three ordered points.
+* `subset_pair_of_no_ordered_triple`: a set of reals with no strictly increasing triple of
+  elements is contained in a set of at most two points (`{a, b}`).
+
+## Tags
+
+upward crossing, sublevel set, interval, zero crossing, fencing theorem, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

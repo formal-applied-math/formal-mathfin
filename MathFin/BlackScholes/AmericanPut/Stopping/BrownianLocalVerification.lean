@@ -5,9 +5,9 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.PlaneIto
 public import MathFin.Foundations.BoundedLocalMartingale
 public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianVerification
+public import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
 
 /-!
 # Bounded stopped-candidate promotion and raw-filtration transfer
@@ -18,10 +18,32 @@ our financial model's raw natural filtration. The local hypothesis is explicit
 in this module; `ContactMartingale` later assembles the Ito representations and
 proves the raw contact-martingale property without that extra hypothesis.
 
-## Result
+## Main definitions
 
-Public entry points include `brownianAugFiltration`, `brownianFiltration_le_aug`,
-`stoppedClassicalCandidate_stronglyAdapted`, `brownian_stoppedCandidate_martingale_of_local`.
+* `brownianAugFiltration`: the raw Brownian filtration with the `gaussianLimit`-null measurable sets
+  adjoined at each time.
+
+## Main results
+
+* `brownianFiltration_le_aug`: the raw Brownian filtration is contained in
+  `brownianAugFiltration`.
+* `stoppedClassicalCandidate_stronglyAdapted`: for a `DividendPutSolution`, an adapted
+  continuous-path `W` and any stopping rule `θ`, the stopped classical candidate is strongly
+  adapted.
+* `brownian_stoppedCandidate_martingale_of_local`: for a `DividendPutSolution` at the normalized
+  rates, `0 < K` and `0 ≤ r`, if the candidate stopped at a raw rule `θ` is a local martingale in
+  `brownianAugFiltration`, it is a martingale in `brownianFiltration`.
+* `brownian_price_identification_of_localMartingale`: if in addition `0 < S`, the candidate is a
+  supermartingale and the candidate stopped at the classical contact rule is a local martingale,
+  then `brownianAmericanPut K r q σ S T = K * p (log (S/K)) (σ²/2 * T)`.
+* `brownian_boundary_curvature_of_localMartingales`: if those two hypotheses hold for all `T`
+  and `S > 0`, and `0 < σ`, then for `τ > 0` the second derivative of the Brownian exercise
+  boundary, as a function of the remaining time, is positive at `τ`.
+
+## Tags
+
+local martingale, stopped candidate, raw filtration, null augmentation, verification, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

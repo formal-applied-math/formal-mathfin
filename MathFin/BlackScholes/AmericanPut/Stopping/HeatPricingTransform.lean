@@ -5,7 +5,6 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.IntervalHeatBoundary
 public import MathFin.BlackScholes.AmericanPut.Stopping.SmoothPricingComparison
 public import MathFin.BlackScholes.AmericanPut.Boundary.GaugeTransform
 
@@ -14,10 +13,23 @@ public import MathFin.BlackScholes.AmericanPut.Boundary.GaugeTransform
 An exponential factor removes the drift and discount without moving the
 spatial endpoints. Heat time is twice normalized pricing time.
 
-## Result
+## Main definitions
 
-Public entry points include `pricingGauge`, `priceFromHeat`, `pricingGauge_hasDeriv_space`,
-`pricingGauge_hasDeriv_time`.
+* `pricingGauge`: the exponential gauge factor `exp ((-(k-h-1)/2)*(x-L) + (-(k+(k-h-1)^2/4))*(t-a))`
+  of the heat-to-pricing change of variables.
+* `priceFromHeat`: a heat solution `V` read as a pricing function: the gauge times `V` at shifted
+  space `z.1 - L` and doubled time `2*(z.2 - a)`.
+
+## Main results
+
+* `pricingGauge_hasDeriv_space`: for every parameter value, `x ↦ pricingGauge k h L a x t` has
+  derivative `-(k-h-1)/2` times the gauge.
+* `pricingGauge_hasDeriv_time`: `t ↦ pricingGauge k h L a x t` has derivative
+  `-(k+(k-h-1)^2/4)` times the gauge.
+
+## Tags
+
+heat transform, gauge, drift removal, heat time, pricing equation, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

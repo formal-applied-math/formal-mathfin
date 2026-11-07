@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.SVI.RealRootTrace
 public import MathFin.BlackScholes.SVI.RankOneSignature
+public import MathFin.BlackScholes.SVI.TraceForm
 
 /-! # A repeated real root contributes one sign
 
@@ -14,6 +15,17 @@ Part of the SVI polynomial-sign certificate (#174).
 
 On `ℝ[X]/((X − c)ʳ)` the weighted trace form has signature `sign (q c)`, whatever the
 multiplicity `r`.
+
+## Main results
+
+* `realRootEval_aeval`: for `r > 0`, `realRootEval c r hr` sends the class of `q` in
+  `AdjoinRoot ((X - C c)^r)` to `q.eval c`.
+* `weightedTraceForm_realRoot_signature`: for `r > 0`, the weighted trace form of `(X - C c)^r`
+  with weight `q` has signature `sign (q.eval c)`, whatever `r` is.
+
+## Tags
+
+repeated real root, trace form signature, multiplicity, SVI, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

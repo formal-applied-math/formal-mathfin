@@ -15,6 +15,26 @@ Part of the SVI polynomial-sign certificate (#174).
 For `σ = 0`, `b ≥ 0`, `ρ² ≤ 1` and `a > 0` the slice is piecewise linear, and `g(k) ≥ 0` for
 every `k ≠ m` is equivalent to two quadratics in the variance `w`, one per wing, being nonnegative
 on the ray `w ≥ a` (`sigmaZeroCertificate_iff`).
+
+## Main definitions
+
+* `sigmaZeroBranchQuadratic`: the quadratic in the variance `w` whose sign is that of `g` on a
+  wing of slope `s` at zero scale.
+* `sigmaZeroBranchCondition`: the sign conditions under which that quadratic is nonnegative on
+  the ray `w ≥ a`.
+* `sigmaZeroCertificate`: the branch condition on both wings.
+
+## Main results
+
+* `sigmaZeroBranchCondition_iff`: `sigmaZeroBranchCondition p s` iff the branch quadratic is
+  nonnegative for all `w ≥ p.a`.
+* `sigmaZeroBranchCondition_zero`: for `a > 0`, the condition holds for slope `0`.
+* `sigmaZeroCertificate_iff`: for `σ = 0`, `b ≥ 0`, `1 - ρ² ≥ 0` and `a > 0`,
+  `sigmaZeroCertificate p` iff `durrleman p k ≥ 0` for every `k ≠ m`.
+
+## Tags
+
+zero-scale SVI, piecewise linear smile, Durrleman condition, butterfly arbitrage, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

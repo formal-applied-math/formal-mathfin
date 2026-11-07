@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.PDE
 
 /-!
@@ -31,6 +30,33 @@ We derive their deltas and gammas:
 
 The strike derivative of the cash digital, `−e^{-rτ} ϕ(d₂) / (K σ √τ)`, is
 `hasDerivAt_bsCashDigital_K` in `StrikeGreeks.lean`.
+
+## Main definitions
+
+* `bsCashDigital`: the cash-or-nothing call price `e^{−rτ} Φ(d₂)` as a function of `(S, τ)`.
+* `bsAssetDigital`: the asset-or-nothing call price `S Φ(d₁)` as a function of `(S, τ)`.
+
+## Main results
+
+* `hasDerivAt_bsCashDigital_S`, `hasDerivAt_bsAssetDigital_S`: the deltas
+  `e^{−rτ} ϕ(d₂) / (S σ √τ)` and `Φ(d₁) + ϕ(d₁) / (σ √τ)`, for positive `K, σ, S, τ`.
+* `hasDerivAt_deriv_bsCashDigital_S`, `hasDerivAt_deriv_bsAssetDigital_S`: the gammas
+  `−e^{−rτ} ϕ(d₂) d₁ / (S² σ² τ)` and `−ϕ(d₁) d₂ / (S σ² τ)`, as derivatives of the delta.
+* `hasDerivAt_bsCashDigital_sigma`, `hasDerivAt_bsAssetDigital_sigma`: the vegas
+  `−e^{−rτ} ϕ(d₂) d₁ / σ` and `−S ϕ(d₁) d₂ / σ`.
+* `hasDerivAt_bsCashDigital_r`, `hasDerivAt_bsAssetDigital_r`: the rhos
+  `e^{−rτ} (ϕ(d₂) √τ/σ − τ Φ(d₂))` and `S ϕ(d₁) √τ/σ`.
+* `hasDerivAt_bsCashDigital_tau`, `hasDerivAt_bsAssetDigital_tau`: the `τ`-derivatives (thetas
+  in the maturity variable) of the two prices.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 26.1
+
+## Tags
+
+digital option, binary option Greeks, delta and gamma, cash-or-nothing, asset-or-nothing, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

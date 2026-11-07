@@ -15,10 +15,22 @@ Strike one and volatility sqrt(2) make physical time equal normalized time.
 Time is clamped at zero only to define a total real-valued function. The
 classical contract uses nonnegative times. No PDE or boundary is postulated.
 
-## Result
+## Main definitions
 
-Public entry points include `canonicalPrice`, `canonicalPrice_continuous`, `canonicalPrice_initial`,
-`canonicalPrice_bounds`, `canonicalPrice_putEnvelope`.
+* `canonicalPrice`: the `brownianUsualAmericanPut` value at strike `1`, rate `k`, dividend `h`,
+  volatility `√2`, spot `exp x` and horizon `t.toNNReal`; negative `t` is clamped to zero.
+
+## Main results
+
+* `canonicalPrice_continuous`: for `0 ≤ k`, `canonicalPrice k h` is jointly continuous.
+* `canonicalPrice_initial`: for `0 ≤ k`, the price at time `0` is the put payoff.
+* `canonicalPrice_bounds`: for `0 ≤ k`, the price lies between the put payoff and `1`.
+* `canonicalPrice_putEnvelope`: for `0 ≤ k`, the price is a `PutEnvelope`.
+
+## Tags
+
+normalized American put, stopping value, canonical price, continuity, put envelope, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -7,11 +7,24 @@ module
 
 public import MathFin.Foundations.ItoDriftWeightedIsometry
 public import MathFin.Foundations.FiniteMeasureCauchySchwarz
+public import MathFin.Foundations.AdaptedDrift
 
 /-! # The quadratic corrections of the adapted Itô–drift identity (the discrete route, stage 5e)
 
 The two corrections of the quadratic block that tend to `0`: the drift² corrections
 `quadDriftSqSum_tendsto` and the drift–martingale cross corrections `quadCrossSum_tendsto`.
+
+## Main results
+
+* `quadDriftSqSum_tendsto`: for bounded adapted path-continuous `β`, adapted `X` and bounded
+  continuous `g`, the sums `∑ₖ 𝔼[g(X_{tₖ})·(Δ driftPath β)²]` over uniform partitions tend to `0`.
+* `quadCrossSum_tendsto`: the sums `∑ₖ 𝔼[g(X_{tₖ})·Δ(driftPath β)·ΔM]` over uniform partitions
+  tend to `0`.
+
+## Tags
+
+quadratic variation, cross variation, drift correction, discrete Itô formula, Itô process,
+MSC 60H05, MSC 60G44
 -/
 
 @[expose] public section

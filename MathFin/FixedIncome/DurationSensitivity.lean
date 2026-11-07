@@ -5,8 +5,13 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.MacaulayModified
+public import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Inv
+public import Mathlib.Analysis.Calculus.Deriv.Pow
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # Duration as price sensitivity (first-principles derivation)
@@ -38,6 +43,19 @@ exactly the first-principles claim formalized here.
 * `bondPriceDisc_deriv_eq_neg_modified_duration_times_price`: the
   duration-sensitivity identity in its usual form
   `P'(y) / P(y) = -D_mod(y)` (for `P(y) ≠ 0`).
+
+## Main results
+
+* `hasDerivAt_coupon_term`: `d/dy [c / (1+y)^n] = -n · c / (1+y)^(n+1)`.
+* `hasDerivAt_bondPriceDisc`: for `1 + y ≠ 0`, the bond price `P(y) = Σ c_i / (1 + y)^{t_i}` has
+  derivative `-ModNum(y)` at `y`.
+* `bondPriceDisc_deriv_eq_neg_modified_duration_times_price`: for `1 + y ≠ 0`, the derivative `P'`
+  satisfies `P' / P(y) = -(ModNum(y) / P(y))`, i.e. `P'/P = -D_mod`.
+
+## Tags
+
+modified duration, price sensitivity, interest rate risk, bond duration, yield derivative,
+coupon bond, MSC 91G30, JEL G12
 -/
 
 @[expose] public section

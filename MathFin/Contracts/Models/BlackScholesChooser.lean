@@ -26,6 +26,18 @@ date, whose spot there is `bsTerminal` of the standardised Brownian value; `bs_c
 ## Main results
 
 * `BlackScholes.value_chooser` — `chooser K r T t₁` is worth `chooserPrice S₀ K r σ T t₁`.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 15.6
+* [M. Rubinstein, *Options for the undecided*][Rubinstein1991]
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], 4.5
+* [Zhang, *Exotic Options*][ZhangExoticOptions]
+
+## Tags
+
+chooser option, path-dependent option, Black–Scholes model, Brownian path, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

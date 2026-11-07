@@ -6,17 +6,29 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.LinearPriceComparison
-public import MathFin.BlackScholes.AmericanPut.Stopping.ActualSmoothComparison
+public import MathFin.BlackScholes.AmericanPut.Stopping.CanonicalPrice
+public import MathFin.BlackScholes.AmericanPut.Stopping.SmoothPricingComparison
 
 /-! # Constructed smooth evolution for continuous initial price data
 
 This constructs the initial-data part of a local Dirichlet solution. Matching
 the two lateral sides is a separate obligation, not claimed here.
 
-## Result
+## Main results
 
-Public entry points include `linearPriceEvolution_smoothAt`, `linearPriceEvolution_pricingOperator`,
-`exists_smooth_initial_solution`, `exists_continuous_compact_interval_extension`.
+* `linearPriceEvolution_smoothAt`: for continuous compactly supported `f` and `a < t`, the linear
+  price evolution of `f` from `a` is `C^∞` at `(x, t)`.
+* `linearPriceEvolution_pricingOperator`: for `a < t`, it satisfies `pricingOperator k h = 0`
+  at `(x, t)`.
+* `exists_smooth_initial_solution`: there is a continuous `U` equal to `f` at time `a`, `C^∞` on
+  `{a < t}`, with `pricingOperator k h U = 0` there.
+* `exists_continuous_compact_interval_extension`: a continuous `f` agrees on `[L, R]` with a
+  continuous compactly supported function.
+
+## Tags
+
+smooth evolution, initial data, Dirichlet solution, linear pricing evolution, continuous payoff,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

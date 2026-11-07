@@ -15,10 +15,29 @@ spatial differentiability of the actual price at every positive maturity.
 Convex stock slices then give joint continuity of the spatial gradient, without
 differentiability of the free boundary.
 
-## Result
+## Main results
 
-Public entry points include `canonicalPrice_exercise_value`, `canonicalPrice_hasDerivAt_boundary`,
-`canonicalPrice_hasDerivAt_exercise`, `canonicalPrice_differentiableAt_spatial`.
+* `canonicalPrice_exercise_value`: for `0 < k`, `0 ≤ h ≤ k` and `0 < t`, at or below the log
+  boundary the actual price is `1 - exp x`.
+* `canonicalPrice_hasDerivAt_boundary`, `canonicalPrice_hasDerivAt_exercise`: under the same
+  hypotheses, the price has spatial derivative `-exp x` at the log boundary and at every point of
+  the exercise side.
+* `canonicalPrice_differentiableAt_spatial`, `canonicalStockPrice_differentiableAt_spatial`: under
+  the same hypotheses, the price is spatially differentiable at every `x` (every `S > 0`).
+* `canonicalStockPrice_continuousAt`: for `0 ≤ k` and `S > 0`, the stock price is jointly
+  continuous at `(S, t)`.
+* `canonicalPrice_spatial_deriv_eq_stock`: the log derivative is the stock derivative at `exp x`
+  times `exp x`.
+* `canonicalStockPrice_gradient_continuousAt`, `canonicalPrice_gradient_continuousAt`,
+  `zeroDividend_canonicalPrice_gradient_continuousAt`,
+  `liuRange_canonicalPrice_gradient_continuousAt`: for `0 < t` the spatial gradient is jointly
+  continuous in `(x, t)` and `(S, t)`, for `0 < k` with `0 ≤ h ≤ k`, for no dividend, and for
+  `h + 1 ≤ k`.
+
+## Tags
+
+spatial differentiability, smooth fit, convex slices, exercise boundary, American put, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

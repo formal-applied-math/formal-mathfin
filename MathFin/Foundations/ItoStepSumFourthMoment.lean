@@ -8,6 +8,7 @@ module
 public import MathFin.Foundations.ItoIntegralL2
 public import MathFin.Foundations.QuadraticVariationL2
 public import MathFin.Foundations.GaussianMoments
+public import Mathlib.Tactic.Polynomial.Basic
 
 /-! # The fourth moment of a bounded adapted Brownian sum
 
@@ -24,6 +25,17 @@ moments of the independent increment (`integral_natMeasurable_mul_increment_pow3
 `𝓕_{s N}`-measurable weight `Z²φ_N²`, with `E[Z²]` the discrete Itô isometry; `E[y⁴]` is the
 fourth-moment kernel `integral_natMeasurable_mul_increment_pow4` (`3(Δs)²`). The integrability the
 odd terms need is Young's inequality `|a|³|b| ≤ 3a⁴/4 + b⁴/4` against fourth powers.
+
+## Main results
+
+* `stepSum_pow4_le`: for a bounded integrand `φ j` (`|φ| ≤ D`), `𝓕_{s j}`-measurable along a
+  monotone grid `s`, the fourth moment of `∑_{k<N} φ_k (B_{s_{k+1}} − B_{s_k})` is at most
+  `3·(D²·total gap)²`.
+
+## Tags
+
+fourth moment, Itô sum, Gaussian moments, Brownian increments, moment estimate, Young inequality,
+MSC 60H05, MSC 60E15, MSC 60J65
 -/
 
 @[expose] public section
@@ -37,7 +49,7 @@ open MathFin ItoIntegralL2 ItoIsometryAdapted QuadraticVariationL2
 
 /-- Young's pointwise inequality `|a|³|b| ≤ 3a⁴/4 + b⁴/4`: from
 `(a − b)²(2a² + (a+b)²) = 3a⁴ + b⁴ − 4a³b ≥ 0`, evaluated at `(|a|, |b|)`. -/
-private theorem young34 (a b : ℝ) : |a| ^ 3 * |b| ≤ 3 * a ^ 4 / 4 + b ^ 4 / 4 := by
+theorem young34 (a b : ℝ) : |a| ^ 3 * |b| ≤ 3 * a ^ 4 / 4 + b ^ 4 / 4 := by
   have h1 : (0:ℝ) ≤ (abs a - abs b) ^ 2 := sq_nonneg _
   have h2 : (0:ℝ) ≤ 2 * abs a ^ 2 + (abs a + abs b) ^ 2 := by positivity
   have h3 : (abs a - abs b) ^ 2 * (2 * abs a ^ 2 + (abs a + abs b) ^ 2)
@@ -50,10 +62,6 @@ private theorem young34 (a b : ℝ) : |a| ^ 3 * |b| ≤ 3 * a ^ 4 / 4 + b ^ 4 / 
     linarith
   linarith
 
-/-- Young's pointwise inequality, the symmetric instance `|a|·|b|³ ≤ a⁴/4 + 3b⁴/4`. -/
-private theorem young134 (a b : ℝ) : |a| * |b| ^ 3 ≤ a ^ 4 / 4 + 3 * b ^ 4 / 4 := by
-  linarith [young34 b a, mul_comm (abs b ^ 3) (abs a)]
-
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
   {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
 
@@ -62,7 +70,7 @@ include hB hBmeas
 omit hBmeas in
 /-- Third moment of a Brownian increment: `E[(B_{t₁} − B_{t₀})³] = 0` for `t₀ ≤ t₁`
 (the law-transfer of the vanishing odd Gaussian moment). -/
-private theorem integral_increment_pow3
+theorem integral_increment_pow3
     {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) :
     ∫ ω, (B t₁ ω - B t₀ ω) ^ 3 ∂μ = 0 := by
   have hv : nndist (t₁ : ℝ) (t₀ : ℝ) = t₁ - t₀ := by
@@ -303,9 +311,8 @@ theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ : ℕ �
                 φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 4
               + 3 / 4 * (φ N ω * (B (s (N + 1)) ω - B (s N) ω)) ^ 4
           rw [Real.norm_eq_abs, abs_mul, abs_pow]
-          have hy := young134 (∑ k ∈ Finset.range N,
-            φ k ω * (B (s (k + 1)) ω - B (s k) ω))
-            (φ N ω * (B (s (N + 1)) ω - B (s N) ω))
+          have hy := young34 (φ N ω * (B (s (N + 1)) ω - B (s N) ω))
+            (∑ k ∈ Finset.range N, φ k ω * (B (s (k + 1)) ω - B (s k) ω))
           linarith)
     have hintZY2 : Integrable (fun ω ↦ (∑ k ∈ Finset.range N,
           φ k ω * (B (s (k + 1)) ω - B (s k) ω)) ^ 2

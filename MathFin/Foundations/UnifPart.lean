@@ -5,7 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.RCLike.Basic
+public import Mathlib.Analysis.SpecificLimits.Basic
 
 /-!
 # The uniform partition of `[0, T]`
@@ -18,15 +22,24 @@ facts about it are proved here once: monotone, `≤ T`, endpoints, cell length, 
 
 `unifPartIcc s t` is the same partition of `[s, t]`, shifted to start at `s`.
 
-## Main definitions and results
+## Main definitions
 
-* `unifPart`, `unifPartIcc` — the partitions of `[0, T]` and of `[s, t]`.
+* `unifPart`: the uniform partition of `[0, T]` into `n` cells, `unifPart T n k = (k/n)·T`.
+* `unifPartIcc`: the uniform partition of `[s, t]` into `n` cells, `unifPart (t − s) n k` shifted
+  to start at `s`.
+
+## Main results
+
 * `unifPart_mono`, `unifPart_le_T`, `unifPart_zero`, `unifPart_self` — monotone, bounded by
   `T`, and the endpoints `0` and `T`.
 * `unifPart_succ_sub`, `unifPart_mesh_sum` — every cell has length `T/n`, and the lengths
   telescope to `T`.
 * `tendsto_inv_sqrt_nat_add`, `one_div_sqrt_le_two` — the `1/√n` mesh rate of the `O(√mesh)`
   bounds: a null sequence, and the shift comparison `1/√n ≤ 2/√(n+1)`.
+
+## Tags
+
+uniform partition, equipartition, mesh size, Riemann sum grid, time discretisation, MSC 60H05
 -/
 
 @[expose] public section

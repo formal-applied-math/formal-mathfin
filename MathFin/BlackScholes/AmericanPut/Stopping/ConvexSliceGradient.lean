@@ -5,6 +5,7 @@ Authors: Robert Martin
 -/
 module
 
+public import MathFin.Init
 public import Mathlib.Analysis.Convex.Deriv
 
 /-! # Joint continuity of the gradient of differentiable convex slices
@@ -13,9 +14,16 @@ Joint continuity of function values and differentiability of every convex
 spatial slice imply joint continuity of the spatial derivatives. Fixed-endpoint
 secants bound the derivative near each point.
 
-## Result
+## Main results
 
-Public entry points include `continuousAt_deriv_convex_slices`.
+* `continuousAt_deriv_convex_slices`: if every positive-time slice of `f` is convex on `[0, ∞)`
+  and differentiable in space on `S > 0`, and `f` is jointly continuous there, then the spatial
+  derivative `(S, t) ↦ deriv (f · t) S` is jointly continuous at each `(S, t)` with `S, t > 0`.
+
+## Tags
+
+convex slices, gradient continuity, joint continuity, secant bounds, spatial derivative, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

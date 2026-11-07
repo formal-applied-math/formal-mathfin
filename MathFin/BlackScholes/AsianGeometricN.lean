@@ -5,10 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
-public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.WienerIntegralIndicator
 public import MathFin.BlackScholes.Call
+public import MathFin.Foundations.WienerIntegralGaussian
 
 /-!
 # The geometric-average Asian option: `n` averaging dates, closed-form price
@@ -33,9 +32,28 @@ under the standardized driver `Z = D/√Vₙ ~ N(0,1)`, with effective spot
 (so `σ_G√T = σ√Vₙ`). Feeding that into `bs_call_formula` gives the geometric-Asian
 call price in closed form — the same "reduce to one effective BS driver" move as Margrabe.
 
+## Main definitions
+
+* `geomAsianTbar`: the average of the sampling dates, `t̄ = (1/n) ∑ τᵢ`.
+* `geomAsianVar`: the geometric-Asian log-driver variance `Vₙ = (1/n²) ∑ᵢ∑ⱼ min(τᵢ,τⱼ)`.
+* `geomAsianEffVol`: the effective volatility `σ_G = σ·√(Vₙ/T)` reducing the geometric-Asian call to
+  a vanilla call.
+* `geomAsianEffSpot`: the effective spot `Ŝ₀ = S₀·exp((r-σ²/2)t̄ + σ²Vₙ/2 - rT)` reducing the
+  geometric-Asian call to a vanilla call.
+
 ## Main results
 
 * `geomAsianN_driver_hasLaw` — `(1/n) ∑ᵢ B_{τᵢ} ~ N(0, (1/n²) ∑ᵢ∑ⱼ min(τᵢ,τⱼ))`.
+
+## References
+
+* [A. G. Z. Kemna and A. C. F. Vorst, *A pricing method for options based on average asset
+  values*][KemnaVorst1990]
+
+## Tags
+
+geometric Asian option, average price option, closed-form price, effective volatility,
+Wiener integral, lognormal, MSC 91G20, MSC 60J65, JEL G13
 -/
 
 @[expose] public section
@@ -72,7 +90,8 @@ theorem geomAsianN_driver_hasLaw (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
   have hmem : ∀ i, MemLp (B (τ i)) 2 μ := fun i ↦
     (hB.isGaussianProcess.hasGaussianLaw_eval (τ i)).memLp_two
   have hincr : ∀ i, (wienerIncrementLp B hB (idx i) : Ω → ℝ)
-      =ᵐ[μ] fun ω ↦ B (τ i) ω - B 0 ω := fun i ↦ (memLp_increment_two hB (idx i)).coeFn_toLp
+      =ᵐ[μ] fun ω ↦ B (τ i) ω - B 0 ω := fun i ↦
+        (memLp_increment hB (idx i).1.1 (idx i).1.2).coeFn_toLp
   -- The Wiener integral's coeFn is `(1/n) ∑ᵢ B_{τᵢ}` a.e. (zero start).
   have hD : (fun ω ↦ wienerIntegralLp B hB T f ω) =ᵐ[μ] fun ω ↦ (∑ i, B (τ i) ω) / n := by
     rw [hf_eq]
@@ -134,7 +153,7 @@ noncomputable def geomAsianEffSpot (S₀ r σ Tmat : ℝ) {n : ℕ} (τ : Fin n 
 /-- **The geometric average of GBM prices is one lognormal factor.** For a positive spot
 `S₀` and any log-increments `a : Fin n → ℝ`,
 `∏ᵢ (S₀·exp(aᵢ))^{1/n} = S₀·exp((∑ᵢ aᵢ)/n)`. -/
-private lemma geomAvg_prod_eq {n : ℕ} (hn : 0 < n) (S₀ : ℝ) (hS₀ : 0 < S₀) (a : Fin n → ℝ) :
+lemma prod_mul_exp_rpow_inv_eq {n : ℕ} (hn : 0 < n) (S₀ : ℝ) (hS₀ : 0 < S₀) (a : Fin n → ℝ) :
     (∏ i, (S₀ * Real.exp (a i)) ^ ((n : ℝ)⁻¹)) = S₀ * Real.exp ((∑ i, a i) / n) := by
   have hn0 : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
   have hexp_rpow : ∀ x y : ℝ, (Real.exp x) ^ y = Real.exp (x * y) := fun x y ↦ by
@@ -219,7 +238,7 @@ theorem geomAsianN_call_price (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
   have hterm : ∀ ω, bsTerminal Ŝ r σG Tmat ((∑ i, B (τ i) ω) / n / Real.sqrt V)
       = ∏ i, (S₀ * Real.exp ((r - σ ^ 2 / 2) * (τ i : ℝ) + σ * B (τ i) ω)) ^ ((n : ℝ)⁻¹) := by
     intro ω
-    rw [geomAvg_prod_eq hn S₀ hS₀, hŜ, hσG, bsTerminal_geomAsian_eq hTmat hV]
+    rw [prod_mul_exp_rpow_inv_eq hn S₀ hS₀, hŜ, hσG, bsTerminal_geomAsian_eq hTmat hV]
     congr 2
     rw [htb, Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum]
     ring

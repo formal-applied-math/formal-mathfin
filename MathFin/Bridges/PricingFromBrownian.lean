@@ -5,10 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Bridges.BSCallHypFromBrownian
 public import MathFin.BlackScholes.Put
-public import MathFin.BlackScholes.Forward
 public import MathFin.BlackScholes.Digital
 public import MathFin.BlackScholes.PowerCall
 public import MathFin.BlackScholes.StockNumeraire
@@ -38,7 +36,7 @@ The pricing theorems take the marginal `Z ~ N(0, 1)` as a hypothesis. The scalin
 so each formula listed above holds for the terminal value of an actual Brownian model. Only
 the time-`T` marginal is used: nothing here concerns the price process before `T`.
 
-## Results
+## Main results
 
 * `bs_call_formula_via_brownian`: BS call price formula from BM.
 * `bs_put_formula_via_brownian`: BS put price formula from BM.
@@ -47,6 +45,11 @@ the time-`T` marginal is used: nothing here concerns the price process before `T
 * `bs_dividends_put_formula_via_brownian`: the Black–Scholes–Merton put with a continuous
   dividend yield `q`, as the closed form `bsPDiv`, from BM. Consumed by
   `Bridges/AmericanPutEuropeanBound`, which bounds the American put value below by it.
+
+## Tags
+
+Black–Scholes formula, Bachelier model, put–call parity, dividend yield, Brownian motion,
+digital option, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -224,19 +227,5 @@ theorem kmvPD_eq_one_sub_survival_probability_via_brownian
         (W T.toNNReal ω / Real.sqrt T) > F}).toReal :=
   kmvPD_eq_one_sub_survival_probability hV hF
     (BSCallHyp.of_isPreBrownian Q W hW hV hF hσ hT)
-
-/-- **Merton equity = call on firm assets, from a pre-Brownian motion**. -/
-theorem merton_equity_eq_bs_call_via_brownian
-    {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    (Q : Measure Ω) [IsProbabilityMeasure Q]
-    (W : ℝ≥0 → Ω → ℝ) (hW : IsPreBrownianReal W Q)
-    {V_0 F r σ_V T : ℝ}
-    (hV : 0 < V_0) (hF : 0 < F) (hσ : 0 < σ_V) (hT : 0 < T) :
-    ∫ ω, Real.exp (-r * T) *
-        max (bsTerminal V_0 r σ_V T
-          (W T.toNNReal ω / Real.sqrt T) - F) 0 ∂Q =
-      V_0 * Phi (bsd1 V_0 F r σ_V T) -
-        F * Real.exp (-r * T) * Phi (bsd2 V_0 F r σ_V T) :=
-  merton_equity_eq_bs_call (BSCallHyp.of_isPreBrownian Q W hW hV hF hσ hT)
 
 end MathFin

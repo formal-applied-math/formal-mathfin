@@ -70,11 +70,29 @@ lean_lib Challenge where
 lean_lib Solution where
   roots := #[`Solution]
 
+-- Lean tooling lives in `MathFinTools/`, outside the library: executables that load
+-- the built `MathFin` environment and report on it. Nothing in `MathFin/` imports them,
+-- and they are not default targets.
+--
 -- Blueprint JSON emitter with *inferred* dependency edges (LeanArchitect's
--- own `--json` path omits them; see MathFin/Blueprint/Export.lean). Used by
+-- own `--json` path omits them; see MathFinTools/Blueprint.lean). Used by
 -- `tools/blueprint_render.py` to regenerate the docs/blueprint.md spine.
 lean_exe blueprint_export where
-  root := `MathFin.Blueprint.Export
+  root := `MathFinTools.Blueprint
+  supportInterpreter := true
+
+-- The declaration index: one JSON record per MathFin declaration (statement,
+-- docstring, proof-term uses, attributes), read by `tools/verify/decl_index.py`
+-- and everything built on it (`find`, `decl_diff`, the ratchet's index metrics).
+-- See MathFinTools/Index.lean and docs/specs/2026-11-05-library-practices-design.md.
+lean_exe mathfin_index where
+  root := `MathFinTools.Index
+  supportInterpreter := true
+
+-- `lake shake` without its indirect-use over-approximation (see MathFinTools/Shake.lean); the
+-- import-shake workflow runs it to narrow the library's imports.
+lean_exe mathfin_shake where
+  root := `MathFinTools.Shake
   supportInterpreter := true
 
 -- hanwenzhu/LeanArchitect: blueprint extraction directly from Lean source.

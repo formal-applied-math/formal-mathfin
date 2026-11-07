@@ -5,14 +5,14 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoIntegralCLM
 public import BrownianMotion.StochasticIntegral.Predictable
+public import MathFin.Foundations.ItoIntegralHorizonDense
 
 /-!
 # Realizing a bounded adapted continuous process as an Itô-integrand class (the σ-realization)
 
-The Itô integral `∫₀ᵀ σ dB` (`ItoIntegralCLM.itoIntegralCLM_T`) takes its integrand from the
-**predictable** `L²` space `E := Lp ℝ 2 (trimMeasure_T T)` — an `Lp` class over the trim product
+The Itô integral `∫₀ᵀ σ dB` (`ItoIntegralCLM.itoIntegralCLM`) takes its integrand from the
+**predictable** `L²` space `E := Lp ℝ 2 (trimMeasure T)` — an `Lp` class over the trim product
 measure on the predictable σ-algebra, never a raw process `σ : ℝ≥0 → Ω → ℝ`. To integrate a genuine
 bounded adapted process (e.g. a continuous market price of risk `θ` for the general adapted Girsanov
 theorem), one must first **realize** it inside `E`. This is the σ-realization: the last piece of
@@ -27,12 +27,34 @@ elementary drift:
   Degenne's `StronglyAdapted.isStronglyPredictable_of_leftContinuous` (continuity gives the
   left-continuity it wants);
 * `MathFin.memLp_uncurry_of_bdd_adapted_cont` — predictable + bounded on the *finite* measure
-  `trimMeasure_T T` ⟹ `MemLp … 2`;
+  `trimMeasure T` ⟹ `MemLp … 2`;
 * `MathFin.processToLp` — the realization `σ ↦ (its class in E)`, with `processToLp_coeFn` the a.e.
   identification back to `Function.uncurry σ`.
 
 This unblocks the continuous-adapted Girsanov (brick α4): `∫θdB` and its Doléans density are now
 formable for a bounded adapted continuous `θ`.
+
+## Main definitions
+
+* `processToLp`: the realization of a bounded adapted process with continuous paths as an
+  element of the Itô-integrand space `Lp ℝ 2 (trimMeasure T)`.
+* `processToLpPredictable`: the same realization for a bounded strongly predictable process.
+
+## Main results
+
+* `isStronglyPredictable_of_bdd_adapted_cont`: a bounded adapted process with continuous paths
+  is strongly predictable.
+* `memLp_uncurry_of_bdd_adapted_cont`, `memLp_uncurry_of_bdd_predictable`: such a process, and
+  any bounded predictable one, is in `L²` over `trimMeasure T`.
+* `processToLp_coeFn`, `processToLpPredictable_coeFn`: the realization agrees with the process
+  `trimMeasure T`-almost everywhere.
+* `processToLpPredictable_ae_slice`: the predictable realization agrees with the process on almost
+  every `ω`-slice.
+
+## Tags
+
+Itô integrand, predictable process, stochastic integral, market price of risk, L2 space, MSC 60H05,
+MSC 60G07
 -/
 
 @[expose] public section
@@ -60,39 +82,39 @@ theorem isStronglyPredictable_of_bdd_adapted_cont (hBmeas : ∀ t, Measurable (B
   apply MeasureTheory.StronglyAdapted.isStronglyPredictable_of_leftContinuous hadap
   exact fun ω a ↦ (hcont ω).continuousWithinAt
 
-/-- **A bounded adapted continuous process is `L²` over `trimMeasure_T T`.** It is predictable
-(`isStronglyPredictable_of_bdd_adapted_cont`) and bounded, and `trimMeasure_T T` is a finite
+/-- **A bounded adapted continuous process is `L²` over `trimMeasure T`.** It is predictable
+(`isStronglyPredictable_of_bdd_adapted_cont`) and bounded, and `trimMeasure T` is a finite
 measure, so `MemLp.of_bound` applies. -/
 theorem memLp_uncurry_of_bdd_adapted_cont (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     {σ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (σ t))
     (hcont : ∀ ω, Continuous (fun t : ℝ≥0 ↦ σ t ω)) {C : ℝ} (hbdd : ∀ t ω, |σ t ω| ≤ C) :
-    MemLp (Function.uncurry σ) 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+    MemLp (Function.uncurry σ) 2 (trimMeasure (μ := μ) T hBmeas) :=
   MemLp.of_bound
     (isStronglyPredictable_of_bdd_adapted_cont hBmeas hadap hcont).aestronglyMeasurable
     C (ae_of_all _ fun z ↦ by rw [Real.norm_eq_abs]; exact hbdd z.1 z.2)
 
 /-- **The σ-realization.** A bounded adapted continuous process realized as an element of the
-Itô-integrand space `E = Lp ℝ 2 (trimMeasure_T T)` — the domain of
-`ItoIntegralCLM.itoIntegralCLM_T`. This is the missing bridge from a raw bounded adapted continuous
+Itô-integrand space `E = Lp ℝ 2 (trimMeasure T)` — the domain of
+`ItoIntegralCLM.itoIntegralCLM`. This is the missing bridge from a raw bounded adapted continuous
 process `σ : ℝ≥0 → Ω → ℝ` to `∫₀ᵀ σ dB`; with it, the general continuous-adapted Girsanov density is
 formable. -/
 noncomputable def processToLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     {σ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (σ t))
     (hcont : ∀ ω, Continuous (fun t : ℝ≥0 ↦ σ t ω)) {C : ℝ} (hbdd : ∀ t ω, |σ t ω| ≤ C) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+    Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) :=
   (memLp_uncurry_of_bdd_adapted_cont T hBmeas hadap hcont hbdd).toLp (Function.uncurry σ)
 
 /-- **The realization agrees with `σ` a.e.**
-`processToLp T σ =ᵐ[trimMeasure_T T] Function.uncurry σ` — the identification that lets Itô-integral
+`processToLp T σ =ᵐ[trimMeasure T] Function.uncurry σ` — the identification that lets Itô-integral
 computations read the class back as the process. -/
 theorem processToLp_coeFn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     {σ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (σ t))
     (hcont : ∀ ω, Continuous (fun t : ℝ≥0 ↦ σ t ω)) {C : ℝ} (hbdd : ∀ t ω, |σ t ω| ≤ C) :
     processToLp (μ := μ) T hBmeas hadap hcont hbdd
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] Function.uncurry σ :=
+      =ᵐ[trimMeasure (μ := μ) T hBmeas] Function.uncurry σ :=
   (memLp_uncurry_of_bdd_adapted_cont T hBmeas hadap hcont hbdd).coeFn_toLp
 
 /-! ### The σ-realization for a bounded **predictable** integrand (Girsanov Rung 1)
@@ -103,23 +125,23 @@ bounded process that is already strongly predictable needs no continuity to be r
 realization above is the special case `IsStronglyPredictable` =
 `isStronglyPredictable_of_bdd_adapted_cont`. -/
 
-/-- **A bounded predictable process is `L²` over `trimMeasure_T T`.** Predictable + bounded on the
-finite measure `trimMeasure_T T` ⟹ `MemLp.of_bound`; the continuity of
+/-- **A bounded predictable process is `L²` over `trimMeasure T`.** Predictable + bounded on the
+finite measure `trimMeasure T` ⟹ `MemLp.of_bound`; the continuity of
 `memLp_uncurry_of_bdd_adapted_cont` is dropped. -/
 theorem memLp_uncurry_of_bdd_predictable (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     {σ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) σ)
     {C : ℝ} (hbdd : ∀ t ω, |σ t ω| ≤ C) :
-    MemLp (Function.uncurry σ) 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+    MemLp (Function.uncurry σ) 2 (trimMeasure (μ := μ) T hBmeas) :=
   MemLp.of_bound hpred.aestronglyMeasurable C
     (ae_of_all _ fun z ↦ by rw [Real.norm_eq_abs]; exact hbdd z.1 z.2)
 
 /-- **The σ-realization for a bounded predictable process.** Realizes a bounded strongly-predictable
-`σ : ℝ≥0 → Ω → ℝ` as an element of the Itô-integrand space `E = Lp ℝ 2 (trimMeasure_T T)` — the
-domain of `ItoIntegralCLM.itoIntegralCLM_T` — with no continuity assumption. -/
+`σ : ℝ≥0 → Ω → ℝ` as an element of the Itô-integrand space `E = Lp ℝ 2 (trimMeasure T)` — the
+domain of `ItoIntegralCLM.itoIntegralCLM` — with no continuity assumption. -/
 noncomputable def processToLpPredictable (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     {σ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) σ)
     {C : ℝ} (hbdd : ∀ t ω, |σ t ω| ≤ C) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+    Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) :=
   (memLp_uncurry_of_bdd_predictable T hBmeas hpred hbdd).toLp (Function.uncurry σ)
 
 /-- **The predictable realization agrees with `σ` a.e.** -/
@@ -127,20 +149,21 @@ theorem processToLpPredictable_coeFn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (
     {σ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) σ)
     {C : ℝ} (hbdd : ∀ t ω, |σ t ω| ≤ C) :
     processToLpPredictable (μ := μ) T hBmeas hpred hbdd
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] Function.uncurry σ :=
+      =ᵐ[trimMeasure (μ := μ) T hBmeas] Function.uncurry σ :=
   (memLp_uncurry_of_bdd_predictable T hBmeas hpred hbdd).coeFn_toLp
 
-/-- **The predictable realization agrees with `σ` on almost every `ω`-slice.** The a.e. identification
-`processToLpPredictable_coeFn` over `trimMeasure_T`, read through the product measure
-`timeMeasure_T T ⊗ μ` (`ae_eq_of_ae_eq_trim`) as: for `μ`-a.e. `ω`, the path `s ↦ σ s ω` and the
-representative `s ↦ ⇑(processToLpPredictable σ) (s, ω)` agree for `timeMeasure_T T`-a.e. `s`. -/
+/-- **The predictable realization agrees with `σ` on almost every `ω`-slice.** The a.e.
+identification `processToLpPredictable_coeFn` over `trimMeasure`, read through the product measure
+`timeMeasureHorizon T ⊗ μ` (`ae_eq_of_ae_eq_trim`) as: for `μ`-a.e. `ω`, the path `s ↦ σ s ω` and
+the representative `s ↦ ⇑(processToLpPredictable σ) (s, ω)` agree for `timeMeasureHorizon T`-a.e.
+`s`. -/
 theorem processToLpPredictable_ae_slice (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     {σ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) σ)
     {C : ℝ} (hbdd : ∀ t ω, |σ t ω| ≤ C) :
-    ∀ᵐ ω ∂μ, ∀ᵐ s ∂(timeMeasure_T T),
+    ∀ᵐ ω ∂μ, ∀ᵐ s ∂(timeMeasureHorizon T),
       processToLpPredictable (μ := μ) T hBmeas hpred hbdd (s, ω) = σ s ω :=
   Measure.ae_ae_of_ae_prod
-    ((Measure.measurePreserving_swap (μ := μ) (ν := timeMeasure_T T)).quasiMeasurePreserving.ae
+    ((Measure.measurePreserving_swap (μ := μ) (ν := timeMeasureHorizon T)).quasiMeasurePreserving.ae
       (ae_eq_of_ae_eq_trim (processToLpPredictable_coeFn (μ := μ) T hBmeas hpred hbdd)))
 
 end MathFin

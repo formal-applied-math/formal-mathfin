@@ -5,11 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.JumpDiffusionProcess
 public import MathFin.BlackScholes.JumpImpliedVol
 public import MathFin.Foundations.IndepFreezing
-public import MathFin.Foundations.NoArbitrageDerivations
 
 /-!
 # Option prices at intermediate dates in a jump-diffusion
@@ -25,7 +23,8 @@ function, the discounted expected payoff over a time `τ` started from a spot
 `τ = T − t`. The put payoff is bounded; the call payoff is integrable because `e^{X_T}` is.
 
 The price functions satisfy put–call parity (`jumpDiffusionCallPrice_eq`): the payoff identity
-`(x − K)⁺ − (K − x)⁺ = x − K` (`max_sub_max_neg`) integrated against the log-return law.
+`(x − K)⁺ − (K − x)⁺ = x − K` (`max_zero_sub_max_neg_zero_eq_self`) integrated against the
+log-return law.
 
 At the compensated drift `b = r − σ²/2 − Λ(𝔼[e^J] − 1)` the call price function is Merton's
 formula for the jump law: the log-return law over `τ` is the law of the canonical model with
@@ -35,6 +34,14 @@ the call at every date before maturity, at the current spot and the remaining ma
 same canonical model the call has a Black–Scholes implied volatility above `σ` once jumps occur
 and move the price (`JumpDiffusionHyp.impliedVol_gt`), so the implied volatility of the
 conditional call value is above `σ` at every date before maturity, almost surely.
+
+## Main definitions
+
+* `jumpDiffusionPutPrice`: the discounted expected put payoff `e^{−rτ}(K − Se^Y)⁺` over a time `τ`,
+  with `Y` a jump-diffusion log-return over `τ` of drift `b`, volatility `σ`, rate `Λ` and jump
+  law `ν`.
+* `jumpDiffusionCallPrice`: the discounted expected call payoff `e^{−rτ}(Se^Y − K)⁺` for the same
+  log-return.
 
 ## Main results
 
@@ -57,6 +64,16 @@ conditional call value is above `σ` at every date before maturity, almost surel
 * `JumpDiffusionProcess.condExp_call_impliedVol_gt`: under the same hypotheses as
   `jumpDiffusionCallPrice_impliedVol_gt`, the conditional call value has, almost surely, a unique
   implied volatility at `S_t` and `T − t`, above `σ`.
+
+## References
+
+* [Cont and Tankov, *Financial Modelling with Jump Processes*][ContTankov2004]
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976]
+
+## Tags
+
+conditional expectation, Markov property, freezing lemma, option price at intermediate date,
+jump-diffusion, MSC 91G20, MSC 60G51, JEL G13
 -/
 
 @[expose] public section
@@ -85,7 +102,7 @@ noncomputable def jumpDiffusionCallPrice (S K r b σ : ℝ) (Λ : ℝ≥0) (ν :
 `C(S, τ) = P(S, τ) + S·e^{(b + σ²/2 + Λ(𝔼[e^J] − 1) − r)τ} − Ke^{−rτ}`. The forward
 `e^{−rτ}Se^Y` has mean `S·e^{(b + σ²/2 + Λ(𝔼[e^J] − 1) − r)τ}`
 (`integral_exp_jumpDiffusionIncrementLaw`), which is `S` at the compensated drift; pointwise, the
-call payoff is the put payoff plus the forward (`max_sub_max_neg`). -/
+call payoff is the put payoff plus the forward (`max_zero_sub_max_neg_zero_eq_self`). -/
 theorem jumpDiffusionCallPrice_eq (S K r b σ : ℝ) (Λ : ℝ≥0) {ν : Measure ℝ}
     [IsProbabilityMeasure ν] (hν : Integrable rexp ν) (τ : ℝ≥0) :
     jumpDiffusionCallPrice S K r b σ Λ ν τ
@@ -112,7 +129,7 @@ theorem jumpDiffusionCallPrice_eq (S K r b σ : ℝ) (Λ : ℝ≥0) {ν : Measur
   have hpar (y : ℝ) : rexp (-r * τ) * max (S * rexp y - K) 0
       = rexp (-r * τ) * max (K - S * rexp y) 0
         + (rexp (-r * τ) * (S * rexp y) - rexp (-r * τ) * K) := by
-    have hx := max_sub_max_neg (S * rexp y - K)
+    have hx := max_zero_sub_max_neg_zero_eq_self (S * rexp y - K)
     rw [neg_sub] at hx
     linear_combination rexp (-r * τ) * hx
   rw [jumpDiffusionCallPrice, jumpDiffusionPutPrice, integral_congr_ae (ae_of_all _ hpar),

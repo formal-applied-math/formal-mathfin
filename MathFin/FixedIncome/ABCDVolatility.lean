@@ -5,7 +5,9 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 /-!
 # ABCD instantaneous volatility — closed-form integrated variance
@@ -30,10 +32,13 @@ FTC route as the Vasicek kernel variance integral
 (`integral_vasicekIntegratedKernel_sq_eq_sub`, `FixedIncome/VasicekBondPrice.lean`).
 Every result below assumes `c ≠ 0` (the antiderivative divides by `c`).
 
+## Main definitions
+
+* `abcdVol`: the ABCD instantaneous volatility `f(τ) = (a + b·τ) · e^{-c·τ} + d`.
+* `abcdIntegratedVarAntideriv`: the closed-form antiderivative of `abcdVol a b c d τ ^ 2`.
+
 ## Main results
 
-* `abcdVol` — the ABCD instantaneous volatility `f(τ) = (a+bτ)e^{-cτ} + d`.
-* `abcdIntegratedVarAntideriv` — the closed-form antiderivative of `f²`.
 * `hasDerivAt_abcdIntegratedVarAntideriv` — the core calculus fact: its
   derivative is `f(τ)²`, for `c ≠ 0`.
 * `abcdVol_sq_integral` — the definite integral
@@ -42,8 +47,13 @@ Every result below assumes `c ≠ 0` (the antiderivative divides by `c`).
 
 ## References
 
-* R. Rebonato, *Modern Pricing of Interest-Rate Derivatives: The LIBOR Market Model and
-  Beyond*, Princeton University Press, 2002.
+* [R. Rebonato, *Modern Pricing of Interest-Rate Derivatives: The LIBOR Market Model and
+  Beyond*][Rebonato2002].
+
+## Tags
+
+ABCD volatility, Rebonato, LIBOR market model, integrated variance, caplet volatility,
+forward rate volatility, MSC 91G30, JEL E43
 -/
 
 @[expose] public section

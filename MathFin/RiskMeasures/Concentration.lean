@@ -5,7 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Algebra.Order.Chebyshev
 
 /-!
 # Concentration risk: Herfindahl–Hirschman Index (HHI)
@@ -23,12 +25,24 @@ Properties:
 The "effective number of assets" is `n_eff := 1/HHI ∈ [1, n]`, ranging from
 full concentration (`n_eff = 1`) to full diversification (`n_eff = n`).
 
-Results:
+## Main definitions
 
-* `herfindahl`: `Σ w_i²`.
+* `herfindahl`: the Herfindahl–Hirschman index `∑ᵢ∈s wᵢ²` of a weight vector.
+
+## Main results
+
 * `herfindahl_nonneg`: HHI ≥ 0.
-* `herfindahl_le_one_of_sum_le_one_of_nonneg`: HHI ≤ 1 under unit budget.
-* `herfindahl_card_inv_le_of_sum_one`: HHI ≥ 1/n via Cauchy-Schwarz.
+* `herfindahl_le_one_of_sum_le_one_of_nonneg`: HHI ≤ 1 for weights in `[0, 1]` with sum at most 1.
+* `herfindahl_card_inv_le_of_sum_one`: HHI ≥ 1/n for weights summing to 1, via Cauchy-Schwarz.
+
+## References
+
+* [Hirschman (1945)][Hirschman1945]
+
+## Tags
+
+Herfindahl-Hirschman index, concentration risk, effective number of assets, diversification,
+portfolio concentration, MSC 91G70, JEL G11, JEL G32
 -/
 
 @[expose] public section

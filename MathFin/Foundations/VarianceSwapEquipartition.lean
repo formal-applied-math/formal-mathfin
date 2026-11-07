@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.VarianceSwapFromQV
 
 /-!
@@ -27,12 +26,17 @@ the QV characterisation of the variance-swap fair strike. The limit
 theorem proper requires `Filter.Tendsto` analysis and is left as a
 follow-up; the finite-`n` closed form here makes the limit obvious.
 
-## Results
+## Main results
 
 * `integrable_bsLogPrice_sq_increment`: integrability of each per-
   subinterval squared increment (needed to swap sum and integral).
 * `expected_bsLogPrice_equipartition_sum` (main theorem): closed-form
   finite-`n` equipartition-sum identity.
+
+## Tags
+
+variance swap, realized variance, quadratic variation, log-price increments, equipartition sum,
+fair strike, MSC 91G20, MSC 60J65, JEL G13
 -/
 
 @[expose] public section

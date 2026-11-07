@@ -5,7 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Analysis.Normed.Operator.Extend
 
 /-!
 # `extendOfNorm` of a pointwise isometry is a global isometry
@@ -22,6 +23,17 @@ integral. It lives in its own `Mathlib`-only leaf so both the Brownian (`WienerI
 The `≤` half is Mathlib's `LinearMap.norm_extendOfNorm_apply_le` (with `C = 1`); the reverse half is
 `DenseRange.induction_on`, propagating the pointwise isometry off the dense range to a closed
 equality set.
+
+## Main results
+
+* `norm_extendOfNorm_eq_of_isometry`: if `e` has dense range and `f` is a pointwise isometry along
+  `e` (`‖f x‖ = ‖e x‖`), then its norm-continuous extension satisfies `‖f.extendOfNorm e y‖ = ‖y‖`
+  for all `y`.
+
+## Tags
+
+isometry extension, Itô integral, Wiener integral, density argument, L2 isometry, MSC 60H05,
+MSC 60G51
 -/
 
 @[expose] public section

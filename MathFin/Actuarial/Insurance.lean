@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Actuarial.Mortality
 public import MathFin.FixedIncome.ZCB
 
@@ -40,17 +39,28 @@ intensity adds to the rate in the same way.
 expected present value of the payments made to a random lifetime with survival
 function `S` is the standard actuarial reading; it is not proved here.
 
+## Main definitions
+
+* `lifeAnnuityDue`: the life annuity-due of `n` unit payments at times `0, …, n − 1`, each paid
+  only if the insured is alive, for a rate `r` and a force of mortality `μ`.
+
 ## Main results
 
 * `annuityDue_closed_form`: `Σ_{k=0}^{n-1} v^k = (1 − v^n)/(1 − v)` (geometric).
 * `net_premium_principle`: `P · A = B ↔ P = B / A` for `A ≠ 0`.
-* `lifeAnnuityDue`, `lifeAnnuityDue_const`: the life annuity-due, and its closed form
-  under a constant force of mortality.
+* `lifeAnnuityDue_const`: under a constant force of mortality `m` and `e^{-(r + m)} ≠ 1`, the life
+  annuity-due is the geometric closed form at the discount factor `e^{-(r + m)}`.
 
 ## References
 
-* D. C. M. Dickson, M. R. Hardy and H. R. Waters, *Actuarial Mathematics for Life
-  Contingent Risks*, 2nd ed., Cambridge University Press (2013), Chapter 5 (annuities).
+* [D. C. M. Dickson, M. R. Hardy and H. R. Waters, *Actuarial Mathematics for Life
+  Contingent Risks*][DicksonHardyWaters2013], Chapter 5 (annuities).
+* [Bowers and others, *Actuarial Mathematics*][BowersEtAl]
+
+## Tags
+
+net premium, equivalence principle, annuity-due, life annuity, force of mortality,
+actuarial present value, MSC 91G05, JEL G22
 -/
 
 @[expose] public section

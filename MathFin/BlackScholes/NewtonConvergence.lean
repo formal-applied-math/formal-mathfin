@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.ImpliedVolatility
 
 /-!
@@ -48,12 +47,20 @@ In the implied-volatility application, `f(σ) = bsV(σ) − C_obs` has
 `f' = vega > 0` (`bsV_vega_pos`), so `m` is a positive vega lower bound on the
 bracketing interval and the simple-root hypothesis is automatic.
 
-## Results
+## Main definitions
 
-* `newtonSeq`: the Newton iterates.
+* `newtonSeq`: the Newton–Raphson iterates, `x₀` and then `x_{n+1} = newtonStep f f' xₙ`.
+
+## Main results
+
 * `newtonStep_quadratic_error`: one-step quadratic error bound `(L/(2m))·e²`.
 * `newtonSeq_error_le_geometric`: geometric error decay in the basin.
 * `newtonSeq_tendsto_root`: convergence `xₙ → r`.
+
+## Tags
+
+Newton–Raphson, quadratic convergence, implied volatility solver, root finding, numerical analysis,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

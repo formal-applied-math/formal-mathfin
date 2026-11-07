@@ -5,8 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
-public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.WienerIntegralExpMoment
 public import MathFin.Foundations.Esscher
 
@@ -41,6 +39,19 @@ determines the law (`measure_eq_of_mgf_id_eq`). At `t = 0` the same identity giv
 `Q_λ(Ω) = 1` (`isProbabilityMeasure_withDensity_girsanov`). That result needs only the
 pre-Brownian hypothesis; `girsanovMeasure_isProbabilityMeasure` states it for a filtered
 pre-Brownian motion.
+
+## Main results
+
+* `integral_exp_mul_wienerIntegralLp_withDensity_girsanov`: under
+  `Q_λ = μ.withDensity(exp(−λB_T − λ²T/2))`, `𝔼[exp(t·∫f dB)] = exp(−tλ⟪𝟙_{(0,T]}, f⟫ + t²‖f‖²/2)`.
+* `isProbabilityMeasure_withDensity_girsanov`: `Q_λ` is a probability measure for a
+  pre-Brownian motion.
+* `wienerIntegralLp_hasLaw_girsanov`: under `Q_λ`, `∫₀ᵀ f dB ~ N(−λ∫₀ᵀ f, ∫₀ᵀ f²)`.
+
+## Tags
+
+Girsanov theorem, Cameron–Martin shift, Wiener integral, measure change, drift shift,
+Doléans density, MSC 60H05, MSC 60G15, MSC 91G20
 -/
 
 @[expose] public section

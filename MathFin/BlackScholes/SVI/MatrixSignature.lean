@@ -7,6 +7,7 @@ module
 
 public import MathFin.BlackScholes.SVI.Matrices
 public import MathFin.BlackScholes.SVI.SignVariations
+public import Mathlib.LinearAlgebra.QuadraticForm.Signature
 
 /-! # Signature of a symmetric matrix from its characteristic polynomial
 
@@ -15,6 +16,22 @@ Part of the SVI polynomial-sign certificate (#174).
 The sign variations of the characteristic coefficients compute the inertia signature of a real
 symmetric matrix (`signatureTest_eq_matrixSignature`), and a positive scalar factor does not
 change the test.
+
+## Main definitions
+
+* `matrixSignature`: the signature `sigPos - sigNeg` of the quadratic form of a real matrix.
+
+## Main results
+
+* `signatureTest_eq_matrixSignature`: for a symmetric real matrix `M`, `signatureTest M` equals
+  `matrixSignature M`, singular matrices included.
+* `signatureTest_smul_pos`: for symmetric `M` and `c > 0`, `signatureTest (c • M)` equals
+  `signatureTest M`.
+
+## Tags
+
+matrix inertia, Descartes rule of signs, characteristic polynomial, symmetric matrix signature, SVI,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -27,25 +44,28 @@ open Matrix Polynomial
 noncomputable def matrixSignature {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ) : ℤ :=
   (sigPos M.toQuadraticForm' : ℤ) - (sigNeg M.toQuadraticForm' : ℤ)
 
-private theorem quadratic_apply {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ) (x : Fin n → ℝ) :
+/-- The quadratic form of a matrix evaluates as `x ⬝ᵥ M *ᵥ x`. -/
+theorem toQuadraticForm'_apply {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ) (x : Fin n → ℝ) :
     M.toQuadraticForm' x = dotProduct x (M *ᵥ x) := by
   simp [Matrix.toQuadraticForm', Matrix.toLinearMap₂'_apply']
 
-private theorem quadratic_diagonal {n : ℕ} (w : Fin n → ℝ) :
+/-- The quadratic form of a diagonal matrix is the weighted sum of squares. -/
+theorem toQuadraticForm'_diagonal {n : ℕ} (w : Fin n → ℝ) :
     (diagonal w).toQuadraticForm' = QuadraticMap.weightedSumSquares ℝ w := by
   ext x
-  simp only [quadratic_apply, dotProduct, mulVec_diagonal, QuadraticMap.weightedSumSquares_apply,
-    smul_eq_mul]
+  simp only [toQuadraticForm'_apply, dotProduct, mulVec_diagonal,
+    QuadraticMap.weightedSumSquares_apply, smul_eq_mul]
   apply Finset.sum_congr rfl
   intro i hi
   ring
 
-private theorem quadratic_conjugate {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ)
+/-- The quadratic form of `Uᴴ * M * U` is that of `M` composed with `U`. -/
+theorem toQuadraticForm'_conj_unitary {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ)
     (U : Matrix.unitaryGroup (Fin n) ℝ) :
     ((star (U : Matrix (Fin n) (Fin n) ℝ)) * M * (U : Matrix (Fin n) (Fin n) ℝ)).toQuadraticForm' =
       M.toQuadraticForm'.comp ((Matrix.UnitaryGroup.toLinearEquiv U).toLinearMap) := by
   ext x
-  simp only [QuadraticMap.comp_apply, quadratic_apply]
+  simp only [QuadraticMap.comp_apply, toQuadraticForm'_apply]
   change dotProduct x
       ((star (U : Matrix (Fin n) (Fin n) ℝ) * M * (U : Matrix (Fin n) (Fin n) ℝ)) *ᵥ x) =
     dotProduct ((U : Matrix (Fin n) (Fin n) ℝ) *ᵥ x)
@@ -63,13 +83,13 @@ theorem signatureTest_eq_matrixSignature {n : ℕ} (M : Matrix (Fin n) (Fin n) �
   have heq : (diagonal hh.eigenvalues).toQuadraticForm' =
       M.toQuadraticForm'.comp
           (Matrix.UnitaryGroup.toLinearEquiv hh.eigenvectorUnitary).toLinearMap := by
-    rw [← quadratic_conjugate]
+    rw [← toQuadraticForm'_conj_unitary]
     have hdiag := hh.conjStarAlgAut_star_eigenvectorUnitary
     simpa [Unitary.conjStarAlgAut_star_apply, Function.comp_def] using
       congrArg Matrix.toQuadraticForm' hdiag.symm
   have he : QuadraticMap.Equivalent M.toQuadraticForm'
       (QuadraticMap.weightedSumSquares ℝ hh.eigenvalues) := by
-    rw [← quadratic_diagonal, heq]
+    rw [← toQuadraticForm'_diagonal, heq]
     exact ⟨QuadraticMap.isometryEquivOfCompLinearEquiv _ _⟩
   unfold signatureTest matrixSignature
   rw [signatureTest_eq_root_counts M hM, he.sigPos_eq, he.sigNeg_eq,
@@ -79,7 +99,8 @@ theorem signatureTest_eq_matrixSignature {n : ℕ} (M : Matrix (Fin n) (Fin n) �
   simp only [id_eq, ← Finset.filter_val, ← Finset.card_def,
     Set.ncard_eq_toFinset_card' , Set.toFinset_ofPred]
 
-private theorem sigPos_smul_pos {n : ℕ} (Q : QuadraticForm ℝ (Fin n → ℝ))
+/-- A positive scalar multiple of a quadratic form has the same positive index. -/
+theorem sigPos_smul_of_pos {n : ℕ} (Q : QuadraticForm ℝ (Fin n → ℝ))
     (c : ℝ) (hc : 0 < c) : sigPos (c • Q) = sigPos Q := by
   have hpos (V : Submodule ℝ (Fin n → ℝ)) :
       ((c • Q).restrict V).PosDef ↔ (Q.restrict V).PosDef := by
@@ -93,17 +114,19 @@ private theorem sigPos_smul_pos {n : ℕ} (Q : QuadraticForm ℝ (Fin n → ℝ)
     rw [← hv]
     exact le_sigPos_of_posDef (c • Q) ((hpos V).mpr hp)
 
-private theorem sigNeg_smul_pos {n : ℕ} (Q : QuadraticForm ℝ (Fin n → ℝ))
+/-- A positive scalar multiple of a quadratic form has the same negative index. -/
+theorem sigNeg_smul_of_pos {n : ℕ} (Q : QuadraticForm ℝ (Fin n → ℝ))
     (c : ℝ) (hc : 0 < c) : sigNeg (c • Q) = sigNeg Q := by
   have he : -(c • Q) = c • (-Q) := by
     ext x
     simp
-  rw [← sigPos_neg, he, sigPos_smul_pos _ c hc, sigPos_neg]
+  rw [← sigPos_neg, he, sigPos_smul_of_pos _ c hc, sigPos_neg]
 
-private theorem quadratic_smul {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ) (c : ℝ) :
+/-- The quadratic form of a scalar multiple of a matrix is the scalar multiple. -/
+theorem toQuadraticForm'_smul {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ) (c : ℝ) :
     (c • M).toQuadraticForm' = c • M.toQuadraticForm' := by
   ext x
-  simp [quadratic_apply, Matrix.smul_mulVec, dotProduct_smul]
+  simp [toQuadraticForm'_apply, Matrix.smul_mulVec, dotProduct_smul]
 
 /-- A positive common denominator does not change the sign certificate. -/
 theorem signatureTest_smul_pos {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ)
@@ -113,7 +136,7 @@ theorem signatureTest_smul_pos {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ)
     simpa using congrArg (c * ·) (congrFun (congrFun hM i) j)
   rw [signatureTest_eq_matrixSignature _ hcs, signatureTest_eq_matrixSignature _ hM]
   unfold matrixSignature
-  rw [quadratic_smul, sigPos_smul_pos _ c hc, sigNeg_smul_pos _ c hc]
+  rw [toQuadraticForm'_smul, sigPos_smul_of_pos _ c hc, sigNeg_smul_of_pos _ c hc]
 
 end SVI
 end MathFin

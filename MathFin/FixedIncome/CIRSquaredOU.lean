@@ -27,7 +27,14 @@ The statements are per-time: `V t` is a random variable for each `t`. That `V` s
 CIR SDE is not proved; it needs `B₁`, `B₂` independent (Lévy's characterization of the
 driving Brownian motion of `√V`), which the mean computation does not use.
 
-## Result
+## Main definitions
+
+* `ouProcess`: the Ornstein–Uhlenbeck fluctuation
+  `X_t = x₀e^{−(k/2)t} + s ∫₀ᵗ e^{−(k/2)(t−u)} dB_u` in its Wiener representation.
+* `cirTheta`: the long-run level `θ := 2s²/k` of the Feller-borderline parametrization.
+* `cirVariance`: the sum of squares `V_t = (X₁_t)² + (X₂_t)²` of two OU fluctuations.
+
+## Main results
 
 Public API (all in namespace `MathFin.CIRSquaredOU`):
 
@@ -35,6 +42,16 @@ Public API (all in namespace `MathFin.CIRSquaredOU`):
 * `cirTheta`, `cirTheta_borderline`, `cirVariance`, `cirVariance_nonneg`,
   `cirVariance_mean` — the long-run level, the sum of squares, its nonnegativity and
   its mean.
+
+## References
+
+* [J. C. Cox, J. E. Ingersoll and S. A. Ross, *A theory of the term structure of interest
+  rates*][CoxIngersollRoss1985]
+
+## Tags
+
+CIR process, Ornstein–Uhlenbeck, squared Bessel, Feller condition, sum of squares, mean-reverting,
+MSC 60J60, MSC 60G15, MSC 91G30
 -/
 
 @[expose] public section

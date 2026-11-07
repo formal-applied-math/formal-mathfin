@@ -7,16 +7,25 @@ module
 
 public import Mathlib.Geometry.Manifold.SmoothApprox
 public import MathFin.BlackScholes.AmericanPut.Stopping.LocalizationTimes
+public import Mathlib.Algebra.Order.Star.Real
 
 /-! # Uniformly bounded smooth compact minorants of a continuous payoff
 
 The minorants need not be nonnegative or monotone in the sequence index.
 Their common absolute bound is what permits dominated convergence.
 
-## Result
+## Main results
 
-Public entry points include `exists_smooth_compact_minorant`,
-`exists_smooth_compact_minorant_sequence`.
+* `exists_smooth_compact_minorant`: for continuous `f` with values in `[0,1]`, `R > 0` and
+  `0 < ε ≤ 1`, there is a compactly supported `C²` function `m ≤ f`, with `‖m‖ ≤ 2` and
+  `|m - f| ≤ 2ε` on `[-R,R]`.
+* `exists_smooth_compact_minorant_sequence`: for such `f`, there is a sequence of compactly
+  supported `C²` minorants, uniformly bounded by `2`, converging pointwise to `f`.
+
+## Tags
+
+smooth minorants, compact support, continuous payoff, dominated convergence, approximation,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

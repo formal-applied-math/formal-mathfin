@@ -5,8 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.DerivOfDeriv
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # Almgren-Chriss optimal execution (deterministic closed form)
@@ -37,9 +38,12 @@ The full minimisation theorem (this closed form is optimal among all
 admissible trajectories) is a calculus-of-variations claim that requires
 function-space machinery beyond Mathlib's current pin.
 
-## Results
+## Main definitions
 
-* `almgrenChrissPath`: closed-form trajectory.
+* `almgrenChrissPath`: the closed-form trajectory `X(t) = X_0 · sinh (κ (T − t)) / sinh (κ T)`.
+
+## Main results
+
 * `almgrenChrissPath_at_zero`: `X(0) = X_0`.
 * `almgrenChrissPath_at_terminal`: `X(T) = 0`.
 * `hasDerivAt_almgrenChrissPath`: first derivative.
@@ -48,6 +52,15 @@ function-space machinery beyond Mathlib's current pin.
 Neither derivative needs `sinh(κT) ≠ 0`: under Lean's `x / 0 = 0` the degenerate
 closed form is the zero path, which satisfies both. Only the initial condition
 uses it.
+
+## References
+
+* [Almgren and Chriss (2000)][AlmgrenChriss2000]
+
+## Tags
+
+optimal execution, market impact, liquidation, calculus of variations, Euler–Lagrange equation,
+inventory, JEL G11, MSC 91G80, MSC 49L20
 -/
 
 @[expose] public section
@@ -76,26 +89,24 @@ theorem almgrenChrissPath_at_terminal (X_0 κ T : ℝ) :
   rw [sub_self, mul_zero, Real.sinh_zero]
   simp
 
-/-- `d/dt (κ (T − t)) = −κ`: the inner derivative of both hyperbolic factors. -/
-private lemma hasDerivAt_mul_sub (κ T t : ℝ) : HasDerivAt (fun t : ℝ ↦ κ * (T - t)) (-κ) t := by
-  simpa using ((hasDerivAt_id t).const_sub T).const_mul κ
-
 /-- **First derivative**: `X'(t) = −X_0 · κ · cosh(κ (T − t)) / sinh(κ T)`. -/
 theorem hasDerivAt_almgrenChrissPath (X_0 κ T t : ℝ) :
     HasDerivAt (almgrenChrissPath X_0 κ T)
       (-(X_0 * κ * Real.cosh (κ * (T - t)) / Real.sinh (κ * T))) t := by
+  have hd : HasDerivAt (fun t : ℝ ↦ κ * (T - t)) (-κ) t := by
+    simpa using ((hasDerivAt_id t).const_sub T).const_mul κ
   unfold almgrenChrissPath
-  convert ((hasDerivAt_mul_sub κ T t).sinh.const_mul X_0).div_const (Real.sinh (κ * T))
-    using 1; ring
+  convert (hd.sinh.const_mul X_0).div_const (Real.sinh (κ * T)) using 1; ring
 
 /-- The t-derivative of the first-derivative formula `−X₀ κ cosh(κ (T − t)) / sinh(κ T)` is
 `κ² · X(t)`: the same `sinh(κ (T − t))` shape, multiplied by `κ²`. -/
 private lemma hasDerivAt_almgrenChrissPath_deriv_formula (X_0 κ T t : ℝ) :
     HasDerivAt (fun s : ℝ ↦ -(X_0 * κ * Real.cosh (κ * (T - s)) / Real.sinh (κ * T)))
       (κ ^ 2 * almgrenChrissPath X_0 κ T t) t := by
+  have hd : HasDerivAt (fun t : ℝ ↦ κ * (T - t)) (-κ) t := by
+    simpa using ((hasDerivAt_id t).const_sub T).const_mul κ
   unfold almgrenChrissPath
-  convert (((hasDerivAt_mul_sub κ T t).cosh.const_mul (X_0 * κ)).div_const
-    (Real.sinh (κ * T))).neg using 1; ring
+  convert ((hd.cosh.const_mul (X_0 * κ)).div_const (Real.sinh (κ * T))).neg using 1; ring
 
 /-- **Almgren-Chriss EL equation**: the closed-form trajectory satisfies `X''(t) = κ² · X(t)`,
 the Euler-Lagrange equation of the cost functional: `hasDerivAt_almgrenChrissPath` gives `X'`

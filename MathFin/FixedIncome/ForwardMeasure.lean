@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.ForwardMeasure
 public import MathFin.BlackScholes.Forward
 
@@ -21,6 +20,16 @@ and `Q^T = Q`; this file reads the forward price off the Black–Scholes termina
 
 * `forwardMeasure_bs_expected_terminal` — the concrete Black–Scholes instance:
   `𝔼^{Q^T}[S_T] = S_0·e^{rT}`.
+
+## References
+
+* [H. Geman, N. El Karoui and J. C. Rochet, *Changes of numéraire, changes of probability measure
+  and option pricing*][GemanElKarouiRochet1995]
+
+## Tags
+
+T-forward measure, bond numéraire, change of numéraire, forward price, Black–Scholes, constant rate,
+MSC 91G20, MSC 91G30, JEL G13
 -/
 
 @[expose] public section

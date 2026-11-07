@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.PDE
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # Lookback call lower bound
@@ -17,7 +17,7 @@ Discounted to today, this gives the static lower bound:
 
 `lookbackCall ≥ vanillaCall`.
 
-Results:
+## Main results
 
 * `lookback_payoff_ge_vanilla`: `max(S − K, 0) ≤ max(M − K, 0)` when `S ≤ M`.
 * `bsV_le_lookbackCall`: under the Black–Scholes lognormal hypothesis, the Black–Scholes
@@ -25,6 +25,17 @@ Results:
   `M ≥ S_T` (a.s.) whose call payoff is integrable — the running maximum is one such `M`.
   The law of the running maximum is not used, and no closed form for the lookback is
   claimed.
+
+## References
+
+* [M. B. Goldman, H. B. Sosin and M. A. Gatto, *Path dependent options: buy at the low, sell at the
+  high*][GoldmanSosinGatto1979]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 26.8
+
+## Tags
+
+lookback option, running maximum, path-dependent option, static lower bound, exotic option,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

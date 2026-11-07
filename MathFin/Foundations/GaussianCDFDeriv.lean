@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.StandardNormal
 
 /-!
@@ -25,6 +24,11 @@ into an interval integral plus a constant, then `intervalIntegral.integral_hasDe
   (and its `.neg`-flip `hasDerivAt_neg_gaussianPDFReal_zero_one`), the
   standard-normal first derivative reused across the Greeks and the Bachelier
   truncated-mean identity.
+
+## Tags
+
+standard normal CDF, normal density, Black–Scholes delta, Gaussian derivative,
+fundamental theorem of calculus, MSC 60E05, MSC 91G20
 -/
 
 @[expose] public section

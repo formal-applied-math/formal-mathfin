@@ -44,12 +44,12 @@ For a *bounded* martingale `M` with `M² − t` a martingale, no localisation is
    local martingale, hence a martingale. The clock `t ∧ ρ_n` is slow
    (`isSlowClock_stoppedProcess`), so step 1 applies: `exp(a·M^{ρ_n} − a²(t ∧ ρ_n)/2)` is a
    martingale.
-3. **Limit** (`tendsto_setIntegral_stopped_exp`). For fixed `t`, `ρ_n > t` eventually, so these
+3.  **Limit** (`tendsto_setIntegral_stopped_exp`). For fixed `t`, `ρ_n > t` eventually, so these
    exponentials converge to `exp(a·M_t − a²t/2)` pointwise. They are bounded in `L²`:
-   `E[exp(2aM^{ρ}_t − a²(t∧ρ))] ≤ e^{a²t}·E[exp(2aM^{ρ}_t − 2a²(t∧ρ))] = e^{a²t}`, the last
-   factor being the exponential martingale at `2a` started at `1`. An `L²`-bounded sequence
-   converging a.e. converges on sets
-   (`tendsto_setIntegral_of_subseq_ae_of_sq_bound`, Vitali), which passes the martingale identity over `𝓕_s`-sets to the limit: `IsExpQMartingale P 𝓕 M T`
+   `E[exp(2aM^{ρ}_t − a²(t∧ρ))] ≤ e^{a²t}·E[exp(2aM^{ρ}_t − 2a²(t∧ρ))] = e^{a²t}`, the last factor
+   being the exponential martingale at `2a` started at `1`. An `L²`-bounded sequence converging a.e.
+   converges on sets (`tendsto_setIntegral_of_subseq_ae_of_sq_bound`, Vitali), which passes the
+   martingale identity over `𝓕_s`-sets to the limit: `IsExpQMartingale P 𝓕 M T`
    (`isExpQMartingale_of_localMartingale`).
 
 ## Scope
@@ -59,6 +59,31 @@ For a *bounded* martingale `M` with `M² − t` a martingale, no localisation is
 of the stopped processes. The conclusion `IsBrownianReal M P` is Mathlib's: `M` is a Brownian
 motion with respect to its own law, and with `IsFilteredPreBrownian M 𝓕 P` also with respect to
 `𝓕`.
+
+## Main results
+
+* `isBrownianReal_of_localMartingale`: an adapted process `M` with continuous paths and `M₀ = 0`,
+  such that `M` and `M² − t` are local martingales, is a Brownian motion.
+* `isFilteredPreBrownian_of_localMartingale`: the same hypotheses give
+  `IsFilteredPreBrownian M 𝓕 P`, so every increment `M_t − M_s` is independent of `𝓕_s`.
+* `isExpQMartingale_of_localMartingale`: the same hypotheses give the exponential-martingale data
+  `IsExpQMartingale P 𝓕 M T` for every `T`.
+* `isBrownianReal_of_bounded_martingale`, `isFilteredPreBrownian_of_bounded_martingale`: for a
+  bounded continuous martingale `M` with `M₀ = 0` and `M² − t` a martingale, no localisation is
+  needed.
+* `martingale_stoppedProcess_exitTime`: stopped at the exit time of `|M|` from `(−n−1, n+1)`, `M`
+  and `M² − t ∧ ρ` are martingales.
+* `tendsto_setIntegral_stopped_exp`: the integrals over a set `S` of the stopped exponentials
+  `exp(a·M^{ρₙ}_r − a²(r ∧ ρₙ)/2)` converge as `n → ∞`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 9.1.1
+
+## Tags
+
+Lévy characterization, Brownian motion, continuous local martingale, quadratic variation,
+exponential martingale, stopping, MSC 60J65, MSC 60G44, MSC 60G40
 -/
 
 @[expose] public section
@@ -92,7 +117,8 @@ theorem isBrownianReal_of_bounded_martingale (hM : Martingale M 𝓕 P)
 
 /-! ### The clock `t ∧ ρ` -/
 
-private lemma stoppedClock_sub (c : WithTop ℝ≥0) {p q : ℝ≥0} (hpq : p ≤ q) :
+/-- Increments of the stopped clock `t ∧ c` are nonnegative and at most the time increment. -/
+lemma stoppedClock_sub (c : WithTop ℝ≥0) {p q : ℝ≥0} (hpq : p ≤ q) :
     0 ≤ (((min (q : WithTop ℝ≥0) c).untopA : ℝ≥0) : ℝ)
         - ((min (p : WithTop ℝ≥0) c).untopA : ℝ≥0) ∧
       (((min (q : WithTop ℝ≥0) c).untopA : ℝ≥0) : ℝ)
@@ -291,7 +317,8 @@ theorem isFilteredPreBrownian_of_localMartingale (hadapt : StronglyAdapted 𝓕 
     (hcont : ∀ ω, Continuous fun t ↦ M t ω) (hM0 : ∀ ω, M 0 ω = 0)
     (hM : IsLocalMartingale M 𝓕 P) (hM2 : IsLocalMartingale (fun t ω ↦ M t ω ^ 2 - (t : ℝ)) 𝓕 P) :
     IsFilteredPreBrownian M 𝓕 P :=
-  isFilteredPreBrownian_of_expMartingale (isExpQMartingale_of_localMartingale hadapt hcont hM0 hM hM2)
+  isFilteredPreBrownian_of_expMartingale
+      (isExpQMartingale_of_localMartingale hadapt hcont hM0 hM hM2)
 
 /-- **Lévy's characterisation of Brownian motion.** An adapted process `M` with continuous paths
 and `M₀ = 0` such that `M` and `M² − t` are local martingales is a Brownian motion. -/

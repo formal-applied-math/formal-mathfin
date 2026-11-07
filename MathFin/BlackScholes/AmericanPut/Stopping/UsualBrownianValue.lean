@@ -6,13 +6,41 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.CompletedSpace
-public import MathFin.BlackScholes.AmericanPut.Stopping.AugmentedValue
+public import MathFin.BlackScholes.AmericanPut.Stopping.ClassicalSupermartingale
 
-/-! # The American value on the completed usual Brownian filtration 
-## Result
+/-!
+# The American value on the completed usual Brownian filtration
 
-Public entry points include `brownianUsualFiltration`, `brownian_completedRaw_le_usual`,
-`brownian_completed_measurable`, `brownianUsualAmericanPut`.
+## Main definitions
+
+* `brownianUsualFiltration`: the usual filtration of `brownian`: the completed raw filtration,
+  null-augmented and then made right-continuous.
+* `brownianUsualAmericanPut`: the `americanPutValue` of `brownian` on `brownianUsualFiltration`,
+  under the completed Gaussian limit measure.
+* `brownianUsualExerciseBoundary`: the `exerciseThreshold` of `brownian` on
+  `brownianUsualFiltration`, under the completed Gaussian limit measure.
+
+## Main results
+
+* `brownian_completedRaw_le_usual`: the completed raw Brownian filtration is contained in
+  `brownianUsualFiltration`.
+* `brownian_completed_measurable`: `brownian` is jointly measurable for the completed Gaussian
+  σ-algebra.
+* `brownianClassicalCandidate_usual_supermartingale`: for a `DividendPutSolution`, `0 ≤ K`,
+  `0 ≤ r`, `0 < σ`, the classical candidate is a supermartingale for the usual filtration under
+  the completed measure.
+* `brownianUsualAmericanPut_eq_raw`: for a `DividendPutSolution`, `0 < K`, `0 ≤ r`, `0 < σ` and
+  `0 < S`, the usual-filtration American put value equals the raw one.
+* `brownianUsual_boundary_eq_classical`: under the same solution and parameter hypotheses, for
+  `τ > 0` the usual exercise boundary at `τ` equals `K exp (b (σ²/2 · τ))`.
+* `brownianUsual_boundary_conclusions`: under the same hypotheses, for `τ > 0`, the second
+  derivative of the log-boundary (over `K`) in time-to-expiry is nonnegative and that of the
+  stock boundary is positive at `τ`.
+
+## Tags
+
+usual filtration, completed filtration, American put value, Brownian filtration, stopping value,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

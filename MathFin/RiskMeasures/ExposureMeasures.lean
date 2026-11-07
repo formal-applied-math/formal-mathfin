@@ -5,7 +5,6 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.CVA
 public import MathFin.RiskMeasures.GaussianValueAtRisk
 
@@ -31,10 +30,35 @@ process, `ν` its measure): ENE (the mirror of `CVA.expectedExposure`), PFE (thr
   the pointwise subadditivity of `max (·) 0` (`max_add_add_le_max_add_max` with the second pair
   at `0`), summed by `le_sum_of_subadditive`, then integrated.
 
+## Main definitions
+
+* `expectedNegativeExposure`: `ENE(s) = E_ν[(−V_s)⁺]` of an exposure process `V`.
+* `potentialFutureExposure`: `PFE_α(s)`, the `α`-level value-at-risk of the exposure `V_s⁺`.
+
+## Main results
+
+* `expectedNegativeExposure_eq_sub_integral`: `ENE(s) = EE(s) − E[V_s]` for integrable `V_s`.
+* `expectedNegativeExposure_gaussian`: the closed form of `ENE` for `V_s = a + b√s Z` with
+  `Z ~ N(0, 1)`, `b > 0` and `s > 0`.
+* `expectedExposure_of_hasLaw_gaussianReal`: for `V_s ~ N(m, v)` with `v > 0`,
+  `EE(s) = m Φ(m/√v) + √v φ(m/√v)`.
+* `potentialFutureExposure_eq_max`: `PFE_α(s) = max (VaR_α(V_s)) 0` for `α ∈ (0, 1)`.
+* `potentialFutureExposure_gaussian`: for `V_s = m + σ√s Z` with `Z ~ N(0, 1)`, `σ ≥ 0` and
+  `α ∈ (0, 1)`, `PFE_α(s) = max (gaussianVaR m (σ√s) (Φ⁻¹ α)) 0`.
+* `integral_posPart_finsetSum_le`: netting reduces exposure, `E[(∑ᵢ Vᵢ)⁺] ≤ ∑ᵢ E[Vᵢ⁺]` for
+  integrable `Vᵢ`.
+
 ## References
 
-* J. C. Hull, *Options, Futures, and Other Derivatives* (CVA/exposure chapter): EE, ENE, PFE.
-* McNeil, Frey, Embrechts, *Quantitative Risk Management* (netting of credit exposures).
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull] (CVA/exposure chapter): EE, ENE,
+  PFE.
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management*][McNeilFreyEmbrechts]
+  (netting of credit exposures).
+
+## Tags
+
+expected negative exposure, potential future exposure, netting, counterparty credit risk,
+CVA exposure, expected exposure, MSC 91G40, MSC 91G70, JEL G32
 -/
 
 @[expose] public section

@@ -5,7 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Probability.Distributions.Exponential
+public import Mathlib.Probability.Independence.Basic
 
 /-!
 # Minimum of independent exponentials (Appendix B.2)
@@ -15,6 +17,21 @@ The minimum of independent exponentials has the `Exp(∑ rates)` **survival func
 independence (`iIndepFun.meas_iInter`) and the individual exponential laws
 (`expMeasure` CDF formula). The law identity itself — that the minimum *is*
 `Exp(∑ rates)` as a measure — is not stated here.
+
+## Main results
+
+* `minimum_survival`: for jointly independent `τ i` with exponential laws of rates `rates i > 0`
+  and `t ≥ 0`, `μ {ω | t < min_i τ_i ω} = exp (-(∑ rates) * t)`. The law of the minimum as a
+  measure is not stated.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], B.2
+
+## Tags
+
+minimum of exponentials, survival function, competing risks, first default time,
+independent exponentials, MSC 60E05, MSC 91G40
 -/
 
 @[expose] public section
@@ -26,7 +43,7 @@ open MeasureTheory ProbabilityTheory Finset
 variable {Ω : Type*} {n : ℕ} {rates : Fin n → ℝ} {τ : Fin n → Ω → ℝ}
 
 /-- Survival function of `expMeasure r` for `t ≥ 0`. -/
-private lemma expMeasure_Ioi (r : ℝ) (hr : 0 < r) {t : ℝ} (ht : 0 ≤ t) :
+lemma expMeasure_Ioi (r : ℝ) (hr : 0 < r) {t : ℝ} (ht : 0 ≤ t) :
     expMeasure r (Set.Ioi t) = ENNReal.ofReal (Real.exp (-(r * t))) := by
   have : IsProbabilityMeasure (expMeasure r) := isProbabilityMeasure_expMeasure hr
   have h_compl : expMeasure r (Set.Ioi t) = 1 - expMeasure r (Set.Iic t) := by
@@ -45,7 +62,7 @@ private lemma expMeasure_Ioi (r : ℝ) (hr : 0 < r) {t : ℝ} (ht : 0 ≤ t) :
   ring
 
 /-- The set `{ω | t < min_i τ_i ω}` rewrites to `⋂_i {ω | t < τ_i ω}`. -/
-private lemma min_gt_iInter (hn : 0 < n) (t : ℝ) :
+lemma min_gt_iInter (hn : 0 < n) (t : ℝ) :
     {ω : Ω | t < (Finset.univ.inf' ⟨⟨0, hn⟩, Finset.mem_univ _⟩
       (fun i : Fin n ↦ τ i ω))}
       = ⋂ i : Fin n, (τ i) ⁻¹' Set.Ioi t := by

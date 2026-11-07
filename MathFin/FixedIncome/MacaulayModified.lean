@@ -5,7 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.BigOperators.Field
+public import Mathlib.Analysis.Normed.Field.Basic
 
 /-!
 # Macaulay vs modified duration under discrete compounding
@@ -24,9 +26,25 @@ The discrete-compounding identity is
 i.e. modified duration differs from Macaulay duration by exactly one factor of
 the discount step. (Under continuous compounding the two coincide.)
 
-Result:
+## Main definitions
+
+* `bondPriceDisc`: the bond price under discrete annual compounding with integer cashflow times.
+* `macaulayNumerator`: the Macaulay duration numerator `MacNum(y) = Σ t_i · c_i / (1 + y)^{t_i}`.
+* `modifiedNumerator`: the modified duration numerator
+  `ModNum(y) = Σ t_i · c_i / (1 + y)^{t_i + 1}`.
+
+## Main results
 
 * `modifiedNumerator_eq_macaulayNumerator_div`: the algebraic identity.
+
+## References
+
+* [Fabozzi, *Fixed Income Mathematics*][FabozziFIM], 4.3
+
+## Tags
+
+Macaulay duration, modified duration, discrete compounding, bond duration, interest rate risk,
+MSC 91G30, JEL G12
 -/
 
 @[expose] public section

@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.Quantile
+public import Mathlib.Probability.StrongLaw
 
 /-!
 # Convergence of quantiles and of empirical distribution functions
@@ -30,13 +30,28 @@ Two limit theorems for the quantile layer of `Foundations/Quantile.lean`.
   depend on `x`, the empirical CDF may be evaluated at a *random* point. This is the conditional
   law of large numbers behind the large-portfolio limit of `RiskMeasures/VasicekIRB.lean`.
 
+## Main definitions
+
+* `empiricalCDF`: the empirical CDF `x ↦ (1/m) #{i < m | ε i ω ≤ x}` of the first `m`
+  observations.
+
 ## Main results
 
 * `cdf_map_eq_measureReal`: the CDF of a pushforward law.
 * `tendsto_quantile_of_tendsto_ae`: quantiles converge along almost-sure convergence to a limit
   with a strict quantile.
-* `empiricalCDF`, `empiricalCDF_mono`: the empirical distribution function and its monotonicity.
-* `tendsto_empiricalCDF_ae`: almost surely, the empirical CDF converges to `G` everywhere.
+* `empiricalCDF_mono`: the empirical distribution function is monotone.
+* `tendsto_empiricalCDF_ae`: for pairwise independent observations with a common law whose CDF `G`
+  is continuous, almost surely the empirical CDF converges to `G` at every `x`.
+
+## References
+
+* [van der Vaart (1998)][VanDerVaart1998], Lemma 21.2
+
+## Tags
+
+convergence of quantiles, empirical distribution function, Glivenko–Cantelli,
+strong law of large numbers, large portfolio limit, empirical CDF, MSC 60F15, MSC 62G30
 -/
 
 @[expose] public section

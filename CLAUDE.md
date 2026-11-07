@@ -89,6 +89,35 @@ constant declared in `MathFin/` that a benchmark proof cites, resolved by
 declaration through `open`s and dot notation, plus the upstream constants each
 `library_wrapper` entry's proof cites, listed in `UPSTREAM_CITATIONS`; the curated
 `MathFin/AxiomAudit.lean` remains the storied headliner file).
+**Declaration index and ratchet** (`docs/specs/2026-11-05-library-practices-design.md`):
+`lake exe mathfin_index decl-index.json` (`MathFinTools/Index.lean`, run by `build.yml`,
+uploaded as the `decl-index` artifact) is the environment's own record of every MathFin
+declaration: statement and its hash, docstring, uses, attributes. `tools/verify/find.py`
+searches it, `decl_diff.py` diffs two of them (renames, changed statements — posted to each
+PR's run summary), `decl_index.py report` lists duplicate statements and Mathlib-shaped
+private lemmas. `ratchet.json` holds one baseline per debt count (heartbeat bumps,
+whole-`Mathlib` imports, long files, nolints, doc-section coverage, and the index's
+duplicates and Mathlib-shaped privates): `tests/test_ratchet.py` and `build.yml` fail when a
+count rises; `python3 -m tools.verify.ratchet update` lowers a baseline and never raises one.
+**One doc standard** (`tools/verify/doc_standard.py`, gated in `test_values`): every module
+docstring has Mathlib's layout — `# Title`, `## Main definitions` / `## Main results`,
+`## References` keyed to `docs/references.bib` (`* [Author, *Title*][Key], §2.3`), `## Tags`
+(search terms + JEL/MSC codes from the controlled vocabulary `docs/subjects.toml`; the HF
+dataset exports them as each entry's `subjects`). Missing sections are ratchet counts.
+**`MathFin/Init.lean`** is imported by every module (a module importing no library module
+imports it directly; `test_architecture`): it holds the library's attributes, so far the grind
+set `pricing` (`@[pricing =]` on parity and tree identities, `grind [pricing]`, pinned
+in `MathFinTest/Automation.lean`). Notation is `scoped` or `local`, never global
+(`test_notation_is_scoped`; `docs/design.md` §5). The docs site (`docs-site.yml`,
+`tools/verify/docs_site.py`) is generated from main's `decl-index`; import narrowing runs on a
+runner (`import-shake.yml`, dispatch-only, commits to the branch).
+**The blueprint and the issues are always connected** (`docs/blueprint.md`): every open
+math issue (`type:proof`, `type:research`, `open-problem`, `frontier`) carries a body line
+`Blueprint: <label>` naming the node it advances; a result not on the blueprint gets a
+frontier entry in `docs/blueprint_frontier.toml` first; a PR delivering a frontier node tags
+the declaration in `MathFin/Blueprint.lean` under the same label and deletes the entry.
+`python3 -m tools.verify.blueprint_issues check` (build.yml, blueprint-sync.yml) holds both
+directions.
 `tests/test_architecture.py` keeps the library one graph: `Foundations/` imports only
 `Foundations/` (joins live in `Bridges/`), every module imports a library module or is
 imported by one, and every module is imported by another or cited by a corpus entry. A
@@ -120,10 +149,13 @@ and act on the backlog — not a quality verdict).
 already has.** This applies to a theorem, a definition, a bridge, a refactor, a tool, a doc
 or an agent brief. Search three layers, in this order:
 
-1. The library's own program. Grep `MathFin/` for the object, read the module docstrings
-   of the section it belongs to, and look for a hypothesis bundle, framework or general
-   lemma the new work should land in (`IsExpQMartingale`, `riemannσ`, `sampledFiltration`,
-   `statePricePricing`, `Contract.value`, `numeraireMeasure`, …).
+1. The library's own program. Search the declaration index
+   (`python3 -m tools.verify.find forward measure`, `--mentions IsEMM`, `--used-by
+   MathFin.X`; the index is the `decl-index` artifact of main's latest `build` run), grep
+   `MathFin/`, read the module docstrings of the section it belongs to, and look for a
+   hypothesis bundle, framework or general lemma the new work should land in
+   (`IsExpQMartingale`, `riemannσ`, `sampledFiltration`, `statePricePricing`,
+   `Contract.value`, `numeraireMeasure`, …).
 2. BrownianMotion.
 3. Mathlib (`scripts/loogle.sh`, or grep the pinned sources).
 
@@ -370,11 +402,11 @@ The gate (the repo contract applies unchanged to machine-found proofs):
   docs/blueprint.md.
 - `AxiomAudit.lean` (`#guard_msgs`-pinned axioms, enforced per-push by
   `build.yml`) is the ENFORCED honesty floor: no `sorry`, axiom-clean.
-  `leanchecker` (the `kernel-replay.yml` CI job) is BEST-EFFORT kernel
-  replay below the elaborator — it cannot complete on a 16 GB hosted runner
-  (every module's `public import` closure loads the ~14 GB full Mathlib
-  environment; OOM-kills inside batch 1 at any cgroup cap < ~14 GB, confirmed
-  2026-06-07), so it is `workflow_dispatch`-only and wants a >16 GB box.
+  `leanchecker` (the `kernel-replay.yml` CI job, monthly + on demand) replays
+  every content module through the kernel, below the elaborator, in six
+  parallel shards. From 2026-06-07 it could not finish (every module imported
+  Mathlib whole, ~14 GB per load, OOM in batch 1); since the imports were
+  narrowed (`whole_mathlib_imports` 0) it fits a 16 GB runner with >5 GB free.
 
 **Idiomatic register — the Mathlib house-style checklist** (full form +
 before/after in `docs/patterns.md` → "Mathlib house-style golf"): when polishing

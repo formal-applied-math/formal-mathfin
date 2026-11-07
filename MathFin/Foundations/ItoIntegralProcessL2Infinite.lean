@@ -26,6 +26,25 @@ is the finite-horizon `itoProcessCLM T` of the band-restricted integrand
   horizon `T = n`, glued by `indistinguishable_of_modification_on`);
 * **step 4** — the `IsLocalMartingale` on the null-augmented filtration (reusing
   `condExp_sup_nulls` / `augFiltration` from the `[0,T]` follow-on).
+
+## Main definitions
+
+* `clampSP`: the `[0,T]` clamp of a simple process.
+
+## Main results
+
+* `clampSP_itoSimpleProcess`: for `t ≤ T` the `[0,T]` clamp of a simple process has the same
+  `[0,t]` discrete Itô integral.
+* `itoProcessCLM_simpleProcessL2Horizon`: for `t ≤ T`, `itoProcessCLM T t` of a simple process's
+  `[0,T]` `L²` integrand is its `[0,t]` discrete Itô integral.
+* `itoProcessL2Inf_eq_itoProcessCLM`: for `t ≤ T`, `(f●B)_t = (f|[0,T] ● B)_t`, the
+  unbounded-horizon process equals the finite-horizon process of the `[0,T]`-restricted
+  integrand.
+
+## Tags
+
+horizon consistency, Itô integral, continuous local martingale, infinite horizon,
+stochastic integral, MSC 60H05, MSC 60G44
 -/
 
 @[expose] public section
@@ -43,13 +62,13 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 
 /-! ### The `[0,T]` clamp of a simple process
 
-The increment-independence crux `itoIntegralCLM_T T (simpleProcessL2_T T V) =ᵐ
-itoSimpleProcess V T` cannot be read off the existing `T`-bounded machinery directly,
-because a general `V` may carry intervals reaching past `T`. We clamp `V` to the band:
-**drop the intervals starting past `T`, clamp every surviving right endpoint to `T`**.
-The clamp `clampSP T V` is `T`-bounded, its discrete Itô integral on `[0,t]` agrees with
-`V`'s for `t ≤ T`, and its `[0,T]` `L²` integrand agrees with `V`'s — so `V` and its clamp
-are indistinguishable to all of the `[0,T]` machinery, which is exactly what closes the
+The increment-independence crux
+`itoIntegralCLM T (simpleProcessL2Horizon T V) =ᵐ itoSimpleProcess V T` cannot be read off the
+existing `T`-bounded machinery directly, because a general `V` may carry intervals reaching past
+`T`. We clamp `V` to the band: **drop the intervals starting past `T`, clamp every surviving right
+endpoint to `T`**. The clamp `clampSP T V` is `T`-bounded, its discrete Itô integral on `[0,t]`
+agrees with `V`'s for `t ≤ T`, and its `[0,T]` `L²` integrand agrees with `V`'s — so `V` and its
+clamp are indistinguishable to all of the `[0,T]` machinery, which is exactly what closes the
 crux. -/
 
 /-- Fiber-sum value of the clamped `mapDomain`: `mapDomain` collapses intervals sharing a
@@ -112,7 +131,7 @@ noncomputable def clampSP (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
 /-- **Master `Finsupp.sum` identity for the clamp.** Any additive-in-the-value statistic
 `φ` summed over the clamp equals the same statistic summed over `V`, provided `φ` is
 invariant under the right-endpoint clamp on the kept intervals (`hclamp`) and vanishes on
-the dropped ones (`hdrop`). Both `clampSP_itoSimpleProcess` and `clampSP_simpleProcessL2_T`
+the dropped ones (`hdrop`). Both `clampSP_itoSimpleProcess` and `clampSP_simpleProcessL2Horizon`
 are instances. -/
 private lemma clampSP_value_sum {N : Type*} [AddCommMonoid N] (T : ℝ≥0)
     (hBmeas : ∀ u, Measurable (B u)) (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas))
@@ -170,15 +189,15 @@ lemma clampSP_apply (T s : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
       exact absurd (lt_of_le_of_lt hsT hP) (not_lt.mpr h1.le))
 
 /-- **Clamp preserves the `[0,T]` `L²` integrand.** -/
-lemma clampSP_simpleProcessL2_T (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+lemma clampSP_simpleProcessL2Horizon (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
-    simpleProcessL2_T (μ := μ) T hBmeas (clampSP T hBmeas V)
-      = simpleProcessL2_T (μ := μ) T hBmeas V := by
-  refine Lp.ext ((MemLp.coeFn_toLp (memLp_uncurry_trim_T T hBmeas (clampSP T hBmeas V))).trans
+    simpleProcessL2Horizon (μ := μ) T hBmeas (clampSP T hBmeas V)
+      = simpleProcessL2Horizon (μ := μ) T hBmeas V := by
+  refine Lp.ext ((MemLp.coeFn_toLp (memLp_uncurry_trimMeasure T hBmeas (clampSP T hBmeas V))).trans
     ((?_ : Function.uncurry ⇑(clampSP T hBmeas V)
-        =ᵐ[trimMeasure_T (μ := μ) T hBmeas] Function.uncurry ⇑V).trans
-      (MemLp.coeFn_toLp (memLp_uncurry_trim_T T hBmeas V)).symm))
-  rw [trimMeasure_T_eq_restrict]
+        =ᵐ[trimMeasure (μ := μ) T hBmeas] Function.uncurry ⇑V).trans
+      (MemLp.coeFn_toLp (memLp_uncurry_trimMeasure T hBmeas V)).symm))
+  rw [trimMeasure_eq_restrict]
   refine Filter.eventuallyEq_of_mem
     (self_mem_ae_restrict (MeasureTheory.measurableSet_predictable_Ioc_prod
       (𝓕 := natFiltration hBmeas) 0 T MeasurableSet.univ)) (fun z hz ↦ ?_)
@@ -186,21 +205,21 @@ lemma clampSP_simpleProcessL2_T (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
   exact clampSP_apply T z.1 hBmeas V hzT z.2
 
 /-- **The increment-independence crux (process form).** For `t ≤ T` the finite-horizon
-process `itoProcessCLM T t` of `V`'s `[0,T]` `L²` integrand reproduces `V`'s `[0,t]` discrete
-Itô integral. Via the clamp: `simpleProcessL2_T T V = simpleAssembly_T T (clampSP T V)`
-(`clampSP_simpleProcessL2_T`), `itoProcessCLM_simpleAssembly_T` then gives `(V'●B)_t` of the
-`T`-bounded clamp, which equals `(V●B)_t` (`clampSP_itoSimpleProcess`). -/
-lemma itoProcessCLM_simpleProcessL2_T (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+process `itoProcessCLM T t` of `V`'s `[0,T]` `L²` integrand reproduces `V`'s `[0,t]` discrete Itô
+integral. Via the clamp: `simpleProcessL2Horizon T V = simpleAssemblyHorizon T (clampSP T V)`
+(`clampSP_simpleProcessL2Horizon`), `itoProcessCLM_simpleAssemblyHorizon` then gives `(V'●B)_t` of
+the `T`-bounded clamp, which equals `(V●B)_t` (`clampSP_itoSimpleProcess`). -/
+lemma itoProcessCLM_simpleProcessL2Horizon (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (ht : t ≤ T) :
-    (itoProcessCLM hB T t hBmeas (simpleProcessL2_T (μ := μ) T hBmeas V) : Ω → ℝ)
+    (itoProcessCLM hB T t hBmeas (simpleProcessL2Horizon (μ := μ) T hBmeas V) : Ω → ℝ)
       =ᵐ[μ] itoSimpleProcess hBmeas V t := by
   have hclampT : clampSP T hBmeas V ∈ TBoundedSP T hBmeas := fun p hp ↦ by
     obtain ⟨a, _, rfl⟩ := Finset.mem_image.mp (Finsupp.mapDomain_support hp)
     exact inf_le_right
-  have hP1 : simpleProcessL2_T (μ := μ) T hBmeas V
-      = simpleAssembly_T (μ := μ) T hBmeas ⟨clampSP T hBmeas V, hclampT⟩ :=
-    (clampSP_simpleProcessL2_T T hBmeas V).symm
-  rw [hP1, itoProcessCLM_simpleAssembly_T]
+  have hP1 : simpleProcessL2Horizon (μ := μ) T hBmeas V
+      = simpleAssemblyHorizon (μ := μ) T hBmeas ⟨clampSP T hBmeas V, hclampT⟩ :=
+    (clampSP_simpleProcessL2Horizon T hBmeas V).symm
+  rw [hP1, itoProcessCLM_simpleAssemblyHorizon]
   exact clampSP_itoSimpleProcess T t hBmeas V ht ▸
     (memLp_itoSimpleProcess hB hBmeas (clampSP T hBmeas V) t).coeFn_toLp
 
@@ -212,7 +231,7 @@ increment-independence** `E[∫₀^∞ f dB | 𝓕_T] = ∫₀ᵀ f dB`. The `[0
 `f ↦ itoProcessL2Inf t f` and `f ↦ itoProcessCLM T t (restrictToBand T f)` are
 continuous-linear in `f` and, on the dense simple processes, both reproduce `V`'s `[0,t]`
 discrete Itô integral (`itoProcessL2Inf_simpleAssembly_ae` on the left;
-`restrictToBand_simpleAssembly` + `itoProcessCLM_simpleProcessL2_T` on the right), so they
+`restrictToBand_simpleAssembly` + `itoProcessCLM_simpleProcessL2Horizon` on the right), so they
 agree everywhere. -/
 
 /-- **Horizon consistency.** For `t ≤ T`, the unbounded-horizon process equals the
@@ -234,7 +253,7 @@ theorem itoProcessL2Inf_eq_itoProcessCLM (T t : ℝ≥0) (hBmeas : ∀ u, Measur
         (restrictToBand (μ := μ) T hBmeas (simpleAssembly hBmeas V)) : Ω → ℝ)
       =ᵐ[μ] itoSimpleProcess hBmeas V t := by
     rw [restrictToBand_simpleAssembly T hBmeas V]
-    exact itoProcessCLM_simpleProcessL2_T hB T t hBmeas V ht
+    exact itoProcessCLM_simpleProcessL2Horizon hB T t hBmeas V ht
   exact hLHS.trans hRHS.symm
 
 end ItoIntegralProcessL2Infinite

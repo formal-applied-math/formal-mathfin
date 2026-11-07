@@ -7,17 +7,37 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Boundary.Problem
 public import Mathlib.Analysis.Calculus.Deriv.Slope
-public import Mathlib.MeasureTheory.Integral.DominatedConvergence
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-! # Bounded logarithmic put-payoff difference quotients
 
 The log-payoff is globally 1-Lipschitz, even though the stock multiplier is
 unbounded. This supplies a constant dominating function for stopped slopes.
 
-## Result
+## Main definitions
 
-Public entry points include `putPayoff_sub_bounds`, `putPayoff_norm_sub_le`,
-`putPayoff_hasDerivAt_neg`, `discountedPutSlope`.
+* `discountedPutSlope`: the difference quotient
+  `exp (-k*t) * (putPayoff (x+D) - putPayoff (b+D)) / (x-b)`, a discounted log-payoff slope between
+  `b` and `x`, both displaced by `D`.
+
+## Main results
+
+* `putPayoff_sub_bounds`, `putPayoff_norm_sub_le`: for `x ≤ y`, `putPayoff x - putPayoff y` lies
+  in `[0, y - x]`; in general `‖putPayoff x - putPayoff y‖ ≤ ‖x - y‖`.
+* `putPayoff_hasDerivAt_neg`: for `b < 0`, `putPayoff` has derivative `-exp b` at `b`.
+* `discountedPutSlope_bound`: for `0 ≤ k` and `0 ≤ t`, the discounted slope has norm at most `1`.
+* `discountedPutSlope_eq_exp`: when `x + D ≤ 0` and `b + D ≤ 0`, the slope equals
+  `-exp (-k t + D)` times the slope of `exp` between `b` and `x`.
+* `discountedPutSlope_tendsto`: for `b < 0` and `t, D → 0` at `b`, the slope tends to `-exp b`
+  as `x → b` from the right.
+
+## Tags
+
+put payoff, Lipschitz, difference quotients, log-payoff, dominated convergence, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

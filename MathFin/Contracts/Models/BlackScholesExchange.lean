@@ -28,6 +28,15 @@ evaluates under the model measure, for jointly Gaussian standard-normal drivers.
 ## Main results
 
 * `BlackScholes.value_exchangeOption` — `exchangeOption T` is worth `margrabePrice S¹₀ S²₀ σ_eff T`.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [W. Margrabe, *The value of an option to exchange one asset for another*][Margrabe1978]
+
+## Tags
+
+exchange option, Margrabe formula, two-asset model, outperformance option, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

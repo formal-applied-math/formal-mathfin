@@ -7,16 +7,31 @@ module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.FlatHeatKernel
 public import MathFin.BlackScholes.AmericanPut.Stopping.HeatBoundaryExtension
+public import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 
 /-! # Interior smoothing of continuous compact boundary data
 
 The boundary datum is not differentiated. A smooth compact cutoff is placed
 on the causal kernel, allowing Mathlib's parameter-convolution theorem to apply.
 
-## Result
+## Main definitions
 
-Public entry points include `causalBoundaryIntegral`, `compact_causalBoundaryIntegral_smooth`,
-`heatBoundaryExtension_eq_causalBoundaryIntegral`, `compact_heatBoundaryExtension_smooth`.
+* `causalBoundaryIntegral`: the boundary datum `g` convolved against the causal kernel at depth `x`,
+  namely `∫ y, causalHeatBoundaryKernel (t-y) x * g y`.
+
+## Main results
+
+* `compact_causalBoundaryIntegral_smooth`: for continuous compactly supported `g`,
+  `causalBoundaryIntegral g` is `C^∞` on `{x > 0}`.
+* `heatBoundaryExtension_eq_causalBoundaryIntegral`: for `x > 0`, the extension equals the
+  causal boundary integral.
+* `compact_heatBoundaryExtension_smooth`: for such `g`, `heatBoundaryExtension g` is `C^∞`
+  on `{x > 0}`.
+
+## Tags
+
+causal kernel, boundary smoothing, convolution theorem, compact boundary data, interior smoothness,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

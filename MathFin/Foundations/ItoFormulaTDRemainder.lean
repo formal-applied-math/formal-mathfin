@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.ItoFormulaRemainder
 public import MathFin.Foundations.ItoLemma2D
+public import Mathlib.Algebra.Order.Chebyshev
 
 /-! # The time-dependent Itô–Taylor remainder vanishes in `L²`
 
@@ -27,6 +28,24 @@ applied to the `t₀`-section. Under Brownian scaling `E[R²] = O(Δt³)` (the G
 moments `E[ΔB²] = Δt`, `E[ΔB⁶] = 15Δt³`), so Cauchy–Schwarz on the sum gives
 `E[(∑ₖ Rₖ)²] ≤ n·∑ₖ E[Rₖ²] = O(n⁻¹) → 0`; the time-independent remainder is the case
 `f_t = 0`.
+
+## Main results
+
+* `abs_sub_le_of_hasDerivAt`: a function with derivative bounded by `M` moves at most
+  `M · |y − x|` between `x` and `y`.
+* `abs_taylor1_le`: for `g ∈ C²` with `|g″| ≤ M`, `|g y − g x − g′(x)(y − x)| ≤ M · |y − x|²`.
+* `abs_discreteTaylorRemainder2D_le`: the 2D discrete remainder is bounded by
+  `C_tt Δt² + C_tx |Δx| Δt + C_xxx |Δx|³`.
+* `sq_discreteTaylorRemainder2D_le`: the squared form of that bound, with even powers
+  `3C_tt² Δt⁴ + 3C_tx² Δt² Δx² + 3C_xxx² Δx⁶`.
+* `memLp_discreteTaylorRemainder2D_two`: the per-step remainder along Brownian nodes is in `L²(μ)`.
+* `tendsto_ito_remainder_td`: for `f(t,x)` with bounded `f_tt, f_tx, f_xxx`, the sum of the 2D
+  discrete remainders along the uniform partition of `[0,T]` tends to `0` in `L²(μ)`.
+
+## Tags
+
+Taylor remainder, Itô formula, Gaussian moments, Cauchy–Schwarz, time-dependent function, MSC 60H05,
+MSC 60J65
 -/
 
 @[expose] public section

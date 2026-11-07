@@ -5,13 +5,13 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.ConvexSeparation
 public import MathFin.Foundations.MartingaleTransform
 public import MathFin.Foundations.FTAP
 public import MathFin.Foundations.FTAPOnePeriod
 public import MathFin.Foundations.NoArbitrageCore
-public import MathFin.Foundations.ContinuousMarket
+public import Mathlib.Algebra.Order.Archimedean.Real.Hom
+public import Mathlib.Probability.ProbabilityMassFunction.Integrals
 
 /-!
 # Discrete-time FTAP on a finite probability space (scalar, finite horizon)
@@ -46,21 +46,43 @@ and the `d`-asset generalisation are out of scope here.
   `Foundations/FTAPOnePeriod.lean` for the increment `Y = S 1 − S 0`: the EMMs coincide
   (`isEMM_one_iff_onePeriod`) and so do the no-arbitrage conditions
   (`noArbitrage_one_iff_onePeriod`).
-* **Continuous time.** `ContinuousMarket.IsEMM` is a process-level notion over `ℝ≥0` on a
-  general Ω, with a horizon `T : ℝ≥0` like this one, and stays separate. It restricts in one
+* **Continuous time.** `IsEMM` is one notion for every time index
+  (`Foundations/EquivMartingaleMeasure.lean`); at time `ℝ≥0`, on a general Ω, it restricts in one
   direction: sampled along any monotone schedule inside `[0, T]`, a continuous-time EMM is an
-  EMM here for the sampled price and filtration (`ContinuousMarket.IsEMM.sampled`, in
-  `ContinuousMarket.lean`, general Ω, though `ftap_discrete` itself needs finite Ω), and it is a
-  one-period EMM for every increment `S t − S s` with `s, t ≤ T`
-  (`ContinuousMarket.IsEMM.increment`). The converses are not claimed: neither restriction sees
-  adaptedness of `S` at all times or the martingale property between arbitrary times.
+  EMM here for the sampled price and filtration (`IsEMM.sampled`, in `ContinuousMarket.lean`,
+  general Ω, though `ftap_discrete` itself needs finite Ω), and at any time index it is a
+  one-period EMM for every increment `S t − S s` with `s, t ≤ T` (`IsEMM.increment`). The
+  converses are not claimed: neither restriction sees adaptedness of `S` at all times or the
+  martingale property between arbitrary times.
 
-## Main definitions / results (assembled across this file)
+## Main definitions
 
-* `MathFin.NoArbitrage`, `MathFin.IsEMM` (`Foundations/FTAP.lean`)
-* `MathFin.ftap_discrete` — the biconditional `NoArbitrage ↔ ∃ Q, IsEMM Q`
+* `incrementIndicator`: `𝟙_A · (S_{t+1} − S_t)`, the discounted gain of holding one unit on the
+  event `A` over period `t + 1`.
+* `gainsSubspace`: the span in `Ω → ℝ` of the increment-indicators over `t < T` and
+  `𝓕_t`-measurable events `A`; each of its elements is the gain of some predictable strategy
+  (`mem_gains_imp_predictable`).
+
+## Main results
+
+* `MathFin.ftap_discrete` — the biconditional `NoArbitrage ↔ ∃ Q, IsEMM Q` (`NoArbitrage` in
+  `Foundations/FTAP.lean`, `IsEMM` in `Foundations/EquivMartingaleMeasure.lean`), for a finite
+  `Ω` with `P {ω} > 0` and an adapted price `S`
 * `MathFin.isEMM_one_iff_onePeriod`, `MathFin.noArbitrage_one_iff_onePeriod`
-* `MathFin.ContinuousMarket.IsEMM.increment`
+* `MathFin.IsEMM.increment`
+
+## References
+
+* [H. Föllmer and A. Schied, *Stochastic Finance: An Introduction in Discrete Time*][FollmerSchied],
+  §1.2 and §5.2
+* [J. M. Harrison and S. R. Pliska, *Martingales and stochastic integrals in the theory of
+  continuous trading*][HarrisonPliska1981]
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], §5.4
+
+## Tags
+
+fundamental theorem of asset pricing, Harrison–Pliska, Dalang–Morton–Willinger, no arbitrage,
+equivalent martingale measure, finite state space, JEL G13, MSC 91G20, MSC 60G42
 -/
 
 @[expose] public section
@@ -71,7 +93,8 @@ open MeasureTheory ProbabilityTheory
 
 -- Heterogeneous use of one rich `variable` context: the algebraic transform
 -- lemmas need only `S`, and several theorems do not touch
--- `MeasurableSingletonClass`/`IsProbabilityMeasure` (`Nonempty` is stated where an EMM is built). Five scattered
+-- `MeasurableSingletonClass`/`IsProbabilityMeasure` (`Nonempty` is stated where an EMM is built).
+-- Five scattered
 -- `omit … in` clauses would be noisier than a single suppression, so we disable
 -- the unused-section-variable linter file-wide (deliberate, localized).
 set_option linter.unusedSectionVars false
@@ -95,7 +118,7 @@ variable {Ω : Type*} [Fintype Ω] {mΩ : MeasurableSpace Ω}
 omit [Fintype Ω] [MeasurableSingletonClass Ω] in
 /-- On a full-support measure a null set is empty — hence any two full-support
 measures on `Ω` are mutually absolutely continuous. -/
-private lemma eq_empty_of_pos_singleton {μ : Measure Ω} (hμ : ∀ ω, 0 < μ {ω})
+lemma eq_empty_of_pos_singleton {μ : Measure Ω} (hμ : ∀ ω, 0 < μ {ω})
     {s : Set Ω} (hs : μ s = 0) : s = ∅ := by
   rw [← Set.not_nonempty_iff_eq_empty]
   rintro ⟨ω, hω⟩
@@ -336,35 +359,34 @@ theorem noArbitrage_one_iff_onePeriod (h0 : 𝓕 0 = ⊥) :
 
 end MathFin
 
-/-! ### The continuous-time EMM, sampled
+/-! ### An EMM up to a horizon, restricted to one period
 
-A continuous-time EMM `ContinuousMarket.IsEMM` (`Foundations/ContinuousMarket.lean`) is a
-process-level object on a general Ω. It restricts to the discrete-time notion
-(`ContinuousMarket.IsEMM.sampled`, there) and to the one-period notion (below); these
-restrictions are one-directional. -/
+An `IsEMM` up to a horizon (`Foundations/EquivMartingaleMeasure.lean`, for any time index) is a
+process-level object on a general Ω. In continuous time it restricts to the discrete-time notion
+(`IsEMM.sampled`, `ContinuousMarket.lean`), and at any time index to the one-period notion
+(below); these restrictions are one-directional. -/
 
-namespace MathFin.ContinuousMarket
+namespace MathFin
 
 open MeasureTheory ProbabilityTheory
-open scoped NNReal
 
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {𝓕 : Filtration ℝ≥0 mΩ}
-
-/-- **A continuous-time EMM is a one-period EMM for every increment before the horizon.** If `Q`
-is an equivalent martingale measure up to `T` for the discounted price `S`, then for any two
-dates `s`, `t ≤ T` it is an equivalent martingale measure, in the sense of
+/-- **An EMM is a one-period EMM for every increment before the horizon.** If `Q` is an
+equivalent martingale measure up to `T` for the discounted price `S`, then for any two dates `s`,
+`t ≤ T` it is an equivalent martingale measure, in the sense of
 `Foundations/FTAPOnePeriodVector.lean`, for the one-period excess return `S t − S s` with a
-constant holding: a martingale has constant expectation. -/
-theorem IsEMM.increment {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
-    [FiniteDimensional ℝ F] {S : ℝ≥0 → Ω → F} {T : ℝ≥0} {Q : Measure Ω}
-    (h : IsEMM 𝓕 P S T Q) {s t : ℝ≥0} (hs : s ≤ T) (ht : t ≤ T) :
+constant holding: a martingale has the constant expectation of its first date. -/
+theorem IsEMM.increment {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
+    {ι : Type*} [LinearOrder ι] [OrderBot ι] {𝓕 : Filtration ι mΩ}
+    {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F] [FiniteDimensional ℝ F]
+    {S : ι → Ω → F} {T : ι} {Q : Measure Ω}
+    (h : IsEMM 𝓕 P S T Q) {s t : ι} (hs : s ≤ T) (ht : t ≤ T) :
     OnePeriodVector.IsEMM P (S t - S s) Q := by
   have := h.isProb
-  have hmean {u : ℝ≥0} (hu : u ≤ T) : ∫ ω, S u ω ∂Q = ∫ ω, S 0 ω ∂Q := by
-    rw [← integral_condExp (𝓕.le 0)]
-    exact integral_congr_ae (h.condExp_eq zero_le hu)
+  have hmean {u : ι} (hu : u ≤ T) : ∫ ω, S u ω ∂Q = ∫ ω, S ⊥ ω ∂Q := by
+    rw [← integral_condExp (𝓕.le ⊥)]
+    exact integral_congr_ae (h.condExp_eq bot_le hu)
   refine ⟨h.toIsEquivProbMeasure, (h.integrable ht).sub (h.integrable hs), ?_⟩
   change ∫ ω, (S t ω - S s ω) ∂Q = 0
   rw [integral_sub (h.integrable ht) (h.integrable hs), hmean ht, hmean hs, sub_self]
 
-end MathFin.ContinuousMarket
+end MathFin

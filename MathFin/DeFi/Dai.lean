@@ -5,7 +5,6 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.PeriodicCompounding
 
 /-!
@@ -19,9 +18,12 @@ and the "Liquidation Ratio" / "Stability Fee" parameter entries under
 "Risk Parameters Controlled by Maker Governance" (these are named
 parameter entries, not sub-sections of the paper).
 
-## Results
+## Main definitions
 
-* `isLiquidatable`: the predicate `collateral / debt < liquidationRatio`.
+* `isLiquidatable`: the predicate `collateral / debt < liquidationRatio` on a vault.
+
+## Main results
+
 * `isLiquidatable_iff_mul`: cross-multiplied equivalent form (no division), for
   `debt > 0`.
 * `debt_eq_debt_zero_mul_pow`: the compounding recurrence
@@ -35,6 +37,17 @@ parameter entries, not sub-sections of the paper).
 
 The probability that a vault with lognormal collateral is liquidatable at a horizon is in
 `MathFin/Bridges/LiquidationAsStructuralDefault.lean` (`prob_isLiquidatable_eq_kmvPD`).
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], §4.2
+* [MakerDAO, *The Maker Protocol: MakerDAO's Multi-Collateral Dai (MCD) System*][MakerDAO2020]
+* [MakerDAO, *MakerDAO technical documentation*][MakerDAOTechDocs], Rates Module
+
+## Tags
+
+MakerDAO, stablecoin, vault liquidation, collateralization ratio, stability fee, compounding,
+MSC 91G80, JEL G23
 -/
 
 @[expose] public section

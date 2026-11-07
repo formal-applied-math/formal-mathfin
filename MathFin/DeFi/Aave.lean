@@ -5,8 +5,8 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.PeriodicCompounding
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # Aave v2: kinked interest-rate model, health factor, liquidity index
@@ -16,9 +16,19 @@ Adapted from the Aave v2 whitepaper (Aave, "Aave Protocol V2", 2020,
 §5 ("Formal Definitions"), which states the kinked borrow-rate model and the
 health factor; the liquidity-index recurrence is §3.1 ("aTokens").
 
-## Results
+## Main definitions
 
-* `kinkedRate`: the piecewise-linear borrow-rate curve.
+* `kinkedRate`: the piecewise-linear Aave v2 borrow rate in the utilization `U`, with optimal
+  utilization `Uopt` and slopes `slope1`, `slope2`.
+* `healthFactorV1`: the single-asset health factor
+  `collateral * liquidationThreshold / (borrows + fees)`.
+* `healthFactorV2`: the multi-asset health factor summed over `i ∈ s`.
+* `liquidityIndexStep`: the per-period growth factor `R * U * ΔT / Tyear + 1` of the liquidity
+  index.
+* `stableRateUpdate`: the stable-rate weighted average after a new stable-rate borrow.
+
+## Main results
+
 * `kinkedRate_apply_optimal`: the rate at the kink is `R₀ + slope1`, for
   `Uopt ≠ 0` (the value of the `U ≤ Uopt` branch).
 * `kinkedRate_eq_affine_add_hinge`: for `Uopt ≠ 0` the kinked curve is an affine rate plus
@@ -49,6 +59,11 @@ health factor; the liquidity-index recurrence is §3.1 ("aTokens").
   stable rate, shown to lie in `[SRprev, SRnew]` when the new borrower's rate is
   at least the pool's prior average, the prior stable debt is nonnegative and
   the new borrow is positive.
+
+## Tags
+
+Aave protocol, lending pool, borrow rate, utilization, health factor, liquidation, liquidity index,
+MSC 91G80, JEL G23
 -/
 
 @[expose] public section

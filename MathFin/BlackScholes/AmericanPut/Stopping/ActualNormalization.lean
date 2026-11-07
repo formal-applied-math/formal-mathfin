@@ -6,16 +6,25 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.GridNormalization
+public import MathFin.BlackScholes.AmericanPut.Stopping.ShrinkingGrids
 
 /-! # Physical-unit identification of the actual normalized stopping price
 
 Exact finite-grid normalization passes to the stopping-value limit. This
 argument uses neither a classical pricing solution nor boundary regularity.
 
-## Result
+## Main results
 
-Public entry points include `brownianUsualAmericanPut_normalization_log`,
-`brownianUsualAmericanPut_normalization`, `brownianAmericanPut_normalization`.
+* `brownianUsualAmericanPut_normalization_log`: for `0 < K`, `0 ≤ r`, `0 < σ`, the usual-space
+  American put at spot `exp (x + log K)` is `K` times `canonicalPrice` at the normalized rates
+  `2r/σ²`, `2q/σ²`, log spot `x` and time `σ²/2 * T`.
+* `brownianUsualAmericanPut_normalization`: the same with spot `S > 0` and log spot `log (S/K)`.
+* `brownianAmericanPut_normalization`: the same identity for `brownianAmericanPut`.
+
+## Tags
+
+normalization, finite-grid limit, physical units, American put, scaling, MSC 60G40, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

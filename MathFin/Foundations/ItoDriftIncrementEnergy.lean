@@ -5,20 +5,15 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import MathFin.Foundations.ItoFormulaItoProcess
-public import MathFin.Foundations.ItoDriftExpectation
 public import MathFin.Foundations.ItoIntegralProcessGeneral
 public import MathFin.Foundations.AdaptedProcessToLp
 public import MathFin.Foundations.ItoIntegralRiemannBridgeAdapted
-public import MathFin.Foundations.WeightedQuadraticVariation
-public import MathFin.Foundations.ItoFormulaRemainder
 public import MathFin.Foundations.DiscreteIto
 public import MathFin.Foundations.ItoIntegralProcessIsometry
 public import MathFin.Foundations.ItoIsometryAdapted
 public import MathFin.Foundations.ItoIntegralBrownian
 public import MathFin.Foundations.QuadraticVariationL2
 public import MathFin.Foundations.GaussianMoments
-public import MathFin.Foundations.AdaptedDrift
 public import MathFin.Foundations.MartingaleTransform
 
 /-! # The increment energy of an adapted Itô integral (the discrete route, stages 2–3)
@@ -32,6 +27,26 @@ takes, the martingale property `martingale_M` of `M` and the exact first-order k
 (`𝔼[(M_v − M_u)²] = ∫_{(u,v]} δ² d(trim)`, the transfer of `clm_band_energy` to `M`), and the
 left-endpoint step approximants `deltaStepLp` with their `L²` convergence `deltaStepLp_tendsto`.
 `M` is a hypothesis: the stack is conditional on the bundle.
+
+## Main definitions
+
+* `IsAdaptedIntegrand`: a bounded `natFiltration`-adapted path-continuous process `δ`.
+* `IsAdaptedItoDrift`: the setting of the adapted Itô–drift stack: a pre-Brownian motion `B`, an
+  `IsAdaptedIntegrand` `δ` and a `natFiltration`-adapted version `M` of its Itô integral.
+* `deltaStepLp`: the `n`-th left-endpoint step approximant of `δ` in the Itô-integrand space.
+
+## Main results
+
+* `martingale_M`: `M` is a martingale for the natural filtration of `B`.
+* `mul_trueIncr_expect_eq_zero`: `𝔼[h·(M_v − M_u)] = 0` for bounded `𝓕_u`-measurable `h` and
+  `u ≤ v`.
+* `incrementEnergy`: for `u ≤ v ≤ T`, `𝔼[(M_v − M_u)²] = ∫_u^v 𝔼[δ_s²] ds`.
+* `deltaStepLp_tendsto`: the step approximants converge to `δ` in `L²` of the trim measure.
+
+## Tags
+
+increment energy, Itô isometry, adapted integrand, step approximants, martingale property,
+Itô integral, MSC 60H05, MSC 60G44
 -/
 
 @[expose] public section
@@ -77,7 +92,7 @@ private theorem bandIntegral_slice (hBmeas : ∀ t, Measurable (B t)) (ψ : ℝ�
     {Cψ : ℝ} (hψbdd : ∀ s ω, |ψ s ω| ≤ Cψ)
     (u v : ℝ≥0) (hvT : v ≤ T) :
     ∫ z in Set.Ioc u v ×ˢ (Set.univ : Set Ω), Function.uncurry ψ z
-        ∂(trimMeasure_T (μ := μ) T hBmeas)
+        ∂(trimMeasure (μ := μ) T hBmeas)
       = ∫ s in Set.Ioc u v, (∫ ω, ψ s ω ∂μ) ∂ItoIntegralL2.timeMeasure := by
   have hpred : IsStronglyPredictable (natFiltration hBmeas) ψ :=
     isStronglyPredictable_of_bdd_adapted_cont hBmeas hψadap hψcont
@@ -89,7 +104,7 @@ private theorem bandIntegral_slice (hBmeas : ∀ t, Measurable (B t)) (ψ : ℝ�
       ((Set.Ioc u v ×ˢ (Set.univ : Set Ω)).indicator (Function.uncurry ψ)) :=
     (show StronglyMeasurable[(natFiltration hBmeas).predictable] (Function.uncurry ψ) from
       hpred).indicator hband
-  have hint : Integrable (Function.uncurry ψ) (trimMeasure_T (μ := μ) T hBmeas) :=
+  have hint : Integrable (Function.uncurry ψ) (trimMeasure (μ := μ) T hBmeas) :=
     (MemLp.of_bound hpred.aestronglyMeasurable Cψ
       (ae_of_all _ fun z ↦ by rw [Real.norm_eq_abs]; exact hψbdd z.1 z.2)).integrable one_le_two
   have hUVamb : MeasurableSet (Set.Ioc u v ×ˢ (Set.univ : Set Ω)) :=
@@ -114,23 +129,23 @@ private theorem bandIntegral_slice (hBmeas : ∀ t, Measurable (B t)) (ψ : ℝ�
     · rw [Set.indicator_of_notMem hz]
       simp
   calc ∫ z in Set.Ioc u v ×ˢ (Set.univ : Set Ω), Function.uncurry ψ z
-        ∂(trimMeasure_T (μ := μ) T hBmeas)
+        ∂(trimMeasure (μ := μ) T hBmeas)
       = ∫ z, (Set.Ioc u v ×ˢ (Set.univ : Set Ω)).indicator (Function.uncurry ψ) z
-          ∂(trimMeasure_T (μ := μ) T hBmeas) :=
-        (integral_indicator (μ := trimMeasure_T (μ := μ) T hBmeas)
+          ∂(trimMeasure (μ := μ) T hBmeas) :=
+        (integral_indicator (μ := trimMeasure (μ := μ) T hBmeas)
           (f := Function.uncurry ψ) hband).symm
     _ = ∫ z, (Set.Ioc u v ×ˢ (Set.univ : Set Ω)).indicator (Function.uncurry ψ) z
-          ∂(((timeMeasure_T T).prod μ).trim
+          ∂(((timeMeasureHorizon T).prod μ).trim
             (natFiltration hBmeas).predictable_le_prod) := rfl
     _ = ∫ z, (Set.Ioc u v ×ˢ (Set.univ : Set Ω)).indicator (Function.uncurry ψ) z
-          ∂((timeMeasure_T T).prod μ) :=
+          ∂((timeMeasureHorizon T).prod μ) :=
         (integral_trim (natFiltration hBmeas).predictable_le_prod hsm).symm
     _ = ∫ z, (Set.Ioc u v ×ˢ (Set.univ : Set Ω)).indicator (Function.uncurry ψ) z
           ∂((ItoIntegralL2.timeMeasure.prod μ).restrict (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω))) := by
-        rw [show (((timeMeasure_T T).prod μ : Measure (ℝ≥0 × Ω))
+        rw [show (((timeMeasureHorizon T).prod μ : Measure (ℝ≥0 × Ω))
             = (ItoIntegralL2.timeMeasure.prod μ).restrict
               (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω))) from by
-          rw [timeMeasure_T, Measure.restrict_prod_eq_prod_univ]]
+          rw [timeMeasureHorizon, Measure.restrict_prod_eq_prod_univ]]
     _ = ∫ z, (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)).indicator
           ((Set.Ioc u v ×ˢ (Set.univ : Set Ω)).indicator (Function.uncurry ψ)) z
           ∂(ItoIntegralL2.timeMeasure.prod μ) :=
@@ -188,48 +203,48 @@ private theorem bandIntegral_slice (hBmeas : ∀ t, Measurable (B t)) (ψ : ℝ�
 * `deltaStepLp`, `deltaStepLp_tendsto` — the left-endpoint step approximants of `δ` on the
   uniform partition and their `L²` convergence. The terminal Itô isometry is an isometry, so
   it transfers the Riemann bridge's `L²` convergence of the Itô sums
-  (`itoIntegralCLM_T_of_bdd_adapted_cont`) to the integrand classes. -/
+  (`itoIntegralCLM_of_bdd_adapted_cont`) to the integrand classes. -/
 
 /-- The `n`-th left-endpoint step approximant of the integrand `δ`, as an element of
-the Itô-integrand space (the `simpleAssembly_T` embedding of `stepσ n`). -/
+the Itô-integrand space (the `simpleAssemblyHorizon` embedding of `stepσ n`). -/
 noncomputable def deltaStepLp (hBmeas : ∀ t, Measurable (B t))
     {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
     (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
     (hδbdd : ∀ t ω, |δ t ω| ≤ Dd) (n : ℕ) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
-  simpleAssembly_T (μ := μ) T hBmeas (stepσ hBmeas hδadap hδbdd T n)
+    Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) :=
+  simpleAssemblyHorizon (μ := μ) T hBmeas (stepσ hBmeas hδadap hδbdd T n)
 
 /-- **`L²`-convergence of the step approximants**: `‖δⁿ − δ‖_{L²(trim)} → 0`. The
-terminal Itô isometry `itoIntegralCLM_T_norm` is an isometry, so the norm of the
+terminal Itô isometry `itoIntegralCLM_norm` is an isometry, so the norm of the
 integrand difference equals the norm of the difference of the Itô sums — the
-Riemann bridge's `L²` convergence (`itoIntegralCLM_T_of_bdd_adapted_cont`), with the
-step-integrand sum identified with the Riemann sum by `itoIntegralCLM_T_stepσ`. -/
+Riemann bridge's `L²` convergence (`itoIntegralCLM_of_bdd_adapted_cont`), with the
+step-integrand sum identified with the Riemann sum by `itoIntegralCLM_stepσ`. -/
 theorem deltaStepLp_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ}
     (hδadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (δ t))
     (hδcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ δ s ω)
     (hδbdd : ∀ t ω, |δ t ω| ≤ Dd) :
     Tendsto (fun n : ℕ ↦ (deltaStepLp hBmeas hδadap hδbdd n :
-        Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))) atTop
+        Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))) atTop
       (𝓝 (processToLp T hBmeas hδadap hδcont hδbdd)) := by
   refine tendsto_iff_norm_sub_tendsto_zero.mpr ?_
-  have hiso : ∀ ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      ‖ψ‖ = ‖itoIntegralCLM_T hB T hBmeas ψ‖ := fun ψ ↦
-    (itoIntegralCLM_T_norm hB T hBmeas ψ).symm
-  have hstep : ∀ n : ℕ, itoIntegralCLM_T hB T hBmeas (deltaStepLp hBmeas hδadap hδbdd n)
+  have hiso : ∀ ψ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
+      ‖ψ‖ = ‖itoIntegralCLM hB T hBmeas ψ‖ := fun ψ ↦
+    (itoIntegralCLM_norm hB T hBmeas ψ).symm
+  have hstep : ∀ n : ℕ, itoIntegralCLM hB T hBmeas (deltaStepLp hBmeas hδadap hδbdd n)
       = (memLp_riemannσ hB hBmeas hδadap hδbdd T n).toLp (riemannσ δ T n) :=
-    fun n ↦ itoIntegralCLM_T_stepσ hB hBmeas hδadap hδbdd T n
+    fun n ↦ itoIntegralCLM_stepσ hB hBmeas hδadap hδbdd T n
   have key : ∀ n : ℕ,
       ‖(deltaStepLp hBmeas hδadap hδbdd n
-          - processToLp T hBmeas hδadap hδcont hδbdd : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))‖
+          - processToLp T hBmeas hδadap hδcont hδbdd : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))‖
       = ‖((memLp_riemannσ hB hBmeas hδadap hδbdd T n).toLp (riemannσ δ T n)
-          - itoIntegralCLM_T hB T hBmeas (processToLp T hBmeas hδadap hδcont hδbdd) :
+          - itoIntegralCLM hB T hBmeas (processToLp T hBmeas hδadap hδcont hδbdd) :
             Lp ℝ 2 μ)‖ := by
     intro n
     rw [hiso _]
     congr 1
     rw [map_sub, hstep n]
-  have hbridge := itoIntegralCLM_T_of_bdd_adapted_cont hB hBmeas hδadap hδcont hδbdd T
+  have hbridge := itoIntegralCLM_of_bdd_adapted_cont hB hBmeas hδadap hδcont hδbdd T
   refine Metric.tendsto_atTop.mpr fun ε hε ↦ ?_
   obtain ⟨N, hN⟩ := Metric.tendsto_atTop.mp hbridge ε hε
   refine ⟨N, fun n hn ↦ ?_⟩
@@ -274,12 +289,12 @@ variable {hB : IsPreBrownianReal B μ} {hBmeas : ∀ t, Measurable (B t)}
 
 /-- The σ-realization `processToLp δ` of the integrand of `hD`, as an element of the
 Itô-integrand space: the `φ` whose Itô integral process `M` is a version of. -/
-noncomputable abbrev IsAdaptedItoDrift.integrand : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+noncomputable abbrev IsAdaptedItoDrift.integrand : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) :=
   processToLp T hBmeas hD.adapted hD.continuous hD.bdd
 
 /-- The integrand of `hD` is a.e. the process `δ` itself. -/
 theorem IsAdaptedItoDrift.integrand_coeFn :
-    ⇑hD.integrand =ᵐ[trimMeasure_T (μ := μ) T hBmeas] Function.uncurry δ :=
+    ⇑hD.integrand =ᵐ[trimMeasure (μ := μ) T hBmeas] Function.uncurry δ :=
   processToLp_coeFn T hBmeas hD.adapted hD.continuous hD.bdd
 
 end Integrand
@@ -335,9 +350,9 @@ theorem incrementEnergy {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
           - (itoProcessCLM hB T u hBmeas hD.integrand : Ω → ℝ) ω) ^ 2 ∂μ :=
         integral_congr_ae (((hD.ae_eq v).sub (hD.ae_eq u)).fun_comp (· ^ 2))
     _ = ∫ z in Set.Ioc u v ×ˢ (Set.univ : Set Ω), (hD.integrand z) ^ 2
-          ∂(trimMeasure_T (μ := μ) T hBmeas) := clm_band_energy hB hBmeas _ huv hvT
+          ∂(trimMeasure (μ := μ) T hBmeas) := clm_band_energy hB hBmeas _ huv hvT
     _ = ∫ z in Set.Ioc u v ×ˢ (Set.univ : Set Ω), Function.uncurry (fun s ω ↦ δ s ω * δ s ω) z
-          ∂(trimMeasure_T (μ := μ) T hBmeas) := by
+          ∂(trimMeasure (μ := μ) T hBmeas) := by
         refine integral_congr_ae ?_
         filter_upwards [ae_restrict_of_ae hD.integrand_coeFn] with z hz
         rw [hz, sq]

@@ -5,7 +5,6 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Portfolio.MarkowitzNAsset
 public import MathFin.Portfolio.CovariancePSD
 public import MathFin.Portfolio.RiskParityFOC
@@ -30,19 +29,35 @@ partial derivatives of `portfolioVaRN`: its derivative along any direction `d` i
 `Portfolio/RiskParityFOC.lean`, and the Euler identity reduces to
 `sum_riskContribution_eq_variance`.
 
-## Main definitions and results
+## Main definitions
 
-* `portfolioVaRN`: the parametric VaR `α · √(x'Σx)`.
-* `marginalVaR`: defined as `α(Σx)ᵢ/√(x'Σx)`, with `(Σx)ᵢ = marginalVariance s σ x i`.
-* `componentVaR`: `CVaRᵢ = xᵢ · marginalVaRᵢ`.
+* `portfolioVaRN`: the parametric portfolio VaR `α · √(x'Σx)`, with `x'Σx` the `portfolioVarN`
+  of positions `x` against the kernel `σ`.
+* `marginalVaR`: the marginal VaR `α (Σx)ᵢ / √(x'Σx)`, defined as this closed form.
+* `componentVaR`: the component VaR `xᵢ · marginalVaR i`.
+
+## Main results
+
 * `sum_componentVaR_eq_portfolioVaRN`: the Euler allocation `∑ᵢ CVaRᵢ = VaR`, stated for
   `0 < x'Σx` (strictly positive portfolio variance).
-* `hasDerivAt_portfolioVaRN`: for symmetric `σ`, the derivative of `portfolioVaRN` along any
-  direction `d` is `∑ᵢ dᵢ · marginalVaRᵢ`.
+* `hasDerivAt_portfolioVaRN`: for symmetric `σ` and `0 < x'Σx`, the derivative of `portfolioVaRN`
+  along any direction `d` is `∑ᵢ dᵢ · marginalVaRᵢ`.
 * `valueAtRisk_portfolio_gaussian_eq_portfolioVaRN`: the VaR of a Gaussian portfolio loss is its
   mean plus `portfolioVaRN` at `Φ⁻¹(α)`.
 * `sum_componentVaR_eq_valueAtRisk_sub`: the component VaRs at `Φ⁻¹(α)` allocate the VaR of a
   Gaussian portfolio loss in excess of its mean.
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Corollary 8.43
+* [D. Tasche, *Capital allocation to business units and sub-portfolios: the Euler
+  principle*][Tasche2008]
+
+## Tags
+
+component VaR, marginal VaR, Euler allocation, parametric VaR, risk contribution, delta-normal VaR,
+MSC 91G70, JEL G32
 -/
 
 @[expose] public section

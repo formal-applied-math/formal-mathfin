@@ -13,10 +13,29 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.ContactTimeBoundary
 The time-zero boundary limit and the global log-payoff slope bound justify
 dominated convergence of difference quotients along the actual contact rules.
 
-## Result
+## Main definitions
 
-Public entry points include `normalized_putReward_eq_logPayoff`, `actualContactSlope`,
-`actualContactSlope_bound`, `actualContactSlope_measurable`.
+* `actualContactSlope`: the discounted put slope between `b` and `x`, evaluated at the actual
+  contact time `s` of the path `ω` and at the displacement `(k-h-1)*s + √2 * brownian s ω`.
+
+## Main results
+
+* `normalized_putReward_eq_logPayoff`: for the Brownian motion with strike `1` and `σ = √2`, the
+  put reward at spot `exp x` and any time `θ ω` is `exp (-k θ)` times `putPayoff` of
+  `x + ((k-h-1) θ + √2 · brownian θ)`.
+* `actualContactSlope_bound`, `actualContactSlope_measurable`, `actualContactSlope_integrable`: for
+  `0 ≤ k`, the contact slope has norm at most `1`, is measurable for the completed Gaussian
+  σ-algebra, and is integrable.
+* `actualContactSlope_eq_rewards`: the contact slope is the difference quotient of the put rewards
+  at spots `exp x` and `exp b` along the actual contact time.
+* `actualContactSlope_tendsto_ae`, `actualContactSlope_integral_tendsto`: for `0 < k`,
+  `0 ≤ h ≤ k` and `0 < T`, as `x` decreases to the log-boundary at `T`, the contact slope
+  converges almost surely, and in expectation, to `-exp` of the log-boundary.
+
+## Tags
+
+payoff slope, dominated convergence, difference quotient, optimal rule, contact rule, MSC 60G40,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

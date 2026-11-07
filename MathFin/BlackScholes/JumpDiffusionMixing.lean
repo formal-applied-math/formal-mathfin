@@ -5,13 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Actuarial.CompoundPoissonMGF
 public import MathFin.BlackScholes.Forward
 public import MathFin.BlackScholes.PriceBounds
 public import MathFin.BlackScholes.SpotConvexity
 public import MathFin.Foundations.AffineMinorant
-public import MathFin.Foundations.GaussianMoments
 public import MathFin.Foundations.IndepFreezing
 public import MathFin.Foundations.NormalQuantile
 
@@ -27,6 +25,14 @@ jump law. Under a probability measure `Q` the terminal price is
 with `Z ∼ N(0, 1)`, a jump count `N ∼ Poisson(Λ)`, i.i.d. log-jumps `Jᵢ` of any law with
 `𝔼[e^J] < ∞`, and a drift correction `κ`. The count is independent of the diffusion sample and
 the jumps together, and the diffusion sample is independent of the jumps (`JumpDiffusionHyp`).
+
+## Main definitions
+
+* `jumpDiffusionTerminal`: the terminal price
+  `S₀ · exp((r − σ²/2)T − κ + σ√T·z + ∑_{i<n} jᵢ)` at a diffusion sample `z`, a jump count `n` and
+  log-jump sizes `j`, with drift correction `κ`.
+* `JumpDiffusionHyp`: a standard normal diffusion sample `Z`, a jump count `N ∼ Poisson(Λ)` and
+  i.i.d. log-jump sizes `Jᵢ`, with `Z`, `N` and the sizes mutually independent.
 
 ## Main results
 
@@ -61,6 +67,16 @@ Only the law of the price at maturity is modelled here. A price process
 with independent jump-diffusion increments, its martingale property and its prices at
 intermediate dates are in `BlackScholes/JumpDiffusionProcess.lean` and
 `BlackScholes/JumpDiffusionOptionPrices.lean`; such a process is constructed only without jumps.
+
+## References
+
+* [Cont and Tankov, *Financial Modelling with Jump Processes*][ContTankov2004]
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976]
+
+## Tags
+
+jump-diffusion, arbitrary jump law, Poisson mixture, conditioning on jump count, terminal price law,
+MSC 91G20, MSC 60G51, JEL G13
 -/
 
 @[expose] public section

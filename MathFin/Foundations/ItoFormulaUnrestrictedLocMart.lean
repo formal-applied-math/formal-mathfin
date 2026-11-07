@@ -7,7 +7,7 @@ module
 
 public import MathFin.Foundations.ItoFormulaAdaptedProcess
 public import MathFin.Foundations.ItoFormulaCutoff
-public import MathFin.Foundations.LevyCharacterization
+public import MathFin.Foundations.BoundedLocalMartingale
 
 /-! # Summit C — the unrestricted-`C²` Itô formula as a local martingale
 
@@ -33,6 +33,32 @@ martingale is a martingale (`bounded_localMartingale_is_martingale`).
 because, after clamping the integrand's time to `[0, t]` (so each slice is `𝓕_t`-measurable), it is
 jointly strongly measurable (Carathéodory: continuous in `s`, `𝓕_t`-measurable in `ω`), and the
 integral of a jointly measurable function is measurable (`StronglyMeasurable.integral_prod_right`).
+
+## Main definitions
+
+* `itoResidual`: the Itô residual
+  `M_t = f(t, B_t) − f(0, B_0) − ∫₀ᵗ (f_t + ½ f_xx)(s, B_s) ds`.
+
+## Main results
+
+* `martingale_stoppedProcess_itoResidual`: for `f` with jointly continuous `f`, `f_t`, `f_x`,
+  `f_xx`, the Itô residual stopped at `σ_N = min(τ_N, N)` is a martingale.
+* `ito_formula_unrestricted`: for such `f`, with no growth or boundedness hypothesis, the Itô
+  residual has a version `M` (equal to it almost surely at each `t`) with continuous paths that
+  is an `IsLocalMartingale` on the null-augmented Brownian filtration.
+* `ito_formula_unrestricted_local`: the same in explicit form, a localizing sequence with a
+  continuous true martingale for each `N` agreeing with the residual up to `σ_N`.
+* `ae_localItoIntegral_one_eq`: almost surely the local Itô integral of `σ = 1` is the path `B`
+  at every `t ∈ [0,T]`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Thm 7.1.x
+
+## Tags
+
+Itô formula, Itô lemma, local martingale, localizing sequence, exit time, general C² function,
+MSC 60H05, MSC 60G44, MSC 60J65
 -/
 
 @[expose] public section
@@ -135,8 +161,8 @@ lemma residual_stronglyMeasurable (hBmeas : ∀ t, Measurable (B t))
 
 variable [IsProbabilityMeasure μ]
 
-/-- **The Itô residual** `M_t = f(t, B_t) − f(0, B_0) − ∫₀ᵗ (f_t + ½ f_xx)(s, B_s) ds`: what is left of
-`f(t, B_t) − f(0, B_0)` once the drift of Itô's formula is taken out. -/
+/-- **The Itô residual** `M_t = f(t, B_t) − f(0, B_0) − ∫₀ᵗ (f_t + ½ f_xx)(s, B_s) ds`: what is left
+of `f(t, B_t) − f(0, B_0)` once the drift of Itô's formula is taken out. -/
 noncomputable def itoResidual (f f_t f_xx : ℝ → ℝ → ℝ) (B : ℝ≥0 → Ω → ℝ) (t : ℝ≥0) (ω : Ω) : ℝ :=
   f (t : ℝ) (B t ω) - f 0 (B 0 ω)
     - ∫ s in Set.Ioc 0 t, (f_t (s : ℝ) (B s ω) + (1 / 2) * f_xx (s : ℝ) (B s ω)) ∂timeMeasure
@@ -205,7 +231,8 @@ theorem martingale_stoppedProcess_itoResidual (hB : IsPreBrownianReal B μ)
       (fun i ↦ {ω | ⊥ < sigmaSeq B N ω}.indicator (itoResidual f f_t f_xx B i)) (sigmaSeq B N))
       (augFiltration (μ := μ) hBmeas) μ := by
   set M := itoResidual f f_t f_xx B
-  have hMcont : ∀ ω, Continuous fun t ↦ M t ω := continuous_itoResidual hf_cont hf_t_cont hf_xx_cont hBcont
+  have hMcont : ∀ ω, Continuous fun t ↦ M t ω := continuous_itoResidual hf_cont hf_t_cont hf_xx_cont
+      hBcont
   have hMadapt : StronglyAdapted (augFiltration (μ := μ) hBmeas) M := fun i ↦ by
     refine (residual_stronglyMeasurable hBmeas hBcont hf_cont hf_t_cont hf_xx_cont i).mono ?_
     rw [augFiltration_apply]; exact le_sup_left
@@ -354,6 +381,7 @@ theorem ito_formula_unrestricted_local (hB : IsPreBrownianReal B μ)
           ∀ t : ℝ≥0, ∀ᵐ ω ∂μ, (t : WithTop ℝ≥0) ≤ σ N ω → M t ω = Mₙ t ω := by
   obtain ⟨M, hMcont, hloc, hI⟩ := ito_formula_unrestricted hB hBmeas hBcont hf_t hf_x hf_xx hf_cont
     hf_t_cont hf_x_cont hf_xx_cont
-  exact ⟨M, hMcont, hI, exists_martingale_eqOn hloc hMcont ((hI 0).mono fun ω h ↦ by simpa using h.symm)⟩
+  exact ⟨M, hMcont, hI, exists_martingale_eqOn hloc hMcont
+      ((hI 0).mono fun ω h ↦ by simpa using h.symm)⟩
 
 end MathFin

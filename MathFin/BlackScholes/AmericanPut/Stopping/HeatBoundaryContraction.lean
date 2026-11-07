@@ -5,19 +5,34 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.HeatBoundaryEquation
 public import Mathlib.Topology.ContinuousMap.Bounded.Normed
-public import Mathlib.Topology.MetricSpace.Contracting
+public import MathFin.BlackScholes.AmericanPut.Stopping.HeatBoundaryExtension
 
 /-! # Strict finite-time contraction of cross-boundary heat propagation
 
 Only part of the unit-mass boundary kernel arrives within any finite time.
 This strict bound is the input for solving the two coupled boundary equations.
 
-## Result
+## Main definitions
 
-Public entry points include `boundaryArrivalMass`, `boundaryArrivalMass_nonneg`,
-`boundaryArrivalMass_lt_one`, `heatBoundaryExtension_finite_bound`.
+* `boundaryArrivalMass`: the mass of the boundary kernel at depth `x` arriving within elapsed time
+  `D`, namely `∫ s in Ioc 0 D, heatBoundaryKernel s x`.
+* `CausalBoundaryData`: bounded continuous boundary data that vanish at every time `t ≤ a`.
+* `crossBoundaryMap`: the bounded continuous function `t ↦ χ t * heatBoundaryExtension g L t`: the
+  half-line extension of `g` read at depth `L`, multiplied by `χ`.
+* `crossBoundaryCausal`: `crossBoundaryMap χ L` as a self-map of `CausalBoundaryData a`.
+
+## Main results
+
+* `boundaryArrivalMass_nonneg`, `boundaryArrivalMass_lt_one`: for `0 < x`, the mass arriving
+  within time `D` is nonnegative, and for `0 ≤ D` it is strictly less than `1`.
+* `heatBoundaryExtension_finite_bound`: for `0 < x`, `t ≤ a + D`, `g` vanishing up to `a` and
+  bounded by `C`, the extension has norm at most `boundaryArrivalMass x D * C`.
+
+## Tags
+
+boundary kernel, contraction, finite time, heat propagation, arrival mass, MSC 35R35, MSC 91G20,
+JEL G13
 -/
 
 @[expose] public section

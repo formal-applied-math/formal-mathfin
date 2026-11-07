@@ -5,7 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Analysis.Complex.Exponential
 
 /-!
 # Arrow-Debreu state prices and the linear pricing functional
@@ -29,9 +30,13 @@ This is the **discrete-state core** of risk-neutral pricing: every formula in
 the library (BS, Black-76, binomial) is `V_0 = ∑ q_i · X_i` in disguise, with
 specific `q` given by the model.
 
-## Results
+## Main definitions
 
-* `statePricePricing`: definition `V_0 = ∑ q_i · X_i`.
+* `statePricePricing`: the linear pricing functional `V₀(X) = ∑ i ∈ s, q i * X i` from
+  Arrow-Debreu state prices `q` on the finite state set `s`.
+
+## Main results
+
 * `statePricePricing_zero`: `V_0(0) = 0`.
 * `statePricePricing_one`: `V_0(1) = ∑ q_i` (unit-payoff price = ∑ state prices).
 * `statePricePricing_const`: `V_0(c · 1) = c · ∑ q_i` (unit-payoff times constant).
@@ -41,6 +46,16 @@ specific `q` given by the model.
   `q_i = e^{−rT} · ν_i ⟹ V_0(X) = e^{−rT} · E^ν[X]`.
 * `statePricePricing_nonneg`: payoff non-negative + state prices non-negative ⟹
   price non-negative (no-arb monotonicity).
+
+## References
+
+* [Arrow (1953)][Arrow1953]
+* [Debreu (1959)][Debreu1959]
+
+## Tags
+
+Arrow–Debreu, state prices, risk-neutral measure, linear pricing, contingent claim,
+finite-state market, MSC 91G20, JEL D53, JEL G13
 -/
 
 @[expose] public section

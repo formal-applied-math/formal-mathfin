@@ -5,8 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
-public import MathFin.Foundations.PoissonCompensatedBilinear
+public import MathFin.Foundations.PoissonCompensatedIsometryAdapted
 
 /-!
 # The marked simple integrand as a vector space
@@ -32,6 +31,28 @@ sibling modules.
 Structure shape mirrors `ProbabilityTheory.SimpleProcess` (Degenne, BrownianMotion — a `Finsupp` of
 interval coefficients); the compensated-integral content is our own. The PRM field shape is
 consulted from `cgarryZA/LevyStochCalc` (Apache-2.0, cited).
+
+## Main definitions
+
+* `indexBox`: the space-time box `(s, t] × A` of an index `b = (s, t, A)`.
+* `IsLevySimple`: a finitely supported family `V` of coefficients indexed by boxes is a marked
+  simple integrand when each `V b` is adapted at the box start, each mark is measurable with
+  finite `ν`-intensity, and the coefficients are uniformly bounded.
+* `levySimpleModule`: the marked simple integrands as a submodule of
+  `(ℝ × ℝ × Set E) →₀ (Ω → ℝ)`.
+
+## Main results
+
+* `mem_levySimpleModule`: membership in `levySimpleModule N` is `IsLevySimple N`.
+* `IsLevySimple.measurable_coe`: every coefficient of a marked simple integrand is adapted at its
+  index's start, since off the support it is `0`.
+* `IsLevySimple.bound_coe`: a marked simple integrand has a nonnegative uniform bound `C` at every
+  index.
+
+## Tags
+
+marked simple integrand, space-time boxes, Lévy integrand, predictable simple process,
+Poisson integral domain, MSC 60G51, MSC 60H05, MSC 60G55
 -/
 
 @[expose] public section

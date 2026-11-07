@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.JumpDiffusionOptionPrices
 
 /-!
@@ -33,6 +32,32 @@ cumulant generating function of the log-return per unit time where `∫ e^{θx} 
 * `JumpDiffusionProcess.condExp_rpow`, power claims at each date `t ≤ T`: given `𝓕_t`, the
   discounted payoff `e^{−r(T−t)}S_T^p` has conditional expectation `S_t^p e^{(κ(p) − r)(T − t)}`,
   almost surely.
+
+## Main results
+
+* `jumpDiffusionIncrementLaw_map_const_mul`: `θ` times a jump-diffusion log-return over `τ` is
+  one with drift `θb`, volatility coefficient `θσ`, the same rate and jump law `ν.map (θ * ·)`.
+* `jumpDiffusionMeasure_map_jumps`: applying a measurable `g` to every jump size of the
+  canonical model gives the canonical model with jump law `ν.map g`.
+* `JumpDiffusionProcess.const_mul`: `θX` is a jump-diffusion with drift `θb`, volatility
+  coefficient `θσ`, the same rate and jump law `ν.map (θ * ·)`.
+* `JumpDiffusionProcess.martingale_exp_const_mul_sub`: if `∫ e^{θx} dν < ∞`,
+  `t ↦ e^{θX_t − κ(θ)t}` is a martingale, with `κ` the Laplace exponent
+  `jumpDiffusionExponent`.
+* `JumpDiffusionProcess.martingale_iff_exponent_one`: for `∫ eˣ dν < ∞` and `S₀ ≠ 0`, the
+  discounted price `e^{−rt} S₀ e^{X_t}` is a martingale iff `κ(1) = r`.
+* `JumpDiffusionProcess.condExp_rpow`: for `S₀ > 0`, `∫ e^{px} dν < ∞` and `t ≤ T`, the
+  conditional expectation of `e^{−r(T−t)} S_T^p` given `𝓕_t` is `S_t^p e^{(κ(p) − r)(T − t)}`
+  almost surely.
+
+## References
+
+* [Cont and Tankov, *Financial Modelling with Jump Processes*][ContTankov2004]
+
+## Tags
+
+exponential martingale, Laplace exponent, scaling of jump-diffusion, Lévy exponent,
+compensated jumps, MSC 60G51, MSC 60G44, MSC 91G20
 -/
 
 @[expose] public section

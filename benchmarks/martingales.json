@@ -12,6 +12,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.2.12",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 2.2.12"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full textbook statement: existence AND a.e.-uniqueness of the decomposition. Mathlib provides all component lemmas (martingalePart/predictablePart, their martingale/predictability/zero facts, and the two essential-uniqueness lemmas martingalePart_add_ae_eq / predictablePart_add_ae_eq); this library's contribution (MathFin.Foundations.DoobDecomposition) is the single existence-plus-uniqueness packaging, which Mathlib never states. Previous entry stated only the near-definitional sum identity. Axioms-clean."
@@ -28,6 +34,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.3.6",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 2.3.6"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the conditional-expectation-form optional sampling INEQUALITY for submartingales, stoppedValue f sigma <=ae mu[stoppedValue f tau | F_sigma] for bounded stopping times sigma <= tau <= n (Foundations/OptionalSamplingInequality.lean) — absent from Mathlib at the pin (which has the martingale EQUALITY, Martingale.stoppedValue_ae_eq_condExp_of_le, and only the expectation-form submartingale inequality). Derivation = Doob decomposition: the martingale part transports by Mathlib's optional sampling equality; the compensator predictablePart is a.s. nondecreasing (its increments are mu[f_{k+1} - f_k | F_k] >= 0, exactly the submartingale property), so its stopped values compare pathwise and condExp_mono transports the comparison. Replaces the former wrapper around the expectation-form Submartingale.expected_stoppedValue_mono. Axioms-clean."
@@ -44,6 +56,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.4.3",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 2.4.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "library_wrapper",
         "formalization_scope": "Direct Lean wrapper around an existing library theorem closely matching the benchmark statement."
@@ -60,6 +78,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.5.1",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 2.5.1"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full statement: a.e. convergence (Mathlib's upcrossing-based ae_tendsto_limitProcess) AND L²-norm convergence. The L² half is NOT in Mathlib; MathFin.Foundations.L2MartingaleConvergence derives it by manufacturing uniform integrability in L² from this library's Doob L² maximal inequality (Martingale.eLpNorm_norm_runMax_le, lifted by monotone convergence to an L² envelope dominating every f_n: MeasureTheory.LpDominator) and Degenne's uniformIntegrable_of_dominated_singleton, closed by Vitali. Differentiates this entry from mart-thm-2.5.3 (the a.s.-only Mathlib wrapper). Axioms-clean."
@@ -76,6 +100,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Proposition 2.5.5",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Proposition 2.5.5"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "library_wrapper",
         "formalization_scope": "Direct Lean wrapper around an existing library theorem closely matching the benchmark statement."
@@ -92,6 +122,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.2.9",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 2.2.9"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Real Lean derivation of Theorem 2.2.9: re-export of MathFin.martingaleTransform_isMartingale (MathFin/Foundations/MartingaleTransform.lean). The boundedness hypothesis is the a.e. form (∃ K, ∀ᵐ ω ∂μ, ∀ n, |A n ω| ≤ K) — weaker than the textbook's pointwise bound, so the statement is strictly stronger. Proof: the martingale_of_condExp_sub_eq_zero_nat characterization; the transform increment A_{n+1}(M_{n+1} − M_n) has vanishing conditional expectation via condExp_mul_of_stronglyMeasurable_left (pull-out) + the martingale increment property of M; integrability of each summand from the a.e. bound. Axioms-clean."
@@ -108,6 +144,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.4.6",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 2.4.6"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of Doob's L^p maximal inequality. End-to-end derivation (no sorries, no library wrapper) from Mathlib primitives: layer cake (MeasureTheory.lintegral_rpow_eq_lintegral_meas_le_mul) + Doob's L^1 maximal inequality (MeasureTheory.maximal_ineq) + Fubini/Tonelli swap (MeasureTheory.lintegral_lintegral_swap) + Hölder inequality (ENNReal.lintegral_mul_le_Lp_mul_Lq with HolderConjugate p (p/(p-1))) + rpow inversion (ENNReal.rpow_add_of_nonneg + ENNReal.div_le_iff) + truncation argument (min(runMax, K) + monotone convergence via lintegral_iSup) for the A=infty, B<infty corner. Lives at MathFin/Foundations/DoobLpMaximalInequality.lean (18 helper lemmas + MeasureTheory.maximal_ineq_Lp). Axioms-clean: depends only on propext, Classical.choice, Quot.sound.",
@@ -130,6 +172,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.5.3",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 2.5.3"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "library_wrapper",
         "formalization_scope": "library_wrapper of the a.s.-convergence theorem; faithful for the a.s. claim."
@@ -146,6 +194,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.6.7",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 2.6.7"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Real derivation of FTAP (⇒ direction), the library theorem MathFin.IsEMM.noArbitrage is stated at the horizon T (the price frozen at T is a Q-martingale; strategy predictable and bounded up to T, conclusion gains =ᵐ 0); this entry restates it for a Q-martingale on all of ℕ and bounded φ with the conclusion that the positive set is null, and derives it from that theorem, which cuts the strategy off at T, applies the martingale-transform theorem (shared with mart-thm-2.2.9 via `import MathFin.Foundations.MartingaleTransform`, not duplicated inline) to the frozen price under the EMM `Q`, then uses `Q ≪ P`, `ae_zero_of_nonneg_of_integral_zero` (NoArbitrageCore), and `P ≪ Q` to derive that arbitrage sets have `P`-measure zero. This one theorem is also the forward direction of the one-period vector FTAP and of the finite-Ω FTAP."
@@ -162,6 +216,15 @@
       "metadata": {
         "chapter": 5,
         "reference": "Exponential martingales of processes with independent increments (Cont & Tankov (2004), Financial Modelling with Jump Processes; Saporito, Remark 5.1.6 for Brownian motion)",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          },
+          {
+            "key": "Saporito",
+            "locator": "Remark 5.1.6"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. e^{X_t − ψ(t)} splits as e^{X_s − ψ(s)} · e^{ψ(s) − ψ(t)}e^{X_t − X_s}. The second factor is a function of the increment, independent of 𝓕_s, so its conditional expectation is its mean, 1 (condExp_indep_eq); the first is 𝓕_s-measurable and comes out of the conditional expectation (condExp_mul_of_stronglyMeasurable_left). Integrability of the increment factor follows from its integral being nonzero. Lives in MathFin/Foundations/ExpMartingaleIndepIncrements.lean. Axioms-clean."

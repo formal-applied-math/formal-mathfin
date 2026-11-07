@@ -22,7 +22,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.Order.Archimedean.Real.Basic
 
 /-!
 # FTAP both directions, two-state market (after Nagy 2026)
@@ -40,13 +41,18 @@ return under `Q`).
 **Arbitrage** is a portfolio `θ : ℝ` with `θ · z` componentwise non-
 negative and strictly positive in at least one state.
 
-## Results
+## Main definitions
 
-* `HasEMM_two_state`: definition of EMM existence.
-* `HasArbitrage_two_state`: definition of arbitrage.
+* `HasEMMTwoState`: `(z_up, z_down)` admits a strictly positive probability `(q_up, q_down)`
+  with `q_up · z_up + q_down · z_down = 0`.
+* `HasArbitrageTwoState`: a portfolio `θ : ℝ` with `θ · z` componentwise non-negative and
+  strictly positive in at least one state.
+* `emmWeightUp`, `emmWeightDown`: the weights `−z_down / (z_up − z_down)` and
+  `z_up / (z_up − z_down)` used to construct the EMM.
+
+## Main results
+
 * `noArbitrage_of_emm` (Nagy 7.1, forward): EMM exists ⟹ no arbitrage.
-* `emmWeightUp` / `emmWeightDown`: the named canonical backward-FTAP
-  weights `−z_down / (z_up − z_down)`, `z_up / (z_up − z_down)`.
 * `emm_of_signs` (Nagy 7.3, backward construction): if `z_up > 0` and
   `z_down < 0`, the named weights form an EMM.
 * `emm_of_signs_swapped` / `emm_of_trivial_market`: the mirrored sign
@@ -54,12 +60,17 @@ negative and strictly positive in at least one state.
 
 The packaged two-state biconditional and Nagy 7.2 (no arbitrage and `z ≠ 0` ⟹
 opposite strict signs) are proved in `Foundations/FTAPMultiState.lean`
-(`hasEMM_two_state_iff_not_hasArbitrage`,
-`signs_opposite_of_not_hasArbitrage_two_state`): this market is the `N = 2`, `M = 1`
-multi-state market (`hasEMM_two_state_iff_multi`, `hasArbitrage_two_state_iff_multi`), so
+(`hasEMMTwoState_iff_not_hasArbitrage`,
+`signs_opposite_of_not_hasArbitrageTwoState`): this market is the `N = 2`, `M = 1`
+multi-state market (`hasEMMTwoState_iff_multi`, `hasArbitrageTwoState_iff_multi`), so
 they are instances of the multi-state FTAP. The backward *construction* here is what
 `Bridges/PricingKernel` consumes: it builds the discounted state prices directly from the
 named weights.
+
+## Tags
+
+fundamental theorem of asset pricing, two-state market, arbitrage, risk-neutral probability,
+one-period binomial, JEL G13, MSC 91G20
 -/
 
 @[expose] public section
@@ -69,15 +80,15 @@ namespace MathFin
 /-- **EMM existence in a two-state market**: there exists a strictly
 positive probability `(q_up, q_down)` summing to `1` such that
 `q_up · z_up + q_down · z_down = 0` (zero risk-neutral excess return). The `N = 2`,
-`M = 1` case of `HasEMM_multi_state` (`hasEMM_two_state_iff_multi`). -/
-def HasEMM_two_state (z_up z_down : ℝ) : Prop :=
+`M = 1` case of `HasEMMMultiState` (`hasEMMTwoState_iff_multi`). -/
+def HasEMMTwoState (z_up z_down : ℝ) : Prop :=
   ∃ q_up q_down : ℝ,
     0 < q_up ∧ 0 < q_down ∧ q_up + q_down = 1 ∧
     q_up * z_up + q_down * z_down = 0
 
 /-- **Arbitrage in a two-state market**: a portfolio `θ : ℝ` with `θ·z`
 componentwise non-negative and strictly positive in at least one state. -/
-def HasArbitrage_two_state (z_up z_down : ℝ) : Prop :=
+def HasArbitrageTwoState (z_up z_down : ℝ) : Prop :=
   ∃ θ : ℝ, 0 ≤ θ * z_up ∧ 0 ≤ θ * z_down ∧
     (0 < θ * z_up ∨ 0 < θ * z_down)
 
@@ -88,8 +99,8 @@ Proof: under EMM, any portfolio satisfies `q_up · (θ z_up) + q_down · (θ
 z_down) = θ · 0 = 0`. If both terms are non-negative and one is strictly
 positive, the EMM-weighted sum is strictly positive — contradiction. -/
 theorem noArbitrage_of_emm (z_up z_down : ℝ)
-    (h_emm : HasEMM_two_state z_up z_down) :
-    ¬ HasArbitrage_two_state z_up z_down := by
+    (h_emm : HasEMMTwoState z_up z_down) :
+    ¬ HasArbitrageTwoState z_up z_down := by
   obtain ⟨q_up, q_down, hq_up_pos, hq_down_pos, _hq_sum, h_zero⟩ := h_emm
   rintro ⟨θ, h_up_nn, h_down_nn, h_one_pos⟩
   -- q_up * (θ * z_up) + q_down * (θ * z_down) = θ * (q_up * z_up + q_down * z_down) = 0
@@ -126,7 +137,7 @@ noncomputable def emmWeightDown (z_up z_down : ℝ) : ℝ :=
 z_down)` form an EMM. -/
 theorem emm_of_signs (z_up z_down : ℝ)
     (h_up_pos : 0 < z_up) (h_down_neg : z_down < 0) :
-    HasEMM_two_state z_up z_down := by
+    HasEMMTwoState z_up z_down := by
   have h_diff_pos : 0 < z_up - z_down := by linarith
   refine ⟨emmWeightUp z_up z_down, emmWeightDown z_up z_down, ?_, ?_, ?_, ?_⟩ <;>
       simp only [emmWeightUp, emmWeightDown]
@@ -141,7 +152,7 @@ theorem emm_of_signs (z_up z_down : ℝ)
 0`, the same construction (with roles reversed) yields an EMM. -/
 theorem emm_of_signs_swapped (z_up z_down : ℝ)
     (h_up_neg : z_up < 0) (h_down_pos : 0 < z_down) :
-    HasEMM_two_state z_up z_down := by
+    HasEMMTwoState z_up z_down := by
   have h_diff_pos : 0 < z_down - z_up := by linarith
   refine ⟨z_down / (z_down - z_up), -z_up / (z_down - z_up), ?_, ?_, ?_, ?_⟩
   · exact div_pos h_down_pos h_diff_pos
@@ -152,7 +163,7 @@ theorem emm_of_signs_swapped (z_up z_down : ℝ)
 /-- **Trivial market**: when `z_up = z_down = 0`, the uniform measure
 `(1/2, 1/2)` is an EMM and there is no arbitrage. -/
 theorem emm_of_trivial_market :
-    HasEMM_two_state 0 0 :=
+    HasEMMTwoState 0 0 :=
   ⟨1 / 2, 1 / 2, by norm_num, by norm_num, by norm_num, by norm_num⟩
 
 end MathFin

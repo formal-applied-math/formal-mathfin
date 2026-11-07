@@ -5,7 +5,12 @@ Authors: Robert Martin
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.Deriv.MeanValue
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # A two-sided Cauchy comparison lemma for a factored real ODE
@@ -14,9 +19,15 @@ If `(D-u)(D-v) H ≥ 0` on an interval containing zero, and `H(0)=H'(0)=0`,
 then `H ≥ 0` on that interval. Two integrating factors reduce the proof to
 ordinary derivative monotonicity. No Cauchy-kernel representation is assumed.
 
-## Result
+## Main results
 
-Public entry points include `ode_nonneg_of_factored_forcing`.
+* `ode_nonneg_of_factored_forcing`: if `H` is smooth, `H 0 = 0`, `H' 0 = 0` and
+  `H'' − (u + v) H' + u v H ≥ 0` on `[a, b]` with `a ≤ 0 ≤ b`, then `H ≥ 0` on `[a, b]`.
+
+## Tags
+
+ODE comparison, integrating factor, Cauchy problem, factored differential operator, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

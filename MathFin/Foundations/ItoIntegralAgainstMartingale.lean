@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.ItoIntegralLocality
 public import MathFin.Foundations.PredictableDensityGeneral
+public import Mathlib.CategoryTheory.Countable
 
 /-! # The Itô integral against an Itô integral, and the chain rule
 
@@ -31,7 +32,7 @@ of `M` lives in `ItoIntegralProcessContinuousModification`, not here. The integr
   `∫ψ dM := ∫ ψφ dB`,
 
 obtained by composing the multiplication isometry `ψ ↦ ψφ` of `LpMulIsometry` with
-`itoIntegralCLM_T`. Because both factors are isometries, so is the composite:
+`itoIntegralCLM`. Because both factors are isometries, so is the composite:
 
   `‖∫ψ dM‖_{L²(μ)} = ‖ψ‖_{L²(⟨M⟩)}`,
 
@@ -59,8 +60,8 @@ remains as the density statement it is built from.)
 
 The proof of the elementary identity is short because the locality machinery already exists:
 `1_{(a,b]}·φ` is `restrictAfterCLM a φ − restrictAfterCLM b φ`, and its integral is `M_b − M_a`
-by `itoIntegralCLM_T_bandRestrict`; the `𝓕_a`-measurable factor `Z` passes through by
-`itoIntegralCLM_T_smulAdapted`.
+by `itoIntegralCLM_bandRestrict`; the `𝓕_a`-measurable factor `Z` passes through by
+`itoIntegralCLM_smulAdapted`.
 
 ## Upstream
 
@@ -73,13 +74,21 @@ here satisfies it, for `M` stopped at `T`:
 extension in the upstream sense is not assumed `L²`-continuous, so the characterisation's
 uniqueness clause is proved by a monotone-class argument instead.
 
-## Result
+## Main definitions
 
-* `bracketMeasure` — `d⟨M⟩ = φ²·trim_T`, and its finiteness.
+* `bracketMeasure`: the measure `φ² · trim_T` on the predictable σ-algebra, the domain of
+  integration against `M = φ●B`.
+* `itoIntegralAgainstCLM`: the Itô integral against `M = φ●B` as a continuous linear map out of
+  the integrands square-integrable against the bracket; `itoIntegralCLM` composed with
+  multiplication by `φ`.
+* `bandRestrict`: the restriction `1_{(a,b]} · φ` as an element of the flat predictable `L²`.
+* `bandLp`: the band of a simple process `V` at a rectangle `p`, as an element of `L²(⟨M⟩)`.
+
+## Main results
+
 * `norm_sq_increment_eq_bracket` — **the bracket earns its name**:
   `𝔼[(M_b − M_a)²] = ⟨M⟩((a,b] × Ω)`.
-* `itoIntegralCLM_T_bandRestrict` — the band integral: `∫ 𝟙_{(a,b]}·φ dB = M_b − M_a`.
-* `itoIntegralAgainstCLM` — `∫· dM`, as a CLM on `L²(⟨M⟩)`.
+* `itoIntegralCLM_bandRestrict` — the band integral: `∫ 𝟙_{(a,b]}·φ dB = M_b − M_a`.
 * `itoIntegralAgainst_eq_itoIntegral` — **the chain rule**: `∫ψ dM = ∫ ψφ dB`.
 * `norm_itoIntegralAgainstCLM` — the Itô isometry against `M`.
 * `itoIntegralAgainst_elementary` — **the identification**, on a single band:
@@ -90,6 +99,17 @@ uniqueness clause is proved by a monotone-class argument instead.
   `itoIntegralAgainst_unique`, the density statement it factors through.
 * `bracketMeasure_mulLI` — `d⟨ψ●M⟩ = ψ² d⟨M⟩`: the construction is closed under itself, the
   brackets composing the way the integrands do.
+
+## References
+
+* [I. Karatzas and S. E. Shreve, *Brownian Motion and Stochastic Calculus*][KaratzasShreve1991],
+  3.2; 3.2.20
+* [Revuz and Yor, *Continuous Martingales and Brownian Motion*][RevuzYor], IV.2
+
+## Tags
+
+stochastic integral, integral against a martingale, chain rule, bracket measure,
+quadratic variation, Itô isometry, Riemann–Stieltjes sums, MSC 60H05, MSC 60G44
 -/
 
 @[expose] public section
@@ -114,57 +134,57 @@ quadratic variation, or the conditional form of that identity. Also proved: the 
 `norm_itoIntegralAgainstCLM`, and `bracketMeasure_mulLI`, that it composes the way a bracket
 should. -/
 noncomputable def bracketMeasure (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     @Measure (ℝ≥0 × Ω)
       (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable :=
-  sqWeight (trimMeasure_T (μ := μ) T hBmeas) (⇑φ)
+  sqWeight (trimMeasure (μ := μ) T hBmeas) (⇑φ)
 
 omit [IsProbabilityMeasure μ] in
 /-- `bracketMeasure` unfolded — the bridge to `LpMulIsometry`'s generic API. -/
 theorem bracketMeasure_eq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     bracketMeasure (μ := μ) T hBmeas φ
-      = sqWeight (trimMeasure_T (μ := μ) T hBmeas) (⇑φ) := rfl
+      = sqWeight (trimMeasure (μ := μ) T hBmeas) (⇑φ) := rfl
 
 omit [IsProbabilityMeasure μ] in
 /-- The bracket measure is finite, with total mass `‖φ‖²` — the energy of the driver. -/
 instance instIsFiniteMeasureBracketMeasure (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     IsFiniteMeasure (bracketMeasure (μ := μ) T hBmeas φ) :=
   isFiniteMeasure_sqWeight T hBmeas (Lp.memLp φ)
 
 /-! ### The integral against `M` -/
 
 /-- **The Itô integral against `M = φ●B`**, as a continuous linear map from the integrands
-square-integrable against the bracket. It is `itoIntegralCLM_T` precomposed with
+square-integrable against the bracket. It is `itoIntegralCLM` precomposed with
 multiplication by the driver, so the chain rule holds by construction and the isometry is
 inherited from the two factors. -/
 noncomputable def itoIntegralAgainstCLM (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
-    (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas φ) →L[ℝ] Lp ℝ 2 μ :=
-  (itoIntegralCLM_T hB T hBmeas).comp
-    (mulLI (trimMeasure_T (μ := μ) T hBmeas)
+  (itoIntegralCLM hB T hBmeas).comp
+    (mulLI (trimMeasure (μ := μ) T hBmeas)
       (Lp.stronglyMeasurable φ).measurable).toContinuousLinearMap
 
 /-- **The chain rule, in bundled form**: integrating `ψ` against `M` is integrating `ψφ`
 against `B`. -/
 theorem itoIntegralAgainstCLM_apply (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
     (ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas φ)) :
     itoIntegralAgainstCLM hB T hBmeas φ ψ
-      = itoIntegralCLM_T hB T hBmeas
-          (mulLI (trimMeasure_T (μ := μ) T hBmeas)
+      = itoIntegralCLM hB T hBmeas
+          (mulLI (trimMeasure (μ := μ) T hBmeas)
             (Lp.stronglyMeasurable φ).measurable ψ) := rfl
 
 /-- **The chain rule** in the form a caller uses it: if `χ` is any predictable `L²` integrand
 a.e. equal to `φ·ψ`, then `∫ψ dM = ∫χ dB`. -/
 theorem itoIntegralAgainst_eq_itoIntegral (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
     (ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas φ))
-    (χ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
-    (hχ : ⇑χ =ᵐ[trimMeasure_T (μ := μ) T hBmeas]
+    (χ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
+    (hχ : ⇑χ =ᵐ[trimMeasure (μ := μ) T hBmeas]
       fun z ↦ (φ : ℝ≥0 × Ω → ℝ) z * (ψ : ℝ≥0 × Ω → ℝ) z) :
-    itoIntegralAgainstCLM hB T hBmeas φ ψ = itoIntegralCLM_T hB T hBmeas χ := by
+    itoIntegralAgainstCLM hB T hBmeas φ ψ = itoIntegralCLM hB T hBmeas χ := by
   rw [itoIntegralAgainstCLM_apply]
   congr 1
   refine Lp.ext ?_
@@ -173,10 +193,10 @@ theorem itoIntegralAgainst_eq_itoIntegral (T : ℝ≥0) (hBmeas : ∀ t, Measura
 /-- **The Itô isometry against `M`**: `‖∫ψ dM‖_{L²(μ)} = ‖ψ‖_{L²(⟨M⟩)}`. Both factors of the
 composite are isometries. -/
 theorem norm_itoIntegralAgainstCLM (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
     (ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas φ)) :
     ‖itoIntegralAgainstCLM hB T hBmeas φ ψ‖ = ‖ψ‖ := by
-  rw [itoIntegralAgainstCLM_apply, itoIntegralCLM_T_norm]
+  rw [itoIntegralAgainstCLM_apply, itoIntegralCLM_norm]
   exact LinearIsometry.norm_map _ _
 
 /-! ### The elementary identity that earns the name -/
@@ -184,15 +204,15 @@ theorem norm_itoIntegralAgainstCLM (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B 
 /-- `1_{(a,b]}·φ`, as an element of the flat predictable `L²`: the difference of the two
 restrictions the locality file already provides. -/
 noncomputable def bandRestrict (T a b : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
+    Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) :=
   restrictAfterCLM T a hBmeas φ - restrictAfterCLM T b hBmeas φ
 
 omit [IsProbabilityMeasure μ] in
 /-- `bandRestrict` is what its name says: `φ` cut down to the time band `(a, b]`. -/
 theorem coeFn_bandRestrict (T a b : ℝ≥0) (hab : a ≤ b) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    ⇑(bandRestrict (μ := μ) T a b hBmeas φ) =ᵐ[trimMeasure_T (μ := μ) T hBmeas]
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
+    ⇑(bandRestrict (μ := μ) T a b hBmeas φ) =ᵐ[trimMeasure (μ := μ) T hBmeas]
       fun z ↦ (Set.Ioc a b).indicator (fun _ ↦ (1 : ℝ)) z.1 * (φ : ℝ≥0 × Ω → ℝ) z := by
   simp only [bandRestrict]
   filter_upwards [Lp.coeFn_sub (restrictAfterCLM T a hBmeas φ) (restrictAfterCLM T b hBmeas φ),
@@ -213,8 +233,8 @@ omit [IsProbabilityMeasure μ] in
 /-- `bandRestrict` vanishes on `[0, a]`, which is the support hypothesis the `𝓕_a`-linearity
 of the Itô integral asks for. -/
 theorem bandRestrict_eq_zero_of_le (T a b : ℝ≥0) (hab : a ≤ b)
-    (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), z.1 ≤ a →
+    (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
+    ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas), z.1 ≤ a →
       (bandRestrict (μ := μ) T a b hBmeas φ : ℝ≥0 × Ω → ℝ) z = 0 := by
   filter_upwards [coeFn_bandRestrict (μ := μ) T a b hab hBmeas φ] with z hz hza
   rw [hz, Set.indicator_of_notMem
@@ -224,18 +244,18 @@ theorem bandRestrict_eq_zero_of_le (T a b : ℝ≥0) (hab : a ≤ b)
 
   `∫₀ᵀ 𝟙_{(a,b]}·φ dB = M_b − M_a`,
 
-by locality (`itoIntegralCLM_T_restrictAfterCLM`, applied to each endpoint). Wanted twice:
+by locality (`itoIntegralCLM_restrictAfterCLM`, applied to each endpoint). Wanted twice:
 inside the elementary identification below, and for the second moment
 `norm_sq_increment_eq_bracket`. -/
-theorem itoIntegralCLM_T_bandRestrict (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+theorem itoIntegralCLM_bandRestrict (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
     {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) :
-    itoIntegralCLM_T hB T hBmeas (bandRestrict (μ := μ) T a b hBmeas φ)
+    itoIntegralCLM hB T hBmeas (bandRestrict (μ := μ) T a b hBmeas φ)
       = itoProcessCLM hB T b hBmeas φ - itoProcessCLM hB T a hBmeas φ := by
   simp only [bandRestrict]
   rw [map_sub,
-    itoIntegralCLM_T_restrictAfterCLM (hB := hB) T a (hab.trans hbT) hBmeas φ,
-    itoIntegralCLM_T_restrictAfterCLM (hB := hB) T b hbT hBmeas φ]
+    itoIntegralCLM_restrictAfterCLM (hB := hB) T a (hab.trans hbT) hBmeas φ,
+    itoIntegralCLM_restrictAfterCLM (hB := hB) T b hbT hBmeas φ]
   abel
 
 /-- **The characterisation.** On an elementary integrand `Z·1_{(a,b]}` with `Z` bounded and
@@ -243,7 +263,7 @@ theorem itoIntegralCLM_T_bandRestrict (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
 Riemann–Stieltjes sum. This is what makes `itoIntegralAgainstCLM` the stochastic integral
 against `M` rather than a name for a formula. -/
 theorem itoIntegralAgainst_elementary (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
     {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T)
     (Z : Ω → ℝ) (hZm : Measurable[ItoIntegralL2.natFiltration hBmeas a] Z)
     (C : ℝ) (hZb : ∀ ω, |Z ω| ≤ C)
@@ -254,12 +274,12 @@ theorem itoIntegralAgainst_elementary (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
   -- the scaled band integrand, as an `L²` class
   set W := smulAdapted T a hBmeas Z hZm C hZb (bandRestrict (μ := μ) T a b hBmeas φ) with hW
   -- `mulLI ψ` and `W` are the same integrand
-  have hmul : itoIntegralAgainstCLM hB T hBmeas φ ψ = itoIntegralCLM_T hB T hBmeas W := by
+  have hmul : itoIntegralAgainstCLM hB T hBmeas φ ψ = itoIntegralCLM hB T hBmeas W := by
     refine itoIntegralAgainst_eq_itoIntegral T hBmeas φ ψ W ?_
     -- move the a.e. hypothesis across the weight: it is only `bracketMeasure`-a.e.
-    have hcross : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas),
+    have hcross : ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas),
         (φ : ℝ≥0 × Ω → ℝ) z ≠ 0 → (ψ : ℝ≥0 × Ω → ℝ) z = elemIntegrand a b Z z := by
-      have := (ae_withDensity_iff (μ := trimMeasure_T (μ := μ) T hBmeas)
+      have := (ae_withDensity_iff (μ := trimMeasure (μ := μ) T hBmeas)
         (measurable_sqDensity (Lp.stronglyMeasurable φ).measurable)).1 hψ
       filter_upwards [this] with z hz hφz
       exact hz (sqDensity_ne_zero hφz)
@@ -273,9 +293,9 @@ theorem itoIntegralAgainst_elementary (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
     · simp only [hz hφz, elemIntegrand]
       ring
   rw [hmul]
-  -- pull `Z` out, then read the band integral off `itoIntegralCLM_T_bandRestrict`
-  have hband := itoIntegralCLM_T_bandRestrict (hB := hB) T hBmeas φ hab hbT
-  filter_upwards [itoIntegralCLM_T_smulAdapted (hB := hB) T a hBmeas Z hZm C hZb
+  -- pull `Z` out, then read the band integral off `itoIntegralCLM_bandRestrict`
+  have hband := itoIntegralCLM_bandRestrict (hB := hB) T hBmeas φ hab hbT
+  filter_upwards [itoIntegralCLM_smulAdapted (hB := hB) T a hBmeas Z hZm C hZb
       (bandRestrict (μ := μ) T a b hBmeas φ)
       (bandRestrict_eq_zero_of_le (μ := μ) T a b hab hBmeas φ),
     Lp.coeFn_sub (itoProcessCLM hB T b hBmeas φ) (itoProcessCLM hB T a hBmeas φ)] with ω h1 h2
@@ -332,7 +352,7 @@ omit [IsProbabilityMeasure μ] in
 /-- A band of a simple process is `L²` against the bracket: it is bounded, and the bracket
 measure is finite. -/
 theorem memLp_elemIntegrand_of_mem_support (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (V : TBoundedSP T hBmeas)
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (V : TBoundedSP T hBmeas)
     {p : ℝ≥0 × ℝ≥0} (hp : p ∈ V.val.value.support) :
     MemLp (elemIntegrand p.1 p.2 (V.val.value p)) 2
       (bracketMeasure (μ := μ) T hBmeas φ) := by
@@ -347,7 +367,7 @@ open scoped Classical in
 construction: off the support of `V.value` the hypotheses that make the band `L²` are
 unavailable, and the band is `0` there anyway. -/
 noncomputable def bandLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (V : TBoundedSP T hBmeas)
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (V : TBoundedSP T hBmeas)
     (p : ℝ≥0 × ℝ≥0) : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas φ) :=
   if h : MemLp (elemIntegrand p.1 p.2 (V.val.value p)) 2
       (bracketMeasure (μ := μ) T hBmeas φ) then h.toLp _ else 0
@@ -356,7 +376,7 @@ omit [IsProbabilityMeasure μ] in
 open scoped Classical in
 /-- On the support, `bandLp` is the band. -/
 theorem coeFn_bandLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (V : TBoundedSP T hBmeas)
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (V : TBoundedSP T hBmeas)
     {p : ℝ≥0 × ℝ≥0} (hp : p ∈ V.val.value.support) :
     ⇑(bandLp T hBmeas φ V p) =ᵐ[bracketMeasure (μ := μ) T hBmeas φ]
       elemIntegrand p.1 p.2 (V.val.value p) := by
@@ -367,12 +387,12 @@ theorem coeFn_bandLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 single-band identity above be summed into a statement about a whole simple process — and hence
 what connects it to the dense family of `PredictableDensityGeneral`. -/
 theorem simpleAssemblyOfMeasure_eq_sum_bands (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (V : TBoundedSP T hBmeas) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (V : TBoundedSP T hBmeas) :
     simpleAssemblyOfMeasure T hBmeas (bracketMeasure (μ := μ) T hBmeas φ) V
       = ∑ p ∈ V.val.value.support, bandLp T hBmeas φ V p := by
   refine Lp.ext ?_
   have hbot : ∀ᵐ z ∂(bracketMeasure (μ := μ) T hBmeas φ), z.1 ≠ 0 :=
-    (withDensity_absolutelyContinuous (trimMeasure_T (μ := μ) T hBmeas)
+    (withDensity_absolutelyContinuous (trimMeasure (μ := μ) T hBmeas)
       (fun z ↦ ‖(φ : ℝ≥0 × Ω → ℝ) z‖ₑ ^ 2)).ae_le (ae_fst_ne_zero T hBmeas)
   have hsum : ⇑(∑ p ∈ V.val.value.support, bandLp T hBmeas φ V p)
       =ᵐ[bracketMeasure (μ := μ) T hBmeas φ]
@@ -398,7 +418,7 @@ returns the sum of its band increments,
 the sum one would write down by hand. This is `itoIntegralAgainst_elementary` summed over
 `simpleAssemblyOfMeasure_eq_sum_bands`. -/
 theorem itoIntegralAgainst_simpleProcess (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (V : TBoundedSP T hBmeas) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (V : TBoundedSP T hBmeas) :
     ⇑(itoIntegralAgainstCLM hB T hBmeas φ
         (simpleAssemblyOfMeasure T hBmeas (bracketMeasure (μ := μ) T hBmeas φ) V))
       =ᵐ[μ] fun ω ↦ ∑ p ∈ V.val.value.support, V.val.value p ω
@@ -423,7 +443,7 @@ theorem itoIntegralAgainst_simpleProcess (T : ℝ≥0) (hBmeas : ∀ t, Measurab
 `itoIntegralAgainst_elementary` identifying those values as the Riemann–Stieltjes sums, this
 says the integral against `M` is the unique continuous linear extension of them. -/
 theorem itoIntegralAgainst_unique (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
     (I : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas φ) →L[ℝ] Lp ℝ 2 μ)
     (hI : ∀ V : TBoundedSP T hBmeas,
       I (simpleAssemblyOfMeasure T hBmeas (bracketMeasure (μ := μ) T hBmeas φ) V)
@@ -431,7 +451,7 @@ theorem itoIntegralAgainst_unique (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t
             (simpleAssemblyOfMeasure T hBmeas (bracketMeasure (μ := μ) T hBmeas φ) V)) :
     I = itoIntegralAgainstCLM hB T hBmeas φ := by
   -- instance search does not unfold `bracketMeasure`, so hand it the unfolded form
-  have : IsFiniteMeasure (sqWeight (trimMeasure_T (μ := μ) T hBmeas) (⇑φ)) :=
+  have : IsFiniteMeasure (sqWeight (trimMeasure (μ := μ) T hBmeas) (⇑φ)) :=
     instIsFiniteMeasureBracketMeasure (μ := μ) T hBmeas φ
   refine ContinuousLinearMap.ext fun ψ ↦ ?_
   exact congrFun (DenseRange.equalizer
@@ -443,7 +463,7 @@ value on every simple process is that process's Riemann–Stieltjes sum against 
 `itoIntegralAgainstCLM`. The hypothesis names no stochastic integral: it is the finite sum of
 increments, which is what "the integral extends the elementary one" means. -/
 theorem itoIntegralAgainst_unique_of_riemannStieltjes (T : ℝ≥0)
-    (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+    (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
     (I : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas φ) →L[ℝ] Lp ℝ 2 μ)
     (hI : ∀ V : TBoundedSP T hBmeas,
       ⇑(I (simpleAssemblyOfMeasure T hBmeas (bracketMeasure (μ := μ) T hBmeas φ) V))
@@ -465,18 +485,18 @@ itself rather than needing a new construction at each level.
 Densities multiply (`LpMulIsometry.sqWeight_sqWeight`); the only care is that the driver is an
 `Lp` class, so the weight has to be moved along an a.e. identity first. -/
 theorem bracketMeasure_mulLI (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
     (ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas φ)) :
     bracketMeasure (μ := μ) T hBmeas
-        (mulLI (trimMeasure_T (μ := μ) T hBmeas) (Lp.stronglyMeasurable φ).measurable ψ)
+        (mulLI (trimMeasure (μ := μ) T hBmeas) (Lp.stronglyMeasurable φ).measurable ψ)
       = sqWeight (bracketMeasure (μ := μ) T hBmeas φ) (⇑ψ) :=
   -- a bare term, deliberately: both `rw [bracketMeasure]` and a `show` fail here. `rw` cannot
   -- unfold a `def`, and `show` produces a goal that is type-correct only at default transparency
   -- (`ψ`'s type names `bracketMeasure`, the rewritten form names `sqWeight`), which then breaks
   -- `rw`'s motive. Term-mode unification handles the defeq and never builds a motive.
-  (sqWeight_congr_ae (coeFn_mulLI (trimMeasure_T (μ := μ) T hBmeas)
+  (sqWeight_congr_ae (coeFn_mulLI (trimMeasure (μ := μ) T hBmeas)
       (Lp.stronglyMeasurable φ).measurable ψ)).trans
-    (sqWeight_sqWeight (ν := trimMeasure_T (μ := μ) T hBmeas)
+    (sqWeight_sqWeight (ν := trimMeasure (μ := μ) T hBmeas)
       (Lp.stronglyMeasurable φ).measurable (Lp.stronglyMeasurable ψ).measurable).symm
 
 /-! ### The second moment: the bracket earns its name -/
@@ -485,7 +505,7 @@ omit [IsProbabilityMeasure μ] in
 /-- **Squared `L²` norms are lower integrals**: `‖W‖² = (∫⁻ ‖W‖ₑ² ∂ν).toReal`. This is the
 bridge by which a second moment meets a measure of a set — consumed by
 `norm_sq_increment_eq_bracket`, where both sides are read as integrals over a time band. -/
-private theorem lpNorm_sq_eq_lintegral_enorm_sq {α : Type*} {mα : MeasurableSpace α}
+theorem norm_sq_eq_toReal_lintegral_enorm_sq {α : Type*} {mα : MeasurableSpace α}
     {ν : Measure α} (W : Lp ℝ 2 ν) :
     ‖W‖ ^ 2 = (∫⁻ x, ‖(W : α → ℝ) x‖ₑ ^ 2 ∂ν).toReal := by
   have hrpow : eLpNorm (W : α → ℝ) 2 ν
@@ -511,25 +531,25 @@ the level of expectations, the form the tower supports. The conditional refineme
 construction of the integral against `M`, not the composition with `∫·dB` used here.
 
 The proof is one band: the increment is the integral of `bandRestrict`
-(`itoIntegralCLM_T_bandRestrict`), the isometry turns its norm into an integral, and the band
+(`itoIntegralCLM_bandRestrict`), the isometry turns its norm into an integral, and the band
 representative (`coeFn_bandRestrict`) reads that integral off `(a,b] × Ω` — which is exactly
 how `bracketMeasure` weights the set (`withDensity_apply`). -/
 theorem norm_sq_increment_eq_bracket (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) :
+    (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) :
     ‖itoProcessCLM hB T b hBmeas φ - itoProcessCLM hB T a hBmeas φ‖ ^ 2
       = ((bracketMeasure (μ := μ) T hBmeas φ)
           (Set.Ioc a b ×ˢ (Set.univ : Set Ω))).toReal := by
   have hset : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable]
       (Set.Ioc a b ×ˢ (Set.univ : Set Ω)) :=
     MeasureTheory.measurableSet_predictable_Ioc_prod a b MeasurableSet.univ
-  rw [← itoIntegralCLM_T_bandRestrict (hB := hB) T hBmeas φ hab hbT, itoIntegralCLM_T_norm,
-    lpNorm_sq_eq_lintegral_enorm_sq]
+  rw [← itoIntegralCLM_bandRestrict (hB := hB) T hBmeas φ hab hbT, itoIntegralCLM_norm,
+    norm_sq_eq_toReal_lintegral_enorm_sq]
   refine congrArg ENNReal.toReal ?_
   calc ∫⁻ z, ‖(bandRestrict (μ := μ) T a b hBmeas φ : ℝ≥0 × Ω → ℝ) z‖ₑ ^ 2
-          ∂(trimMeasure_T (μ := μ) T hBmeas)
+          ∂(trimMeasure (μ := μ) T hBmeas)
       = ∫⁻ z, (Set.Ioc a b ×ˢ (Set.univ : Set Ω)).indicator
             (fun z' ↦ ‖(φ : ℝ≥0 × Ω → ℝ) z'‖ₑ ^ 2) z
-          ∂(trimMeasure_T (μ := μ) T hBmeas) := by
+          ∂(trimMeasure (μ := μ) T hBmeas) := by
         refine lintegral_congr_ae ?_
         filter_upwards [coeFn_bandRestrict (μ := μ) T a b hab hBmeas φ] with z hz
         by_cases hmem : z.1 ∈ Set.Ioc a b
@@ -540,7 +560,7 @@ theorem norm_sq_increment_eq_bracket (T : ℝ≥0) (hBmeas : ∀ t, Measurable (
             Set.indicator_of_notMem
               (show z ∉ Set.Ioc a b ×ˢ (Set.univ : Set Ω) from fun hprod ↦ hmem hprod.1)]
     _ = ∫⁻ z in Set.Ioc a b ×ˢ (Set.univ : Set Ω), ‖(φ : ℝ≥0 × Ω → ℝ) z‖ₑ ^ 2
-          ∂(trimMeasure_T (μ := μ) T hBmeas) := lintegral_indicator hset _
+          ∂(trimMeasure (μ := μ) T hBmeas) := lintegral_indicator hset _
     _ = (bracketMeasure (μ := μ) T hBmeas φ)
           (Set.Ioc a b ×ˢ (Set.univ : Set Ω)) := by
         rw [bracketMeasure_eq]

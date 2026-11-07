@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.NormalQuantile
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # Bernoulli mixture models of portfolio credit risk
@@ -35,17 +35,35 @@ the others. Dependence between defaults comes only from the common `Q`.
   probability exactly `π`, because the asset value is again standard normal
   (`oneFactor_measureReal_default`).
 
+## Main definitions
+
+* `oneFactorPD`: the conditional default probability `Φ((Φ⁻¹(π) − √ρ f) / √(1 − ρ))` of the
+  one-factor Gaussian threshold model at default probability `π`, asset correlation `ρ` and
+  factor value `f`.
+
 ## Main results
 
 * `measureReal_iInter_default_eq_integral_pow`: `πₖ = E[Q^k]`.
 * `measureReal_inter_default_sub_mul`: the default covariance is `Var(Q)`.
 * `defaultCorrelation_eq`: `ρ_Y = Var(Q)/(π₁(1 − π₁))`, and `defaultCorrelation_nonneg`.
-* `oneFactorPD`: the conditional default probability `p(f)` of the one-factor Gaussian model.
 * `oneFactor_asset_le_iff`, `oneFactor_default_iff`: the threshold event is the mixture event.
 * `oneFactor_bernoulliMixture`: the one-factor model satisfies the mixture hypotheses.
 * `oneFactor_measureReal_iInter_default`: `πₖ = ∫ p(x)^k dN(0,1)(x)` in the Gaussian model.
 * `oneFactor_measureReal_default`: each obligor defaults with probability `π`.
 * `oneFactor_measureReal_inter_default_sub_mul`: the default covariance is `Var(p(F))`.
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Section 11.2
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 11.11(a); Ex. 11.2(c), 11.9; Ex. 11.4(a), 11.11(b);
+  Ex. 11.4(a), 11.9
+
+## Tags
+
+Bernoulli mixture model, portfolio credit risk, default correlation, one-factor Gaussian model,
+conditionally independent defaults, joint default probability, Vasicek model, MSC 91G40, MSC 60E05,
+JEL G32, JEL G33
 -/
 
 @[expose] public section

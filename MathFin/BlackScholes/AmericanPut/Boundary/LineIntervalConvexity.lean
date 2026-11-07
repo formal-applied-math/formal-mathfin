@@ -5,7 +5,12 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Boundary.ContinuousContact
+public import MathFin.Init
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Smooth.Flat
+public import Mathlib.Analysis.Convex.Slope
+public import Mathlib.Analysis.RCLike.Basic
 
 /-! # Derivative-free convexity from negative-intercept line intervals
 
@@ -13,10 +18,21 @@ The expiry condition first makes `b(t)/t` monotone. Every chord then has
 nonpositive intercept, so the line-interval property controls all chords.
 This is a geometric replacement for selecting a twice-differentiable tangent.
 
-## Result
+## Main results
 
-Public entry points include `boundaryRatio_monotone_of_line_intervals`,
-`convexOn_of_ratio_monotone_and_line_intervals`, `convexOn_of_negative_line_intervals`.
+* `boundaryRatio_monotone_of_line_intervals`: if `b < 0` on `(0, ∞)`, `b (v) < −c v` for some
+  small `v` for every slope `c`, and every set `{t > 0 | b t < d − c t}` (`c > 0`, `d ≤ 0`) is
+  order-connected, then `t ↦ b t / t` is monotone on `(0, ∞)`.
+* `convexOn_of_ratio_monotone_and_line_intervals`: if `b` is antitone and `b t / t` is monotone
+  on `(0, ∞)` and the line-interval sets are order-connected, then `b` is convex on `(0, ∞)`.
+* `convexOn_of_negative_line_intervals`: the combination: negativity, antitonicity, the
+  near-expiry condition and the line-interval property together give convexity of `b` on
+  `(0, ∞)`.
+
+## Tags
+
+convexity without derivatives, line intervals, chord, negative intercept, boundary convexity,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

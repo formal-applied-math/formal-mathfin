@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.CIRRiccati
 public import MathFin.FixedIncome.VasicekBondPrice
 
@@ -50,6 +49,20 @@ At zero volatility the two models coincide, and so do their rate loadings:
   Vasicek loadings solve their Riccati equations, for `κ ≠ 0`.
 * `vasicekBondPrice_solves_pde` — the Vasicek affine price solves the Vasicek PDE, for `κ ≠ 0`.
 * `cirBondB_zero_vol` — the CIR rate loading at `σ = 0` is the Vasicek rate loading.
+
+## References
+
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  §3.2.3
+* [J. C. Cox, J. E. Ingersoll and S. A. Ross, *A theory of the term structure of interest
+  rates*][CoxIngersollRoss1985]
+* [D. Duffie and R. Kan, *A yield-factor model of interest rates*][DuffieKan1996]
+* [O. Vasicek, *An equilibrium characterization of the term structure*][Vasicek1977]
+
+## Tags
+
+term structure PDE, Riccati equation, affine short-rate model, Cox–Ingersoll–Ross, Vasicek model,
+bond pricing equation, MSC 91G30, MSC 35K10, JEL E43
 -/
 
 @[expose] public section

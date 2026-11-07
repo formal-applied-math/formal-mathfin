@@ -5,7 +5,6 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.Portfolio.ConvexQPKKT
 
 /-!
@@ -30,6 +29,31 @@ the Markowitz mean–variance problem.
 
 KKT necessity (that an optimal solution is a KKT point) is not proved; the module certifies
 candidates, as `MathFin.Portfolio.ConvexQPKKT` does.
+
+## Main definitions
+
+* `pricedReturn`: the return `μ ⬝ᵥ y` minus the charge
+  `t₁ · √(x1 ⬝ᵥ (Sig *ᵥ x1)) · √(y ⬝ᵥ (Sig *ᵥ y))`, with the price of risk calibrated on the
+  benchmark `x1`.
+
+## Main results
+
+* `posSemidef_cauchySchwarz`: for a positive semidefinite matrix `Sig`,
+  `|x ⬝ᵥ (Sig *ᵥ y)| ≤ √(x ⬝ᵥ (Sig *ᵥ x)) · √(y ⬝ᵥ (Sig *ᵥ y))`.
+* `pricedReturn_le_of_kkt`: a point `x1` satisfying the KKT stationarity, dual-feasibility and
+  complementary-slackness conditions of the risk-penalized quadratic program (with `Sig`
+  positive semidefinite and `t₁ ≥ 0`) maximizes `pricedReturn` over every feasible `y`. It
+  certifies a candidate; KKT necessity is not proved.
+
+## References
+
+* [Boyd and Vandenberghe, *Convex Optimization*][BoydVandenberghe2004]
+* [H. Markowitz, *Portfolio selection*][Markowitz1952]
+
+## Tags
+
+Cauchy-Schwarz inequality, mean-standard deviation tradeoff, positive semidefinite form, Markowitz,
+KKT conditions, risk aversion, MSC 91G10, MSC 90C25, JEL G11
 -/
 
 @[expose] public section

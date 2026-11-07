@@ -26,8 +26,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 module
 
-public import Mathlib
-public import MathFin.Foundations.DiscreteIto
+public import MathFin.Init
+public import Mathlib.Algebra.Order.Archimedean.Real.Basic
 
 /-!
 # Itô's lemma structural drift formula (phase 39, after Nagy 2026)
@@ -62,6 +62,23 @@ Mathlib's complete Itô-integral pipeline; see `docs/bridges.md`.
 The drift formula here is *all that is needed* for the downstream
 applications in this library (GBM drift derivation, BS PDE, log-payoff
 variance swap).
+
+## Main definitions
+
+* `itoDrift`: the Itô drift coefficient `μ_X · f' + ½ σ_X² · f''` of `f(X_t)` for a process with
+  local drift `μ_X` and local volatility `σ_X`.
+
+## Main results
+
+* `itoDrift_id`: for `f = id` the Itô drift is the local drift `μ_X`.
+* `itoDrift_log_gbm`: for `S ≠ 0`, the Itô drift of `log` at a process with drift `μ S` and
+  volatility `σ S` is `μ − σ² / 2`.
+* `gbm_log_volatility`: the scalar identity `σ · S · (1 / S) = σ` for `S ≠ 0`.
+
+## Tags
+
+Itô lemma, Itô drift, geometric Brownian motion, log price, variance swap, Itô process, MSC 60H05,
+MSC 60H10, JEL G13
 -/
 
 @[expose] public section

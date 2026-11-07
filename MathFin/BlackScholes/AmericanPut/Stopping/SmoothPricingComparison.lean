@@ -5,17 +5,35 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.PricingTests
+public import MathFin.BlackScholes.AmericanPut.Stopping.CompactLocalization
 
 /-! # Parabolic comparison from smooth pricing tests
 
 Only the comparator is smooth. A time-weighted maximum avoids applying a
 two-sided touching test at terminal time; continuity recovers the terminal slice.
 
-## Result
+## Main definitions
 
-Public entry points include `pricingOperator`, `SmoothPricingSubsolutionOn`,
-`pricingOperator_barrier`, `smoothPricingSubsolution_le_before_terminal`.
+* `pricingOperator`: the parabolic operator `∂ₜ F - ∂ₓ∂ₓ F - (k-h-1) * ∂ₓ F + k * F`, with `z.1` the
+  space variable and `z.2` the time variable.
+* `SmoothPricingSubsolutionOn`: the smooth-test subsolution property of `u` on `U`: at every
+  `z ∈ U`, every `C²` function `F` that agrees with `u` at `z` and dominates it nearby satisfies
+  `pricingOperator k h F z ≤ 0`.
+
+## Main results
+
+* `pricingOperator_barrier`: adding the barrier term `M/(T - y.2)` to a differentiable `F` changes
+  the pricing operator at `z` (with `z.2 < T`) by `M/(T - z.2)² + k M/(T - z.2)`.
+* `smoothPricingSubsolution_le_before_terminal`: for `0 ≤ k`, a continuous smooth-test
+  subsolution `u` on the open box, below a continuous `C²` supersolution `F` on the initial and
+  lateral boundary of the cylinder `[L,R] × [a,T]`, satisfies `u ≤ F` on `[L,R] × [a,T)`.
+* `smoothPricingSubsolution_le`: under the same hypotheses and `a < T`, `u ≤ F` on the whole
+  closed cylinder, terminal time included.
+
+## Tags
+
+parabolic comparison, smooth comparator, time-weighted maximum, subsolution, pricing tests,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

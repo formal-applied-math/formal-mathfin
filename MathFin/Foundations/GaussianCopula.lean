@@ -5,10 +5,10 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.Sklar
 public import MathFin.Foundations.NormalQuantile
 public import MathFin.Foundations.BivariateNormalCDF
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # The one-factor Gaussian copula
@@ -35,6 +35,13 @@ correlation `ρ`; the symmetric model here has pairwise correlation `ρ²`, neve
 
 The copula is defined via `copulaOf`, so being a copula is Sklar's theorem.
 
+## Main definitions
+
+* `stdNormalFactors`: the product of `n + 1` standard normal laws on `ℝ × (Fin n → ℝ)`, the
+  systematic factor `Z₀` in the first slot and the idiosyncratic factors in the second.
+* `gaussianFactorVec`: the latent vector `Xᵢ = ρ z₀ + √(1 − ρ²) zᵢ`.
+* `gaussianFactorCopula`: the copula of `gaussianFactorVec ρ` under `stdNormalFactors n`.
+
 ## Main results
 
 * `gaussianFactorCopula`, `isCopula_gaussianFactorCopula`, `gaussianFactorCopula_real_Iic`.
@@ -50,6 +57,16 @@ The countermonotonicity copula `W` (`countermonotoneCopula`) is defined on `Fin 
 the lower Fréchet bound is not a copula, `not_exists_isCopula_frechetLower`). Since the pairwise
 correlations `ρ²` are nonnegative, `W` is not a member of this family; that is not stated as a
 lemma.
+
+## References
+
+* [J. Hull and A. White, *Valuation of a CDO and an $n$-th to default CDS without Monte Carlo
+  simulation*][HullWhite2004]
+
+## Tags
+
+Gaussian copula, one-factor model, factor loading, asset correlation, default dependence,
+latent variable, MSC 62H05, MSC 91G40, JEL G32
 -/
 @[expose] public section
 

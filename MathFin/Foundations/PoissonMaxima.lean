@@ -5,9 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.PoissonPgf
 public import MathFin.Foundations.GeneralizedPareto
+public import Mathlib.Order.CompletePartialOrder
 
 /-!
 # The maximum of a Poisson number of losses
@@ -49,6 +49,16 @@ of the empty maximum, and the GEV identity does not hold there.
 * `exp_neg_mul_gpdTail`, `exp_neg_mul_gpdTail_zero`: `exp(−λ Ḡ_{ξ,β}(x))` is a GEV distribution
   function on `x ≥ 0`.
 * `measureReal_poisson_max_gpd`, `measureReal_poisson_max_gpd_zero`: MFE Exercise 5.26.
+
+## References
+
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 5.26
+
+## Tags
+
+maximum of Poisson losses, peaks over threshold, generalized Pareto distribution,
+generalized extreme value, extreme value theory, block maxima, compound Poisson loss, MSC 60G55,
+MSC 91G70, JEL G32
 -/
 
 @[expose] public section

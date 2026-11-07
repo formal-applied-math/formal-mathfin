@@ -15,6 +15,21 @@ Part of the SVI polynomial-sign certificate (#174).
 `criticalCertificate` handles constant and nonconstant numerator polynomials alike. For `σ > 0`,
 `b ≥ 0`, `ρ² ≤ 1` and under the variance gate, `criticalCertificate (polynomial p)` is equivalent to
 `g(k) ≥ 0` for every `k` (`svi_criticalCertificate_iff`).
+
+## Main definitions
+
+* `criticalCertificate`: for a real polynomial `P`, `0 ≤ P.coeff 0` if `P` is constant, and
+  otherwise `0 < P.leadingCoeff`, `0 ≤ P.eval 0` and `badCriticalCount P = 0`.
+
+## Main results
+
+* `criticalCertificate_iff`: `criticalCertificate P` iff `0 ≤ P.eval t` for every `t > 0`.
+* `svi_criticalCertificate_iff`: for `σ > 0`, `b ≥ 0`, `1 - ρ² ≥ 0` and `varianceGate p`,
+  `criticalCertificate (polynomial p)` iff `durrleman p k ≥ 0` for every `k`.
+
+## Tags
+
+critical point certificate, Durrleman condition, raw SVI, butterfly arbitrage, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

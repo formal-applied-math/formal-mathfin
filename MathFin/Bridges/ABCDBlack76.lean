@@ -5,8 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
-public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.WienerIntegralGaussian
 public import MathFin.FixedIncome.ABCDVolatility
 public import MathFin.Futures.Black76
@@ -42,14 +40,33 @@ forward measure; no change of measure is built. The discounting is the factor `e
 `black_futures_formula`; the caplet's accrual `δ` and payment-date discount factor
 `P(0, T + δ)` are not modelled.
 
+## Main definitions
+
+* `abcdKernel`: the integrand `u ↦ abcdVol a b c d (T - u)` of the forward fixing at `T`.
+* `abcdKernelLp`: `abcdKernel` as an element of `L²((0, T])`.
+* `abcdTotalVar`: the ABCD total variance `v(T)`, in the closed form of `abcdVol_sq_integral_zero`.
+* `abcdForward`: the forward fixing `F₀ * exp (-v(T)/2 + ∫₀ᵀ f(T - u) dB_u)`, for a pre-Brownian
+  motion `B`.
+* `abcdRMSVol`: the root-mean-square volatility `√(v(T)/T)`.
+
 ## Main results
 
-* `abcdKernel`, `abcdKernelLp` — the integrand `u ↦ f(T − u)` on `(0, T]`, and its `L²` class.
-* `abcdTotalVar` — `v(T)`, the ABCD closed form of `∫₀ᵀ f²`.
 * `abcdKernel_integral_sq` — `∫_{(0,T]} f(T − u)² du = v(T)`, for `c ≠ 0`.
 * `abcdWienerIntegral_hasLaw` — `∫₀ᵀ f(T − u) dB_u ~ N(0, v(T))`, for `c ≠ 0`.
-* `abcdForward`, `abcdRMSVol` — the forward in solved form, and `σ̄ = √(v(T)/T)`.
 * `abcdForward_call_eq_black76` — the discounted call on the ABCD forward is Black-76 at `σ̄`.
+
+## References
+
+* [F. Black, *The pricing of commodity contracts*][Black1976]
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006], ch.
+  6
+* [R. Rebonato, *Modern Pricing of Interest-Rate Derivatives: The LIBOR Market Model and
+  Beyond*][Rebonato2002]
+
+## Tags
+
+ABCD volatility, Black-76, caplet volatility, Wiener integral, forward rate volatility, Rebonato,
+MSC 91G30, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

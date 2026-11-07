@@ -12,6 +12,12 @@
       "metadata": {
         "chapter": 4,
         "reference": "Theorem 4.3.7",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 4.3.7"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "library_wrapper",
         "formalization_scope": "Lean library wrapper of Degenne MeasureTheory.Martingale.stoppedProcess_indicator from BrownianMotion/StochasticIntegral/LocalMartingale.lean in RemyDegenne/brownian-motion. For a continuous-time martingale M with right-continuous paths under a finite measure, indexed by NNReal (so the Approximable instance fires), the stopped process stoppedProcess (indicator {tau > bot} M) tau is a martingale w.r.t. the same filtration for every stopping time tau. The indicator wrapping is Degenne's canonical form: it agrees with the textbook stopped process M_{t and tau} on {tau > 0} and is 0 on {tau = 0}, so the two coincide when tau > 0 a.s. or M_0 = 0. Its axioms are pinned in MathFin/AxiomAuditGen.lean (`#print axioms MeasureTheory.Martingale.stoppedProcess_indicator`): propext, Classical.choice, Quot.sound, checked at every build. So it uses no `sorry`, although another declaration in the same module (isStable_submartingale) does at the current BrownianMotion pin.",
@@ -34,6 +40,12 @@
       "metadata": {
         "chapter": 4,
         "reference": "Theorem 4.3.9",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 4.3.9"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "library_wrapper",
         "formalization_scope": "Lean library wrapper of Degenne maximal_ineq_nonneg from BrownianMotion/StochasticIntegral/DoobLp.lean in RemyDegenne/brownian-motion. The textbook continuous-time Doob L^1 maximal inequality in its sharp form: for a non-negative right-continuous submartingale Y, ε * P({sup_{s leq n} Y_s >= ε}) <= integral over that set of Y_n. The classical textbook bound λ * P(sup >= λ) <= E[M_t] is the immediate corollary by bounding the right-side set integral against E[Y_n] using Y_n >= 0. The wrap reads the conclusion off Degenne directly. Its axioms are pinned in MathFin/AxiomAuditGen.lean (`#print axioms ProbabilityTheory.maximal_ineq_nonneg`): propext, Classical.choice, Quot.sound, checked at every build. So it uses no `sorry`, although two later declarations in the same module (integral_iSup_le_norm_rpow_le, integral_iSup_norm_rpow_le) do at the current BrownianMotion pin.",
@@ -56,6 +68,12 @@
       "metadata": {
         "chapter": 4,
         "reference": "Theorem 4.3.10",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 4.3.10"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the combined natural-a.s. + real-time-in-measure form of Theorem 4.3.10. Wraps MathFin.lp_continuous_martingale_full, which assembles: (a) natural-time a.s. convergence via dyadic sampling + Mathlib Submartingale.ae_tendsto_limitProcess + Hölder L^p → L^1; (b) sup_increment_measure_tendsto_zero via Degenne maximal_ineq_norm + eLpNorm-triangle + Hölder + integral conversion; (c) BddAbove of the increment running max a.s. via Degenne Submartingale.rightCont_iSup_ofReal_ne_top; (d) Nat.floor set-inclusion argument. Lives at MathFin/Foundations/LpContinuousMartingaleConvergence.lean (640 lines, 8 helpers + 3 public theorems). Textbook also asserts real-time a.s. + real-time L^p which require cadlag paths (stronger than right-continuous); not claimed here. Axioms-clean per #print axioms: depends only on propext, Classical.choice, Quot.sound.",
@@ -78,6 +96,12 @@
       "metadata": {
         "chapter": 4,
         "reference": "Proposition 4.3.6",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Proposition 4.3.6"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of Proposition 4.3.6. Derives the conclusion from first principles using the classical rationals-density argument: {omega | tau_A omega < i} = union over rationals q in [0, i) of {omega | X_q omega in A}, where the non-trivial inclusion uses continuity of X(*, omega) and openness of A to upgrade an arbitrary real witness to a rational witness via Real.exists_rat_btwn. Each {omega | X_q omega in A} is in F_q (by adaptedness + measurability of open sets) and hence in F_i by monotonicity of the filtration. Countable union of F_i-measurable sets is F_i-measurable. Then apply Mathlib's isStoppingTime_of_measurableSet_lt_of_isRightContinuous (for right-continuous filtrations). The proof avoids Degenne's Choquet/Debut machinery (which has transitive sorryAx through Choquet/CompactSystem.lean) and lives at MathFin/Foundations/BrownianMartingale.lean (3 lemmas + main theorem). Axioms-clean per #print axioms: depends only on propext, Classical.choice, Quot.sound.",

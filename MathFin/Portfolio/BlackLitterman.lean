@@ -5,7 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Tactic.Positivity.Basic  -- shake: keep (positivity extensions)
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.Ring.RingNF
 
 /-!
 # Black-Litterman one-dimensional Bayesian update
@@ -26,14 +30,27 @@ result is the harmonic mean of variances; equivalently, the precision
 * `s1sq → 0` (perfect view): posterior_mean → `Q`,
 * `s1sq → ∞` (uninformative view): posterior_mean → `π`.
 
-Results:
+## Main definitions
 
-* `posteriorMean1d`: standard formula.
-* `posteriorVariance1d`: harmonic combination.
-* `blackLitterman_mean_eq_precision_weighted`: equivalence of the
+* `posteriorMean1d`: the one-dimensional Black-Litterman posterior mean
+  `(s1sq·π + s0sq·Q) / (s0sq + s1sq)`.
+* `posteriorVariance1d`: the posterior variance `s0sq·s1sq / (s0sq + s1sq)`.
+
+## Main results
+
+* `blackLitterman_mean_eq_precision_weighted`: for positive variances, equivalence of the
   precision-weighted form with the symmetric form.
-* `blackLitterman_var_eq_inv_sum_precision`: equivalence with the
+* `blackLitterman_var_eq_inv_sum_precision`: for positive variances, equivalence with the
   inverse-sum-of-precisions form.
+
+## References
+
+* [Black and Litterman, *Global portfolio optimization*][BlackLitterman1992]
+
+## Tags
+
+Black-Litterman model, Bayesian update, posterior mean, investor views, precision weighting,
+Gaussian conjugate, MSC 91G10, MSC 62F10, JEL G11
 -/
 
 @[expose] public section

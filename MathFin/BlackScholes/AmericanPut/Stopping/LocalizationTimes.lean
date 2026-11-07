@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.BlackScholes.AmericanPut.Stopping.FirstContact
+public import Mathlib.MeasureTheory.Order.Group.Lattice
 
 /-!
 # Interior stopping-time approximations to first contact
@@ -14,10 +15,32 @@ Stop before the price/payoff gap becomes small, before the driver leaves a
 bounded interval, or before remaining maturity becomes small. These margins
 are continuous and adapted, so their first zeros are actual stopping rules.
 
-## Result
+## Main definitions
 
-Public entry points include `localizationEps`, `localizationEps_pos`, `localizationEps_tendsto`,
-`localizationMargin`.
+* `localizationEps`: the margin `(n+1)⁻¹` of the `n`-th localization.
+* `localizationMargin`: the nonnegative slack in the three interior margins at time `t`: `Z` above
+  `localizationEps n`, `|W|` below `n+1`, and remaining maturity above `localizationEps n`.
+* `interiorRule`: the rule stopping at the first zero of `localizationMargin Z W T n`, capped at
+  `T`.
+
+## Main results
+
+* `localizationEps_pos`, `localizationEps_tendsto`: the margins are positive and tend to `0`.
+* `localizationMargin_continuous`, `localizationMargin_adapted`, `localizationMargin_nonneg`,
+  `localizationMargin_terminal`: the margin is continuous in time for continuous paths, adapted
+  for adapted `Z, W`, nonnegative, and zero at time `T`.
+* `interiorRule_before`: strictly before the interior rule, the three margins hold strictly.
+* `interiorRule_at_positive_exit`: at a positive exit time the three margins hold in the closed
+  (non-strict) sense.
+* `interiorRule_le_contact`: if `Z T = 0`, the interior rule is at most `firstContactTime Z T`.
+* `interiorRule_eventually_after`, `interiorRule_tendsto_contact`: for nonnegative `Z` with
+  `Z T = 0`, the interior rules eventually exceed any time before first contact, so they
+  converge to `firstContactTime Z T` as `n → ∞`.
+
+## Tags
+
+interior stopping times, localization, first contact approximation, margin, stopping rule,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

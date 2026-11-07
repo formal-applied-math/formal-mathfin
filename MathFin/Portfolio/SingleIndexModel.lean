@@ -5,7 +5,6 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Portfolio.MarkowitzNAsset
 public import MathFin.Portfolio.CovariancePSD
 public import MathFin.Portfolio.CAPM
@@ -30,9 +29,13 @@ portfolio, the idiosyncratic term tends to `0` as `n → ∞`: idiosyncratic ris
 The limit is stated for the idiosyncratic term alone; that `Var(Rp)` minus the systematic term
 `(β_p σ_M)²` tends to `0` follows with `portfolioVarN_singleIndex_eq` but is not stated.
 
-## Main definitions and results
+## Main definitions
 
-* `singleIndexKernel`: `σᵢⱼ = βᵢβⱼσ_M² + (idiosyncratic diagonal)`.
+* `singleIndexKernel`: the single-index covariance kernel
+  `σᵢⱼ = βᵢβⱼσ_M² + 1[i=j]·D_ε(i)`.
+
+## Main results
+
 * `portfolioVarN_singleIndex_eq`: `Var(Rp) = (∑ wᵢβᵢ)² σ_M² + ∑ wᵢ² D_ε(i)`.
 * `idiosyncraticTerm_equalWeight_le`: for equal weights `1/n` and idiosyncratic variances
   bounded by `M`, the idiosyncratic term is at most `M / n`.
@@ -41,6 +44,16 @@ The limit is stated for the idiosyncratic term alone; that `Var(Rp)` minus the s
 * `covariance_singleIndex`: the covariance of the return model is `singleIndexKernel`.
 * `variance_singleIndex_portfolio`: `Var[∑ wᵢRᵢ] = (∑ wᵢβᵢ)² Var[R_M] + ∑ wᵢ² Var[εᵢ]`.
 * `beta_singleIndex`: the CAPM beta of asset `i` is `βᵢ`.
+
+## References
+
+* [Sharpe, *A simplified model for portfolio analysis*][Sharpe1963]
+* [Sharpe, *Capital asset prices*][Sharpe1964]
+
+## Tags
+
+single-index model, Sharpe's index model, idiosyncratic risk, systematic risk, diversification,
+market model, beta, MSC 91G10, MSC 62P05, JEL G11
 -/
 
 @[expose] public section

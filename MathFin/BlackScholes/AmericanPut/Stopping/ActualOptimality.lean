@@ -13,10 +13,19 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.ActualSupermartingale
 No PDE, smooth-fit or boundary-regularity premise is used. The nearly optimal
 sequence consists of the already constructed optimal physical-grid rules.
 
-## Result
+## Main definitions
 
-Public entry points include `brownianUsualActualContactTime`,
-`brownianUsualActualContactRule_optimal`.
+* `brownianUsualActualContactTime`: the stopping time of `brownianUsualActualContactRule`.
+
+## Main results
+
+* `brownianUsualActualContactRule_optimal`: for `0 ≤ k`, the expected discounted put reward at
+  the first-contact time equals `canonicalPrice k h x T`.
+
+## Tags
+
+optimal first contact, optimal stopping rule, usual filtration, American put, contact time,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

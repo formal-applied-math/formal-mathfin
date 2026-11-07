@@ -5,11 +5,11 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.PoissonInterarrival
 public import MathFin.FixedIncome.Credit
 public import MathFin.FixedIncome.HazardCurve
 public import MathFin.FixedIncome.CDSTimeVarying
+public import Mathlib.Topology.UniformSpace.Uniformizable
 
 /-!
 # Cox-intensity credit: survival, default density, CDS legs and fair spread
@@ -59,34 +59,49 @@ cash-flow balance `cdsFairSpread_TV_cash_flow_balance`
 annuity-positivity discharged by `cdsAnnuity_pos`; its own docstring discloses
 this.
 
-## Result
+## Main definitions
 
-Public definitions: `riskyAnnuity`, `coxDefaultTime`, `cdsAnnuity`, `cdsLosses`,
-`premiumLeg`, `protectionLeg`, `cdsFairSpreadTV`.
+* `riskyAnnuity`: the risky annuity `∫₀ᵀ e^{−rs} e^{−lam·s} ds` at constant intensity `lam` and
+  discount rate `r`.
+* `coxDefaultTime`: the Cox default time, a unit-exponential clock inverted through the cumulative
+  hazard `Λ`.
+* `cdsAnnuity`: the risky annuity `∫₀ᵀ e^{−rs} S(s) ds` under deterministic intensity `h`.
+* `cdsLosses`: the default-density integral `∫₀ᵀ e^{−rs} h(s) S(s) ds` under deterministic
+  intensity `h`.
+* `premiumLeg`, `protectionLeg`: the CDS premium leg at spread `c` and protection leg at
+  recovery `R`.
+* `cdsFairSpreadTV`: the time-varying fair spread `(1−R) · losses / annuity`.
 
-Public lemmas (all in `namespace MathFin.Cox`):
+## Main results
 
-* `defaultSurvival_const`, `defaultTimeLaw_const` — the first-arrival laws in
-  credit variables;
-* `riskyAnnuity_eq`, `riskyAnnuity_pos`, `protectionLeg_const`,
-  `cdsLegs_balance_const`, `cdsFairSpread_const_balances` — the
-  constant-intensity legs and balance;
-* `cumHazard_strictMono`, `cumHazard_surjOn_Ici` — monotonicity and
-  surjectivity of the cumulative hazard;
-* `cox_survival_timeVarying`, `cox_cdf_timeVarying` — the survival and CDF
-  identities of the clock-inverted default time; `measurable_coxDefaultTime` — its
-  measurability;
-* `cdsAnnuity_pos`, `defaultDensity_antideriv`, `clockTail_eq_defaultDensity`,
-  `cdsFairSpreadTV_balances`, `cdsAnnuity_eq_riskyAnnuity`,
-  `cdsLosses_eq_riskyAnnuity_mul`, `cdsFairSpreadTV_const`,
-  `cox_defaultProb_density` — the time-varying CDS layer;
-* `cox_mixing_survival`, `cox_mixed_survival` — the restricted-Cox mixing identity.
+* `defaultSurvival_const`: if `τ` is the first arrival of a counting process with Poisson
+  increments of rate `rate`, then `P(τ > t) = e^{−rate·t}` for `t ≥ 0`.
+* `riskyAnnuity_eq`, `riskyAnnuity_pos`: the constant-intensity risky annuity equals
+  `(1 − e^{−(r+λ)T})/(r+λ)` when `r + λ ≠ 0`, and is positive for `T > 0`.
+* `cdsLegs_balance_const`: for `T > 0`, premium and protection legs at constant intensity
+  balance if and only if `c = cdsFairSpread λ R`.
+* `cumHazard_strictMono`, `cumHazard_surjOn_Ici`: for `h` continuous and positive, the cumulative
+  hazard is strictly increasing; if it also tends to `∞`, it takes every value `y ≥ 0` at some
+  `s ≥ 0`.
+* `cox_survival_timeVarying`, `cox_cdf_timeVarying`: for `h` continuous, positive, with divergent
+  cumulative hazard and a unit-exponential `ξ`, the Cox time satisfies `P(τ > t) = e^{−Λ(t)}`
+  and `P(τ ≤ a) = 1 − e^{−Λ(a)}` for `t, a ≥ 0`.
+* `measurable_coxDefaultTime`: for `h` continuous and positive and `ξ` measurable, the Cox
+  default time is measurable.
+* `cox_defaultProb_density`: under the same hypotheses, `P(τ ≤ a) = ∫₀ᵃ h(s)·S(s) ds` for
+  `a ≥ 0` (undiscounted).
+* `cdsAnnuity_pos`, `cdsFairSpreadTV_balances`: for `h` continuous and `T > 0`, the time-varying
+  annuity is positive, and the premium and protection legs balance if and only if
+  `c = cdsFairSpreadTV r h R T`.
+* `cdsFairSpreadTV_const`: for `T > 0`, the time-varying fair spread at constant intensity `λ`
+  equals `cdsFairSpread λ R`.
+* `cox_mixed_survival`: on the product of a path space with an `Exp(1)` clock, for a measurable
+  nonnegative `Λ` and a `τ` with `t < τ ↔ Λ_t < clock`, `P(τ > t) = ∫ e^{−Λ_t} dμ₁`.
 
-Supporting lemmas (`hazardSurvival_eq_exp`, `cumHazard_zero`,
-`cumHazard_nonneg`, `cumHazard_deriv`, `cumHazard_continuous`,
-`expClock_null_neg`, `expClock_nonneg_ae`, `expClock_Iic`, `expClock_Ioi`,
-`invFun_on_halfline`, `coxDefaultTime_survSet`, `coxDefaultTime_cdfSet`,
-`hazardSurvival_continuous`) are `private`.
+## Tags
+
+Cox process, intensity model, default time, reduced-form credit, hazard rate, CDS fair spread,
+doubly stochastic, MSC 91G40, MSC 60G55, JEL G12
 -/
 
 @[expose] public section
@@ -116,21 +131,6 @@ theorem defaultSurvival_const {rate : ℝ≥0} {N : ℝ → Ω → ℕ}
     μ {ω | t < τ ω} = ENNReal.ofReal (rexp (-((rate : ℝ) * t))) := by
   rw [hτfirst ht]
   exact PoissonInterarrival.survival_eq hmeas hzero hincr ht
-
-/-- **Law of the default time under constant intensity**: the first arrival is
-exponentially distributed — `τ ∼ Exp(rate)`. Consumes
-`PoissonInterarrival.map_firstArrival_eq_expMeasure`. -/
-theorem defaultTimeLaw_const [IsProbabilityMeasure μ] {rate : ℝ≥0} (hrate : 0 < rate)
-    {N : ℝ → Ω → ℕ}
-    (hmeas : ∀ t, Measurable (N t)) (hzero : ∀ ω, N 0 ω = 0)
-    (hincr : ∀ ⦃s t : ℝ⦄, 0 ≤ s → (hst : s ≤ t) →
-      Measure.map (fun ω ↦ N t ω - N s ω) μ
-        = poissonMeasure (rate * ⟨t - s, sub_nonneg.mpr hst⟩))
-    {τ : Ω → ℝ} (hτmeas : Measurable τ) (hτnn : ∀ ω, 0 ≤ τ ω)
-    (hτfirst : ∀ ⦃t : ℝ⦄, 0 ≤ t → {ω | t < τ ω} = {ω | N t ω = 0}) :
-    μ.map τ = expMeasure rate :=
-  PoissonInterarrival.map_firstArrival_eq_expMeasure hrate hmeas hzero hincr
-    hτmeas hτnn hτfirst
 
 end FirstArrival
 
@@ -274,7 +274,7 @@ theorem cumHazard_surjOn_Ici {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s
 
 /-- **CDF of the unit exponential clock**: for `ν = Exp(1)` and `x ≥ 0`,
 `ν(−∞, x] = 1 − e^{−x}`. -/
-private theorem expClock_Iic {x : ℝ} (hx : 0 ≤ x) :
+theorem expClock_Iic {x : ℝ} (hx : 0 ≤ x) :
     expMeasure 1 (Set.Iic x) = ENNReal.ofReal (1 - rexp (-x)) := by
   have : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
   rw [← ENNReal.ofReal_toReal (measure_ne_top _ _),
@@ -285,7 +285,7 @@ private theorem expClock_Iic {x : ℝ} (hx : 0 ≤ x) :
 
 /-- **Tail of the unit exponential clock**: for `ν = Exp(1)` and `x ≥ 0`,
 `ν(x, ∞) = e^{−x}`. -/
-private theorem expClock_Ioi {x : ℝ} (hx : 0 ≤ x) :
+theorem expClock_Ioi {x : ℝ} (hx : 0 ≤ x) :
     expMeasure 1 (Set.Ioi x) = ENNReal.ofReal (rexp (-x)) := by
   have : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
   have hset : Set.Ioi x = (Set.Iic x)ᶜ := by
@@ -301,7 +301,7 @@ private theorem expClock_Ioi {x : ℝ} (hx : 0 ≤ x) :
   ring
 
 /-- The unit exponential clock is almost surely nonnegative. -/
-private theorem expClock_null_neg {ξ : Ω → ℝ} (hξmeas : Measurable ξ)
+theorem expClock_null_neg {ξ : Ω → ℝ} (hξmeas : Measurable ξ)
     (hξlaw : Measure.map ξ μ = expMeasure 1) : μ {ω | ξ ω < 0} = 0 := by
   have : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
   rw [show {ω | ξ ω < 0} = ξ ⁻¹' Set.Iio 0 from rfl,
@@ -313,7 +313,7 @@ private theorem expClock_null_neg {ξ : Ω → ℝ} (hξmeas : Measurable ξ)
   norm_num
 
 /-- Almost-sure nonnegativity of the clock. -/
-private theorem expClock_nonneg_ae {ξ : Ω → ℝ} (hξmeas : Measurable ξ)
+theorem expClock_nonneg_ae {ξ : Ω → ℝ} (hξmeas : Measurable ξ)
     (hξlaw : Measure.map ξ μ = expMeasure 1) : ∀ᵐ ω ∂μ, 0 ≤ ξ ω := by
   rw [ae_iff]
   simp only [not_le]

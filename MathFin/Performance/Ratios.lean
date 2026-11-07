@@ -5,7 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Basic.Real.Sign
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # Sharpe ratio and Kelly criterion
@@ -22,17 +26,35 @@ Two classical performance and money-management identities:
   win-probability `p` and payoff ratio `b`. It is the maximizer because `g` is
   concave — concavity is not formalized here.
 
-Results:
+## Main definitions
 
-* `sharpeRatio`: definition.
+* `sharpeRatio`: the Sharpe ratio `(μ − r_f) / σ`.
+* `kellyFraction`: the Kelly fraction `f* = (p·b − (1 − p)) / b`.
+* `kellyGrowth`: the expected log-growth of a binary bet at fraction `f`,
+  `p · log(1 + f·b) + (1 − p) · log(1 − f)`.
+
+## Main results
+
 * `sharpeRatio_scale_invariant`: `S(λμ, λr_f, λσ) = S(μ, r_f, σ)` for `λ ≠ 0`.
 * `sharpeRatio_translation_invariant`: shift cancels in the excess return.
 * `sharpeRatio_affine_invariant`: full affine invariance, scale + shift.
 * `sharpeRatio_affine_signed`: with `|c|`-volatility convention, the Sharpe
   ratio picks up `sign(c)` under `X ↦ c·X + d`.
 * `sharpeRatio_scaleT`: `S_T = √T · S_1` for iid time aggregation.
-* `kellyFraction`, `kellyGrowth`: definitions.
 * `kellyGrowth_deriv_at_kelly`: first-order optimality `g'(f*) = 0`.
+
+## References
+
+* [K. Bodie and Marcus, *Investments*][BodieKaneMarcus], Ch 10; Ch 5.5
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], Ch 14
+* [J. L. Kelly, *A new interpretation of information rate*][Kelly1956]
+* [Sharpe (1966)][Sharpe1966]
+* [Thorp (2006)][Thorp2006]
+
+## Tags
+
+Sharpe ratio, Kelly criterion, excess return per risk, time aggregation, money management,
+log-growth, MSC 91G10, JEL G11
 -/
 
 @[expose] public section

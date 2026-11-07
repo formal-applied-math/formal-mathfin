@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.StandardNormal
 
 /-!
@@ -46,7 +45,7 @@ All of these are already proved in this library. This file packages the
 *affine-shifted* MGF identity that they share, as a named theorem suitable
 for re-use, and serves as a navigational guide to the structural unification.
 
-## Results
+## Main results
 
 * `integral_exp_affine_gaussianPDFReal_univ`: the affine-shifted MGF
   `∫ exp(α + β · z) · pdf(0, 1, z) = exp(α + β²/2)`.
@@ -54,6 +53,11 @@ for re-use, and serves as a navigational guide to the structural unification.
 The single-line corollary pattern: each downstream theorem unfolds a payoff
 of the form `S_0^k · exp(α + β · Z)`, factors `S_0^k · exp(α)` out, and applies
 this identity at `β`.
+
+## Tags
+
+moment generating function, lognormal moments, Black–Scholes, Gaussian expectation,
+risk-neutral expectation, standard normal, MSC 60E10, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -5,11 +5,11 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.GarmanNormalForm
 public import MathFin.BlackScholes.ExchangeOption
 public import MathFin.BlackScholes.MargrabeGrounding
 public import MathFin.Foundations.BivariateNormalCDF
+public import Mathlib.Algebra.Order.Star.Real
 
 /-!
 # Stulz (1982): the two-asset rainbow (max/min) closed form
@@ -36,6 +36,18 @@ the call-on-the-max and call-on-the-min prices are
           `− Ke^{−rT}(1 − N₂(−y₁+σ₁√T, −y₂+σ₂√T; ρ))`,
   `C_min = S¹e^{(b₁−r)T} N₂(y₁, −d; −ρ₁) + S²e^{(b₂−r)T} N₂(y₂, d−v√T; −ρ₂)`
           `− Ke^{−rT} N₂(y₁−σ₁√T, y₂−σ₂√T; ρ)`.
+
+## Main definitions
+
+* `stulzEffVol`: the spread volatility `√(σ₁² + σ₂² - 2ρσ₁σ₂)`.
+* `stulzRho1`, `stulzRho2`: the correlations `(σ₁ - ρσ₂)/v` and `(σ₂ - ρσ₁)/v` of each log-asset
+  with the log-spread.
+* `stulzY1`, `stulzY2`: the Black-Scholes `d₁` of each asset against strike `K` at its
+  cost-of-carry.
+* `stulzD`: the Margrabe-style `d₁` of the ratio `S¹/S²` at the spread volatility.
+* `stulzCallMax`, `stulzCallMin`: the closed forms of Stulz (1982), as transcribed by Haug, for
+  calls on the maximum and the minimum of two assets. That they equal discounted expected
+  payoffs is not proved here.
 
 ## Main results
 
@@ -75,6 +87,16 @@ as `GarmanNormalForm.lean`'s own specializations, which take the one-asset BS cl
 given rather than re-deriving it from Girsanov. Deriving `C_max` itself from a bivariate
 lognormal expectation is a separate, harder project (the two-asset analogue of
 `MargrabeGrounding.lean`).
+
+## References
+
+* [R. M. Stulz, *Options on the minimum or the maximum of two risky assets: analysis and
+  applications*][Stulz1982]
+
+## Tags
+
+rainbow option, Stulz formula, call on maximum, call on minimum, bivariate normal, Margrabe,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

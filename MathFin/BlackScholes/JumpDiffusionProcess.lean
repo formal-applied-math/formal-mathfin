@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.JumpDiffusionCanonical
 public import MathFin.Foundations.ExpMartingaleIndepIncrements
 
@@ -35,11 +34,22 @@ exponential moment is `e^{(b + σ²/2 + Λ(𝔼[e^J] − 1))(t − s)}`
 independent increments (`martingale_exp_sub_of_indep_increments`) gives the "if"; conversely a
 martingale has constant mean, and the mean at time `1` is `S₀e^{b + σ²/2 + Λ(𝔼[e^J] − 1) − r}`.
 
+## Main definitions
+
+* `jumpDiffusionLogReturn`: the log-return over a time `τ` on the canonical space
+  `ℝ × ℕ × (ℕ → ℝ)`, built from the drift `bτ`, the Gaussian part `σ√τ·ω₁` and the jumps.
+* `jumpDiffusionIncrementLaw`: the law of that log-return over `τ`, with drift `b`, volatility `σ`,
+  jump rate `Λ` and jump law `ν`.
+* `jumpDiffusionExponent`: the Laplace exponent `κ(θ) = bθ + σ²θ²/2 + Λ(∫ e^{θx} dν − 1)`.
+* `JumpDiffusionProcess`: a log-price process adapted to a filtration, starting at `0`, whose
+  increment over `[s, t]` is independent of `𝓕_s` and has the jump-diffusion log-return law over
+  `t − s`.
+
 ## Main results
 
-* `jumpDiffusionIncrementLaw`: the law of a jump-diffusion log-return over a time `τ`.
 * `integral_exp_const_mul_jumpDiffusionIncrementLaw`, `mgf_id_jumpDiffusionIncrementLaw`,
-  `cgf_id_jumpDiffusionIncrementLaw`: its moment-generating function `e^{κ(θ)τ}`.
+  `cgf_id_jumpDiffusionIncrementLaw`: for `θ` with `∫ e^{θx} dν < ∞`, its moment-generating
+  function is `e^{κ(θ)τ}`.
 * `integrableExpSet_id_subset_jumpDiffusionIncrementLaw`,
   `zero_mem_interior_integrableExpSet_jumpDiffusionIncrementLaw`,
   `cgf_id_jumpDiffusionIncrementLaw_eventuallyEq`: the jumps' exponential moments pass to the
@@ -49,8 +59,18 @@ martingale has constant mean, and the mean at time `1` is `S₀e^{b + σ²/2 + �
 * `integral_exp_jumpDiffusionIncrementLaw_of_compensated`: at the compensated drift the forward is
   the mean, `∫ eʸ = e^{rτ}`.
 * `JumpDiffusionProcess.hasLaw`: `X_t` has the log-return law over `t`.
-* `JumpDiffusionProcess.martingale_iff`: the discounted price is a martingale if and only if the
-  drift is compensated.
+* `JumpDiffusionProcess.martingale_iff`: for `S₀ ≠ 0` and integrable `e^J`, the discounted price
+  is a martingale if and only if the drift is compensated, `b = r − σ²/2 − Λ(𝔼[e^J] − 1)`.
+
+## References
+
+* [Cont and Tankov, *Financial Modelling with Jump Processes*][ContTankov2004]
+* [R. C. Merton, *Option pricing when underlying stock returns are discontinuous*][Merton1976]
+
+## Tags
+
+jump-diffusion process, independent increments, Lévy process, filtered log-price, Merton model,
+MSC 60G51, MSC 91G20
 -/
 
 @[expose] public section

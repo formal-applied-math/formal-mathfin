@@ -14,10 +14,21 @@ For an adapted integrable reward process on a discrete filtration, `stoppingValu
 over all rules with horizon `N`) is the expectation of the finite Snell envelope at index `0`,
 and the Snell first-contact rule attains it.
 
-## Result
+## Main definitions
 
-Public entry points include `snellRule`, `stoppingValue_eq_integral_snellEnvelope`,
-`snellRule_attains_value`.
+* `snellRule`: the Snell first-contact time of `Z`, packaged as a discrete rule with horizon `N`.
+
+## Main results
+
+* `stoppingValue_eq_integral_snellEnvelope`: for an adapted integrable reward `Z`, the stopping
+  value with horizon `N` is the expectation of the Snell envelope at index `0`.
+* `snellRule_attains_value`: the expected reward at the Snell first-contact rule equals the
+  stopping value.
+
+## Tags
+
+Snell envelope, Bellman recursion, discrete optimal stopping, stopping value, first-contact rule,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

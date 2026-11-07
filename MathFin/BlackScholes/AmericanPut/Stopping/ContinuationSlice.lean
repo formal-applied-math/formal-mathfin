@@ -5,8 +5,8 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.PositiveExerciseBoundary
 public import Mathlib.Analysis.Calculus.Deriv.Slope
+public import MathFin.BlackScholes.AmericanPut.Stopping.ActualInteriorRegularity
 
 /-! # Excluding an instantaneous interval of continuation
 
@@ -15,10 +15,22 @@ elliptic inequality on each continuation slice. A quadratic maximum argument
 prevents a whole interval of payoff contact from instantly becoming continuation.
 Only price values, not derivatives, are passed to the initial-time limit.
 
-## Result
+## Main definitions
 
-Public entry points include `canonicalPrice_monotone_time`, `canonicalPrice_time_deriv_nonneg`,
-`canonicalIntrinsicPremium`, `canonicalIntrinsicPremium_nonneg`.
+* `canonicalIntrinsicPremium`: the canonical price above its unclipped payoff,
+  `canonicalPrice k h x t - (1 - exp x)`.
+
+## Main results
+
+* `canonicalPrice_monotone_time`: for `0 ≤ k`, the canonical price is monotone in time.
+* `canonicalPrice_time_deriv_nonneg`: for `0 ≤ k`, its time derivative is nonnegative.
+* `canonicalIntrinsicPremium_nonneg`: for `0 ≤ k`, the price is at least the unclipped payoff
+  `1 - exp x`.
+
+## Tags
+
+continuation slice, elliptic inequality, quadratic maximum, payoff contact, American put, MSC 35R35,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

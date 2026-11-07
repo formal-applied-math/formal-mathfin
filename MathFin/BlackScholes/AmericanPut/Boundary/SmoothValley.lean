@@ -5,7 +5,12 @@ Authors: Robert Martin
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.SpecialFunctions.Sqrt
+public import Mathlib.Analysis.Calculus.Deriv.MeanValue
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # Smooth three-point detectors of a positive valley
@@ -15,10 +20,30 @@ partial derivatives. Their difference detects a valley between two positive
 values, while remaining nonpositive at spatial collisions and nonpositive
 endpoints. These elementary functions will be used for parabolic comparison.
 
-## Result
+## Main definitions
 
-Public entry points include `smoothPositive`, `smoothPositiveSlope`, `smoothMinimum`,
-`smoothValley`.
+* `smoothPositive`: the smooth approximation `(x + √(x² + δ²)) / 2` to `max x 0`.
+* `smoothPositiveSlope`: its derivative `(1 + x / √(x² + δ²)) / 2`.
+* `smoothMinimum`: the smooth approximation `x − smoothPositive δ (x − z)` to `min x z`.
+* `smoothValley`: the three-point detector `smoothMinimum δ x z − smoothPositive δ y`.
+
+## Main results
+
+* `smoothPositive_bounds`: for `0 ≤ δ`, `max x 0 ≤ smoothPositive δ x ≤ max x 0 + δ / 2`.
+* `smoothMinimum_bounds`: for `0 ≤ δ`, `min x z − δ / 2 ≤ smoothMinimum δ x z ≤ min x z`.
+* `smoothValley_bounds`: for `0 ≤ δ`, `min x z − max y 0 − δ ≤ smoothValley δ x y z`, and
+  `smoothValley δ x y z ≤ min x z − max y 0`.
+* `smoothPositive_hasDeriv`, `smoothPositiveSlope_bounds`, `smoothPositive_strictMono`: for
+  `0 < δ`, `smoothPositive δ` has derivative `smoothPositiveSlope δ`, which lies in `(0, 1)`, and
+  `smoothPositive δ` is strictly monotone.
+* `smoothMinimum_strictMono_left`, `smoothMinimum_strictMono_right`: for `0 < δ`,
+  `smoothMinimum δ` is strictly monotone in each argument.
+* `smoothValley_hasDeriv`: for `0 < δ` and functions with derivatives at `t`, the chain-rule
+  derivative of `s ↦ smoothValley δ (f s) (g s) (j s)`.
+
+## Tags
+
+smooth approximation, positive part, valley detector, smooth minimum, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

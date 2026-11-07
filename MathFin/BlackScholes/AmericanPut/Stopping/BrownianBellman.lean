@@ -15,10 +15,39 @@ schedule. Its identification with conditional expectation is stated once, for an
 measure in which the log state is `IsGaussianMarkov`; the raw and usual Brownian filtrations and the
 delayed grid are instances. No classical pricing solution is assumed.
 
-## Result
+## Main definitions
 
-Public entry points include `brownianGridMarkovAux`, `brownianGridMarkovAux_bound`,
-`snellEnvelopeAux_eq_brownianGridMarkovAux`, `brownianGridPrice_eq_gridAmericanPutValue`.
+* `brownianGridMarkovAux`: the backward recursion in the log-spot variable `x` along a schedule `s`:
+  stage `0` at index `i` is `Z i`, and each further stage takes the maximum of `Z i x` with the
+  Gaussian integral of the previous stage.
+* `discountedLogPayoff`: the put payoff at log spot `x`, discounted to time zero:
+  `exp (-r*t) * max (K - exp x) 0`.
+* `brownianGridPrice`: the deterministic Gaussian recursion for the capped-grid put value.
+
+## Main results
+
+* `brownianGridMarkovAux_bound`, `brownianGridMarkovAux_continuous`: if the rewards `Z i` are
+  bounded by `C` (resp. continuous), so is every stage of the recursion.
+* `brownianGridMarkovAux_add_left`: delaying the schedule by a constant does not change the
+  recursion.
+* `snellEnvelopeAux_eq_brownianGridMarkovAux`: for a monotone schedule, a log state that is
+  `IsGaussianMarkov` and bounded continuous rewards, the Snell recursion on the sampled
+  filtration equals the Gaussian recursion at the log state, almost surely.
+* `discountedLogPayoff_continuous`, `discountedLogPayoff_bound`: the discounted put payoff is
+  continuous in the log spot and, for `0 ≤ K` and `0 ≤ r`, bounded in norm by `K`.
+* `gridReward_eq_discountedLogPayoff`: the Brownian grid reward is `discountedLogPayoff` at the
+  log state at the capped grid times.
+* `brownianGridPrice_eq_gridAmericanPutValue`: for `0 ≤ K`, `0 ≤ r`, `0 < δ` and any filtration
+  and probability measure in which the log state is `IsGaussianMarkov`, `brownianGridPrice` is
+  `gridAmericanPutValue`.
+* `brownianGridPrice_eq_gridValue`, `brownianGridPrice_tendsto`: the raw-filtration instance, and
+  convergence of `brownianGridPrice K r q σ T (gridStep n) x` to `brownianAmericanPut` for
+  `0 ≤ K`, `0 ≤ r`.
+
+## Tags
+
+Bellman recursion, Snell envelope, Gaussian Markov, Gaussian integration, American put grid,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

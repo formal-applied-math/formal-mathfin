@@ -5,8 +5,9 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Stopping.BrownianModel
 public import Mathlib.Analysis.SpecificLimits.Basic
+public import BrownianMotion.Gaussian.BrownianMotion
+public import MathFin.Init
 
 /-! # Arbitrarily early downward Brownian excursions
 
@@ -15,10 +16,32 @@ Their negative limsup event belongs to the Brownian germ sigma algebra. The
 zero-one law and bounded convergence show that this event has probability one.
 No independence between these overlapping evaluations is claimed or needed.
 
-## Result
+## Main definitions
 
-Public entry points include `brownianProbeTime`, `brownianProbe`, `brownianNegativeGerm`,
-`brownianProbeTime_pos`.
+* `brownianProbeTime`: the `n`-th probe time `(1/(n+1))^2`.
+* `brownianProbe`: the Brownian evaluation at `brownianProbeTime n`, normalized by the factor `n+1`.
+* `brownianNegativeGerm`: the set of paths whose normalized probes fall below `-1` for infinitely
+  many `n`.
+* `negativeProbeTest`: the continuous test function `max 0 (min 1 (-x-1))`, valued in `[0,1]` and
+  zero on `-1 ≤ x`.
+
+## Main results
+
+* `brownianProbeTime_pos`, `brownianProbeTime_tendsto`: the probe times are positive and tend
+  to `0`.
+* `brownianProbe_hasLaw`: each normalized probe has the standard Gaussian law under
+  `gaussianLimit`.
+* `brownianNegativeGerm_measurable_germ`, `brownianNegativeGerm_prob_one`: the event of
+  infinitely many probes below `-1` belongs to the Brownian germ sigma algebra and has
+  `gaussianLimit` probability one.
+* `brownian_downward_excursion_of_germ`: on that event, for every `μ`, `σ > 0` and `δ > 0`, some
+  `t ∈ (0, δ)` has `μ t + σ B_t < 0`.
+* `brownian_downward_excursions_ae`: almost surely, that holds for all `μ`, `σ > 0` and
+  `δ > 0` at once.
+
+## Tags
+
+Brownian germ, zero-one law, early excursions, Blumenthal, negative limsup, MSC 60G40, MSC 60J65
 -/
 
 @[expose] public section

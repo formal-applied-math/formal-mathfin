@@ -5,10 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Actuarial.ActuarialInsurance
 public import MathFin.Foundations.FiniteMeasureCauchySchwarz
 public import MathFin.RiskMeasures.GaussianExpectedShortfall
+public import MathFin.RiskMeasures.GaussianValueAtRisk
 
 /-!
 # The standard-deviation principle: everything but monotonicity
@@ -40,14 +40,31 @@ principle with loading `ϕ(Φ⁻¹(α))/(1 − α)`, where `ϕ` is the standard 
 closed forms `valueAtRisk_of_hasLaw_gaussianReal` and `expectedShortfall_of_hasLaw_gaussianReal`,
 with the mean and variance of the law.
 
+## Main definitions
+
+* `stdDevPrinciple`: the standard-deviation principle `ρ(X) = E[X] + k·sd(X)` with loading `k`.
+
 ## Main results
 
 * `stdDevPrinciple_add_const`, `stdDevPrinciple_const_mul`, `stdDevPrinciple_add_le`.
-* `stdDevPrinciple_not_monotone`: the principle is not monotone.
+* `stdDevPrinciple_not_monotone`: the principle is not monotone: for a loading `k ≥ 0`, a loss
+  `B ≤ 0` valued in `{−1, 0}` with `P{B = −1} = q`, `q (1 + k²) < k²`, has `ρ(0) < ρ(B)`.
 * `integral_le_stdDevPrinciple`: a nonnegative loading prices at or above the mean.
 * `stdDevPrinciple_eq_valueAtRisk_of_hasLaw_gaussianReal`,
   `stdDevPrinciple_eq_expectedShortfall_of_hasLaw_gaussianReal`: on Gaussian losses VaR and ES are
-  standard-deviation principles.
+  standard-deviation principles, with loadings `Φ⁻¹(α)` and `ϕ(Φ⁻¹(α))/(1 − α)` (for ES, positive
+  variance).
+
+## References
+
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Examples 2.11 and 2.14
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 8.11; Ex. 8.11, 2.19
+
+## Tags
+
+standard deviation principle, premium principle, mean plus standard deviation, monotonicity failure,
+coherence axioms, safety loading, MSC 91G70, MSC 91G05, JEL G22, JEL G32
 -/
 
 @[expose] public section

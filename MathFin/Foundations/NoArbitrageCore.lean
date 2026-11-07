@@ -5,7 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Probability.Martingale.Basic
 
 /-!
 # No-arbitrage core: a nonnegative zero-mean payoff vanishes
@@ -18,6 +19,20 @@ discrete-time `IsEMM.noArbitrage` does; the one-period, finite-Ω and continuous
 (`ContinuousMarket.isEMM_noArbitrageSimple`, through sampling) forward directions are its
 instances. `ae_eq_zero_of_nonneg_of_null_pos` turns the null positive set into
 the `=ᵐ 0` form of the no-arbitrage definitions.
+
+## Main results
+
+* `ae_zero_of_nonneg_of_integral_zero`: a `Q`-integrable, `Q`-a.s. nonnegative `f` with
+  `∫ f dQ = 0` has `Q {f > 0} = 0`.
+* `ae_eq_zero_of_nonneg_of_null_pos`: an a.s. nonnegative `f` with null positive set is a.e.
+  zero.
+* `martingale_nonneg_terminal_ae_zero`: for a `Q`-martingale `V` on `ℕ` with `V 0 = 0` and
+  `V T ≥ 0` a.s., `Q {V T > 0} = 0`.
+
+## Tags
+
+no arbitrage, fundamental theorem of asset pricing, nonnegative zero-mean payoff,
+equivalent martingale measure, martingale transform, MSC 91G20, MSC 60G42, JEL G13
 -/
 
 @[expose] public section

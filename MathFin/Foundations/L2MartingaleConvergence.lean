@@ -5,9 +5,9 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.DoobLpMaximalInequality
 public import BrownianMotion.StochasticIntegral.UniformIntegrable
+public import Mathlib.Probability.Martingale.Convergence
 
 /-!
 # L²-bounded discrete martingales converge in L²
@@ -36,11 +36,20 @@ input is manufactured from this library's own **Doob L² maximal inequality**
 4. Vitali (`tendsto_Lp_finite_of_tendsto_ae`) upgrades the a.e. convergence
    to L²-norm convergence.
 
-## Main result
+## Main results
 
 * `martingale_ae_tendsto_and_eLpNorm_two_tendsto` — for a martingale `f`
   with `eLpNorm (f n) 2 μ ≤ R` for all `n`: a.e. convergence to
   `ℱ.limitProcess f μ` **and** `eLpNorm (f n − ℱ.limitProcess f μ) 2 μ → 0`.
+
+## References
+
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 2.5.1
+
+## Tags
+
+martingale convergence, L²-bounded martingale, Doob maximal inequality, uniform integrability,
+Vitali theorem, MSC 60G42, MSC 60F15
 -/
 
 @[expose] public section

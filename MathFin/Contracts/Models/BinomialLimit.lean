@@ -33,6 +33,18 @@ contract (`BlackScholes.value_europeanCall`). This file only composes the three.
 
 * `tendsto_binomial_value_europeanCall` — the call's value in the `n`-step CRR tree tends to its
   Black–Scholes value.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [J. C. Cox, S. A. Ross and M. Rubinstein, *Option pricing: a simplified
+  approach*][CoxRossRubinstein1979]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], ch. 13
+
+## Tags
+
+binomial convergence, Cox–Ross–Rubinstein limit, Black–Scholes limit, tree approximation, MSC 91G60,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

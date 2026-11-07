@@ -21,6 +21,19 @@ constant-volatility counterparts):
 ## Main results
 
 * `bondPrice_gsr` — `bondPrice` in the GSR model, almost surely.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  section 3.3.1
+* [J. Hull and A. White, *Pricing interest-rate-derivative securities*][HullWhite1990]
+* [The QuantLib contributors, *QuantLib*][QuantLib], Gsr model
+
+## Tags
+
+Gaussian short rate, GSR model, affine bond price, zero-coupon bond, conditional expectation,
+MSC 91G30, JEL E43, JEL G12
 -/
 
 @[expose] public section

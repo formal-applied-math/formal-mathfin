@@ -5,10 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.Foundations.GaussianCDFDeriv
 public import MathFin.Foundations.DerivOfDeriv
+public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 /-!
 # Black–Scholes PDE — forward direction
@@ -27,11 +27,26 @@ The proof leverages:
 * the "Black–Scholes identity" `S · ϕ(d₁) = K · e^{-r(T−t)} · ϕ(d₂)`,
 * chain rule on `d₁, d₂` to compute `∂_S V`, `∂²_S V`, `∂_t V`.
 
+## Main definitions
+
+* `bsV`: the Black–Scholes call price as a function of the spot `S` and the time to maturity `τ`,
+  `V(S, τ) = S · Φ(d₁) − K · e^{−rτ} · Φ(d₂)`.
+
 ## Main results
 
 * `bs_identity` — `S · ϕ(d₁) = K · e^{-r τ} · ϕ(d₂)`,
 * `hasDerivAt_bsd1_S`, `hasDerivAt_bsd1_tau` — chain-rule pieces for d₁,
 * `bs_pde_holds` — the BS price satisfies the BS PDE.
+
+## References
+
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 19.3; 19.5
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], 4.5
+
+## Tags
+
+Black–Scholes PDE, parabolic equation, backward equation, option price PDE, Greeks identity,
+MSC 91G20, MSC 35K10, JEL G13
 -/
 
 @[expose] public section

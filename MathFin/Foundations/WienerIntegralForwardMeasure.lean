@@ -5,8 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
-public import BrownianMotion.Gaussian.BrownianMotion
 public import MathFin.Foundations.Esscher
 public import MathFin.Foundations.ForwardMeasure
 public import MathFin.Foundations.WienerIntegralExpMoment
@@ -30,6 +28,11 @@ facts behind the bond put in the Hull–White and two-piece GSR models.
 * `hasLaw_forwardMeasure_wienerIntegralLp` — the law of a Wiener-represented rate under the forward
   measure of a Wiener-represented bank account; Hull–White (`FixedIncome/TimingAdjustment`) and
   GSR (`FixedIncome/GSRBondPriceAt`) short rates are its instances.
+
+## Tags
+
+forward measure, Wiener-represented bank account, Hull–White model, Gaussian short rate,
+futures versus forward, convexity adjustment, MSC 91G30, MSC 60H05, JEL E43
 -/
 
 @[expose] public section

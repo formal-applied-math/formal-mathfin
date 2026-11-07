@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.VarianceSwapEquipartition
 
 /-!
@@ -22,7 +21,7 @@ strike. The drift contribution `(r − σ²/2)² · T² / (n + 1)` vanishes as
 `n → ∞` by standard `Tendsto` analysis
 (`tendsto_one_div_add_atTop_nhds_zero_nat`).
 
-## Result
+## Main results
 
 * `tendsto_expected_bsLogPrice_equipartition_sum`: the realised-variance
   expectation converges to `σ²·T` as the partition refines.
@@ -33,6 +32,11 @@ The pre-existing `BlackScholes/VarianceSwap.lean` proves the Demeterfi-
 Derman-Kamal log-payoff identity `(2/T) · E[log(F/S_T)] = σ²`. The two
 characterisations of `σ²` (realised-variance / QV here, log-payoff
 replication there) are different functionals of the same BS price process.
+
+## Tags
+
+variance swap, realized variance limit, quadratic variation, fair strike, partition refinement,
+MSC 91G20, MSC 60J65, JEL G13
 -/
 
 @[expose] public section

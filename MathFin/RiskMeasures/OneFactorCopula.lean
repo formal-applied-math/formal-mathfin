@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.RiskMeasures.BernoulliMixture
 public import MathFin.Foundations.GaussianCopula
 
@@ -31,6 +30,31 @@ so that the library's parameter is the asset correlation `ρ`:
   (O. Vasicek, "Loan portfolio value", *Risk* 15(12) (2002)). With
   `oneFactor_measureReal_default`, the default covariance of two names is
   `N₂(Φ⁻¹(π), Φ⁻¹(π); ρ) − π²`; that corollary is not stated separately.
+
+## Main results
+
+* `gaussianFactorCopula_sqrt_real_Iic_const`: for `π ∈ (0, 1)` and `0 ≤ ρ < 1`, the Gaussian
+  factor copula at loading `√ρ`, evaluated at `(π, …, π)`, is `∫ oneFactorPD π ρ (x) ^ n` against
+  `N(0, 1)`.
+* `oneFactor_measureReal_iInter_default_eq_gaussianFactorCopula`: for independent standard
+  normals `F`, `ε₁, …, εₙ`, the probability that every name defaults, `√ρ F + √(1 − ρ) εᵢ ≤ Φ⁻¹(π)`
+  for all `i`, is `C(π, …, π)` for the copula `C = gaussianFactorCopula n √ρ`.
+* `integral_oneFactorPD_sq`: `∫ oneFactorPD π ρ (x) ^ 2 dN(0, 1) = N₂(Φ⁻¹(π), Φ⁻¹(π); ρ)`, the
+  bivariate normal CDF at correlation `ρ`.
+* `oneFactor_measureReal_inter_default`: two names default together with probability
+  `N₂(Φ⁻¹(π), Φ⁻¹(π); ρ)` in the one-factor Gaussian threshold model.
+
+## References
+
+* [J. Hull and A. White, *Valuation of a CDO and an $n$-th to default CDS without Monte Carlo
+  simulation*][HullWhite2004]
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 11.9
+* [O. Vasicek, *Loan portfolio value*][Vasicek2002]
+
+## Tags
+
+one-factor Gaussian copula, Vasicek model, asset correlation, factor loading,
+joint default probability, bivariate normal, CDO modelling, MSC 91G40, MSC 62H05, JEL G32
 -/
 
 @[expose] public section

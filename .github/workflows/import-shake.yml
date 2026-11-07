@@ -1,0 +1,134 @@
+name: import shake
+
+# Narrow the library's imports on a runner (docs/specs/2026-11-05-library-practices-design.md
+# §6c). `lake shake` reads the built `.olean`s, finds which modules each file actually needs, and
+# rewrites its import list. It needs the whole library built, which is runner work under the
+# memory doctrine (CLAUDE.md), so it runs here and commits the result to the branch it was
+# dispatched on.
+#
+# The shake is `lake exe mathfin_shake` (MathFinTools/Shake.lean): `lake shake` except that an
+# upstream module's extra reverse use is not preserved downstream. Mathlib marks every module that
+# registers a `positivity`/`norm_num` extension that way (extension use is not tracked), so under
+# `lake shake` a whole-Mathlib file is "narrowed" to a block of unrelated Mathlib leaves that
+# hides what it uses. A file that does rely on an upstream extension fails the rebuild below and
+# names the module itself. `MathFin/ShakeScaffold.lean`, when present, is a temporary stand-in
+# for Mathlib that a branch points modules at; this workflow deletes it before the rebuild.
+#
+# Flags: `--add-public` makes a replacement import `public` when what it replaces was in the
+# public closure, so a downstream module keeps seeing what it saw; `--keep-implied` keeps an
+# import that another import already implies, so the diff only narrows. The modules are passed
+# by name: given the umbrella `MathFin`, shake would prune the umbrella's own imports, which
+# are there to re-export the library. `MathFin/Init.lean` is marked `shake: keep-downstream`,
+# so the conventions module stays imported where nothing uses its constants yet.
+#
+# The rewritten library is built again before anything is committed; the ratchet then records
+# the lower `whole_mathlib_imports`. Benchmark snippets that used a Mathlib name only through a
+# module's whole-Mathlib re-export show up stale-and-failing in the next ledger sweep, and get
+# the import they need.
+
+on:
+  workflow_dispatch:
+    inputs:
+      trace_module:
+        description: "diagnose instead: elaborate this module (e.g. MathFin.Performance.Ratios) with trace.extraModUses and print what it records, and why"
+        required: false
+        default: ""
+
+concurrency:
+  group: import-shake-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  shake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install elan
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Mathlib cache (retried)
+        run: |
+          for i in 1 2 3 4; do
+            lake exe cache get && exit 0
+            echo "cache get failed (attempt $i), retrying in $((i * 20)) s"
+            sleep $((i * 20))
+          done
+          exit 1
+
+      - name: Build
+        uses: leanprover/lean-action@v1
+        with:
+          lint: "false"
+          use-mathlib-cache: "false"
+
+      - name: Trace a module's recorded elaboration uses
+        if: inputs.trace_module != ''
+        env:
+          MOD: ${{ inputs.trace_module }}
+        run: |
+          echo "== mathfin_shake --explain $MOD"
+          lake exe mathfin_shake --explain --trace --add-public --keep-implied "$MOD" 2>&1 | head -300 || true
+          f="$(echo "$MOD" | sed 's|\.|/|g').lean"
+          python3 - "$f" <<'PY'
+          import sys
+          p = sys.argv[1]
+          s = open(p, encoding="utf-8").read()
+          s = s.replace("@[expose] public section", "@[expose] public section\n\nset_option trace.extraModUses true", 1)
+          open(p, "w", encoding="utf-8").write(s)
+          PY
+          lake env lean "$f" 2>&1 | grep -o "recording .*" | sort | uniq -c | sort -rn | head -400
+
+      - name: Shake the library's imports
+        if: inputs.trace_module == ''
+        run: |
+          mods=$(git ls-files 'MathFin/*.lean' | grep -v -E '^MathFin/(AxiomAudit|AxiomAuditGen|Blueprint|ShakeScaffold)\.lean$' \
+            | sed -e 's/\.lean$//' -e 's|/|.|g')
+          lake exe mathfin_shake --fix --add-public --keep-implied $mods
+          git diff --stat | tail -1
+          echo "the imports added most often (a leftover cover block would top this list):"
+          git diff -U0 -- MathFin | grep -E '^\+(public )?import' | sort | uniq -c | sort -rn | head -25
+
+      - name: Remove the scaffold
+        if: inputs.trace_module == ''
+        run: |
+          if [ -f MathFin/ShakeScaffold.lean ]; then
+            git rm -qf MathFin/ShakeScaffold.lean
+            if git grep -n 'MathFin.ShakeScaffold' -- MathFin; then
+              echo "::error::modules still import the scaffold (a keep annotation?)"; exit 1
+            fi
+          fi
+
+      - name: Build the narrowed library
+        if: inputs.trace_module == ''
+        run: lake build
+
+      - name: Python gates and the lowered ratchet
+        if: inputs.trace_module == ''
+        run: |
+          python3 -m tools.verify.ratchet update
+          python3 -m tools.verify.ratchet show | grep whole_mathlib_imports
+
+      - name: Commit
+        if: inputs.trace_module == ''
+        run: |
+          if git diff --quiet -- MathFin ratchet.json; then
+            echo "imports already minimal — nothing to commit"; exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A MathFin ratchet.json
+          git commit \
+            -m "chore(imports): narrow the library's imports with mathfin_shake" \
+            -m "import-shake.yml: 'lake exe mathfin_shake --fix --add-public --keep-implied' over every library module, then a full 'lake build' of the result. The ratchet's whole_mathlib_imports is lowered to match."
+          git push

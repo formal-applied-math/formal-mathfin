@@ -30,11 +30,16 @@ LIBRARY sources and the generated audit artifacts (complementing
    non-``MathFin`` namespaces); no identifier that could be such a citation is
    left unresolved; and every upstream constant a ``library_wrapper`` entry
    cites is listed in the generator's ``UPSTREAM_CITATIONS`` and pinned.
+8. ``test_module_docstrings_follow_the_doc_standard`` — every module docstring has
+   Mathlib's layout (``tools/verify/doc_standard.py``): a title first, standard sections
+   spelled the standard way, References and Tags last, every reference keyed to
+   ``docs/references.bib``, subject codes well formed. Section coverage is a ratchet count.
 """
 
 import re
 from pathlib import Path
 
+from tools.verify import library
 from tools.verify.axiom_audit_gen import GEN_PATH, UPSTREAM_CITATIONS, generate
 from tools.verify.corpus import iter_entries
 from tools.verify.mathfin_index import (
@@ -145,7 +150,7 @@ def _decl_tails(text: str):
 
 def _mathfin_decl_tail_index() -> dict:
     index: dict = {}
-    for path in sorted(Path("MathFin").rglob("*.lean")):
+    for path in library.modules(aggregators=True):
         text = _strip_comments(path.read_text())
         for name, tail in _decl_tails(text):
             index.setdefault(name.split(".")[-1], []).append((str(path), tail))
@@ -311,7 +316,7 @@ def test_values_review_is_current() -> None:
     )
     reviewed_modules = [int(m.group(1)) for m in REVIEW_MODULES_RE.finditer(text)]
     if reviewed_modules:
-        modules = sum(1 for p in Path("MathFin").rglob("*.lean") if not p.name.startswith("."))
+        modules = len(library.modules(aggregators=True))
         newest_modules = max(reviewed_modules)
         assert modules - newest_modules <= REVIEW_SLACK_MODULES, (
             f"MathFin/ has {modules} modules but the latest recorded values review covered "
@@ -580,3 +585,12 @@ def test_library_wrapper_citations_are_pinned() -> None:
         "proof cites, fully qualified, then run "
         "`python3 -m tools.verify.axiom_audit_gen --write`:\n  " + "\n  ".join(problems)
     )
+
+
+def test_module_docstrings_follow_the_doc_standard() -> None:
+    from tools.verify import doc_standard
+
+    problems = doc_standard.all_problems()
+    assert not problems, (
+        "module docstrings off the doc standard (docs/specs/2026-11-05-library-practices-design.md"
+        " §4; `python3 -m tools.verify.doc_standard`):\n  " + "\n  ".join(problems))

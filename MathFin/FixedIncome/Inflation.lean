@@ -5,7 +5,6 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.Foundations.Numeraire
 public import MathFin.Foundations.BrownianMartingale
 public import MathFin.Foundations.ForwardMeasure
@@ -47,10 +46,38 @@ chapter's numeric tables. The Jarrow–Yildirim identification is a hypothesis (
 never derived. The reconstitution formula itself, `P(S,T)` as a function of `r_S`, is not derived
 either: only its normalisation under the `S`-forward measure is.
 
+## Main definitions
+
+* `hwD`: the reconstitution deterministic `Dⁱ = −½·Bⁱ²·Vⁱ` of the Hull–White bond reconstitution
+  formula.
+
+## Main results
+
+* `forwardIndex_eq`: under the Jarrow–Yildirim identification `hident` and positive `B_T`,
+  `𝔼^{Q^{n,T}}[I_T] = I₀ · Pʳ(0,T) / Pⁿ(0,T)` under the nominal `T`-forward measure.
+* `breakeven_eq`: for `I₀ > 0`, if a zero-coupon inflation swap is fair under the nominal
+  `T`-forward measure, then `(1+b)^T = Pʳ(0,T) / Pⁿ(0,T)`.
+* `yoyRatioExp_gaussian`: for independent standard normals `Z₁, Z₂`, `Vⁿ, Vʳ ≥ 0` and `ρ² ≤ 1`,
+  the closed form of `𝔼[exp(Bⁿ·yⁿ − Bʳ·yʳ)]` for the two correlated Gaussian rate deviations.
+* `yoyRatioExp_gaussian_cov`: the same closed form with the correlation replaced by a covariance
+  `Cov = ρ·√(Vⁿ·Vʳ)` given by hypothesis.
+* `yoyConvexity_eq`: the year-on-year convexity closed form. The Gaussian expectation of the
+  reconstituted bond-ratio factor is the naive ratio of forwards times
+  `exp(Bⁿ·mⁿ − Bʳ·mʳ + Bⁿ²·Vⁿ − Bʳ·Bⁿ·Cov)`.
+* `integral_exp_hwD_forwardMeasure`: in the Hull–White model calibrated to a `C¹` forward curve with
+  `κ > 0`, `𝔼^{Q^S}[exp(hwD b V − b·(r_S − f(0, S)))] = 1` under the `S`-forward measure.
+
 ## References
 
-* S. Bagaria, *Notes on Fixed Income Derivative Pricing* (lecture notes), ch. 17 §§17.3–17.4
+* [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 17 §§17.3–17.4
   ("the chapter" throughout); the Hull–White reconstitution formula is from its ch. 8.
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  §3.3
+
+## Tags
+
+zero-coupon inflation swap, Jarrow–Yildirim, year-on-year inflation, convexity adjustment,
+breakeven inflation, index-linked bond, quanto, MSC 91G30, MSC 91G20, JEL E31
 -/
 
 @[expose] public section
@@ -59,12 +86,11 @@ open MeasureTheory ProbabilityTheory
 
 /-! ## The zero-coupon inflation swap (eqs. 17.6/17.7)
 
-`Qⁿ` is the nominal pricing measure, `B_T` the money-market account at
-`T` (a strictly positive random variable), `Pⁿ₀T = Pⁿ(0,T)` and `Pʳ₀T = Pʳ(0,T)` the
-nominal and real T-bond prices, `I₀` today's index and `I_T` the terminal index. The
-**identification hypothesis** `hident` is the chapter's postulate verbatim: the
-index-linked bond, paying `I_T` at `T`, is priced on the real curve, `𝔼^{Qⁿ}[I_T/B_T]
-= I₀·Pʳ(0,T)`.
+`Qⁿ` is the nominal pricing measure, `B_T` the money-market account at `T` (a strictly positive
+random variable), `Pⁿ₀T = Pⁿ(0,T)` and `Pʳ₀T = Pʳ(0,T)` the nominal and real T-bond prices, `I₀`
+today's index and `I_T` the terminal index. The **identification hypothesis** `hident` is the
+chapter's postulate verbatim: the index-linked bond, paying `I_T` at `T`, is priced on the real
+curve, `𝔼^{Qⁿ}[I_T/B_T] = I₀·Pʳ(0,T)`.
 
 In `forwardIndex_eq` and `breakeven_eq`, the numéraire measure is the nominal T-forward
 measure `MathFin.forwardMeasure Qⁿ B_T` (the T-bond numéraire against the money market), whose
@@ -92,9 +118,9 @@ theorem forwardIndex_eq (BT : Ω → ℝ) (Pn0T Pr0T I0 : ℝ) (IT : Ω → ℝ)
   rw [eq_div_iff hPn0T.ne', mul_comm, MathFin.forwardMeasure_price IT hBTmeas hBTpos hPn0T, hident]
 
 /-- **The breakeven inflation rate (eq. 17.7).** A zero-coupon inflation swap pays
-`I_T/I₀ − (1+b)^T` at `T`; `b` is quoted as the breakeven. Fairness (`hfair`: under the
-the nominal T-forward measure `forwardMeasure Qⁿ B_T` — the fixed leg `I₀(1+b)^T` matches the floating leg `I_T`)
-combined with eq. (17.6) — so under the identification `hident` — gives, for `I₀ > 0`, the
+`I_T/I₀ − (1+b)^T` at `T`; `b` is quoted as the breakeven. Fairness (`hfair`: under the the nominal
+T-forward measure `forwardMeasure Qⁿ B_T` — the fixed leg `I₀(1+b)^T` matches the floating leg
+`I_T`) combined with eq. (17.6) — so under the identification `hident` — gives, for `I₀ > 0`, the
 curve-only breakeven identity
 
   `(1+b)^T = Pʳ(0,T) / Pⁿ(0,T)`,

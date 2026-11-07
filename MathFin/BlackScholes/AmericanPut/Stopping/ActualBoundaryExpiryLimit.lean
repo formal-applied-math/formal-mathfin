@@ -17,9 +17,20 @@ Only this cell is covered. The cells `q > r > 0`, `q < 0`, and negative rates (i
 double-boundary case) are not treated here, because the underlying boundary theory assumes
 `0 < r` and `0 ≤ q ≤ r`.
 
-## Result
+## Main results
 
 `tendsto_brownianUsualExerciseBoundary_expiry`.
+
+## References
+
+* [Andersen and Lake, *Fast American option pricing: the double-boundary case*][AndersenLake2021]
+* [Andersen, Lake and Offengenden, *High-performance American option
+  pricing*][AndersenLakeOffengenden2016]
+
+## Tags
+
+exercise boundary at expiry, boundary tends to strike, free boundary, American put, dividend yield,
+MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -35,7 +46,7 @@ theorem tendsto_brownianUsualExerciseBoundary_expiry {K r q σ : ℝ}
     (hK : 0 < K) (hr : 0 < r) (hq : 0 ≤ q) (hqr : q ≤ r) (hσ : 0 < σ) :
     Tendsto (fun τ : ℝ ↦ brownianUsualExerciseBoundary K r q σ τ.toNNReal)
       (𝓝[>] 0) (𝓝 K) := by
-  obtain ⟨hk, hh, hhk⟩ := normalized_rates_admissible hr hq hqr hσ
+  obtain ⟨hk, hh, hhk⟩ := Boundary.normalized_dividend_regime hr hq hqr hσ
   have hcont : ContinuousAt
       (fun τ : ℝ ↦ K * canonicalStockBoundary (normalizedRate r σ) (normalizedRate q σ)
         (σ ^ 2 / 2 * τ)) 0 := by

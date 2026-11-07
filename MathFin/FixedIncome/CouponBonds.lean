@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.ZCB
 
 /-!
@@ -23,7 +22,12 @@ Extensions of the deterministic-short-rate framework in `ZCB.lean`:
   giving the standard YTM-uniqueness property at the parameter-monotonicity
   level.
 
-Results:
+## Main definitions
+
+* `annuityValue`: the value of an annuity over `n` periods of length `Δt` with coupon `c` at rate
+  `r`.
+
+## Main results
 
 * `annuityValue`, `annuityValue_closed_form`: definition and geometric-series
   closed form.
@@ -33,6 +37,16 @@ Results:
   curve).
 * `couponBondPrice_strictAnti`: bond price strictly decreasing in `r`, for
   positive coupons at future times.
+
+## References
+
+* [Fabozzi, *Fixed Income Mathematics*][FabozziFIM], Ch 2; Ch 3
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], Ch 4; Ch 4.5; Ch 4.7
+
+## Tags
+
+annuity, coupon bond, yield to maturity, flat curve, forward rate, geometric series, present value,
+MSC 91G30, JEL G12
 -/
 
 @[expose] public section

@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.StrikeGreeks
 public import MathFin.BlackScholes.StrikeConvexity
 public import MathFin.BlackScholes.Call
@@ -59,13 +58,27 @@ sign of the density share their root: `lognormalTerminalPDF_nonneg` reads it off
 the formula, and `lognormalTerminalPDF_nonneg_via_strike_convexity`, steps
 3 → 4 → 5, explains it by the convexity of the payoff.
 
-Results:
+## Main definitions
 
-* `lognormalTerminalPDF`: definition.
+* `lognormalTerminalPDF`: the lognormal density of `S_T` at strike `K`, written through the
+  Black–Scholes `d₂`: `ϕ(d₂(K)) / (K · σ · √T)`.
+
+## Main results
+
 * `breedenLitzenberger`: `∂²_K bsV(K) = e^{-rT} · lognormalTerminalPDF(K)`.
 * `lognormalTerminalPDF_nonneg`: `0 ≤ lognormalTerminalPDF`, directly.
 * `lognormalTerminalPDF_nonneg_via_strike_convexity`: the same, from the strike
   convexity of the price.
+
+## References
+
+* [Breeden and Litzenberger, *Prices of state-contingent claims implicit in option
+  prices*][BreedenLitzenberger1978]
+
+## Tags
+
+risk-neutral density, implied distribution, second strike derivative, state price density,
+option-implied PDF, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

@@ -9,6 +9,8 @@ module
 -- `QuadraticVariationL2`; this file's own surface needs only:
 public import MathFin.Foundations.ItoSquaringIdentity
 public import MathFin.Foundations.QuadraticVariationL2
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ReduceModChar
 
 /-! # Itô's lemma for `f(x) = x²` — the L² continuous-time form
 
@@ -46,6 +48,18 @@ That is the entire content.
 The first form is what the proof produces directly (no division); the
 second is the canonical Itô-lemma statement. Both are derived; pick the
 shape that downstream proofs find more convenient.
+
+## Main results
+
+* `itoSquared_L2_tendsto`: along the uniform partition of `[0,T]`, the `L²(μ)` distance between
+  `2 ∑ B_{t_k} (B_{t_{k+1}} − B_{t_k})` and `B_T² − B_0² − T` tends to `0`.
+* `itoSquared_L2_tendsto_div2`: the same statement in half form, the Riemann sums
+  `∑ B_{t_k} (B_{t_{k+1}} − B_{t_k})` tend to `½(B_T² − B_0² − T)` in `L²(μ)`.
+
+## Tags
+
+Itô lemma, ∫ B dB, quadratic variation, Riemann sums, Brownian motion, stochastic integral,
+MSC 60H05, MSC 60J65
 -/
 
 @[expose] public section

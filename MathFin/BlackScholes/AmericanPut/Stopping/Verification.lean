@@ -17,11 +17,25 @@ A contact rule with a martingale stopped candidate attains it. This file assumes
 properties; the classical free-boundary contract supplies them in `ContactMartingale` and
 `ClassicalSupermartingale`, and the actual price supplies them in `Actual*`.
 
-## Result
+## Main results
 
-Public entry points include `candidate_stopped_integrable`, `value_le_supermartingale_candidate`,
-`value_eq_of_attained`, `expectedReward_eq_initial_of_contact_martingale`,
-`value_eq_of_contact_martingale`.
+* `candidate_stopped_integrable`: for a bounded continuous-path supermartingale `U`, `U` at any
+  stopping rule is integrable.
+* `value_le_supermartingale_candidate`: for `0 ≤ K`, `0 ≤ r`, `0 ≤ S`, jointly measurable `W` and
+  a bounded continuous supermartingale `U` dominating the reward at deterministic times up to
+  `T`, the American put value is at most `∫ U 0`.
+* `value_eq_of_attained`: under the same hypotheses, if some rule's expected reward equals
+  `∫ U 0`, the value equals `∫ U 0`.
+* `expectedReward_eq_initial_of_contact_martingale`: on a finite measure, if `U` meets the reward
+  at the rule `θ` almost surely and `U` stopped at `θ` is a martingale, the expected reward at
+  `θ` equals `∫ U 0`.
+* `value_eq_of_contact_martingale`: under the hypotheses of the first two, with such a contact
+  rule `θ`, the American put value equals `∫ U 0`.
+
+## Tags
+
+verification theorem, supermartingale, contact rule, optimal stopping, American put value,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

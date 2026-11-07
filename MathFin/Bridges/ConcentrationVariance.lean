@@ -26,6 +26,25 @@ portfolio loss `∑ wᵢXᵢ` is Gaussian with variance `v · HHI(w)`, so its va
 `valueAtRisk_portfolio_gaussian` of `Bridges/GaussianRiskMarkowitz.lean`). The VaR in excess of
 the mean scales with the square root of the concentration index. A certified unification of
 known textbook facts, not new finance.
+
+## Main results
+
+* `portfolioVarN_diag_eq_herfindahl`: if the covariances `σ i j` vanish off the diagonal on `s`
+  and `σ i i = σ_sq` on `s`, then `portfolioVarN s w σ = σ_sq * herfindahl s w`.
+* `valueAtRisk_portfolio_gaussian_uncorrelated`: for a Gaussian vector `X` of pairwise
+  uncorrelated factors with common variance `v` and `α ∈ (0, 1)`, `valueAtRisk` of `∑ wᵢXᵢ` at
+  level `α` is `∑ wᵢ E Xᵢ + √(v * herfindahl univ w) * PhiInv α`.
+
+## References
+
+* [H. Markowitz, *Portfolio selection*][Markowitz1952]
+* [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
+  Tools*][McNeilFreyEmbrechts], Example 2.11
+
+## Tags
+
+Herfindahl index, portfolio concentration, Markowitz variance, diversification,
+Gaussian value-at-risk, MSC 91G10, MSC 91G70, JEL G11
 -/
 
 @[expose] public section

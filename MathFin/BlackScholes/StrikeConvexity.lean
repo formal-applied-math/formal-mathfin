@@ -5,9 +5,10 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
-public import MathFin.BlackScholes.StrikeGreeks
-public import MathFin.BlackScholes.GreekSigns
+public import MathFin.BlackScholes.PutGreeks
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Smooth.Flat
 
 /-!
 # Strike-direction convexity at every scale
@@ -58,7 +59,7 @@ finitely supported measure.
   positivity of the standard normal law (used as `ϕ ≥ 0` inside
   `bs_call_formula`).
 
-## Results
+## Main results
 
 * `StrictConvexOn.smul`: a strictly convex function scaled by a positive
   constant is strictly convex.
@@ -71,6 +72,17 @@ finitely supported measure.
   strikes `s` when `μ {k₁ < X < k₂} ≠ 0` for all `k₁ < k₂` in `s`.
 * `bsV_strike_convexOn`: `K ↦ bsV K r σ S τ` is convex on `(0, ∞)`
   (continuous BS price level).
+
+## References
+
+* [Breeden and Litzenberger, *Prices of state-contingent claims implicit in option
+  prices*][BreedenLitzenberger1978]
+* [R. C. Merton, *Theory of rational option pricing*][Merton1973]
+
+## Tags
+
+call price convexity, butterfly arbitrage, Breeden–Litzenberger, implied density, strike convexity,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section

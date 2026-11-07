@@ -5,8 +5,12 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.BlackScholes.AmericanPut.Boundary.ParabolicMaximum
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.Deriv.Pow
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
 
 /-!
 # A positive polynomial barrier for bounded-drift parabolic equations
@@ -16,10 +20,28 @@ An explicit exponential time factor makes it a subsolution for every drift
 whose absolute value is bounded by `M`. This is a propagation barrier, not
 an assumed strong maximum principle.
 
-## Result
+## Main definitions
 
-Public entry points include `positiveBump`, `positiveBump_contDiff`, `positiveBump_hasDeriv`,
-`positiveBump_deriv2`.
+* `positiveBump`: the quartic `x² (L − x)²`, vanishing to second order at `0` and `L`.
+* `decayingBump`: `positiveBump L` scaled by `η` and the time factor
+  `exp (−(M² + 16 / L²) (t − a))`.
+
+## Main results
+
+* `positiveBump_contDiff`, `positiveBump_hasDeriv`, `positiveBump_deriv2`: `positiveBump L` is
+  smooth, with first derivative `2x(L − x)(L − 2x)` and second derivative
+  `2(L − 2x)² − 4x(L − x)`.
+* `positiveBump_pos`: `positiveBump L x > 0` for `0 < x < L`.
+* `positiveBump_operator`: for `0 < L` and `|D| ≤ M`, `b'' + D b' + (M² + 16 / L²) b ≥ 0` for
+  `b = positiveBump L`.
+* `decayingBump_contDiff`, `decayingBump_hasDeriv_t`: `decayingBump L M η a` is smooth in
+  `(x, t)`, and its time derivative is `−(M² + 16 / L²)` times its value.
+* `decayingBump_subsolution`: for `0 < L`, `0 ≤ η` and `|D| ≤ M`, the time derivative of
+  `decayingBump L M η a` is at most `b_xx + D b_x`.
+
+## Tags
+
+polynomial barrier, bounded drift, subsolution, propagation barrier, MSC 35R35, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

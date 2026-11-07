@@ -13,10 +13,40 @@ public import MathFin.BlackScholes.AmericanPut.Stopping.ClassicalSupermartingale
 This extension stays inside the given ambient measurable space. It must not
 be confused with completing that space by all subsets of null sets.
 
-## Result
+## Main definitions
 
-Public entry points include `StoppingRule.enlargeFiltration`, `americanPutValue_mono_filtration`,
-`brownianRightAugFiltration`, `brownianFiltration_le_rightAug`.
+* `StoppingRule.enlargeFiltration`: a stopping rule of `𝓕` read in a larger filtration `𝓖 ≥ 𝓕`, with
+  the same exercise time and the same bound `T`.
+* `brownianRightAugFiltration`: the right-continuous regularization of the raw Brownian filtration
+  after adjoining the `gaussianLimit`-null ambient sets.
+* `brownianRightAugAmericanPut`: the finite-horizon American put value of the constructed Brownian
+  model, taken over the rules of `brownianRightAugFiltration`.
+
+## Main results
+
+* `americanPutValue_mono_filtration`: for a probability measure, `𝓕 ≤ 𝓖`, measurable `W` and
+  `0 ≤ K`, `0 ≤ r`, `0 ≤ S`, the American put value over `𝓕`-rules is at most that over
+  `𝓖`-rules.
+* `brownianFiltration_le_rightAug`, `brownianRightAugFiltration_contains_null`: the raw Brownian
+  filtration is contained in `brownianRightAugFiltration`, which contains every measurable
+  `gaussianLimit`-null set at every time.
+* `brownianClassicalCandidate_rightAug_supermartingale`: given a `DividendPutSolution` at the
+  normalized rates, `0 ≤ K`, `0 ≤ r` and `0 < σ`, the classical candidate is a supermartingale
+  for `brownianRightAugFiltration` under `gaussianLimit`.
+* `brownianRightAugAmericanPut_eq_raw`: given such a `DividendPutSolution`, `0 < K`, `0 ≤ r`,
+  `0 < σ` and `0 < S`, the right-augmented value equals `brownianAmericanPut`.
+
+## References
+
+* [R. Martin, *Log-convexity of the exercise boundary of an American put
+  option*][MartinAmericanPutConvexity]
+* [G. Peskir and A. Shiryaev, *Optimal Stopping and Free-Boundary Problems*][PeskirShiryaev2006],
+  Ch. I
+
+## Tags
+
+filtration augmentation, right-continuous filtration, null sets, usual conditions, American value,
+MSC 60G40, MSC 91G20, JEL G13
 -/
 
 @[expose] public section

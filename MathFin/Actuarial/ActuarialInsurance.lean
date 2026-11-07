@@ -5,7 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Basic.Real.Basic
 
 -- pointers: MathFin/Actuarial/Insurance.lean
 -- main-module: MathFin/Actuarial/ActuarialInsurance.lean
@@ -24,6 +25,24 @@ The principles take the mean `μ`, the variance `σ²` and the standard deviatio
 `σ` as numbers. For a random loss `X`, `stdDevPrinciple` of
 `RiskMeasures/StandardDeviationPrinciple.lean` is `stdDevPremium` at the mean and
 standard deviation of `X`.
+
+## Main definitions
+
+* `expectedValuePremium`: the expected-value principle `(1 + θ) · μ` with loading `θ`.
+* `variancePremium`: the variance principle `μ + α · σ²` with loading `α` on the variance.
+* `stdDevPremium`: the standard-deviation principle `μ + β · σ` with loading `β`.
+
+## Main results
+
+* `expectedValuePremium_ge_mean`: for `0 ≤ θ` and `0 ≤ μ`, the expected-value premium is at
+  least `μ`.
+* `variancePremium_ge_mean`: for `0 ≤ α` and `0 ≤ σ²`, the variance premium is at least `μ`.
+* `stdDevPremium_ge_mean`: for `0 ≤ β` and `0 ≤ σ`, the standard-deviation premium is at least `μ`.
+
+## Tags
+
+premium principle, expected value principle, variance principle, standard deviation principle,
+pure premium, loading, MSC 91G05, JEL G22
 -/
 
 set_option autoImplicit false

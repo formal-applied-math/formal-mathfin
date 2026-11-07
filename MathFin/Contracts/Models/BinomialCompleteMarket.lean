@@ -30,6 +30,27 @@ It is the finite-market counterpart of `Binomial.pathPV_eq_value_add_gains`
 (`Contracts/Models/Binomial.lean`), which gives the hedge on the infinite path space from the
 tree's backward recursion: there the value is built into the hedge by construction, here the
 completeness theorem produces some hedge and the pricing argument shows its capital is the value.
+
+## Main results
+
+* `exists_hedge_eq_value`: under no-arbitrage, `S₀ > 0`, `q = crrUpProb u d ρ` and `T / h = N`, for
+  the European contract `Contract.pay T a` with `a.eval s = g (s () T)` and each `p ∈ (0, 1)`, there
+  is a bounded predictable strategy `φ` in `horizonSpot N` such that the discounted payoff equals,
+  almost surely under `horizonMeasure N p`, `Contract.value` under `coinFlipMeasure q` plus the
+  martingale transform of `φ`. The strategy comes from completeness and is not given in closed form;
+  only its capital is identified, as the contract's value.
+
+## References
+
+* [J. M. Harrison and S. R. Pliska, *Martingales and stochastic integrals in the theory of
+  continuous trading*][HarrisonPliska1981]
+* [S. E. Shreve, *Stochastic Calculus for Finance I: The Binomial Asset Pricing Model*][ShreveSCFI],
+  Section 5.4
+
+## Tags
+
+complete market, second fundamental theorem, replication, hedging portfolio,
+martingale representation, MSC 91G20, MSC 60G42, JEL G13
 -/
 
 @[expose] public section

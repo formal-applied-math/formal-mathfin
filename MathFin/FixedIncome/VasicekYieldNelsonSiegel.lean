@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.FixedIncome.NelsonSiegelSvensson
 public import MathFin.FixedIncome.VasicekBondPrice
 
@@ -45,6 +44,18 @@ Wiener representation.
   `nssYield θ (r₀ − θ) 0 0 κ⁻¹ l₂`.
 * `tendsto_vasicekYield_nhdsGT_zero` — `y(T) → r₀` as `T → 0⁺`.
 * `tendsto_vasicekYield_atTop` — `y(T) → θ − σ²/(2κ²)` as `T → ∞`.
+
+## References
+
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  §3.2.1
+* [C. R. Nelson and A. F. Siegel, *Parsimonious modeling of yield curves*][NelsonSiegel1987]
+* [O. Vasicek, *An equilibrium characterization of the term structure*][Vasicek1977]
+
+## Tags
+
+Vasicek model, Nelson–Siegel curve, zero yield, term structure, slope factor, long rate, JEL E43,
+MSC 91G30
 -/
 
 @[expose] public section
@@ -97,7 +108,7 @@ theorem vasicekYield_zeroVol_eq_nssYield (hB : IsPreBrownianReal B μ) (r₀ θ 
   ring
 
 /-- `T ↦ c·T` sends `T → 0⁺` (in `ℝ≥0`) to `x → 0` through nonzero values, for `c ≠ 0`. -/
-private theorem tendsto_const_mul_coe_nhdsNE {c : ℝ} (hc : c ≠ 0) :
+theorem tendsto_const_mul_coe_nhdsNE {c : ℝ} (hc : c ≠ 0) :
     Tendsto (fun T : ℝ≥0 ↦ c * (T : ℝ)) (𝓝[>] 0) (𝓝[≠] 0) := by
   rw [tendsto_nhdsWithin_iff]
   refine ⟨?_, ?_⟩

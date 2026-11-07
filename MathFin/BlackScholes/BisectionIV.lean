@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.ImpliedVolatility
 public import MathFin.Foundations.Bisection
 
@@ -20,13 +19,24 @@ inside the bracket, and strict monotonicity makes it the only positive one. It
 also makes `σ` the threshold of the price against `C_obs`, which is all the
 bisection method (`Foundations/Bisection.lean`) needs to converge to it.
 
-## Result
+## Main results
 
 * `impliedVol_bracket_exists`: for `f` continuous and strictly increasing on
   `[σ_lo, σ_hi]`, a target strictly between `f σ_lo` and `f σ_hi` is attained
   at a unique `σ ∈ (σ_lo, σ_hi)`.
 * `impliedVol_bisection_converges`: bisection on the BS call price converges to
   the implied volatility, within `(σ_hi − σ_lo) / 2ⁿ⁺¹` after `n` steps.
+
+## References
+
+* [Burden and Faires, *Numerical Analysis*][BurdenFaires], §2.1
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull]
+* [Press and others, *Numerical Recipes*][PressEtAlNumericalRecipes], §9.1
+
+## Tags
+
+implied volatility, bisection method, intermediate value, volatility bracket, root finding,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section
