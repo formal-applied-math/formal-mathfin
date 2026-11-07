@@ -58,6 +58,9 @@ open scoped NNReal
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
   {lam : ℝ≥0} {N : Ω → ℕ} {X : ℕ → Ω → ℝ}
 
+private lemma natCast_le_two_pow (n : ℕ) : (n : ℝ) ≤ 2 ^ n := by
+  exact_mod_cast (Nat.lt_two_pow_self (n := n)).le
+
 section Wald
 
 variable (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ) (hX : Integrable (X 0) μ)
@@ -77,16 +80,13 @@ private lemma integral_abs_range_sum_le (n : ℕ) :
           (integrable_finset_sum _ fun i _ ↦ hi i) fun ω ↦ Finset.abs_sum_le_sum_abs _ _
     _ = ∑ i ∈ Finset.range n, ∫ ω, |X i ω| ∂μ := integral_finset_sum _ fun i _ ↦ hi i
     _ = n * ∫ ω, |X 0 ω| ∂μ := by
-        rw [Finset.sum_congr rfl fun i _ ↦ ((hident i).comp continuous_abs.measurable).integral_eq,
-          Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+        have h (i : ℕ) : ∫ ω, |X i ω| ∂μ = ∫ ω, |X 0 ω| ∂μ :=
+          ((hident i).comp continuous_abs.measurable).integral_eq
+        simp [h]
 
 omit hX in
 private lemma aemeasurable_claims : AEMeasurable (fun ω i ↦ X i ω) μ :=
   .of_eval fun i ↦ (hident i).aemeasurable_fst
-
-omit hX in
-private lemma natCast_le_two_pow (n : ℕ) : (n : ℝ) ≤ 2 ^ n := by
-  exact_mod_cast (Nat.lt_two_pow_self (n := n)).le
 
 variable (hN : HasLaw N (poissonMeasure lam) μ) (hNX : IndepFun N (fun ω i ↦ X i ω) μ)
 include hN hNX
