@@ -2407,16 +2407,16 @@
     "mf-discrete-market-parity": {
       "benchmark_file": "contracts.json",
       "date": "2026-11-07",
-      "elapsed_s": 8.3,
-      "input_hash": "050485c76137f11fb97ad4ca5b08711a076aa4cd88d314d4bf0391edb69cd7bf",
-      "verified_at_commit": "cf2ace0"
+      "elapsed_s": 2.4,
+      "input_hash": "0c488877917cfab56e5dd4f865d92cb212de707810a28ea076edf1e586366c00",
+      "verified_at_commit": "c99b571"
     },
     "mf-dmw-conditional": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-11-07",
-      "elapsed_s": 2.7,
-      "input_hash": "15a97d7a24387f02db0f39e0ed19b3c10ab0005f9daeb0bf36576a78d5a62051",
-      "verified_at_commit": "cf2ace0"
+      "elapsed_s": 2.3,
+      "input_hash": "19f5d8c1d90ec3f4a959a17eebd069c3098e428b1f85bc27d7e15956afcc7c68",
+      "verified_at_commit": "c99b571"
     },
     "mf-downside-performance-metrics": {
       "benchmark_file": "portfolio_and_performance.json",
@@ -3877,9 +3877,9 @@
     "mf-no-arbitrage-local": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-11-07",
-      "elapsed_s": 2.7,
-      "input_hash": "f3b658a03e1626dfcdb2b175c1e8a10a1d423c7cee8506ade9b0f4133f5fc30e",
-      "verified_at_commit": "cf2ace0"
+      "elapsed_s": 2.3,
+      "input_hash": "b258e323f8c39f0c5e9b64f0bca710799e518d6afe0575a7eb55403f5900dcac",
+      "verified_at_commit": "c99b571"
     },
     "mf-nth-moment-terminal": {
       "benchmark_file": "black_scholes.json",
