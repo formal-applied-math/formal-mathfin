@@ -52,8 +52,9 @@ the `dx = √3 v`, `v2 = v²` substitution of the same solution.
   the textbook `(1/6, 2/3, 1/6)` at `e = 0`.
 * `trinomialProbDownUp_nonneg_iff`, `trinomialProbMid_nonneg_iff`: the exact non-negativity
   conditions `|e| (dx - |e|) ≤ v2` and `v2 + e² ≤ dx²`.
-* `trinomialProb_mem_Icc_of_window`, `trinomialProb_mem_Icc_classical`: on the window
-  `dx² ≤ 4 v2 ≤ 3 dx²` every offset `|e| ≤ dx / 2` keeps all three weights in `[0, 1]`.
+* `trinomialProb_mem_Icc_of_window`: on the window `dx² ≤ 4 v2 ≤ 3 dx²` every offset
+  `|e| ≤ dx / 2` keeps all three weights in `[0, 1]`; `trinomialProb_mem_Icc_classical` is
+  the classical-spacing case `dx² = 3 v2`.
 * `lattice_variance_lower_bound`, `not_exists_nonneg_lattice_scheme`: every non-negative
   weighting of the lattice `c + dx ℤ` with mean `c + e` has variance at least `e (dx - e)`,
   so no branching scheme on that lattice, with any number of branches, matches a variance
@@ -264,7 +265,7 @@ theorem trinomialProb_bsStep_mean (h : BSCallHyp Q S_0 K r σ dt Z) (c e : ℝ)
 Black–Scholes hypothesis over a step `dt`, with the classical spacing `dx = √3 σ √dt` and
 variance parameter `v2 = σ² dt`, the lattice law's variance about its mean,
 `dx² (p₃ + p₁) - e²`, equals the log-return's variance `Var[bsLogReturn r σ dt Z] = σ² dt`
-— the offset `e` cancels, so the identity holds for every anchor-offset pair `(c, e)`. -/
+— the offset `e` cancels, so the identity holds for every offset `e`. -/
 theorem trinomialProb_bsStep_variance (h : BSCallHyp Q S_0 K r σ dt Z) (e : ℝ) :
     (√3 * σ * Real.sqrt dt) ^ 2 *
         (trinomialProbUp (σ ^ 2 * dt) e (√3 * σ * Real.sqrt dt) +
