@@ -67,9 +67,9 @@ the `dx = √3 v`, `v2 = v²` substitution of the same solution.
 
 The statements are about one-step weights and finitely supported laws on a lattice. Nothing
 here is a multi-period tree object, and nothing is claimed about the prices a tree built
-from these weights produces or about their convergence; the three `full`-strength
-non-negativity statements hold on the window above, and outside it the same formulas
-produce signed weights (the tradeoff the transcribed source documents and accepts).
+from these weights produces or about their convergence. Non-negativity of the weights is
+guaranteed only on the window above; outside it the same formulas produce signed weights
+(the tradeoff the transcribed source documents and accepts).
 
 ## References
 
