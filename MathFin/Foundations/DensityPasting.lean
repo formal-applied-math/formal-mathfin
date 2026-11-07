@@ -148,6 +148,7 @@ include h in
 lemma pastedDensity_pos {n : ℕ} (hn : n ≤ T) (ω : Ω) : 0 < pastedDensity Z n ω :=
   Finset.prod_pos fun s hs ↦ (h.density s (lt_of_lt_of_le (Finset.mem_range.1 hs) hn)).pos ω
 
+omit [CompleteSpace F] in
 include h in
 lemma exists_bound_pasted (n : ℕ) (hn : n ≤ T) : ∃ C : ℝ, ∀ ω, pastedDensity Z n ω ≤ C := by
   induction n with
@@ -162,6 +163,7 @@ lemma exists_bound_pasted (n : ℕ) (hn : n ≤ T) : ∃ C : ℝ, ∀ ω, pasted
     exact mul_le_mul (hC ω) (hB ω) ((h.density n hnT).pos ω).le
       ((h.pastedDensity_pos hnT.le ω).le.trans (hC ω))
 
+omit [CompleteSpace F] in
 include h in
 lemma measurable_pasted {n : ℕ} (hn : n ≤ T) : Measurable (pastedDensity Z n) :=
   ((h.stronglyMeasurable_pasted n hn).mono (𝓕.le n)).measurable
@@ -171,6 +173,7 @@ include h in
 lemma measurable_Z {t : ℕ} (ht : t < T) : Measurable (Z t) :=
   ((h.density t ht).meas.mono (𝓕.le (t + 1))).measurable
 
+omit [CompleteSpace E] in
 include h in
 lemma integrable_smul_pasted {n : ℕ} (hn : n ≤ T) {Y : Ω → E} (hY : Integrable Y P) :
     Integrable (fun ω ↦ pastedDensity Z n ω • Y ω) P := by
@@ -178,6 +181,7 @@ lemma integrable_smul_pasted {n : ℕ} (hn : n ≤ T) {Y : Ω → E} (hY : Integ
   exact integrable_smul_of_bdd (h.measurable_pasted hn).aestronglyMeasurable
     (fun ω ↦ (h.pastedDensity_pos hn ω).le) C hC hY
 
+omit [CompleteSpace F] [CompleteSpace E] in
 include h in
 lemma integrable_smul_Z {t : ℕ} (ht : t < T) {Y : Ω → E} (hY : Integrable Y P) :
     Integrable (fun ω ↦ Z t ω • Y ω) P := by
@@ -189,6 +193,7 @@ section Probability
 
 variable [IsProbabilityMeasure P]
 
+omit [CompleteSpace F] in
 include h in
 lemma integrable_Z {t : ℕ} (ht : t < T) : Integrable (Z t) P := by
   obtain ⟨C, hC⟩ := (h.density t ht).bdd

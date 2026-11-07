@@ -94,6 +94,7 @@ omit [InnerProductSpace ℝ F] in
 lemma truncation_of_not_le (h : ¬ ‖θ ω‖ ≤ (n : ℝ)) : truncation n θ ω = 0 := by
   simp [truncation, Set.indicator_apply, h]
 
+omit [InnerProductSpace ℝ F] in
 lemma norm_truncation_le : ‖truncation n θ ω‖ ≤ (n : ℝ) := by
   by_cases h : ‖θ ω‖ ≤ (n : ℝ)
   · rw [truncation_of_le h]; exact h
@@ -118,6 +119,7 @@ omit [InnerProductSpace ℝ F] in
 lemma singleStrategy_of_ne {u : ℕ} (h : u ≠ t) : singleStrategy t θ (u + 1) = 0 := by
   funext ω; simp [singleStrategy, h]
 
+omit [InnerProductSpace ℝ F] in
 lemma singleStrategy_predictable {𝓕 : Filtration ℕ m0} (hθ : StronglyMeasurable[𝓕 t] θ) :
     ∀ u < T, StronglyMeasurable[𝓕 u] (singleStrategy t θ (u + 1)) := by
   intro u _
@@ -209,6 +211,7 @@ lemma stronglyMeasurable_martingaleTransform {T : ℕ}
     rw [e]
     exact h1.add (h2.inner ((hS (n + 1) hn).sub h3))
 
+omit [CompleteSpace F] in
 /-- The induction on the horizon behind `noArbitrage_of_noArbitrageLocal`. -/
 private theorem noArbitrage_aux (T : ℕ) :
     (∀ t ≤ T, StronglyMeasurable[𝓕 t] (S t)) → NoArbitrageLocal 𝓕 P S T →

@@ -285,6 +285,7 @@ private instance isFiniteMeasure_timeMeasure_restrict_Ioc_zero (s : ℝ≥0) :
     IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) s)) :=
   inferInstanceAs (IsFiniteMeasure (timeMeasureHorizon s))
 
+omit [IsProbabilityMeasure μ] in
 /-- The band energy is a bounded monotone, hence integrable, function of the band edge. -/
 theorem integrable_bandEnergy (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (Z : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (s : ℝ≥0) :
