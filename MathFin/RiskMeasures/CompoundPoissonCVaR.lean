@@ -67,6 +67,7 @@ section Wald
 variable (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ) (hX : Integrable (X 0) μ)
 include hident hX
 
+omit [IsProbabilityMeasure μ] in
 private lemma integrable_range_sum (n : ℕ) :
     Integrable (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ :=
   integrable_finset_sum _ fun i _ ↦ (hident i).integrable_iff.mpr hX
@@ -85,7 +86,7 @@ private lemma integral_abs_range_sum_le (n : ℕ) :
           ((hident i).comp continuous_abs.measurable).integral_eq
         simp [h]
 
-omit hX in
+omit hX [IsProbabilityMeasure μ] in
 private lemma aemeasurable_claims : AEMeasurable (fun ω i ↦ X i ω) μ :=
   .of_eval fun i ↦ (hident i).aemeasurable_fst
 
