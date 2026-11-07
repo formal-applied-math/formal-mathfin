@@ -1316,29 +1316,29 @@
       "benchmark_file": "contracts.json",
       "date": "2026-11-07",
       "elapsed_s": 3.4,
-      "input_hash": "1c6b352801eb5fde0d29f9e83d76bcad0cb23ff38fc77578376fd1bc0535f46a",
-      "verified_at_commit": "e6b2365"
+      "input_hash": "49673b861814be28031d0f5914849a83e788c292d0ed35f7d9c4d28a239dd19b",
+      "verified_at_commit": "e6a640e"
     },
     "mf-bs-physical-chooser": {
       "benchmark_file": "contracts.json",
       "date": "2026-11-07",
-      "elapsed_s": 3.4,
-      "input_hash": "a2bb684c4c620743105fb9c1d40ff8837d6ad6dc2000449f85b187096bdd2cc0",
-      "verified_at_commit": "e6b2365"
+      "elapsed_s": 3.3,
+      "input_hash": "955265aa6f7447f85216a84ebd16d47e6c95b9285d4db91e26d86bc6039460f9",
+      "verified_at_commit": "e6a640e"
     },
     "mf-bs-physical-contract-value": {
       "benchmark_file": "contracts.json",
       "date": "2026-11-07",
       "elapsed_s": 3.4,
-      "input_hash": "18aa32c75d8fb5033d2d52ddb61cf107ac7d7132edaa9d19537bf898044a1d07",
-      "verified_at_commit": "e6b2365"
+      "input_hash": "ad5688699f3992a6b40e5f7c9fc19e5fd6e7afeecd361518b213ded7e16e0538",
+      "verified_at_commit": "e6a640e"
     },
     "mf-bs-physical-geom-asian": {
       "benchmark_file": "contracts.json",
       "date": "2026-11-07",
-      "elapsed_s": 3.6,
-      "input_hash": "27464fc80139794deee7e49c65cb5381130c3224049fba735f2ac6d56af2da82",
-      "verified_at_commit": "e6b2365"
+      "elapsed_s": 3.4,
+      "input_hash": "eeedff7f87a5e5b0a6cd2dd00ab3854205c2a48a9b26161f08776537262bad37",
+      "verified_at_commit": "e6a640e"
     },
     "mf-bs-put-delta": {
       "benchmark_file": "black_scholes.json",
@@ -2387,8 +2387,8 @@
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-11-07",
       "elapsed_s": 3.0,
-      "input_hash": "70077f661ac8c2c482df80179f1a187d698cfc0e612fa117f513aa4c2155d514",
-      "verified_at_commit": "e6b2365"
+      "input_hash": "334248ac478a9ce0877df41fa558d5444850ad6650e8e1003ed50e72a16467de",
+      "verified_at_commit": "e6a640e"
     },
     "mf-dirty-price-drops-by-coupon": {
       "benchmark_file": "interest_rates.json",
@@ -2407,16 +2407,16 @@
     "mf-discrete-market-parity": {
       "benchmark_file": "contracts.json",
       "date": "2026-11-07",
-      "elapsed_s": 2.8,
-      "input_hash": "521705269fa0b28c56043b2bec37fb9acca3c6f406ef4311369d0587398f2106",
-      "verified_at_commit": "e6b2365"
+      "elapsed_s": 3.1,
+      "input_hash": "334fdfa3d1482678b4a6fc5eb75217aebfa9ee724b45953cd69fec012c58c091",
+      "verified_at_commit": "e6a640e"
     },
     "mf-dmw-conditional": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-11-07",
       "elapsed_s": 3.0,
-      "input_hash": "5ec6dd3f98a545d0c75ec33d3fd5c3f15e6d116cea980ccc0cdd5ed356143ed5",
-      "verified_at_commit": "e6b2365"
+      "input_hash": "0cc88acd8261a1ab053f0e6a9d3724dbf93586f3e7073016474593c18700e611",
+      "verified_at_commit": "e6a640e"
     },
     "mf-downside-performance-metrics": {
       "benchmark_file": "portfolio_and_performance.json",
@@ -3878,8 +3878,8 @@
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-11-07",
       "elapsed_s": 3.1,
-      "input_hash": "4c478f172279c72ff0d70c6c7233db5568f7f6df1ae415aab2395dd7b24da4a4",
-      "verified_at_commit": "e6b2365"
+      "input_hash": "4f68e31aac6188393bd89119422e951fe8b91e25b242266bd78a375bcb5ea46f",
+      "verified_at_commit": "e6a640e"
     },
     "mf-nth-moment-terminal": {
       "benchmark_file": "black_scholes.json",
@@ -4158,8 +4158,8 @@
       "benchmark_file": "stochastic_foundations.json",
       "date": "2026-11-07",
       "elapsed_s": 3.2,
-      "input_hash": "a83c18db107c0946f5cf1ca489caee065c65ec3a9c0d9194c0d0c4e8ecb6c0b5",
-      "verified_at_commit": "e6b2365"
+      "input_hash": "4ed7f3dd75d5dc45047a142fdec3b0613832c47df59e7788a7fadf9fcc2b2b5d",
+      "verified_at_commit": "e6a640e"
     },
     "mf-second-FTAP-single-period": {
       "benchmark_file": "binomial.json",
@@ -5522,9 +5522,9 @@
     "sc-sde-existence-any-horizon": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-11-07",
-      "elapsed_s": 4.1,
-      "input_hash": "2d587c01c77e169931e713113f5c56f1f23166a1035d073011430531cd7940a1",
-      "verified_at_commit": "83de4d1"
+      "elapsed_s": 3.2,
+      "input_hash": "0c9807dd0faa1eecd741ca04c057153fd25ac1c80151c3a8a55cb6f7da7650d8",
+      "verified_at_commit": "e6a640e"
     },
     "sc-simple-dense-bracket": {
       "benchmark_file": "stochastic_calculus.json",
@@ -5641,9 +5641,9 @@
     "sde-picard-existence-uniqueness": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-11-07",
-      "elapsed_s": 2.8,
-      "input_hash": "9bf6e8b463e4cee08c88f4653e11edbf78de5de19f61431e3e52531eb1e69aa7",
-      "verified_at_commit": "e6b2365"
+      "elapsed_s": 3.1,
+      "input_hash": "b3eec34aa3e9cf19ee1cf984255194f1d17064289d69f453f4170789c79cc21c",
+      "verified_at_commit": "e6a640e"
     }
   }
 }
