@@ -31,7 +31,8 @@ No dynamics of `P`, no drift condition and no stochastic Fubini interchange is p
 ## Main definitions
 
 * `HJMModel`: the bundle (forward curve, drift, volatility, the `L²` realization of the volatility,
-  the Itô dynamics in `t` for each maturity, adaptedness, measurability, integrability).
+  the Itô dynamics in `t` for each maturity, adaptedness, measurability, integrability of the
+  curve and of the short rate).
 * `HJMModel.bond`, `HJMModel.shortRate`, `HJMModel.bankAccount`, `HJMModel.discountedBond`,
   `HJMModel.starDrift`, `HJMModel.starVol`: the derived objects.
 
@@ -88,6 +89,9 @@ structure HJMModel {Ω : Type*} {mΩ : MeasurableSpace Ω} (μ : Measure Ω) [Is
   vol_meas : ∀ ω, Measurable fun p : ℝ≥0 × ℝ≥0 ↦ vol p.1 p.2 ω
   drift_integrable : ∀ T ω, IntegrableOn (fun s ↦ drift s T ω) (Set.Ioc 0 H) timeMeasure
   fwd_integrable : ∀ t ω, IntegrableOn (fun u ↦ fwd t u ω) (Set.Ioc t H) timeMeasure
+  /-- The short rate `f(s,s)` is integrable on the horizon, so the bank account is not a junk
+  `exp 0`. -/
+  shortRate_integrable : ∀ ω, IntegrableOn (fun s ↦ fwd s s ω) (Set.Ioc 0 H) timeMeasure
 
 namespace HJMModel
 

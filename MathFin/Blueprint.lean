@@ -447,7 +447,7 @@ attribute [blueprint "thm:girsanov-brownian-characterisation"
   (title := "Girsanov: the shifted process is a filtered Brownian motion")
   (statement := /-- For bounded predictable $\theta$ and a horizon $T$, under
   $Q = Z_T\,\mu$ with $Z_T = \exp(-\int_0^T\theta\,dB - \tfrac12\int_0^T\theta^2\,dt)$, the
-  process $B^\theta = B + \int_0^{\cdot\wedge T}\theta\,ds$ is a pre-Brownian motion for the
+  process $B^\theta$, a modification of $B + \int_0^{\cdot\wedge T}\theta\,ds$, is a pre-Brownian motion for the
   natural filtration of $B$ on all of $[0,\infty)$: $\mathcal{N}(0,t-s)$ increments independent of
   $\mathcal{F}_s$. With continuous paths for $B$ it is a Brownian motion under $Q$
   (`Btheta_isBrownianReal_predictable_of_bdd`). The measure is the horizon-$T$ one; unbounded
@@ -458,11 +458,12 @@ attribute [blueprint "thm:physical-measure-pricing"
   (title := "Contracts on the physical asset, priced under the Girsanov measure")
   (statement := /-- For the physical asset $S_u = S_0 e^{(m-\sigma^2/2)u + \sigma W_u}$ and the
   constant market price of risk $\theta = (m-r)/\sigma$, under the horizon-$H$ Girsanov measure
-  the European call with maturity $T \le H$ is worth $S_0\Phi(d_1) - Ke^{-rT}\Phi(d_2)$; the
-  chooser and the geometric Asian call likewise (`value_chooser_physical`,
-  `value_geomAsianCall_physical`). The asset identity behind it holds almost surely at each
-  date. -/)]
-  MathFin.Contracts.BlackScholes.value_europeanCall_physical
+  every fixed-dated contract observed in $[0,H]$ has the same value on the physical asset as on
+  the risk-neutral asset $S_0 e^{(r-\sigma^2/2)u + \sigma B^\theta_u}$, for any discount curve.
+  So the European call with maturity $T \le H$ is worth $S_0\Phi(d_1) - Ke^{-rT}\Phi(d_2)$
+  (`value_europeanCall_physical`), and the chooser and the geometric Asian call their closed
+  forms. The asset identity behind it holds almost surely at each date. -/)]
+  MathFin.Contracts.BlackScholes.value_physical_eq_riskNeutral
 
 attribute [blueprint "thm:bs-delta-hedge" (title := "The Black–Scholes delta hedge")
   (statement := /-- With $C(t,S) = $ `bsV` the call price and $S_t$ geometric Brownian motion,
@@ -473,7 +474,7 @@ attribute [blueprint "thm:bs-delta-hedge" (title := "The Black–Scholes delta h
   $[0,T']$, and the hedge is not packaged as a trading-strategy structure. -/)]
   MathFin.bs_delta_hedge_replication
 
-attribute [blueprint "thm:sde-strong-solution" (title := "SDE solutions on every horizon")
+attribute [blueprint "thm:sde-strong-solution" (title := "Picard fixed point on every horizon")
   (statement := /-- For Lipschitz $b$, $\sigma$, any horizon $T$ and any initial value in the
   predictable $L^2$ space $E$ on $[0,T]$, the Picard map of $dX = b(X)dt + \sigma(X)dB$ has
   exactly one fixed point in $E$, with no smallness condition: its $n$-th iterate contracts with
@@ -501,7 +502,7 @@ attribute [blueprint "thm:no-arbitrage-local" (title := "No arbitrage is local")
 attribute [blueprint "thm:emm-density-pasting" (title := "Pasting one-period densities into an EMM")
   (statement := /-- Bounded positive one-period densities $Z_t$, $\mathcal{F}_{t+1}$-measurable with
   $E[Z_t \mid \mathcal{F}_t] = 1$ and $E[Z_t S_{t+1} \mid \mathcal{F}_t] = S_t$, multiply to an
-  equivalent martingale measure $P\,\prod_t Z_t$ for the price up to the horizon: the assembly
+  equivalent martingale measure $P\,\prod_t Z_t$ for an adapted integrable price up to the horizon: the assembly
   step of Dalang–Morton–Willinger. That conditional no arbitrage produces such densities is not
   proved. -/)]
   MathFin.LocalEMMDensities.isEMM_pastedMeasure
@@ -515,7 +516,7 @@ attribute [blueprint "thm:ito-product-rule" (title := "Itô product rule")
   This is Itô's formula for $f(x,y) = xy$ only. -/)]
   MathFin.ItoFormulaAdapted.ito_product_rule_process
 
-attribute [blueprint "thm:bs-self-financing" (title := "The delta hedge is self-financing")
+attribute [blueprint "thm:bs-self-financing" (title := "The delta hedge satisfies the self-financing equation")
   (statement := /-- Along the Black–Scholes path, with value $V_t = C(t,S_t)$, $\Delta_t = \Phi(d_1)$
   shares and $\psi_t = V_t - \Delta_tS_t$ in the bank, for every $T' < T$, almost surely at every
   $t \le T'$: $V_t = V_0 + \int_0^t \Delta\,dS + \int_0^t r\psi\,ds$, with

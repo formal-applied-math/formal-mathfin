@@ -15,7 +15,8 @@ public import MathFin.Foundations.NormalTail
 # The Black–Scholes delta hedge replicates the call
 
 In the risk-neutral Black–Scholes model `S_t = S₀·exp((r − σ²/2)t + σ B_t)` the call is
-replicated by the self-financing delta hedge. With `C(t, S) = bsV K r σ S (T − t)` the call price
+replicated by the delta hedge (the self-financing equation is `europeanCall_selfFinancing`; no
+strategy structure is defined). With `C(t, S) = bsV K r σ S (T − t)` the call price
 at time `t`, the discounted price `e^{−rt} C(t, S_t)` is the initial price plus the gains of
 holding `Δ(s, S_s) = Φ(d₁(S_s, T − s))` shares:
 
@@ -65,7 +66,7 @@ integral `∫ Δ σ S̃ dB` equals `∫ Δ d S̃` as an integral against the sem
 
 ## Tags
 
-Black–Scholes, delta hedging, replication, self-financing strategy, Itô formula,
+Black–Scholes, delta hedging, replication, Itô formula,
 Black–Scholes PDE, MSC 91G20, MSC 60H05, JEL G13
 -/
 

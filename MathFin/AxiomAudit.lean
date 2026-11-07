@@ -2339,6 +2339,9 @@ bounded-coefficient process class. -/
 /-- info: 'MathFin.Contracts.BlackScholes.value_europeanCall_physical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.BlackScholes.value_europeanCall_physical
+/-- info: 'MathFin.Contracts.BlackScholes.value_physical_eq_riskNeutral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.value_physical_eq_riskNeutral
 /-- info: 'MathFin.bs_delta_hedge_replication' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.bs_delta_hedge_replication

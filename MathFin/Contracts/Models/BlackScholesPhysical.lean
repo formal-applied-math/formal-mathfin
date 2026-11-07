@@ -46,9 +46,12 @@ frozen drift, which is why the contracts below carry the hypothesis that their d
 * `BlackScholes.pathAssets_physical_ae_eq`: for `u ≤ H` and `θ = (m − r)/σ`, the physical asset at
   `u` equals `pathAssets S₀ r σ B^θ` at `u`, `Q`-almost surely.
 * `BlackScholes.isPreBrownianReal_constBtheta`: `B^θ` is a pre-Brownian motion under `Q`.
+* `BlackScholes.value_physical_eq_riskNeutral`: any fixed-dated contract observed in `[0, H]` has
+  the same `Q`-value on the physical asset as on `pathAssets S₀ r σ B^θ`.
 * `BlackScholes.value_europeanCall_physical`, `BlackScholes.value_chooser_physical`,
   `BlackScholes.value_geomAsianCall_physical`: the European call, the chooser and the geometric
-  Asian call on the physical asset are worth their Black–Scholes closed forms under `Q`.
+  Asian call on the physical asset are worth their Black–Scholes closed forms under `Q`, as
+  instances of `value_physical_eq_riskNeutral`.
 
 ## References
 
@@ -177,6 +180,19 @@ lemma obsList_obsProd {ι : Type*} (i : ι) (ts : List ℝ≥0) :
   | cons t ts ih => simp [Payoff.obsProd, Payoff.obsList, ih]
 
 include hW in
+/-- **Physical value is risk-neutral value.** For `σ ≠ 0` and any fixed-dated contract `c` whose
+observation dates lie in the horizon `[0, H]`, its value on the physical asset
+`pathAssets S₀ m σ W` under the Girsanov measure `Q` of `θ = (m − r)/σ` is its value on the
+risk-neutral asset `pathAssets S₀ r σ B^θ`, for any discount curve `D`. The physical drift `m`
+enters only through `Q`. -/
+theorem value_physical_eq_riskNeutral {S_0 m r σ : ℝ} (hσ : σ ≠ 0) (H : ℝ≥0) {D : ℝ≥0 → ℝ}
+    (c : Contract Unit) (hc : c.FixedDated) (hH : ∀ p ∈ c.obsList, p.2 ≤ H) :
+    c.value (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) D (pathAssets S_0 m σ W)
+      = c.value (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) D
+          (pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H)) :=
+  Contract.value_congr_ae c hc fun p hp ↦ pathAssets_physical_ae_eq hW hWmeas hσ H (hH p hp)
+
+include hW in
 /-- **The European call on the physical asset** is worth the Black–Scholes call price under the
 Girsanov measure `Q` of the market price of risk `θ = (m − r)/σ`, for a maturity `T` in the
 horizon `[0, H]`: `S₀ Φ(d₁) − K e^{−rT} Φ(d₂)`. The scenario is rewritten from the physical asset
@@ -190,13 +206,7 @@ theorem value_europeanCall_physical {S_0 K m r σ : ℝ} {T H : ℝ≥0} (hTH : 
   have := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
   have hB := isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
   have hfix : (europeanCall K T).FixedDated := by simp [europeanCall, Contract.FixedDated]
-  rw [Contract.value_congr_ae (Q := constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
-      (X := pathAssets S_0 m σ W)
-      (Y := pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H))
-      (europeanCall K T) hfix (fun p hp ↦ by
-        rw [obsList_europeanCall, List.mem_singleton] at hp
-        subst hp
-        exact pathAssets_physical_ae_eq hW hWmeas hσ.ne' H hTH),
+  rw [value_physical_eq_riskNeutral hW hWmeas hσ.ne' H _ hfix (by simp [obsList_europeanCall, hTH]),
     Contract.value_congr_ae (Q := constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
       (X := pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H))
       (Y := assets S_0 r σ T
@@ -222,15 +232,11 @@ theorem value_chooser_physical {S_0 K m r σ : ℝ} {T t₁ H : ℝ≥0} (hTH : 
   have hB := isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
   have hfix : (chooser K r T t₁).FixedDated := by
     simp [chooser, europeanCall, europeanPut, Contract.FixedDated]
-  rw [Contract.value_congr_ae
-      (Y := pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H))
-      (chooser K r T t₁) hfix (fun p hp ↦ by
-        simp only [chooser, europeanCall, europeanPut, Contract.obsList, Payoff.obsList,
-          europeanCallPayoff, List.append_nil, List.nil_append, List.mem_append,
-          List.mem_singleton] at hp
-        rcases hp with rfl | rfl
-        · exact pathAssets_physical_ae_eq hW hWmeas hσ.ne' H hTH
-        · exact pathAssets_physical_ae_eq hW hWmeas hσ.ne' H ht₁H)]
+  rw [value_physical_eq_riskNeutral hW hWmeas hσ.ne' H _ hfix fun p hp ↦ by
+    simp only [chooser, europeanCall, europeanPut, Contract.obsList, Payoff.obsList,
+      europeanCallPayoff, List.append_nil, List.nil_append, List.mem_append,
+      List.mem_singleton] at hp
+    rcases hp with rfl | rfl <;> assumption]
   exact value_chooser hB hT ht₁ hS₀ hK hσ
 
 include hW in
@@ -249,13 +255,11 @@ theorem value_geomAsianCall_physical {S_0 K m r σ : ℝ} {T H : ℝ≥0} {n : �
   have := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
   have hB := isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
   have hfix : (geomAsianCall K T τ).FixedDated := by simp [geomAsianCall, Contract.FixedDated]
-  rw [Contract.value_congr_ae
-      (Y := pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H))
-      (geomAsianCall K T τ) hfix (fun p hp ↦ by
-        simp only [geomAsianCall, Contract.obsList, Payoff.obsList, obsList_obsProd,
-          List.append_nil, List.nil_append, List.map_ofFn, List.mem_ofFn] at hp
-        obtain ⟨j, rfl⟩ := hp
-        exact pathAssets_physical_ae_eq hW hWmeas hσ.ne' H (hτH j))]
+  rw [value_physical_eq_riskNeutral hW hWmeas hσ.ne' H _ hfix fun p hp ↦ by
+    simp only [geomAsianCall, Contract.obsList, Payoff.obsList, obsList_obsProd,
+      List.append_nil, List.nil_append, List.map_ofFn, List.mem_ofFn] at hp
+    obtain ⟨j, rfl⟩ := hp
+    exact hτH j]
   exact value_geomAsianCall hB hn τ hτT hS₀ hK hσ hT hV
 
 end MathFin.Contracts.BlackScholes

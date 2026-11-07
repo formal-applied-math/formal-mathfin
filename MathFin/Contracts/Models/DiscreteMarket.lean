@@ -27,8 +27,9 @@ underlying is `S (min n T)` (`discreteAssets_natCast`). Parity is not re-proved 
 
 The composite `exists_isEMM_parity` closes the loop with the Dalang–Morton–Willinger reduction:
 **assuming `ConditionalOnePeriodFTAP`** (the conditional one-period FTAP, not proved in this
-library), an arbitrage-free adapted integrable market has an equivalent martingale measure `Q`
-under which the forward is worth `S₀ − K` and the contracts satisfy parity.
+library), an arbitrage-free adapted integrable market has one equivalent martingale measure `Q`
+under which, for every strike and maturity, the forward is worth `S₀ − K` and the contracts
+satisfy parity.
 
 ## Main definitions
 
@@ -126,17 +127,18 @@ theorem value_europeanCall_sub_put (hQ : IsEMM 𝓕 P S T Q) (hS₀ : ∀ ω, S 
 /-- **No arbitrage gives a measure under which the contracts satisfy parity**, assuming the
 conditional one-period FTAP. For an adapted integrable one-asset price with
 `ConditionalOnePeriodFTAP` (an hypothesis, **not proved** in this library: see
-`DalangMortonWillinger.lean`), no arbitrage yields an equivalent martingale measure `Q`, and under
-it the forward is worth `S₀ - K` and call minus put equals `S₀ - K` at every maturity. -/
+`DalangMortonWillinger.lean`), no arbitrage yields one equivalent martingale measure `Q` under
+which, for every strike and maturity, the forward is worth `S₀ - K` and call minus put equals
+`S₀ - K`. -/
 theorem exists_isEMM_parity [IsProbabilityMeasure P]
     (hS : ∀ t ≤ T, StronglyMeasurable[𝓕 t] (S t)) (hint : ∀ t ≤ T, Integrable (S t) P)
     (hcond : ConditionalOnePeriodFTAP 𝓕 P S T) (hNA : NoArbitrage 𝓕 P S T)
-    (hS₀ : ∀ ω, S 0 ω = S₀) (K : ℝ) (τ : ℝ≥0) :
-    ∃ Q, IsEMM 𝓕 P S T Q ∧
+    (hS₀ : ∀ ω, S 0 ω = S₀) :
+    ∃ Q, IsEMM 𝓕 P S T Q ∧ ∀ (K : ℝ) (τ : ℝ≥0),
       (forward K τ).value Q (fun _ ↦ 1) (discreteAssets S T) = S₀ - K ∧
       (europeanCall K τ).value Q (fun _ ↦ 1) (discreteAssets S T)
         - (europeanPut K τ).value Q (fun _ ↦ 1) (discreteAssets S T) = S₀ - K := by
   obtain ⟨Q, hQ⟩ := exists_isEMM_of_noArbitrage hS hint hcond hNA
-  exact ⟨Q, hQ, value_forward hQ hS₀ K τ, value_europeanCall_sub_put hQ hS₀ K τ⟩
+  exact ⟨Q, hQ, fun K τ ↦ ⟨value_forward hQ hS₀ K τ, value_europeanCall_sub_put hQ hS₀ K τ⟩⟩
 
 end MathFin.Contracts.DiscreteMarket

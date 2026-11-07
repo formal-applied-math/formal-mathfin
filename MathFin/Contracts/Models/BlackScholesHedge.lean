@@ -22,7 +22,7 @@ statement that the hedge's capital is the contract's value.
   `e^{−rt} bsV K r σ S_t (T − t)` is `(europeanCall K T).value …` plus the Itô integral of the
   delta-hedge integrand, almost surely, for all `t ≤ T'` at once, for every `T' < T`
   (`europeanCall_deltaHedge`).
-* At maturity the discounted hedge value converges, as `t → T⁻`, along every path continuous at
+* At maturity the discounted call price converges, as `t → T⁻`, along every path continuous at
   `T`, to the contract's discounted payoff `pathPV` (`tendsto_hedge_europeanCall_payoff`).
 
 The integral identity is stated on `[0, T']` with `T' < T`; the limit at `T` is a separate

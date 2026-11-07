@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 803 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 766 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 804 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 767 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 19 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -62,8 +62,8 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 - **Girsanov's theorem.** For bounded predictable $`\theta`$ and a horizon $`T`$, let
   $`dQ = \exp\big(-\int_0^T \theta\,dB - \tfrac12 \int_0^T \theta^2\,dt\big)\,dP`$. Under $`Q`$
-  the process $`B_t + \int_0^t \theta_s\,ds`$ (an adapted modification, which has the same
-  finite-dimensional laws) is a Brownian motion for the Brownian filtration $`\mathcal{F}`$:
+  the process $`B_t + \int_0^{t\wedge T} \theta_s\,ds`$ (an adapted modification, which has the
+  same finite-dimensional laws) is a Brownian motion for the Brownian filtration $`\mathcal{F}`$:
   it starts at $`0`$, has $`\mathcal{N}(0,t-s)`$ increments, and each increment is independent of
   $`\mathcal{F}_s`$, on all of $`[0,\infty)`$ (past $`T`$ it moves as $`B`$ does, plus the drift
   frozen at $`T`$)
@@ -182,11 +182,13 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
     are worth their Black–Scholes closed forms, and the chooser's replicating portfolio is worth Rubinstein's
     ([`Contracts/Models/`](MathFin/Contracts/Models));
   - from the physical market, an asset $`S_0 e^{(m-\sigma^2/2)u + \sigma W_u}`$ with a physical
-    Brownian motion $`W`$, the call, the chooser and the geometric Asian call are worth the same
-    Black–Scholes closed forms, at the risk-free rate $`r`$, under the Girsanov measure of the
-    constant market price of risk $`(m-r)/\sigma`$ at horizon $`H`$, for dates in $`[0,H]`$; the
-    identification of the physical asset with the risk-neutral one is almost sure at each date
-    ([`value_europeanCall_physical`](MathFin/Contracts/Models/BlackScholesPhysical.lean));
+    Brownian motion $`W`$: under the Girsanov measure of the constant market price of risk
+    $`(m-r)/\sigma`$ at horizon $`H`$, every fixed-dated contract observed in $`[0,H]`$ has the
+    value it has on the risk-neutral asset at rate $`r`$
+    ([`value_physical_eq_riskNeutral`](MathFin/Contracts/Models/BlackScholesPhysical.lean)), so
+    the call, the chooser and the geometric Asian call are worth the same Black–Scholes closed
+    forms; the identification of the physical asset with the risk-neutral one is almost sure at
+    each date;
   - the call's contract value is the initial capital of its delta hedge, as in the delta hedge
     above
     ([`europeanCall_deltaHedge`](MathFin/Contracts/Models/BlackScholesHedge.lean)).
@@ -208,7 +210,8 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
     [`SwapModel.valueDisc_cmsSwaplet_eq`](MathFin/Contracts/Models/CMS.lean)).
 
   In a Heath–Jarrow–Morton model bundle with short rate $`f(t,t)`$, a schedule of fixed cash flows
-  $`c_i`$ at $`t_i`$ is worth $`\sum_i P(0,t_i)\,c_i`$ given the pricing hypothesis
+  $`c_i`$ at $`t_i`$ is worth $`\sum_i P(0,t_i)\,c_i`$ given a deterministic time-$`0`$ curve and the
+  pricing hypothesis
   $`\mathbb{E}[D(t_i)] = P(0,t_i)`$ for the discount factor $`D = e^{-\int_0^t f(s,s)\,ds}`$
   ([`valueDisc_fixedFlows_hjm`](MathFin/Contracts/Models/HJMBond.lean)); that hypothesis is what
   the HJM drift condition delivers, and it is not proved. On a flat deterministic curve the value
@@ -235,7 +238,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Nineteen of the 803 results are reduced cores. Eleven assume a structure whose fields include the
+- Nineteen of the 804 results are reduced cores. Eleven assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, the two-dimensional Itô formula,

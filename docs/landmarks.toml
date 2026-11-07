@@ -39,8 +39,8 @@ constructed."""
 decl = "MathFin.Btheta_isFilteredPreBrownian_predictable_of_bdd"
 title = "Girsanov's theorem"
 summary = """For bounded predictable θ and a horizon T, under the measure with density \
-exp(−∫₀ᵀ θ dB − ½∫₀ᵀ θ² dt), the process B_t + ∫₀ᵗ θ_s ds is a Brownian motion for the Brownian \
-filtration F: it starts at 0, has N(0,t−s) increments, and each increment is independent of F_s, \
+exp(−∫₀ᵀ θ dB − ½∫₀ᵀ θ² dt), an adapted modification of B_t + ∫₀^{t∧T} θ_s ds is a Brownian motion \
+for the Brownian filtration F: it starts at 0, has N(0,t−s) increments, and each increment is independent of F_s, \
 on all of [0,∞). If B has continuous paths so does the new process."""
 scope = """Only bounded θ, for an adapted modification of the process. The measure is that of the \
 fixed horizon T and changes with T; past T the process is B plus the drift frozen at T. Unbounded \
@@ -174,9 +174,10 @@ title = "Contracts, separate from models"
 summary = """Payoffs are terms of a contract language priced by interchangeable models. In any \
 model whose discounted price is a martingale from S₀, a call less a put is worth the forward, \
 S₀ − K·D(T); the n-step CRR values of a European call converge to the Black–Scholes value when \
-|r|√T < σ. From the physical market, a European call on S₀exp((m−σ²/2)u + σW_u) is worth the \
-Black–Scholes price at the risk-free rate under the Girsanov measure of the constant market price \
-of risk (m−r)/σ; the chooser and the geometric Asian call likewise."""
+|r|√T < σ. From the physical market S₀exp((m−σ²/2)u + σW_u), under the Girsanov measure of the \
+constant market price of risk (m−r)/σ, every fixed-dated contract has its risk-neutral value at \
+the rate r, so a European call is worth the Black–Scholes price; the chooser and the geometric \
+Asian call likewise."""
 scope = """The binomial limit is proved for call prices and for the law of the terminal \
 log-return; convergence of the price process (Donsker) is not formalized. The exotic closed \
 forms (power call, exchange option, geometric Asian call, chooser) hold when the pricing measure \
@@ -185,6 +186,7 @@ for dates up to the Girsanov horizon H, for a constant market price of risk, and
 the physical asset with the risk-neutral one is almost sure at each date, not pathwise."""
 also = [
   "MathFin.Contracts.tendsto_binomial_value_europeanCall",
+  "MathFin.Contracts.BlackScholes.value_physical_eq_riskNeutral",
   "MathFin.Contracts.BlackScholes.value_europeanCall_physical",
 ]
 
@@ -197,8 +199,8 @@ price at t is A_t(T−t)·e^{−B(T−t)r_t} almost surely; the bond put is a Bl
 is lognormal under the forward measure (Jamshidian), and a caplet is 1+δK such puts. For any \
 discount factor, a swap rate tied to the bonds by a model bundle gives the payer swaption as \
 A(0)·E^A[(S−K)⁺] and the CMS swaplet as its forward value plus an exact covariance adjustment. \
-In a Heath–Jarrow–Morton bundle, fixed cash flows are worth ΣP(0,tᵢ)cᵢ given the pricing \
-hypothesis E[D(tᵢ)] = P(0,tᵢ)."""
+In a Heath–Jarrow–Morton bundle, fixed cash flows are worth ΣP(0,tᵢ)cᵢ given a deterministic \
+time-0 curve and the pricing hypothesis E[D(tᵢ)] = P(0,tᵢ)."""
 scope = """That the Wiener-integral representation solves the short-rate SDE, and the swap of \
 time integrals behind the integrated rate, are cited, not proved. Outside these two models the \
 observed bond is a hypothesis of the model bundle, and so is the lognormality behind the Black-76 \

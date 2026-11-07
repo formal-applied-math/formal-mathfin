@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (928 MathFin constants, 29 upstream). Citations
+  corpus (929 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -298,6 +298,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.Contracts.BlackScholes.value_geomAsianCall_physical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.BlackScholes.value_geomAsianCall_physical
+
+/-- info: 'MathFin.Contracts.BlackScholes.value_physical_eq_riskNeutral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.value_physical_eq_riskNeutral
 
 /-- info: 'MathFin.Contracts.BlackScholes.value_powerCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

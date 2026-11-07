@@ -14,8 +14,9 @@ public import Mathlib.MeasureTheory.Integral.Prod
 # Stochastic Fubini for an `L²`-continuous linear map
 
 A stochastic integral on a finite measure space `(S, m)` is a continuous linear map
-`I : Lp ℝ 2 m →L[ℝ] F` (the Wiener, Itô and Lévy integrals all are, in `F = Lp ℝ 2 P`). A
-parameter integral `∫ φ u dν(u)` of `L²`-valued integrands commutes with `I`, because `I` is
+`I : Lp ℝ 2 m →L[ℝ] F` (the Wiener, Itô and Lévy integrals all are, in `F = Lp ℝ 2 P`; the Wiener
+and Itô cases are instantiated in `StochasticFubiniIto`). A parameter integral `∫ φ u dν(u)` of
+`L²`-valued integrands commutes with `I`, because `I` is
 continuous linear (`ContinuousLinearMap.integral_comp_comm`). What makes this the *stochastic
 Fubini theorem* is the representative of the left side: the Bochner integral
 `∫ φ u dν(u)` in `Lp ℝ 2 m` is the class of the pointwise parameter integral

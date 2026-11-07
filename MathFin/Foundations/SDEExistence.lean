@@ -621,7 +621,7 @@ theorem picardMap_iterate_norm_sq_le (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
   (norm_sq_eq_bandEnergy T hBmeas _).le.trans
     (bandEnergy_picardMap_iterate_le hB T hBmeas hBcont hb hσ η_E X Y n T le_rfl)
 
-/-- **Existence and uniqueness of the strong solution for every horizon.** For Lipschitz `b, σ`
+/-- **A unique Picard fixed point on every horizon.** For Lipschitz `b, σ`
 and any `T` (no smallness condition `T L_b + √T L_σ < 1`), the Picard map of
 `dX = b(X)dt + σ(X)dB`, `X₀ = η` has exactly one fixed point in the predictable `L²` space `E`.
 Some iterate `Φⁿ` is a contraction (`picardMap_iterate_norm_sq_le`: factorial decay), and a map

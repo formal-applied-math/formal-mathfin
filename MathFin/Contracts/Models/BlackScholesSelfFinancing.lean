@@ -6,15 +6,14 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Contracts.Models.BlackScholesHedge
-public import MathFin.Foundations.ItoProductRule
 
 /-!
-# The Black–Scholes delta hedge is self-financing
+# The self-financing equation of the Black–Scholes delta hedge
 
 `BlackScholesHedge` states the replication theorem in discounted terms:
-`e^{−rt} C(t, S_t) = C(0, S₀) + ∫₀ᵗ Δ σ e^{−rs} S_s dB_s`. This file turns it into the statement
-that the stock-and-bank portfolio finances itself. With the undiscounted value
-`V_t = C(t, S_t)`, the delta `Δ_t = Φ(d₁(S_t, T − t))` and the bank position
+`e^{−rt} C(t, S_t) = C(0, S₀) + ∫₀ᵗ Δ σ e^{−rs} S_s dB_s`. This file turns it into the
+self-financing equation of the stock-and-bank portfolio, as an integral identity. With the
+undiscounted value `V_t = C(t, S_t)`, the delta `Δ_t = Φ(d₁(S_t, T − t))` and the bank position
 `ψ_t = V_t − Δ_t S_t`, almost surely, for all `t ≤ T'` at once (`T' < T`),
 
   `V_t = V₀ + (∫₀ᵗ Δ_s r S_s ds + ∫₀ᵗ Δ_s σ S_s dB_s) + ∫₀ᵗ r ψ_s ds`,
@@ -23,10 +22,10 @@ with `V₀ = (europeanCall K T).value` (`europeanCall_selfFinancing`). The brack
 `∫ Δ dS` of holding `Δ` shares, `dS = r S dt + σ S dB`; the last term is the interest on the bank
 position. The stochastic integral is the library's `predItoIntegral`.
 
-The proof is the product rule with the finite-variation factor `e^{rt}`, applied to the discounted
-value, which is the Itô process `localItoProcess` of the delta-hedge integrand (capped in time so
-that its paths are continuous, `timeCap`): Itô's formula for `f(t, x) = e^{rt} x`
-(`ito_formula_adapted_unbounded_process`, the product rule with a deterministic factor) gives
+The proof undoes the discounting with Itô's formula for the finite-variation factor `e^{rt}`,
+applied to the discounted value, which is the Itô process `localItoProcess` of the delta-hedge
+integrand (capped in time so that its paths are continuous, `timeCap`): Itô's formula for
+`f(t, x) = e^{rt} x` (`ito_formula_adapted_unbounded_process`) gives
 `V_t = V₀ + ∫₀ᵗ r V_s ds + ∫₀ᵗ e^{rs} H_s dB_s`, where `H` is the discounted integrand
 `Δ σ e^{−rs} S_s`, and `r V = Δ r S + r ψ` splits the drift.
 
@@ -110,10 +109,10 @@ theorem hedgeGain_isStronglyPredictable {B : ℝ≥0 → Ω → ℝ} (hBmeas : �
   unfold bsd1 gbmValue
   fun_prop
 
-/-- **The Black–Scholes delta hedge is self-financing.** Let `B` be a Brownian motion with
-continuous paths, `T' < T`, and `K, σ, S₀ > 0`. With the call value `V_t = C(t, S_t)`
-(`hedgeValue`), the delta `Δ_t = Φ(d₁)` (`hedgeDelta`) and the bank position
-`ψ_t = V_t − Δ_t S_t` (`hedgeBank`), almost surely, for all `t ≤ T'` at once,
+/-- **The self-financing equation of the Black–Scholes delta hedge.** Let `B` be a Brownian motion
+with continuous paths, `T' < T`, and `K, σ, S₀ > 0`. With the call value `V_t = C(t, S_t)`
+(`hedgeValue`), the delta `Δ_t = Φ(d₁)` (`hedgeDelta`) and the bank position `ψ_t = V_t − Δ_t S_t`
+(`hedgeBank`), almost surely, for all `t ≤ T'` at once,
 
   `V_t = V₀ + (∫₀ᵗ Δ_s · r S_s ds + ∫₀ᵗ Δ_s · σ S_s dB_s) + ∫₀ᵗ r ψ_s ds`,
 

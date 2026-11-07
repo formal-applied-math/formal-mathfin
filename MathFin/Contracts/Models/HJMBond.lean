@@ -21,7 +21,7 @@ A schedule of fixed cash flows sees the model only through the zero curve `𝔼[
 (`valueDisc_fixedFlows_of_zeroCurve_eq`). Two results:
 
 * `valueDisc_fixedFlows_hjm`: **conditional on the pricing hypothesis** `𝔼[D tᵢ] = P(0, tᵢ)`,
-  where `P(0,·)` is the model's (deterministic) initial bond curve, the schedule is worth
+  where `P(0,·)` is the initial bond curve, assumed deterministic (`hdet`), the schedule is worth
   `∑ P(0, tᵢ) cᵢ`. That hypothesis is what the HJM drift condition delivers (the discounted bonds
   are martingales); it is *not* proved here and is an explicit hypothesis of the statement.
 * `valueDisc_fixedFlows_hjm_flat`: unconditionally, for a deterministic flat forward curve
