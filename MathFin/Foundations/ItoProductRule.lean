@@ -80,7 +80,7 @@ private theorem product_algebra {X Y Z x₀ y₀ DX DY DZ D IX IY IZ IXY Iθ : �
   linear_combination hZ - hX - hY + hD + hI₂ + hI₁
 
 /-- A function continuous on `[0, t]` is integrable on `(0, t]`. -/
-private theorem integrableOn_Ioc_of_continuousOn {g : ℝ≥0 → ℝ} {t : ℝ≥0}
+theorem integrableOn_Ioc_of_continuousOn {g : ℝ≥0 → ℝ} {t : ℝ≥0}
     (hg : ContinuousOn g (Icc 0 t)) : IntegrableOn g (Ioc 0 t) timeMeasure :=
   (hg.integrableOn_compact isCompact_Icc).mono_set Ioc_subset_Icc_self
 
