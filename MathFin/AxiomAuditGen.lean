@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (906 MathFin constants, 29 upstream). Citations
+  corpus (917 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -1102,6 +1102,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.WienerIntegralL2.wienerIntegralLp_map_eq_gaussianReal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.WienerIntegralL2.wienerIntegralLp_map_eq_gaussianReal
+
+/-- info: 'MathFin.WillowMomentConstraints.bivariateNormal_moments' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.WillowMomentConstraints.bivariateNormal_moments
 
 /-- info: 'MathFin.abcdForward_call_eq_black76' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3606,6 +3610,46 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.weakForwardUniqueConst' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.weakForwardUniqueConst
+
+/-- info: 'MathFin.willowBeta_eq_sqrt_div' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.willowBeta_eq_sqrt_div
+
+/-- info: 'MathFin.willowBeta_eq_sqrt_div'' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.willowBeta_eq_sqrt_div'
+
+/-- info: 'MathFin.willowMarginal_crossMoment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.willowMarginal_crossMoment
+
+/-- info: 'MathFin.willowMarginal_crossMoment_eq_willowBeta' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.willowMarginal_crossMoment_eq_willowBeta
+
+/-- info: 'MathFin.willowMarginal_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.willowMarginal_eq
+
+/-- info: 'MathFin.willowMarginal_mass' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.willowMarginal_mass
+
+/-- info: 'MathFin.willowMarginal_mean' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.willowMarginal_mean
+
+/-- info: 'MathFin.willowMarginal_secondMoment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.willowMarginal_secondMoment
+
+/-- info: 'MathFin.willowScaled_crossMoment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.willowScaled_crossMoment
+
+/-- info: 'MathFin.willowScaled_secondMoment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.willowScaled_secondMoment
 
 /-- info: 'MathFin.worstCase_isLUB' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

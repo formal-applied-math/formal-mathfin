@@ -559,6 +559,8 @@ import MathFin.Binomial.CRRDiscreteIto
 import MathFin.Binomial.CRRCharFun
 -- CRR → BS in literal closed form `S₀Φ(d₁) − Ke^{−rT}Φ(d₂)` (Φ-landing corollary)
 import MathFin.Binomial.CRRClosedForm
+-- The willow tree: Curran's moment-constrained lattice on a fixed node set
+import MathFin.Binomial.WillowTree
 -- Phase 20: first-principles core derivations
 import MathFin.Foundations.NoArbitrageDerivations
 import MathFin.BlackScholes.RiskNeutralProbabilities
