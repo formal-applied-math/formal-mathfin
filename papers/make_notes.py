@@ -14,19 +14,21 @@ PAPERS = [
 
 COMMENTS = {
     "ftap": (
-        "{pages} pages, 1 figure, 1 table. v2 corrects three statements of v1 (priority of the "
-        "one-asset two-state case, the identification with the Esscher measure, and the claimed "
-        "equivalence of no arbitrage and coercivity), adds the separation shared with coherent risk "
-        "measures and the finite-state d-asset theorem, and describes release v1.5.0 of the Lean "
-        "artifact: https://github.com/formal-applied-math/formal-mathfin"
+        "{pages} pages. v2 describes release v1.11.0 of the Lean artifact. It adds the second fundamental "
+        "theorem on finite spaces, the reduction of the Dalang-Morton-Willinger theorem to its conditional "
+        "one-period form (the conditional step is assumed, not proved), one martingale-measure predicate "
+        "for discrete and continuous time, and external checks (kernel replay, Lean's comparator); it "
+        "corrects three statements of v1. Lean artifact: "
+        "https://github.com/formal-applied-math/formal-mathfin, release archived at "
+        "doi:10.5281/zenodo.24043549"
     ),
     "ito": (
-        "{pages} pages, 1 figure, 1 table. v3 adds Itô's formula under exponential growth with a "
-        "named integrand, for C^3 functions without growth conditions (local-martingale form) and for "
-        "Itô processes; martingale representation; agreement with the BrownianMotion package's "
-        "stochastic integral; Girsanov and SDE applications; and corrects statements of v2 against the "
-        "Lean source. Lean artifact (release v1.5.0): "
-        "https://github.com/formal-applied-math/formal-mathfin"
+        "{pages} pages. v3 describes release v1.11.0. It adds Itô's formula for Itô processes with "
+        "unbounded continuous adapted coefficients as an identity of processes, the product rule, Lévy's "
+        "characterisation, Girsanov's theorem for the filtration, SDEs on every horizon and stochastic "
+        "Fubini; the horizon-T integral is now defined from the half-line integral; and it corrects "
+        "statements of v2. Lean artifact: https://github.com/formal-applied-math/formal-mathfin, release "
+        "archived at doi:10.5281/zenodo.24043549"
     ),
     "library": (
         "{pages} pages, 4 tables. v4 describes release v1.11.0 (804 benchmark entries, about 158,000 "
@@ -35,7 +37,7 @@ COMMENTS = {
         "Dalang-Morton-Willinger to its conditional one-period form, and a contract layer on which the "
         "delta hedge and the change of measure are theorems about contract values. It also corrects "
         "several statements of v3. Lean artifact: https://github.com/formal-applied-math/formal-mathfin, "
-        "archived at doi:10.5281/zenodo.20477781"
+        "release archived at doi:10.5281/zenodo.24043549"
     ),
 }
 
