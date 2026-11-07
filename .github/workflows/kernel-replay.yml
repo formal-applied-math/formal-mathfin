@@ -1,36 +1,32 @@
 name: kernel-replay
 
-# Defense-in-depth BELOW the elaborator: replay every MathFin content
-# module's declarations through the Lean kernel via the toolchain-bundled
-# `leanchecker` (elaborator bugs / environment hacking cannot slip past it).
+# Defense in depth below the elaborator: replay every MathFin content module's declarations
+# through the Lean kernel with the toolchain's `leanchecker`, so an elaborator bug or an
+# environment hack cannot slip past. The enforced floor stays build.yml (a green `lake build`
+# and AxiomAudit's `#guard_msgs`-pinned axioms); this is the layer under it.
 #
-# ON-DEMAND ONLY (workflow_dispatch) — the nightly cron was dropped
-# 2026-06-07 after the cap experiment below concluded negatively. leanchecker
-# loads every checked module's FULL `public import` closure (all of Mathlib +
-# BrownianMotion) into one kernel environment — ~14 GB — and its allocator
-# sizes to the VM's total RAM, not the cgroup cap. So on a 16 GB hosted runner
-# the replay OOM-kills (exit 137) inside the FIRST batch at any cap below
-# ~14 GB: measured 11G cap → killed at ~11.3 GB after 1h45m of reclaim crawl,
-# 13G cap → killed at ~13.2 GB in 20 min. No cap both contains the workload
-# AND leaves the runner agent room; making it green needs a >16 GB runner or
-# un-wholesaling the library's imports (a refactor against the module-system
-# design) — not worth it for a redundant layer.
+# History. From 2026-06-07 the replay could not finish on a 16 GB hosted runner: every module
+# imported Mathlib whole, so each `leanchecker` loaded the full environment (~14 GB) and was
+# OOM-killed inside the first batch at any cgroup cap. Once the library's imports were narrowed
+# (docs/specs/2026-11-05-library-practices-design.md §6c, `whole_mathlib_imports` 0), the
+# 2026-11-07 run on main replayed 62 batches of 8 modules at about a minute each with at least
+# 5.6 GB free throughout, and stopped only at the 60-minute limit. The library is therefore
+# split into shards that run in parallel, each well inside its limit.
 #
-# The ENFORCED soundness floor is build.yml (per-push): a green `lake build`
-# + AxiomAudit's #guard_msgs-pinned axioms (no `sorry`, axiom-clean). This
-# kernel-replay job is BEST-EFFORT defense-in-depth, kept for manual
-# on-demand use from a bigger box / self-hosted runner.
+# Each shard takes every SHARDS-th module (`NR % SHARDS`), so the slow and fast parts of the
+# library spread evenly. Within a shard, a fresh `leanchecker` per batch of 8 releases memory
+# between batches and keeps import loading amortised inside one. The cgroup cap stays as
+# containment: a module whose closure grows past it is killed alone, not the runner agent.
 #
-# Upstream-report candidate: leanchecker × module-system `public import`
-# closures × headroom-scaling allocation (ticker data in runs
-# 27858a2 / 93fe22a / c3f28c9 of the build workflow, 2026-06-06).
+# Excluded: modules that re-export the whole library and declare no proof content (`Examples`,
+# `AxiomAudit*`, `Blueprint`). Every theorem they mention is replayed in its declaring module.
 #
-# Runs on the GitHub runner by doctrine — a full-environment batch load
-# must never share the 10 GB local box with the lean-repl daemon (CLAUDE.md
-# "Memory doctrine").
+# Runs weekly and on demand, on GitHub runners by the memory doctrine (CLAUDE.md).
 
 on:
-  workflow_dispatch:   # best-effort, on-demand only (nightly dropped — see header)
+  workflow_dispatch:
+  schedule:
+    - cron: "17 5 * * 1"   # Mondays 05:17 UTC
 
 concurrency:
   group: kernel-replay
@@ -38,58 +34,39 @@ concurrency:
 
 jobs:
   kernel-replay:
-    name: leanchecker kernel replay (MathFin)
+    name: leanchecker kernel replay (shard ${{ matrix.shard }}/6)
     runs-on: ubuntu-latest
-    timeout-minutes: 60   # OOMs in ~20 min at 13G on a 16 GB runner; bound the manual-run cost
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5]
+    env:
+      SHARDS: 6
+      SHARD: ${{ matrix.shard }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Same cache key family as build.yml (manifest-keyed) — on a cache hit
-      # the inner `lake build` is an incremental no-op and leanchecker only
-      # pays import loads.
+      # Same cache key family as build.yml (manifest-keyed): on a hit the inner `lake build`
+      # is an incremental no-op and leanchecker only pays import loads.
       - name: Build / restore (elan + Mathlib cache + lake build)
         uses: leanprover/lean-action@v1
 
-      - name: Replay every MathFin content module through the kernel
-        # CHUNKED + CONTAINED, deliberately:
-        # * One 180-module invocation OOM-evicted the runner (silent ~20 min,
-        #   agent shutdown + exit 143). Fresh process per batch of 8 releases
-        #   everything between batches, keeps within-batch import
-        #   amortization.
-        # * Lean's allocator scales to available headroom: the same module
-        #   peaks 0.6 GB under a 6 GB cgroup, 6.6 GB under 8.5 GB, >14 GB
-        #   uncapped on the 16 GB VM. The cgroup-v2 sub-group below caps it.
-        #   HONEST STATUS (2026-06-07): post-Summit-A′ the batch-1 import
-        #   closure no longer fits an 11G cap — runs 14ca008 / f424b30 were
-        #   OOM-killed (exit 137) INSIDE batch 1 after ~1h45m, cgroup floor
-        #   held at ~11.3 GB (so containment engaged; the workload simply
-        #   needs more). Chunking can't help — peak is set by one module's
-        #   public-import closure, not batch size. Trying memory.max 13G; a
-        #   long shot, since the uncapped peak (>14 GB) may not fit alongside
-        #   the runner agent on a 16 GB VM at all. The ENFORCED soundness
-        #   floor remains build.yml (green lake build + AxiomAudit
-        #   #guard_msgs-pinned axioms); this kernel layer is best-effort
-        #   redundancy below the elaborator.
-        # * Whole-library-closure modules (umbrella `MathFin`, `Examples`,
-        #   `AxiomAudit`, `Blueprint*`) are excluded: replaying them
-        #   re-checks every re-exported declaration — the entire library
-        #   again — for zero added coverage (they declare no proof content;
-        #   every theorem is replayed via its declaring module).
-        # * The free-ticker keeps climb-vs-flat truth in the log even if the
-        #   agent is evicted mid-batch.
+      - name: Replay this shard's modules through the kernel
         run: |
           echo "== runner resources =="; free -h; df -h /
           sudo mkdir -p /sys/fs/cgroup/leancheck
           echo $$ | sudo tee /sys/fs/cgroup/leancheck/cgroup.procs > /dev/null
           echo 12G | sudo tee /sys/fs/cgroup/leancheck/memory.high  > /dev/null
           echo 13G | sudo tee /sys/fs/cgroup/leancheck/memory.max   > /dev/null
-          ( while true; do free -m | awk '/^Mem/{print strftime("%T"), "avail:", $7, "MB"}'; sleep 5; done ) &
+          ( while true; do free -m | awk '/^Mem/{print strftime("%T"), "avail:", $7, "MB"}'; sleep 15; done ) &
           TICKER=$!
-          find MathFin -name '*.lean' | sed 's|/|.|g; s|\.lean$||' \
-            | grep -v -E '^MathFin\.(Examples|AxiomAudit|Blueprint)' > /tmp/modules.txt
+          find MathFin -name '*.lean' | sort | sed 's|/|.|g; s|\.lean$||' \
+            | grep -v -E '^MathFin\.(Examples|AxiomAudit|Blueprint)' \
+            | awk -v n="$SHARDS" -v k="$SHARD" 'NR % n == k' > /tmp/modules.txt
           total=$(wc -l < /tmp/modules.txt)
-          echo "checking $total modules in batches of 8"
+          echo "shard $SHARD/$SHARDS: checking $total modules in batches of 8"
           batch=0
           while mapfile -t -n 8 chunk && ((${#chunk[@]})); do
             batch=$((batch+1))
@@ -100,3 +77,4 @@ jobs:
             echo "::endgroup::"
           done < /tmp/modules.txt
           kill "$TICKER" 2>/dev/null || true
+          echo "shard $SHARD: $total modules replayed"
