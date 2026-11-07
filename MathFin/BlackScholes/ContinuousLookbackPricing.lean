@@ -5,9 +5,14 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
 public import MathFin.BlackScholes.PDE
 public import MathFin.Foundations.NormalTail
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
+public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Continuous-monitoring floating-strike lookback option: Haug's closed form
@@ -50,6 +55,18 @@ this file's `Φ`/power-function expression. `Lookback.lean` proves the static pa
 *any* a.s.-dominating `M`, with `M`'s law unused); neither links to a closed form for the running
 extremum's law, which is the piece this file's transcription route sidesteps.
 
+## Main definitions
+
+* `lookbackFloatingPrice`: the transcribed closed form (`η = 1` call, `η = -1` put),
+  cost-of-carry parametrization.
+* `lookbackTiltGap k d`: the one term of the closed form with a removable singularity at
+  `r = 0`, written in the standardized pair `k = 2b√T/σ`, `d` the price's own `a₁`
+  (`bsd1 S m b σ T`, the cost-of-carry `d1`), as
+  `e^{k²/2 − kd}·Φ(k − d) − Φ(−d)` — in the price formula's own variables this bracket is
+  `e^{bT}` times the standardized form, namely
+  `(S/m)^{−2b/σ²}·Φ(−a₁ + 2b√T/σ) − e^{bT}·Φ(−a₁)`; isolated so the reduction can argue its
+  sign directly (`h(0, d) = 0`, and the reduction needs only that `h(k, d)` has the sign of `k`).
+
 ## Main results
 
 * `lookbackFloatingPrice`: the transcribed closed form (`η = 1` call, `η = -1` put).
@@ -67,6 +84,18 @@ extremum's law, which is the piece this file's transcription route sidesteps.
   running *maximum*); this theorem is a floating-strike statement about the running *minimum*,
   with no `max(·,0)` on either side, proved independently. The two share only the theme that a
   lookback value dominates a vanilla one, not a derivation route or a payoff identity.
+
+## References
+
+* [M. B. Goldman, H. B. Sosin and M. A. Gatto, *Path dependent options: 'Buy at the low,
+  sell at the high'*][GoldmanSosinGatto1979]
+* [E. G. Haug, *The Complete Guide to Option Pricing Formulas*][Haug2007], ch. 4,
+  'Floating-Strike Lookback Options'
+
+## Tags
+
+lookback option, floating strike, running minimum, running maximum, closed form,
+transcription, Black-Scholes reduction, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
