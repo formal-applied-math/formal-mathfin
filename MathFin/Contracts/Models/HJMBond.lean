@@ -98,7 +98,7 @@ theorem valueDisc_fixedFlows_hjm_flat (M : HJMModel μ hB hBmeas H) {r : ℝ}
       = ∑ i ∈ Finset.range n, zcb r 0 (t i) * c i := by
   have hD (s : ℝ≥0) (ω : Ω) : M.discount s ω = zcb r 0 s := by
     have hint : ∫ u in Set.Ioc 0 s, M.shortRate u ω ∂timeMeasure = r * (s : ℝ) := by
-      rw [setIntegral_congr_fun measurableSet_Ioc (g := fun _ ↦ r)
+      rw [setIntegral_congr_fun measurableSet_Ioc (f := fun u ↦ M.shortRate u ω) (g := fun _ ↦ r)
           (fun u _ ↦ hflat u u ω le_rfl), setIntegral_const, Measure.real_def, timeMeasure_Ioc,
         ENNReal.toReal_ofReal (by simp), smul_eq_mul, mul_comm] <;> simp
     rw [HJM.HJMModel.discount, shortRateDiscount, hint, zcb]
