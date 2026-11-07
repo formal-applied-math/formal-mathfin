@@ -77,9 +77,10 @@ private lemma integral_abs_range_sum_le (n : ℕ) :
           (integrable_finset_sum _ fun i _ ↦ hi i) fun ω ↦ Finset.abs_sum_le_sum_abs _ _
     _ = ∑ i ∈ Finset.range n, ∫ ω, |X i ω| ∂μ := integral_finset_sum _ fun i _ ↦ hi i
     _ = n * ∫ ω, |X 0 ω| ∂μ := by
-        rw [Finset.sum_congr rfl fun i _ ↦ ((hident i).comp measurable_abs).integral_eq,
+        rw [Finset.sum_congr rfl fun i _ ↦ ((hident i).comp continuous_abs.measurable).integral_eq,
           Finset.sum_const, Finset.card_range, nsmul_eq_mul]
 
+omit hX in
 private lemma aemeasurable_claims : AEMeasurable (fun ω i ↦ X i ω) μ :=
   .of_eval fun i ↦ (hident i).aemeasurable_fst
 
@@ -102,7 +103,7 @@ theorem integrable_compoundPoisson :
     (integrable_prod_map_of_countable hY hgm (integrable_range_sum hident hX) ?_)
   rw [hN.map_eq]
   have hC : 0 ≤ ∫ ω, |X 0 ω| ∂μ := integral_nonneg fun _ ↦ abs_nonneg _
-  refine ((integrable_pow_poissonMeasure lam 2).const_mul (∫ ω, |X 0 ω| ∂μ)).mono'
+  refine ((PoissonPgf.integrable_pow_poissonMeasure lam 2).const_mul (∫ ω, |X 0 ω| ∂μ)).mono'
     Measurable.of_discrete.aestronglyMeasurable (ae_of_all _ fun n ↦ ?_)
   rw [Real.norm_of_nonneg (integral_nonneg fun _ ↦ norm_nonneg _)]
   simp only [Real.norm_eq_abs]
@@ -122,7 +123,7 @@ theorem integral_max_sub_compoundPoisson (c : ℝ) :
     (fun n ↦ by fun_prop) (fun _ _ ↦ le_max_right _ _)
     (fun n ↦ ((integrable_range_sum hident hX n).sub (integrable_const c)).pos_part)
     (fun _ ↦ rfl) ?_
-  refine ((integrable_pow_poissonMeasure lam 2).const_mul
+  refine ((PoissonPgf.integrable_pow_poissonMeasure lam 2).const_mul
     (∫ ω, |X 0 ω| ∂μ + |c|)).mono' Measurable.of_discrete.aestronglyMeasurable
     (ae_of_all _ fun n ↦ ?_)
   have hn := natCast_le_two_pow n
@@ -146,10 +147,10 @@ theorem integral_max_sub_compoundPoisson (c : ℝ) :
 `𝔼[(L − c)⁺] = ∑ₙ P(N = n)·𝔼[(∑_{i<n} Xᵢ − c)⁺]`, with `P(N = n) = e^{−λ} λⁿ / n!`. -/
 theorem integral_max_sub_compoundPoisson_eq_tsum (c : ℝ) :
     ∫ ω, max (∑ i ∈ Finset.range (N ω), X i ω - c) 0 ∂μ
-      = ∑' n : ℕ, poissonPMFReal lam n *
+      = ∑' n : ℕ, Real.exp (-(lam : ℝ)) * (lam : ℝ) ^ n / n.factorial *
           ∫ ω, max (∑ i ∈ Finset.range n, X i ω - c) 0 ∂μ := by
   rw [integral_max_sub_compoundPoisson hident hX hN hNX, integral_poissonMeasure]
-  simp only [smul_eq_mul]
+  rfl
 
 /-- **The Rockafellar–Uryasev theorem for the compound-Poisson loss**: for `α ∈ (0, 1)`,
 `ES_α(L)` is the least value of `c ↦ c + (1 − α)⁻¹ 𝔼[(L − c)⁺]`. -/

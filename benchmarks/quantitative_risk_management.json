@@ -227,6 +227,37 @@
       }
     },
     {
+      "id": "mf-compound-poisson-cvar",
+      "name": "Compound-Poisson Aggregate Loss: Integrability, Rockafellar–Uryasev and Poisson Mixture",
+      "description": "For an aggregate loss L = ∑_{i<N} Xᵢ with claim count N ~ Poisson(λ) independent of identically distributed integrable claim sizes Xᵢ on a probability space: L is integrable; for α ∈ (0, 1), ES_α(L) is the least value of c ↦ c + (1−α)⁻¹E[(L − c)⁺] and equals VaR_α(L) + (1−α)⁻¹E[(L − VaR_α(L))⁺]; and E[(L − c)⁺] = ∫ n, E[(∑_{i<n} Xᵢ − c)⁺] d Poisson(λ) (the mixture over the claim count).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.CompoundPoissonCVaR\n\nopen MeasureTheory ProbabilityTheory Set\nopen scoped NNReal\nopen MathFin\n\ntheorem compoundPoisson_integrable_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ] {lam : ℝ≥0} {N : Ω → ℕ} {X : ℕ → Ω → ℝ} (hN : HasLaw N (poissonMeasure lam) μ) (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ) (hNX : IndepFun N (fun ω i ↦ X i ω) μ) (hX : Integrable (X 0) μ) :\n    Integrable (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ :=\n  MathFin.integrable_compoundPoisson hident hX hN hNX\n\ntheorem compoundPoisson_isLeast_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ] {lam : ℝ≥0} {N : Ω → ℕ} {X : ℕ → Ω → ℝ} (hN : HasLaw N (poissonMeasure lam) μ) (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ) (hNX : IndepFun N (fun ω i ↦ X i ω) μ) (hX : Integrable (X 0) μ) {α : ℝ} (hα : α ∈ Ioo 0 1) :\n    IsLeast (range (rockafellarUryasev (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ α))\n      (expectedShortfall (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ α) :=\n  MathFin.isLeast_rockafellarUryasev_compoundPoisson hident hX hN hNX hα\n\ntheorem compoundPoisson_es_eq_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ] {lam : ℝ≥0} {N : Ω → ℕ} {X : ℕ → Ω → ℝ} (hN : HasLaw N (poissonMeasure lam) μ) (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ) (hNX : IndepFun N (fun ω i ↦ X i ω) μ) (hX : Integrable (X 0) μ) {α : ℝ} (hα : α ∈ Ioo 0 1) :\n    expectedShortfall (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ α\n      = valueAtRisk (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ α\n        + (1 - α)⁻¹ * ∫ ω, max (∑ i ∈ Finset.range (N ω), X i ω\n            - valueAtRisk (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ α) 0 ∂μ :=\n  MathFin.expectedShortfall_compoundPoisson_eq hident hX hN hNX hα\n\ntheorem compoundPoisson_mixture_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ] {lam : ℝ≥0} {N : Ω → ℕ} {X : ℕ → Ω → ℝ} (hN : HasLaw N (poissonMeasure lam) μ) (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ) (hNX : IndepFun N (fun ω i ↦ X i ω) μ) (hX : Integrable (X 0) μ) (c : ℝ) :\n    ∫ ω, max (∑ i ∈ Finset.range (N ω), X i ω - c) 0 ∂μ\n      = ∫ n, ∫ ω, max (∑ i ∈ Finset.range n, X i ω - c) 0 ∂μ ∂(poissonMeasure lam) :=\n  MathFin.integral_max_sub_compoundPoisson hident hX hN hNX c\n\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "Rockafellar–Uryasev (2000, 2002); MFE (2015) Section 8.2; Klugman–Panjer–Willmot Thm 9.3",
+        "citations": [
+          {
+            "key": "RockafellarUryasev2000"
+          },
+          {
+            "key": "RockafellarUryasev2002"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Section 8.2"
+          },
+          {
+            "key": "KlugmanPanjerWillmot"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Integrability of the compound sum is a Wald-type bound (freezing the Poisson count; the n-claim sums are dominated by E|X0|·2^n); the Rockafellar–Uryasev statements instantiate the library theorem for arbitrary integrable losses; the mixture expansion integrates out the count with the countable freezing lemma. Hypotheses: Poisson count independent of the claim sequence, identically distributed integrable claims (mutual independence of the claims is not needed). Lives in MathFin/RiskMeasures/CompoundPoissonCVaR.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "qrm-es-subadditive",
       "name": "Expected Shortfall Is Subadditive",
       "description": "For integrable losses X, Y on one probability space and α ∈ (0, 1): ES_α(X + Y) ≤ ES_α(X) + ES_α(Y).",
