@@ -50,8 +50,8 @@ before, 747 after; 764 → 765 delivery-ready).
   noise/signal cut (`mpUpperEdge_inv`, `mpLowerEdge_inv`) — and the quadratic scaling
   `λ±(kσ, c) = k²λ±(σ, c)` (`mpUpperEdge_const_mul`, `mpLowerEdge_const_mul`). A bridge to
   the portfolio layer: an equicorrelation matrix's trace is its dimension, so its average
-  eigenvalue is `1 = σ²` for a correlation matrix — the center of the `σ = 1` support
-  interval (`trace_equicorrelationMatrix_eq_card`, importing
+  eigenvalue is `1 = σ²` for a correlation matrix — the variance the `σ = 1` support interval
+  sandwiches for every `c ≤ 1` (`trace_equicorrelationMatrix_eq_card`, importing
   `Portfolio/Equicorrelation.lean`). Cited:
   Marchenko & Pastur (1967), Bai & Silverstein 2nd ed. (2010) ch. 3 (the law these endpoints
   support), López de Prado (2020) ch. 2 Snippet 2.1 (the parameterization actually
