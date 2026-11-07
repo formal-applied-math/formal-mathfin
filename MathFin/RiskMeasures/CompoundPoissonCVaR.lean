@@ -72,6 +72,7 @@ private lemma integrable_range_sum (n : ℕ) :
     Integrable (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ :=
   integrable_finset_sum _ fun i _ ↦ (hident i).integrable_iff.mpr hX
 
+omit [IsProbabilityMeasure μ] in
 /-- Wald's bound for a fixed number of claims: `𝔼|∑_{i<n} Xᵢ| ≤ n·𝔼|X₀|`. -/
 private lemma integral_abs_range_sum_le (n : ℕ) :
     ∫ ω, |∑ i ∈ Finset.range n, X i ω| ∂μ ≤ n * ∫ ω, |X 0 ω| ∂μ := by
