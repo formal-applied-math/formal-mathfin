@@ -78,17 +78,15 @@ noncomputable def hedgeValue (K r σ S_0 T : ℝ) (B : ℝ≥0 → Ω → ℝ) (
 noncomputable def hedgeBank (K r σ S_0 T : ℝ) (B : ℝ≥0 → Ω → ℝ) (s : ℝ≥0) (ω : Ω) : ℝ :=
   hedgeValue K r σ S_0 T B s ω - hedgeDelta K r σ S_0 T B s ω * pathAssets S_0 r σ B () s ω
 
-private theorem aux_mul {e e' σ S Φ : ℝ} (h : e * e' = 1) :
-    Φ * (σ * S) = e * (σ * (e' * S) * Φ) := by
-  linear_combination (-(σ * S * Φ)) * h
-
 /-- The delta times the diffusion `σ S` of the stock is `e^{rs}` times the discounted hedge
 integrand. -/
 private theorem delta_mul_diffusion (K r σ S_0 T : ℝ) (s x : ℝ) :
     Phi (bsd1 (gbmValue S_0 r σ s x) K r σ (T - s)) * (σ * gbmValue S_0 r σ s x)
       = Real.exp (r * s) * deltaHedgeIntegrand K r σ S_0 T s x := by
   unfold deltaHedgeIntegrand
-  exact aux_mul (by rw [← Real.exp_add]; simp)
+  have h : Real.exp (r * s) * Real.exp (-(r * s)) = 1 := by rw [← Real.exp_add]; simp
+  linear_combination
+    (-(σ * gbmValue S_0 r σ s x * Phi (bsd1 (gbmValue S_0 r σ s x) K r σ (T - s)))) * h
 
 /-- The delta times the stock is `e^{rs}` times the discounted hedge integrand over `σ`. -/
 private theorem delta_mul_stock (K r σ S_0 T : ℝ) (hσ : σ ≠ 0) (s x : ℝ) :

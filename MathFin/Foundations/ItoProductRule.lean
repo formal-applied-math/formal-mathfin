@@ -68,17 +68,6 @@ open scoped NNReal ENNReal
 
 /-! ### Real and pathwise algebra -/
 
-/-- The polarisation identity `XY = Z²/2 − X²/2 − Y²/2` for `Z = X + Y`, carried through the
-three Itô formulas for `x ↦ x²/2`. -/
-private theorem product_algebra {X Y Z x₀ y₀ DX DY DZ D IX IY IZ IXY Iθ : ℝ}
-    (hZt : Z = X + Y)
-    (hX : X * X / 2 = x₀ * x₀ / 2 + DX + IX) (hY : Y * Y / 2 = y₀ * y₀ / 2 + DY + IY)
-    (hZ : Z * Z / 2 = (x₀ + y₀) * (x₀ + y₀) / 2 + DZ + IZ)
-    (hD : DZ = DX + DY + D) (hI₁ : IXY = IX + IY) (hI₂ : IZ = IXY + Iθ) :
-    X * Y = x₀ * y₀ + D + Iθ := by
-  subst hZt
-  linear_combination hZ - hX - hY + hD + hI₂ + hI₁
-
 /-- A function continuous on `[0, t]` is integrable on `(0, t]`. -/
 theorem integrableOn_Ioc_of_continuousOn {g : ℝ≥0 → ℝ} {t : ℝ≥0}
     (hg : ContinuousOn g (Icc 0 t)) : IntegrableOn g (Ioc 0 t) timeMeasure :=
@@ -341,7 +330,9 @@ theorem ito_product_rule_of_half_sq {σ τ b c X Y Z : ℝ≥0 → Ω → ℝ} {
     refine setIntegral_congr_fun measurableSet_Ioc fun s hs ↦ ?_
     simp only [hZe s ⟨zero_le, hs.2.trans ht.2⟩]
     ring
-  exact product_algebra (hZe t ht) (hX t ht) (hY t ht) (hZ t ht) hD (h1 t ht) (h2 t ht)
+  -- polarisation: `XY = Z²/2 − X²/2 − Y²/2` along `Z = X + Y`
+  linear_combination (hZ t ht) - (hX t ht) - (hY t ht) + hD + (h2 t ht) + (h1 t ht)
+    - ((Z t ω + X t ω + Y t ω) / 2) * (hZe t ht)
 
 variable {σ τ b c : ℝ≥0 → Ω → ℝ}
   (hσa : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (σ t))

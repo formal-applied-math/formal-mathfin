@@ -85,11 +85,10 @@ jobs:
       # because the environment is already built; its gates (the ratchet's index metrics)
       # run on it, and the artifact is what `python3 -m tools.verify.find` and the next
       # PR's declaration diff read (docs/specs/2026-11-05-library-practices-design.md §2).
+      # The report and the artifact come before the gates, so a red ratchet names its offenders.
       - name: Declaration index
         run: |
           lake exe mathfin_index decl-index.json 4
-          python3 -m tools.verify.ratchet check --index decl-index.json
-          python3 -m tools.verify.decl_index check decl-index.json
           python3 -m tools.verify.decl_index report decl-index.json >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload declaration index
@@ -98,6 +97,11 @@ jobs:
           name: decl-index
           path: decl-index.json
           retention-days: 90
+
+      - name: Ratchet and index checks
+        run: |
+          python3 -m tools.verify.ratchet check --index decl-index.json
+          python3 -m tools.verify.decl_index check decl-index.json
 
       # Physlib's check_golf + pr_summary as one diff: added / removed / renamed
       # declarations and changed statements, against the index of the PR's base commit
