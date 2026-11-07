@@ -301,8 +301,10 @@ theorem willowMarginal_crossMoment (hP : WillowMomentConstraints z β P)
     _ = β k := by rw [willowMarginal_secondMoment hP hq hq2, mul_one]
 
 /-- **The scaled chain's second moment**: in the unstandardized variables
-`X k = √(t k) * Z k` on an initially unit-second-moment willow chain, the marginal
-second moment at step `k` is `t k` — the Brownian marginal variance at the grid time.
+`X k = √(t k) * Z k` on a willow chain started at a marginal of unit mass and unit
+second moment (`hq`, `hq2` — the recursion weights the increment variance by the mass),
+the marginal second moment at step `k` is `t k` — the Brownian marginal variance at the
+grid time.
 (It is the variance as well whenever the marginal mean is zero, which
 `willowMarginal_mean` gives under its own hypotheses.) -/
 theorem willowScaled_secondMoment (hP : WillowMomentConstraints z β P)
@@ -319,8 +321,9 @@ theorem willowScaled_secondMoment (hP : WillowMomentConstraints z β P)
         exact Finset.sum_congr rfl fun j _ ↦ mul_left_comm _ _ _
     _ = t k := by rw [willowMarginal_secondMoment hP hq hq2, mul_one]
 
-/-- **The scaled chain's cross moment**: on an initially unit-second-moment willow
-chain, in the unstandardized variables `X k = √(t k) * Z k` with the chain's own
+/-- **The scaled chain's cross moment**: on a willow chain started at a marginal of
+unit mass and unit second moment (`hq`, `hq2`), in the unstandardized variables
+`X k = √(t k) * Z k` with the chain's own
 coefficient tied to the grid by `hβ : β k = √(t k / t (k+1))`, the cross moment across
 the step `[t k, t (k+1)]` is `E[X_k X_{k+1}] = t k` — exactly the Brownian covariance
 at two grid times, which is the de-correlation property Curran's constraint system
