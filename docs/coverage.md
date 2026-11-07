@@ -28,7 +28,10 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ### The willow tree: the beta identity and moment/marginal preservation (2026-11-06)
 
-One `full` entry in `benchmarks/binomial.json`. Corpus 781 → 782.
+One `full` entry in `benchmarks/binomial.json`. Corpus 781 → 782. The README's corpus
+line is corrected in the same change from its stale 779/744 — origin/main's README
+lagged formalization.yaml by the two entries of the previous batch — to the recomputed
+782/747 (746 full before this entry, 747 after; 764 → 765 delivery-ready).
 
 - **`mf-willow-tree-moment-marginal-constraints`** (MathFin/Binomial/WillowTree.lean):
   Curran's willow tree prices against a Brownian motion with a time-inhomogeneous
