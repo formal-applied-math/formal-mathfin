@@ -301,6 +301,7 @@ import MathFin.Foundations.GirsanovAdaptedTheta
 import MathFin.Foundations.SimpleProcessPartition
 import MathFin.Foundations.GirsanovSimpleDoleansMoments
 import MathFin.Foundations.GirsanovPredictableTheta
+import MathFin.Foundations.GirsanovFiltered
 import MathFin.Foundations.ItoFormulaCLM
 -- Summit A′: time-dependent Itô formula in L² — TD Taylor remainder vanishes,
 -- TD Riemann↔CLM bridge, and the assembly f(T,B_T) = f(0,B₀) + ∫f_x dB + ∫(f_t+½f_xx)ds
@@ -799,6 +800,7 @@ import MathFin.Contracts.Models.BlackScholesAsian
 import MathFin.Contracts.Models.BlackScholesSDE
 import MathFin.Contracts.Models.BlackScholesChooser
 import MathFin.Contracts.Models.BlackScholesHedge
+import MathFin.Contracts.Models.BlackScholesPhysical
 import MathFin.Contracts.Models.Binomial
 import MathFin.Contracts.Models.DiscreteMarket
 import MathFin.Contracts.Models.BinomialCompleteMarket
