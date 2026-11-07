@@ -1788,6 +1788,13 @@
       "input_hash": "986455a906e7dcefb2afb4fc99a9078d884a27ebc9a76e2bb7b1bf75bc41a562",
       "verified_at_commit": "abe6d37"
     },
+    "mf-compound-poisson-cvar": {
+      "benchmark_file": "quantitative_risk_management.json",
+      "date": "2026-11-07",
+      "elapsed_s": 2.8,
+      "input_hash": "4c5abdcb5961839111a363d0324e599207e9257453881338ea65bbd25a4854c7",
+      "verified_at_commit": "33a209a"
+    },
     "mf-compound-poisson-implied-vol-above-sigma": {
       "benchmark_file": "jumps_and_variance_swaps.json",
       "date": "2026-11-07",

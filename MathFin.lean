@@ -736,6 +736,7 @@ import MathFin.RiskMeasures.CollateralizedExposureBrownian
 -- VaR and ES of the Student-t law (McNeil–Frey–Embrechts closed forms); elicitability
 -- (VaR elicitable, ES not); Bernoulli mixtures and the Basel IRB limit theorem
 import MathFin.RiskMeasures.ExpectedShortfall
+import MathFin.RiskMeasures.CompoundPoissonCVaR
 import MathFin.RiskMeasures.GaussianExpectedShortfall
 import MathFin.RiskMeasures.ValueAtRiskBisection
 import MathFin.RiskMeasures.VaRSuperadditivity

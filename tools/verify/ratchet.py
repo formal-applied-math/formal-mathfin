@@ -58,10 +58,15 @@ def source_metrics() -> dict[str, int]:
 def index_metrics(index_path: str | Path) -> dict[str, int]:
     from .decl_index import DeclIndex
 
+    from .program_tree import load_nodes, place_corpus
+
     idx = DeclIndex.load(index_path)
     return {
         "private_mathlib_shaped": len(idx.mathlib_shaped_private()),
         "duplicate_statements": sum(len(g) - 1 for g in idx.duplicate_statements()),
+        # corpus entries in no relation the program map records (tools/verify/program_tree.py)
+        "corpus_off_blueprint": sum(p.kind == "off-map"
+                                    for p in place_corpus(idx, load_nodes())),
     }
 
 

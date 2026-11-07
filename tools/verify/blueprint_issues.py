@@ -62,6 +62,8 @@ class Node:
     uses: tuple[str, ...] = ()
     statement: str = ""
     area: str = ""
+    ground: str = ""  # frontier only: the upstream material a Mathlib-only result builds on
+    core: tuple[str, ...] = ()  # frontier only: corpus entries already proving part of it
 
 
 @dataclass
@@ -109,7 +111,8 @@ def load_frontier(path: Path = FRONTIER_TOML) -> list[Node]:
     data = tomllib.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
     return [Node(label=r["label"], title=r["title"], status="frontier",
                  uses=tuple(r.get("uses", ())), statement=r.get("statement", ""),
-                 area=r.get("area", ""))
+                 area=r.get("area", ""), ground=r.get("ground", ""),
+                 core=tuple(r.get("core", ())))
             for r in data.get("node", [])]
 
 
@@ -125,8 +128,30 @@ def load_nodes(nodes_json: Path = NODES_JSON, frontier: Path = FRONTIER_TOML) ->
     return nodes
 
 
-def frontier_problems(nodes: dict[str, Node]) -> list[str]:
-    """Static checks of the frontier file (no network): label shape, `uses` resolve."""
+def grows_from_wood(label: str, nodes: dict[str, Node]) -> bool:
+    """Whether following `uses` from a node reaches a Lean-backed node, or a frontier node that
+    declares its upstream `ground`. Frontier-only chains count when they end in the wood."""
+    seen: set[str] = set()
+    stack = [label]
+    while stack:
+        n = nodes.get(stack.pop())
+        if n is None or n.label in seen:
+            continue
+        seen.add(n.label)
+        if n.status != "frontier" or n.ground:
+            return True
+        stack.extend(n.uses)
+    return False
+
+
+def frontier_problems(nodes: dict[str, Node],
+                      corpus_status: dict[str, str] | None = None) -> list[str]:
+    """Static checks of the frontier file (no network): label shape, `uses` resolve, every node
+    grows from the proved blueprint, and `core` names corpus entries that prove something."""
+    if corpus_status is None and any(n.core for n in nodes.values()):
+        from .corpus import iter_entries
+        corpus_status = {t["id"]: t.get("metadata", {}).get("formalization_status", "")
+                         for _, t in iter_entries()}
     out = []
     for n in nodes.values():
         if n.status != "frontier":
@@ -138,6 +163,17 @@ def frontier_problems(nodes: dict[str, Node]) -> list[str]:
         for u in n.uses:
             if u not in nodes:
                 out.append(f"frontier node `{n.label}`: uses unknown node `{u}`")
+        if not any(grows_from_wood(u, nodes) for u in n.uses) and not n.ground:
+            out.append(f"frontier node `{n.label}`: its `uses` reach no proved node; name the "
+                       "proved result it builds on, or say in `ground` what Mathlib material it "
+                       "draws on")
+        for c in n.core:
+            status = (corpus_status or {}).get(c)
+            if status is None:
+                out.append(f"frontier node `{n.label}`: `core` names unknown corpus entry `{c}`")
+            elif status not in ("full", "reduced_core"):
+                out.append(f"frontier node `{n.label}`: `core` entry `{c}` is {status}, "
+                           "not a proof")
     return out
 
 
@@ -171,8 +207,9 @@ class Problem:
     issue: int | None = None  # the issue to comment on, when one is at fault
 
 
-def check(issues: list[Issue], nodes: dict[str, Node]) -> list[Problem]:
-    problems = [Problem(m) for m in frontier_problems(nodes)]
+def check(issues: list[Issue], nodes: dict[str, Node],
+          corpus_status: dict[str, str] | None = None) -> list[Problem]:
+    problems = [Problem(m) for m in frontier_problems(nodes, corpus_status)]
     open_named: dict[str, list[int]] = {}
     any_named: dict[str, list[int]] = {}
     for i in issues:

@@ -117,7 +117,15 @@ math issue (`type:proof`, `type:research`, `open-problem`, `frontier`) carries a
 frontier entry in `docs/blueprint_frontier.toml` first; a PR delivering a frontier node tags
 the declaration in `MathFin/Blueprint.lean` under the same label and deletes the entry.
 `python3 -m tools.verify.blueprint_issues check` (build.yml, blueprint-sync.yml) holds both
-directions.
+directions. Every frontier node grows from the proved blueprint: its `uses` reach a Lean-tagged
+node (through other frontier nodes if need be), or its `ground` field says what Mathlib material
+it builds on; a `core` field lists the corpus entries that already prove part of it.
+**The corpus sits on the map** (`tools/verify/program_tree.py`): an entry rests on a node when its
+proof's citations depend on the node's declaration. The program's central objects are nodes too
+(`def:quantile`, `def:emm`, `def:contract-value`, …), since most entries reach the library through
+them. The count of entries off the map is a ratchet (`corpus_off_blueprint`); the docs site draws
+the whole picture as the program tree (`tree.html`). A new area or object the corpus builds on gets
+a blueprint node.
 `tests/test_architecture.py` keeps the library one graph: `Foundations/` imports only
 `Foundations/` (joins live in `Bridges/`), every module imports a library module or is
 imported by one, and every module is imported by another or cited by a corpus entry. A
