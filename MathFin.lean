@@ -796,6 +796,7 @@ import MathFin.Contracts.Parity
 import MathFin.Contracts.Models.BlackScholes
 import MathFin.Contracts.Models.BlackScholesExchange
 import MathFin.Contracts.Models.BlackScholesAsian
+import MathFin.Contracts.Models.BlackScholesSDE
 import MathFin.Contracts.Models.BlackScholesChooser
 import MathFin.Contracts.Models.BlackScholesHedge
 import MathFin.Contracts.Models.Binomial

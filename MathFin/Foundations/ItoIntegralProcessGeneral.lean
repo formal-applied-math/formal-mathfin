@@ -199,5 +199,60 @@ theorem itoIntegralProcessGen_l2_continuous (T : ℝ≥0) (hBmeas : ∀ u, Measu
     exact lt_of_le_of_lt (itoProcessCLM_norm_le hB T t hBmeas (φ - g n)) hn
   exact huniform.continuous (Filter.Eventually.of_forall hcont_n).frequently
 
+
+omit hB [IsProbabilityMeasure μ] in
+/-- **The `timeMeasure` ↔ interval-integral bridge** (the
+definitional transfer of the adapted assembly's time integral into the
+`intervalIntegral` form the marginal-flow machinery consumes): since
+`timeMeasure = Measure.comap ((↑) : ℝ≥0 → ℝ) volume`, a `timeMeasure`
+integral over the time band `(0, T]` *is* the Lebesgue integral over `(0, ↑T)` of the
+coe-reindexing, read as an `intervalIntegral` by `intervalIntegral.integral_of_le`.
+
+Route: `(comap c ν).restrict S = comap c (ν.restrict (c '' S))`
+(`MeasurableEmbedding.restrict_comap` at the embedding
+`measurableEmbedding_nnrealCoe`), `map c (comap c ν') = ν'.restrict (range c)`
+(`MeasurableEmbedding.map_comap`, with `range c ⊇ c '' S`), and
+`MeasurableEmbedding.integral_map` moves the integral to the `volume` side. Unconditional:
+no measurability or integrability hypotheses — the bridge is a measure-theoretic
+change of variables. -/
+theorem timeMeasure_Ioc_eq_interval {g : ℝ≥0 → ℝ} (T : ℝ≥0) :
+    ∫ s in Set.Ioc (0:ℝ≥0) T, g s ∂timeMeasure
+      = ∫ x in (0)..(T:ℝ), g (Real.toNNReal x) := by
+  have himg : ((↑) : ℝ≥0 → ℝ) '' Set.Ioc (0:ℝ≥0) T = Set.Ioc (0:ℝ) (T:ℝ) := by
+    ext x
+    simp only [Set.mem_image, Set.mem_Ioc]
+    constructor
+    · rintro ⟨y, ⟨hy1, hy2⟩, rfl⟩
+      exact ⟨by exact_mod_cast hy1, by exact_mod_cast hy2⟩
+    · rintro ⟨hx1, hx2⟩
+      have hy : (Real.toNNReal x : ℝ) = x := Real.coe_toNNReal x hx1.le
+      have hle : (Real.toNNReal x : ℝ) ≤ (T:ℝ) := by rw [hy]; exact hx2
+      exact ⟨Real.toNNReal x, Set.mem_Ioc.2 ⟨Real.toNNReal_pos.2 hx1,
+        NNReal.coe_le_coe.mp hle⟩, hy⟩
+  have hrng : ((↑) : ℝ≥0 → ℝ) '' Set.Ioc (0:ℝ≥0) T ⊆ Set.range ((↑) : ℝ≥0 → ℝ) :=
+    Set.image_subset_range _ _
+  have hmap : MeasureTheory.Measure.map ((↑) : ℝ≥0 → ℝ)
+      (timeMeasure.restrict (Set.Ioc (0:ℝ≥0) T))
+      = MeasureTheory.volume.restrict (((↑) : ℝ≥0 → ℝ) '' Set.Ioc (0:ℝ≥0) T) := by
+    rw [timeMeasure,
+      MeasurableEmbedding.restrict_comap measurableEmbedding_nnrealCoe,
+      MeasurableEmbedding.map_comap measurableEmbedding_nnrealCoe,
+      Measure.restrict_restrict measurableEmbedding_nnrealCoe.measurableSet_range,
+      Set.inter_eq_right.2 hrng]
+  calc ∫ s in Set.Ioc (0:ℝ≥0) T, g s ∂timeMeasure
+      = ∫ x, g (Real.toNNReal (↑x)) ∂(timeMeasure.restrict (Set.Ioc (0:ℝ≥0) T)) :=
+        MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall fun x => by
+          simp only [Real.toNNReal_coe])
+    _ = ∫ y, g (Real.toNNReal y) ∂(MeasureTheory.Measure.map ((↑) : ℝ≥0 → ℝ)
+          (timeMeasure.restrict (Set.Ioc (0:ℝ≥0) T))) :=
+          (measurableEmbedding_nnrealCoe.integral_map
+            (fun y : ℝ => g (Real.toNNReal y))).symm
+    _ = ∫ y, g (Real.toNNReal y) ∂(MeasureTheory.volume.restrict
+          (((↑) : ℝ≥0 → ℝ) '' Set.Ioc (0:ℝ≥0) T)) := by rw [hmap]
+    _ = ∫ x in ((↑) : ℝ≥0 → ℝ) '' Set.Ioc (0:ℝ≥0) T, g (Real.toNNReal x) ∂volume := rfl
+    _ = ∫ x in Set.Ioc (0:ℝ) (T:ℝ), g (Real.toNNReal x) ∂volume := by rw [himg]
+    _ = ∫ x in (0)..(T:ℝ), g (Real.toNNReal x) ∂volume :=
+        (intervalIntegral.integral_of_le (NNReal.coe_nonneg T)).symm
+
 end ItoIntegralProcessGeneral
 end MathFin
