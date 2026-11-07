@@ -18,8 +18,8 @@ paths recombine trivially because the nodes never grow. The number of nodes per 
 step is constant, and the lattice widens like `√t` only through the scaling, not
 through new nodes. What replaces the recombination
 familiar from binomial trees is a time-inhomogeneous family of transition matrices `P k`,
-each row of which is chosen (in the original construction, by linear programming) to
-satisfy, with `β k = √(t k / t (k+1))`,
+each matrix of which is chosen (in the original construction, by a linear program over
+the whole matrix) to satisfy, with `β k = √(t k / t (k+1))`,
 
     ∑ j, P k i j = 1                       (row stochasticity)
     ∑ j, P k i j * z j = β k * z i         (conditional first moment)
@@ -72,6 +72,12 @@ full system, the objective, sparsity): the statements are unconditional in the m
 `P`, which is what makes them usable against any solver output. No claim is made about
 prices computed on the lattice.
 
+The chain is stated entrywise — finite sums over the node set, matching the entrywise
+form of Curran's constraint rows. Over Mathlib's matrix API the recursion is `vecMul`
+and the roll-up lemma below is the entrywise form of `Matrix.dotProduct_mulVec`; the
+entrywise form was kept because every hypothesis here is itself an entrywise statement
+about rows.
+
 ## References
 
 * [M. Curran, *Willow Power: Optimizing Derivative Pricing Trees*][Curran2001],
@@ -94,9 +100,10 @@ namespace MathFin
 open MeasureTheory ProbabilityTheory
 
 /-- **Curran's de-correlation coefficient**: for a grid step widening time by the factor
-`1 + α`, the willow tree pairs times `t` and `t' = (1 + α) t` through `β = 1 / √(1 + α)`,
-which is `√(t / t')` (`willowBeta_eq_sqrt_div`) — the correlation of a Brownian motion
-read at `t` and `t'`. -/
+`1 + α > 0`, the willow tree pairs times `t` and `t' = (1 + α) t` through
+`β = 1 / √(1 + α)`, which is `√(t / t')` (`willowBeta_eq_sqrt_div`) — the correlation of
+a Brownian motion read at `t` and `t'`. (Without `1 + α > 0` the definition takes the
+junk value `0`.) -/
 noncomputable def willowBeta (α : ℝ) : ℝ := 1 / √(1 + α)
 
 /-- **The `β` identity of the willow tree**: if `0 < 1 + α` and `t' = (1 + α) * t`
@@ -126,10 +133,12 @@ theorem willowBeta_eq_sqrt_div' {t : ℕ → ℝ} (ht0 : ∀ k, 0 < t k) (k : �
 variable {n : ℕ}
 
 /-- **The willow tree moment constraints** on a family of transition matrices `P k` over
-a fixed node set `z`: each matrix is row stochastic, and its rows match the first two
-conditional moments of the standardized Brownian pair with correlation `β k`. No
-non-negativity is required of the entries — the moment statements below are insensitive
-to it (it is the linear program's business, not the induction's). -/
+a fixed node set `z`: each matrix is row stochastic, and its rows have the form of the
+first two conditional moments of the standardized Brownian pair with correlation `β k`.
+No non-negativity is required of the entries — the moment statements below are
+insensitive to it (it is the linear program's business, not the induction's) — so with
+sign-free entries the rows are satisfiable at `|β k| > 1` too; that `β k` is a genuine
+correlation for a given step needs a non-negative row (`willowBeta_sq_le_one`). -/
 structure WillowMomentConstraints (z : Fin n → ℝ) (β : ℕ → ℝ)
     (P : ℕ → Fin n → Fin n → ℝ) : Prop where
   /-- Every transition matrix is row stochastic. -/
