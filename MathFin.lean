@@ -384,6 +384,11 @@ import MathFin.Foundations.FTAPComplete
 import MathFin.Foundations.FTAPOnePeriod
 -- General-Ω one-period FTAP, d assets (Esscher minimal-divergence EMM, full — finite-dim market)
 import MathFin.Foundations.FTAPOnePeriodVector
+-- Multi-period FTAP on a general space: no arbitrage is local, one-period densities paste, and
+-- the Dalang–Morton–Willinger theorem reduces to the conditional one-period FTAP
+import MathFin.Foundations.NoArbitrageLocal
+import MathFin.Foundations.DensityPasting
+import MathFin.Foundations.DalangMortonWillinger
 -- BlackScholes
 import MathFin.BlackScholes.Call
 import MathFin.BlackScholes.Put
@@ -794,6 +799,7 @@ import MathFin.Contracts.Models.BlackScholesAsian
 import MathFin.Contracts.Models.BlackScholesChooser
 import MathFin.Contracts.Models.BlackScholesHedge
 import MathFin.Contracts.Models.Binomial
+import MathFin.Contracts.Models.DiscreteMarket
 import MathFin.Contracts.Models.BinomialCompleteMarket
 import MathFin.Contracts.Models.BinomialLimit
 import MathFin.Contracts.Models.Caplet
