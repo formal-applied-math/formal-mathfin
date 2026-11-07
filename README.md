@@ -298,9 +298,8 @@ Comparator below).
   are published as a
   [Hugging Face dataset](https://huggingface.co/datasets/formal-applied-math/formal-mathfin-theorems).
 
-- **Kernel replay.** A workflow replays every declaration through `leanchecker`, but the full
-  Mathlib environment it loads does not fit on a 16 GB hosted runner, and the replay has not
-  completed.
+- **Kernel replay.** A monthly workflow replays every module's declarations through the Lean
+  kernel with `leanchecker`, below the elaborator.
 
 - **Provenance.** [`formalization.yaml`](formalization.yaml) describes how the library was written,
   including AI assistance and the entries drafted by an automated pipeline. The American put port

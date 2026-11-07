@@ -21,12 +21,12 @@ name: kernel-replay
 # Excluded: modules that re-export the whole library and declare no proof content (`Examples`,
 # `AxiomAudit*`, `Blueprint`). Every theorem they mention is replayed in its declaring module.
 #
-# Runs weekly and on demand, on GitHub runners by the memory doctrine (CLAUDE.md).
+# Runs monthly and on demand, on GitHub runners by the memory doctrine (CLAUDE.md).
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "17 5 * * 1"   # Mondays 05:17 UTC
+    - cron: "17 5 1 * *"   # the 1st of each month, 05:17 UTC
 
 concurrency:
   group: kernel-replay
