@@ -259,7 +259,8 @@ moment keeps unit second moment at every step, for any family of transition matr
 satisfying the row constraints (the proof uses the conditional second moment constraint
 for the recursion and row stochasticity for the unit mass its constant term is weighted
 by). This is the variance-on-track induction: combined with the scaling `√(t k)` it
-keeps the chain's marginal variance at `t k` (`willowScaled_secondMoment`). -/
+keeps the chain's marginal second moment at `t k` (`willowScaled_secondMoment`) — its
+variance too, under `willowMarginal_mean`'s mean-zero start. -/
 theorem willowMarginal_secondMoment (hP : WillowMomentConstraints z β P)
     (hq : ∑ i, q i = 1) (hq2 : ∑ i, q i * z i ^ 2 = 1) (k : ℕ) :
     ∑ j, willowMarginal P q k j * z j ^ 2 = 1 := by
