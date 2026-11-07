@@ -1385,9 +1385,9 @@
     "mf-bs-self-financing-hedge": {
       "benchmark_file": "contracts.json",
       "date": "2026-11-07",
-      "elapsed_s": 2.6,
-      "input_hash": "767d86c3c0e95a93e66b9eaee4b71c198fd11c90016fee76c3ccf24af33748a9",
-      "verified_at_commit": "e6b2365"
+      "elapsed_s": 2.8,
+      "input_hash": "89cda02c849a2ac99cfd083c400fcdc24a3dcd1828b86dd80969d804db68b611",
+      "verified_at_commit": "aa226d8"
     },
     "mf-bs-speed": {
       "benchmark_file": "black_scholes.json",
@@ -5445,9 +5445,9 @@
     "sc-ito-product-rule": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-11-07",
-      "elapsed_s": 2.9,
-      "input_hash": "4018d2c5c6047fcc0f23e73a125d61f65dfaa8e06a136f1c0166b7bed88dc94a",
-      "verified_at_commit": "e6b2365"
+      "elapsed_s": 2.7,
+      "input_hash": "0d5b46310df4d303f97a444555c6dd754f588087436b52840746343d0c76b3cf",
+      "verified_at_commit": "aa226d8"
     },
     "sc-ito-simple-process-isometry": {
       "benchmark_file": "stochastic_calculus.json",
