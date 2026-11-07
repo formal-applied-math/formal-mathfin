@@ -335,9 +335,9 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.DiscreteMarket.exists_isEMM_parity
 
-/-- info: 'MathFin.Contracts.Payoff.measurable_eval_of_obsTimes_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.Contracts.Payoff.measurable_eval_of_obsList_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.Contracts.Payoff.measurable_eval_of_obsTimes_le
+#print axioms MathFin.Contracts.Payoff.measurable_eval_of_obsList_le
 
 /-- info: 'MathFin.Contracts.SwapModel.cmsCurveRate_integral_le_forwardSwapRate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

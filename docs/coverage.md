@@ -2143,9 +2143,9 @@ prior corpus audit, not a verification of this addition.
 > reifies a payoff as data — `Payoff ι` / `Contract ι` inductives over a **typed** underlying
 > index `ι` (`ι = Unit` for the single-asset instances below), not the inline lambda every other
 > payoff in the library is written as. `Adapted.lean` proves the reification pays for itself:
-> `Payoff.measurable_eval_of_obsTimes_le` is the adaptedness hypothesis a `Payoff` will need to
+> `Payoff.measurable_eval_of_obsList_le` is the adaptedness hypothesis a `Payoff` will need to
 > be a legitimate stochastic-integral integrand — `𝓕 u`-measurability follows from every
-> observation time in `obsTimes` (a syntactic, sufficient-not-necessary over-approximation)
+> observation date in `obsList` (a syntactic, sufficient-not-necessary over-approximation)
 > being `≤ u`; **it still has no consumer**, since `Pricing.lean` integrates against a fixed
 > measure, never a filtration. Its a.e.-measurable sibling `Payoff.aemeasurable_eval` does have
 > one as of 2026-08-19: `CappedCall.lean`'s `integrable_europeanCall_pathPV` calls it directly,
@@ -2171,7 +2171,7 @@ prior corpus audit, not a verification of this addition.
 > would silently attach the pricing result to whichever entry a reader opens first.
 >
 > **The honest ceiling, stated once for the whole tower.** `Payoff` is a finite inductive walked
-> by `List`-valued `obsTimes`, so every instance here is a payoff kernel over a **finite**
+> by `List`-valued `obsList`, so every instance here is a payoff kernel over a **finite**
 > observation grid — no continuously-monitored barrier is expressible. Rung (c) (the
 > `BlackScholes.lean`/`CappedCall.lean` reductions) is **single-asset**, `ι = Unit`, under the
 > `BSCallHyp` hypothesis bundle each closed form already needed; nothing here prices under a

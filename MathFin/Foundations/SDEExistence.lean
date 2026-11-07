@@ -237,10 +237,10 @@ theorem bandEnergy_nonneg (T s : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (Z : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) : 0 ≤ bandEnergy T s hBmeas Z :=
   integral_nonneg fun _ ↦ sq_nonneg _
 
-theorem bandEnergy_mono (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (Z : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {s s' : ℝ≥0} (h : s ≤ s') :
-    bandEnergy T s hBmeas Z ≤ bandEnergy T s' hBmeas Z :=
-  setIntegral_mono_set (Lp.memLp Z).integrable_sq.integrableOn
+theorem monotone_bandEnergy (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (Z : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
+    Monotone fun s ↦ bandEnergy T s hBmeas Z :=
+  fun _ _ h ↦ setIntegral_mono_set (Lp.memLp Z).integrable_sq.integrableOn
     (ae_of_all _ fun _ ↦ sq_nonneg _)
     (Set.prod_mono (Set.Ioc_subset_Ioc_right h) subset_rfl).eventuallyLE
 
@@ -275,11 +275,6 @@ theorem bandEnergy_add_le (T s : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   filter_upwards [ae_restrict_of_ae (Lp.coeFn_add Z W)] with z hz
   simp only [hz, Pi.add_apply]
   nlinarith [sq_nonneg (Z z - W z)]
-
-theorem monotone_bandEnergy (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (Z : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
-    Monotone fun s ↦ bandEnergy T s hBmeas Z :=
-  fun _ _ h ↦ bandEnergy_mono T hBmeas Z h
 
 /-- `timeMeasure` restricted to a bounded time-interval `(0, s]` is finite. -/
 private instance isFiniteMeasure_timeMeasure_restrict_Ioc_zero (s : ℝ≥0) :

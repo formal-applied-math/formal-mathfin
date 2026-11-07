@@ -44,6 +44,11 @@ formable for a bounded adapted continuous `θ`.
 
 * `isStronglyPredictable_of_bdd_adapted_cont`: a bounded adapted process with continuous paths
   is strongly predictable.
+* `isStronglyPredictable_deterministic`, `isStronglyPredictable_const`,
+  `isStronglyPredictable_time`: a continuous function of time alone, a constant, and time itself
+  are predictable.
+* `isStronglyPredictable_comp_path`: a Borel function of time and a continuous adapted path is
+  predictable.
 * `memLp_uncurry_of_bdd_adapted_cont`, `memLp_uncurry_of_bdd_predictable`: such a process, and
   any bounded predictable one, is in `L²` over `trimMeasure T`.
 * `processToLp_coeFn`, `processToLpPredictable_coeFn`: the realization agrees with the process
@@ -81,6 +86,32 @@ theorem isStronglyPredictable_of_bdd_adapted_cont (hBmeas : ∀ t, Measurable (B
     IsStronglyPredictable (natFiltration hBmeas) σ := by
   apply MeasureTheory.StronglyAdapted.isStronglyPredictable_of_leftContinuous hadap
   exact fun ω a ↦ (hcont ω).continuousWithinAt
+
+/-- **A deterministic continuous function of time is predictable** for the natural filtration. -/
+theorem isStronglyPredictable_deterministic (hBmeas : ∀ t, Measurable (B t)) {f : ℝ≥0 → ℝ}
+    (hf : Continuous f) :
+    IsStronglyPredictable (natFiltration hBmeas) fun (s : ℝ≥0) (_ : Ω) ↦ f s :=
+  isStronglyPredictable_of_bdd_adapted_cont hBmeas (fun _ ↦ stronglyMeasurable_const)
+    fun _ ↦ hf
+
+/-- A constant process is predictable for the natural filtration. -/
+theorem isStronglyPredictable_const (hBmeas : ∀ t, Measurable (B t)) (c : ℝ) :
+    IsStronglyPredictable (natFiltration hBmeas) fun (_ : ℝ≥0) (_ : Ω) ↦ c :=
+  isStronglyPredictable_deterministic hBmeas continuous_const
+
+/-- Time itself, `(s, ω) ↦ s`, is predictable for the natural filtration. -/
+theorem isStronglyPredictable_time (hBmeas : ∀ t, Measurable (B t)) :
+    IsStronglyPredictable (natFiltration hBmeas) fun (s : ℝ≥0) (_ : Ω) ↦ (s : ℝ) :=
+  isStronglyPredictable_deterministic hBmeas NNReal.continuous_coe
+
+/-- **A Borel function of time and a continuous adapted path is predictable.** -/
+theorem isStronglyPredictable_comp_path (hBmeas : ∀ t, Measurable (B t))
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω) {h : ℝ → ℝ → ℝ}
+    (hh : Measurable fun p : ℝ × ℝ ↦ h p.1 p.2) :
+    IsStronglyPredictable (natFiltration hBmeas) fun (s : ℝ≥0) ω ↦ h s (B s ω) :=
+  (hh.comp (StronglyMeasurable.prodMk (isStronglyPredictable_time hBmeas)
+    (isStronglyPredictable_of_bdd_adapted_cont hBmeas (stronglyAdapted_natFiltration hBmeas)
+      hBcont)).measurable).stronglyMeasurable
 
 /-- **A bounded adapted continuous process is `L²` over `trimMeasure T`.** It is predictable
 (`isStronglyPredictable_of_bdd_adapted_cont`) and bounded, and `trimMeasure T` is a finite

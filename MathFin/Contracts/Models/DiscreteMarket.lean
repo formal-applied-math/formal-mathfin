@@ -138,7 +138,7 @@ theorem exists_isEMM_parity [IsProbabilityMeasure P]
       (forward K τ).value Q (fun _ ↦ 1) (discreteAssets S T) = S₀ - K ∧
       (europeanCall K τ).value Q (fun _ ↦ 1) (discreteAssets S T)
         - (europeanPut K τ).value Q (fun _ ↦ 1) (discreteAssets S T) = S₀ - K := by
-  obtain ⟨Q, hQ⟩ := exists_isEMM_of_noArbitrage hS hint hcond hNA
+  obtain ⟨Q, hQ⟩ := exists_isEMM_of_noArbitrage_of_conditionalFTAP hS hint hcond hNA
   exact ⟨Q, hQ, fun K τ ↦ ⟨value_forward hQ hS₀ K τ, value_europeanCall_sub_put hQ hS₀ K τ⟩⟩
 
 end MathFin.Contracts.DiscreteMarket

@@ -69,15 +69,10 @@ theorem isStronglyPredictable_diffusion_pathAssets (hBmeas : ∀ t, Measurable (
     (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω) (S_0 r σ : ℝ) :
     IsStronglyPredictable (natFiltration hBmeas)
       fun (s : ℝ≥0) ω ↦ σ * pathAssets S_0 r σ B () s ω := by
-  have hBp : IsStronglyPredictable (natFiltration hBmeas) B :=
-    StronglyAdapted.isStronglyPredictable_of_leftContinuous (stronglyAdapted_natFiltration hBmeas)
-      fun ω _ ↦ (hBcont ω).continuousWithinAt
-  have ht : IsStronglyPredictable (natFiltration hBmeas) fun (s : ℝ≥0) (_ : Ω) ↦ (s : ℝ) :=
-    StronglyAdapted.isStronglyPredictable_of_leftContinuous (fun _ ↦ stronglyMeasurable_const)
-      fun _ _ ↦ NNReal.continuous_coe.continuousWithinAt
   have hg : Continuous fun p : ℝ × ℝ ↦ σ * gbmValue S_0 r σ p.1 p.2 := by
     unfold gbmValue; fun_prop
-  exact hg.comp_stronglyMeasurable (StronglyMeasurable.prodMk ht hBp)
+  exact isStronglyPredictable_comp_path hBmeas hBcont
+    (h := fun s x ↦ σ * gbmValue S_0 r σ s x) hg.measurable
 
 /-- **The Black–Scholes contract model solves `dS = rS dt + σS dB`.** For a pre-Brownian motion
 `B` with continuous paths, almost surely, for every `t ∈ [0, T]` at once,

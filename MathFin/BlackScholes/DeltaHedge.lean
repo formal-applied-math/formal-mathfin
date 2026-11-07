@@ -249,19 +249,6 @@ section Predictable
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} {B : ℝ≥0 → Ω → ℝ}
 
-/-- **A Borel function of time and a continuous adapted path is predictable.** -/
-theorem isStronglyPredictable_comp_path (hBmeas : ∀ t, Measurable (B t))
-    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω) {h : ℝ → ℝ → ℝ}
-    (hh : Measurable fun p : ℝ × ℝ ↦ h p.1 p.2) :
-    IsStronglyPredictable (natFiltration hBmeas) fun (s : ℝ≥0) ω ↦ h s (B s ω) := by
-  have hBp : IsStronglyPredictable (natFiltration hBmeas) B :=
-    StronglyAdapted.isStronglyPredictable_of_leftContinuous (stronglyAdapted_natFiltration hBmeas)
-      fun ω _ ↦ (hBcont ω).continuousWithinAt
-  have ht : IsStronglyPredictable (natFiltration hBmeas) fun (s : ℝ≥0) (_ : Ω) ↦ (s : ℝ) :=
-    StronglyAdapted.isStronglyPredictable_of_leftContinuous (fun _ ↦ stronglyMeasurable_const)
-      fun _ _ ↦ NNReal.continuous_coe.continuousWithinAt
-  exact (hh.comp (StronglyMeasurable.prodMk ht hBp).measurable).stronglyMeasurable
-
 /-- The delta-hedge integrand along the Brownian path is predictable (for every `T`, with the
 junk value of `bsd1` at and after maturity). -/
 theorem deltaHedgeIntegrand_isStronglyPredictable (hBmeas : ∀ t, Measurable (B t))
@@ -386,19 +373,6 @@ theorem bs_delta_hedge_replication {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ :
   linarith [key, hz', hc', e2, e3]
 
 /-! ### Convergence to the payoff at maturity -/
-
-/-- The standard normal CDF is 1-Lipschitz: `Φ(y) − Φ(x) ≤ y − x` for `x ≤ y` (its density is at
-most `1`). -/
-theorem Phi_sub_le {x y : ℝ} (hxy : x ≤ y) : Phi y - Phi x ≤ y - x := by
-  have h := Convex.norm_image_sub_le_of_norm_deriv_le (f := Phi) (C := 1) (s := univ)
-    (fun z _ ↦ (hasDerivAt_Phi z).differentiableAt)
-    (fun z _ ↦ by
-      rw [(hasDerivAt_Phi z).deriv, Real.norm_eq_abs,
-        abs_of_nonneg (gaussianPDFReal_nonneg 0 1 z)]
-      exact gaussianPDFReal_zero_one_le_one z)
-    convex_univ (mem_univ x) (mem_univ y)
-  rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg (sub_nonneg.2 hxy)] at h
-  exact (le_abs_self _).trans (by simpa using h)
 
 /-- **The Black–Scholes call value converges to the call payoff at maturity.** If `S → S* > 0`
 and the time to maturity `τ → 0⁺` along a filter, then `bsV K r σ S τ → (S* − K)⁺`. Write
