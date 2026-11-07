@@ -174,7 +174,7 @@ theorem deriv_timeCap_of_lt {a b t : ℝ} (hab : a < b) (ht : t < a) :
     Filter.eventuallyEq_of_mem (Iio_mem_nhds ht) fun s hs ↦
       timeCap_of_le hab (le_of_lt (show s < a from hs))
   rw [h.deriv_eq]
-  exact deriv_id
+  simp
 
 /-- `timeCap a b` has derivative `1` on `(−∞, a]` (at `a` by continuity of the derivative). -/
 theorem deriv_timeCap_of_le {a b t : ℝ} (hab : a < b) (ht : t ≤ a) :
@@ -346,7 +346,7 @@ theorem bs_delta_hedge_replication {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ :
       (Icc 0 T') :=
     ae_of_all _ fun ω ↦ ((hf_x_cont.comp (NNReal.continuous_coe.prodMk (hBcont ω))).continuousOn
       ).congr fun s hs ↦ by
-        show deltaHedgeIntegrand K r σ S₀ T s (B s ω) =
+        change deltaHedgeIntegrand K r σ S₀ T s (B s ω) =
           deltaHedgeIntegrand K r σ S₀ T (ψ s) (B s ω)
         rw [hψid s (NNReal.coe_le_coe.2 hs.2)]
   have hXs (ω : Ω) (hω : ∀ t ∈ Icc (0 : ℝ≥0) T', localItoIntegral (μ := μ) T' hBmeas
@@ -358,9 +358,9 @@ theorem bs_delta_hedge_replication {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ :
     (deltaHedgeIntegrand_isStronglyPredictable hBmeas hBcont K r σ S₀ T) hHc
     (by
       filter_upwards [hX] with ω hω s hs
-      show f_x s (Xp s ω) * 1 = deltaHedgeIntegrand K r σ S₀ T s (B s ω)
+      change f_x s (Xp s ω) * 1 = deltaHedgeIntegrand K r σ S₀ T s (B s ω)
       rw [hXs ω hω s hs, mul_one]
-      show deltaHedgeIntegrand K r σ S₀ T (ψ s) (B s ω) = _
+      change deltaHedgeIntegrand K r σ S₀ T (ψ s) (B s ω) = _
       rw [hψid s (NNReal.coe_le_coe.2 hs.2)])
   -- the drift of the formula vanishes up to `T'`: `f_t + ½ f_xx = 0` there
   have hz (t : ℝ≥0) (ht : t ≤ T') (Y : ℝ≥0 → ℝ) :
