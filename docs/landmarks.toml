@@ -36,15 +36,20 @@ scope = """The hypothesis is that M² − t is a local martingale, not that the 
 constructed."""
 
 [[landmark]]
-decl = "MathFin.Btheta_isQBrownianMotion_predictable_of_bdd"
+decl = "MathFin.Btheta_isFilteredPreBrownian_predictable_of_bdd"
 title = "Girsanov's theorem"
-summary = """For bounded predictable θ, under the measure with density \
-exp(−∫₀ᵀ θ dB − ½∫₀ᵀ θ² dt), the process B_t + ∫₀ᵗ θ_s ds on [0,T] starts at 0 and has \
-independent N(0,t−s) increments."""
-scope = """Only bounded θ, and only at the level of finite-dimensional laws, for an adapted \
-modification of the process: neither path continuity of the new process nor independence of its \
-increments from the past is stated. The general form of Girsanov's theorem and Novikov's \
-condition are reduced cores, not derived."""
+summary = """For bounded predictable θ and a horizon T, under the measure with density \
+exp(−∫₀ᵀ θ dB − ½∫₀ᵀ θ² dt), the process B_t + ∫₀ᵗ θ_s ds is a Brownian motion for the Brownian \
+filtration F: it starts at 0, has N(0,t−s) increments, and each increment is independent of F_s, \
+on all of [0,∞). If B has continuous paths so does the new process."""
+scope = """Only bounded θ, for an adapted modification of the process. The measure is that of the \
+fixed horizon T and changes with T; past T the process is B plus the drift frozen at T. Unbounded \
+θ, Novikov's condition and the general form of Girsanov's theorem are reduced cores, not \
+derived."""
+also = [
+  "MathFin.Btheta_isBrownianReal_predictable_of_bdd",
+  "MathFin.Btheta_isQBrownianMotion_predictable_of_bdd",
+]
 
 [[landmark]]
 decl = "MathFin.exists_replicating_strategy"
@@ -55,13 +60,20 @@ scope = """This proves that a hedge exists and is unique, but does not identify 
 the Clark–Ocone formula (open)."""
 
 [[landmark]]
-decl = "MathFin.SDEExistence.picardMap_exists_unique_fixedPoint"
+decl = "MathFin.SDEExistence.picardMap_exists_unique_fixedPoint_any_horizon"
 title = "Stochastic differential equations"
-summary = """For Lipschitz b and σ with constants L_b and L_σ, the Picard map of \
-dX = b(X)dt + σ(X)dB has a unique fixed point in the L² space of predictable processes on \
-[0,T] when T·L_b + √T·L_σ < 1."""
-scope = """Existence is proved only on horizons with T·L_b + √T·L_σ < 1; the theorem for \
-arbitrary horizons is not."""
+summary = """For Lipschitz b and σ and any horizon T, the Picard map of dX = b(X)dt + σ(X)dB \
+has a unique fixed point in the L² space of predictable processes on [0,T]. The Picard map \
+is itself a contraction only when T·L_b + √T·L_σ < 1; for any horizon some iterate is, since \
+the energy of ΦⁿX − ΦⁿY decays like cⁿtⁿ/n!. The Black–Scholes path S₀exp((r−σ²/2)t + σB_t) \
+solves dS = rS dt + σS dB."""
+scope = """The solution is in the predictable L² space; path regularity and pathwise uniqueness \
+are not claimed. The Black–Scholes path is shown to solve its SDE (pathAssets_solves_sde) but is \
+not identified with the fixed point."""
+also = [
+  "MathFin.SDEExistence.picardMap_exists_unique_fixedPoint",
+  "MathFin.Contracts.BlackScholes.pathAssets_solves_sde",
+]
 
 [[landmark]]
 decl = "MathFin.ftap_discrete"
@@ -69,7 +81,12 @@ title = "Fundamental theorem of asset pricing"
 summary = """A discrete-time, finite-horizon market with one discounted risky asset on a finite \
 probability space of full support has no arbitrage if and only if it has an equivalent martingale \
 measure; the one-period theorem holds on any probability space with finitely many assets."""
-scope = """The multi-period theorem is on finite probability spaces only. In continuous time \
+scope = """The multi-period theorem is proved unconditionally on finite probability spaces \
+only. On a general space, multi-period no arbitrage is equivalent to conditional one-period no \
+arbitrage (noArbitrage_iff_noArbitrageLocal) and one-period densities paste to an equivalent \
+martingale measure (LocalEMMDensities.isEMM_pastedMeasure), so the Dalang–Morton–Willinger \
+theorem follows from the conditional one-period theorem, which is not proved (the hypothesis \
+ConditionalOnePeriodFTAP of noArbitrage_iff_exists_isEMM). In continuous time \
 only the easy direction is proved: an equivalent martingale measure precludes arbitrage by simple \
 strategies. The second theorem (completeness iff a unique measure) is proved in both directions \
 only for one risky asset on a finite space of full support; in the Brownian market only \
@@ -77,6 +94,9 @@ completeness implies uniqueness."""
 also = [
   "MathFin.OnePeriodVector.ftap_one_period_vector",
   "MathFin.ftap_two",
+  "MathFin.noArbitrage_iff_noArbitrageLocal",
+  "MathFin.LocalEMMDensities.isEMM_pastedMeasure",
+  "MathFin.noArbitrage_iff_exists_isEMM",
 ]
 
 [[landmark]]
@@ -102,7 +122,12 @@ title = "Black–Scholes delta hedge"
 summary = """e^{−rt}·C(t,S_t) = C(0,S₀) + ∫₀ᵗ Δ σ e^{−rs} S_s dB_s almost surely, for all \
 t ≤ T' < T."""
 scope = """The identity is on [0,T'] for T' < T; convergence to the payoff at T is a separate \
-theorem. The hedge is not packaged as an admissible self-financing strategy."""
+theorem. The hedge is not packaged as an admissible self-financing strategy. The integral is \
+against B, not against the discounted stock as a semimartingale."""
+also = [
+  "MathFin.Contracts.BlackScholes.europeanCall_deltaHedge",
+  "MathFin.tendsto_bsV_gbm_payoff",
+]
 
 [[landmark]]
 decl = "MathFin.JumpDiffusionProcess.martingale_iff"
@@ -146,12 +171,19 @@ title = "Contracts, separate from models"
 summary = """Payoffs are terms of a contract language priced by interchangeable models. In any \
 model whose discounted price is a martingale from S₀, a call less a put is worth the forward, \
 S₀ − K·D(T); the n-step CRR values of a European call converge to the Black–Scholes value when \
-|r|√T < σ."""
+|r|√T < σ. From the physical market, a European call on S₀exp((m−σ²/2)u + σW_u) is worth the \
+Black–Scholes price at the risk-free rate under the Girsanov measure of the constant market price \
+of risk (m−r)/σ; the chooser and the geometric Asian call likewise."""
 scope = """The binomial limit is proved for call prices and for the law of the terminal \
 log-return; convergence of the price process (Donsker) is not formalized. The exotic closed \
 forms (power call, exchange option, geometric Asian call, chooser) hold when the pricing measure \
-makes the log-price Gaussian; see the Contracts/Models modules."""
-also = ["MathFin.Contracts.tendsto_binomial_value_europeanCall"]
+makes the log-price Gaussian; see the Contracts/Models modules. The physical-market prices hold \
+for dates up to the Girsanov horizon H, for a constant market price of risk, and the identity of \
+the physical asset with the risk-neutral one is almost sure at each date, not pathwise."""
+also = [
+  "MathFin.Contracts.tendsto_binomial_value_europeanCall",
+  "MathFin.Contracts.BlackScholes.value_europeanCall_physical",
+]
 
 [[landmark]]
 decl = "MathFin.Contracts.bondPrice_hullWhite"
@@ -161,15 +193,20 @@ Wiener-integral representation and the Brownian measure read as the pricing meas
 price at t is A_t(T−t)·e^{−B(T−t)r_t} almost surely; the bond put is a Black put on a bond that \
 is lognormal under the forward measure (Jamshidian), and a caplet is 1+δK such puts. For any \
 discount factor, a swap rate tied to the bonds by a model bundle gives the payer swaption as \
-A(0)·E^A[(S−K)⁺] and the CMS swaplet as its forward value plus an exact covariance adjustment."""
+A(0)·E^A[(S−K)⁺] and the CMS swaplet as its forward value plus an exact covariance adjustment. \
+In a Heath–Jarrow–Morton bundle, fixed cash flows are worth ΣP(0,tᵢ)cᵢ given the pricing \
+hypothesis E[D(tᵢ)] = P(0,tᵢ)."""
 scope = """That the Wiener-integral representation solves the short-rate SDE, and the swap of \
 time integrals behind the integrated rate, are cited, not proved. Outside these two models the \
 observed bond is a hypothesis of the model bundle, and so is the lognormality behind the Black-76 \
 caplet and Black's swaption formula. The CMS adjustment is exact for payment at the fixing date; \
-its sign is proved only when every bond but the last is known at the fixing date."""
+its sign is proved only when every bond but the last is known at the fixing date. The HJM \
+valuation is conditional on the bond-pricing hypothesis, which the HJM drift condition would \
+deliver and which is not proved; the drift condition and the bond dynamics are not proved."""
 also = [
   "MathFin.Contracts.valueDisc_bondPut_hullWhite",
   "MathFin.Contracts.valueDisc_caplet_eq_bondPut",
   "MathFin.Contracts.valueDisc_payerSwaption",
   "MathFin.Contracts.SwapModel.valueDisc_cmsSwaplet_eq",
+  "MathFin.Contracts.valueDisc_fixedFlows_hjm",
 ]
