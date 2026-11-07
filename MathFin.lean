@@ -290,6 +290,8 @@ import MathFin.Foundations.ItoIntegralPredictableRiemann
 import MathFin.Foundations.ItoIntegralLocalisedPredictable
 -- Itô's formula as an identity of processes; its stochastic term is a local martingale
 import MathFin.Foundations.ItoFormulaAdaptedProcess
+-- The product rule for two Itô processes driven by one Brownian motion
+import MathFin.Foundations.ItoProductRule
 -- Deterministic drift Riemann-convergence (α4 brick b-tail): ∑θ(tₖ)²·Δτ → ∫₀ᵀθ²ds
 import MathFin.Foundations.DriftRiemannConvergence
 -- Continuous adapted-θ Girsanov assembly (α4 (c)): convergence core toward
