@@ -285,11 +285,11 @@ Comparator below).
   [`Solution.lean`](Solution.lean) proves both from the library, converting the Challenge's
   positions convention to the library's loss convention with
   [`isCoherentRiskMeasure_neg_iff`](MathFin/RiskMeasures/PositionsConvention.lean).
-  [Comparator](https://github.com/leanprover/comparator), configured by
-  [`comparator.json`](comparator.json), checks that the two files state the same theorems and that
-  the proofs use only the three standard axioms. It accepted an earlier Solution at commit
-  `06f88ca`. It has not been re-run on the current one and is not part of CI; see
-  [`docs/palomar.md`](docs/palomar.md).
+  Lean's comparator (`lake comparator`), configured by [`comparator.json`](comparator.json), checks
+  that the two files state the same theorems and that the proofs use only the three standard
+  axioms. A workflow runs it with `--paranoid`, so the proofs must be accepted by every kernel
+  bundled with Lean (Lean's default and paranoid kernels, lean4lean, nanoda, con-leche and
+  con-ron), on changes to the pair and monthly; see [`docs/palomar.md`](docs/palomar.md).
 
 - **Benchmark.** Each entry in [`benchmarks/`](benchmarks) records a result's Lean statement, its
   status and its scope. The ledger runner, `tools/verify/ledger.py`, checks each entry's snippet
