@@ -113,8 +113,8 @@ theorem tendsto_hedge_europeanCall_payoff {B : ℝ≥0 → Ω → ℝ} {S_0 K r 
     ((by fun_prop : Continuous fun t : ℝ≥0 ↦ Real.exp (-(r * t))).tendsto T).mono_left
       nhdsWithin_le_nhds
   have h := hexp.mul (tendsto_bsV_gbm_payoff (r := r) T hK hσ hS₀ hω)
-  convert h using 2
-  simp [Contract.pathPV, Contract.cashflows, europeanCall, europeanCallPayoff, Payoff.eval,
-    scenarioAt, pathAssets, gbmValue]
+  convert h using 2 <;>
+    simp [Contract.pathPV, Contract.cashflows, europeanCall, europeanCallPayoff, Payoff.eval,
+      scenarioAt, pathAssets, gbmValue, neg_mul]
 
 end MathFin.Contracts.BlackScholes
