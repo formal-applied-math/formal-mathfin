@@ -12,8 +12,9 @@ public import MathFin.RiskMeasures.ExpectedShortfall
 # Expected shortfall of a compound-Poisson aggregate loss
 
 The aggregate loss `L = ∑_{i<N} Xᵢ` of the collective risk model has a Poisson(λ) claim count `N`
-independent of i.i.d. integrable claim sizes `Xᵢ`. Its risk is computed by the
-Rockafellar–Uryasev theorem, once `L` is known to be integrable:
+independent of the claim sizes `Xᵢ`, which are identically distributed and integrable. No
+independence between the claims is assumed: Wald's bound does not need it. Its risk is computed
+by the Rockafellar–Uryasev theorem, once `L` is known to be integrable:
 
 * `integrable_compoundPoisson` is the Wald-type bound. The count is integrated out with the
   freezing lemma for a countable variable (`Foundations/IndepFreezing.lean`), and the `n`-claim
@@ -92,7 +93,8 @@ variable (hN : HasLaw N (poissonMeasure lam) μ) (hNX : IndepFun N (fun ω i ↦
 include hN hNX
 
 /-- **The compound-Poisson aggregate loss is integrable** (Wald-type bound). For a claim count
-`N ∼ Poisson(λ)` independent of i.i.d. integrable claims, `∑_{i<N} Xᵢ` is integrable. -/
+`N ∼ Poisson(λ)` independent of identically distributed integrable claims, `∑_{i<N} Xᵢ` is
+integrable. -/
 theorem integrable_compoundPoisson :
     Integrable (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ := by
   have hgm (n : ℕ) : Measurable fun x : ℕ → ℝ ↦ ∑ i ∈ Finset.range n, x i := by fun_prop
@@ -111,8 +113,8 @@ theorem integrable_compoundPoisson :
     rw [mul_comm]; exact mul_le_mul_of_nonneg_left (natCast_le_two_pow n) hC
 
 /-- **The Poisson-mixture expansion of the Rockafellar–Uryasev expectation.** For a claim count
-`N ∼ Poisson(λ)` independent of i.i.d. integrable claims, `𝔼[(L − c)⁺]` is the Poisson(λ)
-average of the `n`-claim expectations `𝔼[(∑_{i<n} Xᵢ − c)⁺]`. -/
+`N ∼ Poisson(λ)` independent of identically distributed integrable claims, `𝔼[(L − c)⁺]` is
+the Poisson(λ) average of the `n`-claim expectations `𝔼[(∑_{i<n} Xᵢ − c)⁺]`. -/
 theorem integral_max_sub_compoundPoisson (c : ℝ) :
     ∫ ω, max (∑ i ∈ Finset.range (N ω), X i ω - c) 0 ∂μ
       = ∫ n, ∫ ω, max (∑ i ∈ Finset.range n, X i ω - c) 0 ∂μ ∂(poissonMeasure lam) := by

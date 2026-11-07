@@ -2503,4 +2503,8 @@ bounded-coefficient process class. -/
 #guard_msgs in
 #print axioms MathFin.trackingErrorSq
 
+/-- info: 'MathFin.isLeast_rockafellarUryasev_compoundPoisson' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.isLeast_rockafellarUryasev_compoundPoisson
+
 end MathFin.AxiomAudit

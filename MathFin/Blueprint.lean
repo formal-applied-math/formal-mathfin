@@ -61,6 +61,7 @@ import MathFin.Foundations.GaussianCopula
 import MathFin.RiskMeasures.ValueAtRisk
 import MathFin.RiskMeasures.Coherent
 import MathFin.RiskMeasures.ExpectedShortfall
+import MathFin.RiskMeasures.CompoundPoissonCVaR
 import MathFin.Contracts.Core
 import MathFin.Contracts.Pricing
 import MathFin.FixedIncome.ZCB
@@ -694,6 +695,14 @@ attribute [blueprint "thm:expected-shortfall-coherent" (title := "Expected short
   (statement := /-- For $\alpha \in (0,1)$, expected shortfall is a coherent risk measure on the
   integrable losses. -/)]
   MathFin.expectedShortfall_isCoherentRiskMeasure
+
+attribute [blueprint "thm:cvar-rockafellar-uryasev" (title := "CVaR of a compound-Poisson loss")
+  (statement := /-- For $L = \sum_{i<N} X_i$ with $N \sim \mathrm{Poisson}(\lambda)$ independent of
+  identically distributed integrable claims $X_i$, and $\alpha \in (0,1)$, $\mathrm{ES}_\alpha(L)$
+  is the least value of $c \mapsto c + (1-\alpha)^{-1}E[(L-c)^+]$. Companion lemmas prove $L$
+  integrable (`integrable_compoundPoisson`) and expand $E[(L-c)^+]$ as a Poisson mixture of the
+  $n$-claim expectations (`integral_max_sub_compoundPoisson`). -/)]
+  MathFin.isLeast_rockafellarUryasev_compoundPoisson
 
 attribute [blueprint "thm:empirical-cdf-strong-law" (title := "Strong law for the empirical CDF")
   (statement := /-- For pairwise independent draws with a common law whose CDF is continuous,

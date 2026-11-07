@@ -551,14 +551,6 @@ uses = ["thm:martingale-transform", "def:emm"]
 area = "portfolio"
 
 [[node]]
-label = "thm:cvar-rockafellar-uryasev"
-title = "CVaR via Rockafellar–Uryasev"
-statement = "CVaR of a compound-Poisson aggregate loss equals the Rockafellar–Uryasev variational form."
-uses = ["thm:rockafellar-uryasev", "thm:compound-poisson-mgf"]
-core = ["qrm-rockafellar-uryasev", "mf-cvar-rockafellar-uryasev"]
-area = "risk"
-
-[[node]]
 label = "thm:expected-utility-risk-aversion"
 title = "Expected utility and risk aversion"
 statement = "Arrow–Pratt coefficients, CARA certainty equivalent, stochastic dominance orderings and utility acceptance."
