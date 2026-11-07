@@ -149,7 +149,7 @@ theorem europeanCall_selfFinancing {μ : Measure Ω} [IsProbabilityMeasure μ] {
     exact hg.comp_stronglyMeasurable (stronglyAdapted_natFiltration hBmeas t)
   have hHc : ∀ ω, Continuous fun s : ℝ≥0 ↦ H' s ω := by
     intro ω
-    have : (fun s : ℝ≥0 ↦ H' s ω) = fun s ↦ deltaHedgeIntegrand K r σ S_0 T (ψ s) (B s ω) :=
+    have : (fun s : ℝ≥0 ↦ H' s ω) = fun s : ℝ≥0 ↦ deltaHedgeIntegrand K r σ S_0 T (ψ s) (B s ω) :=
       funext fun s ↦ hH' s ω
     rw [this]
     exact hcomp.comp (NNReal.continuous_coe.prodMk (hBcont ω))
