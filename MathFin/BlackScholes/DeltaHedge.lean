@@ -19,12 +19,13 @@ replicated by the self-financing delta hedge. With `C(t, S) = bsV K r σ S (T �
 at time `t`, the discounted price `e^{−rt} C(t, S_t)` is the initial price plus the gains of
 holding `Δ(s, S_s) = Φ(d₁(S_s, T − s))` shares:
 
-  `e^{−rt} C(t, S_t) = C(0, S₀) + ∫₀ᵗ Δ(s, S_s) · σ e^{−rs} S_s dB_s`   (`bs_delta_hedge_replication`)
+  `e^{−rt} C(t, S_t) = C(0, S₀) + ∫₀ᵗ Δ(s, S_s) · σ e^{−rs} S_s dB_s`
+  (`bs_delta_hedge_replication`)
 
 almost surely, for all `t ≤ T'` at once, for every horizon `T' < T`. The integrand is the delta
-times the diffusion coefficient `σ e^{−rs} S_s` of the discounted stock (`discountedGBM_eq_itoIntegral`),
-so the right side is the initial price plus the hedge's gains from trade `∫ Δ d(e^{−rs} S_s)`;
-the integral is the library's `predItoIntegral`.
+times the diffusion coefficient `σ e^{−rs} S_s` of the discounted stock
+(`discountedGBM_eq_itoIntegral`), so the right side is the initial price plus the hedge's gains
+from trade `∫ Δ d(e^{−rs} S_s)`; the integral is the library's `predItoIntegral`.
 
 The proof applies Itô's formula as an identity of processes
 (`ItoFormulaAdapted.ito_formula_adapted_unbounded_process`) to the discounted call value in the
@@ -146,34 +147,46 @@ theorem timeCap_of_le {a b t : ℝ} (hab : a < b) (ht : t ≤ a) : timeCap a b t
 
 /-- `timeCap a b` stays below `b`. -/
 theorem timeCap_lt {a b : ℝ} (hab : a < b) (t : ℝ) : timeCap a b t < b := by
-  set u := (t - a) / (b - a)
-  have hs0 := Real.smoothTransition.nonneg u
-  have hs1 := Real.smoothTransition.le_one u
-  set s := Real.smoothTransition u
   have hba : 0 < b - a := by linarith
-  have : (1 - s) * u + s / 2 < 1 := by
-    rcases hs1.lt_or_eq with h | h
-    · rcases lt_or_ge u 1 with hu | hu
+  have hs0 := Real.smoothTransition.nonneg ((t - a) / (b - a))
+  have hs1 := Real.smoothTransition.le_one ((t - a) / (b - a))
+  have key : ∀ u s : ℝ, 0 ≤ s → s ≤ 1 → (u < 1 ∨ s = 1) → (1 - s) * u + s / 2 < 1 := by
+    intro u s hs0 hs1 h
+    rcases h with hu | rfl
+    · rcases hs0.lt_or_eq with hpos | rfl
       · nlinarith [mul_nonneg (sub_nonneg.2 hs1) (sub_nonneg.2 hu.le)]
-      · nlinarith
-    · rw [h]; norm_num
-  nlinarith
+      · linarith
+    · norm_num
+  have hlt : (1 - Real.smoothTransition ((t - a) / (b - a))) * ((t - a) / (b - a))
+      + Real.smoothTransition ((t - a) / (b - a)) / 2 < 1 := by
+    refine key _ _ hs0 hs1 ?_
+    rcases lt_or_ge ((t - a) / (b - a)) 1 with hu | hu
+    · exact Or.inl hu
+    · exact Or.inr (Real.smoothTransition.one_of_one_le hu)
+  have := mul_lt_mul_of_pos_left hlt hba
+  rw [timeCap]
+  linarith
+
+/-- `timeCap a b` has derivative `1` on `(−∞, a)`: it is the identity nearby. -/
+theorem deriv_timeCap_of_lt {a b t : ℝ} (hab : a < b) (ht : t < a) :
+    deriv (timeCap a b) t = 1 := by
+  have h : timeCap a b =ᶠ[𝓝 t] id :=
+    Filter.eventuallyEq_of_mem (Iio_mem_nhds ht) fun s hs ↦
+      timeCap_of_le hab (le_of_lt (show s < a from hs))
+  rw [h.deriv_eq]
+  exact deriv_id
 
 /-- `timeCap a b` has derivative `1` on `(−∞, a]` (at `a` by continuity of the derivative). -/
-theorem deriv_timeCap_of_le {a b t : ℝ} (hab : a < b) (ht : t ≤ a) : deriv (timeCap a b) t = 1 := by
+theorem deriv_timeCap_of_le {a b t : ℝ} (hab : a < b) (ht : t ≤ a) :
+    deriv (timeCap a b) t = 1 := by
   rcases ht.lt_or_eq with h | rfl
-  · rw [((eventually_lt_nhds h).mono fun s hs ↦ timeCap_of_le hab hs.le :
-      timeCap a b =ᶠ[𝓝 t] id).deriv_eq]
-    exact deriv_id
+  · exact deriv_timeCap_of_lt hab h
   · have hc : ContinuousAt (deriv (timeCap t b)) t :=
       ((contDiff_timeCap 1).continuous_deriv le_rfl).continuousAt
     have h1 : Tendsto (deriv (timeCap t b)) (𝓝[<] t) (𝓝 1) :=
       tendsto_const_nhds.congr' (by
         filter_upwards [self_mem_nhdsWithin] with s hs
-        exact (by
-          rw [((eventually_lt_nhds (show s < t from hs)).mono fun r hr ↦ timeCap_of_le hab hr.le :
-            timeCap t b =ᶠ[𝓝 s] id).deriv_eq]
-          exact deriv_id : deriv (timeCap t b) s = 1).symm)
+        exact (deriv_timeCap_of_lt hab (show s < t from hs)).symm)
     exact tendsto_nhds_unique (hc.tendsto.mono_left nhdsWithin_le_nhds) h1
 
 /-! ### Continuity of the hedge integrand along a capped time -/
@@ -291,7 +304,7 @@ theorem bs_delta_hedge_replication {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ :
   have hψid : ∀ t ≤ (T' : ℝ), ψ t = t := fun t ht ↦ timeCap_of_le hT' ht
   have hψ'1 : ∀ t ≤ (T' : ℝ), deriv ψ t = 1 := fun t ht ↦ deriv_timeCap_of_le hT' ht
   have hψd (t : ℝ) : HasDerivAt ψ (deriv ψ t) t :=
-    (hψ.differentiable le_rfl t).hasDerivAt
+    (hψ.differentiable one_ne_zero t).hasDerivAt
   -- the time-changed value function and its partials
   set f : ℝ → ℝ → ℝ := fun t x ↦ discountedCallBrownian K r σ S₀ T (ψ t) x with hf
   set f_x : ℝ → ℝ → ℝ := fun t x ↦ deltaHedgeIntegrand K r σ S₀ T (ψ t) x with hfx
@@ -465,8 +478,8 @@ theorem tendsto_bsV_gbm_payoff {K r σ S₀ : ℝ} (T : ℝ≥0) (hK : 0 < K) (h
       (NNReal.continuous_coe.continuousAt.prodMk hx)
   refine tendsto_bsV_payoff hK hσ (mul_pos hS₀ (Real.exp_pos _))
     (hS.tendsto.mono_left nhdsWithin_le_nhds) (tendsto_nhdsWithin_iff.2 ⟨?_, ?_⟩)
-  · simpa using ((continuous_const.sub NNReal.continuous_coe).tendsto T :
-      Tendsto (fun t : ℝ≥0 ↦ (T : ℝ) - t) (𝓝 T) _).mono_left nhdsWithin_le_nhds
+  · have h := (tendsto_const_nhds (x := (T : ℝ))).sub (NNReal.continuous_coe.tendsto T)
+    simpa using h.mono_left nhdsWithin_le_nhds
   · filter_upwards [self_mem_nhdsWithin] with t ht
     exact sub_pos.2 (NNReal.coe_lt_coe.2 ht)
 
