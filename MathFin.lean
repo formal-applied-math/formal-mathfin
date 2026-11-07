@@ -290,6 +290,8 @@ import MathFin.Foundations.ItoIntegralPredictableRiemann
 import MathFin.Foundations.ItoIntegralLocalisedPredictable
 -- Itô's formula as an identity of processes; its stochastic term is a local martingale
 import MathFin.Foundations.ItoFormulaAdaptedProcess
+-- The product rule for two Itô processes driven by one Brownian motion
+import MathFin.Foundations.ItoProductRule
 -- Deterministic drift Riemann-convergence (α4 brick b-tail): ∑θ(tₖ)²·Δτ → ∫₀ᵀθ²ds
 import MathFin.Foundations.DriftRiemannConvergence
 -- Continuous adapted-θ Girsanov assembly (α4 (c)): convergence core toward
@@ -801,6 +803,8 @@ import MathFin.Contracts.Models.BlackScholesSDE
 import MathFin.Contracts.Models.BlackScholesChooser
 import MathFin.Contracts.Models.BlackScholesHedge
 import MathFin.Contracts.Models.BlackScholesPhysical
+-- The Black–Scholes delta hedge is self-financing: the product rule with the factor e^{rt}
+import MathFin.Contracts.Models.BlackScholesSelfFinancing
 import MathFin.Contracts.Models.Binomial
 import MathFin.Contracts.Models.DiscreteMarket
 import MathFin.Contracts.Models.BinomialCompleteMarket

@@ -42,6 +42,15 @@ import MathFin.Foundations.Numeraire
 import MathFin.Foundations.SnellEnvelope
 import MathFin.Foundations.MarshallOlkin
 import MathFin.FixedIncome.KeyRateDuration
+import MathFin.BlackScholes.DeltaHedge
+import MathFin.Foundations.GirsanovFiltered
+import MathFin.Foundations.SDEExistence
+import MathFin.Foundations.StochasticFubini
+import MathFin.Foundations.NoArbitrageLocal
+import MathFin.Foundations.DensityPasting
+import MathFin.Contracts.Models.BlackScholesPhysical
+import MathFin.Foundations.ItoProductRule
+import MathFin.Contracts.Models.BlackScholesSelfFinancing
 import Architect
 
 /-!
@@ -433,3 +442,83 @@ attribute [blueprint "thm:key-rate-duration" (title := "Key-rate durations sum t
   the derivative of the flat-yield price: $\sum_j \partial P/\partial k_j = dP/dy$ (dollar
   durations; divide by $-P$ for durations). -/)]
   MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc
+
+attribute [blueprint "thm:girsanov-brownian-characterisation"
+  (title := "Girsanov: the shifted process is a filtered Brownian motion")
+  (statement := /-- For bounded predictable $\theta$ and a horizon $T$, under
+  $Q = Z_T\,\mu$ with $Z_T = \exp(-\int_0^T\theta\,dB - \tfrac12\int_0^T\theta^2\,dt)$, the
+  process $B^\theta = B + \int_0^{\cdot\wedge T}\theta\,ds$ is a pre-Brownian motion for the
+  natural filtration of $B$ on all of $[0,\infty)$: $\mathcal{N}(0,t-s)$ increments independent of
+  $\mathcal{F}_s$. With continuous paths for $B$ it is a Brownian motion under $Q$
+  (`Btheta_isBrownianReal_predictable_of_bdd`). The measure is the horizon-$T$ one; unbounded
+  $\theta$ and Novikov's condition are not covered. -/)]
+  MathFin.Btheta_isFilteredPreBrownian_predictable_of_bdd
+
+attribute [blueprint "thm:physical-measure-pricing"
+  (title := "Contracts on the physical asset, priced under the Girsanov measure")
+  (statement := /-- For the physical asset $S_u = S_0 e^{(m-\sigma^2/2)u + \sigma W_u}$ and the
+  constant market price of risk $\theta = (m-r)/\sigma$, under the horizon-$H$ Girsanov measure
+  the European call with maturity $T \le H$ is worth $S_0\Phi(d_1) - Ke^{-rT}\Phi(d_2)$; the
+  chooser and the geometric Asian call likewise (`value_chooser_physical`,
+  `value_geomAsianCall_physical`). The asset identity behind it holds almost surely at each
+  date. -/)]
+  MathFin.Contracts.BlackScholes.value_europeanCall_physical
+
+attribute [blueprint "thm:bs-delta-hedge" (title := "The Black–Scholes delta hedge")
+  (statement := /-- With $C(t,S) = $ `bsV` the call price and $S_t$ geometric Brownian motion,
+  for every $T' < T$, almost surely and for all $t \le T'$ at once,
+  $e^{-rt}C(t,S_t) = C(0,S_0) + \int_0^t \Phi(d_1)\,\sigma e^{-rs}S_s\,dB_s$: the discounted
+  value is the initial price plus the gains of holding $\Delta = \Phi(d_1)$ shares. The price
+  tends to the payoff as $t \to T^-$ (`tendsto_bsV_gbm_payoff`); the identity itself is stated on
+  $[0,T']$, and the hedge is not packaged as a trading-strategy structure. -/)]
+  MathFin.bs_delta_hedge_replication
+
+attribute [blueprint "thm:sde-strong-solution" (title := "SDE solutions on every horizon")
+  (statement := /-- For Lipschitz $b$, $\sigma$, any horizon $T$ and any initial value in the
+  predictable $L^2$ space $E$ on $[0,T]$, the Picard map of $dX = b(X)dt + \sigma(X)dB$ has
+  exactly one fixed point in $E$, with no smallness condition: its $n$-th iterate contracts with
+  constant $(2(TL_b^2+L_\sigma^2)T)^n/n!$. The fixed point is an $L^2(dt\otimes dP)$ class; a
+  continuous adapted representative on every horizon is the frontier node
+  `thm:sde-continuous-solution`. -/)]
+  MathFin.SDEExistence.picardMap_exists_unique_fixedPoint_any_horizon
+
+attribute [blueprint "thm:stochastic-fubini" (title := "Stochastic Fubini (L² form)")
+  (statement := /-- For a continuous linear map $I$ out of $L^2(m)$, $m$ finite, and a
+  Bochner-integrable family $\varphi : A \to L^2(m)$ with jointly integrable representatives
+  $\psi$, $\int I(\varphi_u)\,d\nu(u) = I(g)$ for any $g \in L^2(m)$ representing
+  $x \mapsto \int \psi_u(x)\,d\nu(u)$; instances at the horizon-$T$ Itô integral and the Wiener
+  integral (`stochFubini_ito`, `stochFubini_wiener`). The swap for the integral as a process in
+  $t$ is the frontier node `thm:stochastic-fubini-process`. -/)]
+  MathFin.StochasticFubini.stochFubini_ofCLM
+
+attribute [blueprint "thm:no-arbitrage-local" (title := "No arbitrage is local")
+  (statement := /-- For a price adapted up to a finite horizon on any filtered probability space,
+  no arbitrage over bounded predictable strategies holds if and only if each one-period market,
+  conditional on $\mathcal{F}_t$, admits no position with almost surely nonnegative, not almost
+  surely zero gain: the reduction step of Dalang–Morton–Willinger. -/)]
+  MathFin.noArbitrage_iff_noArbitrageLocal
+
+attribute [blueprint "thm:emm-density-pasting" (title := "Pasting one-period densities into an EMM")
+  (statement := /-- Bounded positive one-period densities $Z_t$, $\mathcal{F}_{t+1}$-measurable with
+  $E[Z_t \mid \mathcal{F}_t] = 1$ and $E[Z_t S_{t+1} \mid \mathcal{F}_t] = S_t$, multiply to an
+  equivalent martingale measure $P\,\prod_t Z_t$ for the price up to the horizon: the assembly
+  step of Dalang–Morton–Willinger. That conditional no arbitrage produces such densities is not
+  proved. -/)]
+  MathFin.LocalEMMDensities.isEMM_pastedMeasure
+
+attribute [blueprint "thm:ito-product-rule" (title := "Itô product rule")
+  (statement := /-- For two Itô processes $X = x_0 + \int b\,ds + \int\sigma\,dB$ and
+  $Y = y_0 + \int c\,ds + \int\tau\,dB$ driven by one Brownian motion, with continuous adapted
+  coefficients and no bounds, almost surely at every $t \le T$ at once,
+  $X_tY_t = x_0y_0 + \int_0^t (Xc + Yb + \sigma\tau)\,ds + \int_0^t (X\tau + Y\sigma)\,dB$:
+  the cross term $\int\sigma\tau\,ds$ is derived, by polarisation from the one-process formula.
+  This is Itô's formula for $f(x,y) = xy$ only. -/)]
+  MathFin.ItoFormulaAdapted.ito_product_rule_process
+
+attribute [blueprint "thm:bs-self-financing" (title := "The delta hedge is self-financing")
+  (statement := /-- Along the Black–Scholes path, with value $V_t = C(t,S_t)$, $\Delta_t = \Phi(d_1)$
+  shares and $\psi_t = V_t - \Delta_tS_t$ in the bank, for every $T' < T$, almost surely at every
+  $t \le T'$: $V_t = V_0 + \int_0^t \Delta\,dS + \int_0^t r\psi\,ds$, with
+  $\int\Delta\,dS = \int\Delta rS\,ds + \int\Delta\sigma S\,dB$ and $V_0$ the value of the
+  European call contract. An integral identity, not a trading-strategy structure. -/)]
+  MathFin.Contracts.BlackScholes.europeanCall_selfFinancing
