@@ -33,7 +33,8 @@ No dynamics of `P`, no drift condition and no stochastic Fubini interchange is p
 * `HJMModel`: the bundle (forward curve, drift, volatility, the `L²` realization of the volatility,
   the Itô dynamics in `t` for each maturity, adaptedness, measurability, integrability of the
   curve and of the short rate).
-* `HJMModel.bond`, `HJMModel.shortRate`, `HJMModel.bankAccount`, `HJMModel.discountedBond`,
+* `HJMModel.bond`, `HJMModel.shortRate`, `HJMModel.integratedRate`,
+  `HJMModel.bankAccount`, `HJMModel.discountedBond`,
   `HJMModel.starDrift`, `HJMModel.starVol`: the derived objects.
 
 ## Main results
@@ -106,9 +107,12 @@ noncomputable def bond (t T : ℝ≥0) (ω : Ω) : ℝ :=
 /-- **The short rate** `r(t) = f(t,t)`. -/
 def shortRate (t : ℝ≥0) (ω : Ω) : ℝ := M.fwd t t ω
 
+/-- **The integrated short rate** `∫₀ᵗ r(s) ds`. -/
+noncomputable def integratedRate (t : ℝ≥0) (ω : Ω) : ℝ :=
+  ∫ s in Set.Ioc 0 t, M.shortRate s ω ∂timeMeasure
+
 /-- **The bank account** `B(t) = exp(∫₀ᵗ r(s) ds)`. -/
-noncomputable def bankAccount (t : ℝ≥0) (ω : Ω) : ℝ :=
-  Real.exp (∫ s in Set.Ioc 0 t, M.shortRate s ω ∂timeMeasure)
+noncomputable def bankAccount (t : ℝ≥0) (ω : Ω) : ℝ := Real.exp (M.integratedRate t ω)
 
 /-- **The discounted bond** `Z(t,T) = P(t,T) / B(t)`. -/
 noncomputable def discountedBond (t T : ℝ≥0) (ω : Ω) : ℝ := M.bond t T ω / M.bankAccount t ω
@@ -131,7 +135,7 @@ lemma bankAccount_pos (t : ℝ≥0) (ω : Ω) : 0 < M.bankAccount t ω := Real.e
 
 /-- The bank account starts at one. -/
 @[simp] lemma bankAccount_zero (ω : Ω) : M.bankAccount 0 ω = 1 := by
-  simp [bankAccount]
+  simp [bankAccount, integratedRate]
 
 lemma discountedBond_pos (t T : ℝ≥0) (ω : Ω) : 0 < M.discountedBond t T ω :=
   div_pos (M.bond_pos t T ω) (M.bankAccount_pos t ω)

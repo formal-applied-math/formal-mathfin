@@ -39,16 +39,16 @@ assumed, remains open in this library (issue #313).
 
 ## Main definitions
 
-* `HasOnePeriodDensity`: period `t` carries a one-period density (bounded, positive,
-  `𝓕 (t+1)`-measurable, conditional mean one, making `S` a conditional martingale).
+* `HasOnePeriodDensity`: period `t` carries a one-period density (`IsOnePeriodDensity`, defined
+  in `DensityPasting.lean`).
 * `ConditionalOnePeriodFTAP`: conditional no arbitrage at each period yields a one-period density.
 
 ## Main results
 
 * `exists_isEMM_of_hasOnePeriodDensity`: one-period densities in every period give an equivalent
   martingale measure.
-* `exists_isEMM_of_noArbitrage`: given `ConditionalOnePeriodFTAP`, no arbitrage gives an
-  equivalent martingale measure.
+* `exists_isEMM_of_noArbitrage_of_conditionalFTAP`: given `ConditionalOnePeriodFTAP`, no
+  arbitrage gives an equivalent martingale measure.
 * `noArbitrage_iff_exists_isEMM`: given `ConditionalOnePeriodFTAP`, no arbitrage is equivalent
   to the existence of an equivalent martingale measure.
 
@@ -74,13 +74,11 @@ variable {Ω : Type*} {m0 : MeasurableSpace Ω}
   {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F] [CompleteSpace F]
   {𝓕 : Filtration ℕ m0} {P : Measure Ω} {S : ℕ → Ω → F}
 
-/-- **A one-period density for period `t`**: a bounded, strictly positive, `𝓕 (t+1)`-measurable
-weight `Z` with conditional mean one, `P[Z | 𝓕 t] = 1`, under which `S` is a conditional
-martingale over `(t, t+1]`, `P[Z • S (t+1) | 𝓕 t] = S t`. This is a one-period equivalent
-martingale measure conditional on `𝓕 t`. -/
+/-- **Period `t` carries a one-period density** (`IsOnePeriodDensity`): there is a bounded,
+positive, `𝓕 (t+1)`-measurable weight of conditional mean one making `S` a conditional martingale
+over `(t, t+1]`. -/
 def HasOnePeriodDensity (𝓕 : Filtration ℕ m0) (P : Measure Ω) (S : ℕ → Ω → F) (t : ℕ) : Prop :=
-  ∃ Z : Ω → ℝ, StronglyMeasurable[𝓕 (t + 1)] Z ∧ (∀ ω, 0 < Z ω) ∧ (∃ C : ℝ, ∀ ω, Z ω ≤ C) ∧
-    P[Z | 𝓕 t] =ᵐ[P] (fun _ ↦ (1 : ℝ)) ∧ P[Z • S (t + 1) | 𝓕 t] =ᵐ[P] S t
+  ∃ Z : Ω → ℝ, IsOnePeriodDensity 𝓕 P S t Z
 
 /-- **The conditional one-period FTAP** for the price `S` up to the horizon `T`, as a hypothesis:
 conditional no arbitrage at period `t < T` (`NoArbitrageAt`) yields a one-period density
@@ -100,17 +98,15 @@ theorem exists_isEMM_of_hasOnePeriodDensity
     (hS : ∀ t ≤ T, StronglyMeasurable[𝓕 t] (S t)) (hint : ∀ t ≤ T, Integrable (S t) P)
     (hd : ∀ t < T, HasOnePeriodDensity 𝓕 P S t) : ∃ Q, IsEMM 𝓕 P S T Q := by
   choose! Z hZ using hd
-  exact ⟨pastedMeasure P Z T,
-    (LocalEMMDensities.mk hS hint (fun t ht ↦ (hZ t ht).1) (fun t ht ↦ (hZ t ht).2.1)
-      (fun t ht ↦ (hZ t ht).2.2.1) (fun t ht ↦ (hZ t ht).2.2.2.1)
-      (fun t ht ↦ (hZ t ht).2.2.2.2)).isEMM_pastedMeasure⟩
+  exact ⟨pastedMeasure P Z T, (LocalEMMDensities.mk hS hint hZ).isEMM_pastedMeasure⟩
 
 /-- **Dalang–Morton–Willinger, assuming the conditional one-period FTAP**: for an adapted
 integrable price, if the conditional one-period FTAP holds (`ConditionalOnePeriodFTAP`) then no
 arbitrage gives an equivalent martingale measure. The reduction
 `noArbitrageLocal_of_noArbitrage` turns multi-period no arbitrage into conditional no arbitrage
 in each period, the hypothesis produces a density per period, and pasting multiplies them. -/
-theorem exists_isEMM_of_noArbitrage (hS : ∀ t ≤ T, StronglyMeasurable[𝓕 t] (S t))
+theorem exists_isEMM_of_noArbitrage_of_conditionalFTAP
+    (hS : ∀ t ≤ T, StronglyMeasurable[𝓕 t] (S t))
     (hint : ∀ t ≤ T, Integrable (S t) P) (hcond : ConditionalOnePeriodFTAP 𝓕 P S T)
     (hNA : NoArbitrage 𝓕 P S T) : ∃ Q, IsEMM 𝓕 P S T Q :=
   exists_isEMM_of_hasOnePeriodDensity hS hint fun t ht ↦
@@ -122,6 +118,6 @@ existence of an equivalent martingale measure. The converse is `IsEMM.noArbitrag
 theorem noArbitrage_iff_exists_isEMM (hS : ∀ t ≤ T, StronglyMeasurable[𝓕 t] (S t))
     (hint : ∀ t ≤ T, Integrable (S t) P) (hcond : ConditionalOnePeriodFTAP 𝓕 P S T) :
     NoArbitrage 𝓕 P S T ↔ ∃ Q, IsEMM 𝓕 P S T Q :=
-  ⟨exists_isEMM_of_noArbitrage hS hint hcond, fun ⟨_, hQ⟩ ↦ hQ.noArbitrage⟩
+  ⟨exists_isEMM_of_noArbitrage_of_conditionalFTAP hS hint hcond, fun ⟨_, hQ⟩ ↦ hQ.noArbitrage⟩
 
 end MathFin

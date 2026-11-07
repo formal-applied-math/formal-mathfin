@@ -5,21 +5,25 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Foundations.GaussianCDFDeriv
 public import MathFin.Foundations.NormalQuantile
 public import MathFin.Foundations.GaussianPartialMoments
 public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.MeanValue
 public import Mathlib.Analysis.Real.Pi.Bounds
 
 /-! # The left tail of the standard normal
 
-Three facts about `Φ` and the standard normal density `φ` used to bound option prices far from
-the money: `Φ(x) → 0` as `x → −∞`, the Mills bound `−x·Φ(x) ≤ φ(x)`, and `φ ≤ 1`.
+Four facts about `Φ` and the standard normal density `φ` used to bound option prices far from
+the money: `Φ(x) → 0` as `x → −∞`, the Mills bound `−x·Φ(x) ≤ φ(x)`, `φ ≤ 1`, and the
+Lipschitz bound on `Φ` that follows.
 
 ## Main results
 
 * `tendsto_Phi_atBot`, `tendsto_Phi_atTop`: `Φ(x) → 0` as `x → −∞` and `Φ(x) → 1` as `x → +∞`.
 * `neg_mul_Phi_le_gaussianPDFReal`: `−x·Φ(x) ≤ φ(x)` for all `x`.
 * `gaussianPDFReal_zero_one_le_one`: the standard normal density is at most `1`.
+* `Phi_sub_le`: `Φ` is 1-Lipschitz, `Φ(y) − Φ(x) ≤ y − x` for `x ≤ y`.
 
 ## Tags
 
@@ -57,5 +61,18 @@ theorem gaussianPDFReal_zero_one_le_one (x : ℝ) : gaussianPDFReal 0 1 x ≤ 1 
     (inv_le_one_of_one_le₀ (Real.one_le_sqrt.2 (by nlinarith [Real.pi_gt_three])))).trans
     (Real.exp_le_one_iff.2
       (div_nonpos_of_nonpos_of_nonneg (neg_nonpos.2 (sq_nonneg x)) zero_le_two))
+
+/-- The standard normal CDF is 1-Lipschitz: `Φ(y) − Φ(x) ≤ y − x` for `x ≤ y` (its density is at
+most `1`). -/
+theorem Phi_sub_le {x y : ℝ} (hxy : x ≤ y) : Phi y - Phi x ≤ y - x := by
+  have h := Convex.norm_image_sub_le_of_norm_deriv_le (f := Phi) (C := 1) (s := Set.univ)
+    (fun z _ ↦ (hasDerivAt_Phi z).differentiableAt)
+    (fun z _ ↦ by
+      rw [(hasDerivAt_Phi z).deriv, Real.norm_eq_abs,
+        abs_of_nonneg (gaussianPDFReal_nonneg 0 1 z)]
+      exact gaussianPDFReal_zero_one_le_one z)
+    convex_univ (Set.mem_univ x) (Set.mem_univ y)
+  rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg (sub_nonneg.2 hxy)] at h
+  exact (le_abs_self _).trans (by simpa using h)
 
 end MathFin

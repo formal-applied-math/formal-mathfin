@@ -127,14 +127,15 @@ theorem ae_localItoIntegral_add {σ τ : ℝ≥0 → Ω → ℝ}
     (hσa : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (σ t))
     (hσc : ∀ ω, Continuous fun t : ℝ≥0 ↦ σ t ω)
     (hτa : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (τ t))
-    (hτc : ∀ ω, Continuous fun t : ℝ≥0 ↦ τ t ω)
-    (hρa : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)]
-      (fun ω ↦ σ t ω + τ t ω))
-    (hρc : ∀ ω, Continuous fun t : ℝ≥0 ↦ σ t ω + τ t ω) :
+    (hτc : ∀ ω, Continuous fun t : ℝ≥0 ↦ τ t ω) :
     ∀ᵐ ω ∂μ, ∀ t ∈ Icc 0 T,
-      localItoIntegral (μ := μ) T hBmeas hρa hρc t ω
+      localItoIntegral (μ := μ) T hBmeas (σ := fun s ω ↦ σ s ω + τ s ω)
+          (fun t ↦ (hσa t).add (hτa t)) (fun ω ↦ (hσc ω).add (hτc ω)) t ω
         = localItoIntegral (μ := μ) T hBmeas hσa hσc t ω
           + localItoIntegral (μ := μ) T hBmeas hτa hτc t ω := by
+  have hρa : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)]
+      (fun ω ↦ σ t ω + τ t ω) := fun t ↦ (hσa t).add (hτa t)
+  have hρc : ∀ ω, Continuous fun t : ℝ≥0 ↦ σ t ω + τ t ω := fun ω ↦ (hσc ω).add (hτc ω)
   refine ae_forall_eq_of_tendstoInMeasure (T := T)
     (Y := fun t ω ↦ localItoIntegral (μ := μ) T hBmeas hρa hρc t ω)
     (Y' := fun t ω ↦ localItoIntegral (μ := μ) T hBmeas hσa hσc t ω
@@ -164,16 +165,15 @@ theorem ae_localItoProcess_add {σ τ b c : ℝ≥0 → Ω → ℝ}
     (hσc : ∀ ω, Continuous fun t : ℝ≥0 ↦ σ t ω)
     (hτa : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (τ t))
     (hτc : ∀ ω, Continuous fun t : ℝ≥0 ↦ τ t ω)
-    (hρa : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)]
-      (fun ω ↦ σ t ω + τ t ω))
-    (hρc : ∀ ω, Continuous fun t : ℝ≥0 ↦ σ t ω + τ t ω)
     (hb_cont : ∀ ω, Continuous fun s ↦ b s ω) (hc_cont : ∀ ω, Continuous fun s ↦ c s ω)
     (x₀ y₀ : ℝ) :
     ∀ᵐ ω ∂μ, ∀ t ∈ Icc 0 T,
-      localItoProcess (μ := μ) T hBmeas hρa hρc (x₀ + y₀) (fun s ω ↦ b s ω + c s ω) t ω
+      localItoProcess (μ := μ) T hBmeas (σ := fun s ω ↦ σ s ω + τ s ω)
+          (fun t ↦ (hσa t).add (hτa t)) (fun ω ↦ (hσc ω).add (hτc ω)) (x₀ + y₀)
+          (fun s ω ↦ b s ω + c s ω) t ω
         = localItoProcess (μ := μ) T hBmeas hσa hσc x₀ b t ω
           + localItoProcess (μ := μ) T hBmeas hτa hτc y₀ c t ω := by
-  filter_upwards [ae_localItoIntegral_add hB T hBmeas hBcont hσa hσc hτa hτc hρa hρc]
+  filter_upwards [ae_localItoIntegral_add hB T hBmeas hBcont hσa hσc hτa hτc]
     with ω h t ht
   unfold localItoProcess
   rw [h t ht, driftPath_add (hb_cont ω) (hc_cont ω)]
@@ -403,7 +403,7 @@ theorem ito_product_rule_process :
       hc_adap hc_cont x₀ y₀)
     (ae_continuousOn_localItoProcess hB T hBmeas hBcont hσa hσc hb_cont x₀)
     (ae_continuousOn_localItoProcess hB T hBmeas hBcont hτa hτc hc_cont y₀)
-    (ae_localItoProcess_add hB T hBmeas hBcont hσa hσc hτa hτc hρa hρc hb_cont hc_cont x₀ y₀)
+    (ae_localItoProcess_add hB T hBmeas hBcont hσa hσc hτa hτc hb_cont hc_cont x₀ y₀)
     (ito_half_sq_process hB T hBmeas hBcont hσa hσc hb_adap hb_cont x₀)
     (ito_half_sq_process hB T hBmeas hBcont hτa hτc hc_adap hc_cont y₀)
     (ito_half_sq_process hB T hBmeas hBcont hρa hρc hba hbc (x₀ + y₀))

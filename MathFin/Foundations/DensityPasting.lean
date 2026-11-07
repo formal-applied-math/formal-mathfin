@@ -18,7 +18,8 @@ The pasting step of the Dalang–Morton–Willinger theorem. Let `S` be an adapt
 `F`-valued discounted price on a filtered probability space `(Ω, 𝓕, P)` with finite horizon `T`,
 and suppose each period `t < T` carries a *one-period density* `Z t`: an `𝓕 (t+1)`-measurable,
 strictly positive, bounded weight with `P[Z t | 𝓕 t] = 1` that makes `S` a conditional martingale
-over that period, `P[Z t • S (t+1) | 𝓕 t] = S t` (`LocalEMMDensities`). Then the measure
+over that period, `P[Z t • S (t+1) | 𝓕 t] = S t` (`IsOnePeriodDensity`, bundled over the periods
+as `LocalEMMDensities`). Then the measure
 `Q = P.withDensity (∏_{t<T} Z t)` (`pastedMeasure`) is an equivalent martingale measure
 (`isEMM_pastedMeasure`).
 
@@ -36,6 +37,8 @@ the remaining step of the Dalang–Morton–Willinger theorem, see `DalangMorton
 
 ## Main definitions
 
+* `IsOnePeriodDensity`: a bounded, positive, `𝓕 (t+1)`-measurable weight of conditional mean one
+  that makes `S` a conditional martingale over the period `(t, t+1]`.
 * `LocalEMMDensities`: the data of one-period densities `Z t`, `t < T`, for an adapted
   integrable price.
 * `pastedDensity`: the product density `D n = ∏_{s<n} Z s`.
@@ -69,20 +72,27 @@ variable {Ω : Type*} {m0 : MeasurableSpace Ω}
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
   {𝓕 : Filtration ℕ m0} {P : Measure Ω} {S : ℕ → Ω → F} {T : ℕ} {Z : ℕ → Ω → ℝ}
 
-/-- **One-period densities** `Z t`, `t < T`, for an adapted integrable price `S`: `Z t` is
-`𝓕 (t+1)`-measurable, strictly positive and bounded, has conditional mean one,
-`P[Z t | 𝓕 t] = 1`, and makes `S` a conditional martingale over the period `(t, t+1]`,
-`P[Z t • S (t+1) | 𝓕 t] = S t` (equivalently `E[Z t (S (t+1) − S t) | 𝓕 t] = 0`). These are the
-conditional one-period equivalent martingale measures that are pasted into a multi-period one. -/
+/-- **A one-period density for period `t`**: a bounded, strictly positive, `𝓕 (t+1)`-measurable
+weight `Z` with conditional mean one, `P[Z | 𝓕 t] = 1`, under which `S` is a conditional
+martingale over `(t, t+1]`, `P[Z • S (t+1) | 𝓕 t] = S t` (equivalently
+`E[Z (S (t+1) − S t) | 𝓕 t] = 0`). This is a one-period equivalent martingale measure conditional
+on `𝓕 t`. -/
+structure IsOnePeriodDensity (𝓕 : Filtration ℕ m0) (P : Measure Ω) (S : ℕ → Ω → F) (t : ℕ)
+    (Z : Ω → ℝ) : Prop where
+  meas : StronglyMeasurable[𝓕 (t + 1)] Z
+  pos : ∀ ω, 0 < Z ω
+  bdd : ∃ C : ℝ, ∀ ω, Z ω ≤ C
+  cond_one : P[Z | 𝓕 t] =ᵐ[P] fun _ ↦ (1 : ℝ)
+  cond_price : P[Z • S (t + 1) | 𝓕 t] =ᵐ[P] S t
+
+/-- **One-period densities** `Z t`, `t < T`, for an adapted integrable price `S`: each `Z t` is a
+one-period density for period `t` (`IsOnePeriodDensity`). These are the conditional one-period
+equivalent martingale measures that are pasted into a multi-period one. -/
 structure LocalEMMDensities (𝓕 : Filtration ℕ m0) (P : Measure Ω) (S : ℕ → Ω → F) (T : ℕ)
     (Z : ℕ → Ω → ℝ) : Prop where
   adapted : ∀ t ≤ T, StronglyMeasurable[𝓕 t] (S t)
   integrable : ∀ t ≤ T, Integrable (S t) P
-  meas : ∀ t < T, StronglyMeasurable[𝓕 (t + 1)] (Z t)
-  pos : ∀ t < T, ∀ ω, 0 < Z t ω
-  bdd : ∀ t < T, ∃ C : ℝ, ∀ ω, Z t ω ≤ C
-  cond_one : ∀ t < T, P[Z t | 𝓕 t] =ᵐ[P] fun _ ↦ (1 : ℝ)
-  cond_price : ∀ t < T, P[Z t • S (t + 1) | 𝓕 t] =ᵐ[P] S t
+  density : ∀ t < T, IsOnePeriodDensity 𝓕 P S t (Z t)
 
 /-- The **product density** `D n ω = ∏_{s<n} Z s ω` of the first `n` one-period densities. -/
 noncomputable def pastedDensity (Z : ℕ → Ω → ℝ) (n : ℕ) (ω : Ω) : ℝ :=
@@ -117,40 +127,35 @@ namespace LocalEMMDensities
 variable (h : LocalEMMDensities 𝓕 P S T Z)
 
 include h in
-lemma stronglyMeasurable_pasted : ∀ n ≤ T, StronglyMeasurable[𝓕 n] (pastedDensity Z n) := by
-  intro n
+lemma stronglyMeasurable_pasted (n : ℕ) (hn : n ≤ T) :
+    StronglyMeasurable[𝓕 n] (pastedDensity Z n) := by
   induction n with
   | zero =>
-    intro _
     have e : pastedDensity Z 0 = fun _ ↦ (1 : ℝ) := funext pastedDensity_zero
     rw [e]
     exact stronglyMeasurable_const
   | succ n ih =>
-    intro hn
     have hnT : n < T := Nat.lt_of_succ_le hn
     have e : pastedDensity Z (n + 1) = pastedDensity Z n * Z n := funext (pastedDensity_succ n)
     rw [e]
-    exact ((ih hnT.le).mono (𝓕.mono n.le_succ)).mul (h.meas n hnT)
+    exact ((ih hnT.le).mono (𝓕.mono n.le_succ)).mul (h.density n hnT).meas
 
 include h in
 lemma pastedDensity_pos {n : ℕ} (hn : n ≤ T) (ω : Ω) : 0 < pastedDensity Z n ω :=
-  Finset.prod_pos fun s hs ↦ h.pos s (lt_of_lt_of_le (Finset.mem_range.1 hs) hn) ω
+  Finset.prod_pos fun s hs ↦ (h.density s (lt_of_lt_of_le (Finset.mem_range.1 hs) hn)).pos ω
 
 include h in
-lemma exists_bound_pasted : ∀ n ≤ T, ∃ C : ℝ, ∀ ω, pastedDensity Z n ω ≤ C := by
-  intro n
+lemma exists_bound_pasted (n : ℕ) (hn : n ≤ T) : ∃ C : ℝ, ∀ ω, pastedDensity Z n ω ≤ C := by
   induction n with
   | zero =>
-    intro _
     exact ⟨1, fun ω ↦ (pastedDensity_zero ω).le⟩
   | succ n ih =>
-    intro hn
     have hnT : n < T := Nat.lt_of_succ_le hn
     obtain ⟨C, hC⟩ := ih hnT.le
-    obtain ⟨B, hB⟩ := h.bdd n hnT
+    obtain ⟨B, hB⟩ := (h.density n hnT).bdd
     refine ⟨C * B, fun ω ↦ ?_⟩
     rw [pastedDensity_succ]
-    exact mul_le_mul (hC ω) (hB ω) (h.pos n hnT ω).le
+    exact mul_le_mul (hC ω) (hB ω) ((h.density n hnT).pos ω).le
       ((h.pastedDensity_pos hnT.le ω).le.trans (hC ω))
 
 include h in
@@ -159,7 +164,7 @@ lemma measurable_pasted {n : ℕ} (hn : n ≤ T) : Measurable (pastedDensity Z n
 
 include h in
 lemma measurable_Z {t : ℕ} (ht : t < T) : Measurable (Z t) :=
-  ((h.meas t ht).mono (𝓕.le (t + 1))).measurable
+  ((h.density t ht).meas.mono (𝓕.le (t + 1))).measurable
 
 include h in
 lemma integrable_smul_pasted {n : ℕ} (hn : n ≤ T) {Y : Ω → E} (hY : Integrable Y P) :
@@ -171,9 +176,9 @@ lemma integrable_smul_pasted {n : ℕ} (hn : n ≤ T) {Y : Ω → E} (hY : Integ
 include h in
 lemma integrable_smul_Z {t : ℕ} (ht : t < T) {Y : Ω → E} (hY : Integrable Y P) :
     Integrable (fun ω ↦ Z t ω • Y ω) P := by
-  obtain ⟨C, hC⟩ := h.bdd t ht
+  obtain ⟨C, hC⟩ := (h.density t ht).bdd
   exact integrable_smul_of_bdd (h.measurable_Z ht).aestronglyMeasurable
-    (fun ω ↦ (h.pos t ht ω).le) C hC hY
+    (fun ω ↦ ((h.density t ht).pos ω).le) C hC hY
 
 section Probability
 
@@ -181,9 +186,9 @@ variable [IsProbabilityMeasure P]
 
 include h in
 lemma integrable_Z {t : ℕ} (ht : t < T) : Integrable (Z t) P := by
-  obtain ⟨C, hC⟩ := h.bdd t ht
+  obtain ⟨C, hC⟩ := (h.density t ht).bdd
   exact Integrable.of_bound (h.measurable_Z ht).aestronglyMeasurable C
-    (ae_of_all _ fun ω ↦ (Real.norm_of_nonneg (h.pos t ht ω).le).le.trans (hC ω))
+    (ae_of_all _ fun ω ↦ (Real.norm_of_nonneg ((h.density t ht).pos ω).le).le.trans (hC ω))
 
 include h in
 /-- **Peeling one density factor**: against an `𝓕 t`-measurable integrable `g`, the period-`t`
@@ -197,7 +202,7 @@ lemma integral_smul_cond {t : ℕ} (ht : t < T) {g : Ω → E} (hg : StronglyMea
     _ = ∫ ω, (P[Z t | 𝓕 t] • g) ω ∂P := integral_congr_ae e
     _ = ∫ ω, g ω ∂P := by
       refine integral_congr_ae ?_
-      filter_upwards [h.cond_one t ht] with ω hω
+      filter_upwards [(h.density t ht).cond_one] with ω hω
       simp [hω]
 
 include h in
@@ -277,7 +282,7 @@ lemma setIntegral_pasted_step {t : ℕ} (ht : t < T) {A : Set Ω} (hA : Measurab
       (h.stronglyMeasurable_pasted t ht.le).aestronglyMeasurable hint
       (h.integrable_smul_Z ht (h.integrable (t + 1) (Nat.succ_le_of_lt ht)))
   have e2 : pastedDensity Z t • P[Z t • S (t + 1) | 𝓕 t] =ᵐ[P] pastedDensity Z t • S t := by
-    filter_upwards [h.cond_price t ht] with ω hω
+    filter_upwards [(h.density t ht).cond_price] with ω hω
     exact congrArg (fun x ↦ pastedDensity Z t ω • x) hω
   have hM : ∫ ω in A, pastedDensity Z (t + 1) ω • S (t + 1) ω ∂P =
       ∫ ω in A, pastedDensity Z t ω • S t ω ∂P := by

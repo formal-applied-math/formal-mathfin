@@ -16,10 +16,10 @@ substitute a genuinely stochastic model `X : ι → ℝ≥0 → Ω → ℝ` for 
 `Scenario`, and `fun ω ↦ e.eval (fun i t ↦ X i t ω)` is measurable
 (`Payoff.measurable_eval`), and moreover `𝓕 u`-measurable as soon as every
 observation the payoff makes is dated no later than `u`
-(`Payoff.measurable_eval_of_obsTimes_le`). That second fact is what will make a
+(`Payoff.measurable_eval_of_obsList_le`). That second fact is what will make a
 `Payoff` a legitimate stochastic-integral integrand: it is the adaptedness
 hypothesis a future integral rung against a filtered probability space will
-need. **`measurable_eval_of_obsTimes_le` has no consumer yet** —
+need. **`measurable_eval_of_obsList_le` has no consumer yet** —
 `Contracts/Pricing.lean` integrates only against a fixed measure `Q`, never
 against a filtration, so it has no adaptedness hypothesis to discharge with
 this file's results.
@@ -40,22 +40,14 @@ others. A finite-state model such as
 the binomial tree is bounded, so there `Contract.value_both` needs no per-instrument
 integrability lemma (`Contracts/Models/Binomial.lean`).
 
-## Main definitions
-
-* `Payoff.obsTimes` — the list of times a payoff's `obs` leaves read, found by
-  walking the syntax tree. It is a *syntactic* over-approximation: a payoff
-  can list a time its value does not actually depend on — e.g.
-  `Payoff.mul (.const 0) (.obs i t)` evaluates to `0` on every scenario, so
-  `obsTimes` listing `t` overstates what the value depends on. Consequently
-  the adaptedness theorem below is *sufficient*, not necessary — a payoff can
-  be `𝓕 u`-adapted for reasons `obsTimes` does not see.
-
 ## Main results
 
 * `Payoff.measurable_eval` — evaluating a payoff against a jointly-measurable
   model is measurable, unconditionally.
-* `Payoff.measurable_eval_of_obsTimes_le` — if every time in `e.obsTimes` is
-  `≤ u` and each `X i t` is `𝓕 t`-measurable, then evaluating `e` against `X`
+* `Payoff.measurable_eval_of_obsList_le` — if every date in `e.obsList` (the syntactic list of
+  observations `Contracts/Core.lean` defines; an over-approximation, so the criterion is
+  sufficient, not necessary: `Payoff.mul (.const 0) (.obs i t)` lists `t` though its value does
+  not depend on it) is `≤ u` and each `X i t` is `𝓕 t`-measurable, then evaluating `e` against `X`
   is `𝓕 u`-measurable. The filtration's monotonicity (`𝓕.mono`) does the work
   in the `obs` leaf; the six binary constructors combine two adapted pieces
   into one by the corresponding `Measurable.add`/`.sub`/`.mul`/`.max`/`.min`
@@ -116,17 +108,6 @@ namespace MathFin.Contracts
 
 variable {ι Ω : Type*} {mΩ : MeasurableSpace Ω}
 
-/-- The times a `Payoff`'s `obs` leaves read, found syntactically. An
-over-approximation: e.g. `Payoff.mul (.const 0) (.obs i t)` evaluates to `0`
-on every scenario, so this may list times the value does not actually depend
-on. -/
-def Payoff.obsTimes : Payoff ι → List ℝ≥0
-  | .const _ => []
-  | .obs _ t => [t]
-  | .add a b | .sub a b | .mul a b | .max a b | .min a b | .indicatorLt a b =>
-      a.obsTimes ++ b.obsTimes
-  | .rpow a _ => a.obsTimes
-
 /-- Evaluating a payoff against a jointly-measurable model is measurable. -/
 theorem Payoff.measurable_eval (e : Payoff ι) (X : ι → ℝ≥0 → Ω → ℝ)
     (hX : ∀ i t, Measurable (X i t)) :
@@ -177,14 +158,14 @@ Still has no consumer: `Contracts/Pricing.lean` integrates against a fixed
 measure, not a filtration, and unlike `measurable_eval`'s a.e. counterpart
 above, no `Payoff` in the tower yet needs an argument observed before a fixed
 time rather than a fixed measure. -/
-theorem Payoff.measurable_eval_of_obsTimes_le
+theorem Payoff.measurable_eval_of_obsList_le
     {𝓕 : Filtration ℝ≥0 mΩ} {u : ℝ≥0} (e : Payoff ι) (X : ι → ℝ≥0 → Ω → ℝ)
     (hX : ∀ i t, Measurable[𝓕 t] (X i t))
-    (hle : ∀ t ∈ e.obsTimes, t ≤ u) :
+    (hle : ∀ p ∈ e.obsList, p.2 ≤ u) :
     Measurable[𝓕 u] fun ω ↦ e.eval (fun i t ↦ X i t ω) := by
   induction e generalizing u with
   | const c => exact measurable_const
-  | obs i t => exact (hX i t).mono (𝓕.mono (hle t (by simp [obsTimes]))) le_rfl
+  | obs i t => exact (hX i t).mono (𝓕.mono (hle (i, t) (by simp [Payoff.obsList]))) le_rfl
   | add a b ha hb =>
       obtain ⟨hl, hr⟩ := List.forall_mem_append.1 hle; exact (ha hl).add (hb hr)
   | sub a b ha hb =>

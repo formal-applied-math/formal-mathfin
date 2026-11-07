@@ -65,7 +65,7 @@ variable {ι Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabi
 /-- **The stochastic discount factor of an HJM model**: `D t = exp(-∫₀ᵗ f(s,s) ds)`, the
 `shortRateDiscount` of the integrated short rate. -/
 noncomputable def _root_.MathFin.HJM.HJMModel.discount (M : HJMModel μ hB hBmeas H) : ℝ≥0 → Ω → ℝ :=
-  shortRateDiscount fun t ω ↦ ∫ s in Set.Ioc 0 t, M.shortRate s ω ∂timeMeasure
+  shortRateDiscount M.integratedRate
 
 /-- The HJM discount factor is the inverse of the bank account. -/
 theorem _root_.MathFin.HJM.HJMModel.discount_eq_inv_bankAccount (M : HJMModel μ hB hBmeas H)
@@ -99,8 +99,9 @@ theorem valueDisc_fixedFlows_hjm_flat (M : HJMModel μ hB hBmeas H) {r : ℝ}
     (fixedFlows t c n : Contract ι).valueDisc μ M.discount X
       = ∑ i ∈ Finset.range n, zcb r 0 (t i) * c i := by
   have hD (s : ℝ≥0) (ω : Ω) : M.discount s ω = zcb r 0 s := by
-    have hint : ∫ u in Set.Ioc 0 s, M.shortRate u ω ∂timeMeasure = r * (s : ℝ) := by
-      rw [setIntegral_congr_fun measurableSet_Ioc (f := fun u ↦ M.shortRate u ω) (g := fun _ ↦ r)
+    have hint : M.integratedRate s ω = r * (s : ℝ) := by
+      rw [HJMModel.integratedRate,
+        setIntegral_congr_fun measurableSet_Ioc (f := fun u ↦ M.shortRate u ω) (g := fun _ ↦ r)
           (fun u _ ↦ hflat u u ω le_rfl), setIntegral_const, Measure.real_def, timeMeasure_Ioc,
         ENNReal.toReal_ofReal (by simp), smul_eq_mul, mul_comm] <;> simp
     rw [HJM.HJMModel.discount, shortRateDiscount, hint, zcb]

@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Contracts.Models.BlackScholesHedge
+public import MathFin.Foundations.ItoProductRule
 
 /-!
 # The self-financing equation of the Black–Scholes delta hedge
@@ -188,8 +189,7 @@ theorem europeanCall_selfFinancing {μ : Measure Ω} [IsProbabilityMeasure μ] {
   -- Itô's formula for `f(t, x) = e^{rt} x` along the discounted value
   have hpt : IsStronglyPredictable (natFiltration hBmeas) fun (s : ℝ≥0) (_ : Ω) ↦
       Real.exp (r * s) :=
-    StronglyAdapted.isStronglyPredictable_of_leftContinuous (fun _ ↦ stronglyMeasurable_const)
-      fun _ _ ↦ hecont.continuousWithinAt
+    isStronglyPredictable_deterministic hBmeas hecont
   have hpE : IsStronglyPredictable (natFiltration hBmeas) fun s ω ↦ Real.exp (r * s) * H' s ω :=
     hpt.mul hpredH'
   have hct : Continuous fun p : ℝ × ℝ ↦ r * Real.exp (r * p.1) * p.2 := by fun_prop

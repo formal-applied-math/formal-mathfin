@@ -81,15 +81,6 @@ namespace MathFin.Contracts.BlackScholes
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω}
   [IsProbabilityMeasure μ]
 
-/-- A constant integrand is predictable for the natural filtration. -/
-lemma isStronglyPredictable_const (hWmeas : ∀ t, Measurable (W t)) (c : ℝ) :
-    IsStronglyPredictable (natFiltration hWmeas) (fun (_ : ℝ≥0) (_ : Ω) ↦ c) := by
-  rw [IsStronglyPredictable]
-  exact stronglyMeasurable_const
-
-/-- A constant integrand is bounded by its absolute value. -/
-lemma abs_const_le (c : ℝ) : ∀ (_ : ℝ≥0) (_ : Ω), |c| ≤ |c| := fun _ _ ↦ le_rfl
-
 variable (hW : IsPreBrownianReal W μ) (hWmeas : ∀ t, Measurable (W t))
 
 /-- The Girsanov measure at horizon `H` of the constant market price of risk `θ`:
@@ -97,21 +88,21 @@ variable (hW : IsPreBrownianReal W μ) (hWmeas : ∀ t, Measurable (W t))
 (`ZTpred` for the constant integrand). -/
 noncomputable def constGirsanovMeasure (θ : ℝ) (H : ℝ≥0) : Measure Ω :=
   μ.withDensity fun ω ↦ ENNReal.ofReal
-    (ZTpred hW H hWmeas (isStronglyPredictable_const hWmeas θ) (abs_const_le θ) ω)
+    (ZTpred hW H hWmeas (isStronglyPredictable_const hWmeas θ) (fun _ _ ↦ le_rfl) ω)
 
 /-- The drift-corrected process `B^θ_u = W_u + driftContinuousMod θ̂ u` of the constant market
 price of risk `θ` (`BthetaPred` for the constant integrand). -/
 noncomputable def constBtheta (θ : ℝ) (H : ℝ≥0) (u : ℝ≥0) (ω : Ω) : ℝ :=
-  BthetaPred (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas θ) (abs_const_le θ) u ω
+  BthetaPred (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas θ) (fun _ _ ↦ le_rfl) u ω
 
 include hW in
 /-- The constant-price-of-risk Girsanov measure is a probability measure. -/
 lemma constGirsanovMeasure_isProbabilityMeasure (θ : ℝ) (H : ℝ≥0) :
     IsProbabilityMeasure (constGirsanovMeasure hW hWmeas θ H) := by
   obtain ⟨V, hV⟩ := exists_approxSeq (μ := μ) hWmeas H
-    (isStronglyPredictable_const hWmeas θ) (abs_const_le θ)
+    (isStronglyPredictable_const hWmeas θ) (fun _ _ ↦ le_rfl)
   exact isProbabilityMeasure_predGirsanov hW hWmeas H (isStronglyPredictable_const hWmeas θ)
-    (abs_const_le θ) V hV
+    (fun _ _ ↦ le_rfl) V hV
 
 include hW in
 /-- **`B^θ` is a Brownian motion for the filtration under `Q`.** For the constant price of risk
@@ -121,7 +112,7 @@ theorem isFilteredPreBrownian_constBtheta (θ : ℝ) (H : ℝ≥0) :
     IsFilteredPreBrownian (constBtheta (μ := μ) hWmeas θ H) (natFiltration hWmeas)
       (constGirsanovMeasure hW hWmeas θ H) :=
   Btheta_isFilteredPreBrownian_predictable_of_bdd hW hWmeas
-    (isStronglyPredictable_const hWmeas θ) (abs_const_le θ) H
+    (isStronglyPredictable_const hWmeas θ) (fun _ _ ↦ le_rfl) H
 
 include hW in
 /-- `B^θ` is a pre-Brownian motion under `Q`, the hypothesis the contract theorems take. -/
@@ -138,12 +129,12 @@ theorem constBtheta_drift_ae (θ : ℝ) (H : ℝ≥0) {u : ℝ≥0} (hu : u ≤ 
     ∀ᵐ ω ∂μ, constBtheta (μ := μ) hWmeas θ H u ω = W u ω + θ * (u : ℝ) := by
   filter_upwards [driftContinuousMod_eq_setIntegral H hWmeas
       (processToLpPredictable (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas θ)
-        (abs_const_le θ)) hu,
+        (fun _ _ ↦ le_rfl)) hu,
     processToLpPredictable_ae_slice (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas θ)
-      (abs_const_le θ)] with ω h1 h2
+      (fun _ _ ↦ le_rfl)] with ω h1 h2
   have h3 : ∀ᵐ s ∂(ItoIntegralL2.timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) u)),
       processToLpPredictable (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas θ)
-        (abs_const_le θ) (s, ω) = θ :=
+        (fun _ _ ↦ le_rfl) (s, ω) = θ :=
     ae_mono (Measure.restrict_mono (Set.Ioc_subset_Ioc_right hu) le_rfl) h2
   simp only [constBtheta, BthetaPred]
   rw [h1, integral_congr_ae h3, setIntegral_const, smul_eq_mul, measureReal_def,
