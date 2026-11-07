@@ -123,13 +123,6 @@ uses = ["thm:ito-levy-formula", "thm:merton-dominance"]
 area = "black-scholes"
 
 [[node]]
-label = "thm:merton-risk-neutral-drift"
-title = "Merton risk-neutral compensation"
-statement = "The risk-neutral drift of a Merton jump-diffusion is μ=r-λκ with κ=E[e^Y-1]."
-uses = ["thm:merton-dominance"]
-area = "black-scholes"
-
-[[node]]
 label = "thm:perpetual-american"
 title = "Perpetual American option"
 statement = "Closed form for the perpetual American option with its optimal exercise boundary."
@@ -189,13 +182,6 @@ area = "credit"
 label = "thm:stefan-uniqueness"
 title = "Stefan uniqueness with accumulating jumps"
 statement = "Physical Stefan problem uniqueness when jumps accumulate at time zero (open problem)."
-uses = []
-area = "credit"
-
-[[node]]
-label = "thm:unilateral-cva"
-title = "Unilateral CVA"
-statement = "CVA=(1-R)∫EE·e^{-ru}h S du."
 uses = []
 area = "credit"
 
@@ -410,13 +396,6 @@ uses = ["thm:ito-formula-l2", "thm:ito-formula-td-l2"]
 area = "foundations"
 
 [[node]]
-label = "thm:ito-formula-c2"
-title = "Itô formula for C² functions"
-statement = "The L² Itô formula holds for C² (not only bounded C³) test functions, the textbook scope."
-uses = ["thm:ito-formula-l2"]
-area = "foundations"
-
-[[node]]
 label = "thm:ito-integral-martingale"
 title = "General-integrand Itô process is a martingale"
 statement = "The Itô integral of a general L² integrand is exhibited as a bundled Martingale, composing the PricesGainsAtZero guards."
@@ -534,20 +513,6 @@ title = "Contango, backwardation and basis convergence"
 statement = "For F=Se^{(r-δ)T} the curve is in contango or backwardation by the sign of r-δ and the basis converges."
 uses = []
 area = "futures"
-
-[[node]]
-label = "thm:schwartz-commodity-futures"
-title = "Schwartz commodity futures"
-statement = "The one-factor OU log-spot commodity futures closed form."
-uses = []
-area = "futures"
-
-[[node]]
-label = "thm:interest-rate-parity"
-title = "Covered and uncovered interest-rate parity"
-statement = "F=Se^{(r_d-r_f)T}."
-uses = []
-area = "fx"
 
 [[node]]
 label = "thm:siegel-paradox"
@@ -724,9 +689,3 @@ statement = "Static no-arbitrage conditions on an implied-vol smile (Roper, the 
 uses = ["thm:carr-madan", "thm:bs-call"]
 area = "stoch-vol"
 
-[[node]]
-label = "thm:variance-swap-jump-bias"
-title = "Variance-swap jump bias"
-statement = "The log-contract fair strike under jumps picks up the term 2λE[e^Y-1-Y]."
-uses = ["thm:jump-diffusion-law", "thm:quadratic-variation"]
-area = "stoch-vol"

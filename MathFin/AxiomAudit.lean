@@ -2309,4 +2309,15 @@ bounded-coefficient process class. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Dupire.dupire_pointwise
 
+-- Blueprint nodes tagged 2026-11-06 (interest-rate parity, unilateral CVA): the covered and
+-- uncovered parities agree, and CVA with Gaussian exposure under independence.
+
+/-- info: 'MathFin.covered_eq_uncovered_interest_parity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.covered_eq_uncovered_interest_parity
+
+/-- info: 'MathFin.CVA.cva_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.CVA.cva_gaussian
+
 end MathFin.AxiomAudit

@@ -402,11 +402,11 @@ The gate (the repo contract applies unchanged to machine-found proofs):
   docs/blueprint.md.
 - `AxiomAudit.lean` (`#guard_msgs`-pinned axioms, enforced per-push by
   `build.yml`) is the ENFORCED honesty floor: no `sorry`, axiom-clean.
-  `leanchecker` (the `kernel-replay.yml` CI job) is BEST-EFFORT kernel
-  replay below the elaborator — it cannot complete on a 16 GB hosted runner
-  (every module's `public import` closure loads the ~14 GB full Mathlib
-  environment; OOM-kills inside batch 1 at any cgroup cap < ~14 GB, confirmed
-  2026-06-07), so it is `workflow_dispatch`-only and wants a >16 GB box.
+  `leanchecker` (the `kernel-replay.yml` CI job, monthly + on demand) replays
+  every content module through the kernel, below the elaborator, in six
+  parallel shards. From 2026-06-07 it could not finish (every module imported
+  Mathlib whole, ~14 GB per load, OOM in batch 1); since the imports were
+  narrowed (`whole_mathlib_imports` 0) it fits a 16 GB runner with >5 GB free.
 
 **Idiomatic register — the Mathlib house-style checklist** (full form +
 before/after in `docs/patterns.md` → "Mathlib house-style golf"): when polishing

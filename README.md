@@ -168,7 +168,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Seventeen of the 779 results are reduced cores. Eleven assume a structure whose fields include the
+- Seventeen of the 782 results are reduced cores. Eleven assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, the two-dimensional Itô formula,
@@ -246,7 +246,7 @@ dependency to its `lakefile.toml`:
 [[require]]
 name = "MathFin"
 git = "https://github.com/formal-applied-math/formal-mathfin"
-rev = "v1.9.0"
+rev = "v1.10.0"
 ```
 
 Then fetch it and the prebuilt Mathlib files:
@@ -298,9 +298,8 @@ Comparator below).
   are published as a
   [Hugging Face dataset](https://huggingface.co/datasets/formal-applied-math/formal-mathfin-theorems).
 
-- **Kernel replay.** A workflow replays every declaration through `leanchecker`, but the full
-  Mathlib environment it loads does not fit on a 16 GB hosted runner, and the replay has not
-  completed.
+- **Kernel replay.** A monthly workflow replays every module's declarations through the Lean
+  kernel with `leanchecker`, below the elaborator.
 
 - **Provenance.** [`formalization.yaml`](formalization.yaml) describes how the library was written,
   including AI assistance and the entries drafted by an automated pipeline. The American put port

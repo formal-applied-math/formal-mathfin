@@ -58,11 +58,14 @@ graph TD
   expectationIto["Expectation-form Itô / Feynman–Kac"]:::proved
   feynmanKacHeatEq["Heat equation for the kernel convolution"]:::proved
   gbmSde["GBM coefficient matching (algebraic)"]:::proved
+  interestRateParity["Covered and uncovered interest-rate parity"]:::proved
   markovPathLaw["Markov path law (Ionescu–Tulcea)"]:::proved
+  mertonRiskNeutralDrift["Jump-diffusion risk-neutral drift"]:::proved
+  unilateralCva["Unilateral CVA, Gaussian exposure"]:::proved
+  varianceSwapJumpBias["Variance-swap jump bias"]:::proved
   itoIntegralClm["Continuous Itô integral (CLM on [0,T])"]:::proved
   bsDelta["Greeks (δ shown; γ vega θ ρ alongside)"]:::proved
   bsPdeBrownian["BS PDE in the Brownian coordinate"]:::proved
-  bsPdeFeynmanKac["Black–Scholes PDE (from Feynman–Kac)"]:::proved
   bscallhypBrownian["BSCallHyp from a Brownian model"]:::proved
   continuousFtap["Continuous-time first FTAP (EMM)"]:::proved
   girsanovCall["Call price from the physical measure"]:::proved
@@ -70,12 +73,15 @@ graph TD
   margrabe["Margrabe exchange option"]:::proved
   quadraticVariation["Quadratic variation: ∑(ΔB)² → T in L²"]:::proved
   wienerIsometry["Wiener isometry (deterministic L²)"]:::proved
+  bsPdeFeynmanKac["Black–Scholes PDE (from Feynman–Kac)"]:::proved
   conditionalBracket["The bracket is conditional"]:::proved
-  itoFormulaL2["Itô formula, L² (C³ bounded — Summit A)"]:::proved
+  itoFormulaC2["Itô's formula for C² functions"]:::proved
   itoFormulaTdL2["Time-dependent Itô formula, L² (Summit A′)"]:::proved
   itoSquaredL2["Itô for x² in L²: ∑B·ΔB → ½(B_T²−B₀²−T)"]:::proved
   mertonDominance["Merton dominance: jump risk is never free"]:::proved
+  schwartzCommodityFutures["Schwartz commodity futures"]:::proved
   bracketCompensator["The bracket compensates the square"]:::proved
+  itoFormulaL2["Itô formula, L² (C³ bounded — Summit A)"]:::proved
   itoIntegralBrownian["∫₀ᵀ B dB = ½(B_T² − B₀² − T)"]:::proved
   martingaleRepresentation["Martingale representation (terminal form)"]:::proved
   marketCompleteness["Completeness of the Brownian market"]:::proved
@@ -102,7 +108,6 @@ graph TD
     kouJumpDiffusion["Kou double-exponential jump-diffusion"]:::frontier
     margrabeNumeraire["Margrabe and chooser via the S²-numéraire"]:::frontier
     mertonPide["Merton PIDE"]:::frontier
-    mertonRiskNeutralDrift["Merton risk-neutral compensation"]:::frontier
     perpetualAmerican["Perpetual American option"]:::frontier
     twoAssetOptionFormulas["Stulz and Heynen–Kat two-asset formulas"]:::frontier
     varianceGammaCall["Variance-gamma European call"]:::frontier
@@ -114,7 +119,6 @@ graph TD
     mertonCreditSpread["Merton structural credit spread"]:::frontier
     oneFactorCopulaDefault["One-factor Gaussian copula default"]:::frontier
     stefanUniqueness["Stefan uniqueness with accumulating jumps"]:::frontier
-    unilateralCva["Unilateral CVA"]:::frontier
   end
   subgraph frontier_defi["⏳ frontier · defi"]
     aaveHealthFactorBound["Aave multi-asset health factor: a liquidation bound"]:::frontier
@@ -153,7 +157,6 @@ graph TD
     girsanovBrownianCharacterisation["Girsanov: independent increments, continuous paths"]:::frontier
     girsanovContinuousEmm["Girsanov EMM from the Itô tower"]:::frontier
     itoFormula2d["Two-process Itô formula"]:::frontier
-    itoFormulaC2["Itô formula for C² functions"]:::frontier
     itoIntegralMartingale["General-integrand Itô process is a martingale"]:::frontier
     itoLevyFormula["Itô–Lévy change of variables"]:::frontier
     jumpDiffusionLaw["Compound-Poisson and jump-diffusion law"]:::frontier
@@ -173,10 +176,8 @@ graph TD
   end
   subgraph frontier_futures["⏳ frontier · futures"]
     futuresBasisConvergence["Contango, backwardation and basis convergence"]:::frontier
-    schwartzCommodityFutures["Schwartz commodity futures"]:::frontier
   end
   subgraph frontier_fx["⏳ frontier · fx"]
-    interestRateParity["Covered and uncovered interest-rate parity"]:::frontier
     siegelParadox["Siegel's paradox"]:::frontier
   end
   subgraph frontier_portfolio["⏳ frontier · portfolio"]
@@ -208,15 +209,12 @@ graph TD
     sabrHagan["SABR Hagan asymptotic implied vol"]:::frontier
     schrodingerSpxVix["Schrödinger calibration of SPX/VIX"]:::frontier
     smileNoArbitrage["Smile no-arbitrage (Roper, SVI)"]:::frontier
-    varianceSwapJumpBias["Variance-swap jump bias"]:::frontier
   end
 
   brownianMotion --> itoIntegralClm
   bsIdentity --> bsDelta
   bsCall --> bsPdeBrownian
   feynmanKacHeatEq --> bsPdeBrownian
-  bsCall --> bsPdeFeynmanKac
-  feynmanKacHeatEq --> bsPdeFeynmanKac
   brownianMotion --> bscallhypBrownian
   brownianMotion --> continuousFtap
   bsCall --> girsanovCall
@@ -226,11 +224,14 @@ graph TD
   esscherTilt --> margrabe
   brownianMotion --> quadraticVariation
   brownianMotion --> wienerIsometry
+  bsCall --> bsPdeFeynmanKac
+  bsDelta --> bsPdeFeynmanKac
+  bsIdentity --> bsPdeFeynmanKac
+  feynmanKacHeatEq --> bsPdeFeynmanKac
   brownianMotion --> conditionalBracket
   itoIntegralClm --> conditionalBracket
-  brownianMotion --> itoFormulaL2
-  itoIntegralClm --> itoFormulaL2
-  discreteIto --> itoFormulaL2
+  brownianMotion --> itoFormulaC2
+  itoIntegralClm --> itoFormulaC2
   brownianMotion --> itoFormulaTdL2
   itoIntegralClm --> itoFormulaTdL2
   brownianMotion --> itoSquaredL2
@@ -239,9 +240,13 @@ graph TD
   bsCall --> mertonDominance
   bsDelta --> mertonDominance
   bsIdentity --> mertonDominance
+  brownianMotion --> schwartzCommodityFutures
+  wienerIsometry --> schwartzCommodityFutures
   brownianMotion --> bracketCompensator
-  itoIntegralClm --> bracketCompensator
   conditionalBracket --> bracketCompensator
+  brownianMotion --> itoFormulaL2
+  itoIntegralClm --> itoFormulaL2
+  itoFormulaTdL2 --> itoFormulaL2
   brownianMotion --> itoIntegralBrownian
   itoIntegralClm --> itoIntegralBrownian
   itoIsometryAdapted --> itoIntegralBrownian
@@ -299,7 +304,6 @@ graph TD
   bsDelta --> impliedVolExistence
   itoFormulaL2 --> itoFormula2d
   itoFormulaTdL2 --> itoFormula2d
-  itoFormulaL2 --> itoFormulaC2
   itoIntegralClm --> itoIntegralMartingale
   marketCompleteness --> itoIntegralMartingale
   itoFormulaL2 --> itoLevyFormula
@@ -320,7 +324,6 @@ graph TD
   bsCall --> mertonCreditSpread
   itoLevyFormula --> mertonPide
   mertonDominance --> mertonPide
-  mertonDominance --> mertonRiskNeutralDrift
   carrMadan --> modelFreeVariance
   girsanovContinuousEmm --> novikovGirsanov
   brownianMotion --> purgedCvIndependence
@@ -340,8 +343,6 @@ graph TD
   margrabe --> twoAssetOptionFormulas
   bsCall --> twoAssetOptionFormulas
   bsCall --> varianceGammaCall
-  jumpDiffusionLaw --> varianceSwapJumpBias
-  quadraticVariation --> varianceSwapJumpBias
 
   classDef proved fill:#d4edda,stroke:#28a745,color:#111;
   classDef upstream fill:#d9e8f6,stroke:#1f6fb2,color:#111;
@@ -363,11 +364,14 @@ graph TD
 | `thm:expectation-ito` Expectation-form Itô / Feynman–Kac | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpectation-ito%22%20in%3Abody) |
 | `thm:feynman-kac-heat-eq` Heat equation for the kernel convolution | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Afeynman-kac-heat-eq%22%20in%3Abody) |
 | `thm:gbm-sde` GBM coefficient matching (algebraic) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Agbm-sde%22%20in%3Abody) |
+| `thm:interest-rate-parity` Covered and uncovered interest-rate parity | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ainterest-rate-parity%22%20in%3Abody) |
 | `thm:markov-path-law` Markov path law (Ionescu–Tulcea) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarkov-path-law%22%20in%3Abody) |
+| `thm:merton-risk-neutral-drift` Jump-diffusion risk-neutral drift | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amerton-risk-neutral-drift%22%20in%3Abody) |
+| `thm:unilateral-cva` Unilateral CVA, Gaussian exposure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aunilateral-cva%22%20in%3Abody) |
+| `thm:variance-swap-jump-bias` Variance-swap jump bias | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-swap-jump-bias%22%20in%3Abody) |
 | `def:ito-integral-clm` Continuous Itô integral (CLM on [0,T]) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aito-integral-clm%22%20in%3Abody) |
 | `thm:bs-delta` Greeks (δ shown; γ vega θ ρ alongside) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-delta%22%20in%3Abody) |
 | `thm:bs-pde-brownian` BS PDE in the Brownian coordinate | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-pde-brownian%22%20in%3Abody) |
-| `thm:bs-pde-feynman-kac` Black–Scholes PDE (from Feynman–Kac) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-pde-feynman-kac%22%20in%3Abody) |
 | `thm:bscallhyp-brownian` BSCallHyp from a Brownian model | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abscallhyp-brownian%22%20in%3Abody) |
 | `thm:continuous-ftap` Continuous-time first FTAP (EMM) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acontinuous-ftap%22%20in%3Abody) |
 | `thm:girsanov-call` Call price from the physical measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Agirsanov-call%22%20in%3Abody) |
@@ -375,12 +379,15 @@ graph TD
 | `thm:margrabe` Margrabe exchange option | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amargrabe%22%20in%3Abody) |
 | `thm:quadratic-variation` Quadratic variation: ∑(ΔB)² → T in L² | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aquadratic-variation%22%20in%3Abody) |
 | `thm:wiener-isometry` Wiener isometry (deterministic L²) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Awiener-isometry%22%20in%3Abody) |
+| `thm:bs-pde-feynman-kac` Black–Scholes PDE (from Feynman–Kac) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-pde-feynman-kac%22%20in%3Abody) |
 | `thm:conditional-bracket` The bracket is conditional | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aconditional-bracket%22%20in%3Abody) |
-| `thm:ito-formula-l2` Itô formula, L² (C³ bounded — Summit A) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-formula-l2%22%20in%3Abody) |
+| `thm:ito-formula-c2` Itô's formula for C² functions | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-formula-c2%22%20in%3Abody) |
 | `thm:ito-formula-td-l2` Time-dependent Itô formula, L² (Summit A′) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-formula-td-l2%22%20in%3Abody) |
 | `thm:ito-squared-l2` Itô for x² in L²: ∑B·ΔB → ½(B_T²−B₀²−T) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-squared-l2%22%20in%3Abody) |
 | `thm:merton-dominance` Merton dominance: jump risk is never free | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amerton-dominance%22%20in%3Abody) |
+| `thm:schwartz-commodity-futures` Schwartz commodity futures | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aschwartz-commodity-futures%22%20in%3Abody) |
 | `thm:bracket-compensator` The bracket compensates the square | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abracket-compensator%22%20in%3Abody) |
+| `thm:ito-formula-l2` Itô formula, L² (C³ bounded — Summit A) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-formula-l2%22%20in%3Abody) |
 | `thm:ito-integral-brownian` ∫₀ᵀ B dB = ½(B_T² − B₀² − T) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-integral-brownian%22%20in%3Abody) |
 | `thm:martingale-representation` Martingale representation (terminal form) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amartingale-representation%22%20in%3Abody) |
 | `thm:market-completeness` Completeness of the Brownian market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarket-completeness%22%20in%3Abody) |
@@ -429,9 +436,7 @@ graph TD
 | `thm:hjm-musiela` HJM Musiela parametrization | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ahjm-musiela%22%20in%3Abody) |
 | `thm:hjm-short-rate` HJM induces a short-rate model | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ahjm-short-rate%22%20in%3Abody) |
 | `thm:implied-vol-existence` Implied volatility for every arbitrage-free price | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aimplied-vol-existence%22%20in%3Abody) |
-| `thm:interest-rate-parity` Covered and uncovered interest-rate parity | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ainterest-rate-parity%22%20in%3Abody) |
 | `thm:ito-formula-2d` Two-process Itô formula | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-formula-2d%22%20in%3Abody) |
-| `thm:ito-formula-c2` Itô formula for C² functions | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-formula-c2%22%20in%3Abody) |
 | `thm:ito-integral-martingale` General-integrand Itô process is a martingale | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-integral-martingale%22%20in%3Abody) |
 | `thm:ito-levy-formula` Itô–Lévy change of variables | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-levy-formula%22%20in%3Abody) |
 | `thm:jump-diffusion-law` Compound-Poisson and jump-diffusion law | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ajump-diffusion-law%22%20in%3Abody) |
@@ -453,7 +458,6 @@ graph TD
 | `thm:merton-credit-spread` Merton structural credit spread | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amerton-credit-spread%22%20in%3Abody) |
 | `thm:merton-pide` Merton PIDE | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amerton-pide%22%20in%3Abody) |
 | `thm:merton-portfolio-fraction` Merton myopic risky fraction | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amerton-portfolio-fraction%22%20in%3Abody) |
-| `thm:merton-risk-neutral-drift` Merton risk-neutral compensation | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amerton-risk-neutral-drift%22%20in%3Abody) |
 | `thm:model-free-variance` Model-free implied variance replication | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amodel-free-variance%22%20in%3Abody) |
 | `thm:novikov-girsanov` Novikov Girsanov for unbounded θ | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Anovikov-girsanov%22%20in%3Abody) |
 | `thm:one-factor-copula-default` One-factor Gaussian copula default | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aone-factor-copula-default%22%20in%3Abody) |
@@ -470,7 +474,6 @@ graph TD
 | `thm:rough-heston-pathwise-uniqueness` Rough-Heston pathwise uniqueness | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Arough-heston-pathwise-uniqueness%22%20in%3Abody) |
 | `thm:sabr-hagan` SABR Hagan asymptotic implied vol | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asabr-hagan%22%20in%3Abody) |
 | `thm:schrodinger-spx-vix` Schrödinger calibration of SPX/VIX | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aschrodinger-spx-vix%22%20in%3Abody) |
-| `thm:schwartz-commodity-futures` Schwartz commodity futures | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aschwartz-commodity-futures%22%20in%3Abody) |
 | `thm:sde-strong-solution` SDE strong solutions on every horizon | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asde-strong-solution%22%20in%3Abody) |
 | `thm:second-ftap-converse` Second FTAP: uniqueness implies completeness | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asecond-ftap-converse%22%20in%3Abody) |
 | `thm:semistatic-ftap` Semistatic FTAP with entropy | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asemistatic-ftap%22%20in%3Abody) |
@@ -485,10 +488,8 @@ graph TD
 | `thm:thiele-reserve` Thiele reserve | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Athiele-reserve%22%20in%3Abody) |
 | `thm:time-inconsistent-equilibrium` Relaxed equilibria under time inconsistency | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atime-inconsistent-equilibrium%22%20in%3Abody) |
 | `thm:two-asset-option-formulas` Stulz and Heynen–Kat two-asset formulas | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atwo-asset-option-formulas%22%20in%3Abody) |
-| `thm:unilateral-cva` Unilateral CVA | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aunilateral-cva%22%20in%3Abody) |
 | `thm:variance-gamma-call` Variance-gamma European call | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-gamma-call%22%20in%3Abody) |
 | `thm:variance-optimal-hedging` Variance-optimal hedging | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-optimal-hedging%22%20in%3Abody) |
-| `thm:variance-swap-jump-bias` Variance-swap jump bias | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-swap-jump-bias%22%20in%3Abody) |
 <!-- END GENERATED SPINE -->
 
 ---
