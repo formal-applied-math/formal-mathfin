@@ -64,14 +64,14 @@ namespace MathFin.Contracts.DiscreteMarket
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
 
 /-- The continuous-time filtration `t ↦ 𝓕 ⌊t⌋₊` of a discrete-time one. -/
-def floorFiltration (𝓕 : Filtration ℕ mΩ) : Filtration ℝ≥0 mΩ where
+noncomputable def floorFiltration (𝓕 : Filtration ℕ mΩ) : Filtration ℝ≥0 mΩ where
   seq t := 𝓕 ⌊t⌋₊
   mono' _ _ hst := 𝓕.mono (Nat.floor_mono hst)
   le' t := 𝓕.le _
 
 /-- A discrete-time price as a contract model map: constant between integer dates and frozen at
 the horizon `T`. -/
-def discreteAssets (S : ℕ → Ω → ℝ) (T : ℕ) : Unit → ℝ≥0 → Ω → ℝ :=
+noncomputable def discreteAssets (S : ℕ → Ω → ℝ) (T : ℕ) : Unit → ℝ≥0 → Ω → ℝ :=
   fun _ t ω ↦ S (min ⌊t⌋₊ T) ω
 
 /-- At an integer date `n` the underlying is the price at `min n T`. -/
