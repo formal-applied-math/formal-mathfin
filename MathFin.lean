@@ -921,3 +921,8 @@ import MathFin.FixedIncome.KeyRateDuration
 -- Weak uniqueness for the constant-coefficient integrated weak forward equation, via
 -- the characteristic-function/Groenwall method
 import MathFin.Foundations.WeakForwardUniqueness
+-- Stochastic Fubini for a continuous linear L²-integral, and its Itô and Wiener instances
+import MathFin.Foundations.StochasticFubini
+import MathFin.Foundations.StochasticFubiniIto
+-- The Heath–Jarrow–Morton model bundle: forward curve, bond, short rate, bank account
+import MathFin.FixedIncome.HJM
