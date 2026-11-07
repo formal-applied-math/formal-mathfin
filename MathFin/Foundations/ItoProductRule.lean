@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import BrownianMotion.Auxiliary.ConvergenceInMeasure
 public import MathFin.Foundations.ItoFormulaAdaptedProcess
 
 /-! # The product rule for two Itô processes driven by one Brownian motion
@@ -146,7 +147,8 @@ theorem ae_localItoIntegral_add {σ τ : ℝ≥0 → Ω → ℝ}
   · intro t ht
     exact tendstoInMeasure_riemannσ_localItoIntegral hB T hBmeas hBcont hρa hρc ht.2
   · intro t ht
-    refine ((tendstoInMeasure_riemannσ_localItoIntegral hB T hBmeas hBcont hσa hσc ht.2).add
+    refine (TendstoInMeasure.add
+      (tendstoInMeasure_riemannσ_localItoIntegral hB T hBmeas hBcont hσa hσc ht.2)
       (tendstoInMeasure_riemannσ_localItoIntegral hB T hBmeas hBcont hτa hτc ht.2)).congr_left
         fun n ↦ Filter.Eventually.of_forall fun ω ↦ ?_
     exact (riemannσ_add_of_eq (B := B) (T := t) (ω := ω) (θ := fun s ω ↦ σ s ω + τ s ω)
@@ -205,7 +207,8 @@ theorem ae_predItoIntegral_add {θ₁ θ₂ θ₃ : ℝ≥0 → Ω → ℝ}
   · intro t ht
     exact tendstoInMeasure_riemannσ_predItoIntegral hB T hBmeas hBcont hp₃ hc₃ ht.2
   · intro t ht
-    refine ((tendstoInMeasure_riemannσ_predItoIntegral hB T hBmeas hBcont hp₁ hc₁ ht.2).add
+    refine (TendstoInMeasure.add
+      (tendstoInMeasure_riemannσ_predItoIntegral hB T hBmeas hBcont hp₁ hc₁ ht.2)
       (tendstoInMeasure_riemannσ_predItoIntegral hB T hBmeas hBcont hp₂ hc₂ ht.2)).congr_left
         fun n ↦ ?_
     filter_upwards [h] with ω hω
