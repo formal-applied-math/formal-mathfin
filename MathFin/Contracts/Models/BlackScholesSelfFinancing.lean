@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Contracts.Models.BlackScholesHedge
+public import MathFin.Foundations.ItoProductRule
 
 /-!
 # The self-financing equation of the Black–Scholes delta hedge

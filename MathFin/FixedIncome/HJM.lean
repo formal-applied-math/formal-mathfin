@@ -135,7 +135,7 @@ lemma bankAccount_pos (t : ℝ≥0) (ω : Ω) : 0 < M.bankAccount t ω := Real.e
 
 /-- The bank account starts at one. -/
 @[simp] lemma bankAccount_zero (ω : Ω) : M.bankAccount 0 ω = 1 := by
-  simp [bankAccount]
+  simp [bankAccount, integratedRate]
 
 lemma discountedBond_pos (t T : ℝ≥0) (ω : Ω) : 0 < M.discountedBond t T ω :=
   div_pos (M.bond_pos t T ω) (M.bankAccount_pos t ω)
