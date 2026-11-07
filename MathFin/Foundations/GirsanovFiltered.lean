@@ -210,12 +210,13 @@ theorem aestronglyMeasurable_ZTpred (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ
       ((marshalEndpoints hBmeas T (V (ms k)).val).card - 1)).1 T
   have hmeas : StronglyMeasurable[natFiltration hBmeas T]
       (fun ω ↦ limUnder atTop (fun k ↦ Zn k ω)) := by
-    letI : MeasurableSpace Ω := natFiltration hBmeas T
+    let _ : MeasurableSpace Ω := natFiltration hBmeas T
     exact StronglyMeasurable.limUnder hZn
   refine ⟨_, hmeas, ?_⟩
   filter_upwards [hms] with ω hω
   exact hω.limUnder_eq.symm
 
+omit [IsProbabilityMeasure μ] in
 /-- **A Brownian increment's normalised exponential has mean one.**
 `𝔼 exp(a(B_t − B_s) − a²(t−s)/2) = 1`, from the Gaussian law of the increment. -/
 lemma integral_exp_increment (hBr : IsPreBrownianReal B μ) {s t : ℝ≥0} (hst : s ≤ t) (a : ℝ) :

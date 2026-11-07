@@ -792,6 +792,7 @@ import MathFin.Contracts.Models.BlackScholes
 import MathFin.Contracts.Models.BlackScholesExchange
 import MathFin.Contracts.Models.BlackScholesAsian
 import MathFin.Contracts.Models.BlackScholesChooser
+import MathFin.Contracts.Models.BlackScholesPhysical
 import MathFin.Contracts.Models.Binomial
 import MathFin.Contracts.Models.BinomialCompleteMarket
 import MathFin.Contracts.Models.BinomialLimit

@@ -44,6 +44,8 @@ is load-bearing.
   fixed times `0` and `T` — it carries no equivalence content, so it is stated against
   `Martingale` directly rather than the library's `IsEMM` bundle, whose `ac`/`ac'` fields
   this argument never needs.
+* `Contract.value_congr_ae` — a fixed-dated contract has the same value in two models that agree
+  almost surely at the `(underlying, date)` observations it reads (`Contract.obsList`).
 * `Contract.value_process_martingale` — the conditional-expectation value process of a
   contract is a `Q`-martingale. Carries **no** `Integrable` hypothesis: `martingale_condExp`
   is unconditional, because Mathlib's Bochner integral returns the junk value `0` off the
@@ -167,5 +169,93 @@ theorem Contract.value_process_martingale {Q : Measure Ω} {𝓕 : Filtration �
     (c : Contract ι) :
     Martingale (fun t ↦ Q[fun ω ↦ c.pathPV D (scenarioAt X ω) | 𝓕 t]) 𝓕 Q :=
   martingale_condExp _ 𝓕 Q
+
+/-! ### Two models that agree where the contract looks -/
+
+/-- The `(underlying, date)` observations a `Payoff` reads. -/
+def Payoff.obsList : Payoff ι → List (ι × ℝ≥0)
+  | .const _ => []
+  | .obs i t => [(i, t)]
+  | .add a b => a.obsList ++ b.obsList
+  | .sub a b => a.obsList ++ b.obsList
+  | .mul a b => a.obsList ++ b.obsList
+  | .max a b => a.obsList ++ b.obsList
+  | .min a b => a.obsList ++ b.obsList
+  | .indicatorLt a b => a.obsList ++ b.obsList
+  | .rpow a _ => a.obsList
+
+/-- A payoff evaluates the same on two scenarios that agree at the observations it reads. -/
+theorem Payoff.eval_congr {s s' : Scenario ι} :
+    ∀ a : Payoff ι, (∀ p ∈ a.obsList, s p.1 p.2 = s' p.1 p.2) → a.eval s = a.eval s'
+  | .const _, _ => rfl
+  | .obs i t, h => h (i, t) (List.mem_singleton_self _)
+  | .add a b, h => by
+      simp only [Payoff.eval]
+      rw [Payoff.eval_congr a fun p hp ↦ h p (List.mem_append.2 (Or.inl hp)),
+        Payoff.eval_congr b fun p hp ↦ h p (List.mem_append.2 (Or.inr hp))]
+  | .sub a b, h => by
+      simp only [Payoff.eval]
+      rw [Payoff.eval_congr a fun p hp ↦ h p (List.mem_append.2 (Or.inl hp)),
+        Payoff.eval_congr b fun p hp ↦ h p (List.mem_append.2 (Or.inr hp))]
+  | .mul a b, h => by
+      simp only [Payoff.eval]
+      rw [Payoff.eval_congr a fun p hp ↦ h p (List.mem_append.2 (Or.inl hp)),
+        Payoff.eval_congr b fun p hp ↦ h p (List.mem_append.2 (Or.inr hp))]
+  | .max a b, h => by
+      simp only [Payoff.eval]
+      rw [Payoff.eval_congr a fun p hp ↦ h p (List.mem_append.2 (Or.inl hp)),
+        Payoff.eval_congr b fun p hp ↦ h p (List.mem_append.2 (Or.inr hp))]
+  | .min a b, h => by
+      simp only [Payoff.eval]
+      rw [Payoff.eval_congr a fun p hp ↦ h p (List.mem_append.2 (Or.inl hp)),
+        Payoff.eval_congr b fun p hp ↦ h p (List.mem_append.2 (Or.inr hp))]
+  | .indicatorLt a b, h => by
+      simp only [Payoff.eval]
+      rw [Payoff.eval_congr a fun p hp ↦ h p (List.mem_append.2 (Or.inl hp)),
+        Payoff.eval_congr b fun p hp ↦ h p (List.mem_append.2 (Or.inr hp))]
+  | .rpow a _, h => by
+      simp only [Payoff.eval]
+      rw [Payoff.eval_congr a h]
+
+/-- The `(underlying, date)` observations a `Contract` reads (those of its payoffs; the dates of
+a `payAtHit` are not listed, which is why the congruence below asks for `FixedDated`). -/
+def Contract.obsList : Contract ι → List (ι × ℝ≥0)
+  | .zero => []
+  | .pay _ a => a.obsList
+  | .payAtHit _ _ a => a.obsList
+  | .both a b => a.obsList ++ b.obsList
+  | .scale _ a => a.obsList
+
+/-- A fixed-dated contract generates the same cash flows along two scenarios that agree at the
+observations it reads. -/
+theorem Contract.cashflows_congr {s s' : Scenario ι} :
+    ∀ c : Contract ι, c.FixedDated → (∀ p ∈ c.obsList, s p.1 p.2 = s' p.1 p.2) →
+      c.cashflows s = c.cashflows s'
+  | .zero, _, _ => rfl
+  | .pay t a, _, h => by
+      simp only [Contract.cashflows]
+      rw [Payoff.eval_congr a h]
+  | .payAtHit _ _ _, hc, _ => hc.elim
+  | .both a b, hc, h => by
+      simp only [Contract.cashflows]
+      rw [Contract.cashflows_congr a hc.1 fun p hp ↦ h p (List.mem_append.2 (Or.inl hp)),
+        Contract.cashflows_congr b hc.2 fun p hp ↦ h p (List.mem_append.2 (Or.inr hp))]
+  | .scale _ a, hc, h => by
+      simp only [Contract.cashflows]
+      rw [Contract.cashflows_congr a hc h]
+
+/-- **A fixed-dated contract has the same value in two models that agree almost surely at the
+observations it reads.** The models need not agree anywhere else: this is what lets a model that
+is only Brownian up to a horizon price a contract whose dates lie before it. -/
+theorem Contract.value_congr_ae {Q : Measure Ω} {D : ℝ≥0 → ℝ} {X Y : ι → ℝ≥0 → Ω → ℝ}
+    (c : Contract ι) (hc : c.FixedDated)
+    (h : ∀ p ∈ c.obsList, ∀ᵐ ω ∂Q, X p.1 p.2 ω = Y p.1 p.2 ω) :
+    c.value Q D X = c.value Q D Y := by
+  refine integral_congr_ae ?_
+  have hall : ∀ᵐ ω ∂Q, ∀ p ∈ {p | p ∈ c.obsList}, X p.1 p.2 ω = Y p.1 p.2 ω :=
+    (ae_ball_iff (List.finite_toSet _).countable).2 h
+  filter_upwards [hall] with ω hω
+  unfold Contract.pathPV
+  rw [Contract.cashflows_congr c hc (s := scenarioAt X ω) (s' := scenarioAt Y ω) hω]
 
 end MathFin.Contracts
