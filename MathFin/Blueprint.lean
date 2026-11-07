@@ -49,6 +49,8 @@ import MathFin.Foundations.StochasticFubini
 import MathFin.Foundations.NoArbitrageLocal
 import MathFin.Foundations.DensityPasting
 import MathFin.Contracts.Models.BlackScholesPhysical
+import MathFin.Foundations.ItoProductRule
+import MathFin.Contracts.Models.BlackScholesSelfFinancing
 import Architect
 
 /-!
@@ -503,3 +505,20 @@ attribute [blueprint "thm:emm-density-pasting" (title := "Pasting one-period den
   step of Dalang–Morton–Willinger. That conditional no arbitrage produces such densities is not
   proved. -/)]
   MathFin.LocalEMMDensities.isEMM_pastedMeasure
+
+attribute [blueprint "thm:ito-product-rule" (title := "Itô product rule")
+  (statement := /-- For two Itô processes $X = x_0 + \int b\,ds + \int\sigma\,dB$ and
+  $Y = y_0 + \int c\,ds + \int\tau\,dB$ driven by one Brownian motion, with continuous adapted
+  coefficients and no bounds, almost surely at every $t \le T$ at once,
+  $X_tY_t = x_0y_0 + \int_0^t (Xc + Yb + \sigma\tau)\,ds + \int_0^t (X\tau + Y\sigma)\,dB$:
+  the cross term $\int\sigma\tau\,ds$ is derived, by polarisation from the one-process formula.
+  This is Itô's formula for $f(x,y) = xy$ only. -/)]
+  MathFin.ItoFormulaAdapted.ito_product_rule_process
+
+attribute [blueprint "thm:bs-self-financing" (title := "The delta hedge is self-financing")
+  (statement := /-- Along the Black–Scholes path, with value $V_t = C(t,S_t)$, $\Delta_t = \Phi(d_1)$
+  shares and $\psi_t = V_t - \Delta_tS_t$ in the bank, for every $T' < T$, almost surely at every
+  $t \le T'$: $V_t = V_0 + \int_0^t \Delta\,dS + \int_0^t r\psi\,ds$, with
+  $\int\Delta\,dS = \int\Delta rS\,ds + \int\Delta\sigma S\,dB$ and $V_0$ the value of the
+  European call contract. An integral identity, not a trading-strategy structure. -/)]
+  MathFin.Contracts.BlackScholes.europeanCall_selfFinancing

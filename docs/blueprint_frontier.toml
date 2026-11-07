@@ -363,8 +363,8 @@ area = "foundations"
 [[node]]
 label = "thm:ito-formula-2d"
 title = "Two-process Itô formula"
-statement = "A continuous Itô formula for f(X,Y) with two Itô processes, upgrading the reduced_core sc-thm-7.5.2."
-uses = ["thm:ito-formula-l2", "thm:ito-formula-td-l2"]
+statement = "A continuous Itô formula for general C² f(t,X,Y) with two Itô processes, upgrading the reduced_core sc-thm-7.5.2; the product case f = xy is proved."
+uses = ["thm:ito-formula-l2", "thm:ito-formula-td-l2", "thm:ito-product-rule"]
 area = "foundations"
 
 [[node]]

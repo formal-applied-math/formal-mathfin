@@ -2355,4 +2355,11 @@ bounded-coefficient process class. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.LocalEMMDensities.isEMM_pastedMeasure
 
+/-- info: 'MathFin.ItoFormulaAdapted.ito_product_rule_process' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoFormulaAdapted.ito_product_rule_process
+/-- info: 'MathFin.Contracts.BlackScholes.europeanCall_selfFinancing' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.europeanCall_selfFinancing
+
 end MathFin.AxiomAudit
