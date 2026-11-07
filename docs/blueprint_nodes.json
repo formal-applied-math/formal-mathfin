@@ -12,6 +12,18 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/ItoFormulaCLM.lean"},
  {"uses": [],
+  "title": "CAPM beta",
+  "text":
+  "$\\beta = \\mathrm{Cov}(R, R_M)/\\mathrm{Var}(R_M)$, defined as the ratio of a\n  given covariance and variance.",
+  "name": "MathFin.beta",
+  "module": "MathFin.Portfolio.CAPM",
+  "line": 52,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:capm-beta",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Portfolio/CAPM.lean"},
+ {"uses": [],
   "title": "Portfolio variance",
   "text":
   "$\\mathrm{Var}(w) = \\sum_{i,j} w_i w_j \\sigma_{ij}$, the variance of an\n  $N$-asset portfolio with weights $w$ and covariance $\\sigma$.",
@@ -35,18 +47,6 @@
   "label": "def:zero-coupon-bond",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/FixedIncome/ZCB.lean"},
- {"uses": ["def:equivalent-measure"],
-  "title": "Equivalent martingale measure",
-  "text":
-  "$Q$ is a probability measure equivalent to $P$ under which the price $S$,\n  frozen at the horizon $T$ ($t \\mapsto S_{\\min(t,T)}$), is a martingale for the filtration.",
-  "name": "MathFin.IsEMM",
-  "module": "MathFin.Foundations.EquivMartingaleMeasure",
-  "line": 60,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:emm",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/EquivMartingaleMeasure.lean"},
  {"uses": [],
   "title": "bs_identity: S·φ(d₁) = Ke^{−rτ}·φ(d₂)",
   "text":
@@ -59,6 +59,18 @@
   "label": "thm:bs-identity",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/BlackScholes/PDE.lean"},
+ {"uses": ["def:equivalent-measure"],
+  "title": "Equivalent martingale measure",
+  "text":
+  "$Q$ is a probability measure equivalent to $P$ under which the price $S$,\n  frozen at the horizon $T$ ($t \\mapsto S_{\\min(t,T)}$), is a martingale for the filtration.",
+  "name": "MathFin.IsEMM",
+  "module": "MathFin.Foundations.EquivMartingaleMeasure",
+  "line": 60,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:emm",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/EquivMartingaleMeasure.lean"},
  {"uses": ["def:brownian-motion"],
   "title": "Discounted risk-neutral GBM is a martingale (EMM property)",
   "text":
@@ -143,18 +155,6 @@
   "label": "thm:binomial-representation",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Binomial/MartingaleRepresentation.lean"},
- {"uses": [],
-  "title": "Coherent risk measure",
-  "text":
-  "The Artzner–Delbaen–Eber–Heath axioms for a functional on the integrable\n  losses of $(\\Omega, P)$: monotonicity, translation invariance, positive homogeneity and\n  subadditivity.",
-  "name": "MathFin.IsCoherentRiskMeasure",
-  "module": "MathFin.RiskMeasures.Coherent",
-  "line": 74,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:coherent-risk-measure",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/RiskMeasures/Coherent.lean"},
  {"uses": ["def:quantile"],
   "title": "Value-at-risk",
   "text":
@@ -167,6 +167,18 @@
   "label": "def:value-at-risk",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/RiskMeasures/ValueAtRisk.lean"},
+ {"uses": [],
+  "title": "Coherent risk measure",
+  "text":
+  "The Artzner–Delbaen–Eber–Heath axioms for a functional on the integrable\n  losses of $(\\Omega, P)$: monotonicity, translation invariance, positive homogeneity and\n  subadditivity.",
+  "name": "MathFin.IsCoherentRiskMeasure",
+  "module": "MathFin.RiskMeasures.Coherent",
+  "line": 74,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:coherent-risk-measure",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/RiskMeasures/Coherent.lean"},
  {"uses": [],
   "title": "Snell envelope (the recursion)",
   "text":
@@ -192,6 +204,18 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/RiskMeasures/ValueAtRisk.lean"},
  {"uses": [],
+  "title": "Sharpe ratio",
+  "text":
+  "$(\\mu - r_f)/\\sigma$, the excess return per unit of volatility, of given\n  numbers $\\mu$, $r_f$, $\\sigma$.",
+  "name": "MathFin.sharpeRatio",
+  "module": "MathFin.Performance.Ratios",
+  "line": 79,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:sharpe-ratio",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Performance/Ratios.lean"},
+ {"uses": [],
   "title": "Quantile function (generalized inverse CDF)",
   "text":
   "The quantile function of a law $\\mu$ on $\\mathbb{R}$,\n  $q_\\mu(p) = \\inf\\{x \\mid p \\le F_\\mu(x)\\}$, the generalized inverse of its CDF. Its values are\n  meaningful for $p \\in (0,1)$.",
@@ -203,6 +227,18 @@
   "label": "def:quantile",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/Quantile.lean"},
+ {"uses": [],
+  "title": "Tangent portfolio (first-order condition)",
+  "text":
+  "$w$ satisfies the tangency first-order condition when its marginal-variance\n  vector $\\Sigma w$ is parallel to the excess-return vector.",
+  "name": "MathFin.IsTangentPortfolioN",
+  "module": "MathFin.Portfolio.TangentPortfolio",
+  "line": 85,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:tangent-portfolio",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Portfolio/TangentPortfolio.lean"},
  {"uses": ["def:brownian-motion", "thm:wiener-isometry"],
   "title": "Schwartz commodity futures",
   "text":
@@ -251,6 +287,18 @@
   "label": "thm:carr-madan",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/CarrMadan.lean"},
+ {"uses": [],
+  "title": "Two-asset minimum-variance weight",
+  "text":
+  "$w^* = (\\sigma_2^2 - \\rho\\sigma_1\\sigma_2)/(\\sigma_1^2 - 2\\rho\\sigma_1\\sigma_2\n  + \\sigma_2^2)$, the closed-form weight on the first asset of the two-asset minimum-variance\n  portfolio.",
+  "name": "MathFin.minVarWeightTwo",
+  "module": "MathFin.Portfolio.Markowitz",
+  "line": 94,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:two-asset-min-variance",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Portfolio/Markowitz.lean"},
  {"uses": [],
   "title": "Discrete Itô formula (pathwise)",
   "text":
@@ -327,18 +375,6 @@
   "label": "thm:stochastic-fubini",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/StochasticFubini.lean"},
- {"uses": ["def:standard-normal-cdf", "thm:feynman-kac-heat-eq", "thm:bs-call"],
-  "title": "BS PDE in the Brownian coordinate",
-  "text":
-  "The discounted call price read along the Brownian state,\n  $f(t,x) = e^{-rt}\\,V(S_0 e^{(r-\\sigma^2/2)t + \\sigma x},\\,T-t)$, solves the backward heat\n  equation $\\partial_t f + \\tfrac12\\partial_{xx} f = 0$ for $t < T$, from the Feynman–Kac\n  heat-flow form of the price. That $f(t, B_t)$ is then a local martingale is not proved.",
-  "name": "MathFin.discountedCallBrownian_heat_equation",
-  "module": "MathFin.BlackScholes.PDEFromIto",
-  "line": 106,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:bs-pde-brownian",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/BlackScholes/PDEFromIto.lean"},
  {"uses": ["def:zero-coupon-bond"],
   "title": "First-order immunization",
   "text":
@@ -351,6 +387,18 @@
   "label": "thm:bond-immunization",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/FixedIncome/Immunization.lean"},
+ {"uses": ["def:standard-normal-cdf", "thm:feynman-kac-heat-eq", "thm:bs-call"],
+  "title": "BS PDE in the Brownian coordinate",
+  "text":
+  "The discounted call price read along the Brownian state,\n  $f(t,x) = e^{-rt}\\,V(S_0 e^{(r-\\sigma^2/2)t + \\sigma x},\\,T-t)$, solves the backward heat\n  equation $\\partial_t f + \\tfrac12\\partial_{xx} f = 0$ for $t < T$, from the Feynman–Kac\n  heat-flow form of the price. That $f(t, B_t)$ is then a local martingale is not proved.",
+  "name": "MathFin.discountedCallBrownian_heat_equation",
+  "module": "MathFin.BlackScholes.PDEFromIto",
+  "line": 106,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:bs-pde-brownian",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/BlackScholes/PDEFromIto.lean"},
  {"uses": ["def:standard-normal-cdf"],
   "title": "Aave liquidation probability is a KMV default probability",
   "text":
@@ -510,6 +558,18 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/QuantileConvergence.lean"},
  {"uses": [],
+  "title": "Kelly fraction",
+  "text":
+  "$f^* = (pb - q)/b$ with $q = 1 - p$: the Kelly stake for a bet that pays $b$\n  to $1$ with win probability $p$.",
+  "name": "MathFin.kellyFraction",
+  "module": "MathFin.Performance.Ratios",
+  "line": 156,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:kelly-fraction",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Performance/Ratios.lean"},
+ {"uses": [],
   "title": "The contract language",
   "text":
   "A contract says what is paid and when, built from payoffs by combination.",
@@ -533,6 +593,18 @@
   "label": "thm:rockafellar-uryasev",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/RiskMeasures/ExpectedShortfall.lean"},
+ {"uses": [],
+  "title": "Tracking error",
+  "text":
+  "The squared tracking error $\\sigma_p^2 - 2\\,\\mathrm{cov} + \\sigma_b^2$ of given\n  moments, the variance of the active return $R_p - R_b$\n  (`trackingErrorSq_eq_variance_sub`).",
+  "name": "MathFin.trackingErrorSq",
+  "module": "MathFin.Performance.RatiosExtended",
+  "line": 158,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:tracking-error",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Performance/RatiosExtended.lean"},
  {"uses": [],
   "title": "The Vasicek bond price solves its PDE",
   "text":
@@ -723,18 +795,6 @@
   "label": "thm:pricing-measure",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/MarketCompleteness.lean"},
- {"uses": ["def:standard-normal-cdf", "thm:esscher-tilt", "thm:bs-call"],
-  "title": "Call price under an Esscher-tilted Gaussian (static Girsanov)",
-  "text":
-  "For a standard normal $W$ under $P$ and any shift $c$, the tilt\n  $Q = P\\,e^{cW - c^2/2}$ makes $W - c$ standard normal, so the call on\n  $S_0 e^{(r-\\sigma^2/2)T + \\sigma\\sqrt T (W - c)}$ is worth the Black–Scholes closed form\n  under $Q$. One date, Gaussian shift only. With $c = (r-\\mu)\\sqrt T/\\sigma$ the same tilt\n  reprices the physical-drift asset to $S_0$ (`discounted_physical_terminal_eq_S0`); the call\n  formula for the physical-drift asset is not stated separately.",
-  "name": "MathFin.bs_call_formula_of_physical",
-  "module": "MathFin.Bridges.GaussianGirsanov",
-  "line": 255,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:girsanov-call",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Bridges/GaussianGirsanov.lean"},
  {"uses": [],
   "title": "Markowitz: the Lagrangian condition is sufficient",
   "text":
@@ -747,6 +807,18 @@
   "label": "thm:markowitz-lagrangian",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Portfolio/MarkowitzLagrangian.lean"},
+ {"uses": ["def:standard-normal-cdf", "thm:esscher-tilt", "thm:bs-call"],
+  "title": "Call price under an Esscher-tilted Gaussian (static Girsanov)",
+  "text":
+  "For a standard normal $W$ under $P$ and any shift $c$, the tilt\n  $Q = P\\,e^{cW - c^2/2}$ makes $W - c$ standard normal, so the call on\n  $S_0 e^{(r-\\sigma^2/2)T + \\sigma\\sqrt T (W - c)}$ is worth the Black–Scholes closed form\n  under $Q$. One date, Gaussian shift only. With $c = (r-\\mu)\\sqrt T/\\sigma$ the same tilt\n  reprices the physical-drift asset to $S_0$ (`discounted_physical_terminal_eq_S0`); the call\n  formula for the physical-drift asset is not stated separately.",
+  "name": "MathFin.bs_call_formula_of_physical",
+  "module": "MathFin.Bridges.GaussianGirsanov",
+  "line": 255,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:girsanov-call",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Bridges/GaussianGirsanov.lean"},
  {"uses": ["def:brownian-motion", "thm:conditional-bracket"],
   "title": "The bracket compensates the square",
   "text":
@@ -759,18 +831,6 @@
   "label": "thm:bracket-compensator",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/BracketCompensator.lean"},
- {"uses": ["def:brownian-motion"],
-  "title": "Adapted Itô isometry",
-  "text":
-  "For random *adapted* simple integrands,\n  $E[(\\sum_k \\varphi_k \\Delta B_k)^2] = \\sum_k E[\\varphi_k^2]\\,\\Delta t_k$ — the\n  cross terms vanish by the weak Markov property, the exact point where Itô\n  departs from Wiener.",
-  "name": "MathFin.ItoIsometryAdapted.ito_isometry_discrete",
-  "module": "MathFin.Foundations.ItoIsometryAdapted",
-  "line": 268,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:ito-isometry-adapted",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/ItoIsometryAdapted.lean"},
  {"uses":
   ["def:brownian-motion",
    "def:standard-normal-cdf",
@@ -789,6 +849,18 @@
   "label": "thm:bs-delta-hedge",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/BlackScholes/DeltaHedge.lean"},
+ {"uses": ["def:brownian-motion"],
+  "title": "Adapted Itô isometry",
+  "text":
+  "For random *adapted* simple integrands,\n  $E[(\\sum_k \\varphi_k \\Delta B_k)^2] = \\sum_k E[\\varphi_k^2]\\,\\Delta t_k$ — the\n  cross terms vanish by the weak Markov property, the exact point where Itô\n  departs from Wiener.",
+  "name": "MathFin.ItoIsometryAdapted.ito_isometry_discrete",
+  "module": "MathFin.Foundations.ItoIsometryAdapted",
+  "line": 268,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:ito-isometry-adapted",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/ItoIsometryAdapted.lean"},
  {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
   "title": "Itô's formula for C² functions",
   "text":
@@ -801,18 +873,6 @@
   "label": "thm:ito-formula-c2",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/ItoFormulaAdaptedProcess.lean"},
- {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
-  "title": "Time-dependent Itô formula, L² (Summit A′)",
-  "text":
-  "The classical $df = f_x\\,dB + (f_t + \\tfrac12 f_{xx})\\,dt$ in\n  integrated $L^2$ form: $f(T,B_T) - f(0,B_0) = \\int_0^T f_x(s,B_s)\\,dB_s\n  + \\int_0^T (f_t + \\tfrac12 f_{xx})(s,B_s)\\,ds$ for $C^{1,2}$ functions with bounded\n  higher partials — the time-dependent extension of Summit A, with the drift Riemann\n  term as the third vanishing limit and the joint continuity of $f_t$ *derived* from\n  its bounded partials. Unbounded coefficients stay out of scope — the named gap.",
-  "name": "MathFin.ito_formula_td_L2_bddDeriv",
-  "module": "MathFin.Foundations.ItoFormulaTD",
-  "line": 272,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:ito-formula-td-l2",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/ItoFormulaTD.lean"},
  {"uses": ["def:brownian-motion"],
   "title": "Continuous Itô integral (CLM on [0,T])",
   "text":
@@ -825,6 +885,18 @@
   "label": "def:ito-integral-clm",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/ItoIntegralCLM.lean"},
+ {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
+  "title": "Time-dependent Itô formula, L² (Summit A′)",
+  "text":
+  "The classical $df = f_x\\,dB + (f_t + \\tfrac12 f_{xx})\\,dt$ in\n  integrated $L^2$ form: $f(T,B_T) - f(0,B_0) = \\int_0^T f_x(s,B_s)\\,dB_s\n  + \\int_0^T (f_t + \\tfrac12 f_{xx})(s,B_s)\\,ds$ for $C^{1,2}$ functions with bounded\n  higher partials — the time-dependent extension of Summit A, with the drift Riemann\n  term as the third vanishing limit and the joint continuity of $f_t$ *derived* from\n  its bounded partials. Unbounded coefficients stay out of scope — the named gap.",
+  "name": "MathFin.ito_formula_td_L2_bddDeriv",
+  "module": "MathFin.Foundations.ItoFormulaTD",
+  "line": 272,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:ito-formula-td-l2",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/ItoFormulaTD.lean"},
  {"uses": ["def:brownian-motion"],
   "title": "Wiener isometry (deterministic L²)",
   "text":

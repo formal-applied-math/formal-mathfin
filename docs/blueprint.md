@@ -60,16 +60,22 @@ edge is a genuine logical root.
 graph TD
   binomialNoArbitrage["Binomial no-arbitrage condition"]:::proved
   brownianMotion["Brownian motion (Mathlib, upstream)"]:::upstream
+  capmBeta["CAPM beta"]:::proved
   coherentRiskMeasure["Coherent risk measure"]:::proved
   contract["The contract language"]:::proved
   equivalentMeasure["Equivalent probability measure"]:::proved
   gaussianFactorCopula["One-factor Gaussian copula"]:::proved
+  kellyFraction["Kelly fraction"]:::proved
   numeraireMeasure["Numéraire measure as a Radon–Nikodym change"]:::proved
   portfolioVariance["Portfolio variance"]:::proved
   quantile["Quantile function (generalized inverse CDF)"]:::proved
+  sharpeRatio["Sharpe ratio"]:::proved
   snellEnvelope["Snell envelope (the recursion)"]:::proved
   standardNormalCdf["Standard normal CDF Φ"]:::proved
   survivalFunction["Survival function of a lifetime"]:::proved
+  tangentPortfolio["Tangent portfolio (first-order condition)"]:::proved
+  trackingError["Tracking error"]:::proved
+  twoAssetMinVariance["Two-asset minimum-variance weight"]:::proved
   zeroCouponBond["Zero-coupon bond, constant short rate"]:::proved
   binomialRepresentation["Binomial martingale representation (completeness)"]:::proved
   bsIdentity["bs_identity: S·φ(d₁) = Ke^{−rτ}·φ(d₂)"]:::proved
@@ -376,6 +382,7 @@ graph TD
   vasicekBondPde --> affineTermStructure
   snellEnvelope --> americanPutPremium
   emm --> aptPricing
+  capmBeta --> aptPricing
   impermanentLoss --> balancerInvariant
   reflectionPrinciple --> barrierLookbackClosedForms
   bsCall --> barrierLookbackClosedForms
@@ -510,16 +517,22 @@ graph TD
 |---|---|---|
 | `def:binomial-no-arbitrage` Binomial no-arbitrage condition | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Abinomial-no-arbitrage%22%20in%3Abody) |
 | `def:brownian-motion` Brownian motion (Mathlib, upstream) | ✅ upstream | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Abrownian-motion%22%20in%3Abody) |
+| `def:capm-beta` CAPM beta | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acapm-beta%22%20in%3Abody) |
 | `def:coherent-risk-measure` Coherent risk measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acoherent-risk-measure%22%20in%3Abody) |
 | `def:contract` The contract language | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acontract%22%20in%3Abody) |
 | `def:equivalent-measure` Equivalent probability measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aequivalent-measure%22%20in%3Abody) |
 | `def:gaussian-factor-copula` One-factor Gaussian copula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Agaussian-factor-copula%22%20in%3Abody) |
+| `def:kelly-fraction` Kelly fraction | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Akelly-fraction%22%20in%3Abody) |
 | `def:numeraire-measure` Numéraire measure as a Radon–Nikodym change | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Anumeraire-measure%22%20in%3Abody) |
 | `def:portfolio-variance` Portfolio variance | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aportfolio-variance%22%20in%3Abody) |
 | `def:quantile` Quantile function (generalized inverse CDF) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aquantile%22%20in%3Abody) |
+| `def:sharpe-ratio` Sharpe ratio | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Asharpe-ratio%22%20in%3Abody) |
 | `def:snell-envelope` Snell envelope (the recursion) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Asnell-envelope%22%20in%3Abody) |
 | `def:standard-normal-cdf` Standard normal CDF Φ | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Astandard-normal-cdf%22%20in%3Abody) |
 | `def:survival-function` Survival function of a lifetime | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Asurvival-function%22%20in%3Abody) |
+| `def:tangent-portfolio` Tangent portfolio (first-order condition) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Atangent-portfolio%22%20in%3Abody) |
+| `def:tracking-error` Tracking error | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Atracking-error%22%20in%3Abody) |
+| `def:two-asset-min-variance` Two-asset minimum-variance weight | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Atwo-asset-min-variance%22%20in%3Abody) |
 | `def:zero-coupon-bond` Zero-coupon bond, constant short rate | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Azero-coupon-bond%22%20in%3Abody) |
 | `thm:binomial-representation` Binomial martingale representation (completeness) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abinomial-representation%22%20in%3Abody) |
 | `thm:bs-identity` bs_identity: S·φ(d₁) = Ke^{−rτ}·φ(d₂) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-identity%22%20in%3Abody) |
