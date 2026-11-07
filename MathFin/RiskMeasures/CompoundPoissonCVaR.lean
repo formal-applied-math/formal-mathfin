@@ -73,8 +73,8 @@ theorem _root_.ProbabilityTheory.integral_abs_sum_le_of_identDistrib {ι : Type*
     ((hident i hi).integrable_iff.mpr hY).abs
   calc ∫ ω, |∑ i ∈ s, X i ω| ∂μ
       ≤ ∫ ω, ∑ i ∈ s, |X i ω| ∂μ :=
-        integral_mono (integrable_finset_sum _ fun i hi ↦ (hident i hi).integrable_iff.mpr hY).abs
-          (integrable_finset_sum _ habs) fun ω ↦ Finset.abs_sum_le_sum_abs _ _
+        integral_mono (integrable_finsetSum _ fun i hi ↦ (hident i hi).integrable_iff.mpr hY).abs
+          (integrable_finsetSum _ habs) fun ω ↦ Finset.abs_sum_le_sum_abs _ _
     _ = ∑ i ∈ s, ∫ ω, |X i ω| ∂μ := integral_finset_sum _ habs
     _ = ∑ i ∈ s, ∫ ω, |Y ω| ∂μ :=
         Finset.sum_congr rfl fun i hi ↦ ((hident i hi).comp continuous_abs.measurable).integral_eq
@@ -95,11 +95,12 @@ theorem integrable_compoundPoisson :
     Integrable (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ := by
   have hgm (n : ℕ) : Measurable fun x : ℕ → ℝ ↦ ∑ i ∈ Finset.range n, x i := by fun_prop
   have hY : AEMeasurable (fun ω i ↦ X i ω) μ := .of_eval fun i ↦ (hident i).aemeasurable_fst
+  have hS (n : ℕ) : Integrable (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ :=
+    integrable_finsetSum _ fun i _ ↦ (hident i).integrable_iff.mpr hX
   refine (integrable_comp_prodMk_iff_of_indepFun (g := fun p ↦ ∑ i ∈ Finset.range p.1, p.2 i)
     hNX hN.aemeasurable hY
     (measurable_from_prod_countable_right hgm).aestronglyMeasurable).mpr
-    (integrable_prod_map_of_countable hY hgm
-      (fun n ↦ integrable_finset_sum _ fun i _ ↦ (hident i).integrable_iff.mpr hX) ?_)
+    (integrable_prod_map_of_countable hY hgm hS ?_)
   rw [hN.map_eq]
   have hC : 0 ≤ ∫ ω, |X 0 ω| ∂μ := integral_nonneg fun _ ↦ abs_nonneg _
   refine ((PoissonPgf.integrable_pow_poissonMeasure lam 2).const_mul (∫ ω, |X 0 ω| ∂μ)).mono'
@@ -117,7 +118,7 @@ theorem integral_max_sub_compoundPoisson (c : ℝ) :
     ∫ ω, max (∑ i ∈ Finset.range (N ω), X i ω - c) 0 ∂μ
       = ∫ n, ∫ ω, max (∑ i ∈ Finset.range n, X i ω - c) 0 ∂μ ∂(poissonMeasure lam) := by
   have hS (n : ℕ) : Integrable (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ :=
-    integrable_finset_sum _ fun i _ ↦ (hident i).integrable_iff.mpr hX
+    integrable_finsetSum _ fun i _ ↦ (hident i).integrable_iff.mpr hX
   have hC : 0 ≤ ∫ ω, |X 0 ω| ∂μ := integral_nonneg fun _ ↦ abs_nonneg _
   refine integral_comp_of_hasLaw_of_countable
     (F := fun n x ↦ max (∑ i ∈ Finset.range n, x i - c) 0) (c := fun n ↦ ∫ ω,
@@ -143,8 +144,10 @@ theorem integral_max_sub_compoundPoisson (c : ℝ) :
     _ ≤ n * ∫ ω, |X 0 ω| ∂μ + |c| := by
         rw [integral_add (hS n).abs (integrable_const _),
           integral_const, probReal_univ, one_smul]
-        exact add_le_add_left (by simpa using integral_abs_sum_le_of_identDistrib
-          (s := Finset.range n) (fun i _ ↦ hident i) hX) _
+        have hW := integral_abs_sum_le_of_identDistrib (s := Finset.range n)
+          (fun i _ ↦ hident i) hX
+        rw [Finset.card_range] at hW
+        exact add_le_add_left hW _
     _ ≤ _ := by
         nlinarith [mul_le_mul_of_nonneg_right hn hC,
           mul_le_mul_of_nonneg_left h1 (abs_nonneg c)]
