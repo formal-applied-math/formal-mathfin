@@ -52,7 +52,8 @@ MSC 60H10, MSC 91G20, JEL G13
 
 @[expose] public section
 
-open MeasureTheory ProbabilityTheory Set ItoIntegralL2 ItoFormulaAdapted ItoIntegralLocalised
+open MeasureTheory ProbabilityTheory Set MathFin MathFin.ItoIntegralL2 MathFin.ItoFormulaAdapted
+  MathFin.ItoIntegralLocalised
 open scoped NNReal
 
 namespace MathFin.Contracts.BlackScholes
