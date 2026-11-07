@@ -29,6 +29,7 @@ import MathFin.BlackScholes.PDEFromFeynmanKac
 import MathFin.BlackScholes.MargrabeGrounding
 import MathFin.Binomial.MartingaleRepresentation
 import MathFin.Binomial.CRRCharFun
+import MathFin.Binomial.CRRClosedForm
 import MathFin.BlackScholes.MertonDominance
 import MathFin.Foundations.MarkovPathMeasure
 import MathFin.Foundations.ItoFormulaAdaptedProcess
@@ -37,6 +38,19 @@ import MathFin.FixedIncome.CVA
 import MathFin.FixedIncome.FxForwardParity
 import MathFin.BlackScholes.JumpDiffusionProcess
 import MathFin.BlackScholes.JumpDiffusionVarianceSwap
+import MathFin.Foundations.Numeraire
+import MathFin.Foundations.SnellEnvelope
+import MathFin.Foundations.MarshallOlkin
+import MathFin.FixedIncome.KeyRateDuration
+import MathFin.BlackScholes.DeltaHedge
+import MathFin.Foundations.GirsanovFiltered
+import MathFin.Foundations.SDEExistence
+import MathFin.Foundations.StochasticFubini
+import MathFin.Foundations.NoArbitrageLocal
+import MathFin.Foundations.DensityPasting
+import MathFin.Contracts.Models.BlackScholesPhysical
+import MathFin.Foundations.ItoProductRule
+import MathFin.Contracts.Models.BlackScholesSelfFinancing
 import Architect
 
 /-!
@@ -74,8 +88,8 @@ attribute [blueprint "def:brownian-motion" (title := "Brownian motion (Mathlib, 
 -- ===== foundations =====
 
 attribute [blueprint "thm:quadratic-variation" (title := "Quadratic variation: ∑(ΔB)² → T in L²")
-  (statement := /-- Along refining partitions, $\sum_k (B_{t_{k+1}}-B_{t_k})^2 \to T$
-  in $L^2$: realized variance accumulates linearly in time at unit rate — the
+  (statement := /-- Along the uniform partition of $[0,T]$ into $n$ pieces,
+  $\sum_k (B_{t_{k+1}}-B_{t_k})^2 \to T$ in $L^2$ at rate $2T^2/n$: realized variance accumulates linearly in time at unit rate — the
   root of the "$\sigma^2 \cdot$ time" that pervades pricing. -/)]
   MathFin.QuadraticVariationL2.tendsto_qv
 
@@ -136,7 +150,8 @@ attribute [blueprint "thm:ito-formula-td-l2" (title := "Time-dependent Itô form
   MathFin.ito_formula_td_L2_bddDeriv
 
 attribute [blueprint "thm:expectation-ito" (title := "Expectation-form Itô / Feynman–Kac")
-  (statement := /-- $E[f(B_t)] = f(0) + \tfrac12 \int_0^t E[f''(B_s)]\,ds$, proved
+  (statement := /-- For $f$ with $f, f', f''$ bounded and $f''$ continuous,
+  $E[f(B_t)] = f(0) + \tfrac12 \int_0^t E[f''(B_s)]\,ds$, proved
   via the heat equation: the $\tfrac12\sigma^2$ second-order term that drives the
   Black–Scholes PDE. -/)]
   MathFin.FeynmanKacHeatEquation.expectation_ito
@@ -166,10 +181,14 @@ attribute [blueprint "thm:esscher-tilt" (title := "Esscher tilt is the Gaussian 
   constructed, not assumed. -/)]
   MathFin.hasLaw_esscher_tilt
 
-attribute [blueprint "thm:girsanov-call" (title := "Call price from the physical measure")
-  (statement := /-- Under the Esscher-derived risk-neutral measure the call price
-  is the discounted expectation: **the risk-neutral measure is a theorem, not an
-  axiom** — `BSCallHyp` stops being a hypothesis. -/)]
+attribute [blueprint "thm:girsanov-call"
+  (title := "Call price under an Esscher-tilted Gaussian (static Girsanov)")
+  (statement := /-- For a standard normal $W$ under $P$ and any shift $c$, the tilt
+  $Q = P\,e^{cW - c^2/2}$ makes $W - c$ standard normal, so the call on
+  $S_0 e^{(r-\sigma^2/2)T + \sigma\sqrt T (W - c)}$ is worth the Black–Scholes closed form
+  under $Q$. One date, Gaussian shift only. With $c = (r-\mu)\sqrt T/\sigma$ the same tilt
+  reprices the physical-drift asset to $S_0$ (`discounted_physical_terminal_eq_S0`); the call
+  formula for the physical-drift asset is not stated separately. -/)]
   MathFin.bs_call_formula_of_physical
 
 attribute [blueprint "thm:bscallhyp-brownian" (title := "BSCallHyp from a Brownian model")
@@ -177,11 +196,13 @@ attribute [blueprint "thm:bscallhyp-brownian" (title := "BSCallHyp from a Browni
   hypothesis directly — the second route into `BSCallHyp`. -/)]
   MathFin.BSCallHyp.of_isPreBrownian
 
-attribute [blueprint "thm:continuous-ftap" (title := "Continuous-time first FTAP (EMM)")
+attribute [blueprint "thm:continuous-ftap"
+  (title := "Discounted risk-neutral GBM is a martingale (EMM property)")
   (statement := /-- Under the risk-neutral measure the discounted price
   $e^{-rt}S_t$ is a continuous-time martingale, straight from the Wald
   exponential — the defining EMM property, with no stochastic-integral
-  machinery. -/)]
+  machinery. It is not a continuous-time FTAP: only "an EMM precludes arbitrage by
+  simple strategies" is proved, and the converse is not. -/)]
   MathFin.discountedGBM_isMartingale
 
 attribute [blueprint "thm:martingale-representation"
@@ -222,7 +243,10 @@ attribute [blueprint "thm:pricing-measure" (title := "The pricing measure on �
   a price $S$ — the wealth built here is an integral against $B$, and nothing in
   $\mathrm{IsEMM}\,S\,Q$ makes that a $Q$-fair game. The hypothesis is guarded: $\mu$
   satisfies it, and the textbook gains-martingale condition implies it. Only
-  complete $\Rightarrow$ unique is proved; the Jacod–Yor converse is out of scope. -/)]
+  complete $\Rightarrow$ unique is proved; the Jacod–Yor converse is out of scope. For a
+  price $S = S_0 + \int \sigma\,dB$ with $\sigma \ne 0$ a.e. and $Q$ with a square-integrable
+  density, the hypothesis does follow from $S$ being a $Q$-martingale
+  (`measure_eq_of_density`). -/)]
   MathFin.measure_eq_of_pricesGainsAtZero
 
 -- ===== pricing =====
@@ -283,9 +307,10 @@ attribute [blueprint "thm:margrabe" (title := "Margrabe exchange option")
   MathFin.margrabe_exchange_price
 
 attribute [blueprint "thm:carr-madan" (title := "Carr–Madan static replication")
-  (statement := /-- Every twice-differentiable payoff decomposes as cash, a
-  forward, and a static book of OTM options weighted by its convexity $f''$ —
-  one integration by parts plus a positive-part case split. The log payoff
+  (statement := /-- A payoff $f$ twice differentiable on $[L,U]$ with continuous $f''$
+  decomposes, at every spot in $[L,U]$, as cash, a forward, and a static book of OTM
+  options on the strikes in $[L,U]$ weighted by its convexity $f''$ — one integration by
+  parts plus a positive-part case split. The unbounded-strike form is not proved. The log payoff
   specializes to the variance-swap $1/K^2$ strip. -/)]
   MathFin.carrMadan_spanning
 
@@ -300,12 +325,13 @@ attribute [blueprint "thm:binomial-representation"
   MathFin.binomial_martingale_representation
 
 attribute [blueprint "thm:crr-bs-convergence" (title := "CRR → Black–Scholes convergence")
-  (statement := /-- The binomial call price converges to the Black–Scholes call
-  price: charFun → Lévy continuity → weak convergence, with put–call parity
-  lifting the (bounded) put's convergence to the call. -/)]
-  MathFin.binomialPrice_call_tendsto_bs
+  (statement := /-- When every $n$-step tree is arbitrage-free, the binomial call price
+  converges to the Black–Scholes closed form $S_0\Phi(d_1) - Ke^{-rT}\Phi(d_2)$:
+  charFun → Lévy continuity → weak convergence, with put–call parity lifting the
+  (bounded) put's convergence to the call. -/)]
+  MathFin.binomialPrice_call_tendsto_bs_closed
 
-attribute [blueprint "thm:merton-dominance" (title := "Merton dominance: jump risk is never free")
+attribute [blueprint "thm:merton-dominance" (title := "Merton call price dominates Black–Scholes at the diffusion vol")
   (statement := /-- The Merton (1976) jump-diffusion call price dominates the
   Black–Scholes price at the diffusion vol, for every intensity, mean jump
   size $k > -1$, and jump vol: vega prices the jump-size channel (conditional
@@ -386,3 +412,114 @@ attribute [blueprint "thm:unilateral-cva" (title := "Unilateral CVA, Gaussian ex
   \varphi(d_s)]\,h(s)Q(s)\,ds$, $d_s = m(s)/(\sigma(s)\sqrt s)$. Only the marginal laws of
   the exposure enter; no exposure dynamics are modelled. -/)]
   MathFin.CVA.cva_gaussian
+
+attribute [blueprint "def:numeraire-measure" (title := "Numéraire measure as a Radon–Nikodym change")
+  (statement := /-- $Q^N = Q$ with density $(N_T B_0)/(N_0 B_T)$. When $N_T, B_T > 0$ and
+  $\mathbb{E}^Q[N_T/B_T] = N_0/B_0$ it is a probability measure equivalent to $Q$
+  (`numeraireMeasure_isEquivProbMeasure`). -/)]
+  MathFin.numeraireMeasure
+
+attribute [blueprint "thm:snell-envelope" (title := "Snell envelope: the smallest dominating supermartingale")
+  (statement := /-- For an integrable reward with exercise dates $X$ and horizon $N$ on a
+  discrete-time filtered probability space, the Snell envelope lies almost surely below every
+  supermartingale that dominates the reward at the exercise dates and at $N$: it is the
+  smallest such supermartingale (it is one, and dominates the reward, by
+  `snellEnvelope_supermartingale` and `snellEnvelope_dominates`). The first-contact time
+  attains it in expectation (`snellContact_expected_payoff`). -/)]
+  MathFin.snellEnvelope_le_supermartingale
+
+attribute [blueprint "thm:marshall-olkin" (title := "Marshall–Olkin first-to-default")
+  (statement := /-- With independent exponential clocks $T_0, T_1, T_2$ of positive rates and
+  default times $\min(T_0,T_2)$, $\min(T_1,T_2)$ (a common shock $T_2$), the first default
+  survives past $t \ge 0$ with probability $e^{-(\lambda_0+\lambda_1+\lambda_2)t}$. The
+  default-indicator covariance is `covariance_indicator_marshallOlkin`; it is not normalised
+  to a correlation. -/)]
+  MathFin.marshallOlkin_firstToDefault_survival
+
+attribute [blueprint "thm:key-rate-duration" (title := "Key-rate durations sum to the parallel shift")
+  (statement := /-- For a coupon bond on a curve of annually compounded key rates, at a flat
+  curve $k \equiv y$ with $1 + y \ne 0$, the key-rate partial derivatives of the price sum to
+  the derivative of the flat-yield price: $\sum_j \partial P/\partial k_j = dP/dy$ (dollar
+  durations; divide by $-P$ for durations). -/)]
+  MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc
+
+attribute [blueprint "thm:girsanov-brownian-characterisation"
+  (title := "Girsanov: the shifted process is a filtered Brownian motion")
+  (statement := /-- For bounded predictable $\theta$ and a horizon $T$, under
+  $Q = Z_T\,\mu$ with $Z_T = \exp(-\int_0^T\theta\,dB - \tfrac12\int_0^T\theta^2\,dt)$, the
+  process $B^\theta$, a modification of $B + \int_0^{\cdot\wedge T}\theta\,ds$, is a pre-Brownian motion for the
+  natural filtration of $B$ on all of $[0,\infty)$: $\mathcal{N}(0,t-s)$ increments independent of
+  $\mathcal{F}_s$. With continuous paths for $B$ it is a Brownian motion under $Q$
+  (`Btheta_isBrownianReal_predictable_of_bdd`). The measure is the horizon-$T$ one; unbounded
+  $\theta$ and Novikov's condition are not covered. -/)]
+  MathFin.Btheta_isFilteredPreBrownian_predictable_of_bdd
+
+attribute [blueprint "thm:physical-measure-pricing"
+  (title := "Contracts on the physical asset, priced under the Girsanov measure")
+  (statement := /-- For the physical asset $S_u = S_0 e^{(m-\sigma^2/2)u + \sigma W_u}$ and the
+  constant market price of risk $\theta = (m-r)/\sigma$, under the horizon-$H$ Girsanov measure
+  every fixed-dated contract observed in $[0,H]$ has the same value on the physical asset as on
+  the risk-neutral asset $S_0 e^{(r-\sigma^2/2)u + \sigma B^\theta_u}$, for any discount curve.
+  So the European call with maturity $T \le H$ is worth $S_0\Phi(d_1) - Ke^{-rT}\Phi(d_2)$
+  (`value_europeanCall_physical`), and the chooser and the geometric Asian call their closed
+  forms. The asset identity behind it holds almost surely at each date. -/)]
+  MathFin.Contracts.BlackScholes.value_physical_eq_riskNeutral
+
+attribute [blueprint "thm:bs-delta-hedge" (title := "The Black–Scholes delta hedge")
+  (statement := /-- With $C(t,S) = $ `bsV` the call price and $S_t$ geometric Brownian motion,
+  for every $T' < T$, almost surely and for all $t \le T'$ at once,
+  $e^{-rt}C(t,S_t) = C(0,S_0) + \int_0^t \Phi(d_1)\,\sigma e^{-rs}S_s\,dB_s$: the discounted
+  value is the initial price plus the gains of holding $\Delta = \Phi(d_1)$ shares. The price
+  tends to the payoff as $t \to T^-$ (`tendsto_bsV_gbm_payoff`); the identity itself is stated on
+  $[0,T']$, and the hedge is not packaged as a trading-strategy structure. -/)]
+  MathFin.bs_delta_hedge_replication
+
+attribute [blueprint "thm:sde-strong-solution" (title := "Picard fixed point on every horizon")
+  (statement := /-- For Lipschitz $b$, $\sigma$, any horizon $T$ and any initial value in the
+  predictable $L^2$ space $E$ on $[0,T]$, the Picard map of $dX = b(X)dt + \sigma(X)dB$ has
+  exactly one fixed point in $E$, with no smallness condition: its $n$-th iterate contracts with
+  constant $(2(TL_b^2+L_\sigma^2)T)^n/n!$. The fixed point is an $L^2(dt\otimes dP)$ class; a
+  continuous adapted representative on every horizon is the frontier node
+  `thm:sde-continuous-solution`. -/)]
+  MathFin.SDEExistence.picardMap_exists_unique_fixedPoint_any_horizon
+
+attribute [blueprint "thm:stochastic-fubini" (title := "Stochastic Fubini (L² form)")
+  (statement := /-- For a continuous linear map $I$ out of $L^2(m)$, $m$ finite, and a
+  Bochner-integrable family $\varphi : A \to L^2(m)$ with jointly integrable representatives
+  $\psi$, $\int I(\varphi_u)\,d\nu(u) = I(g)$ for any $g \in L^2(m)$ representing
+  $x \mapsto \int \psi_u(x)\,d\nu(u)$; instances at the horizon-$T$ Itô integral and the Wiener
+  integral (`stochFubini_ito`, `stochFubini_wiener`). The swap for the integral as a process in
+  $t$ is the frontier node `thm:stochastic-fubini-process`. -/)]
+  MathFin.StochasticFubini.stochFubini_ofCLM
+
+attribute [blueprint "thm:no-arbitrage-local" (title := "No arbitrage is local")
+  (statement := /-- For a price adapted up to a finite horizon on any filtered probability space,
+  no arbitrage over bounded predictable strategies holds if and only if each one-period market,
+  conditional on $\mathcal{F}_t$, admits no position with almost surely nonnegative, not almost
+  surely zero gain: the reduction step of Dalang–Morton–Willinger. -/)]
+  MathFin.noArbitrage_iff_noArbitrageLocal
+
+attribute [blueprint "thm:emm-density-pasting" (title := "Pasting one-period densities into an EMM")
+  (statement := /-- Bounded positive one-period densities $Z_t$, $\mathcal{F}_{t+1}$-measurable with
+  $E[Z_t \mid \mathcal{F}_t] = 1$ and $E[Z_t S_{t+1} \mid \mathcal{F}_t] = S_t$, multiply to an
+  equivalent martingale measure $P\,\prod_t Z_t$ for an adapted integrable price up to the horizon: the assembly
+  step of Dalang–Morton–Willinger. That conditional no arbitrage produces such densities is not
+  proved. -/)]
+  MathFin.LocalEMMDensities.isEMM_pastedMeasure
+
+attribute [blueprint "thm:ito-product-rule" (title := "Itô product rule")
+  (statement := /-- For two Itô processes $X = x_0 + \int b\,ds + \int\sigma\,dB$ and
+  $Y = y_0 + \int c\,ds + \int\tau\,dB$ driven by one Brownian motion, with continuous adapted
+  coefficients and no bounds, almost surely at every $t \le T$ at once,
+  $X_tY_t = x_0y_0 + \int_0^t (Xc + Yb + \sigma\tau)\,ds + \int_0^t (X\tau + Y\sigma)\,dB$:
+  the cross term $\int\sigma\tau\,ds$ is derived, by polarisation from the one-process formula.
+  This is Itô's formula for $f(x,y) = xy$ only. -/)]
+  MathFin.ItoFormulaAdapted.ito_product_rule_process
+
+attribute [blueprint "thm:bs-self-financing" (title := "The delta hedge satisfies the self-financing equation")
+  (statement := /-- Along the Black–Scholes path, with value $V_t = C(t,S_t)$, $\Delta_t = \Phi(d_1)$
+  shares and $\psi_t = V_t - \Delta_tS_t$ in the bank, for every $T' < T$, almost surely at every
+  $t \le T'$: $V_t = V_0 + \int_0^t \Delta\,dS + \int_0^t r\psi\,ds$, with
+  $\int\Delta\,dS = \int\Delta rS\,ds + \int\Delta\sigma S\,dB$ and $V_0$ the value of the
+  European call contract. An integral identity, not a trading-strategy structure. -/)]
+  MathFin.Contracts.BlackScholes.europeanCall_selfFinancing

@@ -2320,4 +2320,49 @@ bounded-coefficient process class. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.CVA.cva_gaussian
 
+/-- info: 'MathFin.numeraireMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.numeraireMeasure
+/-- info: 'MathFin.snellEnvelope_le_supermartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.snellEnvelope_le_supermartingale
+/-- info: 'MathFin.marshallOlkin_firstToDefault_survival' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.marshallOlkin_firstToDefault_survival
+/-- info: 'MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc
+
+/-- info: 'MathFin.Btheta_isFilteredPreBrownian_predictable_of_bdd' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Btheta_isFilteredPreBrownian_predictable_of_bdd
+/-- info: 'MathFin.Contracts.BlackScholes.value_europeanCall_physical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.value_europeanCall_physical
+/-- info: 'MathFin.Contracts.BlackScholes.value_physical_eq_riskNeutral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.value_physical_eq_riskNeutral
+/-- info: 'MathFin.bs_delta_hedge_replication' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.bs_delta_hedge_replication
+/-- info: 'MathFin.SDEExistence.picardMap_exists_unique_fixedPoint_any_horizon' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.SDEExistence.picardMap_exists_unique_fixedPoint_any_horizon
+/-- info: 'MathFin.StochasticFubini.stochFubini_ofCLM' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.StochasticFubini.stochFubini_ofCLM
+/-- info: 'MathFin.noArbitrage_iff_noArbitrageLocal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.noArbitrage_iff_noArbitrageLocal
+/-- info: 'MathFin.LocalEMMDensities.isEMM_pastedMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.LocalEMMDensities.isEMM_pastedMeasure
+
+/-- info: 'MathFin.ItoFormulaAdapted.ito_product_rule_process' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoFormulaAdapted.ito_product_rule_process
+/-- info: 'MathFin.Contracts.BlackScholes.europeanCall_selfFinancing' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.europeanCall_selfFinancing
+
 end MathFin.AxiomAudit

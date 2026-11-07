@@ -290,6 +290,8 @@ import MathFin.Foundations.ItoIntegralPredictableRiemann
 import MathFin.Foundations.ItoIntegralLocalisedPredictable
 -- Itô's formula as an identity of processes; its stochastic term is a local martingale
 import MathFin.Foundations.ItoFormulaAdaptedProcess
+-- The product rule for two Itô processes driven by one Brownian motion
+import MathFin.Foundations.ItoProductRule
 -- Deterministic drift Riemann-convergence (α4 brick b-tail): ∑θ(tₖ)²·Δτ → ∫₀ᵀθ²ds
 import MathFin.Foundations.DriftRiemannConvergence
 -- Continuous adapted-θ Girsanov assembly (α4 (c)): convergence core toward
@@ -301,6 +303,7 @@ import MathFin.Foundations.GirsanovAdaptedTheta
 import MathFin.Foundations.SimpleProcessPartition
 import MathFin.Foundations.GirsanovSimpleDoleansMoments
 import MathFin.Foundations.GirsanovPredictableTheta
+import MathFin.Foundations.GirsanovFiltered
 import MathFin.Foundations.ItoFormulaCLM
 -- Summit A′: time-dependent Itô formula in L² — TD Taylor remainder vanishes,
 -- TD Riemann↔CLM bridge, and the assembly f(T,B_T) = f(0,B₀) + ∫f_x dB + ∫(f_t+½f_xx)ds
@@ -384,6 +387,11 @@ import MathFin.Foundations.FTAPComplete
 import MathFin.Foundations.FTAPOnePeriod
 -- General-Ω one-period FTAP, d assets (Esscher minimal-divergence EMM, full — finite-dim market)
 import MathFin.Foundations.FTAPOnePeriodVector
+-- Multi-period FTAP on a general space: no arbitrage is local, one-period densities paste, and
+-- the Dalang–Morton–Willinger theorem reduces to the conditional one-period FTAP
+import MathFin.Foundations.NoArbitrageLocal
+import MathFin.Foundations.DensityPasting
+import MathFin.Foundations.DalangMortonWillinger
 -- BlackScholes
 import MathFin.BlackScholes.Call
 import MathFin.BlackScholes.Put
@@ -497,6 +505,7 @@ import MathFin.BlackScholes.Spreads
 -- order Breeden–Litzenberger, for any law with a finite mean); the call price is differentiable
 -- in the strike exactly where the law has no atom, and there its derivative is minus the digital
 import MathFin.BlackScholes.CallSpreadDigital
+import MathFin.BlackScholes.DeltaHedge
 import MathFin.BlackScholes.Dupire
 -- The Heston 2D affine transform at the generator/PDE level: the rho-shifted Riccati
 -- closed forms, the pricing PDE, and the gated real-moment expectation
@@ -790,8 +799,14 @@ import MathFin.Contracts.Parity
 import MathFin.Contracts.Models.BlackScholes
 import MathFin.Contracts.Models.BlackScholesExchange
 import MathFin.Contracts.Models.BlackScholesAsian
+import MathFin.Contracts.Models.BlackScholesSDE
 import MathFin.Contracts.Models.BlackScholesChooser
+import MathFin.Contracts.Models.BlackScholesHedge
+import MathFin.Contracts.Models.BlackScholesPhysical
+-- The Black–Scholes delta hedge is self-financing: the product rule with the factor e^{rt}
+import MathFin.Contracts.Models.BlackScholesSelfFinancing
 import MathFin.Contracts.Models.Binomial
+import MathFin.Contracts.Models.DiscreteMarket
 import MathFin.Contracts.Models.BinomialCompleteMarket
 import MathFin.Contracts.Models.BinomialLimit
 import MathFin.Contracts.Models.Caplet
@@ -921,3 +936,10 @@ import MathFin.FixedIncome.KeyRateDuration
 -- Weak uniqueness for the constant-coefficient integrated weak forward equation, via
 -- the characteristic-function/Groenwall method
 import MathFin.Foundations.WeakForwardUniqueness
+-- Stochastic Fubini for a continuous linear L²-integral, and its Itô and Wiener instances
+import MathFin.Foundations.StochasticFubini
+import MathFin.Foundations.StochasticFubiniIto
+-- The Heath–Jarrow–Morton model bundle: forward curve, bond, short rate, bank account
+import MathFin.FixedIncome.HJM
+-- Fixed cash flows in the HJM model: the discount factor, and pricing off the initial bond curve
+import MathFin.Contracts.Models.HJMBond

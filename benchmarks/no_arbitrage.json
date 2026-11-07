@@ -553,6 +553,72 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. measure_eq_of_replicates in MathFin/Foundations/ReplicationPricing.lean, from integral_eq_of_replicates: transport the almost-sure replication along Q << P, integrate, and read the measure of the event off the indicator. Abstract: the class Gains and the neutrality of the two measures are hypotheses, discharged in the discrete market by IsEMM.integrable_and_integral_gains (Foundations/FTAP.lean) and in the Brownian market by pricesGainsAtZero_self and the hypothesis PricesGainsAtZero (Foundations/MarketCompleteness.lean). Axioms-clean."
       }
+    },
+    {
+      "id": "mf-no-arbitrage-local",
+      "name": "No Arbitrage Is Local: Multi-Period No Arbitrage Iff Conditional One-Period No Arbitrage",
+      "description": "On a general filtered measure space with a price S valued in an inner-product space F (complete; F = R^d, d assets, is the case of interest), adapted up to the horizon T, the multi-period NoArbitrage 𝓕 P S T (no bounded predictable strategy turns zero initial wealth into a P-almost surely non-negative, not almost surely zero gain) holds if and only if for each period t < T the one-period market conditional on 𝓕 t is arbitrage free: every 𝓕 t-measurable (not necessarily bounded) position theta whose one-period gain <theta, S_{t+1} - S_t> is almost surely non-negative has an almost surely zero gain (NoArbitrageLocal). The direction from NoArbitrage needs no adaptedness; the converse is an induction on the horizon. This is the reduction step of the Dalang-Morton-Willinger theorem only; the existence of an equivalent martingale measure is not stated, and the conditional one-period FTAP (the measurable-selection step) is not proved here.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.NoArbitrageLocal\n\nopen MeasureTheory\nopen MathFin\n\n/-- For an adapted price, multi-period no arbitrage holds iff every conditional one-period market\nis arbitrage free. -/\ntheorem no_arbitrage_iff_no_arbitrage_local {Ω : Type*} {m0 : MeasurableSpace Ω} {F : Type*}\n    [NormedAddCommGroup F] [InnerProductSpace ℝ F] [CompleteSpace F] {𝓕 : Filtration ℕ m0}\n    {P : Measure Ω} {S : ℕ → Ω → F} {T : ℕ} (hS : ∀ t ≤ T, StronglyMeasurable[𝓕 t] (S t)) :\n    NoArbitrage 𝓕 P S T ↔ NoArbitrageLocal 𝓕 P S T :=\n  MathFin.noArbitrage_iff_noArbitrageLocal hS\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Dalang-Morton-Willinger fundamental theorem of asset pricing on a general probability space: reduction to conditional one-period markets and pasting of one-period densities (Foellmer and Schied, Stochastic Finance, sec. 5.2)",
+        "citations": [
+          {
+            "key": "FollmerSchied",
+            "locator": "sec. 5.2"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. noArbitrage_iff_noArbitrageLocal in MathFin/Foundations/NoArbitrageLocal.lean. NoArbitrage => NoArbitrageLocal (noArbitrageLocal_of_noArbitrage; no adaptedness): a position theta with non-negative gain is truncated to the bounded theta 1_{||theta|| <= n} and held over (t, t+1] only; the resulting bounded predictable strategy has a non-negative gain, so its gain vanishes, hence the gain of theta vanishes on each {||theta|| <= n} and so almost surely. NoArbitrageLocal => NoArbitrage (noArbitrage_of_noArbitrageLocal): induction on the horizon; if V_T + g >= 0 with g the last-period gain and V_T the F_T-measurable gain so far, the position phi 1_{V_T < 0} has non-negative gain, so it is almost surely zero and V_T >= 0 almost surely; then V_T = 0 by induction and g >= 0 forces g = 0. SCOPE: this is the first half of the multi-period FTAP on a general space. It does not say an equivalent martingale measure exists; that needs the conditional one-period FTAP, assumed in mf-dmw-conditional and not proved in the library. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-density-pasting-emm",
+      "name": "Pasting One-Period Densities Gives an Equivalent Martingale Measure",
+      "description": "Let S be an adapted, integrable price valued in an inner-product space F (complete) on a filtered probability space (Omega, 𝓕, P) with finite horizon T, and suppose each period t < T carries a one-period density Z t: an 𝓕 (t+1)-measurable, strictly positive, bounded weight with conditional mean one, P[Z t | 𝓕 t] = 1, that makes S a conditional martingale over the period, P[Z t • S (t+1) | 𝓕 t] = S t (LocalEMMDensities). Then the measure P.withDensity(prod_{t<T} Z t) (pastedMeasure) is an equivalent martingale measure for S up to the horizon T (IsEMM). The one-period densities are the hypothesis: that conditional one-period no arbitrage produces them is not proved here (it is the assumption ConditionalOnePeriodFTAP of mf-dmw-conditional).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.DensityPasting\n\nopen MeasureTheory\nopen MathFin\n\n/-- One-period densities paste to an equivalent martingale measure. -/\ntheorem density_pasting_isEMM {Ω : Type*} {m0 : MeasurableSpace Ω} {F : Type*}\n    [NormedAddCommGroup F] [InnerProductSpace ℝ F] [CompleteSpace F] {𝓕 : Filtration ℕ m0}\n    {P : Measure Ω} [IsProbabilityMeasure P] {S : ℕ → Ω → F} {T : ℕ} {Z : ℕ → Ω → ℝ}\n    (h : LocalEMMDensities 𝓕 P S T Z) : IsEMM 𝓕 P S T (pastedMeasure P Z T) :=\n  h.isEMM_pastedMeasure\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Dalang-Morton-Willinger fundamental theorem of asset pricing on a general probability space: reduction to conditional one-period markets and pasting of one-period densities (Foellmer and Schied, Stochastic Finance, sec. 5.2)",
+        "citations": [
+          {
+            "key": "FollmerSchied",
+            "locator": "sec. 5.2"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. LocalEMMDensities.isEMM_pastedMeasure in MathFin/Foundations/DensityPasting.lean. The proof is the tower property for the product density D n = prod_{s<n} Z s: integral D m • Y = integral D n • Y for n <= m <= T and Y an 𝓕 n-measurable integrable function (integral_pasted_eq), because E[Z m | 𝓕 m] = 1 lets each factor be peeled off from the outside (integral_smul_cond); hence D T integrates to 1, and for A in 𝓕 t the Q-integrals of S (t+1) and S t over A agree (setIntegral_pasted_step); the conditional-expectation characterisation ae_eq_condExp_of_forall_setIntegral_eq turns this into S t = E_Q[S (t+1) | 𝓕 t] and IsEMM.of_condExp_succ packages the measure. SCOPE: pasting of given densities only; existence of the one-period densities from conditional no arbitrage (a measurable selection of the one-period equivalent martingale measure over 𝓕 t) is not proved in the library. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-dmw-conditional",
+      "name": "Dalang-Morton-Willinger, Assuming the Conditional One-Period FTAP",
+      "description": "For an adapted, integrable price S valued in an inner-product space F on a filtered probability space with finite horizon T, ASSUMING the hypothesis ConditionalOnePeriodFTAP 𝓕 P S T (conditional one-period no arbitrage at each period t < T yields a one-period density: a bounded, strictly positive, 𝓕 (t+1)-measurable weight with conditional mean one under which S is a conditional martingale), no arbitrage is equivalent to the existence of an equivalent martingale measure: NoArbitrage 𝓕 P S T iff there is Q with IsEMM 𝓕 P S T Q. The hypothesis ConditionalOnePeriodFTAP, the measurable-selection core of the Dalang-Morton-Willinger theorem (the one-period theorem carried out conditionally on a non-trivial 𝓕 t), is NOT proved in the library; the Dalang-Morton-Willinger theorem on a general probability space is not delivered here. What is proved is the reduction of no arbitrage to the conditional one-period markets (mf-no-arbitrage-local) and the pasting of one-period densities into an equivalent martingale measure (mf-density-pasting-emm), assembled under that hypothesis; the converse direction (an equivalent martingale measure precludes arbitrage) needs no hypothesis. The hypothesis is the conditional one-period FTAP of the literature only for F = R^d; for an infinite-dimensional F it need not hold, and the statement is then vacuous.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.DalangMortonWillinger\n\nopen MeasureTheory\nopen MathFin\n\n/-- Dalang-Morton-Willinger, assuming the conditional one-period FTAP. -/\ntheorem dmw_conditional {Ω : Type*} {m0 : MeasurableSpace Ω} {F : Type*}\n    [NormedAddCommGroup F] [InnerProductSpace ℝ F] [CompleteSpace F] {𝓕 : Filtration ℕ m0}\n    {P : Measure Ω} {S : ℕ → Ω → F} [IsProbabilityMeasure P] {T : ℕ}\n    (hS : ∀ t ≤ T, StronglyMeasurable[𝓕 t] (S t)) (hint : ∀ t ≤ T, Integrable (S t) P)\n    (hcond : ConditionalOnePeriodFTAP 𝓕 P S T) :\n    NoArbitrage 𝓕 P S T ↔ ∃ Q, IsEMM 𝓕 P S T Q :=\n  MathFin.noArbitrage_iff_exists_isEMM hS hint hcond\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Dalang-Morton-Willinger fundamental theorem of asset pricing on a general probability space: reduction to conditional one-period markets and pasting of one-period densities (Foellmer and Schied, Stochastic Finance, sec. 5.2)",
+        "citations": [
+          {
+            "key": "FollmerSchied",
+            "locator": "sec. 5.2"
+          }
+        ],
+        "difficulty": "research",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "REDUCED CORE: the entry assumes ConditionalOnePeriodFTAP as a hypothesis, which is the genuinely hard step of Dalang-Morton-Willinger and is not proved in this library (issue #313). noArbitrage_iff_exists_isEMM in MathFin/Foundations/DalangMortonWillinger.lean is the composition of the reduction noArbitrageLocal_of_noArbitrage (mf-no-arbitrage-local), the assumption ConditionalOnePeriodFTAP (a hypothesis of the statement, defined as: for t < T, NoArbitrageAt 𝓕 P S t implies HasOnePeriodDensity 𝓕 P S t), one-period densities chosen per period, and the pasting LocalEMMDensities.isEMM_pastedMeasure (mf-density-pasting-emm), which gives the explicit product measure pastedMeasure; the forward direction is IsEMM.noArbitrage. The hypothesis is the conditional version of OnePeriodVector.ftap_one_period_vector (Foellmer and Schied sec. 5.2) and needs a measurable selection of the one-period equivalent martingale measure over 𝓕 t or closedness of the gains cone in L0. SCOPE: assuming it, the iff holds for an adapted integrable price in an inner-product space; the statement is not the Dalang-Morton-Willinger theorem. Axioms-clean."
+      }
     }
   ]
 }

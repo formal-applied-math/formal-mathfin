@@ -158,13 +158,6 @@ uses = ["thm:one-factor-copula-default"]
 area = "credit"
 
 [[node]]
-label = "thm:marshall-olkin"
-title = "Marshall–Olkin defaults"
-statement = "Default correlation and first-to-default from the exponential minimum."
-uses = []
-area = "credit"
-
-[[node]]
 label = "thm:merton-credit-spread"
 title = "Merton structural credit spread"
 statement = "The Merton credit spread s(T) in closed form."
@@ -237,7 +230,7 @@ area = "fixed-income"
 [[node]]
 label = "thm:cir-bond-loadings"
 title = "CIR bond-price loadings"
-statement = "The CIR loadings solve a linear ODE and give the CIR forward curve."
+statement = "The CIR loadings solve the Riccati system B' = 1 − κB − σ²B²/2, A' = −κθB, and give the CIR forward curve."
 uses = ["thm:affine-term-structure"]
 area = "fixed-income"
 
@@ -280,7 +273,7 @@ area = "fixed-income"
 label = "thm:hjm-log-bond-dynamics"
 title = "HJM log-bond dynamics"
 statement = "The log-bond satisfies dY=(r-α*)dt-σ*dW, via the Itô Fubini and a moving-boundary Leibniz term."
-uses = ["thm:stochastic-fubini"]
+uses = ["thm:stochastic-fubini-process"]
 area = "fixed-income"
 
 [[node]]
@@ -298,25 +291,11 @@ uses = ["thm:hjm-drift-condition"]
 area = "fixed-income"
 
 [[node]]
-label = "thm:key-rate-duration"
-title = "Key-rate duration"
-statement = "Key-rate durations sum to the effective duration."
-uses = []
-area = "fixed-income"
-
-[[node]]
 label = "thm:lmm-forward-martingale"
 title = "LIBOR market model forward martingale"
 statement = "Forward LIBOR is a martingale under its own forward measure."
 uses = ["def:numeraire-measure"]
 area = "fixed-income"
-
-[[node]]
-label = "def:numeraire-measure"
-title = "Numéraire measure as a Radon–Nikodym change"
-statement = "numeraireMeasure has Radon–Nikodym derivative numeraireDensity with respect to Q and is absolutely continuous (equivalent for positive numéraires)."
-uses = []
-area = "foundations"
 
 [[node]]
 label = "def:real-erf"
@@ -356,8 +335,8 @@ area = "foundations"
 [[node]]
 label = "thm:dmw-ftap"
 title = "Dalang–Morton–Willinger FTAP"
-statement = "No arbitrage is equivalent to the existence of an equivalent martingale measure for a multi-period market on a general probability space."
-uses = []
+statement = "No arbitrage is equivalent to the existence of an equivalent martingale measure for a multi-period market on a general probability space. The reduction to one period and the pasting of one-period densities are proved; the conditional one-period theorem (a measurable selection) is what remains."
+uses = ["thm:no-arbitrage-local", "thm:emm-density-pasting"]
 area = "foundations"
 
 [[node]]
@@ -371,14 +350,7 @@ area = "foundations"
 label = "thm:feynman-kac-variable-coefficient"
 title = "Variable-coefficient Feynman–Kac"
 statement = "The conditional expectation of a payoff along a variable-coefficient SDE solves the associated parabolic PDE (local-vol / Heston), beyond the heat-kernel case."
-uses = ["thm:feynman-kac-heat-eq", "thm:sde-strong-solution", "thm:ito-formula-td-l2"]
-area = "foundations"
-
-[[node]]
-label = "thm:girsanov-brownian-characterisation"
-title = "Girsanov: independent increments, continuous paths"
-statement = "Under the Girsanov measure the shifted process has increments independent of the past and almost-surely continuous paths, i.e. is a filtered Brownian motion (the packaging is still missing)."
-uses = ["thm:esscher-tilt"]
+uses = ["thm:feynman-kac-heat-eq", "thm:sde-continuous-solution", "thm:ito-formula-td-l2"]
 area = "foundations"
 
 [[node]]
@@ -391,8 +363,8 @@ area = "foundations"
 [[node]]
 label = "thm:ito-formula-2d"
 title = "Two-process Itô formula"
-statement = "A continuous Itô formula for f(X,Y) with two Itô processes, upgrading the reduced_core sc-thm-7.5.2."
-uses = ["thm:ito-formula-l2", "thm:ito-formula-td-l2"]
+statement = "A continuous Itô formula for general C² f(t,X,Y) with two Itô processes, upgrading the reduced_core sc-thm-7.5.2; the product case f = xy is proved."
+uses = ["thm:ito-formula-l2", "thm:ito-formula-td-l2", "thm:ito-product-rule"]
 area = "foundations"
 
 [[node]]
@@ -466,13 +438,6 @@ uses = ["def:brownian-motion"]
 area = "foundations"
 
 [[node]]
-label = "thm:sde-strong-solution"
-title = "SDE strong solutions on every horizon"
-statement = "The Picard fixed point solves dX=b(X)dt+σ(X)dB on every horizon (no smallness condition) with a continuous adapted representative for each t."
-uses = ["def:ito-integral-clm"]
-area = "foundations"
-
-[[node]]
 label = "thm:second-ftap-converse"
 title = "Second FTAP: uniqueness implies completeness"
 statement = "A unique equivalent martingale measure implies the market is complete, the converse of the completeness result already proved."
@@ -484,20 +449,6 @@ label = "thm:semistatic-ftap"
 title = "Semistatic FTAP with entropy"
 statement = "A semistatic no-arbitrage criterion for the existence of an equivalent martingale measure of finite entropy calibrated to option prices (open problem)."
 uses = ["thm:dmw-ftap", "thm:carr-madan"]
-area = "foundations"
-
-[[node]]
-label = "thm:snell-envelope"
-title = "Snell envelope and optimal stopping"
-statement = "The Snell envelope is the smallest supermartingale dominating the payoff, attained by the largest optimal time, characterising optimal stopping."
-uses = []
-area = "foundations"
-
-[[node]]
-label = "thm:stochastic-fubini"
-title = "Stochastic Fubini theorem"
-statement = "The parameter integral and the Itô (Wiener) integral commute, first as a tower-agnostic CLM primitive, then for the terminal and all-t Itô integral."
-uses = ["def:ito-integral-clm"]
 area = "foundations"
 
 [[node]]
@@ -689,3 +640,16 @@ statement = "Static no-arbitrage conditions on an implied-vol smile (Roper, the 
 uses = ["thm:carr-madan", "thm:bs-call"]
 area = "stoch-vol"
 
+[[node]]
+label = "thm:sde-continuous-solution"
+title = "Continuous strong solutions on every horizon"
+statement = "The every-horizon Picard fixed point has a continuous adapted representative solving dX=b(X)dt+σ(X)dB pathwise, unique up to indistinguishability."
+uses = ["thm:sde-strong-solution"]
+area = "foundations"
+
+[[node]]
+label = "thm:stochastic-fubini-process"
+title = "Stochastic Fubini for the integral process"
+statement = "The parameter integral and the Itô integral commute as processes in t, almost surely at every t at once."
+uses = ["thm:stochastic-fubini"]
+area = "foundations"

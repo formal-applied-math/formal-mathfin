@@ -45,6 +45,7 @@ SKIP_KINDS = frozenset({"constructor", "recursor", "quot"})
 ASSETS = Path(__file__).with_name("site_assets")
 BLUEPRINT_NODES = Path("docs/blueprint_nodes.json")
 FRONTIER = Path("docs/blueprint_frontier.toml")
+LANDMARKS = Path("docs/landmarks.toml")
 
 # The sections of the library: display name, layer (the map's colour), one line of what is there.
 SECTIONS: dict[str, tuple[str, str, str]] = {
@@ -311,7 +312,7 @@ class Site:
 
 # ------------------------------------------------------------------ page shell
 
-NAV = [("index.html", "Map"), ("blueprint.html", "Blueprint"), ("corpus.html", "Corpus"),
+NAV = [("index.html", "Map"), ("landmarks.html", "Landmarks"), ("blueprint.html", "Blueprint"), ("corpus.html", "Corpus"),
        ("subjects.html", "Subjects"), ("references.html", "References")]
 
 
@@ -675,6 +676,118 @@ issues.</p>{loose_html}"""
                                              "program's results."), encoding="utf-8")
 
 
+LANDMARK_KEYS = ("decl", "title", "summary", "scope")
+
+
+def load_landmarks(path: Path = LANDMARKS) -> list[dict]:
+    """The curated landmark list; a malformed entry is an error, never a silently dropped card."""
+    if not path.exists():
+        return []
+    entries = tomllib.loads(path.read_text(encoding="utf-8")).get("landmark", [])
+    seen: set[str] = set()
+    for i, e in enumerate(entries):
+        where = f"{path} landmark #{i + 1} ({e.get('decl', '?')})"
+        for k in LANDMARK_KEYS:
+            if not isinstance(e.get(k), str) or not e[k].strip():
+                raise ValueError(f"{where}: missing or empty string key `{k}`")
+        also = e.get("also", [])
+        if not isinstance(also, list) or not all(isinstance(a, str) and a for a in also):
+            raise ValueError(f"{where}: `also` must be a list of declaration names")
+        if extra := set(e) - set(LANDMARK_KEYS) - {"also"}:
+            raise ValueError(f"{where}: unknown keys {sorted(extra)}")
+        if e["decl"] in seen:
+            raise ValueError(f"{where}: duplicate decl")
+        seen.add(e["decl"])
+    return entries
+
+
+def landmark_path(idx: DeclIndex, decl: str, anchors: dict[str, str]) -> list[tuple[str, str]]:
+    """The anchor declarations `decl` builds on, transitively through the uses recorded in the
+    index, as (name, titles of the anchors it uses directly) from the nearest to the foundations.
+    `anchors` maps a declaration name to its display title (blueprint nodes and curated
+    landmarks). Edges are the transitive reduction of reachability among the anchors."""
+    def reach(start: str) -> set[str]:
+        seen: set[str] = set()
+        stack = [start]
+        while stack:
+            d = idx.decls.get(stack.pop())
+            if d is None:
+                continue
+            for u in d.uses:
+                if u not in seen and u != start:
+                    seen.add(u)
+                    stack.append(u)
+        return seen
+
+    below = {a for a in reach(decl) if a in anchors}
+    nodes = below | {decl}
+    r = {a: reach(a) & nodes for a in nodes}
+    kept = transitive_reduction(nodes, {(a, b) for a in nodes for b in r[a]})
+    depth = {decl: 0}                       # longest chain from `decl`; foundations come last
+    for a in sorted(nodes, key=lambda a: -len(r[a])):
+        for x, y in kept:
+            if x == a:
+                depth[y] = max(depth.get(y, 0), depth.get(a, 0) + 1)
+    order = sorted(below, key=lambda a: (depth.get(a, 0), anchors[a]))
+    return [(a, ", ".join(sorted(anchors[y] for x, y in kept if x == a))) for a in order]
+
+
+def _landmark_stmt(link: Linker, d: IndexedDecl) -> str:
+    src = f"{REPO_URL}/blob/main/{library.module_path(d.module)}#L{d.line}"
+    ns, _, last = d.name.rpartition(".")
+    return (f'<article class="decl"><div class="decl-h"><span class="kind k-{d.kind}">{d.kind}</span>'
+            f'<span class="dname"><span class="ns">{esc(ns)}.</span>{esc(last)}</span>'
+            f'<a class="src" href="{src}">source</a>'
+            f' <a class="src" href="{decl_url(d)}">module page</a></div>'
+            f'<pre class="stmt-pre">{link.statement(d.type)}</pre></article>')
+
+
+def landmark_card(site: Site, link: Linker, e: dict, anchors: dict[str, str]) -> str:
+    d = site.idx.decls.get(e["decl"])
+    aid = esc(e["decl"])
+    if d is None or d.private:
+        return (f'<section class="landmark missing" id="{aid}"><h2>{esc(e["title"])}</h2>'
+                f'<p class="muted">Not in this build: <code>{esc(e["decl"])}</code> is not in the '
+                f"declaration index this site was generated from.</p></section>")
+    stmts = _landmark_stmt(link, d)
+    for a in e.get("also", ()):
+        c = site.idx.decls.get(a)
+        stmts += (_landmark_stmt(link, c) if c is not None and not c.private else
+                  f'<p class="muted">Companion <code>{esc(a)}</code> is not in this build.</p>')
+    path = [(a, via) for a, via in landmark_path(site.idx, e["decl"], anchors)
+            if a in site.idx.decls and not site.idx.decls[a].private]
+    chain = ""
+    if path:
+        items = "".join(
+            f'<li><a href="{decl_url(site.idx.decls[a])}">{esc(anchors[a])}</a>'
+            + (f' <span class="muted">uses {esc(via)}</span>' if via else "") + "</li>"
+            for a, via in path)
+        chain = ('<h3>Builds on</h3><p class="muted">Blueprint results and other landmarks this '
+                 "declaration uses, transitively, from the nearest to the foundations.</p>"
+                 f"<ol class='lm-path'>{items}</ol>")
+    return (f'<section class="landmark" id="{aid}"><h2>{esc(e["title"])}</h2>'
+            f'<p class="lm-summary">{esc(e["summary"])}</p>'
+            f'<p class="lm-scope"><strong>Not proved.</strong> {esc(e["scope"])}</p>'
+            f'<h3>The Lean statement</h3>{stmts}{chain}</section>')
+
+
+def build_landmarks(site: Site, out: Path, landmarks: list[dict], nodes_json: list[dict],
+                    link: Linker) -> None:
+    anchors = {n["name"]: n["title"] for n in nodes_json if n.get("name")}
+    anchors.update({e["decl"]: e["title"] for e in landmarks})
+    cards = "".join(landmark_card(site, link, e, anchors) for e in landmarks)
+    toc = "".join(f'<li><a href="#{esc(e["decl"])}">{esc(e["title"])}</a></li>' for e in landmarks)
+    body = f"""<h1>Landmarks</h1>
+<p class="lede ink2">The headline results, one per line of the README's main results. Each shows the
+statement exactly as Lean elaborates it, read from the declaration index, with what the statement
+does not cover stated next to it. The prose above a statement is a reading aid; the statement is the claim.</p>
+<ul class="toc">{toc}</ul>{cards}"""
+    (out / "landmarks.html").write_text(
+        page("Landmarks — MathFin", body, "", "landmarks.html",
+             "The library's headline theorems with their exact Lean statements and scope."),
+        encoding="utf-8")
+
+
 def build_corpus(site: Site, out: Path) -> None:
     by_file: dict[str, list[tuple[str, dict]]] = defaultdict(list)
     for f, e in site.all_entries:
@@ -805,7 +918,9 @@ def build(index_path: str | Path, out: str | Path) -> int:
         if FRONTIER.exists() else []
     blueprint = nodes_json + [dict(f, leanOk=False) for f in frontier]
 
-    link = Linker(site.idx, "../", {d.name: d for ds in site.decls.values() for d in ds})
+    landmarks = load_landmarks()
+    public = {d.name: d for ds in site.decls.values() for d in ds}
+    link = Linker(site.idx, "../", public)
     search = []
     mods = site.modules()
     for m in mods:
@@ -823,6 +938,7 @@ def build(index_path: str | Path, out: str | Path) -> int:
         build_section(site, out, sec, ms)
     build_home(site, out, blueprint)
     build_blueprint(site, out, nodes_json, frontier)
+    build_landmarks(site, out, landmarks, nodes_json, Linker(site.idx, "", public))
     build_corpus(site, out)
     build_subjects(site, out)
     build_references(site, out)

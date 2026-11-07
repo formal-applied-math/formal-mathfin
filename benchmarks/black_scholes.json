@@ -2347,6 +2347,57 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, MathFin/BlackScholes/HestonSmallVolOfVol.lean. Builds on the pre-existing Heston.lean Riccati closed forms (hestonA, hestonBv) and FixedIncome/VasicekBondPrice.lean (vasicekIntegratedMean, vasicekBondB, and the nonnegativity lemma vasicekIntegratedMean_nonneg) for the xi=0 total variance; the A-flow limit is proved via its FTC-integral form, avoiding the closed form's own 2*kappa*theta/xi^2 cancellation. Scope inherited from Heston.lean: the real moment transform 0 < u < 1 at the Riccati level, not the complex characteristic function or the identification of the profile with E[e^{u log S_T}] for an actual Heston process. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-bs-delta-hedge-replication",
+      "name": "Black-Scholes Delta Hedge Replicates the Call (Discounted Identity on [0, T'])",
+      "description": "Let B be a Brownian motion with continuous paths (pre-Brownian under a probability measure, every path continuous), S_t = S_0 exp((r - sigma^2/2) t + sigma B_t) the risk-neutral stock, K, sigma, S_0 > 0, and T' < T. Writing C(t, S) = bsV K r sigma S (T - t) for the Black-Scholes call price, almost surely and for all t in [0, T'] at once, e^{-rt} C(t, S_t) = C(0, S_0) + I_t, where I is the library's predictable Ito integral predItoIntegral on [0, T'] of the predictable integrand sigma e^{-rs} S_s Phi(d_1(S_s, T - s)), the delta Phi(d_1) of the call times the diffusion coefficient of the discounted stock. So the discounted call value is the initial price plus the gains from holding the delta of shares. The identity is on [0, T'] for T' strictly below T (the delta is discontinuous at maturity); the behaviour at T is the separate statement mf-bs-call-value-tends-to-payoff. Not proved: the identity up to t = T, that the hedge is an admissible self-financing strategy as a structure, or that I equals the integral of the delta against the discounted stock as a semimartingale integrator.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.DeltaHedge\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.ItoIntegralL2 MathFin.ItoIntegralLocalised\n\n/-- The discounted call value along the risk-neutral stock is the initial price plus the gains of\nthe delta hedge, on `[0, T']` for every `T' < T`. -/\ntheorem bs_delta_hedge_replication' {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω}\n    [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)\n    {K r σ S₀ T : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hS₀ : 0 < S₀) (T' : ℝ≥0) (hT' : (T' : ℝ) < T) :\n    ∀ᵐ ω ∂μ, ∀ t ∈ Set.Icc (0 : ℝ≥0) T',\n      Real.exp (-(r * t)) * bsV K r σ (gbmValue S₀ r σ t (B t ω)) (T - t) =\n        bsV K r σ S₀ T + predItoIntegral (μ := μ) T' hBmeas\n          (deltaHedgeIntegrand_isStronglyPredictable hBmeas hBcont K r σ S₀ T) t ω :=\n  MathFin.bs_delta_hedge_replication hB hBmeas hBcont hK hσ hS₀ T' hT'\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-Scholes delta hedging: replication of the call by the self-financing delta hedge (Black and Scholes 1973; Shreve, Stochastic Calculus for Finance II, 4.5)",
+        "citations": [
+          {
+            "key": "BlackScholes1973"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "4.5"
+          }
+        ],
+        "difficulty": "research",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. bs_delta_hedge_replication in MathFin/BlackScholes/DeltaHedge.lean applies Ito's formula as an identity of processes (ItoFormulaAdapted.ito_formula_adapted_unbounded_process) to the discounted call value in the Brownian coordinate f(t, x) = e^{-rt} C(t, S(t, x)) of BlackScholes/PDEFromIto: its drift f_t + (1/2) f_xx vanishes by the Black-Scholes PDE (discountedCallBrownian_heat_equation) and its x-derivative is the hedge integrand (hasDerivAt_discountedCallBrownian_x). The call price is singular at t = T while the formula needs partials continuous on all of R x R, so f is composed with a smooth time cap equal to the identity up to T' and below T everywhere, and the identity is read at t <= T'. SCOPE: the integral is the library's predItoIntegral (horizon T') of the predictable integrand deltaHedgeIntegrand, a stochastic integral against the Brownian motion B, not against the stock; the integrand is the delta times the diffusion coefficient sigma e^{-rs} S_s of the discounted stock, which is why the right side is the hedge's gains from trade, but that reading (integral against the discounted stock as a semimartingale) is not a statement in the library. There is no strategy structure and no admissibility or self-financing predicate; the hedge is the integrand. The horizon T' is strictly below T. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-call-value-tends-to-payoff",
+      "name": "Black-Scholes Call Value Tends to the Payoff at Maturity",
+      "description": "For K, sigma, S_0 > 0 and any path x : R>=0 -> R continuous at T, the Black-Scholes call value bsV K r sigma S_t (T - t) at the stock S_t = S_0 exp((r - sigma^2/2) t + sigma x_t) tends, as t -> T from below, to the call payoff max(S_T - K, 0). A deterministic statement about the closed-form call value along a path: no probability measure and no hedge are involved. Together with mf-bs-delta-hedge-replication (identity on [0, T'] for T' < T) it is the maturity half of the delta-hedge picture; neither statement says the replication identity extends to t = T.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.DeltaHedge\n\nopen Filter Topology\nopen scoped NNReal\nopen MathFin\n\n/-- Along a path continuous at `T`, the Black-Scholes call value at the geometric Brownian stock\ntends to the call payoff as `t → T⁻`. -/\ntheorem tendsto_bsV_gbm_payoff' {K r σ S₀ : ℝ} (T : ℝ≥0) (hK : 0 < K) (hσ : 0 < σ)\n    (hS₀ : 0 < S₀) {x : ℝ≥0 → ℝ} (hx : ContinuousAt x T) :\n    Tendsto (fun t : ℝ≥0 ↦ bsV K r σ (gbmValue S₀ r σ t (x t)) ((T : ℝ) - t)) (𝓝[<] T)\n      (𝓝 (max (gbmValue S₀ r σ T (x T) - K) 0)) :=\n  MathFin.tendsto_bsV_gbm_payoff T hK hσ hS₀ hx\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-Scholes call value at maturity: the call price C(t, S) tends to (S - K)^+ as t tends to T and S to the terminal stock (Hull 15.6; Shreve, Stochastic Calculus for Finance II, 4.5)",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "15.6"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "4.5"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. tendsto_bsV_gbm_payoff in MathFin/BlackScholes/DeltaHedge.lean composes the continuity of the geometric-Brownian value gbmValue with the analytic core tendsto_bsV_payoff (bsV K r sigma S tau tends to (S* - K)^+ as S -> S* > 0 and tau -> 0+). SCOPE: the limit is taken along the left neighbourhood filter of T within R>=0 and needs only continuity of the path at T; the maturity limit of the discounted hedge is not a statement here. Axioms-clean."
+      }
     }
   ]
 }

@@ -130,6 +130,121 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-11-07 — corpus 804, modules 725 — the RiO foundations, read before they land
+
+Scope: `feat/rio-foundations`, six foundation results, each with a seam into the contracts
+layer:
+- the Black–Scholes delta hedge (`DeltaHedge`, `BlackScholesHedge`, `BlackScholesSelfFinancing`);
+- the SDE Picard fixed point on every horizon (`SDEExistence`, `BlackScholesSDE`);
+- Girsanov for the filtration with bounded predictable `θ` (`GirsanovFiltered`,
+  `BlackScholesPhysical`);
+- stochastic Fubini and the HJM bundle (`StochasticFubini`, `StochasticFubiniIto`, `HJM`,
+  `HJMBond`);
+- the Dalang–Morton–Willinger reduction and pasting (`NoArbitrageLocal`, `DensityPasting`,
+  `DalangMortonWillinger`, `DiscreteMarket`);
+- the Itô product rule (`ItoProductRule`).
+
+There are 23 new corpus entries. Three read-only reviewers split the lenses:
+- the first pass with lenses 7 and 8;
+- lenses 2, 3 and 6;
+- lenses 1, 4 and 5.
+
+### The standing first pass: prose against statement
+
+Most of the new prose states its hypotheses where it should: `ConditionalOnePeriodFTAP`,
+`hprice`, `T' < T`, `t ≤ H`, and "almost sure per date, not pathwise". The pass found three
+patterns of overclaim.
+
+- **Names that promise what the scope retracts.**
+  - "The delta hedge is self-financing" (entry name, blueprint title, module title): the entry
+    states the self-financing *equation* as an integral identity, with no strategy predicate.
+  - "SDE strong solution: existence and uniqueness": the entry proves a unique fixed point of the
+    Picard map in `L²`, with no continuous adapted representative.
+  - "the hedge pays the call": what is proved is that the call price formula tends to the payoff.
+
+  All are renamed to what they deliver. `DeltaHedge` loses the "self-financing strategy" tag.
+- **Quantifier order.** `exists_isEMM_parity` bound the strike and the maturity before `∃ Q`,
+  while its prose read "one `Q` for every strike and maturity". The Lean statement is now the
+  stronger `∃ Q, IsEMM … ∧ ∀ K τ, …`, which the proof already gave, so the prose is true.
+- **Dropped qualifiers.**
+  - The Girsanov landmark and README wrote `B_t + ∫₀ᵗ θ` for what is an adapted modification of
+    `B_t + ∫₀^{t∧T} θ`.
+  - The HJM sentences omitted the deterministic time-0 curve (`hdet`).
+  - `GirsanovFiltered` promised continuous paths without the continuity hypothesis.
+  - `StochasticFubini` listed the Lévy integral beside the two instances that exist.
+  - The DMW descriptions said "inner-product space F" without noting that the hypothesis is the
+    conditional FTAP only for `F = ℝ^d`.
+  - The density-pasting node omitted the adapted integrable price.
+
+  All are restated.
+
+**Taxonomy.** `mf-hjm-fixed-flows` was `full` while assuming `E[D(tᵢ)] = P(0,tᵢ)`, the identity
+the HJM drift condition is for. Given it, the theorem is the model-agnostic zero-curve valuation.
+It is now `reduced_core`, like the two entries that assume the conditional one-period FTAP.
+
+Junk values: `HJMModel.bankAccount` and `discount` integrate the short rate `f(s,s)`, which the
+bundle did not assume integrable. A non-integrable short rate made the discount factor
+`exp 0 = 1`. The bundle now carries `shortRate_integrable` (design.md §2).
+
+### Upgrades executed
+
+- **One physical-value theorem for every contract.**
+  - New: `value_physical_eq_riskNeutral`. Under the Girsanov measure of `(m − r)/σ`, any
+    fixed-dated contract observed in `[0, H]` has, on the physical asset, its value on the
+    risk-neutral asset of `B^θ`.
+  - The call, chooser and geometric-Asian theorems were three copies of one `value_congr_ae`
+    spine; they are now its instances.
+  - It is the blueprint node `thm:physical-measure-pricing` and a corpus entry
+    (`mf-bs-physical-contract-value`).
+- **No advertised dependency that is not used.** `BlackScholesSelfFinancing` imported
+  `ItoProductRule` and its docstring called the proof "the product rule". The proof is Itô's
+  formula for `e^{rt}x`. The import is gone and the docstring says what the proof does.
+- **The coherence findings, executed on a branch before landing:**
+  - `Payoff.obsTimes` was the same recursion as the new `Payoff.obsList`, so there is one
+    primitive.
+  - `HasOnePeriodDensity` and `LocalEMMDensities` stated the same five per-period conditions
+    twice; they now share `IsOnePeriodDensity`.
+  - Predictability of time, of the Brownian path and of constants was re-derived at four sites;
+    one Foundations lemma each now covers them.
+  - `HJMModel.integratedRate` replaces three copies of the integrated short rate.
+  - `eval_congr`'s six identical cases are one or-pattern.
+  - The redundant `hρa`/`hρc` hypotheses of the product-rule additivity lemmas are gone.
+  - The moved `timeMeasure_Ioc_eq_interval` is in house style.
+
+### Ranked backlog
+
+1. **Consumers for three foundations.** The product rule, stochastic Fubini and the
+   any-horizon fixed point are each used only by their corpus entries.
+   - Derive the self-financing equation from `ito_product_rule_process` with the
+     finite-variation factor `e^{rt}`, which removes the second `timeCap` bookkeeping, or the
+     discounted-stock representation `e^{−rt}S_t = S₀ + ∫ σ e^{−rs}S_s dB_s`.
+   - `pathAssets_eq_picardSolution`: GBM is the unique Picard fixed point. Then the contract
+     model is the SDE's solution, not a convention.
+   - `HJMModel.expected_discount_eq_bond_zero` from the drift condition `α = σ σ*` via
+     `stochFubini_ito`, which retires `hprice`.
+2. **`IsSelfFinancing` as a predicate.** A structure on `(Δ, ψ)`: predictable, value
+   `ΔS + ψ`, and the self-financing equation. Then `europeanCall_hedge_isSelfFinancing`
+   instantiates it, the hedge value equals `C(t, S_t)` as a corollary, and the physical and HJM
+   seams can reuse it. Link it to `ContinuousMarket.SimpleStrategy`.
+3. **`conditionalOnePeriodFTAP_of_finite_filtration`.** For `𝓕 t` generated by finitely many
+   atoms of positive mass, apply `ftap_one_period_vector` per atom and paste. This makes
+   `exists_isEMM_of_noArbitrage` unconditional on countable `Ω`, and gives `DiscreteMarket` an
+   unconditional instance. Also connect the CRR tree as a `discreteAssets` model with its EMM,
+   since the DiscreteMarket seam is the weakest of the six.
+4. **The delta hedge beyond the call.**
+   - `heat_solution_itoIntegral_rep`: `f(t, B_t) = f(0,0) + ∫ f_x dB` for `f_t + ½f_xx = 0`, of
+     which the call hedge is an instance.
+   - The put hedge by parity.
+   - The identity up to `T` by localisation at `τ_n ↑ T` in place of `timeCap`.
+5. **Random physical drift.** `value_europeanCall_physical` with a predictable drift `m_t`. It
+   is the case the predictable-`θ` Girsanov theorem exists for and that the constant-`θ` seam
+   does not exercise. It needs a `pathAssets` with drift integral.
+6. **Unify the two constant-`θ` Girsanov measures.** `ZTpred` of a constant is
+   `exp(−θB_T − ½θ²T)`; prove it, and `GirsanovConstantTheta` becomes an instance.
+7. **Name checks for scope words.** Extend `test_prose_does_not_outrun_statement` to entry
+   names: "self-financing", "strong solution", "existence and uniqueness", "replicat" beside a
+   "Not proved" clause naming the same notion.
+
 ## 2026-11-06 — corpus 779, modules 710 — library practices (#439), read before it lands
 
 Scope: #439, the library-practices program (`docs/specs/2026-11-05-library-practices-design.md`):
