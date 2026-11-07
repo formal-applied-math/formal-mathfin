@@ -92,9 +92,10 @@ noncomputable def lookbackFloatingPrice (η S m r q σ T : ℝ) : ℝ :=
 /-! ### The tilt-gap: isolating the one term that needs a sign argument -/
 
 /-- **The exponential-tilt gap** `h(k, d) = e^{k²/2 − kd}·Φ(k − d) − Φ(−d)`. This is the
-carry term of `lookbackFloatingPrice`, rewritten on `(k, d)` coordinates with `k` the dimensionless
-carry `2r√T/σ` and `d` the zero-carry `a₁`; `h(0, d) = 0`, and the headline reduction needs only
-that `h(k, d)` has the same sign as `k`. -/
+carry term of `lookbackFloatingPrice` up to the positive factor `e^{bT}` (the price's bracket
+is `e^{bT} · h` in these coordinates), rewritten with `k` the dimensionless carry `2r√T/σ` and
+`d` the price's own `a₁` (`bsd1 S m b σ T`, the cost-of-carry `d1`, at the reduction's `q = 0`);
+`h(0, d) = 0`, and the headline reduction needs only that `h(k, d)` has the same sign as `k`. -/
 noncomputable def lookbackTiltGap (k d : ℝ) : ℝ :=
   Real.exp (k ^ 2 / 2 - k * d) * Phi (k - d) - Phi (-d)
 
