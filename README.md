@@ -13,7 +13,7 @@ differential equations), no-arbitrage theory, derivative pricing, fixed income, 
 risk measures and actuarial mathematics.
 
 The corpus records 804 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 767 are proved in full, 18 restate a lemma from Mathlib or
+Lean statement and proof. Of these, 766 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 19 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -238,13 +238,15 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Nineteen of the 804 results are reduced cores. Eleven assume a structure whose fields include the
+- Twenty of the 804 results are reduced cores. Eleven assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, the two-dimensional Itô formula,
   and five theorems on Markov chains. Two assume the conditional one-period fundamental theorem of
   asset pricing, the measurable-selection core of the Dalang–Morton–Willinger theorem: the theorem
-  itself, and the put–call parity it gives in a discrete market. The other six prove special cases: the first interarrival
+  itself, and the put–call parity it gives in a discrete market. One assumes the bond-pricing
+  identity of a Heath–Jarrow–Morton model, which the unproved drift condition would deliver: fixed
+  cash flows in that model. The other six prove special cases: the first interarrival
   time of a Poisson process is exponential; Stulz's call on the maximum is checked only in its
   zero-strike limit, and the Heynen–Kat two-asset barrier only at zero correlation, neither formula
   being derived as an expected payoff; the Ornstein–Uhlenbeck Hermite modes decay at their

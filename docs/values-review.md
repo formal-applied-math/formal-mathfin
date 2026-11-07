@@ -178,6 +178,10 @@ patterns of overclaim.
 
   All are restated.
 
+**Taxonomy.** `mf-hjm-fixed-flows` was `full` while assuming `E[D(tᵢ)] = P(0,tᵢ)`, the identity
+the HJM drift condition is for. Given it, the theorem is the model-agnostic zero-curve valuation.
+It is now `reduced_core`, like the two entries that assume the conditional one-period FTAP.
+
 Junk values: `HJMModel.bankAccount` and `discount` integrate the short rate `f(s,s)`, which the
 bundle did not assume integrable. A non-integrable short rate made the discount factor
 `exp 0 = 1`. The bundle now carries `shortRate_integrable` (design.md §2).
