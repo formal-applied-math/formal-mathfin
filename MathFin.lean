@@ -497,6 +497,7 @@ import MathFin.BlackScholes.Spreads
 -- order Breeden–Litzenberger, for any law with a finite mean); the call price is differentiable
 -- in the strike exactly where the law has no atom, and there its derivative is minus the digital
 import MathFin.BlackScholes.CallSpreadDigital
+import MathFin.BlackScholes.DeltaHedge
 import MathFin.BlackScholes.Dupire
 -- The Heston 2D affine transform at the generator/PDE level: the rho-shifted Riccati
 -- closed forms, the pricing PDE, and the gated real-moment expectation
@@ -791,6 +792,7 @@ import MathFin.Contracts.Models.BlackScholes
 import MathFin.Contracts.Models.BlackScholesExchange
 import MathFin.Contracts.Models.BlackScholesAsian
 import MathFin.Contracts.Models.BlackScholesChooser
+import MathFin.Contracts.Models.BlackScholesHedge
 import MathFin.Contracts.Models.Binomial
 import MathFin.Contracts.Models.BinomialCompleteMarket
 import MathFin.Contracts.Models.BinomialLimit
