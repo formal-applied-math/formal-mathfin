@@ -57,7 +57,8 @@ MSC 91G20, MSC 60H05, JEL G13
 @[expose] public section
 
 open MeasureTheory ProbabilityTheory Filter Topology Set
-open ItoIntegralL2 ItoIntegralLocalised ItoFormulaAdapted AdaptedDrift
+open MathFin MathFin.ItoIntegralL2 MathFin.ItoIntegralLocalised MathFin.ItoFormulaAdapted
+  MathFin.AdaptedDrift
 open scoped NNReal
 
 namespace MathFin.Contracts.BlackScholes
