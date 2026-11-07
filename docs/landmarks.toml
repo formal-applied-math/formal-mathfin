@@ -1,0 +1,175 @@
+# The curated headline results shown on the docs site's Landmarks page (landmarks.html).
+# One [[landmark]] per bullet of the README's "Main results". The page prints the exact Lean
+# statement from the declaration index; `summary` and `scope` are prose and must never claim more
+# than that statement. `scope` is what is NOT proved, taken from the README's "Limitations".
+#
+#   decl    the full Lean name (a name missing from the index renders a "not in this build" card)
+#   title   short heading
+#   summary one plain sentence
+#   scope   what the statement leaves out
+#   also    optional companion declarations, statements shown below the main one
+
+[[landmark]]
+decl = "MathFin.ito_formula_unrestricted"
+title = "Itô's formula"
+summary = """For f(t,x) with continuous f, f_t, f_x and f_xx and no growth condition, \
+f(t,B_t) − f(0,B_0) − ∫₀ᵗ (f_t + ½ f_xx)(s,B_s) ds is a continuous local martingale for the \
+augmented Brownian filtration. For an Itô process built from one Brownian motion, with \
+continuous adapted coefficients and no bounds on them or on f, the full change-of-variables \
+formula holds almost surely at every t ≤ T at once."""
+scope = """The formula for an Itô process is proved on a finite horizon [0,T], for a process built \
+from a single Brownian motion with a deterministic starting point. Itô's formula for a \
+continuous semimartingale not built from B is not proved, and neither is a quadratic-variation \
+process for a general continuous local martingale."""
+also = [
+  "MathFin.ItoFormulaAdapted.ito_formula_adapted_unbounded_process",
+  "MathFin.ItoFormulaAdapted.exists_localMartingale_ito_formula",
+]
+
+[[landmark]]
+decl = "MathFin.LevyCharacterization.isFilteredPreBrownian_of_localMartingale"
+title = "Lévy's characterization"
+summary = """A continuous adapted process M with M₀ = 0 such that M and M² − t are local \
+martingales for a filtration F is an F-Brownian motion."""
+scope = """The hypothesis is that M² − t is a local martingale, not that the quadratic variation \
+⟨M⟩ₜ equals t: a quadratic-variation process for a general continuous local martingale is not \
+constructed."""
+
+[[landmark]]
+decl = "MathFin.Btheta_isQBrownianMotion_predictable_of_bdd"
+title = "Girsanov's theorem"
+summary = """For bounded predictable θ, under the measure with density \
+exp(−∫₀ᵀ θ dB − ½∫₀ᵀ θ² dt), the process B_t + ∫₀ᵗ θ_s ds on [0,T] starts at 0 and has \
+independent N(0,t−s) increments."""
+scope = """Only bounded θ, and only at the level of finite-dimensional laws, for an adapted \
+modification of the process: neither path continuity of the new process nor independence of its \
+increments from the past is stated. The general form of Girsanov's theorem and Novikov's \
+condition are reduced cores, not derived."""
+
+[[landmark]]
+decl = "MathFin.exists_replicating_strategy"
+title = "Martingale representation"
+summary = """Every square-integrable F^B_T-measurable claim H is E[H] plus a stochastic integral \
+∫₀ᵀ φ dB for a unique φ, so it is replicated from initial wealth E[H] by a unique strategy."""
+scope = """This proves that a hedge exists and is unique, but does not identify it; that needs \
+the Clark–Ocone formula (open)."""
+
+[[landmark]]
+decl = "MathFin.SDEExistence.picardMap_exists_unique_fixedPoint"
+title = "Stochastic differential equations"
+summary = """For Lipschitz b and σ with constants L_b and L_σ, the Picard map of \
+dX = b(X)dt + σ(X)dB has a unique fixed point in the L² space of predictable processes on \
+[0,T] when T·L_b + √T·L_σ < 1."""
+scope = """Existence is proved only on horizons with T·L_b + √T·L_σ < 1; the theorem for \
+arbitrary horizons is not."""
+
+[[landmark]]
+decl = "MathFin.ftap_discrete"
+title = "Fundamental theorem of asset pricing"
+summary = """A discrete-time, finite-horizon market with one discounted risky asset on a finite \
+probability space of full support has no arbitrage if and only if it has an equivalent martingale \
+measure; the one-period theorem holds on any probability space with finitely many assets."""
+scope = """The multi-period theorem is on finite probability spaces only. In continuous time \
+only the easy direction is proved: an equivalent martingale measure precludes arbitrage by simple \
+strategies. The second theorem (completeness iff a unique measure) is proved in both directions \
+only for one risky asset on a finite space of full support; in the Brownian market only \
+completeness implies uniqueness."""
+also = [
+  "MathFin.OnePeriodVector.ftap_one_period_vector",
+  "MathFin.ftap_two",
+]
+
+[[landmark]]
+decl = "MathFin.coherentRisk_isLUB"
+title = "Coherent risk measures"
+summary = """On a finite state space a coherent risk measure of losses is the supremum of \
+E_q[L] over the probability vectors q that price every acceptable loss nonpositively."""
+scope = """Finite probability spaces only. It rests on the same cone-separation lemmas as the \
+finite FTAP (ConvexDuality)."""
+
+[[landmark]]
+decl = "MathFin.bsV_satisfies_bs_pde_via_feynmanKac"
+title = "The Black–Scholes PDE from Feynman–Kac"
+summary = """The call price is a heat-kernel (Gaussian) integral of the payoff, and the \
+Black–Scholes PDE for the closed-form price follows from the heat equation for the kernel, \
+without differentiating the closed form."""
+scope = """This is the Gaussian-integral form of Feynman–Kac; no stochastic differential \
+equation enters."""
+
+[[landmark]]
+decl = "MathFin.bs_delta_hedge_replication"
+title = "Black–Scholes delta hedge"
+summary = """e^{−rt}·C(t,S_t) = C(0,S₀) + ∫₀ᵗ Δ σ e^{−rs} S_s dB_s almost surely, for all \
+t ≤ T' < T."""
+scope = """The identity is on [0,T'] for T' < T; convergence to the payoff at T is a separate \
+theorem. The hedge is not packaged as an admissible self-financing strategy."""
+
+[[landmark]]
+decl = "MathFin.JumpDiffusionProcess.martingale_iff"
+title = "Jump-diffusions and Merton's series"
+summary = """For a process with independent increments distributed as bτ + σ√τ Z + Σ_{i<N} J_i \
+(Z standard normal, N Poisson(Λτ), i.i.d. jumps of law ν), the discounted price e^{−rt}S₀e^{X_t} \
+is a martingale exactly when b = r − σ²/2 − Λ(∫eˣdν − 1). With Gaussian jumps, at that drift \
+and reading P as the pricing measure, the conditional discounted call payoff is Merton's 1976 \
+series."""
+scope = """The results assume the properties bundled in JumpDiffusionProcess; a process with \
+them is constructed only without jumps, as Brownian motion with drift. A change of measure that \
+alters the jump rate or the jump law is not covered."""
+also = ["MathFin.JumpDiffusionProcess.condExp_call_eq_mertonCallPrice"]
+
+[[landmark]]
+decl = "MathFin.BlackScholes.AmericanPut.Stopping.value_eq_of_attained"
+title = "The American put"
+summary = """A bounded continuous supermartingale dominating the discounted reward bounds the \
+value, and a stopping rule whose expected reward equals its initial value attains it."""
+scope = """This is a verification principle: the supermartingale is a hypothesis, not \
+constructed. Separately, convexity of the early-exercise boundary in the time to expiry is \
+proved for the value defined over stopping times of the completed Brownian filtration, with \
+r > 0 and dividend yield 0 ≤ q ≤ r (see the PhysicalBoundaryConvexity module)."""
+
+[[landmark]]
+decl = "MathFin.SVI.extendedCertificateFormula_iff_bsSmile_convex"
+title = "Raw SVI"
+summary = """A fixed Boolean combination of polynomial signs in (a,b,ρ,m,σ) holds exactly when \
+σ, b ≥ 0, ρ² ≤ 1, the total variance is positive and the Black–Scholes call with the SVI \
+volatility is convex in the strike. With one more sign, b(1+ρ) < 2, it holds exactly when that \
+call is also nonincreasing, lies between (1−K)⁺ and 1, and has the limits of a call price."""
+scope = """The certificate's formula is defined structurally, not written out as inequalities. \
+Butterfly-freeness is proved as properties of the call price as a function of the strike; the \
+risk-neutral law is not constructed from them. At σ = 0 convexity of the call is not tied to \
+Durrleman's condition."""
+also = ["MathFin.SVI.butterflyFreeFormula_iff_isNormalizedCallPrice"]
+
+[[landmark]]
+decl = "MathFin.Contracts.value_europeanCall_sub_put_of_martingale"
+title = "Contracts, separate from models"
+summary = """Payoffs are terms of a contract language priced by interchangeable models. In any \
+model whose discounted price is a martingale from S₀, a call less a put is worth the forward, \
+S₀ − K·D(T); the n-step CRR values of a European call converge to the Black–Scholes value when \
+|r|√T < σ."""
+scope = """The binomial limit is proved for call prices and for the law of the terminal \
+log-return; convergence of the price process (Donsker) is not formalized. The exotic closed \
+forms (power call, exchange option, geometric Asian call, chooser) hold when the pricing measure \
+makes the log-price Gaussian; see the Contracts/Models modules."""
+also = ["MathFin.Contracts.tendsto_binomial_value_europeanCall"]
+
+[[landmark]]
+decl = "MathFin.Contracts.bondPrice_hullWhite"
+title = "Interest rates"
+summary = """In Hull–White with continuous forcing (and Vasicek), with the short rate in its \
+Wiener-integral representation and the Brownian measure read as the pricing measure, the bond \
+price at t is A_t(T−t)·e^{−B(T−t)r_t} almost surely; the bond put is a Black put on a bond that \
+is lognormal under the forward measure (Jamshidian), and a caplet is 1+δK such puts. For any \
+discount factor, a swap rate tied to the bonds by a model bundle gives the payer swaption as \
+A(0)·E^A[(S−K)⁺] and the CMS swaplet as its forward value plus an exact covariance adjustment."""
+scope = """That the Wiener-integral representation solves the short-rate SDE, and the swap of \
+time integrals behind the integrated rate, are cited, not proved. Outside these two models the \
+observed bond is a hypothesis of the model bundle, and so is the lognormality behind the Black-76 \
+caplet and Black's swaption formula. The CMS adjustment is exact for payment at the fixing date; \
+its sign is proved only when every bond but the last is known at the fixing date."""
+also = [
+  "MathFin.Contracts.valueDisc_bondPut_hullWhite",
+  "MathFin.Contracts.valueDisc_caplet_eq_bondPut",
+  "MathFin.Contracts.valueDisc_payerSwaption",
+  "MathFin.Contracts.SwapModel.valueDisc_cmsSwaplet_eq",
+]

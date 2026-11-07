@@ -203,3 +203,11 @@ details.tableview summary { cursor: pointer; color: var(--ink-2); }
   .search kbd { display: none; }
   .theme { margin-left: auto; }
 }
+
+/* landmarks page */
+.landmark { margin: 28px 0 40px; padding-top: 8px; border-top: 1px solid var(--line); }
+.landmark.missing { opacity: 0.6; }
+.lm-summary { max-width: 70ch; }
+.lm-scope { max-width: 70ch; border-left: 3px solid var(--muted); padding: 4px 12px;
+  background: var(--surface); color: var(--ink-2); }
+.lm-path { font-size: 0.92rem; }
