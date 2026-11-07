@@ -687,6 +687,8 @@ import MathFin.Performance.FracDiffWeights
 import MathFin.Performance.LabelUniqueness
 import MathFin.Performance.BetSizeSigmoid
 import MathFin.Performance.PurgedCV
+-- Marchenko-Pastur support edges: closed form, width, sandwich, limits, de Prado form
+import MathFin.Performance.MarchenkoPasturEdge
 
 -- RiskMeasures
 import MathFin.RiskMeasures.Gaussian

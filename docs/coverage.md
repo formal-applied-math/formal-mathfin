@@ -26,6 +26,40 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Marchenko-Pastur support edges (2026-11-08)
+
+One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 781 → 782 (746 full
+before, 747 after; 764 → 765 delivery-ready).
+
+- **`mf-marchenko-pastur-edges`** (MathFin/Performance/MarchenkoPasturEdge.lean): the support
+  endpoints `λ₊ = σ²(1+√c)²`, `λ₋ = σ²(1−√c)²` of the Marchenko-Pastur law for the sample
+  covariance of an `N × T` i.i.d. matrix with entry variance `σ²`, aspect ratio `c = N/T` —
+  the closed forms only. Proved: the width `λ₊ − λ₋ = 4σ²√c` (`mpUpperEdge_sub_mpLowerEdge`),
+  the ordering `λ₋ ≤ λ₊` and the variance sandwich `λ₋ ≤ σ² ≤ λ₊` (the lower side for
+  `c ≤ 1`; `mpLowerEdge_le_mpUpperEdge`, `le_mpUpperEdge`,
+  `mpLowerEdge_le_variance_of_le_one`), the degeneracy characterization `λ₊ = σ² ↔ σ = 0 ∨
+  c = 0` (`mpUpperEdge_eq_variance_iff`), the rank-boundary `λ₋ = 0 ↔ c = 1` for `σ ≠ 0`
+  (`mpLowerEdge_eq_zero_iff`), the product `λ₊λ₋ = σ⁴(1−c)²`
+  (`mpUpperEdge_mul_mpLowerEdge`), strict monotonicity in `c` and divergence
+  (`mpUpperEdge_lt_of_lt`, `tendsto_mpUpperEdge_atTop`), continuity of both edge maps
+  (`Real.sqrt` is total; `continuous_mpUpperEdge`, `continuous_mpLowerEdge`), the bulk
+  collapse `λ± → σ²` as `c → 0⁺` and `λ₋ → 0` as `c → 1`
+  (`tendsto_mpUpperEdge_zero`, `tendsto_mpLowerEdge_zero`, `tendsto_mpLowerEdge_one`),
+  López de Prado's reciprocal form `λ±(σ, q⁻¹) = σ²(1 ± (√q)⁻¹)²` with `q = T/N` — the
+  `eMin`/`eMax` of Snippet 2.1 of *Machine Learning for Asset Managers*, where `eMax` is the
+  noise/signal cut (`mpUpperEdge_inv`, `mpLowerEdge_inv`) — and the quadratic scaling
+  `λ±(kσ, c) = k²λ±(σ, c)` (`mpUpperEdge_const_mul`, `mpLowerEdge_const_mul`). A bridge to
+  the portfolio layer: an equicorrelation matrix's trace is its dimension, so its average
+  eigenvalue is `1 = σ²` for a correlation matrix — the center of the `σ = 1` support
+  interval (`trace_equicorrelationMatrix_eq_card`, importing
+  `Portfolio/Equicorrelation.lean`). Cited:
+  Marchenko & Pastur (1967), Bai & Silverstein 2nd ed. (2010) ch. 3 (the law these endpoints
+  support), López de Prado (2020) ch. 2 Snippet 2.1 (the parameterization actually
+  transcribed, from the book's code repository). Disclosed out of scope: nothing
+  probabilistic — no random matrix, sample covariance, eigenvalue, or convergence of the
+  empirical spectral distribution; the atom at zero for `c > 1` and the support density are
+  not treated. Axioms-clean, `full`.
+
 ### Removable singularities in two stochastic-vol smile models (2026-11-01)
 
 Three `full` entries in `benchmarks/black_scholes.json`. Corpus 754 → 757.
