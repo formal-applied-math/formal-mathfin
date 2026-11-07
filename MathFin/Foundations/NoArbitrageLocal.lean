@@ -209,7 +209,6 @@ private theorem noArbitrage_aux (T : ℕ) :
   | zero =>
     intro _ _ φ _ _ _
     rw [martingaleTransform_zero]
-    exact Filter.EventuallyEq.rfl
   | succ T ih =>
     intro hS hloc φ hφ hbdd hnn
     have hloc' : NoArbitrageLocal 𝓕 P S T := fun t ht ↦ hloc t (Nat.lt_succ_of_lt ht)

@@ -278,13 +278,15 @@ lemma setIntegral_pasted_step {t : ℕ} (ht : t < T) {A : Set Ω} (hA : Measurab
       (h.integrable_smul_Z ht (h.integrable (t + 1) (Nat.succ_le_of_lt ht)))
   have e2 : pastedDensity Z t • P[Z t • S (t + 1) | 𝓕 t] =ᵐ[P] pastedDensity Z t • S t := by
     filter_upwards [h.cond_price t ht] with ω hω
-    simp only [Pi.smul_apply, hω]
+    exact congrArg (fun x ↦ pastedDensity Z t ω • x) hω
   have hM : ∫ ω in A, pastedDensity Z (t + 1) ω • S (t + 1) ω ∂P =
       ∫ ω in A, pastedDensity Z t ω • S t ω ∂P := by
     calc ∫ ω in A, pastedDensity Z (t + 1) ω • S (t + 1) ω ∂P
         = ∫ ω in A, (pastedDensity Z t • (Z t • S (t + 1))) ω ∂P := by
           refine setIntegral_congr_ae hAm (ae_of_all _ fun ω _ ↦ ?_)
-          simp only [Pi.smul_apply, pastedDensity_succ, mul_smul]
+          change pastedDensity Z (t + 1) ω • S (t + 1) ω =
+            pastedDensity Z t ω • (Z t ω • S (t + 1) ω)
+          rw [pastedDensity_succ, mul_smul]
       _ = ∫ ω in A, (P[pastedDensity Z t • (Z t • S (t + 1)) | 𝓕 t]) ω ∂P :=
           (setIntegral_condExp (𝓕.le t) hint hA).symm
       _ = ∫ ω in A, pastedDensity Z t ω • S t ω ∂P :=
