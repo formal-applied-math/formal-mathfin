@@ -56,7 +56,7 @@ rows above.
 * `willowMarginal_eq` — **marginal preservation**: with the marginal constraint added,
   the marginal at every step is the same discrete law `q`.
 * `willowMarginal_crossMoment`, `willowScaled_secondMoment`, `willowScaled_crossMoment` —
-  the cross moments: `E[Z_k Z_{k+1}] = β k`, and in the unstandardized variables
+  the scaled moments and cross moments: `E[Z_k Z_{k+1}] = β k`, and in the unstandardized variables
   `X k = √(t k) * Z k` the second moment is `t k` and the cross moment across
   `[t k, t (k+1)]` is `t k` — the Brownian values, which is the de-correlation
   property Curran's constraint system encodes.
