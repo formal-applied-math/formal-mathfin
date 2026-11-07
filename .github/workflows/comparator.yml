@@ -8,8 +8,8 @@ name: comparator
 # (leanchecker-paranoid, lean4lean, nanoda, con-leche, con-ron), so the verdict needs every one
 # of them, not only Lean's kernel. The project is built and exported inside a `bwrap` sandbox.
 #
-# Runs when the Challenge, the Solution, the config or the modules the Solution uses change,
-# monthly, and on demand. docs/palomar.md records the registry submission this backs.
+# Runs on pull requests and pushes to main that change the Challenge, the Solution, the config or
+# the modules the Solution uses, monthly, and on demand. docs/palomar.md records the registry submission this backs.
 
 on:
   workflow_dispatch:
@@ -24,6 +24,15 @@ on:
       - MathFin/RiskMeasures/**
       - lean-toolchain
       - lake-manifest.json
+  pull_request:
+    paths:
+      - Challenge.lean
+      - Solution.lean
+      - comparator.json
+      - MathFin/RiskMeasures/**
+      - lean-toolchain
+      - lake-manifest.json
+      - .github/workflows/comparator.yml
 
 concurrency:
   group: comparator-${{ github.ref }}
