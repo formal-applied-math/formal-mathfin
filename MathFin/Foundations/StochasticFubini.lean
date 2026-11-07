@@ -27,6 +27,10 @@ commutation.
 No `StochasticIntegralTower` class is introduced: `I` as an explicit continuous linear map is
 already maximal generality; the isometry of the towers is never used.
 
+## Main definitions
+
+* `JointIntegrable`: joint integrability of a family of representatives on `ν ⊗ m`.
+
 ## Main results
 
 * `coeFn_integral_ae_eq`: the `Lp ℝ 2 m`-valued Bochner integral `∫ u, φ u ∂ν` is
