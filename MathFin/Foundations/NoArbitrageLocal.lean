@@ -209,10 +209,12 @@ lemma stronglyMeasurable_martingaleTransform {T : ℕ}
     rw [e]
     exact h1.add (h2.inner ((hS (n + 1) hn).sub h3))
 
-/-- The induction on the horizon behind `noArbitrage_of_noArbitrageLocal`. -/
-private theorem noArbitrage_aux (T : ℕ) :
-    (∀ t ≤ T, StronglyMeasurable[𝓕 t] (S t)) → NoArbitrageLocal 𝓕 P S T →
-      NoArbitrage 𝓕 P S T := by
+/-- **Conditional one-period no arbitrage gives multi-period no arbitrage**, for a price adapted
+up to the horizon. -/
+theorem noArbitrage_of_noArbitrageLocal {T : ℕ}
+    (hS : ∀ t ≤ T, StronglyMeasurable[𝓕 t] (S t)) (hloc : NoArbitrageLocal 𝓕 P S T) :
+    NoArbitrage 𝓕 P S T := by
+  revert hS hloc
   induction T with
   | zero =>
     intro _ _ φ _ _ _
@@ -276,13 +278,6 @@ private theorem noArbitrage_aux (T : ℕ) :
     have h2ω' : ⟪φ (T + 1) ω, S (T + 1) ω - S T ω⟫_ℝ = 0 := h2ω
     show martingaleTransform φ S (T + 1) ω = 0
     rw [hsplit ω, hVω', h2ω', add_zero]
-
-/-- **Conditional one-period no arbitrage gives multi-period no arbitrage**, for a price adapted
-up to the horizon. -/
-theorem noArbitrage_of_noArbitrageLocal {T : ℕ}
-    (hS : ∀ t ≤ T, StronglyMeasurable[𝓕 t] (S t)) (hloc : NoArbitrageLocal 𝓕 P S T) :
-    NoArbitrage 𝓕 P S T :=
-  noArbitrage_aux T hS hloc
 
 /-- **No arbitrage is local.** For a price adapted up to the horizon `T`, the multi-period market
 is arbitrage free if and only if every one-period market conditional on `𝓕 t`, `t < T`, is. -/
