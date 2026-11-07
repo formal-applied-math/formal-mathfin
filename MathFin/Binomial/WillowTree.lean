@@ -300,10 +300,10 @@ theorem willowMarginal_crossMoment (hP : WillowMomentConstraints z β P)
     _ = β k := by rw [willowMarginal_secondMoment hP hq hq2, mul_one]
 
 /-- **The scaled chain's second moment**: in the unstandardized variables
-`X k = √(t k) * Z k` on an initially unit-variance willow chain, the marginal second
-moment at step `k` is `t k` — the Brownian marginal variance at the grid time. (It is
-the variance as well whenever the marginal mean is zero, which `willowMarginal_mean`
-gives under its own hypotheses.) -/
+`X k = √(t k) * Z k` on an initially unit-second-moment willow chain, the marginal
+second moment at step `k` is `t k` — the Brownian marginal variance at the grid time.
+(It is the variance as well whenever the marginal mean is zero, which
+`willowMarginal_mean` gives under its own hypotheses.) -/
 theorem willowScaled_secondMoment (hP : WillowMomentConstraints z β P)
     (hq : ∑ i, q i = 1) (hq2 : ∑ i, q i * z i ^ 2 = 1)
     (t : ℕ → ℝ) (k : ℕ) (ht : 0 ≤ t k) :
@@ -398,8 +398,8 @@ theorem WillowMomentConstraints.bivariateNormal_moments (hP : WillowMomentConstr
       ∧ Var[(Prod.fst : ℝ × ℝ → ℝ); bivariateNormalLaw (β k)] = 1
       ∧ Var[(Prod.snd : ℝ × ℝ → ℝ); bivariateNormalLaw (β k)] = 1
       ∧ cov[Prod.fst, Prod.snd; bivariateNormalLaw (β k)] = β k :=
-  ⟨sq_le_one hP k i hrow,
-    variance_fst_bivariateNormalLaw (sq_le_one hP k i hrow),
-    variance_snd_bivariateNormalLaw _, covariance_fst_snd_bivariateNormalLaw _⟩
+  have h := hP.sq_le_one k i hrow
+  ⟨h, variance_fst_bivariateNormalLaw h, variance_snd_bivariateNormalLaw _,
+    covariance_fst_snd_bivariateNormalLaw _⟩
 
 end MathFin
