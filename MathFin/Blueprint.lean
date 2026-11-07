@@ -31,6 +31,12 @@ import MathFin.Binomial.MartingaleRepresentation
 import MathFin.Binomial.CRRCharFun
 import MathFin.BlackScholes.MertonDominance
 import MathFin.Foundations.MarkovPathMeasure
+import MathFin.Foundations.ItoFormulaAdaptedProcess
+import MathFin.Futures.SchwartzOneFactor
+import MathFin.FixedIncome.CVA
+import MathFin.FixedIncome.FxForwardParity
+import MathFin.BlackScholes.JumpDiffusionProcess
+import MathFin.BlackScholes.JumpDiffusionVarianceSwap
 import Architect
 
 /-!
@@ -141,6 +147,16 @@ attribute [blueprint "thm:gbm-sde" (title := "GBM coefficient matching (algebrai
   partials + the 2D Itô drift. Honestly *coefficient matching*, not a continuous
   SDE-solution theorem — the $-\sigma^2/2$ cancellation IS the Itô correction. -/)]
   MathFin.gbm_solves_sde
+
+attribute [blueprint "thm:ito-formula-c2" (title := "Itô's formula for C² functions")
+  (statement := /-- For an Itô process $X = x_0 + \int b\,ds + \int \sigma\,dB$ with adapted
+  continuous coefficients (no boundedness) and $f(t,x)$ with jointly continuous $f_t$, $f_x$,
+  $f_{xx}$, almost surely for every $t \in [0,T]$ at once
+  $f(t,X_t) = f(0,x_0) + \int_0^t (f_t + f_x b + \tfrac12 f_{xx}\sigma^2)(s,X_s)\,ds
+  + \bigl(\int f_x(\cdot,X)\,\sigma\,dB\bigr)_t$, the stochastic integral being the
+  localised predictable Itô integral. The textbook $C^2$ scope, as an identity of
+  processes. -/)]
+  MathFin.ItoFormulaAdapted.ito_formula_adapted_unbounded_process
 
 -- ===== change of measure — the centerpiece =====
 
@@ -328,3 +344,45 @@ attribute [blueprint "thm:bracket-compensator"
   traced onto a band $(a,b]\times\Omega$, is $\mathcal{B}(\mathbb{R}_{\ge 0})\otimes
   \mathcal{F}_b$-measurable. -/)]
   MathFin.BracketCompensator.condExp_sq_sub_bracket
+
+attribute [blueprint "thm:merton-risk-neutral-drift"
+  (title := "Jump-diffusion risk-neutral drift")
+  (statement := /-- For a jump-diffusion $X$ with drift $b$, volatility $\sigma$, jump
+  intensity $\Lambda$ and a jump law $\nu$ with $\mathbb{E}[e^J] < \infty$, and
+  $S_0 \ne 0$, the discounted price $e^{-rt}S_0e^{X_t}$ is a martingale if and only if
+  $b = r - \sigma^2/2 - \Lambda(\mathbb{E}[e^J] - 1)$. Merton's log-normal jumps have
+  $\mathbb{E}[e^J] - 1 = \kappa$ (`integral_exp_mertonJump`), the compensation
+  $r - \lambda\kappa$. -/)]
+  MathFin.JumpDiffusionProcess.martingale_iff
+
+attribute [blueprint "thm:variance-swap-jump-bias" (title := "Variance-swap jump bias")
+  (statement := /-- At the compensated drift, the Demeterfi–Derman–Kamal–Zou log contract on
+  the forward, scaled as a variance rate, has expected payoff
+  $\sigma^2 + 2\Lambda\,\mathbb{E}[e^J - 1 - J]$ under the jump-diffusion increment law
+  (jump law with $\mathbb{E}[e^J] < \infty$ and exponential moments near $0$). Without
+  jumps it is $\sigma^2$, the Black–Scholes fair strike. -/)]
+  MathFin.jumpDiffusion_logContract
+
+attribute [blueprint "thm:schwartz-commodity-futures" (title := "Schwartz commodity futures")
+  (statement := /-- With the log spot in its Ornstein–Uhlenbeck Wiener representation
+  $\ln S_T = m_T + \sigma\int_0^T e^{-\kappa(T-s)}\,dB_s$ and $\kappa > 0$, the expected
+  terminal spot is the closed form $\exp(m_T + v_T/2)$. The modelling bridge from the
+  SDE to that representation is cited, not proved here. -/)]
+  MathFin.schwartzFuturesPrice_eq_integral
+
+attribute [blueprint "thm:interest-rate-parity"
+  (title := "Covered and uncovered interest-rate parity")
+  (statement := /-- In a finite-state market pricing the domestic bond at $e^{-r_dT}$ and the
+  foreign bond, in domestic currency, at $Se^{-r_fT}$, the forward priced to zero is
+  $F = Se^{(r_d-r_f)T}$; under the Garman–Kohlhagen risk-neutral measure it is also the
+  expected terminal spot. A statement about the pricing measure, not the physical one. -/)]
+  MathFin.covered_eq_uncovered_interest_parity
+
+attribute [blueprint "thm:unilateral-cva" (title := "Unilateral CVA, Gaussian exposure")
+  (statement := /-- With exposure $V_s = m(s) + \sigma(s)\sqrt s\,Z$, $Z \sim N(0,1)$,
+  independent of a default time with continuous hazard $h \ge 0$ (no wrong-way risk), and
+  $D$, $m$, $\sigma$ measurable and bounded with $\sigma > 0$:
+  $\mathrm{CVA} = \mathrm{LGD}\int_0^T D(s)\,[m(s)\Phi(d_s) + \sigma(s)\sqrt s\,
+  \varphi(d_s)]\,h(s)Q(s)\,ds$, $d_s = m(s)/(\sigma(s)\sqrt s)$. Only the marginal laws of
+  the exposure enter; no exposure dynamics are modelled. -/)]
+  MathFin.CVA.cva_gaussian
