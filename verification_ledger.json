@@ -5519,6 +5519,13 @@
       "input_hash": "ae90bb25946b203c4ac740c313a06004d1c4e37f9e66636cdb25a208dabc5959",
       "verified_at_commit": "e6b2365"
     },
+    "sc-sde-existence-any-horizon": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-11-07",
+      "elapsed_s": 4.1,
+      "input_hash": "2d587c01c77e169931e713113f5c56f1f23166a1035d073011430531cd7940a1",
+      "verified_at_commit": "83de4d1"
+    },
     "sc-simple-dense-bracket": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-11-06",
