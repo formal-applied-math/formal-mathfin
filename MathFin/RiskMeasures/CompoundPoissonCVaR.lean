@@ -128,7 +128,9 @@ theorem integral_max_sub_compoundPoisson (c : ℝ) :
     (ae_of_all _ fun n ↦ ?_)
   have hn := natCast_le_two_pow n
   have h1 : (1 : ℝ) ≤ 2 ^ n := one_le_pow₀ one_le_two
-  rw [Real.norm_of_nonneg (integral_nonneg fun _ ↦ le_max_right _ _)]
+  have h0 : 0 ≤ ∫ ω, max (∑ i ∈ Finset.range n, X i ω - c) 0 ∂μ :=
+    integral_nonneg fun _ ↦ le_max_right _ _
+  rw [Real.norm_of_nonneg h0]
   calc ∫ ω, max (∑ i ∈ Finset.range n, X i ω - c) 0 ∂μ
       ≤ ∫ ω, (|∑ i ∈ Finset.range n, X i ω| + |c|) ∂μ :=
         integral_mono (((integrable_range_sum hident hX n).sub (integrable_const c)).pos_part)
