@@ -69,8 +69,7 @@ rows above.
   honest (non-negative, summing-to-one) transition row forces `β k ^ 2 ≤ 1`, the
   lattice-side analogue of `sq_le_one_of_covariance_unit` for a correlated Gaussian
   pair; and for such a coefficient the standard bivariate normal law
-  `bivariateNormalLaw (β k)` — the pair whose conditional moments the row constraints
-  encode — has unit variances and covariance `β k`.
+  `bivariateNormalLaw (β k)` has unit variances and covariance `β k`.
 
 Nothing here touches the linear program that *finds* such a matrix (feasibility of the
 full system, the objective, sparsity): the statements are unconditional in the matrix
@@ -196,9 +195,10 @@ theorem willowMarginal_mass_succ (hP : WillowMomentConstraints z β P) (k : ℕ)
   rw [Finset.sum_congr rfl fun i _ ↦ by rw [h2 i, mul_one]]
   simp only [h]
 
-/-- **Mass preservation**: the willow marginal has total mass `1` at every step, for any
-family of transition matrices satisfying the row constraints (bundled as
-`WillowMomentConstraints`; the proof uses only row stochasticity). -/
+/-- **Mass preservation**: a chain started at a unit-mass marginal `q` (`hq`) keeps
+total mass `1` at every step, for any family of transition matrices satisfying the row
+constraints (bundled as `WillowMomentConstraints`; the proof uses only row
+stochasticity). -/
 theorem willowMarginal_mass (hP : WillowMomentConstraints z β P) (hq : ∑ i, q i = 1) (k : ℕ) :
     ∑ j, willowMarginal P q k j = 1 := by
   induction k with
@@ -255,11 +255,12 @@ theorem willowMarginal_mean (hP : WillowMomentConstraints z β P)
   | zero => exact hq0
   | succ k ih => rw [willowMarginal_mean_succ hP k, ih, mul_zero]
 
-/-- **Second-moment propagation**: a willow chain started at a marginal of unit second
-moment keeps unit second moment at every step, for any family of transition matrices
-satisfying the row constraints (the proof uses the conditional second moment constraint
-for the recursion and row stochasticity for the unit mass its constant term is weighted
-by). This is the variance-on-track induction: combined with the scaling `√(t k)` it
+/-- **Second-moment propagation**: a willow chain started at a marginal of unit mass
+and unit second moment (`hq`, `hq2`) keeps unit second moment at every step, for any
+family of transition matrices satisfying the row constraints (the proof uses the
+conditional second moment constraint for the recursion and row stochasticity — via
+`willowMarginal_mass` — for the unit mass its constant term is weighted by). This is
+the variance-on-track induction: combined with the scaling `√(t k)` it
 keeps the chain's marginal second moment at `t k` (`willowScaled_secondMoment`) — its
 variance too, under `willowMarginal_mean`'s mean-zero start. -/
 theorem willowMarginal_secondMoment (hP : WillowMomentConstraints z β P)
@@ -311,7 +312,7 @@ theorem willowScaled_secondMoment (hP : WillowMomentConstraints z β P)
     (hq : ∑ i, q i = 1) (hq2 : ∑ i, q i * z i ^ 2 = 1)
     (t : ℕ → ℝ) (k : ℕ) (ht : 0 ≤ t k) :
     ∑ j, willowMarginal P q k j * (√(t k) * z j) ^ 2 = t k := by
-  have hpow : ∀ j, (√(t k) * z j) ^ 2 = t k * z j ^ 2 := fun j ↦ by
+  have hpow (j : Fin n) : (√(t k) * z j) ^ 2 = t k * z j ^ 2 := by
     rw [mul_pow, Real.sq_sqrt ht]
   calc ∑ j, willowMarginal P q k j * (√(t k) * z j) ^ 2
       = ∑ j, willowMarginal P q k j * (t k * z j ^ 2) :=
@@ -336,8 +337,8 @@ theorem willowScaled_crossMoment (hP : WillowMomentConstraints z β P)
       = t k := by
   have hinner (i : Fin n) : ∑ j, P k i j * (√(t (k + 1)) * z j)
       = √(t (k + 1)) * (β k * z i) := by
-    have hterm : ∀ j : Fin n, P k i j * (√(t (k + 1)) * z j)
-        = √(t (k + 1)) * (P k i j * z j) := fun j ↦ by ring
+    have hterm (j : Fin n) : P k i j * (√(t (k + 1)) * z j)
+        = √(t (k + 1)) * (P k i j * z j) := by ring
     simp only [hterm]
     rw [← Finset.mul_sum, hP.mean k i]
   calc ∑ i, willowMarginal P q k i * (√(t k) * z i) * ∑ j, P k i j * (√(t (k + 1)) * z j)
@@ -391,11 +392,11 @@ theorem WillowMomentConstraints.sq_le_one (hP : WillowMomentConstraints z β P) 
   rw [hsq, hP.secondMoment k i, hP.rowStochastic k i, mul_one] at hcs
   linarith
 
-/-- **The willow pair's second-order system is the bivariate normal's**: an honest
-transition row forces `β k ^ 2 ≤ 1`, and for a coefficient in that range the standard
-bivariate normal law `bivariateNormalLaw (β k)` — the standardized pair whose
-conditional moments the LP's row constraints encode — has unit variances and covariance
-`β k`. -/
+/-- **The willow coefficient is a valid correlation, and the bivariate normal law at
+it is standard**: an honest transition row forces `β k ^ 2 ≤ 1`, and for a coefficient
+in that range the standard bivariate normal law `bivariateNormalLaw (β k)` has unit
+variances and covariance `β k`. (The chain's own moments matching that law's is proved
+separately, entrywise: `willowMarginal_crossMoment` gives the cross moment `β k`.) -/
 theorem WillowMomentConstraints.bivariateNormal_moments (hP : WillowMomentConstraints z β P) (k : ℕ)
     (i : Fin n) (hrow : ∀ j, 0 ≤ P k i j) :
     β k ^ 2 ≤ 1
