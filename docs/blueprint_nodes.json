@@ -605,6 +605,18 @@
   "label": "def:tracking-error",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Performance/RatiosExtended.lean"},
+ {"uses": ["def:expected-shortfall", "thm:rockafellar-uryasev"],
+  "title": "CVaR of a compound-Poisson loss",
+  "text":
+  "For $L = \\sum_{i<N} X_i$ with $N \\sim \\mathrm{Poisson}(\\lambda)$ independent of\n  identically distributed integrable claims $X_i$, and $\\alpha \\in (0,1)$, $\\mathrm{ES}_\\alpha(L)$\n  is the least value of $c \\mapsto c + (1-\\alpha)^{-1}E[(L-c)^+]$. Companion lemmas prove $L$\n  integrable (`integrable_compoundPoisson`) and expand $E[(L-c)^+]$ as a Poisson mixture of the\n  $n$-claim expectations (`integral_max_sub_compoundPoisson`).",
+  "name": "MathFin.isLeast_rockafellarUryasev_compoundPoisson",
+  "module": "MathFin.RiskMeasures.CompoundPoissonCVaR",
+  "line": 159,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:cvar-rockafellar-uryasev",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/RiskMeasures/CompoundPoissonCVaR.lean"},
  {"uses": [],
   "title": "The Vasicek bond price solves its PDE",
   "text":
@@ -831,6 +843,18 @@
   "label": "thm:bracket-compensator",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/BracketCompensator.lean"},
+ {"uses": ["def:brownian-motion"],
+  "title": "Adapted Itô isometry",
+  "text":
+  "For random *adapted* simple integrands,\n  $E[(\\sum_k \\varphi_k \\Delta B_k)^2] = \\sum_k E[\\varphi_k^2]\\,\\Delta t_k$ — the\n  cross terms vanish by the weak Markov property, the exact point where Itô\n  departs from Wiener.",
+  "name": "MathFin.ItoIsometryAdapted.ito_isometry_discrete",
+  "module": "MathFin.Foundations.ItoIsometryAdapted",
+  "line": 268,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:ito-isometry-adapted",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/ItoIsometryAdapted.lean"},
  {"uses":
   ["def:brownian-motion",
    "def:standard-normal-cdf",
@@ -849,18 +873,6 @@
   "label": "thm:bs-delta-hedge",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/BlackScholes/DeltaHedge.lean"},
- {"uses": ["def:brownian-motion"],
-  "title": "Adapted Itô isometry",
-  "text":
-  "For random *adapted* simple integrands,\n  $E[(\\sum_k \\varphi_k \\Delta B_k)^2] = \\sum_k E[\\varphi_k^2]\\,\\Delta t_k$ — the\n  cross terms vanish by the weak Markov property, the exact point where Itô\n  departs from Wiener.",
-  "name": "MathFin.ItoIsometryAdapted.ito_isometry_discrete",
-  "module": "MathFin.Foundations.ItoIsometryAdapted",
-  "line": 268,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:ito-isometry-adapted",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/ItoIsometryAdapted.lean"},
  {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
   "title": "Itô's formula for C² functions",
   "text":
@@ -897,18 +909,6 @@
   "label": "thm:ito-formula-td-l2",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/ItoFormulaTD.lean"},
- {"uses": ["def:brownian-motion"],
-  "title": "Wiener isometry (deterministic L²)",
-  "text":
-  "For deterministic step integrands,\n  $E[(\\int \\varphi\\,dB)^2] = \\int \\varphi^2\\,dt$: the $L^2$ geometry of a fixed\n  (non-reacting) position in Brownian noise.",
-  "name": "MathFin.WienerIntegralL2.wiener_assembly_isometry",
-  "module": "MathFin.Foundations.WienerIntegralL2",
-  "line": 282,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:wiener-isometry",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/WienerIntegralL2.lean"},
  {"uses": [],
   "title": "No arbitrage is local",
   "text":
@@ -921,6 +921,18 @@
   "label": "thm:no-arbitrage-local",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/NoArbitrageLocal.lean"},
+ {"uses": ["def:brownian-motion"],
+  "title": "Wiener isometry (deterministic L²)",
+  "text":
+  "For deterministic step integrands,\n  $E[(\\int \\varphi\\,dB)^2] = \\int \\varphi^2\\,dt$: the $L^2$ geometry of a fixed\n  (non-reacting) position in Brownian noise.",
+  "name": "MathFin.WienerIntegralL2.wiener_assembly_isometry",
+  "module": "MathFin.Foundations.WienerIntegralL2",
+  "line": 282,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:wiener-isometry",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Foundations/WienerIntegralL2.lean"},
  {"uses":
   ["def:standard-normal-cdf",
    "thm:feynman-kac-heat-eq",

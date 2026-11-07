@@ -145,6 +145,7 @@ graph TD
   martingaleRepresentation["Martingale representation (terminal form)"]:::proved
   rockafellarUryasev["Rockafellar–Uryasev: ES as a minimum"]:::proved
   bsSelfFinancing["The delta hedge satisfies the self-financing equation"]:::proved
+  cvarRockafellarUryasev["CVaR of a compound-Poisson loss"]:::proved
   marketCompleteness["Completeness of the Brownian market"]:::proved
   martingaleRepresentationProcess["Martingale representation (process form)"]:::proved
   pricingMeasure["The pricing measure on 𝓕ᴮ_T is unique"]:::proved
@@ -247,7 +248,6 @@ graph TD
     varianceOptimalHedging["Variance-optimal hedging"]:::frontier
   end
   subgraph frontier_risk["⏳ frontier · risk"]
-    cvarRockafellarUryasev["CVaR via Rockafellar–Uryasev"]:::frontier
     expectedUtilityRiskAversion["Expected utility and risk aversion"]:::frontier
     glivenkoCantelli["Glivenko–Cantelli theorem"]:::frontier
     kusuoka["Kusuoka representation"]:::frontier
@@ -368,6 +368,8 @@ graph TD
   bsDeltaHedge --> bsSelfFinancing
   bscallhypBrownian --> bsSelfFinancing
   itoFormulaC2 --> bsSelfFinancing
+  expectedShortfall --> cvarRockafellarUryasev
+  rockafellarUryasev --> cvarRockafellarUryasev
   brownianMotion --> marketCompleteness
   itoIntegralClm --> marketCompleteness
   martingaleRepresentation --> marketCompleteness
@@ -403,8 +405,6 @@ graph TD
   numeraireMeasure --> cmsConvexityAdjustment
   zeroCouponBond --> compoundExchangeRateBridge
   compoundPoissonMgf --> cramerLundbergClaims
-  rockafellarUryasev --> cvarRockafellarUryasev
-  compoundPoissonMgf --> cvarRockafellarUryasev
   noArbitrageLocal --> dmwFtap
   emmDensityPasting --> dmwFtap
   bsPde --> dupireLocalVol
@@ -602,6 +602,7 @@ graph TD
 | `thm:martingale-representation` Martingale representation (terminal form) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amartingale-representation%22%20in%3Abody) |
 | `thm:rockafellar-uryasev` Rockafellar–Uryasev: ES as a minimum | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Arockafellar-uryasev%22%20in%3Abody) |
 | `thm:bs-self-financing` The delta hedge satisfies the self-financing equation | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-self-financing%22%20in%3Abody) |
+| `thm:cvar-rockafellar-uryasev` CVaR of a compound-Poisson loss | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acvar-rockafellar-uryasev%22%20in%3Abody) |
 | `thm:market-completeness` Completeness of the Brownian market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarket-completeness%22%20in%3Abody) |
 | `thm:martingale-representation-process` Martingale representation (process form) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amartingale-representation-process%22%20in%3Abody) |
 | `thm:pricing-measure` The pricing measure on 𝓕ᴮ_T is unique | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Apricing-measure%22%20in%3Abody) |
@@ -627,7 +628,6 @@ graph TD
 | `thm:compensated-poisson-integral` Compensated-Poisson integral | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acompensated-poisson-integral%22%20in%3Abody) |
 | `thm:compound-exchange-rate-bridge` Compound's exchange rate as a money-market account | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acompound-exchange-rate-bridge%22%20in%3Abody) |
 | `thm:cramer-lundberg-claims` Cramér–Lundberg claims | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acramer-lundberg-claims%22%20in%3Abody) |
-| `thm:cvar-rockafellar-uryasev` CVaR via Rockafellar–Uryasev | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acvar-rockafellar-uryasev%22%20in%3Abody) |
 | `thm:dmw-ftap` Dalang–Morton–Willinger FTAP | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Admw-ftap%22%20in%3Abody) |
 | `thm:dupire-local-vol` Dupire local volatility | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Adupire-local-vol%22%20in%3Abody) |
 | `thm:esscher-emm-levy` Esscher EMM for exponential-Lévy markets | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aesscher-emm-levy%22%20in%3Abody) |
