@@ -3412,6 +3412,13 @@
       "input_hash": "e132dd0de143b98ad809220952cb43a6be496998aab53732944b56eed57311f9",
       "verified_at_commit": "d3ddeb8"
     },
+    "mf-marchenko-pastur-edges": {
+      "benchmark_file": "portfolio_and_performance.json",
+      "date": "2026-11-07",
+      "elapsed_s": 2.5,
+      "input_hash": "f49f792cde12063819f88399a0dcb2e129763401d59e853179cbf08efbe86e34",
+      "verified_at_commit": "1704479"
+    },
     "mf-margrabe-exchange-expected-payoff": {
       "benchmark_file": "exotic_options.json",
       "date": "2026-11-06",
