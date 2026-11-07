@@ -77,7 +77,8 @@ Public API (all in namespace `MathFin.GyongyMimicry`):
 * `reindexed`, `stronglyMeasurable_X_hXrel` — the real-time reindexing `t ↦ X_{t⁺}` and
   the adaptedness lemma behind the constructed instance's measurability field
   (`reindexed` is consumed by `MathFin.Dupire`);
-* `ItoIntegralProcessGeneral.timeMeasure_Ioc_eq_interval` — the `timeMeasure` → `intervalIntegral` bridge;
+* `ItoIntegralProcessGeneral.timeMeasure_Ioc_eq_interval` — the `timeMeasure` →
+  `intervalIntegral` bridge;
 * `constructedCoeffData`, `constructedGenIntegrandExp` (+ `_coe`), the integrated drift
   identities `hitoid_constructed_terminal` / `hitoid_constructed_band`, and the weak
   forward equation in both forms;

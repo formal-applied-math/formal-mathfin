@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.DriftProcessPredictable
 public import MathFin.Foundations.ItoProcessPredictable
+public import Mathlib.Topology.Algebra.Order.Floor
 public import Mathlib.Topology.MetricSpace.Contracting
 
 /-! # SDE existence/uniqueness via Picard on `E` (build)
@@ -333,7 +334,7 @@ theorem bandEnergy_toLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {g : �
       = ∫ z in Set.Ioc (0 : ℝ≥0) s ×ˢ (Set.univ : Set Ω), (Function.uncurry g z) ^ 2
         ∂((timeMeasureHorizon T).prod μ) := by
     rw [← integral_indicator hband, ← integral_indicator hbandP]
-    exact integral_trim 𝓕.predictable_le_prod hsm
+    exact (integral_trim (μ := (timeMeasureHorizon T).prod μ) 𝓕.predictable_le_prod hsm).symm
   have h3 : ∫ z in Set.Ioc (0 : ℝ≥0) s ×ˢ (Set.univ : Set Ω), (Function.uncurry g z) ^ 2
         ∂((timeMeasureHorizon T).prod μ)
       = ∫ t in Set.Ioc (0 : ℝ≥0) s, ∫ ω, (g t ω) ^ 2 ∂μ ∂timeMeasure := by
@@ -359,7 +360,7 @@ theorem bandEnergy_itoProcessAssembled (hB : IsPreBrownianReal B μ) (T : ℝ≥
   have htT : t ≤ T := ht.2.trans hsT
   have hb : bandEnergy T t hBmeas φ = ‖itoProcessCLM hB T t hBmeas φ‖ ^ 2 :=
     (itoProcessCLM_norm_sq hB htT hBmeas φ).symm
-  show ∫ ω, (itoContinuousMod T hBmeas φ t ω) ^ 2 ∂μ = bandEnergy T t hBmeas φ
+  change ∫ ω, (itoContinuousMod T hBmeas φ t ω) ^ 2 ∂μ = bandEnergy T t hBmeas φ
   rw [hb, lp_two_norm_sq]
   refine integral_congr_ae ?_
   filter_upwards [itoContinuousMod_modification hB T hBmeas hBcont φ htT] with ω hω
@@ -380,7 +381,7 @@ theorem lipschitzWith_itoProcessAssembled (hB : IsPreBrownianReal B μ) (T : ℝ
     (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω) :
     LipschitzWith (NNReal.sqrt T) (itoProcessAssembled hB T hBmeas hBcont) := by
   refine LipschitzWith.of_dist_le_mul fun X Y ↦ ?_
-  rw [dist_eq_norm, dist_eq_norm, ← itoProcessAssembled_sub, NNReal.coe_sqrt]
+  rw [dist_eq_norm, dist_eq_norm, ← itoProcessAssembled_sub, Real.coe_sqrt]
   exact itoProcessAssembled_norm_le hB T hBmeas hBcont _
 
 /-- **The elementary drift, band by band.** For a `T`-bounded simple process `V`, the band energy
@@ -606,7 +607,7 @@ theorem bandEnergy_picardMap_iterate_le (hB : IsPreBrownianReal B μ) (T : ℝ�
     refine (mul_le_mul_of_nonneg_left hmono hK).trans_eq ?_
     rw [Nat.factorial_succ]
     push_cast
-    field_simp
+    first | (field_simp; done) | (field_simp; ring)
 
 /-- **Picard iterates contract in `E`, factorially.**
 `‖Φⁿ X − Φⁿ Y‖² ≤ (2(T L_b² + L_σ²) T)ⁿ / n! · ‖X − Y‖²` for every horizon `T`. -/
