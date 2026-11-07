@@ -116,17 +116,19 @@ theorem willowBeta_eq_sqrt_div {t t' α : ℝ} (hα : 0 < 1 + α) (ht : 0 < t)
 
 /-- **The `β` identity on a time grid**: with `α` computed from consecutive grid times as
 in the willow tree construction, `α k = (t (k+1) - t k) / t k`, the de-correlation
-coefficient is `√(t k / t (k+1))`. -/
-theorem willowBeta_eq_sqrt_div' {t : ℕ → ℝ} (ht0 : ∀ k, 0 < t k) (k : ℕ) :
+coefficient is `√(t k / t (k+1))`. Only the two times it pairs are required to be
+positive — a willow grid may start at `t 0 = 0`. -/
+theorem willowBeta_eq_sqrt_div' {t : ℕ → ℝ} (k : ℕ) (htk : 0 < t k)
+    (htk1 : 0 < t (k + 1)) :
     willowBeta ((t (k + 1) - t k) / t k) = √(t k / t (k + 1)) := by
-  have htne : t k ≠ 0 := (ht0 k).ne'
-  refine willowBeta_eq_sqrt_div ?_ (ht0 k) ?_
+  have htne : t k ≠ 0 := htk.ne'
+  refine willowBeta_eq_sqrt_div ?_ htk ?_
   · have h1 : 1 + (t (k + 1) - t k) / t k = t (k + 1) / t k := by
       rw [add_div_eq_mul_add_div 1 _ htne, one_mul]
       congr 1
       ring
     rw [h1]
-    exact div_pos (ht0 (k + 1)) (ht0 k)
+    exact div_pos htk1 htk
   · rw [add_mul, one_mul, div_mul_cancel₀ _ htne]
     ring
 
@@ -299,10 +301,10 @@ the variance as well whenever the marginal mean is zero, which `willowMarginal_m
 gives under its own hypotheses.) -/
 theorem willowScaled_secondMoment (hP : WillowMomentConstraints z β P)
     (hq : ∑ i, q i = 1) (hq2 : ∑ i, q i * z i ^ 2 = 1)
-    (t : ℕ → ℝ) (ht : ∀ k, 0 ≤ t k) (k : ℕ) :
+    (t : ℕ → ℝ) (k : ℕ) (ht : 0 ≤ t k) :
     ∑ j, willowMarginal P q k j * (√(t k) * z j) ^ 2 = t k := by
   have hpow : ∀ j, (√(t k) * z j) ^ 2 = t k * z j ^ 2 := fun j ↦ by
-    rw [mul_pow, Real.sq_sqrt (ht k)]
+    rw [mul_pow, Real.sq_sqrt ht]
   calc ∑ j, willowMarginal P q k j * (√(t k) * z j) ^ 2
       = ∑ j, willowMarginal P q k j * (t k * z j ^ 2) :=
         Finset.sum_congr rfl fun j _ ↦ by rw [hpow j]
@@ -317,8 +319,8 @@ theorem willowScaled_secondMoment (hP : WillowMomentConstraints z β P)
 de-correlation property Curran's constraint system encodes. -/
 theorem willowScaled_crossMoment (hP : WillowMomentConstraints z β P)
     (hq : ∑ i, q i = 1) (hq2 : ∑ i, q i * z i ^ 2 = 1)
-    (t : ℕ → ℝ) (ht : ∀ k, 0 ≤ t k) (ht1 : ∀ k, 0 < t (k + 1))
-    (hβ : ∀ k, β k = √(t k / t (k + 1))) (k : ℕ) :
+    (t : ℕ → ℝ) (k : ℕ) (ht : 0 ≤ t k) (ht1 : 0 < t (k + 1))
+    (hβ : β k = √(t k / t (k + 1))) :
     ∑ i, willowMarginal P q k i * (√(t k) * z i) * ∑ j, P k i j * (√(t (k + 1)) * z j)
       = t k := by
   have hinner (i : Fin n) : ∑ j, P k i j * (√(t (k + 1)) * z j)
@@ -335,9 +337,22 @@ theorem willowScaled_crossMoment (hP : WillowMomentConstraints z β P)
     _ = √(t k) * β k * √(t (k + 1)) * ∑ i, willowMarginal P q k i * z i ^ 2 := by
         rw [Finset.mul_sum]
     _ = t k := by
-        rw [hβ k, willowMarginal_secondMoment hP hq hq2, mul_one,
-          Real.sqrt_div' _ (ht1 k).le, mul_div_assoc', Real.mul_self_sqrt (ht k),
-          div_mul_cancel₀ _ (Real.sqrt_ne_zero'.mpr (ht1 k))]
+        rw [hβ, willowMarginal_secondMoment hP hq hq2, mul_one,
+          Real.sqrt_div' _ ht1.le, mul_div_assoc', Real.mul_self_sqrt ht,
+          div_mul_cancel₀ _ (Real.sqrt_ne_zero'.mpr ht1)]
+
+/-- **The chain's cross moment is the construction's own coefficient**: on a grid with
+positive consecutive times, the standardized cross moment across one step is
+`willowBeta ((t (k+1) - t k) / t k)` — the two halves of the file (the `willowBeta`
+identity and the moment-constrained chain) join here. -/
+theorem willowMarginal_crossMoment_eq_willowBeta (hP : WillowMomentConstraints z β P)
+    (hq : ∑ i, q i = 1) (hq2 : ∑ i, q i * z i ^ 2 = 1)
+    (t : ℕ → ℝ) (k : ℕ) (ht0 : 0 < t k) (ht1 : 0 < t (k + 1))
+    (hβ : β k = √(t k / t (k + 1))) :
+    ∑ i, willowMarginal P q k i * z i * ∑ j, P k i j * z j
+      = willowBeta ((t (k + 1) - t k) / t k) := by
+  rw [willowBeta_eq_sqrt_div' k ht0 ht1, ← hβ]
+  exact willowMarginal_crossMoment hP hq hq2 k
 
 /-- **Feasibility of the de-correlation coefficient**: if a willow transition row is an
 honest probability row (non-negative entries summing to one), then `β k ^ 2 ≤ 1` — the
