@@ -48,10 +48,13 @@ One `full` entry in `benchmarks/binomial.json`. Corpus 781 → 782.
   cross moments `E[Z_k Z_{k+1}] = beta_k` and `E[X_k X_{k+1}] = t_k` in the scaled
   variables on a grid with `beta_k = sqrt(t_k/t_{k+1})` — the Brownian covariance the
   constraint system encodes (`willowMarginal_crossMoment`, `willowScaled_secondMoment`,
-  `willowScaled_crossMoment`); and the correlation bound — an honest (non-negative,
-  summing-to-one) transition row forces `beta_k^2 <= 1`, and at such a coefficient the
-  standard bivariate normal law has unit variances and covariance `beta_k`
-  (`willowBeta_sq_le_one`, `willowBeta_bivariateNormal_moments`). Cited: Curran, Willow
+  `willowScaled_crossMoment`); the join — the chain's standardized cross moment is the
+  construction's own `willowBeta` coefficient once `beta_k` is tied to the grid
+  (`willowMarginal_crossMoment_eq_willowBeta`); and the correlation bound — an honest
+  (non-negative, summing-to-one) transition row forces `beta_k^2 <= 1`, and at such a
+  coefficient the standard bivariate normal law has unit variances and covariance
+  `beta_k` (`WillowMomentConstraints.sq_le_one`,
+  `WillowMomentConstraints.bivariateNormal_moments`). Cited: Curran, Willow
   Power: Optimizing Derivative Pricing Trees, ALGO Research Quarterly 4(4) (2001);
   Ho, Willow Tree, MSc thesis, UBC (2000); the constraint set as implemented in the
   open-source willowtree package (`willowtree/lp.py`). The linear program that finds

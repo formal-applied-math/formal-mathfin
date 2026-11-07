@@ -1103,6 +1103,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.WienerIntegralL2.wienerIntegralLp_map_eq_gaussianReal
 
+/-- info: 'MathFin.WillowMomentConstraints.bivariateNormal_moments' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.WillowMomentConstraints.bivariateNormal_moments
+
 /-- info: 'MathFin.abcdForward_call_eq_black76' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.abcdForward_call_eq_black76
@@ -3606,10 +3610,6 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.weakForwardUniqueConst' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.weakForwardUniqueConst
-
-/-- info: 'MathFin.willowBeta_bivariateNormal_moments' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.willowBeta_bivariateNormal_moments
 
 /-- info: 'MathFin.willowBeta_eq_sqrt_div' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

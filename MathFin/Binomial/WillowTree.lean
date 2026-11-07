@@ -60,7 +60,11 @@ rows above.
   `X k = √(t k) * Z k` the second moment is `t k` and the cross moment across
   `[t k, t (k+1)]` is `t k` — the Brownian values, which is the de-correlation
   property Curran's constraint system encodes.
-* `willowBeta_sq_le_one`, `willowBeta_bivariateNormal_moments` — **feasibility**: an
+* `willowMarginal_crossMoment_eq_willowBeta` — the join: the chain's standardized
+  cross moment is the construction's own `willowBeta` coefficient once `β k` is tied
+  to the grid.
+* `WillowMomentConstraints.sq_le_one`,
+  `WillowMomentConstraints.bivariateNormal_moments` — **feasibility**: an
   honest (non-negative, summing-to-one) transition row forces `β k ^ 2 ≤ 1`, the
   lattice-side analogue of `sq_le_one_of_covariance_unit` for a correlated Gaussian
   pair; and for such a coefficient the standard bivariate normal law
@@ -140,7 +144,7 @@ first two conditional moments of the standardized Brownian pair with correlation
 No non-negativity is required of the entries — the moment statements below are
 insensitive to it (it is the linear program's business, not the induction's) — so with
 sign-free entries the rows are satisfiable at `|β k| > 1` too; that `β k` is a genuine
-correlation for a given step needs a non-negative row (`willowBeta_sq_le_one`). -/
+correlation for a given step needs a non-negative row (`WillowMomentConstraints.sq_le_one`). -/
 structure WillowMomentConstraints (z : Fin n → ℝ) (β : ℕ → ℝ)
     (P : ℕ → Fin n → Fin n → ℝ) : Prop where
   /-- Every transition matrix is row stochastic. -/
@@ -313,10 +317,12 @@ theorem willowScaled_secondMoment (hP : WillowMomentConstraints z β P)
         exact Finset.sum_congr rfl fun j _ ↦ mul_left_comm _ _ _
     _ = t k := by rw [willowMarginal_secondMoment hP hq hq2, mul_one]
 
-/-- **The scaled chain's cross moment**: in the unstandardized variables
-`X k = √(t k) * Z k`, the cross moment across the step `[t k, t (k+1)]` is
-`E[X_k X_{k+1}] = t k` — exactly the Brownian covariance at two grid times, which is the
-de-correlation property Curran's constraint system encodes. -/
+/-- **The scaled chain's cross moment**: on an initially unit-second-moment willow
+chain, in the unstandardized variables `X k = √(t k) * Z k` with the chain's own
+coefficient tied to the grid by `hβ : β k = √(t k / t (k+1))`, the cross moment across
+the step `[t k, t (k+1)]` is `E[X_k X_{k+1}] = t k` — exactly the Brownian covariance
+at two grid times, which is the de-correlation property Curran's constraint system
+encodes. -/
 theorem willowScaled_crossMoment (hP : WillowMomentConstraints z β P)
     (hq : ∑ i, q i = 1) (hq2 : ∑ i, q i * z i ^ 2 = 1)
     (t : ℕ → ℝ) (k : ℕ) (ht : 0 ≤ t k) (ht1 : 0 < t (k + 1))
@@ -341,10 +347,12 @@ theorem willowScaled_crossMoment (hP : WillowMomentConstraints z β P)
           Real.sqrt_div' _ ht1.le, mul_div_assoc', Real.mul_self_sqrt ht,
           div_mul_cancel₀ _ (Real.sqrt_ne_zero'.mpr ht1)]
 
-/-- **The chain's cross moment is the construction's own coefficient**: on a grid with
-positive consecutive times, the standardized cross moment across one step is
-`willowBeta ((t (k+1) - t k) / t k)` — the two halves of the file (the `willowBeta`
-identity and the moment-constrained chain) join here. -/
+/-- **The chain's cross moment is the construction's own coefficient**: the
+standardized cross moment across one step is `willowBeta ((t (k+1) - t k) / t k)` — the
+two halves of the file (the `willowBeta` identity and the moment-constrained chain)
+join here. The chain's own coefficient `β k` is tied to the grid by the hypothesis
+`hβ : β k = √(t k / t (k+1))`; with it, the identity lemma re-expresses the grid side
+and the cross-moment theorem the chain side. -/
 theorem willowMarginal_crossMoment_eq_willowBeta (hP : WillowMomentConstraints z β P)
     (hq : ∑ i, q i = 1) (hq2 : ∑ i, q i * z i ^ 2 = 1)
     (t : ℕ → ℝ) (k : ℕ) (ht0 : 0 < t k) (ht1 : 0 < t (k + 1))
@@ -360,7 +368,7 @@ coefficient is a bona fide correlation. By Cauchy–Schwarz on the row the condi
 second moment dominates the squared conditional mean; substituting the two moment rows
 then gives `1 - β k ^ 2 ≥ 0`. This is the lattice-side analogue of
 `sq_le_one_of_covariance_unit` for a correlated Gaussian pair. -/
-theorem willowBeta_sq_le_one (hP : WillowMomentConstraints z β P) (k : ℕ) (i : Fin n)
+theorem WillowMomentConstraints.sq_le_one (hP : WillowMomentConstraints z β P) (k : ℕ) (i : Fin n)
     (hrow : ∀ j, 0 ≤ P k i j) :
     β k ^ 2 ≤ 1 := by
   have hcs := Finset.sum_mul_sq_le_sq_mul_sq Finset.univ
@@ -383,14 +391,14 @@ transition row forces `β k ^ 2 ≤ 1`, and for a coefficient in that range the 
 bivariate normal law `bivariateNormalLaw (β k)` — the standardized pair whose
 conditional moments the LP's row constraints encode — has unit variances and covariance
 `β k`. -/
-theorem willowBeta_bivariateNormal_moments (hP : WillowMomentConstraints z β P) (k : ℕ)
+theorem WillowMomentConstraints.bivariateNormal_moments (hP : WillowMomentConstraints z β P) (k : ℕ)
     (i : Fin n) (hrow : ∀ j, 0 ≤ P k i j) :
     β k ^ 2 ≤ 1
       ∧ Var[(Prod.fst : ℝ × ℝ → ℝ); bivariateNormalLaw (β k)] = 1
       ∧ Var[(Prod.snd : ℝ × ℝ → ℝ); bivariateNormalLaw (β k)] = 1
       ∧ cov[Prod.fst, Prod.snd; bivariateNormalLaw (β k)] = β k :=
-  ⟨willowBeta_sq_le_one hP k i hrow,
-    variance_fst_bivariateNormalLaw (willowBeta_sq_le_one hP k i hrow),
+  ⟨sq_le_one hP k i hrow,
+    variance_fst_bivariateNormalLaw (sq_le_one hP k i hrow),
     variance_snd_bivariateNormalLaw _, covariance_fst_snd_bivariateNormalLaw _⟩
 
 end MathFin
