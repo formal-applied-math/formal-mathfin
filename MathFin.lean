@@ -559,6 +559,8 @@ import MathFin.Binomial.CRRDiscreteIto
 import MathFin.Binomial.CRRCharFun
 -- CRR → BS in literal closed form `S₀Φ(d₁) − Ke^{−rT}Φ(d₂)` (Φ-landing corollary)
 import MathFin.Binomial.CRRClosedForm
+-- trinomial branch weights: moment matching, validity window, lattice variance bound
+import MathFin.Binomial.TrinomialMomentMatching
 -- Phase 20: first-principles core derivations
 import MathFin.Foundations.NoArbitrageDerivations
 import MathFin.BlackScholes.RiskNeutralProbabilities

@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (906 MathFin constants, 29 upstream). Citations
+  corpus (912 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -2703,6 +2703,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.knockIn_add_knockOut_eq_vanilla
 
+/-- info: 'MathFin.lattice_variance_lower_bound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.lattice_variance_lower_bound
+
 /-- info: 'MathFin.levelPaymentBalance_eq_annuityValue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.levelPaymentBalance_eq_annuityValue
@@ -2946,6 +2950,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.not_exists_isCopula_frechetLower' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.not_exists_isCopula_frechetLower
+
+/-- info: 'MathFin.not_exists_nonneg_lattice_scheme' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.not_exists_nonneg_lattice_scheme
 
 /-- info: 'MathFin.not_isElicitable_expectedShortfall_integrable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3458,6 +3466,22 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.triangleNoArb_solve_third' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.triangleNoArb_solve_third
+
+/-- info: 'MathFin.trinomialProb_bsStep_mean' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.trinomialProb_bsStep_mean
+
+/-- info: 'MathFin.trinomialProb_bsStep_variance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.trinomialProb_bsStep_variance
+
+/-- info: 'MathFin.trinomialProb_mem_Icc_classical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.trinomialProb_mem_Icc_classical
+
+/-- info: 'MathFin.trinomialProb_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.trinomialProb_unique
 
 /-- info: 'MathFin.upCapture_smul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
