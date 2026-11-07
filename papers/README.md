@@ -1,13 +1,16 @@
 # arXiv papers
 
-Sources for the three papers that describe this library at release `v1.5.0` (`main` at
-`c0180c8`). They live on this branch rather than on `main`, which holds only the library.
+Sources for the three papers that describe this library. They live on this branch rather than
+on `main`, which holds only the library.
 
-| Paper | arXiv | This revision | Source | PDF |
-|---|---|---|---|---|
-| The Fundamental Theorem of Asset Pricing, Formalized in Lean 4 | 2606.28990 | v2 | [`ftap/ftap.tex`](ftap/ftap.tex) | [`ftap/ftap.pdf`](ftap/ftap.pdf) |
-| A Machine-Checked Itô Calculus for Brownian Motion | 2606.15089 | v3 | [`ito/ito.tex`](ito/ito.tex) | [`ito/ito.pdf`](ito/ito.pdf) |
-| A Formally Verified Library of Mathematical Finance in Lean 4 | 2606.01356 | v4 | [`library/library.tex`](library/library.tex) | [`library/library.pdf`](library/library.pdf) |
+| Paper | arXiv | Next version | Describes | Source | PDF |
+|---|---|---|---|---|---|
+| A Formally Verified Library of Mathematical Finance in Lean 4 | 2606.01356 | v4 | release `v1.11.0` (`main` at `df94c98`) | [`library/library.tex`](library/library.tex) | [`library/library.pdf`](library/library.pdf) |
+| The Fundamental Theorem of Asset Pricing, Formalized in Lean 4 | 2606.28990 | v2 | release `v1.5.0` (`main` at `c0180c8`) | [`ftap/ftap.tex`](ftap/ftap.tex) | [`ftap/ftap.pdf`](ftap/ftap.pdf) |
+| A Machine-Checked Itô Calculus for Brownian Motion | 2606.15089 | v3 | release `v1.5.0` (`main` at `c0180c8`) | [`ito/ito.tex`](ito/ito.tex) | [`ito/ito.pdf`](ito/ito.pdf) |
+
+The revisions of the two companion papers were prepared against `v1.5.0` and not uploaded; they
+need the same pass against the current release before they go up.
 
 ## Building
 

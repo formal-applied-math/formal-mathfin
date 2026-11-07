@@ -29,14 +29,17 @@ COMMENTS = {
         "https://github.com/formal-applied-math/formal-mathfin"
     ),
     "library": (
-        "{pages} pages, 4 tables. v4 describes release v1.5.0 (535 benchmark entries, about 100,000 "
-        "lines of Lean), adds martingale representation, Itô processes, jump-diffusions, quantitative "
-        "risk management and two contributed developments, and corrects several statements of v3. "
-        "Lean artifact: https://github.com/formal-applied-math/formal-mathfin"
+        "{pages} pages, 4 tables. v4 describes release v1.11.0 (804 benchmark entries, about 158,000 "
+        "lines of Lean). It adds Itô's formula for Itô processes as an identity of processes, Lévy's "
+        "characterisation, Girsanov's theorem for the filtration, SDEs on every horizon, the reduction of "
+        "Dalang-Morton-Willinger to its conditional one-period form, and a contract layer on which the "
+        "delta hedge and the change of measure are theorems about contract values. It also corrects "
+        "several statements of v3. Lean artifact: https://github.com/formal-applied-math/formal-mathfin, "
+        "archived at doi:10.5281/zenodo.20477781"
     ),
 }
 
-ACCENTS = [(r"It\^o", "Itô"), (r"Dol\'eans", "Doléans"), (r"L\'evy", "Lévy"), (r"num\'eraire", "numéraire")]
+ACCENTS = [(r"It\^o", "Itô"), (r"Dol\'eans", "Doléans"), (r"L\'evy", "Lévy"), (r"num\'eraire", "numéraire"), (r"Gu\'eant", "Guéant"), (r"Fr\'echet", "Fréchet"), (r"Andr\'e", "André")]
 
 
 def to_plain(tex: str) -> str:
