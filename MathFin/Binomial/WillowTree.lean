@@ -78,6 +78,8 @@ prices computed on the lattice.
   ALGO Research Quarterly 4(4), 2001.
 * [A. C. T. Ho, *Willow Tree*][Ho2000], MSc thesis in Mathematics, University of British
   Columbia (2000) — the constraint system as stated.
+* [F. M. Massari, *willowtree*][willowtreePkg] — the open-source implementation whose
+  `lp.py` states the constraint set as used here.
 
 ## Tags
 
