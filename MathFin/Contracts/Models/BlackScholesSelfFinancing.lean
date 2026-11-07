@@ -167,7 +167,7 @@ theorem europeanCall_selfFinancing {μ : Measure Ω} [IsProbabilityMeasure μ] {
     subst hX'
     exact ae_continuousOn_localItoProcess hB T' hBmeas hBcont hHa hHc (b := fun _ _ ↦ (0 : ℝ))
       (fun _ ↦ continuous_const) _
-  have hrep := bs_delta_hedge_replication hB hBmeas hBcont hK hσ hS₀ T' hT''
+  have hrep := bs_delta_hedge_replication (r := r) hB hBmeas hBcont hK hσ hS₀ T' hT''
   have hcongr := ae_predItoIntegral_congr hB T' hBmeas hBcont
     (deltaHedgeIntegrand_isStronglyPredictable hBmeas hBcont K r σ S_0 T)
     (ae_of_all _ fun ω ↦ (hHc ω).continuousOn.congr fun s hs ↦ hHeq ω s hs) hpredH'
