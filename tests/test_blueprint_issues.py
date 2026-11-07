@@ -65,6 +65,29 @@ def test_a_pull_request_is_a_delivery_record() -> None:
     assert bi.check(issues, NODES) == []
 
 
+def test_every_frontier_node_grows_from_the_wood() -> None:
+    nodes = dict(NODES)
+    nodes["thm:g"] = bi.Node("thm:g", "G", "frontier", uses=("thm:f",), statement="G.")
+    nodes["thm:h"] = bi.Node("thm:h", "H", "frontier", statement="H.",
+                             ground="Mathlib: conditional expectation")
+    assert bi.frontier_problems(nodes, {}) == []  # a frontier chain into the wood; a ground
+    nodes["thm:x"] = bi.Node("thm:x", "X", "frontier", statement="X.")
+    nodes["thm:y"] = bi.Node("thm:y", "Y", "frontier", uses=("thm:x",), statement="Y.")
+    msgs = bi.frontier_problems(nodes, {})
+    assert {m.split("`")[1] for m in msgs} == {"thm:x", "thm:y"}
+    assert all("reach no proved node" in m for m in msgs)
+
+
+def test_core_names_corpus_proofs() -> None:
+    nodes = dict(NODES)
+    nodes["thm:c"] = bi.Node("thm:c", "C", "frontier", uses=("thm:a",), statement="C.",
+                             core=("e-full", "e-placeholder", "e-missing"))
+    msgs = bi.frontier_problems(nodes, {"e-full": "full", "e-placeholder": "placeholder"})
+    assert len(msgs) == 2
+    assert any("`e-placeholder` is placeholder" in m for m in msgs)
+    assert any("unknown corpus entry `e-missing`" in m for m in msgs)
+
+
 def test_frontier_file_is_well_formed() -> None:
     nodes = bi.load_nodes(REPO / bi.NODES_JSON, REPO / bi.FRONTIER_TOML)
     assert bi.frontier_problems(nodes) == []

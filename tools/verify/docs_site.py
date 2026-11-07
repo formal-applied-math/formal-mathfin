@@ -13,7 +13,8 @@ own records, so the site cannot drift from the library:
 Pages: a home page with the map of the library (sections as a graph of what imports what) and the
 blueprint's landmarks; a page per section with its module graph; a page per module with its
 docstring, its import neighbourhood, the corpus entries it formalizes and every declaration
-(statement with linked names, docstring, source, used-by); the blueprint as a dependency graph; the
+(statement with linked names, docstring, source, used-by); the blueprint as a dependency graph and
+as the program tree (tree.html, with the corpus placed on it by program_tree.py); the
 corpus by status; the subjects; the references; and a ranked client-side search.
 
     python3 -m tools.verify.docs_site decl-index.json --out site
@@ -36,6 +37,7 @@ from pathlib import Path
 
 from . import doc_standard, library
 from .blueprint_issues import issues_url
+from .program_tree import tree_data
 from .corpus import iter_entries
 from .decl_index import DeclIndex, IndexedDecl
 
@@ -312,7 +314,8 @@ class Site:
 
 # ------------------------------------------------------------------ page shell
 
-NAV = [("index.html", "Map"), ("landmarks.html", "Landmarks"), ("blueprint.html", "Blueprint"), ("corpus.html", "Corpus"),
+NAV = [("index.html", "Map"), ("landmarks.html", "Landmarks"), ("blueprint.html", "Blueprint"),
+       ("tree.html", "Tree"), ("corpus.html", "Corpus"),
        ("subjects.html", "Subjects"), ("references.html", "References")]
 
 
@@ -614,9 +617,13 @@ def build_module(site: Site, out: Path, m: str, link: Linker) -> None:
 def build_blueprint(site: Site, out: Path, nodes_json: list[dict], frontier: list[dict]) -> None:
     labels = {n["label"] for n in nodes_json} | {f["label"] for f in frontier}
     connected = {n["label"] for n in nodes_json}
-    for f in frontier:
-        if any(u in connected for u in f.get("uses", ())):
-            connected.add(f["label"])
+    grew = True
+    while grew:  # a frontier node is connected when its uses reach the proved blueprint
+        grew = False
+        for f in frontier:
+            if f["label"] not in connected and any(u in connected for u in f.get("uses", ())):
+                connected.add(f["label"])
+                grew = True
     for n in nodes_json:
         connected.update(u for u in n.get("uses", ()) if u in labels)
     gnodes, cards = [], []
@@ -655,7 +662,8 @@ def build_blueprint(site: Site, out: Path, nodes_json: list[dict], frontier: lis
         f"<h3>{esc(area)}</h3><div class='cards'>" + "".join(
             f'<a class="card" href="{issues_url(f["label"])}"><h3>{esc(f["title"])}</h3>'
             f'<div class="stmt">{esc(f.get("statement", ""))}</div>'
-            f'<div class="nums">{esc(f["label"])}</div></a>' for f in fs) + "</div>"
+            f'<div class="nums">{esc(f.get("ground") or f["label"])}</div></a>' for f in fs)
+        + "</div>"
         for area, fs in sorted(loose.items()))
     proved = sum(1 for n in nodes_json if n.get("leanOk"))
     body = f"""<h1>Blueprint</h1>
@@ -668,12 +676,91 @@ not yet formalized. Arrows run from a result to the results that use it. Click a
 <aside class="panel side" id="bp-side"><p class="empty">Select a node to read its statement,
 the Lean declaration that proves it, and the issues that advance it.</p></aside>
 {"".join(cards)}
-<h2>Frontier, not yet connected</h2>
-<p class="ink2">Stated results that do not yet build on a node above, by area. Each links to its open
-issues.</p>{loose_html}"""
+<h2>Frontier on upstream ground</h2>
+<p class="ink2">Stated results that build on Mathlib alone, with no proved node above to grow from;
+each card says what it draws on and links to its open issues. Every other frontier result reaches
+the proved blueprint through its uses (<code>blueprint_issues check</code> enforces it).</p>
+{loose_html}"""
     (out / "blueprint.html").write_text(page("Blueprint — MathFin", body, "", "blueprint.html",
                                              "The MathFin blueprint: dependency graph of the "
                                              "program's results."), encoding="utf-8")
+
+
+TREE_SCRIPTS = ("https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js", "assets/tree.js")
+TREE_KINDS = (("rests-on-node", "rests on a node", "--t-wood"),
+              ("feeds-node", "feeds a node", "--t-leaf"),
+              ("upstream-only", "upstream only", "--t-up"),
+              ("off-map", "off the map", "--line"))
+
+
+def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dict],
+               issues: list[dict] | None) -> None:
+    """The program tree: the blueprint as a tree, with the corpus as its leaves
+    (tools/verify/program_tree.py places every entry)."""
+    data = tree_data(site.idx, nodes_json, frontier, issues)
+    data["repo"] = REPO_URL
+    for n in data["nodes"]:
+        d = site.idx.decls.get(n.get("d") or "")
+        if d and not d.private:
+            n["h"] = decl_url(d)
+    areas, total = data["areas"], data["corpus"]
+    off = sum(c.get("off-map", 0) for c in areas.values())
+    on = sum(c.get("rests-on-node", 0) + c.get("feeds-node", 0) for c in areas.values())
+    bars = []
+    for a in sorted(areas, key=lambda a: -sum(areas[a].values())):
+        c, t = areas[a], sum(areas[a].values())
+        segs = "".join(f'<span title="{label}: {c[k]}" style="width:{100 * c[k] / t:.2f}%;'
+                       f'background:var({var})"></span>'
+                       for k, label, var in TREE_KINDS if c.get(k))
+        bars.append(f'<div class="t-bar"><span>{esc(a)}</span><div class="t-track">{segs}</div>'
+                    f'<span class="ink2">{t - c.get("off-map", 0)} / {t}</span></div>')
+    plots = "".join(
+        f'<div class="t-plot"><p><b>{esc(a)}</b> <span class="ink2">{len(es)} off the map</span></p>'
+        f'<div class="t-seeds">' + "".join(f'<i title="{esc(e)} — {esc(nm)}"></i>' for e, nm in es)
+        + "</div></div>"
+        for a, es in sorted(data["off"].items(), key=lambda kv: -len(kv[1])))
+    partial = [n for n in data["nodes"] if n.get("core")]
+    partial_rows = "".join(
+        f'<tr><td><button type="button" class="t-chip" data-focus="{esc(n["l"])}">'
+        f'{esc(n["t"])}</button></td><td>{", ".join(f"<code>{esc(c)}</code>" for c in n["core"])}'
+        f"</td></tr>" for n in partial)
+    proved = sum(n["s"] == "proved" for n in data["nodes"])
+    nfront = sum(n["s"] == "frontier" for n in data["nodes"])
+    payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+    buds = ('<label><input type="checkbox" id="t-buds" checked> Issues</label>'
+            if issues is not None else "")
+    body = f"""<h1>The program tree</h1>
+<p class="lede ink2">The blueprint drawn as a tree. The {proved} proved results are the wood, each
+one step above the deepest result its proof uses; the {nfront} frontier results grow off them as
+translucent branches, amber where the corpus already proves part of one. The corpus entries are the
+leaves, each hung on the deepest node its proof rests on, and branch thickness counts what rests on
+a branch. Click a node to read it; drag to pan, scroll to zoom.</p>
+<div class="t-box" id="tree-box"><div class="t-tools">{buds}
+<label><input type="checkbox" id="t-leaves" checked> Corpus leaves</label>
+<button type="button" id="t-reset">Reset view</button></div>
+<div class="t-stage"><svg id="tree" role="img" aria-label="The MathFin blueprint as a tree"></svg>
+<aside class="panel side t-panel" id="tree-panel"><p class="empty">A node sits one step above the
+deepest result it uses. Click one to see its statement, what it builds on and what builds on
+it.</p></aside></div><div id="tree-tip" class="t-tip"></div></div>
+<h2>Where the corpus sits</h2>
+<p class="ink2">{on} of the {total} corpus entries are on the map: their proofs rest on a blueprint
+node, or a node's proof uses what they cite. {off} cite MathFin results in no relation the map
+records. They are proved, and the import graph connects them to the library, but the program map
+does not show them. The count is a ratchet (<code>corpus_off_blueprint</code>): it may fall and
+may not rise.</p>
+<div class="t-bars">{"".join(bars)}</div>
+{legend([(v, label, "") for _, label, v in TREE_KINDS])}
+<h2>Off the map, by area</h2><p class="ink2">One dot per entry; hover for its id.</p>
+<div class="t-bed">{plots}</div>
+<h2>Frontier with a proved core</h2>
+<p class="ink2">Frontier results that corpus entries already prove in part (the node's
+<code>core</code>). They stay on the frontier until the whole statement is proved.</p>
+<table class="t-table"><tbody>{partial_rows}</tbody></table>
+<script type="application/json" id="tree-data">{payload}</script>
+{"".join(f'<script src="{s}" defer></script>' for s in TREE_SCRIPTS)}"""
+    (out / "tree.html").write_text(page("Program tree — MathFin", body, "", "tree.html",
+                                        "The MathFin blueprint as a tree, with the corpus as "
+                                        "its leaves."), encoding="utf-8")
 
 
 LANDMARK_KEYS = ("decl", "title", "summary", "scope")
@@ -903,7 +990,7 @@ def build_references(site: Site, out: Path) -> None:
                                               "references.html"), encoding="utf-8")
 
 
-def build(index_path: str | Path, out: str | Path) -> int:
+def build(index_path: str | Path, out: str | Path, issues_path: str | Path | None = None) -> int:
     site = Site.load(index_path)
     out = Path(out)
     if out.exists():
@@ -938,6 +1025,9 @@ def build(index_path: str | Path, out: str | Path) -> int:
         build_section(site, out, sec, ms)
     build_home(site, out, blueprint)
     build_blueprint(site, out, nodes_json, frontier)
+    issues = ([json.loads(line) for line in Path(issues_path).read_text(encoding="utf-8").splitlines()
+               if line.strip()] if issues_path else None)
+    build_tree(site, out, nodes_json, frontier, issues)
     build_landmarks(site, out, landmarks, nodes_json, Linker(site.idx, "", public))
     build_corpus(site, out)
     build_subjects(site, out)
@@ -950,8 +1040,10 @@ def main() -> int:
     ap = argparse.ArgumentParser(prog="python3 -m tools.verify.docs_site")
     ap.add_argument("index")
     ap.add_argument("--out", default="site")
+    ap.add_argument("--issues", help="issues and pull requests, one JSON object per line "
+                    "(gh api …/issues --jq '.[] | {number,title,state,body,labels,is_pr}')")
     args = ap.parse_args()
-    n = build(args.index, args.out)
+    n = build(args.index, args.out, args.issues)
     print(f"docs site: {n} module pages in {args.out}/")
     return 0
 

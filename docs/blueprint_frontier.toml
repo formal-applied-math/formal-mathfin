@@ -9,54 +9,63 @@
 #
 # Fields: label (`thm:`/`def:` + kebab-case), title, statement (one honest sentence of what
 # proving it would establish), uses (labels it builds on), area (the issue's `area:*`).
+#
+# Every frontier node grows from the proved blueprint: following `uses` (through other frontier
+# nodes) reaches a node with a Lean declaration. A result that builds only on Mathlib says so in
+# `ground` instead ("Mathlib: …", what it draws on). `blueprint_issues check` enforces this.
+#
+# Optional `core` lists the corpus entries that already prove part of the node: the node stays on
+# the frontier, and the map draws it as partly grown. Each entry must exist; the check flags a
+# `core` entry that is not `full` or `reduced_core`.
 
 [[node]]
 label = "thm:buhlmann-credibility"
 title = "Bühlmann credibility"
 statement = "The credibility premium Z·X̄+(1-Z)μ with Z=n/(n+k)."
 uses = []
+ground = "Mathlib: conditional expectation and L² projection"
 area = "actuarial"
 
 [[node]]
 label = "thm:cramer-lundberg-claims"
 title = "Cramér–Lundberg claims"
 statement = "E[S_t]=λtμ₁ and the compensated claims process is a martingale."
-uses = []
+uses = ["thm:compound-poisson-mgf"]
 area = "actuarial"
 
 [[node]]
 label = "thm:life-insurance-epv"
 title = "Life annuity and insurance EPV"
 statement = "Annuity and insurance expected present values satisfy A_x=1-dä_x."
-uses = ["thm:survival-model"]
+uses = ["thm:survival-model", "def:survival-function"]
 area = "actuarial"
 
 [[node]]
 label = "thm:lundberg-ruin-bound"
 title = "Lundberg ruin bound"
 statement = "ψ(u)≤e^{-Ru} from the Lundberg exponential martingale."
-uses = ["thm:cramer-lundberg-claims"]
+uses = ["thm:cramer-lundberg-claims", "thm:compound-poisson-mgf"]
 area = "actuarial"
 
 [[node]]
 label = "thm:panjer-recursion"
 title = "Panjer recursion"
 statement = "Panjer's recursion computes the aggregate-loss law for the (a,b,0) class."
-uses = []
+uses = ["thm:compound-poisson-mgf"]
 area = "actuarial"
 
 [[node]]
 label = "thm:survival-model"
 title = "Survival model and life tables"
 statement = "Survival relations, curtate lifetime, expectation of life and life-table layer tied to the probabilistic survival model."
-uses = []
+uses = ["def:survival-function"]
 area = "actuarial"
 
 [[node]]
 label = "thm:thiele-reserve"
 title = "Thiele reserve"
 statement = "Thiele's differential equation and its discrete recursion for the prospective reserve."
-uses = ["thm:survival-model"]
+uses = ["thm:survival-model", "def:survival-function"]
 area = "actuarial"
 
 [[node]]
@@ -70,7 +79,7 @@ area = "binomial"
 label = "thm:binomial-barrier-reflection"
 title = "Binomial barrier prices via reflection"
 statement = "Binomial barrier option prices follow from the discrete reflection principle."
-uses = []
+uses = ["def:binomial-no-arbitrage"]
 area = "binomial"
 
 [[node]]
@@ -126,7 +135,7 @@ area = "black-scholes"
 label = "thm:perpetual-american"
 title = "Perpetual American option"
 statement = "Closed form for the perpetual American option with its optimal exercise boundary."
-uses = []
+uses = ["thm:snell-envelope", "thm:bs-pde"]
 area = "black-scholes"
 
 [[node]]
@@ -147,14 +156,15 @@ area = "black-scholes"
 label = "thm:black-cox-default"
 title = "Black–Cox first-passage default"
 statement = "The closed-form barrier default probability P(τ≤T)."
-uses = ["thm:reflection-principle"]
+uses = ["thm:reflection-principle", "def:standard-normal-cdf"]
 area = "credit"
 
 [[node]]
 label = "thm:large-pool-loss"
 title = "Large homogeneous pool loss law"
 statement = "The Vasicek large-pool loss distribution and CDO tranche expected loss."
-uses = ["thm:one-factor-copula-default"]
+uses = ["thm:one-factor-copula-default", "def:gaussian-factor-copula", "def:standard-normal-cdf"]
+core = ["mf-lhp-stop-loss-closed-form"]
 area = "credit"
 
 [[node]]
@@ -168,42 +178,43 @@ area = "credit"
 label = "thm:one-factor-copula-default"
 title = "One-factor Gaussian copula default"
 statement = "Conditional default probability p(M)=Φ((c-√ρM)/√(1-ρ)) with a joint law, heterogeneous thresholds, recovery and migration."
-uses = []
+uses = ["def:gaussian-factor-copula", "def:standard-normal-cdf"]
+core = ["mf-one-factor-copula-joint-default"]
 area = "credit"
 
 [[node]]
 label = "thm:stefan-uniqueness"
 title = "Stefan uniqueness with accumulating jumps"
 statement = "Physical Stefan problem uniqueness when jumps accumulate at time zero (open problem)."
-uses = []
+uses = ["def:brownian-motion"]
 area = "credit"
 
 [[node]]
 label = "thm:aave-health-factor-bound"
 title = "Aave multi-asset health factor: a liquidation bound"
 statement = "A bound on the probability that Aave's multi-asset health factor falls below 1 under lognormal collateral (a single-asset or moment bound; the ratio has no closed form)."
-uses = []
+uses = ["thm:aave-liquidation-kmv"]
 area = "defi"
 
 [[node]]
 label = "thm:balancer-invariant"
 title = "Balancer constant-mean AMM"
 statement = "The weighted product invariant and spot price of the constant-mean AMM."
-uses = []
+uses = ["thm:impermanent-loss"]
 area = "defi"
 
 [[node]]
 label = "thm:compound-exchange-rate-bridge"
 title = "Compound's exchange rate as a money-market account"
 statement = "Compound's cToken exchange rate is the deposit index of a money-market account under the borrow index, tying DeFi/Compound to the library's lending indices, or the gap is recorded."
-uses = []
+uses = ["def:zero-coupon-bond"]
 area = "defi"
 
 [[node]]
 label = "thm:liquidation-first-passage"
 title = "Liquidation before maturity as first passage"
 statement = "The probability that a lending position is liquidated before T, as the Black–Cox first-passage probability of its collateral ratio."
-uses = ["thm:black-cox-default"]
+uses = ["thm:black-cox-default", "thm:aave-liquidation-kmv"]
 area = "defi"
 
 [[node]]
@@ -211,13 +222,15 @@ label = "thm:kyle-equilibrium"
 title = "Kyle single-period equilibrium"
 statement = "Equilibrium price impact λ=σ_v/(2σ_u)."
 uses = []
+ground = "Mathlib: Gaussian conditional expectation"
 area = "execution"
 
 [[node]]
 label = "thm:affine-term-structure"
 title = "Affine term structure"
 statement = "Bond prices P=exp(A(T)-B(T)r₀) form a general affine abstraction with Vasicek, Ho–Lee and Hull–White as instances."
-uses = []
+uses = ["thm:vasicek-bond-pde"]
+core = ["mf-affine-bond-pde-from-riccati"]
 area = "fixed-income"
 
 [[node]]
@@ -232,6 +245,7 @@ label = "thm:cir-bond-loadings"
 title = "CIR bond-price loadings"
 statement = "The CIR loadings solve the Riccati system B' = 1 − κB − σ²B²/2, A' = −κθB, and give the CIR forward curve."
 uses = ["thm:affine-term-structure"]
+core = ["mf-cir-bond-loading-riccati", "mf-cir-bond-level-loading"]
 area = "fixed-income"
 
 [[node]]
@@ -239,6 +253,7 @@ label = "thm:cms-convexity-adjustment"
 title = "CMS convexity adjustment"
 statement = "The CMS convexity adjustment under the payment-date forward measure."
 uses = ["def:numeraire-measure"]
+core = ["mf-contract-cms-swaplet-adjustment-nonneg"]
 area = "fixed-income"
 
 [[node]]
@@ -259,21 +274,21 @@ area = "fixed-income"
 label = "thm:hjm-bond-dynamics"
 title = "HJM bond-price dynamics"
 statement = "The bond and discounted bond have dynamics dP/P=(r-α*+½σ*²)dt-σ*dW (and the discounted analogue)."
-uses = ["thm:hjm-log-bond-dynamics", "thm:ito-formula-l2"]
+uses = ["thm:hjm-log-bond-dynamics", "thm:ito-formula-l2", "def:hjm-model"]
 area = "fixed-income"
 
 [[node]]
 label = "thm:hjm-drift-condition"
 title = "HJM drift condition"
 statement = "The discounted bond is a (local) martingale iff α=σ∫σ, in integrated, pointwise and converse forms."
-uses = ["thm:hjm-bond-dynamics"]
+uses = ["thm:hjm-bond-dynamics", "def:hjm-model"]
 area = "fixed-income"
 
 [[node]]
 label = "thm:hjm-log-bond-dynamics"
 title = "HJM log-bond dynamics"
 statement = "The log-bond satisfies dY=(r-α*)dt-σ*dW, via the Itô Fubini and a moving-boundary Leibniz term."
-uses = ["thm:stochastic-fubini-process"]
+uses = ["thm:stochastic-fubini-process", "def:hjm-model"]
 area = "fixed-income"
 
 [[node]]
@@ -301,7 +316,7 @@ area = "fixed-income"
 label = "def:real-erf"
 title = "erf / erfc / erfinv for Mathlib"
 statement = "Mathlib-style Real.erf, Real.erfc and Real.erfinv with their basic identities, upstreamed."
-uses = []
+uses = ["def:standard-normal-cdf"]
 area = "foundations"
 
 [[node]]
@@ -330,6 +345,8 @@ label = "thm:compensated-poisson-integral"
 title = "Compensated-Poisson integral"
 statement = "The compensated-Poisson integral of an L² integrand is a mean-zero L² martingale with jump quadratic variation ∫∫H² dN."
 uses = []
+ground = "Mathlib: Poisson measure; the L² extension of an isometry"
+core = ["sc-levy-integral-clm-isometry"]
 area = "foundations"
 
 [[node]]
@@ -337,6 +354,7 @@ label = "thm:dmw-ftap"
 title = "Dalang–Morton–Willinger FTAP"
 statement = "No arbitrage is equivalent to the existence of an equivalent martingale measure for a multi-period market on a general probability space. The reduction to one period and the pasting of one-period densities are proved; the conditional one-period theorem (a measurable selection) is what remains."
 uses = ["thm:no-arbitrage-local", "thm:emm-density-pasting"]
+core = ["mf-dmw-conditional"]
 area = "foundations"
 
 [[node]]
@@ -372,6 +390,7 @@ label = "thm:ito-integral-martingale"
 title = "General-integrand Itô process is a martingale"
 statement = "The Itô integral of a general L² integrand is exhibited as a bundled Martingale, composing the PricesGainsAtZero guards."
 uses = ["def:ito-integral-clm", "thm:market-completeness"]
+core = ["sc-ito-general-martingale"]
 area = "foundations"
 
 [[node]]
@@ -385,7 +404,8 @@ area = "foundations"
 label = "thm:jump-diffusion-law"
 title = "Compound-Poisson and jump-diffusion law"
 statement = "The compound-Poisson law, its convolution semigroup, and the law layer of a jump-diffusion with Λ>0, including realized-variance variance and the price law."
-uses = []
+uses = ["thm:compound-poisson-mgf"]
+core = ["mf-jump-diffusion-model-exists", "mf-jump-diffusion-compensator"]
 area = "foundations"
 
 [[node]]
@@ -413,7 +433,7 @@ area = "foundations"
 label = "thm:perron-frobenius-markov"
 title = "Perron–Frobenius and finite Markov chain ergodicity"
 statement = "For a finite primitive chain, recurrence, convergence to the unique stationary law and the ergodic theorem follow from a renewal and Perron–Frobenius build."
-uses = []
+uses = ["thm:markov-path-law"]
 area = "foundations"
 
 [[node]]
@@ -421,6 +441,7 @@ label = "thm:poisson-interarrival-iid"
 title = "Poisson interarrivals are iid exponential"
 statement = "The whole interarrival sequence of a Poisson process is iid Exp(λ), upgrading the reduced_core pp-prop-3.3.6."
 uses = []
+ground = "Mathlib: exponential and Poisson laws"
 area = "foundations"
 
 [[node]]
@@ -428,6 +449,7 @@ label = "thm:propagator-no-arbitrage"
 title = "Transient-impact propagator no-arbitrage"
 statement = "A positive-semidefinite criterion for no price manipulation under transient impact, with certified counterexamples (open problem)."
 uses = []
+ground = "Mathlib: positive-semidefinite kernels"
 area = "foundations"
 
 [[node]]
@@ -462,21 +484,21 @@ area = "foundations"
 label = "thm:futures-basis-convergence"
 title = "Contango, backwardation and basis convergence"
 statement = "For F=Se^{(r-δ)T} the curve is in contango or backwardation by the sign of r-δ and the basis converges."
-uses = []
+uses = ["thm:interest-rate-parity"]
 area = "futures"
 
 [[node]]
 label = "thm:siegel-paradox"
 title = "Siegel's paradox"
 statement = "E[S_T]E[1/S_T]=e^{σ²T}>1."
-uses = []
+uses = ["thm:gbm-sde"]
 area = "fx"
 
 [[node]]
 label = "thm:apt-pricing"
 title = "APT exact-factor pricing"
 statement = "No arbitrage implies E[Rᵢ]-r=Σβᵢₖλₖ."
-uses = []
+uses = ["def:emm"]
 area = "portfolio"
 
 [[node]]
@@ -490,14 +512,14 @@ area = "portfolio"
 label = "thm:markowitz-kkt-necessity"
 title = "Markowitz first-order conditions are necessary"
 statement = "At every budget- and return-constrained variance minimiser, Σw lies in span{1, μ}, so the KKT conditions characterise the Markowitz optimum (sufficiency is proved)."
-uses = []
+uses = ["thm:markowitz-lagrangian"]
 area = "portfolio"
 
 [[node]]
 label = "thm:merton-portfolio-fraction"
 title = "Merton myopic risky fraction"
 statement = "The optimal risky fraction (μ-r)/(γσ²) is the CRRA / mean-variance first-order maximiser."
-uses = []
+uses = ["thm:gbm-sde", "def:portfolio-variance"]
 area = "portfolio"
 
 [[node]]
@@ -511,28 +533,29 @@ area = "portfolio"
 label = "thm:risk-parity-n-asset"
 title = "N-asset risk parity exists and is unique"
 statement = "Among long-only portfolios there is exactly one equal-risk-contribution portfolio, from strict convexity of the log-barrier objective (two assets are proved)."
-uses = []
+uses = ["thm:risk-parity-foc"]
 area = "portfolio"
 
 [[node]]
 label = "thm:time-inconsistent-equilibrium"
 title = "Relaxed equilibria under time inconsistency"
 statement = "Relaxed equilibria exist with action-dependent diffusion under time inconsistency (open problem)."
-uses = []
+uses = ["thm:sde-strong-solution"]
 area = "portfolio"
 
 [[node]]
 label = "thm:variance-optimal-hedging"
 title = "Variance-optimal hedging"
 statement = "Variance-optimal hedges exist and are characterised in finite-state markets."
-uses = []
+uses = ["thm:martingale-transform", "def:emm"]
 area = "portfolio"
 
 [[node]]
 label = "thm:cvar-rockafellar-uryasev"
 title = "CVaR via Rockafellar–Uryasev"
 statement = "CVaR of a compound-Poisson aggregate loss equals the Rockafellar–Uryasev variational form."
-uses = []
+uses = ["thm:rockafellar-uryasev", "thm:compound-poisson-mgf"]
+core = ["qrm-rockafellar-uryasev", "mf-cvar-rockafellar-uryasev"]
 area = "risk"
 
 [[node]]
@@ -540,41 +563,42 @@ label = "thm:expected-utility-risk-aversion"
 title = "Expected utility and risk aversion"
 statement = "Arrow–Pratt coefficients, CARA certainty equivalent, stochastic dominance orderings and utility acceptance."
 uses = []
+ground = "Mathlib: convex functions and Jensen"
 area = "risk"
 
 [[node]]
 label = "thm:glivenko-cantelli"
 title = "Glivenko–Cantelli theorem"
 statement = "The empirical distribution function of an i.i.d. sample converges to the true one uniformly, almost surely."
-uses = []
+uses = ["thm:empirical-cdf-strong-law"]
 area = "risk"
 
 [[node]]
 label = "thm:kusuoka"
 title = "Kusuoka representation"
 statement = "Law-invariant coherent risk measures are suprema of CVaR mixtures."
-uses = []
+uses = ["thm:expected-shortfall-coherent", "def:coherent-risk-measure"]
 area = "risk"
 
 [[node]]
 label = "thm:quantile-convergence-in-distribution"
 title = "Quantiles under convergence in distribution"
 statement = "If X_n → X in distribution then the quantiles converge at every continuity point of X's quantile function (Portmanteau), so the ASRF VaR limit holds in distribution."
-uses = []
+uses = ["def:quantile"]
 area = "risk"
 
 [[node]]
 label = "thm:risk-measure-families"
 title = "Entropic, distortion and expectile risk measures"
 statement = "Entropic, Wang-distortion and expectile risk measures satisfy their axioms (convexity, cash invariance, coherence for τ≥½)."
-uses = []
+uses = ["def:coherent-risk-measure"]
 area = "risk"
 
 [[node]]
 label = "thm:sklar-general"
 title = "Sklar's theorem for arbitrary margins"
 statement = "Every joint distribution function factors as C(F₁,…,F_d) through a copula C, without assuming continuous margins (the library has the continuous case)."
-uses = []
+uses = ["def:quantile"]
 area = "risk"
 
 [[node]]
@@ -596,13 +620,14 @@ label = "thm:dupire-local-vol"
 title = "Dupire local volatility"
 statement = "The local volatility is determined by call prices via σ²=(∂_T C+rK∂_K C)/(½K²∂²_K C)."
 uses = ["thm:bs-pde", "thm:feynman-kac-variable-coefficient"]
+core = ["mf-dupire-local-vol"]
 area = "stoch-vol"
 
 [[node]]
 label = "thm:heston-cf"
 title = "Heston characteristic function"
 statement = "The Heston characteristic function's C and D solve the Heston Riccati ODEs."
-uses = []
+uses = ["thm:heston-pde"]
 area = "stoch-vol"
 
 [[node]]
@@ -616,7 +641,7 @@ area = "stoch-vol"
 label = "thm:rough-heston-pathwise-uniqueness"
 title = "Rough-Heston pathwise uniqueness"
 statement = "Pathwise uniqueness holds for the square-root rough-Heston variance equation (open problem)."
-uses = []
+uses = ["thm:sde-strong-solution"]
 area = "stoch-vol"
 
 [[node]]
@@ -652,4 +677,5 @@ label = "thm:stochastic-fubini-process"
 title = "Stochastic Fubini for the integral process"
 statement = "The parameter integral and the Itô integral commute as processes in t, almost surely at every t at once."
 uses = ["thm:stochastic-fubini"]
+core = ["sc-stochastic-fubini-ito"]
 area = "foundations"
