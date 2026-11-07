@@ -150,9 +150,8 @@ lemma martingaleTransform_singleStrategy (S : ℕ → Ω → F) (ht : t < T) :
 
 end SingleStrategy
 
-variable [CompleteSpace F] {𝓕 : Filtration ℕ m0} {P : Measure Ω} {S : ℕ → Ω → F}
+variable {𝓕 : Filtration ℕ m0} {P : Measure Ω} {S : ℕ → Ω → F}
 
-omit [CompleteSpace F] in
 /-- **Multi-period no arbitrage gives conditional one-period no arbitrage.** A position `θ` with
 a nonnegative gain is truncated to the bounded `θ 1_{‖θ‖ ≤ n}` and held over `(t, t+1]` only; the
 resulting bounded predictable strategy has a nonnegative gain, so its gain vanishes; the gain of
@@ -183,7 +182,6 @@ theorem noArbitrageLocal_of_noArbitrage {T : ℕ} (hNA : NoArbitrage 𝓕 P S T)
   rw [truncation_of_le (θ := θ) (ω := ω) (Nat.le_ceil ‖θ ω‖)] at h1
   exact h1
 
-omit [CompleteSpace F] in
 /-- The gain process of a predictable strategy is adapted: `martingaleTransform φ S n` is
 `𝓕 n`-measurable for `n ≤ T`, for an adapted price. -/
 lemma stronglyMeasurable_martingaleTransform {T : ℕ}
@@ -211,7 +209,6 @@ lemma stronglyMeasurable_martingaleTransform {T : ℕ}
     rw [e]
     exact h1.add (h2.inner ((hS (n + 1) hn).sub h3))
 
-omit [CompleteSpace F] in
 /-- The induction on the horizon behind `noArbitrage_of_noArbitrageLocal`. -/
 private theorem noArbitrage_aux (T : ℕ) :
     (∀ t ≤ T, StronglyMeasurable[𝓕 t] (S t)) → NoArbitrageLocal 𝓕 P S T →

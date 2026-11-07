@@ -173,7 +173,7 @@ include h in
 lemma measurable_Z {t : ℕ} (ht : t < T) : Measurable (Z t) :=
   ((h.density t ht).meas.mono (𝓕.le (t + 1))).measurable
 
-omit [CompleteSpace E] in
+omit [CompleteSpace F] [CompleteSpace E] in
 include h in
 lemma integrable_smul_pasted {n : ℕ} (hn : n ≤ T) {Y : Ω → E} (hY : Integrable Y P) :
     Integrable (fun ω ↦ pastedDensity Z n ω • Y ω) P := by
@@ -200,6 +200,7 @@ lemma integrable_Z {t : ℕ} (ht : t < T) : Integrable (Z t) P := by
   exact Integrable.of_bound (h.measurable_Z ht).aestronglyMeasurable C
     (ae_of_all _ fun ω ↦ (Real.norm_of_nonneg ((h.density t ht).pos ω).le).le.trans (hC ω))
 
+omit [CompleteSpace F] in
 include h in
 /-- **Peeling one density factor**: against an `𝓕 t`-measurable integrable `g`, the period-`t`
 density integrates as if it were `1`, since `P[Z t | 𝓕 t] = 1`. -/
@@ -215,6 +216,7 @@ lemma integral_smul_cond {t : ℕ} (ht : t < T) {g : Ω → E} (hg : StronglyMea
       filter_upwards [(h.density t ht).cond_one] with ω hω
       simp [hω]
 
+omit [CompleteSpace F] in
 include h in
 /-- **Tower property of the product density**: for `n ≤ m ≤ T` and an `𝓕 n`-measurable
 integrable `Y`, `∫ D m • Y = ∫ D n • Y`. -/
@@ -235,6 +237,7 @@ lemma integral_pasted_eq {n m : ℕ} (hnm : n ≤ m) (hmT : m ≤ T) {Y : Ω →
     simp_rw [e]
     exact (h.integral_smul_cond hmlt hg hgi).trans (ih hmlt.le)
 
+omit [CompleteSpace F] in
 include h in
 /-- The **total mass** of the product density is `1`. -/
 lemma integral_pasted_eq_one : ∫ ω, pastedDensity Z T ω ∂P = 1 := by
@@ -242,7 +245,7 @@ lemma integral_pasted_eq_one : ∫ ω, pastedDensity Z T ω ∂P = 1 := by
     stronglyMeasurable_const (integrable_const 1)
   simpa [pastedDensity_zero] using this
 
-omit [CompleteSpace E] [IsProbabilityMeasure P] in
+omit [CompleteSpace F] [CompleteSpace E] [IsProbabilityMeasure P] in
 include h in
 /-- **Change of measure to the pasted measure**: over a measurable set the `pastedMeasure`
 integral of `g` is the `P`-integral of `D T • g`. -/
