@@ -1865,6 +1865,34 @@
         "formalization_status": "reduced_core",
         "formalization_scope": "REDUCED CORE: the existence of Q is conditional on ConditionalOnePeriodFTAP, an explicit hypothesis of the statement that is not proved in this library (see mf-dmw-conditional). exists_isEMM_parity in MathFin/Contracts/Models/DiscreteMarket.lean: exists_isEMM_of_noArbitrage (Dalang-Morton-Willinger reduction and pasting, under the hypothesis) gives Q, then value_forward and value_europeanCall_sub_put (the risk-neutral lemmas of Contracts/Parity.lean applied to the model map discreteAssets S T, the price frozen at the horizon, a Q-martingale for the floor filtration t -> 𝓕 floor(t), martingale_floor) give the two identities. SCOPE: one asset, undiscounted price in numeraire units (D = 1), contracts the forward and the European call and put of Contracts/Instruments/Options.lean; between integer dates the underlying is constant; the statement is not unconditional no-arbitrage pricing on a general space. Not a legal instrument. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-bs-self-financing-hedge",
+      "name": "The Black-Scholes Delta Hedge of the Call Is Self-Financing (Integral Identity on [0, T'])",
+      "description": "Let B be a Brownian motion with continuous paths, T > 0, T' < T, K, sigma, S_0 > 0, and S the Black-Scholes path S_u = S_0 exp((r - sigma^2/2) u + sigma B_u) (BlackScholes.pathAssets). With the call value V_t = bsV K r sigma S_t (T - t) (hedgeValue), the delta Delta_t = Phi(d_1(S_t, T - t)) (hedgeDelta) and the bank position psi_t = V_t - Delta_t S_t (hedgeBank), almost surely and for all t in [0, T'] at once, V_t = V_0 + (int_0^t Delta_s r S_s ds + I_t) + int_0^t r psi_s ds, where V_0 is the value of the reified contract europeanCall K T (discount e^{-ru}) and I is the predictable Ito integral predItoIntegral on [0, T'] of the integrand Delta sigma S. The bracket is the gain of holding Delta shares of the stock, written as its drift integral plus the Brownian integral of Delta sigma S, and the last term is the interest on the bank position: the stock-and-bank portfolio finances itself. Stated on [0, T'] with T' < T. Not proved: that this is a trading-strategy structure (no admissibility or self-financing predicate is defined), that the bracket is an integral against the semimartingale S, or the identity up to t = T.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.BlackScholesSelfFinancing\n\nopen MeasureTheory ProbabilityTheory Filter Topology Set\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.ItoIntegralL2 MathFin.ItoIntegralLocalised\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The call value is its initial value plus the gain `∫ Δ dS` of the delta hedge, written as\n`∫ Δ r S ds + ∫ Δ σ S dB`, plus the interest `∫ r ψ ds` on the bank position, on `[0, T']`. -/\ntheorem europeanCall_selfFinancing' {μ : Measure Ω} [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ}\n    (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω) {T : ℝ≥0} (hT : 0 < (T : ℝ))\n    {S_0 K r σ : ℝ} (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (T' : ℝ≥0) (hT' : T' < T) :\n    ∀ᵐ ω ∂μ, ∀ t ∈ Icc (0 : ℝ≥0) T',\n      BlackScholes.hedgeValue K r σ S_0 T B t ω\n        = (europeanCall K T).value μ (fun u ↦ Real.exp (-r * u)) (BlackScholes.pathAssets S_0 r σ B)\n          + ((∫ s in Ioc 0 t, BlackScholes.hedgeDelta K r σ S_0 T B s ω\n                * (r * BlackScholes.pathAssets S_0 r σ B () s ω) ∂timeMeasure)\n              + predItoIntegral (μ := μ) T' hBmeas\n                (BlackScholes.hedgeGain_isStronglyPredictable hBmeas hBcont K r σ S_0 T) t ω)\n          + ∫ s in Ioc 0 t, r * BlackScholes.hedgeBank K r σ S_0 T B s ω ∂timeMeasure :=\n  BlackScholes.europeanCall_selfFinancing hB hBmeas hBcont hT hS₀ hK hσ T' hT'\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Self-financing property of the delta hedge in the Black-Scholes model (Black and Scholes 1973; Shreve, Stochastic Calculus for Finance II, 4.5). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "BlackScholes1973"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "4.5"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
+        "difficulty": "research",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. europeanCall_selfFinancing in MathFin/Contracts/Models/BlackScholesSelfFinancing.lean applies the product rule with the finite-variation factor e^{rt} to the discounted value, which is the Ito process localItoProcess of the delta-hedge integrand (capped in time by timeCap so that its paths are continuous): Ito's formula for f(t, x) = e^{rt} x (ito_formula_adapted_unbounded_process) gives V_t = V_0 + int r V ds + int e^{rs} H_s dB with H the discounted integrand, and r V = Delta r S + r psi splits the drift; the contract value comes from mf-bs-call-contract-value-pathassets and the replication theorem of mf-bs-delta-hedge-replication. SCOPE: an integral identity only. There is no trading-strategy structure and no admissibility or self-financing predicate; the gain int Delta dS is not an integral against the semimartingale S, it is spelled as int Delta r S ds + int Delta sigma S dB, with the Brownian integral predItoIntegral against B at horizon T'. The identity is on [0, T'] with T' < T. Not a legal instrument. Axioms-clean."
+      }
     }
   ]
 }

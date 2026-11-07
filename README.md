@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 801 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 764 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 803 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 766 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 19 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -101,7 +101,12 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
   ([`europeanCall_deltaHedge`](MathFin/Contracts/Models/BlackScholesHedge.lean)). At maturity,
   $`C(t,S_t) \to (S_T - K)^+`$ as $`t \uparrow T`$ along any path continuous at $`T`$
   ([`tendsto_bsV_gbm_payoff`](MathFin/BlackScholes/DeltaHedge.lean)), stated separately: the integral
-  identity is on $`[0,T']`$ with $`T' < T`$. The hedge is an integrand, not a strategy structure.
+  identity is on $`[0,T']`$ with $`T' < T`$. The portfolio of $`\Delta`$ shares and the bank position
+  $`\psi = C - \Delta S`$ is self-financing in the integral sense:
+  $`C(t,S_t) = C(0,S_0) + \int_0^t \Delta\,rS\,ds + \int_0^t \Delta\,\sigma S\,dB + \int_0^t r\psi\,ds`$
+  on $`[0,T']`$ ([`europeanCall_selfFinancing`](MathFin/Contracts/Models/BlackScholesSelfFinancing.lean)),
+  where the gain $`\int \Delta\,dS`$ is spelled as its drift and Brownian integrals, not as an
+  integral against the semimartingale $`S`$. The hedge is an integrand, not a strategy structure.
 
 - **Fundamental theorem of asset pricing.** A discrete-time, finite-horizon market with one
   discounted risky asset on a finite probability space of full support has no arbitrage if and only
@@ -230,7 +235,7 @@ whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRCon
 
 ## Limitations
 
-- Nineteen of the 801 results are reduced cores. Eleven assume a structure whose fields include the
+- Nineteen of the 803 results are reduced cores. Eleven assume a structure whose fields include the
   textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
   differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
   the general form of Girsanov's theorem, the two-dimensional Itô formula,

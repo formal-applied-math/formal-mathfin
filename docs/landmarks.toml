@@ -123,9 +123,12 @@ summary = """e^{−rt}·C(t,S_t) = C(0,S₀) + ∫₀ᵗ Δ σ e^{−rs} S_s dB_
 t ≤ T' < T."""
 scope = """The identity is on [0,T'] for T' < T; convergence to the payoff at T is a separate \
 theorem. The hedge is not packaged as an admissible self-financing strategy. The integral is \
-against B, not against the discounted stock as a semimartingale."""
+against B, not against the discounted stock as a semimartingale. The self-financing identity \
+(europeanCall_selfFinancing) is an integral identity, with the gain written as a drift integral \
+plus a Brownian integral, not an integral against S."""
 also = [
   "MathFin.Contracts.BlackScholes.europeanCall_deltaHedge",
+  "MathFin.Contracts.BlackScholes.europeanCall_selfFinancing",
   "MathFin.tendsto_bsV_gbm_payoff",
 ]
 
