@@ -107,6 +107,7 @@ lemma pastedDensity_zero (ω : Ω) : pastedDensity Z 0 ω = 1 := Finset.prod_ran
 lemma pastedDensity_succ (n : ℕ) (ω : Ω) :
     pastedDensity Z (n + 1) ω = pastedDensity Z n ω * Z n ω := Finset.prod_range_succ _ _
 
+omit [CompleteSpace E] in
 /-- A bounded nonnegative a.e.-strongly measurable weight against an integrable function is
 integrable. -/
 lemma integrable_smul_of_bdd {φ : Ω → ℝ} {Y : Ω → E} (hφm : AEStronglyMeasurable φ P)
@@ -114,6 +115,7 @@ lemma integrable_smul_of_bdd {φ : Ω → ℝ} {Y : Ω → E} (hφm : AEStrongly
     Integrable (fun ω ↦ φ ω • Y ω) P :=
   hY.bdd_smul C hφm (ae_of_all _ fun ω ↦ (Real.norm_of_nonneg (hφ0 ω)).le.trans (hC ω))
 
+omit [CompleteSpace E] in
 /-- `∫_A φ • X = ∫ φ • 1_A X`. -/
 lemma setIntegral_smul_eq_integral_indicator {A : Set Ω} (hA : MeasurableSet A) (φ : Ω → ℝ)
     (X : Ω → E) :
@@ -126,6 +128,7 @@ namespace LocalEMMDensities
 
 variable (h : LocalEMMDensities 𝓕 P S T Z)
 
+omit [CompleteSpace F] in
 include h in
 lemma stronglyMeasurable_pasted (n : ℕ) (hn : n ≤ T) :
     StronglyMeasurable[𝓕 n] (pastedDensity Z n) := by
@@ -140,6 +143,7 @@ lemma stronglyMeasurable_pasted (n : ℕ) (hn : n ≤ T) :
     rw [e]
     exact ((ih hnT.le).mono (𝓕.mono n.le_succ)).mul (h.density n hnT).meas
 
+omit [CompleteSpace F] in
 include h in
 lemma pastedDensity_pos {n : ℕ} (hn : n ≤ T) (ω : Ω) : 0 < pastedDensity Z n ω :=
   Finset.prod_pos fun s hs ↦ (h.density s (lt_of_lt_of_le (Finset.mem_range.1 hs) hn)).pos ω
@@ -162,6 +166,7 @@ include h in
 lemma measurable_pasted {n : ℕ} (hn : n ≤ T) : Measurable (pastedDensity Z n) :=
   ((h.stronglyMeasurable_pasted n hn).mono (𝓕.le n)).measurable
 
+omit [CompleteSpace F] in
 include h in
 lemma measurable_Z {t : ℕ} (ht : t < T) : Measurable (Z t) :=
   ((h.density t ht).meas.mono (𝓕.le (t + 1))).measurable
@@ -232,6 +237,7 @@ lemma integral_pasted_eq_one : ∫ ω, pastedDensity Z T ω ∂P = 1 := by
     stronglyMeasurable_const (integrable_const 1)
   simpa [pastedDensity_zero] using this
 
+omit [CompleteSpace E] [IsProbabilityMeasure P] in
 include h in
 /-- **Change of measure to the pasted measure**: over a measurable set the `pastedMeasure`
 integral of `g` is the `P`-integral of `D T • g`. -/

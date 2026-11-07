@@ -86,9 +86,11 @@ section Truncation
 
 variable {θ : Ω → F} {n : ℕ} {ω : Ω}
 
+omit [InnerProductSpace ℝ F] in
 lemma truncation_of_le (h : ‖θ ω‖ ≤ (n : ℝ)) : truncation n θ ω = θ ω := by
   simp [truncation, Set.indicator_apply, h]
 
+omit [InnerProductSpace ℝ F] in
 lemma truncation_of_not_le (h : ¬ ‖θ ω‖ ≤ (n : ℝ)) : truncation n θ ω = 0 := by
   simp [truncation, Set.indicator_apply, h]
 
@@ -97,6 +99,7 @@ lemma norm_truncation_le : ‖truncation n θ ω‖ ≤ (n : ℝ) := by
   · rw [truncation_of_le h]; exact h
   · rw [truncation_of_not_le h]; simp
 
+omit [InnerProductSpace ℝ F] in
 lemma stronglyMeasurable_truncation {m : MeasurableSpace Ω} (hθ : StronglyMeasurable[m] θ) :
     StronglyMeasurable[m] (truncation n θ) :=
   hθ.indicator (hθ.norm.measurable (measurableSet_Iic (a := (n : ℝ))))
@@ -107,9 +110,11 @@ section SingleStrategy
 
 variable {t T : ℕ} {θ : Ω → F}
 
+omit [InnerProductSpace ℝ F] in
 lemma singleStrategy_self : singleStrategy t θ (t + 1) = θ := by
   funext ω; simp [singleStrategy]
 
+omit [InnerProductSpace ℝ F] in
 lemma singleStrategy_of_ne {u : ℕ} (h : u ≠ t) : singleStrategy t θ (u + 1) = 0 := by
   funext ω; simp [singleStrategy, h]
 
@@ -123,6 +128,7 @@ lemma singleStrategy_predictable {𝓕 : Filtration ℕ m0} (hθ : StronglyMeasu
   · rw [singleStrategy_of_ne h]
     exact stronglyMeasurable_zero
 
+omit [InnerProductSpace ℝ F] in
 lemma norm_singleStrategy_le {K : ℝ} (hK0 : 0 ≤ K) (hK : ∀ ω, ‖θ ω‖ ≤ K) (s : ℕ) (ω : Ω) :
     ‖singleStrategy t θ s ω‖ ≤ K := by
   by_cases h : s = t + 1
@@ -144,6 +150,7 @@ end SingleStrategy
 
 variable [CompleteSpace F] {𝓕 : Filtration ℕ m0} {P : Measure Ω} {S : ℕ → Ω → F}
 
+omit [CompleteSpace F] in
 /-- **Multi-period no arbitrage gives conditional one-period no arbitrage.** A position `θ` with
 a nonnegative gain is truncated to the bounded `θ 1_{‖θ‖ ≤ n}` and held over `(t, t+1]` only; the
 resulting bounded predictable strategy has a nonnegative gain, so its gain vanishes; the gain of
@@ -174,6 +181,7 @@ theorem noArbitrageLocal_of_noArbitrage {T : ℕ} (hNA : NoArbitrage 𝓕 P S T)
   rw [truncation_of_le (θ := θ) (ω := ω) (Nat.le_ceil ‖θ ω‖)] at h1
   exact h1
 
+omit [CompleteSpace F] in
 /-- The gain process of a predictable strategy is adapted: `martingaleTransform φ S n` is
 `𝓕 n`-measurable for `n ≤ T`, for an adapted price. -/
 lemma stronglyMeasurable_martingaleTransform {T : ℕ}

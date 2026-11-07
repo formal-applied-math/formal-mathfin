@@ -233,10 +233,12 @@ noncomputable def bandEnergy (T s : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (Z : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) : ℝ :=
   ∫ z in Set.Ioc 0 s ×ˢ (Set.univ : Set Ω), (Z z) ^ 2 ∂(trimMeasure (μ := μ) T hBmeas)
 
+omit [IsProbabilityMeasure μ] in
 theorem bandEnergy_nonneg (T s : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (Z : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) : 0 ≤ bandEnergy T s hBmeas Z :=
   integral_nonneg fun _ ↦ sq_nonneg _
 
+omit [IsProbabilityMeasure μ] in
 theorem monotone_bandEnergy (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (Z : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     Monotone fun s ↦ bandEnergy T s hBmeas Z :=
@@ -244,6 +246,7 @@ theorem monotone_bandEnergy (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (ae_of_all _ fun _ ↦ sq_nonneg _)
     (Set.prod_mono (Set.Ioc_subset_Ioc_right h) subset_rfl).eventuallyLE
 
+omit [IsProbabilityMeasure μ] in
 theorem bandEnergy_le_norm_sq (T s : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (Z : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) : bandEnergy T s hBmeas Z ≤ ‖Z‖ ^ 2 := by
   rw [bandEnergy, lp_two_norm_sq]
@@ -258,6 +261,7 @@ theorem norm_sq_eq_bandEnergy (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
       ((ae_fst_mem_Ioc_trimMeasure (μ := μ) T hBmeas).mono fun _ hz ↦ ⟨hz, Set.mem_univ _⟩)
   rw [bandEnergy, lp_two_norm_sq, h]
 
+omit [IsProbabilityMeasure μ] in
 theorem bandEnergy_add_le (T s : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (Z W : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     bandEnergy T s hBmeas (Z + W) ≤ 2 * bandEnergy T s hBmeas Z + 2 * bandEnergy T s hBmeas W := by

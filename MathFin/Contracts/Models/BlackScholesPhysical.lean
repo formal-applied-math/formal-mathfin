@@ -120,7 +120,6 @@ theorem isPreBrownianReal_constBtheta (θ : ℝ) (H : ℝ≥0) :
     IsPreBrownianReal (constBtheta (μ := μ) hWmeas θ H) (constGirsanovMeasure hW hWmeas θ H) :=
   (isFilteredPreBrownian_constBtheta hW hWmeas θ H).toIsPreBrownianReal
 
-include hW in
 /-- **The drift of a constant integrand is `θu`.** For `u ≤ H`, almost surely
 `B^θ_u = W_u + θu`: the limit drift `driftContinuousMod θ̂ u` is `∫₀ᵘ θ̂(s) ds`
 (`driftContinuousMod_eq_setIntegral`) and the integrand `θ̂` is `θ` for almost every `s` on almost
@@ -151,7 +150,7 @@ theorem pathAssets_physical_ae_eq {S_0 m r σ : ℝ} (hσ : σ ≠ 0) (H : ℝ�
         = pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H) () u ω := by
   have hac : constGirsanovMeasure hW hWmeas ((m - r) / σ) H ≪ μ :=
     withDensity_absolutelyContinuous _ _
-  filter_upwards [hac.ae_le (constBtheta_drift_ae hW hWmeas ((m - r) / σ) H hu)] with ω hω
+  filter_upwards [hac.ae_le (constBtheta_drift_ae (μ := μ) hWmeas ((m - r) / σ) H hu)] with ω hω
   simp only [pathAssets, hω]
   congr 2
   field_simp
