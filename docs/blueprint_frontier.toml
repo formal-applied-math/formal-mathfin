@@ -498,7 +498,7 @@ area = "fx"
 label = "thm:apt-pricing"
 title = "APT exact-factor pricing"
 statement = "No arbitrage implies E[Rᵢ]-r=Σβᵢₖλₖ."
-uses = ["def:emm"]
+uses = ["def:emm", "def:capm-beta"]
 area = "portfolio"
 
 [[node]]

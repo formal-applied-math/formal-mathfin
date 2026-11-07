@@ -2479,4 +2479,28 @@ bounded-coefficient process class. -/
 #guard_msgs in
 #print axioms MathFin.prob_healthFactorV1_lt_one_eq_kmvPD
 
+/-- info: 'MathFin.kellyFraction' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.kellyFraction
+
+/-- info: 'MathFin.sharpeRatio' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.sharpeRatio
+
+/-- info: 'MathFin.beta' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.beta
+
+/-- info: 'MathFin.minVarWeightTwo' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.minVarWeightTwo
+
+/-- info: 'MathFin.IsTangentPortfolioN' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.IsTangentPortfolioN
+
+/-- info: 'MathFin.trackingErrorSq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.trackingErrorSq
+
 end MathFin.AxiomAudit

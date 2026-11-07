@@ -70,6 +70,11 @@ import MathFin.FixedIncome.AffineTermStructurePDE
 import MathFin.Portfolio.MarkowitzNAsset
 import MathFin.Portfolio.MarkowitzLagrangian
 import MathFin.Portfolio.RiskParityFOC
+import MathFin.Portfolio.Markowitz
+import MathFin.Portfolio.CAPM
+import MathFin.Portfolio.TangentPortfolio
+import MathFin.Performance.Ratios
+import MathFin.Performance.RatiosExtended
 import MathFin.Binomial.Model
 import MathFin.Actuarial.SurvivalModel
 import MathFin.Actuarial.CompoundPoissonMGF
@@ -616,6 +621,38 @@ attribute [blueprint "def:portfolio-variance" (title := "Portfolio variance")
   (statement := /-- $\mathrm{Var}(w) = \sum_{i,j} w_i w_j \sigma_{ij}$, the variance of an
   $N$-asset portfolio with weights $w$ and covariance $\sigma$. -/)]
   MathFin.portfolioVarN
+
+attribute [blueprint "def:kelly-fraction" (title := "Kelly fraction")
+  (statement := /-- $f^* = (pb - q)/b$ with $q = 1 - p$: the Kelly stake for a bet that pays $b$
+  to $1$ with win probability $p$. -/)]
+  MathFin.kellyFraction
+
+attribute [blueprint "def:sharpe-ratio" (title := "Sharpe ratio")
+  (statement := /-- $(\mu - r_f)/\sigma$, the excess return per unit of volatility, of given
+  numbers $\mu$, $r_f$, $\sigma$. -/)]
+  MathFin.sharpeRatio
+
+attribute [blueprint "def:capm-beta" (title := "CAPM beta")
+  (statement := /-- $\beta = \mathrm{Cov}(R, R_M)/\mathrm{Var}(R_M)$, defined as the ratio of a
+  given covariance and variance. -/)]
+  MathFin.beta
+
+attribute [blueprint "def:two-asset-min-variance" (title := "Two-asset minimum-variance weight")
+  (statement := /-- $w^* = (\sigma_2^2 - \rho\sigma_1\sigma_2)/(\sigma_1^2 - 2\rho\sigma_1\sigma_2
+  + \sigma_2^2)$, the closed-form weight on the first asset of the two-asset minimum-variance
+  portfolio. -/)]
+  MathFin.minVarWeightTwo
+
+attribute [blueprint "def:tangent-portfolio" (title := "Tangent portfolio (first-order condition)")
+  (statement := /-- $w$ satisfies the tangency first-order condition when its marginal-variance
+  vector $\Sigma w$ is parallel to the excess-return vector. -/)]
+  MathFin.IsTangentPortfolioN
+
+attribute [blueprint "def:tracking-error" (title := "Tracking error")
+  (statement := /-- The squared tracking error $\sigma_p^2 - 2\,\mathrm{cov} + \sigma_b^2$ of given
+  moments, the variance of the active return $R_p - R_b$
+  (`trackingErrorSq_eq_variance_sub`). -/)]
+  MathFin.trackingErrorSq
 
 attribute [blueprint "def:binomial-no-arbitrage" (title := "Binomial no-arbitrage condition")
   (statement := /-- The one-period binomial model with up and down factors $u, d$ and rate $r$ is
