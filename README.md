@@ -247,6 +247,12 @@ lake exe cache get   # prebuilt Mathlib
 lake build
 ```
 
+To reproduce a release's claims in one command, run
+[`scripts/reproduce.sh`](scripts/reproduce.sh) from a clone at its tag: it builds the library
+(every proof, and the axiom pins below), then runs the repository's checks on the sources and the
+corpus. `scripts/reproduce.sh --corpus` also re-checks every benchmark snippet against the library,
+which takes hours on one machine.
+
 [`lean-toolchain`](lean-toolchain) pins the Lean version and
 [`lake-manifest.json`](lake-manifest.json) pins Mathlib and BrownianMotion. BrownianMotion and the
 library itself are compiled from source. [`CONTRIBUTING.md`](CONTRIBUTING.md) describes a prebuilt

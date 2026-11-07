@@ -30,6 +30,7 @@ import datetime as _dt
 import hashlib
 import json
 import os
+import re
 import socket
 import subprocess
 import sys
@@ -226,7 +227,8 @@ def exec_check(code: str, timeout: float) -> dict:
         tmp_host.unlink(missing_ok=True)
     out = (proc.stdout or "") + (proc.stderr or "")
     errors = [ln for ln in out.splitlines() if "error" in ln.lower()]
-    sorry_count = out.count("declaration uses 'sorry'")
+    # Lean writes the name in backticks since v4.2x and in straight quotes before; count both.
+    sorry_count = len(re.findall(r"declaration uses [`']sorry[`']", out))
     return {
         "success": proc.returncode == 0 and not errors and sorry_count == 0,
         "errors": errors[:20],
@@ -294,6 +296,7 @@ def cmd_verify(args) -> int:
     print(f"verifying {len(targets)} entries via {via} (HEAD {head})",
           flush=True)
     failures = []
+    aborted = False
     # Rows verified by THIS run, written out incrementally so an interrupted or
     # timed-out shard still contributes everything it finished.
     fragment: dict[str, dict] = {}
@@ -305,6 +308,7 @@ def cmd_verify(args) -> int:
                 subprocess.TimeoutExpired) as exc:
             print(f"\nABORT at {tid}: checker unavailable ({exc}). "
                   "Fix and resume with `verify --stale`.", flush=True)
+            aborted = True
             break
         elapsed = round(time.monotonic() - t0, 1)
         if verdict.get("success"):
@@ -333,7 +337,8 @@ def cmd_verify(args) -> int:
         print(f"  FAIL {fname:32} {tid}")
         for err in errors[:3]:
             print(f"       {err}")
-    return 1 if failures else 0
+    # An aborted run verified only part of its targets: never report it as a pass.
+    return 1 if failures or aborted else 0
 
 
 def _parse_shard(spec: str) -> tuple[int, int]:
