@@ -51,6 +51,32 @@ import MathFin.Foundations.DensityPasting
 import MathFin.Contracts.Models.BlackScholesPhysical
 import MathFin.Foundations.ItoProductRule
 import MathFin.Contracts.Models.BlackScholesSelfFinancing
+import MathFin.Foundations.StandardNormal
+import MathFin.Foundations.Quantile
+import MathFin.Foundations.QuantileConvergence
+import MathFin.Foundations.EquivMeasure
+import MathFin.Foundations.EquivMartingaleMeasure
+import MathFin.Foundations.MartingaleTransform
+import MathFin.Foundations.GaussianCopula
+import MathFin.RiskMeasures.ValueAtRisk
+import MathFin.RiskMeasures.Coherent
+import MathFin.RiskMeasures.ExpectedShortfall
+import MathFin.Contracts.Core
+import MathFin.Contracts.Pricing
+import MathFin.FixedIncome.ZCB
+import MathFin.FixedIncome.HJM
+import MathFin.FixedIncome.Immunization
+import MathFin.FixedIncome.AffineTermStructurePDE
+import MathFin.Portfolio.MarkowitzNAsset
+import MathFin.Portfolio.MarkowitzLagrangian
+import MathFin.Portfolio.RiskParityFOC
+import MathFin.Binomial.Model
+import MathFin.Actuarial.SurvivalModel
+import MathFin.Actuarial.CompoundPoissonMGF
+import MathFin.DeFi.UniswapMechanics
+import MathFin.Execution.GlostenMilgromCondExp
+import MathFin.BlackScholes.Heston
+import MathFin.Bridges.LiquidationAsStructuralDefault
 import Architect
 
 /-!
@@ -523,3 +549,173 @@ attribute [blueprint "thm:bs-self-financing" (title := "The delta hedge satisfie
   $\int\Delta\,dS = \int\Delta rS\,ds + \int\Delta\sigma S\,dB$ and $V_0$ the value of the
   European call contract. An integral identity, not a trading-strategy structure. -/)]
   MathFin.Contracts.BlackScholes.europeanCall_selfFinancing
+
+-- ===== the program's objects: definitions the corpus is written in =====
+-- A corpus entry is on the map when its proof rests on a node. Most of the corpus reaches the
+-- library through its shared definitions, not through a deep theorem, so the central objects are
+-- nodes too (docs/blueprint.md, "Objects and anchors").
+
+attribute [blueprint "def:standard-normal-cdf" (title := "Standard normal CDF Φ")
+  (statement := /-- $\Phi(x) = P(Z \le x)$ for $Z \sim N(0,1)$: the function the closed-form
+  prices, Greeks and Gaussian risk figures of the library are written in. -/)]
+  MathFin.Phi
+
+attribute [blueprint "def:quantile" (title := "Quantile function (generalized inverse CDF)")
+  (statement := /-- The quantile function of a law $\mu$ on $\mathbb{R}$,
+  $q_\mu(p) = \inf\{x \mid p \le F_\mu(x)\}$, the generalized inverse of its CDF. Its values are
+  meaningful for $p \in (0,1)$. -/)]
+  MathFin.quantile
+
+attribute [blueprint "def:value-at-risk" (title := "Value-at-risk")
+  (statement := /-- $\mathrm{VaR}_\alpha(X) = \inf\{x \mid \alpha \le P(X \le x)\}$, the
+  $\alpha$-quantile of the law of the loss $X$. -/)]
+  MathFin.valueAtRisk
+
+attribute [blueprint "def:expected-shortfall" (title := "Expected shortfall")
+  (statement := /-- $\mathrm{ES}_\alpha(X) = (1-\alpha)^{-1}\int_\alpha^1 \mathrm{VaR}_u(X)\,du$,
+  the average value-at-risk over the levels above $\alpha$. -/)]
+  MathFin.expectedShortfall
+
+attribute [blueprint "def:coherent-risk-measure" (title := "Coherent risk measure")
+  (statement := /-- The Artzner–Delbaen–Eber–Heath axioms for a functional on the integrable
+  losses of $(\Omega, P)$: monotonicity, translation invariance, positive homogeneity and
+  subadditivity. -/)]
+  MathFin.IsCoherentRiskMeasure
+
+attribute [blueprint "def:equivalent-measure" (title := "Equivalent probability measure")
+  (statement := /-- $Q$ is a probability measure with the same null sets as $P$ ($Q \ll P$ and
+  $P \ll Q$): the prefix every equivalent-martingale-measure structure of the library extends. -/)]
+  MathFin.IsEquivProbMeasure
+
+attribute [blueprint "def:emm" (title := "Equivalent martingale measure")
+  (statement := /-- $Q$ is a probability measure equivalent to $P$ under which the price $S$,
+  frozen at the horizon $T$ ($t \mapsto S_{\min(t,T)}$), is a martingale for the filtration. -/)]
+  MathFin.IsEMM
+
+attribute [blueprint "def:snell-envelope" (title := "Snell envelope (the recursion)")
+  (statement := /-- The Snell envelope of a reward process $Z$ on the horizon $N$ with exercise
+  set $X$, defined by the backward recursion and frozen at $Z_N$ past the horizon. -/)]
+  MathFin.snellEnvelope
+
+attribute [blueprint "def:contract" (title := "The contract language")
+  (statement := /-- A contract says what is paid and when, built from payoffs by combination. -/)]
+  MathFin.Contracts.Contract
+
+attribute [blueprint "def:contract-value" (title := "Value of a contract")
+  (statement := /-- The value of a contract is the $Q$-expectation of its discounted pathwise
+  present value, against a model that turns each observation the contract makes into a random
+  variable. -/)]
+  MathFin.Contracts.Contract.value
+
+attribute [blueprint "def:zero-coupon-bond" (title := "Zero-coupon bond, constant short rate")
+  (statement := /-- $P(t,T) = e^{-r(T-t)}$, the price at $t$ of one unit paid at $T$ under a
+  constant short rate $r$. -/)]
+  MathFin.zcb
+
+attribute [blueprint "def:portfolio-variance" (title := "Portfolio variance")
+  (statement := /-- $\mathrm{Var}(w) = \sum_{i,j} w_i w_j \sigma_{ij}$, the variance of an
+  $N$-asset portfolio with weights $w$ and covariance $\sigma$. -/)]
+  MathFin.portfolioVarN
+
+attribute [blueprint "def:binomial-no-arbitrage" (title := "Binomial no-arbitrage condition")
+  (statement := /-- The one-period binomial model with up and down factors $u, d$ and rate $r$ is
+  arbitrage-free: $0 < d < e^r < u$. -/)]
+  MathFin.BinomialNoArb
+
+attribute [blueprint "def:survival-function" (title := "Survival function of a lifetime")
+  (statement := /-- $S_X(t) = P(X > t)$, the probability that the age at death $X$ exceeds $t$. -/)]
+  MathFin.SurvivalModel.survivalFunction
+
+attribute [blueprint "def:hjm-model" (title := "The HJM model")
+  (statement := /-- An HJM model on $[0,H]$ over a Brownian motion $B$: forward rates $f(t,T)$
+  with drift $\alpha$ and volatility $\sigma$ satisfying
+  $f(t,T) = f(0,T) + \int_0^t \alpha(s,T)\,ds + \int_0^t \sigma(s,T)\,dB_s$ almost surely, for
+  $t \le T$ and $t \le H$. -/)]
+  MathFin.HJM.HJMModel
+
+attribute [blueprint "def:gaussian-factor-copula" (title := "One-factor Gaussian copula")
+  (statement := /-- The copula on $n$ names of the latent vector
+  $X_i = \rho Z_0 + \sqrt{1-\rho^2}\,Z_i$ with independent standard normals; it is a copula for
+  $\rho \in [-1,1]$. -/)]
+  MathFin.gaussianFactorCopula
+
+-- ===== area anchors: one result per area that had none on the map =====
+
+attribute [blueprint "thm:martingale-transform" (title := "The martingale transform is a martingale")
+  (statement := /-- For a martingale $M$ and a bounded predictable $A$ on a finite measure space,
+  $(A \cdot M)_n = \sum_{k<n} \langle A_{k+1}, M_{k+1} - M_k \rangle$ is a martingale: the discrete
+  stochastic integral, and the gains process of a trading strategy. -/)]
+  MathFin.martingaleTransform_isMartingale
+
+attribute [blueprint "thm:rockafellar-uryasev" (title := "Rockafellar–Uryasev: ES as a minimum")
+  (statement := /-- For an integrable loss $X$ and $\alpha \in (0,1)$, $\mathrm{ES}_\alpha(X)$ is
+  the least value of $c \mapsto c + (1-\alpha)^{-1}E[(X-c)^+]$. No continuity of the law is
+  assumed. -/)]
+  MathFin.isLeast_rockafellarUryasev
+
+attribute [blueprint "thm:expected-shortfall-coherent" (title := "Expected shortfall is coherent")
+  (statement := /-- For $\alpha \in (0,1)$, expected shortfall is a coherent risk measure on the
+  integrable losses. -/)]
+  MathFin.expectedShortfall_isCoherentRiskMeasure
+
+attribute [blueprint "thm:empirical-cdf-strong-law" (title := "Strong law for the empirical CDF")
+  (statement := /-- For pairwise independent draws with a common law whose CDF is continuous,
+  almost surely the empirical CDF converges to that CDF at every point. The convergence is
+  pointwise; uniformity (Glivenko–Cantelli) is not proved. -/)]
+  MathFin.tendsto_empiricalCDF_ae
+
+attribute [blueprint "thm:compound-poisson-mgf" (title := "Compound-Poisson MGF")
+  (statement := /-- For i.i.d. claims $X_i$, the MGF of the $n$-claim sum averaged over
+  $n \sim \mathrm{Poisson}(\lambda)$ is $\exp(\lambda(M_X(t) - 1))$. The statement is in this
+  mixture form; no claim-count process is constructed. -/)]
+  MathFin.compoundPoisson_mgf
+
+attribute [blueprint "thm:markowitz-lagrangian" (title := "Markowitz: the Lagrangian condition is sufficient")
+  (statement := /-- For a positive-semidefinite covariance $\Sigma$, a portfolio with
+  $\sum w_i = 1$, mean return $m$ and $(\Sigma w)_i = \lambda_1 + \lambda_2\mu_i$ for every asset
+  has the least variance among all portfolios with $\sum v_i = 1$ and mean return $m$. -/)]
+  MathFin.portfolioVariance_le_of_lagrangian_FOC
+
+attribute [blueprint "thm:risk-parity-foc" (title := "Risk parity from the log-barrier condition")
+  (statement := /-- If every asset's marginal variance equals $c / w_i$ for one constant $c$ (the
+  uniform-budget log-barrier first-order condition), all risk contributions are equal. -/)]
+  MathFin.isRiskParity_of_uniform_log_barrier_FOC
+
+attribute [blueprint "thm:bond-immunization" (title := "First-order immunization")
+  (statement := /-- If the duration-weighted values of an asset and a liability bond portfolio
+  agree at the rate $r$, the derivative in $r$ of their net value is zero there. -/)]
+  MathFin.bondPortfolio_immunization_first_order
+
+attribute [blueprint "thm:vasicek-bond-pde" (title := "The Vasicek bond price solves its PDE")
+  (statement := /-- For $\kappa \ne 0$, $u(\tau, r) = A(\tau)e^{-B(\tau)r}$ with the Vasicek
+  loadings satisfies $-\partial_\tau u + \kappa(\theta - r)\partial_r u
+  + \tfrac12\sigma^2\partial_r^2 u - ru = 0$. -/)]
+  MathFin.vasicekBondPrice_solves_pde
+
+attribute [blueprint "thm:heston-pde" (title := "Heston transform profile solves the pricing PDE")
+  (statement := /-- If coefficient flows $A, B$ solve the Heston Riccati system, the transform
+  profile built from them satisfies the backward Heston pricing equation
+  $\partial_t\Phi + L\Phi = 0$. Existence of the Riccati solutions is a hypothesis. -/)]
+  MathFin.Heston.hestonProfile_pde
+
+attribute [blueprint "thm:impermanent-loss" (title := "Impermanent loss is never positive")
+  (statement := /-- For a price ratio $r \ge 0$, the impermanent loss
+  $2\sqrt r/(1+r) - 1$ of a fee-free constant-product position is at most $0$. -/)]
+  MathFin.DeFi.impermanentLoss_nonpos
+
+attribute [blueprint "thm:uniswap-v3-covered-call" (title := "A Uniswap v3 position is at most a covered call")
+  (statement := /-- A v3 position with liquidity $L \ge 0$ on the range $[a, b]$ is worth at most
+  $x_{\max}(s^2 - \max(s^2 - ab, 0))$: long its full $X$ holding and short a call struck at $ab$. -/)]
+  MathFin.DeFi.v3PositionValue_le_coveredCall
+
+attribute [blueprint "thm:glosten-milgrom-quote" (title := "Glosten–Milgrom: quotes are conditional expectations")
+  (statement := /-- On a finite measure space, the conditional expectation of the asset value given
+  the trade direction equals almost everywhere the ask $\int V\,d\mu[\cdot\mid B]$ on the buy
+  event and the bid $\int V\,d\mu[\cdot\mid B^c]$ on the sell event. -/)]
+  MathFin.Execution.condExp_payoff_eq_quote
+
+attribute [blueprint "thm:aave-liquidation-kmv" (title := "Aave liquidation probability is a KMV default probability")
+  (statement := /-- With lognormal collateral, liquidation threshold $LT > 0$ and debt $B + F > 0$,
+  the probability that the single-collateral (v1) health factor is below $1$ at the horizon is the
+  Merton–KMV default probability with barrier $(B+F)/LT$. -/)]
+  MathFin.prob_healthFactorV1_lt_one_eq_kmvPD
