@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Contracts.Models.BlackScholes
 public import MathFin.Contracts.Models.BlackScholesAsian
 public import MathFin.Contracts.Models.BlackScholesChooser
 public import MathFin.Foundations.GirsanovFiltered
@@ -142,9 +143,9 @@ theorem pathAssets_physical_ae_eq {S_0 m r σ : ℝ} (hσ : σ ≠ 0) (H : ℝ�
     ∀ᵐ ω ∂(constGirsanovMeasure hW hWmeas ((m - r) / σ) H),
       pathAssets S_0 m σ W () u ω
         = pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H) () u ω := by
-  have hae := (withDensity_absolutelyContinuous μ _).ae_le
-    (constBtheta_drift_ae hW hWmeas ((m - r) / σ) H hu)
-  filter_upwards [hae] with ω hω
+  have hac : constGirsanovMeasure hW hWmeas ((m - r) / σ) H ≪ μ :=
+    withDensity_absolutelyContinuous _ _
+  filter_upwards [hac.ae_le (constBtheta_drift_ae hW hWmeas ((m - r) / σ) H hu)] with ω hω
   simp only [pathAssets, hω]
   congr 2
   field_simp
@@ -174,7 +175,7 @@ theorem value_europeanCall_physical {S_0 K m r σ : ℝ} {T H : ℝ≥0} (hTH : 
     (europeanCall K T).value (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
         (fun _ ↦ Real.exp (-r * T)) (pathAssets S_0 m σ W)
       = S_0 * Phi (bsd1 S_0 K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) := by
-  haveI := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
+  have := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
   have hB := isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
   have hfix : (europeanCall K T).FixedDated := by simp [europeanCall, Contract.FixedDated]
   rw [Contract.value_congr_ae (Q := constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
@@ -204,7 +205,7 @@ theorem value_chooser_physical {S_0 K m r σ : ℝ} {T t₁ H : ℝ≥0} (hTH : 
     (chooser K r T t₁).value (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
         (fun u ↦ Real.exp (-r * u)) (pathAssets S_0 m σ W)
       = chooserPrice S_0 K r σ T t₁ := by
-  haveI := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
+  have := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
   have hB := isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
   have hfix : (chooser K r T t₁).FixedDated := by
     simp [chooser, europeanCall, europeanPut, Contract.FixedDated]
@@ -231,7 +232,7 @@ theorem value_geomAsianCall_physical {S_0 K m r σ : ℝ} {T H : ℝ≥0} {n : �
           Phi (bsd1 (geomAsianEffSpot S_0 r σ T τ) K r (geomAsianEffVol σ T τ) T)
         - K * Real.exp (-r * T) *
           Phi (bsd2 (geomAsianEffSpot S_0 r σ T τ) K r (geomAsianEffVol σ T τ) T) := by
-  haveI := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
+  have := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
   have hB := isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
   have hfix : (geomAsianCall K T τ).FixedDated := by simp [geomAsianCall, Contract.FixedDated]
   rw [Contract.value_congr_ae (Y := pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H))
