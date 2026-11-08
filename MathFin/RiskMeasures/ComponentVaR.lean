@@ -85,8 +85,7 @@ noncomputable def componentVaR (i : ι) : ℝ := x i * marginalVaR s x σ α i
 /-- **Euler allocation of VaR**: the component VaRs sum to the portfolio VaR, `∑ᵢ CVaRᵢ = VaR`,
 whenever the portfolio variance is (strictly) positive. This is the identity Euler's theorem
 predicts for the degree-1-homogeneous map `x ↦ α√(x'Σx)`; since `marginalVaR` is defined by its
-closed form, the proof is the algebra `∑ᵢ xᵢ(Σx)ᵢ = x'Σx` (`sum_riskContribution_eq_variance`,
-`portfolioVariance_eq_portfolioVarN`). -/
+closed form, the proof is the algebra `∑ᵢ xᵢ(Σx)ᵢ = x'Σx` (`sum_riskContribution_eq_variance`). -/
 theorem sum_componentVaR_eq_portfolioVaRN (hvar : 0 < portfolioVarN s x σ) :
     ∑ i ∈ s, componentVaR s x σ α i = portfolioVaRN s x σ α := by
   have hsqrt : Real.sqrt (portfolioVarN s x σ) ≠ 0 := (Real.sqrt_pos.mpr hvar).ne'
@@ -100,7 +99,7 @@ theorem sum_componentVaR_eq_portfolioVaRN (hvar : 0 < portfolioVarN s x σ) :
     ring
   have hsq : Real.sqrt (portfolioVarN s x σ) * Real.sqrt (portfolioVarN s x σ) =
       portfolioVarN s x σ := Real.mul_self_sqrt hvar.le
-  rw [hsum, sum_riskContribution_eq_variance, portfolioVariance_eq_portfolioVarN,
+  rw [hsum, sum_riskContribution_eq_variance,
     div_eq_iff hsqrt, mul_assoc, hsq]
 
 /-- **The portfolio variance along a line** `x + t d` is the quadratic

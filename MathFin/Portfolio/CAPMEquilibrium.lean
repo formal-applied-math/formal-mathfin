@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Portfolio.CAPM
+public import MathFin.Portfolio.MarkowitzNAsset
 public import Mathlib.Algebra.Order.Archimedean.Real.Basic
 
 /-!
@@ -28,7 +29,7 @@ aggregating gives the market portfolio = tangent portfolio).
 * `μ_excess : ι → ℝ` — excess expected returns (over the risk-free rate).
 * `Sg : ι → ι → ℝ` — covariance matrix.
 * `marginalVariance` — `(Σw)_i = ∑_k Sg(i,k) · w(k)` (= `Cov(R_i, R_M)`).
-* `portfolioVariance` — `Var(R_M) = w_M · (Σw_M)`.
+* `portfolioVarN_eq_sum_mul_marginalVariance` — `Var(R_M) = w_M · (Σw_M)`.
 * `portfolioReturn` — `μ_M = w_M · μ_excess` (market excess return).
 
 ## The equilibrium hypothesis
@@ -61,7 +62,7 @@ pricing identity is a *consequence*, not a definition.
 ## Main definitions
 
 * `marginalVariance`: the marginal variance contribution `(Σw)_i = ∑_k Sg(i, k)·w(k)`.
-* `portfolioVariance`: `w · (Σw)`.
+* `portfolioVarN_eq_sum_mul_marginalVariance`: the portfolio variance `portfolioVarN` is `w · (Σw)`.
 * `portfolioReturn`: `w · μ = ∑_i w(i)·μ(i)`.
 
 ## Main results
@@ -90,10 +91,14 @@ def marginalVariance {ι : Type*} (s : Finset ι) (Sg : ι → ι → ℝ)
     (w : ι → ℝ) (i : ι) : ℝ :=
   ∑ k ∈ s, Sg i k * w k
 
-/-- Portfolio variance: `Var(R_w) = w · (Σw) = ∑_i w(i) · (Σw)_i`. -/
-def portfolioVariance {ι : Type*} (s : Finset ι) (Sg : ι → ι → ℝ)
-    (w : ι → ℝ) : ℝ :=
-  ∑ k ∈ s, w k * marginalVariance s Sg w k
+/-- **The portfolio variance is `w · (Σw)`**: the Markowitz double sum `portfolioVarN`
+is `∑ₖ wₖ (Σw)ₖ`, the `w`-weighted sum of the marginal variances. -/
+lemma portfolioVarN_eq_sum_mul_marginalVariance {ι : Type*} (s : Finset ι) (Sg : ι → ι → ℝ)
+    (w : ι → ℝ) : portfolioVarN s w Sg = ∑ k ∈ s, w k * marginalVariance s Sg w k := by
+  unfold portfolioVarN marginalVariance
+  refine Finset.sum_congr rfl fun i _ ↦ ?_
+  rw [Finset.mul_sum]
+  exact Finset.sum_congr rfl fun j _ ↦ by ring
 
 /-- Portfolio expected return: `μ_w = w · μ = ∑_i w(i) · μ(i)`. -/
 def portfolioReturn {ι : Type*} (s : Finset ι) (w μ : ι → ℝ) : ℝ :=
@@ -114,12 +119,12 @@ The proof is a discrete-Lagrangian argument:
 theorem CAPM_from_market_equilibrium
     {ι : Type*} (s : Finset ι) (w_M : ι → ℝ) (μ_excess : ι → ℝ)
     (Sg : ι → ι → ℝ) (i : ι) (hi : i ∈ s)
-    (h_var : portfolioVariance s Sg w_M ≠ 0)
+    (h_var : portfolioVarN s w_M Sg ≠ 0)
     (h_FOC : ∀ j ∈ s, ∀ k ∈ s,
        μ_excess k * marginalVariance s Sg w_M j =
          μ_excess j * marginalVariance s Sg w_M k) :
     μ_excess i =
-      (marginalVariance s Sg w_M i / portfolioVariance s Sg w_M) *
+      (marginalVariance s Sg w_M i / portfolioVarN s w_M Sg) *
         portfolioReturn s w_M μ_excess := by
   -- Sum w_M(j) · (h_FOC i j) over j ∈ s
   have h_sum :
@@ -132,9 +137,8 @@ theorem CAPM_from_market_equilibrium
   -- LHS = μ_excess i · Var(R_M)
   have h_LHS :
       ∑ j ∈ s, w_M j * (μ_excess i * marginalVariance s Sg w_M j) =
-        μ_excess i * portfolioVariance s Sg w_M := by
-    unfold portfolioVariance
-    rw [Finset.mul_sum]
+        μ_excess i * portfolioVarN s w_M Sg := by
+    rw [portfolioVarN_eq_sum_mul_marginalVariance, Finset.mul_sum]
     refine Finset.sum_congr rfl (fun j _ ↦ by ring)
   -- RHS = μ_M · (Σw_M)_i
   have h_RHS :
@@ -158,12 +162,12 @@ theorem expectedReturn_eq_SML_from_equilibrium
     {ι : Type*} (s : Finset ι) (w_M : ι → ℝ) (μ : ι → ℝ) (rf : ℝ)
     (Sg : ι → ι → ℝ) (i : ι) (hi : i ∈ s)
     (h_weights : ∑ k ∈ s, w_M k = 1)
-    (h_var : portfolioVariance s Sg w_M ≠ 0)
+    (h_var : portfolioVarN s w_M Sg ≠ 0)
     (h_FOC : ∀ j ∈ s, ∀ k ∈ s,
        (μ k - rf) * marginalVariance s Sg w_M j =
          (μ j - rf) * marginalVariance s Sg w_M k) :
     μ i = securityMarketLine rf
-      (marginalVariance s Sg w_M i / portfolioVariance s Sg w_M)
+      (marginalVariance s Sg w_M i / portfolioVarN s w_M Sg)
       (∑ k ∈ s, w_M k * μ k) := by
   unfold securityMarketLine
   have h := CAPM_from_market_equilibrium s w_M (fun k ↦ μ k - rf) Sg i hi h_var h_FOC

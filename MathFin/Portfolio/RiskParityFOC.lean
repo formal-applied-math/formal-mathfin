@@ -83,8 +83,8 @@ def riskContribution {ι : Type*} (s : Finset ι) (Sg : ι → ι → ℝ)
 /-- **Sum-of-risk-contributions identity**: `∑_i RC_i = Var(w) = w · (Σw)`. -/
 lemma sum_riskContribution_eq_variance
     {ι : Type*} (s : Finset ι) (Sg : ι → ι → ℝ) (w : ι → ℝ) :
-    ∑ i ∈ s, riskContribution s Sg w i = portfolioVariance s Sg w := by
-  unfold riskContribution portfolioVariance
+    ∑ i ∈ s, riskContribution s Sg w i = portfolioVarN s w Sg := by
+  rw [portfolioVarN_eq_sum_mul_marginalVariance]
   rfl
 
 /-- **Equal-risk-contribution property ("risk parity")**: all assets
@@ -151,7 +151,7 @@ theorem riskContribution_eq_variance_div_card_of_riskParity
     (w : ι → ℝ) (i : ι) (hi : i ∈ s) (hs : s.Nonempty)
     (h_RP : IsRiskParity s Sg w) :
     riskContribution s Sg w i =
-      portfolioVariance s Sg w / (s.card : ℝ) := by
+      portfolioVarN s w Sg / (s.card : ℝ) := by
   have h_card_pos : 0 < (s.card : ℝ) := by exact_mod_cast s.card_pos.mpr hs
   have h_card_ne : (s.card : ℝ) ≠ 0 := h_card_pos.ne'
   -- ∑ RC_j = card · RC_i (since all are equal)
@@ -173,7 +173,7 @@ Minimising `L` subject to `w > 0` is the standard risk-parity formulation
 (Maillard–Roncalli–Teïletche 2010, Roncalli 2014). -/
 noncomputable def logBarrierObj {ι : Type*} (s : Finset ι) (Sg : ι → ι → ℝ)
     (b w : ι → ℝ) : ℝ :=
-  (1 / 2 : ℝ) * portfolioVariance s Sg w - ∑ i ∈ s, b i * Real.log (w i)
+  (1 / 2 : ℝ) * portfolioVarN s w Sg - ∑ i ∈ s, b i * Real.log (w i)
 
 /-- **Directional derivative of the log-barrier objective** along coordinate
 `j`. Freezing all weights except `w_j` and differentiating `L` in `w_j` at the
@@ -239,11 +239,11 @@ theorem hasDerivAt_logBarrierObj_update
           * (∑ l ∈ s, Sg k l * Function.update w j (w j) l)
         + Function.update w j (w j) k * Sg k j)) (w j) :=
     HasDerivAt.fun_sum (fun k (_ : k ∈ s) ↦ hF k)
-  -- identify that sum with `portfolioVariance ∘ update`
-  have hfun : (fun x ↦ portfolioVariance s Sg (Function.update w j x))
+  -- identify that sum with `portfolioVarN ∘ update`
+  have hfun : (fun x ↦ portfolioVarN s (Function.update w j x) Sg)
       = (fun x ↦ ∑ k ∈ s,
           Function.update w j x k * ∑ l ∈ s, Sg k l * Function.update w j x l) := by
-    funext x; rfl
+    funext x; rw [portfolioVarN_eq_sum_mul_marginalVariance]; rfl
   -- simplify the derivative sum to `2 · (Σw)_j`
   have hderiv_eq :
       (∑ k ∈ s, ((if k = j then (1 : ℝ) else 0)
@@ -266,11 +266,11 @@ theorem hasDerivAt_logBarrierObj_update
       rw [hSg k j]; ring
     rw [h1, h2]; ring
   -- assemble: half the quadratic derivative
-  have hPV : HasDerivAt (fun x ↦ portfolioVariance s Sg (Function.update w j x))
+  have hPV : HasDerivAt (fun x ↦ portfolioVarN s (Function.update w j x) Sg)
       (2 * marginalVariance s Sg w j) (w j) := by
     rw [hfun, ← hderiv_eq]; exact hsum
   have hHalf : HasDerivAt
-      (fun x ↦ (1 / 2 : ℝ) * portfolioVariance s Sg (Function.update w j x))
+      (fun x ↦ (1 / 2 : ℝ) * portfolioVarN s (Function.update w j x) Sg)
       (marginalVariance s Sg w j) (w j) := by
     have h := hPV.const_mul (1 / 2 : ℝ)
     have he : (1 / 2 : ℝ) * (2 * marginalVariance s Sg w j)

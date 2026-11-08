@@ -83,6 +83,17 @@ import MathFin.DeFi.UniswapMechanics
 import MathFin.Execution.GlostenMilgromCondExp
 import MathFin.BlackScholes.Heston
 import MathFin.Bridges.LiquidationAsStructuralDefault
+import MathFin.RiskMeasures.VasicekIRB
+import MathFin.Foundations.StochasticFubiniIto
+import MathFin.Contracts.Instruments.FixedIncome
+import MathFin.Bridges.GaussianRiskMarkowitz
+import MathFin.Bridges.UniswapV3CoveredCallPrice
+import MathFin.Contracts.Models.Caplet
+import MathFin.BlackScholes.JumpDiffusionMixing
+import MathFin.RiskMeasures.OneFactorCopula
+import MathFin.BlackScholes.Dupire
+import MathFin.BlackScholes.AmericanPut.Stopping.ActualBoundaryExpiryLimit
+import MathFin.Portfolio.CAPMEquilibrium
 import Architect
 
 /-!
@@ -720,7 +731,7 @@ attribute [blueprint "thm:markowitz-lagrangian" (title := "Markowitz: the Lagran
   (statement := /-- For a positive-semidefinite covariance $\Sigma$, a portfolio with
   $\sum w_i = 1$, mean return $m$ and $(\Sigma w)_i = \lambda_1 + \lambda_2\mu_i$ for every asset
   has the least variance among all portfolios with $\sum v_i = 1$ and mean return $m$. -/)]
-  MathFin.portfolioVariance_le_of_lagrangian_FOC
+  MathFin.portfolioVarN_le_of_lagrangian_FOC
 
 attribute [blueprint "thm:risk-parity-foc" (title := "Risk parity from the log-barrier condition")
   (statement := /-- If every asset's marginal variance equals $c / w_i$ for one constant $c$ (the
@@ -765,3 +776,121 @@ attribute [blueprint "thm:aave-liquidation-kmv" (title := "Aave liquidation prob
   the probability that the single-collateral (v1) health factor is below $1$ at the horizon is the
   Merton–KMV default probability with barrier $(B+F)/LT$. -/)]
   MathFin.prob_healthFactorV1_lt_one_eq_kmvPD
+
+/-! ### Shared objects and bridges
+
+Objects the proofs already share, and theorems that already join two parts of the map. Before
+these tags the proof-term graph of the blueprint fell into one main component and 34 islands:
+each island was proved, but no recorded edge tied it to the rest. -/
+
+attribute [blueprint "def:gbm" (title := "Geometric Brownian motion")
+  (statement := /-- The GBM value function $S(t,x) = S_0 \exp((\mu - \tfrac12\sigma^2)t + \sigma x)$;
+  at $x = B_t$ it is geometric Brownian motion. -/)]
+  MathFin.gbmValue
+
+attribute [blueprint "def:heat-feynman-kac" (title := "Heat-kernel solution $u(t,x)$")
+  (statement := /-- The Feynman–Kac function of the heat equation,
+  $u(t,x) = \int g(z)\,K(t, z - x)\,dz$ for the Gaussian heat kernel $K$. -/)]
+  MathFin.FeynmanKacHeatEquation.feynmanU
+
+attribute [blueprint "def:martingale-transform" (title := "Martingale transform")
+  (statement := /-- The discrete stochastic integral
+  $(A\cdot M)_n = \sum_{k<n} \langle A_{k+1}, M_{k+1} - M_k\rangle$. -/)]
+  MathFin.martingaleTransform
+
+attribute [blueprint "def:path-cylinder" (title := "Path cylinder")
+  (statement := /-- The event that a trajectory agrees with a given path up to time $n$,
+  $\{X_0 = x_0, \dots, X_n = x_n\}$. -/)]
+  MathFin.pathCylinder
+
+attribute [blueprint "def:black-scholes-model" (title := "The Black–Scholes model")
+  (statement := /-- The Black–Scholes hypotheses: $S_0, K, \sigma, T > 0$ and $Z \sim N(0,1)$ under
+  $Q$, for the terminal price $S_T = S_0 \exp((r - \tfrac12\sigma^2)T + \sigma\sqrt{T} Z)$. -/)]
+  MathFin.BSCallHyp
+
+attribute [blueprint "def:marginal-variance" (title := "Marginal variance $(\\Sigma w)_i$")
+  (statement := /-- The marginal variance of asset $i$ in the portfolio $w$,
+  $(\Sigma w)_i = \sum_k \Sigma_{ik} w_k$; the portfolio variance is $\sum_k w_k (\Sigma w)_k$. -/)]
+  MathFin.marginalVariance
+
+attribute [blueprint "thm:gbm-no-simple-arbitrage" (title := "No simple arbitrage for discounted GBM")
+  (statement := /-- Under its risk-neutral measure, no simple (piecewise-constant, predictable,
+  bounded) strategy trading the discounted GBM up to $T$ is an arbitrage: the forward FTAP applied
+  to the discounted GBM as an EMM. -/)]
+  MathFin.discountedGBM_noArbitrageSimple
+
+attribute [blueprint "thm:numeraire-measure-equivalent" (title := "The numéraire measure is equivalent")
+  (statement := /-- If $N, B > 0$ and $E^Q[N_T/B_T] = N_0/B_0$, the measure with density
+  $N_T B_0 / (N_0 B_T)$ is a probability measure equivalent to $Q$. -/)]
+  MathFin.numeraireMeasure_isEquivProbMeasure
+
+attribute [blueprint "thm:stochastic-fubini-ito" (title := "Stochastic Fubini for the Itô integral")
+  (statement := /-- For a Bochner-integrable family $\varphi : A \to L^2$ with jointly integrable
+  representatives, $\int_A \big(\int_0^T \varphi_u\,dB\big)\,d\nu(u) = \int_0^T \big(\int_A
+  \varphi_u\,d\nu(u)\big)\,dB$ in $L^2$. -/)]
+  MathFin.StochasticFubini.stochFubini_ito
+
+attribute [blueprint "thm:american-put-boundary-expiry" (title := "The American put boundary at expiry")
+  (statement := /-- For $K, \sigma > 0$, $r > 0$ and $0 \le q \le r$, the exercise boundary of the
+  American put in the Black–Scholes model tends to the strike as time to expiry tends to $0$. -/)]
+  MathFin.BlackScholes.AmericanPut.Stopping.tendsto_brownianUsualExerciseBoundary_expiry
+
+attribute [blueprint "thm:dupire-zero-rates" (title := "Dupire's formula, zero rates")
+  (statement := /-- For an Itô process whose local variance $\sigma_{loc}(K)^2 K^2$ is a continuous
+  version of $E[\delta_t^2 \mid X_t = K]$ on a window of strikes, at every strike of the window
+  with $\partial_K^2 C > 0$: $\sigma_{loc}(K)^2 = 2\,\partial_T C / (K^2 \partial_K^2 C)$. Zero
+  interest rate. -/)]
+  MathFin.Dupire.dupire_pointwise
+
+attribute [blueprint "thm:jump-diffusion-mixing" (title := "Jump-diffusion call as a mixture of Black–Scholes prices")
+  (statement := /-- For a jump-diffusion whose Poisson jump count is independent of the Gaussian
+  driver and of the i.i.d. jump sizes, the discounted expected call payoff is the Black–Scholes price averaged over the jump
+  part $-\kappa + \sum_{i<N} J_i$. -/)]
+  MathFin.JumpDiffusionHyp.call_eq_integral_bsV
+
+attribute [blueprint "thm:black76-caplet" (title := "Caplet as a Black-76 call under the forward measure")
+  (statement := /-- If the simple rate $L(T_0,T_1)$ is lognormal under the $T_1$-forward measure
+  (a hypothesis, not derived from a rate model), the caplet is worth
+  $P(0,T_1)\,\delta\,[F\Phi(d_1) - K\Phi(d_2)]$. -/)]
+  MathFin.Contracts.valueDisc_caplet_black76
+
+attribute [blueprint "thm:level-payments-annuity" (title := "Level payments are an annuity")
+  (statement := /-- $n$ payments of $c$ at $\Delta t, \dots, n\Delta t$, discounted by the
+  zero-coupon bond of a flat continuous curve, are worth $\sum_{i<n} c\,e^{-r(i+1)\Delta t}$. -/)]
+  MathFin.Contracts.pathPV_fixedFlows_zcb
+
+attribute [blueprint "thm:binomial-replication" (title := "The binomial price is the cost of a hedge")
+  (statement := /-- Under $0 < d < e^r < u$ and $S_0 \ne 0$, every payoff has a predictable strategy
+  whose martingale transform against the discounted spot, added to the tree price, is the
+  discounted payoff on every path. -/)]
+  MathFin.binomialPrice_replication
+
+attribute [blueprint "thm:gaussian-portfolio-var" (title := "VaR of a Gaussian portfolio")
+  (statement := /-- For a Gaussian vector $X$ and $\alpha \in (0,1)$,
+  $\mathrm{VaR}_\alpha(\sum_i w_i X_i) = \sum_i w_i E X_i + \sqrt{w^\top \Sigma w}\,\Phi^{-1}(\alpha)$
+  with $\Sigma$ the covariance matrix of $X$. -/)]
+  MathFin.valueAtRisk_portfolio_gaussian
+
+attribute [blueprint "thm:markowitz-random-returns" (title := "Markowitz for random returns")
+  (statement := /-- For square-integrable returns, a budget- and target-feasible portfolio whose
+  covariances with the assets meet the Lagrangian condition has the least variance
+  $\mathrm{Var}[\sum_i w_i R_i]$ among feasible portfolios. Sufficiency only. -/)]
+  MathFin.variance_le_of_lagrangian_FOC
+
+attribute [blueprint "thm:large-portfolio-limit" (title := "The large-portfolio limit")
+  (statement := /-- In the one-factor model with pairwise independent standard normal
+  idiosyncratic terms and $\rho < 1$, the loss fraction converges almost surely to the conditional
+  default probability $p(F)$, for any systematic factor $F$. -/)]
+  MathFin.tendsto_oneFactorLossFraction_ae
+
+attribute [blueprint "thm:one-factor-joint-default" (title := "Joint default is the Gaussian factor copula")
+  (statement := /-- With $F, \varepsilon_1, \dots, \varepsilon_n$ independent standard normals,
+  $\pi \in (0,1)$ and $0 \le \rho < 1$, the probability that every name defaults is
+  $C(\pi, \dots, \pi)$ for the Gaussian factor copula $C$. -/)]
+  MathFin.oneFactor_measureReal_iInter_default_eq_gaussianFactorCopula
+
+attribute [blueprint "thm:uniswap-v3-bs-bound" (title := "A v3 position is worth at most a covered call")
+  (statement := /-- Under the Black–Scholes model, the discounted expected value of a Uniswap v3
+  position on $[a,b]$ is at most $x_{max}(S_0 - C)$, where $C$ is the Black–Scholes call struck
+  at the geometric-mean price $ab$. -/)]
+  MathFin.integral_discounted_v3PositionValue_le
