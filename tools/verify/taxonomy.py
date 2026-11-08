@@ -62,6 +62,18 @@ def family_of(module: str) -> str | None:
     return _longest(module, _prefixes(load()["family"]))
 
 
+def place_of(modules: list[str]) -> tuple[str | None, str | None]:
+    """The (cell, family) of a corpus entry, from the library modules its snippet imports: the
+    cell most of them share (ties to the first imported), and the first family any of them has.
+    The umbrella ``MathFin`` and the meta modules place nothing."""
+    skip = {"MathFin", *(f"MathFin.{m}" for m in meta())}
+    placed = [m for m in modules if m not in skip]
+    cs = [c for c in map(cell_of, placed) if c]
+    cell = max(cs, key=cs.count) if cs else None  # max keeps the first of equal counts
+    family = next((f for f in map(family_of, placed) if f), None)
+    return cell, family
+
+
 def part_of(cell: str) -> str:
     return cell.partition("/")[0]
 

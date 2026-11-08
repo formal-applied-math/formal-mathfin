@@ -1781,6 +1781,8 @@
             "key": "CarrMadan2001"
           }
         ],
+        "cell": "valuation/model-free",
+        "family": "model-free",
         "difficulty": "intermediate",
         "formalization_status": "library_wrapper",
         "formalization_scope": "Direct invocation of Mathlib's Real.log_div (statement-identical algebra step of the Carr-Madan log-contract chain). Relabeled full->library_wrapper in the 2026-06-03 audit; the former MathFin alias lemma was deleted. The genuine Carr-Madan content lives in mf-carr-madan-spanning and mf-carr-madan-log-contract (both full)."
