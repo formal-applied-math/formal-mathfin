@@ -79,6 +79,7 @@ class Node:
     family: str = ""  # a family key of the same file, or ""
     ground: str = ""  # frontier only: the upstream material a Mathlib-only result builds on
     core: tuple[str, ...] = ()  # frontier only: corpus entries already proving part of it
+    lean: str = ""  # frontier only: the connector's statement in MathFinFrontier/, if stated
 
 
 @dataclass(frozen=True)
@@ -134,7 +135,7 @@ def load_frontier(path: Path = FRONTIER_TOML) -> list[Node]:
     return [Node(label=r["label"], title=r["title"], status="frontier",
                  uses=tuple(r.get("uses", ())), statement=r.get("statement", ""),
                  area=r.get("area", ""), family=r.get("family", ""), ground=r.get("ground", ""),
-                 core=tuple(r.get("core", ())))
+                 core=tuple(r.get("core", ())), lean=r.get("lean", ""))
             for r in data.get("node", [])]
 
 
@@ -181,6 +182,37 @@ def grows_from_wood(label: str, nodes: dict[str, Node]) -> bool:
             return True
         stack.extend(n.uses)
     return False
+
+
+CONNECTORS_DIR = Path("MathFinFrontier")
+_CONNECTOR = re.compile(r"^theorem\s+([^\s:({\[]+)", re.M)
+
+
+def connector_names(root: Path = CONNECTORS_DIR) -> set[str]:
+    """The theorems stated in the connector library, by full name (each file's `namespace`
+    lines are not used: connectors are written with their full name, `MathFinFrontier.x`)."""
+    return {m.group(1) for p in sorted(root.rglob("*.lean"))
+            for m in _CONNECTOR.finditer(p.read_text(encoding="utf-8"))}
+
+
+def connector_problems(nodes: dict[str, Node], stated: set[str] | None = None) -> list[str]:
+    """Every connector theorem is named by exactly one frontier node's `lean`, and every `lean`
+    names a connector theorem."""
+    stated = connector_names() if stated is None else stated
+    out = []
+    named: dict[str, list[str]] = {}
+    for n in nodes.values():
+        if n.lean:
+            named.setdefault(n.lean, []).append(n.label)
+            if n.lean not in stated:
+                out.append(f"frontier node `{n.label}`: `lean` names `{n.lean}`, which is not a "
+                           "theorem of MathFinFrontier/")
+    for name in sorted(stated):
+        labels = named.get(name, [])
+        if len(labels) != 1:
+            out.append(f"connector `{name}` is named by {len(labels)} frontier nodes "
+                       f"({', '.join(labels) or 'none'}); it needs exactly one")
+    return out
 
 
 def frontier_problems(nodes: dict[str, Node],
@@ -317,6 +349,7 @@ def check(issues: list[Issue], nodes: dict[str, Node],
           retired: dict[str, Retired] | None = None) -> list[Problem]:
     retired = retired or {}
     problems = [Problem(m) for m in frontier_problems(nodes, corpus_status)]
+    problems += [Problem(m) for m in connector_problems(nodes)]
     problems += [Problem(m) for m in retired_problems(retired, nodes)]
     open_named: dict[str, list[int]] = {}
     any_named: dict[str, list[int]] = {}

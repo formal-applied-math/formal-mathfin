@@ -133,6 +133,16 @@ def test_core_names_corpus_proofs() -> None:
 def test_frontier_file_is_well_formed() -> None:
     nodes = bi.load_nodes(REPO / bi.NODES_JSON, REPO / bi.FRONTIER_TOML, REPO / bi.RETIRED_TOML)
     assert bi.frontier_problems(nodes) == []
+    assert bi.connector_problems(nodes, bi.connector_names(REPO / bi.CONNECTORS_DIR)) == []
+
+
+def test_connectors_and_their_nodes_are_one_to_one() -> None:
+    nodes = {"thm:k": bi.Node("thm:k", "K", "frontier", lean="MathFinFrontier.k"),
+             "thm:j": bi.Node("thm:j", "J", "frontier", lean="MathFinFrontier.gone")}
+    msgs = bi.connector_problems(nodes, {"MathFinFrontier.k", "MathFinFrontier.orphan"})
+    assert any("`MathFinFrontier.gone`" in m for m in msgs)
+    assert any("`MathFinFrontier.orphan` is named by 0" in m for m in msgs)
+    assert not any("`MathFinFrontier.k`" in m for m in msgs)
 
 
 RETIRED = {"thm:old": bi.Retired("thm:old", "thm:a", "a waypoint")}

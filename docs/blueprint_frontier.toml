@@ -15,6 +15,11 @@
 # nodes) reaches a node with a Lean declaration. A result that builds only on Mathlib says so in
 # `ground` instead ("Mathlib: …", what it draws on). `blueprint_issues check` enforces this.
 #
+# Optional `lean` makes the node a **connector**: the full name of a theorem in `MathFinFrontier/`
+# that states it as Lean, closed by `sorry` (docs/specs/2026-11-08-chain-design.md §3.5). The
+# statement elaborates against the library, so both ends of the link are real declarations;
+# `blueprint_issues check` keeps the theorems and the nodes one to one.
+#
 # Optional `core` lists the corpus entries that already prove part of the node: the node stays on
 # the frontier, and the map draws it as partly grown. Each entry must exist; the check flags a
 # `core` entry that is not `full` or `reduced_core`.
