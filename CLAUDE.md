@@ -125,7 +125,12 @@ proof's citations depend on the node's declaration. The program's central object
 (`def:quantile`, `def:emm`, `def:contract-value`, …), since most entries reach the library through
 them. The count of entries off the map is a ratchet (`corpus_off_blueprint`); the docs site draws
 the whole picture as the program tree (`tree.html`). A new area or object the corpus builds on gets
-a blueprint node.
+a blueprint node. The proved blueprint is one tree: `program_tree.islands` lists the proved nodes no
+recorded edge ties to the component holding Brownian motion, and their count is a ratchet
+(`blueprint_islands`). A tagged node joins the tree through a shared object its proof uses or a
+bridge theorem that uses it, never through prose (2026-11-07: tagging objects and anchors left 34
+islands, among them the EMM and the whole risk cluster; one duplicate, `portfolioVariance`, kept
+Markowitz off the portfolio node).
 `tests/test_architecture.py` keeps the library one graph: `Foundations/` imports only
 `Foundations/` (joins live in `Bridges/`), every module imports a library module or is
 imported by one, and every module is imported by another or cited by a corpus entry. A

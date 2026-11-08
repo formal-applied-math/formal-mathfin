@@ -13,7 +13,8 @@ declaration index (``lake exe mathfin_index``):
 * otherwise it is **off the map**: proved, and connected to the library by imports, but in no
   relation the program map records.
 
-``off_map_count`` is a ratchet count (``ratchet.json``: ``corpus_off_blueprint``); the docs site
+``off_map_count`` is a ratchet count (``ratchet.json``: ``corpus_off_blueprint``), and so is the
+number of ``islands`` of the proved blueprint (``blueprint_islands``); the docs site
 draws the whole picture as the program tree (``tree.html``, ``tree_data``).
 
     python3 -m tools.verify.program_tree decl-index.json            # summary by area
@@ -157,17 +158,53 @@ def load_frontier(path: Path = FRONTIER_TOML) -> list[dict]:
     return tomllib.loads(path.read_text(encoding="utf-8")).get("node", []) if path.exists() else []
 
 
+def islands(nodes: list[dict]) -> list[list[str]]:
+    """The proved blueprint's connected components other than the one holding Brownian motion.
+
+    Proved and upstream nodes are joined by their recorded uses, in either direction. A node in an
+    island is proved, but no recorded edge ties it to the rest of the program: the tree draws it
+    beside the trunk. The count is a ratchet (``ratchet.json``: ``blueprint_islands``); a shared
+    object or a bridge theorem, tagged, joins an island to the tree."""
+    wood = {n["label"] for n in nodes if n.get("leanOk", True)}
+    parent = {label: label for label in wood}
+
+    def find(x: str) -> str:
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    for n in nodes:
+        if n["label"] in wood:
+            for u in n.get("uses", ()):
+                if u in wood:
+                    parent[find(n["label"])] = find(u)
+    comps: dict[str, list[str]] = defaultdict(list)
+    for label in sorted(wood):
+        comps[find(label)].append(label)
+    main = find("def:brownian-motion") if "def:brownian-motion" in wood else max(
+        comps, key=lambda k: len(comps[k]), default=None)
+    return sorted((c for k, c in comps.items() if k != main), key=lambda c: (-len(c), c))
+
+
 def off_map_count(index_path: str | Path) -> int:
     """The ratchet count: corpus entries that cite MathFin but sit off the program map."""
     places = place_corpus(DeclIndex.load(index_path), load_nodes())
     return sum(p.kind == "off-map" for p in places)
 
 
-def _plain(text: str) -> str:
-    """Node prose for a tooltip: TeX delimiters and spacing commands dropped."""
-    for a, b in (("$", ""), (r"\tfrac", ""), (r"\,", " "), (r"\mid", "|"), ("\n", " ")):
-        text = text.replace(a, b)
-    return " ".join(text.split())
+def _statement(text: str, limit: int = 480) -> str:
+    """Node prose for the side panel, TeX kept for the page to typeset.
+
+    Whitespace is collapsed; a cut at `limit` falls back to before an unclosed `$`, so the
+    page never receives half a formula."""
+    text = " ".join(text.split())
+    if len(text) <= limit:
+        return text
+    cut = text[:limit].rsplit(" ", 1)[0]
+    if cut.count("$") % 2:
+        cut = cut[:cut.rindex("$")].rstrip()
+    return cut + " …"
 
 
 def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
@@ -176,6 +213,7 @@ def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
     places = place_corpus(idx, nodes)
     nearest = Counter(p.nearest for p in places if p.nearest)
     named: dict[str, list[list]] = defaultdict(list)
+    open_problem: set[str] = set()  # nodes an open `open-problem` issue carries
     for i in issues or ():
         from .blueprint_issues import named_nodes
 
@@ -183,6 +221,8 @@ def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
             status = [x.split(":", 1)[1] for x in i.get("labels", ()) if x.startswith("status:")]
             named[label].append([i["number"], i["state"][0], int(bool(i.get("is_pr"))),
                                  i["title"][:120], status[:1]])
+            if i["state"][0] == "o" and "open-problem" in i.get("labels", ()):
+                open_problem.add(label)
     out_nodes = []
     for n in nodes:
         status = ("upstream" if not n.get("module", "").startswith("MathFin")
@@ -190,13 +230,13 @@ def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
         out_nodes.append(dict(
             l=n["label"], t=n.get("title") or n["label"], s=status, u=n.get("uses", []),
             a=area_of_module(n.get("module", "")) if status != "upstream" else "upstream",
-            x=_plain(n.get("text", ""))[:480], d=n.get("name"), m=n.get("module"),
+            x=_statement(n.get("text", "")), d=n.get("name"), m=n.get("module"),
             e=nearest.get(n["label"], 0), i=named.get(n["label"], [])))
     for f in frontier:
         out_nodes.append(dict(
             l=f["label"], t=f["title"], s="frontier", u=f.get("uses", []), a=f.get("area", ""),
             x=f.get("statement", ""), ground=f.get("ground", ""), core=f.get("core", []),
-            e=0, i=named.get(f["label"], [])))
+            e=0, i=named.get(f["label"], []), op=int(f["label"] in open_problem)))
     by_area: dict[str, Counter] = defaultdict(Counter)
     off: dict[str, list[list[str]]] = defaultdict(list)
     for p in places:

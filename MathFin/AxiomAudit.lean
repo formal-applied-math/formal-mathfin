@@ -2443,9 +2443,9 @@ bounded-coefficient process class. -/
 #guard_msgs in
 #print axioms MathFin.compoundPoisson_mgf
 
-/-- info: 'MathFin.portfolioVariance_le_of_lagrangian_FOC' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.portfolioVarN_le_of_lagrangian_FOC' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
-#print axioms MathFin.portfolioVariance_le_of_lagrangian_FOC
+#print axioms MathFin.portfolioVarN_le_of_lagrangian_FOC
 
 /-- info: 'MathFin.isRiskParity_of_uniform_log_barrier_FOC' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
@@ -2506,5 +2506,95 @@ bounded-coefficient process class. -/
 /-- info: 'MathFin.isLeast_rockafellarUryasev_compoundPoisson' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.isLeast_rockafellarUryasev_compoundPoisson
+
+/-! ## Shared objects and bridges -/
+
+/-- info: 'MathFin.gbmValue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.gbmValue
+
+/-- info: 'MathFin.FeynmanKacHeatEquation.feynmanU' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.FeynmanKacHeatEquation.feynmanU
+
+/-- info: 'MathFin.martingaleTransform' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.martingaleTransform
+
+/-- info: 'MathFin.pathCylinder' does not depend on any axioms -/
+#guard_msgs in
+#print axioms MathFin.pathCylinder
+
+/-- info: 'MathFin.BSCallHyp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.BSCallHyp
+
+/-- info: 'MathFin.marginalVariance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.marginalVariance
+
+/-- info: 'MathFin.numeraireMeasure_isEquivProbMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.numeraireMeasure_isEquivProbMeasure
+
+/-- info: 'MathFin.StochasticFubini.stochFubini_ito' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.StochasticFubini.stochFubini_ito
+
+/-- info: 'MathFin.BlackScholes.AmericanPut.Stopping.tendsto_brownianUsualExerciseBoundary_expiry' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.BlackScholes.AmericanPut.Stopping.tendsto_brownianUsualExerciseBoundary_expiry
+
+/-- info: 'MathFin.JumpDiffusionHyp.call_eq_integral_bsV' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.JumpDiffusionHyp.call_eq_integral_bsV
+
+/-- info: 'MathFin.Contracts.valueDisc_caplet_black76' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Contracts.valueDisc_caplet_black76
+
+/-- info: 'MathFin.Contracts.pathPV_fixedFlows_zcb' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Contracts.pathPV_fixedFlows_zcb
+
+/-- info: 'MathFin.binomialPrice_replication' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.binomialPrice_replication
+
+/-- info: 'MathFin.valueAtRisk_portfolio_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.valueAtRisk_portfolio_gaussian
+
+/-- info: 'MathFin.variance_le_of_lagrangian_FOC' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.variance_le_of_lagrangian_FOC
+
+/-- info: 'MathFin.tendsto_oneFactorLossFraction_ae' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.tendsto_oneFactorLossFraction_ae
+
+/-- info: 'MathFin.oneFactor_measureReal_iInter_default_eq_gaussianFactorCopula' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.oneFactor_measureReal_iInter_default_eq_gaussianFactorCopula
+
+/-- info: 'MathFin.integral_discounted_v3PositionValue_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.integral_discounted_v3PositionValue_le
+
+/-- info: 'MathFin.CAPM_from_market_equilibrium' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.CAPM_from_market_equilibrium
+
+/-- info: 'MathFin.isTangentPortfolioN_and_portfolioVarN_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.isTangentPortfolioN_and_portfolioVarN_le
+
+/-- info: 'MathFin.portfolioVarN_minVarWeightTwo_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.portfolioVarN_minVarWeightTwo_le
 
 end MathFin.AxiomAudit

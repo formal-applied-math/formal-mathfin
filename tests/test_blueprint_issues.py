@@ -112,3 +112,19 @@ def test_rendered_blueprint_is_current() -> None:
         n.setdefault("title", None)
     block = f"{br.BEGIN}\n{br.render(raw, bi.load_frontier(REPO / bi.FRONTIER_TOML))}\n{br.END}"
     assert block in md, "docs/blueprint.md is stale: run `python3 tools/blueprint_render.py`"
+
+
+def test_islands_are_components_apart_from_brownian_motion() -> None:
+    from tools.verify.program_tree import islands
+
+    nodes = [
+        {"label": "def:brownian-motion", "uses": []},
+        {"label": "thm:a", "uses": ["def:brownian-motion"]},
+        {"label": "def:b", "uses": []},
+        {"label": "thm:c", "uses": ["def:b"]},
+        {"label": "thm:d", "uses": [], "leanOk": False},
+        {"label": "thm:e", "uses": ["def:b", "thm:a"]},
+        {"label": "def:f", "uses": []},
+    ]
+    assert islands(nodes) == [["def:f"]]
+    assert islands(nodes[:4]) == [["def:b", "thm:c"]]

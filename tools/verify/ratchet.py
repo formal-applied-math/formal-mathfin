@@ -37,6 +37,8 @@ _WHOLE_MATHLIB = re.compile(r"^(?:public\s+)?import\s+Mathlib\s*$", re.M)
 
 
 def source_metrics() -> dict[str, int]:
+    from .program_tree import islands, load_nodes
+
     heartbeats = whole = long_files = long_lines = 0
     for p in library.modules():  # aggregators: size and imports are their job
         src = p.read_text(encoding="utf-8")
@@ -52,6 +54,8 @@ def source_metrics() -> dict[str, int]:
         "long_files": long_files,
         "long_lines": long_lines,
         "nolints": nolints,
+        # proved blueprint nodes no recorded edge ties to the main tree (tools/verify/program_tree.py)
+        "blueprint_islands": len(islands(load_nodes())),
     } | doc_standard.coverage(doc_standard.all_docs())
 
 

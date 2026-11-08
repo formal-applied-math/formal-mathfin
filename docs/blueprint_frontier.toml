@@ -163,7 +163,7 @@ area = "credit"
 label = "thm:large-pool-loss"
 title = "Large homogeneous pool loss law"
 statement = "The Vasicek large-pool loss distribution and CDO tranche expected loss."
-uses = ["thm:one-factor-copula-default", "def:gaussian-factor-copula", "def:standard-normal-cdf"]
+uses = ["thm:one-factor-copula-default", "def:gaussian-factor-copula", "def:standard-normal-cdf", "thm:large-portfolio-limit"]
 core = ["mf-lhp-stop-loss-closed-form"]
 area = "credit"
 
@@ -178,7 +178,7 @@ area = "credit"
 label = "thm:one-factor-copula-default"
 title = "One-factor Gaussian copula default"
 statement = "Conditional default probability p(M)=Φ((c-√ρM)/√(1-ρ)) with a joint law, heterogeneous thresholds, recovery and migration."
-uses = ["def:gaussian-factor-copula", "def:standard-normal-cdf"]
+uses = ["def:gaussian-factor-copula", "def:standard-normal-cdf", "thm:one-factor-joint-default"]
 core = ["mf-one-factor-copula-joint-default"]
 area = "credit"
 
@@ -611,7 +611,7 @@ area = "stoch-vol"
 label = "thm:dupire-local-vol"
 title = "Dupire local volatility"
 statement = "The local volatility is determined by call prices via σ²=(∂_T C+rK∂_K C)/(½K²∂²_K C)."
-uses = ["thm:bs-pde", "thm:feynman-kac-variable-coefficient"]
+uses = ["thm:bs-pde", "thm:feynman-kac-variable-coefficient", "thm:dupire-zero-rates"]
 core = ["mf-dupire-local-vol"]
 area = "stoch-vol"
 

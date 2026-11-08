@@ -3115,6 +3115,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.portfolioVarN_equal_weights_iid
 
+/-- info: 'MathFin.portfolioVarN_le_of_lagrangian_FOC' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.portfolioVarN_le_of_lagrangian_FOC
+
 /-- info: 'MathFin.portfolioVarN_smul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.portfolioVarN_smul
@@ -3138,10 +3142,6 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.portfolioVarTwo_ge_min' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.portfolioVarTwo_ge_min
-
-/-- info: 'MathFin.portfolioVariance_le_of_lagrangian_FOC' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.portfolioVariance_le_of_lagrangian_FOC
 
 /-- info: 'MathFin.posSemidef_equicorrelationMatrix_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
