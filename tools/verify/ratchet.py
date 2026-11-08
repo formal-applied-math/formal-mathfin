@@ -25,7 +25,7 @@ import json
 import re
 from pathlib import Path
 
-from . import doc_standard, library
+from . import doc_standard, library, trunk_reach
 from .mathfin_index import strip_comments
 
 RATCHET_FILE = Path("ratchet.json")
@@ -37,6 +37,8 @@ _WHOLE_MATHLIB = re.compile(r"^(?:public\s+)?import\s+Mathlib\s*$", re.M)
 
 
 def source_metrics() -> dict[str, int]:
+    from .program_tree import islands, load_nodes
+
     heartbeats = whole = long_files = long_lines = 0
     for p in library.modules():  # aggregators: size and imports are their job
         src = p.read_text(encoding="utf-8")
@@ -52,17 +54,24 @@ def source_metrics() -> dict[str, int]:
         "long_files": long_files,
         "long_lines": long_lines,
         "nolints": nolints,
+        # proved blueprint nodes no recorded edge ties to the main tree (tools/verify/program_tree.py)
+        "blueprint_islands": len(islands(load_nodes())),
     } | doc_standard.coverage(doc_standard.all_docs())
 
 
 def index_metrics(index_path: str | Path) -> dict[str, int]:
     from .decl_index import DeclIndex
 
+    from .program_tree import load_nodes, place_corpus
+
     idx = DeclIndex.load(index_path)
     return {
         "private_mathlib_shaped": len(idx.mathlib_shaped_private()),
         "duplicate_statements": sum(len(g) - 1 for g in idx.duplicate_statements()),
-    }
+        # corpus entries in no relation the program map records (tools/verify/program_tree.py)
+        "corpus_off_blueprint": sum(p.kind == "off-map"
+                                    for p in place_corpus(idx, load_nodes())),
+    } | {k: len(v) for k, v in trunk_reach.offenders(idx).items()}  # the one-trunk counts
 
 
 def load_baseline() -> dict[str, int]:

@@ -952,7 +952,7 @@
       "domain": "mathematical_finance",
       "description": "For a positive semidefinite covariance matrix Σ, a portfolio w with budget ∑ wᵢ = 1, target return ∑ wᵢ μᵢ = m and Lagrangian first-order condition (Σw)ᵢ = λ₁ + λ₂ μᵢ for every asset has variance wᵀΣw no larger than that of any portfolio meeting the same two constraints. Sufficiency only: that every minimum-variance portfolio satisfies the first-order condition is not proved.",
       "code": {
-        "lean": "import MathFin.Portfolio.MarkowitzLagrangian\n\nopen MathFin\n\n/-- **The Lagrangian FOC is sufficient for minimum variance.** For positive semidefinite `Sg`,\na portfolio `w` meeting the budget and the return target with `(Sg w)ᵢ = λ₁ + λ₂ μᵢ` has\nvariance at most that of every portfolio `v` meeting the same constraints. -/\ntheorem markowitz_lagrangian_sufficient_thm {ι : Type*} [Fintype ι] {Sg : Matrix ι ι ℝ}\n    (hSg : Sg.PosSemidef) {μ w : ι → ℝ} {m lam₁ lam₂ : ℝ}\n    (hw₁ : ∑ i, w i = 1) (hwμ : portfolioReturn Finset.univ w μ = m)\n    (h_FOC : ∀ i, marginalVariance Finset.univ Sg w i = lam₁ + lam₂ * μ i)\n    {v : ι → ℝ} (hv₁ : ∑ i, v i = 1) (hvμ : portfolioReturn Finset.univ v μ = m) :\n    portfolioVariance Finset.univ Sg w ≤ portfolioVariance Finset.univ Sg v :=\n  MathFin.portfolioVariance_le_of_lagrangian_FOC hSg hw₁ hwμ h_FOC hv₁ hvμ\n"
+        "lean": "import MathFin.Portfolio.MarkowitzLagrangian\n\nopen MathFin\n\n/-- **The Lagrangian FOC is sufficient for minimum variance.** For positive semidefinite `Sg`,\na portfolio `w` meeting the budget and the return target with `(Sg w)ᵢ = λ₁ + λ₂ μᵢ` has\nvariance at most that of every portfolio `v` meeting the same constraints. -/\ntheorem markowitz_lagrangian_sufficient_thm {ι : Type*} [Fintype ι] {Sg : Matrix ι ι ℝ}\n    (hSg : Sg.PosSemidef) {μ w : ι → ℝ} {m lam₁ lam₂ : ℝ}\n    (hw₁ : ∑ i, w i = 1) (hwμ : portfolioReturn Finset.univ w μ = m)\n    (h_FOC : ∀ i, marginalVariance Finset.univ Sg w i = lam₁ + lam₂ * μ i)\n    {v : ι → ℝ} (hv₁ : ∑ i, v i = 1) (hvμ : portfolioReturn Finset.univ v μ = m) :\n    portfolioVarN Finset.univ w Sg ≤ portfolioVarN Finset.univ v Sg :=\n  MathFin.portfolioVarN_le_of_lagrangian_FOC hSg hw₁ hwμ h_FOC hv₁ hvμ\n"
       },
       "metadata": {
         "chapter": 11,
@@ -969,7 +969,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.portfolioVariance_le_of_lagrangian_FOC (MathFin/Portfolio/MarkowitzLagrangian.lean), proved as an instance of the KKT sufficiency theorem kkt_sufficient_of_eq (MathFin/Portfolio/ConvexQPKKT.lean) for the QP min ½ wᵀΣw with the equality constraints 1·w = 1, μ·w = m. SCOPE: sufficiency of the first-order condition for a global minimum among feasible portfolios; positive semidefiniteness of Σ is a hypothesis; necessity (every minimiser satisfies the FOC) and the closed-form frontier are not proved."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.portfolioVarN_le_of_lagrangian_FOC (MathFin/Portfolio/MarkowitzLagrangian.lean), proved as an instance of the KKT sufficiency theorem kkt_sufficient_of_eq (MathFin/Portfolio/ConvexQPKKT.lean) for the QP min ½ wᵀΣw with the equality constraints 1·w = 1, μ·w = m. SCOPE: sufficiency of the first-order condition for a global minimum among feasible portfolios; positive semidefiniteness of Σ is a hypothesis; necessity (every minimiser satisfies the FOC) and the closed-form frontier are not proved."
       }
     },
     {
@@ -994,7 +994,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.variance_le_of_lagrangian_FOC (MathFin/Portfolio/MarkowitzLagrangian.lean): posSemidef_covariance derives Matrix.PosSemidef of the covariance matrix from covariance_kernel_psd (MathFin/Portfolio/CovariancePSD.lean), portfolioVarN_covariance_eq_variance identifies the quadratic form with Var[∑ wᵢ Rᵢ], and portfolioVariance_le_of_lagrangian_FOC (KKT sufficiency) gives the inequality. SCOPE: sufficiency only; the means μ are given numbers (not required to be E[Rᵢ]); square-integrability on a finite measure is assumed."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.variance_le_of_lagrangian_FOC (MathFin/Portfolio/MarkowitzLagrangian.lean): posSemidef_covariance derives Matrix.PosSemidef of the covariance matrix from covariance_kernel_psd (MathFin/Portfolio/CovariancePSD.lean), portfolioVarN_covariance_eq_variance identifies the quadratic form with Var[∑ wᵢ Rᵢ], and portfolioVarN_le_of_lagrangian_FOC (KKT sufficiency) gives the inequality. SCOPE: sufficiency only; the means μ are given numbers (not required to be E[Rᵢ]); square-integrability on a finite measure is assumed."
       }
     },
     {

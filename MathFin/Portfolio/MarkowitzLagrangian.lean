@@ -67,15 +67,18 @@ that polynomial in `t` (no derivative statement is proved).
   the variance objective as a self-dot, and the explicit linear coefficient
   `(Σw) · δw` of a perturbation of `(1/2) wᵀΣw` for symmetric `Σ` — the
   directional-derivative content underlying the FOC.
-* `portfolioVariance_le_of_lagrangian_FOC`: for positive semidefinite `Σ`, a portfolio
+* `portfolioVarN_le_of_lagrangian_FOC`: for positive semidefinite `Σ`, a portfolio
   meeting both constraints and the Lagrangian FOC has the least variance among all
   portfolios meeting the same constraints — the KKT sufficiency theorem
   `kkt_sufficient_of_eq` (`Portfolio/ConvexQPKKT.lean`) for the QP `min ½ wᵀΣw`.
 * `posSemidef_covariance`, `variance_le_of_lagrangian_FOC`: the same for the covariance
   matrix of square-integrable random returns, whose positive semidefiniteness is derived
   (`covariance_kernel_psd`), stated for the variance of the portfolio return itself.
-* Two assets: `portfolioVariance_covTwo` and `portfolioVarTwo_eq_variance` identify the closed form
-  `portfolioVarTwo` (`Portfolio/Markowitz.lean`) with this file's `portfolioVariance` and with
+* `isTangentPortfolioN_and_portfolioVarN_le`: a portfolio with `Σw = λ(μ − r_f)` is a tangent
+  portfolio and has the least variance at its budget and expected return.
+* `portfolioVarN_minVarWeightTwo_le`: the closed-form two-asset weight minimises `portfolioVarN`.
+* Two assets: `portfolioVarN_covTwo` and `portfolioVarTwo_eq_variance` identify the closed form
+  `portfolioVarTwo` (`Portfolio/Markowitz.lean`) with the quadratic form `portfolioVarN` and with
   `Var[w R₁ + (1 − w) R₂]`; `marginalVariance_minVarWeightTwo` shows that at the minimum-variance
   weight each asset's marginal variance equals `V_min` (for `D ≠ 0`), so
   (`isConstrainedVarianceCriticalPoint_minVarWeightTwo`) that weight satisfies the budget-only
@@ -135,7 +138,7 @@ asset `i ∈ s`, then `w` is a constrained-variance critical point.
 The "Lagrangian FOC" `Σw = lam_1 · 1 + lam_2 · μ` is the textbook
 characterisation of efficient portfolios. Only this direction (FOC ⟹ critical
 point) is proved here, together with FOC ⟹ global minimum for positive
-semidefinite `Σ` (`portfolioVariance_le_of_lagrangian_FOC`); that every
+semidefinite `Σ` (`portfolioVarN_le_of_lagrangian_FOC`); that every
 variance-minimising portfolio satisfies the FOC is not proved.
 
 Proof: substitute the FOC into the directional-derivative sum and use the
@@ -171,10 +174,9 @@ This is the same self-dot identity used in `Portfolio/SharpeFOCDerivation.lean`,
 restated for N assets. -/
 lemma variance_objective_eq_self_dot
     {ι : Type*} (s : Finset ι) (Sg : ι → ι → ℝ) (w : ι → ℝ) :
-    (1 / 2 : ℝ) * portfolioVariance s Sg w =
+    (1 / 2 : ℝ) * portfolioVarN s w Sg =
       (1 / 2 : ℝ) * ∑ i ∈ s, w i * marginalVariance s Sg w i := by
-  unfold portfolioVariance
-  rfl
+  rw [portfolioVarN_eq_sum_mul_marginalVariance]
 
 /-- **Directional derivative of the variance objective at `w` in direction
 `δw`**, for *symmetric* `Sg`:
@@ -249,8 +251,9 @@ lemma marginalVariance_univ (Sg : Matrix ι ι ℝ) (w : ι → ℝ) :
     marginalVariance Finset.univ Sg w = Sg *ᵥ w := rfl
 
 /-- On a finite asset set the portfolio variance is the quadratic form `w ⬝ᵥ (Σ *ᵥ w)`. -/
-lemma portfolioVariance_univ (Sg : Matrix ι ι ℝ) (w : ι → ℝ) :
-    portfolioVariance Finset.univ Sg w = w ⬝ᵥ (Sg *ᵥ w) := rfl
+lemma portfolioVarN_univ (Sg : Matrix ι ι ℝ) (w : ι → ℝ) :
+    portfolioVarN Finset.univ w Sg = w ⬝ᵥ (Sg *ᵥ w) :=
+  portfolioVarN_eq_sum_mul_marginalVariance Finset.univ Sg w
 
 /-- **The Lagrangian FOC is sufficient for minimum variance.** Let `Σ` be positive
 semidefinite and let `w` meet the budget `∑ wᵢ = 1` and the return target `∑ wᵢ μᵢ = m`.
@@ -260,12 +263,12 @@ portfolios meeting the same two constraints.
 This is `kkt_sufficient_of_eq` for the QP `min ½ wᵀΣw` with the equality constraints
 `1 ⬝ᵥ w = 1`, `μ ⬝ᵥ w = m` and multipliers `(λ₁, λ₂)`. Only sufficiency is proved: that
 every minimiser satisfies the FOC is not. -/
-theorem portfolioVariance_le_of_lagrangian_FOC {Sg : Matrix ι ι ℝ} (hSg : Sg.PosSemidef)
+theorem portfolioVarN_le_of_lagrangian_FOC {Sg : Matrix ι ι ℝ} (hSg : Sg.PosSemidef)
     {μ w : ι → ℝ} {m lam₁ lam₂ : ℝ}
     (hw₁ : ∑ i, w i = 1) (hwμ : portfolioReturn Finset.univ w μ = m)
     (h_FOC : ∀ i, marginalVariance Finset.univ Sg w i = lam₁ + lam₂ * μ i)
     {v : ι → ℝ} (hv₁ : ∑ i, v i = 1) (hvμ : portfolioReturn Finset.univ v μ = m) :
-    portfolioVariance Finset.univ Sg w ≤ portfolioVariance Finset.univ Sg v := by
+    portfolioVarN Finset.univ w Sg ≤ portfolioVarN Finset.univ v Sg := by
   have hfeas (x : ι → ℝ) (h₁ : ∑ i, x i = 1) (hμ : portfolioReturn Finset.univ x μ = m) :
       ∀ k, ![fun _ ↦ (1 : ℝ), μ] k ⬝ᵥ x = ![1, m] k := by
     intro k
@@ -278,7 +281,7 @@ theorem portfolioVariance_le_of_lagrangian_FOC {Sg : Matrix ι ι ℝ} (hSg : Sg
     simp [Finset.sum_apply, Fin.sum_univ_two, h_FOC]
   have key := kkt_sufficient_of_eq hSg (hfeas w hw₁ hwμ) hstat v (hfeas v hv₁ hvμ)
   simp only [qpObj, zero_dotProduct, zero_add] at key
-  rw [portfolioVariance_univ, portfolioVariance_univ]
+  rw [portfolioVarN_univ, portfolioVarN_univ]
   linarith
 
 omit [Fintype ι] in
@@ -300,7 +303,7 @@ theorem posSemidef_covariance [Finite ι] {Ω : Type*} {mΩ : MeasurableSpace Ω
 meeting the budget and the return target whose covariances with the assets satisfy the
 Lagrangian FOC `∑ⱼ cov(Rᵢ, Rⱼ) wⱼ = λ₁ + λ₂ μᵢ` minimises the variance of the portfolio
 return `∑ wᵢ Rᵢ` among all portfolios meeting the same constraints. The positive
-semidefiniteness that `portfolioVariance_le_of_lagrangian_FOC` needs is derived
+semidefiniteness that `portfolioVarN_le_of_lagrangian_FOC` needs is derived
 (`posSemidef_covariance`), not assumed. Sufficiency only. -/
 theorem variance_le_of_lagrangian_FOC {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
     [IsFiniteMeasure P] (R : ι → Ω → ℝ) (hR : ∀ i, MemLp (R i) 2 P)
@@ -312,10 +315,24 @@ theorem variance_le_of_lagrangian_FOC {Ω : Type*} {mΩ : MeasurableSpace Ω} {P
     Var[∑ i, w i • R i; P] ≤ Var[∑ i, v i • R i; P] := by
   have hR' : ∀ i ∈ Finset.univ, MemLp (R i) 2 P := fun i _ ↦ hR i
   rw [← portfolioVarN_covariance_eq_variance _ w R hR',
-    ← portfolioVarN_covariance_eq_variance _ v R hR',
-    ← portfolioVariance_eq_portfolioVarN, ← portfolioVariance_eq_portfolioVarN]
-  exact portfolioVariance_le_of_lagrangian_FOC (posSemidef_covariance R hR) hw₁ hwμ h_FOC
+    ← portfolioVarN_covariance_eq_variance _ v R hR']
+  exact portfolioVarN_le_of_lagrangian_FOC (posSemidef_covariance R hR) hw₁ hwμ h_FOC
     hv₁ hvμ
+
+/-- **The tangent portfolio is mean–variance efficient.** If `Σw = λ(μ − r_f)` and `∑ wᵢ = 1`,
+then `w` is a tangent portfolio, and it has the least variance among the portfolios with the same
+budget and expected return: the tangency condition is the Lagrangian condition with multipliers
+`(−λ r_f, λ)`. Positive semidefiniteness of `Σ` is a hypothesis. -/
+theorem isTangentPortfolioN_and_portfolioVarN_le {Sg : Matrix ι ι ℝ} (hSg : Sg.PosSemidef)
+    {μ w : ι → ℝ} {rf lam : ℝ} (hw₁ : ∑ i, w i = 1)
+    (h : ∀ i, marginalVariance Finset.univ Sg w i = lam * (μ i - rf)) :
+    IsTangentPortfolioN Finset.univ (fun i ↦ μ i - rf) Sg w ∧
+      ∀ v : ι → ℝ, ∑ i, v i = 1 →
+        portfolioReturn Finset.univ v μ = portfolioReturn Finset.univ w μ →
+        portfolioVarN Finset.univ w Sg ≤ portfolioVarN Finset.univ v Sg :=
+  ⟨isTangent_of_proportional _ _ _ _ lam fun i _ ↦ h i,
+    fun _ hv₁ hvμ ↦ portfolioVarN_le_of_lagrangian_FOC (lam₁ := -(lam * rf)) (lam₂ := lam)
+      hSg hw₁ rfl (fun i ↦ by rw [h i]; ring) hv₁ hvμ⟩
 
 end Global
 
@@ -325,11 +342,11 @@ section TwoAsset
 
 open Matrix MeasureTheory ProbabilityTheory
 
-/-- The two-asset `portfolioVariance` with the covariance matrix `covTwo` and weights
+/-- The two-asset `portfolioVarN` with the covariance matrix `covTwo` and weights
 `(w, 1 − w)` is the closed form `portfolioVarTwo` of `Portfolio/Markowitz.lean`. -/
-lemma portfolioVariance_covTwo (σ₁ σ₂ ρ w : ℝ) :
-    portfolioVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] = portfolioVarTwo σ₁ σ₂ ρ w := by
-  rw [portfolioVariance_univ, portfolioVarTwo_eq_dotProduct]
+lemma portfolioVarN_covTwo (σ₁ σ₂ ρ w : ℝ) :
+    portfolioVarN Finset.univ ![w, 1 - w] (covTwo σ₁ σ₂ ρ) = portfolioVarTwo σ₁ σ₂ ρ w := by
+  rw [portfolioVarN_univ, portfolioVarTwo_eq_dotProduct]
 
 /-- **The two-asset variance formula is the variance of the portfolio return.** For
 square-integrable returns with `Var[R₁] = σ₁²`, `Var[R₂] = σ₂²` and `cov[R₁, R₂] = ρσ₁σ₂`,
@@ -388,6 +405,15 @@ theorem isConstrainedVarianceCriticalPoint_minVarWeightTwo {σ₁ σ₂ ρ : ℝ
       ![minVarWeightTwo σ₁ σ₂ ρ, 1 - minVarWeightTwo σ₁ σ₂ ρ] :=
   isCriticalPoint_of_lagrangian_FOC _ _ 0 _ (minPortfolioVarTwo σ₁ σ₂ ρ) 0 fun i _ ↦ by
     rw [marginalVariance_minVarWeightTwo hD, zero_mul, add_zero]
+
+/-- **The closed-form two-asset weight minimises the portfolio variance.** When
+`D = σ₁² − 2ρσ₁σ₂ + σ₂² > 0`, the weights `(w*, 1 − w*)` have the least `portfolioVarN` under
+`covTwo` among all two-asset budgets `(w, 1 − w)`. -/
+theorem portfolioVarN_minVarWeightTwo_le {σ₁ σ₂ ρ : ℝ} (hD : 0 < minVarDenom σ₁ σ₂ ρ) (w : ℝ) :
+    portfolioVarN Finset.univ ![minVarWeightTwo σ₁ σ₂ ρ, 1 - minVarWeightTwo σ₁ σ₂ ρ]
+        (covTwo σ₁ σ₂ ρ) ≤ portfolioVarN Finset.univ ![w, 1 - w] (covTwo σ₁ σ₂ ρ) := by
+  rw [portfolioVarN_covTwo, portfolioVarN_covTwo, portfolioVarTwo_at_minVarWeight hD.ne']
+  exact portfolioVarTwo_ge_min hD w
 
 end TwoAsset
 

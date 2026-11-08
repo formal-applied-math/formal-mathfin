@@ -97,7 +97,8 @@ searches it, `decl_diff.py` diffs two of them (renames, changed statements — p
 PR's run summary), `decl_index.py report` lists duplicate statements and Mathlib-shaped
 private lemmas. `ratchet.json` holds one baseline per debt count (heartbeat bumps,
 whole-`Mathlib` imports, long files, nolints, doc-section coverage, and the index's
-duplicates and Mathlib-shaped privates): `tests/test_ratchet.py` and `build.yml` fail when a
+duplicates and Mathlib-shaped privates, and the one-trunk counts of `tools/verify/trunk_reach.py`,
+whose table is `tools/verify/trunk.toml`): `tests/test_ratchet.py` and `build.yml` fail when a
 count rises; `python3 -m tools.verify.ratchet update` lowers a baseline and never raises one.
 **One doc standard** (`tools/verify/doc_standard.py`, gated in `test_values`): every module
 docstring has Mathlib's layout — `# Title`, `## Main definitions` / `## Main results`,
@@ -117,7 +118,20 @@ math issue (`type:proof`, `type:research`, `open-problem`, `frontier`) carries a
 frontier entry in `docs/blueprint_frontier.toml` first; a PR delivering a frontier node tags
 the declaration in `MathFin/Blueprint.lean` under the same label and deletes the entry.
 `python3 -m tools.verify.blueprint_issues check` (build.yml, blueprint-sync.yml) holds both
-directions.
+directions. Every frontier node grows from the proved blueprint: its `uses` reach a Lean-tagged
+node (through other frontier nodes if need be), or its `ground` field says what Mathlib material
+it builds on; a `core` field lists the corpus entries that already prove part of it.
+**The corpus sits on the map** (`tools/verify/program_tree.py`): an entry rests on a node when its
+proof's citations depend on the node's declaration. The program's central objects are nodes too
+(`def:quantile`, `def:emm`, `def:contract-value`, …), since most entries reach the library through
+them. The count of entries off the map is a ratchet (`corpus_off_blueprint`); the docs site draws
+the whole picture as the program tree (`tree.html`). A new area or object the corpus builds on gets
+a blueprint node. The proved blueprint is one tree: `program_tree.islands` lists the proved nodes no
+recorded edge ties to the component holding Brownian motion, and their count is a ratchet
+(`blueprint_islands`). A tagged node joins the tree through a shared object its proof uses or a
+bridge theorem that uses it, never through prose (2026-11-07: tagging objects and anchors left 34
+islands, among them the EMM and the whole risk cluster; one duplicate, `portfolioVariance`, kept
+Markowitz off the portfolio node).
 `tests/test_architecture.py` keeps the library one graph: `Foundations/` imports only
 `Foundations/` (joins live in `Bridges/`), every module imports a library module or is
 imported by one, and every module is imported by another or cited by a corpus entry. A

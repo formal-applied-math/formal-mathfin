@@ -47,6 +47,7 @@ the corpus entry that forces it; see
 * `Payoff ι`: payoff formulas as data (constants, observations, `add`, `sub`, `mul`, `max`, `min`,
   `indicatorLt`, and `rpow` with an `ℝ≥0` exponent); `Payoff.eval` interprets one against a
   scenario.
+* `Payoff.obsList`: the `(underlying, date)` observations a payoff reads, found syntactically.
 * `Scenario.hitTime`: the first time the observed underlying `i` lies in `A`, as Mathlib's
   `hittingAfter` of the observed path.
 * `Contract ι`: contracts built from `zero`, `pay t amount`, `payAtHit i A amount`, `both` and
@@ -135,6 +136,16 @@ noncomputable def Payoff.eval (s : Scenario ι) : Payoff ι → ℝ
   | .min a b => Min.min (eval s a) (eval s b)
   | .indicatorLt a b => if eval s a < eval s b then 1 else 0
   | .rpow a p => eval s a ^ (p : ℝ)
+
+/-- The `(underlying, date)` observations a `Payoff` reads, found syntactically. An
+over-approximation: `Payoff.mul (.const 0) (.obs i t)` evaluates to `0` on every scenario, yet
+lists `(i, t)`. -/
+def Payoff.obsList : Payoff ι → List (ι × ℝ≥0)
+  | .const _ => []
+  | .obs i t => [(i, t)]
+  | .add a b | .sub a b | .mul a b | .max a b | .min a b | .indicatorLt a b =>
+      a.obsList ++ b.obsList
+  | .rpow a _ => a.obsList
 
 /-- The first time the observed underlying `i` of a scenario lies in `A`: Mathlib's
 `hittingAfter` of the process `u ↦ s i u` at time `0`, which is `⊤` if it never does. It is the

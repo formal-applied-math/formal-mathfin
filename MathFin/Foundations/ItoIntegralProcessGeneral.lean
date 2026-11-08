@@ -199,5 +199,38 @@ theorem itoIntegralProcessGen_l2_continuous (T : ℝ≥0) (hBmeas : ∀ u, Measu
     exact lt_of_le_of_lt (itoProcessCLM_norm_le hB T t hBmeas (φ - g n)) hn
   exact huniform.continuous (Filter.Eventually.of_forall hcont_n).frequently
 
+omit hB [IsProbabilityMeasure μ] in
+/-- **A `timeMeasure` integral over `(0, T]` is an interval integral over `[0, T]`.** For every
+`g : ℝ≥0 → ℝ`, `∫ s in Ioc 0 T, g s ∂timeMeasure = ∫ x in 0..T, g x.toNNReal`. Since
+`timeMeasure = Measure.comap ((↑) : ℝ≥0 → ℝ) volume`, this is a change of variables along the
+coercion (`MeasurableEmbedding.restrict_comap`, `.map_comap`, `.integral_map`) followed by
+`intervalIntegral.integral_of_le`, so it needs no measurability or integrability hypothesis. -/
+theorem timeMeasure_Ioc_eq_interval {g : ℝ≥0 → ℝ} (T : ℝ≥0) :
+    ∫ s in Set.Ioc 0 T, g s ∂timeMeasure = ∫ x in (0)..(T : ℝ), g (Real.toNNReal x) := by
+  have himg : ((↑) : ℝ≥0 → ℝ) '' Set.Ioc 0 T = Set.Ioc 0 (T : ℝ) := by
+    ext x
+    simp only [Set.mem_image, Set.mem_Ioc]
+    constructor
+    · rintro ⟨y, ⟨hy1, hy2⟩, rfl⟩
+      exact ⟨mod_cast hy1, mod_cast hy2⟩
+    · rintro ⟨hx1, hx2⟩
+      have hy : (Real.toNNReal x : ℝ) = x := Real.coe_toNNReal x hx1.le
+      exact ⟨Real.toNNReal x, ⟨Real.toNNReal_pos.2 hx1, NNReal.coe_le_coe.1 (hy.trans_le hx2)⟩, hy⟩
+  have hmap : Measure.map ((↑) : ℝ≥0 → ℝ) (timeMeasure.restrict (Set.Ioc 0 T))
+      = volume.restrict (((↑) : ℝ≥0 → ℝ) '' Set.Ioc 0 T) := by
+    rw [timeMeasure, MeasurableEmbedding.restrict_comap measurableEmbedding_nnrealCoe,
+      MeasurableEmbedding.map_comap measurableEmbedding_nnrealCoe,
+      Measure.restrict_restrict measurableEmbedding_nnrealCoe.measurableSet_range,
+      Set.inter_eq_right.2 (Set.image_subset_range _ _)]
+  calc ∫ s in Set.Ioc 0 T, g s ∂timeMeasure
+      = ∫ x, g (Real.toNNReal x) ∂(timeMeasure.restrict (Set.Ioc 0 T)) :=
+        integral_congr_ae (.of_forall fun x ↦ by simp only [Real.toNNReal_coe])
+    _ = ∫ y, g (Real.toNNReal y) ∂(Measure.map ((↑) : ℝ≥0 → ℝ)
+          (timeMeasure.restrict (Set.Ioc 0 T))) :=
+        (measurableEmbedding_nnrealCoe.integral_map fun y : ℝ ↦ g (Real.toNNReal y)).symm
+    _ = ∫ x in Set.Ioc 0 (T : ℝ), g (Real.toNNReal x) := by rw [hmap, himg]
+    _ = ∫ x in (0)..(T : ℝ), g (Real.toNNReal x) :=
+        (intervalIntegral.integral_of_le (NNReal.coe_nonneg T)).symm
+
 end ItoIntegralProcessGeneral
 end MathFin

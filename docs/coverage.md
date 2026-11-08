@@ -1671,6 +1671,7 @@ What is not covered:
 | `qrm-var-additive-linear-dependence` | For an a.e.-measurable loss X, α ∈ (0, 1), a ≥ 0 and b ∈ ℝ: VaR_α(X + (aX + b)) = VaR_α(X) + VaR_α(aX + b). | `MathFin/RiskMeasures/ValueAtRisk.lean`, `MathFin.valueAtRisk_add_affine` | `full` |
 | `qrm-gaussian-var-is-var` | For a loss X ~ N(m, v) and α ∈ (0, 1), VaR_α(X) = gaussianVaR m √v (Φ⁻¹(α)) = m + √v·Φ⁻¹(α): the library's quantile-parametrized Gaussian closed form is the value-at-risk of the law. | `MathFin/RiskMeasures/GaussianValueAtRisk.lean`, `MathFin.valueAtRisk_of_hasLaw_gaussianReal` | `full` |
 | `qrm-rockafellar-uryasev` | For an integrable loss X and α ∈ (0, 1), expected shortfall ES_α(X) = (1−α)⁻¹∫_α^1 VaR_u(X) du is the least value of c ↦ c + (1−α)⁻¹E[(X − c)⁺], and that value is attained (the minimizer c = VaR_α(X) is `rockafellarUryasev_valueAtRisk`). No continuity of the law is assumed. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.isLeast_rockafellarUryasev` | `full` |
+| `mf-compound-poisson-cvar` | For an aggregate loss L = ∑_{i<N} Xᵢ with claim count N ~ Poisson(λ) independent of identically distributed integrable claim sizes Xᵢ on a probability space: L is integrable; for α ∈ (0, 1), ES_α(L) is the least value of c ↦ c + (1−α)⁻¹E[(L − c)⁺] and equals VaR_α(L) + (1−α)⁻¹E[(L − VaR_α(L))⁺]; and E[(L − c)⁺] = ∫ n, E[(∑_{i<n} Xᵢ − c)⁺] d Poisson(λ) (the mixture over the claim count). | `MathFin/RiskMeasures/CompoundPoissonCVaR.lean`, `MathFin.integrable_compoundPoisson` | `full` |
 | `qrm-es-subadditive` | For integrable losses X, Y on one probability space and α ∈ (0, 1): ES_α(X + Y) ≤ ES_α(X) + ES_α(Y). | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_add_le` | `full` |
 | `qrm-es-coherent` | For α ∈ (0, 1), X ↦ ES_α(X) satisfies the four coherence axioms (monotonicity, translation invariance, positive homogeneity, subadditivity) on the integrable losses of any probability space. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_isCoherentRiskMeasure` | `full` |
 | `qrm-es-acerbi-tasche` | For an integrable loss X, α ∈ (0, 1) and q = VaR_α(X): ES_α(X) = (1−α)⁻¹(E[X·1{X > q}] + q·(1 − α − P(X > q))), the correction term accounting for an atom at q. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_eq_acerbiTasche` | `full` |
@@ -2177,9 +2178,9 @@ prior corpus audit, not a verification of this addition.
 > reifies a payoff as data — `Payoff ι` / `Contract ι` inductives over a **typed** underlying
 > index `ι` (`ι = Unit` for the single-asset instances below), not the inline lambda every other
 > payoff in the library is written as. `Adapted.lean` proves the reification pays for itself:
-> `Payoff.measurable_eval_of_obsTimes_le` is the adaptedness hypothesis a `Payoff` will need to
+> `Payoff.measurable_eval_of_obsList_le` is the adaptedness hypothesis a `Payoff` will need to
 > be a legitimate stochastic-integral integrand — `𝓕 u`-measurability follows from every
-> observation time in `obsTimes` (a syntactic, sufficient-not-necessary over-approximation)
+> observation date in `obsList` (a syntactic, sufficient-not-necessary over-approximation)
 > being `≤ u`; **it still has no consumer**, since `Pricing.lean` integrates against a fixed
 > measure, never a filtration. Its a.e.-measurable sibling `Payoff.aemeasurable_eval` does have
 > one as of 2026-08-19: `CappedCall.lean`'s `integrable_europeanCall_pathPV` calls it directly,
@@ -2205,7 +2206,7 @@ prior corpus audit, not a verification of this addition.
 > would silently attach the pricing result to whichever entry a reader opens first.
 >
 > **The honest ceiling, stated once for the whole tower.** `Payoff` is a finite inductive walked
-> by `List`-valued `obsTimes`, so every instance here is a payoff kernel over a **finite**
+> by `List`-valued `obsList`, so every instance here is a payoff kernel over a **finite**
 > observation grid — no continuously-monitored barrier is expressible. Rung (c) (the
 > `BlackScholes.lean`/`CappedCall.lean` reductions) is **single-asset**, `ι = Unit`, under the
 > `BSCallHyp` hypothesis bundle each closed form already needed; nothing here prices under a

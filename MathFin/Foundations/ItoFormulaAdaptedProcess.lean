@@ -245,10 +245,7 @@ theorem comp_time_localItoProcess_isStronglyPredictable {g : ℝ → ℝ → ℝ
     (hg : Continuous fun p : ℝ × ℝ ↦ g p.1 p.2) :
     IsStronglyPredictable (natFiltration hBmeas)
       fun s ω ↦ g s (localItoProcess (μ := μ) T hBmeas hadap hcont x₀ b s ω) := by
-  have ht : IsStronglyPredictable (natFiltration hBmeas) fun (s : ℝ≥0) (_ : Ω) ↦ (s : ℝ) :=
-    StronglyAdapted.isStronglyPredictable_of_leftContinuous (fun _ ↦ stronglyMeasurable_const)
-      fun _ _ ↦ NNReal.continuous_coe.continuousWithinAt
-  exact hg.comp_stronglyMeasurable (StronglyMeasurable.prodMk ht
+  exact hg.comp_stronglyMeasurable (StronglyMeasurable.prodMk (isStronglyPredictable_time hBmeas)
     (isStronglyPredictable_localItoProcess hB T hBmeas hBcont hadap hcont hb_adap hb_cont x₀))
 
 include hB hBcont hb_adap hb_cont in

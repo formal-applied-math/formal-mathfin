@@ -29,10 +29,10 @@
     {
       "id": "mf-contract-eval-adapted",
       "name": "A Payoff is Adapted to Its Observation Times",
-      "description": "Evaluating a Payoff against a filtration-adapted model X is F_u-measurable as soon as every observation time the payoff's syntax reads is <= u -- the adaptedness hypothesis a Payoff needs to be a legitimate pricing integrand. obsTimes is a syntactic over-approximation, so the theorem gives a sufficient, not necessary, adaptedness criterion.",
+      "description": "Evaluating a Payoff against a filtration-adapted model X is F_u-measurable as soon as every observation time the payoff's syntax reads is <= u -- the adaptedness hypothesis a Payoff needs to be a legitimate pricing integrand. obsList is a syntactic over-approximation, so the theorem gives a sufficient, not necessary, adaptedness criterion.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Contracts.Adapted\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {ι Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Evaluating a payoff against a filtration-adapted model is `𝓕 u`-measurable\nonce every observation time it reads is `≤ u`. -/\ntheorem measurable_eval_of_obsTimes_le' {𝓕 : Filtration ℝ≥0 mΩ} {u : ℝ≥0}\n    (e : Payoff ι) (X : ι → ℝ≥0 → Ω → ℝ)\n    (hX : ∀ i t, Measurable[𝓕 t] (X i t))\n    (hle : ∀ t ∈ e.obsTimes, t ≤ u) :\n    Measurable[𝓕 u] fun ω ↦ e.eval (fun i t ↦ X i t ω) :=\n  MathFin.Contracts.Payoff.measurable_eval_of_obsTimes_le e X hX hle\n"
+        "lean": "import MathFin.Contracts.Adapted\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {ι Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Evaluating a payoff against a filtration-adapted model is `𝓕 u`-measurable\nonce every observation time it reads is `≤ u`. -/\ntheorem measurable_eval_of_obsList_le' {𝓕 : Filtration ℝ≥0 mΩ} {u : ℝ≥0}\n    (e : Payoff ι) (X : ι → ℝ≥0 → Ω → ℝ)\n    (hX : ∀ i t, Measurable[𝓕 t] (X i t))\n    (hle : ∀ p ∈ e.obsList, p.2 ≤ u) :\n    Measurable[𝓕 u] fun ω ↦ e.eval (fun i t ↦ X i t ω) :=\n  MathFin.Contracts.Payoff.measurable_eval_of_obsList_le e X hX hle\n"
       },
       "metadata": {
         "chapter": 9,
@@ -48,7 +48,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Payoff.measurable_eval_of_obsTimes_le in MathFin/Contracts/Adapted.lean, by structural induction on the eight Payoff constructors (six of them binary), threading Measurable.add/.sub/.mul/.max/.min and Measurable.ite through Filtration.mono. obsTimes is computed syntactically by walking the payoff tree and is a deliberate over-approximation (e.g. mul (const 0) (obs i t) evaluates to 0 on every scenario yet obsTimes still lists t), so the theorem is a sufficient, not necessary, adaptedness criterion. Stated for a generic index type ι -- this lemma is not itself restricted to a single asset; the corpus's BlackScholes/CappedCall entries below instantiate ι = Unit for a single-asset market observed only at T. Payoff is a finite inductive, so any payoff kernel it can express is over a finite observation grid; the Payoff/Contract language has no calendar, business-day convention, market-disruption, corporate-action or issuer-credit node at any instantiation, so this is never a legal instrument and none of that content is claimed. Axioms-clean."
+        "formalization_scope": "Full formal proof. Payoff.measurable_eval_of_obsList_le in MathFin/Contracts/Adapted.lean, by structural induction on the eight Payoff constructors (six of them binary), threading Measurable.add/.sub/.mul/.max/.min and Measurable.ite through Filtration.mono. obsList is computed syntactically by walking the payoff tree and is a deliberate over-approximation (e.g. mul (const 0) (obs i t) evaluates to 0 on every scenario yet obsList still lists (i, t)), so the theorem is a sufficient, not necessary, adaptedness criterion. Stated for a generic index type ι -- this lemma is not itself restricted to a single asset; the corpus's BlackScholes/CappedCall entries below instantiate ι = Unit for a single-asset market observed only at T. Payoff is a finite inductive, so any payoff kernel it can express is over a finite observation grid; the Payoff/Contract language has no calendar, business-day convention, market-disruption, corporate-action or issuer-credit node at any instantiation, so this is never a legal instrument and none of that content is claimed. Axioms-clean."
       }
     },
     {
@@ -1646,6 +1646,281 @@
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. tendsto_value_cdsProtectionLeg_coxDefaultTime in MathFin/Contracts/Models/DefaultTimeMesh.lean: the value of the contract paying at the default time is Cox.protectionLeg (value_cdsProtectionAtDefault_coxDefaultTime, mf-contract-cds-protection-at-default), the grid protection leg is worth (1 - R) cdsLossesGrid (value_cdsProtectionLeg, with the Cox survival function), and the grid losses converge to Cox.cdsLosses (tendsto_cdsLossesGrid, mf-contract-cds-losses-mesh-limit; a Riemann-Stieltjes bound for the continuous discount against the continuous default density). SCOPE: a flat discount rate, a deterministic recovery R, grids monotone from 0 to T with steps at most delta_k -> 0, a continuous strictly positive hazard h. Only the protection leg: the premium leg has no contract paying at a random time in the tower (its continuous limit is a value, mf-contract-cds-mesh-convergence). Not a legal instrument. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-call-contract-hedge",
+      "name": "The Contract Value of the Call Is the Delta Hedge's Initial Capital",
+      "description": "Let B be a Brownian motion with continuous paths, T > 0, K, sigma, S_0 > 0, and T' < T. Along the Black-Scholes path S_u = S_0 exp((r - sigma^2/2) u + sigma B_u) (BlackScholes.pathAssets), almost surely and for all t in [0, T'] at once, the discounted call price e^{-rt} bsV K r sigma S_t (T - t) equals the value of the reified contract europeanCall K T (discount e^{-ru}) plus the predictable Ito integral on [0, T'] of the delta-hedge integrand sigma e^{-rs} S_s Phi(d_1(S_s, T - s)). So the contract's value is the initial capital of the delta hedge (the value is bsV K r sigma S_0 T by mf-bs-call-contract-value-pathassets). The same module also proves tendsto_hedge_europeanCall_payoff: along a path continuous at T the discounted call price tends, as t -> T from below, to the contract's discounted payoff (Contract.pathPV); that limit is not part of this statement. Stated on [0, T'] with T' < T. Not proved: that the hedge is an admissible self-financing strategy as a structure, or that the integral against B equals the integral of the delta against the discounted stock.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.BlackScholesHedge\n\nopen MeasureTheory ProbabilityTheory Real Filter Topology\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Along the Black-Scholes path the discounted call price is the value of `europeanCall K T`\nplus the gains of the delta hedge, on `[0, T']` for every `T' < T`. -/\ntheorem europeanCall_deltaHedge' {μ : Measure Ω} [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ}\n    (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω) {T : ℝ≥0} (hT : 0 < (T : ℝ))\n    {S_0 K r σ : ℝ} (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (T' : ℝ≥0) (hT' : T' < T) :\n    ∀ᵐ ω ∂μ, ∀ t ∈ Set.Icc (0 : ℝ≥0) T',\n      Real.exp (-(r * t)) * bsV K r σ (BlackScholes.pathAssets S_0 r σ B () t ω) (T - t)\n        = (europeanCall K T).value μ (fun u ↦ Real.exp (-r * u)) (BlackScholes.pathAssets S_0 r σ B)\n          + ItoIntegralLocalised.predItoIntegral (μ := μ) T' hBmeas\n            (deltaHedgeIntegrand_isStronglyPredictable hBmeas hBcont K r σ S_0 (T : ℝ)) t ω :=\n  BlackScholes.europeanCall_deltaHedge hB hBmeas hBcont hT hS₀ hK hσ T' hT'\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Delta hedging of the European call in the contract model (Black and Scholes 1973; Shreve, Stochastic Calculus for Finance II, 4.5). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "BlackScholes1973"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "4.5"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. europeanCall_deltaHedge in MathFin/Contracts/Models/BlackScholesHedge.lean rewrites the contract value with value_europeanCall_pathAssets (mf-bs-call-contract-value-pathassets) and applies bs_delta_hedge_replication (mf-bs-delta-hedge-replication) to the pathAssets path, which is gbmValue at the Brownian coordinate (pathAssets_eq_gbmValue, by rfl). SCOPE: the integral is predItoIntegral (horizon T') against B, the identity is on [0, T'] for T' < T, and the maturity limit is a separate theorem of the module (tendsto_hedge_europeanCall_payoff, the left limit of the discounted call price is the discounted payoff of the contract along any path continuous at T). There is no strategy structure and no admissibility or self-financing predicate. Not a legal instrument. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-call-contract-value-pathassets",
+      "name": "The Reified European Call Along the Black-Scholes Path Is Worth the Black-Scholes Price",
+      "description": "For a pre-Brownian motion B under a probability measure mu, a positive maturity T and S_0, K, sigma > 0, the value of the reified contract europeanCall K T along the Black-Scholes path S_u = S_0 exp((r - sigma^2/2) u + sigma B_u) with discount e^{-ru} is the Black-Scholes call price bsV K r sigma S_0 T, that is S_0 Phi(d_1) - K e^{-rT} Phi(d_2) written through bsV. The measure mu is the pricing measure: B is assumed pre-Brownian under it, no change of measure is constructed here (for the physical measure see mf-bs-physical-call). This is the value that mf-bs-call-contract-hedge identifies as the initial capital of the delta hedge.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.BlackScholesHedge\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The reified European call along the Black-Scholes path is worth `bsV K r σ S₀ T`. -/\ntheorem value_europeanCall_pathAssets' {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) {T : ℝ≥0} (hT : 0 < (T : ℝ))\n    {S_0 K r σ : ℝ} (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) :\n    (europeanCall K T).value μ (fun u ↦ Real.exp (-r * u)) (BlackScholes.pathAssets S_0 r σ B)\n      = bsV K r σ S_0 T :=\n  BlackScholes.value_europeanCall_pathAssets hB hT hS₀ hK hσ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-Scholes European call formula (Hull 15.6; Shreve, Stochastic Calculus for Finance II, 4.5) as the value of the reified call. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "BlackScholes1973"
+          },
+          {
+            "key": "Hull",
+            "locator": "15.6"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "4.5"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. value_europeanCall_pathAssets in MathFin/Contracts/Models/BlackScholesHedge.lean: Contract.value_pay unfolds the single cash flow, the path at the positive maturity is bsTerminal of the standardised Brownian value (pathAssets_eq_bsTerminal), BSCallHyp.of_isPreBrownian supplies the lognormal hypothesis, and bs_call_formula prices the leg; the result is rewritten to the closed form bsV. SCOPE: B pre-Brownian under mu (no path regularity), discount e^{-ru} flat, the contract is the single payoff max(S_T - K, 0) paid at T. Not a legal instrument. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-path-solves-sde",
+      "name": "The Black-Scholes Contract Path Solves dS = rS dt + sigma S dB",
+      "description": "For a pre-Brownian motion B under a probability measure, with every path continuous, and any horizon T, the geometric Brownian path of the contract model S_u = S_0 exp((r - sigma^2/2) u + sigma B_u) (BlackScholes.pathAssets) satisfies, almost surely and for all t in [0, T] at once, S_t = S_0 + int_0^t r S_s ds + I_t, where I is the library's predictable Ito integral predItoIntegral on [0, T] of the predictable integrand sigma S. So the path solves dS = rS dt + sigma S dB. Only the solution direction: that this path is the unique solution, or the fixed point of the Picard map of sc-sde-existence-any-horizon, is not proved; no connection to that theorem is made.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.BlackScholesSDE\n\nopen MeasureTheory ProbabilityTheory Set\nopen scoped NNReal\nopen MathFin MathFin.ItoIntegralL2 MathFin.ItoIntegralLocalised MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n  {B : ℝ≥0 → Ω → ℝ}\n\n/-- The Black-Scholes path satisfies `S_t = S₀ + ∫₀ᵗ r S_s ds + (∫ σ S dB)_t` on `[0, T]`. -/\ntheorem pathAssets_solves_sde' (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω) (T : ℝ≥0) (S_0 r σ : ℝ) :\n    ∀ᵐ ω ∂μ, ∀ t ∈ Icc (0 : ℝ≥0) T,\n      BlackScholes.pathAssets S_0 r σ B () t ω\n        = S_0 + ∫ s in Ioc 0 t, r * BlackScholes.pathAssets S_0 r σ B () s ω ∂timeMeasure\n          + predItoIntegral (μ := μ) T hBmeas\n            (BlackScholes.isStronglyPredictable_diffusion_pathAssets hBmeas hBcont S_0 r σ) t ω :=\n  BlackScholes.pathAssets_solves_sde hB hBmeas hBcont T S_0 r σ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Geometric Brownian motion as the strong solution of dS = rS dt + sigma S dB (Black and Scholes 1973; Shreve, Stochastic Calculus for Finance II, 4.4). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "BlackScholes1973"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "4.4"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
+        "difficulty": "research",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. pathAssets_solves_sde in MathFin/Contracts/Models/BlackScholesSDE.lean is Ito's formula as an identity of processes (ItoFormulaAdapted.ito_formula_adapted_unbounded_process) for the smooth value function gbmValue S_0 r sigma t x evaluated along the Brownian path (B is the Ito integral of 1, ae_localItoIntegral_one_eq): the drift f_t + (1/2) f_xx = (r - sigma^2/2) f + (1/2) sigma^2 f is r S and the x-derivative sigma f is the integrand, which is predictable (isStronglyPredictable_diffusion_pathAssets); ae_predItoIntegral_congr moves the integral to that integrand. SCOPE: existence of a solution only. The statement does not say this path is the only solution, and it is not identified with the Picard fixed point of MathFin/Foundations/SDEExistence.lean (uniqueness is not connected). The integral is predItoIntegral against B with horizon T. Not a legal instrument. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-physical-contract-value",
+      "name": "Any Fixed-Dated Contract on the Physical Asset Has Its Risk-Neutral Value under the Girsanov Measure",
+      "description": "Starting from the physical Brownian motion W under a probability measure mu (W pre-Brownian, every W t measurable), physical drift m, risk-free rate r and sigma != 0, the asset is S_u = S_0 exp((m - sigma^2/2) u + sigma W_u) (pathAssets S_0 m sigma W). Q is the Girsanov measure constGirsanovMeasure of the constant market price of risk theta = (m - r)/sigma at horizon H, Q = mu.withDensity(Z_H), and B^theta = constBtheta the drift-corrected process. For every fixed-dated contract c (Contract.FixedDated: no hitting-time payments) whose observation dates (Contract.obsList) lie in [0, H], and every discount curve D, the value of c on the physical asset under Q equals its value on the risk-neutral asset pathAssets S_0 r sigma B^theta = S_0 exp((r - sigma^2/2) u + sigma B^theta_u) under Q. The physical drift m enters only through Q. The European call, the chooser and the geometric Asian call on the physical asset (mf-bs-physical-call, mf-bs-physical-chooser, mf-bs-physical-geom-asian) are instances. The identification of the two assets is almost sure at each date, not pathwise; dates past H are excluded because past H the drift-corrected process has frozen drift. Constant market price of risk only; no stochastic theta, no statement about uniqueness of the pricing measure or about arbitrage, and no closed form for c is asserted: the right side is whatever the risk-neutral model gives.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.BlackScholesPhysical\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- Any fixed-dated contract observed in `[0, H]` has the same value on the physical asset as on\nthe risk-neutral asset of the drift-corrected Brownian motion, under the Girsanov measure of the\nconstant market price of risk `(m - r)/σ`. -/\ntheorem value_physical_eq_riskNeutral' {Ω : Type*} [mΩ : MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ}\n    {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) {S_0 m r σ : ℝ} (hσ : σ ≠ 0) (H : ℝ≥0) {D : ℝ≥0 → ℝ}\n    (c : Contract Unit) (hc : c.FixedDated) (hH : ∀ p ∈ c.obsList, p.2 ≤ H) :\n    c.value (BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H) D\n        (BlackScholes.pathAssets S_0 m σ W)\n      = c.value (BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H) D\n          (BlackScholes.pathAssets S_0 r σ\n            (BlackScholes.constBtheta (μ := μ) hWmeas ((m - r) / σ) H)) :=\n  BlackScholes.value_physical_eq_riskNeutral hW hWmeas hσ H c hc hH\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Girsanov change of measure from the physical to the risk-neutral market with constant market price of risk (Saporito, Stochastic Processes, Thm 9.1.8; Shreve, Stochastic Calculus for Finance II, 5.2). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 9.1.8"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "5.2"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
+        "difficulty": "research",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. value_physical_eq_riskNeutral in MathFin/Contracts/Models/BlackScholesPhysical.lean: for each observation date u <= H the physical asset at u is Q-almost surely pathAssets S_0 r sigma B^theta at u (pathAssets_physical_ae_eq, from constBtheta_drift_ae: the drift of a constant integrand is theta u), and Contract.value_congr_ae (a fixed-dated contract has the same value in two models that agree a.s. at the observations it reads) concludes. That B^theta is pre-Brownian under Q is the Girsanov theorem for the filtration (gir-filtered-brownian-predictable); the instances mf-bs-physical-call/chooser/geom-asian combine it with the risk-neutral contract theorems. SCOPE: almost sure per date, dates <= H, constant market price of risk, Q depends on H; the statement does not itself price c in closed form. Not a legal instrument. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-physical-call",
+      "name": "The European Call on the Physical Asset Is Worth the Black-Scholes Price under the Girsanov Measure",
+      "description": "Starting from the physical Brownian motion W under a probability measure mu (W pre-Brownian, every W t measurable), physical drift m, risk-free rate r and sigma > 0, the asset is S_u = S_0 exp((m - sigma^2/2) u + sigma W_u) (pathAssets S_0 m sigma W). Q is the Girsanov measure constGirsanovMeasure of the constant market price of risk theta = (m - r)/sigma at horizon H, Q = mu.withDensity(Z_H). For a maturity T in (0, H] and S_0, K, sigma > 0, the reified European call europeanCall K T on the physical asset, discounted at e^{-rT}, is worth S_0 Phi(d_1) - K e^{-rT} Phi(d_2) under Q: the Black-Scholes call price, with the risk-free rate r in d_1, d_2 and not the physical drift m. The dates must lie in [0, H]: past H the drift-corrected process has frozen drift. The identification of the physical asset with the risk-neutral asset of the drift-corrected process is almost sure at each date, not pathwise. Constant market price of risk only; no stochastic theta, no statement about uniqueness of the pricing measure or about arbitrage.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.BlackScholesPhysical\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal ENNReal\nopen MathFin MathFin.Contracts\n\n/-- The European call on the physical asset is worth the Black-Scholes call price under the\nGirsanov measure of the constant market price of risk `(m - r)/σ`. -/\ntheorem value_europeanCall_physical' {Ω : Type*} [mΩ : MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ}\n    {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) {S_0 K m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H)\n    (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) :\n    (europeanCall K T).value\n        (BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)\n        (fun _ ↦ Real.exp (-r * T)) (BlackScholes.pathAssets S_0 m σ W)\n      = S_0 * Phi (bsd1 S_0 K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) :=\n  BlackScholes.value_europeanCall_physical hW hWmeas hTH hS₀ hK hσ hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Girsanov change of measure from the physical to the risk-neutral market with constant market price of risk (Saporito, Stochastic Processes, Thm 9.1.8; Shreve, Stochastic Calculus for Finance II, 5.2). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 9.1.8"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "5.2"
+          },
+          {
+            "key": "BlackScholes1973"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
+        "difficulty": "research",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. value_europeanCall_physical in MathFin/Contracts/Models/BlackScholesPhysical.lean. Proof: for each date u <= H, B^theta_u = W_u + theta u almost surely (constBtheta_drift_ae: the drift of a constant integrand), so the physical asset at u is almost surely pathAssets S_0 r sigma B^theta at u (pathAssets_physical_ae_eq); B^theta is pre-Brownian under Q by the Girsanov theorem for the filtration (Btheta_isFilteredPreBrownian_predictable_of_bdd, gir-filtered-brownian-predictable); Contract.value_congr_ae (a fixed-dated contract has the same value in two models that agree a.s. at the (underlying, date) observations it reads) moves the value to pathAssets S_0 r sigma B^theta, and the risk-neutral contract theorem applies. SCOPE: the identity of the assets is almost sure per date and only for dates <= H; the market price of risk is the constant (m - r)/sigma; the measure Q depends on H. Not a legal instrument. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-physical-chooser",
+      "name": "The Chooser on the Physical Asset Is Worth the Chooser Price under the Girsanov Measure",
+      "description": "Starting from the physical Brownian motion W under a probability measure mu (W pre-Brownian, every W t measurable), physical drift m, risk-free rate r and sigma > 0, the asset is S_u = S_0 exp((m - sigma^2/2) u + sigma W_u) (pathAssets S_0 m sigma W). Q is the Girsanov measure constGirsanovMeasure of the constant market price of risk theta = (m - r)/sigma at horizon H, Q = mu.withDensity(Z_H). For dates T, t_1 in (0, H] and S_0, K, sigma > 0, the static replicating portfolio chooser K r T t_1 (a call maturing at T plus a put maturing at t_1 struck at K e^{-r(T - t_1)}) on the physical asset, discounted at e^{-ru}, is worth chooserPrice S_0 K r sigma T t_1 = bsV K r sigma S_0 T + bsP (K e^{-r(T - t_1)}) r sigma S_0 t_1 under Q. The contract is the replicating portfolio, not the holder's choice written as a payoff (as in mf-contract-chooser-black-scholes). The dates must lie in [0, H]: past H the drift-corrected process has frozen drift. The identification of the physical asset with the risk-neutral asset of the drift-corrected process is almost sure at each date, not pathwise. Constant market price of risk only; no stochastic theta, no statement about uniqueness of the pricing measure or about arbitrage.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.BlackScholesPhysical\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal ENNReal\nopen MathFin MathFin.Contracts\n\n/-- The replicating chooser portfolio on the physical asset is worth the chooser price under the\nGirsanov measure of the constant market price of risk `(m - r)/σ`. -/\ntheorem value_chooser_physical' {Ω : Type*} [mΩ : MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ}\n    {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) {S_0 K m r σ : ℝ} {T t₁ H : ℝ≥0} (hTH : T ≤ H)\n    (ht₁H : t₁ ≤ H) (hT : 0 < (T : ℝ)) (ht₁ : 0 < (t₁ : ℝ)) (hS₀ : 0 < S_0) (hK : 0 < K)\n    (hσ : 0 < σ) :\n    (chooser K r T t₁).value\n        (BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)\n        (fun u ↦ Real.exp (-r * u)) (BlackScholes.pathAssets S_0 m σ W)\n      = chooserPrice S_0 K r σ T t₁ :=\n  BlackScholes.value_chooser_physical hW hWmeas hTH ht₁H hT ht₁ hS₀ hK hσ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Girsanov change of measure from the physical to the risk-neutral market with constant market price of risk (Saporito, Stochastic Processes, Thm 9.1.8; Shreve, Stochastic Calculus for Finance II, 5.2). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied. Simple chooser: Rubinstein, Options for the Undecided, Risk 1991.",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 9.1.8"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "5.2"
+          },
+          {
+            "key": "BlackScholes1973"
+          },
+          {
+            "key": "Bilokon2026"
+          },
+          {
+            "key": "Rubinstein1991"
+          }
+        ],
+        "difficulty": "research",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. value_chooser_physical in MathFin/Contracts/Models/BlackScholesPhysical.lean. Proof: for each date u <= H, B^theta_u = W_u + theta u almost surely (constBtheta_drift_ae: the drift of a constant integrand), so the physical asset at u is almost surely pathAssets S_0 r sigma B^theta at u (pathAssets_physical_ae_eq); B^theta is pre-Brownian under Q by the Girsanov theorem for the filtration (Btheta_isFilteredPreBrownian_predictable_of_bdd, gir-filtered-brownian-predictable); Contract.value_congr_ae (a fixed-dated contract has the same value in two models that agree a.s. at the (underlying, date) observations it reads) moves the value to pathAssets S_0 r sigma B^theta, and the risk-neutral contract theorem applies. SCOPE: the identity of the assets is almost sure per date and only for dates <= H; the market price of risk is the constant (m - r)/sigma; the measure Q depends on H. Not a legal instrument. Axioms-clean. The chooser contract is the static portfolio of mf-contract-chooser-black-scholes; that it replicates the holder's choice is put-call parity at t_1, not re-derived here."
+      }
+    },
+    {
+      "id": "mf-bs-physical-geom-asian",
+      "name": "The Geometric Asian Call on the Physical Asset Is Worth the Effective Black-Scholes Price under the Girsanov Measure",
+      "description": "Starting from the physical Brownian motion W under a probability measure mu (W pre-Brownian, every W t measurable), physical drift m, risk-free rate r and sigma > 0, the asset is S_u = S_0 exp((m - sigma^2/2) u + sigma W_u) (pathAssets S_0 m sigma W). Q is the Girsanov measure constGirsanovMeasure of the constant market price of risk theta = (m - r)/sigma at horizon H, Q = mu.withDensity(Z_H). For n > 0 averaging dates tau_i with tau_i <= T and tau_i <= H, T > 0, S_0, K, sigma > 0 and positive log-driver variance V_n = geomAsianVar tau, the geometric Asian call geomAsianCall K T tau (paying max((prod_i S_{tau_i})^(1/n) - K, 0) at T) on the physical asset, discounted at e^{-rT}, is worth the call price at the effective spot geomAsianEffSpot S_0 r sigma T tau and effective volatility geomAsianEffVol sigma T tau, with the risk-free rate r, under Q. The maturity T itself need not lie in [0, H] since the payoff reads only the averaging dates. The dates must lie in [0, H]: past H the drift-corrected process has frozen drift. The identification of the physical asset with the risk-neutral asset of the drift-corrected process is almost sure at each date, not pathwise. Constant market price of risk only; no stochastic theta, no statement about uniqueness of the pricing measure or about arbitrage.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.BlackScholesPhysical\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal ENNReal\nopen MathFin MathFin.Contracts\n\n/-- The geometric Asian call on the physical asset is worth the effective Black-Scholes call price\nunder the Girsanov measure of the constant market price of risk `(m - r)/σ`. -/\ntheorem value_geomAsianCall_physical' {Ω : Type*} [mΩ : MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ}\n    {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) {S_0 K m r σ : ℝ} {T H : ℝ≥0} {n : ℕ} (hn : 0 < n)\n    (τ : Fin n → ℝ≥0) (hτT : ∀ i, τ i ≤ T) (hτH : ∀ i, τ i ≤ H) (hS₀ : 0 < S_0) (hK : 0 < K)\n    (hσ : 0 < σ) (hT : 0 < (T : ℝ)) (hV : 0 < geomAsianVar τ) :\n    (geomAsianCall K T τ).value\n        (BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)\n        (fun _ ↦ Real.exp (-r * T)) (BlackScholes.pathAssets S_0 m σ W)\n      = geomAsianEffSpot S_0 r σ T τ *\n          Phi (bsd1 (geomAsianEffSpot S_0 r σ T τ) K r (geomAsianEffVol σ T τ) T)\n        - K * Real.exp (-r * T) *\n          Phi (bsd2 (geomAsianEffSpot S_0 r σ T τ) K r (geomAsianEffVol σ T τ) T) :=\n  BlackScholes.value_geomAsianCall_physical hW hWmeas hn τ hτT hτH hS₀ hK hσ hT hV\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Girsanov change of measure from the physical to the risk-neutral market with constant market price of risk (Saporito, Stochastic Processes, Thm 9.1.8; Shreve, Stochastic Calculus for Finance II, 5.2). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied. Geometric-average Asian options: Kemna and Vorst 1990.",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 9.1.8"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "5.2"
+          },
+          {
+            "key": "BlackScholes1973"
+          },
+          {
+            "key": "Bilokon2026"
+          },
+          {
+            "key": "KemnaVorst1990"
+          },
+          {
+            "key": "ZhangExoticOptions"
+          }
+        ],
+        "difficulty": "research",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. value_geomAsianCall_physical in MathFin/Contracts/Models/BlackScholesPhysical.lean. Proof: for each date u <= H, B^theta_u = W_u + theta u almost surely (constBtheta_drift_ae: the drift of a constant integrand), so the physical asset at u is almost surely pathAssets S_0 r sigma B^theta at u (pathAssets_physical_ae_eq); B^theta is pre-Brownian under Q by the Girsanov theorem for the filtration (Btheta_isFilteredPreBrownian_predictable_of_bdd, gir-filtered-brownian-predictable); Contract.value_congr_ae (a fixed-dated contract has the same value in two models that agree a.s. at the (underlying, date) observations it reads) moves the value to pathAssets S_0 r sigma B^theta, and the risk-neutral contract theorem applies. SCOPE: the identity of the assets is almost sure per date and only for dates <= H; the market price of risk is the constant (m - r)/sigma; the measure Q depends on H. Not a legal instrument. Axioms-clean. The contract reads only the averaging dates tau_i (each <= H), so the maturity T enters through the payment date and discount only, and is not required to be <= H."
+      }
+    },
+    {
+      "id": "mf-discrete-market-parity",
+      "name": "No Arbitrage Gives a Measure Under Which Forward Value and Put-Call Parity Hold, Assuming the Conditional One-Period FTAP",
+      "description": "Assuming the hypothesis ConditionalOnePeriodFTAP, for a one-asset discrete-time price S on a filtered probability space, adapted and integrable up to the horizon T, with S 0 = S_0 and no arbitrage, there is one equivalent martingale measure Q (IsEMM) under which, for every strike K and maturity tau, with the price quoted in units of the numeraire (discount D = 1), frozen at the horizon and constant between integer dates (discreteAssets), the forward struck at K is worth S_0 - K and the European call minus the European put, struck at K and of maturity tau, is worth S_0 - K. The hypothesis ConditionalOnePeriodFTAP, the measurable-selection core of the Dalang-Morton-Willinger theorem, is NOT proved in the library; the existence of Q rests on it (mf-dmw-conditional), while the two valuation identities for a given Q are proved without it (value_forward, value_europeanCall_sub_put).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.DiscreteMarket\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.Contracts.DiscreteMarket\n\n/-- No arbitrage gives one equivalent martingale measure under which, at every strike and maturity,\nthe forward is worth `S₀ - K` and call minus put is `S₀ - K`, assuming the conditional one-period FTAP. -/\ntheorem exists_isEMM_parity' {Ω : Type*} {mΩ : MeasurableSpace Ω} {𝓕 : Filtration ℕ mΩ}\n    {P : Measure Ω} {S : ℕ → Ω → ℝ} {T : ℕ} {S₀ : ℝ} [IsProbabilityMeasure P]\n    (hS : ∀ t ≤ T, StronglyMeasurable[𝓕 t] (S t)) (hint : ∀ t ≤ T, Integrable (S t) P)\n    (hcond : ConditionalOnePeriodFTAP 𝓕 P S T) (hNA : NoArbitrage 𝓕 P S T)\n    (hS₀ : ∀ ω, S 0 ω = S₀) :\n    ∃ Q, IsEMM 𝓕 P S T Q ∧ ∀ (K : ℝ) (τ : ℝ≥0),\n      (forward K τ).value Q (fun _ ↦ 1) (discreteAssets S T) = S₀ - K ∧\n      (europeanCall K τ).value Q (fun _ ↦ 1) (discreteAssets S T)\n        - (europeanPut K τ).value Q (fun _ ↦ 1) (discreteAssets S T) = S₀ - K :=\n  MathFin.Contracts.DiscreteMarket.exists_isEMM_parity hS hint hcond hNA hS₀\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Contract values in a discrete-time market with an equivalent martingale measure: forward value and put-call parity, with the measure from the Dalang-Morton-Willinger reduction (Foellmer and Schied, Stochastic Finance, sec. 5.2). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "FollmerSchied",
+            "locator": "sec. 5.2"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "REDUCED CORE: the existence of Q is conditional on ConditionalOnePeriodFTAP, an explicit hypothesis of the statement that is not proved in this library (see mf-dmw-conditional). exists_isEMM_parity in MathFin/Contracts/Models/DiscreteMarket.lean: exists_isEMM_of_noArbitrage_of_conditionalFTAP (Dalang-Morton-Willinger reduction and pasting, under the hypothesis) gives Q, then value_forward and value_europeanCall_sub_put (the risk-neutral lemmas of Contracts/Parity.lean applied to the model map discreteAssets S T, the price frozen at the horizon, a Q-martingale for the floor filtration t -> 𝓕 floor(t), martingale_floor) give the two identities. SCOPE: one asset, undiscounted price in numeraire units (D = 1), contracts the forward and the European call and put of Contracts/Instruments/Options.lean; between integer dates the underlying is constant; the statement is not unconditional no-arbitrage pricing on a general space. Not a legal instrument. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-self-financing-hedge",
+      "name": "The Self-Financing Equation of the Black-Scholes Delta Hedge of the Call (Integral Identity on [0, T'])",
+      "description": "Let B be a Brownian motion with continuous paths, T > 0, T' < T, K, sigma, S_0 > 0, and S the Black-Scholes path S_u = S_0 exp((r - sigma^2/2) u + sigma B_u) (BlackScholes.pathAssets). With the call value V_t = bsV K r sigma S_t (T - t) (hedgeValue), the delta Delta_t = Phi(d_1(S_t, T - t)) (hedgeDelta) and the bank position psi_t = V_t - Delta_t S_t (hedgeBank), almost surely and for all t in [0, T'] at once, V_t = V_0 + (int_0^t Delta_s r S_s ds + I_t) + int_0^t r psi_s ds, where V_0 is the value of the reified contract europeanCall K T (discount e^{-ru}) and I is the predictable Ito integral predItoIntegral on [0, T'] of the integrand Delta sigma S. The bracket is the gain of holding Delta shares of the stock, written as its drift integral plus the Brownian integral of Delta sigma S, and the last term is the interest on the bank position: the self-financing equation of the stock-and-bank portfolio, as an integral identity. Stated on [0, T'] with T' < T. Not proved: that this is a trading-strategy structure (no admissibility or self-financing predicate is defined), that the bracket is an integral against the semimartingale S, or the identity up to t = T.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Models.BlackScholesSelfFinancing\n\nopen MeasureTheory ProbabilityTheory Filter Topology Set\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.ItoIntegralL2 MathFin.ItoIntegralLocalised\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- The call value is its initial value plus the gain `∫ Δ dS` of the delta hedge, written as\n`∫ Δ r S ds + ∫ Δ σ S dB`, plus the interest `∫ r ψ ds` on the bank position, on `[0, T']`. -/\ntheorem europeanCall_selfFinancing' {μ : Measure Ω} [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ}\n    (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω) {T : ℝ≥0} (hT : 0 < (T : ℝ))\n    {S_0 K r σ : ℝ} (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (T' : ℝ≥0) (hT' : T' < T) :\n    ∀ᵐ ω ∂μ, ∀ t ∈ Icc (0 : ℝ≥0) T',\n      BlackScholes.hedgeValue K r σ S_0 T B t ω\n        = (europeanCall K T).value μ (fun u ↦ Real.exp (-r * u)) (BlackScholes.pathAssets S_0 r σ B)\n          + ((∫ s in Ioc 0 t, BlackScholes.hedgeDelta K r σ S_0 T B s ω\n                * (r * BlackScholes.pathAssets S_0 r σ B () s ω) ∂timeMeasure)\n              + predItoIntegral (μ := μ) T' hBmeas\n                (BlackScholes.hedgeGain_isStronglyPredictable hBmeas hBcont K r σ S_0 T) t ω)\n          + ∫ s in Ioc 0 t, r * BlackScholes.hedgeBank K r σ S_0 T B s ω ∂timeMeasure :=\n  BlackScholes.europeanCall_selfFinancing hB hBmeas hBcont hT hS₀ hK hσ T' hT'\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Self-financing property of the delta hedge in the Black-Scholes model (Black and Scholes 1973; Shreve, Stochastic Calculus for Finance II, 4.5). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "BlackScholes1973"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "4.5"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
+        "difficulty": "research",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. europeanCall_selfFinancing in MathFin/Contracts/Models/BlackScholesSelfFinancing.lean applies the product rule with the finite-variation factor e^{rt} to the discounted value, which is the Ito process localItoProcess of the delta-hedge integrand (capped in time by timeCap so that its paths are continuous): Ito's formula for f(t, x) = e^{rt} x (ito_formula_adapted_unbounded_process) gives V_t = V_0 + int r V ds + int e^{rs} H_s dB with H the discounted integrand, and r V = Delta r S + r psi splits the drift; the contract value comes from mf-bs-call-contract-value-pathassets and the replication theorem of mf-bs-delta-hedge-replication. SCOPE: an integral identity only. There is no trading-strategy structure and no admissibility or self-financing predicate; the gain int Delta dS is not an integral against the semimartingale S, it is spelled as int Delta r S ds + int Delta sigma S dB, with the Brownian integral predItoIntegral against B at horizon T'. The identity is on [0, T'] with T' < T. Not a legal instrument. Axioms-clean."
       }
     }
   ]
