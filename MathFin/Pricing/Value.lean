@@ -279,8 +279,8 @@ theorem Contract.measurable_observation (c : Contract ι) {D : ℝ≥0 → Ω �
     Measurable (c.observation D X) := by
   unfold Contract.observation
   refine Measurable.prodMk ?_ ?_
-  · exact measurable_pi_lambda _ fun p ↦ hX p.1.1 p.1.2
-  · exact measurable_pi_lambda _ fun t ↦ hD t.1
+  · exact measurable_pi_iff.2 fun p ↦ hX p.1.1 p.1.2
+  · exact measurable_pi_iff.2 fun t ↦ hD t.1
 
 theorem Contract.measurable_pvOf (c : Contract ι) (hc : c.FixedDated) : Measurable c.pvOf := by
   refine Contract.measurable_pathPV (c := c)
@@ -288,14 +288,14 @@ theorem Contract.measurable_pvOf (c : Contract ι) (hc : c.FixedDated) : Measura
     (D := fun t z ↦ c.fillDates z.2 t)
     (X := fun i t z ↦ c.fillScenario z.1 i t) (fun t ↦ ?_) (fun i t ↦ ?_)
   · by_cases h : t ∈ c.dates
-    · simp only [Contract.fillDates, dif_pos h]
+    · simp only [Contract.fillDates, h, ↓reduceDIte]
       exact (measurable_pi_apply _).comp measurable_snd
-    · simp only [Contract.fillDates, dif_neg h]
+    · simp only [Contract.fillDates, h, ↓reduceDIte]
       exact measurable_const
   · by_cases h : (i, t) ∈ c.obsList
-    · simp only [Contract.fillScenario, dif_pos h]
+    · simp only [Contract.fillScenario, h, ↓reduceDIte]
       exact (measurable_pi_apply _).comp measurable_fst
-    · simp only [Contract.fillScenario, dif_neg h]
+    · simp only [Contract.fillScenario, h, ↓reduceDIte]
       exact measurable_const
 
 /-- **The value of a fixed-dated contract is an integral against the law of what it reads**: the
