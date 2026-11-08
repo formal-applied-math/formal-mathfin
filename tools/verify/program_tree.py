@@ -69,9 +69,38 @@ def load_map(path: Path = TREE_MAP) -> dict:
     return dict(parts=raw.get("part", []), branch=raw.get("branch", {}), place=raw.get("place", {}))
 
 
-def map_place(label: str, area: str, tree_map: dict) -> tuple[str, str]:
-    """(part, branch) of a node: the map's place for it, else its directory's."""
-    where = tree_map["place"].get(label) or AREA_PLACE.get(area, "pricing")
+# Where the tree puts a module's nodes by default: its directory, longest prefix first. The map
+# names only the nodes that sit elsewhere.
+DIR_PLACE = {
+    "Probability": "pricing", "Probability.Discrete": "discrete",
+    "Probability.Brownian": "brownian", "Probability.BrownianMotion": "brownian",
+    "Probability.Martingales": "brownian", "Probability.Gaussian": "analysis",
+    "Probability.Analysis": "analysis", "Probability.Laws": "analysis",
+    "Probability.Jumps": "jumps", "Probability.Dependence": "risk/dependence",
+    "Contracts": "pricing", "Pricing": "pricing",
+    "Models.BlackScholes": "models/black-scholes", "Models.Bachelier": "models/black-scholes",
+    "Models.Binomial": "models/discrete", "Models.Jumps": "models/jumps",
+    "Models.StochVol": "models/stoch-vol", "Models.LocalVol": "models/local-vol",
+    "Models.ModelFree": "models/model-free", "Models.Rates": "models/rates",
+    "Models.Credit": "models/credit", "Models.Forwards": "models/fx-futures",
+    "Risk": "risk/measures", "Risk.Credit": "risk/dependence",
+    "Choice": "choice/static", "Choice.Performance": "choice/performance",
+    "Insurance": "insurance/survival",
+    "Markets": "markets/execution", "Markets.DeFi": "markets/amm",
+    "Markets.Microstructure": "markets/price-formation",
+}
+
+
+def dir_place(module: str) -> str | None:
+    parts = module.split(".")[1:-1]
+    return next((DIR_PLACE[sec] for k in range(len(parts), 0, -1)
+                 if (sec := ".".join(parts[:k])) in DIR_PLACE), None)
+
+
+def map_place(label: str, area: str, tree_map: dict, module: str = "") -> tuple[str, str]:
+    """(part, branch) of a node: the map's place for it, else its directory's, else its area's."""
+    where = (tree_map["place"].get(label) or (module and dir_place(module))
+             or AREA_PLACE.get(area, "pricing"))
     part, _, branch = where.partition("/")
     return part, branch
 
@@ -268,7 +297,7 @@ def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
             x=f.get("statement", ""), ground=f.get("ground", ""), core=f.get("core", []),
             e=0, i=named.get(f["label"], []), op=int(f["label"] in open_problem)))
     for n in out_nodes:
-        n["p"], n["b"] = map_place(n["l"], n["a"], tree_map)
+        n["p"], n["b"] = map_place(n["l"], n["a"], tree_map, n.get("m") or "")
     by_area: dict[str, Counter] = defaultdict(Counter)
     off: dict[str, list[list[str]]] = defaultdict(list)
     for p in places:

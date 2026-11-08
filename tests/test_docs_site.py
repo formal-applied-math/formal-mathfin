@@ -126,7 +126,8 @@ def test_tree_map_places_name_real_parts_and_branches():
     for p in m["parts"]:
         assert p.get("title", "").strip(), p["key"]
     assert set(m["branch"]) <= set().union(*branches.values()), "a display name for no branch"
-    places = list(m["place"].items()) + [(f"area:{a}", w) for a, w in program_tree.AREA_PLACE.items()]
+    places = (list(m["place"].items()) + [(f"area:{a}", w) for a, w in program_tree.AREA_PLACE.items()]
+              + [(f"dir:{d}", w) for d, w in program_tree.DIR_PLACE.items()])
     for label, where in places:
         part, _, branch = where.partition("/")
         assert part in branches and (not branch or branch in branches[part]), (label, where)
