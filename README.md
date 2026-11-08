@@ -108,22 +108,21 @@ exact statement of each one, and what it leaves out.
 
 ## How the library is organized
 
-The library is organized the way the field is: one object and three questions asked of it. The
-object is a **position**, a random payoff traded in a **market** with a numéraire and the gains
-of its strategies. **Valuation** asks what a position is worth, a linear functional given by
-pricing measures. **Choice** asks whether to hold it, a concave functional given by expected
-utility. **Risk** asks how dangerous it is, a convex functional given by a risk measure. Duality
-theorems join the questions, for instance that marginal utility at an optimum is a state-price
-density and that the superhedging price is a coherent risk measure; the
-[table of joints](docs/organization.md#where-the-questions-meet) says which are proved and at what
-scope. Model families (trees, diffusions, volatility,
-jumps, term structures, default, mortality and claims, market mechanisms) form a second axis,
-the kind of randomness a question is asked about. Probability and statistics are the tools.
+Financial mathematics has one economic object, a price system: positions in a market and the set
+of pricing measures that price them. Its deep theorems are three dualities of that set: with the
+gains of trading strategies (valuation: the fundamental theorems, superhedging), with the
+positions a risk measure accepts (risk: the robust representation), and with the positions an
+investor prefers (choice: marginal utility is a state-price density). The model families (trees,
+diffusions, volatility, jumps, term structures, default, mortality and claims, market
+mechanisms) are a second axis; probability and statistics are the tools.
 
-[`docs/organization.md`](docs/organization.md) gives the full account. The module directories,
-the [blueprint](docs/blueprint.md), the issue labels, the
-[documentation site](https://formal-applied-math.github.io/formal-mathfin/) and its program tree
-all read this structure from one file, [`docs/taxonomy.toml`](docs/taxonomy.toml).
+[`docs/organization.md`](docs/organization.md) gives the account, and says how much of the
+library already hangs from the trunk: the library measures that from its own statements
+(`tools/verify/chain_reach.py`), and states each missing link as a Lean theorem in the connector
+library [`MathFinFrontier`](MathFinFrontier.lean), carried by an issue. The module directories,
+the [blueprint](docs/blueprint.md), the issue labels and the
+[documentation site](https://formal-applied-math.github.io/formal-mathfin/) read the structure
+from one file, [`docs/taxonomy.toml`](docs/taxonomy.toml).
 
 | | Topics |
 |---|---|
