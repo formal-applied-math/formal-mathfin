@@ -374,6 +374,12 @@ follows the dependencies. The move comes first: it changes no content and depend
 other work, and every PR after it lands in its final place once. The trunk comes before anything
 that rests on it, and one pilot before the rest.
 
+Any phase may build the bridge theorems it needs: a proved equality between two encodings of one
+object, or a constructor turning one library object into another's hypothesis (design.md §4). They
+are built in the phase that first needs them, not batched for later. After the move, a bridge lives
+in the module that consumes it, which is the limb's, or `Pricing/` for a bridge between pricing
+devices. No `Bridges/` directory is recreated.
+
 **Phase 0: instruments (1 PR).**
 
 - This spec, revised to the maintainer's decisions.
