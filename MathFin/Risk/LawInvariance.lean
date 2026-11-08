@@ -88,9 +88,11 @@ theorem isLawInvariant_expectile [IsProbabilityMeasure P] (α : ℝ) :
       expectileGap α Y P e = α * ∫ y, max (y - e) 0 ∂(P.map Y) -
         (1 - α) * ∫ y, max (e - y) 0 ∂(P.map Y) := by
     have h1 : ∫ ω, max (Y ω - e) 0 ∂P = ∫ y, max (y - e) 0 ∂(P.map Y) :=
-      (integral_map hY (Continuous.aestronglyMeasurable (by fun_prop))).symm
+      (integral_map (f := fun y ↦ max (y - e) 0) hY
+        (Continuous.aestronglyMeasurable (by fun_prop))).symm
     have h2 : ∫ ω, max (e - Y ω) 0 ∂P = ∫ y, max (e - y) 0 ∂(P.map Y) :=
-      (integral_map hY (Continuous.aestronglyMeasurable (by fun_prop))).symm
+      (integral_map (f := fun y ↦ max (e - y) 0) hY
+        (Continuous.aestronglyMeasurable (by fun_prop))).symm
     rw [expectileGap, h1, h2]
   intro X Y hX hY h
   have : expectileGap α X P = expectileGap α Y P := funext fun e ↦ by rw [key hX, key hY, h]
