@@ -73,6 +73,7 @@ import MathFin.Choice.Portfolio.MarkowitzLagrangian
 import MathFin.Choice.Portfolio.RiskParityFOC
 import MathFin.Choice.Portfolio.Markowitz
 import MathFin.Choice.Portfolio.CAPM
+import MathFin.Choice.Utility.StatePriceDensity
 import MathFin.Choice.Portfolio.TangentPortfolio
 import MathFin.Choice.Performance.Ratios
 import MathFin.Choice.Performance.RatiosExtended
@@ -911,3 +912,12 @@ attribute [blueprint "thm:two-asset-min-variance" (title := "The two-asset weigh
   (statement := /-- When $D = \sigma_1^2 - 2\rho\sigma_1\sigma_2 + \sigma_2^2 > 0$, the closed-form
   weight $w^*$ gives $(w^*, 1-w^*)$ the least portfolio variance among all two-asset budgets. -/)]
   MathFin.portfolioVarN_minVarWeightTwo_le
+
+attribute [blueprint "thm:utility-state-price-density" (title := "Marginal utility is a state-price density")
+  (statement := /-- In the finite-state market with payoff matrix $A$ and prices $\pi$, let $\theta$
+  be a local maximum of $\sum_\omega p_\omega u(W_\omega)$, $W = A^\top\theta$, on the budget set
+  $\{\theta' : \pi\cdot\theta' = w_0\}$, with $p>0$, $w_0>0$, $W>0$ and $u'(W_\omega)>0$. Then
+  $q_\omega = p_\omega u'(W_\omega)/\mu$, for some $\mu>0$, is a strictly positive state-price
+  vector pricing every asset, and its normalisation is an equivalent martingale measure for the
+  excess returns. -/)]
+  MathFin.exists_hasEMMMultiState_of_isLocalMaxOn

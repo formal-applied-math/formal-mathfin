@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Choice.Performance.Ratios
+public import MathFin.Choice.Utility.StatePriceDensity
 
 /-!
 # The Kelly (growth-optimal) portfolio as numéraire ⟹ the risk-neutral measure
@@ -46,10 +47,18 @@ to the growth-optimal portfolio and the physical measure becomes risk-neutral.
 * `kellyDeflatedProb_sum_one` — `q₊ + q₋ = 1` (a probability measure).
 * `kellyNumeraire_isRiskNeutral` — `q₊·b + q₋·(−1) = 0`: under the GOP-deflated probabilities
   the one-period bet has zero mean, the numéraire-portfolio ⟹ EMM identity in one period.
+* `kellyPayoff`, `kellyPrice` — the Kelly market as a payoff matrix and a price vector: the unit
+  bond and the bet, which costs nothing.
+* `kelly_statePrices` — the GOP-deflated probabilities `q₊, q₋` are a state-price vector of the
+  Kelly market, pricing the bond (`q₊ + q₋ = 1`) and the bet (`q₊·b − q₋ = 0`): the logarithmic
+  instance of `logUtility_statePrices_of_stationary` (`Choice/Utility/StatePriceDensity`), whose
+  stationarity hypothesis is the Kelly first-order condition, which is
+  `kellyNumeraire_isRiskNeutral`.
 
 ## References
 
 * [Long (1990)][Long1990]
+* [J. L. Kelly, *A new interpretation of information rate*][Kelly1956]
 
 ## Tags
 
@@ -118,5 +127,77 @@ theorem kellyNumeraire_isRiskNeutral (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :
       + (1 - p) / (1 - kellyFraction p b) * (-1) = 0 := by
   rw [kellyDeflatedProb_win hp hb, kellyDeflatedProb_lose hp1 hb]
   ring
+
+/-- The **Kelly market** on the states `0` (win) and `1` (lose), as a payoff matrix: asset `0` is
+the unit bond, asset `1` the bet, paying `b` or `-1`. A portfolio `θ` pays `θ 0 + θ 1 * b` when
+the bet wins and `θ 0 - θ 1` when it loses. -/
+def kellyPayoff (b : ℝ) : Fin 2 → Fin 2 → ℝ := ![![1, 1], ![b, -1]]
+
+/-- The prices of the Kelly market: the bond costs `1`, the bet nothing. -/
+def kellyPrice : Fin 2 → ℝ := ![1, 0]
+
+lemma kellyPayoff_win (θ : Fin 2 → ℝ) :
+    portfolioPayoff (kellyPayoff b) θ 0 = θ 0 + θ 1 * b := by
+  simp [portfolioPayoff, kellyPayoff, Fin.sum_univ_two] <;> ring
+
+lemma kellyPayoff_lose (θ : Fin 2 → ℝ) :
+    portfolioPayoff (kellyPayoff b) θ 1 = θ 0 - θ 1 := by
+  simp [portfolioPayoff, kellyPayoff, Fin.sum_univ_two] <;> ring
+
+lemma kellyCost (θ : Fin 2 → ℝ) : portfolioCost kellyPrice θ = θ 0 := by
+  simp [portfolioCost, kellyPrice, Fin.sum_univ_two]
+
+/-- **The GOP-deflated probabilities are the state prices of the Kelly market.** The Kelly
+portfolio (one unit in the bond, the fraction `f*` on the bet) has the marginal-utility density
+`p / W*` of the logarithmic utility, and this density, which is `q₊, q₋`, prices both assets of the
+Kelly market: the bond at `1` (`q₊ + q₋ = 1`) and the bet at `0`
+(`q₊·b − q₋ = 0`, `kellyNumeraire_isRiskNeutral`). -/
+theorem kelly_statePrices (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) (k : Fin 2) :
+    statePricePricing Finset.univ
+      ![p / (1 + kellyFraction p b * b), (1 - p) / (1 - kellyFraction p b)]
+      (kellyPayoff b k) = kellyPrice k := by
+  have hW : portfolioPayoff (kellyPayoff b) ![1, kellyFraction p b] =
+      ![1 + kellyFraction p b * b, 1 - kellyFraction p b] := by
+    funext ω
+    fin_cases ω
+    · simp [kellyPayoff_win]
+    · simp [kellyPayoff_lose]
+  have hq : (fun ω : Fin 2 ↦ 1 * ![p, 1 - p] ω /
+      portfolioPayoff (kellyPayoff b) ![1, kellyFraction p b] ω) =
+      ![p / (1 + kellyFraction p b * b), (1 - p) / (1 - kellyFraction p b)] := by
+    funext ω
+    fin_cases ω
+    · simp [hW]
+    · simp [hW]
+  have hpos : ∀ ω, 0 < ![p, 1 - p] ω := by
+    intro ω
+    fin_cases ω
+    · simpa using hp
+    · simpa using hp1
+  have h1 : 0 < 1 + kellyFraction p b * b := by
+    rw [kellyGOPWealth_win hb.ne']
+    positivity
+  have h2 : 0 < 1 - kellyFraction p b := by
+    rw [kellyGOPWealth_lose hb.ne']
+    exact div_pos (mul_pos (sub_pos.mpr hp1) (by linarith)) hb
+  have hWpos : ∀ ω, 0 < portfolioPayoff (kellyPayoff b) ![1, kellyFraction p b] ω := by
+    intro ω
+    rw [hW]
+    fin_cases ω
+    · simpa using h1
+    · simpa using h2
+  have hfoc : ∀ d, portfolioCost kellyPrice d = 0 →
+      ∑ ω, ![p, 1 - p] ω * (portfolioPayoff (kellyPayoff b) ![1, kellyFraction p b] ω)⁻¹ *
+        portfolioPayoff (kellyPayoff b) d ω = 0 := by
+    intro d hd
+    have hd0 : d 0 = 0 := by rwa [kellyCost] at hd
+    rw [Fin.sum_univ_two]
+    simp only [kellyPayoff_win, kellyPayoff_lose, hd0, Matrix.cons_val_zero, Matrix.cons_val_one]
+    linear_combination d 1 * kellyNumeraire_isRiskNeutral hp hp1 hb
+  obtain ⟨-, hprice⟩ := logUtility_statePrices_of_stationary (p := ![p, 1 - p])
+    (A := kellyPayoff b) (pr := kellyPrice) (θ := ![1, kellyFraction p b]) (w₀ := 1)
+    (by rw [kellyCost]; simp) one_pos hpos (by simp [Fin.sum_univ_two]) hWpos hfoc
+  exact (congrArg (fun q ↦ statePricePricing Finset.univ q (kellyPayoff b k)) hq).symm.trans
+    (hprice k)
 
 end MathFin
