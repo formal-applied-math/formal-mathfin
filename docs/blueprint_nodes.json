@@ -1089,18 +1089,6 @@
   "label": "thm:markowitz-lagrangian",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
- {"uses": [],
-  "title": "Marginal utility is a state-price density",
-  "text":
-  "In the finite-state market with payoff matrix $A$ and prices $\\pi$, let $\\theta$\n  be a local maximum of $\\sum_\\omega p_\\omega u(W_\\omega)$, $W = A^\\top\\theta$, on the budget set\n  $\\{\\theta' : \\pi\\cdot\\theta' = w_0\\}$, with $p>0$, $w_0>0$, $W>0$ and $u'(W_\\omega)>0$. Then\n  $q_\\omega = p_\\omega u'(W_\\omega)/\\mu$, for some $\\mu>0$, is a strictly positive state-price\n  vector pricing every asset, and its normalisation is an equivalent martingale measure for the\n  excess returns.",
-  "name": "MathFin.exists_hasEMMMultiState_of_isLocalMaxOn",
-  "module": "MathFin.Choice.Utility.StatePriceDensity",
-  "line": 263,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:utility-state-price-density",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/StatePriceDensity.lean"},
  {"uses": ["def:brownian-motion", "thm:conditional-bracket"],
   "title": "The bracket compensates the square",
   "text":
@@ -1180,6 +1168,22 @@
   "label": "def:ito-integral-clm",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoIntegralCLM.lean"},
+ {"uses":
+  ["def:equivalent-measure",
+   "def:emm",
+   "thm:martingale-transform",
+   "def:martingale-transform"],
+  "title": "Marginal utility is a state-price density",
+  "text":
+  "In the finite-state market with payoff matrix $A$ and prices $\\pi$, let $\\theta$\n  be a local maximum of $\\sum_\\omega p_\\omega u(W_\\omega)$, $W = A^\\top\\theta$, on the budget set\n  $\\{\\theta' : \\pi\\cdot\\theta' = w_0\\}$, with $p>0$, $w_0>0$, $W>0$ and $u'(W_\\omega)>0$. Then\n  $q_\\omega = p_\\omega u'(W_\\omega)/\\mu$, for some $\\mu>0$, is a strictly positive state-price\n  vector pricing every asset, and on a finite probability space charging every state there is an\n  equivalent martingale measure for the excess returns.",
+  "name": "MathFin.exists_isEMM_of_isLocalMaxOn",
+  "module": "MathFin.Choice.Utility.StatePriceDensity",
+  "line": 280,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:utility-state-price-density",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/StatePriceDensity.lean"},
  {"uses": ["def:martingale-transform"],
   "title": "No arbitrage is local",
   "text":

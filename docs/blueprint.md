@@ -105,7 +105,6 @@ graph TD
   marshallOlkin["Marshall–Olkin first-to-default"]:::proved
   stochasticFubini["Stochastic Fubini (L² form)"]:::proved
   uniswapV3CoveredCall["A Uniswap v3 position is at most a covered call"]:::proved
-  utilityStatePriceDensity["Marginal utility is a state-price density"]:::proved
   vasicekBondPde["The Vasicek bond price solves its PDE"]:::proved
   contractValue["Value of a contract"]:::proved
   emm["Equivalent martingale measure"]:::proved
@@ -167,6 +166,7 @@ graph TD
   stochasticFubiniIto["Stochastic Fubini for the Itô integral"]:::proved
   tangentPortfolioEfficient["The tangent portfolio is efficient"]:::proved
   uniswapV3BsBound["A v3 position is worth at most a covered call"]:::proved
+  utilityStatePriceDensity["Marginal utility is a state-price density"]:::proved
   americanPutBoundaryExpiry["The American put boundary at expiry"]:::proved
   bracketCompensator["The bracket compensates the square"]:::proved
   bsDeltaHedge["The Black–Scholes delta hedge"]:::proved
@@ -455,6 +455,10 @@ graph TD
   standardNormalCdf --> uniswapV3BsBound
   bsCall --> uniswapV3BsBound
   uniswapV3CoveredCall --> uniswapV3BsBound
+  emm --> utilityStatePriceDensity
+  equivalentMeasure --> utilityStatePriceDensity
+  martingaleTransform --> utilityStatePriceDensity
+  martingaleTransform --> utilityStatePriceDensity
   brownianMotion --> americanPutBoundaryExpiry
   gbm --> americanPutBoundaryExpiry
   heatFeynmanKac --> americanPutBoundaryExpiry
@@ -724,7 +728,6 @@ graph TD
 | `thm:marshall-olkin` Marshall–Olkin first-to-default | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarshall-olkin%22%20in%3Abody) |
 | `thm:stochastic-fubini` Stochastic Fubini (L² form) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astochastic-fubini%22%20in%3Abody) |
 | `thm:uniswap-v3-covered-call` A Uniswap v3 position is at most a covered call | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Auniswap-v3-covered-call%22%20in%3Abody) |
-| `thm:utility-state-price-density` Marginal utility is a state-price density | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Autility-state-price-density%22%20in%3Abody) |
 | `thm:vasicek-bond-pde` The Vasicek bond price solves its PDE | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avasicek-bond-pde%22%20in%3Abody) |
 | `def:contract-value` Value of a contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acontract-value%22%20in%3Abody) |
 | `def:emm` Equivalent martingale measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aemm%22%20in%3Abody) |
@@ -786,6 +789,7 @@ graph TD
 | `thm:stochastic-fubini-ito` Stochastic Fubini for the Itô integral | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astochastic-fubini-ito%22%20in%3Abody) |
 | `thm:tangent-portfolio-efficient` The tangent portfolio is efficient | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atangent-portfolio-efficient%22%20in%3Abody) |
 | `thm:uniswap-v3-bs-bound` A v3 position is worth at most a covered call | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Auniswap-v3-bs-bound%22%20in%3Abody) |
+| `thm:utility-state-price-density` Marginal utility is a state-price density | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Autility-state-price-density%22%20in%3Abody) |
 | `thm:american-put-boundary-expiry` The American put boundary at expiry | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-boundary-expiry%22%20in%3Abody) |
 | `thm:bracket-compensator` The bracket compensates the square | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abracket-compensator%22%20in%3Abody) |
 | `thm:bs-delta-hedge` The Black–Scholes delta hedge | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-delta-hedge%22%20in%3Abody) |
