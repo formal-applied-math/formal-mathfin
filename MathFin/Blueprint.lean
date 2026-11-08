@@ -61,6 +61,7 @@ import MathFin.Probability.Dependence.GaussianCopula
 import MathFin.Risk.ValueAtRisk
 import MathFin.Risk.Coherent
 import MathFin.Risk.ExpectedShortfall
+import MathFin.Risk.Superhedging
 import MathFin.Risk.CompoundPoissonCVaR
 import MathFin.Contracts.Core
 import MathFin.Pricing.Value
@@ -911,3 +912,17 @@ attribute [blueprint "thm:two-asset-min-variance" (title := "The two-asset weigh
   (statement := /-- When $D = \sigma_1^2 - 2\rho\sigma_1\sigma_2 + \sigma_2^2 > 0$, the closed-form
   weight $w^*$ gives $(w^*, 1-w^*)$ the least portfolio variance among all two-asset budgets. -/)]
   MathFin.portfolioVarN_minVarWeightTwo_le
+
+attribute [blueprint "thm:superhedging-coherent"
+  (title := "The superhedging price is a coherent risk measure")
+  (statement := /-- In the one-period finite-state market with a martingale probability vector, and
+  for a reference measure charging every state, the superhedging price of a claim, read as a
+  loss, is monotone, cash-invariant, positively homogeneous and subadditive. The equality with
+  the supremum of the martingale prices is not part of this statement. -/)]
+  MathFin.isCoherentRiskMeasure_superhedgingPrice
+
+attribute [blueprint "thm:superhedging-price-lower-bound"
+  (title := "The superhedging price dominates every martingale price")
+  (statement := /-- For every martingale probability vector $q$ and every claim $Y$,
+  $\sum_n q_n Y_n$ is at most the superhedging price of $Y$. -/)]
+  MathFin.le_superhedgingPrice

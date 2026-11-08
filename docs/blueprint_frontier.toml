@@ -710,13 +710,6 @@ uses = ["thm:expected-shortfall-coherent", "def:expected-shortfall", "def:cohere
 area = "risk"
 
 [[node]]
-label = "thm:superhedging-coherent"
-title = "The superhedging price is a coherent risk measure"
-statement = "On a finite space the superreplication price of a loss is a coherent risk measure, bounded below by its price under every pricing measure, with equality to the supremum once finitely generated cones are closed."
-uses = ["def:pricing-functional", "def:coherent-risk-measure"]
-area = "risk"
-
-[[node]]
 label = "thm:utility-state-price-density"
 title = "Marginal utility is a state-price density"
 statement = "At the optimum of a finite-state expected-utility problem with a budget constraint, marginal utility of optimal wealth is proportional to a state-price density, so the optimum defines a pricing measure; Kelly is the logarithmic case."
