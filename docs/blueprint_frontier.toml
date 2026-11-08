@@ -696,13 +696,6 @@ uses = ["def:pricing-functional", "thm:esscher-emm-levy", "thm:jump-diffusion-mi
 area = "black-scholes"
 
 [[node]]
-label = "thm:expected-shortfall-dual-set"
-title = "Expected shortfall's representing set"
-statement = "On a finite space the representing set of expected shortfall in the ADEH representation is exactly the probability densities bounded by 1/(1−α), joining coherentRisk_isLUB to the general-space dual."
-uses = ["thm:expected-shortfall-coherent", "def:expected-shortfall", "def:coherent-risk-measure"]
-area = "risk"
-
-[[node]]
 label = "thm:superhedging-coherent"
 title = "The superhedging price is a coherent risk measure"
 statement = "On a finite space the superreplication price of a loss is a coherent risk measure, bounded below by its price under every pricing measure, with equality to the supremum once finitely generated cones are closed."
