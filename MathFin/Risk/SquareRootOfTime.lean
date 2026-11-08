@@ -10,7 +10,7 @@ public import MathFin.Probability.Gaussian.GaussianMoments
 public import MathFin.Probability.Brownian.Ito.ItoLemma2D
 
 /-!
-# Bridge: the square-root-of-time rule is a theorem about Brownian increments
+# The square-root-of-time rule is a theorem about Brownian increments
 
 `Risk/Gaussian.lean` records the square-root-of-time scaling of the Gaussian VaR formula
 as an algebraic identity (`gaussianVaR_volatility_scaling`). Here it is a statement about the loss

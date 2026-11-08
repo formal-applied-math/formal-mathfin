@@ -9,16 +9,13 @@ public import MathFin.Models.Credit.CVA
 public import MathFin.Risk.GaussianValueAtRisk
 
 /-!
-# Expected negative exposure, potential future exposure, and netting subadditivity
+# Potential future exposure and netting subadditivity
 
-Three exposure measures on the CVA exposure-process substrate (`V : ℝ → Ω₁ → ℝ` an exposure
-process, `ν` its measure): ENE (the mirror of `CVA.expectedExposure`), PFE (through
-`MathFin.valueAtRisk`), and netting subadditivity.
+Two risk measures of the CVA exposure process (`V : ℝ → Ω₁ → ℝ` an exposure process, `ν` its
+measure): PFE, a quantile of the exposure (through `MathFin.valueAtRisk`), and netting
+subadditivity. The expectations of the exposure that price the adjustments, EE and ENE, are with
+the adjustments they price (`Models/Credit/CVA.lean`, `Models/Credit/DVA.lean`).
 
-* `expectedNegativeExposure`: `ENE(s) = E_ν[(-V_s)⁺]`. `expectedNegativeExposure_eq_sub_integral`
-  proves `ENE = EE - E[V_s]` for integrable `V_s`, from the pointwise identity `(-x)⁺ = x⁺ - x`
-  and integral linearity; `expectedNegativeExposure_gaussian` is its Gaussian closed form, from
-  `CVA.expectedExposure_gaussian` and that identity.
 * `potentialFutureExposure`: `PFE_α(s) = VaR_α(V_s⁺)`, the `α`-quantile of the exposure `V_s⁺`.
   `potentialFutureExposure_eq_max` gives `PFE_α(s) = max (VaR_α(V_s)) 0`, since `x ↦ max x 0` is
   monotone and continuous (`valueAtRisk_comp`). `potentialFutureExposure_of_hasLaw_gaussianReal`
@@ -32,16 +29,10 @@ process, `ν` its measure): ENE (the mirror of `CVA.expectedExposure`), PFE (thr
 
 ## Main definitions
 
-* `expectedNegativeExposure`: `ENE(s) = E_ν[(−V_s)⁺]` of an exposure process `V`.
 * `potentialFutureExposure`: `PFE_α(s)`, the `α`-level value-at-risk of the exposure `V_s⁺`.
 
 ## Main results
 
-* `expectedNegativeExposure_eq_sub_integral`: `ENE(s) = EE(s) − E[V_s]` for integrable `V_s`.
-* `expectedNegativeExposure_gaussian`: the closed form of `ENE` for `V_s = a + b√s Z` with
-  `Z ~ N(0, 1)`, `b > 0` and `s > 0`.
-* `expectedExposure_of_hasLaw_gaussianReal`: for `V_s ~ N(m, v)` with `v > 0`,
-  `EE(s) = m Φ(m/√v) + √v φ(m/√v)`.
 * `potentialFutureExposure_eq_max`: `PFE_α(s) = max (VaR_α(V_s)) 0` for `α ∈ (0, 1)`.
 * `potentialFutureExposure_gaussian`: for `V_s = m + σ√s Z` with `Z ~ N(0, 1)`, `σ ≥ 0` and
   `α ∈ (0, 1)`, `PFE_α(s) = max (gaussianVaR m (σ√s) (Φ⁻¹ α)) 0`.
@@ -69,54 +60,6 @@ open MeasureTheory Real ProbabilityTheory Set
 open scoped NNReal
 
 variable {Ω₁ : Type*} {m₁ : MeasurableSpace Ω₁} {ν : Measure Ω₁}
-
-/-- Expected negative exposure `ENE(s) = E_ν[(-V_s)⁺]`, the mirror of `expectedExposure`. -/
-noncomputable def expectedNegativeExposure (V : ℝ → Ω₁ → ℝ) (ν : Measure Ω₁) (s : ℝ) : ℝ :=
-  ∫ ω, max (-(V s ω)) 0 ∂ν
-
-/-- **ENE = EE − E[V]**: for `V_s` integrable, from `(-x)⁺ = x⁺ - x` pointwise and integral
-linearity. -/
-theorem expectedNegativeExposure_eq_sub_integral {V : ℝ → Ω₁ → ℝ} {s : ℝ}
-    (hV : Integrable (V s) ν) :
-    expectedNegativeExposure V ν s = expectedExposure V ν s - ∫ ω, V s ω ∂ν := by
-  rw [expectedNegativeExposure, expectedExposure, ← integral_sub hV.pos_part hV]
-  congr with ω
-  linarith [max_zero_sub_max_neg_zero_eq_self (V s ω)]
-
-/-- **Gaussian expected negative exposure**: for `Z ~ N(0,1)`, `s > 0`, `b > 0`,
-`E[(a + b√s Z)⁻] = E[(a+b√s Z)⁺] - a`, specializing `expectedNegativeExposure_eq_sub_integral`
-to the exposure model of `CVA.expectedExposure_gaussian`, since `E[a + b√s Z] = a`. -/
-theorem expectedNegativeExposure_gaussian [IsProbabilityMeasure ν] {Z : Ω₁ → ℝ}
-    (hZ : HasLaw Z (gaussianReal 0 1) ν) {a b s : ℝ} (hb : 0 < b) (hs : 0 < s) :
-    expectedNegativeExposure (fun s ω ↦ a + b * √s * Z ω) ν s
-      = a * Phi (a / (b * √s)) + b * √s * gaussianPDFReal 0 1 (a / (b * √s)) - a := by
-  have hZi : Integrable Z ν := hZ.hasGaussianLaw.integrable
-  have hVi : Integrable (fun ω ↦ a + b * √s * Z ω) ν :=
-    (integrable_const a).add (hZi.const_mul (b * √s))
-  have hmean : ∫ ω, (a + b * √s * Z ω) ∂ν = a := by
-    rw [(gaussianReal_const_add (gaussianReal_const_mul hZ (b * √s)) a).integral_eq,
-      integral_id_gaussianReal]
-    ring
-  rw [expectedNegativeExposure_eq_sub_integral hVi, hmean, expectedExposure,
-    expectedExposure_gaussian hZ hb hs]
-
-/-- **Gaussian expected exposure at the law**: for `V_s ~ N(m, v)` with `v > 0`,
-`EE(s) = m Φ(m/√v) + √v φ(m/√v)`. The law of `V_s` is that of `m + √v Z` for `Z ~ N(0,1)`, so
-this is `CVA.expectedExposure_gaussian` at `b = √v`, `s = 1`, transported through the law. -/
-theorem expectedExposure_of_hasLaw_gaussianReal {V : ℝ → Ω₁ → ℝ} {s m : ℝ} {v : ℝ≥0}
-    (hV : HasLaw (V s) (gaussianReal m v) ν) (hv : 0 < v) :
-    expectedExposure V ν s
-      = m * Phi (m / √(v : ℝ)) + √(v : ℝ) * gaussianPDFReal 0 1 (m / √(v : ℝ)) := by
-  have hZ : HasLaw (fun z : ℝ ↦ z) (gaussianReal 0 1) (gaussianReal 0 1) := HasLaw.id
-  have hW : HasLaw (fun z : ℝ ↦ m + √(v : ℝ) * √1 * z) (gaussianReal m v) (gaussianReal 0 1) := by
-    convert gaussianReal_const_add (gaussianReal_const_mul hZ (√(v : ℝ) * √1)) m using 2
-    · simp
-    · ext; simp
-  have h := expectedExposure_gaussian hZ (a := m) (Real.sqrt_pos.2 (NNReal.coe_pos.2 hv)) one_pos
-  have hf : AEStronglyMeasurable (fun x : ℝ ↦ max x 0) (gaussianReal m v) := by fun_prop
-  calc expectedExposure V ν s = ∫ x, max x 0 ∂gaussianReal m v := hV.integral_comp hf
-    _ = ∫ z, max (m + √(v : ℝ) * √1 * z) 0 ∂gaussianReal 0 1 := (hW.integral_comp hf).symm
-    _ = _ := by simpa using h
 
 /-- **Potential future exposure**: the `α`-level value-at-risk of the exposure `V_s⁺` at time
 `s`, `PFE_α(s) = VaR_α(V_s⁺)`. -/

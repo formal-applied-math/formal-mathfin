@@ -316,7 +316,7 @@ import MathFin.Probability.Brownian.Ito.StochasticFubini
 import MathFin.Probability.Brownian.Ito.StochasticFubiniIto
 
 -- Contracts
-import MathFin.Contracts.Instruments.CappedCall
+import MathFin.Contracts.Instruments.CallPayoff
 -- Contracts tower: a reified payoff language, model-agnostic until priced
 -- (Bilokon, "The Contract Is Not the Model", 9 August 2026)
 import MathFin.Contracts.Core
@@ -669,6 +669,7 @@ import MathFin.Models.StochVol.LSVLeverage
 import MathFin.Models.Rates.InterestRateSwap
 import MathFin.Models.Rates.CMS
 import MathFin.Models.Rates.FRA
+import MathFin.Models.Rates.DeterministicCurve
 import MathFin.Models.Rates.NelsonSiegelSvensson
 import MathFin.Models.BlackScholes.BlackScholes
 import MathFin.Models.BlackScholes.BlackScholesExchange

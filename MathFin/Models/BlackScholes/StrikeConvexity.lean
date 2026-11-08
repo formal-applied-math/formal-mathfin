@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Models.BlackScholes.PutGreeks
+public import MathFin.Contracts.Instruments.CallPayoff
 public import Mathlib.Algebra.Order.Star.Real
 public import Mathlib.RingTheory.Flat.TorsionFree
 public import Mathlib.RingTheory.Smooth.Flat
@@ -63,9 +64,6 @@ finitely supported measure.
 
 * `StrictConvexOn.smul`: a strictly convex function scaled by a positive
   constant is strictly convex.
-* `convexOn_sub_const_id`: `K ↦ a − K` is convex.
-* `convexOn_call_payoff`: `K ↦ max(S − K, 0)` is convex in K (payoff level).
-* `antitone_call_payoff`: `K ↦ max(S − K, 0)` is antitone in K.
 * `convexOn_integral_call`: `K ↦ ∫ (X − K)⁺ dμ` is convex, for any integrable
   `X` under a finite measure.
 * `strictConvexOn_integral_call`: it is strictly convex on a convex set of
@@ -101,36 +99,6 @@ theorem StrictConvexOn.smul {𝕜 E β : Type*} [CommSemiring 𝕜] [PartialOrde
 namespace MathFin
 
 open MeasureTheory Set Real ProbabilityTheory
-
-/-- The affine function `K ↦ a − K` is convex on `Set.univ`. Affine
-functions are simultaneously convex and concave; the inequality holds
-with equality. -/
-lemma convexOn_sub_const_id (a : ℝ) :
-    ConvexOn ℝ Set.univ (fun K : ℝ ↦ a - K) := by
-  refine ⟨convex_univ, fun K₁ _ K₂ _ s t _ _ hst ↦ ?_⟩
-  change a - (s • K₁ + t • K₂) ≤ s • (a - K₁) + t • (a - K₂)
-  simp only [smul_eq_mul]
-  -- Equality (affine functions are tight): `s·a + t·a = a` via `s + t = 1`.
-  have h_sa_ta : s * a + t * a = a := by linear_combination a * hst
-  linarith
-
-/-- **Call payoff is convex in the strike**: `K ↦ max(S − K, 0)` is convex.
-
-This is the structural spine of static option-price no-arbitrage relations.
-Butterfly non-negativity and Breeden-Litzenberger PDF positivity are
-discrete and infinitesimal consequences (respectively) of this single fact,
-after passing through risk-neutral expectation. -/
-lemma convexOn_call_payoff (S : ℝ) :
-    ConvexOn ℝ Set.univ (fun K : ℝ ↦ max (S - K) 0) :=
-  (convexOn_sub_const_id S).sup (convexOn_const (0 : ℝ) convex_univ)
-
-/-- **Call payoff is antitone in the strike**: higher strikes pay less.
-
-Equivalent to monotonicity of `max(·, 0)` composed with `K ↦ S − K` (which
-is itself antitone). The single-line consequence of monotonicity of `max`. -/
-lemma antitone_call_payoff (S : ℝ) :
-    Antitone (fun K : ℝ ↦ max (S - K) 0) :=
-  fun _ _ h ↦ max_le_max (by linarith) le_rfl
 
 /-! ## The price under any law
 

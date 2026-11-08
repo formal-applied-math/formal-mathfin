@@ -10,7 +10,7 @@ public import MathFin.Models.Bachelier.Bachelier
 public import Mathlib.Probability.BrownianMotion.Basic
 
 /-!
-# Bridge: `BSCallHyp` / `BachelierHyp` from a Brownian motion
+# `BSCallHyp` / `BachelierHyp` from a Brownian motion
 
 The existing `BSCallHyp` and `BachelierHyp` hypotheses are stated at the
 **marginal level**: `Z ~ N(0, 1)` under `Q` with `S_T = bsTerminal …(Z ω)`

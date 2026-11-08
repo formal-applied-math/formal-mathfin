@@ -10,7 +10,7 @@ public import MathFin.Probability.Gaussian.GaussianMoments
 public import MathFin.Models.Rates.VasicekSDEGaussian
 
 /-!
-# Bridge: the OU Hermite modes decay at their eigenvalues under the Vasicek law
+# The OU Hermite modes decay at their eigenvalues under the Vasicek law
 
 `Probability/Brownian/SDE/OUSpectral.lean` proves, as polynomial algebra, that the scaled Hermite
 polynomials `q_n(x) = He_n(x/s)` are eigenfunctions of the OU generator

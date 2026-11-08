@@ -5,7 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Contracts.Core
+public import MathFin.Contracts.Instruments.FixedIncome
 public import Mathlib.Probability.Martingale.Basic
 
 /-!
@@ -44,6 +44,9 @@ is load-bearing.
   fixed times `0` and `T` — it carries no equivalence content, so it is stated against
   `Martingale` directly rather than the library's `IsEMM` bundle, whose `ac`/`ac'` fields
   this argument never needs.
+* `Contract.value_eq_of_pathPV_eq`, `value_fixedFlows` — a contract that pays the same amount
+  along every scenario, a schedule of fixed cash flows among them, is worth that amount in every
+  model.
 * `Contract.value_congr_ae` — a fixed-dated contract has the same value in two models that agree
   almost surely at the `(underlying, date)` observations it reads (`Contract.obsList`).
 * `Contract.value_process_martingale` — the conditional-expectation value process of a
@@ -172,40 +175,6 @@ theorem Contract.value_process_martingale {Q : Measure Ω} {𝓕 : Filtration �
 
 /-! ### Two models that agree where the contract looks -/
 
-/-- A payoff evaluates the same on two scenarios that agree at the observations it reads. -/
-theorem Payoff.eval_congr {s s' : Scenario ι} (a : Payoff ι)
-    (h : ∀ p ∈ a.obsList, s p.1 p.2 = s' p.1 p.2) : a.eval s = a.eval s' := by
-  induction a with
-  | const _ => rfl
-  | obs i t => exact h (i, t) (List.mem_singleton_self _)
-  | add a b ha hb | sub a b ha hb | mul a b ha hb | max a b ha hb | min a b ha hb
-  | indicatorLt a b ha hb =>
-      obtain ⟨hl, hr⟩ := List.forall_mem_append.1 h
-      simp only [Payoff.eval, ha hl, hb hr]
-  | rpow a _ ha => simp only [Payoff.eval, ha h]
-
-/-- The `(underlying, date)` observations a `Contract` reads (those of its payoffs; the dates of
-a `payAtHit` are not listed, which is why the congruence below asks for `FixedDated`). -/
-def Contract.obsList : Contract ι → List (ι × ℝ≥0)
-  | .zero => []
-  | .pay _ a => a.obsList
-  | .payAtHit _ _ a => a.obsList
-  | .both a b => a.obsList ++ b.obsList
-  | .scale _ a => a.obsList
-
-/-- A fixed-dated contract generates the same cash flows along two scenarios that agree at the
-observations it reads. -/
-theorem Contract.cashflows_congr {s s' : Scenario ι} (c : Contract ι) (hc : c.FixedDated)
-    (h : ∀ p ∈ c.obsList, s p.1 p.2 = s' p.1 p.2) : c.cashflows s = c.cashflows s' := by
-  induction c with
-  | zero => rfl
-  | pay t a => simp only [Contract.cashflows, Payoff.eval_congr a h]
-  | payAtHit _ _ _ => exact hc.elim
-  | both a b ha hb =>
-      obtain ⟨hl, hr⟩ := List.forall_mem_append.1 h
-      simp only [Contract.cashflows, ha hc.1 hl, hb hc.2 hr]
-  | scale _ a ha => simp only [Contract.cashflows, ha hc h]
-
 /-- **A fixed-dated contract has the same value in two models that agree almost surely at the
 observations it reads.** The models need not agree anywhere else: this is what lets a model that
 is only Brownian up to a horizon price a contract whose dates lie before it. -/
@@ -219,5 +188,18 @@ theorem Contract.value_congr_ae {Q : Measure Ω} {D : ℝ≥0 → ℝ} {X Y : ι
   filter_upwards [hall] with ω hω
   unfold Contract.pathPV
   rw [Contract.cashflows_congr c hc (s := scenarioAt X ω) (s' := scenarioAt Y ω) hω]
+
+/-- **A contract that pays the same along every scenario is worth that amount** in every model,
+under any probability measure. -/
+theorem Contract.value_eq_of_pathPV_eq {Q : Measure Ω} [IsProbabilityMeasure Q] {D : ℝ≥0 → ℝ}
+    (X : ι → ℝ≥0 → Ω → ℝ) {c : Contract ι} {v : ℝ} (h : ∀ s, c.pathPV D s = v) :
+    c.value Q D X = v := by
+  simp [Contract.value, h]
+
+/-- In every model, a schedule of fixed cash flows is worth `∑ D(tᵢ) cᵢ`. -/
+theorem value_fixedFlows {Q : Measure Ω} [IsProbabilityMeasure Q] (D : ℝ≥0 → ℝ)
+    (X : ι → ℝ≥0 → Ω → ℝ) (t : ℕ → ℝ≥0) (c : ℕ → ℝ) (n : ℕ) :
+    (fixedFlows t c n : Contract ι).value Q D X = ∑ i ∈ Finset.range n, D (t i) * c i :=
+  Contract.value_eq_of_pathPV_eq X fun s ↦ pathPV_fixedFlows D s t c n
 
 end MathFin.Contracts

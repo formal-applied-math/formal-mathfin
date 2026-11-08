@@ -10,7 +10,7 @@ public import MathFin.Choice.Portfolio.MarkowitzNAsset
 public import MathFin.Risk.GaussianRiskMarkowitz
 
 /-!
-# Bridge: concentration is diversifiable variance
+# Concentration is diversifiable variance
 
 For uncorrelated assets of common variance `σ²`, the N-asset Markowitz portfolio
 variance equals `σ²` times the Herfindahl–Hirschman concentration index

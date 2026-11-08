@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Pricing.Value
 public import MathFin.Contracts.Instruments.Options
 
 /-!
@@ -118,6 +119,18 @@ theorem value_forward_of_integral [IsProbabilityMeasure Q]
   simp only [Payoff.eval, scenarioAt, mul_sub]
   rw [integral_sub hX (integrable_const _), hS₀, integral_const, probReal_univ, one_smul]
   ring
+
+/-- **Put–call parity, in any model.** For any pricing measure, discount and model, if the put's
+and the forward's discounted payoffs are integrable, the call is worth the put plus the forward:
+it pays exactly that combination on every path (`pathPV_europeanCall_eq_put_add_forward`). -/
+theorem value_europeanCall_eq_put_add_forward (Q : Measure Ω) (D : ℝ≥0 → ℝ)
+    (X : Unit → ℝ≥0 → Ω → ℝ) {K : ℝ} {T : ℝ≥0}
+    (hput : Integrable (fun ω ↦ (europeanPut K T).pathPV D (scenarioAt X ω)) Q)
+    (hfwd : Integrable (fun ω ↦ (forward K T).pathPV D (scenarioAt X ω)) Q) :
+    (europeanCall K T).value Q D X
+      = (europeanPut K T).value Q D X + (forward K T).value Q D X := by
+  rw [← Contract.value_both _ _ _ _ _ hput hfwd]
+  simp only [Contract.value, pathPV_europeanCall_eq_put_add_forward]
 
 /-- **Put–call parity in closed form, in any model** in which the discounted underlying at `T`
 is integrable with mean `S₀`: `C − P = S₀ − K D(T)`. No integrability of either option is

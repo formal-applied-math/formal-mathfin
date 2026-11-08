@@ -528,7 +528,7 @@
       "domain": "mathematical_finance",
       "description": "ENE(s) = E[(-V_s)⁺]. For integrable V_s, ENE = EE − E[V_s]; for V_s = a + b√s Z with Z ~ N(0,1), b > 0, s > 0, ENE = aΦ(d) + b√s φ(d) − a, d = a/(b√s).",
       "code": {
-        "lean": "import MathFin.Risk.ExposureMeasures\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The expected negative exposure of a Gaussian exposure, in closed form. -/\ntheorem expected_negative_exposure_gaussian {Ω₁ : Type*} {m₁ : MeasurableSpace Ω₁}\n    {ν : Measure Ω₁} [IsProbabilityMeasure ν] {Z : Ω₁ → ℝ}\n    (hZ : HasLaw Z (gaussianReal 0 1) ν) {a b s : ℝ} (hb : 0 < b) (hs : 0 < s) :\n    CVA.expectedNegativeExposure (fun s ω ↦ a + b * √s * Z ω) ν s\n      = a * Phi (a / (b * √s)) + b * √s * gaussianPDFReal 0 1 (a / (b * √s)) - a :=\n  MathFin.CVA.expectedNegativeExposure_gaussian hZ hb hs\n\n"
+        "lean": "import MathFin.Models.Credit.DVA\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The expected negative exposure of a Gaussian exposure, in closed form. -/\ntheorem expected_negative_exposure_gaussian {Ω₁ : Type*} {m₁ : MeasurableSpace Ω₁}\n    {ν : Measure Ω₁} [IsProbabilityMeasure ν] {Z : Ω₁ → ℝ}\n    (hZ : HasLaw Z (gaussianReal 0 1) ν) {a b s : ℝ} (hb : 0 < b) (hs : 0 < s) :\n    CVA.expectedNegativeExposure (fun s ω ↦ a + b * √s * Z ω) ν s\n      = a * Phi (a / (b * √s)) + b * √s * gaussianPDFReal 0 1 (a / (b * √s)) - a :=\n  MathFin.CVA.expectedNegativeExposure_gaussian hZ hb hs\n\n"
       },
       "metadata": {
         "reference": "J. C. Hull, Options, Futures, and Other Derivatives (CVA/exposure chapter): expected negative exposure",
@@ -548,7 +548,7 @@
       "domain": "mathematical_finance",
       "description": "EE(s) = E[V_s⁺]. For V_s ~ N(m, v) with v > 0, EE(s) = m Φ(m/√v) + √v φ(m/√v), with φ the standard normal density. Only the law of V_s is assumed, not a representation of V_s.",
       "code": {
-        "lean": "import MathFin.Risk.ExposureMeasures\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- Expected exposure of a Gaussian exposure, at its law. -/\ntheorem expected_exposure_gaussian_law {Ω₁ : Type*} {m₁ : MeasurableSpace Ω₁}\n    {ν : Measure Ω₁} {V : ℝ → Ω₁ → ℝ} {s m : ℝ} {v : ℝ≥0}\n    (hV : HasLaw (V s) (gaussianReal m v) ν) (hv : 0 < v) :\n    CVA.expectedExposure V ν s\n      = m * Phi (m / √(v : ℝ)) + √(v : ℝ) * gaussianPDFReal 0 1 (m / √(v : ℝ)) :=\n  CVA.expectedExposure_of_hasLaw_gaussianReal hV hv\n"
+        "lean": "import MathFin.Models.Credit.CVA\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- Expected exposure of a Gaussian exposure, at its law. -/\ntheorem expected_exposure_gaussian_law {Ω₁ : Type*} {m₁ : MeasurableSpace Ω₁}\n    {ν : Measure Ω₁} {V : ℝ → Ω₁ → ℝ} {s m : ℝ} {v : ℝ≥0}\n    (hV : HasLaw (V s) (gaussianReal m v) ν) (hv : 0 < v) :\n    CVA.expectedExposure V ν s\n      = m * Phi (m / √(v : ℝ)) + √(v : ℝ) * gaussianPDFReal 0 1 (m / √(v : ℝ)) :=\n  CVA.expectedExposure_of_hasLaw_gaussianReal hV hv\n"
       },
       "metadata": {
         "reference": "J. C. Hull, Options, Futures, and Other Derivatives (CVA/exposure chapter): expected exposure",

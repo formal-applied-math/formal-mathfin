@@ -199,7 +199,7 @@ theorem pricingKernelTwoState_nonneg
 /-- **No-arbitrage ⟹ butterfly spreads cost ≥ 0** (FTAP + convex pricing).
 The FTAP two-state state prices are non-negative
 (`statePricesTwoState_nonneg`, a consequence of `z_up > 0 > z_down`), so
-the finite-state call-price functional `K ↦ Σᵢ qᵢ · max(Sᵢ − K, 0)` is
+the call price `K ↦ statePricePricing univ q (max (S · − K) 0)` is
 convex in the strike and the butterfly combination
 `C(K₁) − 2·C((K₁+K₃)/2) + C(K₃)` is non-negative
 (`Pricing/ConvexPricingFunctional.callPrice_finiteState_butterfly_nonneg`).
@@ -212,10 +212,12 @@ the FTAP / state-price framework. -/
 theorem stateprice_call_butterfly_nonneg
     (z_up z_down rT : ℝ) (h_up : 0 < z_up) (h_down : z_down < 0)
     (S : Fin 2 → ℝ) (K₁ K₃ : ℝ) :
-    0 ≤ (∑ i, statePricesTwoState z_up z_down rT i * max (S i - K₁) 0)
-        - 2 * (∑ i, statePricesTwoState z_up z_down rT i *
-              max (S i - (K₁ + K₃) / 2) 0)
-        + (∑ i, statePricesTwoState z_up z_down rT i * max (S i - K₃) 0) :=
+    0 ≤ statePricePricing Finset.univ (statePricesTwoState z_up z_down rT)
+          (fun i ↦ max (S i - K₁) 0)
+        - 2 * statePricePricing Finset.univ (statePricesTwoState z_up z_down rT)
+          (fun i ↦ max (S i - (K₁ + K₃) / 2) 0)
+        + statePricePricing Finset.univ (statePricesTwoState z_up z_down rT)
+          (fun i ↦ max (S i - K₃) 0) :=
   callPrice_finiteState_butterfly_nonneg Finset.univ S
     (statePricesTwoState z_up z_down rT)
     (fun i _ ↦ statePricesTwoState_nonneg z_up z_down rT h_up h_down i) K₁ K₃

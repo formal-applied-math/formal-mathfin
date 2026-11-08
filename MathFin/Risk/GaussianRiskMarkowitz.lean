@@ -12,7 +12,7 @@ public import MathFin.Choice.Portfolio.Equicorrelation
 public import Mathlib.Probability.Distributions.Gaussian.Fernique
 
 /-!
-# Bridge: for Gaussian risk factors, VaR and ES rank portfolios as Markowitz does
+# For Gaussian risk factors, VaR and ES rank portfolios as Markowitz does
 
 Value-at-risk and expected shortfall are translation invariant, positively homogeneous and law
 invariant (`Risk/ValueAtRisk.lean`). Those three properties alone already give the

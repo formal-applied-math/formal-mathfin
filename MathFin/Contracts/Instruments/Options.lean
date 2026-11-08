@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Pricing.Value
-public import MathFin.Contracts.Instruments.CappedCall
+public import MathFin.Contracts.Core
+public import MathFin.Contracts.Instruments.CallPayoff
 
 /-!
 # Options, as contracts
@@ -14,9 +14,10 @@ public import MathFin.Contracts.Instruments.CappedCall
 The instruments: the European call and put, the cash-or-nothing digital, the forward, the capped
 call and the power call, each a `Contract Unit` written in the payoff language of
 `Contracts/Core.lean`; the exchange option is a `Contract (Fin 2)` on two underlyings. Nothing here
-assumes a model. What is proved is what the instruments pay, along every scenario, and what follows
-for their values in every model through the linearity of `Contract.value`. Their prices in a
-particular model live in that model's file (`Models/BlackScholes/BlackScholes.lean`).
+assumes a model or a pricing measure. What is proved is what the instruments pay, along every
+scenario. What follows for their values in every model, through the linearity of
+`Contract.value`, is in `Pricing/Parity.lean`, and their prices in a particular model live in that
+model's file (`Models/BlackScholes/BlackScholes.lean`).
 
 The capped call is *defined* by composition, as a long call at `K₁` and a short call at `K₂`;
 `cappedCall_payoff_eq` is what earns it the name: for `K₁ ≤ K₂` it pays
@@ -36,8 +37,6 @@ The capped call is *defined* by composition, as a long call at `K₁` and a shor
 ## Main results
 
 * `pathPV_europeanCall_eq_put_add_forward` — a call pays a put plus a forward on every path.
-* `value_europeanCall_eq_put_add_forward` — so, in any model where the put's and the forward's
-  discounted payoffs are integrable, the call is worth the put plus the forward.
 * `cappedCall_payoff_eq` — for `K₁ ≤ K₂`, `cappedCall K₁ K₂ T` pays the capped payoff.
 
 ## Source
@@ -174,17 +173,5 @@ theorem pathPV_europeanCall_eq_put_add_forward (D : ℝ≥0 → ℝ) (s : Scenar
   have h := max_zero_sub_max_neg_zero_eq_self (s () T - K)
   rw [neg_sub] at h
   linear_combination D T * h
-
-/-- **Put–call parity, in any model.** For any pricing measure, discount and model, if the put's
-and the forward's discounted payoffs are integrable, the call is worth the put plus the forward:
-it pays exactly that combination on every path (`pathPV_europeanCall_eq_put_add_forward`). -/
-theorem value_europeanCall_eq_put_add_forward (Q : Measure Ω) (D : ℝ≥0 → ℝ)
-    (X : Unit → ℝ≥0 → Ω → ℝ) {K : ℝ} {T : ℝ≥0}
-    (hput : Integrable (fun ω ↦ (europeanPut K T).pathPV D (scenarioAt X ω)) Q)
-    (hfwd : Integrable (fun ω ↦ (forward K T).pathPV D (scenarioAt X ω)) Q) :
-    (europeanCall K T).value Q D X
-      = (europeanPut K T).value Q D X + (forward K T).value Q D X := by
-  rw [← Contract.value_both _ _ _ _ _ hput hfwd]
-  simp only [Contract.value, pathPV_europeanCall_eq_put_add_forward]
 
 end MathFin.Contracts

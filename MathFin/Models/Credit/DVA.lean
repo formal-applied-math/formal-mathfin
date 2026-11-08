@@ -5,7 +5,8 @@ Authors: Yang Ye
 -/
 module
 
-public import MathFin.Risk.ExposureMeasures
+public import MathFin.Models.Credit.CVA
+public import Mathlib.Probability.Distributions.Gaussian.HasGaussianLaw.Basic
 
 /-!
 # DVA as a CVA mirror
@@ -26,11 +27,16 @@ their joint law and is out of scope.
 
 ## Main definitions
 
+* `expectedNegativeExposure`: `ENE(s) = E_ν[(−V_s)⁺]`, the mirror of `CVA.expectedExposure`: the
+  expected exposure the counterparty has to the bank.
 * `dva`: the bank's own-default mirror of `cva`, taken at the bank's own default time and hazard
   with the exposure `-V` seen from the bank's side.
 
 ## Main results
 
+* `expectedNegativeExposure_eq_sub_integral`: `ENE(s) = EE(s) − E[V_s]` for integrable `V_s`, from
+  the pointwise identity `(−x)⁺ = x⁺ − x`; `expectedNegativeExposure_gaussian` is its closed form
+  for `V_s = a + b√s Z` with `Z ~ N(0, 1)`, `b > 0` and `s > 0`.
 * `dva_eq_integral_expectedNegativeExposure`: with the bank's default independent of the
   exposure and a deterministic continuous hazard,
   `DVA = LGD_B · ∫₀ᵀ D(s) · ENE(s) · λ(s)Q(s) ds`, the integral of the expected negative exposure
@@ -57,6 +63,36 @@ open MeasureTheory Real ProbabilityTheory MathFin.DefaultDensity
 
 variable {Ω₁ Ω₂ : Type*} {m₁ : MeasurableSpace Ω₁} {m₂ : MeasurableSpace Ω₂}
   {ν : Measure Ω₁} {μ : Measure Ω₂}
+
+/-- Expected negative exposure `ENE(s) = E_ν[(-V_s)⁺]`, the mirror of `expectedExposure`. -/
+noncomputable def expectedNegativeExposure (V : ℝ → Ω₁ → ℝ) (ν : Measure Ω₁) (s : ℝ) : ℝ :=
+  ∫ ω, max (-(V s ω)) 0 ∂ν
+
+/-- **ENE = EE − E[V]**: for `V_s` integrable, from `(-x)⁺ = x⁺ - x` pointwise and integral
+linearity. -/
+theorem expectedNegativeExposure_eq_sub_integral {V : ℝ → Ω₁ → ℝ} {s : ℝ}
+    (hV : Integrable (V s) ν) :
+    expectedNegativeExposure V ν s = expectedExposure V ν s - ∫ ω, V s ω ∂ν := by
+  rw [expectedNegativeExposure, expectedExposure, ← integral_sub hV.pos_part hV]
+  congr with ω
+  linarith [max_zero_sub_max_neg_zero_eq_self (V s ω)]
+
+/-- **Gaussian expected negative exposure**: for `Z ~ N(0,1)`, `s > 0`, `b > 0`,
+`E[(a + b√s Z)⁻] = E[(a+b√s Z)⁺] - a`, specializing `expectedNegativeExposure_eq_sub_integral`
+to the exposure model of `CVA.expectedExposure_gaussian`, since `E[a + b√s Z] = a`. -/
+theorem expectedNegativeExposure_gaussian [IsProbabilityMeasure ν] {Z : Ω₁ → ℝ}
+    (hZ : HasLaw Z (gaussianReal 0 1) ν) {a b s : ℝ} (hb : 0 < b) (hs : 0 < s) :
+    expectedNegativeExposure (fun s ω ↦ a + b * √s * Z ω) ν s
+      = a * Phi (a / (b * √s)) + b * √s * gaussianPDFReal 0 1 (a / (b * √s)) - a := by
+  have hZi : Integrable Z ν := hZ.hasGaussianLaw.integrable
+  have hVi : Integrable (fun ω ↦ a + b * √s * Z ω) ν :=
+    (integrable_const a).add (hZi.const_mul (b * √s))
+  have hmean : ∫ ω, (a + b * √s * Z ω) ∂ν = a := by
+    rw [(gaussianReal_const_add (gaussianReal_const_mul hZ (b * √s)) a).integral_eq,
+      integral_id_gaussianReal]
+    ring
+  rw [expectedNegativeExposure_eq_sub_integral hVi, hmean, expectedExposure,
+    expectedExposure_gaussian hZ hb hs]
 
 /-- **DVA**: the bank's own-default mirror of `cva`, at the bank's own default time `τBank` and
 the exposure `-V` seen from the bank's side. Default is independent of the exposure because `cva`

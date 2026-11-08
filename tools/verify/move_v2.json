@@ -211,7 +211,7 @@
  "MathFin.BlackScholes.Call": "MathFin.Models.BlackScholes.Call",
  "MathFin.BlackScholes.CallPriceFunction": "MathFin.Models.ModelFree.CallPriceFunction",
  "MathFin.BlackScholes.CallSpreadDigital": "MathFin.Models.ModelFree.CallSpreadDigital",
- "MathFin.BlackScholes.CappedCall": "MathFin.Contracts.Instruments.CappedCall",
+ "MathFin.BlackScholes.CappedCall": "MathFin.Contracts.Instruments.CallPayoff",
  "MathFin.BlackScholes.Chooser": "MathFin.Models.BlackScholes.Chooser",
  "MathFin.BlackScholes.ChooserComposition": "MathFin.Models.BlackScholes.ChooserComposition",
  "MathFin.BlackScholes.DeltaHedge": "MathFin.Models.BlackScholes.DeltaHedge",

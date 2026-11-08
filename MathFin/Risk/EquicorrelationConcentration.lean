@@ -9,7 +9,7 @@ public import MathFin.Risk.Concentration
 public import MathFin.Choice.Portfolio.MarkowitzNAsset
 
 /-!
-# Bridge: equicorrelated variance is concentration plus a systematic floor
+# Equicorrelated variance is concentration plus a systematic floor
 
 For a covariance kernel with a common variance `v` and a common pairwise covariance `ρ v`
 (`σᵢᵢ = v`, and `σᵢⱼ = ρ v` for `i ≠ j`), the Markowitz portfolio variance splits as

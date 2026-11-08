@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Contracts.Adapted
-public import MathFin.Contracts.Instruments.Options
+public import MathFin.Pricing.Parity
 public import MathFin.Models.Binomial.PathMeasure
 public import MathFin.Models.Binomial.MartingaleRepresentation
 

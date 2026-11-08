@@ -10,7 +10,7 @@ public import MathFin.Models.Rates.ABCDVolatility
 public import MathFin.Models.Forwards.Black76
 
 /-!
-# Bridge: ABCD volatility prices through Black-76 at its root-mean-square
+# ABCD volatility prices through Black-76 at its root-mean-square
 
 `Models/Rates/ABCDVolatility.lean` gives the ABCD instantaneous volatility
 `f(τ) = (a + bτ)e^{−cτ} + d` of a forward rate as a function of its time to maturity `τ`, and

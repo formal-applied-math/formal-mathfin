@@ -11,7 +11,7 @@ public import MathFin.Models.Credit.HazardCurve
 public import MathFin.Models.Credit.DefaultDensity
 
 /-!
-# Bridge: actuarial survival ≡ reduced-form credit survival
+# Actuarial survival ≡ reduced-form credit survival
 
 The actuarial survival function built from a force of mortality `μ` (`survivalFromForce`,
 `Insurance/Mortality.lean`) and the reduced-form credit survival curve built from a hazard rate `h`

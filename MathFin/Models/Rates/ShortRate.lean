@@ -5,7 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Contracts.Instruments.FixedIncome
+public import MathFin.Pricing.Value
 public import MathFin.Models.Rates.HullWhiteCalibration
 public import MathFin.Models.Rates.GSRPiecewiseVol
 

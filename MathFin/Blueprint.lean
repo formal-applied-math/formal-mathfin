@@ -85,7 +85,7 @@ import MathFin.Models.StochVol.Heston
 import MathFin.Markets.DeFi.LiquidationAsStructuralDefault
 import MathFin.Risk.Credit.VasicekIRB
 import MathFin.Probability.Brownian.Ito.StochasticFubiniIto
-import MathFin.Contracts.Instruments.FixedIncome
+import MathFin.Models.Rates.DeterministicCurve
 import MathFin.Risk.GaussianRiskMarkowitz
 import MathFin.Markets.DeFi.UniswapV3CoveredCallPrice
 import MathFin.Models.Rates.Caplet

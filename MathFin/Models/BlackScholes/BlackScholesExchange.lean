@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Contracts.Instruments.Options
+public import MathFin.Pricing.Value
 public import MathFin.Models.BlackScholes.MargrabeGrounding
 
 /-!
