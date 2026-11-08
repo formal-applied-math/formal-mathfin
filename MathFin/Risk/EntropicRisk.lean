@@ -74,7 +74,8 @@ theorem isLawInvariant_entropicRisk {Ω : Type*} [MeasurableSpace Ω] {P : Measu
     IsLawInvariant P fun X ↦ entropicRisk X P γ := by
   have key {X : Ω → ℝ} (hX : AEMeasurable X P) :
       ∫ ω, exp (γ * X ω) ∂P = ∫ x, exp (γ * x) ∂(P.map X) :=
-    (integral_map (f := fun x ↦ exp (γ * x)) hX (Continuous.aestronglyMeasurable (by fun_prop))).symm
+    (integral_map (f := fun x ↦ exp (γ * x)) hX
+      (Continuous.aestronglyMeasurable (by fun_prop))).symm
   intro X Y hX hY h
   simp only [entropicRisk, key hX, key hY, h]
 
