@@ -119,6 +119,7 @@ graph TD
   bsPde["Black–Scholes PDE (from the closed form)"]:::proved
   bscallhypBrownian["BSCallHyp from a Brownian model"]:::proved
   capmEquilibrium["CAPM from market equilibrium"]:::proved
+  coherentRiskRepresentation["Representation of a coherent risk measure"]:::proved
   continuousFtap["Discounted risk-neutral GBM is a martingale (EMM property)"]:::proved
   expectationIto["Expectation-form Itô / Feynman–Kac"]:::proved
   gbmSde["GBM coefficient matching (algebraic)"]:::proved
@@ -170,6 +171,8 @@ graph TD
   bracketCompensator["The bracket compensates the square"]:::proved
   bsDeltaHedge["The Black–Scholes delta hedge"]:::proved
   expectedShortfallCoherent["Expected shortfall is coherent"]:::proved
+  expectedShortfallDual["Dual form of expected shortfall"]:::proved
+  expectedShortfallDualSet["Expected shortfall's representing set"]:::proved
   itoFormulaL2["Itô formula, L² (C³ bounded — Summit A)"]:::proved
   itoIntegralBrownian["∫₀ᵀ B dB = ½(B_T² − B₀² − T)"]:::proved
   itoProductRule["Itô product rule"]:::proved
@@ -289,7 +292,6 @@ graph TD
     varianceOptimalHedging["Variance-optimal hedging"]:::frontier
   end
   subgraph frontier_risk["⏳ frontier · risk"]
-    expectedShortfallDualSet["Expected shortfall's representing set"]:::frontier
     expectedUtilityRiskAversion["Expected utility and risk aversion"]:::frontier
     glivenkoCantelli["Glivenko–Cantelli theorem"]:::frontier
     kusuoka["Kusuoka representation"]:::frontier
@@ -330,6 +332,7 @@ graph TD
   capmBeta --> capmEquilibrium
   marginalVariance --> capmEquilibrium
   portfolioVariance --> capmEquilibrium
+  coherentRiskMeasure --> coherentRiskRepresentation
   brownianMotion --> continuousFtap
   heatFeynmanKac --> expectationIto
   gbm --> gbmSde
@@ -366,6 +369,7 @@ graph TD
   binomialRepresentation --> binomialReplication
   blackScholesModel --> black76Caplet
   contract --> black76Caplet
+  contractValue --> black76Caplet
   numeraireMeasure --> black76Caplet
   standardNormalCdf --> black76Caplet
   bsCall --> black76Caplet
@@ -474,6 +478,12 @@ graph TD
   expectedShortfall --> expectedShortfallCoherent
   quantile --> expectedShortfallCoherent
   valueAtRisk --> expectedShortfallCoherent
+  expectedShortfall --> expectedShortfallDual
+  quantile --> expectedShortfallDual
+  valueAtRisk --> expectedShortfallDual
+  expectedShortfall --> expectedShortfallDualSet
+  quantile --> expectedShortfallDualSet
+  valueAtRisk --> expectedShortfallDualSet
   brownianMotion --> itoFormulaL2
   itoIntegralClm --> itoFormulaL2
   itoFormulaTdL2 --> itoFormulaL2
@@ -557,9 +567,6 @@ graph TD
   dupireZeroRates --> dupireLocalVol
   esscherTilt --> esscherEmmLevy
   jumpDiffusionLaw --> esscherEmmLevy
-  expectedShortfallCoherent --> expectedShortfallDualSet
-  expectedShortfall --> expectedShortfallDualSet
-  coherentRiskMeasure --> expectedShortfallDualSet
   feynmanKacHeatEq --> feynmanKacVariableCoefficient
   sdeContinuousSolution --> feynmanKacVariableCoefficient
   itoFormulaTdL2 --> feynmanKacVariableCoefficient
@@ -739,6 +746,7 @@ graph TD
 | `thm:bs-pde` Black–Scholes PDE (from the closed form) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-pde%22%20in%3Abody) |
 | `thm:bscallhyp-brownian` BSCallHyp from a Brownian model | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abscallhyp-brownian%22%20in%3Abody) |
 | `thm:capm-equilibrium` CAPM from market equilibrium | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acapm-equilibrium%22%20in%3Abody) |
+| `thm:coherent-risk-representation` Representation of a coherent risk measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acoherent-risk-representation%22%20in%3Abody) |
 | `thm:continuous-ftap` Discounted risk-neutral GBM is a martingale (EMM property) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acontinuous-ftap%22%20in%3Abody) |
 | `thm:expectation-ito` Expectation-form Itô / Feynman–Kac | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpectation-ito%22%20in%3Abody) |
 | `thm:gbm-sde` GBM coefficient matching (algebraic) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Agbm-sde%22%20in%3Abody) |
@@ -790,6 +798,8 @@ graph TD
 | `thm:bracket-compensator` The bracket compensates the square | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abracket-compensator%22%20in%3Abody) |
 | `thm:bs-delta-hedge` The Black–Scholes delta hedge | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-delta-hedge%22%20in%3Abody) |
 | `thm:expected-shortfall-coherent` Expected shortfall is coherent | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-shortfall-coherent%22%20in%3Abody) |
+| `thm:expected-shortfall-dual` Dual form of expected shortfall | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-shortfall-dual%22%20in%3Abody) |
+| `thm:expected-shortfall-dual-set` Expected shortfall's representing set | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-shortfall-dual-set%22%20in%3Abody) |
 | `thm:ito-formula-l2` Itô formula, L² (C³ bounded — Summit A) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-formula-l2%22%20in%3Abody) |
 | `thm:ito-integral-brownian` ∫₀ᵀ B dB = ½(B_T² − B₀² − T) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-integral-brownian%22%20in%3Abody) |
 | `thm:ito-product-rule` Itô product rule | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-product-rule%22%20in%3Abody) |
@@ -828,7 +838,6 @@ graph TD
 | `thm:dmw-ftap` Dalang–Morton–Willinger FTAP | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Admw-ftap%22%20in%3Abody) |
 | `thm:dupire-local-vol` Dupire local volatility | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Adupire-local-vol%22%20in%3Abody) |
 | `thm:esscher-emm-levy` Esscher EMM for exponential-Lévy markets | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aesscher-emm-levy%22%20in%3Abody) |
-| `thm:expected-shortfall-dual-set` Expected shortfall's representing set | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-shortfall-dual-set%22%20in%3Abody) |
 | `thm:expected-utility-risk-aversion` Expected utility and risk aversion | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-utility-risk-aversion%22%20in%3Abody) |
 | `thm:feynman-kac-variable-coefficient` Variable-coefficient Feynman–Kac | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Afeynman-kac-variable-coefficient%22%20in%3Abody) |
 | `thm:forward-start-call` Forward-start call | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aforward-start-call%22%20in%3Abody) |

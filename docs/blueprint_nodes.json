@@ -205,18 +205,6 @@
   "label": "thm:glosten-milgrom-quote",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/Microstructure/GlostenMilgromCondExp.lean"},
- {"uses": ["def:quantile"],
-  "title": "Value-at-risk",
-  "text":
-  "$\\mathrm{VaR}_\\alpha(X) = \\inf\\{x \\mid \\alpha \\le P(X \\le x)\\}$, the\n  $\\alpha$-quantile of the law of the loss $X$.",
-  "name": "MathFin.valueAtRisk",
-  "module": "MathFin.Risk.ValueAtRisk",
-  "line": 74,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:value-at-risk",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ValueAtRisk.lean"},
  {"uses": [],
   "title": "Coherent risk measure",
   "text":
@@ -229,6 +217,18 @@
   "label": "def:coherent-risk-measure",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Coherent.lean"},
+ {"uses": ["def:quantile"],
+  "title": "Value-at-risk",
+  "text":
+  "$\\mathrm{VaR}_\\alpha(X) = \\inf\\{x \\mid \\alpha \\le P(X \\le x)\\}$, the\n  $\\alpha$-quantile of the law of the loss $X$.",
+  "name": "MathFin.valueAtRisk",
+  "module": "MathFin.Risk.ValueAtRisk",
+  "line": 74,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:value-at-risk",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ValueAtRisk.lean"},
  {"uses": ["def:martingale-transform", "def:path-cylinder"],
   "title": "Binomial martingale representation (completeness)",
   "text":
@@ -314,6 +314,18 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Forwards/SchwartzOneFactor.lean"},
  {"uses": [],
+  "title": "Marginal variance $(\\Sigma w)_i$",
+  "text":
+  "The marginal variance of asset $i$ in the portfolio $w$,\n  $(\\Sigma w)_i = \\sum_k \\Sigma_{ik} w_k$; the portfolio variance is $\\sum_k w_k (\\Sigma w)_k$.",
+  "name": "MathFin.marginalVariance",
+  "module": "MathFin.Choice.Portfolio.CAPMEquilibrium",
+  "line": 87,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:marginal-variance",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/CAPMEquilibrium.lean"},
+ {"uses": [],
   "title": "Survival function of a lifetime",
   "text":
   "$S_X(t) = P(X > t)$, the probability that the age at death $X$ exceeds $t$.",
@@ -337,18 +349,6 @@
   "label": "thm:level-payments-annuity",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicCurve.lean"},
- {"uses": [],
-  "title": "Marginal variance $(\\Sigma w)_i$",
-  "text":
-  "The marginal variance of asset $i$ in the portfolio $w$,\n  $(\\Sigma w)_i = \\sum_k \\Sigma_{ik} w_k$; the portfolio variance is $\\sum_k w_k (\\Sigma w)_k$.",
-  "name": "MathFin.marginalVariance",
-  "module": "MathFin.Choice.Portfolio.CAPMEquilibrium",
-  "line": 87,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:marginal-variance",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/CAPMEquilibrium.lean"},
  {"uses": [],
   "title": "Binomial no-arbitrage condition",
   "text":
@@ -439,6 +439,18 @@
   "label": "def:path-cylinder",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/MarkovPathMeasure.lean"},
+ {"uses": ["def:coherent-risk-measure"],
+  "title": "Representation of a coherent risk measure",
+  "text":
+  "On a finite state space a coherent risk measure $\\rho$ of losses is the least\n  upper bound of the expected losses $\\sum_i q_i L_i$ over its representing set of probability\n  vectors.",
+  "name": "MathFin.coherentRisk_isLUB",
+  "module": "MathFin.Risk.AcceptanceSet",
+  "line": 99,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:coherent-risk-representation",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/AcceptanceSet.lean"},
  {"uses": ["def:brownian-motion", "def:black-scholes-model"],
   "title": "BSCallHyp from a Brownian model",
   "text":
@@ -609,18 +621,6 @@
   "label": "thm:numeraire-measure-equivalent",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Numeraire.lean"},
- {"uses": ["def:contract"],
-  "title": "Value of a contract",
-  "text":
-  "The value of a contract is the $Q$-expectation of its discounted pathwise\n  present value, against a model that turns each observation the contract makes into a random\n  variable.",
-  "name": "MathFin.Contracts.Contract.value",
-  "module": "MathFin.Pricing.Value",
-  "line": 112,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:contract-value",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Value.lean"},
  {"uses":
   ["def:brownian-motion", "thm:discrete-ito", "thm:quadratic-variation"],
   "title": "Itô for x² in L²: ∑B·ΔB → ½(B_T²−B₀²−T)",
@@ -701,6 +701,18 @@
   "label": "thm:one-factor-joint-default",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Credit/OneFactorCopula.lean"},
+ {"uses": ["def:contract"],
+  "title": "Value of a contract",
+  "text":
+  "The value of a contract is the $Q$-expectation of its discounted pathwise\n  present value, against a model that turns each observation the contract makes into a random\n  variable.",
+  "name": "MathFin.Contracts.Contract.value",
+  "module": "MathFin.Pricing.Value",
+  "line": 125,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:contract-value",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Value.lean"},
  {"uses": [],
   "title": "Key-rate durations sum to the parallel shift",
   "text":
@@ -795,7 +807,7 @@
   "For an integrable loss $X$ and $\\alpha \\in (0,1)$, $\\mathrm{ES}_\\alpha(X)$ is\n  the least value of $c \\mapsto c + (1-\\alpha)^{-1}E[(X-c)^+]$. No continuity of the law is\n  assumed.",
   "name": "MathFin.isLeast_rockafellarUryasev",
   "module": "MathFin.Risk.ExpectedShortfall",
-  "line": 158,
+  "line": 161,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:rockafellar-uryasev",
@@ -813,18 +825,6 @@
   "label": "def:gbm",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoLemma2D.lean"},
- {"uses": [],
-  "title": "The contract language",
-  "text":
-  "A contract says what is paid and when, built from payoffs by combination.",
-  "name": "MathFin.Contracts.Contract",
-  "module": "MathFin.Contracts.Core",
-  "line": 162,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:contract",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Contracts/Core.lean"},
  {"uses": ["def:expected-shortfall", "thm:rockafellar-uryasev"],
   "title": "CVaR of a compound-Poisson loss",
   "text":
@@ -837,6 +837,18 @@
   "label": "thm:cvar-rockafellar-uryasev",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/CompoundPoissonCVaR.lean"},
+ {"uses": [],
+  "title": "The contract language",
+  "text":
+  "A contract says what is paid and when, built from payoffs by combination.",
+  "name": "MathFin.Contracts.Contract",
+  "module": "MathFin.Contracts.Core",
+  "line": 166,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:contract",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Contracts/Core.lean"},
  {"uses": [],
   "title": "The Vasicek bond price solves its PDE",
   "text":
@@ -947,7 +959,7 @@
   "For $\\alpha \\in (0,1)$, expected shortfall is a coherent risk measure on the\n  integrable losses.",
   "name": "MathFin.expectedShortfall_isCoherentRiskMeasure",
   "module": "MathFin.Risk.ExpectedShortfall",
-  "line": 199,
+  "line": 202,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:expected-shortfall-coherent",
@@ -1048,13 +1060,14 @@
    "def:standard-normal-cdf",
    "def:numeraire-measure",
    "def:contract",
+   "def:contract-value",
    "thm:bs-call"],
   "title": "Caplet as a Black-76 call under the forward measure",
   "text":
   "If the simple rate $L(T_0,T_1)$ is lognormal under the $T_1$-forward measure\n  (a hypothesis, not derived from a rate model), the caplet is worth\n  $P(0,T_1)\\,\\delta\\,[F\\Phi(d_1) - K\\Phi(d_2)]$.",
   "name": "MathFin.Contracts.value_caplet_black76",
   "module": "MathFin.Models.Rates.Caplet",
-  "line": 246,
+  "line": 254,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:black76-caplet",
@@ -1100,6 +1113,18 @@
   "label": "thm:bracket-compensator",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Martingales/BracketCompensator.lean"},
+ {"uses": ["def:brownian-motion"],
+  "title": "Adapted Itô isometry",
+  "text":
+  "For random *adapted* simple integrands,\n  $E[(\\sum_k \\varphi_k \\Delta B_k)^2] = \\sum_k E[\\varphi_k^2]\\,\\Delta t_k$ — the\n  cross terms vanish by the weak Markov property, the exact point where Itô\n  departs from Wiener.",
+  "name": "MathFin.ItoIsometryAdapted.ito_isometry_discrete",
+  "module": "MathFin.Probability.Brownian.Ito.ItoIsometryAdapted",
+  "line": 268,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:ito-isometry-adapted",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoIsometryAdapted.lean"},
  {"uses":
   ["def:gbm",
    "def:brownian-motion",
@@ -1119,18 +1144,6 @@
   "label": "thm:bs-delta-hedge",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/DeltaHedge.lean"},
- {"uses": ["def:brownian-motion"],
-  "title": "Adapted Itô isometry",
-  "text":
-  "For random *adapted* simple integrands,\n  $E[(\\sum_k \\varphi_k \\Delta B_k)^2] = \\sum_k E[\\varphi_k^2]\\,\\Delta t_k$ — the\n  cross terms vanish by the weak Markov property, the exact point where Itô\n  departs from Wiener.",
-  "name": "MathFin.ItoIsometryAdapted.ito_isometry_discrete",
-  "module": "MathFin.Probability.Brownian.Ito.ItoIsometryAdapted",
-  "line": 268,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:ito-isometry-adapted",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoIsometryAdapted.lean"},
  {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
   "title": "Itô's formula for C² functions",
   "text":
@@ -1192,21 +1205,6 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Wiener/WienerIntegralL2.lean"},
  {"uses":
-  ["def:marginal-variance",
-   "thm:markowitz-lagrangian",
-   "def:portfolio-variance"],
-  "title": "Markowitz for random returns",
-  "text":
-  "For square-integrable returns, a budget- and target-feasible portfolio whose\n  covariances with the assets meet the Lagrangian condition has the least variance\n  $\\mathrm{Var}[\\sum_i w_i R_i]$ among feasible portfolios. Sufficiency only.",
-  "name": "MathFin.variance_le_of_lagrangian_FOC",
-  "module": "MathFin.Choice.Portfolio.MarkowitzLagrangian",
-  "line": 303,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:markowitz-random-returns",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
- {"uses":
   ["def:standard-normal-cdf",
    "thm:feynman-kac-heat-eq",
    "def:black-scholes-model",
@@ -1225,6 +1223,21 @@
   "label": "thm:bs-pde-feynman-kac",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/PDEFromFeynmanKac.lean"},
+ {"uses":
+  ["def:marginal-variance",
+   "thm:markowitz-lagrangian",
+   "def:portfolio-variance"],
+  "title": "Markowitz for random returns",
+  "text":
+  "For square-integrable returns, a budget- and target-feasible portfolio whose\n  covariances with the assets meet the Lagrangian condition has the least variance\n  $\\mathrm{Var}[\\sum_i w_i R_i]$ among feasible portfolios. Sufficiency only.",
+  "name": "MathFin.variance_le_of_lagrangian_FOC",
+  "module": "MathFin.Choice.Portfolio.MarkowitzLagrangian",
+  "line": 303,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:markowitz-random-returns",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
  {"uses": ["def:emm", "def:equivalent-measure"],
   "title": "Pasting one-period densities into an EMM",
   "text":
@@ -1360,6 +1373,18 @@
   "label": "thm:ito-integral-brownian",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoIntegralBrownian.lean"},
+ {"uses": ["def:expected-shortfall", "def:value-at-risk", "def:quantile"],
+  "title": "Dual form of expected shortfall",
+  "text":
+  "For an integrable loss $X$ and $\\alpha \\in (0,1)$, $\\mathrm{ES}_\\alpha(X)$ is\n  the greatest value of $E[DX]$ over densities $0 \\le D \\le (1-\\alpha)^{-1}$ with $E[D]=1$.",
+  "name": "MathFin.isGreatest_integral_mul_expectedShortfall",
+  "module": "MathFin.Risk.ExpectedShortfall",
+  "line": 392,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:expected-shortfall-dual",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ExpectedShortfall.lean"},
  {"uses":
   ["def:two-asset-min-variance",
    "def:portfolio-variance",
@@ -1375,6 +1400,18 @@
   "label": "thm:two-asset-min-variance",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
+ {"uses": ["def:expected-shortfall", "def:value-at-risk", "def:quantile"],
+  "title": "Expected shortfall's representing set",
+  "text":
+  "On a finite probability space $(\\iota, P)$ and for $\\alpha \\in (0,1)$, the\n  representing set of $\\mathrm{ES}_\\alpha$ in the Artzner--Delbaen--Eber--Heath representation is\n  exactly the set of probability vectors $q$ with $q_i \\le (1-\\alpha)^{-1} P\\{i\\}$, the\n  probability densities bounded by $(1-\\alpha)^{-1}$.",
+  "name": "MathFin.representingSet_expectedShortfall",
+  "module": "MathFin.Risk.ExpectedShortfall",
+  "line": 415,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:expected-shortfall-dual-set",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ExpectedShortfall.lean"},
  {"uses": [],
   "title": "A Uniswap v3 position is at most a covered call",
   "text":
