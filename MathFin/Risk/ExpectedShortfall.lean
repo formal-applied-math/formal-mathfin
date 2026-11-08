@@ -428,20 +428,20 @@ theorem representingSet_expectedShortfall {ι : Type*} [Fintype ι] [MeasurableS
   constructor
   · rintro ⟨hq0, hq1, hq⟩
     refine ⟨hq0, hq1, fun i ↦ ?_⟩
-    have hint : ∫ ω, max (Pi.single i (1 : ℝ) ω - 0) 0 ∂P = P.real {i} := by
-      have : (fun ω ↦ max (Pi.single i (1 : ℝ) ω - 0) 0) = Pi.single i 1 := by
+    have hint : ∫ ω, max ((Pi.single i 1 : ι → ℝ) ω - 0) 0 ∂P = P.real {i} := by
+      have : (fun ω ↦ max ((Pi.single i 1 : ι → ℝ) ω - 0) 0) = Pi.single i 1 := by
         ext ω
         by_cases h : ω = i <;> simp [Pi.single_apply, h]
-      rw [this, integral_fintype _ Integrable.of_finite]
+      rw [this, integral_fintype (μ := P) Integrable.of_finite]
       simp [Pi.single_apply]
     have hZ : expectedShortfall
-        (fun j ↦ Pi.single i (1 : ℝ) j + -((1 - α)⁻¹ * P.real {i})) P α ≤ 0 := by
+        (fun j ↦ (Pi.single i 1 : ι → ℝ) j + -((1 - α)⁻¹ * P.real {i})) P α ≤ 0 := by
       rw [expectedShortfall_add_const Integrable.of_finite hα]
       have := expectedShortfall_le_rockafellarUryasev
-        (Integrable.of_finite : Integrable (Pi.single i (1 : ℝ)) P) hα 0
+        (Integrable.of_finite : Integrable ((Pi.single i 1 : ι → ℝ)) P) hα 0
       rw [rockafellarUryasev, hint, zero_add] at this
       linarith
-    have h2 : ∑ j, q j * Pi.single i (1 : ℝ) j = q i := by simp [Pi.single_apply]
+    have h2 : ∑ j, q j * (Pi.single i 1 : ι → ℝ) j = q i := by simp [Pi.single_apply]
     have h3 := hq _ hZ
     rw [Finset.sum_congr rfl fun j _ ↦ mul_add (q j) _ _, Finset.sum_add_distrib, h2,
       ← Finset.sum_mul, hq1, one_mul] at h3
@@ -461,14 +461,14 @@ theorem representingSet_expectedShortfall {ι : Type*} [Fintype ι] [MeasurableS
       · simpa [hD, hp] using h1α.le
       · exact (div_le_iff₀ (lt_of_le_of_ne measureReal_nonneg (Ne.symm hp))).2 (hqp i)
     have hDint : ∫ ω, D ω ∂P = 1 := by
-      rw [integral_fintype _ Integrable.of_finite]
+      rw [integral_fintype (μ := P) Integrable.of_finite]
       simp only [smul_eq_mul]
       rw [← hq1]
       exact Finset.sum_congr rfl fun i _ ↦ by rw [mul_comm]; exact hDp i
     have hle := integral_mul_le_expectedShortfall (Integrable.of_finite : Integrable Z P) hα
       (Integrable.of_finite : Integrable D P).aestronglyMeasurable
       (ae_of_all _ fun i ↦ div_nonneg (hq0 i) measureReal_nonneg) (ae_of_all _ hDle) hDint
-    rw [integral_fintype _ Integrable.of_finite] at hle
+    rw [integral_fintype (μ := P) Integrable.of_finite] at hle
     refine le_trans (le_of_eq ?_) (hle.trans hZ)
     exact Finset.sum_congr rfl fun i _ ↦ by
       rw [smul_eq_mul]; linear_combination (-(Z i)) * hDp i
