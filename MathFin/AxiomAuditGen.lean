@@ -331,9 +331,9 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.Contract.value_eq_of_pathPV_eq
 
-/-- info: 'MathFin.Contracts.DiscreteMarket.exists_isEMM_parity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.Contracts.DiscreteMarket.exists_isPricingMeasure_parity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.Contracts.DiscreteMarket.exists_isEMM_parity
+#print axioms MathFin.Contracts.DiscreteMarket.exists_isPricingMeasure_parity
 
 /-- info: 'MathFin.Contracts.Payoff.measurable_eval_of_obsList_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
