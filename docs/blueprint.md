@@ -105,7 +105,6 @@ graph TD
   marshallOlkin["Marshall–Olkin first-to-default"]:::proved
   stochasticFubini["Stochastic Fubini (L² form)"]:::proved
   uniswapV3CoveredCall["A Uniswap v3 position is at most a covered call"]:::proved
-  utilityStatePriceDensity["Marginal utility is a state-price density"]:::proved
   vasicekBondPde["The Vasicek bond price solves its PDE"]:::proved
   contractValue["Value of a contract"]:::proved
   emm["Equivalent martingale measure"]:::proved
@@ -123,6 +122,7 @@ graph TD
   continuousFtap["Discounted risk-neutral GBM is a martingale (EMM property)"]:::proved
   expectationIto["Expectation-form Itô / Feynman–Kac"]:::proved
   gbmSde["GBM coefficient matching (algebraic)"]:::proved
+  hansenJagannathanBound["The Hansen–Jagannathan bound"]:::proved
   interestRateParity["Covered and uncovered interest-rate parity"]:::proved
   itoIsometryAdapted["Adapted Itô isometry"]:::proved
   largePortfolioLimit["The large-portfolio limit"]:::proved
@@ -136,6 +136,7 @@ graph TD
   oneFactorJointDefault["Joint default is the Gaussian factor copula"]:::proved
   quadraticVariation["Quadratic variation: ∑(ΔB)² → T in L²"]:::proved
   riskParityFoc["Risk parity from the log-barrier condition"]:::proved
+  sdfCapmHansenJagannathan["CAPM from a discount factor affine in the market return"]:::proved
   snellEnvelope["Snell envelope: the smallest dominating supermartingale"]:::proved
   twoAssetMinVariance["The two-asset weight minimises variance"]:::proved
   unilateralCva["Unilateral CVA, Gaussian exposure"]:::proved
@@ -167,6 +168,7 @@ graph TD
   stochasticFubiniIto["Stochastic Fubini for the Itô integral"]:::proved
   tangentPortfolioEfficient["The tangent portfolio is efficient"]:::proved
   uniswapV3BsBound["A v3 position is worth at most a covered call"]:::proved
+  utilityStatePriceDensity["Marginal utility is a state-price density"]:::proved
   americanPutBoundaryExpiry["The American put boundary at expiry"]:::proved
   bracketCompensator["The bracket compensates the square"]:::proved
   bsDeltaHedge["The Black–Scholes delta hedge"]:::proved
@@ -284,7 +286,6 @@ graph TD
     mertonPortfolioFraction["Merton myopic risky fraction"]:::frontier
     purgedCvIndependence["Purged cross-validation: σ-algebra independence"]:::frontier
     riskParityNAsset["N-asset risk parity exists and is unique"]:::frontier
-    sdfCapmHansenJagannathan["CAPM and Hansen–Jagannathan from the discount factor"]:::frontier
     timeInconsistentEquilibrium["Relaxed equilibria under time inconsistency"]:::frontier
     varianceOptimalHedging["Variance-optimal hedging"]:::frontier
   end
@@ -333,6 +334,7 @@ graph TD
   brownianMotion --> continuousFtap
   heatFeynmanKac --> expectationIto
   gbm --> gbmSde
+  sharpeRatio --> hansenJagannathanBound
   blackScholesModel --> interestRateParity
   brownianMotion --> itoIsometryAdapted
   quantile --> largePortfolioLimit
@@ -353,6 +355,7 @@ graph TD
   standardNormalCdf --> oneFactorJointDefault
   brownianMotion --> quadraticVariation
   marginalVariance --> riskParityFoc
+  capmBeta --> sdfCapmHansenJagannathan
   snellEnvelope --> snellEnvelope
   marginalVariance --> twoAssetMinVariance
   portfolioVariance --> twoAssetMinVariance
@@ -455,6 +458,10 @@ graph TD
   standardNormalCdf --> uniswapV3BsBound
   bsCall --> uniswapV3BsBound
   uniswapV3CoveredCall --> uniswapV3BsBound
+  emm --> utilityStatePriceDensity
+  equivalentMeasure --> utilityStatePriceDensity
+  martingaleTransform --> utilityStatePriceDensity
+  martingaleTransform --> utilityStatePriceDensity
   brownianMotion --> americanPutBoundaryExpiry
   gbm --> americanPutBoundaryExpiry
   heatFeynmanKac --> americanPutBoundaryExpiry
@@ -649,9 +656,6 @@ graph TD
   bsCall --> sabrHagan
   modelFreeVariance --> schrodingerSpxVix
   sdeStrongSolution --> sdeContinuousSolution
-  utilityStatePriceDensity --> sdfCapmHansenJagannathan
-  capmEquilibrium --> sdfCapmHansenJagannathan
-  sharpeRatio --> sdfCapmHansenJagannathan
   marketCompleteness --> secondFtapConverse
   pricingMeasure --> secondFtapConverse
   dmwFtap --> semistaticFtap
@@ -724,7 +728,6 @@ graph TD
 | `thm:marshall-olkin` Marshall–Olkin first-to-default | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarshall-olkin%22%20in%3Abody) |
 | `thm:stochastic-fubini` Stochastic Fubini (L² form) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astochastic-fubini%22%20in%3Abody) |
 | `thm:uniswap-v3-covered-call` A Uniswap v3 position is at most a covered call | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Auniswap-v3-covered-call%22%20in%3Abody) |
-| `thm:utility-state-price-density` Marginal utility is a state-price density | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Autility-state-price-density%22%20in%3Abody) |
 | `thm:vasicek-bond-pde` The Vasicek bond price solves its PDE | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avasicek-bond-pde%22%20in%3Abody) |
 | `def:contract-value` Value of a contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acontract-value%22%20in%3Abody) |
 | `def:emm` Equivalent martingale measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aemm%22%20in%3Abody) |
@@ -742,6 +745,7 @@ graph TD
 | `thm:continuous-ftap` Discounted risk-neutral GBM is a martingale (EMM property) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acontinuous-ftap%22%20in%3Abody) |
 | `thm:expectation-ito` Expectation-form Itô / Feynman–Kac | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpectation-ito%22%20in%3Abody) |
 | `thm:gbm-sde` GBM coefficient matching (algebraic) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Agbm-sde%22%20in%3Abody) |
+| `thm:hansen-jagannathan-bound` The Hansen–Jagannathan bound | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ahansen-jagannathan-bound%22%20in%3Abody) |
 | `thm:interest-rate-parity` Covered and uncovered interest-rate parity | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ainterest-rate-parity%22%20in%3Abody) |
 | `thm:ito-isometry-adapted` Adapted Itô isometry | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-isometry-adapted%22%20in%3Abody) |
 | `thm:large-portfolio-limit` The large-portfolio limit | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alarge-portfolio-limit%22%20in%3Abody) |
@@ -755,6 +759,7 @@ graph TD
 | `thm:one-factor-joint-default` Joint default is the Gaussian factor copula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aone-factor-joint-default%22%20in%3Abody) |
 | `thm:quadratic-variation` Quadratic variation: ∑(ΔB)² → T in L² | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aquadratic-variation%22%20in%3Abody) |
 | `thm:risk-parity-foc` Risk parity from the log-barrier condition | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Arisk-parity-foc%22%20in%3Abody) |
+| `thm:sdf-capm-hansen-jagannathan` CAPM from a discount factor affine in the market return | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asdf-capm-hansen-jagannathan%22%20in%3Abody) |
 | `thm:snell-envelope` Snell envelope: the smallest dominating supermartingale | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asnell-envelope%22%20in%3Abody) |
 | `thm:two-asset-min-variance` The two-asset weight minimises variance | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atwo-asset-min-variance%22%20in%3Abody) |
 | `thm:unilateral-cva` Unilateral CVA, Gaussian exposure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aunilateral-cva%22%20in%3Abody) |
@@ -786,6 +791,7 @@ graph TD
 | `thm:stochastic-fubini-ito` Stochastic Fubini for the Itô integral | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astochastic-fubini-ito%22%20in%3Abody) |
 | `thm:tangent-portfolio-efficient` The tangent portfolio is efficient | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atangent-portfolio-efficient%22%20in%3Abody) |
 | `thm:uniswap-v3-bs-bound` A v3 position is worth at most a covered call | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Auniswap-v3-bs-bound%22%20in%3Abody) |
+| `thm:utility-state-price-density` Marginal utility is a state-price density | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Autility-state-price-density%22%20in%3Abody) |
 | `thm:american-put-boundary-expiry` The American put boundary at expiry | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-boundary-expiry%22%20in%3Abody) |
 | `thm:bracket-compensator` The bracket compensates the square | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abracket-compensator%22%20in%3Abody) |
 | `thm:bs-delta-hedge` The Black–Scholes delta hedge | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-delta-hedge%22%20in%3Abody) |
@@ -885,7 +891,6 @@ graph TD
 | `thm:sabr-hagan` SABR Hagan asymptotic implied vol | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asabr-hagan%22%20in%3Abody) |
 | `thm:schrodinger-spx-vix` Schrödinger calibration of SPX/VIX | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aschrodinger-spx-vix%22%20in%3Abody) |
 | `thm:sde-continuous-solution` Continuous strong solutions on every horizon | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asde-continuous-solution%22%20in%3Abody) |
-| `thm:sdf-capm-hansen-jagannathan` CAPM and Hansen–Jagannathan from the discount factor | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asdf-capm-hansen-jagannathan%22%20in%3Abody) |
 | `thm:second-ftap-converse` Second FTAP: uniqueness implies completeness | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asecond-ftap-converse%22%20in%3Abody) |
 | `thm:semistatic-ftap` Semistatic FTAP with entropy | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asemistatic-ftap%22%20in%3Abody) |
 | `thm:siegel-paradox` Siegel's paradox | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asiegel-paradox%22%20in%3Abody) |
