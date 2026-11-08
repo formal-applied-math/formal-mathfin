@@ -171,9 +171,9 @@ discusses this further.
 
 ## 5. Finding a theorem
 
-- **By topic.** The library is organized by area: `Foundations/` for stochastic calculus and
-  no-arbitrage theory, then `BlackScholes/`, `Binomial/`, `FixedIncome/`, `Portfolio/`,
-  `RiskMeasures/` and so on. Each module's documentation lists what it proves.
+- **By topic.** The library is organized by area: `Probability/` for stochastic calculus, `Pricing/`
+  for no-arbitrage theory, then the models (`Models/BlackScholes/`, `Models/Binomial/`,
+  `Models/Rates/`), `Choice/Portfolio/`, `Risk/` and so on. Each module's documentation lists what it proves.
 - **By source.** Each benchmark file in [`benchmarks/`](../benchmarks) lists results from the
   literature, with the reference, a description of what the entry proves, and the name of the Lean
   theorem. The same corpus is published as a

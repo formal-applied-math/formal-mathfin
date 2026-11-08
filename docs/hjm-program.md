@@ -170,7 +170,7 @@ dissolved into it) · F3 #142 · F4 #143 · F5 #144 · F6 #145 · B1 #146 · B2 
 B3 #148 · D1 #149 · D2 #150 · C1 #151 · C2 #152 · C3 #153 · C4 #154 · G1 #155 ·
 G2 #156 · G3 #157 · G4 #158 (umbrella #138).
 
-### Tier 0 — objects · `FixedIncome/HJM/Model.lean`
+### Tier 0 — objects · `Models/Rates/HJM/Model.lean`
 - **H0 · `mf-hjm-model`** — the `HJMModel` bundle (`W, f(t,T), α, σ` + adapted /
   measurable / integrable fields) and `hjmBond`, `hjmShortRate`, `bankAccount`,
   `discountedBond`, `starDrift α*`, `starVol σ*`. Defs + basic well-definedness.
@@ -192,7 +192,7 @@ G2 #156 · G3 #157 · G4 #158 (umbrella #138).
 - **F6 · `sc-stochastic-fubini-levy`** — the Lévy instance via `itoLevyIntegralL2`;
   unblocks `#132` / `#133`. *(foundations · ready · full)*
 
-### Tier 2 — log-bond dynamics · `FixedIncome/HJM/BondDynamics.lean`
+### Tier 2 — log-bond dynamics · `Models/Rates/HJM/BondDynamics.lean`
 - **B1 · `mf-hjm-logbond-fixed-limit`** — fixed lower limit
   `−∫_{t0}^T df(t,u) du` via F4. *(fixed-income · blocked-design)*
 - **B2 · `mf-hjm-logbond-leibniz`** — the moving-boundary correction
@@ -200,13 +200,13 @@ G2 #156 · G3 #157 · G4 #158 (umbrella #138).
 - **B3 · `mf-hjm-logbond-dynamics`** — assemble
   `dY = [r − α*] dt − σ* dW`. *(fixed-income · blocked-design)*
 
-### Tier 3 — bond & discounted-bond dynamics · `FixedIncome/HJM/DiscountedBond.lean`
+### Tier 3 — bond & discounted-bond dynamics · `Models/Rates/HJM/DiscountedBond.lean`
 - **D1 · `mf-hjm-bond-dynamics`** — Itô-for-exp on `P = exp Y` (consume
   `ito_formula_expBrownian`): `dP/P = [r − α* + ½σ*²]dt − σ*dW`. *(fixed-income · blocked-design)*
 - **D2 · `mf-hjm-discounted-bond-dynamics`** — subtract `r dt`:
   `dZ/Z = [−α* + ½σ*²]dt − σ*dW`. *(fixed-income · blocked-design)*
 
-### Tier 4 — the drift condition, the crown · `FixedIncome/HJM/DriftCondition.lean`
+### Tier 4 — the drift condition, the crown · `Models/Rates/HJM/DriftCondition.lean`
 - **C1 · `mf-hjm-drift-integrated`** — martingale ⟹ `α* = ½σ*²` (consume
   martingale ⇔ zero-drift). *(fixed-income · blocked-design)*
 - **C2 · `mf-hjm-drift-condition`** — differentiate in `T` ⟹ **`α = σσ*`**
@@ -216,7 +216,7 @@ G2 #156 · G3 #157 · G4 #158 (umbrella #138).
 - **C4 · `mf-hjm-drift-iff`** — package the equivalence: discounted-bond
   martingale ↔ HJM drift condition. the headline. *(fixed-income · blocked-design)*
 
-### Tier 5 — bridges (tower integration, finance-facing) · `FixedIncome/HJM/Bridges.lean`
+### Tier 5 — bridges (tower integration, finance-facing) · `Models/Rates/HJM/Bridges.lean`
 - **G1 · `mf-hjm-short-rate`** — `r(t) = f(t,t)` and the induced short-rate SDE. *(fixed-income · blocked-design)*
 - **G2 · `mf-hjm-ho-lee`** — `σ` constant ⟹ the Ho–Lee affine term structure. *(fixed-income · blocked-design)*
 - **G3 · `mf-hjm-vasicek-bridge`** — `σ(t,T) = σ e^{−κ(T−t)}` recovers the
@@ -230,12 +230,12 @@ G2 #156 · G3 #157 · G4 #158 (umbrella #138).
 ```
 MathFin/Probability/Brownian/Ito/StochasticFubini.lean          -- F1 (stochFubini_ofCLM + its L²-representative step)
 MathFin/Probability/Brownian/Ito/StochasticFubiniIto.lean        -- F3, F4  (+ F5 Wiener instance)
-MathFin/Foundations/StochasticFubiniLevy.lean       -- F6      (near the Lévy operator)
-MathFin/FixedIncome/HJM/Model.lean                  -- H0
-MathFin/FixedIncome/HJM/BondDynamics.lean           -- B1, B2, B3
-MathFin/FixedIncome/HJM/DiscountedBond.lean         -- D1, D2
-MathFin/FixedIncome/HJM/DriftCondition.lean         -- C1, C2, C3, C4
-MathFin/FixedIncome/HJM/Bridges.lean                -- G1, G2, G3, G4
+MathFin/Probability/Brownian/Ito/StochasticFubiniLevy.lean  -- F6  (near the Lévy operator)
+MathFin/Models/Rates/HJM/Model.lean                  -- H0
+MathFin/Models/Rates/HJM/BondDynamics.lean           -- B1, B2, B3
+MathFin/Models/Rates/HJM/DiscountedBond.lean         -- D1, D2
+MathFin/Models/Rates/HJM/DriftCondition.lean         -- C1, C2, C3, C4
+MathFin/Models/Rates/HJM/Bridges.lean                -- G1, G2, G3, G4
 ```
 
 Each `module`-header file carries `@[expose] public section`; each imports a

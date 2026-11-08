@@ -969,7 +969,7 @@ Scope: a second model for the contracts tower (`Models/Binomial/Binomial.lean`) 
 
 - **Inspired math.** Exemplar: the limit theorem, in which the contract stays fixed and only the model moves. Next: the put's limit, and a path-dependent instrument in the tree (backlog 1, 3).
 - **Coherence.** Exemplar: `value_pay_eq_binomialPrice` is `binomialPrice_eq_integral_coinFlipMeasure` read through `Contract.value_pay`, with nothing reproved.
-- **Zero slop.** Exemplar: the inline duplicate in `CRRCharFun` is gone. Next: `Contracts/Instruments/CappedCall.lean` is a pure real identity filed under a model's directory (backlog 4).
+- **Zero slop.** Exemplar: the inline duplicate in `CRRCharFun` is gone. Next: `Contracts/Instruments/CallPayoff.lean` is a pure real identity filed under a model's directory (backlog 4).
 - **Architectural ingenuity.** Exemplar: the bridge is its own file, so neither model imports the other.
 - **Concept clarity.** Next: every statement repeats the triple `(Q, D, X)`. A `Model` structure would make the "same contract, other model" story visible in the types (backlog 5).
 

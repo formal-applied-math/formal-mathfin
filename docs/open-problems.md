@@ -18,7 +18,7 @@ of them our existing formalization actually gives us leverage on.
 impact propagator. Solved: [#175](https://github.com/formal-applied-math/formal-mathfin/issues/175)
 American convexity, by Robert Martin in [#212](https://github.com/formal-applied-math/formal-mathfin/pull/212);
 and [#174](https://github.com/formal-applied-math/formal-mathfin/issues/174) SVI domain, by Robert
-Martin, ported in `MathFin/BlackScholes/SVI/` (§2 below).
+Martin, ported in `MathFin/Models/ModelFree/SVI/` (§2 below).
 
 ## How this list was built, and why it is organized by evidence
 
@@ -106,7 +106,7 @@ A clean trichotomy in the dividend yield `q`:
 | `0 < q < r` | convexity **proved** by Robert Martin (2026), machine-checked in this repo |
 
 **Solved (2026-09).** Robert Martin proved convexity on the whole open region, and his
-proof is machine-checked and axiom-clean in `MathFin/BlackScholes/AmericanPut/`,
+proof is machine-checked and axiom-clean in `MathFin/Models/BlackScholes/American/`,
 contributed in [#212](https://github.com/formal-applied-math/formal-mathfin/pull/212) and ported from
 [robertmartin8/AmericanPutConvexity](https://github.com/robertmartin8/AmericanPutConvexity).
 For `K, r, σ > 0` and `0 ≤ q ≤ r`, `log(B(τ)/K)` is convex and `B(τ)` is strictly convex
@@ -144,7 +144,7 @@ domain as polynomial inequalities in `(a,b,ρ,m,σ)`. Substituting `y = (k−m)/
 a quantifier-elimination problem.
 
 **Solved (2026-10-04), as stated.** Robert Martin's certificate, ported in
-`MathFin/BlackScholes/SVI/`, gives a fixed finite Boolean combination of signs of polynomials in
+`MathFin/Models/ModelFree/SVI/`, gives a fixed finite Boolean combination of signs of polynomials in
 `(a,b,ρ,m,σ)` that holds exactly when `σ > 0`, `b ≥ 0`, `ρ² ≤ 1`, the variance is positive and
 `g(k) ≥ 0` for every `k` (`fullCertificateFormula_iff`). A second formula, which also admits
 `σ = 0`, holds exactly when `σ ≥ 0`, `b ≥ 0`, `ρ² ≤ 1`, the variance is positive and the
@@ -603,7 +603,7 @@ The butterfly-arbitrage criterion is *already formalized*, in substance:
 | `Models/ModelFree/BreedenLitzenberger.breedenLitzenberger` | `∂²V/∂K² = e^{−rT}·density` — butterfly-freeness **is** this second derivative's sign |
 | `BreedenLitzenberger.lognormalTerminalPDF_nonneg_via_strike_convexity` | the density-nonnegativity ⟸ strike-convexity route, already proved |
 | `Models/BlackScholes/StrikeConvexity.bsV_strike_convexOn`, `bsP_strike_convexOn` | the convexity side for calls and puts |
-| `BlackScholes/{ImpliedVolatility,BisectionIV,NewtonConvergence}` | the implied-vol layer, with convergence |
+| `Models/BlackScholes/{ImpliedVolatility,BisectionIV,NewtonConvergence}` | the implied-vol layer, with convergence |
 | `PutStrikeConvexity`, `SpotConvexity`, `PriceBounds` | the surrounding static-arbitrage results |
 
 Missing is small and well-defined: an SVI parametrization module and
@@ -620,7 +620,7 @@ Durrleman's `g`. Positivity certificates land in the house idiom
 
 Solved in [#212](https://github.com/formal-applied-math/formal-mathfin/pull/212), and not through this seam. The proof works in continuous
 time, on the optimal-stopping value directly, and builds on the Itô-formula and
-Feynman–Kac modules in `Foundations/` rather than the binomial layer.
+Feynman–Kac modules in `Probability/` rather than the binomial layer.
 
 ### 3. Impact-kernel positive-definiteness (§5) — cheapest decisive output
 
@@ -639,7 +639,7 @@ negative expected cost, i.e. rational arithmetic closable by `norm_num`/`ring`.
 
 `docs/hjm-program.md` names Musiela as node **G4**, the deferred SPDE summit
 shipping `placeholder`. But two caveats now stack: **neither
-`MathFin/FixedIncome/HJM/` nor `MathFin/Probability/Brownian/Ito/StochasticFubini*.lean`
+`MathFin/Models/Rates/HJM/` nor `MathFin/Probability/Brownian/Ito/StochasticFubini*.lean`
 exists yet** (the HJM program is *ratified, not built* — the whole F1→C4 chain
 precedes G4), and round 4 demoted the problem itself from "best-evidenced open
 problem" to a bracketed gap in a mature theory.

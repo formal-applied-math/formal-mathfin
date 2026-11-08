@@ -215,7 +215,7 @@ that made `formal-mathfin` work.
 
 Cheapest substrate of the four — nearly everything reduces to a fixed point of a
 contraction, which Mathlib has. Weakness: less overlap with our existing
-`Foundations/`, so less reuse.
+`Probability/`, so less reuse.
 
 ### 3.4 General equilibrium — rank 4, deferred
 

@@ -18,7 +18,7 @@ The Lean evidence is a Challenge/Solution pair, checked by
 | File | Role |
 |---|---|
 | [`Challenge.lean`](../Challenge.lean) | the statement of record — small, self-contained, **Mathlib-only** |
-| [`Solution.lean`](../Solution.lean) | the same declarations, discharged against `MathFin/RiskMeasures/` |
+| [`Solution.lean`](../Solution.lean) | the same declarations, discharged against `MathFin/Risk/` |
 | [`comparator.json`](../comparator.json) | which declarations are compared, and under which axioms |
 | [`formalization.yaml`](../formalization.yaml) | the v0.4 self-report; its `project.description` is the public abstract |
 

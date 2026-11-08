@@ -163,7 +163,7 @@ Four entries added, all `full`: `mf-contract-bounded-model-integrable`,
 `Models/Binomial/Binomial.lean` is the second model for the instruments of
 `Contracts/Instruments/Options.lean`. The underlying is read off coin-flip paths (the spot after
 `⌊t / h⌋` flips), and a European payoff is worth its backward-induction tree price. The file
-contains only the translation. Everything about the tree is in `Binomial/`:
+contains only the translation. Everything about the tree is in `Models/Binomial/`:
 - `measurable_spotPath` and `abs_spotPath_le` are new in `Models/Binomial/PathMeasure.lean`;
 - `crrProb_mem_Icc` is new in `Models/Binomial/CRRConvergence.lean`. It was proved inline twice in
   `Models/Binomial/CRRCharFun.lean`, and both copies now call it.
@@ -1507,7 +1507,7 @@ variable of mean one, the last step of Roper's Theorem 2.1.
 New benchmark file `benchmarks/svi_certificate.json`, three entries, all `full`. Corpus 442 → 445.
 The development is Robert Martin's
 [ButterflyFreeSVI](https://github.com/robertmartin8/ButterflyFreeSVI), ported to
-`MathFin/BlackScholes/SVI/` (42 modules) with statements unchanged; it answers #174.
+`MathFin/Models/ModelFree/SVI/` (42 modules) with statements unchanged; it answers #174.
 
 | Benchmark ID | Mathematical conclusion | Lean declaration |
 |---|---|---|

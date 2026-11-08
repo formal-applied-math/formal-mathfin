@@ -40,4 +40,4 @@ Cite the tradition, not only the nearest author.
 
 Consulted for the actuarial survival layer (2026-07-11). Our design, our Lean; the
 AFP entry was a source for the mathematical content, not a port. See the
-`MathFin/Actuarial/` module docstrings.
+`MathFin/Insurance/` module docstrings.

@@ -9,10 +9,12 @@ The library's shape is deliberate. Three principles drive every decision:
 2. **Be honest about the proof depth.** Not every lemma is a deep theorem.
    Algebraic closed-form bookkeeping is necessary but not sufficient — the
    library is organised in three tiers so the difference is visible.
-3. **Build bridges, not replacements.** Foundations machinery becomes
-   load-bearing only when downstream modules can consume it. New work
-   *adds* an alternative constructor (`X.of_isPreBrownian`) rather than
-   replacing existing entry points; existing consumers keep working.
+3. **Layers, and imports that point one way.** `Probability/` → `Contracts/` →
+   `Pricing/` → the limbs (`Models/`, `Risk/`, `Choice/`, `Insurance/`, `Markets/`),
+   with limb-to-limb imports only along the declared edges of `tools/verify/layers.py`.
+   Probability becomes load-bearing only when the modules above it consume it, so a
+   join — a constructor such as `X.of_isPreBrownian`, an equality between two encodings —
+   is built in the module that uses it.
 
 The rest of this document spells out these three principles and catalogues
 the modules that implement them.
@@ -27,9 +29,9 @@ tier visible.
 Multi-hundred-line proofs in genuine probability + integration +
 chain-rule calculus. The hard machinery the rest of the library leans on.
 
-Modules: `Foundations/*` (Wiener integral, Brownian martingales, quadratic
-variation, Doob L^p convergence, conditional Jensen, FTAP variants, Itô
-drift, pricing kernels), `Models/Binomial/Model`, `Models/Binomial/CRRConvergence`,
+Modules: `Probability/*` (Wiener integral, Brownian martingales, quadratic
+variation, Doob L^p convergence, Itô drift, Girsanov), `Pricing/*` (FTAP
+variants, pricing kernels), `Models/Binomial/Model`, `Models/Binomial/CRRConvergence`,
 `Models/BlackScholes/Call`, `Models/BlackScholes/Put`, `Models/BlackScholes/Forward`, the
 various `*Greeks`, `DoobLpMaximalInequality`, `WienerIntegralL2`.
 
@@ -121,7 +123,7 @@ load-bearing claim had outrun their consumers:
 | `Models/Credit/KMVMertonStructural.lean` | **KMV-Merton `kmvPD` as actual risk-neutral default probability**: combines `riskNeutralProb_S_T_gt_K` with the algebraic survival identity `1 − kmvPD = Φ(bsd2)` to show `kmvPD = 1 − Q({V_T > F}).toReal`. Merton equity is `bs_call_formula` read at `(V_0, F, σ_V)`. | Connects the algebraic kmvPD definition to the actual `Q(V_T ≤ F)` probability via the same BS structure. |
 | `Models/Credit/CDSTimeVarying.lean` | **CDS fair-spread cash-flow balance for time-varying hazard**: `c · annuity(T) = (1 − R) · losses(T)` via integral identities. Plus the discrete multi-period survival factorisation `∏ exp(−h_i Δt_i) = exp(−∑ h_i Δt_i)`. | Generalises constant-hazard `c = h(1 − R)` to the cash-flow-balance form that holds for any deterministic hazard curve. |
 | `Risk/UtilityDerivation.lean` | **Acceptance under expected utility, and why it is not coherent**: acceptance under a utility is unchanged by affine changes of the utility and closed under mixing lotteries; under log utility it is the Kelly-growth condition (`acceptableUnderUtility_log_iff_kellyGrowth`) and it is **not** a cone (`not_exists_isCoherentRiskMeasure_log_acceptance`), so no coherent risk measure has it as acceptance set. | Separates convex from coherent risk at the utility primitive. (Until 2026-10-21 this row and the module claimed the ADEH characterisation; the acceptance set is convex, not a cone.) |
-| `Models/BlackScholes/BSCallHypFromBrownian.lean` | **`BSCallHyp` / `BachelierHyp` derivable from a pre-Brownian motion**: core scaling lemma `scaled_isPreBrownian_eval_law` shows `W T.toNNReal / √T ∼ N(0, 1)` under `IsPreBrownianReal W Q`. Constructors `BSCallHyp.of_isPreBrownian` and `BachelierHyp.of_isPreBrownian` then discharge the BS / Bachelier hypotheses additively. | First architectural bridge between `Foundations/` BM machinery and pricing-module consumption. Existing pricing modules continue to work unchanged; downstream consumers gain an optional BM-based constructor. |
+| `Models/BlackScholes/BSCallHypFromBrownian.lean` | **`BSCallHyp` / `BachelierHyp` derivable from a pre-Brownian motion**: core scaling lemma `scaled_isPreBrownian_eval_law` shows `W T.toNNReal / √T ∼ N(0, 1)` under `IsPreBrownianReal W Q`. Constructors `BSCallHyp.of_isPreBrownian` and `BachelierHyp.of_isPreBrownian` then discharge the BS / Bachelier hypotheses additively. | First architectural bridge between the Brownian machinery of `Probability/` and pricing-module consumption. Existing pricing modules continue to work unchanged; downstream consumers gain an optional BM-based constructor. |
 | `Models/BlackScholes/PricingFromBrownian.lean` | **Full BS / Bachelier / Digital / Power / Dividends / StockNumeraire / KMV pricing pipeline derivable from a pre-Brownian motion**: 11 one-line composite corollaries showing that every pricing entry-point that consumes `BSCallHyp` or `BachelierHyp` can be driven from a single primitive (`IsPreBrownianReal W Q`). | Demonstrates that the entire BS-family pricing infrastructure is *structurally* a corollary of "you have a Brownian motion." |
 | `Models/ModelFree/VarianceSwapFromQV.lean` + `VarianceSwapEquipartition.lean` + `VarianceSwapLimit.lean` | **Variance-swap fair strike as a QV limit**: under refinement, `E[Σ (X-increments)²]` converges to `σ² · T`. Chain of (a) per-increment QV identity, (b) finite-`n` equipartition closed form, (c) limit as `n → ∞`. | First downstream use of `Probability/Brownian/BrownianQuadraticVariation.lean`. The companion log-payoff form and this QV form are two functionals of the same BS price process, both yielding `σ²` (after `1/T` rescaling). |
 | `Pricing/PricingKernel.lean` | **Pricing kernel from two-state FTAP backward direction**: discounted EMM weights as state prices, the standard pricing kernel `V_0(X) = e^{−rT}(q_up · X_up + q_down · X_down)`. | The stochastic-discount-factor framework instantiated in the simplest finite-state market — every claim's no-arb price is a single linear functional, derived from no-arbitrage rather than assumed. |
@@ -132,12 +134,12 @@ docstring pretending to be a module.
 
 ## The bridge methodology
 
-Tier 1 Foundations machinery (Brownian motion construction, Wiener
-integral, Doob L^p, quadratic variation) is only useful to the library
-when downstream modules can *consume* it. Until that bridge exists, the
-Foundations work is dead code from the pricing modules' perspective.
+Tier 1 probability (Brownian motion construction, Wiener integral, Doob L^p,
+quadratic variation) is only useful to the library when the modules above it
+can *consume* it. Until that bridge exists, it is dead code from the pricing
+modules' perspective.
 
-Bridges are **additive**, not replacing: a new file `Bridges/X.lean`
+Bridges are **additive**, not replacing: the consuming module
 introduces a constructor `XHyp.of_isPreBrownian` (or similar) that
 discharges an existing hypothesis (`BSCallHyp`, `BachelierHyp`,
 `BrownianMartingaleHyp`, …) from a single Brownian-motion primitive.
@@ -150,18 +152,18 @@ The first complete bridge programme is documented in
 `FTAPTwoState`, etc. Each "phase" in the bridge log
 adds one constructor and one or more one-line corollaries downstream.
 
-Anti-pattern recognised early: a `Foundations/` file with great
+Anti-pattern recognised early: a `Probability/` file with great
 machinery but zero downstream consumers is a docstring pretending to be a
 module. Bridges promote it to actually load-bearing.
 
 ## Naming and organisation
 
-- Files are organised by topic under `MathFin/<Section>/`. One
+- Files are organised by layer and topic under `MathFin/<Layer>/…/`. One
   theorem per file when the theorem is non-trivial; helper lemmas in the
   same file as `private`.
-- Section names are user-facing: `BlackScholes/`, `Binomial/`, `Portfolio/`,
-  `RiskMeasures/`, etc. Match the textbook chapter you'd reach for if you
-  were looking up the result.
+- Below the layer, directory names are user-facing: `Models/BlackScholes/`,
+  `Models/Binomial/`, `Choice/Portfolio/`, `Risk/Credit/`, etc. Match the textbook
+  chapter you'd reach for if you were looking up the result.
 - File names are the *result* name, not the technique: `RiskParityFOC.lean`
   not `LogBarrierFOC.lean`. The technique appears in the docstring.
 - Inside files, follow Mathlib convention: lemma names in `lower_snake_case`,
