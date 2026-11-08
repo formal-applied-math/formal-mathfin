@@ -111,3 +111,22 @@ def test_landmark_path_is_restricted_to_anchors():
     path = docs_site.landmark_path(idx, "top", {"top": "Top", "mid": "Mid", "base": "Base"})
     assert [a for a, _ in path] == ["mid", "base"]       # `helper` is not an anchor
     assert dict(path)["mid"] == "Base"
+
+
+# ---- the tree's map (tools/verify/tree_map.toml): a drawing aid, so only its shape is checked
+
+def test_tree_map_places_name_real_parts_and_branches():
+    from tools.verify import program_tree
+    m = program_tree.load_map()
+    kinds = [p["kind"] for p in m["parts"]]
+    assert kinds.count("trunk") == 1 and "root" in kinds and "limb" in kinds
+    assert set(kinds) <= {"root", "trunk", "limb"}
+    branches = {p["key"]: set(p.get("branches", [])) for p in m["parts"]}
+    assert len(branches) == len(m["parts"]), "duplicate part key"
+    for p in m["parts"]:
+        assert p.get("title", "").strip(), p["key"]
+    assert set(m["branch"]) <= set().union(*branches.values()), "a display name for no branch"
+    places = list(m["place"].items()) + [(f"area:{a}", w) for a, w in program_tree.AREA_PLACE.items()]
+    for label, where in places:
+        part, _, branch = where.partition("/")
+        assert part in branches and (not branch or branch in branches[part]), (label, where)

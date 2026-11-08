@@ -15,7 +15,9 @@ declaration index (``lake exe mathfin_index``):
 
 ``off_map_count`` is a ratchet count (``ratchet.json``: ``corpus_off_blueprint``), and so is the
 number of ``islands`` of the proved blueprint (``blueprint_islands``); the docs site
-draws the whole picture as the program tree (``tree.html``, ``tree_data``).
+draws the whole picture as the program tree (``tree.html``, ``tree_data``), laid out on the map in
+``tree_map.toml``: four roots, the pricing functional as the trunk, five limbs. The map is a way of
+drawing the library and nothing else reads it.
 
     python3 -m tools.verify.program_tree decl-index.json            # summary by area
     python3 -m tools.verify.program_tree decl-index.json --off risk # the off-map entries of an area
@@ -35,6 +37,7 @@ from .decl_index import DeclIndex
 from .mathfin_index import cited_constants, declaration_index
 
 NODES_JSON = Path("docs/blueprint_nodes.json")
+TREE_MAP = Path(__file__).with_name("tree_map.toml")
 FRONTIER_TOML = Path("docs/blueprint_frontier.toml")
 
 # A section of the library (`MathFin.<Section>.…`) and the `area:*` label its work carries.
@@ -47,6 +50,29 @@ SECTION_AREA = {
 }
 
 KINDS = ("rests-on-node", "feeds-node", "upstream-only", "off-map")
+
+# Where the tree puts a node the map does not name, and an area's fallen leaves: by directory.
+AREA_PLACE = {
+    "foundations": "pricing", "contracts": "pricing", "black-scholes": "models/black-scholes",
+    "binomial": "models/discrete", "stoch-vol": "models/stoch-vol", "fixed-income": "models/rates",
+    "credit": "models/credit", "futures": "models/fx-futures", "commodities": "models/fx-futures",
+    "fx": "models/fx-futures", "portfolio": "choice", "risk": "risk/measures",
+    "actuarial": "insurance", "execution": "markets/execution", "defi": "markets/amm",
+    "upstream": "brownian",
+}
+
+
+def load_map(path: Path = TREE_MAP) -> dict:
+    """The tree's map: its parts in drawing order, branch names, and each named node's place."""
+    raw = tomllib.loads(path.read_text(encoding="utf-8"))
+    return dict(parts=raw.get("part", []), branch=raw.get("branch", {}), place=raw.get("place", {}))
+
+
+def map_place(label: str, area: str, tree_map: dict) -> tuple[str, str]:
+    """(part, branch) of a node: the map's place for it, else its directory's."""
+    where = tree_map["place"].get(label) or AREA_PLACE.get(area, "pricing")
+    part, _, branch = where.partition("/")
+    return part, branch
 
 
 def area_of_module(module: str) -> str:
@@ -211,6 +237,7 @@ def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
               issues: list[dict] | None = None) -> dict:
     """Everything the tree page draws, as one JSON-ready dict."""
     places = place_corpus(idx, nodes)
+    tree_map = load_map()
     nearest = Counter(p.nearest for p in places if p.nearest)
     named: dict[str, list[list]] = defaultdict(list)
     open_problem: set[str] = set()  # nodes an open `open-problem` issue carries
@@ -237,6 +264,8 @@ def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
             l=f["label"], t=f["title"], s="frontier", u=f.get("uses", []), a=f.get("area", ""),
             x=f.get("statement", ""), ground=f.get("ground", ""), core=f.get("core", []),
             e=0, i=named.get(f["label"], []), op=int(f["label"] in open_problem)))
+    for n in out_nodes:
+        n["p"], n["b"] = map_place(n["l"], n["a"], tree_map)
     by_area: dict[str, Counter] = defaultdict(Counter)
     off: dict[str, list[list[str]]] = defaultdict(list)
     for p in places:
@@ -245,7 +274,8 @@ def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
             off[p.area].append([p.entry, p.name[:90]])
     return dict(nodes=out_nodes, areas={a: dict(c) for a, c in by_area.items()},
                 off={a: v for a, v in off.items()}, issues=issues is not None,
-                corpus=len(places))
+                corpus=len(places), parts=tree_map["parts"], branch=tree_map["branch"],
+                pile={a: "/".join(filter(None, map_place("", a, tree_map))) for a in by_area})
 
 
 def main(argv: list[str] | None = None) -> int:
