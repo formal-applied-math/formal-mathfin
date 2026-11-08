@@ -28,11 +28,13 @@ definition is total, and the theorems that call it a price carry those condition
 
 Two facts make it the price rather than one more integral:
 
-* a traded asset is priced at its price: under a pricing measure, the claim that delivers asset
-  `i` at a date `t ≤ T` is worth `𝔼_Q[S i 0]` (`IsPricingMeasure.price_pay_obs`);
-* the price depends on the market only through the law of what the contract reads: two markets,
-  on two sample spaces, whose assets and deflators at the contract's observations and payment
-  dates have one law under their measures give the same price (`price_eq_of_map_observation_eq`).
+* a traded asset is priced at its price: under a pricing measure, with a deterministic `N 0`, the
+  claim that delivers asset `i` at a date `t ≤ T` is worth `𝔼_Q[S i 0]`
+  (`IsPricingMeasure.price_pay_obs`);
+* a fixed-dated contract's price depends on the market only through the law of what it reads: two
+  markets, on two sample spaces, whose assets and deflators at the contract's observations and
+  payment dates have one law under their measures give the same price
+  (`price_eq_of_map_observation_eq`).
   A parametric price defined in one concrete model is therefore the price in every market with
   that law.
 
