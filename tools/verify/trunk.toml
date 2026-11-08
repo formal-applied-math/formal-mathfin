@@ -12,6 +12,8 @@
 [trunk]
 # The pricing functional. A proof that reaches one of these reaches the trunk.
 anchors = [
+  "MathFin.Market.price",
+  "MathFin.Market.IsPricingMeasure",
   "MathFin.IsEMM",
   "MathFin.OnePeriod.IsEMM",
   "MathFin.OnePeriodVector.IsEMM",
@@ -58,7 +60,7 @@ names = [
 # the theorem that proves it (empty until it exists).
 [[device]]
 name = "MathFin.statePricePricing"
-instance = ""
+instance = "MathFin.Market.price_pay_eq_statePricePricing"
 
 [[device]]
 name = "MathFin.numeraireMeasure"

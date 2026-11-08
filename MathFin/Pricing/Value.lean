@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Contracts.Instruments.FixedIncome
+public import MathFin.Contracts.Adapted
 public import Mathlib.Probability.Martingale.Basic
 
 /-!
@@ -27,9 +28,12 @@ is load-bearing.
 ## Main definitions
 
 * `scenarioAt` — the scenario read off a model `X` at a single outcome `ω`.
-* `zeroCurve` — the zero curve `t ↦ 𝔼_Q[D t]` of a deflator: the value of one unit paid at `t`.
 * `Contract.value` — the pricing integral `∫ ω, c.pathPV (D · ω) (scenarioAt X ω) ∂Q` under a
   deflator `D`.
+* `Contract.observation` — what a fixed-dated contract reads at an outcome: the model at its
+  observations and the deflator at its payment dates; `Contract.pvOf`, its present value as a
+  function of that.
+* `zeroCurve` — the zero curve `t ↦ 𝔼_Q[D t]` of a deflator: the value of one unit paid at `t`.
 
 ## Main results
 
@@ -53,6 +57,9 @@ is load-bearing.
   flows on a deterministic curve is one.
 * `Contract.value_congr_ae` — a fixed-dated contract has the same value in two models that agree
   almost surely at the `(underlying, date)` observations it reads (`Contract.obsList`).
+* `Contract.value_eq_of_map_observation_eq` — **law invariance**: a fixed-dated contract has the
+  same value in two models, on two sample spaces, whose observations and deflators at the
+  contract's dates have one law (`Contract.value_eq_integral_map`).
 * `Contract.value_process_martingale` — the conditional-expectation value process of a
   contract is a `Q`-martingale. Carries **no** `Integrable` hypothesis: `martingale_condExp`
   is unconditional, because Mathlib's Bochner integral returns the junk value `0` off the
@@ -228,6 +235,90 @@ theorem value_fixedFlows_deterministic {Q : Measure Ω} [IsProbabilityMeasure Q]
     (fixedFlows t c n : Contract ι).value Q (fun s _ ↦ D s) X
       = ∑ i ∈ Finset.range n, D (t i) * c i :=
   Contract.value_eq_of_pathPV_eq X fun ω ↦ pathPV_fixedFlows D (scenarioAt X ω) t c n
+
+/-! ### Law invariance -/
+
+/-- **What a fixed-dated contract reads** from a model `X` and a deflator `D` at an outcome `ω`: the
+model at each of its observations (`c.obsList`) and the deflator at each of its payment dates
+(`c.dates`). -/
+def Contract.observation (c : Contract ι) (D : ℝ≥0 → Ω → ℝ) (X : ι → ℝ≥0 → Ω → ℝ) (ω : Ω) :
+    ({p // p ∈ c.obsList} → ℝ) × ({t // t ∈ c.dates} → ℝ) :=
+  (fun p ↦ X p.1.1 p.1.2 ω, fun t ↦ D t.1 ω)
+
+open Classical in
+/-- The scenario an observation fills in: the observed value at each of `c.obsList`, `0`
+elsewhere. -/
+noncomputable def Contract.fillScenario (c : Contract ι) (v : {p // p ∈ c.obsList} → ℝ) :
+    Scenario ι :=
+  fun i t ↦ if h : (i, t) ∈ c.obsList then v ⟨(i, t), h⟩ else 0
+
+open Classical in
+/-- The discount factor an observation fills in: the observed value at each of `c.dates`, `0`
+elsewhere. -/
+noncomputable def Contract.fillDates (c : Contract ι) (w : {t // t ∈ c.dates} → ℝ) :
+    ℝ≥0 → ℝ :=
+  fun t ↦ if h : t ∈ c.dates then w ⟨t, h⟩ else 0
+
+/-- The present value of a contract as a function of what it reads. -/
+noncomputable def Contract.pvOf (c : Contract ι)
+    (z : ({p // p ∈ c.obsList} → ℝ) × ({t // t ∈ c.dates} → ℝ)) : ℝ :=
+  c.pathPV (c.fillDates z.2) (c.fillScenario z.1)
+
+/-- A fixed-dated contract's deflated present value along `ω` is its present value read off the
+observation at `ω`. -/
+theorem Contract.pathPV_eq_pvOf (c : Contract ι) (hc : c.FixedDated) (D : ℝ≥0 → Ω → ℝ)
+    (X : ι → ℝ≥0 → Ω → ℝ) (ω : Ω) :
+    c.pathPV (fun t ↦ D t ω) (scenarioAt X ω) = c.pvOf (c.observation D X ω) := by
+  unfold Contract.pvOf
+  refine c.pathPV_congr hc (fun t ht ↦ ?_) (fun ⟨i, t⟩ hp ↦ ?_)
+  · simp [Contract.fillDates, Contract.observation, ht]
+  · simp [Contract.fillScenario, Contract.observation, scenarioAt, hp]
+
+theorem Contract.measurable_observation (c : Contract ι) {D : ℝ≥0 → Ω → ℝ}
+    (hD : ∀ t, Measurable (D t)) {X : ι → ℝ≥0 → Ω → ℝ} (hX : ∀ i t, Measurable (X i t)) :
+    Measurable (c.observation D X) := by
+  unfold Contract.observation
+  exact (measurable_pi_lambda _ fun p ↦ hX p.1.1 p.1.2).prodMk
+    (measurable_pi_lambda _ fun t ↦ hD t.1)
+
+theorem Contract.measurable_pvOf (c : Contract ι) (hc : c.FixedDated) : Measurable c.pvOf := by
+  refine Contract.measurable_pathPV (c := c) hc (D := fun t z ↦ c.fillDates z.2 t)
+    (X := fun i t z ↦ c.fillScenario z.1 i t) (fun t ↦ ?_) (fun i t ↦ ?_)
+  · by_cases h : t ∈ c.dates
+    · simp only [Contract.fillDates, dif_pos h]
+      exact (measurable_pi_apply _).comp measurable_snd
+    · simp only [Contract.fillDates, dif_neg h]
+      exact measurable_const
+  · by_cases h : (i, t) ∈ c.obsList
+    · simp only [Contract.fillScenario, dif_pos h]
+      exact (measurable_pi_apply _).comp measurable_fst
+    · simp only [Contract.fillScenario, dif_neg h]
+      exact measurable_const
+
+/-- **The value of a fixed-dated contract is an integral against the law of what it reads**: the
+`Q`-law of its observation, for a measurable model and deflator. -/
+theorem Contract.value_eq_integral_map (c : Contract ι) (hc : c.FixedDated) (Q : Measure Ω)
+    {D : ℝ≥0 → Ω → ℝ} (hD : ∀ t, Measurable (D t)) {X : ι → ℝ≥0 → Ω → ℝ}
+    (hX : ∀ i t, Measurable (X i t)) :
+    c.value Q D X = ∫ z, c.pvOf z ∂(Q.map (c.observation D X)) := by
+  rw [integral_map (c.measurable_observation hD hX).aemeasurable
+    (c.measurable_pvOf hc).aestronglyMeasurable]
+  unfold Contract.value
+  exact integral_congr_ae (.of_forall fun ω ↦ c.pathPV_eq_pvOf hc D X ω)
+
+/-- **Law invariance.** A fixed-dated contract has the same value in two models, on two sample
+spaces, whose observations have the same law: if `(X, D)` at the contract's observations and
+payment dates has one law under `Q` and under `Q'`, the values agree. The value depends on the
+model only through that law, which is what lets a model built on one concrete space define a price
+in every market with the same law. -/
+theorem Contract.value_eq_of_map_observation_eq {Ω' : Type*} {mΩ' : MeasurableSpace Ω'}
+    (c : Contract ι) (hc : c.FixedDated) {Q : Measure Ω} {Q' : Measure Ω'}
+    {D : ℝ≥0 → Ω → ℝ} {D' : ℝ≥0 → Ω' → ℝ} {X : ι → ℝ≥0 → Ω → ℝ} {X' : ι → ℝ≥0 → Ω' → ℝ}
+    (hD : ∀ t, Measurable (D t)) (hX : ∀ i t, Measurable (X i t))
+    (hD' : ∀ t, Measurable (D' t)) (hX' : ∀ i t, Measurable (X' i t))
+    (h : Q.map (c.observation D X) = Q'.map (c.observation D' X')) :
+    c.value Q D X = c.value Q' D' X' := by
+  rw [c.value_eq_integral_map hc Q hD hX, c.value_eq_integral_map hc Q' hD' hX', h]
 
 /-! ### The zero curve -/
 

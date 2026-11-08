@@ -375,6 +375,7 @@ import MathFin.Pricing.NoArbitrageDerivations
 -- representation)
 import MathFin.Pricing.SuperhedgingDuality
 import MathFin.Pricing.Value
+import MathFin.Pricing.Market
 import MathFin.Pricing.Parity
 import MathFin.Pricing.DiscreteMarket
 -- The law of a Wiener-represented rate under the forward measure of a Wiener-represented account
