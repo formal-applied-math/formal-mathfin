@@ -2581,4 +2581,16 @@ bounded-coefficient process class. -/
 #guard_msgs in
 #print axioms MathFin.integral_discounted_v3PositionValue_le
 
+/-- info: 'MathFin.CAPM_from_market_equilibrium' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.CAPM_from_market_equilibrium
+
+/-- info: 'MathFin.isTangentPortfolioN_and_portfolioVarN_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.isTangentPortfolioN_and_portfolioVarN_le
+
+/-- info: 'MathFin.portfolioVarN_minVarWeightTwo_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.portfolioVarN_minVarWeightTwo_le
+
 end MathFin.AxiomAudit

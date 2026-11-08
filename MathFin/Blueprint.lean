@@ -894,3 +894,20 @@ attribute [blueprint "thm:uniswap-v3-bs-bound" (title := "A v3 position is worth
   position on $[a,b]$ is at most $x_{max}(S_0 - C)$, where $C$ is the Black–Scholes call struck
   at the geometric-mean price $ab$. -/)]
   MathFin.integral_discounted_v3PositionValue_le
+
+attribute [blueprint "thm:capm-equilibrium" (title := "CAPM from market equilibrium")
+  (statement := /-- If the market portfolio $w_M$ meets the tangency cross-product condition and
+  $w_M^\top \Sigma w_M \ne 0$, every asset's excess return is its beta times the market's:
+  $\mu_i - r_f = \beta_i (\mu_M - r_f)$ with $\beta_i = (\Sigma w_M)_i / w_M^\top \Sigma w_M$. -/)]
+  MathFin.CAPM_from_market_equilibrium
+
+attribute [blueprint "thm:tangent-portfolio-efficient" (title := "The tangent portfolio is efficient")
+  (statement := /-- For positive semidefinite $\Sigma$, a fully invested portfolio with
+  $\Sigma w = \lambda(\mu - r_f)$ is a tangent portfolio and has the least variance among the
+  fully invested portfolios with the same expected return. -/)]
+  MathFin.isTangentPortfolioN_and_portfolioVarN_le
+
+attribute [blueprint "thm:two-asset-min-variance" (title := "The two-asset weight minimises variance")
+  (statement := /-- When $D = \sigma_1^2 - 2\rho\sigma_1\sigma_2 + \sigma_2^2 > 0$, the closed-form
+  weight $w^*$ gives $(w^*, 1-w^*)$ the least portfolio variance among all two-asset budgets. -/)]
+  MathFin.portfolioVarN_minVarWeightTwo_le

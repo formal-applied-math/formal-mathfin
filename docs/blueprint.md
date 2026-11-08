@@ -44,6 +44,14 @@ picture as the program tree. Every frontier node grows from the proved nodes: it
 one, or its `ground` field names the Mathlib material it builds on. A frontier node whose `core`
 lists corpus entries is proved in part.
 
+**Shared objects and bridges.** A tag adds a node; only a proof adds an edge. The proved nodes are
+joined into one tree by the objects their proofs share (`def:gbm`, `def:black-scholes-model`,
+`def:martingale-transform`, `def:marginal-variance`, …) and by theorems that already join two
+parts of the map (the VaR of a Gaussian portfolio, the binomial price as the cost of a hedge, the
+caplet as a Black-76 call under the forward measure, the jump-diffusion call as a mixture of
+Black–Scholes prices, …). The proved nodes that remain apart are `program_tree.islands`, counted by
+the ratchet `blueprint_islands`; the tree draws them growing from the soil beside the trunk.
+
 **The graph below is generated, not drawn.** Nodes are `@[blueprint]`-tagged
 declarations ([`MathFin/Blueprint.lean`](../MathFin/Blueprint.lean)); edges are
 *inferred from the proof terms* (LeanArchitect's `collectUsed`, a transitive

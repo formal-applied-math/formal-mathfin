@@ -12,6 +12,7 @@
     "modules_without_main_definitions": 0,
     "modules_with_uncited_sources": 0,
     "long_lines": 0,
-    "corpus_off_blueprint": 236
+    "corpus_off_blueprint": 236,
+    "blueprint_islands": 34
   }
 }

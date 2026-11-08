@@ -687,10 +687,10 @@ the proved blueprint through its uses (<code>blueprint_issues check</code> enfor
 
 
 TREE_SCRIPTS = ("https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js", "assets/tree.js")
-TREE_KINDS = (("rests-on-node", "rests on a node", "--t-wood"),
-              ("feeds-node", "feeds a node", "--t-leaf"),
-              ("upstream-only", "upstream only", "--t-up"),
-              ("off-map", "off the map", "--line"))
+TREE_KINDS = (("rests-on-node", "rests on a node", "--tr-leaf-2"),
+              ("feeds-node", "feeds a node", "--tr-leaf-3"),
+              ("upstream-only", "upstream only", "--tr-soil-2"),
+              ("off-map", "off the map", "--tr-fallen"))
 
 
 def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dict],
@@ -727,21 +727,22 @@ def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dic
     proved = sum(n["s"] == "proved" for n in data["nodes"])
     nfront = sum(n["s"] == "frontier" for n in data["nodes"])
     payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
-    buds = ('<label><input type="checkbox" id="t-buds" checked> Issues</label>'
-            if issues is not None else "")
     body = f"""<h1>The program tree</h1>
-<p class="lede ink2">The blueprint drawn as a tree. The {proved} proved results are the wood, each
-one step above the deepest result its proof uses; the {nfront} frontier results grow off them as
-translucent branches, amber where the corpus already proves part of one. The corpus entries are the
-leaves, each hung on the deepest node its proof rests on, and branch thickness counts what rests on
-a branch. Click a node to read it; drag to pan, scroll to zoom.</p>
-<div class="t-box" id="tree-box"><div class="t-tools">{buds}
-<label><input type="checkbox" id="t-leaves" checked> Corpus leaves</label>
+<p class="lede ink2">The blueprint drawn as a tree, grown from Mathlib and BrownianMotion. Height is
+conceptual depth: each of the {proved} proved results sits above everything its proof rests on, with
+Foundations as the trunk. Every use is drawn as wood, and wood thickens with the corpus it carries.
+The corpus entries are the leaves, hung on the deepest node their proof rests on. The {nfront}
+frontier results are dashed blueprint shoots, each bud coloured by the state of its issue, with the
+open problems as stars. Proved results that rest on no node grow from the soil beside the trunk;
+entries that touch no node lie on the ground. Click a node to trace its lineage; drag to pan,
+scroll to zoom.</p>
+<div class="t-box" id="tree-box"><div class="t-tools">
+<input id="t-q" type="search" placeholder="Find a node: Itô, VaR, Heston…" aria-label="Find a node" autocomplete="off">
+<button type="button" id="t-grow">Grow it again</button>
 <button type="button" id="t-reset">Reset view</button></div>
 <div class="t-stage"><svg id="tree" role="img" aria-label="The MathFin blueprint as a tree"></svg>
-<aside class="panel side t-panel" id="tree-panel"><p class="empty">A node sits one step above the
-deepest result it uses. Click one to see its statement, what it builds on and what builds on
-it.</p></aside></div><div id="tree-tip" class="t-tip"></div></div>
+<aside class="t-panel" id="tree-panel" aria-live="polite"></aside></div>
+<div id="tree-tip" hidden></div></div>
 <h2>Where the corpus sits</h2>
 <p class="ink2">{on} of the {total} corpus entries are on the map: their proofs rest on a blueprint
 node, or a node's proof uses what they cite. {off} cite MathFin results in no relation the map

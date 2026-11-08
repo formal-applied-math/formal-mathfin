@@ -124,7 +124,7 @@ theorem CAPM_from_market_equilibrium
        μ_excess k * marginalVariance s Sg w_M j =
          μ_excess j * marginalVariance s Sg w_M k) :
     μ_excess i =
-      (marginalVariance s Sg w_M i / portfolioVarN s w_M Sg) *
+      beta (marginalVariance s Sg w_M i) (portfolioVarN s w_M Sg) *
         portfolioReturn s w_M μ_excess := by
   -- Sum w_M(j) · (h_FOC i j) over j ∈ s
   have h_sum :
@@ -150,7 +150,7 @@ theorem CAPM_from_market_equilibrium
   rw [h_LHS, h_RHS] at h_sum
   -- h_sum: μ_excess i * Var(R_M) = μ_M * (Σw_M)_i
   -- Divide both sides by Var(R_M)
-  rw [div_mul_eq_mul_div, eq_div_iff h_var]
+  rw [beta, div_mul_eq_mul_div, eq_div_iff h_var]
   linarith
 
 /-- **CAPM equilibrium ⟹ Security Market Line**: the equilibrium CAPM
@@ -167,7 +167,7 @@ theorem expectedReturn_eq_SML_from_equilibrium
        (μ k - rf) * marginalVariance s Sg w_M j =
          (μ j - rf) * marginalVariance s Sg w_M k) :
     μ i = securityMarketLine rf
-      (marginalVariance s Sg w_M i / portfolioVarN s w_M Sg)
+      (beta (marginalVariance s Sg w_M i) (portfolioVarN s w_M Sg))
       (∑ k ∈ s, w_M k * μ k) := by
   unfold securityMarketLine
   have h := CAPM_from_market_equilibrium s w_M (fun k ↦ μ k - rf) Sg i hi h_var h_FOC
