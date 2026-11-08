@@ -65,6 +65,37 @@ def test_a_pull_request_is_a_delivery_record() -> None:
     assert bi.check(issues, NODES) == []
 
 
+def test_taxonomy_labels_are_derived_from_the_nodes() -> None:
+    nodes = {
+        "thm:a": bi.Node("thm:a", "A", "proved", area="valuation/term", family="term"),
+        "thm:f": bi.Node("thm:f", "F", "frontier", uses=("thm:a",), statement="F holds.",
+                         area="risk/measures"),
+    }
+    right = _issue(1, "Blueprint: thm:a, thm:f", labels=(
+        "type:proof", "area:valuation/term", "family:term", "area:risk/measures", "area:ci"))
+    assert bi.check([right], nodes) == []
+    wrong = _issue(2, "Blueprint: thm:a, thm:f", labels=("type:proof", "area:risk"))
+    assert bi.label_drift(wrong, nodes) == (
+        {"area:valuation/term", "family:term", "area:risk/measures"}, {"area:risk"})
+    assert any(p.message.startswith("#2: ") for p in bi.check([wrong], nodes))
+    # closed issues are relabelled by `labels --apply` but never fail the check
+    closed = _issue(3, "Blueprint: thm:a, thm:f", state="closed")
+    assert bi.label_drift(closed, nodes)[0] and bi.check([right, closed], nodes) == []
+
+
+def test_every_taxonomy_label_fits_github() -> None:
+    labels = bi.taxonomy_labels()
+    assert all(len(name) <= 50 and len(desc) <= 100 for name, (_, desc) in labels.items())
+    assert all(bi.is_taxonomy_label(name) for name in labels)
+    assert not bi.is_taxonomy_label("area:ci") and not bi.is_taxonomy_label("area:foundations")
+
+
+def test_lean_nodes_take_their_module_cell() -> None:
+    nodes = bi.load_nodes(REPO / "docs/blueprint_nodes.json", REPO / "docs/blueprint_frontier.toml")
+    unplaced = [n.label for n in nodes.values() if n.status != "upstream" and not n.area]
+    assert unplaced == []
+
+
 def test_every_frontier_node_grows_from_the_wood() -> None:
     nodes = dict(NODES)
     nodes["thm:g"] = bi.Node("thm:g", "G", "frontier", uses=("thm:f",), statement="G.")
