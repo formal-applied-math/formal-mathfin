@@ -85,6 +85,8 @@ matrices*][MarchenkoPastur1967]
 * [Bai and Silverstein, *Spectral Analysis of Large Dimensional Random
 Matrices*][BaiSilverstein2010], ch. 3
 * [López de Prado, *Machine Learning for Asset Managers*][LopezDePrado2020], ch. 2, Snippet 2.1
+* [*QRM Exercise Book*][QRMExerciseBook], Ex. 6.16 (the equal-weight diversification floor the
+  benchmark snippet composes with the sandwich)
 
 ## Tags
 

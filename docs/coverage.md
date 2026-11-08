@@ -48,7 +48,9 @@ tree (767 full before, 768 after; 785 → 786 delivery-ready).
   López de Prado's reciprocal form `λ±(σ, q⁻¹) = σ²(1 ± (√q)⁻¹)²` with `q = T/N` — the
   `eMin`/`eMax` of Snippet 2.1 of *Machine Learning for Asset Managers*, where `eMax` is the
   noise/signal cut (`mpUpperEdge_inv`, `mpLowerEdge_inv`) — and the quadratic scaling
-  `λ±(kσ, c) = k²λ±(σ, c)` (`mpUpperEdge_const_mul`, `mpLowerEdge_const_mul`). A bridge to
+  `λ±(kσ, c) = k²λ±(σ, c)` (`mpUpperEdge_const_mul`, `mpLowerEdge_const_mul`). The snippet
+  additionally composes the equal-weight diversification floor `ρ + (1 − ρ)/d` of QRM Ex. 6.16
+  (`portfolioVarN_equicorrelation_equal_weights`) with the `c ≤ 1` sandwich. A bridge to
   the portfolio layer: an equicorrelation matrix's trace is its dimension, so its average
   eigenvalue is `1 = σ²` for a correlation matrix — the variance the `σ = 1` support interval
   sandwiches for every `c ≤ 1` (`trace_equicorrelationMatrix_eq_card`, importing
