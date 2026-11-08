@@ -801,6 +801,7 @@ import MathFin.Risk.PositionsConvention
 -- Phase 1 (convex-duality unification): coherent-risk ADEH representation — acceptance cone
 -- separation giving the representing probability measures (risk-side Hahn–Banach)
 import MathFin.Risk.AcceptanceSet
+import MathFin.Risk.Superhedging
 -- Phase 1 (convex-duality unification): worst-case loss — the most conservative coherent risk
 -- measure, concrete instance of the ADEH representation (sup over the entire probability simplex)
 import MathFin.Risk.WorstCaseRisk

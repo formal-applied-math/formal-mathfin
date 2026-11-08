@@ -108,6 +108,7 @@ graph TD
   sdePathwiseUniqueness["Pathwise uniqueness for SDEs with Lipschitz coefficients"]:::proved
   snellEnvelope["Snell envelope"]:::proved
   stochasticFubini["Stochastic Fubini theorem"]:::proved
+  superhedgingPriceLowerBound["The superhedging price dominates every martingale price"]:::proved
   uniswapV3CoveredCall["A concentrated-liquidity position is dominated by a covered call"]:::proved
   vasicekBondPde["Vasicek bond price"]:::proved
   contractValue["Value of a contract"]:::proved
@@ -146,6 +147,7 @@ graph TD
   schwartzCommodityFutures["Schwartz commodity futures price"]:::proved
   sdeStrongSolution["Existence and uniqueness of solutions of Lipschitz SDEs"]:::proved
   secondFtap["Second fundamental theorem of asset pricing"]:::proved
+  superhedgingCoherent["The superhedging price is a coherent risk measure"]:::proved
   varianceSwapJumpBias["Variance swap and the log contract"]:::proved
   expectedShortfall["Expected shortfall"]:::proved
   black76Caplet["Black's caplet formula"]:::proved
@@ -239,7 +241,6 @@ graph TD
     delbaenRepresentation["Delbaen's representation of coherent risk measures"]:::frontier
     kusuoka["Kusuoka representation"]:::frontier
     riskMeasureFamilies["Entropic, distortion and expectile risk measures"]:::frontier
-    superhedgingCoherent["The superhedging price is a coherent risk measure"]:::frontier
   end
   subgraph frontier_statistics["⏳ frontier · Statistics"]
     buhlmannCredibility["Bühlmann credibility"]:::frontier
@@ -371,6 +372,8 @@ graph TD
   brownianMotion --> sdeStrongSolution
   emm --> secondFtap
   martingaleTransform --> secondFtap
+  coherentRiskMeasure --> superhedgingCoherent
+  superhedgingPriceLowerBound --> superhedgingCoherent
   compoundPoissonMgf --> varianceSwapJumpBias
   valueAtRisk --> expectedShortfall
   contract --> black76Caplet
@@ -601,8 +604,6 @@ graph TD
   brownianMotion --> stefanUniqueness
   stochasticFubini --> stochasticFubiniLevy
   stochasticFubini --> stochasticFubiniProcess
-  pricingFunctional --> superhedgingCoherent
-  coherentRiskMeasure --> superhedgingCoherent
   survivalFunction --> survivalModel
   survivalModel --> thieleReserve
   survivalFunction --> thieleReserve
@@ -669,6 +670,7 @@ graph TD
 | `thm:sde-pathwise-uniqueness` Pathwise uniqueness for SDEs with Lipschitz coefficients | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asde-pathwise-uniqueness%22%20in%3Abody) |
 | `thm:snell-envelope` Snell envelope | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asnell-envelope%22%20in%3Abody) |
 | `thm:stochastic-fubini` Stochastic Fubini theorem | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astochastic-fubini%22%20in%3Abody) |
+| `thm:superhedging-price-lower-bound` The superhedging price dominates every martingale price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-price-lower-bound%22%20in%3Abody) |
 | `thm:uniswap-v3-covered-call` A concentrated-liquidity position is dominated by a covered call | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Auniswap-v3-covered-call%22%20in%3Abody) |
 | `thm:vasicek-bond-pde` Vasicek bond price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avasicek-bond-pde%22%20in%3Abody) |
 | `def:contract-value` Value of a contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acontract-value%22%20in%3Abody) |
@@ -707,6 +709,7 @@ graph TD
 | `thm:schwartz-commodity-futures` Schwartz commodity futures price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aschwartz-commodity-futures%22%20in%3Abody) |
 | `thm:sde-strong-solution` Existence and uniqueness of solutions of Lipschitz SDEs | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asde-strong-solution%22%20in%3Abody) |
 | `thm:second-ftap` Second fundamental theorem of asset pricing | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asecond-ftap%22%20in%3Abody) |
+| `thm:superhedging-coherent` The superhedging price is a coherent risk measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-coherent%22%20in%3Abody) |
 | `thm:variance-swap-jump-bias` Variance swap and the log contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-swap-jump-bias%22%20in%3Abody) |
 | `def:expected-shortfall` Expected shortfall | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aexpected-shortfall%22%20in%3Abody) |
 | `thm:black76-caplet` Black's caplet formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ablack76-caplet%22%20in%3Abody) |
@@ -827,7 +830,6 @@ graph TD
 | `thm:stefan-uniqueness` Stefan uniqueness with accumulating jumps | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astefan-uniqueness%22%20in%3Abody) |
 | `thm:stochastic-fubini-levy` Stochastic Fubini for Itô–Lévy integrals | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astochastic-fubini-levy%22%20in%3Abody) |
 | `thm:stochastic-fubini-process` Stochastic Fubini for the integral process | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astochastic-fubini-process%22%20in%3Abody) |
-| `thm:superhedging-coherent` The superhedging price is a coherent risk measure | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-coherent%22%20in%3Abody) |
 | `thm:survival-model` Survival model and life tables | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asurvival-model%22%20in%3Abody) |
 | `thm:thiele-reserve` Thiele reserve | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Athiele-reserve%22%20in%3Abody) |
 | `thm:time-inconsistent-equilibrium` Relaxed equilibria under time inconsistency | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atime-inconsistent-equilibrium%22%20in%3Abody) |
