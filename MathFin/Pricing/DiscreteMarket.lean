@@ -209,6 +209,7 @@ theorem isPricingMeasure_toMarket_iff [IsFiniteMeasure P] :
         Q'.trim ((toMarket P 𝓕 S T hS).𝓕.le T) = Q.trim ((toMarket P 𝓕 S T hS).𝓕.le T) := by
   refine ⟨fun hQ ↦ ?_, fun ⟨Q', hQ', htrim⟩ ↦ (isPricingMeasure_toMarket_of_isEMM hQ').of_trim_eq
     htrim⟩
+  have : IsFiniteMeasure (toMarket P 𝓕 S T hS).P := inferInstanceAs (IsFiniteMeasure P)
   obtain ⟨Q', hQP, hQ', htrim⟩ := hQ.exists_isEquivProbMeasure
   exact ⟨Q', isEMM_of_isPricingMeasure_toMarket hQ' hQP, htrim⟩
 

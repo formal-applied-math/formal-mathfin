@@ -193,10 +193,10 @@ theorem map_flips_equiv_of_isPricingMeasure (hh : 0 < h) (hTN : ⌊(T : ℝ) / h
   refine ⟨Measure.AbsolutelyContinuous.mk fun S hS h0 ↦ ?_,
     Measure.AbsolutelyContinuous.mk fun S hS h0 ↦ ?_⟩
   · rw [Measure.map_apply (measurable_flips N) hS] at h0 ⊢
-    rw [← trim_measurableSet_eq _ (hmeas hS)] at h0 ⊢
+    rw [← trim_measurableSet_eq ((market P S₀ u d ρ hh.le).𝓕.le T) (hmeas hS)] at h0 ⊢
     exact hQ.ac h0
   · rw [Measure.map_apply (measurable_flips N) hS] at h0 ⊢
-    rw [← trim_measurableSet_eq _ (hmeas hS)] at h0 ⊢
+    rw [← trim_measurableSet_eq ((market P S₀ u d ρ hh.le).𝓕.le T) (hmeas hS)] at h0 ⊢
     exact hQ.ac' h0
 
 /-- **Every pricing measure is the risk-neutral law on the flips made by the horizon.** For
@@ -242,7 +242,7 @@ theorem price_pay_eq_binomialPrice_of_isPricingMeasure (hS₀ : 0 < S₀) (hna :
     rw [pathAdaptedAt_spotPath S₀ u d N ω ω' hω]
   calc (market P S₀ u d ρ hh.le).price Q (.pay T a)
       = ∫ ω, discount ρ h T * a.eval (scenarioAt (assets S₀ u d h) ω) ∂Q := by
-        rw [price_market P Q S₀ hh.le trivial hgrid, Contract.value_pay]
+        rw [price_market P Q S₀ hh.le (c := .pay T a) trivial hgrid, Contract.value_pay]
     _ = ∫ ω, discount ρ h T * a.eval (scenarioAt (assets S₀ u d h) ω) ∂coinFlipMeasure q hq := by
         rw [integral_trim (flipFiltration.le N) hF, integral_trim (flipFiltration.le N) hF,
           trim_eq_of_isPricingMeasure hq hS₀ hna hqcrr hh hfl hQ]
