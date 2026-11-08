@@ -881,9 +881,9 @@
     "mf-binomial-market-pricing-measure": {
       "benchmark_file": "binomial.json",
       "date": "2026-11-08",
-      "elapsed_s": 2.8,
-      "input_hash": "d2f447d58df059b8bc694e8f6a1705cf31f282248c1028aaeab4f8773086ded2",
-      "verified_at_commit": "ed1ecf3"
+      "elapsed_s": 3.2,
+      "input_hash": "569ad72aa648562b7aa54ce53b019be20f77a54d51e01130366b2940090249ef",
+      "verified_at_commit": "9ebf6cc"
     },
     "mf-binomial-martingale-representation": {
       "benchmark_file": "binomial.json",
@@ -2421,9 +2421,9 @@
     "mf-discrete-market-parity": {
       "benchmark_file": "contracts.json",
       "date": "2026-11-08",
-      "elapsed_s": 2.7,
-      "input_hash": "a204a302d04f2424cda662579fbef43a8173e8e9791553ae9e803331c839282b",
-      "verified_at_commit": "ed1ecf3"
+      "elapsed_s": 3.1,
+      "input_hash": "dadc2902ea0dd124d15d40bff29e5906a2581d58a624f29abfe73721fc4dc096",
+      "verified_at_commit": "9ebf6cc"
     },
     "mf-dmw-conditional": {
       "benchmark_file": "no_arbitrage.json",
