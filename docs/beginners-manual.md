@@ -61,7 +61,7 @@ To use the library from your own project instead, see
 
 ## 3. Reading a file
 
-Open [`MathFin/Binomial/Model.lean`](../MathFin/Binomial/Model.lean), the one-period binomial model.
+Open [`MathFin/Models/Binomial/Model.lean`](../MathFin/Models/Binomial/Model.lean), the one-period binomial model.
 Its parts appear in every file.
 
 ```lean
@@ -145,7 +145,7 @@ library:
 
 Long statements usually rely on a `variable` line earlier in the file, which declares arguments
 shared by every theorem below it. The discrete fundamental theorem of asset pricing in
-[`Foundations/FTAPDiscrete.lean`](../MathFin/Foundations/FTAPDiscrete.lean) reads
+[`Pricing/FTAP/FTAPDiscrete.lean`](../MathFin/Pricing/FTAP/FTAPDiscrete.lean) reads
 
 ```lean
 variable {Ω : Type*} [Fintype Ω] [Nonempty Ω] {mΩ : MeasurableSpace Ω}
@@ -171,9 +171,9 @@ discusses this further.
 
 ## 5. Finding a theorem
 
-- **By topic.** The library is organized by area: `Foundations/` for stochastic calculus and
-  no-arbitrage theory, then `BlackScholes/`, `Binomial/`, `FixedIncome/`, `Portfolio/`,
-  `RiskMeasures/` and so on. Each module's documentation lists what it proves.
+- **By topic.** The library is organized by area: `Probability/` for stochastic calculus, `Pricing/`
+  for no-arbitrage theory, then the models (`Models/BlackScholes/`, `Models/Binomial/`,
+  `Models/Rates/`), `Choice/Portfolio/`, `Risk/` and so on. Each module's documentation lists what it proves.
 - **By source.** Each benchmark file in [`benchmarks/`](../benchmarks) lists results from the
   literature, with the reference, a description of what the entry proves, and the name of the Lean
   theorem. The same corpus is published as a

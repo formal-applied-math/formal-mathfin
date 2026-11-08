@@ -6,7 +6,7 @@ import json
 from tools.verify import docs_site
 from tools.verify.decl_index import DeclIndex
 
-MODULE = "MathFin.BlackScholes.Call"
+MODULE = "MathFin.Models.BlackScholes.Call"
 
 
 def _index(path):
@@ -26,11 +26,11 @@ def test_site_builds(tmp_path):
     docs_site.build(_index(tmp_path / "idx.json"), out)
     for page in ("index.html", "blueprint.html", "corpus.html", "subjects.html",
                  "references.html", "search.json", "assets/site.css", "assets/site.js",
-                 f"m/{MODULE}.html", "s/BlackScholes.html"):
+                 f"m/{MODULE}.html", "s/Models.BlackScholes.html"):
         assert (out / page).is_file(), page
     mod = (out / f"m/{MODULE}.html").read_text(encoding="utf-8")
     assert 'id="MathFin.bsCall_pos"' in mod
-    assert 'class="mf" href="../m/MathFin.BlackScholes.Call.html#MathFin.bsCall"' in mod
+    assert 'class="mf" href="../m/MathFin.Models.BlackScholes.Call.html#MathFin.bsCall"' in mod
     assert "used by 1" in mod
     rows = json.loads((out / "search.json").read_text(encoding="utf-8"))
     assert {r["n"] for r in rows} == {"MathFin.bsCall", "MathFin.bsCall_pos"}
@@ -126,7 +126,8 @@ def test_tree_map_places_name_real_parts_and_branches():
     for p in m["parts"]:
         assert p.get("title", "").strip(), p["key"]
     assert set(m["branch"]) <= set().union(*branches.values()), "a display name for no branch"
-    places = list(m["place"].items()) + [(f"area:{a}", w) for a, w in program_tree.AREA_PLACE.items()]
+    places = (list(m["place"].items()) + [(f"area:{a}", w) for a, w in program_tree.AREA_PLACE.items()]
+              + [(f"dir:{d}", w) for d, w in program_tree.DIR_PLACE.items()])
     for label, where in places:
         part, _, branch = where.partition("/")
         assert part in branches and (not branch or branch in branches[part]), (label, where)

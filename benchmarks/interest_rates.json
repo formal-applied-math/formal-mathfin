@@ -8,7 +8,7 @@
       "description": "ZCB pays par at maturity: B(T, T) = exp(0) = 1.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.ZCB\n\nopen MathFin\n\ntheorem zcb_maturity_thm (r T : ℝ) : MathFin.zcb r T T = 1 :=\n  MathFin.zcb_at_maturity r T\n"
+        "lean": "import MathFin.Models.Rates.ZCB\n\nopen MathFin\n\ntheorem zcb_maturity_thm (r T : ℝ) : MathFin.zcb r T T = 1 :=\n  MathFin.zcb_at_maturity r T\n"
       },
       "metadata": {
         "chapter": 10,
@@ -21,7 +21,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Lives in MathFin/Models/Rates/ZCB.lean. Axioms-clean."
       }
     },
     {
@@ -30,7 +30,7 @@
       "description": "Under a constant short rate r, the yield-to-maturity of a continuously-compounded ZCB equals r: -log(B(t,T))/(T-t) = r.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.ZCB\n\nopen MathFin\n\ntheorem zcb_yield_thm {r t T : ℝ} (htT : t < T) :\n    -Real.log (MathFin.zcb r t T) / (T - t) = r :=\n  MathFin.zcb_yield_eq_rate htT\n"
+        "lean": "import MathFin.Models.Rates.ZCB\n\nopen MathFin\n\ntheorem zcb_yield_thm {r t T : ℝ} (htT : t < T) :\n    -Real.log (MathFin.zcb r t T) / (T - t) = r :=\n  MathFin.zcb_yield_eq_rate htT\n"
       },
       "metadata": {
         "chapter": 10,
@@ -43,7 +43,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via log of exp + algebraic simplification. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via log of exp + algebraic simplification. Lives in MathFin/Models/Rates/ZCB.lean. Axioms-clean."
       }
     },
     {
@@ -52,7 +52,7 @@
       "description": "ZCB Macaulay duration equals remaining time: -∂_r B(t,T) / B(t,T) = T - t.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.ZCB\n\nopen MathFin\n\ntheorem zcb_duration_thm (t T r : ℝ) :\n    -deriv (fun r' => MathFin.zcb r' t T) r / MathFin.zcb r t T = T - t :=\n  MathFin.zcb_duration_eq_time_to_maturity t T r\n"
+        "lean": "import MathFin.Models.Rates.ZCB\n\nopen MathFin\n\ntheorem zcb_duration_thm (t T r : ℝ) :\n    -deriv (fun r' => MathFin.zcb r' t T) r / MathFin.zcb r t T = T - t :=\n  MathFin.zcb_duration_eq_time_to_maturity t T r\n"
       },
       "metadata": {
         "chapter": 10,
@@ -65,7 +65,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: the rate derivative ∂_r B = −(T − t)·B of the price itself (hasDerivAt_zcb_r) substituted into −∂_r B / B. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: the rate derivative ∂_r B = −(T − t)·B of the price itself (hasDerivAt_zcb_r) substituted into −∂_r B / B. Lives in MathFin/Models/Rates/ZCB.lean. Axioms-clean."
       }
     },
     {
@@ -74,7 +74,7 @@
       "description": "ZCB convexity equals squared remaining time: ∂²_r B(t,T) / B(t,T) = (T - t)².",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.ZCB\n\nopen MathFin\n\ntheorem zcb_convexity_thm (t T r : ℝ) :\n    deriv (deriv fun r' => MathFin.zcb r' t T) r / MathFin.zcb r t T = (T - t)^2 :=\n  MathFin.zcb_convexity_eq_time_to_maturity_sq t T r\n"
+        "lean": "import MathFin.Models.Rates.ZCB\n\nopen MathFin\n\ntheorem zcb_convexity_thm (t T r : ℝ) :\n    deriv (deriv fun r' => MathFin.zcb r' t T) r / MathFin.zcb r t T = (T - t)^2 :=\n  MathFin.zcb_convexity_eq_time_to_maturity_sq t T r\n"
       },
       "metadata": {
         "chapter": 10,
@@ -87,7 +87,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: the second rate-derivative of the price itself, ∂²_r B = (T − t)²·B (hasDerivAt_deriv_zcb_r, via hasDerivAt_deriv_of_eventually in Foundations/DerivOfDeriv.lean), divided by B. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: the second rate-derivative of the price itself, ∂²_r B = (T − t)²·B (hasDerivAt_deriv_zcb_r, via hasDerivAt_deriv_of_eventually in Probability/Analysis/DerivOfDeriv.lean), divided by B. Lives in MathFin/Models/Rates/ZCB.lean. Axioms-clean."
       }
     },
     {
@@ -96,7 +96,7 @@
       "description": "For a ZCB portfolio P(r) = ∑ w_i exp(-r(T_i - t)) with duration-times-value D_P·P = ∑ w_i (T_i - t) exp(-r(T_i - t)), the rate derivative is ∂P/∂r = -D_P·P.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.Immunization\n\nopen MathFin\n\ntheorem bond_portfolio_rate_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (fun r' => MathFin.bondPortfolioValue s w T t r')\n      (-MathFin.bondPortfolioDur s w T t r) r :=\n  MathFin.hasDerivAt_bondPortfolioValue_r s w T t r\n"
+        "lean": "import MathFin.Models.Rates.Immunization\n\nopen MathFin\n\ntheorem bond_portfolio_rate_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (fun r' => MathFin.bondPortfolioValue s w T t r')\n      (-MathFin.bondPortfolioDur s w T t r) r :=\n  MathFin.hasDerivAt_bondPortfolioValue_r s w T t r\n"
       },
       "metadata": {
         "chapter": 14,
@@ -112,7 +112,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof from HasDerivAt.sum on the per-bond exponential derivative. Lives in MathFin/FixedIncome/Immunization.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof from HasDerivAt.sum on the per-bond exponential derivative. Lives in MathFin/Models/Rates/Immunization.lean. Axioms-clean."
       }
     },
     {
@@ -121,7 +121,7 @@
       "description": "A single-bond portfolio's duration-times-value reduces to w·(T - t)·exp(-r(T - t)), matching the ZCB duration in FixedIncome.lean.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.Immunization\n\nopen MathFin\n\ntheorem bond_single_dur_thm\n    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :\n    MathFin.bondPortfolioDur {i} w T t r =\n      w i * (T i - t) * Real.exp (-(r * (T i - t))) :=\n  MathFin.bondPortfolio_single_bond_dur i w T t r\n"
+        "lean": "import MathFin.Models.Rates.Immunization\n\nopen MathFin\n\ntheorem bond_single_dur_thm\n    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :\n    MathFin.bondPortfolioDur {i} w T t r =\n      w i * (T i - t) * Real.exp (-(r * (T i - t))) :=\n  MathFin.bondPortfolio_single_bond_dur i w T t r\n"
       },
       "metadata": {
         "chapter": 14,
@@ -133,7 +133,7 @@
         ],
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in MathFin/FixedIncome/Immunization.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in MathFin/Models/Rates/Immunization.lean. Axioms-clean."
       }
     },
     {
@@ -142,7 +142,7 @@
       "description": "A single-bond portfolio's value reduces to w·exp(-r(T - t)), matching the ZCB price.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.Immunization\n\nopen MathFin\n\ntheorem bond_single_value_thm\n    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :\n    MathFin.bondPortfolioValue {i} w T t r =\n      w i * Real.exp (-(r * (T i - t))) :=\n  MathFin.bondPortfolio_single_bond_value i w T t r\n"
+        "lean": "import MathFin.Models.Rates.Immunization\n\nopen MathFin\n\ntheorem bond_single_value_thm\n    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :\n    MathFin.bondPortfolioValue {i} w T t r =\n      w i * Real.exp (-(r * (T i - t))) :=\n  MathFin.bondPortfolio_single_bond_value i w T t r\n"
       },
       "metadata": {
         "chapter": 14,
@@ -154,7 +154,7 @@
         ],
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in MathFin/FixedIncome/Immunization.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in MathFin/Models/Rates/Immunization.lean. Axioms-clean."
       }
     },
     {
@@ -163,7 +163,7 @@
       "description": "If the duration-times-value of the asset portfolio matches that of the liability, the net portfolio's first-order rate sensitivity is zero: ∂(A - L)/∂r = 0.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.Immunization\n\nopen MathFin\n\ntheorem bond_immunization_first_order_thm\n    {ι κ : Type*}\n    (sA : Finset ι) (wA TA : ι → ℝ)\n    (sL : Finset κ) (wL TL : κ → ℝ)\n    (t r : ℝ)\n    (h_match : MathFin.bondPortfolioDur sA wA TA t r =\n               MathFin.bondPortfolioDur sL wL TL t r) :\n    HasDerivAt (fun r' =>\n        MathFin.bondPortfolioValue sA wA TA t r' -\n        MathFin.bondPortfolioValue sL wL TL t r')\n      0 r :=\n  MathFin.bondPortfolio_immunization_first_order sA wA TA sL wL TL t r h_match\n"
+        "lean": "import MathFin.Models.Rates.Immunization\n\nopen MathFin\n\ntheorem bond_immunization_first_order_thm\n    {ι κ : Type*}\n    (sA : Finset ι) (wA TA : ι → ℝ)\n    (sL : Finset κ) (wL TL : κ → ℝ)\n    (t r : ℝ)\n    (h_match : MathFin.bondPortfolioDur sA wA TA t r =\n               MathFin.bondPortfolioDur sL wL TL t r) :\n    HasDerivAt (fun r' =>\n        MathFin.bondPortfolioValue sA wA TA t r' -\n        MathFin.bondPortfolioValue sL wL TL t r')\n      0 r :=\n  MathFin.bondPortfolio_immunization_first_order sA wA TA sL wL TL t r h_match\n"
       },
       "metadata": {
         "chapter": 14,
@@ -179,7 +179,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof from rate-sensitivity of A and L plus duration matching. Lives in MathFin/FixedIncome/Immunization.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof from rate-sensitivity of A and L plus duration matching. Lives in MathFin/Models/Rates/Immunization.lean. Axioms-clean."
       }
     },
     {
@@ -188,7 +188,7 @@
       "description": "A_n(c, r, Δt) = c·e^{-rΔt}·(1 - e^{-nrΔt})/(1 - e^{-rΔt}), the standard annuity present-value formula derived from the geometric series identity.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.CouponBonds\n\nopen MathFin Real\n\ntheorem annuity_closed_form_thm (n : ℕ) (c r Δt : ℝ)\n    (h : Real.exp (-(r * Δt)) ≠ 1) :\n    MathFin.annuityValue n c r Δt =\n      c * Real.exp (-(r * Δt)) *\n        (1 - Real.exp (-(r * Δt)) ^ n) / (1 - Real.exp (-(r * Δt))) :=\n  MathFin.annuityValue_closed_form n c r Δt h\n"
+        "lean": "import MathFin.Models.Rates.CouponBonds\n\nopen MathFin Real\n\ntheorem annuity_closed_form_thm (n : ℕ) (c r Δt : ℝ)\n    (h : Real.exp (-(r * Δt)) ≠ 1) :\n    MathFin.annuityValue n c r Δt =\n      c * Real.exp (-(r * Δt)) *\n        (1 - Real.exp (-(r * Δt)) ^ n) / (1 - Real.exp (-(r * Δt))) :=\n  MathFin.annuityValue_closed_form n c r Δt h\n"
       },
       "metadata": {
         "chapter": 14,
@@ -205,7 +205,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via term rewriting exp(-r(i+1)Δt) = exp(-rΔt)·exp(-rΔt)^i, geom_sum_eq, and field_simp. Lives in MathFin/FixedIncome/CouponBonds.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via term rewriting exp(-r(i+1)Δt) = exp(-rΔt)·exp(-rΔt)^i, geom_sum_eq, and field_simp. Lives in MathFin/Models/Rates/CouponBonds.lean. Axioms-clean."
       }
     },
     {
@@ -214,7 +214,7 @@
       "description": "Under a constant short rate r, the instantaneous forward rate f(t, T) = -∂_T log B(t, T) equals r at every horizon. ZCB compatibility.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.CouponBonds\n\nopen MathFin\n\ntheorem forward_spot_flat_thm (r t T : ℝ) :\n    HasDerivAt (fun T' => -Real.log (MathFin.zcb r t T')) r T :=\n  MathFin.hasDerivAt_neg_log_zcb_T r t T\n"
+        "lean": "import MathFin.Models.Rates.CouponBonds\n\nopen MathFin\n\ntheorem forward_spot_flat_thm (r t T : ℝ) :\n    HasDerivAt (fun T' => -Real.log (MathFin.zcb r t T')) r T :=\n  MathFin.hasDerivAt_neg_log_zcb_T r t T\n"
       },
       "metadata": {
         "chapter": 14,
@@ -231,7 +231,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: log(exp(-r(T-t))) = -r(T-t), so -log = r(T-t), with derivative r in T. Lives in MathFin/FixedIncome/CouponBonds.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: log(exp(-r(T-t))) = -r(T-t), so -log = r(T-t), with derivative r in T. Lives in MathFin/Models/Rates/CouponBonds.lean. Axioms-clean."
       }
     },
     {
@@ -240,7 +240,7 @@
       "description": "For a coupon bond with strictly positive coupons paid at strictly future times, the price is a strictly decreasing function of the yield. Establishes YTM uniqueness at the parameter-monotonicity level.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.CouponBonds\n\nopen MathFin\n\ntheorem coupon_bond_strict_anti_thm\n    {ι : Type*} (s : Finset ι) (c T : ι → ℝ) (t : ℝ)\n    (h_pos : ∀ i ∈ s, 0 < c i)\n    (h_future : ∀ i ∈ s, t < T i)\n    (h_nonempty : s.Nonempty) :\n    StrictAnti (fun r => ∑ i ∈ s, c i * Real.exp (-(r * (T i - t)))) :=\n  MathFin.couponBondPrice_strictAnti s c T t h_pos h_future h_nonempty\n"
+        "lean": "import MathFin.Models.Rates.CouponBonds\n\nopen MathFin\n\ntheorem coupon_bond_strict_anti_thm\n    {ι : Type*} (s : Finset ι) (c T : ι → ℝ) (t : ℝ)\n    (h_pos : ∀ i ∈ s, 0 < c i)\n    (h_future : ∀ i ∈ s, t < T i)\n    (h_nonempty : s.Nonempty) :\n    StrictAnti (fun r => ∑ i ∈ s, c i * Real.exp (-(r * (T i - t)))) :=\n  MathFin.couponBondPrice_strictAnti s c T t h_pos h_future h_nonempty\n"
       },
       "metadata": {
         "chapter": 14,
@@ -256,7 +256,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via Finset.sum_lt_sum_of_nonempty and Real.exp_lt_exp on each summand. Lives in MathFin/FixedIncome/CouponBonds.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via Finset.sum_lt_sum_of_nonempty and Real.exp_lt_exp on each summand. Lives in MathFin/Models/Rates/CouponBonds.lean. Axioms-clean."
       }
     },
     {
@@ -265,7 +265,7 @@
       "description": "Derivative of the duration-times-value w.r.t. rate: ∂_r (D_P·P) = −C_P·P, where C_P is the convexity-times-value.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.ConvexityImmunization\n\nopen MathFin\n\ntheorem bond_dur_rate_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (fun r' => MathFin.bondPortfolioDur s w T t r')\n      (-MathFin.bondPortfolioConv s w T t r) r :=\n  MathFin.hasDerivAt_bondPortfolioDur_r s w T t r\n"
+        "lean": "import MathFin.Models.Rates.ConvexityImmunization\n\nopen MathFin\n\ntheorem bond_dur_rate_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (fun r' => MathFin.bondPortfolioDur s w T t r')\n      (-MathFin.bondPortfolioConv s w T t r) r :=\n  MathFin.hasDerivAt_bondPortfolioDur_r s w T t r\n"
       },
       "metadata": {
         "chapter": 14,
@@ -278,7 +278,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via HasDerivAt.sum on the per-bond exponential second derivative. Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via HasDerivAt.sum on the per-bond exponential second derivative. Lives in MathFin/Models/Rates/ConvexityImmunization.lean. Axioms-clean."
       }
     },
     {
@@ -287,7 +287,7 @@
       "description": "The second rate-derivative of a zero-coupon bond portfolio's value P(r) = Σᵢ wᵢ·e^{−r(Tᵢ − t)}: ∂²P/∂r² = Σᵢ wᵢ(Tᵢ − t)²·e^{−r(Tᵢ − t)}, the convexity-times-value C_P·P.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.ConvexityImmunization\n\nopen MathFin\n\ntheorem bond_2nd_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (deriv fun r' => MathFin.bondPortfolioValue s w T t r')\n      (MathFin.bondPortfolioConv s w T t r) r :=\n  MathFin.hasDerivAt_deriv_bondPortfolioValue_r s w T t r\n"
+        "lean": "import MathFin.Models.Rates.ConvexityImmunization\n\nopen MathFin\n\ntheorem bond_2nd_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (deriv fun r' => MathFin.bondPortfolioValue s w T t r')\n      (MathFin.bondPortfolioConv s w T t r) r :=\n  MathFin.hasDerivAt_deriv_bondPortfolioValue_r s w T t r\n"
       },
       "metadata": {
         "chapter": 14,
@@ -300,7 +300,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof, stated for the portfolio value itself: the r-derivative of minus the duration-times-value (hasDerivAt_neg_bondPortfolioDur_r, by negating the duration derivative) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since −D_P·P is ∂P/∂r at every r (hasDerivAt_bondPortfolioValue_r). Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, stated for the portfolio value itself: the r-derivative of minus the duration-times-value (hasDerivAt_neg_bondPortfolioDur_r, by negating the duration derivative) is transported to `deriv` of the price by hasDerivAt_deriv_of_eventually (Probability/Analysis/DerivOfDeriv.lean), since −D_P·P is ∂P/∂r at every r (hasDerivAt_bondPortfolioValue_r). Lives in MathFin/Models/Rates/ConvexityImmunization.lean. Axioms-clean."
       }
     },
     {
@@ -309,7 +309,7 @@
       "description": "A single-bond portfolio's convexity-times-value equals w·(T-t)²·exp(-r(T-t)), matching the ZCB second-order sensitivity in FixedIncome.lean.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.ConvexityImmunization\n\nopen MathFin\n\ntheorem bond_single_conv_thm\n    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :\n    MathFin.bondPortfolioConv {i} w T t r =\n      w i * (T i - t) ^ 2 * Real.exp (-(r * (T i - t))) :=\n  MathFin.bondPortfolio_single_bond_conv i w T t r\n"
+        "lean": "import MathFin.Models.Rates.ConvexityImmunization\n\nopen MathFin\n\ntheorem bond_single_conv_thm\n    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :\n    MathFin.bondPortfolioConv {i} w T t r =\n      w i * (T i - t) ^ 2 * Real.exp (-(r * (T i - t))) :=\n  MathFin.bondPortfolio_single_bond_conv i w T t r\n"
       },
       "metadata": {
         "chapter": 14,
@@ -322,7 +322,7 @@
         ],
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in MathFin/Models/Rates/ConvexityImmunization.lean. Axioms-clean."
       }
     },
     {
@@ -331,7 +331,7 @@
       "description": "Matching the convexity-times-value Σᵢ wᵢ(Tᵢ − t)²·e^{−r(Tᵢ − t)} of the asset and liability bond portfolios gives ∂²(A − L)/∂r² = 0 at the current rate r: the surplus has zero second rate-derivative. The statement assumes only the convexity-times-value match; matching duration-times-value is the separate first-order condition. Redington's second-order condition is the strict inequality ∂²A/∂r² > ∂²L/∂r², with values and first derivatives matched, which makes the surplus a local minimum. This entry is the equality boundary, where the second-order term vanishes, and claims no minimum.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.ConvexityImmunization\n\nopen MathFin\n\ntheorem bond_2nd_immunization_thm\n    {ι κ : Type*}\n    (sA : Finset ι) (wA TA : ι → ℝ)\n    (sL : Finset κ) (wL TL : κ → ℝ)\n    (t r : ℝ)\n    (h_match_conv : MathFin.bondPortfolioConv sA wA TA t r =\n                    MathFin.bondPortfolioConv sL wL TL t r) :\n    HasDerivAt (deriv fun r' =>\n        MathFin.bondPortfolioValue sA wA TA t r' - MathFin.bondPortfolioValue sL wL TL t r')\n      0 r :=\n  MathFin.bondPortfolio_immunization_second_order sA wA TA sL wL TL t r h_match_conv\n"
+        "lean": "import MathFin.Models.Rates.ConvexityImmunization\n\nopen MathFin\n\ntheorem bond_2nd_immunization_thm\n    {ι κ : Type*}\n    (sA : Finset ι) (wA TA : ι → ℝ)\n    (sL : Finset κ) (wL TL : κ → ℝ)\n    (t r : ℝ)\n    (h_match_conv : MathFin.bondPortfolioConv sA wA TA t r =\n                    MathFin.bondPortfolioConv sL wL TL t r) :\n    HasDerivAt (deriv fun r' =>\n        MathFin.bondPortfolioValue sA wA TA t r' - MathFin.bondPortfolioValue sL wL TL t r')\n      0 r :=\n  MathFin.bondPortfolio_immunization_second_order sA wA TA sL wL TL t r h_match_conv\n"
       },
       "metadata": {
         "chapter": 14,
@@ -348,7 +348,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof, stated for the surplus A − L itself: the second derivative of each side is its convexity-times-value (hasDerivAt_neg_bondPortfolioDur_r, the r-derivative of −Dur·P), so matching those makes the r-derivative of the dollar-duration gap vanish. That is transported to `deriv` of the surplus by hasDerivAt_deriv_of_eventually (Foundations/DerivOfDeriv.lean), since the dollar-duration gap is ∂(A − L)/∂r at every r (hasDerivAt_bondPortfolioValue_r on each side). Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, stated for the surplus A − L itself: the second derivative of each side is its convexity-times-value (hasDerivAt_neg_bondPortfolioDur_r, the r-derivative of −Dur·P), so matching those makes the r-derivative of the dollar-duration gap vanish. That is transported to `deriv` of the surplus by hasDerivAt_deriv_of_eventually (Probability/Analysis/DerivOfDeriv.lean), since the dollar-duration gap is ∂(A − L)/∂r at every r (hasDerivAt_bondPortfolioValue_r on each side). Lives in MathFin/Models/Rates/ConvexityImmunization.lean. Axioms-clean."
       }
     },
     {
@@ -357,7 +357,7 @@
       "description": "From the coupon-bond pricing equation P = ∑ c_i·B_i + (c_n + F)·B_n, the new ZCB price is B_n = (P - ∑ c_i·B_i)/(c_n + F).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.YieldCurve\n\nopen MathFin\n\ntheorem bootstrap_solve_thm\n    {ι : Type*} (sprev : Finset ι) (c B : ι → ℝ)\n    (P c_last F B_last : ℝ) (h : c_last + F ≠ 0)\n    (hP : MathFin.couponBondPricingEq sprev c B P c_last F B_last) :\n    B_last = (P - ∑ i ∈ sprev, c i * B i) / (c_last + F) :=\n  MathFin.bootstrap_solve sprev c B P c_last F B_last h hP\n"
+        "lean": "import MathFin.Models.Rates.YieldCurve\n\nopen MathFin\n\ntheorem bootstrap_solve_thm\n    {ι : Type*} (sprev : Finset ι) (c B : ι → ℝ)\n    (P c_last F B_last : ℝ) (h : c_last + F ≠ 0)\n    (hP : MathFin.couponBondPricingEq sprev c B P c_last F B_last) :\n    B_last = (P - ∑ i ∈ sprev, c i * B i) / (c_last + F) :=\n  MathFin.bootstrap_solve sprev c B P c_last F B_last h hP\n"
       },
       "metadata": {
         "chapter": 14,
@@ -374,7 +374,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via field_simp + linarith on the pricing equation. Lives in MathFin/FixedIncome/YieldCurve.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via field_simp + linarith on the pricing equation. Lives in MathFin/Models/Rates/YieldCurve.lean. Axioms-clean."
       }
     },
     {
@@ -383,7 +383,7 @@
       "description": "For a single-period coupon bond with cash flow c + F at maturity, B_1 = P/(c + F).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.YieldCurve\n\nopen MathFin\n\ntheorem bootstrap_first_thm (P c_last F B_last : ℝ) (h : c_last + F ≠ 0)\n    (hP : P = (c_last + F) * B_last) :\n    B_last = P / (c_last + F) :=\n  MathFin.bootstrap_solve_first P c_last F B_last h hP\n"
+        "lean": "import MathFin.Models.Rates.YieldCurve\n\nopen MathFin\n\ntheorem bootstrap_first_thm (P c_last F B_last : ℝ) (h : c_last + F ≠ 0)\n    (hP : P = (c_last + F) * B_last) :\n    B_last = P / (c_last + F) :=\n  MathFin.bootstrap_solve_first P c_last F B_last h hP\n"
       },
       "metadata": {
         "chapter": 14,
@@ -396,7 +396,7 @@
         ],
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via field_simp. Lives in MathFin/FixedIncome/YieldCurve.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via field_simp. Lives in MathFin/Models/Rates/YieldCurve.lean. Axioms-clean."
       }
     },
     {
@@ -405,7 +405,7 @@
       "description": "For a two-period coupon bond paying c at both dates plus F at the second: B_2 = (P - c·B_1)/(c + F).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.YieldCurve\n\nopen MathFin\n\ntheorem bootstrap_second_thm (P c F B_1 B_2 : ℝ) (h : c + F ≠ 0)\n    (hP : P = c * B_1 + (c + F) * B_2) :\n    B_2 = (P - c * B_1) / (c + F) :=\n  MathFin.bootstrap_solve_second P c F B_1 B_2 h hP\n"
+        "lean": "import MathFin.Models.Rates.YieldCurve\n\nopen MathFin\n\ntheorem bootstrap_second_thm (P c F B_1 B_2 : ℝ) (h : c + F ≠ 0)\n    (hP : P = c * B_1 + (c + F) * B_2) :\n    B_2 = (P - c * B_1) / (c + F) :=\n  MathFin.bootstrap_solve_second P c F B_1 B_2 h hP\n"
       },
       "metadata": {
         "chapter": 14,
@@ -418,7 +418,7 @@
         ],
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via field_simp + ring. Lives in MathFin/FixedIncome/YieldCurve.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via field_simp + ring. Lives in MathFin/Models/Rates/YieldCurve.lean. Axioms-clean."
       }
     },
     {
@@ -427,7 +427,7 @@
       "description": "The bootstrapped B_n price, plugged back into the pricing equation, reproduces the original observed bond price P.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.YieldCurve\n\nopen MathFin\n\ntheorem bootstrap_consistency_thm\n    {ι : Type*} (sprev : Finset ι) (c B : ι → ℝ)\n    (P c_last F : ℝ) (h : c_last + F ≠ 0) :\n    MathFin.couponBondPricingEq sprev c B P c_last F\n      ((P - ∑ i ∈ sprev, c i * B i) / (c_last + F)) :=\n  MathFin.bootstrap_consistency sprev c B P c_last F h\n"
+        "lean": "import MathFin.Models.Rates.YieldCurve\n\nopen MathFin\n\ntheorem bootstrap_consistency_thm\n    {ι : Type*} (sprev : Finset ι) (c B : ι → ℝ)\n    (P c_last F : ℝ) (h : c_last + F ≠ 0) :\n    MathFin.couponBondPricingEq sprev c B P c_last F\n      ((P - ∑ i ∈ sprev, c i * B i) / (c_last + F)) :=\n  MathFin.bootstrap_consistency sprev c B P c_last F h\n"
       },
       "metadata": {
         "chapter": 14,
@@ -440,7 +440,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via field_simp + ring on the pricing equation. Lives in MathFin/FixedIncome/YieldCurve.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via field_simp + ring on the pricing equation. Lives in MathFin/Models/Rates/YieldCurve.lean. Axioms-clean."
       }
     },
     {
@@ -449,7 +449,7 @@
       "description": "Under discrete annual compounding (1 + y ≠ 0), the modified duration numerator equals the Macaulay duration numerator divided by (1+y). This is the algebraic core of the price-sensitivity identity -dP/dy = D_mod · P with D_mod = D_mac / (1+y); that derivative identity is not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.MacaulayModified\n\nopen Real\nopen MathFin\n\ntheorem modifiedNumerator_eq_macaulayNumerator_div_thm {ι : Type*}\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (y : ℝ) (hy : 1 + y ≠ 0) :\n    MathFin.modifiedNumerator s t c y =\n      MathFin.macaulayNumerator s t c y / (1 + y) :=\n  MathFin.modifiedNumerator_eq_macaulayNumerator_div s t c y hy\n"
+        "lean": "import MathFin.Models.Rates.MacaulayModified\n\nopen Real\nopen MathFin\n\ntheorem modifiedNumerator_eq_macaulayNumerator_div_thm {ι : Type*}\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (y : ℝ) (hy : 1 + y ≠ 0) :\n    MathFin.modifiedNumerator s t c y =\n      MathFin.macaulayNumerator s t c y / (1 + y) :=\n  MathFin.modifiedNumerator_eq_macaulayNumerator_div s t c y hy\n"
       },
       "metadata": {
         "chapter": 11,
@@ -471,7 +471,7 @@
       "description": "When the spot rate R(T) is differentiable, d/dT [T · R(T)] = R(T) + T · R'(T) (product rule). This is the instantaneous forward rate, generalizing the flat-curve case.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.ForwardRate\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem hasDerivAt_T_mul_spotRate_thm {R : ℝ → ℝ} {R'_T T : ℝ}\n    (hR : HasDerivAt R R'_T T) :\n    HasDerivAt (fun t => t * R t) (R T + T * R'_T) T :=\n  MathFin.hasDerivAt_T_mul_spotRate hR\n"
+        "lean": "import MathFin.Models.Rates.ForwardRate\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem hasDerivAt_T_mul_spotRate_thm {R : ℝ → ℝ} {R'_T T : ℝ}\n    (hR : HasDerivAt R R'_T T) :\n    HasDerivAt (fun t => t * R t) (R T + T * R'_T) T :=\n  MathFin.hasDerivAt_T_mul_spotRate hR\n"
       },
       "metadata": {
         "chapter": 11,
@@ -497,7 +497,7 @@
       "description": "The closed form r(t) = θ + (r₀ - θ)·e^{-κt} solves the deterministic part of the Vasicek SDE dr/dt = κ(θ - r(t)). Exhibits exponential mean reversion to θ at rate κ.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.Vasicek\n\nopen Real\nopen MathFin\n\ntheorem vasicekDeterministic_solves_ODE_thm (r₀ θ κ t : ℝ) :\n    HasDerivAt (MathFin.vasicekDeterministic r₀ θ κ)\n      (κ * (θ - MathFin.vasicekDeterministic r₀ θ κ t)) t :=\n  MathFin.vasicekDeterministic_solves_ODE r₀ θ κ t\n"
+        "lean": "import MathFin.Models.Rates.Vasicek\n\nopen Real\nopen MathFin\n\ntheorem vasicekDeterministic_solves_ODE_thm (r₀ θ κ t : ℝ) :\n    HasDerivAt (MathFin.vasicekDeterministic r₀ θ κ)\n      (κ * (θ - MathFin.vasicekDeterministic r₀ θ κ t)) t :=\n  MathFin.vasicekDeterministic_solves_ODE r₀ θ κ t\n"
       },
       "metadata": {
         "chapter": 12,
@@ -518,7 +518,7 @@
       "description": "At t = log(2)/κ the gap between r(t) and θ has closed to half its initial value.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.Vasicek\n\nopen Real\nopen MathFin\n\ntheorem vasicekDeterministic_at_halfLife_thm (r₀ θ κ : ℝ) (hκ : 0 < κ) :\n    MathFin.vasicekDeterministic r₀ θ κ (MathFin.meanReversionHalfLife κ) - θ =\n      (r₀ - θ) / 2 :=\n  MathFin.vasicekDeterministic_at_halfLife r₀ θ κ hκ\n"
+        "lean": "import MathFin.Models.Rates.Vasicek\n\nopen Real\nopen MathFin\n\ntheorem vasicekDeterministic_at_halfLife_thm (r₀ θ κ : ℝ) (hκ : 0 < κ) :\n    MathFin.vasicekDeterministic r₀ θ κ (MathFin.meanReversionHalfLife κ) - θ =\n      (r₀ - θ) / 2 :=\n  MathFin.vasicekDeterministic_at_halfLife r₀ θ κ hκ\n"
       },
       "metadata": {
         "chapter": 12,
@@ -539,7 +539,7 @@
       "description": "V^payer − V^receiver = A · (F − K) — the swap-rate analog of put-call parity.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Futures.Black76\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem swaption_payer_receiver_parity_thm (A F K σ T : ℝ) :\n    MathFin.blackPayerSwaption A F K σ T - MathFin.blackReceiverSwaption A F K σ T =\n      A * (F - K) :=\n  MathFin.swaption_payer_receiver_parity A F K σ T\n"
+        "lean": "import MathFin.Models.Forwards.Black76\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem swaption_payer_receiver_parity_thm (A F K σ T : ℝ) :\n    MathFin.blackPayerSwaption A F K σ T - MathFin.blackReceiverSwaption A F K σ T =\n      A * (F - K) :=\n  MathFin.swaption_payer_receiver_parity A F K σ T\n"
       },
       "metadata": {
         "chapter": 15,
@@ -560,7 +560,7 @@
       "domain": "mathematical_finance",
       "description": "The Vasicek short-rate SDE dr = κ(θ − r)dt + σ dB has the textbook solution r_T = r₀e^{−κT} + θ(1 − e^{−κT}) + σ ∫₀ᵀ e^{−κ(T−s)} dB_s (cited, not proved here). For κ > 0 and r_T in this Wiener representation, this theorem DERIVES (no longer posits) the terminal law r_T ~ N(vasicekSDEMean, vasicekSDEVariance) = N(r₀e^{−κT}+θ(1−e^{−κT}), σ²(1−e^{−2κT})/(2κ)). The stochastic term is the Wiener integral of the DETERMINISTIC integrand e^{−κ(T−s)}, hence Gaussian (sc-wiener-integral-gaussian) with variance its squared L²-norm ∫₀ᵀ e^{−2κ(T−s)} ds = (1−e^{−2κT})/(2κ) (an FTC computation); the affine map x ↦ mean + σx then sends N(0, ∫kernel²) to N(mean, σ²·∫kernel²) = N(vasicekSDEMean, vasicekSDEVariance) via gaussianReal_const_mul / gaussianReal_const_add. This is the FIRST consumer of the deterministic-integrand Itô tower in the FixedIncome layer — the analytic Wiener/Itô machinery made load-bearing in a pricing module, closing the two-tower gap for the Vasicek short rate (VasicekSDE.lean previously stated this law without derivation).",
       "code": {
-        "lean": "import MathFin.FixedIncome.VasicekSDEGaussian\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\ntheorem vasicek_sde_terminal_gaussian\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :\n    HasLaw (fun ω => vasicekSDEMean r₀ θ κ (T : ℝ)\n        + σ * (wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω))\n      (gaussianReal (vasicekSDEMean r₀ θ κ (T : ℝ))\n        (vasicekSDEVariance σ κ (T : ℝ)).toNNReal) μ :=\n  MathFin.vasicekShortRate_hasLaw_gaussian hB r₀ θ σ hκ T\n"
+        "lean": "import MathFin.Models.Rates.VasicekSDEGaussian\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\ntheorem vasicek_sde_terminal_gaussian\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :\n    HasLaw (fun ω => vasicekSDEMean r₀ θ κ (T : ℝ)\n        + σ * (wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω))\n      (gaussianReal (vasicekSDEMean r₀ θ κ (T : ℝ))\n        (vasicekSDEVariance σ κ (T : ℝ)).toNNReal) μ :=\n  MathFin.vasicekShortRate_hasLaw_gaussian hB r₀ θ σ hκ T\n"
       },
       "metadata": {
         "chapter": 12,
@@ -572,7 +572,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export from MathFin.FixedIncome.VasicekSDEGaussian (vasicekShortRate_hasLaw_gaussian). DERIVES the Vasicek terminal Gaussian law (previously posited as closed-form defs in VasicekSDE.lean) for the short rate in its Wiener representation, the textbook solution of the SDE (that it solves the SDE is cited, not proved): the diffusion term sigma * (Wiener integral of e^{-kappa(T-s)}) is Gaussian by the deterministic-integrand Wiener-Gaussian theorem (sc-wiener-integral-gaussian); the variance is fixed by the FTC integral int_0^T e^{-2kappa(T-s)} ds = (1-e^{-2kappa T})/(2kappa) (vasicekKernel_integral_sq, antiderivative e^{-2kappa(T-s)}/(2kappa)); the affine map x |-> mean + sigma*x transports the law N(0, var) to N(vasicekSDEMean, vasicekSDEVariance) via gaussianReal_const_mul / gaussianReal_const_add with the NNReal variance algebra. First consumer of the deterministic-integrand Ito tower in FixedIncome -- the two-tower bridge. Axioms-clean: [propext, Classical.choice, Quot.sound]."
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Models.Rates.VasicekSDEGaussian (vasicekShortRate_hasLaw_gaussian). DERIVES the Vasicek terminal Gaussian law (previously posited as closed-form defs in VasicekSDE.lean) for the short rate in its Wiener representation, the textbook solution of the SDE (that it solves the SDE is cited, not proved): the diffusion term sigma * (Wiener integral of e^{-kappa(T-s)}) is Gaussian by the deterministic-integrand Wiener-Gaussian theorem (sc-wiener-integral-gaussian); the variance is fixed by the FTC integral int_0^T e^{-2kappa(T-s)} ds = (1-e^{-2kappa T})/(2kappa) (vasicekKernel_integral_sq, antiderivative e^{-2kappa(T-s)}/(2kappa)); the affine map x |-> mean + sigma*x transports the law N(0, var) to N(vasicekSDEMean, vasicekSDEVariance) via gaussianReal_const_mul / gaussianReal_const_add with the NNReal variance algebra. First consumer of the deterministic-integrand Ito tower in FixedIncome -- the two-tower bridge. Axioms-clean: [propext, Classical.choice, Quot.sound]."
       }
     },
     {
@@ -581,7 +581,7 @@
       "domain": "mathematical_finance",
       "description": "The Vasicek zero-coupon bond price P(0,T) = E[exp(-∫₀ᵀ r_s ds)], the expectation taken under the probability measure that carries the Brownian driver (read as the pricing measure; no change of measure is built in this entry. When μ is instead the real-world measure with a constant market price of risk λ, mf-vasicek-girsanov-bond-price shows that the bond price under the constructed Girsanov measure Q_λ is this same formula at the level θ − λσ/κ). The short rate is carried in its Wiener-integral representation; that it solves the Vasicek SDE, and the swap of time integrals behind the integrated rate, are cited, not proved. In that representation the integrated short rate ∫₀ᵀ r_s ds = M(T) + σ∫₀ᵀ g dB is again Gaussian (integrated OU kernel g(u) = (1-e^{-κ(T-u)})/κ), so the bond price is a Gaussian Laplace transform and collapses to the classical AFFINE TERM STRUCTURE P(0,T) = A(T)·exp(-B(T)·r₀) with B(T) = (1-e^{-κT})/κ. The exponential-affine dependence on the initial short rate r₀ is the defining property of an affine term-structure model.",
       "code": {
-        "lean": "import MathFin.FixedIncome.VasicekBondPrice\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **Vasicek zero-coupon bond price — the affine term structure.**\nThe expectation `P(0,T) = 𝔼[exp(−∫₀ᵀ r_s ds)]` under the measure carrying `B` (read as the pricing measure) of one unit paid\nat `T` under the Vasicek short-rate model separates the initial rate into the\nexponential-affine form `P(0,T) = A(T)·exp(−B(T)·r₀)`, `B(T) = (1−e^{−κT})/κ`.\nRe-exports `MathFin.vasicekBondPrice_affine`. -/\ntheorem vasicek_bond_price_affine\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :\n    ∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω)) ∂μ\n      = vasicekBondA θ σ κ (T : ℝ) * Real.exp (-(vasicekBondB κ (T : ℝ) * r₀)) :=\n  MathFin.vasicekBondPrice_affine hB r₀ θ σ hκ T\n"
+        "lean": "import MathFin.Models.Rates.VasicekBondPrice\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **Vasicek zero-coupon bond price — the affine term structure.**\nThe expectation `P(0,T) = 𝔼[exp(−∫₀ᵀ r_s ds)]` under the measure carrying `B` (read as the pricing measure) of one unit paid\nat `T` under the Vasicek short-rate model separates the initial rate into the\nexponential-affine form `P(0,T) = A(T)·exp(−B(T)·r₀)`, `B(T) = (1−e^{−κT})/κ`.\nRe-exports `MathFin.vasicekBondPrice_affine`. -/\ntheorem vasicek_bond_price_affine\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :\n    ∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω)) ∂μ\n      = vasicekBondA θ σ κ (T : ℝ) * Real.exp (-(vasicekBondB κ (T : ℝ) * r₀)) :=\n  MathFin.vasicekBondPrice_affine hB r₀ θ σ hκ T\n"
       },
       "metadata": {
         "chapter": 12,
@@ -593,7 +593,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export from MathFin.FixedIncome.VasicekBondPrice (vasicekBondPrice_affine). The Vasicek zero-coupon bond price P(0,T) = E[exp(-int_0^T r_s ds)] as the Gaussian Laplace transform of the integrated short rate, collapsing to the affine term structure P = A(T)*exp(-B(T)*r0), B(T) = (1-e^{-kappa T})/kappa. The integrated rate int_0^T r_s ds = M(T) + sigma*int_0^T g dB is carried in its Wiener representation (integrated OU kernel g(u) = (1-e^{-kappa(T-u)})/kappa; the deterministic time-order swap is the modelling bridge, cited not proven -- parity with the OU-solution model of mf-vasicek-sde-terminal-gaussian). Its Gaussian law N(M, sigma^2 V) follows from wienerIntegralLp_hasLaw_gaussian + the FTC variance integral int_0^T g^2 = V(T) (vasicekIntegratedKernel_integral_sq, antiderivative u/kappa^2 - 2e^{-kappa(T-u)}/kappa^3 + e^{-2kappa(T-u)}/(2kappa^3)); the bond price exp(-M + sigma^2 V/2) is the Wiener bond-price lemma integral_exp_neg_add_mul_wienerIntegralLp (MathFin/Foundations/WienerIntegralExpMoment.lean) at m = M(T), c = sigma, f = g. Second consumer of the deterministic-integrand Wiener tower in FixedIncome. Axioms-clean: [propext, Classical.choice, Quot.sound]."
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Models.Rates.VasicekBondPrice (vasicekBondPrice_affine). The Vasicek zero-coupon bond price P(0,T) = E[exp(-int_0^T r_s ds)] as the Gaussian Laplace transform of the integrated short rate, collapsing to the affine term structure P = A(T)*exp(-B(T)*r0), B(T) = (1-e^{-kappa T})/kappa. The integrated rate int_0^T r_s ds = M(T) + sigma*int_0^T g dB is carried in its Wiener representation (integrated OU kernel g(u) = (1-e^{-kappa(T-u)})/kappa; the deterministic time-order swap is the modelling bridge, cited not proven -- parity with the OU-solution model of mf-vasicek-sde-terminal-gaussian). Its Gaussian law N(M, sigma^2 V) follows from wienerIntegralLp_hasLaw_gaussian + the FTC variance integral int_0^T g^2 = V(T) (vasicekIntegratedKernel_integral_sq, antiderivative u/kappa^2 - 2e^{-kappa(T-u)}/kappa^3 + e^{-2kappa(T-u)}/(2kappa^3)); the bond price exp(-M + sigma^2 V/2) is the Wiener bond-price lemma integral_exp_neg_add_mul_wienerIntegralLp (MathFin/Probability/Brownian/Wiener/WienerIntegralExpMoment.lean) at m = M(T), c = sigma, f = g. Second consumer of the deterministic-integrand Wiener tower in FixedIncome. Axioms-clean: [propext, Classical.choice, Quot.sound]."
       }
     },
     {
@@ -602,7 +602,7 @@
       "domain": "mathematical_finance",
       "description": "The Vasicek zero-coupon bond price's closed form exp(-M(T) + sigma^2*V(T)/2) (mf-vasicek-bond-price), for kappa > 0, tends as kappa -> 0+ to exp(-r0*T + sigma^2*T^3/6). That value is the bond price of the driftless Gaussian short rate r_s = r0 + sigma*B_s in its Wiener representation (mf-vasicek-zero-meanreversion-crosscheck). The variance term V(T), a sum of three kappa^-2-order pieces that individually diverge, only converges as a sum; the limit is obtained by an explicit cubic-Taylor cancellation bound, not substitution (Lean's x/0 = 0 gives the closed form a different value, exp(-theta*T), at kappa = 0). A limit of the closed form, not of the short-rate processes.",
       "code": {
-        "lean": "import MathFin.FixedIncome.VasicekZeroMeanReversionLimit\n\nopen Filter Topology MathFin\n\n/-- **The Vasicek bond price at vanishing mean reversion.** As kappa -> 0+, the closed-form\nVasicek bond price tends to exp(-r0*T + sigma^2*T^3/6), the price of the driftless Gaussian\nshort rate -- not to the kappa = 0 substitution value. -/\ntheorem vasicek_zero_meanreversion_limit_thm (r0 theta sigma T : ℝ) :\n    Tendsto (fun kappa => Real.exp (-(vasicekIntegratedMean r0 theta kappa T)\n        + sigma ^ 2 * vasicekBondV kappa T / 2))\n      (𝓝[>] 0) (𝓝 (Real.exp (-(r0 * T) + sigma ^ 2 * T ^ 3 / 6))) :=\n  MathFin.tendsto_vasicekBondPrice_zero_meanReversion r0 theta sigma T\n"
+        "lean": "import MathFin.Models.Rates.VasicekZeroMeanReversionLimit\n\nopen Filter Topology MathFin\n\n/-- **The Vasicek bond price at vanishing mean reversion.** As kappa -> 0+, the closed-form\nVasicek bond price tends to exp(-r0*T + sigma^2*T^3/6), the price of the driftless Gaussian\nshort rate -- not to the kappa = 0 substitution value. -/\ntheorem vasicek_zero_meanreversion_limit_thm (r0 theta sigma T : ℝ) :\n    Tendsto (fun kappa => Real.exp (-(vasicekIntegratedMean r0 theta kappa T)\n        + sigma ^ 2 * vasicekBondV kappa T / 2))\n      (𝓝[>] 0) (𝓝 (Real.exp (-(r0 * T) + sigma ^ 2 * T ^ 3 / 6))) :=\n  MathFin.tendsto_vasicekBondPrice_zero_meanReversion r0 theta sigma T\n"
       },
       "metadata": {
         "chapter": 12,
@@ -618,7 +618,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof on the closed form exp(-M(T) + sigma^2*V(T)/2) of mf-vasicek-bond-price. Lives in MathFin/FixedIncome/VasicekZeroMeanReversionLimit.lean: tendsto_vasicekBondB_zero_meanReversion (B(T) -> T) and the quantitative cancellation abs_vasicekBondV_sub_le (|V(T) - T^3/3| <= 10*|kappa|*T^4 for |2*kappa*T| <= 1, from the cubic Taylor remainder of exp) give tendsto_vasicekBondV_zero_meanReversion (V(T) -> T^3/3) and tendsto_vasicekIntegratedMean_zero_meanReversion (M(T) -> r0*T), composed into tendsto_vasicekBondPrice_zero_meanReversion. SCOPE: a limit of the closed form, not a convergence statement about the underlying random variables integral_0^T r_s^kappa ds as kappa -> 0+; no convergence of the short-rate processes themselves is claimed. The kappa = 0 substitution (Lean's x/0 = 0) gives the different, wrong value exp(-theta*T) (vasicekBondPrice_closedForm_zero_meanReversion), stated in the same file as a contrast, not as part of this entry's claim. Axioms-clean."
+        "formalization_scope": "Full formal proof on the closed form exp(-M(T) + sigma^2*V(T)/2) of mf-vasicek-bond-price. Lives in MathFin/Models/Rates/VasicekZeroMeanReversionLimit.lean: tendsto_vasicekBondB_zero_meanReversion (B(T) -> T) and the quantitative cancellation abs_vasicekBondV_sub_le (|V(T) - T^3/3| <= 10*|kappa|*T^4 for |2*kappa*T| <= 1, from the cubic Taylor remainder of exp) give tendsto_vasicekBondV_zero_meanReversion (V(T) -> T^3/3) and tendsto_vasicekIntegratedMean_zero_meanReversion (M(T) -> r0*T), composed into tendsto_vasicekBondPrice_zero_meanReversion. SCOPE: a limit of the closed form, not a convergence statement about the underlying random variables integral_0^T r_s^kappa ds as kappa -> 0+; no convergence of the short-rate processes themselves is claimed. The kappa = 0 substitution (Lean's x/0 = 0) gives the different, wrong value exp(-theta*T) (vasicekBondPrice_closedForm_zero_meanReversion), stated in the same file as a contrast, not as part of this entry's claim. Axioms-clean."
       }
     },
     {
@@ -627,7 +627,7 @@
       "domain": "mathematical_finance",
       "description": "The kappa -> 0+ limit of the Vasicek closed-form bond price (mf-vasicek-zero-meanreversion-limit) equals the bond price of the driftless Gaussian short rate r_s = r0 + sigma*B_s computed directly as a Wiener-integral expectation, with no Vasicek formula and no limit: a second route to exp(-r0*T + sigma^2*T^3/6), through the same Wiener bond-price lemma the Vasicek price uses, with kernel T - u. The driftless model's integrated rate is carried in its Wiener representation integral_0^T r_s ds = r0*T + sigma*integral_0^T (T-u) dB_u; the time-order-swap identity behind this (integral_0^T B_s ds = integral_0^T (T-u) dB_u) is cited, not proved.",
       "code": {
-        "lean": "import MathFin.FixedIncome.VasicekZeroMeanReversionLimit\n\nopen MeasureTheory ProbabilityTheory Filter Topology MathFin\nopen scoped NNReal\n\n/-- **Two independent routes to the same price.** The kappa -> 0+ limit of the Vasicek closed\nform agrees with the driftless Gaussian short rate's bond price, computed directly as a\nWiener-integral expectation with no Vasicek formula and no limit. -/\ntheorem vasicek_zero_meanreversion_crosscheck_thm\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (r0 theta sigma : ℝ) (T : ℝ≥0) :\n    Tendsto (fun kappa => Real.exp (-(vasicekIntegratedMean r0 theta kappa T)\n        + sigma ^ 2 * vasicekBondV kappa T / 2))\n      (𝓝[>] 0) (𝓝 (∫ ω, Real.exp (-(brownianIntegratedRate hB r0 sigma T ω)) ∂μ)) :=\n  MathFin.tendsto_vasicekBondPrice_brownianBondPrice hB r0 theta sigma T\n"
+        "lean": "import MathFin.Models.Rates.VasicekZeroMeanReversionLimit\n\nopen MeasureTheory ProbabilityTheory Filter Topology MathFin\nopen scoped NNReal\n\n/-- **Two independent routes to the same price.** The kappa -> 0+ limit of the Vasicek closed\nform agrees with the driftless Gaussian short rate's bond price, computed directly as a\nWiener-integral expectation with no Vasicek formula and no limit. -/\ntheorem vasicek_zero_meanreversion_crosscheck_thm\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (r0 theta sigma : ℝ) (T : ℝ≥0) :\n    Tendsto (fun kappa => Real.exp (-(vasicekIntegratedMean r0 theta kappa T)\n        + sigma ^ 2 * vasicekBondV kappa T / 2))\n      (𝓝[>] 0) (𝓝 (∫ ω, Real.exp (-(brownianIntegratedRate hB r0 sigma T ω)) ∂μ)) :=\n  MathFin.tendsto_vasicekBondPrice_brownianBondPrice hB r0 theta sigma T\n"
       },
       "metadata": {
         "chapter": 12,
@@ -639,7 +639,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Lives in MathFin/FixedIncome/VasicekZeroMeanReversionLimit.lean: brownianBondPrice_eq prices the driftless model r_s = r0 + sigma*B_s directly, via the Wiener bond-price lemma integral_exp_neg_add_mul_wienerIntegralLp on the integrated kernel u -> T - u (brownianIntegratedKernelLp, with integral of its square T^3/3 by brownianIntegratedKernelLp_integral_sq); tendsto_vasicekBondPrice_brownianBondPrice composes this with tendsto_vasicekBondPrice_zero_meanReversion. SCOPE: the driftless model's integrated rate is carried in its Wiener representation integral_0^T (r0 + sigma*B_s) ds = r0*T + sigma*integral_0^T (T-u) dB_u; the time-order-swap identity behind this (integral_0^T B_s ds = integral_0^T (T-u) dB_u) is the same cited, not proved, modelling bridge used by vasicekIntegratedRate elsewhere in this corpus. Axioms-clean."
+        "formalization_scope": "Full formal proof. Lives in MathFin/Models/Rates/VasicekZeroMeanReversionLimit.lean: brownianBondPrice_eq prices the driftless model r_s = r0 + sigma*B_s directly, via the Wiener bond-price lemma integral_exp_neg_add_mul_wienerIntegralLp on the integrated kernel u -> T - u (brownianIntegratedKernelLp, with integral of its square T^3/3 by brownianIntegratedKernelLp_integral_sq); tendsto_vasicekBondPrice_brownianBondPrice composes this with tendsto_vasicekBondPrice_zero_meanReversion. SCOPE: the driftless model's integrated rate is carried in its Wiener representation integral_0^T (r0 + sigma*B_s) ds = r0*T + sigma*integral_0^T (T-u) dB_u; the time-order-swap identity behind this (integral_0^T B_s ds = integral_0^T (T-u) dB_u) is the same cited, not proved, modelling bridge used by vasicekIntegratedRate elsewhere in this corpus. Axioms-clean."
       }
     },
     {
@@ -648,7 +648,7 @@
       "domain": "mathematical_finance",
       "description": "For the Cox–Ingersoll–Ross short rate dr = κ(θ − r)dt + σ√r dW, in the affine form P(0,T) = exp(A(T) − B(T)·r₀) of its bond price, the closed-form rate loading B(T) = 2(e^{γT} − 1)/((γ + κ)(e^{γT} − 1) + 2γ), γ = √(κ² + 2σ²), solves the Riccati equation B'(T) = 1 − κB(T) − ½σ²B(T)² with B(0) = 0, at every real T, whenever κ² + 2σ² > 0. Only this equation is verified: the bond price itself is not derived.",
       "code": {
-        "lean": "import MathFin.FixedIncome.CIRRiccati\n\nopen MathFin\n\n/-- **The CIR rate loading solves the Riccati equation.** With `γ = √(κ² + 2σ²)`, the closed\nform `B(T) = 2(e^{γT} − 1) / ((γ + κ)(e^{γT} − 1) + 2γ)` of the CIR affine bond price\n`P(0,T) = exp(A(T) − B(T)·r₀)` satisfies `B(0) = 0` and `B'(T) = 1 − κB(T) − ½σ²B(T)²` at every\n`T`, whenever `κ² + 2σ² > 0`. Re-exports `MathFin.cirBondB_zero` and\n`MathFin.hasDerivAt_cirBondB`. -/\ntheorem cir_bond_B_solves_riccati {κ σ : ℝ} (h : 0 < κ ^ 2 + 2 * σ ^ 2) :\n    cirBondB κ σ 0 = 0 ∧\n      ∀ T : ℝ, HasDerivAt (cirBondB κ σ)\n        (1 - κ * cirBondB κ σ T - σ ^ 2 / 2 * cirBondB κ σ T ^ 2) T :=\n  ⟨cirBondB_zero κ σ, hasDerivAt_cirBondB h⟩\n"
+        "lean": "import MathFin.Models.Rates.CIRRiccati\n\nopen MathFin\n\n/-- **The CIR rate loading solves the Riccati equation.** With `γ = √(κ² + 2σ²)`, the closed\nform `B(T) = 2(e^{γT} − 1) / ((γ + κ)(e^{γT} − 1) + 2γ)` of the CIR affine bond price\n`P(0,T) = exp(A(T) − B(T)·r₀)` satisfies `B(0) = 0` and `B'(T) = 1 − κB(T) − ½σ²B(T)²` at every\n`T`, whenever `κ² + 2σ² > 0`. Re-exports `MathFin.cirBondB_zero` and\n`MathFin.hasDerivAt_cirBondB`. -/\ntheorem cir_bond_B_solves_riccati {κ σ : ℝ} (h : 0 < κ ^ 2 + 2 * σ ^ 2) :\n    cirBondB κ σ 0 = 0 ∧\n      ∀ T : ℝ, HasDerivAt (cirBondB κ σ)\n        (1 - κ * cirBondB κ σ T - σ ^ 2 / 2 * cirBondB κ σ T ^ 2) T :=\n  ⟨cirBondB_zero κ σ, hasDerivAt_cirBondB h⟩\n"
       },
       "metadata": {
         "chapter": 12,
@@ -664,7 +664,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.cirBondB_zero and MathFin.hasDerivAt_cirBondB (FixedIncome/CIRRiccati.lean). SCOPE. Only the term-structure equation is verified; the bond price P = E[exp(-int_0^T r_s ds)] needs the affine (Feynman-Kac) framework, which is not formalized."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.cirBondB_zero and MathFin.hasDerivAt_cirBondB (Models/Rates/CIRRiccati.lean). SCOPE. Only the term-structure equation is verified; the bond price P = E[exp(-int_0^T r_s ds)] needs the affine (Feynman-Kac) framework, which is not formalized."
       }
     },
     {
@@ -673,7 +673,7 @@
       "domain": "mathematical_finance",
       "description": "For the Cox–Ingersoll–Ross short rate, in the affine form P(0,T) = exp(A(T) − B(T)·r₀) of its bond price, the closed-form level loading A(T) = (2κθ/σ²)·log(2γe^{(κ+γ)T/2} / ((γ + κ)(e^{γT} − 1) + 2γ)), γ = √(κ² + 2σ²), satisfies A(0) = 0 and A'(T) = −κθB(T) at every real T, whenever σ ≠ 0. Only this equation is verified: the bond price itself is not derived.",
       "code": {
-        "lean": "import MathFin.FixedIncome.CIRRiccati\n\nopen MathFin\n\n/-- **The CIR level loading solves its equation.** In the affine form\n`P(0,T) = exp(A(T) − B(T)·r₀)`, the closed form `A(T) = (2κθ/σ²)·log(2γ e^{(κ+γ)T/2} / D(T))`,\nwith `γ = √(κ² + 2σ²)` and `D(T) = (γ + κ)(e^{γT} − 1) + 2γ`, satisfies `A(0) = 0` and\n`A'(T) = −κθ B(T)` at every `T`, whenever `σ ≠ 0`. Re-exports `MathFin.cirBondA_zero` and\n`MathFin.hasDerivAt_cirBondA`. -/\ntheorem cir_bond_A_solves_equation {κ σ : ℝ} (θ : ℝ) (hσ : σ ≠ 0) :\n    cirBondA κ θ σ 0 = 0 ∧\n      ∀ T : ℝ, HasDerivAt (cirBondA κ θ σ) (-(κ * θ) * cirBondB κ σ T) T :=\n  ⟨cirBondA_zero κ θ σ, hasDerivAt_cirBondA κ θ hσ⟩\n"
+        "lean": "import MathFin.Models.Rates.CIRRiccati\n\nopen MathFin\n\n/-- **The CIR level loading solves its equation.** In the affine form\n`P(0,T) = exp(A(T) − B(T)·r₀)`, the closed form `A(T) = (2κθ/σ²)·log(2γ e^{(κ+γ)T/2} / D(T))`,\nwith `γ = √(κ² + 2σ²)` and `D(T) = (γ + κ)(e^{γT} − 1) + 2γ`, satisfies `A(0) = 0` and\n`A'(T) = −κθ B(T)` at every `T`, whenever `σ ≠ 0`. Re-exports `MathFin.cirBondA_zero` and\n`MathFin.hasDerivAt_cirBondA`. -/\ntheorem cir_bond_A_solves_equation {κ σ : ℝ} (θ : ℝ) (hσ : σ ≠ 0) :\n    cirBondA κ θ σ 0 = 0 ∧\n      ∀ T : ℝ, HasDerivAt (cirBondA κ θ σ) (-(κ * θ) * cirBondB κ σ T) T :=\n  ⟨cirBondA_zero κ θ σ, hasDerivAt_cirBondA κ θ hσ⟩\n"
       },
       "metadata": {
         "chapter": 12,
@@ -689,7 +689,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.cirBondA_zero and MathFin.hasDerivAt_cirBondA (FixedIncome/CIRRiccati.lean). A is the log-form level loading of P = exp(A - B*r0), so A(0) = 0. SCOPE. sigma != 0 is needed because the factor 2*kappa*theta/sigma^2 divides by sigma^2. Only the term-structure equation is verified; the bond price needs the affine (Feynman-Kac) framework, which is not formalized."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.cirBondA_zero and MathFin.hasDerivAt_cirBondA (Models/Rates/CIRRiccati.lean). A is the log-form level loading of P = exp(A - B*r0), so A(0) = 0. SCOPE. sigma != 0 is needed because the factor 2*kappa*theta/sigma^2 divides by sigma^2. Only the term-structure equation is verified; the bond price needs the affine (Feynman-Kac) framework, which is not formalized."
       }
     },
     {
@@ -698,7 +698,7 @@
       "description": "The sum of squares of two OU fluctuations e^{-kt/2}(x_{i0} + s∫₀ᵗ e^{ku/2}dB_i) has mean θ(1−e^{−kt}) + v₀e^{−kt}, θ = 2s²/k, the mean of the Feller-borderline CIR process. That V solves the CIR SDE (which needs B₁, B₂ independent) is not proved.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.CIRSquaredOU\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\nnamespace MathFin\nopen CIRSquaredOU\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\nvariable {B1 B2 : ℝ≥0 → Ω → ℝ}\n\n/-- The mean of the sum of two squared OU fluctuations, the Feller-borderline CIR mean. -/\ntheorem cir_squared_ou_mean (hB1 : IsPreBrownianReal B1 μ)\n    (hB2 : IsPreBrownianReal B2 μ) {k : ℝ} (hk : 0 < k) (s x10 x20 : ℝ)\n    (t : ℝ≥0) :\n    ∫ ω, cirVariance hB1 hB2 k s x10 x20 hk t ω ∂μ\n      = cirTheta s k * (1 - Real.exp (-(k * (t : ℝ))))\n        + (x10 ^ 2 + x20 ^ 2) * Real.exp (-(k * (t : ℝ))) :=\n  MathFin.CIRSquaredOU.cirVariance_mean hB1 hB2 hk s x10 x20 t\n\nend MathFin\n"
+        "lean": "import MathFin.Models.Rates.CIRSquaredOU\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\nnamespace MathFin\nopen CIRSquaredOU\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\nvariable {B1 B2 : ℝ≥0 → Ω → ℝ}\n\n/-- The mean of the sum of two squared OU fluctuations, the Feller-borderline CIR mean. -/\ntheorem cir_squared_ou_mean (hB1 : IsPreBrownianReal B1 μ)\n    (hB2 : IsPreBrownianReal B2 μ) {k : ℝ} (hk : 0 < k) (s x10 x20 : ℝ)\n    (t : ℝ≥0) :\n    ∫ ω, cirVariance hB1 hB2 k s x10 x20 hk t ω ∂μ\n      = cirTheta s k * (1 - Real.exp (-(k * (t : ℝ))))\n        + (x10 ^ 2 + x20 ^ 2) * Real.exp (-(k * (t : ℝ))) :=\n  MathFin.CIRSquaredOU.cirVariance_mean hB1 hB2 hk s x10 x20 t\n\nend MathFin\n"
       },
       "metadata": {
         "reference": "Cox, Ingersoll and Ross 1985 (the CIR mean); the squared-OU representation at the Feller boundary 2kθ = (2s)²",
@@ -709,7 +709,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof, MathFin/FixedIncome/CIRSquaredOU.lean. Each OU fluctuation is the Vasicek short rate of MathFin/FixedIncome/VasicekSDEGaussian.lean at mean level 0, speed k/2, volatility s, so its law N(x0 e^{-kt/2}, (s²/k)(1 − e^{-kt})) is vasicekShortRate_hasLaw_gaussian; the second moment is m² + v from that law, and the mean of V is the sum of the two second moments. Per-time random variables only: no path regularity is claimed, and that V solves dV = k(θ − V)dt + 2s√V dW is not proved (it needs B1, B2 independent, which the mean computation does not use). Axioms-clean."
+        "formalization_scope": "Full formal proof, MathFin/Models/Rates/CIRSquaredOU.lean. Each OU fluctuation is the Vasicek short rate of MathFin/Models/Rates/VasicekSDEGaussian.lean at mean level 0, speed k/2, volatility s, so its law N(x0 e^{-kt/2}, (s²/k)(1 − e^{-kt})) is vasicekShortRate_hasLaw_gaussian; the second moment is m² + v from that law, and the mean of V is the sum of the two second moments. Per-time random variables only: no path regularity is claimed, and that V solves dV = k(θ − V)dt + 2s√V dW is not proved (it needs B1, B2 independent, which the mean computation does not use). Axioms-clean."
       }
     },
     {
@@ -718,7 +718,7 @@
       "domain": "mathematical_finance",
       "description": "The T-forward measure Q^T is the pricing measure with the zero-coupon bond P(·,T) as numéraire. Its defining property is that the forward price is the Q^T-expectation of the spot: E^{Q^T}[S_T] = S_0/P(0,T) = S_0·e^{rT} = F(0,T), the no-arbitrage forward price. Built as a change-of-numéraire instance (bond slots N_T = P(T,T) = 1, N_0 = P(0,T) = e^{-rT}, money-market reference B_T = e^{rT}, B_0 = 1), the natural next numéraire instance after the stock and exchange-option S²-numéraires.",
       "code": {
-        "lean": "import MathFin.FixedIncome.ForwardMeasure\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\n/-- **Black–Scholes forward price under the T-forward measure.**\nWith the zero-coupon bond `P(·,T)` as numéraire, the forward price of the spot is\nits `Q^T`-expectation: `𝔼^{Q^T}[S_T] = S_0·e^{rT} = S_0/P(0,T) = F(0,T)`, the\nno-arbitrage forward price. Re-exports `MathFin.forwardMeasure_bs_expected_terminal`. -/\ntheorem forward_measure_bs_expected_terminal\n    {Ω : Type*} [MeasurableSpace Ω] {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, bsTerminal S_0 r σ T (Z ω) ∂(forwardMeasure Q fun _ ↦ Real.exp (r * T)) =\n      S_0 * Real.exp (r * T) :=\n  MathFin.forwardMeasure_bs_expected_terminal h\n"
+        "lean": "import MathFin.Models.Rates.ForwardMeasure\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\n/-- **Black–Scholes forward price under the T-forward measure.**\nWith the zero-coupon bond `P(·,T)` as numéraire, the forward price of the spot is\nits `Q^T`-expectation: `𝔼^{Q^T}[S_T] = S_0·e^{rT} = S_0/P(0,T) = F(0,T)`, the\nno-arbitrage forward price. Re-exports `MathFin.forwardMeasure_bs_expected_terminal`. -/\ntheorem forward_measure_bs_expected_terminal\n    {Ω : Type*} [MeasurableSpace Ω] {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, bsTerminal S_0 r σ T (Z ω) ∂(forwardMeasure Q fun _ ↦ Real.exp (r * T)) =\n      S_0 * Real.exp (r * T) :=\n  MathFin.forwardMeasure_bs_expected_terminal h\n"
       },
       "metadata": {
         "chapter": 10,
@@ -730,7 +730,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export from MathFin.FixedIncome.ForwardMeasure (forwardMeasure_bs_expected_terminal). The T-forward measure Q^T (zero-coupon bond P(.,T) as numeraire) satisfies E^{Q^T}[S_T] = S_0*e^{rT} = S_0/P(0,T) = F(0,T), the no-arbitrage forward price. forwardMeasure Q B is the library's one T-forward measure, a numeraireMeasure instance for a general bank account B (N_T = P(T,T) = 1, N_0 = P(0,T) = E^Q[1/B_T], reference B_T, B_0 = 1) on the change-of-numeraire engine (MathFin.changeOfNumeraire, no integrability hypothesis); this entry is its constant-rate instance B = e^{rT}. forwardMeasure_price gives P(0,T)*E^{Q^T}[X] = E^Q[X/B_T] for any claim, and combined with the discounted-terminal EMM property discounted_terminal_eq_S0 yields the forward price of the BS terminal. HONEST SCOPE: in the constant-rate ZCB the density dQ^T/dQ = 1 so Q^T = Q coincides with the risk-neutral measure (the construction generalizes verbatim to a stochastic short rate where Q^T != Q). Natural next numeraire instance after the stock and S^2-numeraires. Axioms-clean: [propext, Classical.choice, Quot.sound]."
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Models.Rates.ForwardMeasure (forwardMeasure_bs_expected_terminal). The T-forward measure Q^T (zero-coupon bond P(.,T) as numeraire) satisfies E^{Q^T}[S_T] = S_0*e^{rT} = S_0/P(0,T) = F(0,T), the no-arbitrage forward price. forwardMeasure Q B is the library's one T-forward measure, a numeraireMeasure instance for a general bank account B (N_T = P(T,T) = 1, N_0 = P(0,T) = E^Q[1/B_T], reference B_T, B_0 = 1) on the change-of-numeraire engine (MathFin.changeOfNumeraire, no integrability hypothesis); this entry is its constant-rate instance B = e^{rT}. forwardMeasure_price gives P(0,T)*E^{Q^T}[X] = E^Q[X/B_T] for any claim, and combined with the discounted-terminal EMM property discounted_terminal_eq_S0 yields the forward price of the BS terminal. HONEST SCOPE: in the constant-rate ZCB the density dQ^T/dQ = 1 so Q^T = Q coincides with the risk-neutral measure (the construction generalizes verbatim to a stochastic short rate where Q^T != Q). Natural next numeraire instance after the stock and S^2-numeraires. Axioms-clean: [propext, Classical.choice, Quot.sound]."
       }
     },
     {
@@ -739,7 +739,7 @@
       "description": "Vanilla interest-rate swap: annuity, payer-swap value, par swap rate, and the par identity over the zcb curve.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.InterestRateSwap\n\nopen MathFin\n\n/-- Vanilla interest-rate swap par identity on the zcb curve: with a positive daycount and a nonempty payment schedule, the payer swap is worth zero iff the fixed rate is the par swap rate. -/\ntheorem mf_fixedincome_swap {ι : Type*} (r δ K T0 Tn : ℝ) (T : ι → ℝ) (s : Finset ι)\n    (hδ : 0 < δ) (hs : s.Nonempty) :\n    payerSwapValue (zcb r 0 T0) (zcb r 0 Tn) K (annuity δ (fun i ↦ zcb r 0 (T i)) s) = 0 ↔\n      K = parSwapRate (zcb r 0 T0) (zcb r 0 Tn) (annuity δ (fun i ↦ zcb r 0 (T i)) s) :=\n  MathFin.payerSwapValue_zcb_eq_zero_iff r δ K T0 Tn T s hδ hs\n"
+        "lean": "import MathFin.Models.Rates.InterestRateSwap\n\nopen MathFin\n\n/-- Vanilla interest-rate swap par identity on the zcb curve: with a positive daycount and a nonempty payment schedule, the payer swap is worth zero iff the fixed rate is the par swap rate. -/\ntheorem mf_fixedincome_swap {ι : Type*} (r δ K T0 Tn : ℝ) (T : ι → ℝ) (s : Finset ι)\n    (hδ : 0 < δ) (hs : s.Nonempty) :\n    payerSwapValue (zcb r 0 T0) (zcb r 0 Tn) K (annuity δ (fun i ↦ zcb r 0 (T i)) s) = 0 ↔\n      K = parSwapRate (zcb r 0 T0) (zcb r 0 Tn) (annuity δ (fun i ↦ zcb r 0 (T i)) s) :=\n  MathFin.payerSwapValue_zcb_eq_zero_iff r δ K T0 Tn T s hδ hs\n"
       },
       "metadata": {
         "chapter": 0,
@@ -747,7 +747,7 @@
         "citations": [],
         "difficulty": "small",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof in MathFin/FixedIncome/InterestRateSwap.lean (magistral-drafted statement, leanstral proof, human-refined at review). The par identity payerSwapValue = 0 ↔ K = parSwapRate is proved abstractly for any nonzero annuity (payerSwapValue_eq_zero_iff) and instantiated on the zcb curve with positivity discharged by zcb_pos + annuity_pos rather than assumed. Re-export from MathFin. Axioms-clean. Introduces definitions: annuity, payerSwapValue, parSwapRate (new-defs review class).",
+        "formalization_scope": "Full formal proof in MathFin/Models/Rates/InterestRateSwap.lean (magistral-drafted statement, leanstral proof, human-refined at review). The par identity payerSwapValue = 0 ↔ K = parSwapRate is proved abstractly for any nonzero annuity (payerSwapValue_eq_zero_iff) and instantiated on the zcb curve with positivity discharged by zcb_pos + annuity_pos rather than assumed. Re-export from MathFin. Axioms-clean. Introduces definitions: annuity, payerSwapValue, parSwapRate (new-defs review class).",
         "provenance": {
           "statement_source": "magistral-autoform",
           "statement_model": "magistral-medium",
@@ -769,7 +769,7 @@
       "description": "The simple forward rate implied by two zero-coupon bonds gives the FRA discount-factor value, and the FRA is worth zero exactly at that rate.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.FRA\n\nopen MathFin\n\n/-- The ZCB-implied simple forward rate expands the FRA value to the discount-factor difference, and it is the unique fixed rate giving zero value. -/\ntheorem mf_fixedincome_fra (r δ K T1 T2 : ℝ) (hδ : δ ≠ 0) :\n    fraValue δ (zcb r 0 T2) (fraForwardRate (zcb r 0 T1) (zcb r 0 T2) δ) K =\n        zcb r 0 T1 - zcb r 0 T2 - δ * zcb r 0 T2 * K\n      ∧ (fraValue δ (zcb r 0 T2) (fraForwardRate (zcb r 0 T1) (zcb r 0 T2) δ) K = 0 ↔\n        K = fraForwardRate (zcb r 0 T1) (zcb r 0 T2) δ) :=\n  ⟨MathFin.fraValue_zcb_eq_discount_difference r δ K T1 T2 hδ,\n   MathFin.fraValue_zcb_eq_zero_iff r δ K T1 T2 hδ⟩\n"
+        "lean": "import MathFin.Models.Rates.FRA\n\nopen MathFin\n\n/-- The ZCB-implied simple forward rate expands the FRA value to the discount-factor difference, and it is the unique fixed rate giving zero value. -/\ntheorem mf_fixedincome_fra (r δ K T1 T2 : ℝ) (hδ : δ ≠ 0) :\n    fraValue δ (zcb r 0 T2) (fraForwardRate (zcb r 0 T1) (zcb r 0 T2) δ) K =\n        zcb r 0 T1 - zcb r 0 T2 - δ * zcb r 0 T2 * K\n      ∧ (fraValue δ (zcb r 0 T2) (fraForwardRate (zcb r 0 T1) (zcb r 0 T2) δ) K = 0 ↔\n        K = fraForwardRate (zcb r 0 T1) (zcb r 0 T2) δ) :=\n  ⟨MathFin.fraValue_zcb_eq_discount_difference r δ K T1 T2 hδ,\n   MathFin.fraValue_zcb_eq_zero_iff r δ K T1 T2 hδ⟩\n"
       },
       "metadata": {
         "chapter": 0,
@@ -777,7 +777,7 @@
         "citations": [],
         "difficulty": "small",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof in MathFin/FixedIncome/FRA.lean. The generic FRA algebra is instantiated on the existing deterministic zcb curve. The discount-factor denominator is proved nonzero from zcb_pos; only the nonzero accrual period is assumed. The benchmark re-exports both the expanded value identity and the fair-rate zero-value equivalence. Axioms-clean.",
+        "formalization_scope": "Full formal proof in MathFin/Models/Rates/FRA.lean. The generic FRA algebra is instantiated on the existing deterministic zcb curve. The discount-factor denominator is proved nonzero from zcb_pos; only the nonzero accrual period is assumed. The benchmark re-exports both the expanded value identity and the fair-rate zero-value equivalence. Axioms-clean.",
         "provenance": {
           "issue": 67,
           "new_defs": [
@@ -794,7 +794,7 @@
       "description": "V^caplet - V^floorlet = α·(F - K), the forward-rate analogue of put-call parity. The caplet/floorlet pair is the payer/receiver swaption pair with the accrual factor in the annuity slot, so parity is that theorem applied.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Futures.Black76\n\nopen MathFin\n\n/-- Caplet-floorlet parity, the forward-rate analogue of put-call parity. -/\ntheorem mf_caplet_floorlet_parity (F K σ T α : ℝ) :\n    blackCaplet F K σ T α - blackFloorlet F K σ T α = α * (F - K) :=\n  MathFin.caplet_floorlet_parity F K σ T α\n"
+        "lean": "import MathFin.Models.Forwards.Black76\n\nopen MathFin\n\n/-- Caplet-floorlet parity, the forward-rate analogue of put-call parity. -/\ntheorem mf_caplet_floorlet_parity (F K σ T α : ℝ) :\n    blackCaplet F K σ T α - blackFloorlet F K σ T α = α * (F - K) :=\n  MathFin.caplet_floorlet_parity F K σ T α\n"
       },
       "metadata": {
         "chapter": 9,
@@ -807,7 +807,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof in MathFin/Futures/Black76.lean. Derived by application of swaption_payer_receiver_parity rather than re-running the Phi-symmetry argument: blackCaplet_eq_blackPayerSwaption records that the caplet is the payer swaption's formula with the accrual factor where the annuity sits. The caplet and floorlet price definitions are exercised through this identity and the ledger; they carry no separate benchmark entry, since price-equals-definition closes by rfl. Re-export from MathFin. Axioms-clean."
+        "formalization_scope": "Full formal proof in MathFin/Models/Forwards/Black76.lean. Derived by application of swaption_payer_receiver_parity rather than re-running the Phi-symmetry argument: blackCaplet_eq_blackPayerSwaption records that the caplet is the payer swaption's formula with the accrual factor where the annuity sits. The caplet and floorlet price definitions are exercised through this identity and the ledger; they carry no separate benchmark entry, since price-equals-definition closes by rfl. Re-export from MathFin. Axioms-clean."
       }
     },
     {
@@ -816,7 +816,7 @@
       "domain": "mathematical_finance",
       "description": "A payer swap with floating leg P0 − x (spot-starting when P0 = 1), fixed rate K and one fixed payment of K·δ at each date of the schedule and at the new maturity has zero value exactly when the coupon bond paying K·δ at those dates and face 1 at the last prices at P0 (the coupon-bond pricing equation of the closed-form bootstrap). If the new discount factor x solves that equation and 1 + K·δ > 0, bisection on the zero-quote swap from any bracket [lo, hi] containing x lands within (hi − lo)/2^{n+1} of x after n steps. The bracket containing x is a hypothesis; the rest of the curve (the earlier discount factors P) is taken as given.",
       "code": {
-        "lean": "import MathFin.FixedIncome.Bootstrapping\n\nopen MathFin MathFin.Bootstrapping\n\n/-- **Bootstrapping a par swap recovers the coupon-bond discount factor.** A zero-value\nlast-coupon swap at fixed rate `K` is the par coupon bond with coupon `K·δ` and face `1`; when\nthe new factor `x` solves that bond's pricing equation, bisection on the swap from a bracket\ncontaining `x` lands within `(hi − lo)/2^{n+1}` of it. Re-exports\n`MathFin.Bootstrapping.payerSwapValue_lastCoupon_eq_zero_iff_couponBond` and\n`MathFin.Bootstrapping.swapBootstrap_recovers_couponBondFactor`. -/\ntheorem par_swap_bootstrap_recovers_coupon_bond_factor {ι : Type*} (s : Finset ι)\n    (P : ι → ℝ) (P0 K δ x lo hi : ℝ) (hpos : 0 < 1 + K * δ)\n    (hbond : couponBondPricingEq s (fun _ ↦ K * δ) P P0 (K * δ) 1 x)\n    (hx : x ∈ Set.Icc lo hi) (n : ℕ) :\n    payerSwapValue P0 x K (annuity δ P s + δ * x) = 0 ∧\n      |bisectMid (fun y : ℝ ↦ -(payerSwapValue P0 y K (annuity δ P s + δ * y))) 0 lo hi n - x|\n        ≤ (hi - lo) / 2 ^ (n + 1) :=\n  ⟨(payerSwapValue_lastCoupon_eq_zero_iff_couponBond s P P0 K δ x).mpr hbond,\n    swapBootstrap_recovers_couponBondFactor s P P0 K δ x lo hi hpos hbond hx n⟩\n"
+        "lean": "import MathFin.Models.Rates.Bootstrapping\n\nopen MathFin MathFin.Bootstrapping\n\n/-- **Bootstrapping a par swap recovers the coupon-bond discount factor.** A zero-value\nlast-coupon swap at fixed rate `K` is the par coupon bond with coupon `K·δ` and face `1`; when\nthe new factor `x` solves that bond's pricing equation, bisection on the swap from a bracket\ncontaining `x` lands within `(hi − lo)/2^{n+1}` of it. Re-exports\n`MathFin.Bootstrapping.payerSwapValue_lastCoupon_eq_zero_iff_couponBond` and\n`MathFin.Bootstrapping.swapBootstrap_recovers_couponBondFactor`. -/\ntheorem par_swap_bootstrap_recovers_coupon_bond_factor {ι : Type*} (s : Finset ι)\n    (P : ι → ℝ) (P0 K δ x lo hi : ℝ) (hpos : 0 < 1 + K * δ)\n    (hbond : couponBondPricingEq s (fun _ ↦ K * δ) P P0 (K * δ) 1 x)\n    (hx : x ∈ Set.Icc lo hi) (n : ℕ) :\n    payerSwapValue P0 x K (annuity δ P s + δ * x) = 0 ∧\n      |bisectMid (fun y : ℝ ↦ -(payerSwapValue P0 y K (annuity δ P s + δ * y))) 0 lo hi n - x|\n        ≤ (hi - lo) / 2 ^ (n + 1) :=\n  ⟨(payerSwapValue_lastCoupon_eq_zero_iff_couponBond s P P0 K δ x).mpr hbond,\n    swapBootstrap_recovers_couponBondFactor s P P0 K δ x lo hi hpos hbond hx n⟩\n"
       },
       "metadata": {
         "reference": "J. C. Hull, Options, Futures, and Other Derivatives (10th ed., Pearson, 2018), ch. 4 (the bootstrap method for zero rates) and ch. 7 (valuing a swap as a pair of bonds)",
@@ -828,7 +828,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.Bootstrapping.payerSwapValue_lastCoupon_eq_zero_iff_couponBond and MathFin.Bootstrapping.swapBootstrap_recovers_couponBondFactor (MathFin/FixedIncome/Bootstrapping.lean). The closed-form root comes from MathFin.bootstrap_solve (MathFin/FixedIncome/YieldCurve.lean) and the bisection bound from MathFin.Bootstrapping.swapStep_lastCoupon_err. SCOPE: one bootstrap step; the earlier discount factors P are given, the bracket [lo, hi] containing x is a hypothesis, and 1 + K·δ > 0 is assumed."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.Bootstrapping.payerSwapValue_lastCoupon_eq_zero_iff_couponBond and MathFin.Bootstrapping.swapBootstrap_recovers_couponBondFactor (MathFin/Models/Rates/Bootstrapping.lean). The closed-form root comes from MathFin.bootstrap_solve (MathFin/Models/Rates/YieldCurve.lean) and the bisection bound from MathFin.Bootstrapping.swapStep_lastCoupon_err. SCOPE: one bootstrap step; the earlier discount factors P are given, the bracket [lo, hi] containing x is a hypothesis, and 1 + K·δ > 0 is assumed."
       }
     },
     {
@@ -837,7 +837,7 @@
       "domain": "mathematical_finance",
       "description": "The search-based bootstrap boot (swapChain δ K) builds a discount curve by structural recursion: step i bisects the spot-starting payer swap with fixed rate K_i (one fixed payment of K_i·δ at each date bootstrapped so far and at the new one) on the factors the earlier steps produced. At every step i, if 1 + K_i·δ > 0 and the bracket [lo_i, hi_i] contains the root computed from the factors the run actually produced, the new factor reprices swap i's quote c_i to within (1 + K_i·δ)·(hi_i − lo_i)/2^{n+1}. The bracket condition is a hypothesis; convergence of the curve as n → ∞ is not formalized.",
       "code": {
-        "lean": "import MathFin.FixedIncome.Bootstrapping\n\nopen MathFin MathFin.Bootstrapping\n\n/-- **The swap strip reprices inside the bootstrap induction.** At every step `i`, under\n`1 + K i·δ > 0` and a bracket containing the root computed from the factors the run produced,\nthe bootstrapped factor reprices swap `i`'s quote to within `(1 + K i·δ)·(hi i − lo i)/2^{n+1}`.\nRe-exports `MathFin.Bootstrapping.boot_reprices_swapChain`. -/\ntheorem swap_strip_bootstrap_reprices (δ : ℝ) (K c lo hi : ℕ → ℝ) (n i : ℕ)\n    (hpos : 0 < 1 + K i * δ)\n    (hσ : (1 - K i * (δ * (boot (swapChain δ K) c lo hi n i).sum) - c i) / (1 + K i * δ)\n      ∈ Set.Icc (lo i) (hi i)) :\n    |swapChain δ K i ((boot (swapChain δ K) c lo hi n (i + 1)).head\n        (boot_succ_ne_nil (swapChain δ K) c lo hi n i)\n        :: boot (swapChain δ K) c lo hi n i) - c i|\n      ≤ (1 + K i * δ) * ((hi i - lo i) / 2 ^ (n + 1)) :=\n  boot_reprices_swapChain δ K c lo hi n i hpos hσ\n"
+        "lean": "import MathFin.Models.Rates.Bootstrapping\n\nopen MathFin MathFin.Bootstrapping\n\n/-- **The swap strip reprices inside the bootstrap induction.** At every step `i`, under\n`1 + K i·δ > 0` and a bracket containing the root computed from the factors the run produced,\nthe bootstrapped factor reprices swap `i`'s quote to within `(1 + K i·δ)·(hi i − lo i)/2^{n+1}`.\nRe-exports `MathFin.Bootstrapping.boot_reprices_swapChain`. -/\ntheorem swap_strip_bootstrap_reprices (δ : ℝ) (K c lo hi : ℕ → ℝ) (n i : ℕ)\n    (hpos : 0 < 1 + K i * δ)\n    (hσ : (1 - K i * (δ * (boot (swapChain δ K) c lo hi n i).sum) - c i) / (1 + K i * δ)\n      ∈ Set.Icc (lo i) (hi i)) :\n    |swapChain δ K i ((boot (swapChain δ K) c lo hi n (i + 1)).head\n        (boot_succ_ne_nil (swapChain δ K) c lo hi n i)\n        :: boot (swapChain δ K) c lo hi n i) - c i|\n      ≤ (1 + K i * δ) * ((hi i - lo i) / 2 ^ (n + 1)) :=\n  boot_reprices_swapChain δ K c lo hi n i hpos hσ\n"
       },
       "metadata": {
         "reference": "P. S. Hagan and G. West, Interpolation Methods for Curve Construction, Applied Mathematical Finance 13(2) (2006), 89–129, §2 (bootstrapping the curve instrument by instrument)",
@@ -849,7 +849,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.Bootstrapping.boot_reprices_swapChain (MathFin/FixedIncome/Bootstrapping.lean), the swap strip run through the induction boot_reprices_all with the bisection engine of MathFin/Foundations/Bisection.lean. SCOPE: the per-step bracket condition, stated at the prefix the recursion feeds in, is a hypothesis; the error bound is per step for a fixed bisection budget n; convergence of the curve as n → ∞ and joint solves are not formalized."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.Bootstrapping.boot_reprices_swapChain (MathFin/Models/Rates/Bootstrapping.lean), the swap strip run through the induction boot_reprices_all with the bisection engine of MathFin/Probability/Analysis/Bisection.lean. SCOPE: the per-step bracket condition, stated at the prefix the recursion feeds in, is a hypothesis; the error bound is per step for a fixed bisection budget n; convergence of the curve as n → ∞ and joint solves are not formalized."
       }
     },
     {
@@ -858,7 +858,7 @@
       "domain": "mathematical_finance",
       "description": "For the Vasicek short rate (κ > 0) and maturity T > 0, the continuously compounded zero yield −log P(0,T)/T of the bond price P(0,T) = E[exp(−∫₀ᵀ r_s ds)] equals (θ − σ²/(2κ²)) + (r₀ − θ + σ²/κ²)·s(κT) − (σ²/(2κ²))·s(2κT), where s(x) = (1 − e^{−x})/x is the Nelson–Siegel slope factor. So the Vasicek curve is a level plus slope factors at the two decay rates κ and 2κ. The expectation is under the measure carrying the Brownian driver, and the integrated rate is in its Wiener representation, as in the Vasicek bond-price entry.",
       "code": {
-        "lean": "import MathFin.FixedIncome.VasicekYieldNelsonSiegel\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- **The Vasicek zero yield in Nelson–Siegel slope factors.** For `κ, T > 0`,\n`−log P(0,T)/T = (θ − σ²/(2κ²)) + (r₀ − θ + σ²/κ²)·s(κT) − (σ²/(2κ²))·s(2κT)` with\n`s = nssSlope`, the Nelson–Siegel slope factor. Re-exports `MathFin.vasicekYield_eq_nssSlope`. -/\ntheorem vasicek_yield_nelson_siegel_factors\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ)\n    (T : ℝ≥0) (hT : 0 < (T : ℝ)) :\n    -Real.log (∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω)) ∂μ) / T\n      = θ - σ ^ 2 / (2 * κ ^ 2) + (r₀ - θ + σ ^ 2 / κ ^ 2) * nssSlope (κ * T)\n        - σ ^ 2 / (2 * κ ^ 2) * nssSlope (2 * κ * T) :=\n  vasicekYield_eq_nssSlope hB r₀ θ σ hκ T hT\n"
+        "lean": "import MathFin.Models.Rates.VasicekYieldNelsonSiegel\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- **The Vasicek zero yield in Nelson–Siegel slope factors.** For `κ, T > 0`,\n`−log P(0,T)/T = (θ − σ²/(2κ²)) + (r₀ − θ + σ²/κ²)·s(κT) − (σ²/(2κ²))·s(2κT)` with\n`s = nssSlope`, the Nelson–Siegel slope factor. Re-exports `MathFin.vasicekYield_eq_nssSlope`. -/\ntheorem vasicek_yield_nelson_siegel_factors\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ)\n    (T : ℝ≥0) (hT : 0 < (T : ℝ)) :\n    -Real.log (∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω)) ∂μ) / T\n      = θ - σ ^ 2 / (2 * κ ^ 2) + (r₀ - θ + σ ^ 2 / κ ^ 2) * nssSlope (κ * T)\n        - σ ^ 2 / (2 * κ ^ 2) * nssSlope (2 * κ * T) :=\n  vasicekYield_eq_nssSlope hB r₀ θ σ hκ T hT\n"
       },
       "metadata": {
         "reference": "C. R. Nelson and A. F. Siegel, Parsimonious Modeling of Yield Curves, Journal of Business 60(4) (1987), 473–489; O. Vasicek, An Equilibrium Characterization of the Term Structure, Journal of Financial Economics 5 (1977), 177–188",
@@ -872,7 +872,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.vasicekYield_eq_nssSlope (MathFin/FixedIncome/VasicekYieldNelsonSiegel.lean), from MathFin.vasicekBondPrice_eq (MathFin/FixedIncome/VasicekBondPrice.lean) and the identities vasicekBondB κ τ / τ = nssSlope (κτ) and V(T)/T = (1 − 2s(κT) + s(2κT))/κ². SCOPE: the bond price is the expectation under the probability measure carrying the Brownian motion (read as the pricing measure; no change of measure); the integrated short rate is carried in its Wiener representation, as in mf-vasicek-bond-price."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.vasicekYield_eq_nssSlope (MathFin/Models/Rates/VasicekYieldNelsonSiegel.lean), from MathFin.vasicekBondPrice_eq (MathFin/Models/Rates/VasicekBondPrice.lean) and the identities vasicekBondB κ τ / τ = nssSlope (κτ) and V(T)/T = (1 − 2s(κT) + s(2κT))/κ². SCOPE: the bond price is the expectation under the probability measure carrying the Brownian motion (read as the pricing measure; no change of measure); the integrated short rate is carried in its Wiener representation, as in mf-vasicek-bond-price."
       }
     },
     {
@@ -881,7 +881,7 @@
       "domain": "mathematical_finance",
       "description": "For the Vasicek short rate with κ > 0, the continuously compounded zero yield −log P(0,T)/T of the bond price P(0,T) = E[exp(−∫₀ᵀ r_s ds)] tends to the initial short rate r₀ as T → 0⁺ and to the long rate θ − σ²/(2κ²) as T → ∞. Both limits are read off the Nelson–Siegel form of the Vasicek yield, using s(x) → 1 as x → 0 and s(x) → 0 as x → ∞ for the slope factor s(x) = (1 − e^{−x})/x. The expectation is under the measure carrying the Brownian driver, and the integrated rate is in its Wiener representation.",
       "code": {
-        "lean": "import MathFin.FixedIncome.VasicekYieldNelsonSiegel\n\nopen MeasureTheory ProbabilityTheory Filter Topology\nopen scoped NNReal\nopen MathFin\n\n/-- **The two ends of the Vasicek yield curve.** For `κ > 0`, the zero yield\n`−log P(0,T)/T` tends to `r₀` as `T → 0⁺` and to `θ − σ²/(2κ²)` as `T → ∞`. Re-exports\n`MathFin.tendsto_vasicekYield_nhdsGT_zero` and `MathFin.tendsto_vasicekYield_atTop`. -/\ntheorem vasicek_yield_curve_ends\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) :\n    Tendsto (fun T : ℝ≥0 ↦\n        -Real.log (∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω)) ∂μ) / T)\n      (𝓝[>] 0) (𝓝 r₀) ∧\n    Tendsto (fun T : ℝ≥0 ↦\n        -Real.log (∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω)) ∂μ) / T)\n      atTop (𝓝 (θ - σ ^ 2 / (2 * κ ^ 2))) :=\n  ⟨tendsto_vasicekYield_nhdsGT_zero hB r₀ θ σ hκ, tendsto_vasicekYield_atTop hB r₀ θ σ hκ⟩\n"
+        "lean": "import MathFin.Models.Rates.VasicekYieldNelsonSiegel\n\nopen MeasureTheory ProbabilityTheory Filter Topology\nopen scoped NNReal\nopen MathFin\n\n/-- **The two ends of the Vasicek yield curve.** For `κ > 0`, the zero yield\n`−log P(0,T)/T` tends to `r₀` as `T → 0⁺` and to `θ − σ²/(2κ²)` as `T → ∞`. Re-exports\n`MathFin.tendsto_vasicekYield_nhdsGT_zero` and `MathFin.tendsto_vasicekYield_atTop`. -/\ntheorem vasicek_yield_curve_ends\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) :\n    Tendsto (fun T : ℝ≥0 ↦\n        -Real.log (∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω)) ∂μ) / T)\n      (𝓝[>] 0) (𝓝 r₀) ∧\n    Tendsto (fun T : ℝ≥0 ↦\n        -Real.log (∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω)) ∂μ) / T)\n      atTop (𝓝 (θ - σ ^ 2 / (2 * κ ^ 2))) :=\n  ⟨tendsto_vasicekYield_nhdsGT_zero hB r₀ θ σ hκ, tendsto_vasicekYield_atTop hB r₀ θ σ hκ⟩\n"
       },
       "metadata": {
         "reference": "O. Vasicek, An Equilibrium Characterization of the Term Structure, Journal of Financial Economics 5 (1977), 177–188; D. Brigo and F. Mercurio, Interest Rate Models — Theory and Practice (2nd ed., Springer, 2006), §3.2.1",
@@ -896,7 +896,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.tendsto_vasicekYield_nhdsGT_zero and MathFin.tendsto_vasicekYield_atTop (MathFin/FixedIncome/VasicekYieldNelsonSiegel.lean), combining MathFin.vasicekYield_eq_nssSlope with the slope-factor limits tendsto_nssSlope_nhdsNE_zero and tendsto_nssSlope_atTop (MathFin/FixedIncome/NelsonSiegelSvensson.lean). SCOPE: same measure and Wiener-representation conventions as mf-vasicek-bond-price; maturities range over ℝ≥0 and the short end is the limit through T > 0."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.tendsto_vasicekYield_nhdsGT_zero and MathFin.tendsto_vasicekYield_atTop (MathFin/Models/Rates/VasicekYieldNelsonSiegel.lean), combining MathFin.vasicekYield_eq_nssSlope with the slope-factor limits tendsto_nssSlope_nhdsNE_zero and tendsto_nssSlope_atTop (MathFin/Models/Rates/NelsonSiegelSvensson.lean). SCOPE: same measure and Wiener-representation conventions as mf-vasicek-bond-price; maturities range over ℝ≥0 and the short end is the limit through T > 0."
       }
     },
     {
@@ -905,7 +905,7 @@
       "domain": "mathematical_finance",
       "description": "For the ABCD instantaneous volatility f(τ) = (a + bτ)e^{−cτ} + d with c ≠ 0, the Wiener integral ∫₀ᵀ f(T − u) dB_u of the deterministic integrand u ↦ f(T − u) against a pre-Brownian motion is centred Gaussian with variance v(T) = ∫₀ᵀ f(τ)² dτ, given by the closed-form antiderivative of the ABCD module. This is the log-forward noise of a forward rate with ABCD volatility.",
       "code": {
-        "lean": "import MathFin.Bridges.ABCDBlack76\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The ABCD stochastic integral is Gaussian with the ABCD total variance.** For `c ≠ 0`,\n`∫₀ᵀ f(T − u) dB_u ~ N(0, v(T))` with `v(T) = ∫₀ᵀ f²` in closed form. Re-exports\n`MathFin.abcdWienerIntegral_hasLaw`. -/\ntheorem abcd_wiener_integral_gaussian\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (a b c d : ℝ) (hc : c ≠ 0) (T : ℝ≥0) :\n    HasLaw (fun ω ↦ wienerIntegralLp B hB T (abcdKernelLp a b c d T) ω)\n      (gaussianReal 0 (abcdTotalVar a b c d T).toNNReal) μ :=\n  abcdWienerIntegral_hasLaw hB a b c d hc T\n"
+        "lean": "import MathFin.Models.Rates.ABCDBlack76\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The ABCD stochastic integral is Gaussian with the ABCD total variance.** For `c ≠ 0`,\n`∫₀ᵀ f(T − u) dB_u ~ N(0, v(T))` with `v(T) = ∫₀ᵀ f²` in closed form. Re-exports\n`MathFin.abcdWienerIntegral_hasLaw`. -/\ntheorem abcd_wiener_integral_gaussian\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (a b c d : ℝ) (hc : c ≠ 0) (T : ℝ≥0) :\n    HasLaw (fun ω ↦ wienerIntegralLp B hB T (abcdKernelLp a b c d T) ω)\n      (gaussianReal 0 (abcdTotalVar a b c d T).toNNReal) μ :=\n  abcdWienerIntegral_hasLaw hB a b c d hc T\n"
       },
       "metadata": {
         "reference": "R. Rebonato, Modern Pricing of Interest-Rate Derivatives: The LIBOR Market Model and Beyond (Princeton University Press, 2002), the abcd instantaneous-volatility parametrization; D. Brigo and F. Mercurio, Interest Rate Models — Theory and Practice (2nd ed., Springer, 2006), ch. 6",
@@ -920,7 +920,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.abcdWienerIntegral_hasLaw (MathFin/Bridges/ABCDBlack76.lean): MathFin.WienerIntegralL2.wienerIntegralLp_hasLaw_gaussian (MathFin/Foundations/WienerIntegralGaussian.lean) applied to the L² class of u ↦ abcdVol a b c d (T − u), with ∫_{(0,T]} f(T − u)² du = v(T) by the substitution τ = T − u and MathFin.abcdVol_sq_integral_zero (MathFin/FixedIncome/ABCDVolatility.lean). SCOPE: c ≠ 0 (the closed form divides by c)."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.abcdWienerIntegral_hasLaw (MathFin/Models/Rates/ABCDBlack76.lean): MathFin.WienerIntegralL2.wienerIntegralLp_hasLaw_gaussian (MathFin/Probability/Brownian/Wiener/WienerIntegralGaussian.lean) applied to the L² class of u ↦ abcdVol a b c d (T − u), with ∫_{(0,T]} f(T − u)² du = v(T) by the substitution τ = T − u and MathFin.abcdVol_sq_integral_zero (MathFin/Models/Rates/ABCDVolatility.lean). SCOPE: c ≠ 0 (the closed form divides by c)."
       }
     },
     {
@@ -929,7 +929,7 @@
       "domain": "mathematical_finance",
       "description": "Take a driftless lognormal forward with ABCD instantaneous volatility f(T − u) at calendar time u, in solved form F_T = F₀·exp(−v(T)/2 + ∫₀ᵀ f(T − u) dB_u), with v(T) = ∫₀ᵀ f(τ)² dτ. For F₀, K, T > 0, c ≠ 0 and v(T) > 0, the e^{−rT}-discounted call E[e^{−rT}(F_T − K)⁺] equals the Black-76 price e^{−rT}(F₀Φ(d₁) − KΦ(d₂)) at the root-mean-square volatility √(v(T)/T). The forward's SDE is cited, not proved (the forward is taken in solved form), the expectation is under the measure carrying the Brownian motion (no change to the forward measure is built), and a caplet's accrual factor and payment-date discount factor are not modelled.",
       "code": {
-        "lean": "import MathFin.Bridges.ABCDBlack76\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- **A call on the ABCD forward is Black-76 at the root-mean-square volatility.** For\n`F₀, K, T > 0`, `c ≠ 0` and `v(T) > 0`, the `e^{−rT}`-discounted call on\n`F_T = F₀·exp(−v(T)/2 + ∫₀ᵀ f(T − u) dB_u)` is `e^{−rT}·(F₀Φ(d₁) − KΦ(d₂))` at `σ̄ = √(v(T)/T)`.\nRe-exports `MathFin.abcdForward_call_eq_black76`. -/\ntheorem abcd_forward_call_black76_rms_vol\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) {F₀ K : ℝ} (r a b c d : ℝ)\n    (hc : c ≠ 0) {T : ℝ≥0} (hF : 0 < F₀) (hK : 0 < K) (hT : 0 < (T : ℝ))\n    (hv : 0 < abcdTotalVar a b c d T) :\n    ∫ ω, Real.exp (-r * T) * max (abcdForward hB F₀ a b c d T ω - K) 0 ∂μ\n      = Real.exp (-r * T) * (F₀ * Phi (bsd1 F₀ K 0 (abcdRMSVol a b c d T) T)\n          - K * Phi (bsd2 F₀ K 0 (abcdRMSVol a b c d T) T)) :=\n  abcdForward_call_eq_black76 hB r a b c d hc hF hK hT hv\n"
+        "lean": "import MathFin.Models.Rates.ABCDBlack76\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- **A call on the ABCD forward is Black-76 at the root-mean-square volatility.** For\n`F₀, K, T > 0`, `c ≠ 0` and `v(T) > 0`, the `e^{−rT}`-discounted call on\n`F_T = F₀·exp(−v(T)/2 + ∫₀ᵀ f(T − u) dB_u)` is `e^{−rT}·(F₀Φ(d₁) − KΦ(d₂))` at `σ̄ = √(v(T)/T)`.\nRe-exports `MathFin.abcdForward_call_eq_black76`. -/\ntheorem abcd_forward_call_black76_rms_vol\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) {F₀ K : ℝ} (r a b c d : ℝ)\n    (hc : c ≠ 0) {T : ℝ≥0} (hF : 0 < F₀) (hK : 0 < K) (hT : 0 < (T : ℝ))\n    (hv : 0 < abcdTotalVar a b c d T) :\n    ∫ ω, Real.exp (-r * T) * max (abcdForward hB F₀ a b c d T ω - K) 0 ∂μ\n      = Real.exp (-r * T) * (F₀ * Phi (bsd1 F₀ K 0 (abcdRMSVol a b c d T) T)\n          - K * Phi (bsd2 F₀ K 0 (abcdRMSVol a b c d T) T)) :=\n  abcdForward_call_eq_black76 hB r a b c d hc hF hK hT hv\n"
       },
       "metadata": {
         "reference": "F. Black, The Pricing of Commodity Contracts, Journal of Financial Economics 3 (1976), 167–179; R. Rebonato, Modern Pricing of Interest-Rate Derivatives: The LIBOR Market Model and Beyond (Princeton University Press, 2002), caplet volatility as the root-mean-square of the instantaneous volatility",
@@ -943,7 +943,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.abcdForward_call_eq_black76 (MathFin/Bridges/ABCDBlack76.lean): the ABCD Wiener integral is N(0, v(T)) (abcdWienerIntegral_hasLaw), its standardisation is the standard normal of BSCallHyp at σ̄ = √(v(T)/T), and MathFin.black_futures_formula (MathFin/Futures/Black76.lean) prices the call. SCOPE: the forward is taken in solved form (its SDE is cited, not proved); the expectation is under the probability measure carrying the Brownian motion, read as the forward measure, with no change of measure built; discounting is the e^{−rT} factor of black_futures_formula; a caplet's accrual δ and payment-date discount factor P(0, T + δ) are not modelled."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.abcdForward_call_eq_black76 (MathFin/Models/Rates/ABCDBlack76.lean): the ABCD Wiener integral is N(0, v(T)) (abcdWienerIntegral_hasLaw), its standardisation is the standard normal of BSCallHyp at σ̄ = √(v(T)/T), and MathFin.black_futures_formula (MathFin/Models/Forwards/Black76.lean) prices the call. SCOPE: the forward is taken in solved form (its SDE is cited, not proved); the expectation is under the probability measure carrying the Brownian motion, read as the forward measure, with no change of measure built; discounting is the e^{−rT} factor of black_futures_formula; a caplet's accrual δ and payment-date discount factor P(0, T + δ) are not modelled."
       }
     },
     {
@@ -952,7 +952,7 @@
       "domain": "mathematical_finance",
       "description": "For the one-factor affine short rate dr = κ(θ − r)dt + √(α + βr) dW: if loadings A and B satisfy the Riccati equations A'(τ) = −κθB(τ) + ½αB(τ)² and B'(τ) = 1 − κB(τ) − ½βB(τ)² at τ, then u(τ, r) = exp(A(τ) − B(τ)·r) satisfies the term-structure PDE −∂_τu + κ(θ − r)∂_ru + ½(α + βr)∂²_ru − r·u = 0 at (τ, r), with τ the time to maturity. Only this direction is proved: the entry does not show that u is the bond price E[exp(−∫r)], and no solution of the Riccati system is constructed here.",
       "code": {
-        "lean": "import MathFin.FixedIncome.AffineTermStructurePDE\n\nopen MathFin\n\n/-- **The Riccati system implies the term-structure PDE** (one-factor affine models). If\n`A' = −κθB + ½αB²` and `B' = 1 − κB − ½βB²` at `τ`, then `u = exp(A − B·r)` satisfies\n`−∂_τu + κ(θ − r)∂_ru + ½(α + βr)∂²_ru − r·u = 0` at `(τ, r)`. Re-exports\n`MathFin.affineBondPrice_solves_pde`. -/\ntheorem affine_bond_price_solves_term_structure_pde {κ θ α β : ℝ} {A B : ℝ → ℝ} {τ : ℝ}\n    (hA : HasDerivAt A (-(κ * θ) * B τ + α / 2 * B τ ^ 2) τ)\n    (hB : HasDerivAt B (1 - κ * B τ - β / 2 * B τ ^ 2) τ) (r : ℝ) :\n    -deriv (fun t ↦ Real.exp (A t - B t * r)) τ\n      + κ * (θ - r) * deriv (fun x ↦ Real.exp (A τ - B τ * x)) r\n      + (α + β * r) / 2 * deriv (deriv fun x ↦ Real.exp (A τ - B τ * x)) r\n      - r * Real.exp (A τ - B τ * r) = 0 :=\n  affineBondPrice_solves_pde hA hB r\n"
+        "lean": "import MathFin.Models.Rates.AffineTermStructurePDE\n\nopen MathFin\n\n/-- **The Riccati system implies the term-structure PDE** (one-factor affine models). If\n`A' = −κθB + ½αB²` and `B' = 1 − κB − ½βB²` at `τ`, then `u = exp(A − B·r)` satisfies\n`−∂_τu + κ(θ − r)∂_ru + ½(α + βr)∂²_ru − r·u = 0` at `(τ, r)`. Re-exports\n`MathFin.affineBondPrice_solves_pde`. -/\ntheorem affine_bond_price_solves_term_structure_pde {κ θ α β : ℝ} {A B : ℝ → ℝ} {τ : ℝ}\n    (hA : HasDerivAt A (-(κ * θ) * B τ + α / 2 * B τ ^ 2) τ)\n    (hB : HasDerivAt B (1 - κ * B τ - β / 2 * B τ ^ 2) τ) (r : ℝ) :\n    -deriv (fun t ↦ Real.exp (A t - B t * r)) τ\n      + κ * (θ - r) * deriv (fun x ↦ Real.exp (A τ - B τ * x)) r\n      + (α + β * r) / 2 * deriv (deriv fun x ↦ Real.exp (A τ - B τ * x)) r\n      - r * Real.exp (A τ - B τ * r) = 0 :=\n  affineBondPrice_solves_pde hA hB r\n"
       },
       "metadata": {
         "reference": "D. Duffie and R. Kan, A Yield-Factor Model of Interest Rates, Mathematical Finance 6(4) (1996), 379–406",
@@ -963,7 +963,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.affineBondPrice_solves_pde (MathFin/FixedIncome/AffineTermStructurePDE.lean). SCOPE: the implication from the Riccati equations at τ to the pricing PDE at (τ, r), by differentiating the exponential-affine form; the Feynman–Kac identification of u with E[exp(−∫r)] is not proved here, and the entry takes the loadings' derivatives as hypotheses."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.affineBondPrice_solves_pde (MathFin/Models/Rates/AffineTermStructurePDE.lean). SCOPE: the implication from the Riccati equations at τ to the pricing PDE at (τ, r), by differentiating the exponential-affine form; the Feynman–Kac identification of u with E[exp(−∫r)] is not proved here, and the entry takes the loadings' derivatives as hypotheses."
       }
     },
     {
@@ -972,7 +972,7 @@
       "domain": "mathematical_finance",
       "description": "For the Cox–Ingersoll–Ross short rate dr = κ(θ − r)dt + σ√r dW with σ ≠ 0, the closed-form affine price u(τ, r) = exp(A(τ) − B(τ)·r), with γ = √(κ² + 2σ²), B(τ) = 2(e^{γτ} − 1)/((γ + κ)(e^{γτ} − 1) + 2γ) and A(τ) = (2κθ/σ²)·log(2γe^{(κ+γ)τ/2}/((γ + κ)(e^{γτ} − 1) + 2γ)), satisfies the CIR pricing PDE −∂_τu + κ(θ − r)∂_ru + ½σ²r∂²_ru − r·u = 0 at every (τ, r). That this closed form equals the bond price E[exp(−∫₀ᵀ r_s ds)] of the CIR process (Feynman–Kac) is not proved.",
       "code": {
-        "lean": "import MathFin.FixedIncome.AffineTermStructurePDE\n\nopen MathFin\n\n/-- **The CIR closed form solves the CIR pricing PDE.** For `σ ≠ 0`,\n`u(τ, r) = exp(cirBondA κ θ σ τ − cirBondB κ σ τ · r)` satisfies\n`−∂_τu + κ(θ − r)∂_ru + ½σ²r∂²_ru − r·u = 0`. Re-exports `MathFin.cirBondPrice_solves_pde`. -/\ntheorem cir_closed_form_bond_price_solves_pde (κ θ : ℝ) {σ : ℝ} (hσ : σ ≠ 0) (τ r : ℝ) :\n    -deriv (fun t ↦ Real.exp (cirBondA κ θ σ t - cirBondB κ σ t * r)) τ\n      + κ * (θ - r) * deriv (fun x ↦ Real.exp (cirBondA κ θ σ τ - cirBondB κ σ τ * x)) r\n      + σ ^ 2 * r / 2 * deriv (deriv fun x ↦ Real.exp (cirBondA κ θ σ τ - cirBondB κ σ τ * x)) r\n      - r * Real.exp (cirBondA κ θ σ τ - cirBondB κ σ τ * r) = 0 :=\n  cirBondPrice_solves_pde κ θ hσ τ r\n"
+        "lean": "import MathFin.Models.Rates.AffineTermStructurePDE\n\nopen MathFin\n\n/-- **The CIR closed form solves the CIR pricing PDE.** For `σ ≠ 0`,\n`u(τ, r) = exp(cirBondA κ θ σ τ − cirBondB κ σ τ · r)` satisfies\n`−∂_τu + κ(θ − r)∂_ru + ½σ²r∂²_ru − r·u = 0`. Re-exports `MathFin.cirBondPrice_solves_pde`. -/\ntheorem cir_closed_form_bond_price_solves_pde (κ θ : ℝ) {σ : ℝ} (hσ : σ ≠ 0) (τ r : ℝ) :\n    -deriv (fun t ↦ Real.exp (cirBondA κ θ σ t - cirBondB κ σ t * r)) τ\n      + κ * (θ - r) * deriv (fun x ↦ Real.exp (cirBondA κ θ σ τ - cirBondB κ σ τ * x)) r\n      + σ ^ 2 * r / 2 * deriv (deriv fun x ↦ Real.exp (cirBondA κ θ σ τ - cirBondB κ σ τ * x)) r\n      - r * Real.exp (cirBondA κ θ σ τ - cirBondB κ σ τ * r) = 0 :=\n  cirBondPrice_solves_pde κ θ hσ τ r\n"
       },
       "metadata": {
         "reference": "J. C. Cox, J. E. Ingersoll and S. A. Ross, A Theory of the Term Structure of Interest Rates, Econometrica 53(2) (1985), 385–407; D. Brigo and F. Mercurio, Interest Rate Models — Theory and Practice (2nd ed., Springer, 2006), §3.2.3",
@@ -987,7 +987,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.cirBondPrice_solves_pde (MathFin/FixedIncome/AffineTermStructurePDE.lean): MathFin.affineBondPrice_solves_pde at (α, β) = (0, σ²), fed by MathFin.hasDerivAt_cirBondA and MathFin.hasDerivAt_cirBondB (MathFin/FixedIncome/CIRRiccati.lean). SCOPE: the closed form solves the PDE; the CIR process and the identification of the closed form with E[exp(−∫r)] are not formalized; σ ≠ 0 because A divides by σ²."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.cirBondPrice_solves_pde (MathFin/Models/Rates/AffineTermStructurePDE.lean): MathFin.affineBondPrice_solves_pde at (α, β) = (0, σ²), fed by MathFin.hasDerivAt_cirBondA and MathFin.hasDerivAt_cirBondB (MathFin/Models/Rates/CIRRiccati.lean). SCOPE: the closed form solves the PDE; the CIR process and the identification of the closed form with E[exp(−∫r)] are not formalized; σ ≠ 0 because A divides by σ²."
       }
     },
     {
@@ -996,7 +996,7 @@
       "domain": "mathematical_finance",
       "description": "For the Vasicek short rate with κ > 0, the bond price E[exp(−∫₀ᵀ r_s ds)] (short rate started at r₀, integrated rate in its Wiener representation, expectation under the measure carrying the Brownian motion) equals the affine form A(T)·exp(−B(T)·r₀), and that affine form satisfies the Vasicek pricing PDE −∂_τu + κ(θ − r)∂_ru + ½σ²∂²_ru − r·u = 0 at (τ, r) = (T, r₀). The PDE is checked on the closed form; it is not derived from the process by Itô's formula.",
       "code": {
-        "lean": "import MathFin.FixedIncome.AffineTermStructurePDE\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- **The Vasicek bond price solves the Vasicek pricing PDE.** For `κ > 0`, the bond price is\nthe affine form `A(T)·exp(−B(T)·r₀)`, and that form satisfies\n`−∂_τu + κ(θ − r)∂_ru + ½σ²∂²_ru − r·u = 0` at `(T, r₀)`. Re-exports\n`MathFin.vasicekBondPrice_affine` and `MathFin.vasicekBondPrice_solves_pde`. -/\ntheorem vasicek_bond_price_solves_pde\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ)\n    (T : ℝ≥0) :\n    ∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω)) ∂μ\n        = vasicekBondA θ σ κ T * Real.exp (-(vasicekBondB κ T * r₀)) ∧\n      -deriv (fun t ↦ vasicekBondA θ σ κ t * Real.exp (-(vasicekBondB κ t * r₀))) T\n        + κ * (θ - r₀)\n          * deriv (fun x ↦ vasicekBondA θ σ κ T * Real.exp (-(vasicekBondB κ T * x))) r₀\n        + σ ^ 2 / 2\n          * deriv (deriv fun x ↦ vasicekBondA θ σ κ T * Real.exp (-(vasicekBondB κ T * x))) r₀\n        - r₀ * (vasicekBondA θ σ κ T * Real.exp (-(vasicekBondB κ T * r₀))) = 0 :=\n  ⟨vasicekBondPrice_affine hB r₀ θ σ hκ T, vasicekBondPrice_solves_pde θ σ hκ.ne' T r₀⟩\n"
+        "lean": "import MathFin.Models.Rates.AffineTermStructurePDE\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- **The Vasicek bond price solves the Vasicek pricing PDE.** For `κ > 0`, the bond price is\nthe affine form `A(T)·exp(−B(T)·r₀)`, and that form satisfies\n`−∂_τu + κ(θ − r)∂_ru + ½σ²∂²_ru − r·u = 0` at `(T, r₀)`. Re-exports\n`MathFin.vasicekBondPrice_affine` and `MathFin.vasicekBondPrice_solves_pde`. -/\ntheorem vasicek_bond_price_solves_pde\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ)\n    (T : ℝ≥0) :\n    ∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω)) ∂μ\n        = vasicekBondA θ σ κ T * Real.exp (-(vasicekBondB κ T * r₀)) ∧\n      -deriv (fun t ↦ vasicekBondA θ σ κ t * Real.exp (-(vasicekBondB κ t * r₀))) T\n        + κ * (θ - r₀)\n          * deriv (fun x ↦ vasicekBondA θ σ κ T * Real.exp (-(vasicekBondB κ T * x))) r₀\n        + σ ^ 2 / 2\n          * deriv (deriv fun x ↦ vasicekBondA θ σ κ T * Real.exp (-(vasicekBondB κ T * x))) r₀\n        - r₀ * (vasicekBondA θ σ κ T * Real.exp (-(vasicekBondB κ T * r₀))) = 0 :=\n  ⟨vasicekBondPrice_affine hB r₀ θ σ hκ T, vasicekBondPrice_solves_pde θ σ hκ.ne' T r₀⟩\n"
       },
       "metadata": {
         "reference": "O. Vasicek, An Equilibrium Characterization of the Term Structure, Journal of Financial Economics 5 (1977), 177–188; D. Duffie and R. Kan, A Yield-Factor Model of Interest Rates, Mathematical Finance 6(4) (1996), 379–406",
@@ -1010,7 +1010,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.vasicekBondPrice_affine (MathFin/FixedIncome/VasicekBondPrice.lean) and MathFin.vasicekBondPrice_solves_pde (MathFin/FixedIncome/AffineTermStructurePDE.lean), the latter being MathFin.affineBondPrice_solves_pde at (α, β) = (σ², 0) with hasDerivAt_vasicekBondB (B' = 1 − κB), hasDerivAt_vasicekBondV (V' = B²) and hasDerivAt_log_vasicekBondA. SCOPE: the expectation is under the probability measure carrying the Brownian motion, with the integrated rate in its Wiener representation (as in mf-vasicek-bond-price); the PDE is verified for the closed form, which the first conjunct identifies with the expectation at (T, r₀). The PDE is not derived from the process by Itô's formula."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.vasicekBondPrice_affine (MathFin/Models/Rates/VasicekBondPrice.lean) and MathFin.vasicekBondPrice_solves_pde (MathFin/Models/Rates/AffineTermStructurePDE.lean), the latter being MathFin.affineBondPrice_solves_pde at (α, β) = (σ², 0) with hasDerivAt_vasicekBondB (B' = 1 − κB), hasDerivAt_vasicekBondV (V' = B²) and hasDerivAt_log_vasicekBondA. SCOPE: the expectation is under the probability measure carrying the Brownian motion, with the integrated rate in its Wiener representation (as in mf-vasicek-bond-price); the PDE is verified for the closed form, which the first conjunct identifies with the expectation at (T, r₀). The PDE is not derived from the process by Itô's formula."
       }
     },
     {
@@ -1019,7 +1019,7 @@
       "domain": "mathematical_finance",
       "description": "Fix a swap schedule s, accrual δ > 0, the floating-leg start value P0 and every discount factor except the one at a payment date n ∈ s, with the remaining factors summing to C > 0 and P0 + C ≥ 0. Then the par swap rate (P0 − x)/(δ·(C + x)) of the curve whose factor at n is set to x is a convex function of x on [0, ∞). This convexity is the source of the CMS convexity adjustment; the adjustment itself is not derived.",
       "code": {
-        "lean": "import MathFin.FixedIncome.CMS\n\nopen MathFin MathFin.CMS\n\n/-- **The par swap rate is convex in the final discount factor.** With every other discount\nfactor fixed (summing to `C > 0`, `P0 + C ≥ 0`) and `δ > 0`, the par rate of the curve updated\nto `x` at `n ∈ s` is convex in `x ≥ 0`. Re-exports `MathFin.CMS.parSwapRate_update_eq` and\n`MathFin.CMS.cmsCurveRate_convexOn`. -/\ntheorem par_swap_rate_convex_in_final_discount_factor {ι : Type*} [DecidableEq ι]\n    (P0 δ : ℝ) (P : ι → ℝ) (s : Finset ι) {n : ι} (hn : n ∈ s) (hδ : 0 < δ)\n    (hC : 0 < ∑ i ∈ s.erase n, P i) (hPC : 0 ≤ P0 + ∑ i ∈ s.erase n, P i) :\n    ConvexOn ℝ (Set.Ici 0) (fun x ↦\n      parSwapRate P0 (Function.update P n x n) (annuity δ (Function.update P n x) s)) := by\n  rw [show (fun x ↦ parSwapRate P0 (Function.update P n x n)\n      (annuity δ (Function.update P n x) s)) = cmsCurveRate P0 δ (∑ i ∈ s.erase n, P i) from\n    funext fun x ↦ parSwapRate_update_eq P0 δ x P s hn]\n  exact cmsCurveRate_convexOn P0 δ _ hδ hC hPC\n"
+        "lean": "import MathFin.Models.Rates.CMS\n\nopen MathFin MathFin.CMS\n\n/-- **The par swap rate is convex in the final discount factor.** With every other discount\nfactor fixed (summing to `C > 0`, `P0 + C ≥ 0`) and `δ > 0`, the par rate of the curve updated\nto `x` at `n ∈ s` is convex in `x ≥ 0`. Re-exports `MathFin.CMS.parSwapRate_update_eq` and\n`MathFin.CMS.cmsCurveRate_convexOn`. -/\ntheorem par_swap_rate_convex_in_final_discount_factor {ι : Type*} [DecidableEq ι]\n    (P0 δ : ℝ) (P : ι → ℝ) (s : Finset ι) {n : ι} (hn : n ∈ s) (hδ : 0 < δ)\n    (hC : 0 < ∑ i ∈ s.erase n, P i) (hPC : 0 ≤ P0 + ∑ i ∈ s.erase n, P i) :\n    ConvexOn ℝ (Set.Ici 0) (fun x ↦\n      parSwapRate P0 (Function.update P n x n) (annuity δ (Function.update P n x) s)) := by\n  rw [show (fun x ↦ parSwapRate P0 (Function.update P n x n)\n      (annuity δ (Function.update P n x) s)) = cmsCurveRate P0 δ (∑ i ∈ s.erase n, P i) from\n    funext fun x ↦ parSwapRate_update_eq P0 δ x P s hn]\n  exact cmsCurveRate_convexOn P0 δ _ hδ hC hPC\n"
       },
       "metadata": {
         "reference": "P. S. Hagan, Convexity Conundrums: Pricing CMS Swaps, Caps, and Floors, Wilmott Magazine (March 2003), 38–44",
@@ -1030,7 +1030,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.CMS.parSwapRate_update_eq and MathFin.CMS.cmsCurveRate_convexOn (MathFin/FixedIncome/CMS.lean). SCOPE: convexity of the par rate in one discount factor with the others fixed, on [0, ∞); the CMS convexity adjustment E^{T_p}[S_T] − S_0, which needs the change of measure to the payment-date forward measure and a curve model, is not formalized."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.CMS.parSwapRate_update_eq and MathFin.CMS.cmsCurveRate_convexOn (MathFin/Models/Rates/CMS.lean). SCOPE: convexity of the par rate in one discount factor with the others fixed, on [0, ∞); the CMS convexity adjustment E^{T_p}[S_T] − S_0, which needs the change of measure to the payment-date forward measure and a curve model, is not formalized."
       }
     },
     {
@@ -1039,7 +1039,7 @@
       "domain": "mathematical_finance",
       "description": "For δ > 0 and a strike range [L, U] with L > −C, the par-rate functional S(x) = (P0 − x)/(δ·(C + x)) in the final discount factor x is replicated on [L, U] by cash S(κ), a forward position S'(κ)·(x − κ) and static strips of puts below κ and calls above κ on x with weights S''(K) = 2(P0 + C)/(δ(C + K)³): the Carr–Madan spanning identity restricted to a compact strike range. The unbounded-strike replication and the CMS convexity adjustment are not formalized.",
       "code": {
-        "lean": "import MathFin.FixedIncome.CMS\n\nopen MathFin MathFin.CMS\n\n/-- **Compact-range static replication of the CMS par-rate functional.** On `[L, U]` with\n`L > −C`, `S(x) = S(κ) + S'(κ)(x − κ) + ∫_L^κ S''(K)(K − x)⁺ dK + ∫_κ^U S''(K)(x − K)⁺ dK`\nfor `S = cmsCurveRate P0 δ C`. Re-exports `MathFin.CMS.cmsCurveRate_spanning`. -/\ntheorem cms_par_rate_compact_spanning (P0 δ C : ℝ) (hδ : 0 < δ)\n    {L U κ S : ℝ} (hL : -C < L) (hLκ : L ≤ κ) (hκU : κ ≤ U) (hS : S ∈ Set.Icc L U) :\n    cmsCurveRate P0 δ C S = cmsCurveRate P0 δ C κ\n      + (-(P0 + C) / (δ * (C + κ) ^ 2)) * (S - κ)\n      + (∫ K in L..κ, (2 * (P0 + C) / (δ * (C + K) ^ 3)) * max (K - S) 0)\n      + (∫ K in κ..U, (2 * (P0 + C) / (δ * (C + K) ^ 3)) * max (S - K) 0) :=\n  cmsCurveRate_spanning P0 δ C hδ hL hLκ hκU hS\n"
+        "lean": "import MathFin.Models.Rates.CMS\n\nopen MathFin MathFin.CMS\n\n/-- **Compact-range static replication of the CMS par-rate functional.** On `[L, U]` with\n`L > −C`, `S(x) = S(κ) + S'(κ)(x − κ) + ∫_L^κ S''(K)(K − x)⁺ dK + ∫_κ^U S''(K)(x − K)⁺ dK`\nfor `S = cmsCurveRate P0 δ C`. Re-exports `MathFin.CMS.cmsCurveRate_spanning`. -/\ntheorem cms_par_rate_compact_spanning (P0 δ C : ℝ) (hδ : 0 < δ)\n    {L U κ S : ℝ} (hL : -C < L) (hLκ : L ≤ κ) (hκU : κ ≤ U) (hS : S ∈ Set.Icc L U) :\n    cmsCurveRate P0 δ C S = cmsCurveRate P0 δ C κ\n      + (-(P0 + C) / (δ * (C + κ) ^ 2)) * (S - κ)\n      + (∫ K in L..κ, (2 * (P0 + C) / (δ * (C + K) ^ 3)) * max (K - S) 0)\n      + (∫ K in κ..U, (2 * (P0 + C) / (δ * (C + K) ^ 3)) * max (S - K) 0) :=\n  cmsCurveRate_spanning P0 δ C hδ hL hLκ hκU hS\n"
       },
       "metadata": {
         "reference": "P. Carr and D. Madan, Towards a Theory of Volatility Trading, in R. Jarrow (ed.), Volatility (Risk Books, 1998), 417–427; P. S. Hagan, Convexity Conundrums: Pricing CMS Swaps, Caps, and Floors, Wilmott Magazine (March 2003), 38–44",
@@ -1053,7 +1053,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.CMS.cmsCurveRate_spanning (MathFin/FixedIncome/CMS.lean), an instance of MathFin.carrMadan_spanning (MathFin/Foundations/CarrMadan.lean). SCOPE: the spanning identity on a compact strike range [L, U] with L > −C, in the discount factor rather than the swap rate; the unbounded-strike limit and the CMS convexity adjustment are not formalized."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.CMS.cmsCurveRate_spanning (MathFin/Models/Rates/CMS.lean), an instance of MathFin.carrMadan_spanning (MathFin/Models/ModelFree/CarrMadan.lean). SCOPE: the spanning identity on a compact strike range [L, U] with L > −C, in the discount factor rather than the swap rate; the unbounded-strike limit and the CMS convexity adjustment are not formalized."
       }
     },
     {
@@ -1062,7 +1062,7 @@
       "domain": "mathematical_finance",
       "description": "For the Vasicek short rate r_T started at r₀ (κ > 0, in its Wiener representation) and the stationary scale s with 2κs² = σ², s ≠ 0, the scaled Hermite modes q_n(x) = He_n(x/s) of the centred rate satisfy E[q_n(r_T − θ)] = e^{−nκT}·q_n(r₀ − θ) for n = 0, 1, 2: the semigroup form of the eigenidentity L q_n = −nκ·q_n of the OU generator. Modes n ≥ 3 are not proved, and that the polynomial operator L is the generator of the Vasicek process is not proved; the decay is computed from the explicit Gaussian law.",
       "code": {
-        "lean": "import MathFin.Bridges.OUHermiteVasicek\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.OUSpectral MathFin.WienerIntegralL2\n\n/-- **The first three OU Hermite modes decay at their eigenvalues under the Vasicek law.** For\n`κ > 0`, `s ≠ 0`, `2κs² = σ²` and `n ≤ 2`, `𝔼[q_n(r_T − θ)] = e^{−nκT}·q_n(r₀ − θ)` with\n`q_n = scaledHermite s n`. Re-exports `MathFin.integral_scaledHermite_vasicekShortRate`. -/\ntheorem ou_hermite_modes_decay_vasicek\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ)\n    (T : ℝ≥0) {s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ ^ 2) {n : ℕ} (hn : n ≤ 2) :\n    ∫ ω, (scaledHermite s n).eval\n        (vasicekSDEMean r₀ θ κ T + σ * wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω - θ)\n        ∂μ\n      = Real.exp (-(n * κ * T)) * (scaledHermite s n).eval (r₀ - θ) :=\n  integral_scaledHermite_vasicekShortRate hB r₀ θ σ hκ T hs h hn\n"
+        "lean": "import MathFin.Models.Rates.OUHermiteVasicek\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.OUSpectral MathFin.WienerIntegralL2\n\n/-- **The first three OU Hermite modes decay at their eigenvalues under the Vasicek law.** For\n`κ > 0`, `s ≠ 0`, `2κs² = σ²` and `n ≤ 2`, `𝔼[q_n(r_T − θ)] = e^{−nκT}·q_n(r₀ − θ)` with\n`q_n = scaledHermite s n`. Re-exports `MathFin.integral_scaledHermite_vasicekShortRate`. -/\ntheorem ou_hermite_modes_decay_vasicek\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ)\n    (T : ℝ≥0) {s : ℝ} (hs : s ≠ 0) (h : 2 * κ * s ^ 2 = σ ^ 2) {n : ℕ} (hn : n ≤ 2) :\n    ∫ ω, (scaledHermite s n).eval\n        (vasicekSDEMean r₀ θ κ T + σ * wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω - θ)\n        ∂μ\n      = Real.exp (-(n * κ * T)) * (scaledHermite s n).eval (r₀ - θ) :=\n  integral_scaledHermite_vasicekShortRate hB r₀ θ σ hκ T hs h hn\n"
       },
       "metadata": {
         "reference": "G. A. Pavliotis, Stochastic Processes and Applications (Springer, 2014), ch. 4 (the Ornstein–Uhlenbeck process: Hermite polynomials as eigenfunctions of its generator); O. Vasicek, An Equilibrium Characterization of the Term Structure, Journal of Financial Economics 5 (1977), 177–188",
@@ -1077,7 +1077,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "reduced_core",
-        "formalization_scope": "Reduced core. Re-export of MathFin.integral_scaledHermite_vasicekShortRate (MathFin/Bridges/OUHermiteVasicek.lean), computed from MathFin.vasicekShortRate_hasLaw_gaussian (MathFin/FixedIncome/VasicekSDEGaussian.lean) and the Gaussian moments of MathFin/Foundations/GaussianMoments.lean, with the modes of MathFin/Foundations/OUSpectral.lean. SCOPE: n ≤ 2 only (the general mode needs Gaussian integration by parts or the Hermite generating function); the identification of ouGen with the generator of the Vasicek process is not formalized; the short rate starts at a deterministic r₀ and is carried in its Wiener representation."
+        "formalization_scope": "Reduced core. Re-export of MathFin.integral_scaledHermite_vasicekShortRate (MathFin/Models/Rates/OUHermiteVasicek.lean), computed from MathFin.vasicekShortRate_hasLaw_gaussian (MathFin/Models/Rates/VasicekSDEGaussian.lean) and the Gaussian moments of MathFin/Probability/Gaussian/GaussianMoments.lean, with the modes of MathFin/Probability/Brownian/SDE/OUSpectral.lean. SCOPE: n ≤ 2 only (the general mode needs Gaussian integration by parts or the Hermite generating function); the identification of ouGen with the generator of the Vasicek process is not formalized; the short rate starts at a deterministic r₀ and is carried in its Wiener representation."
       }
     },
     {
@@ -1086,7 +1086,7 @@
       "domain": "mathematical_finance",
       "description": "For a pre-Brownian motion B under a probability measure μ, a horizon T, a deterministic kernel f ∈ L²((0,T]) and constants m, c: E[exp(−(m + c·∫₀ᵀ f dB))] = exp(−m + c²·∫₀ᵀ f²/2), where ∫₀ᵀ f dB is the library's Wiener integral (the L²-isometric extension of the step-function integral). The Vasicek, Hull–White and two-piece GSR zero-coupon bond prices are derived from this one lemma. A short-rate model whose integrated rate has the Wiener representation m + c·∫₀ᵀ f dB has bond price E[exp(−∫r)] = exp(−m + c²∫f²/2). The representation itself is a modelling input: for each model, that its integrated short rate has this form (the SDE solution and the time-order swap) is cited, not proved. The expectation is under the measure that carries B; no change of measure is built here.",
       "code": {
-        "lean": "import MathFin.Foundations.WienerIntegralExpMoment\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The Gaussian bond-price lemma**: for a deterministic kernel `f ∈ L²((0,T])`,\n`𝔼[exp(−(m + c·∫₀ᵀ f dB))] = exp(−m + c²·∫₀ᵀ f²/2)`. -/\ntheorem wiener_integral_bond_lemma\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (T : ℝ≥0) (m c : ℝ) (f : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ)))) :\n    ∫ ω, Real.exp (-(m + c * wienerIntegralLp B hB T f ω)) ∂μ\n      = Real.exp (-m + c ^ 2 * (∫ s in Set.Ioc (0 : ℝ) (T : ℝ), f s ^ 2) / 2) :=\n  integral_exp_neg_add_mul_wienerIntegralLp hB T m c f\n"
+        "lean": "import MathFin.Probability.Brownian.Wiener.WienerIntegralExpMoment\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The Gaussian bond-price lemma**: for a deterministic kernel `f ∈ L²((0,T])`,\n`𝔼[exp(−(m + c·∫₀ᵀ f dB))] = exp(−m + c²·∫₀ᵀ f²/2)`. -/\ntheorem wiener_integral_bond_lemma\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (T : ℝ≥0) (m c : ℝ) (f : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ)))) :\n    ∫ ω, Real.exp (-(m + c * wienerIntegralLp B hB T f ω)) ∂μ\n      = Real.exp (-m + c ^ 2 * (∫ s in Set.Ioc (0 : ℝ) (T : ℝ), f s ^ 2) / 2) :=\n  integral_exp_neg_add_mul_wienerIntegralLp hB T m c f\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1103,7 +1103,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.WienerIntegralL2.integral_exp_neg_add_mul_wienerIntegralLp (MathFin/Foundations/WienerIntegralExpMoment.lean). SCOPE: the exponential moment of m + c·W(f) for the Wiener integral W of a deterministic L² kernel, from its Gaussian law N(0, ∫f²) (wienerIntegralLp_map_eq_gaussianReal) and the Gaussian MGF. Hypotheses: IsPreBrownianReal B μ, μ a probability measure. It is the shared step of vasicekBondPrice_eq, HullWhite.bondPrice_eq and gsrBondPrice_eq; for those models the Wiener representation of the integrated short rate (SDE solution, time-order swap) is a cited modelling input, not proved."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.WienerIntegralL2.integral_exp_neg_add_mul_wienerIntegralLp (MathFin/Probability/Brownian/Wiener/WienerIntegralExpMoment.lean). SCOPE: the exponential moment of m + c·W(f) for the Wiener integral W of a deterministic L² kernel, from its Gaussian law N(0, ∫f²) (wienerIntegralLp_map_eq_gaussianReal) and the Gaussian MGF. Hypotheses: IsPreBrownianReal B μ, μ a probability measure. It is the shared step of vasicekBondPrice_eq, HullWhite.bondPrice_eq and gsrBondPrice_eq; for those models the Wiener representation of the integrated short rate (SDE solution, time-order swap) is a cited modelling input, not proved."
       }
     },
     {
@@ -1112,7 +1112,7 @@
       "domain": "mathematical_finance",
       "description": "The Gaussian short-rate (GSR) model with constant mean reversion κ > 0, constant level θ and a two-piece volatility: σ₁ on (0, T*] and σ₂ on (T*, T], one fixed breakpoint 0 ≤ T* ≤ T. The bond price E[exp(−∫₀ᵀ r_s ds)] equals exp(−M(T) + gsrBondV/2). M(T) is the Vasicek mean of the integrated rate. gsrBondV = σ₁²(F(T*) − F(0)) + σ₂²(F(T) − F(T*)), with F the antiderivative of the squared integrated kernel g(u) = (1 − e^{−κ(T−u)})/κ. Only the two-piece case is proved, not the general piecewise-constant GSR. The proof is the Wiener bond-price lemma applied to the kernel σ(u)·g(u). The short rate and its time integral are carried in their Wiener representations (integrals of deterministic kernels against the pre-Brownian driver B under μ); that they solve the short-rate SDE, and the time-order swap behind the integrated rate, are cited, not proved. The expectation is under the measure carrying B, read as the pricing measure.",
       "code": {
-        "lean": "import MathFin.FixedIncome.GSRPiecewiseVol\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **GSR bond price, two-piece volatility**: `𝔼[exp(−∫₀ᵀ r_s ds)] = exp(−M(T) + gsrBondV/2)`. -/\ntheorem gsr_two_piece_bond_price\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (r₀ θ σ1 σ2 : ℝ) {κ : ℝ} (hκ : 0 < κ) (Tstar T : ℝ≥0) (hTstarT : (Tstar : ℝ) ≤ (T : ℝ)) :\n    ∫ ω, Real.exp (-(gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar T ω)) ∂μ\n      = Real.exp (-(vasicekIntegratedMean r₀ θ κ (T : ℝ))\n          + gsrBondV κ σ1 σ2 (Tstar : ℝ) (T : ℝ) / 2) :=\n  gsrBondPrice_eq hB r₀ θ σ1 σ2 hκ Tstar T hTstarT\n"
+        "lean": "import MathFin.Models.Rates.GSRPiecewiseVol\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **GSR bond price, two-piece volatility**: `𝔼[exp(−∫₀ᵀ r_s ds)] = exp(−M(T) + gsrBondV/2)`. -/\ntheorem gsr_two_piece_bond_price\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (r₀ θ σ1 σ2 : ℝ) {κ : ℝ} (hκ : 0 < κ) (Tstar T : ℝ≥0) (hTstarT : (Tstar : ℝ) ≤ (T : ℝ)) :\n    ∫ ω, Real.exp (-(gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar T ω)) ∂μ\n      = Real.exp (-(vasicekIntegratedMean r₀ θ κ (T : ℝ))\n          + gsrBondV κ σ1 σ2 (Tstar : ℝ) (T : ℝ) / 2) :=\n  gsrBondPrice_eq hB r₀ θ σ1 σ2 hκ Tstar T hTstarT\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1129,7 +1129,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.gsrBondPrice_eq (MathFin/FixedIncome/GSRPiecewiseVol.lean). SCOPE: two volatility pieces with one breakpoint, constant κ and θ; the general finitely-many-pieces GSR is not formalized. The integrated rate is defined by its Wiener representation (gsrIntegratedRate); that it integrates the GSR SDE solution is cited, not proved. The same module proves that with σ₁ = σ₂ = σ the GSR integrated rate is a.s. the Vasicek integrated rate (gsrIntegratedRate_self_ae) and gsrBondV = σ²·vasicekBondV (gsrBondV_self)."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.gsrBondPrice_eq (MathFin/Models/Rates/GSRPiecewiseVol.lean). SCOPE: two volatility pieces with one breakpoint, constant κ and θ; the general finitely-many-pieces GSR is not formalized. The integrated rate is defined by its Wiener representation (gsrIntegratedRate); that it integrates the GSR SDE solution is cited, not proved. The same module proves that with σ₁ = σ₂ = σ the GSR integrated rate is a.s. the Vasicek integrated rate (gsrIntegratedRate_self_ae) and gsrBondV = σ²·vasicekBondV (gsrBondV_self)."
       }
     },
     {
@@ -1138,7 +1138,7 @@
       "domain": "mathematical_finance",
       "description": "Hull–White model dr = (θ(t) − κr)dt + σdB, κ > 0, with the calibrated forcing θ(t) = ∂_t f(0,t) + κ f(0,t) + (σ²/2κ)(1 − e^{−2κt}) for a C¹ initial forward curve f(0,·), and the short rate started at f(0,0). Then the model bond price E[exp(−∫₀ᵀ r_s ds)] equals exp(−∫₀ᵀ f(0,s) ds), so the model reprices the market discount curve read off the forwards. The proof combines the Wiener bond-price lemma (bond price exp(−∫α + σ²V/2)) with the calibrated mean ∫α = ∫f(0,·) + σ²V/2. The short rate and its time integral are carried in their Wiener representations (integrals of deterministic kernels against the pre-Brownian driver B under μ); that they solve the short-rate SDE, and the time-order swap behind the integrated rate, are cited, not proved. The expectation is under the measure carrying B, read as the pricing measure. Uniqueness of the calibrating θ is not proved.",
       "code": {
-        "lean": "import MathFin.FixedIncome.HullWhiteCalibration\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **Hull–White repricing**: with the calibrated `θ` and `r₀ = f(0,0)`,\n`𝔼[exp(−∫₀ᵀ r_s ds)] = exp(−∫₀ᵀ f(0,s) ds)`. -/\ntheorem hull_white_reprices_curve\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ σ : ℝ) (hκ : 0 < κ) (T : ℝ≥0) :\n    ∫ ω, Real.exp (-(HullWhite.bondRate hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ T ω)) ∂μ\n      = Real.exp (-(∫ s in (0 : ℝ)..(T : ℝ), f0 s)) :=\n  HullWhite.reprices_curve hB f0 hf0 κ σ hκ T\n"
+        "lean": "import MathFin.Models.Rates.HullWhiteCalibration\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **Hull–White repricing**: with the calibrated `θ` and `r₀ = f(0,0)`,\n`𝔼[exp(−∫₀ᵀ r_s ds)] = exp(−∫₀ᵀ f(0,s) ds)`. -/\ntheorem hull_white_reprices_curve\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ σ : ℝ) (hκ : 0 < κ) (T : ℝ≥0) :\n    ∫ ω, Real.exp (-(HullWhite.bondRate hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ T ω)) ∂μ\n      = Real.exp (-(∫ s in (0 : ℝ)..(T : ℝ), f0 s)) :=\n  HullWhite.reprices_curve hB f0 hf0 κ σ hκ T\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1154,7 +1154,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.HullWhite.reprices_curve (MathFin/FixedIncome/HullWhiteCalibration.lean). SCOPE: time-0 bond prices only (P(t,T) for t > 0 is mf-hullwhite-bond-price-at-t, which this entry does not use); f0 ∈ C¹, κ > 0, r₀ = f(0,0). The short rate and its integral are Wiener representations (integratedRate, bondRate); that they solve the HW SDE and the time-order swap are cited, not proved. The bond price is the Wiener bond-price lemma (integral_exp_neg_add_mul_wienerIntegralLp); the θ-formula is shown sufficient for repricing, not unique."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.HullWhite.reprices_curve (MathFin/Models/Rates/HullWhiteCalibration.lean). SCOPE: time-0 bond prices only (P(t,T) for t > 0 is mf-hullwhite-bond-price-at-t, which this entry does not use); f0 ∈ C¹, κ > 0, r₀ = f(0,0). The short rate and its integral are Wiener representations (integratedRate, bondRate); that they solve the HW SDE and the time-order swap are cited, not proved. The bond price is the Wiener bond-price lemma (integral_exp_neg_add_mul_wienerIntegralLp); the θ-formula is shown sufficient for repricing, not unique."
       }
     },
     {
@@ -1163,7 +1163,7 @@
       "domain": "mathematical_finance",
       "description": "Vasicek short rate with κ > 0 and a constant market price of risk λ. Under the Girsanov measure Q_λ = μ.withDensity(exp(−λB_T − λ²T/2)), the terminal short rate r_T = r₀e^{−κT} + θ(1 − e^{−κT}) + σ∫₀ᵀ e^{−κ(T−s)} dB_s has the Gaussian law N(mean_θ − λσ·B(T), σ²(1 − e^{−2κT})/(2κ)), with B(T) = (1 − e^{−κT})/κ. This is the law of the Vasicek short rate at the risk-adjusted level θ − λσ/κ. Q_λ is the measure the library builds: a probability measure (isProbabilityMeasure_withDensity_girsanov) under which, with a filtration, B_t + λt has, on [0, T], the increments of a Brownian motion (Btheta_isQBrownianMotion). The proof uses the Cameron–Martin shift of Wiener integrals under Q_λ (mean −λ∫f, variance unchanged); no joint law of (B_T, ∫e^{−κ(T−s)}dB_s) is needed. The short rate and its time integral are carried in their Wiener representations (integrals of deterministic kernels against the pre-Brownian driver B under μ); that they solve the short-rate SDE, and the time-order swap behind the integrated rate, are cited, not proved.",
       "code": {
-        "lean": "import MathFin.FixedIncome.VasicekMarketPriceOfRisk\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **Vasicek `r_T` under the Girsanov measure**: `r_T ~ N(mean_θ − λσ·B(T), var)` under\n`Q_λ = μ.withDensity(exp(−λB_T − λ²T/2))`. -/\ntheorem vasicek_short_rate_law_girsanov\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (r₀ θ σ lam : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :\n    HasLaw (fun ω ↦ vasicekSDEMean r₀ θ κ T\n        + σ * wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω)\n      (gaussianReal (vasicekSDEMean r₀ θ κ T - lam * σ * vasicekBondB κ T)\n        (vasicekSDEVariance σ κ T).toNNReal)\n      (μ.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-lam * B T ω - lam ^ 2 * (T : ℝ) / 2))) :=\n  vasicekShortRate_hasLaw_girsanov hB r₀ θ σ lam hκ T\n"
+        "lean": "import MathFin.Models.Rates.VasicekMarketPriceOfRisk\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **Vasicek `r_T` under the Girsanov measure**: `r_T ~ N(mean_θ − λσ·B(T), var)` under\n`Q_λ = μ.withDensity(exp(−λB_T − λ²T/2))`. -/\ntheorem vasicek_short_rate_law_girsanov\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (r₀ θ σ lam : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :\n    HasLaw (fun ω ↦ vasicekSDEMean r₀ θ κ T\n        + σ * wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω)\n      (gaussianReal (vasicekSDEMean r₀ θ κ T - lam * σ * vasicekBondB κ T)\n        (vasicekSDEVariance σ κ T).toNNReal)\n      (μ.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-lam * B T ω - lam ^ 2 * (T : ℝ) / 2))) :=\n  vasicekShortRate_hasLaw_girsanov hB r₀ θ σ lam hκ T\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1179,7 +1179,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.vasicekShortRate_hasLaw_girsanov (MathFin/FixedIncome/VasicekMarketPriceOfRisk.lean), from the Cameron–Martin shift MathFin.WienerIntegralL2.wienerIntegralLp_hasLaw_girsanov (MathFin/Foundations/WienerIntegralGirsanov.lean). SCOPE: constant λ; terminal law only. The short rate is its Wiener representation; that it solves the Vasicek SDE is cited, not proved. Hypothesis: IsPreBrownianReal B μ (no filtration needed for the law)."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.vasicekShortRate_hasLaw_girsanov (MathFin/Models/Rates/VasicekMarketPriceOfRisk.lean), from the Cameron–Martin shift MathFin.WienerIntegralL2.wienerIntegralLp_hasLaw_girsanov (MathFin/Probability/Brownian/Girsanov/WienerIntegralGirsanov.lean). SCOPE: constant λ; terminal law only. The short rate is its Wiener representation; that it solves the Vasicek SDE is cited, not proved. Hypothesis: IsPreBrownianReal B μ (no filtration needed for the law)."
       }
     },
     {
@@ -1188,7 +1188,7 @@
       "domain": "mathematical_finance",
       "description": "Vasicek model with κ > 0 and a constant market price of risk λ. Under the Girsanov measure Q_λ = μ.withDensity(exp(−λB_T − λ²T/2)), the zero-coupon bond price E_{Q_λ}[exp(−∫₀ᵀ r_s ds)] equals the Vasicek bond formula E_μ[exp(−∫₀ᵀ r_s ds)] evaluated at the risk-adjusted level θ − λσ/κ, i.e. exp(−r₀B(T) − (θ − λσ/κ)(T − B(T)) + σ²V(T)/2). Under Q_λ the Wiener integral of the integrated kernel g is shifted by −λ∫₀ᵀ g = −λ(T − B(T))/κ, so σ∫₀ᵀ g dB shifts by −λσ(T − B(T))/κ, exactly the change of the integrated mean when θ drops by λσ/κ. The short rate and its time integral are carried in their Wiener representations (integrals of deterministic kernels against the pre-Brownian driver B under μ); that they solve the short-rate SDE, and the time-order swap behind the integrated rate, are cited, not proved.",
       "code": {
-        "lean": "import MathFin.FixedIncome.VasicekMarketPriceOfRisk\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The Vasicek bond under the Girsanov measure** is the Vasicek bond at level `θ − λσ/κ`. -/\ntheorem vasicek_bond_price_girsanov\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (r₀ θ σ lam : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :\n    ∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω))\n        ∂(μ.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-lam * B T ω - lam ^ 2 * (T : ℝ) / 2)))\n      = ∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ (θ - lam * σ / κ) σ hκ T ω)) ∂μ :=\n  vasicekBondPrice_girsanov hB r₀ θ σ lam hκ T\n"
+        "lean": "import MathFin.Models.Rates.VasicekMarketPriceOfRisk\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The Vasicek bond under the Girsanov measure** is the Vasicek bond at level `θ − λσ/κ`. -/\ntheorem vasicek_bond_price_girsanov\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (r₀ θ σ lam : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :\n    ∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω))\n        ∂(μ.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-lam * B T ω - lam ^ 2 * (T : ℝ) / 2)))\n      = ∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ (θ - lam * σ / κ) σ hκ T ω)) ∂μ :=\n  vasicekBondPrice_girsanov hB r₀ θ σ lam hκ T\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1204,7 +1204,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.vasicekBondPrice_girsanov (MathFin/FixedIncome/VasicekMarketPriceOfRisk.lean); the closed form of the right side is vasicekBondPrice_eq. SCOPE: constant λ, time-0 bond price. The integrated rate is its Wiener representation (vasicekIntegratedRate); the SDE solution and the time-order swap are cited, not proved."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.vasicekBondPrice_girsanov (MathFin/Models/Rates/VasicekMarketPriceOfRisk.lean); the closed form of the right side is vasicekBondPrice_eq. SCOPE: constant λ, time-0 bond price. The integrated rate is its Wiener representation (vasicekIntegratedRate); the SDE solution and the time-order swap are cited, not proved."
       }
     },
     {
@@ -1213,7 +1213,7 @@
       "domain": "mathematical_finance",
       "description": "Hull–White short rate r_S with κ > 0 and any deterministic forcing θ. Its mean under the measure μ carrying the driver, minus its mean under the S-forward measure Q^S, equals σ²B(S)²/2 = (σ²/2κ²)(1 − e^{−κS})². Q^S is the numéraire measure of the S-bond against the bank account exp(∫₀ˢ r), normalised by the bond price. Under Q^S, r_S ~ N(α(S) − σ²B(S)²/2, var): the covariance Cov(r_S, ∫₀ˢ r) = σ²B(S)²/2 is the L² inner product of the two Wiener kernels. Reading E_μ[r_S] as the futures rate and E^{Q^S}[r_S] as the forward rate of the instantaneous short rate is the textbook identification. The statement is about the short rate at S, not about a futures contract on a term rate (e.g. Ho–Lee's ½σ²T₁T₂ for a forward period is not formalized). The short rate and its time integral are carried in their Wiener representations (integrals of deterministic kernels against the pre-Brownian driver B under μ); that they solve the short-rate SDE, and the time-order swap behind the integrated rate, are cited, not proved.",
       "code": {
-        "lean": "import MathFin.FixedIncome.TimingAdjustment\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The futures–forward gap of the Hull–White short rate**:\n`𝔼[r_S] − 𝔼^{Q^S}[r_S] = σ²B(S)²/2`. -/\ntheorem hull_white_futures_forward_gap\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (θ : ℝ → ℝ) (κ σ r₀ : ℝ) (hκ : 0 < κ) (S : ℝ≥0) :\n    ∫ ω, HullWhite.integratedRate hB θ κ σ r₀ hκ S ω ∂μ\n        - ∫ ω, HullWhite.integratedRate hB θ κ σ r₀ hκ S ω\n            ∂(forwardMeasure μ fun ω ↦ Real.exp (HullWhite.bondRate hB θ κ σ r₀ hκ S ω))\n      = σ ^ 2 * vasicekBondB κ S ^ 2 / 2 :=\n  HullWhite.integral_shortRate_sub_forwardMeasure hB θ κ σ r₀ hκ S\n"
+        "lean": "import MathFin.Models.Rates.TimingAdjustment\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The futures–forward gap of the Hull–White short rate**:\n`𝔼[r_S] − 𝔼^{Q^S}[r_S] = σ²B(S)²/2`. -/\ntheorem hull_white_futures_forward_gap\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (θ : ℝ → ℝ) (κ σ r₀ : ℝ) (hκ : 0 < κ) (S : ℝ≥0) :\n    ∫ ω, HullWhite.integratedRate hB θ κ σ r₀ hκ S ω ∂μ\n        - ∫ ω, HullWhite.integratedRate hB θ κ σ r₀ hκ S ω\n            ∂(forwardMeasure μ fun ω ↦ Real.exp (HullWhite.bondRate hB θ κ σ r₀ hκ S ω))\n      = σ ^ 2 * vasicekBondB κ S ^ 2 / 2 :=\n  HullWhite.integral_shortRate_sub_forwardMeasure hB θ κ σ r₀ hκ S\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1229,7 +1229,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.HullWhite.integral_shortRate_sub_forwardMeasure (MathFin/FixedIncome/TimingAdjustment.lean). SCOPE: the instantaneous short rate r_S; its S-forward law comes from the numéraire step futuresForwardBasis_of_integral_mul_exp_neg with the Wiener covariance identity integral_exp_mul_exp_neg_wienerIntegralLp. Term-rate futures and daily margining are not modelled; the futures/forward-rate readings of the two expectations are textbook identifications. The short rate and its integral are Wiener representations; the SDE solution and the time-order swap are cited, not proved."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.HullWhite.integral_shortRate_sub_forwardMeasure (MathFin/Models/Rates/TimingAdjustment.lean). SCOPE: the instantaneous short rate r_S; its S-forward law comes from the numéraire step futuresForwardBasis_of_integral_mul_exp_neg with the Wiener covariance identity integral_exp_mul_exp_neg_wienerIntegralLp. Term-rate futures and daily margining are not modelled; the futures/forward-rate readings of the two expectations are textbook identifications. The short rate and its integral are Wiener representations; the SDE solution and the time-order swap are cited, not proved."
       }
     },
     {
@@ -1238,7 +1238,7 @@
       "domain": "mathematical_finance",
       "description": "Hull–White model calibrated to a C¹ initial forward curve f(0,·) (calibrated forcing θ, short rate started at f(0,0), κ > 0). Under the S-forward measure Q^S, the numéraire measure of the S-bond against the bank account exp(∫₀ˢ r), the expected short rate at S is the initial forward rate: E^{Q^S}[r_S] = f(0, S). The calibrated mean is f(0,S) + σ²B(S)²/2, and the change to Q^S removes exactly σ²B(S)²/2. The short rate and its time integral are carried in their Wiener representations (integrals of deterministic kernels against the pre-Brownian driver B under μ); that they solve the short-rate SDE, and the time-order swap behind the integrated rate, are cited, not proved.",
       "code": {
-        "lean": "import MathFin.FixedIncome.TimingAdjustment\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The forward curve is the `S`-forward mean of the calibrated Hull–White short rate**. -/\ntheorem hull_white_forward_measure_short_rate_mean\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ σ : ℝ) (hκ : 0 < κ) (S : ℝ≥0) :\n    ∫ ω, HullWhite.integratedRate hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S ω\n        ∂(forwardMeasure μ fun ω ↦ Real.exp\n          (HullWhite.bondRate hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S ω))\n      = f0 S :=\n  HullWhite.forwardMeasure_shortRate_mean_eq_forwardCurve hB f0 hf0 κ σ hκ S\n"
+        "lean": "import MathFin.Models.Rates.TimingAdjustment\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The forward curve is the `S`-forward mean of the calibrated Hull–White short rate**. -/\ntheorem hull_white_forward_measure_short_rate_mean\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ σ : ℝ) (hκ : 0 < κ) (S : ℝ≥0) :\n    ∫ ω, HullWhite.integratedRate hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S ω\n        ∂(forwardMeasure μ fun ω ↦ Real.exp\n          (HullWhite.bondRate hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S ω))\n      = f0 S :=\n  HullWhite.forwardMeasure_shortRate_mean_eq_forwardCurve hB f0 hf0 κ σ hκ S\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1254,7 +1254,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.HullWhite.forwardMeasure_shortRate_mean_eq_forwardCurve (MathFin/FixedIncome/TimingAdjustment.lean). SCOPE: f0 ∈ C¹, κ > 0, r₀ = f(0,0), the calibrated θ of HullWhite.theta. The general identity E^T[r_T] = f(0,T) for an arbitrary short-rate model is not formalized; this is the Hull–White instance. The short rate and its integral are Wiener representations; the SDE solution and the time-order swap are cited, not proved."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.HullWhite.forwardMeasure_shortRate_mean_eq_forwardCurve (MathFin/Models/Rates/TimingAdjustment.lean). SCOPE: f0 ∈ C¹, κ > 0, r₀ = f(0,0), the calibrated θ of HullWhite.theta. The general identity E^T[r_T] = f(0,T) for an arbitrary short-rate model is not formalized; this is the Hull–White instance. The short rate and its integral are Wiener representations; the SDE solution and the time-order swap are cited, not proved."
       }
     },
     {
@@ -1263,7 +1263,7 @@
       "domain": "mathematical_finance",
       "description": "In the Hull–White model calibrated to a C¹ forward curve f(0,·) (κ > 0, short rate started at f(0,0)), let V = σ²(1 − e^{−2κS})/(2κ) be the variance of the short rate r_S and D = −½b²V the bond-reconstitution deterministic used in the year-on-year inflation convexity (hwD). Then for every factor b, under the S-forward measure, E^{Q^S}[exp(D − b·(r_S − f(0,S)))] = 1. This is the normalisation that makes the reconstitution formula P(S,T) = (P(0,T)/P(0,S))·exp(D − B(S,T)(r_S − f(0,S))) consistent with the forward-measure identity E^{Q^S}[P(S,T)] = P(0,T)/P(0,S). The reconstitution formula itself is not derived. The short rate and its time integral are carried in their Wiener representations (integrals of deterministic kernels against the pre-Brownian driver B under μ); that they solve the short-rate SDE, and the time-order swap behind the integrated rate, are cited, not proved.",
       "code": {
-        "lean": "import MathFin.FixedIncome.Inflation\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The reconstitution deterministic normalises the factor under the forward measure**. -/\ntheorem hw_reconstitution_normaliser\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ σ : ℝ) (hκ : 0 < κ) (S : ℝ≥0) (b : ℝ) :\n    ∫ ω, Real.exp (Inflation.Convexity.hwD b (vasicekSDEVariance σ κ S)\n        - b * (HullWhite.integratedRate hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S ω - f0 S))\n      ∂(forwardMeasure μ fun ω ↦ Real.exp\n          (HullWhite.bondRate hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S ω)) = 1 :=\n  Inflation.Convexity.integral_exp_hwD_forwardMeasure hB f0 hf0 κ σ hκ S b\n"
+        "lean": "import MathFin.Models.Rates.Inflation\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The reconstitution deterministic normalises the factor under the forward measure**. -/\ntheorem hw_reconstitution_normaliser\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (f0 : ℝ → ℝ) (hf0 : ContDiff ℝ 1 f0) (κ σ : ℝ) (hκ : 0 < κ) (S : ℝ≥0) (b : ℝ) :\n    ∫ ω, Real.exp (Inflation.Convexity.hwD b (vasicekSDEVariance σ κ S)\n        - b * (HullWhite.integratedRate hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S ω - f0 S))\n      ∂(forwardMeasure μ fun ω ↦ Real.exp\n          (HullWhite.bondRate hB (HullWhite.theta f0 κ σ) κ σ (f0 0) hκ S ω)) = 1 :=\n  Inflation.Convexity.integral_exp_hwD_forwardMeasure hB f0 hf0 κ σ hκ S b\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1280,7 +1280,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.Inflation.Convexity.integral_exp_hwD_forwardMeasure (MathFin/FixedIncome/Inflation.lean). SCOPE: the normalisation E^{Q^S}[exp(D − b(r_S − f(0,S)))] = 1 with D = hwD b Var(r_S), under the calibrated Hull–White S-forward measure (MathFin.forwardMeasure at the bank account exp(∫₀ˢ r)). The reconstitution formula for P(S,T), and the two-curve Jarrow–Yildirim dynamics behind the YoY convexity, are not derived. The short rate is its Wiener representation; the SDE solution and the time-order swap are cited, not proved."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.Inflation.Convexity.integral_exp_hwD_forwardMeasure (MathFin/Models/Rates/Inflation.lean). SCOPE: the normalisation E^{Q^S}[exp(D − b(r_S − f(0,S)))] = 1 with D = hwD b Var(r_S), under the calibrated Hull–White S-forward measure (MathFin.forwardMeasure at the bank account exp(∫₀ˢ r)). The reconstitution formula for P(S,T), and the two-curve Jarrow–Yildirim dynamics behind the YoY convexity, are not derived. The short rate is its Wiener representation; the SDE solution and the time-order swap are cited, not proved."
       }
     },
     {
@@ -1289,7 +1289,7 @@
       "domain": "mathematical_finance",
       "description": "For a bond priced as P(k) = Σ cᵢ/(1 + kᵢ)^{tᵢ}, each cashflow i discounted at its own rate kᵢ (one node per cashflow, not a tenor-indexed curve), on a flat curve k ≡ y with 1 + y ≠ 0: the partial derivatives ∂P/∂kⱼ (the derivative along the curve that moves kⱼ alone) sum to dP/dy, the derivative of the flat-yield price Σ cᵢ/(1 + y)^{tᵢ}. Key-rate durations −(1/P)·∂P/∂kⱼ are not defined.",
       "code": {
-        "lean": "import MathFin.FixedIncome.KeyRateDuration\n\nopen MathFin\n\n/-- **Key-rate partials sum to the yield derivative** on a flat curve. -/\ntheorem key_rate_partials_sum_to_yield_derivative {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) {y : ℝ} (hy : 1 + y ≠ 0) :\n    ∑ j ∈ s, deriv (fun x ↦ bondPriceKeyRate s t c (Function.update (fun _ ↦ y) j x)) y =\n      deriv (bondPriceDisc s t c) y :=\n  sum_deriv_keyRate_eq_deriv_bondPriceDisc s t c hy\n"
+        "lean": "import MathFin.Models.Rates.KeyRateDuration\n\nopen MathFin\n\n/-- **Key-rate partials sum to the yield derivative** on a flat curve. -/\ntheorem key_rate_partials_sum_to_yield_derivative {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) {y : ℝ} (hy : 1 + y ≠ 0) :\n    ∑ j ∈ s, deriv (fun x ↦ bondPriceKeyRate s t c (Function.update (fun _ ↦ y) j x)) y =\n      deriv (bondPriceDisc s t c) y :=\n  sum_deriv_keyRate_eq_deriv_bondPriceDisc s t c hy\n"
       },
       "metadata": {
         "chapter": 14,
@@ -1301,7 +1301,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc, via sum_keyRate_partials_eq_deriv_bondPriceDisc (MathFin/FixedIncome/KeyRateDuration.lean). Each partial exists by hasDerivAt_bondPriceKeyRate_update (from hasDerivAt_coupon_term); for any such witnesses their sum is the derivative along the parallel shift k + ε·1 (hasDerivAt_bondPriceKeyRate_parallel, which holds on any curve), and on a flat curve that shift is a move of the yield, whose derivative is hasDerivAt_bondPriceDisc — uniqueness of derivatives identifies the two sums. SCOPE: one key rate per cashflow, annual compounding, integer tenors; interpolated key-rate nodes (hat-function bases) are not modelled."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc, via sum_keyRate_partials_eq_deriv_bondPriceDisc (MathFin/Models/Rates/KeyRateDuration.lean). Each partial exists by hasDerivAt_bondPriceKeyRate_update (from hasDerivAt_coupon_term); for any such witnesses their sum is the derivative along the parallel shift k + ε·1 (hasDerivAt_bondPriceKeyRate_parallel, which holds on any curve), and on a flat curve that shift is a move of the yield, whose derivative is hasDerivAt_bondPriceDisc — uniqueness of derivatives identifies the two sums. SCOPE: one key rate per cashflow, annual compounding, integer tenors; interpolated key-rate nodes (hat-function bases) are not modelled."
       }
     },
     {
@@ -1310,7 +1310,7 @@
       "domain": "mathematical_finance",
       "description": "With dirty price (1 + y)^f · Σ cᵢ/(1 + y)^{tᵢ} at elapsed fraction f of the period, accrued interest f · cⱼ on the next coupon cⱼ (j ∈ s, tⱼ = 1, all tᵢ ≥ 1) and clean price dirty − accrued, for 1 + y > 0: as f ↑ 1 the clean price tends to the clean price at the start of the next period (remaining cashflows without j, each one period closer, f = 0), for any next accruing coupon.",
       "code": {
-        "lean": "import MathFin.FixedIncome.CleanPriceAccrued\n\nopen MathFin Filter Topology\n\n/-- **The clean price is continuous across a coupon date.** -/\ntheorem clean_price_continuous_at_coupon_date {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) {y : ℝ} (hy : 0 < 1 + y) {j : ι} (hj : j ∈ s)\n    (htj : t j = 1) (ht : ∀ i ∈ s, 1 ≤ t i) (c1' : ℝ) :\n    Tendsto (fun f ↦ cleanPrice s t c y f (c j)) (𝓝[<] 1)\n      (𝓝 (cleanPrice (s.erase j) (fun i ↦ t i - 1) c y 0 c1')) :=\n  tendsto_cleanPrice_coupon_date s t c hy hj htj ht c1'\n"
+        "lean": "import MathFin.Models.Rates.CleanPriceAccrued\n\nopen MathFin Filter Topology\n\n/-- **The clean price is continuous across a coupon date.** -/\ntheorem clean_price_continuous_at_coupon_date {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) {y : ℝ} (hy : 0 < 1 + y) {j : ι} (hj : j ∈ s)\n    (htj : t j = 1) (ht : ∀ i ∈ s, 1 ≤ t i) (c1' : ℝ) :\n    Tendsto (fun f ↦ cleanPrice s t c y f (c j)) (𝓝[<] 1)\n      (𝓝 (cleanPrice (s.erase j) (fun i ↦ t i - 1) c y 0 c1')) :=\n  tendsto_cleanPrice_coupon_date s t c hy hj htj ht c1'\n"
       },
       "metadata": {
         "chapter": 14,
@@ -1325,7 +1325,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.tendsto_cleanPrice_coupon_date (MathFin/FixedIncome/CleanPriceAccrued.lean): the limit of the dirty price (tendsto_dirtyPrice_coupon_date, continuity of f ↦ (1+y)^f) minus the limit of the accrued interest. SCOPE: street-convention dirty price with flat yield, integer periods, accrued interest linear in the period fraction; day-count conventions are not modelled."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.tendsto_cleanPrice_coupon_date (MathFin/Models/Rates/CleanPriceAccrued.lean): the limit of the dirty price (tendsto_dirtyPrice_coupon_date, continuity of f ↦ (1+y)^f) minus the limit of the accrued interest. SCOPE: street-convention dirty price with flat yield, integer periods, accrued interest linear in the period fraction; day-count conventions are not modelled."
       }
     },
     {
@@ -1334,7 +1334,7 @@
       "domain": "mathematical_finance",
       "description": "With dirty price (1 + y)^f · Σ cᵢ/(1 + y)^{tᵢ} at elapsed fraction f of the period, next coupon cⱼ (j ∈ s, tⱼ = 1, all tᵢ ≥ 1) and 1 + y > 0: as f ↑ 1 the dirty price tends to the dirty price at the start of the next period (remaining cashflows without j, each one period closer, f = 0) plus cⱼ. The dirty price drops by exactly the coupon paid.",
       "code": {
-        "lean": "import MathFin.FixedIncome.CleanPriceAccrued\n\nopen MathFin Filter Topology\n\n/-- **The dirty price drops by the coupon at a coupon date.** -/\ntheorem dirty_price_drops_by_coupon {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) {y : ℝ} (hy : 0 < 1 + y) {j : ι} (hj : j ∈ s)\n    (htj : t j = 1) (ht : ∀ i ∈ s, 1 ≤ t i) :\n    Tendsto (fun f ↦ dirtyPrice s t c y f) (𝓝[<] 1)\n      (𝓝 (dirtyPrice (s.erase j) (fun i ↦ t i - 1) c y 0 + c j)) :=\n  tendsto_dirtyPrice_coupon_date s t c hy hj htj ht\n"
+        "lean": "import MathFin.Models.Rates.CleanPriceAccrued\n\nopen MathFin Filter Topology\n\n/-- **The dirty price drops by the coupon at a coupon date.** -/\ntheorem dirty_price_drops_by_coupon {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) {y : ℝ} (hy : 0 < 1 + y) {j : ι} (hj : j ∈ s)\n    (htj : t j = 1) (ht : ∀ i ∈ s, 1 ≤ t i) :\n    Tendsto (fun f ↦ dirtyPrice s t c y f) (𝓝[<] 1)\n      (𝓝 (dirtyPrice (s.erase j) (fun i ↦ t i - 1) c y 0 + c j)) :=\n  tendsto_dirtyPrice_coupon_date s t c hy hj htj ht\n"
       },
       "metadata": {
         "chapter": 14,
@@ -1349,7 +1349,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.tendsto_dirtyPrice_coupon_date (MathFin/FixedIncome/CleanPriceAccrued.lean): continuity of f ↦ (1+y)^f (Real.continuousAt_const_rpow) and the end-of-period value dirtyPrice_one_eq, which splits the coupon off a sum of bondPriceDisc terms. SCOPE: street-convention dirty price with flat yield and integer periods."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.tendsto_dirtyPrice_coupon_date (MathFin/Models/Rates/CleanPriceAccrued.lean): continuity of f ↦ (1+y)^f (Real.continuousAt_const_rpow) and the end-of-period value dirtyPrice_one_eq, which splits the coupon off a sum of bondPriceDisc terms. SCOPE: street-convention dirty price with flat yield and integer periods."
       }
     },
     {
@@ -1358,7 +1358,7 @@
       "domain": "mathematical_finance",
       "description": "In a finite-state market with state prices q at the forward-expiry date, where the zero-coupon bond to that date costs Df_fe = Σ q ≠ 0 and a coupon bond worth B in each state at expiry is priced as its pre-expiry coupons plus its expiry value, P₀ = Σ Df(t)·CF(t) + Σ q·B: the forward contract paying B − X at expiry has zero value iff X = (P₀ − Σ Df(t)·CF(t))/Df_fe.",
       "code": {
-        "lean": "import MathFin.FixedIncome.BondForward\n\nopen MathFin\n\n/-- **Bond forward price from no-arbitrage.** -/\ntheorem bond_forward_from_no_arbitrage {Ω ι : Type*} (states : Finset Ω) (q B : Ω → ℝ)\n    (s : Finset ι) (Df CF : ι → ℝ) (P0 Df_fe X : ℝ) (hDf : Df_fe ≠ 0)\n    (h_zcb : ∑ ω ∈ states, q ω = Df_fe)\n    (h_bond : P0 = ∑ t ∈ s, Df t * CF t + ∑ ω ∈ states, q ω * B ω) :\n    ∑ ω ∈ states, q ω * (B ω - X) = 0 ↔ X = bondForwardPrice s Df CF P0 Df_fe :=\n  bondForwardPrice_from_no_arbitrage states q B s Df CF P0 Df_fe X hDf h_zcb h_bond\n"
+        "lean": "import MathFin.Models.Rates.BondForward\n\nopen MathFin\n\n/-- **Bond forward price from no-arbitrage.** -/\ntheorem bond_forward_from_no_arbitrage {Ω ι : Type*} (states : Finset Ω) (q B : Ω → ℝ)\n    (s : Finset ι) (Df CF : ι → ℝ) (P0 Df_fe X : ℝ) (hDf : Df_fe ≠ 0)\n    (h_zcb : ∑ ω ∈ states, q ω = Df_fe)\n    (h_bond : P0 = ∑ t ∈ s, Df t * CF t + ∑ ω ∈ states, q ω * B ω) :\n    ∑ ω ∈ states, q ω * (B ω - X) = 0 ↔ X = bondForwardPrice s Df CF P0 Df_fe :=\n  bondForwardPrice_from_no_arbitrage states q B s Df CF P0 Df_fe X hDf h_zcb h_bond\n"
       },
       "metadata": {
         "chapter": 14,
@@ -1370,7 +1370,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.bondForwardPrice_from_no_arbitrage (MathFin/FixedIncome/BondForward.lean), which is forward_price_from_no_arbitrage (MathFin/Foundations/NoArbitrageDerivations.lean) applied with the coupon-stripped bond P₀ − Σ Df·CF as the spot. SCOPE: finite state space; the coupon dates in s are the caller's (the range (0, t_fe] is not enforced)."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.bondForwardPrice_from_no_arbitrage (MathFin/Models/Rates/BondForward.lean), which is forward_price_from_no_arbitrage (MathFin/Pricing/NoArbitrageDerivations.lean) applied with the coupon-stripped bond P₀ − Σ Df·CF as the spot. SCOPE: finite state space; the coupon dates in s are the caller's (the range (0, t_fe] is not enforced)."
       }
     },
     {
@@ -1379,7 +1379,7 @@
       "domain": "mathematical_finance",
       "description": "A loan with level payment A and period rate i = e^{rΔt} − 1, whose balance follows B_{n+1} = B_n·(1 + i) − A, and whose principal B₀ is the annuity value A_N = Σ_{k<N} A·e^{−r(k+1)Δt} of its N payments: after n ≤ N payments the balance is the annuity value of the N − n payments still to come.",
       "code": {
-        "lean": "import MathFin.FixedIncome.LoanAmortization\n\nopen MathFin\n\n/-- **The level-payment balance is the value of the remaining payments.** -/\ntheorem level_payment_balance_annuity {B0 A r Δt : ℝ} {N : ℕ}\n    (hB0 : annuityValue N A r Δt = B0) {n : ℕ} (hn : n ≤ N) :\n    levelPaymentBalance B0 A (Real.exp (r * Δt) - 1) n = annuityValue (N - n) A r Δt :=\n  levelPaymentBalance_eq_annuityValue hB0 hn\n"
+        "lean": "import MathFin.Models.Rates.LoanAmortization\n\nopen MathFin\n\n/-- **The level-payment balance is the value of the remaining payments.** -/\ntheorem level_payment_balance_annuity {B0 A r Δt : ℝ} {N : ℕ}\n    (hB0 : annuityValue N A r Δt = B0) {n : ℕ} (hn : n ≤ N) :\n    levelPaymentBalance B0 A (Real.exp (r * Δt) - 1) n = annuityValue (N - n) A r Δt :=\n  levelPaymentBalance_eq_annuityValue hB0 hn\n"
       },
       "metadata": {
         "chapter": 14,
@@ -1391,7 +1391,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.levelPaymentBalance_eq_annuityValue (MathFin/FixedIncome/LoanAmortization.lean): induction on n, unfolding levelPaymentBalance directly against the one-period annuity identity annuityValue_succ_mul_exp_sub, A_{m+1}·e^{rΔt} − A = A_m, for annuityValue (MathFin/FixedIncome/CouponBonds.lean). SCOPE: constant rate, continuously-compounded discounting matched to the period rate."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.levelPaymentBalance_eq_annuityValue (MathFin/Models/Rates/LoanAmortization.lean): induction on n, unfolding levelPaymentBalance directly against the one-period annuity identity annuityValue_succ_mul_exp_sub, A_{m+1}·e^{rΔt} − A = A_m, for annuityValue (MathFin/Models/Rates/CouponBonds.lean). SCOPE: constant rate, continuously-compounded discounting matched to the period rate."
       }
     },
     {
@@ -1400,7 +1400,7 @@
       "description": "Vasicek model with kappa > 0, the integrated short rate int_0^T r_s ds carried in its Wiener representation (vasicekIntegratedRate), the measure read as the pricing measure, and F_t the natural filtration of the driving Brownian motion (measurable sections). For t <= T, E[exp(-int_0^T r_s ds) | F_t] = exp(-int_0^t r_s ds) * A(T-t) * exp(-B(T-t) * r_t) almost surely, where r_t = vasicekSDEMean + sigma * int_0^t e^{-kappa(t-u)} dB_u is the short rate in its Wiener representation and A, B are the coefficients of the time-0 price (mf-vasicek-bond-price) at the remaining maturity T - t. Dividing by the F_t-known discount factor exp(-int_0^t r_s ds), the price at t of one unit paid at T is A(T-t) * exp(-B(T-t) * r_t); the division is the entry mf-contract-bond-price-vasicek.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.VasicekBondPriceAt\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The Vasicek bond price at time `t`**: the conditional mean of the discount factor given\nthe past is `exp(−∫₀ᵗ r)·A(T − t)·exp(−B(T − t)·r_t)`. -/\ntheorem vasicek_bond_price_cond_exp\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Measurable (B s))\n    (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) {t T : ℝ≥0} (htT : t ≤ T) :\n    μ[fun ω ↦ Real.exp (-vasicekIntegratedRate hB r₀ θ σ hκ T ω)\n        | Filtration.natural B (fun s ↦ (hBm s).stronglyMeasurable) t]\n      =ᵐ[μ] fun ω ↦ Real.exp (-vasicekIntegratedRate hB r₀ θ σ hκ t ω)\n        * (vasicekBondA θ σ κ ((T - t : ℝ≥0) : ℝ)\n          * Real.exp (-(vasicekBondB κ ((T - t : ℝ≥0) : ℝ)\n            * (vasicekSDEMean r₀ θ κ t + vasicekDiffusionTerm hB κ σ hκ.le t ω)))) :=\n  MathFin.vasicekBondPrice_condExp hB hBm r₀ θ σ hκ htT\n"
+        "lean": "import MathFin.Models.Rates.VasicekBondPriceAt\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The Vasicek bond price at time `t`**: the conditional mean of the discount factor given\nthe past is `exp(−∫₀ᵗ r)·A(T − t)·exp(−B(T − t)·r_t)`. -/\ntheorem vasicek_bond_price_cond_exp\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Measurable (B s))\n    (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) {t T : ℝ≥0} (htT : t ≤ T) :\n    μ[fun ω ↦ Real.exp (-vasicekIntegratedRate hB r₀ θ σ hκ T ω)\n        | Filtration.natural B (fun s ↦ (hBm s).stronglyMeasurable) t]\n      =ᵐ[μ] fun ω ↦ Real.exp (-vasicekIntegratedRate hB r₀ θ σ hκ t ω)\n        * (vasicekBondA θ σ κ ((T - t : ℝ≥0) : ℝ)\n          * Real.exp (-(vasicekBondB κ ((T - t : ℝ≥0) : ℝ)\n            * (vasicekSDEMean r₀ θ κ t + vasicekDiffusionTerm hB κ σ hκ.le t ω)))) :=\n  MathFin.vasicekBondPrice_condExp hB hBm r₀ θ σ hκ htT\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1416,7 +1416,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of the statement as written. vasicekBondPrice_condExp in MathFin/FixedIncome/VasicekBondPriceAt.lean, from the conditional Laplace transform of the Wiener integral (condExp_exp_wienerIntegralLp, mf-wiener-conditional-laplace) at the integrated kernel g_T: restricted to (0,t] it is g_t + B(T-t) e^{-kappa(t-.)} (kernelRestrict_vasicekIntegratedKernelLp), so the past part of the discount depends on the past only through the Wiener integral of e^{-kappa(t-.)}, which is (r_t - mean)/sigma; the independent remainder has the exponential moments of a centred Gaussian of variance int_t^T g_T^2 = V(T-t) (integral_sq_vasicekIntegratedKernelLp_Ioc), and the mean shift is the identity M(t) - M(T) = -theta (tau - B(tau)) - B(tau) m_t (vasicekIntegratedMean_sub). SCOPE: the integrated rate and the short rate are carried in their Wiener representations (as in mf-vasicek-bond-price; that they solve the SDE and the time-order swap are cited, not proved); the measure is read as the pricing measure; the filtration is the natural one of B. Vasicek only (constant theta) here: the Hull-White bond price at t > 0 is mf-hullwhite-bond-price-at-t (the two share condExp_exp_neg_integratedRate); the two-piece GSR is mf-gsr-bond-price-at-t. Axioms-clean."
+        "formalization_scope": "Full formal proof of the statement as written. vasicekBondPrice_condExp in MathFin/Models/Rates/VasicekBondPriceAt.lean, from the conditional Laplace transform of the Wiener integral (condExp_exp_wienerIntegralLp, mf-wiener-conditional-laplace) at the integrated kernel g_T: restricted to (0,t] it is g_t + B(T-t) e^{-kappa(t-.)} (kernelRestrict_vasicekIntegratedKernelLp), so the past part of the discount depends on the past only through the Wiener integral of e^{-kappa(t-.)}, which is (r_t - mean)/sigma; the independent remainder has the exponential moments of a centred Gaussian of variance int_t^T g_T^2 = V(T-t) (integral_sq_vasicekIntegratedKernelLp_Ioc), and the mean shift is the identity M(t) - M(T) = -theta (tau - B(tau)) - B(tau) m_t (vasicekIntegratedMean_sub). SCOPE: the integrated rate and the short rate are carried in their Wiener representations (as in mf-vasicek-bond-price; that they solve the SDE and the time-order swap are cited, not proved); the measure is read as the pricing measure; the filtration is the natural one of B. Vasicek only (constant theta) here: the Hull-White bond price at t > 0 is mf-hullwhite-bond-price-at-t (the two share condExp_exp_neg_integratedRate); the two-piece GSR is mf-gsr-bond-price-at-t. Axioms-clean."
       }
     },
     {
@@ -1425,7 +1425,7 @@
       "description": "Hull-White model with continuous forcing theta and kappa > 0, the integrated short rate int_0^T r_s ds carried in its Wiener representation (HullWhite.bondRate), the measure read as the pricing measure, and F_t the natural filtration of the driving Brownian motion (measurable sections). For t <= T, E[exp(-int_0^T r_s ds) | F_t] = exp(-int_0^t r_s ds) * A_t(T-t) * exp(-B(T-t) * r_t) almost surely, where r_t = HullWhite.integratedRate is the short rate in its Wiener representation, B is the Vasicek coefficient and A_t = bondA (theta(t + .)) is the coefficient of the time-0 price (HullWhite.bondPrice_affine) of the forcing shifted to t, at the remaining maturity T - t. The division by the F_t-known discount factor is the entry mf-contract-bond-price-hullwhite.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.HullWhiteBondPriceAt\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The Hull–White bond price at time `t`**: the conditional mean of the discount factor given\nthe past is `exp(−∫₀ᵗ r)·A_t(T − t)·exp(−B(T − t)·r_t)`. -/\ntheorem hullWhite_bond_price_cond_exp\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Measurable (B s))\n    {θ : ℝ → ℝ} (hθ : Continuous θ) (κ σ r₀ : ℝ) (hκ : 0 < κ) {t T : ℝ≥0} (htT : t ≤ T) :\n    μ[fun ω ↦ Real.exp (-HullWhite.bondRate hB θ κ σ r₀ hκ T ω)\n        | Filtration.natural B (fun s ↦ (hBm s).stronglyMeasurable) t]\n      =ᵐ[μ] fun ω ↦ Real.exp (-HullWhite.bondRate hB θ κ σ r₀ hκ t ω)\n        * (HullWhite.bondA (fun s ↦ θ ((t : ℝ) + s)) σ κ ((T - t : ℝ≥0) : ℝ)\n          * Real.exp (-(vasicekBondB κ ((T - t : ℝ≥0) : ℝ)\n            * HullWhite.integratedRate hB θ κ σ r₀ hκ t ω))) :=\n  MathFin.HullWhite.bondRate_condExp hB hBm hθ κ σ r₀ hκ htT\n"
+        "lean": "import MathFin.Models.Rates.HullWhiteBondPriceAt\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The Hull–White bond price at time `t`**: the conditional mean of the discount factor given\nthe past is `exp(−∫₀ᵗ r)·A_t(T − t)·exp(−B(T − t)·r_t)`. -/\ntheorem hullWhite_bond_price_cond_exp\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Measurable (B s))\n    {θ : ℝ → ℝ} (hθ : Continuous θ) (κ σ r₀ : ℝ) (hκ : 0 < κ) {t T : ℝ≥0} (htT : t ≤ T) :\n    μ[fun ω ↦ Real.exp (-HullWhite.bondRate hB θ κ σ r₀ hκ T ω)\n        | Filtration.natural B (fun s ↦ (hBm s).stronglyMeasurable) t]\n      =ᵐ[μ] fun ω ↦ Real.exp (-HullWhite.bondRate hB θ κ σ r₀ hκ t ω)\n        * (HullWhite.bondA (fun s ↦ θ ((t : ℝ) + s)) σ κ ((T - t : ℝ≥0) : ℝ)\n          * Real.exp (-(vasicekBondB κ ((T - t : ℝ≥0) : ℝ)\n            * HullWhite.integratedRate hB θ κ σ r₀ hκ t ω))) :=\n  MathFin.HullWhite.bondRate_condExp hB hBm hθ κ σ r₀ hκ htT\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1441,7 +1441,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of the statement as written. HullWhite.bondRate_condExp in MathFin/FixedIncome/HullWhiteBondPriceAt.lean, from condExp_exp_neg_integratedRate (MathFin/FixedIncome/VasicekBondPriceAt.lean, the lift of the proof of vasicekBondPrice_condExp to the mean identity M(t) - M(T) = -c - B(T-t) m between the deterministic parts), itself the instance at the kernel sigma*g_T of condExp_exp_neg_wienerIntegralLp, the conditional Laplace transform of the Wiener integral (condExp_exp_wienerIntegralLp, mf-wiener-conditional-laplace) for a kernel that splits as f' + b*h on (0,t]. The Hull-White mean identity is HullWhite.integratedMean_sub: int_0^T alpha - int_0^t alpha = B(T-t) alpha(t) + int_t^T theta(s) B(T-s) ds, from the splitting B(T-s) = B(t-s) + e^{-kappa(t-s)} B(T-t). SCOPE: continuous forcing theta (needed for the integrated mean in B-form); the integrated rate and the short rate are carried in their Wiener representations (that they solve the SDE and the time-order swap are cited, not proved); the measure is read as the pricing measure; the filtration is the natural one of B. The two-piece GSR is mf-gsr-bond-price-at-t. Axioms-clean."
+        "formalization_scope": "Full formal proof of the statement as written. HullWhite.bondRate_condExp in MathFin/Models/Rates/HullWhiteBondPriceAt.lean, from condExp_exp_neg_integratedRate (MathFin/Models/Rates/VasicekBondPriceAt.lean, the lift of the proof of vasicekBondPrice_condExp to the mean identity M(t) - M(T) = -c - B(T-t) m between the deterministic parts), itself the instance at the kernel sigma*g_T of condExp_exp_neg_wienerIntegralLp, the conditional Laplace transform of the Wiener integral (condExp_exp_wienerIntegralLp, mf-wiener-conditional-laplace) for a kernel that splits as f' + b*h on (0,t]. The Hull-White mean identity is HullWhite.integratedMean_sub: int_0^T alpha - int_0^t alpha = B(T-t) alpha(t) + int_t^T theta(s) B(T-s) ds, from the splitting B(T-s) = B(t-s) + e^{-kappa(t-s)} B(T-t). SCOPE: continuous forcing theta (needed for the integrated mean in B-form); the integrated rate and the short rate are carried in their Wiener representations (that they solve the SDE and the time-order swap are cited, not proved); the measure is read as the pricing measure; the filtration is the natural one of B. The two-piece GSR is mf-gsr-bond-price-at-t. Axioms-clean."
       }
     },
     {
@@ -1450,7 +1450,7 @@
       "description": "Gaussian short rate with constant mean reversion kappa > 0 and level theta and a two-piece piecewise-constant volatility, sigma1 up to a breakpoint Tstar and sigma2 after it, the integrated short rate int_0^T r_s ds carried in its Wiener representation (gsrIntegratedRate), the short rate r_t in its Wiener representation (gsrShortRate), the measure read as the pricing measure, and F_t the natural filtration of the driving Brownian motion (measurable sections). For t <= T and Tstar <= T, E[exp(-int_0^T r_s ds) | F_t] = exp(-int_0^t r_s ds) * A(t,T) * exp(-B(T-t) * r_t) almost surely, where B is the Vasicek coefficient and A(t,T) = gsrBondA = exp(-theta (tau - B(tau)) + Var/2) with tau = T - t and Var = gsrBondVIoc the variance of the remainder int_t^T sigma(u) g_T(u) dB_u. A depends on t and T separately, not only on T - t.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.GSRBondPriceAt\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The GSR bond price at time `t`**: the conditional mean of the discount factor given the past\nis `exp(−∫₀ᵗ r)·A(t, T)·exp(−B(T − t)·r_t)`. -/\ntheorem gsr_bond_price_cond_exp\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Measurable (B s))\n    (r₀ θ σ1 σ2 : ℝ) {κ : ℝ} (hκ : 0 < κ) {Tstar t T : ℝ≥0} (htT : t ≤ T)\n    (hTstarT : Tstar ≤ T) :\n    μ[fun ω ↦ Real.exp (-gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar T ω)\n        | Filtration.natural B (fun s ↦ (hBm s).stronglyMeasurable) t]\n      =ᵐ[μ] fun ω ↦ Real.exp (-gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar t ω)\n        * (gsrBondA θ κ σ1 σ2 (Tstar : ℝ) t T\n          * Real.exp (-(vasicekBondB κ ((T : ℝ) - t)\n            * gsrShortRate hB r₀ θ σ1 σ2 hκ Tstar t ω))) :=\n  MathFin.gsrBondPrice_condExp hB hBm r₀ θ σ1 σ2 hκ htT hTstarT\n"
+        "lean": "import MathFin.Models.Rates.GSRBondPriceAt\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **The GSR bond price at time `t`**: the conditional mean of the discount factor given the past\nis `exp(−∫₀ᵗ r)·A(t, T)·exp(−B(T − t)·r_t)`. -/\ntheorem gsr_bond_price_cond_exp\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Measurable (B s))\n    (r₀ θ σ1 σ2 : ℝ) {κ : ℝ} (hκ : 0 < κ) {Tstar t T : ℝ≥0} (htT : t ≤ T)\n    (hTstarT : Tstar ≤ T) :\n    μ[fun ω ↦ Real.exp (-gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar T ω)\n        | Filtration.natural B (fun s ↦ (hBm s).stronglyMeasurable) t]\n      =ᵐ[μ] fun ω ↦ Real.exp (-gsrIntegratedRate hB r₀ θ σ1 σ2 hκ Tstar t ω)\n        * (gsrBondA θ κ σ1 σ2 (Tstar : ℝ) t T\n          * Real.exp (-(vasicekBondB κ ((T : ℝ) - t)\n            * gsrShortRate hB r₀ θ σ1 σ2 hκ Tstar t ω))) :=\n  MathFin.gsrBondPrice_condExp hB hBm r₀ θ σ1 σ2 hκ htT hTstarT\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1470,7 +1470,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of the statement as written. gsrBondPrice_condExp in MathFin/FixedIncome/GSRBondPriceAt.lean, the instance of condExp_exp_neg_wienerIntegralLp (MathFin/FixedIncome/VasicekBondPriceAt.lean; the conditional Laplace transform of the Wiener integral, mf-wiener-conditional-laplace, for a kernel that splits as f' + b*h on (0,t]) at the GSR kernel sigma(u) g_T(u). Its three inputs: the kernel seen from t, sigma g_T = sigma g_t + B(T-t) sigma e^{-kappa(t-.)} on (0,t] (kernelRestrict_gsrKernelLp); the variance of the remainder int_t^T (sigma g_T)^2 = gsrBondVIoc (integral_sq_gsrKernelLp_Ioc, gsrKernel_integral_sq_Ioc_eq, splitting the window at max t Tstar); and the mean identity of the Vasicek model (vasicekIntegratedMean_sub), unchanged because only the volatility is piecewise. SCOPE: two volatility pieces with a breakpoint Tstar <= T, constant mean reversion kappa > 0 and constant level theta (the time-varying-level generalization is not combined with the piecewise volatility); the integrated rate and the short rate are carried in their Wiener representations (that they solve the SDE and the time-order swap are cited, not proved); the measure is read as the pricing measure; the filtration is the natural one of B. Axioms-clean."
+        "formalization_scope": "Full formal proof of the statement as written. gsrBondPrice_condExp in MathFin/Models/Rates/GSRBondPriceAt.lean, the instance of condExp_exp_neg_wienerIntegralLp (MathFin/Models/Rates/VasicekBondPriceAt.lean; the conditional Laplace transform of the Wiener integral, mf-wiener-conditional-laplace, for a kernel that splits as f' + b*h on (0,t]) at the GSR kernel sigma(u) g_T(u). Its three inputs: the kernel seen from t, sigma g_T = sigma g_t + B(T-t) sigma e^{-kappa(t-.)} on (0,t] (kernelRestrict_gsrKernelLp); the variance of the remainder int_t^T (sigma g_T)^2 = gsrBondVIoc (integral_sq_gsrKernelLp_Ioc, gsrKernel_integral_sq_Ioc_eq, splitting the window at max t Tstar); and the mean identity of the Vasicek model (vasicekIntegratedMean_sub), unchanged because only the volatility is piecewise. SCOPE: two volatility pieces with a breakpoint Tstar <= T, constant mean reversion kappa > 0 and constant level theta (the time-varying-level generalization is not combined with the piecewise volatility); the integrated rate and the short rate are carried in their Wiener representations (that they solve the SDE and the time-order swap are cited, not proved); the measure is read as the pricing measure; the filtration is the natural one of B. Axioms-clean."
       }
     },
     {
@@ -1479,7 +1479,7 @@
       "description": "Conditional on two explicit hypotheses, fixed cash flows in an HJM model are worth the sum of P(0, t_i) c_i. For an HJM model bundle M on [0, H] over a Brownian motion B (forward rates f(t, T), drift alpha, volatility sigma, with the Ito dynamics f(t, T) = f(0, T) + int alpha + int sigma dB recorded as a field of the bundle), let D(t) = exp(-int_0^t f(s, s) ds) be its stochastic discount factor (the inverse of the bank account). Suppose (hdet) the time-0 bond curve is deterministic, M.bond 0 t_i = P(t_i) for every outcome, and (hprice) the discount factor prices each bond at its curve value, E[D(t_i)] = P(t_i), for i < n. Then the schedule paying c_i at t_i (fixedFlows t c n), valued with the stochastic discount D by Contract.valueDisc, is worth sum_i P(t_i) c_i. The pricing hypothesis hprice (the discounted bonds being martingales, which the HJM drift condition delivers) is NOT proved here; the drift condition itself and the dynamics of the bonds are not proved.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Contracts.Models.HJMBond\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.HJM\n\n/-- Fixed cash flows in an HJM model are worth `∑ P(0, tᵢ) cᵢ`, given that the discount factor\nprices each bond at its curve value. -/\ntheorem valueDisc_fixedFlows_hjm' {ι Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} {hB : IsPreBrownianReal B μ}\n    {hBmeas : ∀ t, Measurable (B t)} {H : ℝ≥0} (M : HJMModel μ hB hBmeas H)\n    (X : ι → ℝ≥0 → Ω → ℝ) (t : ℕ → ℝ≥0) (c : ℕ → ℝ) (n : ℕ) {P : ℝ≥0 → ℝ}\n    (hdet : ∀ i < n, ∀ ω, M.bond 0 (t i) ω = P (t i))\n    (hprice : ∀ i < n, ∫ ω, M.discount (t i) ω ∂μ = P (t i)) :\n    (fixedFlows t c n : Contract ι).valueDisc μ M.discount X\n      = ∑ i ∈ Finset.range n, P (t i) * c i :=\n  MathFin.Contracts.valueDisc_fixedFlows_hjm M X t c n hdet hprice\n"
+        "lean": "import MathFin.Models.Rates.HJMBond\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.HJM\n\n/-- Fixed cash flows in an HJM model are worth `∑ P(0, tᵢ) cᵢ`, given that the discount factor\nprices each bond at its curve value. -/\ntheorem valueDisc_fixedFlows_hjm' {ι Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} {hB : IsPreBrownianReal B μ}\n    {hBmeas : ∀ t, Measurable (B t)} {H : ℝ≥0} (M : HJMModel μ hB hBmeas H)\n    (X : ι → ℝ≥0 → Ω → ℝ) (t : ℕ → ℝ≥0) (c : ℕ → ℝ) (n : ℕ) {P : ℝ≥0 → ℝ}\n    (hdet : ∀ i < n, ∀ ω, M.bond 0 (t i) ω = P (t i))\n    (hprice : ∀ i < n, ∫ ω, M.discount (t i) ω ∂μ = P (t i)) :\n    (fixedFlows t c n : Contract ι).valueDisc μ M.discount X\n      = ∑ i ∈ Finset.range n, P (t i) * c i :=\n  MathFin.Contracts.valueDisc_fixedFlows_hjm M X t c n hdet hprice\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1499,7 +1499,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "reduced_core",
-        "formalization_scope": "REDUCED CORE: the valuation is conditional on hprice, the bond-pricing identity E[D(t_i)] = P(t_i) that the HJM drift condition would deliver, an explicit hypothesis of the statement not proved in this library; with it the theorem is the model-agnostic zero-curve valuation. valueDisc_fixedFlows_hjm in MathFin/Contracts/Models/HJMBond.lean: a schedule of fixed cash flows sees the model only through the zero curve E[D t_i] (valueDisc_fixedFlows_of_zeroCurve_eq), and hprice identifies it with the deterministic initial bond curve P (positive because M.bond is an exponential, M.bond_pos). The HJMModel bundle (MathFin/FixedIncome/HJM.lean) records the forward-rate dynamics as data and gives the bond, short rate f(t, t), bank account and discounted bond; HJMModel.discount is shortRateDiscount of the integrated short rate and discount_eq_inv_bankAccount identifies it with 1/bankAccount. NOT PROVED: hprice, the martingale property of the discounted bonds, i.e. the HJM drift condition alpha = sigma int sigma; the statement takes hprice as an explicit hypothesis and the library does not derive it for the bundle. Not a legal instrument. Axioms-clean."
+        "formalization_scope": "REDUCED CORE: the valuation is conditional on hprice, the bond-pricing identity E[D(t_i)] = P(t_i) that the HJM drift condition would deliver, an explicit hypothesis of the statement not proved in this library; with it the theorem is the model-agnostic zero-curve valuation. valueDisc_fixedFlows_hjm in MathFin/Models/Rates/HJMBond.lean: a schedule of fixed cash flows sees the model only through the zero curve E[D t_i] (valueDisc_fixedFlows_of_zeroCurve_eq), and hprice identifies it with the deterministic initial bond curve P (positive because M.bond is an exponential, M.bond_pos). The HJMModel bundle (MathFin/Models/Rates/HJM.lean) records the forward-rate dynamics as data and gives the bond, short rate f(t, t), bank account and discounted bond; HJMModel.discount is shortRateDiscount of the integrated short rate and discount_eq_inv_bankAccount identifies it with 1/bankAccount. NOT PROVED: hprice, the martingale property of the discounted bonds, i.e. the HJM drift condition alpha = sigma int sigma; the statement takes hprice as an explicit hypothesis and the library does not derive it for the bundle. Not a legal instrument. Axioms-clean."
       }
     },
     {
@@ -1508,7 +1508,7 @@
       "description": "For an HJM model bundle M whose forward curve is flat and deterministic, f(s, u) = r for all s <= u and all outcomes, the stochastic discount factor D(t) = exp(-int_0^t f(s, s) ds) is the deterministic zcb r 0 t = e^{-rt}, and a schedule paying c_i at t_i (fixedFlows t c n), valued with D by Contract.valueDisc, is worth sum_i zcb r 0 t_i * c_i = sum_i e^{-r t_i} c_i. Unconditional, but only for the flat deterministic curve, where the HJM drift condition is not involved: the volatility is not constrained and no drift condition is stated or proved. The general case is mf-hjm-fixed-flows, conditional on the bond-pricing hypothesis.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Contracts.Models.HJMBond\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.HJM\n\n/-- On a flat deterministic forward curve, fixed cash flows are worth `∑ zcb r 0 tᵢ · cᵢ`. -/\ntheorem valueDisc_fixedFlows_hjm_flat' {ι Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} {hB : IsPreBrownianReal B μ}\n    {hBmeas : ∀ t, Measurable (B t)} {H : ℝ≥0} (M : HJMModel μ hB hBmeas H) {r : ℝ}\n    (hflat : ∀ s u ω, s ≤ u → M.fwd s u ω = r) (X : ι → ℝ≥0 → Ω → ℝ) (t : ℕ → ℝ≥0)\n    (c : ℕ → ℝ) (n : ℕ) :\n    (fixedFlows t c n : Contract ι).valueDisc μ M.discount X\n      = ∑ i ∈ Finset.range n, zcb r 0 (t i) * c i :=\n  MathFin.Contracts.valueDisc_fixedFlows_hjm_flat M hflat X t c n\n"
+        "lean": "import MathFin.Models.Rates.HJMBond\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.HJM\n\n/-- On a flat deterministic forward curve, fixed cash flows are worth `∑ zcb r 0 tᵢ · cᵢ`. -/\ntheorem valueDisc_fixedFlows_hjm_flat' {ι Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} {hB : IsPreBrownianReal B μ}\n    {hBmeas : ∀ t, Measurable (B t)} {H : ℝ≥0} (M : HJMModel μ hB hBmeas H) {r : ℝ}\n    (hflat : ∀ s u ω, s ≤ u → M.fwd s u ω = r) (X : ι → ℝ≥0 → Ω → ℝ) (t : ℕ → ℝ≥0)\n    (c : ℕ → ℝ) (n : ℕ) :\n    (fixedFlows t c n : Contract ι).valueDisc μ M.discount X\n      = ∑ i ∈ Finset.range n, zcb r 0 (t i) * c i :=\n  MathFin.Contracts.valueDisc_fixedFlows_hjm_flat M hflat X t c n\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1528,7 +1528,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of the statement as written. valueDisc_fixedFlows_hjm_flat in MathFin/Contracts/Models/HJMBond.lean: from hflat the integrated short rate is r t (setIntegral_congr_fun and the volume of (0, t]), so the HJM discount factor is zcb r 0 t pointwise, and valueDisc_fixedFlows_of_zeroCurve_eq closes it. SCOPE: the curve is flat and deterministic as a hypothesis on every outcome; this is a consistency check of the contract valuation against the zero-coupon bond, not a test of the HJM no-arbitrage drift condition. Not a legal instrument. Axioms-clean."
+        "formalization_scope": "Full formal proof of the statement as written. valueDisc_fixedFlows_hjm_flat in MathFin/Models/Rates/HJMBond.lean: from hflat the integrated short rate is r t (setIntegral_congr_fun and the volume of (0, t]), so the HJM discount factor is zcb r 0 t pointwise, and valueDisc_fixedFlows_of_zeroCurve_eq closes it. SCOPE: the curve is flat and deterministic as a hypothesis on every outcome; this is a consistency check of the contract valuation against the zero-coupon bond, not a test of the HJM no-arbitrage drift condition. Not a legal instrument. Axioms-clean."
       }
     }
   ]

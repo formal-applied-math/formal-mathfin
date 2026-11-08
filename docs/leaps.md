@@ -14,7 +14,7 @@ This document is the narrative. For the per-theorem audit see
 
 ## Leap 1 — static Girsanov: the risk-neutral measure is *derived*
 
-`MathFin/Bridges/GaussianGirsanov.lean`.
+`MathFin/Models/BlackScholes/GaussianGirsanov.lean`.
 
 `BSCallHyp` is no longer an axiom. The risk-neutral measure `Q` is
 *constructed* from the physical measure `P` by an explicit Radon-Nikodym
@@ -23,7 +23,7 @@ it. The deductive chain, bottom-up:
 
 | Step | Theorem | Content |
 |---|---|---|
-| 1 | `gaussianReal_tilted_const_mul` | The Gaussian Esscher transform (`Foundations/Esscher.lean`): `N(m, v)` tilted by `e^{θx}` is `N(m + θv, v)`, by comparing moment-generating functions. Until 2026-10-08 this step was the pdf identity `gaussian_esscher_pdf` (completing the square); the general tilt replaced it because the jump layer's Esscher transform uses the same lemma, without jumps and for Merton's lognormal jumps. |
+| 1 | `gaussianReal_tilted_const_mul` | The Gaussian Esscher transform (`Probability/Laws/Esscher.lean`): `N(m, v)` tilted by `e^{θx}` is `N(m + θv, v)`, by comparing moment-generating functions. Until 2026-10-08 this step was the pdf identity `gaussian_esscher_pdf` (completing the square); the general tilt replaced it because the jump layer's Esscher transform uses the same lemma, without jumps and for Merton's lognormal jumps. |
 | 2 | `gaussianReal_withDensity_esscher` | Measure level: tilting `N(0,1)` by the Esscher density gives exactly `N(c,1)` — mean shift `c`, variance fixed. The static (single-Gaussian) Girsanov theorem: the case `m = 0`, `v = 1`, `θ = c` of step 1, with the normalizer `e^{c²/2}` written into the density. |
 | 3 | `map_withDensity_comp` | Pushforward commutes with a density factoring through the map: `(P.withDensity (g∘W)).map W = (P.map W).withDensity g`. Proved from `Measure.ext` + `setLIntegral_map`; **upstreamable to Mathlib**. |
 | 4 | `hasLaw_esscher_tilt` | Girsanov for a random variable: if `W ~ N(0,1)` under `P`, then `W ~ N(c,1)` under `Q := P.withDensity(exp(c·W − c²/2))`. |
@@ -38,7 +38,7 @@ slice of Girsanov tractable without the path-wise stochastic integral.
 
 ## Leap 2 — the genesis cascade: physical → EMM → pricing
 
-`MathFin/Bridges/GaussianGirsanov.lean` (same file).
+`MathFin/Models/BlackScholes/GaussianGirsanov.lean` (same file).
 
 Two composites wire the Girsanov construction into the prior pricing
 artifacts — making `GaussianGirsanov` load-bearing rather than a dead leaf:
@@ -59,7 +59,7 @@ The spine is `physical measure → Girsanov → Q → BSCallHyp → pricing`.
 
 ## Leap 3 — multivariate: Margrabe's exchange option
 
-`MathFin/BlackScholes/ExchangeOption.lean`.
+`MathFin/Models/BlackScholes/ExchangeOption.lean`.
 
 The first genuinely multivariate result. The exchange option pays
 `max(S¹_T − S²_T, 0)`; its structural fact (Margrabe 1978) is that it depends
@@ -70,7 +70,7 @@ the same structural-reduction discipline as `PowerCall`.
 
 | Theorem | Content |
 |---|---|
-| `margrabe_variance_sub` | `Var[L₁ − L₂] = Var L₁ + Var L₂ − 2·cov(L₁,L₂)` via covariance bilinearity. First consumer of the covariance machinery shared with `Foundations/BivariateGaussian` — makes it load-bearing. |
+| `margrabe_variance_sub` | `Var[L₁ − L₂] = Var L₁ + Var L₂ − 2·cov(L₁,L₂)` via covariance bilinearity. First consumer of the covariance machinery shared with `Probability/Gaussian/BivariateGaussian` — makes it load-bearing. |
 | `margrabe_effective_variance` | Substituting `σ₁²T, σ₂²T, ρσ₁σ₂T` gives the effective variance `(σ₁²+σ₂²−2ρσ₁σ₂)·T`. |
 | `exchange_payoff_eq_ratio` | `max(a−b,0) = b·max(a/b−1,0)` — the exchange payoff is `S²_T` times a vanilla call on the ratio. |
 | `margrabe_eq_bsVGarman` | Margrabe **is** a `GarmanNormalForm` instance at `A=S¹₀, K=S²₀, DF=1`, effective vol `σ`. A multivariate option is the same formula `V = A·Φ(d₁) − K·DF·Φ(d₂)` as every BS-family price. |
@@ -80,12 +80,12 @@ the same structural-reduction discipline as `PowerCall`.
 The price-level result takes `BSCallHyp` for the *ratio* `R = S¹/S²` — exactly
 the abstraction `bs_call_formula` takes for any underlying.
 
-**Leap 3 grounding (done)** — `MathFin/BlackScholes/MargrabeGrounding.lean`.
+**Leap 3 grounding (done)** — `MathFin/Models/BlackScholes/MargrabeGrounding.lean`.
 That `BSCallHyp` for the ratio is now *derived*, the Margrabe-analog of leap 1:
 
 | Theorem | Content |
 |---|---|
-| `normalizedSpread_hasLaw_std` | **Bivariate → univariate reduction.** For a jointly-gaussian pair `(W₁,W₂)` of standard drivers with correlation `ρ`, the normalized log-spread driver `(σ₁W₁ − σ₂W₂)/σ_eff` is `N(0,1)`: gaussianity is preserved under the linear map (`HasGaussianLaw.map_of_measurable`), and the variance is pinned to `1` by covariance bilinearity (`margrabe_effective_variance`) — making `Foundations/BivariateGaussian`'s machinery load-bearing. |
+| `normalizedSpread_hasLaw_std` | **Bivariate → univariate reduction.** For a jointly-gaussian pair `(W₁,W₂)` of standard drivers with correlation `ρ`, the normalized log-spread driver `(σ₁W₁ − σ₂W₂)/σ_eff` is `N(0,1)`: gaussianity is preserved under the linear map (`HasGaussianLaw.map_of_measurable`), and the variance is pinned to `1` by covariance bilinearity (`margrabe_effective_variance`) — making `Probability/Gaussian/BivariateGaussian`'s machinery load-bearing. |
 | **`margrabe_bsCallHyp_of_gaussian`** | From the joint Gaussian model it exhibits a probability measure `Q` (an explicit Esscher tilt) and a standard-normal driver `Z` with the pathwise identity `S¹_T/S²_T = bsTerminal (S1/S2) 0 σ_eff T Z`, so `BSCallHyp` holds for the ratio at the effective volatility. That `Q` is the `S²`-numéraire measure is not shown. (Until 2026-10-21 the theorem only asserted that some such `Q` and `Z` exist, which any Gaussian driver satisfies.) |
 | **`margrabe_exchange_price`** | The discounted expected exchange payoff under the physical two-GBM model, `E_P[e^{−rT}(S¹_T − S²_T)⁺]`, equals Margrabe's price, by splitting off a residual independent of the effective driver (`HasGaussianLaw.indepFun_of_covariance_eq_zero`). |
 
@@ -107,9 +107,9 @@ primitive.
 
 ## Leap 4 — the adapted Itô isometry (done, discrete)
 
-`MathFin/Foundations/ItoIsometryAdapted.lean`.
+`MathFin/Probability/Brownian/Ito/ItoIsometryAdapted.lean`.
 
-The Wiener integral (`Foundations/WienerIntegralL2.lean`) handles
+The Wiener integral (`Probability/Brownian/Wiener/WienerIntegralL2.lean`) handles
 *deterministic* integrands, where cross-terms vanish by the BM covariance.
 That is **not** the Itô integral. Leap 4 builds the genuinely-stochastic
 core: a **random, adapted** integrand `φ`, where the cross-terms vanish for a
@@ -140,7 +140,7 @@ isometry `‖∫₀ᵀ f dB‖ = ‖f‖` (density via `simpleAssemblyHorizon_de
 orthogonal-complement → π-λ argument). Bounded horizon `[0,T]`; the unbounded-`ℝ≥0`
 CLM (σ-finite predictable exhaustion) stays gated.
 
-It now has its **first genuine consumer** (`Foundations/ItoIntegralBrownian.lean`,
+It now has its **first genuine consumer** (`Probability/Brownian/Ito/ItoIntegralBrownian.lean`,
 `itoIntegralCLM_brownian`): `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` as a real
 `itoIntegralCLM` identity, bridging the abstract CLM to the concrete
 quadratic-variation limit. The unbounded Gaussian integrand `s ↦ Bₛ` is realised
@@ -156,8 +156,8 @@ Leap 3 above, `MargrabeGrounding.lean`.)
 
 ## Leap 5 — martingale representation: the hedge is *derived* (2026-08-07)
 
-`MathFin/Foundations/MartingaleRepresentation.lean`,
-`MathFin/Foundations/MarketCompleteness.lean`.
+`MathFin/Probability/Brownian/MartingaleRepresentation.lean`,
+`MathFin/Pricing/MarketCompleteness.lean`.
 
 Leap 4's continuous half built the Itô integral as an isometry `φ ↦ ∫₀ᵀ φ dB` from
 the predictable `L²(dt⊗dμ)` integrands into `L²(μ)`. What that isometry does *not*
@@ -214,7 +214,7 @@ Only `complete ⟹ unique` is delivered. The converse needs the Jacod–Yor extr
 characterisation of the set of martingale measures and is out of scope, additive in
 the same sense as the Delbaen–Schachermayer boundary `ContinuousMarket` records.
 `superReplication_eq_emm_price` does not close the finite-state Farkas gap in
-`Foundations/SuperhedgingDuality`: separation proves the duality there, martingale
+`Pricing/SuperhedgingDuality`: separation proves the duality there, martingale
 representation proves it here, and neither implies the other.
 
 **The gap named in the last paragraph is closed by Leap 6 (2026-08-16).** `∫ φ dS` now exists,
@@ -224,9 +224,9 @@ records is no longer an absence.
 
 ## Leap 6 — the chain rule: the hedge is held in the *price* (2026-08-16)
 
-`MathFin/Foundations/ItoIntegralAgainstMartingale.lean`,
-`MathFin/Foundations/MarketCompletenessInPrice.lean`,
-`MathFin/Foundations/PricingMeasureL2Density.lean`.
+`MathFin/Probability/Brownian/Ito/ItoIntegralAgainstMartingale.lean`,
+`MathFin/Pricing/MarketCompletenessInPrice.lean`,
+`MathFin/Pricing/PricingMeasureL2Density.lean`.
 
 Leap 5 identified the image of `φ ↦ ∫₀ᵀ φ dB` exactly, and with it produced a hedge. What it
 could not say is that the hedge is a *holding in the traded asset*: the wealth it builds is an

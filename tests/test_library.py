@@ -33,7 +33,7 @@ def test_import_parser() -> None:
     src = "\n".join([
         "module -- shake: keep-downstream",
         "public import MathFin.Foundations.ZCB",
-        "import all MathFin.Binomial.Model",
+        "import all MathFin.Models.Binomial.Model",
         "public meta import MathFin.Init",
         "import MathFin",
         "import Mathlib.Probability.Moments",
@@ -41,9 +41,9 @@ def test_import_parser() -> None:
         "  -- import MathFin.IndentedComment",
         "theorem foo : True := by import_tactic MathFin.NotAnImport",
     ])
-    assert library.imports(src) == ["MathFin.Foundations.ZCB", "MathFin.Binomial.Model",
+    assert library.imports(src) == ["MathFin.Foundations.ZCB", "MathFin.Models.Binomial.Model",
                                     "MathFin.Init", "MathFin", "Mathlib.Probability.Moments"]
-    assert library.library_imports(src) == ["MathFin.Foundations.ZCB", "MathFin.Binomial.Model",
+    assert library.library_imports(src) == ["MathFin.Foundations.ZCB", "MathFin.Models.Binomial.Model",
                                             "MathFin.Init", "MathFin"]
 
 

@@ -21,7 +21,7 @@ on:
       - Challenge.lean
       - Solution.lean
       - comparator.json
-      - MathFin/RiskMeasures/**
+      - MathFin/Risk/**
       - lean-toolchain
       - lake-manifest.json
   pull_request:
@@ -29,7 +29,7 @@ on:
       - Challenge.lean
       - Solution.lean
       - comparator.json
-      - MathFin/RiskMeasures/**
+      - MathFin/Risk/**
       - lean-toolchain
       - lake-manifest.json
       - .github/workflows/comparator.yml

@@ -25,7 +25,7 @@ import json
 import re
 from pathlib import Path
 
-from . import doc_standard, library, trunk_reach
+from . import doc_standard, layers, library, trunk_reach
 from .mathfin_index import strip_comments
 
 RATCHET_FILE = Path("ratchet.json")
@@ -56,7 +56,7 @@ def source_metrics() -> dict[str, int]:
         "nolints": nolints,
         # proved blueprint nodes no recorded edge ties to the main tree (tools/verify/program_tree.py)
         "blueprint_islands": len(islands(load_nodes())),
-    } | doc_standard.coverage(doc_standard.all_docs())
+    } | layers.metrics() | doc_standard.coverage(doc_standard.all_docs())
 
 
 def index_metrics(index_path: str | Path) -> dict[str, int]:

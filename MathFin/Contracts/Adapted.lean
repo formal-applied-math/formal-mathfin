@@ -20,7 +20,7 @@ observation the payoff makes is dated no later than `u`
 `Payoff` a legitimate stochastic-integral integrand: it is the adaptedness
 hypothesis a future integral rung against a filtered probability space will
 need. **`measurable_eval_of_obsList_le` has no consumer yet** —
-`Contracts/Pricing.lean` integrates only against a fixed measure `Q`, never
+`Pricing/Value.lean` integrates only against a fixed measure `Q`, never
 against a filtration, so it has no adaptedness hypothesis to discharge with
 this file's results.
 
@@ -28,7 +28,7 @@ this file's results.
 `Measurable` to `AEMeasurable` — the strength the tower's own pricing
 hypotheses actually supply (`BSCallHyp`'s `Z_law : HasLaw Z (gaussianReal 0 1)
 Q` gives only `AEMeasurable Z`, never `Measurable Z`). It has no consumer
-now either: the integrability lemmas of `Contracts/Models/BlackScholes.lean` build each
+now either: the integrability lemmas of `Models/BlackScholes/BlackScholes.lean` build each
 reified payoff from integrable pieces (`Integrable.pos_part`, `.sub`,
 `.const_mul`), which carry their own measurability.
 
@@ -38,7 +38,7 @@ dates (`Contract.FixedDated`) is integrable against any finite measure. Measurab
 `measurable_eval`, and the bound from `Payoff.exists_bound_eval`, a structural induction like the
 others. A finite-state model such as
 the binomial tree is bounded, so there `Contract.value_both` needs no per-instrument
-integrability lemma (`Contracts/Models/Binomial.lean`).
+integrability lemma (`Models/Binomial/Binomial.lean`).
 
 ## Main results
 
@@ -154,7 +154,7 @@ theorem Payoff.aemeasurable_eval {μ : Measure Ω} (e : Payoff ι) (X : ι → �
 `𝓕 u`, as soon as every time the payoff observes is dated no later than `u`.
 This is the theorem that will make a `Payoff` a legitimate stochastic-integral
 integrand — the adaptedness hypothesis a future integral rung will need.
-Still has no consumer: `Contracts/Pricing.lean` integrates against a fixed
+Still has no consumer: `Pricing/Value.lean` integrates against a fixed
 measure, not a filtration, and unlike `measurable_eval`'s a.e. counterpart
 above, no `Payoff` in the tower yet needs an argument observed before a fixed
 time rather than a fixed measure. -/
@@ -216,7 +216,7 @@ model whose every coordinate is bounded, every contract that pays at fixed dates
 (`Contract.FixedDated`) has an integrable discounted payoff, so `Contract.value_both` applies to
 any two of them with no further hypothesis. A finite-state model such as the binomial tree is
 bounded; a lognormal one is not, and there each instrument's integrability is proved on its own
-(`Contracts/Models/BlackScholes.lean`). A `payAtHit` is excluded: the hitting time of a
+(`Models/BlackScholes/BlackScholes.lean`). A `payAtHit` is excluded: the hitting time of a
 measurable process need not be measurable, and an unbounded discount factor evaluated at a random
 date need not be integrable. -/
 theorem Contract.integrable_pathPV_of_bounded {Q : Measure Ω} [IsFiniteMeasure Q]

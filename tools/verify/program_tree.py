@@ -40,13 +40,14 @@ NODES_JSON = Path("docs/blueprint_nodes.json")
 TREE_MAP = Path(__file__).with_name("tree_map.toml")
 FRONTIER_TOML = Path("docs/blueprint_frontier.toml")
 
-# A section of the library (`MathFin.<Section>.…`) and the `area:*` label its work carries.
+# Where a module sits (`MathFin.<Layer>.<Sub>.…`, longest prefix first) and the `area:*` label
+# its work carries.
 SECTION_AREA = {
-    "Foundations": "foundations", "Bridges": "foundations", "BlackScholes": "black-scholes",
-    "Binomial": "binomial", "FixedIncome": "fixed-income", "Portfolio": "portfolio",
-    "Performance": "portfolio", "RiskMeasures": "risk", "Actuarial": "actuarial",
-    "DeFi": "defi", "Futures": "futures", "Execution": "execution", "Contracts": "contracts",
-    "Commodities": "commodities",
+    "Probability": "foundations", "Pricing": "foundations", "Contracts": "contracts",
+    "Models": "black-scholes", "Models.StochVol": "stoch-vol", "Models.Binomial": "binomial",
+    "Models.Rates": "fixed-income", "Models.Credit": "credit", "Models.Forwards": "futures",
+    "Risk": "risk", "Choice": "portfolio", "Insurance": "actuarial", "Markets": "execution",
+    "Markets.DeFi": "defi",
 }
 
 KINDS = ("rests-on-node", "feeds-node", "upstream-only", "off-map")
@@ -68,17 +69,48 @@ def load_map(path: Path = TREE_MAP) -> dict:
     return dict(parts=raw.get("part", []), branch=raw.get("branch", {}), place=raw.get("place", {}))
 
 
-def map_place(label: str, area: str, tree_map: dict) -> tuple[str, str]:
-    """(part, branch) of a node: the map's place for it, else its directory's."""
-    where = tree_map["place"].get(label) or AREA_PLACE.get(area, "pricing")
+# Where the tree puts a module's nodes by default: its directory, longest prefix first. The map
+# names only the nodes that sit elsewhere.
+DIR_PLACE = {
+    "Probability": "pricing", "Probability.Discrete": "discrete",
+    "Probability.Brownian": "brownian", "Probability.BrownianMotion": "brownian",
+    "Probability.Martingales": "brownian", "Probability.Gaussian": "analysis",
+    "Probability.Analysis": "analysis", "Probability.Laws": "analysis",
+    "Probability.Jumps": "jumps", "Probability.Dependence": "risk/dependence",
+    "Contracts": "pricing", "Pricing": "pricing",
+    "Models.BlackScholes": "models/black-scholes", "Models.Bachelier": "models/black-scholes",
+    "Models.Binomial": "models/discrete", "Models.Jumps": "models/jumps",
+    "Models.StochVol": "models/stoch-vol", "Models.LocalVol": "models/local-vol",
+    "Models.ModelFree": "models/model-free", "Models.Rates": "models/rates",
+    "Models.Credit": "models/credit", "Models.Forwards": "models/fx-futures",
+    "Risk": "risk/measures", "Risk.Credit": "risk/dependence",
+    "Choice": "choice/static", "Choice.Performance": "choice/performance",
+    "Insurance": "insurance/survival",
+    "Markets": "markets/execution", "Markets.DeFi": "markets/amm",
+    "Markets.Microstructure": "markets/price-formation",
+}
+
+
+def dir_place(module: str) -> str | None:
+    parts = module.split(".")[1:-1]
+    return next((DIR_PLACE[sec] for k in range(len(parts), 0, -1)
+                 if (sec := ".".join(parts[:k])) in DIR_PLACE), None)
+
+
+def map_place(label: str, area: str, tree_map: dict, module: str = "") -> tuple[str, str]:
+    """(part, branch) of a node: the map's place for it, else its directory's, else its area's."""
+    where = (tree_map["place"].get(label) or (module and dir_place(module))
+             or AREA_PLACE.get(area, "pricing"))
     part, _, branch = where.partition("/")
     return part, branch
 
 
 def area_of_module(module: str) -> str:
-    parts = module.split(".")
-    sec = parts[1] if len(parts) > 2 else ""
-    return SECTION_AREA.get(sec, sec.lower() or "upstream")
+    parts = module.split(".")[1:-1]
+    for k in range(len(parts), 0, -1):
+        if (sec := ".".join(parts[:k])) in SECTION_AREA:
+            return SECTION_AREA[sec]
+    return parts[0].lower() if parts else "upstream"
 
 
 @dataclass(frozen=True)
@@ -265,7 +297,7 @@ def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
             x=f.get("statement", ""), ground=f.get("ground", ""), core=f.get("core", []),
             e=0, i=named.get(f["label"], []), op=int(f["label"] in open_problem)))
     for n in out_nodes:
-        n["p"], n["b"] = map_place(n["l"], n["a"], tree_map)
+        n["p"], n["b"] = map_place(n["l"], n["a"], tree_map, n.get("m") or "")
     by_area: dict[str, Counter] = defaultdict(Counter)
     off: dict[str, list[list[str]]] = defaultdict(list)
     for p in places:
