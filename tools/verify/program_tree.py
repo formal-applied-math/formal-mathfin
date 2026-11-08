@@ -20,6 +20,14 @@ read from ``docs/taxonomy.toml`` (``tools/verify/taxonomy.py``): a proved node i
 declaration module, a frontier node in its ``area``, both with a family; ``tree_map.toml`` lists
 the few proved nodes whose declaration module is not their conceptual cell.
 
+Height on the tree is measured, not ordered: a node on a limb sits at its **hop**, the distance
+in statements from the trunk that ``chain_reach`` computes from the same index (a theorem's hop;
+for a definition, its concept distance plus one). A node of infinite hop is an **island**, drawn
+beside its limb under its cluster's name (a declared ``[[standalone]]`` of the taxonomy, else its
+cell) and ringed when nothing reaches it. A ``[[tower]]`` of the taxonomy is one node. A
+**connector** (a frontier node with a ``lean`` field) is a phantom: placed between the nodes its
+statement mentions, at the hop it would have if proved, sized by ``connector_gains``.
+
     python3 -m tools.verify.program_tree decl-index.json                    # summary by cell
     python3 -m tools.verify.program_tree decl-index.json --off risk/credit  # a cell's off-map
 """
@@ -34,7 +42,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .corpus import iter_entries
-from . import taxonomy
+from . import chain_reach, taxonomy
 from .decl_index import DeclIndex
 from .mathfin_index import cited_constants, declaration_index
 
@@ -248,9 +256,16 @@ def _statement(text: str, limit: int = 480) -> str:
     return cut + " …"
 
 
+def _records(idx: DeclIndex) -> list[dict]:
+    """The index in the shape ``chain_reach`` reads."""
+    return [dict(name=d.name, kind=d.kind, module=d.module, private=d.private, type=d.type,
+                 uses=list(d.uses)) for d in idx.decls.values()]
+
+
 def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
-              issues: list[dict] | None = None) -> dict:
-    """Everything the tree page draws, as one JSON-ready dict."""
+              issues: list[dict] | None = None, connectors: list[dict] = ()) -> dict:
+    """Everything the tree page draws, as one JSON-ready dict. ``connectors`` are the records
+    of the connector library's index (``MathFinFrontier.*``)."""
     places = place_corpus(idx, nodes)
     exceptions = load_map()
     nearest = Counter(p.nearest for p in places if p.nearest)
@@ -278,7 +293,8 @@ def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
             l=f["label"], t=f["title"], s="frontier", u=f.get("uses", []),
             area=f["area"], family=f.get("family", ""),
             x=f.get("statement", ""), ground=f.get("ground", ""), core=f.get("core", []),
-            e=0, i=named.get(f["label"], []), op=int(f["label"] in open_problem)))
+            e=0, i=named.get(f["label"], []), op=int(f["label"] in open_problem),
+            **({"ln": f["lean"]} if f.get("lean") else {})))
     joint_of = {j["node"]: j["limbs"] for j in taxonomy.joints()}
     for n in out_nodes:
         cell, family = place_node(n, exceptions)
@@ -289,6 +305,32 @@ def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
             n["j"] = joint_of[n["l"]]
         n.pop("area", None)
         n.pop("family", None)
+    # the measure: heights, towers, islands, phantoms
+    records = _records(idx)
+    reach = chain_reach.compute(records)
+    by_rec = {r["name"]: r for r in records}
+    hops = {r["name"]: reach.hop_of(r) for r in records}
+    part_kind = {p["key"]: p["kind"] for p in taxonomy.parts()}
+    assign_hops(out_nodes, hops)
+    out_nodes = collapse_towers(out_nodes, sorted({r["module"] for r in records}),
+                                taxonomy.towers())
+    by_conn = {c["name"]: c for c in connectors}
+    gains = chain_reach.connector_gains(records, list(connectors)) if connectors else {}
+    conn_nodes = [(n["l"], by_conn[n["ln"]]) for n in out_nodes if n.get("ln") in by_conn]
+    phantom = phantoms(out_nodes, conn_nodes, reach,
+                       {r["name"]: r["module"] for r in records}, gains)
+    for n in out_nodes:
+        if n["l"] in phantom:
+            ph = phantom[n["l"]]
+            n["ph"] = dict(gain=ph["gain"])
+            n["hp"] = ph["hp"]
+            if ph["ends"]:
+                n["u"] = ph["ends"]
+        elif n.get("ln"):
+            n["ph"] = dict(gain=0)
+    reached = {e for ph in phantom.values() for e in ph["ends"]}
+    island_list = float_islands(out_nodes, part_kind, reached)
+    metric = metrics(reach, len(taxonomy.families()), island_list)
     by_cell: dict[str, Counter] = defaultdict(Counter)
     off: dict[str, list[list[str]]] = defaultdict(list)
     for p in places:
@@ -300,9 +342,144 @@ def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
                 parts=crown_order(taxonomy.parts()),
                 cellName={k: taxonomy.label(k) for k in taxonomy.cells()} | {UPSTREAM: UPSTREAM},
                 cellBlurb={k: c["blurb"] for k, c in taxonomy.cells().items()},
-                families=[dict(key=k, title=f["title"], blurb=f["blurb"], hue=f["hue"])
+                families=[dict(key=k, title=f["title"], blurb=f["blurb"], hue=f["hue"],
+                               socket=k in reach.sockets)
                           for k, f in taxonomy.families().items()],
-                joints=taxonomy.joints())
+                joints=taxonomy.joints(), islands=island_list, metrics=metric)
+
+
+def _hop(h: float) -> int | None:
+    return None if h == float("inf") else int(h)
+
+
+def assign_hops(nodes: list[dict], hops: dict[str, float]) -> None:
+    """Set ``hp`` on every node: the measured hop of its declaration (``None`` when infinite or
+    when the node has no declaration). A frontier node with no declaration takes one more than
+    the least hop among the nodes it builds on, ``None`` if none of them is measured."""
+    by = {n["l"]: n for n in nodes}
+    for n in nodes:
+        n["hp"] = _hop(hops.get(n.get("d") or "", float("inf")))
+    memo: dict[str, int | None] = {}
+
+    def frontier_hop(label: str, seen: frozenset[str] = frozenset()) -> int | None:
+        n = by[label]
+        if n["s"] != "frontier" or n.get("d"):
+            return n["hp"]
+        if label in memo:
+            return memo[label]
+        us = [u for u in n["u"] if u in by and u not in seen]
+        hs = [h for h in (frontier_hop(u, seen | {label}) for u in us) if h is not None]
+        memo[label] = 1 + min(hs) if hs else None
+        return memo[label]
+
+    for n in nodes:
+        if n["s"] == "frontier" and not n.get("d"):
+            n["hp"] = frontier_hop(n["l"])
+
+
+def collapse_towers(nodes: list[dict], modules: list[str], towers: list[dict]) -> list[dict]:
+    """Each tower of the taxonomy becomes one node. Its members' modules are counted in
+    ``modules`` (every module of the index), its hop is the best of its members' (the summit),
+    its corpus count the sum, its issues the union, and every ``uses`` edge into a member points
+    at the tower. A tower with no blueprint node stays absent."""
+    out = list(nodes)
+    for t in towers:
+        mem = [n for n in out if n["s"] != "frontier" and n.get("m")
+               and taxonomy.in_prefixes(n["m"], t["modules"])]
+        if not mem:
+            continue
+        gone = {n["l"] for n in mem}
+        hs = [n["hp"] for n in mem if n["hp"] is not None]
+        summit = min(mem, key=lambda n: (n["hp"] is None, n["hp"] or 0, n["l"]))
+        label = "tower:" + t["key"]
+        count = sum(taxonomy.in_prefixes(m, t["modules"]) for m in modules)
+        uses = list(dict.fromkeys(label if u in gone else u for n in mem for u in n["u"]
+                                  if u not in gone))
+        tower = dict(
+            summit, l=label, t=f"{t['title']} tower", tw=count, u=uses,
+            s="partial" if any(n["s"] == "partial" for n in mem) else "proved",
+            hp=min(hs) if hs else None, e=sum(n["e"] for n in mem),
+            i=[x for n in mem for x in n["i"]],
+            x=f"{len(mem)} blueprint nodes in {count} modules under "
+              f"{', '.join(t['modules'])}; the summit is {summit['t']}.")
+        out = [n for n in out if n["l"] not in gone]
+        for n in out:
+            if gone & set(n["u"]):
+                n["u"] = list(dict.fromkeys(label if u in gone else u for u in n["u"]))
+        out.append(tower)
+    return out
+
+
+def float_islands(nodes: list[dict], part_kind: dict[str, str], reached: set[str],
+                  standalone: list[dict] | None = None) -> list[dict]:
+    """The clusters of infinite hop, drawn beside their limb. A proved node on a limb whose hop
+    is infinite belongs to the ``[[standalone]]`` entry covering its module, else to its cell; a
+    frontier node joins the cluster of an island node it builds on. A cluster is **declared**
+    when a standalone entry covers it and **reached** when a connector mentions one of its
+    nodes; one that is neither gets the red ring (``ring``). Sets ``isl`` on each member."""
+    standalone = taxonomy.standalones() if standalone is None else standalone
+    by = {n["l"]: n for n in nodes}
+    clusters: dict[str, dict] = {}
+
+    def home(n: dict) -> dict:
+        for k, st in enumerate(standalone):
+            if n.get("m") and taxonomy.in_prefixes(n["m"], st["modules"]):
+                return dict(key=f"standalone:{k}", title=st.get("title") or st["reason"][:48],
+                            declared=True, reason=st["reason"], socket=st.get("socket", ""))
+        cell = n["p"] + ("/" + n["b"] if n.get("b") else "")
+        return dict(key="cell:" + cell, title=taxonomy.label(cell), declared=False,
+                    reason="", socket="")
+
+    for n in nodes:
+        if (part_kind.get(n["p"]) == "limb" and not n.get("j") and n["hp"] is None
+                and n["s"] in ("proved", "partial")):
+            c = home(n)
+            cl = clusters.setdefault(c["key"], dict(c, p=n["p"], nodes=[]))
+            cl["nodes"].append(n["l"])
+            n["isl"] = c["key"]
+    for n in nodes:  # a frontier node that builds on an island sits with it
+        if n["s"] == "frontier" and n["hp"] is None and not n.get("isl"):
+            hosts = [by[u]["isl"] for u in n["u"] if u in by and by[u].get("isl")]
+            if hosts:
+                n["isl"] = hosts[0]
+                clusters[hosts[0]]["nodes"].append(n["l"])
+    for cl in clusters.values():
+        cl["ring"] = not cl["declared"] and not (set(cl["nodes"]) & reached)
+    return sorted(clusters.values(), key=lambda c: (-len(c["nodes"]), c["key"]))
+
+
+def phantoms(nodes: list[dict], connectors: list[tuple[str, dict]], reach: chain_reach.Reach,
+             module_of: dict[str, str], gains: dict[str, int]) -> dict[str, dict]:
+    """Where each connector sits. ``connectors`` pairs a node label with its record in the
+    connector library's index. The ends are the blueprint nodes of the concepts its statement
+    mentions (the node whose declaration is the concept, else a node of the concept's module,
+    ``module_of``); the hop is one more than the least concept distance, what it would be if
+    proved; the gain is ``connector_gains`` (theorems brought within three hops)."""
+    by_decl = {n["d"]: n["l"] for n in nodes if n.get("d")}
+    by_mod: dict[str, list[str]] = defaultdict(list)
+    for n in nodes:
+        if n.get("m") and n["s"] != "frontier":
+            by_mod[n["m"]].append(n["l"])
+    out: dict[str, dict] = {}
+    for label, rec in connectors:
+        ends: list[str] = []
+        ds = []
+        for c in sorted(reach.mentioned(rec)):
+            ds.append(reach.dist.get(c, float("inf")))
+            hit = by_decl.get(c) or next(iter(by_mod.get(module_of.get(c, ""), [])), None)
+            if hit and hit not in ends:
+                ends.append(hit)
+        out[label] = dict(ends=ends, hp=_hop(1 + min(ds)) if ds else None,
+                          gain=gains.get(rec["name"], 0))
+    return out
+
+
+def metrics(reach: chain_reach.Reach, families: int, island_list: list[dict]) -> dict:
+    """The strip above the tree: how connected the library is, from the same index."""
+    s = chain_reach.summary(reach)
+    return dict(R3=s["R3"], sockets=s["sockets"], families=families,
+                span=sum(s["joint_span"].values()), islands=len(island_list),
+                unreached=sum(c["ring"] for c in island_list), theorems=s["theorems"])
 
 
 def crown_order(parts: list[dict]) -> list[dict]:

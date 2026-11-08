@@ -40,7 +40,8 @@ import argparse
 import json
 import re
 from collections import Counter, defaultdict, deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Callable
 from pathlib import Path
 
 from . import taxonomy
@@ -69,6 +70,20 @@ class Reach:
     cell: dict[str, str]  # finance theorem -> its cell
     sockets: set[str]  # model families with a pricing-measure theorem
     joint_span: Counter  # (limb, limb) -> theorems
+    dist: dict[str, int] = field(default_factory=dict)  # concept -> distance from the spine
+    mentioned: Callable[[dict], set[str]] = lambda d: set()  # the concepts a record states
+
+    def hop_of(self, d: dict) -> float:
+        """The hop of a node's declaration: a theorem's hop, a concept's distance plus one
+        (a spine theorem or concept sits at 1); infinite when unreached or not a finance
+        declaration (the caller decides what a tool is)."""
+        if d["name"] in self.hops:
+            return self.hops[d["name"]]
+        if d["name"] in self.dist:
+            return 1 + self.dist[d["name"]]
+        return 1 if d["kind"] == "theorem" and d["name"] in self.spine_theorems else float("inf")
+
+    spine_theorems: frozenset[str] = frozenset()
 
     def share(self, k: int, cell: str | None = None) -> float:
         hs = [h for t, h in self.hops.items() if cell is None or self.cell[t] == cell]
@@ -152,6 +167,7 @@ def compute(decls: list[dict], *, guard: bool = True,
     tcell: dict[str, str] = {}
     sockets: set[str] = set()
     span: Counter = Counter()
+    spine_theorems: set[str] = set()
     for d in theorems:
         c = cell[d["name"]]
         if _is_tool(c):
@@ -165,11 +181,13 @@ def compute(decls: list[dict], *, guard: bool = True,
         for pair in {tuple(sorted((a, b))) for a in limbs for b in limbs if a < b}:
             span[pair] += 1
         if _is_spine(c):
+            spine_theorems.add(d["name"])
             continue
         hops[d["name"]] = 1 + min((dist.get(n, float("inf")) for n in ns),
                                   default=float("inf"))
         tcell[d["name"]] = c
-    return Reach(hops=hops, cell=tcell, sockets=sockets, joint_span=span)
+    return Reach(hops=hops, cell=tcell, sockets=sockets, joint_span=span, dist=dist,
+                 mentioned=mentioned, spine_theorems=frozenset(spine_theorems))
 
 
 def connector_gains(decls: list[dict], connectors: list[dict], *,
