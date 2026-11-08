@@ -3981,10 +3981,10 @@
     },
     "mf-pricing-kernel-butterfly": {
       "benchmark_file": "no_arbitrage.json",
-      "date": "2026-11-06",
-      "elapsed_s": 3.2,
-      "input_hash": "25af14eb5863d6907779445c4c259bcb787ce9d39c8ce288c5982d8562a08058",
-      "verified_at_commit": "abe6d37"
+      "date": "2026-11-08",
+      "elapsed_s": 2.6,
+      "input_hash": "8995b674e5b24bf5f75ac26216979b25880d7468b007cf7257d10eb069911960",
+      "verified_at_commit": "f68ab19"
     },
     "mf-psd-cauchy-schwarz": {
       "benchmark_file": "portfolio_and_performance.json",
