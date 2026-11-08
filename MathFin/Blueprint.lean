@@ -26,6 +26,7 @@ import MathFin.Models.BlackScholes.BlackScholesPhysical
 import MathFin.Models.BlackScholes.Call
 import MathFin.Models.BlackScholes.DeltaHedge
 import MathFin.Models.BlackScholes.GaussianGirsanov
+import MathFin.Models.BlackScholes.Market
 import MathFin.Models.BlackScholes.MargrabeGrounding
 import MathFin.Models.BlackScholes.PDE
 import MathFin.Models.Credit.CVA
@@ -50,6 +51,7 @@ import MathFin.Pricing.Duality.ConvexDuality
 import MathFin.Pricing.EquivMartingaleMeasure
 import MathFin.Pricing.FTAP.FTAPComplete
 import MathFin.Pricing.FTAP.FTAPDiscrete
+import MathFin.Pricing.FTAP.MarketFTAP
 import MathFin.Pricing.ForwardMeasure
 import MathFin.Pricing.Market
 import MathFin.Pricing.MarketCompleteness
@@ -558,6 +560,18 @@ attribute [blueprint "thm:second-ftap"
   beyond finite $\Omega$ is the frontier node `thm:second-ftap-converse`. -/)]
   MathFin.ftap_two
 
+attribute [blueprint "thm:market-ftap"
+  (title := "The fundamental theorem of asset pricing for a market")
+  (statement := /-- A one-asset market on a finite sample space whose reference measure charges
+  every state has no arbitrage when trading at the dates of a grid (no bounded predictable
+  strategy on the deflated price sampled along the grid is an arbitrage) if and only if the
+  market traded on the grid has a pricing measure. A pricing measure of the market itself up to a
+  horizon rules out arbitrage on every grid inside the horizon, on any space. On a general
+  probability space the equivalence is proved assuming the conditional one-period theorem
+  (`ConditionalOnePeriodFTAP`, not proved); unconditionally it is the frontier node
+  `thm:dmw-ftap`. -/)]
+  MathFin.Market.noArbitrage_iff_exists_isPricingMeasure_of_finite
+
 -- ===== valuation/trees: Trees =====
 
 attribute [blueprint "thm:binomial-representation"
@@ -646,6 +660,18 @@ attribute [blueprint "thm:physical-measure-pricing"
   $Q = P\,e^{cW - c^2/2}$ makes $W - c$ standard normal, and the call is worth the
   Black–Scholes closed form under $Q$ (`bs_call_formula_of_physical`). -/)]
   MathFin.Contracts.BlackScholes.value_physical_eq_riskNeutral
+
+attribute [blueprint "thm:black-scholes-market"
+  (title := "Black–Scholes is a market")
+  (statement := /-- The Black–Scholes model of a pre-Brownian motion $W$ (asset $S_0e^{(m -
+  \sigma^2/2)t + \sigma W_t}$, numéraire $e^{rt}$, the filtration $W$ generates) is a market,
+  and for $\sigma \ne 0$ the Girsanov measure of the constant market price of risk
+  $\theta = (m-r)/\sigma$ at a horizon $H$ is a pricing measure of it at every horizon $T \le
+  H$: equivalent to the physical measure, with the deflated asset a martingale. Under it the
+  European call is worth $S_0\Phi(d_1) - Ke^{-rT}\Phi(d_2)$ whatever the physical drift
+  (`price_europeanCall_constGirsanovMeasure`). That it is the only pricing measure is not proved
+  here: it is the frontier node `thm:bs-arbitrage-free-price`. -/)]
+  MathFin.Contracts.BlackScholes.isPricingMeasure_constGirsanovMeasure
 
 attribute [blueprint "thm:bs-delta-hedge"
   (title := "Black–Scholes delta hedging")

@@ -400,7 +400,8 @@ area = "probability/jumps"
 label = "thm:dmw-ftap"
 title = "Dalang–Morton–Willinger FTAP"
 statement = "No arbitrage is equivalent to the existence of an equivalent martingale measure for a multi-period market on a general probability space. The reduction to one period and the pasting of one-period densities are proved; the conditional one-period theorem (a measurable selection) is what remains."
-uses = ["thm:first-ftap", "def:emm"]
+uses = ["thm:first-ftap", "def:emm", "thm:market-ftap"]
+lean = "MathFinFrontier.market_dmw"
 core = ["mf-dmw-conditional", "mf-no-arbitrage-local", "mf-density-pasting-emm"]
 area = "valuation/general"
 
@@ -740,8 +741,9 @@ area = "probability/brownian"
 [[node]]
 label = "thm:bs-arbitrage-free-price"
 title = "The Black–Scholes price is the arbitrage-free price"
-statement = "In the Black–Scholes market every pricing measure with a square-integrable density gives the European call the price bsCallPrice, which is also the superreplication price and the initial capital of the delta hedge."
-uses = ["def:pricing-functional", "thm:bs-call", "thm:physical-measure-pricing", "thm:market-completeness", "thm:bs-delta-hedge"]
+statement = "In the Black–Scholes market every pricing measure with a square-integrable density gives the European call the price bsCallPrice. That this is also the superreplication price and the initial capital of the delta hedge is not part of the connector."
+uses = ["def:pricing-functional", "thm:black-scholes-market", "thm:bs-call", "thm:physical-measure-pricing", "thm:market-completeness", "thm:bs-delta-hedge"]
+lean = "MathFinFrontier.bs_call_price_unique"
 area = "valuation/diffusions"
 family = "diffusions"
 

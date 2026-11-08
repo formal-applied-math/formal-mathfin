@@ -369,6 +369,7 @@ import MathFin.Pricing.FTAP.FTAPOnePeriodVector
 import MathFin.Pricing.FTAP.NoArbitrageLocal
 import MathFin.Pricing.FTAP.DensityPasting
 import MathFin.Pricing.FTAP.DalangMortonWillinger
+import MathFin.Pricing.FTAP.MarketFTAP
 -- Phase 20: first-principles core derivations
 import MathFin.Pricing.NoArbitrageDerivations
 -- Phase 1 (convex-duality unification): fundamental superhedging bound — every EMM prices a claim
