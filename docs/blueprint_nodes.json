@@ -205,18 +205,6 @@
   "label": "thm:glosten-milgrom-quote",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/Microstructure/GlostenMilgromCondExp.lean"},
- {"uses": ["def:quantile"],
-  "title": "Value-at-risk",
-  "text":
-  "$\\mathrm{VaR}_\\alpha(X) = \\inf\\{x \\mid \\alpha \\le P(X \\le x)\\}$, the\n  $\\alpha$-quantile of the law of the loss $X$.",
-  "name": "MathFin.valueAtRisk",
-  "module": "MathFin.Risk.ValueAtRisk",
-  "line": 74,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:value-at-risk",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ValueAtRisk.lean"},
  {"uses": [],
   "title": "Coherent risk measure",
   "text":
@@ -229,6 +217,18 @@
   "label": "def:coherent-risk-measure",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Coherent.lean"},
+ {"uses": ["def:quantile"],
+  "title": "Value-at-risk",
+  "text":
+  "$\\mathrm{VaR}_\\alpha(X) = \\inf\\{x \\mid \\alpha \\le P(X \\le x)\\}$, the\n  $\\alpha$-quantile of the law of the loss $X$.",
+  "name": "MathFin.valueAtRisk",
+  "module": "MathFin.Risk.ValueAtRisk",
+  "line": 74,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:value-at-risk",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ValueAtRisk.lean"},
  {"uses": ["def:martingale-transform", "def:path-cylinder"],
   "title": "Binomial martingale representation (completeness)",
   "text":
@@ -439,6 +439,18 @@
   "label": "def:path-cylinder",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/MarkovPathMeasure.lean"},
+ {"uses": ["def:coherent-risk-measure"],
+  "title": "Representation of a coherent risk measure",
+  "text":
+  "On a finite state space a coherent risk measure $\\rho$ of losses is the least\n  upper bound of the expected losses $\\sum_i q_i L_i$ over its representing set of probability\n  vectors.",
+  "name": "MathFin.coherentRisk_isLUB",
+  "module": "MathFin.Risk.AcceptanceSet",
+  "line": 99,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:coherent-risk-representation",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/AcceptanceSet.lean"},
  {"uses": ["def:brownian-motion", "def:black-scholes-model"],
   "title": "BSCallHyp from a Brownian model",
   "text":
@@ -795,7 +807,7 @@
   "For an integrable loss $X$ and $\\alpha \\in (0,1)$, $\\mathrm{ES}_\\alpha(X)$ is\n  the least value of $c \\mapsto c + (1-\\alpha)^{-1}E[(X-c)^+]$. No continuity of the law is\n  assumed.",
   "name": "MathFin.isLeast_rockafellarUryasev",
   "module": "MathFin.Risk.ExpectedShortfall",
-  "line": 158,
+  "line": 161,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:rockafellar-uryasev",
@@ -947,7 +959,7 @@
   "For $\\alpha \\in (0,1)$, expected shortfall is a coherent risk measure on the\n  integrable losses.",
   "name": "MathFin.expectedShortfall_isCoherentRiskMeasure",
   "module": "MathFin.Risk.ExpectedShortfall",
-  "line": 199,
+  "line": 202,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:expected-shortfall-coherent",
@@ -1377,6 +1389,18 @@
   "label": "thm:ito-integral-brownian",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoIntegralBrownian.lean"},
+ {"uses": ["def:expected-shortfall", "def:value-at-risk", "def:quantile"],
+  "title": "Dual form of expected shortfall",
+  "text":
+  "For an integrable loss $X$ and $\\alpha \\in (0,1)$, $\\mathrm{ES}_\\alpha(X)$ is\n  the greatest value of $E[DX]$ over densities $0 \\le D \\le (1-\\alpha)^{-1}$ with $E[D]=1$.",
+  "name": "MathFin.isGreatest_integral_mul_expectedShortfall",
+  "module": "MathFin.Risk.ExpectedShortfall",
+  "line": 392,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:expected-shortfall-dual",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ExpectedShortfall.lean"},
  {"uses":
   ["def:two-asset-min-variance",
    "def:portfolio-variance",
@@ -1392,6 +1416,18 @@
   "label": "thm:two-asset-min-variance",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
+ {"uses": ["def:expected-shortfall", "def:value-at-risk", "def:quantile"],
+  "title": "Expected shortfall's representing set",
+  "text":
+  "On a finite probability space $(\\iota, P)$ and for $\\alpha \\in (0,1)$, the\n  representing set of $\\mathrm{ES}_\\alpha$ in the Artzner--Delbaen--Eber--Heath representation is\n  exactly the set of probability vectors $q$ with $q_i \\le (1-\\alpha)^{-1} P\\{i\\}$, the\n  probability densities bounded by $(1-\\alpha)^{-1}$.",
+  "name": "MathFin.representingSet_expectedShortfall",
+  "module": "MathFin.Risk.ExpectedShortfall",
+  "line": 415,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:expected-shortfall-dual-set",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ExpectedShortfall.lean"},
  {"uses": [],
   "title": "A Uniswap v3 position is at most a covered call",
   "text":

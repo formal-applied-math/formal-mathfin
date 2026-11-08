@@ -623,7 +623,7 @@
     {
       "id": "mf-market-price-traded-asset",
       "name": "A traded asset is priced at its price",
-      "description": "In a market with a strictly positive adapted numeraire N and a deterministic initial numeraire N 0 = n0, under a pricing measure Q up to T (a probability measure equivalent to the reference measure making every deflated asset S_i/N, frozen at T, a martingale), the contract that delivers asset i at a date t <= T has price E_Q[S_i(0)]: Market.price, the contract's value with the deflator N 0 / N t, is the asset's initial price.",
+      "description": "In a market with a strictly positive adapted numeraire N and a deterministic initial numeraire N 0 = n0, under a pricing measure Q up to T (a probability measure equivalent to the reference measure on the information at T, making every deflated asset S_i/N, frozen at T, a martingale), the contract that delivers asset i at a date t <= T has price E_Q[S_i(0)]: Market.price, the contract's value with the deflator N 0 / N t, is the asset's initial price.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Pricing.Market\n\nopen MeasureTheory MathFin MathFin.Contracts\nopen scoped NNReal\n\n/-- Under a pricing measure, the claim delivering asset `i` at `t ≤ T` is worth `𝔼_Q[S i 0]`. -/\ntheorem market_price_traded_asset {ι Ω : Type*} {mΩ : MeasurableSpace Ω} {M : Market ι Ω}\n    {T : ℝ≥0} {Q : Measure Ω} (hQ : M.IsPricingMeasure T Q) {n₀ : ℝ}\n    (hN₀ : ∀ ω, M.numeraire 0 ω = n₀) (i : ι) {t : ℝ≥0} (ht : t ≤ T) :\n    M.price Q (.pay t (.obs i t)) = ∫ ω, M.asset i 0 ω ∂Q :=\n  Market.IsPricingMeasure.price_pay_obs hQ hN₀ i ht\n"
@@ -641,6 +641,54 @@
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Market.IsPricingMeasure.price_pay_obs in MathFin/Pricing/Market.lean: the price unfolds to E_Q[(n0/N t) S_i(t)] = n0 E_Q[S_i(t)/N t] (Contract.value_pay), the deflated asset's mean is constant up to the horizon (Martingale.condExp_ae_eq through integral_condExp), and n0 E_Q[S_i(0)/n0] = E_Q[S_i(0)]. The initial numeraire is assumed deterministic; a random N 0 is not covered. No integrability hypothesis is needed beyond the martingale property, which carries it. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-pricing-measure-horizon-glue",
+      "name": "A Pricing Measure Agrees up to the Horizon with One Equivalent to the Reference Measure Everywhere",
+      "domain": "mathematical_finance",
+      "description": "In a market (Market) with a finite reference measure P, a pricing measure Q up to the horizon T (Market.IsPricingMeasure: a probability measure equivalent to P on the information F_T, under which every deflated asset frozen at T is a martingale) agrees on F_T with a pricing measure Q' that is equivalent to P on the whole space; conversely every measure agreeing with a pricing measure on F_T is one.",
+      "metadata": {
+        "reference": "Foellmer and Schied, Stochastic Finance, sec. 5.2; Delbaen and Schachermayer, The Mathematics of Arbitrage",
+        "citations": [
+          {
+            "key": "FollmerSchied",
+            "locator": "sec. 5.2"
+          },
+          {
+            "key": "DelbaenSchachermayer"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Market.IsPricingMeasure.exists_isEquivProbMeasure and Market.IsPricingMeasure.of_trim_eq in MathFin/Pricing/Market.lean: Q' is P weighted by the Radon-Nikodym density of Q|F_T with respect to P|F_T (exists_isEquivProbMeasure_trim_eq, MathFin/Probability/Martingales/EquivMeasure.lean: trim_withDensity and withDensity_rnDeriv_eq give Q'|F_T = Q|F_T, and the density is P-a.e. positive because P|F_T << Q|F_T); a frozen martingale is F_T-measurable, so it stays a martingale under any measure with the same restriction to F_T (martingale_min_of_trim_eq, MathFin/Probability/Martingales/MartingaleFrozen.lean, by set integrals over F_s, s <= T). Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.Pricing.Market\n\nopen MeasureTheory MathFin\nopen scoped NNReal\n\n/-- A pricing measure agrees on `𝓕 T` with a pricing measure equivalent to `P` everywhere, and a\nmeasure agreeing with a pricing measure on `𝓕 T` is one. -/\ntheorem pricing_measure_horizon_glue {ι Ω : Type*} {mΩ : MeasurableSpace Ω} {M : Market ι Ω}\n    [IsFiniteMeasure M.P] {T : ℝ≥0} {Q : Measure Ω} (hQ : M.IsPricingMeasure T Q) :\n    (∃ Q', IsEquivProbMeasure M.P Q' ∧ M.IsPricingMeasure T Q' ∧\n      Q'.trim (M.𝓕.le T) = Q.trim (M.𝓕.le T)) ∧\n      ∀ Q' : Measure Ω, Q.trim (M.𝓕.le T) = Q'.trim (M.𝓕.le T) → M.IsPricingMeasure T Q' :=\n  ⟨Market.IsPricingMeasure.exists_isEquivProbMeasure hQ,\n    fun _ h ↦ Market.IsPricingMeasure.of_trim_eq hQ h⟩\n"
+      }
+    },
+    {
+      "id": "mf-discrete-market-ftap-finite",
+      "name": "The Finite-State Fundamental Theorem of Asset Pricing on the Trunk: No Arbitrage iff a Pricing Measure of the Discrete Market Exists",
+      "domain": "mathematical_finance",
+      "description": "For a one-asset adapted discrete-time price S on a finite sample space whose finite reference measure P charges every state, the market has no arbitrage up to the horizon T (NoArbitrage: no bounded predictable strategy with a non-negative, not almost surely zero, gain) if and only if the discrete market as a Market (toMarket: the price frozen at T, the floor filtration, the unit numeraire) has a pricing measure at T (Market.IsPricingMeasure).",
+      "metadata": {
+        "reference": "Harrison and Pliska (1981); Foellmer and Schied, Stochastic Finance, sec. 5.2",
+        "citations": [
+          {
+            "key": "HarrisonPliska1981"
+          },
+          {
+            "key": "FollmerSchied",
+            "locator": "sec. 5.2"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. noArbitrage_iff_exists_isPricingMeasure_of_finite in MathFin/Pricing/DiscreteMarket.lean: ftap_discrete (separation, MathFin/Pricing/FTAP/FTAPDiscrete.lean) gives NoArbitrage iff an equivalent martingale measure exists; an IsEMM is a pricing measure of toMarket (isPricingMeasure_toMarket_of_isEMM, Martingale.comp along the floor), and a pricing measure, equivalent to P only on F_T, agrees there with one equivalent everywhere (Market.IsPricingMeasure.exists_isEquivProbMeasure), which is an IsEMM (isEMM_of_isPricingMeasure_toMarket, Martingale.of_comp) and so rules out arbitrage (IsEMM.noArbitrage). SCOPE: one asset, real-valued, in numeraire units. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.Pricing.DiscreteMarket\n\nopen MeasureTheory MathFin MathFin.Contracts.DiscreteMarket\n\n/-- On a finite full-support space, no arbitrage iff the discrete market has a pricing measure. -/\ntheorem discrete_market_ftap_finite {Ω : Type*} [Finite Ω] [Nonempty Ω] {mΩ : MeasurableSpace Ω}\n    [MeasurableSingletonClass Ω] {𝓕 : Filtration ℕ mΩ} {P : Measure Ω} [IsFiniteMeasure P]\n    {S : ℕ → Ω → ℝ} {T : ℕ} (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :\n    NoArbitrage 𝓕 P S T ↔ ∃ Q, (toMarket P 𝓕 S T fun n _ ↦ hS n).IsPricingMeasure T Q :=\n  noArbitrage_iff_exists_isPricingMeasure_of_finite hS hP\n"
       }
     },
     {

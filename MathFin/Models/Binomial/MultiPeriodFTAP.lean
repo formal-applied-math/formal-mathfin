@@ -56,6 +56,8 @@ probability (`IsEMM.real_horizonAtom`), and at `t = T` the atoms are the paths, 
 
 * `comap_flips_horizonFiltration` — at times `t ≤ T`, `flipFiltration t` is the pullback of
   `horizonFiltration T t` along `flips T`.
+* `isEMM_horizonSpot_map` — a measure on the paths making the frozen discounted spot a martingale
+  maps to an equivalent martingale measure of the `T`-period tree.
 * `isEMM_horizonSpot` — under `BinomialNoArb`, `horizonMeasure (crrUpProb)` is an equivalent
   martingale measure for every real-world `horizonMeasure p`, `0 < p < 1`.
 * `noArbitrage_horizonSpot_iff` — `NoArbitrage ↔ BinomialNoArb u d r` (for `S₀ > 0`, `0 < d < u`,
@@ -211,11 +213,36 @@ lemma eq_of_ae_eq_of_pos {Ω : Type*} [MeasurableSpace Ω]
   exact (hμ x).not_ge ((measure_mono (show {x} ⊆ {y | ¬ f y = g y} by simpa)).trans_eq
     (ae_iff.1 h))
 
+/-- **A martingale measure on the paths gives one on the first `T` flips.** If the discounted spot
+frozen at `T` is a `Q`-martingale for the flip filtration, the law of the first `T` flips under `Q`
+is an equivalent martingale measure, in the sense of `MathFin.IsEMM`, for the `T`-period tree,
+against any reference measure equivalent to it: the set integrals over the events of `ℱₜ` transport
+along `flips T` (`comap_flips_horizonFiltration`). -/
+theorem isEMM_horizonSpot_map {Q : Measure (ℕ → Bool)} [IsProbabilityMeasure Q]
+    {P : Measure (Fin T → Bool)} (hQP : IsEquivProbMeasure P (Q.map (flips T)))
+    (hM : Martingale (fun n ↦ discountedSpot S₀ u d r (min n T)) flipFiltration Q) :
+    IsEMM (horizonFiltration T) P (horizonSpot T S₀ u d r) T (Q.map (flips T)) := by
+  refine .of_condExp_succ hQP (fun t _ ↦ stronglyAdapted_horizonSpot t)
+    (fun t _ ↦ Integrable.of_finite) fun t ht ↦ ?_
+  refine ae_eq_condExp_of_forall_setIntegral_eq ((horizonFiltration T).le t) Integrable.of_finite
+    (fun s _ _ ↦ Integrable.of_finite.integrableOn) (fun s hs _ ↦ ?_)
+    (stronglyAdapted_horizonSpot t).aestronglyMeasurable
+  have hs' : MeasurableSet[flipFiltration t] (flips T ⁻¹' s) := by
+    rw [← comap_flips_horizonFiltration T ht.le]
+    exact ⟨s, hs, rfl⟩
+  have hsm : MeasurableSet s := (horizonFiltration T).le t s hs
+  rw [setIntegral_map hsm Integrable.of_finite.aestronglyMeasurable
+      (measurable_flips T).aemeasurable,
+    setIntegral_map hsm Integrable.of_finite.aestronglyMeasurable (measurable_flips T).aemeasurable]
+  simp_rw [horizonSpot_flips ht.le, horizonSpot_flips (Nat.succ_le_of_lt ht)]
+  simpa only [min_eq_left ht.le, min_eq_left (Nat.succ_le_of_lt ht)] using
+    hM.setIntegral_eq (Nat.le_succ t) hs'
+
 /-- **An equivalent martingale measure for the `T`-period tree.** Under `BinomialNoArb u d r`,
 the law of the first `T` i.i.d. `Bernoulli(q)` flips with `q = crrUpProb u d r` is an equivalent
 martingale measure, in the sense of `MathFin.IsEMM`, for the discounted spot, against the
 real-world law of i.i.d. `Bernoulli(p)` flips, any `0 < p < 1`: the martingale property
-`martingale_discountedSpot` transports along `flips T`. -/
+`martingale_discountedSpot` transports along `flips T` (`isEMM_horizonSpot_map`). -/
 theorem isEMM_horizonSpot (h : BinomialNoArb u d r) (S₀ : ℝ) {p q : ℝ≥0} (hp0 : 0 < p)
     (hp1 : p < 1) (hq1 : q ≤ 1) (hqcrr : crrUpProb u d r = q) :
     IsEMM (horizonFiltration T) (horizonMeasure T p hp1.le) (horizonSpot T S₀ u d r) T
@@ -228,25 +255,13 @@ theorem isEMM_horizonSpot (h : BinomialNoArb u d r) (S₀ : ℝ) {p q : ℝ≥0}
     have := (crrUpProb_mem_Ioo h).2
     rw [hqcrr] at this
     exact_mod_cast this
-  refine .of_condExp_succ
+  exact isEMM_horizonSpot_map (Q := coinFlipMeasure q hq1)
     ⟨inferInstance,
       fun s hs ↦ by
         rw [eq_empty_of_pos_singleton (horizonMeasure_pos T hp0 hp1) hs, measure_empty],
       fun s hs ↦ by
         rw [eq_empty_of_pos_singleton (horizonMeasure_pos T hq0 hq1') hs, measure_empty]⟩
-    (fun t _ ↦ stronglyAdapted_horizonSpot t) (fun t _ ↦ Integrable.of_finite) fun t ht ↦ ?_
-  refine ae_eq_condExp_of_forall_setIntegral_eq ((horizonFiltration T).le t) Integrable.of_finite
-    (fun s _ _ ↦ Integrable.of_finite.integrableOn) (fun s hs _ ↦ ?_)
-    (stronglyAdapted_horizonSpot t).aestronglyMeasurable
-  have hs' : MeasurableSet[flipFiltration t] (flips T ⁻¹' s) := by
-    rw [← comap_flips_horizonFiltration T ht.le]
-    exact ⟨s, hs, rfl⟩
-  have hsm : MeasurableSet s := (horizonFiltration T).le t s hs
-  rw [horizonMeasure, setIntegral_map hsm Integrable.of_finite.aestronglyMeasurable
-      (measurable_flips T).aemeasurable,
-    setIntegral_map hsm Integrable.of_finite.aestronglyMeasurable (measurable_flips T).aemeasurable]
-  simp_rw [horizonSpot_flips ht.le, horizonSpot_flips (Nat.succ_le_of_lt ht)]
-  exact (martingale_discountedSpot h S₀ hq1 hqcrr).setIntegral_eq (Nat.le_succ t) hs'
+    (martingale_min_of_martingale (martingale_discountedSpot h S₀ hq1 hqcrr) T)
 
 /-- **Multi-period binomial no-arbitrage, through the discrete FTAP.** Under
 `BinomialNoArb u d r`, the `T`-period CRR market (discounted spot, flip filtration, real-world
