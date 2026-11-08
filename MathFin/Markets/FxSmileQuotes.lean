@@ -284,8 +284,9 @@ theorem existsUnique_fxDelta_eq {w : ℝ} (hw : 0 < w) {Δ : ℝ} (hΔ : Δ ∈ 
 /-- **The `Δ`-call and `Δ`-put strikes are reflections about the ATM strike**: their
 log-strikes sum to `w`, so both sit at distance `√w·|Φ⁻¹(Δ)|` from the delta-neutral-straddle
 ATM strike `w/2` (BRSD eq. (5): `K_ATM = F·e^{σ²_ATM τ/2}`). The `Δ`-put wing is read
-through `Φ(d₊) = 1 − Δ` (put delta = call delta − 1 at a common strike, the convention of
-BRSD eq. (4)); the reflection itself is the `Φ⁻¹(1 − Δ) = −Φ⁻¹(Δ)` symmetry. -/
+through `Φ(d₊) = 1 − Δ` — at a common strike the driftless put delta is the call delta
+minus one, the parity identity of the BRSD eq. (4) deltas, not formalized here; the
+reflection itself is the `Φ⁻¹(1 − Δ) = −Φ⁻¹(Δ)` symmetry. -/
 theorem fxDeltaStrike_call_add_put {w : ℝ} {Δ : ℝ} (hΔ : Δ ∈ Set.Ioo 0 1) :
     fxDeltaStrike w (PhiInv Δ) + fxDeltaStrike w (PhiInv (1 - Δ)) = w := by
   rw [PhiInv_one_sub hΔ]
