@@ -44,6 +44,8 @@ integrability lemma (`Models/Binomial/Binomial.lean`).
 
 * `Payoff.measurable_eval` — evaluating a payoff against a jointly-measurable
   model is measurable, unconditionally.
+* `Contract.measurable_pathPV` — a fixed-dated contract's present value under a measurable
+  stochastic discount factor is measurable.
 * `Payoff.measurable_eval_of_obsList_le` — if every date in `e.obsList` (the syntactic list of
   observations `Contracts/Core.lean` defines; an over-approximation, so the criterion is
   sufficient, not necessary: `Payoff.mul (.const 0) (.obs i t)` lists `t` though its value does
@@ -123,6 +125,27 @@ theorem Payoff.measurable_eval (e : Payoff ι) (X : ι → ℝ≥0 → Ω → �
   | indicatorLt a b ha hb =>
       exact Measurable.ite (measurableSet_lt ha hb) measurable_const measurable_const
   | rpow a p ha => exact ha.pow_const _
+
+/-- **A fixed-dated contract's deflated present value is measurable** for a measurable model and
+a measurable stochastic discount factor `D : ℝ≥0 → Ω → ℝ`. -/
+theorem Contract.measurable_pathPV {c : Contract ι} (hc : c.FixedDated) {D : ℝ≥0 → Ω → ℝ}
+    (hD : ∀ t, Measurable (D t)) {X : ι → ℝ≥0 → Ω → ℝ} (hX : ∀ i t, Measurable (X i t)) :
+    Measurable fun ω ↦ c.pathPV (fun t ↦ D t ω) (fun i t ↦ X i t ω) := by
+  induction c with
+  | zero =>
+      simp only [Contract.pathPV, Contract.cashflows, List.map_nil, List.sum_nil]
+      exact measurable_const
+  | pay t a =>
+      simp only [Contract.pathPV, Contract.cashflows, List.map_cons, List.map_nil, List.sum_cons,
+        List.sum_nil, add_zero]
+      exact (hD t).mul (a.measurable_eval X hX)
+  | payAtHit _ _ _ => exact hc.elim
+  | both a b ha hb =>
+      simp only [Contract.pathPV_both]
+      exact (ha hc.1).add (hb hc.2)
+  | scale r a ha =>
+      simp only [Contract.pathPV_scale]
+      exact (ha hc).const_mul r
 
 /-- Evaluating a payoff against an a.e.-measurable model is a.e.-measurable: the strength a
 consumer whose model only satisfies `AEMeasurable` (e.g. `HasLaw.aemeasurable`, never

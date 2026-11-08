@@ -102,9 +102,9 @@ exact statement of each one, and what it leaves out.
 - **Interest rates.** In Vasicek and Hull–White, the bond price at t is an exponential-affine
   function of the short rate, and the bond put is a Black put under the forward measure
   ([`bondPrice_hullWhite`](MathFin/Models/Rates/HullWhiteBond.lean),
-  [`valueDisc_bondPut_hullWhite`](MathFin/Models/Rates/Jamshidian.lean)). Swaptions and the CMS
+  [`value_bondPut_hullWhite`](MathFin/Models/Rates/Jamshidian.lean)). Swaptions and the CMS
   swaplet are priced under the annuity measure
-  ([`valueDisc_payerSwaption`](MathFin/Models/Rates/CMSContract.lean)).
+  ([`value_payerSwaption`](MathFin/Models/Rates/CMSContract.lean)).
 
 ## Contents
 

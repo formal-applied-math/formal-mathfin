@@ -1052,7 +1052,7 @@
   "title": "Caplet as a Black-76 call under the forward measure",
   "text":
   "If the simple rate $L(T_0,T_1)$ is lognormal under the $T_1$-forward measure\n  (a hypothesis, not derived from a rate model), the caplet is worth\n  $P(0,T_1)\\,\\delta\\,[F\\Phi(d_1) - K\\Phi(d_2)]$.",
-  "name": "MathFin.Contracts.valueDisc_caplet_black76",
+  "name": "MathFin.Contracts.value_caplet_black76",
   "module": "MathFin.Models.Rates.Caplet",
   "line": 246,
   "leanOk": true,

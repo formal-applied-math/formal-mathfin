@@ -244,7 +244,7 @@ discounted vanilla leg `e^{−rT}·B₁` (call side) of both parity theorems:
 theorem value_digitalCall_eq_bboB1 {Ω : Type*} {mΩ : MeasurableSpace Ω}
     {Q : Measure Ω} [IsProbabilityMeasure Q] {S_0 K r σ mu : ℝ} {T : ℝ≥0} {Z : Ω → ℝ}
     (h : BSCallHyp Q S_0 K r σ T Z) (hmu : mu = (r - σ ^ 2 / 2) / σ ^ 2) :
-    (Contracts.digitalCall K T).value Q (fun _ ↦ Real.exp (-r * T))
+    (Contracts.digitalCall K T).value Q (fun _ _ ↦ Real.exp (-r * T))
         (Contracts.BlackScholes.assets S_0 r σ T Z)
       = Real.exp (-r * T) * bboB1 S_0 K mu σ T true := by
   rw [Contracts.BlackScholes.value_digitalCall h,

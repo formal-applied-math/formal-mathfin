@@ -209,9 +209,9 @@ its sign is proved only when every bond but the last is known at the fixing date
 valuation is conditional on the bond-pricing hypothesis, which the HJM drift condition would \
 deliver and which is not proved; the drift condition and the bond dynamics are not proved."""
 also = [
-  "MathFin.Contracts.valueDisc_bondPut_hullWhite",
-  "MathFin.Contracts.valueDisc_caplet_eq_bondPut",
-  "MathFin.Contracts.valueDisc_payerSwaption",
-  "MathFin.Contracts.SwapModel.valueDisc_cmsSwaplet_eq",
-  "MathFin.Contracts.valueDisc_fixedFlows_hjm",
+  "MathFin.Contracts.value_bondPut_hullWhite",
+  "MathFin.Contracts.value_caplet_eq_bondPut",
+  "MathFin.Contracts.value_payerSwaption",
+  "MathFin.Contracts.SwapModel.value_cmsSwaplet_eq",
+  "MathFin.Contracts.value_fixedFlows_hjm",
 ]

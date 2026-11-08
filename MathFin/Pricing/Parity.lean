@@ -114,21 +114,20 @@ theorem integrable_europeanCall_pathPV [IsFiniteMeasure Q]
 with mean `S₀`: the forward struck at `K` is worth `S₀ − K D(T)`. -/
 theorem value_forward_of_integral [IsProbabilityMeasure Q]
     (hX : Integrable (fun ω ↦ D T * X () T ω) Q) (hS₀ : ∫ ω, D T * X () T ω ∂Q = S₀) :
-    (forward K T).value Q D X = S₀ - K * D T := by
+    (forward K T).value Q (fun t _ ↦ D t) X = S₀ - K * D T := by
   rw [forward, Contract.value_pay]
   simp only [Payoff.eval, scenarioAt, mul_sub]
   rw [integral_sub hX (integrable_const _), hS₀, integral_const, probReal_univ, one_smul]
   ring
 
-/-- **Put–call parity, in any model.** For any pricing measure, discount and model, if the put's
-and the forward's discounted payoffs are integrable, the call is worth the put plus the forward:
-it pays exactly that combination on every path (`pathPV_europeanCall_eq_put_add_forward`). -/
-theorem value_europeanCall_eq_put_add_forward (Q : Measure Ω) (D : ℝ≥0 → ℝ)
+/-- **Put–call parity, in any model.** For any measure, deflator and model, if the put's and the
+forward's deflated payoffs are integrable, the call is worth the put plus the forward: it pays
+exactly that combination on every path (`pathPV_europeanCall_eq_put_add_forward`). -/
+theorem value_europeanCall_eq_put_add_forward (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ)
     (X : Unit → ℝ≥0 → Ω → ℝ) {K : ℝ} {T : ℝ≥0}
-    (hput : Integrable (fun ω ↦ (europeanPut K T).pathPV D (scenarioAt X ω)) Q)
-    (hfwd : Integrable (fun ω ↦ (forward K T).pathPV D (scenarioAt X ω)) Q) :
-    (europeanCall K T).value Q D X
-      = (europeanPut K T).value Q D X + (forward K T).value Q D X := by
+    (hput : Integrable (fun ω ↦ (europeanPut K T).pathPV (fun t ↦ D t ω) (scenarioAt X ω)) Q)
+    (hfwd : Integrable (fun ω ↦ (forward K T).pathPV (fun t ↦ D t ω) (scenarioAt X ω)) Q) :
+    (europeanCall K T).value Q D X = (europeanPut K T).value Q D X + (forward K T).value Q D X := by
   rw [← Contract.value_both _ _ _ _ _ hput hfwd]
   simp only [Contract.value, pathPV_europeanCall_eq_put_add_forward]
 
@@ -137,8 +136,9 @@ is integrable with mean `S₀`: `C − P = S₀ − K D(T)`. No integrability of
 assumed; the put's follows from the underlying's. -/
 theorem value_europeanCall_sub_put_of_integral [IsProbabilityMeasure Q]
     (hX : Integrable (fun ω ↦ D T * X () T ω) Q) (hS₀ : ∫ ω, D T * X () T ω ∂Q = S₀) :
-    (europeanCall K T).value Q D X - (europeanPut K T).value Q D X = S₀ - K * D T := by
-  rw [value_europeanCall_eq_put_add_forward Q D X (integrable_europeanPut_pathPV hX)
+    (europeanCall K T).value Q (fun t _ ↦ D t) X - (europeanPut K T).value Q (fun t _ ↦ D t) X
+      = S₀ - K * D T := by
+  rw [value_europeanCall_eq_put_add_forward Q (fun t _ ↦ D t) X (integrable_europeanPut_pathPV hX)
     (integrable_forward_pathPV hX), value_forward_of_integral hX hS₀]
   ring
 
@@ -160,7 +160,7 @@ theorem integral_discounted_of_martingale [IsProbabilityMeasure Q]
 theorem value_forward_of_martingale [IsProbabilityMeasure Q]
     (hM : Martingale (fun t ω ↦ D t * X () t ω) 𝓕 Q) (hD₀ : D 0 = 1)
     (hX₀ : ∀ ω, X () 0 ω = S₀) :
-    (forward K T).value Q D X = S₀ - K * D T :=
+    (forward K T).value Q (fun t _ ↦ D t) X = S₀ - K * D T :=
   value_forward_of_integral (hM.integrable T) (integral_discounted_of_martingale hM hD₀ hX₀ T)
 
 /-- **Put–call parity in every risk-neutral model**, with no integrability hypotheses. If the
@@ -169,7 +169,8 @@ discounted price is a `Q`-martingale starting from `S₀`, with `D(0) = 1`, then
 theorem value_europeanCall_sub_put_of_martingale [IsProbabilityMeasure Q]
     (hM : Martingale (fun t ω ↦ D t * X () t ω) 𝓕 Q) (hD₀ : D 0 = 1)
     (hX₀ : ∀ ω, X () 0 ω = S₀) :
-    (europeanCall K T).value Q D X - (europeanPut K T).value Q D X = S₀ - K * D T :=
+    (europeanCall K T).value Q (fun t _ ↦ D t) X - (europeanPut K T).value Q (fun t _ ↦ D t) X
+      = S₀ - K * D T :=
   value_europeanCall_sub_put_of_integral (hM.integrable T)
     (integral_discounted_of_martingale hM hD₀ hX₀ T)
 

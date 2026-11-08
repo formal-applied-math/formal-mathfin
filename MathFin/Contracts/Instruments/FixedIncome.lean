@@ -14,7 +14,7 @@ A schedule of payments is a contract: `payFlows t a n` pays the payoff `a i` at 
 `i < n`, and along a scenario it is worth `∑ D(tᵢ) · aᵢ` (`pathPV_payFlows`); `fixedFlows t c n`
 is the case of constant payoffs, `c i` at `t i`, worth `∑ D(tᵢ) cᵢ` (`pathPV_fixedFlows`). These
 are the legs of bonds, annuities, swaps and credit default swaps. Nothing here assumes a model or
-a pricing measure: the value of a schedule in every model is `value_fixedFlows`
+a pricing measure: the value of a schedule in every model is `value_fixedFlows_deterministic`
 (`Pricing/Value.lean`), and the bonds and swaps of a deterministic curve are in
 `Models/Rates/DeterministicCurve.lean`.
 
