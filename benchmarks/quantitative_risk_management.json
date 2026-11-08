@@ -419,7 +419,7 @@
     {
       "id": "qrm-es-adeh-representation",
       "name": "ES in the ADEH Representation (Finite State)",
-      "description": "On a finite probability space, ES_α is a coherent risk measure of losses (IsCoherentRiskMeasure), so ES_α(L) is the least upper bound of the expected losses ∑ qᵢ Lᵢ over its representing probability vectors, those q with ∑ qᵢ Zᵢ ≤ 0 on every loss Z with ES_α(Z) ≤ 0. That this representing set is the set of densities bounded by (1 − α)⁻¹ is not proved here.",
+      "description": "On a finite probability space, ES_α is a coherent risk measure of losses (IsCoherentRiskMeasure), so ES_α(L) is the least upper bound of the expected losses ∑ qᵢ Lᵢ over its representing probability vectors, those q with ∑ qᵢ Zᵢ ≤ 0 on every loss Z with ES_α(Z) ≤ 0. That this representing set is the set of probability vectors with qᵢ ≤ (1 − α)⁻¹ P{i} is the separate entry mf-expected-shortfall-representing-set.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Risk.ExpectedShortfall\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\ntheorem expectedShortfall_isLUB_representingSet_thm {α : ℝ} {ι : Type*} [Fintype ι] [MeasurableSpace ι] [MeasurableSingletonClass ι] (P : Measure ι) [IsProbabilityMeasure P] (hα : α ∈ Ioo 0 1) (L : ι → ℝ) :\n    IsLUB ((fun q ↦ ∑ i, q i * L i) '' representingSet fun L : ι → ℝ ↦ expectedShortfall L P α) (expectedShortfall L P α) :=\n  MathFin.expectedShortfall_isLUB_representingSet P hα L\n\n"
@@ -438,7 +438,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. ES coherence (expectedShortfall_isCoherentRiskMeasure, in the library's loss-convention structure IsCoherentRiskMeasure) plugged into the finite-state ADEH theorem coherentRisk_isLUB. Lives in MathFin/Risk/ExpectedShortfall.lean. The representing set is that of the acceptance set {Z : ES_α(Z) ≤ 0}; the dual representation over densities bounded by (1 − α)⁻¹ is the separate theorem isGreatest_integral_mul_expectedShortfall, and their identification is not proved. Axioms-clean."
+        "formalization_scope": "Full formal proof. ES coherence (expectedShortfall_isCoherentRiskMeasure, in the library's loss-convention structure IsCoherentRiskMeasure) plugged into the finite-state ADEH theorem coherentRisk_isLUB. Lives in MathFin/Risk/ExpectedShortfall.lean. The representing set is that of the acceptance set {Z : ES_α(Z) ≤ 0}; the dual representation over densities bounded by (1 − α)⁻¹ is the separate theorem isGreatest_integral_mul_expectedShortfall, and their identification is representingSet_expectedShortfall (entry mf-expected-shortfall-representing-set). Axioms-clean."
       }
     },
     {

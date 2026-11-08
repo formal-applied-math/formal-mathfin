@@ -703,13 +703,6 @@ uses = ["def:pricing-functional", "thm:esscher-emm-levy", "thm:jump-diffusion-mi
 area = "black-scholes"
 
 [[node]]
-label = "thm:expected-shortfall-dual-set"
-title = "Expected shortfall's representing set"
-statement = "On a finite space the representing set of expected shortfall in the ADEH representation is exactly the probability densities bounded by 1/(1−α), joining coherentRisk_isLUB to the general-space dual."
-uses = ["thm:expected-shortfall-coherent", "def:expected-shortfall", "def:coherent-risk-measure"]
-area = "risk"
-
-[[node]]
 label = "thm:utility-state-price-density"
 title = "Marginal utility is a state-price density"
 statement = "At the optimum of a finite-state expected-utility problem with a budget constraint, marginal utility of optimal wealth is proportional to a state-price density, so the optimum defines a pricing measure; Kelly is the logarithmic case."

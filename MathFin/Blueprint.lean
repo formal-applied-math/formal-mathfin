@@ -62,6 +62,7 @@ import MathFin.Risk.ValueAtRisk
 import MathFin.Risk.Coherent
 import MathFin.Risk.ExpectedShortfall
 import MathFin.Risk.Superhedging
+import MathFin.Risk.AcceptanceSet
 import MathFin.Risk.CompoundPoissonCVaR
 import MathFin.Contracts.Core
 import MathFin.Pricing.Value
@@ -707,6 +708,25 @@ attribute [blueprint "thm:expected-shortfall-coherent" (title := "Expected short
   (statement := /-- For $\alpha \in (0,1)$, expected shortfall is a coherent risk measure on the
   integrable losses. -/)]
   MathFin.expectedShortfall_isCoherentRiskMeasure
+
+attribute [blueprint "thm:expected-shortfall-dual-set"
+  (title := "Expected shortfall's representing set")
+  (statement := /-- On a finite probability space $(\iota, P)$ and for $\alpha \in (0,1)$, the
+  representing set of $\mathrm{ES}_\alpha$ in the Artzner--Delbaen--Eber--Heath representation is
+  exactly the set of probability vectors $q$ with $q_i \le (1-\alpha)^{-1} P\{i\}$, the
+  probability densities bounded by $(1-\alpha)^{-1}$. -/)]
+  MathFin.representingSet_expectedShortfall
+
+attribute [blueprint "thm:coherent-risk-representation" (title := "Representation of a coherent risk measure")
+  (statement := /-- On a finite state space a coherent risk measure $\rho$ of losses is the least
+  upper bound of the expected losses $\sum_i q_i L_i$ over its representing set of probability
+  vectors. -/)]
+  MathFin.coherentRisk_isLUB
+
+attribute [blueprint "thm:expected-shortfall-dual" (title := "Dual form of expected shortfall")
+  (statement := /-- For an integrable loss $X$ and $\alpha \in (0,1)$, $\mathrm{ES}_\alpha(X)$ is
+  the greatest value of $E[DX]$ over densities $0 \le D \le (1-\alpha)^{-1}$ with $E[D]=1$. -/)]
+  MathFin.isGreatest_integral_mul_expectedShortfall
 
 attribute [blueprint "thm:cvar-rockafellar-uryasev" (title := "CVaR of a compound-Poisson loss")
   (statement := /-- For $L = \sum_{i<N} X_i$ with $N \sim \mathrm{Poisson}(\lambda)$ independent of

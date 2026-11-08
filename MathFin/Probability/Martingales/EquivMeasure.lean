@@ -8,6 +8,7 @@ module
 public import MathFin.Init
 public import Mathlib.Analysis.InnerProductSpace.Basic
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.MeasureTheory.Measure.Decomposition.RadonNikodym
 
 /-!
 # Equivalent probability measures, and the one from a positive normalised density
@@ -25,6 +26,12 @@ in the one-period FTAP files (`FTAPOnePeriod.lean`, `FTAPOnePeriodVector.lean`):
 fair density (a logistic Esscher weight, or a `(1+‖Y‖)⁻¹` tempering for the `L¹` reduction),
 normalises it, and then needs exactly `IsEquivProbMeasure P Q`.
 
+An equivalence on a sub-σ-algebra `m` extends to the whole space: `P` weighted by the density
+`d(Q|m)/d(P|m)` of the restrictions is equivalent to `P` everywhere and is `Q` on `m`
+(`exists_isEquivProbMeasure_trim_eq`). A pricing measure up to a horizon `T` need only be equivalent
+to the reference measure on the information `𝓕 T`, and this is how it meets the theorems stated for
+measures equivalent on the whole space.
+
 ## Main definitions
 
 * `IsEquivProbMeasure`: `Q` is a probability measure with `Q ≪ P` and `P ≪ Q`.
@@ -37,6 +44,8 @@ normalises it, and then needs exactly `IsEquivProbMeasure P Q`.
   strictly positive density `g` is equivalent to `P` as soon as it is a probability measure.
 * `isEquivProbMeasure_withDensity`: for a strictly positive, `P`-integrable `g` with `∫ g ∂P = 1`,
   `P.withDensity (ofReal g)` is an equivalent probability measure.
+* `exists_isEquivProbMeasure_trim_eq`: a probability measure equivalent to `P` on a sub-σ-algebra
+  agrees there with one equivalent to `P` on the whole space.
 
 ## Tags
 
@@ -92,5 +101,23 @@ theorem isEquivProbMeasure_withDensity {Ω : Type*} {mΩ : MeasurableSpace Ω} (
       rw [withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ,
         ← ofReal_integral_eq_lintegral_ofReal hint (ae_of_all _ fun ω ↦ (hpos ω).le), hsum,
         ENNReal.ofReal_one]⟩
+
+/-- **An equivalence on a sub-σ-algebra extends to the whole space.** If the probability measure `Q`
+has the null sets of `P` among the events of `m ≤ m0`, then `P` weighted by the density
+`d(Q|m)/d(P|m)` of the restrictions is a probability measure equivalent to `P` on all of `m0` that
+is `Q` on `m`. The density is positive `P`-almost everywhere because `P|m ≪ Q|m`. -/
+theorem exists_isEquivProbMeasure_trim_eq {Ω : Type*} {m m0 : MeasurableSpace Ω} (hm : m ≤ m0)
+    {P Q : Measure Ω} [IsFiniteMeasure P] [IsProbabilityMeasure Q] (hQP : Q.trim hm ≪ P.trim hm)
+    (hPQ : P.trim hm ≪ Q.trim hm) :
+    ∃ Q' : Measure Ω, IsEquivProbMeasure P Q' ∧ Q'.trim hm = Q.trim hm := by
+  have hf : Measurable[m] ((Q.trim hm).rnDeriv (P.trim hm)) := Measure.measurable_rnDeriv _ _
+  have htrim : (P.withDensity ((Q.trim hm).rnDeriv (P.trim hm))).trim hm = Q.trim hm := by
+    rw [trim_withDensity hm hf, Measure.withDensity_rnDeriv_eq _ _ hQP]
+  refine ⟨P.withDensity ((Q.trim hm).rnDeriv (P.trim hm)),
+    ⟨⟨?_⟩, withDensity_absolutelyContinuous _ _, ?_⟩, htrim⟩
+  · rw [← trim_measurableSet_eq hm (@MeasurableSet.univ _ m), htrim,
+      trim_measurableSet_eq hm (@MeasurableSet.univ _ m), measure_univ]
+  · exact withDensity_absolutelyContinuous' (hf.mono hm le_rfl).aemeasurable
+      ((ae_of_ae_trim hm (hPQ.ae_le (Measure.rnDeriv_pos hQP))).mono fun _ h ↦ h.ne')
 
 end MathFin

@@ -2163,6 +2163,10 @@ than definitionally, since `driftContinuousMod 0` is a `limUnder` along a chosen
 #guard_msgs in
 #print axioms MathFin.le_superhedgingPrice
 
+/-- info: 'MathFin.representingSet_expectedShortfall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.representingSet_expectedShortfall
+
 /-- info: 'MathFin.expectedShortfall_of_hasLaw_gaussianReal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.expectedShortfall_of_hasLaw_gaussianReal
