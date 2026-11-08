@@ -70,18 +70,6 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzNAsset.lean"},
  {"uses": [],
-  "title": "Zero-coupon bond, constant short rate",
-  "text":
-  "$P(t,T) = e^{-r(T-t)}$, the price at $t$ of one unit paid at $T$ under a\n  constant short rate $r$.",
-  "name": "MathFin.zcb",
-  "module": "MathFin.Models.Rates.ZCB",
-  "line": 56,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:zero-coupon-bond",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/ZCB.lean"},
- {"uses": [],
   "title": "Martingale transform",
   "text":
   "The discrete stochastic integral\n  $(A\\cdot M)_n = \\sum_{k<n} \\langle A_{k+1}, M_{k+1} - M_k\\rangle$.",
@@ -93,6 +81,18 @@
   "label": "def:martingale-transform",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/MartingaleTransform.lean"},
+ {"uses": [],
+  "title": "Zero-coupon bond, constant short rate",
+  "text":
+  "$P(t,T) = e^{-r(T-t)}$, the price at $t$ of one unit paid at $T$ under a\n  constant short rate $r$.",
+  "name": "MathFin.zcb",
+  "module": "MathFin.Models.Rates.ZCB",
+  "line": 56,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:zero-coupon-bond",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/ZCB.lean"},
  {"uses":
   ["def:black-scholes-model",
    "def:standard-normal-cdf",
@@ -314,6 +314,18 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Forwards/SchwartzOneFactor.lean"},
  {"uses": [],
+  "title": "Marginal variance $(\\Sigma w)_i$",
+  "text":
+  "The marginal variance of asset $i$ in the portfolio $w$,\n  $(\\Sigma w)_i = \\sum_k \\Sigma_{ik} w_k$; the portfolio variance is $\\sum_k w_k (\\Sigma w)_k$.",
+  "name": "MathFin.marginalVariance",
+  "module": "MathFin.Choice.Portfolio.CAPMEquilibrium",
+  "line": 87,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:marginal-variance",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/CAPMEquilibrium.lean"},
+ {"uses": [],
   "title": "Survival function of a lifetime",
   "text":
   "$S_X(t) = P(X > t)$, the probability that the age at death $X$ exceeds $t$.",
@@ -337,18 +349,6 @@
   "label": "thm:level-payments-annuity",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicCurve.lean"},
- {"uses": [],
-  "title": "Marginal variance $(\\Sigma w)_i$",
-  "text":
-  "The marginal variance of asset $i$ in the portfolio $w$,\n  $(\\Sigma w)_i = \\sum_k \\Sigma_{ik} w_k$; the portfolio variance is $\\sum_k w_k (\\Sigma w)_k$.",
-  "name": "MathFin.marginalVariance",
-  "module": "MathFin.Choice.Portfolio.CAPMEquilibrium",
-  "line": 87,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:marginal-variance",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/CAPMEquilibrium.lean"},
  {"uses": [],
   "title": "Binomial no-arbitrage condition",
   "text":
@@ -493,6 +493,18 @@
   "label": "thm:stochastic-fubini",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/StochasticFubini.lean"},
+ {"uses": ["def:zero-coupon-bond"],
+  "title": "First-order immunization",
+  "text":
+  "If the duration-weighted values of an asset and a liability bond portfolio\n  agree at the rate $r$, the derivative in $r$ of their net value is zero there.",
+  "name": "MathFin.bondPortfolio_immunization_first_order",
+  "module": "MathFin.Models.Rates.Immunization",
+  "line": 106,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:bond-immunization",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/Immunization.lean"},
  {"uses":
   ["def:gbm",
    "def:standard-normal-cdf",
@@ -511,18 +523,6 @@
   "label": "thm:bs-pde-brownian",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/PDEFromIto.lean"},
- {"uses": ["def:zero-coupon-bond"],
-  "title": "First-order immunization",
-  "text":
-  "If the duration-weighted values of an asset and a liability bond portfolio\n  agree at the rate $r$, the derivative in $r$ of their net value is zero there.",
-  "name": "MathFin.bondPortfolio_immunization_first_order",
-  "module": "MathFin.Models.Rates.Immunization",
-  "line": 106,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:bond-immunization",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/Immunization.lean"},
  {"uses": ["def:black-scholes-model", "def:standard-normal-cdf"],
   "title": "Aave liquidation probability is a KMV default probability",
   "text":
@@ -574,6 +574,18 @@
   "label": "def:black-scholes-model",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/Call.lean"},
+ {"uses": ["def:equivalent-measure", "def:numeraire-measure"],
+  "title": "The numéraire measure is equivalent",
+  "text":
+  "If $N, B > 0$ and $E^Q[N_T/B_T] = N_0/B_0$, the measure with density\n  $N_T B_0 / (N_0 B_T)$ is a probability measure equivalent to $Q$.",
+  "name": "MathFin.numeraireMeasure_isEquivProbMeasure",
+  "module": "MathFin.Pricing.Numeraire",
+  "line": 111,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:numeraire-measure-equivalent",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Numeraire.lean"},
  {"uses":
   ["def:gbm",
    "def:brownian-motion",
@@ -597,30 +609,6 @@
   "label": "thm:bs-self-financing",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/BlackScholesSelfFinancing.lean"},
- {"uses": ["def:equivalent-measure", "def:numeraire-measure"],
-  "title": "The numéraire measure is equivalent",
-  "text":
-  "If $N, B > 0$ and $E^Q[N_T/B_T] = N_0/B_0$, the measure with density\n  $N_T B_0 / (N_0 B_T)$ is a probability measure equivalent to $Q$.",
-  "name": "MathFin.numeraireMeasure_isEquivProbMeasure",
-  "module": "MathFin.Pricing.Numeraire",
-  "line": 111,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:numeraire-measure-equivalent",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Numeraire.lean"},
- {"uses": ["def:contract"],
-  "title": "Value of a contract",
-  "text":
-  "The value of a contract is the $Q$-expectation of its discounted pathwise\n  present value, against a model that turns each observation the contract makes into a random\n  variable.",
-  "name": "MathFin.Contracts.Contract.value",
-  "module": "MathFin.Pricing.Value",
-  "line": 112,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:contract-value",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Value.lean"},
  {"uses":
   ["def:brownian-motion", "thm:discrete-ito", "thm:quadratic-variation"],
   "title": "Itô for x² in L²: ∑B·ΔB → ½(B_T²−B₀²−T)",
@@ -701,6 +689,30 @@
   "label": "thm:one-factor-joint-default",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Credit/OneFactorCopula.lean"},
+ {"uses": [],
+  "title": "The superhedging price dominates every martingale price",
+  "text":
+  "For every martingale probability vector $q$ and every claim $Y$,\n  $\\sum_n q_n Y_n$ is at most the superhedging price of $Y$.",
+  "name": "MathFin.le_superhedgingPrice",
+  "module": "MathFin.Risk.Superhedging",
+  "line": 125,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:superhedging-price-lower-bound",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"},
+ {"uses": ["def:contract"],
+  "title": "Value of a contract",
+  "text":
+  "The value of a contract is the $Q$-expectation of its discounted pathwise\n  present value, against a model that turns each observation the contract makes into a random\n  variable.",
+  "name": "MathFin.Contracts.Contract.value",
+  "module": "MathFin.Pricing.Value",
+  "line": 125,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:contract-value",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Value.lean"},
  {"uses": [],
   "title": "Key-rate durations sum to the parallel shift",
   "text":
@@ -813,18 +825,6 @@
   "label": "def:gbm",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoLemma2D.lean"},
- {"uses": [],
-  "title": "The contract language",
-  "text":
-  "A contract says what is paid and when, built from payoffs by combination.",
-  "name": "MathFin.Contracts.Contract",
-  "module": "MathFin.Contracts.Core",
-  "line": 162,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:contract",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Contracts/Core.lean"},
  {"uses": ["def:expected-shortfall", "thm:rockafellar-uryasev"],
   "title": "CVaR of a compound-Poisson loss",
   "text":
@@ -837,6 +837,18 @@
   "label": "thm:cvar-rockafellar-uryasev",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/CompoundPoissonCVaR.lean"},
+ {"uses": [],
+  "title": "The contract language",
+  "text":
+  "A contract says what is paid and when, built from payoffs by combination.",
+  "name": "MathFin.Contracts.Contract",
+  "module": "MathFin.Contracts.Core",
+  "line": 166,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:contract",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Contracts/Core.lean"},
  {"uses": [],
   "title": "The Vasicek bond price solves its PDE",
   "text":
@@ -925,6 +937,18 @@
   "label": "thm:markov-path-law",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/MarkovPathMeasure.lean"},
+ {"uses": ["def:coherent-risk-measure", "thm:superhedging-price-lower-bound"],
+  "title": "The superhedging price is a coherent risk measure",
+  "text":
+  "In the one-period finite-state market with a martingale probability vector, and\n  for a reference measure charging every state, the superhedging price of a claim, read as a\n  loss, is monotone, cash-invariant, positively homogeneous and subadditive. The equality with\n  the supremum of the martingale prices is not part of this statement.",
+  "name": "MathFin.isCoherentRiskMeasure_superhedgingPrice",
+  "module": "MathFin.Risk.Superhedging",
+  "line": 198,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:superhedging-coherent",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"},
  {"uses": ["def:gbm"],
   "title": "GBM coefficient matching (algebraic)",
   "text":
@@ -1048,13 +1072,14 @@
    "def:standard-normal-cdf",
    "def:numeraire-measure",
    "def:contract",
+   "def:contract-value",
    "thm:bs-call"],
   "title": "Caplet as a Black-76 call under the forward measure",
   "text":
   "If the simple rate $L(T_0,T_1)$ is lognormal under the $T_1$-forward measure\n  (a hypothesis, not derived from a rate model), the caplet is worth\n  $P(0,T_1)\\,\\delta\\,[F\\Phi(d_1) - K\\Phi(d_2)]$.",
   "name": "MathFin.Contracts.value_caplet_black76",
   "module": "MathFin.Models.Rates.Caplet",
-  "line": 246,
+  "line": 254,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:black76-caplet",
@@ -1100,6 +1125,18 @@
   "label": "thm:bracket-compensator",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Martingales/BracketCompensator.lean"},
+ {"uses": ["def:brownian-motion"],
+  "title": "Adapted Itô isometry",
+  "text":
+  "For random *adapted* simple integrands,\n  $E[(\\sum_k \\varphi_k \\Delta B_k)^2] = \\sum_k E[\\varphi_k^2]\\,\\Delta t_k$ — the\n  cross terms vanish by the weak Markov property, the exact point where Itô\n  departs from Wiener.",
+  "name": "MathFin.ItoIsometryAdapted.ito_isometry_discrete",
+  "module": "MathFin.Probability.Brownian.Ito.ItoIsometryAdapted",
+  "line": 268,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:ito-isometry-adapted",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoIsometryAdapted.lean"},
  {"uses":
   ["def:gbm",
    "def:brownian-motion",
@@ -1119,18 +1156,6 @@
   "label": "thm:bs-delta-hedge",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/DeltaHedge.lean"},
- {"uses": ["def:brownian-motion"],
-  "title": "Adapted Itô isometry",
-  "text":
-  "For random *adapted* simple integrands,\n  $E[(\\sum_k \\varphi_k \\Delta B_k)^2] = \\sum_k E[\\varphi_k^2]\\,\\Delta t_k$ — the\n  cross terms vanish by the weak Markov property, the exact point where Itô\n  departs from Wiener.",
-  "name": "MathFin.ItoIsometryAdapted.ito_isometry_discrete",
-  "module": "MathFin.Probability.Brownian.Ito.ItoIsometryAdapted",
-  "line": 268,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:ito-isometry-adapted",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoIsometryAdapted.lean"},
  {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
   "title": "Itô's formula for C² functions",
   "text":
@@ -1143,18 +1168,6 @@
   "label": "thm:ito-formula-c2",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoFormulaAdaptedProcess.lean"},
- {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
-  "title": "Time-dependent Itô formula, L² (Summit A′)",
-  "text":
-  "The classical $df = f_x\\,dB + (f_t + \\tfrac12 f_{xx})\\,dt$ in\n  integrated $L^2$ form: $f(T,B_T) - f(0,B_0) = \\int_0^T f_x(s,B_s)\\,dB_s\n  + \\int_0^T (f_t + \\tfrac12 f_{xx})(s,B_s)\\,ds$ for $C^{1,2}$ functions with bounded\n  higher partials — the time-dependent extension of Summit A, with the drift Riemann\n  term as the third vanishing limit and the joint continuity of $f_t$ *derived* from\n  its bounded partials. Unbounded coefficients stay out of scope — the named gap.",
-  "name": "MathFin.ito_formula_td_L2_bddDeriv",
-  "module": "MathFin.Probability.Brownian.Ito.ItoFormulaTD",
-  "line": 272,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:ito-formula-td-l2",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoFormulaTD.lean"},
  {"uses": ["def:brownian-motion"],
   "title": "Continuous Itô integral (CLM on [0,T])",
   "text":
@@ -1167,6 +1180,18 @@
   "label": "def:ito-integral-clm",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoIntegralCLM.lean"},
+ {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
+  "title": "Time-dependent Itô formula, L² (Summit A′)",
+  "text":
+  "The classical $df = f_x\\,dB + (f_t + \\tfrac12 f_{xx})\\,dt$ in\n  integrated $L^2$ form: $f(T,B_T) - f(0,B_0) = \\int_0^T f_x(s,B_s)\\,dB_s\n  + \\int_0^T (f_t + \\tfrac12 f_{xx})(s,B_s)\\,ds$ for $C^{1,2}$ functions with bounded\n  higher partials — the time-dependent extension of Summit A, with the drift Riemann\n  term as the third vanishing limit and the joint continuity of $f_t$ *derived* from\n  its bounded partials. Unbounded coefficients stay out of scope — the named gap.",
+  "name": "MathFin.ito_formula_td_L2_bddDeriv",
+  "module": "MathFin.Probability.Brownian.Ito.ItoFormulaTD",
+  "line": 272,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:ito-formula-td-l2",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoFormulaTD.lean"},
  {"uses": ["def:martingale-transform"],
   "title": "No arbitrage is local",
   "text":
@@ -1192,21 +1217,6 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Wiener/WienerIntegralL2.lean"},
  {"uses":
-  ["def:marginal-variance",
-   "thm:markowitz-lagrangian",
-   "def:portfolio-variance"],
-  "title": "Markowitz for random returns",
-  "text":
-  "For square-integrable returns, a budget- and target-feasible portfolio whose\n  covariances with the assets meet the Lagrangian condition has the least variance\n  $\\mathrm{Var}[\\sum_i w_i R_i]$ among feasible portfolios. Sufficiency only.",
-  "name": "MathFin.variance_le_of_lagrangian_FOC",
-  "module": "MathFin.Choice.Portfolio.MarkowitzLagrangian",
-  "line": 303,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:markowitz-random-returns",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
- {"uses":
   ["def:standard-normal-cdf",
    "thm:feynman-kac-heat-eq",
    "def:black-scholes-model",
@@ -1225,6 +1235,21 @@
   "label": "thm:bs-pde-feynman-kac",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/PDEFromFeynmanKac.lean"},
+ {"uses":
+  ["def:marginal-variance",
+   "thm:markowitz-lagrangian",
+   "def:portfolio-variance"],
+  "title": "Markowitz for random returns",
+  "text":
+  "For square-integrable returns, a budget- and target-feasible portfolio whose\n  covariances with the assets meet the Lagrangian condition has the least variance\n  $\\mathrm{Var}[\\sum_i w_i R_i]$ among feasible portfolios. Sufficiency only.",
+  "name": "MathFin.variance_le_of_lagrangian_FOC",
+  "module": "MathFin.Choice.Portfolio.MarkowitzLagrangian",
+  "line": 303,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:markowitz-random-returns",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
  {"uses": ["def:emm", "def:equivalent-measure"],
   "title": "Pasting one-period densities into an EMM",
   "text":
