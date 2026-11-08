@@ -291,7 +291,6 @@ details.tableview summary { cursor: pointer; color: var(--ink-2); }
 #tree-box .lbl.show { display: block; }
 #tree-box .lbl.fr { fill: var(--tr-blue); font-style: italic; font-weight: 400; }
 #tree-box .lbl.op { fill: var(--tr-star-ink); font-style: italic; font-weight: 600; }
-#tree-box .limb-lbl { font: 600 14.5px var(--sans); letter-spacing: .16em; text-transform: uppercase; fill: var(--muted); pointer-events: none; }
 #tree-box .ghost { fill: var(--tr-ghost); }
 #tree-box .trunk-lbl { font: 12px var(--sans); letter-spacing: .32em; text-transform: uppercase; fill: var(--tr-soil-ink); paint-order: stroke; stroke: var(--tr-soil-1); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
 #tree-box .root-lbl { font: 600 13.5px var(--sans); letter-spacing: .16em; text-transform: uppercase; fill: var(--tr-soil-ink); paint-order: stroke; stroke: var(--tr-soil-1); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
