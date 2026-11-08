@@ -166,7 +166,33 @@ def place_corpus(idx: DeclIndex, nodes: list[dict]) -> list[Placement]:
 
 
 def load_nodes(path: Path = NODES_JSON) -> list[dict]:
-    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+    """The exported Lean-tagged nodes, minus any label retired since the export.
+
+    An export older than a retirement still lists the retired node. The graph the next export
+    draws walks through an untagged declaration to what it uses, so a retired node is removed
+    here the same way: its users inherit its own `uses`."""
+    from .blueprint_issues import load_retired
+
+    gone = set(load_retired(path.parent / "blueprint_retired.toml"))
+    nodes = json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+    if not gone:
+        return nodes
+    by = {n["label"]: n for n in nodes}
+
+    def through(label: str, seen: frozenset[str] = frozenset()) -> list[str]:
+        if label not in gone:
+            return [label]
+        if label in seen or label not in by:
+            return []
+        return [u for v in by[label].get("uses", ()) for u in through(v, seen | {label})]
+
+    out = []
+    for n in nodes:
+        if n["label"] in gone:
+            continue
+        uses = list(dict.fromkeys(u for v in n.get("uses", ()) for u in through(v)))
+        out.append({**n, "uses": uses})
+    return out
 
 
 def load_frontier(path: Path = FRONTIER_TOML) -> list[dict]:

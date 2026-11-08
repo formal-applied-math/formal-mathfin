@@ -42,7 +42,7 @@ BEGIN = "<!-- BEGIN GENERATED SPINE (tools/blueprint_render.py — do not hand-e
 END = "<!-- END GENERATED SPINE -->"
 
 def mermaid_id(label: str) -> str:
-    """`thm:ito-formula-l2` → `itoFormulaL2` (mermaid-safe camelCase)."""
+    """`thm:ito-formula-c2` → `itoFormulaC2` (mermaid-safe camelCase)."""
     stem = label.split(":", 1)[-1]
     parts = re.split(r"[^A-Za-z0-9]+", stem)
     return parts[0] + "".join(p.capitalize() for p in parts[1:] if p)

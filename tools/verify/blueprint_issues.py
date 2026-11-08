@@ -21,7 +21,10 @@ The invariants, checked by ``check``:
    working towards is not on the program, and one whose issues all closed has either been
    delivered (tag it in ``MathFin/Blueprint.lean`` and delete the frontier entry) or dropped;
 4. every proved MathFin node is named by at least one issue or pull request, open or closed:
-   its delivery record.
+   its delivery record;
+5. a retired label (``docs/blueprint_retired.toml``: a waypoint folded into a landmark) is named
+   by no open issue or pull request, only by closed ones as history; it is never also a
+   live node, and what it folded into is one.
 
     python3 -m tools.verify.blueprint_issues check            # all issues, via `gh api`
     python3 -m tools.verify.blueprint_issues check --issues issues.json
@@ -43,6 +46,7 @@ from pathlib import Path
 REPO = "formal-applied-math/formal-mathfin"
 NODES_JSON = Path("docs/blueprint_nodes.json")
 FRONTIER_TOML = Path("docs/blueprint_frontier.toml")
+RETIRED_TOML = Path("docs/blueprint_retired.toml")
 
 MATH_LABELS = frozenset({"type:proof", "type:research", "open-problem", "frontier"})
 EXEMPT_LABELS = frozenset({"tracking"})
@@ -65,6 +69,13 @@ class Node:
     family: str = ""  # a family key of the same file, or ""
     ground: str = ""  # frontier only: the upstream material a Mathlib-only result builds on
     core: tuple[str, ...] = ()  # frontier only: corpus entries already proving part of it
+
+
+@dataclass(frozen=True)
+class Retired:
+    label: str
+    folded_into: str  # the surviving node (a live node or a frontier label)
+    reason: str = ""
 
 
 @dataclass
@@ -117,14 +128,28 @@ def load_frontier(path: Path = FRONTIER_TOML) -> list[Node]:
             for r in data.get("node", [])]
 
 
-def load_nodes(nodes_json: Path = NODES_JSON, frontier: Path = FRONTIER_TOML) -> dict[str, Node]:
+def load_retired(path: Path = RETIRED_TOML) -> dict[str, Retired]:
+    data = tomllib.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    return {r["label"]: Retired(r["label"], r["folded_into"], r.get("reason", ""))
+            for r in data.get("retired", [])}
+
+
+def load_nodes(nodes_json: Path = NODES_JSON, frontier: Path = FRONTIER_TOML,
+               retired: Path = RETIRED_TOML) -> dict[str, Node]:
+    """The live nodes: the exported Lean tags (a retired label is never one, even in an export
+    older than its retirement) and the frontier."""
+    gone = load_retired(retired)
     nodes: dict[str, Node] = {}
     for n in json.loads(nodes_json.read_text(encoding="utf-8")):
+        if n["label"] in gone:
+            continue
         nodes[n["label"]] = Node(label=n["label"], title=n.get("title") or n["label"],
                                  status=_lean_status(n), uses=tuple(n.get("uses", ())))
     for n in load_frontier(frontier):
         if n.label in nodes:
             raise ValueError(f"frontier node {n.label} is also a Lean-tagged node")
+        if n.label in gone:
+            raise ValueError(f"frontier node {n.label} is also a retired label")
         nodes[n.label] = n
     return nodes
 
@@ -178,6 +203,19 @@ def frontier_problems(nodes: dict[str, Node],
     return out
 
 
+def retired_problems(retired: dict[str, Retired], nodes: dict[str, Node]) -> list[str]:
+    """Static checks of the retired file (no network): a retired label is not a live node, and it
+    folded into one."""
+    out = []
+    for r in retired.values():
+        if r.label in nodes:
+            out.append(f"retired label `{r.label}` is also a live node")
+        if r.folded_into not in nodes:
+            out.append(f"retired label `{r.label}` folded into `{r.folded_into}`, "
+                       "which is not a node")
+    return out
+
+
 # ------------------------------------------------------------------ issues
 
 def fetch_issues(repo: str = REPO) -> list[Issue]:
@@ -209,12 +247,22 @@ class Problem:
 
 
 def check(issues: list[Issue], nodes: dict[str, Node],
-          corpus_status: dict[str, str] | None = None) -> list[Problem]:
+          corpus_status: dict[str, str] | None = None,
+          retired: dict[str, Retired] | None = None) -> list[Problem]:
+    retired = retired or {}
     problems = [Problem(m) for m in frontier_problems(nodes, corpus_status)]
+    problems += [Problem(m) for m in retired_problems(retired, nodes)]
     open_named: dict[str, list[int]] = {}
     any_named: dict[str, list[int]] = {}
     for i in issues:
         for label in i.nodes:
+            if label in retired and label not in nodes:
+                # a closed issue or pull request naming a folded label is history
+                if i.state == "open":
+                    problems.append(Problem(
+                        f"#{i.number} names `{label}`, which was folded into "
+                        f"`{retired[label].folded_into}`: name that node instead", i.number))
+                continue
             if label not in nodes:
                 problems.append(Problem(
                     f"#{i.number} names `{label}`, which is not a blueprint node", i.number))
@@ -287,7 +335,7 @@ def main(argv: list[str] | None = None) -> int:
 
     nodes = load_nodes()
     issues = load_issues(args.issues) if args.issues else fetch_issues(args.repo)
-    problems = check(issues, nodes)
+    problems = check(issues, nodes, retired=load_retired())
 
     if args.cmd == "comment":
         if args.number is None:

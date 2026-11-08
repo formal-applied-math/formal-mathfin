@@ -57,11 +57,45 @@ def test_frontier_areas_and_families_are_taxonomy_keys():
     assert not bad, f"frontier nodes with an unknown family: {bad}"
 
 
+_TAG = re.compile(r'attribute \[blueprint "([^"]+)".*?-/\)\]\s*([\w.\']+)', re.S)
+
+
+def _lean_tags() -> dict[str, str]:
+    """label -> declaration, from the `attribute [blueprint …]` lines of MathFin/Blueprint.lean
+    (read from the source, so it is current before docs/blueprint_nodes.json is re-exported)."""
+    text = (ROOT / "MathFin/Blueprint.lean").read_text("utf-8")
+    return {label: decl for label, decl in _TAG.findall(text)}
+
+
+def _frontier() -> list[dict]:
+    return tomllib.loads((ROOT / "docs/blueprint_frontier.toml").read_text("utf-8"))["node"]
+
+
+def test_tag_parser_sees_every_tag():
+    text = (ROOT / "MathFin/Blueprint.lean").read_text("utf-8")
+    assert len(_lean_tags()) == len(re.findall(r'^attribute \[blueprint "', text, re.M))
+
+
+def test_every_listed_landmark_is_a_blueprint_node():
+    tagged = set(_lean_tags().values())
+    listed = [(c["key"], d) for c in taxonomy.cells().values() for d in c.get("landmarks", [])]
+    missing = [(k, d) for k, d in listed if d not in tagged]
+    assert not missing, f"landmarks in the taxonomy that no `attribute [blueprint …]` tags: {missing}"
+    names = [d for _, d in listed]
+    assert len(names) == len(set(names)), "a landmark is listed under two cells"
+
+
+def test_every_cell_has_a_characteristic_node():
+    cells = taxonomy.cells()
+    parents = {taxonomy.part_of(k) for k in cells if "/" in k}
+    frontier_areas = {n["area"] for n in _frontier()}
+    bare = [k for k, c in cells.items()
+            if k not in parents and not c.get("landmarks") and k not in frontier_areas]
+    assert not bare, f"cells with neither a proved landmark nor a frontier node: {bare}"
+
+
 def test_joints_name_nodes_and_limbs():
-    nodes = json.loads((ROOT / "docs/blueprint_nodes.json").read_text("utf-8"))
-    labels = {n["label"] for n in nodes}
-    labels |= {n["label"] for n in
-               tomllib.loads((ROOT / "docs/blueprint_frontier.toml").read_text("utf-8"))["node"]}
+    labels = set(_lean_tags()) | {n["label"] for n in _frontier()}
     limbs = {p["key"] for p in taxonomy.parts() if p["kind"] == "limb"}
     for j in taxonomy.joints():
         assert j["node"] in labels, j["node"]

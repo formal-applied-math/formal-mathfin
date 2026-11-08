@@ -11,7 +11,7 @@
 
 [place]
 "def:gbm" = "valuation/diffusions"                 # declared in the Itô lemma file; it is the Black–Scholes asset
-"thm:gbm-sde" = "valuation/diffusions"             # its SDE, same reason
 "thm:esscher-tilt" = "probability/laws"            # declared beside Girsanov; the Gaussian tilt is a law
-"thm:expectation-ito" = "probability/brownian"     # declared with the heat kernel; it is Itô in expectation form
-"def:kelly-fraction" = "choice/dynamic"            # declared among the ratios; it is the log-utility optimum
+"thm:feynman-kac-heat-eq" = "probability/brownian"  # declared with the heat kernel; Feynman–Kac lives in Brownian calculus
+"thm:levy-characterization" = "probability/martingales"  # declared with the Brownian files; it is martingale theory
+"thm:forward-measure" = "valuation/term"           # declared among the pricing files; it is the bond-numéraire measure

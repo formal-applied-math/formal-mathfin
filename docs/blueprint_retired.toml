@@ -1,0 +1,255 @@
+# Labels the blueprint no longer carries as nodes, and the node each was folded into.
+#
+# The blueprint is a map of the field's landmarks (docs/specs/2026-11-08-organization-design.md,
+# section 5): a waypoint, that is a proof step, a hypothesis bundle, a special case of a landmark
+# that is already a node, or a bridge between two encodings, is not a node. When a tag is removed
+# from MathFin/Blueprint.lean its label is recorded here, so that issues and pull requests that
+# named it stay valid:
+#
+#   - a CLOSED issue or pull request naming a retired label is history, and fine;
+#   - an OPEN one is a problem (`python3 -m tools.verify.blueprint_issues check`): it should name
+#     `folded_into` instead;
+#   - a retired label is never also a live node, and `folded_into` is a live node or a frontier
+#     label.
+#
+# Fields: label, folded_into (the surviving label), reason (what the retired node was).
+
+[[retired]]
+label = "thm:ito-formula-l2"
+folded_into = "thm:ito-formula-c2"
+reason = "the bounded-derivative case of Itô's formula"
+
+[[retired]]
+label = "thm:ito-formula-td-l2"
+folded_into = "thm:ito-formula-c2"
+reason = "the time-dependent bounded-derivative case of Itô's formula"
+
+[[retired]]
+label = "thm:ito-squared-l2"
+folded_into = "thm:ito-formula-c2"
+reason = "the case f(x) = x² of Itô's formula"
+
+[[retired]]
+label = "thm:ito-integral-brownian"
+folded_into = "thm:ito-formula-c2"
+reason = "∫B dB, an application of Itô's formula"
+
+[[retired]]
+label = "thm:discrete-ito"
+folded_into = "thm:ito-formula-c2"
+reason = "the pathwise discrete identity: a proof step of Itô's formula"
+
+[[retired]]
+label = "thm:gbm-sde"
+folded_into = "thm:ito-formula-c2"
+reason = "coefficient matching for geometric Brownian motion: an application of Itô's formula"
+
+[[retired]]
+label = "thm:ito-isometry-adapted"
+folded_into = "def:ito-integral-clm"
+reason = "the isometry on simple adapted integrands: the first step of the Itô integral"
+
+[[retired]]
+label = "thm:wiener-isometry"
+folded_into = "def:ito-integral-clm"
+reason = "the Wiener integral, the Itô integral of a deterministic integrand"
+
+[[retired]]
+label = "thm:conditional-bracket"
+folded_into = "thm:bracket-compensator"
+reason = "the conditional Itô isometry behind the bracket compensator"
+
+[[retired]]
+label = "thm:stochastic-fubini-ito"
+folded_into = "thm:stochastic-fubini"
+reason = "the instance of the L² stochastic Fubini theorem at the Itô integral"
+
+[[retired]]
+label = "thm:martingale-representation-process"
+folded_into = "thm:martingale-representation"
+reason = "the process form of one theorem"
+
+[[retired]]
+label = "thm:binomial-replication"
+folded_into = "thm:binomial-representation"
+reason = "replication of a payoff, the special case of martingale representation"
+
+[[retired]]
+label = "def:binomial-no-arbitrage"
+folded_into = "thm:binomial-representation"
+reason = "the condition d < e^r < u, a hypothesis of the binomial theorems"
+
+[[retired]]
+label = "def:black-scholes-model"
+folded_into = "thm:bs-call"
+reason = "the lognormal hypothesis bundle of the call formula"
+
+[[retired]]
+label = "thm:bscallhyp-brownian"
+folded_into = "thm:bs-call"
+reason = "a construction of the hypothesis of the call formula from Brownian motion"
+
+[[retired]]
+label = "thm:bs-identity"
+folded_into = "thm:bs-pde"
+reason = "the density identity: a proof step of the Greeks and the PDE"
+
+[[retired]]
+label = "thm:bs-pde-brownian"
+folded_into = "thm:bs-pde"
+reason = "a second route to the Black–Scholes PDE"
+
+[[retired]]
+label = "thm:bs-pde-feynman-kac"
+folded_into = "thm:bs-pde"
+reason = "a third route to the Black–Scholes PDE"
+
+[[retired]]
+label = "thm:bs-self-financing"
+folded_into = "thm:bs-delta-hedge"
+reason = "the self-financing identity of the delta hedge"
+
+[[retired]]
+label = "def:heat-feynman-kac"
+folded_into = "thm:feynman-kac-heat-eq"
+reason = "the definition of the heat-kernel solution"
+
+[[retired]]
+label = "thm:expectation-ito"
+folded_into = "thm:feynman-kac-heat-eq"
+reason = "the expectation form of Itô's formula, a corollary of the heat equation"
+
+[[retired]]
+label = "thm:gbm-no-simple-arbitrage"
+folded_into = "thm:continuous-ftap"
+reason = "the Black–Scholes instance of the continuous-time FTAP"
+
+[[retired]]
+label = "thm:no-arbitrage-local"
+folded_into = "thm:dmw-ftap"
+reason = "the reduction step of Dalang–Morton–Willinger"
+
+[[retired]]
+label = "thm:emm-density-pasting"
+folded_into = "thm:dmw-ftap"
+reason = "the pasting step of Dalang–Morton–Willinger"
+
+[[retired]]
+label = "thm:pricing-measure"
+folded_into = "thm:second-ftap"
+reason = "uniqueness of the pricing measure in the Brownian market: the complete-implies-unique half of the second FTAP"
+
+[[retired]]
+label = "thm:numeraire-measure-equivalent"
+folded_into = "thm:change-of-numeraire"
+reason = "equivalence of the numéraire measure: part of the change-of-numéraire theorem"
+
+[[retired]]
+label = "def:numeraire-measure"
+folded_into = "thm:change-of-numeraire"
+reason = "the measure of the change-of-numéraire theorem"
+
+[[retired]]
+label = "def:equivalent-measure"
+folded_into = "def:emm"
+reason = "the prefix of the equivalent martingale measure"
+
+[[retired]]
+label = "def:snell-envelope"
+folded_into = "thm:snell-envelope"
+reason = "the recursion that defines the Snell envelope"
+
+[[retired]]
+label = "thm:american-put-boundary-expiry"
+folded_into = "thm:american-put-optimal-exercise"
+reason = "one regularity property of the free boundary"
+
+[[retired]]
+label = "thm:uniswap-v3-bs-bound"
+folded_into = "thm:uniswap-v3-covered-call"
+reason = "the expected form of the pathwise covered-call bound"
+
+[[retired]]
+label = "thm:one-factor-joint-default"
+folded_into = "thm:large-portfolio-limit"
+reason = "the joint default probability of Vasicek's one-factor model"
+
+[[retired]]
+label = "thm:expected-shortfall-dual-set"
+folded_into = "thm:expected-shortfall-dual"
+reason = "the finite-state representing set of expected shortfall"
+
+[[retired]]
+label = "thm:cvar-rockafellar-uryasev"
+folded_into = "thm:rockafellar-uryasev"
+reason = "the compound-Poisson case of the Rockafellar–Uryasev formula"
+
+[[retired]]
+label = "thm:markowitz-random-returns"
+folded_into = "thm:markowitz-lagrangian"
+reason = "the random-returns form of the same optimality theorem"
+
+[[retired]]
+label = "thm:two-asset-min-variance"
+folded_into = "thm:markowitz-lagrangian"
+reason = "the two-asset case of Markowitz optimality"
+
+[[retired]]
+label = "def:two-asset-min-variance"
+folded_into = "thm:markowitz-lagrangian"
+reason = "the closed-form weight of the two-asset case"
+
+[[retired]]
+label = "def:marginal-variance"
+folded_into = "thm:markowitz-lagrangian"
+reason = "the notation (Σw)_i of the first-order conditions"
+
+[[retired]]
+label = "def:tangent-portfolio"
+folded_into = "thm:tangent-portfolio-efficient"
+reason = "the first-order condition that defines the tangent portfolio"
+
+[[retired]]
+label = "def:capm-beta"
+folded_into = "thm:capm-equilibrium"
+reason = "the beta of the CAPM"
+
+[[retired]]
+label = "def:tracking-error"
+folded_into = "def:sharpe-ratio"
+reason = "a performance statistic defined by one formula"
+
+[[retired]]
+label = "def:kelly-fraction"
+folded_into = "thm:kelly-criterion"
+reason = "the fraction of the Kelly criterion"
+
+[[retired]]
+label = "thm:merton-dominance"
+folded_into = "thm:jump-diffusion-mixing"
+reason = "a consequence of Merton's formula"
+
+[[retired]]
+label = "thm:girsanov-call"
+folded_into = "thm:physical-measure-pricing"
+reason = "the one-date Gaussian-shift case of pricing under the physical measure"
+
+[[retired]]
+label = "def:zero-coupon-bond"
+folded_into = "thm:bond-immunization"
+reason = "the constant-rate zero-coupon price: a definition of the deterministic-curve calculus"
+
+[[retired]]
+label = "thm:level-payments-annuity"
+folded_into = "thm:bond-immunization"
+reason = "a level annuity on a flat curve: elementary curve algebra"
+
+[[retired]]
+label = "def:path-cylinder"
+folded_into = "thm:markov-path-law"
+reason = "the cylinder events of the Ionescu–Tulcea construction"
+
+[[retired]]
+label = "def:martingale-transform"
+folded_into = "thm:martingale-transform"
+reason = "the definition of the discrete stochastic integral"
