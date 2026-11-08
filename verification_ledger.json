@@ -4339,9 +4339,9 @@
     "mf-superhedging-price-coherent": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-11-08",
-      "elapsed_s": 3.0,
-      "input_hash": "d4d5d8c139c66cb97674ae528348287f48120bd3e135d798be1e06970a15160d",
-      "verified_at_commit": "cc895c4"
+      "elapsed_s": 2.7,
+      "input_hash": "d8257d5d49ba0fcb7c04005fbdf7596d43919c562dc0744cf3ce0226264f08db",
+      "verified_at_commit": "6b2aed4"
     },
     "mf-survival-at-zero": {
       "benchmark_file": "credit.json",
