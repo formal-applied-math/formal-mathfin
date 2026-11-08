@@ -58,7 +58,7 @@ the vega-weighted approximation eq. (13) are not treated); no-arbitrage content 
 quotes is not addressed; and the strike solving is proved only on the flat slice — on a
 non-flat smile the `Δ`-strike solves `Φ(d₊(k, σ(k)²τ)) = Δ` in `k`, whose existence and
 uniqueness is the smile's no-butterfly-arbitrage property (the Durrleman condition of
-`MathFin.Models.ModelFree.SVI`), not assumed or proved here. The premium-included delta
+`MathFin/Models/ModelFree/SVI/Assembly.lean`), not assumed or proved here. The premium-included delta
 convention (BRSD eq. (3)) is not treated; `v` is read in the driftless forward delta of
 BRSD eq. (4).
 
