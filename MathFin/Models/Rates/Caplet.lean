@@ -7,6 +7,7 @@ module
 
 public import MathFin.Models.BlackScholes.Forward
 public import MathFin.Models.Rates.ShortRate
+public import MathFin.Models.Rates.FRA
 public import MathFin.Pricing.ForwardMeasure
 public import MathFin.Models.Forwards.Black76
 

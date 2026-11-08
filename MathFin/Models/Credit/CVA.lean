@@ -78,7 +78,7 @@ CDS protection leg, Gaussian exposure, MSC 91G40, JEL G32, JEL G33
 
 namespace MathFin.CVA
 
-open MeasureTheory Real MathFin.DefaultDensity
+open MeasureTheory ProbabilityTheory Real MathFin.DefaultDensity
 
 variable {Ω₁ Ω₂ : Type*} {m₁ : MeasurableSpace Ω₁} {m₂ : MeasurableSpace Ω₂}
   {ν : Measure Ω₁} {μ : Measure Ω₂}
@@ -119,7 +119,6 @@ theorem integral_exposure_eq [IsProbabilityMeasure ν] [IsProbabilityMeasure μ]
       (hD.mul (measurable_expectedExposure hV)) hT)
   exact (Set.indicator_mul_left _ D (expectedExposure V ν)).symm
 
-open ProbabilityTheory in
 /-- **Gaussian expected exposure**: for `Z ~ N(0,1)`, `s > 0`, `b > 0`,
 `E[(a + b√s·Z)⁺] = a·Φ(d) + b√s·φ(d)` with `d = a/(b√s)`. The Bachelier call formula with
 strike `K = 1` and spot `a + 1`, so no `K > 0` restriction is lost. -/
@@ -131,8 +130,6 @@ theorem expectedExposure_gaussian [IsProbabilityMeasure ν] {Z : Ω₁ → ℝ}
   simp only [bachelierTerminal, bachelierD, add_sub_cancel_right] at this
   simpa only [add_right_comm a 1, add_sub_cancel_right] using this
 
-open ProbabilityTheory in
-open ProbabilityTheory in
 open scoped NNReal in
 /-- **Gaussian expected exposure at the law**: for `V_s ~ N(m, v)` with `v > 0`,
 `EE(s) = m Φ(m/√v) + √v φ(m/√v)`. The law of `V_s` is that of `m + √v Z` for `Z ~ N(0,1)`, so
