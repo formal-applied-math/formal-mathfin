@@ -81,7 +81,7 @@ noncomputable def discountedValue (D : ℝ) (Q : Measure Ω) (g : Ω → ℝ) : 
 below are this with `g` the knock-in, knock-out or vanilla payoff. -/
 theorem discountedValue_eq_contract_value (D : ℝ) (Q : Measure Ω) (g : Ω → ℝ) :
     discountedValue D Q g
-      = (Contracts.Contract.pay 0 (Contracts.Payoff.obs () 0)).value Q (fun _ ↦ D)
+      = (Contracts.Contract.pay 0 (Contracts.Payoff.obs () 0)).value Q (fun _ _ ↦ D)
           (fun _ _ ↦ g) := by
   simp only [discountedValue, Contracts.Contract.value_pay, Contracts.Payoff.eval,
     Contracts.scenarioAt, integral_const_mul]

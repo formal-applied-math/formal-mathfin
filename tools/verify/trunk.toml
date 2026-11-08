@@ -20,7 +20,6 @@ anchors = [
   "MathFin.NoArbitrage",
   "MathFin.IsCompleteMarket",
   "MathFin.Contracts.Contract.value",
-  "MathFin.Contracts.Contract.valueDisc",
   "MathFin.numeraireMeasure",
   "MathFin.statePricePricing",
   "MathFin.superReplicationPrice",

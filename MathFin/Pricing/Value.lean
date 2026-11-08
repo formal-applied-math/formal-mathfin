@@ -14,7 +14,8 @@ public import Mathlib.Probability.Martingale.Basic
 A `Contract` is still model-agnostic data until it meets a stochastic model. `Scenario`
 becomes a random variable once a model `X : ι → ℝ≥0 → Ω → ℝ` and an outcome `ω : Ω` are
 fixed (`scenarioAt`); `Contract.value` integrates the resulting `pathPV` against a pricing
-measure `Q` and a discount curve `D`.
+measure `Q` and a deflator `D : ℝ≥0 → Ω → ℝ`, each outcome's cash flows discounted along that
+outcome's path `t ↦ D t ω`. A deterministic discount curve is the deflator `fun t _ ↦ D t`.
 
 This file's connection to the market vocabulary is through `Martingale`, not `IsEMM`:
 `value_deliverAsset`'s pricing identity needs a `Q`-martingale price process and `Q` a
@@ -26,11 +27,14 @@ is load-bearing.
 ## Main definitions
 
 * `scenarioAt` — the scenario read off a model `X` at a single outcome `ω`.
-* `Contract.value` — the pricing integral `∫ ω, c.pathPV D (scenarioAt X ω) ∂Q`.
+* `zeroCurve` — the zero curve `t ↦ 𝔼_Q[D t]` of a deflator: the value of one unit paid at `t`.
+* `Contract.value` — the pricing integral `∫ ω, c.pathPV (D · ω) (scenarioAt X ω) ∂Q` under a
+  deflator `D`.
 
 ## Main results
 
-* `Contract.value_pay` — a single cash flow is worth the integral of its discounted payoff.
+* `Contract.value_pay` — a single cash flow is worth the integral of its deflated payoff;
+  `Contract.value_payFlows` — a schedule of them, the sum.
 * `Contract.value_scale`, `Contract.value_both` — `value` is homogeneous and additive,
   inherited from `pathPV_scale` and `pathPV_both`. The two carry different hypotheses on
   purpose: `value_scale` needs none, because `integral_const_mul` holds unconditionally in
@@ -44,9 +48,9 @@ is load-bearing.
   fixed times `0` and `T` — it carries no equivalence content, so it is stated against
   `Martingale` directly rather than the library's `IsEMM` bundle, whose `ac`/`ac'` fields
   this argument never needs.
-* `Contract.value_eq_of_pathPV_eq`, `value_fixedFlows` — a contract that pays the same amount
-  along every scenario, a schedule of fixed cash flows among them, is worth that amount in every
-  model.
+* `Contract.value_eq_of_pathPV_eq`, `value_fixedFlows_deterministic` — a contract whose deflated
+  present value is the same along every outcome is worth that amount; a schedule of fixed cash
+  flows on a deterministic curve is one.
 * `Contract.value_congr_ae` — a fixed-dated contract has the same value in two models that agree
   almost surely at the `(underlying, date)` observations it reads (`Contract.obsList`).
 * `Contract.value_process_martingale` — the conditional-expectation value process of a
@@ -87,6 +91,8 @@ written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 ## References
 
 * [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
+  sec. 1.2
 * [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 1.1
 * [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], 5.2;
   ch. 5
@@ -109,23 +115,28 @@ variable {ι Ω : Type*} {mΩ : MeasurableSpace Ω}
 /-- The scenario read off a model at a single outcome. -/
 def scenarioAt (X : ι → ℝ≥0 → Ω → ℝ) (ω : Ω) : Scenario ι := fun i t ↦ X i t ω
 
-/-- The value of a `Contract`: the `Q`-expectation of its discounted pathwise present value,
-against a model `X` that reifies each `Scenario` observation as a random variable. -/
-noncomputable def Contract.value (Q : Measure Ω) (D : ℝ≥0 → ℝ)
-    (X : ι → ℝ≥0 → Ω → ℝ) (c : Contract ι) : ℝ :=
-  ∫ ω, c.pathPV D (scenarioAt X ω) ∂Q
+/-- The value of a `Contract` under a measure `Q` and a **deflator** `D : ℝ≥0 → Ω → ℝ`: the
+`Q`-expectation of its present value along each outcome `ω`, each cash flow at `t` multiplied by
+`D t ω`, against a model `X` that reifies each `Scenario` observation as a random variable.
 
-/-- **The value of a single cash flow** is the integral of its discounted payoff. Every
+The deflator is stochastic: a short-rate model's `D t = exp(−∫₀ᵗ r_s ds)`, or a market's
+`N 0 / N t` for a numéraire `N`. A deterministic discount curve `D : ℝ≥0 → ℝ` is the deflator
+`fun t _ ↦ D t`. -/
+noncomputable def Contract.value (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ)
+    (X : ι → ℝ≥0 → Ω → ℝ) (c : Contract ι) : ℝ :=
+  ∫ ω, c.pathPV (fun t ↦ D t ω) (scenarioAt X ω) ∂Q
+
+/-- **The value of a single cash flow** is the integral of its deflated payoff. Every
 instrument that pays once (`Contracts/Instruments/Options.lean`) reaches its closed form in a
 model by rewriting through this lemma. -/
-theorem Contract.value_pay (Q : Measure Ω) (D : ℝ≥0 → ℝ) (X : ι → ℝ≥0 → Ω → ℝ) (t : ℝ≥0)
+theorem Contract.value_pay (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ) (X : ι → ℝ≥0 → Ω → ℝ) (t : ℝ≥0)
     (a : Payoff ι) :
-    (Contract.pay t a).value Q D X = ∫ ω, D t * a.eval (scenarioAt X ω) ∂Q := by
+    (Contract.pay t a).value Q D X = ∫ ω, D t ω * a.eval (scenarioAt X ω) ∂Q := by
   simp [Contract.value, Contract.pathPV, Contract.cashflows]
 
 /-- `value` is homogeneous under `scale`, unconditionally: `integral_const_mul` holds even
 off the integrable set (both sides are `0` there), so no integrability hypothesis is needed. -/
-theorem Contract.value_scale (Q : Measure Ω) (D : ℝ≥0 → ℝ)
+theorem Contract.value_scale (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ)
     (X : ι → ℝ≥0 → Ω → ℝ) (r : ℝ) (a : Contract ι) :
     (Contract.scale r a).value Q D X = r * a.value Q D X := by
   simp only [value, Contract.pathPV_scale]
@@ -133,16 +144,28 @@ theorem Contract.value_scale (Q : Measure Ω) (D : ℝ≥0 → ℝ)
 
 /-- `value` is additive under `both`, given both summands are integrable — `integral_add`
 is false without that hypothesis on either side, unlike `value_scale`'s unconditional case. -/
-theorem Contract.value_both (Q : Measure Ω) (D : ℝ≥0 → ℝ)
+theorem Contract.value_both (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ)
     (X : ι → ℝ≥0 → Ω → ℝ) (a b : Contract ι)
-    (ha : Integrable (fun ω ↦ a.pathPV D (scenarioAt X ω)) Q)
-    (hb : Integrable (fun ω ↦ b.pathPV D (scenarioAt X ω)) Q) :
+    (ha : Integrable (fun ω ↦ a.pathPV (fun t ↦ D t ω) (scenarioAt X ω)) Q)
+    (hb : Integrable (fun ω ↦ b.pathPV (fun t ↦ D t ω) (scenarioAt X ω)) Q) :
     (Contract.both a b).value Q D X = a.value Q D X + b.value Q D X := by
   simp only [value, Contract.pathPV_both]
   exact integral_add ha hb
 
+/-- A schedule of payments is worth the sum of its payments, given each deflated payoff is
+integrable. -/
+theorem Contract.value_payFlows (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ) (X : ι → ℝ≥0 → Ω → ℝ)
+    (t : ℕ → ℝ≥0) (a : ℕ → Payoff ι) (n : ℕ)
+    (hint : ∀ i < n, Integrable (fun ω ↦ D (t i) ω * (a i).eval (scenarioAt X ω)) Q) :
+    (payFlows t a n).value Q D X
+      = ∑ i ∈ Finset.range n, (Contract.pay (t i) (a i)).value Q D X := by
+  simp only [Contract.value_pay]
+  rw [Contract.value]
+  simp only [pathPV_payFlows]
+  exact integral_finsetSum _ fun i hi ↦ hint i (Finset.mem_range.1 hi)
+
 /-- Under a `Q`-martingale `S` and `Q` a probability measure, a contract that simply
-delivers the asset `S` at time `T`, undiscounted, is worth `∫ ω, S 0 ω ∂Q` today — the
+delivers the asset `S` at time `T`, undeflated, is worth `∫ ω, S 0 ω ∂Q` today — the
 `Q`-price of `S` at time `0`. This is `Martingale.condExp_ae_eq` between `0` and `T`
 chained through `integral_condExp`: a martingale-plus-probability-measure fact evaluated
 at fixed times, the same conditional-expectation machinery `value_process_martingale`
@@ -154,7 +177,7 @@ this argument never needs; that mutual-absolute-continuity content lives elsewhe
 theorem Contract.value_deliverAsset {𝓕 : Filtration ℝ≥0 mΩ}
     {S : ℝ≥0 → Ω → ℝ} {Q : Measure Ω} [IsProbabilityMeasure Q]
     (hM : Martingale S 𝓕 Q) (T : ℝ≥0) :
-    (Contract.pay T (Payoff.obs () T)).value Q (fun _ ↦ 1) (fun _ ↦ S)
+    (Contract.pay T (Payoff.obs () T)).value Q (fun _ _ ↦ 1) (fun _ ↦ S)
       = ∫ ω, S 0 ω ∂Q := by
   simp only [value, Contract.pathPV, Contract.cashflows, Payoff.eval, scenarioAt,
     List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, one_mul, add_zero]
@@ -168,9 +191,9 @@ is the integrable case. Needs **no** EMM hypothesis either: it is a property of 
 expectation, not of the pricing measure — no theorem in this file needs `IsEMM`;
 `value_deliverAsset` needs only `Martingale S 𝓕 Q` and `[IsProbabilityMeasure Q]`. -/
 theorem Contract.value_process_martingale {Q : Measure Ω} {𝓕 : Filtration ℝ≥0 mΩ}
-    [SigmaFiniteFiltration Q 𝓕] (D : ℝ≥0 → ℝ) (X : ι → ℝ≥0 → Ω → ℝ)
+    [SigmaFiniteFiltration Q 𝓕] (D : ℝ≥0 → Ω → ℝ) (X : ι → ℝ≥0 → Ω → ℝ)
     (c : Contract ι) :
-    Martingale (fun t ↦ Q[fun ω ↦ c.pathPV D (scenarioAt X ω) | 𝓕 t]) 𝓕 Q :=
+    Martingale (fun t ↦ Q[fun ω ↦ c.pathPV (fun s ↦ D s ω) (scenarioAt X ω) | 𝓕 t]) 𝓕 Q :=
   martingale_condExp _ 𝓕 Q
 
 /-! ### Two models that agree where the contract looks -/
@@ -178,7 +201,7 @@ theorem Contract.value_process_martingale {Q : Measure Ω} {𝓕 : Filtration �
 /-- **A fixed-dated contract has the same value in two models that agree almost surely at the
 observations it reads.** The models need not agree anywhere else: this is what lets a model that
 is only Brownian up to a horizon price a contract whose dates lie before it. -/
-theorem Contract.value_congr_ae {Q : Measure Ω} {D : ℝ≥0 → ℝ} {X Y : ι → ℝ≥0 → Ω → ℝ}
+theorem Contract.value_congr_ae {Q : Measure Ω} {D : ℝ≥0 → Ω → ℝ} {X Y : ι → ℝ≥0 → Ω → ℝ}
     (c : Contract ι) (hc : c.FixedDated)
     (h : ∀ p ∈ c.obsList, ∀ᵐ ω ∂Q, X p.1 p.2 ω = Y p.1 p.2 ω) :
     c.value Q D X = c.value Q D Y := by
@@ -189,17 +212,58 @@ theorem Contract.value_congr_ae {Q : Measure Ω} {D : ℝ≥0 → ℝ} {X Y : ι
   unfold Contract.pathPV
   rw [Contract.cashflows_congr c hc (s := scenarioAt X ω) (s' := scenarioAt Y ω) hω]
 
-/-- **A contract that pays the same along every scenario is worth that amount** in every model,
-under any probability measure. -/
-theorem Contract.value_eq_of_pathPV_eq {Q : Measure Ω} [IsProbabilityMeasure Q] {D : ℝ≥0 → ℝ}
-    (X : ι → ℝ≥0 → Ω → ℝ) {c : Contract ι} {v : ℝ} (h : ∀ s, c.pathPV D s = v) :
+/-- **A contract whose deflated present value is the same along every outcome is worth that
+amount**, under any probability measure. -/
+theorem Contract.value_eq_of_pathPV_eq {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {D : ℝ≥0 → Ω → ℝ} (X : ι → ℝ≥0 → Ω → ℝ) {c : Contract ι} {v : ℝ}
+    (h : ∀ ω, c.pathPV (fun t ↦ D t ω) (scenarioAt X ω) = v) :
     c.value Q D X = v := by
   simp [Contract.value, h]
 
-/-- In every model, a schedule of fixed cash flows is worth `∑ D(tᵢ) cᵢ`. -/
-theorem value_fixedFlows {Q : Measure Ω} [IsProbabilityMeasure Q] (D : ℝ≥0 → ℝ)
+/-- On a deterministic discount curve, in every model, a schedule of fixed cash flows is worth
+`∑ D(tᵢ) cᵢ`. Under a stochastic deflator it is worth the same sum on the zero curve
+`t ↦ 𝔼_Q[D t]` (`value_fixedFlows`). -/
+theorem value_fixedFlows_deterministic {Q : Measure Ω} [IsProbabilityMeasure Q] (D : ℝ≥0 → ℝ)
     (X : ι → ℝ≥0 → Ω → ℝ) (t : ℕ → ℝ≥0) (c : ℕ → ℝ) (n : ℕ) :
-    (fixedFlows t c n : Contract ι).value Q D X = ∑ i ∈ Finset.range n, D (t i) * c i :=
-  Contract.value_eq_of_pathPV_eq X fun s ↦ pathPV_fixedFlows D s t c n
+    (fixedFlows t c n : Contract ι).value Q (fun s _ ↦ D s) X
+      = ∑ i ∈ Finset.range n, D (t i) * c i :=
+  Contract.value_eq_of_pathPV_eq X fun ω ↦ pathPV_fixedFlows D (scenarioAt X ω) t c n
+
+/-! ### The zero curve -/
+
+/-- The **zero curve** of a deflator, `P(0, t) = 𝔼_Q[D t]`: the value of one
+unit paid at `t`. -/
+noncomputable def zeroCurve (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ) (t : ℝ≥0) : ℝ :=
+  ∫ ω, D t ω ∂Q
+
+/-- **A schedule of fixed cash flows is priced off the zero curve**: under a deflator with each
+`D tᵢ` integrable, `fixedFlows t c n` is worth `∑ P(0, tᵢ) cᵢ`. -/
+theorem value_fixedFlows {Q : Measure Ω} {D : ℝ≥0 → Ω → ℝ} (X : ι → ℝ≥0 → Ω → ℝ)
+    (t : ℕ → ℝ≥0) (c : ℕ → ℝ) (n : ℕ) (hD : ∀ i < n, Integrable (D (t i)) Q) :
+    (fixedFlows t c n : Contract ι).value Q D X
+      = ∑ i ∈ Finset.range n, zeroCurve Q D (t i) * c i := by
+  simp only [Contract.value, pathPV_fixedFlows]
+  rw [integral_finsetSum _ fun i hi ↦ (hD i (Finset.mem_range.1 hi)).mul_const _]
+  simp only [zeroCurve, integral_mul_const]
+
+/-- **A deflator reaches a fixed schedule only through its zero curve**: its value under `D` is
+its value on the deterministic curve `zeroCurve Q D`, in every model. -/
+theorem value_fixedFlows_eq_zeroCurve {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {D : ℝ≥0 → Ω → ℝ} (X : ι → ℝ≥0 → Ω → ℝ) (t : ℕ → ℝ≥0) (c : ℕ → ℝ) (n : ℕ)
+    (hD : ∀ i < n, Integrable (D (t i)) Q) :
+    (fixedFlows t c n : Contract ι).value Q D X
+      = (fixedFlows t c n : Contract ι).value Q (fun s _ ↦ zeroCurve Q D s) X := by
+  rw [value_fixedFlows X t c n hD, value_fixedFlows_deterministic]
+
+/-- A closed-form zero curve prices a fixed schedule: if `𝔼_Q[D tᵢ] = P(tᵢ) ≠ 0` at each payment
+date, the schedule is worth `∑ P(tᵢ) cᵢ`. Integrability is not assumed: a function whose integral
+is nonzero is integrable. -/
+theorem value_fixedFlows_of_zeroCurve_eq {Q : Measure Ω} {D : ℝ≥0 → Ω → ℝ}
+    (X : ι → ℝ≥0 → Ω → ℝ) (t : ℕ → ℝ≥0) (c : ℕ → ℝ) (n : ℕ) {P : ℝ≥0 → ℝ}
+    (hP : ∀ i < n, zeroCurve Q D (t i) = P (t i)) (hP0 : ∀ i < n, P (t i) ≠ 0) :
+    (fixedFlows t c n : Contract ι).value Q D X = ∑ i ∈ Finset.range n, P (t i) * c i := by
+  rw [value_fixedFlows X t c n fun i hi ↦
+    Integrable.of_integral_ne_zero ((hP i hi).trans_ne (hP0 i hi))]
+  exact Finset.sum_congr rfl fun i hi ↦ by rw [hP i (Finset.mem_range.1 hi)]
 
 end MathFin.Contracts

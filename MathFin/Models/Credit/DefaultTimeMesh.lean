@@ -281,7 +281,7 @@ theorem tendsto_value_cdsBuyer_coxDefaultTime (hh : Continuous h) (hpos : ∀ s,
     (hξmeas : Measurable ξ) (hξlaw : Measure.map ξ μ = expMeasure 1) (r s R : ℝ) {T : ℝ}
     (hT : 0 ≤ T) {t : ℕ → ℕ → ℝ≥0} {n : ℕ → ℕ} {δ : ℕ → ℝ}
     (hgrid : ∀ k, IsGridOfMesh (t k) (n k) T (δ k)) (hδ : Tendsto δ atTop (𝓝 0)) :
-    Tendsto (fun k ↦ (cdsBuyer (t k) s R (n k)).value μ (fun u : ℝ≥0 ↦ Real.exp (-(r * u)))
+    Tendsto (fun k ↦ (cdsBuyer (t k) s R (n k)).value μ (fun (u : ℝ≥0) _ ↦ Real.exp (-(r * u)))
       (defaultIndicator (coxDefaultTime h ξ))) atTop
       (𝓝 (protectionLeg R r h T - premiumLeg s r h T)) := by
   simp only [value_cdsBuyer_coxDefaultTime hh hpos hdiv hξmeas hξlaw, protectionLeg, premiumLeg]
@@ -298,9 +298,10 @@ theorem tendsto_value_cdsProtectionLeg_coxDefaultTime (hh : Continuous h) (hpos 
     (hξmeas : Measurable ξ) (hξlaw : Measure.map ξ μ = expMeasure 1) (r R : ℝ) {T : ℝ≥0}
     {t : ℕ → ℕ → ℝ≥0} {n : ℕ → ℕ} {δ : ℕ → ℝ}
     (hgrid : ∀ k, IsGridOfMesh (t k) (n k) T (δ k)) (hδ : Tendsto δ atTop (𝓝 0)) :
-    Tendsto (fun k ↦ (cdsProtectionLeg (t k) R (n k)).value μ (fun u : ℝ≥0 ↦ Real.exp (-(r * u)))
+    Tendsto (fun k ↦ (cdsProtectionLeg (t k) R (n k)).value μ
+      (fun (u : ℝ≥0) _ ↦ Real.exp (-(r * u)))
       (defaultIndicator (coxDefaultTime h ξ))) atTop
-      (𝓝 ((cdsProtectionAtDefault T R).value μ (fun u : ℝ≥0 ↦ Real.exp (-(r * u)))
+      (𝓝 ((cdsProtectionAtDefault T R).value μ (fun (u : ℝ≥0) _ ↦ Real.exp (-(r * u)))
         (defaultIndicator (coxDefaultTime h ξ)))) := by
   rw [value_cdsProtectionAtDefault_coxDefaultTime hh hpos hdiv hξmeas hξlaw, protectionLeg]
   simp only [value_cdsProtectionLeg (measurable_coxDefaultTime hh hpos hξmeas)

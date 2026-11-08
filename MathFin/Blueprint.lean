@@ -852,7 +852,7 @@ attribute [blueprint "thm:black76-caplet" (title := "Caplet as a Black-76 call u
   (statement := /-- If the simple rate $L(T_0,T_1)$ is lognormal under the $T_1$-forward measure
   (a hypothesis, not derived from a rate model), the caplet is worth
   $P(0,T_1)\,\delta\,[F\Phi(d_1) - K\Phi(d_2)]$. -/)]
-  MathFin.Contracts.valueDisc_caplet_black76
+  MathFin.Contracts.value_caplet_black76
 
 attribute [blueprint "thm:level-payments-annuity" (title := "Level payments are an annuity")
   (statement := /-- $n$ payments of $c$ at $\Delta t, \dots, n\Delta t$, discounted by the

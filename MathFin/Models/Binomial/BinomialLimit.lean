@@ -66,9 +66,9 @@ theorem tendsto_binomial_value_europeanCall {Q : Measure Ω} [IsProbabilityMeasu
     Tendsto (fun n : ℕ ↦ (europeanCall K T).value
         (coinFlipMeasure (crrProb r σ T n).toNNReal (Real.toNNReal_le_one.mpr
           (crrProb_mem_Icc (fun _ hn ↦ binomialNoArb_crr hbs.T_pos hrT hn) n).2))
-        (Binomial.discount (crrPerStepRate r T n) (crrStep T n))
+        (fun t _ ↦ Binomial.discount (crrPerStepRate r T n) (crrStep T n) t)
         (Binomial.assets S₀ (crrUp σ T n) (crrDown σ T n) (crrStep T n))) atTop
-      (𝓝 ((europeanCall K T).value Q (fun _ ↦ Real.exp (-r * T))
+      (𝓝 ((europeanCall K T).value Q (fun _ _ ↦ Real.exp (-r * T))
         (BlackScholes.assets S₀ r σ T Z))) := by
   have hna (n : ℕ) (hn : 0 < n) := binomialNoArb_crr hbs.T_pos hrT hn
   have hTN (n : ℕ) : (T : ℝ) / crrStep T n = n := div_div_cancel₀ hbs.T_pos.ne'

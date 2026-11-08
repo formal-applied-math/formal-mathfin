@@ -99,7 +99,7 @@ theorem martingale_discreteAssets (hQ : IsEMM 𝓕 P S T Q) :
 any maturity, is worth `S₀ - K` (the price is in numeraire units, `D ≡ 1`), for a price starting
 at `S₀`. This is `value_forward_of_martingale`. -/
 theorem value_forward (hQ : IsEMM 𝓕 P S T Q) (hS₀ : ∀ ω, S 0 ω = S₀) (K : ℝ) (τ : ℝ≥0) :
-    (forward K τ).value Q (fun _ ↦ 1) (discreteAssets S T) = S₀ - K := by
+    (forward K τ).value Q (fun _ _ ↦ 1) (discreteAssets S T) = S₀ - K := by
   haveI := hQ.isProb
   have := value_forward_of_martingale (K := K) (T := τ) (𝓕 := floorFiltration 𝓕)
     (martingale_discreteAssets hQ) rfl
@@ -113,8 +113,8 @@ theorem value_forward (hQ : IsEMM 𝓕 P S T Q) (hS₀ : ∀ ω, S 0 ω = S₀) 
 is `S₀ - K`. This is `value_europeanCall_sub_put_of_martingale`. -/
 theorem value_europeanCall_sub_put (hQ : IsEMM 𝓕 P S T Q) (hS₀ : ∀ ω, S 0 ω = S₀) (K : ℝ)
     (τ : ℝ≥0) :
-    (europeanCall K τ).value Q (fun _ ↦ 1) (discreteAssets S T)
-      - (europeanPut K τ).value Q (fun _ ↦ 1) (discreteAssets S T) = S₀ - K := by
+    (europeanCall K τ).value Q (fun _ _ ↦ 1) (discreteAssets S T)
+      - (europeanPut K τ).value Q (fun _ _ ↦ 1) (discreteAssets S T) = S₀ - K := by
   haveI := hQ.isProb
   have := value_europeanCall_sub_put_of_martingale (K := K) (T := τ) (𝓕 := floorFiltration 𝓕)
     (martingale_discreteAssets hQ) rfl
@@ -135,9 +135,9 @@ theorem exists_isEMM_parity [IsProbabilityMeasure P]
     (hcond : ConditionalOnePeriodFTAP 𝓕 P S T) (hNA : NoArbitrage 𝓕 P S T)
     (hS₀ : ∀ ω, S 0 ω = S₀) :
     ∃ Q, IsEMM 𝓕 P S T Q ∧ ∀ (K : ℝ) (τ : ℝ≥0),
-      (forward K τ).value Q (fun _ ↦ 1) (discreteAssets S T) = S₀ - K ∧
-      (europeanCall K τ).value Q (fun _ ↦ 1) (discreteAssets S T)
-        - (europeanPut K τ).value Q (fun _ ↦ 1) (discreteAssets S T) = S₀ - K := by
+      (forward K τ).value Q (fun _ _ ↦ 1) (discreteAssets S T) = S₀ - K ∧
+      (europeanCall K τ).value Q (fun _ _ ↦ 1) (discreteAssets S T)
+        - (europeanPut K τ).value Q (fun _ _ ↦ 1) (discreteAssets S T) = S₀ - K := by
   obtain ⟨Q, hQ⟩ := exists_isEMM_of_noArbitrage_of_conditionalFTAP hS hint hcond hNA
   exact ⟨Q, hQ, fun K τ ↦ ⟨value_forward hQ hS₀ K τ, value_europeanCall_sub_put hQ hS₀ K τ⟩⟩
 

@@ -97,7 +97,7 @@ noncomputable def assets (S_0 r σ T : ℝ) (Z : Ω → ℝ) : Unit → ℝ≥0 
 `europeanCall K T` under `BlackScholes.assets` is exactly `bs_call_formula`'s right-hand side. -/
 theorem value_europeanCall {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :
-    (europeanCall K T).value Q (fun _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
+    (europeanCall K T).value Q (fun _ _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
       = S_0 * Phi (bsd1 S_0 K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) := by
   rw [europeanCall, Contract.value_pay]
   exact MathFin.bs_call_formula h
@@ -107,7 +107,7 @@ cash-or-nothing formula: the value of `digitalCall K T` under `BlackScholes.asse
 `bs_cash_or_nothing_formula`'s right-hand side. -/
 theorem value_digitalCall {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :
-    (digitalCall K T).value Q (fun _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
+    (digitalCall K T).value Q (fun _ _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
       = Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) := by
   rw [digitalCall, Contract.value_pay]
   have heq (ω : Ω) : Payoff.eval (scenarioAt (assets S_0 r σ T Z) ω)
@@ -122,7 +122,7 @@ theorem value_digitalCall {Q : Measure Ω} [IsProbabilityMeasure Q]
 `europeanPut K T` under `BlackScholes.assets` is exactly `bs_put_formula`'s right-hand side. -/
 theorem value_europeanPut {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :
-    (europeanPut K T).value Q (fun _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
+    (europeanPut K T).value Q (fun _ _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
       = K * Real.exp (-r * T) * Phi (-(bsd2 S_0 K r σ T)) - S_0 * Phi (-(bsd1 S_0 K r σ T)) := by
   rw [europeanPut, Contract.value_pay]
   exact MathFin.bs_put_formula h
@@ -131,7 +131,7 @@ theorem value_europeanPut {Q : Measure Ω} [IsProbabilityMeasure Q]
 mean `S₀` (`discounted_terminal_eq_S0`), so this is `value_forward_of_integral`. -/
 theorem value_forward {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :
-    (forward K T).value Q (fun _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
+    (forward K T).value Q (fun _ _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
       = S_0 - K * Real.exp (-r * T) :=
   value_forward_of_integral ((integrable_bsTerminal h.Z_law S_0 r σ T).const_mul _)
     (by simpa [assets, neg_mul] using discounted_terminal_eq_S0 h)
@@ -146,7 +146,7 @@ one more inline payoff lambda. -/
 theorem value_cappedCall {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K₁ K₂ r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ}
     (h₁ : BSCallHyp Q S_0 K₁ r σ T Z) (h₂ : BSCallHyp Q S_0 K₂ r σ T Z) :
-    (cappedCall K₁ K₂ T).value Q (fun _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
+    (cappedCall K₁ K₂ T).value Q (fun _ _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
       = (S_0 * Phi (bsd1 S_0 K₁ r σ T) - K₁ * Real.exp (-r * T) * Phi (bsd2 S_0 K₁ r σ T))
       - (S_0 * Phi (bsd1 S_0 K₂ r σ T) - K₂ * Real.exp (-r * T) * Phi (bsd2 S_0 K₂ r σ T)) := by
   have hX := (integrable_bsTerminal h₁.Z_law S_0 r σ T).const_mul (Real.exp (-r * T))
@@ -167,7 +167,7 @@ volatility `aσ`. -/
 theorem value_powerCall {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (a : ℕ) (ha : 0 < a) (hK : 0 < K)
     (h : BSCallHyp Q S_0 K r σ T Z) :
-    (powerCall a K T).value Q (fun _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
+    (powerCall a K T).value Q (fun _ _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
       = bsPowerEffectiveSpot S_0 r σ T a *
           Phi (bsd1 (bsPowerEffectiveSpot S_0 r σ T a) K r ((a : ℝ) * σ) T)
         - K * Real.exp (-r * T) *
