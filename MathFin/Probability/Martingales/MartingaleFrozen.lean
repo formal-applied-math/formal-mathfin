@@ -23,12 +23,20 @@ frozen martingale, and the three consequences read off it (adaptedness, integrab
 martingale identity before the horizon) are the forward direction of `martingale_min_iff`. On
 `ℕ` the identity need only be given one step at a time (`martingale_min_of_condExp_succ`).
 
+A frozen process is `𝓕 T`-measurable at every time, so whether it is a martingale depends on the
+measure only through its restriction to `𝓕 T`: two measures that agree on `𝓕 T` have the same
+frozen martingales (`martingale_min_of_trim_eq`). This is why a pricing measure up to `T` need only
+be equivalent to the reference measure on `𝓕 T` (`Market.IsPricingMeasure`).
+
 ## Main results
 
 * `martingale_min_iff`: `t ↦ S (min t T)` is a martingale for `𝓕` iff `S` is adapted and
   integrable on `{t ≤ T}` and `S s = E[S t | 𝓕 s]` for `s ≤ t ≤ T` (finite measure).
 * `martingale_min_of_condExp_succ`: on `ℕ`, adaptedness and integrability up to `T` and the
   one-step identity `S t = E[S (t+1) | 𝓕 t]` for `t < T` make `n ↦ S (min n T)` a martingale.
+* `martingale_min_of_martingale`: a martingale frozen at any time is one.
+* `martingale_min_of_trim_eq`: a frozen martingale stays one under any measure with the same
+  restriction to `𝓕 T`.
 
 ## Tags
 
@@ -72,6 +80,36 @@ theorem martingale_min_iff [IsFiniteMeasure μ] :
   · rw [min_eq_right hi.le]
     exact .of_eq (condExp_of_stronglyMeasurable (𝓕.le i)
       ((hadapt T le_rfl).mono (𝓕.mono hi.le)) (hint T le_rfl))
+
+/-- **A martingale frozen at any time is a martingale.** -/
+theorem martingale_min_of_martingale [IsFiniteMeasure μ] (hS : Martingale S 𝓕 μ) (T : ι) :
+    Martingale (fun t ↦ S (min t T)) 𝓕 μ :=
+  martingale_min_iff.mpr
+    ⟨fun t _ ↦ hS.1 t, fun t _ ↦ hS.integrable t, fun _ _ hst _ ↦ (hS.condExp_ae_eq hst).symm⟩
+
+/-- **A frozen martingale depends on the measure only up to the horizon.** If `t ↦ S (min t T)` is
+a `μ`-martingale and `ν` agrees with `μ` on `𝓕 T`, it is a `ν`-martingale: before the horizon
+every `S t` is `𝓕 T`-measurable, so its integrability and its integrals over the sets of
+`𝓕 s ⊆ 𝓕 T` are the same under both measures. -/
+theorem martingale_min_of_trim_eq {ν : Measure Ω} [IsFiniteMeasure μ] [IsFiniteMeasure ν]
+    (hμν : μ.trim (𝓕.le T) = ν.trim (𝓕.le T)) (hS : Martingale (fun t ↦ S (min t T)) 𝓕 μ) :
+    Martingale (fun t ↦ S (min t T)) 𝓕 ν := by
+  obtain ⟨hadapt, hint, hmart⟩ := martingale_min_iff.mp hS
+  have hT {t : ι} (ht : t ≤ T) : StronglyMeasurable[𝓕 T] (S t) := (hadapt t ht).mono (𝓕.mono ht)
+  have hintν {t : ι} (ht : t ≤ T) : Integrable (S t) ν := by
+    refine integrable_of_integrable_trim (𝓕.le T) ?_
+    rw [← hμν]
+    exact (hint t ht).trim (𝓕.le T) (hT ht)
+  have hset {t : ι} (ht : t ≤ T) {A : Set Ω} (hA : MeasurableSet[𝓕 T] A) :
+      ∫ ω in A, S t ω ∂ν = ∫ ω in A, S t ω ∂μ := by
+    rw [setIntegral_trim (𝓕.le T) (hT ht) hA, setIntegral_trim (𝓕.le T) (hT ht) hA, hμν]
+  refine martingale_min_iff.mpr ⟨hadapt, fun t ht ↦ hintν ht, fun s t hst ht ↦ ?_⟩
+  refine ae_eq_condExp_of_forall_setIntegral_eq (𝓕.le s) (hintν ht)
+    (fun _ _ _ ↦ (hintν (hst.trans ht)).integrableOn) (fun A hA _ ↦ ?_)
+    (hadapt s (hst.trans ht)).aestronglyMeasurable
+  have hAT : MeasurableSet[𝓕 T] A := 𝓕.mono (hst.trans ht) A hA
+  rw [hset (hst.trans ht) hAT, hset ht hAT, ← setIntegral_condExp (𝓕.le s) (hint t ht) hA]
+  exact setIntegral_congr_ae (𝓕.le s A hA) ((hmart hst ht).mono fun _ h _ ↦ h)
 
 end LinearOrder
 
