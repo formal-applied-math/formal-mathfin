@@ -206,7 +206,7 @@ area = "defi"
 [[node]]
 label = "thm:compound-exchange-rate-bridge"
 title = "Compound's exchange rate as a money-market account"
-statement = "Compound's cToken exchange rate is the deposit index of a money-market account under the borrow index, tying DeFi/Compound to the library's lending indices, or the gap is recorded."
+statement = "Compound's cToken exchange rate is the deposit index of a money-market account under the borrow index, tying Markets/DeFi/Compound to the library's lending indices, or the gap is recorded."
 uses = ["def:zero-coupon-bond"]
 area = "defi"
 

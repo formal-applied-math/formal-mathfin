@@ -132,11 +132,16 @@ recorded edge ties to the component holding Brownian motion, and their count is 
 bridge theorem that uses it, never through prose (2026-11-07: tagging objects and anchors left 34
 islands, among them the EMM and the whole risk cluster; one duplicate, `portfolioVariance`, kept
 Markowitz off the portfolio node).
-`tests/test_architecture.py` keeps the library one graph: `Foundations/` imports only
-`Foundations/` (joins live in `Bridges/`), every module imports a library module or is
-imported by one, and every module is imported by another or cited by a corpus entry. A
-module that connects to nothing gets a bridge (a proved theorem tying it to the library's
-objects), never a quarantine list (2026-10-21).
+`tests/test_architecture.py` keeps the library one graph, layered: every module lives in a
+layer (`tools/verify/layers.py`), `Probability/` → `Contracts/` → `Pricing/` → the limbs
+`Models/`, `Risk/`, `Choice/`, `Insurance/`, `Markets/`, and imports point that way; a limb
+reaches another limb only through a declared edge (`layers.EDGES`, each with its reason), and
+the imports against the direction are the ratchet count `layer_violations`, held at 0. A join
+lives in the module that consumes it; there is no `Bridges/` (2026-11-08, the v2 move,
+`tools/verify/move_v2.py`). Every module imports a library module or is imported by one, and
+every module is imported by another or cited by a corpus entry. A module that connects to
+nothing gets a bridge (a proved theorem tying it to the library's objects), never a
+quarantine list (2026-10-21).
 `tests/test_attribution.py` enforces contributor credit from git history (see
 "Contributor attribution" below). CI
 (`build.yml`) runs pytest + `ledger status` BEFORE the Lean build — pushes
@@ -265,7 +270,8 @@ Delivery/status docs:
 - `docs/coverage.md`: per-theorem audit, safe claim wording, verification evidence, and remaining placeholders.
 - `docs/status.md`: scope, pillars, the rules that keep the library one graph, and the backlog (the issue tracker).
 - `docs/roadmap.md`: strategy (depth before breadth; how breadth is admitted); the phase log is `docs/archive/roadmap-history.md`.
-- `docs/bridges.md`: catalogue of Foundations/ → pricing-module bridges.
+- `docs/bridges.md`: the 2026-05-22 audit of the old `Foundations/` layer against Mathlib and
+  BrownianMotion, and the bridges it led to (historical; the layers replaced the split).
 - `docs/patterns.md`: distilled Lean proof patterns from prior phases.
 - `docs/design.md`: principles for definitions and statements, including the
   junk-value rule (a term called a price/expectation/probability carries the
@@ -472,21 +478,24 @@ entirely.)
 - Every benchmark theorem must declare `metadata.formalization_status`: `full`, `library_wrapper`, `reduced_core`, or `placeholder`. Delivery claims count only `full + library_wrapper`; see `docs/coverage.md`.
 - Do not tell a collaborator that all course theorems are formally proved. Run `python3 -m tools.verify.coverage_report` for the current `full / library_wrapper / reduced_core / placeholder` split.
 
-**Lean proofs live in `MathFin/<Section>/<Module>.lean`, not in JSON
-strings**. The library is organized into thematic subdirectories under the
-repo-root `MathFin/`: `Foundations/`, `BlackScholes/`, `Futures/`,
-`Binomial/`, `FixedIncome/`, `Portfolio/`, `Performance/`, `RiskMeasures/`,
-`Actuarial/`, `DeFi/`. The Lean backend uses `lean-interact.LocalProject`
+**Lean proofs live in `MathFin/<Layer>/…/<Module>.lean`, not in JSON
+strings**. The library is organized in layers under the repo-root `MathFin/`:
+`Probability/` (the roots: discrete and continuous martingales, Brownian and Itô calculus,
+jumps, Gaussian and other laws, dependence), `Contracts/` (the payoff language),
+`Pricing/` (the pricing functional: EMMs, the FTAPs, state prices, numéraires, replication,
+superhedging, contract value), and the limbs `Models/` (`BlackScholes/`, `Binomial/`,
+`Rates/`, `Credit/`, `Jumps/`, `StochVol/`, `LocalVol/`, `ModelFree/`, `Forwards/`, …),
+`Risk/`, `Choice/`, `Insurance/`, `Markets/`. The Lean backend uses `lean-interact.LocalProject`
 pointing at the repo root (configured via `mathfin.toml`
 `local_project = "."`). `lakefile.lean` + `lake-manifest.json` +
 `lean-toolchain` are authoritative for Mathlib/Lean versions and transitive
 deps. Non-trivial proofs (multi-step derivations, helper lemmas, structures)
-**must** live as real Lean files under `MathFin/<Section>/` so they
+**must** live as real Lean files under `MathFin/<Layer>/` so they
 get the full `lake build` memory budget + incremental compilation + LSP
-authoring; benchmark snippets `import MathFin.<Section>.<Module>` and
+authoring; benchmark snippets `import MathFin.<Layer>.<…>.<Module>` and
 re-export the named lemma in 5–25 lines. Trivial library wrappers
 (single-line `:= someLemma`) can stay inline in the JSON. To author a new
-proof: edit `MathFin/<Section>/<Module>.lean` on host with VS Code +
+proof: edit `MathFin/<Layer>/…/<Module>.lean` on host with VS Code +
 Lean LSP (`loogle`/`leansearch%`/`apply?` are transitively available
 via Mathlib's `LeanSearchClient`), `lake build` to validate, then update the
 benchmark JSON to import + reference.
@@ -514,7 +523,7 @@ docker compose -f docker/docker-compose.yml up -d lean-repl
 docker compose -f docker/docker-compose.yml logs -f lean-repl | grep -m1 READY
 
 # per iteration: edit a .lean file, then check it via the wrapper
-./scripts/lean-check.sh MathFin/Foundations/BrownianMartingale.lean
+./scripts/lean-check.sh MathFin/Probability/Brownian/BrownianMartingale.lean
 # Returns JSON: {"success": bool, "errors": [...], "warnings": [...], "sorry_count": N}
 
 # check a single benchmark snippet the same way (seconds, not a 5-min cold boot)
@@ -542,7 +551,7 @@ Caveats:
   builds; the canonical green gate stays the final `lake build`.
 
 For multi-iteration sessions, prefer keeping
-`Foundations/BrownianMartingale.lean`-class files small (one theorem + its
+`Probability/Brownian/BrownianMartingale.lean`-class files small (one theorem + its
 private helpers per file) so Lean only re-elaborates the changed file.
 
 **Lean backend is lazily initialized**. `LeanBackend._ensure_server` defers

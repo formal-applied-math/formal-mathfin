@@ -29,7 +29,7 @@ architecture that stays pristine?
 **Ownership and foundry quality are aligned and compounding.** Every additional
 domain enriches the same three assets the foundry runs on: the proof-state cache,
 the retrieval corpus, and the obstruction telemetry. A normalized goal state reached
-in `Foundations/ItoIntegralL2` genuinely can recur in a time-series L² projection
+in `Probability/Brownian/Ito/ItoIntegralL2` genuinely can recur in a time-series L² projection
 argument — it is the same Hilbert machinery. `pipeline.toml` already says the state
 cache is self-gating until cross-target recurrence is nonzero. **A second domain is
 how that number becomes nonzero.** Multi-domain is not a tax on the foundry; it is

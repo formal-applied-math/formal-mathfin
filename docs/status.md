@@ -37,8 +37,9 @@ current state in [`mathematical-architecture.md`](mathematical-architecture.md):
 Three rules keep it one library, each enforced by a test:
 
 * **Every module connects** (`tests/test_architecture.py`). It imports a library module or is
-  imported by one, and is imported by another module or cited by a corpus entry. `Foundations/`
-  imports only `Foundations/`; joins between sections live in `Bridges/`.
+  imported by one, and is imported by another module or cited by a corpus entry. Imports point
+  one way, `Probability/` → `Contracts/` → `Pricing/` → the limbs; a limb imports another only
+  through an edge declared in `tools/verify/layers.py`. A join lives in the module that consumes it.
 * **Every claim is checked.** No `sorry`, and every cited constant axiom-pinned
   (`MathFin/AxiomAudit*.lean`). Prose may not outrun the statement (`tests/test_values.py`). The
   verification ledger re-checks exactly the entries whose inputs changed.

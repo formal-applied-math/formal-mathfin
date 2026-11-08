@@ -109,7 +109,7 @@
     surface: css("--surface"), s1: css("--s1"), s2: css("--s2"), s3: css("--s3"), good: css("--good"),
     accent: css("--accent"),
   });
-  const layerColor = (p, layer) => ({ foundations: p.s1, bridges: p.s2, applications: p.s3 }[layer] || p.muted);
+  const layerColor = (p, layer) => ({ roots: p.s1, trunk: p.s2, limbs: p.s3 }[layer] || p.muted);
 
   const styleFor = (kind, p) => {
     const common = [
@@ -146,9 +146,9 @@
       { selector: "node.frontier", style: { "border-style": "dashed", "border-color": p.muted, "color": p.ink2 } },
       { selector: "node.center", style: { "background-color": p.accent, "color": p.surface, "border-color": p.accent,
           "font-weight": 600 } },
-      { selector: "node.foundations", style: { "border-color": p.s1, "border-width": 2 } },
-      { selector: "node.bridges", style: { "border-color": p.s2, "border-width": 2 } },
-      { selector: "node.applications", style: { "border-color": p.s3, "border-width": 2 } },
+      { selector: "node.roots", style: { "border-color": p.s1, "border-width": 2 } },
+      { selector: "node.trunk", style: { "border-color": p.s2, "border-width": 2 } },
+      { selector: "node.limbs", style: { "border-color": p.s3, "border-width": 2 } },
       { selector: "edge", style: { "curve-style": "bezier", "arrow-scale": 0.6 } },
     ]);
   };
@@ -159,7 +159,7 @@
     const p0 = palette();
     const elements = spec.nodes.map((n) => ({ data: n, classes: n.cls || "" }))
       .concat(spec.edges.map((e, i) => ({ data: Object.assign({ id: "e" + i }, e), classes: e.cls || "" })));
-    const ring = { foundations: 3, bridges: 2, applications: 1 };
+    const ring = { roots: 3, trunk: 2, limbs: 1 };
     const layout = kind === "map"
       ? { name: "concentric", animate: false, padding: 30, minNodeSpacing: 34, startAngle: 3.4,
           concentric: (n) => ring[n.data("layer")] || 1, levelWidth: () => 1, avoidOverlap: true }

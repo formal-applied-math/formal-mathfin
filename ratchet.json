@@ -17,6 +17,7 @@
     "prices_off_trunk": 41,
     "price_entries_off_trunk": 171,
     "pricing_devices_unbridged": 5,
-    "concept_duplicates": 9
+    "concept_duplicates": 9,
+    "layer_violations": 0
   }
 }

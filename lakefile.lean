@@ -51,7 +51,7 @@ lean_lib MathFinTest where
 -- Palomar registry submission (https://palomar-registry.org). `Challenge.lean`
 -- is the small, Mathlib-only statement of record that a mathematical reader is
 -- expected to audit; `Solution.lean` repeats those declarations verbatim and
--- discharges them against `MathFin/RiskMeasures/`. Comparator
+-- discharges them against `MathFin/Risk/`. Comparator
 -- (leanprover/comparator, driven by `comparator.json`) checks mechanically that
 -- the two agree on the statement and that the proof uses only the three
 -- permitted axioms.
