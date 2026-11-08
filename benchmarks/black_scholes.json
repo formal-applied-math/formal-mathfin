@@ -2412,7 +2412,12 @@
         "reference": "Hagan, Kumar, Lesniewski & Woodward, \"Managing Smile Risk,\" Wilmott Magazine, September 2002, pp. 84-108, section 3.2, eq. 3.9 (the chain-rule Delta risk) applied with the ATM vol of eq. 2.18 as the vol curve",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of the ATM-vol-curve chain-rule Delta. Lives in MathFin/BlackScholes/SABRChainRuleGreeks.lean (sabrATMVol_bsV_delta_chainRule), built on a new general bivariate Frechet-derivative chain rule for bsV (hasDerivAt_bsV_S_chainRule, proved from the joint differentiability of bsV in (S, sigma) rather than by combining the two one-variable Greek formulas), instantiated at sabrATMVol's own derivative (hasDerivAt_sabrATMVol_F). Axioms-clean. LIMITS: the strike is held fixed at K = f and only the spot (and the vol curve's argument) moves, but the vol curve differentiated is the ATM curve f -> sigma_ATM(f) = sigma_B(f,f) (eq. 2.18), not the fixed-strike smile f -> sigma_B(K,f) of Hagan's eq. 3.9. The fixed-strike case is not attempted: away from K = f it needs only a (routine, unformalized) chain rule through sabrImpliedVol's factors; at K = f the literal sabrImpliedVol evaluates its 0/0 factor to 0 (not even continuous there), so it would first need the ATM value redefined by its limit and then a second derivative of the sabrX building block, neither of which is in this repo."
+        "formalization_scope": "Full formal proof of the ATM-vol-curve chain-rule Delta. Lives in MathFin/BlackScholes/SABRChainRuleGreeks.lean (sabrATMVol_bsV_delta_chainRule), built on a new general bivariate Frechet-derivative chain rule for bsV (hasDerivAt_bsV_S_chainRule, proved from the joint differentiability of bsV in (S, sigma) rather than by combining the two one-variable Greek formulas), instantiated at sabrATMVol's own derivative (hasDerivAt_sabrATMVol_F). Axioms-clean. LIMITS: the strike is held fixed at K = f and only the spot (and the vol curve's argument) moves, but the vol curve differentiated is the ATM curve f -> sigma_ATM(f) = sigma_B(f,f) (eq. 2.18), not the fixed-strike smile f -> sigma_B(K,f) of Hagan's eq. 3.9. The fixed-strike case is not attempted: away from K = f it needs only a (routine, unformalized) chain rule through sabrImpliedVol's factors; at K = f the literal sabrImpliedVol evaluates its 0/0 factor to 0 (not even continuous there), so it would first need the ATM value redefined by its limit and then a second derivative of the sabrX building block, neither of which is in this repo.",
+        "citations": [
+          {
+            "key": "HaganKumarLesniewskiWoodward2002"
+          }
+        ]
       }
     },
     {
@@ -2428,7 +2433,12 @@
         "reference": "Hagan, Kumar, Lesniewski & Woodward, \"Managing Smile Risk,\" Wilmott Magazine, September 2002, pp. 84-108, section 3.2, eq. 3.6 (the vega risk in alpha) at the ATM strike, with the ATM vol of eq. 2.18",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Lives in MathFin/BlackScholes/SABRChainRuleGreeks.lean (sabrATMVol_bsV_vega_chainRule), the ordinary one-variable chain rule through the general hasDerivAt_bsV_param_chainRule and sigma_ATM's own alpha-derivative (hasDerivAt_sabrATMVol_alpha). Axioms-clean. LIMITS: spot and strike are both held fixed at f for this one (only alpha moves), unlike the Delta case; the fixed-strike alpha-sensitivity away from K = f (eq. 3.6 at a general strike, through sabrImpliedVol's alpha-dependence, which also enters z) is not addressed either; it is a routine, unformalized chain rule, since z != 0 there and no 0/0 factor arises. At K = f itself only alpha moves and the strike stays at f, so there is no second curve to choose between: the theorem is eq. 3.6 at the ATM strike with sigma_B(f, f) taken as eq. 2.18."
+        "formalization_scope": "Full formal proof. Lives in MathFin/BlackScholes/SABRChainRuleGreeks.lean (sabrATMVol_bsV_vega_chainRule), the ordinary one-variable chain rule through the general hasDerivAt_bsV_param_chainRule and sigma_ATM's own alpha-derivative (hasDerivAt_sabrATMVol_alpha). Axioms-clean. LIMITS: spot and strike are both held fixed at f for this one (only alpha moves), unlike the Delta case; the fixed-strike alpha-sensitivity away from K = f (eq. 3.6 at a general strike, through sabrImpliedVol's alpha-dependence, which also enters z) is not addressed either; it is a routine, unformalized chain rule, since z != 0 there and no 0/0 factor arises. At K = f itself only alpha moves and the strike stays at f, so there is no second curve to choose between: the theorem is eq. 3.6 at the ATM strike with sigma_B(f, f) taken as eq. 2.18.",
+        "citations": [
+          {
+            "key": "HaganKumarLesniewskiWoodward2002"
+          }
+        ]
       }
     }
   ]
