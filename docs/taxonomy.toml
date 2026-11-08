@@ -1,0 +1,399 @@
+# How the library organizes financial mathematics: the one statement every projection reads.
+# The design and its reasons: docs/specs/2026-11-08-organization-design.md; the readable account:
+# docs/organization.md.
+#
+# Two axes. A cell answers WHERE a result sits: a root (the tools), the trunk (positions, markets,
+# strategies), or one of three limbs, each a question asked of a position (valuation: what is it
+# worth; choice: whether to hold it; risk: how dangerous it is), and a branch inside it. A family
+# answers WHICH RANDOMNESS it is about (Gaussian diffusions, default, mortality and claims, …);
+# one family serves several questions, so it is a second axis, not a place.
+#
+# [[cell]]   key        "part" or "part/branch"; the parts are the roots, the trunk and the limbs
+#            kind       root | trunk | limb (on the part's first cell; its branches inherit it)
+#            title      a name a financial mathematician would use
+#            blurb      one line: what the cell asks or provides
+#            modules    module-name prefixes; a module belongs to the cell of its LONGEST prefix
+#            subjects   JEL / MSC codes (docs/subjects.toml)
+#            landmarks  the cell's characteristic results (Lean names); a blueprint node each
+# [[family]] key, title, blurb, hue (a tree colour token), modules (prefixes, longest wins)
+# [[joint]]  a theorem whose statement involves two limbs: limbs, node (blueprint label), title
+#
+# Every module under MathFin/ belongs to exactly one cell (tests/test_taxonomy.py); the files
+# directly under MathFin/ (Init, Blueprint, the audits) are the library's own machinery.
+
+meta = ["MathFin.Init", "MathFin.Blueprint", "MathFin.AxiomAudit", "MathFin.AxiomAuditGen"]
+
+# ───────────────────────────── roots ─────────────────────────────
+
+[[cell]]
+key = "probability"
+kind = "root"
+title = "Probability"
+blurb = "martingales, stopping, Brownian and jump calculus, Gaussian laws, dependence, convexity"
+
+[[cell]]
+key = "probability/discrete"
+title = "Discrete time"
+blurb = "martingale transforms, Doob decomposition, the Snell envelope, path measures, Markov chains"
+modules = ["MathFin.Probability.Discrete"]
+subjects = ["MSC 60G42", "MSC 60G40", "MSC 60J10"]
+
+[[cell]]
+key = "probability/martingales"
+title = "Continuous martingales"
+blurb = "changes of measure, localisation, brackets, convergence, stopped and time-changed processes"
+modules = ["MathFin.Probability.Martingales"]
+subjects = ["MSC 60G44", "MSC 60G48"]
+
+[[cell]]
+key = "probability/brownian"
+title = "Brownian calculus"
+blurb = "the Itô integral and formula, Girsanov, martingale representation, Feynman–Kac, SDEs"
+modules = ["MathFin.Probability.Brownian"]
+subjects = ["MSC 60H05", "MSC 60H10", "MSC 60J65"]
+
+[[cell]]
+key = "probability/jumps"
+title = "Jumps"
+blurb = "Poisson processes and random measures, the compensated integral, compound Poisson laws"
+modules = ["MathFin.Probability.Jumps"]
+subjects = ["MSC 60G51", "MSC 60G55"]
+
+[[cell]]
+key = "probability/gaussian"
+title = "Gaussian analysis"
+blurb = "Φ and its moments, the bivariate normal, the heat kernel"
+modules = ["MathFin.Probability.Gaussian"]
+subjects = ["MSC 60G15", "MSC 60E05"]
+
+[[cell]]
+key = "probability/laws"
+title = "Laws"
+blurb = "quantiles, the exponential tilt, Student-t, extreme-value and Pareto laws"
+modules = ["MathFin.Probability.Laws"]
+subjects = ["MSC 60E05", "MSC 60E10"]
+
+[[cell]]
+key = "probability/dependence"
+title = "Dependence"
+blurb = "copulas, Sklar's theorem, Hoeffding's covariance identity"
+modules = ["MathFin.Probability.Dependence"]
+subjects = ["MSC 62H05"]
+
+[[cell]]
+key = "probability/analysis"
+title = "Analysis and convexity"
+blurb = "separation and convex duality, isometries, bisection, the inequalities the limbs share"
+modules = ["MathFin.Probability.Analysis", "MathFin.Pricing.Duality"]
+subjects = ["MSC 90C25", "MSC 60E15"]
+
+[[cell]]
+key = "statistics"
+kind = "root"
+title = "Statistics"
+blurb = "estimation, empirical laws, performance statistics, backtesting: what every question consumes"
+modules = [
+  "MathFin.Probability.Laws.Estimation", "MathFin.Probability.Laws.QuantileConvergence",
+  "MathFin.Choice.Performance", "MathFin.Models.Forwards.AR1OUCalibration",
+  "MathFin.Markets.Microstructure.RollSpread",
+]
+subjects = ["JEL C13", "JEL C58", "MSC 62G30", "MSC 62P05"]
+
+# ───────────────────────────── trunk ─────────────────────────────
+
+[[cell]]
+key = "market"
+kind = "trunk"
+title = "Positions and markets"
+blurb = "payoffs and contracts, the market and its numéraire, strategies and their gains, value under a measure"
+modules = [
+  "MathFin.Contracts", "MathFin.Pricing.Market", "MathFin.Pricing.Numeraire",
+  "MathFin.Pricing.Value",
+]
+subjects = ["MSC 91G15", "JEL G10"]
+
+# ───────────────────────────── limbs ─────────────────────────────
+
+[[cell]]
+key = "valuation"
+kind = "limb"
+title = "Valuation"
+blurb = "what a position is worth: pricing measures, the fundamental theorems, replication, superhedging"
+
+[[cell]]
+key = "valuation/general"
+title = "Arbitrage theory"
+blurb = "the fundamental theorems, state prices and the pricing kernel, completeness, superhedging duality"
+modules = ["MathFin.Pricing"]
+subjects = ["MSC 91G20", "JEL G12", "JEL G13"]
+
+[[cell]]
+key = "valuation/trees"
+title = "Trees"
+blurb = "one-period and binomial markets, CRR and its limit, American and Bermudan exercise"
+modules = ["MathFin.Models.Binomial"]
+subjects = ["MSC 91G20", "MSC 60G42"]
+
+[[cell]]
+key = "valuation/diffusions"
+title = "Black–Scholes and Bachelier"
+blurb = "the Gaussian diffusion models: formula, PDE, Greeks, hedging, exotics, the American put"
+modules = ["MathFin.Models.BlackScholes", "MathFin.Models.Bachelier"]
+subjects = ["MSC 91G20", "JEL G13"]
+
+[[cell]]
+key = "valuation/volatility"
+title = "Volatility"
+blurb = "local and stochastic volatility, the smile and its parametrisations"
+modules = ["MathFin.Models.LocalVol", "MathFin.Models.StochVol", "MathFin.Models.ModelFree.SVI"]
+subjects = ["MSC 91G20"]
+
+[[cell]]
+key = "valuation/jumps"
+title = "Jump models"
+blurb = "Merton and general jump diffusions, the Esscher measure, variance swaps with jumps"
+modules = ["MathFin.Models.Jumps"]
+subjects = ["MSC 91G20", "MSC 60G51"]
+
+[[cell]]
+key = "valuation/term"
+title = "Term structures"
+blurb = "bonds and curves, short-rate and affine models, HJM, forward measures, FX, futures, commodities"
+modules = ["MathFin.Models.Rates", "MathFin.Models.Forwards"]
+subjects = ["MSC 91G30", "JEL E43", "JEL F31", "JEL Q02"]
+
+[[cell]]
+key = "valuation/default"
+title = "Credit"
+blurb = "structural and intensity models of default, CDS, counterparty valuation"
+modules = ["MathFin.Models.Credit"]
+subjects = ["MSC 91G40"]
+
+[[cell]]
+key = "valuation/insurance"
+title = "Life and insurance contracts"
+blurb = "survival models, annuities and insurances, reserves"
+modules = ["MathFin.Insurance"]
+subjects = ["MSC 91G05", "JEL G22"]
+
+[[cell]]
+key = "valuation/mechanisms"
+title = "Market mechanisms"
+blurb = "automated market makers and lending protocols, valued as contracts"
+modules = ["MathFin.Markets.DeFi"]
+subjects = ["MSC 91G15"]
+
+[[cell]]
+key = "valuation/model-free"
+title = "Model-free"
+blurb = "static replication, price bounds, variance swaps, the call-price function"
+modules = ["MathFin.Models.ModelFree"]
+subjects = ["MSC 91G20"]
+
+[[cell]]
+key = "choice"
+kind = "limb"
+title = "Choice"
+blurb = "whether to hold a position: preferences, portfolios, equilibrium, dynamic and strategic trading"
+
+[[cell]]
+key = "choice/preferences"
+title = "Preferences"
+blurb = "expected utility and risk aversion"
+modules = ["MathFin.Choice.Utility"]
+subjects = ["MSC 91B16", "JEL D81"]
+
+[[cell]]
+key = "choice/portfolio"
+title = "Portfolio choice"
+blurb = "mean–variance, the efficient frontier, risk parity, Black–Litterman"
+modules = ["MathFin.Choice.Portfolio", "MathFin.Choice.Performance.BetSizeSigmoid"]
+subjects = ["MSC 91G10", "JEL G11"]
+
+[[cell]]
+key = "choice/equilibrium"
+title = "Equilibrium"
+blurb = "CAPM, factor models, the stochastic discount factor"
+modules = [
+  "MathFin.Choice.Portfolio.CAPM", "MathFin.Choice.Portfolio.CAPMEquilibrium",
+  "MathFin.Choice.Portfolio.SingleIndexModel",
+]
+subjects = ["JEL G12", "JEL D53"]
+
+[[cell]]
+key = "choice/dynamic"
+title = "Dynamic choice"
+blurb = "growth-optimal and log-utility investment, Merton's problem, time consistency"
+modules = ["MathFin.Choice.Performance.Kelly", "MathFin.Choice.Performance.KellyNumeraire"]
+subjects = ["MSC 91G10", "MSC 49L20"]
+
+[[cell]]
+key = "choice/trading"
+title = "Strategic trading"
+blurb = "price formation under asymmetric information, market making, optimal execution"
+modules = ["MathFin.Markets.Microstructure", "MathFin.Markets.Execution"]
+subjects = ["JEL G14", "JEL D82", "MSC 49L20"]
+
+[[cell]]
+key = "risk"
+kind = "limb"
+title = "Risk"
+blurb = "how dangerous a position is: risk measures, their representations, aggregation, credit and ruin"
+
+[[cell]]
+key = "risk/measures"
+title = "Risk measures"
+blurb = "acceptance sets, coherent and convex measures and their representation, elicitability"
+modules = [
+  "MathFin.Risk.AcceptanceSet", "MathFin.Risk.Coherent", "MathFin.Risk.CoherentAxioms",
+  "MathFin.Risk.Elicitability", "MathFin.Risk.JointElicitability", "MathFin.Risk.Expectile",
+  "MathFin.Risk.Spectral", "MathFin.Risk.WorstCaseRisk", "MathFin.Risk.UtilityDerivation",
+  "MathFin.Risk.PositionsConvention", "MathFin.Risk.ContractRisk", "MathFin.Risk.Additivity",
+]
+subjects = ["MSC 91G70", "JEL G32"]
+
+[[cell]]
+key = "risk/law-invariant"
+title = "Value at risk and expected shortfall"
+blurb = "the quantile measures, their dual forms and closed forms under standard laws"
+modules = ["MathFin.Risk"]
+subjects = ["MSC 91G70", "JEL G32"]
+
+[[cell]]
+key = "risk/aggregation"
+title = "Aggregation"
+blurb = "diversification and its failure, risk contributions, concentration"
+modules = [
+  "MathFin.Risk.VaRSuperadditivity", "MathFin.Risk.ComponentVaR", "MathFin.Risk.Concentration",
+  "MathFin.Risk.ConcentrationVariance", "MathFin.Risk.EquicorrelationConcentration",
+  "MathFin.Risk.GaussianRiskMarkowitz",
+]
+subjects = ["MSC 91G70", "JEL G32"]
+
+[[cell]]
+key = "risk/credit"
+title = "Credit portfolio risk"
+blurb = "default correlation, the large-pool limit, IRB capital, tranche losses, protocol liquidations"
+modules = [
+  "MathFin.Risk.Credit", "MathFin.Markets.DeFi.Aave",
+  "MathFin.Markets.DeFi.LiquidationAsStructuralDefault",
+]
+subjects = ["MSC 91G40", "JEL G32"]
+
+[[cell]]
+key = "risk/exposure"
+title = "Exposure"
+blurb = "counterparty exposure profiles and their regulatory measures"
+modules = [
+  "MathFin.Risk.ExposureMeasures", "MathFin.Risk.SACCRExposure",
+  "MathFin.Risk.CollateralizedExposureBrownian",
+]
+subjects = ["MSC 91G40", "JEL G28"]
+
+[[cell]]
+key = "risk/insurance"
+title = "Premiums and ruin"
+blurb = "premium principles as risk-loaded functionals, collective risk theory"
+modules = ["MathFin.Insurance.StandardDeviationPrinciple"]
+subjects = ["MSC 91G05", "JEL G22"]
+
+# ───────────────────────────── families ─────────────────────────────
+# The second axis. A module without a family is general theory (a root, the trunk, a limb's base).
+
+[[family]]
+key = "trees"
+title = "Trees"
+blurb = "finite and binomial randomness"
+hue = "--fam-trees"
+modules = ["MathFin.Models.Binomial", "MathFin.Pricing.DiscreteMarket", "MathFin.Pricing.FTAP"]
+
+[[family]]
+key = "diffusions"
+title = "Gaussian diffusions"
+blurb = "Black–Scholes, Bachelier, Brownian markets"
+hue = "--fam-diffusions"
+modules = [
+  "MathFin.Models.BlackScholes", "MathFin.Models.Bachelier", "MathFin.Pricing.MarketCompleteness",
+  "MathFin.Pricing.MarketCompletenessInPrice", "MathFin.Pricing.PricingMeasureL2Density",
+  "MathFin.Pricing.ContinuousMarket", "MathFin.Pricing.Girsanov",
+]
+
+[[family]]
+key = "volatility"
+title = "Volatility"
+blurb = "local, stochastic and rough volatility, the smile"
+hue = "--fam-volatility"
+modules = ["MathFin.Models.LocalVol", "MathFin.Models.StochVol", "MathFin.Models.ModelFree.SVI"]
+
+[[family]]
+key = "jumps"
+title = "Jumps"
+blurb = "compound Poisson and Lévy randomness"
+hue = "--fam-jumps"
+modules = ["MathFin.Models.Jumps", "MathFin.Risk.CompoundPoissonCVaR"]
+
+[[family]]
+key = "term"
+title = "Term structures"
+blurb = "rates, FX, futures and commodities"
+hue = "--fam-term"
+modules = [
+  "MathFin.Models.Rates", "MathFin.Models.Forwards", "MathFin.Pricing.ForwardMeasure",
+  "MathFin.Pricing.WienerIntegralForwardMeasure",
+]
+
+[[family]]
+key = "default"
+title = "Default"
+blurb = "structural and intensity models of default, credit portfolios"
+hue = "--fam-default"
+modules = ["MathFin.Models.Credit", "MathFin.Risk.Credit", "MathFin.Risk.ExposureMeasures",
+  "MathFin.Risk.SACCRExposure", "MathFin.Risk.CollateralizedExposureBrownian"]
+
+[[family]]
+key = "insurance"
+title = "Mortality and claims"
+blurb = "lifetimes, claim counts and sizes"
+hue = "--fam-insurance"
+modules = ["MathFin.Insurance"]
+
+[[family]]
+key = "mechanisms"
+title = "Market mechanisms"
+blurb = "order books, automated market makers, lending protocols"
+hue = "--fam-mechanisms"
+modules = ["MathFin.Markets"]
+
+[[family]]
+key = "model-free"
+title = "Model-free"
+blurb = "no model: static replication and robust bounds"
+hue = "--fam-model-free"
+modules = ["MathFin.Models.ModelFree", "MathFin.Risk.WorstCaseRisk"]
+
+# ───────────────────────────── joints ─────────────────────────────
+
+[[joint]]
+limbs = ["choice", "valuation"]
+node = "thm:utility-state-price-density"
+title = "Marginal utility is a state-price density"
+
+[[joint]]
+limbs = ["choice", "valuation"]
+node = "thm:sdf-capm-hansen-jagannathan"
+title = "CAPM and Hansen–Jagannathan from the stochastic discount factor"
+
+[[joint]]
+limbs = ["choice", "valuation"]
+node = "thm:log-optimal-numeraire"
+title = "The log-optimal portfolio is the numéraire portfolio"
+
+[[joint]]
+limbs = ["valuation", "risk"]
+node = "thm:superhedging-coherent"
+title = "The superhedging price is a coherent risk measure"
+
+[[joint]]
+limbs = ["valuation", "risk"]
+node = "thm:premium-is-price"
+title = "Insurance premiums are prices"
