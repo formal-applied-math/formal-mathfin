@@ -918,6 +918,6 @@ attribute [blueprint "thm:utility-state-price-density" (title := "Marginal utili
   be a local maximum of $\sum_\omega p_\omega u(W_\omega)$, $W = A^\top\theta$, on the budget set
   $\{\theta' : \pi\cdot\theta' = w_0\}$, with $p>0$, $w_0>0$, $W>0$ and $u'(W_\omega)>0$. Then
   $q_\omega = p_\omega u'(W_\omega)/\mu$, for some $\mu>0$, is a strictly positive state-price
-  vector pricing every asset, and its normalisation is an equivalent martingale measure for the
-  excess returns. -/)]
-  MathFin.exists_hasEMMMultiState_of_isLocalMaxOn
+  vector pricing every asset, and on a finite probability space charging every state there is an
+  equivalent martingale measure for the excess returns. -/)]
+  MathFin.exists_isEMM_of_isLocalMaxOn
