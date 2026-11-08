@@ -138,7 +138,11 @@ subjects = ["MSC 91G20", "MSC 60G42"]
 key = "valuation/diffusions"
 title = "Black–Scholes and Bachelier"
 blurb = "the Gaussian diffusion models: formula, PDE, Greeks, hedging, exotics, the American put"
-modules = ["MathFin.Models.BlackScholes", "MathFin.Models.Bachelier"]
+modules = [
+  "MathFin.Models.BlackScholes", "MathFin.Models.Bachelier", "MathFin.Pricing.MarketCompleteness",
+  "MathFin.Pricing.MarketCompletenessInPrice", "MathFin.Pricing.PricingMeasureL2Density",
+  "MathFin.Pricing.FTAP.ContinuousFTAP", "MathFin.Pricing.Girsanov",
+]
 subjects = ["MSC 91G20", "JEL G13"]
 
 [[cell]]
@@ -248,7 +252,7 @@ modules = [
   "MathFin.Risk.AcceptanceSet", "MathFin.Risk.Coherent", "MathFin.Risk.CoherentAxioms",
   "MathFin.Risk.Elicitability", "MathFin.Risk.JointElicitability", "MathFin.Risk.Expectile",
   "MathFin.Risk.Spectral", "MathFin.Risk.WorstCaseRisk", "MathFin.Risk.UtilityDerivation",
-  "MathFin.Risk.PositionsConvention", "MathFin.Risk.ContractRisk", "MathFin.Risk.Additivity",
+  "MathFin.Risk.PositionsConvention",
 ]
 subjects = ["MSC 91G70", "JEL G32"]
 
@@ -266,7 +270,7 @@ blurb = "diversification and its failure, risk contributions, concentration"
 modules = [
   "MathFin.Risk.VaRSuperadditivity", "MathFin.Risk.ComponentVaR", "MathFin.Risk.Concentration",
   "MathFin.Risk.ConcentrationVariance", "MathFin.Risk.EquicorrelationConcentration",
-  "MathFin.Risk.GaussianRiskMarkowitz",
+  "MathFin.Risk.GaussianRiskMarkowitz", "MathFin.Risk.Additivity",
 ]
 subjects = ["MSC 91G70", "JEL G32"]
 
@@ -294,7 +298,7 @@ subjects = ["MSC 91G40", "JEL G28"]
 key = "risk/insurance"
 title = "Premiums and ruin"
 blurb = "premium principles as risk-loaded functionals, collective risk theory"
-modules = ["MathFin.Insurance.StandardDeviationPrinciple"]
+modules = ["MathFin.Insurance.StandardDeviationPrinciple", "MathFin.Insurance.ActuarialInsurance"]
 subjects = ["MSC 91G05", "JEL G22"]
 
 # ───────────────────────────── families ─────────────────────────────
