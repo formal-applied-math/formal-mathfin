@@ -859,6 +859,7 @@ import MathFin.Choice.Portfolio.TangentPortfolio
 -- Phase 21: first-principles Sharpe-FOC and CAPM-equilibrium derivations
 import MathFin.Choice.Portfolio.SharpeFOCDerivation
 import MathFin.Choice.Portfolio.CAPMEquilibrium
+import MathFin.Choice.Portfolio.StochasticDiscountFactor
 -- Phase 23: N-asset Markowitz Lagrangian FOC (forward direction)
 import MathFin.Choice.Portfolio.MarkowitzLagrangian
 -- Phase 26: N-asset risk parity from log-barrier Lagrangian FOC

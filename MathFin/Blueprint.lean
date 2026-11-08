@@ -74,6 +74,7 @@ import MathFin.Choice.Portfolio.RiskParityFOC
 import MathFin.Choice.Portfolio.Markowitz
 import MathFin.Choice.Portfolio.CAPM
 import MathFin.Choice.Utility.StatePriceDensity
+import MathFin.Choice.Portfolio.StochasticDiscountFactor
 import MathFin.Choice.Portfolio.TangentPortfolio
 import MathFin.Choice.Performance.Ratios
 import MathFin.Choice.Performance.RatiosExtended
@@ -921,3 +922,17 @@ attribute [blueprint "thm:utility-state-price-density" (title := "Marginal utili
   vector pricing every asset, and its normalisation is an equivalent martingale measure for the
   excess returns. -/)]
   MathFin.exists_hasEMMMultiState_of_isLocalMaxOn
+
+attribute [blueprint "thm:sdf-capm-hansen-jagannathan" (title := "CAPM from a discount factor affine in the market return")
+  (statement := /-- If $m = a - bR_m$ prices a return $R_i$, the market return $R_m$ and the riskless
+  return $r_f$ ($E[mR_i] = E[mR_m] = 1$, $r_f E[m] = 1$) and $\operatorname{Var}R_m \ne 0$, then
+  $E[R_i] = r_f + \beta_i (E[R_m] - r_f)$ with $\beta_i = \operatorname{Cov}(R_i, R_m) /
+  \operatorname{Var} R_m$. -/)]
+  MathFin.capm_of_affine_discountFactor
+
+attribute [blueprint "thm:hansen-jagannathan-bound" (title := "The Hansen–Jagannathan bound")
+  (statement := /-- If a discount factor $m$ with $E[m] > 0$ prices a gross return $R$ with
+  $\operatorname{Var} R > 0$ ($E[mR] = 1$) and the riskless return $r_f$ ($r_f E[m] = 1$), then the
+  Sharpe ratio of $R$ satisfies $|E[R] - r_f| / \sigma(R) \le \sigma(m) / E[m]$, by
+  Cauchy–Schwarz for $\operatorname{Cov}(m, R)$. -/)]
+  MathFin.abs_sharpeRatio_le_of_discountFactor

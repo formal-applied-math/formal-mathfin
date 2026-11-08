@@ -940,6 +940,81 @@
       }
     },
     {
+      "id": "mf-hansen-jagannathan-bound",
+      "name": "Hansen–Jagannathan Bound on the Sharpe Ratio",
+      "description": "On a probability space let the stochastic discount factor m and the gross return R be square-integrable with E[m] > 0 and Var R > 0, let m price R (E[m R] = 1) and the riskless return r_f (r_f E[m] = 1). Then |sharpeRatio(E R, r_f, σ(R))| = |E[R] − r_f| / σ(R) ≤ σ(m) / E[m]. The proof is Cauchy–Schwarz for Cov(m, R − r_f) = −E[m] E[R − r_f]. The existence of the discount factor, and the minimum-variance discount factor attaining the bound, are not part of this entry.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Choice.Portfolio.StochasticDiscountFactor\n\nopen MeasureTheory ProbabilityTheory MathFin\n\ntheorem hansen_jagannathan_sharpe {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsProbabilityMeasure μ] {m R : Ω → ℝ} {rf : ℝ} (hm : MemLp m 2 μ) (hR : MemLp R 2 μ)\n    (hm0 : 0 < ∫ ω, m ω ∂μ) (hR0 : 0 < Var[R; μ]) (hrf : rf * ∫ ω, m ω ∂μ = 1)\n    (hprice : ∫ ω, m ω * R ω ∂μ = 1) :\n    |sharpeRatio (∫ ω, R ω ∂μ) rf √(Var[R; μ])| ≤ √(Var[m; μ]) / ∫ ω, m ω ∂μ :=\n  MathFin.abs_sharpeRatio_le_of_discountFactor hm hR hm0 hR0 hrf hprice\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Hansen and Jagannathan (1991); Cochrane, Asset Pricing, §6.3",
+        "citations": [
+          {
+            "key": "HansenJagannathan1991"
+          },
+          {
+            "key": "Cochrane2005",
+            "locator": "§6.3"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. MathFin.abs_sharpeRatio_le_of_discountFactor in MathFin/Choice/Portfolio/StochasticDiscountFactor.lean: the excess return x = R − r_f is priced at zero by m (hansenJagannathan_bound), Cov(m, x)² ≤ Var m · Var x (covariance_sq_le_variance_mul, from the non-negativity of Var(X + tY) and the discriminant) with Cov(m, x) = −E[m]E[x] (hansenJagannathan_sq); Var(R − r_f) = Var R. Moments are those of Mathlib on a general probability space. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
+      "id": "mf-capm-from-affine-discount-factor",
+      "name": "CAPM from a Discount Factor Affine in the Market Return",
+      "description": "On a probability space let m = a − b·R_m pointwise, with R_m and R_i square-integrable and Var R_m ≠ 0. If m prices R_i (E[m R_i] = 1), the market return (E[m R_m] = 1) and the riskless return (r_f E[m] = 1), then E[R_i] = securityMarketLine r_f β_i E[R_m], i.e. E[R_i] = r_f + β_i (E[R_m] − r_f), with β_i = Cov(R_i, R_m) / Var R_m (the library's beta). Intermediate: E[R_i] − r_f = r_f·b·Cov(R_i, R_m). The existence of such a discount factor (from preferences or equilibrium) is not proved here.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Choice.Portfolio.StochasticDiscountFactor\n\nopen MeasureTheory ProbabilityTheory MathFin\n\ntheorem capm_affine_discount_factor {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsProbabilityMeasure μ] {m Rm Ri : Ω → ℝ} {a b rf : ℝ}\n    (hm : ∀ ω, m ω = a - b * Rm ω) (hRm : MemLp Rm 2 μ) (hRi : MemLp Ri 2 μ)\n    (hrf : rf * ∫ ω, m ω ∂μ = 1) (hpi : ∫ ω, m ω * Ri ω ∂μ = 1)\n    (hpm : ∫ ω, m ω * Rm ω ∂μ = 1) (hvar : Var[Rm; μ] ≠ 0) :\n    ∫ ω, Ri ω ∂μ =\n      securityMarketLine rf (beta cov[Ri, Rm; μ] Var[Rm; μ]) (∫ ω, Rm ω ∂μ) :=\n  MathFin.capm_of_affine_discountFactor hm hRm hRi hrf hpi hpm hvar\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "CAPM as a discount-factor model (Cochrane, Asset Pricing, §9.1); Sharpe (1964)",
+        "citations": [
+          {
+            "key": "Cochrane2005",
+            "locator": "§9.1"
+          },
+          {
+            "key": "Sharpe1964"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. MathFin.capm_of_affine_discountFactor in MathFin/Choice/Portfolio/StochasticDiscountFactor.lean: integral_sub_eq_of_affine_discountFactor expands E[m R] = a E[R] − b E[R_m R] and E[m] = a − b E[R_m] and uses Cov(R, R_m) = E[R_m R] − E[R_m]E[R] (Mathlib covariance_eq_sub) to get E[R] − r_f = r_f b Cov(R, R_m) for every priced R; applied to R_i and to R_m (Cov(R_m, R_m) = Var R_m) it gives the SML. Moments are Mathlib's on a general probability space. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
+      "id": "mf-capm-equilibrium-from-discount-factor",
+      "name": "CAPM Equilibrium from Discount-Factor Pricing of a Market Portfolio",
+      "description": "For finitely many square-integrable returns R_k (k ∈ s), a market portfolio R_m = Σ w_k R_k, and a discount factor m = a − b·R_m that prices every R_k (E[m R_k] = 1) and the riskless return (r_f E[m] = 1), with w'Σw ≠ 0 for the covariance matrix Σ of the returns: E[R_i] − r_f = β_i · Σ_k w_k (E[R_k] − r_f), β_i = (Σw)_i / (w'Σw). This is CAPM_from_market_equilibrium with its tangent-portfolio cross-product hypothesis derived from the discount factor (the excess returns are r_f·b times the marginal variances) rather than assumed.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Choice.Portfolio.StochasticDiscountFactor\n\nopen MeasureTheory ProbabilityTheory MathFin\n\ntheorem capm_equilibrium_from_discount_factor {Ω ι : Type*} {mΩ : MeasurableSpace Ω}\n    {μ : Measure Ω} [IsProbabilityMeasure μ] (s : Finset ι) (R : ι → Ω → ℝ)\n    (hR : ∀ i, MemLp (R i) 2 μ) (w : ι → ℝ) {m : Ω → ℝ} {a b rf : ℝ}\n    (hm : ∀ ω, m ω = a - b * (∑ k ∈ s, w k • R k) ω)\n    (hrf : rf * ∫ ω, m ω ∂μ = 1) (hprice : ∀ i ∈ s, ∫ ω, m ω * R i ω ∂μ = 1) {i : ι}\n    (hi : i ∈ s) (hvar : portfolioVarN s w (fun j k ↦ cov[R j, R k; μ]) ≠ 0) :\n    (∫ ω, R i ω ∂μ) - rf =\n      beta (marginalVariance s (fun j k ↦ cov[R j, R k; μ]) w i)\n          (portfolioVarN s w (fun j k ↦ cov[R j, R k; μ])) *\n        portfolioReturn s w (fun k ↦ (∫ ω, R k ω ∂μ) - rf) :=\n  MathFin.capm_from_market_equilibrium_of_discountFactor s R hR w hm hrf hprice hi hvar\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "CAPM as a discount-factor model (Cochrane, Asset Pricing, §9.1); Sharpe (1964)",
+        "citations": [
+          {
+            "key": "Cochrane2005",
+            "locator": "§9.1"
+          },
+          {
+            "key": "Sharpe1964"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. MathFin.capm_from_market_equilibrium_of_discountFactor in MathFin/Choice/Portfolio/StochasticDiscountFactor.lean: integral_sub_eq_of_affine_discountFactor gives E[R_k] − r_f = r_f b Cov(R_k, R_m) for every asset, Cov(R_k, R_m) = (Σw)_k (marginalVariance_eq_covariance, Mathlib covariance_sum_right'), hence the cross-product condition μ_k (Σw)_j = μ_j (Σw)_k, and CAPM_from_market_equilibrium (MathFin/Choice/Portfolio/CAPMEquilibrium.lean) concludes. The nonvanishing of the market variance is a hypothesis. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
       "id": "mf-performance-gain_to_pain",
       "name": "Gain-to-Pain Ratio is Nonnegative",
       "description": "The gain-to-pain ratio, total gains over total losses on a finite period set, is nonnegative — unconditionally.",

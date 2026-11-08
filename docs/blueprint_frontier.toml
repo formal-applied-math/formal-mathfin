@@ -717,13 +717,6 @@ uses = ["def:pricing-functional", "def:coherent-risk-measure"]
 area = "risk"
 
 [[node]]
-label = "thm:sdf-capm-hansen-jagannathan"
-title = "CAPM and Hansen–Jagannathan from the discount factor"
-statement = "A stochastic discount factor affine in the market return yields the CAPM security market line, and Cauchy–Schwarz on state prices bounds every Sharpe ratio by σ(m)/E[m]."
-uses = ["thm:utility-state-price-density", "thm:capm-equilibrium", "def:sharpe-ratio"]
-area = "portfolio"
-
-[[node]]
 label = "thm:premium-is-price"
 title = "Insurance premiums are prices"
 statement = "The net premium of a survival-contingent benefit is its contract value under a deterministic discount and the survival law, and the Esscher premium is the price under the Esscher-tilted measure."
