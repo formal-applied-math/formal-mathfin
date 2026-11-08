@@ -156,7 +156,8 @@ lemma integral_sub_eq_of_affine_discountFactor [IsProbabilityMeasure μ] {m Rm R
   have hrf' : rf * (a - b * ∫ ω, Rm ω ∂μ) = 1 := by rw [← e1]; exact hrf
   have hpi : a * ∫ ω, R ω ∂μ - b * ∫ ω, Rm ω * R ω ∂μ = 1 := by rw [← e2]; exact hprice
   have hcov : cov[R, Rm; μ] = (∫ ω, Rm ω * R ω ∂μ) - (∫ ω, Rm ω ∂μ) * ∫ ω, R ω ∂μ := by
-    exact covariance_comm.trans (covariance_eq_sub hRm hR)
+    rw [covariance_comm]
+    exact covariance_eq_sub hRm hR
   rw [hcov]
   linear_combination rf * hpi - (∫ ω, R ω ∂μ) * hrf'
 
