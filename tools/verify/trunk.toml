@@ -68,11 +68,11 @@ instance = "MathFin.Market.price_pay_withNumeraire"
 
 [[device]]
 name = "MathFin.superReplicationPrice"
-instance = ""
+instance = "MathFin.Market.superReplicationPrice_eq_price"
 
 [[device]]
 name = "MathFin.PricesGainsAtZero"
-instance = ""
+instance = "MathFin.Market.IsPricingMeasure.of_pricesGainsAtZero"
 
 # the conditional price at an intermediate date (a conditional expectation of the deflated
 # payoff); the trunk's price at time t makes it an instance

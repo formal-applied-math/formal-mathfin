@@ -933,6 +933,15 @@ attribute [blueprint "thm:two-asset-min-variance" (title := "The two-asset weigh
   weight $w^*$ gives $(w^*, 1-w^*)$ the least portfolio variance among all two-asset budgets. -/)]
   MathFin.portfolioVarN_minVarWeightTwo_le
 
+attribute [blueprint "def:pricing-functional" (title := "The pricing functional")
+  (statement := /-- A market is a filtered space with traded assets and a positive numéraire. A
+  pricing measure up to $T$ is a probability measure equivalent to the reference measure on
+  $\mathcal F_T$ under which every deflated asset, frozen at $T$, is a martingale, and the price of
+  a contract under it is the expectation of its deflated cash flows. State-price pricing, the
+  change of numéraire, the conditional bond price, superreplication and gains-neutral measures are
+  instances. -/)]
+  MathFin.Market.price
+
 attribute [blueprint "thm:superhedging-coherent"
   (title := "The superhedging price is a coherent risk measure")
   (statement := /-- In the one-period finite-state market with a martingale probability vector, and
