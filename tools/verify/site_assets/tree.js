@@ -108,7 +108,7 @@ const secOf = n => isTrunk(n) ? {x0:CX - 120, x1:CX + 120, cx:CX} : isRoot(n) ? 
   : BSEC.get(n.p + "/" + ((PARTS.get(n.p).branches || []).includes(n.b) ? n.b : "")) || SEC.get(n.p);
 
 // heights: two caption rows on top, the crown, the trunk, the ground, the roots, the bedrock
-const TOP = 26 + 92 * TF;
+const TOP = 26 + 34 * TF;
 const maxIn = kind => d3.max(live.filter(n => kindOf(n) === kind), n => n.pd) || 0;
 const LH = 92, TSTEP = 54, RSTEP = 46;
 const LB = TOP + 24 + maxIn("limb") * LH;          // a limb's first level
@@ -238,7 +238,7 @@ const branchSel = linkG.selectAll("path").data(woodEdges.slice().sort((a, b) => 
 const shootSel = shootG.selectAll("path").data(shootEdges).join("path").attr("class", e => "shoot dimmable" + (e.prim ? "" : " sec"))
   .attr("d", e => { const g = edgeGeom(e); return `M${g.P}C${g.c1} ${g.c2} ${g.C}`; });
 
-// captions: limb names across the top, their branches beneath; root names in the soil
+// captions: limb names across the top, root names in the soil
 const limbLbl = view.append("g").attr("class", "dimmable");
 function relax(items){
   items.sort((p, q) => p.x - q.x);
@@ -250,22 +250,9 @@ function relax(items){
   }
   return items;
 }
-const L1 = 14 + 16 * TF, L2 = L1 + 17 * TF, L3 = L2 + 20 * TF;
-for (const L of relax(limbKeys.map(k => { const ns = inPart(k), np = ns.filter(isWood).length, cnt = `${np} proved · ${ns.length - np} frontier`;
-    return {x:SEC.get(k).cx, t:partTitle(k), cnt, w:Math.max(partTitle(k).length * 11.4, cnt.length * 6.9) * TF + 16}; }))){
+const L1 = 14 + 16 * TF;
+for (const L of relax(limbKeys.map(k => ({x:SEC.get(k).cx, t:partTitle(k), w:partTitle(k).length * 11.4 * TF + 16}))))
   cap(limbLbl.append("text").attr("class", "limb-lbl").attr("x", L.x).attr("y", L1).attr("text-anchor", "middle").text(L.t), 14.5);
-  cap(limbLbl.append("text").attr("class", "limb-n").attr("x", L.x).attr("y", L2).attr("text-anchor", "middle").text(L.cnt), 12.5);
-}
-const brs = [];
-for (const [key, bs] of BSEC){ const b = key.split("/")[1]; if (b) brs.push({x:bs.cx, cx:bs.cx, t:branchName(b), w:branchName(b).length * 7.4 * TF + 12}); }
-{ const rows = [[], [], []];
-  for (const L of relax(brs)){
-    const t = cap(limbLbl.append("text").attr("class", "branch-lbl").attr("x", L.x).attr("text-anchor", "middle").text(L.t), 13);
-    const lw = t.node().getComputedTextLength() / 2 + 5 * TF;
-    const r = Math.max(0, rows.findIndex(row => !row.some(u => Math.abs(u.x - L.x) < u.lw + lw)));
-    rows[r].push({x:L.x, lw}); t.attr("y", L3 + r * 14 * TF);
-    limbLbl.append("path").attr("class", "limb-guide").attr("d", `M${L.x},${L3 + r * 14 * TF + 6 * TF}L${L.cx},${TOP + 20}`);
-  } }
 for (const k of rootKeys){
   const s = RSEC.get(k), y = rootCap.get(k);
   cap(limbLbl.append("text").attr("class", "root-lbl").attr("x", s.cx).attr("y", y).attr("text-anchor", "middle").text(partTitle(k)), 13.5);
@@ -360,7 +347,7 @@ function placeLabels(k = curK, set = litSet){
   curK = k;
   const s = pxPerUnit() * k, fs = (k < 1.4 ? 13 : 12.5) / s, h = fs * 1.2, pad = 3 / s;
   const boxes = [];
-  if (!set) for (const el of document.querySelectorAll("#tree .limb-lbl, #tree .limb-n, #tree .branch-lbl, #tree .root-lbl, #tree .root-sub, #tree .trunk-lbl")){
+  if (!set) for (const el of document.querySelectorAll("#tree .limb-lbl, #tree .root-lbl, #tree .root-sub, #tree .trunk-lbl")){
     const b = el.getBBox(); boxes.push([b.x, b.y, b.x + b.width, b.y + b.height, "cap"]); }
   for (const d of nodeData) if (!d.up && (!set || set.has(d.id))){ const r = glyphR(d) + 1.5; boxes.push([d.px - r, d.py - r, d.px + r, d.py + r, d.id]); }
   const hit = (b, self) => boxes.some(c => c[4] !== self && !(b[2] < c[0] || b[0] > c[2] || b[3] < c[1] || b[1] > c[3]));

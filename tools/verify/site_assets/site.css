@@ -292,10 +292,7 @@ details.tableview summary { cursor: pointer; color: var(--ink-2); }
 #tree-box .lbl.fr { fill: var(--tr-blue); font-style: italic; font-weight: 400; }
 #tree-box .lbl.op { fill: var(--tr-star-ink); font-style: italic; font-weight: 600; }
 #tree-box .limb-lbl { font: 600 14.5px var(--sans); letter-spacing: .16em; text-transform: uppercase; fill: var(--muted); pointer-events: none; }
-#tree-box .limb-n { font: 12.5px var(--sans); fill: var(--muted); opacity: .8; pointer-events: none; }
-#tree-box .limb-guide { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 1 5; stroke-linecap: round; opacity: .45; }
 #tree-box .ghost { fill: var(--tr-ghost); }
-#tree-box .branch-lbl { font: 13px var(--sans); fill: var(--muted); pointer-events: none; }
 #tree-box .trunk-lbl { font: 12px var(--sans); letter-spacing: .32em; text-transform: uppercase; fill: var(--tr-soil-ink); paint-order: stroke; stroke: var(--tr-soil-1); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
 #tree-box .root-lbl { font: 600 13.5px var(--sans); letter-spacing: .16em; text-transform: uppercase; fill: var(--tr-soil-ink); paint-order: stroke; stroke: var(--tr-soil-1); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
 #tree-box .root-sub { font: italic 12.5px var(--serif); fill: var(--tr-soil-ink); paint-order: stroke; stroke: var(--tr-soil-1); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
