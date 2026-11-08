@@ -58,7 +58,7 @@ EXPECTED_FULL_THEOREMS = {
     "mc-prop-1.4.13",
     # 2026-06-05 Poisson-cluster + Itô-QV upgrade round: conclusions are now
     # DERIVED (PoissonSuperposition / PoissonThinning / PoissonCounting /
-    # ItoProcessQV in Foundations/), not structure-field projections.
+    # ItoProcessQV in Probability/), not structure-field projections.
     "pp-thm-3.3.5",
     "pp-thm-3.3.9",
     "pp-thm-3.3.10",
@@ -69,7 +69,7 @@ EXPECTED_FULL_THEOREMS = {
 # neither silently regress to placeholder nor be re-promoted without a
 # genuine derivation. (mc-thm-1.1.2 left this list 2026-06-06: the
 # Ionescu-Tulcea path-measure derivation landed in
-# Foundations/MarkovPathMeasure.lean and the entry is `full` now.)
+# Probability/Discrete/MarkovPathMeasure.lean and the entry is `full` now.)
 EXPECTED_REDUCED_CORE_THEOREMS = {
     # pp-prop-3.3.6 stays reduced_core HONESTLY: the first interarrival's
     # exponential law + memorylessness are derived (PoissonInterarrival), but
@@ -78,7 +78,7 @@ EXPECTED_REDUCED_CORE_THEOREMS = {
     # (mf-kelly-n-periods-linearity was demoted here 2026-06-06 by the
     # definitional-rfl tripwire and re-promoted the same day: the n-period
     # iid model is now real — Measure.pi of the two-point return law +
-    # linearity of expectation in Performance/Kelly.lean.)
+    # linearity of expectation in Choice/Performance/Kelly.lean.)
 }
 
 EXPECTED_NON_PLACEHOLDER_THEOREMS = {

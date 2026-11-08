@@ -135,7 +135,7 @@ def main() -> None:
         raise SystemExit(f"markers not found in {BLUEPRINT_MD}; refusing to guess")
     frontier = load_frontier(REPO / "docs" / "blueprint_frontier.toml")
     block = f"{BEGIN}\n{render(raw, frontier)}\n{END}"
-    new = re.sub(re.escape(BEGIN) + r".*?" + re.escape(END), block, md, flags=re.S)
+    new = re.sub(re.escape(BEGIN) + r".*?" + re.escape(END), lambda _: block, md, flags=re.S)
     BLUEPRINT_MD.write_text(new)
     print(f"rendered {len(raw)} nodes + {len(frontier)} frontier into {BLUEPRINT_MD}")
 

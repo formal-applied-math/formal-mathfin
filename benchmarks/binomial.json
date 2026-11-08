@@ -8,7 +8,7 @@
       "description": "In a single-period binomial model with no-arbitrage (d < e^r < u), every contingent claim with payoffs (V_u, V_d) in the up/down states is replicable, and the replicating portfolio cost equals the risk-neutral expected payoff discounted: V_0 = e^{-r} (q V_u + (1-q) V_d) where q = (e^r - d) / (u - d).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.Model\n\nopen MathFin\n\n/-- Single-period binomial: the replicating portfolio cost equals the\n    risk-neutral expected discounted payoff. -/\ntheorem binomial_replication_cost {S_0 u d r V_u V_d : ℝ}\n    (hS_0 : 0 < S_0) (h : BinomialNoArb u d r) :\n    let Δ : ℝ := (V_u - V_d) / (S_0 * (u - d))\n    let B : ℝ := Real.exp (-r) * (u * V_d - d * V_u) / (u - d)\n    Δ * S_0 + B = binomialOptionPriceOnePeriod u d r V_u V_d :=\n  MathFin.replicating_portfolio_cost hS_0 h\n\n/-- Single-period binomial: the replicating portfolio pays V_u in the up state. -/\ntheorem binomial_replication_up {S_0 u d r V_u V_d : ℝ}\n    (hS_0 : 0 < S_0) (h : BinomialNoArb u d r) :\n    let Δ : ℝ := (V_u - V_d) / (S_0 * (u - d))\n    let B : ℝ := Real.exp (-r) * (u * V_d - d * V_u) / (u - d)\n    Δ * (S_0 * u) + B * Real.exp r = V_u :=\n  MathFin.replicating_payoff_up hS_0 h\n\n/-- Single-period binomial: the replicating portfolio pays V_d in the down state. -/\ntheorem binomial_replication_down {S_0 u d r V_u V_d : ℝ}\n    (hS_0 : 0 < S_0) (h : BinomialNoArb u d r) :\n    let Δ : ℝ := (V_u - V_d) / (S_0 * (u - d))\n    let B : ℝ := Real.exp (-r) * (u * V_d - d * V_u) / (u - d)\n    Δ * (S_0 * d) + B * Real.exp r = V_d :=\n  MathFin.replicating_payoff_down hS_0 h\n"
+        "lean": "import MathFin.Models.Binomial.Model\n\nopen MathFin\n\n/-- Single-period binomial: the replicating portfolio cost equals the\n    risk-neutral expected discounted payoff. -/\ntheorem binomial_replication_cost {S_0 u d r V_u V_d : ℝ}\n    (hS_0 : 0 < S_0) (h : BinomialNoArb u d r) :\n    let Δ : ℝ := (V_u - V_d) / (S_0 * (u - d))\n    let B : ℝ := Real.exp (-r) * (u * V_d - d * V_u) / (u - d)\n    Δ * S_0 + B = binomialOptionPriceOnePeriod u d r V_u V_d :=\n  MathFin.replicating_portfolio_cost hS_0 h\n\n/-- Single-period binomial: the replicating portfolio pays V_u in the up state. -/\ntheorem binomial_replication_up {S_0 u d r V_u V_d : ℝ}\n    (hS_0 : 0 < S_0) (h : BinomialNoArb u d r) :\n    let Δ : ℝ := (V_u - V_d) / (S_0 * (u - d))\n    let B : ℝ := Real.exp (-r) * (u * V_d - d * V_u) / (u - d)\n    Δ * (S_0 * u) + B * Real.exp r = V_u :=\n  MathFin.replicating_payoff_up hS_0 h\n\n/-- Single-period binomial: the replicating portfolio pays V_d in the down state. -/\ntheorem binomial_replication_down {S_0 u d r V_u V_d : ℝ}\n    (hS_0 : 0 < S_0) (h : BinomialNoArb u d r) :\n    let Δ : ℝ := (V_u - V_d) / (S_0 * (u - d))\n    let B : ℝ := Real.exp (-r) * (u * V_d - d * V_u) / (u - d)\n    Δ * (S_0 * d) + B * Real.exp r = V_d :=\n  MathFin.replicating_payoff_down hS_0 h\n"
       },
       "metadata": {
         "chapter": 9,
@@ -24,7 +24,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of all three statements: portfolio cost, up-state payoff, down-state payoff. Lives in MathFin/Binomial/Model.lean. Axioms-clean. Multi-period backward induction (binomialPrice) also defined and proved consistent; CRR convergence to BS is upstream."
+        "formalization_scope": "Full formal proof of all three statements: portfolio cost, up-state payoff, down-state payoff. Lives in MathFin/Models/Binomial/Model.lean. Axioms-clean. Multi-period backward induction (binomialPrice) also defined and proved consistent; CRR convergence to BS is upstream."
       }
     },
     {
@@ -33,7 +33,7 @@
       "description": "Under CRR parameterization (u_n = e^{σ √Δt}, d_n = e^{-σ √Δt}, Δt = T/n), the risk-neutral up-probability p_n = (e^{rΔt} - d_n)/(u_n - d_n) satisfies p_n · u_n + (1 - p_n) · d_n = e^{rΔt}. The discrete-time discounted asset is a Q-martingale at each step. Exact algebraic identity, not asymptotic.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.CRRConvergence\n\nopen MathFin\n\n/-- CRR one-step risk-neutral martingale identity. -/\ntheorem crr_one_step_martingale_identity {σ T r : ℝ} {n : ℕ}\n    (h_du : crrDown σ T n < crrUp σ T n) :\n    crrProb r σ T n * crrUp σ T n + (1 - crrProb r σ T n) * crrDown σ T n\n      = Real.exp (crrPerStepRate r T n) :=\n  MathFin.crr_one_step_martingale h_du\n"
+        "lean": "import MathFin.Models.Binomial.CRRConvergence\n\nopen MathFin\n\n/-- CRR one-step risk-neutral martingale identity. -/\ntheorem crr_one_step_martingale_identity {σ T r : ℝ} {n : ℕ}\n    (h_du : crrDown σ T n < crrUp σ T n) :\n    crrProb r σ T n * crrUp σ T n + (1 - crrProb r σ T n) * crrDown σ T n\n      = Real.exp (crrPerStepRate r T n) :=\n  MathFin.crr_one_step_martingale h_du\n"
       },
       "metadata": {
         "chapter": 9,
@@ -50,7 +50,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Pure algebraic identity following from the definitions of crrUp, crrDown, crrPerStepRate, crrProb. Lives in MathFin/Binomial/CRRConvergence.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Pure algebraic identity following from the definitions of crrUp, crrDown, crrPerStepRate, crrProb. Lives in MathFin/Models/Binomial/CRRConvergence.lean. Axioms-clean."
       }
     },
     {
@@ -59,7 +59,7 @@
       "description": "Under the CRR parameterization with σ > 0 and T > 0, the risk-neutral up-probability p_n → 1/2 as n → ∞: the per-step Bernoulli increment becomes asymptotically symmetric. This is the analytic step behind the variance limit n · σ² Δt · 4 p_n (1 - p_n) → σ² T in the CRR-to-Black–Scholes correspondence; that limit is not itself stated in this entry.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.CRRConvergence\n\nopen MathFin Filter\nopen scoped Topology\n\n/-- CRR risk-neutral probability tends to 1/2 as n → ∞. -/\ntheorem crr_prob_tendsto_half {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Filter.Tendsto (fun n : ℕ => crrProb r σ T n) Filter.atTop (𝓝 (1/2)) :=\n  MathFin.crrProb_tendsto_half hσ hT\n"
+        "lean": "import MathFin.Models.Binomial.CRRConvergence\n\nopen MathFin Filter\nopen scoped Topology\n\n/-- CRR risk-neutral probability tends to 1/2 as n → ∞. -/\ntheorem crr_prob_tendsto_half {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Filter.Tendsto (fun n : ℕ => crrProb r σ T n) Filter.atTop (𝓝 (1/2)) :=\n  MathFin.crrProb_tendsto_half hσ hT\n"
       },
       "metadata": {
         "chapter": 9,
@@ -76,7 +76,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Substantial: ~80 lines using difference-quotient limits (e^{cx}-1)/x → c via hasDerivAt_iff_tendsto_slope, plus quotient-of-limits arithmetic to show p(h) → 1/2 as h → 0, plus composition with h_n = √(T/n). Implies the variance limit. Lives in MathFin/Binomial/CRRConvergence.lean. Axioms-clean. The full distributional convergence binomialPrice → bs_call_price is now proved: see mf-crr-gaussian-limit and mf-crr-bs-call-convergence."
+        "formalization_scope": "Full formal proof. Substantial: ~80 lines using difference-quotient limits (e^{cx}-1)/x → c via hasDerivAt_iff_tendsto_slope, plus quotient-of-limits arithmetic to show p(h) → 1/2 as h → 0, plus composition with h_n = √(T/n). Implies the variance limit. Lives in MathFin/Models/Binomial/CRRConvergence.lean. Axioms-clean. The full distributional convergence binomialPrice → bs_call_price is now proved: see mf-crr-gaussian-limit and mf-crr-bs-call-convergence."
       }
     },
     {
@@ -85,7 +85,7 @@
       "description": "Under CRR parameterization, n · σ² · (T/n) · 4 p_n (1 - p_n) → σ² T as n → ∞. The per-step variance of the log-return matches the BS variance to leading order. Direct corollary of crrProb_tendsto_half.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.CRRConvergence\n\nopen MathFin Filter\nopen scoped Topology\n\n/-- CRR variance limit: 4 σ² T · p_n (1 - p_n) → σ² T. -/\ntheorem crr_variance_limit_theorem {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Filter.Tendsto\n      (fun n : ℕ => 4 * σ^2 * T * (crrProb r σ T n) * (1 - crrProb r σ T n))\n      Filter.atTop (𝓝 (σ^2 * T)) :=\n  MathFin.crr_variance_limit hσ hT\n"
+        "lean": "import MathFin.Models.Binomial.CRRConvergence\n\nopen MathFin Filter\nopen scoped Topology\n\n/-- CRR variance limit: 4 σ² T · p_n (1 - p_n) → σ² T. -/\ntheorem crr_variance_limit_theorem {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Filter.Tendsto\n      (fun n : ℕ => 4 * σ^2 * T * (crrProb r σ T n) * (1 - crrProb r σ T n))\n      Filter.atTop (𝓝 (σ^2 * T)) :=\n  MathFin.crr_variance_limit hσ hT\n"
       },
       "metadata": {
         "chapter": 9,
@@ -102,7 +102,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Direct corollary of crrProb_tendsto_half via 4 p_n (1 - p_n) → 4 · (1/2) · (1/2) = 1, then const_mul to get σ² T. Lives in MathFin/Binomial/CRRConvergence.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Direct corollary of crrProb_tendsto_half via 4 p_n (1 - p_n) → 4 · (1/2) · (1/2) = 1, then const_mul to get σ² T. Lives in MathFin/Models/Binomial/CRRConvergence.lean. Axioms-clean."
       }
     },
     {
@@ -111,7 +111,7 @@
       "description": "Whenever every step's risk-neutral up-probability is a genuine probability (0 ≤ pₙ ≤ 1 — the non-strict closure of the no-arbitrage condition, which the degenerate n = 0 step satisfies), the law of the n-step CRR risk-neutral log-return — the n-fold convolution of the two-point per-step law — converges weakly to the Black-Scholes normal N((r − σ²/2)T, σ²T). The genuine distributional CLT for the binomial tree, via characteristic functions and Lévy's continuity theorem.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.CRRCharFun\n\nopen MathFin Filter\nopen scoped Topology\n\n/-- CRR → Black–Scholes, convergence in distribution: under no-arbitrage at every\n    step (`0 ≤ pₙ ≤ 1`), the `n`-step CRR risk-neutral log-return law — the `n`-fold\n    convolution `crrRowProbMeasure` of the two-point per-step law — converges weakly\n    to the Black–Scholes normal `N((r − σ²/2)T, σ²T)`. Re-export of\n    `MathFin.crr_tendsto_gaussian_inDistribution` (real derivation in\n    `MathFin/Binomial/CRRCharFun.lean`: the per-step charFun is computed exactly,\n    its `n`-th power converges to the Gaussian charFun\n    (`crr_charFun_pow_tendsto_gaussian`), and Lévy's continuity theorem\n    (`ProbabilityMeasure.tendsto_of_tendsto_charFun`) upgrades charFun convergence\n    to weak convergence, via `charFun_convPow` for the `n`-fold row law). -/\ntheorem crr_log_return_tendsto_gaussian {r σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T)\n    (hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1) :\n    Tendsto (fun n : ℕ => crrRowProbMeasure r σ T n (hp n).1 (hp n).2) atTop\n      (𝓝 (bsLimitProbMeasure r σ T)) :=\n  MathFin.crr_tendsto_gaussian_inDistribution hσ hT hp\n"
+        "lean": "import MathFin.Models.Binomial.CRRCharFun\n\nopen MathFin Filter\nopen scoped Topology\n\n/-- CRR → Black–Scholes, convergence in distribution: under no-arbitrage at every\n    step (`0 ≤ pₙ ≤ 1`), the `n`-step CRR risk-neutral log-return law — the `n`-fold\n    convolution `crrRowProbMeasure` of the two-point per-step law — converges weakly\n    to the Black–Scholes normal `N((r − σ²/2)T, σ²T)`. Re-export of\n    `MathFin.crr_tendsto_gaussian_inDistribution` (real derivation in\n    `MathFin/Models/Binomial/CRRCharFun.lean`: the per-step charFun is computed exactly,\n    its `n`-th power converges to the Gaussian charFun\n    (`crr_charFun_pow_tendsto_gaussian`), and Lévy's continuity theorem\n    (`ProbabilityMeasure.tendsto_of_tendsto_charFun`) upgrades charFun convergence\n    to weak convergence, via `charFun_convPow` for the `n`-fold row law). -/\ntheorem crr_log_return_tendsto_gaussian {r σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T)\n    (hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1) :\n    Tendsto (fun n : ℕ => crrRowProbMeasure r σ T n (hp n).1 (hp n).2) atTop\n      (𝓝 (bsLimitProbMeasure r σ T)) :=\n  MathFin.crr_tendsto_gaussian_inDistribution hσ hT hp\n"
       },
       "metadata": {
         "chapter": 9,
@@ -131,7 +131,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. The per-step CRR charFun is computed exactly from the two-point step law; its n-th power converges to the Gaussian charFun (crr_charFun_pow_tendsto_gaussian, via real cos/sin splitting of the complex exponential and second-order asymptotics of the CRR parameters); charFun_convPow identifies the n-step row law's charFun as that power; and Lévy's continuity theorem (ProbabilityMeasure.tendsto_of_tendsto_charFun) upgrades charFun convergence to weak convergence of the bundled ProbabilityMeasures. Lives in MathFin/Binomial/CRRCharFun.lean (crr_tendsto_gaussian_inDistribution). Axioms-clean."
+        "formalization_scope": "Full formal proof. The per-step CRR charFun is computed exactly from the two-point step law; its n-th power converges to the Gaussian charFun (crr_charFun_pow_tendsto_gaussian, via real cos/sin splitting of the complex exponential and second-order asymptotics of the CRR parameters); charFun_convPow identifies the n-step row law's charFun as that power; and Lévy's continuity theorem (ProbabilityMeasure.tendsto_of_tendsto_charFun) upgrades charFun convergence to weak convergence of the bundled ProbabilityMeasures. Lives in MathFin/Models/Binomial/CRRCharFun.lean (crr_tendsto_gaussian_inDistribution). Axioms-clean."
       }
     },
     {
@@ -140,7 +140,7 @@
       "description": "The n-step Cox-Ross-Rubinstein binomial price of a European call converges, as n → ∞, to the Black-Scholes call price S₀Φ(d₁) − Ke^{−rT}Φ(d₂). The classical CRR→BS convergence theorem, completing the discrete-to-continuous pricing correspondence. No-arbitrage is hypothesised at every step with n ≥ 1; n = 0 is excluded because the step degenerates there (Δt = T/0 = 0 forces u = d = 1, where no-arbitrage is impossible), and MathFin.binomialNoArb_crr discharges the hypothesis whenever |r|·√T < σ, so it is satisfiable rather than vacuous.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.CRRClosedForm\n\nopen MathFin Filter\nopen scoped Topology\n\n/-- **Cox–Ross–Rubinstein → Black–Scholes.** Under no-arbitrage at every step with\n    `n ≥ 1`, the\n    `n`-step CRR binomial price of a European call converges to the literal\n    Black–Scholes call price `S₀·Φ(d₁) − K·e^{−rT}·Φ(d₂)`. Re-export of\n    `MathFin.binomialPrice_call_tendsto_bs_closed`\n    (`MathFin/Binomial/CRRClosedForm.lean`). The route needs no uniform-integrability\n    machinery: the bounded *put* payoff passes to the limit under the distributional\n    CLT (`binomialPrice_call_tendsto_bs`), binomial put-call parity lifts the limit\n    to the unbounded call, and instantiating `bs_put_formula` on the limiting\n    Gaussian lands the closed Φ-form. -/\ntheorem binomial_call_price_tendsto_black_scholes {r σ T S₀ K : ℝ}\n    (hσ : 0 < σ) (hT : 0 < T) (hS₀ : 0 < S₀) (hK : 0 < K)\n    (hna : ∀ n, 0 < n → BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :\n    Tendsto (fun n : ℕ => binomialPrice (crrUp σ T n) (crrDown σ T n)\n        (crrPerStepRate r T n) (fun x => max (x - K) 0) n S₀) atTop\n      (𝓝 (S₀ * Phi (bsd1 S₀ K r σ T)\n          - K * Real.exp (-(r * T)) * Phi (bsd2 S₀ K r σ T))) :=\n  MathFin.binomialPrice_call_tendsto_bs_closed hσ hT hS₀ hK hna\n"
+        "lean": "import MathFin.Models.Binomial.CRRClosedForm\n\nopen MathFin Filter\nopen scoped Topology\n\n/-- **Cox–Ross–Rubinstein → Black–Scholes.** Under no-arbitrage at every step with\n    `n ≥ 1`, the\n    `n`-step CRR binomial price of a European call converges to the literal\n    Black–Scholes call price `S₀·Φ(d₁) − K·e^{−rT}·Φ(d₂)`. Re-export of\n    `MathFin.binomialPrice_call_tendsto_bs_closed`\n    (`MathFin/Models/Binomial/CRRClosedForm.lean`). The route needs no uniform-integrability\n    machinery: the bounded *put* payoff passes to the limit under the distributional\n    CLT (`binomialPrice_call_tendsto_bs`), binomial put-call parity lifts the limit\n    to the unbounded call, and instantiating `bs_put_formula` on the limiting\n    Gaussian lands the closed Φ-form. -/\ntheorem binomial_call_price_tendsto_black_scholes {r σ T S₀ K : ℝ}\n    (hσ : 0 < σ) (hT : 0 < T) (hS₀ : 0 < S₀) (hK : 0 < K)\n    (hna : ∀ n, 0 < n → BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :\n    Tendsto (fun n : ℕ => binomialPrice (crrUp σ T n) (crrDown σ T n)\n        (crrPerStepRate r T n) (fun x => max (x - K) 0) n S₀) atTop\n      (𝓝 (S₀ * Phi (bsd1 S₀ K r σ T)\n          - K * Real.exp (-(r * T)) * Phi (bsd2 S₀ K r σ T))) :=\n  MathFin.binomialPrice_call_tendsto_bs_closed hσ hT hS₀ hK hna\n"
       },
       "metadata": {
         "chapter": 9,
@@ -160,7 +160,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of the headline CRR→BS convergence. Chain: binomialPrice_eq_integral_convPow identifies the binomial price with a discounted expectation against the n-fold convolution row law; the bounded put payoff passes to the limit under weak convergence (the distributional CLT of mf-crr-gaussian-limit); binomial put-call parity (binomialPrice_callPut_parity) lifts the limit to the unbounded call — no uniform-integrability/Vitali machinery needed; exp_neg_mul_integral_put_gaussian_eq instantiates bs_put_formula on the limiting Gaussian N((r−σ²/2)T, σ²T) through the standardisation Z = (· − (r−σ²/2)T)/(σ√T), and Phi_neg lands the literal closed form. Lives in MathFin/Binomial/CRRCharFun.lean + MathFin/Binomial/CRRClosedForm.lean. Axioms-clean. \n\n2026-08-20 correction: the hypothesis was previously `∀ n, BinomialNoArb …`, quantified over every n including n = 0. That is UNSATISFIABLE — at n = 0, crrStep T 0 = T/0 = 0, so u = d = 1 and BinomialNoArb 1 1 0 demands Real.exp 0 < 1 — which made the theorem vacuously true and its content empty, though the proof never exploited that. The hypothesis is now restricted to 0 < n, which is all the limit consumes (the proof already worked eventually-in-n; only the 0 ≤ p ≤ 1 bound needed n = 0, and that survives via crrProb_zero). MathFin.binomialNoArb_crr proves the restricted hypothesis holds whenever |r|·√T < σ."
+        "formalization_scope": "Full formal proof of the headline CRR→BS convergence. Chain: binomialPrice_eq_integral_convPow identifies the binomial price with a discounted expectation against the n-fold convolution row law; the bounded put payoff passes to the limit under weak convergence (the distributional CLT of mf-crr-gaussian-limit); binomial put-call parity (binomialPrice_callPut_parity) lifts the limit to the unbounded call — no uniform-integrability/Vitali machinery needed; exp_neg_mul_integral_put_gaussian_eq instantiates bs_put_formula on the limiting Gaussian N((r−σ²/2)T, σ²T) through the standardisation Z = (· − (r−σ²/2)T)/(σ√T), and Phi_neg lands the literal closed form. Lives in MathFin/Models/Binomial/CRRCharFun.lean + MathFin/Models/Binomial/CRRClosedForm.lean. Axioms-clean. \n\n2026-08-20 correction: the hypothesis was previously `∀ n, BinomialNoArb …`, quantified over every n including n = 0. That is UNSATISFIABLE — at n = 0, crrStep T 0 = T/0 = 0, so u = d = 1 and BinomialNoArb 1 1 0 demands Real.exp 0 < 1 — which made the theorem vacuously true and its content empty, though the proof never exploited that. The hypothesis is now restricted to 0 < n, which is all the limit consumes (the proof already worked eventually-in-n; only the 0 ≤ p ≤ 1 bound needed n = 0, and that survives via crrProb_zero). MathFin.binomialNoArb_crr proves the restricted hypothesis holds whenever |r|·√T < σ."
       }
     },
     {
@@ -169,7 +169,7 @@
       "description": "Along every coin-flip path the discounted intrinsic payoff is dominated by the discounted American value: e^(−rk)·g(S_k(ω)) ≤ e^(−rk)·americanPrice(N−k, S_k(ω)) — the dominance clause of the Snell-envelope characterization at path level, routed through the identification theorem rather than the scalar Bellman max (the American case E = univ of the exercise-set statement discounted_intrinsic_le_bermudanPrice).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.American\nimport MathFin.Binomial.SnellEnvelope\n\nopen MathFin\n\ntheorem discounted_intrinsic_le_americanPrice_thm\n    (u d r : ℝ) (g : ℝ → ℝ) (S₀ : ℝ) (N k : ℕ) (ω : ℕ → Bool) :\n    Real.exp (-r * k) * g (MathFin.spotPath S₀ u d k ω)\n      ≤ Real.exp (-r * k) * MathFin.americanPrice u d r g (N - k)\n          (MathFin.spotPath S₀ u d k ω) :=\n  MathFin.discounted_intrinsic_le_bermudanPrice Set.univ u d r g S₀ (N := N) (k := k)\n    (Or.inr (Set.mem_univ _)) ω\n"
+        "lean": "import MathFin.Models.Binomial.American\nimport MathFin.Models.Binomial.SnellEnvelope\n\nopen MathFin\n\ntheorem discounted_intrinsic_le_americanPrice_thm\n    (u d r : ℝ) (g : ℝ → ℝ) (S₀ : ℝ) (N k : ℕ) (ω : ℕ → Bool) :\n    Real.exp (-r * k) * g (MathFin.spotPath S₀ u d k ω)\n      ≤ Real.exp (-r * k) * MathFin.americanPrice u d r g (N - k)\n          (MathFin.spotPath S₀ u d k ω) :=\n  MathFin.discounted_intrinsic_le_bermudanPrice Set.univ u d r g S₀ (N := N) (k := k)\n    (Or.inr (Set.mem_univ _)) ω\n"
       },
       "metadata": {
         "chapter": 9,
@@ -182,7 +182,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the dominance clause of the Snell characterization at path level — the discounted intrinsic payoff e^{-rk}*g(S_k(omega)) is dominated by the discounted American value along every path, proved through the identification theorem snellAux_eq_discounted_bermudanPrice (an induction over the tree, Binomial/SnellEnvelope.lean), not by le_max on the Bellman definition. Honest scope: this clause is the elementary corner of the characterization; the depth lives in the sibling clauses (supermartingale property, adaptedness, minimality over arbitrary path-processes) proved in the same module — see mf-american-supermartingale. Axioms-clean."
+        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the dominance clause of the Snell characterization at path level — the discounted intrinsic payoff e^{-rk}*g(S_k(omega)) is dominated by the discounted American value along every path, proved through the identification theorem snellAux_eq_discounted_bermudanPrice (an induction over the tree, Models/Binomial/SnellEnvelope.lean), not by le_max on the Bellman definition. Honest scope: this clause is the elementary corner of the characterization; the depth lives in the sibling clauses (supermartingale property, adaptedness, minimality over arbitrary path-processes) proved in the same module — see mf-american-supermartingale. Axioms-clean."
       }
     },
     {
@@ -191,7 +191,7 @@
       "description": "The discounted American value process X_k(ω) = e^(−rk)·americanPrice(N−k, S_k(ω)) on coin-flip paths is a supermartingale under the risk-neutral node average: q·X_{k+1}(up) + (1−q)·X_{k+1}(down) ≤ X_k — the conditional-expectation form E[X_{k+1}|ℱ_k] ≤ X_k on the finite tree, via the identification snellAux = e^(−rk)·americanPrice: the discounted American value is the Snell envelope of the discounted payoff.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.American\nimport MathFin.Binomial.SnellEnvelope\n\nopen MathFin\n\ntheorem discounted_americanPrice_supermartingale_thm\n    (u d r : ℝ) (g : ℝ → ℝ) (S₀ : ℝ) {N k : ℕ} (hk : k < N) (ω : ℕ → Bool) :\n    MathFin.crrUpProb u d r * (Real.exp (-r * (k + 1 : ℕ)) *\n        MathFin.americanPrice u d r g (N - (k + 1))\n          (MathFin.spotPath S₀ u d (k + 1) (Function.update ω k true)))\n      + (1 - MathFin.crrUpProb u d r) * (Real.exp (-r * (k + 1 : ℕ)) *\n        MathFin.americanPrice u d r g (N - (k + 1))\n          (MathFin.spotPath S₀ u d (k + 1) (Function.update ω k false)))\n      ≤ Real.exp (-r * k) * MathFin.americanPrice u d r g (N - k)\n          (MathFin.spotPath S₀ u d k ω) :=\n  MathFin.discounted_bermudanPrice_supermartingale Set.univ u d r g S₀ hk ω\n"
+        "lean": "import MathFin.Models.Binomial.American\nimport MathFin.Models.Binomial.SnellEnvelope\n\nopen MathFin\n\ntheorem discounted_americanPrice_supermartingale_thm\n    (u d r : ℝ) (g : ℝ → ℝ) (S₀ : ℝ) {N k : ℕ} (hk : k < N) (ω : ℕ → Bool) :\n    MathFin.crrUpProb u d r * (Real.exp (-r * (k + 1 : ℕ)) *\n        MathFin.americanPrice u d r g (N - (k + 1))\n          (MathFin.spotPath S₀ u d (k + 1) (Function.update ω k true)))\n      + (1 - MathFin.crrUpProb u d r) * (Real.exp (-r * (k + 1 : ℕ)) *\n        MathFin.americanPrice u d r g (N - (k + 1))\n          (MathFin.spotPath S₀ u d (k + 1) (Function.update ω k false)))\n      ≤ Real.exp (-r * k) * MathFin.americanPrice u d r g (N - k)\n          (MathFin.spotPath S₀ u d k ω) :=\n  MathFin.discounted_bermudanPrice_supermartingale Set.univ u d r g S₀ hk ω\n"
       },
       "metadata": {
         "chapter": 9,
@@ -208,7 +208,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the genuine path-process supermartingale property of the discounted American value X_k(omega) = e^{-rk}*americanPrice(N-k, S_k(omega)) on coin-flip paths — q*X_{k+1}(up) + (1-q)*X_{k+1}(down) <= X_k, the explicit node-average form of E[X_{k+1}|F_k] (which on a finite tree IS the conditional expectation; same pathwise idiom as Binomial/MartingaleRepresentation.lean). Proved via the identification theorem snellAux_eq_discounted_bermudanPrice (the scalar Bellman recursion is the Markov instance of the path-space Snell envelope) in Binomial/SnellEnvelope.lean, where the FULL Snell characterization lives: payoff dominance, supermartingale, adaptedness (pathAdaptedAt clauses), and minimality over arbitrary path-processes (bermudanPrice_snell_minimal). Replaces the former le_max-on-the-Bellman-def shadow. Axioms-clean. The entry is the American case E = univ of discounted_bermudanPrice_supermartingale, which holds for every early-exercise step set."
+        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the genuine path-process supermartingale property of the discounted American value X_k(omega) = e^{-rk}*americanPrice(N-k, S_k(omega)) on coin-flip paths — q*X_{k+1}(up) + (1-q)*X_{k+1}(down) <= X_k, the explicit node-average form of E[X_{k+1}|F_k] (which on a finite tree IS the conditional expectation; same pathwise idiom as Models/Binomial/MartingaleRepresentation.lean). Proved via the identification theorem snellAux_eq_discounted_bermudanPrice (the scalar Bellman recursion is the Markov instance of the path-space Snell envelope) in Models/Binomial/SnellEnvelope.lean, where the FULL Snell characterization lives: payoff dominance, supermartingale, adaptedness (pathAdaptedAt clauses), and minimality over arbitrary path-processes (bermudanPrice_snell_minimal). Replaces the former le_max-on-the-Bellman-def shadow. Axioms-clean. The entry is the American case E = univ of discounted_bermudanPrice_supermartingale, which holds for every early-exercise step set."
       }
     },
     {
@@ -217,7 +217,7 @@
       "description": "Under BinomialNoArb u d r, binomialPrice ≤ americanPrice for the same intrinsic g. The American option dominates the European with the same payoff — the early-exercise feature can only add value.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.Bermudan\n\nopen MathFin\n\ntheorem american_ge_european_thm {u d r : ℝ} (h : MathFin.BinomialNoArb u d r)\n    (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :\n    MathFin.binomialPrice u d r g n S ≤ MathFin.americanPrice u d r g n S :=\n  MathFin.bermudanPrice_mono h g (Set.empty_subset _) n S\n"
+        "lean": "import MathFin.Models.Binomial.Bermudan\n\nopen MathFin\n\ntheorem american_ge_european_thm {u d r : ℝ} (h : MathFin.BinomialNoArb u d r)\n    (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :\n    MathFin.binomialPrice u d r g n S ≤ MathFin.americanPrice u d r g n S :=\n  MathFin.bermudanPrice_mono h g (Set.empty_subset _) n S\n"
       },
       "metadata": {
         "chapter": 9,
@@ -234,7 +234,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: monotonicity of the tree price in the early-exercise step set (bermudanPrice_mono, Binomial/Bermudan.lean) for the sets empty subset univ, i.e. European = bermudanPrice with E empty and American = bermudanPrice with E = univ. The monotonicity is an instance of Snell minimality: the American price is a supermartingale dominating the payoff at maturity, so it dominates the European envelope. Axioms-clean."
+        "formalization_scope": "Full formal proof: monotonicity of the tree price in the early-exercise step set (bermudanPrice_mono, Models/Binomial/Bermudan.lean) for the sets empty subset univ, i.e. European = bermudanPrice with E empty and American = bermudanPrice with E = univ. The monotonicity is an instance of Snell minimality: the American price is a supermartingale dominating the payoff at maturity, so it dominates the European envelope. Axioms-clean."
       }
     },
     {
@@ -243,7 +243,7 @@
       "description": "For σ ≠ 0, (2 e^{rh²} − e^{σh} − e^{−σh}) / (h · (e^{σh} − e^{−σh})) → (r − σ²/2)/σ as h → 0 (h ≠ 0). Substantive analytic content of the CRR-to-BS drift correspondence: it is the step behind the textbook drift limit n · (2 p_n − 1) · σ√(T/n) → (r − σ²/2)T (substitute h_n = √(T/n) and scale by σT), which is not itself stated in this entry.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.DriftLimit\n\nopen MathFin Filter\nopen scoped Topology\n\ntheorem crr_drift_quotient_thm {σ : ℝ} (hσ : σ ≠ 0) (r : ℝ) :\n    Tendsto (fun h : ℝ =>\n        (2 * Real.exp (r * h^2) - Real.exp (σ * h) - Real.exp (-(σ * h)))\n          / (h * (Real.exp (σ * h) - Real.exp (-(σ * h)))))\n      (𝓝[≠] 0) (𝓝 ((r - σ^2 / 2) / σ)) :=\n  MathFin.tendsto_crr_drift_quotient hσ r\n"
+        "lean": "import MathFin.Models.Binomial.DriftLimit\n\nopen MathFin Filter\nopen scoped Topology\n\ntheorem crr_drift_quotient_thm {σ : ℝ} (hσ : σ ≠ 0) (r : ℝ) :\n    Tendsto (fun h : ℝ =>\n        (2 * Real.exp (r * h^2) - Real.exp (σ * h) - Real.exp (-(σ * h)))\n          / (h * (Real.exp (σ * h) - Real.exp (-(σ * h)))))\n      (𝓝[≠] 0) (𝓝 ((r - σ^2 / 2) / σ)) :=\n  MathFin.tendsto_crr_drift_quotient hσ r\n"
       },
       "metadata": {
         "chapter": 9,
@@ -260,7 +260,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of the h-form drift quotient limit. Building blocks: tendsto_exp_sym_sub_two_div_sq (via the algebraic identity e^{σh} + e^{-σh} - 2 = e^{-σh}(e^{σh} - 1)², reducing to existing tendsto_exp_sub_one_div); tendsto_crr_numerator_div_sq (combines with the existing tendsto_exp_sq_sub_one_div_sq); tendsto_sinh_div for the denominator. The n → ∞ form n · (2 p_n − 1) · σ√(T/n) → (r − σ²/2)T is the obvious substitution h = √(T/n) scaled by σT, deferred as routine algebra (the Lean expression for the substitution is intricate, the analytic content is identical to the h-form proven here). Lives in MathFin/Binomial/DriftLimit.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof of the h-form drift quotient limit. Building blocks: tendsto_exp_sym_sub_two_div_sq (via the algebraic identity e^{σh} + e^{-σh} - 2 = e^{-σh}(e^{σh} - 1)², reducing to existing tendsto_exp_sub_one_div); tendsto_crr_numerator_div_sq (combines with the existing tendsto_exp_sq_sub_one_div_sq); tendsto_sinh_div for the denominator. The n → ∞ form n · (2 p_n − 1) · σ√(T/n) → (r − σ²/2)T is the obvious substitution h = √(T/n) scaled by σT, deferred as routine algebra (the Lean expression for the substitution is intricate, the analytic content is identical to the h-form proven here). Lives in MathFin/Models/Binomial/DriftLimit.lean. Axioms-clean."
       }
     },
     {
@@ -269,7 +269,7 @@
       "description": "CRR drift limit (n-form): n · (2 p_n − 1) · σ · √(T/n) → (r − σ²/2) · T as n → ∞. Closes the analytic content of CRR-to-BS drift correspondence; the h-form was shipped in mf-crr-drift-quotient.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.DriftLimit\n\nopen MathFin\n\ntheorem crr_drift_limit_thm {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Filter.Tendsto (fun n : ℕ =>\n        (n : ℝ) * (2 * MathFin.crrProb r σ T n - 1) * σ * Real.sqrt (T / n))\n      Filter.atTop (nhds ((r - σ^2 / 2) * T)) :=\n  MathFin.crr_drift_limit_n hσ hT\n"
+        "lean": "import MathFin.Models.Binomial.DriftLimit\n\nopen MathFin\n\ntheorem crr_drift_limit_thm {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Filter.Tendsto (fun n : ℕ =>\n        (n : ℝ) * (2 * MathFin.crrProb r σ T n - 1) * σ * Real.sqrt (T / n))\n      Filter.atTop (nhds ((r - σ^2 / 2) * T)) :=\n  MathFin.crr_drift_limit_n hσ hT\n"
       },
       "metadata": {
         "chapter": 9,
@@ -285,7 +285,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Substitutes h_n = √(T/n) into the h-form tendsto_crr_drift_quotient, scales by σT, and closes the algebraic residual via linear_combination over the identity n · (√(T/n))² = T. Lives in MathFin/Binomial/DriftLimit.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Substitutes h_n = √(T/n) into the h-form tendsto_crr_drift_quotient, scales by σT, and closes the algebraic residual via linear_combination over the identity n · (√(T/n))² = T. Lives in MathFin/Models/Binomial/DriftLimit.lean. Axioms-clean."
       }
     },
     {
@@ -294,7 +294,7 @@
       "description": "On the CRR binomial tree with BinomialNoArb, for every early-exercise step set E, the European price binomialPrice is at most the Bermudan price bermudanPrice E, which is at most the American price americanPrice, at every number of steps and every spot (all three are the one Bellman recursion bermudanPrice at E = empty, E, univ).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.Bermudan\n\nopen Real\nopen MathFin\n\ntheorem bermudan_sandwich_thm {u d r : ℝ} (h : BinomialNoArb u d r)\n    (g : ℝ → ℝ) (E : Set ℕ) (n : ℕ) (S : ℝ) :\n    binomialPrice u d r g n S ≤ bermudanPrice E u d r g n S ∧\n      bermudanPrice E u d r g n S ≤ americanPrice u d r g n S :=\n  MathFin.binomialPrice_le_bermudanPrice_le_americanPrice h g E n S\n"
+        "lean": "import MathFin.Models.Binomial.Bermudan\n\nopen Real\nopen MathFin\n\ntheorem bermudan_sandwich_thm {u d r : ℝ} (h : BinomialNoArb u d r)\n    (g : ℝ → ℝ) (E : Set ℕ) (n : ℕ) (S : ℝ) :\n    binomialPrice u d r g n S ≤ bermudanPrice E u d r g n S ∧\n      bermudanPrice E u d r g n S ≤ americanPrice u d r g n S :=\n  MathFin.binomialPrice_le_bermudanPrice_le_americanPrice h g E n S\n"
       },
       "metadata": {
         "chapter": 14,
@@ -311,16 +311,16 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of the price-tree sandwich binomialPrice <= bermudanPrice E <= americanPrice (binomialPrice_le_bermudanPrice_le_americanPrice, Binomial/Bermudan.lean), from monotonicity of bermudanPrice in the exercise set (bermudanPrice_mono), itself an instance of Snell minimality (bermudanPrice_le_of_supermartingale_dominating). The abstract Finset.sup' form (bermudan_sandwich) is a separate lemma not stated in this entry. Axioms-clean."
+        "formalization_scope": "Full formal proof of the price-tree sandwich binomialPrice <= bermudanPrice E <= americanPrice (binomialPrice_le_bermudanPrice_le_americanPrice, Models/Binomial/Bermudan.lean), from monotonicity of bermudanPrice in the exercise set (bermudanPrice_mono), itself an instance of Snell minimality (bermudanPrice_le_of_supermartingale_dominating). The abstract Finset.sup' form (bermudan_sandwich) is a separate lemma not stated in this entry. Axioms-clean."
       }
     },
     {
       "id": "mf-binomial-girsanov-RN-norm",
-      "name": "Discrete Girsanov: E^P[dQ/dP] = 1",
+      "name": "Single-Period Binomial Density Normalization: E^P[dQ/dP] = 1",
       "description": "In a single-period binomial, the Radon-Nikodym derivative Z = dQ/dP satisfies E^P[Z] = 1.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.Girsanov\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem binomialRN_expectation_one_thm (p q : ℝ)\n    (hp : p ≠ 0) (hp1 : p ≠ 1) :\n    p * MathFin.binomialRN p q true + (1 - p) * MathFin.binomialRN p q false = 1 :=\n  MathFin.binomialRN_expectation_one p q hp hp1\n"
+        "lean": "import MathFin.Models.Binomial.Girsanov\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem binomialRN_expectation_one_thm (p q : ℝ)\n    (hp : p ≠ 0) (hp1 : p ≠ 1) :\n    p * MathFin.binomialRN p q true + (1 - p) * MathFin.binomialRN p q false = 1 :=\n  MathFin.binomialRN_expectation_one p q hp hp1\n"
       },
       "metadata": {
         "chapter": 7,
@@ -342,7 +342,7 @@
       "description": "On the binomial tree with i.i.d. Bernoulli(q) coin flips, 0 < q < 1, every Mathlib Martingale M for the natural filtration of the flips is, on every path, its initial value plus the martingaleTransform (discrete stochastic integral) of a hedge A against a martingale S of the same filtration whose two children at every node differ; the hedge is StronglyAdapted for the filtration (A_{k+1} depends only on the first k flips) -- market completeness, the second pillar of the FTAP.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.MartingaleRepresentation\n\nopen MeasureTheory MathFin\nopen scoped NNReal\n\ntheorem binomial_martingale_representation_thm {q : ℝ≥0} (hq0 : 0 < q) (hq1 : q < 1)\n    {M S : ℕ → (ℕ → Bool) → ℝ}\n    (hM : Martingale M flipFiltration (coinFlipMeasure q hq1.le))\n    (hS : Martingale S flipFiltration (coinFlipMeasure q hq1.le))\n    (hS_nondeg : ∀ n ω, S (n + 1) (Function.update ω n true) ≠ S (n + 1) (Function.update ω n false)) :\n    ∃ A : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ A (n + 1)) ∧\n      ∀ N ω, M N ω = M 0 ω + martingaleTransform A S N ω :=\n  binomial_martingale_representation hq0 hq1 hM hS hS_nondeg\n"
+        "lean": "import MathFin.Models.Binomial.MartingaleRepresentation\n\nopen MeasureTheory MathFin\nopen scoped NNReal\n\ntheorem binomial_martingale_representation_thm {q : ℝ≥0} (hq0 : 0 < q) (hq1 : q < 1)\n    {M S : ℕ → (ℕ → Bool) → ℝ}\n    (hM : Martingale M flipFiltration (coinFlipMeasure q hq1.le))\n    (hS : Martingale S flipFiltration (coinFlipMeasure q hq1.le))\n    (hS_nondeg : ∀ n ω, S (n + 1) (Function.update ω n true) ≠ S (n + 1) (Function.update ω n false)) :\n    ∃ A : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ A (n + 1)) ∧\n      ∀ N ω, M N ω = M 0 ω + martingaleTransform A S N ω :=\n  binomial_martingale_representation hq0 hq1 hM hS hS_nondeg\n"
       },
       "metadata": {
         "chapter": 7,
@@ -354,7 +354,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. oneStep_of_martingale (MathFin/Binomial/PathMeasure.lean) turns a Martingale of flipFiltration under coinFlipMeasure q into the node-average identity on every path (condExp_flipFiltration_succ: the conditional expectation is the node average because the next flip is independent of the past; the almost-sure identity is pointwise because every cylinder has positive probability for 0 < q < 1); then the pathwise delta hedge repr_one_step (hedge = (delta M)/(delta S), MathFin/Binomial/FlipPaths.lean) telescopes. Lives in MathFin/Binomial/MartingaleRepresentation.lean. The space is the infinite coin-flip paths; flipFiltration is the pullback of the finite-horizon filtration of the multi-period market. Axioms-clean."
+        "formalization_scope": "Full formal proof. oneStep_of_martingale (MathFin/Models/Binomial/PathMeasure.lean) turns a Martingale of flipFiltration under coinFlipMeasure q into the node-average identity on every path (condExp_flipFiltration_succ: the conditional expectation is the node average because the next flip is independent of the past; the almost-sure identity is pointwise because every cylinder has positive probability for 0 < q < 1); then the pathwise delta hedge repr_one_step (hedge = (delta M)/(delta S), MathFin/Models/Binomial/FlipPaths.lean) telescopes. Lives in MathFin/Models/Binomial/MartingaleRepresentation.lean. The space is the infinite coin-flip paths; flipFiltration is the pullback of the finite-horizon filtration of the multi-period market. Axioms-clean."
       }
     },
     {
@@ -363,7 +363,7 @@
       "domain": "mathematical_finance",
       "description": "Under no-arbitrage (0 < d < e^r < u) and S0 != 0, for every payoff g and horizon N there is a predictable strategy H (H_{k+1} is strongly measurable for the natural filtration of the first k coin flips, i.e. depends only on them) such that, along every coin-flip path, e^(-rN) g(S_N) = binomialPrice u d r g N S0 + sum_{k<N} H_{k+1} (S~_{k+1} - S~_k) (the martingaleTransform of H against the discounted spot), where S~_k = e^(-rk) S_k is the discounted spot.",
       "code": {
-        "lean": "import MathFin.Binomial.MartingaleRepresentation\n\nopen MeasureTheory MathFin\n\n/-- The binomial price of a European claim is the initial capital of a hedge. -/\ntheorem binomialPrice_replication' {u d r : ℝ} (h : BinomialNoArb u d r) {S₀ : ℝ}\n    (hS₀ : S₀ ≠ 0) (g : ℝ → ℝ) (N : ℕ) :\n    ∃ H : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ H (n + 1)) ∧ ∀ ω,\n      Real.exp (-(r * N)) * g (spotPath S₀ u d N ω) = binomialPrice u d r g N S₀\n        + martingaleTransform H (discountedSpot S₀ u d r) N ω :=\n  binomialPrice_replication h hS₀ g N\n"
+        "lean": "import MathFin.Models.Binomial.MartingaleRepresentation\n\nopen MeasureTheory MathFin\n\n/-- The binomial price of a European claim is the initial capital of a hedge. -/\ntheorem binomialPrice_replication' {u d r : ℝ} (h : BinomialNoArb u d r) {S₀ : ℝ}\n    (hS₀ : S₀ ≠ 0) (g : ℝ → ℝ) (N : ℕ) :\n    ∃ H : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ H (n + 1)) ∧ ∀ ω,\n      Real.exp (-(r * N)) * g (spotPath S₀ u d N ω) = binomialPrice u d r g N S₀\n        + martingaleTransform H (discountedSpot S₀ u d r) N ω :=\n  binomialPrice_replication h hS₀ g N\n"
       },
       "metadata": {
         "chapter": 7,
@@ -379,7 +379,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. binomialPrice_replication in MathFin/Binomial/MartingaleRepresentation.lean: binomial_martingale_representation applied to two Mathlib martingales of flipFiltration under coinFlipMeasure (crrUpProb u d r), the discounted tree value stopped at N (martingale_discountedTreeValue, from binomialPrice_succ) and the discounted spot (martingale_discountedSpot, from crrUpProb_mul_up_add), with nondegeneracy from d < u and S0 != 0. The strategy is the representation's node-wise delta. European payoffs of the terminal spot only; the identity is pathwise, with no measure on paths. Axioms-clean."
+        "formalization_scope": "Full formal proof. binomialPrice_replication in MathFin/Models/Binomial/MartingaleRepresentation.lean: binomial_martingale_representation applied to two Mathlib martingales of flipFiltration under coinFlipMeasure (crrUpProb u d r), the discounted tree value stopped at N (martingale_discountedTreeValue, from binomialPrice_succ) and the discounted spot (martingale_discountedSpot, from crrUpProb_mul_up_add), with nondegeneracy from d < u and S0 != 0. The strategy is the representation's node-wise delta. European payoffs of the terminal spot only; the identity is pathwise, with no measure on paths. Axioms-clean."
       }
     },
     {
@@ -388,7 +388,7 @@
       "description": "Under no-arbitrage, the risk-neutral measure in the single-period binomial is uniquely determined by the martingale condition.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.SecondFTAP\n\nopen Real\nopen MathFin\n\ntheorem second_FTAP_single_period_thm {u d r : ℝ} (h : MathFin.BinomialNoArb u d r) :\n    ∃! q : ℝ, q * u + (1 - q) * d = Real.exp r :=\n  MathFin.second_FTAP_single_period h\n"
+        "lean": "import MathFin.Models.Binomial.SecondFTAP\n\nopen Real\nopen MathFin\n\ntheorem second_FTAP_single_period_thm {u d r : ℝ} (h : MathFin.BinomialNoArb u d r) :\n    ∃! q : ℝ, q * u + (1 - q) * d = Real.exp r :=\n  MathFin.second_FTAP_single_period h\n"
       },
       "metadata": {
         "chapter": 7,
@@ -409,7 +409,7 @@
       "description": "Andre's reflection principle for ±1 random-walk paths: the number of length-n paths that touch a barrier a > 0 and end at b ≤ a equals the number of all paths ending at the reflected endpoint 2a − b. The combinatorial backbone of barrier-option counting in the binomial tree; the hitting condition on the reflected side is discharged by a discrete intermediate-value theorem.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.PathReflection\nimport Mathlib.SetTheory.Cardinal.Finite\n\n/-- **Andre's reflection principle, counting form** (1887). For ±1 walks of\n    length `n` (paths `Fin n → Bool`), a barrier `a > 0`, and an endpoint\n    `b ≤ a`: the number of paths that touch the barrier and end at `b` equals\n    the number of ALL paths ending at the reflected endpoint `2a − b` — the\n    hitting condition on the reflected side is automatic by the discrete IVT,\n    since `2a − b ≥ a`. This is the counting backbone of barrier-option\n    pricing in the binomial tree. Re-exports\n    `MathFin.reflectionPrincipleEquivBelow` through `Nat.card_congr`. -/\ntheorem reflection_principle_count {n : ℕ} (a b : ℤ) (ha : 0 < a) (hb : b ≤ a) :\n    Nat.card {ω : Fin n → Bool // MathFin.HitsLevel a ω ∧ MathFin.walkPos ω n = b} =\n    Nat.card {ω : Fin n → Bool // MathFin.walkPos ω n = 2 * a - b} :=\n  Nat.card_congr (MathFin.reflectionPrincipleEquivBelow a b ha hb)"
+        "lean": "import MathFin.Models.Binomial.PathReflection\nimport Mathlib.SetTheory.Cardinal.Finite\n\n/-- **Andre's reflection principle, counting form** (1887). For ±1 walks of\n    length `n` (paths `Fin n → Bool`), a barrier `a > 0`, and an endpoint\n    `b ≤ a`: the number of paths that touch the barrier and end at `b` equals\n    the number of ALL paths ending at the reflected endpoint `2a − b` — the\n    hitting condition on the reflected side is automatic by the discrete IVT,\n    since `2a − b ≥ a`. This is the counting backbone of barrier-option\n    pricing in the binomial tree. Re-exports\n    `MathFin.reflectionPrincipleEquivBelow` through `Nat.card_congr`. -/\ntheorem reflection_principle_count {n : ℕ} (a b : ℤ) (ha : 0 < a) (hb : b ≤ a) :\n    Nat.card {ω : Fin n → Bool // MathFin.HitsLevel a ω ∧ MathFin.walkPos ω n = b} =\n    Nat.card {ω : Fin n → Bool // MathFin.walkPos ω n = 2 * a - b} :=\n  Nat.card_congr (MathFin.reflectionPrincipleEquivBelow a b ha hb)"
       },
       "metadata": {
         "chapter": 14,
@@ -421,7 +421,7 @@
         ],
         "difficulty": "medium",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof in MathFin/Binomial/PathReflection.lean: the reflectAtFirstHit involution, the reflected-endpoint identity, the discrete IVT (HitsLevel_of_walkPos_endpoint_ge), and the bijection reflectionPrincipleEquivBelow; the snippet re-exports the counting identity via Nat.card_congr."
+        "formalization_scope": "Full formal proof in MathFin/Models/Binomial/PathReflection.lean: the reflectAtFirstHit involution, the reflected-endpoint identity, the discrete IVT (HitsLevel_of_walkPos_endpoint_ge), and the bijection reflectionPrincipleEquivBelow; the snippet re-exports the counting identity via Nat.card_congr."
       }
     },
     {
@@ -430,7 +430,7 @@
       "description": "Number of paths touching a and ending at b equals number ending at 2a-b, for 0<a, b<=a.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.BarrierReflection\n\nopen MathFin\n\n/-- **Reflection-principle counting identity** (barrier-pricing backbone). For a barrier\n`0 < a` and terminal `b ≤ a`, the number of `n`-step ±1 paths that touch `a` and finish\nat `b` equals the number that finish at `2a − b`. Re-exports `MathFin.reflection_principle_card`. -/\ntheorem barrier_reflection_count (n : ℕ) (a b : ℤ) (ha : 0 < a) (hb : b ≤ a) :\n    Nat.card {ω : Fin n → Bool // HitsLevel a ω ∧ walkPos ω n = b}\n      = Nat.card {ω : Fin n → Bool // walkPos ω n = 2 * a - b} :=\n  MathFin.reflection_principle_card (n := n) a b ha hb\n"
+        "lean": "import MathFin.Models.Binomial.BarrierReflection\n\nopen MathFin\n\n/-- **Reflection-principle counting identity** (barrier-pricing backbone). For a barrier\n`0 < a` and terminal `b ≤ a`, the number of `n`-step ±1 paths that touch `a` and finish\nat `b` equals the number that finish at `2a − b`. Re-exports `MathFin.reflection_principle_card`. -/\ntheorem barrier_reflection_count (n : ℕ) (a b : ℤ) (ha : 0 < a) (hb : b ≤ a) :\n    Nat.card {ω : Fin n → Bool // HitsLevel a ω ∧ walkPos ω n = b}\n      = Nat.card {ω : Fin n → Bool // walkPos ω n = 2 * a - b} :=\n  MathFin.reflection_principle_card (n := n) a b ha hb\n"
       },
       "metadata": {
         "chapter": 13,
@@ -451,7 +451,7 @@
       "description": "Number of paths with running max >= a equals 2*#{end>a} + #{end=a}.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.BarrierReflection\n\nopen MathFin\n\n/-- **Binomial maximal-distribution identity** (running-maximum law). For a barrier `0 < a`,\nthe number of `n`-step ±1 paths whose running maximum reaches `a` is\n`2·#{end > a} + #{end = a}` — the discrete `P(max ≥ a) = 2·P(Sₙ > a) + P(Sₙ = a)`.\nRe-exports `MathFin.binomial_maximal_distribution_card`. -/\ntheorem barrier_maximal_distribution (n : ℕ) (a : ℤ) (ha : 0 < a) :\n    Nat.card {ω : Fin n → Bool // HitsLevel a ω}\n      = 2 * Nat.card {ω : Fin n → Bool // a < walkPos ω n}\n        + Nat.card {ω : Fin n → Bool // walkPos ω n = a} :=\n  MathFin.binomial_maximal_distribution_card (n := n) a ha\n"
+        "lean": "import MathFin.Models.Binomial.BarrierReflection\n\nopen MathFin\n\n/-- **Binomial maximal-distribution identity** (running-maximum law). For a barrier `0 < a`,\nthe number of `n`-step ±1 paths whose running maximum reaches `a` is\n`2·#{end > a} + #{end = a}` — the discrete `P(max ≥ a) = 2·P(Sₙ > a) + P(Sₙ = a)`.\nRe-exports `MathFin.binomial_maximal_distribution_card`. -/\ntheorem barrier_maximal_distribution (n : ℕ) (a : ℤ) (ha : 0 < a) :\n    Nat.card {ω : Fin n → Bool // HitsLevel a ω}\n      = 2 * Nat.card {ω : Fin n → Bool // a < walkPos ω n}\n        + Nat.card {ω : Fin n → Bool // walkPos ω n = a} :=\n  MathFin.binomial_maximal_distribution_card (n := n) a ha\n"
       },
       "metadata": {
         "chapter": 13,
@@ -468,7 +468,7 @@
       "domain": "mathematical_finance",
       "description": "If the CRR risk-neutral up-probability crrUpProb u d r equals q ∈ [0, 1], then for every payoff g, horizon N and spot S₀, the backward-induction price binomialPrice u d r g N S₀ equals e^{−rN} times the expectation of g(S₀·∏_{i<N}(u if ω_i else d)) under coinFlipMeasure q: the infinite product of Mathlib's bernoulliMeasure on ℕ → Bool (i.i.d. Bernoulli(q) flips). The cylinder probabilities q^{#up}(1 − q)^{#down} are derived from the product-measure formula, not assumed.",
       "code": {
-        "lean": "import MathFin.Binomial.PathMeasure\n\nopen MeasureTheory MathFin\nopen scoped NNReal\n\n/-- The `N`-step CRR backward-induction price is the discounted expectation of the payoff of\nthe spot path under the infinite product law of i.i.d. `Bernoulli(q)` coin flips,\n`q = crrUpProb u d r`. Re-export of `MathFin.binomialPrice_eq_integral_coinFlipMeasure`. -/\ntheorem binomial_price_eq_path_expectation (u d r : ℝ) (g : ℝ → ℝ) {q : ℝ≥0} (hq : q ≤ 1)\n    (hqcrr : crrUpProb u d r = q) (N : ℕ) (S₀ : ℝ) :\n    binomialPrice u d r g N S₀\n      = Real.exp (-(r * N)) * ∫ ω, g (spotPath S₀ u d N ω) ∂coinFlipMeasure q hq :=\n  binomialPrice_eq_integral_coinFlipMeasure u d r g hq hqcrr N S₀\n"
+        "lean": "import MathFin.Models.Binomial.PathMeasure\n\nopen MeasureTheory MathFin\nopen scoped NNReal\n\n/-- The `N`-step CRR backward-induction price is the discounted expectation of the payoff of\nthe spot path under the infinite product law of i.i.d. `Bernoulli(q)` coin flips,\n`q = crrUpProb u d r`. Re-export of `MathFin.binomialPrice_eq_integral_coinFlipMeasure`. -/\ntheorem binomial_price_eq_path_expectation (u d r : ℝ) (g : ℝ → ℝ) {q : ℝ≥0} (hq : q ≤ 1)\n    (hqcrr : crrUpProb u d r = q) (N : ℕ) (S₀ : ℝ) :\n    binomialPrice u d r g N S₀\n      = Real.exp (-(r * N)) * ∫ ω, g (spotPath S₀ u d N ω) ∂coinFlipMeasure q hq :=\n  binomialPrice_eq_integral_coinFlipMeasure u d r g hq hqcrr N S₀\n"
       },
       "metadata": {
         "chapter": 1,
@@ -484,7 +484,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.binomialPrice_eq_integral_coinFlipMeasure (MathFin/Binomial/PathMeasure.lean). coinFlipMeasure q is Measure.infinitePi of Mathlib's bernoulliMeasure on Bool; the probability of the first N flips being x is ∏ Bernoulli(q)(x_i), from Measure.infinitePi_pi (coinFlipMeasure_cylinder); the integral of a function of N flips is the finite sum over the 2^N sequences (integral_comp_flips), and the backward recursion unrolls into the same sum (binomialPrice_eq_sum). SCOPE: European payoffs of the terminal spot; American prices and path-dependent payoffs are not covered."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.binomialPrice_eq_integral_coinFlipMeasure (MathFin/Models/Binomial/PathMeasure.lean). coinFlipMeasure q is Measure.infinitePi of Mathlib's bernoulliMeasure on Bool; the probability of the first N flips being x is ∏ Bernoulli(q)(x_i), from Measure.infinitePi_pi (coinFlipMeasure_cylinder); the integral of a function of N flips is the finite sum over the 2^N sequences (integral_comp_flips), and the backward recursion unrolls into the same sum (binomialPrice_eq_sum). SCOPE: European payoffs of the terminal spot; American prices and path-dependent payoffs are not covered."
       }
     },
     {
@@ -493,7 +493,7 @@
       "domain": "mathematical_finance",
       "description": "In the one-period binomial model with S₀ > 0 and 0 < d < e^r < u, the portfolio replicating a claim (V_u, V_d) is unique, and every portfolio (Δ, B) paying V_u in the up state and V_d in the down state costs ΔS₀ + B = e^{−r}(qV_u + (1−q)V_d), q = (e^r − d)/(u − d). This price equals the two-state pricing-kernel value whose state prices e^{−r}·(−z_d, z_u)/(z_u − z_d) are the discounted backward-FTAP martingale weights of the excess returns z_u = u − e^r, z_d = d − e^r. One period, two states.",
       "code": {
-        "lean": "import MathFin.Binomial.BinomialFromFTAP\n\nopen MathFin\n\n/-- **Law of one price, one-period binomial.** Re-export of\n`MathFin.binomial_replicatingPortfolio_unique`, `binomial_replication_cost_eq_price` and\n`binomial_replication_cost_eq_pricingKernel`. -/\ntheorem binomial_law_of_one_price {S₀ u d r V_u V_d : ℝ} (hS₀ : 0 < S₀)\n    (h : BinomialNoArb u d r) :\n    (∃! p : ℝ × ℝ, p.1 * (S₀ * u) + p.2 * Real.exp r = V_u ∧\n        p.1 * (S₀ * d) + p.2 * Real.exp r = V_d) ∧\n    ∀ Δ B : ℝ, Δ * (S₀ * u) + B * Real.exp r = V_u → Δ * (S₀ * d) + B * Real.exp r = V_d →\n      Δ * S₀ + B = binomialOptionPriceOnePeriod u d r V_u V_d ∧\n        Δ * S₀ + B = pricingKernelTwoState (u - Real.exp r) (d - Real.exp r) r V_u V_d :=\n  ⟨binomial_replicatingPortfolio_unique hS₀ h, fun _ _ h_up h_down ↦\n    ⟨binomial_replication_cost_eq_price hS₀ h h_up h_down,\n      binomial_replication_cost_eq_pricingKernel hS₀ h h_up h_down⟩⟩\n"
+        "lean": "import MathFin.Models.Binomial.BinomialFromFTAP\n\nopen MathFin\n\n/-- **Law of one price, one-period binomial.** Re-export of\n`MathFin.binomial_replicatingPortfolio_unique`, `binomial_replication_cost_eq_price` and\n`binomial_replication_cost_eq_pricingKernel`. -/\ntheorem binomial_law_of_one_price {S₀ u d r V_u V_d : ℝ} (hS₀ : 0 < S₀)\n    (h : BinomialNoArb u d r) :\n    (∃! p : ℝ × ℝ, p.1 * (S₀ * u) + p.2 * Real.exp r = V_u ∧\n        p.1 * (S₀ * d) + p.2 * Real.exp r = V_d) ∧\n    ∀ Δ B : ℝ, Δ * (S₀ * u) + B * Real.exp r = V_u → Δ * (S₀ * d) + B * Real.exp r = V_d →\n      Δ * S₀ + B = binomialOptionPriceOnePeriod u d r V_u V_d ∧\n        Δ * S₀ + B = pricingKernelTwoState (u - Real.exp r) (d - Real.exp r) r V_u V_d :=\n  ⟨binomial_replicatingPortfolio_unique hS₀ h, fun _ _ h_up h_down ↦\n    ⟨binomial_replication_cost_eq_price hS₀ h h_up h_down,\n      binomial_replication_cost_eq_pricingKernel hS₀ h h_up h_down⟩⟩\n"
       },
       "metadata": {
         "chapter": 9,
@@ -509,7 +509,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.binomial_replicatingPortfolio_unique and binomial_replication_cost_eq_price (MathFin/Binomial/ReplicatingUniqueness.lean) and binomial_replication_cost_eq_pricingKernel (MathFin/Binomial/BinomialFromFTAP.lean). Uniqueness is the nonzero determinant S₀(u − d)e^r; the kernel identity rests on binomial_q_eq_emm and binomial_emmWeightDown_eq (the FTAPTwoState weights are q and 1 − q) and pricingKernelTwoState (Bridges/PricingKernel). SCOPE: one period, two states; the multi-period tree is not covered here."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.binomial_replicatingPortfolio_unique and binomial_replication_cost_eq_price (MathFin/Models/Binomial/ReplicatingUniqueness.lean) and binomial_replication_cost_eq_pricingKernel (MathFin/Models/Binomial/BinomialFromFTAP.lean). Uniqueness is the nonzero determinant S₀(u − d)e^r; the kernel identity rests on binomial_q_eq_emm and binomial_emmWeightDown_eq (the FTAPTwoState weights are q and 1 − q) and pricingKernelTwoState (Pricing/PricingKernel). SCOPE: one period, two states; the multi-period tree is not covered here."
       }
     },
     {
@@ -518,7 +518,7 @@
       "domain": "mathematical_finance",
       "description": "In the n-step binomial tree with 0 < d < e^r < u, a nonnegative per-step rate r ≥ 0 and strike K ≥ 0, the American call price on a non-dividend-paying stock (backward induction with the Bellman maximum of exercise value and continuation value) equals the European call price at every step n and spot S: early exercise never adds value. The one-period continuation dominates the intrinsic value by Jensen's inequality for (·)⁺, the martingale identity qu + (1−q)d = e^r and e^{−r}K ≤ K; induction on n lifts it.",
       "code": {
-        "lean": "import MathFin.Binomial.MertonAmericanCallTree\n\nopen MathFin\n\n/-- **American call = European call in the binomial tree.** Re-export of\n`MathFin.americanCallPrice_eq_binomialPrice`. -/\ntheorem binomial_american_call_eq_european {u d r K : ℝ} (h : BinomialNoArb u d r)\n    (hr : 0 ≤ r) (hK : 0 ≤ K) (n : ℕ) (S : ℝ) :\n    americanPrice u d r (fun S' ↦ max (S' - K) 0) n S =\n      binomialPrice u d r (fun S' ↦ max (S' - K) 0) n S :=\n  americanCallPrice_eq_binomialPrice h hr hK n S\n"
+        "lean": "import MathFin.Models.Binomial.MertonAmericanCallTree\n\nopen MathFin\n\n/-- **American call = European call in the binomial tree.** Re-export of\n`MathFin.americanCallPrice_eq_binomialPrice`. -/\ntheorem binomial_american_call_eq_european {u d r K : ℝ} (h : BinomialNoArb u d r)\n    (hr : 0 ≤ r) (hK : 0 ≤ K) (n : ℕ) (S : ℝ) :\n    americanPrice u d r (fun S' ↦ max (S' - K) 0) n S =\n      binomialPrice u d r (fun S' ↦ max (S' - K) 0) n S :=\n  americanCallPrice_eq_binomialPrice h hr hK n S\n"
       },
       "metadata": {
         "chapter": 9,
@@ -534,7 +534,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.americanCallPrice_eq_binomialPrice (MathFin/Binomial/MertonAmericanCallTree.lean): the case E = univ of bermudanCallPrice_eq_binomialPrice, proved by the Snell minimality of bermudanPrice E against the European price process (a martingale above the payoff, by induction from call_one_period_continuation_dominates_intrinsic), and bermudanPrice_mono for the exercise sets empty subset E (Binomial/Bermudan). SCOPE: the discrete tree, no dividends, r ≥ 0, K ≥ 0. The continuous-time American = European statement is not part of this entry (mf-merton-1973-no-early-exercise proves the strict dominance bsV > S₀ − K only)."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.americanCallPrice_eq_binomialPrice (MathFin/Models/Binomial/MertonAmericanCallTree.lean): the case E = univ of bermudanCallPrice_eq_binomialPrice, proved by the Snell minimality of bermudanPrice E against the European price process (a martingale above the payoff, by induction from call_one_period_continuation_dominates_intrinsic), and bermudanPrice_mono for the exercise sets empty subset E (Models/Binomial/Bermudan). SCOPE: the discrete tree, no dividends, r ≥ 0, K ≥ 0. The continuous-time American = European statement is not part of this entry (mf-merton-1973-no-early-exercise proves the strict dominance bsV > S₀ − K only)."
       }
     },
     {
@@ -543,7 +543,7 @@
       "domain": "mathematical_finance",
       "description": "On the Cox–Ross–Rubinstein tree (u = e^{σ√(T/n)}, d = e^{−σ√(T/n)}, per-step rate rT/n) with r ≥ 0, σ, T, S₀, K > 0 and no-arbitrage at every step n ≥ 1, the n-step American call price on a non-dividend-paying stock converges as n → ∞ to the Black–Scholes European call price S₀Φ(d₁) − Ke^{−rT}Φ(d₂). The no-arbitrage hypothesis holds whenever |r|√T < σ (binomialNoArb_crr). A statement about the tree prices: a continuous-time American call value is not defined or identified here.",
       "code": {
-        "lean": "import MathFin.Binomial.MertonAmericanCallTree\n\nopen MathFin Filter\nopen scoped Topology\n\n/-- **The CRR American call converges to the Black–Scholes call.** Re-export of\n`MathFin.crr_americanCall_tendsto_bs`. -/\ntheorem crr_american_call_tendsto_black_scholes {r σ T S₀ K : ℝ} (hr : 0 ≤ r) (hσ : 0 < σ)\n    (hT : 0 < T) (hS₀ : 0 < S₀) (hK : 0 < K)\n    (hna : ∀ n, 0 < n → BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :\n    Tendsto (fun n : ℕ ↦ americanPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)\n        (fun x ↦ max (x - K) 0) n S₀) atTop\n      (𝓝 (S₀ * Phi (bsd1 S₀ K r σ T) - K * Real.exp (-(r * T)) * Phi (bsd2 S₀ K r σ T))) :=\n  crr_americanCall_tendsto_bs hr hσ hT hS₀ hK hna\n"
+        "lean": "import MathFin.Models.Binomial.MertonAmericanCallTree\n\nopen MathFin Filter\nopen scoped Topology\n\n/-- **The CRR American call converges to the Black–Scholes call.** Re-export of\n`MathFin.crr_americanCall_tendsto_bs`. -/\ntheorem crr_american_call_tendsto_black_scholes {r σ T S₀ K : ℝ} (hr : 0 ≤ r) (hσ : 0 < σ)\n    (hT : 0 < T) (hS₀ : 0 < S₀) (hK : 0 < K)\n    (hna : ∀ n, 0 < n → BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :\n    Tendsto (fun n : ℕ ↦ americanPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)\n        (fun x ↦ max (x - K) 0) n S₀) atTop\n      (𝓝 (S₀ * Phi (bsd1 S₀ K r σ T) - K * Real.exp (-(r * T)) * Phi (bsd2 S₀ K r σ T))) :=\n  crr_americanCall_tendsto_bs hr hσ hT hS₀ hK hna\n"
       },
       "metadata": {
         "chapter": 9,
@@ -555,7 +555,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.crr_americanCall_tendsto_bs (MathFin/Binomial/MertonAmericanCallTree.lean): for n ≥ 1 the American and European CRR prices agree (americanCallPrice_eq_binomialPrice, the per-step rate rT/n being nonnegative), and the European prices converge to the closed form (binomialPrice_call_tendsto_bs_closed, Binomial/CRRClosedForm). SCOPE: convergence of tree prices; no continuous-time optimal-stopping value is involved."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.crr_americanCall_tendsto_bs (MathFin/Models/Binomial/MertonAmericanCallTree.lean): for n ≥ 1 the American and European CRR prices agree (americanCallPrice_eq_binomialPrice, the per-step rate rT/n being nonnegative), and the European prices converge to the closed form (binomialPrice_call_tendsto_bs_closed, Models/Binomial/CRRClosedForm). SCOPE: convergence of tree prices; no continuous-time optimal-stopping value is involved."
       }
     },
     {
@@ -564,7 +564,7 @@
       "domain": "mathematical_finance",
       "description": "Let ν_n be the Cox–Ross–Rubinstein one-step risk-neutral log-return law (mass p_n at σ√(T/n) and 1 − p_n at −σ√(T/n)) and ν_n^{*n} its n-fold convolution, the law of the n-step log-return. For σ, T > 0, as n → ∞ the mean of ν_n^{*n} converges to (r − σ²/2)T and its variance to σ²T, the mean and variance of the Black–Scholes limit law N((r − σ²/2)T, σ²T). This complements the weak convergence of the same laws (mf-crr-gaussian-limit), which does not by itself give convergence of moments. For a boundedly supported law the k-fold convolution has k times its mean and variance; the CRR drift and variance limits finish it.",
       "code": {
-        "lean": "import MathFin.Binomial.CRRDiscreteIto\n\nopen MathFin MeasureTheory ProbabilityTheory Filter\nopen scoped Topology\n\n/-- **Mean and variance of the `n`-step CRR log-return law converge to those of the\nBlack–Scholes limit.** Re-export of `MathFin.crrRowLaw_moments_tendsto`. -/\ntheorem crr_log_return_moments_limit {r σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Tendsto (fun n : ℕ ↦ ∫ x, x ∂(convPow (crrStepMeasure r σ T n) n)) atTop\n        (𝓝 (∫ x, x ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) ∧\n      Tendsto (fun n : ℕ ↦ variance id (convPow (crrStepMeasure r σ T n) n)) atTop\n        (𝓝 (variance id (gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) :=\n  crrRowLaw_moments_tendsto hσ hT\n"
+        "lean": "import MathFin.Models.Binomial.CRRDiscreteIto\n\nopen MathFin MeasureTheory ProbabilityTheory Filter\nopen scoped Topology\n\n/-- **Mean and variance of the `n`-step CRR log-return law converge to those of the\nBlack–Scholes limit.** Re-export of `MathFin.crrRowLaw_moments_tendsto`. -/\ntheorem crr_log_return_moments_limit {r σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Tendsto (fun n : ℕ ↦ ∫ x, x ∂(convPow (crrStepMeasure r σ T n) n)) atTop\n        (𝓝 (∫ x, x ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) ∧\n      Tendsto (fun n : ℕ ↦ variance id (convPow (crrStepMeasure r σ T n) n)) atTop\n        (𝓝 (variance id (gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) :=\n  crrRowLaw_moments_tendsto hσ hT\n"
       },
       "metadata": {
         "chapter": 9,
@@ -576,7 +576,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.crrRowLaw_moments_tendsto (MathFin/Binomial/CRRDiscreteIto.lean). General lemmas there: bounded support propagates through convolution powers (ae_abs_le_convPow), and convPow ν k has mean k·E_ν[X] and variance k·Var_ν(X) (integral_id_convPow, variance_convPow, via Mathlib's integral_conv and variance_eq_sub). The CRR step has mean (2p_n − 1)σ√(T/n) and variance 4p_n(1 − p_n)σ²T/n; the limits are crr_drift_limit_n and crr_variance_limit. No no-arbitrage hypothesis: p_n → 1/2, so the step law is a probability measure for large n. SCOPE: first two moments; higher moments and rates are not covered."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.crrRowLaw_moments_tendsto (MathFin/Models/Binomial/CRRDiscreteIto.lean). General lemmas there: bounded support propagates through convolution powers (ae_abs_le_convPow), and convPow ν k has mean k·E_ν[X] and variance k·Var_ν(X) (integral_id_convPow, variance_convPow, via Mathlib's integral_conv and variance_eq_sub). The CRR step has mean (2p_n − 1)σ√(T/n) and variance 4p_n(1 − p_n)σ²T/n; the limits are crr_drift_limit_n and crr_variance_limit. No no-arbitrage hypothesis: p_n → 1/2, so the step law is a probability measure for large n. SCOPE: first two moments; higher moments and rates are not covered."
       }
     },
     {
@@ -585,7 +585,7 @@
       "domain": "mathematical_finance",
       "description": "For the T-period CRR market on the sample space Fin T -> Bool of the first T coin flips, with the filtration generated by the flips revealed so far, the discounted spot S_n = e^{-rn} S_0 prod_{i<n} (u or d) frozen at T, and any real-world law of i.i.d. Bernoulli(p) flips with 0 < p < 1: if d < e^r < u and d > 0 (BinomialNoArb u d r), then the law of the first T i.i.d. Bernoulli(q) flips with q = crrUpProb u d r = (e^r - d)/(u - d) is an equivalent martingale measure in the sense of the library's finite-horizon discrete FTAP (IsEMM): a probability measure, mutually absolutely continuous with the real-world law, under which S_t = E[S_{t+1} | F_t] for every t < T. The martingale property is the Mathlib Martingale of the discounted spot under the infinite product of Bernoulli(q) measures, transported along the first-T-flips map. Existence only; uniqueness is the separate entry mf-binomial-multi-period-emm-unique.",
       "code": {
-        "lean": "import MathFin.Binomial.MultiPeriodFTAP\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin\n\n/-- The risk-neutral law of the first `T` flips is an equivalent martingale measure for the\ndiscounted spot of the `T`-period CRR market. -/\ntheorem binomial_multi_period_emm {T : ℕ} {u d r : ℝ} (h : BinomialNoArb u d r) (S₀ : ℝ)\n    {p q : ℝ≥0} (hp0 : 0 < p) (hp1 : p < 1) (hq1 : q ≤ 1) (hqcrr : crrUpProb u d r = q) :\n    IsEMM (horizonFiltration T) (horizonMeasure T p hp1.le) (horizonSpot T S₀ u d r) T\n      (horizonMeasure T q hq1) :=\n  MathFin.isEMM_horizonSpot h S₀ hp0 hp1 hq1 hqcrr\n"
+        "lean": "import MathFin.Models.Binomial.MultiPeriodFTAP\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin\n\n/-- The risk-neutral law of the first `T` flips is an equivalent martingale measure for the\ndiscounted spot of the `T`-period CRR market. -/\ntheorem binomial_multi_period_emm {T : ℕ} {u d r : ℝ} (h : BinomialNoArb u d r) (S₀ : ℝ)\n    {p q : ℝ≥0} (hp0 : 0 < p) (hp1 : p < 1) (hq1 : q ≤ 1) (hqcrr : crrUpProb u d r = q) :\n    IsEMM (horizonFiltration T) (horizonMeasure T p hp1.le) (horizonSpot T S₀ u d r) T\n      (horizonMeasure T q hq1) :=\n  MathFin.isEMM_horizonSpot h S₀ hp0 hp1 hq1 hqcrr\n"
       },
       "metadata": {
         "chapter": 9,
@@ -601,7 +601,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. isEMM_horizonSpot in MathFin/Binomial/MultiPeriodFTAP.lean: the Mathlib Martingale of the discounted spot under coinFlipMeasure (martingale_discountedSpot, MathFin/Binomial/PathMeasure.lean) is pulled back to the finite space Fin T -> Bool, where the filtration horizonFiltration T has the path-space flipFiltration as its preimage under flips T (comap_flips_horizonFiltration); equivalence of the two measures is full support from the cylinder formula. Single risky asset, finite horizon T, finite sample space; the real-world law is any i.i.d. Bernoulli(p) with 0 < p < 1. Says an EMM exists; uniqueness is mf-binomial-multi-period-emm-unique. Axioms-clean."
+        "formalization_scope": "Full formal proof. isEMM_horizonSpot in MathFin/Models/Binomial/MultiPeriodFTAP.lean: the Mathlib Martingale of the discounted spot under coinFlipMeasure (martingale_discountedSpot, MathFin/Models/Binomial/PathMeasure.lean) is pulled back to the finite space Fin T -> Bool, where the filtration horizonFiltration T has the path-space flipFiltration as its preimage under flips T (comap_flips_horizonFiltration); equivalence of the two measures is full support from the cylinder formula. Single risky asset, finite horizon T, finite sample space; the real-world law is any i.i.d. Bernoulli(p) with 0 < p < 1. Says an EMM exists; uniqueness is mf-binomial-multi-period-emm-unique. Axioms-clean."
       }
     },
     {
@@ -610,7 +610,7 @@
       "domain": "mathematical_finance",
       "description": "In the T-period CRR market on Fin T -> Bool (T >= 1, S_0 > 0, 0 < d < u, real-world law of i.i.d. Bernoulli(p) flips with 0 < p < 1, discounted spot frozen at T), the library's no-arbitrage condition NoArbitrage (every predictable strategy whose discounted gains are almost surely non-negative has gains almost surely zero) holds if and only if d < e^r < u (BinomialNoArb u d r). The forward direction is the equivalent martingale measure with up-probability crrUpProb and the easy half of the finite discrete FTAP (ftap_discrete); the converse is an explicit one-period strategy, holding one unit over the first period if e^r <= d and minus one unit if u <= e^r.",
       "code": {
-        "lean": "import MathFin.Binomial.MultiPeriodFTAP\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin\n\n/-- No arbitrage in the `T`-period CRR market is exactly `d < e^r < u`. -/\ntheorem binomial_multi_period_no_arbitrage_iff {T : ℕ} {S₀ u d r : ℝ} (hS₀ : 0 < S₀) (hd : 0 < d)\n    (hdu : d < u) (hT : 0 < T) {p : ℝ≥0} (hp0 : 0 < p) (hp1 : p < 1) :\n    NoArbitrage (horizonFiltration T) (horizonMeasure T p hp1.le) (horizonSpot T S₀ u d r) T\n      ↔ BinomialNoArb u d r :=\n  MathFin.noArbitrage_horizonSpot_iff hS₀ hd hdu hT hp0 hp1\n"
+        "lean": "import MathFin.Models.Binomial.MultiPeriodFTAP\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin\n\n/-- No arbitrage in the `T`-period CRR market is exactly `d < e^r < u`. -/\ntheorem binomial_multi_period_no_arbitrage_iff {T : ℕ} {S₀ u d r : ℝ} (hS₀ : 0 < S₀) (hd : 0 < d)\n    (hdu : d < u) (hT : 0 < T) {p : ℝ≥0} (hp0 : 0 < p) (hp1 : p < 1) :\n    NoArbitrage (horizonFiltration T) (horizonMeasure T p hp1.le) (horizonSpot T S₀ u d r) T\n      ↔ BinomialNoArb u d r :=\n  MathFin.noArbitrage_horizonSpot_iff hS₀ hd hdu hT hp0 hp1\n"
       },
       "metadata": {
         "chapter": 9,
@@ -626,7 +626,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. noArbitrage_horizonSpot_iff in MathFin/Binomial/MultiPeriodFTAP.lean. Forward: isEMM_horizonSpot plus ftap_discrete (MathFin/Foundations/FTAPDiscrete.lean). Converse: binomialNoArb_of_noArbitrage, a first-period buy-and-hold or short-and-hold arbitrage, which uses S_0 > 0, d < u and at least one period; the standing hypotheses 0 < d < u are model assumptions (u = d gives a deterministic market with no arbitrage and no d < e^r < u). Single risky asset, finite horizon, finite sample space. Does not claim uniqueness of the EMM. Axioms-clean."
+        "formalization_scope": "Full formal proof. noArbitrage_horizonSpot_iff in MathFin/Models/Binomial/MultiPeriodFTAP.lean. Forward: isEMM_horizonSpot plus ftap_discrete (MathFin/Pricing/FTAP/FTAPDiscrete.lean). Converse: binomialNoArb_of_noArbitrage, a first-period buy-and-hold or short-and-hold arbitrage, which uses S_0 > 0, d < u and at least one period; the standing hypotheses 0 < d < u are model assumptions (u = d gives a deterministic market with no arbitrage and no d < e^r < u). Single risky asset, finite horizon, finite sample space. Does not claim uniqueness of the EMM. Axioms-clean."
       }
     },
     {
@@ -635,7 +635,7 @@
       "domain": "mathematical_finance",
       "description": "For the T-period CRR market on the sample space Fin T -> Bool of the first T coin flips, with the filtration generated by the flips revealed so far, the discounted spot S_n = e^{-rn} S_0 prod_{i<n} (u or d) frozen at T with S_0 > 0, and any real-world law of i.i.d. Bernoulli(p) flips with 0 < p < 1: if d < e^r < u and d > 0 (BinomialNoArb u d r), there is exactly one equivalent martingale measure in the sense of the library's finite-horizon discrete FTAP (IsEMM), namely the law of the first T i.i.d. Bernoulli(q) flips with q = crrUpProb u d r = (e^r - d)/(u - d). Existence is isEMM_horizonSpot; uniqueness shows that any probability measure Q under which S_t = E_Q[S_{t+1} | F_t] for every t < T gives the next flip conditional up-probability q on every history atom of F_t, hence every path the product probability.",
       "code": {
-        "lean": "import MathFin.Binomial.MultiPeriodFTAP\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin\n\n/-- The risk-neutral law of the first `T` flips is the only equivalent martingale measure of the\n`T`-period CRR market. -/\ntheorem binomial_multi_period_emm_unique {T : ℕ} {S₀ u d r : ℝ} (hS₀ : 0 < S₀)\n    (h : BinomialNoArb u d r) {p q : ℝ≥0} (hp0 : 0 < p) (hp1 : p < 1) (hq1 : q ≤ 1)\n    (hqcrr : crrUpProb u d r = q) :\n    ∃! Q, IsEMM (horizonFiltration T) (horizonMeasure T p hp1.le) (horizonSpot T S₀ u d r) T Q :=\n  MathFin.existsUnique_isEMM_horizonSpot hS₀ h hp0 hp1 hq1 hqcrr\n"
+        "lean": "import MathFin.Models.Binomial.MultiPeriodFTAP\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin\n\n/-- The risk-neutral law of the first `T` flips is the only equivalent martingale measure of the\n`T`-period CRR market. -/\ntheorem binomial_multi_period_emm_unique {T : ℕ} {S₀ u d r : ℝ} (hS₀ : 0 < S₀)\n    (h : BinomialNoArb u d r) {p q : ℝ≥0} (hp0 : 0 < p) (hp1 : p < 1) (hq1 : q ≤ 1)\n    (hqcrr : crrUpProb u d r = q) :\n    ∃! Q, IsEMM (horizonFiltration T) (horizonMeasure T p hp1.le) (horizonSpot T S₀ u d r) T Q :=\n  MathFin.existsUnique_isEMM_horizonSpot hS₀ h hp0 hp1 hq1 hqcrr\n"
       },
       "metadata": {
         "chapter": 9,
@@ -651,7 +651,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. existsUnique_isEMM_horizonSpot in MathFin/Binomial/MultiPeriodFTAP.lean: existence is isEMM_horizonSpot; uniqueness is IsEMM.eq_horizonMeasure. Node by node, on the atom A of F_t of paths agreeing with x on the first t flips, the martingale property in set-integral form gives the integral over A of S_{t+1} - S_t equal to zero; there the increment is S_t(x)(e^{-r}u - 1) or S_t(x)(e^{-r}d - 1) according to flip t, which with Q(A) = Q(A and up) + Q(A and down) forces Q(A and up) = crrUpProb * Q(A) (IsEMM.real_atom_flip, using S_0 > 0 and d > 0 for S_t(x) > 0). Induction on the prefix length gives each atom the product probability (IsEMM.real_horizonAtom), and at t = T the atoms are the paths. Single risky asset, finite horizon T, finite sample space, standing hypotheses S_0 > 0 and BinomialNoArb. The uniqueness proof uses only the probability and martingale fields of IsEMM, not the equivalence with the real-world law. Uniqueness of the EMM is what the second fundamental theorem equates with completeness; replication of contingent claims is the separate entry mf-binomial-multi-period-complete. Axioms-clean."
+        "formalization_scope": "Full formal proof. existsUnique_isEMM_horizonSpot in MathFin/Models/Binomial/MultiPeriodFTAP.lean: existence is isEMM_horizonSpot; uniqueness is IsEMM.eq_horizonMeasure. Node by node, on the atom A of F_t of paths agreeing with x on the first t flips, the martingale property in set-integral form gives the integral over A of S_{t+1} - S_t equal to zero; there the increment is S_t(x)(e^{-r}u - 1) or S_t(x)(e^{-r}d - 1) according to flip t, which with Q(A) = Q(A and up) + Q(A and down) forces Q(A and up) = crrUpProb * Q(A) (IsEMM.real_atom_flip, using S_0 > 0 and d > 0 for S_t(x) > 0). Induction on the prefix length gives each atom the product probability (IsEMM.real_horizonAtom), and at t = T the atoms are the paths. Single risky asset, finite horizon T, finite sample space, standing hypotheses S_0 > 0 and BinomialNoArb. The uniqueness proof uses only the probability and martingale fields of IsEMM, not the equivalence with the real-world law. Uniqueness of the EMM is what the second fundamental theorem equates with completeness; replication of contingent claims is the separate entry mf-binomial-multi-period-complete. Axioms-clean."
       }
     },
     {
@@ -660,7 +660,7 @@
       "domain": "mathematical_finance",
       "description": "For the T-period CRR market on the sample space Fin T -> Bool of the first T coin flips, with the filtration generated by the flips revealed so far, the discounted spot frozen at T with S_0 > 0, and any real-world law of i.i.d. Bernoulli(p) flips with 0 < p < 1: if d < e^r < u and d > 0 (BinomialNoArb u d r), the market is complete in the sense of the library's IsCompleteMarket: every claim on the paths (a bounded function of the first T flips, i.e. every function on Fin T -> Bool) equals, P-a.s., an initial wealth plus the discounted gains Σ φ_{t+1}(S_{t+1} − S_t) of a bounded predictable strategy φ in the discounted spot. By the second fundamental theorem on a finite space (mf-ftap-two-discrete) completeness holds iff the equivalent martingale measure is unique, which is mf-binomial-multi-period-emm-unique.",
       "code": {
-        "lean": "import MathFin.Binomial.MultiPeriodFTAP\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin\n\n/-- Under no arbitrage the `T`-period CRR market is complete: every claim is replicated by a\npredictable strategy in the discounted spot from some initial wealth. -/\ntheorem binomial_multi_period_complete {T : ℕ} {S₀ u d r : ℝ} (hS₀ : 0 < S₀)\n    (h : BinomialNoArb u d r) {p : ℝ≥0} (hp0 : 0 < p) (hp1 : p < 1) :\n    IsCompleteMarket (horizonFiltration T) (horizonMeasure T p hp1.le)\n      (horizonSpot T S₀ u d r) T :=\n  MathFin.isCompleteMarket_horizonSpot hS₀ h hp0 hp1\n"
+        "lean": "import MathFin.Models.Binomial.MultiPeriodFTAP\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin\n\n/-- Under no arbitrage the `T`-period CRR market is complete: every claim is replicated by a\npredictable strategy in the discounted spot from some initial wealth. -/\ntheorem binomial_multi_period_complete {T : ℕ} {S₀ u d r : ℝ} (hS₀ : 0 < S₀)\n    (h : BinomialNoArb u d r) {p : ℝ≥0} (hp0 : 0 < p) (hp1 : p < 1) :\n    IsCompleteMarket (horizonFiltration T) (horizonMeasure T p hp1.le)\n      (horizonSpot T S₀ u d r) T :=\n  MathFin.isCompleteMarket_horizonSpot hS₀ h hp0 hp1\n"
       },
       "metadata": {
         "chapter": 9,
@@ -676,7 +676,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. isCompleteMarket_horizonSpot in MathFin/Binomial/MultiPeriodFTAP.lean: the unique equivalent martingale measure (existsUnique_isEMM_horizonSpot) and the finite-space second FTAP (ftap_two, Foundations/FTAPComplete.lean, with no arbitrage from noArbitrage_horizonSpot and 𝓕 T the full σ-algebra, horizonFiltration_horizon) give completeness. Completeness is the library definition IsCompleteMarket, replication by bounded predictable strategies of every bounded 𝓕 T-measurable claim, not a weaker notion; the replicating strategy is not given in closed form here (the node-wise delta hedge on paths is binomial_martingale_representation, Binomial/MartingaleRepresentation.lean, which is stated on the infinite path space and is not used in this proof). Single risky asset, finite horizon T, finite sample space, standing hypotheses S_0 > 0 and BinomialNoArb. Axioms-clean."
+        "formalization_scope": "Full formal proof. isCompleteMarket_horizonSpot in MathFin/Models/Binomial/MultiPeriodFTAP.lean: the unique equivalent martingale measure (existsUnique_isEMM_horizonSpot) and the finite-space second FTAP (ftap_two, Pricing/FTAP/FTAPComplete.lean, with no arbitrage from noArbitrage_horizonSpot and 𝓕 T the full σ-algebra, horizonFiltration_horizon) give completeness. Completeness is the library definition IsCompleteMarket, replication by bounded predictable strategies of every bounded 𝓕 T-measurable claim, not a weaker notion; the replicating strategy is not given in closed form here (the node-wise delta hedge on paths is binomial_martingale_representation, Models/Binomial/MartingaleRepresentation.lean, which is stated on the infinite path space and is not used in this proof). Single risky asset, finite horizon T, finite sample space, standing hypotheses S_0 > 0 and BinomialNoArb. Axioms-clean."
       }
     },
     {
@@ -685,7 +685,7 @@
       "domain": "mathematical_finance",
       "description": "On the coin-flip path space with the law of i.i.d. Bernoulli(q) flips (coinFlipMeasure q) and the natural flip filtration, for a payoff process Z adapted to the flips, the tree's explicit pathwise Snell envelope snell E q Z N k agrees almost surely, at every time k ≤ N, with the library's general Snell envelope snellEnvelope (the backward recursion U_i = max(Z_i, E[U_{i+1} | F_i]) at the exercise times {i | N − i ∈ E}, the bare conditional expectation elsewhere). With q = crrUpProb u d r, the Snell envelope of the discounted payoff e^{−rn} g(S_n) is, almost surely and at every k ≤ N, the discounted Bermudan price e^{−rk} bermudanPrice E (N − k) at the spot S_k. Only the identification is stated: no optimal stopping time is exhibited, and no-arbitrage is not assumed (crrUpProb need not lie in (0, 1)).",
       "code": {
-        "lean": "import MathFin.Binomial.PathMeasure\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin\n\n/-- The tree's pathwise Snell envelope `snell` is, almost surely and at times `k ≤ N`, the\nlibrary's `snellEnvelope` for the flip filtration under `coinFlipMeasure q`, exercisable at the\ntimes `i` with `N - i ∈ E`. -/\ntheorem binomial_snell_ae_eq_snellEnvelope {q : ℝ≥0} (hq : q ≤ 1) {E : Set ℕ}\n    {Z : ℕ → (ℕ → Bool) → ℝ} (hZ : ∀ n, PathAdaptedAt n (Z n)) {N k : ℕ} (hk : k ≤ N) :\n    snell E (q : ℝ) Z N k =ᵐ[coinFlipMeasure q hq]\n      snellEnvelope (coinFlipMeasure q hq) flipFiltration {i | N - i ∈ E} Z N k :=\n  snell_ae_eq_snellEnvelope hq hZ hk\n\n/-- With `q = crrUpProb u d r`, the Snell envelope of the discounted payoff `e^{-rn} g(Sₙ)` is,\nalmost surely, the discounted Bermudan price with `N - k` steps to go at the spot `S_k`. -/\ntheorem binomial_snellEnvelope_discounted_bermudanPrice {q : ℝ≥0} (hq : q ≤ 1) {E : Set ℕ}\n    (u d r : ℝ) (g : ℝ → ℝ) (S₀ : ℝ) (hqcrr : crrUpProb u d r = q) {N k : ℕ} (hk : k ≤ N) :\n    snellEnvelope (coinFlipMeasure q hq) flipFiltration {i | N - i ∈ E}\n        (fun n ω ↦ Real.exp (-r * n) * g (spotPath S₀ u d n ω)) N k\n      =ᵐ[coinFlipMeasure q hq] fun ω ↦\n        Real.exp (-r * k) * bermudanPrice E u d r g (N - k) (spotPath S₀ u d k ω) :=\n  snellEnvelope_discounted_bermudanPrice hq u d r g S₀ hqcrr hk\n"
+        "lean": "import MathFin.Models.Binomial.PathMeasure\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin\n\n/-- The tree's pathwise Snell envelope `snell` is, almost surely and at times `k ≤ N`, the\nlibrary's `snellEnvelope` for the flip filtration under `coinFlipMeasure q`, exercisable at the\ntimes `i` with `N - i ∈ E`. -/\ntheorem binomial_snell_ae_eq_snellEnvelope {q : ℝ≥0} (hq : q ≤ 1) {E : Set ℕ}\n    {Z : ℕ → (ℕ → Bool) → ℝ} (hZ : ∀ n, PathAdaptedAt n (Z n)) {N k : ℕ} (hk : k ≤ N) :\n    snell E (q : ℝ) Z N k =ᵐ[coinFlipMeasure q hq]\n      snellEnvelope (coinFlipMeasure q hq) flipFiltration {i | N - i ∈ E} Z N k :=\n  snell_ae_eq_snellEnvelope hq hZ hk\n\n/-- With `q = crrUpProb u d r`, the Snell envelope of the discounted payoff `e^{-rn} g(Sₙ)` is,\nalmost surely, the discounted Bermudan price with `N - k` steps to go at the spot `S_k`. -/\ntheorem binomial_snellEnvelope_discounted_bermudanPrice {q : ℝ≥0} (hq : q ≤ 1) {E : Set ℕ}\n    (u d r : ℝ) (g : ℝ → ℝ) (S₀ : ℝ) (hqcrr : crrUpProb u d r = q) {N k : ℕ} (hk : k ≤ N) :\n    snellEnvelope (coinFlipMeasure q hq) flipFiltration {i | N - i ∈ E}\n        (fun n ω ↦ Real.exp (-r * n) * g (spotPath S₀ u d n ω)) N k\n      =ᵐ[coinFlipMeasure q hq] fun ω ↦\n        Real.exp (-r * k) * bermudanPrice E u d r g (N - k) (spotPath S₀ u d k ω) :=\n  snellEnvelope_discounted_bermudanPrice hq u d r g S₀ hqcrr hk\n"
       },
       "metadata": {
         "chapter": 9,
@@ -702,7 +702,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. snell_ae_eq_snellEnvelope and snellEnvelope_discounted_bermudanPrice (MathFin/Binomial/PathMeasure.lean): the first by induction on the steps left, the conditional expectation of the recursion being the node average (condExp_flipFiltration_succ), which turns the tree's pathwise recursion snell into the general one (Foundations/SnellEnvelope.lean) almost surely; the second composes it with snellAux_eq_discounted_bermudanPrice (Binomial/SnellEnvelope.lean). The agreement is almost sure under coinFlipMeasure q, at times k ≤ N, with exercise times {i | N − i ∈ E} (E counts the steps still to go); the payoff must be adapted to the flips (PathAdaptedAt). Axioms-clean."
+        "formalization_scope": "Full formal proof. snell_ae_eq_snellEnvelope and snellEnvelope_discounted_bermudanPrice (MathFin/Models/Binomial/PathMeasure.lean): the first by induction on the steps left, the conditional expectation of the recursion being the node average (condExp_flipFiltration_succ), which turns the tree's pathwise recursion snell into the general one (Probability/Discrete/SnellEnvelope.lean) almost surely; the second composes it with snellAux_eq_discounted_bermudanPrice (Models/Binomial/SnellEnvelope.lean). The agreement is almost sure under coinFlipMeasure q, at times k ≤ N, with exercise times {i | N − i ∈ E} (E counts the steps still to go); the payoff must be adapted to the flips (PathAdaptedAt). Axioms-clean."
       }
     },
     {
@@ -711,7 +711,7 @@
       "domain": "mathematical_finance",
       "description": "For the N-period CRR market on the first N coin flips under no arbitrage (BinomialNoArb u d rho, S_0 > 0) and any real-world law of i.i.d. Bernoulli(p) flips with 0 < p < 1, take a European contract that pays g of the underlying at a time T falling on step N (T / h = N). Its discounted payoff, read as a claim on the first N flips (the path padded by false), equals P-a.s. the contract's value, Contract.value under the risk-neutral coin flips coinFlipMeasure q with q = crrUpProb u d rho, plus the discounted gains of a bounded predictable strategy in the discounted spot. The strategy is not given in closed form: it is the one the completeness of the market (mf-binomial-multi-period-complete) produces, and only its initial capital is identified, as the value.",
       "code": {
-        "lean": "import MathFin.Contracts.Models.BinomialCompleteMarket\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.Contracts.Binomial\n\n/-- In the complete `N`-period tree the capital of the replicating strategy of a European\ncontract's discounted payoff is the contract's value under the risk-neutral coin flips. -/\ntheorem binomial_complete_hedge_capital_is_value {S₀ u d ρ h : ℝ} {q : ℝ≥0} (hS₀ : 0 < S₀)\n    (hna : BinomialNoArb u d ρ) {p : ℝ≥0} (hp0 : 0 < p) (hp1 : p < 1) (hq : q ≤ 1)\n    (hqcrr : crrUpProb u d ρ = q) {T : ℝ≥0} {N : ℕ} (hTN : (T : ℝ) / h = N) {a : Payoff Unit}\n    {g : ℝ → ℝ} (hg : ∀ s : Scenario Unit, a.eval s = g (s () T)) :\n    ∃ φ : ℕ → (Fin N → Bool) → ℝ,\n      (∀ t < N, StronglyMeasurable[horizonFiltration N t] (φ (t + 1))) ∧\n      (∃ K : ℝ, ∀ n ≤ N, ∀ x, ‖φ n x‖ ≤ K) ∧\n      (fun x ↦ (Contract.pay T a).pathPV (discount ρ h)\n          (scenarioAt (assets S₀ u d h) (padFlips N x)))\n        =ᵐ[horizonMeasure N p hp1.le] fun x ↦\n          (Contract.pay T a).value (coinFlipMeasure q hq) (discount ρ h) (assets S₀ u d h)\n            + martingaleTransform φ (horizonSpot N S₀ u d ρ) N x :=\n  exists_hedge_eq_value hS₀ hna hp0 hp1 hq hqcrr hTN hg\n"
+        "lean": "import MathFin.Models.Binomial.BinomialCompleteMarket\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.Contracts.Binomial\n\n/-- In the complete `N`-period tree the capital of the replicating strategy of a European\ncontract's discounted payoff is the contract's value under the risk-neutral coin flips. -/\ntheorem binomial_complete_hedge_capital_is_value {S₀ u d ρ h : ℝ} {q : ℝ≥0} (hS₀ : 0 < S₀)\n    (hna : BinomialNoArb u d ρ) {p : ℝ≥0} (hp0 : 0 < p) (hp1 : p < 1) (hq : q ≤ 1)\n    (hqcrr : crrUpProb u d ρ = q) {T : ℝ≥0} {N : ℕ} (hTN : (T : ℝ) / h = N) {a : Payoff Unit}\n    {g : ℝ → ℝ} (hg : ∀ s : Scenario Unit, a.eval s = g (s () T)) :\n    ∃ φ : ℕ → (Fin N → Bool) → ℝ,\n      (∀ t < N, StronglyMeasurable[horizonFiltration N t] (φ (t + 1))) ∧\n      (∃ K : ℝ, ∀ n ≤ N, ∀ x, ‖φ n x‖ ≤ K) ∧\n      (fun x ↦ (Contract.pay T a).pathPV (discount ρ h)\n          (scenarioAt (assets S₀ u d h) (padFlips N x)))\n        =ᵐ[horizonMeasure N p hp1.le] fun x ↦\n          (Contract.pay T a).value (coinFlipMeasure q hq) (fun t _ ↦ discount ρ h t) (assets S₀ u d h)\n            + martingaleTransform φ (horizonSpot N S₀ u d ρ) N x :=\n  exists_hedge_eq_value hS₀ hna hp0 hp1 hq hqcrr hTN hg\n"
       },
       "metadata": {
         "chapter": 9,
@@ -727,7 +727,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. exists_hedge_eq_value in MathFin/Contracts/Models/BinomialCompleteMarket.lean: the completeness of the tree (isCompleteMarket_horizonSpot) supplies a capital x and a strategy for the claim; the risk-neutral law horizonMeasure N (crrUpProb u d rho) is an equivalent martingale measure (isEMM_horizonSpot) under which the gains are a fair game (IsEMM.integrable_and_integral_gains), so replication prices the claim at x (integral_eq_of_replicates), and that price is the contract's value because the law of the first N flips under coinFlipMeasure q is horizonMeasure N q and the claim is a function of them. Scope: a single cash flow (Contract.pay) maturing exactly on the horizon step N, paying a function of the spot; the strategy is existential (the explicit delta hedge on the infinite path space is pathPV_eq_value_add_gains, Contracts/Models/Binomial.lean). Axioms-clean."
+        "formalization_scope": "Full formal proof. exists_hedge_eq_value in MathFin/Models/Binomial/BinomialCompleteMarket.lean: the completeness of the tree (isCompleteMarket_horizonSpot) supplies a capital x and a strategy for the claim; the risk-neutral law horizonMeasure N (crrUpProb u d rho) is an equivalent martingale measure (isEMM_horizonSpot) under which the gains are a fair game (IsEMM.integrable_and_integral_gains), so replication prices the claim at x (integral_eq_of_replicates), and that price is the contract's value because the law of the first N flips under coinFlipMeasure q is horizonMeasure N q and the claim is a function of them. Scope: a single cash flow (Contract.pay) maturing exactly on the horizon step N, paying a function of the spot; the strategy is existential (the explicit delta hedge on the infinite path space is pathPV_eq_value_add_gains, Models/Binomial/Binomial.lean). Axioms-clean."
       }
     },
     {
@@ -736,7 +736,7 @@
       "domain": "mathematical_finance",
       "description": "On the coin-flip path space with the law of i.i.d. Bernoulli(q) flips and the natural flip filtration, for a payoff process Z adapted to the flips, the tree's explicit pathwise Snell envelope snell E q Z N, frozen at the horizon N (k maps to snell E q Z N (min k N)), is a Mathlib Supermartingale for the flip filtration under coinFlipMeasure q. No optimal stopping time is exhibited, and the minimality of the envelope is not part of this entry (mf-binomial-snell-is-snell-envelope identifies it with the library's general envelope, which is the smallest supermartingale dominating the payoff at the exercise times and at the horizon).",
       "code": {
-        "lean": "import MathFin.Binomial.PathMeasure\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- The tree's pathwise Snell envelope, frozen at the horizon `N`, is a Mathlib supermartingale\nfor the flip filtration under `coinFlipMeasure q`. -/\ntheorem binomial_snell_supermartingale {q : ℝ≥0} (hq : q ≤ 1) {E : Set ℕ}\n    {Z : ℕ → (ℕ → Bool) → ℝ} (hZ : ∀ n, PathAdaptedAt n (Z n)) (N : ℕ) :\n    Supermartingale (fun k ↦ snell E (q : ℝ) Z N (min k N)) flipFiltration\n      (coinFlipMeasure q hq) :=\n  supermartingale_snell hq hZ N\n"
+        "lean": "import MathFin.Models.Binomial.PathMeasure\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- The tree's pathwise Snell envelope, frozen at the horizon `N`, is a Mathlib supermartingale\nfor the flip filtration under `coinFlipMeasure q`. -/\ntheorem binomial_snell_supermartingale {q : ℝ≥0} (hq : q ≤ 1) {E : Set ℕ}\n    {Z : ℕ → (ℕ → Bool) → ℝ} (hZ : ∀ n, PathAdaptedAt n (Z n)) (N : ℕ) :\n    Supermartingale (fun k ↦ snell E (q : ℝ) Z N (min k N)) flipFiltration\n      (coinFlipMeasure q hq) :=\n  supermartingale_snell hq hZ N\n"
       },
       "metadata": {
         "chapter": 9,
@@ -753,7 +753,82 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. supermartingale_snell (MathFin/Binomial/PathMeasure.lean): at every time the frozen pathwise envelope agrees almost surely with the library's snellEnvelope (snell_ae_eq_snellEnvelope, and past the horizon snellEnvelope_after_horizon), which is a supermartingale (snellEnvelope_supermartingale, Foundations/SnellEnvelope.lean); adaptedness and integrability come from the envelope depending only on the first k flips. The freezing at the horizon is needed because past it the pathwise snell is the payoff again. The payoff must be adapted to the flips (PathAdaptedAt); no-arbitrage is not assumed. Axioms-clean."
+        "formalization_scope": "Full formal proof. supermartingale_snell (MathFin/Models/Binomial/PathMeasure.lean): at every time the frozen pathwise envelope agrees almost surely with the library's snellEnvelope (snell_ae_eq_snellEnvelope, and past the horizon snellEnvelope_after_horizon), which is a supermartingale (snellEnvelope_supermartingale, Probability/Discrete/SnellEnvelope.lean); adaptedness and integrability come from the envelope depending only on the first k flips. The freezing at the horizon is needed because past it the pathwise snell is the payoff again. The payoff must be adapted to the flips (PathAdaptedAt); no-arbitrage is not assumed. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-binomial-market-pricing-measure",
+      "name": "The Risk-Neutral Coin Flips Are a Pricing Measure of the Binomial Market Under Any Physical Coin, and Price a European Payoff at Its Tree Price",
+      "domain": "mathematical_finance",
+      "description": "The binomial tree with step h >= 0 is a Market (Binomial.market): coin-flip paths under a physical law of i.i.d. flips going up with probability p, 0 < p < 1, the information of the flips made by time t (the flip filtration along the step count floor(t/h)), the spot after those flips as the traded asset, and the money market e^(rho n) after n steps as numeraire. Under no arbitrage (BinomialNoArb u d rho), the law of i.i.d. flips that go up with probability q = crrUpProb u d rho is a pricing measure of this market at every horizon T (Market.IsPricingMeasure: equivalent to the physical law on the information at T, and the deflated spot frozen at T is a martingale), whatever p, and the market's price (Market.price) of a cash flow at T, on step N (T / h = N), paying g of the spot at T, is the backward-induction tree price binomialPrice u d rho g N S_0.",
+      "code": {
+        "lean": "import MathFin.Models.Binomial.Market\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.Contracts.Binomial\n\n/-- Under no-arbitrage the risk-neutral law of the flips is a pricing measure of the binomial\nmarket under any physical law of i.i.d. flips, and it prices a European payoff on step `N` at its\nbackward-induction tree price. -/\ntheorem binomial_market_pricing_measure {S₀ u d ρ h : ℝ} {p q : ℝ≥0} (hq : q ≤ 1) (hp0 : 0 < p)\n    (hp : p < 1) (hna : BinomialNoArb u d ρ) (hqcrr : crrUpProb u d ρ = q) (hh : 0 ≤ h)\n    (T : ℝ≥0) {N : ℕ} (hTN : (T : ℝ) / h = N) {a : Payoff Unit} {g : ℝ → ℝ}\n    (hg : ∀ s : Scenario Unit, a.eval s = g (s () T)) :\n    (market (coinFlipMeasure p hp.le) S₀ u d ρ hh).IsPricingMeasure T (coinFlipMeasure q hq) ∧\n      (market (coinFlipMeasure p hp.le) S₀ u d ρ hh).price (coinFlipMeasure q hq) (.pay T a)\n        = binomialPrice u d ρ g N S₀ :=\n  ⟨isPricingMeasure_coinFlipMeasure hq hna hqcrr S₀ hh hp0 hp T,\n    price_market_pay_eq_binomialPrice hq hqcrr _ S₀ hh hTN hg⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cox, Ross and Rubinstein, Option pricing: a simplified approach (1979); Shreve, Stochastic Calculus for Finance I, ch. 2",
+        "citations": [
+          {
+            "key": "CoxRossRubinstein1979"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "ch. 2"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. isPricingMeasure_coinFlipMeasure and price_market_pay_eq_binomialPrice in MathFin/Models/Binomial/Market.lean: the deflated spot of Binomial.market is the discounted spot after floor(t/h) steps (deflated_market), a martingale for the flip filtration under the risk-neutral coin flips (martingale_discountedSpot), hence for its time change along the step count (Martingale.comp, MathFin/Probability/Martingales/TimeChange.lean), and frozen at T (martingale_min_of_martingale); the two coin-flip laws are equivalent on the information of the first floor(T/h) flips (coinFlipMeasure_trim_equiv, from the n-flip Girsanov density map_flips_coinFlipMeasure_equiv), which is all Market.IsPricingMeasure asks; on grid dates the deflator e^(-rho floor(t/h)) is the binomial discount, so the price is Contract.value under the binomial model (price_market), which value_pay_eq_binomialPrice evaluates. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-binomial-market-unique-price",
+      "name": "Every Pricing Measure of the Binomial Market Is the Risk-Neutral Law up to the Horizon, and Gives a European Payoff Its Tree Price",
+      "domain": "mathematical_finance",
+      "description": "In the binomial market (Binomial.market) with step h > 0, spot S_0 > 0 and no arbitrage (BinomialNoArb u d rho), under any physical law P of the flips, every pricing measure Q at a horizon T of N steps (T / h = N, Market.IsPricingMeasure) agrees with the law of i.i.d. flips going up with probability q = crrUpProb u d rho on the information of the first N flips (equal restrictions to flipFiltration N), and prices a cash flow at T paying g of the spot at T at the backward-induction tree price binomialPrice u d rho g N S_0.",
+      "metadata": {
+        "chapter": 9,
+        "reference": "Harrison and Pliska (1981); Shreve, Stochastic Calculus for Finance I, sec. 5.4",
+        "citations": [
+          {
+            "key": "HarrisonPliska1981"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "sec. 5.4"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. trim_eq_of_isPricingMeasure and price_pay_eq_binomialPrice_of_isPricingMeasure in MathFin/Models/Binomial/Market.lean: under a pricing measure the deflated spot frozen at T is a martingale along the step count, so the discounted spot frozen at step N is one for the flip filtration (Martingale.of_comp with the right inverse n -> n h); the law of the first N flips under Q is then an equivalent martingale measure of the N-period tree (isEMM_horizonSpot_map, MathFin/Models/Binomial/MultiPeriodFTAP.lean), which is the risk-neutral horizon law (IsEMM.eq_horizonMeasure, node by node); the restrictions to flipFiltration N agree, and the discounted payoff depends on the first N flips only (stronglyMeasurable_flipFiltration_iff), so its integral is the same under Q and under the risk-neutral law (integral_trim), where value_pay_eq_binomialPrice evaluates it. The physical law P is arbitrary. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.Models.Binomial.Market\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.Contracts.Binomial\n\n/-- Every pricing measure of the binomial market at a horizon of `N` steps is the risk-neutral law\non the first `N` flips, and prices a European payoff at its tree price. -/\ntheorem binomial_market_unique_price {S₀ u d ρ h : ℝ} {q : ℝ≥0} (hq : q ≤ 1) (hS₀ : 0 < S₀)\n    (hna : BinomialNoArb u d ρ) (hqcrr : crrUpProb u d ρ = q) (hh : 0 < h)\n    {P Q : Measure (ℕ → Bool)} {T : ℝ≥0} {N : ℕ} (hTN : (T : ℝ) / h = N) {a : Payoff Unit}\n    {g : ℝ → ℝ} (hg : ∀ s : Scenario Unit, a.eval s = g (s () T))\n    (hQ : (market P S₀ u d ρ hh.le).IsPricingMeasure T Q) :\n    Q.trim (flipFiltration.le N) = (coinFlipMeasure q hq).trim (flipFiltration.le N) ∧\n      (market P S₀ u d ρ hh.le).price Q (.pay T a) = binomialPrice u d ρ g N S₀ :=\n  ⟨trim_eq_of_isPricingMeasure hq hS₀ hna hqcrr hh (by rw [hTN, Nat.floor_natCast]) hQ,\n    price_pay_eq_binomialPrice_of_isPricingMeasure hS₀ hna hqcrr hh hTN hg hQ⟩\n"
+      }
+    },
+    {
+      "id": "mf-binomial-market-ftap",
+      "name": "The Fundamental Theorem of Asset Pricing for the Binomial Market: a Pricing Measure Exists iff d < e^rho < u",
+      "domain": "mathematical_finance",
+      "description": "For the binomial market (Binomial.market) with spot S_0 > 0, factors 0 < d < u, step h > 0 and a horizon T of N >= 1 steps (T / h = N), under the physical law of i.i.d. flips going up with any probability 0 < p < 1, the market has a pricing measure at T (Market.IsPricingMeasure) if and only if d < e^rho < u (BinomialNoArb u d rho).",
+      "metadata": {
+        "chapter": 9,
+        "reference": "Harrison and Pliska (1981); Shreve, Stochastic Calculus for Finance I, sec. 5.4",
+        "citations": [
+          {
+            "key": "HarrisonPliska1981"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "sec. 5.4"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. exists_isPricingMeasure_iff in MathFin/Models/Binomial/Market.lean: a pricing measure Q makes the discounted spot frozen at step N a martingale for the flip filtration (martingale_discountedSpot_of_isPricingMeasure), and its law on the first N flips is equivalent to the physical horizon law (map_flips_equiv_of_isPricingMeasure, from the equivalence on the information at T), so it is an equivalent martingale measure of the N-period tree (isEMM_horizonSpot_map), which has no arbitrage (IsEMM.noArbitrage), which forces d < e^rho < u (binomialNoArb_of_noArbitrage, the one-period arbitrage); conversely the risk-neutral coin flips are a pricing measure (isPricingMeasure_coinFlipMeasure). Arbitrage here is NoArbitrage of the N-period tree with bounded predictable strategies. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.Models.Binomial.Market\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.Contracts.Binomial\n\n/-- The binomial market has a pricing measure exactly when `d < e^ρ < u`. -/\ntheorem binomial_market_ftap {S₀ u d ρ h : ℝ} (hS₀ : 0 < S₀) (hd : 0 < d) (hdu : d < u)\n    (hh : 0 < h) {p : ℝ≥0} (hp0 : 0 < p) (hp : p < 1) {T : ℝ≥0} {N : ℕ} (hN : 0 < N)\n    (hTN : (T : ℝ) / h = N) :\n    (∃ Q, (market (coinFlipMeasure p hp.le) S₀ u d ρ hh.le).IsPricingMeasure T Q)\n      ↔ BinomialNoArb u d ρ :=\n  exists_isPricingMeasure_iff hS₀ hd hdu hh hp0 hp hN hTN\n"
       }
     },
     {
@@ -762,7 +837,7 @@
       "domain": "mathematical_finance",
       "description": "One step of a recombining trinomial lattice sends a node x_k to three children x_k - dx, x_k, x_k + dx with weights (p1, p2, p3). Matching total mass, the conditional mean x_k + e and the conditional variance v2 gives a linear system of three equations in three unknowns with determinant 2 dx^3: for dx != 0 the solution is unique, with p1 = (v2 + e^2 - e dx) / (2 dx^2), p2 = 1 - (v2 + e^2) / dx^2, p3 = (v2 + e^2 + e dx) / (2 dx^2), transcribed from QuantLib's trinomialtree.cpp (the general-spacing branch weights the source applies when a grid-wide floor has widened dx beyond its natural sqrt(3) v). At the classical spacing dx = sqrt(3) v, v2 = v^2 the solution reduces to the classical closed form ((1 + e^2/v^2 - sqrt(3) e/v) / 6, (2 - e^2/v^2) / 3, (1 + e^2/v^2 + sqrt(3) e/v) / 6), the (1/6, 2/3, 1/6) triple at e = 0. Non-negativity is characterized exactly: the two outer weights are non-negative iff |e| (dx - |e|) <= v2, the central weight iff v2 + e^2 <= dx^2, and on the window dx^2 <= 4 v2 <= 3 dx^2 every nearest-node offset |e| <= dx/2 keeps all three weights in [0, 1]. A lattice variance lower bound holds for any branching, not only three: every non-negative weighting of finitely many points of the lattice c + dx Z with mean c + e has variance at least e (dx - e), so no non-negative scheme on that lattice, with any number of branches, matches a one-step variance below e (dx - e). Tying the weights to the discretized process at the classical spacing dx = sqrt(3) sigma sqrt(dt), v2 = sigma^2 dt: the lattice law matches the Black-Scholes risk-neutral log-return's mean (r - sigma^2/2) dt and variance sigma^2 dt exactly. The statements are about one-step weights and finitely supported lattice laws; no multi-period tree object, no lattice prices and no convergence are claimed.",
       "code": {
-        "lean": "import MathFin.Binomial.TrinomialMomentMatching\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\n/-- The trinomial one-step moment-matching solution is unique: any weights solving the\nmass, mean and second-moment equations are the trinomial weights. -/\ntheorem trinomial_unique_thm {v2 e dx q1 q2 q3 : ℝ} (hdx : dx ≠ 0)\n    (hsum : q1 + q2 + q3 = 1) (hmean : dx * (q3 - q1) = e)\n    (hsec : dx ^ 2 * (q3 + q1) = v2 + e ^ 2) :\n    q1 = trinomialProbDown v2 e dx ∧ q2 = trinomialProbMid v2 e dx ∧\n      q3 = trinomialProbUp v2 e dx :=\n  trinomialProb_unique hdx hsum hmean hsec\n\n/-- On the classical spacing `dx ^ 2 = 3 * v2`, every nearest-node offset `|e| ≤ dx / 2`\nkeeps all three weights in `[0, 1]`. -/\ntheorem trinomial_classical_window_thm {v2 e dx : ℝ} (hdx : 0 < dx) (he : |e| ≤ dx / 2)\n    (hcl : dx ^ 2 = 3 * v2) :\n    trinomialProbDown v2 e dx ∈ Set.Icc 0 1 ∧ trinomialProbMid v2 e dx ∈ Set.Icc 0 1 ∧\n      trinomialProbUp v2 e dx ∈ Set.Icc 0 1 :=\n  trinomialProb_mem_Icc_classical hdx he hcl\n\n/-- Every non-negative weighting of the lattice `c + dx ℤ` with mean `c + e` has variance\nat least `e (dx - e)`. -/\ntheorem lattice_variance_bound_thm {c dx e : ℝ} (s : Finset ℤ) (w : ℤ → ℝ)\n    (hw : ∀ n ∈ s, 0 ≤ w n) (hsum : ∑ n ∈ s, w n = 1)\n    (hmean : ∑ n ∈ s, w n * (c + dx * n) = c + e) :\n    e * (dx - e) ≤ ∑ n ∈ s, w n * (c + dx * n - (c + e)) ^ 2 :=\n  lattice_variance_lower_bound s w hw hsum hmean\n\n/-- No non-negative scheme on that lattice, with any number of branches, matches a\none-step variance below `e (dx - e)`. -/\ntheorem no_nonneg_lattice_scheme_thm {c dx e v2 : ℝ} (hv : v2 < e * (dx - e)) :\n    ¬ ∃ (s : Finset ℤ) (w : ℤ → ℝ), (∀ n ∈ s, 0 ≤ w n) ∧ ∑ n ∈ s, w n = 1 ∧\n      ∑ n ∈ s, w n * (c + dx * n) = c + e ∧\n      ∑ n ∈ s, w n * (c + dx * n - (c + e)) ^ 2 = v2 :=\n  not_exists_nonneg_lattice_scheme hv\n\n/-- At the classical spacing `dx = √3 σ √dt` with `v2 = σ² dt`, the lattice law's mean and\nvariance match the Black–Scholes log-return's over the step. -/\ntheorem trinomial_bsStep_moments_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}\n    [IsProbabilityMeasure Q] {S_0 K r σ dt : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ dt Z)\n    (c e : ℝ) (he : c + e = (r - σ ^ 2 / 2) * dt) :\n    c + (√3 * σ * Real.sqrt dt) *\n        (trinomialProbUp (σ ^ 2 * dt) e (√3 * σ * Real.sqrt dt) -\n          trinomialProbDown (σ ^ 2 * dt) e (√3 * σ * Real.sqrt dt))\n      = ∫ ω, bsLogReturn r σ dt (Z ω) ∂Q ∧\n    (√3 * σ * Real.sqrt dt) ^ 2 *\n        (trinomialProbUp (σ ^ 2 * dt) e (√3 * σ * Real.sqrt dt) +\n          trinomialProbDown (σ ^ 2 * dt) e (√3 * σ * Real.sqrt dt)) - e ^ 2\n      = Var[fun ω ↦ bsLogReturn r σ dt (Z ω); Q] :=\n  ⟨trinomialProb_bsStep_mean h c e he, trinomialProb_bsStep_variance h e⟩\n"
+        "lean": "import MathFin.Models.Binomial.TrinomialMomentMatching\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\n/-- The trinomial one-step moment-matching solution is unique: any weights solving the\nmass, mean and second-moment equations are the trinomial weights. -/\ntheorem trinomial_unique_thm {v2 e dx q1 q2 q3 : ℝ} (hdx : dx ≠ 0)\n    (hsum : q1 + q2 + q3 = 1) (hmean : dx * (q3 - q1) = e)\n    (hsec : dx ^ 2 * (q3 + q1) = v2 + e ^ 2) :\n    q1 = trinomialProbDown v2 e dx ∧ q2 = trinomialProbMid v2 e dx ∧\n      q3 = trinomialProbUp v2 e dx :=\n  trinomialProb_unique hdx hsum hmean hsec\n\n/-- On the classical spacing `dx ^ 2 = 3 * v2`, every nearest-node offset `|e| ≤ dx / 2`\nkeeps all three weights in `[0, 1]`. -/\ntheorem trinomial_classical_window_thm {v2 e dx : ℝ} (hdx : 0 < dx) (he : |e| ≤ dx / 2)\n    (hcl : dx ^ 2 = 3 * v2) :\n    trinomialProbDown v2 e dx ∈ Set.Icc 0 1 ∧ trinomialProbMid v2 e dx ∈ Set.Icc 0 1 ∧\n      trinomialProbUp v2 e dx ∈ Set.Icc 0 1 :=\n  trinomialProb_mem_Icc_classical hdx he hcl\n\n/-- Every non-negative weighting of the lattice `c + dx ℤ` with mean `c + e` has variance\nat least `e (dx - e)`. -/\ntheorem lattice_variance_bound_thm {c dx e : ℝ} (s : Finset ℤ) (w : ℤ → ℝ)\n    (hw : ∀ n ∈ s, 0 ≤ w n) (hsum : ∑ n ∈ s, w n = 1)\n    (hmean : ∑ n ∈ s, w n * (c + dx * n) = c + e) :\n    e * (dx - e) ≤ ∑ n ∈ s, w n * (c + dx * n - (c + e)) ^ 2 :=\n  lattice_variance_lower_bound s w hw hsum hmean\n\n/-- No non-negative scheme on that lattice, with any number of branches, matches a\none-step variance below `e (dx - e)`. -/\ntheorem no_nonneg_lattice_scheme_thm {c dx e v2 : ℝ} (hv : v2 < e * (dx - e)) :\n    ¬ ∃ (s : Finset ℤ) (w : ℤ → ℝ), (∀ n ∈ s, 0 ≤ w n) ∧ ∑ n ∈ s, w n = 1 ∧\n      ∑ n ∈ s, w n * (c + dx * n) = c + e ∧\n      ∑ n ∈ s, w n * (c + dx * n - (c + e)) ^ 2 = v2 :=\n  not_exists_nonneg_lattice_scheme hv\n\n/-- At the classical spacing `dx = √3 σ √dt` with `v2 = σ² dt`, the lattice law's mean and\nvariance match the Black–Scholes log-return's over the step. -/\ntheorem trinomial_bsStep_moments_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}\n    [IsProbabilityMeasure Q] {S_0 K r σ dt : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ dt Z)\n    (c e : ℝ) (he : c + e = (r - σ ^ 2 / 2) * dt) :\n    c + (√3 * σ * Real.sqrt dt) *\n        (trinomialProbUp (σ ^ 2 * dt) e (√3 * σ * Real.sqrt dt) -\n          trinomialProbDown (σ ^ 2 * dt) e (√3 * σ * Real.sqrt dt))\n      = ∫ ω, bsLogReturn r σ dt (Z ω) ∂Q ∧\n    (√3 * σ * Real.sqrt dt) ^ 2 *\n        (trinomialProbUp (σ ^ 2 * dt) e (√3 * σ * Real.sqrt dt) +\n          trinomialProbDown (σ ^ 2 * dt) e (√3 * σ * Real.sqrt dt)) - e ^ 2\n      = Var[fun ω ↦ bsLogReturn r σ dt (Z ω); Q] :=\n  ⟨trinomialProb_bsStep_mean h c e he, trinomialProb_bsStep_variance h e⟩\n"
       },
       "metadata": {
         "chapter": 9,

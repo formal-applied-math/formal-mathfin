@@ -13,7 +13,8 @@ own records, so the site cannot drift from the library:
 Pages: a home page with the map of the library (sections as a graph of what imports what) and the
 blueprint's landmarks; a page per section with its module graph; a page per module with its
 docstring, its import neighbourhood, the corpus entries it formalizes and every declaration
-(statement with linked names, docstring, source, used-by); the blueprint as a dependency graph; the
+(statement with linked names, docstring, source, used-by); the blueprint as a dependency graph and
+as the program tree (tree.html, with the corpus placed on it by program_tree.py); the
 corpus by status; the subjects; the references; and a ranked client-side search.
 
     python3 -m tools.verify.docs_site decl-index.json --out site
@@ -36,6 +37,7 @@ from pathlib import Path
 
 from . import doc_standard, library
 from .blueprint_issues import issues_url
+from .program_tree import tree_data
 from .corpus import iter_entries
 from .decl_index import DeclIndex, IndexedDecl
 
@@ -45,38 +47,62 @@ SKIP_KINDS = frozenset({"constructor", "recursor", "quot"})
 ASSETS = Path(__file__).with_name("site_assets")
 BLUEPRINT_NODES = Path("docs/blueprint_nodes.json")
 FRONTIER = Path("docs/blueprint_frontier.toml")
+LANDMARKS = Path("docs/landmarks.toml")
 
 # The sections of the library: display name, layer (the map's colour), one line of what is there.
+# A section is a layer (`MathFin.<Layer>`), or for the two broad layers a subdirectory of it
+# (`MathFin.Probability.<Sub>`, `MathFin.Models.<Sub>`).
 SECTIONS: dict[str, tuple[str, str, str]] = {
-    "Foundations": ("Foundations", "foundations",
-                    "Probability and stochastic calculus: Brownian motion, the Itô integral and "
-                    "formula, martingales, changes of measure, the fundamental theorems."),
-    "Bridges": ("Bridges", "bridges",
-                "Theorems that tie a foundational object to a pricing model."),
-    "BlackScholes": ("Black–Scholes and beyond", "applications",
-                     "The Black–Scholes family, Greeks, exotics, jump diffusions, implied "
-                     "volatility, SVI and the American put."),
-    "Binomial": ("Binomial trees", "applications",
-                 "Discrete-time trees, replication, CRR convergence, American and Bermudan "
-                 "exercise."),
-    "FixedIncome": ("Fixed income and credit", "applications",
-                    "Bonds, yield curves, short-rate models, forward measures, swaps and "
-                    "hazard-rate credit."),
-    "Futures": ("Futures", "applications", "Black-76 and commodity futures."),
-    "Commodities": ("Commodities", "applications", "Own rates of interest and convenience yield."),
-    "Contracts": ("Contracts", "applications",
-                  "A contract language: payoffs, observables and the models that price them."),
-    "Portfolio": ("Portfolio theory", "applications",
-                  "Mean–variance, CAPM, Black–Litterman, risk parity."),
-    "Performance": ("Performance", "applications", "Sharpe, Sortino, Kelly and their kin."),
-    "RiskMeasures": ("Risk measures", "applications",
-                     "Value at risk, expected shortfall, coherent and convex risk measures, "
-                     "expectiles."),
-    "Actuarial": ("Actuarial", "applications", "Premiums, mortality, survival models."),
-    "Execution": ("Execution", "applications", "Market microstructure and optimal execution."),
-    "DeFi": ("DeFi", "applications", "Automated market makers."),
+    "Probability.Discrete": ("Discrete time", "roots",
+                             "Martingale transforms, Doob decomposition, the Snell envelope, path "
+                             "measures."),
+    "Probability.Martingales": ("Martingales", "roots",
+                                "Changes of measure, localisation, convergence, stopped processes."),
+    "Probability.Brownian": ("Brownian calculus", "roots",
+                             "Brownian motion, the Itô integral and formula, Girsanov, Wiener "
+                             "integrals, martingale representation, SDEs."),
+    "Probability.Jumps": ("Jumps", "roots",
+                          "Poisson processes and random measures, the compensated integral, "
+                          "compound Poisson laws."),
+    "Probability.Gaussian": ("Gaussian analysis", "roots",
+                             "Φ and its moments, the bivariate normal, the heat equation."),
+    "Probability.Laws": ("Laws", "roots",
+                         "Quantiles, the Esscher tilt, Student-t, extreme value and Pareto laws."),
+    "Probability.Dependence": ("Dependence", "roots",
+                               "Copulas, Sklar's theorem, Hoeffding's covariance identity."),
+    "Probability.Analysis": ("Analysis", "roots",
+                             "Real and measure-theoretic tools: bisection, Jensen, isometries."),
+    "Contracts": ("Contracts", "trunk",
+                  "The payoff language: payoffs, observables, measurability, instruments."),
+    "Pricing": ("Pricing", "trunk",
+                "The pricing functional: martingale measures, the fundamental theorems, state "
+                "prices, numéraires, replication, completeness, superhedging, contract value."),
+    "Models.BlackScholes": ("Black–Scholes", "limbs",
+                            "The Black–Scholes family, Greeks, exotics, implied volatility and the "
+                            "American put."),
+    "Models.Bachelier": ("Bachelier", "limbs", "The normal model and its Greeks."),
+    "Models.Jumps": ("Jump diffusions", "limbs",
+                     "Merton and general jump-diffusion models, their prices and Greeks."),
+    "Models.StochVol": ("Stochastic volatility", "limbs", "Heston, SABR, local-stochastic volatility."),
+    "Models.LocalVol": ("Local volatility", "limbs", "Dupire's formula and the forward smile."),
+    "Models.ModelFree": ("Model-free", "limbs",
+                         "Static replication, price bounds, variance swaps, SVI."),
+    "Models.Binomial": ("Binomial trees", "limbs",
+                        "Discrete-time trees, replication, CRR convergence, American and Bermudan "
+                        "exercise."),
+    "Models.Rates": ("Rates", "limbs",
+                     "Bonds, yield curves, short-rate models, forward measures, swaps."),
+    "Models.Credit": ("Credit", "limbs", "Hazard rates, default times, CDS, CVA, structural credit."),
+    "Models.Forwards": ("Forwards", "limbs", "FX, futures, Black-76 and commodities."),
+    "Risk": ("Risk", "limbs",
+             "Value at risk, expected shortfall, coherent and convex risk measures, credit "
+             "portfolio risk, exposure."),
+    "Choice": ("Choice", "limbs", "Utility, portfolio theory, CAPM, performance and Kelly."),
+    "Insurance": ("Insurance", "limbs", "Premiums, mortality, survival models."),
+    "Markets": ("Markets", "limbs", "Microstructure, execution, AMMs and lending protocols."),
 }
-LAYER_NAMES = {"foundations": "Foundations", "bridges": "Bridges", "applications": "Applications"}
+LAYER_NAMES = {"roots": "Probability", "trunk": "Contracts and pricing", "limbs": "Models and applications"}
+LAYER_VAR = {"roots": "--s1", "trunk": "--s2", "limbs": "--s3"}
 STATUS = {"full": "full statement", "library_wrapper": "library wrapper",
           "reduced_core": "reduced core", "placeholder": "placeholder"}
 STATUS_VAR = {"full": "--s1", "library_wrapper": "--s2", "reduced_core": "--s3",
@@ -250,7 +276,9 @@ def decl_url(d: IndexedDecl) -> str:
 
 def section_of(module: str) -> str:
     parts = module.split(".")
-    return parts[1] if len(parts) > 2 else ""
+    if len(parts) < 3:
+        return ""
+    return ".".join(parts[1:3]) if parts[1] in ("Probability", "Models") and len(parts) > 3 else parts[1]
 
 
 def section_url(sec: str) -> str:
@@ -311,7 +339,8 @@ class Site:
 
 # ------------------------------------------------------------------ page shell
 
-NAV = [("index.html", "Map"), ("blueprint.html", "Blueprint"), ("corpus.html", "Corpus"),
+NAV = [("index.html", "Map"), ("landmarks.html", "Landmarks"), ("blueprint.html", "Blueprint"),
+       ("tree.html", "Tree"), ("corpus.html", "Corpus"),
        ("subjects.html", "Subjects"), ("references.html", "References")]
 
 
@@ -413,7 +442,7 @@ def build_home(site: Site, out: Path, blueprint: list[dict]) -> None:
     for s, ms in by_sec.items():
         if not s:
             continue
-        name, layer, _ = SECTIONS.get(s, (s, "applications", ""))
+        name, layer, _ = SECTIONS.get(s, (s, "limbs", ""))
         nodes.append({"id": s, "label": name, "layer": layer, "url": section_url(s),
                       "sz": round(22 + 3.2 * sec_decls[s] ** 0.5, 1),
                       "info": f"{len(ms)} modules · {sec_decls[s]} declarations · "
@@ -424,7 +453,7 @@ def build_home(site: Site, out: Path, blueprint: list[dict]) -> None:
                             "label": "Map of the library's sections"}, "tall")
     table = "".join(
         f'<tr><td><a href="{section_url(s)}">{esc(SECTIONS.get(s, (s,))[0])}</a></td>'
-        f'<td>{LAYER_NAMES[SECTIONS.get(s, (s, "applications"))[1]]}</td>'
+        f'<td>{LAYER_NAMES[SECTIONS.get(s, (s, "limbs"))[1]]}</td>'
         f'<td class="n">{len(by_sec[s])}</td><td class="n">{sec_decls[s]}</td>'
         f'<td class="n">{sec_entries[s]}</td></tr>'
         for s in sorted(by_sec, key=lambda s: -sec_decls[s]) if s)
@@ -460,9 +489,9 @@ def build_home(site: Site, out: Path, blueprint: list[dict]) -> None:
     for s in sorted(by_sec, key=lambda s: -sec_decls[s]):
         if not s:
             continue
-        name, layer, blurb = SECTIONS.get(s, (s, "applications", ""))
+        name, layer, blurb = SECTIONS.get(s, (s, "limbs", ""))
         cards.append(f'<a class="card" href="{section_url(s)}"><h3><span class="dot" '
-                     f'style="background:var(--{ {"foundations": "s1", "bridges": "s2"}.get(layer, "s3")})">'
+                     f'style="background:var({LAYER_VAR[layer]})">'
                      f'</span>{esc(name)}</h3><div class="sub">{esc(blurb)}</div>'
                      f'<div class="nums">{len(by_sec[s])} modules · {sec_decls[s]} declarations · '
                      f'{sec_entries[s]} entries</div></a>')
@@ -483,11 +512,11 @@ by the build, to Lean's three standard axioms.</p>
 
 <h2>The map</h2>
 <p class="ink2">Each disc is a section of the library, sized by its declarations; an arrow runs from a
-section to one that builds on it, thicker the more of its modules are imported; the foundations sit
-at the centre, the applications around them. Hover to see a
+section to one that builds on it, thicker the more of its modules are imported; probability sits
+at the centre, contracts and pricing around it, the models and applications outside. Hover to see a
 section's neighbours, click to open it.</p>
 {the_map}
-{legend([("--s1", "Foundations", ""), ("--s2", "Bridges", ""), ("--s3", "Applications", "")])}
+{legend([(LAYER_VAR[k], v, "") for k, v in LAYER_NAMES.items()])}
 <details class="tableview"><summary>Table view</summary><table class="data"><thead><tr>
 <th>Section</th><th>Layer</th><th>Modules</th><th>Declarations</th><th>Corpus entries</th></tr></thead>
 <tbody>{table}</tbody></table></details>
@@ -507,11 +536,11 @@ other results build on.</p>
 
 
 def build_section(site: Site, out: Path, sec: str, mods: list[str]) -> None:
-    name, layer, blurb = SECTIONS.get(sec, (sec, "applications", ""))
+    name, layer, blurb = SECTIONS.get(sec, (sec, "limbs", ""))
     inside = set(mods)
     edges = {(i, m) for m in mods for i in site.imports[m] if i in inside}
     red = transitive_reduction(inside, edges)
-    rel = lambda m: m.split(".", 2)[2] if m.count(".") >= 2 else m  # noqa: E731
+    rel = lambda m: m.removeprefix(f"MathFin.{sec}.")  # noqa: E731
     nodes = [{"id": m, "label": rel(m), "full": site.title(m), "url": module_url(m),
               "info": f"{len(site.decls.get(m, ()))} declarations · "
                       f"{len(site.entries.get(m, ()))} corpus entries",
@@ -613,9 +642,13 @@ def build_module(site: Site, out: Path, m: str, link: Linker) -> None:
 def build_blueprint(site: Site, out: Path, nodes_json: list[dict], frontier: list[dict]) -> None:
     labels = {n["label"] for n in nodes_json} | {f["label"] for f in frontier}
     connected = {n["label"] for n in nodes_json}
-    for f in frontier:
-        if any(u in connected for u in f.get("uses", ())):
-            connected.add(f["label"])
+    grew = True
+    while grew:  # a frontier node is connected when its uses reach the proved blueprint
+        grew = False
+        for f in frontier:
+            if f["label"] not in connected and any(u in connected for u in f.get("uses", ())):
+                connected.add(f["label"])
+                grew = True
     for n in nodes_json:
         connected.update(u for u in n.get("uses", ()) if u in labels)
     gnodes, cards = [], []
@@ -654,7 +687,8 @@ def build_blueprint(site: Site, out: Path, nodes_json: list[dict], frontier: lis
         f"<h3>{esc(area)}</h3><div class='cards'>" + "".join(
             f'<a class="card" href="{issues_url(f["label"])}"><h3>{esc(f["title"])}</h3>'
             f'<div class="stmt">{esc(f.get("statement", ""))}</div>'
-            f'<div class="nums">{esc(f["label"])}</div></a>' for f in fs) + "</div>"
+            f'<div class="nums">{esc(f.get("ground") or f["label"])}</div></a>' for f in fs)
+        + "</div>"
         for area, fs in sorted(loose.items()))
     proved = sum(1 for n in nodes_json if n.get("leanOk"))
     body = f"""<h1>Blueprint</h1>
@@ -667,12 +701,210 @@ not yet formalized. Arrows run from a result to the results that use it. Click a
 <aside class="panel side" id="bp-side"><p class="empty">Select a node to read its statement,
 the Lean declaration that proves it, and the issues that advance it.</p></aside>
 {"".join(cards)}
-<h2>Frontier, not yet connected</h2>
-<p class="ink2">Stated results that do not yet build on a node above, by area. Each links to its open
-issues.</p>{loose_html}"""
+<h2>Frontier on upstream ground</h2>
+<p class="ink2">Stated results that build on Mathlib alone, with no proved node above to grow from;
+each card says what it draws on and links to its open issues. Every other frontier result reaches
+the proved blueprint through its uses (<code>blueprint_issues check</code> enforces it).</p>
+{loose_html}"""
     (out / "blueprint.html").write_text(page("Blueprint — MathFin", body, "", "blueprint.html",
                                              "The MathFin blueprint: dependency graph of the "
                                              "program's results."), encoding="utf-8")
+
+
+TREE_SCRIPTS = ("https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js", "assets/tree.js")
+TREE_KINDS = (("rests-on-node", "rests on a node", "--tr-leaf-2"),
+              ("feeds-node", "feeds a node", "--tr-leaf-3"),
+              ("upstream-only", "upstream only", "--tr-soil-2"),
+              ("off-map", "off the map", "--tr-fallen"))
+
+
+def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dict],
+               issues: list[dict] | None) -> None:
+    """The program tree: the blueprint as a tree, with the corpus as its leaves
+    (tools/verify/program_tree.py places every entry)."""
+    data = tree_data(site.idx, nodes_json, frontier, issues)
+    data["repo"] = REPO_URL
+    for n in data["nodes"]:
+        d = site.idx.decls.get(n.get("d") or "")
+        if d and not d.private:
+            n["h"] = decl_url(d)
+    areas, total = data["areas"], data["corpus"]
+    off = sum(c.get("off-map", 0) for c in areas.values())
+    on = sum(c.get("rests-on-node", 0) + c.get("feeds-node", 0) for c in areas.values())
+    bars = []
+    for a in sorted(areas, key=lambda a: -sum(areas[a].values())):
+        c, t = areas[a], sum(areas[a].values())
+        segs = "".join(f'<span title="{label}: {c[k]}" style="width:{100 * c[k] / t:.2f}%;'
+                       f'background:var({var})"></span>'
+                       for k, label, var in TREE_KINDS if c.get(k))
+        bars.append(f'<div class="t-bar"><span>{esc(a)}</span><div class="t-track">{segs}</div>'
+                    f'<span class="ink2">{t - c.get("off-map", 0)} / {t}</span></div>')
+    plots = "".join(
+        f'<div class="t-plot"><p><b>{esc(a)}</b> <span class="ink2">{len(es)} off the map</span></p>'
+        f'<div class="t-seeds">' + "".join(f'<i title="{esc(e)} — {esc(nm)}"></i>' for e, nm in es)
+        + "</div></div>"
+        for a, es in sorted(data["off"].items(), key=lambda kv: -len(kv[1])))
+    partial = [n for n in data["nodes"] if n.get("core")]
+    partial_rows = "".join(
+        f'<tr><td><button type="button" class="t-chip" data-focus="{esc(n["l"])}">'
+        f'{esc(n["t"])}</button></td><td>{", ".join(f"<code>{esc(c)}</code>" for c in n["core"])}'
+        f"</td></tr>" for n in partial)
+    proved = sum(n["s"] == "proved" for n in data["nodes"])
+    nfront = sum(n["s"] == "frontier" for n in data["nodes"])
+    payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+    body = f"""<h1>The program tree</h1>
+<p class="lede ink2">The blueprint drawn on a map of financial mathematics. The pale tree is the
+map: four roots in the soil (discrete time, Gaussian analysis, Brownian calculus, jumps), one trunk
+(the pricing functional: martingale measures, deflators, numéraires), and five limbs, from insurance
+and risk on the left to pricing models and markets on the right. Where a result sits is a reading,
+kept in <code>tools/verify/tree_map.toml</code>; the dark wood drawn over the map is the proofs. Each
+of the {proved} proved results is joined to every node its proof uses, and wood thickens with the
+corpus it carries. Where the wood bypasses the trunk, the result rests on a root directly. A knot's
+size counts the corpus entries whose proof rests deepest on it; the Leaves button hangs them on the
+tree. The {nfront} frontier results are dashed blueprint shoots, each bud coloured by the state of
+its issue, with the open problems as stars. Proved results that rest on no node grow straight from
+the soil; entries that touch no node lie on the ground. Click a node to trace its lineage; drag to
+pan, scroll to zoom; names fill in as you zoom.</p>
+<div class="t-box" id="tree-box"><div class="t-tools">
+<input id="t-q" type="search" placeholder="Find a node: Itô, VaR, Heston…" aria-label="Find a node" autocomplete="off">
+<button type="button" id="t-grow">Grow it again</button>
+<button type="button" id="t-leaves" aria-pressed="false">Leaves</button>
+<span class="t-zoom"><button type="button" id="t-zin" aria-label="Zoom in">+</button><button type="button" id="t-zout" aria-label="Zoom out">−</button></span>
+<button type="button" id="t-reset">Reset view</button></div>
+<div class="t-stage"><svg id="tree" role="img" aria-label="The MathFin blueprint as a tree"></svg>
+<aside class="t-panel" id="tree-panel" aria-live="polite"></aside></div>
+<div id="tree-tip" hidden></div></div>
+<h2>Where the corpus sits</h2>
+<p class="ink2">{on} of the {total} corpus entries are on the map: their proofs rest on a blueprint
+node, or a node's proof uses what they cite. {off} cite MathFin results in no relation the map
+records. They are proved, and the import graph connects them to the library, but the program map
+does not show them. The count is a ratchet (<code>corpus_off_blueprint</code>): it may fall and
+may not rise.</p>
+<div class="t-bars">{"".join(bars)}</div>
+{legend([(v, label, "") for _, label, v in TREE_KINDS])}
+<h2>Off the map, by area</h2><p class="ink2">One dot per entry; hover for its id.</p>
+<div class="t-bed">{plots}</div>
+<h2>Frontier with a proved core</h2>
+<p class="ink2">Frontier results that corpus entries already prove in part (the node's
+<code>core</code>). They stay on the frontier until the whole statement is proved.</p>
+<table class="t-table"><tbody>{partial_rows}</tbody></table>
+<script type="application/json" id="tree-data">{payload}</script>
+{"".join(f'<script src="{s}" defer></script>' for s in TREE_SCRIPTS)}"""
+    (out / "tree.html").write_text(page("Program tree — MathFin", body, "", "tree.html",
+                                        "The MathFin blueprint as a tree, with the corpus as "
+                                        "its leaves."), encoding="utf-8")
+
+
+LANDMARK_KEYS = ("decl", "title", "summary", "scope")
+
+
+def load_landmarks(path: Path = LANDMARKS) -> list[dict]:
+    """The curated landmark list; a malformed entry is an error, never a silently dropped card."""
+    if not path.exists():
+        return []
+    entries = tomllib.loads(path.read_text(encoding="utf-8")).get("landmark", [])
+    seen: set[str] = set()
+    for i, e in enumerate(entries):
+        where = f"{path} landmark #{i + 1} ({e.get('decl', '?')})"
+        for k in LANDMARK_KEYS:
+            if not isinstance(e.get(k), str) or not e[k].strip():
+                raise ValueError(f"{where}: missing or empty string key `{k}`")
+        also = e.get("also", [])
+        if not isinstance(also, list) or not all(isinstance(a, str) and a for a in also):
+            raise ValueError(f"{where}: `also` must be a list of declaration names")
+        if extra := set(e) - set(LANDMARK_KEYS) - {"also"}:
+            raise ValueError(f"{where}: unknown keys {sorted(extra)}")
+        if e["decl"] in seen:
+            raise ValueError(f"{where}: duplicate decl")
+        seen.add(e["decl"])
+    return entries
+
+
+def landmark_path(idx: DeclIndex, decl: str, anchors: dict[str, str]) -> list[tuple[str, str]]:
+    """The anchor declarations `decl` builds on, transitively through the uses recorded in the
+    index, as (name, titles of the anchors it uses directly) from the nearest to the foundations.
+    `anchors` maps a declaration name to its display title (blueprint nodes and curated
+    landmarks). Edges are the transitive reduction of reachability among the anchors."""
+    def reach(start: str) -> set[str]:
+        seen: set[str] = set()
+        stack = [start]
+        while stack:
+            d = idx.decls.get(stack.pop())
+            if d is None:
+                continue
+            for u in d.uses:
+                if u not in seen and u != start:
+                    seen.add(u)
+                    stack.append(u)
+        return seen
+
+    below = {a for a in reach(decl) if a in anchors}
+    nodes = below | {decl}
+    r = {a: reach(a) & nodes for a in nodes}
+    kept = transitive_reduction(nodes, {(a, b) for a in nodes for b in r[a]})
+    depth = {decl: 0}                       # longest chain from `decl`; foundations come last
+    for a in sorted(nodes, key=lambda a: -len(r[a])):
+        for x, y in kept:
+            if x == a:
+                depth[y] = max(depth.get(y, 0), depth.get(a, 0) + 1)
+    order = sorted(below, key=lambda a: (depth.get(a, 0), anchors[a]))
+    return [(a, ", ".join(sorted(anchors[y] for x, y in kept if x == a))) for a in order]
+
+
+def _landmark_stmt(link: Linker, d: IndexedDecl) -> str:
+    src = f"{REPO_URL}/blob/main/{library.module_path(d.module)}#L{d.line}"
+    ns, _, last = d.name.rpartition(".")
+    return (f'<article class="decl"><div class="decl-h"><span class="kind k-{d.kind}">{d.kind}</span>'
+            f'<span class="dname"><span class="ns">{esc(ns)}.</span>{esc(last)}</span>'
+            f'<a class="src" href="{src}">source</a>'
+            f' <a class="src" href="{decl_url(d)}">module page</a></div>'
+            f'<pre class="stmt-pre">{link.statement(d.type)}</pre></article>')
+
+
+def landmark_card(site: Site, link: Linker, e: dict, anchors: dict[str, str]) -> str:
+    d = site.idx.decls.get(e["decl"])
+    aid = esc(e["decl"])
+    if d is None or d.private:
+        return (f'<section class="landmark missing" id="{aid}"><h2>{esc(e["title"])}</h2>'
+                f'<p class="muted">Not in this build: <code>{esc(e["decl"])}</code> is not in the '
+                f"declaration index this site was generated from.</p></section>")
+    stmts = _landmark_stmt(link, d)
+    for a in e.get("also", ()):
+        c = site.idx.decls.get(a)
+        stmts += (_landmark_stmt(link, c) if c is not None and not c.private else
+                  f'<p class="muted">Companion <code>{esc(a)}</code> is not in this build.</p>')
+    path = [(a, via) for a, via in landmark_path(site.idx, e["decl"], anchors)
+            if a in site.idx.decls and not site.idx.decls[a].private]
+    chain = ""
+    if path:
+        items = "".join(
+            f'<li><a href="{decl_url(site.idx.decls[a])}">{esc(anchors[a])}</a>'
+            + (f' <span class="muted">uses {esc(via)}</span>' if via else "") + "</li>"
+            for a, via in path)
+        chain = ('<h3>Builds on</h3><p class="muted">Blueprint results and other landmarks this '
+                 "declaration uses, transitively, from the nearest to the foundations.</p>"
+                 f"<ol class='lm-path'>{items}</ol>")
+    return (f'<section class="landmark" id="{aid}"><h2>{esc(e["title"])}</h2>'
+            f'<p class="lm-summary">{esc(e["summary"])}</p>'
+            f'<p class="lm-scope"><strong>Not proved.</strong> {esc(e["scope"])}</p>'
+            f'<h3>The Lean statement</h3>{stmts}{chain}</section>')
+
+
+def build_landmarks(site: Site, out: Path, landmarks: list[dict], nodes_json: list[dict],
+                    link: Linker) -> None:
+    anchors = {n["name"]: n["title"] for n in nodes_json if n.get("name")}
+    anchors.update({e["decl"]: e["title"] for e in landmarks})
+    cards = "".join(landmark_card(site, link, e, anchors) for e in landmarks)
+    toc = "".join(f'<li><a href="#{esc(e["decl"])}">{esc(e["title"])}</a></li>' for e in landmarks)
+    body = f"""<h1>Landmarks</h1>
+<p class="lede ink2">The headline results, one per line of the README's main results. Each shows the
+statement exactly as Lean elaborates it, read from the declaration index, with what the statement
+does not cover stated next to it. The prose above a statement is a reading aid; the statement is the claim.</p>
+<ul class="toc">{toc}</ul>{cards}"""
+    (out / "landmarks.html").write_text(
+        page("Landmarks — MathFin", body, "", "landmarks.html",
+             "The library's headline theorems with their exact Lean statements and scope."),
+        encoding="utf-8")
 
 
 def build_corpus(site: Site, out: Path) -> None:
@@ -790,7 +1022,7 @@ def build_references(site: Site, out: Path) -> None:
                                               "references.html"), encoding="utf-8")
 
 
-def build(index_path: str | Path, out: str | Path) -> int:
+def build(index_path: str | Path, out: str | Path, issues_path: str | Path | None = None) -> int:
     site = Site.load(index_path)
     out = Path(out)
     if out.exists():
@@ -805,7 +1037,9 @@ def build(index_path: str | Path, out: str | Path) -> int:
         if FRONTIER.exists() else []
     blueprint = nodes_json + [dict(f, leanOk=False) for f in frontier]
 
-    link = Linker(site.idx, "../", {d.name: d for ds in site.decls.values() for d in ds})
+    landmarks = load_landmarks()
+    public = {d.name: d for ds in site.decls.values() for d in ds}
+    link = Linker(site.idx, "../", public)
     search = []
     mods = site.modules()
     for m in mods:
@@ -823,6 +1057,10 @@ def build(index_path: str | Path, out: str | Path) -> int:
         build_section(site, out, sec, ms)
     build_home(site, out, blueprint)
     build_blueprint(site, out, nodes_json, frontier)
+    issues = ([json.loads(line) for line in Path(issues_path).read_text(encoding="utf-8").splitlines()
+               if line.strip()] if issues_path else None)
+    build_tree(site, out, nodes_json, frontier, issues)
+    build_landmarks(site, out, landmarks, nodes_json, Linker(site.idx, "", public))
     build_corpus(site, out)
     build_subjects(site, out)
     build_references(site, out)
@@ -834,8 +1072,10 @@ def main() -> int:
     ap = argparse.ArgumentParser(prog="python3 -m tools.verify.docs_site")
     ap.add_argument("index")
     ap.add_argument("--out", default="site")
+    ap.add_argument("--issues", help="issues and pull requests, one JSON object per line "
+                    "(gh api …/issues --jq '.[] | {number,title,state,body,labels,is_pr}')")
     args = ap.parse_args()
-    n = build(args.index, args.out)
+    n = build(args.index, args.out, args.issues)
     print(f"docs site: {n} module pages in {args.out}/")
     return 0
 

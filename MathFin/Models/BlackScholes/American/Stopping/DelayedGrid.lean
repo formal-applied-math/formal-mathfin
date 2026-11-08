@@ -1,0 +1,136 @@
+/-
+Copyright (c) 2026 Robert Martin. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Robert Martin
+-/
+module
+
+public import MathFin.Models.BlackScholes.American.Stopping.SampledRules
+public import MathFin.Models.BlackScholes.American.Stopping.BrownianBellman
+
+/-! # Optimal finite-grid exercise after a deterministic waiting time
+
+## Main definitions
+
+* `delayedGridTime`: the `i`-th capped grid time delayed by a waiting time,
+  `u + cappedGridTime T δ i`.
+* `delayedGridFiltration`: the Brownian filtration sampled along the delayed grid times.
+* `delayedGridReward`: the discounted put reward from spot `exp x`, exercised at the deterministic
+  time `delayedGridTime u T δ i`.
+
+## Main results
+
+* `delayedGridTime_mono`: the delayed grid times are monotone in the index.
+* `delayedGrid_snellEnvelope_ae_eq`: for `0 ≤ K` and `0 ≤ r`, the Snell envelope of the delayed
+  grid reward at index `0` equals a.e. the discounted `brownianGridPrice` at the log state
+  at the delay `u`.
+* `delayedGridPrice_le_american`: for `0 ≤ K`, `0 ≤ r` and `0 < δ`, the expected discounted grid
+  price at the delay `u` is at most the Brownian American put with horizon `u + T`.
+
+## Tags
+
+exercise grid, deterministic delay, finite-grid rule, filtration, Bermudan exercise, MSC 60G40,
+MSC 91G20, JEL G13
+-/
+
+@[expose] public section
+
+namespace MathFin.BlackScholes.AmericanPut.Stopping
+
+open Set Filter MeasureTheory ProbabilityTheory
+open scoped NNReal Topology
+
+/-- The `i`-th capped grid time delayed by a waiting time: `u+cappedGridTime T δ i`. -/
+def delayedGridTime (u T δ : ℝ≥0) (i : ℕ) : ℝ≥0 := u+cappedGridTime T δ i
+
+theorem delayedGridTime_mono (u T δ : ℝ≥0) : Monotone (delayedGridTime u T δ) :=
+  fun _ _ hij => add_le_add le_rfl (cappedGridTime_mono T δ hij)
+
+/-- The Brownian filtration sampled along the delayed grid times. -/
+noncomputable def delayedGridFiltration (u T δ : ℝ≥0) :=
+  ContinuousMarket.sampledFiltration brownianFiltration (delayedGridTime_mono u T δ)
+
+/-- The discounted put reward from spot `Real.exp x`, exercised at the deterministic time
+`delayedGridTime u T δ i`. -/
+noncomputable def delayedGridReward (K r q σ x : ℝ) (u T δ : ℝ≥0) (i : ℕ) : (ℝ≥0 → ℝ) → ℝ :=
+  putReward brownian K r q σ (Real.exp x) (fun _ => delayedGridTime u T δ i)
+
+theorem delayedGridReward_adapted (K r q σ x : ℝ) (u T δ : ℝ≥0) :
+    Adapted (delayedGridFiltration u T δ) (delayedGridReward K r q σ x u T δ) := by
+  intro i
+  have hw := brownian_adapted (delayedGridTime u T δ i)
+  unfold delayedGridReward putReward MathFin.gbmValue
+  dsimp only
+  fun_prop
+
+theorem delayedGridReward_integrable {K r q σ x : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r)
+    (u T δ : ℝ≥0) (i : ℕ) : Integrable (delayedGridReward K r q σ x u T δ i) gaussianLimit :=
+  putReward_integrable measurable_brownian_uncurry gaussianLimit hK hr (Real.exp_pos x).le
+      measurable_const
+
+theorem delayedGridReward_eq (K r q σ x : ℝ) (u T δ : ℝ≥0) :
+    delayedGridReward K r q σ x u T δ = fun i ω => Real.exp (-r*(u : ℝ))*
+      discountedLogPayoff K r (cappedGridTime T δ i)
+        (brownianLogState (r-q-σ^2/2) σ x (delayedGridTime u T δ i) ω) := by
+  funext i ω
+  unfold delayedGridReward putReward discountedLogPayoff MathFin.gbmValue brownianLogState
+  dsimp only
+  have he : Real.exp (-r*(delayedGridTime u T δ i : ℝ)) =
+      Real.exp (-r*(u : ℝ))*Real.exp (-r*(cappedGridTime T δ i : ℝ)) := by
+    rw [← Real.exp_add]
+    congr 1
+    simp only [delayedGridTime,NNReal.coe_add]
+    ring
+  rw [he]
+  simp only [Real.exp_add,mul_assoc]
+
+theorem delayedGrid_snellEnvelope_ae_eq {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r)
+    (u T δ : ℝ≥0) (x : ℝ) :
+    snellEnvelope gaussianLimit (delayedGridFiltration u T δ) Set.univ
+      (delayedGridReward K r q σ x u T δ) ⌈T/δ⌉₊ 0 =ᵐ[gaussianLimit]
+      fun ω => Real.exp (-r*(u : ℝ))*brownianGridPrice K r q σ T δ
+        (brownianLogState (r-q-σ^2/2) σ x u ω) := by
+  rw [delayedGridReward_eq]
+  simp only [snellEnvelope,Nat.sub_zero,min_eq_left (Nat.zero_le _)]
+  have hm := snellEnvelopeAux_const_mul (P := gaussianLimit) (𝓕 := delayedGridFiltration u T δ)
+    (X := Set.univ) (Z := fun i ω => discountedLogPayoff K r (cappedGridTime T δ i)
+      (brownianLogState (r-q-σ^2/2) σ x (delayedGridTime u T δ i) ω))
+    (Real.exp_pos (-r*(u : ℝ))).le ⌈T/δ⌉₊ 0
+  have he : snellEnvelopeAux gaussianLimit (delayedGridFiltration u T δ) Set.univ
+      (fun i ω => discountedLogPayoff K r (cappedGridTime T δ i)
+        (brownianLogState (r-q-σ^2/2) σ x (delayedGridTime u T δ i) ω)) ⌈T/δ⌉₊ 0 =ᵐ[gaussianLimit]
+      fun ω => brownianGridMarkovAux (fun i => discountedLogPayoff K r (cappedGridTime T δ i))
+        (cappedGridTime T δ) (r-q-σ^2/2) σ ⌈T/δ⌉₊ 0
+        (brownianLogState (r-q-σ^2/2) σ x (delayedGridTime u T δ 0) ω) := by
+    have h := snellEnvelopeAux_eq_brownianGridMarkovAux (delayedGridTime_mono u T δ)
+      (brownianLogState_isGaussianMarkov (r-q-σ^2/2) σ x)
+      (fun i => discountedLogPayoff_continuous K r (cappedGridTime T δ i))
+      (fun i y => discountedLogPayoff_bound hK hr (cappedGridTime T δ i) y) ⌈T/δ⌉₊ 0
+    rw [brownianGridMarkovAux_add_left _ u (s' := delayedGridTime u T δ)
+      (s := cappedGridTime T δ) (fun _ => rfl)] at h
+    exact h
+  filter_upwards [hm,he] with ω hmω heω
+  rw [hmω,heω]
+  simp [brownianGridPrice,delayedGridTime,cappedGridTime]
+
+theorem delayedGridPrice_le_american {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r)
+    (u T : ℝ≥0) {δ : ℝ≥0} (hδ : 0 < δ) (x : ℝ) :
+    (∫ ω, Real.exp (-r*(u : ℝ))*brownianGridPrice K r q σ T δ
+      (brownianLogState (r-q-σ^2/2) σ x u ω) ∂gaussianLimit) ≤
+      brownianAmericanPut K r q σ (Real.exp x) (u+T) := by
+  let η := snellRule (P := gaussianLimit) (delayedGridReward_adapted K r q σ x u T δ) ⌈T/δ⌉₊
+  have hsT : delayedGridTime u T δ ⌈T/δ⌉₊ = u+T := by
+    have hh : T ≤ (⌈T/δ⌉₊ : ℝ≥0)*δ := (div_le_iff₀ hδ).mp (Nat.le_ceil (T/δ))
+    simp only [delayedGridTime,cappedGridTime,min_eq_right hh]
+  let hη := η.toSampledRule
+  have hv := expectedReward_le_value (P := gaussianLimit) (q := q) (σ := σ)
+    measurable_brownian_uncurry hK hr (Real.exp_pos x).le hη
+  have hi := snellContact_expected_payoff (P := gaussianLimit)
+    (delayedGridReward_adapted K r q σ x u T δ) (delayedGridReward_integrable hK hr u T δ) ⌈T/δ⌉₊
+  have he := integral_congr_ae (delayedGrid_snellEnvelope_ae_eq (q := q) (σ := σ) hK hr u T δ x)
+  rw [← he,← hi]
+  convert! hv using 1
+  rw [hsT]
+  rfl
+
+end MathFin.BlackScholes.AmericanPut.Stopping

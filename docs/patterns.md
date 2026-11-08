@@ -21,7 +21,7 @@ formalisation is naming the principle once and writing the three scales as
 corollaries.
 
 Example: **K-convexity** of the call lives at four scales, three of them in
-`BlackScholes/StrikeConvexity.lean`:
+`Models/BlackScholes/StrikeConvexity.lean`:
 
 * `convexOn_call_payoff` — payoff `K ↦ max(S − K, 0)` convex (combinatorial:
   `sup` of an affine function and zero).
@@ -76,7 +76,7 @@ proves cleanly by sum decomposition. The counting bijection then uses the
 identity as one ingredient and adds first-hitting-time machinery
 (`Finset.min'`) for the other.
 
-Used in `Binomial/PathReflection.lean`:
+Used in `Models/Binomial/PathReflection.lean`:
 
 * `walkPos_reflectAfter_ge` — algebraic identity, no hitting-time anywhere.
 * `firstHit`, `HitsLevel`, `reflectAtFirstHit`, `reflectionPrincipleEquiv` —
@@ -161,7 +161,7 @@ hasDerivAt_deriv_of_eventually
   hasDerivAt_g                                                -- g' at K
 ```
 
-The lemma (`Foundations/DerivOfDeriv.lean`) packages
+The lemma (`Probability/Analysis/DerivOfDeriv.lean`) packages
 `HasDerivAt.congr_of_eventuallyEq` with `HasDerivAt.deriv`, and
 `hasDerivAt_deriv_param_of_eventually` is the mixed-partial form
 `s ↦ deriv (F s) y`. When the first derivative holds everywhere, the first
@@ -320,7 +320,7 @@ write out the terms explicitly rather than relying on the aliases.
 
 The temptation when refactoring is to fold small modules into parent
 files. This can hurt clarity when the small module names a distinct
-principle. `BlackScholes/StrikeConvexity.lean` was *not* folded into
+principle. `Models/BlackScholes/StrikeConvexity.lean` was *not* folded into
 `StrikeGreeks.lean` despite their proximity — because K-convexity is a
 *principle*, while strike Greeks are *computations*. Naming wins out
 over collocation.
@@ -454,7 +454,7 @@ hunt for a *pointwise* inequality whose integral collapses to `m` for *every*
 `c`, with equality exactly at `c*`. No calculus, no convexity machinery, no
 derivative of the objective.
 
-Concrete: Rockafellar–Uryasev (`RiskMeasures/RockafellarUryasev.lean`). The
+Concrete: Rockafellar–Uryasev (`Risk/RockafellarUryasev.lean`). The
 certificate is `(L − c)⁺ ≥ (L − c)·𝟙_{Z > z}` (the `α`-tail event); integrating
 against the Gaussian density gives `g(c) ≥ CVaR` in three integral evaluations,
 and at `c = VaR` the positive part vanishes exactly off the tail — equality.
@@ -475,7 +475,7 @@ no second derivative anywhere. (The uniform mean-value bound
 but doubles the constant: the derivative deviation *vanishes at* `x`, and
 only the integral sees that.)
 
-Concrete: `newtonStep_quadratic_error` (`BlackScholes/NewtonConvergence.lean`)
+Concrete: `newtonStep_quadratic_error` (`Models/BlackScholes/NewtonConvergence.lean`)
 — the whole "Newton is quadratic at `L/(2m)`" content is this plus the
 error–times–derivative identity `(x⁺ − r)·f'(x) = f'(x)(x − r) − f(x)`.
 
@@ -489,7 +489,7 @@ threaded through. Doob-decompose `f = M + A`, transport the equality on `M`
 property), and recombine with `condExp_mono`.
 
 Concrete: `submartingale_optional_sampling`
-(`Foundations/OptionalSamplingInequality.lean`) = Mathlib's
+(`Probability/Discrete/OptionalSamplingInequality.lean`) = Mathlib's
 `Martingale.stoppedValue_ae_eq_condExp_of_le` + `predictablePart` monotonicity.
 The decomposition is the *conceptual* picture, and the proof is exactly it.
 
@@ -503,7 +503,7 @@ ONE induction — the identification `scalar recursion = discounted path object`
 — and every clause transports to the scalar object for free.
 
 Concrete: `snellAux_eq_discounted_bermudanPrice`
-(`Binomial/SnellEnvelope.lean`): `snell E q Z N k ω = e^{−rk}·bermudanPrice E
+(`Models/Binomial/SnellEnvelope.lean`): `snell E q Z N k ω = e^{−rk}·bermudanPrice E
 (N−k) (S_k ω)`. Four abstract Snell clauses + one induction = the genuine
 supermartingale/intrinsic statements about `bermudanPrice`, with the
 node-average conditional expectation made explicit. Same instrument as the
@@ -521,7 +521,7 @@ boundary is sharp and worth internalizing.
 8/10 in its lane, including goals our current proofs work harder for:
 
 * **Field identities with `≠ 0` side conditions** — the full risk-parity
-  contribution identity (`Portfolio/RiskParity.lean`) closes by bare `grind`,
+  contribution identity (`Choice/Portfolio/RiskParity.lean`) closes by bare `grind`,
   *including the un-normalized form with commuted denominators*
   (`σ₁ + σ₂` and `σ₂ + σ₁` mixed) that forces a manual
   `rw [show σ₂ + σ₁ = σ₁ + σ₂ from by ring]` before `field_simp; ring`.
@@ -679,7 +679,7 @@ When a proof is developed with an external formalization or textbook as a *sourc
 carries an attribution block in its copyright header and the benchmark entry a machine-checkable
 provenance marker, so the "our design, source consulted" claim is honest and cannot drift.
 
-- **File header** (after `Authors:`), e.g. `MathFin/Actuarial/SurvivalModel.lean`:
+- **File header** (after `Authors:`), e.g. `MathFin/Insurance/SurvivalModel.lean`:
   > The definitions and proofs here are our own, following this library's conventions … `<Source>`
   > … was consulted as a source for the classical result set, and is cited here with thanks and
   > with the author's kind permission.
@@ -694,7 +694,7 @@ provenance marker, so the "our design, source consulted" claim is honest and can
 
 ## Continuous-time FTAP / conditional-expectation idioms (2026-07-11 batch)
 
-Distilled from the continuous first-FTAP frame (`Foundations/ContinuousMarket.lean`).
+Distilled from the continuous first-FTAP frame (`Pricing/ContinuousMarket.lean`).
 
 ### Bilinear `condExp` pull-out for predictable-weighted martingale increments
 The building block of the forward FTAP — "a `𝓕_s`-measurable bounded weight against a martingale
@@ -725,7 +725,7 @@ column: name collisions join `autoImplicit` and instance-path `simpa`-folds ther
 
 ### Lift the shared *vanishing* primitive, let each setting supply its own zero-integral
 When two forward-FTAP settings both close through "nonneg + `∫ = 0` ⟹ positive set is null,"
-extract exactly THAT (`ae_zero_of_nonneg_of_integral_zero`, `Foundations/NoArbitrageCore.lean`) and
+extract exactly THAT (`ae_zero_of_nonneg_of_integral_zero`, `Pricing/NoArbitrageCore.lean`) and
 let each side reach `∫ = 0` its own way — the discrete one via a martingale transform started at `0`
 (`∫ V_T = ∫ V_0 = 0`), the continuous one term-by-term via the pull-out. Do NOT force a
 martingale-shaped shared lemma onto the continuous setting, which has no martingale to hand: that
@@ -845,7 +845,7 @@ the file does with `Matrix.Norms.Operator`. Only the scalar `tanh` derivative is
 
 ## Extending an isometry to an `L²` closure — `extendOfNorm` into a submodule (2026-07-18 batch)
 
-From the Itô–Lévy integral CLM (`Foundations/PoissonCompensatedIntegralOperator`): building
+From the Itô–Lévy integral CLM (`Probability/Jumps/PoissonCompensatedIntegralOperator`): building
 `f.extendOfNorm e : Eₗ →L F` where the dense domain `Eₗ` is a *submodule* of the ambient `L²`, not a
 full space. The continuous Itô CLM dodged this by making its codomain a full `Lp` of a bespoke
 trimmed measure; when you instead extend to a `Submodule.topologicalClosure`, these are the traps.
@@ -887,7 +887,7 @@ trimmed measure; when you instead extend to a `Submodule.topologicalClosure`, th
 ### Workflow: relocating a lemma restales its whole transitive importer set
 - The jump tower must not import `WienerIntegral` (it pulls in `BrownianMotion`), so the shared kernel
   `norm_extendOfNorm_eq_of_isometry` was lifted into a new `Mathlib`-only leaf
-  `Foundations/ExtendOfNormIsometry.lean`, re-imported (and re-exported) by `WienerIntegral` and
+  `Probability/Analysis/ExtendOfNormIsometry.lean`, re-imported (and re-exported) by `WienerIntegral` and
   imported by the operator file. **Cost**: changing `WienerIntegral`'s *source* restaled **every**
   ledger entry that transitively imports it (the whole Itô/finance chain — 36 entries, a ~50-min
   daemon `ledger verify`). Lift-to-a-shared-leaf is the right call for a genuinely generic kernel, but
@@ -978,12 +978,12 @@ integral, and the orthogonality argument that identifies the representation.
 ### `𝓕_a`-linearity of a stochastic integral, by simple-process density
 
 The shape: build the two sides as continuous linear maps and equalize them on the dense range of
-simple-process assemblies via `DenseRange.equalizer`, exactly as `Foundations/ItoIntegralProcessGeneral.lean`'s
+simple-process assemblies via `DenseRange.equalizer`, exactly as `Probability/Brownian/Ito/ItoIntegralProcessGeneral.lean`'s
 `itoProcessCLM_eq_condExpL2` (:134, the `DenseRange.equalizer` call at :144) and
 `itoProcessCLM_terminal_eq` (:213, at :216) already do. Both are worth reading as templates before
 writing a third instance of this technique.
 
-The wrinkle that made it non-obvious (`Foundations/ItoIntegralLocality.lean`, Task 2): multiplying an
+The wrinkle that made it non-obvious (`Probability/Brownian/Ito/ItoIntegralLocality.lean`, Task 2): multiplying an
 Itô integrand by a merely `𝓕_a`-measurable `Z` is *not* predictable. Predictability of
 `(t,ω) ↦ Z ω` would need `Z` to be `𝓕_0`-measurable, and the trim measure `trim_T` charges the whole
 band `(0,a]`, not just `{0}`, so no a.e.-equal predictable representative exists either. The statement
@@ -1002,7 +1002,7 @@ Extracted along the way: `mulBddCLM` — multiplication by a bounded measurable 
 ### An unbounded multiplier, without truncation machinery
 
 The obvious route to extend the bounded-`Z` result to unbounded `Z` is `clampM` plus dominated
-convergence. `itoIntegralCLM_smulAdapted_of_memLp` (`Foundations/ItoIntegralLocality.lean`) doesn't
+convergence. `itoIntegralCLM_smulAdapted_of_memLp` (`Probability/Brownian/Ito/ItoIntegralLocality.lean`) doesn't
 do that: for each `M : ℕ`, let `A = {|Z| ≤ M} ∈ 𝓕_a` and apply the *bounded* theorem twice — once
 factoring `𝟙_A` (bound `1`) against the sample-side integrand, once factoring `𝟙_A · Z` (bound `M`)
 against the trim-side one. The two scaled results coincide a.e. (both reduce to `𝟙_{a<t}·𝟙_A·Z·φ`), so
@@ -1012,7 +1012,7 @@ anywhere.
 
 ### Orthogonality to a vanishing conditional expectation, via MGF comparison
 
-`Foundations/WienerExponentialTotality.lean` (Task 4) proves an `F ∈ L²(𝓕ᴮ_T)` orthogonal to every
+`Probability/Brownian/WienerExponentialTotality.lean` (Task 4) proves an `F ∈ L²(𝓕ᴮ_T)` orthogonal to every
 step-Doléans exponential is `0`. Split `F = F⁺ − F⁻`, push both parts forward by
 `ν± = μ.withDensity (ENNReal.ofReal ∘ (±f))` into two *finite* measures on `ι → ℝ`. The domain where
 the complex MGF argument is licensed, `integrableExpSet`, is the whole space: `F ∈ L²` against an
@@ -1039,7 +1039,7 @@ setting, no extraction.
 
 ### Countable generation of a natural filtration, from path continuity
 
-`Foundations/BrownianCylinderGeneration.lean` (Task 1) proves
+`Probability/Brownian/BrownianCylinderGeneration.lean` (Task 1) proves
 `⨆ₙ cylinderSigma B T n = natFiltration hBmeas T`, where
 `cylinderSigma B T n = ⨆ q ∈ dyadicGrid T n, comap (B q) inferInstance` is the σ-algebra generated by
 the level-`n` dyadic grid. Path continuity is used exactly once: given `s ≤ T`, the nearest dyadic grid
@@ -1063,7 +1063,7 @@ adopted it unprompted).
 
 Second: `lake lint` is a CI gate `lake build` does not run, and its `unusedArguments` check turns an
 unused hypothesis kept for signature fidelity into a build-failing error, not a warning.
-`Foundations/DoleansStepRepresentation.lean`'s `stepDoleans_sub_one_mem_range` kept `hs0 : s 0 = 0`
+`Probability/Brownian/Ito/DoleansStepRepresentation.lean`'s `stepDoleans_sub_one_mem_range` kept `hs0 : s 0 = 0`
 because the specified signature carried it (the hypothesis was later dropped outright — see the
 used-vs-needed entry below — but the lint lesson stands), and the daemon reported only a plain
 `linter.unusedVariables` warning, which `lake lint` then failed the build on. The repair that preserves
@@ -1074,7 +1074,7 @@ authoring time, not as noise to clear later.
 
 ### A `sorry`-typecheck verifies elaboration, not intent
 
-`Foundations/WienerExponentialTotality.lean`'s `eq_zero_of_orthogonal_stepDoleans` and
+`Probability/Brownian/WienerExponentialTotality.lean`'s `eq_zero_of_orthogonal_stepDoleans` and
 `integral_mul_exp_linear_eq_zero` were both drafted under a `variable` block carrying
 `(hB : IsPreBrownianReal B μ)`, but neither statement's body mentioned `hB`. Lean only
 auto-includes an explicit `variable` binder a statement names, so both theorems shipped without
@@ -1099,7 +1099,7 @@ that way.
 
 The same program's cleanup pass produced the other half of that lesson, and the two belong together.
 Priority D changed `obtain ⟨ψ, hψ⟩ := id hy` to `obtain ⟨ψ, hψ⟩ := hy` in
-`Foundations/MartingaleRepresentation.lean`, reading the `id` as a redundant defeq nudge. It is not.
+`Probability/Brownian/MartingaleRepresentation.lean`, reading the `id` as a redundant defeq nudge. It is not.
 `id` is the idiom for destructuring *without clearing*: a bare `obtain … := hy` consumes `hy` and
 removes it from context, while `id hy` destructures a copy and leaves the original alive. `hy` is used
 again a few lines down (`exact hy`), so the file stopped compiling with `Unknown identifier hy`. Both
@@ -1126,7 +1126,7 @@ The 2026-07-31 entry above (under "Statement design") already covers a hypothesi
 from the moment it's drafted — a division guard nothing downstream needs. This program produced a
 different-shaped instance of the same failure mode, worth recording rather than folding silently into
 the same bullet: a hypothesis a proof *consumes* can still be unnecessary to the *theorem*, discovered
-only after the fact. `eq_zero_of_orthogonal_stepDoleans` (`Foundations/WienerExponentialTotality.lean`)
+only after the fact. `eq_zero_of_orthogonal_stepDoleans` (`Probability/Brownian/WienerExponentialTotality.lean`)
 carried a centering hypothesis `hF1 : ∫ F ∂μ = 0` in its public signature, as specified. The
 orthogonality hypothesis `hFperp` already implies it at one instantiation (`h ≡ 0, N = 1`: the
 step-Doléans exponential of the zero integrand is identically `1`, independent of `B`, so `hFperp`
@@ -1141,7 +1141,7 @@ not from any gate.
 
 A measure bound to `R` breaks integral notation: `∫ ω, f ω ∂R` elaborates as `∫ ω, (f ω ∂R)` against
 `volume`, so the error lands on the integrand and says nothing about the name. Rename to `ν`. Cost of
-rediscovering it in `Foundations/MarketCompleteness.lean` was one confusing round trip, and there is no
+rediscovering it in `Pricing/MarketCompleteness.lean` was one confusing round trip, and there is no
 diagnostic that points at the cause.
 
 ### Daemon overruns track import-set switches, not file size
@@ -1162,7 +1162,7 @@ From [#183](https://github.com/formal-applied-math/formal-mathfin/issues/183): c
 
 ### Identify an `L²` limit by *pointwise* limits of a.e. representatives
 
-The general fact (`ae_eq_of_tendsto_Lp_of_tendsto`, `Foundations/ItoFormulaLocalized.lean`): if
+The general fact (`ae_eq_of_tendsto_Lp_of_tendsto`, `Probability/Brownian/Ito/ItoFormulaLocalized.lean`): if
 `gₙ → g` in `L²` and each `gₙ` is a.e. equal to a concrete `hₙ` with `hₙ x → h x` for every `x`, then
 `g =ᵐ h`. Three lines of Mathlib — `tendstoInMeasure_of_tendsto_Lp` for the `Lp`-to-in-measure step,
 `TendstoInMeasure.exists_seq_tendsto_ae` for the subsequence, `tendsto_nhds_unique` to finish, with
@@ -1188,7 +1188,7 @@ theory. A localizing family that is eventually inert pointwise is usually identi
 
 ### A trim measure erases a time cutoff
 
-`ae_fst_mem_Ioc_trimMeasure` (`Foundations/ItoIntegralHorizonDense.lean`): trim-a.e. `z`, `z.1 ∈ Ioc 0 T`, the
+`ae_fst_mem_Ioc_trimMeasure` (`Probability/Brownian/Ito/ItoIntegralHorizonDense.lean`): trim-a.e. `z`, `z.1 ∈ Ioc 0 T`, the
 pointwise reading of `trimMeasure_eq_restrict`. That is what lets `ito_formula_itoProcess` state its
 integrand as `σ·f'(X₀ + b·z.1 + σ·B)` although the localized formula hands back
 `σ·f'(X₀ + b·φₙ(z.1) + σ·B)`: past the horizon the trim charges nothing, and inside it `φₙ = id`. The
@@ -1537,7 +1537,7 @@ call once its statement stopped fighting elaboration).
 
 ### Reify-then-reduce: `simp only` to the existing theorem's exact shape, then `exact`
 
-Every `value_*` theorem in `Contracts/Models/BlackScholes.lean` follows the same shape: unfold
+Every `value_*` theorem in `Models/BlackScholes/BlackScholes.lean` follows the same shape: unfold
 the reified contract's semantics with a targeted `simp only [...]` list until the goal is
 *syntactically* the integral an existing closed-form theorem already proves, then close with
 `exact`/`rw` against that theorem — no new integral is ever touched. The one discipline that keeps
@@ -1545,15 +1545,15 @@ this from becoming eleven near-duplicate `simp only` lists is to extract the sha
 one lemma once a second call site needs it:
 
 ```lean
-theorem Contract.value_pay (Q : Measure Ω) (D : ℝ≥0 → ℝ) (X : ι → ℝ≥0 → Ω → ℝ) (t : ℝ≥0)
+theorem Contract.value_pay (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ) (X : ι → ℝ≥0 → Ω → ℝ) (t : ℝ≥0)
     (a : Payoff ι) :
-    (Contract.pay t a).value Q D X = ∫ ω, D t * a.eval (scenarioAt X ω) ∂Q := by
+    (Contract.pay t a).value Q D X = ∫ ω, D t ω * a.eval (scenarioAt X ω) ∂Q := by
   simp [Contract.value, Contract.pathPV, Contract.cashflows]
 ```
 
 `value_europeanCall`, `value_europeanPut` and `value_digitalCall` each then close with
 `rw [<def>, Contract.value_pay]` followed by the one line that invokes the target theorem. The
-lemma is model-agnostic, so it lives in `Contracts/Pricing.lean`, where every model file finds it. Two
+lemma is model-agnostic, so it lives in `Pricing/Value.lean`, where every model file finds it. Two
 guardrails make the pattern honest rather than a shortcut: never escalate the `simp only` list to a
 bare `simp` (an unbounded simp set can accidentally discharge — or silently reshape — the very goal
 the reduction is supposed to leave intact for the target theorem to close), and never edit the

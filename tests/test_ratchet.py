@@ -27,3 +27,18 @@ def test_check_and_improvements_are_strict() -> None:
     assert ratchet.check({"a": 4, "b": 3}, base) == ["a: 4 > baseline 3"]
     assert ratchet.check({"a": 3, "b": 2}, base) == []
     assert ratchet.improvements({"a": 3, "b": 2}, base) == ["b: 2 < baseline 3"]
+
+
+def test_trunk_table_names_real_declarations() -> None:
+    """Every constant `tools/verify/trunk.toml` names is declared in `MathFin/`, so a rename
+    cannot silently drop it from the one-trunk counts."""
+    from tools.verify import trunk_reach
+    from tools.verify.mathfin_index import declaration_index
+
+    table, decls = trunk_reach.load_table(), declaration_index()
+    names = [*table["anchors"], *table["prices"], *(d["name"] for d in table["devices"]),
+             *(d["instance"] for d in table["devices"] if d.get("instance")),
+             *(g["canonical"] for g in table["duplicates"]),
+             *(m for g in table["duplicates"] for m in g["members"])]
+    missing = sorted({n for n in names if n not in decls})
+    assert not missing, f"trunk.toml names no declaration: {missing}"
