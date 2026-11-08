@@ -38,6 +38,11 @@ EMM. The `p`-independence is exactly the content of the Kelly first-order condit
 `1 + f*·b = p·(b+1)`, so the physical `p` cancels in the deflation. Change the numéraire
 to the growth-optimal portfolio and the physical measure becomes risk-neutral.
 
+## Main definitions
+
+* `kellyPayoff`, `kellyPrice` — the Kelly market as a payoff matrix and a price vector: the unit
+  bond and the bet, which costs nothing.
+
 ## Main results
 
 * `kellyGOPWealth_win`, `kellyGOPWealth_lose` — the growth-optimal terminal wealths
@@ -47,8 +52,6 @@ to the growth-optimal portfolio and the physical measure becomes risk-neutral.
 * `kellyDeflatedProb_sum_one` — `q₊ + q₋ = 1` (a probability measure).
 * `kellyNumeraire_isRiskNeutral` — `q₊·b + q₋·(−1) = 0`: under the GOP-deflated probabilities
   the one-period bet has zero mean, the numéraire-portfolio ⟹ EMM identity in one period.
-* `kellyPayoff`, `kellyPrice` — the Kelly market as a payoff matrix and a price vector: the unit
-  bond and the bet, which costs nothing.
 * `kelly_statePrices` — the GOP-deflated probabilities `q₊, q₋` are a state-price vector of the
   Kelly market, pricing the bond (`q₊ + q₋ = 1`) and the bet (`q₊·b − q₋ = 0`): the logarithmic
   instance of `logUtility_statePrices_of_stationary` (`Choice/Utility/StatePriceDensity`), whose
