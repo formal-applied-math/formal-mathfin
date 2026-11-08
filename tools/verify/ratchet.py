@@ -25,7 +25,7 @@ import json
 import re
 from pathlib import Path
 
-from . import doc_standard, library
+from . import doc_standard, library, trunk_reach
 from .mathfin_index import strip_comments
 
 RATCHET_FILE = Path("ratchet.json")
@@ -71,7 +71,7 @@ def index_metrics(index_path: str | Path) -> dict[str, int]:
         # corpus entries in no relation the program map records (tools/verify/program_tree.py)
         "corpus_off_blueprint": sum(p.kind == "off-map"
                                     for p in place_corpus(idx, load_nodes())),
-    }
+    } | {k: len(v) for k, v in trunk_reach.offenders(idx).items()}  # the one-trunk counts
 
 
 def load_baseline() -> dict[str, int]:

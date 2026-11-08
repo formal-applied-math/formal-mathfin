@@ -12,7 +12,11 @@
     "modules_without_main_definitions": 0,
     "modules_with_uncited_sources": 0,
     "long_lines": 0,
-    "corpus_off_blueprint": 236,
-    "blueprint_islands": 10
+    "corpus_off_blueprint": 224,
+    "blueprint_islands": 10,
+    "prices_off_trunk": 41,
+    "price_entries_off_trunk": 171,
+    "pricing_devices_unbridged": 5,
+    "concept_duplicates": 9
   }
 }
