@@ -43,15 +43,21 @@ whose statements it changes: a golf or refactor PR should change no statement.
 
 ## Adding a theorem
 
-1. **Pick a home.** The library is organised by topic under `MathFin/`:
-   - `Foundations/` — probability primitives, Itô, FTAP, pricing kernels. It imports only
-     `Foundations/`: a model lives in its market's section.
-   - `Bridges/` — modules that join a foundation to a model, or two sections to each other.
-   - `BlackScholes/` — BS family, Greeks, exotics.
-   - `Binomial/` — CRR, American, Snell, reflection.
-   - `Futures/`, `FixedIncome/`, `Portfolio/`, `Performance/`, `RiskMeasures/`,
-     `Actuarial/`, `Commodities/`, `Contracts/`, `DeFi/`, `Execution/` — domain-specific
-     modules.
+1. **Pick a home.** The library is layered under `MathFin/`, and imports point one way
+   (`tools/verify/layers.py`):
+   - `Probability/` — the roots: discrete martingales, Brownian and Itô calculus, Girsanov,
+     jumps, Gaussian and other laws, dependence. It imports only Mathlib, BrownianMotion and
+     itself, and is Mathlib-shaped: what it holds is a candidate for upstreaming.
+   - `Contracts/` — the payoff language: payoffs, contracts, instruments, with no model.
+   - `Pricing/` — the pricing functional: EMMs, the FTAPs, state prices, numéraires,
+     replication, completeness, superhedging, and the value of a contract.
+   - the limbs: `Models/` (Black–Scholes, binomial, rates, credit, jumps, volatility models,
+     model-free results, forwards), `Risk/`, `Choice/` (utility, portfolios, performance),
+     `Insurance/`, `Markets/` (microstructure, execution, DeFi).
+
+   A limb imports another limb only through a declared edge in `layers.EDGES` (a DeFi position
+   priced as a Black–Scholes covered call is `Markets → Models`). A theorem that joins two
+   places lives in the module that uses it; there is no bridges directory.
 2. **Connect it.** A new module stands on what the library already has: the one normal law
    (`Phi`, `quantile`), `valueAtRisk`, `bsV`, the numéraire, `zcb`, the Vasicek bond lemma and
    so on. A model whose formula the library can derive is derived, not posited, and an object
@@ -62,7 +68,7 @@ whose statements it changes: a golf or refactor PR should change no statement.
 3. **Author the proof in a real `.lean` file**, not in a JSON snippet.
    Non-trivial proofs need the full `lake build` memory budget + incremental
    compilation + LSP authoring. The benchmark JSONs are for re-export shims
-   (5-25 lines) that `import MathFin.<Section>.<Module>` and reference
+   (5-25 lines) that `import MathFin.<Layer>.<…>.<Module>` and reference
    the named lemma. Trivial library wrappers (single-line `:= someLemma`)
    can stay inline in the JSON.
 4. **Iterate fast via the REPL daemon.** Per-file checks in 5-30 sec
@@ -70,7 +76,7 @@ whose statements it changes: a golf or refactor PR should change no statement.
    ```bash
    docker compose -f docker/docker-compose.yml up -d lean-repl
    docker compose -f docker/docker-compose.yml logs -f lean-repl | grep -m1 READY
-   ./scripts/lean-check.sh MathFin/<Section>/<Module>.lean
+   ./scripts/lean-check.sh MathFin/<Layer>/…/<Module>.lean
    ```
 5. **Confirm axioms-cleanliness.** Every `full` theorem must depend only on
    the three standard Mathlib axioms:
@@ -97,8 +103,8 @@ whose statements it changes: a golf or refactor PR should change no statement.
    ```
 
    The suites must pass, among them:
-   - `tests/test_architecture.py` — the `Foundations/` rule, and every module connected and
-     used.
+   - `tests/test_architecture.py` — every module in a layer, imports pointing one way, and
+     every module connected and used.
    - `tests/test_router.py` — Lean-only routing, no `sorry`, `@[expose]` rule,
      `formalization_status` declared on every entry.
    - `tests/test_ledger.py` — ledger freshness and globally unique ids.

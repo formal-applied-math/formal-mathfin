@@ -1,23 +1,23 @@
-import MathFin.RiskMeasures.AcceptanceSet
-import MathFin.RiskMeasures.PositionsConvention
-import MathFin.RiskMeasures.WorstCaseRisk
+import MathFin.Risk.AcceptanceSet
+import MathFin.Risk.PositionsConvention
+import MathFin.Risk.WorstCaseRisk
 
 /-!
 # Proofs of the advertised statements
 
 The two declarations of `Challenge.lean` are repeated here verbatim and proved
-by discharging them against the proof development in `MathFin/RiskMeasures/`.
+by discharging them against the proof development in `MathFin/Risk/`.
 The Challenge states coherence for **positions** (a position is a gain, so `ρ`
 decreases and `ρ (X + m) = ρ X - m`); the library has one coherence structure,
 `MathFin.IsCoherentRiskMeasure`, stated for **losses**. The bridge is
 `MathFin.isCoherentRiskMeasure_neg_iff`
-(`MathFin/RiskMeasures/PositionsConvention.lean`): on a finite state space with
+(`MathFin/Risk/PositionsConvention.lean`): on a finite state space with
 a finite measure charging every state (here counting measure), `ρ` satisfies the four positions axioms exactly when
 `L ↦ ρ (-L)` is an `IsCoherentRiskMeasure`.
 
-* `MathFin.coherentRisk_isLUB` (`MathFin/RiskMeasures/AcceptanceSet.lean`) —
+* `MathFin.coherentRisk_isLUB` (`MathFin/Risk/AcceptanceSet.lean`) —
   the separation argument that yields the representation, applied to `L ↦ ρ (-L)`;
-* `MathFin.worstCase_isCoherent` (`MathFin/RiskMeasures/WorstCaseRisk.lean`) —
+* `MathFin.worstCase_isCoherent` (`MathFin/Risk/WorstCaseRisk.lean`) —
   the coherence of worst-case loss, transported along the same bridge.
 
 `ADEH.IsCoherentRisk` and `ADEH.representingSet` are declared here with the same

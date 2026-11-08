@@ -86,7 +86,7 @@ representations needs its own bridge theorems, and the two definitions drift apa
 
 The library's bridges are this principle at the scale of modules
 ([`architecture.md`](architecture.md#the-bridge-methodology), [`bridges.md`](bridges.md)): a
-constructor such as `BSCallHyp.of_isPreBrownian` turns a Foundations object into the
+constructor such as `BSCallHyp.of_isPreBrownian` turns a `Probability/` object into the
 hypothesis a pricing module already consumes, instead of a second pricing module built on Brownian
 motion. The same discipline applies to smaller changes: a discounted price process, a change of
 numéraire, a pushforward of the pricing measure, an `Lp` class and its representative.

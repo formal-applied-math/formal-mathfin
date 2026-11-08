@@ -16,11 +16,11 @@ substitute a genuinely stochastic model `X : ι → ℝ≥0 → Ω → ℝ` for 
 `Scenario`, and `fun ω ↦ e.eval (fun i t ↦ X i t ω)` is measurable
 (`Payoff.measurable_eval`), and moreover `𝓕 u`-measurable as soon as every
 observation the payoff makes is dated no later than `u`
-(`Payoff.measurable_eval_of_obsTimes_le`). That second fact is what will make a
+(`Payoff.measurable_eval_of_obsList_le`). That second fact is what will make a
 `Payoff` a legitimate stochastic-integral integrand: it is the adaptedness
 hypothesis a future integral rung against a filtered probability space will
-need. **`measurable_eval_of_obsTimes_le` has no consumer yet** —
-`Contracts/Pricing.lean` integrates only against a fixed measure `Q`, never
+need. **`measurable_eval_of_obsList_le` has no consumer yet** —
+`Pricing/Value.lean` integrates only against a fixed measure `Q`, never
 against a filtration, so it has no adaptedness hypothesis to discharge with
 this file's results.
 
@@ -28,7 +28,7 @@ this file's results.
 `Measurable` to `AEMeasurable` — the strength the tower's own pricing
 hypotheses actually supply (`BSCallHyp`'s `Z_law : HasLaw Z (gaussianReal 0 1)
 Q` gives only `AEMeasurable Z`, never `Measurable Z`). It has no consumer
-now either: the integrability lemmas of `Contracts/Models/BlackScholes.lean` build each
+now either: the integrability lemmas of `Models/BlackScholes/BlackScholes.lean` build each
 reified payoff from integrable pieces (`Integrable.pos_part`, `.sub`,
 `.const_mul`), which carry their own measurability.
 
@@ -38,24 +38,18 @@ dates (`Contract.FixedDated`) is integrable against any finite measure. Measurab
 `measurable_eval`, and the bound from `Payoff.exists_bound_eval`, a structural induction like the
 others. A finite-state model such as
 the binomial tree is bounded, so there `Contract.value_both` needs no per-instrument
-integrability lemma (`Contracts/Models/Binomial.lean`).
-
-## Main definitions
-
-* `Payoff.obsTimes` — the list of times a payoff's `obs` leaves read, found by
-  walking the syntax tree. It is a *syntactic* over-approximation: a payoff
-  can list a time its value does not actually depend on — e.g.
-  `Payoff.mul (.const 0) (.obs i t)` evaluates to `0` on every scenario, so
-  `obsTimes` listing `t` overstates what the value depends on. Consequently
-  the adaptedness theorem below is *sufficient*, not necessary — a payoff can
-  be `𝓕 u`-adapted for reasons `obsTimes` does not see.
+integrability lemma (`Models/Binomial/Binomial.lean`).
 
 ## Main results
 
 * `Payoff.measurable_eval` — evaluating a payoff against a jointly-measurable
   model is measurable, unconditionally.
-* `Payoff.measurable_eval_of_obsTimes_le` — if every time in `e.obsTimes` is
-  `≤ u` and each `X i t` is `𝓕 t`-measurable, then evaluating `e` against `X`
+* `Contract.measurable_pathPV` — a fixed-dated contract's present value under a measurable
+  stochastic discount factor is measurable.
+* `Payoff.measurable_eval_of_obsList_le` — if every date in `e.obsList` (the syntactic list of
+  observations `Contracts/Core.lean` defines; an over-approximation, so the criterion is
+  sufficient, not necessary: `Payoff.mul (.const 0) (.obs i t)` lists `t` though its value does
+  not depend on it) is `≤ u` and each `X i t` is `𝓕 t`-measurable, then evaluating `e` against `X`
   is `𝓕 u`-measurable. The filtration's monotonicity (`𝓕.mono`) does the work
   in the `obs` leaf; the six binary constructors combine two adapted pieces
   into one by the corresponding `Measurable.add`/`.sub`/`.mul`/`.max`/`.min`
@@ -116,17 +110,6 @@ namespace MathFin.Contracts
 
 variable {ι Ω : Type*} {mΩ : MeasurableSpace Ω}
 
-/-- The times a `Payoff`'s `obs` leaves read, found syntactically. An
-over-approximation: e.g. `Payoff.mul (.const 0) (.obs i t)` evaluates to `0`
-on every scenario, so this may list times the value does not actually depend
-on. -/
-def Payoff.obsTimes : Payoff ι → List ℝ≥0
-  | .const _ => []
-  | .obs _ t => [t]
-  | .add a b | .sub a b | .mul a b | .max a b | .min a b | .indicatorLt a b =>
-      a.obsTimes ++ b.obsTimes
-  | .rpow a _ => a.obsTimes
-
 /-- Evaluating a payoff against a jointly-measurable model is measurable. -/
 theorem Payoff.measurable_eval (e : Payoff ι) (X : ι → ℝ≥0 → Ω → ℝ)
     (hX : ∀ i t, Measurable (X i t)) :
@@ -142,6 +125,27 @@ theorem Payoff.measurable_eval (e : Payoff ι) (X : ι → ℝ≥0 → Ω → �
   | indicatorLt a b ha hb =>
       exact Measurable.ite (measurableSet_lt ha hb) measurable_const measurable_const
   | rpow a p ha => exact ha.pow_const _
+
+/-- **A fixed-dated contract's deflated present value is measurable** for a measurable model and
+a measurable stochastic discount factor `D : ℝ≥0 → Ω → ℝ`. -/
+theorem Contract.measurable_pathPV {c : Contract ι} (hc : c.FixedDated) {D : ℝ≥0 → Ω → ℝ}
+    (hD : ∀ t, Measurable (D t)) {X : ι → ℝ≥0 → Ω → ℝ} (hX : ∀ i t, Measurable (X i t)) :
+    Measurable fun ω ↦ c.pathPV (fun t ↦ D t ω) (fun i t ↦ X i t ω) := by
+  induction c with
+  | zero =>
+      simp only [Contract.pathPV, Contract.cashflows, List.map_nil, List.sum_nil]
+      exact measurable_const
+  | pay t a =>
+      simp only [Contract.pathPV, Contract.cashflows, List.map_cons, List.map_nil, List.sum_cons,
+        List.sum_nil, add_zero]
+      exact (hD t).mul (a.measurable_eval X hX)
+  | payAtHit _ _ _ => exact hc.elim
+  | both a b ha hb =>
+      simp only [Contract.pathPV_both]
+      exact (ha hc.1).add (hb hc.2)
+  | scale r a ha =>
+      simp only [Contract.pathPV_scale]
+      exact (ha hc).const_mul r
 
 /-- Evaluating a payoff against an a.e.-measurable model is a.e.-measurable: the strength a
 consumer whose model only satisfies `AEMeasurable` (e.g. `HasLaw.aemeasurable`, never
@@ -173,18 +177,18 @@ theorem Payoff.aemeasurable_eval {μ : Measure Ω} (e : Payoff ι) (X : ι → �
 `𝓕 u`, as soon as every time the payoff observes is dated no later than `u`.
 This is the theorem that will make a `Payoff` a legitimate stochastic-integral
 integrand — the adaptedness hypothesis a future integral rung will need.
-Still has no consumer: `Contracts/Pricing.lean` integrates against a fixed
+Still has no consumer: `Pricing/Value.lean` integrates against a fixed
 measure, not a filtration, and unlike `measurable_eval`'s a.e. counterpart
 above, no `Payoff` in the tower yet needs an argument observed before a fixed
 time rather than a fixed measure. -/
-theorem Payoff.measurable_eval_of_obsTimes_le
+theorem Payoff.measurable_eval_of_obsList_le
     {𝓕 : Filtration ℝ≥0 mΩ} {u : ℝ≥0} (e : Payoff ι) (X : ι → ℝ≥0 → Ω → ℝ)
     (hX : ∀ i t, Measurable[𝓕 t] (X i t))
-    (hle : ∀ t ∈ e.obsTimes, t ≤ u) :
+    (hle : ∀ p ∈ e.obsList, p.2 ≤ u) :
     Measurable[𝓕 u] fun ω ↦ e.eval (fun i t ↦ X i t ω) := by
   induction e generalizing u with
   | const c => exact measurable_const
-  | obs i t => exact (hX i t).mono (𝓕.mono (hle t (by simp [obsTimes]))) le_rfl
+  | obs i t => exact (hX i t).mono (𝓕.mono (hle (i, t) (by simp [Payoff.obsList]))) le_rfl
   | add a b ha hb =>
       obtain ⟨hl, hr⟩ := List.forall_mem_append.1 hle; exact (ha hl).add (hb hr)
   | sub a b ha hb =>
@@ -235,7 +239,7 @@ model whose every coordinate is bounded, every contract that pays at fixed dates
 (`Contract.FixedDated`) has an integrable discounted payoff, so `Contract.value_both` applies to
 any two of them with no further hypothesis. A finite-state model such as the binomial tree is
 bounded; a lognormal one is not, and there each instrument's integrability is proved on its own
-(`Contracts/Models/BlackScholes.lean`). A `payAtHit` is excluded: the hitting time of a
+(`Models/BlackScholes/BlackScholes.lean`). A `payAtHit` is excluded: the hitting time of a
 measurable process need not be measurable, and an unbounded discount factor evaluated at a random
 date need not be integrable. -/
 theorem Contract.integrable_pathPV_of_bounded {Q : Measure Ω} [IsFiniteMeasure Q]

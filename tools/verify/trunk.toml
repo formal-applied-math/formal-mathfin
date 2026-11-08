@@ -1,0 +1,111 @@
+# The trunk and what must grow from it (docs/specs/2026-11-07-one-trunk-design.md, §3 I5).
+#
+# tools/verify/trunk_reach.py reads this table and the declaration index and computes the
+# one-trunk ratchet counts. The table is the one judgment the counts need: which constants
+# are the pricing functional, which definitions claim to be prices, which devices price beside
+# it, and which objects encode one concept twice. Everything else is computed.
+#
+# A law functional (valueAtRisk, a quantile), a ratio of moments (sharpeRatio) or a
+# quadratic form (portfolioVarN) is not a price, and is not listed under `prices`: it rests
+# on a root by its nature.
+
+[trunk]
+# The pricing functional. A proof that reaches one of these reaches the trunk.
+anchors = [
+  "MathFin.Market.price",
+  "MathFin.Market.IsPricingMeasure",
+  "MathFin.IsEMM",
+  "MathFin.OnePeriod.IsEMM",
+  "MathFin.OnePeriodVector.IsEMM",
+  "MathFin.HasEMMMultiState",
+  "MathFin.HasEMMTwoState",
+  "MathFin.NoArbitrage",
+  "MathFin.IsCompleteMarket",
+  "MathFin.Contracts.Contract.value",
+  "MathFin.numeraireMeasure",
+  "MathFin.statePricePricing",
+  "MathFin.superReplicationPrice",
+  "MathFin.PricesGainsAtZero",
+]
+
+[prices]
+# Definitions that claim to be the price, value or premium of a claim. Each is re-founded
+# through the functional (defined as a price, its closed form a theorem) or reaches it.
+names = [
+  # Black–Scholes and its relatives
+  "MathFin.bsV", "MathFin.bsP", "MathFin.bsVDiv", "MathFin.bsVGarman",
+  "MathFin.bsCashDigital", "MathFin.bsAssetDigital", "MathFin.margrabePrice",
+  "MathFin.kirkSpreadPrice", "MathFin.chooserPrice", "MathFin.basketMomentMatchPrice",
+  "MathFin.stulzCallMax", "MathFin.stulzCallMin", "MathFin.ptDownOutCall",
+  "MathFin.totalVarianceCall", "MathFin.SVI.blackCall",
+  # jumps
+  "MathFin.jumpDiffusionCallPrice", "MathFin.jumpDiffusionPutPrice",
+  "MathFin.jumpDiffusionDigitalPrice", "MathFin.mertonCallPrice", "MathFin.mertonPutPrice",
+  "MathFin.mertonDigitalPrice",
+  # lattices and early exercise
+  "MathFin.binomialPrice", "MathFin.binomialOptionPriceOnePeriod", "MathFin.americanPrice",
+  "MathFin.bermudanPrice", "MathFin.BlackScholes.AmericanPut.Stopping.canonicalPrice",
+  # rates, credit, forwards
+  "MathFin.zcb", "MathFin.bondPriceDisc", "MathFin.bondPriceKeyRate", "MathFin.vasicekBondV",
+  "MathFin.cleanPrice", "MathFin.dirtyPrice", "MathFin.bondForwardPrice",
+  "MathFin.schwartzFuturesPrice", "MathFin.CVA.cva", "MathFin.Cox.premiumLeg",
+  # insurance
+  "MathFin.lifeAnnuityDue", "MathFin.expectedValuePremium", "MathFin.stdDevPremium",
+  "MathFin.variancePremium",
+  # markets
+  "MathFin.DeFi.v3PositionValue",
+]
+
+# Parallel pricing devices. Each becomes an instance of the one functional; `instance` names
+# the theorem that proves it (empty until it exists).
+[[device]]
+name = "MathFin.statePricePricing"
+instance = "MathFin.Market.price_pay_eq_statePricePricing"
+
+[[device]]
+name = "MathFin.numeraireMeasure"
+instance = "MathFin.Market.price_pay_withNumeraire"
+
+[[device]]
+name = "MathFin.superReplicationPrice"
+instance = "MathFin.Market.superReplicationPrice_eq_price"
+
+[[device]]
+name = "MathFin.PricesGainsAtZero"
+instance = "MathFin.Market.IsPricingMeasure.of_pricesGainsAtZero"
+
+# the conditional price at an intermediate date (a conditional expectation of the deflated
+# payoff); the trunk's price at time t makes it an instance
+[[device]]
+name = "MathFin.Contracts.bondPrice"
+instance = "MathFin.Contracts.bondPrice_deflator_eq_priceAt"
+
+# One concept, several encodings. A member is resolved when it is gone, or when a theorem
+# uses both it and the canonical object (the equality that ties them).
+[[duplicate]]
+concept = "bond price"
+canonical = "MathFin.Contracts.bondPrice"
+members = ["MathFin.zcb", "MathFin.bondPriceDisc", "MathFin.bondPriceKeyRate",
+           "MathFin.vasicekBondV"]
+
+[[duplicate]]
+concept = "survival function"
+canonical = "MathFin.SurvivalModel.survivalFunction"
+members = ["MathFin.survivalProbability", "MathFin.hazardSurvival",
+           "MathFin.survivalFromIntensity", "MathFin.survivalFromForce"]
+
+[[duplicate]]
+concept = "portfolio variance"
+canonical = "MathFin.portfolioVarN"
+members = ["MathFin.portfolioVarTwo", "MathFin.varianceTwo"]
+
+[[duplicate]]
+concept = "Black–Scholes call"
+canonical = "MathFin.bsV"
+members = ["MathFin.bsP", "MathFin.bsVDiv", "MathFin.bsVGarman", "MathFin.margrabePrice",
+           "MathFin.totalVarianceCall", "MathFin.SVI.blackCall"]
+
+[[duplicate]]
+concept = "Merton jump-diffusion call"
+canonical = "MathFin.jumpDiffusionCallPrice"
+members = ["MathFin.mertonCallPrice"]

@@ -51,7 +51,7 @@
       "description": "Theorem B.1.3(2), BIVARIATE case: for (X,Y) jointly Gaussian with σ_Y > 0, E[X|σ(Y)] = μ_X + (ρ σ_X/σ_Y)(Y − μ_Y) a.s. — the two-variable instance of the general Σ_XY Σ_YY⁻¹ formula; the vector-valued case is not delivered.",
       "domain": "measure_theory",
       "code": {
-        "lean": "import MathFin.Foundations.BivariateGaussian\n\nopen MeasureTheory ProbabilityTheory\n\n/-- Theorem B.1.3 (2): for a bivariate Gaussian pair (X, Y) with positive\n    marginal variances and correlation ρ ∈ (−1, 1), the conditional expectation\n    of X given σ(Y) is μ_X + (ρ σ_X / σ_Y)(Y − μ_Y) almost surely.\n    Re-export of `MathFin.BivariateGaussianHyp.conditional_expectation_formula`\n    (real derivation in `MathFin/Foundations/BivariateGaussian.lean`: orthogonal\n    regression, joint-Gaussian transfer via a linear CLM, Cov = 0 ⇒\n    `HasGaussianLaw.indepFun_of_covariance_eq_zero`, then condExp linearity). -/\ntheorem bivariate_gaussian_conditional_expectation\n    {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P]\n    {X Y : Ω → ℝ} {μ_X μ_Y σ_X σ_Y ρ : ℝ}\n    (h : MathFin.BivariateGaussianHyp P X Y μ_X μ_Y σ_X σ_Y ρ) :\n    (P[X | MeasurableSpace.comap Y inferInstance])\n      =ᵐ[P] fun ω => μ_X + (ρ * σ_X / σ_Y) * (Y ω - μ_Y) :=\n  h.conditional_expectation_formula\n"
+        "lean": "import MathFin.Probability.Gaussian.BivariateGaussian\n\nopen MeasureTheory ProbabilityTheory\n\n/-- Theorem B.1.3 (2): for a bivariate Gaussian pair (X, Y) with positive\n    marginal variances and correlation ρ ∈ (−1, 1), the conditional expectation\n    of X given σ(Y) is μ_X + (ρ σ_X / σ_Y)(Y − μ_Y) almost surely.\n    Re-export of `MathFin.BivariateGaussianHyp.conditional_expectation_formula`\n    (real derivation in `MathFin/Probability/Gaussian/BivariateGaussian.lean`: orthogonal\n    regression, joint-Gaussian transfer via a linear CLM, Cov = 0 ⇒\n    `HasGaussianLaw.indepFun_of_covariance_eq_zero`, then condExp linearity). -/\ntheorem bivariate_gaussian_conditional_expectation\n    {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P]\n    {X Y : Ω → ℝ} {μ_X μ_Y σ_X σ_Y ρ : ℝ}\n    (h : MathFin.BivariateGaussianHyp P X Y μ_X μ_Y σ_X σ_Y ρ) :\n    (P[X | MeasurableSpace.comap Y inferInstance])\n      =ᵐ[P] fun ω => μ_X + (ρ * σ_X / σ_Y) * (Y ω - μ_Y) :=\n  h.conditional_expectation_formula\n"
       },
       "metadata": {
         "appendix": "B.1",
@@ -64,7 +64,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Real Lean derivation of Theorem B.1.3(2). The hypotheses (joint Gaussianity of (X,Y), marginal means, Var Y, Cov(X,Y)) are bundled in `BivariateGaussianHyp`; the conditional-expectation conclusion is *derived* (not a structural field) via orthogonal regression β = ρσ_X/σ_Y, linear-CLM transfer of joint Gaussianity to (X − βY, Y), Cov(X − βY, Y) = 0 ⇒ independence via `HasGaussianLaw.indepFun_of_covariance_eq_zero`, `condExp_indep_eq` for the orthogonal residual, `condExp_of_stronglyMeasurable` for the σ(Y)-measurable estimator, and `condExp_add`/`condExp_sub` linearity. Proof lives in `MathFin/Foundations/BivariateGaussian.lean` (~240 lines).",
+        "formalization_scope": "Real Lean derivation of Theorem B.1.3(2). The hypotheses (joint Gaussianity of (X,Y), marginal means, Var Y, Cov(X,Y)) are bundled in `BivariateGaussianHyp`; the conditional-expectation conclusion is *derived* (not a structural field) via orthogonal regression β = ρσ_X/σ_Y, linear-CLM transfer of joint Gaussianity to (X − βY, Y), Cov(X − βY, Y) = 0 ⇒ independence via `HasGaussianLaw.indepFun_of_covariance_eq_zero`, `condExp_indep_eq` for the orthogonal residual, `condExp_of_stronglyMeasurable` for the σ(Y)-measurable estimator, and `condExp_add`/`condExp_sub` linearity. Proof lives in `MathFin/Probability/Gaussian/BivariateGaussian.lean` (~240 lines).",
         "lean_note": "Promoted reduced_core → full on 2026-05-13: structure field `conditional_mean` removed; the conclusion is now derived inside MathFin.BivariateGaussian."
       }
     },
@@ -96,7 +96,7 @@
       "description": "Appendix B.2: If τ_1, ..., τ_n independent with τ_i ~ Exp(λ_i), then min(τ_1,...,τ_n) ~ Exp(λ_1+...+λ_n)",
       "domain": "measure_theory",
       "code": {
-        "lean": "import MathFin.Foundations.ExpMin\n\nopen MeasureTheory ProbabilityTheory\n\n/-- Appendix B.2: minimum of jointly independent exponential random variables\n    has Exp(∑ rates) at the survival-function level. Re-export of\n    `MathFin.minimum_survival` (real derivation in\n    `MathFin/Foundations/ExpMin.lean`, derived from `iIndepFun.meas_iInter`\n    and the `expMeasure` CDF formula). -/\ntheorem minimum_of_independent_exponentials_survival\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}\n    {n : ℕ} {rates : Fin n → ℝ} {τ : Fin n → Ω → ℝ}\n    (hrates_pos : ∀ i, 0 < rates i)\n    (hexp_law : ∀ i, Measure.map (τ i) μ = expMeasure (rates i))\n    (hindep : iIndepFun τ μ)\n    (hmeas : ∀ i, Measurable (τ i))\n    (hn : 0 < n) {t : ℝ} (ht : 0 ≤ t) :\n    μ {ω | t < Finset.univ.inf' ⟨⟨0, hn⟩, Finset.mem_univ _⟩\n      (fun i : Fin n => τ i ω)} =\n        ENNReal.ofReal (Real.exp (-((∑ i, rates i) * t))) :=\n  MathFin.minimum_survival hrates_pos hexp_law hindep hmeas hn ht\n"
+        "lean": "import MathFin.Probability.Laws.ExpMin\n\nopen MeasureTheory ProbabilityTheory\n\n/-- Appendix B.2: minimum of jointly independent exponential random variables\n    has Exp(∑ rates) at the survival-function level. Re-export of\n    `MathFin.minimum_survival` (real derivation in\n    `MathFin/Probability/Laws/ExpMin.lean`, derived from `iIndepFun.meas_iInter`\n    and the `expMeasure` CDF formula). -/\ntheorem minimum_of_independent_exponentials_survival\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}\n    {n : ℕ} {rates : Fin n → ℝ} {τ : Fin n → Ω → ℝ}\n    (hrates_pos : ∀ i, 0 < rates i)\n    (hexp_law : ∀ i, Measure.map (τ i) μ = expMeasure (rates i))\n    (hindep : iIndepFun τ μ)\n    (hmeas : ∀ i, Measurable (τ i))\n    (hn : 0 < n) {t : ℝ} (ht : 0 ≤ t) :\n    μ {ω | t < Finset.univ.inf' ⟨⟨0, hn⟩, Finset.mem_univ _⟩\n      (fun i : Fin n => τ i ω)} =\n        ENNReal.ofReal (Real.exp (-((∑ i, rates i) * t))) :=\n  MathFin.minimum_survival hrates_pos hexp_law hindep hmeas hn ht\n"
       },
       "metadata": {
         "appendix": "B.2",
@@ -118,7 +118,7 @@
       "description": "E[x^N] = e^{r(x-1)} for N ~ Poisson(r) and every real x — the Poisson pgf as an honest expectation against poissonMeasure, absent from Mathlib. The exponential series at r·x rescaled by e^{-r}, so absolute convergence holds for all x.",
       "domain": "poisson_processes",
       "code": {
-        "lean": "import MathFin.Foundations.PoissonPgf\n\nopen MeasureTheory ProbabilityTheory Real MathFin\nopen scoped NNReal\n\ntheorem poisson_pgf_thm (r : ℝ≥0) (x : ℝ) :\n    ∫ n, x ^ n ∂(poissonMeasure r) = Real.exp ((r : ℝ) * (x - 1)) :=\n  MathFin.PoissonPgf.integral_pow_poissonMeasure r x\n"
+        "lean": "import MathFin.Probability.Jumps.PoissonPgf\n\nopen MeasureTheory ProbabilityTheory Real MathFin\nopen scoped NNReal\n\ntheorem poisson_pgf_thm (r : ℝ≥0) (x : ℝ) :\n    ∫ n, x ^ n ∂(poissonMeasure r) = Real.exp ((r : ℝ) * (x - 1)) :=\n  MathFin.PoissonPgf.integral_pow_poissonMeasure r x\n"
       },
       "metadata": {
         "reference": "Poisson generating function E[x^N] = e^{r(x-1)} (standard; e.g. Saporito Ch 3 toolbox)",
@@ -130,7 +130,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof for every real x: the weighted series ∑ e^{-r} rⁿ/n! xⁿ is the exponential series at r·x rescaled by e^{-r} (NormedSpace.expSeries_div_hasSum_exp, the same route Mathlib uses for the pmf normalisation), then integral_poissonMeasure converts the expectation to the series. Lives in MathFin/Foundations/PoissonPgf.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof for every real x: the weighted series ∑ e^{-r} rⁿ/n! xⁿ is the exponential series at r·x rescaled by e^{-r} (NormedSpace.expSeries_div_hasSum_exp, the same route Mathlib uses for the pmf normalisation), then integral_poissonMeasure converts the expectation to the series. Lives in MathFin/Probability/Jumps/PoissonPgf.lean. Axioms-clean."
       }
     }
   ]
