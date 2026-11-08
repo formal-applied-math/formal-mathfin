@@ -4403,8 +4403,8 @@
       "benchmark_file": "risk_measures.json",
       "date": "2026-11-08",
       "elapsed_s": 2.6,
-      "input_hash": "822ebf28da5b6c39fe3b164c0ad6a121dfa3c23279c0921aa8537fe36e05e43b",
-      "verified_at_commit": "6768304"
+      "input_hash": "e70c90f311b72850c1e570f385fd27c2d401310b19ecd310b05cd8a4eb6928b2",
+      "verified_at_commit": "456e13e"
     },
     "mf-survival-at-zero": {
       "benchmark_file": "credit.json",
