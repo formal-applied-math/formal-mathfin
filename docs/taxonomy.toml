@@ -332,7 +332,7 @@ modules = [
   "MathFin.Risk.AcceptanceSet", "MathFin.Risk.Coherent", "MathFin.Risk.CoherentAxioms",
   "MathFin.Risk.Elicitability", "MathFin.Risk.JointElicitability", "MathFin.Risk.Expectile",
   "MathFin.Risk.Spectral", "MathFin.Risk.WorstCaseRisk", "MathFin.Risk.UtilityDerivation",
-  "MathFin.Risk.PositionsConvention",
+  "MathFin.Risk.PositionsConvention", "MathFin.Risk.EntropicRisk",
 ]
 subjects = ["MSC 91G70", "JEL G32"]
 landmarks = [
@@ -503,6 +503,16 @@ title = "Insurance premiums are prices"
 limbs = ["choice", "risk"]
 node = "thm:log-utility-acceptance"
 title = "Acceptance sets from expected utility"
+
+[[joint]]
+limbs = ["choice", "risk"]
+node = "thm:entropic-risk-certainty-equivalent"
+title = "Entropic risk is the certainty equivalent of exponential utility"
+
+[[joint]]
+limbs = ["valuation", "risk"]
+node = "thm:superhedging-duality"
+title = "Superhedging duality"
 
 [[joint]]
 limbs = ["valuation", "risk"]

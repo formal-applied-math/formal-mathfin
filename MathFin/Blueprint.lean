@@ -88,6 +88,8 @@ import MathFin.Probability.Laws.QuantileConvergence
 import MathFin.Probability.Martingales.BracketCompensator
 import MathFin.Risk.AcceptanceSet
 import MathFin.Risk.Coherent
+import MathFin.Risk.EntropicRisk
+import MathFin.Risk.LawInvariance
 import MathFin.Risk.ComponentVaR
 import MathFin.Risk.ContractRisk
 import MathFin.Risk.Credit.VasicekIRB
@@ -962,14 +964,29 @@ attribute [blueprint "thm:superhedging-coherent"
   (statement := /-- In the one-period finite-state market with a martingale probability vector, and
   for a reference measure charging every state, the superhedging price of a claim, read as a
   loss, is monotone, cash-invariant, positively homogeneous and subadditive. The equality with
-  the supremum of the martingale prices is not part of this statement. -/)]
+  the supremum of the martingale prices is `thm:superhedging-duality`. -/)]
   MathFin.isCoherentRiskMeasure_superhedgingPrice
+
+attribute [blueprint "thm:superhedging-duality"
+  (title := "Superhedging duality")
+  (statement := /-- In the one-period finite-state market with a martingale probability vector,
+  the superhedging price of a claim $Y$ is the least upper bound of $\sum_n q_n Y_n$ over the
+  martingale probability vectors $q$. The supremum is over all martingale probability vectors,
+  which may vanish on states, and whether it is attained is not claimed. -/)]
+  MathFin.superhedgingPrice_isLUB
 
 attribute [blueprint "thm:superhedging-price-lower-bound"
   (title := "The superhedging price dominates every martingale price")
   (statement := /-- For every martingale probability vector $q$ and every claim $Y$,
   $\sum_n q_n Y_n$ is at most the superhedging price of $Y$. -/)]
   MathFin.le_superhedgingPrice
+
+attribute [blueprint "def:convex-risk-measure"
+  (title := "Convex risk measure")
+  (statement := /-- A functional on the integrable losses of $(\Omega, P)$ that is monotone,
+  translation invariant, $\rho(X + m) = \rho(X) + m$, and convex. Every coherent risk measure is
+  one (`IsCoherentRiskMeasure.toIsConvexRiskMeasure`). -/)]
+  MathFin.IsConvexRiskMeasure
 
 attribute [blueprint "def:coherent-risk-measure"
   (title := "Coherent risk measure")
@@ -1008,7 +1025,24 @@ attribute [blueprint "thm:log-utility-acceptance"
   iff its Kelly growth is nonnegative (`acceptableUnderUtility_log_iff_kellyGrowth`). -/)]
   MathFin.not_exists_isCoherentRiskMeasure_log_acceptance
 
+attribute [blueprint "thm:entropic-risk-certainty-equivalent"
+  (title := "Entropic risk is the certainty equivalent of exponential utility")
+  (statement := /-- On a finite probability space with the weights $p_i = P\{i\}$, the position
+  $-L$ is acceptable under the exponential utility $u(x) = -e^{-\gamma x}$ at wealth $0$ if and
+  only if the entropic risk $\gamma^{-1}\log E[e^{\gamma L}]$ of the loss $L$ is at most $0$.
+  The entropic risk measure is a convex risk measure on a finite probability space
+  (`isConvexRiskMeasure_entropicRisk`) and is not coherent
+  (`not_isCoherentRiskMeasure_entropicRisk`: positive homogeneity fails on a fair coin). -/)]
+  MathFin.acceptableUnderUtility_exp_iff
+
 -- ===== risk/law-invariant: Value at risk and expected shortfall =====
+
+attribute [blueprint "def:law-invariant"
+  (title := "Law-invariant risk functional")
+  (statement := /-- A functional $\rho$ of losses on $(\Omega, P)$ such that measurable losses
+  with the same law have the same risk. Value-at-risk, expected shortfall, the spectral risk
+  measures, expectiles and the entropic risk measure are law invariant. -/)]
+  MathFin.IsLawInvariant
 
 attribute [blueprint "def:value-at-risk"
   (title := "Value-at-risk")

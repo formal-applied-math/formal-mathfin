@@ -829,6 +829,8 @@ import MathFin.Risk.StudentTValueAtRisk
 import MathFin.Risk.Elicitability
 import MathFin.Risk.JointElicitability
 import MathFin.Risk.Expectile
+import MathFin.Risk.EntropicRisk
+import MathFin.Risk.LawInvariance
 import MathFin.Risk.Credit.BernoulliMixture
 import MathFin.Risk.Credit.CreditMetrics
 import MathFin.Risk.Credit.VasicekIRB

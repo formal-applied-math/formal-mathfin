@@ -2395,6 +2395,22 @@ bounded-coefficient process class. -/
 #guard_msgs in
 #print axioms MathFin.expectedShortfall
 
+/-- info: 'MathFin.IsConvexRiskMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.IsConvexRiskMeasure
+
+/-- info: 'MathFin.IsLawInvariant' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.IsLawInvariant
+
+/-- info: 'MathFin.acceptableUnderUtility_exp_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.acceptableUnderUtility_exp_iff
+
+/-- info: 'MathFin.superhedgingPrice_isLUB' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.superhedgingPrice_isLUB
+
 /-- info: 'MathFin.IsCoherentRiskMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.IsCoherentRiskMeasure

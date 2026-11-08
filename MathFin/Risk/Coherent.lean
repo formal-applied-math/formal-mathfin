@@ -40,12 +40,15 @@ no support hypothesis.
 
 ## Main definitions
 
+* `IsConvexRiskMeasure`: the base object of the theory (Föllmer and Schied 2002): almost-sure
+  monotonicity, translation `ρ (X + m) = ρ X + m`, and convexity on the integrable losses.
 * `IsCoherentRiskMeasure`: the four axioms of a coherent risk measure `ρ` of losses on a measure
   space `(Ω, P)`: almost-sure monotonicity, translation `ρ (X + m) = ρ X + m`, positive
   homogeneity `ρ (c X) = c ρ X` for `c ≥ 0`, and subadditivity.
 
 ## Main results
 
+* `IsCoherentRiskMeasure.toIsConvexRiskMeasure`: a coherent risk measure is a convex one.
 * `IsCoherentRiskMeasure.rho_zero`: `ρ 0 = 0`.
 * `IsCoherentRiskMeasure.convexOn`: `ρ` is convex on the integrable losses.
 * `IsCoherentRiskMeasure.mono_of_le`, `IsCoherentRiskMeasure.continuous`: on a finite state space
@@ -70,6 +73,17 @@ almost everywhere exactly when it holds everywhere. Counting measure is the case
 lemma ae_iff_forall_of_singleton_ne_zero {P : Measure Ω} {p : Ω → Prop} [Countable Ω]
     (hP : ∀ ω, P {ω} ≠ 0) : (∀ᵐ ω ∂P, p ω) ↔ ∀ ω, p ω :=
   ae_iff_of_countable.trans <| forall_congr' fun ω ↦ ⟨fun h ↦ h (hP ω), fun h _ ↦ h⟩
+
+/-- The three axioms of a **convex risk measure** (Föllmer and Schied, *Convex measures of risk
+and trading constraints*, Finance Stoch. 6 (2002)) for a functional `ρ` on the integrable losses of
+`(Ω, P)`, in the loss convention of `IsCoherentRiskMeasure`: almost-sure monotonicity,
+translation `ρ (X + m) = ρ X + m`, and convexity. This is the base object: the entropic risk
+measure and shortfall risk are convex and not coherent, and `IsCoherentRiskMeasure` adds positive
+homogeneity and subadditivity (`IsCoherentRiskMeasure.toIsConvexRiskMeasure`). -/
+structure IsConvexRiskMeasure (P : Measure Ω) (ρ : (Ω → ℝ) → ℝ) : Prop where
+  mono : ∀ ⦃X Y : Ω → ℝ⦄, Integrable X P → Integrable Y P → X ≤ᵐ[P] Y → ρ X ≤ ρ Y
+  add_const : ∀ ⦃X : Ω → ℝ⦄, Integrable X P → ∀ m : ℝ, ρ (fun ω ↦ X ω + m) = ρ X + m
+  convexOn : ConvexOn ℝ {X | Integrable X P} ρ
 
 /-- The four axioms of a **coherent risk measure** (Artzner, Delbaen, Eber and Heath 1999;
 McNeil–Frey–Embrechts, Definition 2.18) for a functional `ρ` on the integrable losses of
@@ -101,6 +115,13 @@ lemma convexOn (hρ : IsCoherentRiskMeasure P ρ) : ConvexOn ℝ {X | Integrable
   · have h := hρ.add_le (hx.const_mul a) (hy.const_mul b)
     rw [hρ.const_mul hx ha, hρ.const_mul hy hb] at h
     exact h
+
+/-- **A coherent risk measure is a convex risk measure.** `IsCoherentRiskMeasure` is not stated as
+an extension of `IsConvexRiskMeasure`: convexity is a consequence of positive homogeneity and
+subadditivity, so as a field it would make every constructor of a coherent measure prove a
+redundant axiom. -/
+lemma toIsConvexRiskMeasure (hρ : IsCoherentRiskMeasure P ρ) : IsConvexRiskMeasure P ρ :=
+  ⟨hρ.mono, hρ.add_const, hρ.convexOn⟩
 
 section Finite
 

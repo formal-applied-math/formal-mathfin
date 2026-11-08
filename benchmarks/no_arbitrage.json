@@ -180,7 +180,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.emm_le_superReplication (MathFin/Pricing/SuperhedgingDuality.lean). SCOPE: q ranges over martingaleProbVectors z (q ≥ 0, possibly vanishing on some states), which contains every EMM (hasEMMMultiState_iff_exists_pos_mem), so the statement is stronger than the EMM bound it is named after. Proof: q-weight the super-replication inequality; fairness (Σ_n q n z m n = 0) kills the portfolio term and Σq = 1 leaves x. Not proved: the strong-duality equality, which needs closedness of the finitely generated super-replication cone (Mathlib at this pin has PointedCone.DualFG but no Minkowski–Weyl)."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.emm_le_superReplication (MathFin/Pricing/SuperhedgingDuality.lean). SCOPE: q ranges over martingaleProbVectors z (q ≥ 0, possibly vanishing on some states), which contains every EMM (hasEMMMultiState_iff_exists_pos_mem), so the statement is stronger than the EMM bound it is named after. Proof: q-weight the super-replication inequality; fairness (Σ_n q n z m n = 0) kills the portfolio term and Σq = 1 leaves x. The strong-duality equality (superhedging price = supremum of these prices) is the separate entry mf-superhedging-duality."
       }
     },
     {
