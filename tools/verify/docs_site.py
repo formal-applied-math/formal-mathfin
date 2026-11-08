@@ -728,15 +728,18 @@ def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dic
     nfront = sum(n["s"] == "frontier" for n in data["nodes"])
     payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     body = f"""<h1>The program tree</h1>
-<p class="lede ink2">The blueprint drawn as a tree, grown from Mathlib and BrownianMotion. Height is
-conceptual depth: each of the {proved} proved results sits above everything its proof rests on, with
-Foundations as the trunk. Every use is drawn as wood, and wood thickens with the corpus it carries.
-A knot's size counts the corpus entries whose proof rests deepest on it; the Leaves button
-hangs them on the tree. The {nfront}
-frontier results are dashed blueprint shoots, each bud coloured by the state of its issue, with the
-open problems as stars. Proved results that rest on no node grow from the soil beside the trunk;
-entries that touch no node lie on the ground. Click a node to trace its lineage; drag to pan,
-scroll to zoom; names fill in as you zoom.</p>
+<p class="lede ink2">The blueprint drawn on a map of financial mathematics. The pale tree is the
+map: four roots in the soil (discrete time, Gaussian analysis, Brownian calculus, jumps), one trunk
+(the pricing functional: martingale measures, deflators, numéraires), and five limbs, from insurance
+and risk on the left to pricing models and markets on the right. Where a result sits is a reading,
+kept in <code>tools/verify/tree_map.toml</code>; the dark wood drawn over the map is the proofs. Each
+of the {proved} proved results is joined to every node its proof uses, and wood thickens with the
+corpus it carries. Where the wood bypasses the trunk, the result rests on a root directly. A knot's
+size counts the corpus entries whose proof rests deepest on it; the Leaves button hangs them on the
+tree. The {nfront} frontier results are dashed blueprint shoots, each bud coloured by the state of
+its issue, with the open problems as stars. Proved results that rest on no node grow straight from
+the soil; entries that touch no node lie on the ground. Click a node to trace its lineage; drag to
+pan, scroll to zoom; names fill in as you zoom.</p>
 <div class="t-box" id="tree-box"><div class="t-tools">
 <input id="t-q" type="search" placeholder="Find a node: Itô, VaR, Heston…" aria-label="Find a node" autocomplete="off">
 <button type="button" id="t-grow">Grow it again</button>
