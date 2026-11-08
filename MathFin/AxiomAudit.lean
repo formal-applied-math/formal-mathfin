@@ -2597,9 +2597,9 @@ bounded-coefficient process class. -/
 #guard_msgs in
 #print axioms MathFin.portfolioVarN_minVarWeightTwo_le
 
-/-- info: 'MathFin.exists_hasEMMMultiState_of_isLocalMaxOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.exists_isEMM_of_isLocalMaxOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
-#print axioms MathFin.exists_hasEMMMultiState_of_isLocalMaxOn
+#print axioms MathFin.exists_isEMM_of_isLocalMaxOn
 
 /-- info: 'MathFin.capm_of_affine_discountFactor' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in

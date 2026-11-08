@@ -57,6 +57,7 @@ Differentiability of `u` at the optimal wealths is implied by `deriv u (W ω) > 
 * `exists_statePrices_of_isLocalMaxOn`: marginal utility, normalised, is a strictly positive
   state-price vector.
 * `exists_hasEMMMultiState_of_isLocalMaxOn`: the optimum defines a pricing measure.
+* `exists_isEMM_of_isLocalMaxOn`: the same as a measure `Q` with `OnePeriodVector.IsEMM`.
 * `hasEMMMultiState_of_statePrices`: strictly positive state prices give `HasEMMMultiState`.
 * `logUtility_statePrices_of_stationary`: for `u = log`, the density is `w₀ * p / W`.
 
@@ -77,7 +78,7 @@ MSC 91G10
 
 namespace MathFin
 
-open Filter Topology
+open MeasureTheory Filter Topology
 
 variable {N M : ℕ}
 
@@ -275,6 +276,22 @@ theorem exists_hasEMMMultiState_of_isLocalMaxOn [NeZero N] {p : Fin N → ℝ} {
       HasEMMMultiState fun k ω ↦ A k ω - pr k / ∑ ω', q ω' := by
   obtain ⟨μ, hμ, hpos, hprice⟩ := exists_statePrices_of_isLocalMaxOn hmax hθ hw₀ hp hW hu
   exact ⟨_, hpos, ⟨μ, hμ, fun _ ↦ rfl⟩, hprice, hasEMMMultiState_of_statePrices hpos hprice⟩
+
+/-- **The optimum defines a pricing measure on the state space.** For a probability `P` on the
+states charging every state, the optimum of `exists_hasEMMMultiState_of_isLocalMaxOn` gives
+strictly positive state prices `q` and a measure `Q` that is an equivalent martingale measure
+(`OnePeriodVector.IsEMM`) for the excess-return vector `A k ω - pr k / ∑ q`. -/
+theorem exists_isEMM_of_isLocalMaxOn [NeZero N] (P : Measure (Fin N)) [IsProbabilityMeasure P]
+    (hP : ∀ i, P {i} ≠ 0) {p : Fin N → ℝ} {u : ℝ → ℝ} {A : Fin M → Fin N → ℝ}
+    {pr : Fin M → ℝ} {w₀ : ℝ} {θ : Fin M → ℝ}
+    (hmax : IsLocalMaxOn (portfolioUtility p u A) {θ' | portfolioCost pr θ' = w₀} θ)
+    (hθ : portfolioCost pr θ = w₀) (hw₀ : 0 < w₀) (hp : ∀ ω, 0 < p ω)
+    (hW : ∀ ω, 0 < portfolioPayoff A θ ω) (hu : ∀ ω, 0 < deriv u (portfolioPayoff A θ ω)) :
+    ∃ q : Fin N → ℝ, (∀ ω, 0 < q ω) ∧ (∀ k, statePricePricing Finset.univ q (A k) = pr k) ∧
+      ∃ Q, OnePeriodVector.IsEMM P
+        (multiStateReturn fun k ω ↦ A k ω - pr k / ∑ ω', q ω') Q := by
+  obtain ⟨q, hq, -, hprice, hemm⟩ := exists_hasEMMMultiState_of_isLocalMaxOn hmax hθ hw₀ hp hW hu
+  exact ⟨q, hq, hprice, (hasEMMMultiState_iff_exists_isEMM _ P hP).mp hemm⟩
 
 /-- **Logarithmic utility: the density is the reciprocal of the optimal wealth.** For `u = log`
 and probabilities summing to one, a stationary portfolio of positive wealth `W` and budget
