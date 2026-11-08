@@ -37,6 +37,8 @@ import sys
 import time
 from pathlib import Path
 
+from . import library
+
 REPO = Path(__file__).resolve().parents[2]
 LEDGER_PATH = REPO / "verification_ledger.json"
 BENCH_DIR = REPO / "benchmarks"
@@ -70,20 +72,11 @@ def _pin_bytes(path: Path) -> bytes:
     ]
     return json.dumps(manifest, sort_keys=True).encode()
 
-MATHFIN_IMPORT_RE = re.compile(
-    r"^\s*(?:public\s+)?import(?:\s+all)?\s+(MathFin(?:\.[A-Za-z0-9_]+)*)\s*$",
-    re.MULTILINE,
-)
-
 DAEMON_HOST = "127.0.0.1"
 DAEMON_PORT = 7878
 
 
 # ---------------------------------------------------------------- inputs
-
-def _module_path(module: str) -> Path:
-    return REPO / (module.replace(".", "/") + ".lean")
-
 
 def _sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -109,19 +102,19 @@ class InputHasher:
     def _imports_of(self, path: Path) -> list[str]:
         if path not in self._file_imports:
             text = path.read_text(encoding="utf-8")
-            self._file_imports[path] = MATHFIN_IMPORT_RE.findall(text)
+            self._file_imports[path] = library.library_imports(text)
         return self._file_imports[path]
 
     def closure(self, code: str) -> list[tuple[str, str]]:
         """Transitive MathFin modules imported by a snippet: (module, sha)."""
         seen: dict[str, str] = {}
-        frontier = MATHFIN_IMPORT_RE.findall(code)
+        frontier = library.library_imports(code)
         missing: list[str] = []
         while frontier:
             module = frontier.pop()
             if module in seen:
                 continue
-            path = _module_path(module)
+            path = library.module_path(module, REPO)
             if not path.is_file():
                 missing.append(module)
                 seen[module] = "MISSING"
@@ -234,7 +227,8 @@ def exec_check(code: str, timeout: float) -> dict:
         tmp_host.unlink(missing_ok=True)
     out = (proc.stdout or "") + (proc.stderr or "")
     errors = [ln for ln in out.splitlines() if "error" in ln.lower()]
-    sorry_count = out.count("declaration uses 'sorry'")
+    # Lean writes the name in backticks since v4.2x and in straight quotes before; count both.
+    sorry_count = len(re.findall(r"declaration uses [`']sorry[`']", out))
     return {
         "success": proc.returncode == 0 and not errors and sorry_count == 0,
         "errors": errors[:20],
@@ -275,7 +269,7 @@ def cmd_verify(args) -> int:
     # a repeat import-set ~0.1s vs ~60-80s for a fresh one, so ordering by
     # import set amortizes env construction maximally.
     targets.sort(key=lambda item: (
-        tuple(sorted(MATHFIN_IMPORT_RE.findall(item[2]))) or ("~mathlib-only",),
+        tuple(sorted(library.library_imports(item[2]))) or ("~mathlib-only",),
         item[0], item[1],
     ))
     if args.shard:
@@ -302,6 +296,7 @@ def cmd_verify(args) -> int:
     print(f"verifying {len(targets)} entries via {via} (HEAD {head})",
           flush=True)
     failures = []
+    aborted = False
     # Rows verified by THIS run, written out incrementally so an interrupted or
     # timed-out shard still contributes everything it finished.
     fragment: dict[str, dict] = {}
@@ -313,6 +308,7 @@ def cmd_verify(args) -> int:
                 subprocess.TimeoutExpired) as exc:
             print(f"\nABORT at {tid}: checker unavailable ({exc}). "
                   "Fix and resume with `verify --stale`.", flush=True)
+            aborted = True
             break
         elapsed = round(time.monotonic() - t0, 1)
         if verdict.get("success"):
@@ -341,7 +337,8 @@ def cmd_verify(args) -> int:
         print(f"  FAIL {fname:32} {tid}")
         for err in errors[:3]:
             print(f"       {err}")
-    return 1 if failures else 0
+    # An aborted run verified only part of its targets: never report it as a pass.
+    return 1 if failures or aborted else 0
 
 
 def _parse_shard(spec: str) -> tuple[int, int]:

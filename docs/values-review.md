@@ -96,7 +96,7 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   not state the derivative of an explicit lower-order formula such as a delta
   `Φ(d₁)` or a vega `S·ϕ(d₁)·√τ`. `hasDerivAt_deriv_of_eventually`, or
   `hasDerivAt_deriv_param_of_eventually` for a mixed partial
-  (`Foundations/DerivOfDeriv.lean`), makes the formula-level result a
+  (`Probability/Analysis/DerivOfDeriv.lean`), makes the formula-level result a
   statement about the price, once the formula is shown to be the lower
   derivative near the point. The Greeks family has stated genuine higher derivatives since
   2026-09-18. An entry that still differentiates a formula says so in its
@@ -124,11 +124,314 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   that finds nothing to improve.
 
 ## Review log
+## 2026-11-08 — corpus 817, modules 731 — the one trunk, phases 0–2, read before it lands
+
+Scope: the one-trunk work since the RiO review (#450, #451; branches `v2/phase2c-horizon` and
+`v2/phase2d-black-scholes`). `Market`, `IsPricingMeasure` (equivalence on `𝓕 T` only), `price` and
+`priceAt` (`Pricing/Market.lean`) and `Contract.value` with a stochastic deflator
+(`Pricing/Value.lean`). Three markets on it: discrete (`Pricing/DiscreteMarket.lean`), binomial
+(`Models/Binomial/Market.lean`) and Black–Scholes (`Models/BlackScholes/Market.lean`).
+Superreplication and gains-neutral measures as instances (`Pricing/MarketCompleteness.lean`). The
+support lemmas: `MartingaleFrozen`, `EquivMeasure`'s gluing lemma and `TimeChange`. 13 new corpus
+entries. Three read-only reviewers split the lenses:
+- the first pass with lenses 7 and 8;
+- lenses 2, 3 and 6;
+- lenses 1, 4 and 5.
+
+### The standing first pass: prose against statement
+
+- Twelve of the thirteen entries are faithful. `gir-market-superreplication-price` named
+  `M.price Q c` for a merely gains-neutral `Q`, never shown to be a pricing measure of `M`, and
+  its description said the market was "driven additively by `B`", which nothing in the statement
+  says. This is the junk-value case. The theorem now takes `M.𝓕 T = 𝓕ᴮ_T` and
+  `M.IsPricingMeasure T μ` and concludes `M.IsPricingMeasure T Q` alongside the price identity. The
+  description says when the hypothesis on `μ` holds (a Bachelier-type market, not Black–Scholes
+  under its physical measure).
+- Module docstrings, fixed:
+  - `Market.lean` said the change of numéraire "changes the pricing measure". Only the price
+    identity is proved, and the docstring now says that `Q^N` being a pricing measure is not proved.
+  - `Market.lean` said "a measure equivalent everywhere is one" without the martingale condition.
+  - `Binomial/Market.lean` led with "the pricing measure is unique". It is unique on the
+    information at the horizon, and the lead now says so.
+  - `MarketCompleteness.lean` did not say that "the market driven by `B`" means its deflated asset
+    is `B`.
+  - `BlackScholes/Market.lean` said "Brownian motion" for a pre-Brownian hypothesis.
+  - `DiscreteMarket.lean` had a stale title and a stale model count.
+  - `Value.lean` said `value` integrates against "a pricing measure".
+- Dissolved on adjudication:
+  - the claim that the Black–Scholes pricing-measure proof re-proves `deflated_market` inline (it
+    rewrites through `B^θ`, not `W`, so the lemma does not apply);
+  - the claim that `Value.lean`'s "no theorem here needs `IsEMM`" is stale (it is true);
+  - the claim that the Wald exponential has no Itô representation in the library
+    (`discountedGBM_eq_itoIntegral`, `constDoleans_sub_one_mem_range`).
+
+### Upgrades executed
+
+- `Market.superReplicationPrice_eq_price` restated with a genuine pricing measure (above).
+- `Martingale.congr_ae` (an adapted a.e.-equal copy of a martingale is one) and
+  `Market.stronglyAdapted_deflated`, the general lemmas the Black–Scholes pricing measure needed, in
+  the general modules rather than inline.
+- The seven docstring corrections above.
+
+### Lens gradients
+
+- **Inspired math.** The exemplar is `IsPricingMeasure` with `of_trim_eq` and
+  `exists_isEquivProbMeasure`: the Föllmer–Schied notion, lossless in both directions. The next
+  upgrade is a trunk notion of strategy: `Market.NoArbitrage` with self-financing gains, so that the
+  three FTAPs are statements about a `Market` rather than about raw data or a parameter condition.
+- **Coherence.** The exemplar is `martingale_min_iff` and `martingale_min_of_trim_eq`, general and
+  consumed thinly by the trunk. The next upgrade is one `Martingale.integral_eq` lemma replacing the
+  seven re-derivations of "a martingale has constant mean".
+- **Zero slop.** The exemplar is the module docstrings' "not proved" disclosures. The next upgrade
+  covers the duplicated blocks in `Binomial/Market.lean` (the two `map_flips` bullets, the two
+  `crrUpProb` casts, `hgrid`/`hfl`), the duplicated `hS₀` shim and the `D ≡ 1` residue in
+  `DiscreteMarket.lean`.
+- **Architectural ingenuity.** The exemplar is the time change: the discrete market and the tree
+  become markets on `ℝ≥0` by `Filtration.comp`. The next upgrade is one `Market.ofDiscrete` along a
+  step `h` with a numéraire, of which `toMarket` and `Binomial.market` are both instances.
+- **First principles.** The exemplar is the Black–Scholes uniqueness gap, stated as a gap. The next
+  upgrade is `exists_isEquivProbMeasure` under `SigmaFinite (P.trim _)` instead of
+  `IsFiniteMeasure P`.
+- **Idiomatic register.** The exemplar is `exists_isEquivProbMeasure` as a two-line term. The next
+  upgrade is `trim_eq_trim_iff` and `isProbabilityMeasure_of_trim_eq`, replacing four hand-rolled
+  `Measure.ext`/`trim_measurableSet_eq` blocks.
+- **Concept clarity.** The exemplar is `Market.lean`'s header (definition, then why `𝓕 T`, then
+  when the total `price` is a price). The next upgrade is to state `IsPricingMeasure` through
+  `IsEquivProbMeasure (P.trim _) (Q.trim _)` instead of a bare `ac`/`ac'` pair.
+- **Beautiful math.** The exemplar is the gluing lemma `exists_isEquivProbMeasure_trim_eq` (weight
+  `P` by `d(Q|m)/d(P|m)`). The next upgrade is the Black–Scholes keystone itself (#452).
+
+### Ranked backlog
+
+1. Black–Scholes uniqueness among pricing measures with an `L²` density (#452, phase 3). The route:
+   under the Girsanov measure the deflated asset is `S₀ + ∫ σS dB^θ`
+   (`discountedGBM_eq_itoIntegral`), so `pricesGainsAtZero_of_density` applies. The filtration of
+   `B^θ` against that of `W` is the step to settle first. The `L¹`-density case (localisation) stays
+   on the frontier.
+2. `Market.NoArbitrage` / self-financing gains on the trunk, with the discrete, binomial and
+   Black–Scholes FTAPs as instances (phase 5 or after v2.0).
+3. `Market.ofDiscrete` with a numéraire and a step, merging `toMarket` and `Binomial.market`. This
+   also opens the short-rate limb: `Market.ofShortRate`, with `value_fixedFlows_vasicek`/`hullWhite`/
+   `gsr` restated as `Market.price` (#453).
+4. `bondPrice` and `HasBondPrice` over a `Market` (`priceAt`), retiring the parallel definition
+   (#453).
+5. `Martingale.integral_eq`, `trim_eq_trim_iff` and `isProbabilityMeasure_of_trim_eq`, with their
+   callers migrated, as upstream candidates alongside `Martingale.congr_ae`, `Filtration.comp` /
+   `Martingale.comp` / `of_comp` and `exists_isEquivProbMeasure_trim_eq`.
+6. Binomial API friction: derive `hq` from `hna`, use `T = N h` as the single grid hypothesis, and
+   derive `BinomialNoArb` from `hQ` in `trim_eq_of_isPricingMeasure`.
+7. `Market.superPrice` over the set of pricing measures, convex and monotone, for the risk,
+   insurance and incomplete jump limbs (#454, #456, #459).
+8. A Mathlib-style home for `integral_abs_sum_le_of_identDistrib` (`Risk/CompoundPoissonCVaR.lean`),
+   and the mean-based domination there in place of `2ⁿ`.
+
 
 Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the **upgrade-driven model**
 (per-lens exemplar → next upgrade; upgrades executed + ranked backlog). Earlier entries are historical
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
+
+## 2026-11-07 — corpus 804, modules 725 — the RiO foundations, read before they land
+
+Scope: `feat/rio-foundations`, six foundation results, each with a seam into the contracts
+layer:
+- the Black–Scholes delta hedge (`DeltaHedge`, `BlackScholesHedge`, `BlackScholesSelfFinancing`);
+- the SDE Picard fixed point on every horizon (`SDEExistence`, `BlackScholesSDE`);
+- Girsanov for the filtration with bounded predictable `θ` (`GirsanovFiltered`,
+  `BlackScholesPhysical`);
+- stochastic Fubini and the HJM bundle (`StochasticFubini`, `StochasticFubiniIto`, `HJM`,
+  `HJMBond`);
+- the Dalang–Morton–Willinger reduction and pasting (`NoArbitrageLocal`, `DensityPasting`,
+  `DalangMortonWillinger`, `DiscreteMarket`);
+- the Itô product rule (`ItoProductRule`).
+
+There are 23 new corpus entries. Three read-only reviewers split the lenses:
+- the first pass with lenses 7 and 8;
+- lenses 2, 3 and 6;
+- lenses 1, 4 and 5.
+
+### The standing first pass: prose against statement
+
+Most of the new prose states its hypotheses where it should: `ConditionalOnePeriodFTAP`,
+`hprice`, `T' < T`, `t ≤ H`, and "almost sure per date, not pathwise". The pass found three
+patterns of overclaim.
+
+- **Names that promise what the scope retracts.**
+  - "The delta hedge is self-financing" (entry name, blueprint title, module title): the entry
+    states the self-financing *equation* as an integral identity, with no strategy predicate.
+  - "SDE strong solution: existence and uniqueness": the entry proves a unique fixed point of the
+    Picard map in `L²`, with no continuous adapted representative.
+  - "the hedge pays the call": what is proved is that the call price formula tends to the payoff.
+
+  All are renamed to what they deliver. `DeltaHedge` loses the "self-financing strategy" tag.
+- **Quantifier order.** `exists_isEMM_parity` bound the strike and the maturity before `∃ Q`,
+  while its prose read "one `Q` for every strike and maturity". The Lean statement is now the
+  stronger `∃ Q, IsEMM … ∧ ∀ K τ, …`, which the proof already gave, so the prose is true.
+- **Dropped qualifiers.**
+  - The Girsanov landmark and README wrote `B_t + ∫₀ᵗ θ` for what is an adapted modification of
+    `B_t + ∫₀^{t∧T} θ`.
+  - The HJM sentences omitted the deterministic time-0 curve (`hdet`).
+  - `GirsanovFiltered` promised continuous paths without the continuity hypothesis.
+  - `StochasticFubini` listed the Lévy integral beside the two instances that exist.
+  - The DMW descriptions said "inner-product space F" without noting that the hypothesis is the
+    conditional FTAP only for `F = ℝ^d`.
+  - The density-pasting node omitted the adapted integrable price.
+
+  All are restated.
+
+**Taxonomy.** `mf-hjm-fixed-flows` was `full` while assuming `E[D(tᵢ)] = P(0,tᵢ)`, the identity
+the HJM drift condition is for. Given it, the theorem is the model-agnostic zero-curve valuation.
+It is now `reduced_core`, like the two entries that assume the conditional one-period FTAP.
+
+Junk values: `HJMModel.bankAccount` and `discount` integrate the short rate `f(s,s)`, which the
+bundle did not assume integrable. A non-integrable short rate made the discount factor
+`exp 0 = 1`. The bundle now carries `shortRate_integrable` (design.md §2).
+
+### Upgrades executed
+
+- **One physical-value theorem for every contract.**
+  - New: `value_physical_eq_riskNeutral`. Under the Girsanov measure of `(m − r)/σ`, any
+    fixed-dated contract observed in `[0, H]` has, on the physical asset, its value on the
+    risk-neutral asset of `B^θ`.
+  - The call, chooser and geometric-Asian theorems were three copies of one `value_congr_ae`
+    spine; they are now its instances.
+  - It is the blueprint node `thm:physical-measure-pricing` and a corpus entry
+    (`mf-bs-physical-contract-value`).
+- **No advertised dependency that is not used.** `BlackScholesSelfFinancing` imported
+  `ItoProductRule` and its docstring called the proof "the product rule". The proof is Itô's
+  formula for `e^{rt}x`. The import is gone and the docstring says what the proof does.
+- **The coherence findings, executed on a branch before landing:**
+  - `Payoff.obsTimes` was the same recursion as the new `Payoff.obsList`, so there is one
+    primitive.
+  - `HasOnePeriodDensity` and `LocalEMMDensities` stated the same five per-period conditions
+    twice; they now share `IsOnePeriodDensity`.
+  - Predictability of time, of the Brownian path and of constants was re-derived at four sites;
+    one Foundations lemma each now covers them.
+  - `HJMModel.integratedRate` replaces three copies of the integrated short rate.
+  - `eval_congr`'s six identical cases are one or-pattern.
+  - The redundant `hρa`/`hρc` hypotheses of the product-rule additivity lemmas are gone.
+  - The moved `timeMeasure_Ioc_eq_interval` is in house style.
+
+### Ranked backlog
+
+1. **Consumers for three foundations.** The product rule, stochastic Fubini and the
+   any-horizon fixed point are each used only by their corpus entries.
+   - Derive the self-financing equation from `ito_product_rule_process` with the
+     finite-variation factor `e^{rt}`, which removes the second `timeCap` bookkeeping, or the
+     discounted-stock representation `e^{−rt}S_t = S₀ + ∫ σ e^{−rs}S_s dB_s`.
+   - `pathAssets_eq_picardSolution`: GBM is the unique Picard fixed point. Then the contract
+     model is the SDE's solution, not a convention.
+   - `HJMModel.expected_discount_eq_bond_zero` from the drift condition `α = σ σ*` via
+     `stochFubini_ito`, which retires `hprice`.
+2. **`IsSelfFinancing` as a predicate.** A structure on `(Δ, ψ)`: predictable, value
+   `ΔS + ψ`, and the self-financing equation. Then `europeanCall_hedge_isSelfFinancing`
+   instantiates it, the hedge value equals `C(t, S_t)` as a corollary, and the physical and HJM
+   seams can reuse it. Link it to `ContinuousMarket.SimpleStrategy`.
+3. **`conditionalOnePeriodFTAP_of_finite_filtration`.** For `𝓕 t` generated by finitely many
+   atoms of positive mass, apply `ftap_one_period_vector` per atom and paste. This makes
+   `exists_isEMM_of_noArbitrage` unconditional on countable `Ω`, and gives `DiscreteMarket` an
+   unconditional instance. Also connect the CRR tree as a `discreteAssets` model with its EMM,
+   since the DiscreteMarket seam is the weakest of the six.
+4. **The delta hedge beyond the call.**
+   - `heat_solution_itoIntegral_rep`: `f(t, B_t) = f(0,0) + ∫ f_x dB` for `f_t + ½f_xx = 0`, of
+     which the call hedge is an instance.
+   - The put hedge by parity.
+   - The identity up to `T` by localisation at `τ_n ↑ T` in place of `timeCap`.
+5. **Random physical drift.** `value_europeanCall_physical` with a predictable drift `m_t`. It
+   is the case the predictable-`θ` Girsanov theorem exists for and that the constant-`θ` seam
+   does not exercise. It needs a `pathAssets` with drift integral.
+6. **Unify the two constant-`θ` Girsanov measures.** `ZTpred` of a constant is
+   `exp(−θB_T − ½θ²T)`; prove it, and `GirsanovConstantTheta` becomes an instance.
+7. **Name checks for scope words.** Extend `test_prose_does_not_outrun_statement` to entry
+   names: "self-financing", "strong solution", "existence and uniqueness", "replicat" beside a
+   "Not proved" clause naming the same notion.
+
+## 2026-11-06 — corpus 779, modules 710 — library practices (#439), read before it lands
+
+Scope: #439, the library-practices program (`docs/specs/2026-11-05-library-practices-design.md`):
+the declaration index, one ratchet, one host-side library model, one doc standard on every module,
+one bibliography, `MathFin/Init.lean`, the blueprint ↔ issues link, and the debt the index found.
+Three read-only reviewers: the lemmas this branch made public (lenses 2, 3, 6), the Lean structure
+it changed (`IsEMM`, the twelve removed duplicates, the `pricing` set, the renames; lenses 1, 4,
+5), and 85 rewritten module docstrings against their statements (lenses 7, 8 and the first pass).
+Their findings were adjudicated against the code, executed, and built before the branch landed.
+
+### The standing first pass: prose against statement
+
+The doc standard put a `## Main results` list in every module, about 170 of them written this
+session, which is a great deal of new prose to read against statements. Seven bullets said more
+than the theorem: a balance equation over abstract reals read as a hazard-model theorem
+(`cdsFairSpread_TV_cash_flow_balance`); a conditional-expectation identity as "is a martingale"
+(`condExp_itoProcessCLM_min`); the binomial representation without its second martingale's
+nondegeneracy and `0 < q < 1`; the jump-diffusion martingale criterion without `S₀ ≠ 0` and
+integrable `e^J`, and its MGF without `∫ e^{θx} dν < ∞` (the junk-value case); a consistency
+witness read as a nontrivial density, where it is `Q = μ`; and a one-period zero-mean identity as
+a martingale. All are restated. One flagged bullet was dismissed: the Glosten–Milgrom average does
+go through `integral_condExp`. Seven modules still had bare name lists under Main results (`Cox`,
+`HullWhiteCalibration`, `Bootstrapping`, `CMS`, `UniswapMechanics`, `MarshallOlkin`,
+`ConvexDuality`); they are bullets now, hypotheses included. Beyond the bullets:
+`martingale_comp_monotone` claimed to be the sampling bridge of the forward FTAP, which uses
+`IsEMM.sampled`, and the `pricing` set promised discounting and forward-price lemmas it never held.
+
+### Upgrades executed
+
+- **One-liners inline, upstream by name.** The index's count of Mathlib-shaped private lemmas went
+  193 → 0, but the first resolution made every one public, and the coherence panel found 52 thin
+  wrappers, 9 upstream copies and 4 duplicates among them. Publishing a one-liner trades a hidden
+  helper for a public wrapper. 26 are gone: 23 written inline (`by positivity`, `fun_prop`,
+  `rw [abs_div, abs_two]`, `.pos_part`, …), `hasDerivAt_const_mul` and
+  `intervalIntegral.continuous_primitive` called by name, and `absolutelyContinuous_of_pos`
+  folded into `eq_empty_of_pos_singleton`. 34 stay, each for a stated reason (a rewrite handle in
+  `rw` lists, an upstream lemma outside the file's imports, an ascription longer than the lemma).
+  The spec and `decl_index.mathlib_shaped_private` now name the three resolutions.
+- **One `L²` increment.** `memLp_increment` (`GaussianMoments`, beside `hasLaw_increment`): for
+  any two times, `B t − B s ∈ L²(μ)`. It replaces `WienerIntegralL2.memLp_increment_two` (on a
+  `StepIndex`) and `PointwiseBracket.memLp_increment` (with an order hypothesis it never used).
+- **The `pricing` set holds what grind can use.** `mertonTerm_parity` and `margrabe_parity` were
+  tagged with no example. Pinned, both failed: each is stated as a difference (`call − put = …`),
+  so grind's only pattern is that difference, which a rearranged goal never contains. Both are
+  untagged, and the set's description now says what it holds (parity on the closed forms, the
+  trees' risk-neutral probabilities).
+- **Renames finished.** `memLp_uncurry_trim_T` → `memLp_uncurry_trimMeasure`,
+  `assembly_isometry_T` → `norm_itoAssemblyHorizon` (their objects were renamed in this branch);
+  `max_zero_sub_eq_self` (a Mathlib alias) → `max_zero_sub_max_neg_zero_eq_self`, the name the
+  rest of the library uses.
+
+Confirmed and fine: the one `IsEMM` over `[LinearOrder ι]` (no restated ℕ or ℝ≥0 lemma survives),
+the twelve duplicates went to the copies every user imports, the `PointwiseBracket` increment
+merge, and the `TwoState`/`MultiState`/`Horizon` renames.
+
+### Ranked backlog
+
+1. **The Brownian increment kernels at `IsFilteredPreBrownian`.** Mean zero and variance of an
+   increment given `𝓕_s` are derived inline in `squareSubTime_isMartingale`, again in
+   `PointwiseBracket.condExp_increment_eq_zero`/`_sq`, and a third time in
+   `integral_sq_increment`. State `IsFilteredPreBrownian.condExp_increment_eq_zero` and `_sq`
+   once, and make the others instances.
+2. **The exponential survival function, once.** `expMeasure_real_Ioi` (`MarshallOlkin`),
+   `expMeasure_Ioi` (`ExpMin`, its `ofReal` form) and `expClock_Ioi`/`_Iic` (`Cox`, at rate 1)
+   state it three times; the survivor belongs in a module the other two import.
+3. **The kept wrappers.** The six chain-rule shims in `WeakForwardUniqueness` are
+   `HasDerivAt.cos`/`.sin` of `hasDerivAt_const_mul` plus `congr_deriv (by ring)`;
+   `martingale_norm_submartingale` and `iSup_rpow_of_monotone` are BrownianMotion's
+   `Martingale.submartingale_norm` and `ENNReal.rpow_iSup` once `DoobLpMaximalInequality` imports
+   it; the four `Lp.const` helpers in `MartingaleRepresentation` vanish if constants are written
+   `Lp.const 2 μ c`; `convexOn_inv_shift` is `convexOn_zpow (-1)` after a translation. Each needs
+   Lean in the loop.
+4. **`IsEMM.sampled` and `sampledFiltration` at a monotone `t : κ → ι`**, beside the already
+   general `IsEMM.increment`; and the vector, general-`Ω` form of `isEMM_one_iff_onePeriod`, which
+   retires the hand-built two-step filtration in `noArbitrage_of_isEMM`.
+5. **First principles.** `emm_unique_of_complete` uses only `IsEquivProbMeasure` of its `IsEMM`
+   argument; state it there.
+6. **Names.** `OnePeriodVector.IsEMM` shadows the unified `IsEMM` inside its namespace; the
+   `Horizon` suffix next to unsuffixed `trimMeasure`/`itoIsometry` hides which objects are the
+   horizon ones; `band_overlap_real`, `min_gt_iInter` and `upperPartialMoment_sub` say nothing
+   about their statements; the MatrixSignature `toQuadraticForm'` lemmas are upstream candidates
+   that will collide when Mathlib adds them.
+7. **Merton and Margrabe parity in price form.** `bsP_eq_bsV` states the put as a function of the
+   call, which gives grind a pattern; restate `mertonTerm_parity` and `margrabe_parity` the same
+   way and tag them, with a pinned example each.
+8. **The nine heartbeat bumps** (89 to 614 lines each): one lemma per idea, with Lean in the loop.
 
 ## 2026-11-05 — corpus 779, modules 709 — the backlog closed on main, read before it lands
 
@@ -192,7 +495,7 @@ re-threads the parameter list).
 2. The CDS premium leg as a contract: the tower has no continuous payment stream.
 3. `snellAux_supermartingale`'s pathwise clause, kept because `bermudanPrice_snell_minimal` and a
    benchmark state pathwise hypotheses; restate them a.e. and drop it.
-4. `Foundations/FiniteMeasureCauchySchwarz` now also holds covariance lemmas under
+4. `Probability/Analysis/FiniteMeasureCauchySchwarz` now also holds covariance lemmas under
    `IsProbabilityMeasure`; `StdSimplex.prod` and `lp_two_norm_sq` are upstream candidates.
 
 ## 2026-11-04 — corpus 773, modules 703 — the pin bump (BrownianMotion 497e5e2, Mathlib e91b128), read before it lands
@@ -272,11 +575,11 @@ proved; `aeStoppingValue` (a bare `sSup`) gained the junk-value sentence `stoppi
   gets the corpus entry its Vasicek and GSR siblings had.
 - **Snell and FTAP.** The tree's Snell envelope agrees with the general one
   (`snell_ae_eq_snellEnvelope`, now a corpus entry and a bridges row); the Doob decomposition of the
-  envelope moves to `Foundations/SnellDoobDecomposition` in namespace `MathFin` (it never needed the
+  envelope moves to `Probability/Discrete/SnellDoobDecomposition` in namespace `MathFin` (it never needed the
   American put); the `*_bellman` lemma names follow the object they are about (`snellEnvelope`);
   FTAP II's 45-line `by_contra` ladder is two lemmas in `ConvexSeparation` (a nonzero annihilator of a
   proper subspace, on Mathlib's `Submodule.exists_le_ker_of_lt_top`; a positive perturbation); one
-  `BinomialNoArb.exists_nnreal_crrUpProb` in `Binomial/Model` replaces a repeated block; `gridTime_mono`
+  `BinomialNoArb.exists_nnreal_crrUpProb` in `Models/Binomial/Model` replaces a repeated block; `gridTime_mono`
   replaces three cast inequalities; implicit `hq` arguments that every caller named became explicit.
 
 ### Lens gradients
@@ -402,7 +705,7 @@ Vasicek forward rate is a shifted lognormal, a remark, not a theorem). No overst
 
 8. Beauty, the panel's verdicts. Exemplary, leave them: `ftap_discrete`,
    `noArbitrage_horizonSpot_iff`, `bermudanPrice` and `bermudanCallPrice_eq_binomialPrice`, the CDS
-   and cap values, `value_chooser` and parity, `itoIntegralCLM_T := itoIntegralL2 ∘ bandExtend` with
+   and cap values, `value_chooser` and parity, `itoIntegralCLM := itoIntegralL2 ∘ bandExtend` with
    its cross-horizon consistency, the adapted Girsanov proof (12 lines, one idea per transport lemma),
    and the proof of `martingale_of_setIntegral_eq`. Sound but obscured: Lévy's characterization (the
    stopped pair spelled out ~25 times, one localisation recipe three times), the local Itô formula (a
@@ -536,7 +839,7 @@ not determine `k` and `b`). Every branch: ledger fresh 725/725, sweep and build 
 
 ## 2026-10-29 — corpus 713, modules 656 — stochastic discount factors, and bonds in the Gaussian short-rate models
 
-Scope: the rates tower's first step into contracts, after #287. Four entries were added to `contracts.json` (all `full`); corpus 709 → 713. One module was added: `Contracts/Models/ShortRate.lean`.
+Scope: the rates tower's first step into contracts, after #287. Four entries were added to `contracts.json` (all `full`); corpus 709 → 713. One module was added: `Models/Rates/ShortRate.lean`.
 
 ### Upgrades executed
 
@@ -598,7 +901,7 @@ Every new module passes in the daemon, with 0 sorries. `AxiomAuditGen` is regene
 
 ## 2026-10-29 — corpus 705, modules 651 — the contract in any model, bonds and swaps, and the risk of a position
 
-Scope: the three contracts items after the binomial hedge. Nine entries were added to `contracts.json` (all `full`); corpus 696 → 705. Three modules were added: `Contracts/Parity.lean`, `Contracts/Instruments/FixedIncome.lean` and `Contracts/Risk.lean`.
+Scope: the three contracts items after the binomial hedge. Nine entries were added to `contracts.json` (all `full`); corpus 696 → 705. Three modules were added: `Pricing/Parity.lean`, `Contracts/Instruments/FixedIncome.lean` and `Risk/ContractRisk.lean`.
 
 ### Upgrades executed
 
@@ -611,7 +914,7 @@ Scope: the three contracts items after the binomial hedge. Nine entries were add
   - `Contract.loss` is the price paid less the path PV.
   - The book bound is `expectedShortfall_add_le` read through `pathPV_both`.
   - The hedged binomial seller's zero risk is the replication identity `pathPV_eq_value_add_gains` read pointwise.
-  - The two constant-loss lemmas the proofs needed (`valueAtRisk_const`, `expectedShortfall_const`) went to `RiskMeasures/ValueAtRisk.lean`, the module they are about.
+  - The two constant-loss lemmas the proofs needed (`valueAtRisk_const`, `expectedShortfall_const`) went to `Risk/ValueAtRisk.lean`, the module they are about.
 
 ### The standing first pass: prose against statement
 
@@ -684,7 +987,7 @@ The daemon checks of every follow-up file pass: `KeyRateDuration`, `CIRSquaredOU
 
 ## 2026-10-29 — corpus 671, modules 631 — the binomial value is the cost of its hedge
 
-Scope: replication in the tree, then stated for a contract. Two entries were added, `mf-binomial-european-replication` and `mf-contract-binomial-hedge` (both `full`); corpus 669 → 671. One module was added, `Binomial/EuropeanReplication.lean`.
+Scope: replication in the tree, then stated for a contract. Two entries were added, `mf-binomial-european-replication` and `mf-contract-binomial-hedge` (both `full`); corpus 669 → 671. One module was added, `Models/Binomial/EuropeanReplication.lean`.
 
 ### Upgrades executed
 
@@ -706,7 +1009,7 @@ Scope: replication in the tree, then stated for a contract. Two entries were add
 
 1. The explicit delta-hedge formula for the strategy.
 2. Path-dependent payoffs: replication for a contract paying a function of the whole path up to `N`. The model map is already a genuine path.
-3. The American case: the Snell envelope's hedge with consumption (`Binomial/SnellEnvelope.lean`).
+3. The American case: the Snell envelope's hedge with consumption (`Models/Binomial/SnellEnvelope.lean`).
 
 ### Evidence
 
@@ -718,7 +1021,7 @@ Scope: the realization gap that #340 was closed with. One entry was added, `mf-g
 
 ### Upgrades executed
 
-- **The abstraction lifted, not repeated.** Both examples needed a Gaussian pair with given moments. It is one definition in the library, `gaussianPair` in `Foundations/BivariateNormalCDF.lean`, not two constructions in two example files. It is built on the Cholesky pair the file already had. Its law is Mathlib's instances for linear images and translates, and its moments are Mathlib's affine variance and covariance lemmas applied to the pair's.
+- **The abstraction lifted, not repeated.** Both examples needed a Gaussian pair with given moments. It is one definition in the library, `gaussianPair` in `Probability/Gaussian/BivariateNormalCDF.lean`, not two constructions in two example files. It is built on the Cholesky pair the file already had. Its law is Mathlib's instances for linear images and translates, and its moments are Mathlib's affine variance and covariance lemmas applied to the pair's.
 - **No vacuous checks left.** `Book.isRealization_gaussianPair` realizes every book, and `sample_checked` in the risk report now opens with the witness. `AssetPair.exists_returns` does the same for the minimum-variance variance clause. The "no realization is constructed" disclosures are replaced by what is now true.
 
 ### The standing first pass: prose against statement
@@ -742,17 +1045,17 @@ Scope: the realization gap that #340 was closed with. One entry was added, `mf-g
 
 ## 2026-10-28 — corpus 668, modules 630 — one contract, two models: the binomial tree
 
-Scope: a second model for the contracts tower (`Contracts/Models/Binomial.lean`) and a bridge between the two models (`Contracts/Models/BinomialLimit.lean`). Four entries were added, all `full`; corpus 664 → 668. The maintainer asked, mid-batch, that `Contracts/` not carry what belongs elsewhere, and that request shaped the result.
+Scope: a second model for the contracts tower (`Models/Binomial/Binomial.lean`) and a bridge between the two models (`Models/Binomial/BinomialLimit.lean`). Four entries were added, all `full`; corpus 664 → 668. The maintainer asked, mid-batch, that `Contracts/` not carry what belongs elsewhere, and that request shaped the result.
 
 ### Upgrades executed
 
 - **The contracts layer translates, and the model's facts live with the model.** The first draft put the spot's measurability and bound, a risk-neutral measure with its instance, and the CRR up-probability's range in the contracts file. Now:
-  - `measurable_spotPath` and `abs_spotPath_le` are in `Binomial/PathMeasure.lean`;
+  - `measurable_spotPath` and `abs_spotPath_le` are in `Models/Binomial/PathMeasure.lean`;
   - the measure is the existing `coinFlipMeasure q` with `crrUpProb u d ρ = q`, in the shape `binomialPrice_eq_integral_coinFlipMeasure` already uses, so there is no new definition;
-  - `crrProb_mem_Icc` is in `Binomial/CRRConvergence.lean`.
+  - `crrProb_mem_Icc` is in `Models/Binomial/CRRConvergence.lean`.
 
   The rule is now in the tower spec: a `Contracts` file proves only statements that mention a `Payoff` or a `Contract`.
-- **One proof where there were two.** `crrProb_mem_Icc` replaces two identical inline proofs in `Binomial/CRRCharFun.lean`.
+- **One proof where there were two.** `crrProb_mem_Icc` replaces two identical inline proofs in `Models/Binomial/CRRCharFun.lean`.
 - **A general lemma in place of per-instrument ones.** `Contract.integrable_pathPV_of_bounded`: in a bounded model every contract is integrable. It gives `Payoff.measurable_eval` its first consumer, and the binomial capped call composes with no integrability lemma of its own.
 - **A namespace per model.** `Contracts.BlackScholes` and `Contracts.Binomial`, so one instrument's value has the same name in each model. `bsAssets` became `BlackScholes.assets`.
 - **A step length in the model.** The contract `europeanCall K T` is one term priced in every tree, whatever the number of steps. That is what lets `tendsto_binomial_value_europeanCall` state the CRR limit for one instrument in two models instead of for two pricing functions.
@@ -767,7 +1070,7 @@ Scope: a second model for the contracts tower (`Contracts/Models/Binomial.lean`)
 
 - **Inspired math.** Exemplar: the limit theorem, in which the contract stays fixed and only the model moves. Next: the put's limit, and a path-dependent instrument in the tree (backlog 1, 3).
 - **Coherence.** Exemplar: `value_pay_eq_binomialPrice` is `binomialPrice_eq_integral_coinFlipMeasure` read through `Contract.value_pay`, with nothing reproved.
-- **Zero slop.** Exemplar: the inline duplicate in `CRRCharFun` is gone. Next: `BlackScholes/CappedCall.lean` is a pure real identity filed under a model's directory (backlog 4).
+- **Zero slop.** Exemplar: the inline duplicate in `CRRCharFun` is gone. Next: `Contracts/Instruments/CallPayoff.lean` is a pure real identity filed under a model's directory (backlog 4).
 - **Architectural ingenuity.** Exemplar: the bridge is its own file, so neither model imports the other.
 - **Concept clarity.** Next: every statement repeats the triple `(Q, D, X)`. A `Model` structure would make the "same contract, other model" story visible in the types (backlog 5).
 
@@ -775,7 +1078,7 @@ Scope: a second model for the contracts tower (`Contracts/Models/Binomial.lean`)
 
 1. The put and the digital through the same limit. `tendsto_integral_put` is already in `CRRCharFun`.
 2. Value = hedge cost in the tree: a contract's binomial value is the initial cost of its replicating strategy (`binomial_martingale_representation`, `binomial_replicatingPortfolio_unique`). This is the next item of the contracts plan.
-3. A path-dependent instrument priced in the tree, such as a barrier digital through `Binomial/BarrierReflection.lean`.
+3. A path-dependent instrument priced in the tree, such as a barrier digital through `Models/Binomial/BarrierReflection.lean`.
 4. Move `cappedCall_eq_bull_spread` out of `BlackScholes/` to a model-free payoff-identity module, so that `Instruments/Options` imports nothing from a model's directory.
 5. A `Contracts.Model` structure bundling the pricing measure, the discount and the model map.
 6. Model-free parity (carried over from the previous block, item 1).
@@ -803,7 +1106,7 @@ Every finding acted on was confirmed against the code.
 - **The library's theorem, not a re-proof.** The binomial example cites `binomialPrice_callPut_parity`; its hand-written `parity` duplicated it.
 - **ES diversification by coherence.** The risk report proves ES subadditivity from `expectedShortfall_add_le`, at every level and for any integrable losses. Only VaR goes through the Gaussian closed form at `α ≥ 1/2`, which is the instructive contrast with `VaRSuperadditivity.lean`.
 - **Register.** `trans_eq` in place of `rw`/`exact` pairs; `sample_df` passed whole; snake_case theorem names (`gaussian_loss_report`, `defaultCorrelation_eq_and_nonneg`).
-- **The contract is not the model, in the module layout too.** `Contracts/Models/BlackScholes.lean` had defined the instruments as well as pricing them, and `Contracts/CappedCall.lean` mixed a definition with a price. Now:
+- **The contract is not the model, in the module layout too.** `Models/BlackScholes/BlackScholes.lean` had defined the instruments as well as pricing them, and `Contracts/CappedCall.lean` mixed a definition with a price. Now:
   - `Core`, `Adapted` and `Pricing` hold the language, its measurability and the model-agnostic value (with `Contract.value_pay`, formerly private to the model file);
   - `Instruments/Options` holds the instruments, what they pay and parity in any model;
   - `Models/BlackScholes` holds one model and the prices in it.
@@ -834,12 +1137,12 @@ Every finding acted on was confirmed against the code.
 ### Ranked backlog
 
 1. Model-free parity: the forward's value from `E[e^{−rT} S_T] = S₀` alone, so the quote check rules out every such pricing measure, not just Black–Scholes. It belongs with the next contracts batch (strategies, notes, swaps).
-2. Existence of a realization for the Gaussian book and the minimum-variance pair, by an affine image of `stdNormalVec` (`Foundations/BivariateNormalCDF.lean`), about 40 lines, shared by both. *Done 2026-10-29: `gaussianPair`, on the Cholesky pair rather than `stdNormalVec`.*
+2. Existence of a realization for the Gaussian book and the minimum-variance pair, by an affine image of `stdNormalVec` (`Probability/Gaussian/BivariateNormalCDF.lean`), about 40 lines, shared by both. *Done 2026-10-29: `gaussianPair`, on the Cholesky pair rather than `stdNormalVec`.*
 3. Credit: `ρ > 0 → ρ_D > 0` (`p` is strictly monotone and `F` has no atoms); `ρ_D` in closed form through `N₂(z, z; ρ)`.
 4. Binomial: tie the hedge to `binomial_replicatingPortfolio_unique` (the only arbitrage-free price), and make the sample tree a CRR tree.
-5. Bootstrapping: certify the whole curve (`df (n + 1) = df n / 1.03` for the flat tail), and lift `eq_df` into `FixedIncome/Bootstrapping.lean`.
+5. Bootstrapping: certify the whole curve (`df (n + 1) = df n / 1.03` for the flat tail), and lift `eq_df` into `Models/Rates/Bootstrapping.lean`.
 6. Minimum variance: `w ≠ w* → var > V_min`, and the diversification condition `V_min < min(σ₁², σ₂²) ⟺ ρ < min(σ₁/σ₂, σ₂/σ₁)` as a library theorem.
-7. Lift `gaussian_loss_report`, σ-form, into `RiskMeasures/GaussianExpectedShortfall.lean`; state the tail mean as a set average `⨍`.
+7. Lift `gaussian_loss_report`, σ-form, into `Risk/GaussianExpectedShortfall.lean`; state the tail mean as a set average `⨍`.
 8. One sheet record shape across the examples.
 
 ### Evidence
@@ -918,7 +1221,7 @@ reviewer found no dead hypotheses and no circularity.
 ### Upgrades executed
 
 - **The `C²` formula is a corollary.** All three reviewers found the same slop. `ito_formula_adapted_local` re-derived, with its own cutoff (`exists_bddDeriv_eqOn_Icc` and a private copy of `abs_mul_le_of`), the space localisation that `ito_formula_adapted_td_local` already carries out. Its `_le` step was a line-for-line copy of the time-dependent one. `ito_formula_adapted_local_le` is now the `f_t = 0` case of `ito_formula_adapted_td_local_le`, as `ito_formula_adapted_unbounded_C2_le` already was. About 150 lines are gone, and so is `ItoFormulaAdaptedLocal`: its horizon lemmas and the bounded-`f'` identification moved into `ItoFormulaAdaptedTD`.
-- **The layering is right side up.** The construction of the integral (`ItoIntegralLocalised`) imported a formula module, and opened its namespace, only to get eight generic lemmas. Those lemmas now live in `Foundations/LocalisationInMeasure`, which imports only Mathlib:
+- **The layering is right side up.** The construction of the integral (`ItoIntegralLocalised`) imported a formula module, and opened its namespace, only to get eight generic lemmas. Those lemmas now live in `Probability/Martingales/LocalisationInMeasure`, which imports only Mathlib:
   - limits in measure are local, in both directions;
   - continuous paths stay bounded with probability tending to `1`;
   - continuous processes that agree at each time agree as paths.
@@ -1180,7 +1483,7 @@ The batch's prose was careful about scope in most files; the overclaims were con
 
 - **One `bivariateNormalCDF`.** #262 and #266 each defined `MathFin.bivariateNormalCDF`, and the
   combined tree would not have built. TrancheLoss and the Gaussian copula consume
-  `Foundations/BivariateNormalCDF`; `posPart_Phi_sub_Phi` lives there once.
+  `Probability/Gaussian/BivariateNormalCDF`; `posPart_Phi_sub_Phi` lives there once.
 - **Consume, don't copy.** Component VaR on main's `marginalVariance` and
   `sum_riskContribution_eq_variance`; `integral_defaultDensity_zero` is
   `Cox.defaultDensity_antideriv`; GSR's bond price on a public antiderivative of `VasicekBondPrice`
@@ -1293,7 +1596,7 @@ none is filled there yet.
 
 ## 2026-10-15 — corpus 537 — #245: the CIR loadings solve their term-structure equations
 
-Scope: `FixedIncome/CIRRiccati` by Alfredo Garcia (@oxarbitrage), merged with its two commits
+Scope: `Models/Rates/CIRRiccati` by Alfredo Garcia (@oxarbitrage), merged with its two commits
 intact, and its two `full` entries, `mf-cir-bond-loading-riccati` and `mf-cir-bond-level-loading`.
 CI ran green on the pull request, and `build.yml` ran on the merged tree. A first single-reader pass
 found nothing beyond one golf; the three-agent panel the protocol asks for (lenses 1, 5 and 8;
@@ -1362,8 +1665,8 @@ counterpart of `B` is `vasicekBondB`.
 ## 2026-10-14 — corpus 535 — #244: the Itô–drift expectation, Hull–White, Monte Carlo, Cox, CMS, bootstrapping
 
 Scope: the eight modules of #244 by Yang Ye (@leafyoung), merged with its three commits intact:
-`Foundations/ItoDriftExpectation`, `ItoFormulaAdaptedDrift`, `ItoIntegralCrossHorizon`,
-`HullWhiteCalibration`, `MonteCarloPricer`, and `FixedIncome/Cox`, `CMS`, `Bootstrapping` — about
+`Probability/Brownian/Ito/ItoDriftExpectation`, `ItoFormulaAdaptedDrift`, `ItoIntegralCrossHorizon`,
+`HullWhiteCalibration`, `MonteCarloPricer`, and `Models/Credit/Cox`, `CMS`, `Bootstrapping` — about
 10.5k lines. No corpus entries; the corpus stays at 535. CI never ran on the pull request
 (workflows from a first-time contributor wait for approval), so `build.yml` was run on the merged
 tree. Three read-only agents read the prose against the statements (Hull–White and Monte Carlo;
@@ -1423,7 +1726,7 @@ All findings are applied.
 ### Lens gradients
 
 - **Coherence.** Exemplar: `MonteCarloPricer` consumes Mathlib's strong law and CLT instead of
-  re-deriving them. Next: `Bootstrapping`'s bisection engine duplicates `Foundations/Bisection`
+  re-deriving them. Next: `Bootstrapping`'s bisection engine duplicates `Probability/Analysis/Bisection`
   verbatim, so two `bisectMid` constants sit under the umbrella; Hull–White's kernel, its `L²` lemmas
   and the short-rate law duplicate `VasicekSDEGaussian`; `driftPrim` and its lemmas duplicate
   `AdaptedDrift.driftPath`, and `abs_driftPath_sub_le` is declared both in `MathFin` and in
@@ -1446,7 +1749,7 @@ All findings are applied.
    continuous `M` (or restate over `augFiltration`), or prove the expectation form as a corollary of
    `ItoFormulaAdapted.ito_formula_adapted` and retire the conditional route.
 2. **Bootstrapping**: state the induction's hypotheses at the prefix the recursion feeds in,
-   instantiate `boot` with the FRA and the swap, and switch to `Foundations/Bisection`.
+   instantiate `boot` with the FRA and the swap, and switch to `Probability/Analysis/Bisection`.
 3. **Dedupe** against `VasicekSDEGaussian`, `AdaptedDrift`, a shared exponential-discount lemma, and
    one payoff-generic Monte Carlo consistency and CLT.
 4. **CMS**: the change of measure from `Qᴬ` to the payment-date forward measure, for the adjustment
@@ -1532,13 +1835,13 @@ Scope: corpus 517 → 530, two rungs.
 - Convexity in the strike (corpus 522): `mf-call-price-convex-in-strike`,
   `mf-jump-diffusion-density-positive`, `mf-jump-diffusion-call-convex-strike`,
   `mf-black-scholes-call-strictly-convex-strike` and `mf-merton-call-strictly-convex-strike`. New
-  file `BlackScholes/JumpDiffusionStrikeConvexity.lean`.
+  file `Models/Jumps/JumpDiffusionStrikeConvexity.lean`.
 - Variance swaps with jumps (corpus 530): `mf-log-contract-any-law`,
   `mf-jump-diffusion-log-return-mean`, `mf-jump-diffusion-log-return-variance`,
   `mf-jump-diffusion-log-contract`, `mf-jump-diffusion-log-contract-jump-bias`,
   `mf-jump-diffusion-log-contract-downward-jumps`, `mf-jump-diffusion-realized-variance` and
-  `mf-jump-diffusion-variance-swap-vs-log-contract`. New files `BlackScholes/JumpDiffusionMoments.lean`
-  and `BlackScholes/JumpDiffusionVarianceSwap.lean`.
+  `mf-jump-diffusion-variance-swap-vs-log-contract`. New files `Models/Jumps/JumpDiffusionMoments.lean`
+  and `Models/Jumps/JumpDiffusionVarianceSwap.lean`.
 
 Four read-only reviewers: one on the strict-convexity rung, acted on in its own commit, and three on
 the variance-swap rung (lenses 1, 3 and 8 with a mathematical-finance referee; lenses 2, 4 and 6;
@@ -1713,7 +2016,7 @@ All findings are applied.
 Scope: corpus 506 → 517, three rungs.
 - Merton's digital and density (corpus 509): `mf-merton-strike-derivatives`,
   `mf-jump-diffusion-merton-digital` and `mf-jump-diffusion-merton-density`. New file
-  `BlackScholes/MertonStrikeGreeks.lean`.
+  `Models/Jumps/MertonStrikeGreeks.lean`.
 - Kinks (corpus 513): `mf-call-strike-differentiable-iff-no-atom`,
   `mf-jump-diffusion-call-differentiable-iff`, `mf-jump-diffusion-call-kink` and
   `mf-cash-digital-strike`.
@@ -1838,10 +2141,10 @@ All findings are applied unless marked otherwise.
 Scope: corpus 500 → 506, two rungs.
 - Digital options (corpus 503): `mf-call-strike-derivative`,
   `mf-jump-diffusion-digital-strike-derivative` and `mf-jump-diffusion-digital-black-scholes`. New
-  file `BlackScholes/JumpDiffusionDigital.lean`; `BlackScholes/CallSpreadDigital.lean` gains the
+  file `Models/Jumps/JumpDiffusionDigital.lean`; `Models/ModelFree/CallSpreadDigital.lean` gains the
   general strike derivative `hasDerivAt_integral_call`.
 - The density (corpus 506): `mf-jump-diffusion-density`, `mf-breeden-litzenberger-jump-diffusion`
-  and `mf-black-scholes-lognormal-density`. New file `BlackScholes/JumpDiffusionDensity.lean`.
+  and `mf-black-scholes-lognormal-density`. New file `Models/Jumps/JumpDiffusionDensity.lean`.
 
 One read-only reviewer read both rungs: prose against statement, coherence and the mathematics. It
 found no error in the Lean proofs. The density rung's first build failed in four places, on the
@@ -1936,14 +2239,14 @@ All findings are applied.
 
 ## 2026-10-08 — corpus 500 — incompleteness at one date: two equivalent compensated laws, two call prices
 
-Scope: corpus 496 → 500. Three new files: `BlackScholes/CallSpreadDigital.lean`,
-`BlackScholes/JumpDiffusionIdentifiability.lean` and `BlackScholes/JumpDiffusionIncompleteness.lean`.
-`Foundations/Esscher.lean` gains:
+Scope: corpus 496 → 500. Three new files: `Models/ModelFree/CallSpreadDigital.lean`,
+`Models/Jumps/JumpDiffusionIdentifiability.lean` and `Models/Jumps/JumpDiffusionIncompleteness.lean`.
+`Probability/Laws/Esscher.lean` gains:
 - the finite-measure form of local MGF uniqueness;
 - two lemmas on the tilted domain;
 - the unnormalized Esscher transform.
 
-`BlackScholes/JumpDiffusionEsscher.lean` gains the Lévy-measure form of the transform. The new
+`Models/Jumps/JumpDiffusionEsscher.lean` gains the Lévy-measure form of the transform. The new
 entries are:
 - `mf-call-spread-digital`;
 - `mf-call-prices-determine-law`;
@@ -2099,11 +2402,11 @@ Eleven findings; three were must-fix. All are applied, and the first is fixed by
 
 ## 2026-10-08 — corpus 495 — the Esscher transform: one tilt, one identification, three users
 
-Scope: corpus 490 → 495. `Foundations/Esscher.lean` and `BlackScholes/JumpDiffusionEsscher.lean`
+Scope: corpus 490 → 495. `Probability/Laws/Esscher.lean` and `Models/Jumps/JumpDiffusionEsscher.lean`
 are new. Two refactors make existing code consume them: `gaussianReal_withDensity_esscher` in
-`Bridges/GaussianGirsanov.lean`, and the Gaussian identification in
-`Foundations/ExpMartingaleQBrownian.lean`. One compensated-drift criterion was lifted into
-`BlackScholes/JumpDiffusionProcess.lean`. Entries: `mf-jump-diffusion-esscher-transform`,
+`Models/BlackScholes/GaussianGirsanov.lean`, and the Gaussian identification in
+`Probability/Brownian/ExpMartingaleQBrownian.lean`. One compensated-drift criterion was lifted into
+`Models/Jumps/JumpDiffusionProcess.lean`. Entries: `mf-jump-diffusion-esscher-transform`,
 `mf-jump-diffusion-esscher-pricing`, `mf-merton-esscher-pricing`,
 `mf-black-scholes-esscher-pricing` and `gir-gaussian-esscher-tilt`.
 
@@ -2144,7 +2447,7 @@ Twelve findings, all applied:
 
 ### Upgrades executed
 
-- **One home for the tilt.** `Foundations/Esscher.lean` holds:
+- **One home for the tilt.** `Probability/Laws/Esscher.lean` holds:
   - the tilted moments: Mathlib's `integral_exp_tilted` at linear exponents, also in `mgf` form;
   - identification by moment-generating function, `measure_eq_of_mgf_id_eq`, lifted to a
     probability law against any finite measure;
@@ -2174,7 +2477,7 @@ Twelve findings, all applied:
 
 - **Coherence.** Exemplar: three consumers of one identification lemma, and static Girsanov as
   literally the `N(0, 1)` case of the tilt the jump layer uses. Next: the pdf twin
-  `exp_mul_gaussianPDFReal_zero_one` (`Foundations/StandardNormal.lean`) feeds the Black–Scholes
+  `exp_mul_gaussianPDFReal_zero_one` (`Probability/Gaussian/StandardNormal.lean`) feeds the Black–Scholes
   `Φ(d₁)` through the stock numéraire. That is the Gaussian tilt on a half-line: under `Q^(S)`,
   `Z ~ N(σ√T, 1)`, the tilt at `θ = 1`.
 - **First principles.** Exemplar: the Esscher condition is a structural identity (the
@@ -2212,8 +2515,8 @@ Twelve findings, all applied:
 
 ## 2026-10-08 — corpus 490 — the Laplace exponent: one moment-generating function, from first principles
 
-Scope: corpus 486 → 490, `BlackScholes/JumpDiffusionExponent.lean` (new) and the moment section of
-`BlackScholes/JumpDiffusionProcess.lean`; entries `mf-jump-diffusion-{scaling,levy-exponent,
+Scope: corpus 486 → 490, `Models/Jumps/JumpDiffusionExponent.lean` (new) and the moment section of
+`Models/Jumps/JumpDiffusionProcess.lean`; entries `mf-jump-diffusion-{scaling,levy-exponent,
 exponential-martingales,power-claim-every-date}`. One read-only reviewer covered compile risk,
 prose against statement and the mathematical and coherence lenses. It found no mathematical error,
 no open compile risk (the one CI failure, a stuck `Mul` instance in a measurability term, was
@@ -2293,13 +2596,13 @@ already fixed) and no dishonest hypothesis.
 Scope: corpus 461 → 486, in two rounds.
 
 - First round (461 → 480):
-  - `BlackScholes/JumpImpliedVol.lean` (jumps lift the implied volatility);
-  - `BlackScholes/JumpDiffusionCanonical.lean` (the model exists; the price depends only on the
+  - `Models/Jumps/JumpImpliedVol.lean` (jumps lift the implied volatility);
+  - `Models/Jumps/JumpDiffusionCanonical.lean` (the model exists; the price depends only on the
     expected jump count and the jump law);
-  - `BlackScholes/JumpDiffusionProcess.lean` and `Foundations/ExpMartingaleIndepIncrements.lean`
+  - `Models/Jumps/JumpDiffusionProcess.lean` and `Probability/Jumps/ExpMartingaleIndepIncrements.lean`
     (the price process; martingale exactly at the compensated drift);
-  - `BlackScholes/JumpDiffusionOptionPrices.lean` (prices at every date);
-  - `BlackScholes/GaussianSmoothing.lean` and `BlackScholes/JumpDiffusionMerton.lean` (Merton's
+  - `Models/Jumps/JumpDiffusionOptionPrices.lean` (prices at every date);
+  - `Models/BlackScholes/GaussianSmoothing.lean` and `Models/Jumps/JumpDiffusionMerton.lean` (Merton's
     series from the general route).
   - 19 entries: `mf-bs-call-strictly-convex-in-spot`, `mf-bs-call-tends-to-spot-high-vol`,
     `mf-implied-vol-exists-above-reference`, `mf-jump-diffusion-call-strict-bounds`,
@@ -2312,10 +2615,10 @@ Scope: corpus 461 → 486, in two rounds.
     `mf-jump-diffusion-merton-1976-every-date`.
 - Coherence round (480 → 486), after the request to link the new jump work to the rest of the
   library:
-  - `BlackScholes/JumpDiffusionBrownian.lean` (new): Brownian motion with drift is the process
+  - `Models/Jumps/JumpDiffusionBrownian.lean` (new): Brownian motion with drift is the process
     without jumps;
   - Merton's model exists (`mertonHyp_canonical`);
-  - one conditional freezing lemma in `Foundations/IndepFreezing.lean`, consumed by the American
+  - one conditional freezing lemma in `Probability/Analysis/IndepFreezing.lean`, consumed by the American
     put and by the jump process;
   - the Wald martingale derived from the exponential-martingale lemma.
   - 6 entries: `mf-jump-diffusion-brownian-no-jumps`, `mf-bs-formulas-every-date`,
@@ -2372,7 +2675,7 @@ Second panel (6 fix-now, 7 nits, all applied):
 ### Upgrades executed
 
 - **One conditional freezing lemma.** `condExp_comp_prodMk_of_indep` (Shreve's independence
-  lemma) in `Foundations/IndepFreezing.lean`: for `X` measurable for `𝒢` and `Y` independent of
+  lemma) in `Probability/Analysis/IndepFreezing.lean`: for `X` measurable for `𝒢` and `Y` independent of
   `𝒢`, `𝔼[g(X, Y) | 𝒢] = ∫ g(X, y) d(law Y)(y)` for integrable, Banach-valued `g`. On each event
   of `𝒢` the joint law is a product (`map_restrict_prodMk_of_indep`), so Fubini gives the same
   integral over every such event. Mathlib conditions only on `σ(X)` (through `condDistrib`).
@@ -2520,13 +2823,13 @@ Second panel (6 fix-now, 7 nits, all applied):
 
 Scope: the session's jump-diffusion work, corpus 447 → 461.
 
-- `Foundations/IndepFreezing.lean` (new): the freezing lemma, its countable form, integrating out
+- `Probability/Analysis/IndepFreezing.lean` (new): the freezing lemma, its countable form, integrating out
   a countable variable, re-associating mutual independence.
-- `Foundations/AffineMinorant.lean` (new): Jensen's inequality through a supporting line.
-- `Actuarial/CompoundPoissonMGF.lean`: the MGF with a random claim count.
+- `Probability/Analysis/AffineMinorant.lean` (new): Jensen's inequality through a supporting line.
+- `Probability/Jumps/CompoundPoissonMGF.lean`: the MGF with a random claim count.
 - `BlackScholes/MertonModel.lean` (new): Merton's prices derived from the terminal law.
-- `BlackScholes/MertonGreeks.lean` (new): delta, gamma, vega and the shape of the price (#129).
-- `BlackScholes/JumpDiffusionMixing.lean` (new): the mixing formula, dominance, the compensator,
+- `Models/Jumps/MertonGreeks.lean` (new): delta, gamma, vega and the shape of the price (#129).
+- `Models/Jumps/JumpDiffusionMixing.lean` (new): the mixing formula, dominance, the compensator,
   Merton's formula for a general jump law.
 - 14 entries: `ce-freezing-lemma`, `mf-compound-poisson-mgf-random-count`,
   `mf-merton-{call,put}-formula`, `mf-merton-discounted-terminal`,
@@ -2656,8 +2959,8 @@ Dissolved:
 
 ## 2026-10-05 — corpus 447 — Itô's formula for adapted coefficients (B5)
 
-Scope: `Foundations/ItoFormulaAdapted.lean` and the entry `sc-ito-formula-adapted`; corpus
-446 → 447. Also `Foundations/AdaptedDrift.lean` (#237), which was owed a panel.
+Scope: `Probability/Brownian/Ito/ItoFormulaAdapted.lean` and the entry `sc-ito-formula-adapted`; corpus
+446 → 447. Also `Probability/Brownian/Ito/AdaptedDrift.lean` (#237), which was owed a panel.
 
 Three read-only agents: prose against statement, proof quality, and the mathematics. They read a
 first version that asked for `f ∈ C³` with `f‴` bounded and stated the stochastic integral
@@ -2726,8 +3029,8 @@ through an existential.
 
 ## 2026-10-05 — corpus 446 — the SVI tail condition and butterfly-freeness
 
-Scope: `BlackScholes/SVI/TailCondition.lean`, `BlackScholes/CallPriceFunction.lean`,
-`Foundations/NormalTail.lean`, and the entry `mf-svi-butterfly-free-sign-formula`; corpus
+Scope: `Models/ModelFree/SVI/TailCondition.lean`, `Models/ModelFree/CallPriceFunction.lean`,
+`Probability/Gaussian/NormalTail.lean`, and the entry `mf-svi-butterfly-free-sign-formula`; corpus
 445 → 446.
 
 Two panels of three read-only agents. The first read a version that proved only `d₊ → −∞ ⟺
@@ -2760,7 +3063,7 @@ quality, the mathematics) read the result.
   `butterflyFreeFormula_iff_isNormalizedCallPrice`.
 - **General facts lifted out of the SVI file**: `ConvexOn.antitoneOn_Ioi_of_le`,
   `IsNormalizedCallPrice` with the constructor `of_convexOn` (from Roper's conditions alone), and
-  the normal-tail lemmas. Three `Φ` lemmas that duplicated `Foundations/NormalQuantile.lean` were
+  the normal-tail lemmas. Three `Φ` lemmas that duplicated `Probability/Gaussian/NormalQuantile.lean` were
   deleted.
 - `σ ≥ 0` dropped from the tail theorems (the bound uses `b|σ|`); the slope-at-least-two case is an
   eventual lower bound on `d₊`, reused by both converses.
@@ -2793,7 +3096,7 @@ quality, the mathematics) read the result.
 
 Scope: Robert Martin's ButterflyFreeSVI development, 42 modules ported to
 `MathFin/BlackScholes/SVI/` with statements unchanged, and three entries in
-`benchmarks/svi_certificate.json`; corpus 442 → 445. Also `Foundations/AdaptedDrift.lean` (#237),
+`benchmarks/svi_certificate.json`; corpus 442 → 445. Also `Probability/Brownian/Ito/AdaptedDrift.lean` (#237),
 which had no panel of its own and is covered by the B5 backlog below.
 
 Three read-only review agents: two read every module docstring against its file (A–M, N–Z); the
@@ -2851,7 +3154,7 @@ the sign formula, hygiene, conventions and the licence. The parent adjudicated.
 Scope: two steps toward B5 of the adapted-coefficient Itô formula.
 - #235 relaxed `tendsto_weighted_qv_process` and B2 to weights with almost surely continuous
   paths (`tendsto_weighted_qv_process_of_ae_continuous`).
-- `Foundations/AdaptedRiemannStieltjes.lean`: for `M = φ●B` and a bounded predictable weight `w`,
+- `Probability/Brownian/AdaptedRiemannStieltjes.lean`: for `M = φ●B` and a bounded predictable weight `w`,
   `∑ₖ w(tₖ)ΔMₖ → ∫ w dM` in mean square, through dominated convergence in `L²(⟨M⟩)`. One entry,
   `sc-riemann-stieltjes-against-ito`; corpus 441 → 442.
 
@@ -2926,10 +3229,10 @@ for it is beside `cell_collapse` (backlog 2). That touches core modules, so it i
 
 Scope: steps B1 and B2 of the adapted-coefficient Itô formula
 (`docs/specs/2026-07-05-adapted-ito-formula-design.md`).
-- `Foundations/AdaptedStochasticIntegralFreezing.lean` (B1): the freezing defects
+- `Probability/Brownian/Ito/AdaptedStochasticIntegralFreezing.lean` (B1): the freezing defects
   `Dₖ = ΔMₖ − σ(tₖ)ΔBₖ` of `M = σ●B` are orthogonal and sum to the error of the frozen Riemann–Itô
   sum, so `∑ₖ ‖Dₖ‖² → 0`.
-- `Foundations/AdaptedQuadraticVariation.lean` (B2): `∑ₖ w(tₖ)(ΔXₖ)² → ∫₀ᵀ wσ² ds` in `L¹` for
+- `Probability/Brownian/AdaptedQuadraticVariation.lean` (B2): `∑ₖ w(tₖ)(ΔXₖ)² → ∫₀ᵀ wσ² ds` in `L¹` for
   `X = X₀ + A + σ●B`, and the unweighted `∑ₖ (ΔXₖ)² → ∫₀ᵀ σ² ds`. One entry,
   `sc-thm-7.4.5-adapted`; corpus 440 → 441.
 
@@ -3030,7 +3333,7 @@ endpoint lemmas edit core modules that restale about thirty entries, so they are
    `M` with dominated convergence in `L²(⟨M⟩)` gives `∫ f'(X) dM = ∫ f'(X)σ dB`. That is B4 for the
    measure `⟨M⟩` in place of `trim_T`, and `simpleAssemblyOfMeasure ν` already takes a general `ν`.
    The alternative is orthogonality of the weighted defects `wₖDₖ` via
-   `itoIntegralCLM_T_smulAdapted`.
+   `itoIntegralCLM_smulAdapted`.
 4. **The partition and step-process API** (lenses 2, 3). `unifPart_zero`,
    `unifPart_self (hn : n ≠ 0)` and `unifPart_succ_sub` beside `unifPart`, replacing about sixteen
    inline copies of the endpoint facts and five of the cell length. And one public `coe_stepSP`
@@ -3060,7 +3363,7 @@ Scope: three merged PRs.
 - #231 corrects the `mf-compound-poisson-mgf` description, which understated its proof, and the
   market-making docstrings and `docs/patterns.md`, which said Mathlib has no matrix `tanh`, no
   matrix-valued differentiation and no matrix-exponential calculus.
-- #232 adds `Foundations/StochasticIntegralCharacterisation.lean`: the integral against `M = φ●B`
+- #232 adds `Probability/Brownian/Ito/StochasticIntegralCharacterisation.lean`: the integral against `M = φ●B`
   is an `IsStochasticIntegral` (BrownianMotion, J. van Winden) for `M` stopped at `T`. One entry,
   `sc-ito-is-stochastic-integral`; corpus 439 → 440; closes #196.
 
@@ -3102,7 +3405,7 @@ Ten findings, all fixed:
 ### Upgrades executed
 
 - **Coherence and zero slop (lenses 2, 3).** Seven re-derivations now consume the library's own
-  lemmas: `ae_fst_mem_Ioc_trimMeasure_T` (the hand-computed time bound and the separate time-origin
+  lemmas: `ae_fst_mem_Ioc_trimMeasure` (the hand-computed time bound and the separate time-origin
   argument become one `ae_fst_mem_Ioc_bracketMeasure`), `MemLp.toLp_congr`, `MemLp.toLp_add` and
   `MemLp.toLp_const_smul` (both definitional), `Lp.tendsto_Lp_iff_tendsto_eLpNorm''`,
   `tendstoInMeasure_of_tendsto_Lp`, and BrownianMotion's `measurableSet_predictable_univ_prod` with
@@ -3167,7 +3470,7 @@ Ten findings, all fixed:
 Scope: 30 new modules and `benchmarks/quantitative_risk_management.json` (65 entries, all `full`).
 They are drawn from McNeil–Frey–Embrechts (2015) and the QRM Exercise Book (Hofert–Frey–McNeil
 2020).
-- The base layer is `Foundations/Quantile.lean`, the generalized inverse CDF, which Mathlib lacks.
+- The base layer is `Probability/Laws/Quantile.lean`, the generalized inverse CDF, which Mathlib lacks.
 - `valueAtRisk` and `expectedShortfall` are defined for every law. Rockafellar–Uryasev, ES
   coherence, Acerbi–Tasche and the dual representation are proved for every integrable loss.
 - Further results: the Gaussian ES closed form from the old Gaussian R–U file; VaR by bisection;
@@ -3216,7 +3519,7 @@ Judgment calls were taken as proposed:
 ### Upgrades executed
 
 - **Coherence (lens 2) and architecture (lens 4).** Duplicated quantile facts now live once, in
-  `Foundations/Quantile.lean`:
+  `Probability/Laws/Quantile.lean`:
   - `quantile_eq_iff`, moved from `RiskClosedForms`;
   - `quantile_expMeasure`, now at general rate, replacing a private rate-1 copy in
     `GeneralizedPareto`;
@@ -3234,7 +3537,7 @@ Judgment calls were taken as proposed:
 
 ### Exemplars
 
-- `quantile_le_iff` (`Foundations/Quantile.lean`): one Galois connection, from which every VaR
+- `quantile_le_iff` (`Probability/Laws/Quantile.lean`): one Galois connection, from which every VaR
   property is read off. It needs no case analysis for atoms or flat stretches.
 - `expectedShortfall_add_le`: subadditivity is the Rockafellar–Uryasev objective at
   `VaR_X + VaR_Y` plus `(a + b)⁺ ≤ a⁺ + b⁺`.
@@ -3406,8 +3709,8 @@ Adjudicated down:
 
 ## 2026-09-18 — corpus 373 — bisection converges to the implied volatility
 
-Scope: the new `MathFin/Foundations/Bisection.lean` (the bisection method and
-its convergence at a threshold); `MathFin/BlackScholes/BisectionIV.lean` (the
+Scope: the new `MathFin/Probability/Analysis/Bisection.lean` (the bisection method and
+its convergence at a threshold); `MathFin/Models/BlackScholes/BisectionIV.lean` (the
 Black–Scholes instance, `impliedVol_bisection_converges`, corpus entry
 `mf-impliedvol-bisection`); `bsV_continuousOn_sigma` in `ImpliedVolatility.lean`;
 and the narrowed description of `mf-impliedvol-bracket`. Three read-only review
@@ -3447,7 +3750,7 @@ no blockers.
   (`hmono.lt_iff_lt`). `mapsTo_bisectStep` also lost an `hσ` derivable from the
   trap.
 - **Architecture (lens 4).** The generic method moved to
-  `Foundations/Bisection.lean`, which imports only Mathlib, so a quantile or VaR
+  `Probability/Analysis/Bisection.lean`, which imports only Mathlib, so a quantile or VaR
   consumer need not import Black–Scholes.
 - **Zero slop (lens 3), flagged by two agents.** `bsV`'s continuity in `σ` was
   derived twice. It is now `bsV_continuousOn_sigma`, used by
@@ -3572,7 +3875,7 @@ Per-lens **exemplar → next upgrade**:
   representation as a consequence of the adapted-integrand Itô formula. It is not one. Surjectivity of
   an isometry onto a closed subspace is a *totality* statement about its range, and the whole proof is
   an orthogonal decomposition — no Itô formula for `f(∫θ dB)`, no pathwise quadratic variation. Second
-  exemplar, one floor down: `itoIntegralCLM_T_restrictAfterCLM`, "restricting an integrand to `(u,T]`
+  exemplar, one floor down: `itoIntegralCLM_restrictAfterCLM`, "restricting an integrand to `(u,T]`
   removes exactly the past of its integral," which is what turns the *terminal* identity an Itô formula
   hands out into an identity for an inner increment. That single lemma is what lets a Doléans
   exponential over a partition be assembled at all. *Upgrade (HIGH):* the theorem proves `φ` exists and
@@ -3585,9 +3888,9 @@ Per-lens **exemplar → next upgrade**:
   `condExpL2` used through the Hilbert API because it is *definitionally*
   `Submodule.orthogonalProjectionOnto` — neither argument is re-derived in finance clothing.
   *The finding, and it is the headline:* three separate general lemmas landed in application files and
-  each had to be moved. `itoIntegralCLM_T_simpleAssembly_T` existed in **three** copies; the locality
+  each had to be moved. `itoIntegralCLM_simpleAssemblyHorizon` existed in **three** copies; the locality
   facts sat in `DoleansStepRepresentation` when `ItoIntegralLocality` exists to hold them;
-  `itoProcessCLM_zero_time` and `integral_itoIntegralCLM_T` sat in `MartingaleRepresentation` when
+  `itoProcessCLM_zero_time` and `integral_itoIntegralCLM` sat in `MartingaleRepresentation` when
   `ItoIntegralProcessGeneral` is their floor. Three in one program is a rate. *Upgrade (HIGH):* ask the
   placement question at **dispatch**, not at review — a task brief that names the destination file for
   each general fact it expects to produce. #185 clears the residue (`mulBddCLM` vs the older hand-rolled
@@ -3610,9 +3913,9 @@ Per-lens **exemplar → next upgrade**:
   this review ranks HIGH. Dropped in `6530fae`; the hypothesis was inert (`stepDoleansExp … 0` is the
   empty product, and the worker `stepDoleans_aux` never took it).
 - **4 Architectural ingenuity.** *Exemplar:* the crown is stated as **surjectivity of an isometry the
-  library already had**, not as a bespoke theorem. `itoIsometryCentered` corestricts `itoIntegralCLM_T`
+  library already had**, not as a bespoke theorem. `itoIsometryCentered` corestricts `itoIntegralCLM`
   to `centeredBrownianL2 := lpMeas 𝓕ᴮ_T ⊓ (ℝ ∙ 1)ᗮ`, `itoIsometryCentered_surjective` closes it, and
-  `itoIsometryEquiv` is one `LinearIsometryEquiv.ofSurjective` call. So `itoIntegralCLM_T` gains a
+  `itoIsometryEquiv` is one `LinearIsometryEquiv.ofSurjective` call. So `itoIntegralCLM` gains a
   structure theorem and the library gains no parallel construction. The codomain's *definition* is the
   mathematical content. *Upgrade (MED):* `mulBddCLM` was extracted mid-proof as the general operator
   (bounded multiplication on `L²`, arbitrary measure) and instantiated twice in the same file, which is
@@ -3635,8 +3938,8 @@ Per-lens **exemplar → next upgrade**:
   becoming *binding in the plan* after it recurred, instead of being re-raised per task. *Upgrade
   (MED):* the two `lake lint` failures on underscored `def` names landed in consecutive rounds because
   the first fix swept the reported instance and not the class. The class is real and discoverable
-  without CI: every other `_T` def in this tower (`itoIsometry_T`, `trimMeasure_T`, `itoIntegralCLM_T`,
-  `simpleAssembly_T`, `itoAssembly_T`, `timeMeasure_T`) lives in a sub-namespace, and
+  without CI: every other `_T` def in this tower (`itoIsometry`, `trimMeasure`, `itoIntegralCLM`,
+  `simpleAssemblyHorizon`, `itoAssemblyHorizon`, `timeMeasureHorizon`) lives in a sub-namespace, and
   `MartingaleRepresentation` declares only `namespace MathFin`. Either sub-namespace it or record the
   rule where an author reads it before pushing.
 - **7 Concept clarity.** *Exemplar:* the docstrings record the **amendments in the artifact**, not only
@@ -3666,15 +3969,15 @@ Per-lens **exemplar → next upgrade**:
 
 **Upgrades executed this session (the program).**
 
-1. **Three general-lemma relocations** (lens 2/4): the three-way `itoIntegralCLM_T_simpleAssembly_T`
+1. **Three general-lemma relocations** (lens 2/4): the three-way `itoIntegralCLM_simpleAssemblyHorizon`
    dedup to one definition site; the locality facts into `ItoIntegralLocality`; `itoProcessCLM_zero_time`
-   (now public `@[simp]`) and `integral_itoIntegralCLM_T` into `ItoIntegralProcessGeneral`.
+   (now public `@[simp]`) and `integral_itoIntegralCLM` into `ItoIntegralProcessGeneral`.
 2. **A spurious hypothesis removed from a public signature** (lens 3/5): `hF1` gone from
    `eq_zero_of_orthogonal_stepDoleans`, which is strictly stronger than what was specified.
 3. **The crown stated as a structure theorem** on an existing isometry, plus the bundled
    `itoIsometryEquiv` (lens 4).
 4. **`mulBddCLM`** extracted as the general bounded-multiplication operator over an arbitrary measure
-   (lens 2/4); **dead API deleted** (`itoIntegralCLM_T_smulAdapted_mem_range`, zero consumers after the
+   (lens 2/4); **dead API deleted** (`itoIntegralCLM_smulAdapted_mem_range`, zero consumers after the
    route changed) (lens 3).
 5. **`PricesGainsAtZero` guarded rather than asserted**, with the hypothesis-minimal
    `measure_eq_of_pricesGainsAtZero` as the public form and `emm_unique_of_complete` as its corollary
@@ -3690,7 +3993,7 @@ Per-lens **exemplar → next upgrade**:
 
 1. **[HIGH] Ask the placement question at dispatch.** Three general lemmas in the wrong file in one
    program, and the sharpest data point is self-directed: the third copy of
-   `itoIntegralCLM_T_simpleAssembly_T` was found because **this file had already recorded it** as a LOW
+   `itoIntegralCLM_simpleAssemblyHorizon` was found because **this file had already recorded it** as a LOW
    item on 2026-07-10 (`docs/values-review.md:433`) and nobody acted on it for four weeks. The review
    model's stated failure mode is a review that finds nothing to improve. The subtler one is a review
    that finds it, ranks it, writes it down, and then does not do it. Concrete form: task briefs name the
@@ -3774,12 +4077,12 @@ gradients below as one reading, and re-run the panel at the next proof session.
    it is where a positivity hypothesis is genuinely load-bearing. Added alongside.
 4. **Lens 4 (architecture).** Four PRs created four new one-lemma modules
    (`GainToPain`, `PerformanceRatios`, `UpCapture`, `PerformanceRatiosExtended`) when both issues
-   named `Performance/RatiosExtended.lean`, beside the four ratios they belong with. Consolidated
+   named `Choice/Performance/RatiosExtended.lean`, beside the four ratios they belong with. Consolidated
    into one change in that module; four duplicate PRs closed.
 5. **Lens 4 again, on the two stale outside PRs (#36, #38).** Both had sat six weeks with
    review feedback unaddressed and had gone stale against the pin bump; finished in-session
    rather than closed. Two placement/derivation calls beyond the original submissions: *speed*
-   moved out of `BlackScholes/PDE.lean` into `HigherGreeks.lean` beside vanna/volga/charm, since
+   moved out of `Models/BlackScholes/PDE.lean` into `HigherGreeks.lean` beside vanna/volga/charm, since
    gamma is literally the quotient `ϕ(d₁)/(S σ √τ)` and speed is one quotient rule off it; and
    *caplet-floorlet parity* is now `swaption_payer_receiver_parity` **applied**, not the same
    `Phi`-symmetry argument run twice — `blackCaplet_eq_blackPayerSwaption` says why (the caplet
@@ -3868,7 +4171,7 @@ belief about which one was missing. Worth repeating when the merge queue next ba
 
 ## 2026-07-16 — corpus 335 — multi-asset matrix Riccati (BEGV Prop 2) via spectral reduction
 
-`Foundations/MatrixMarketMakingRiccati` (M1 abstract matrix Riccati `a' = a·a − Â·Â` solved in closed
+`Markets/Microstructure/MatrixMarketMakingRiccati` (M1 abstract matrix Riccati `a' = a·a − Â·Â` solved in closed
 form for any Hermitian `Â`; M2 market-making instantiation `A' = 2·A·D₊·A − (γ/2)·cov`), + 2 `full`
 entries `mf-mm-matrix-{riccati,value}` (corpus 333 → **335**). **Mechanical floor green:** `lake build
 MathFin` + `lake lint` (8869 jobs), ledger fresh at 335, both bench-checks green, `AxiomAudit` +
@@ -3962,7 +4265,7 @@ LQ-**approximation** view; the fundamental structure is the exact Hopf–Cole/GL
 
 ## 2026-07-12 — corpus 330 — continuous first-FTAP frame (meaning 1), DS-shaped for meaning 2
 
-The model-agnostic continuous-market EMM frame (`Foundations/ContinuousMarket` + the `Q = P`
+The model-agnostic continuous-market EMM frame (`Pricing/ContinuousMarket` + the `Q = P`
 Black–Scholes instance in `ContinuousFTAP`): six commits, all axiom-clean (`AxiomAudit` +
 `AxiomAuditGen` green), ledger fresh at 330, `lake build` green. Reviewed per-task (opus on the crux
 forward theorem); this is the close-of-session gradient read, not a PASS stamp.
@@ -4009,20 +4312,20 @@ A four-deliverable finance-breadth sprint, all axiom-clean (`AxiomAuditGen` gree
 angle was **coherence (lens 2/4): each deliverable cashes in a foundational asset that was previously
 built but under-consumed**, rather than adding standalone bookkeeping:
 
-- **(A) n-date geometric-Asian** (`BlackScholes/AsianGeometricN`): generalizes the two-date driver law
+- **(A) n-date geometric-Asian** (`Models/BlackScholes/AsianGeometricN`): generalizes the two-date driver law
   to arbitrary `n` via the same Wiener step-kernel + Brownian-covariance route, then reduces the
   geometric average to *one effective BS driver* (`bsTerminal Ŝ₀ r σ_G T`) and prices it through
   `bs_call_formula` — the Margrabe move. Makes `wienerIntegralLp_stepIndicator` (WG.3, built 2026-07-08)
   load-bearing for a real exotic price, not just the two-date law.
-- **(B) binomial barrier/lookback** (`Binomial/BarrierReflection`): consumes the **stranded**
-  `reflectionPrincipleEquiv_below` (PathReflection's own docstring flagged "the `Fintype.card` identity is
+- **(B) binomial barrier/lookback** (`Models/Binomial/BarrierReflection`): consumes the **stranded**
+  `reflectionPrincipleEquivBelow` (PathReflection's own docstring flagged "the `Fintype.card` identity is
   … not separately stated here") — the exact "stranded generic" theme the 2026-07-10 panel named. Ships
   the counting identity **and** the substantive running-maximum law `#{max ≥ a} = 2·#{end>a} + #{end=a}`.
-- **(C) Girsanov-grounded quanto** (`BlackScholes/QuantoGrounding`): upgrades `mf-quanto-correction-factor`
+- **(C) Girsanov-grounded quanto** (`Models/BlackScholes/QuantoGrounding`): upgrades `mf-quanto-correction-factor`
   from a *definitional* identity (the `−ρσ_Sσ_FX` drift baked into `quantoForward`) to a **derivation** —
   the cross-term emerges from an FX Esscher tilt + independent-normal decomposition + the Gaussian MGF.
   First-principles lens (5): the correction is now *earned* from the correlation.
-- **(D) compound-Poisson MGF** (`Actuarial/CompoundPoissonMGF`): flips `mf-compound-poisson-mgf`
+- **(D) compound-Poisson MGF** (`Probability/Jumps/CompoundPoissonMGF`): flips `mf-compound-poisson-mgf`
   `reduced_core → full`, replacing the algebraic shell `e^{−λ}e^{λM}=e^{λ(M−1)}` with the real
   composition — the n-claim iid-sum MGF (`iIndepFun.mgf_sum`) integrated against the Poisson pgf.
 
@@ -4073,7 +4376,7 @@ across agents on the same top coherence debt.
 
 **The dominant, repo-wide finding** (four agents, independently): *generic Mathlib-shaped lemmas
 duplicated or stranded in specialised files.* The exemplar of the fix is
-`Foundations/UnifIntegrableL2.lean` — it names the exact Mathlib gap it fills, states fully generic
+`Probability/Martingales/UnifIntegrableL2.lean` — it names the exact Mathlib gap it fills, states fully generic
 theorems, gives certificate-shaped proofs, and is consumed by all three Girsanov files. It is the home
 every "trapped-generic" lemma below wants.
 
@@ -4098,7 +4401,7 @@ every "trapped-generic" lemma below wants.
    ~180–200 net lines removed. Risk LOW via re-exports (MED-HIGH if done naively). The dedicated
    next-session item; supersedes old backlog #1.
 2. **[MED-HIGH] Lift one generic Riemann-bridge core.** `ItoIntegralRiemannBridge{,Adapted,TD}` re-roll
-   structurally identical `memLp_riemann*`/`itoSimple_step*`/`itoIntegralCLM_T_step*` for φ(B)/θ/φ(t,B);
+   structurally identical `memLp_riemann*`/`itoSimple_step*`/`itoIntegralCLM_step*` for φ(B)/θ/φ(t,B);
    one generic adapted-bounded-multiplier core, three instantiations. Feeds the Itô summits + adapted crown.
 3. **[MED] Hoist the 3 pure-analysis Taylor lemmas** (`abs_sub_le_of_hasDerivAt`, `abs_taylor1_le`,
    `abs_discreteTaylorRemainder_le`) to a generic mean-value module; the order-2 remainder re-inlines the
@@ -4106,13 +4409,13 @@ every "trapped-generic" lemma below wants.
 4. **[MED] Dedup the marshalled-convergence prologue** (`tendstoInMeasure_marshalDrift` vs `_marshalQuadVar`,
    ~22 identical lines incl. `hD0`) into a private `slice_energy_facts` helper. (Old backlog #3.)
 5. **[LOW] Small dedups/relocations:** `isCadlag_of_continuous` (triplicated private), `memLp_increment_two`
-   (dup), the `itoIntegralCLM_T_simpleAssembly_T` name-clash, and trapped-generics
+   (dup), the `itoIntegralCLM_simpleAssemblyHorizon` name-clash, and trapped-generics
    `continuous_uncurry_of_bdd_partials` / `continuous_timeMeasure_primitive` / `Lp_real_two_norm_sq` →
    generic homes.
 
 *Pricing:*
 6. **[MED] CRR one-step identity `p·u+(1−p)·d=eʳ` proved 5×** → route the 3 inline `field_simp;ring` bodies
-   + 1 alias through the canonical `crrUpProb_mul_up_add` (`Binomial/Model.lean`).
+   + 1 alias through the canonical `crrUpProb_mul_up_add` (`Models/Binomial/Model.lean`).
 7. **[MED] ZCB and constant-hazard Credit** (`exp(-(r·(T-t)))`, byte-identical) → route `zcb_pos` /
    `survival_pos` through the `ExponentialDiscount` principle they claim to instance; share a constant-rate core.
 8. **[MED] Greeks:** promote `hasDerivAt_bsd1_sigma_clean` public + add `hasDerivAt_exp_neg_mul` in `PDE.lean`,
@@ -4129,7 +4432,7 @@ every "trapped-generic" lemma below wants.
     order, and have `CAPMEquilibrium` import them.
 11. **[MED] Risk-parity two-tower gap.** `RiskParityFOC`'s docstring promises a bridge no lemma delivers; add
     `riskParityWeightTwo_isRiskParity` mirroring the proven `tangentTwo_isTangentPortfolioN`.
-12. **[LOW] Relocate Lundberg/compound-Poisson** out of `Actuarial/Mortality.lean` into `Insurance`/`RuinTheory`
+12. **[LOW] Relocate Lundberg/compound-Poisson** out of `Insurance/Mortality.lean` into `Insurance`/`RuinTheory`
     (and into that file's `## Results` block); fix the `isLundbergAdjustmentCoefficient` casing; standardise the
     covariance-kernel name (`Sg`); drop `let`-in-statement (`RiskParity`, `TangentPortfolio`).
 
@@ -4140,7 +4443,7 @@ this file` blocks, no overclaims; the one structural blemish is the Portfolio-pr
 
 ## 2026-07-10 — corpus 319 — bounded-PREDICTABLE-θ Girsanov: `B^θ` is a `Q`-Brownian motion (Rung 1)
 
-**Scope**: the whole new `Foundations/GirsanovPredictableTheta.lean` (the bounded-predictable-θ assembly,
+**Scope**: the whole new `Probability/Brownian/Girsanov/GirsanovPredictableTheta.lean` (the bounded-predictable-θ assembly,
 `Btheta_isQBrownianMotion_predictable_of_bdd`, corpus `gir-thm-9.1.8-predictable` **full**, 318→319 /
 285→286 full), plus the two generic moment bounds added to `GirsanovSimpleDoleansMoments.lean`
 (`sq_integral_simpleDoleans_le`, `memLp_simpleDoleans_two`) and `driftContinuousMod_stronglyAdapted`
@@ -4207,7 +4510,7 @@ opening move on the continuous file.
 
 ## 2026-07-09 — corpus 318 — continuous bounded-adapted-θ Girsanov: `B^θ` is a `Q`-Brownian motion (Track-α closes)
 
-**Scope**: `Foundations/GirsanovAdaptedTheta.lean` (the α4 assembly, `Btheta_isQBrownianMotion_adapted`)
+**Scope**: `Probability/Brownian/Girsanov/GirsanovAdaptedTheta.lean` (the α4 assembly, `Btheta_isQBrownianMotion_adapted`)
 and the α5 flip of `gir-thm-9.1.8` `reduced_core → full` (corpus 318 unchanged — an entry flipped, not
 added: 284→285 full, 16→15 reduced). Reviewed by **two independent panel agents** (slop/idiom/coherence;
 architecture/clarity/first-principles), read-only, then maintainer-adjudicated against `grep`-confirmed
@@ -4290,9 +4593,9 @@ duplication (both agents, independently) is the session's clearest signal; it is
 
 ## 2026-07-08 — corpus 318 — finance breadth: Vasicek bond, T-forward measure, geometric-Asian lognormality
 
-**Scope**: the finance-delivery push — `FixedIncome/VasicekBondPrice.lean`,
-`FixedIncome/ForwardMeasure.lean`, `Foundations/WienerIntegralIndicator.lean`,
-`BlackScholes/AsianGeometric.lean` (corpus `mf-vasicek-bond-price`, `mf-forward-measure-spot`,
+**Scope**: the finance-delivery push — `Models/Rates/VasicekBondPrice.lean`,
+`Models/Rates/ForwardMeasure.lean`, `Probability/Brownian/Wiener/WienerIntegralIndicator.lean`,
+`Models/BlackScholes/AsianGeometric.lean` (corpus `mf-vasicek-bond-price`, `mf-forward-measure-spot`,
 `mf-asian-geom-driver-gaussian`; 315→318, all `full`). Reviewed self-critically against the green
 `lake build` (8854 jobs) and `grep`-confirmed usage — not a sycophantic panel. **Recon-first paid off
 twice**: CVaR's Rockafellar–Uryasev variational theorem + the coherence quartet were found ALREADY COMPLETE
@@ -4349,7 +4652,7 @@ assumed-vs-derived `B_0 = 0`; the 1-consumer `HasLaw.congr` wrapper temptation).
 
 ## 2026-07-03 — corpus 312 — SDE strong-solution uniqueness: the L²-energy Grönwall keystone (#19)
 
-**Scope**: `Foundations/SDEUniqueness.lean` (new). Executes backlog item 4 of the numéraire review (the
+**Scope**: `Probability/Brownian/SDE/SDEUniqueness.lean` (new). Executes backlog item 4 of the numéraire review (the
 standing SDE #19). Reviewed self-critically against the green `lake build` (8841 jobs,
 `REAL_BUILD_EXIT=0`), the pinned Mathlib Grönwall API
 (`eq_zero_of_abs_deriv_le_mul_abs_self_of_eq_zero_right`), and the repo's own Itô isometry
@@ -4388,7 +4691,7 @@ proven, not assumed; (3) `sde_pathwise_uniqueness` — the energy-method Grönwa
 exactly the defects worth acting on, each verified against code before execution: (6)
 `sq_integral_le_measureReal_mul` was near-verbatim **duplicated** between `SDEUniqueness` and
 `DriftProcessPredictable` (the latter carrying a dead `hf2`) — extracted once to the Mathlib-only leaf
-`Foundations/FiniteMeasureCauchySchwarz.lean`, `public import`ed from both, ~30 duplicated lines + the dead
+`Probability/Analysis/FiniteMeasureCauchySchwarz.lean`, `public import`ed from both, ~30 duplicated lines + the dead
 hypothesis removed; (7) `IsL2SolutionPair` trimmed **11 → 9 fields** — `stateSqIntervalInt` /
 `stateSqTimeInt` are Fubini consequences of `stateSqProdInt` (`Integrable.prod_left_ae` /
 `integral_prod_right`), now derived inside `drift_energy_le`; (8) two `nlinarith` discharges replaced by
@@ -4419,8 +4722,8 @@ above; the CS-lemma duplication it surfaced was also fixed.)*
 
 ## 2026-07-03 — corpus 312 — The change of numéraire: the full IV↔I seam (backbone + both directions)
 
-**Scope**: `Foundations/Numeraire.lean` (new) + `BlackScholes/StockNumeraire` + `BlackScholes/ExchangeOption`
-+ `Performance/KellyNumeraire.lean` (new). Reviewed self-critically against the green `lake build` + the
+**Scope**: `Pricing/Numeraire.lean` (new) + `Models/BlackScholes/StockNumeraire` + `Models/BlackScholes/ExchangeOption`
++ `Choice/Performance/KellyNumeraire.lean` (new). Reviewed self-critically against the green `lake build` + the
 pinned Mathlib change-of-measure API (the `ChangeOfMeasure` engine's
 `setIntegral_withDensity_eq_setIntegral_toReal_smul` idiom), not by a sycophantic panel. **This entry
 covers the full day's arc**: the backbone was built first, then — executing this same review's ranked
@@ -4432,7 +4735,7 @@ backlog items 1 and 2 in-session — the two seam directions were added.
 - **First principles** — *exemplar*: the proof is the one-line cancellation of `N_T`, with the *no-integrability-needed* observation made explicit (it is a measure-transport identity, true for every claim). *Next*: derive the numéraire-portfolio ⟷ EMM identity from first principles (the deep seam, below).
 - **Zero slop** — no wrapper: the abstract theorem does real work (density construction + cancellation) and generalizes three hand-rolled instances. Green, sorry-free, warning-free; axiom-clean `[propext, Classical.choice, Quot.sound]`.
 
-**Upgrades executed this session:** (1) the abstract `changeOfNumeraire` backbone + probability-measure companion; (2) **wired** it into `StockNumeraire` (a consumed backbone); (3) **backlog item 2 (partial)** — `ExchangeOption.exchangeOption_numeraire_price` makes Margrabe's `S²`-numéraire valuation a genuine `changeOfNumeraire` instance; on inspection **Garman is closed-form algebra with no measure**, so it is honestly *not* wireable and none was faked; (4) **backlog item 1** — `Performance/KellyNumeraire.kellyNumeraire_isRiskNeutral` delivers the numéraire-portfolio ⟹ EMM direction in the discrete Kelly market (the `p`-independence of the GOP-deflated probabilities *is* the Kelly FOC); (5) honest scope framing in every doc (discrete Kelly shadow; continuous Long/Platen still open).
+**Upgrades executed this session:** (1) the abstract `changeOfNumeraire` backbone + probability-measure companion; (2) **wired** it into `StockNumeraire` (a consumed backbone); (3) **backlog item 2 (partial)** — `ExchangeOption.exchangeOption_numeraire_price` makes Margrabe's `S²`-numéraire valuation a genuine `changeOfNumeraire` instance; on inspection **Garman is closed-form algebra with no measure**, so it is honestly *not* wireable and none was faked; (4) **backlog item 1** — `Choice/Performance/KellyNumeraire.kellyNumeraire_isRiskNeutral` delivers the numéraire-portfolio ⟹ EMM direction in the discrete Kelly market (the `p`-independence of the GOP-deflated probabilities *is* the Kelly FOC); (5) honest scope framing in every doc (discrete Kelly shadow; continuous Long/Platen still open).
 
 **A note on the discipline (lens 2 + zero-slop):** backlog item 2 was stated this morning as "wire `ExchangeOption` **and** `GarmanNormalForm` as instances." Executing it revealed the premise was half-wrong — only `ExchangeOption` has a measure to wire; `Garman` is post-integration closed form. The honest outcome (one real instance + a documented non-instance) beats forcing a wrapper to hit a self-set target. The backlog is a hypothesis generator, not a checklist to satisfy at the cost of honesty.
 
@@ -4478,7 +4781,7 @@ repair (the file is a thin, honestly-derived wiring layer). The upgrades are arc
    lines (`ItoProcessPredictable:215-324`) and let the contraction use `map_sub` uniformly. Deferred:
    `itoProcessAssembled` is deliberately the pathwise-continuous modification for future SDE-path-continuity; a
    CLM's representative need not be that modification (needs an a.e.-agreement lemma). The deepest upgrade.
-2. **`timeMeasure_T_real_univ` helper** (in `ItoIntegralCLM`, beside `timeMeasure_T`) — the 7-lemma total-mass
+2. **`timeMeasureHorizon_real_univ` helper** (in `ItoIntegralCLM`, beside `timeMeasureHorizon`) — the 7-lemma total-mass
    `rw` chain is verified-triplicated across the Foundations cluster; collapse each site to one rewrite.
 3. **`lipComp`'s `L` → implicit** (consistency with `lipComp_sub_norm_le`); the stronger `opNorm_extendOfNorm_le`
    form of the drift bound; `set δb/δσ` in `picardMap_contraction` (low value — the verbosity is honest).
@@ -4490,7 +4793,7 @@ transitive importer).
 
 ## 2026-07-02 — corpus 308 — SDE existence: the Picard fixed point in `E` (#16–#18)
 
-**Executed this session.** `MathFin/Foundations/SDEExistence.lean` (new, 210 lines, 0-sorry, in the umbrella,
+**Executed this session.** `MathFin/Probability/Brownian/SDE/SDEExistence.lean` (new, 210 lines, 0-sorry, in the umbrella,
 full-build-green 8838 jobs) — the Picard construction for `dX = b(X)dt + σ(X)dB` as a self-map of the
 predictable `L²` space `E`, through to the **unique fixed point**: `lipComp` (coefficient composition
 `f∘X ∈ E`), `picardMap` (Φ:E→E), the two operator bounds `driftProcessAssembled_norm_le` (`≤T‖·‖`) /
@@ -4531,7 +4834,7 @@ Committed + pushed `e949194..6521a2d`.
 ## 2026-07-02 — corpus 308 — SDE-existence keystone II: the drift assembled into `E` (values-upgrade pass)
 
 **Executed this session.** A three-agent upgrade pass on the drift keystone
-`Foundations/DriftProcessPredictable` (`driftProcessAssembled : E →L E`, the drift term of the Picard
+`Probability/Brownian/Ito/DriftProcessPredictable` (`driftProcessAssembled : E →L E`, the drift term of the Picard
 iterate as a bounded operator on the predictable `L²` space; landed `403b6f2`→`0a1a707`, lake-verified).
 Six in-session upgrades, all daemon-green (success, zero warnings, zero sorries; 431 lines):
 1. *coherence rename* `driftProcessLp` → `driftSimpleProcessLp` (+ `_norm_le`) — it takes a `SimpleProcess`,
@@ -4561,7 +4864,7 @@ rewrite under the `fun t =>` binder, `simp only` can; and the `_stronglyAdapted`
 **Lens reads (exemplar → next upgrade).**
 - *Coherence (strong)*: no lemma re-proves upstream — the file consumes `isStronglyPredictable_of_leftContinuous`,
   `StronglyMeasurable.limUnder`, `LinearMap.extendOfNorm`, `integral_mul_le_Lp_mul_Lq_of_nonneg`,
-  `Finsupp.sum_add_index'` directly and reuses the repo's `simpleAssembly_T` / `memLp_uncurry_trim_T` /
+  `Finsupp.sum_add_index'` directly and reuses the repo's `simpleAssemblyHorizon` / `memLp_uncurry_trim_T` /
   `lp_two_norm_sq`. **Next:** factor the shared `‖toLp g‖² = ∫ (uncurry g)² ∂prod` computation (inlined here as
   `hnorm` and again in `itoProcessAssembled_norm_sq`) into one lemma both keystones consume.
 - *Architectural ingenuity (strong, one open fork)*: the CLM-via-`extendOfNorm` route is cleaner than the Itô
@@ -4599,9 +4902,9 @@ keystone (`8660775..0a1a707`), to be committed on top.
 ## 2026-06-30 — corpus 308 — Phase 2: Girsanov, the EMM as an explicit change of measure
 
 **Executed this session.** The continuous-time EMM is now *constructed*, not assumed:
-`Foundations/Girsanov.bs_discounted_isQMartingale` (the Black–Scholes risk-neutral measure as a Girsanov
+`Pricing/Girsanov.bs_discounted_isQMartingale` (the Black–Scholes risk-neutral measure as a Girsanov
 density tilt, constant θ; the discounted stock a `Q`-martingale on `[0,T]`) standing on a reusable
-abstract engine `Foundations/ChangeOfMeasure.changeOfMeasure_setIntegral_eq` (the Bayes change of
+abstract engine `Probability/Martingales/ChangeOfMeasure.changeOfMeasure_setIntegral_eq` (the Bayes change of
 measure: `Z` and `Z·D` `P`-martingales ⟹ `D` a `Q`-martingale). Two new `full` entries; retires the Wald
 shortcut of `discountedGBM_isMartingale`.
 
@@ -4627,7 +4930,7 @@ of the change-of-measure engine; (4) the Gaussian CVaR robust form.
 ## 2026-06-29 — corpus 306 — Phase 1: the convex-duality unification (FTAP = coherent-risk, one Hahn–Banach root)
 
 **Upgrade executed (the headline).** The architecture doc's **#1 unification** — the I↔IV convex-duality
-bridge — is now *realized in Lean*, not latent. The shared geometric root lives in `Foundations/ConvexDuality`
+bridge — is now *realized in Lean*, not latent. The shared geometric root lives in `Pricing/Duality/ConvexDuality`
 (the cone↔simplex separation `exists_pos_separating_of_cone_disjoint_simplex` + its point↔cone companion
 `exists_separating_of_not_mem_cone`, sharing two named atoms `functional_eq_sum_single` /
 `functional_nonneg_on_cone`), and four consumers now *stand on it*:
@@ -4762,7 +5065,7 @@ to keep climbing, not to certify "OK."
 
 ## 2026-06-29 — corpus 302 — Summit C in Degenne's `IsLocalMartingale` typeclass (the wrapper completed)
 
-**Scope**: `Foundations/ItoFormulaUnrestrictedLocMart.lean` (new — `driftPrimitive_stronglyMeasurable`
+**Scope**: `Probability/Brownian/Ito/ItoFormulaUnrestrictedLocMart.lean` (new — `driftPrimitive_stronglyMeasurable`
 [the drift primitive `D_t = ∫₀ᵗ drift` is `𝓕_t`-measurable via time-clamping + Carathéodory +
 `StronglyMeasurable.integral_prod_right`], `residual_stronglyMeasurable` [`M` adapted], and
 `ito_formula_unrestricted` [the genuine `IsLocalMartingale M`]), the docstring updates to
@@ -4849,7 +5152,7 @@ recorded consistently across the file, `AxiomAudit`, the corpus scope, `docs/cov
 
 ## 2026-06-28 — corpus 300 — Brownian exit times: the first localizing sequence
 
-**Scope**: `Foundations/ExitTime.lean` (new — `exitTime`, `exists_rat_time_below`,
+**Scope**: `Probability/Brownian/ExitTime.lean` (new — `exitTime`, `exists_rat_time_below`,
 `exitTime_le_iff`, `exists_le_abs_eq_iInter_iUnion`, `isStoppingTime_exitTime`,
 `exitTime_mono`/`exitTime_monotone`, `exitTime_tendsto_top`, capstone
 `isLocalizingSequence_exitTime`); umbrella import; curated `AxiomAudit` pins
@@ -4893,9 +5196,9 @@ these exit times.
 
 ## 2026-06-28 — corpus 299 — Itô's lemma as a process (semimartingale decomposition)
 
-**Scope**: `Foundations/ItoFormulaProcess.lean` (new — `ito_formula_td_process`,
+**Scope**: `Probability/Brownian/Ito/ItoFormulaProcess.lean` (new — `ito_formula_td_process`,
 `exists_fullHorizon_extension`); the witness-exposure strengthening of
-`ItoIntegralRiemannBridgeTD.itoIntegralCLM_T_of_bdd_cont_td`; the `_explicit` core +
+`ItoIntegralRiemannBridgeTD.itoIntegralCLM_of_bdd_cont_td`; the `_explicit` core +
 thin wrapper refactor of `ItoFormulaTD.ito_formula_td_L2_bddDeriv`; the extraction of
 `itoProcessCLM_terminal_eq` into `ItoIntegralProcessGeneral`. Entry `sc-ito-formula-td-process`
 (`full`). Two-agent panel (coherence + architecture + first-principles; zero-slop + idiom +
@@ -4938,8 +5241,8 @@ formula's 2D Itô–Taylor remainder), not vestigial. Scope honest: bounded-deri
 
 ## 2026-06-28 — corpus 298 — the Itô formula reaches a general (constant-coefficient) Itô process
 
-**Scope.** New `Foundations/ItoFormulaItoProcess.lean` (`ito_formula_itoProcess`: the Itô formula
-`f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds` for `X_t = X₀ + b·t + σ B_t`
+**Scope.** New `Probability/Brownian/Ito/ItoFormulaItoProcess.lean` (`ito_formula_itoProcess`: the Itô formula
+`f(X_T) − f(X₀) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds` for `X_t = X₀ + b·t + σ B_t`
 and a general `C³` exponential-growth `f`); the coherence refactor lifting three `SmoothTrunc`
 lemmas (`cut_eq_id_of_abs_le`, `cutD1_eq_one_of_abs_lt`, `phi'_eq_one_of_lt`) into
 `ItoFormulaLocalized.lean` (with `cut_eventually_id` refactored to consume the first); and the
@@ -4979,8 +5282,8 @@ the clean hierarchy `ItoFormulaLocalized → ItoFormulaItoProcess → ItoFormula
 
 ## 2026-06-28 — corpus 297 — the Itô tower reaches pricing: GBM decomposed by the Itô integral
 
-**Scope.** New proof content in `Foundations/ItoFormulaGBM.lean`: `ito_formula_gbm` (the GBM
-Itô decomposition `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ m·Ŝ ds` via time-localization),
+**Scope.** New proof content in `Probability/Brownian/Ito/ItoFormulaGBM.lean`: `ito_formula_gbm` (the GBM
+Itô decomposition `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ m·Ŝ ds` via time-localization),
 `discountedGBM_eq_itoIntegral` (the `m=0` pure-Itô-integral specialization), and the plateau-slope
 lemma `SmoothTrunc.phi'_eq_one_of_lt`. Corpus entries `sc-ito-formula-gbm`, `sc-discounted-gbm-ito`
 (both `full`, axioms-clean `[propext, Classical.choice, Quot.sound]`).
@@ -5005,7 +5308,7 @@ continuity arguments, is now factored into a single `hScont` (each partial is `(
 
 **Checks that mattered.** (1) This is the **first pricing-ward consumer of the analytic Itô
 tower** — closing the standing two-tower disconnect on the Itô side: GBM is now decomposed by the
-*genuine* `itoIntegralCLM_T`, not the algebraic `ItoLemma`/`PDEFromIto` tower or the Wald
+*genuine* `itoIntegralCLM`, not the algebraic `ItoLemma`/`PDEFromIto` tower or the Wald
 exponential. (2) The route is the *classic* one and the right idea, not a hack: the GBM value is
 `t`-exponential (`exp(a·t)`, `a=m−σ²/2`), which fails the localized formula's `t`-uniform
 exp-in-`x` growth, so the formula is applied to the **time-localized** exponent
@@ -5031,10 +5334,10 @@ avoid a full rebuild of the localized file and its dependents for a cosmetic coh
 
 ## 2026-06-28 — working tree (uncommitted) — corpus 295 — localized (exponential-growth) time-dependent Itô formula: the rung-3 unlock to GBM
 
-**Scope.** New proof content in `Foundations/ItoFormulaLocalized.lean` (`SmoothTrunc`,
+**Scope.** New proof content in `Probability/Brownian/Ito/ItoFormulaLocalized.lean` (`SmoothTrunc`,
 `abs_le_of_expGrowth_deriv`, `fCut`/`cutoff_bddDeriv`, `pathIntegral_expGrowth_memLp`,
 `boundary_tendsto_L2`, `drift_tendsto_L2`, headline `ito_formula_td_localized`),
-`Foundations/BrownianExpMoment.lean` (Brownian marginal exponential moments), and the
+`Probability/Brownian/BrownianExpMoment.lean` (Brownian marginal exponential moments), and the
 strict generalization+exposure of `WeightedQuadraticVariation.tendsto_riemann_continuous`
 (global → local `[0,T]` bound) and `measurable_pathIntegral` (drop the uniform bound). Corpus
 entry `sc-ito-formula-localized` (`full`, axioms-clean `[propext, Classical.choice, Quot.sound]`).
@@ -5069,7 +5372,7 @@ hyps give only *separate* differentiability, and exp-growth (unlike a global der
 which feeds `continuous_uncurry_of_bdd_partials`) does not supply joint continuity. (5)
 Consumes the right Mathlib/Degenne machinery throughout (`ContDiffBump` antiderivative,
 Gaussian MGF, `Convex.norm_image_sub_le_of_norm_hasDerivWithin_le`,
-`Finset.sum_mul_sq_le_sq_mul_sq`, `lintegral_liminf_le`, the existing `itoIntegralCLM_T_norm`
+`Finset.sum_mul_sq_le_sq_mul_sq`, `lintegral_liminf_le`, the existing `itoIntegralCLM_norm`
 isometry and `tendsto_norm_toLp_sub'` bridge); the WQV change is backward-compatible (the
 in-file callers still compile) and genuinely needed by the new lemma.
 
@@ -5092,7 +5395,7 @@ in-file callers still compile) and genuinely needed by the new lemma.
 
 The first time the deep analytic Itô tower feeds a pricing module at the
 *integral-law* level (not the drift-algebra level). Two new files:
-`MathFin/Foundations/WienerIntegralGaussian.lean` proves the distributional
+`MathFin/Probability/Brownian/Wiener/WienerIntegralGaussian.lean` proves the distributional
 fact the isometry construction left open — a deterministic-integrand Wiener
 integral is Gaussian, `μ.map (wienerIntegralLp B hB T f) = gaussianReal 0 ‖f‖²`
 (`wienerIntegralLp_map_eq_gaussianReal`) — by the characteristic-function
@@ -5103,7 +5406,7 @@ the scaled-increment family + `HasGaussianLaw.map_eq_gaussianReal`, mean 0 from
 characteristic-function bound (`Real.norm_exp_I_mul_ofReal_sub_one_le` + an
 `L¹ ≤ L²` estimate on the probability space) feeding `DenseRange.induction_on`,
 then `Measure.ext_of_charFun`. Its consumer
-`MathFin/FixedIncome/VasicekSDEGaussian.lean` (`vasicekShortRate_hasLaw_gaussian`)
+`MathFin/Models/Rates/VasicekSDEGaussian.lean` (`vasicekShortRate_hasLaw_gaussian`)
 makes the Vasicek SDE terminal law a *theorem*:
 `r_T = mean + σ ∫₀ᵀ e^{−κ(T−s)} dB_s ~ N(vasicekSDEMean, σ²(1−e^{−2κT})/(2κ))` —
 variance pinned by the FTC integral `∫₀ᵀ e^{−2κ(T−s)} ds` (`vasicekKernel_integral_sq`,
@@ -5131,10 +5434,10 @@ the genuinely-random-integrand localized Itô formula remains the open frontier.
 ## 2026-06-27 — commit 913f969 — corpus 292 — the [0,∞) unbounded-horizon Itô integral as a continuous local martingale
 
 The `[0,∞)` crown of the continuous-time Itô tower. New files
-`MathFin/Foundations/ItoIntegralProcessL2Infinite.lean` (the `L²` process
+`MathFin/Probability/Brownian/Ito/ItoIntegralProcessL2Infinite.lean` (the `L²` process
 `itoProcessL2Inf`, the `SimpleProcess` clamp `clampSP` + horizon consistency
 `itoProcessL2Inf_eq_itoProcessCLM`) and
-`MathFin/Foundations/ItoIntegralProcessLocalMartingaleInfinite.lean` (the per-horizon
+`MathFin/Probability/Brownian/Ito/ItoIntegralProcessLocalMartingaleInfinite.lean` (the per-horizon
 gluing + the headline `exists_continuous_localMartingale_modification_infinite`); the
 `[0,T]` follow-on (`…LocalMartingaleGeneral.lean`) strengthened to also expose per-horizon
 `StronglyMeasurable[augFiltration]`. Corpus entry `sc-ito-infinite-local-martingale`
@@ -5183,7 +5486,7 @@ has `MemLp.mono_measure`, no packaged CLM), not wrapper-slop.
 
 ## 2026-06-26 (IV) — the general-integrand Itô process as a continuous local martingale (the IsLocalMartingale follow-on) — corpus 291
 
-New file `MathFin/Foundations/ItoIntegralProcessLocalMartingaleGeneral.lean`
+New file `MathFin/Probability/Brownian/Ito/ItoIntegralProcessLocalMartingaleGeneral.lean`
 (augmentation core + the assembly) + corpus entry `sc-ito-general-local-martingale`
 (`full`). Upgrades the gate (III) to Degenne's local-martingale interface:
 `exists_continuous_localMartingale_modification` — an everywhere-continuous process
@@ -5247,7 +5550,7 @@ the modification clause is horizon-scoped). Scope "impossible" → "not achievab
 
 ## 2026-06-26 (III) — continuous modification of the general-integrand Itô process (the gate) — corpus 290
 
-New file `MathFin/Foundations/ItoIntegralProcessContinuousModification.lean`
+New file `MathFin/Probability/Brownian/Ito/ItoIntegralProcessContinuousModification.lean`
 (13 declarations) + corpus entry `sc-ito-general-continuous-modification`
 (`full`). The first pathwise-regularity result for the **general** integrand:
 `exists_continuous_modification_itoProcess` — the L²-valued process
@@ -5328,7 +5631,7 @@ and adapted for every `ω`).
 ## 2026-06-26 (II) — d-asset one-period FTAP: reduced_core → FULL — corpus 289
 
 **Scope**: dropping the non-redundancy hypothesis from the **d-asset** one-period FTAP, this
-session. `Foundations/FTAPOnePeriodVector.lean` was generalised from
+session. `Pricing/FTAP/FTAPOnePeriodVector.lean` was generalised from
 `Y : Ω → EuclideanSpace ℝ (Fin d)` to a discounted return valued in any **finite-dimensional**
 real inner-product space `F` (the `ℝᵈ` market is the instance `F = EuclideanSpace ℝ (Fin d)`),
 and the coercivity/minimiser machinery was rebuilt around the **gains kernel**
@@ -5389,7 +5692,7 @@ restriction-in-disguise surfaced in metadata, exactly what the values gate exist
    `FTAPOnePeriod.lean`'s `## Scope` (which still called the d-asset case open) repointed at the
    now-complete `ftap_one_period_vector`.
 3. *(done — follow-up commit)* The `isEquivProbMeasure_withDensity` cross-file dedup is landed: new
-   shared module `Foundations/EquivMeasure.lean` (a measurable, strictly-positive, normalised density
+   shared module `Probability/Martingales/EquivMeasure.lean` (a measurable, strictly-positive, normalised density
    → equivalent probability measure: `IsProbabilityMeasure` ∧ `Q ≪ P` ∧ `P ≪ Q`), consumed at all
    **four** sites (the two `FTAPOnePeriodVector` densities + the two scalar `FTAPOnePeriod` densities),
    each `obtain ⟨…⟩ := isEquivProbMeasure_withDensity P … ; rw [← h…def] at …`. Term-preserving
@@ -5406,7 +5709,7 @@ selection), unchanged by this rung.
 ## 2026-06-26 — commit bc9a258 — corpus 289
 
 **Scope**: the **d-asset** one-period FTAP (Föllmer–Schied Thm 1.6, non-redundant
-markets), this session. New proof content: `Foundations/FTAPOnePeriodVector.lean`
+markets), this session. New proof content: `Pricing/FTAP/FTAPOnePeriodVector.lean`
 (~580 lines) — the vector model (`NoArbitrage`, `IsEMM` over `EuclideanSpace ℝ (Fin d)`),
 the forward direction, the **softplus potential** `f(θ)=∫ log(1+exp⟪θ,Y⟫)` with its
 logistic derivative, differentiation under the integral (`hasDerivAt_potential_dir`),
@@ -5479,7 +5782,7 @@ point `Nonempty (Fin d)` is needed) are the right shape.
 
 **Scope**: the general-Ω one-period Fundamental Theorem of Asset Pricing
 (Föllmer–Schied Thm 1.55 / one-period Dalang–Morton–Willinger), shipped this session.
-New proof content: `Foundations/FTAPOnePeriod.lean` — the scalar L⁰ model
+New proof content: `Pricing/FTAP/FTAPOnePeriod.lean` — the scalar L⁰ model
 (`NoArbitrage`, `IsEMM` with mutual absolute continuity), the forward direction
 `noArbitrage_of_isEMM`, the balancing-density core `exists_isEMM_of_pos_tails`
 (EMM `Q = P.withDensity (λ·𝟙_{Y≥0} + μ·𝟙_{Y<0})`, weights solved so `Y` is fair), the
@@ -5556,10 +5859,10 @@ rather than inlined.
 
 **Scope**: the finite-Ω Fundamental Theorem of Asset Pricing (Harrison–Pliska /
 finite Dalang–Morton–Willinger), shipped this session to public `main`. New proof
-content: `Foundations/ConvexSeparation.lean` (the separating-dual kernel
-`exists_pos_dual_of_disjoint_stdSimplex`); `Foundations/FTAPMultiState.lean`
+content: `Pricing/Duality/ConvexSeparation.lean` (the separating-dual kernel
+`exists_pos_dual_of_disjoint_stdSimplex`); `Pricing/FTAP/FTAPMultiState.lean`
 backward direction + biconditional `hasEMM_multi_iff_not_hasArbitrage`;
-`Foundations/FTAPDiscrete.lean` (the multi-period model `NoArbitrage`/`IsEMM`, both
+`Pricing/FTAP/FTAPDiscrete.lean` (the multi-period model `NoArbitrage`/`IsEMM`, both
 directions, `ftap_discrete : NoArbitrage ↔ ∃ EMM`); two `full` corpus entries
 (`mf-ftap-discrete-complete`, `mf-ftap-single-period-complete`). Also a build-env fix
 (`7b15319`, warm REPL daemon on v4.31 — infra, not proof content). Library green,
@@ -5680,12 +5983,12 @@ so it stays a faithful one-line library_wrapper. All **285** ledger entries now
 re-verify fresh under the v4.31 pins (`lake env lean` per snippet); pytest 19/19.
 
 **Recorded actions (non-blocking, next-session tidy)**:
-1. *(nit)* `Foundations/ItoIntegralBrownian.lean:251` — `riemannFn` `def` sits under
+1. *(nit)* `Probability/Brownian/Ito/ItoIntegralBrownian.lean:251` — `riemannFn` `def` sits under
    an active `include hB` with no `omit hB in`, so it carries a vacuous `hB` argument
    (harmless; build green). Inconsistent with the file's own `omit hB in` discipline;
    one-line fix deferred (it touches `riemannFn`'s callers, so out of scope for a
    mid-finalize edit on the memory-constrained box).
-2. *(minor)* `BlackScholes/StrikeGreeks.lean:136/141` — `hasDerivAt_bsV_K` declares
+2. *(minor)* `Models/BlackScholes/StrikeGreeks.lean:136/141` — `hasDerivAt_bsV_K` declares
    two side conditions for `K·σ·√τ` (`≠ 0` and `0 <`); `field_simp` may not need both.
    No unused-variable warning fired (both are referenced), so it is at most a
    functional redundancy — confirm with a build which (if either) is droppable.
@@ -5705,13 +6008,13 @@ blemishes are cosmetic idiom noise and one vacuous-binder nit, none blocking.
 ## 2026-06-23 — commit 2e23025 — corpus 285
 
 **Scope**: D1 — covariation of Itô integrals (the bilinear Itô isometry).
-`Foundations/ItoIntegralCovariation.lean` + umbrella import, 4 AxiomAudit pins,
+`Probability/Brownian/Ito/ItoIntegralCovariation.lean` + umbrella import, 4 AxiomAudit pins,
 benchmark `sc-ito-covariation-bilinear-isometry` (full), roadmap/coverage notes.
-The `[0,T]` Itô CLM is bundled as a `LinearIsometry` (`itoIsometry_T`);
+The `[0,T]` Itô CLM is bundled as a `LinearIsometry` (`itoIsometry`);
 polarization (`LinearIsometry.inner_map_map`) gives `⟪∫φ dB, ∫ψ dB⟫ = ⟪φ, ψ⟫`
-(`inner_itoIntegralCLM_T`); `L2.inner_def` unfolds the μ-side to the expectation
-form `𝔼[(∫φ dB)(∫ψ dB)] = ⟪φ, ψ⟫` (`covariation_itoIntegralCLM_T`); the diagonal
-`φ = ψ` recovers the isometry (`variance_itoIntegralCLM_T`).
+(`inner_itoIntegralCLM`); `L2.inner_def` unfolds the μ-side to the expectation
+form `𝔼[(∫φ dB)(∫ψ dB)] = ⟪φ, ψ⟫` (`covariation_itoIntegralCLM`); the diagonal
+`φ = ψ` recovers the isometry (`variance_itoIntegralCLM`).
 
 **Panel**: three agents — (Mathlib/Degenne coherence + idiomatic register + zero
 slop), (concept clarity + first principles + honest scope), (inspired/beautiful
@@ -5734,7 +6037,7 @@ math + architectural ingenuity + AxiomAudit honesty floor).
 `L2.inner_def`, `RCLike.inner_apply`, `conj_trivial`, `real_inner_self_eq_norm_sq`,
 `ContinuousLinearMap.coe_coe`) were each cross-checked against ledger-verified
 sibling files that use them identically; nothing of B1's isometry is reproved
-(the bilinear law is pure polarization of `itoIntegralCLM_T_norm`); the bundled
+(the bilinear law is pure polarization of `itoIntegralCLM_norm`); the bundled
 `LinearIsometry` is novel in the repo (no other `→ₗᵢ[` for the Itô integral) and
 is the genuine reusable artifact, not a wrapper-to-inline; `mul_comm` in the
 `simpa` is load-bearing, not masking a mismatch (sibling `ItoIntegralL2Dense`
@@ -5764,7 +6067,7 @@ pins are correct and complete at `[propext, Classical.choice, Quot.sound]` (no
 ## 2026-06-13 — commit 839dd06 — corpus 283
 
 **Scope**: Summit B / B3 — the elementary Itô integral as a continuous local
-martingale (the localization entry point). `MathFin/Foundations/ItoIntegralProcessLocalMartingale.lean`
+martingale (the localization entry point). `MathFin/Probability/Brownian/Ito/ItoIntegralProcessLocalMartingale.lean`
 (`itoSimpleProcess_pathContinuous`, `itoSimpleProcess_isLocalMartingale`), corpus
 entry `sc-ito-simple-process-local-martingale`.
 
@@ -5809,7 +6112,7 @@ no overclaim (simple integrands, continuity assumed).
 ## 2026-06-13 — commit 6bd9477 — corpus 282
 
 **Scope**: Summit B / B2 — the unbounded-horizon `[0,∞)` Itô integral as a
-continuous linear isometry. `MathFin/Foundations/ItoIntegralL2Dense.lean`
+continuous linear isometry. `MathFin/Probability/Brownian/Ito/ItoIntegralL2Dense.lean`
 (`itoIntegralL2`, `itoIntegralL2_norm`), corpus entry
 `sc-ito-infinite-horizon-isometry`, plus de-privatising
 `ItoIntegralCLM.setIntegral_eq_zero_of_orthogonal_pred` for reuse. Closes the
@@ -5830,7 +6133,7 @@ coherence / first-principles / architecture; inspired / elegant / honesty).
   (only the density theorem + CLM + isometry are public, as in
   `ItoIntegralCLM`/`WienerIntegralL2`). Marked `private`.
 - **MINOR (clarity)** — module doc said B2 "removes the horizon bound from
-  `itoIntegralCLM_T`"; it is a sibling CLM reusing that file's density
+  `itoIntegralCLM`"; it is a sibling CLM reusing that file's density
   machinery, not a direct extension. Reworded.
 - **MINOR (honesty, stale docs)** — `docs/coverage.md`, `docs/blueprint.md`,
   `docs/archive/roadmap-history.md`, and the deferred-doc header still listed the
@@ -5854,8 +6157,8 @@ axioms-clean; ledger 282/282 fresh; pytest 19.
 ## 2026-06-12 — commit 867d265 — corpus 281
 
 **Scope**: the deferred per-`t` Itô isometry, now closed —
-`MathFin/Foundations/ItoIntegralProcessIsometry.lean` (`itoProcessCLM_norm_sq`:
-`‖(φ●B)_t‖² = ∫_{(0,t]×Ω} φ² d(trimMeasure_T T)` `= ∫₀ᵗ E[φ_s²] ds`, for every
+`MathFin/Probability/Brownian/Ito/ItoIntegralProcessIsometry.lean` (`itoProcessCLM_norm_sq`:
+`‖(φ●B)_t‖² = ∫_{(0,t]×Ω} φ² d(trimMeasure T)` `= ∫₀ᵗ E[φ_s²] ds`, for every
 predictable `φ ∈ L²([0,T])` and `t ≤ T`) — plus the de-privatisation of the generic
 `lp_two_norm_sq` in `ItoIntegralL2` (reused, not copied) and 1 new `full` corpus entry
 `sc-ito-general-time-isometry`. This is the refinement B1b openly deferred (the
@@ -5871,7 +6174,7 @@ de-dup). Read-only, no Lean.
    embedding at every `t`, not only the terminal; the load-bearing fact behind
    quadratic-variation / hedging-error analysis in continuous time.
 2. *Mathlib/Degenne coherence* — consumes B1a's `itoSimpleProcess_isometry_time`, the
-   repo's `integral_rectTerm_mul` / `trimMeasure_T_eq_restrict` / `simpleAssembly_T`, and
+   repo's `integral_rectTerm_mul` / `trimMeasure_eq_restrict` / `simpleAssemblyHorizon`, and
    Mathlib's `DenseRange.equalizer` / `integral_trim` / `eLpNorm_indicator_le`. The one
    hand-built object `truncCLM` is justified: Mathlib has only the *constant*-indicator
    `indicatorConstLp` and no `Lp→Lp` restriction CLM (confirmed by loogle search).
@@ -5880,7 +6183,7 @@ de-dup). Read-only, no Lean.
    this round). [fix applied: `integral_rectTerm_mul_band` made `private`.]
 4. *Architectural ingenuity* — reduce the per-`t` isometry to a band-restricted *simple*
    isometry, then transfer by density through `truncCLM`; reuses the SAME
-   `simpleAssembly_T` dense embedding, so the bridge to B1a is definitional.
+   `simpleAssemblyHorizon` dense embedding, so the bridge to B1a is definitional.
 5. *First principles* — no circularity (`truncCLM_norm_sq` assumes no isometry; the
    simple case is B1a + Fubini + the pure-ℝ overlap identity), and the statement is the
    genuine isometry — RHS a real integral against the predictable Lebesgue⊗μ measure, not
@@ -5915,9 +6218,9 @@ pytest green.
 ## 2026-06-12 — commit 5f41a11 — corpus 280
 
 **Scope**: this session's Summit B / B1b deliverable —
-`MathFin/Foundations/ItoIntegralProcessGeneral.lean` (the **general-integrand**
+`MathFin/Probability/Brownian/Ito/ItoIntegralProcessGeneral.lean` (the **general-integrand**
 Itô integral `(φ●B)_t = ∫₀ᵗ φ dB` for `φ ∈ L2Predictable[0,T]` as a continuous L²
-martingale on `[0,T]`: `itoProcessCLM` via `extendOfNorm` along `simpleAssembly_T`,
+martingale on `[0,T]`: `itoProcessCLM` via `extendOfNorm` along `simpleAssemblyHorizon`,
 the definitional bridge to B1a, the key identity `(φ●B)_t = condExpL2 𝓕_t
 (∫₀ᵀ φ dB)`, a.e.-adaptedness, the L² martingale property, the contraction
 `‖(φ●B)_t‖ ≤ ‖φ‖`, the terminal isometry `‖(φ●B)_T‖ = ‖φ‖`, and L²-continuity) plus
@@ -5936,20 +6239,20 @@ file + its dependencies + the corpus prose (read-only, no Lean).
 2. *Mathlib/Degenne coherence* — pure consumption: `condExpL2` +
    `MemLp.condExpL2_ae_eq_condExp`, `mem_lpMeas_iff_aestronglyMeasurable`,
    `condExp_condExp_of_le`, `DenseRange.equalizer`, `TendstoUniformly.continuous`,
-   `eLpNorm_condExp_le`, plus B1a + `itoIntegralCLM_T`. The consumed surface was
+   `eLpNorm_condExp_le`, plus B1a + `itoIntegralCLM`. The consumed surface was
    verified to exist upstream; nothing reproved.
 3. *Zero slop* — every declaration load-bearing; the two helpers
-   (`condExp_itoSimple_eq`, `itoIntegralCLM_T_simpleAssembly_T`) earn their place
+   (`condExp_itoSimple_eq`, `itoIntegralCLM_simpleAssemblyHorizon`) earn their place
    (no upstream duplicate; each discharges a real `extendOfNorm_eq`/martingale
    obligation, not a thin wrapper).
 4. *Architectural ingenuity* — `itoProcessCLM := itoProcessLM.extendOfNorm
-   simpleAssembly_T` reuses the exact recipe that builds `itoIntegralCLM_T`, making
+   simpleAssemblyHorizon` reuses the exact recipe that builds `itoIntegralCLM`, making
    the bridge to B1a definitional (`rfl` after `extendOfNorm_eq`); the key identity
    collapses martingale/adaptedness/contraction/terminal-isometry into corollaries
    of ONE identity; the t-uniform contraction reused for
    continuity-via-`TendstoUniformly`. No simpler architecture found by the panel.
 5. *First principles* — derived from B1a's martingale + the condExp tower + the
-   terminal isometry + the real `simpleAssembly_T_denseRange`; no hypothesis
+   terminal isometry + the real `simpleAssemblyHorizon_denseRange`; no hypothesis
    smuggles the conclusion (`hBmeas`, T-boundedness are honest side-conditions).
 6. *Idiomatic register* — disciplined `simp only` (always an explicit lemma list),
    `calc`/`filter_upwards`, B1a-consistent naming (`_norm_le`, `_isMartingale`,
@@ -5982,7 +6285,7 @@ file + its dependencies + the corpus prose (read-only, no Lean).
 
 ## 2026-06-10 — commit c288861 — corpus 277
 
-**Scope**: this session's B1a deliverable — `MathFin/Foundations/ItoIntegralProcessMartingale.lean`
+**Scope**: this session's B1a deliverable — `MathFin/Probability/Brownian/Ito/ItoIntegralProcessMartingale.lean`
 (the elementary Itô integral as a *process*: adaptedness, the conditional martingale-difference,
 the martingale property, the time-indexed isometry, L²-continuity) plus its 3 new `full` corpus
 entries `sc-ito-simple-process-{martingale,isometry,l2-continuity}`. Machine gates green before the
@@ -6074,19 +6377,19 @@ since the FK/Itô/Merton headliners had four recent reviews. Machine gates green
    left candidates free at negative times — a second uninhabitability the panel itself missed);
    a `: Prop` ascription (register corroboration); and an **in-snippet inhabitant `example`**, so
    non-vacuity is machine-guarded permanently. Corollary corrections in `coverage.md`.
-2. **`FixedIncome/Vasicek.lean` claimed an unproved limit theorem** ("limiting value `r(∞) = θ`" —
+2. **`Models/Rates/Vasicek.lean` claimed an unproved limit theorem** ("limiting value `r(∞) = θ`" —
    no `Tendsto` existed in FixedIncome). **Fixed in the strong direction**:
    `vasicekDeterministic_tendsto_mean` added (exponential mean reversion, consuming `hκ` exactly
    as the docstring advertised), making the claim true rather than deleting it.
-3. **`Performance/RatiosExtended.lean` claimed an unproved `Var(R_p − R_b)` expansion** for
+3. **`Choice/Performance/RatiosExtended.lean` claimed an unproved `Var(R_p − R_b)` expansion** for
    `trackingErrorSq`. **Fix**: de-claimed — the def is the model definition, the variance-level
    identity honestly out of scope; `trackingErrorSq_self`'s "decomposition" header retitled.
 
 **Fixed minors (the round's main wave):**
 
-- *PricingKernel recomposed* (3 lenses converged): `statePrices_two_state` is now **defined** as
+- *PricingKernel recomposed* (3 lenses converged): `statePricesTwoState` is now **defined** as
   `e^{−rT} · emmWeight{Up,Down}` — the Phase-37 weights, newly **named** in `FTAPTwoState` and
-  consumed by `emm_of_signs` — and `pricingKernel_two_state` is defined as the two-state
+  consumed by `emm_of_signs` — and `pricingKernelTwoState` is defined as the two-state
   `statePricePricing` instance, so `_linear`/`_bond`/`_nonneg` genuinely consume `StatePrices`
   and the "via state-price linearity" docstring describes the actual proof (the round-5-era
   "via Greeks" fiction class, eliminated structurally). Phantom Results name fixed; `⟨0, by omega⟩`
@@ -6101,7 +6404,7 @@ since the FK/Itô/Merton headliners had four recent reviews. Machine gates green
 - *André's reflection principle wired* (the round's inverted-weight repair): `PathReflection.lean`'s
   stale "the hitting-time bijection is downstream work" de-staled (the bijection was *in the file*),
   Results list completed, and the counting form wired as **`mf-reflection-principle-counting`**
-  (`Nat.card_congr` over `reflectionPrincipleEquiv_below`) with a curated AxiomAudit pin — the
+  (`Nat.card_congr` over `reflectionPrincipleEquivBelow`) with a curated AxiomAudit pin — the
   library's best long-tail mathematics now has corpus existence.
 - *Coherence cites*: `herfindahl_card_inv_le_of_sum_one` now consumes Mathlib's
   `sq_sum_le_card_mul_sum_sq` (was hand-reconstructed; a pre-existing dead `have` went with it);
@@ -6177,11 +6480,11 @@ keep-deferred recommendations.
    `mf-triangle-arbitrage-unique`, `mf-log-forward-bsTerminal`, `mf-sortino-translation`) stays
    honest-but-thin `full`; upgrade toward the real theorems when those files are next touched.
 
-**Positive exemplars recorded by the panel**: `Portfolio/CovariancePSD` (the docstring's story IS
-the certificate), `Futures/Black76Greeks` (structural reduction made visible),
-`RiskMeasures/RockafellarUryasev` (certificate-first elegance), `RiskMeasures/UtilityDerivation`
-(the coherent axioms given content from a primitive), `Foundations/CarrMadan` (the model
-upstream-coherence note), `FixedIncome/KMVMerton` (structural-identity honesty),
+**Positive exemplars recorded by the panel**: `Choice/Portfolio/CovariancePSD` (the docstring's story IS
+the certificate), `Models/Forwards/Black76Greeks` (structural reduction made visible),
+`Risk/RockafellarUryasev` (certificate-first elegance), `Risk/UtilityDerivation`
+(the coherent axioms given content from a primitive), `Models/ModelFree/CarrMadan` (the model
+upstream-coherence note), `Models/Credit/KMVMerton` (structural-identity honesty),
 `pp-prop-3.3.6`'s scope note (the model reduced_core disclosure), and the snippet corpus's
 mechanically perfect import discipline (0 blanket-Mathlib violations in 235 MathFin-importing
 snippets).
@@ -6249,7 +6552,7 @@ flipped a too-aggressive "delete"):
 - *[style, declined/deferred]*: ~159 `Real.` qualifiers under `open Real` — **declined** (the file
   consistently qualifies; low-value, high-churn, disambiguation-fragile); the `integrable_payoff_mul_d{t,x}K`
   / `curve_*` boilerplate dedup; 8 dead `set … with h…_def` binding names; 9 honestly-labeled re-export
-  shim files; DeFi `internalPrice`/`arbitragePresent` + a `Performance/Ratios` docstring word.
+  shim files; DeFi `internalPrice`/`arbitragePresent` + a `Choice/Performance/Ratios` docstring word.
 
 **Verdict**: PASS. No blocking findings; the proofs across the whole repo are sound, elegant, and honest.
 The remaining work is honesty-drift cleanup + pre-existing orphan housekeeping, fully catalogued above.
@@ -6338,7 +6641,7 @@ axiom-clean. Remaining for the full keystone: `∂_SS` via FK + the PDE-operator
 ## 2026-06-08 (round 2) — parametric unification — corpus 269
 
 **Scope**: the parametric unification of the heat-kernel differentiate-under-the-integral lemmas in
-`Foundations/FeynmanKacHeatEquation` — new skeleton `hasDerivAt_integral_mul_kernelFamily` + extracted
+`Probability/Gaussian/FeynmanKacHeatEquation` — new skeleton `hasDerivAt_integral_mul_kernelFamily` + extracted
 `heatKernel_temporal_le` / `sq_sub_div_le` / `integrable_payoff_mul_heatKernel`, with `hasDerivAt_phi`
 and `hasDerivAt_feynmanU_{t,x,xx}` refactored to route through it (net ≈ −55 lines); the
 `exp_mul_heatKernel` docstring made honest. The timed-out ∂_τ tower (the heat kernel's joint Fréchet
@@ -6373,11 +6676,11 @@ errors), 19 pytest pass, ledger 269/269 fresh, axiom-clean.
 ## 2026-06-08 — commit 3beb170 — corpus 269
 
 **Scope**: the Feynman–Kac → BS-PDE *keystone core* — step 1 (kernel-side heat equation
-`∂_t U = ½ ∂_xx U` for sub-Gaussian payoffs, in `Foundations/FeynmanKacHeatEquation`: the
+`∂_t U = ½ ∂_xx U` for sub-Gaussian payoffs, in `Probability/Gaussian/FeynmanKacHeatEquation`: the
 completing-the-square mean-shift, the sub-Gaussian envelope, the spatial kernel bound, three
 diff-under-integral derivatives, the `feynmanU_heat_equation` identity) + the bridge
 `bsV_eq_discount_feynmanU` (bsV = discounted heat flow, making `feynmanU` load-bearing for pricing)
-and Delta-via-FK `hasDerivAt_bsV_S_fk` (in `BlackScholes/PDEFromFeynmanKac`). The full `∂_τ`/PDE
+and Delta-via-FK `hasDerivAt_bsV_S_fk` (in `Models/BlackScholes/PDEFromFeynmanKac`). The full `∂_τ`/PDE
 assembly is deferred (its brute-force domination is infeasible — see below).
 **Panel**: three Sonnet reviewers (coherence+idiomatic · zero-slop+architecture ·
 inspired-math+first-principles+clarity+beauty) reading the diff, + Opus synthesis and judgment.
@@ -6410,7 +6713,7 @@ docstring.
    the completing-the-square identity (the *analytic core* of the shift, not the measure-change
    theorem); retitle honestly.
 4. *(idiomatic)* `open Real` is declared but `Real.` is qualified ~200×; drop it.
-5. *(architecture)* `callPayoff_continuous`/`le_exp` are call-payoff facts → `BlackScholes/Call.lean`.
+5. *(architecture)* `callPayoff_continuous`/`le_exp` are call-payoff facts → `Models/BlackScholes/Call.lean`.
 6. *(zero slop)* `hasDerivAt_feynmanU_xx`'s closing `linarith [show … ring]` should mirror `_x`'s
    clean `calc … ring`.
 
@@ -6432,7 +6735,7 @@ a parametric pass.
 
 **Scope**: commit `321eb4f` — `bsV_eq_feynmanU` (the Feynman–Kac representation of
 the Black–Scholes call price) in the new bridge module
-`MathFin/BlackScholes/PDEFromFeynmanKac.lean`, plus its umbrella import. This is
+`MathFin/Models/BlackScholes/PDEFromFeynmanKac.lean`, plus its umbrella import. This is
 step 2 of the Feynman–Kac → BS PDE keystone (which makes the previously
 consumer-less `Foundations.FeynmanKacHeatEquation.feynmanU` load-bearing for
 pricing); steps 1 (kernel-side heat equation), 3 (change of variables) and 4
@@ -6474,7 +6777,7 @@ file/layer (a `BlackScholes/` bridge over the Foundations FK layer) at the right
 generality (the concrete call payoff baked in, not over-abstracted).
 
 **Declined reviewer flags** (with reason):
-1. *(minor)* "redundant `public import MathFin.BlackScholes.Call`" — declined: this
+1. *(minor)* "redundant `public import MathFin.Models.BlackScholes.Call`" — declined: this
    file directly consumes `bs_call_formula`/`bsTerminal`/`BSCallHyp`, so the
    explicit import is correct direct-dependency hygiene; the file's transitive-import
    comment scopes only the Mathlib base, not directly-used modules.
@@ -6663,7 +6966,7 @@ first pass, and (3, 6, 8). The authoring agent adjudicated and ran all Lean seri
 
 ### Upgrades executed
 
-1. **`Foundations/DerivOfDeriv.lean`** (lenses 2, 4). This is the missing adapter between how
+1. **`Probability/Analysis/DerivOfDeriv.lean`** (lenses 2, 4). This is the missing adapter between how
    Mathlib produces second derivatives and how it consumes them. It has three lemmas:
    - `hasDerivAt_deriv_of_eventually`, whose hypothesis shape is Mathlib's own;
    - `hasDerivAt_deriv_param_of_eventually`, the mixed-partial twin;
@@ -7070,7 +7373,7 @@ proves it, so that sentence became an understatement and was replaced.
 |---|---|---|
 | 1 | **Pathwise quadratic variation**: identify `bracketProcess` with a limit of sums along partitions — what would make "bracket" mean `[M]` rather than `∫φ²`. Multi-phase: needs an approximation argument along partitions for a general `L²` integrand, which the tower does not yet supply | unassigned |
 | 2 | Package `M² − ⟨M⟩` as a bundled `Martingale` by rebuilding `M` from `μ[· \| 𝓕_t]`, as `pricePathCondExp` does — turns the identity into the slogan | unassigned |
-| 3 | #199 — collapse `simpleAssembly_T` (carried; assessed this round as a high-regression pure refactor that should not ride with proof work) | unassigned |
+| 3 | #199 — collapse `simpleAssemblyHorizon` (carried; assessed this round as a high-regression pure refactor that should not ride with proof work) | unassigned |
 | 4 | #194 — drift term in the Itô-process price (carried; belongs to the HJM seam) | unassigned |
 | 5 | Lift `lpNorm_sq_eq_lintegral_enorm_sq` to `LpMulIsometry` when a second consumer appears (carried) | unassigned |
 
@@ -7121,7 +7424,7 @@ difference rather than letting the shared shape hide it.
   beautiful math). The design of record was polarise → generators → density → ε, roughly 800
   lines, of which about 200 were already written. It was dropped on a two-line observation: a
   conditional-expectation identity *is* an identity of `𝓕_a`-set integrals, and on such a set
-  `𝟙_F` is a bounded `𝓕_a`-measurable factor — so `itoIntegralCLM_T_smulAdapted`, the locality
+  `𝟙_F` is a bounded `𝓕_a`-measurable factor — so `itoIntegralCLM_smulAdapted`, the locality
   lemma built for the *first* moment, folds it back inside one Itô integral, and `𝟙_F² = 𝟙_F`
   makes the square free. Both sides then meet at `∫_{(a,b]×F} φ²`, one by the isometry and one by
   Tonelli. About 200 lines, and the proof states the reason rather than grinding it out.
@@ -7139,7 +7442,7 @@ difference rather than letting the shared shape hide it.
   "for a.e. ω, for a.e. u" would have forced never appears.
 * **A duplicated computation was lifted in the cleanup pass**: the four-line indicator case
   analysis and the restrict-intersect rewrite each appeared twice, and became `bandSq_section` and
-  `restrict_timeMeasure_T`.
+  `restrict_timeMeasureHorizon`.
 * **The one orphan was given a consumer rather than kept or deleted.** `bandGen_support` (the
   generator vanishes before its left endpoint) was the dropped route's entry point and had no
   reader. It is exactly the hypothesis `ItoIntegralLocality`'s time-locality consumes, so adding
@@ -7167,7 +7470,7 @@ difference rather than letting the shared shape hide it.
 | 1 | The **adapted** bracket process: `t ↦ ∫₀ᵗ φ_s² ds` progressively measurable, so the increment is `𝓕_b`-measurable and `M² − ⟨M⟩` can be stated as a martingale | unassigned |
 | 2 | **Pathwise quadratic variation**: identify `bracketRep` with a limit of sums along partitions — what would make "bracket" mean `[M]` rather than `∫φ²` | unassigned |
 | 3 | Evaluate `bracketRep` on a band generator (`= Z²·(d−c)`), which turns `condExp_bandGen_second_moment` from an independent witness into a corollary — needs the trim→product→ω-section a.e. transfer | unassigned |
-| 4 | #199 — collapse `simpleAssembly_T` (carried) | unassigned |
+| 4 | #199 — collapse `simpleAssemblyHorizon` (carried) | unassigned |
 | 5 | Regenerate `docs/blueprint.md` (carried) | next session |
 | 6 | #194 — drift term in the Itô-process price | unassigned |
 | 7 | Lift `lpNorm_sq_eq_lintegral_enorm_sq` to `LpMulIsometry` when a second consumer appears (carried) | unassigned |
@@ -7189,7 +7492,7 @@ errors in this work were invisible to the daemon and hard errors in the build). 
 
 ## 2026-08-25 — corpus 367 — the pointwise bracket rung, part 1: conditional kernels and band generators
 
-New Foundations depth, no corpus growth: `Foundations/PointwiseBracket` starts the rung above
+New Foundations depth, no corpus growth: `Probability/Martingales/PointwiseBracket` starts the rung above
 #200 — the *conditional* second moment `μ[(M_b−M_a)² | 𝓕_a] = μ[ωise ∫_a^b ⇑φ² du | 𝓕_a]`, which
 `bracketMeasure` (integrating ω out) cannot state. Landed: the four conditional Brownian kernels
 (increment zero-mean; squared increment → elapsed time; tower+pull-out upgrades to `𝓕_a`-adapted
@@ -7208,7 +7511,7 @@ mode this pass exists for.
 * **The generator is `stepSP`'s assembly, not an `smulAdapted` wrapper**: the first draft wrapped
   a constant-one band in `smulAdapted`, which double-scales by the coefficient; `ItoIntegralBrownian.stepSP`
   already packages the single-band process with its explicit evaluation (`itoSimple_stepSP`), so the
-  wrapper (and an entire Finsupp-surgery detour through `iocSP_T`) deleted itself.
+  wrapper (and an entire Finsupp-surgery detour through `iocSPHorizon`) deleted itself.
 * **The tower property needed a σ-finiteness shim**: `condExp_condExp_of_le` wants
   `SigmaFinite (μ.trim hm)` for natural-filtration sub-σ-algebras; supplied as a private instance
   (`isFiniteMeasure_trim` + `toSigmaFinite`). Instances with explicit leading binders are invisible
@@ -7221,7 +7524,7 @@ mode this pass exists for.
 | rank | item | owner |
 |---|---|---|
 | 1 | Pointwise bracket part 2: pair identity (disjoint/nested/partial cases via kernels + increment splitting), then density (`setIntegral_eq_zero_of_orthogonal_pred` + clip trick) and ε-extension to the headline conditional form | next session |
-| 2 | #199 — collapse `simpleAssembly_T` (carried) | unassigned |
+| 2 | #199 — collapse `simpleAssemblyHorizon` (carried) | unassigned |
 | 3 | Regenerate `docs/blueprint.md` (carried) | next session |
 | 4 | #194 — drift term in the Itô-process price | unassigned |
 | 5 | Lift `lpNorm_sq_eq_lintegral_enorm_sq` to `LpMulIsometry` when a second consumer appears | unassigned |
@@ -7237,7 +7540,7 @@ change — the new module is not yet corpus-referenced); module checks 0 errors 
 
 A one-issue proof session: `ItoIntegralAgainstMartingale.norm_sq_increment_eq_bracket` proves
 `𝔼[(M_b − M_a)²] = ⟨M⟩((a,b] × Ω)` — the unconditional second moment of an increment equals the
-bracket measure of its time band — with `itoIntegralCLM_T_bandRestrict` extracted from
+bracket measure of its time band — with `itoIntegralCLM_bandRestrict` extracted from
 `itoIntegralAgainst_elementary` (which now consumes it; it is wanted exactly twice). No corpus
 growth: 367 entries, statuses unchanged.
 
@@ -7262,7 +7565,7 @@ adapted bracket process, which this file does not construct.
 - **#200 closed** (lens 1 + lens 5): the definition's name is now backed by the theorem the
   name was borrowed for, in the exact form the tower supports.
 - **A duplicated derivation deleted**: `itoIntegralAgainst_elementary`'s inline band step became
-  `itoIntegralCLM_T_bandRestrict`; net code shrank while adding a theorem.
+  `itoIntegralCLM_bandRestrict`; net code shrank while adding a theorem.
 - **A reusable idiom surfaced as a private lemma** (`lpNorm_sq_eq_lintegral_enorm_sq`):
   `‖W‖²_{L²} = (∫⁻ ‖W‖ₑ² ∂ν).toReal`, the bridge by which a second moment meets a measure of a
   set. Kept private until a second consumer exists — if #194 or any QV work needs it, lift it to
@@ -7273,7 +7576,7 @@ adapted bracket process, which this file does not construct.
 | rank | item | owner |
 |---|---|---|
 | 1 | Pointwise bracket process `t ↦ ∫₀ᵗ φ_s² ds` (adapted, increasing) + the conditional second-moment identity — the rung above #200 | unassigned |
-| 2 | #199 — collapse `simpleAssembly_T`, fixing the dependency direction | unassigned |
+| 2 | #199 — collapse `simpleAssemblyHorizon`, fixing the dependency direction | unassigned |
 | 3 | Regenerate `docs/blueprint.md` (carried; the chain-rule tower edges are still missing) | next session |
 | 4 | #194 — drift term in the Itô-process price | unassigned |
 | 5 | Audit `trim_T`-specific lemmas for hidden measure-genericity (carried) | unassigned |
@@ -7369,7 +7672,7 @@ in the docstring that none is known. This is a five-minute question and it caugh
    `𝔼[(M_b − M_a)²] = ⟨M⟩((a,b]×Ω)`, which is reachable from the isometry today.
 2. **Coherence.** *Exemplar:* `martingale_condExp` and `martingale_const` consumed rather than
    re-derived; the adapted price is Mathlib's conditional expectation, not a bespoke object.
-   *Upgrade (MED):* `simpleAssembly_T` is now a special case of `simpleAssemblyOfMeasure` with a
+   *Upgrade (MED):* `simpleAssemblyHorizon` is now a special case of `simpleAssemblyOfMeasure` with a
    worse proof (#199) — the dependency runs the wrong way and wants a downward move.
 3. **Zero slop.** *Exemplar:* three deletions this round (a copied proof, a duplicate definition, a
    derivable hypothesis) and no additions that lacked a consumer. *Upgrade (MED):* the corpus still
@@ -7400,7 +7703,7 @@ in the docstring that none is known. This is a five-minute question and it caugh
 |---|---|---|
 | 1 | Witness check as a standing pass (lens 5) — five minutes, caught a live vacuity | next session |
 | 2 | #200 — let `bracketMeasure` earn its name | unassigned |
-| 3 | #199 — collapse `simpleAssembly_T`, fixing the dependency direction | unassigned |
+| 3 | #199 — collapse `simpleAssemblyHorizon`, fixing the dependency direction | unassigned |
 | 4 | Regenerate `docs/blueprint.md` (lens 7) | next session |
 | 5 | Audit the other `trim_T`-specific lemmas for hidden measure-genericity (lens 4) | unassigned |
 | 6 | #201 — compose project-name collision (infra; schedule with a pin bump) | unassigned |
@@ -7484,7 +7787,7 @@ is delivered; and that `Q = μ` holds **on `𝓕ᴮ_T`** and says nothing off it
 6. **Idiomatic register.** *Exemplar:* `mulLM` / `mulLI` split the linear map from its isometry
    exactly as the tower's own `itoProcessLM` / `itoProcessCLM` do. *Upgrade (LOW):* `lake lint`
    rejected `simpleAssembly_ν`; it was renamed rather than added to `nolints.json`, which is the
-   right call, but the file's siblings (`simpleAssembly_T`, `iocSP_T`) are all exemptions. The
+   right call, but the file's siblings (`simpleAssemblyHorizon`, `iocSPHorizon`) are all exemptions. The
    convention should be settled one way.
 7. **Concept clarity.** *Exemplar:* "defining `∫ψ dM` by a formula proves nothing on its own; what
    earns the name is the elementary identity" — the docstring states the epistemic status of its own
@@ -7551,11 +7854,11 @@ backlog).
    to `discountedGBM_eq_itoIntegral` states `gfx =ᵐ [the integrand]`, ending at `σ·Ŝ(·)`.
 2. **The `C²` sibling, found by the audit, not by the issue.** `sc-thm-7.1.1` had exactly the same
    defect one tower over: its description wrote `∫₀ᵗ f'(B_s) dB_s` while the statement said `∃ gf'`.
-   Fixed by carrying the conjunct through `itoIntegralCLM_T_of_bdd_cont → ito_formula_L2_bddDeriv →
+   Fixed by carrying the conjunct through `itoIntegralCLM_of_bdd_cont → ito_formula_L2_bddDeriv →
    _mk`. The TD bridge had exposed the identification since it was written; the untimed one never did.
 3. **Two forgetful wrappers merged away.** `ito_formula_td_L2_bddDeriv_explicit` + its conjunct-dropping
    wrapper are one theorem now.
-4. **`ae_fst_mem_Ioc_trimMeasure_T` existed six times.** One private lemma in `ItoIntegralLocality`,
+4. **`ae_fst_mem_Ioc_trimMeasure` existed six times.** One private lemma in `ItoIntegralLocality`,
    four inline `have`s (`ItoIntegralRiemannBridge`, `…TD`, `…Adapted`, `SimpleProcessPartition`), and
    the public one I added *yesterday* in `ItoIntegralCLM` without noticing the other five. All five
    duplicates retired.
@@ -7605,8 +7908,8 @@ entry that the structure is the hypothesis, since "specification" is doing quiet
 **6 Idiomatic register.** *Exemplar:* `{mα : MeasurableSpace α}` as a plain implicit, matching
 Mathlib's own measure-theory convention — which is *why* our helper composes with a trim measure at
 all; instance-implicit would have synthesized `Prod.instMeasurableSpace` and failed. *Upgrade (LOW):*
-`ae_fst_mem_Ioc_trimMeasure_T` is a mouthful; a Mathlib reviewer would want
-`trimMeasure_T.ae_fst_mem_Ioc` or similar once it has a namespace worth dotting into.
+`ae_fst_mem_Ioc_trimMeasure` is a mouthful; a Mathlib reviewer would want
+`trimMeasure.ae_fst_mem_Ioc` or similar once it has a namespace worth dotting into.
 
 **7 Concept clarity.** *This is the round's weak lens, and the reason the user asked for the audit.*
 Six separate places said more than their Lean did. The pattern is not carelessness, it is structural:

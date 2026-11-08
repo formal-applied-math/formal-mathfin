@@ -14,7 +14,7 @@ This document is the narrative. For the per-theorem audit see
 
 ## Leap 1 — static Girsanov: the risk-neutral measure is *derived*
 
-`MathFin/Bridges/GaussianGirsanov.lean`.
+`MathFin/Models/BlackScholes/GaussianGirsanov.lean`.
 
 `BSCallHyp` is no longer an axiom. The risk-neutral measure `Q` is
 *constructed* from the physical measure `P` by an explicit Radon-Nikodym
@@ -23,7 +23,7 @@ it. The deductive chain, bottom-up:
 
 | Step | Theorem | Content |
 |---|---|---|
-| 1 | `gaussianReal_tilted_const_mul` | The Gaussian Esscher transform (`Foundations/Esscher.lean`): `N(m, v)` tilted by `e^{θx}` is `N(m + θv, v)`, by comparing moment-generating functions. Until 2026-10-08 this step was the pdf identity `gaussian_esscher_pdf` (completing the square); the general tilt replaced it because the jump layer's Esscher transform uses the same lemma, without jumps and for Merton's lognormal jumps. |
+| 1 | `gaussianReal_tilted_const_mul` | The Gaussian Esscher transform (`Probability/Laws/Esscher.lean`): `N(m, v)` tilted by `e^{θx}` is `N(m + θv, v)`, by comparing moment-generating functions. Until 2026-10-08 this step was the pdf identity `gaussian_esscher_pdf` (completing the square); the general tilt replaced it because the jump layer's Esscher transform uses the same lemma, without jumps and for Merton's lognormal jumps. |
 | 2 | `gaussianReal_withDensity_esscher` | Measure level: tilting `N(0,1)` by the Esscher density gives exactly `N(c,1)` — mean shift `c`, variance fixed. The static (single-Gaussian) Girsanov theorem: the case `m = 0`, `v = 1`, `θ = c` of step 1, with the normalizer `e^{c²/2}` written into the density. |
 | 3 | `map_withDensity_comp` | Pushforward commutes with a density factoring through the map: `(P.withDensity (g∘W)).map W = (P.map W).withDensity g`. Proved from `Measure.ext` + `setLIntegral_map`; **upstreamable to Mathlib**. |
 | 4 | `hasLaw_esscher_tilt` | Girsanov for a random variable: if `W ~ N(0,1)` under `P`, then `W ~ N(c,1)` under `Q := P.withDensity(exp(c·W − c²/2))`. |
@@ -38,7 +38,7 @@ slice of Girsanov tractable without the path-wise stochastic integral.
 
 ## Leap 2 — the genesis cascade: physical → EMM → pricing
 
-`MathFin/Bridges/GaussianGirsanov.lean` (same file).
+`MathFin/Models/BlackScholes/GaussianGirsanov.lean` (same file).
 
 Two composites wire the Girsanov construction into the prior pricing
 artifacts — making `GaussianGirsanov` load-bearing rather than a dead leaf:
@@ -59,7 +59,7 @@ The spine is `physical measure → Girsanov → Q → BSCallHyp → pricing`.
 
 ## Leap 3 — multivariate: Margrabe's exchange option
 
-`MathFin/BlackScholes/ExchangeOption.lean`.
+`MathFin/Models/BlackScholes/ExchangeOption.lean`.
 
 The first genuinely multivariate result. The exchange option pays
 `max(S¹_T − S²_T, 0)`; its structural fact (Margrabe 1978) is that it depends
@@ -70,7 +70,7 @@ the same structural-reduction discipline as `PowerCall`.
 
 | Theorem | Content |
 |---|---|
-| `margrabe_variance_sub` | `Var[L₁ − L₂] = Var L₁ + Var L₂ − 2·cov(L₁,L₂)` via covariance bilinearity. First consumer of the covariance machinery shared with `Foundations/BivariateGaussian` — makes it load-bearing. |
+| `margrabe_variance_sub` | `Var[L₁ − L₂] = Var L₁ + Var L₂ − 2·cov(L₁,L₂)` via covariance bilinearity. First consumer of the covariance machinery shared with `Probability/Gaussian/BivariateGaussian` — makes it load-bearing. |
 | `margrabe_effective_variance` | Substituting `σ₁²T, σ₂²T, ρσ₁σ₂T` gives the effective variance `(σ₁²+σ₂²−2ρσ₁σ₂)·T`. |
 | `exchange_payoff_eq_ratio` | `max(a−b,0) = b·max(a/b−1,0)` — the exchange payoff is `S²_T` times a vanilla call on the ratio. |
 | `margrabe_eq_bsVGarman` | Margrabe **is** a `GarmanNormalForm` instance at `A=S¹₀, K=S²₀, DF=1`, effective vol `σ`. A multivariate option is the same formula `V = A·Φ(d₁) − K·DF·Φ(d₂)` as every BS-family price. |
@@ -80,12 +80,12 @@ the same structural-reduction discipline as `PowerCall`.
 The price-level result takes `BSCallHyp` for the *ratio* `R = S¹/S²` — exactly
 the abstraction `bs_call_formula` takes for any underlying.
 
-**Leap 3 grounding (done)** — `MathFin/BlackScholes/MargrabeGrounding.lean`.
+**Leap 3 grounding (done)** — `MathFin/Models/BlackScholes/MargrabeGrounding.lean`.
 That `BSCallHyp` for the ratio is now *derived*, the Margrabe-analog of leap 1:
 
 | Theorem | Content |
 |---|---|
-| `normalizedSpread_hasLaw_std` | **Bivariate → univariate reduction.** For a jointly-gaussian pair `(W₁,W₂)` of standard drivers with correlation `ρ`, the normalized log-spread driver `(σ₁W₁ − σ₂W₂)/σ_eff` is `N(0,1)`: gaussianity is preserved under the linear map (`HasGaussianLaw.map_of_measurable`), and the variance is pinned to `1` by covariance bilinearity (`margrabe_effective_variance`) — making `Foundations/BivariateGaussian`'s machinery load-bearing. |
+| `normalizedSpread_hasLaw_std` | **Bivariate → univariate reduction.** For a jointly-gaussian pair `(W₁,W₂)` of standard drivers with correlation `ρ`, the normalized log-spread driver `(σ₁W₁ − σ₂W₂)/σ_eff` is `N(0,1)`: gaussianity is preserved under the linear map (`HasGaussianLaw.map_of_measurable`), and the variance is pinned to `1` by covariance bilinearity (`margrabe_effective_variance`) — making `Probability/Gaussian/BivariateGaussian`'s machinery load-bearing. |
 | **`margrabe_bsCallHyp_of_gaussian`** | From the joint Gaussian model it exhibits a probability measure `Q` (an explicit Esscher tilt) and a standard-normal driver `Z` with the pathwise identity `S¹_T/S²_T = bsTerminal (S1/S2) 0 σ_eff T Z`, so `BSCallHyp` holds for the ratio at the effective volatility. That `Q` is the `S²`-numéraire measure is not shown. (Until 2026-10-21 the theorem only asserted that some such `Q` and `Z` exist, which any Gaussian driver satisfies.) |
 | **`margrabe_exchange_price`** | The discounted expected exchange payoff under the physical two-GBM model, `E_P[e^{−rT}(S¹_T − S²_T)⁺]`, equals Margrabe's price, by splitting off a residual independent of the effective driver (`HasGaussianLaw.indepFun_of_covariance_eq_zero`). |
 
@@ -107,9 +107,9 @@ primitive.
 
 ## Leap 4 — the adapted Itô isometry (done, discrete)
 
-`MathFin/Foundations/ItoIsometryAdapted.lean`.
+`MathFin/Probability/Brownian/Ito/ItoIsometryAdapted.lean`.
 
-The Wiener integral (`Foundations/WienerIntegralL2.lean`) handles
+The Wiener integral (`Probability/Brownian/Wiener/WienerIntegralL2.lean`) handles
 *deterministic* integrands, where cross-terms vanish by the BM covariance.
 That is **not** the Itô integral. Leap 4 builds the genuinely-stochastic
 core: a **random, adapted** integrand `φ`, where the cross-terms vanish for a
@@ -134,15 +134,15 @@ All build-enforced axioms-clean (`MathFin/AxiomAudit.lean`).
 
 ## Leap 4, continuous — the bounded-horizon CLM, now consumed (2026-05-29)
 
-The L²(adapted) Cauchy completion is **built**: `ItoIntegralCLM.itoIntegralCLM_T`
+The L²(adapted) Cauchy completion is **built**: `ItoIntegralCLM.itoIntegralCLM`
 is the continuous Itô integral as a CLM `Lp 2 trim_T →L[ℝ] Lp 2 μ` with the
-isometry `‖∫₀ᵀ f dB‖ = ‖f‖` (density via `simpleAssembly_T_denseRange`, the
+isometry `‖∫₀ᵀ f dB‖ = ‖f‖` (density via `simpleAssemblyHorizon_denseRange`, the
 orthogonal-complement → π-λ argument). Bounded horizon `[0,T]`; the unbounded-`ℝ≥0`
 CLM (σ-finite predictable exhaustion) stays gated.
 
-It now has its **first genuine consumer** (`Foundations/ItoIntegralBrownian.lean`,
-`itoIntegralCLM_T_brownian`): `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` as a real
-`itoIntegralCLM_T` identity, bridging the abstract CLM to the concrete
+It now has its **first genuine consumer** (`Probability/Brownian/Ito/ItoIntegralBrownian.lean`,
+`itoIntegralCLM_brownian`): `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` as a real
+`itoIntegralCLM` identity, bridging the abstract CLM to the concrete
 quadratic-variation limit. The unbounded Gaussian integrand `s ↦ Bₛ` is realised
 as the `trim_T`-limit of its clamp-truncated left-endpoint step processes — the
 genuine construction of the Itô integral for an unbounded `L²` integrand.
@@ -156,15 +156,15 @@ Leap 3 above, `MargrabeGrounding.lean`.)
 
 ## Leap 5 — martingale representation: the hedge is *derived* (2026-08-07)
 
-`MathFin/Foundations/MartingaleRepresentation.lean`,
-`MathFin/Foundations/MarketCompleteness.lean`.
+`MathFin/Probability/Brownian/MartingaleRepresentation.lean`,
+`MathFin/Pricing/MarketCompleteness.lean`.
 
 Leap 4's continuous half built the Itô integral as an isometry `φ ↦ ∫₀ᵀ φ dB` from
 the predictable `L²(dt⊗dμ)` integrands into `L²(μ)`. What that isometry does *not*
 say is which claims it reaches. The binomial tower has replication and its uniqueness
 because a finite tree can be solved backwards; in continuous time the library could
 integrate a strategy it was handed, and had no theorem saying a strategy exists.
-Leap 5 identifies the image exactly. `itoIntegralCLM_T` is onto the **centered
+Leap 5 identifies the image exactly. `itoIntegralCLM` is onto the **centered
 `𝓕ᴮ_T`-measurable** part of `L²(μ)`, so the hedge exists, is unique, and is produced
 by the theorem rather than posited.
 
@@ -178,13 +178,13 @@ come from separate modules:
 | `ItoIntegralLocality.coeFn_smulAdapted` | `𝓕_a`-linearity of the terminal integral: scaling a predictable integrand by an `𝓕_a`-measurable factor supported on `(a, T]` scales the integral. Proved by equalizing two continuous linear maps on the dense range of simple-process assemblies (`DenseRange.equalizer`). |
 | `DoleansStepRepresentation.stepDoleans_sub_one_mem_range` | Every step-integrand Doléans exponential, minus one, is **inside** the range. The induction over the partition is where `𝓕_a`-linearity is spent. |
 | `WienerExponentialTotality.eq_zero_of_orthogonal_stepDoleans` | The other half: an `L²(𝓕ᴮ_T)` variable orthogonal to all of them is zero. Abel summation reduces to a linear exponential, MGF analytic continuation settles it on each cylinder σ-algebra, and Lévy upward convergence lifts it to `𝓕ᴮ_T`. |
-| **`itoIntegralCLM_T_surjective_onto_centered`** | **The capstone.** The Itô integrals together with the constants exhaust `lpMeas ℝ ℝ 𝓕ᴮ_T 2 μ`. A centered `𝓕ᴮ_T`-measurable `F` splits as `y + z` against the range (closed, being an isometry's image, hence orthogonally complemented); `z` inherits measurability and centering from `F`, so `∫ z·D = ∫ z·(D − 1) + ∫ z = 0` for every step Doléans `D`, and totality kills `z`. |
+| **`itoIntegralCLM_surjective_onto_centered`** | **The capstone.** The Itô integrals together with the constants exhaust `lpMeas ℝ ℝ 𝓕ᴮ_T 2 μ`. A centered `𝓕ᴮ_T`-measurable `F` splits as `y + z` against the range (closed, being an isometry's image, hence orthogonally complemented); `z` inherits measurability and centering from `F`, so `∫ z·D = ∫ z·(D − 1) + ∫ z = 0` for every step Doléans `D`, and totality kills `z`. |
 | `exists_itoIntegral_representation` | Terminal form, `∃!`: `F =ᵐ 𝔼[F] + ∫₀ᵀ φ dB`, uniqueness being injectivity of an isometry. |
 | `itoIsometryEquiv` | The two bundled: a `LinearIsometryEquiv` from the predictable integrands onto `centeredBrownianL2`. |
 | `martingale_representation` | Process form: every square-integrable martingale on the Brownian filtration is `M_t = M_0 + ∫₀ᵗ φ dB` (corpus `gir-thm-9.3.4`, flipped `reduced_core → full`). |
 
 `𝔼[∫₀ᵀ φ dB] = 0` is proved, not assumed, one floor down as
-`ItoIntegralProcessGeneral.integral_itoIntegralCLM_T`.
+`ItoIntegralProcessGeneral.integral_itoIntegralCLM`.
 
 **The finance reading** (`MarketCompleteness.lean`): `exists_replicating_strategy`
 says every square-integrable `𝓕ᴮ_T`-claim is the terminal wealth `𝔼_μ[H] + ∫₀ᵀ φ dB`
@@ -214,7 +214,7 @@ Only `complete ⟹ unique` is delivered. The converse needs the Jacod–Yor extr
 characterisation of the set of martingale measures and is out of scope, additive in
 the same sense as the Delbaen–Schachermayer boundary `ContinuousMarket` records.
 `superReplication_eq_emm_price` does not close the finite-state Farkas gap in
-`Foundations/SuperhedgingDuality`: separation proves the duality there, martingale
+`Pricing/SuperhedgingDuality`: separation proves the duality there, martingale
 representation proves it here, and neither implies the other.
 
 **The gap named in the last paragraph is closed by Leap 6 (2026-08-16).** `∫ φ dS` now exists,
@@ -224,9 +224,9 @@ records is no longer an absence.
 
 ## Leap 6 — the chain rule: the hedge is held in the *price* (2026-08-16)
 
-`MathFin/Foundations/ItoIntegralAgainstMartingale.lean`,
-`MathFin/Foundations/MarketCompletenessInPrice.lean`,
-`MathFin/Foundations/PricingMeasureL2Density.lean`.
+`MathFin/Probability/Brownian/Ito/ItoIntegralAgainstMartingale.lean`,
+`MathFin/Pricing/MarketCompletenessInPrice.lean`,
+`MathFin/Pricing/PricingMeasureL2Density.lean`.
 
 Leap 5 identified the image of `φ ↦ ∫₀ᵀ φ dB` exactly, and with it produced a hedge. What it
 could not say is that the hedge is a *holding in the traded asset*: the wealth it builds is an
@@ -240,7 +240,7 @@ is no longer only motivation: `norm_sq_increment_eq_bracket` proves the uncondit
 moment `𝔼[(M_b − M_a)²] = ⟨M⟩((a,b] × Ω)`, the defining property quadratic variation is for, at
 the level of expectations (the conditional refinement landed 2026-08-27, below). So the integrands
 square-integrable against `M` are the weighted space `L²(φ²·trim_T)`; and `ψ ↦ ψφ` is an
-isometry from it into `L²(trim_T)`. Composing with `itoIntegralCLM_T` gives `∫· dM` with the
+isometry from it into `L²(trim_T)`. Composing with `itoIntegralCLM` gives `∫· dM` with the
 right domain and the right isometry for free.
 
 | Theorem | Content |
@@ -249,12 +249,12 @@ right domain and the right isometry for free.
 | `PredictableDensityGeneral.simpleAssembly_sqWeight_denseRange` | Simple processes are dense in the weighted `L²`. The flat π-λ induction is not ported: its core only ever uses *integrability*, so the weight moves into the integrand as `h := f²·g`, which is `L¹` and generally not `L²` — which is why the core had to be weakened from an `L²` class to an integrable function. |
 | `ItoIntegralAgainstMartingale.itoIntegralAgainst_eq_itoIntegral` | **The chain rule.** `∫ψ dM = ∫ψφ dB`. |
 | `ItoIntegralAgainstMartingale.norm_itoIntegralAgainstCLM` | The Itô isometry against `M`: `‖∫ψ dM‖_{L²(μ)} = ‖ψ‖_{L²(⟨M⟩)}`. |
-| **`ItoIntegralAgainstMartingale.itoIntegralAgainst_elementary`** | **What earns the name.** On a band `Z·1_{(a,b]}` with `Z` bounded and `𝓕_a`-measurable, the integral is `Z·(M_b − M_a)` — the Riemann–Stieltjes sum. Defining by a formula proves nothing; this is the theorem that says the formula computes the integral one wanted. Both halves came from the locality file: `1_{(a,b]}·φ` is a difference of two `restrictAfterCLM`, and the `𝓕_a`-measurable factor passes through by `itoIntegralCLM_T_smulAdapted`. |
+| **`ItoIntegralAgainstMartingale.itoIntegralAgainst_elementary`** | **What earns the name.** On a band `Z·1_{(a,b]}` with `Z` bounded and `𝓕_a`-measurable, the integral is `Z·(M_b − M_a)` — the Riemann–Stieltjes sum. Defining by a formula proves nothing; this is the theorem that says the formula computes the integral one wanted. Both halves came from the locality file: `1_{(a,b]}·φ` is a difference of two `restrictAfterCLM`, and the `𝓕_a`-measurable factor passes through by `itoIntegralCLM_smulAdapted`. |
 | `MarketCompletenessInPrice.exists_replicating_strategy_in_price` | **Completeness, in the price.** Every square-integrable `𝓕ᴮ_T`-claim is the terminal wealth of a *unique* holding `ψ` in `S = S₀ + (σ●B)`. Only `σ ≠ 0` a.e. is needed, not a uniform lower bound: `‖ψ‖²_{L²(⟨S⟩)} = ∫(φ/σ)²σ² = ‖φ‖²`, so the weighted norm rescales and the holding is admissible however small `σ` gets. |
 | `ItoIntegralAgainstMartingale.itoIntegralAgainst_simpleProcess` | **The band identity, summed.** `∫V dM = ∑ₚ V(p)·(M_{p.2} − M_{p.1})` for a simple process, which is what makes `itoIntegralAgainst_unique_of_riemannStieltjes` able to take agreement with the *written-out* sums as its hypothesis rather than agreement with the integral being characterised. |
 | `ItoIntegralAgainstMartingale.bracketMeasure_mulLI` | **The tower closes on itself.** `d⟨ψ●M⟩ = ψ² d⟨M⟩`: an Itô integral against an Itô integral is again one, the brackets composing the way the integrands do. Densities multiply, and that is the whole proof. |
 | `ItoIntegralAgainstMartingale.norm_sq_increment_eq_bracket` | **The bracket earns its name.** `𝔼[(M_b − M_a)²] = ⟨M⟩((a,b] × Ω)` — the second moment of an increment is the bracket measure of its time band, which is the defining property quadratic variation is for, at the level of expectations (the conditional form `𝔼[(M_b−M_a)² \| 𝓕_a] = 𝔼[⟨M⟩_b − ⟨M⟩_a \| 𝓕_a]` stays unclaimed). One band: the increment is the integral of `bandRestrict`, the isometry turns the norm into an integral, and the band representative reads it off `(a,b] × Ω`. |
-| **`PointwiseBracket.condExp_band_second_moment`** | **The bracket is conditional.** `𝔼[(M_b − M_a)² \| 𝓕_a] =ᵐ 𝔼[⟨M⟩_b − ⟨M⟩_a \| 𝓕_a]`, with `⟨M⟩_b − ⟨M⟩_a` the *pathwise* `∫_a^b φ_u(ω)² du` (`bracketRep`) — the form the bracket *measure* cannot state, because it integrates `ω` out. The identity is the Itô isometry localised: for `F ∈ 𝓕_a` the indicator `𝟙_F` is a bounded `𝓕_a`-measurable factor, so `itoIntegralCLM_T_smulAdapted` folds it inside the integral and `𝟙_F² = 𝟙_F` costs nothing; both set-integrals then meet at `∫_{(a,b]×F} φ²`, one by the isometry, the other by Tonelli through the trim. No density argument, no polarisation, no ε-extension. **Not claimed:** that `bracketRep` is adapted (hence the conditional expectation on the right, which is the classical statement), and no pathwise quadratic variation. |
+| **`PointwiseBracket.condExp_band_second_moment`** | **The bracket is conditional.** `𝔼[(M_b − M_a)² \| 𝓕_a] =ᵐ 𝔼[⟨M⟩_b − ⟨M⟩_a \| 𝓕_a]`, with `⟨M⟩_b − ⟨M⟩_a` the *pathwise* `∫_a^b φ_u(ω)² du` (`bracketRep`) — the form the bracket *measure* cannot state, because it integrates `ω` out. The identity is the Itô isometry localised: for `F ∈ 𝓕_a` the indicator `𝟙_F` is a bounded `𝓕_a`-measurable factor, so `itoIntegralCLM_smulAdapted` folds it inside the integral and `𝟙_F² = 𝟙_F` costs nothing; both set-integrals then meet at `∫_{(a,b]×F} φ²`, one by the isometry, the other by Tonelli through the trim. No density argument, no polarisation, no ε-extension. **Not claimed:** that `bracketRep` is adapted (hence the conditional expectation on the right, which is the classical statement), and no pathwise quadratic variation. |
 | **`BracketCompensator.condExp_sq_sub_bracket`** | **The bracket compensates the square.** `𝔼[M_b² − ⟨M⟩_b \| 𝓕_a] =ᵐ M_a² − ⟨M⟩_a` — what makes `⟨M⟩` *the* compensator of `M²` rather than a formula with a suggestive name. It needs the bracket **adapted**, which the previous round explicitly declined to claim: `⇑φ` is predictable, and the predictable σ-algebra mixes every `𝓕_s`. The fix is a *trace* statement — intersected with a band `(a,b] × Ω`, every predictable set is `Borel(ℝ≥0) ⊗ 𝓕_b`-measurable, because on a generator `(c,d] × F` the **left** endpoint decides (either `c ≤ b`, so `F ∈ 𝓕_c ⊆ 𝓕_b`, or `c > b`, so the intersection is empty). That asymmetry is exactly what predictability buys, and it is the whole reason the bracket ends up adapted. Clamp, integrate the time variable out, and `⟨M⟩_a` splits off the conditional expectation; the cross term collapses by the martingale property of `M`. **Not claimed:** any pathwise quadratic variation, a bundled `Martingale` structure (the `Lp`-valued `M` gives only a.e. adaptedness), or Doob–Meyer for a general submartingale. |
 | **`PricingMeasureL2Density.measure_eq_of_density`** | **The capstone.** If an adapted process agreeing a.e. with `S` is a `Q`-martingale and `Q = D·μ` with `D ∈ L²(μ)`, then `Q` agrees with `μ` on all of `𝓕ᴮ_T`. Leap 5's `PricesGainsAtZero` is a *conclusion* here, not a hypothesis. |
 | `MarketCompletenessInPrice.pricePathCondExp` | **The adaptedness the `Lp` process does not have.** `Martingale` requires adaptedness pointwise; an `Lp`-valued process supplies only its a.e. version, so `Martingale (pricePath …) 𝓕 Q` is a hypothesis with no exhibited witness. Rebuilding the price from `μ[· | 𝓕_t]` — adapted by construction, a.e. equal by `itoProcessCLM_eq_condExpL2` — supplies one, and `exists_density_price_martingale` assembles it. Without this the capstone would be true and empty. |

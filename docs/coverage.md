@@ -141,7 +141,7 @@ jump-diffusion mixing formula, with Gaussian log-jumps". Not covered: the price 
 ### Contracts in any model, bonds and swaps, and the risk of a position (2026-10-29)
 
 Nine entries added, all `full`, in `contracts.json`.
-- **Any risk-neutral model.** `Contracts/Parity.lean` prices the forward from one fact about
+- **Any risk-neutral model.** `Pricing/Parity.lean` prices the forward from one fact about
   the model: the discounted underlying at `T` is integrable with mean `S₀`. When the discounted
   price is a `Q`-martingale from `S₀` with `D(0) = 1`, the forward is worth `S₀ − K D(T)` and
   `C − P = S₀ − K D(T)`, with no integrability hypotheses
@@ -155,7 +155,7 @@ Nine entries added, all `full`, in `contracts.json`.
   worth zero exactly at the par rate (`mf-contract-payer-swap-value`,
   `mf-contract-payer-swap-par-rate`). Scope: deterministic curves, so floating rates are known
   in advance; yields with integer payment times.
-- **Risk of a position.** `Contracts/Risk.lean` defines the loss of a position bought at `p` as
+- **Risk of a position.** `Risk/ContractRisk.lean` defines the loss of a position bought at `p` as
   `p − pathPV`, measured under any law `P` of the outcomes. A book's expected shortfall is at
   most the sum of its contracts' (`mf-contract-book-es-subadditive`); a long call's VaR is at most
   its premium (`mf-contract-long-call-var-le-premium`); in the binomial tree a hedged seller's loss
@@ -165,7 +165,7 @@ Nine entries added, all `full`, in `contracts.json`.
 ### The binomial value is the cost of its hedge (2026-10-29)
 
 Two entries added, both `full`: `mf-binomial-european-replication` and `mf-contract-binomial-hedge`;
-corpus 669 → 671. `binomialPrice_replication` in `Binomial/EuropeanReplication.lean` applies the
+corpus 669 → 671. `binomialPrice_replication` in `Models/Binomial/EuropeanReplication.lean` applies the
 discrete martingale representation to the discounted tree value and the discounted spot. Under
 no-arbitrage and `S₀ ≠ 0`, it gives a predictable strategy whose gains, added to the tree price,
 are the discounted payoff `e^{−rN} g(S_N)` on every path. `Binomial.pathPV_eq_value_add_gains`
@@ -176,7 +176,7 @@ terminal spot only. The identity is pathwise; the measure enters only through th
 ### Every worked example has a model (2026-10-29)
 
 One entry added, `mf-gaussian-pair-any-moments` (`full`); corpus 668 → 669. `gaussianPair` in
-`Foundations/BivariateNormalCDF.lean` shifts and scales the Cholesky pair. It is jointly Gaussian,
+`Probability/Gaussian/BivariateNormalCDF.lean` shifts and scales the Cholesky pair. It is jointly Gaussian,
 with any given means and volatilities and with covariance `r σ₀ σ₁`; the variances need `r² ≤ 1`.
 The two worked examples that quantified over models without exhibiting one now exhibit one:
 - the Gaussian risk report has `Book.isRealization_gaussianPair`, and its `sample_checked` opens
@@ -191,20 +191,20 @@ Four entries added, all `full`: `mf-contract-bounded-model-integrable`,
 `mf-contract-binomial-european-payoff`, `mf-contract-binomial-capped-call` and
 `mf-contract-binomial-to-black-scholes`. Corpus 664 → 668.
 
-`Contracts/Models/Binomial.lean` is the second model for the instruments of
+`Models/Binomial/Binomial.lean` is the second model for the instruments of
 `Contracts/Instruments/Options.lean`. The underlying is read off coin-flip paths (the spot after
 `⌊t / h⌋` flips), and a European payoff is worth its backward-induction tree price. The file
-contains only the translation. Everything about the tree is in `Binomial/`:
-- `measurable_spotPath` and `abs_spotPath_le` are new in `Binomial/PathMeasure.lean`;
-- `crrProb_mem_Icc` is new in `Binomial/CRRConvergence.lean`. It was proved inline twice in
-  `Binomial/CRRCharFun.lean`, and both copies now call it.
+contains only the translation. Everything about the tree is in `Models/Binomial/`:
+- `measurable_spotPath` and `abs_spotPath_le` are new in `Models/Binomial/PathMeasure.lean`;
+- `crrProb_mem_Icc` is new in `Models/Binomial/CRRConvergence.lean`. It was proved inline twice in
+  `Models/Binomial/CRRCharFun.lean`, and both copies now call it.
 
 Every fixed-date contract (`Contract.FixedDated`, no `payAtHit`) is integrable in the tree, because the model is bounded. That is a general fact,
 `Contract.integrable_pathPV_of_bounded` in `Contracts/Adapted.lean`, and it gives
 `Payoff.measurable_eval` its first consumer. So the capped call is priced by composition with no
 integrability lemma of its own.
 
-`Contracts/Models/BinomialLimit.lean` proves that `europeanCall K T`, one term, has CRR values
+`Models/Binomial/BinomialLimit.lean` proves that `europeanCall K T`, one term, has CRR values
 converging to its Black–Scholes value. It composes three results already proved: the tree value
 is the tree price, the CRR prices converge to the closed form, and the closed form is the
 Black–Scholes value. The hypothesis `|r| √T < σ` keeps every tree arbitrage-free. Only the call
@@ -343,20 +343,20 @@ identity of processes, a Brownian motion continuous only almost surely. Issue #3
 
 Five entries added to `benchmarks/quantitative_risk_management.json`, all `full`.
 
-Mathlib has no Student-t law at the pin. `Foundations/StudentT.lean` builds it as Lebesgue measure
+Mathlib has no Student-t law at the pin. `Probability/Laws/StudentT.lean` builds it as Lebesgue measure
 with density `k_ν/∫k_ν`, `k_ν(x) = (1 + x²/ν)^(-(ν+1)/2)`, computes the normalizing constant (a
 Gamma mixture of Gaussian kernels, integrals exchanged), anchors `ν = 1` at Mathlib's
-`cauchyMeasure 0 1`, and evaluates the tail first moment. `RiskMeasures/StudentTValueAtRisk.lean`
+`cauchyMeasure 0 1`, and evaluates the tail first moment. `Risk/StudentTValueAtRisk.lean`
 states VaR and ES of `μ + σT` through the library's `valueAtRisk` and `expectedShortfall`
 (McNeil, Frey and Embrechts 2015, Example 2.15); ES goes through the Acerbi–Tasche formula.
 
 | Benchmark ID | Mathematical conclusion | Lean module and declaration | Faithfulness |
 |---|---|---|---|
-| `qrm-student-t-density` | For ν > 0, the Student-t law built as Lebesgue measure with density k_ν/∫k_ν, k_ν(x) = (1 + x²/ν)^(-(ν+1)/2), has density Γ((ν+1)/2)/(√(νπ)Γ(ν/2))·(1 + x²/ν)^(-(ν+1)/2). | `MathFin/Foundations/StudentT.lean`, `MathFin.studentTPDFReal_eq` | `full` |
-| `qrm-student-t-cauchy` | The Student-t law with ν = 1 is Mathlib's standard Cauchy law: studentTMeasure 1 = cauchyMeasure 0 1. | `MathFin/Foundations/StudentT.lean`, `MathFin.studentTMeasure_one` | `full` |
-| `qrm-student-t-var` | For T ~ t_ν, σ ≥ 0 and α ∈ (0, 1): VaR_α(μ + σT) = μ + σ·t_ν⁻¹(α), with t_ν⁻¹(α) the quantile of the law. | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.valueAtRisk_of_hasLaw_studentTMeasure` | `full` |
-| `qrm-student-t-es` | For T ~ t_ν, ν > 1, σ ≥ 0 and α ∈ (0, 1): ES_α(μ + σT) = μ + σ·g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α). | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.expectedShortfall_of_hasLaw_studentTMeasure` | `full` |
-| `qrm-student-t-var-le-es` | For T ~ t_ν, ν > 1 and α ∈ (0, 1): VaR_α(μ + σT) ≤ ES_α(μ + σT), the general VaR ≤ ES at the law. | `MathFin/RiskMeasures/StudentTValueAtRisk.lean`, `MathFin.valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure` | `full` |
+| `qrm-student-t-density` | For ν > 0, the Student-t law built as Lebesgue measure with density k_ν/∫k_ν, k_ν(x) = (1 + x²/ν)^(-(ν+1)/2), has density Γ((ν+1)/2)/(√(νπ)Γ(ν/2))·(1 + x²/ν)^(-(ν+1)/2). | `MathFin/Probability/Laws/StudentT.lean`, `MathFin.studentTPDFReal_eq` | `full` |
+| `qrm-student-t-cauchy` | The Student-t law with ν = 1 is Mathlib's standard Cauchy law: studentTMeasure 1 = cauchyMeasure 0 1. | `MathFin/Probability/Laws/StudentT.lean`, `MathFin.studentTMeasure_one` | `full` |
+| `qrm-student-t-var` | For T ~ t_ν, σ ≥ 0 and α ∈ (0, 1): VaR_α(μ + σT) = μ + σ·t_ν⁻¹(α), with t_ν⁻¹(α) the quantile of the law. | `MathFin/Risk/StudentTValueAtRisk.lean`, `MathFin.valueAtRisk_of_hasLaw_studentTMeasure` | `full` |
+| `qrm-student-t-es` | For T ~ t_ν, ν > 1, σ ≥ 0 and α ∈ (0, 1): ES_α(μ + σT) = μ + σ·g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α). | `MathFin/Risk/StudentTValueAtRisk.lean`, `MathFin.expectedShortfall_of_hasLaw_studentTMeasure` | `full` |
+| `qrm-student-t-var-le-es` | For T ~ t_ν, ν > 1 and α ∈ (0, 1): VaR_α(μ + σT) ≤ ES_α(μ + σT), the general VaR ≤ ES at the law. | `MathFin/Risk/StudentTValueAtRisk.lean`, `MathFin.valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure` | `full` |
 
 What is not covered:
 - `t_ν⁻¹(α)` is the generic `quantile` of the law; no closed form for it is given.
@@ -407,7 +407,7 @@ Seven `full` entries, each derived from library machinery:
 
 ### SABR: the ATM limit, the backbone law, the ATM Black-76 price (2026-10-22)
 
-Three `full` entries in `BlackScholes/SABRImpliedVol.lean`, on Hagan–Kumar–Lesniewski–Woodward
+Three `full` entries in `Models/StochVol/SABRImpliedVol.lean`, on Hagan–Kumar–Lesniewski–Woodward
 (2002), answering the three items named on issue #100.
 
 - **`mf-sabr-implied-vol-atm-limit`** (`tendsto_sabrImpliedVol_atm`): the printed smile formula
@@ -419,7 +419,7 @@ Three `full` entries in `BlackScholes/SABRImpliedVol.lean`, on Hagan–Kumar–L
   the chain rule through `exp` applied to `hasDerivAt_log_sabrBackbone`
   (`d log σ / df = (β − 1)/f` for `f, α > 0`).
 - **`mf-sabr-atm-black76-price`** (`sabrATMVol_black_futures_price`, from
-  `black_futures_formula_atm` in `Futures/Black76.lean`): under the Black-76 hypothesis at
+  `black_futures_formula_atm` in `Models/Forwards/Black76.lean`): under the Black-76 hypothesis at
   `σ = sabrATMVol f α β ρ ν T` (the vol's own `t_ex` fixed to the option's expiry `T`, not an
   independent variable), the discounted expected ATM call payoff is `e^{−rT} f (2Φ(σ√T/2) − 1)`.
   The hypothesis includes `σ_ATM > 0`, which is assumed, not proved.
@@ -431,7 +431,7 @@ error bound against the model's implied volatility (issue #100's `O(T²)` statem
 
 One entry added, `mf-mean-variance-kkt-mean-sd-tradeoff` (`full`).
 
-`Portfolio/PosSemidefCauchySchwarz.lean` states the tradeoff form of the Markowitz mean–variance
+`Choice/Portfolio/PosSemidefCauchySchwarz.lean` states the tradeoff form of the Markowitz mean–variance
 problem (`pricedReturn_le_of_kkt`): a KKT point `x1` (stationarity, dual feasibility,
 complementary slackness) of `min −μ ⬝ᵥ x + (t₁/2) · x ⬝ᵥ (Sig *ᵥ x)` with `Sig` PSD and `t₁ ≥ 0`
 maximizes the mean–standard-deviation objective `μ ⬝ᵥ y − t₁·√(x1 ⬝ᵥ (Sig *ᵥ x1))·√(y ⬝ᵥ (Sig *ᵥ y))`
@@ -450,11 +450,11 @@ split by area. What each bridge proves, by area:
 
 - **Rates under a measure the library constructs** (`interest_rates.json`; issues #287, #288).
   One Wiener-integral lemma, `E[exp(−(m + c∫f dB))] = exp(−m + c²∫f²/2)`
-  (`mf-wiener-integral-bond-lemma`, `Foundations/WienerIntegralExpMoment`), gives the Vasicek,
+  (`mf-wiener-integral-bond-lemma`, `Probability/Brownian/Wiener/WienerIntegralExpMoment`), gives the Vasicek,
   Hull–White and GSR bond prices (`mf-gsr-two-piece-bond-price`, `mf-hull-white-reprices-curve`);
   GSR at one volatility is Vasicek, and Hull–White at constant forcing is Vasicek. Under the
   Girsanov measure `Q_λ = P.withDensity(exp(−λB_T − λ²T/2))` a Wiener integral `∫f dB` has law
-  `N(−λ∫f, ∫f²)` (`Foundations/WienerIntegralGirsanov`), so on `[0, T]` the Vasicek short rate is
+  `N(−λ∫f, ∫f²)` (`Probability/Brownian/Girsanov/WienerIntegralGirsanov`), so on `[0, T]` the Vasicek short rate is
   `N(m_T − λσB(T), v_T)` under `Q_λ`, and the bond price under `Q_λ` is the Vasicek bond formula
   (`𝔼_μ[exp(−∫r)]`) at level `θ − λσ/κ` (`mf-vasicek-girsanov-short-rate-law`, `mf-vasicek-girsanov-bond-price`). The
   Hull–White `S`-forward measure is built through the change of numéraire; under it `r_S` is
@@ -603,7 +603,7 @@ commits after the values review of 2026-10-21 (`docs/values-review.md`). Seven e
 `full`; corpus 537 → 544. Six pull requests of the batch are not merged (#270, #271, #275, #277,
 #281, #284; the review says why).
 
-- **Schwartz one-factor futures** (`mf-schwartz-futures-price`, `Futures/SchwartzOneFactor.lean`).
+- **Schwartz one-factor futures** (`mf-schwartz-futures-price`, `Models/Forwards/SchwartzOneFactor.lean`).
   For the log spot carried in its Ornstein–Uhlenbeck Wiener representation
   `ln S_T = m_T + σ∫₀ᵀ e^{−κ(T−s)} dB_s`, `E[S_T] = exp(m_T + v_T/2)` for `κ > 0`, with
   `m_T = vasicekSDEMean` and `v_T = vasicekSDEVariance` (`schwartzFuturesPrice_eq_integral`): Mathlib's
@@ -611,11 +611,11 @@ commits after the values review of 2026-10-21 (`docs/values-review.md`). Seven e
   (`vasicekShortRate_hasLaw_gaussian`). That the representation solves the Schwartz (1997)
   log-price SDE is cited, not proved, as for `mf-vasicek-sde-terminal-gaussian`. The long-maturity
   limit `tendsto_schwartzFuturesPrice_atTop` (through
-  `tendsto_vasicekSDEVariance_atTop` in `FixedIncome/VasicekSDE`) is proved but not benchmarked.
+  `tendsto_vasicekSDEVariance_atTop` in `Models/Rates/VasicekSDE`) is proved but not benchmarked.
   The expectation is under the given measure, read as the pricing measure; that the futures price
   is `E^Q[S_T]` is a textbook identification. Constant parameters only.
 - **CreditMetrics** (`qrm-creditmetrics-default-absorbing-monotone`,
-  `qrm-creditmetrics-gaussian-threshold-row-stochastic`, `RiskMeasures/CreditMetrics.lean`). A
+  `qrm-creditmetrics-gaussian-threshold-row-stochastic`, `Risk/Credit/CreditMetrics.lean`). A
   rating-transition matrix is `P ∈ Matrix.rowStochastic ℝ ι`; `P ^ k` stays row-stochastic
   (Mathlib's `Submonoid.pow_mem`), and for an absorbing state `d` the probability `(P ^ k) i d`
   is monotone in `k` (`monotone_pow_apply_absorbing`). Row-wise monotone thresholds
@@ -626,7 +626,7 @@ commits after the values review of 2026-10-21 (`docs/values-review.md`). Seven e
   the thresholds to a target matrix, no correlated multi-obligor migration. (The coherence pass
   above adds the calibration and the two-obligor default covariance.)
 - **Calendar-spread arbitrage** (`mf-calendar-arbitrage-total-variance`,
-  `mf-svi-calendar-free-iff`, `BlackScholes/CalendarArbitrage.lean`; Gatheral–Jacquier 2014,
+  `mf-svi-calendar-free-iff`, `Models/ModelFree/CalendarArbitrage.lean`; Gatheral–Jacquier 2014,
   Lemma 2.1). Calls on a real martingale are non-decreasing in maturity (conditional Jensen,
   `ConvexOn.map_condExp_le`); with zero rates the Black–Scholes call depends only on total
   variance and is strictly increasing in it, so call prices rise with maturity at every strike iff
@@ -635,7 +635,7 @@ commits after the values review of 2026-10-21 (`docs/values-review.md`). Seven e
   assumed at `t ≤ 0`, so the flat `w = σ²t` is covered. Not proved: the local-variance
   characterisation, SSVI, and the slice-crossing quartic.
 - **SA-CCR** (`mf-saccr-ead-mono`, `mf-saccr-effnotional-diversification-bound`,
-  `RiskMeasures/SACCRExposure.lean`). `EAD = α·(RC + PFE)` is nondecreasing in `RC` and in `PFE`
+  `Risk/SACCRExposure.lean`). `EAD = α·(RC + PFE)` is nondecreasing in `RC` and in `PFE`
   for `α ≥ 0`, with `RC` and `PFE` free real numbers. `effNotionalIR D₁ D₂ D₃ =
   √(D₁² + D₂² + D₃² + 1.4·D₁·D₂ + 1.4·D₂·D₃ + 0.6·D₁·D₃)` is the Basel CRE52.57 interest-rate
   effective notional of a hedging set's three maturity buckets, and it never exceeds
@@ -646,22 +646,22 @@ commits after the values review of 2026-10-21 (`docs/values-review.md`). Seven e
 
 Library modules the batch added without corpus entries, each stating its own scope (the coherence
 pass the same day gave each a corpus entry or a library consumer; see the section above):
-`Foundations/BivariateNormalCDF` (the standard `N₂`, its law, margins, covariance, symmetries
-and the `r = 0, ±1` cases), `Foundations/GaussianCopula`, `Foundations/GammaPoissonMixturePgf`
+`Probability/Gaussian/BivariateNormalCDF` (the standard `N₂`, its law, margins, covariance, symmetries
+and the `r = 0, ±1` cases), `Probability/Dependence/GaussianCopula`, `Probability/Laws/GammaPoissonMixturePgf`
 (the Gamma MGF, which Mathlib lacks, and the Poisson–Gamma mixture as an iterated integral),
-`Foundations/OUSpectral` (the OU generator on Hermite polynomials), `BlackScholes/LSVLeverage`,
-`Foundations/Estimation`, `Foundations/ItoFormulaAdaptedDriftConstructed` (the integrated Itô–drift
-identity for the constructed process, with no hypothesized `M`), `BlackScholes/ForwardSmile`,
-`BlackScholes/KirkSpreadApproximation`, `BlackScholes/StulzTwoAssetRainbow`,
-`BlackScholes/HeynenKatTwoAssetBarrier`, `BlackScholes/BasketMomentMatching`,
+`Probability/Brownian/SDE/OUSpectral` (the OU generator on Hermite polynomials), `Models/StochVol/LSVLeverage`,
+`Probability/Laws/Estimation`, `Probability/Brownian/Ito/ItoFormulaAdaptedDriftConstructed` (the integrated Itô–drift
+identity for the constructed process, with no hypothesized `M`), `Models/LocalVol/ForwardSmile`,
+`Models/BlackScholes/KirkSpreadApproximation`, `Models/BlackScholes/StulzTwoAssetRainbow`,
+`Models/BlackScholes/HeynenKatTwoAssetBarrier`, `Models/BlackScholes/BasketMomentMatching`,
 `FixedIncome/{Inflation, CVA, DefaultDensity, TimingAdjustment, VasicekMarketPriceOfRisk,
 NelsonSiegelSvensson, ABCDVolatility, GSRPiecewiseVol}`, `RiskMeasures/{DiscreteVaR, TrancheLoss,
 JointElicitability, ComponentVaR}`, `Portfolio/{SingleIndexModel, ConvexQPKKT}`,
-`Execution/RollSpread`, `Performance/{FracDiffWeights, LabelUniqueness, BetSizeSigmoid,
+`Markets/Microstructure/RollSpread`, `Performance/{FracDiffWeights, LabelUniqueness, BetSizeSigmoid,
 PurgedCV}`, `DeFi/{UniswapMechanics, Aave, Compound, Dai}` and
 `Commodities/{FisherSraffaOwnRate, TheoryOfStorage, AR1OUCalibration}`. The batch also reworked
-`FixedIncome/Bootstrapping` (the induction at the prefix it is fed, instantiated with the FRA and
-swap strips, on `Foundations/Bisection`) and deduplicated `HullWhiteCalibration` and
+`Models/Rates/Bootstrapping` (the induction at the prefix it is fed, instantiated with the FRA and
+swap strips, on `Probability/Analysis/Bisection`) and deduplicated `HullWhiteCalibration` and
 `ItoFormulaAdaptedDrift` against `VasicekSDEGaussian` and `AdaptedDrift`.
 
 ### The CIR loadings solve their term-structure equations (2026-10-14)
@@ -669,7 +669,7 @@ swap strips, on `Foundations/Bisection`) and deduplicated `HullWhiteCalibration`
 Two entries added, `mf-cir-bond-loading-riccati` and `mf-cir-bond-level-loading` (both `full`).
 Corpus 535 → 537.
 
-`FixedIncome/CIRRiccati.lean`, in the affine form `P(0,T) = exp(A(T) − B(T)·r₀)`: with
+`Models/Rates/CIRRiccati.lean`, in the affine form `P(0,T) = exp(A(T) − B(T)·r₀)`: with
 `γ = √(κ² + 2σ²)` and `D(T) = (γ + κ)(e^{γT} − 1) + 2γ`, the closed form `B(T) = 2(e^{γT} − 1)/D(T)`
 satisfies `B(0) = 0` and `B' = 1 − κB − ½σ²B²` at every `T`, for `κ² + 2σ² > 0`
 (`hasDerivAt_cirBondB`), and `A(T) = (2κθ/σ²)·log(2γe^{(κ+γ)T/2}/D(T))` satisfies `A(0) = 0` and
@@ -685,8 +685,8 @@ Five entries added and one restated, all `full`: `mf-jump-diffusion-terminal-law
 `mf-black-scholes-log-contract-discrete-swap` and `mf-merton-log-contract-variance`; the headline
 `mf-jump-diffusion-variance-swap-vs-log-contract` now states the log contract and the realized
 variance of the same process under the same measure, at every sampling frequency. Corpus 530 → 535.
-`BlackScholes/JumpDiffusionProcess.lean` gains the law of `X_t`, and
-`BlackScholes/JumpDiffusionVarianceSwap.lean` the process section and the two models.
+`Models/Jumps/JumpDiffusionProcess.lean` gains the law of `X_t`, and
+`Models/Jumps/JumpDiffusionVarianceSwap.lean` the process section and the two models.
 
 - The law of the process. `X_t` has the log-return law over `t`
   (`JumpDiffusionProcess.hasLaw`, Mathlib's `HasLaw.congr`), so statements about the law become
@@ -738,9 +738,9 @@ Eight entries added, all `full`: `mf-log-contract-any-law`, `mf-jump-diffusion-l
 `mf-jump-diffusion-log-return-variance`, `mf-jump-diffusion-log-contract`,
 `mf-jump-diffusion-log-contract-jump-bias`, `mf-jump-diffusion-log-contract-downward-jumps`,
 `mf-jump-diffusion-realized-variance` and `mf-jump-diffusion-variance-swap-vs-log-contract`.
-Corpus 522 → 530. New files `BlackScholes/JumpDiffusionMoments.lean` (the moments of the law) and
-`BlackScholes/JumpDiffusionVarianceSwap.lean`; `BlackScholes/VarianceSwap.lean` gains the
-model-free log contract, and `BlackScholes/JumpDiffusionProcess.lean` the law-level facts the
+Corpus 522 → 530. New files `Models/Jumps/JumpDiffusionMoments.lean` (the moments of the law) and
+`Models/Jumps/JumpDiffusionVarianceSwap.lean`; `Models/ModelFree/VarianceSwap.lean` gains the
+model-free log contract, and `Models/Jumps/JumpDiffusionProcess.lean` the law-level facts the
 moments need (the exponential moments pass from the jumps to the log-return, the cgf is `κ(θ)τ`
 near `0`, `κ` is differentiable, and the forward is the mean at the compensated drift), which
 `JumpDiffusionIdentifiability`, `JumpDiffusionEsscher` and `JumpDiffusionIncompleteness` now use
@@ -809,9 +809,9 @@ Not covered:
 Five entries added, all `full`: `mf-call-price-convex-in-strike`,
 `mf-jump-diffusion-density-positive`, `mf-jump-diffusion-call-convex-strike`,
 `mf-black-scholes-call-strictly-convex-strike` and `mf-merton-call-strictly-convex-strike`. Corpus
-517 → 522. New file `BlackScholes/JumpDiffusionStrikeConvexity.lean`;
-`BlackScholes/StrikeConvexity.lean`, `BlackScholes/JumpDiffusionDensity.lean` and
-`BlackScholes/Call.lean` gain the general facts.
+517 → 522. New file `Models/Jumps/JumpDiffusionStrikeConvexity.lean`;
+`Models/BlackScholes/StrikeConvexity.lean`, `Models/Jumps/JumpDiffusionDensity.lean` and
+`Models/BlackScholes/Call.lean` gain the general facts.
 
 - Under any law. For an integrable `X` under a finite measure, `k ↦ ∫ (X − k)⁺ dμ` is convex
   (`convexOn_integral_call`, Mathlib's `integral_convexOn_of_integrand_ae` for the call payoff):
@@ -851,7 +851,7 @@ price and Merton's series". Not covered:
 
 Four entries added, all `full`: `mf-price-law-change-of-variables`, `mf-jump-diffusion-price-law`,
 `mf-black-scholes-price-law` and `mf-merton-price-law`. Corpus 513 → 517. Files:
-`BlackScholes/JumpDiffusionDensity.lean` and `BlackScholes/JumpDiffusionDigital.lean`.
+`Models/Jumps/JumpDiffusionDensity.lean` and `Models/Jumps/JumpDiffusionDigital.lean`.
 
 - The change of variables. For any `f` and `S > 0`, the image of `f(y) dy` under `y ↦ Seʸ` is
   `f(log(K/S))/K dK` on `(0, ∞)` (`map_mul_exp_withDensity`, from Mathlib's
@@ -888,9 +888,9 @@ them from the log-return law, `mgf_id_jumpDiffusionIncrementLaw`).
 
 Four entries added, all `full`: `mf-call-strike-differentiable-iff-no-atom`,
 `mf-jump-diffusion-call-differentiable-iff`, `mf-jump-diffusion-call-kink` and
-`mf-cash-digital-strike`. Corpus 509 → 513. `BlackScholes/CallSpreadDigital.lean`,
-`BlackScholes/JumpDiffusionDensity.lean`, `BlackScholes/JumpDiffusionDigital.lean` and
-`BlackScholes/StrikeGreeks.lean` gain the results.
+`mf-cash-digital-strike`. Corpus 509 → 513. `Models/ModelFree/CallSpreadDigital.lean`,
+`Models/Jumps/JumpDiffusionDensity.lean`, `Models/Jumps/JumpDiffusionDigital.lean` and
+`Models/BlackScholes/StrikeGreeks.lean` gain the results.
 
 - The left spread. For a measurable, integrable `X` under a finite measure, the call spread just
   below the strike, `(C(K − h) − C(K))/h`, tends to `μ{X ≥ K}` as `h ↓ 0`
@@ -926,7 +926,7 @@ Gaussian part has an atom at the no-jump outcome, so its call price has a kink a
 
 Three entries added, all `full`: `mf-merton-strike-derivatives`, `mf-jump-diffusion-merton-digital`
 and `mf-jump-diffusion-merton-density`. Corpus 506 → 509. New file
-`BlackScholes/MertonStrikeGreeks.lean`; `BlackScholes/JumpDiffusionDigital.lean` gains the
+`Models/Jumps/MertonStrikeGreeks.lean`; `Models/Jumps/JumpDiffusionDigital.lean` gains the
 identifications.
 
 - The series in the strike. Merton's call series `C(K) = ∑ₙ wₙ C_BS(S·cₙ, K, σₙ)` is
@@ -971,8 +971,8 @@ drift) and the density of the price (at every drift) of the jump-diffusion". Not
 
 Three entries added, all `full`: `mf-jump-diffusion-density`, `mf-breeden-litzenberger-jump-diffusion`
 and `mf-black-scholes-lognormal-density`. Corpus 503 → 506. New file
-`BlackScholes/JumpDiffusionDensity.lean`, which holds the facts about the law; the option prices
-are in `BlackScholes/JumpDiffusionDigital.lean`. The no-atom lemma of the digital rung moved to the
+`Models/Jumps/JumpDiffusionDensity.lean`, which holds the facts about the law; the option prices
+are in `Models/Jumps/JumpDiffusionDigital.lean`. The no-atom lemma of the digital rung moved to the
 density file, where it is a corollary of the density, and `mf-jump-diffusion-digital-strike-derivative`
 now states it.
 
@@ -1017,7 +1017,7 @@ lognormal density of `breedenLitzenberger`". Not covered:
 
 Three entries added, all `full`: `mf-call-strike-derivative`,
 `mf-jump-diffusion-digital-strike-derivative` and `mf-jump-diffusion-digital-black-scholes`. Corpus
-500 → 503. New file `BlackScholes/JumpDiffusionDigital.lean`; `BlackScholes/CallSpreadDigital.lean`
+500 → 503. New file `Models/Jumps/JumpDiffusionDigital.lean`; `Models/ModelFree/CallSpreadDigital.lean`
 gains the general strike derivative.
 
 - The strike derivative in general. Where a measurable, integrable `X` has no atom at `K`, the
@@ -1048,9 +1048,9 @@ series for the jump-diffusion digital came later (Merton section above).
 
 Four entries added, all `full`: `mf-call-spread-digital`, `mf-call-prices-determine-law`,
 `mf-jump-diffusion-identifiability` and `mf-jump-diffusion-incompleteness`. Corpus 496 → 500.
-Files: `BlackScholes/CallSpreadDigital.lean`, `BlackScholes/JumpDiffusionIdentifiability.lean` and
-`BlackScholes/JumpDiffusionIncompleteness.lean`. The local uniqueness lemma of
-`Foundations/Esscher.lean` now holds for finite measures, not only probability laws, and the same
+Files: `Models/ModelFree/CallSpreadDigital.lean`, `Models/Jumps/JumpDiffusionIdentifiability.lean` and
+`Models/Jumps/JumpDiffusionIncompleteness.lean`. The local uniqueness lemma of
+`Probability/Laws/Esscher.lean` now holds for finite measures, not only probability laws, and the same
 file has the unnormalized Esscher transform `(∫ e^f dμ)·μ.tilted f = e^f·μ`
 (`ofReal_integral_exp_smul_tilted`).
 
@@ -1078,7 +1078,7 @@ file has the unnormalized Esscher transform `(∫ e^f dμ)·μ.tilted f = e^f·�
   only in the drift are equivalent (`jumpDiffusionIncrementLaw_absolutelyContinuous`): on the
   canonical model a change of drift is a move of the standard normal sample, and the moved
   Gaussian `N(m, 1)` is the Esscher tilt of `N(0, 1)` (`gaussianReal_tilted_const_mul`), equivalent
-  to it. This is static Girsanov on the Gaussian factor (`Bridges/GaussianGirsanov.lean`).
+  to it. This is static Girsanov on the Gaussian factor (`Models/BlackScholes/GaussianGirsanov.lean`).
 - Incompleteness at one date. The Esscher transform multiplies the Lévy measure by `e^{θx}`
   (`smul_tilted_eq_withDensity`). Suppose `σ ≠ 0`, the jumps are nontrivial (`Λ > 0`, `ν` not the
   point mass at `0`), the jump law's moment-generating function is finite near `0` and near `θ`
@@ -1106,8 +1106,8 @@ that price some call differently". Not covered:
 Six entries added, all `full`: `mf-jump-diffusion-esscher-transform`,
 `mf-jump-diffusion-esscher-pricing`, `mf-jump-diffusion-esscher-parameter`,
 `mf-merton-esscher-pricing`, `mf-black-scholes-esscher-pricing` and `gir-gaussian-esscher-tilt`.
-Corpus 490 → 496. The tilt lives in `Foundations/Esscher.lean`, the jump-diffusion results in
-`BlackScholes/JumpDiffusionEsscher.lean`.
+Corpus 490 → 496. The tilt lives in `Probability/Laws/Esscher.lean`, the jump-diffusion results in
+`Models/Jumps/JumpDiffusionEsscher.lean`.
 
 - One tilt. The Esscher transform with parameter `θ` of a law `μ` on `ℝ` is Mathlib's
   `μ.tilted (θ * ·)`. Its exponential moments are ratios of those of `μ`
@@ -1166,8 +1166,8 @@ jumps the model is Black–Scholes. Not covered:
 
 Four entries added, all `full`: `mf-jump-diffusion-scaling`, `mf-jump-diffusion-levy-exponent`,
 `mf-jump-diffusion-exponential-martingales` and `mf-jump-diffusion-power-claim-every-date`.
-Corpus 486 → 490. They live in `BlackScholes/JumpDiffusionProcess.lean` (the moment-generating
-function) and `BlackScholes/JumpDiffusionExponent.lean` (scaling, martingales, power claims).
+Corpus 486 → 490. They live in `Models/Jumps/JumpDiffusionProcess.lean` (the moment-generating
+function) and `Models/Jumps/JumpDiffusionExponent.lean` (scaling, martingales, power claims).
 
 - The moment-generating function, at every `θ` with `∫ e^{θx} dν < ∞`:
   `∫ e^{θy} dμ_τ(y) = e^{κ(θ)τ}` with the Laplace exponent
@@ -1175,7 +1175,7 @@ function) and `BlackScholes/JumpDiffusionExponent.lean` (scaling, martingales, p
   `integral_exp_const_mul_jumpDiffusionIncrementLaw`). On the canonical model it is the Gaussian
   moment-generating function times the compound-Poisson one, by independence
   (`JumpDiffusionHyp.mgf_logReturn`: Mathlib's `mgf_gaussianReal` and `IndepFun.mgf_add'`, and
-  `compoundPoisson_mgf_of_indepFun` from `Actuarial/CompoundPoissonMGF.lean`). In Mathlib's terms
+  `compoundPoisson_mgf_of_indepFun` from `Probability/Jumps/CompoundPoissonMGF.lean`). In Mathlib's terms
   `κ(θ)τ` is the cumulant generating function (`cgf_id_jumpDiffusionIncrementLaw`). The moment at
   `1`, which the discounted-price criterion uses, is now its corollary; it was derived from the
   pricing identity `discounted_terminal`.
@@ -1211,7 +1211,7 @@ Two entries added, both `full`: `ce-conditional-freezing-lemma` and
 `mf-jump-diffusion-payoff-every-date`. Corpus 484 → 486.
 
 - The conditional freezing lemma (Shreve's independence lemma), `condExp_comp_prodMk_of_indep`
-  (`Foundations/IndepFreezing.lean`): for `X` measurable for a σ-algebra `𝒢` and `Y` independent
+  (`Probability/Analysis/IndepFreezing.lean`): for `X` measurable for a σ-algebra `𝒢` and `Y` independent
   of `𝒢`, `𝔼[g(X, Y) | 𝒢] = G(X)` with `G(x) = ∫ g(x, y) d(law Y)(y)`, for `g` strongly measurable
   with `g(X, Y)` integrable. On each event of `𝒢` the joint law of `(X, Y)` is a product
   (`map_restrict_prodMk_of_indep`), so Fubini gives the same integral over every such event. It
@@ -1223,7 +1223,7 @@ Two entries added, both `full`: `ce-conditional-freezing-lemma` and
   call (for `∫ eˣ dν < ∞`, any `S₀` and `K`) are instances. The call no longer goes through
   put–call parity, the put no longer needs `K ≥ 0`, and the call no longer needs `S₀, K ≥ 0`.
 - Coherence: put–call parity of the price functions comes from the payoff identity
-  `max_sub_max_neg` of the finite-state parity (`Foundations/NoArbitrageDerivations.lean`). The
+  `max_zero_sub_max_neg_zero_eq_self` (Mathlib), the identity behind the finite-state parity. The
   canonical model's count–size independence comes from Mathlib's
   `indepFun_iff_hasLaw_prodMk_prod`; the repo's measure-preserving pull-back lemma is deleted.
   `[IsProbabilityMeasure P]` is derived from the process (`JumpDiffusionProcess.isProbabilityMeasure`)
@@ -1241,7 +1241,7 @@ Four entries added, all `full`: `mf-jump-diffusion-brownian-no-jumps`, `mf-bs-fo
 
 - With rate `0` the jump-diffusion log-return is `N(bτ, σ²τ)` (`jumpDiffusionIncrementLaw_zero`),
   so for a filtered pre-Brownian motion `B` the log-price `bt + σB_t` is a `JumpDiffusionProcess`
-  (`IsFilteredPreBrownian.jumpDiffusionProcess`, `BlackScholes/JumpDiffusionBrownian.lean`). The
+  (`IsFilteredPreBrownian.jumpDiffusionProcess`, `Models/Jumps/JumpDiffusionBrownian.lean`). The
   Brownian motion constructed on path space for the American-put development
   (`brownian_filtered`) makes the structure satisfiable without jumps
   (`jumpDiffusionProcess_brownian`).
@@ -1265,12 +1265,12 @@ Merton's model exists". Not covered: a jump-diffusion process with jumps (`Λ > 
 Three entries added, all `full`: `mf-bs-gaussian-smoothing`, `mf-merton-from-general-jump-law` and
 `mf-jump-diffusion-merton-1976-every-date`. Corpus 477 → 480.
 
-- Gaussian smoothing of the Black–Scholes price (`BlackScholes/GaussianSmoothing.lean`): for
+- Gaussian smoothing of the Black–Scholes price (`Models/BlackScholes/GaussianSmoothing.lean`): for
   `G ∼ N(m, v)`, `𝔼[C_BS(Se^G; σ)] = C_BS(Se^{m + v/2}; √(σ² + v/T))`
   (`integral_bsV_mul_exp_gaussianReal`, with the volatility characterised by `σ'²T = σ²T + v` in
   `integral_bsV_mul_exp_gaussianReal_of_sq`). The proof reads the average as a call through the
   mixing formula and adds the Gaussian log-shocks.
-- Merton's series from the general route (`BlackScholes/JumpDiffusionMerton.lean`): with
+- Merton's series from the general route (`Models/Jumps/JumpDiffusionMerton.lean`): with
   log-jumps `N(log(1 + k) − δ²/2, δ²)` and the compensator `kΛ`, the general-law formula and
   Gaussian smoothing give `mertonCallPrice` (`JumpDiffusionHyp.call_eq_mertonCallPrice`). The
   former second Merton tower was removed on 2026-10-30 (see that entry).
@@ -1295,7 +1295,7 @@ Five entries added, all `full`: `mf-jump-diffusion-price-parity`,
 `mf-jump-diffusion-merton-intermediate-date` and `mf-jump-diffusion-implied-vol-every-date`.
 Corpus 472 → 477.
 
-- The price functions (`BlackScholes/JumpDiffusionOptionPrices.lean`): `jumpDiffusionPutPrice` and
+- The price functions (`Models/Jumps/JumpDiffusionOptionPrices.lean`): `jumpDiffusionPutPrice` and
   `jumpDiffusionCallPrice` are the discounted expected payoffs `e^{−rτ}(K − Se^Y)⁺` and
   `e^{−rτ}(Se^Y − K)⁺` against the log-return law over `τ`. They satisfy put–call parity
   `C = P + S·e^{(b + σ²/2 + Λ(𝔼[e^J] − 1) − r)τ} − Ke^{−rτ}` (`jumpDiffusionCallPrice_eq`), which
@@ -1337,7 +1337,7 @@ Five entries added, all `full`: `mf-jump-diffusion-model-exists`,
 `mf-jump-diffusion-call-law-invariance`, `mf-jump-diffusion-log-return-mgf`,
 `mf-jump-diffusion-discounted-price-martingale` and `mart-exp-indep-increments`. Corpus 467 → 472.
 
-- The model exists, `jumpDiffusionHyp_canonical` (`BlackScholes/JumpDiffusionCanonical.lean`):
+- The model exists, `jumpDiffusionHyp_canonical` (`Models/Jumps/JumpDiffusionCanonical.lean`):
   for every expected jump count `Λ` and every jump law `ν`, the coordinates of `ℝ × ℕ × (ℕ → ℝ)`
   under `N(0, 1) ⊗ Poisson(Λ) ⊗ ν^ℕ` satisfy `JumpDiffusionHyp`, with jumps of law `ν`.
   `JumpDiffusionHyp` can therefore be discharged for any `Λ` and `ν`; the remaining hypotheses on
@@ -1346,13 +1346,13 @@ Five entries added, all `full`: `mf-jump-diffusion-model-exists`,
 - The call depends only on `Λ` and the jump law, `JumpDiffusionHyp.call_eq_integral_infinitePi`:
   on any model with `𝔼[e^{J₀}] < ∞`, for `S₀, K, σ, T > 0`, it is
   `∫ n, ∫ x, C_BS(S₀e^{−κ + ∑_{i<n} xᵢ}) dν^ℕ dPoisson(Λ)`, with `ν` the law of `J₀`.
-- The price process, `BlackScholes/JumpDiffusionProcess.lean`: a log-price `X` on `[0, ∞)`,
+- The price process, `Models/Jumps/JumpDiffusionProcess.lean`: a log-price `X` on `[0, ∞)`,
   adapted, started at `0`, with increments independent of the past and distributed as a
   jump-diffusion log-return over the elapsed time (`JumpDiffusionProcess`). The log-return's
   exponential moment is `e^{(b + σ²/2 + Λ(𝔼[e^J] − 1))τ}`
   (`integral_exp_jumpDiffusionIncrementLaw`), and the discounted price `e^{−rt}S₀e^{X_t}` is a
   martingale if and only if `b = r − σ²/2 − Λ(𝔼[e^J] − 1)` (`JumpDiffusionProcess.martingale_iff`).
-  The engine is `Foundations/ExpMartingaleIndepIncrements.martingale_exp_sub_of_indep_increments`:
+  The engine is `Probability/Jumps/ExpMartingaleIndepIncrements.martingale_exp_sub_of_indep_increments`:
   `e^{X_t − ψ(t)}` is a martingale when the increments are independent of the past with
   `𝔼[e^{X_t − X_s}] = e^{ψ(t) − ψ(s)}`.
 
@@ -1374,10 +1374,10 @@ Six entries added, all `full`: `mf-bs-call-strictly-convex-in-spot`,
 - Strict bounds, `bsV_lt_jumpDiffusion_call` and `jumpDiffusion_call_lt`: a compensated jump part
   `Y` (`𝔼[e^Y] = 1`) that is not almost surely `0` puts the call strictly between `C_BS(S₀; σ)`
   and `S₀`. The lower bound is Jensen's inequality made strict
-  (`Foundations/AffineMinorant.lt_integral_of_affine_lt`): the Black–Scholes price is strictly
+  (`Probability/Analysis/AffineMinorant.lt_integral_of_affine_lt`): the Black–Scholes price is strictly
   convex in the spot (`bsV_spot_strictConvexOn`, from positive gamma), so it lies strictly above
   its tangent away from `S₀` (`bsV_spot_tangent_lt`).
-- The Black–Scholes side, in `BlackScholes/ImpliedVolatility.lean`: the call tends to the spot as
+- The Black–Scholes side, in `Models/BlackScholes/ImpliedVolatility.lean`: the call tends to the spot as
   `σ → ∞` (`tendsto_bsV_sigma_atTop`), so a price strictly between the Black–Scholes price at
   some `σ₀ > 0` and the spot has a unique positive implied volatility, and it is above `σ₀`
   (`exists_impliedVol_gt_of_bsV_lt`).
@@ -1402,7 +1402,7 @@ Four entries added, all `full`: `mf-jump-diffusion-mixing-formula`,
 `mf-jump-diffusion-call-dominates-bs`, `mf-jump-diffusion-compensator` and
 `mf-merton-general-jump-law`. Corpus 457 → 461.
 
-`BlackScholes/JumpDiffusionMixing.lean` takes jumps of any law, not only Gaussian:
+`Models/Jumps/JumpDiffusionMixing.lean` takes jumps of any law, not only Gaussian:
 
 - the mixing formula, `jumpDiffusion_call_eq_integral_bsV`: for `Z ∼ N(0, 1)` and a jump part `Y`
   independent of `Z` with `𝔼[e^Y] < ∞`,
@@ -1422,11 +1422,11 @@ Four entries added, all `full`: `mf-jump-diffusion-mixing-formula`,
   integrated out, `∫ n, 𝔼[C_BS(S₀e^{−κ + ∑_{i<n} Jᵢ})] ∂Poisson(Λ)`.
 
 The model assumes the count independent of the diffusion sample and the jump sizes, and the
-diffusion sample independent of the sizes. `Foundations/IndepFreezing.indepFun_prodMk_of_indepFun_prodMk`
+diffusion sample independent of the sizes. `Probability/Analysis/IndepFreezing.indepFun_prodMk_of_indepFun_prodMk`
 re-associates this to "the diffusion sample is independent of the count and the sizes", so each
 model-level statement is the single-jump-part theorem at `Y = −κ + ∑_{i<N} Jᵢ`. Integrating out a
 countable variable is one lemma, `integral_comp_of_hasLaw_of_countable`, which the Merton prices,
-the compound-Poisson MGF and the general-law formula all use (`Foundations/PoissonMaxima` still
+the compound-Poisson MGF and the general-law formula all use (`Probability/Jumps/PoissonMaxima` still
 conditions on its count by hand).
 
 Safe wording: "the mixing formula, Black–Scholes and spot bounds for a compensated jump-diffusion
@@ -1442,7 +1442,7 @@ Five entries added, all `full`: `mf-merton-delta`, `mf-merton-gamma`, `mf-merton
 `mf-merton-call-convex-in-spot` and `mf-merton-call-increasing-in-vol`. Corpus 452 → 457. These
 are the statements issue #129 asks for.
 
-`BlackScholes/MertonGreeks.lean` differentiates the Poisson series of Black–Scholes prices
+`Models/Jumps/MertonGreeks.lean` differentiates the Poisson series of Black–Scholes prices
 `C(S) = ∑ₙ wₙ C_BS(S·cₙ, σₙ)` term by term (`hasDerivAt_tsum_of_isPreconnected`), with
 `wₙ = e^{−Λ}Λⁿ/n!`, `cₙ = e^{−kΛ}(1 + k)ⁿ` and `σₙ = √(σ² + nδ²/T)`. For `K, σ, T > 0`, `k > −1`
 and `S > 0`:
@@ -1483,10 +1483,10 @@ analogue (`JumpDiffusionHyp.put_eq_mertonPutPrice`) and `𝔼[e^{−rT}S_T] = S�
 (`JumpDiffusionHyp.discounted_terminal_merton`). (Originally proved in `MertonModel.lean` with its
 own Poisson freezing; since 2026-10-30 these are corollaries of the general mixing formula.)
 
-The freezing lemma is `Foundations/IndepFreezing.integral_comp_prodMk_of_indepFun`:
+The freezing lemma is `Probability/Analysis/IndepFreezing.integral_comp_prodMk_of_indepFun`:
 `𝔼[g(X, Y)] = ∫ x, 𝔼[g(x, Y)] d(law X)` for independent `X`, `Y`, from Mathlib's
 `IndepFun.map_prod_eq_prod_map_map` and `integral_prod`. Its second consumer closes a gap
-`Actuarial/CompoundPoissonMGF.lean` used to declare: `compoundPoisson_mgf_of_indepFun` computes
+`Probability/Jumps/CompoundPoissonMGF.lean` used to declare: `compoundPoisson_mgf_of_indepFun` computes
 `𝔼[exp(t·∑_{i<N} Xᵢ)] = exp(λ(M_X(t) − 1))` for a claim count that is a random variable
 independent of the claims, where `mf-compound-poisson-mgf` integrated against the Poisson weights.
 
@@ -1526,9 +1526,9 @@ positive and the smiled call is a normalised call price function (`IsNormalizedC
 that is convexity of the call together with `d₊ → −∞` (`butterflyFreeFormula_iff`); convexity is
 Durrleman's `g ≥ 0` for `σ > 0`, and at `σ = 0` only the convexity statement is proved.
 
-The general pieces are in `BlackScholes/CallPriceFunction.lean` (the structure, and that a convex
+The general pieces are in `Models/ModelFree/CallPriceFunction.lean` (the structure, and that a convex
 function bounded above on a right-infinite interval is nonincreasing) and
-`Foundations/NormalTail.lean` (the Mills bound).
+`Probability/Gaussian/NormalTail.lean` (the Mills bound).
 
 Not proved: that a normalised call price function is the call price of a nonnegative random
 variable of mean one, the last step of Roper's Theorem 2.1.
@@ -1538,7 +1538,7 @@ variable of mean one, the last step of Roper's Theorem 2.1.
 New benchmark file `benchmarks/svi_certificate.json`, three entries, all `full`. Corpus 442 → 445.
 The development is Robert Martin's
 [ButterflyFreeSVI](https://github.com/robertmartin8/ButterflyFreeSVI), ported to
-`MathFin/BlackScholes/SVI/` (42 modules) with statements unchanged; it answers #174.
+`MathFin/Models/ModelFree/SVI/` (42 modules) with statements unchanged; it answers #174.
 
 | Benchmark ID | Mathematical conclusion | Lean declaration |
 |---|---|---|
@@ -1565,7 +1565,7 @@ One entry added, `sc-riemann-stieltjes-against-ito` (`full`). Corpus 441 → 442
 For `M = φ●B` and a bounded predictable weight `w` whose paths are almost surely continuous on
 `[0, T]`, the sums `∑ₖ w(tₖ)(M_{tₖ₊₁} − M_{tₖ})` along the uniform partition of `[0, T]` converge
 in mean square to `∫ w dM`, and `∫ w dM` is the Itô integral against `B` of a class equal to `φ·w`
-almost everywhere (`Foundations/AdaptedRiemannStieltjes.lean`). This is the martingale part of the
+almost everywhere (`Probability/Brownian/AdaptedRiemannStieltjes.lean`). This is the martingale part of the
 first-order term of the planned adapted Itô formula, with `w = f'(X)`.
 
 The route goes through `L²(⟨M⟩)` and does not freeze the driver. Each sum is the integral against
@@ -1597,7 +1597,7 @@ formula
 
 The proof splits `(ΔXₖ)²` around the frozen increment `σ(tₖ)ΔBₖ`. The freezing defects
 `Dₖ = ΔMₖ − σ(tₖ)ΔBₖ` of `M = σ●B` are orthogonal Itô integrals whose sum is the error of the frozen
-Riemann–Itô sum, so `∑ₖ ‖Dₖ‖² → 0` (`Foundations/AdaptedStochasticIntegralFreezing.lean`). What the
+Riemann–Itô sum, so `∑ₖ ‖Dₖ‖² → 0` (`Probability/Brownian/Ito/AdaptedStochasticIntegralFreezing.lean`). What the
 defects leave is the weighted quadratic variation of `B` with weight `w σ²`, which the tower already
 had (`tendsto_weighted_qv_process`).
 
@@ -1614,7 +1614,7 @@ One entry added, `sc-ito-is-stochastic-integral` (`full`). Corpus 439 → 440.
 BrownianMotion's `StochasticIntegral.lean` characterises a stochastic integral axiomatically:
 Riemann–Stieltjes values on elementary processes, linearity, indistinguishability and dominated
 convergence (`IsRiemannStieltjesExtension`), plus agreement with every other such extension on the
-common domain (`IsStochasticIntegral`). `Foundations/StochasticIntegralCharacterisation.lean` proves
+common domain (`IsStochasticIntegral`). `Probability/Brownian/Ito/StochasticIntegralCharacterisation.lean` proves
 that the integral against `M = φ●B` is one, for `M` stopped at `T` and the natural Brownian
 filtration. BrownianMotion does not instantiate the predicate anywhere at the pin.
 
@@ -1641,8 +1641,8 @@ New benchmark file `benchmarks/quantitative_risk_management.json`, drawn from Mc
 Embrechts, *Quantitative Risk Management* (2015) and its exercise book (Hofert, Frey and McNeil,
 2020). Every entry carries `formalization_status: full`.
 
-The base layer is `Foundations/Quantile.lean`, the generalized inverse of a CDF, which Mathlib
-does not have. Value-at-risk (`RiskMeasures/ValueAtRisk.lean`) is defined for every law, atoms included. The
+The base layer is `Probability/Laws/Quantile.lean`, the generalized inverse of a CDF, which Mathlib
+does not have. Value-at-risk (`Risk/ValueAtRisk.lean`) is defined for every law, atoms included. The
 expected-shortfall theorems hold for every integrable loss. The library's earlier Gaussian closed forms, which take a quantile
 parameter `z`, are now theorems about the law at `z = Φ⁻¹(α)` (`qrm-gaussian-var-is-var`,
 `qrm-gaussian-es`).
@@ -1659,73 +1659,74 @@ What is not covered:
 
 | Benchmark ID | Mathematical conclusion | Lean module and declaration | Faithfulness |
 |---|---|---|---|
-| `qrm-quantile-transform` | For every probability measure μ on ℝ, its quantile function (the generalized inverse p ↦ inf{x | p ≤ F(x)} of the CDF) has law μ under the uniform law on (0, 1). | `MathFin/Foundations/Quantile.lean`, `MathFin.hasLaw_quantile` | `full` |
-| `qrm-quantile-galois` | For p ∈ (0, 1) and any measure μ on ℝ, quantile μ p ≤ x ↔ p ≤ F_μ(x): the generalized inverse of the CDF is its lower adjoint, with no continuity or strict-monotonicity assumption. | `MathFin/Foundations/Quantile.lean`, `MathFin.quantile_le_iff` | `full` |
-| `qrm-probability-integral-transform` | If X has law μ and the CDF F of μ is continuous, then F(X) is uniformly distributed on (0, 1). | `MathFin/Foundations/Quantile.lean`, `MathFin.hasLaw_cdf` | `full` |
-| `qrm-quantile-equivariance` | For a probability measure μ, a monotone lower-semicontinuous h (e.g. continuous increasing) and p ∈ (0, 1): the p-quantile of the image law μ∘h⁻¹ is h(quantile μ p). | `MathFin/Foundations/Quantile.lean`, `MathFin.quantile_map` | `full` |
-| `qrm-gaussian-quantile` | For p ∈ (0, 1), the p-quantile of N(m, v) is m + √v · Φ⁻¹(p), where Φ⁻¹ is the standard normal quantile function. | `MathFin/Foundations/NormalQuantile.lean`, `MathFin.quantile_gaussianReal` | `full` |
-| `qrm-var-comonotone-additive` | For a loss factor Z and monotone lower-semicontinuous f, g, VaR_α(f(Z) + g(Z)) = VaR_α(f(Z)) + VaR_α(g(Z)) for every α ∈ (0, 1) (comonotone additivity in its common-factor form). | `MathFin/RiskMeasures/ValueAtRisk.lean`, `MathFin.valueAtRisk_add_of_comonotone` | `full` |
-| `qrm-var-additive-linear-dependence` | For an a.e.-measurable loss X, α ∈ (0, 1), a ≥ 0 and b ∈ ℝ: VaR_α(X + (aX + b)) = VaR_α(X) + VaR_α(aX + b). | `MathFin/RiskMeasures/ValueAtRisk.lean`, `MathFin.valueAtRisk_add_affine` | `full` |
-| `qrm-gaussian-var-is-var` | For a loss X ~ N(m, v) and α ∈ (0, 1), VaR_α(X) = gaussianVaR m √v (Φ⁻¹(α)) = m + √v·Φ⁻¹(α): the library's quantile-parametrized Gaussian closed form is the value-at-risk of the law. | `MathFin/RiskMeasures/GaussianValueAtRisk.lean`, `MathFin.valueAtRisk_of_hasLaw_gaussianReal` | `full` |
-| `qrm-rockafellar-uryasev` | For an integrable loss X and α ∈ (0, 1), expected shortfall ES_α(X) = (1−α)⁻¹∫_α^1 VaR_u(X) du is the least value of c ↦ c + (1−α)⁻¹E[(X − c)⁺], and that value is attained (the minimizer c = VaR_α(X) is `rockafellarUryasev_valueAtRisk`). No continuity of the law is assumed. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.isLeast_rockafellarUryasev` | `full` |
-| `qrm-es-subadditive` | For integrable losses X, Y on one probability space and α ∈ (0, 1): ES_α(X + Y) ≤ ES_α(X) + ES_α(Y). | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_add_le` | `full` |
-| `qrm-es-coherent` | For α ∈ (0, 1), X ↦ ES_α(X) satisfies the four coherence axioms (monotonicity, translation invariance, positive homogeneity, subadditivity) on the integrable losses of any probability space. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_isCoherentRiskMeasure` | `full` |
-| `qrm-es-acerbi-tasche` | For an integrable loss X, α ∈ (0, 1) and q = VaR_α(X): ES_α(X) = (1−α)⁻¹(E[X·1{X > q}] + q·(1 − α − P(X > q))), the correction term accounting for an atom at q. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_eq_acerbiTasche` | `full` |
-| `qrm-es-tail-mean` | For an integrable loss X whose law has a continuous CDF and α ∈ (0, 1), with q = VaR_α(X): the tail {X > q} has probability exactly 1 − α, and ES_α(X) = (1−α)⁻¹ E[X·1{X > q}], the mean of X over that tail. The Acerbi–Tasche correction term vanishes. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_eq_setIntegral_tail` | `full` |
-| `qrm-es-dual-representation` | For an integrable loss X and α ∈ (0, 1), ES_α(X) is the greatest value of E[D·X] over densities D with 0 ≤ D ≤ (1−α)⁻¹ a.s. and E[D] = 1; the maximum is attained. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.isGreatest_integral_mul_expectedShortfall` | `full` |
-| `qrm-es-monotone-level` | For an integrable loss X and 0 < α ≤ β < 1, ES_α(X) ≤ ES_β(X). | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_mono_level` | `full` |
-| `qrm-es-adeh-representation` | On a finite probability space, ES_α is a coherent risk measure of losses (IsCoherentRiskMeasure), so ES_α(L) is the least upper bound of the expected losses ∑ qᵢ Lᵢ over its representing probability vectors, those q with ∑ qᵢ Zᵢ ≤ 0 on every loss Z with ES_α(Z) ≤ 0. That this representing set is the set of densities bounded by (1 − α)⁻¹ is not proved here. | `MathFin/RiskMeasures/ExpectedShortfall.lean`, `MathFin.expectedShortfall_isLUB_representingSet` | `full` |
-| `qrm-gaussian-es` | For a loss X ~ N(m, v) with v > 0 and α ∈ (0, 1): ES_α(X) = gaussianCVaR m √v (Φ⁻¹(α)) α = m + √v·ϕ(Φ⁻¹(α))/(1 − α). | `MathFin/RiskMeasures/GaussianExpectedShortfall.lean`, `MathFin.expectedShortfall_of_hasLaw_gaussianReal` | `full` |
-| `qrm-var-bisection` | For any loss X, α ∈ (0, 1) and a bracket with P(X ≤ lo) < α ≤ P(X ≤ hi), bisection on x ↦ P(X ≤ x) against α converges to VaR_α(X) (with error at most (hi − lo)/2^(n+1) after n steps, abs_bisectMid_sub_valueAtRisk_le). | `MathFin/RiskMeasures/ValueAtRiskBisection.lean`, `MathFin.tendsto_bisectMid_valueAtRisk` | `full` |
-| `qrm-var-superadditive-bernoulli` | For d independent Bernoulli(p) losses Y₁,…,Y_d (values in {0,1}, p ∈ (0,1)) and α ∈ (0, 1): ∑ VaR_α(Yᵢ) < VaR_α(∑ Yᵢ) if and only if (1 − p)^d < α ≤ 1 − p. So VaR is superadditive for such losses whenever d ≥ 2 and α lies in that range. | `MathFin/RiskMeasures/VaRSuperadditivity.lean`, `MathFin.valueAtRisk_sum_bernoulli_superadditive_iff` | `full` |
-| `qrm-var-superadditive-pareto` | For independent L₁, L₂ with Pareto law F(x) = 1 − x^(−1/2) on [1, ∞) and every α ∈ (0, 1): VaR_α(L₁) + VaR_α(L₂) < VaR_α(L₁ + L₂). | `MathFin/RiskMeasures/VaRSuperadditivity.lean`, `MathFin.valueAtRisk_add_gt_of_paretoHalf` | `full` |
-| `qrm-var-gaussian-subadditive-iff` | For a jointly Gaussian pair (X₁, X₂) whose covariance is strictly below √Var X₁·√Var X₂ and α ∈ (0, 1): VaR_α(X₁ + X₂) ≤ VaR_α(X₁) + VaR_α(X₂) if and only if α ≥ 1/2. | `MathFin/RiskMeasures/VaRSuperadditivity.lean`, `MathFin.valueAtRisk_add_le_iff_of_hasGaussianLaw` | `full` |
-| `qrm-es-exponential` | For X ~ Exp(r) (r > 0) and α ∈ (0, 1): ES_α(X) = (1 − log(1 − α))/r (the VaR is `valueAtRisk_of_hasLaw_expMeasure`: −log(1 − α)/r). | `MathFin/RiskMeasures/RiskClosedForms.lean`, `MathFin.expectedShortfall_of_hasLaw_expMeasure` | `full` |
-| `qrm-es-var-ratio-exponential` | For X ~ Exp(r), ES_α(X)/VaR_α(X) → 1 as α → 1⁻ (light tail). | `MathFin/RiskMeasures/RiskClosedForms.lean`, `MathFin.tendsto_expectedShortfall_div_valueAtRisk_expMeasure` | `full` |
-| `qrm-es-lomax` | For X with Lomax law F(x) = 1 − (κ/(κ + x))^θ, θ > 1, κ > 0 and α ∈ (0, 1): ES_α(X) = κ(θ/(θ − 1)·(1 − α)^(−1/θ) − 1). | `MathFin/RiskMeasures/RiskClosedForms.lean`, `MathFin.expectedShortfall_of_hasLaw_lomaxMeasure` | `full` |
-| `qrm-es-var-ratio-pareto` | For X with Lomax law (θ > 1, κ > 0), ES_α(X)/VaR_α(X) → θ/(θ − 1) as α → 1⁻: the heavy tail is visible in the shortfall-to-quantile ratio. | `MathFin/RiskMeasures/RiskClosedForms.lean`, `MathFin.tendsto_expectedShortfall_div_valueAtRisk_lomaxMeasure` | `full` |
-| `qrm-median-shortfall` | For a loss with continuous CDF and α ∈ (0, 1), the median of the conditional law of X given X > VaR_α(X) equals VaR_{(1+α)/2}(X). | `MathFin/RiskMeasures/RiskClosedForms.lean`, `MathFin.medianShortfall_eq_valueAtRisk` | `full` |
-| `qrm-var-elicitable` | For α ∈ (0, 1), the pinball loss (𝟙{y ≤ x} − α)(x − y) strictly elicits the α-quantile on the probability measures with finite mean whose α-quantile is unique (CDF > α right after it): the quantile is the unique minimizer of the expected score. | `MathFin/RiskMeasures/Elicitability.lean`, `MathFin.strictlyElicits_pinballLoss` | `full` |
-| `qrm-es-not-elicitable` | For every α ∈ (0, 1), no scoring function with finite expected score under every law in the class elicits ES_α on the probability measures with finite mean: δ₀ and ((1+α)/2)δ₋₁ + ((1−α)/2)δ₁ both have ES_α = 0 while their mixture (1−α)δ₀ + α·(second law) has ES_α = α/2, so the level set is not convex. | `MathFin/RiskMeasures/Elicitability.lean`, `MathFin.not_isElicitable_expectedShortfall_integrable` | `full` |
-| `qrm-frechet-lower-not-copula` | For an index type with at least three elements, no copula (probability measure on ℝ^ι with uniform coordinates) has distribution function u ↦ max(∑ uᵢ − (d − 1), 0) on [0, 1]^ι. | `MathFin/Foundations/Copula.lean`, `MathFin.not_exists_isCopula_frechetLower` | `full` |
-| `qrm-frechet-hoeffding-lower` | For every copula C on ℝ^ι and u ∈ [0, 1]^ι: ∑ uᵢ − (d − 1) ≤ C(U ≤ u). | `MathFin/Foundations/Copula.lean`, `MathFin.IsCopula.sum_sub_le_measureReal_Iic` | `full` |
-| `qrm-sklar-existence-copula` | For a random vector X whose marginal CDFs are continuous, the joint law of the probability-integral transforms (F₁(X₁), …, F_d(X_d)) is a copula (probability measure with uniform coordinates). | `MathFin/Foundations/Sklar.lean`, `MathFin.isCopula_copulaOf` | `full` |
-| `qrm-sklar-representation` | For a random vector X with continuous marginal CDFs F_i: P(X ≤ x) = C(F₁(x₁), …, F_d(x_d)) for all x, where C is the copula of X (continuous-margins case of Sklar's theorem). | `MathFin/Foundations/Sklar.lean`, `MathFin.measureReal_le_eq_copulaOf` | `full` |
-| `qrm-sklar-uniqueness` | For a random vector X with continuous marginal CDFs, any copula C with P(X ≤ x) = C(F₁(x₁), …, F_d(x_d)) for all x equals the copula of X. | `MathFin/Foundations/Sklar.lean`, `MathFin.eq_copulaOf_of_measureReal_le` | `full` |
-| `qrm-copula-invariance` | For a random vector X and strictly increasing T₁, …, T_d, the joint law of the probability-integral transforms of (T₁(X₁), …, T_d(X_d)) (copulaOf, a copula when the margins are continuous) equals that of X. | `MathFin/Foundations/Sklar.lean`, `MathFin.copulaOf_comp_strictMono` | `full` |
-| `qrm-fgm-copula` | The function uv + θuv(1 − u)(1 − v) is the distribution function on [0, 1]² of some bivariate copula if and only if |θ| ≤ 1. | `MathFin/Foundations/CopulaFamilies.lean`, `MathFin.exists_isCopula_fgm_iff` | `full` |
-| `qrm-fgm-spearman` | For |θ| ≤ 1, Spearman's rho (12E[U₀U₁] − 3) of the FGM copula is θ/3, so the family only reaches rank correlations in [−1/3, 1/3]. | `MathFin/Foundations/CopulaFamilies.lean`, `MathFin.spearmanRho_fgmCopula` | `full` |
-| `qrm-clayton-tail-dependence` | For θ > 0 the Clayton copula function C_θ(u, u) = (2u^(−θ) − 1)^(−1/θ) satisfies C_θ(u, u)/u → 2^(−1/θ) as u → 0⁺ (lower tail dependence coefficient), proved at the level of the copula function. | `MathFin/Foundations/CopulaFamilies.lean`, `MathFin.tendsto_claytonCopulaFun_diag_div` | `full` |
-| `qrm-hoeffding-covariance` | For square-integrable X, Y: cov(X, Y) = ∫∫ (P(X ≤ s, Y ≤ t) − P(X ≤ s)P(Y ≤ t)) ds dt. | `MathFin/Foundations/HoeffdingCovariance.lean`, `MathFin.covariance_eq_integral_cdf` | `full` |
-| `qrm-covariance-ordering` | For two square-integrable pairs with the same marginal laws whose joint distribution functions are pointwise ordered, their covariances are ordered the same way. | `MathFin/Foundations/HoeffdingCovariance.lean`, `MathFin.covariance_le_covariance_of_cdf_le` | `full` |
-| `qrm-default-correlation-bound` | For events A, B: cov(1_A, 1_B) ≤ min(P(A), P(B)) − P(A)P(B) (the comonotone Fréchet bound for default indicators). | `MathFin/Foundations/HoeffdingCovariance.lean`, `MathFin.covariance_indicator_one_le` | `full` |
-| `qrm-marshall-olkin-survival` | For independent exponential T₁, T₂, T₃ with rates λ₁, λ₂, λ₃ and Xⱼ = min(Tⱼ, T₃): P(X₁ > s, X₂ > t) = exp(−λ₁s − λ₂t − λ₃ max(s, t)) for s, t ≥ 0. | `MathFin/Foundations/MarshallOlkin.lean`, `MathFin.marshallOlkin_survival` | `full` |
-| `qrm-marshall-olkin-ftd` | In the Marshall–Olkin model with all three rates positive, the first-to-default spread −log P(min(X₁, X₂) > t)/t (equal to λ₁ + λ₂ + λ₃, `marshallOlkin_firstToDefault_spread`) is strictly below the sum of the single-name spreads (λ₁ + λ₃) + (λ₂ + λ₃). | `MathFin/Foundations/MarshallOlkin.lean`, `MathFin.marshallOlkin_firstToDefault_spread_lt` | `full` |
-| `qrm-correlation-fallacy` | There exist random variables Z, Y, both N(0, 1), with cov(Z, Y) = 0 that are not independent, not jointly Gaussian, and whose sum is not Gaussian (Y = V·Z with an independent random sign V). | `MathFin/Foundations/CorrelationFallacies.lean`, `MathFin.exists_gaussian_uncorrelated_not_indepFun` | `full` |
-| `qrm-evt-poisson-approximation` | For a nonnegative F, thresholds uₙ and h > 0: F(uₙ)ⁿ → h if and only if n(1 − F(uₙ)) → −log h. | `MathFin/Foundations/ExtremeValue.lean`, `MathFin.tendsto_pow_iff_tendsto_nat_mul_tail` | `full` |
-| `qrm-gev-max-stable` | For every shape ξ, x and n ≥ 1: H_ξ(cₙx + dₙ)ⁿ = H_ξ(x) with the explicit normalizations gevNormScale ξ n and gevNormLoc ξ n. | `MathFin/Foundations/ExtremeValue.lean`, `MathFin.gevCDF_max_stable` | `full` |
-| `qrm-exponential-gumbel-mda` | For r > 0 the exponential CDF lies in MDA(H₀) (witnessed by cₙ = 1/r, dₙ = log n/r): F(x/r + log n/r)ⁿ → exp(−e^(−x)). | `MathFin/Foundations/ExtremeValue.lean`, `MathFin.cdf_expMeasure_inMDA` | `full` |
-| `qrm-gpd-mda` | For β > 0 and every ξ ∈ ℝ, the generalized Pareto distribution function G_{ξ,β} lies in MDA(H_ξ). | `MathFin/Foundations/GeneralizedPareto.lean`, `MathFin.gpdCDF_inMDA` | `full` |
-| `qrm-gpd-mean-excess` | For the GPD law with ξ < 1, β > 0 and a threshold u ≥ 0 in the support: E[X − u | X > u] = (β + ξu)/(1 − ξ), linear in u. | `MathFin/Foundations/GeneralizedPareto.lean`, `MathFin.integral_sub_cond_gpdMeasure` | `full` |
-| `qrm-poisson-gpd-gev` | For N ~ Poisson(λ) independent of iid GPD(ξ, β) losses Yᵢ (ξ ≠ 0), and x ≥ 0: P(max_{i<N} Yᵢ ≤ x) = H_ξ((x − μ)/σ) with σ = βλ^ξ, μ = β(λ^ξ − 1)/ξ. | `MathFin/Foundations/PoissonMaxima.lean`, `MathFin.measureReal_poisson_max_gpd` | `full` |
-| `qrm-quantile-convergence` | If Xₙ → Y almost surely and the α-quantile of Y is unique (F_Y(x) > α for every x above it), then the α-quantiles of the laws of Xₙ converge to the α-quantile of the law of Y. | `MathFin/Foundations/QuantileConvergence.lean`, `MathFin.tendsto_quantile_of_tendsto_ae` | `full` |
-| `qrm-bernoulli-mixture-moments` | For defaults Yᵢ = 1{Uᵢ ≤ Q} with Q ∈ [0, 1], Uᵢ iid uniform and independent of Q: the probability that every obligor in a set s defaults is E[Q^|s|]. | `MathFin/RiskMeasures/BernoulliMixture.lean`, `MathFin.measureReal_iInter_default_eq_integral_pow` | `full` |
-| `qrm-default-correlation` | In the exchangeable Bernoulli mixture, the default correlation of two distinct obligors equals Var(Q)/(E[Q](1 − E[Q])) (hence is nonnegative, defaultCorrelation_nonneg). | `MathFin/RiskMeasures/BernoulliMixture.lean`, `MathFin.defaultCorrelation_eq` | `full` |
-| `qrm-one-factor-default-covariance` | In the one-factor Gaussian threshold model (F and ε₁, …, εₙ independent standard normals, asset correlation ρ < 1, default when √ρ F + √(1 − ρ) εᵢ ≤ Φ⁻¹(π)), two distinct obligors satisfy P(Dᵢ ∩ Dⱼ) − P(Dᵢ)P(Dⱼ) = Var(p(F)), with p(f) = Φ((Φ⁻¹(π) − √ρ f)/√(1 − ρ)) the default probability given the factor. | `MathFin/RiskMeasures/BernoulliMixture.lean`, `MathFin.oneFactor_measureReal_inter_default_sub_mul` | `full` |
-| `qrm-one-factor-pd` | For independent N(0, 1) factor F and idiosyncratic ε, π ∈ (0, 1) and ρ ∈ [0, 1]: P(√ρ F + √(1 − ρ) ε ≤ Φ⁻¹(π)) = π. | `MathFin/RiskMeasures/BernoulliMixture.lean`, `MathFin.oneFactor_measureReal_default` | `full` |
-| `qrm-large-portfolio-lln` | In the one-factor Gaussian threshold model with pairwise independent N(0, 1) idiosyncratic terms (any factor F, any π, ρ < 1), the default fraction of the first m obligors converges almost surely to p(F) = Φ((Φ⁻¹(π) − √ρ F)/√(1 − ρ)). | `MathFin/RiskMeasures/VasicekIRB.lean`, `MathFin.tendsto_oneFactorLossFraction_ae` | `full` |
-| `qrm-basel-irb-formula` | In the one-factor Gaussian threshold model (standard normal factor, pairwise independent standard normal idiosyncratic terms, α ∈ (0, 1), ρ < 1), VaR_α of the default fraction of the first m obligors converges as m → ∞ to Φ((Φ⁻¹(π) + √ρ·Φ⁻¹(α))/√(1 − ρ)) (asrfQuantile), the worst-case default rate at the core of the Basel IRB formula. Loss given default, expected-loss subtraction and the maturity adjustment are not modelled. | `MathFin/RiskMeasures/VasicekIRB.lean`, `MathFin.tendsto_valueAtRisk_oneFactorLossFraction` | `full` |
-| `qrm-equicorrelation-psd` | For d ≥ 2, the matrix with ones on the diagonal and ρ off it is positive semidefinite if and only if −1/(d − 1) ≤ ρ ≤ 1. | `MathFin/Portfolio/Equicorrelation.lean`, `MathFin.posSemidef_equicorrelationMatrix_iff` | `full` |
-| `qrm-var-optimal-is-markowitz` | For a Gaussian random vector X, α ∈ (1/2, 1) and a set S of weights with a common expected portfolio loss, w₀ minimizes VaR_α(∑ wᵢXᵢ) over S if and only if it minimizes the portfolio variance wᵀΣw over S. | `MathFin/Bridges/GaussianRiskMarkowitz.lean`, `MathFin.isMinOn_valueAtRisk_iff_isMinOn_portfolioVarN` | `full` |
-| `qrm-es-optimal-is-markowitz` | For a Gaussian random vector X, α ∈ (1/2, 1) and a set S of weights with a common expected portfolio loss, w₀ minimizes ES_α(∑ wᵢXᵢ) over S if and only if it minimizes the portfolio variance over S. | `MathFin/Bridges/GaussianRiskMarkowitz.lean`, `MathFin.isMinOn_expectedShortfall_iff_isMinOn_portfolioVarN` | `full` |
-| `qrm-var-subadditive-gaussian-portfolios` | For a Gaussian random vector X, α ∈ [1/2, 1) and weight vectors w, w': VaR_α(⟨w, X⟩ + ⟨w', X⟩) ≤ VaR_α(⟨w, X⟩) + VaR_α(⟨w', X⟩). | `MathFin/Bridges/GaussianRiskMarkowitz.lean`, `MathFin.valueAtRisk_portfolio_add_le` | `full` |
-| `qrm-systematic-floor` | For a covariance kernel with variance v ≥ 0 and common covariance ρv (ρ ≤ 1) and fully invested weights, the portfolio variance is at least ρv (the identity Var(w) = v((1 − ρ)·HHI(w) + ρ) is `portfolioVarN_equicorrelated_of_sum_eq_one`). | `MathFin/Bridges/EquicorrelationConcentration.lean`, `MathFin.mul_le_portfolioVarN_equicorrelated` | `full` |
-| `qrm-square-root-of-time` | For a geometric Brownian motion S_t = S₀exp((μ − σ²/2)t + σB_t) driven by a pre-Brownian motion and σ ≥ 0: the h-period log-loss −log(S_{t+h}/S_t) has VaR_α = −(μ − σ²/2)h + σ√h·Φ⁻¹(α), so the volatility term scales with √h. | `MathFin/Bridges/SquareRootOfTime.lean`, `MathFin.valueAtRisk_gbm_loss` | `full` |
-| `qrm-expectile-exists-unique` | For an integrable loss Y and α ∈ (0, 1) there is exactly one e with α·E[(Y − e)⁺] = (1 − α)·E[(e − Y)⁺] (the α-expectile). | `MathFin/RiskMeasures/Expectile.lean`, `MathFin.existsUnique_expectileGap_eq_zero` | `full` |
-| `qrm-expectile-monotone` | For an integrable loss Y and 0 < α ≤ β < 1, the α-expectile is at most the β-expectile. | `MathFin/RiskMeasures/Expectile.lean`, `MathFin.expectile_mono` | `full` |
-| `qrm-covariance-cauchy-schwarz` | For square-integrable X, Y on a probability space: cov(X, Y) ≤ √Var X · √Var Y. | `MathFin/Foundations/FiniteMeasureCauchySchwarz.lean`, `MathFin.covariance_le_sqrt_mul_sqrt` | `full` |
-| `qrm-sd-principle-subadditive` | For k ≥ 0 and square-integrable X, Y: E[X + Y] + k·sd(X + Y) ≤ (E[X] + k·sd(X)) + (E[Y] + k·sd(Y)). | `MathFin/RiskMeasures/StandardDeviationPrinciple.lean`, `MathFin.stdDevPrinciple_add_le` | `full` |
-| `qrm-sd-principle-not-monotone` | For k ≥ 0 and a loss B ≤ 0 equal to −1 with probability q > 0 and 0 otherwise, if q(1 + k²) < k² then E[B] + k·sd(B) > 0 = the principle's value at the zero loss, although B ≤ 0. | `MathFin/RiskMeasures/StandardDeviationPrinciple.lean`, `MathFin.stdDevPrinciple_not_monotone` | `full` |
+| `qrm-quantile-transform` | For every probability measure μ on ℝ, its quantile function (the generalized inverse p ↦ inf{x | p ≤ F(x)} of the CDF) has law μ under the uniform law on (0, 1). | `MathFin/Probability/Laws/Quantile.lean`, `MathFin.hasLaw_quantile` | `full` |
+| `qrm-quantile-galois` | For p ∈ (0, 1) and any measure μ on ℝ, quantile μ p ≤ x ↔ p ≤ F_μ(x): the generalized inverse of the CDF is its lower adjoint, with no continuity or strict-monotonicity assumption. | `MathFin/Probability/Laws/Quantile.lean`, `MathFin.quantile_le_iff` | `full` |
+| `qrm-probability-integral-transform` | If X has law μ and the CDF F of μ is continuous, then F(X) is uniformly distributed on (0, 1). | `MathFin/Probability/Laws/Quantile.lean`, `MathFin.hasLaw_cdf` | `full` |
+| `qrm-quantile-equivariance` | For a probability measure μ, a monotone lower-semicontinuous h (e.g. continuous increasing) and p ∈ (0, 1): the p-quantile of the image law μ∘h⁻¹ is h(quantile μ p). | `MathFin/Probability/Laws/Quantile.lean`, `MathFin.quantile_map` | `full` |
+| `qrm-gaussian-quantile` | For p ∈ (0, 1), the p-quantile of N(m, v) is m + √v · Φ⁻¹(p), where Φ⁻¹ is the standard normal quantile function. | `MathFin/Probability/Gaussian/NormalQuantile.lean`, `MathFin.quantile_gaussianReal` | `full` |
+| `qrm-var-comonotone-additive` | For a loss factor Z and monotone lower-semicontinuous f, g, VaR_α(f(Z) + g(Z)) = VaR_α(f(Z)) + VaR_α(g(Z)) for every α ∈ (0, 1) (comonotone additivity in its common-factor form). | `MathFin/Risk/ValueAtRisk.lean`, `MathFin.valueAtRisk_add_of_comonotone` | `full` |
+| `qrm-var-additive-linear-dependence` | For an a.e.-measurable loss X, α ∈ (0, 1), a ≥ 0 and b ∈ ℝ: VaR_α(X + (aX + b)) = VaR_α(X) + VaR_α(aX + b). | `MathFin/Risk/ValueAtRisk.lean`, `MathFin.valueAtRisk_add_affine` | `full` |
+| `qrm-gaussian-var-is-var` | For a loss X ~ N(m, v) and α ∈ (0, 1), VaR_α(X) = gaussianVaR m √v (Φ⁻¹(α)) = m + √v·Φ⁻¹(α): the library's quantile-parametrized Gaussian closed form is the value-at-risk of the law. | `MathFin/Risk/GaussianValueAtRisk.lean`, `MathFin.valueAtRisk_of_hasLaw_gaussianReal` | `full` |
+| `qrm-rockafellar-uryasev` | For an integrable loss X and α ∈ (0, 1), expected shortfall ES_α(X) = (1−α)⁻¹∫_α^1 VaR_u(X) du is the least value of c ↦ c + (1−α)⁻¹E[(X − c)⁺], and that value is attained (the minimizer c = VaR_α(X) is `rockafellarUryasev_valueAtRisk`). No continuity of the law is assumed. | `MathFin/Risk/ExpectedShortfall.lean`, `MathFin.isLeast_rockafellarUryasev` | `full` |
+| `mf-compound-poisson-cvar` | For an aggregate loss L = ∑_{i<N} Xᵢ with claim count N ~ Poisson(λ) independent of identically distributed integrable claim sizes Xᵢ on a probability space: L is integrable; for α ∈ (0, 1), ES_α(L) is the least value of c ↦ c + (1−α)⁻¹E[(L − c)⁺] and equals VaR_α(L) + (1−α)⁻¹E[(L − VaR_α(L))⁺]; and E[(L − c)⁺] = ∫ n, E[(∑_{i<n} Xᵢ − c)⁺] d Poisson(λ) (the mixture over the claim count). | `MathFin/Risk/CompoundPoissonCVaR.lean`, `MathFin.integrable_compoundPoisson` | `full` |
+| `qrm-es-subadditive` | For integrable losses X, Y on one probability space and α ∈ (0, 1): ES_α(X + Y) ≤ ES_α(X) + ES_α(Y). | `MathFin/Risk/ExpectedShortfall.lean`, `MathFin.expectedShortfall_add_le` | `full` |
+| `qrm-es-coherent` | For α ∈ (0, 1), X ↦ ES_α(X) satisfies the four coherence axioms (monotonicity, translation invariance, positive homogeneity, subadditivity) on the integrable losses of any probability space. | `MathFin/Risk/ExpectedShortfall.lean`, `MathFin.expectedShortfall_isCoherentRiskMeasure` | `full` |
+| `qrm-es-acerbi-tasche` | For an integrable loss X, α ∈ (0, 1) and q = VaR_α(X): ES_α(X) = (1−α)⁻¹(E[X·1{X > q}] + q·(1 − α − P(X > q))), the correction term accounting for an atom at q. | `MathFin/Risk/ExpectedShortfall.lean`, `MathFin.expectedShortfall_eq_acerbiTasche` | `full` |
+| `qrm-es-tail-mean` | For an integrable loss X whose law has a continuous CDF and α ∈ (0, 1), with q = VaR_α(X): the tail {X > q} has probability exactly 1 − α, and ES_α(X) = (1−α)⁻¹ E[X·1{X > q}], the mean of X over that tail. The Acerbi–Tasche correction term vanishes. | `MathFin/Risk/ExpectedShortfall.lean`, `MathFin.expectedShortfall_eq_setIntegral_tail` | `full` |
+| `qrm-es-dual-representation` | For an integrable loss X and α ∈ (0, 1), ES_α(X) is the greatest value of E[D·X] over densities D with 0 ≤ D ≤ (1−α)⁻¹ a.s. and E[D] = 1; the maximum is attained. | `MathFin/Risk/ExpectedShortfall.lean`, `MathFin.isGreatest_integral_mul_expectedShortfall` | `full` |
+| `qrm-es-monotone-level` | For an integrable loss X and 0 < α ≤ β < 1, ES_α(X) ≤ ES_β(X). | `MathFin/Risk/ExpectedShortfall.lean`, `MathFin.expectedShortfall_mono_level` | `full` |
+| `qrm-es-adeh-representation` | On a finite probability space, ES_α is a coherent risk measure of losses (IsCoherentRiskMeasure), so ES_α(L) is the least upper bound of the expected losses ∑ qᵢ Lᵢ over its representing probability vectors, those q with ∑ qᵢ Zᵢ ≤ 0 on every loss Z with ES_α(Z) ≤ 0. That this representing set is the set of probability vectors with qᵢ ≤ (1 − α)⁻¹ P{i} is the separate entry `mf-expected-shortfall-representing-set`. | `MathFin/Risk/ExpectedShortfall.lean`, `MathFin.expectedShortfall_isLUB_representingSet` | `full` |
+| `qrm-gaussian-es` | For a loss X ~ N(m, v) with v > 0 and α ∈ (0, 1): ES_α(X) = gaussianCVaR m √v (Φ⁻¹(α)) α = m + √v·ϕ(Φ⁻¹(α))/(1 − α). | `MathFin/Risk/GaussianExpectedShortfall.lean`, `MathFin.expectedShortfall_of_hasLaw_gaussianReal` | `full` |
+| `qrm-var-bisection` | For any loss X, α ∈ (0, 1) and a bracket with P(X ≤ lo) < α ≤ P(X ≤ hi), bisection on x ↦ P(X ≤ x) against α converges to VaR_α(X) (with error at most (hi − lo)/2^(n+1) after n steps, abs_bisectMid_sub_valueAtRisk_le). | `MathFin/Risk/ValueAtRiskBisection.lean`, `MathFin.tendsto_bisectMid_valueAtRisk` | `full` |
+| `qrm-var-superadditive-bernoulli` | For d independent Bernoulli(p) losses Y₁,…,Y_d (values in {0,1}, p ∈ (0,1)) and α ∈ (0, 1): ∑ VaR_α(Yᵢ) < VaR_α(∑ Yᵢ) if and only if (1 − p)^d < α ≤ 1 − p. So VaR is superadditive for such losses whenever d ≥ 2 and α lies in that range. | `MathFin/Risk/VaRSuperadditivity.lean`, `MathFin.valueAtRisk_sum_bernoulli_superadditive_iff` | `full` |
+| `qrm-var-superadditive-pareto` | For independent L₁, L₂ with Pareto law F(x) = 1 − x^(−1/2) on [1, ∞) and every α ∈ (0, 1): VaR_α(L₁) + VaR_α(L₂) < VaR_α(L₁ + L₂). | `MathFin/Risk/VaRSuperadditivity.lean`, `MathFin.valueAtRisk_add_gt_of_paretoHalf` | `full` |
+| `qrm-var-gaussian-subadditive-iff` | For a jointly Gaussian pair (X₁, X₂) whose covariance is strictly below √Var X₁·√Var X₂ and α ∈ (0, 1): VaR_α(X₁ + X₂) ≤ VaR_α(X₁) + VaR_α(X₂) if and only if α ≥ 1/2. | `MathFin/Risk/VaRSuperadditivity.lean`, `MathFin.valueAtRisk_add_le_iff_of_hasGaussianLaw` | `full` |
+| `qrm-es-exponential` | For X ~ Exp(r) (r > 0) and α ∈ (0, 1): ES_α(X) = (1 − log(1 − α))/r (the VaR is `valueAtRisk_of_hasLaw_expMeasure`: −log(1 − α)/r). | `MathFin/Risk/RiskClosedForms.lean`, `MathFin.expectedShortfall_of_hasLaw_expMeasure` | `full` |
+| `qrm-es-var-ratio-exponential` | For X ~ Exp(r), ES_α(X)/VaR_α(X) → 1 as α → 1⁻ (light tail). | `MathFin/Risk/RiskClosedForms.lean`, `MathFin.tendsto_expectedShortfall_div_valueAtRisk_expMeasure` | `full` |
+| `qrm-es-lomax` | For X with Lomax law F(x) = 1 − (κ/(κ + x))^θ, θ > 1, κ > 0 and α ∈ (0, 1): ES_α(X) = κ(θ/(θ − 1)·(1 − α)^(−1/θ) − 1). | `MathFin/Risk/RiskClosedForms.lean`, `MathFin.expectedShortfall_of_hasLaw_lomaxMeasure` | `full` |
+| `qrm-es-var-ratio-pareto` | For X with Lomax law (θ > 1, κ > 0), ES_α(X)/VaR_α(X) → θ/(θ − 1) as α → 1⁻: the heavy tail is visible in the shortfall-to-quantile ratio. | `MathFin/Risk/RiskClosedForms.lean`, `MathFin.tendsto_expectedShortfall_div_valueAtRisk_lomaxMeasure` | `full` |
+| `qrm-median-shortfall` | For a loss with continuous CDF and α ∈ (0, 1), the median of the conditional law of X given X > VaR_α(X) equals VaR_{(1+α)/2}(X). | `MathFin/Risk/RiskClosedForms.lean`, `MathFin.medianShortfall_eq_valueAtRisk` | `full` |
+| `qrm-var-elicitable` | For α ∈ (0, 1), the pinball loss (𝟙{y ≤ x} − α)(x − y) strictly elicits the α-quantile on the probability measures with finite mean whose α-quantile is unique (CDF > α right after it): the quantile is the unique minimizer of the expected score. | `MathFin/Risk/Elicitability.lean`, `MathFin.strictlyElicits_pinballLoss` | `full` |
+| `qrm-es-not-elicitable` | For every α ∈ (0, 1), no scoring function with finite expected score under every law in the class elicits ES_α on the probability measures with finite mean: δ₀ and ((1+α)/2)δ₋₁ + ((1−α)/2)δ₁ both have ES_α = 0 while their mixture (1−α)δ₀ + α·(second law) has ES_α = α/2, so the level set is not convex. | `MathFin/Risk/Elicitability.lean`, `MathFin.not_isElicitable_expectedShortfall_integrable` | `full` |
+| `qrm-frechet-lower-not-copula` | For an index type with at least three elements, no copula (probability measure on ℝ^ι with uniform coordinates) has distribution function u ↦ max(∑ uᵢ − (d − 1), 0) on [0, 1]^ι. | `MathFin/Probability/Dependence/Copula.lean`, `MathFin.not_exists_isCopula_frechetLower` | `full` |
+| `qrm-frechet-hoeffding-lower` | For every copula C on ℝ^ι and u ∈ [0, 1]^ι: ∑ uᵢ − (d − 1) ≤ C(U ≤ u). | `MathFin/Probability/Dependence/Copula.lean`, `MathFin.IsCopula.sum_sub_le_measureReal_Iic` | `full` |
+| `qrm-sklar-existence-copula` | For a random vector X whose marginal CDFs are continuous, the joint law of the probability-integral transforms (F₁(X₁), …, F_d(X_d)) is a copula (probability measure with uniform coordinates). | `MathFin/Probability/Dependence/Sklar.lean`, `MathFin.isCopula_copulaOf` | `full` |
+| `qrm-sklar-representation` | For a random vector X with continuous marginal CDFs F_i: P(X ≤ x) = C(F₁(x₁), …, F_d(x_d)) for all x, where C is the copula of X (continuous-margins case of Sklar's theorem). | `MathFin/Probability/Dependence/Sklar.lean`, `MathFin.measureReal_le_eq_copulaOf` | `full` |
+| `qrm-sklar-uniqueness` | For a random vector X with continuous marginal CDFs, any copula C with P(X ≤ x) = C(F₁(x₁), …, F_d(x_d)) for all x equals the copula of X. | `MathFin/Probability/Dependence/Sklar.lean`, `MathFin.eq_copulaOf_of_measureReal_le` | `full` |
+| `qrm-copula-invariance` | For a random vector X and strictly increasing T₁, …, T_d, the joint law of the probability-integral transforms of (T₁(X₁), …, T_d(X_d)) (copulaOf, a copula when the margins are continuous) equals that of X. | `MathFin/Probability/Dependence/Sklar.lean`, `MathFin.copulaOf_comp_strictMono` | `full` |
+| `qrm-fgm-copula` | The function uv + θuv(1 − u)(1 − v) is the distribution function on [0, 1]² of some bivariate copula if and only if |θ| ≤ 1. | `MathFin/Probability/Dependence/CopulaFamilies.lean`, `MathFin.exists_isCopula_fgm_iff` | `full` |
+| `qrm-fgm-spearman` | For |θ| ≤ 1, Spearman's rho (12E[U₀U₁] − 3) of the FGM copula is θ/3, so the family only reaches rank correlations in [−1/3, 1/3]. | `MathFin/Probability/Dependence/CopulaFamilies.lean`, `MathFin.spearmanRho_fgmCopula` | `full` |
+| `qrm-clayton-tail-dependence` | For θ > 0 the Clayton copula function C_θ(u, u) = (2u^(−θ) − 1)^(−1/θ) satisfies C_θ(u, u)/u → 2^(−1/θ) as u → 0⁺ (lower tail dependence coefficient), proved at the level of the copula function. | `MathFin/Probability/Dependence/CopulaFamilies.lean`, `MathFin.tendsto_claytonCopulaFun_diag_div` | `full` |
+| `qrm-hoeffding-covariance` | For square-integrable X, Y: cov(X, Y) = ∫∫ (P(X ≤ s, Y ≤ t) − P(X ≤ s)P(Y ≤ t)) ds dt. | `MathFin/Probability/Dependence/HoeffdingCovariance.lean`, `MathFin.covariance_eq_integral_cdf` | `full` |
+| `qrm-covariance-ordering` | For two square-integrable pairs with the same marginal laws whose joint distribution functions are pointwise ordered, their covariances are ordered the same way. | `MathFin/Probability/Dependence/HoeffdingCovariance.lean`, `MathFin.covariance_le_covariance_of_cdf_le` | `full` |
+| `qrm-default-correlation-bound` | For events A, B: cov(1_A, 1_B) ≤ min(P(A), P(B)) − P(A)P(B) (the comonotone Fréchet bound for default indicators). | `MathFin/Probability/Dependence/HoeffdingCovariance.lean`, `MathFin.covariance_indicator_one_le` | `full` |
+| `qrm-marshall-olkin-survival` | For independent exponential T₁, T₂, T₃ with rates λ₁, λ₂, λ₃ and Xⱼ = min(Tⱼ, T₃): P(X₁ > s, X₂ > t) = exp(−λ₁s − λ₂t − λ₃ max(s, t)) for s, t ≥ 0. | `MathFin/Probability/Dependence/MarshallOlkin.lean`, `MathFin.marshallOlkin_survival` | `full` |
+| `qrm-marshall-olkin-ftd` | In the Marshall–Olkin model with all three rates positive, the first-to-default spread −log P(min(X₁, X₂) > t)/t (equal to λ₁ + λ₂ + λ₃, `marshallOlkin_firstToDefault_spread`) is strictly below the sum of the single-name spreads (λ₁ + λ₃) + (λ₂ + λ₃). | `MathFin/Probability/Dependence/MarshallOlkin.lean`, `MathFin.marshallOlkin_firstToDefault_spread_lt` | `full` |
+| `qrm-correlation-fallacy` | There exist random variables Z, Y, both N(0, 1), with cov(Z, Y) = 0 that are not independent, not jointly Gaussian, and whose sum is not Gaussian (Y = V·Z with an independent random sign V). | `MathFin/Probability/Dependence/CorrelationFallacies.lean`, `MathFin.exists_gaussian_uncorrelated_not_indepFun` | `full` |
+| `qrm-evt-poisson-approximation` | For a nonnegative F, thresholds uₙ and h > 0: F(uₙ)ⁿ → h if and only if n(1 − F(uₙ)) → −log h. | `MathFin/Probability/Laws/ExtremeValue.lean`, `MathFin.tendsto_pow_iff_tendsto_nat_mul_tail` | `full` |
+| `qrm-gev-max-stable` | For every shape ξ, x and n ≥ 1: H_ξ(cₙx + dₙ)ⁿ = H_ξ(x) with the explicit normalizations gevNormScale ξ n and gevNormLoc ξ n. | `MathFin/Probability/Laws/ExtremeValue.lean`, `MathFin.gevCDF_max_stable` | `full` |
+| `qrm-exponential-gumbel-mda` | For r > 0 the exponential CDF lies in MDA(H₀) (witnessed by cₙ = 1/r, dₙ = log n/r): F(x/r + log n/r)ⁿ → exp(−e^(−x)). | `MathFin/Probability/Laws/ExtremeValue.lean`, `MathFin.cdf_expMeasure_inMDA` | `full` |
+| `qrm-gpd-mda` | For β > 0 and every ξ ∈ ℝ, the generalized Pareto distribution function G_{ξ,β} lies in MDA(H_ξ). | `MathFin/Probability/Laws/GeneralizedPareto.lean`, `MathFin.gpdCDF_inMDA` | `full` |
+| `qrm-gpd-mean-excess` | For the GPD law with ξ < 1, β > 0 and a threshold u ≥ 0 in the support: E[X − u | X > u] = (β + ξu)/(1 − ξ), linear in u. | `MathFin/Probability/Laws/GeneralizedPareto.lean`, `MathFin.integral_sub_cond_gpdMeasure` | `full` |
+| `qrm-poisson-gpd-gev` | For N ~ Poisson(λ) independent of iid GPD(ξ, β) losses Yᵢ (ξ ≠ 0), and x ≥ 0: P(max_{i<N} Yᵢ ≤ x) = H_ξ((x − μ)/σ) with σ = βλ^ξ, μ = β(λ^ξ − 1)/ξ. | `MathFin/Probability/Jumps/PoissonMaxima.lean`, `MathFin.measureReal_poisson_max_gpd` | `full` |
+| `qrm-quantile-convergence` | If Xₙ → Y almost surely and the α-quantile of Y is unique (F_Y(x) > α for every x above it), then the α-quantiles of the laws of Xₙ converge to the α-quantile of the law of Y. | `MathFin/Probability/Laws/QuantileConvergence.lean`, `MathFin.tendsto_quantile_of_tendsto_ae` | `full` |
+| `qrm-bernoulli-mixture-moments` | For defaults Yᵢ = 1{Uᵢ ≤ Q} with Q ∈ [0, 1], Uᵢ iid uniform and independent of Q: the probability that every obligor in a set s defaults is E[Q^|s|]. | `MathFin/Risk/Credit/BernoulliMixture.lean`, `MathFin.measureReal_iInter_default_eq_integral_pow` | `full` |
+| `qrm-default-correlation` | In the exchangeable Bernoulli mixture, the default correlation of two distinct obligors equals Var(Q)/(E[Q](1 − E[Q])) (hence is nonnegative, defaultCorrelation_nonneg). | `MathFin/Risk/Credit/BernoulliMixture.lean`, `MathFin.defaultCorrelation_eq` | `full` |
+| `qrm-one-factor-default-covariance` | In the one-factor Gaussian threshold model (F and ε₁, …, εₙ independent standard normals, asset correlation ρ < 1, default when √ρ F + √(1 − ρ) εᵢ ≤ Φ⁻¹(π)), two distinct obligors satisfy P(Dᵢ ∩ Dⱼ) − P(Dᵢ)P(Dⱼ) = Var(p(F)), with p(f) = Φ((Φ⁻¹(π) − √ρ f)/√(1 − ρ)) the default probability given the factor. | `MathFin/Risk/Credit/BernoulliMixture.lean`, `MathFin.oneFactor_measureReal_inter_default_sub_mul` | `full` |
+| `qrm-one-factor-pd` | For independent N(0, 1) factor F and idiosyncratic ε, π ∈ (0, 1) and ρ ∈ [0, 1]: P(√ρ F + √(1 − ρ) ε ≤ Φ⁻¹(π)) = π. | `MathFin/Risk/Credit/BernoulliMixture.lean`, `MathFin.oneFactor_measureReal_default` | `full` |
+| `qrm-large-portfolio-lln` | In the one-factor Gaussian threshold model with pairwise independent N(0, 1) idiosyncratic terms (any factor F, any π, ρ < 1), the default fraction of the first m obligors converges almost surely to p(F) = Φ((Φ⁻¹(π) − √ρ F)/√(1 − ρ)). | `MathFin/Risk/Credit/VasicekIRB.lean`, `MathFin.tendsto_oneFactorLossFraction_ae` | `full` |
+| `qrm-basel-irb-formula` | In the one-factor Gaussian threshold model (standard normal factor, pairwise independent standard normal idiosyncratic terms, α ∈ (0, 1), ρ < 1), VaR_α of the default fraction of the first m obligors converges as m → ∞ to Φ((Φ⁻¹(π) + √ρ·Φ⁻¹(α))/√(1 − ρ)) (asrfQuantile), the worst-case default rate at the core of the Basel IRB formula. Loss given default, expected-loss subtraction and the maturity adjustment are not modelled. | `MathFin/Risk/Credit/VasicekIRB.lean`, `MathFin.tendsto_valueAtRisk_oneFactorLossFraction` | `full` |
+| `qrm-equicorrelation-psd` | For d ≥ 2, the matrix with ones on the diagonal and ρ off it is positive semidefinite if and only if −1/(d − 1) ≤ ρ ≤ 1. | `MathFin/Choice/Portfolio/Equicorrelation.lean`, `MathFin.posSemidef_equicorrelationMatrix_iff` | `full` |
+| `qrm-var-optimal-is-markowitz` | For a Gaussian random vector X, α ∈ (1/2, 1) and a set S of weights with a common expected portfolio loss, w₀ minimizes VaR_α(∑ wᵢXᵢ) over S if and only if it minimizes the portfolio variance wᵀΣw over S. | `MathFin/Risk/GaussianRiskMarkowitz.lean`, `MathFin.isMinOn_valueAtRisk_iff_isMinOn_portfolioVarN` | `full` |
+| `qrm-es-optimal-is-markowitz` | For a Gaussian random vector X, α ∈ (1/2, 1) and a set S of weights with a common expected portfolio loss, w₀ minimizes ES_α(∑ wᵢXᵢ) over S if and only if it minimizes the portfolio variance over S. | `MathFin/Risk/GaussianRiskMarkowitz.lean`, `MathFin.isMinOn_expectedShortfall_iff_isMinOn_portfolioVarN` | `full` |
+| `qrm-var-subadditive-gaussian-portfolios` | For a Gaussian random vector X, α ∈ [1/2, 1) and weight vectors w, w': VaR_α(⟨w, X⟩ + ⟨w', X⟩) ≤ VaR_α(⟨w, X⟩) + VaR_α(⟨w', X⟩). | `MathFin/Risk/GaussianRiskMarkowitz.lean`, `MathFin.valueAtRisk_portfolio_add_le` | `full` |
+| `qrm-systematic-floor` | For a covariance kernel with variance v ≥ 0 and common covariance ρv (ρ ≤ 1) and fully invested weights, the portfolio variance is at least ρv (the identity Var(w) = v((1 − ρ)·HHI(w) + ρ) is `portfolioVarN_equicorrelated_of_sum_eq_one`). | `MathFin/Risk/EquicorrelationConcentration.lean`, `MathFin.mul_le_portfolioVarN_equicorrelated` | `full` |
+| `qrm-square-root-of-time` | For a geometric Brownian motion S_t = S₀exp((μ − σ²/2)t + σB_t) driven by a pre-Brownian motion and σ ≥ 0: the h-period log-loss −log(S_{t+h}/S_t) has VaR_α = −(μ − σ²/2)h + σ√h·Φ⁻¹(α), so the volatility term scales with √h. | `MathFin/Risk/SquareRootOfTime.lean`, `MathFin.valueAtRisk_gbm_loss` | `full` |
+| `qrm-expectile-exists-unique` | For an integrable loss Y and α ∈ (0, 1) there is exactly one e with α·E[(Y − e)⁺] = (1 − α)·E[(e − Y)⁺] (the α-expectile). | `MathFin/Risk/Expectile.lean`, `MathFin.existsUnique_expectileGap_eq_zero` | `full` |
+| `qrm-expectile-monotone` | For an integrable loss Y and 0 < α ≤ β < 1, the α-expectile is at most the β-expectile. | `MathFin/Risk/Expectile.lean`, `MathFin.expectile_mono` | `full` |
+| `qrm-covariance-cauchy-schwarz` | For square-integrable X, Y on a probability space: cov(X, Y) ≤ √Var X · √Var Y. | `MathFin/Probability/Analysis/FiniteMeasureCauchySchwarz.lean`, `MathFin.covariance_le_sqrt_mul_sqrt` | `full` |
+| `qrm-sd-principle-subadditive` | For k ≥ 0 and square-integrable X, Y: E[X + Y] + k·sd(X + Y) ≤ (E[X] + k·sd(X)) + (E[Y] + k·sd(Y)). | `MathFin/Insurance/StandardDeviationPrinciple.lean`, `MathFin.stdDevPrinciple_add_le` | `full` |
+| `qrm-sd-principle-not-monotone` | For k ≥ 0 and a loss B ≤ 0 equal to −1 with probability q > 0 and 0 otherwise, if q(1 + k²) < k² then E[B] + k·sd(B) > 0 = the principle's value at the zero loss, although B ≤ 0. | `MathFin/Insurance/StandardDeviationPrinciple.lean`, `MathFin.stdDevPrinciple_not_monotone` | `full` |
 
 Verification:
 - The default `lake build` passed, including the curated `AxiomAudit.lean`, which gained 17
@@ -1741,7 +1742,7 @@ Verification:
 
 One entry added, `sc-ito-integral-against-drifted-price` (`full`). Corpus 373 → 374.
 
-`Foundations/PricePathDrift.lean` adds `S = S₀ + ∫b ds + (σ●B)` next to the driftless
+`Pricing/PricePathDrift.lean` adds `S = S₀ + ∫b ds + (σ●B)` next to the driftless
 `MarketCompletenessInPrice.pricePath`, which is unchanged, so nothing downstream of it moves.
 The drift is `driftContinuousMod`, the pathwise object the Girsanov track built. No second
 time-integral is constructed. `∫ψ dS` is `gainsDrift`, the drift integral of `ψb` plus
@@ -1892,7 +1893,7 @@ process under `Q`, on `[0, T]`:
 The third is independence of two increments at a time. A Brownian motion also has jointly
 independent increments, which fix its finite-dimensional law, and continuous paths. Neither is
 stated. All four entries read the three properties off `isQBrownianMotion_of_expMartingale`
-(`Foundations/ExpMartingaleQBrownian.lean`), whose conclusion has the same form.
+(`Probability/Brownian/ExpMartingaleQBrownian.lean`), whose conclusion has the same form.
 
 | Benchmark ID | θ | Lean declaration |
 |---|---|---|
@@ -1933,7 +1934,7 @@ with another result. The zero-coupon pair was weaker still: each stated a cancel
 `(c·B)/B = c`, and was described as a derivative. Now each states the derivative of the
 price itself: `HasDerivAt (deriv V) …`, `s ↦ deriv (V s) y` for a mixed partial, or
 `deriv` inside the ratio. One congruence lemma, `hasDerivAt_deriv_of_eventually` in
-`Foundations/DerivOfDeriv.lean`, carries each formula-level result over. It applies because
+`Probability/Analysis/DerivOfDeriv.lean`, carries each formula-level result over. It applies because
 the formula is the lower derivative on a neighbourhood of the point.
 
 Charm now also assumes `K > 0` and `S > 0`, which its delta needs. Almgren–Chriss no
@@ -1961,7 +1962,7 @@ passed 52/52 in the verify container. The change restaled 94 ledger rows, and
 The new entry below carries `formalization_status: full`. The bisection
 iteration is a (noncomputable) definition in the library, not an assumed
 sequence, and the entry proves an explicit rate, not only a limit. The generic
-method lives in `MathFin/Foundations/Bisection.lean`. Its convergence theorem
+method lives in `MathFin/Probability/Analysis/Bisection.lean`. Its convergence theorem
 takes the limit point as an input, in the form bisection uses: `σ ∈ [lo, hi]` is
 the threshold of `f` against the target, `f x < C ↔ x < σ` on the bracket. It
 assumes neither continuity nor strictness. A strictly increasing `f` with
@@ -1973,7 +1974,7 @@ volatility.
 
 | Benchmark ID | Mathematical conclusion | Lean module and declaration | Faithfulness |
 |---|---|---|---|
-| `mf-impliedvol-bisection` | For `K, S, T > 0`, any `r`, and a bracket `0 < σ_lo < σ_hi` with `bsV(σ_lo) < C_obs < bsV(σ_hi)`: an implied volatility `σ ∈ (σ_lo, σ_hi)` exists and is the only positive one; after `n` halvings (`n = 0` is the midpoint of `[σ_lo, σ_hi]`) the bisection estimate is within `(σ_hi − σ_lo)/2ⁿ⁺¹` of `σ`, and the estimates converge to `σ` | `MathFin/BlackScholes/BisectionIV.lean`, `MathFin.impliedVol_bisection_converges` (generic core: `MathFin/Foundations/Bisection.lean`) | `full` |
+| `mf-impliedvol-bisection` | For `K, S, T > 0`, any `r`, and a bracket `0 < σ_lo < σ_hi` with `bsV(σ_lo) < C_obs < bsV(σ_hi)`: an implied volatility `σ ∈ (σ_lo, σ_hi)` exists and is the only positive one; after `n` halvings (`n = 0` is the midpoint of `[σ_lo, σ_hi]`) the bisection estimate is within `(σ_hi − σ_lo)/2ⁿ⁺¹` of `σ`, and the estimates converge to `σ` | `MathFin/Models/BlackScholes/BisectionIV.lean`, `MathFin.impliedVol_bisection_converges` (generic core: `MathFin/Probability/Analysis/Bisection.lean`) | `full` |
 
 `mf-impliedvol-bracket`'s description used to call its lemma "the
 bisection-method correctness statement". The lemma proves only that the bracket
@@ -2000,7 +2001,7 @@ for the model, proof, and source provenance.
 
 | Benchmark ID | Mathematical conclusion | Lean module and declaration | Faithfulness |
 |---|---|---|---|
-| `mf-american-put-log-boundary-convex` | `log(B(τ)/K)` is convex in positive time-to-expiry | `MathFin/BlackScholes/AmericanPut/Stopping/PhysicalBoundaryConvexity.lean`, `MathFin.BlackScholes.AmericanPut.Stopping.brownianUsualLogBoundary_convexOn` | `full` |
+| `mf-american-put-log-boundary-convex` | `log(B(τ)/K)` is convex in positive time-to-expiry | `MathFin/Models/BlackScholes/American/Stopping/PhysicalBoundaryConvexity.lean`, `MathFin.BlackScholes.AmericanPut.Stopping.brownianUsualLogBoundary_convexOn` | `full` |
 | `mf-american-put-stock-boundary-strict-convex` | `B(τ)` is strictly convex in positive time-to-expiry | Same module, `MathFin.BlackScholes.AmericanPut.Stopping.brownianUsualStockBoundary_strictConvexOn` | `full` |
 
 The native default `lake build` passed, including `AxiomAuditGen.lean` and
@@ -2062,7 +2063,7 @@ prior corpus audit, not a verification of this addition.
 >
 > **The hypotheses are satisfiable, and that is a theorem.** A conjunction of measure-theoretic
 > constraints proves nothing if no model meets it — the same failure this round is about, one
-> level up. `MathFin/Execution/GlostenMilgromModel.lean` exhibits a six-point space (value high or
+> level up. `MathFin/Markets/Microstructure/GlostenMilgromModel.lean` exhibits a six-point space (value high or
 > low × informed or not × the uninformed trader's coin) discharging every hypothesis, symbolically
 > in `θ` and `p`, so `spread_pos_witness` states the conclusion with no measure-theoretic
 > hypothesis in front of it.
@@ -2119,7 +2120,7 @@ prior corpus audit, not a verification of this addition.
 > was pair identity → density of the post-`a` generators → ε-extension, roughly 800 lines. It was
 > dropped: the identity *is* the Itô isometry localised. A conditional-expectation identity is an
 > identity of `𝓕_a`-set integrals; on such a set `𝟙_F` is a bounded `𝓕_a`-measurable factor, so
-> `itoIntegralCLM_T_smulAdapted` folds it back inside the integral, `𝟙_F² = 𝟙_F` costs nothing,
+> `itoIntegralCLM_smulAdapted` folds it back inside the integral, `𝟙_F² = 𝟙_F` costs nothing,
 > and both set-integrals meet at `∫_{(a,b]×F} φ² d trim_T` — one side by the isometry, the other
 > by Tonelli through the trim. About 200 lines, no density argument and no ε. The band generators
 > and conditional Brownian kernels from part 1 stay: they state the classical facts the general
@@ -2133,7 +2134,7 @@ prior corpus audit, not a verification of this addition.
 > (`𝔼[(M_b−M_a)² | 𝓕_a] = 𝔼[⟨M⟩_b − ⟨M⟩_a | 𝓕_a]`) was the next rung on this seam and landed
 > 2026-08-27 (entry above); an *adapted* bracket process, and any pathwise quadratic variation,
 > stay unclaimed. Supporting change:
-> `itoIntegralCLM_T_bandRestrict` (`∫ 𝟙_{(a,b]}·φ dB = M_b − M_a`) extracted from
+> `itoIntegralCLM_bandRestrict` (`∫ 𝟙_{(a,b]}·φ dB = M_b − M_a`) extracted from
 > `itoIntegralAgainst_elementary`, which now consumes it.
 >
 > **FIXED — the CRR→BS convergence theorems were vacuous as stated
@@ -2149,7 +2150,7 @@ prior corpus audit, not a verification of this addition.
 > and the only place needing `n = 0` was the `0 ≤ p ≤ 1` bound, which survives
 > the degenerate step on its own (`crrProb_zero`). Restricting a hypothesis is
 > not by itself evidence it can be met, so `MathFin.binomialNoArb_crr`
-> (`MathFin/Binomial/CRRConvergence.lean`) proves it can: whenever
+> (`MathFin/Models/Binomial/CRRConvergence.lean`) proves it can: whenever
 > `|r|·√T < σ`, every step with `n ≥ 1` is arbitrage-free, since
 > `√(T/n) ≤ √T` bounds all of them at once. Both restrictions are necessary —
 > `n = 0` is degenerate, and for a fixed `n` a large enough `|r|` pushes
@@ -2174,9 +2175,9 @@ prior corpus audit, not a verification of this addition.
 > reifies a payoff as data — `Payoff ι` / `Contract ι` inductives over a **typed** underlying
 > index `ι` (`ι = Unit` for the single-asset instances below), not the inline lambda every other
 > payoff in the library is written as. `Adapted.lean` proves the reification pays for itself:
-> `Payoff.measurable_eval_of_obsTimes_le` is the adaptedness hypothesis a `Payoff` will need to
+> `Payoff.measurable_eval_of_obsList_le` is the adaptedness hypothesis a `Payoff` will need to
 > be a legitimate stochastic-integral integrand — `𝓕 u`-measurability follows from every
-> observation time in `obsTimes` (a syntactic, sufficient-not-necessary over-approximation)
+> observation date in `obsList` (a syntactic, sufficient-not-necessary over-approximation)
 > being `≤ u`; **it still has no consumer**, since `Pricing.lean` integrates against a fixed
 > measure, never a filtration. Its a.e.-measurable sibling `Payoff.aemeasurable_eval` does have
 > one as of 2026-08-19: `CappedCall.lean`'s `integrable_europeanCall_pathPV` calls it directly,
@@ -2202,7 +2203,7 @@ prior corpus audit, not a verification of this addition.
 > would silently attach the pricing result to whichever entry a reader opens first.
 >
 > **The honest ceiling, stated once for the whole tower.** `Payoff` is a finite inductive walked
-> by `List`-valued `obsTimes`, so every instance here is a payoff kernel over a **finite**
+> by `List`-valued `obsList`, so every instance here is a payoff kernel over a **finite**
 > observation grid — no continuously-monitored barrier is expressible. Rung (c) (the
 > `BlackScholes.lean`/`CappedCall.lean` reductions) is **single-asset**, `ι = Unit`, under the
 > `BSCallHyp` hypothesis bundle each closed form already needed; nothing here prices under a
@@ -2230,7 +2231,7 @@ prior corpus audit, not a verification of this addition.
 >   adaptedness pointwise; `pricePath`, built from `Lp` classes, supplies only its a.e. version,
 >   so `PricingMeasureL2Density`'s martingale hypothesis had **no exhibited witness**. The
 >   statements are now carried on an abstract adapted `S` agreeing a.e. with the price — the form
->   `ContinuousMarket.IsEMM` already used, for the same reason — and
+>   `IsEMM` already used, for the same reason — and
 >   `exists_density_price_martingale` supplies the witness via `pricePathCondExp`, the price
 >   rebuilt from `μ[· | 𝓕_t]`. This is the price-side counterpart of `pricesGainsAtZero_self`.
 >   Nothing in the gate stack could see this: the theorem was true, axiom-clean and green.
@@ -2251,7 +2252,7 @@ prior corpus audit, not a verification of this addition.
 > **2026-08-16 — the chain rule, the integral against a price, and the pricing measure
 > (353 → 358).** For a predictable `L²` driver `φ` and `M = φ●B`, the integrands
 > square-integrable against `M` are the bracket-weighted `L²(φ²·trim_T)`, and
-> `ItoIntegralAgainstMartingale.itoIntegralAgainstCLM` is `itoIntegralCLM_T` precomposed with
+> `ItoIntegralAgainstMartingale.itoIntegralAgainstCLM` is `itoIntegralCLM` precomposed with
 > multiplication by `φ`. Both factors are isometries, so `‖∫ψ dM‖ = ‖ψ‖_{L²(⟨M⟩)}` — the Itô
 > isometry against `M`, and the reason the weighted space is the right domain. Five entries:
 > `sc-ito-chain-rule` (`∫ψ dM = ∫ψφ dB`), `sc-ito-integral-band`
@@ -2292,9 +2293,9 @@ prior corpus audit, not a verification of this addition.
 > the downside-performance-metrics work of
 > [#173](https://github.com/formal-applied-math/formal-mathfin/pull/173) and the von Neumann–Morgenstern
 > lotteries of [#178](https://github.com/formal-applied-math/formal-mathfin/pull/178).
-> `itoIntegralCLM_T` was already a `LinearIsometry` from the predictable `L²(dt⊗dμ)` integrands into
-> `L²(μ)`. `MathFin/Foundations/MartingaleRepresentation.lean` identifies its image exactly:
-> `itoIntegralCLM_T_surjective_onto_centered` says the Itô integrals together with the constants
+> `itoIntegralCLM` was already a `LinearIsometry` from the predictable `L²(dt⊗dμ)` integrands into
+> `L²(μ)`. `MathFin/Probability/Brownian/MartingaleRepresentation.lean` identifies its image exactly:
+> `itoIntegralCLM_surjective_onto_centered` says the Itô integrals together with the constants
 > exhaust `lpMeas ℝ ℝ 𝓕ᴮ_T 2 μ`, and `itoIsometryEquiv` bundles the isometry as an equivalence onto
 > the centered part. The route is orthogonal decomposition against the (closed, because isometric)
 > range, plus totality of the step-integrand Doléans exponentials
@@ -2303,12 +2304,12 @@ prior corpus audit, not a verification of this addition.
 > σ-algebras of `BrownianCylinderGeneration`, whose supremum is the natural filtration
 > (`iSup_cylinderFiltration_eq_natFiltration`). No Malliavin calculus and no adapted-integrand Itô
 > formula. Centering, `𝔼[∫₀ᵀ φ dB] = 0`, is proved a floor down as
-> `ItoIntegralProcessGeneral.integral_itoIntegralCLM_T`, not assumed.
+> `ItoIntegralProcessGeneral.integral_itoIntegralCLM`, not assumed.
 > **`gir-thm-9.3.4` flips `reduced_core → full`** (14 → 13 reduced cores): it had been a `Prop`
 > structure whose conclusion was a bundled field read off by projection, and it now re-exports
 > `martingale_representation`, the process form the entry states.
 > Three new entries. `gir-mrt-range-surjective` is the submodule form above.
-> `gir-market-completeness` (`MathFin/Foundations/MarketCompleteness.lean`,
+> `gir-market-completeness` (`MathFin/Pricing/MarketCompleteness.lean`,
 > `exists_replicating_strategy`) is the finance reading: every `L²` `𝓕ᴮ_T`-claim is the terminal
 > wealth `𝔼_μ[H] + ∫₀ᵀ φ dB` of a strategy, with a *unique* hedge. `gir-pricing-measure-unique`
 > (`measure_eq_of_pricesGainsAtZero`) is uniqueness of the pricing measure on the Brownian
@@ -2329,7 +2330,7 @@ prior corpus audit, not a verification of this addition.
 > needs the Jacod–Yor extreme-point characterisation and is out of scope.
 > The companion `superReplication_eq_emm_price` is the continuous-time superreplication duality, and
 > its "EMM price" is `𝔼_μ[H]`. It does **not** close
-> [#39](https://github.com/formal-applied-math/formal-mathfin/issues/39): `Foundations/SuperhedgingDuality`
+> [#39](https://github.com/formal-applied-math/formal-mathfin/issues/39): `Pricing/SuperhedgingDuality`
 > is a finite-state one-period matrix model whose Farkas gate is untouched. The two equalities hold
 > for structurally different reasons, separation there and martingale representation here, and
 > neither implies the other. The hedging strategy class is the Itô-integrable predictable integrands,
@@ -2360,12 +2361,12 @@ prior corpus audit, not a verification of this addition.
 > **The audit that followed** (2026-08-07, corpus unchanged). Two overstatements in one day stopped
 > being a one-off, so the class was swept repo-wide. `sc-thm-7.1.1` had the identical defect one tower
 > over — description writing `∫₀ᵗ f'(B_s) dB_s` over an `∃ gf'` — now fixed through
-> `itoIntegralCLM_T_of_bdd_cont → ito_formula_L2_bddDeriv → _mk`. Four descriptions corrected where
+> `itoIntegralCLM_of_bdd_cont → ito_formula_L2_bddDeriv → _mk`. Four descriptions corrected where
 > they claimed the textbook theorem and the entry delivers less (`cm-thm-4.3.10` no `L^p` convergence,
 > `sc-thm-8.2.5` uniqueness not existence, `sc-thm-7.4.5` constant `σ`, `sc-thm-9.2.1` the Feynman–Kac
 > identification not PDE uniqueness). The README's landmark row for `ito_formula_unrestricted` was
 > rendering a local-martingale theorem as an integral identity. And
-> `ae_fst_mem_Ioc_trimMeasure_T` existed six times across five files; five retired. The mechanical
+> `ae_fst_mem_Ioc_trimMeasure` existed six times across five files; five retired. The mechanical
 > slice is now gated (`test_prose_does_not_outrun_statement`, negative-controlled against the three
 > conjuncts it exists to protect); the judgment slice is a standing first pass in the values-review
 > protocol and in `CLAUDE.md`.
@@ -2410,15 +2411,15 @@ prior corpus audit, not a verification of this addition.
 > **348**, **316 full + 18 wrappers = 334/348 delivery-ready**, 14 reduced cores, 0 placeholders.
 > Three entries finishing two contributions that had been open since June (#36, #38, mertunsall)
 > and had gone stale against the pin bump.
-> `mf-bs-speed` (`BlackScholes/HigherGreeks`): **speed** `∂³V/∂S³ = ∂Γ/∂S =
+> `mf-bs-speed` (`Models/BlackScholes/HigherGreeks`): **speed** `∂³V/∂S³ = ∂Γ/∂S =
 > -ϕ(d₁)(d₁ + σ√τ)/(S²σ²τ)`. Placed beside vanna/volga/charm rather than in the PDE file —
 > gamma *is* the quotient `ϕ(d₁)/(S σ √τ)` (`hasDerivAt_bsV_SS`), so speed is one quotient rule
 > away, with `ϕ'(d₁) = -d₁ϕ(d₁)` supplying the numerator derivative. The contribution also
 > corrected the formula in issue #8, which was algebraically wrong.
-> `mf-black76-speed` (`Futures/Black76Greeks`): the discount factor is `F`-independent, so the
+> `mf-black76-speed` (`Models/Forwards/Black76Greeks`): the discount factor is `F`-independent, so the
 > Black-76 speed is a bare-term `const_mul` of the `r = 0` BS speed, with `e^{-rT}` live in both
 > the function and the value — matching the sibling greeks, so the `r` binder is load-bearing.
-> `mf-caplet-floorlet-parity` (`Futures/Black76`): `V^caplet - V^floorlet = α·(F - K)`, derived by
+> `mf-caplet-floorlet-parity` (`Models/Forwards/Black76`): `V^caplet - V^floorlet = α·(F - K)`, derived by
 > *applying* `swaption_payer_receiver_parity` rather than re-running the same `Phi`-symmetry
 > argument — `blackCaplet_eq_blackPayerSwaption` records that a caplet is the payer swaption's
 > formula with the accrual factor where the annuity sits. The caplet and floorlet price
@@ -2428,7 +2429,7 @@ prior corpus audit, not a verification of this addition.
 >
 > **Prior (2026-07-31, forward-rate agreement — closes #67):** corpus **345**,
 > **313 full + 18 wrappers = 331/345 delivery-ready**, 14 reduced cores, 0 placeholders.
-> `mf-fixedincome-fra` (`FixedIncome/FRA`, closes #67; the first outside contribution to the
+> `mf-fixedincome-fra` (`Models/Rates/FRA`, closes #67; the first outside contribution to the
 > corpus): the simple forward rate `F = (P(0,T₁)/P(0,T₂) - 1)/δ`, FRA value
 > `V = δ·P(0,T₂)·(F-K)`, its expanded discount-factor identity, and the fair-rate equivalence
 > `V = 0 ↔ K = F`. The generic discount-factor algebra is stated once and instantiated on the
@@ -2440,7 +2441,7 @@ prior corpus audit, not a verification of this addition.
 > **Prior (2026-07-31, gain-to-pain + upside capture — closes #161, #162):** corpus
 > **344**, **312 full + 18 wrappers = 330/344 delivery-ready**, 14 reduced cores, 0 placeholders.
 > `mf-performance-gain_to_pain` and `mf-performance-upside_capture`
-> (`Performance/RatiosExtended`): the two realised-path ratios join the four moment ratios
+> (`Choice/Performance/RatiosExtended`): the two realised-path ratios join the four moment ratios
 > already in that module. `gainToPain` is written on Mathlib's positive/negative parts
 > (`r⁺`, `r⁻`) rather than open-coded `max _ 0`, which buys `posPart_sub_negPart` and hence
 > `one_le_gainToPain_iff` — the ratio clears 1 exactly when the period was profitable, the
@@ -2457,7 +2458,7 @@ prior corpus audit, not a verification of this addition.
 >
 > **Prior (2026-07-18, in-out barrier parity — closes #53):** corpus
 > **342**, **310 full + 18 wrappers = 328/342 delivery-ready**, 14 reduced cores, 0 placeholders.
-> `mf-barrier-inout-parity` (`BlackScholes/BarrierParity`, closes #53): knock-in / knock-out
+> `mf-barrier-inout-parity` (`Models/BlackScholes/BarrierParity`, closes #53): knock-in / knock-out
 > **in-out parity** `V_in + V_out = V_vanilla` — the barrier-hit event `A` and its complement
 > partition every path, so the discounted expected payoffs add to the vanilla price (pure
 > linearity of expectation; no barrier density, in the register of `chooser_integral_decomp`).
@@ -2472,14 +2473,14 @@ prior corpus audit, not a verification of this addition.
 >
 > **Prior (2026-07-18, second refined autoform PR — loaded premium principles):** corpus
 > **341**, **309 full + 18 wrappers = 327/341 delivery-ready**, 14 reduced cores, 0 placeholders.
-> `mf-insurance-premium-principles` (`Actuarial/ActuarialInsurance`, closes #85; the second
+> `mf-insurance-premium-principles` (`Insurance/ActuarialInsurance`, closes #85; the second
 > autoform-pipeline PR — the generalization run's output, Leanstral-drafted and -proved,
 > human-refined at review): the three classical **loaded premium principles** — expected-value
 > `(1+θ)·μ`, variance `μ + α·σ²`, standard-deviation `μ + β·σ` — each with its own named
 > nonnegative-loading bound (`expectedValuePremium_ge_mean` via `le_mul_of_one_le_left`,
 > `variancePremium_ge_mean` / `stdDevPremium_ge_mean` via one-term `mul_nonneg` certificates), and
 > the bundle `premium_ge_mean` assembled from them. The loadings sit on top of the net premium of
-> `Actuarial/Insurance.lean` (prose seam; the net-premium algebra there is Mathlib's `eq_div_iff`
+> `Insurance/Insurance.lean` (prose seam; the net-premium algebra there is Mathlib's `eq_div_iff`
 > consumed directly, same certificate family as the swap par identity). Refinery diff vs the draft:
 > signature-bound def arguments + docstrings (the `docBlame` red), the never-used coupling
 > hypothesis `hσ_eq : σ = √σ²` dropped, the unused `Insurance` import dropped, per-principle lemmas
@@ -2487,7 +2488,7 @@ prior corpus audit, not a verification of this addition.
 >
 > **Prior (2026-07-18, first refined autoform PR — the vanilla swap par identity):** corpus
 > **340**, **308 full + 18 wrappers = 326/340 delivery-ready**, 14 reduced cores, 0 placeholders.
-> `mf-fixedincome-swap` (`FixedIncome/InterestRateSwap`, closes #66; the first autoform-pipeline PR
+> `mf-fixedincome-swap` (`Models/Rates/InterestRateSwap`, closes #66; the first autoform-pipeline PR
 > to land — Leanstral-drafted and -proved, human-refined at review): the **par identity**
 > `payerSwapValue P₀ Pₙ K A = 0 ↔ K = parSwapRate P₀ Pₙ A`, proved abstractly for any nonzero
 > annuity (`payerSwapValue_eq_zero_iff`, a two-rewrite `sub_eq_zero`/`eq_div_iff` certificate) and
@@ -2503,7 +2504,7 @@ prior corpus audit, not a verification of this addition.
 > **jump/Lévy axis** now carries the compensated-Poisson (Itô–Lévy) stochastic integral all the way
 > to a continuous linear operator and its `L²` isometry — **`cgarryZA/LevyStochCalc`'s (Apache-2.0,
 > cited) axiom #6 in full generality** (`sc-levy-integral-clm-isometry`,
-> `Foundations/PoissonCompensatedIntegralOperator`). The integral `H ↦ ∫ H dÑ` is built on marked
+> `Probability/Jumps/PoissonCompensatedIntegralOperator`). The integral `H ↦ ∫ H dÑ` is built on marked
 > simple integrands (`levySimpleModule`, a `Finsupp` submodule of adapted bounded space-time-box
 > coefficients), shown an isometry there (`assembly_isometry`, summing the overlapping-box bilinear
 > pairing `sc-levy-bilinear-pairing`: `𝔼[(φa·Ñ(boxa))(φb·Ñ(boxb))] = 𝔼[φa·φb]·ν̂(boxa∩boxb)`), then
@@ -2514,7 +2515,7 @@ prior corpus audit, not a verification of this addition.
 > the continuous Itô CLM needed a bespoke trimmed measure for). The simple-integrand rungs
 > `sc-levy-isometry-compensated-simple` (the grid double sum
 > `𝔼[(∑ⱼ∑ₗ φⱼₗ·Ñ((tⱼ,tⱼ₊₁]×Aₗ))²] = ∑ⱼ∑ₗ 𝔼[φⱼₗ²]·(tⱼ₊₁−tⱼ)·ν(Aₗ)`,
-> `Foundations/PoissonCompensatedIntegralL2`) and `sc-levy-isometry-normform` (norm form
+> `Probability/Jumps/PoissonCompensatedIntegralL2`) and `sc-levy-isometry-normform` (norm form
 > `𝔼[(∫ H dÑ)²] = ‖H‖²_{L²(dP⊗dt⊗dν)}`) proved axiom #6 at the simple level via the single
 > independent-scattering PRM field `indep_of_disjoint_region` (with the diagonal Poisson second
 > moment `𝔼[Ñ(B)²]=ν̂(B)`, a Mathlib gap-fill via the pmf index-shift `(n+1)·c_r(n+1)=r·c_r(n)`); the
@@ -2523,14 +2524,14 @@ prior corpus audit, not a verification of this addition.
 > no PRM substrate) remains a declared, deferred Summit.
 >
 > **Prior (2026-07-16, multi-asset matrix Riccati):** the two matrix-Riccati `full` entries
-> `mf-mm-matrix-riccati` / `mf-mm-matrix-value` (`Foundations/MatrixMarketMakingRiccati`, BEGV
+> `mf-mm-matrix-riccati` / `mf-mm-matrix-value` (`Markets/Microstructure/MatrixMarketMakingRiccati`, BEGV
 > Proposition 2): the spectral-reduction closed form `a(t) = U·diag(riccatiCoeff(λᵢ))·Uᴴ` solving
 > `a'(t) = a(t)·a(t) − Â·Â` and its market-making instantiation `A' = 2·A·D₊·A − (γ/2)·Σ`; the
 > `B`/`C` coefficients, general-`d` value verification, and optimal-control substrate remain deferred.
 >
 > **Prior (2026-07-16, single-asset market-making Riccati):** corpus **333**,
 > **301 full + 18 wrappers = 319/333 delivery-ready**, 14 reduced cores, 0 placeholders. Three new
-> `full` entries open optimal **market making** (`Foundations/MarketMakingRiccati`) — the single-asset
+> `full` entries open optimal **market making** (`Markets/Microstructure/MarketMakingRiccati`) — the single-asset
 > (`d = 1`) closed-form approximation of Bergault–Evangelista–Guéant–Vieira (arXiv:1810.04383): the
 > Riccati coefficient `mf-mm-riccati` (`a(t) = Â·tanh(Â(T−t))` solves `a' = a² − Â²`; the `tanh`
 > derivative is derived locally, Mathlib carrying none at this pin), the value-function verification
@@ -2546,7 +2547,7 @@ prior corpus audit, not a verification of this addition.
 >
 > **Prior (2026-07-12, continuous first-FTAP frame):** corpus **330**,
 > **298 full + 18 wrappers = 316/330 delivery-ready**, 14 reduced cores, 0 placeholders. Four new
-> `full` entries land the model-agnostic continuous-market EMM frame (`Foundations/ContinuousMarket`):
+> `full` entries land the model-agnostic continuous-market EMM frame (`Pricing/ContinuousMarket`):
 > the general forward FTAP `gir-continuous-emm-forward` (`isEMM_noArbitrageSimple` — an equivalent
 > martingale measure precludes arbitrage against **simple** piecewise-constant predictable bounded
 > strategies, proved directly via the bilinear conditional-expectation pull-out
@@ -2565,7 +2566,7 @@ prior corpus audit, not a verification of this addition.
 > `full` entries open the life-contingencies foundation (issue #112): the survival-ratio keystone
 > `mf-survival-ccdf-ratio` (`tpₓ = S_X(x+t)/S_X(x)` for `t ≥ 0` — the conditional-probability
 > definition of `survive`, built on Mathlib's conditional measure `cond`, collapses to the ratio)
-> and `mf-survival-ccdf-zero` (`S_X(0) = 1`), in `Actuarial/SurvivalModel`. **Provenance:** the
+> and `mf-survival-ccdf-zero` (`S_X(0) = 1`), in `Insurance/SurvivalModel`. **Provenance:** the
 > design and proofs are our own, in this library's Mathlib idiom; Yosuke Ito's Isabelle/HOL AFP
 > entry *Actuarial Mathematics* (`Survival_Model`, BSD) was consulted as a source for the classical
 > result set and is cited, with the author's kind permission. The disclosure is mechanical —
@@ -2576,22 +2577,22 @@ prior corpus audit, not a verification of this addition.
 > `full` finance entries land and one `reduced_core` flips to `full`, so `mathematical_finance`
 > is now **224/225 full**: (1) the **n-date geometric-Asian** option — driver law
 > `mf-asian-geom-n-driver` (`(1/n)∑ B_{τᵢ} ~ N(0, (1/n²)∑∑min(τᵢ,τⱼ))`) and closed-form price
-> `mf-asian-geom-n-price` (reduction to one effective BS driver), `BlackScholes/AsianGeometricN`;
+> `mf-asian-geom-n-price` (reduction to one effective BS driver), `Models/BlackScholes/AsianGeometricN`;
 > (2) **binomial barrier/lookback** via the reflection principle — the counting identity
 > `mf-barrier-reflection-count` and the running-maximum law `mf-barrier-maximal-distribution`
 > (`#{max ≥ a} = 2·#{end > a} + #{end = a}`), consuming the previously-stranded
-> `reflectionPrincipleEquiv_below`, `Binomial/BarrierReflection`; (3) the **Girsanov-grounded quanto
+> `reflectionPrincipleEquivBelow`, `Models/Binomial/BarrierReflection`; (3) the **Girsanov-grounded quanto
 > forward** `mf-quanto-forward-grounded` — the `−ρ σ_S σ_FX` drift adjustment *derived* from a
-> joint-Gaussian FX model + change of measure rather than posited, `BlackScholes/QuantoGrounding`;
+> joint-Gaussian FX model + change of measure rather than posited, `Models/BlackScholes/QuantoGrounding`;
 > and (4) the **compound-Poisson aggregate-loss MGF** `mf-compound-poisson-mgf` (`reduced_core → full`),
-> the n-claim iid-sum MGF composed with the Poisson pgf, `Actuarial/CompoundPoissonMGF`. Honestly
+> the n-claim iid-sum MGF composed with the Poisson pgf, `Probability/Jumps/CompoundPoissonMGF`. Honestly
 > deferred: the fully general **2D Itô formula** `sc-thm-7.5.2` stays `reduced_core` — its
 > continuous-time covariation form is a summit-scale build, not a breadth item.
 
 > **Prior (2026-07-10, bounded-PREDICTABLE Girsanov — Rung 1):** corpus **319**,
 > **286 full + 18 wrappers = 304/319 delivery-ready**, 15 reduced cores, 0 placeholders. New `full`
 > entry `gir-thm-9.1.8-predictable` (`girsanov_predictable_qbm`,
-> `Foundations/GirsanovPredictableTheta.Btheta_isQBrownianMotion_predictable_of_bdd`) **strengthens**
+> `Probability/Brownian/Girsanov/GirsanovPredictableTheta.Btheta_isQBrownianMotion_predictable_of_bdd`) **strengthens**
 > the continuous-adapted `gir-thm-9.1.8` to a bounded **predictable** `θ` — the honest domain of the Itô
 > `L²` integral, dropping the path-continuity assumption. `B^θ_u = B_u + driftContinuousMod θ̂ u` (the
 > genuinely-`𝓕`-adapted modification of `∫₀ᵘθ ds`) starts at `0`, has `N(0,t−s)` increments, and has
@@ -2611,7 +2612,7 @@ prior corpus audit, not a verification of this addition.
 > **Prior (2026-07-09, continuous-adapted Girsanov closes `gir-thm-9.1.8`):** corpus **318**,
 > **285 full + 18 wrappers = 303/318 delivery-ready**, 15 reduced cores, 0 placeholders. `gir-thm-9.1.8`
 > flips `reduced_core → full`: `girsanov_adapted_continuous_qbm`
-> (`Foundations/GirsanovAdaptedTheta.Btheta_isQBrownianMotion_adapted`) derives zero start, Gaussian
+> (`Probability/Brownian/Girsanov/GirsanovAdaptedTheta.Btheta_isQBrownianMotion_adapted`) derives zero start, Gaussian
 > `𝒩(0,t−s)` increments, and independence of any two non-overlapping increments under `Q` for a
 > bounded (`|θ| ≤ C`), `𝓕`-adapted, path-continuous `θ`, under `Q = μ.withDensity(exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds))`
 > with `B^θ_u = B_u + ∫₀ᵘθ ds`. **Spine-free:** rather than a continuous Doléans stochastic exponential
@@ -2628,11 +2629,11 @@ prior corpus audit, not a verification of this addition.
 > **Prior (2026-07-08, geometric-Asian lognormality + the Wiener-indicator identity):** corpus
 > **318**, **284 full + 18 wrappers = 302/318 delivery-ready**, 16 reduced cores, 0 placeholders. One new
 > `full` entry plus a reusable foundational brick, both axioms-clean (`lake build` green, gates + ledger
-> fresh). `mf-asian-geom-driver-gaussian` (`BlackScholes/AsianGeometric.asianGeom_driver_hasLaw`): the
+> fresh). `mf-asian-geom-driver-gaussian` (`Models/BlackScholes/AsianGeometric.asianGeom_driver_hasLaw`): the
 > two-date geometric-Asian **log-driver** `(B_s + B_t)/2` — the Gaussian part of `log √(S_s·S_t)` under GBM —
 > is Gaussian `N(0, (3s+t)/4)`, the variance the Brownian covariance sum `(s + 2·min(s,t) + t)/4`. This turns
 > the geometric average into a priceable lognormal, complementing the AM-GM payoff bound
-> `mf-asian-geom-le-arith-two`. The enabling brick is `Foundations/WienerIntegralIndicator.wienerIntegralLp_stepIndicator`
+> `mf-asian-geom-le-arith-two`. The enabling brick is `Probability/Brownian/Wiener/WienerIntegralIndicator.wienerIntegralLp_stepIndicator`
 > (`∫ 𝟙_{(s,t]} dB = B_t − B_s`, from `LinearMap.extendOfNorm_eq` on the single-basis coefficient), which lets
 > a sum of Brownian values be read as a single Wiener integral of a deterministic step kernel — the same route
 > the Vasicek bond price takes for the *integrated* rate; here the kernel is a sum of indicators. The law then
@@ -2645,7 +2646,7 @@ prior corpus audit, not a verification of this addition.
 > corpus **317**, **283 full + 18 wrappers = 301/317 delivery-ready**, 16 reduced cores, 0 placeholders.
 > Two new `full` fixed-income entries, both consuming machinery already load-bearing (no new frontier;
 > `lake build` 8852 green, all 19 gates + ledger 317 fresh, both axioms-clean).
-> (1) `mf-vasicek-bond-price` (`FixedIncome/VasicekBondPrice.vasicekBondPrice_affine`): the Vasicek
+> (1) `mf-vasicek-bond-price` (`Models/Rates/VasicekBondPrice.vasicekBondPrice_affine`): the Vasicek
 > zero-coupon bond price `P(0,T) = 𝔼[exp(−∫₀ᵀ r_s ds)]` as the Gaussian Laplace transform of the integrated
 > short rate, collapsing to the **affine term structure** `P(0,T) = A(T)·exp(−B(T)·r₀)`, `B(T) = (1−e^{−κT})/κ`.
 > The integrated rate `∫₀ᵀ r_s ds = M(T) + σ∫₀ᵀ g dB` is carried in its Wiener representation (integrated OU
@@ -2654,7 +2655,7 @@ prior corpus audit, not a verification of this addition.
 > `wienerIntegralLp_hasLaw_gaussian` + the FTC variance integral `∫₀ᵀ g² = V(T)`, and the price factors
 > `exp(−M)·𝔼[exp(−σ∫g dB)] = exp(−M + σ²V/2)` by the centred Gaussian MGF `integral_exp_mul_gaussianReal_zero`
 > at `−σ`. Second deterministic-integrand-Wiener consumer in FixedIncome. (2) `mf-forward-measure-spot`
-> (`FixedIncome/ForwardMeasure.forwardMeasure_bs_expected_terminal`): the **T-forward measure** `Q^T`
+> (`Models/Rates/ForwardMeasure.forwardMeasure_bs_expected_terminal`): the **T-forward measure** `Q^T`
 > (zero-coupon bond as numéraire) with `𝔼^{Q^T}[S_T] = S_0·e^{rT} = S_0/P(0,T) = F(0,T)` — the forward price —
 > as a `changeOfNumeraire` instance (bond slots `N_T = P(T,T) = 1`, `N_0 = P(0,T) = e^{−rT}`), the natural next
 > numéraire instance after the stock and `S²`-numéraires. Honest scope: under the constant-rate ZCB the density
@@ -2667,10 +2668,10 @@ prior corpus audit, not a verification of this addition.
 > #19 → existence bridge):** corpus **312** (unchanged — a Foundations-level formalization advance, not a
 > new benchmark entry). The strong solution, previously banked only as the abstract `L²`-fixed point
 > `picardSolution ∈ E`, is now realized as a genuine **pathwise** process:
-> `Foundations/SDEPathwise.sde_pathwise_decomposition` slices the fixed-point equation `X = Φ(X)` (which
+> `Probability/Brownian/SDE/SDEPathwise.sde_pathwise_decomposition` slices the fixed-point equation `X = Φ(X)` (which
 > holds in `E`) into the sample-path identity
 > `X_t(ω) = η(ω) + driftContinuousMod(b∘X)_t(ω) + itoContinuousMod(σ∘X)_t(ω)` for a.e. `(t, ω)`. The
-> enabling crux is `Foundations/DriftProcessModification.driftProcessAssembled_coeFn`: the abstract
+> enabling crux is `Probability/Brownian/Ito/DriftProcessModification.driftProcessAssembled_coeFn`: the abstract
 > `extendOfNorm` drift operator's `coeFn` equals the honest pointwise-`limUnder` process
 > `driftContinuousMod` a.e. It is proved (not, as on the Itô side, true by construction) via two
 > convergences of `driftSimpleProcessLp Vₙ` — CLM-continuity to the operator and a.e. to the pathwise limit
@@ -2682,7 +2683,7 @@ prior corpus audit, not a verification of this addition.
 > `DriftProcessModification.driftContinuousMod_eq_setIntegral` proves `driftContinuousMod g t ω =
 > ∫₀ᵗ ⇑g(s,ω) ds` a.e. for every `t ≤ T` — the elementary drifts `∫₀ᵗ Vₙ ds` converge to
 > `driftContinuousMod`, and the ω-slice energies `Dₙ(ω) = ∫₀ᵀ(⇑Vₙ − ⇑g)² ds` decay in `L¹(μ)`
-> (`= ‖simpleAssembly_T Vₙ − g‖²`), so a subsequence has `Dₙₖ(ω) → 0` a.e., whence the interval
+> (`= ‖simpleAssemblyHorizon Vₙ − g‖²`), so a subsequence has `Dₙₖ(ω) → 0` a.e., whence the interval
 > Cauchy–Schwarz `|∫₀ᵗ(⇑Vₙₖ − ⇑g)| ≤ √(T·Dₙₖ(ω)) → 0` matches the two limits.
 > `SDEPathwise.sde_pathwise_drift_eq_setIntegral` specializes it to `b∘X`, so the strong solution's drift
 > term is the recognizable SDE integral `∫₀ᵗ b(X_s(ω)) ds`, not merely an abstract limit. All axiom-clean.
@@ -2692,7 +2693,7 @@ prior corpus audit, not a verification of this addition.
 > **Prior (2026-07-03, SDE strong-solution uniqueness — the L²-energy Grönwall keystone, #19):**
 > corpus **312**, **278 full + 18 wrappers = 296/312 delivery-ready**, 16 reduced cores, 0 placeholders.
 > **The uniqueness half of Theorem 8.2.5 is now a genuinely _derived_ theorem, not an assumed field.**
-> `Foundations/SDEUniqueness.IsL2SolutionPair.uniqueness` (entry `sc-thm-8.2.5`, flipped
+> `Probability/Brownian/SDE/SDEUniqueness.IsL2SolutionPair.uniqueness` (entry `sc-thm-8.2.5`, flipped
 > **`reduced_core` → `full`**) proves two `L²` strong solutions of `dX = μ(X)dt + σ(X)dB` sharing the
 > driver agree a.s. at every time, via the classical `L²`-energy argument: `E t = 𝔼[(Xₜ−Yₜ)²]` satisfies
 > `E t ≤ (2·Cdrift·t + 2·Cdiff)·∫₀ᵗ E`, and `gronwall_zero_of_le_const_mul_integral` (a reusable integral
@@ -2709,14 +2710,14 @@ prior corpus audit, not a verification of this addition.
 > **Prior (2026-07-03, the change of numéraire — the IV↔I seam):** corpus
 > **312**, **277 full + 18 wrappers = 295/312 delivery-ready**, 17 reduced cores, 0 placeholders.
 > **The library now has a general change-of-numéraire theorem plus both of its seam directions.**
-> (1) `Foundations/Numeraire.changeOfNumeraire` (entry `mf-change-of-numeraire`, **`full`**) proves price
+> (1) `Pricing/Numeraire.changeOfNumeraire` (entry `mf-change-of-numeraire`, **`full`**) proves price
 > is numéraire-invariant: with `Q^N = Q.withDensity((N_T·B₀)/(N₀·B_T))`, every terminal claim `X`
 > satisfies `N₀·𝔼^{Q^N}[X/N_T] = B₀·𝔼^Q[X/B_T]` — a pure measure-transport identity plus cancellation
 > of `N_T`, needing **no integrability hypothesis**. The backbone is **consumed**, not orphaned:
 > `StockNumeraire.stockNumeraireMeasure_eq_numeraireMeasure` exhibits the BS stock numéraire as the
 > instance `B_T = e^{rT}`, `B₀ = 1`, `N = S`, and `ExchangeOption.exchangeOption_numeraire_price` (entry
 > `mf-exchange-numeraire`, **`full`**) exhibits Margrabe's `S²`-numéraire valuation as the instance
-> `X =` exchange payoff, `N = S²`. (2) `Performance/KellyNumeraire.kellyNumeraire_isRiskNeutral` (entry
+> `X =` exchange payoff, `N = S²`. (2) `Choice/Performance/KellyNumeraire.kellyNumeraire_isRiskNeutral` (entry
 > `mf-kelly-numeraire-emm`, **`full`**) delivers the martingale half of the *numéraire-portfolio ⟹ EMM*
 > direction: deflated by the growth-optimal (Kelly) wealth, the physical weights give the bet zero
 > expected return (`q₊·b + q₋·(−1) = 0`). The closed forms `q₊ = 1/(b+1)`, `q₋ = b/(b+1)`, their
@@ -2731,9 +2732,9 @@ prior corpus audit, not a verification of this addition.
 > **Prior (2026-07-02, SDE existence — the Picard fixed point, #44):** corpus
 > **309**, **274 full + 18 wrappers = 292/309 delivery-ready**, 17 reduced cores, 0 placeholders.
 > **The strong solution of `dX = b(X)dt + σ(X)dB` is now constructed as a Picard fixed point.**
-> `Foundations/SDEExistence.picardMap_exists_unique_fixedPoint` (entry `sde-picard-existence-uniqueness`,
+> `Probability/Brownian/SDE/SDEExistence.picardMap_exists_unique_fixedPoint` (entry `sde-picard-existence-uniqueness`,
 > **`full`**) builds the Picard iterate `Φ(X) = η + ∫₀ᵗ b(X)ds + ∫₀ᵗ σ(X)dB` as a self-map of the
-> predictable `L²` space `E = Lp 2 (trimMeasure_T T)` — its diffusion term the *actual* Itô integral
+> predictable `L²` space `E = Lp 2 (trimMeasure T)` — its diffusion term the *actual* Itô integral
 > assembled in the tower — proves the a priori contraction estimate `‖Φ X − Φ Y‖ ≤ (T·L_b + √T·L_σ)‖X − Y‖`
 > (drift operator norm `T` × Cauchy–Schwarz, Itô operator norm `√T` × the isometry), and obtains existence
 > **and** uniqueness of the fixed point via Banach's theorem. **Honest scope:** the `L²`/`E` formulation,
@@ -2744,23 +2745,23 @@ prior corpus audit, not a verification of this addition.
 > **Prior (2026-06-30, Phase 2 — Girsanov: the EMM as an explicit change of measure):** corpus
 > **308**, **273 full + 18 wrappers = 291/308 delivery-ready**, 17 reduced cores, 0 placeholders.
 > **The Black–Scholes risk-neutral measure is now constructed as a Girsanov density change**, not taken
-> as given. `Foundations/Girsanov.bs_discounted_isQMartingale` (entry `gir-bs-emm-girsanov`, **`full`**)
+> as given. `Pricing/Girsanov.bs_discounted_isQMartingale` (entry `gir-bs-emm-girsanov`, **`full`**)
 > tilts the physical measure by `Q = withDensity(exp(−θX_T − ½θ²T))` (constant market price of risk
 > `θ = (μ−r)/σ`) and proves the discounted stock is a `Q`-martingale on `[0,T]` — retiring the Wald
 > shortcut of `discountedGBM_isMartingale`, which took `Q = P` from the start. It stands on a reusable
-> **Bayes change-of-measure engine** `Foundations/ChangeOfMeasure.changeOfMeasure_setIntegral_eq` (entry
+> **Bayes change-of-measure engine** `Probability/Martingales/ChangeOfMeasure.changeOfMeasure_setIntegral_eq` (entry
 > `gir-change-of-measure-engine`, **`full`**): if `Z` and `Z·D` are both `P`-martingales then `D` is a
 > `Q`-martingale on `[0,T]` — no stochastic calculus, only conditional expectations (a Bayes pull-out and
 > a martingale set-integral). The one new estimate is the mixed-time integrability of `D_u·Z_T`, via
 > AM–GM (`exp(σX_u)exp(−θX_T) ≤ exp(2σX_u)+exp(−2θX_T)`, each Gaussian-MGF-integrable). This partially
 > wires the architecture doc's Girsanov seam (I↔II, the martingale side; see `mathematical-architecture.md`).
 > **The distributional side, for constant `θ` (2026-07-05):**
-> `Foundations/GirsanovConstantTheta.Btheta_isQBrownianMotion` proves the drift-corrected
+> `Probability/Brownian/Girsanov/GirsanovConstantTheta.Btheta_isQBrownianMotion` proves the drift-corrected
 > `B^θ_t = X_t + θ t` has zero start, Gaussian increments
 > `B^θ_t − B^θ_s ~ N(0, t−s)`, **and** independence of any two non-overlapping increments (corpus
 > `gir-const-theta-qbm`, `full`; the marginal law is `gir-const-theta-marginal`, `full`). All three
 > properties are now read off in **one** application of the process-agnostic exponential
-> characterization `Foundations/ExpMartingaleQBrownian.isQBrownianMotion_of_expMartingale` (2026-07-06):
+> characterization `Probability/Brownian/ExpMartingaleQBrownian.isQBrownianMotion_of_expMartingale` (2026-07-06):
 > the const-θ exponential martingale `exp(a·B^θ − ½a²·)` (`expBtheta_isQMartingale`, from the Bayes
 > engine + two Wald exponentials) is packaged as `IsExpQMartingale`, and the characterization derives
 > the marginal law, the increment law, and independence — the same reusable module now scheduled to
@@ -2773,7 +2774,7 @@ prior corpus audit, not a verification of this addition.
 > characteristic functions (`charFun_gaussianReal`) — no adapted-integrand Itô formula.
 >
 > **Simple (piecewise-constant) adapted θ — now `full` (2026-07-06):** `gir-simple-adapted`
-> (`Foundations/GirsanovSimpleTheta.Btheta_simple_isQBrownianMotion`) proves `B^θ_t = X_t + ∑_i c_i
+> (`Probability/Brownian/Girsanov/GirsanovSimpleTheta.Btheta_simple_isQBrownianMotion`) proves `B^θ_t = X_t + ∑_i c_i
 > (s_{i+1}∧t − s_i∧t)` has the same three properties under `Q = P.withDensity(E^{−c}_T)` for bounded
 > `𝓕_{s i}`-measurable multipliers — the general bounded-**adapted**-θ Girsanov for the simple case,
 > strictly beyond constant θ, via one application of `isQBrownianMotion_of_expMartingale` (no charFun
@@ -2783,7 +2784,7 @@ prior corpus audit, not a verification of this addition.
 > `∑ c_i²Δτ_i ≤ K²T`).
 >
 > **Continuous adapted θ — now `full` (2026-07-09):** `gir-thm-9.1.8`
-> (`Foundations/GirsanovAdaptedTheta.Btheta_isQBrownianMotion_adapted`) closes the bounded adapted
+> (`Probability/Brownian/Girsanov/GirsanovAdaptedTheta.Btheta_isQBrownianMotion_adapted`) closes the bounded adapted
 > **continuous** case by exactly the `L²`-approximation route anticipated here: the simple-θ identity
 > `isExpQMartingale_BthetaSimple` (on the uniform-partition approximants `c⁽ⁿ⁾_i = θ(tᵢ)`) passed to the
 > limit through the a.e.-subsequence set-integral engine `tendsto_setIntegral_of_subseq_ae_of_sq_bound`
@@ -2796,18 +2797,18 @@ prior corpus audit, not a verification of this addition.
 > **Prior round (2026-06-29, Phase 1 — the convex-duality unification: pricing = risk):** corpus
 > **306**, **271 full + 18 wrappers = 289/306 delivery-ready**, 17 reduced cores, 0 placeholders.
 > **The FTAP (pricing) and the coherent-risk representation (risk) are now proved to be the same
-> Hahn–Banach theorem.** A shared cone-separation root lives in `Foundations/ConvexDuality.lean` — the
+> Hahn–Banach theorem.** A shared cone-separation root lives in `Pricing/Duality/ConvexDuality.lean` — the
 > cone↔simplex separation `exists_pos_separating_of_cone_disjoint_simplex` + the point↔cone companion
 > `exists_separating_of_not_mem_cone`, sharing two atoms (`functional_eq_sum_single`,
 > `functional_nonneg_on_cone`). Four new `full` corpus entries stand on it: `mf-convex-duality-root`
 > (the root); the FTAP kernel `exists_pos_dual_of_disjoint_stdSimplex` **re-derived in place** from it
 > (signature byte-identical → no consumer churn); `mf-coherent-risk-representation`
-> (`RiskMeasures/AcceptanceSet.coherentRisk_isLUB`, the finite-state ADEH representation stated as an
+> (`Risk/AcceptanceSet.coherentRisk_isLUB`, the finite-state ADEH representation stated as an
 > `IsLUB`, acceptance-set closedness *derived* from the four axioms, not assumed; since #364 stated
 > for the library's one coherence structure `IsCoherentRiskMeasure`, in the loss convention);
-> `mf-worstcase-risk-representation` (`RiskMeasures/WorstCaseRisk.worstCase_isLUB`, a concrete instance
+> `mf-worstcase-risk-representation` (`Risk/WorstCaseRisk.worstCase_isLUB`, a concrete instance
 > — worst-case loss = sup over the whole probability simplex); and `mf-superhedging-emm-bound`
-> (`Foundations/SuperhedgingDuality.emm_le_superReplication`, every equivalent martingale measure
+> (`Pricing/SuperhedgingDuality.emm_le_superReplication`, every equivalent martingale measure
 > prices a claim ≤ its super-replication cost). This realizes the architecture doc's #1 seam (I↔IV;
 > see `mathematical-architecture.md`). **Open:** the superhedging strong-duality *equality*
 > (`superhedge = sup_{EMM}`), blocked on a finite-dimensional Farkas / polyhedral-cone closedness
@@ -2816,7 +2817,7 @@ prior corpus audit, not a verification of this addition.
 > **Prior round (2026-06-29, Summit C in Degenne's `IsLocalMartingale` typeclass — the wrapper
 > completed):** corpus **302**, **267 full + 18 wrappers = 285/302 delivery-ready**, 17 reduced
 > cores, 0 placeholders. **The unrestricted-`C³` residual `M` is now a genuine `IsLocalMartingale`**
-> (`Foundations/ItoFormulaUnrestrictedLocMart.lean`, entry
+> (`Probability/Brownian/Ito/ItoFormulaUnrestrictedLocMart.lean`, entry
 > `sc-ito-formula-unrestricted-islocalmartingale`, **`full`**): the one ingredient beyond the
 > explicit form — adaptedness of `M` (`residual_stronglyMeasurable`), i.e. of the drift primitive
 > `D_t = ∫₀ᵗ drift` (`driftPrimitive_stronglyMeasurable`, time-clamp + Carathéodory +
@@ -2832,7 +2833,7 @@ prior corpus audit, not a verification of this addition.
 > `ito_formula_td_process` apply; the all-time agreement is `indistinguishable_on_stochInterval`. The
 > Degenne-`IsLocalMartingale`-typeclass packaging remains as drift-integral-adaptedness plumbing.
 > **The time-dependent Itô formula now holds as a process identity for every `t ≤ T`
-> simultaneously** (`Foundations/ItoFormulaProcess.lean`, entry `sc-ito-formula-td-process`,
+> simultaneously** (`Probability/Brownian/Ito/ItoFormulaProcess.lean`, entry `sc-ito-formula-td-process`,
 > **`full`**): `f(t,B_t) − f(0,B_0) =ᵐ (itoProcessL2Inf t F) + ∫₀ᵗ (f_t + ½f_xx)(s,B_s) ds`, the
 > stochastic term the genuine Itô-integral **process** `(f_x(·,B) ● B)_t` — a continuous `L²`
 > martingale admitting an everywhere-continuous **local-martingale** modification on the
@@ -2846,14 +2847,14 @@ prior corpus audit, not a verification of this addition.
 > integrand `F` (`exists_fullHorizon_extension`) and matched to each horizon via the existing
 > consistency `itoProcessL2Inf_eq_itoProcessCLM`. Earlier (corpus 298): **the Itô
 > formula decomposes `f(X)` for a general `C³` exp-growth `f` against a constant-coefficient Itô
-> process** `X_t = X₀ + b·t + σ B_t` (`Foundations/ItoFormulaItoProcess.lean`,
+> process** `X_t = X₀ + b·t + σ B_t` (`Probability/Brownian/Ito/ItoFormulaItoProcess.lean`,
 > `sc-ito-formula-ito-process`, **`full`**),
-> `f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds`, `gfx =ᵐ [σ·f'(X_·)]`. Earlier:
+> `f(X_T) − f(X₀) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds`, `gfx =ᵐ [σ·f'(X_·)]`. Earlier:
 > **Geometric Brownian motion is decomposed by the genuine continuous
-> Itô integral** (`Foundations/ItoFormulaGBM.lean`, entries `sc-ito-formula-gbm` and
+> Itô integral** (`Probability/Brownian/Ito/ItoFormulaGBM.lean`, entries `sc-ito-formula-gbm` and
 > `sc-discounted-gbm-ito`, both **`full`**) — the **first pricing-ward consumer of the analytic
 > Itô tower**, which until now had *none* (GBM/BS pricing ran via separate algebraic towers and
-> the Wald exponential). `ito_formula_gbm` gives `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ m·Ŝ ds` with `gfx =ᵐ [σ·Ŝ(·)]`
+> the Wald exponential). `ito_formula_gbm` gives `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ m·Ŝ ds` with `gfx =ᵐ [σ·Ŝ(·)]`
 > for the GBM value `Ŝ(t)=S₀ exp((m−σ²/2)t+σ B_t)`, the stochastic term the *real* Itô integral.
 > The route is the classic one — **localization in time**: the GBM value is `t`-exponential (fails
 > the localized formula's `t`-uniform growth), so the localized formula is applied to the
@@ -2864,7 +2865,7 @@ prior corpus audit, not a verification of this addition.
 > discounted-GBM martingale (`discountedGBM_isMartingale`, there via the Wald exponential).
 > Axioms-clean `[propext, Classical.choice, Quot.sound]`. Earlier:
 > **The time-dependent Itô formula reaches at-most-exponential growth**
-> (`Foundations/ItoFormulaLocalized.lean`, entry `sc-ito-formula-localized`, **`full`**):
+> (`Probability/Brownian/Ito/ItoFormulaLocalized.lean`, entry `sc-ito-formula-localized`, **`full`**):
 > `ito_formula_td_localized` lifts the bounded-derivative `ito_formula_td_L2_bddDeriv` to `f`
 > with `|f_• t x| ≤ C·exp(λ|x|)`, so it reaches the Black–Scholes/GBM value function
 > `f(t,x)=S₀ exp((r−σ²/2)t+σx)` — the named out-of-scope gap of 7.1.1/7.1.2. An L²-cutoff
@@ -2872,12 +2873,12 @@ prior corpus audit, not a verification of this addition.
 > antiderivative), the cutoff `fₙ=f(t,φₙ(x))` through `cutoff_bddDeriv`, then `n→∞` — boundary
 > and drift converge in `L²(μ)` (Brownian marginals have every exponential moment,
 > `BrownianExpMoment`; the drift dominator is the new base stone `pathIntegral_expGrowth_memLp`),
-> so `aₙ=itoIntegralCLM_T gfxₙ` is Cauchy, the Itô **isometry** transfers Cauchy-ness to the
+> so `aₙ=itoIntegralCLM gfxₙ` is Cauchy, the Itô **isometry** transfers Cauchy-ness to the
 > integrands, completeness gives the witness, CLM **continuity** identifies the limit, and an
 > a.e.-identification pass names it (`gfx =ᵐ [f_x(·,B_·)]`).
 > Axioms-clean `[propext, Classical.choice, Quot.sound]`. Earlier:
 > **The unbounded-horizon Itô integral is a continuous local martingale on
-> the whole half-line `ℝ≥0`** (`Foundations/ItoIntegralProcessLocalMartingaleInfinite.lean`,
+> the whole half-line `ℝ≥0`** (`Probability/Brownian/Ito/ItoIntegralProcessLocalMartingaleInfinite.lean`,
 > entry `sc-ito-infinite-local-martingale`, **`full`**): an everywhere-continuous
 > representative modifying the process at *every* `t`. The per-horizon `[0,T=n]` continuous
 > local martingales are **glued** — horizon consistency (`itoProcessL2Inf_eq_itoProcessCLM`,
@@ -2888,11 +2889,11 @@ prior corpus audit, not a verification of this addition.
 > `itoProcessL2Inf_isMartingale` through `condExp_sup_nulls`. This crowns the
 > pathwise-regularity layer (2026-06-26): the
 > L²-valued process `(φ●B)_t` has a **continuous modification on `[0,T]`**
-> (`Foundations/ItoIntegralProcessContinuousModification.lean`, entry
+> (`Probability/Brownian/Ito/ItoIntegralProcessContinuousModification.lean`, entry
 > `sc-ito-general-continuous-modification`, **`full`**) — the first sample-path result for the
 > *general* integrand, via Degenne's continuous-time Doob maximal inequality + Borel–Cantelli
 > on a fast subsequence — upgraded to a genuine **continuous local martingale**
-> (`Foundations/ItoIntegralProcessLocalMartingaleGeneral.lean`, entry
+> (`Probability/Brownian/Ito/ItoIntegralProcessLocalMartingaleGeneral.lean`, entry
 > `sc-ito-general-local-martingale`, **`full`**): the everywhere-continuous representative,
 > adapted to the **null-augmented** Brownian filtration `𝓕ᴮ ⊔ 𝓝`, meets Degenne's
 > `IsLocalMartingale` interface. The measure-theoretic core is `condExp_sup_nulls`
@@ -2900,7 +2901,7 @@ prior corpus audit, not a verification of this addition.
 > Mathlib's `eventuallyMeasurableSpace`); both are axioms-clean and non-redundant with
 > Degenne's sorry-backed general càdlàg modification. Earlier this day: the **d-asset**
 > one-period FTAP `ftap_one_period_vector`
-> (`Foundations/FTAPOnePeriodVector.lean`, entry `mf-ftap-one-period-vector`, **`full`**)
+> (`Pricing/FTAP/FTAPOnePeriodVector.lean`, entry `mf-ftap-one-period-vector`, **`full`**)
 > is the unrestricted Föllmer–Schied §1.2 for a discounted excess return valued in any
 > **finite-dimensional** inner-product space `F` (the `ℝᵈ` market is `F = EuclideanSpace ℝ
 > (Fin d)`) — **no non-redundancy hypothesis**. The explicit **Esscher / minimal-divergence**
@@ -2914,15 +2915,15 @@ prior corpus audit, not a verification of this addition.
 > (Föllmer–Schied §1.2 / one-period Dalang–Morton–Willinger): `ftap_one_period`
 > — for a scalar `L⁰` excess return on an **arbitrary** probability space, no
 > arbitrage ⟺ ∃ equivalent martingale measure `Q ~ P` with `Y` integrable and
-> `E_Q[Y] = 0` (`Foundations/FTAPOnePeriod.lean`, entry
+> `E_Q[Y] = 0` (`Pricing/FTAP/FTAPOnePeriod.lean`, entry
 > `mf-ftap-one-period-general`), as the `F = ℝ` corollary of the d-asset theorem
 > `ftap_one_period_vector` (bounded-density reduction to `L¹`, logistic tilt) —
 > no Hahn–Banach, no Kreps–Yan. This is the genuine measure-theoretic step beyond
 > the finite-Ω **Harrison–Pliska** `ftap_discrete` (no arbitrage ⟺ ∃ EMM,
-> multi-period, finite Ω, scalar discounted asset; `Foundations/FTAPDiscrete.lean`,
+> multi-period, finite Ω, scalar discounted asset; `Pricing/FTAP/FTAPDiscrete.lean`,
 > entry `mf-ftap-discrete-complete`), itself backward via a global geometric
 > Hahn–Banach separation of the attainable-gains subspace from the standard simplex
-> (the reusable kernel `Foundations/ConvexSeparation.lean`) and forward via
+> (the reusable kernel `Pricing/Duality/ConvexSeparation.lean`) and forward via
 > martingale-transform telescoping; plus the single-period multi-state biconditional
 > `hasEMM_multi_iff_not_hasArbitrage` (entry `mf-ftap-single-period-complete`).
 > Open follow-on: the general-Ω **multi-period** DMW (L⁰-closedness + measurable
@@ -2931,21 +2932,21 @@ prior corpus audit, not a verification of this addition.
 > Since B3: **D1** (the **bilinear Itô isometry** — the `[0,T]` Itô CLM bundled as
 > a `LinearIsometry`, so it preserves the L²-inner product by polarization:
 > `𝔼[(∫φ dB)(∫ψ dB)] = ⟪φ, ψ⟫`, the diagonal recovering the isometry;
-> `Foundations/ItoIntegralCovariation.lean`, entry
+> `Probability/Brownian/Ito/ItoIntegralCovariation.lean`, entry
 > `sc-ito-covariation-bilinear-isometry`). Earlier on the Itô tower: **B2**
 > (unbounded-horizon `[0,∞)` σ-finite Itô integral CLM
-> `itoIntegralL2`, `Foundations/ItoIntegralL2Dense.lean`, entry
+> `itoIntegralL2`, `Probability/Brownian/Ito/ItoIntegralL2Dense.lean`, entry
 > `sc-ito-infinite-horizon-isometry`) and **B3** (the elementary Itô integral as
 > a continuous **local martingale** — pathwise continuity + Degenne's
-> `Martingale.IsLocalMartingale`, `Foundations/ItoIntegralProcessLocalMartingale.lean`,
+> `Martingale.IsLocalMartingale`, `Probability/Brownian/Ito/ItoIntegralProcessLocalMartingale.lean`,
 > entry `sc-ito-simple-process-local-martingale`). The figures further below are
 > the historical 2026-05-20 audit record, kept as provenance.
 >
 > **Summit B / B1b round (2026-06-12).** The **general-integrand** Itô integral
 > `(φ●B)_t = ∫₀ᵗ φ dB` for a general predictable `φ ∈ L2Predictable[0,T]`, as a
-> continuous L² martingale on `[0,T]` (`Foundations/ItoIntegralProcessGeneral.lean`).
-> It extends B1a (simple integrands) by density along the *same* `simpleAssembly_T`
-> embedding that builds the terminal CLM `itoIntegralCLM_T`, so the bridge to B1a
+> continuous L² martingale on `[0,T]` (`Probability/Brownian/Ito/ItoIntegralProcessGeneral.lean`).
+> It extends B1a (simple integrands) by density along the *same* `simpleAssemblyHorizon`
+> embedding that builds the terminal CLM `itoIntegralCLM`, so the bridge to B1a
 > is definitional (`extendOfNorm_eq`). The key identity
 > `(φ●B)_t = E[∫₀ᵀ φ dB | 𝓕_t]` (the `condExpL2` projection of the terminal
 > integral) yields the L² martingale property (condExp tower), a.e.-adaptedness,
@@ -2956,7 +2957,7 @@ prior corpus audit, not a verification of this addition.
 >
 > **Isometry round (2026-06-12).** The explicit per-t isometry
 > `E[(φ●B)_t²] = ∫₀ᵗ E[φ²] ds` — deferred at B1b — is now **proved**
-> (`itoProcessCLM_norm_sq`, `Foundations/ItoIntegralProcessIsometry.lean`, entry
+> (`itoProcessCLM_norm_sq`, `Probability/Brownian/Ito/ItoIntegralProcessIsometry.lean`, entry
 > `sc-ito-general-time-isometry`): the band-restricted simple-process isometry
 > (B1a's per-endpoint-`∧t`-truncated rectangle double sum = the joint-overlap-`∩(0,t]`
 > double sum, equal by a pure-ℝ interval-length identity) transfers to all predictable
@@ -2966,7 +2967,7 @@ prior corpus audit, not a verification of this addition.
 > duplication). Net: corpus 280 → **281**, 245 → **246 full**; lake build 8724 jobs
 > green, axioms-clean. (B2 — the infinite-horizon `[0,∞)` σ-finite extension —
 landed 2026-06-13: `itoIntegralL2` / `itoIntegralL2_norm` in
-`Foundations/ItoIntegralL2Dense.lean`, corpus entry `sc-ito-infinite-horizon-isometry`.)
+`Probability/Brownian/Ito/ItoIntegralL2Dense.lean`, corpus entry `sc-ito-infinite-horizon-isometry`.)
 
 Refresh with:
 
@@ -3059,7 +3060,7 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > (`Kernel.trajMeasure`) from kernels that read only the last history
 > coordinate, and `P(X₀=i₀,…,Xₙ=iₙ) = init(i₀)·∏ P(iₖ,iₖ₊₁)` is derived by
 > induction through the comp-product recursion of the marginals, replacing
-> the prior definitional `rfl` (`Foundations/MarkovPathMeasure.lean`; the
+> the prior definitional `rfl` (`Probability/Discrete/MarkovPathMeasure.lean`; the
 > converse characterization is not claimed). The same `Kernel.traj` re-cost
 > found the other five Markov reduced cores still honestly gated: recurrence
 > needs renewal theory / fundamental-matrix algebra, convergence needs
@@ -3093,7 +3094,7 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > replacing the named gap with the actual mathematics. (1)
 > `mf-kelly-n-periods-linearity` — repairing the previous round's
 > definitional-`rfl` demotion: the n-period iid model is now real measure
-> theory (`Performance/Kelly.lean`): one period's wealth multiplier is the
+> theory (`Choice/Performance/Kelly.lean`): one period's wealth multiplier is the
 > two-point law `kellyReturnMeasure p b f`, n periods are its n-fold
 > `Measure.pi`, and `E[∑ log Rᵢ] = n·kellyGrowth p b f` is *computed* via
 > linearity of expectation through the product measure's coordinate
@@ -3101,7 +3102,7 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > (Summit A′): `f(T,B_T) − f(0,B₀) = ∫₀ᵀ f_x(s,B_s) dB_s +
 > ∫₀ᵀ (f_t + ½f_xx)(s,B_s) ds` a.e., the classical `df = f_x dB +
 > (f_t + ½f_xx) dt`, with the stochastic integral the genuine
-> `itoIntegralCLM_T`. The three Summit-A limit arguments redone with
+> `itoIntegralCLM`. The three Summit-A limit arguments redone with
 > `(t,x)`-dependence: `WeightedQuadraticVariation` generalized to bounded
 > **adapted weight processes** (the fluctuation engine never cared the
 > weight was `g(B_s)`; `tendsto_riemann_L2_process` exported standalone for
@@ -3109,7 +3110,7 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > (`ItoFormulaTDRemainder.lean` — time/cross/space split bounded by
 > `C_tt Δt² + C_tx|ΔB|Δt + C_xxx|ΔB|³`), and the time-dependent Riemann↔CLM
 > bridge (`ItoIntegralRiemannBridgeTD.lean`). Assembly in
-> `Foundations/ItoFormulaTD.lean`; `f_t`'s joint continuity is *derived*
+> `Probability/Brownian/Ito/ItoFormulaTD.lean`; `f_t`'s joint continuity is *derived*
 > from its bounded partials (jointly Lipschitz), not assumed; unbounded
 > coefficients stay the named gap, as in 7.1.1. All four new headliners
 > axiom-pinned in the curated audit and the spine node
@@ -3166,8 +3167,8 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > differentiate-under-the-integral skeleton, *not* from Itô — closing the
 > long-standing two-tower gap between the deep heat-kernel/Itô foundations and
 > the pricing layer (the orphaned `feynmanU` heat flow is now load-bearing for
-> pricing; `Foundations/FeynmanKacHeatEquation.lean` +
-> `BlackScholes/PDEFromFeynmanKac.lean`). In the same pass the Feynman–Kac scope
+> pricing; `Probability/Gaussian/FeynmanKacHeatEquation.lean` +
+> `Models/BlackScholes/PDEFromFeynmanKac.lean`). In the same pass the Feynman–Kac scope
 > note on `sc-thm-9.2.1` was de-staled: its "~300–500 lines left as upstream
 > work" claim was false — that infrastructure is now built and consumed by the
 > keystone. Net: **236 full + 18 wrappers = 254 / 270 delivery-ready, 16 reduced
@@ -3240,11 +3241,11 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 
 > **Summit A — continuous-time Itô formula (2026-06-02).** Promoted `sc-thm-7.1.1`
 > (Itô's Formula) `reduced_core`→`full`: the bounded-derivative continuous-time L² Itô
-> formula `f(B_T)−f(B_0) = itoIntegralCLM_T gf' + ½∫₀ᵀ f″(B_s) ds` is now *derived* from
+> formula `f(B_T)−f(B_0) = itoIntegralCLM gf' + ½∫₀ᵀ f″(B_s) ds` is now *derived* from
 > foundational primitives, with the stochastic integral the genuine continuous Itô integral
-> `itoIntegralCLM_T gf'` (the L²-limit of the Riemann–Itô sums). The proof chain (Summit A):
+> `itoIntegralCLM gf'` (the L²-limit of the Riemann–Itô sums). The proof chain (Summit A):
 > `tendsto_weighted_qv` (weighted quadratic variation) + `tendsto_ito_remainder` (vanishing
-> Itô–Taylor remainder) + `itoIntegralCLM_T_of_bdd_cont` (Riemann↔CLM bridge), assembled in
+> Itô–Taylor remainder) + `itoIntegralCLM_of_bdd_cont` (Riemann↔CLM bridge), assembled in
 > `ito_formula_L2_bddDeriv`. Scope: `f ∈ C³` with bounded `f′,f″,f‴` — a faithful but
 > strictly C³-bounded specialization of the C² textbook statement (the gap to unrestricted
 > C² is Summit C localization, not yet formalized). All four Summit-A theorems are
@@ -3252,11 +3253,11 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > 4→5 full, 7→6 reduced.
 
 > **Engine→pricing coherence — deliberate stop (2026-06-03).** The continuous Itô
-> engine `itoIntegralCLM_T` has its flagship consumer (`itoIntegralCLM_T_brownian`:
+> engine `itoIntegralCLM` has its flagship consumer (`itoIntegralCLM_brownian`:
 > `∫₀ᵀ B dB = ½(B_T²−B₀²−T)` through the CLM), and the operational continuous-time
 > pricing result — the discounted GBM is a `Q`-martingale (`discountedGBM_isMartingale`,
 > via the Wald exponential) — is already proved (an AxiomAudit-pinned library theorem). The one *missing* link, identifying the
-> discounted price *with* the engine (`e^{−rt}S_t = S₀ + itoIntegralCLM_T(σ·e^{−r·}S_·)`),
+> discounted price *with* the engine (`e^{−rt}S_t = S₀ + itoIntegralCLM(σ·e^{−r·}S_·)`),
 > was scoped and **declined**: the GBM exponential is unbounded, so it is not a short
 > argument but a second keystone (~400 lines — a parallel clamp-truncation layer plus the
 > martingale-difference L² limit `∑σM_{t_k}ΔB → M_T−1`). It would yield an *alternative
@@ -3267,30 +3268,30 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > **Path-1 upgrades (2026-06-04).** Seven reduced cores earned `full` by the
 > upgrade-properly discipline (build the genuinely deeper theorem; never relabel):
 > `mart-thm-2.3.6` — the conditional-expectation-form **optional sampling
-> inequality** for submartingales (`Foundations/OptionalSamplingInequality.lean`),
+> inequality** for submartingales (`Probability/Discrete/OptionalSamplingInequality.lean`),
 > absent from Mathlib, derived as *optional sampling equality + monotone
 > compensator* through the Doob decomposition;
 > `mf-markowitz-n-psd` — PSD **derived** from genuine L² random returns via the
 > self-dot variance identity, consuming Mathlib's `variance_sum'`
-> (`Portfolio/CovariancePSD.lean`);
+> (`Choice/Portfolio/CovariancePSD.lean`);
 > `mf-cvar-rockafellar-uryasev` — the genuine **Rockafellar–Uryasev variational
 > theorem** (`IsLeast`) for the Gaussian loss, minimality by the pointwise tail
-> certificate (`RiskMeasures/RockafellarUryasev.lean`, which previously recorded
+> certificate (`Risk/RockafellarUryasev.lean`, which previously recorded
 > only the additive identity and explicitly deferred this);
 > `mf-newton-raphson-fixed-at-root` — genuine **local quadratic convergence**
 > at the sharp Newton–Kantorovich constant `(L/(2m))·e²` (integral form of the
 > Taylor remainder) + basin convergence of the Newton iterates
-> (`BlackScholes/NewtonConvergence.lean`);
+> (`Models/BlackScholes/NewtonConvergence.lean`);
 > `mf-kmv-survival-Phi-d2` — re-pointed at the probabilistic survival statement
 > `Q(V_T > F) = Φ(DD)` through the lognormal tail;
 > `mf-american-supermartingale` + `mf-american-intrinsic-bound` — the
-> **path-space Snell envelope** (`Binomial/SnellEnvelope.lean`): payoff
+> **path-space Snell envelope** (`Models/Binomial/SnellEnvelope.lean`): payoff
 > dominance, supermartingale property, adaptedness, and minimality over
 > arbitrary path-processes, plus the identification theorem
 > `snell = e^{−rk}·americanPrice` exhibiting the scalar Bellman recursion as
 > the Markov instance (the conditional expectation is the explicit node
 > average, which on a finite tree it *is* — same pathwise idiom as
-> `Binomial/MartingaleRepresentation.lean`).
+> `Models/Binomial/MartingaleRepresentation.lean`).
 > All new load-bearing theorems are AxiomAudit-pinned.
 
 > **Post-audit values sweep (2026-06-04, follow-up).** A second adversarial
@@ -3344,12 +3345,12 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > discounted excess return on a full-support finite probability space and a finite
 > discrete filtration; backward via a global geometric Hahn–Banach separation of
 > the attainable-gains subspace from the standard simplex (the reusable kernel
-> `Foundations/ConvexSeparation.lean`) and forward via martingale-transform
-> telescoping (`Foundations/FTAPDiscrete.lean`). (2) **General-Ω one-period
+> `Pricing/Duality/ConvexSeparation.lean`) and forward via martingale-transform
+> telescoping (`Pricing/FTAP/FTAPDiscrete.lean`). (2) **General-Ω one-period
 > scalar FTAP** `ftap_one_period` (`mf-ftap-one-period-general`) — Föllmer–Schied
 > §1.2 for an arbitrary probability space and a single scalar `L⁰` excess return;
 > as the `F = ℝ` corollary of the d-asset theorem (3) below, with no proof of its own
-> (`Foundations/FTAPOnePeriod.lean`). (3) **D-asset one-period FTAP**
+> (`Pricing/FTAP/FTAPOnePeriod.lean`). (3) **D-asset one-period FTAP**
 > `ftap_one_period_vector` (`mf-ftap-one-period-vector`) — Föllmer–Schied §1.2 for
 > any finite-dimensional inner-product space `F`; the Esscher/minimal-divergence
 > EMM minimises the convex softplus potential `θ ↦ ∫ log(1 + exp⟪θ,Y⟫)`, which
@@ -3357,8 +3358,8 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > ⟪θ,Y⟫ = 0 a.e.}`), so its minimiser on `Nᗮ` is automatically global; the
 > first-order condition (differentiation under the integral) produces the
 > strictly-positive bounded density; redundant assets are absorbed by `N`,
-> dropping the earlier non-redundancy assumption (`Foundations/FTAPOnePeriodVector.lean`).
-> `isEquivProbMeasure_withDensity` de-duplicated into `Foundations/EquivMeasure.lean`.
+> dropping the earlier non-redundancy assumption (`Pricing/FTAP/FTAPOnePeriodVector.lean`).
+> `isEquivProbMeasure_withDensity` de-duplicated into `Probability/Martingales/EquivMeasure.lean`.
 > Net: corpus 285 → **289**, **254 full** + 18 = 272/289 delivery-ready, 17 reduced.
 > Open rung: general-Ω multi-period DMW (L⁰-closedness + measurable selection).
 
@@ -3366,7 +3367,7 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > Three full entries complete the pathwise-regularity layer. (1) **Continuous
 > modification on `[0,T]`** (`sc-ito-general-continuous-modification`,
 > `exists_continuous_modification_itoProcess`,
-> `Foundations/ItoIntegralProcessContinuousModification.lean`, corpus 290): the
+> `Probability/Brownian/Ito/ItoIntegralProcessContinuousModification.lean`, corpus 290): the
 > general-integrand Itô process `t ↦ (φ●B)_t` admits an a.s.-continuous
 > representative agreeing a.e. with the L² value at each `t ≤ T`. Route: Degenne's
 > continuous-time Doob maximal inequality → Chebyshev on simple-process maxima →
@@ -3375,7 +3376,7 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > The running-max keystone binds the pathwise norm under the supremum over `[0,T]`.
 > (2) **Continuous local martingale on `[0,T]`** (`sc-ito-general-local-martingale`,
 > `exists_continuous_localMartingale_modification`,
-> `Foundations/ItoIntegralProcessLocalMartingaleGeneral.lean`, corpus 291): the
+> `Probability/Brownian/Ito/ItoIntegralProcessLocalMartingaleGeneral.lean`, corpus 291): the
 > continuous modification is upgraded to a genuine `IsLocalMartingale` on the
 > **null-augmented** Brownian filtration `𝓕ᴮ ⊔ 𝓝`. The measure-theoretic core is
 > `condExp_sup_nulls` (conditioning on the null augmentation agrees a.e. with
@@ -3385,7 +3386,7 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > (sorry-backed) general càdlàg modification. (3) **Continuous local martingale on
 > `[0,∞)`** (`sc-ito-infinite-local-martingale`,
 > `exists_continuous_localMartingale_modification_infinite`,
-> `Foundations/ItoIntegralProcessLocalMartingaleInfinite.lean`, corpus 292): the
+> `Probability/Brownian/Ito/ItoIntegralProcessLocalMartingaleInfinite.lean`, corpus 292): the
 > per-horizon `[0,T=n]` continuous local martingales are **glued** into one path
 > continuous on all of `ℝ≥0`. Horizon consistency (`itoProcessL2Inf_eq_itoProcessCLM`,
 > resting on a hand-built `[0,T]` clamp of Degenne's `SimpleProcess` and the
@@ -3400,14 +3401,14 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > the Vasicek terminal law derived (2026-06-27, corpus 292→294).** The deep Itô tower
 > (complete through the `[0,∞)` continuous local martingale) gained its first
 > *deterministic-integrand* pricing consumer. `sc-wiener-integral-gaussian`
-> (`wienerIntegralLp_map_eq_gaussianReal`, `Foundations/WienerIntegralGaussian.lean`):
+> (`wienerIntegralLp_map_eq_gaussianReal`, `Probability/Brownian/Wiener/WienerIntegralGaussian.lean`):
 > a deterministic-integrand Wiener integral is `gaussianReal 0 ‖f‖²` — the distribution
 > the isometry construction left open — by the characteristic-function route
 > (simple-process Gaussianity via `IsGaussianProcess.of_isGaussianProcess` +
 > `map_eq_gaussianReal`, lifted to all `L²` by a `|t|`-Lipschitz-charFun
 > `DenseRange.induction_on` + `Measure.ext_of_charFun`). Its consumer
 > `mf-vasicek-sde-terminal-gaussian` (`vasicekShortRate_hasLaw_gaussian`,
-> `FixedIncome/VasicekSDEGaussian.lean`) **derives** the Vasicek terminal law
+> `Models/Rates/VasicekSDEGaussian.lean`) **derives** the Vasicek terminal law
 > `r_T ~ N(vasicekSDEMean, σ²(1−e^{−2κT})/(2κ))` that `VasicekSDE.lean` previously only
 > posited — variance via the FTC integral `∫₀ᵀ e^{−2κ(T−s)} ds`, affine transport via
 > `gaussianReal_const_mul`/`gaussianReal_const_add`. First Itô-tower consumer in
