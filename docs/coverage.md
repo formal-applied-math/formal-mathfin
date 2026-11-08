@@ -28,8 +28,8 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ### Marchenko-Pastur support edges (2026-11-08)
 
-One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 781 → 782 (746 full
-before, 747 after; 764 → 765 delivery-ready).
+One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 805 → 806 on the merged
+tree (767 full before, 768 after; 785 → 786 delivery-ready).
 
 - **`mf-marchenko-pastur-edges`** (MathFin/Performance/MarchenkoPasturEdge.lean): the support
   endpoints `λ₊ = σ²(1+√c)²`, `λ₋ = σ²(1−√c)²` of the Marchenko-Pastur law for the sample
