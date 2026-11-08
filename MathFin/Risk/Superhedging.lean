@@ -196,11 +196,11 @@ theorem superhedgingPrice_add_le (hz : (martingaleProbVectors z).Nonempty) (Y Y'
   linarith
 
 /-- **The superhedging price is a coherent risk measure.** On the one-period finite-state market
-`z` with a martingale probability vector, and a finite reference measure `P` charging every state,
+`z` with a martingale probability vector, and a reference measure `P` charging every state,
 the superhedging price of a claim, read as a loss, is monotone, cash-invariant, positively
 homogeneous and subadditive (`IsCoherentRiskMeasure`). -/
 theorem isCoherentRiskMeasure_superhedgingPrice (hz : (martingaleProbVectors z).Nonempty)
-    {P : Measure (Fin N)} [IsFiniteMeasure P] (hP : ∀ n, P {n} ≠ 0) :
+    {P : Measure (Fin N)} (hP : ∀ n, P {n} ≠ 0) :
     IsCoherentRiskMeasure P (superhedgingPrice z) where
   mono Y Y' _ _ hae := superhedgingPrice_mono hz
     ((ae_iff_forall_of_singleton_ne_zero (p := fun n ↦ Y n ≤ Y' n) hP).1 hae)
