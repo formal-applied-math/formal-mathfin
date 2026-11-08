@@ -158,7 +158,7 @@ theorem contract_pays (c : CappedCallSheet) (s : Scenario Unit) :
 the call at the cap. -/
 theorem value_contract [IsProbabilityMeasure Q] (c : CappedCallSheet)
     (m : BSMarket Q) :
-    c.contract.value Q (m.discountTo c.maturity) (m.index c.maturity)
+    c.contract.value Q (fun t _ ↦ m.discountTo c.maturity t) (m.index c.maturity)
       = m.call c.strike c.maturity - m.call c.cap c.maturity :=
   BlackScholes.value_cappedCall (m.certificate c.strike_pos c.maturity_pos)
     (m.certificate (c.strike_pos.trans_le c.strike_le_cap) c.maturity_pos)
@@ -167,7 +167,7 @@ theorem value_contract [IsProbabilityMeasure Q] (c : CappedCallSheet)
 every scenario, so its discounted expectation lies between `0` and `e^{−rT}·(cap − strike)`.
 Only the payoff is used: no integrability, and no property of the call formula. -/
 theorem value_mem_Icc [IsProbabilityMeasure Q] (c : CappedCallSheet) (m : BSMarket Q) :
-    c.contract.value Q (m.discountTo c.maturity) (m.index c.maturity)
+    c.contract.value Q (fun t _ ↦ m.discountTo c.maturity t) (m.index c.maturity)
       ∈ Set.Icc 0 (Real.exp (-m.rate * c.maturity) * (c.cap - c.strike)) := by
   set e := Real.exp (-m.rate * c.maturity)
   have hb (s : Scenario Unit) :
@@ -205,8 +205,9 @@ Black–Scholes market, the sample contract pays its §2 payoff in every scenari
 theorem sample_checked [IsProbabilityMeasure Q] (m : BSMarket Q) :
     (∀ s : Scenario Unit,
         sample.contract.pathPV (fun _ ↦ 1) s = min (max (s () 1 - 100) 0) (120 - 100)) ∧
-      sample.contract.value Q (m.discountTo 1) (m.index 1) = m.call 100 1 - m.call 120 1 ∧
-      sample.contract.value Q (m.discountTo 1) (m.index 1)
+      sample.contract.value Q (fun t _ ↦ m.discountTo 1 t) (m.index 1)
+          = m.call 100 1 - m.call 120 1 ∧
+      sample.contract.value Q (fun t _ ↦ m.discountTo 1 t) (m.index 1)
         ∈ Set.Icc 0 (Real.exp (-m.rate * (1 : ℝ≥0)) * (120 - 100)) :=
   ⟨sample.contract_pays, sample.value_contract m, sample.value_mem_Icc m⟩
 

@@ -2,6 +2,12 @@
 
 <!-- One paragraph: what theorem / doc / tooling change does this add, and why. -->
 
+<!-- The blueprint node(s) this delivers or advances, on its own line (a bot reads it).
+If it delivers a frontier node, tag the declaration in MathFin/Blueprint.lean with the same
+label and remove the entry from docs/blueprint_frontier.toml in this PR. -->
+
+Blueprint: thm:<node-label>
+
 ## Checklist
 
 ### Attribution
@@ -11,17 +17,18 @@
 
 ### For Lean proof contributions
 
-- [ ] Proof lives in `MathFin/<Section>/<Module>.lean`, not inlined in JSON (unless it's a single-line library wrapper).
+- [ ] Proof lives in `MathFin/<Layer>/…/<Module>.lean`, not inlined in JSON (unless it's a single-line library wrapper).
 - [ ] `@[expose] public section` present in the module after the docstring.
 - [ ] `#print axioms <myTheorem>` shows only `[propext, Classical.choice, Quot.sound]` — no `sorryAx`.
 - [ ] **`lake build && lake lint`** both exit cleanly. CI runs the linter and `lake build` does
       not — a green build alone will still go red on a missing `def` docstring or an unused
       argument. Every `def`, `structure` and `inductive` needs a doc comment.
-- [ ] `./scripts/lean-check.sh MathFin/<Section>/<Module>.lean` returns `"success": true`.
+- [ ] `./scripts/lean-check.sh MathFin/<Layer>/…/<Module>.lean` returns `"success": true`.
 - [ ] Benchmark re-export shim added (or updated) in `benchmarks/*.json`.
 - [ ] Each new module connects to the library: it imports the library objects it reuses (or
       proves its own equal to them), and it is imported by another module or cited by a corpus
-      entry (`tests/test_architecture.py`). `Foundations/` imports only `Foundations/`.
+      entry (`tests/test_architecture.py`). Its imports point down the layers
+      (`Probability/` → `Contracts/` → `Pricing/` → limbs; `tools/verify/layers.py`).
 - [ ] `metadata.formalization_status` set to `full` / `library_wrapper` / `reduced_core` (never `placeholder` to merge).
 - [ ] `description` states what the entry **proves**, not the textbook theorem it is named after,
       and carries any narrowing in that same field — `description` and `formalization_scope` are

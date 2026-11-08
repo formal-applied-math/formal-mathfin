@@ -1,0 +1,81 @@
+/-
+Copyright (c) 2026 Robert Martin. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Robert Martin
+-/
+module
+
+public import MathFin.Models.BlackScholes.American.Stopping.MaturityTruncation
+public import MathFin.Models.BlackScholes.American.Stopping.UsualBrownianValue
+
+/-! # Maturity continuity of the actual American stopping supremum
+
+No classical PDE solution, boundary regularity, or existence of an optimal
+stopping rule is assumed. Nearly optimal admissible rules suffice.
+
+## Main results
+
+* `americanPutValue_continuous_horizon`: for jointly measurable continuous-path `W`, `0 ≤ K`,
+  `0 ≤ r`, `0 ≤ S`, the American put value is continuous in the maturity.
+* `brownianAmericanPut_continuous_horizon`, `brownianUsualAmericanPut_continuous_horizon`: the
+  same continuity in maturity for the Brownian American put, on the raw and on the usual
+  filtration, for `0 ≤ K`, `0 ≤ r`, `0 ≤ S`.
+
+## Tags
+
+continuity in maturity, stopping supremum, nearly optimal rules, American put value,
+horizon continuity, MSC 60G40, MSC 91G20, JEL G13
+-/
+
+@[expose] public section
+
+namespace MathFin.BlackScholes.AmericanPut.Stopping
+
+open Set Filter MeasureTheory ProbabilityTheory
+open scoped NNReal Topology
+
+theorem americanPutValue_continuous_horizon {Ω : Type*} [MeasurableSpace Ω]
+    {P : Measure Ω} [IsProbabilityMeasure P] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
+    {W : ℝ≥0 → Ω → ℝ} (hW : Measurable W.uncurry)
+    (hpaths : ∀ ω, Continuous (fun t => W t ω))
+    {K r q σ S : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) :
+    Continuous (americanPutValue P 𝓕 W K r q σ S) := by
+  apply continuous_iff_seqContinuous.mpr
+  intro Tn T hT
+  apply tendsto_order.mpr
+  constructor
+  · intro a ha
+    obtain ⟨θ,-,hθ⟩ := exists_lt_of_lt_stoppingValue ha univ_nonempty
+    have he := expectedReward_fixed_truncate_tendsto (P := P) (q := q) (σ := σ)
+      hW hpaths hK hr hS hT θ
+    filter_upwards [he.eventually (Ioi_mem_nhds hθ)] with n hn
+    exact hn.trans_le (expectedReward_le_value hW hK hr hS (θ.truncate (Tn n)))
+  · intro c hc
+    have happrox (n : ℕ) : ∃ θ : StoppingRule 𝓕 (Tn n),
+        americanPutValue P 𝓕 W K r q σ S (Tn n)-localizationEps n <
+          ∫ ω, putReward W K r q σ S θ.time ω ∂P :=
+      exists_expectedReward_gt_value_sub (P := P) (localizationEps_pos n)
+    choose θ hθ using happrox
+    have hd := expectedReward_truncate_tendsto (P := P) (q := q) (σ := σ)
+      hW hpaths hK hr hS hT θ
+    have he : Tendsto (fun n => ((∫ ω, putReward W K r q σ S (θ n).time ω ∂P) -
+        ∫ ω, putReward W K r q σ S ((θ n).truncate T).time ω ∂P)+localizationEps n)
+        atTop (𝓝 0) := by simpa only [add_zero] using hd.add localizationEps_tendsto
+    filter_upwards [he.eventually (Iio_mem_nhds (sub_pos.mpr hc))] with n hn
+    have hle := expectedReward_le_value (P := P) (q := q) (σ := σ) hW hK hr hS ((θ n).truncate T)
+    have hh := hθ n
+    change americanPutValue P 𝓕 W K r q σ S (Tn n) < c
+    linarith
+
+theorem brownianAmericanPut_continuous_horizon {K r q σ S : ℝ}
+    (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) : Continuous (brownianAmericanPut K r q σ S) :=
+  americanPutValue_continuous_horizon measurable_brownian_uncurry continuous_brownian hK hr hS
+
+theorem brownianUsualAmericanPut_continuous_horizon {K r q σ S : ℝ}
+    (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S) : Continuous (brownianUsualAmericanPut K r q σ S) := by
+  let μ := completedMeasure gaussianLimit
+  let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
+  exact americanPutValue_continuous_horizon (P := μ) (𝓕 := brownianUsualFiltration)
+    brownian_completed_measurable continuous_brownian hK hr hS
+
+end MathFin.BlackScholes.AmericanPut.Stopping

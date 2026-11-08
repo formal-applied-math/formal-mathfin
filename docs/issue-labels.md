@@ -30,16 +30,16 @@ cross-cutting.
 
 | Label | Use for |
 |---|---|
-| `area:foundations` | `MathFin/Foundations/` — Itô calculus, Brownian motion, stochastic integration, martingales, Poisson, Markov, and SDEs. |
-| `area:black-scholes` | `MathFin/BlackScholes/` — the Black-Scholes model, greeks, and the pricing PDE. |
-| `area:futures` | `MathFin/Futures/` — Black-76 futures options, caplets, and swaptions. |
-| `area:binomial` | `MathFin/Binomial/` — CRR binomial trees and convergence to Black-Scholes. |
-| `area:fixed-income` | `MathFin/FixedIncome/` — bonds, term structure, and interest-rate models. |
-| `area:portfolio` | `MathFin/Portfolio/` — portfolio choice, Kelly, and Merton problems. |
-| `area:performance` | `MathFin/Performance/` — Sharpe ratio and other performance measures. |
-| `area:risk` | `MathFin/RiskMeasures/` — VaR, CVaR, and coherent risk measures. |
-| `area:actuarial` | `MathFin/Actuarial/` — actuarial and insurance pricing. |
-| `area:defi` | `MathFin/DeFi/` — decentralized-finance models. |
+| `area:foundations` | `MathFin/Probability/` — Itô calculus, Brownian motion, stochastic integration, martingales, Poisson, Markov, and SDEs. |
+| `area:black-scholes` | `MathFin/Models/BlackScholes/` — the Black-Scholes model, greeks, and the pricing PDE. |
+| `area:futures` | `MathFin/Models/Forwards/` — Black-76 futures options, caplets, and swaptions. |
+| `area:binomial` | `MathFin/Models/Binomial/` — CRR binomial trees and convergence to Black-Scholes. |
+| `area:fixed-income` | `MathFin/Models/Rates/` — bonds, term structure, and interest-rate models. |
+| `area:portfolio` | `MathFin/Choice/Portfolio/` — portfolio choice, Kelly, and Merton problems. |
+| `area:performance` | `MathFin/Choice/Performance/` — Sharpe ratio and other performance measures. |
+| `area:risk` | `MathFin/Risk/` — VaR, CVaR, and coherent risk measures. |
+| `area:actuarial` | `MathFin/Insurance/` — actuarial and insurance pricing. |
+| `area:defi` | `MathFin/Markets/DeFi/` — decentralized-finance models. |
 | `area:tooling` | Python verification tools, scripts, ledger logic, and generated audits under `tools/` and `scripts/`. |
 | `area:docs` | Markdown docs, README content, onboarding, coverage/blueprint prose, and cross-links. |
 | `area:ci` | GitHub Actions, Docker images, build gates, and release automation. |
@@ -133,16 +133,16 @@ Maintainers can create the taxonomy with `gh label create`:
 
 ```bash
 # area:* — one shared blue
-gh label create "area:foundations"  --color "1d76db" --description "Foundations/ — Itô, Brownian motion, stochastic integration, martingales, Poisson, Markov, SDEs"
-gh label create "area:black-scholes" --color "1d76db" --description "BlackScholes/ — the Black-Scholes model, greeks, and the pricing PDE"
-gh label create "area:futures"      --color "1d76db" --description "Futures/ — Black-76 futures options, caplets, and swaptions"
-gh label create "area:binomial"     --color "1d76db" --description "Binomial/ — CRR binomial trees and convergence to Black-Scholes"
-gh label create "area:fixed-income" --color "1d76db" --description "FixedIncome/ — bonds, term structure, and interest-rate models"
-gh label create "area:portfolio"    --color "1d76db" --description "Portfolio/ — portfolio choice, Kelly, and Merton problems"
-gh label create "area:performance"  --color "1d76db" --description "Performance/ — Sharpe ratio and other performance measures"
-gh label create "area:risk"         --color "1d76db" --description "RiskMeasures/ — VaR, CVaR, and coherent risk measures"
-gh label create "area:actuarial"    --color "1d76db" --description "Actuarial/ — actuarial and insurance pricing"
-gh label create "area:defi"         --color "1d76db" --description "DeFi/ — decentralized-finance models"
+gh label create "area:foundations"  --color "1d76db" --description "Probability/ — Itô, Brownian motion, stochastic integration, martingales, Poisson, Markov, SDEs"
+gh label create "area:black-scholes" --color "1d76db" --description "Models/BlackScholes/ — the Black-Scholes model, greeks, and the pricing PDE"
+gh label create "area:futures"      --color "1d76db" --description "Models/Forwards/ — Black-76 futures options, caplets, and swaptions"
+gh label create "area:binomial"     --color "1d76db" --description "Models/Binomial/ — CRR binomial trees and convergence to Black-Scholes"
+gh label create "area:fixed-income" --color "1d76db" --description "Models/Rates/ — bonds, term structure, and interest-rate models"
+gh label create "area:portfolio"    --color "1d76db" --description "Choice/Portfolio/ — portfolio choice, Kelly, and Merton problems"
+gh label create "area:performance"  --color "1d76db" --description "Choice/Performance/ — Sharpe ratio and other performance measures"
+gh label create "area:risk"         --color "1d76db" --description "Risk/ — VaR, CVaR, and coherent risk measures"
+gh label create "area:actuarial"    --color "1d76db" --description "Insurance/ — actuarial and insurance pricing"
+gh label create "area:defi"         --color "1d76db" --description "Markets/DeFi/ — decentralized-finance models"
 gh label create "area:tooling"      --color "1d76db" --description "Verification tools, scripts, ledger logic, and generated audits"
 gh label create "area:docs"         --color "1d76db" --description "Markdown docs, onboarding, coverage/blueprint prose, and cross-links"
 gh label create "area:ci"           --color "1d76db" --description "GitHub Actions, Docker images, build gates, and release automation"

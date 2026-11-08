@@ -157,7 +157,7 @@ lemma IsRealization.hasLaw_add (h : b.IsRealization P X) :
 /-- **VaR diversifies on the book**: in every realization, at every level `α ∈ [1/2, 1)`, the
 combined VaR is at most the sum of the standalone ones. All three are the closed form at the
 normal quantile, and the combined volatility is at most `σ₁ + σ₂` (`gaussianVaR_subadditive`).
-VaR is not subadditive for every law (`RiskMeasures/VaRSuperadditivity.lean`): the Gaussian law
+VaR is not subadditive for every law (`Risk/VaRSuperadditivity.lean`): the Gaussian law
 and the level `α ≥ 1/2` are what make it so here. -/
 theorem IsRealization.valueAtRisk_add_le (h : b.IsRealization P X) {α : ℝ}
     (hα : α ∈ Ico (1 / 2) 1) :

@@ -38,8 +38,9 @@ Since the coherence pass of 2026-10-21, every module connects to the library
   constructs.
 * A module is imported by another module or cited by a corpus entry. A result that nothing uses
   and nothing cites is a claim nobody checks.
-* `Foundations/` imports only `Foundations/`. A module that joins a foundation to a model lives in
-  `Bridges/`.
+* Imports point one way: `Probability/` → `Contracts/` → `Pricing/` → the limbs (`Models/`, `Risk/`,
+  `Choice/`, `Insurance/`, `Markets/`). A limb imports another limb only through an edge declared in
+  `tools/verify/layers.py`. A join lives in the module that consumes it.
 
 Satellites such as market making, DeFi mechanics and the machine-learning utilities of López de
 Prado are integrated by bridges, not fenced off. A satellite that cannot be bridged honestly is a

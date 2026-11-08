@@ -5,7 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Probability.Process.HittingTime
 
 /-!
 # A reified payoff language
@@ -13,12 +14,12 @@ public import Mathlib
 `Payoff ι` and `Contract ι` represent *what an instrument pays*, independently of
 any stochastic model. Market outcomes enter through `Scenario ι = ι → ℝ≥0 → ℝ`;
 a stochastic model is a law on that type, and appears only from
-`Contracts/Pricing.lean` onward.
+`Pricing/Value.lean` onward.
 
-Every other payoff in this library — `BlackScholes/Call.lean`, `Digital.lean`,
+Every other payoff in this library — `Models/BlackScholes/Call.lean`, `Digital.lean`,
 `CappedCall.lean` — is written inline as a lambda inside the integral that prices
 it, so the payoff and the model are the same syntactic object. This file
-separates them, which is what lets `Contracts/Models/BlackScholes.lean` price a capped
+separates them, which is what lets `Models/BlackScholes/BlackScholes.lean` price a capped
 call by *composing* two European call values rather than by evaluating a third
 integral.
 
@@ -39,12 +40,38 @@ notional, termination, partial redemption). Each is additive and each waits for
 the corpus entry that forces it; see
 `docs/specs/2026-08-16-contracts-tower-design.md` §2.3.
 
+## Main definitions
+
+* `Scenario ι`: a market scenario `ι → ℝ≥0 → ℝ`, the realized value of each underlying at each
+  time.
+* `Payoff ι`: payoff formulas as data (constants, observations, `add`, `sub`, `mul`, `max`, `min`,
+  `indicatorLt`, and `rpow` with an `ℝ≥0` exponent); `Payoff.eval` interprets one against a
+  scenario.
+* `Payoff.obsList`: the `(underlying, date)` observations a payoff reads, found syntactically.
+* `Contract.obsList`: the observations a contract's payoffs read.
+* `Scenario.hitTime`: the first time the observed underlying `i` lies in `A`, as Mathlib's
+  `hittingAfter` of the observed path.
+* `Contract ι`: contracts built from `zero`, `pay t amount`, `payAtHit i A amount`, `both` and
+  `scale`.
+* `Contract.cashflows`: the list of `(time, amount)` cashflows of a contract along a scenario.
+* `Contract.FixedDated`: the contract contains no `payAtHit`.
+* `Contract.dates`: the payment dates of a contract's `pay` nodes.
+* `Contract.pathPV`: the present value of a contract along one scenario path, for a discount
+  function `D : ℝ≥0 → ℝ`.
+
 ## Main results
 
 * `Contract.pathPV_both`, `Contract.pathPV_scale` — `pathPV` is additive over
-  `both` and homogeneous over `scale`. These are what `Contracts/Pricing.lean`
+  `both` and homogeneous over `scale`. These are what `Pricing/Value.lean`
   integrates to get linearity of `value`.
 * `Contract.pathPV_const` — a constant discount factor comes out of `pathPV`.
+* `Payoff.eval_congr`, `Contract.cashflows_congr` — a payoff, and a fixed-dated contract's cash
+  flows, are the same on two scenarios that agree at the observations they read
+  (`Payoff.obsList`, `Contract.obsList`). `Pricing/Value.lean` lifts this to models that agree
+  almost surely (`Contract.value_congr_ae`).
+* `Contract.pathPV_congr` — a fixed-dated contract's present value depends on the scenario only
+  at `c.obsList` and on the discount factor only at `c.dates`. `Pricing/Value.lean` lifts this to
+  models whose observations have one law (`Contract.value_eq_of_map_observation_eq`).
 
 ## Source
 
@@ -66,6 +93,16 @@ matching `Filtration ℝ≥0 mΩ`.
 No code is copied from `lean_contracts`; every definition and proof here is
 written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 §6 for the full credit line.
+
+## References
+
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [S. Peyton Jones, J. M. Eber and J. Seward, *Composing contracts*][PeytonJonesEberSeward2000]
+
+## Tags
+
+contract language, reified payoff, contract DSL, Bilokon, Peyton Jones, payment at default time,
+MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -108,6 +145,16 @@ noncomputable def Payoff.eval (s : Scenario ι) : Payoff ι → ℝ
   | .min a b => Min.min (eval s a) (eval s b)
   | .indicatorLt a b => if eval s a < eval s b then 1 else 0
   | .rpow a p => eval s a ^ (p : ℝ)
+
+/-- The `(underlying, date)` observations a `Payoff` reads, found syntactically. An
+over-approximation: `Payoff.mul (.const 0) (.obs i t)` evaluates to `0` on every scenario, yet
+lists `(i, t)`. -/
+def Payoff.obsList : Payoff ι → List (ι × ℝ≥0)
+  | .const _ => []
+  | .obs i t => [(i, t)]
+  | .add a b | .sub a b | .mul a b | .max a b | .min a b | .indicatorLt a b =>
+      a.obsList ++ b.obsList
+  | .rpow a _ => a.obsList
 
 /-- The first time the observed underlying `i` of a scenario lies in `A`: Mathlib's
 `hittingAfter` of the process `u ↦ s i u` at time `0`, which is `⊤` if it never does. It is the
@@ -187,5 +234,68 @@ discounting the undiscounted present value by `a`. -/
 theorem Contract.pathPV_const (a : ℝ) (s : Scenario ι) (c : Contract ι) :
     c.pathPV (fun _ ↦ a) s = a * c.pathPV (fun _ ↦ 1) s := by
   simp [pathPV, List.sum_map_mul_left]
+
+/-! ### Two scenarios that agree where the contract looks -/
+
+/-- A payoff evaluates the same on two scenarios that agree at the observations it reads. -/
+theorem Payoff.eval_congr {s s' : Scenario ι} (a : Payoff ι)
+    (h : ∀ p ∈ a.obsList, s p.1 p.2 = s' p.1 p.2) : a.eval s = a.eval s' := by
+  induction a with
+  | const _ => rfl
+  | obs i t => exact h (i, t) (List.mem_singleton_self _)
+  | add a b ha hb | sub a b ha hb | mul a b ha hb | max a b ha hb | min a b ha hb
+  | indicatorLt a b ha hb =>
+      obtain ⟨hl, hr⟩ := List.forall_mem_append.1 h
+      simp only [Payoff.eval, ha hl, hb hr]
+  | rpow a _ ha => simp only [Payoff.eval, ha h]
+
+/-- The `(underlying, date)` observations a `Contract` reads (those of its payoffs; the dates of
+a `payAtHit` are not listed, which is why the congruence below asks for `FixedDated`). -/
+def Contract.obsList : Contract ι → List (ι × ℝ≥0)
+  | .zero => []
+  | .pay _ a => a.obsList
+  | .payAtHit _ _ a => a.obsList
+  | .both a b => a.obsList ++ b.obsList
+  | .scale _ a => a.obsList
+
+/-- A fixed-dated contract generates the same cash flows along two scenarios that agree at the
+observations it reads. -/
+theorem Contract.cashflows_congr {s s' : Scenario ι} (c : Contract ι) (hc : c.FixedDated)
+    (h : ∀ p ∈ c.obsList, s p.1 p.2 = s' p.1 p.2) : c.cashflows s = c.cashflows s' := by
+  induction c with
+  | zero => rfl
+  | pay t a => simp only [Contract.cashflows, Payoff.eval_congr a h]
+  | payAtHit _ _ _ => exact hc.elim
+  | both a b ha hb =>
+      obtain ⟨hl, hr⟩ := List.forall_mem_append.1 h
+      simp only [Contract.cashflows, ha hc.1 hl, hb hc.2 hr]
+  | scale _ a ha => simp only [Contract.cashflows, ha hc h]
+
+/-- The payment dates of a contract: the dates of its `pay` nodes. A `payAtHit` pays at a date the
+scenario decides and lists none, which is why the congruence below asks for `FixedDated`. -/
+def Contract.dates : Contract ι → List ℝ≥0
+  | .zero => []
+  | .pay t _ => [t]
+  | .payAtHit _ _ _ => []
+  | .both a b => a.dates ++ b.dates
+  | .scale _ a => a.dates
+
+/-- **A fixed-dated contract reads a scenario only at its observations and a discount factor only
+at its payment dates**: two discount factors that agree on `c.dates`, along two scenarios that
+agree on `c.obsList`, give the same present value. -/
+theorem Contract.pathPV_congr {D D' : ℝ≥0 → ℝ} {s s' : Scenario ι} (c : Contract ι)
+    (hc : c.FixedDated) (hD : ∀ t ∈ c.dates, D t = D' t)
+    (hs : ∀ p ∈ c.obsList, s p.1 p.2 = s' p.1 p.2) : c.pathPV D s = c.pathPV D' s' := by
+  induction c with
+  | zero => rfl
+  | pay t a =>
+      simp only [pathPV, cashflows, List.map_cons, List.map_nil, List.sum_cons, List.sum_nil,
+        hD t (List.mem_singleton_self t), Payoff.eval_congr a hs]
+  | payAtHit _ _ _ => exact hc.elim
+  | both a b ha hb =>
+      obtain ⟨hDa, hDb⟩ := List.forall_mem_append.1 hD
+      obtain ⟨hsa, hsb⟩ := List.forall_mem_append.1 hs
+      rw [pathPV_both, pathPV_both, ha hc.1 hDa hsa, hb hc.2 hDb hsb]
+  | scale _ a ha => rw [pathPV_scale, pathPV_scale, ha hc hD hs]
 
 end MathFin.Contracts

@@ -44,3 +44,6 @@ uv.lock
 
 # per-shard temp files of `ledger verify --exec`
 MathFin/.ledger-exec-check*.lean
+
+# The declaration index (`lake exe mathfin_index decl-index.json`; CI artifact)
+decl-index*.json

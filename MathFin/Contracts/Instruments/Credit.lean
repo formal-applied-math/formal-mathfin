@@ -11,7 +11,7 @@ public import MathFin.Contracts.Instruments.FixedIncome
 # A credit default swap, as a contract
 
 The credit event is observed through the default indicator process `N u = 1{τ ≤ u}`, the single
-underlying `()` of the scenario (`Contracts/Models/DefaultTime.lean` supplies it from a default
+underlying `()` of the scenario (`Models/Credit/DefaultTime.lean` supplies it from a default
 time `τ`). `N` enters `[1, ∞)` exactly at `τ`, and `Contract.payAtHit` pays at the first time an
 observed underlying enters a set, so a payment at the default time is a contract:
 
@@ -32,7 +32,7 @@ The tower otherwise pays at fixed dates, so the CDS is also written on a payment
 The grid legs are `payFlows`, so their path value is a finite sum (`pathPV_cdsPremiumLeg`,
 `pathPV_cdsProtectionLeg`). Default is paid at the end of its period, not at `τ`: the grid
 protection leg is the discretisation of `cdsProtectionAtDefault`
-(`Contracts/Models/DefaultTimeMesh.lean` proves the limit). There is no continuous premium
+(`Models/Credit/DefaultTimeMesh.lean` proves the limit). There is no continuous premium
 stream in the tower, so the premium leg exists only on the grid.
 
 ## Main definitions
@@ -42,6 +42,11 @@ stream in the tower, so the premium leg exists only on the grid.
 ## Main results
 
 * `pathPV_cdsPremiumLeg`, `pathPV_cdsProtectionLeg`.
+
+## Tags
+
+credit default swap, CDS premium leg, protection leg, default indicator, accrual grid, MSC 91G40,
+JEL G12, JEL G33
 -/
 
 @[expose] public section
@@ -78,7 +83,8 @@ noncomputable def cdsBuyer (t : ℕ → ℝ≥0) (s R : ℝ) (n : ℕ) : Contrac
 leg is worth `∑ D(tᵢ₊₁) · s (tᵢ₊₁ − tᵢ) (1 − σ () tᵢ₊₁)`. -/
 theorem pathPV_cdsPremiumLeg (D : ℝ≥0 → ℝ) (σ : Scenario Unit) (t : ℕ → ℝ≥0) (s : ℝ) (n : ℕ) :
     (cdsPremiumLeg t s n).pathPV D σ
-      = ∑ i ∈ Finset.range n, D (t (i + 1)) * (s * ((t (i + 1) : ℝ) - t i) * (1 - σ () (t (i + 1)))) := by
+      = ∑ i ∈ Finset.range n, D (t (i + 1)) *
+          (s * ((t (i + 1) : ℝ) - t i) * (1 - σ () (t (i + 1)))) := by
   simp [cdsPremiumLeg, pathPV_payFlows, Payoff.eval]
 
 /-- Along a scenario `σ` whose observation at `u` is the default indicator `σ () u`, the
