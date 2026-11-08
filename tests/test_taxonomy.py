@@ -83,3 +83,18 @@ def test_no_other_module_defines_an_area_or_section_table():
     offenders = [str(p.relative_to(ROOT)) for p in files
                  if p.name not in own and pattern.search(p.read_text("utf-8"))]
     assert not offenders, f"an area or section table outside the taxonomy: {offenders}"
+
+
+def test_every_corpus_entry_has_a_place() -> None:
+    """The dataset's `cell` and `family` are taxonomy keys: from the snippet's imports, or the
+    entry's own `metadata.cell`/`family` where it cites no library module that places it."""
+    from tools.verify.corpus import iter_entries
+    from tools.verify.hf_dataset import entry_place
+
+    cells, families = taxonomy.cells(), taxonomy.families()
+    bad = []
+    for _, t in iter_entries():
+        cell, family = entry_place(t)
+        if cell not in cells or (family is not None and family not in families):
+            bad.append((t["id"], cell, family))
+    assert bad == []
