@@ -124,7 +124,7 @@ theorem europeanCall_selfFinancing {μ : Measure Ω} [IsProbabilityMeasure μ] {
     {S_0 K r σ : ℝ} (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (T' : ℝ≥0) (hT' : T' < T) :
     ∀ᵐ ω ∂μ, ∀ t ∈ Icc (0 : ℝ≥0) T',
       hedgeValue K r σ S_0 T B t ω
-        = (europeanCall K T).value μ (fun u ↦ Real.exp (-r * u)) (pathAssets S_0 r σ B)
+        = (europeanCall K T).value μ (fun u _ ↦ Real.exp (-r * u)) (pathAssets S_0 r σ B)
           + ((∫ s in Ioc 0 t, hedgeDelta K r σ S_0 T B s ω * (r * pathAssets S_0 r σ B () s ω)
                 ∂timeMeasure)
               + predItoIntegral (μ := μ) T' hBmeas

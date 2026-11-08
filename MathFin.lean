@@ -297,6 +297,7 @@ import MathFin.Probability.Brownian.Ito.ItoLemma2D
 -- Shared change-of-measure helper: a positive normalised density gives an
 -- equivalent probability measure (consumed by the one-period FTAP files)
 import MathFin.Probability.Martingales.EquivMeasure
+import MathFin.Probability.Martingales.TimeChange
 -- OU generator on polynomials: the Hermite spectral layer of the OU/Vasicek family
 import MathFin.Probability.Brownian.SDE.OUSpectral
 -- Estimation: Gaussian variance-ratio KL, realised-variance noise bias, square-root bias
@@ -375,6 +376,7 @@ import MathFin.Pricing.NoArbitrageDerivations
 -- representation)
 import MathFin.Pricing.SuperhedgingDuality
 import MathFin.Pricing.Value
+import MathFin.Pricing.Market
 import MathFin.Pricing.Parity
 import MathFin.Pricing.DiscreteMarket
 -- The law of a Wiener-represented rate under the forward measure of a Wiener-represented account
@@ -678,11 +680,13 @@ import MathFin.Models.BlackScholes.BlackScholesSDE
 import MathFin.Models.BlackScholes.BlackScholesChooser
 import MathFin.Models.BlackScholes.BlackScholesHedge
 import MathFin.Models.BlackScholes.BlackScholesPhysical
+import MathFin.Models.BlackScholes.Market
 -- The Black–Scholes delta hedge is self-financing: the product rule with the factor e^{rt}
 import MathFin.Models.BlackScholes.BlackScholesSelfFinancing
 import MathFin.Models.Binomial.Binomial
 import MathFin.Models.Binomial.BinomialCompleteMarket
 import MathFin.Models.Binomial.BinomialLimit
+import MathFin.Models.Binomial.Market
 import MathFin.Models.Rates.Caplet
 import MathFin.Models.Rates.CMSContract
 import MathFin.Models.Rates.ShortRate
@@ -798,6 +802,7 @@ import MathFin.Risk.PositionsConvention
 -- Phase 1 (convex-duality unification): coherent-risk ADEH representation — acceptance cone
 -- separation giving the representing probability measures (risk-side Hahn–Banach)
 import MathFin.Risk.AcceptanceSet
+import MathFin.Risk.Superhedging
 -- Phase 1 (convex-duality unification): worst-case loss — the most conservative coherent risk
 -- measure, concrete instance of the ADEH representation (sup over the entire probability simplex)
 import MathFin.Risk.WorstCaseRisk

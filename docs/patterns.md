@@ -1545,9 +1545,9 @@ this from becoming eleven near-duplicate `simp only` lists is to extract the sha
 one lemma once a second call site needs it:
 
 ```lean
-theorem Contract.value_pay (Q : Measure Ω) (D : ℝ≥0 → ℝ) (X : ι → ℝ≥0 → Ω → ℝ) (t : ℝ≥0)
+theorem Contract.value_pay (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ) (X : ι → ℝ≥0 → Ω → ℝ) (t : ℝ≥0)
     (a : Payoff ι) :
-    (Contract.pay t a).value Q D X = ∫ ω, D t * a.eval (scenarioAt X ω) ∂Q := by
+    (Contract.pay t a).value Q D X = ∫ ω, D t ω * a.eval (scenarioAt X ω) ∂Q := by
   simp [Contract.value, Contract.pathPV, Contract.cashflows]
 ```
 

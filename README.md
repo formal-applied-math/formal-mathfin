@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 806 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 768 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 820 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 782 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 20 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -102,9 +102,9 @@ exact statement of each one, and what it leaves out.
 - **Interest rates.** In Vasicek and Hull–White, the bond price at t is an exponential-affine
   function of the short rate, and the bond put is a Black put under the forward measure
   ([`bondPrice_hullWhite`](MathFin/Models/Rates/HullWhiteBond.lean),
-  [`valueDisc_bondPut_hullWhite`](MathFin/Models/Rates/Jamshidian.lean)). Swaptions and the CMS
+  [`value_bondPut_hullWhite`](MathFin/Models/Rates/Jamshidian.lean)). Swaptions and the CMS
   swaplet are priced under the annuity measure
-  ([`valueDisc_payerSwaption`](MathFin/Models/Rates/CMSContract.lean)).
+  ([`value_payerSwaption`](MathFin/Models/Rates/CMSContract.lean)).
 
 ## Contents
 

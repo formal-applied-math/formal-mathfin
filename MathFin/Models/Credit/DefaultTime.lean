@@ -120,7 +120,8 @@ function `S` (`Q(τ ≤ u) = 1 − S u`), the premium leg of the CDS is worth `s
 `cdsAnnuityGrid D S t n`. -/
 theorem value_cdsPremiumLeg (hτ : Measurable τ) (hS : ∀ u : ℝ≥0, Q.real {ω | τ ω ≤ u} = 1 - S u)
     (D : ℝ≥0 → ℝ) (t : ℕ → ℝ≥0) (s : ℝ) (n : ℕ) :
-    (cdsPremiumLeg t s n).value Q D (defaultIndicator τ) = s * cdsAnnuityGrid D S t n := by
+    (cdsPremiumLeg t s n).value Q (fun t _ ↦ D t) (defaultIndicator τ)
+      = s * cdsAnnuityGrid D S t n := by
   simp only [Contract.value, pathPV_cdsPremiumLeg, scenarioAt, cdsAnnuityGrid, Finset.mul_sum]
   rw [integral_finsetSum _ fun i _ ↦
     ((integrable_one_sub_defaultIndicator hτ (t (i + 1))).const_mul _).const_mul _]
@@ -134,7 +135,8 @@ theorem value_cdsPremiumLeg (hτ : Measurable τ) (hS : ∀ u : ℝ≥0, Q.real 
 theorem value_cdsProtectionLeg (hτ : Measurable τ)
     (hS : ∀ u : ℝ≥0, Q.real {ω | τ ω ≤ u} = 1 - S u) (D : ℝ≥0 → ℝ) (t : ℕ → ℝ≥0) (R : ℝ)
     (n : ℕ) :
-    (cdsProtectionLeg t R n).value Q D (defaultIndicator τ) = (1 - R) * cdsLossesGrid D S t n := by
+    (cdsProtectionLeg t R n).value Q (fun t _ ↦ D t) (defaultIndicator τ)
+      = (1 - R) * cdsLossesGrid D S t n := by
   simp only [Contract.value, pathPV_cdsProtectionLeg, scenarioAt, cdsLossesGrid, Finset.mul_sum]
   rw [integral_finsetSum _ fun i _ ↦
     ((integrable_sub_defaultIndicator hτ (t (i + 1)) (t i)).const_mul _).const_mul _]
@@ -163,7 +165,7 @@ private theorem integrable_pathPV_cdsProtectionLeg (hτ : Measurable τ) (D : �
 losses minus `s` times the grid annuity. -/
 theorem value_cdsBuyer (hτ : Measurable τ) (hS : ∀ u : ℝ≥0, Q.real {ω | τ ω ≤ u} = 1 - S u)
     (D : ℝ≥0 → ℝ) (t : ℕ → ℝ≥0) (s R : ℝ) (n : ℕ) :
-    (cdsBuyer t s R n).value Q D (defaultIndicator τ)
+    (cdsBuyer t s R n).value Q (fun t _ ↦ D t) (defaultIndicator τ)
       = (1 - R) * cdsLossesGrid D S t n - s * cdsAnnuityGrid D S t n := by
   have hprem : Integrable (fun ω ↦ (Contract.scale (-1) (cdsPremiumLeg t s n)).pathPV D
       (scenarioAt (defaultIndicator τ) ω)) Q := by
@@ -177,7 +179,7 @@ theorem value_cdsBuyer (hτ : Measurable τ) (hS : ∀ u : ℝ≥0, Q.real {ω |
 theorem value_cdsBuyer_eq_zero_iff (hτ : Measurable τ)
     (hS : ∀ u : ℝ≥0, Q.real {ω | τ ω ≤ u} = 1 - S u) (D : ℝ≥0 → ℝ) (t : ℕ → ℝ≥0) (s R : ℝ)
     (n : ℕ) (hA : cdsAnnuityGrid D S t n ≠ 0) :
-    (cdsBuyer t s R n).value Q D (defaultIndicator τ) = 0
+    (cdsBuyer t s R n).value Q (fun t _ ↦ D t) (defaultIndicator τ) = 0
       ↔ s = cdsParSpreadGrid D S t R n := by
   rw [value_cdsBuyer hτ hS, cdsParSpreadGrid, eq_div_iff hA, sub_eq_zero, eq_comm]
 
@@ -225,7 +227,7 @@ identity of Bochner integrals with no integrability assumed: when the integrand 
 both sides are `0`. -/
 theorem value_cdsProtectionAtDefault (D : ℝ≥0 → ℝ) (τ : Ω → ℝ) (T : ℝ≥0)
     (R : ℝ) :
-    (cdsProtectionAtDefault T R).value μ D (defaultIndicator τ)
+    (cdsProtectionAtDefault T R).value μ (fun t _ ↦ D t) (defaultIndicator τ)
       = (1 - R) * ∫ ω, (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal) (τ ω) ∂μ := by
   rw [Contract.value, ← integral_const_mul]
   refine integral_congr_ae (ae_of_all _ fun ω ↦ ?_)
@@ -267,7 +269,7 @@ theorem value_cdsBuyer_coxDefaultTime (hh : Continuous h) (hpos : ∀ s, 0 < h s
     (hdiv : Filter.Tendsto (cumHazard h) Filter.atTop Filter.atTop) {ξ : Ω → ℝ}
     (hξmeas : Measurable ξ) (hξlaw : Measure.map ξ μ = expMeasure 1) (D : ℝ≥0 → ℝ)
     (t : ℕ → ℝ≥0) (s R : ℝ) (n : ℕ) :
-    (cdsBuyer t s R n).value μ D (defaultIndicator (coxDefaultTime h ξ))
+    (cdsBuyer t s R n).value μ (fun t _ ↦ D t) (defaultIndicator (coxDefaultTime h ξ))
       = (1 - R) * cdsLossesGrid D (hazardSurvival h) t n
         - s * cdsAnnuityGrid D (hazardSurvival h) t n :=
   value_cdsBuyer (measurable_coxDefaultTime hh hpos hξmeas)
@@ -310,7 +312,7 @@ cumulative hazard, the contract that pays `1 − R` at the first time the defaul
 theorem value_cdsProtectionAtDefault_coxDefaultTime (hh : Continuous h) (hpos : ∀ s, 0 < h s)
     (hdiv : Filter.Tendsto (cumHazard h) Filter.atTop Filter.atTop) {ξ : Ω → ℝ}
     (hξmeas : Measurable ξ) (hξlaw : Measure.map ξ μ = expMeasure 1) (r R : ℝ) (T : ℝ≥0) :
-    (cdsProtectionAtDefault T R).value μ (fun u : ℝ≥0 ↦ Real.exp (-(r * u)))
+    (cdsProtectionAtDefault T R).value μ (fun (u : ℝ≥0) _ ↦ Real.exp (-(r * u)))
         (defaultIndicator (coxDefaultTime h ξ))
       = protectionLeg R r h T := by
   rw [value_cdsProtectionAtDefault,

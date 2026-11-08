@@ -66,7 +66,7 @@ theorem value_exchangeOption {P : Measure Ω} [IsProbabilityMeasure P]
     (hcov : cov[W₁, W₂; P] = ρ)
     (hS1 : 0 < S1) (hS2 : 0 < S2) (hσeff : 0 < σeff) (hT : 0 < (T : ℝ))
     (hσeff_sq : σeff ^ 2 = σ₁ ^ 2 + σ₂ ^ 2 - 2 * ρ * σ₁ * σ₂) :
-    (exchangeOption T).value P (fun _ ↦ Real.exp (-(r * T)))
+    (exchangeOption T).value P (fun _ _ ↦ Real.exp (-(r * T)))
         (assets₂ S1 S2 r σ₁ σ₂ T W₁ W₂)
       = margrabePrice S1 S2 σeff T := by
   rw [exchangeOption, Contract.value_pay]

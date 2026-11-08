@@ -2155,6 +2155,18 @@ than definitionally, since `driftContinuousMod 0` is a `limUnder` along a chosen
 #guard_msgs in
 #print axioms MathFin.isGreatest_integral_mul_expectedShortfall
 
+/-- info: 'MathFin.isCoherentRiskMeasure_superhedgingPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.isCoherentRiskMeasure_superhedgingPrice
+
+/-- info: 'MathFin.le_superhedgingPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.le_superhedgingPrice
+
+/-- info: 'MathFin.representingSet_expectedShortfall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.representingSet_expectedShortfall
+
 /-- info: 'MathFin.expectedShortfall_of_hasLaw_gaussianReal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.expectedShortfall_of_hasLaw_gaussianReal
@@ -2407,6 +2419,10 @@ bounded-coefficient process class. -/
 #guard_msgs in
 #print axioms MathFin.Contracts.Contract.value
 
+/-- info: 'MathFin.Market.price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Market.price
+
 /-- info: 'MathFin.zcb' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.zcb
@@ -2551,9 +2567,9 @@ bounded-coefficient process class. -/
 #guard_msgs in
 #print axioms MathFin.JumpDiffusionHyp.call_eq_integral_bsV
 
-/-- info: 'MathFin.Contracts.valueDisc_caplet_black76' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.Contracts.value_caplet_black76' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
-#print axioms MathFin.Contracts.valueDisc_caplet_black76
+#print axioms MathFin.Contracts.value_caplet_black76
 
 /-- info: 'MathFin.Contracts.pathPV_fixedFlows_zcb' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in

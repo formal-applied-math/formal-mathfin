@@ -61,6 +61,8 @@ import MathFin.Probability.Dependence.GaussianCopula
 import MathFin.Risk.ValueAtRisk
 import MathFin.Risk.Coherent
 import MathFin.Risk.ExpectedShortfall
+import MathFin.Risk.Superhedging
+import MathFin.Risk.AcceptanceSet
 import MathFin.Risk.CompoundPoissonCVaR
 import MathFin.Contracts.Core
 import MathFin.Pricing.Value
@@ -707,6 +709,25 @@ attribute [blueprint "thm:expected-shortfall-coherent" (title := "Expected short
   integrable losses. -/)]
   MathFin.expectedShortfall_isCoherentRiskMeasure
 
+attribute [blueprint "thm:expected-shortfall-dual-set"
+  (title := "Expected shortfall's representing set")
+  (statement := /-- On a finite probability space $(\iota, P)$ and for $\alpha \in (0,1)$, the
+  representing set of $\mathrm{ES}_\alpha$ in the Artzner--Delbaen--Eber--Heath representation is
+  exactly the set of probability vectors $q$ with $q_i \le (1-\alpha)^{-1} P\{i\}$, the
+  probability densities bounded by $(1-\alpha)^{-1}$. -/)]
+  MathFin.representingSet_expectedShortfall
+
+attribute [blueprint "thm:coherent-risk-representation" (title := "Representation of a coherent risk measure")
+  (statement := /-- On a finite state space a coherent risk measure $\rho$ of losses is the least
+  upper bound of the expected losses $\sum_i q_i L_i$ over its representing set of probability
+  vectors. -/)]
+  MathFin.coherentRisk_isLUB
+
+attribute [blueprint "thm:expected-shortfall-dual" (title := "Dual form of expected shortfall")
+  (statement := /-- For an integrable loss $X$ and $\alpha \in (0,1)$, $\mathrm{ES}_\alpha(X)$ is
+  the greatest value of $E[DX]$ over densities $0 \le D \le (1-\alpha)^{-1}$ with $E[D]=1$. -/)]
+  MathFin.isGreatest_integral_mul_expectedShortfall
+
 attribute [blueprint "thm:cvar-rockafellar-uryasev" (title := "CVaR of a compound-Poisson loss")
   (statement := /-- For $L = \sum_{i<N} X_i$ with $N \sim \mathrm{Poisson}(\lambda)$ independent of
   identically distributed integrable claims $X_i$, and $\alpha \in (0,1)$, $\mathrm{ES}_\alpha(L)$
@@ -852,7 +873,7 @@ attribute [blueprint "thm:black76-caplet" (title := "Caplet as a Black-76 call u
   (statement := /-- If the simple rate $L(T_0,T_1)$ is lognormal under the $T_1$-forward measure
   (a hypothesis, not derived from a rate model), the caplet is worth
   $P(0,T_1)\,\delta\,[F\Phi(d_1) - K\Phi(d_2)]$. -/)]
-  MathFin.Contracts.valueDisc_caplet_black76
+  MathFin.Contracts.value_caplet_black76
 
 attribute [blueprint "thm:level-payments-annuity" (title := "Level payments are an annuity")
   (statement := /-- $n$ payments of $c$ at $\Delta t, \dots, n\Delta t$, discounted by the
@@ -911,3 +932,26 @@ attribute [blueprint "thm:two-asset-min-variance" (title := "The two-asset weigh
   (statement := /-- When $D = \sigma_1^2 - 2\rho\sigma_1\sigma_2 + \sigma_2^2 > 0$, the closed-form
   weight $w^*$ gives $(w^*, 1-w^*)$ the least portfolio variance among all two-asset budgets. -/)]
   MathFin.portfolioVarN_minVarWeightTwo_le
+
+attribute [blueprint "def:pricing-functional" (title := "The pricing functional")
+  (statement := /-- A market is a filtered space with traded assets and a positive numéraire. A
+  pricing measure up to $T$ is a probability measure equivalent to the reference measure on
+  $\mathcal F_T$ under which every deflated asset, frozen at $T$, is a martingale, and the price of
+  a contract under it is the expectation of its deflated cash flows. State-price pricing, the
+  change of numéraire, the conditional bond price, superreplication and gains-neutral measures are
+  instances. -/)]
+  MathFin.Market.price
+
+attribute [blueprint "thm:superhedging-coherent"
+  (title := "The superhedging price is a coherent risk measure")
+  (statement := /-- In the one-period finite-state market with a martingale probability vector, and
+  for a reference measure charging every state, the superhedging price of a claim, read as a
+  loss, is monotone, cash-invariant, positively homogeneous and subadditive. The equality with
+  the supremum of the martingale prices is not part of this statement. -/)]
+  MathFin.isCoherentRiskMeasure_superhedgingPrice
+
+attribute [blueprint "thm:superhedging-price-lower-bound"
+  (title := "The superhedging price dominates every martingale price")
+  (statement := /-- For every martingale probability vector $q$ and every claim $Y$,
+  $\sum_n q_n Y_n$ is at most the superhedging price of $Y$. -/)]
+  MathFin.le_superhedgingPrice

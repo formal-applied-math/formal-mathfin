@@ -111,7 +111,7 @@ backward-induction price `binomialPrice u d ρ g N S₀`. -/
 theorem value_pay_eq_binomialPrice (hqcrr : crrUpProb u d ρ = q) (S₀ : ℝ) {T : ℝ≥0} {N : ℕ}
     (hTN : (T : ℝ) / h = N) {a : Payoff Unit} {g : ℝ → ℝ}
     (hg : ∀ s : Scenario Unit, a.eval s = g (s () T)) :
-    (Contract.pay T a).value (coinFlipMeasure q hq) (discount ρ h) (assets S₀ u d h)
+    (Contract.pay T a).value (coinFlipMeasure q hq) (fun t _ ↦ discount ρ h t) (assets S₀ u d h)
       = binomialPrice u d ρ g N S₀ := by
   rw [Contract.value_pay, binomialPrice_eq_integral_coinFlipMeasure u d ρ g hq hqcrr N S₀]
   simp only [hg, scenarioAt, assets, discount, hTN, Nat.floor_natCast]
@@ -130,19 +130,19 @@ include hqcrr hTN
 
 /-- The European call's binomial value is the tree price of `max (S − K) 0`. -/
 theorem value_europeanCall :
-    (europeanCall K T).value (coinFlipMeasure q hq) (discount ρ h) (assets S₀ u d h)
+    (europeanCall K T).value (coinFlipMeasure q hq) (fun t _ ↦ discount ρ h t) (assets S₀ u d h)
       = binomialPrice u d ρ (fun S ↦ max (S - K) 0) N S₀ :=
   value_pay_eq_binomialPrice hq hqcrr S₀ hTN fun _ ↦ rfl
 
 /-- The European put's binomial value is the tree price of `max (K − S) 0`. -/
 theorem value_europeanPut :
-    (europeanPut K T).value (coinFlipMeasure q hq) (discount ρ h) (assets S₀ u d h)
+    (europeanPut K T).value (coinFlipMeasure q hq) (fun t _ ↦ discount ρ h t) (assets S₀ u d h)
       = binomialPrice u d ρ (fun S ↦ max (K - S) 0) N S₀ :=
   value_pay_eq_binomialPrice hq hqcrr S₀ hTN fun _ ↦ rfl
 
 /-- The cash-or-nothing digital call's binomial value is the tree price of `𝟙{S > K}`. -/
 theorem value_digitalCall :
-    (digitalCall K T).value (coinFlipMeasure q hq) (discount ρ h) (assets S₀ u d h)
+    (digitalCall K T).value (coinFlipMeasure q hq) (fun t _ ↦ discount ρ h t) (assets S₀ u d h)
       = binomialPrice u d ρ (fun S ↦ if K < S then 1 else 0) N S₀ :=
   value_pay_eq_binomialPrice hq hqcrr S₀ hTN fun _ ↦ rfl
 
@@ -150,7 +150,7 @@ theorem value_digitalCall :
 is a martingale (`binomialPrice_id`) and cash is discounted at `ρ` per step
 (`binomialPrice_const`). -/
 theorem value_forward (hna : BinomialNoArb u d ρ) :
-    (forward K T).value (coinFlipMeasure q hq) (discount ρ h) (assets S₀ u d h)
+    (forward K T).value (coinFlipMeasure q hq) (fun t _ ↦ discount ρ h t) (assets S₀ u d h)
       = S₀ - K * Real.exp (-(ρ * N)) := by
   rw [forward, value_pay_eq_binomialPrice hq hqcrr S₀ hTN (g := fun S ↦ S + -K)
       fun _ ↦ sub_eq_add_neg _ _,
@@ -162,7 +162,7 @@ theorem value_forward (hna : BinomialNoArb u d ρ) :
 Unlike its Black–Scholes counterpart it needs no integrability argument, since every fixed-date
 contract is integrable in this model (`integrable_pathPV`). -/
 theorem value_cappedCall (K₂ : ℝ) :
-    (cappedCall K K₂ T).value (coinFlipMeasure q hq) (discount ρ h) (assets S₀ u d h)
+    (cappedCall K K₂ T).value (coinFlipMeasure q hq) (fun t _ ↦ discount ρ h t) (assets S₀ u d h)
       = binomialPrice u d ρ (fun S ↦ max (S - K) 0) N S₀
         - binomialPrice u d ρ (fun S ↦ max (S - K₂) 0) N S₀ := by
   rw [cappedCall, Contract.value_both _ _ _ _ _
@@ -187,7 +187,8 @@ theorem pathPV_eq_value_add_gains (hna : BinomialNoArb u d ρ) (hS₀ : S₀ ≠
     {g : ℝ → ℝ} (hg : ∀ s : Scenario Unit, a.eval s = g (s () T)) :
     ∃ H : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ H (n + 1)) ∧ ∀ ω,
       (Contract.pay T a).pathPV (discount ρ h) (scenarioAt (assets S₀ u d h) ω)
-        = (Contract.pay T a).value (coinFlipMeasure q hq) (discount ρ h) (assets S₀ u d h)
+        = (Contract.pay T a).value (coinFlipMeasure q hq) (fun t _ ↦ discount ρ h t)
+            (assets S₀ u d h)
           + martingaleTransform H (discountedSpot S₀ u d ρ) N ω := by
   obtain ⟨H, hH, hrep⟩ := binomialPrice_replication hna hS₀ g N
   refine ⟨H, hH, fun ω ↦ ?_⟩
@@ -213,7 +214,7 @@ lemma binomialPrice_callPut_parity {u d r K : ℝ} (h : BinomialNoArb u d r) (n 
   have hq : (⟨crrUpProb u d r, hp.1.le⟩ : ℝ≥0) ≤ 1 := hp.2.le
   have hTN : (((n : ℝ≥0) : ℝ)) / 1 = n := by simp
   have := value_europeanCall_eq_put_add_forward (K := K) (T := (n : ℝ≥0))
-    (coinFlipMeasure _ hq) (Binomial.discount r 1) (Binomial.assets S u d 1)
+    (coinFlipMeasure _ hq) (fun t _ ↦ Binomial.discount r 1 t) (Binomial.assets S u d 1)
     (Binomial.integrable_pathPV hq S u d 1 _ (c := europeanPut K n) trivial)
     (Binomial.integrable_pathPV hq S u d 1 _ (c := forward K n) trivial)
   rw [Binomial.value_europeanCall hq rfl S K hTN, Binomial.value_europeanPut hq rfl S K hTN,

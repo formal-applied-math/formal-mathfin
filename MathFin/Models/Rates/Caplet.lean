@@ -10,6 +10,7 @@ public import MathFin.Models.Rates.ShortRate
 public import MathFin.Models.Rates.FRA
 public import MathFin.Pricing.ForwardMeasure
 public import MathFin.Models.Forwards.Black76
+public import MathFin.Pricing.Market
 
 /-!
 # Caplets and caps, on the bond prices of a stochastic discount factor
@@ -22,15 +23,15 @@ model `X` carries them as observed processes. `BondModel` says the underlying `b
 
 * A **caplet** pays `δ (L(T₀, T₁) − K)⁺` at `T₁` (`caplet`, a one-cash-flow `Contract`). In
   every `BondModel` it is worth `(1 + δK)` puts on `P(T₀, T₁)`, struck at `1/(1 + δK)` and
-  expiring at `T₀` (`valueDisc_caplet_eq_bondPut`): the tower property turns the discount factor
+  expiring at `T₀` (`value_caplet_eq_bondPut`): the tower property turns the discount factor
   `D T₁` into `D T₀ · P(T₀, T₁)`, and `P · δ (L − K)⁺ = (1 − (1 + δK) P)⁺`.
-* A **cap** is its schedule of caplets (`cap`), worth their sum (`valueDisc_cap`), hence
-  `(1 + δK)` times a strip of bond puts (`valueDisc_cap_eq_bondPuts`).
+* A **cap** is its schedule of caplets (`cap`), worth their sum (`value_cap`), hence
+  `(1 + δK)` times a strip of bond puts (`value_cap_eq_bondPuts`).
 * **Black-76.** If `L(T₀, T₁)` is lognormal under the `T₁`-forward measure
   (`forwardMeasure`), the caplet is worth `P(0, T₁) · blackCaplet F K σ T δ`
-  (`valueDisc_caplet_black76`), consuming `black_futures_formula` and the change of numéraire
+  (`value_caplet_black76`), consuming `black_futures_formula` and the change of numéraire
   `forwardMeasure_price`; with a `BondModel`, `F` is the forward rate of the zero curve
-  (`BondModel.integral_libor_forward`, `valueDisc_caplet_black76_forwardRate`).
+  (`BondModel.integral_libor_forward`, `value_caplet_black76_forwardRate`).
 
 ## What is not here
 
@@ -53,9 +54,9 @@ hypothesis.
 
 * `integral_discount_mul_eq_forward` (pricing at the forward measure),
   `HasBondPrice.integral_discount` and `HasBondPrice.integral_discount_mul` (the tower property),
-  `bond_mul_capletPayoff`, `valueDisc_caplet_eq_bondPut`, `valueDisc_cap`,
-  `valueDisc_cap_eq_bondPuts`, `valueDisc_caplet_black76`, `BondModel.integral_libor_forward`,
-  `valueDisc_caplet_black76_forwardRate`.
+  `bond_mul_capletPayoff`, `value_caplet_eq_bondPut`, `value_cap`,
+  `value_cap_eq_bondPuts`, `value_caplet_black76`, `BondModel.integral_libor_forward`,
+  `value_caplet_black76_forwardRate`.
 
 ## References
 
@@ -88,6 +89,13 @@ variable {ι Ω : Type*} {mΩ : MeasurableSpace Ω}
 noncomputable def bondPrice (Q : Measure Ω) (𝓕 : Filtration ℝ≥0 mΩ) (D : ℝ≥0 → Ω → ℝ)
     (t T : ℝ≥0) : Ω → ℝ :=
   fun ω ↦ (Q[D T | 𝓕 t]) ω / D t ω
+
+/-- **The bond price is the price at `t` of one unit paid at `T`**: in a market whose deflator
+`N 0 / N t` is the discount factor, `P(t, T)` is `Market.priceAt` of the payment of `1` at `T`. -/
+theorem bondPrice_deflator_eq_priceAt (M : Market ι Ω) (Q : Measure Ω) (t T : ℝ≥0) :
+    bondPrice Q M.𝓕 M.deflator t T = M.priceAt Q t (.pay T (.const 1)) := by
+  funext ω
+  simp [Market.priceAt, bondPrice, Contract.pathPV, Contract.cashflows, Payoff.eval]
 
 /-- The payoff of a **caplet**: `δ (L − K)⁺`, where the underlying `ℓ` carries the
 simply-compounded forward rate `L(T₀, T₁)`, observed at its reset date `T₀`. -/
@@ -201,15 +209,15 @@ bond prices, the caplet paying `δ (L(T₀, T₁) − K)⁺` at `T₁` is worth 
 `P(T₀, T₁)` struck at `1/(1 + δK)` and expiring at `T₀`: pay `P(T₀, T₁) · δ (L − K)⁺` at `T₀`,
 which is `(1 − (1 + δK) P)⁺`, since `δ L = 1/P − 1`. The bond price `P(T₀, T₁)` is the
 conditional expectation `bondPrice` of the discount factor, not a deterministic curve. -/
-theorem valueDisc_caplet_eq_bondPut (h : BondModel Q 𝓕 D X b ℓ T₀ T₁ δ) {K : ℝ}
+theorem value_caplet_eq_bondPut (h : BondModel Q 𝓕 D X b ℓ T₀ T₁ δ) {K : ℝ}
     (hK : 0 < 1 + δ * K)
     (hint : Integrable (fun ω ↦ D T₁ ω * (δ * max (X ℓ T₀ ω - K) 0)) Q) :
-    (caplet ℓ T₀ T₁ δ K).valueDisc Q D X
-      = (1 + δ * K) * (bondPut b T₀ (1 / (1 + δ * K))).valueDisc Q D X := by
+    (caplet ℓ T₀ T₁ δ K).value Q D X
+      = (1 + δ * K) * (bondPut b T₀ (1 / (1 + δ * K))).value Q D X := by
   have hY : StronglyMeasurable[𝓕 T₀] fun ω ↦ δ * max (X ℓ T₀ ω - K) 0 :=
     (show Continuous fun x : ℝ ↦ δ * max (x - K) 0 by fun_prop).comp_stronglyMeasurable
       h.libor_meas
-  simp only [caplet, bondPut, Contract.valueDisc_pay, capletPayoff, Payoff.eval, scenarioAt]
+  simp only [caplet, bondPut, Contract.value_pay, capletPayoff, Payoff.eval, scenarioAt]
   rw [h.integral_discount_mul hY hint, ← integral_const_mul]
   refine integral_congr_ae ?_
   filter_upwards [h.libor_eq, h.bond_pos] with ω hL hP
@@ -221,27 +229,27 @@ theorem valueDisc_caplet_eq_bondPut (h : BondModel Q 𝓕 D X b ℓ T₀ T₁ δ
 omit [IsProbabilityMeasure Q] in
 /-- **A cap is the sum of its caplets**, in every model in which each caplet's discounted payoff
 is integrable. -/
-theorem valueDisc_cap (ℓ : ℕ → ι) (T : ℕ → ℝ≥0) (δ K : ℝ) (n : ℕ)
+theorem value_cap (ℓ : ℕ → ι) (T : ℕ → ℝ≥0) (δ K : ℝ) (n : ℕ)
     (hint : ∀ i < n, Integrable
       (fun ω ↦ D (T (i + 1)) ω * (δ * max (X (ℓ i) (T i) ω - K) 0)) Q) :
-    (cap ℓ T δ K n).valueDisc Q D X
-      = ∑ i ∈ Finset.range n, (caplet (ℓ i) (T i) (T (i + 1)) δ K).valueDisc Q D X :=
-  Contract.valueDisc_payFlows Q D X _ _ n fun i hi ↦ by
+    (cap ℓ T δ K n).value Q D X
+      = ∑ i ∈ Finset.range n, (caplet (ℓ i) (T i) (T (i + 1)) δ K).value Q D X :=
+  Contract.value_payFlows Q D X _ _ n fun i hi ↦ by
     simpa [capletPayoff, Payoff.eval, scenarioAt] using hint i hi
 
 /-- **A cap is `(1 + δK)` times a strip of bond puts.** In a model with bond prices at each
 reset date, the cap with accrual `δ` and strike `K` is worth `(1 + δK)` times the sum of the
 puts on `P(Tᵢ, Tᵢ₊₁)` struck at `1/(1 + δK)` and expiring at `Tᵢ`. -/
-theorem valueDisc_cap_eq_bondPuts (b ℓ : ℕ → ι) (T : ℕ → ℝ≥0) {δ K : ℝ} (n : ℕ)
+theorem value_cap_eq_bondPuts (b ℓ : ℕ → ι) (T : ℕ → ℝ≥0) {δ K : ℝ} (n : ℕ)
     (h : ∀ i < n, BondModel Q 𝓕 D X (b i) (ℓ i) (T i) (T (i + 1)) δ) (hK : 0 < 1 + δ * K)
     (hint : ∀ i < n, Integrable
       (fun ω ↦ D (T (i + 1)) ω * (δ * max (X (ℓ i) (T i) ω - K) 0)) Q) :
-    (cap ℓ T δ K n).valueDisc Q D X
+    (cap ℓ T δ K n).value Q D X
       = (1 + δ * K) * ∑ i ∈ Finset.range n,
-          (bondPut (b i) (T i) (1 / (1 + δ * K))).valueDisc Q D X := by
-  rw [valueDisc_cap ℓ T δ K n hint, Finset.mul_sum]
+          (bondPut (b i) (T i) (1 / (1 + δ * K))).value Q D X := by
+  rw [value_cap ℓ T δ K n hint, Finset.mul_sum]
   exact Finset.sum_congr rfl fun i hi ↦
-    valueDisc_caplet_eq_bondPut (h i (Finset.mem_range.1 hi)) hK (hint i (Finset.mem_range.1 hi))
+    value_caplet_eq_bondPut (h i (Finset.mem_range.1 hi)) hK (hint i (Finset.mem_range.1 hi))
 
 /-- **The caplet is `P(0, T₁)` times a Black-76 call on the forward rate**, under the
 `T₁`-forward measure `Q'` (`forwardMeasure` for the bank account `1/D T₁`). If the simple rate
@@ -249,12 +257,12 @@ theorem valueDisc_cap_eq_bondPuts (b ℓ : ℕ → ι) (T : ℕ → ℝ≥0) {δ
 caplet is worth `P(0, T₁) · δ · [F Φ(d₁) − K Φ(d₂)]`, which is `blackCaplet`
 (`Models/Forwards/Black76.lean`). The lognormality of `L` under `Q'` is a hypothesis, not derived
 from a short-rate model, and `F` is the mean of `L` under `Q'`. -/
-theorem valueDisc_caplet_black76 {Q' : Measure Ω} [IsProbabilityMeasure Q']
+theorem value_caplet_black76 {Q' : Measure Ω} [IsProbabilityMeasure Q']
     (hQ' : Q' = forwardMeasure Q fun ω ↦ 1 / D T₁ ω) (hD : ∀ ω, 0 < D T₁ ω)
     (hDm : Measurable (D T₁)) (hDi : Integrable (D T₁) Q) {F K σ T : ℝ} {Z : Ω → ℝ}
     (hZ : BSCallHyp Q' F K 0 σ T Z)
     (hL : X ℓ T₀ =ᵐ[Q'] fun ω ↦ bsTerminal F 0 σ T (Z ω)) :
-    (caplet ℓ T₀ T₁ δ K).valueDisc Q D X = zeroCurve Q D T₁ * blackCaplet F K σ T δ := by
+    (caplet ℓ T₀ T₁ δ K).value Q D X = zeroCurve Q D T₁ * blackCaplet F K σ T δ := by
   subst hQ'
   obtain ⟨-, key⟩ := integral_discount_mul_eq_forward hD hDm hDi
     (fun ω ↦ δ * max (X ℓ T₀ ω - K) 0)
@@ -264,7 +272,7 @@ theorem valueDisc_caplet_black76 {Q' : Measure Ω} [IsProbabilityMeasure Q']
         = F * Phi (bsd1 F K 0 σ T) - K * Phi (bsd2 F K 0 σ T) by
       simpa using black_futures_formula hZ 0, ← integral_const_mul]
     exact integral_congr_ae (hL.mono fun ω hω ↦ by simp only [hω])
-  simp only [caplet, Contract.valueDisc_pay, capletPayoff, Payoff.eval, scenarioAt, blackCaplet]
+  simp only [caplet, Contract.value_pay, capletPayoff, Payoff.eval, scenarioAt, blackCaplet]
   rw [← key, e3]
   rfl
 
@@ -294,23 +302,23 @@ theorem BondModel.integral_libor_forward (h : BondModel Q 𝓕 D X b ℓ T₀ T�
   linear_combination key
 
 /-- **The Black-76 caplet formula, at the forward rate of the zero curve.** Under the hypotheses
-of `valueDisc_caplet_black76` and a model with bond prices, the caplet is worth
+of `value_caplet_black76` and a model with bond prices, the caplet is worth
 `P(0, T₁) · blackCaplet F K σ T δ` with `F = (P(0, T₀)/P(0, T₁) − 1)/δ`, the forward rate of the
 zero curve. -/
-theorem valueDisc_caplet_black76_forwardRate (h : BondModel Q 𝓕 D X b ℓ T₀ T₁ δ)
+theorem value_caplet_black76_forwardRate (h : BondModel Q 𝓕 D X b ℓ T₀ T₁ δ)
     {Q' : Measure Ω} [IsProbabilityMeasure Q']
     (hQ' : Q' = forwardMeasure Q fun ω ↦ 1 / D T₁ ω) (hD : ∀ ω, 0 < D T₁ ω)
     (hDm : Measurable (D T₁)) (hD0 : Integrable (D T₀) Q)
     (hint : Integrable (fun ω ↦ D T₁ ω * X ℓ T₀ ω) Q) {K σ T : ℝ} {Z : Ω → ℝ}
     {F : ℝ} (hZ : BSCallHyp Q' F K 0 σ T Z)
     (hL : X ℓ T₀ =ᵐ[Q'] fun ω ↦ bsTerminal F 0 σ T (Z ω)) :
-    (caplet ℓ T₀ T₁ δ K).valueDisc Q D X
+    (caplet ℓ T₀ T₁ δ K).value Q D X
       = zeroCurve Q D T₁ * blackCaplet
           (fraForwardRate (zeroCurve Q D T₀) (zeroCurve Q D T₁) δ) K σ T δ := by
   have hF : F = fraForwardRate (zeroCurve Q D T₀) (zeroCurve Q D T₁) δ := by
     rw [← h.integral_libor_forward hQ' hD hDm hD0 hint, integral_congr_ae hL]
     simpa using (discounted_terminal_eq_S0 hZ).symm
   rw [← hF]
-  exact valueDisc_caplet_black76 hQ' hD hDm h.integrable_D hZ hL
+  exact value_caplet_black76 hQ' hD hDm h.integrable_D hZ hL
 
 end MathFin.Contracts

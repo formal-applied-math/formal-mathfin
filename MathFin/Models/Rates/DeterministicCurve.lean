@@ -17,7 +17,7 @@ public import MathFin.Models.Rates.FRA
 On a deterministic discount curve the library's fixed-income closed forms are the values of
 contracts. A coupon bond is a schedule of fixed cash flows (`fixedFlows`,
 `Contracts/Instruments/FixedIncome.lean`), and in every model it is worth the sum of its
-discounted flows (`value_fixedFlows`):
+discounted flows (`value_fixedFlows_deterministic`):
 
 * discounted at a yield `y`, with integer payment times, it is `bondPriceDisc`
   (`pathPV_fixedFlows_yieldDiscount`), the price the durations and convexities of
@@ -134,9 +134,9 @@ theorem pathPV_fixedLeg (K : ℝ) (s : Scenario ι) :
 floating leg `P(T₀) − P(Tₙ)` less `K` times the annuity. -/
 theorem value_payerSwap {Q : Measure Ω} [IsProbabilityMeasure Q] (X : ι → ℝ≥0 → Ω → ℝ)
     (hδ : δ ≠ 0) (hP : ∀ i, P (T i) ≠ 0) (K : ℝ) :
-    (payerSwap P T δ n K : Contract ι).value Q P X
+    (payerSwap P T δ n K : Contract ι).value Q (fun t _ ↦ P t) X
       = payerSwapValue (P (T 0)) (P (T n)) K (annuity δ (fun i ↦ P (T (i + 1))) (Finset.range n)) :=
-  Contract.value_eq_of_pathPV_eq X fun s ↦ by
+  Contract.value_eq_of_pathPV_eq X fun _ ↦ by
     rw [payerSwap, Contract.pathPV_both, Contract.pathPV_scale, pathPV_floatingLeg n hδ hP,
       pathPV_fixedLeg, payerSwapValue]
     ring
@@ -147,7 +147,7 @@ fixed coupon is `δK`, both paid at `T₁`; its value in every model is `fraValu
 (`Models/Rates/FRA.lean`): `δ · P(T₁) · (F − K)`. -/
 theorem value_payerSwap_one_eq_fraValue {Q : Measure Ω} [IsProbabilityMeasure Q]
     (X : ι → ℝ≥0 → Ω → ℝ) (hδ : δ ≠ 0) (hP : ∀ i, P (T i) ≠ 0) (K : ℝ) :
-    (payerSwap P T δ 1 K : Contract ι).value Q P X
+    (payerSwap P T δ 1 K : Contract ι).value Q (fun t _ ↦ P t) X
       = fraValue δ (P (T 1)) (fraForwardRate (P (T 0)) (P (T 1)) δ) K := by
   rw [value_payerSwap 1 X hδ hP, fraValue_forwardRate_eq_discount_difference _ _ _ _ hδ (hP 1),
     payerSwapValue, annuity]
@@ -158,7 +158,7 @@ theorem value_payerSwap_one_eq_fraValue {Q : Measure Ω} [IsProbabilityMeasure Q
 theorem value_payerSwap_eq_zero_iff {Q : Measure Ω} [IsProbabilityMeasure Q]
     (X : ι → ℝ≥0 → Ω → ℝ) (hδ : δ ≠ 0) (hP : ∀ i, P (T i) ≠ 0)
     (hA : annuity δ (fun i ↦ P (T (i + 1))) (Finset.range n) ≠ 0) (K : ℝ) :
-    (payerSwap P T δ n K : Contract ι).value Q P X = 0
+    (payerSwap P T δ n K : Contract ι).value Q (fun t _ ↦ P t) X = 0
       ↔ K = parSwapRate (P (T 0)) (P (T n))
         (annuity δ (fun i ↦ P (T (i + 1))) (Finset.range n)) := by
   rw [value_payerSwap n X hδ hP]
