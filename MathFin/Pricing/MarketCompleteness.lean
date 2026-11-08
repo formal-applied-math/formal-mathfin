@@ -8,6 +8,7 @@ module
 public import MathFin.Probability.Brownian.MartingaleRepresentation
 public import MathFin.Pricing.ReplicationPricing
 public import MathFin.Pricing.EquivMartingaleMeasure
+public import MathFin.Pricing.Market
 
 /-!
 # Market completeness: replication, superreplication, and the pricing measure
@@ -99,6 +100,12 @@ implies the other.
 * `measure_eq_of_pricesGainsAtZero` — and agrees with `μ` on `𝓕ᴮ_T`.
 * `emm_unique_of_complete` — **EMM uniqueness from completeness**, on `IsEMM`: two EMMs that both
   satisfy `PricesGainsAtZero` agree on `𝓕ᴮ_T` (that hypothesis is not derived from `IsEMM`).
+* `Market.IsPricingMeasure.of_pricesGainsAtZero` — on the trunk: in a market on `𝓕ᴮ` for which
+  `μ` is a pricing measure up to `T`, so is every measure dominated by `μ` that prices the traded
+  gains at zero.
+* `Market.superReplicationPrice_eq_price` — the superreplication price of a contract whose
+  deflated present value is in `L²` and known at `T` is its price `Market.price` under every such
+  measure.
 
 ## References
 
@@ -283,5 +290,53 @@ theorem emm_unique_of_complete (hBmeas : ∀ t, Measurable (B t))
   have := h₂.isProb
   (measure_eq_of_pricesGainsAtZero hB hBmeas hBcont T h₁.ac hg₁ hA).trans
     (measure_eq_of_pricesGainsAtZero hB hBmeas hBcont T h₂.ac hg₂ hA).symm
+
+/-! ### On the trunk: the market's pricing measure and its price -/
+
+open Contracts
+
+/-- The superreplication price sees its claim only up to `μ`-null sets. -/
+theorem superReplicationPrice_congr_ae (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {H H' : Ω → ℝ}
+    (hHH' : H =ᵐ[μ] H') :
+    superReplicationPrice hB T hBmeas H = superReplicationPrice hB T hBmeas H' := by
+  simp only [superReplicationPrice]
+  congr 1
+  ext x
+  exact exists_congr fun _ ↦ ⟨hHH'.symm.le.trans, hHH'.le.trans⟩
+
+/-- **A measure that prices the traded gains at zero is a pricing measure** of any market on the
+Brownian information `𝓕ᴮ` up to `T` for which `μ` is one: it agrees with `μ` on `𝓕ᴮ_T`
+(`measure_eq_of_pricesGainsAtZero`), and a pricing measure up to `T` is one only through its
+restriction to `𝓕 T` (`Market.IsPricingMeasure.of_trim_eq`). -/
+theorem Market.IsPricingMeasure.of_pricesGainsAtZero (hBmeas : ∀ t, Measurable (B t))
+    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) {ι : Type*} {M : Market ι Ω} {T : ℝ≥0}
+    (h𝓕 : M.𝓕 T = ItoIntegralL2.natFiltration hBmeas T) (hμ : M.IsPricingMeasure T μ)
+    {Q : Measure Ω} [IsProbabilityMeasure Q] (hQ : Q ≪ μ) (hg : PricesGainsAtZero hB T hBmeas Q) :
+    M.IsPricingMeasure T Q :=
+  hμ.of_trim_eq <| @Measure.ext _ (M.𝓕 T) _ _ fun A hA ↦ by
+    rw [trim_measurableSet_eq _ hA, trim_measurableSet_eq _ hA]
+    exact (measure_eq_of_pricesGainsAtZero hB hBmeas hBcont T hQ hg (h𝓕 ▸ hA)).symm
+
+/-- **The superreplication price of a contract is its price** under every measure dominated by
+`μ` that prices the traded gains at zero, `μ` among them (`pricesGainsAtZero_self`), for a contract
+of any market whose deflated present value is square-integrable and known at `T` on the Brownian
+information. The superreplication price is `𝔼_μ` of the deflated payoff
+(`superReplication_eq_emm_price`), which every such measure shares
+(`integral_eq_of_pricesGainsAtZero`); the price is that expectation by definition. -/
+theorem Market.superReplicationPrice_eq_price (hBmeas : ∀ t, Measurable (B t))
+    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) {ι : Type*} (M : Market ι Ω) (c : Contract ι)
+    {T : ℝ≥0}
+    (hc : MemLp (fun ω ↦ c.pathPV (fun t ↦ M.deflator t ω) (scenarioAt M.asset ω)) 2 μ)
+    (hcT : AEStronglyMeasurable[ItoIntegralL2.natFiltration hBmeas T]
+      (fun ω ↦ c.pathPV (fun t ↦ M.deflator t ω) (scenarioAt M.asset ω)) μ)
+    {Q : Measure Ω} [IsProbabilityMeasure Q] (hQ : Q ≪ μ) (hg : PricesGainsAtZero hB T hBmeas Q) :
+    superReplicationPrice hB T hBmeas
+        (fun ω ↦ c.pathPV (fun t ↦ M.deflator t ω) (scenarioAt M.asset ω))
+      = M.price Q c := by
+  have hT := hcT.congr hc.coeFn_toLp.symm
+  rw [superReplicationPrice_congr_ae hB T hBmeas hc.coeFn_toLp.symm,
+    superReplication_eq_emm_price hB hBmeas hBcont T _ hT,
+    ← integral_eq_of_pricesGainsAtZero hB hBmeas hBcont T hQ hg _ hT, Market.price, Contract.value]
+  exact integral_congr_ae (hQ.ae_le hc.coeFn_toLp)
 
 end MathFin

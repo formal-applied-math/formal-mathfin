@@ -680,6 +680,7 @@ import MathFin.Models.BlackScholes.BlackScholesSDE
 import MathFin.Models.BlackScholes.BlackScholesChooser
 import MathFin.Models.BlackScholes.BlackScholesHedge
 import MathFin.Models.BlackScholes.BlackScholesPhysical
+import MathFin.Models.BlackScholes.Market
 -- The Black–Scholes delta hedge is self-financing: the product rule with the factor e^{rt}
 import MathFin.Models.BlackScholes.BlackScholesSelfFinancing
 import MathFin.Models.Binomial.Binomial

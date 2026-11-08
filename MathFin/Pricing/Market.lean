@@ -166,6 +166,11 @@ theorem measurable_numeraire (M : Market ι Ω) (t : ℝ≥0) : Measurable (M.nu
 theorem measurable_deflator (M : Market ι Ω) (t : ℝ≥0) : Measurable (M.deflator t) :=
   (M.measurable_numeraire 0).div (M.measurable_numeraire t)
 
+/-- Each deflated asset is adapted. -/
+theorem stronglyAdapted_deflated (M : Market ι Ω) (i : ι) : StronglyAdapted M.𝓕 (M.deflated i) :=
+  fun t ↦
+    ((M.asset_adapted i t).measurable.div (M.numeraire_adapted t).measurable).stronglyMeasurable
+
 /-- **A measure equivalent to `P` everywhere is a pricing measure** as soon as every deflated asset,
 frozen at `T`, is a martingale under it. -/
 theorem IsPricingMeasure.of_isEquivProbMeasure {M : Market ι Ω} {T : ℝ≥0} {Q : Measure Ω}

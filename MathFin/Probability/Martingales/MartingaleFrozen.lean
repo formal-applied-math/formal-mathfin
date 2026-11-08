@@ -37,6 +37,8 @@ be equivalent to the reference measure on `𝓕 T` (`Market.IsPricingMeasure`).
 * `martingale_min_of_martingale`: a martingale frozen at any time is one.
 * `martingale_min_of_trim_eq`: a frozen martingale stays one under any measure with the same
   restriction to `𝓕 T`.
+* `MeasureTheory.Martingale.congr_ae`: an adapted process equal almost surely at each time to a
+  martingale is one.
 
 ## Tags
 
@@ -52,6 +54,13 @@ open MeasureTheory
 
 variable {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+
+/-- **An adapted process equal almost surely at each time to a martingale is a martingale**: the
+conditional expectations see the process only up to null sets. -/
+theorem _root_.MeasureTheory.Martingale.congr_ae {ι : Type*} [Preorder ι] {𝓕 : Filtration ι m0}
+    {f g : ι → Ω → E} (hf : Martingale f 𝓕 μ) (hg : StronglyAdapted 𝓕 g)
+    (hfg : ∀ i, f i =ᵐ[μ] g i) : Martingale g 𝓕 μ :=
+  ⟨hg, fun i j hij ↦ (condExp_congr_ae (hfg j)).symm.trans ((hf.2 i j hij).trans (hfg i))⟩
 
 section LinearOrder
 

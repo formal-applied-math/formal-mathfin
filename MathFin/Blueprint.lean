@@ -911,3 +911,12 @@ attribute [blueprint "thm:two-asset-min-variance" (title := "The two-asset weigh
   (statement := /-- When $D = \sigma_1^2 - 2\rho\sigma_1\sigma_2 + \sigma_2^2 > 0$, the closed-form
   weight $w^*$ gives $(w^*, 1-w^*)$ the least portfolio variance among all two-asset budgets. -/)]
   MathFin.portfolioVarN_minVarWeightTwo_le
+
+attribute [blueprint "def:pricing-functional" (title := "The pricing functional")
+  (statement := /-- A market is a filtered space with traded assets and a positive numéraire. A
+  pricing measure up to $T$ is a probability measure equivalent to the reference measure on
+  $\mathcal F_T$ under which every deflated asset, frozen at $T$, is a martingale, and the price of
+  a contract under it is the expectation of its deflated cash flows. State-price pricing, the
+  change of numéraire, the conditional bond price, superreplication and gains-neutral measures are
+  instances. -/)]
+  MathFin.Market.price
