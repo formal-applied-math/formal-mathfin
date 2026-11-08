@@ -38,7 +38,7 @@ claimed by these two entries**.
 
 ## Public declarations and benchmark entries
 
-Import [`MathFin.BlackScholes.AmericanPut.Stopping.PhysicalBoundaryConvexity`](../MathFin/BlackScholes/AmericanPut/Stopping/PhysicalBoundaryConvexity.lean).
+Import [`MathFin.Models.BlackScholes.American.Stopping.PhysicalBoundaryConvexity`](../MathFin/Models/BlackScholes/American/Stopping/PhysicalBoundaryConvexity.lean).
 Both principal declarations are in namespace
 `MathFin.BlackScholes.AmericanPut.Stopping`:
 

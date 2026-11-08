@@ -14,12 +14,12 @@ public import Mathlib.Probability.Process.HittingTime
 `Payoff ι` and `Contract ι` represent *what an instrument pays*, independently of
 any stochastic model. Market outcomes enter through `Scenario ι = ι → ℝ≥0 → ℝ`;
 a stochastic model is a law on that type, and appears only from
-`Contracts/Pricing.lean` onward.
+`Pricing/Value.lean` onward.
 
-Every other payoff in this library — `BlackScholes/Call.lean`, `Digital.lean`,
+Every other payoff in this library — `Models/BlackScholes/Call.lean`, `Digital.lean`,
 `CappedCall.lean` — is written inline as a lambda inside the integral that prices
 it, so the payoff and the model are the same syntactic object. This file
-separates them, which is what lets `Contracts/Models/BlackScholes.lean` price a capped
+separates them, which is what lets `Models/BlackScholes/BlackScholes.lean` price a capped
 call by *composing* two European call values rather than by evaluating a third
 integral.
 
@@ -60,7 +60,7 @@ the corpus entry that forces it; see
 ## Main results
 
 * `Contract.pathPV_both`, `Contract.pathPV_scale` — `pathPV` is additive over
-  `both` and homogeneous over `scale`. These are what `Contracts/Pricing.lean`
+  `both` and homogeneous over `scale`. These are what `Pricing/Value.lean`
   integrates to get linearity of `value`.
 * `Contract.pathPV_const` — a constant discount factor comes out of `pathPV`.
 

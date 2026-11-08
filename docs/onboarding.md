@@ -52,7 +52,7 @@ docker compose -f docker/docker-compose.yml up -d lean-repl
 docker compose -f docker/docker-compose.yml logs -f lean-repl | grep -m1 READY
 
 # Check a file after each edit:
-./scripts/lean-check.sh MathFin/BlackScholes/PDE.lean
+./scripts/lean-check.sh MathFin/Models/BlackScholes/PDE.lean
 # Returns JSON: {"success": bool, "errors": [...], "warnings": [...], "sorry_count": N}
 
 # Check a single benchmark snippet:
@@ -107,7 +107,7 @@ Authors: Your Name
 `myTheorem` : <one-line description>.
 -/
 
-import MathFin.Foundations.GaussianCDFDeriv
+import MathFin.Probability.Gaussian.GaussianCDFDeriv
 import Mathlib.Analysis.SpecialFunctions.Gaussian
 
 @[expose] public section

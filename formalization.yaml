@@ -62,7 +62,7 @@ status:
     - Quot.sound
   main_results:
     - declaration: MathFin.coherentRisk_isLUB
-      file: MathFin/RiskMeasures/AcceptanceSet.lean
+      file: MathFin/Risk/AcceptanceSet.lean
       sorry_count: 0
       axioms:
         - propext
@@ -72,7 +72,7 @@ status:
         - statement: Coherent-risk representation on a finite state space (Artzner-Delbaen-Eber-Heath 1999)
           source: artzner-delbaen-eber-heath-1999
     - declaration: MathFin.worstCase_isCoherent
-      file: MathFin/RiskMeasures/WorstCaseRisk.lean
+      file: MathFin/Risk/WorstCaseRisk.lean
       sorry_count: 0
       axioms:
         - propext

@@ -5,8 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Contracts.Pricing
-public import MathFin.BlackScholes.CappedCall
+public import MathFin.Pricing.Value
+public import MathFin.Contracts.Instruments.CappedCall
 
 /-!
 # Options, as contracts
@@ -16,7 +16,7 @@ call and the power call, each a `Contract Unit` written in the payoff language o
 `Contracts/Core.lean`; the exchange option is a `Contract (Fin 2)` on two underlyings. Nothing here
 assumes a model. What is proved is what the instruments pay, along every scenario, and what follows
 for their values in every model through the linearity of `Contract.value`. Their prices in a
-particular model live in that model's file (`Contracts/Models/BlackScholes.lean`).
+particular model live in that model's file (`Models/BlackScholes/BlackScholes.lean`).
 
 The capped call is *defined* by composition, as a long call at `K₁` and a short call at `K₂`;
 `cappedCall_payoff_eq` is what earns it the name: for `K₁ ≤ K₂` it pays

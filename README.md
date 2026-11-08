@@ -20,7 +20,7 @@ build-time audit checks that every library theorem the benchmark's proofs cite d
 axioms `propext`, `Classical.choice` and `Quot.sound`.
 
 Here, for example, is the convergence of the Cox–Ross–Rubinstein call price to the Black–Scholes
-price, from [`CRRClosedForm.lean`](MathFin/Binomial/CRRClosedForm.lean):
+price, from [`CRRClosedForm.lean`](MathFin/Models/Binomial/CRRClosedForm.lean):
 
 ```lean
 theorem binomialPrice_call_tendsto_bs_closed {r σ T S₀ K : ℝ}
@@ -33,7 +33,7 @@ theorem binomialPrice_call_tendsto_bs_closed {r σ T S₀ K : ℝ}
 ```
 
 The hypothesis `hna`, that the $`n`$-step tree is free of arbitrage for every $`n \ge 1`$, holds
-whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRConvergence.lean)).
+whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Models/Binomial/CRRConvergence.lean)).
 
 ## Main results
 
@@ -43,68 +43,68 @@ exact statement of each one, and what it leaves out.
 
 - **Itô's formula.** For f(t,x) with continuous partial derivatives and no growth condition,
   f(t,B_t) minus its drift integral agrees, at each time almost surely, with a continuous local
-  martingale ([`ito_formula_unrestricted`](MathFin/Foundations/ItoFormulaUnrestrictedLocMart.lean)).
+  martingale ([`ito_formula_unrestricted`](MathFin/Probability/Brownian/Ito/ItoFormulaUnrestrictedLocMart.lean)).
   For an Itô process with continuous adapted coefficients, the change-of-variables formula holds
   almost surely at every t ≤ T at once
-  ([`ito_formula_adapted_unbounded_process`](MathFin/Foundations/ItoFormulaAdaptedProcess.lean)).
+  ([`ito_formula_adapted_unbounded_process`](MathFin/Probability/Brownian/Ito/ItoFormulaAdaptedProcess.lean)).
 - **Lévy's characterization.** A continuous adapted M with M₀ = 0 such that M and M² − t are local
   martingales is a Brownian motion for the filtration
-  ([`isFilteredPreBrownian_of_localMartingale`](MathFin/Foundations/LevyCharacterization.lean)).
+  ([`isFilteredPreBrownian_of_localMartingale`](MathFin/Probability/Brownian/LevyCharacterization.lean)).
 - **Girsanov's theorem.** For bounded predictable θ, under dQ = exp(−∫₀ᵀ θ dB − ½∫₀ᵀ θ² dt) dP, a
   modification of B + ∫ θ dt has independent N(0, t − s) increments for the Brownian filtration, and
   continuous paths when B has them
-  ([`Btheta_isFilteredPreBrownian_predictable_of_bdd`](MathFin/Foundations/GirsanovFiltered.lean)).
+  ([`Btheta_isFilteredPreBrownian_predictable_of_bdd`](MathFin/Probability/Brownian/Girsanov/GirsanovFiltered.lean)).
 - **Martingale representation.** For a Brownian motion with every path continuous, every
   square-integrable F^B_T-measurable H is E[H] + ∫₀ᵀ φ dB for a unique φ, so it is replicated from
   E[H] by a unique strategy
-  ([`exists_replicating_strategy`](MathFin/Foundations/MarketCompleteness.lean)).
+  ([`exists_replicating_strategy`](MathFin/Pricing/MarketCompleteness.lean)).
 - **Stochastic differential equations.** For Lipschitz coefficients and any horizon, the Picard map
   of dX = b(X) dt + σ(X) dB has a unique fixed point in the predictable L² space
-  ([`picardMap_exists_unique_fixedPoint_any_horizon`](MathFin/Foundations/SDEExistence.lean)).
+  ([`picardMap_exists_unique_fixedPoint_any_horizon`](MathFin/Probability/Brownian/SDE/SDEExistence.lean)).
 - **Fundamental theorem of asset pricing.** On a finite probability space of full support with one
   risky asset, no arbitrage holds if and only if there is an equivalent martingale measure, and,
   with full information at the horizon, the market is complete if and only if that measure is unique
-  ([`ftap_discrete`](MathFin/Foundations/FTAPDiscrete.lean),
-  [`ftap_two`](MathFin/Foundations/FTAPComplete.lean)). On any probability space, multi-period no
+  ([`ftap_discrete`](MathFin/Pricing/FTAP/FTAPDiscrete.lean),
+  [`ftap_two`](MathFin/Pricing/FTAP/FTAPComplete.lean)). On any probability space, multi-period no
   arbitrage is equivalent to no arbitrage in each conditional one-period market
-  ([`noArbitrage_iff_noArbitrageLocal`](MathFin/Foundations/NoArbitrageLocal.lean)).
+  ([`noArbitrage_iff_noArbitrageLocal`](MathFin/Pricing/FTAP/NoArbitrageLocal.lean)).
 - **Coherent risk measures.** On a finite state space, a coherent risk measure is the supremum of
   expected losses over the probability vectors that price every acceptable loss nonpositively
-  ([`coherentRisk_isLUB`](MathFin/RiskMeasures/AcceptanceSet.lean)).
+  ([`coherentRisk_isLUB`](MathFin/Risk/AcceptanceSet.lean)).
 - **The Black–Scholes PDE from Feynman–Kac.** The call price is a heat-kernel integral of the
   payoff, and the PDE follows from the heat equation for the kernel
-  ([`bsV_satisfies_bs_pde_via_feynmanKac`](MathFin/BlackScholes/PDEFromFeynmanKac.lean)).
+  ([`bsV_satisfies_bs_pde_via_feynmanKac`](MathFin/Models/BlackScholes/PDEFromFeynmanKac.lean)).
 - **The delta hedge.** Almost surely, for all t ≤ T′ < T at once, e^(−rt) C(t, S_t) = C(0, S₀) + ∫₀ᵗ
   Φ(d₁) σ e^(−rs) S_s dB_s, and C(0, S₀) is the value of the call contract
-  ([`bs_delta_hedge_replication`](MathFin/BlackScholes/DeltaHedge.lean),
-  [`europeanCall_deltaHedge`](MathFin/Contracts/Models/BlackScholesHedge.lean)).
+  ([`bs_delta_hedge_replication`](MathFin/Models/BlackScholes/DeltaHedge.lean),
+  [`europeanCall_deltaHedge`](MathFin/Models/BlackScholes/BlackScholesHedge.lean)).
 - **Jump-diffusions.** For an assumed jump-diffusion, the discounted price is a martingale exactly
   at the compensated drift, and with Gaussian log-jumps at that drift the conditional call price is
   Merton's series
-  ([`JumpDiffusionProcess.martingale_iff`](MathFin/BlackScholes/JumpDiffusionProcess.lean),
-  [`condExp_call_eq_mertonCallPrice`](MathFin/BlackScholes/JumpDiffusionMerton.lean)).
+  ([`JumpDiffusionProcess.martingale_iff`](MathFin/Models/Jumps/JumpDiffusionProcess.lean),
+  [`condExp_call_eq_mertonCallPrice`](MathFin/Models/Jumps/JumpDiffusionMerton.lean)).
 - **The American put.** For r > 0 and dividend yield 0 ≤ q ≤ r, the early-exercise boundary is
   strictly convex in the time to expiry, and its logarithm is convex
-  ([`PhysicalBoundaryConvexity.lean`](MathFin/BlackScholes/AmericanPut/Stopping/PhysicalBoundaryConvexity.lean)).
+  ([`PhysicalBoundaryConvexity.lean`](MathFin/Models/BlackScholes/American/Stopping/PhysicalBoundaryConvexity.lean)).
 - **Raw SVI.** A polynomial-sign formula in the five parameters holds exactly when the parameters
   are admissible and the call priced through the smile is convex in the strike. With one more sign,
   it holds exactly when that call is a normalized call price, free of butterfly arbitrage
-  ([`extendedCertificateFormula_iff_bsSmile_convex`](MathFin/BlackScholes/SVI/ExtendedFormula.lean),
-  [`butterflyFreeFormula_iff_isNormalizedCallPrice`](MathFin/BlackScholes/SVI/TailCondition.lean)).
+  ([`extendedCertificateFormula_iff_bsSmile_convex`](MathFin/Models/ModelFree/SVI/ExtendedFormula.lean),
+  [`butterflyFreeFormula_iff_isNormalizedCallPrice`](MathFin/Models/ModelFree/SVI/TailCondition.lean)).
 - **Contracts, separate from models.** One contract term is priced in interchangeable models. A call
   less a put is worth the forward in any martingale model
-  ([`value_europeanCall_sub_put_of_martingale`](MathFin/Contracts/Parity.lean)), and the call's
+  ([`value_europeanCall_sub_put_of_martingale`](MathFin/Pricing/Parity.lean)), and the call's
   values in the binomial tree converge to its Black–Scholes value when |r|√T < σ
-  ([`tendsto_binomial_value_europeanCall`](MathFin/Contracts/Models/BinomialLimit.lean)). Every
+  ([`tendsto_binomial_value_europeanCall`](MathFin/Models/Binomial/BinomialLimit.lean)). Every
   fixed-dated contract on the physical Black–Scholes asset has, under the Girsanov measure, its
   risk-neutral value
-  ([`value_physical_eq_riskNeutral`](MathFin/Contracts/Models/BlackScholesPhysical.lean)).
+  ([`value_physical_eq_riskNeutral`](MathFin/Models/BlackScholes/BlackScholesPhysical.lean)).
 - **Interest rates.** In Vasicek and Hull–White, the bond price at t is an exponential-affine
   function of the short rate, and the bond put is a Black put under the forward measure
-  ([`bondPrice_hullWhite`](MathFin/Contracts/Models/HullWhiteBond.lean),
-  [`valueDisc_bondPut_hullWhite`](MathFin/Contracts/Models/Jamshidian.lean)). Swaptions and the CMS
+  ([`bondPrice_hullWhite`](MathFin/Models/Rates/HullWhiteBond.lean),
+  [`valueDisc_bondPut_hullWhite`](MathFin/Models/Rates/Jamshidian.lean)). Swaptions and the CMS
   swaplet are priced under the annuity measure
-  ([`valueDisc_payerSwaption`](MathFin/Contracts/Models/CMS.lean)).
+  ([`valueDisc_payerSwaption`](MathFin/Models/Rates/CMSContract.lean)).
 
 ## Contents
 

@@ -98,7 +98,7 @@ ContinuousLinearMap.integral_comp_comm (L : E →L[𝕜] Fₗ) (φ_int : Integra
 
 Every stochastic-integral tower in the library already exposes its integral **as
 a CLM** — the shared `extendOfNorm`/CLM abstraction that unified the Wiener, Itô,
-and Lévy towers (`Foundations/ExtendOfNormIsometry.lean`):
+and Lévy towers (`Probability/Analysis/ExtendOfNormIsometry.lean`):
 
 | tower | integral CLM | file |
 |---|---|---|
@@ -140,7 +140,7 @@ cheap. **Consumers beyond HJM:**
 ## 5. Honest scope
 
 **Consumed (library / Mathlib), not re-proved:** `ContinuousLinearMap.integral_comp_comm`;
-`ito_formula_expBrownian` (Itô-for-exp, `Foundations/ItoFormulaGBM`); the
+`ito_formula_expBrownian` (Itô-for-exp, `Probability/Brownian/Ito/ItoFormulaGBM`); the
 martingale ⇔ zero-drift core; the three tower CLMs; FTC/Leibniz calculus.
 
 **Genuinely new:** (a) the L²-representative fact inside `stochFubini_ofCLM` (its
@@ -176,7 +176,7 @@ G2 #156 · G3 #157 · G4 #158 (umbrella #138).
   `discountedBond`, `starDrift α*`, `starVol σ*`. Defs + basic well-definedness.
   *(new-defs, area:fixed-income · ready · scaffolding)*
 
-### Tier 1 — stochastic Fubini, the shared primitive · `Foundations/StochasticFubini*.lean`
+### Tier 1 — stochastic Fubini, the shared primitive · `Probability/Brownian/Ito/StochasticFubini*.lean`
 - **F1 · `sc-stochastic-fubini-clm`** (#141, folds in the dissolved #140) — the
   tower-agnostic primitive `stochFubini_ofCLM (I : L²(m) →L[ℝ] L²(P)) …`. Proof =
   `integral_comp_comm` inline + the L²-representative fact (`∫_A [φ(·,u)] dμ`
@@ -228,8 +228,8 @@ G2 #156 · G3 #157 · G4 #158 (umbrella #138).
 ## 7. Module layout
 
 ```
-MathFin/Foundations/StochasticFubini.lean          -- F1 (stochFubini_ofCLM + its L²-representative step)
-MathFin/Foundations/StochasticFubiniIto.lean        -- F3, F4  (+ F5 Wiener instance)
+MathFin/Probability/Brownian/Ito/StochasticFubini.lean          -- F1 (stochFubini_ofCLM + its L²-representative step)
+MathFin/Probability/Brownian/Ito/StochasticFubiniIto.lean        -- F3, F4  (+ F5 Wiener instance)
 MathFin/Foundations/StochasticFubiniLevy.lean       -- F6      (near the Lévy operator)
 MathFin/FixedIncome/HJM/Model.lean                  -- H0
 MathFin/FixedIncome/HJM/BondDynamics.lean           -- B1, B2, B3
@@ -290,8 +290,8 @@ rule). File splits may consolidate if a node proves small.
 - Björk, *Arbitrage Theory in Continuous Time*, 3rd ed., ch. 23–25 (HJM, short
   rate, Musiela).
 - Filipović, *Term-Structure Models: A Graduate Course*.
-- In-repo: `Foundations/Numeraire`, `Foundations/ForwardMeasure`,
-  `FixedIncome/ForwardRate`, `FixedIncome/VasicekBondPrice`,
-  `Foundations/ItoFormulaGBM`, `Foundations/ItoIntegralCLM`,
-  `Foundations/ExtendOfNormIsometry`, `Foundations/PoissonCompensatedIntegralOperator`.
+- In-repo: `Pricing/Numeraire`, `Pricing/ForwardMeasure`,
+  `Models/Rates/ForwardRate`, `Models/Rates/VasicekBondPrice`,
+  `Probability/Brownian/Ito/ItoFormulaGBM`, `Probability/Brownian/Ito/ItoIntegralCLM`,
+  `Probability/Analysis/ExtendOfNormIsometry`, `Probability/Jumps/PoissonCompensatedIntegralOperator`.
 - Mathlib: `ContinuousLinearMap.integral_comp_comm`.

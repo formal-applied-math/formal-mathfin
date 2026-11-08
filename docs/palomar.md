@@ -35,12 +35,12 @@ Two declarations are compared, both in namespace `ADEH`:
 - `ADEH.coherentRisk_isLUB` — the Artzner–Delbaen–Eber–Heath representation
   theorem on a finite state space: a coherent risk measure is the *least upper
   bound* of expected loss over its representing set of probability vectors.
-  Discharged against [`MathFin.coherentRisk_isLUB`](../MathFin/RiskMeasures/AcceptanceSet.lean)
+  Discharged against [`MathFin.coherentRisk_isLUB`](../MathFin/Risk/AcceptanceSet.lean)
   applied to `L ↦ ρ (-L)`, through
-  [`MathFin.isCoherentRiskMeasure_neg_iff`](../MathFin/RiskMeasures/PositionsConvention.lean).
+  [`MathFin.isCoherentRiskMeasure_neg_iff`](../MathFin/Risk/PositionsConvention.lean).
 - `ADEH.worstCase_isCoherentRisk` — worst-case loss satisfies the four
   coherence axioms. Discharged against
-  [`MathFin.worstCase_isCoherent`](../MathFin/RiskMeasures/WorstCaseRisk.lean), transported along
+  [`MathFin.worstCase_isCoherent`](../MathFin/Risk/WorstCaseRisk.lean), transported along
   the same equivalence.
 
 ## Why the second declaration is there

@@ -40,13 +40,14 @@ NODES_JSON = Path("docs/blueprint_nodes.json")
 TREE_MAP = Path(__file__).with_name("tree_map.toml")
 FRONTIER_TOML = Path("docs/blueprint_frontier.toml")
 
-# A section of the library (`MathFin.<Section>.…`) and the `area:*` label its work carries.
+# Where a module sits (`MathFin.<Layer>.<Sub>.…`, longest prefix first) and the `area:*` label
+# its work carries.
 SECTION_AREA = {
-    "Foundations": "foundations", "Bridges": "foundations", "BlackScholes": "black-scholes",
-    "Binomial": "binomial", "FixedIncome": "fixed-income", "Portfolio": "portfolio",
-    "Performance": "portfolio", "RiskMeasures": "risk", "Actuarial": "actuarial",
-    "DeFi": "defi", "Futures": "futures", "Execution": "execution", "Contracts": "contracts",
-    "Commodities": "commodities",
+    "Probability": "foundations", "Pricing": "foundations", "Contracts": "contracts",
+    "Models": "black-scholes", "Models.StochVol": "stoch-vol", "Models.Binomial": "binomial",
+    "Models.Rates": "fixed-income", "Models.Credit": "credit", "Models.Forwards": "futures",
+    "Risk": "risk", "Choice": "portfolio", "Insurance": "actuarial", "Markets": "execution",
+    "Markets.DeFi": "defi",
 }
 
 KINDS = ("rests-on-node", "feeds-node", "upstream-only", "off-map")
@@ -76,9 +77,11 @@ def map_place(label: str, area: str, tree_map: dict) -> tuple[str, str]:
 
 
 def area_of_module(module: str) -> str:
-    parts = module.split(".")
-    sec = parts[1] if len(parts) > 2 else ""
-    return SECTION_AREA.get(sec, sec.lower() or "upstream")
+    parts = module.split(".")[1:-1]
+    for k in range(len(parts), 0, -1):
+        if (sec := ".".join(parts[:k])) in SECTION_AREA:
+            return SECTION_AREA[sec]
+    return parts[0].lower() if parts else "upstream"
 
 
 @dataclass(frozen=True)

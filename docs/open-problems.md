@@ -152,7 +152,7 @@ SVI-smiled Black–Scholes call is convex in strike
 (`extendedCertificateFormula_iff_bsSmile_convex`); for `σ > 0` the two agree. The formula is an
 explicit quantifier-free construction, by Hermite's trace-form signatures, and is not expanded into
 a list of inequalities. On its own it is the Durrleman / strike-convexity domain stated here. The
-tail condition was added on 2026-10-05 (`MathFin/BlackScholes/SVI/TailCondition.lean`):
+tail condition was added on 2026-10-05 (`MathFin/Models/ModelFree/SVI/TailCondition.lean`):
 for `b ≥ 0` and positive variance, `d₊(k) → −∞` exactly when `b(1+ρ) < 2`, and the smiled call
 vanishes at large strikes exactly then. One more sign atom therefore gives a formula that holds
 exactly when `σ ≥ 0`, `b ≥ 0`, `ρ² ≤ 1`, the variance is positive and the smiled call is
@@ -589,7 +589,7 @@ planned-but-unbuilt program, that is stated.
 
 Round 4's four new entries did **not** change this ranking: Kyle uniqueness
 (§9) and the square-root law (§10) need filtering/FBSDE and equilibrium
-machinery the repo lacks (`Foundations/MarketMakingRiccati` is
+machinery the repo lacks (`Markets/Microstructure/MarketMakingRiccati` is
 LQ-approximation market-making, a different animal); time-inconsistent control
 (§11) and Epstein–Zin (§12) need EHJB / BSDE substrates absent here. The
 incumbents keep their positions for the fourth consecutive round.
@@ -600,9 +600,9 @@ The butterfly-arbitrage criterion is *already formalized*, in substance:
 
 | Existing | What it gives |
 |---|---|
-| `BlackScholes/BreedenLitzenberger.breedenLitzenberger` | `∂²V/∂K² = e^{−rT}·density` — butterfly-freeness **is** this second derivative's sign |
+| `Models/ModelFree/BreedenLitzenberger.breedenLitzenberger` | `∂²V/∂K² = e^{−rT}·density` — butterfly-freeness **is** this second derivative's sign |
 | `BreedenLitzenberger.lognormalTerminalPDF_nonneg_via_strike_convexity` | the density-nonnegativity ⟸ strike-convexity route, already proved |
-| `BlackScholes/StrikeConvexity.bsV_strike_convexOn`, `bsP_strike_convexOn` | the convexity side for calls and puts |
+| `Models/BlackScholes/StrikeConvexity.bsV_strike_convexOn`, `bsP_strike_convexOn` | the convexity side for calls and puts |
 | `BlackScholes/{ImpliedVolatility,BisectionIV,NewtonConvergence}` | the implied-vol layer, with convergence |
 | `PutStrikeConvexity`, `SpotConvexity`, `PriceBounds` | the surrounding static-arbitrage results |
 
@@ -612,11 +612,11 @@ Durrleman's `g`. Positivity certificates land in the house idiom
 
 ### 2. American boundary convexity for `0 < q < r` (§1) — solved in #212
 
-`Binomial/SnellEnvelope.bermudanPrice_is_snell_envelope` plus
-`Binomial/American`, `Bermudan`,
-`MertonAmericanCallTree`, `BlackScholes/Dividends`, and the convexity trio
+`Models/Binomial/SnellEnvelope.bermudanPrice_is_snell_envelope` plus
+`Models/Binomial/American`, `Bermudan`,
+`MertonAmericanCallTree`, `Models/BlackScholes/Dividends`, and the convexity trio
 (`StrikeConvexity`, `PutStrikeConvexity`, `SpotConvexity`).
-`Binomial/CRRConvergence` is the discrete→continuous seam.
+`Models/Binomial/CRRConvergence` is the discrete→continuous seam.
 
 Solved in [#212](https://github.com/formal-applied-math/formal-mathfin/pull/212), and not through this seam. The proof works in continuous
 time, on the optimal-stopping value directly, and builds on the Itô-formula and
@@ -626,9 +626,9 @@ Feynman–Kac modules in `Foundations/` rather than the binomial layer.
 
 | Existing | What it gives |
 |---|---|
-| `Portfolio/CovariancePSD.covariance_kernel_psd`, `portfolioVarN_covariance_nonneg` | a PSD-quadratic-form theorem over a kernel — the exact shape of the no-dynamic-arbitrage criterion |
-| `Foundations/AlmgrenChriss.almgrenChrissPath_satisfies_EL` | the execution Euler–Lagrange path |
-| `Foundations/NoArbitrageCore`, `TriangleArbitrage` | no-arbitrage predicates to land the statement on |
+| `Choice/Portfolio/CovariancePSD.covariance_kernel_psd`, `portfolioVarN_covariance_nonneg` | a PSD-quadratic-form theorem over a kernel — the exact shape of the no-dynamic-arbitrage criterion |
+| `Markets/Execution/AlmgrenChriss.almgrenChrissPath_satisfies_EL` | the execution Euler–Lagrange path |
+| `Pricing/NoArbitrageCore`, `TriangleArbitrage` | no-arbitrage predicates to land the statement on |
 
 Gap: our Almgren–Chriss is the deterministic permanent+temporary model with
 **no decay kernel** — the propagator must be built. Small build, and refutation
@@ -639,7 +639,7 @@ negative expected cost, i.e. rational arithmetic closable by `norm_num`/`ring`.
 
 `docs/hjm-program.md` names Musiela as node **G4**, the deferred SPDE summit
 shipping `placeholder`. But two caveats now stack: **neither
-`MathFin/FixedIncome/HJM/` nor `MathFin/Foundations/StochasticFubini*.lean`
+`MathFin/FixedIncome/HJM/` nor `MathFin/Probability/Brownian/Ito/StochasticFubini*.lean`
 exists yet** (the HJM program is *ratified, not built* — the whole F1→C4 chain
 precedes G4), and round 4 demoted the problem itself from "best-evidenced open
 problem" to a bracketed gap in a mature theory.
@@ -656,13 +656,13 @@ Two gaps: FDR theory needs Lie-algebraic / infinite-dimensional differential
 geometry that neither this library nor Mathlib carries — and the target is
 Class C, the evidence class that kept collapsing.
 
-**Weak or absent adjacency.** `Foundations/ExitTime` gives real hitting-time
-machinery, but `FixedIncome/FirstToDefault` is constant-hazard with independent
+**Weak or absent adjacency.** `Probability/Brownian/ExitTime` gives real hitting-time
+machinery, but `Models/Credit/FirstToDefault` is constant-hazard with independent
 names and `KMVMertonStructural` is one-period Merton — neither a first-passage
 model — so the supercooled-Stefan residual (§8) sits on almost nothing.
-`RiskMeasures/RockafellarUryasev.gaussianCVaR_isLeast_ruObjective` remains a
+`Risk/RockafellarUryasev.gaussianCVaR_isLeast_ruObjective` remains a
 seed for scoring-function work, but the systemic-elicitability target closed.
-`DeFi/ConstantProductAMM` is direct but thin. Kyle (§9), the square-root law
+`Markets/DeFi/ConstantProductAMM` is direct but thin. Kyle (§9), the square-root law
 (§10), time-inconsistent control (§11) and Epstein–Zin (§12) have no substrate
 here. The curse-of-dimensionality problem (§4) has **none at all**.
 

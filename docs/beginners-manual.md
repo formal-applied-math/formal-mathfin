@@ -61,7 +61,7 @@ To use the library from your own project instead, see
 
 ## 3. Reading a file
 
-Open [`MathFin/Binomial/Model.lean`](../MathFin/Binomial/Model.lean), the one-period binomial model.
+Open [`MathFin/Models/Binomial/Model.lean`](../MathFin/Models/Binomial/Model.lean), the one-period binomial model.
 Its parts appear in every file.
 
 ```lean
@@ -145,7 +145,7 @@ library:
 
 Long statements usually rely on a `variable` line earlier in the file, which declares arguments
 shared by every theorem below it. The discrete fundamental theorem of asset pricing in
-[`Foundations/FTAPDiscrete.lean`](../MathFin/Foundations/FTAPDiscrete.lean) reads
+[`Pricing/FTAP/FTAPDiscrete.lean`](../MathFin/Pricing/FTAP/FTAPDiscrete.lean) reads
 
 ```lean
 variable {Ω : Type*} [Fintype Ω] [Nonempty Ω] {mΩ : MeasurableSpace Ω}

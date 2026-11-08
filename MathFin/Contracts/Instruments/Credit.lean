@@ -11,7 +11,7 @@ public import MathFin.Contracts.Instruments.FixedIncome
 # A credit default swap, as a contract
 
 The credit event is observed through the default indicator process `N u = 1{τ ≤ u}`, the single
-underlying `()` of the scenario (`Contracts/Models/DefaultTime.lean` supplies it from a default
+underlying `()` of the scenario (`Models/Credit/DefaultTime.lean` supplies it from a default
 time `τ`). `N` enters `[1, ∞)` exactly at `τ`, and `Contract.payAtHit` pays at the first time an
 observed underlying enters a set, so a payment at the default time is a contract:
 
@@ -32,7 +32,7 @@ The tower otherwise pays at fixed dates, so the CDS is also written on a payment
 The grid legs are `payFlows`, so their path value is a finite sum (`pathPV_cdsPremiumLeg`,
 `pathPV_cdsProtectionLeg`). Default is paid at the end of its period, not at `τ`: the grid
 protection leg is the discretisation of `cdsProtectionAtDefault`
-(`Contracts/Models/DefaultTimeMesh.lean` proves the limit). There is no continuous premium
+(`Models/Credit/DefaultTimeMesh.lean` proves the limit). There is no continuous premium
 stream in the tower, so the premium leg exists only on the grid.
 
 ## Main definitions

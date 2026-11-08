@@ -5,11 +5,11 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Contracts.Pricing
-public import MathFin.FixedIncome.MacaulayModified
-public import MathFin.FixedIncome.CouponBonds
-public import MathFin.FixedIncome.InterestRateSwap
-public import MathFin.FixedIncome.FRA
+public import MathFin.Pricing.Value
+public import MathFin.Models.Rates.MacaulayModified
+public import MathFin.Models.Rates.CouponBonds
+public import MathFin.Models.Rates.InterestRateSwap
+public import MathFin.Models.Rates.FRA
 
 /-!
 # Bonds and swaps, as contracts
@@ -22,7 +22,7 @@ of constant payoffs, `c i` at `t i`. Along every scenario its present value is `
 
 * a coupon bond discounted at a yield `y`, with integer payment times, is `bondPriceDisc`
   (`pathPV_fixedFlows_yieldDiscount`), the price the durations and convexities of
-  `FixedIncome/` are taken of;
+  `Models/Rates/` are taken of;
 * `n` level payments on a grid of step `Δt`, discounted on the flat continuous curve `zcb r 0`,
   are `annuityValue` (`pathPV_fixedFlows_zcb`).
 
@@ -198,7 +198,7 @@ theorem value_payerSwap {Q : Measure Ω} [IsProbabilityMeasure Q] (X : ι → �
 /-- **A forward-rate agreement is a one-period payer swap.** With one accrual period `[T₀, T₁]`
 the swap's floating coupon is the simple forward rate `fraForwardRate (P T₀) (P T₁) δ` and the
 fixed coupon is `δK`, both paid at `T₁`; its value in every model is `fraValue`
-(`FixedIncome/FRA.lean`): `δ · P(T₁) · (F − K)`. -/
+(`Models/Rates/FRA.lean`): `δ · P(T₁) · (F − K)`. -/
 theorem value_payerSwap_one_eq_fraValue {Q : Measure Ω} [IsProbabilityMeasure Q]
     (X : ι → ℝ≥0 → Ω → ℝ) (hδ : δ ≠ 0) (hP : ∀ i, P (T i) ≠ 0) (K : ℝ) :
     (payerSwap P T δ 1 K : Contract ι).value Q P X

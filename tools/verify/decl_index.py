@@ -9,7 +9,7 @@ library keeps asking of itself, from one source:
 * which theorems state the same thing (``duplicate_statements``, keyed by the hash of the
   statement's ``Expr``, which ignores binder names);
 * which private lemmas are general (``mathlib_shaped_private``: the statement mentions no
-  MathFin constant, so it is a ``Foundations/`` or upstream lemma kept out of sight).
+  MathFin constant, so it is a ``Probability/`` or upstream lemma kept out of sight).
 
 ``tools/verify/mathfin_index.py`` stays: it is the textual approximation the host-side
 gates use where no Lean environment exists. ``textual_drift`` compares the two.

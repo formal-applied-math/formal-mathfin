@@ -50,36 +50,59 @@ FRONTIER = Path("docs/blueprint_frontier.toml")
 LANDMARKS = Path("docs/landmarks.toml")
 
 # The sections of the library: display name, layer (the map's colour), one line of what is there.
+# A section is a layer (`MathFin.<Layer>`), or for the two broad layers a subdirectory of it
+# (`MathFin.Probability.<Sub>`, `MathFin.Models.<Sub>`).
 SECTIONS: dict[str, tuple[str, str, str]] = {
-    "Foundations": ("Foundations", "foundations",
-                    "Probability and stochastic calculus: Brownian motion, the Itô integral and "
-                    "formula, martingales, changes of measure, the fundamental theorems."),
-    "Bridges": ("Bridges", "bridges",
-                "Theorems that tie a foundational object to a pricing model."),
-    "BlackScholes": ("Black–Scholes and beyond", "applications",
-                     "The Black–Scholes family, Greeks, exotics, jump diffusions, implied "
-                     "volatility, SVI and the American put."),
-    "Binomial": ("Binomial trees", "applications",
-                 "Discrete-time trees, replication, CRR convergence, American and Bermudan "
-                 "exercise."),
-    "FixedIncome": ("Fixed income and credit", "applications",
-                    "Bonds, yield curves, short-rate models, forward measures, swaps and "
-                    "hazard-rate credit."),
-    "Futures": ("Futures", "applications", "Black-76 and commodity futures."),
-    "Commodities": ("Commodities", "applications", "Own rates of interest and convenience yield."),
-    "Contracts": ("Contracts", "applications",
-                  "A contract language: payoffs, observables and the models that price them."),
-    "Portfolio": ("Portfolio theory", "applications",
-                  "Mean–variance, CAPM, Black–Litterman, risk parity."),
-    "Performance": ("Performance", "applications", "Sharpe, Sortino, Kelly and their kin."),
-    "RiskMeasures": ("Risk measures", "applications",
-                     "Value at risk, expected shortfall, coherent and convex risk measures, "
-                     "expectiles."),
-    "Actuarial": ("Actuarial", "applications", "Premiums, mortality, survival models."),
-    "Execution": ("Execution", "applications", "Market microstructure and optimal execution."),
-    "DeFi": ("DeFi", "applications", "Automated market makers."),
+    "Probability.Discrete": ("Discrete time", "roots",
+                             "Martingale transforms, Doob decomposition, the Snell envelope, path "
+                             "measures."),
+    "Probability.Martingales": ("Martingales", "roots",
+                                "Changes of measure, localisation, convergence, stopped processes."),
+    "Probability.Brownian": ("Brownian calculus", "roots",
+                             "Brownian motion, the Itô integral and formula, Girsanov, Wiener "
+                             "integrals, martingale representation, SDEs."),
+    "Probability.Jumps": ("Jumps", "roots",
+                          "Poisson processes and random measures, the compensated integral, "
+                          "compound Poisson laws."),
+    "Probability.Gaussian": ("Gaussian analysis", "roots",
+                             "Φ and its moments, the bivariate normal, the heat equation."),
+    "Probability.Laws": ("Laws", "roots",
+                         "Quantiles, the Esscher tilt, Student-t, extreme value and Pareto laws."),
+    "Probability.Dependence": ("Dependence", "roots",
+                               "Copulas, Sklar's theorem, Hoeffding's covariance identity."),
+    "Probability.Analysis": ("Analysis", "roots",
+                             "Real and measure-theoretic tools: bisection, Jensen, isometries."),
+    "Contracts": ("Contracts", "trunk",
+                  "The payoff language: payoffs, observables, measurability, instruments."),
+    "Pricing": ("Pricing", "trunk",
+                "The pricing functional: martingale measures, the fundamental theorems, state "
+                "prices, numéraires, replication, completeness, superhedging, contract value."),
+    "Models.BlackScholes": ("Black–Scholes", "limbs",
+                            "The Black–Scholes family, Greeks, exotics, implied volatility and the "
+                            "American put."),
+    "Models.Bachelier": ("Bachelier", "limbs", "The normal model and its Greeks."),
+    "Models.Jumps": ("Jump diffusions", "limbs",
+                     "Merton and general jump-diffusion models, their prices and Greeks."),
+    "Models.StochVol": ("Stochastic volatility", "limbs", "Heston, SABR, local-stochastic volatility."),
+    "Models.LocalVol": ("Local volatility", "limbs", "Dupire's formula and the forward smile."),
+    "Models.ModelFree": ("Model-free", "limbs",
+                         "Static replication, price bounds, variance swaps, SVI."),
+    "Models.Binomial": ("Binomial trees", "limbs",
+                        "Discrete-time trees, replication, CRR convergence, American and Bermudan "
+                        "exercise."),
+    "Models.Rates": ("Rates", "limbs",
+                     "Bonds, yield curves, short-rate models, forward measures, swaps."),
+    "Models.Credit": ("Credit", "limbs", "Hazard rates, default times, CDS, CVA, structural credit."),
+    "Models.Forwards": ("Forwards", "limbs", "FX, futures, Black-76 and commodities."),
+    "Risk": ("Risk", "limbs",
+             "Value at risk, expected shortfall, coherent and convex risk measures, credit "
+             "portfolio risk, exposure."),
+    "Choice": ("Choice", "limbs", "Utility, portfolio theory, CAPM, performance and Kelly."),
+    "Insurance": ("Insurance", "limbs", "Premiums, mortality, survival models."),
+    "Markets": ("Markets", "limbs", "Microstructure, execution, AMMs and lending protocols."),
 }
-LAYER_NAMES = {"foundations": "Foundations", "bridges": "Bridges", "applications": "Applications"}
+LAYER_NAMES = {"roots": "Probability", "trunk": "Contracts and pricing", "limbs": "Models and applications"}
+LAYER_VAR = {"roots": "--s1", "trunk": "--s2", "limbs": "--s3"}
 STATUS = {"full": "full statement", "library_wrapper": "library wrapper",
           "reduced_core": "reduced core", "placeholder": "placeholder"}
 STATUS_VAR = {"full": "--s1", "library_wrapper": "--s2", "reduced_core": "--s3",
@@ -253,7 +276,9 @@ def decl_url(d: IndexedDecl) -> str:
 
 def section_of(module: str) -> str:
     parts = module.split(".")
-    return parts[1] if len(parts) > 2 else ""
+    if len(parts) < 3:
+        return ""
+    return ".".join(parts[1:3]) if parts[1] in ("Probability", "Models") and len(parts) > 3 else parts[1]
 
 
 def section_url(sec: str) -> str:
@@ -417,7 +442,7 @@ def build_home(site: Site, out: Path, blueprint: list[dict]) -> None:
     for s, ms in by_sec.items():
         if not s:
             continue
-        name, layer, _ = SECTIONS.get(s, (s, "applications", ""))
+        name, layer, _ = SECTIONS.get(s, (s, "limbs", ""))
         nodes.append({"id": s, "label": name, "layer": layer, "url": section_url(s),
                       "sz": round(22 + 3.2 * sec_decls[s] ** 0.5, 1),
                       "info": f"{len(ms)} modules · {sec_decls[s]} declarations · "
@@ -428,7 +453,7 @@ def build_home(site: Site, out: Path, blueprint: list[dict]) -> None:
                             "label": "Map of the library's sections"}, "tall")
     table = "".join(
         f'<tr><td><a href="{section_url(s)}">{esc(SECTIONS.get(s, (s,))[0])}</a></td>'
-        f'<td>{LAYER_NAMES[SECTIONS.get(s, (s, "applications"))[1]]}</td>'
+        f'<td>{LAYER_NAMES[SECTIONS.get(s, (s, "limbs"))[1]]}</td>'
         f'<td class="n">{len(by_sec[s])}</td><td class="n">{sec_decls[s]}</td>'
         f'<td class="n">{sec_entries[s]}</td></tr>'
         for s in sorted(by_sec, key=lambda s: -sec_decls[s]) if s)
@@ -464,9 +489,9 @@ def build_home(site: Site, out: Path, blueprint: list[dict]) -> None:
     for s in sorted(by_sec, key=lambda s: -sec_decls[s]):
         if not s:
             continue
-        name, layer, blurb = SECTIONS.get(s, (s, "applications", ""))
+        name, layer, blurb = SECTIONS.get(s, (s, "limbs", ""))
         cards.append(f'<a class="card" href="{section_url(s)}"><h3><span class="dot" '
-                     f'style="background:var(--{ {"foundations": "s1", "bridges": "s2"}.get(layer, "s3")})">'
+                     f'style="background:var({LAYER_VAR[layer]})">'
                      f'</span>{esc(name)}</h3><div class="sub">{esc(blurb)}</div>'
                      f'<div class="nums">{len(by_sec[s])} modules · {sec_decls[s]} declarations · '
                      f'{sec_entries[s]} entries</div></a>')
@@ -487,11 +512,11 @@ by the build, to Lean's three standard axioms.</p>
 
 <h2>The map</h2>
 <p class="ink2">Each disc is a section of the library, sized by its declarations; an arrow runs from a
-section to one that builds on it, thicker the more of its modules are imported; the foundations sit
-at the centre, the applications around them. Hover to see a
+section to one that builds on it, thicker the more of its modules are imported; probability sits
+at the centre, contracts and pricing around it, the models and applications outside. Hover to see a
 section's neighbours, click to open it.</p>
 {the_map}
-{legend([("--s1", "Foundations", ""), ("--s2", "Bridges", ""), ("--s3", "Applications", "")])}
+{legend([(LAYER_VAR[k], v, "") for k, v in LAYER_NAMES.items()])}
 <details class="tableview"><summary>Table view</summary><table class="data"><thead><tr>
 <th>Section</th><th>Layer</th><th>Modules</th><th>Declarations</th><th>Corpus entries</th></tr></thead>
 <tbody>{table}</tbody></table></details>
@@ -511,11 +536,11 @@ other results build on.</p>
 
 
 def build_section(site: Site, out: Path, sec: str, mods: list[str]) -> None:
-    name, layer, blurb = SECTIONS.get(sec, (sec, "applications", ""))
+    name, layer, blurb = SECTIONS.get(sec, (sec, "limbs", ""))
     inside = set(mods)
     edges = {(i, m) for m in mods for i in site.imports[m] if i in inside}
     red = transitive_reduction(inside, edges)
-    rel = lambda m: m.split(".", 2)[2] if m.count(".") >= 2 else m  # noqa: E731
+    rel = lambda m: m.removeprefix(f"MathFin.{sec}.")  # noqa: E731
     nodes = [{"id": m, "label": rel(m), "full": site.title(m), "url": module_url(m),
               "info": f"{len(site.decls.get(m, ()))} declarations · "
                       f"{len(site.entries.get(m, ()))} corpus entries",

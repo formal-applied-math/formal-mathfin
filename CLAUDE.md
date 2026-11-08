@@ -514,7 +514,7 @@ docker compose -f docker/docker-compose.yml up -d lean-repl
 docker compose -f docker/docker-compose.yml logs -f lean-repl | grep -m1 READY
 
 # per iteration: edit a .lean file, then check it via the wrapper
-./scripts/lean-check.sh MathFin/Foundations/BrownianMartingale.lean
+./scripts/lean-check.sh MathFin/Probability/Brownian/BrownianMartingale.lean
 # Returns JSON: {"success": bool, "errors": [...], "warnings": [...], "sorry_count": N}
 
 # check a single benchmark snippet the same way (seconds, not a 5-min cold boot)
@@ -542,7 +542,7 @@ Caveats:
   builds; the canonical green gate stays the final `lake build`.
 
 For multi-iteration sessions, prefer keeping
-`Foundations/BrownianMartingale.lean`-class files small (one theorem + its
+`Probability/Brownian/BrownianMartingale.lean`-class files small (one theorem + its
 private helpers per file) so Lean only re-elaborates the changed file.
 
 **Lean backend is lazily initialized**. `LeanBackend._ensure_server` defers

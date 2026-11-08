@@ -8,7 +8,7 @@
       "description": "Under constant hazard rate h, the survival probability at T = t equals 1: S(T, T) = 1.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.Credit\n\nopen MathFin\n\ntheorem survival_at_zero_thm (h T : ℝ) :\n    MathFin.survivalProbability h T T = 1 :=\n  MathFin.survival_at_zero h T\n"
+        "lean": "import MathFin.Models.Credit.Credit\n\nopen MathFin\n\ntheorem survival_at_zero_thm (h T : ℝ) :\n    MathFin.survivalProbability h T T = 1 :=\n  MathFin.survival_at_zero h T\n"
       },
       "metadata": {
         "chapter": 17,
@@ -23,7 +23,7 @@
         ],
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof from exp(0) = 1. Lives in MathFin/FixedIncome/Credit.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof from exp(0) = 1. Lives in MathFin/Models/Credit/Credit.lean. Axioms-clean."
       }
     },
     {
@@ -32,7 +32,7 @@
       "description": "Survival probability is strictly positive: 0 < exp(-h(T-t)) for all h, t, T.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.Credit\n\nopen MathFin\n\ntheorem survival_pos_thm (h t T : ℝ) :\n    0 < MathFin.survivalProbability h t T :=\n  MathFin.survival_pos h t T\n"
+        "lean": "import MathFin.Models.Credit.Credit\n\nopen MathFin\n\ntheorem survival_pos_thm (h t T : ℝ) :\n    0 < MathFin.survivalProbability h t T :=\n  MathFin.survival_pos h t T\n"
       },
       "metadata": {
         "chapter": 17,
@@ -44,7 +44,7 @@
         ],
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof from Real.exp_pos. Lives in MathFin/FixedIncome/Credit.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof from Real.exp_pos. Lives in MathFin/Models/Credit/Credit.lean. Axioms-clean."
       }
     },
     {
@@ -53,7 +53,7 @@
       "description": "Under constant hazard rate h, the credit spread -log(S)/(T-t) equals h. Structurally identical to ZCB yield equality under flat rate.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.Credit\n\nopen MathFin\n\ntheorem credit_spread_eq_hazard_thm {h t T : ℝ} (htT : t < T) :\n    -Real.log (MathFin.survivalProbability h t T) / (T - t) = h :=\n  MathFin.creditSpread_eq_hazard htT\n"
+        "lean": "import MathFin.Models.Credit.Credit\n\nopen MathFin\n\ntheorem credit_spread_eq_hazard_thm {h t T : ℝ} (htT : t < T) :\n    -Real.log (MathFin.survivalProbability h t T) / (T - t) = h :=\n  MathFin.creditSpread_eq_hazard htT\n"
       },
       "metadata": {
         "chapter": 17,
@@ -66,7 +66,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via Real.log_exp + field_simp. Lives in MathFin/FixedIncome/Credit.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via Real.log_exp + field_simp. Lives in MathFin/Models/Credit/Credit.lean. Axioms-clean."
       }
     },
     {
@@ -75,7 +75,7 @@
       "description": "For a basket of jointly independent exponential default times τ_i ~ Exp(rates i), the first-to-default credit spread — read off the measure of the basket survival event, −log μ(min_i τ_i > t)/t for t > 0 — equals Σ rates: basket intensity is the sum of single-name intensities, so FtD spreads are additive under independence. Dependent default times are not treated.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.FirstToDefault\n\nopen MeasureTheory ProbabilityTheory MathFin\n\ntheorem first_to_default_spread_thm\n    {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}\n    {n : ℕ} {rates : Fin n → ℝ} {τ : Fin n → Ω → ℝ}\n    (hrates_pos : ∀ i, 0 < rates i)\n    (hexp_law : ∀ i, Measure.map (τ i) μ = expMeasure (rates i))\n    (hindep : iIndepFun τ μ)\n    (hmeas : ∀ i, Measurable (τ i))\n    (hn : 0 < n) {t : ℝ} (ht : 0 < t) :\n    -Real.log ((μ {ω | t < Finset.univ.inf' ⟨⟨0, hn⟩, Finset.mem_univ _⟩\n        (fun i : Fin n => τ i ω)}).toReal) / t\n      = ∑ i, rates i :=\n  MathFin.firstToDefault_spread_eq_sum_hazards hrates_pos hexp_law hindep hmeas hn ht\n"
+        "lean": "import MathFin.Models.Credit.FirstToDefault\n\nopen MeasureTheory ProbabilityTheory MathFin\n\ntheorem first_to_default_spread_thm\n    {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}\n    {n : ℕ} {rates : Fin n → ℝ} {τ : Fin n → Ω → ℝ}\n    (hrates_pos : ∀ i, 0 < rates i)\n    (hexp_law : ∀ i, Measure.map (τ i) μ = expMeasure (rates i))\n    (hindep : iIndepFun τ μ)\n    (hmeas : ∀ i, Measurable (τ i))\n    (hn : 0 < n) {t : ℝ} (ht : 0 < t) :\n    -Real.log ((μ {ω | t < Finset.univ.inf' ⟨⟨0, hn⟩, Finset.mem_univ _⟩\n        (fun i : Fin n => τ i ω)}).toReal) / t\n      = ∑ i, rates i :=\n  MathFin.firstToDefault_spread_eq_sum_hazards hrates_pos hexp_law hindep hmeas hn ht\n"
       },
       "metadata": {
         "chapter": 17,
@@ -91,7 +91,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: Foundations/ExpMin.minimum_survival (minimum of jointly independent exponentials survives at the summed rate) bridged into the Credit.lean vocabulary — the basket survival probability IS survivalProbability (Σ rates) 0 t (firstToDefault_survival), and the spread reading follows by creditSpread_eq_hazard. Lives in MathFin/FixedIncome/FirstToDefault.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: Probability/Laws/ExpMin.minimum_survival (minimum of jointly independent exponentials survives at the summed rate) bridged into the Credit.lean vocabulary — the basket survival probability IS survivalProbability (Σ rates) 0 t (firstToDefault_survival), and the spread reading follows by creditSpread_eq_hazard. Lives in MathFin/Models/Credit/FirstToDefault.lean. Axioms-clean."
       }
     },
     {
@@ -100,7 +100,7 @@
       "description": "Positive hazard ⇒ survival probability strictly decreasing in horizon T. Hazard induces default risk that accumulates over time.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.Credit\n\nopen MathFin\n\ntheorem survival_strictAnti_thm {h t : ℝ} (hh : 0 < h) :\n    StrictAntiOn (fun T => MathFin.survivalProbability h t T) (Set.Ici t) :=\n  MathFin.survival_strictAnti_of_pos_hazard hh\n"
+        "lean": "import MathFin.Models.Credit.Credit\n\nopen MathFin\n\ntheorem survival_strictAnti_thm {h t : ℝ} (hh : 0 < h) :\n    StrictAntiOn (fun T => MathFin.survivalProbability h t T) (Set.Ici t) :=\n  MathFin.survival_strictAnti_of_pos_hazard hh\n"
       },
       "metadata": {
         "chapter": 17,
@@ -112,7 +112,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via Real.exp_lt_exp on increasing argument. Lives in MathFin/FixedIncome/Credit.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via Real.exp_lt_exp on increasing argument. Lives in MathFin/Models/Credit/Credit.lean. Axioms-clean."
       }
     },
     {
@@ -121,7 +121,7 @@
       "description": "When the hazard function is constant h(u) ≡ h₀, the cumulative hazard ∫₀^t h₀ du = h₀·t and the survival probability exp(-cumHazard) matches the constant-hazard formula exp(-h₀(T-t)) at t=0.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.HazardCurve\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem hazardSurvival_eq_const_survival_thm (h_0 T : ℝ) :\n    MathFin.hazardSurvival (fun _ => h_0) T =\n      MathFin.survivalProbability h_0 0 T :=\n  MathFin.hazardSurvival_eq_const_survival h_0 T\n"
+        "lean": "import MathFin.Models.Credit.HazardCurve\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem hazardSurvival_eq_const_survival_thm (h_0 T : ℝ) :\n    MathFin.hazardSurvival (fun _ => h_0) T =\n      MathFin.survivalProbability h_0 0 T :=\n  MathFin.hazardSurvival_eq_const_survival h_0 T\n"
       },
       "metadata": {
         "chapter": 12,
@@ -142,7 +142,7 @@
       "description": "Under time-varying hazard h(u), the credit spread c(T) = -log(S(T))/T = H(T)/T where H is the cumulative hazard. The spread is the time-averaged hazard.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.HazardCurve\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\n/-- **Credit spread = time-averaged hazard** — definitional given\n    `S := exp(−H)` (`Real.log_exp`); paired below with the substantive FTC\n    recovery that grounds the model. -/\ntheorem creditSpread_eq_time_avg_hazard_thm {h : ℝ → ℝ} {T : ℝ} (hT : 0 < T) :\n    -Real.log (MathFin.hazardSurvival h T) / T = MathFin.cumHazard h T / T :=\n  MathFin.creditSpread_eq_time_avg_hazard hT\n\n/-- **Hazard recovered from the survival curve** (the substantive direction):\n    `h(t) = −d/dt log S(t)` for continuous `h`, by the FTC through the\n    `ExponentialDiscount` principle. -/\ntheorem hazard_recovers_from_survival_thm {h : ℝ → ℝ} (t : ℝ)\n    (hh : Continuous h) :\n    HasDerivAt (fun s => -(Real.log (MathFin.hazardSurvival h s))) (h t) t :=\n  MathFin.hazard_eq_neg_log_deriv_survival t hh"
+        "lean": "import MathFin.Models.Credit.HazardCurve\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\n/-- **Credit spread = time-averaged hazard** — definitional given\n    `S := exp(−H)` (`Real.log_exp`); paired below with the substantive FTC\n    recovery that grounds the model. -/\ntheorem creditSpread_eq_time_avg_hazard_thm {h : ℝ → ℝ} {T : ℝ} (hT : 0 < T) :\n    -Real.log (MathFin.hazardSurvival h T) / T = MathFin.cumHazard h T / T :=\n  MathFin.creditSpread_eq_time_avg_hazard hT\n\n/-- **Hazard recovered from the survival curve** (the substantive direction):\n    `h(t) = −d/dt log S(t)` for continuous `h`, by the FTC through the\n    `ExponentialDiscount` principle. -/\ntheorem hazard_recovers_from_survival_thm {h : ℝ → ℝ} (t : ℝ)\n    (hh : Continuous h) :\n    HasDerivAt (fun s => -(Real.log (MathFin.hazardSurvival h s))) (h t) t :=\n  MathFin.hazard_eq_neg_log_deriv_survival t hh"
       },
       "metadata": {
         "chapter": 12,
@@ -163,7 +163,7 @@
       "description": "Under the Merton structural model with the firm value's risk-neutral law (BSCallHyp), the KMV default probability kmvPD equals the actual risk-neutral default probability 1 − Q({V_T > F}) — the genuine probabilistic content (via the BS risk-neutral exercise probability), not the algebraic Φ-symmetry identity.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.KMVMertonStructural\n\nopen MeasureTheory ProbabilityTheory Real\nopen MathFin\n\ntheorem kmv_pd_eq_risk_neutral_default_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : MeasureTheory.Measure Ω}\n    [MeasureTheory.IsProbabilityMeasure Q] {V_0 F r σ_V T : ℝ} {Z : Ω → ℝ}\n    (hV : 0 < V_0) (hF : 0 < F) (h : MathFin.BSCallHyp Q V_0 F r σ_V T Z) :\n    MathFin.kmvPD V_0 F r σ_V T =\n      1 - (Q {ω | MathFin.bsTerminal V_0 r σ_V T (Z ω) > F}).toReal :=\n  MathFin.kmvPD_eq_one_sub_survival_probability hV hF h\n"
+        "lean": "import MathFin.Models.Credit.KMVMertonStructural\n\nopen MeasureTheory ProbabilityTheory Real\nopen MathFin\n\ntheorem kmv_pd_eq_risk_neutral_default_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : MeasureTheory.Measure Ω}\n    [MeasureTheory.IsProbabilityMeasure Q] {V_0 F r σ_V T : ℝ} {Z : Ω → ℝ}\n    (hV : 0 < V_0) (hF : 0 < F) (h : MathFin.BSCallHyp Q V_0 F r σ_V T Z) :\n    MathFin.kmvPD V_0 F r σ_V T =\n      1 - (Q {ω | MathFin.bsTerminal V_0 r σ_V T (Z ω) > F}).toReal :=\n  MathFin.kmvPD_eq_one_sub_survival_probability hV hF h\n"
       },
       "metadata": {
         "chapter": 12,
@@ -184,7 +184,7 @@
       "description": "The probabilistic survival statement of the KMV–Merton model: under risk-neutral lognormal firm-value dynamics, Q({V_T > F}).toReal = Φ(DD) — the measure of the no-default event equals the standard-normal CDF of the distance to default (survival_probability_eq_Phi_distanceToDefault), routed through the lognormal tail computation riskNeutralProb_S_T_gt_K and kmvDistanceToDefault_eq_bsd2.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.KMVMertonStructural\n\nopen MeasureTheory ProbabilityTheory Real\nopen MathFin\n\ntheorem kmv_survival_probability_eq_Phi_dd_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : MeasureTheory.Measure Ω}\n    [MeasureTheory.IsProbabilityMeasure Q] {V_0 F r σ_V T : ℝ} {Z : Ω → ℝ}\n    (hV : 0 < V_0) (hF : 0 < F) (h : MathFin.BSCallHyp Q V_0 F r σ_V T Z) :\n    (Q {ω | MathFin.bsTerminal V_0 r σ_V T (Z ω) > F}).toReal =\n      Phi (MathFin.kmvDistanceToDefault V_0 F r σ_V T) :=\n  MathFin.survival_probability_eq_Phi_distanceToDefault hV hF h\n"
+        "lean": "import MathFin.Models.Credit.KMVMertonStructural\n\nopen MeasureTheory ProbabilityTheory Real\nopen MathFin\n\ntheorem kmv_survival_probability_eq_Phi_dd_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : MeasureTheory.Measure Ω}\n    [MeasureTheory.IsProbabilityMeasure Q] {V_0 F r σ_V T : ℝ} {Z : Ω → ℝ}\n    (hV : 0 < V_0) (hF : 0 < F) (h : MathFin.BSCallHyp Q V_0 F r σ_V T Z) :\n    (Q {ω | MathFin.bsTerminal V_0 r σ_V T (Z ω) > F}).toReal =\n      Phi (MathFin.kmvDistanceToDefault V_0 F r σ_V T) :=\n  MathFin.survival_probability_eq_Phi_distanceToDefault hV hF h\n"
       },
       "metadata": {
         "chapter": 12,
@@ -205,7 +205,7 @@
       "description": "Under constant hazard h with recovery R, the fair CDS spread c = h · (1 − R), via leg equality.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.Credit\n\nopen Real\nopen MathFin\n\ntheorem cds_leg_equality_thm (h R factor c : ℝ) (h_factor_ne : factor ≠ 0) :\n    c * factor = (1 - R) * h * factor ↔ c = MathFin.cdsFairSpread h R :=\n  MathFin.cds_leg_equality h R factor c h_factor_ne\n"
+        "lean": "import MathFin.Models.Credit.Credit\n\nopen Real\nopen MathFin\n\ntheorem cds_leg_equality_thm (h R factor c : ℝ) (h_factor_ne : factor ≠ 0) :\n    c * factor = (1 - R) * h * factor ↔ c = MathFin.cdsFairSpread h R :=\n  MathFin.cds_leg_equality h R factor c h_factor_ne\n"
       },
       "metadata": {
         "chapter": 12,
@@ -226,7 +226,7 @@
       "domain": "mathematical_finance",
       "description": "In the one-factor Gaussian threshold model (F and ε₁, …, εₙ independent standard normals, asset correlation ρ ∈ [0, 1), default probability π ∈ (0, 1)), the probability that all n names default, P(√ρ F + √(1 − ρ) εᵢ ≤ Φ⁻¹(π) for all i), equals C(π, …, π) for the one-factor Gaussian copula C with factor loading √ρ.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.OneFactorCopula\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- All `n` names of the one-factor model default together with probability `C(π, …, π)`, `C` the\nGaussian factor copula at loading `√ρ`. -/\ntheorem oneFactor_joint_default_eq_gaussianFactorCopula {n : ℕ} {Ω : Type*}\n    {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {π ρ : ℝ} {F : Ω → ℝ}\n    {ε : Fin n → Ω → ℝ} (hF : HasLaw F (gaussianReal 0 1) P)\n    (hε : ∀ i, HasLaw (ε i) (gaussianReal 0 1) P) (hεind : iIndepFun ε P)\n    (hFε : F ⟂ᵢ[P] fun ω i ↦ ε i ω) (hπ : π ∈ Ioo 0 1) (hρ0 : 0 ≤ ρ) (hρ1 : ρ < 1) :\n    P.real (⋂ i, {ω | √ρ * F ω + √(1 - ρ) * ε i ω ≤ PhiInv π}) =\n      (gaussianFactorCopula n √ρ).real (Iic fun _ ↦ π) :=\n  MathFin.oneFactor_measureReal_iInter_default_eq_gaussianFactorCopula hF hε hεind hFε hπ hρ0 hρ1\n\n"
+        "lean": "import MathFin.Risk.Credit.OneFactorCopula\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- All `n` names of the one-factor model default together with probability `C(π, …, π)`, `C` the\nGaussian factor copula at loading `√ρ`. -/\ntheorem oneFactor_joint_default_eq_gaussianFactorCopula {n : ℕ} {Ω : Type*}\n    {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] {π ρ : ℝ} {F : Ω → ℝ}\n    {ε : Fin n → Ω → ℝ} (hF : HasLaw F (gaussianReal 0 1) P)\n    (hε : ∀ i, HasLaw (ε i) (gaussianReal 0 1) P) (hεind : iIndepFun ε P)\n    (hFε : F ⟂ᵢ[P] fun ω i ↦ ε i ω) (hπ : π ∈ Ioo 0 1) (hρ0 : 0 ≤ ρ) (hρ1 : ρ < 1) :\n    P.real (⋂ i, {ω | √ρ * F ω + √(1 - ρ) * ε i ω ≤ PhiInv π}) =\n      (gaussianFactorCopula n √ρ).real (Iic fun _ ↦ π) :=\n  MathFin.oneFactor_measureReal_iInter_default_eq_gaussianFactorCopula hF hε hεind hFε hπ hρ0 hρ1\n\n"
       },
       "metadata": {
         "chapter": 11,
@@ -242,7 +242,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.oneFactor_measureReal_iInter_default_eq_gaussianFactorCopula (MathFin/RiskMeasures/OneFactorCopula.lean). SCOPE: both sides are shown equal to the mixture integral ∫ p(x)ⁿ dN(0,1)(x) (oneFactor_measureReal_iInter_default, applied once on the given space and once on the canonical factor space where Sklar's theorem gives the copula). Only the diagonal point (π, …, π) and identical default probabilities are covered; heterogeneous thresholds are not stated."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.oneFactor_measureReal_iInter_default_eq_gaussianFactorCopula (MathFin/Risk/Credit/OneFactorCopula.lean). SCOPE: both sides are shown equal to the mixture integral ∫ p(x)ⁿ dN(0,1)(x) (oneFactor_measureReal_iInter_default, applied once on the given space and once on the canonical factor space where Sklar's theorem gives the copula). Only the diagonal point (π, …, π) and identical default probabilities are covered; heterogeneous thresholds are not stated."
       }
     },
     {
@@ -251,7 +251,7 @@
       "domain": "mathematical_finance",
       "description": "In the one-factor Gaussian threshold model with asset correlation ρ ∈ [0, 1) (F and the εᵢ independent standard normals), two distinct names default together with probability N₂(Φ⁻¹(π), Φ⁻¹(π); ρ), the standard bivariate normal CDF at correlation ρ. Holds for every real π (Φ⁻¹ is the library's PhiInv).",
       "code": {
-        "lean": "import MathFin.RiskMeasures.OneFactorCopula\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- Two names of the one-factor model default together with probability\n`N₂(Φ⁻¹(π), Φ⁻¹(π); ρ)`. -/\ntheorem oneFactor_pairwise_default_eq_bivariateNormalCDF {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] {ι : Type*} [Fintype ι] {π ρ : ℝ} {F : Ω → ℝ}\n    {ε : ι → Ω → ℝ} (hF : HasLaw F (gaussianReal 0 1) P)\n    (hε : ∀ i, HasLaw (ε i) (gaussianReal 0 1) P) (hεind : iIndepFun ε P)\n    (hFε : F ⟂ᵢ[P] fun ω i ↦ ε i ω) (hρ0 : 0 ≤ ρ) (hρ1 : ρ < 1) {i j : ι} (hij : i ≠ j) :\n    P.real ({ω | √ρ * F ω + √(1 - ρ) * ε i ω ≤ PhiInv π} ∩\n        {ω | √ρ * F ω + √(1 - ρ) * ε j ω ≤ PhiInv π}) =\n      bivariateNormalCDF (PhiInv π) (PhiInv π) ρ :=\n  MathFin.oneFactor_measureReal_inter_default hF hε hεind hFε hρ0 hρ1 hij\n\n"
+        "lean": "import MathFin.Risk.Credit.OneFactorCopula\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- Two names of the one-factor model default together with probability\n`N₂(Φ⁻¹(π), Φ⁻¹(π); ρ)`. -/\ntheorem oneFactor_pairwise_default_eq_bivariateNormalCDF {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] {ι : Type*} [Fintype ι] {π ρ : ℝ} {F : Ω → ℝ}\n    {ε : ι → Ω → ℝ} (hF : HasLaw F (gaussianReal 0 1) P)\n    (hε : ∀ i, HasLaw (ε i) (gaussianReal 0 1) P) (hεind : iIndepFun ε P)\n    (hFε : F ⟂ᵢ[P] fun ω i ↦ ε i ω) (hρ0 : 0 ≤ ρ) (hρ1 : ρ < 1) {i j : ι} (hij : i ≠ j) :\n    P.real ({ω | √ρ * F ω + √(1 - ρ) * ε i ω ≤ PhiInv π} ∩\n        {ω | √ρ * F ω + √(1 - ρ) * ε j ω ≤ PhiInv π}) =\n      bivariateNormalCDF (PhiInv π) (PhiInv π) ρ :=\n  MathFin.oneFactor_measureReal_inter_default hF hε hεind hFε hρ0 hρ1 hij\n\n"
       },
       "metadata": {
         "chapter": 11,
@@ -267,7 +267,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.oneFactor_measureReal_inter_default (MathFin/RiskMeasures/OneFactorCopula.lean). SCOPE: the mixture formula gives ∫ p(x)² dN(0,1)(x) (oneFactor_measureReal_iInter_default with a two-element group); integral_oneFactorPD_sq identifies it with N₂ through the pair law of the one-factor Gaussian latent vector at loading √ρ (measureReal_gaussianFactorVec_le, from map_pair_gaussianFactorVec). The default correlation (N₂ − π²)/(π(1 − π)) is not stated separately."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.oneFactor_measureReal_inter_default (MathFin/Risk/Credit/OneFactorCopula.lean). SCOPE: the mixture formula gives ∫ p(x)² dN(0,1)(x) (oneFactor_measureReal_iInter_default with a two-element group); integral_oneFactorPD_sq identifies it with N₂ through the pair law of the one-factor Gaussian latent vector at loading √ρ (measureReal_gaussianFactorVec_le, from map_pair_gaussianFactorVec). The default correlation (N₂ − π²)/(π(1 − π)) is not stated separately."
       }
     },
     {
@@ -276,7 +276,7 @@
       "domain": "mathematical_finance",
       "description": "For the one-factor Gaussian latent vector Xᵢ = ρ Z₀ + √(1 − ρ²) Zᵢ with Z₀, Z₁, …, Zₙ independent standard normals and loading ρ ∈ [−1, 1], each pair (Xᵢ, Xⱼ) with i ≠ j has the standard bivariate normal law with correlation ρ².",
       "code": {
-        "lean": "import MathFin.Foundations.GaussianCopula\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- Each pair of latent coordinates of the one-factor Gaussian model is standard bivariate normal\nwith correlation `ρ²`. -/\ntheorem gaussianFactorVec_pair_law {n : ℕ} {ρ : ℝ} (hρ : ρ ∈ Icc (-1) 1) {i j : Fin n}\n    (hij : i ≠ j) :\n    (stdNormalFactors n).map (fun z ↦ (gaussianFactorVec ρ z i, gaussianFactorVec ρ z j)) =\n      bivariateNormalLaw (ρ ^ 2) :=\n  MathFin.map_pair_gaussianFactorVec hρ hij\n\n"
+        "lean": "import MathFin.Probability.Dependence.GaussianCopula\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- Each pair of latent coordinates of the one-factor Gaussian model is standard bivariate normal\nwith correlation `ρ²`. -/\ntheorem gaussianFactorVec_pair_law {n : ℕ} {ρ : ℝ} (hρ : ρ ∈ Icc (-1) 1) {i j : Fin n}\n    (hij : i ≠ j) :\n    (stdNormalFactors n).map (fun z ↦ (gaussianFactorVec ρ z i, gaussianFactorVec ρ z j)) =\n      bivariateNormalLaw (ρ ^ 2) :=\n  MathFin.map_pair_gaussianFactorVec hρ hij\n\n"
       },
       "metadata": {
         "chapter": 7,
@@ -288,7 +288,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.map_pair_gaussianFactorVec (MathFin/Foundations/GaussianCopula.lean). SCOPE: the pair is a continuous linear image of the Gaussian factors, hence Gaussian (Mathlib's isGaussian_map); its coordinates are centred with unit variance and covariance ρ² (covariance_gaussianFactorVec); eq_bivariateNormalLaw identifies the law. The bivariate normal law is the library's Cholesky construction bivariateNormalLaw on ℝ × ℝ."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.map_pair_gaussianFactorVec (MathFin/Probability/Dependence/GaussianCopula.lean). SCOPE: the pair is a continuous linear image of the Gaussian factors, hence Gaussian (Mathlib's isGaussian_map); its coordinates are centred with unit variance and covariance ρ² (covariance_gaussianFactorVec); eq_bivariateNormalLaw identifies the law. The bivariate normal law is the library's Cholesky construction bivariateNormalLaw on ℝ × ℝ."
       }
     },
     {
@@ -297,7 +297,7 @@
       "domain": "mathematical_finance",
       "description": "For a row-stochastic transition matrix P on m ratings, take in row i the thresholds Φ⁻¹ of the cumulative row sums ∑_{k<j} P i k (−∞ and +∞ at the ends). Standard normal threshold migration with these thresholds has transition matrix exactly P.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CreditMetrics\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- Standard normal threshold migration with the `Φ⁻¹`-calibrated thresholds reproduces `P`. -/\ntheorem creditMetrics_threshold_calibration {m : ℕ} {P : Matrix (Fin m) (Fin m) ℝ}\n    (hP : P ∈ Matrix.rowStochastic ℝ (Fin m)) :\n    thresholdMatrix (gaussianReal 0 1) (gaussianThresholds P) = P :=\n  MathFin.thresholdMatrix_gaussianThresholds hP\n\n"
+        "lean": "import MathFin.Risk.Credit.CreditMetrics\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- Standard normal threshold migration with the `Φ⁻¹`-calibrated thresholds reproduces `P`. -/\ntheorem creditMetrics_threshold_calibration {m : ℕ} {P : Matrix (Fin m) (Fin m) ℝ}\n    (hP : P ∈ Matrix.rowStochastic ℝ (Fin m)) :\n    thresholdMatrix (gaussianReal 0 1) (gaussianThresholds P) = P :=\n  MathFin.thresholdMatrix_gaussianThresholds hP\n\n"
       },
       "metadata": {
         "chapter": 11,
@@ -310,7 +310,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.thresholdMatrix_gaussianThresholds (MathFin/RiskMeasures/CreditMetrics.lean). SCOPE: the threshold of a cumulative probability c is ⊥ for c ≤ 0, ⊤ for c ≥ 1 and Φ⁻¹(c) otherwise (gaussianThreshold), so zero-probability buckets are handled; the standard normal mass between consecutive thresholds is the difference of cumulative sums. One obligor's marginal migration; the ordering of ratings is the threshold order (lowest returns first)."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.thresholdMatrix_gaussianThresholds (MathFin/Risk/Credit/CreditMetrics.lean). SCOPE: the threshold of a cumulative probability c is ⊥ for c ≤ 0, ⊤ for c ≥ 1 and Φ⁻¹(c) otherwise (gaussianThreshold), so zero-probability buckets are handled; the standard normal mass between consecutive thresholds is the difference of cumulative sums. One obligor's marginal migration; the ordering of ratings is the threshold order (lowest returns first)."
       }
     },
     {
@@ -319,7 +319,7 @@
       "domain": "mathematical_finance",
       "description": "Two obligors in ratings i and k migrate by the Φ⁻¹-calibrated CreditMetrics thresholds of a transition matrix P, and their latent returns are standard bivariate normal with asset correlation r ∈ [−1, 1]. If their default probabilities P i 0 and P k 0 (the lowest bucket) lie in (0, 1), the covariance of their default indicators is N₂(Φ⁻¹(P i 0), Φ⁻¹(P k 0); r) − P i 0 · P k 0.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CreditMetrics\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The covariance of the default indicators of two obligors with correlated returns is\n`N₂(Φ⁻¹(p₁), Φ⁻¹(p₂); r) − p₁ p₂`. -/\ntheorem creditMetrics_default_covariance {m : ℕ} {P : Matrix (Fin (m + 1)) (Fin (m + 1)) ℝ}\n    {i k : Fin (m + 1)} (hi : P i 0 ∈ Ioo 0 1) (hk : P k 0 ∈ Ioo 0 1) {r : ℝ}\n    (hr : r ^ 2 ≤ 1) :\n    cov[(Prod.fst ⁻¹' ratingBucket (gaussianThresholds P i) 0).indicator 1,\n        (Prod.snd ⁻¹' ratingBucket (gaussianThresholds P k) 0).indicator 1;\n        bivariateNormalLaw r] =\n      bivariateNormalCDF (PhiInv (P i 0)) (PhiInv (P k 0)) r - P i 0 * P k 0 :=\n  MathFin.covariance_indicator_default_gaussianThresholds hi hk hr\n\n"
+        "lean": "import MathFin.Risk.Credit.CreditMetrics\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The covariance of the default indicators of two obligors with correlated returns is\n`N₂(Φ⁻¹(p₁), Φ⁻¹(p₂); r) − p₁ p₂`. -/\ntheorem creditMetrics_default_covariance {m : ℕ} {P : Matrix (Fin (m + 1)) (Fin (m + 1)) ℝ}\n    {i k : Fin (m + 1)} (hi : P i 0 ∈ Ioo 0 1) (hk : P k 0 ∈ Ioo 0 1) {r : ℝ}\n    (hr : r ^ 2 ≤ 1) :\n    cov[(Prod.fst ⁻¹' ratingBucket (gaussianThresholds P i) 0).indicator 1,\n        (Prod.snd ⁻¹' ratingBucket (gaussianThresholds P k) 0).indicator 1;\n        bivariateNormalLaw r] =\n      bivariateNormalCDF (PhiInv (P i 0)) (PhiInv (P k 0)) r - P i 0 * P k 0 :=\n  MathFin.covariance_indicator_default_gaussianThresholds hi hk hr\n\n"
       },
       "metadata": {
         "chapter": 11,
@@ -332,7 +332,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.covariance_indicator_default_gaussianThresholds (MathFin/RiskMeasures/CreditMetrics.lean). SCOPE: the lowest calibrated bucket is (−∞, Φ⁻¹(P i 0)] (ratingBucket_gaussianThresholds_zero); the covariance of two indicators is P(A ∩ B) − P(A)P(B) (covariance_indicator_one, MathFin/Foundations/HoeffdingCovariance.lean); the joint default probability is N₂ (measureReal_default_prod_gaussianThresholds) and the margins are standard normal. Only joint default is covered; joint migration to other buckets is not stated. The asset correlation r is a parameter, not estimated."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.covariance_indicator_default_gaussianThresholds (MathFin/Risk/Credit/CreditMetrics.lean). SCOPE: the lowest calibrated bucket is (−∞, Φ⁻¹(P i 0)] (ratingBucket_gaussianThresholds_zero); the covariance of two indicators is P(A ∩ B) − P(A)P(B) (covariance_indicator_one, MathFin/Probability/Dependence/HoeffdingCovariance.lean); the joint default probability is N₂ (measureReal_default_prod_gaussianThresholds) and the margins are standard normal. Only joint default is covered; joint migration to other buckets is not stated. The asset correlation r is a parameter, not estimated."
       }
     },
     {
@@ -341,7 +341,7 @@
       "domain": "mathematical_finance",
       "description": "For independent exponential T₁, T₂, T₃ with rates λ₁, λ₂, λ₃ > 0 and default times Xⱼ = min(Tⱼ, T₃), the default indicators 𝟙{X₁ ≤ s} and 𝟙{X₂ ≤ t} have covariance exp(−(λ₁ + λ₃)s − (λ₂ + λ₃)t) · (exp(λ₃ min(s, t)) − 1) for s, t ≥ 0.",
       "code": {
-        "lean": "import MathFin.Foundations.MarshallOlkin\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The default-indicator covariance of the Marshall–Olkin common-shock model. -/\ntheorem marshallOlkin_default_covariance {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {T : Fin 3 → Ω → ℝ} {rate : Fin 3 → ℝ} (hrate : ∀ i, 0 < rate i)\n    (hT : ∀ i, HasLaw (T i) (expMeasure (rate i)) P) (hind : iIndepFun T P) {s t : ℝ}\n    (hs : 0 ≤ s) (ht : 0 ≤ t) :\n    cov[{ω | min (T 0 ω) (T 2 ω) ≤ s}.indicator 1, {ω | min (T 1 ω) (T 2 ω) ≤ t}.indicator 1;\n        P] =\n      Real.exp (-((rate 0 + rate 2) * s) - (rate 1 + rate 2) * t) *\n        (Real.exp (rate 2 * min s t) - 1) :=\n  MathFin.covariance_indicator_marshallOlkin hrate hT hind hs ht\n\n"
+        "lean": "import MathFin.Probability.Dependence.MarshallOlkin\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The default-indicator covariance of the Marshall–Olkin common-shock model. -/\ntheorem marshallOlkin_default_covariance {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {T : Fin 3 → Ω → ℝ} {rate : Fin 3 → ℝ} (hrate : ∀ i, 0 < rate i)\n    (hT : ∀ i, HasLaw (T i) (expMeasure (rate i)) P) (hind : iIndepFun T P) {s t : ℝ}\n    (hs : 0 ≤ s) (ht : 0 ≤ t) :\n    cov[{ω | min (T 0 ω) (T 2 ω) ≤ s}.indicator 1, {ω | min (T 1 ω) (T 2 ω) ≤ t}.indicator 1;\n        P] =\n      Real.exp (-((rate 0 + rate 2) * s) - (rate 1 + rate 2) * t) *\n        (Real.exp (rate 2 * min s t) - 1) :=\n  MathFin.covariance_indicator_marshallOlkin hrate hT hind hs ht\n\n"
       },
       "metadata": {
         "chapter": 7,
@@ -357,7 +357,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.covariance_indicator_marshallOlkin (MathFin/Foundations/MarshallOlkin.lean). SCOPE: the covariance of the two indicators is computed on the joint law of (X₁, X₂) by covariance_indicator_one and measureReal_inter_sub_mul_compl (MathFin/Foundations/HoeffdingCovariance.lean), then read off the joint survival function marshallOlkin_survival and the exponential margins. The correlation of X₁ and X₂ themselves is not stated."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.covariance_indicator_marshallOlkin (MathFin/Probability/Dependence/MarshallOlkin.lean). SCOPE: the covariance of the two indicators is computed on the joint law of (X₁, X₂) by covariance_indicator_one and measureReal_inter_sub_mul_compl (MathFin/Probability/Dependence/HoeffdingCovariance.lean), then read off the joint survival function marshallOlkin_survival and the exponential margins. The correlation of X₁ and X₂ themselves is not stated."
       }
     },
     {
@@ -366,7 +366,7 @@
       "domain": "mathematical_finance",
       "description": "For Λ ∼ Gamma(a, r) (shape a > 0, rate r > 0, Mathlib's gammaMeasure) and s < r, E[exp(sΛ)] = (r / (r − s))^a.",
       "code": {
-        "lean": "import MathFin.Foundations.GammaPoissonMixturePgf\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The Gamma moment-generating function. -/\ntheorem gamma_mgf {a r s : ℝ} (ha : 0 < a) (hr : 0 < r) (hs : s < r) :\n    mgf id (gammaMeasure a r) s = (r / (r - s)) ^ a :=\n  MathFin.GammaPoissonMixturePgf.mgf_id_gammaMeasure ha hr hs\n\n"
+        "lean": "import MathFin.Probability.Laws.GammaPoissonMixturePgf\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The Gamma moment-generating function. -/\ntheorem gamma_mgf {a r s : ℝ} (ha : 0 < a) (hr : 0 < r) (hs : s < r) :\n    mgf id (gammaMeasure a r) s = (r / (r - s)) ^ a :=\n  MathFin.GammaPoissonMixturePgf.mgf_id_gammaMeasure ha hr hs\n\n"
       },
       "metadata": {
         "chapter": 11,
@@ -379,7 +379,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.GammaPoissonMixturePgf.mgf_id_gammaMeasure (MathFin/Foundations/GammaPoissonMixturePgf.lean). SCOPE: the Gamma density times exp(sλ) is the Gamma integrand at rate r − s, integrated by Mathlib's integral_rpow_mul_exp_neg_mul_Ioi. Only s < r; the MGF is infinite otherwise, which is not stated."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.GammaPoissonMixturePgf.mgf_id_gammaMeasure (MathFin/Probability/Laws/GammaPoissonMixturePgf.lean). SCOPE: the Gamma density times exp(sλ) is the Gamma integrand at rate r − s, integrated by Mathlib's integral_rpow_mul_exp_neg_mul_Ioi. Only s < r; the MGF is infinite otherwise, which is not stated."
       }
     },
     {
@@ -388,7 +388,7 @@
       "domain": "mathematical_finance",
       "description": "For i.i.d. losses Xᵢ with common MGF M_X(t) (Mathlib's mgf, which is 0 where the MGF is infinite) and a Poisson default count whose intensity is mixed against Gamma(a, r), a, r > 0: if M_X(t) < r + 1, the compound-Poisson MGF of the n-loss sum integrated against Poisson(λ) and then against Gamma(a, r) equals (r / (r − (M_X(t) − 1)))^a. Stated as the iterated mixture integral; the mixed count and the sector loss are not constructed as random variables.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CreditRiskPlus\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The CreditRisk+ sector loss MGF, as the Poisson–Gamma mixture of the compound-Poisson MGF. -/\ntheorem creditRiskPlus_sector_loss_mgf {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    {a r t : ℝ} (ha : 0 < a) (hr : 0 < r) (X : ℕ → Ω → ℝ) (hindep : iIndepFun X μ)\n    (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ)\n    (hM : mgf (X 0) μ t < r + 1) :\n    ∫ lam, (∫ n, mgf (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ t ∂poissonMeasure lam.toNNReal)\n        ∂gammaMeasure a r =\n      (r / (r - (mgf (X 0) μ t - 1))) ^ a :=\n  MathFin.integral_compoundPoisson_mgf_gammaMeasure ha hr X hindep hident hM\n\n"
+        "lean": "import MathFin.Risk.Credit.CreditRiskPlus\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The CreditRisk+ sector loss MGF, as the Poisson–Gamma mixture of the compound-Poisson MGF. -/\ntheorem creditRiskPlus_sector_loss_mgf {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    {a r t : ℝ} (ha : 0 < a) (hr : 0 < r) (X : ℕ → Ω → ℝ) (hindep : iIndepFun X μ)\n    (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ)\n    (hM : mgf (X 0) μ t < r + 1) :\n    ∫ lam, (∫ n, mgf (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ t ∂poissonMeasure lam.toNNReal)\n        ∂gammaMeasure a r =\n      (r / (r - (mgf (X 0) μ t - 1))) ^ a :=\n  MathFin.integral_compoundPoisson_mgf_gammaMeasure ha hr X hindep hident hM\n\n"
       },
       "metadata": {
         "chapter": 11,
@@ -400,7 +400,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof in mixture form. Re-export of MathFin.integral_compoundPoisson_mgf_gammaMeasure (MathFin/RiskMeasures/CreditRiskPlus.lean). SCOPE: the n-loss MGF is M_X(t)ⁿ (mgf_range_sum_of_iid, MathFin/Actuarial/CompoundPoissonMGF.lean) and the Poisson–Gamma sector pgf (integral_integral_pow_poissonMeasure_gammaMeasure, MathFin/Foundations/GammaPoissonMixturePgf.lean) is evaluated at z = M_X(t). The random sector count with this conditional law, the sector loss as a random variable, the portfolio across sectors and the loss-banding recursion are not constructed."
+        "formalization_scope": "Full formal proof in mixture form. Re-export of MathFin.integral_compoundPoisson_mgf_gammaMeasure (MathFin/Risk/Credit/CreditRiskPlus.lean). SCOPE: the n-loss MGF is M_X(t)ⁿ (mgf_range_sum_of_iid, MathFin/Probability/Jumps/CompoundPoissonMGF.lean) and the Poisson–Gamma sector pgf (integral_integral_pow_poissonMeasure_gammaMeasure, MathFin/Probability/Laws/GammaPoissonMixturePgf.lean) is evaluated at z = M_X(t). The random sector count with this conditional law, the sector loss as a random variable, the portfolio across sectors and the loss-banding recursion are not constructed."
       }
     },
     {
@@ -409,7 +409,7 @@
       "domain": "mathematical_finance",
       "description": "For a continuous, strictly positive hazard h with ∫₀ᵗ h → ∞ and the Cox default time τ obtained by inverting a unit-exponential clock through ∫₀ᵗ h, the CDS protection leg (1 − R)∫₀ᵀ e^{−rs} h(s) e^{−∫₀ˢ h} ds equals (1 − R) E[e^{−rτ} 1{τ ≤ T}] for every T ≥ 0, recovery R and flat rate r.",
       "code": {
-        "lean": "import MathFin.FixedIncome.CVA\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The CDS protection leg of a deterministic hazard is the discounted expected loss over the\nconstructed Cox default time. -/\ntheorem protectionLeg_eq_expectation {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsFiniteMeasure μ] {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s, 0 < h s)\n    (hdiv : Tendsto (cumHazard h) atTop atTop) {ξ : Ω → ℝ} (hξmeas : Measurable ξ)\n    (hξlaw : μ.map ξ = expMeasure 1) (R r : ℝ) {T : ℝ} (hT : 0 ≤ T) :\n    Cox.protectionLeg R r h T =\n      (1 - R) * ∫ ω, (Iic T).indicator (fun s ↦ Real.exp (-(r * s))) (Cox.coxDefaultTime h ξ ω) ∂μ :=\n  MathFin.CVA.protectionLeg_eq_integral_coxDefaultTime hh hpos hdiv hξmeas hξlaw R r hT\n\n"
+        "lean": "import MathFin.Models.Credit.CVA\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The CDS protection leg of a deterministic hazard is the discounted expected loss over the\nconstructed Cox default time. -/\ntheorem protectionLeg_eq_expectation {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsFiniteMeasure μ] {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s, 0 < h s)\n    (hdiv : Tendsto (cumHazard h) atTop atTop) {ξ : Ω → ℝ} (hξmeas : Measurable ξ)\n    (hξlaw : μ.map ξ = expMeasure 1) (R r : ℝ) {T : ℝ} (hT : 0 ≤ T) :\n    Cox.protectionLeg R r h T =\n      (1 - R) * ∫ ω, (Iic T).indicator (fun s ↦ Real.exp (-(r * s))) (Cox.coxDefaultTime h ξ ω) ∂μ :=\n  MathFin.CVA.protectionLeg_eq_integral_coxDefaultTime hh hpos hdiv hξmeas hξlaw R r hT\n\n"
       },
       "metadata": {
         "chapter": 16,
@@ -426,7 +426,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.protectionLeg_eq_integral_coxDefaultTime (MathFin/FixedIncome/CVA.lean). SCOPE: the default time is constructed (Cox.coxDefaultTime), its CDF is derived (Cox.cox_cdf_timeVarying) and its measurability is proved (Cox.measurable_coxDefaultTime); the expectation is then integrated against the default density (DefaultDensity.integral_indicator_Iic_eq). Deterministic, continuous hazard and flat discount rate only; the premium leg as an expectation, stochastic intensities and the piecewise-constant bootstrapped curve are not covered."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.protectionLeg_eq_integral_coxDefaultTime (MathFin/Models/Credit/CVA.lean). SCOPE: the default time is constructed (Cox.coxDefaultTime), its CDF is derived (Cox.cox_cdf_timeVarying) and its measurability is proved (Cox.measurable_coxDefaultTime); the expectation is then integrated against the default density (DefaultDensity.integral_indicator_Iic_eq). Deterministic, continuous hazard and flat discount rate only; the premium leg as an expectation, stochastic intensities and the piecewise-constant bootstrapped curve are not covered."
       }
     },
     {
@@ -435,7 +435,7 @@
       "domain": "mathematical_finance",
       "description": "For a default time τ whose CDF on [0, ∞) is 1 − exp(−∫₀ᵃ h) (h continuous, h ≥ 0; hypothesized, not constructed), independent of the exposure by a product measure, and exposure Vₛ = m(s) + σ(s)√s Z with one standard normal driver Z (m, σ, D measurable and bounded, σ > 0): CVA = LGD · E[1{τ ≤ T} D(τ) V_τ⁺] = LGD · ∫₀ᵀ D(s) [m(s)Φ(dₛ) + σ(s)√s φ(dₛ)] h(s) e^{−∫₀ˢ h} ds with dₛ = m(s)/(σ(s)√s). Only the marginal laws of Vₛ enter; no exposure dynamics are modelled.",
       "code": {
-        "lean": "import MathFin.FixedIncome.CVA\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- CVA with a Gaussian exposure profile under independence of exposure and default. -/\ntheorem cva_gaussian_exposure {Ω₁ Ω₂ : Type*} {m₁ : MeasurableSpace Ω₁}\n    {m₂ : MeasurableSpace Ω₂} {ν : Measure Ω₁} {μ : Measure Ω₂} [IsProbabilityMeasure ν]\n    [IsProbabilityMeasure μ] {h : ℝ → ℝ} (hh : Continuous h) (hnn : ∀ s, 0 ≤ h s)\n    {τ : Ω₂ → ℝ} (hτ : Measurable τ)\n    (hcdf : ∀ a, 0 ≤ a → μ {ω | τ ω ≤ a} = 1 - ENNReal.ofReal (hazardSurvival h a))\n    {D : ℝ → ℝ} (hD : Measurable D) {C : ℝ} (hDb : ∀ s, |D s| ≤ C) {m σ : ℝ → ℝ}\n    (hm : Measurable m) (hσ : Measurable σ) {M S : ℝ} (hmb : ∀ s, |m s| ≤ M)\n    (hσpos : ∀ s, 0 < σ s) (hσb : ∀ s, σ s ≤ S) {Z : Ω₁ → ℝ} (hZm : Measurable Z)\n    (hZ : HasLaw Z (gaussianReal 0 1) ν) (LGD : ℝ) {T : ℝ} (hT : 0 ≤ T) :\n    CVA.cva LGD D (fun s ω ↦ m s + σ s * √s * Z ω) τ T ν μ\n      = LGD * ∫ s in (0:ℝ)..T, D s * (m s * Phi (m s / (σ s * √s))\n          + σ s * √s * gaussianPDFReal 0 1 (m s / (σ s * √s))) * DefaultDensity.defaultDensity h s :=\n  MathFin.CVA.cva_gaussian hh hnn hτ hcdf hD hDb hm hσ hmb hσpos hσb hZm hZ LGD hT\n\n"
+        "lean": "import MathFin.Models.Credit.CVA\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- CVA with a Gaussian exposure profile under independence of exposure and default. -/\ntheorem cva_gaussian_exposure {Ω₁ Ω₂ : Type*} {m₁ : MeasurableSpace Ω₁}\n    {m₂ : MeasurableSpace Ω₂} {ν : Measure Ω₁} {μ : Measure Ω₂} [IsProbabilityMeasure ν]\n    [IsProbabilityMeasure μ] {h : ℝ → ℝ} (hh : Continuous h) (hnn : ∀ s, 0 ≤ h s)\n    {τ : Ω₂ → ℝ} (hτ : Measurable τ)\n    (hcdf : ∀ a, 0 ≤ a → μ {ω | τ ω ≤ a} = 1 - ENNReal.ofReal (hazardSurvival h a))\n    {D : ℝ → ℝ} (hD : Measurable D) {C : ℝ} (hDb : ∀ s, |D s| ≤ C) {m σ : ℝ → ℝ}\n    (hm : Measurable m) (hσ : Measurable σ) {M S : ℝ} (hmb : ∀ s, |m s| ≤ M)\n    (hσpos : ∀ s, 0 < σ s) (hσb : ∀ s, σ s ≤ S) {Z : Ω₁ → ℝ} (hZm : Measurable Z)\n    (hZ : HasLaw Z (gaussianReal 0 1) ν) (LGD : ℝ) {T : ℝ} (hT : 0 ≤ T) :\n    CVA.cva LGD D (fun s ω ↦ m s + σ s * √s * Z ω) τ T ν μ\n      = LGD * ∫ s in (0:ℝ)..T, D s * (m s * Phi (m s / (σ s * √s))\n          + σ s * √s * gaussianPDFReal 0 1 (m s / (σ s * √s))) * DefaultDensity.defaultDensity h s :=\n  MathFin.CVA.cva_gaussian hh hnn hτ hcdf hD hDb hm hσ hmb hσpos hσb hZm hZ LGD hT\n\n"
       },
       "metadata": {
         "chapter": 16,
@@ -451,7 +451,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.cva_gaussian (MathFin/FixedIncome/CVA.lean). SCOPE: the no-wrong-way-risk reduction integral_exposure_eq (Fubini on the product measure and the default density) and the Gaussian expected exposure expectedExposure_gaussian (from the Bachelier call formula). The law of τ enters through a hypothesized CDF; for a constructed default time see mf-cds-protection-leg-expectation. Exposure is one Gaussian driver scaled by √s, so only the marginal laws Vₛ ∼ N(m(s), σ(s)²s) are modelled."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.cva_gaussian (MathFin/Models/Credit/CVA.lean). SCOPE: the no-wrong-way-risk reduction integral_exposure_eq (Fubini on the product measure and the default density) and the Gaussian expected exposure expectedExposure_gaussian (from the Bachelier call formula). The law of τ enters through a hypothesized CDF; for a constructed default time see mf-cds-protection-leg-expectation. Exposure is one Gaussian driver scaled by √s, so only the marginal laws Vₛ ∼ N(m(s), σ(s)²s) are modelled."
       }
     },
     {
@@ -460,7 +460,7 @@
       "domain": "mathematical_finance",
       "description": "In the large-homogeneous-portfolio limit of the one-factor Gaussian model, with standard normal factor F, default probability π ∈ (0, 1), asset correlation ρ ∈ [0, 1) and K ∈ (0, 1), the loss fraction p(F) = Φ((Φ⁻¹(π) − √ρ F)/√(1 − ρ)) satisfies E[(p(F) − K)⁺] = π − N₂(Φ⁻¹(π), Φ⁻¹(K); √(1 − ρ)).",
       "code": {
-        "lean": "import MathFin.RiskMeasures.TrancheLoss\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The LHP stop-loss expectation in closed form. -/\ntheorem lhp_stop_loss {π ρ K : ℝ} (hπ : π ∈ Ioo 0 1) (hρ0 : 0 ≤ ρ) (hρ1 : ρ < 1)\n    (hK : K ∈ Ioo 0 1) :\n    ∫ f, (oneFactorPD π ρ f - K)⁺ ∂gaussianReal 0 1 =\n      π - bivariateNormalCDF (PhiInv π) (PhiInv K) √(1 - ρ) :=\n  MathFin.integral_posPart_oneFactorPD_sub hπ hρ0 hρ1 hK\n\n"
+        "lean": "import MathFin.Risk.Credit.TrancheLoss\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The LHP stop-loss expectation in closed form. -/\ntheorem lhp_stop_loss {π ρ K : ℝ} (hπ : π ∈ Ioo 0 1) (hρ0 : 0 ≤ ρ) (hρ1 : ρ < 1)\n    (hK : K ∈ Ioo 0 1) :\n    ∫ f, (oneFactorPD π ρ f - K)⁺ ∂gaussianReal 0 1 =\n      π - bivariateNormalCDF (PhiInv π) (PhiInv K) √(1 - ρ) :=\n  MathFin.integral_posPart_oneFactorPD_sub hπ hρ0 hρ1 hK\n\n"
       },
       "metadata": {
         "chapter": 11,
@@ -472,7 +472,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.integral_posPart_oneFactorPD_sub (MathFin/RiskMeasures/TrancheLoss.lean). SCOPE: writing K = Φ(k), the payoff (Φ(T(F)) − Φ(k))⁺ is the conditional probability of {k < ε ≤ T(F)} given F; Fubini on N(0,1) ⊗ N(0,1) turns the expectation into π minus a bivariate normal CDF. Concerns the limiting loss fraction p(F); the finite-pool statement is mf-lhp-tranche-loss-limit."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.integral_posPart_oneFactorPD_sub (MathFin/Risk/Credit/TrancheLoss.lean). SCOPE: writing K = Φ(k), the payoff (Φ(T(F)) − Φ(k))⁺ is the conditional probability of {k < ε ≤ T(F)} given F; Fubini on N(0,1) ⊗ N(0,1) turns the expectation into π minus a bivariate normal CDF. Concerns the limiting loss fraction p(F); the finite-pool statement is mf-lhp-tranche-loss-limit."
       }
     },
     {
@@ -481,7 +481,7 @@
       "domain": "mathematical_finance",
       "description": "In the one-factor Gaussian threshold model with standard normal F and pairwise independent standard normal εᵢ (independence of F from the εᵢ is not assumed), π ∈ (0, 1), ρ ∈ [0, 1) and 0 < a < d < 1, the expected loss of the tranche [a, d] on the first m obligors converges as m → ∞ to (N₂(Φ⁻¹(π), Φ⁻¹(d); √(1 − ρ)) − N₂(Φ⁻¹(π), Φ⁻¹(a); √(1 − ρ)))/(d − a).",
       "code": {
-        "lean": "import MathFin.RiskMeasures.TrancheLoss\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The finite-pool tranche expected loss converges to the LHP closed form. -/\ntheorem tranche_expected_loss_limit {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {π ρ a d : ℝ} {F : Ω → ℝ} {ε : ℕ → Ω → ℝ}\n    (hF : HasLaw F (gaussianReal 0 1) P) (hε : ∀ i, HasLaw (ε i) (gaussianReal 0 1) P)\n    (hind : Pairwise fun i j ↦ ε i ⟂ᵢ[P] ε j) (hπ : π ∈ Ioo 0 1) (hρ0 : 0 ≤ ρ) (hρ1 : ρ < 1)\n    (ha : 0 < a) (had : a < d) (hd : d < 1) :\n    Tendsto (fun m ↦ ∫ ω, tranchePayoff a d (oneFactorLossFraction π ρ F ε m ω) ∂P) atTop\n      (𝓝 ((bivariateNormalCDF (PhiInv π) (PhiInv d) √(1 - ρ) -\n        bivariateNormalCDF (PhiInv π) (PhiInv a) √(1 - ρ)) / (d - a))) :=\n  MathFin.tendsto_integral_tranchePayoff_oneFactorLossFraction hF hε hind hπ hρ0 hρ1 ha had hd\n\n"
+        "lean": "import MathFin.Risk.Credit.TrancheLoss\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The finite-pool tranche expected loss converges to the LHP closed form. -/\ntheorem tranche_expected_loss_limit {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {π ρ a d : ℝ} {F : Ω → ℝ} {ε : ℕ → Ω → ℝ}\n    (hF : HasLaw F (gaussianReal 0 1) P) (hε : ∀ i, HasLaw (ε i) (gaussianReal 0 1) P)\n    (hind : Pairwise fun i j ↦ ε i ⟂ᵢ[P] ε j) (hπ : π ∈ Ioo 0 1) (hρ0 : 0 ≤ ρ) (hρ1 : ρ < 1)\n    (ha : 0 < a) (had : a < d) (hd : d < 1) :\n    Tendsto (fun m ↦ ∫ ω, tranchePayoff a d (oneFactorLossFraction π ρ F ε m ω) ∂P) atTop\n      (𝓝 ((bivariateNormalCDF (PhiInv π) (PhiInv d) √(1 - ρ) -\n        bivariateNormalCDF (PhiInv π) (PhiInv a) √(1 - ρ)) / (d - a))) :=\n  MathFin.tendsto_integral_tranchePayoff_oneFactorLossFraction hF hε hind hπ hρ0 hρ1 ha had hd\n\n"
       },
       "metadata": {
         "chapter": 11,
@@ -497,7 +497,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.tendsto_integral_tranchePayoff_oneFactorLossFraction (MathFin/RiskMeasures/TrancheLoss.lean). SCOPE: dominated convergence (the tranche loss lies in [0, 1]) along the almost-sure large-portfolio limit tendsto_oneFactorLossFraction_ae, whose limit expectation is the LHP closed form integral_tranchePayoff_oneFactorPD. Undiscounted, single period, homogeneous pool, zero recovery: the pool loss is the fraction of the first m names that default (oneFactorLossFraction)."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.tendsto_integral_tranchePayoff_oneFactorLossFraction (MathFin/Risk/Credit/TrancheLoss.lean). SCOPE: dominated convergence (the tranche loss lies in [0, 1]) along the almost-sure large-portfolio limit tendsto_oneFactorLossFraction_ae, whose limit expectation is the LHP closed form integral_tranchePayoff_oneFactorPD. Undiscounted, single period, homogeneous pool, zero recovery: the pool loss is the fraction of the first m names that default (oneFactorLossFraction)."
       }
     },
     {
@@ -506,7 +506,7 @@
       "domain": "mathematical_finance",
       "description": "Let τ be a measurable lifetime whose CDF on [0, ∞) is 1 − exp(−∫₀ᵃ h) for a continuous hazard h ≥ 0 (hypothesized). Then the actuarial survival probability ₜpₓ = P(τ > x + t | τ > x) equals exp(−∫ₓ^{x+t} h) for all x, t ≥ 0.",
       "code": {
-        "lean": "import MathFin.Bridges.SurvivalUnification\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- `ₜpₓ = exp(−∫ₓ^{x+t} h)` for a lifetime with hazard `h`. -/\ntheorem survive_hazard {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}\n    [IsProbabilityMeasure P] {h : ℝ → ℝ} {τ : Ω → ℝ} (hh : Continuous h) (hnn : ∀ s, 0 ≤ h s)\n    (hτ : Measurable τ)\n    (hcdf : ∀ a, 0 ≤ a → P {ω | τ ω ≤ a} = 1 - ENNReal.ofReal (hazardSurvival h a)) {x t : ℝ}\n    (hx : 0 ≤ x) (ht : 0 ≤ t) :\n    SurvivalModel.survive P τ t x = Real.exp (-∫ s in x..x + t, h s) :=\n  MathFin.survive_eq_exp_neg_integral hh hnn hτ hcdf hx ht\n\n"
+        "lean": "import MathFin.Insurance.SurvivalUnification\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- `ₜpₓ = exp(−∫ₓ^{x+t} h)` for a lifetime with hazard `h`. -/\ntheorem survive_hazard {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}\n    [IsProbabilityMeasure P] {h : ℝ → ℝ} {τ : Ω → ℝ} (hh : Continuous h) (hnn : ∀ s, 0 ≤ h s)\n    (hτ : Measurable τ)\n    (hcdf : ∀ a, 0 ≤ a → P {ω | τ ω ≤ a} = 1 - ENNReal.ofReal (hazardSurvival h a)) {x t : ℝ}\n    (hx : 0 ≤ x) (ht : 0 ≤ t) :\n    SurvivalModel.survive P τ t x = Real.exp (-∫ s in x..x + t, h s) :=\n  MathFin.survive_eq_exp_neg_integral hh hnn hτ hcdf hx ht\n\n"
       },
       "metadata": {
         "chapter": 11,
@@ -519,7 +519,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.survive_eq_exp_neg_integral (MathFin/Bridges/SurvivalUnification.lean). SCOPE: the survival function of τ is the credit curve hazardSurvival h (survivalFunction_eq_hazardSurvival) and ₜpₓ is the survival ratio (SurvivalModel.survive_eq_survivalFunction_ratio); the interval integral splits. The law of τ is hypothesized; survive_coxDefaultTime shows the hypotheses hold for the constructed Cox default time when h is positive with ∫₀ᵗ h → ∞. Deterministic hazard only."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.survive_eq_exp_neg_integral (MathFin/Insurance/SurvivalUnification.lean). SCOPE: the survival function of τ is the credit curve hazardSurvival h (survivalFunction_eq_hazardSurvival) and ₜpₓ is the survival ratio (SurvivalModel.survive_eq_survivalFunction_ratio); the interval integral splits. The law of τ is hypothesized; survive_coxDefaultTime shows the hypotheses hold for the constructed Cox default time when h is positive with ∫₀ᵗ h → ∞. Deterministic hazard only."
       }
     },
     {
@@ -528,7 +528,7 @@
       "domain": "mathematical_finance",
       "description": "ENE(s) = E[(-V_s)⁺]. For integrable V_s, ENE = EE − E[V_s]; for V_s = a + b√s Z with Z ~ N(0,1), b > 0, s > 0, ENE = aΦ(d) + b√s φ(d) − a, d = a/(b√s).",
       "code": {
-        "lean": "import MathFin.RiskMeasures.ExposureMeasures\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The expected negative exposure of a Gaussian exposure, in closed form. -/\ntheorem expected_negative_exposure_gaussian {Ω₁ : Type*} {m₁ : MeasurableSpace Ω₁}\n    {ν : Measure Ω₁} [IsProbabilityMeasure ν] {Z : Ω₁ → ℝ}\n    (hZ : HasLaw Z (gaussianReal 0 1) ν) {a b s : ℝ} (hb : 0 < b) (hs : 0 < s) :\n    CVA.expectedNegativeExposure (fun s ω ↦ a + b * √s * Z ω) ν s\n      = a * Phi (a / (b * √s)) + b * √s * gaussianPDFReal 0 1 (a / (b * √s)) - a :=\n  MathFin.CVA.expectedNegativeExposure_gaussian hZ hb hs\n\n"
+        "lean": "import MathFin.Risk.ExposureMeasures\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- The expected negative exposure of a Gaussian exposure, in closed form. -/\ntheorem expected_negative_exposure_gaussian {Ω₁ : Type*} {m₁ : MeasurableSpace Ω₁}\n    {ν : Measure Ω₁} [IsProbabilityMeasure ν] {Z : Ω₁ → ℝ}\n    (hZ : HasLaw Z (gaussianReal 0 1) ν) {a b s : ℝ} (hb : 0 < b) (hs : 0 < s) :\n    CVA.expectedNegativeExposure (fun s ω ↦ a + b * √s * Z ω) ν s\n      = a * Phi (a / (b * √s)) + b * √s * gaussianPDFReal 0 1 (a / (b * √s)) - a :=\n  MathFin.CVA.expectedNegativeExposure_gaussian hZ hb hs\n\n"
       },
       "metadata": {
         "reference": "J. C. Hull, Options, Futures, and Other Derivatives (CVA/exposure chapter): expected negative exposure",
@@ -539,7 +539,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.expectedNegativeExposure_gaussian (MathFin/RiskMeasures/ExposureMeasures.lean): the identity ENE = EE − E[V_s] (expectedNegativeExposure_eq_sub_integral, from (-x)⁺ = x⁺ − x and integral linearity) composed with the Gaussian expected exposure CVA.expectedExposure_gaussian. SCOPE: the single-Gaussian-driver model of mf-cva-gaussian-exposure; only the marginal law of V_s enters."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.expectedNegativeExposure_gaussian (MathFin/Risk/ExposureMeasures.lean): the identity ENE = EE − E[V_s] (expectedNegativeExposure_eq_sub_integral, from (-x)⁺ = x⁺ − x and integral linearity) composed with the Gaussian expected exposure CVA.expectedExposure_gaussian. SCOPE: the single-Gaussian-driver model of mf-cva-gaussian-exposure; only the marginal law of V_s enters."
       }
     },
     {
@@ -548,7 +548,7 @@
       "domain": "mathematical_finance",
       "description": "EE(s) = E[V_s⁺]. For V_s ~ N(m, v) with v > 0, EE(s) = m Φ(m/√v) + √v φ(m/√v), with φ the standard normal density. Only the law of V_s is assumed, not a representation of V_s.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.ExposureMeasures\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- Expected exposure of a Gaussian exposure, at its law. -/\ntheorem expected_exposure_gaussian_law {Ω₁ : Type*} {m₁ : MeasurableSpace Ω₁}\n    {ν : Measure Ω₁} {V : ℝ → Ω₁ → ℝ} {s m : ℝ} {v : ℝ≥0}\n    (hV : HasLaw (V s) (gaussianReal m v) ν) (hv : 0 < v) :\n    CVA.expectedExposure V ν s\n      = m * Phi (m / √(v : ℝ)) + √(v : ℝ) * gaussianPDFReal 0 1 (m / √(v : ℝ)) :=\n  CVA.expectedExposure_of_hasLaw_gaussianReal hV hv\n"
+        "lean": "import MathFin.Risk.ExposureMeasures\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- Expected exposure of a Gaussian exposure, at its law. -/\ntheorem expected_exposure_gaussian_law {Ω₁ : Type*} {m₁ : MeasurableSpace Ω₁}\n    {ν : Measure Ω₁} {V : ℝ → Ω₁ → ℝ} {s m : ℝ} {v : ℝ≥0}\n    (hV : HasLaw (V s) (gaussianReal m v) ν) (hv : 0 < v) :\n    CVA.expectedExposure V ν s\n      = m * Phi (m / √(v : ℝ)) + √(v : ℝ) * gaussianPDFReal 0 1 (m / √(v : ℝ)) :=\n  CVA.expectedExposure_of_hasLaw_gaussianReal hV hv\n"
       },
       "metadata": {
         "reference": "J. C. Hull, Options, Futures, and Other Derivatives (CVA/exposure chapter): expected exposure",
@@ -559,7 +559,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.expectedExposure_of_hasLaw_gaussianReal (MathFin/RiskMeasures/ExposureMeasures.lean): the identity on a standard normal space has law N(0, 1), so z ↦ m + √v z has law N(m, v) (gaussianReal_const_add, gaussianReal_const_mul); integrating max(·, 0) through both laws (HasLaw.integral_comp) reduces EE to CVA.expectedExposure_gaussian, the Bachelier call at b = √v, s = 1. SCOPE: one fixed time s; the law of V_s is a hypothesis; v = 0 is excluded."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.expectedExposure_of_hasLaw_gaussianReal (MathFin/Risk/ExposureMeasures.lean): the identity on a standard normal space has law N(0, 1), so z ↦ m + √v z has law N(m, v) (gaussianReal_const_add, gaussianReal_const_mul); integrating max(·, 0) through both laws (HasLaw.integral_comp) reduces EE to CVA.expectedExposure_gaussian, the Bachelier call at b = √v, s = 1. SCOPE: one fixed time s; the law of V_s is a hypothesis; v = 0 is excluded."
       }
     },
     {
@@ -568,7 +568,7 @@
       "domain": "mathematical_finance",
       "description": "PFE_α(s) = VaR_α(V_s⁺), the α-quantile of the exposure V_s⁺ = max(V_s, 0). For V_s ~ N(m, v) and α ∈ (0, 1), PFE_α(s) = max(m + √v Φ⁻¹(α), 0), the positive part of the Gaussian value-at-risk of V_s.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.ExposureMeasures\n\nopen MeasureTheory ProbabilityTheory Set\nopen scoped NNReal\nopen MathFin\n\n/-- Potential future exposure of a Gaussian exposure: the positive part of its Gaussian VaR. -/\ntheorem potential_future_exposure_gaussian {Ω₁ : Type*} {m₁ : MeasurableSpace Ω₁}\n    {ν : Measure Ω₁} {V : ℝ → Ω₁ → ℝ} {s α m : ℝ} {v : ℝ≥0}\n    (hV : HasLaw (V s) (gaussianReal m v) ν) (hα : α ∈ Ioo 0 1) :\n    CVA.potentialFutureExposure V ν s α = max (gaussianVaR m √(v : ℝ) (PhiInv α)) 0 :=\n  CVA.potentialFutureExposure_of_hasLaw_gaussianReal hV hα\n"
+        "lean": "import MathFin.Risk.ExposureMeasures\n\nopen MeasureTheory ProbabilityTheory Set\nopen scoped NNReal\nopen MathFin\n\n/-- Potential future exposure of a Gaussian exposure: the positive part of its Gaussian VaR. -/\ntheorem potential_future_exposure_gaussian {Ω₁ : Type*} {m₁ : MeasurableSpace Ω₁}\n    {ν : Measure Ω₁} {V : ℝ → Ω₁ → ℝ} {s α m : ℝ} {v : ℝ≥0}\n    (hV : HasLaw (V s) (gaussianReal m v) ν) (hα : α ∈ Ioo 0 1) :\n    CVA.potentialFutureExposure V ν s α = max (gaussianVaR m √(v : ℝ) (PhiInv α)) 0 :=\n  CVA.potentialFutureExposure_of_hasLaw_gaussianReal hV hα\n"
       },
       "metadata": {
         "reference": "J. C. Hull, Options, Futures, and Other Derivatives (CVA/exposure chapter): potential future exposure",
@@ -579,7 +579,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.potentialFutureExposure_of_hasLaw_gaussianReal (MathFin/RiskMeasures/ExposureMeasures.lean): potentialFutureExposure_eq_max gives VaR_α(V_s⁺) = max(VaR_α(V_s), 0), since x ↦ max x 0 is monotone and continuous (MathFin.valueAtRisk_comp), and valueAtRisk_of_hasLaw_gaussianReal evaluates VaR_α(V_s). The module also states the instance V_s = m + σ√s Z of the CVA exposure model (potentialFutureExposure_gaussian). SCOPE: one fixed time s; the law of V_s is a hypothesis."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.potentialFutureExposure_of_hasLaw_gaussianReal (MathFin/Risk/ExposureMeasures.lean): potentialFutureExposure_eq_max gives VaR_α(V_s⁺) = max(VaR_α(V_s), 0), since x ↦ max x 0 is monotone and continuous (MathFin.valueAtRisk_comp), and valueAtRisk_of_hasLaw_gaussianReal evaluates VaR_α(V_s). The module also states the instance V_s = m + σ√s Z of the CVA exposure model (potentialFutureExposure_gaussian). SCOPE: one fixed time s; the law of V_s is a hypothesis."
       }
     },
     {
@@ -588,7 +588,7 @@
       "domain": "mathematical_finance",
       "description": "For a finite family of integrable real-valued exposures V : ι → Ω → ℝ on a common measure, E[(Σᵢ Vᵢ)⁺] ≤ Σᵢ E[Vᵢ⁺]: netting the exposures to one counterparty does not increase expected positive exposure. From the pointwise subadditivity of max(·, 0), summed over the finite index set, then integrated.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.ExposureMeasures\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- Netting reduces expected positive exposure. -/\ntheorem netting_exposure_subadditivity {Ω₁ ι : Type*} {m₁ : MeasurableSpace Ω₁}\n    {ν : Measure Ω₁} (s : Finset ι) {V : ι → Ω₁ → ℝ} (hV : ∀ i ∈ s, Integrable (V i) ν) :\n    ∫ ω, max (∑ i ∈ s, V i ω) 0 ∂ν ≤ ∑ i ∈ s, ∫ ω, max (V i ω) 0 ∂ν :=\n  MathFin.CVA.integral_posPart_finsetSum_le s hV\n\n"
+        "lean": "import MathFin.Risk.ExposureMeasures\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- Netting reduces expected positive exposure. -/\ntheorem netting_exposure_subadditivity {Ω₁ ι : Type*} {m₁ : MeasurableSpace Ω₁}\n    {ν : Measure Ω₁} (s : Finset ι) {V : ι → Ω₁ → ℝ} (hV : ∀ i ∈ s, Integrable (V i) ν) :\n    ∫ ω, max (∑ i ∈ s, V i ω) 0 ∂ν ≤ ∑ i ∈ s, ∫ ω, max (V i ω) 0 ∂ν :=\n  MathFin.CVA.integral_posPart_finsetSum_le s hV\n\n"
       },
       "metadata": {
         "reference": "McNeil, Frey, Embrechts, Quantitative Risk Management (netting of credit exposures); J. C. Hull, Options, Futures, and Other Derivatives (netting agreements)",
@@ -602,7 +602,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.integral_posPart_finsetSum_le (MathFin/RiskMeasures/ExposureMeasures.lean). SCOPE: the inequality for integrable real-valued exposures sharing one measure; no netting-set or collateral mechanics."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.integral_posPart_finsetSum_le (MathFin/Risk/ExposureMeasures.lean). SCOPE: the inequality for integrable real-valued exposures sharing one measure; no netting-set or collateral mechanics."
       }
     },
     {
@@ -611,7 +611,7 @@
       "domain": "mathematical_finance",
       "description": "For an exposure V_t = m + σ B_t with B a pre-Brownian motion (IsPreBrownianReal), collateral C_t = V_{t−Δ} (a two-way CSA with zero threshold and zero minimum transfer amount, lag Δ), σ > 0 and 0 < Δ ≤ t: E[(V_t − V_{t−Δ})⁺] = σ√Δ · φ(0). The level m drops out; the law of the increment σ(B_t − B_{t−Δ}) comes from the Brownian increment law (hasLaw_increment).",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CollateralizedExposureBrownian\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- Collateralized exposure under a Brownian-driven process, in closed form. -/\ntheorem collateralized_exposure_brownian {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B P) (m σ : ℝ)\n    (hσ : 0 < σ) {Δ t : ℝ≥0} (hΔpos : 0 < Δ) (hΔt : Δ ≤ t) :\n    ∫ ω, CVA.collateralizedExposure (fun t ω ↦ m + σ * B t ω) Δ t ω ∂P\n      = σ * √(Δ : ℝ) * gaussianPDFReal 0 1 0 :=\n  MathFin.CVA.collateralizedExposure_brownian_gaussian hB m σ hσ hΔpos hΔt\n\n"
+        "lean": "import MathFin.Risk.CollateralizedExposureBrownian\n\nopen MeasureTheory ProbabilityTheory Set Filter Topology\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- Collateralized exposure under a Brownian-driven process, in closed form. -/\ntheorem collateralized_exposure_brownian {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B P) (m σ : ℝ)\n    (hσ : 0 < σ) {Δ t : ℝ≥0} (hΔpos : 0 < Δ) (hΔt : Δ ≤ t) :\n    ∫ ω, CVA.collateralizedExposure (fun t ω ↦ m + σ * B t ω) Δ t ω ∂P\n      = σ * √(Δ : ℝ) * gaussianPDFReal 0 1 0 :=\n  MathFin.CVA.collateralizedExposure_brownian_gaussian hB m σ hσ hΔpos hΔt\n\n"
       },
       "metadata": {
         "reference": "J. C. Hull, Options, Futures, and Other Derivatives (collateralized exposure / CSAs)",
@@ -622,7 +622,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.collateralizedExposure_brownian_gaussian (MathFin/RiskMeasures/CollateralizedExposureBrownian.lean). The law of the increment comes from hasLaw_increment (the finite-dimensional Gaussian laws of the pre-Brownian motion), standardized to a unit-normal driver by hasLaw_sub_div_of_gaussianReal; CVA.expectedExposure_gaussian at mean zero gives the closed form. SCOPE: one collateral lag Δ, one Brownian driver; no margin-call dynamics beyond the fixed lag."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.collateralizedExposure_brownian_gaussian (MathFin/Risk/CollateralizedExposureBrownian.lean). The law of the increment comes from hasLaw_increment (the finite-dimensional Gaussian laws of the pre-Brownian motion), standardized to a unit-normal driver by hasLaw_sub_div_of_gaussianReal; CVA.expectedExposure_gaussian at mean zero gives the closed form. SCOPE: one collateral lag Δ, one Brownian driver; no margin-call dynamics beyond the fixed lag."
       }
     },
     {
@@ -631,7 +631,7 @@
       "domain": "mathematical_finance",
       "description": "DVA is defined as CVA.cva at the bank's own default time τ_B and the exposure −V seen from the bank's side. With τ_B independent of the exposure (a product measure) and of CDF 1 − exp(−∫₀ᵃ h) on [0, ∞) (h continuous, h ≥ 0; hypothesized), D measurable, V jointly measurable, T ≥ 0 and the integrand integrable: DVA = LGD_B · ∫₀ᵀ D(s) · ENE(s) · h(s) e^{−∫₀ˢ h} ds, with ENE(s) = E[(−V_s)⁺] the expected negative exposure.",
       "code": {
-        "lean": "import MathFin.FixedIncome.DVA\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\n/-- DVA is the integral of the expected negative exposure against the bank's default density. -/\ntheorem dva_eq_integral_expected_negative_exposure {Ω₁ Ω₂ : Type*} {m₁ : MeasurableSpace Ω₁}\n    {m₂ : MeasurableSpace Ω₂} {ν : Measure Ω₁} {μ : Measure Ω₂} [IsProbabilityMeasure ν]\n    [IsProbabilityMeasure μ] {h : ℝ → ℝ} (hh : Continuous h) (hnn : ∀ s, 0 ≤ h s)\n    {τBank : Ω₂ → ℝ} (hτ : Measurable τBank)\n    (hcdf : ∀ a, 0 ≤ a → μ {ω | τBank ω ≤ a} = 1 - ENNReal.ofReal (hazardSurvival h a))\n    {D : ℝ → ℝ} (hD : Measurable D) {V : ℝ → Ω₁ → ℝ} (hV : Measurable (Function.uncurry V))\n    (LGDBank : ℝ) {T : ℝ} (hT : 0 ≤ T)\n    (hint : Integrable (fun p : Ω₁ × Ω₂ ↦\n      (Set.Iic T).indicator D (τBank p.2) * max (-V (τBank p.2) p.1) 0) (ν.prod μ)) :\n    CVA.dva LGDBank D V τBank T ν μ\n      = LGDBank * ∫ s in (0:ℝ)..T,\n          D s * CVA.expectedNegativeExposure V ν s * DefaultDensity.defaultDensity h s :=\n  CVA.dva_eq_integral_expectedNegativeExposure hh hnn hτ hcdf hD hV LGDBank hT hint\n"
+        "lean": "import MathFin.Models.Credit.DVA\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\n/-- DVA is the integral of the expected negative exposure against the bank's default density. -/\ntheorem dva_eq_integral_expected_negative_exposure {Ω₁ Ω₂ : Type*} {m₁ : MeasurableSpace Ω₁}\n    {m₂ : MeasurableSpace Ω₂} {ν : Measure Ω₁} {μ : Measure Ω₂} [IsProbabilityMeasure ν]\n    [IsProbabilityMeasure μ] {h : ℝ → ℝ} (hh : Continuous h) (hnn : ∀ s, 0 ≤ h s)\n    {τBank : Ω₂ → ℝ} (hτ : Measurable τBank)\n    (hcdf : ∀ a, 0 ≤ a → μ {ω | τBank ω ≤ a} = 1 - ENNReal.ofReal (hazardSurvival h a))\n    {D : ℝ → ℝ} (hD : Measurable D) {V : ℝ → Ω₁ → ℝ} (hV : Measurable (Function.uncurry V))\n    (LGDBank : ℝ) {T : ℝ} (hT : 0 ≤ T)\n    (hint : Integrable (fun p : Ω₁ × Ω₂ ↦\n      (Set.Iic T).indicator D (τBank p.2) * max (-V (τBank p.2) p.1) 0) (ν.prod μ)) :\n    CVA.dva LGDBank D V τBank T ν μ\n      = LGDBank * ∫ s in (0:ℝ)..T,\n          D s * CVA.expectedNegativeExposure V ν s * DefaultDensity.defaultDensity h s :=\n  CVA.dva_eq_integral_expectedNegativeExposure hh hnn hτ hcdf hD hV LGDBank hT hint\n"
       },
       "metadata": {
         "reference": "J. C. Hull, Options, Futures, and Other Derivatives (bilateral CVA/DVA)",
@@ -642,7 +642,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.dva_eq_integral_expectedNegativeExposure (MathFin/FixedIncome/DVA.lean): the no-wrong-way-risk reduction CVA.integral_exposure_eq at −V, whose expected exposure is expectedNegativeExposure V. The module also gives the Gaussian closed form dva_gaussian, from cva_gaussian at −V via gaussianReal_neg. SCOPE: the bank's own default is independent of the exposure; the bank's and the counterparty's defaults are not jointly modelled."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.CVA.dva_eq_integral_expectedNegativeExposure (MathFin/Models/Credit/DVA.lean): the no-wrong-way-risk reduction CVA.integral_exposure_eq at −V, whose expected exposure is expectedNegativeExposure V. The module also gives the Gaussian closed form dva_gaussian, from cva_gaussian at −V via gaussianReal_neg. SCOPE: the bank's own default is independent of the exposure; the bank's and the counterparty's defaults are not jointly modelled."
       }
     }
   ]

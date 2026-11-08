@@ -921,7 +921,7 @@ also builds, supplies the continuous modification and the filtered versions.
 (`tendsto_qv`) and **in probability** (`tendstoInMeasure_qv`).
 → *Finance:* realized variance accumulates linearly in time at unit rate — the
 root of the "volatility² · time" that pervades pricing.
-[`Foundations/QuadraticVariationL2.lean`](../MathFin/Foundations/QuadraticVariationL2.lean)
+[`Probability/Brownian/QuadraticVariationL2.lean`](../MathFin/Probability/Brownian/QuadraticVariationL2.lean)
 
 ### Wiener isometry (L²) ✅
 For **deterministic** step integrands, `E[(∫ φ dB)²] = ∫ φ² dt`
@@ -929,7 +929,7 @@ For **deterministic** step integrands, `E[(∫ φ dB)²] = ∫ φ² dt`
 dense (`stepAssembly_denseRange`), giving the L² Wiener integral.
 → *Finance:* the L² geometry of payoffs built from a fixed (non-reacting)
 position in Brownian noise.
-[`Foundations/WienerIntegralL2.lean`](../MathFin/Foundations/WienerIntegralL2.lean)
+[`Probability/Brownian/Wiener/WienerIntegralL2.lean`](../MathFin/Probability/Brownian/Wiener/WienerIntegralL2.lean)
 
 ### Adapted Itô isometry ✅
 The genuinely stochastic version: for **random adapted** simple integrands,
@@ -939,7 +939,7 @@ the distinction that separates Itô from Wiener — with the `∫ B dB` capstone
 (`ito_isometry_brownian_self`).
 → *Finance:* a self-financing strategy whose position reacts to the path still
 has variance equal to the sum of its per-period variances.
-[`Foundations/ItoIsometryAdapted.lean`](../MathFin/Foundations/ItoIsometryAdapted.lean)
+[`Probability/Brownian/Ito/ItoIsometryAdapted.lean`](../MathFin/Probability/Brownian/Ito/ItoIsometryAdapted.lean)
 
 ### Continuous Itô integral as a CLM on `[0,T]` ✅
 The discrete Itô isometry (`assembly_isometry`) extended to a continuous linear
@@ -960,7 +960,7 @@ unbounded-coefficient consumer would reuse.
 predictable `L²` integrand on `[0, T]` has a well-defined Itô integral with
 the isometry norm identity, the bedrock of SDE existence/uniqueness and the
 Black–Scholes PDE derivation downstream.
-[`Foundations/ItoIntegralCLM.lean`](../MathFin/Foundations/ItoIntegralCLM.lean)
+[`Probability/Brownian/Ito/ItoIntegralCLM.lean`](../MathFin/Probability/Brownian/Ito/ItoIntegralCLM.lean)
 
 ### Itô's lemma — discrete pathwise core + continuous `x²` L² form ✅
 The exact pathwise identity `f(X_N) − f(X_0) = ∑ f′(X_k)ΔX_k + ½∑ f″(X_k)(ΔX_k)²
@@ -974,10 +974,10 @@ algebraic step from the discrete identity + the `L²` quadratic variation
 `itoDrift2D`) carries the `∂_t f · Δt` term.
 → *Finance:* the `B_t² = 2∫B dB + t` keystone behind variance-swap pricing
 and Doob's stochastic-integral definition.
-[`Foundations/ItoSquaringIdentity.lean`](../MathFin/Foundations/ItoSquaringIdentity.lean),
-[`Foundations/DiscreteItoPolynomial.lean`](../MathFin/Foundations/DiscreteItoPolynomial.lean),
-[`Foundations/ItoFormulaSquaredL2.lean`](../MathFin/Foundations/ItoFormulaSquaredL2.lean),
-[`Foundations/ItoLemma2D.lean`](../MathFin/Foundations/ItoLemma2D.lean)
+[`Probability/Brownian/Ito/ItoSquaringIdentity.lean`](../MathFin/Probability/Brownian/Ito/ItoSquaringIdentity.lean),
+[`Probability/Discrete/DiscreteItoPolynomial.lean`](../MathFin/Probability/Discrete/DiscreteItoPolynomial.lean),
+[`Probability/Brownian/Ito/ItoFormulaSquaredL2.lean`](../MathFin/Probability/Brownian/Ito/ItoFormulaSquaredL2.lean),
+[`Probability/Brownian/Ito/ItoLemma2D.lean`](../MathFin/Probability/Brownian/Ito/ItoLemma2D.lean)
 
 ### Geometric Brownian motion — SDE coefficient matching 🚧
 Two honestly-distinct layers, NOT a continuous SDE-solution theorem:
@@ -1009,7 +1009,7 @@ The Black–Scholes PDE read in the Brownian coordinate is the next section's ba
 deriving it from a no-arbitrage `Q`-martingale by Itô's formula is not proved.
 → *Finance:* the asset dynamics underlying every BS-family closed form — the
 genuine GBM derivatives in hand, the SDE-solution limit still to come.
-[`Foundations/ItoLemma2D.lean`](../MathFin/Foundations/ItoLemma2D.lean)
+[`Probability/Brownian/Ito/ItoLemma2D.lean`](../MathFin/Probability/Brownian/Ito/ItoLemma2D.lean)
 
 ### Expectation-form Itô / Feynman–Kac ✅
 `E[f(Bₜ)] = f(0) + ½ ∫₀ᵗ E[f''(Bₛ)] ds` (`expectation_ito`,
@@ -1017,7 +1017,7 @@ genuine GBM derivatives in hand, the SDE-solution limit still to come.
 (`heatConvolution_eq_add_integral_deriv`, `feynmanKac_boundary`).
 → *Finance:* how the expected value of a function of the asset evolves — the
 `½σ²` second-order term that drives the Black–Scholes PDE.
-[`Foundations/FeynmanKacHeatEquation.lean`](../MathFin/Foundations/FeynmanKacHeatEquation.lean)
+[`Probability/Gaussian/FeynmanKacHeatEquation.lean`](../MathFin/Probability/Gaussian/FeynmanKacHeatEquation.lean)
 
 ### Feynman–Kac heat flow — kernel-side derivatives ✅
 The kernel convolution `feynmanU g t x = ∫ z, g z · K(t, z − x) dz`, with the
@@ -1028,7 +1028,7 @@ differentiation under the integral, and the heat equation `∂_t U = ½ ∂_xx U
 → *Finance:* the heat flow whose discounted log-transform *is* the
 Black–Scholes price surface — the analytic engine of the FK keystone (Pricing
 section below).
-[`Foundations/FeynmanKacHeatEquation.lean`](../MathFin/Foundations/FeynmanKacHeatEquation.lean)
+[`Probability/Gaussian/FeynmanKacHeatEquation.lean`](../MathFin/Probability/Gaussian/FeynmanKacHeatEquation.lean)
 
 ### Markov path law (Ionescu–Tulcea) ✅
 The law of a countable-state Markov chain constructed on path space via
@@ -1037,7 +1037,7 @@ transition kernels (`markovPathMeasure_cylinder`) — proved by comp-product
 marginal induction, not assumed.
 → *Finance:* the path-space measure underlying lattice/tree models — every
 discrete pricing tree is a Markov path law.
-[`Foundations/MarkovPathMeasure.lean`](../MathFin/Foundations/MarkovPathMeasure.lean)
+[`Probability/Discrete/MarkovPathMeasure.lean`](../MathFin/Probability/Discrete/MarkovPathMeasure.lean)
 
 ## Change of measure — the centerpiece
 
@@ -1050,18 +1050,18 @@ risk-neutral expectation (`bs_call_formula_of_physical`).
 → *Finance:* **the risk-neutral measure is not an axiom — it is constructed from
 the physical measure.** `BSCallHyp` stops being a hypothesis.
 The tilt is the case `N(0,1)` of the Gaussian Esscher transform
-`gaussianReal_tilted_const_mul` ([`Foundations/Esscher.lean`](../MathFin/Foundations/Esscher.lean)).
+`gaussianReal_tilted_const_mul` ([`Probability/Laws/Esscher.lean`](../MathFin/Probability/Laws/Esscher.lean)).
 The same lemma gives the Esscher transform of a jump-diffusion without jumps
 (`jumpDiffusionIncrementLaw_zero_tilted`). The same file's tilted moments and identification of
 a law by its moment-generating function give the case with jumps
 (`jumpDiffusionIncrementLaw_tilted`).
-[`Bridges/GaussianGirsanov.lean`](../MathFin/Bridges/GaussianGirsanov.lean)
+[`Models/BlackScholes/GaussianGirsanov.lean`](../MathFin/Models/BlackScholes/GaussianGirsanov.lean)
 
 ### BSCallHyp from a Brownian model ✅
 A concrete Brownian-driven physical model produces the pricing hypothesis
 directly (`BSCallHyp.of_isPreBrownian`, `bsTerminal_via_brownian`) — the second
 route into `BSCallHyp`.
-[`Bridges/BSCallHypFromBrownian.lean`](../MathFin/Bridges/BSCallHypFromBrownian.lean)
+[`Models/BlackScholes/BSCallHypFromBrownian.lean`](../MathFin/Models/BlackScholes/BSCallHypFromBrownian.lean)
 
 ### Continuous-time first FTAP — discounted price is a `Q`-martingale ✅
 Under the risk-neutral measure, the discounted Black–Scholes price
@@ -1076,7 +1076,7 @@ Itô-representation bridge (see *Geometric Brownian motion* above) is deferral, 
 a gap — the martingale property is already in hand.
 → *Finance:* the continuous-time EMM property — the discounted price is a fair
 game under `Q`, the bedrock of arbitrage-free pricing.
-[`Foundations/ContinuousFTAP.lean`](../MathFin/Foundations/ContinuousFTAP.lean)
+[`Pricing/FTAP/ContinuousFTAP.lean`](../MathFin/Pricing/FTAP/ContinuousFTAP.lean)
 
 ## Pricing
 
@@ -1084,7 +1084,7 @@ game under `Q`, the bedrock of arbitrage-free pricing.
 Under `BSCallHyp`, the call price is `S₀ Φ(d₁) − K e^{−rT} Φ(d₂)`
 (`bs_call_formula`).
 → *Finance:* the option price.
-[`BlackScholes/Call.lean`](../MathFin/BlackScholes/Call.lean)
+[`Models/BlackScholes/Call.lean`](../MathFin/Models/BlackScholes/Call.lean)
 
 ### `bs_identity` — the magic collapse ✅
 The algebraic identity `S · φ(d₁) = K e^{−rτ} · φ(d₂)` (`bs_identity`) that makes
@@ -1092,14 +1092,14 @@ the pdf cross-terms cancel. It depends only on the `d₁`/`d₂` definitions and
 Gaussian density — a self-contained algebraic input, so it is a *root* in the
 graph above (nothing in the spine proves it); it feeds the Greeks and the PDE.
 → *Finance:* the cancellation behind every clean Greek formula.
-[`BlackScholes/PDE.lean`](../MathFin/BlackScholes/PDE.lean)
+[`Models/BlackScholes/PDE.lean`](../MathFin/Models/BlackScholes/PDE.lean)
 
 ### Greeks ✅
 δ (`hasDerivAt_bsV_S`), γ (`hasDerivAt_deriv_bsV_S`), vega (`hasDerivAt_bsV_sigma`),
 θ (`hasDerivAt_bsV_t`), ρ (`hasDerivAt_bsV_r`) — each derived through
 `bs_identity`.
 → *Finance:* the hedging sensitivities.
-[`BlackScholes/PDE.lean`](../MathFin/BlackScholes/PDE.lean)
+[`Models/BlackScholes/PDE.lean`](../MathFin/Models/BlackScholes/PDE.lean)
 
 ### Black–Scholes PDE ✅
 `bsV` satisfies the Black–Scholes PDE (`bs_pde_holds`). *Correction recorded
@@ -1110,7 +1110,7 @@ is self-contained field algebra (`rw [bsV]; field_simp; ring`); it consumes
 neither the Greek theorems nor `bs_identity`. The conceptual route Greeks →
 PDE is real mathematics but a *different proof* than the one formalized; the
 graph shows `thm:bs-pde` as a root, and that is the truth.
-[`BlackScholes/PDE.lean`](../MathFin/BlackScholes/PDE.lean)
+[`Models/BlackScholes/PDE.lean`](../MathFin/Models/BlackScholes/PDE.lean)
 
 ### BS PDE in the Brownian coordinate ✅
 Read along the Brownian state, the discounted call price
@@ -1122,7 +1122,7 @@ proved: that `f(t, B_t)` is a local martingale, by Itô's formula. The value fun
 unbounded as `S → 0`, so the bounded time-dependent formula (`sc-thm-7.1.2`) does not reach it.
 Until 2026-10-21 this section described `ring` identities between the PDE and an Itô-drift
 balance; they were removed as restatements.
-[`BlackScholes/PDEFromIto.lean`](../MathFin/BlackScholes/PDEFromIto.lean)
+[`Models/BlackScholes/PDEFromIto.lean`](../MathFin/Models/BlackScholes/PDEFromIto.lean)
 
 ### BS PDE from Feynman–Kac ✅
 The keystone `bsV_satisfies_bs_pde_via_feynmanKac`: the Black–Scholes PDE
@@ -1135,7 +1135,7 @@ operator. A *second, independent* derivation of the PDE (the closed-form check
 above is the first); the Itô/martingale route remains open.
 → *Finance:* the PDE obtained from the risk-neutral expectation representation
 — Feynman–Kac as practitioners actually use it.
-[`BlackScholes/PDEFromFeynmanKac.lean`](../MathFin/BlackScholes/PDEFromFeynmanKac.lean)
+[`Models/BlackScholes/PDEFromFeynmanKac.lean`](../MathFin/Models/BlackScholes/PDEFromFeynmanKac.lean)
 
 ### Itô formula in L² — Summit A ✅
 The continuous-time L² Itô formula
@@ -1148,7 +1148,7 @@ boundary: GBM's exponential sits outside it (see *Geometric Brownian motion*
 above for why that lift is deferral, not absence).
 → *Finance:* the engine that turns pathwise second-order algebra into
 distributional statements — the analytic heart of every drift argument.
-[`Foundations/ItoFormulaCLM.lean`](../MathFin/Foundations/ItoFormulaCLM.lean)
+[`Probability/Brownian/Ito/ItoFormulaCLM.lean`](../MathFin/Probability/Brownian/Ito/ItoFormulaCLM.lean)
 
 ### Time-dependent Itô formula in L² — Summit A′ ✅
 The classical `df = f_x dB + (f_t + ½f_xx) dt` in integrated form:
@@ -1163,7 +1163,7 @@ moments, and the time-dependent Riemann↔CLM bridge. The joint continuity of
 the boundedness restriction stays the honestly-named boundary, as in Summit A.
 → *Finance:* the form pricing actually uses — value functions depend on time,
 and the `f_t + ½f_xx` drift is the Black–Scholes operator itself.
-[`Foundations/ItoFormulaTD.lean`](../MathFin/Foundations/ItoFormulaTD.lean)
+[`Probability/Brownian/Ito/ItoFormulaTD.lean`](../MathFin/Probability/Brownian/Ito/ItoFormulaTD.lean)
 
 ### CRR → Black–Scholes convergence ✅
 The binomial (CRR) call price converges to the Black–Scholes call price as the
@@ -1174,7 +1174,7 @@ integrability/Vitali argument). The discrete and continuous pricing theories
 meet where they should.
 → *Finance:* the lattice methods used on every trading desk are not a separate
 model — they are the same price, in the limit.
-[`Binomial/CRRCharFun.lean`](../MathFin/Binomial/CRRCharFun.lean)
+[`Models/Binomial/CRRCharFun.lean`](../MathFin/Models/Binomial/CRRCharFun.lean)
 
 ### Margrabe exchange option ✅
 Under two correlated lognormal assets with drift `r`, the discounted expected payoff of
@@ -1182,7 +1182,7 @@ the option to exchange one for the other is Margrabe's closed form, a Black–Sc
 on the ratio with effective volatility `√(σ₁² + σ₂² − 2ρσ₁σ₂)` (`margrabe_exchange_price`,
 via `margrabe_bsCallHyp_of_gaussian` and `normalizedSpread_hasLaw_std`) — the
 multivariate corollary.
-[`BlackScholes/MargrabeGrounding.lean`](../MathFin/BlackScholes/MargrabeGrounding.lean)
+[`Models/BlackScholes/MargrabeGrounding.lean`](../MathFin/Models/BlackScholes/MargrabeGrounding.lean)
 
 ### Carr–Madan static replication — spanning formula ✅
 Any twice-differentiable payoff `f` decomposes, around a reference level `κ`, as cash, a
@@ -1195,7 +1195,7 @@ log payoff specialises to the **variance-swap log-contract** (`carrMadan_log_spa
 `−1/K²`-weighted strips of OTM puts and calls.
 → *Finance:* model-free static replication — every European claim is a portfolio of vanilla
 options, and the `1/K²` density is exactly what a variance swap holds.
-[`Foundations/CarrMadan.lean`](../MathFin/Foundations/CarrMadan.lean)
+[`Models/ModelFree/CarrMadan.lean`](../MathFin/Models/ModelFree/CarrMadan.lean)
 
 ### Binomial martingale representation — market completeness ✅
 On the binomial tree (i.i.d. `Bernoulli(q)` coin flips, `0 < q < 1`), every Mathlib `Martingale` `M`
@@ -1205,11 +1205,11 @@ of the flips' natural filtration (`flipFiltration`) is its initial value plus th
 the node-wise delta `A = ΔM/ΔS`, predictable because it is fixed *before* the next flip is
 revealed. The conditional expectation is the node average `q·X^U + (1−q)·X^D = X`
 (`oneStep_of_martingale`), and the proof is the pathwise one-period delta hedge, telescoped. The
-converse of `martingaleTransform_isMartingale` (`Foundations/MartingaleTransform.lean`).
+converse of `martingaleTransform_isMartingale` (`Probability/Discrete/MartingaleTransform.lean`).
 → *Finance:* **completeness** — the second pillar of the FTAP: every contingent claim is
 replicable by a self-financing strategy, so the risk-neutral price is the *unique* arbitrage-free
 price.
-[`Binomial/MartingaleRepresentation.lean`](../MathFin/Binomial/MartingaleRepresentation.lean)
+[`Models/Binomial/MartingaleRepresentation.lean`](../MathFin/Models/Binomial/MartingaleRepresentation.lean)
 
 ### Merton jump-diffusion dominance ✅
 Jump risk is never free: the Black–Scholes price is dominated by the Merton
@@ -1220,7 +1220,7 @@ linear term killed by `integral_mertonSpot`); the classic `Λ′ = Λ(1+k)`
 weights display is `MertonClassicDisplay`.
 → *Finance:* ignoring jumps *underprices* options — the model-risk inequality,
 as a theorem.
-[`BlackScholes/MertonDominance.lean`](../MathFin/BlackScholes/MertonDominance.lean)
+[`Models/Jumps/MertonDominance.lean`](../MathFin/Models/Jumps/MertonDominance.lean)
 
 ## The frontier ⏳
 

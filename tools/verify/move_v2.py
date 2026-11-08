@@ -50,24 +50,31 @@ def _path(mod: str) -> str:
 
 
 def rewriter(mp: dict[str, str]):
-    """A function rewriting one file's text, and whether it is Lean-like (imports only)."""
-    dots = {k: v for k, v in mp.items()}
+    """A function rewriting one file's text. Idempotent: no new name contains an old one as a
+    token, so a second pass changes nothing."""
+    names = dict(mp) | {k.removeprefix("MathFin."): v.removeprefix("MathFin.") for k, v in mp.items()}
     paths = {_path(k): _path(v) for k, v in mp.items()}
-    alt_dot = "|".join(re.escape(k) for k in sorted(dots, key=len, reverse=True))
-    alt_path = "|".join(re.escape(k) for k in sorted(paths, key=len, reverse=True))
-    imp = re.compile(rf"(\bimport\s+)({alt_dot})(?![\w.]|\.\w)")
-    dot = re.compile(rf"(?<![\w.])({alt_dot})(?!\w|\.[A-Za-z_])")
-    path = re.compile(rf"(?<![\w.])(MathFin/)?({alt_path})(?=\.lean\b|(?![\w/]))")
 
-    scope = re.compile(r"^\s*(namespace|end|open|section|export)\b")
+    def alt(keys) -> str:
+        return "|".join(re.escape(k) for k in sorted(keys, key=len, reverse=True))
+    imp = re.compile(rf"(\bimport\s+)({alt(mp)})(?![\w.])")
+    # `MathFin.Foundations.FTAP`, or the short `Foundations.FTAP`, as a whole token
+    dot = re.compile(rf"(?<![\w.])({alt(names)})(?!\w|\.[A-Za-z_])")
+    # `MathFin/Foundations/FTAP.lean`, or the bare `Foundations/FTAP`, not inside a longer path
+    path = re.compile(rf"(?<![\w.])MathFin/({alt(paths)})(?![\w/])|(?<![\w./])({alt(paths)})(?![\w/])")
+    scope = re.compile(r"^\s*(namespace|end|open|section|export)\b")  # a line naming namespaces
 
-    def go(text: str, lean: bool) -> str:
-        text = imp.sub(lambda m: m[1] + dots[m[2]], text)
-        # in Lean a namespace may share a module's spelling (`MathFin.DeFi.Aave`): leave the
-        # lines that name namespaces alone
-        text = "".join(ln if lean and scope.match(ln) else dot.sub(lambda m: dots[m[1]], ln)
-                       for ln in text.splitlines(keepends=True))
-        return path.sub(lambda m: (m[1] or "") + paths[m[2]], text)
+    def go(text: str) -> str:
+        text = imp.sub(lambda m: m[1] + mp[m[2]], text)
+        # a namespace may share a module's spelling (`MathFin.DeFi.Aave`): leave the lines that
+        # name namespaces alone, in Lean files and in snippets
+        def name(m: re.Match) -> str:
+            # the line it sits on; in a JSON snippet, lines are separated by a written `\n`
+            nl, esc = text.rfind("\n", 0, m.start()), text.rfind("\\n", 0, m.start())
+            start = max(nl + 1, esc + 2 if esc >= 0 else 0)
+            return m[1] if scope.match(text[start:m.start()]) else names[m[1]]
+        text = dot.sub(name, text)
+        return path.sub(lambda m: "MathFin/" + paths[m[1]] if m[1] else paths[m[2]], text)
     return go
 
 
@@ -84,7 +91,7 @@ def rewrite(mp: dict[str, str]) -> int:
         if not f.exists():
             continue
         old = f.read_text(encoding="utf-8")
-        new = go(old, lean=f.suffix == ".lean")
+        new = go(old)
         if new != old:
             f.write_text(new, encoding="utf-8")
             n += 1
