@@ -26,7 +26,10 @@ This file checks the first three on a sample tree and the fourth on a separate C
 4. applies put–call parity `C − P = S − K e^{−nr}` on the `n`-step tree
    (`binomialPrice_callPut_parity`), which follows from the linearity of the tree price and the
    fact that the tree prices the stock at spot and cash at its discount;
-5. applies the Cox–Ross–Rubinstein → Black–Scholes limit to the trees of a concrete market,
+5. builds the sample tree as a `Market` (one step a year, a fair coin as the physical law), with
+   every hypothesis discharged: the risk-neutral law is a pricing measure, and every pricing
+   measure prices the one-year call at the tree price (`sampleMarket_checked`);
+6. applies the Cox–Ross–Rubinstein → Black–Scholes limit to the trees of a concrete market,
    discharging its no-arbitrage hypothesis at every step from `|r|√T < σ` (`market_tendsto_bs`).
 
 `sample_checked` is the single statement the build certifies.
@@ -38,6 +41,9 @@ This file checks the first three on a sample tree and the fourth on a separate C
   `replicating_payoff_down`: the one-period price and its hedge.
 * `MathFin.binomialPrice_callPut_parity`: put–call parity on the `n`-step tree, from
   `binomialPrice_add`, `binomialPrice_smul`, `binomialPrice_id` and `binomialPrice_const`.
+* `MathFin.Contracts.Binomial.market`, `isPricingMeasure_coinFlipMeasure`,
+  `price_pay_eq_binomialPrice_of_isPricingMeasure`: the tree as a market, its pricing measure, and
+  the price every pricing measure gives.
 * `MathFin.binomialNoArb_crr`, `binomialPrice_call_tendsto_bs_closed`: the CRR trees are
   arbitrage-free when `|r|√T < σ`, and their call prices converge to the Black–Scholes price.
 
@@ -57,7 +63,7 @@ The shape of the file follows the capped-call example
 namespace MathFin.Examples.BinomialTree
 
 open Filter
-open scoped Topology
+open scoped Topology NNReal
 
 /-! ### The tree, as data -/
 
@@ -153,6 +159,41 @@ theorem sample_price :
   norm_num [sample]
   ring
 
+/-! ### The tree as a market -/
+
+/-- The risk-neutral up-probability of the sample tree, `(e^{0.01} − 0.9) / 0.2`. -/
+noncomputable def sampleQ : ℝ≥0 :=
+  ⟨crrUpProb sample.up sample.down sample.rate, (crrUpProb_mem_Ioo sample_noArb).1.le⟩
+
+theorem sampleQ_le_one : sampleQ ≤ 1 :=
+  (crrUpProb_mem_Ioo sample_noArb).2.le
+
+/-- The fair coin, the physical law of the sample market's flips. -/
+noncomputable def fairCoin : MeasureTheory.Measure (ℕ → Bool) :=
+  coinFlipMeasure (1 / 2) (by norm_num)
+
+/-- **The sample tree as a market**: one step a year, the spot after the flips, the money market
+`e^{0.01 n}` as numéraire, and a fair coin as the physical law. -/
+noncomputable def sampleMarket : Market Unit (ℕ → Bool) :=
+  Contracts.Binomial.market fairCoin sample.spot sample.up sample.down sample.rate (h := 1)
+    zero_le_one
+
+/-- **The sample market, with every hypothesis discharged.** Its risk-neutral law is a pricing
+measure at the one-year horizon, though the physical law is a fair coin, and every pricing measure
+prices the one-year call at the tree price `sample.price`. No-arbitrage is `sample_noArb`. -/
+theorem sampleMarket_checked :
+    sampleMarket.IsPricingMeasure 1 (coinFlipMeasure sampleQ sampleQ_le_one) ∧
+      ∀ Q, sampleMarket.IsPricingMeasure 1 Q →
+        sampleMarket.price Q (Contracts.europeanCall sample.strike 1) = sample.price := by
+  refine ⟨Contracts.Binomial.isPricingMeasure_coinFlipMeasure sampleQ_le_one sample_noArb rfl _
+    zero_le_one (p := 1 / 2) (by norm_num) (by norm_num) 1, fun Q hQ ↦ ?_⟩
+  rw [sampleMarket, Contracts.europeanCall,
+    Contracts.Binomial.price_pay_eq_binomialPrice_of_isPricingMeasure (by norm_num [sample])
+      sample_noArb (q := sampleQ) rfl one_pos (T := 1) (N := 1) (by norm_num)
+      (a := Contracts.europeanCallPayoff sample.strike 1)
+      (g := fun S ↦ max (S - sample.strike) 0) (fun _ ↦ rfl) hQ]
+  exact (binomialPrice_succ _ _ _ _ 0 _).trans rfl
+
 /-! ### The trees of a market, and their limit -/
 
 /-- **The CRR trees of a market with volatility `20%`, rate `5%` and a one-year horizon price the
@@ -177,6 +218,8 @@ theorem market_tendsto_bs :
 - the call's price on it is `50 − 45 e^{−0.01}`;
 - half a share and the bond cost that price and pay the call in both states;
 - put–call parity holds on every `n`-step version of the tree;
+- the sample tree, as a market under a fair coin, is priced by its risk-neutral law, and every
+  pricing measure prices the call at the tree price;
 - the CRR trees of a separate market (`σ = 20%`, `r = 5%`, `T = 1`, `S = K = 100`) converge to
   its Black–Scholes call price. -/
 theorem sample_checked :
@@ -190,11 +233,15 @@ theorem sample_checked :
       (∀ n : ℕ, binomialPrice sample.up sample.down sample.rate (fun x ↦ max (x - 100) 0) n 100
           - binomialPrice sample.up sample.down sample.rate (fun x ↦ max (100 - x) 0) n 100
         = 100 - 100 * Real.exp (-(n : ℝ) * sample.rate)) ∧
+      (sampleMarket.IsPricingMeasure 1 (coinFlipMeasure sampleQ sampleQ_le_one) ∧
+        ∀ Q, sampleMarket.IsPricingMeasure 1 Q →
+          sampleMarket.price Q (Contracts.europeanCall sample.strike 1) = sample.price) ∧
       Tendsto (fun n : ℕ ↦ binomialPrice (crrUp 0.2 1 n) (crrDown 0.2 1 n)
           (crrPerStepRate 0.05 1 n) (fun x ↦ max (x - 100) 0) n 100) atTop
         (𝓝 (100 * Phi (bsd1 100 100 0.05 0.2 1)
           - 100 * Real.exp (-(0.05 * 1)) * Phi (bsd2 100 100 0.05 0.2 1))) :=
   ⟨sample_noArb, sample_price.2.2, sample.hedge sample_noArb,
-    fun n ↦ by rw [binomialPrice_callPut_parity sample_noArb]; ring, market_tendsto_bs⟩
+    fun n ↦ by rw [binomialPrice_callPut_parity sample_noArb]; ring, sampleMarket_checked,
+    market_tendsto_bs⟩
 
 end MathFin.Examples.BinomialTree

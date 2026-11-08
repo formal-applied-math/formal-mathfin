@@ -8,9 +8,13 @@ were honest, but the honesty gates could not see them, and they did not connect 
 The repair was to build the missing bridges, not to fence the modules off. These tests keep
 the library one graph:
 
-* ``test_foundations_imports_only_foundations``: ``Foundations/`` is the layer the pricing
-  sections stand on, so it imports nothing above it. A model lives in its market's section;
-  a module that joins a foundation to a model lives in ``Bridges/``.
+* ``test_every_module_has_a_layer``: every module lives in a layer (``tools/verify/layers.py``):
+  ``Probability/`` → ``Contracts/`` → ``Pricing/`` → the limbs ``Models/``, ``Risk/``,
+  ``Choice/``, ``Insurance/``, ``Markets/`` (docs/specs/2026-11-07-one-trunk-design.md, §3 I4).
+  Imports point that way, and a limb reaches another limb only through a declared edge; the
+  imports against the direction are the ratchet count ``layer_violations``, which may not rise.
+  A join belongs to the module that consumes it: there is no ``Bridges/``.
+* ``test_limb_edges_are_acyclic``: the declared limb-to-limb edges form a DAG.
 * ``test_every_module_is_connected``: every module has an edge in the import graph. It
   imports a library module, or a library module imports it.
 * ``test_every_module_is_used``: every module is imported by another library module or by a
@@ -31,7 +35,7 @@ from __future__ import annotations
 
 import re
 
-from tools.verify import library
+from tools.verify import layers, library
 from tools.verify.corpus import iter_entries
 from tools.verify.library import INIT
 
@@ -74,18 +78,23 @@ def _cited_by_corpus() -> set[str]:
     return cited
 
 
-def test_foundations_imports_only_foundations() -> None:
-    bad = {
-        m: [i for i in imps if not i.startswith("MathFin.Foundations.")]
-        for m, imps in _modules().items()
-        if m.startswith("MathFin.Foundations.")
-    }  # `_modules` has dropped the edges to `Init`, which every layer imports
-    bad = {m: v for m, v in bad.items() if v}
-    assert not bad, (
-        "Foundations/ imports only Foundations/. Move the module to the section of the model "
-        "it uses, or to Bridges/ if it joins a foundation to a model:\n"
-        + "\n".join(f"  {m} imports {', '.join(v)}" for m, v in sorted(bad.items()))
-    )
+def test_every_module_has_a_layer() -> None:
+    stray = sorted(m for m in _modules() if layers.layer(m) is None)
+    assert not stray, (
+        "every module lives under one of " + ", ".join(f"{x}/" for x in layers.LAYERS)
+        + " (tools/verify/layers.py):\n  " + "\n  ".join(stray))
+
+
+def test_limb_edges_are_acyclic() -> None:
+    succ: dict[str, set[str]] = {}
+    for a, b in layers.EDGES:
+        assert a in layers.LIMBS and b in layers.LIMBS, (a, b)
+        succ.setdefault(a, set()).add(b)
+
+    def reaches(a: str, b: str, seen: frozenset[str] = frozenset()) -> bool:
+        return any(c == b or (c not in seen and reaches(c, b, seen | {c}))
+                   for c in succ.get(a, ()))
+    assert not [x for x in layers.LIMBS if reaches(x, x)], "the declared limb edges have a cycle"
 
 
 def test_every_module_is_connected() -> None:

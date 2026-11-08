@@ -123,7 +123,7 @@ namespace MathFin.AxiomAudit
 
 /-! ## Static Girsanov: the risk-neutral measure derived -/
 
--- The Gaussian Esscher transform (Foundations/Esscher, 2026-10-08): the static Girsanov change of
+-- The Gaussian Esscher transform (Probability/Laws/Esscher, 2026-10-08): the static Girsanov change of
 -- measure is its case N(0,1), and the jump layer uses it without jumps and for Merton's lognormal
 -- jumps. A law whose moment-generating function is finite near 0 is fixed by that function near 0;
 -- the case of every exponential moment also serves the exponential-martingale characterization of
@@ -1230,7 +1230,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #print axioms MathFin.margrabe_exchange_price
 
 -- Values round 6 (2026-06-09): Andre's reflection-principle counting
--- bijection (Binomial/PathReflection.lean), wired to the corpus as
+-- bijection (Models/Binomial/PathReflection.lean), wired to the corpus as
 -- `mf-reflection-principle-counting`.
 
 /-- info: 'MathFin.reflectionPrincipleEquivBelow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -1239,7 +1239,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 
 -- Summit B / B1a (2026-06-10): the elementary Itô integral, viewed as a process
 -- `t ↦ (V●B)_t`, is an adapted L² martingale
--- (Foundations/ItoIntegralProcessMartingale.lean). Infrastructure for the
+-- (Probability/Brownian/Ito/ItoIntegralProcessMartingale.lean). Infrastructure for the
 -- gated Girsanov/Lévy/martingale-representation/SDE cluster; no corpus entry
 -- yet (the `full` entry lands with B1b, the general integrand).
 
@@ -1265,7 +1265,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 
 -- Summit B / B3 (2026-06-13): the elementary Itô integral as a continuous LOCAL
 -- MARTINGALE — pathwise continuity (given continuous Brownian paths) + Degenne's
--- `Martingale.IsLocalMartingale` (`Foundations/ItoIntegralProcessLocalMartingale.lean`).
+-- `Martingale.IsLocalMartingale` (`Probability/Brownian/Ito/ItoIntegralProcessLocalMartingale.lean`).
 -- The localization entry point; consumes the upstream local-martingale class.
 
 /-- info: 'MathFin.ItoIntegralProcess.itoSimpleProcess_pathContinuous' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -1278,7 +1278,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 
 -- Summit B / B1b (2026-06-12): the GENERAL-integrand Itô integral
 -- `(φ●B)_t = ∫₀ᵗ φ dB` for `φ ∈ L2Predictable[0,T]`, built by extending B1a's
--- t-process along the dense `simpleAssemblyHorizon` (`Foundations/ItoIntegralProcessGeneral.lean`).
+-- t-process along the dense `simpleAssemblyHorizon` (`Probability/Brownian/Ito/ItoIntegralProcessGeneral.lean`).
 -- The key identity `(φ●B)_t = E[∫₀ᵀ φ dB | 𝓕_t]` gives the L² martingale property,
 -- a.e.-adaptedness, the contraction and terminal Itô isometry, and L²-continuity.
 -- The explicit time-indexed isometry E[(φ●B)_t²] = ∫₀ᵗ E[φ²] ds is deferred.
@@ -1308,7 +1308,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #print axioms MathFin.ItoIntegralProcessGeneral.itoIntegralProcessGen_l2_continuous
 
 -- The deferred per-`t` Itô isometry `E[(φ●B)_t²] = ∫_{(0,t]×Ω} φ²`
--- (`Foundations/ItoIntegralProcessIsometry.lean`), proved by density-transferring the
+-- (`Probability/Brownian/Ito/ItoIntegralProcessIsometry.lean`), proved by density-transferring the
 -- band-restricted simple-process isometry against the band-truncation CLM.
 /-- info: 'MathFin.ItoIntegralProcessGeneral.itoProcessCLM_norm_sq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1318,7 +1318,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 -- integral, bundled as a `LinearIsometry` (`itoIsometry`), preserves the
 -- L²-inner product (`LinearIsometry.inner_map_map`, polarization of the norm
 -- isometry), giving `𝔼[(∫φ dB)(∫ψ dB)] = ⟪φ, ψ⟫` and, on the diagonal, the Itô
--- isometry itself (`Foundations/ItoIntegralCovariation.lean`). The bilinear
+-- isometry itself (`Probability/Brownian/Ito/ItoIntegralCovariation.lean`). The bilinear
 -- completion of B1 and the covariance backbone for covariance-swap pricing.
 
 /-- info: 'MathFin.ItoIntegralCovariation.itoIsometry' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -1344,7 +1344,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 -- subsequence), so their uniform limit `itoContinuousMod` is pathwise continuous,
 -- equals the L² process `itoProcessCLM T t φ` a.e. at every `t ≤ T` (a modification,
 -- via `tendstoInMeasure_ae_unique`), and is bundled by `exists_continuous_modification_itoProcess`
--- (`Foundations/ItoIntegralProcessContinuousModification.lean`). Non-redundant: Degenne's
+-- (`Probability/Brownian/Ito/ItoIntegralProcessContinuousModification.lean`). Non-redundant: Degenne's
 -- general càdlàg modification is `sorry`-backed, and this L²+Doob route yields a
 -- genuinely continuous (not merely càdlàg) version.
 
@@ -1360,7 +1360,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ItoIntegralProcessContinuousModification.exists_continuous_modification_itoProcess
 
--- The IsLocalMartingale follow-on (`Foundations/ItoIntegralProcessLocalMartingaleGeneral.lean`):
+-- The IsLocalMartingale follow-on (`Probability/Brownian/Ito/ItoIntegralProcessLocalMartingaleGeneral.lean`):
 -- the everywhere-continuous representative of the modification, adapted to the
 -- NULL-AUGMENTED Brownian filtration `𝓕ᴮ ⊔ 𝓝`, is a genuine `IsLocalMartingale`.
 -- The measure-theoretic heart is `condExp_sup_nulls` — conditioning on the null
@@ -1373,7 +1373,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #print axioms MathFin.ItoIntegralProcessLocalMartingaleGeneral.exists_continuous_localMartingale_modification
 
 -- The Itô integral of an unbounded continuous adapted integrand
--- (`Foundations/ItoIntegralLocalisedLocalMartingale.lean`): `localItoIntegral` is, up to
+-- (`Probability/Brownian/Ito/ItoIntegralLocalisedLocalMartingale.lean`): `localItoIntegral` is, up to
 -- indistinguishability on `[0, T]`, a continuous `IsLocalMartingale` for the null-augmented
 -- Brownian filtration, localised by the exit times of `σ` (closed hit set, so stopping times of
 -- the raw filtration). Up to `exitTime σ N` it is the clipped integral `M^N`, a martingale.
@@ -1382,7 +1382,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #print axioms MathFin.ItoIntegralLocalised.exists_continuous_localMartingale_localItoIntegral
 
 -- The Itô integral of a predictable integrand with almost surely continuous paths
--- (`Foundations/ItoIntegralLocalisedPredictable.lean`): `predItoIntegral` glues the `L²` integrals
+-- (`Probability/Brownian/Ito/ItoIntegralLocalisedPredictable.lean`): `predItoIntegral` glues the `L²` integrals
 -- of the clipped integrands at a level read on a countable dense set of times; it is the limit in
 -- probability of its Riemann sums (`ItoIntegralPredictableRiemann`), indistinguishable integrands
 -- have indistinguishable integrals, and it has a continuous local-martingale version for the
@@ -1401,7 +1401,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ItoIntegralLocalised.tendstoInMeasure_riemannStieltjes_localItoIntegral
 
--- Itô's formula as an identity of processes (`Foundations/ItoFormulaAdaptedProcess.lean`): almost
+-- Itô's formula as an identity of processes (`Probability/Brownian/Ito/ItoFormulaAdaptedProcess.lean`): almost
 -- surely, at every `t ∈ [0, T]` at once, `f(t, X_t) = f(0, x₀) + ∫₀ᵗ (…) ds + (∫ f_x(·, X) σ dB)_t`
 -- with unbounded continuous adapted `σ`, `b`; the stochastic term is a continuous local martingale
 -- for the null-augmented filtration. No Doob–Meyer theorem is used.
@@ -1417,7 +1417,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ItoFormulaAdapted.ito_formula_adapted_unbounded_C2_process
 
--- The [0,∞) crown (`Foundations/ItoIntegralProcessLocalMartingaleInfinite.lean`): the per-horizon
+-- The [0,∞) crown (`Probability/Brownian/Ito/ItoIntegralProcessLocalMartingaleInfinite.lean`): the per-horizon
 -- continuous local martingales are glued — horizon consistency (`itoProcessL2Inf_eq_itoProcessCLM`,
 -- itself resting on the `[0,T]` `SimpleProcess` clamp) makes each a modification of the SAME
 -- unbounded-horizon process, and `indistinguishable_of_modification_on` agrees them on overlaps —
@@ -1429,7 +1429,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 
 /-! ## Finite-Ω Fundamental Theorem of Asset Pricing (Harrison–Pliska, 2026-06-25) -/
 
--- The separating-dual kernel (`Foundations/ConvexSeparation.lean`): a finite-dim
+-- The separating-dual kernel (`Pricing/Duality/ConvexSeparation.lean`): a finite-dim
 -- subspace disjoint from the standard simplex admits a strictly-positive
 -- annihilating dual (finite-dimensional geometric Hahn–Banach). The geometric
 -- core shared by the single- and multi-period FTAP backward directions.
@@ -1437,7 +1437,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.exists_pos_dual_of_disjoint_stdSimplex
 
--- The cone-separation root (`Foundations/ConvexDuality.lean`): a closed convex
+-- The cone-separation root (`Pricing/Duality/ConvexDuality.lean`): a closed convex
 -- CONE disjoint from the standard simplex admits a strictly-positive functional
 -- that is `≤ 0` on the cone (finite-dimensional geometric Hahn–Banach). Generalizes
 -- the separating-dual kernel from a subspace (two-sided `= 0`) to a cone (one-sided
@@ -1463,14 +1463,14 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.emm_le_superReplication
 
--- The Bayes change-of-measure engine (`Foundations/ChangeOfMeasure.lean`): `Z` and
+-- The Bayes change-of-measure engine (`Probability/Martingales/ChangeOfMeasure.lean`): `Z` and
 -- `Z·D` both `P`-martingales ⇒ `D` is a `Q`-martingale on `[0,T]` for `Q = withDensity Z_T`.
 -- The abstract kernel of Girsanov, no stochastic calculus — only conditional expectations.
 /-- info: 'MathFin.changeOfMeasure_setIntegral_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.changeOfMeasure_setIntegral_eq
 
--- Black–Scholes EMM via Girsanov (`Foundations/Girsanov.lean`): the discounted stock is a
+-- Black–Scholes EMM via Girsanov (`Pricing/Girsanov.lean`): the discounted stock is a
 -- martingale under the tilted measure `Q = withDensity(exp(−θX_T − ½θ²T))` — the risk-neutral
 -- measure as an explicit change of measure, retiring the Wald shortcut. Consumes the engine.
 /-- info: 'MathFin.bs_discounted_isQMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -1752,7 +1752,7 @@ finite-dimensional law of a Brownian motion on `[0,T]`. Path continuity is not s
 
 /-! ### Continuous-time first FTAP: an EMM precludes simple-strategy arbitrage
 
-A model-agnostic continuous-market frame (`Foundations/ContinuousMarket.lean`): an **equivalent
+A model-agnostic continuous-market frame (`Pricing/ContinuousMarket.lean`): an **equivalent
 martingale measure** for a discounted price process precludes arbitrage against **simple**
 (piecewise-constant, predictable, bounded) strategies — the honest, economically transparent
 meaning-1 scope (general admissible strategies, NFLVR, and the converse are the deferred
@@ -1799,7 +1799,7 @@ Itô formula.
   `t ≤ T`, the terminal integrand spread over the horizon by
   `itoProcessCLM_eq_condExpL2`. `M 0` is not assumed constant — it is the representation at `t = 0`.
 
-The finance reading (`Foundations/MarketCompleteness.lean`) is completeness:
+The finance reading (`Pricing/MarketCompleteness.lean`) is completeness:
 `exists_replicating_strategy` hedges every square-integrable `𝓕ᴮ_T`-claim from initial wealth
 `𝔼_μ[H]`, uniquely.
 
@@ -1844,7 +1844,7 @@ scaling law are audited here as one public acceptance bundle. -/
 
 /-! ### von Neumann–Morgenstern expected utility (#178)
 
-The layer beneath `RiskMeasures.UtilityDerivation`, which takes the expected-utility form as
+The layer beneath `Risk.UtilityDerivation`, which takes the expected-utility form as
 given: lotteries with their mixture algebra, affinity of the expected-utility functional in
 the mixture (the pivot — every axiom below is a corollary of it), the vNM axioms verified for
 the induced preference, and cardinal uniqueness under positive affine rescaling. Soundness
@@ -1954,12 +1954,12 @@ are not, and that separation is what buys the capped call its headline: `cappedC
 the composed object really pays `min(max(S − K₁, 0), K₂ − K₁)`, and `value_cappedCall` prices it as
 the *difference of two already-proved `europeanCall` values* — by `Contract.value_both` and
 `Contract.value_scale` alone, with no integral touched a third time. The instruments and what they
-pay are in `Contracts/Instruments/Options.lean`, with no model; `Contracts/Models/BlackScholes.lean`
+pay are in `Contracts/Instruments/Options.lean`, with no model; `Models/BlackScholes/BlackScholes.lean`
 prices them, and reduces each of `europeanCall`, `europeanPut` and `digitalCall` to the library's existing closed
 forms exactly once; every composed instrument built from them afterward prices by algebra on those
 three values rather than by a fresh integration argument.
 
-A second model prices the same terms (2026-10-28). `Contracts/Models/Binomial.lean` reads the
+A second model prices the same terms (2026-10-28). `Models/Binomial/Binomial.lean` reads the
 underlying off coin-flip paths and gives each European payoff its tree price; there every fixed-date
 contract is integrable, because the model is bounded (`Contract.integrable_pathPV_of_bounded`).
 `tendsto_binomial_value_europeanCall` then shows that `europeanCall K T`, one term, has CRR values
@@ -2007,7 +2007,7 @@ module's `## Source` section for the full credit line. -/
 
 /-! ### The bracket is conditional (2026-08-27)
 
-`MathFin/Foundations/PointwiseBracket.lean` closes the rung above `norm_sq_increment_eq_bracket`:
+`MathFin/Probability/Martingales/PointwiseBracket.lean` closes the rung above `norm_sq_increment_eq_bracket`:
 for `M = φ●B` on `[0,T]` and `a ≤ b ≤ T`, `μ[(M_b − M_a)² | 𝓕_a] =ᵐ μ[⟨M⟩_b − ⟨M⟩_a | 𝓕_a]`, with
 the bracket increment the *pathwise* `∫_a^b φ_u(ω)² du` (`bracketRep`) rather than the bracket
 *measure*, which weights time-and-sample by `φ²` and so integrates `ω` out.
@@ -2029,7 +2029,7 @@ increasing process; and no pathwise quadratic variation is constructed. -/
 
 /-! ### The bracket is adapted, and compensates `M²` (2026-08-28)
 
-`MathFin/Foundations/BracketCompensator.lean` supplies the adaptedness `PointwiseBracket`
+`MathFin/Probability/Martingales/BracketCompensator.lean` supplies the adaptedness `PointwiseBracket`
 deliberately did not claim, and cashes it. `⇑φ` is strongly measurable for the *predictable*
 σ-algebra, which mixes all of `𝓕_s`; nothing about it is `𝓕_b`-measurable on its own. What is true
 is a **trace** statement: intersected with a band `(a,b] × Ω`, every predictable set is
@@ -2055,7 +2055,7 @@ only a.e. adaptedness). -/
 
 /-! ### Glosten-Milgrom adverse selection (2026-09-01)
 
-`MathFin/Execution/GlostenMilgrom.lean` derives the bid-ask spread from adverse selection
+`MathFin/Markets/Microstructure/GlostenMilgrom.lean` derives the bid-ask spread from adverse selection
 alone. Five theorems are pinned, one per load-bearing claim.
 
 The **trade probabilities** are derived from the trader mix rather than assumed, which is what
@@ -2154,6 +2154,18 @@ than definitionally, since `driftContinuousMod 0` is a `limUnder` along a chosen
 /-- info: 'MathFin.isGreatest_integral_mul_expectedShortfall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.isGreatest_integral_mul_expectedShortfall
+
+/-- info: 'MathFin.isCoherentRiskMeasure_superhedgingPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.isCoherentRiskMeasure_superhedgingPrice
+
+/-- info: 'MathFin.le_superhedgingPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.le_superhedgingPrice
+
+/-- info: 'MathFin.representingSet_expectedShortfall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.representingSet_expectedShortfall
 
 /-- info: 'MathFin.expectedShortfall_of_hasLaw_gaussianReal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
@@ -2319,5 +2331,286 @@ bounded-coefficient process class. -/
 /-- info: 'MathFin.CVA.cva_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.CVA.cva_gaussian
+
+/-- info: 'MathFin.numeraireMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.numeraireMeasure
+/-- info: 'MathFin.snellEnvelope_le_supermartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.snellEnvelope_le_supermartingale
+/-- info: 'MathFin.marshallOlkin_firstToDefault_survival' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.marshallOlkin_firstToDefault_survival
+/-- info: 'MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc
+
+/-- info: 'MathFin.Btheta_isFilteredPreBrownian_predictable_of_bdd' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Btheta_isFilteredPreBrownian_predictable_of_bdd
+/-- info: 'MathFin.Contracts.BlackScholes.value_europeanCall_physical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.value_europeanCall_physical
+/-- info: 'MathFin.Contracts.BlackScholes.value_physical_eq_riskNeutral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.value_physical_eq_riskNeutral
+/-- info: 'MathFin.bs_delta_hedge_replication' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.bs_delta_hedge_replication
+/-- info: 'MathFin.SDEExistence.picardMap_exists_unique_fixedPoint_any_horizon' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.SDEExistence.picardMap_exists_unique_fixedPoint_any_horizon
+/-- info: 'MathFin.StochasticFubini.stochFubini_ofCLM' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.StochasticFubini.stochFubini_ofCLM
+/-- info: 'MathFin.noArbitrage_iff_noArbitrageLocal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.noArbitrage_iff_noArbitrageLocal
+/-- info: 'MathFin.LocalEMMDensities.isEMM_pastedMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.LocalEMMDensities.isEMM_pastedMeasure
+
+/-- info: 'MathFin.ItoFormulaAdapted.ito_product_rule_process' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ItoFormulaAdapted.ito_product_rule_process
+/-- info: 'MathFin.Contracts.BlackScholes.europeanCall_selfFinancing' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.europeanCall_selfFinancing
+
+/-! ## Blueprint objects and area anchors -/
+
+/-- info: 'MathFin.Phi' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Phi
+
+/-- info: 'MathFin.quantile' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.quantile
+
+/-- info: 'MathFin.valueAtRisk' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.valueAtRisk
+
+/-- info: 'MathFin.expectedShortfall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.expectedShortfall
+
+/-- info: 'MathFin.IsCoherentRiskMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.IsCoherentRiskMeasure
+
+/-- info: 'MathFin.IsEquivProbMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.IsEquivProbMeasure
+
+/-- info: 'MathFin.IsEMM' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.IsEMM
+
+/-- info: 'MathFin.snellEnvelope' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.snellEnvelope
+
+/-- info: 'MathFin.Contracts.Contract' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Contracts.Contract
+
+/-- info: 'MathFin.Contracts.Contract.value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Contracts.Contract.value
+
+/-- info: 'MathFin.Market.price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Market.price
+
+/-- info: 'MathFin.zcb' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.zcb
+
+/-- info: 'MathFin.portfolioVarN' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.portfolioVarN
+
+/-- info: 'MathFin.BinomialNoArb' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.BinomialNoArb
+
+/-- info: 'MathFin.SurvivalModel.survivalFunction' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.SurvivalModel.survivalFunction
+
+/-- info: 'MathFin.HJM.HJMModel' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.HJM.HJMModel
+
+/-- info: 'MathFin.gaussianFactorCopula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.gaussianFactorCopula
+
+/-- info: 'MathFin.martingaleTransform_isMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.martingaleTransform_isMartingale
+
+/-- info: 'MathFin.tendsto_empiricalCDF_ae' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.tendsto_empiricalCDF_ae
+
+/-- info: 'MathFin.compoundPoisson_mgf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.compoundPoisson_mgf
+
+/-- info: 'MathFin.portfolioVarN_le_of_lagrangian_FOC' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.portfolioVarN_le_of_lagrangian_FOC
+
+/-- info: 'MathFin.isRiskParity_of_uniform_log_barrier_FOC' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.isRiskParity_of_uniform_log_barrier_FOC
+
+/-- info: 'MathFin.bondPortfolio_immunization_first_order' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.bondPortfolio_immunization_first_order
+
+/-- info: 'MathFin.vasicekBondPrice_solves_pde' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.vasicekBondPrice_solves_pde
+
+/-- info: 'MathFin.Heston.hestonProfile_pde' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Heston.hestonProfile_pde
+
+/-- info: 'MathFin.DeFi.impermanentLoss_nonpos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.DeFi.impermanentLoss_nonpos
+
+/-- info: 'MathFin.DeFi.v3PositionValue_le_coveredCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.DeFi.v3PositionValue_le_coveredCall
+
+/-- info: 'MathFin.Execution.condExp_payoff_eq_quote' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Execution.condExp_payoff_eq_quote
+
+/-- info: 'MathFin.prob_healthFactorV1_lt_one_eq_kmvPD' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.prob_healthFactorV1_lt_one_eq_kmvPD
+
+/-- info: 'MathFin.kellyFraction' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.kellyFraction
+
+/-- info: 'MathFin.sharpeRatio' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.sharpeRatio
+
+/-- info: 'MathFin.beta' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.beta
+
+/-- info: 'MathFin.minVarWeightTwo' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.minVarWeightTwo
+
+/-- info: 'MathFin.IsTangentPortfolioN' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.IsTangentPortfolioN
+
+/-- info: 'MathFin.trackingErrorSq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.trackingErrorSq
+
+/-- info: 'MathFin.isLeast_rockafellarUryasev_compoundPoisson' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.isLeast_rockafellarUryasev_compoundPoisson
+
+/-! ## Shared objects and bridges -/
+
+/-- info: 'MathFin.gbmValue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.gbmValue
+
+/-- info: 'MathFin.FeynmanKacHeatEquation.feynmanU' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.FeynmanKacHeatEquation.feynmanU
+
+/-- info: 'MathFin.martingaleTransform' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.martingaleTransform
+
+/-- info: 'MathFin.pathCylinder' does not depend on any axioms -/
+#guard_msgs in
+#print axioms MathFin.pathCylinder
+
+/-- info: 'MathFin.BSCallHyp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.BSCallHyp
+
+/-- info: 'MathFin.marginalVariance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.marginalVariance
+
+/-- info: 'MathFin.numeraireMeasure_isEquivProbMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.numeraireMeasure_isEquivProbMeasure
+
+/-- info: 'MathFin.StochasticFubini.stochFubini_ito' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.StochasticFubini.stochFubini_ito
+
+/-- info: 'MathFin.BlackScholes.AmericanPut.Stopping.tendsto_brownianUsualExerciseBoundary_expiry' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.BlackScholes.AmericanPut.Stopping.tendsto_brownianUsualExerciseBoundary_expiry
+
+/-- info: 'MathFin.JumpDiffusionHyp.call_eq_integral_bsV' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.JumpDiffusionHyp.call_eq_integral_bsV
+
+/-- info: 'MathFin.Contracts.value_caplet_black76' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Contracts.value_caplet_black76
+
+/-- info: 'MathFin.Contracts.pathPV_fixedFlows_zcb' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Contracts.pathPV_fixedFlows_zcb
+
+/-- info: 'MathFin.binomialPrice_replication' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.binomialPrice_replication
+
+/-- info: 'MathFin.valueAtRisk_portfolio_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.valueAtRisk_portfolio_gaussian
+
+/-- info: 'MathFin.variance_le_of_lagrangian_FOC' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.variance_le_of_lagrangian_FOC
+
+/-- info: 'MathFin.tendsto_oneFactorLossFraction_ae' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.tendsto_oneFactorLossFraction_ae
+
+/-- info: 'MathFin.oneFactor_measureReal_iInter_default_eq_gaussianFactorCopula' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.oneFactor_measureReal_iInter_default_eq_gaussianFactorCopula
+
+/-- info: 'MathFin.integral_discounted_v3PositionValue_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.integral_discounted_v3PositionValue_le
+
+/-- info: 'MathFin.CAPM_from_market_equilibrium' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.CAPM_from_market_equilibrium
+
+/-- info: 'MathFin.isTangentPortfolioN_and_portfolioVarN_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.isTangentPortfolioN_and_portfolioVarN_le
+
+/-- info: 'MathFin.portfolioVarN_minVarWeightTwo_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.portfolioVarN_minVarWeightTwo_le
 
 end MathFin.AxiomAudit

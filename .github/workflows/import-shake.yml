@@ -30,7 +30,7 @@ on:
   workflow_dispatch:
     inputs:
       trace_module:
-        description: "diagnose instead: elaborate this module (e.g. MathFin.Performance.Ratios) with trace.extraModUses and print what it records, and why"
+        description: "diagnose instead: elaborate this module (e.g. MathFin.Choice.Performance.Ratios) with trace.extraModUses and print what it records, and why"
         required: false
         default: ""
 

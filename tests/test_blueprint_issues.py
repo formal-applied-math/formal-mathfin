@@ -65,6 +65,40 @@ def test_a_pull_request_is_a_delivery_record() -> None:
     assert bi.check(issues, NODES) == []
 
 
+def test_an_open_pull_request_may_name_the_node_it_adds() -> None:
+    """A node an open PR adds exists only on its branch: that PR's own build checks the name, and
+    other branches do not fail on it. A merged PR's names must be nodes."""
+    base = [_issue(8, "Blueprint: thm:f"), _issue(9, "Blueprint: thm:a", is_pr=True,
+                                                  state="closed")]
+    assert bi.check(base + [_issue(10, "Blueprint: thm:new", is_pr=True)], NODES) == []
+    msgs = [p.message for p in bi.check(
+        base + [_issue(11, "Blueprint: thm:new", is_pr=True, state="closed")], NODES)]
+    assert any("#11 names `thm:new`" in m for m in msgs)
+
+
+def test_every_frontier_node_grows_from_the_wood() -> None:
+    nodes = dict(NODES)
+    nodes["thm:g"] = bi.Node("thm:g", "G", "frontier", uses=("thm:f",), statement="G.")
+    nodes["thm:h"] = bi.Node("thm:h", "H", "frontier", statement="H.",
+                             ground="Mathlib: conditional expectation")
+    assert bi.frontier_problems(nodes, {}) == []  # a frontier chain into the wood; a ground
+    nodes["thm:x"] = bi.Node("thm:x", "X", "frontier", statement="X.")
+    nodes["thm:y"] = bi.Node("thm:y", "Y", "frontier", uses=("thm:x",), statement="Y.")
+    msgs = bi.frontier_problems(nodes, {})
+    assert {m.split("`")[1] for m in msgs} == {"thm:x", "thm:y"}
+    assert all("reach no proved node" in m for m in msgs)
+
+
+def test_core_names_corpus_proofs() -> None:
+    nodes = dict(NODES)
+    nodes["thm:c"] = bi.Node("thm:c", "C", "frontier", uses=("thm:a",), statement="C.",
+                             core=("e-full", "e-placeholder", "e-missing"))
+    msgs = bi.frontier_problems(nodes, {"e-full": "full", "e-placeholder": "placeholder"})
+    assert len(msgs) == 2
+    assert any("`e-placeholder` is placeholder" in m for m in msgs)
+    assert any("unknown corpus entry `e-missing`" in m for m in msgs)
+
+
 def test_frontier_file_is_well_formed() -> None:
     nodes = bi.load_nodes(REPO / bi.NODES_JSON, REPO / bi.FRONTIER_TOML)
     assert bi.frontier_problems(nodes) == []
@@ -89,3 +123,19 @@ def test_rendered_blueprint_is_current() -> None:
         n.setdefault("title", None)
     block = f"{br.BEGIN}\n{br.render(raw, bi.load_frontier(REPO / bi.FRONTIER_TOML))}\n{br.END}"
     assert block in md, "docs/blueprint.md is stale: run `python3 tools/blueprint_render.py`"
+
+
+def test_islands_are_components_apart_from_brownian_motion() -> None:
+    from tools.verify.program_tree import islands
+
+    nodes = [
+        {"label": "def:brownian-motion", "uses": []},
+        {"label": "thm:a", "uses": ["def:brownian-motion"]},
+        {"label": "def:b", "uses": []},
+        {"label": "thm:c", "uses": ["def:b"]},
+        {"label": "thm:d", "uses": [], "leanOk": False},
+        {"label": "thm:e", "uses": ["def:b", "thm:a"]},
+        {"label": "def:f", "uses": []},
+    ]
+    assert islands(nodes) == [["def:f"]]
+    assert islands(nodes[:4]) == [["def:b", "thm:c"]]
