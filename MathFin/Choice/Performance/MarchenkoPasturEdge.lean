@@ -63,15 +63,15 @@ restriction.
 * `mpUpperEdge_eq_variance_iff`: for `c ≥ 0`, `λ₊ = σ²` iff `σ = 0` or `c = 0`.
 * `mpLowerEdge_le_variance_of_le_one`: for `c ≤ 1`, `λ₋ ≤ σ²` (with `le_mpUpperEdge`, the
   sandwich `λ₋ ≤ σ² ≤ λ₊` of the `N ≤ T` regime).
-* `mpLowerEdge_eq_zero_iff`: for `σ ≠ 0`, `λ₋ = 0` iff `c = 1`, the rank boundary.
+* `mpLowerEdge_eq_zero_iff`: for `0 < σ`, `λ₋ = 0` iff `c = 1`, the rank boundary.
 * `mpUpperEdge_mul_mpLowerEdge`: `λ₊λ₋ = σ⁴(1 − c)²` for `c ≥ 0`.
-* `mpUpperEdge_lt_of_lt`: the upper edge is strictly increasing in `c` for `σ ≠ 0`.
+* `mpUpperEdge_lt_of_lt`: the upper edge is strictly increasing in `c` for `0 < σ`.
 * `continuous_mpUpperEdge`, `continuous_mpLowerEdge`: both edge maps are continuous
   (`Real.sqrt` is total).
 * `tendsto_mpUpperEdge_zero`, `tendsto_mpLowerEdge_zero`: both edges tend to `σ²` as
   `c → 0⁺`.
 * `tendsto_mpLowerEdge_one`: the lower edge tends to `0` as `c → 1`.
-* `tendsto_mpUpperEdge_atTop`: the upper edge diverges for `σ ≠ 0`.
+* `tendsto_mpUpperEdge_atTop`: the upper edge diverges for `0 < σ`.
 * `mpUpperEdge_inv`, `mpLowerEdge_inv`: the de Prado form `λ±(σ, q⁻¹) = σ²(1 ± (√q)⁻¹)²`.
 * `mpUpperEdge_const_mul`, `mpLowerEdge_const_mul`: `λ±(kσ, c) = k²λ±(σ, c)`.
 * `trace_equicorrelationMatrix_eq_card`: an equicorrelation matrix's trace is its dimension,
@@ -193,7 +193,7 @@ theorem continuous_mpLowerEdge (σ : ℝ) : Continuous (mpLowerEdge σ) := by
   unfold mpLowerEdge
   exact continuous_const.mul ((continuous_const.sub Real.continuous_sqrt).pow 2)
 
-/-- The upper edge is strictly increasing in the aspect ratio for `σ ≠ 0`: more instruments
+/-- The upper edge is strictly increasing in the aspect ratio for `0 < σ`: more instruments
 per observation pushes the top of the noise bulk up. -/
 theorem mpUpperEdge_lt_of_lt {σ : ℝ} (hσ : 0 < σ) {c₁ c₂ : ℝ} (hc₁ : 0 ≤ c₁) (h : c₁ < c₂) :
     mpUpperEdge σ c₁ < mpUpperEdge σ c₂ := by
@@ -227,7 +227,7 @@ theorem tendsto_mpLowerEdge_one (σ : ℝ) : Tendsto (mpLowerEdge σ) (𝓝 1) (
   have hval : mpLowerEdge σ 1 = 0 := by simp [mpLowerEdge, Real.sqrt_one]
   simpa only [hval] using (continuous_mpLowerEdge σ).continuousAt (x := 1) |>.tendsto
 
-/-- The upper edge diverges for `σ ≠ 0`: as `c → ∞` the top of the noise bulk escapes. -/
+/-- The upper edge diverges for `0 < σ`: as `c → ∞` the top of the noise bulk escapes. -/
 theorem tendsto_mpUpperEdge_atTop {σ : ℝ} (hσ : 0 < σ) :
     Tendsto (mpUpperEdge σ) atTop atTop := by
   have h1 : Tendsto (fun x : ℝ ↦ 1 + x) atTop atTop :=
