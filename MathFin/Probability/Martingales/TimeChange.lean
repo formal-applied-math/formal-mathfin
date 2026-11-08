@@ -47,7 +47,7 @@ MSC 60G44
 namespace MeasureTheory
 
 variable {Ω ι κ E : Type*} {m : MeasurableSpace Ω} [Preorder ι] [Preorder κ]
-  [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E] {μ : Measure Ω}
+  [NormedAddCommGroup E] [NormedSpace ℝ E] {μ : Measure Ω}
 
 /-- The filtration `t ↦ 𝓕 (φ t)` along a monotone time change `φ`. -/
 def Filtration.comp (𝓕 : Filtration ι m) {φ : κ → ι} (hφ : Monotone φ) : Filtration κ m where
