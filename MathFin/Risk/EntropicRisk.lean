@@ -117,6 +117,7 @@ theorem entropicRisk_add_const [Finite ι] (hγ : 0 < γ) (X : ι → ℝ) (m : 
   simp only [entropicRisk, e, integral_const_mul]
   rw [Real.log_mul (exp_pos _).ne' (integral_exp_mul_pos γ X).ne', Real.log_exp]
   field_simp
+  ring
 
 omit [Fintype ι] in
 /-- Entropic risk is convex: Hölder's inequality `E[e^{γ(aX + bY)}] ≤ E[e^{γX}]^a E[e^{γY}]^b`
@@ -164,7 +165,7 @@ theorem acceptableUnderUtility_exp_iff (hγ : 0 < γ) (L : ι → ℝ) :
     acceptableUnderUtility Finset.univ (fun i ↦ P.real {i}) (fun x ↦ -exp (-γ * x)) 0 (-L) ↔
       entropicRisk L P γ ≤ 0 := by
   have hE : ∫ ω, exp (γ * L ω) ∂P = ∑ i, P.real {i} * exp (γ * L i) := by
-    rw [integral_fintype _ .of_finite]; simp only [smul_eq_mul]
+    rw [integral_fintype .of_finite]; simp only [smul_eq_mul]
   have hpos := integral_exp_mul_pos (P := P) γ L
   have e (i : ι) : P.real {i} * -exp (-γ * (0 + (-L) i)) = -(P.real {i} * exp (γ * L i)) := by
     rw [mul_neg]; congr 3; simp only [Pi.neg_apply, zero_add]; ring
@@ -174,7 +175,7 @@ theorem acceptableUnderUtility_exp_iff (hγ : 0 < γ) (L : ι → ℝ) :
   generalize ∫ ω, exp (γ * L ω) ∂P = I at hpos ⊢
   have hlog : log I ≤ 0 ↔ I ≤ 1 := by simpa using Real.log_le_log_iff hpos one_pos
   rw [← hlog]
-  refine ⟨fun h ↦ ?_, fun h ↦ mul_nonpos_of_nonneg_of_nonpos (inv_nonneg.2 hγ.le) h⟩
+  refine ⟨fun h ↦ mul_nonpos_of_nonneg_of_nonpos (inv_nonneg.2 hγ.le) h, fun h ↦ ?_⟩
   by_contra hc
   exact absurd h (not_le.2 (mul_pos (inv_pos.2 hγ) (not_le.1 hc)))
 
@@ -186,14 +187,14 @@ theorem not_isCoherentRiskMeasure_entropicRisk {γ : ℝ} (hγ : 0 < γ) :
     ∃ (P : Measure (Fin 2)) (_ : IsProbabilityMeasure P),
       ¬ IsCoherentRiskMeasure P fun X ↦ entropicRisk X P γ := by
   let p : PMF (Fin 2) := PMF.ofFintype (fun _ ↦ (2 : ENNReal)⁻¹) (by
-    simp [Fin.sum_univ_two, ENNReal.inv_two_add_inv_two])
+    rw [Fin.sum_univ_two, ENNReal.inv_two_add_inv_two])
   refine ⟨p.toMeasure, inferInstance, fun h ↦ ?_⟩
   have hw (i : Fin 2) : (p.toMeasure).real {i} = 1 / 2 := by
     rw [measureReal_def, PMF.toMeasure_apply_singleton _ _ (measurableSet_singleton i)]
     simp [p]
   have key (a b : ℝ) : entropicRisk (![a, b] : Fin 2 → ℝ) p.toMeasure γ =
       γ⁻¹ * log ((exp (γ * a) + exp (γ * b)) / 2) := by
-    rw [entropicRisk, integral_fintype _ .of_finite]
+    rw [entropicRisk, integral_fintype .of_finite]
     simp only [Fin.sum_univ_two, hw, smul_eq_mul]
     simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
     congr 2; ring
@@ -208,10 +209,10 @@ theorem not_isCoherentRiskMeasure_entropicRisk {γ : ℝ} (hγ : 0 < γ) :
   have hu : exp (γ * 2) = exp γ * exp γ := by rw [← Real.exp_add]; ring_nf
   have hu1 : 1 < exp γ := by linarith [Real.add_one_lt_exp hγ.ne']
   rw [hu] at h2
-  have h3 : log ((exp γ * exp γ + 1) / 2) = 2 * log ((exp γ + 1) / 2) := by
+  have h3 : log ((exp γ ^ 2 + 1) / 2) = 2 * log ((exp γ + 1) / 2) := by
     field_simp at h2; linarith
   have h4 := Real.log_injOn_pos (Set.mem_Ioi.2 (by positivity)) (Set.mem_Ioi.2 (by positivity))
-    (h3.trans (by rw [Real.log_pow]; norm_num) : log ((exp γ * exp γ + 1) / 2) =
+    (h3.trans (by rw [Real.log_pow]; norm_num) : log ((exp γ ^ 2 + 1) / 2) =
       log (((exp γ + 1) / 2) ^ 2))
   nlinarith [mul_pos (sub_pos.2 hu1) (sub_pos.2 hu1)]
 
