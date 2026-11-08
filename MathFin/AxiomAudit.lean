@@ -2521,7 +2521,7 @@ bounded-coefficient process class. -/
 #guard_msgs in
 #print axioms MathFin.martingaleTransform
 
-/-- info: 'MathFin.pathCylinder' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.pathCylinder' does not depend on any axioms -/
 #guard_msgs in
 #print axioms MathFin.pathCylinder
 
@@ -2541,7 +2541,9 @@ bounded-coefficient process class. -/
 #guard_msgs in
 #print axioms MathFin.StochasticFubini.stochFubini_ito
 
-/-- info: 'MathFin.BlackScholes.AmericanPut.Stopping.tendsto_brownianUsualExerciseBoundary_expiry' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.BlackScholes.AmericanPut.Stopping.tendsto_brownianUsualExerciseBoundary_expiry' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.BlackScholes.AmericanPut.Stopping.tendsto_brownianUsualExerciseBoundary_expiry
 
@@ -2573,7 +2575,9 @@ bounded-coefficient process class. -/
 #guard_msgs in
 #print axioms MathFin.tendsto_oneFactorLossFraction_ae
 
-/-- info: 'MathFin.oneFactor_measureReal_iInter_default_eq_gaussianFactorCopula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.oneFactor_measureReal_iInter_default_eq_gaussianFactorCopula' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.oneFactor_measureReal_iInter_default_eq_gaussianFactorCopula
 
