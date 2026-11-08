@@ -18,10 +18,10 @@ terminal wealth `x + ∑ₘ θₘ zₘₙ` dominate `Y` in every state. Read as 
 capital that makes it acceptable, which is the library's convention for a coherent risk measure
 (`IsCoherentRiskMeasure`: a larger loss is worse, `ρ (Y + m) = ρ Y + m`).
 
-The price is real-valued exactly when the market has a martingale probability vector: a
-superreplicating capital always exists (the claim's absolute value summed over states, with no
-portfolio), and the vector `q` bounds every such capital below by `∑ qₙ Yₙ`
-(`emm_le_superReplication`). That hypothesis, `(martingaleProbVectors z).Nonempty`, is weaker than
+A superreplicating capital always exists (the claim's absolute value summed over states, with no
+portfolio), and a martingale probability vector `q` bounds every such capital below by `∑ qₙ Yₙ`
+(`emm_le_superReplication`), so with such a vector the infimum is a genuine real greatest lower
+bound. That hypothesis, `(martingaleProbVectors z).Nonempty`, is weaker than
 no arbitrage (`martingaleProbVectors_nonempty_of_not_hasArbitrage`), because a martingale
 probability vector may vanish on a state.
 
@@ -69,9 +69,9 @@ variable {M N : ℕ} {z : Fin M → Fin N → ℝ} {Y Y' : Fin N → ℝ} {x x' 
 
 /-- The **superhedging price** of a claim `Y` in the market `z`: the least initial capital `x` for
 which some portfolio `θ` superreplicates `Y` (`SuperReplicates z Y x θ`). It is the infimum of the
-superreplicating capitals. The set of capitals is always nonempty, and it is bounded below, so
-that the infimum is the true greatest lower bound, exactly when a martingale probability vector
-exists (`le_superhedgingPrice`); otherwise the real `sInf` returns the junk value `0`. -/
+superreplicating capitals. The set of capitals is always nonempty; a martingale probability
+vector bounds it below (`le_superhedgingPrice`), and without a lower bound the real `sInf` would
+return the junk value `0`. -/
 noncomputable def superhedgingPrice (z : Fin M → Fin N → ℝ) (Y : Fin N → ℝ) : ℝ :=
   sInf {x | ∃ θ, SuperReplicates z Y x θ}
 
