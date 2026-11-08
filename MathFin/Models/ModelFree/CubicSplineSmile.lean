@@ -70,7 +70,7 @@ to future work.
 ## References
 
 * [J. Stoer and R. Bulirsch, *Introduction to Numerical Analysis*][StoerBulirsch2002], §2.4.2
-* [R. L. Burden and J. D. Faires, *Numerical Analysis*][BurdenFaires], Theorem 3.11
+* [R. L. Burden and J. D. Faires, *Numerical Analysis*][BurdenFaires2011], Theorem 3.11
 
 ## Tags
 
