@@ -3436,9 +3436,16 @@
     "mf-kelly-numeraire-emm": {
       "benchmark_file": "portfolio_and_performance.json",
       "date": "2026-11-08",
-      "elapsed_s": 2.7,
-      "input_hash": "640b1bd6351bfa8cef28814287b420bfa8132bd32299be242ef80fbbbbbf008a",
-      "verified_at_commit": "f68ab19"
+      "elapsed_s": 3.2,
+      "input_hash": "6153ec1c6002ba62e73da938db54da44076e7572f18172f64536c9f799569265",
+      "verified_at_commit": "0c885ff"
+    },
+    "mf-kelly-state-price-density": {
+      "benchmark_file": "portfolio_and_performance.json",
+      "date": "2026-11-08",
+      "elapsed_s": 3.1,
+      "input_hash": "4dbbdb19b5c154cea6a6164b694f4c080db567702c60fb1e23257c1dff04b2ac",
+      "verified_at_commit": "0c885ff"
     },
     "mf-key-rate-partials-sum-to-yield-derivative": {
       "benchmark_file": "interest_rates.json",
@@ -4496,6 +4503,13 @@
       "elapsed_s": 2.1,
       "input_hash": "613b5fa345c51c936b6857c8f1050044d90e05c31439fd1d187c9bc7e912064c",
       "verified_at_commit": "f68ab19"
+    },
+    "mf-utility-state-price-density": {
+      "benchmark_file": "portfolio_and_performance.json",
+      "date": "2026-11-08",
+      "elapsed_s": 3.1,
+      "input_hash": "7fac1cc82c103376ca49bd3429ba6d14133ba2a1901b1910be63579cfb884b70",
+      "verified_at_commit": "0c885ff"
     },
     "mf-variance-swap-drift-immunity": {
       "benchmark_file": "jumps_and_variance_swaps.json",
