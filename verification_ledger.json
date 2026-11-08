@@ -4399,6 +4399,13 @@
       "input_hash": "e89f18925b6ea319e6fc7016fc1098ae9f401917c07c1521f89b538341ebdda8",
       "verified_at_commit": "90b674a"
     },
+    "mf-superhedging-price-coherent": {
+      "benchmark_file": "risk_measures.json",
+      "date": "2026-11-08",
+      "elapsed_s": 2.6,
+      "input_hash": "822ebf28da5b6c39fe3b164c0ad6a121dfa3c23279c0921aa8537fe36e05e43b",
+      "verified_at_commit": "6768304"
+    },
     "mf-survival-at-zero": {
       "benchmark_file": "credit.json",
       "date": "2026-11-08",

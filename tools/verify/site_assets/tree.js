@@ -107,13 +107,33 @@ for (const k of limbKeys){
 const secOf = n => isTrunk(n) ? {x0:CX - 120, x1:CX + 120, cx:CX} : isRoot(n) ? RSEC.get(n.p)
   : BSEC.get(n.p + "/" + ((PARTS.get(n.p).branches || []).includes(n.b) ? n.b : "")) || SEC.get(n.p);
 
-// heights: two caption rows on top, the crown, the trunk, the ground, the roots, the bedrock
-const TOP = 26 + 92 * TF;
+// heights: the crown, the trunk, the ground, the roots, the bedrock. A level of a sector holding more
+// knots than fit across it wraps into sub-rows, and the level grows by them, so a crowded branch
+// grows taller instead of packing its results into one line.
+const TOP = 30;
+const LH = 92, TSTEP = 54, RSTEP = 46, SUBH = 46;
+const rad = n => isWood(n) ? 10 + Math.sqrt(n.e) * 2.2 : n.op ? 14 : 8;
+const sub = new Map(), subRows = new Map();   // node -> its sub-row; "kind|pd" -> most sub-rows
+{ const groups = d3.group(live.filter(n => !isRoot(n) && !isUp(n) && !n.sucker),
+    n => (isTrunk(n) ? "pricing" : n.p + "/" + (n.b || "")) + "|" + n.pd);
+  for (const [, g] of groups){
+    const s = secOf(g[0]), need = d3.sum(g, n => 2 * rad(n) + 16);
+    const k = Math.max(1, Math.ceil(need / Math.max(40, s.x1 - s.x0)));
+    g.slice().sort((x, y) => hash(x.l) - hash(y.l)).forEach((n, i) => sub.set(n.l, i % k));
+    const key = (isTrunk(g[0]) ? "trunk" : "limb") + "|" + g[0].pd;
+    subRows.set(key, Math.max(subRows.get(key) || 1, k));
+  } }
 const maxIn = kind => d3.max(live.filter(n => kindOf(n) === kind), n => n.pd) || 0;
-const LH = 92, TSTEP = 54, RSTEP = 46;
-const LB = TOP + 24 + maxIn("limb") * LH;          // a limb's first level
+// offset of each level above the first: the levels below it, each with its sub-rows
+const offsets = (kind, step) => { const o = [0];
+  for (let d = 1; d <= maxIn(kind); d++) o.push(o[d - 1] + step + ((subRows.get(kind + "|" + (d - 1)) || 1) - 1) * SUBH);
+  return o; };
+const LOFF = offsets("limb", LH), TOFF = offsets("trunk", TSTEP);
+const crown = LOFF[LOFF.length - 1] + ((subRows.get("limb|" + maxIn("limb")) || 1) - 1) * SUBH;
+const bole = TOFF[TOFF.length - 1] + ((subRows.get("trunk|" + maxIn("trunk")) || 1) - 1) * SUBH;
+const LB = TOP + 40 + crown;                      // a limb's first level
 const TT = LB + 70;                               // the trunk's top, where the limbs fork
-const GY = TT + 60 + maxIn("trunk") * TSTEP;      // the ground
+const GY = TT + 60 + bole;                        // the ground
 const ROW0 = GY + 10 + 14 * TF, ROWH = 17 * TF;   // pile labels just under the ground
 const RT = ROW0 + 3 * ROWH + 14;                  // the root band
 const rootMax = new Map(rootKeys.map(k => [k, d3.max(inPart(k), n => n.pd) || 0]));
@@ -129,10 +149,9 @@ const rootCap = new Map();
 const BED = Math.max(...rootCap.values()) + 30 * TF;
 const H = Math.round(BED + 64 * TF);
 const yTarget = n => isUp(n) ? BED + 24 : isRoot(n) ? RT + 14 + (rootMax.get(n.p) - n.pd) * RSTEP
-  : isTrunk(n) ? GY - 40 - n.pd * TSTEP
+  : isTrunk(n) ? GY - 40 - TOFF[n.pd] - (sub.get(n.l) || 0) * SUBH
   : n.sucker ? LB + 60 + hash(n.l) * 90
-  : LB - n.pd * LH;
-const rad = n => isWood(n) ? 10 + Math.sqrt(n.e) * 2.2 : n.op ? 14 : 8;
+  : LB - LOFF[n.pd] - (sub.get(n.l) || 0) * SUBH;
 const sim = live.map(n => { const s = secOf(n); return {id:n.l, n, s, x:s.cx + (hash(n.l + "x") - .5) * (s.x1 - s.x0) * .8, y:yTarget(n)}; });
 d3.forceSimulation(sim)
   .force("x", d3.forceX(s => s.s.cx).strength(.06))
@@ -238,7 +257,7 @@ const branchSel = linkG.selectAll("path").data(woodEdges.slice().sort((a, b) => 
 const shootSel = shootG.selectAll("path").data(shootEdges).join("path").attr("class", e => "shoot dimmable" + (e.prim ? "" : " sec"))
   .attr("d", e => { const g = edgeGeom(e); return `M${g.P}C${g.c1} ${g.c2} ${g.C}`; });
 
-// captions: limb names across the top, their branches beneath; root names in the soil
+// captions: root names in the soil
 const limbLbl = view.append("g").attr("class", "dimmable");
 function relax(items){
   items.sort((p, q) => p.x - q.x);
@@ -250,22 +269,6 @@ function relax(items){
   }
   return items;
 }
-const L1 = 14 + 16 * TF, L2 = L1 + 17 * TF, L3 = L2 + 20 * TF;
-for (const L of relax(limbKeys.map(k => { const ns = inPart(k), np = ns.filter(isWood).length, cnt = `${np} proved · ${ns.length - np} frontier`;
-    return {x:SEC.get(k).cx, t:partTitle(k), cnt, w:Math.max(partTitle(k).length * 11.4, cnt.length * 6.9) * TF + 16}; }))){
-  cap(limbLbl.append("text").attr("class", "limb-lbl").attr("x", L.x).attr("y", L1).attr("text-anchor", "middle").text(L.t), 14.5);
-  cap(limbLbl.append("text").attr("class", "limb-n").attr("x", L.x).attr("y", L2).attr("text-anchor", "middle").text(L.cnt), 12.5);
-}
-const brs = [];
-for (const [key, bs] of BSEC){ const b = key.split("/")[1]; if (b) brs.push({x:bs.cx, cx:bs.cx, t:branchName(b), w:branchName(b).length * 7.4 * TF + 12}); }
-{ const rows = [[], [], []];
-  for (const L of relax(brs)){
-    const t = cap(limbLbl.append("text").attr("class", "branch-lbl").attr("x", L.x).attr("text-anchor", "middle").text(L.t), 13);
-    const lw = t.node().getComputedTextLength() / 2 + 5 * TF;
-    const r = Math.max(0, rows.findIndex(row => !row.some(u => Math.abs(u.x - L.x) < u.lw + lw)));
-    rows[r].push({x:L.x, lw}); t.attr("y", L3 + r * 14 * TF);
-    limbLbl.append("path").attr("class", "limb-guide").attr("d", `M${L.x},${L3 + r * 14 * TF + 6 * TF}L${L.cx},${TOP + 20}`);
-  } }
 for (const k of rootKeys){
   const s = RSEC.get(k), y = rootCap.get(k);
   cap(limbLbl.append("text").attr("class", "root-lbl").attr("x", s.cx).attr("y", y).attr("text-anchor", "middle").text(partTitle(k)), 13.5);
@@ -360,7 +363,7 @@ function placeLabels(k = curK, set = litSet){
   curK = k;
   const s = pxPerUnit() * k, fs = (k < 1.4 ? 13 : 12.5) / s, h = fs * 1.2, pad = 3 / s;
   const boxes = [];
-  if (!set) for (const el of document.querySelectorAll("#tree .limb-lbl, #tree .limb-n, #tree .branch-lbl, #tree .root-lbl, #tree .root-sub, #tree .trunk-lbl")){
+  if (!set) for (const el of document.querySelectorAll("#tree .root-lbl, #tree .root-sub, #tree .trunk-lbl")){
     const b = el.getBBox(); boxes.push([b.x, b.y, b.x + b.width, b.y + b.height, "cap"]); }
   for (const d of nodeData) if (!d.up && (!set || set.has(d.id))){ const r = glyphR(d) + 1.5; boxes.push([d.px - r, d.py - r, d.px + r, d.py + r, d.id]); }
   const hit = (b, self) => boxes.some(c => c[4] !== self && !(b[2] < c[0] || b[0] > c[2] || b[3] < c[1] || b[1] > c[3]));

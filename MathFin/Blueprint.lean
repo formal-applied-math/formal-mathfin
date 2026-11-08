@@ -61,6 +61,7 @@ import MathFin.Probability.Dependence.GaussianCopula
 import MathFin.Risk.ValueAtRisk
 import MathFin.Risk.Coherent
 import MathFin.Risk.ExpectedShortfall
+import MathFin.Risk.Superhedging
 import MathFin.Risk.AcceptanceSet
 import MathFin.Risk.CompoundPoissonCVaR
 import MathFin.Contracts.Core
@@ -940,3 +941,17 @@ attribute [blueprint "def:pricing-functional" (title := "The pricing functional"
   change of numéraire, the conditional bond price, superreplication and gains-neutral measures are
   instances. -/)]
   MathFin.Market.price
+
+attribute [blueprint "thm:superhedging-coherent"
+  (title := "The superhedging price is a coherent risk measure")
+  (statement := /-- In the one-period finite-state market with a martingale probability vector, and
+  for a reference measure charging every state, the superhedging price of a claim, read as a
+  loss, is monotone, cash-invariant, positively homogeneous and subadditive. The equality with
+  the supremum of the martingale prices is not part of this statement. -/)]
+  MathFin.isCoherentRiskMeasure_superhedgingPrice
+
+attribute [blueprint "thm:superhedging-price-lower-bound"
+  (title := "The superhedging price dominates every martingale price")
+  (statement := /-- For every martingale probability vector $q$ and every claim $Y$,
+  $\sum_n q_n Y_n$ is at most the superhedging price of $Y$. -/)]
+  MathFin.le_superhedgingPrice

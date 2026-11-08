@@ -1704,5 +1704,32 @@
     "latexEnv": "theorem",
     "label": "thm:expected-shortfall-dual-set",
     "file": "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ExpectedShortfall.lean"
+  },
+  {
+    "uses": [],
+    "title": "The superhedging price dominates every martingale price",
+    "text": "For every martingale probability vector $q$ and every claim $Y$,\n  $\\sum_n q_n Y_n$ is at most the superhedging price of $Y$.",
+    "name": "MathFin.le_superhedgingPrice",
+    "module": "MathFin.Risk.Superhedging",
+    "line": 125,
+    "leanOk": true,
+    "latexEnv": "theorem",
+    "label": "thm:superhedging-price-lower-bound",
+    "file": "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"
+  },
+  {
+    "uses": [
+      "def:coherent-risk-measure",
+      "thm:superhedging-price-lower-bound"
+    ],
+    "title": "The superhedging price is a coherent risk measure",
+    "text": "In the one-period finite-state market with a martingale probability vector, and\n  for a reference measure charging every state, the superhedging price of a claim, read as a\n  loss, is monotone, cash-invariant, positively homogeneous and subadditive. The equality with\n  the supremum of the martingale prices is not part of this statement.",
+    "name": "MathFin.isCoherentRiskMeasure_superhedgingPrice",
+    "module": "MathFin.Risk.Superhedging",
+    "line": 198,
+    "leanOk": true,
+    "latexEnv": "theorem",
+    "label": "thm:superhedging-coherent",
+    "file": "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"
   }
 ]
