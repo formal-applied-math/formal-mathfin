@@ -2617,9 +2617,9 @@
     "mf-fx-smile-quotes": {
       "benchmark_file": "exotic_options.json",
       "date": "2026-11-08",
-      "elapsed_s": 2.2,
-      "input_hash": "8fd01ef8858d6fbd72be44cedcab100cc1c4e5e29c6437659a04164c53c88be4",
-      "verified_at_commit": "84d2fc6"
+      "elapsed_s": 2.6,
+      "input_hash": "6d7b3e15c50aa82548eaa150c6b4236ec5e98f4898125f3dd30ed353da8d4d45",
+      "verified_at_commit": "b8d9a36"
     },
     "mf-gamma-mgf": {
       "benchmark_file": "credit.json",
