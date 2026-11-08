@@ -12,11 +12,11 @@ public import MathFin.Pricing.Market
 public import MathFin.Probability.Martingales.TimeChange
 
 /-!
-# The contracts priced in a discrete-time market with an equivalent martingale measure
+# The discrete-time market on the trunk
 
-The third model for the instruments of `Contracts/Instruments/Options.lean`, after the
-Black–Scholes and binomial ones, and the seam between the contracts layer and the multi-period
-FTAP. A one-asset discrete-time market on a general filtered probability space, a price
+A model for the instruments of `Contracts/Instruments/Options.lean`, its fundamental theorems of
+asset pricing read on the trunk's `Market`, and the seam between the contracts layer and the
+multi-period FTAP. A one-asset discrete-time market on a general filtered probability space, a price
 `S : ℕ → Ω → ℝ` with an equivalent martingale measure `IsEMM 𝓕 P S T Q`, is a contract model
 map: between integer dates the underlying is constant, `discreteAssets S T () t = S ⌊t⌋₊` frozen
 at the horizon `T` (the price is a `Q`-martingale only up to `T`). The price `S` is quoted in

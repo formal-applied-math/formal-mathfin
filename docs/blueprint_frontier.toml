@@ -738,13 +738,6 @@ area = "probability/brownian"
 # ---- the one-trunk hinges (docs/specs/2026-11-07-one-trunk-design.md §5)
 
 [[node]]
-label = "def:pricing-functional"
-title = "The pricing functional"
-statement = "A market (filtered space, traded assets, numéraire), its pricing measures (EMMs of the deflated assets) and the price of a contract under one; the price depends only on the law of the deflator and the observations, and state prices, the numéraire change, superreplication, PricesGainsAtZero and the conditional bond price are instances."
-uses = ["def:emm", "def:contract-value", "thm:change-of-numeraire", "thm:second-ftap", "thm:market-completeness"]
-area = "valuation/general"
-
-[[node]]
 label = "thm:bs-arbitrage-free-price"
 title = "The Black–Scholes price is the arbitrage-free price"
 statement = "In the Black–Scholes market every pricing measure with a square-integrable density gives the European call the price bsCallPrice, which is also the superreplication price and the initial capital of the delta hedge."
