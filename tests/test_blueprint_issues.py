@@ -65,6 +65,17 @@ def test_a_pull_request_is_a_delivery_record() -> None:
     assert bi.check(issues, NODES) == []
 
 
+def test_an_open_pull_request_may_name_the_node_it_adds() -> None:
+    """A node an open PR adds exists only on its branch: that PR's own build checks the name, and
+    other branches do not fail on it. A merged PR's names must be nodes."""
+    base = [_issue(8, "Blueprint: thm:f"), _issue(9, "Blueprint: thm:a", is_pr=True,
+                                                  state="closed")]
+    assert bi.check(base + [_issue(10, "Blueprint: thm:new", is_pr=True)], NODES) == []
+    msgs = [p.message for p in bi.check(
+        base + [_issue(11, "Blueprint: thm:new", is_pr=True, state="closed")], NODES)]
+    assert any("#11 names `thm:new`" in m for m in msgs)
+
+
 def test_every_frontier_node_grows_from_the_wood() -> None:
     nodes = dict(NODES)
     nodes["thm:g"] = bi.Node("thm:g", "G", "frontier", uses=("thm:f",), statement="G.")
