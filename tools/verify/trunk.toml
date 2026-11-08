@@ -12,6 +12,8 @@
 [trunk]
 # The pricing functional. A proof that reaches one of these reaches the trunk.
 anchors = [
+  "MathFin.Market.price",
+  "MathFin.Market.IsPricingMeasure",
   "MathFin.IsEMM",
   "MathFin.OnePeriod.IsEMM",
   "MathFin.OnePeriodVector.IsEMM",
@@ -20,7 +22,6 @@ anchors = [
   "MathFin.NoArbitrage",
   "MathFin.IsCompleteMarket",
   "MathFin.Contracts.Contract.value",
-  "MathFin.Contracts.Contract.valueDisc",
   "MathFin.numeraireMeasure",
   "MathFin.statePricePricing",
   "MathFin.superReplicationPrice",
@@ -59,25 +60,25 @@ names = [
 # the theorem that proves it (empty until it exists).
 [[device]]
 name = "MathFin.statePricePricing"
-instance = ""
+instance = "MathFin.Market.price_pay_eq_statePricePricing"
 
 [[device]]
 name = "MathFin.numeraireMeasure"
-instance = ""
+instance = "MathFin.Market.price_pay_withNumeraire"
 
 [[device]]
 name = "MathFin.superReplicationPrice"
-instance = ""
+instance = "MathFin.Market.superReplicationPrice_eq_price"
 
 [[device]]
 name = "MathFin.PricesGainsAtZero"
-instance = ""
+instance = "MathFin.Market.IsPricingMeasure.of_pricesGainsAtZero"
 
 # the conditional price at an intermediate date (a conditional expectation of the deflated
 # payoff); the trunk's price at time t makes it an instance
 [[device]]
 name = "MathFin.Contracts.bondPrice"
-instance = ""
+instance = "MathFin.Contracts.bondPrice_deflator_eq_priceAt"
 
 # One concept, several encodings. A member is resolved when it is gone, or when a theorem
 # uses both it and the canonical object (the equality that ties them).

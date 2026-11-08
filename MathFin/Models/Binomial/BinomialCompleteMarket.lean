@@ -82,7 +82,8 @@ theorem exists_hedge_eq_value (hS₀ : 0 < S₀) (hna : BinomialNoArb u d ρ) {p
       (fun x ↦ (Contract.pay T a).pathPV (discount ρ h)
           (scenarioAt (assets S₀ u d h) (padFlips N x)))
         =ᵐ[horizonMeasure N p hp1.le] fun x ↦
-          (Contract.pay T a).value (coinFlipMeasure q hq) (discount ρ h) (assets S₀ u d h)
+          (Contract.pay T a).value (coinFlipMeasure q hq) (fun t _ ↦ discount ρ h t)
+              (assets S₀ u d h)
             + martingaleTransform φ (horizonSpot N S₀ u d ρ) N x := by
   set H : (Fin N → Bool) → ℝ := fun x ↦ (Contract.pay T a).pathPV (discount ρ h)
     (scenarioAt (assets S₀ u d h) (padFlips N x)) with hH
@@ -100,8 +101,8 @@ theorem exists_hedge_eq_value (hS₀ : 0 < S₀) (hna : BinomialNoArb u d ρ) {p
   -- the risk-neutral law prices the gains at zero, so the capital is `∫ H` there, the value
   have hQ := isEMM_horizonSpot (T := N) hna S₀ hp0 hp1 hq hqcrr
   have hQ' := (hQ.integrable_and_integral_gains (martingaleTransform_mem_tradedGains hpred hbdd))
-  have hx : (Contract.pay T a).value (coinFlipMeasure q hq) (discount ρ h) (assets S₀ u d h)
-      = x := by
+  have hx : (Contract.pay T a).value (coinFlipMeasure q hq) (fun t _ ↦ discount ρ h t)
+      (assets S₀ u d h) = x := by
     have := hQ.isProb
     rw [← integral_eq_of_replicates hQ.ac hQ'.1 hQ'.2 hrep, horizonMeasure,
       integral_map (measurable_flips N).aemeasurable Integrable.of_finite.aestronglyMeasurable]

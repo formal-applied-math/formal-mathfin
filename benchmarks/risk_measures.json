@@ -968,6 +968,53 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.valueAtRisk_portfolio_gaussian_uncorrelated (MathFin/Risk/ConcentrationVariance.lean): valueAtRisk_portfolio_gaussian (MathFin/Risk/GaussianRiskMarkowitz.lean) with the variance identity portfolioVarN_diag_eq_herfindahl, the ρ = 0 case of portfolioVarN_equicorrelated_eq_herfindahl (MathFin/Risk/EquicorrelationConcentration.lean). SCOPE: Gaussian factors, pairwise uncorrelated with a common variance; the equicorrelated case is in EquicorrelationConcentration for the variance only."
       }
+    },
+    {
+      "id": "mf-expected-shortfall-representing-set",
+      "name": "The Representing Set of Expected Shortfall",
+      "domain": "mathematical_finance",
+      "description": "On a finite probability space (any reference probability measure P, atoms of null mass allowed) and for α ∈ (0, 1), the Artzner–Delbaen–Eber–Heath representing set of expected shortfall ES_α, the probability vectors q with ∑ qᵢ Zᵢ ≤ 0 for every loss Z with ES_α(Z) ≤ 0, equals the set of probability vectors q with qᵢ ≤ (1 − α)⁻¹ P{i} for every state i, that is, the probability densities q/P bounded by (1 − α)⁻¹ (a state of null P-mass carries no q-mass). Hence ES_α(L) is the least upper bound, and by the dual representation the greatest value, of ∑ qᵢ Lᵢ over that set.",
+      "code": {
+        "lean": "import MathFin.Risk.ExpectedShortfall\n\nopen MeasureTheory Set\nopen MathFin\n\n/-- On a finite probability space the ADEH representing set of expected shortfall is the set of\nprobability vectors `q` with `qᵢ ≤ (1 − α)⁻¹ P{i}`. -/\ntheorem representingSet_expectedShortfall_thm {ι : Type*} [Fintype ι] [MeasurableSpace ι]\n    [MeasurableSingletonClass ι] (P : Measure ι) [IsProbabilityMeasure P] {α : ℝ}\n    (hα : α ∈ Ioo 0 1) :\n    representingSet (fun L : ι → ℝ ↦ expectedShortfall L P α) =\n      {q | (∀ i, 0 ≤ q i) ∧ ∑ i, q i = 1 ∧ ∀ i, q i ≤ (1 - α)⁻¹ * P.real {i}} :=\n  MathFin.representingSet_expectedShortfall P hα\n"
+      },
+      "metadata": {
+        "reference": "P. Artzner, F. Delbaen, J.-M. Eber and D. Heath, Coherent measures of risk, Mathematical Finance 9(3) (1999), 203–228; C. Acerbi and D. Tasche, On the coherence of expected shortfall, Journal of Banking & Finance 26(7) (2002), 1487–1503",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          },
+          {
+            "key": "AcerbiTasche2002"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. representingSet_expectedShortfall in MathFin/Risk/ExpectedShortfall.lean. The inclusion of the density set is the dual bound integral_mul_le_expectedShortfall applied to the density q/P; the converse tests the acceptable loss 1{i} − (1 − α)⁻¹ P{i}, whose shortfall is nonpositive by the Rockafellar–Uryasev bound at c = 0 and cash-invariance. Finite state space only; the general-space dual is isGreatest_integral_mul_expectedShortfall. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-superhedging-price-coherent",
+      "name": "The Superhedging Price Is a Coherent Risk Measure",
+      "domain": "mathematical_finance",
+      "description": "In the one-period market with M assets and N states, excess-return matrix z, and at least one martingale probability vector (a probability vector q with ∑ qₙ zₘₙ = 0 for every asset m; implied by no arbitrage), let the superhedging price of a claim Y be the infimum of the initial capitals x for which some portfolio θ gives x + ∑ θₘ zₘₙ ≥ Yₙ in every state. For a reference measure P charging every state, this price, read as a loss, is a coherent risk measure (monotone, ρ(Y + m) = ρ(Y) + m, ρ(cY) = cρ(Y) for c ≥ 0, subadditive), and it is bounded below by ∑ qₙ Yₙ for every martingale probability vector q. The equality of the superhedging price with the supremum of these prices is not proved.",
+      "code": {
+        "lean": "import MathFin.Risk.Superhedging\n\nopen MeasureTheory\nopen MathFin\n\n/-- The superhedging price of a claim, read as a loss, is a coherent risk measure, and dominates\nthe price under every martingale probability vector. -/\ntheorem superhedgingPrice_coherent_thm {M N : ℕ} (z : Fin M → Fin N → ℝ)\n    (hz : (martingaleProbVectors z).Nonempty) {P : Measure (Fin N)}\n    (hP : ∀ n, P {n} ≠ 0) :\n    IsCoherentRiskMeasure P (superhedgingPrice z) ∧\n      ∀ q ∈ martingaleProbVectors z, ∀ Y : Fin N → ℝ, ∑ n, q n * Y n ≤ superhedgingPrice z Y :=\n  ⟨MathFin.isCoherentRiskMeasure_superhedgingPrice hz hP,\n    fun _ hq Y ↦ MathFin.le_superhedgingPrice hq Y⟩\n"
+      },
+      "metadata": {
+        "reference": "H. Föllmer and A. Schied, Stochastic Finance: An Introduction in Discrete Time, 4th ed. (2016), Sections 1.3 and 7.1; P. Artzner, F. Delbaen, J.-M. Eber and D. Heath, Coherent measures of risk, Mathematical Finance 9(3) (1999), 203–228",
+        "citations": [
+          {
+            "key": "FollmerSchied",
+            "locator": "Section 1.3"
+          },
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. isCoherentRiskMeasure_superhedgingPrice and le_superhedgingPrice in MathFin/Risk/Superhedging.lean. Each axiom is a transport of superreplicating pairs (x, θ) (shift, scaling, sum, pointwise order) through the infimum; the lower bound is emm_le_superReplication (MathFin/Pricing/SuperhedgingDuality.lean) passed to the infimum. Hypotheses: a martingale probability vector exists (it makes the infimum finite) and P charges every state (superhedging is a pointwise order, the axioms ask it almost surely). SCOPE: the superhedging duality, that the price equals the supremum of the martingale prices, is not proved; it needs the closedness of the finitely generated superreplication cone (Minkowski–Weyl), absent from the pinned Mathlib. Axioms-clean."
+      }
     }
   ]
 }

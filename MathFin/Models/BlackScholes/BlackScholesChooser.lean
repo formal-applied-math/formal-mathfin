@@ -64,7 +64,7 @@ the identity; the contract is a chooser when `t₁ ≤ T`. -/
 theorem value_chooser {μ : Measure Ω} [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ}
     (hB : IsPreBrownianReal B μ) {T t₁ : ℝ≥0} (hT : 0 < (T : ℝ)) (ht₁ : 0 < (t₁ : ℝ))
     {S_0 K r σ : ℝ} (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) :
-    (chooser K r T t₁).value μ (fun u ↦ Real.exp (-r * u)) (pathAssets S_0 r σ B)
+    (chooser K r T t₁).value μ (fun u _ ↦ Real.exp (-r * u)) (pathAssets S_0 r σ B)
       = chooserPrice S_0 K r σ T t₁ := by
   have hyp {u : ℝ≥0} (hu : 0 < (u : ℝ)) {K : ℝ} (hK : 0 < K) :
       BSCallHyp μ S_0 K r σ u (fun ω ↦ B u ω / Real.sqrt u) := by

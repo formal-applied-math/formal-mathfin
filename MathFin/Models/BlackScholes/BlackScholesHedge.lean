@@ -71,7 +71,7 @@ positive maturity, `(europeanCall K T).value` at the discount `e^{−ru}` is `bs
 theorem value_europeanCall_pathAssets {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) {T : ℝ≥0} (hT : 0 < (T : ℝ))
     {S_0 K r σ : ℝ} (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) :
-    (europeanCall K T).value μ (fun u ↦ Real.exp (-r * u)) (pathAssets S_0 r σ B)
+    (europeanCall K T).value μ (fun u _ ↦ Real.exp (-r * u)) (pathAssets S_0 r σ B)
       = bsV K r σ S_0 T := by
   have hyp : BSCallHyp μ S_0 K r σ T (fun ω ↦ B T ω / Real.sqrt T) := by
     simpa using BSCallHyp.of_isPreBrownian μ B hB hS₀ hK hσ hT
@@ -92,7 +92,7 @@ theorem europeanCall_deltaHedge {μ : Measure Ω} [IsProbabilityMeasure μ] {B :
     {S_0 K r σ : ℝ} (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (T' : ℝ≥0) (hT' : T' < T) :
     ∀ᵐ ω ∂μ, ∀ t ∈ Set.Icc (0 : ℝ≥0) T',
       Real.exp (-(r * t)) * bsV K r σ (pathAssets S_0 r σ B () t ω) (T - t)
-        = (europeanCall K T).value μ (fun u ↦ Real.exp (-r * u)) (pathAssets S_0 r σ B)
+        = (europeanCall K T).value μ (fun u _ ↦ Real.exp (-r * u)) (pathAssets S_0 r σ B)
           + ItoIntegralLocalised.predItoIntegral (μ := μ) T' hBmeas
             (deltaHedgeIntegrand_isStronglyPredictable hBmeas hBcont K r σ S_0 (T : ℝ)) t ω := by
   filter_upwards [bs_delta_hedge_replication hB hBmeas hBcont hK hσ hS₀ T'

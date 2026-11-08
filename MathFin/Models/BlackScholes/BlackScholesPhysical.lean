@@ -174,9 +174,9 @@ include hW in
 /-- **Physical value is risk-neutral value.** For `σ ≠ 0` and any fixed-dated contract `c` whose
 observation dates lie in the horizon `[0, H]`, its value on the physical asset
 `pathAssets S₀ m σ W` under the Girsanov measure `Q` of `θ = (m − r)/σ` is its value on the
-risk-neutral asset `pathAssets S₀ r σ B^θ`, for any discount curve `D`. The physical drift `m`
+risk-neutral asset `pathAssets S₀ r σ B^θ`, for any deflator `D`. The physical drift `m`
 enters only through `Q`. -/
-theorem value_physical_eq_riskNeutral {S_0 m r σ : ℝ} (hσ : σ ≠ 0) (H : ℝ≥0) {D : ℝ≥0 → ℝ}
+theorem value_physical_eq_riskNeutral {S_0 m r σ : ℝ} (hσ : σ ≠ 0) (H : ℝ≥0) {D : ℝ≥0 → Ω → ℝ}
     (c : Contract Unit) (hc : c.FixedDated) (hH : ∀ p ∈ c.obsList, p.2 ≤ H) :
     c.value (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) D (pathAssets S_0 m σ W)
       = c.value (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) D
@@ -192,7 +192,7 @@ horizon `[0, H]`: `S₀ Φ(d₁) − K e^{−rT} Φ(d₂)`. The scenario is rewr
 theorem value_europeanCall_physical {S_0 K m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H)
     (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) :
     (europeanCall K T).value (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
-        (fun _ ↦ Real.exp (-r * T)) (pathAssets S_0 m σ W)
+        (fun _ _ ↦ Real.exp (-r * T)) (pathAssets S_0 m σ W)
       = S_0 * Phi (bsd1 S_0 K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) := by
   have := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
   have hB := isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
@@ -217,7 +217,7 @@ price of risk `θ = (m − r)/σ`, for dates `T`, `t₁` in the horizon `[0, H]`
 theorem value_chooser_physical {S_0 K m r σ : ℝ} {T t₁ H : ℝ≥0} (hTH : T ≤ H) (ht₁H : t₁ ≤ H)
     (hT : 0 < (T : ℝ)) (ht₁ : 0 < (t₁ : ℝ)) (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) :
     (chooser K r T t₁).value (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
-        (fun u ↦ Real.exp (-r * u)) (pathAssets S_0 m σ W)
+        (fun u _ ↦ Real.exp (-r * u)) (pathAssets S_0 m σ W)
       = chooserPrice S_0 K r σ T t₁ := by
   have := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
   have hB := isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
@@ -238,7 +238,7 @@ theorem value_geomAsianCall_physical {S_0 K m r σ : ℝ} {T H : ℝ≥0} {n : �
     (τ : Fin n → ℝ≥0) (hτT : ∀ i, τ i ≤ T) (hτH : ∀ i, τ i ≤ H) (hS₀ : 0 < S_0) (hK : 0 < K)
     (hσ : 0 < σ) (hT : 0 < (T : ℝ)) (hV : 0 < geomAsianVar τ) :
     (geomAsianCall K T τ).value (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
-        (fun _ ↦ Real.exp (-r * T)) (pathAssets S_0 m σ W)
+        (fun _ _ ↦ Real.exp (-r * T)) (pathAssets S_0 m σ W)
       = geomAsianEffSpot S_0 r σ T τ *
           Phi (bsd1 (geomAsianEffSpot S_0 r σ T τ) K r (geomAsianEffVol σ T τ) T)
         - K * Real.exp (-r * T) *

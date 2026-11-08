@@ -55,6 +55,7 @@ the corpus entry that forces it; see
   `scale`.
 * `Contract.cashflows`: the list of `(time, amount)` cashflows of a contract along a scenario.
 * `Contract.FixedDated`: the contract contains no `payAtHit`.
+* `Contract.dates`: the payment dates of a contract's `pay` nodes.
 * `Contract.pathPV`: the present value of a contract along one scenario path, for a discount
   function `D : ℝ≥0 → ℝ`.
 
@@ -68,6 +69,9 @@ the corpus entry that forces it; see
   flows, are the same on two scenarios that agree at the observations they read
   (`Payoff.obsList`, `Contract.obsList`). `Pricing/Value.lean` lifts this to models that agree
   almost surely (`Contract.value_congr_ae`).
+* `Contract.pathPV_congr` — a fixed-dated contract's present value depends on the scenario only
+  at `c.obsList` and on the discount factor only at `c.dates`. `Pricing/Value.lean` lifts this to
+  models whose observations have one law (`Contract.value_eq_of_map_observation_eq`).
 
 ## Source
 
@@ -266,5 +270,32 @@ theorem Contract.cashflows_congr {s s' : Scenario ι} (c : Contract ι) (hc : c.
       obtain ⟨hl, hr⟩ := List.forall_mem_append.1 h
       simp only [Contract.cashflows, ha hc.1 hl, hb hc.2 hr]
   | scale _ a ha => simp only [Contract.cashflows, ha hc h]
+
+/-- The payment dates of a contract: the dates of its `pay` nodes. A `payAtHit` pays at a date the
+scenario decides and lists none, which is why the congruence below asks for `FixedDated`. -/
+def Contract.dates : Contract ι → List ℝ≥0
+  | .zero => []
+  | .pay t _ => [t]
+  | .payAtHit _ _ _ => []
+  | .both a b => a.dates ++ b.dates
+  | .scale _ a => a.dates
+
+/-- **A fixed-dated contract reads a scenario only at its observations and a discount factor only
+at its payment dates**: two discount factors that agree on `c.dates`, along two scenarios that
+agree on `c.obsList`, give the same present value. -/
+theorem Contract.pathPV_congr {D D' : ℝ≥0 → ℝ} {s s' : Scenario ι} (c : Contract ι)
+    (hc : c.FixedDated) (hD : ∀ t ∈ c.dates, D t = D' t)
+    (hs : ∀ p ∈ c.obsList, s p.1 p.2 = s' p.1 p.2) : c.pathPV D s = c.pathPV D' s' := by
+  induction c with
+  | zero => rfl
+  | pay t a =>
+      simp only [pathPV, cashflows, List.map_cons, List.map_nil, List.sum_cons, List.sum_nil,
+        hD t (List.mem_singleton_self t), Payoff.eval_congr a hs]
+  | payAtHit _ _ _ => exact hc.elim
+  | both a b ha hb =>
+      obtain ⟨hDa, hDb⟩ := List.forall_mem_append.1 hD
+      obtain ⟨hsa, hsb⟩ := List.forall_mem_append.1 hs
+      rw [pathPV_both, pathPV_both, ha hc.1 hDa hsa, hb hc.2 hDb hsb]
+  | scale _ a ha => rw [pathPV_scale, pathPV_scale, ha hc hD hs]
 
 end MathFin.Contracts

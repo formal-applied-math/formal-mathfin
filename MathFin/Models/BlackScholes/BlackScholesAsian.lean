@@ -70,7 +70,7 @@ theorem value_geomAsianCall {μ : Measure Ω} [IsProbabilityMeasure μ] {B : ℝ
     (hB : IsPreBrownianReal B μ) {T : ℝ≥0} {n : ℕ} (hn : 0 < n) (τ : Fin n → ℝ≥0)
     (hτT : ∀ i, τ i ≤ T) {S_0 K r σ : ℝ} (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ)
     (hT : 0 < (T : ℝ)) (hV : 0 < geomAsianVar τ) :
-    (geomAsianCall K T τ).value μ (fun _ ↦ Real.exp (-r * T)) (pathAssets S_0 r σ B)
+    (geomAsianCall K T τ).value μ (fun _ _ ↦ Real.exp (-r * T)) (pathAssets S_0 r σ B)
       = geomAsianEffSpot S_0 r σ T τ *
           Phi (bsd1 (geomAsianEffSpot S_0 r σ T τ) K r (geomAsianEffVol σ T τ) T)
         - K * Real.exp (-r * T) *

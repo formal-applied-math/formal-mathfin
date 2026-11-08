@@ -21,7 +21,7 @@ and to the annuity, as `BondModel` does for the forward rate of a caplet.
 * The CMS caplet, floorlet and swaplet (`cmsCaplet`, `cmsFloorlet`, `cmsSwaplet`) are one-cash-flow
   contracts on `σ`.
 * **Annuity-measure pricing.** A payoff `g(S)` paid at `T₀` is worth `A(0) · 𝔼^A[g(S) / A(T₀)]`
-  (`valueDisc_pay_swapRate`), where `𝔼^A` is the annuity measure `swapAnnuityMeasure` and
+  (`value_pay_swapRate`), where `𝔼^A` is the annuity measure `swapAnnuityMeasure` and
   `A(0) = δ Σ P(0, Tᵢ)` is the annuity of the zero curve. This is `annuityMeasure_price`
   (`Models/Rates/CMS.lean`) for the discount factor `D (T 0)`.
 * **The forward swap rate is the annuity-measure mean of the swap rate**
@@ -42,8 +42,8 @@ later date `Tₚ` needs the change of measure to the `Tₚ`-forward measure.
 ## Main results
 
 * `SwapModel.integral_annuity_mul`,
-  `SwapModel.isProbabilityMeasure`, `valueDisc_pay_swapRate`, `valueDisc_cmsCaplet`,
-  `valueDisc_cmsFloorlet`, `valueDisc_cmsSwaplet`, `SwapModel.integral_swapRate`.
+  `SwapModel.isProbabilityMeasure`, `value_pay_swapRate`, `value_cmsCaplet`,
+  `value_cmsFloorlet`, `value_cmsSwaplet`, `SwapModel.integral_swapRate`.
 
 ## References
 
@@ -192,15 +192,15 @@ theorem SwapModel.annuity0_mul_integral (h : SwapModel Q 𝓕 D X σ b T n δ) (
 /-- **A payoff on the swap rate, paid at the fixing date, is an annuity-measure expectation.** If
 `φ` is `g` of the swap rate observed at `T₀`, the contract paying `φ` at `T₀` is worth
 `A(0) · 𝔼^A[g(S) / A(T₀)]`: `annuityMeasure_price` with the annuity-settled payoff `g(S)`. -/
-theorem valueDisc_pay_swapRate (h : SwapModel Q 𝓕 D X σ b T n δ) {φ : Payoff ι} {g : ℝ → ℝ}
+theorem value_pay_swapRate (h : SwapModel Q 𝓕 D X σ b T n δ) {φ : Payoff ι} {g : ℝ → ℝ}
     (hφ : ∀ s : Scenario ι, φ.eval s = g (s σ (T 0))) :
-    (Contract.pay (T 0) φ).valueDisc Q D X
+    (Contract.pay (T 0) φ).value Q D X
       = annuity δ (fun i ↦ zeroCurve Q D (T i)) (Finset.Icc 1 n)
         * ∫ ω, g (X σ (T 0) ω) / CMS.annuityRandom δ (swapCurve X b (T 0)) (Finset.Icc 1 n) ω
           ∂(swapAnnuityMeasure Q D X b T n δ) := by
   rw [h.annuity0_mul_integral
     (fun ω ↦ g (X σ (T 0) ω) / CMS.annuityRandom δ (swapCurve X b (T 0)) (Finset.Icc 1 n) ω),
-    Contract.valueDisc_pay]
+    Contract.value_pay]
   refine integral_congr_ae (ae_of_all _ fun ω ↦ ?_)
   beta_reduce
   rw [hφ, div_mul_cancel₀ _ (h.annuity_pos ω).ne']
@@ -208,31 +208,31 @@ theorem valueDisc_pay_swapRate (h : SwapModel Q 𝓕 D X σ b T n δ) {φ : Payo
 
 /-- **A CMS caplet is an annuity-measure call on the swap rate**: the caplet paying `(S − K)⁺` at
 `T₀` is worth `A(0) · 𝔼^A[(S − K)⁺ / A(T₀)]`. -/
-theorem valueDisc_cmsCaplet (h : SwapModel Q 𝓕 D X σ b T n δ) (K : ℝ) :
-    (cmsCaplet σ (T 0) K).valueDisc Q D X
+theorem value_cmsCaplet (h : SwapModel Q 𝓕 D X σ b T n δ) (K : ℝ) :
+    (cmsCaplet σ (T 0) K).value Q D X
       = annuity δ (fun i ↦ zeroCurve Q D (T i)) (Finset.Icc 1 n)
         * ∫ ω, max (X σ (T 0) ω - K) 0
             / CMS.annuityRandom δ (swapCurve X b (T 0)) (Finset.Icc 1 n) ω
           ∂(swapAnnuityMeasure Q D X b T n δ) :=
-  valueDisc_pay_swapRate h (g := fun x ↦ max (x - K) 0) fun _ ↦ rfl
+  value_pay_swapRate h (g := fun x ↦ max (x - K) 0) fun _ ↦ rfl
 
 /-- **A CMS floorlet is an annuity-measure put on the swap rate**: the floorlet paying `(K − S)⁺`
 at `T₀` is worth `A(0) · 𝔼^A[(K − S)⁺ / A(T₀)]`. -/
-theorem valueDisc_cmsFloorlet (h : SwapModel Q 𝓕 D X σ b T n δ) (K : ℝ) :
-    (cmsFloorlet σ (T 0) K).valueDisc Q D X
+theorem value_cmsFloorlet (h : SwapModel Q 𝓕 D X σ b T n δ) (K : ℝ) :
+    (cmsFloorlet σ (T 0) K).value Q D X
       = annuity δ (fun i ↦ zeroCurve Q D (T i)) (Finset.Icc 1 n)
         * ∫ ω, max (K - X σ (T 0) ω) 0
             / CMS.annuityRandom δ (swapCurve X b (T 0)) (Finset.Icc 1 n) ω
           ∂(swapAnnuityMeasure Q D X b T n δ) :=
-  valueDisc_pay_swapRate h (g := fun x ↦ max (K - x) 0) fun _ ↦ rfl
+  value_pay_swapRate h (g := fun x ↦ max (K - x) 0) fun _ ↦ rfl
 
 /-- **A CMS swaplet is worth `A(0) · 𝔼^A[S / A(T₀)]`.** -/
-theorem valueDisc_cmsSwaplet (h : SwapModel Q 𝓕 D X σ b T n δ) :
-    (cmsSwaplet σ (T 0)).valueDisc Q D X
+theorem value_cmsSwaplet (h : SwapModel Q 𝓕 D X σ b T n δ) :
+    (cmsSwaplet σ (T 0)).value Q D X
       = annuity δ (fun i ↦ zeroCurve Q D (T i)) (Finset.Icc 1 n)
         * ∫ ω, X σ (T 0) ω / CMS.annuityRandom δ (swapCurve X b (T 0)) (Finset.Icc 1 n) ω
           ∂(swapAnnuityMeasure Q D X b T n δ) :=
-  valueDisc_pay_swapRate h (g := id) fun _ ↦ rfl
+  value_pay_swapRate h (g := id) fun _ ↦ rfl
 
 /-! ### The forward swap rate -/
 
@@ -330,8 +330,8 @@ theorem SwapModel.annuity0_mul_integral_inv (h : SwapModel Q 𝓕 D X σ b T n �
 `value = P(0, T₀) · S₀ + A(0) · Cov^A(S, 1/A(T₀))`, with `S₀` the forward swap rate and the
 covariance written out: the contract is worth `A(0) 𝔼^A[S/A]`, and `A(0) 𝔼^A[1/A] = P(0, T₀)`,
 `𝔼^A[S] = S₀`. -/
-theorem SwapModel.valueDisc_cmsSwaplet_eq (h : SwapModel Q 𝓕 D X σ b T n δ) :
-    (cmsSwaplet σ (T 0)).valueDisc Q D X
+theorem SwapModel.value_cmsSwaplet_eq (h : SwapModel Q 𝓕 D X σ b T n δ) :
+    (cmsSwaplet σ (T 0)).value Q D X
       = zeroCurve Q D (T 0) * parSwapRate (zeroCurve Q D (T 0)) (zeroCurve Q D (T n))
             (annuity δ (fun i ↦ zeroCurve Q D (T i)) (Finset.Icc 1 n))
         + annuity δ (fun i ↦ zeroCurve Q D (T i)) (Finset.Icc 1 n)
@@ -340,7 +340,7 @@ theorem SwapModel.valueDisc_cmsSwaplet_eq (h : SwapModel Q 𝓕 D X σ b T n δ)
             - (∫ ω, X σ (T 0) ω ∂(swapAnnuityMeasure Q D X b T n δ))
               * ∫ ω, (CMS.annuityRandom δ (swapCurve X b (T 0)) (Finset.Icc 1 n) ω)⁻¹
                   ∂(swapAnnuityMeasure Q D X b T n δ)) := by
-  rw [valueDisc_cmsSwaplet h, ← h.integral_swapRate, ← h.annuity0_mul_integral_inv]
+  rw [value_cmsSwaplet h, ← h.integral_swapRate, ← h.annuity0_mul_integral_inv]
   ring
 
 /-- **The convexity adjustment of a CMS swaplet paid at its fixing date is nonnegative.** If the
@@ -348,7 +348,7 @@ bond prices other than `P(T₀, Tₙ)` are known constants, the swap rate is aff
 annuity, `S = (1 + C)/A − 1/δ` (`C = Σ c i`, `1 + C ≥ 0`), so
 `Cov^A(S, 1/A) = (1 + C) Var^A(1/A) ≥ 0`: the swaplet is worth at least `P(0, T₀)` times the forward
 swap rate. The reciprocal annuity is assumed square-integrable under the annuity measure. -/
-theorem SwapModel.zeroCurve_mul_forwardSwapRate_le_valueDisc_cmsSwaplet
+theorem SwapModel.zeroCurve_mul_forwardSwapRate_le_value_cmsSwaplet
     (h : SwapModel Q 𝓕 D X σ b T n δ)
     (hc : ∀ i ∈ (Finset.Icc 1 n).erase n, ∀ᵐ ω ∂Q, X (b i) (T 0) ω = c i)
     (hC : 0 ≤ 1 + ∑ i ∈ (Finset.Icc 1 n).erase n, c i)
@@ -360,7 +360,7 @@ theorem SwapModel.zeroCurve_mul_forwardSwapRate_le_valueDisc_cmsSwaplet
       (swapAnnuityMeasure Q D X b T n δ)) :
     zeroCurve Q D (T 0) * parSwapRate (zeroCurve Q D (T 0)) (zeroCurve Q D (T n))
         (annuity δ (fun i ↦ zeroCurve Q D (T i)) (Finset.Icc 1 n))
-      ≤ (cmsSwaplet σ (T 0)).valueDisc Q D X := by
+      ≤ (cmsSwaplet σ (T 0)).value Q D X := by
   have := h.isProbabilityMeasure
   set A := CMS.annuityRandom δ (swapCurve X b (T 0)) (Finset.Icc 1 n) with hA
   set μ := swapAnnuityMeasure Q D X b T n δ with hμ
@@ -396,7 +396,7 @@ theorem SwapModel.zeroCurve_mul_forwardSwapRate_le_valueDisc_cmsSwaplet
       (memLp_two_iff_integrable_sq h.annuity_meas.inv.aestronglyMeasurable).2 hg2
     have := ProbabilityTheory.variance_nonneg (fun ω ↦ (A ω)⁻¹) μ
     rwa [ProbabilityTheory.variance_eq_sub hm] at this
-  rw [h.valueDisc_cmsSwaplet_eq]
+  rw [h.value_cmsSwaplet_eq]
   refine le_add_of_nonneg_right (mul_nonneg h.annuity0_pos.le ?_)
   rw [hK, hJ]
   nlinarith [mul_nonneg hC hvar]
@@ -428,12 +428,12 @@ noncomputable def payerSwaption (b : ℕ → ι) (T₀ : ℝ≥0) (n : ℕ) (δ 
 /-- **A payer swaption is `A(0)` times an annuity-measure call on the swap rate**:
 `value = A(0) · 𝔼^A[(S − K)⁺]`. The payoff is `A(T₀)(S − K)⁺`, the annuity-settled payoff of
 `annuityMeasure_price`. -/
-theorem valueDisc_payerSwaption (h : SwapModel Q 𝓕 D X σ b T n δ) (K : ℝ) :
-    (payerSwaption b (T 0) n δ K).valueDisc Q D X
+theorem value_payerSwaption (h : SwapModel Q 𝓕 D X σ b T n δ) (K : ℝ) :
+    (payerSwaption b (T 0) n δ K).value Q D X
       = annuity δ (fun i ↦ zeroCurve Q D (T i)) (Finset.Icc 1 n)
         * ∫ ω, max (X σ (T 0) ω - K) 0 ∂(swapAnnuityMeasure Q D X b T n δ) := by
   rw [h.annuity0_mul_integral (fun ω ↦ max (X σ (T 0) ω - K) 0)]
-  simp only [payerSwaption, Contract.valueDisc_pay, Payoff.eval, Payoff.eval_obsSum, scenarioAt]
+  simp only [payerSwaption, Contract.value_pay, Payoff.eval, Payoff.eval_obsSum, scenarioAt]
   refine integral_congr_ae ?_
   filter_upwards [h.rate_eq] with ω hω
   have hA := h.annuity_pos ω
@@ -450,30 +450,30 @@ theorem valueDisc_payerSwaption (h : SwapModel Q 𝓕 D X σ b T n δ) (K : ℝ)
 `blackPayerSwaption A(0) F K σ' T'`, `A(0) [F Φ(d₁) − K Φ(d₂)]`; `black_futures_formula` on `Qᴬ`.
 The lognormality of the swap rate under its annuity measure is a hypothesis, the standard
 assumption of Black's swaption model, and not derived from a term-structure model. -/
-theorem valueDisc_payerSwaption_black (h : SwapModel Q 𝓕 D X σ b T n δ)
+theorem value_payerSwaption_black (h : SwapModel Q 𝓕 D X σ b T n δ)
     {Q' : Measure Ω} [IsProbabilityMeasure Q']
     (hQ' : Q' = swapAnnuityMeasure Q D X b T n δ) {F K σ' T' : ℝ} {Z : Ω → ℝ}
     (hZ : BSCallHyp Q' F K 0 σ' T' Z)
     (hS : X σ (T 0) =ᵐ[Q'] fun ω ↦ bsTerminal F 0 σ' T' (Z ω)) :
-    (payerSwaption b (T 0) n δ K).valueDisc Q D X
+    (payerSwaption b (T 0) n δ K).value Q D X
       = blackPayerSwaption (annuity δ (fun i ↦ zeroCurve Q D (T i)) (Finset.Icc 1 n))
           F K σ' T' := by
   subst hQ'
   have e : ∀ᵐ ω ∂swapAnnuityMeasure Q D X b T n δ, max (X σ (T 0) ω - K) 0
       = max (bsTerminal F 0 σ' T' (Z ω) - K) 0 := hS.mono fun ω hω ↦ by rw [hω]
-  rw [valueDisc_payerSwaption h, integral_congr_ae e, blackPayerSwaption]
+  rw [value_payerSwaption h, integral_congr_ae e, blackPayerSwaption]
   simpa using congrArg (annuity δ (fun i ↦ zeroCurve Q D (T i)) (Finset.Icc 1 n) * ·)
     (black_futures_formula hZ 0)
 
 /-- **Black's swaption formula, at the forward swap rate of the zero curve.** Under the
-hypotheses of `valueDisc_payerSwaption_black`, `F` is the par swap rate of the zero curve,
+hypotheses of `value_payerSwaption_black`, `F` is the par swap rate of the zero curve,
 `(P(0, T₀) − P(0, Tₙ))/A(0)`: the annuity-measure mean of a lognormal is its centre. -/
-theorem valueDisc_payerSwaption_black_forwardSwapRate (h : SwapModel Q 𝓕 D X σ b T n δ)
+theorem value_payerSwaption_black_forwardSwapRate (h : SwapModel Q 𝓕 D X σ b T n δ)
     {Q' : Measure Ω} [IsProbabilityMeasure Q']
     (hQ' : Q' = swapAnnuityMeasure Q D X b T n δ) {K σ' T' F : ℝ} {Z : Ω → ℝ}
     (hZ : BSCallHyp Q' F K 0 σ' T' Z)
     (hS : X σ (T 0) =ᵐ[Q'] fun ω ↦ bsTerminal F 0 σ' T' (Z ω)) :
-    (payerSwaption b (T 0) n δ K).valueDisc Q D X
+    (payerSwaption b (T 0) n δ K).value Q D X
       = blackPayerSwaption (annuity δ (fun i ↦ zeroCurve Q D (T i)) (Finset.Icc 1 n))
           (parSwapRate (zeroCurve Q D (T 0)) (zeroCurve Q D (T n))
             (annuity δ (fun i ↦ zeroCurve Q D (T i)) (Finset.Icc 1 n))) K σ' T' := by
@@ -482,6 +482,6 @@ theorem valueDisc_payerSwaption_black_forwardSwapRate (h : SwapModel Q 𝓕 D X 
     rw [← h.integral_swapRate, ← hQ', integral_congr_ae hS]
     simpa using (discounted_terminal_eq_S0 hZ).symm
   rw [← hF]
-  exact valueDisc_payerSwaption_black h hQ' hZ hS
+  exact value_payerSwaption_black h hQ' hZ hS
 
 end MathFin.Contracts

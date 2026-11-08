@@ -675,13 +675,6 @@ area = "foundations"
 # ---- the one-trunk hinges (docs/specs/2026-11-07-one-trunk-design.md §5)
 
 [[node]]
-label = "def:pricing-functional"
-title = "The pricing functional"
-statement = "A market (filtered space, traded assets, numéraire), its pricing measures (EMMs of the deflated assets) and the price of a contract under one; the price depends only on the law of the deflator and the observations, and state prices, the numéraire change, superreplication, PricesGainsAtZero and the conditional bond price are instances."
-uses = ["def:emm", "def:contract-value", "def:numeraire-measure", "thm:pricing-measure", "thm:market-completeness"]
-area = "foundations"
-
-[[node]]
 label = "thm:bs-arbitrage-free-price"
 title = "The Black–Scholes price is the arbitrage-free price"
 statement = "In the Black–Scholes market every pricing measure with a square-integrable density gives the European call the price bsCallPrice, which is also the superreplication price and the initial capital of the delta hedge."
@@ -701,20 +694,6 @@ title = "Jump-diffusion prices under the Esscher pricing measure"
 statement = "The Merton jump-diffusion market has a pricing measure (the Esscher one), and under it the European call's price is the Poisson mixture of Black–Scholes prices."
 uses = ["def:pricing-functional", "thm:esscher-emm-levy", "thm:jump-diffusion-mixing", "thm:merton-risk-neutral-drift"]
 area = "black-scholes"
-
-[[node]]
-label = "thm:expected-shortfall-dual-set"
-title = "Expected shortfall's representing set"
-statement = "On a finite space the representing set of expected shortfall in the ADEH representation is exactly the probability densities bounded by 1/(1−α), joining coherentRisk_isLUB to the general-space dual."
-uses = ["thm:expected-shortfall-coherent", "def:expected-shortfall", "def:coherent-risk-measure"]
-area = "risk"
-
-[[node]]
-label = "thm:superhedging-coherent"
-title = "The superhedging price is a coherent risk measure"
-statement = "On a finite space the superreplication price of a loss is a coherent risk measure, bounded below by its price under every pricing measure, with equality to the supremum once finitely generated cones are closed."
-uses = ["def:pricing-functional", "def:coherent-risk-measure"]
-area = "risk"
 
 [[node]]
 label = "thm:utility-state-price-density"

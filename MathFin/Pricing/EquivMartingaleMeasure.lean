@@ -72,8 +72,7 @@ variable {𝓕 : Filtration ι m0} {P Q : Measure Ω} {S : ι → Ω → F} {T :
 /-- **A martingale under an equivalent probability measure is an EMM at every horizon.** -/
 theorem of_martingale [IsProbabilityMeasure Q] (hS : Martingale S 𝓕 Q) (hQP : Q ≪ P)
     (hPQ : P ≪ Q) (T : ι) : IsEMM 𝓕 P S T Q :=
-  ⟨⟨inferInstance, hQP, hPQ⟩, martingale_min_iff.mpr
-    ⟨fun t _ ↦ hS.1 t, fun t _ ↦ hS.integrable t, fun _ _ hst _ ↦ (hS.condExp_ae_eq hst).symm⟩⟩
+  ⟨⟨inferInstance, hQP, hPQ⟩, martingale_min_of_martingale hS T⟩
 
 /-- Before the horizon the price is `𝓕`-adapted. -/
 theorem adapted (h : IsEMM 𝓕 P S T Q) {t : ι} (ht : t ≤ T) : StronglyMeasurable[𝓕 t] (S t) :=
