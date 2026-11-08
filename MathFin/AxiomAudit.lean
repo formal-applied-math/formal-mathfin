@@ -2637,7 +2637,7 @@ The landmarks of `docs/blueprint.md` that no section above pins: one `#print axi
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.kkt_sufficient
 
-/-- info: 'MathFin.Market' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.Market' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Market
 
