@@ -139,7 +139,7 @@ const secOf = n => n.isl ? BSEC.get(ISL.get(n.isl).p + "/~" + n.isl) : isJoint(n
 // grows taller instead of packing its results into one line.
 const TOP = 30;
 const LH = 92, TSTEP = 54, RSTEP = 46, SUBH = 46;
-const phR = n => 6 + Math.min(13, Math.sqrt(n.ph.gain || 0) * 3);   // a connector: its gain
+const phR = n => 9 + Math.min(12, Math.sqrt(n.ph.gain || 0) * 2.6);   // a connector: its gain
 const rad = n => n.tw ? 16 : n.ph ? phR(n) + 4 : isWood(n) ? 10 + Math.sqrt(n.e) * 2.2 : n.op ? 14 : 8;
 const sub = new Map(), subRows = new Map();   // node -> its sub-row; "kind|pd" -> most sub-rows
 { const groups = d3.group(live.filter(n => !isRoot(n) && !isUp(n) && !n.sucker && !n.isl && !n.ph),
@@ -168,7 +168,8 @@ const LB = TOP + 40 + crown;                      // a limb's first level
 const TT = LB + 70;                               // the trunk's top, where the limbs fork
 const GY = TT + 60 + bole;                        // the ground
 const ROW0 = GY + 10 + 14 * TF, ROWH = 17 * TF;   // pile labels just under the ground
-const RT = ROW0 + 3 * ROWH + 14;                  // the root band
+const PROWS = 4;
+const RT = ROW0 + PROWS * ROWH + 14;                  // the root band
 const rootMax = new Map(rootKeys.map(k => [k, d3.max(inRoot(k), n => n.pd) || 0]));
 // root captions sit under their root; one that would run into its left neighbour drops a line
 const rootCap = new Map();
@@ -198,16 +199,20 @@ for (const s of sim) s.x = Math.max(s.s.x0 + 8, Math.min(s.s.x1 - 8, s.x));
 // phantoms (connectors): between the nodes the statement mentions, at the height the hop would give it if proved
 { const at = new Map(sim.map(s => [s.id, s]));
   const ph = live.filter(n => n.ph).map(n => {
+    // between the far end (an island, else the highest node it mentions) and the node it mentions
+    // nearest the trunk, at the height of the far end
     const ends = n.u.map(u => at.get(u)).filter(Boolean);
-    const ex = ends.length ? d3.mean(ends, e => e.x) : CX, ey = ends.length ? d3.mean(ends, e => e.y) : LB;
-    const lv = n.hp == null ? null : Math.min(n.hp - 1, LOFF.length - 1);
-    return {id:n.l, n, x:ex, y:lv == null ? ey - LH * .6 : LB - LOFF[lv] - 22, tx:ex};
+    const far = ends.filter(e => !isTrunk(e.n)).sort((a, b) => (!!b.n.isl - !!a.n.isl) || a.y - b.y)[0] || ends[0];
+    const near = ends.filter(e => e !== far).sort((a, b) => (isTrunk(a.n) - isTrunk(b.n)) || b.y - a.y)[0];
+    n.phEnds = [far, near].filter(Boolean).map(e => e.id);
+    const ex = !far ? CX : near ? (far.x + near.x) / 2 : far.x + 40, ey = far ? far.y - 30 : LB;
+    return {id:n.l, n, x:ex, y:ey, tx:ex};
   });
-  const fixed = sim.map(s => ({fx:s.x, fy:s.y, r:rad(s.n) * .6}));
+  const fixed = sim.map(s => ({fx:s.x, fy:s.y, r:rad(s.n) * .5}));
   const all = [...fixed, ...ph];
   d3.forceSimulation(all)
-    .force("x", d3.forceX(s => s.tx ?? s.fx).strength(.05))
-    .force("y", d3.forceY(s => s.n ? s.y : s.fy).strength(.4))
+    .force("x", d3.forceX(s => s.tx ?? s.fx).strength(s => s.n ? .08 : 0))
+    .force("y", d3.forceY(s => s.n ? s.y : s.fy).strength(s => s.n ? .4 : 1))
     .force("collide", d3.forceCollide(s => s.n ? rad(s.n) : s.r).strength(.8).iterations(3))
     .stop().tick(240);
   for (const q of ph){ q.x = Math.max(24, Math.min(W - 24, q.x)); sim.push({id:q.id, n:q.n, x:q.x, y:q.y}); }
@@ -233,7 +238,7 @@ for (const n of live){
 const edges = [];
 for (const n of live){
   const t = byId.get(n.l), us = mfUses(n);
-  for (const u of us) edges.push({s:byId.get(u), t, f:flow.get(n.l) / us.length, prim:u === n.prim});
+  for (const u of us) edges.push({s:byId.get(u), t, f:flow.get(n.l) / us.length, prim:n.ph ? !!n.phEnds?.includes(u) : u === n.prim});
   if (!us.length && !isRoot(n) && !n.isl) edges.push({s:null, base:[(isTrunk(n) ? CX : t.px) + (hash(n.l + "stem") - .5) * 20, GY + 6], t, f:flow.get(n.l), prim:true});
 }
 const BW = f => Math.min(22, .9 + 1.2 * Math.sqrt(f));
@@ -281,12 +286,16 @@ function taper(P, c1, c2, C, w0, w1, steps = 18){
 const ghost = view.append("g").attr("class", "map-ghost dimmable");
 const gw = k => 10 + 3.2 * Math.sqrt((PARTS.get(k) ? inPart(k) : inRoot(k)).length);
 ghost.append("path").attr("class", "ghost").attr("d", taper([CX, GY + 8], [CX, GY - 60], [CX, TT + 40], [CX, TT], gw(TRUNK) * 1.8, gw(TRUNK) * 1.3));
+// the pale wood of a limb ends at its highest measured node: no rays run on past the data
+const topOf = (k, b) => d3.min(live.filter(n => n.p === k && !n.isl && !n.ph && !isJoint(n) && (b === undefined || (n.b || "") === b)), n => byId.get(n.l).py);
 for (const k of limbKeys){
-  const s = SEC.get(k), w = gw(k);
-  const mid = LB - .5 * (LB - TOP);
+  const s = SEC.get(k), w = gw(k), ytop = Math.max(TOP + 20, topOf(k) ?? LB);
+  const mid = LB - .5 * (LB - ytop);
   ghost.append("path").attr("class", "ghost").attr("d", taper([CX, TT + 6], [CX + (s.cx - CX) * .15, TT - 60], [s.cx, LB - 40], [s.cx, mid], w, w * .55));
-  for (const [key, bs] of BSEC) if (key.startsWith(k + "/"))
-    ghost.append("path").attr("class", "ghost").attr("d", taper([s.cx, mid + 4], [s.cx, mid - 50], [bs.cx, TOP + 90], [bs.cx, TOP + 24], w * .4, 2.5));
+  for (const [key, bs] of BSEC) if (key.startsWith(k + "/") && key[k.length + 1] !== "~"){
+    const yb = Math.max(TOP + 20, topOf(k, key.slice(k.length + 1)) ?? mid) - 6;
+    ghost.append("path").attr("class", "ghost").attr("d", taper([s.cx, mid + 4], [s.cx, mid - 20], [bs.cx, yb + 30], [bs.cx, yb], w * .4, 2.5));
+  }
 }
 for (const k of rootKeys){
   const s = RSEC.get(k), w = gw(k), y1 = RT + 14 + rootMax.get(k) * RSTEP;
@@ -307,10 +316,18 @@ const branchSel = linkG.selectAll("path").data(woodEdges.slice().sort((a, b) => 
   .attr("class", e => "branch dimmable" + (e.prim ? "" : " sec"))
   .attr("d", e => { const g = edgeGeom(e), w = BW(e.f); return taper(g.P, g.c1, g.c2, g.C, w * 1.15, Math.max(.8, w * .62)); });
 // a connector's edges are dashed and straight-ish, heavier with its gain; a plain shoot rises from its base
+// a plain frontier edge is a faint stub toward what it rests on (the full curve shows on hover or selection)
+const STUB = 46;
+function shootD(e, full){
+  const n = e.t.data.node, C = [e.t.px, e.t.py];
+  if (n.ph){ const P = [e.s.px, e.s.py]; return `M${P}Q${(P[0] + C[0]) / 2},${Math.min(P[1], C[1]) - 18} ${C}`; }
+  const g = edgeGeom(e), len = Math.hypot(g.P[0] - C[0], g.P[1] - C[1]);
+  if (full || len <= 150) return `M${g.P}C${g.c1} ${g.c2} ${g.C}`;
+  const k = STUB / len; return `M${C[0] + (g.P[0] - C[0]) * k},${C[1] + (g.P[1] - C[1]) * k}L${C}`;
+}
 const shootSel = shootG.selectAll("path").data(shootEdges).join("path")
-  .attr("class", e => e.t.data.node.ph ? "shoot ph dimmable" : "shoot dimmable" + (e.prim ? "" : " sec"))
-  .attr("d", e => { if (e.t.data.node.ph){ const P = [e.s.px, e.s.py], C = [e.t.px, e.t.py]; return `M${P}Q${(P[0] + C[0]) / 2},${Math.min(P[1], C[1]) - 18} ${C}`; }
-    const g = edgeGeom(e); return `M${g.P}C${g.c1} ${g.c2} ${g.C}`; })
+  .attr("class", e => e.t.data.node.ph ? "shoot ph dimmable" + (e.prim ? "" : " sec") : "shoot dimmable" + (e.prim ? "" : " sec"))
+  .attr("d", e => shootD(e, false))
   .style("stroke-width", e => e.t.data.node.ph ? (1.2 + Math.sqrt(e.t.data.node.ph.gain || 0) * .45).toFixed(2) : null);
 
 // islands: a dashed outline round each floating cluster, named; red when nothing reaches it
@@ -324,9 +341,17 @@ islSel.each(function(c){
   const t = cap(g.append("text").attr("class", "isl-lbl").attr("x", c.box.cx).attr("y", islIn(c.p).indexOf(c) % 2 ? y1 + 15 * TF : y0 - 6).attr("text-anchor", "middle"), 12.5);
   const words = c.title.replace(/^[^·]*·\s*/, "");
   t.text(words.length > 22 ? words.slice(0, 21).trimEnd() + "…" : words);
+  c.lbl = t;
   g.append("title").text(c.declared ? `${c.title}: standalone. ${c.reason}${c.socket ? " Read in a market by " + c.socket + "." : ""}` : c.ring ? `${c.title}: no statement joins it to the trunk, no connector reaches it, and nothing declares why.` : `${c.title}: no statement joins it to the trunk yet; a connector would.`);
   g.append("rect").attr("class", "hit").attr("x", x0).attr("y", y0 - 16).attr("width", x1 - x0).attr("height", 18);
 });
+
+// island labels: inside the canvas and apart, above or below the ring in turn, then pushed along x
+for (const row of [0, 1]){
+  const items = D.islands.filter(c => c.lbl && islIn(c.p).indexOf(c) % 2 === row).map(c => ({c, x:c.box.cx, w:c.lbl.node().getComputedTextLength() + 26}));
+  relax(items);
+  for (const L of items) L.c.lbl.attr("x", L.x);
+}
 
 // captions: root names in the soil
 const limbLbl = view.append("g").attr("class", "dimmable");
@@ -387,14 +412,16 @@ pileSel.each(function(p){
     g.append("path").attr("class", "fallen").attr("d", LEAF).attr("transform", `translate(${fx.toFixed(1)},${fy.toFixed(1)}) rotate(${(r() * 360).toFixed(0)}) scale(${(.75 + r() * .4).toFixed(2)})`);
   }
   cap(g.append("text").attr("class", "pile-lbl").attr("x", x).attr("y", ROW0).text(`${p.list.length} ${pileName(p.a)}`), 13.5);
+  g.append("title").text(`${p.list.length} ${pileName(p.a)} entries off the map`);
   g.append("rect").attr("class", "hit").attr("x", x - half - 8).attr("y", GY - 18).attr("width", 2 * half + 16).attr("height", 24 + 20 * TF);
 });
 // pile labels, measured: the first row with room, else the next one down
-{ const rows = [[{x:CX, lw:trunkLbl.node().getComputedTextLength() / 2 + 8 * TF}], [], []], pad = 8 * TF;
+{ const rows = [[{x:CX, lw:trunkLbl.node().getComputedTextLength() / 2 + 8 * TF}], ...Array.from({length:PROWS - 1}, () => [])], pad = 10 * TF;
   const lbls = []; pileSel.each(function(p){ const t = d3.select(this).select(".pile-lbl"); lbls.push({t, x:pileX.get(p.a).x, lw:t.node().getComputedTextLength() / 2 + pad}); });
   for (const L of lbls){ L.x = Math.max(L.lw + 6, Math.min(W - L.lw - 6, L.x)); L.t.attr("x", L.x); }
   for (const L of lbls.sort((a, b) => a.x - b.x)){
-    const r = Math.max(0, rows.findIndex(row => !row.some(u => Math.abs(u.x - L.x) < u.lw + L.lw)));
+    const r = rows.findIndex(row => !row.some(u => Math.abs(u.x - L.x) < u.lw + L.lw));
+    if (r < 0){ L.t.attr("display", "none"); continue; }   // no free row: the pile keeps its tooltip
     rows[r].push(L); L.t.attr("y", ROW0 + r * ROWH);
   } }
 // upstream-only entries as seeds in the bedrock
@@ -424,7 +451,7 @@ nodeSel.each(function(d){
   else if (n.ph){
     const fv = famVar(n), r = phR(n);
     g.append("circle").attr("r", r).attr("class", "phantom").style("stroke", fv);
-    g.append("circle").attr("r", 1.8).attr("class", "bud-dot st-" + (n.st || "none")); }
+    g.append("text").attr("class", "ph-n").attr("y", 4).attr("text-anchor", "middle").text("+" + (n.ph.gain || 0)); }
   else if (isOP(n)){ g.append("circle").attr("r", 13).attr("class", "halo"); g.append("path").attr("class", "star").attr("d", "M" + STAR(7.5).join("L") + "Z"); }
   else {
     const fv = famVar(n);
@@ -434,6 +461,8 @@ nodeSel.each(function(d){
   }
   g.append("circle").attr("r", d.up ? 14 : 9).attr("class", "hit");
 });
+
+nodeSel.filter(d => d.data.node.ph).raise();   // connectors sit above everything else
 
 // labels: sized in screen pixels, tried at four spots around the node, never over a knot or another label
 const lblG = view.append("g");
@@ -511,7 +540,7 @@ function light(set, extra){
   svg.classed("focus", !!set); litSet = set && set.size ? set : null; placeLabels();
   nodeSel.classed("on", d => on(d.id));
   branchSel.classed("on", e => on(e.t.id) && (!e.s || on(e.s.id)));
-  shootSel.classed("on", e => on(e.t.id) && (!e.s || on(e.s.id)));
+  shootSel.classed("on", e => on(e.t.id) && (!e.s || on(e.s.id))).attr("d", e => shootD(e, !!set));
   leafSel.classed("on", f => on(f.d.id));
   pileSel.classed("on", p => extra === "pile:" + p.a);
   seedbed.classed("on", extra === "seedbed");
@@ -601,7 +630,7 @@ function defaultPanel(){
   folio.innerHTML = `
     <h2>How to read the tree</h2>
     <div class="legend">
-      <div>${glyph("ghost")}<span><b>The map</b>, in pale wood, is docs/taxonomy.toml: the tools as roots (probability in its branches, statistics), positions and markets as the trunk, and three limbs, one for each question asked of a position (choice, valuation, risk). A node's place on it is a reading, not a proof.</span></div>
+      <div>${glyph("ghost")}<span><b>The map</b>, in pale wood, is docs/taxonomy.toml: the tools as roots (probability in its branches, statistics), positions and markets as the trunk, and three limbs, one for each question asked of a position (choice, valuation, risk). Each limb's wood ends at its highest measured node. A node's place on it is a reading, not a proof.</span></div>
       <div>${glyph("fam")}<span><b>Colour</b> is the model family, the same hue in every limb; a node in wood colour is general theory. A <b>joint</b> sits in the fork between the two limbs its statement joins.</span></div>
       <div>${glyph("hop")}<span><b>Height is measured</b>: on a limb a node sits at its hop, its distance in statements from the trunk (the metric of <code>chain_reach</code>). Probability tools stay in the roots.</span></div>
       <div>${glyph("island")}<span><b>Islands</b>: nodes at infinite distance float beside their limb under their cluster's name; a red ring means no connector reaches it and no standalone reason is declared.</span></div>
