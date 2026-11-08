@@ -755,6 +755,31 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. supermartingale_snell (MathFin/Models/Binomial/PathMeasure.lean): at every time the frozen pathwise envelope agrees almost surely with the library's snellEnvelope (snell_ae_eq_snellEnvelope, and past the horizon snellEnvelope_after_horizon), which is a supermartingale (snellEnvelope_supermartingale, Probability/Discrete/SnellEnvelope.lean); adaptedness and integrability come from the envelope depending only on the first k flips. The freezing at the horizon is needed because past it the pathwise snell is the payoff again. The payoff must be adapted to the flips (PathAdaptedAt); no-arbitrage is not assumed. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-binomial-market-pricing-measure",
+      "name": "The Risk-Neutral Coin Flips Are a Pricing Measure of the Binomial Market, and Price a European Payoff at Its Tree Price",
+      "domain": "mathematical_finance",
+      "description": "The binomial tree with step h >= 0 is a Market (Binomial.market): coin-flip paths, the information of the flips made by time t (the flip filtration along the step count floor(t/h)), the spot after those flips as the traded asset, and the money market e^(rho n) after n steps as numeraire. Under no arbitrage (BinomialNoArb u d rho), the law of i.i.d. flips that go up with probability q = crrUpProb u d rho, taken here also as the physical law, is a pricing measure of this market at every horizon T (Market.IsPricingMeasure: the deflated spot frozen at T is a martingale), and the market's price (Market.price) of a cash flow at T, on step N (T / h = N), paying g of the spot at T, is the backward-induction tree price binomialPrice u d rho g N S_0. The general theorem takes any physical law equivalent to the risk-neutral one on the whole path space; this entry instantiates it at the risk-neutral law itself.",
+      "code": {
+        "lean": "import MathFin.Models.Binomial.Market\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.Contracts.Binomial\n\n/-- Under no-arbitrage the risk-neutral law of the flips is a pricing measure of the binomial\nmarket, and in it a European payoff on step `N` is priced at its backward-induction tree price. -/\ntheorem binomial_market_pricing_measure {S₀ u d ρ h : ℝ} {q : ℝ≥0} (hq : q ≤ 1)\n    (hna : BinomialNoArb u d ρ) (hqcrr : crrUpProb u d ρ = q) (hh : 0 ≤ h) (T : ℝ≥0) {N : ℕ}\n    (hTN : (T : ℝ) / h = N) {a : Payoff Unit} {g : ℝ → ℝ}\n    (hg : ∀ s : Scenario Unit, a.eval s = g (s () T)) :\n    (market (coinFlipMeasure q hq) S₀ u d ρ hh).IsPricingMeasure T (coinFlipMeasure q hq) ∧\n      (market (coinFlipMeasure q hq) S₀ u d ρ hh).price (coinFlipMeasure q hq) (.pay T a)\n        = binomialPrice u d ρ g N S₀ :=\n  ⟨isPricingMeasure_coinFlipMeasure hq hna hqcrr S₀ hh ⟨inferInstance, .rfl, .rfl⟩ T,\n    price_market_pay_eq_binomialPrice hq hqcrr _ S₀ hh hTN hg⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cox, Ross and Rubinstein, Option pricing: a simplified approach (1979); Shreve, Stochastic Calculus for Finance I, ch. 2",
+        "citations": [
+          {
+            "key": "CoxRossRubinstein1979"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "ch. 2"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. isPricingMeasure_coinFlipMeasure and price_market_pay_eq_binomialPrice in MathFin/Models/Binomial/Market.lean: the deflated spot of Binomial.market is the discounted spot after floor(t/h) steps (deflated_market), a martingale for the flip filtration under the risk-neutral coin flips (martingale_discountedSpot), hence for its time change along the step count (Martingale.comp, MathFin/Probability/Martingales/TimeChange.lean), and frozen at T (IsEMM.of_martingale); on grid dates the deflator e^(-rho floor(t/h)) is the binomial discount, so the price is Contract.value under the binomial model (price_market), which value_pay_eq_binomialPrice evaluates. SCOPE: IsPricingMeasure asks for equivalence to the physical law on the whole path space, and the entry takes the physical law to be the risk-neutral one; a physical law of i.i.d. flips with another up-probability is not covered. Axioms-clean."
+      }
     }
   ]
 }
