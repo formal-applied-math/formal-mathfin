@@ -703,13 +703,6 @@ uses = ["def:pricing-functional", "thm:esscher-emm-levy", "thm:jump-diffusion-mi
 area = "black-scholes"
 
 [[node]]
-label = "thm:superhedging-coherent"
-title = "The superhedging price is a coherent risk measure"
-statement = "On a finite space the superreplication price of a loss is a coherent risk measure, bounded below by its price under every pricing measure, with equality to the supremum once finitely generated cones are closed."
-uses = ["def:pricing-functional", "def:coherent-risk-measure"]
-area = "risk"
-
-[[node]]
 label = "thm:sdf-capm-hansen-jagannathan"
 title = "CAPM and Hansen–Jagannathan from the discount factor"
 statement = "A stochastic discount factor affine in the market return yields the CAPM security market line, and Cauchy–Schwarz on state prices bounds every Sharpe ratio by σ(m)/E[m]."
