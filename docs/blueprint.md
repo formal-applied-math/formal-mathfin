@@ -186,6 +186,7 @@ graph TD
     lifeInsuranceEpv["Life annuity and insurance EPV"]:::frontier
     lundbergRuinBound["Lundberg ruin bound"]:::frontier
     panjerRecursion["Panjer recursion"]:::frontier
+    premiumIsPrice["Insurance premiums are prices"]:::frontier
     survivalModel["Survival model and life tables"]:::frontier
     thieleReserve["Thiele reserve"]:::frontier
   end
@@ -195,9 +196,11 @@ graph TD
   end
   subgraph frontier_blackScholes["⏳ frontier · black-scholes"]
     barrierLookbackClosedForms["Barrier and lookback closed forms"]:::frontier
+    bsArbitrageFreePrice["The Black–Scholes price is the arbitrage-free price"]:::frontier
     carrLeeMoment["Carr–Lee moment formula"]:::frontier
     forwardStartCall["Forward-start call"]:::frontier
     impliedVolExistence["Implied volatility for every arbitrage-free price"]:::frontier
+    jumpDiffusionPrice["Jump-diffusion prices under the Esscher pricing measure"]:::frontier
     kouJumpDiffusion["Kou double-exponential jump-diffusion"]:::frontier
     margrabeNumeraire["Margrabe and chooser via the S²-numéraire"]:::frontier
     mertonPide["Merton PIDE"]:::frontier
@@ -207,6 +210,7 @@ graph TD
   end
   subgraph frontier_credit["⏳ frontier · credit"]
     blackCoxDefault["Black–Cox first-passage default"]:::frontier
+    cvaIsPrice["CVA is the price of the default loss"]:::frontier
     largePoolLoss["Large homogeneous pool loss law"]:::frontier
     mertonCreditSpread["Merton structural credit spread"]:::frontier
     oneFactorCopulaDefault["One-factor Gaussian copula default"]:::frontier
@@ -217,8 +221,10 @@ graph TD
     balancerInvariant["Balancer constant-mean AMM"]:::frontier
     compoundExchangeRateBridge["Compound's exchange rate as a money-market account"]:::frontier
     liquidationFirstPassage["Liquidation before maturity as first passage"]:::frontier
+    lpPositionPrice["An AMM liquidity position is a contract"]:::frontier
   end
   subgraph frontier_execution["⏳ frontier · execution"]
+    glostenMilgromPricingMeasure["The Glosten–Milgrom quote process is a martingale"]:::frontier
     kyleEquilibrium["Kyle single-period equilibrium"]:::frontier
   end
   subgraph frontier_fixedIncome["⏳ frontier · fixed-income"]
@@ -234,8 +240,10 @@ graph TD
     hjmMusiela["HJM Musiela parametrization"]:::frontier
     hjmShortRate["HJM induces a short-rate model"]:::frontier
     lmmForwardMartingale["LIBOR market model forward martingale"]:::frontier
+    zeroCouponBondPrice["The zero-coupon bond price is a price"]:::frontier
   end
   subgraph frontier_foundations["⏳ frontier · foundations"]
+    pricingFunctional["The pricing functional"]:::frontier
     realErf["erf / erfc / erfinv for Mathlib"]:::frontier
     bracketQuadraticVariation["Bracket is the quadratic variation of an Itô integral"]:::frontier
     brownianNowhereDifferentiable["Brownian paths are nowhere differentiable"]:::frontier
@@ -275,16 +283,20 @@ graph TD
     mertonPortfolioFraction["Merton myopic risky fraction"]:::frontier
     purgedCvIndependence["Purged cross-validation: σ-algebra independence"]:::frontier
     riskParityNAsset["N-asset risk parity exists and is unique"]:::frontier
+    sdfCapmHansenJagannathan["CAPM and Hansen–Jagannathan from the discount factor"]:::frontier
     timeInconsistentEquilibrium["Relaxed equilibria under time inconsistency"]:::frontier
+    utilityStatePriceDensity["Marginal utility is a state-price density"]:::frontier
     varianceOptimalHedging["Variance-optimal hedging"]:::frontier
   end
   subgraph frontier_risk["⏳ frontier · risk"]
+    expectedShortfallDualSet["Expected shortfall's representing set"]:::frontier
     expectedUtilityRiskAversion["Expected utility and risk aversion"]:::frontier
     glivenkoCantelli["Glivenko–Cantelli theorem"]:::frontier
     kusuoka["Kusuoka representation"]:::frontier
     quantileConvergenceInDistribution["Quantiles under convergence in distribution"]:::frontier
     riskMeasureFamilies["Entropic, distortion and expectile risk measures"]:::frontier
     sklarGeneral["Sklar's theorem for arbitrary margins"]:::frontier
+    superhedgingCoherent["The superhedging price is a coherent risk measure"]:::frontier
   end
   subgraph frontier_stochVol["⏳ frontier · stoch-vol"]
     batesCf["Bates characteristic function"]:::frontier
@@ -500,6 +512,11 @@ graph TD
   brownianMotion --> pricingMeasure
   itoIntegralClm --> pricingMeasure
   marketCompleteness --> pricingMeasure
+  emm --> pricingFunctional
+  contractValue --> pricingFunctional
+  numeraireMeasure --> pricingFunctional
+  pricingMeasure --> pricingFunctional
+  marketCompleteness --> pricingFunctional
   standardNormalCdf --> realErf
   aaveLiquidationKmv --> aaveHealthFactorBound
   vasicekBondPde --> affineTermStructure
@@ -519,6 +536,11 @@ graph TD
   quadraticVariation --> bracketQuadraticVariation
   itoIntegralMartingale --> bracketQuadraticVariation
   brownianMotion --> brownianNowhereDifferentiable
+  pricingFunctional --> bsArbitrageFreePrice
+  bsCall --> bsArbitrageFreePrice
+  physicalMeasurePricing --> bsArbitrageFreePrice
+  marketCompleteness --> bsArbitrageFreePrice
+  bsSelfFinancing --> bsArbitrageFreePrice
   bsCall --> carrLeeMoment
   bsCall --> cevCall
   affineTermStructure --> cirBondLoadings
@@ -526,6 +548,8 @@ graph TD
   numeraireMeasure --> cmsConvexityAdjustment
   zeroCouponBond --> compoundExchangeRateBridge
   compoundPoissonMgf --> cramerLundbergClaims
+  pricingFunctional --> cvaIsPrice
+  unilateralCva --> cvaIsPrice
   noArbitrageLocal --> dmwFtap
   emmDensityPasting --> dmwFtap
   bsPde --> dupireLocalVol
@@ -533,6 +557,9 @@ graph TD
   dupireZeroRates --> dupireLocalVol
   esscherTilt --> esscherEmmLevy
   jumpDiffusionLaw --> esscherEmmLevy
+  expectedShortfallCoherent --> expectedShortfallDualSet
+  expectedShortfall --> expectedShortfallDualSet
+  coherentRiskMeasure --> expectedShortfallDualSet
   feynmanKacHeatEq --> feynmanKacVariableCoefficient
   sdeContinuousSolution --> feynmanKacVariableCoefficient
   itoFormulaTdL2 --> feynmanKacVariableCoefficient
@@ -543,6 +570,8 @@ graph TD
   itoFormulaTdL2 --> girsanovContinuousEmm
   esscherTilt --> girsanovContinuousEmm
   empiricalCdfStrongLaw --> glivenkoCantelli
+  glostenMilgromQuote --> glostenMilgromPricingMeasure
+  pricingFunctional --> glostenMilgromPricingMeasure
   hestonPde --> hestonCf
   hjmDriftCondition --> hjmAffineModels
   affineTermStructure --> hjmAffineModels
@@ -565,6 +594,10 @@ graph TD
   itoFormulaL2 --> itoLevyFormula
   itoIntegralClm --> itoLevyFormula
   compoundPoissonMgf --> jumpDiffusionLaw
+  pricingFunctional --> jumpDiffusionPrice
+  esscherEmmLevy --> jumpDiffusionPrice
+  jumpDiffusionMixing --> jumpDiffusionPrice
+  mertonRiskNeutralDrift --> jumpDiffusionPrice
   jumpDiffusionLaw --> kouJumpDiffusion
   bsCall --> kouJumpDiffusion
   expectedShortfallCoherent --> kusuoka
@@ -581,6 +614,8 @@ graph TD
   numeraireMeasure --> lmmForwardMartingale
   numeraireMeasure --> logOptimalNumeraire
   continuousFtap --> logOptimalNumeraire
+  pricingFunctional --> lpPositionPrice
+  uniswapV3CoveredCall --> lpPositionPrice
   cramerLundbergClaims --> lundbergRuinBound
   compoundPoissonMgf --> lundbergRuinBound
   margrabe --> margrabeNumeraire
@@ -601,6 +636,9 @@ graph TD
   snellEnvelope --> perpetualAmerican
   bsPde --> perpetualAmerican
   markovPathLaw --> perronFrobeniusMarkov
+  pricingFunctional --> premiumIsPrice
+  survivalFunction --> premiumIsPrice
+  esscherTilt --> premiumIsPrice
   brownianMotion --> purgedCvIndependence
   quantile --> quantileConvergenceInDistribution
   brownianMotion --> reflectionPrinciple
@@ -610,6 +648,9 @@ graph TD
   bsCall --> sabrHagan
   modelFreeVariance --> schrodingerSpxVix
   sdeStrongSolution --> sdeContinuousSolution
+  utilityStatePriceDensity --> sdfCapmHansenJagannathan
+  capmEquilibrium --> sdfCapmHansenJagannathan
+  sharpeRatio --> sdfCapmHansenJagannathan
   marketCompleteness --> secondFtapConverse
   pricingMeasure --> secondFtapConverse
   dmwFtap --> semistaticFtap
@@ -621,15 +662,21 @@ graph TD
   brownianMotion --> stefanUniqueness
   stochasticFubini --> stochasticFubiniLevy
   stochasticFubini --> stochasticFubiniProcess
+  pricingFunctional --> superhedgingCoherent
+  coherentRiskMeasure --> superhedgingCoherent
   survivalFunction --> survivalModel
   survivalModel --> thieleReserve
   survivalFunction --> thieleReserve
   sdeStrongSolution --> timeInconsistentEquilibrium
   margrabe --> twoAssetOptionFormulas
   bsCall --> twoAssetOptionFormulas
+  pricingFunctional --> utilityStatePriceDensity
+  kellyFraction --> utilityStatePriceDensity
   bsCall --> varianceGammaCall
   martingaleTransform --> varianceOptimalHedging
   emm --> varianceOptimalHedging
+  pricingFunctional --> zeroCouponBondPrice
+  zeroCouponBond --> zeroCouponBondPrice
 
   classDef proved fill:#d4edda,stroke:#28a745,color:#111;
   classDef upstream fill:#d9e8f6,stroke:#1f6fb2,color:#111;
@@ -753,6 +800,7 @@ graph TD
 | `thm:market-completeness` Completeness of the Brownian market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarket-completeness%22%20in%3Abody) |
 | `thm:martingale-representation-process` Martingale representation (process form) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amartingale-representation-process%22%20in%3Abody) |
 | `thm:pricing-measure` The pricing measure on 𝓕ᴮ_T is unique | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Apricing-measure%22%20in%3Abody) |
+| `def:pricing-functional` The pricing functional | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Apricing-functional%22%20in%3Abody) |
 | `def:real-erf` erf / erfc / erfinv for Mathlib | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Areal-erf%22%20in%3Abody) |
 | `thm:aave-health-factor-bound` Aave multi-asset health factor: a liquidation bound | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaave-health-factor-bound%22%20in%3Abody) |
 | `thm:affine-term-structure` Affine term structure | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaffine-term-structure%22%20in%3Abody) |
@@ -766,6 +814,7 @@ graph TD
 | `thm:black-cox-default` Black–Cox first-passage default | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ablack-cox-default%22%20in%3Abody) |
 | `thm:bracket-quadratic-variation` Bracket is the quadratic variation of an Itô integral | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abracket-quadratic-variation%22%20in%3Abody) |
 | `thm:brownian-nowhere-differentiable` Brownian paths are nowhere differentiable | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abrownian-nowhere-differentiable%22%20in%3Abody) |
+| `thm:bs-arbitrage-free-price` The Black–Scholes price is the arbitrage-free price | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-arbitrage-free-price%22%20in%3Abody) |
 | `thm:buhlmann-credibility` Bühlmann credibility | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abuhlmann-credibility%22%20in%3Abody) |
 | `thm:carr-lee-moment` Carr–Lee moment formula | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acarr-lee-moment%22%20in%3Abody) |
 | `thm:cev-call` CEV European call | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acev-call%22%20in%3Abody) |
@@ -775,9 +824,11 @@ graph TD
 | `thm:compensated-poisson-integral` Compensated-Poisson integral | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acompensated-poisson-integral%22%20in%3Abody) |
 | `thm:compound-exchange-rate-bridge` Compound's exchange rate as a money-market account | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acompound-exchange-rate-bridge%22%20in%3Abody) |
 | `thm:cramer-lundberg-claims` Cramér–Lundberg claims | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acramer-lundberg-claims%22%20in%3Abody) |
+| `thm:cva-is-price` CVA is the price of the default loss | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acva-is-price%22%20in%3Abody) |
 | `thm:dmw-ftap` Dalang–Morton–Willinger FTAP | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Admw-ftap%22%20in%3Abody) |
 | `thm:dupire-local-vol` Dupire local volatility | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Adupire-local-vol%22%20in%3Abody) |
 | `thm:esscher-emm-levy` Esscher EMM for exponential-Lévy markets | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aesscher-emm-levy%22%20in%3Abody) |
+| `thm:expected-shortfall-dual-set` Expected shortfall's representing set | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-shortfall-dual-set%22%20in%3Abody) |
 | `thm:expected-utility-risk-aversion` Expected utility and risk aversion | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-utility-risk-aversion%22%20in%3Abody) |
 | `thm:feynman-kac-variable-coefficient` Variable-coefficient Feynman–Kac | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Afeynman-kac-variable-coefficient%22%20in%3Abody) |
 | `thm:forward-start-call` Forward-start call | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aforward-start-call%22%20in%3Abody) |
@@ -785,6 +836,7 @@ graph TD
 | `thm:futures-forward-convexity` Futures–forward convexity adjustment | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Afutures-forward-convexity%22%20in%3Abody) |
 | `thm:girsanov-continuous-emm` Girsanov EMM from the Itô tower | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Agirsanov-continuous-emm%22%20in%3Abody) |
 | `thm:glivenko-cantelli` Glivenko–Cantelli theorem | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aglivenko-cantelli%22%20in%3Abody) |
+| `thm:glosten-milgrom-pricing-measure` The Glosten–Milgrom quote process is a martingale | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aglosten-milgrom-pricing-measure%22%20in%3Abody) |
 | `thm:heston-cf` Heston characteristic function | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aheston-cf%22%20in%3Abody) |
 | `thm:hjm-affine-models` HJM recovers Ho–Lee and Vasicek | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ahjm-affine-models%22%20in%3Abody) |
 | `thm:hjm-bond-dynamics` HJM bond-price dynamics | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ahjm-bond-dynamics%22%20in%3Abody) |
@@ -797,6 +849,7 @@ graph TD
 | `thm:ito-integral-martingale` General-integrand Itô process is a martingale | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-integral-martingale%22%20in%3Abody) |
 | `thm:ito-levy-formula` Itô–Lévy change of variables | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-levy-formula%22%20in%3Abody) |
 | `thm:jump-diffusion-law` Compound-Poisson and jump-diffusion law | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ajump-diffusion-law%22%20in%3Abody) |
+| `thm:jump-diffusion-price` Jump-diffusion prices under the Esscher pricing measure | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ajump-diffusion-price%22%20in%3Abody) |
 | `thm:kou-jump-diffusion` Kou double-exponential jump-diffusion | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Akou-jump-diffusion%22%20in%3Abody) |
 | `thm:kusuoka` Kusuoka representation | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Akusuoka%22%20in%3Abody) |
 | `thm:kyle-equilibrium` Kyle single-period equilibrium | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Akyle-equilibrium%22%20in%3Abody) |
@@ -806,6 +859,7 @@ graph TD
 | `thm:liquidation-first-passage` Liquidation before maturity as first passage | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aliquidation-first-passage%22%20in%3Abody) |
 | `thm:lmm-forward-martingale` LIBOR market model forward martingale | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Almm-forward-martingale%22%20in%3Abody) |
 | `thm:log-optimal-numeraire` Log-optimal portfolio is the numéraire | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alog-optimal-numeraire%22%20in%3Abody) |
+| `thm:lp-position-price` An AMM liquidity position is a contract | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alp-position-price%22%20in%3Abody) |
 | `thm:lundberg-ruin-bound` Lundberg ruin bound | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alundberg-ruin-bound%22%20in%3Abody) |
 | `thm:margrabe-numeraire` Margrabe and chooser via the S²-numéraire | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amargrabe-numeraire%22%20in%3Abody) |
 | `thm:markowitz-kkt-necessity` Markowitz first-order conditions are necessary | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarkowitz-kkt-necessity%22%20in%3Abody) |
@@ -820,6 +874,7 @@ graph TD
 | `thm:perpetual-american` Perpetual American option | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aperpetual-american%22%20in%3Abody) |
 | `thm:perron-frobenius-markov` Perron–Frobenius and finite Markov chain ergodicity | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aperron-frobenius-markov%22%20in%3Abody) |
 | `thm:poisson-interarrival-iid` Poisson interarrivals are iid exponential | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Apoisson-interarrival-iid%22%20in%3Abody) |
+| `thm:premium-is-price` Insurance premiums are prices | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Apremium-is-price%22%20in%3Abody) |
 | `thm:propagator-no-arbitrage` Transient-impact propagator no-arbitrage | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Apropagator-no-arbitrage%22%20in%3Abody) |
 | `thm:purged-cv-independence` Purged cross-validation: σ-algebra independence | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Apurged-cv-independence%22%20in%3Abody) |
 | `thm:quantile-convergence-in-distribution` Quantiles under convergence in distribution | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aquantile-convergence-in-distribution%22%20in%3Abody) |
@@ -830,6 +885,7 @@ graph TD
 | `thm:sabr-hagan` SABR Hagan asymptotic implied vol | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asabr-hagan%22%20in%3Abody) |
 | `thm:schrodinger-spx-vix` Schrödinger calibration of SPX/VIX | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aschrodinger-spx-vix%22%20in%3Abody) |
 | `thm:sde-continuous-solution` Continuous strong solutions on every horizon | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asde-continuous-solution%22%20in%3Abody) |
+| `thm:sdf-capm-hansen-jagannathan` CAPM and Hansen–Jagannathan from the discount factor | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asdf-capm-hansen-jagannathan%22%20in%3Abody) |
 | `thm:second-ftap-converse` Second FTAP: uniqueness implies completeness | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asecond-ftap-converse%22%20in%3Abody) |
 | `thm:semistatic-ftap` Semistatic FTAP with entropy | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asemistatic-ftap%22%20in%3Abody) |
 | `thm:siegel-paradox` Siegel's paradox | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asiegel-paradox%22%20in%3Abody) |
@@ -838,12 +894,15 @@ graph TD
 | `thm:stefan-uniqueness` Stefan uniqueness with accumulating jumps | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astefan-uniqueness%22%20in%3Abody) |
 | `thm:stochastic-fubini-levy` Stochastic Fubini for Itô–Lévy integrals | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astochastic-fubini-levy%22%20in%3Abody) |
 | `thm:stochastic-fubini-process` Stochastic Fubini for the integral process | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astochastic-fubini-process%22%20in%3Abody) |
+| `thm:superhedging-coherent` The superhedging price is a coherent risk measure | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-coherent%22%20in%3Abody) |
 | `thm:survival-model` Survival model and life tables | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asurvival-model%22%20in%3Abody) |
 | `thm:thiele-reserve` Thiele reserve | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Athiele-reserve%22%20in%3Abody) |
 | `thm:time-inconsistent-equilibrium` Relaxed equilibria under time inconsistency | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atime-inconsistent-equilibrium%22%20in%3Abody) |
 | `thm:two-asset-option-formulas` Stulz and Heynen–Kat two-asset formulas | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atwo-asset-option-formulas%22%20in%3Abody) |
+| `thm:utility-state-price-density` Marginal utility is a state-price density | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Autility-state-price-density%22%20in%3Abody) |
 | `thm:variance-gamma-call` Variance-gamma European call | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-gamma-call%22%20in%3Abody) |
 | `thm:variance-optimal-hedging` Variance-optimal hedging | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-optimal-hedging%22%20in%3Abody) |
+| `thm:zero-coupon-bond-price` The zero-coupon bond price is a price | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Azero-coupon-bond-price%22%20in%3Abody) |
 <!-- END GENERATED SPINE -->
 
 ---

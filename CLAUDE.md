@@ -97,7 +97,8 @@ searches it, `decl_diff.py` diffs two of them (renames, changed statements — p
 PR's run summary), `decl_index.py report` lists duplicate statements and Mathlib-shaped
 private lemmas. `ratchet.json` holds one baseline per debt count (heartbeat bumps,
 whole-`Mathlib` imports, long files, nolints, doc-section coverage, and the index's
-duplicates and Mathlib-shaped privates): `tests/test_ratchet.py` and `build.yml` fail when a
+duplicates and Mathlib-shaped privates, and the one-trunk counts of `tools/verify/trunk_reach.py`,
+whose table is `tools/verify/trunk.toml`): `tests/test_ratchet.py` and `build.yml` fail when a
 count rises; `python3 -m tools.verify.ratchet update` lowers a baseline and never raises one.
 **One doc standard** (`tools/verify/doc_standard.py`, gated in `test_values`): every module
 docstring has Mathlib's layout — `# Title`, `## Main definitions` / `## Main results`,

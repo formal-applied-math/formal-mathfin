@@ -197,16 +197,20 @@ that consumes it. `Probability/` is also the staging ground for upstream work: w
 Mathlib-shaped (the L0 commons of [`program-architecture.md`](../program-architecture.md)), and the
 upstream ledger ages it.
 
-**I5. The measurements are gated.** A ratchet in `ratchet.json` tracks each of the following, and
-each falls to its target:
+**I5. The measurements are gated.** `tools/verify/trunk_reach.py` computes four counts from the
+declaration index and the table in `tools/verify/trunk.toml`. The table lists the trunk anchors,
+the price definitions, the parallel devices and the duplicate groups; it is the one judgment the
+counts need. Each count is a ratchet in `ratchet.json`, checked in `build.yml`, and falls to zero:
 
-| count | now | target |
+| count | 2026-11-08 | what it counts |
 |---|---|---|
-| corpus entries resting on a price-carrying limb node with no path to the trunk | ~250 (per-node classification pending) | 0 |
-| parallel pricing devices not proved to be instances of the functional | 4 | 0 |
-| price-named definitions not defined through the functional | ~30 | 0 |
-| concept duplicates with no equality theorem (bond price, discount, survival, portfolio variance) | ~15 | 0 |
-| imports against the layer direction | not yet measured | 0 |
+| `prices_off_trunk` | 41 | price definitions whose definition does not reach the pricing functional |
+| `price_entries_off_trunk` | 171 | corpus entries whose proof reaches a price definition but not the functional |
+| `pricing_devices_unbridged` | 5 | parallel pricing devices with no proved instance theorem (`Contracts.bondPrice`, a conditional price, is the fifth) |
+| `concept_duplicates` | 9 | encodings of one concept with no theorem tying them to the canonical one |
+
+A fifth count, imports against the layer direction, starts with the move (Phase 1), as part of
+the rewritten `tests/test_architecture.py`.
 
 ## 4. The trunk, concretely
 
@@ -383,9 +387,8 @@ devices. No `Bridges/` directory is recreated.
 **Phase 0: instruments (1 PR).**
 
 - This spec, revised to the maintainer's decisions.
-- `tools/verify/trunk_reach.py`, which reads the declaration index and the blueprint export and
-  computes the five §3 counts. The per-node class (price-carrying, law functional, algebra) is a
-  short reviewed table; this is the one judgment the gate needs.
+- `tools/verify/trunk_reach.py` and its table `tools/verify/trunk.toml`, computing the four §3 I5
+  counts from the declaration index.
 - The counts enter `ratchet.json` as baselines, so they may not rise from here.
 - The blueprint frontier gains one node per hinge in §5, each with its issue and `Blueprint:` line
   (the blueprint–issues rule).
