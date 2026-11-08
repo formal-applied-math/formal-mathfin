@@ -240,6 +240,7 @@ details.tableview summary { cursor: pointer; color: var(--ink-2); }
 .t-panel p { margin: 0; }
 .t-panel .stmt { font-family: var(--serif); }
 .t-panel .stmt code { font: 0.8em var(--mono); background: var(--raised); padding: 0 3px; border-radius: 3px; }
+.t-tools button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
 .t-tools .t-zoom { display: inline-flex; }
 .t-tools .t-zoom button { width: 30px; padding: 3px 0; }
 .t-tools .t-zoom button:first-child { border-radius: 6px 0 0 6px; }

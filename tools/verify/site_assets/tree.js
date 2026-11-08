@@ -238,7 +238,7 @@ for (const L of areaLbls){
 }
 
 // leaves: one per corpus entry resting on the node
-const leafG = view.append("g");
+const leafG = view.append("g").attr("display", "none");
 const LEAF = "M0,0 C2.2,-2.6 5.6,-2.6 8,0 C5.6,2.6 2.2,2.6 0,0Z";
 const leafData = [];
 for (const d of byId.values()){
@@ -298,7 +298,7 @@ const nodeSel = nodeG.selectAll("g").data(nodeData).join("g").attr("class", "nd 
 nodeSel.each(function(d){
   const g = d3.select(this), n = d.data.node;
   if (d.up){ g.append("ellipse").attr("rx", 11).attr("ry", 6.5).attr("class", "knot"); cap(g.append("text").attr("class", "stratum-sub").attr("x", 18).attr("y", 5).text(n.t), 16); }
-  else if (isWood(n)){ g.append("circle").attr("r", 2.4 + Math.min(3.6, Math.sqrt(n.e) * .55)).attr("class", "knot" + (n.s === "partial" ? " partial" : "")); }
+  else if (isWood(n)){ g.append("circle").attr("r", 2.6 + Math.min(6.4, Math.sqrt(n.e) * 1.05)).attr("class", "knot" + (n.s === "partial" ? " partial" : "")); }
   else if (isOP(n)){ g.append("circle").attr("r", 13).attr("class", "halo"); g.append("path").attr("class", "star").attr("d", "M" + STAR(7.5).join("L") + "Z"); }
   else {
     g.append("circle").attr("r", 4.6).attr("class", "bud");
@@ -319,7 +319,7 @@ const lblData = nodeData.filter(d => !d.up).map(d => {
 });
 const lblSel = lblG.selectAll("text").data(lblData).join("text")
   .attr("class", L => "lbl dimmable" + (isOP(L.n) ? " op" : !isWood(L.n) ? " fr" : ""));
-const glyphR = d => { const n = d.data.node; return isWood(n) ? 2.4 + Math.min(3.6, Math.sqrt(n.e) * .55) : isOP(n) ? 8 : 4.6; };
+const glyphR = d => { const n = d.data.node; return isWood(n) ? 2.6 + Math.min(6.4, Math.sqrt(n.e) * 1.05) : isOP(n) ? 8 : 4.6; };
 let curK = 1, litSet = null;
 function placeLabels(k = curK, set = litSet){
   curK = k;
@@ -459,8 +459,8 @@ function defaultPanel(){
   folio.innerHTML = `
     <h2>How to read the tree</h2>
     <div class="legend">
-      <div>${glyph("knot")}<span><b>Wood and knots</b>: proved blueprint nodes. Height is conceptual depth: a node sits above everything it rests on, with Foundations as the trunk. Every use is drawn, and wood thickens with the corpus it carries.</span></div>
-      <div>${glyph("leaf")}<span><b>Leaves</b>: corpus entries, hung on the deepest node their proof rests on.</span></div>
+      <div>${glyph("knot")}<span><b>Wood and knots</b>: proved blueprint nodes; a knot's size counts the corpus entries resting deepest on it. Height is conceptual depth: a node sits above everything it rests on, with Foundations as the trunk. Every use is drawn, and wood thickens with the corpus it carries.</span></div>
+      <div>${glyph("leaf")}<span><b>Leaves</b> (the Leaves button): the same corpus entries drawn one by one, hung on the deepest node their proof rests on.</span></div>
       <div>${glyph("bud")}<span><b>Blueprint shoots and buds</b>: frontier nodes. The bud's centre shows the state of its issue.</span></div>
       <div>${glyph("core")}<span><b>Half-filled bud</b>: a frontier node whose core is already proved in the corpus.</span></div>
       <div>${glyph("star")}<span><b>Stars</b>: frontier nodes carried by an open-problem issue.</span></div>
@@ -501,6 +501,11 @@ q.addEventListener("input", () => { if (selected) return; const m = matches(q.va
   if (!q.value.trim()) return light(null); light(new Set(m.map(n => n.l))); });
 q.addEventListener("keydown", e => { if (e.key !== "Enter") return; const m = matches(q.value); if (!m.length) return;
   m.sort((a, b) => (b.s !== "frontier") - (a.s !== "frontier")); select(m[0].l); const d = byId.get(m[0].l); if (d) focusOn(d); });
+
+// ---------- leaves on demand ----------
+const leavesBtn = document.getElementById("t-leaves");
+leavesBtn.onclick = () => { const on = leavesBtn.getAttribute("aria-pressed") !== "true";
+  leavesBtn.setAttribute("aria-pressed", on); leafG.attr("display", on ? null : "none"); };
 
 // ---------- growth ----------
 const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
