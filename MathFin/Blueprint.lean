@@ -18,6 +18,7 @@ import MathFin.Insurance.SurvivalModel
 import MathFin.Markets.DeFi.LiquidationAsStructuralDefault
 import MathFin.Markets.DeFi.UniswapMechanics
 import MathFin.Markets.Microstructure.GlostenMilgromCondExp
+import MathFin.Markets.Microstructure.GlostenMilgromMarket
 import MathFin.Models.Bachelier.Bachelier
 import MathFin.Models.Binomial.CRRClosedForm
 import MathFin.Models.Binomial.MartingaleRepresentation
@@ -397,8 +398,8 @@ attribute [blueprint "def:gaussian-factor-copula"
   (title := "One-factor Gaussian copula")
   (statement := /-- The copula on $n$ names of the latent vector $X_i = \rho Z_0 +
   \sqrt{1-\rho^2}\,Z_i$ with independent standard normals; it is a copula for $\rho \in
-  [-1,1]$. -/)]
-  MathFin.gaussianFactorCopula
+  [-1,1]$ (`isCopula_gaussianFactorCopula`, the tagged declaration). -/)]
+  MathFin.isCopula_gaussianFactorCopula
 
 attribute [blueprint "def:copula"
   (title := "Copula")
@@ -954,6 +955,16 @@ attribute [blueprint "thm:glosten-milgrom-quote"
   given the trade direction equals almost everywhere the ask $\int V\,d\mu[\cdot\mid B]$ on
   the buy event and the bid $\int V\,d\mu[\cdot\mid B^c]$ on the sell event. -/)]
   MathFin.Execution.condExp_payoff_eq_quote
+
+attribute [blueprint "thm:conditional-expectation-pricing-measure"
+  (title := "A conditional-expectation process is priced by its own measure")
+  (statement := /-- For a probability measure $P$, a filtration $\mathcal G$ on $\mathbb N$ and
+  an arbitrary value $V$, $P$ is a pricing measure, at every horizon, of the discrete market
+  with unit numéraire whose asset is $n \mapsto \mathbb E_P[V \mid \mathcal G_n]$, because
+  that process is a $P$-martingale and the equivalent martingale measure $P$ of it is a pricing
+  measure. That the Glosten–Milgrom dealer's quotes along a sequence of trades are such
+  conditional expectations is not part of this statement. -/)]
+  MathFin.Execution.isPricingMeasure_toMarket_condExp
 
 -- ===== risk/measures: Risk measures =====
 
