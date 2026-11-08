@@ -24,9 +24,10 @@ horizon-`T` market cannot tell measures apart beyond `𝓕 T`, and on an infinit
 risk-neutral and the physical laws are typically singular (i.i.d. coin flips with two
 up-probabilities, Brownian motions with two drifts) while equivalent on every `𝓕 T`. Nothing is
 lost: a pricing measure agrees on `𝓕 T` with one equivalent to `P` everywhere
-(`IsPricingMeasure.exists_isEquivProbMeasure`), and a measure equivalent everywhere is one on `𝓕 T`
-(`IsPricingMeasure.of_isEquivProbMeasure`). **The price** of a contract under a
-measure `Q` is its value (`Contract.value`) with the deflator `N 0 / N t` on the market's assets:
+(`IsPricingMeasure.exists_isEquivProbMeasure`), and a measure equivalent everywhere under which the
+frozen deflated assets are martingales is a pricing measure
+(`IsPricingMeasure.of_isEquivProbMeasure`). **The price** of a contract under a measure `Q` is its
+value (`Contract.value`) with the deflator `N 0 / N t` on the market's assets:
 
   `price Q c = 𝔼_Q[∑ (N 0 / N tₖ) · cₖ]` over the contract's cash flows `cₖ` at `tₖ`.
 
@@ -53,10 +54,11 @@ given `𝓕 t`, re-expressed at `t` (`priceAt`); deflated to `0`, it averages to
 rates models is the price at `t` of one unit paid at `T`
 (`Contracts.bondPrice_deflator_eq_priceAt`, in `Models/Rates/Caplet.lean`).
 
-Changing the numéraire changes the pricing measure and not the price: the market with numéraire `N`
+Changing the numéraire changes the measure and not the price: the market with numéraire `N`
 in place of `B` prices a payment at `T` under the numéraire measure `Q^N` exactly as the original
 market does under `Q` (`price_pay_withNumeraire`, the change-of-numéraire theorem
-`changeOfNumeraire` read through the price).
+`changeOfNumeraire` read through the price). That `Q^N` is a pricing measure of the new market is
+not proved here.
 
 On a finite sample space the price of a single payment is `statePricePricing` with the state
 prices `q ω = (N 0 / N t)(ω) · Q {ω}` (`price_pay_eq_statePricePricing`), non-negative for every
