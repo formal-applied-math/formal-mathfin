@@ -132,8 +132,9 @@ should *generate work*, not certify "OK").
 
 ## 2026-11-08 — corpus 817, modules 732 — the trunk's first sockets and three dualities, read before they land
 
-Scope: what landed on main since the RiO review (#470, #472, #474, #476), together with
-`v2/choice-utility-state-prices` (#473). There are 13 new corpus entries, from these modules:
+Scope: `v2/choice-utility-state-prices` (#473) with what it brings from main besides #474,
+whose trunk review is recorded separately (#470, #472, #476). There are 13 new corpus entries,
+from these modules:
 - `Pricing/Market` (the price system and the `𝓕 T` glue);
 - `Models/Binomial/Market` (the first socket);
 - `Pricing/DiscreteMarket`;
