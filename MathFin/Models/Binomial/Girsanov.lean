@@ -57,6 +57,8 @@ is just two-state algebra. We make this discrete Girsanov-machinery explicit.
   of the first `n` flips under `Bernoulli(q)` is the law under `Bernoulli(p)` with density
   `∏ᵢ Z(xᵢ)`; `coinFlipMeasure_apply_eq_lintegral` states it on `ℱₙ`, and
   `integral_comp_flips_eq` as `E^Q[F] = E^P[Z_n · F]`.
+* `coinFlipMeasure_trim_equiv`: for `0 < p, q < 1` the two coin-flip laws are equivalent on every
+  `ℱₙ`.
 * `martingale_binomialDensity`: for `0 < p < 1`, the density process `Z_n = ∏_{i<n} Z(ωᵢ)` is a
   `P`-martingale.
 
@@ -211,6 +213,27 @@ theorem map_flips_coinFlipMeasure_equiv (hp0 : 0 < p) (hp : p < 1) (hq0 : 0 < q)
       (ae_of_all _ fun x ↦ prod_pos fun i _ ↦
         binomialRN_pos (NNReal.coe_pos.2 hp0) (NNReal.coe_lt_one.2 hp) (NNReal.coe_pos.2 hq0)
           (NNReal.coe_lt_one.2 hq) (x i))⟩
+
+/-- **The two coin-flip laws are equivalent on the information `ℱₙ`** of the first `n` flips, for
+`0 < p, q < 1`: an event known by time `n` is the preimage of a set of `n`-flip patterns, null under
+one law exactly when under the other (`map_flips_coinFlipMeasure_equiv`). (On the whole path space
+the two laws are mutually singular when `p ≠ q`, by the strong law of large numbers; that is not
+proved here.) -/
+theorem coinFlipMeasure_trim_equiv (hp0 : 0 < p) (hp : p < 1) (hq0 : 0 < q) (hq : q < 1)
+    (n : ℕ) :
+    (coinFlipMeasure q hq.le).trim (flipFiltration.le n)
+        ≪ (coinFlipMeasure p hp.le).trim (flipFiltration.le n) ∧
+      (coinFlipMeasure p hp.le).trim (flipFiltration.le n)
+        ≪ (coinFlipMeasure q hq.le).trim (flipFiltration.le n) := by
+  have key {μ ν : Measure (ℕ → Bool)} (h : μ.map (flips n) ≪ ν.map (flips n)) :
+      μ.trim (flipFiltration.le n) ≪ ν.trim (flipFiltration.le n) := by
+    refine Measure.AbsolutelyContinuous.mk fun A hA h0 ↦ ?_
+    obtain ⟨S, hS, rfl⟩ := MeasurableSpace.measurableSet_comap.1 hA
+    rw [trim_measurableSet_eq _ hA, ← Measure.map_apply (measurable_flips n) hS] at h0
+    rw [trim_measurableSet_eq _ hA, ← Measure.map_apply (measurable_flips n) hS]
+    exact h h0
+  obtain ⟨h₁, h₂⟩ := map_flips_coinFlipMeasure_equiv hp0 hp hq0 hq n
+  exact ⟨key h₁, key h₂⟩
 
 /-- **The Radon–Nikodym derivative on `ℱₙ`.** Under the hypotheses of
 `map_flips_coinFlipMeasure_eq_withDensity`, the `Bernoulli(q)` probability of an event known by
