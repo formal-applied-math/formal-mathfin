@@ -278,11 +278,14 @@ theorem Contract.measurable_observation (c : Contract ι) {D : ℝ≥0 → Ω �
     (hD : ∀ t, Measurable (D t)) {X : ι → ℝ≥0 → Ω → ℝ} (hX : ∀ i t, Measurable (X i t)) :
     Measurable (c.observation D X) := by
   unfold Contract.observation
-  exact (measurable_pi_lambda _ fun p ↦ hX p.1.1 p.1.2).prodMk
-    (measurable_pi_lambda _ fun t ↦ hD t.1)
+  refine Measurable.prodMk ?_ ?_
+  · exact measurable_pi_lambda _ fun p ↦ hX p.1.1 p.1.2
+  · exact measurable_pi_lambda _ fun t ↦ hD t.1
 
 theorem Contract.measurable_pvOf (c : Contract ι) (hc : c.FixedDated) : Measurable c.pvOf := by
-  refine Contract.measurable_pathPV (c := c) hc (D := fun t z ↦ c.fillDates z.2 t)
+  refine Contract.measurable_pathPV (c := c)
+    (Ω := ({p // p ∈ c.obsList} → ℝ) × ({t // t ∈ c.dates} → ℝ)) hc
+    (D := fun t z ↦ c.fillDates z.2 t)
     (X := fun i t z ↦ c.fillScenario z.1 i t) (fun t ↦ ?_) (fun i t ↦ ?_)
   · by_cases h : t ∈ c.dates
     · simp only [Contract.fillDates, dif_pos h]
