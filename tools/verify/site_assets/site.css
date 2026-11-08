@@ -214,13 +214,13 @@ details.tableview summary { cursor: pointer; color: var(--ink-2); }
 
 /* ---- the program tree (tree.html, assets/tree.js) ---- */
 :root { --tr-bark:#4b3b2b; --tr-bark-2:#6b5640; --tr-leaf-1:#356f33; --tr-leaf-2:#56923f; --tr-leaf-3:#86b158;
-  --tr-fallen:#b48a4f; --tr-blue:var(--s1); --tr-star:#c48a0c; --tr-soil-1:#ddd5c4; --tr-soil-2:#cbbfa7;
+  --tr-fallen:#b48a4f; --tr-blue:var(--s1); --tr-star:#c48a0c; --tr-star-ink:#9a6a00; --tr-soil-1:#ddd5c4; --tr-soil-2:#cbbfa7;
   --tr-soil-ink:#6d5f46; --tr-ready:#23896f; --tr-blocked:#8a8f98; --tr-research:#7652b5; --tr-progress:#cc7f12; }
 @media (prefers-color-scheme: dark) { :root:where(:not([data-theme="light"])) { --tr-bark:#a98f71; --tr-bark-2:#c2a887; --tr-leaf-1:#4f8f43; --tr-leaf-2:#71ad57; --tr-leaf-3:#a2cb74;
-  --tr-fallen:#8c7149; --tr-star:#f1c34a; --tr-soil-1:#28231b; --tr-soil-2:#1e1a14;
+  --tr-fallen:#8c7149; --tr-star:#f1c34a; --tr-star-ink:#f1c34a; --tr-soil-1:#28231b; --tr-soil-2:#1e1a14;
   --tr-soil-ink:#b4a283; --tr-ready:#4cc3a4; --tr-blocked:#8e95a1; --tr-research:#a98ae2; --tr-progress:#efa63e; } }
 :root[data-theme="dark"] { --tr-bark:#a98f71; --tr-bark-2:#c2a887; --tr-leaf-1:#4f8f43; --tr-leaf-2:#71ad57; --tr-leaf-3:#a2cb74;
-  --tr-fallen:#8c7149; --tr-star:#f1c34a; --tr-soil-1:#28231b; --tr-soil-2:#1e1a14;
+  --tr-fallen:#8c7149; --tr-star:#f1c34a; --tr-star-ink:#f1c34a; --tr-soil-1:#28231b; --tr-soil-2:#1e1a14;
   --tr-soil-ink:#b4a283; --tr-ready:#4cc3a4; --tr-blocked:#8e95a1; --tr-research:#a98ae2; --tr-progress:#efa63e; }
 .t-box { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 .t-tools { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 10px 14px;
@@ -231,7 +231,7 @@ details.tableview summary { cursor: pointer; color: var(--ink-2); }
                   border-radius: 6px; padding: 3px 10px; cursor: pointer; }
 .t-stage { display: grid; grid-template-columns: minmax(0, 1fr) 330px; }
 @media (max-width: 900px) { .t-stage { grid-template-columns: minmax(0, 1fr); } }
-#tree { display: block; width: 100%; height: auto; aspect-ratio: 1600 / 1010; cursor: grab; touch-action: none; }
+#tree { display: block; width: 100%; height: auto; aspect-ratio: 1600 / 1060; cursor: grab; touch-action: none; }
 .t-panel { border: 0; border-left: 1px solid var(--line); border-radius: 0; padding: 14px 16px; display: grid; gap: 12px;
            align-content: start; max-height: 820px; overflow: auto; font-size: 0.9rem; }
 @media (max-width: 900px) { .t-panel { border-left: 0; border-top: 1px solid var(--line); max-height: none; } }
@@ -239,6 +239,11 @@ details.tableview summary { cursor: pointer; color: var(--ink-2); }
 .t-panel h3 { font-size: 0.72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; font-weight: 600; }
 .t-panel p { margin: 0; }
 .t-panel .stmt { font-family: var(--serif); }
+.t-panel .stmt code { font: 0.8em var(--mono); background: var(--raised); padding: 0 3px; border-radius: 3px; }
+.t-tools .t-zoom { display: inline-flex; }
+.t-tools .t-zoom button { width: 30px; padding: 3px 0; }
+.t-tools .t-zoom button:first-child { border-radius: 6px 0 0 6px; }
+.t-tools .t-zoom button:last-child { border-radius: 0 6px 6px 0; border-left: 0; }
 .t-panel .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; padding: 1px 8px; border-radius: 20px;
                  border: 1px solid var(--line); color: var(--ink-2); width: max-content; }
 .t-panel .pill i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
@@ -260,8 +265,12 @@ details.tableview summary { cursor: pointer; color: var(--ink-2); }
             line-height: 1.35; padding: 6px 9px; border-radius: 4px; max-width: 300px; z-index: 5; }
 #tree-tip b { display: block; font: 400 0.9rem var(--serif); }
 #tree-box .branch, #tree-box .trunk { fill: var(--tr-bark); }
+#tree-box .branch.sec { fill: var(--tr-bark-2); opacity: .42; }
+#tree.focus .branch.sec.on { opacity: .95; }
 #tree-box .root { fill: var(--tr-bark); opacity: .55; }
-#tree-box .shoot { fill: none; stroke: var(--tr-blue); stroke-width: 1.15; stroke-dasharray: 3.2 2.6; opacity: .75; }
+#tree-box .shoot { fill: none; stroke: var(--tr-blue); stroke-width: 1.3; stroke-dasharray: 3.4 2.8; opacity: .62; }
+#tree-box .shoot.sec { display: none; }
+#tree.focus .shoot.sec.on { display: inline; opacity: .8; }
 #tree-box .leaf { opacity: .92; }
 #tree-box .leaf.l1 { fill: var(--tr-leaf-1); } #tree-box .leaf.l2 { fill: var(--tr-leaf-2); } #tree-box .leaf.l3 { fill: var(--tr-leaf-3); }
 #tree-box .fallen { fill: var(--tr-fallen); opacity: .85; }
@@ -275,24 +284,26 @@ details.tableview summary { cursor: pointer; color: var(--ink-2); }
 #tree-box .star { fill: var(--tr-star); stroke: var(--surface); stroke-width: .8; }
 #tree-box .halo { fill: var(--tr-star); opacity: .16; }
 #tree-box .hit { fill: transparent; cursor: pointer; }
-#tree-box .lbl { font-family: var(--serif); fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-linejoin: round;
-                 pointer-events: none; display: none; }
+#tree-box .lbl { font-family: var(--sans); font-weight: 500; fill: var(--ink); paint-order: stroke; stroke: var(--surface);
+                 stroke-opacity: .92; stroke-linejoin: round; pointer-events: none; display: none; }
+#tree-box .lbl.sel { font-weight: 600; }
 #tree-box .lbl.show { display: block; }
-#tree-box .lbl.fr { fill: var(--tr-blue); font-style: italic; }
-#tree-box .lbl.op { fill: var(--tr-star); font-style: italic; font-weight: 600; }
-#tree-box .limb-lbl { font: 11px var(--sans); letter-spacing: .16em; text-transform: uppercase; fill: var(--muted); pointer-events: none; }
+#tree-box .lbl.fr { fill: var(--tr-blue); font-style: italic; font-weight: 400; }
+#tree-box .lbl.op { fill: var(--tr-star-ink); font-style: italic; font-weight: 600; }
+#tree-box .limb-lbl { font: 600 14.5px var(--sans); letter-spacing: .16em; text-transform: uppercase; fill: var(--muted); pointer-events: none; }
+#tree-box .limb-n { font: 12.5px var(--sans); fill: var(--muted); opacity: .8; pointer-events: none; }
+#tree-box .limb-guide { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 1 5; stroke-linecap: round; opacity: .45; }
 #tree-box .trunk-lbl { font: 12px var(--sans); letter-spacing: .32em; text-transform: uppercase; fill: var(--surface); opacity: .85; pointer-events: none; }
 #tree-box .soil-1 { fill: var(--tr-soil-1); } #tree-box .soil-2 { fill: var(--tr-soil-2); }
-#tree-box .stratum { font: 12px var(--sans); letter-spacing: .2em; text-transform: uppercase; fill: var(--tr-soil-ink); }
-#tree-box .stratum-sub { font: italic 13px var(--serif); fill: var(--tr-soil-ink); }
+#tree-box .stratum { font: 600 15px var(--sans); letter-spacing: .2em; text-transform: uppercase; fill: var(--tr-soil-ink); }
+#tree-box .stratum-sub { font: italic 16px var(--serif); fill: var(--tr-soil-ink); }
 #tree-box .stone { fill: var(--tr-soil-ink); opacity: .5; }
 #tree-box .seedmark { fill: var(--tr-soil-ink); opacity: .55; }
-#tree-box .pile-lbl { font: 10.5px var(--sans); fill: var(--muted); text-anchor: middle; pointer-events: none; }
+#tree-box .pile-lbl { font: 13.5px var(--sans); fill: var(--tr-soil-ink); paint-order: stroke; stroke: var(--tr-soil-1); stroke-width: 4px; stroke-linejoin: round; text-anchor: middle; pointer-events: none; }
 #tree-box .ground-line { fill: none; stroke: var(--tr-soil-ink); stroke-width: 1; opacity: .5; }
 #tree-box .sel-ring { fill: none; stroke: var(--ink); stroke-width: 1.4; }
 #tree.focus .dimmable { opacity: .12; transition: opacity .2s; }
 #tree.focus .dimmable.on { opacity: 1; }
-#tree.focus .lbl.on { display: block; }
 .t-bars { display: grid; gap: 6px; margin: 14px 0 4px; }
 .t-bar { display: grid; grid-template-columns: 120px minmax(0, 1fr) 72px; gap: 10px; align-items: center; font-size: 0.86rem; }
 .t-bar > span:last-child { text-align: right; font-variant-numeric: tabular-nums; }

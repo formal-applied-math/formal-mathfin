@@ -735,10 +735,11 @@ The corpus entries are the leaves, hung on the deepest node their proof rests on
 frontier results are dashed blueprint shoots, each bud coloured by the state of its issue, with the
 open problems as stars. Proved results that rest on no node grow from the soil beside the trunk;
 entries that touch no node lie on the ground. Click a node to trace its lineage; drag to pan,
-scroll to zoom.</p>
+scroll to zoom; names fill in as you zoom.</p>
 <div class="t-box" id="tree-box"><div class="t-tools">
 <input id="t-q" type="search" placeholder="Find a node: Itô, VaR, Heston…" aria-label="Find a node" autocomplete="off">
 <button type="button" id="t-grow">Grow it again</button>
+<span class="t-zoom"><button type="button" id="t-zin" aria-label="Zoom in">+</button><button type="button" id="t-zout" aria-label="Zoom out">−</button></span>
 <button type="button" id="t-reset">Reset view</button></div>
 <div class="t-stage"><svg id="tree" role="img" aria-label="The MathFin blueprint as a tree"></svg>
 <aside class="t-panel" id="tree-panel" aria-live="polite"></aside></div>

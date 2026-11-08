@@ -1,9 +1,10 @@
 /* The program tree (tree.html): the blueprint drawn as a tree, grown from Mathlib and
-   BrownianMotion. Height is conceptual depth: a node sits above everything it rests on, Foundations
-   is the trunk, every use is drawn as wood, and wood thickens with the corpus it carries. Corpus
-   entries are leaves on the deepest node their proof rests on; off-map entries lie on the ground.
-   Data: the JSON block #tree-data, written by tools/verify/docs_site.py from
-   program_tree.tree_data. Needs d3 (loaded by the page). */
+ BrownianMotion. Height is conceptual depth: a node sits above everything it rests on, Foundations
+ is the trunk, every use is drawn as wood, and wood thickens with the corpus it carries; the use
+ that sets a node's height is drawn in bark, the others lighter. Corpus entries are leaves on the
+ deepest node their proof rests on; off-map entries lie on the ground. Labels are sized in screen
+ pixels and fill in with zoom. Data: the JSON block #tree-data, written by tools/verify/docs_site.py
+ from program_tree.tree_data. Needs d3 and KaTeX (loaded by the page). */
 (function () {
 "use strict";
 const el = document.getElementById("tree-data");
@@ -19,6 +20,11 @@ const STATUS_TXT = {"in-progress":"in progress", ready:"ready to pick up", resea
 const STATUS_VAR = {"in-progress":"--tr-progress", ready:"--tr-ready", research:"--tr-research", "blocked-design":"--tr-blocked", "blocked-upstream":"--tr-blocked", "needs-info":"--tr-blocked"};
 const AREA_TXT = {foundations:"foundations","black-scholes":"Black–Scholes","fixed-income":"fixed income",portfolio:"portfolio",risk:"risk",actuarial:"actuarial","stoch-vol":"stochastic vol",defi:"DeFi",binomial:"binomial",credit:"credit",contracts:"contracts",execution:"execution",futures:"futures",fx:"FX",commodities:"commodities",upstream:"upstream"};
 const areaName = a => AREA_TXT[a] || a;
+// statement prose: TeX between dollars is typeset (KaTeX, MathML output: no stylesheet or fonts to fetch);
+// outside it, `code` and *emphasis* are the blueprint's own markup
+const tex = m => { try { return window.katex.renderToString(m, {throwOnError:false}); } catch (e) { return esc("$" + m + "$"); } };
+const prose = t => String(t ?? "").split(/(\$[^$]*\$)/).map((seg, i) => i % 2 ? tex(seg.slice(1, -1))
+  : esc(seg).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*([^*\s][^*]*)\*/g, "<em>$1</em>")).join("");
 
 for (const n of D.nodes){
   n.users = [];
@@ -41,7 +47,14 @@ function hash(s){ let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.cha
 function rng(seed){ let s = Math.floor(hash(seed) * 4294967295) | 0; return () => ((s = Math.imul(s ^ (s >>> 15), 2246822507) + 0x6D2B79F5 | 0) >>> 0) / 4294967296; }
 
 // ---------- layout: height is conceptual depth, Foundations is the trunk ----------
-const W = 1600, H = 1010, CX = 800, GY = 846, LH = 118, Y0 = GY - 236;
+const W = 1600, CX = 800, GY = 890, LH = 124, Y0 = GY - 240;
+const pxPerUnit = () => (document.getElementById("tree").getBoundingClientRect().width || W) / W;
+// the plate's fixed captions (areas, strata, piles) are drawn for a ~1300px stage; on a narrower one they grow, up to 1.7×
+const TF = Math.min(1.7, Math.max(1, .8 / pxPerUnit()));
+const cap = (sel, px) => sel.style("font-size", (px * TF).toFixed(1) + "px");
+// the soil, top down: the rows of pile labels, the BrownianMotion stratum, the Mathlib stratum; it deepens with its captions
+const ROW0 = GY + 10 + 14 * TF, ROWH = 17 * TF, BM_Y = ROW0 + ROWH + 30 * TF, M_TOP = BM_Y + 34 * TF, M_Y = M_TOP + 32 * TF;
+const H = Math.round(M_Y + 52 * TF);
 const live = D.nodes.filter(n => !isUp(n));
 for (const n of live) n.depth = depth(n.l);
 const maxLevel = d3.max(live, n => n.depth);
@@ -74,8 +87,8 @@ const widen = lv => .62 + .38 * lv / Math.max(1, maxLevel);
 const yTarget = n => n.sucker ? GY - 78 - hash(n.l) * 70
   : n.depth === 0 && n.a === "foundations" ? GY - 150 - hash(n.l) * 120
   : Y0 - (n.depth - (n.depth ? .55 : 0)) * LH;
-const xTarget = n => n.a === "foundations" ? CX : CX + (colX.get(n.a) - CX) * (n.sucker ? 1.02 : widen(n.depth));
-const rad = n => isWood(n) ? 8 + Math.sqrt(n.e) * 2.7 : n.op ? 13 : 8;
+const xTarget = n => n.a === "foundations" ? CX + (hash(n.l + "f") - .5) * (70 + n.depth * 70) : CX + (colX.get(n.a) - CX) * (n.sucker ? 1.02 : widen(n.depth));
+const rad = n => isWood(n) ? 11 + Math.sqrt(n.e) * 2.9 : n.op ? 15 : 9;
 const sim = live.map(n => ({id:n.l, n, x:xTarget(n) + (hash(n.l + "x") - .5) * 60, y:yTarget(n)}));
 const linkData = [];
 for (const n of live) for (const u of mfUses(n)) if (!isUp(N.get(u))) linkData.push({source:u, target:n.l});
@@ -89,21 +102,26 @@ d3.forceSimulation(sim)
 const byId = new Map();
 for (const s of sim){
   const n = s.n;
-  byId.set(n.l, {id:n.l, data:{node:n}, px:Math.max(70, Math.min(W - 70, s.x)), py:Math.max(60, Math.min(GY - 54, s.y)),
+  byId.set(n.l, {id:n.l, data:{node:n}, px:Math.max(70, Math.min(W - 70, s.x)), py:Math.max(84, Math.min(GY - 54, s.y)),
     depth:n.depth, value:flow.get(n.l), seed:n.s === "frontier" && !mfUses(n).length});
 }
 const upNodes = D.nodes.filter(isUp);
-upNodes.forEach((n, k) => byId.set(n.l, {id:n.l, data:{node:n}, px:CX + k * 90, py:GY + 36, up:true, depth:-1, value:flow.get(n.l)}));
+upNodes.forEach((n, k) => byId.set(n.l, {id:n.l, data:{node:n}, px:CX + 70 + k * 90, py:ROW0 + ROWH - 5, up:true, depth:-1, value:flow.get(n.l)}));
 
+// the primary parent is the deepest node a node rests on (it sets the height); the other uses are drawn lighter
+for (const n of live){
+  const us = mfUses(n).filter(u => !isUp(N.get(u)));
+  n.prim = us.length ? us.reduce((a, b) => (N.get(b).depth - N.get(a).depth || flow.get(b) - flow.get(a)) > 0 ? b : a) : null;
+}
 // edges: every use, drawn from the node it rests on up to the node that uses it
 const edges = [];
 for (const n of live){
   const t = byId.get(n.l), us = mfUses(n);
-  for (const u of us) edges.push({s:byId.get(u), t, f:flow.get(n.l) / us.length});
+  for (const u of us) edges.push({s:byId.get(u), t, f:flow.get(n.l) / us.length, prim:u === n.prim || (!n.prim && isUp(N.get(u)))});
   if (!us.length){
     const r = hash(n.l + "stem");
     const base = n.a === "foundations" ? [CX + (r - .5) * 22, GY + 6] : [t.px + (r - .5) * 26, GY + 6];
-    edges.push({s:null, base, t, f:flow.get(n.l)});
+    edges.push({s:null, base, t, f:flow.get(n.l), prim:true});
   }
 }
 for (const e of edges){ if (e.s && e.s.up) e.base = [CX + (hash(e.t.id) - .5) * 16, GY + 6]; }
@@ -122,7 +140,7 @@ for (const a of new Set(D.nodes.map(n => n.a))){
 }
 
 // ---------- drawing ----------
-const svg = d3.select("#tree").attr("viewBox", `0 0 ${W} ${H}`);
+const svg = d3.select("#tree").attr("viewBox", `0 0 ${W} ${H}`).style("aspect-ratio", `${W} / ${H}`);
 const view = svg.append("g");
 
 // soil strata
@@ -130,15 +148,15 @@ const ground = view.append("g");
 const wave = (y, amp, ph) => d3.range(0, W + 41, 40).map(x => [x, y + Math.sin(x / 190 + ph) * amp]);
 const area = (top, bot) => d3.area().x(p => p[0]).y0(p => p[1]).y1(bot).curve(d3.curveBasis)(top);
 ground.append("path").attr("class", "soil-1").attr("d", area(wave(GY, 4, 0), H));
-ground.append("path").attr("class", "soil-2").attr("d", area(wave(GY + 70, 5, 1.7), H));
+ground.append("path").attr("class", "soil-2").attr("d", area(wave(M_TOP, 5, 1.7), H));
 ground.append("path").attr("class", "ground-line").attr("d", d3.line().curve(d3.curveBasis)(wave(GY, 4, 0)));
-ground.append("text").attr("class", "stratum").attr("x", 30).attr("y", GY + 34).text("BrownianMotion");
-ground.append("text").attr("class", "stratum").attr("x", 30).attr("y", GY + 106).text("Mathlib");
-ground.append("text").attr("class", "stratum-sub").attr("x", 30).attr("y", GY + 52).text("Brownian motion, stochastic integration");
-ground.append("text").attr("class", "stratum-sub").attr("x", 30).attr("y", GY + 124).text("measure, probability, analysis, linear algebra");
+cap(ground.append("text").attr("class", "stratum").attr("x", 30).attr("y", BM_Y).text("BrownianMotion"), 15);
+cap(ground.append("text").attr("class", "stratum").attr("x", 30).attr("y", M_Y).text("Mathlib"), 15);
+cap(ground.append("text").attr("class", "stratum-sub").attr("x", 30).attr("y", BM_Y + 20 * TF).text("Brownian motion, stochastic integration"), 16);
+cap(ground.append("text").attr("class", "stratum-sub").attr("x", 30).attr("y", M_Y + 20 * TF).text("measure, probability, analysis, linear algebra"), 16);
 { const r = rng("stones"); for (let k = 0; k < 70; k++){
-  const x = r() * W, y = GY + 82 + r() * (H - GY - 90);
-  if (x < 380 && y < GY + 135) continue;
+  const x = r() * W, y = M_TOP + 12 + r() * (H - M_TOP - 20);
+  if (x < 40 + 400 * TF && y < M_Y + 30 * TF) continue;
   ground.append("ellipse").attr("class", "stone").attr("cx", x).attr("cy", y).attr("rx", 2 + r() * 5).attr("ry", 1.2 + r() * 2.2); } }
 
 function taper(P, c1, c2, C, w0, w1, steps = 18){
@@ -176,25 +194,48 @@ function edgeGeom(e){
 }
 const woodEdges = edges.filter(e => isWood(e.t.data.node)).sort((a, b) => b.f - a.f);
 const shootEdges = edges.filter(e => !isWood(e.t.data.node));
-const branchSel = linkG.selectAll("path").data(woodEdges).join("path").attr("class", "branch dimmable")
+const branchSel = linkG.selectAll("path").data(woodEdges.slice().sort((a, b) => a.prim - b.prim || b.f - a.f)).join("path").attr("class", e => "branch dimmable" + (e.prim ? "" : " sec"))
   .attr("d", e => { const g = edgeGeom(e), w = BW(e.f); return taper(g.P, g.c1, g.c2, g.C, w * 1.15, Math.max(.8, w * .62)); });
-const shootSel = shootG.selectAll("path").data(shootEdges).join("path").attr("class", "shoot dimmable")
+const shootSel = shootG.selectAll("path").data(shootEdges).join("path").attr("class", e => "shoot dimmable" + (e.prim ? "" : " sec"))
   .attr("d", e => { const g = edgeGeom(e); return `M${g.P}C${g.c1} ${g.c2} ${g.C}`; });
 
-// area names above their part of the crown
-const limbLbl = view.append("g"), areaLbls = [];
+// area names: one row across the top of the plate, each with a faint guide down to its part of the crown
+const limbLbl = view.append("g").attr("class", "dimmable"), areaLbls = [];
 for (const a of colX.keys()){
   if (a === "foundations") continue;
   const ds = [...byId.values()].filter(d => !d.up && d.data.node.a === a && !d.data.node.sucker);
   if (ds.length < 3) continue;
-  areaLbls.push({a, x:d3.median(ds, d => d.px), y:Math.max(24, d3.min(ds, d => d.py) - 30), w:areaName(a).length * 9.4 + 12});
+  const name = areaName(a);
+  const all = live.filter(n => n.a === a), np = all.filter(isWood).length, cnt = `${np} proved · ${all.length - np} frontier`;
+  areaLbls.push({a, x:d3.median(ds, d => d.px), top:d3.min(ds, d => d.py), w:(Math.max(name.length * 11.6, cnt.length * 6.9) + 22) * TF, name, cnt});
 }
-areaLbls.sort((p, q) => q.y - p.y);
-for (let i = 0; i < areaLbls.length; i++) for (let j = 0; j < i; j++){
-  const p = areaLbls[i], q = areaLbls[j];
-  if (Math.abs(p.x - q.x) < (p.w + q.w) / 2 && Math.abs(p.y - q.y) < 16){ p.y = q.y - 18; j = -1; }
+areaLbls.sort((p, q) => p.x - q.x);
+for (let it = 0; it < 60; it++){            // relax: push overlapping neighbours apart symmetrically
+  let moved = false;
+  for (let i = 1; i < areaLbls.length; i++){
+    const p = areaLbls[i - 1], q = areaLbls[i], need = (p.w + q.w) / 2 - (q.x - p.x);
+    if (need > 0){ p.x -= need / 2; q.x += need / 2; moved = true; }
+  }
+  for (const L of areaLbls) L.x = Math.max(L.w / 2 + 12, Math.min(W - L.w / 2 - 12, L.x));
+  if (!moved) break;
 }
-for (const L of areaLbls) limbLbl.append("text").attr("class", "limb-lbl").attr("x", L.x).attr("y", Math.max(16, L.y)).attr("text-anchor", "middle").text(areaName(L.a));
+const LROW = 12 + 18 * TF;
+// too many for one row: stagger alternate names onto a second row and relax each row on its own
+if (d3.sum(areaLbls, L => L.w) > W - 60){
+  areaLbls.forEach((L, i) => { L.row = i % 2; });
+  for (let it = 0; it < 60; it++) for (const r of [0, 1]){
+    const row = areaLbls.filter(L => L.row === r);
+    for (let i = 1; i < row.length; i++){ const p = row[i - 1], q = row[i], need = (p.w + q.w) / 2 - (q.x - p.x); if (need > 0){ p.x -= need / 2; q.x += need / 2; } }
+    for (const L of row) L.x = Math.max(L.w / 2 + 12, Math.min(W - L.w / 2 - 12, L.x));
+  }
+} else areaLbls.forEach(L => { L.row = 0; });
+for (const L of areaLbls){
+  const y = LROW + L.row * 44 * TF;
+  const ds = [...byId.values()].filter(d => !d.up && d.data.node.a === L.a && !d.data.node.sucker), cx = d3.median(ds, d => d.px);
+  limbLbl.append("path").attr("class", "limb-guide").attr("d", `M${L.x},${y + 24 * TF}C${L.x},${y + 70} ${cx},${L.top - 60} ${cx},${L.top - 18}`);
+  cap(limbLbl.append("text").attr("class", "limb-lbl").attr("x", L.x).attr("y", y).attr("text-anchor", "middle").text(L.name), 14.5);
+  cap(limbLbl.append("text").attr("class", "limb-n").attr("x", L.x).attr("y", y + 17 * TF).attr("text-anchor", "middle").text(L.cnt), 12.5);
+}
 
 // leaves: one per corpus entry resting on the node
 const leafG = view.append("g");
@@ -215,28 +256,38 @@ const leafSel = leafG.selectAll("path").data(leafData).join("path")
 // fallen leaves: proved entries off the map, under their area
 const litterG = view.append("g");
 const piles = Object.entries(D.off).map(([a, list]) => ({a, list}));
-const pileX = new Map(); { const used = [];
+const pileX = new Map(); { const used = [{x:CX, half:TW * .9 + 6}];
   for (const p of piles.sort((x, y) => y.list.length - x.list.length)){
-    let x = areaX.get(p.a) ?? CX; const half = 16 + Math.sqrt(p.list.length) * 7;
-    for (let it = 0; it < 40; it++){ const clash = used.find(u => Math.abs(u.x - x) < u.half + half + 14); if (!clash) break; x += (x >= clash.x ? 1 : -1) * 12; }
-    x = Math.max(70 + half, Math.min(W - 70 - half, x)); used.push({x, half}); pileX.set(p.a, {x, half}); } }
+    let x = areaX.get(p.a) ?? colX.get(p.a) ?? W - 150; const half = 14 + Math.sqrt(p.list.length) * 6.5;
+    const free = c => c >= 30 + half && c <= W - 30 - half && !used.some(u => Math.abs(u.x - c) < u.half + half + 12);
+    for (let off = 0; off < W; off += 6){ if (free(x + off)){ x += off; break; } if (free(x - off)){ x -= off; break; } }
+    used.push({x, half}); pileX.set(p.a, {x, half}); }
+}
 const pileSel = litterG.selectAll("g").data(piles).join("g").attr("class", "pile dimmable");
 pileSel.each(function(p){
-  const g = d3.select(this), {x, half} = pileX.get(p.a), r = rng("pile" + p.a);
+  const g = d3.select(this), {x, half} = pileX.get(p.a), r = rng("pile" + p.a);  // half: leaf spread
   for (let k = 0; k < p.list.length; k++){
     const fx = x + (r() + r() - 1) * half, fy = GY - 4 + (r() - .3) * 9 - Math.max(0, 1 - Math.abs(fx - x) / half) * 5;
     g.append("path").attr("class", "fallen").attr("d", LEAF).attr("transform", `translate(${fx.toFixed(1)},${fy.toFixed(1)}) rotate(${(r() * 360).toFixed(0)}) scale(${(.75 + r() * .4).toFixed(2)})`);
   }
-  g.append("text").attr("class", "pile-lbl").attr("x", x).attr("y", GY + 20).text(`${p.list.length} ${areaName(p.a)}`);
-  g.append("rect").attr("class", "hit").attr("x", x - half - 8).attr("y", GY - 18).attr("width", 2 * half + 16).attr("height", 44);
+  cap(g.append("text").attr("class", "pile-lbl").attr("x", x).attr("y", ROW0).text(`${p.list.length} ${areaName(p.a)}`), 13.5);
+  g.append("rect").attr("class", "hit").attr("x", x - half - 8).attr("y", GY - 18).attr("width", 2 * half + 16).attr("height", 24 + 20 * TF);
 });
+// pile labels, measured: the first row with room, else the next one down (the upstream node's name holds a slot in the second)
+{ const rows = [[], [], []], pad = 8 * TF;
+  for (const u of upNodes){ const d = byId.get(u.l), hw = u.t.length * 4.6 * TF + pad; rows[1].push({x:d.px + 18 + hw, lw:hw}); }
+  const lbls = []; pileSel.each(function(p){ const t = d3.select(this).select(".pile-lbl"); lbls.push({t, x:pileX.get(p.a).x, lw:t.node().getComputedTextLength() / 2 + pad}); });
+  for (const L of lbls.sort((a, b) => a.x - b.x)){
+    const r = Math.max(0, rows.findIndex(row => !row.some(u => Math.abs(u.x - L.x) < u.lw + L.lw)));
+    rows[r].push(L); L.t.attr("y", ROW0 + r * ROWH);
+  } }
 // upstream-only entries as seeds in the Mathlib stratum
 const upOnly = Object.values(D.areas).reduce((s, c) => s + (c["upstream-only"] || 0), 0);
 const seedbed = view.append("g").attr("class", "seedbed dimmable");
 { const r = rng("seedbed"), x0 = W - 330;
-  for (let k = 0; k < upOnly; k++) seedbed.append("ellipse").attr("class", "seedmark").attr("cx", x0 + r() * 270).attr("cy", GY + 88 + r() * 48).attr("rx", 2.4).attr("ry", 1.5).attr("transform-origin", "center");
-  seedbed.append("text").attr("class", "stratum-sub").attr("x", x0 + 270).attr("y", GY + 156).attr("text-anchor", "end").text(`${upOnly} entries cite Mathlib alone`);
-  seedbed.append("rect").attr("class", "hit").attr("x", x0 - 6).attr("y", GY + 84).attr("width", 282).attr("height", 90); }
+  for (let k = 0; k < upOnly; k++) seedbed.append("ellipse").attr("class", "seedmark").attr("cx", x0 + r() * 270).attr("cy", M_TOP + 22 + r() * (H - M_TOP - 50)).attr("rx", 2.4).attr("ry", 1.5).attr("transform-origin", "center");
+  cap(seedbed.append("text").attr("class", "stratum-sub").attr("x", x0 + 270).attr("y", H - 14).attr("text-anchor", "end").text(`${upOnly} entries cite Mathlib alone`), 16);
+  seedbed.append("rect").attr("class", "hit").attr("x", x0 - 6).attr("y", M_TOP + 10).attr("width", 282).attr("height", H - M_TOP - 10); }
 
 // nodes
 const nodeG = view.append("g");
@@ -246,7 +297,7 @@ const isOP = n => !!n.op;
 const nodeSel = nodeG.selectAll("g").data(nodeData).join("g").attr("class", "nd dimmable").attr("transform", d => `translate(${d.px},${d.py})`);
 nodeSel.each(function(d){
   const g = d3.select(this), n = d.data.node;
-  if (d.up){ g.append("ellipse").attr("rx", 11).attr("ry", 6.5).attr("class", "knot"); g.append("text").attr("class", "stratum-sub").attr("x", 16).attr("y", 5).text(n.t + " · upstream"); }
+  if (d.up){ g.append("ellipse").attr("rx", 11).attr("ry", 6.5).attr("class", "knot"); cap(g.append("text").attr("class", "stratum-sub").attr("x", 18).attr("y", 5).text(n.t), 16); }
   else if (isWood(n)){ g.append("circle").attr("r", 2.4 + Math.min(3.6, Math.sqrt(n.e) * .55)).attr("class", "knot" + (n.s === "partial" ? " partial" : "")); }
   else if (isOP(n)){ g.append("circle").attr("r", 13).attr("class", "halo"); g.append("path").attr("class", "star").attr("d", "M" + STAR(7.5).join("L") + "Z"); }
   else {
@@ -257,40 +308,49 @@ nodeSel.each(function(d){
   g.append("circle").attr("r", d.up ? 14 : 9).attr("class", "hit");
 });
 
-// labels
+// labels: sized in screen pixels, tried at four spots around the node, never over a knot or another label
 const lblG = view.append("g");
-function shortTitle(t){ let s = t.replace(/\s*\(.*?\)\s*/g, " ").replace(/\s+—.*$/, "").trim(); return s.length > 38 ? s.slice(0, 36).trimEnd() + "…" : s; }
+function shortTitle(t, max){ let s = t.replace(/\s*\(.*?\)\s*/g, " ").replace(/\s+—.*$/, "").replace(/:.*$/, "").trim(); return s.length > max ? s.slice(0, max - 1).trimEnd() + "…" : s; }
 const lblData = nodeData.filter(d => !d.up).map(d => {
   const n = d.data.node, [ux, uy] = d.seed ? [0, -1] : dirOf(d);
   const side = Math.abs(ux) < .28 ? 0 : (ux < 0 ? -1 : 1);
   const pr = isOP(n) ? 1e6 : isWood(n) ? d.value * 10 + n.e : (n.st === "ready" ? 3 : 1);
-  return {d, n, ux, uy, side, pr, text: shortTitle(n.t)};
+  return {d, n, side, pr, full: shortTitle(n.t, 46), short: shortTitle(n.t, 34)};
 });
 const lblSel = lblG.selectAll("text").data(lblData).join("text")
-  .attr("class", L => "lbl dimmable" + (isOP(L.n) ? " op" : !isWood(L.n) ? " fr" : ""))
-  .text(L => L.text);
-function placeLabels(k){
-  const fs = 12.5 / Math.pow(k, .82), off = (isop) => (isop ? 13 : 8) / Math.sqrt(k);
+  .attr("class", L => "lbl dimmable" + (isOP(L.n) ? " op" : !isWood(L.n) ? " fr" : ""));
+const glyphR = d => { const n = d.data.node; return isWood(n) ? 2.4 + Math.min(3.6, Math.sqrt(n.e) * .55) : isOP(n) ? 8 : 4.6; };
+let curK = 1, litSet = null;
+function placeLabels(k = curK, set = litSet){
+  curK = k;
+  const s = pxPerUnit() * k, fs = (k < 1.4 ? 13 : 12.5) / s, h = fs * 1.2, pad = 3 / s;
   const boxes = [];
-  const order = lblData.slice().sort((a, b) => b.pr - a.pr);
-  const show = new Set();
-  const budget = k < 1.4 ? 17 : k < 2.5 ? 60 : 1e9;
+  for (const d of nodeData) if (!d.up && (!set || set.has(d.id))){ const r = glyphR(d) + 1.5; boxes.push([d.px - r, d.py - r, d.px + r, d.py + r, d.id]); }
+  const hit = (b, self) => boxes.some(c => c[4] !== self && !(b[2] < c[0] || b[0] > c[2] || b[3] < c[1] || b[1] > c[3]));
+  const eligible = L => set ? set.has(L.d.id)
+    : k < 1.4 ? isWood(L.n) || isOP(L.n)
+    : k < 2.4 ? isWood(L.n) || isOP(L.n) || L.n.st === "ready" : true;
+  const budget = set ? 1e9 : k < 1.4 ? 30 : k < 2.4 ? 80 : 1e9;
+  const order = lblData.filter(eligible).sort((a, b) => (b.d.id === selected) - (a.d.id === selected) || b.pr - a.pr);
+  const show = new Map();
   for (const L of order){
-    const w = L.text.length * fs * .5, h = fs * 1.15, o = off(isOP(L.n)) + (isWood(L.n) && L.n.e ? Math.sqrt(L.n.e) * 2.2 / Math.sqrt(k) : 0);
-    let x = L.d.px + L.ux * o, y = L.d.py + L.uy * o;
-    let x0 = L.side === 0 ? x - w / 2 : L.side < 0 ? x - w : x;
-    const y0 = L.side === 0 ? y - h : y - h / 2;
-    L.x = x; L.y = L.side === 0 ? y - h * .25 : y + h * .33;
-    if (show.size >= budget) continue;
-    const box = [x0 - 2, y0 - 1, x0 + w + 2, y0 + h + 1];
-    if (boxes.some(b => !(box[2] < b[0] || box[0] > b[2] || box[3] < b[1] || box[1] > b[3]))) continue;
-    boxes.push(box); show.add(L);
+    if (show.size >= budget) break;
+    const text = k < 1.4 && !set ? L.short : L.full, w = text.length * fs * .56;
+    const o = glyphR(L.d) + 4 / s;
+    const spots = [[1, 0], [-1, 0], [0, -1], [0, 1]];
+    if (L.side < 0) spots.unshift(spots.splice(1, 1)[0]); else if (L.side === 0 && L.d.seed) spots.unshift(spots.splice(2, 1)[0]);
+    for (const [sx, sy] of spots){
+      const x = L.d.px + sx * o, y = L.d.py + sy * (o + h * .5);
+      const x0 = sx > 0 ? x : sx < 0 ? x - w : x - w / 2, y0 = y - h / 2;
+      const b = [x0 - pad, y0 - pad, x0 + w + pad, y0 + h + pad, L.d.id];
+      if (hit(b, L.d.id) || b[0] < 4 || b[2] > W - 4) continue;
+      boxes.push(b); show.set(L, {x, y: y + fs * .36, anchor: sx > 0 ? "start" : sx < 0 ? "end" : "middle", text}); break;
+    }
   }
-  lblSel.attr("x", L => L.x).attr("y", L => L.y).attr("font-size", fs).attr("stroke-width", 3.2 / Math.sqrt(k))
-    .attr("text-anchor", L => L.side === 0 ? "middle" : L.side < 0 ? "end" : "start")
-    .classed("show", L => show.has(L));
+  lblSel.classed("show", L => show.has(L)).classed("on", L => show.has(L)).classed("sel", L => L.d.id === selected)
+    .attr("font-size", fs).attr("stroke-width", 4 / s)
+    .each(function(L){ const p = show.get(L); if (!p) return; d3.select(this).attr("x", p.x).attr("y", p.y).attr("text-anchor", p.anchor).text(p.text); });
 }
-placeLabels(1);
 
 const selRing = view.append("circle").attr("class", "sel-ring").attr("r", 12).attr("visibility", "hidden");
 
@@ -298,8 +358,11 @@ const selRing = view.append("circle").attr("class", "sel-ring").attr("r", 12).at
 const zoom = d3.zoom().scaleExtent([1, 9]).translateExtent([[0, 0], [W, H]])
   .on("zoom", e => { view.attr("transform", e.transform); })
   .on("end", e => placeLabels(e.transform.k));
+new ResizeObserver(() => placeLabels()).observe(document.getElementById("tree"));
 svg.call(zoom).on("dblclick.zoom", null);
 document.getElementById("t-reset").onclick = () => svg.transition().duration(600).call(zoom.transform, d3.zoomIdentity);
+document.getElementById("t-zin").onclick = () => svg.transition().duration(350).call(zoom.scaleBy, 1.6);
+document.getElementById("t-zout").onclick = () => svg.transition().duration(350).call(zoom.scaleBy, 1 / 1.6);
 function focusOn(d, k = 2.6){
   svg.transition().duration(650).call(zoom.transform, d3.zoomIdentity.translate(W / 2 - k * d.px, H * .45 - k * d.py).scale(k));
 }
@@ -314,9 +377,8 @@ function lineage(l){
 let selected = null;
 function light(set, extra){
   const on = set ? (id => set.has(id)) : () => true;
-  svg.classed("focus", !!set);
+  svg.classed("focus", !!set); litSet = set && set.size ? set : null; placeLabels();
   nodeSel.classed("on", d => on(d.id));
-  lblSel.classed("on", L => !!set && on(L.d.id));
   branchSel.classed("on", e => on(e.t.id) && (!e.s || on(e.s.id)));
   shootSel.classed("on", e => on(e.t.id) && (!e.s || on(e.s.id)));
   leafSel.classed("on", f => on(f.d.id));
@@ -365,7 +427,7 @@ function nodePanel(n){
     <button class="backbtn" type="button" data-back>← How to read the tree</button>
     <div style="display:flex; gap:6px; flex-wrap:wrap">${kind}${st}<span class="pill">${esc(areaName(n.a))}</span></div>
     <h2>${esc(n.t)}</h2>
-    ${n.x ? `<p class="stmt">${esc(n.x)}</p>` : ""}
+    ${n.x ? `<p class="stmt">${prose(n.x)}</p>` : ""}
     ${n.d ? `<div><h3>Lean</h3><div class="mono">${n.h ? `<a href="${esc(n.h)}">${esc(n.d)}</a>` : esc(n.d)}</div>${n.m ? `<div class="muted" style="font-size:12.5px">${esc(n.m)}</div>` : ""}</div>` : ""}
     ${isWood(n) ? `<div><h3>Corpus</h3><p>${n.e ? `<b>${n.e}</b> ${n.e === 1 ? "entry hangs" : "entries hang"} here as leaves: this is the deepest node ${n.e === 1 ? "its proof rests" : "their proofs rest"} on.` : "No entry has this as its deepest node; entries reach it through the nodes above."}</p></div>` : ""}
     ${n.core?.length ? `<div><h3>Core already proved</h3><ul class="entries">${n.core.map(c => `<li><span class="mono">${esc(c)}</span></li>`).join("")}</ul></div>` : ""}
@@ -459,4 +521,5 @@ growBtn.onclick = () => {
 };
 
 defaultPanel();
+placeLabels(1);
 })();

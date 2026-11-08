@@ -193,11 +193,18 @@ def off_map_count(index_path: str | Path) -> int:
     return sum(p.kind == "off-map" for p in places)
 
 
-def _plain(text: str) -> str:
-    """Node prose for a tooltip: TeX delimiters and spacing commands dropped."""
-    for a, b in (("$", ""), (r"\tfrac", ""), (r"\,", " "), (r"\mid", "|"), ("\n", " ")):
-        text = text.replace(a, b)
-    return " ".join(text.split())
+def _statement(text: str, limit: int = 480) -> str:
+    """Node prose for the side panel, TeX kept for the page to typeset.
+
+    Whitespace is collapsed; a cut at `limit` falls back to before an unclosed `$`, so the
+    page never receives half a formula."""
+    text = " ".join(text.split())
+    if len(text) <= limit:
+        return text
+    cut = text[:limit].rsplit(" ", 1)[0]
+    if cut.count("$") % 2:
+        cut = cut[:cut.rindex("$")].rstrip()
+    return cut + " …"
 
 
 def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
@@ -223,7 +230,7 @@ def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
         out_nodes.append(dict(
             l=n["label"], t=n.get("title") or n["label"], s=status, u=n.get("uses", []),
             a=area_of_module(n.get("module", "")) if status != "upstream" else "upstream",
-            x=_plain(n.get("text", ""))[:480], d=n.get("name"), m=n.get("module"),
+            x=_statement(n.get("text", "")), d=n.get("name"), m=n.get("module"),
             e=nearest.get(n["label"], 0), i=named.get(n["label"], [])))
     for f in frontier:
         out_nodes.append(dict(
