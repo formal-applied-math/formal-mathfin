@@ -8,6 +8,7 @@ module
 public import MathFin.Pricing.Parity
 public import MathFin.Pricing.FTAP.DalangMortonWillinger
 public import MathFin.Pricing.Market
+public import MathFin.Probability.Martingales.TimeChange
 
 /-!
 # The contracts priced in a discrete-time market with an equivalent martingale measure
@@ -20,15 +21,16 @@ map: between integer dates the underlying is constant, `discreteAssets S T () t 
 at the horizon `T` (the price is a `Q`-martingale only up to `T`). The price `S` is quoted in
 units of the numeraire, so cash is not discounted, `D ≡ 1`.
 
-The filtration of the model is `floorFiltration 𝓕`, `t ↦ 𝓕 ⌊t⌋₊`, and the frozen price is a
-martingale for it (`martingale_floor`). The risk-neutral lemmas of `Pricing/Parity.lean` then
+The filtration of the model is `floorFiltration 𝓕`, `t ↦ 𝓕 ⌊t⌋₊`, the time change of `𝓕` along
+the step count `t ↦ ⌊t⌋₊` (`Filtration.comp`), and the frozen price is a martingale for it
+(`Martingale.comp`). The risk-neutral lemmas of `Pricing/Parity.lean` then
 apply as they stand: the forward is worth `S₀ − K` and call minus put is `S₀ − K` at every
 maturity (`value_forward`, `value_europeanCall_sub_put`); at an integer maturity `n` the
 underlying is `S (min n T)` (`discreteAssets_natCast`). Parity is not re-proved here.
 
 The discrete market is a `Market` (`toMarket`): the frozen price, the floor filtration and the
 unit numéraire. Its pricing measures at the horizon are exactly its equivalent martingale measures
-(`isPricingMeasure_toMarket_iff`, the converse direction through `martingale_of_floor`), and its
+(`isPricingMeasure_toMarket_iff`, the converse direction through `Martingale.of_comp`), and its
 price is the contract value with `D ≡ 1` (`price_toMarket`).
 
 The composite `exists_isPricingMeasure_parity` closes the loop with the Dalang–Morton–Willinger
@@ -39,14 +41,13 @@ is `S₀ − K`.
 
 ## Main definitions
 
-* `floorFiltration`: the continuous-time filtration `t ↦ 𝓕 ⌊t⌋₊` of a discrete one.
+* `floorFiltration`: the continuous-time filtration `t ↦ 𝓕 ⌊t⌋₊` of a discrete one, the time
+  change `𝓕.comp Nat.floor_mono`.
 * `discreteAssets`: the discrete market as a contract model map, frozen at the horizon.
 * `toMarket`: the discrete market as a `Market`, with the unit numéraire.
 
 ## Main results
 
-* `martingale_floor`, `martingale_of_floor`: a discrete process is a martingale exactly when its
-  floor extension is a martingale for `floorFiltration`.
 * `value_forward`, `value_europeanCall_sub_put`: forward value and put–call parity under an `IsEMM`.
 * `isPricingMeasure_toMarket_iff`: the pricing measures of `toMarket` are the `IsEMM`s.
 * `exists_isPricingMeasure_parity`: no arbitrage gives a pricing measure under which parity holds,
@@ -73,11 +74,10 @@ namespace MathFin.Contracts.DiscreteMarket
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
 
-/-- The continuous-time filtration `t ↦ 𝓕 ⌊t⌋₊` of a discrete-time one. -/
-noncomputable def floorFiltration (𝓕 : Filtration ℕ mΩ) : Filtration ℝ≥0 mΩ where
-  seq t := 𝓕 ⌊t⌋₊
-  mono' _ _ hst := 𝓕.mono (Nat.floor_mono hst)
-  le' t := 𝓕.le _
+/-- The continuous-time filtration `t ↦ 𝓕 ⌊t⌋₊` of a discrete-time one: its time change along the
+step count. -/
+noncomputable abbrev floorFiltration (𝓕 : Filtration ℕ mΩ) : Filtration ℝ≥0 mΩ :=
+  𝓕.comp (Nat.floor_mono (R := ℝ≥0))
 
 /-- A discrete-time price as a contract model map: constant between integer dates and frozen at
 the horizon `T`. -/
@@ -89,28 +89,6 @@ theorem discreteAssets_natCast (S : ℕ → Ω → ℝ) (T n : ℕ) (ω : Ω) :
     discreteAssets S T () (n : ℝ≥0) ω = S (min n T) ω := by
   simp [discreteAssets]
 
-/-- **A discrete martingale is a martingale for the floor filtration**, along `t ↦ ⌊t⌋₊`. -/
-theorem martingale_floor {𝓕 : Filtration ℕ mΩ} {Q : Measure Ω} {f : ℕ → Ω → ℝ}
-    (hM : Martingale f 𝓕 Q) :
-    Martingale (fun t ω ↦ f ⌊t⌋₊ ω) (floorFiltration 𝓕) Q :=
-  ⟨fun t ↦ hM.1 ⌊t⌋₊, fun _ _ hst ↦ hM.2 _ _ (Nat.floor_mono hst)⟩
-
-theorem floorFiltration_natCast (𝓕 : Filtration ℕ mΩ) (n : ℕ) :
-    floorFiltration 𝓕 (n : ℝ≥0) = 𝓕 n :=
-  show 𝓕 ⌊(n : ℝ≥0)⌋₊ = 𝓕 n by rw [Nat.floor_natCast]
-
-/-- **Conversely, a process whose floor extension is a martingale for the floor filtration is a
-discrete martingale**: read it at the integer dates. -/
-theorem martingale_of_floor {𝓕 : Filtration ℕ mΩ} {Q : Measure Ω} {f : ℕ → Ω → ℝ}
-    (hM : Martingale (fun t ω ↦ f ⌊t⌋₊ ω) (floorFiltration 𝓕) Q) : Martingale f 𝓕 Q := by
-  refine ⟨fun n ↦ ?_, fun m n hmn ↦ ?_⟩
-  · have h := hM.1 n
-    rw [floorFiltration_natCast] at h
-    simpa using h
-  · have h := hM.2 m n (Nat.cast_le.2 hmn)
-    rw [floorFiltration_natCast] at h
-    simpa using h
-
 variable {𝓕 : Filtration ℕ mΩ} {P Q : Measure Ω} {S : ℕ → Ω → ℝ} {T : ℕ} {S₀ : ℝ}
 
 /-- Under an equivalent martingale measure the model's (undiscounted) price is a martingale for
@@ -118,7 +96,7 @@ the floor filtration. -/
 theorem martingale_discreteAssets (hQ : IsEMM 𝓕 P S T Q) :
     Martingale (fun t ω ↦ (fun _ : ℝ≥0 ↦ (1 : ℝ)) t * discreteAssets S T () t ω)
       (floorFiltration 𝓕) Q := by
-  simpa only [one_mul, discreteAssets] using martingale_floor hQ.martingale
+  simpa only [one_mul, discreteAssets] using hQ.martingale.comp (Nat.floor_mono (R := ℝ≥0))
 
 /-- **The forward's value under an equivalent martingale measure**: the forward struck at `K`, at
 any maturity, is worth `S₀ - K` (the price is in numeraire units, `D ≡ 1`), for a price starting
@@ -179,8 +157,8 @@ theorem price_toMarket (c : Contract Unit) :
 
 /-- **The pricing measures of the discrete market are its equivalent martingale measures.** The
 deflated asset frozen at `T` is the floor extension of `n ↦ S (min n T)`, which is a martingale for
-the floor filtration exactly when `S` frozen at `T` is a martingale for `𝓕` (`martingale_floor`,
-`martingale_of_floor`). -/
+the floor filtration exactly when `S` frozen at `T` is a martingale for `𝓕` (`Martingale.comp`,
+`Martingale.of_comp` with the right inverse `Nat.cast`). -/
 theorem isPricingMeasure_toMarket_iff :
     (toMarket P 𝓕 S T hS).IsPricingMeasure T Q ↔ IsEMM 𝓕 P S T Q := by
   have h (u : Unit) : (fun t ↦ (toMarket P 𝓕 S T hS).deflated u (min t T))
@@ -193,9 +171,10 @@ theorem isPricingMeasure_toMarket_iff :
     fun hQ ↦ ⟨hQ.toIsEquivProbMeasure, fun _ ↦ ?_⟩⟩
   · have hM := hQ.martingale ()
     rw [h ()] at hM
-    exact martingale_of_floor (f := fun n ↦ S (min n T)) hM
+    exact Martingale.of_comp (f := fun n ↦ S (min n T)) (Nat.floor_mono (R := ℝ≥0))
+      Nat.mono_cast Nat.floor_natCast hM
   · rw [h]
-    exact martingale_floor hQ.martingale
+    exact hQ.martingale.comp (Nat.floor_mono (R := ℝ≥0))
 
 variable (hS) in
 /-- **No arbitrage gives a pricing measure under which the contracts satisfy parity**, assuming the

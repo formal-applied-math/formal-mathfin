@@ -297,6 +297,7 @@ import MathFin.Probability.Brownian.Ito.ItoLemma2D
 -- Shared change-of-measure helper: a positive normalised density gives an
 -- equivalent probability measure (consumed by the one-period FTAP files)
 import MathFin.Probability.Martingales.EquivMeasure
+import MathFin.Probability.Martingales.TimeChange
 -- OU generator on polynomials: the Hermite spectral layer of the OU/Vasicek family
 import MathFin.Probability.Brownian.SDE.OUSpectral
 -- Estimation: Gaussian variance-ratio KL, realised-variance noise bias, square-root bias
@@ -684,6 +685,7 @@ import MathFin.Models.BlackScholes.BlackScholesSelfFinancing
 import MathFin.Models.Binomial.Binomial
 import MathFin.Models.Binomial.BinomialCompleteMarket
 import MathFin.Models.Binomial.BinomialLimit
+import MathFin.Models.Binomial.Market
 import MathFin.Models.Rates.Caplet
 import MathFin.Models.Rates.CMSContract
 import MathFin.Models.Rates.ShortRate
