@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (933 MathFin constants, 29 upstream). Citations
+  corpus (946 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -1795,6 +1795,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.existsUnique_expectileGap_eq_zero
 
+/-- info: 'MathFin.existsUnique_fxDelta_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.existsUnique_fxDelta_eq
+
 /-- info: 'MathFin.existsUnique_isEMM_horizonSpot' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.existsUnique_isEMM_horizonSpot
@@ -1930,6 +1934,54 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.ftap_two' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ftap_two
+
+/-- info: 'MathFin.fxAtmStrike_delta' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxAtmStrike_delta
+
+/-- info: 'MathFin.fxCallWingVol_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxCallWingVol_eq
+
+/-- info: 'MathFin.fxDeltaStrike_call_add_put' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxDeltaStrike_call_add_put
+
+/-- info: 'MathFin.fxDeltaStrike_call_gt_atm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxDeltaStrike_call_gt_atm
+
+/-- info: 'MathFin.fxForwardPoint_delta_gt_half' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxForwardPoint_delta_gt_half
+
+/-- info: 'MathFin.fxPutWingVol_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxPutWingVol_eq
+
+/-- info: 'MathFin.fxRiskReversal_eq_zero_of_even' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxRiskReversal_eq_zero_of_even
+
+/-- info: 'MathFin.fxRiskReversal_mirror' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxRiskReversal_mirror
+
+/-- info: 'MathFin.fxSmileButterfly_eq_sub_of_even' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxSmileButterfly_eq_sub_of_even
+
+/-- info: 'MathFin.fxSmileButterfly_mirror' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxSmileButterfly_mirror
+
+/-- info: 'MathFin.fxSmileButterfly_nonneg_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxSmileButterfly_nonneg_iff
+
+/-- info: 'MathFin.fxWingVols_eq_of_quotes_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxWingVols_eq_of_quotes_eq
 
 /-- info: 'MathFin.gainToPain_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
