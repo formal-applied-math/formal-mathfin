@@ -8,6 +8,7 @@ module
 public import MathFin.Pricing.Value
 public import MathFin.Pricing.EquivMartingaleMeasure
 public import MathFin.Pricing.StatePrices
+public import MathFin.Pricing.Numeraire
 
 /-!
 # The market and its pricing functional
@@ -35,6 +36,11 @@ Two facts make it the price rather than one more integral:
   A parametric price defined in one concrete model is therefore the price in every market with
   that law.
 
+Changing the numéraire changes the pricing measure and not the price: the market with numéraire `N`
+in place of `B` prices a payment at `T` under the numéraire measure `Q^N` exactly as the original
+market does under `Q` (`price_pay_withNumeraire`, the change-of-numéraire theorem
+`changeOfNumeraire` read through the price).
+
 On a finite sample space the price of a single payment is `statePricePricing` with the state
 prices `q ω = (N 0 / N t)(ω) · Q {ω}` (`price_pay_eq_statePricePricing`), non-negative for every
 `Q` (`statePrice_nonneg`).
@@ -46,12 +52,14 @@ prices `q ω = (N 0 / N t)(ω) · Q {ω}` (`price_pay_eq_statePricePricing`), no
 * `Market.IsPricingMeasure`: an equivalent probability measure making every deflated asset a
   martingale up to the horizon.
 * `Market.price`: the value of a contract under a measure, deflated by the numéraire.
+* `Market.withNumeraire`: the same market with another numéraire.
 
 ## Main results
 
 * `Market.IsPricingMeasure.isEMM`: a pricing measure is an `IsEMM` for each deflated asset.
 * `Market.IsPricingMeasure.price_pay_obs`: a traded asset is priced at its initial price.
 * `Market.price_eq_of_map_observation_eq`: law invariance of the price.
+* `Market.price_pay_withNumeraire`: the price is invariant under the change of numéraire.
 * `Market.price_pay_eq_statePricePricing`: on a finite sample space the price of a payment is
   state-price pricing, with non-negative state prices (`Market.statePrice_nonneg`).
 
@@ -170,6 +178,42 @@ theorem price_eq_of_map_observation_eq {Ω' : Type*} {mΩ' : MeasurableSpace Ω'
     M.price Q c = M'.price Q' c :=
   c.value_eq_of_map_observation_eq hc M.measurable_deflator M.measurable_asset
     M'.measurable_deflator M'.measurable_asset h
+
+/-! ### Change of numéraire -/
+
+/-- The market `M` with its numéraire replaced by a strictly positive adapted process `N`. -/
+def withNumeraire (M : Market ι Ω) (N : ℝ≥0 → Ω → ℝ) (hN : ∀ t ω, 0 < N t ω)
+    (hNa : StronglyAdapted M.𝓕 N) : Market ι Ω :=
+  { M with numeraire := N, numeraire_pos := hN, numeraire_adapted := hNa }
+
+/-- **The price is invariant under the change of numéraire.** Replace the numéraire `B` of `M` by
+a strictly positive adapted `N`, with deterministic initial values `B 0 = b₀` and `N 0 = n₀`. The
+new market prices a payment at `T` under the numéraire measure `Q^N`, of density
+`(N_T b₀)/(n₀ B_T)` with respect to `Q`, as `M` prices it under `Q`: this is `changeOfNumeraire`,
+`n₀ 𝔼^{Q^N}[X / N_T] = b₀ 𝔼^Q[X / B_T]`, and it needs no integrability. -/
+theorem price_pay_withNumeraire [Nonempty Ω] (M : Market ι Ω) (Q : Measure Ω)
+    {N : ℝ≥0 → Ω → ℝ} (hN : ∀ t ω, 0 < N t ω) (hNa : StronglyAdapted M.𝓕 N) {b₀ n₀ : ℝ}
+    (hB₀ : ∀ ω, M.numeraire 0 ω = b₀) (hN₀ : ∀ ω, N 0 ω = n₀) (T : ℝ≥0) (a : Payoff ι) :
+    (M.withNumeraire N hN hNa).price (numeraireMeasure Q (M.numeraire T) (N T) b₀ n₀) (.pay T a)
+      = M.price Q (.pay T a) := by
+  obtain ⟨ω₀⟩ := ‹Nonempty Ω›
+  have hb₀ : 0 < b₀ := hB₀ ω₀ ▸ M.numeraire_pos 0 ω₀
+  have hn₀ : 0 < n₀ := hN₀ ω₀ ▸ hN 0 ω₀
+  calc (M.withNumeraire N hN hNa).price (numeraireMeasure Q (M.numeraire T) (N T) b₀ n₀) (.pay T a)
+      = n₀ * ∫ ω, a.eval (scenarioAt M.asset ω) / N T ω
+          ∂(numeraireMeasure Q (M.numeraire T) (N T) b₀ n₀) := by
+        rw [price, Contract.value_pay, ← integral_const_mul]
+        refine integral_congr_ae (.of_forall fun ω ↦ ?_)
+        simp only [deflator, withNumeraire, hN₀]
+        ring
+    _ = b₀ * ∫ ω, a.eval (scenarioAt M.asset ω) / M.numeraire T ω ∂Q :=
+        changeOfNumeraire _ ((hNa T).mono (M.𝓕.le T)).measurable (M.measurable_numeraire T)
+          (hN T) (M.numeraire_pos T) hb₀.le hn₀
+    _ = M.price Q (.pay T a) := by
+        rw [price, Contract.value_pay, ← integral_const_mul]
+        refine integral_congr_ae (.of_forall fun ω ↦ ?_)
+        simp only [deflator, hB₀]
+        ring
 
 /-! ### Finite sample spaces: state prices -/
 

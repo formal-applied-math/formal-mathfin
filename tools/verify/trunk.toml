@@ -64,7 +64,7 @@ instance = "MathFin.Market.price_pay_eq_statePricePricing"
 
 [[device]]
 name = "MathFin.numeraireMeasure"
-instance = ""
+instance = "MathFin.Market.price_pay_withNumeraire"
 
 [[device]]
 name = "MathFin.superReplicationPrice"
