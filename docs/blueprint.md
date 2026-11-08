@@ -144,6 +144,7 @@ graph TD
   varianceSwapJumpBias["Variance-swap jump bias"]:::proved
   wienerIsometry["Wiener isometry (deterministic L²)"]:::proved
   expectedShortfall["Expected shortfall"]:::proved
+  pricingFunctional["The pricing functional"]:::proved
   binomialReplication["The binomial price is the cost of a hedge"]:::proved
   black76Caplet["Caplet as a Black-76 call under the forward measure"]:::proved
   bsPdeBrownian["BS PDE in the Brownian coordinate"]:::proved
@@ -249,7 +250,6 @@ graph TD
     zeroCouponBondPrice["The zero-coupon bond price is a price"]:::frontier
   end
   subgraph frontier_foundations["⏳ frontier · foundations"]
-    pricingFunctional["The pricing functional"]:::frontier
     realErf["erf / erfc / erfinv for Mathlib"]:::frontier
     bracketQuadraticVariation["Bracket is the quadratic variation of an Itô integral"]:::frontier
     brownianNowhereDifferentiable["Brownian paths are nowhere differentiable"]:::frontier
@@ -367,6 +367,8 @@ graph TD
   compoundPoissonMgf --> varianceSwapJumpBias
   brownianMotion --> wienerIsometry
   valueAtRisk --> expectedShortfall
+  contract --> pricingFunctional
+  contractValue --> pricingFunctional
   binomialNoArbitrage --> binomialReplication
   martingaleTransform --> binomialReplication
   binomialRepresentation --> binomialReplication
@@ -529,11 +531,6 @@ graph TD
   brownianMotion --> pricingMeasure
   itoIntegralClm --> pricingMeasure
   marketCompleteness --> pricingMeasure
-  emm --> pricingFunctional
-  contractValue --> pricingFunctional
-  numeraireMeasure --> pricingFunctional
-  pricingMeasure --> pricingFunctional
-  marketCompleteness --> pricingFunctional
   standardNormalCdf --> realErf
   aaveLiquidationKmv --> aaveHealthFactorBound
   vasicekBondPde --> affineTermStructure
@@ -774,6 +771,7 @@ graph TD
 | `thm:variance-swap-jump-bias` Variance-swap jump bias | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-swap-jump-bias%22%20in%3Abody) |
 | `thm:wiener-isometry` Wiener isometry (deterministic L²) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Awiener-isometry%22%20in%3Abody) |
 | `def:expected-shortfall` Expected shortfall | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aexpected-shortfall%22%20in%3Abody) |
+| `def:pricing-functional` The pricing functional | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Apricing-functional%22%20in%3Abody) |
 | `thm:binomial-replication` The binomial price is the cost of a hedge | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abinomial-replication%22%20in%3Abody) |
 | `thm:black76-caplet` Caplet as a Black-76 call under the forward measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ablack76-caplet%22%20in%3Abody) |
 | `thm:bs-pde-brownian` BS PDE in the Brownian coordinate | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-pde-brownian%22%20in%3Abody) |
@@ -816,7 +814,6 @@ graph TD
 | `thm:market-completeness` Completeness of the Brownian market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarket-completeness%22%20in%3Abody) |
 | `thm:martingale-representation-process` Martingale representation (process form) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amartingale-representation-process%22%20in%3Abody) |
 | `thm:pricing-measure` The pricing measure on 𝓕ᴮ_T is unique | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Apricing-measure%22%20in%3Abody) |
-| `def:pricing-functional` The pricing functional | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Apricing-functional%22%20in%3Abody) |
 | `def:real-erf` erf / erfc / erfinv for Mathlib | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Areal-erf%22%20in%3Abody) |
 | `thm:aave-health-factor-bound` Aave multi-asset health factor: a liquidation bound | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaave-health-factor-bound%22%20in%3Abody) |
 | `thm:affine-term-structure` Affine term structure | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaffine-term-structure%22%20in%3Abody) |

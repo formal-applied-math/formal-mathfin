@@ -145,18 +145,18 @@
   "label": "thm:continuous-ftap",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/FTAP/ContinuousFTAP.lean"},
- {"uses": [],
-  "title": "Equivalent probability measure",
-  "text":
-  "$Q$ is a probability measure with the same null sets as $P$ ($Q \\ll P$ and\n  $P \\ll Q$): the prefix every equivalent-martingale-measure structure of the library extends.",
-  "name": "MathFin.IsEquivProbMeasure",
-  "module": "MathFin.Probability.Martingales.EquivMeasure",
-  "line": 63,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:equivalent-measure",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Martingales/EquivMeasure.lean"},
+ {
+    "uses": [],
+    "title": "Equivalent probability measure",
+    "text": "$Q$ is a probability measure with the same null sets as $P$ ($Q \\ll P$ and\n  $P \\ll Q$): the prefix every equivalent-martingale-measure structure of the library extends.",
+    "name": "MathFin.IsEquivProbMeasure",
+    "module": "MathFin.Probability.Martingales.EquivMeasure",
+    "line": 72,
+    "leanOk": true,
+    "latexEnv": "definition",
+    "label": "def:equivalent-measure",
+    "file": "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Martingales/EquivMeasure.lean"
+  },
  {"uses": [],
   "title": "Standard normal CDF Φ",
   "text":
@@ -701,18 +701,20 @@
   "label": "thm:one-factor-joint-default",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Credit/OneFactorCopula.lean"},
- {"uses": ["def:contract"],
-  "title": "Value of a contract",
-  "text":
-  "The value of a contract is the $Q$-expectation of its discounted pathwise\n  present value, against a model that turns each observation the contract makes into a random\n  variable.",
-  "name": "MathFin.Contracts.Contract.value",
-  "module": "MathFin.Pricing.Value",
-  "line": 125,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:contract-value",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Value.lean"},
+ {
+    "uses": [
+      "def:contract"
+    ],
+    "title": "Value of a contract",
+    "text": "The value of a contract is the $Q$-expectation of its discounted pathwise\n  present value, against a model that turns each observation the contract makes into a random\n  variable.",
+    "name": "MathFin.Contracts.Contract.value",
+    "module": "MathFin.Pricing.Value",
+    "line": 126,
+    "leanOk": true,
+    "latexEnv": "definition",
+    "label": "def:contract-value",
+    "file": "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Value.lean"
+  },
  {"uses": [],
   "title": "Key-rate durations sum to the parallel shift",
   "text":
@@ -750,21 +752,22 @@
   "label": "thm:empirical-cdf-strong-law",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Laws/QuantileConvergence.lean"},
- {"uses":
-  ["def:brownian-motion",
-   "def:ito-integral-clm",
-   "thm:martingale-representation"],
-  "title": "Completeness of the Brownian market",
-  "text":
-  "Every square-integrable $\\mathcal{F}^B_T$-claim is replicated from\n  initial wealth $E_\\mu[H]$ by a unique Itô-integrable strategy — the representation\n  theorem read as a trading statement, the integrand *being* the hedge. The strategy class\n  is the predictable $L^2$ integrands (piecewise-constant holdings could not hedge a\n  general $L^2$ claim), and the traded gain is the integral against $B$ itself: the\n  stochastic integral $\\int\\varphi\\,dS$ against a general price is absent by design.",
-  "name": "MathFin.exists_replicating_strategy",
-  "module": "MathFin.Pricing.MarketCompleteness",
-  "line": 138,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:market-completeness",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/MarketCompleteness.lean"},
+ {
+    "uses": [
+      "def:brownian-motion",
+      "def:ito-integral-clm",
+      "thm:martingale-representation"
+    ],
+    "title": "Completeness of the Brownian market",
+    "text": "Every square-integrable $\\mathcal{F}^B_T$-claim is replicated from\n  initial wealth $E_\\mu[H]$ by a unique Itô-integrable strategy — the representation\n  theorem read as a trading statement, the integrand *being* the hedge. The strategy class\n  is the predictable $L^2$ integrands (piecewise-constant holdings could not hedge a\n  general $L^2$ claim), and the traded gain is the integral against $B$ itself: the\n  stochastic integral $\\int\\varphi\\,dS$ against a general price is absent by design.",
+    "name": "MathFin.exists_replicating_strategy",
+    "module": "MathFin.Pricing.MarketCompleteness",
+    "line": 148,
+    "leanOk": true,
+    "latexEnv": "theorem",
+    "label": "thm:market-completeness",
+    "file": "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/MarketCompleteness.lean"
+  },
  {"uses": ["def:standard-normal-cdf"],
   "title": "Unilateral CVA, Gaussian exposure",
   "text":
@@ -1042,19 +1045,22 @@
   "label": "thm:quadratic-variation",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/QuadraticVariationL2.lean"},
- {"uses":
-  ["def:brownian-motion", "def:ito-integral-clm", "thm:market-completeness"],
-  "title": "The pricing measure on 𝓕ᴮ_T is unique",
-  "text":
-  "A probability measure $Q \\ll \\mu$ that prices the traded Itô gains at\n  zero agrees with $\\mu$ on all of $\\mathcal{F}^B_T$: replicate an event's indicator, and\n  only the initial wealth $\\mu(A)$ survives. This is *not* the unconditional second FTAP.\n  Gains-neutrality is a hypothesis, not a consequence of $Q$ being a martingale measure for\n  a price $S$ — the wealth built here is an integral against $B$, and nothing in\n  $\\mathrm{IsEMM}\\,S\\,Q$ makes that a $Q$-fair game. The hypothesis is guarded: $\\mu$\n  satisfies it, and the textbook gains-martingale condition implies it. Only\n  complete $\\Rightarrow$ unique is proved; the Jacod–Yor converse is out of scope. For a\n  price $S = S_0 + \\int \\sigma\\,dB$ with $\\sigma \\ne 0$ a.e. and $Q$ with a square-integrable\n  density, the hypothesis does follow from $S$ being a $Q$-martingale\n  (`measure_eq_of_density`).",
-  "name": "MathFin.measure_eq_of_pricesGainsAtZero",
-  "module": "MathFin.Pricing.MarketCompleteness",
-  "line": 242,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:pricing-measure",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/MarketCompleteness.lean"},
+ {
+    "uses": [
+      "def:brownian-motion",
+      "def:ito-integral-clm",
+      "thm:market-completeness"
+    ],
+    "title": "The pricing measure on 𝓕ᴮ_T is unique",
+    "text": "A probability measure $Q \\ll \\mu$ that prices the traded Itô gains at\n  zero agrees with $\\mu$ on all of $\\mathcal{F}^B_T$: replicate an event's indicator, and\n  only the initial wealth $\\mu(A)$ survives. This is *not* the unconditional second FTAP.\n  Gains-neutrality is a hypothesis, not a consequence of $Q$ being a martingale measure for\n  a price $S$ — the wealth built here is an integral against $B$, and nothing in\n  $\\mathrm{IsEMM}\\,S\\,Q$ makes that a $Q$-fair game. The hypothesis is guarded: $\\mu$\n  satisfies it, and the textbook gains-martingale condition implies it. Only\n  complete $\\Rightarrow$ unique is proved; the Jacod–Yor converse is out of scope. For a\n  price $S = S_0 + \\int \\sigma\\,dB$ with $\\sigma \\ne 0$ a.e. and $Q$ with a square-integrable\n  density, the hypothesis does follow from $S$ being a $Q$-martingale\n  (`measure_eq_of_density`).",
+    "name": "MathFin.measure_eq_of_pricesGainsAtZero",
+    "module": "MathFin.Pricing.MarketCompleteness",
+    "line": 252,
+    "leanOk": true,
+    "latexEnv": "theorem",
+    "label": "thm:pricing-measure",
+    "file": "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/MarketCompleteness.lean"
+  },
  {"uses":
   ["def:black-scholes-model",
    "def:standard-normal-cdf",
@@ -1567,4 +1573,19 @@
     "latexEnv": "theorem",
     "label": "thm:superhedging-coherent",
     "file": "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"
+  },
+ {
+    "uses": [
+      "def:contract",
+      "def:contract-value"
+    ],
+    "title": "The pricing functional",
+    "text": "A market is a filtered space with traded assets and a positive numéraire. A\n  pricing measure up to $T$ is a probability measure equivalent to the reference measure on\n  $\\mathcal F_T$ under which every deflated asset, frozen at $T$, is a martingale, and the price of\n  a contract under it is the expectation of its deflated cash flows. State-price pricing, the\n  change of numéraire, the conditional bond price, superreplication and gains-neutral measures are\n  instances.",
+    "name": "MathFin.Market.price",
+    "module": "MathFin.Pricing.Market",
+    "line": 152,
+    "leanOk": true,
+    "latexEnv": "definition",
+    "label": "def:pricing-functional",
+    "file": "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Market.lean"
   }]

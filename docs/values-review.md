@@ -124,6 +124,107 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   that finds nothing to improve.
 
 ## Review log
+## 2026-11-08 — corpus 817, modules 731 — the one trunk, phases 0–2, read before it lands
+
+Scope: the one-trunk work since the RiO review (#450, #451; branches `v2/phase2c-horizon` and
+`v2/phase2d-black-scholes`). `Market`, `IsPricingMeasure` (equivalence on `𝓕 T` only), `price` and
+`priceAt` (`Pricing/Market.lean`) and `Contract.value` with a stochastic deflator
+(`Pricing/Value.lean`). Three markets on it: discrete (`Pricing/DiscreteMarket.lean`), binomial
+(`Models/Binomial/Market.lean`) and Black–Scholes (`Models/BlackScholes/Market.lean`).
+Superreplication and gains-neutral measures as instances (`Pricing/MarketCompleteness.lean`). The
+support lemmas: `MartingaleFrozen`, `EquivMeasure`'s gluing lemma and `TimeChange`. 13 new corpus
+entries. Three read-only reviewers split the lenses:
+- the first pass with lenses 7 and 8;
+- lenses 2, 3 and 6;
+- lenses 1, 4 and 5.
+
+### The standing first pass: prose against statement
+
+- Twelve of the thirteen entries are faithful. `gir-market-superreplication-price` named
+  `M.price Q c` for a merely gains-neutral `Q`, never shown to be a pricing measure of `M`, and
+  its description said the market was "driven additively by `B`", which nothing in the statement
+  says. This is the junk-value case. The theorem now takes `M.𝓕 T = 𝓕ᴮ_T` and
+  `M.IsPricingMeasure T μ` and concludes `M.IsPricingMeasure T Q` alongside the price identity. The
+  description says when the hypothesis on `μ` holds (a Bachelier-type market, not Black–Scholes
+  under its physical measure).
+- Module docstrings, fixed:
+  - `Market.lean` said the change of numéraire "changes the pricing measure". Only the price
+    identity is proved, and the docstring now says that `Q^N` being a pricing measure is not proved.
+  - `Market.lean` said "a measure equivalent everywhere is one" without the martingale condition.
+  - `Binomial/Market.lean` led with "the pricing measure is unique". It is unique on the
+    information at the horizon, and the lead now says so.
+  - `MarketCompleteness.lean` did not say that "the market driven by `B`" means its deflated asset
+    is `B`.
+  - `BlackScholes/Market.lean` said "Brownian motion" for a pre-Brownian hypothesis.
+  - `DiscreteMarket.lean` had a stale title and a stale model count.
+  - `Value.lean` said `value` integrates against "a pricing measure".
+- Dissolved on adjudication:
+  - the claim that the Black–Scholes pricing-measure proof re-proves `deflated_market` inline (it
+    rewrites through `B^θ`, not `W`, so the lemma does not apply);
+  - the claim that `Value.lean`'s "no theorem here needs `IsEMM`" is stale (it is true);
+  - the claim that the Wald exponential has no Itô representation in the library
+    (`discountedGBM_eq_itoIntegral`, `constDoleans_sub_one_mem_range`).
+
+### Upgrades executed
+
+- `Market.superReplicationPrice_eq_price` restated with a genuine pricing measure (above).
+- `Martingale.congr_ae` (an adapted a.e.-equal copy of a martingale is one) and
+  `Market.stronglyAdapted_deflated`, the general lemmas the Black–Scholes pricing measure needed, in
+  the general modules rather than inline.
+- The seven docstring corrections above.
+
+### Lens gradients
+
+- **Inspired math.** The exemplar is `IsPricingMeasure` with `of_trim_eq` and
+  `exists_isEquivProbMeasure`: the Föllmer–Schied notion, lossless in both directions. The next
+  upgrade is a trunk notion of strategy: `Market.NoArbitrage` with self-financing gains, so that the
+  three FTAPs are statements about a `Market` rather than about raw data or a parameter condition.
+- **Coherence.** The exemplar is `martingale_min_iff` and `martingale_min_of_trim_eq`, general and
+  consumed thinly by the trunk. The next upgrade is one `Martingale.integral_eq` lemma replacing the
+  seven re-derivations of "a martingale has constant mean".
+- **Zero slop.** The exemplar is the module docstrings' "not proved" disclosures. The next upgrade
+  covers the duplicated blocks in `Binomial/Market.lean` (the two `map_flips` bullets, the two
+  `crrUpProb` casts, `hgrid`/`hfl`), the duplicated `hS₀` shim and the `D ≡ 1` residue in
+  `DiscreteMarket.lean`.
+- **Architectural ingenuity.** The exemplar is the time change: the discrete market and the tree
+  become markets on `ℝ≥0` by `Filtration.comp`. The next upgrade is one `Market.ofDiscrete` along a
+  step `h` with a numéraire, of which `toMarket` and `Binomial.market` are both instances.
+- **First principles.** The exemplar is the Black–Scholes uniqueness gap, stated as a gap. The next
+  upgrade is `exists_isEquivProbMeasure` under `SigmaFinite (P.trim _)` instead of
+  `IsFiniteMeasure P`.
+- **Idiomatic register.** The exemplar is `exists_isEquivProbMeasure` as a two-line term. The next
+  upgrade is `trim_eq_trim_iff` and `isProbabilityMeasure_of_trim_eq`, replacing four hand-rolled
+  `Measure.ext`/`trim_measurableSet_eq` blocks.
+- **Concept clarity.** The exemplar is `Market.lean`'s header (definition, then why `𝓕 T`, then
+  when the total `price` is a price). The next upgrade is to state `IsPricingMeasure` through
+  `IsEquivProbMeasure (P.trim _) (Q.trim _)` instead of a bare `ac`/`ac'` pair.
+- **Beautiful math.** The exemplar is the gluing lemma `exists_isEquivProbMeasure_trim_eq` (weight
+  `P` by `d(Q|m)/d(P|m)`). The next upgrade is the Black–Scholes keystone itself (#452).
+
+### Ranked backlog
+
+1. Black–Scholes uniqueness among pricing measures with an `L²` density (#452, phase 3). The route:
+   under the Girsanov measure the deflated asset is `S₀ + ∫ σS dB^θ`
+   (`discountedGBM_eq_itoIntegral`), so `pricesGainsAtZero_of_density` applies. The filtration of
+   `B^θ` against that of `W` is the step to settle first. The `L¹`-density case (localisation) stays
+   on the frontier.
+2. `Market.NoArbitrage` / self-financing gains on the trunk, with the discrete, binomial and
+   Black–Scholes FTAPs as instances (phase 5 or after v2.0).
+3. `Market.ofDiscrete` with a numéraire and a step, merging `toMarket` and `Binomial.market`. This
+   also opens the short-rate limb: `Market.ofShortRate`, with `value_fixedFlows_vasicek`/`hullWhite`/
+   `gsr` restated as `Market.price` (#453).
+4. `bondPrice` and `HasBondPrice` over a `Market` (`priceAt`), retiring the parallel definition
+   (#453).
+5. `Martingale.integral_eq`, `trim_eq_trim_iff` and `isProbabilityMeasure_of_trim_eq`, with their
+   callers migrated, as upstream candidates alongside `Martingale.congr_ae`, `Filtration.comp` /
+   `Martingale.comp` / `of_comp` and `exists_isEquivProbMeasure_trim_eq`.
+6. Binomial API friction: derive `hq` from `hna`, use `T = N h` as the single grid hypothesis, and
+   derive `BinomialNoArb` from `hQ` in `trim_eq_of_isPricingMeasure`.
+7. `Market.superPrice` over the set of pricing measures, convex and monotone, for the risk,
+   insurance and incomplete jump limbs (#454, #456, #459).
+8. A Mathlib-style home for `integral_abs_sum_le_of_identDistrib` (`Risk/CompoundPoissonCVaR.lean`),
+   and the mean-based domination there in place of `2ⁿ`.
+
 
 Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the **upgrade-driven model**
 (per-lens exemplar → next upgrade; upgrades executed + ranked backlog). Earlier entries are historical
