@@ -2614,6 +2614,13 @@
       "input_hash": "7db1e1ff6e12650aea4c74bf4ac230eec36ca89a28eb82f27697260dc5ac7e7f",
       "verified_at_commit": "f68ab19"
     },
+    "mf-fx-smile-quotes": {
+      "benchmark_file": "exotic_options.json",
+      "date": "2026-11-08",
+      "elapsed_s": 2.2,
+      "input_hash": "8fd01ef8858d6fbd72be44cedcab100cc1c4e5e29c6437659a04164c53c88be4",
+      "verified_at_commit": "84d2fc6"
+    },
     "mf-gamma-mgf": {
       "benchmark_file": "credit.json",
       "date": "2026-11-08",
