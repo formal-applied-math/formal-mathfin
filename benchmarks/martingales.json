@@ -7,14 +7,20 @@
       "description": "Every adapted integrable process f decomposes as f = M + A with M a martingale and A predictable null at 0, uniquely up to a.e. equality at every time. The existence-plus-uniqueness packaging is assembled in MathFin from Mathlib's martingalePart/predictablePart lemmas.",
       "domain": "martingales",
       "code": {
-        "lean": "import MathFin.Foundations.DoobDecomposition\n\nopen MeasureTheory ProbabilityTheory\n\ntheorem doob_decomposition_thm {Ω E : Type*} {m0 : MeasurableSpace Ω}\n    [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]\n    {μ : Measure Ω} {ℱ : Filtration ℕ m0} [SigmaFiniteFiltration μ ℱ]\n    {f : ℕ → Ω → E} (hf : StronglyAdapted ℱ f) (hf_int : ∀ n, Integrable (f n) μ) :\n    ∃ M A : ℕ → Ω → E,\n      (Martingale M ℱ μ ∧ (StronglyAdapted ℱ fun n => A (n + 1)) ∧ A 0 = 0 ∧\n        M + A = f) ∧\n      ∀ M' A' : ℕ → Ω → E, Martingale M' ℱ μ →\n        (StronglyAdapted ℱ fun n => A' (n + 1)) → A' 0 = 0 →\n        (∀ n, Integrable (A' n) μ) → M' + A' = f →\n        ∀ n, M' n =ᵐ[μ] M n ∧ A' n =ᵐ[μ] A n :=\n  MathFin.doob_decomposition hf hf_int\n"
+        "lean": "import MathFin.Probability.Discrete.DoobDecomposition\n\nopen MeasureTheory ProbabilityTheory\n\ntheorem doob_decomposition_thm {Ω E : Type*} {m0 : MeasurableSpace Ω}\n    [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]\n    {μ : Measure Ω} {ℱ : Filtration ℕ m0} [SigmaFiniteFiltration μ ℱ]\n    {f : ℕ → Ω → E} (hf : StronglyAdapted ℱ f) (hf_int : ∀ n, Integrable (f n) μ) :\n    ∃ M A : ℕ → Ω → E,\n      (Martingale M ℱ μ ∧ (StronglyAdapted ℱ fun n => A (n + 1)) ∧ A 0 = 0 ∧\n        M + A = f) ∧\n      ∀ M' A' : ℕ → Ω → E, Martingale M' ℱ μ →\n        (StronglyAdapted ℱ fun n => A' (n + 1)) → A' 0 = 0 →\n        (∀ n, Integrable (A' n) μ) → M' + A' = f →\n        ∀ n, M' n =ᵐ[μ] M n ∧ A' n =ᵐ[μ] A n :=\n  MathFin.doob_decomposition hf hf_int\n"
       },
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.2.12",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 2.2.12"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full textbook statement: existence AND a.e.-uniqueness of the decomposition. Mathlib provides all component lemmas (martingalePart/predictablePart, their martingale/predictability/zero facts, and the two essential-uniqueness lemmas martingalePart_add_ae_eq / predictablePart_add_ae_eq); this library's contribution (MathFin.Foundations.DoobDecomposition) is the single existence-plus-uniqueness packaging, which Mathlib never states. Previous entry stated only the near-definitional sum identity. Axioms-clean."
+        "formalization_scope": "Full textbook statement: existence AND a.e.-uniqueness of the decomposition. Mathlib provides all component lemmas (martingalePart/predictablePart, their martingale/predictability/zero facts, and the two essential-uniqueness lemmas martingalePart_add_ae_eq / predictablePart_add_ae_eq); this library's contribution (MathFin.Probability.Discrete.DoobDecomposition) is the single existence-plus-uniqueness packaging, which Mathlib never states. Previous entry stated only the near-definitional sum identity. Axioms-clean."
       }
     },
     {
@@ -23,14 +29,20 @@
       "description": "Conditional-expectation-form optional sampling for submartingales: for stopping times σ ≤ τ bounded by n, stoppedValue f σ ≤ᵐ μ[stoppedValue f τ | ℱ_σ] (MathFin.submartingale_optional_sampling) — derived by Doob decomposition: the martingale part transports across stopping times by Mathlib's optional-sampling equality, and the compensator is a.s. monotone (exactly the submartingale property). Strictly stronger than the expectation form E[f_σ] ≤ E[f_τ] (Submartingale.expected_stoppedValue_mono), which is all Mathlib provides for submartingales.",
       "domain": "stopping_times",
       "code": {
-        "lean": "import MathFin.Foundations.OptionalSamplingInequality\n\nopen MeasureTheory ProbabilityTheory\n\ntheorem submartingale_optional_sampling_thm\n    {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : MeasureTheory.Measure Ω}\n    {ℱ : MeasureTheory.Filtration ℕ m0} {f : ℕ → Ω → ℝ} {τ σ : Ω → ℕ∞} {n : ℕ}\n    [MeasureTheory.SigmaFiniteFiltration μ ℱ]\n    (hf : MeasureTheory.Submartingale f ℱ μ)\n    (hτ : MeasureTheory.IsStoppingTime ℱ τ) (hσ : MeasureTheory.IsStoppingTime ℱ σ)\n    (hσ_le_τ : σ ≤ τ) (hτ_le : ∀ ω, τ ω ≤ n)\n    [MeasureTheory.SigmaFinite (μ.trim hσ.measurableSpace_le)] :\n    MeasureTheory.stoppedValue f σ ≤ᵐ[μ]\n      μ[MeasureTheory.stoppedValue f τ | hσ.measurableSpace] :=\n  MathFin.submartingale_optional_sampling hf hτ hσ hσ_le_τ hτ_le\n"
+        "lean": "import MathFin.Probability.Discrete.OptionalSamplingInequality\n\nopen MeasureTheory ProbabilityTheory\n\ntheorem submartingale_optional_sampling_thm\n    {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : MeasureTheory.Measure Ω}\n    {ℱ : MeasureTheory.Filtration ℕ m0} {f : ℕ → Ω → ℝ} {τ σ : Ω → ℕ∞} {n : ℕ}\n    [MeasureTheory.SigmaFiniteFiltration μ ℱ]\n    (hf : MeasureTheory.Submartingale f ℱ μ)\n    (hτ : MeasureTheory.IsStoppingTime ℱ τ) (hσ : MeasureTheory.IsStoppingTime ℱ σ)\n    (hσ_le_τ : σ ≤ τ) (hτ_le : ∀ ω, τ ω ≤ n)\n    [MeasureTheory.SigmaFinite (μ.trim hσ.measurableSpace_le)] :\n    MeasureTheory.stoppedValue f σ ≤ᵐ[μ]\n      μ[MeasureTheory.stoppedValue f τ | hσ.measurableSpace] :=\n  MathFin.submartingale_optional_sampling hf hτ hσ hσ_le_τ hτ_le\n"
       },
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.3.6",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 2.3.6"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the conditional-expectation-form optional sampling INEQUALITY for submartingales, stoppedValue f sigma <=ae mu[stoppedValue f tau | F_sigma] for bounded stopping times sigma <= tau <= n (Foundations/OptionalSamplingInequality.lean) — absent from Mathlib at the pin (which has the martingale EQUALITY, Martingale.stoppedValue_ae_eq_condExp_of_le, and only the expectation-form submartingale inequality). Derivation = Doob decomposition: the martingale part transports by Mathlib's optional sampling equality; the compensator predictablePart is a.s. nondecreasing (its increments are mu[f_{k+1} - f_k | F_k] >= 0, exactly the submartingale property), so its stopped values compare pathwise and condExp_mono transports the comparison. Replaces the former wrapper around the expectation-form Submartingale.expected_stoppedValue_mono. Axioms-clean."
+        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the conditional-expectation-form optional sampling INEQUALITY for submartingales, stoppedValue f sigma <=ae mu[stoppedValue f tau | F_sigma] for bounded stopping times sigma <= tau <= n (Probability/Discrete/OptionalSamplingInequality.lean) — absent from Mathlib at the pin (which has the martingale EQUALITY, Martingale.stoppedValue_ae_eq_condExp_of_le, and only the expectation-form submartingale inequality). Derivation = Doob decomposition: the martingale part transports by Mathlib's optional sampling equality; the compensator predictablePart is a.s. nondecreasing (its increments are mu[f_{k+1} - f_k | F_k] >= 0, exactly the submartingale property), so its stopped values compare pathwise and condExp_mono transports the comparison. Replaces the former wrapper around the expectation-form Submartingale.expected_stoppedValue_mono. Axioms-clean."
       }
     },
     {
@@ -44,6 +56,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.4.3",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 2.4.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "library_wrapper",
         "formalization_scope": "Direct Lean wrapper around an existing library theorem closely matching the benchmark statement."
@@ -55,14 +73,20 @@
       "description": "A martingale bounded in L² converges to the limit process almost surely AND in L²-norm. The L² half is absent from Mathlib; it is proved in MathFin via the library's Doob L² maximal inequality (an L² envelope dominating every f_n), uniform integrability from that single dominator, and Vitali's convergence theorem.",
       "domain": "martingales",
       "code": {
-        "lean": "import MathFin.Foundations.L2MartingaleConvergence\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\ntheorem martingale_L2_convergence_thm {Ω : Type*} {m0 : MeasurableSpace Ω}\n    {μ : Measure Ω} [IsFiniteMeasure μ] {ℱ : Filtration ℕ m0}\n    {f : ℕ → Ω → ℝ} {R : ℝ≥0}\n    (hf : Martingale f ℱ μ) (hbdd : ∀ n, eLpNorm (f n) 2 μ ≤ R) :\n    (∀ᵐ ω ∂μ, Filter.Tendsto (fun n => f n ω) Filter.atTop\n      (nhds (ℱ.limitProcess f μ ω))) ∧\n    Filter.Tendsto (fun n => eLpNorm (f n - ℱ.limitProcess f μ) 2 μ)\n      Filter.atTop (nhds 0) :=\n  MathFin.martingale_ae_tendsto_and_eLpNorm_two_tendsto hf hbdd\n"
+        "lean": "import MathFin.Probability.Discrete.L2MartingaleConvergence\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\ntheorem martingale_L2_convergence_thm {Ω : Type*} {m0 : MeasurableSpace Ω}\n    {μ : Measure Ω} [IsFiniteMeasure μ] {ℱ : Filtration ℕ m0}\n    {f : ℕ → Ω → ℝ} {R : ℝ≥0}\n    (hf : Martingale f ℱ μ) (hbdd : ∀ n, eLpNorm (f n) 2 μ ≤ R) :\n    (∀ᵐ ω ∂μ, Filter.Tendsto (fun n => f n ω) Filter.atTop\n      (nhds (ℱ.limitProcess f μ ω))) ∧\n    Filter.Tendsto (fun n => eLpNorm (f n - ℱ.limitProcess f μ) 2 μ)\n      Filter.atTop (nhds 0) :=\n  MathFin.martingale_ae_tendsto_and_eLpNorm_two_tendsto hf hbdd\n"
       },
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.5.1",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 2.5.1"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full statement: a.e. convergence (Mathlib's upcrossing-based ae_tendsto_limitProcess) AND L²-norm convergence. The L² half is NOT in Mathlib; MathFin.Foundations.L2MartingaleConvergence derives it by manufacturing uniform integrability in L² from this library's Doob L² maximal inequality (Martingale.eLpNorm_norm_runMax_le, lifted by monotone convergence to an L² envelope dominating every f_n: MeasureTheory.LpDominator) and Degenne's uniformIntegrable_of_dominated_singleton, closed by Vitali. Differentiates this entry from mart-thm-2.5.3 (the a.s.-only Mathlib wrapper). Axioms-clean."
+        "formalization_scope": "Full statement: a.e. convergence (Mathlib's upcrossing-based ae_tendsto_limitProcess) AND L²-norm convergence. The L² half is NOT in Mathlib; MathFin.Probability.Discrete.L2MartingaleConvergence derives it by manufacturing uniform integrability in L² from this library's Doob L² maximal inequality (Martingale.eLpNorm_norm_runMax_le, lifted by monotone convergence to an L² envelope dominating every f_n: MeasureTheory.LpDominator) and Degenne's uniformIntegrable_of_dominated_singleton, closed by Vitali. Differentiates this entry from mart-thm-2.5.3 (the a.s.-only Mathlib wrapper). Axioms-clean."
       }
     },
     {
@@ -76,6 +100,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Proposition 2.5.5",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Proposition 2.5.5"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "library_wrapper",
         "formalization_scope": "Direct Lean wrapper around an existing library theorem closely matching the benchmark statement."
@@ -87,14 +117,20 @@
       "description": "Theorem 2.2.9: If M is a martingale and A is non-anticipative (predictable, a.e. uniformly bounded), then (A·M)_n = sum_{k=1}^n A_k (M_k - M_{k-1}) is a martingale",
       "domain": "martingales",
       "code": {
-        "lean": "import MathFin.Foundations.MartingaleTransform\n\nopen MeasureTheory ProbabilityTheory\n\n/-- Theorem 2.2.9: the discrete-time martingale transform of a martingale `M`\n    by an a.e.-uniformly-bounded predictable process `A` is itself a\n    martingale (the a.e. bound is weaker than the textbook pointwise bound). Re-export of\n    `MathFin.martingaleTransform_isMartingale` (real derivation in\n    `MathFin/Foundations/MartingaleTransform.lean`, derived from Mathlib\n    `condExp_add` / `condExp_mul_of_stronglyMeasurable_left` / `martingale_nat`).\n    The proof lives in a Lake-built library so each file gets the full\n    incremental-compilation memory budget; the benchmark snippet only\n    typechecks against the prebuilt library. -/\ntheorem martingale_transform_is_martingale\n    {Ω : Type*} {m0 : MeasurableSpace Ω}\n    {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℕ m0}\n    {M A : ℕ → Ω → ℝ}\n    (hM : Martingale M 𝓕 μ)\n    (hA : StronglyAdapted 𝓕 (fun n => A (n + 1)))\n    (hA_bdd : ∃ K : ℝ, ∀ᵐ ω ∂μ, ∀ n, |A n ω| ≤ K) :\n    Martingale (MathFin.martingaleTransform A M) 𝓕 μ :=\n  MathFin.martingaleTransform_isMartingale hM hA hA_bdd\n"
+        "lean": "import MathFin.Probability.Discrete.MartingaleTransform\n\nopen MeasureTheory ProbabilityTheory\n\n/-- Theorem 2.2.9: the discrete-time martingale transform of a martingale `M`\n    by an a.e.-uniformly-bounded predictable process `A` is itself a\n    martingale (the a.e. bound is weaker than the textbook pointwise bound). Re-export of\n    `MathFin.martingaleTransform_isMartingale` (real derivation in\n    `MathFin/Probability/Discrete/MartingaleTransform.lean`, derived from Mathlib\n    `condExp_add` / `condExp_mul_of_stronglyMeasurable_left` / `martingale_nat`).\n    The proof lives in a Lake-built library so each file gets the full\n    incremental-compilation memory budget; the benchmark snippet only\n    typechecks against the prebuilt library. -/\ntheorem martingale_transform_is_martingale\n    {Ω : Type*} {m0 : MeasurableSpace Ω}\n    {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℕ m0}\n    {M A : ℕ → Ω → ℝ}\n    (hM : Martingale M 𝓕 μ)\n    (hA : StronglyAdapted 𝓕 (fun n => A (n + 1)))\n    (hA_bdd : ∃ K : ℝ, ∀ᵐ ω ∂μ, ∀ n, |A n ω| ≤ K) :\n    Martingale (MathFin.martingaleTransform A M) 𝓕 μ :=\n  MathFin.martingaleTransform_isMartingale hM hA hA_bdd\n"
       },
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.2.9",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 2.2.9"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Real Lean derivation of Theorem 2.2.9: re-export of MathFin.martingaleTransform_isMartingale (MathFin/Foundations/MartingaleTransform.lean). The boundedness hypothesis is the a.e. form (∃ K, ∀ᵐ ω ∂μ, ∀ n, |A n ω| ≤ K) — weaker than the textbook's pointwise bound, so the statement is strictly stronger. Proof: the martingale_of_condExp_sub_eq_zero_nat characterization; the transform increment A_{n+1}(M_{n+1} − M_n) has vanishing conditional expectation via condExp_mul_of_stronglyMeasurable_left (pull-out) + the martingale increment property of M; integrability of each summand from the a.e. bound. Axioms-clean."
+        "formalization_scope": "Real Lean derivation of Theorem 2.2.9: re-export of MathFin.martingaleTransform_isMartingale (MathFin/Probability/Discrete/MartingaleTransform.lean). The boundedness hypothesis is the a.e. form (∃ K, ∀ᵐ ω ∂μ, ∀ n, |A n ω| ≤ K) — weaker than the textbook's pointwise bound, so the statement is strictly stronger. Proof: the martingale_of_condExp_sub_eq_zero_nat characterization; the transform increment A_{n+1}(M_{n+1} − M_n) has vanishing conditional expectation via condExp_mul_of_stronglyMeasurable_left (pull-out) + the martingale increment property of M; integrability of each summand from the a.e. bound. Axioms-clean."
       }
     },
     {
@@ -103,19 +139,25 @@
       "description": "Theorem 2.4.6: For p > 1 and a non-negative submartingale (M_n), ||M_n*||_p ≤ (p/(p-1)) ||M_n||_p where M_n* = max_{k≤n} M_k",
       "domain": "martingales",
       "code": {
-        "lean": "import MathFin.Foundations.DoobLpMaximalInequality\n\nopen MeasureTheory ProbabilityTheory\n\n/-- Theorem 2.4.6 (Doob's L^p maximal inequality, full formal proof).\n    For `p > 1` and a non-negative submartingale `M`, the L^p norm of the\n    running maximum `max_{k ≤ n} M_k` is bounded by `(p / (p - 1))` times\n    the L^p norm of `M n`.\n\n    Direct re-export of `MeasureTheory.maximal_ineq_Lp`, proved end-to-end\n    from first principles via layer cake + Doob's L^1 maximal inequality +\n    Fubini (Tonelli) swap + Hölder + rpow inversion + truncation/monotone\n    convergence. Axioms-clean (`#print axioms` confirms\n    `[propext, Classical.choice, Quot.sound]`). -/\ntheorem doob_lp_maximal_inequality\n    {Ω : Type*} [m0 : MeasurableSpace Ω] {μ : Measure Ω} [IsFiniteMeasure μ]\n    {𝓕 : Filtration ℕ m0} {M : ℕ → Ω → ℝ} {p : ℝ}\n    (hsub : Submartingale M 𝓕 μ) (hnn : ∀ n ω, 0 ≤ M n ω)\n    (hp : 1 < p) (n : ℕ) :\n    eLpNorm (fun ω ↦ (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one\n        (fun k ↦ M k ω)) (ENNReal.ofReal p) μ\n      ≤ ENNReal.ofReal (p / (p - 1)) *\n          eLpNorm (M n) (ENNReal.ofReal p) μ :=\n  MeasureTheory.maximal_ineq_Lp hsub hnn hp n\n"
+        "lean": "import MathFin.Probability.Discrete.DoobLpMaximalInequality\n\nopen MeasureTheory ProbabilityTheory\n\n/-- Theorem 2.4.6 (Doob's L^p maximal inequality, full formal proof).\n    For `p > 1` and a non-negative submartingale `M`, the L^p norm of the\n    running maximum `max_{k ≤ n} M_k` is bounded by `(p / (p - 1))` times\n    the L^p norm of `M n`.\n\n    Direct re-export of `MeasureTheory.maximal_ineq_Lp`, proved end-to-end\n    from first principles via layer cake + Doob's L^1 maximal inequality +\n    Fubini (Tonelli) swap + Hölder + rpow inversion + truncation/monotone\n    convergence. Axioms-clean (`#print axioms` confirms\n    `[propext, Classical.choice, Quot.sound]`). -/\ntheorem doob_lp_maximal_inequality\n    {Ω : Type*} [m0 : MeasurableSpace Ω] {μ : Measure Ω} [IsFiniteMeasure μ]\n    {𝓕 : Filtration ℕ m0} {M : ℕ → Ω → ℝ} {p : ℝ}\n    (hsub : Submartingale M 𝓕 μ) (hnn : ∀ n ω, 0 ≤ M n ω)\n    (hp : 1 < p) (n : ℕ) :\n    eLpNorm (fun ω ↦ (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one\n        (fun k ↦ M k ω)) (ENNReal.ofReal p) μ\n      ≤ ENNReal.ofReal (p / (p - 1)) *\n          eLpNorm (M n) (ENNReal.ofReal p) μ :=\n  MeasureTheory.maximal_ineq_Lp hsub hnn hp n\n"
       },
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.4.6",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 2.4.6"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of Doob's L^p maximal inequality. End-to-end derivation (no sorries, no library wrapper) from Mathlib primitives: layer cake (MeasureTheory.lintegral_rpow_eq_lintegral_meas_le_mul) + Doob's L^1 maximal inequality (MeasureTheory.maximal_ineq) + Fubini/Tonelli swap (MeasureTheory.lintegral_lintegral_swap) + Hölder inequality (ENNReal.lintegral_mul_le_Lp_mul_Lq with HolderConjugate p (p/(p-1))) + rpow inversion (ENNReal.rpow_add_of_nonneg + ENNReal.div_le_iff) + truncation argument (min(runMax, K) + monotone convergence via lintegral_iSup) for the A=infty, B<infty corner. Lives at MathFin/Foundations/DoobLpMaximalInequality.lean (18 helper lemmas + MeasureTheory.maximal_ineq_Lp). Axioms-clean: depends only on propext, Classical.choice, Quot.sound.",
+        "formalization_scope": "Full formal proof of Doob's L^p maximal inequality. End-to-end derivation (no sorries, no library wrapper) from Mathlib primitives: layer cake (MeasureTheory.lintegral_rpow_eq_lintegral_meas_le_mul) + Doob's L^1 maximal inequality (MeasureTheory.maximal_ineq) + Fubini/Tonelli swap (MeasureTheory.lintegral_lintegral_swap) + Hölder inequality (ENNReal.lintegral_mul_le_Lp_mul_Lq with HolderConjugate p (p/(p-1))) + rpow inversion (ENNReal.rpow_add_of_nonneg + ENNReal.div_le_iff) + truncation argument (min(runMax, K) + monotone convergence via lintegral_iSup) for the A=infty, B<infty corner. Lives at MathFin/Probability/Discrete/DoobLpMaximalInequality.lean (18 helper lemmas + MeasureTheory.maximal_ineq_Lp). Axioms-clean: depends only on propext, Classical.choice, Quot.sound.",
         "v430_recovery": {
           "from": "reduced_core",
           "to": "full",
           "recorded_on": "2026-05-13",
-          "note": "Promoted to full after completing end-to-end Doob L^p proof in MathFin/Foundations/DoobLpMaximalInequality.lean (Fubini swap + Holder + truncation + monotone convergence). #print axioms clean."
+          "note": "Promoted to full after completing end-to-end Doob L^p proof in MathFin/Probability/Discrete/DoobLpMaximalInequality.lean (Fubini swap + Holder + truncation + monotone convergence). #print axioms clean."
         }
       }
     },
@@ -130,6 +172,12 @@
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.5.3",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 2.5.3"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "library_wrapper",
         "formalization_scope": "library_wrapper of the a.s.-convergence theorem; faithful for the a.s. claim."
@@ -141,14 +189,20 @@
       "description": "Theorem 2.6.7: If there exists an equivalent martingale measure Q, then the discrete-time market is arbitrage-free",
       "domain": "martingales",
       "code": {
-        "lean": "import MathFin.Foundations.FTAP\n\nopen MeasureTheory ProbabilityTheory\n\n/-- Theorem 2.6.7 (FTAP, ⇒ direction): existence of an equivalent martingale\n    measure precludes arbitrage. Re-export of\n    `MathFin.IsEMM.noArbitrage` (real derivation in\n    `MathFin/Foundations/FTAP.lean`, stated at the horizon `T`: applies the martingale-transform\n    theorem to the discounted price frozen at `T` under the EMM `Q`, then uses `Q ≪ P` and\n    `ae_zero_of_nonneg_of_integral_zero`). A martingale for all times satisfies\n    the horizon hypotheses. The martingale-transform helper is\n    shared with `mart-thm-2.2.9` via `import MathFin.Foundations.MartingaleTransform`\n    rather than duplicated inline. -/\ntheorem emm_implies_no_arbitrage\n    {Ω : Type*} {m0 : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P]\n    {T : ℕ} {𝓕 : Filtration ℕ m0} {S : ℕ → Ω → ℝ}\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    (hQP : Q ≪ P) (hPQ : P ≪ Q)\n    (hSQ : Martingale S 𝓕 Q)\n    (φ : ℕ → Ω → ℝ)\n    (hφ_pred : StronglyAdapted 𝓕 (fun n => φ (n + 1)))\n    (hφ_bdd : ∃ K : ℝ, ∀ n ω, |φ n ω| ≤ K)\n    (hV_nonneg : ∀ᵐ ω ∂P,\n      0 ≤ ∑ t ∈ Finset.range T, φ (t + 1) ω * (S (t + 1) ω - S t ω)) :\n    P {ω | 0 < ∑ t ∈ Finset.range T, φ (t + 1) ω * (S (t + 1) ω - S t ω)} = 0 := by\n  have key (ω : Ω) := MathFin.martingaleTransform_real φ S T ω\n  have hnn : 0 ≤ᵐ[P] MathFin.martingaleTransform φ S T := by\n    filter_upwards [hV_nonneg] with ω h\n    simpa [key] using h\n  have hE : MathFin.IsEMM 𝓕 P S T Q :=\n    MathFin.IsEMM.of_condExp_succ ⟨inferInstance, hQP, hPQ⟩\n    (fun t _ => hSQ.1 t) (fun t _ => MeasureTheory.Martingale.integrable hSQ t)\n    (fun t _ => (hSQ.condExp_ae_eq t.le_succ).symm)\n  have h := hE.noArbitrage φ (fun t _ => hφ_pred t)\n    (let ⟨K, hK⟩ := hφ_bdd; ⟨K, fun n _ ω => hK n ω⟩) hnn\n  refine measure_mono_null (fun ω hω => ?_) (ae_iff.mp h)\n  simp only [Set.mem_setOf_eq, Pi.zero_apply, key] at hω ⊢\n  exact ne_of_gt hω\n"
+        "lean": "import MathFin.Pricing.FTAP.FTAP\n\nopen MeasureTheory ProbabilityTheory\n\n/-- Theorem 2.6.7 (FTAP, ⇒ direction): existence of an equivalent martingale\n    measure precludes arbitrage. Re-export of\n    `MathFin.IsEMM.noArbitrage` (real derivation in\n    `MathFin/Pricing/FTAP/FTAP.lean`, stated at the horizon `T`: applies the martingale-transform\n    theorem to the discounted price frozen at `T` under the EMM `Q`, then uses `Q ≪ P` and\n    `ae_zero_of_nonneg_of_integral_zero`). A martingale for all times satisfies\n    the horizon hypotheses. The martingale-transform helper is\n    shared with `mart-thm-2.2.9` via `import MathFin.Probability.Discrete.MartingaleTransform`\n    rather than duplicated inline. -/\ntheorem emm_implies_no_arbitrage\n    {Ω : Type*} {m0 : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P]\n    {T : ℕ} {𝓕 : Filtration ℕ m0} {S : ℕ → Ω → ℝ}\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    (hQP : Q ≪ P) (hPQ : P ≪ Q)\n    (hSQ : Martingale S 𝓕 Q)\n    (φ : ℕ → Ω → ℝ)\n    (hφ_pred : StronglyAdapted 𝓕 (fun n => φ (n + 1)))\n    (hφ_bdd : ∃ K : ℝ, ∀ n ω, |φ n ω| ≤ K)\n    (hV_nonneg : ∀ᵐ ω ∂P,\n      0 ≤ ∑ t ∈ Finset.range T, φ (t + 1) ω * (S (t + 1) ω - S t ω)) :\n    P {ω | 0 < ∑ t ∈ Finset.range T, φ (t + 1) ω * (S (t + 1) ω - S t ω)} = 0 := by\n  have key (ω : Ω) := MathFin.martingaleTransform_real φ S T ω\n  have hnn : 0 ≤ᵐ[P] MathFin.martingaleTransform φ S T := by\n    filter_upwards [hV_nonneg] with ω h\n    simpa [key] using h\n  have hE : MathFin.IsEMM 𝓕 P S T Q :=\n    MathFin.IsEMM.of_condExp_succ ⟨inferInstance, hQP, hPQ⟩\n    (fun t _ => hSQ.1 t) (fun t _ => MeasureTheory.Martingale.integrable hSQ t)\n    (fun t _ => (hSQ.condExp_ae_eq t.le_succ).symm)\n  have h := hE.noArbitrage φ (fun t _ => hφ_pred t)\n    (let ⟨K, hK⟩ := hφ_bdd; ⟨K, fun n _ ω => hK n ω⟩) hnn\n  refine measure_mono_null (fun ω hω => ?_) (ae_iff.mp h)\n  simp only [Set.mem_setOf_eq, Pi.zero_apply, key] at hω ⊢\n  exact ne_of_gt hω\n"
       },
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.6.7",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 2.6.7"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Real derivation of FTAP (⇒ direction), the library theorem MathFin.IsEMM.noArbitrage is stated at the horizon T (the price frozen at T is a Q-martingale; strategy predictable and bounded up to T, conclusion gains =ᵐ 0); this entry restates it for a Q-martingale on all of ℕ and bounded φ with the conclusion that the positive set is null, and derives it from that theorem, which cuts the strategy off at T, applies the martingale-transform theorem (shared with mart-thm-2.2.9 via `import MathFin.Foundations.MartingaleTransform`, not duplicated inline) to the frozen price under the EMM `Q`, then uses `Q ≪ P`, `ae_zero_of_nonneg_of_integral_zero` (NoArbitrageCore), and `P ≪ Q` to derive that arbitrage sets have `P`-measure zero. This one theorem is also the forward direction of the one-period vector FTAP and of the finite-Ω FTAP."
+        "formalization_scope": "Real derivation of FTAP (⇒ direction), the library theorem MathFin.IsEMM.noArbitrage is stated at the horizon T (the price frozen at T is a Q-martingale; strategy predictable and bounded up to T, conclusion gains =ᵐ 0); this entry restates it for a Q-martingale on all of ℕ and bounded φ with the conclusion that the positive set is null, and derives it from that theorem, which cuts the strategy off at T, applies the martingale-transform theorem (shared with mart-thm-2.2.9 via `import MathFin.Probability.Discrete.MartingaleTransform`, not duplicated inline) to the frozen price under the EMM `Q`, then uses `Q ≪ P`, `ae_zero_of_nonneg_of_integral_zero` (NoArbitrageCore), and `P ≪ Q` to derive that arbitrage sets have `P`-measure zero. This one theorem is also the forward direction of the one-period vector FTAP and of the finite-Ω FTAP."
       }
     },
     {
@@ -157,14 +211,23 @@
       "description": "Under a finite measure, let X be a real process adapted to a filtration 𝓕 indexed by a preordered set, with each increment X_t − X_s (s ≤ t) independent of 𝓕_s and E[e^{X_t − X_s}] = e^{ψ(t) − ψ(s)} for a deterministic function ψ, and with each e^{X_t} integrable. Then t ↦ e^{X_t − ψ(t)} is an 𝓕-martingale. For Brownian motion, αX with ψ(t) = α²t/2 gives the Wald exponential martingale (IsFilteredPreBrownian.waldExponential_isMartingale, bm-rmk-5.1.6-exp, is derived from this lemma). For a jump-diffusion log-price at the compensated drift, where E[e^{X_t − X_s}] = e^{r(t − s)}, ψ(t) = rt makes the discounted price a martingale (mf-jump-diffusion-discounted-price-martingale, which also shows that no other drift does).",
       "domain": "martingales",
       "code": {
-        "lean": "import MathFin.Foundations.ExpMartingaleIndepIncrements\n\nopen MeasureTheory ProbabilityTheory\n\n/-- **The exponential martingale of a process with independent increments.** -/\ntheorem exp_martingale_indep_increments_thm {Ω ι : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsFiniteMeasure P] [Preorder ι] {𝓕 : Filtration ι mΩ} {X : ι → Ω → ℝ}\n    {ψ : ι → ℝ} (hX : StronglyAdapted 𝓕 X)\n    (hindep : ∀ s t, s ≤ t →\n      Indep (MeasurableSpace.comap (fun ω ↦ X t ω - X s ω) inferInstance) (𝓕 s) P)\n    (hint : ∀ t, Integrable (fun ω ↦ Real.exp (X t ω)) P)\n    (hmean : ∀ s t, s ≤ t → ∫ ω, Real.exp (X t ω - X s ω) ∂P = Real.exp (ψ t - ψ s)) :\n    Martingale (fun t ω ↦ Real.exp (X t ω - ψ t)) 𝓕 P :=\n  MathFin.martingale_exp_sub_of_indep_increments hX hindep hint hmean\n"
+        "lean": "import MathFin.Probability.Jumps.ExpMartingaleIndepIncrements\n\nopen MeasureTheory ProbabilityTheory\n\n/-- **The exponential martingale of a process with independent increments.** -/\ntheorem exp_martingale_indep_increments_thm {Ω ι : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsFiniteMeasure P] [Preorder ι] {𝓕 : Filtration ι mΩ} {X : ι → Ω → ℝ}\n    {ψ : ι → ℝ} (hX : StronglyAdapted 𝓕 X)\n    (hindep : ∀ s t, s ≤ t →\n      Indep (MeasurableSpace.comap (fun ω ↦ X t ω - X s ω) inferInstance) (𝓕 s) P)\n    (hint : ∀ t, Integrable (fun ω ↦ Real.exp (X t ω)) P)\n    (hmean : ∀ s t, s ≤ t → ∫ ω, Real.exp (X t ω - X s ω) ∂P = Real.exp (ψ t - ψ s)) :\n    Martingale (fun t ω ↦ Real.exp (X t ω - ψ t)) 𝓕 P :=\n  MathFin.martingale_exp_sub_of_indep_increments hX hindep hint hmean\n"
       },
       "metadata": {
         "chapter": 5,
         "reference": "Exponential martingales of processes with independent increments (Cont & Tankov (2004), Financial Modelling with Jump Processes; Saporito, Remark 5.1.6 for Brownian motion)",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          },
+          {
+            "key": "Saporito",
+            "locator": "Remark 5.1.6"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. e^{X_t − ψ(t)} splits as e^{X_s − ψ(s)} · e^{ψ(s) − ψ(t)}e^{X_t − X_s}. The second factor is a function of the increment, independent of 𝓕_s, so its conditional expectation is its mean, 1 (condExp_indep_eq); the first is 𝓕_s-measurable and comes out of the conditional expectation (condExp_mul_of_stronglyMeasurable_left). Integrability of the increment factor follows from its integral being nonzero. Lives in MathFin/Foundations/ExpMartingaleIndepIncrements.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. e^{X_t − ψ(t)} splits as e^{X_s − ψ(s)} · e^{ψ(s) − ψ(t)}e^{X_t − X_s}. The second factor is a function of the increment, independent of 𝓕_s, so its conditional expectation is its mean, 1 (condExp_indep_eq); the first is 𝓕_s-measurable and comes out of the conditional expectation (condExp_mul_of_stronglyMeasurable_left). Integrability of the increment factor follows from its integral being nonzero. Lives in MathFin/Probability/Jumps/ExpMartingaleIndepIncrements.lean. Axioms-clean."
       }
     }
   ]

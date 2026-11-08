@@ -85,13 +85,13 @@ note = "Canonical results whose textbook statements the wider corpus tracks."
 # declaration, its file, and (optionally) the informal statement it tracks.
 [[main_results]]
 declaration = "MathFin.coherentRisk_isLUB"
-file = "MathFin/RiskMeasures/AcceptanceSet.lean"
+file = "MathFin/Risk/AcceptanceSet.lean"
 literature = "Coherent-risk representation on a finite state space (Artzner-Delbaen-Eber-Heath 1999)"
 source = "artzner-delbaen-eber-heath-1999"
 
 [[main_results]]
 declaration = "MathFin.worstCase_isCoherent"
-file = "MathFin/RiskMeasures/WorstCaseRisk.lean"
+file = "MathFin/Risk/WorstCaseRisk.lean"
 literature = "Worst-case loss is a coherent risk measure (witness that the axioms are satisfiable)"
 source = "artzner-delbaen-eber-heath-1999"
 

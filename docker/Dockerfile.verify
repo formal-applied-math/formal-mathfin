@@ -39,6 +39,7 @@ COPY lakefile.lean lean-toolchain lake-manifest.json MathFin.lean \
 COPY MathFin/ MathFin/
 COPY MathFinExamples/ MathFinExamples/
 COPY MathFinTest/ MathFinTest/
+COPY MathFinTools/ MathFinTools/
 RUN elan toolchain install "$(cat lean-toolchain)" \
     && lean --version \
     && lake --version \

@@ -41,10 +41,10 @@ and regeneration must be a no-op).
 
 from __future__ import annotations
 
-import re
 import sys
 from pathlib import Path
 
+from tools.verify import library
 from tools.verify.corpus import iter_entries
 from tools.verify.mathfin_index import cited_constants, declaration_index, strip_comments
 
@@ -107,9 +107,6 @@ UPSTREAM_CITATIONS: dict[str, tuple[str, ...]] = {
     "mf-carr-madan-log": ("Eq.symm", "LT.lt.ne'", "Real.log_div"),
 }
 
-_IMPORT_RE = re.compile(r"(?m)^import\s+(\S+)")
-
-
 def collect_proof_position_names() -> list[str]:
     index = declaration_index()
     names: set[str] = set()
@@ -133,7 +130,7 @@ def upstream_imports() -> list[str]:
         if theorem.get("metadata", {}).get("formalization_status") != "library_wrapper":
             continue
         code = strip_comments(theorem.get("code", {}).get("lean", ""))
-        modules |= {m for m in _IMPORT_RE.findall(code)
+        modules |= {m for m in library.imports(code)
                     if m != "Mathlib" and not m.startswith("MathFin")}
     return sorted(modules)
 

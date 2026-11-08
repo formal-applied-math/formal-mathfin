@@ -1,0 +1,1412 @@
+% The library's one bibliography (docs/specs/2026-11-05-library-practices-design.md §4).
+%
+% A module docstring's `## References` section cites these keys in Mathlib's form,
+%   * [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], §4.2
+% with the locator (chapter, section, equation) after the key. `tools/verify/doc_standard.py`
+% resolves every key; an entry here records only what the citing modules state (no edition
+% is guessed where they name none).
+
+@book{Hull,
+  author    = {Hull, John C.},
+  title     = {Options, Futures, and Other Derivatives},
+  publisher = {Pearson}
+}
+
+@unpublished{BagariaFIDP,
+  author = {Bagaria, S.},
+  title  = {Notes on Fixed Income Derivative Pricing},
+  note   = {Lecture notes}
+}
+
+@book{McNeilFreyEmbrechts,
+  author    = {McNeil, Alexander J. and Frey, R{\"u}diger and Embrechts, Paul},
+  title     = {Quantitative Risk Management: Concepts, Techniques and Tools},
+  publisher = {Princeton University Press}
+}
+
+@book{DicksonHardyWaters2013,
+  author    = {Dickson, David C. M. and Hardy, Mary R. and Waters, Howard R.},
+  title     = {Actuarial Mathematics for Life Contingent Risks},
+  edition   = {2},
+  publisher = {Cambridge University Press},
+  year      = {2013}
+}
+
+@misc{Healy2021,
+  author        = {Healy, Jherek},
+  title         = {Pricing {American} options under negative rates},
+  year          = {2021},
+  eprint        = {2109.15157},
+  archiveprefix = {arXiv}
+}
+
+@article{JuZhong1999,
+  author  = {Ju, Nengjiu and Zhong, Rui},
+  title   = {An approximate formula for pricing {American} options},
+  journal = {Journal of Derivatives},
+  volume  = {7},
+  number  = {2},
+  pages   = {31--40},
+  year    = {1999}
+}
+
+@article{BaroneAdesiWhaley1987,
+  author  = {Barone-Adesi, Giovanni and Whaley, Robert E.},
+  title   = {Efficient analytic approximation of {American} option values},
+  journal = {Journal of Finance},
+  volume  = {42},
+  number  = {2},
+  pages   = {301--320},
+  year    = {1987}
+}
+
+@techreport{Li2009,
+  author      = {Li, Minqiang},
+  title       = {Analytical approximations for the critical stock prices of {American}
+                 options: a performance comparison},
+  institution = {MPRA},
+  type        = {MPRA Paper},
+  number      = {15018},
+  year        = {2009}
+}
+
+@misc{QuantLibJuQuadratic,
+  author       = {{The QuantLib contributors}},
+  title        = {{QuantLib}: \texttt{ql/pricingengines/vanilla/juquadraticengine.cpp}},
+  howpublished = {\url{https://github.com/lballabio/QuantLib}}
+}
+
+@article{Gyongy1986,
+  author  = {Gy{\"o}ngy, Istv{\'a}n},
+  title   = {Mimicking the one-dimensional marginal distributions of processes having an
+             {It\^o} differential},
+  journal = {Probability Theory and Related Fields},
+  volume  = {71},
+  pages   = {501--516},
+  year    = {1986}
+}
+
+@article{GuyonHenryLabordere2012,
+  author  = {Guyon, Julien and Henry-Labord{\`e}re, Pierre},
+  title   = {Being particular about calibration},
+  journal = {Risk},
+  month   = jan,
+  year    = {2012}
+}
+
+@article{Kaldor1939,
+  author  = {Kaldor, Nicholas},
+  title   = {Speculation and economic stability},
+  journal = {Review of Economic Studies},
+  volume  = {7},
+  pages   = {1--27},
+  year    = {1939}
+}
+
+@article{Working1949,
+  author  = {Working, Holbrook},
+  title   = {The theory of price of storage},
+  journal = {American Economic Review},
+  volume  = {39},
+  pages   = {1254--1262},
+  year    = {1949}
+}
+
+@article{AngerisKaoChiangNoyesChitra2021,
+  author  = {Angeris, Guillermo and Kao, Hsien-Tang and Chiang, Rei and Noyes, Charlie and
+             Chitra, Tarun},
+  title   = {An analysis of {Uniswap} markets},
+  journal = {Cryptoeconomic Systems},
+  volume  = {1},
+  number  = {1},
+  year    = {2021}
+}
+
+@article{GlostenMilgrom1985,
+  author  = {Glosten, Lawrence R. and Milgrom, Paul R.},
+  title   = {Bid, ask and transaction prices in a specialist market with heterogeneously
+             informed traders},
+  journal = {Journal of Financial Economics},
+  volume  = {14},
+  pages   = {71--100},
+  year    = {1985}
+}
+
+@article{Roll1984,
+  author  = {Roll, Richard},
+  title   = {A simple implicit measure of the effective bid-ask spread in an efficient market},
+  journal = {Journal of Finance},
+  volume  = {39},
+  pages   = {1127--1139},
+  year    = {1984}
+}
+
+@book{Rebonato2002,
+  author    = {Rebonato, Riccardo},
+  title     = {Modern Pricing of Interest-Rate Derivatives: The {LIBOR} Market Model and
+               Beyond},
+  publisher = {Princeton University Press},
+  year      = {2002}
+}
+
+@article{NelsonSiegel1987,
+  author  = {Nelson, Charles R. and Siegel, Andrew F.},
+  title   = {Parsimonious modeling of yield curves},
+  journal = {Journal of Business},
+  volume  = {60},
+  year    = {1987}
+}
+
+@techreport{Svensson1994,
+  author      = {Svensson, Lars E. O.},
+  title       = {Estimating and Interpreting Forward Interest Rates: {Sweden} 1992--1994},
+  institution = {NBER},
+  type        = {NBER Working Paper},
+  number      = {4871},
+  year        = {1994}
+}
+
+@article{GemanElKarouiRochet1995,
+  author  = {Geman, H{\'e}lyette and El Karoui, Nicole and Rochet, Jean-Charles},
+  title   = {Changes of num{\'e}raire, changes of probability measure and option pricing},
+  journal = {Journal of Applied Probability},
+  volume  = {32},
+  year    = {1995}
+}
+
+@book{CoverThomas2006,
+  author    = {Cover, Thomas M. and Thomas, Joy A.},
+  title     = {Elements of Information Theory},
+  edition   = {2},
+  publisher = {Wiley},
+  year      = {2006}
+}
+
+@article{ZhangMyklandAitSahalia2005,
+  author  = {Zhang, Lan and Mykland, Per A. and A{\"i}t-Sahalia, Yacine},
+  title   = {A tale of two time scales: determining integrated volatility with noisy
+             high-frequency data},
+  journal = {Journal of the American Statistical Association},
+  volume  = {100},
+  pages   = {1394--1411},
+  year    = {2005}
+}
+
+@book{Wald1947,
+  author    = {Wald, Abraham},
+  title     = {Sequential Analysis},
+  publisher = {Wiley},
+  year      = {1947}
+}
+
+@article{Schwartz1997,
+  author  = {Schwartz, Eduardo S.},
+  title   = {The stochastic behavior of commodity prices: implications for valuation and
+             hedging},
+  journal = {Journal of Finance},
+  volume  = {52},
+  year    = {1997}
+}
+
+@techreport{BCBS279,
+  author      = {{Basel Committee on Banking Supervision}},
+  title       = {The standardised approach for measuring counterparty credit risk exposures},
+  institution = {Bank for International Settlements},
+  number      = {BCBS 279},
+  year        = {2014}
+}
+
+@misc{BaselFrameworkCRE52,
+  author       = {{Basel Committee on Banking Supervision}},
+  title        = {The {Basel} Framework, {CRE52}: Standardised approach to counterparty
+                  credit risk},
+  howpublished = {Bank for International Settlements}
+}
+
+@misc{CSLib,
+  author       = {{The CSLib contributors}},
+  title        = {{CSLib}: a {Lean} library for computer science},
+  howpublished = {\url{https://github.com/leanprover/cslib}}
+}
+
+@article{HarrisonPliska1981,
+  author  = {Harrison, J. Michael and Pliska, Stanley R.},
+  title   = {Martingales and stochastic integrals in the theory of continuous trading},
+  journal = {Stochastic Processes and their Applications},
+  volume  = {11},
+  number  = {3},
+  pages   = {215--260},
+  year    = {1981}
+}
+
+@book{FollmerSchied,
+  author    = {F{\"o}llmer, Hans and Schied, Alexander},
+  title     = {Stochastic Finance: An Introduction in Discrete Time},
+  publisher = {De Gruyter}
+}
+
+@misc{Aave2020,
+  author = {{Aave}},
+  title  = {Aave Protocol {V2} whitepaper},
+  year   = {2020}
+}
+
+@article{Acerbi2002,
+  author  = {Acerbi, C.},
+  title   = {Spectral measures of risk: A coherent representation of subjective risk aversion},
+  journal = {Journal of Banking \& Finance},
+  volume  = {26},
+  number  = {7},
+  pages   = {1505--1518},
+  year    = {2002}
+}
+
+@article{AcerbiTasche2002,
+  author  = {Acerbi, C. and Tasche, D.},
+  title   = {On the coherence of expected shortfall},
+  journal = {Journal of Banking \& Finance},
+  volume  = {26},
+  number  = {7},
+  pages   = {1487--1503},
+  year    = {2002}
+}
+
+@misc{AdamsEtAl2021,
+  author = {Adams, H. and Zinsmeister, N. and Salem, M. and Keefer, R. and Robinson, D.},
+  title  = {{Uniswap} v3 Core},
+  year   = {2021}
+}
+
+@article{AibaEtAl2002,
+  author  = {Aiba, Y. and Hatano, N. and Takayasu, H. and Marumo, K. and Shimizu, T.},
+  title   = {Triangular arbitrage as an interaction among foreign exchange rates},
+  journal = {Physica A},
+  volume  = {310},
+  pages   = {467--479},
+  year    = {2002}
+}
+
+@misc{AlmgrenChriss2000,
+  author = {Almgren and Chriss},
+  year   = {2000}
+}
+
+@misc{AndersenLake2021,
+  author = {Andersen and Lake},
+  title  = {Fast {American} option pricing: the double-boundary case},
+  year   = {2021}
+}
+
+@article{AndersenLakeOffengenden2016,
+  author  = {Andersen and Lake and Offengenden},
+  title   = {High-performance {American} option pricing},
+  journal = {Journal of Computational Finance},
+  year    = {2016}
+}
+
+@book{AndersenPiterbarg2010,
+  author = {Andersen and Piterbarg},
+  title  = {Interest Rate Modeling},
+  volume = {2},
+  year   = {2010}
+}
+
+@misc{Andre1887,
+  author = {Andr{\'e}},
+  year   = {1887}
+}
+
+@misc{Applebaum2009,
+  author = {Applebaum},
+  year   = {2009}
+}
+
+@misc{Arrow1953,
+  author = {Arrow},
+  year   = {1953}
+}
+
+@article{ArtznerDelbaenEberHeath1999,
+  author  = {Artzner, P. and Delbaen, F. and Eber, J.-M. and Heath, D.},
+  title   = {Coherent measures of risk},
+  journal = {Mathematical Finance},
+  volume  = {9},
+  number  = {3},
+  pages   = {203--228},
+  year    = {1999}
+}
+
+@misc{Bachelier1900,
+  author = {Bachelier},
+  year   = {1900}
+}
+
+@book{Bacon2008,
+  author  = {Bacon, C.},
+  title   = {Practical Portfolio Performance Measurement and Attribution},
+  edition = {2},
+  year    = {2008}
+}
+
+@misc{BergaultEtAlMarketMaking,
+  author        = {Bergault and Evangelista and Gu{\'e}ant and Vieira},
+  title         = {Closed-form approximations in multi-asset market making},
+  eprint        = {1810.04383},
+  archiveprefix = {arXiv}
+}
+
+@book{Billingsley1995,
+  author  = {Billingsley, P.},
+  title   = {Probability and Measure},
+  edition = {3},
+  year    = {1995}
+}
+
+@unpublished{Bilokon2026,
+  author = {Bilokon, P.},
+  title  = {The Contract Is Not the Model},
+  note   = {Working paper},
+  url    = {https://github.com/thalesians/lean_contracts},
+  year   = {2026}
+}
+
+@article{Black1976,
+  author  = {Black, F.},
+  title   = {The pricing of commodity contracts},
+  journal = {Journal of Financial Economics},
+  volume  = {3},
+  pages   = {167--179},
+  year    = {1976}
+}
+
+@article{BlackLitterman1992,
+  author  = {Black and Litterman},
+  title   = {Global portfolio optimization},
+  journal = {Financial Analysts Journal},
+  volume  = {48},
+  number  = {5},
+  pages   = {28--43},
+  year    = {1992}
+}
+
+@article{BlackScholes1973,
+  author  = {Black, F. and Scholes, M.},
+  title   = {The pricing of options and corporate liabilities},
+  journal = {Journal of Political Economy},
+  volume  = {81},
+  pages   = {637--654},
+  year    = {1973}
+}
+
+@book{BodieKaneMarcus,
+  author = {Bodie, Kane and Marcus},
+  title  = {Investments}
+}
+
+@book{BowersEtAl,
+  author = {Bowers and others},
+  title  = {Actuarial Mathematics}
+}
+
+@book{BoydVandenberghe2004,
+  author = {Boyd and Vandenberghe},
+  title  = {Convex Optimization},
+  year   = {2004}
+}
+
+@article{BreedenLitzenberger1978,
+  author  = {Breeden and Litzenberger},
+  title   = {Prices of state-contingent claims implicit in option prices},
+  journal = {Journal of Business},
+  volume  = {51},
+  pages   = {621--651},
+  year    = {1978}
+}
+
+@book{BrigoMercurio2006,
+  author    = {Brigo, D. and Mercurio, F.},
+  title     = {Interest Rate Models --- Theory and Practice},
+  edition   = {2},
+  publisher = {Springer},
+  year      = {2006}
+}
+
+@article{BrigoMercurioRapisardaScotti2004,
+  author  = {Brigo, D. and Mercurio, F. and Rapisarda, F. and Scotti, R.},
+  title   = {Approximated moment-matching dynamics for basket-options pricing},
+  journal = {Quantitative Finance},
+  volume  = {4},
+  number  = {1},
+  pages   = {1--16},
+  year    = {2004}
+}
+
+@article{BroadieJain2008,
+  author  = {Broadie and Jain},
+  title   = {The effect of jumps and discrete sampling on volatility and variance swaps},
+  journal = {International Journal of Theoretical and Applied Finance},
+  volume  = {11},
+  pages   = {761--797},
+  year    = {2008}
+}
+
+@misc{BrownianMotionLean,
+  author = {van Winden, J.},
+  title  = {{BrownianMotion}}
+}
+
+@book{BurdenFaires,
+  author = {Burden and Faires},
+  title  = {Numerical Analysis}
+}
+
+@techreport{CSFB1997,
+  author      = {{Credit Suisse First Boston}},
+  title       = {{CreditRisk+}: A Credit Risk Management Framework},
+  institution = {Credit Suisse First Boston},
+  year        = {1997}
+}
+
+@incollection{CarrMadan1998,
+  author    = {Carr, P. and Madan, D.},
+  title     = {Towards a theory of volatility trading},
+  booktitle = {Volatility},
+  editor    = {Jarrow, R.},
+  publisher = {Risk Books},
+  pages     = {417--427},
+  year      = {1998}
+}
+
+@misc{CarrMadan2001,
+  author = {Carr and Madan},
+  year   = {2001}
+}
+
+@article{CarrWu2009,
+  author  = {Carr and Wu},
+  title   = {Variance risk premiums},
+  journal = {Review of Financial Studies},
+  volume  = {22},
+  pages   = {1311--1341},
+  year    = {2009}
+}
+
+@misc{Cohen1985,
+  author = {Cohen},
+  year   = {1985}
+}
+
+@book{ContTankov2004,
+  author = {Cont and Tankov},
+  title  = {Financial Modelling with Jump Processes},
+  year   = {2004}
+}
+
+@article{CoxIngersollRoss1985,
+  author  = {Cox, J. C. and Ingersoll, J. E. and Ross, S. A.},
+  title   = {A theory of the term structure of interest rates},
+  journal = {Econometrica},
+  volume  = {53},
+  number  = {2},
+  pages   = {385--407},
+  year    = {1985}
+}
+
+@article{CoxRossRubinstein1979,
+  author  = {Cox, J. C. and Ross, S. A. and Rubinstein, M.},
+  title   = {Option pricing: a simplified approach},
+  journal = {Journal of Financial Economics},
+  volume  = {7},
+  pages   = {229--263},
+  year    = {1979}
+}
+
+@techreport{CreditMetrics1997,
+  author      = {{J.P. Morgan}},
+  title       = {{CreditMetrics} Technical Document},
+  institution = {J.P. Morgan},
+  year        = {1997}
+}
+
+@misc{Debreu1959,
+  author = {Debreu},
+  year   = {1959}
+}
+
+@book{DelbaenSchachermayer,
+  author    = {Delbaen, Freddy and Schachermayer, Walter},
+  title     = {The Mathematics of Arbitrage},
+  publisher = {Springer},
+  year      = {2006}
+}
+
+@misc{DemeterfiDermanKamalZou1999,
+  author       = {Demeterfi and Derman and Kamal and Zou},
+  title        = {More than you ever wanted to know about volatility swaps},
+  howpublished = {Goldman Sachs Quantitative Strategies Research Notes},
+  year         = {1999}
+}
+
+@article{DuffieKan1996,
+  author  = {Duffie, D. and Kan, R.},
+  title   = {A yield-factor model of interest rates},
+  journal = {Mathematical Finance},
+  volume  = {6},
+  number  = {4},
+  pages   = {379--406},
+  year    = {1996}
+}
+
+@misc{DuffieSingleton1999,
+  author = {Duffie and Singleton},
+  year   = {1999}
+}
+
+@misc{DuffieSingleton2003,
+  author = {Duffie and Singleton},
+  year   = {2003}
+}
+
+@article{Dupire1994,
+  author  = {Dupire, B.},
+  title   = {Pricing with a smile},
+  journal = {Risk},
+  volume  = {7},
+  number  = {1},
+  pages   = {18--20},
+  year    = {1994}
+}
+
+@misc{EmbrechtsMcNeilStraumann2002,
+  author = {Embrechts and McNeil and Straumann},
+  year   = {2002}
+}
+
+@article{Esscher1932,
+  author  = {Esscher},
+  title   = {On the probability function in the collective theory of risk},
+  journal = {Skandinavisk Aktuarietidskrift},
+  volume  = {15},
+  pages   = {175--195},
+  year    = {1932}
+}
+
+@book{FabozziBMAS,
+  author = {Fabozzi},
+  title  = {Bond Markets, Analysis and Strategies}
+}
+
+@book{FabozziFIM,
+  author = {Fabozzi},
+  title  = {Fixed Income Mathematics}
+}
+
+@article{FisslerZiegel2016,
+  author  = {Fissler, T. and Ziegel, J. F.},
+  title   = {Higher order elicitability and {Osband}'s principle},
+  journal = {Annals of Statistics},
+  volume  = {44},
+  number  = {4},
+  pages   = {1680--1707},
+  year    = {2016}
+}
+
+@article{FollmerSchied2002,
+  author  = {F{\"o}llmer, H. and Schied, A.},
+  title   = {Convex measures of risk and trading constraints},
+  journal = {Finance and Stochastics},
+  volume  = {6},
+  number  = {4},
+  pages   = {429--447},
+  year    = {2002}
+}
+
+@article{GarmanKohlhagen1983,
+  author  = {Garman and Kohlhagen},
+  title   = {Foreign currency option values},
+  journal = {Journal of International Money and Finance},
+  volume  = {2},
+  pages   = {231--237},
+  year    = {1983}
+}
+
+@book{Gatheral2006,
+  author    = {Gatheral, J.},
+  title     = {The Volatility Surface: A Practitioner's Guide},
+  publisher = {Wiley},
+  year      = {2006}
+}
+
+@article{GatheralJacquier2014,
+  author  = {Gatheral and Jacquier},
+  title   = {Arbitrage-free {SVI} volatility surfaces},
+  journal = {Quantitative Finance},
+  volume  = {14},
+  number  = {1},
+  year    = {2014}
+}
+
+@article{GerberShiu1994,
+  author  = {Gerber and Shiu},
+  title   = {Option pricing by {Esscher} transforms},
+  journal = {Transactions of the Society of Actuaries},
+  volume  = {46},
+  pages   = {99--191},
+  year    = {1994}
+}
+
+@book{Glasserman2003,
+  author    = {Glasserman, P.},
+  title     = {Monte Carlo Methods in Financial Engineering},
+  publisher = {Springer},
+  year      = {2003}
+}
+
+@article{Gneiting2011,
+  author  = {Gneiting, T.},
+  title   = {Making and evaluating point forecasts},
+  journal = {Journal of the American Statistical Association},
+  volume  = {106},
+  number  = {494},
+  pages   = {746--762},
+  year    = {2011}
+}
+
+@article{GoldmanSosinGatto1979,
+  author  = {Goldman, M. B. and Sosin, H. B. and Gatto, M. A.},
+  title   = {Path dependent options: buy at the low, sell at the high},
+  journal = {Journal of Finance},
+  volume  = {34},
+  number  = {5},
+  pages   = {1111--1127},
+  year    = {1979}
+}
+
+@misc{Gordy2003,
+  author = {Gordy},
+  year   = {2003}
+}
+
+@book{GrinoldKahn1999,
+  author = {Grinold and Kahn},
+  title  = {Active Portfolio Management},
+  year   = {1999}
+}
+
+@misc{GueantLehalleFernandezTapia,
+  author = {Gu{\'e}ant and Lehalle and Fernandez-Tapia}
+}
+
+@article{Hagan2003,
+  author  = {Hagan, P. S.},
+  title   = {Convexity conundrums: pricing {CMS} swaps, caps, and floors},
+  journal = {Wilmott Magazine},
+  month   = {mar},
+  pages   = {38--44},
+  year    = {2003}
+}
+
+@article{HaganKumarLesniewskiWoodward2002,
+  author  = {Hagan and Kumar and Lesniewski and Woodward},
+  title   = {Managing smile risk},
+  journal = {Wilmott Magazine},
+  month   = {sep},
+  year    = {2002}
+}
+
+@article{HaganWest2006,
+  author  = {Hagan, P. S. and West, G.},
+  title   = {Interpolation methods for curve construction},
+  journal = {Applied Mathematical Finance},
+  volume  = {13},
+  number  = {2},
+  pages   = {89--129},
+  year    = {2006}
+}
+
+@book{Haug2007,
+  author  = {Haug},
+  title   = {The Complete Guide to Option Pricing Formulas},
+  edition = {2},
+  year    = {2007}
+}
+
+@inproceedings{HeimbachSchertenlebWattenhofer2022,
+  author        = {Heimbach, L. and Schertenleib, E. and Wattenhofer, R.},
+  title         = {Risks and returns of {Uniswap} {V3} liquidity providers},
+  booktitle     = {Proceedings of the 4th ACM Conference on Advances in Financial Technologies (AFT 2022)},
+  eprint        = {2205.08904},
+  archiveprefix = {arXiv},
+  year          = {2022}
+}
+
+@article{Heston1993,
+  author  = {Heston},
+  title   = {A closed-form solution for options with stochastic volatility with applications to bond and currency options},
+  journal = {Review of Financial Studies},
+  volume  = {6},
+  number  = {2},
+  pages   = {327--343},
+  year    = {1993}
+}
+
+@article{HeynenKat1994a,
+  author  = {Heynen, R. and Kat, H.},
+  title   = {Crossing barriers},
+  journal = {Risk},
+  volume  = {7},
+  number  = {6},
+  pages   = {46--51},
+  year    = {1994}
+}
+
+@article{HeynenKat1994b,
+  author  = {Heynen and Kat},
+  title   = {Partial barrier options},
+  journal = {Journal of Financial Engineering},
+  volume  = {3},
+  year    = {1994}
+}
+
+@misc{HeynenKat1996,
+  author = {Heynen and Kat},
+  year   = {1996}
+}
+
+@misc{Hirschman1945,
+  author = {Hirschman},
+  year   = {1945}
+}
+
+@article{Ho1992,
+  author  = {Ho},
+  title   = {Key rate durations: measures of interest rate risks},
+  journal = {Journal of Fixed Income},
+  volume  = {2},
+  number  = {2},
+  year    = {1992}
+}
+
+@misc{Hoeffding1940,
+  author = {H{\"o}ffding},
+  year   = {1940}
+}
+
+@article{Hosking1981,
+  author  = {Hosking},
+  title   = {Fractional differencing},
+  journal = {Biometrika},
+  volume  = {68},
+  number  = {1},
+  pages   = {165--176},
+  year    = {1981}
+}
+
+@article{HullWhite1990,
+  author  = {Hull, J. and White, A.},
+  title   = {Pricing interest-rate-derivative securities},
+  journal = {Review of Financial Studies},
+  volume  = {3},
+  number  = {4},
+  pages   = {573--592},
+  year    = {1990}
+}
+
+@article{HullWhite2004,
+  author  = {Hull, J. and White, A.},
+  title   = {Valuation of a {CDO} and an $n$-th to default {CDS} without {Monte Carlo} simulation},
+  journal = {Journal of Derivatives},
+  volume  = {12},
+  number  = {2},
+  year    = {2004}
+}
+
+@misc{ItoAFPActuarial,
+  author = {Ito, Yosuke},
+  title  = {{AFP} Actuarial Mathematics}
+}
+
+@article{Jamshidian1989,
+  author  = {Jamshidian},
+  title   = {An exact bond option formula},
+  journal = {Journal of Finance},
+  volume  = {44},
+  year    = {1989}
+}
+
+@misc{JarrowTurnbull,
+  author = {Jarrow and Turnbull}
+}
+
+@book{JohnsonKotzBalakrishnan1994,
+  author    = {Johnson, N. L. and Kotz, S. and Balakrishnan, N.},
+  title     = {Continuous Univariate Distributions, Vol.~1},
+  edition   = {2},
+  publisher = {Wiley},
+  year      = {1994}
+}
+
+@book{KaratzasShreve1991,
+  author    = {Karatzas, I. and Shreve, S. E.},
+  title     = {Brownian Motion and Stochastic Calculus},
+  edition   = {2},
+  publisher = {Springer},
+  year      = {1991}
+}
+
+@book{KaratzasShreve1998,
+  author    = {Karatzas, I. and Shreve, S. E.},
+  title     = {Methods of Mathematical Finance},
+  publisher = {Springer},
+  year      = {1998}
+}
+
+@misc{KeatingShadwick2002,
+  author = {Keating and Shadwick},
+  year   = {2002}
+}
+
+@article{Kelly1956,
+  author  = {Kelly, J. L.},
+  title   = {A new interpretation of information rate},
+  journal = {Bell System Technical Journal},
+  volume  = {35},
+  number  = {4},
+  pages   = {917--926},
+  year    = {1956}
+}
+
+@article{KemnaVorst1990,
+  author  = {Kemna, A. G. Z. and Vorst, A. C. F.},
+  title   = {A pricing method for options based on average asset values},
+  journal = {Journal of Banking \& Finance},
+  volume  = {14},
+  pages   = {113--129},
+  year    = {1990}
+}
+
+@book{Keynes1936,
+  author = {Keynes, J. M.},
+  title  = {The General Theory of Employment, Interest and Money},
+  year   = {1936}
+}
+
+@incollection{Kirk1995,
+  author    = {Kirk, E.},
+  title     = {Correlation in the energy markets},
+  booktitle = {Managing Energy Price Risk},
+  publisher = {Risk Publications},
+  pages     = {71--78},
+  year      = {1995}
+}
+
+@book{KlugmanPanjerWillmot,
+  author = {Klugman and Panjer and Willmot},
+  title  = {Loss Models}
+}
+
+@book{LambertonLapeyre2008,
+  author    = {Lamberton, D. and Lapeyre, B.},
+  title     = {Introduction to Stochastic Calculus Applied to Finance},
+  edition   = {2},
+  publisher = {Chapman \& Hall/CRC},
+  year      = {2008}
+}
+
+@book{Lando2004,
+  author = {Lando, D.},
+  title  = {Credit Risk Modeling},
+  year   = {2004}
+}
+
+@misc{LeFlochKennedy2014,
+  author       = {Le Floc'h, F. and Kennedy, G.},
+  title        = {Explicit {SABR} calibration through simple expansions},
+  howpublished = {SSRN 2467231},
+  year         = {2014}
+}
+
+@misc{LeshnerHayes2019,
+  author = {Leshner, R. and Hayes, G.},
+  title  = {Compound: The Money Market Protocol},
+  note   = {v1.0, February 2019},
+  year   = {2019}
+}
+
+@article{Levy1992,
+  author  = {Levy, M.},
+  title   = {Pricing {European} average rate currency options},
+  journal = {Journal of International Money and Finance},
+  volume  = {11},
+  number  = {5},
+  pages   = {474--491},
+  year    = {1992}
+}
+
+@misc{LevyStochCalc,
+  title = {cgarryZA/LevyStochCalc}
+}
+
+@misc{Long1990,
+  author = {Long},
+  year   = {1990}
+}
+
+@book{LopezDePrado2018,
+  author    = {L{\'o}pez de Prado},
+  title     = {Advances in Financial Machine Learning},
+  publisher = {Wiley},
+  year      = {2018}
+}
+
+@misc{MacLeanThorpZiemba2010,
+  author = {MacLean and Thorp and Ziemba},
+  year   = {2010}
+}
+
+@article{MaillardRoncalliTeiletche2010,
+  author  = {Maillard and Roncalli and Te{\"\i}letche},
+  title   = {The properties of equally weighted risk contribution portfolios},
+  journal = {Journal of Portfolio Management},
+  volume  = {36},
+  number  = {4},
+  pages   = {60--70},
+  year    = {2010}
+}
+
+@misc{MakerDAO2020,
+  author = {{MakerDAO}},
+  title  = {The Maker Protocol: {MakerDAO}'s Multi-Collateral Dai ({MCD}) System},
+  year   = {2020}
+}
+
+@misc{MakerDAOTechDocs,
+  author = {{MakerDAO}},
+  title  = {{MakerDAO} technical documentation}
+}
+
+@article{Margrabe1978,
+  author  = {Margrabe, W.},
+  title   = {The value of an option to exchange one asset for another},
+  journal = {Journal of Finance},
+  volume  = {33},
+  number  = {1},
+  pages   = {177--186},
+  year    = {1978}
+}
+
+@article{Markowitz1952,
+  author  = {Markowitz, H.},
+  title   = {Portfolio selection},
+  journal = {Journal of Finance},
+  volume  = {7},
+  number  = {1},
+  pages   = {77--91},
+  year    = {1952}
+}
+
+@misc{MarshallOlkin1967,
+  author = {Marshall and Olkin},
+  year   = {1967}
+}
+
+@misc{MartinAmericanPutConvexity,
+  author       = {Martin, Robert},
+  title        = {Log-convexity of the exercise boundary of an {American} put option},
+  howpublished = {Source development},
+  url          = {https://github.com/robertmartin8/AmericanPutConvexity/tree/9b2b208520341a63b64eef43c1ecb3c5708a8e63}
+}
+
+@misc{MartinButterflyFreeSVI,
+  author       = {Martin, Robert},
+  title        = {A polynomial-sign certificate for butterfly-free raw {SVI}},
+  howpublished = {Source development},
+  url          = {https://github.com/robertmartin8/ButterflyFreeSVI/tree/eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a}
+}
+
+@article{Merton1972,
+  author  = {Merton, R. C.},
+  title   = {An analytic derivation of the efficient portfolio frontier},
+  journal = {Journal of Financial and Quantitative Analysis},
+  volume  = {7},
+  number  = {4},
+  year    = {1972}
+}
+
+@article{Merton1973,
+  author  = {Merton, R. C.},
+  title   = {Theory of rational option pricing},
+  journal = {Bell Journal of Economics and Management Science},
+  volume  = {4},
+  number  = {1},
+  pages   = {141--183},
+  year    = {1973}
+}
+
+@article{Merton1974,
+  author  = {Merton, R. C.},
+  title   = {On the pricing of corporate debt: the risk structure of interest rates},
+  journal = {Journal of Finance},
+  volume  = {29},
+  pages   = {449--470},
+  year    = {1974}
+}
+
+@article{Merton1976,
+  author  = {Merton, R. C.},
+  title   = {Option pricing when underlying stock returns are discontinuous},
+  journal = {Journal of Financial Economics},
+  volume  = {3},
+  pages   = {125--144},
+  year    = {1976}
+}
+
+@article{Merton1980,
+  author  = {Merton, R. C.},
+  title   = {On estimating the expected return on the market},
+  journal = {Journal of Financial Economics},
+  volume  = {8},
+  number  = {4},
+  pages   = {323--361},
+  year    = {1980}
+}
+
+@misc{MilionisMoallemiRoughgardenZhang2022,
+  author        = {Milionis, J. and Moallemi, C. C. and Roughgarden, T. and Zhang, A. L.},
+  title         = {Automated market making and loss-versus-rebalancing},
+  eprint        = {2208.06046},
+  archiveprefix = {arXiv},
+  year          = {2022}
+}
+
+@book{MusielaRutkowski,
+  author = {Musiela and Rutkowski},
+  title  = {Martingale Methods in Financial Modelling}
+}
+
+@misc{Nagy2026,
+  author       = {Nagy, T.},
+  title        = {From {It\^o} to {Black}--{Scholes}: A Machine-Verified Derivation in {Lean} 4},
+  howpublished = {SSRN 6336503},
+  year         = {2026}
+}
+
+@article{NeweyPowell1987,
+  author  = {Newey, W. K. and Powell, J. L.},
+  title   = {Asymmetric least squares estimation and testing},
+  journal = {Econometrica},
+  volume  = {55},
+  number  = {4},
+  pages   = {819--847},
+  year    = {1987}
+}
+
+@book{Oksendal2003,
+  author    = {{\O}ksendal, B.},
+  title     = {Stochastic Differential Equations},
+  edition   = {6},
+  publisher = {Springer},
+  year      = {2003}
+}
+
+@book{Pavliotis2014,
+  author    = {Pavliotis, G. A.},
+  title     = {Stochastic Processes and Applications},
+  publisher = {Springer},
+  year      = {2014}
+}
+
+@book{PeskirShiryaev2006,
+  author    = {Peskir, G. and Shiryaev, A.},
+  title     = {Optimal Stopping and Free-Boundary Problems},
+  publisher = {Birkh{\"a}user},
+  year      = {2006}
+}
+
+@misc{PeytonJonesEberSeward2000,
+  author = {Peyton Jones, S. and Eber, J.-M. and Seward, J.},
+  title  = {Composing contracts},
+  year   = {2000}
+}
+
+@book{PressEtAlNumericalRecipes,
+  author = {Press and others},
+  title  = {Numerical Recipes}
+}
+
+@misc{QRMExerciseBook,
+  title = {{QRM} Exercise Book}
+}
+
+@misc{QuantLib,
+  author = {{The QuantLib contributors}},
+  title  = {{QuantLib}}
+}
+
+@misc{Redington1952,
+  author = {Redington},
+  year   = {1952}
+}
+
+@misc{Reiner1992,
+  author = {Reiner},
+  year   = {1992}
+}
+
+@article{ReinerRubinstein1991,
+  author  = {Reiner, E. and Rubinstein, M.},
+  title   = {Breaking down the barriers},
+  journal = {Risk},
+  volume  = {4},
+  number  = {8},
+  pages   = {28--35},
+  year    = {1991}
+}
+
+@book{RevuzYor,
+  author = {Revuz and Yor},
+  title  = {Continuous Martingales and Brownian Motion}
+}
+
+@misc{RockafellarUryasev2000,
+  author = {Rockafellar and Uryasev},
+  year   = {2000}
+}
+
+@misc{RockafellarUryasev2002,
+  author = {Rockafellar and Uryasev},
+  year   = {2002}
+}
+
+@book{RogersWilliams,
+  author = {Rogers and Williams}
+}
+
+@misc{Roper2010,
+  author = {Roper},
+  title  = {Arbitrage free implied volatility surfaces},
+  year   = {2010}
+}
+
+@article{Rubinstein1991,
+  author  = {Rubinstein, M.},
+  title   = {Options for the undecided},
+  journal = {Risk},
+  volume  = {4},
+  number  = {4},
+  pages   = {43},
+  year    = {1991}
+}
+
+@article{RubinsteinReiner1991,
+  author  = {Rubinstein and Reiner},
+  journal = {Risk},
+  volume  = {4},
+  number  = {9},
+  year    = {1991}
+}
+
+@misc{Saporito,
+  author = {Saporito, Yuri F.},
+  title  = {Stochastic Processes},
+  note   = {Lecture notes}
+}
+
+@book{Sato1999,
+  author = {Sato},
+  title  = {L{\'e}vy Processes and Infinitely Divisible Distributions},
+  year   = {1999}
+}
+
+@article{Sharpe1963,
+  author  = {Sharpe},
+  title   = {A simplified model for portfolio analysis},
+  journal = {Management Science},
+  volume  = {9},
+  number  = {2},
+  pages   = {277--293},
+  year    = {1963}
+}
+
+@article{Sharpe1964,
+  author  = {Sharpe},
+  title   = {Capital asset prices},
+  journal = {Journal of Finance},
+  volume  = {19},
+  number  = {3},
+  pages   = {425--442},
+  year    = {1964}
+}
+
+@misc{Sharpe1966,
+  author = {Sharpe},
+  year   = {1966}
+}
+
+@book{ShreveSCFI,
+  author    = {Shreve, S. E.},
+  title     = {Stochastic Calculus for Finance {I}: The Binomial Asset Pricing Model},
+  publisher = {Springer},
+  year      = {2004}
+}
+
+@book{ShreveSCFII,
+  author    = {Shreve, S. E.},
+  title     = {Stochastic Calculus for Finance {II}: Continuous-Time Models},
+  publisher = {Springer},
+  year      = {2004}
+}
+
+@misc{Sklar1959,
+  author = {Sklar},
+  year   = {1959}
+}
+
+@misc{SortinoVanDerMeer1991,
+  author = {Sortino and van der Meer},
+  year   = {1991}
+}
+
+@article{Sraffa1932,
+  author  = {Sraffa, P.},
+  title   = {Dr.~{Hayek} on money and capital},
+  journal = {Economic Journal},
+  volume  = {42},
+  number  = {165},
+  pages   = {42--53},
+  year    = {1932}
+}
+
+@article{Stoll1969,
+  author  = {Stoll},
+  title   = {The relationship between put and call option prices},
+  journal = {Journal of Finance},
+  volume  = {24},
+  year    = {1969}
+}
+
+@book{StroockVaradhan1979,
+  author    = {Stroock and Varadhan},
+  title     = {Multidimensional Diffusion Processes},
+  publisher = {Springer},
+  year      = {1979}
+}
+
+@article{Stulz1982,
+  author  = {Stulz, R. M.},
+  title   = {Options on the minimum or the maximum of two risky assets: analysis and applications},
+  journal = {Journal of Financial Economics},
+  volume  = {10},
+  number  = {2},
+  pages   = {161--185},
+  year    = {1982}
+}
+
+@misc{Tasche2008,
+  author        = {Tasche, D.},
+  title         = {Capital allocation to business units and sub-portfolios: the {Euler} principle},
+  eprint        = {0708.2542},
+  archiveprefix = {arXiv},
+  year          = {2008}
+}
+
+@article{TheilGoldberger1961,
+  author  = {Theil and Goldberger},
+  title   = {On pure and mixed statistical estimation in economics},
+  journal = {International Economic Review},
+  volume  = {2},
+  number  = {1},
+  pages   = {65--78},
+  year    = {1961}
+}
+
+@misc{Thorp2006,
+  author = {Thorp},
+  year   = {2006}
+}
+
+@misc{Tobin1958,
+  author = {Tobin},
+  year   = {1958}
+}
+
+@misc{Treynor1965,
+  author = {Treynor},
+  year   = {1965}
+}
+
+@misc{VanDerVaart1998,
+  author = {van der Vaart},
+  year   = {1998}
+}
+
+@article{Vasicek1977,
+  author  = {Vasicek, O.},
+  title   = {An equilibrium characterization of the term structure},
+  journal = {Journal of Financial Economics},
+  volume  = {5},
+  number  = {2},
+  pages   = {177--188},
+  year    = {1977}
+}
+
+@article{Vasicek2002,
+  author  = {Vasicek, O.},
+  title   = {Loan portfolio value},
+  journal = {Risk},
+  volume  = {15},
+  number  = {12},
+  year    = {2002}
+}
+
+@book{VonNeumannMorgenstern1944,
+  author = {von Neumann and Morgenstern},
+  title  = {Theory of Games and Economic Behavior},
+  year   = {1944}
+}
+
+@misc{Wystup2002,
+  author = {Wystup},
+  year   = {2002}
+}
+
+@misc{Young1991,
+  author = {Young},
+  year   = {1991}
+}
+
+@book{ZhangExoticOptions,
+  author  = {Zhang},
+  title   = {Exotic Options},
+  edition = {2}
+}
+
+@article{Veraar2012,
+  author  = {Veraar, M.},
+  title   = {The stochastic {F}ubini theorem revisited},
+  journal = {Stochastics},
+  volume  = {84},
+  number  = {4},
+  pages   = {543--551},
+  year    = {2012}
+}
+
+@article{HeathJarrowMorton1992,
+  author  = {Heath, D. and Jarrow, R. and Morton, A.},
+  title   = {Bond pricing and the term structure of interest rates: a new methodology for contingent claims valuation},
+  journal = {Econometrica},
+  volume  = {60},
+  number  = {1},
+  pages   = {77--105},
+  year    = {1992}
+}
+
+@article{Kahale2004,
+  author  = {Kahal{\'e}, Nabil},
+  title   = {An Arbitrage-Free Interpolation of Volatilities},
+  journal = {Risk},
+  volume  = {17},
+  number  = {5},
+  pages   = {102--106},
+  year    = {2004}
+}
