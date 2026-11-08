@@ -15,12 +15,13 @@ declaration index (``lake exe mathfin_index``):
 
 ``off_map_count`` is a ratchet count (``ratchet.json``: ``corpus_off_blueprint``), and so is the
 number of ``islands`` of the proved blueprint (``blueprint_islands``); the docs site
-draws the whole picture as the program tree (``tree.html``, ``tree_data``), laid out on the map in
-``tree_map.toml``: four roots, the pricing functional as the trunk, five limbs. The map is a way of
-drawing the library and nothing else reads it.
+draws the whole picture as the program tree (``tree.html``, ``tree_data``). Where a node sits is
+read from ``docs/taxonomy.toml`` (``tools/verify/taxonomy.py``): a proved node in the cell of its
+declaration module, a frontier node in its ``area``, both with a family; ``tree_map.toml`` lists
+the few proved nodes whose declaration module is not their conceptual cell.
 
-    python3 -m tools.verify.program_tree decl-index.json            # summary by area
-    python3 -m tools.verify.program_tree decl-index.json --off risk # the off-map entries of an area
+    python3 -m tools.verify.program_tree decl-index.json                    # summary by cell
+    python3 -m tools.verify.program_tree decl-index.json --off risk/credit  # a cell's off-map
 """
 
 from __future__ import annotations
@@ -33,6 +34,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .corpus import iter_entries
+from . import taxonomy
 from .decl_index import DeclIndex
 from .mathfin_index import cited_constants, declaration_index
 
@@ -40,77 +42,30 @@ NODES_JSON = Path("docs/blueprint_nodes.json")
 TREE_MAP = Path(__file__).with_name("tree_map.toml")
 FRONTIER_TOML = Path("docs/blueprint_frontier.toml")
 
-# Where a module sits (`MathFin.<Layer>.<Sub>.…`, longest prefix first) and the `area:*` label
-# its work carries.
-SECTION_AREA = {
-    "Probability": "foundations", "Pricing": "foundations", "Contracts": "contracts",
-    "Models": "black-scholes", "Models.StochVol": "stoch-vol", "Models.Binomial": "binomial",
-    "Models.Rates": "fixed-income", "Models.Credit": "credit", "Models.Forwards": "futures",
-    "Risk": "risk", "Choice": "portfolio", "Insurance": "actuarial", "Markets": "execution",
-    "Markets.DeFi": "defi",
-}
-
 KINDS = ("rests-on-node", "feeds-node", "upstream-only", "off-map")
 
-# Where the tree puts a node the map does not name, and an area's fallen leaves: by directory.
-AREA_PLACE = {
-    "foundations": "pricing", "contracts": "pricing", "black-scholes": "models/black-scholes",
-    "binomial": "models/discrete", "stoch-vol": "models/stoch-vol", "fixed-income": "models/rates",
-    "credit": "models/credit", "futures": "models/fx-futures", "commodities": "models/fx-futures",
-    "fx": "models/fx-futures", "portfolio": "choice", "risk": "risk/measures",
-    "actuarial": "insurance", "execution": "markets/execution", "defi": "markets/amm",
-    "upstream": "brownian",
-}
+UPSTREAM = "upstream"  # the cell of an entry that cites no MathFin module
 
 
-def load_map(path: Path = TREE_MAP) -> dict:
-    """The tree's map: its parts in drawing order, branch names, and each named node's place."""
-    raw = tomllib.loads(path.read_text(encoding="utf-8"))
-    return dict(parts=raw.get("part", []), branch=raw.get("branch", {}), place=raw.get("place", {}))
+def load_map(path: Path = TREE_MAP) -> dict[str, str]:
+    """The per-node exceptions: blueprint label -> cell key."""
+    return tomllib.loads(path.read_text(encoding="utf-8")).get("place", {})
 
 
-# Where the tree puts a module's nodes by default: its directory, longest prefix first. The map
-# names only the nodes that sit elsewhere.
-DIR_PLACE = {
-    "Probability": "pricing", "Probability.Discrete": "discrete",
-    "Probability.Brownian": "brownian", "Probability.BrownianMotion": "brownian",
-    "Probability.Martingales": "brownian", "Probability.Gaussian": "analysis",
-    "Probability.Analysis": "analysis", "Probability.Laws": "analysis",
-    "Probability.Jumps": "jumps", "Probability.Dependence": "risk/dependence",
-    "Contracts": "pricing", "Pricing": "pricing",
-    "Models.BlackScholes": "models/black-scholes", "Models.Bachelier": "models/black-scholes",
-    "Models.Binomial": "models/discrete", "Models.Jumps": "models/jumps",
-    "Models.StochVol": "models/stoch-vol", "Models.LocalVol": "models/local-vol",
-    "Models.ModelFree": "models/model-free", "Models.Rates": "models/rates",
-    "Models.Credit": "models/credit", "Models.Forwards": "models/fx-futures",
-    "Risk": "risk/measures", "Risk.Credit": "risk/dependence",
-    "Choice": "choice/static", "Choice.Performance": "choice/performance",
-    "Insurance": "insurance/survival",
-    "Markets": "markets/execution", "Markets.DeFi": "markets/amm",
-    "Markets.Microstructure": "markets/price-formation",
-}
+def cell_of_module(module: str) -> str:
+    """The taxonomy cell of a MathFin module (the trunk for the library's own machinery)."""
+    return taxonomy.cell_of(module) or "market"
 
 
-def dir_place(module: str) -> str | None:
-    parts = module.split(".")[1:-1]
-    return next((DIR_PLACE[sec] for k in range(len(parts), 0, -1)
-                 if (sec := ".".join(parts[:k])) in DIR_PLACE), None)
-
-
-def map_place(label: str, area: str, tree_map: dict, module: str = "") -> tuple[str, str]:
-    """(part, branch) of a node: the map's place for it, else its directory's, else its area's."""
-    where = (tree_map["place"].get(label) or (module and dir_place(module))
-             or AREA_PLACE.get(area, "pricing"))
-    part, _, branch = where.partition("/")
-    return part, branch
-
-
-def area_of_module(module: str) -> str:
-    parts = module.split(".")[1:-1]
-    for k in range(len(parts), 0, -1):
-        if (sec := ".".join(parts[:k])) in SECTION_AREA:
-            return SECTION_AREA[sec]
-    return parts[0].lower() if parts else "upstream"
+def place_node(n: dict, exceptions: dict[str, str]) -> tuple[str, str | None]:
+    """(cell, family) of a node of the tree: a proved node by its exception, else by its
+    declaration module; a frontier node by its ``area`` and ``family``; upstream in the soil."""
+    if n["s"] == "frontier":
+        return n["area"], n.get("family") or None
+    module = n.get("m") or ""
+    if n["s"] == "upstream":
+        return "probability/brownian", None
+    return exceptions.get(n["l"]) or cell_of_module(module), taxonomy.family_of(module)
 
 
 @dataclass(frozen=True)
@@ -119,7 +74,8 @@ class Placement:
     name: str
     status: str
     kind: str  # one of KINDS
-    area: str
+    cell: str
+    family: str | None
     rests_on: tuple[str, ...]  # node labels, all of them
     nearest: str | None  # the deepest node it rests on: where the tree hangs it
 
@@ -203,7 +159,8 @@ def place_corpus(idx: DeclIndex, nodes: list[dict]) -> list[Placement]:
         out.append(Placement(
             entry=t["id"], name=t.get("name", ""),
             status=t.get("metadata", {}).get("formalization_status", ""), kind=kind,
-            area=area_of_module(mods[0]) if mods else "upstream", rests_on=tuple(sorted(on)),
+            cell=cell_of_module(mods[0]) if mods else UPSTREAM,
+            family=taxonomy.family_of(mods[0]) if mods else None, rests_on=tuple(sorted(on)),
             nearest=max(on, key=lambda label: (depth.get(label, 0), label)) if on else None))
     return out
 
@@ -269,7 +226,7 @@ def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
               issues: list[dict] | None = None) -> dict:
     """Everything the tree page draws, as one JSON-ready dict."""
     places = place_corpus(idx, nodes)
-    tree_map = load_map()
+    exceptions = load_map()
     nearest = Counter(p.nearest for p in places if p.nearest)
     named: dict[str, list[list]] = defaultdict(list)
     open_problem: set[str] = set()  # nodes an open `open-problem` issue carries
@@ -288,47 +245,68 @@ def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
                   else "proved" if n.get("leanOk", True) else "partial")
         out_nodes.append(dict(
             l=n["label"], t=n.get("title") or n["label"], s=status, u=n.get("uses", []),
-            a=area_of_module(n.get("module", "")) if status != "upstream" else "upstream",
             x=_statement(n.get("text", "")), d=n.get("name"), m=n.get("module"),
             e=nearest.get(n["label"], 0), i=named.get(n["label"], [])))
     for f in frontier:
         out_nodes.append(dict(
-            l=f["label"], t=f["title"], s="frontier", u=f.get("uses", []), a=f.get("area", ""),
+            l=f["label"], t=f["title"], s="frontier", u=f.get("uses", []),
+            area=f["area"], family=f.get("family", ""),
             x=f.get("statement", ""), ground=f.get("ground", ""), core=f.get("core", []),
             e=0, i=named.get(f["label"], []), op=int(f["label"] in open_problem)))
+    joint_of = {j["node"]: j["limbs"] for j in taxonomy.joints()}
     for n in out_nodes:
-        n["p"], n["b"] = map_place(n["l"], n["a"], tree_map, n.get("m") or "")
-    by_area: dict[str, Counter] = defaultdict(Counter)
+        cell, family = place_node(n, exceptions)
+        n["p"], _, n["b"] = cell.partition("/")
+        if family:
+            n["f"] = family
+        if n["l"] in joint_of:
+            n["j"] = joint_of[n["l"]]
+        n.pop("area", None)
+        n.pop("family", None)
+    by_cell: dict[str, Counter] = defaultdict(Counter)
     off: dict[str, list[list[str]]] = defaultdict(list)
     for p in places:
-        by_area[p.area][p.kind] += 1
+        by_cell[p.cell][p.kind] += 1
         if p.kind == "off-map":
-            off[p.area].append([p.entry, p.name[:90]])
-    return dict(nodes=out_nodes, areas={a: dict(c) for a, c in by_area.items()},
-                off={a: v for a, v in off.items()}, issues=issues is not None,
-                corpus=len(places), parts=tree_map["parts"], branch=tree_map["branch"],
-                pile={a: "/".join(filter(None, map_place("", a, tree_map))) for a in by_area})
+            off[p.cell].append([p.entry, p.name[:90]])
+    return dict(nodes=out_nodes, areas={a: dict(c) for a, c in by_cell.items()},
+                off=dict(off), issues=issues is not None, corpus=len(places),
+                parts=crown_order(taxonomy.parts()),
+                cellName={k: taxonomy.label(k) for k in taxonomy.cells()} | {UPSTREAM: UPSTREAM},
+                cellBlurb={k: c["blurb"] for k, c in taxonomy.cells().items()},
+                families=[dict(key=k, title=f["title"], blurb=f["blurb"], hue=f["hue"])
+                          for k, f in taxonomy.families().items()],
+                joints=taxonomy.joints())
+
+
+def crown_order(parts: list[dict]) -> list[dict]:
+    """The parts as drawn: roots, the trunk, then the limbs from the centre out, the first limb
+    in the middle, the second to its left, the third to its right."""
+    limbs: list[dict] = []
+    for i, p in enumerate(q for q in parts if q["kind"] == "limb"):
+        limbs.insert(0, p) if i % 2 else limbs.append(p)
+    return [p for p in parts if p["kind"] != "limb"] + limbs
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="python3 -m tools.verify.program_tree")
     ap.add_argument("index", help="decl-index.json (lake exe mathfin_index)")
-    ap.add_argument("--off", metavar="AREA", help="list the off-map entries of an area")
+    ap.add_argument("--off", metavar="CELL", help="list the off-map entries of a taxonomy cell")
     args = ap.parse_args(argv)
     places = place_corpus(DeclIndex.load(args.index), load_nodes())
     if args.off:
         for p in places:
-            if p.kind == "off-map" and p.area == args.off:
+            if p.kind == "off-map" and p.cell == args.off:
                 print(f"{p.entry}\t{p.name}")
         return 0
     by_area: dict[str, Counter] = defaultdict(Counter)
     for p in places:
-        by_area[p.area][p.kind] += 1
+        by_area[p.cell][p.kind] += 1
     total = Counter(p.kind for p in places)
-    print(f"{'area':<16}" + "".join(f"{k:>15}" for k in KINDS))
+    print(f"{'cell':<24}" + "".join(f"{k:>15}" for k in KINDS))
     for a in sorted(by_area, key=lambda a: -sum(by_area[a].values())):
-        print(f"{a:<16}" + "".join(f"{by_area[a][k]:>15}" for k in KINDS))
-    print(f"{'all':<16}" + "".join(f"{total[k]:>15}" for k in KINDS))
+        print(f"{a:<24}" + "".join(f"{by_area[a][k]:>15}" for k in KINDS))
+    print(f"{'all':<24}" + "".join(f"{total[k]:>15}" for k in KINDS))
     return 0
 
 

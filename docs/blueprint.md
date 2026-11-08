@@ -183,58 +183,130 @@ graph TD
   marketCompleteness["Completeness of the Brownian market"]:::proved
   martingaleRepresentationProcess["Martingale representation (process form)"]:::proved
   pricingMeasure["The pricing measure on 𝓕ᴮ_T is unique"]:::proved
-  subgraph frontier_actuarial["⏳ frontier · actuarial"]
-    buhlmannCredibility["Bühlmann credibility"]:::frontier
+  subgraph frontier_choiceDynamic["⏳ frontier · Choice · Dynamic choice"]
+    logOptimalNumeraire["Log-optimal portfolio is the numéraire"]:::frontier
+    mertonPortfolioFraction["Merton myopic risky fraction"]:::frontier
+    timeInconsistentEquilibrium["Relaxed equilibria under time inconsistency"]:::frontier
+  end
+  subgraph frontier_choiceEquilibrium["⏳ frontier · Choice · Equilibrium"]
+    aptPricing["APT exact-factor pricing"]:::frontier
+    sdfCapmHansenJagannathan["CAPM and Hansen–Jagannathan from the discount factor"]:::frontier
+  end
+  subgraph frontier_choicePortfolio["⏳ frontier · Choice · Portfolio choice"]
+    markowitzKktNecessity["Markowitz first-order conditions are necessary"]:::frontier
+    riskParityNAsset["N-asset risk parity exists and is unique"]:::frontier
+  end
+  subgraph frontier_choicePreferences["⏳ frontier · Choice · Preferences"]
+    expectedUtilityRiskAversion["Expected utility and risk aversion"]:::frontier
+    utilityStatePriceDensity["Marginal utility is a state-price density"]:::frontier
+  end
+  subgraph frontier_choiceTrading["⏳ frontier · Choice · Strategic trading"]
+    glostenMilgromPricingMeasure["The Glosten–Milgrom quote process is a martingale"]:::frontier
+    kyleEquilibrium["Kyle single-period equilibrium"]:::frontier
+  end
+  subgraph frontier_probabilityBrownian["⏳ frontier · Probability · Brownian calculus"]
+    bracketQuadraticVariation["Bracket is the quadratic variation of an Itô integral"]:::frontier
+    brownianNowhereDifferentiable["Brownian paths are nowhere differentiable"]:::frontier
+    clarkOcone["L¹ martingale representation and Clark–Ocone"]:::frontier
+    feynmanKacVariableCoefficient["Variable-coefficient Feynman–Kac"]:::frontier
+    itoFormula2d["Two-process Itô formula"]:::frontier
+    itoIntegralMartingale["General-integrand Itô process is a martingale"]:::frontier
+    lawIteratedLogarithm["Law of the iterated logarithm"]:::frontier
+    martingaleRepresentationVector["Vector martingale representation"]:::frontier
+    novikovGirsanov["Novikov Girsanov for unbounded θ"]:::frontier
+    reflectionPrinciple["Reflection principle for Brownian motion"]:::frontier
+    sdeContinuousSolution["Continuous strong solutions on every horizon"]:::frontier
+    stochasticFubiniProcess["Stochastic Fubini for the integral process"]:::frontier
+  end
+  subgraph frontier_probabilityDependence["⏳ frontier · Probability · Dependence"]
+    sklarGeneral["Sklar's theorem for arbitrary margins"]:::frontier
+  end
+  subgraph frontier_probabilityDiscrete["⏳ frontier · Probability · Discrete time"]
+    perronFrobeniusMarkov["Perron–Frobenius and finite Markov chain ergodicity"]:::frontier
+  end
+  subgraph frontier_probabilityGaussian["⏳ frontier · Probability · Gaussian analysis"]
+    realErf["erf / erfc / erfinv for Mathlib"]:::frontier
+  end
+  subgraph frontier_probabilityJumps["⏳ frontier · Probability · Jumps"]
+    compensatedPoissonIntegral["Compensated-Poisson integral"]:::frontier
+    itoLevyFormula["Itô–Lévy change of variables"]:::frontier
+    jumpDiffusionLaw["Compound-Poisson and jump-diffusion law"]:::frontier
+    poissonInterarrivalIid["Poisson interarrivals are iid exponential"]:::frontier
+    stochasticFubiniLevy["Stochastic Fubini for Itô–Lévy integrals"]:::frontier
+  end
+  subgraph frontier_riskCredit["⏳ frontier · Risk · Credit portfolio risk"]
+    aaveHealthFactorBound["Aave multi-asset health factor: a liquidation bound"]:::frontier
+    largePoolLoss["Large homogeneous pool loss law"]:::frontier
+    liquidationFirstPassage["Liquidation before maturity as first passage"]:::frontier
+    oneFactorCopulaDefault["One-factor Gaussian copula default"]:::frontier
+  end
+  subgraph frontier_riskInsurance["⏳ frontier · Risk · Premiums and ruin"]
     cramerLundbergClaims["Cramér–Lundberg claims"]:::frontier
-    lifeInsuranceEpv["Life annuity and insurance EPV"]:::frontier
     lundbergRuinBound["Lundberg ruin bound"]:::frontier
     panjerRecursion["Panjer recursion"]:::frontier
+  end
+  subgraph frontier_riskMeasures["⏳ frontier · Risk · Risk measures"]
+    kusuoka["Kusuoka representation"]:::frontier
+    riskMeasureFamilies["Entropic, distortion and expectile risk measures"]:::frontier
+    superhedgingCoherent["The superhedging price is a coherent risk measure"]:::frontier
+  end
+  subgraph frontier_statistics["⏳ frontier · Statistics"]
+    buhlmannCredibility["Bühlmann credibility"]:::frontier
+    glivenkoCantelli["Glivenko–Cantelli theorem"]:::frontier
+    purgedCvIndependence["Purged cross-validation: σ-algebra independence"]:::frontier
+    quantileConvergenceInDistribution["Quantiles under convergence in distribution"]:::frontier
+  end
+  subgraph frontier_valuationDefault["⏳ frontier · Valuation · Credit"]
+    blackCoxDefault["Black–Cox first-passage default"]:::frontier
+    cvaIsPrice["CVA is the price of the default loss"]:::frontier
+    mertonCreditSpread["Merton structural credit spread"]:::frontier
+    stefanUniqueness["Stefan uniqueness with accumulating jumps"]:::frontier
+  end
+  subgraph frontier_valuationDiffusions["⏳ frontier · Valuation · Black–Scholes and Bachelier"]
+    barrierLookbackClosedForms["Barrier and lookback closed forms"]:::frontier
+    bsArbitrageFreePrice["The Black–Scholes price is the arbitrage-free price"]:::frontier
+    forwardStartCall["Forward-start call"]:::frontier
+    girsanovContinuousEmm["Girsanov EMM from the Itô tower"]:::frontier
+    impliedVolExistence["Implied volatility for every arbitrage-free price"]:::frontier
+    margrabeNumeraire["Margrabe and chooser via the S²-numéraire"]:::frontier
+    perpetualAmerican["Perpetual American option"]:::frontier
+    twoAssetOptionFormulas["Stulz and Heynen–Kat two-asset formulas"]:::frontier
+  end
+  subgraph frontier_valuationGeneral["⏳ frontier · Valuation · Arbitrage theory"]
+    pricingFunctional["The pricing functional"]:::frontier
+    dmwFtap["Dalang–Morton–Willinger FTAP"]:::frontier
+    secondFtapConverse["Second FTAP: uniqueness implies completeness"]:::frontier
+    semistaticFtap["Semistatic FTAP with entropy"]:::frontier
+    varianceOptimalHedging["Variance-optimal hedging"]:::frontier
+  end
+  subgraph frontier_valuationInsurance["⏳ frontier · Valuation · Life and insurance contracts"]
+    lifeInsuranceEpv["Life annuity and insurance EPV"]:::frontier
     premiumIsPrice["Insurance premiums are prices"]:::frontier
     survivalModel["Survival model and life tables"]:::frontier
     thieleReserve["Thiele reserve"]:::frontier
   end
-  subgraph frontier_binomial["⏳ frontier · binomial"]
-    americanPutPremium["American put early-exercise premium"]:::frontier
-    binomialBarrierReflection["Binomial barrier prices via reflection"]:::frontier
-  end
-  subgraph frontier_blackScholes["⏳ frontier · black-scholes"]
-    barrierLookbackClosedForms["Barrier and lookback closed forms"]:::frontier
-    bsArbitrageFreePrice["The Black–Scholes price is the arbitrage-free price"]:::frontier
-    carrLeeMoment["Carr–Lee moment formula"]:::frontier
-    forwardStartCall["Forward-start call"]:::frontier
-    impliedVolExistence["Implied volatility for every arbitrage-free price"]:::frontier
+  subgraph frontier_valuationJumps["⏳ frontier · Valuation · Jump models"]
+    esscherEmmLevy["Esscher EMM for exponential-Lévy markets"]:::frontier
     jumpDiffusionPrice["Jump-diffusion prices under the Esscher pricing measure"]:::frontier
     kouJumpDiffusion["Kou double-exponential jump-diffusion"]:::frontier
-    margrabeNumeraire["Margrabe and chooser via the S²-numéraire"]:::frontier
     mertonPide["Merton PIDE"]:::frontier
-    perpetualAmerican["Perpetual American option"]:::frontier
-    twoAssetOptionFormulas["Stulz and Heynen–Kat two-asset formulas"]:::frontier
     varianceGammaCall["Variance-gamma European call"]:::frontier
   end
-  subgraph frontier_credit["⏳ frontier · credit"]
-    blackCoxDefault["Black–Cox first-passage default"]:::frontier
-    cvaIsPrice["CVA is the price of the default loss"]:::frontier
-    largePoolLoss["Large homogeneous pool loss law"]:::frontier
-    mertonCreditSpread["Merton structural credit spread"]:::frontier
-    oneFactorCopulaDefault["One-factor Gaussian copula default"]:::frontier
-    stefanUniqueness["Stefan uniqueness with accumulating jumps"]:::frontier
-  end
-  subgraph frontier_defi["⏳ frontier · defi"]
-    aaveHealthFactorBound["Aave multi-asset health factor: a liquidation bound"]:::frontier
+  subgraph frontier_valuationMechanisms["⏳ frontier · Valuation · Market mechanisms"]
     balancerInvariant["Balancer constant-mean AMM"]:::frontier
     compoundExchangeRateBridge["Compound's exchange rate as a money-market account"]:::frontier
-    liquidationFirstPassage["Liquidation before maturity as first passage"]:::frontier
     lpPositionPrice["An AMM liquidity position is a contract"]:::frontier
+    propagatorNoArbitrage["Transient-impact propagator no-arbitrage"]:::frontier
   end
-  subgraph frontier_execution["⏳ frontier · execution"]
-    glostenMilgromPricingMeasure["The Glosten–Milgrom quote process is a martingale"]:::frontier
-    kyleEquilibrium["Kyle single-period equilibrium"]:::frontier
+  subgraph frontier_valuationModelFree["⏳ frontier · Valuation · Model-free"]
+    modelFreeVariance["Model-free implied variance replication"]:::frontier
   end
-  subgraph frontier_fixedIncome["⏳ frontier · fixed-income"]
+  subgraph frontier_valuationTerm["⏳ frontier · Valuation · Term structures"]
     affineTermStructure["Affine term structure"]:::frontier
     bermudanCallableSnell["Callable bonds and Bermudan swaptions by Snell envelope"]:::frontier
     cirBondLoadings["CIR bond-price loadings"]:::frontier
     cmsConvexityAdjustment["CMS convexity adjustment"]:::frontier
+    futuresBasisConvergence["Contango, backwardation and basis convergence"]:::frontier
     futuresForwardConvexity["Futures–forward convexity adjustment"]:::frontier
     hjmAffineModels["HJM recovers Ho–Lee and Vasicek"]:::frontier
     hjmBondDynamics["HJM bond-price dynamics"]:::frontier
@@ -243,69 +315,19 @@ graph TD
     hjmMusiela["HJM Musiela parametrization"]:::frontier
     hjmShortRate["HJM induces a short-rate model"]:::frontier
     lmmForwardMartingale["LIBOR market model forward martingale"]:::frontier
+    siegelParadox["Siegel's paradox"]:::frontier
     zeroCouponBondPrice["The zero-coupon bond price is a price"]:::frontier
   end
-  subgraph frontier_foundations["⏳ frontier · foundations"]
-    pricingFunctional["The pricing functional"]:::frontier
-    realErf["erf / erfc / erfinv for Mathlib"]:::frontier
-    bracketQuadraticVariation["Bracket is the quadratic variation of an Itô integral"]:::frontier
-    brownianNowhereDifferentiable["Brownian paths are nowhere differentiable"]:::frontier
-    clarkOcone["L¹ martingale representation and Clark–Ocone"]:::frontier
-    compensatedPoissonIntegral["Compensated-Poisson integral"]:::frontier
-    dmwFtap["Dalang–Morton–Willinger FTAP"]:::frontier
-    esscherEmmLevy["Esscher EMM for exponential-Lévy markets"]:::frontier
-    feynmanKacVariableCoefficient["Variable-coefficient Feynman–Kac"]:::frontier
-    girsanovContinuousEmm["Girsanov EMM from the Itô tower"]:::frontier
-    itoFormula2d["Two-process Itô formula"]:::frontier
-    itoIntegralMartingale["General-integrand Itô process is a martingale"]:::frontier
-    itoLevyFormula["Itô–Lévy change of variables"]:::frontier
-    jumpDiffusionLaw["Compound-Poisson and jump-diffusion law"]:::frontier
-    lawIteratedLogarithm["Law of the iterated logarithm"]:::frontier
-    martingaleRepresentationVector["Vector martingale representation"]:::frontier
-    novikovGirsanov["Novikov Girsanov for unbounded θ"]:::frontier
-    perronFrobeniusMarkov["Perron–Frobenius and finite Markov chain ergodicity"]:::frontier
-    poissonInterarrivalIid["Poisson interarrivals are iid exponential"]:::frontier
-    propagatorNoArbitrage["Transient-impact propagator no-arbitrage"]:::frontier
-    reflectionPrinciple["Reflection principle for Brownian motion"]:::frontier
-    sdeContinuousSolution["Continuous strong solutions on every horizon"]:::frontier
-    secondFtapConverse["Second FTAP: uniqueness implies completeness"]:::frontier
-    semistaticFtap["Semistatic FTAP with entropy"]:::frontier
-    stochasticFubiniLevy["Stochastic Fubini for Itô–Lévy integrals"]:::frontier
-    stochasticFubiniProcess["Stochastic Fubini for the integral process"]:::frontier
+  subgraph frontier_valuationTrees["⏳ frontier · Valuation · Trees"]
+    americanPutPremium["American put early-exercise premium"]:::frontier
+    binomialBarrierReflection["Binomial barrier prices via reflection"]:::frontier
   end
-  subgraph frontier_futures["⏳ frontier · futures"]
-    futuresBasisConvergence["Contango, backwardation and basis convergence"]:::frontier
-  end
-  subgraph frontier_fx["⏳ frontier · fx"]
-    siegelParadox["Siegel's paradox"]:::frontier
-  end
-  subgraph frontier_portfolio["⏳ frontier · portfolio"]
-    aptPricing["APT exact-factor pricing"]:::frontier
-    logOptimalNumeraire["Log-optimal portfolio is the numéraire"]:::frontier
-    markowitzKktNecessity["Markowitz first-order conditions are necessary"]:::frontier
-    mertonPortfolioFraction["Merton myopic risky fraction"]:::frontier
-    purgedCvIndependence["Purged cross-validation: σ-algebra independence"]:::frontier
-    riskParityNAsset["N-asset risk parity exists and is unique"]:::frontier
-    sdfCapmHansenJagannathan["CAPM and Hansen–Jagannathan from the discount factor"]:::frontier
-    timeInconsistentEquilibrium["Relaxed equilibria under time inconsistency"]:::frontier
-    utilityStatePriceDensity["Marginal utility is a state-price density"]:::frontier
-    varianceOptimalHedging["Variance-optimal hedging"]:::frontier
-  end
-  subgraph frontier_risk["⏳ frontier · risk"]
-    expectedUtilityRiskAversion["Expected utility and risk aversion"]:::frontier
-    glivenkoCantelli["Glivenko–Cantelli theorem"]:::frontier
-    kusuoka["Kusuoka representation"]:::frontier
-    quantileConvergenceInDistribution["Quantiles under convergence in distribution"]:::frontier
-    riskMeasureFamilies["Entropic, distortion and expectile risk measures"]:::frontier
-    sklarGeneral["Sklar's theorem for arbitrary margins"]:::frontier
-    superhedgingCoherent["The superhedging price is a coherent risk measure"]:::frontier
-  end
-  subgraph frontier_stochVol["⏳ frontier · stoch-vol"]
+  subgraph frontier_valuationVolatility["⏳ frontier · Valuation · Volatility"]
     batesCf["Bates characteristic function"]:::frontier
+    carrLeeMoment["Carr–Lee moment formula"]:::frontier
     cevCall["CEV European call"]:::frontier
     dupireLocalVol["Dupire local volatility"]:::frontier
     hestonCf["Heston characteristic function"]:::frontier
-    modelFreeVariance["Model-free implied variance replication"]:::frontier
     roughHestonPathwiseUniqueness["Rough-Heston pathwise uniqueness"]:::frontier
     sabrHagan["SABR Hagan asymptotic implied vol"]:::frontier
     schrodingerSpxVix["Schrödinger calibration of SPX/VIX"]:::frontier

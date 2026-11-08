@@ -18,8 +18,10 @@ const isWood = n => n.s === "proved" || n.s === "partial";
 const STATUS_RANK = ["in-progress","ready","research","blocked-design","blocked-upstream","needs-info"];
 const STATUS_TXT = {"in-progress":"in progress", ready:"ready to pick up", research:"research", "blocked-design":"blocked on design", "blocked-upstream":"blocked upstream", "needs-info":"needs info"};
 const STATUS_VAR = {"in-progress":"--tr-progress", ready:"--tr-ready", research:"--tr-research", "blocked-design":"--tr-blocked", "blocked-upstream":"--tr-blocked", "needs-info":"--tr-blocked"};
-const AREA_TXT = {foundations:"foundations","black-scholes":"Black–Scholes","fixed-income":"fixed income",portfolio:"portfolio",risk:"risk",actuarial:"actuarial","stoch-vol":"stochastic vol",defi:"DeFi",binomial:"binomial",credit:"credit",contracts:"contracts",execution:"execution",futures:"futures",fx:"FX",commodities:"commodities",upstream:"upstream"};
-const areaName = a => AREA_TXT[a] || a;
+// cells, parts and families come from docs/taxonomy.toml, through program_tree.tree_data
+const cellName = c => D.cellName[c] || c;
+const FAM = new Map(D.families.map(f => [f.key, f]));
+const famVar = n => n.f && FAM.get(n.f) ? `var(${FAM.get(n.f).hue})` : null;
 // statement prose: TeX between dollars is typeset (KaTeX, MathML output: no stylesheet or fonts to fetch);
 // outside it, `code` and *emphasis* are the blueprint's own markup
 const tex = m => { try { return window.katex.renderToString(m, {throwOnError:false}); } catch (e) { return esc("$" + m + "$"); } };
@@ -46,10 +48,11 @@ function depth(l, seen = new Set()){
 function hash(s){ let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return (h >>> 0) / 4294967296; }
 function rng(seed){ let s = Math.floor(hash(seed) * 4294967295) | 0; return () => ((s = Math.imul(s ^ (s >>> 15), 2246822507) + 0x6D2B79F5 | 0) >>> 0) / 4294967296; }
 
-// ---------- layout: the map places the nodes (tree_map.toml); the proofs draw the wood ----------
-// Four roots in the soil, the pricing functional as the trunk, the limbs in sectors across the crown.
-// A node's height counts only the uses inside its own part; an edge from another part is drawn as it
-// is, so a pricing formula resting on a root rather than on the trunk shows as wood that bypasses it.
+// ---------- layout: the taxonomy places the nodes (docs/taxonomy.toml); the proofs draw the wood ----------
+// The roots in the soil (one sector per root cell), positions and markets as the trunk, three limbs in
+// sectors across the crown, each split into its branches; a joint sits in the gap between the two limbs
+// it joins. A node's height counts only the uses inside its own part; an edge from another part is drawn
+// as it is, so a pricing formula resting on a root rather than on the trunk shows as wood that bypasses it.
 const W = 1600, CX = 800;
 const pxPerUnit = () => (document.getElementById("tree").getBoundingClientRect().width || W) / W;
 // the plate's fixed captions are drawn for a ~1300px stage; on a narrower one they grow, up to 1.7×
@@ -58,8 +61,11 @@ const cap = (sel, px) => sel.style("font-size", (px * TF).toFixed(1) + "px");
 const PARTS = new Map(D.parts.map(p => [p.key, p]));
 const kindOf = n => PARTS.get(n.p)?.kind || "limb";
 const isRoot = n => kindOf(n) === "root", isTrunk = n => kindOf(n) === "trunk";
+const isJoint = n => !!n.j;
 const partTitle = p => PARTS.get(p)?.title || p;
-const branchName = b => (D.branch || {})[b] || b;
+const cellKey = n => n.p + (n.b ? "/" + n.b : "");
+const cellTitle = k => cellName(k).split(" · ").pop();
+const TRUNK = D.parts.find(p => p.kind === "trunk").key;
 const live = D.nodes;
 for (const n of live) n.depth = depth(n.l);
 const mfUses = n => n.u.filter(u => N.has(u));
@@ -92,20 +98,29 @@ function sectors(keys, x0, x1, weight){
   keys.forEach((k, i) => { const w = (x1 - x0) * ws[i] / tot; out.set(k, {x0:acc, x1:acc + w, cx:acc + w / 2}); acc += w; });
   return out;
 }
-const inPart = p => live.filter(n => n.p === p);
+const inPart = p => live.filter(n => n.p === p && !isJoint(n));
 const limbKeys = D.parts.filter(p => p.kind === "limb" && inPart(p.key).length).map(p => p.key);
-const rootKeys = D.parts.filter(p => p.kind === "root" && inPart(p.key).length).map(p => p.key);
+// a root sector per root cell that holds a node: the branches of a root part, or the part itself
+const rootKeys = D.parts.filter(p => p.kind === "root").flatMap(p => p.branches.length ? p.branches.map(b => p.key + "/" + b.key) : [p.key])
+  .filter(k => live.some(n => isRoot(n) && cellKey(n) === k));
+const inRoot = k => live.filter(n => isRoot(n) && cellKey(n) === k);
+const GAP = 90;   // between neighbouring limbs: the fork, where the joints sit
 const SEC = sectors(limbKeys, 40, W - 40, k => Math.max(6, Math.pow(inPart(k).length, .8)));
-const RSEC = sectors(rootKeys, 150, W - 150, k => Math.max(6, Math.pow(inPart(k).length, .8)));
+limbKeys.forEach((k, i) => { const s = SEC.get(k); if (i) s.x0 += GAP / 2; if (i < limbKeys.length - 1) s.x1 -= GAP / 2; });
+const RSEC = sectors(rootKeys, 150, W - 150, k => Math.max(6, Math.pow(inRoot(k).length, .8)));
 const BSEC = new Map();   // "limb/branch" -> sector
 for (const k of limbKeys){
-  const s = SEC.get(k), order = PARTS.get(k).branches || [];
+  const s = SEC.get(k), order = PARTS.get(k).branches.map(b => b.key);
   const present = [...order.filter(b => inPart(k).some(n => n.b === b)), ...(inPart(k).some(n => !order.includes(n.b)) ? [""] : [])];
   for (const [b, bs] of sectors(present, s.x0 + 6, s.x1 - 6, b => Math.max(3, Math.pow(inPart(k).filter(n => (order.includes(n.b) ? n.b : "") === b).length, .8))))
     BSEC.set(k + "/" + b, bs);
 }
-const secOf = n => isTrunk(n) ? {x0:CX - 120, x1:CX + 120, cx:CX} : isRoot(n) ? RSEC.get(n.p)
-  : BSEC.get(n.p + "/" + ((PARTS.get(n.p).branches || []).includes(n.b) ? n.b : "")) || SEC.get(n.p);
+// a joint sits in the fork between its two limbs
+const jointKey = n => n.j.slice().sort().join("|");
+const JSEC = n => { const [a, b] = n.j.map(k => SEC.get(k)).sort((p, q) => p.cx - q.cx);
+  const x = a && b ? (a.x1 + b.x0) / 2 : CX; return {x0:x - GAP / 2 - 20, x1:x + GAP / 2 + 20, cx:x}; };
+const secOf = n => isJoint(n) ? JSEC(n) : isTrunk(n) ? {x0:CX - 120, x1:CX + 120, cx:CX} : isRoot(n) ? RSEC.get(cellKey(n))
+  : BSEC.get(n.p + "/" + (PARTS.get(n.p).branches.some(b => b.key === n.b) ? n.b : "")) || SEC.get(n.p);
 
 // heights: the crown, the trunk, the ground, the roots, the bedrock. A level of a sector holding more
 // knots than fit across it wraps into sub-rows, and the level grows by them, so a crowded branch
@@ -115,15 +130,15 @@ const LH = 92, TSTEP = 54, RSTEP = 46, SUBH = 46;
 const rad = n => isWood(n) ? 10 + Math.sqrt(n.e) * 2.2 : n.op ? 14 : 8;
 const sub = new Map(), subRows = new Map();   // node -> its sub-row; "kind|pd" -> most sub-rows
 { const groups = d3.group(live.filter(n => !isRoot(n) && !isUp(n) && !n.sucker),
-    n => (isTrunk(n) ? "pricing" : n.p + "/" + (n.b || "")) + "|" + n.pd);
+    n => (isJoint(n) ? "joint/" + jointKey(n) : isTrunk(n) ? "trunk" : n.p + "/" + (n.b || "")) + "|" + n.pd);
   for (const [, g] of groups){
     const s = secOf(g[0]), need = d3.sum(g, n => 2 * rad(n) + 16);
     const k = Math.max(1, Math.ceil(need / Math.max(40, s.x1 - s.x0)));
     g.slice().sort((x, y) => hash(x.l) - hash(y.l)).forEach((n, i) => sub.set(n.l, i % k));
-    const key = (isTrunk(g[0]) ? "trunk" : "limb") + "|" + g[0].pd;
+    const key = (isJoint(g[0]) ? "joint" : isTrunk(g[0]) ? "trunk" : "limb") + "|" + g[0].pd;
     subRows.set(key, Math.max(subRows.get(key) || 1, k));
   } }
-const maxIn = kind => d3.max(live.filter(n => kindOf(n) === kind), n => n.pd) || 0;
+const maxIn = kind => d3.max(live.filter(n => kindOf(n) === kind && !isJoint(n)), n => n.pd) || 0;
 // offset of each level above the first: the levels below it, each with its sub-rows
 const offsets = (kind, step) => { const o = [0];
   for (let d = 1; d <= maxIn(kind); d++) o.push(o[d - 1] + step + ((subRows.get(kind + "|" + (d - 1)) || 1) - 1) * SUBH);
@@ -136,19 +151,20 @@ const TT = LB + 70;                               // the trunk's top, where the 
 const GY = TT + 60 + bole;                        // the ground
 const ROW0 = GY + 10 + 14 * TF, ROWH = 17 * TF;   // pile labels just under the ground
 const RT = ROW0 + 3 * ROWH + 14;                  // the root band
-const rootMax = new Map(rootKeys.map(k => [k, d3.max(inPart(k), n => n.pd) || 0]));
+const rootMax = new Map(rootKeys.map(k => [k, d3.max(inRoot(k), n => n.pd) || 0]));
 // root captions sit under their root; one that would run into its left neighbour drops a line
 const rootCap = new Map();
 { const placed = [];
   for (const k of rootKeys){
-    const s = RSEC.get(k), w = Math.max(partTitle(k).length * 10.5, (PARTS.get(k).blurb || "").length * 5.9) * TF / 2 + 6;
+    const s = RSEC.get(k), w = cellTitle(k).length * 10.5 * TF / 2 + 6;
     let y = RT + 14 + rootMax.get(k) * RSTEP + 46 * TF;
     while (placed.some(q => Math.abs(q.x - s.cx) < q.w + w && Math.abs(q.y - y) < 44 * TF)) y += 40 * TF;
     placed.push({x:s.cx, y, w}); rootCap.set(k, y);
   } }
 const BED = Math.max(...rootCap.values()) + 30 * TF;
 const H = Math.round(BED + 64 * TF);
-const yTarget = n => isUp(n) ? BED + 24 : isRoot(n) ? RT + 14 + (rootMax.get(n.p) - n.pd) * RSTEP
+const yTarget = n => isUp(n) ? BED + 24 : isRoot(n) ? RT + 14 + (rootMax.get(cellKey(n)) - n.pd) * RSTEP
+  : isJoint(n) ? LB + 24 - (sub.get(n.l) || 0) * SUBH
   : isTrunk(n) ? GY - 40 - TOFF[n.pd] - (sub.get(n.l) || 0) * SUBH
   : n.sucker ? LB + 60 + hash(n.l) * 90
   : LB - LOFF[n.pd] - (sub.get(n.l) || 0) * SUBH;
@@ -227,8 +243,8 @@ function taper(P, c1, c2, C, w0, w1, steps = 18){
 
 // the map, in pale wood: the trunk, a limb to each sector, a twig to each branch, a root to each root
 const ghost = view.append("g").attr("class", "map-ghost dimmable");
-const gw = k => 10 + 3.2 * Math.sqrt(inPart(k).length);
-ghost.append("path").attr("class", "ghost").attr("d", taper([CX, GY + 8], [CX, GY - 60], [CX, TT + 40], [CX, TT], gw("pricing") * 1.8, gw("pricing") * 1.3));
+const gw = k => 10 + 3.2 * Math.sqrt((PARTS.get(k) ? inPart(k) : inRoot(k)).length);
+ghost.append("path").attr("class", "ghost").attr("d", taper([CX, GY + 8], [CX, GY - 60], [CX, TT + 40], [CX, TT], gw(TRUNK) * 1.8, gw(TRUNK) * 1.3));
 for (const k of limbKeys){
   const s = SEC.get(k), w = gw(k);
   const mid = LB - .5 * (LB - TOP);
@@ -240,7 +256,7 @@ for (const k of rootKeys){
   const s = RSEC.get(k), w = gw(k), y1 = RT + 14 + rootMax.get(k) * RSTEP;
   ghost.append("path").attr("class", "ghost").attr("d", taper([CX, GY - 2], [CX, GY + 40], [s.cx, RT - 20], [s.cx, y1], w, 3));
 }
-const trunkLbl = cap(view.append("text").attr("class", "trunk-lbl").attr("x", CX).attr("y", ROW0).attr("text-anchor", "middle").text(partTitle("pricing")), 12);
+const trunkLbl = cap(view.append("text").attr("class", "trunk-lbl").attr("x", CX).attr("y", ROW0).attr("text-anchor", "middle").text(partTitle(TRUNK)), 12);
 
 // the proofs, in dark wood (and in blueprint ink where the node is still frontier)
 const roots = view.append("g");          // kept for the growth animation
@@ -271,8 +287,8 @@ function relax(items){
 }
 for (const k of rootKeys){
   const s = RSEC.get(k), y = rootCap.get(k);
-  cap(limbLbl.append("text").attr("class", "root-lbl").attr("x", s.cx).attr("y", y).attr("text-anchor", "middle").text(partTitle(k)), 13.5);
-  cap(limbLbl.append("text").attr("class", "root-sub").attr("x", s.cx).attr("y", y + 16 * TF).attr("text-anchor", "middle").text(PARTS.get(k).blurb || ""), 12.5);
+  cap(limbLbl.append("text").attr("class", "root-lbl").attr("x", s.cx).attr("y", y).attr("text-anchor", "middle").text(cellTitle(k)), 13.5)
+    .append("title").text(D.cellBlurb[k] || cellName(k));
 }
 
 // leaves: one per corpus entry resting on the node
@@ -293,8 +309,14 @@ const leafSel = leafG.selectAll("path").data(leafData).join("path")
 
 // fallen leaves: proved entries off the map, under the part of the map their directory belongs to
 const litterG = view.append("g");
-const piles = Object.entries(D.off).map(([a, list]) => ({a, list}));
-const pileHome = a => { const [p, b] = (D.pile?.[a] || "pricing").split("/"); return (b && BSEC.get(p + "/" + b)) || SEC.get(p) || RSEC.get(p) || {cx:CX}; };
+// piles: a root cell keeps its own, a limb's cells share the limb's pile
+const pileKey = c => RSEC.has(c) ? c : c.split("/")[0];
+const pileName = a => (PARTS.has(a) ? partTitle(a) : cellTitle(a)).split(" and ")[0].slice(0, 18);
+const byPile = new Map();
+for (const [c, l] of Object.entries(D.off)) for (const e of l){
+  const a = pileKey(c); if (!byPile.has(a)) byPile.set(a, []); byPile.get(a).push([...e, cellTitle(c)]); }
+const piles = [...byPile].map(([a, list]) => ({a, list}));
+const pileHome = a => RSEC.get(a) || SEC.get(a) || {cx:CX};
 const pileX = new Map(); { const used = [{x:CX, half:trunkLbl.node().getComputedTextLength() / 2 + 4}];
   for (const p of piles.sort((x, y) => y.list.length - x.list.length)){
     let x = pileHome(p.a).cx; const half = 14 + Math.sqrt(p.list.length) * 6.5;
@@ -309,12 +331,13 @@ pileSel.each(function(p){
     const fx = x + (r() + r() - 1) * half, fy = GY - 4 + (r() - .3) * 9 - Math.max(0, 1 - Math.abs(fx - x) / half) * 5;
     g.append("path").attr("class", "fallen").attr("d", LEAF).attr("transform", `translate(${fx.toFixed(1)},${fy.toFixed(1)}) rotate(${(r() * 360).toFixed(0)}) scale(${(.75 + r() * .4).toFixed(2)})`);
   }
-  cap(g.append("text").attr("class", "pile-lbl").attr("x", x).attr("y", ROW0).text(`${p.list.length} ${areaName(p.a)}`), 13.5);
+  cap(g.append("text").attr("class", "pile-lbl").attr("x", x).attr("y", ROW0).text(`${p.list.length} ${pileName(p.a)}`), 13.5);
   g.append("rect").attr("class", "hit").attr("x", x - half - 8).attr("y", GY - 18).attr("width", 2 * half + 16).attr("height", 24 + 20 * TF);
 });
 // pile labels, measured: the first row with room, else the next one down
 { const rows = [[{x:CX, lw:trunkLbl.node().getComputedTextLength() / 2 + 8 * TF}], [], []], pad = 8 * TF;
   const lbls = []; pileSel.each(function(p){ const t = d3.select(this).select(".pile-lbl"); lbls.push({t, x:pileX.get(p.a).x, lw:t.node().getComputedTextLength() / 2 + pad}); });
+  for (const L of lbls){ L.x = Math.max(L.lw + 6, Math.min(W - L.lw - 6, L.x)); L.t.attr("x", L.x); }
   for (const L of lbls.sort((a, b) => a.x - b.x)){
     const r = Math.max(0, rows.findIndex(row => !row.some(u => Math.abs(u.x - L.x) < u.lw + L.lw)));
     rows[r].push(L); L.t.attr("y", ROW0 + r * ROWH);
@@ -336,11 +359,14 @@ const nodeSel = nodeG.selectAll("g").data(nodeData).join("g").attr("class", "nd 
 nodeSel.each(function(d){
   const g = d3.select(this), n = d.data.node;
   if (d.up){ g.append("ellipse").attr("rx", 11).attr("ry", 6.5).attr("class", "knot"); cap(g.append("text").attr("class", "stratum-sub").attr("x", 18).attr("y", 5).text(n.t), 16); }
-  else if (isWood(n)){ g.append("circle").attr("r", 2.6 + Math.min(6.4, Math.sqrt(n.e) * 1.05)).attr("class", "knot" + (n.s === "partial" ? " partial" : "")); }
+  else if (isWood(n)){
+    const k = g.append("circle").attr("r", 2.6 + Math.min(6.4, Math.sqrt(n.e) * 1.05)).attr("class", "knot" + (n.s === "partial" ? " partial" : ""));
+    if (famVar(n)) k.style(n.s === "partial" ? "stroke" : "fill", famVar(n)); }
   else if (isOP(n)){ g.append("circle").attr("r", 13).attr("class", "halo"); g.append("path").attr("class", "star").attr("d", "M" + STAR(7.5).join("L") + "Z"); }
   else {
-    g.append("circle").attr("r", 4.6).attr("class", "bud");
-    if (n.core && n.core.length) g.append("path").attr("class", "bud-core").attr("d", "M0,-4.6 A4.6,4.6 0 0 0 0,4.6 Z");
+    const fv = famVar(n);
+    g.append("circle").attr("r", 4.6).attr("class", "bud").style("stroke", fv);
+    if (n.core && n.core.length) g.append("path").attr("class", "bud-core").attr("d", "M0,-4.6 A4.6,4.6 0 0 0 0,4.6 Z").style("fill", fv);
     g.append("circle").attr("r", 1.7).attr("cx", n.core && n.core.length ? 1.9 : 0).attr("class", "bud-dot st-" + (n.st || "none"));
   }
   g.append("circle").attr("r", d.up ? 14 : 9).attr("class", "hit");
@@ -445,8 +471,8 @@ nodeSel.on("mouseenter", (ev, d) => { if (!selected) light(lineage(d.id)); showT
   .on("mousemove", (ev, d) => showTip(ev, `<b>${esc(d.data.node.t)}</b>${esc(statusLine(d.data.node))}`))
   .on("mouseleave", () => { hideTip(); if (!selected) light(null); })
   .on("click", (ev, d) => { ev.stopPropagation(); select(d.id); });
-pileSel.on("mouseenter", (ev, p) => { if (!selected) light(new Set(), "pile:" + p.a); showTip(ev, `<b>${p.list.length} ${esc(areaName(p.a))} entries off the map</b>proved, but resting on no node and feeding none`); })
-  .on("mousemove", (ev, p) => showTip(ev, `<b>${p.list.length} ${esc(areaName(p.a))} entries off the map</b>proved, but resting on no node and feeding none`))
+pileSel.on("mouseenter", (ev, p) => { if (!selected) light(new Set(), "pile:" + p.a); showTip(ev, `<b>${p.list.length} ${esc(pileName(p.a))} entries off the map</b>proved, but resting on no node and feeding none`); })
+  .on("mousemove", (ev, p) => showTip(ev, `<b>${p.list.length} ${esc(pileName(p.a))} entries off the map</b>proved, but resting on no node and feeding none`))
   .on("mouseleave", () => { hideTip(); if (!selected) light(null); })
   .on("click", (ev, p) => { ev.stopPropagation(); selectPile(p.a); });
 seedbed.on("mouseenter", ev => { if (!selected) light(new Set(), "seedbed"); showTip(ev, `<b>${upOnly} upstream-only entries</b>their proofs cite Mathlib and no MathFin constant`); })
@@ -466,7 +492,7 @@ function nodePanel(n){
   const uses = n.u.filter(u => N.has(u)), users = n.users;
   return `
     <button class="backbtn" type="button" data-back>← How to read the tree</button>
-    <div style="display:flex; gap:6px; flex-wrap:wrap">${kind}${st}<span class="pill">${esc(partTitle(n.p) + (n.b ? " · " + branchName(n.b) : ""))}</span></div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap">${kind}${st}<span class="pill">${esc(cellName(cellKey(n)))}</span>${n.f && FAM.get(n.f) ? `<span class="pill"><i style="background:${famVar(n)}"></i>${esc(FAM.get(n.f).title)}</span>` : ""}${isJoint(n) ? `<span class="pill">joint · ${esc(n.j.map(partTitle).join(" and "))}</span>` : ""}</div>
     <h2>${esc(n.t)}</h2>
     ${n.x ? `<p class="stmt">${prose(n.x)}</p>` : ""}
     ${n.d ? `<div><h3>Lean</h3><div class="mono">${n.h ? `<a href="${esc(n.h)}">${esc(n.d)}</a>` : esc(n.d)}</div>${n.m ? `<div class="muted" style="font-size:12.5px">${esc(n.m)}</div>` : ""}</div>` : ""}
@@ -490,6 +516,7 @@ function glyph(kind){
     sucker:`<rect x="0" y="18" width="34" height="8" class="soil-1"/><path class="branch" d="M7,22 C8,14 13,10 18,7 L19,8.5 C14,12 10,15 9.5,22Z"/><circle class="knot" cx="19" cy="7" r="3.6"/>`,
     seed:`<rect x="0" y="18" width="34" height="8" class="soil-1"/><path class="shoot" d="M8,22 C10,14 16,10 20,6"/><circle class="bud" cx="20" cy="6" r="4.2"/><circle class="bud-dot st-ready" cx="20" cy="6" r="1.6"/>`,
     ghost:`<path class="ghost" style="opacity:1" d="M4,23 C10,14 14,10 30,4 L31,8 C17,13 14,17 11,23Z"/>`,
+    fam:`<circle class="knot" cx="7" cy="12" r="4.5" style="fill:var(--fam-diffusions)"/><circle class="knot" cx="17" cy="12" r="4.5" style="fill:var(--fam-default)"/><circle class="knot" cx="27" cy="12" r="4.5" style="fill:var(--fam-jumps)"/>`,
     vein:`<path class="vein on" style="opacity:.6" d="M2,20 Q17,4 32,20"/>`
   }[kind];
   return `<svg viewBox="0 0 34 24" aria-hidden="true">${s}</svg>`;
@@ -501,7 +528,8 @@ function defaultPanel(){
   folio.innerHTML = `
     <h2>How to read the tree</h2>
     <div class="legend">
-      <div>${glyph("ghost")}<span><b>The map</b>, in pale wood: four roots (discrete time, Gaussian analysis, Brownian calculus, jumps), the pricing functional as the trunk, and five limbs. It is a reading of financial mathematics; a node's place on it is a choice, not a proof.</span></div>
+      <div>${glyph("ghost")}<span><b>The map</b>, in pale wood, is docs/taxonomy.toml: the tools as roots (probability in its branches, statistics), positions and markets as the trunk, and three limbs, one for each question asked of a position (choice, valuation, risk). A node's place on it is a reading, not a proof.</span></div>
+      <div>${glyph("fam")}<span><b>Colour</b> is the model family, the same hue in every limb; a node in wood colour is general theory. A <b>joint</b> sits in the fork between the two limbs its statement joins.</span></div>
       <div>${glyph("knot")}<span><b>Dark wood and knots</b>: the proved blueprint nodes and every use their proofs make. Wood thickens with the corpus it carries; where it skips the trunk, a result rests on a root directly. A knot's size counts the corpus entries resting deepest on it.</span></div>
       <div>${glyph("leaf")}<span><b>Leaves</b> (the Leaves button): the same corpus entries drawn one by one, hung on the deepest node their proof rests on.</span></div>
       <div>${glyph("bud")}<span><b>Blueprint shoots and buds</b>: frontier nodes. The bud's centre shows the state of its issue.</span></div>
@@ -517,12 +545,12 @@ function defaultPanel(){
 }
 function selectPile(a){
   selected = "pile:" + a; light(new Set(), selected); selRing.attr("visibility", "hidden");
-  const list = D.off[a] || [];
+  const list = piles.find(p => p.a === a)?.list || [];
   folio.innerHTML = `<button class="backbtn" type="button" data-back>← How to read the tree</button>
     <span class="pill"><i style="background:var(--tr-fallen)"></i>off the map</span>
-    <h2>${list.length} ${esc(areaName(a))} entries on the ground</h2>
+    <h2>${list.length} ${esc(pileName(a))} entries on the ground</h2>
     <p>Proved and imported by the library, but no constant they cite reaches a blueprint node, and no node depends on them. A tag on the object they share, or a bridge to the node they illustrate, lifts them onto the tree.</p>
-    <ul class="entries">${list.map(([id, name]) => `<li>${esc(name)}<br><span class="mono">${esc(id)}</span></li>`).join("")}</ul>`;
+    <ul class="entries">${list.map(([id, name, c]) => `<li>${esc(name)}<br><span class="mono">${esc(id)}</span>${PARTS.has(a) ? ` <span class="muted">· ${esc(c)}</span>` : ""}</li>`).join("")}</ul>`;
 }
 function select(l){
   selected = l; hideTip();

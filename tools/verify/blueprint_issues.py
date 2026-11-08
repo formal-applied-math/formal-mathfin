@@ -61,7 +61,8 @@ class Node:
     status: str  # proved | upstream | partial | frontier
     uses: tuple[str, ...] = ()
     statement: str = ""
-    area: str = ""
+    area: str = ""  # a cell key of docs/taxonomy.toml
+    family: str = ""  # a family key of the same file, or ""
     ground: str = ""  # frontier only: the upstream material a Mathlib-only result builds on
     core: tuple[str, ...] = ()  # frontier only: corpus entries already proving part of it
 
@@ -111,7 +112,7 @@ def load_frontier(path: Path = FRONTIER_TOML) -> list[Node]:
     data = tomllib.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
     return [Node(label=r["label"], title=r["title"], status="frontier",
                  uses=tuple(r.get("uses", ())), statement=r.get("statement", ""),
-                 area=r.get("area", ""), ground=r.get("ground", ""),
+                 area=r.get("area", ""), family=r.get("family", ""), ground=r.get("ground", ""),
                  core=tuple(r.get("core", ())))
             for r in data.get("node", [])]
 
