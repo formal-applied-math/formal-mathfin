@@ -12,8 +12,8 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 804 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 766 are proved in full, 18 restate a lemma from Mathlib or
+The corpus records 821 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 783 are proved in full, 18 restate a lemma from Mathlib or
 BrownianMotion, and 20 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -126,7 +126,7 @@ exact statement of each one, and what it leaves out.
 
 ## Limitations
 
-- **Reduced cores.** Twenty of the 804 results prove less than the theorem they are named after.
+- **Reduced cores.** Twenty of the 821 results prove less than the theorem they are named after.
   - Eleven assume a structure whose fields include the textbook conclusion: the reflection
     principle, nowhere differentiability and the law of the iterated logarithm for Brownian motion,
     Novikov's condition, the general Girsanov theorem, the two-dimensional Itô formula, and five
