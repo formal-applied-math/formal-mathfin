@@ -36,6 +36,12 @@ Two facts make it the price rather than one more integral:
   A parametric price defined in one concrete model is therefore the price in every market with
   that law.
 
+The price at an intermediate date `t` is the conditional expectation of the deflated cash flows
+given `𝓕 t`, re-expressed at `t` (`priceAt`); deflated to `0`, it averages to the price
+(`integral_deflator_mul_priceAt`, the tower property). The zero-coupon bond price `P(t, T)` of the
+rates models is the price at `t` of one unit paid at `T`
+(`Contracts.bondPrice_deflator_eq_priceAt`, in `Models/Rates/Caplet.lean`).
+
 Changing the numéraire changes the pricing measure and not the price: the market with numéraire `N`
 in place of `B` prices a payment at `T` under the numéraire measure `Q^N` exactly as the original
 market does under `Q` (`price_pay_withNumeraire`, the change-of-numéraire theorem
@@ -52,6 +58,7 @@ prices `q ω = (N 0 / N t)(ω) · Q {ω}` (`price_pay_eq_statePricePricing`), no
 * `Market.IsPricingMeasure`: an equivalent probability measure making every deflated asset a
   martingale up to the horizon.
 * `Market.price`: the value of a contract under a measure, deflated by the numéraire.
+* `Market.priceAt`: the price at an intermediate date, a random variable.
 * `Market.withNumeraire`: the same market with another numéraire.
 
 ## Main results
@@ -59,6 +66,7 @@ prices `q ω = (N 0 / N t)(ω) · Q {ω}` (`price_pay_eq_statePricePricing`), no
 * `Market.IsPricingMeasure.isEMM`: a pricing measure is an `IsEMM` for each deflated asset.
 * `Market.IsPricingMeasure.price_pay_obs`: a traded asset is priced at its initial price.
 * `Market.price_eq_of_map_observation_eq`: law invariance of the price.
+* `Market.integral_deflator_mul_priceAt`: the deflated price at `t` averages to the price.
 * `Market.price_pay_withNumeraire`: the price is invariant under the change of numéraire.
 * `Market.price_pay_eq_statePricePricing`: on a finite sample space the price of a payment is
   state-price pricing, with non-negative state prices (`Market.statePrice_nonneg`).
@@ -178,6 +186,28 @@ theorem price_eq_of_map_observation_eq {Ω' : Type*} {mΩ' : MeasurableSpace Ω'
     M.price Q c = M'.price Q' c :=
   c.value_eq_of_map_observation_eq hc M.measurable_deflator M.measurable_asset
     M'.measurable_deflator M'.measurable_asset h
+
+/-! ### The price at an intermediate date -/
+
+/-- **The price of a contract at date `t`**, a random variable: the conditional expectation given
+`𝓕 t` of the contract's cash flows deflated to `0`, divided by the deflator `N 0 / N t` to express
+it at `t`. It is a price under the conditions that make `price` one (a pricing measure and
+integrable deflated cash flows); the definition is total. -/
+noncomputable def priceAt (M : Market ι Ω) (Q : Measure Ω) (t : ℝ≥0) (c : Contract ι) : Ω → ℝ :=
+  fun ω ↦ Q[fun ω' ↦ c.pathPV (fun s ↦ M.deflator s ω') (scenarioAt M.asset ω') | M.𝓕 t] ω
+    / M.deflator t ω
+
+/-- **The deflated price at `t` averages to the price**:
+`𝔼_Q[(N 0 / N t) · price_t c] = price c`, by the tower property (`integral_condExp`). -/
+theorem integral_deflator_mul_priceAt (M : Market ι Ω) (Q : Measure Ω) [IsFiniteMeasure Q]
+    (t : ℝ≥0) (c : Contract ι) :
+    ∫ ω, M.deflator t ω * M.priceAt Q t c ω ∂Q = M.price Q c := by
+  have h (ω : Ω) : M.deflator t ω * M.priceAt Q t c ω
+      = Q[fun ω' ↦ c.pathPV (fun s ↦ M.deflator s ω') (scenarioAt M.asset ω') | M.𝓕 t] ω := by
+    rw [priceAt]
+    field_simp [(M.deflator_pos t ω).ne']
+  simp_rw [h]
+  exact integral_condExp (M.𝓕.le t)
 
 /-! ### Change of numéraire -/
 

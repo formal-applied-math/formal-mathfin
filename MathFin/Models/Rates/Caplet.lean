@@ -10,6 +10,7 @@ public import MathFin.Models.Rates.ShortRate
 public import MathFin.Models.Rates.FRA
 public import MathFin.Pricing.ForwardMeasure
 public import MathFin.Models.Forwards.Black76
+public import MathFin.Pricing.Market
 
 /-!
 # Caplets and caps, on the bond prices of a stochastic discount factor
@@ -88,6 +89,13 @@ variable {ι Ω : Type*} {mΩ : MeasurableSpace Ω}
 noncomputable def bondPrice (Q : Measure Ω) (𝓕 : Filtration ℝ≥0 mΩ) (D : ℝ≥0 → Ω → ℝ)
     (t T : ℝ≥0) : Ω → ℝ :=
   fun ω ↦ (Q[D T | 𝓕 t]) ω / D t ω
+
+/-- **The bond price is the price at `t` of one unit paid at `T`**: in a market whose deflator
+`N 0 / N t` is the discount factor, `P(t, T)` is `Market.priceAt` of the payment of `1` at `T`. -/
+theorem bondPrice_deflator_eq_priceAt (M : Market ι Ω) (Q : Measure Ω) (t T : ℝ≥0) :
+    bondPrice Q M.𝓕 M.deflator t T = M.priceAt Q t (.pay T (.const 1)) := by
+  funext ω
+  simp [Market.priceAt, bondPrice, Contract.pathPV, Contract.cashflows, Payoff.eval]
 
 /-- The payoff of a **caplet**: `δ (L − K)⁺`, where the underlying `ℓ` carries the
 simply-compounded forward rate `L(T₀, T₁)`, observed at its reset date `T₀`. -/

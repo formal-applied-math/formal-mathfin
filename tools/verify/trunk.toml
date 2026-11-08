@@ -78,7 +78,7 @@ instance = ""
 # payoff); the trunk's price at time t makes it an instance
 [[device]]
 name = "MathFin.Contracts.bondPrice"
-instance = ""
+instance = "MathFin.Contracts.bondPrice_deflator_eq_priceAt"
 
 # One concept, several encodings. A member is resolved when it is gone, or when a theorem
 # uses both it and the canonical object (the equality that ties them).
