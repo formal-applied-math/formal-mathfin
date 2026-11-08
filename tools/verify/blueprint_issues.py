@@ -16,7 +16,8 @@ The invariants, checked by ``check``:
 
 1. every open issue labelled ``type:proof``, ``type:research``, ``open-problem`` or
    ``frontier`` names at least one node (``tracking`` umbrellas are exempt);
-2. every name in a ``Blueprint:`` line is a node;
+2. every name in a ``Blueprint:`` line is a node. An open pull request may name a node it
+   adds: that node exists only on its branch, so the pull request's own build checks the name;
 3. every frontier node is named by at least one open issue — a frontier result nobody is
    working towards is not on the program, and one whose issues all closed has either been
    delivered (tag it in ``MathFin/Blueprint.lean`` and delete the frontier entry) or dropped;
@@ -329,6 +330,8 @@ def check(issues: list[Issue], nodes: dict[str, Node],
                         f"`{retired[label].folded_into}`: name that node instead", i.number))
                 continue
             if label not in nodes:
+                if i.is_pr and i.state == "open":
+                    continue  # a node the PR itself adds: its own build checks it on its branch
                 problems.append(Problem(
                     f"#{i.number} names `{label}`, which is not a blueprint node", i.number))
                 continue
