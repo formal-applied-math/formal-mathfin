@@ -38,7 +38,7 @@ claimed by these two entries**.
 
 ## Public declarations and benchmark entries
 
-Import [`MathFin.BlackScholes.AmericanPut.Stopping.PhysicalBoundaryConvexity`](../MathFin/BlackScholes/AmericanPut/Stopping/PhysicalBoundaryConvexity.lean).
+Import [`MathFin.Models.BlackScholes.American.Stopping.PhysicalBoundaryConvexity`](../MathFin/Models/BlackScholes/American/Stopping/PhysicalBoundaryConvexity.lean).
 Both principal declarations are in namespace
 `MathFin.BlackScholes.AmericanPut.Stopping`:
 
@@ -55,7 +55,7 @@ strictly positive real time-to-expiry, where the conversion does not change time
 
 ## Which boundary is proved convex?
 
-The following files are under `MathFin/BlackScholes/AmericanPut/Stopping/`.
+The following files are under `MathFin/Models/BlackScholes/American/Stopping/`.
 
 1. `Rules.lean`, `Reward.lean`, and `AmericanValue.lean` define the value as
    a supremum of expected discounted put payoffs over **all** stopping times

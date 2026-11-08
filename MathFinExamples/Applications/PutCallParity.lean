@@ -112,9 +112,9 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
 driver price the call and the put, at the sheet's spot and rate, at exactly the quoted values. -/
 def IsBSConsistent (q : QuoteSheet) (Q : Measure Ω) : Prop :=
   ∃ σ > 0, ∃ Z : Ω → ℝ, HasLaw Z (gaussianReal 0 1) Q ∧
-    (europeanCall q.strike q.maturity).value Q (fun _ ↦ q.discount)
+    (europeanCall q.strike q.maturity).value Q (fun _ _ ↦ q.discount)
         (BlackScholes.assets q.spot q.rate σ q.maturity Z) = q.call ∧
-      (europeanPut q.strike q.maturity).value Q (fun _ ↦ q.discount)
+      (europeanPut q.strike q.maturity).value Q (fun _ _ ↦ q.discount)
         (BlackScholes.assets q.spot q.rate σ q.maturity Z) = q.put
 
 /-- **Put–call parity, through the contracts.** If a Black–Scholes market prices both quotes, the
@@ -128,7 +128,8 @@ theorem parityGap_eq_zero {q : QuoteSheet} {Q : Measure Ω} [IsProbabilityMeasur
     ⟨q.spot_pos, q.strike_pos, hσ, NNReal.coe_pos.mpr q.maturity_pos, hZ⟩
   have hX := (integrable_bsTerminal hZ q.spot q.rate σ q.maturity).const_mul
     (Real.exp (-q.rate * q.maturity))
-  have hparity := value_europeanCall_eq_put_add_forward Q (fun _ ↦ Real.exp (-q.rate * q.maturity))
+  have hparity := value_europeanCall_eq_put_add_forward Q
+    (fun _ _ ↦ Real.exp (-q.rate * q.maturity))
     (BlackScholes.assets q.spot q.rate σ q.maturity Z) (K := q.strike) (T := q.maturity)
     (integrable_europeanPut_pathPV hX) (integrable_forward_pathPV hX)
   rw [discount] at hC hP

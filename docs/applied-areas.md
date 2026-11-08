@@ -107,7 +107,7 @@ of the shift operator on `L²` converging to the projection onto the invariant
 subspace. **The one theorem Mathlib does have is the one the field actually uses.**
 That is a genuine architectural gift — the L² route is both available and the
 conceptually right one, and it is the same Hilbert-space projection machinery
-already load-bearing in `Foundations/ItoIntegralL2`.
+already load-bearing in `Probability/Brownian/Ito/ItoIntegralL2`.
 
 Critically, **the identification territory (§3.1) needs no fixed-point theory
 whatsoever.** It is conditional expectation, orthogonal projection, and linear
@@ -215,7 +215,7 @@ that made `formal-mathfin` work.
 
 Cheapest substrate of the four — nearly everything reduces to a fixed point of a
 contraction, which Mathlib has. Weakness: less overlap with our existing
-`Foundations/`, so less reuse.
+`Probability/`, so less reuse.
 
 ### 3.4 General equilibrium — rank 4, deferred
 
@@ -288,7 +288,7 @@ swapping the pointer modules and the house doctrine. **Marginal cost of library 
 is far below library one** — this is probably the single strongest argument for
 doing it at all.
 
-**Substrate modules.** `Foundations/ItoIntegralL2` (Hilbert projection machinery),
+**Substrate modules.** `Probability/Brownian/Ito/ItoIntegralL2` (Hilbert projection machinery),
 `ConvexSeparation` and `ConvexDuality` (Hahn–Banach applications — directly reusable
 for the second welfare theorem), the conditional-expectation and martingale wrappers,
 and the Markov-chain entries noted in §3.2.

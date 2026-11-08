@@ -52,7 +52,7 @@ docker compose -f docker/docker-compose.yml up -d lean-repl
 docker compose -f docker/docker-compose.yml logs -f lean-repl | grep -m1 READY
 
 # Check a file after each edit:
-./scripts/lean-check.sh MathFin/BlackScholes/PDE.lean
+./scripts/lean-check.sh MathFin/Models/BlackScholes/PDE.lean
 # Returns JSON: {"success": bool, "errors": [...], "warnings": [...], "sorry_count": N}
 
 # Check a single benchmark snippet:
@@ -70,19 +70,21 @@ docker compose -f docker/docker-compose.yml down lean-repl
 
 ```
 MathFin/
-  Foundations/       # probability primitives, Itô, FTAP, pricing kernels
-  BlackScholes/      # BS formula, Greeks, exotics, PDE, Merton jump-diffusion
-  Binomial/          # CRR, American/Bermudan, Snell, reflection principle
-  Futures/           # Black-76, swaption
-  FixedIncome/       # ZCB, duration, credit, Vasicek
-  Portfolio/         # Markowitz, CAPM, Black-Litterman, risk parity
-  Performance/       # Sharpe, Sortino, Treynor, Kelly
-  RiskMeasures/      # VaR, CVaR, coherent axioms
-  Actuarial/         # annuity, net premium, Gompertz
-  DeFi/              # constant-product AMM
+  Probability/       # martingales, Brownian motion, Itô, Girsanov, SDEs, Gaussian laws, jumps
+  Contracts/         # the instruments: options, bonds, credit, payoffs
+  Pricing/           # FTAP, EMM, state prices, numéraire, duality, the pricing kernel
+  Models/            # BlackScholes, Binomial, Rates, Credit, Forwards, Bachelier, StochVol, ...
+  Risk/              # VaR, CVaR, coherent axioms, credit risk
+  Choice/            # Portfolio (Markowitz, CAPM), Performance (Sharpe, Kelly), Utility
+  Insurance/         # annuity, net premium, survival models
+  Markets/           # DeFi (AMMs), Microstructure, Execution
 MathFinExamples/     # worked demonstrations of the public API (Tour.lean — start here)
 MathFinTest/         # API checks: the README's Lean, through `import MathFin`
 ```
+
+Imports point one way: `Probability/` → `Contracts/` → `Pricing/` → the limbs (`Models/`,
+`Risk/`, `Choice/`, `Insurance/`, `Markets/`). A limb imports another limb only through an edge
+declared in `tools/verify/layers.py`.
 
 `MathFinExamples/` and `MathFinTest/` import only the umbrella `MathFin`, as a downstream project
 does, and nothing in `MathFin/` imports them.
@@ -107,7 +109,7 @@ Authors: Your Name
 `myTheorem` : <one-line description>.
 -/
 
-import MathFin.Foundations.GaussianCDFDeriv
+import MathFin.Probability.Gaussian.GaussianCDFDeriv
 import Mathlib.Analysis.SpecialFunctions.Gaussian
 
 @[expose] public section

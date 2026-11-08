@@ -44,7 +44,7 @@ exhibits, it holds for every realization of the model, on any probability space:
 * `MathFin.oneFactor_measureReal_inter_default_sub_mul`: and the default covariance is
   `Var(p(F))` (`measureReal_inter_default_sub_mul`). The correlation and its sign are computed
   here from it, in the shape of `defaultCorrelation_eq` and `defaultCorrelation_nonneg`.
-* `MathFin.stdNormalFactors` and its coordinate lemmas (`RiskMeasures/OneFactorCopula.lean`): the
+* `MathFin.stdNormalFactors` and its coordinate lemmas (`Risk/Credit/OneFactorCopula.lean`): the
   realization.
 
 ## What it does not

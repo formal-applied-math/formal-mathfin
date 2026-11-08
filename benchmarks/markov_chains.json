@@ -12,6 +12,12 @@
       "metadata": {
         "chapter": 1,
         "reference": "Definition 1.1.1",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Definition 1.1.1"
+          }
+        ],
         "difficulty": "foundational",
         "formalization_status": "full",
         "formalization_scope": "Faithful finite-state Lean encoding of the Markov-property definition: the next-state conditional law depends only on the current state, with stochastic transition rows."
@@ -28,6 +34,12 @@
       "metadata": {
         "chapter": 1,
         "reference": "Proposition 1.2.3",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Proposition 1.2.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Faithful finite-state formal statement/proof of Chapman-Kolmogorov as matrix-power composition."
@@ -44,6 +56,12 @@
       "metadata": {
         "chapter": 1,
         "reference": "Theorem 1.2.11",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 1.2.11"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "reduced_core",
         "formalization_scope": "reduced_core (active Lean backend): the Lean code is a structural specification -- the textbook conclusion is a structure field, read off by a one-line projection."
@@ -60,6 +78,12 @@
       "metadata": {
         "chapter": 1,
         "reference": "Theorem 1.3.12",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 1.3.12"
+          }
+        ],
         "difficulty": "advanced",
         "status": "stub",
         "formalization_status": "reduced_core",
@@ -77,6 +101,12 @@
       "metadata": {
         "chapter": 1,
         "reference": "Theorem 1.4.25",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 1.4.25"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "reduced_core",
         "formalization_scope": "reduced_core (active Lean backend): the Lean code is a structural specification -- the textbook conclusion is a structure field, read off by a one-line projection."
@@ -93,6 +123,12 @@
       "metadata": {
         "chapter": 1,
         "reference": "Theorem 1.4.32",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 1.4.32"
+          }
+        ],
         "difficulty": "advanced",
         "status": "stub",
         "formalization_status": "reduced_core",
@@ -105,14 +141,20 @@
       "description": "Theorem 1.1.2: the law of the Markov chain (init, P) assigns to every finite path the probability P(X_0=i_0,...,X_n=i_n) = init(i_0) prod_{k<n} P(i_k,i_{k+1}) \u2014 the path-distribution factorization, derived from the Ionescu-Tulcea construction.",
       "domain": "markov_chains",
       "code": {
-        "lean": "import MathFin.Foundations.MarkovPathMeasure\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen scoped ENNReal\n\ntheorem markov_path_distribution_thm {\u03b9 : Type*} [MeasurableSpace \u03b9]\n    [MeasurableSingletonClass \u03b9] [Countable \u03b9]\n    (init : PMF \u03b9) (P : \u03b9 \u2192 PMF \u03b9) (path : \u2115 \u2192 \u03b9) (n : \u2115) :\n    MathFin.markovPathMeasure init P (MathFin.pathCylinder path n)\n      = init (path 0) * \u220f k \u2208 Finset.range n, P (path k) (path (k + 1)) :=\n  MathFin.markovPathMeasure_cylinder init P path n\n"
+        "lean": "import MathFin.Probability.Discrete.MarkovPathMeasure\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen scoped ENNReal\n\ntheorem markov_path_distribution_thm {\u03b9 : Type*} [MeasurableSpace \u03b9]\n    [MeasurableSingletonClass \u03b9] [Countable \u03b9]\n    (init : PMF \u03b9) (P : \u03b9 \u2192 PMF \u03b9) (path : \u2115 \u2192 \u03b9) (n : \u2115) :\n    MathFin.markovPathMeasure init P (MathFin.pathCylinder path n)\n      = init (path 0) * \u220f k \u2208 Finset.range n, P (path k) (path (k + 1)) :=\n  MathFin.markovPathMeasure_cylinder init P path n\n"
       },
       "metadata": {
         "chapter": 1,
         "reference": "Theorem 1.1.2",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 1.1.2"
+          }
+        ],
         "difficulty": "foundational",
         "formalization_status": "full",
-        "formalization_scope": "Full formal derivation (reduced_core -> full, 2026-06-06): the chain's law markovPathMeasure is CONSTRUCTED on infinite trajectories via Mathlib's Ionescu-Tulcea machinery (Kernel.trajMeasure, in the pin) from kernels reading only the last history coordinate \u2014 that restriction is the Markov property of the construction \u2014 and the cylinder factorization is PROVED by induction through the comp-product recursion of the marginals (Kernel.map_frestrictLe_trajMeasure_compProd_eq_map_trajMeasure), replacing the earlier definitional rfl. Countable discrete state space; probabilities in ENNReal via PMF. The converse characterization (factorization implies the Markov property as a conditional-probability statement) is not claimed. Lives in MathFin/Foundations/MarkovPathMeasure.lean. Axioms-clean."
+        "formalization_scope": "Full formal derivation (reduced_core -> full, 2026-06-06): the chain's law markovPathMeasure is CONSTRUCTED on infinite trajectories via Mathlib's Ionescu-Tulcea machinery (Kernel.trajMeasure, in the pin) from kernels reading only the last history coordinate \u2014 that restriction is the Markov property of the construction \u2014 and the cylinder factorization is PROVED by induction through the comp-product recursion of the marginals (Kernel.map_frestrictLe_trajMeasure_compProd_eq_map_trajMeasure), replacing the earlier definitional rfl. Countable discrete state space; probabilities in ENNReal via PMF. The converse characterization (factorization implies the Markov property as a conditional-probability statement) is not claimed. Lives in MathFin/Probability/Discrete/MarkovPathMeasure.lean. Axioms-clean."
       }
     },
     {
@@ -126,6 +168,12 @@
       "metadata": {
         "chapter": 1,
         "reference": "Proposition 1.4.13",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Proposition 1.4.13"
+          }
+        ],
         "difficulty": "foundational",
         "formalization_status": "full",
         "formalization_scope": "Faithful finite-state formal statement/proof that detailed balance implies stationarity."
@@ -142,6 +190,12 @@
       "metadata": {
         "chapter": 1,
         "reference": "Theorem 1.4.40",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 1.4.40"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "reduced_core",
         "formalization_scope": "reduced_core (active Lean backend): the Lean code is a structural specification -- the textbook conclusion is a structure field, read off by a one-line projection."
