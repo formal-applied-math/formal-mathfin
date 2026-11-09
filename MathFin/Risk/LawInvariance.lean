@@ -31,6 +31,8 @@ The library's four are instances:
 
 * `isLawInvariant_valueAtRisk`, `isLawInvariant_expectedShortfall`,
   `isLawInvariant_spectralRiskMeasure`, `isLawInvariant_expectile`.
+* `expectedShortfall_isCoherentRiskMeasure_and_isLawInvariant`: expected shortfall is a
+  law-invariant coherent risk measure.
 * `IsLawInvariant.eq_of_hasLaw`: two losses with the law `μ` have the same risk.
 
 ## References
@@ -73,6 +75,14 @@ theorem isLawInvariant_valueAtRisk (α : ℝ) : IsLawInvariant P fun X ↦ value
 theorem isLawInvariant_expectedShortfall (α : ℝ) :
     IsLawInvariant P fun X ↦ expectedShortfall X P α :=
   fun _ _ _ _ h ↦ by simp only [expectedShortfall, valueAtRisk, h]
+
+/-- **Expected shortfall is a law-invariant coherent risk measure** on the integrable losses, for
+every level `α ∈ (0, 1)`. Kusuoka's theorem is the converse direction, the representation of
+law-invariant coherent risk measures through expected shortfalls; it is not proved here. -/
+theorem expectedShortfall_isCoherentRiskMeasure_and_isLawInvariant {α : ℝ} (hα : α ∈ Set.Ioo 0 1) :
+    IsCoherentRiskMeasure P (fun X ↦ expectedShortfall X P α) ∧
+      IsLawInvariant P fun X ↦ expectedShortfall X P α :=
+  ⟨expectedShortfall_isCoherentRiskMeasure hα, isLawInvariant_expectedShortfall α⟩
 
 /-- **Spectral risk measures are law invariant**: they integrate the value-at-risk curve against
 the spectrum. -/

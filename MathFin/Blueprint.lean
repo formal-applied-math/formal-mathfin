@@ -994,7 +994,7 @@ attribute [blueprint "def:convex-risk-measure"
   (title := "Convex risk measure")
   (statement := /-- A functional on the integrable losses of $(\Omega, P)$ that is monotone,
   translation invariant, $\rho(X + m) = \rho(X) + m$, and convex. Every coherent risk measure is
-  one (`IsCoherentRiskMeasure.toIsConvexRiskMeasure`). -/)]
+  one: `IsCoherentRiskMeasure` extends it. -/)]
   MathFin.IsConvexRiskMeasure
 
 attribute [blueprint "def:coherent-risk-measure"
@@ -1075,10 +1075,11 @@ attribute [blueprint "thm:rockafellar-uryasev"
   MathFin.isLeast_rockafellarUryasev
 
 attribute [blueprint "thm:expected-shortfall-coherent"
-  (title := "Expected shortfall is coherent")
+  (title := "Expected shortfall is a law-invariant coherent risk measure")
   (statement := /-- For $\alpha \in (0,1)$, expected shortfall is a coherent risk measure on
-  the integrable losses. -/)]
-  MathFin.expectedShortfall_isCoherentRiskMeasure
+  the integrable losses (`expectedShortfall_isCoherentRiskMeasure`) and is law invariant. Kusuoka's
+  theorem, the converse, is not proved. -/)]
+  MathFin.expectedShortfall_isCoherentRiskMeasure_and_isLawInvariant
 
 attribute [blueprint "thm:expected-shortfall-dual"
   (title := "Dual representation of expected shortfall")

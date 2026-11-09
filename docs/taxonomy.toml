@@ -348,7 +348,8 @@ modules = ["MathFin.Risk"]
 subjects = ["MSC 91G70", "JEL G32"]
 landmarks = [
   "MathFin.valueAtRisk", "MathFin.expectedShortfall",
-  "MathFin.expectedShortfall_isCoherentRiskMeasure", "MathFin.isLeast_rockafellarUryasev",
+  "MathFin.expectedShortfall_isCoherentRiskMeasure_and_isLawInvariant",
+  "MathFin.isLeast_rockafellarUryasev",
   "MathFin.isGreatest_integral_mul_expectedShortfall", "MathFin.valueAtRisk_portfolio_gaussian",
 ]
 
