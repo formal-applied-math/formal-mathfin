@@ -24,7 +24,7 @@ transcribes the continuous-monitoring closed form for its price — Goldman, Sos
 1111–1127, in the cost-of-carry form of Haug, *The Complete Guide to Option Pricing Formulas*,
 2nd ed. (2007), ch. 4, "Floating-Strike Lookback Options" — and proves a reduction of the
 transcribed closed form to the already-built vanilla Black–Scholes call (`bsV`,
-`BlackScholes/PDE.lean`).
+`Models/BlackScholes/PDE.lean`).
 
 Transcribed from QuantLib's `ql/pricingengines/lookback/analyticcontinuousfloatinglookback.cpp`
 (`AnalyticContinuousFloatingLookbackEngine::A`, upstream commit `c547e0ae6`, 2026-10-22;
@@ -34,7 +34,7 @@ The engine's own zero-carry handling (`|λ| < 1e-7`, upstream commit `060d87ef3`
 continuous lookbacks when the carry is zero") is the true removable-singularity limit this file
 does not transcribe — see the Scope section below and `lookbackFloatingPrice`'s own docstring.
 With cost of carry `b = r − q`, `a₁ = bsd1 S m b σ T`, `a₂ = bsd2 S m b σ T`
-(`BlackScholes/Call.lean`), the price is
+(`Models/BlackScholes/Call.lean`), the price is
 
   `η·[S·e^{−qT}·Φ(ηa₁) − m·e^{−rT}·Φ(ηa₂)
       + S·e^{−rT}·(σ²/2b)·((S/m)^{−2b/σ²}·Φ(η(−a₁ + 2b√T/σ)) − e^{bT}·Φ(−ηa₁))]`.
@@ -78,7 +78,7 @@ extremum's law, which is the piece this file's transcription route sidesteps.
   could break the bound — `(S/m)^{−2r/σ²}·Φ(−a₁ + 2r√T/σ) − e^{rT}·Φ(−a₁)`, the term with a
   removable singularity at `r = 0` — and showing it always has the same sign as `r`, via a
   Mills-ratio monotonicity argument reusing `neg_mul_Phi_le_gaussianPDFReal`
-  (`Foundations/NormalTail.lean`) in a new role: there it bounds a normal tail, here it supplies a
+  (`Probability/Gaussian/NormalTail.lean`) in a new role: there it bounds a normal tail, here it supplies a
   derivative sign. **Not a counterpart of `Lookback.lean`'s `lookback_payoff_ge_vanilla`**: that
   lemma is a same-strike fixed-strike statement (`max(S−K,0) ≤ max(M−K,0)` given `S ≤ M`, the
   running *maximum*); this theorem is a floating-strike statement about the running *minimum*,
