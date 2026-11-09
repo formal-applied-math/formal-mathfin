@@ -4072,10 +4072,10 @@
     },
     "mf-piecewise-linear-arbitrage-free-interpolation": {
       "benchmark_file": "no_arbitrage.json",
-      "date": "2026-11-08",
-      "elapsed_s": 2.6,
-      "input_hash": "7958ad6ce97a9a9a51be7922e2dbafbe5685f1fcda51389b011be7f1ae1341db",
-      "verified_at_commit": "4c7080f"
+      "date": "2026-11-09",
+      "elapsed_s": 2.3,
+      "input_hash": "c2b25c1e3a6ebb9ce3f91d128ea5e70c72d0b603c3edb52d90051220a17e5968",
+      "verified_at_commit": "043e2b6"
     },
     "mf-poisson-merged-arrivals": {
       "benchmark_file": "stochastic_foundations.json",
