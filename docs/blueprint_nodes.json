@@ -124,13 +124,13 @@
   "text":
   "The tranche leg, the tranche loss $((L-a)^+ - (L-d)^+)/(d-a)$ paid at $T$ as a\n  contract on the portfolio loss fraction $L$, is worth on a deterministic discount curve $D$\n  the discounted expected tranche loss $D_T\\,\\mathbb E_Q[\\mathrm{tranchePayoff}(L_T)]$. The law\n  of the loss fraction is not part of the statement.",
   "name": "MathFin.Contracts.value_trancheLeg",
-  "module": "MathFin.Contracts.Instruments.Tranche",
-  "line": 69,
+  "module": "MathFin.Risk.Credit.TrancheLeg",
+  "line": 70,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:tranche-leg-price",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Contracts/Instruments/Tranche.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Credit/TrancheLeg.lean"},
  {"uses": [],
   "title": "Glosten–Milgrom bid and ask quotes",
   "text":
