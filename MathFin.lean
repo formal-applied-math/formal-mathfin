@@ -325,6 +325,7 @@ import MathFin.Contracts.Adapted
 import MathFin.Contracts.Instruments.Options
 import MathFin.Contracts.Instruments.FixedIncome
 import MathFin.Contracts.Instruments.Credit
+import MathFin.Risk.Credit.TrancheLeg
 
 -- Pricing
 -- Continuous-time first FTAP: discounted GBM price is a Q-martingale (Wald exponential)
@@ -922,4 +923,6 @@ import MathFin.Markets.Microstructure.RollSpread
 import MathFin.Markets.DeFi.ConstantProductLPLognormal
 import MathFin.Markets.DeFi.LiquidationAsStructuralDefault
 import MathFin.Markets.DeFi.UniswapV3CoveredCallPrice
+import MathFin.Markets.DeFi.LPContract
 import MathFin.Markets.Microstructure.GlostenMilgromCondExp
+import MathFin.Markets.Microstructure.GlostenMilgromMarket

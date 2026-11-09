@@ -11,6 +11,18 @@
   "label": "thm:american-put-optimal-exercise",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/American/Stopping/ActualOptimality.lean"},
+ {"uses": ["def:market", "def:pricing-measure", "def:emm"],
+  "title": "A conditional-expectation process is priced by its own measure",
+  "text":
+  "For a probability measure $P$, a filtration $\\mathcal G$ on $\\mathbb N$ and\n  an arbitrary value $V$, $P$ is a pricing measure, at every horizon, of the discrete market\n  with unit numéraire whose asset is $n \\mapsto \\mathbb E_P[V \\mid \\mathcal G_n]$, because\n  that process is a $P$-martingale and the equivalent martingale measure $P$ of it is a pricing\n  measure. That the Glosten–Milgrom dealer's quotes along a sequence of trades are such\n  conditional expectations is not part of this statement.",
+  "name": "MathFin.Execution.isPricingMeasure_toMarket_condExp",
+  "module": "MathFin.Markets.Microstructure.GlostenMilgromMarket",
+  "line": 51,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:conditional-expectation-pricing-measure",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/Microstructure/GlostenMilgromMarket.lean"},
  {"uses": [],
   "title": "Portfolio variance",
   "text":
@@ -107,6 +119,18 @@
   "label": "def:brownian-motion",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/.lake/packages/mathlib/Mathlib/Probability/BrownianMotion/Basic.lean"},
+ {"uses": ["def:contract", "def:contract-value"],
+  "title": "A CDO tranche leg is a contract",
+  "text":
+  "The tranche leg, the tranche loss $((L-a)^+ - (L-d)^+)/(d-a)$ paid at $T$ as a\n  contract on the portfolio loss fraction $L$, is worth on a deterministic discount curve $D$\n  the discounted expected tranche loss $D_T\\,\\mathbb E_Q[\\mathrm{tranchePayoff}(L_T)]$. The law\n  of the loss fraction is not part of the statement.",
+  "name": "MathFin.Contracts.value_trancheLeg",
+  "module": "MathFin.Risk.Credit.TrancheLeg",
+  "line": 70,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:tranche-leg-price",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Credit/TrancheLeg.lean"},
  {"uses": [],
   "title": "Glosten–Milgrom bid and ask quotes",
   "text":
@@ -191,18 +215,6 @@
   "label": "def:expected-shortfall",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ValueAtRisk.lean"},
- {"uses": [],
-  "title": "Quantile function",
-  "text":
-  "The quantile function of a law $\\mu$ on $\\mathbb{R}$, $q_\\mu(p) = \\inf\\{x\n  \\mid p \\le F_\\mu(x)\\}$, the generalized inverse of its CDF. Its values are meaningful for $p\n  \\in (0,1)$.",
-  "name": "MathFin.quantile",
-  "module": "MathFin.Probability.Laws.Quantile",
-  "line": 80,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:quantile",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Laws/Quantile.lean"},
  {"uses": ["def:standard-normal-cdf"],
   "title": "Bachelier call price formula",
   "text":
@@ -215,6 +227,18 @@
   "label": "thm:bachelier-call",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Bachelier/Bachelier.lean"},
+ {"uses": [],
+  "title": "Quantile function",
+  "text":
+  "The quantile function of a law $\\mu$ on $\\mathbb{R}$, $q_\\mu(p) = \\inf\\{x\n  \\mid p \\le F_\\mu(x)\\}$, the generalized inverse of its CDF. Its values are meaningful for $p\n  \\in (0,1)$.",
+  "name": "MathFin.quantile",
+  "module": "MathFin.Probability.Laws.Quantile",
+  "line": 80,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:quantile",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Laws/Quantile.lean"},
  {"uses": [],
   "title": "Optional sampling theorem",
   "text":
@@ -359,18 +383,6 @@
   "label": "thm:bond-immunization",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/Immunization.lean"},
- {"uses": ["def:standard-normal-cdf"],
-  "title": "Liquidation of a lending position is Merton default",
-  "text":
-  "With lognormal collateral, liquidation threshold $LT > 0$ and debt $B + F\n  > 0$, the probability that the single-collateral (v1) health factor is below $1$ at the\n  horizon is the Merton–KMV default probability with barrier $(B+F)/LT$.",
-  "name": "MathFin.prob_healthFactorV1_lt_one_eq_kmvPD",
-  "module": "MathFin.Markets.DeFi.LiquidationAsStructuralDefault",
-  "line": 107,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:aave-liquidation-kmv",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/LiquidationAsStructuralDefault.lean"},
  {"uses": ["def:portfolio-variance"],
   "title": "Capital asset pricing model",
   "text":
@@ -383,6 +395,18 @@
   "label": "thm:capm-equilibrium",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/CAPMEquilibrium.lean"},
+ {"uses": ["def:standard-normal-cdf"],
+  "title": "Liquidation of a lending position is Merton default",
+  "text":
+  "With lognormal collateral, liquidation threshold $LT > 0$ and debt $B + F\n  > 0$, the probability that the single-collateral (v1) health factor is below $1$ at the\n  horizon is the Merton–KMV default probability with barrier $(B+F)/LT$.",
+  "name": "MathFin.prob_healthFactorV1_lt_one_eq_kmvPD",
+  "module": "MathFin.Markets.DeFi.LiquidationAsStructuralDefault",
+  "line": 107,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:aave-liquidation-kmv",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/LiquidationAsStructuralDefault.lean"},
  {"uses": ["thm:compound-poisson-mgf"],
   "title": "Incompleteness of jump-diffusion markets",
   "text":
@@ -558,6 +582,22 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Duality/ConvexDuality.lean"},
  {"uses":
+  ["def:market",
+   "def:contract",
+   "def:pricing-functional",
+   "def:contract-value"],
+  "title": "An AMM liquidity position is a contract",
+  "text":
+  "In a market with positive price of $X$ in $Y$ at $T$, under any measure $Q$, the\n  concentrated-liquidity payoff (a payoff in $\\sqrt P$) paid at $T$ is worth $\\int D_T\\,\n  v_3(\\sqrt{P_T})\\,dQ$ for the position value $v_3$ of Uniswap v3, and the constant-product\n  payoff of invariant $x_0y_0$ is worth the discounted expectation of the rebalanced reserves\n  valued at $P_T$. It is a price in the sense of a pricing measure when $Q$ is one; its closed\n  form under Black--Scholes is not stated.",
+  "name": "MathFin.DeFi.price_lpPayoff",
+  "module": "MathFin.Markets.DeFi.LPContract",
+  "line": 135,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:lp-position-price",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/LPContract.lean"},
+ {"uses":
   ["def:quantile", "def:standard-normal-cdf", "thm:empirical-cdf-strong-law"],
   "title": "Vasicek's large-portfolio limit",
   "text":
@@ -571,18 +611,6 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Credit/VasicekIRB.lean"},
  {"uses": [],
-  "title": "Strong law for the empirical distribution function",
-  "text":
-  "For pairwise independent draws with a common law whose CDF is continuous,\n  almost surely the empirical CDF converges to that CDF at every point. The convergence is\n  pointwise; uniformity (Glivenko–Cantelli) is not proved.",
-  "name": "MathFin.tendsto_empiricalCDF_ae",
-  "module": "MathFin.Probability.Laws.QuantileConvergence",
-  "line": 138,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:empirical-cdf-strong-law",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Laws/QuantileConvergence.lean"},
- {"uses": [],
   "title": "Change of numéraire",
   "text":
   "For positive $B_T, N_T$ and $B_0 \\ge 0$, $N_0 > 0$, the measure $Q^N$ with\n  density $N_TB_0/(N_0B_T)$ with respect to $Q$ satisfies $N_0E^{Q^N}[X/N_T] = B_0E^Q[X/B_T]$.\n  When $E^Q[N_T/B_T] = N_0/B_0$ and $B_0, N_0 > 0$, $Q^N$ is a probability measure equivalent\n  to $Q$ (`numeraireMeasure_isEquivProbMeasure`). A pricing identity at one date; no dynamics.",
@@ -594,6 +622,18 @@
   "label": "thm:change-of-numeraire",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Numeraire.lean"},
+ {"uses": [],
+  "title": "Strong law for the empirical distribution function",
+  "text":
+  "For pairwise independent draws with a common law whose CDF is continuous,\n  almost surely the empirical CDF converges to that CDF at every point. The convergence is\n  pointwise; uniformity (Glivenko–Cantelli) is not proved.",
+  "name": "MathFin.tendsto_empiricalCDF_ae",
+  "module": "MathFin.Probability.Laws.QuantileConvergence",
+  "line": 138,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:empirical-cdf-strong-law",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Laws/QuantileConvergence.lean"},
  {"uses": ["def:market"],
   "title": "Pricing measure",
   "text":
@@ -606,18 +646,6 @@
   "label": "def:pricing-measure",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Market.lean"},
- {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
-  "title": "Completeness of the Brownian market",
-  "text":
-  "Every square-integrable $\\mathcal{F}^B_T$-claim is replicated from initial\n  wealth $E_\\mu[H]$ by a unique Itô-integrable strategy — the representation theorem read as a\n  trading statement, the integrand *being* the hedge. The strategy class is the predictable\n  $L^2$ integrands (piecewise-constant holdings could not hedge a general $L^2$ claim), and\n  the traded gain is the integral against $B$ itself: the stochastic integral\n  $\\int\\varphi\\,dS$ against a general price is absent by design.",
-  "name": "MathFin.exists_replicating_strategy",
-  "module": "MathFin.Pricing.MarketCompleteness",
-  "line": 148,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:market-completeness",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/MarketCompleteness.lean"},
  {"uses": ["def:quantile"],
   "title": "Gaussian quantile function",
   "text":
@@ -630,6 +658,18 @@
   "label": "thm:gaussian-quantile",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Gaussian/NormalQuantile.lean"},
+ {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
+  "title": "Completeness of the Brownian market",
+  "text":
+  "Every square-integrable $\\mathcal{F}^B_T$-claim is replicated from initial\n  wealth $E_\\mu[H]$ by a unique Itô-integrable strategy — the representation theorem read as a\n  trading statement, the integrand *being* the hedge. The strategy class is the predictable\n  $L^2$ integrands (piecewise-constant holdings could not hedge a general $L^2$ claim), and\n  the traded gain is the integral against $B$ itself: the stochastic integral\n  $\\int\\varphi\\,dS$ against a general price is absent by design.",
+  "name": "MathFin.exists_replicating_strategy",
+  "module": "MathFin.Pricing.MarketCompleteness",
+  "line": 148,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:market-completeness",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/MarketCompleteness.lean"},
  {"uses": ["def:standard-normal-cdf", "thm:bachelier-call"],
   "title": "Credit valuation adjustment",
   "text":
@@ -718,18 +758,6 @@
   "label": "def:gbm",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoLemma2D.lean"},
- {"uses": ["def:contract", "def:contract-value"],
-  "title": "Put-call parity",
-  "text":
-  "If the discounted price $D_tX_t$ is a $Q$-martingale with $D_0 = 1$ and\n  $X_0 = S_0$, the value of the European call minus the European put at strike $K$ and\n  maturity $T$ is $S_0 - KD_T$. In a finite-state market with non-negative state prices $q$\n  summing to the discount factor $DF$ and spot $S_0 = \\sum_i q_iS_i$, call minus put is $S_0 -\n  K\\cdot DF$ (`putCall_parity_from_no_arbitrage`).",
-  "name": "MathFin.Contracts.value_europeanCall_sub_put_of_martingale",
-  "module": "MathFin.Pricing.Parity",
-  "line": 166,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:put-call-parity",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Parity.lean"},
  {"uses": [],
   "title": "Contract",
   "text":
@@ -742,6 +770,18 @@
   "label": "def:contract",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Contracts/Core.lean"},
+ {"uses": ["def:contract", "def:contract-value"],
+  "title": "Put-call parity",
+  "text":
+  "If the discounted price $D_tX_t$ is a $Q$-martingale with $D_0 = 1$ and\n  $X_0 = S_0$, the value of the European call minus the European put at strike $K$ and\n  maturity $T$ is $S_0 - KD_T$. In a finite-state market with non-negative state prices $q$\n  summing to the discount factor $DF$ and spot $S_0 = \\sum_i q_iS_i$, call minus put is $S_0 -\n  K\\cdot DF$ (`putCall_parity_from_no_arbitrage`).",
+  "name": "MathFin.Contracts.value_europeanCall_sub_put_of_martingale",
+  "module": "MathFin.Pricing.Parity",
+  "line": 166,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:put-call-parity",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Parity.lean"},
  {"uses": [],
   "title": "Vasicek bond price",
   "text":
@@ -778,18 +818,6 @@
   "label": "thm:quantile-transform",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Laws/Quantile.lean"},
- {"uses": [],
-  "title": "Marginal utility is a state-price density",
-  "text":
-  "In the finite-state market with payoff matrix $A$ and prices $\\pi$, let the\n  portfolio $\\theta$ cost $w_0>0$, with payoff $W = A^\\top\\theta > 0$, probabilities $p>0$ and\n  marginal utility $u'(W_\\omega)>0$, and let it be stationary for $\\sum_\\omega p_\\omega\n  u(W_\\omega)$ on the budget set: $\\sum_\\omega p_\\omega u'(W_\\omega) W^d_\\omega = 0$ for every\n  portfolio $d$ of zero cost. Then there is $\\mu>0$ with $\\sum_\\omega p_\\omega u'(W_\\omega)\n  A_{k\\omega} = \\mu\\,\\pi_k$ for every asset $k$: the normalised marginal utility\n  $p_\\omega u'(W_\\omega)/\\mu$ is a state-price vector (the Euler equation). A local maximum on the\n  budget set is stationary, and on a finite probability space charging every state the state prices\n  give an equivalent martingale measure (`exists_isEMM_of_isLocalMaxOn`).",
-  "name": "MathFin.exists_pos_smul_eq_of_stationary",
-  "module": "MathFin.Choice.Utility.StatePriceDensity",
-  "line": 176,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:utility-state-price-density",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/StatePriceDensity.lean"},
  {"uses":
   ["def:value-at-risk",
    "def:quantile",
@@ -866,18 +894,6 @@
   "label": "thm:log-utility-acceptance",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/UtilityDerivation.lean"},
- {"uses": [],
-  "title": "Ionescu–Tulcea theorem: the law of a Markov chain",
-  "text":
-  "The law of a countable-state Markov chain, constructed on infinite\n  trajectories by Mathlib's Ionescu–Tulcea trajectory kernels from kernels reading only the\n  last history coordinate; the finite-path factorization $P(X_0{=}i_0,\\dots,X_n{=}i_n) =\n  \\mathrm{init}(i_0)\\prod_k P(i_k,i_{k+1})$ is derived by induction through the comp-product\n  recursion of the marginals (Saporito 1.1.2).",
-  "name": "MathFin.markovPathMeasure_cylinder",
-  "module": "MathFin.Probability.Discrete.MarkovPathMeasure",
-  "line": 198,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:markov-path-law",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/MarkovPathMeasure.lean"},
  {"uses": ["def:coherent-risk-measure", "thm:superhedging-price-lower-bound"],
   "title": "The superhedging price is a coherent risk measure",
   "text":
@@ -890,6 +906,18 @@
   "label": "thm:superhedging-coherent",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"},
+ {"uses": [],
+  "title": "Ionescu–Tulcea theorem: the law of a Markov chain",
+  "text":
+  "The law of a countable-state Markov chain, constructed on infinite\n  trajectories by Mathlib's Ionescu–Tulcea trajectory kernels from kernels reading only the\n  last history coordinate; the finite-path factorization $P(X_0{=}i_0,\\dots,X_n{=}i_n) =\n  \\mathrm{init}(i_0)\\prod_k P(i_k,i_{k+1})$ is derived by induction through the comp-product\n  recursion of the marginals (Saporito 1.1.2).",
+  "name": "MathFin.markovPathMeasure_cylinder",
+  "module": "MathFin.Probability.Discrete.MarkovPathMeasure",
+  "line": 198,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:markov-path-law",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/MarkovPathMeasure.lean"},
  {"uses":
   ["def:expected-shortfall",
    "def:coherent-risk-measure",
@@ -959,18 +987,6 @@
   "label": "thm:margrabe",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/MargrabeGrounding.lean"},
- {"uses": [],
-  "title": "One-factor Gaussian copula",
-  "text":
-  "The copula on $n$ names of the latent vector $X_i = \\rho Z_0 +\n  \\sqrt{1-\\rho^2}\\,Z_i$ with independent standard normals; it is a copula for $\\rho \\in\n  [-1,1]$.",
-  "name": "MathFin.gaussianFactorCopula",
-  "module": "MathFin.Probability.Dependence.GaussianCopula",
-  "line": 233,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:gaussian-factor-copula",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Dependence/GaussianCopula.lean"},
  {"uses": ["def:brownian-motion"],
   "title": "Quadratic variation of Brownian motion",
   "text":
@@ -983,6 +999,22 @@
   "label": "thm:quadratic-variation",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/QuadraticVariationL2.lean"},
+ {"uses":
+  ["def:copula",
+   "thm:quantile-transform",
+   "def:quantile",
+   "def:standard-normal-cdf"],
+  "title": "One-factor Gaussian copula",
+  "text":
+  "The copula on $n$ names of the latent vector $X_i = \\rho Z_0 +\n  \\sqrt{1-\\rho^2}\\,Z_i$ with independent standard normals; it is a copula for $\\rho \\in\n  [-1,1]$ (`isCopula_gaussianFactorCopula`, the tagged declaration).",
+  "name": "MathFin.isCopula_gaussianFactorCopula",
+  "module": "MathFin.Probability.Dependence.GaussianCopula",
+  "line": 251,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "def:gaussian-factor-copula",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Dependence/GaussianCopula.lean"},
  {"uses":
   ["def:standard-normal-cdf",
    "def:contract",
@@ -1012,18 +1044,6 @@
   "label": "thm:markowitz-lagrangian",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
- {"uses": ["def:brownian-motion"],
-  "title": "Bracket of the Itô integral",
-  "text":
-  "$M^2 - \\langle M\\rangle$ is a martingale: $\\mathbb{E}[M_b^2 - \\langle\n  M\\rangle_b \\mid \\mathcal{F}_a] = M_a^2 - \\langle M\\rangle_a$ for $a \\le b \\le T$. Expanding\n  $(M_b-M_a)^2$, the cross term collapses by the martingale property of $M$, and the bracket\n  increment splits off the conditional expectation because $\\langle M\\rangle_a$ is adapted —\n  which holds because the predictable $\\sigma$-algebra, traced onto a band\n  $(a,b]\\times\\Omega$, is $\\mathcal{B}(\\mathbb{R}_{\\ge 0})\\otimes \\mathcal{F}_b$-measurable.\n  The bracket is the pathwise integral $\\int\\varphi^2\\,dt$; that it is the limit of the\n  realized quadratic variation is the frontier node `thm:bracket-quadratic-variation`.",
-  "name": "MathFin.BracketCompensator.condExp_sq_sub_bracket",
-  "module": "MathFin.Probability.Martingales.BracketCompensator",
-  "line": 267,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:bracket-compensator",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Martingales/BracketCompensator.lean"},
  {"uses": ["thm:carr-madan"],
   "title": "Breeden–Litzenberger formula",
   "text":
@@ -1036,6 +1056,18 @@
   "label": "thm:breeden-litzenberger",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/LocalVol/Dupire.lean"},
+ {"uses": ["def:brownian-motion"],
+  "title": "Bracket of the Itô integral",
+  "text":
+  "$M^2 - \\langle M\\rangle$ is a martingale: $\\mathbb{E}[M_b^2 - \\langle\n  M\\rangle_b \\mid \\mathcal{F}_a] = M_a^2 - \\langle M\\rangle_a$ for $a \\le b \\le T$. Expanding\n  $(M_b-M_a)^2$, the cross term collapses by the martingale property of $M$, and the bracket\n  increment splits off the conditional expectation because $\\langle M\\rangle_a$ is adapted —\n  which holds because the predictable $\\sigma$-algebra, traced onto a band\n  $(a,b]\\times\\Omega$, is $\\mathcal{B}(\\mathbb{R}_{\\ge 0})\\otimes \\mathcal{F}_b$-measurable.\n  The bracket is the pathwise integral $\\int\\varphi^2\\,dt$; that it is the limit of the\n  realized quadratic variation is the frontier node `thm:bracket-quadratic-variation`.",
+  "name": "MathFin.BracketCompensator.condExp_sq_sub_bracket",
+  "module": "MathFin.Probability.Martingales.BracketCompensator",
+  "line": 267,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:bracket-compensator",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Martingales/BracketCompensator.lean"},
  {"uses":
   ["def:gbm",
    "def:brownian-motion",
@@ -1367,4 +1399,16 @@
   "latexEnv": "theorem",
   "label": "thm:feynman-kac-heat-eq",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Gaussian/FeynmanKacHeatEquation.lean"}]
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Gaussian/FeynmanKacHeatEquation.lean"},
+ {"uses": [],
+  "title": "Marginal utility is a state-price density",
+  "text":
+  "In the finite-state market with payoff matrix $A$ and prices $\\pi$, let the\n  portfolio $\\theta$ cost $w_0>0$, with payoff $W = A^\\top\\theta > 0$, probabilities $p>0$ and\n  marginal utility $u'(W_\\omega)>0$, and let it be stationary for $\\sum_\\omega p_\\omega\n  u(W_\\omega)$ on the budget set: $\\sum_\\omega p_\\omega u'(W_\\omega) W^d_\\omega = 0$ for every\n  portfolio $d$ of zero cost. Then there is $\\mu>0$ with $\\sum_\\omega p_\\omega u'(W_\\omega)\n  A_{k\\omega} = \\mu\\,\\pi_k$ for every asset $k$: the normalised marginal utility\n  $p_\\omega u'(W_\\omega)/\\mu$ is a state-price vector (the Euler equation). A local maximum on the\n  budget set is stationary, and on a finite probability space charging every state the state prices\n  give an equivalent martingale measure (`exists_isEMM_of_isLocalMaxOn`).",
+  "name": "MathFin.exists_pos_smul_eq_of_stationary",
+  "module": "MathFin.Choice.Utility.StatePriceDensity",
+  "line": 176,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:utility-state-price-density",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/StatePriceDensity.lean"}]
