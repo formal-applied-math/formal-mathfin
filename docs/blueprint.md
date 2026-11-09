@@ -120,6 +120,7 @@ graph TD
   valueAtRisk["Value-at-risk"]:::proved
   aaveLiquidationKmv["Liquidation of a lending position is Merton default"]:::proved
   americanPutOptimalExercise["Optimal exercise of the American put"]:::proved
+  arbitrageFreeSmileInterpolation["Piecewise-linear arbitrage-free interpolation of a quoted call-price smile"]:::proved
   bachelierCall["Bachelier call price formula"]:::proved
   bracketCompensator["Bracket of the Itô integral"]:::proved
   breedenLitzenberger["Breeden–Litzenberger formula"]:::proved
@@ -350,6 +351,7 @@ graph TD
   standardNormalCdf --> aaveLiquidationKmv
   brownianMotion --> americanPutOptimalExercise
   gbm --> americanPutOptimalExercise
+  emm --> arbitrageFreeSmileInterpolation
   standardNormalCdf --> bachelierCall
   brownianMotion --> bracketCompensator
   carrMadan --> breedenLitzenberger
@@ -739,6 +741,7 @@ graph TD
 | `def:value-at-risk` Value-at-risk | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Avalue-at-risk%22%20in%3Abody) |
 | `thm:aave-liquidation-kmv` Liquidation of a lending position is Merton default | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaave-liquidation-kmv%22%20in%3Abody) |
 | `thm:american-put-optimal-exercise` Optimal exercise of the American put | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-optimal-exercise%22%20in%3Abody) |
+| `thm:arbitrage-free-smile-interpolation` Piecewise-linear arbitrage-free interpolation of a quoted call-price smile | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aarbitrage-free-smile-interpolation%22%20in%3Abody) |
 | `thm:bachelier-call` Bachelier call price formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abachelier-call%22%20in%3Abody) |
 | `thm:bracket-compensator` Bracket of the Itô integral | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abracket-compensator%22%20in%3Abody) |
 | `thm:breeden-litzenberger` Breeden–Litzenberger formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abreeden-litzenberger%22%20in%3Abody) |

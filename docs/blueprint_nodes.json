@@ -1504,4 +1504,17 @@
   "latexEnv": "theorem",
   "label": "thm:utility-state-price-density",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/StatePriceDensity.lean"}]
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/StatePriceDensity.lean"},
+  {
+  "name": "MathFin.convexOn_piecewiseLinear",
+  "label": "thm:arbitrage-free-smile-interpolation",
+  "title": "Piecewise-linear arbitrage-free interpolation of a quoted call-price smile",
+  "latexEnv": "theorem",
+  "text":
+  "A finite dataset of arbitrage-free call-price quotes (increasing\n  strikes, non-increasing prices, non-decreasing secant slopes) admits a piecewise-linear\n  interpolant that is itself convex and non-increasing across the whole quoted strike\n  range and matches the quotes exactly, at the knots and along every segment. The quoted\n  conditions are the smile-side face of no-arbitrage: convexity and monotonicity of call\n  prices in strike are what an equivalent martingale measure implies for the price surface.",
+  "module": "MathFin.Models.ModelFree.CallPriceInterpolation",
+  "line": 355,
+  "leanOk": true,
+  "file":
+  "MathFin/Models/ModelFree/CallPriceInterpolation.lean",
+  "uses": ["def:emm"]}]

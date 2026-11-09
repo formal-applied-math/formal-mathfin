@@ -456,6 +456,8 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.binomialPrice_call_tendsto_bs_closed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.binomialPrice_call_tendsto_bs_closed
+-- info: 'MathFin.convexOn_piecewiseLinear' depends on axioms: [propext, Classical.choice, Quot.sound]
+#print axioms MathFin.convexOn_piecewiseLinear
 
 /-! ## Summit A: bounded-derivative continuous-time Itô formula in L² (CLM-identified) -/
 

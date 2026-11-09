@@ -32,6 +32,7 @@ import MathFin.Models.BlackScholes.GaussianGirsanov
 import MathFin.Models.BlackScholes.Market
 import MathFin.Models.BlackScholes.MargrabeGrounding
 import MathFin.Models.BlackScholes.PDE
+import MathFin.Models.ModelFree.CallPriceInterpolation
 import MathFin.Models.Credit.CVA
 import MathFin.Models.Credit.Cox
 import MathFin.Models.Credit.KMVMertonStructural
@@ -598,6 +599,17 @@ attribute [blueprint "thm:crr-bs-convergence"
   Lévy continuity → weak convergence, with put–call parity lifting the (bounded) put's
   convergence to the call. -/)]
   MathFin.binomialPrice_call_tendsto_bs_closed
+
+attribute [blueprint "thm:arbitrage-free-smile-interpolation"
+  (title := "Piecewise-linear arbitrage-free interpolation of a quoted call-price smile")
+  (uses := ["def:emm"])
+  (statement := /-- A finite dataset of arbitrage-free call-price quotes (increasing
+  strikes, non-increasing prices, non-decreasing secant slopes) admits a piecewise-linear
+  interpolant that is itself convex and non-increasing across the whole quoted strike
+  range and matches the quotes exactly, at the knots and along every segment. The quoted
+  conditions are the smile-side face of no-arbitrage: convexity and monotonicity of call
+  prices in strike are what an equivalent martingale measure implies for the price surface. -/)]
+  MathFin.convexOn_piecewiseLinear
 
 -- ===== valuation/diffusions: Black–Scholes and Bachelier =====
 
