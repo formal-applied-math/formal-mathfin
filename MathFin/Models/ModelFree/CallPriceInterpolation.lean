@@ -109,29 +109,10 @@ structure IsArbitrageFreeQuotes (K C : ℕ → ℝ) (n : ℕ) : Prop where
   strikes_mono : StrictMonoOn K (Iic n)
   /-- Prices are non-increasing: no vertical call spread has a negative price. -/
   prices_anti : AntitoneOn C (Iic n)
-  /-- Secant slopes are non-decreasing: no butterfly spread has a negative price. -/
-  no_butterfly : ∀ i, i + 2 ≤ n →
-      (C (i + 1) - C i) / (K (i + 1) - K i) ≤ (C (i + 2) - C (i + 1)) / (K (i + 2) - K (i + 1))
-
-/-! ### Two generic gluing lemmas
-
-Neither mentions `piecewiseLinear`: they glue an arbitrary convex piece on the left to an
-arbitrary *affine* piece on the right, which is the shape the inductive step below always has
-(the newest segment is always affine). Monotonicity glues for free (`antitoneOn_glue`); convexity
-needs one quantitative hypothesis, `hjump`, bounding every secant from the left piece into the
-junction by the new piece's slope — the discrete no-butterfly condition, carried to the
-continuum. -/
-
-private lemma antitoneOn_glue {f : ℝ → ℝ} {a b c : ℝ} (hab : a ≤ b) (hbc : b ≤ c)
-    (hleft : AntitoneOn f (Icc a b)) (hright : AntitoneOn f (Icc b c)) :
-    AntitoneOn f (Icc a c) := by
-  rw [← Icc_union_Icc_eq_Icc hab hbc]
-  exact hleft.union_right hright (isGreatest_Icc hab) (isLeast_Icc hbc)
-
-/-- If `L` bounds the secant from `y` into the junction `b`, and `f` is affine with slope `s ≥ L`
+  /-- If `L` bounds the secant from `y` into the junction `b`, and `f` is affine with slope `s ≥ L`
 beyond `b`, then `L` also bounds the secant from `y` into any point beyond `b`. The algebraic core
 of gluing a convex piece to an affine one. -/
-private lemma slope_le_of_affine_beyond {f : ℝ → ℝ} {y b z s L : ℝ} (hyb : y < b) (hbz : b < z)
+lemma slope_le_of_affine_beyond {f : ℝ → ℝ} {y b z s L : ℝ} (hyb : y < b) (hbz : b < z)
     (hL : L ≤ (f b - f y) / (b - y)) (hLs : L ≤ s) (haff : f z = f b + s * (z - b)) :
     L ≤ (f z - f y) / (z - y) := by
   rw [le_div_iff₀ (by linarith : (0 : ℝ) < b - y)] at hL
@@ -141,7 +122,7 @@ private lemma slope_le_of_affine_beyond {f : ℝ → ℝ} {y b z s L : ℝ} (hyb
 /-- Gluing a convex left piece to an affine right piece stays convex, provided every secant from
 the left piece into the junction is bounded above by the new piece's slope (the continuum form of
 the discrete no-butterfly condition at the junction). -/
-private lemma convexOn_glue {f : ℝ → ℝ} {a b c s : ℝ} (hab : a < b)
+lemma convexOn_glue {f : ℝ → ℝ} {a b c s : ℝ} (hab : a < b)
     (hleft : ConvexOn ℝ (Icc a b) f)
     (hjump : ∀ y ∈ Ico a b, (f b - f y) / (b - y) ≤ s)
     (haffine : ∀ z ∈ Icc b c, f z = f b + s * (z - b)) :
@@ -190,26 +171,6 @@ private lemma convexOn_glue {f : ℝ → ℝ} {a b c s : ℝ} (hab : a < b)
           rw [hay, haz, div_eq_iff (sub_ne_zero.mpr hyz.ne')]; ring
         rw [h3]; exact h2
 
-/-! ### An affine function is convex, and antitone when its slope is non-positive
-
-The two base-case facts the induction below reduces to: each new segment of
-`piecewiseLinear` is an explicit affine function, so its convexity (a linear map is convex, and
-convexity survives adding a constant) and its monotonicity (given a non-positive slope, a linear
-map with that slope is antitone, and antitonicity survives composing with a monotone shift) are
-immediate from Mathlib's convexity and monotonicity API. -/
-
-private lemma convexOn_affine (m b₀ x₀ : ℝ) {s : Set ℝ} (hs : Convex ℝ s) :
-    ConvexOn ℝ s (fun x ↦ b₀ + m * (x - x₀)) := by
-  have h := ((m • LinearMap.id : ℝ →ₗ[ℝ] ℝ).convexOn hs).add_const (b₀ - m * x₀)
-  refine h.congr fun x _ ↦ ?_
-  show m • LinearMap.id x + (b₀ - m * x₀) = b₀ + m * (x - x₀)
-  simp only [LinearMap.id_apply, smul_eq_mul]
-  ring
-
-private lemma antitoneOn_affine_of_nonpos {m b₀ x₀ : ℝ} (hm : m ≤ 0) (s : Set ℝ) :
-    AntitoneOn (fun x ↦ b₀ + m * (x - x₀)) s :=
-  (((monotone_id.add_const (-x₀)).const_mul_of_nonpos hm).const_add b₀).antitoneOn s
-
 /-! ### Restricting arbitrage-free quotes to a shorter prefix -/
 
 private lemma IsArbitrageFreeQuotes.restrict {K C : ℕ → ℝ} {n m : ℕ} (hmn : m ≤ n)
@@ -242,10 +203,14 @@ private theorem piecewiseLinear_spec (K C : ℕ → ℝ) : ∀ n, 1 ≤ n →
       have hC01 : C 1 ≤ C 0 := hq.prices_anti (mem_Iic.2 (by omega)) (mem_Iic.2 le_rfl) one_pos.le
       set sl : ℝ := (C 1 - C 0) / (K 1 - K 0) with hsl
       have hslnp : sl ≤ 0 := div_nonpos_of_nonpos_of_nonneg (by linarith) (by linarith)
-      have hconv : ConvexOn ℝ (Icc (K 0) (K 1)) (piecewiseLinear K C 1) :=
-        convexOn_affine sl (C 0) (K 0) (convex_Icc _ _)
+      have hconv : ConvexOn ℝ (Icc (K 0) (K 1)) (piecewiseLinear K C 1) := by
+        refine (((sl • LinearMap.id : ℝ →ₗ[ℝ] ℝ).convexOn (convex_Icc _ _)).add_const
+          (C 0 - sl * K 0)).congr ?_
+        intro x _
+        simp only [smul_eq_mul, LinearMap.id_apply]
+        ring
       have hanti : AntitoneOn (piecewiseLinear K C 1) (Icc (K 0) (K 1)) :=
-        antitoneOn_affine_of_nonpos hslnp _
+        (((monotone_id.add_const (-(K 0))).const_mul_of_nonpos hslnp).const_add (C 0)).antitoneOn _
       have hd : K 1 - K 0 ≠ 0 := sub_ne_zero.mpr hK01.ne'
       refine ⟨hconv, hanti, ?_, ?_⟩
       · intro i hi
@@ -323,8 +288,10 @@ private theorem piecewiseLinear_spec (K C : ℕ → ℝ) : ∀ n, 1 ≤ n →
       · exact convexOn_glue h0n hconv' hjump_glue haffine_glue
       · have hright_anti : AntitoneOn (piecewiseLinear K C (m' + 2))
             (Icc (K (m' + 1)) (K (m' + 2))) :=
-          (antitoneOn_affine_of_nonpos hslnp _).congr (fun z hz ↦ (haffine z hz).symm)
-        exact antitoneOn_glue h0n.le hKn.le hanti' hright_anti
+          (((monotone_id.add_const (-(K (m' + 1)))).const_mul_of_nonpos hslnp).const_add
+            (C (m' + 1))).antitoneOn _ |>.congr (fun z hz ↦ (haffine z hz).symm)
+        rw [← Icc_union_Icc_eq_Icc h0n.le hKn.le]
+        exact hanti'.union_right hright_anti (isGreatest_Icc h0n.le) (isLeast_Icc hKn.le)
       · intro i hi
         rcases Nat.lt_or_ge i (m' + 2) with hi' | hi'
         · have hi'' : i ≤ m' + 1 := by omega
