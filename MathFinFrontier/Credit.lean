@@ -28,11 +28,3 @@ theorem MathFinFrontier.condDefault_eq_oneFactorPD {Ω : Type*} {mΩ : Measurabl
         (fun _ ↦ (1 : ℝ)) | MeasurableSpace.comap M inferInstance]
       =ᵐ[Q] fun ω ↦ oneFactorPD (kmvPD V₀ F r σ T) ρ (M ω) := by
   sorry
-
-/-- **A tranche leg is worth the discounted expected tranche loss.** On a deterministic discount
-curve `D`, with the portfolio loss fraction as the underlying `X ()`, the leg `trancheLeg a d T`
-is worth `D T · 𝔼_Q[tranchePayoff a d (X () T)]`. -/
-theorem MathFinFrontier.value_trancheLeg {Ω : Type*} [MeasurableSpace Ω] (Q : Measure Ω)
-    (D : ℝ≥0 → ℝ) (X : Unit → ℝ≥0 → Ω → ℝ) (a d : ℝ) (T : ℝ≥0) :
-    (trancheLeg a d T).value Q (fun t _ ↦ D t) X = D T * ∫ ω, tranchePayoff a d (X () T ω) ∂Q := by
-  sorry

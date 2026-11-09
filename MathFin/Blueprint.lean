@@ -18,6 +18,7 @@ import MathFin.Insurance.SurvivalModel
 import MathFin.Markets.DeFi.LiquidationAsStructuralDefault
 import MathFin.Markets.DeFi.UniswapMechanics
 import MathFin.Markets.Microstructure.GlostenMilgromCondExp
+import MathFin.Markets.DeFi.LPContract
 import MathFin.Markets.Microstructure.GlostenMilgromMarket
 import MathFin.Models.Bachelier.Bachelier
 import MathFin.Models.Binomial.CRRClosedForm
@@ -29,6 +30,7 @@ import MathFin.Models.BlackScholes.DeltaHedge
 import MathFin.Models.BlackScholes.GaussianGirsanov
 import MathFin.Models.BlackScholes.MargrabeGrounding
 import MathFin.Models.BlackScholes.PDE
+import MathFin.Contracts.Instruments.Tranche
 import MathFin.Models.Credit.CVA
 import MathFin.Models.Credit.Cox
 import MathFin.Models.Credit.KMVMertonStructural
@@ -854,6 +856,16 @@ attribute [blueprint "thm:uniswap-v3-covered-call"
   geometric-mean price $ab$ (`integral_discounted_v3PositionValue_le`). -/)]
   MathFin.DeFi.v3PositionValue_le_coveredCall
 
+attribute [blueprint "thm:lp-position-price"
+  (title := "An AMM liquidity position is a contract")
+  (statement := /-- In a market with positive price of $X$ in $Y$ at $T$, under any measure $Q$, the
+  concentrated-liquidity payoff (a payoff in $\sqrt P$) paid at $T$ is worth $\int D_T\,
+  v_3(\sqrt{P_T})\,dQ$ for the position value $v_3$ of Uniswap v3, and the constant-product
+  payoff of invariant $x_0y_0$ is worth the discounted expectation of the rebalanced reserves
+  valued at $P_T$. It is a price in the sense of a pricing measure when $Q$ is one; its closed
+  form under Black--Scholes is not stated. -/)]
+  MathFin.DeFi.price_lpPayoff
+
 -- ===== valuation/model-free: Model-free =====
 
 attribute [blueprint "thm:carr-madan"
@@ -1103,6 +1115,14 @@ attribute [blueprint "thm:euler-allocation"
   MathFin.sum_componentVaR_eq_valueAtRisk_sub
 
 -- ===== risk/credit: Credit portfolio risk =====
+
+attribute [blueprint "thm:tranche-leg-price"
+  (title := "A CDO tranche leg is a contract")
+  (statement := /-- The tranche leg, the tranche loss $((L-a)^+ - (L-d)^+)/(d-a)$ paid at $T$ as a
+  contract on the portfolio loss fraction $L$, is worth on a deterministic discount curve $D$
+  the discounted expected tranche loss $D_T\,\mathbb E_Q[\mathrm{tranchePayoff}(L_T)]$. The law
+  of the loss fraction is not part of the statement. -/)]
+  MathFin.Contracts.value_trancheLeg
 
 attribute [blueprint "thm:aave-liquidation-kmv"
   (title := "Liquidation of a lending position is Merton default")

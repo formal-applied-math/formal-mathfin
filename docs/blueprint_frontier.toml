@@ -796,15 +796,6 @@ family = "mechanisms"
 lean = "MathFinFrontier.condExp_payoff_eq_quote_history"
 
 [[node]]
-label = "thm:lp-position-price"
-title = "An AMM liquidity position is a contract"
-statement = "A constant-product or concentrated-liquidity position is a Contract (a payoff in the square root of the price): in any market its price is the discounted expectation of the position value of UniswapMechanics. Its closed form in Φ under the Black–Scholes market is not stated."
-uses = ["def:pricing-measure", "thm:uniswap-v3-covered-call", "thm:impermanent-loss"]
-area = "valuation/mechanisms"
-family = "mechanisms"
-lean = "MathFinFrontier.price_lpPayoff"
-
-[[node]]
 label = "thm:cva-is-price"
 title = "CVA is the price of the default loss"
 statement = "Unilateral CVA is the price of the default-contingent exposure loss as a contract under a pricing measure with an independent default time, and the Gaussian-exposure closed form is a theorem about it."
@@ -858,15 +849,6 @@ uses = ["def:gaussian-factor-copula", "thm:large-pool-loss"]
 area = "risk/credit"
 family = "default"
 lean = "MathFinFrontier.condDefault_eq_oneFactorPD"
-
-[[node]]
-label = "thm:tranche-leg-price"
-title = "A CDO tranche leg is a contract"
-statement = "The tranche leg, the tranche loss paid at T as a Contract on the portfolio loss fraction, is worth on a deterministic discount curve the discounted expected tranchePayoff."
-uses = ["def:contract-value", "thm:large-pool-loss"]
-area = "risk/credit"
-family = "default"
-lean = "MathFinFrontier.value_trancheLeg"
 
 [[node]]
 label = "thm:esscher-premium-is-price"

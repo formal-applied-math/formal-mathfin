@@ -6,7 +6,6 @@ Authors: Raphael Coelho
 import MathFin
 import MathFinFrontier.ModelFree
 import MathFinFrontier.Microstructure
-import MathFinFrontier.AMM
 import MathFinFrontier.Credit
 import MathFinFrontier.Insurance
 import MathFinFrontier.American

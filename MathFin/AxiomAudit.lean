@@ -2742,3 +2742,11 @@ The landmarks of `docs/blueprint.md` that no section above pins: one `#print axi
 #print axioms MathFin.Contracts.trancheLeg
 
 end MathFin.AxiomAudit
+
+/-- info: 'MathFin.DeFi.price_lpPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.DeFi.price_lpPayoff
+
+/-- info: 'MathFin.Contracts.value_trancheLeg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Contracts.value_trancheLeg
