@@ -346,10 +346,13 @@ class Problem:
 
 def check(issues: list[Issue], nodes: dict[str, Node],
           corpus_status: dict[str, str] | None = None,
-          retired: dict[str, Retired] | None = None) -> list[Problem]:
+          retired: dict[str, Retired] | None = None,
+          connectors: set[str] | None = None) -> list[Problem]:
+    """``connectors``: the theorems of the connector library (``connector_names()``); none when
+    omitted, like ``retired``, so a fixture is not read against the repository's files."""
     retired = retired or {}
     problems = [Problem(m) for m in frontier_problems(nodes, corpus_status)]
-    problems += [Problem(m) for m in connector_problems(nodes)]
+    problems += [Problem(m) for m in connector_problems(nodes, connectors or set())]
     problems += [Problem(m) for m in retired_problems(retired, nodes)]
     open_named: dict[str, list[int]] = {}
     any_named: dict[str, list[int]] = {}
@@ -486,7 +489,7 @@ def main(argv: list[str] | None = None) -> int:
         apply_labels(args.repo, issues, nodes, dry_run=not args.apply)
         return 0
 
-    problems = check(issues, nodes, retired=load_retired())
+    problems = check(issues, nodes, retired=load_retired(), connectors=connector_names())
 
     if args.cmd == "comment":
         if args.number is None:
