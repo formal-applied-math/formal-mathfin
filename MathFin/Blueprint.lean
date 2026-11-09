@@ -32,6 +32,7 @@ import MathFin.Models.BlackScholes.GaussianGirsanov
 import MathFin.Models.BlackScholes.Market
 import MathFin.Models.BlackScholes.MargrabeGrounding
 import MathFin.Models.BlackScholes.PDE
+import MathFin.Models.Binomial.WillowTree
 import MathFin.Models.Credit.CVA
 import MathFin.Models.Credit.Cox
 import MathFin.Models.Credit.KMVMertonStructural
