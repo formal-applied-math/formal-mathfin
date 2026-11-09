@@ -12,12 +12,15 @@ import MathFin.Choice.Portfolio.ConvexQPKKT
 import MathFin.Choice.Portfolio.MarkowitzLagrangian
 import MathFin.Choice.Portfolio.MarkowitzNAsset
 import MathFin.Choice.Portfolio.RiskParityFOC
+import MathFin.Choice.Utility.StatePriceDensity
 import MathFin.Choice.Utility.VonNeumannMorgenstern
 import MathFin.Contracts.Core
 import MathFin.Insurance.SurvivalModel
+import MathFin.Markets.DeFi.LPContract
 import MathFin.Markets.DeFi.LiquidationAsStructuralDefault
 import MathFin.Markets.DeFi.UniswapMechanics
 import MathFin.Markets.Microstructure.GlostenMilgromCondExp
+import MathFin.Markets.Microstructure.GlostenMilgromMarket
 import MathFin.Models.Bachelier.Bachelier
 import MathFin.Models.Binomial.CRRClosedForm
 import MathFin.Models.Binomial.MartingaleRepresentation
@@ -92,15 +95,16 @@ import MathFin.Risk.AcceptanceSet
 import MathFin.Risk.Coherent
 import MathFin.Risk.ComponentVaR
 import MathFin.Risk.ContractRisk
+import MathFin.Risk.Credit.TrancheLeg
 import MathFin.Risk.Credit.VasicekIRB
 import MathFin.Risk.Elicitability
 import MathFin.Risk.ExpectedShortfall
 import MathFin.Risk.ExposureMeasures
 import MathFin.Risk.GaussianRiskMarkowitz
+import MathFin.Risk.Superhedging
 import MathFin.Risk.UtilityDerivation
 import MathFin.Risk.VaRSuperadditivity
 import MathFin.Risk.ValueAtRisk
-import MathFin.Risk.Superhedging
 import Architect
 
 /-!
@@ -399,8 +403,8 @@ attribute [blueprint "def:gaussian-factor-copula"
   (title := "One-factor Gaussian copula")
   (statement := /-- The copula on $n$ names of the latent vector $X_i = \rho Z_0 +
   \sqrt{1-\rho^2}\,Z_i$ with independent standard normals; it is a copula for $\rho \in
-  [-1,1]$. -/)]
-  MathFin.gaussianFactorCopula
+  [-1,1]$ (`isCopula_gaussianFactorCopula`, the tagged declaration). -/)]
+  MathFin.isCopula_gaussianFactorCopula
 
 attribute [blueprint "def:copula"
   (title := "Copula")
@@ -879,6 +883,16 @@ attribute [blueprint "thm:uniswap-v3-covered-call"
   geometric-mean price $ab$ (`integral_discounted_v3PositionValue_le`). -/)]
   MathFin.DeFi.v3PositionValue_le_coveredCall
 
+attribute [blueprint "thm:lp-position-price"
+  (title := "An AMM liquidity position is a contract")
+  (statement := /-- In a market with positive price of $X$ in $Y$ at $T$, under any measure $Q$, the
+  concentrated-liquidity payoff (a payoff in $\sqrt P$) paid at $T$ is worth $\int D_T\,
+  v_3(\sqrt{P_T})\,dQ$ for the position value $v_3$ of Uniswap v3, and the constant-product
+  payoff of invariant $x_0y_0$ is worth the discounted expectation of the rebalanced reserves
+  valued at $P_T$. It is a price in the sense of a pricing measure when $Q$ is one; its closed
+  form under Black--Scholes is not stated. -/)]
+  MathFin.DeFi.price_lpPayoff
+
 -- ===== valuation/model-free: Model-free =====
 
 attribute [blueprint "thm:carr-madan"
@@ -907,6 +921,19 @@ attribute [blueprint "def:expected-utility"
   (statement := /-- The expected utility $E_p[u] = \sum_{i \in s} p_iu_i$ of a lottery $p$
   over a finite support $s$ under the utility $u$. -/)]
   MathFin.expectedUtility
+
+attribute [blueprint "thm:utility-state-price-density"
+  (title := "Marginal utility is a state-price density")
+  (statement := /-- In the finite-state market with payoff matrix $A$ and prices $\pi$, let the
+  portfolio $\theta$ cost $w_0>0$, with payoff $W = A^\top\theta > 0$, probabilities $p>0$ and
+  marginal utility $u'(W_\omega)>0$, and let it be stationary for $\sum_\omega p_\omega
+  u(W_\omega)$ on the budget set: $\sum_\omega p_\omega u'(W_\omega) W^d_\omega = 0$ for every
+  portfolio $d$ of zero cost. Then there is $\mu>0$ with $\sum_\omega p_\omega u'(W_\omega)
+  A_{k\omega} = \mu\,\pi_k$ for every asset $k$: the normalised marginal utility
+  $p_\omega u'(W_\omega)/\mu$ is a state-price vector (the Euler equation). A local maximum on the
+  budget set is stationary, and on a finite probability space charging every state the state prices
+  give an equivalent martingale measure (`exists_isEMM_of_isLocalMaxOn`). -/)]
+  MathFin.exists_pos_smul_eq_of_stationary
 
 -- ===== choice/portfolio: Portfolio choice =====
 
@@ -980,6 +1007,16 @@ attribute [blueprint "thm:glosten-milgrom-quote"
   given the trade direction equals almost everywhere the ask $\int V\,d\mu[\cdot\mid B]$ on
   the buy event and the bid $\int V\,d\mu[\cdot\mid B^c]$ on the sell event. -/)]
   MathFin.Execution.condExp_payoff_eq_quote
+
+attribute [blueprint "thm:conditional-expectation-pricing-measure"
+  (title := "A conditional-expectation process is priced by its own measure")
+  (statement := /-- For a probability measure $P$, a filtration $\mathcal G$ on $\mathbb N$ and
+  an arbitrary value $V$, $P$ is a pricing measure, at every horizon, of the discrete market
+  with unit numéraire whose asset is $n \mapsto \mathbb E_P[V \mid \mathcal G_n]$, because
+  that process is a $P$-martingale and the equivalent martingale measure $P$ of it is a pricing
+  measure. That the Glosten–Milgrom dealer's quotes along a sequence of trades are such
+  conditional expectations is not part of this statement. -/)]
+  MathFin.Execution.isPricingMeasure_toMarket_condExp
 
 -- ===== risk/measures: Risk measures =====
 
@@ -1118,6 +1155,14 @@ attribute [blueprint "thm:euler-allocation"
   MathFin.sum_componentVaR_eq_valueAtRisk_sub
 
 -- ===== risk/credit: Credit portfolio risk =====
+
+attribute [blueprint "thm:tranche-leg-price"
+  (title := "A CDO tranche leg is a contract")
+  (statement := /-- The tranche leg, the tranche loss $((L-a)^+ - (L-d)^+)/(d-a)$ paid at $T$ as a
+  contract on the portfolio loss fraction $L$, is worth on a deterministic discount curve $D$
+  the discounted expected tranche loss $D_T\,\mathbb E_Q[\mathrm{tranchePayoff}(L_T)]$. The law
+  of the loss fraction is not part of the statement. -/)]
+  MathFin.Contracts.value_trancheLeg
 
 attribute [blueprint "thm:aave-liquidation-kmv"
   (title := "Liquidation of a lending position is Merton default")

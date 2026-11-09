@@ -325,6 +325,7 @@ import MathFin.Contracts.Adapted
 import MathFin.Contracts.Instruments.Options
 import MathFin.Contracts.Instruments.FixedIncome
 import MathFin.Contracts.Instruments.Credit
+import MathFin.Risk.Credit.TrancheLeg
 
 -- Pricing
 -- Continuous-time first FTAP: discounted GBM price is a Q-martingale (Wald exponential)
@@ -887,6 +888,7 @@ import MathFin.Choice.Performance.PurgedCV
 -- the mixture, and the vNM axioms verified for the induced preference (the soundness half,
 -- plus invariance of the preference under positive affine rescaling of the utility)
 import MathFin.Choice.Utility.VonNeumannMorgenstern
+import MathFin.Choice.Utility.StatePriceDensity
 -- QRM bridges: equicorrelation, Gaussian VaR/ES-optimal = Markowitz portfolios, the HHI
 -- systematic floor, and the square-root-of-time rule for GBM losses
 import MathFin.Choice.Portfolio.Equicorrelation
@@ -922,4 +924,6 @@ import MathFin.Markets.Microstructure.RollSpread
 import MathFin.Markets.DeFi.ConstantProductLPLognormal
 import MathFin.Markets.DeFi.LiquidationAsStructuralDefault
 import MathFin.Markets.DeFi.UniswapV3CoveredCallPrice
+import MathFin.Markets.DeFi.LPContract
 import MathFin.Markets.Microstructure.GlostenMilgromCondExp
+import MathFin.Markets.Microstructure.GlostenMilgromMarket

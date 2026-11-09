@@ -8,17 +8,11 @@
 # `MathFin/Blueprint.lean` with the same label and delete the entry here.
 #
 # Fields: label (`thm:`/`def:` + kebab-case), title, statement (one honest sentence of what
-# proving it would establish), uses (labels it builds on), area (a cell key of docs/taxonomy.toml).
-# Optional `family` (a family key of the same file) names the randomness it is about.
+# proving it would establish), uses (labels it builds on), area (the issue's `area:*`).
 #
 # Every frontier node grows from the proved blueprint: following `uses` (through other frontier
 # nodes) reaches a node with a Lean declaration. A result that builds only on Mathlib says so in
 # `ground` instead ("Mathlib: …", what it draws on). `blueprint_issues check` enforces this.
-#
-# Optional `lean` makes the node a **connector**: the full name of a theorem in `MathFinFrontier/`
-# that states it as Lean, closed by `sorry` (docs/specs/2026-11-08-chain-design.md §3.5). The
-# statement elaborates against the library, so both ends of the link are real declarations;
-# `blueprint_issues check` keeps the theorems and the nodes one to one.
 #
 # Optional `core` lists the corpus entries that already prove part of the node: the node stays on
 # the frontier, and the map draws it as partly grown. Each entry must exist; the check flags a
@@ -716,10 +710,11 @@ family = "volatility"
 [[node]]
 label = "thm:smile-no-arbitrage"
 title = "Smile no-arbitrage (Roper, SVI)"
-statement = "Static no-arbitrage conditions on an implied-vol smile (Roper, the left wing, calendar spreads) and the raw-SVI slice's convexity and linear wings."
+statement = "Roper's converse: every normalised call price function (convex, nonincreasing, between the intrinsic value and one, with limits one and zero) is the call price function, at maturity one, of a market with unit numéraire, a positive asset of forward one and a pricing measure. Raw SVI slices and the left wing, calendar spreads are further instances not stated here."
 uses = ["thm:carr-madan", "thm:bs-call"]
 area = "valuation/volatility"
 family = "volatility"
+lean = "MathFinFrontier.exists_market_of_isNormalizedCallPrice"
 
 [[node]]
 label = "thm:sde-continuous-solution"
@@ -750,10 +745,11 @@ family = "diffusions"
 [[node]]
 label = "thm:zero-coupon-bond-price"
 title = "The zero-coupon bond price is a price"
-statement = "Under a deterministic short rate the conditional price of the unit zero-coupon claim is zcb, so the flat-rate duration, convexity and key-rate results are statements about a price."
-uses = ["def:pricing-functional", "thm:bond-immunization"]
+statement = "The flat-rate value of a zero-coupon portfolio, and the annually compounded price of a coupon bond, are the market price of the corresponding schedule of fixed cash flows when the numéraire is the money market at that rate, so the immunization and key-rate duration results are statements about a price."
+uses = ["def:pricing-measure", "thm:bond-immunization", "thm:key-rate-duration"]
 area = "valuation/term"
 family = "term"
+lean = "MathFinFrontier.bondPortfolioValue_eq_price"
 
 [[node]]
 label = "thm:jump-diffusion-price"
@@ -762,13 +758,6 @@ statement = "The Merton jump-diffusion market has a pricing measure (the Esscher
 uses = ["def:pricing-functional", "thm:esscher-emm-levy", "thm:jump-diffusion-mixing", "thm:merton-risk-neutral-drift"]
 area = "valuation/jumps"
 family = "jumps"
-
-[[node]]
-label = "thm:utility-state-price-density"
-title = "Marginal utility is a state-price density"
-statement = "At the optimum of a finite-state expected-utility problem with a budget constraint, marginal utility of optimal wealth is proportional to a state-price density, so the optimum defines a pricing measure; Kelly is the logarithmic case."
-uses = ["def:pricing-functional", "thm:kelly-criterion"]
-area = "choice/preferences"
 
 [[node]]
 label = "thm:sdf-capm-hansen-jagannathan"
@@ -780,26 +769,20 @@ area = "choice/equilibrium"
 [[node]]
 label = "thm:premium-is-price"
 title = "Insurance premiums are prices"
-statement = "The net premium of a survival-contingent benefit is its contract value under a deterministic discount and the survival law, and the Esscher premium is the price under the Esscher-tilted measure."
-uses = ["def:pricing-functional", "def:survival-function", "thm:esscher-tilt"]
+statement = "The life annuity-due for a force of mortality is the value, on the flat-rate discount, of the contract paying one at each date while the default indicator of the lifetime is still zero."
+uses = ["def:contract-value", "def:survival-function"]
 area = "valuation/insurance"
 family = "insurance"
+lean = "MathFinFrontier.lifeAnnuityDue_eq_value"
 
 [[node]]
 label = "thm:glosten-milgrom-pricing-measure"
 title = "The Glosten–Milgrom quote process is a martingale"
-statement = "In the Glosten–Milgrom model the sequence of quotes is a martingale for the dealer's information, so the dealer's measure prices the asset."
-uses = ["thm:glosten-milgrom-quote", "def:pricing-functional"]
+statement = "The Glosten–Milgrom dealer's quote after n trades is the conditional expectation of the value given the observed history of trade directions, which extends the one-trade identification to a sequence; with the proved fact that a conditional-expectation process is priced by its own measure (thm:conditional-expectation-pricing-measure) the quote sequence is a martingale for the dealer's measure."
+uses = ["thm:glosten-milgrom-quote", "thm:conditional-expectation-pricing-measure"]
 area = "choice/trading"
 family = "mechanisms"
-
-[[node]]
-label = "thm:lp-position-price"
-title = "An AMM liquidity position is a contract"
-statement = "A constant-product or concentrated-liquidity position is a Contract whose price under a lognormal pricing measure is the existing closed-form integral."
-uses = ["def:pricing-functional", "thm:uniswap-v3-covered-call"]
-area = "valuation/mechanisms"
-family = "mechanisms"
+lean = "MathFinFrontier.condExp_payoff_eq_quote_history"
 
 [[node]]
 label = "thm:cva-is-price"
@@ -828,3 +811,65 @@ state space case (thm:coherent-risk-representation) and the dual form of expecte
 on any probability space."""
 uses = ["thm:coherent-risk-representation", "thm:expected-shortfall-dual"]
 area = "risk/measures"
+
+[[node]]
+label = "thm:market-call-price-normalized"
+title = "A pricing measure gives a normalised call price function"
+statement = "In a market with unit numéraire and a positive asset, priced at T by a pricing measure, the calls at the strikes kF, in units of the forward F, are a normalised call price function."
+uses = ["def:pricing-measure", "thm:smile-no-arbitrage"]
+area = "valuation/volatility"
+family = "volatility"
+lean = "MathFinFrontier.isNormalizedCallPrice_of_isPricingMeasure"
+
+[[node]]
+label = "thm:svi-market-realisation"
+title = "A butterfly-free SVI slice is a market"
+statement = "If the raw SVI parameters satisfy the butterfly-free sign formula, the SVI-smiled Black call is the call price function at maturity one of a market with unit numéraire, forward one and a pricing measure."
+uses = ["thm:smile-no-arbitrage", "def:pricing-measure"]
+area = "valuation/volatility"
+family = "volatility"
+lean = "MathFinFrontier.svi_realised_by_market"
+
+[[node]]
+label = "thm:credit-portfolio-is-merton"
+title = "The one-factor credit portfolio is Merton's"
+statement = "With the standardised log firm value equal to the root of rho times a systematic normal plus the root of one minus rho times an independent normal, a Merton name defaults at T, given the systematic factor, with probability oneFactorPD of its Merton default probability kmvPD."
+uses = ["def:gaussian-factor-copula", "thm:large-pool-loss"]
+area = "risk/credit"
+family = "default"
+lean = "MathFinFrontier.condDefault_eq_oneFactorPD"
+
+[[node]]
+label = "thm:esscher-premium-is-price"
+title = "The Esscher premium is a price"
+statement = "With unit numéraire and the insured loss as the asset at T, the claim paying the loss is worth, under the Esscher-tilted measure, the Esscher premium E[X e^{hX}]/E[e^{hX}]."
+uses = ["def:pricing-measure", "thm:esscher-tilt"]
+area = "valuation/insurance"
+family = "insurance"
+lean = "MathFinFrontier.esscherPremium_eq_price"
+
+[[node]]
+label = "thm:american-price-snell-envelope"
+title = "The binomial American price is the Snell envelope of the market"
+statement = "Under the risk-neutral coin flips, the binomial americanPrice is the Snell envelope, for Mathlib's conditional expectation on the flip filtration, of the discounted intrinsic value along the spot path, at time zero."
+uses = ["thm:snell-envelope", "def:pricing-measure"]
+area = "valuation/trees"
+family = "trees"
+lean = "MathFinFrontier.americanPrice_eq_snellEnvelope"
+
+[[node]]
+label = "thm:american-put-dominates-european"
+title = "The American put value dominates the Black–Scholes European price"
+statement = "At the Girsanov pricing measure of the Black–Scholes market, the price of the European put is at most the American put value over stopping rules bounded by the maturity."
+uses = ["def:pricing-measure", "thm:american-put-optimal-exercise", "thm:bs-call"]
+area = "valuation/diffusions"
+family = "diffusions"
+lean = "MathFinFrontier.price_europeanPut_le_americanPutValue"
+
+[[node]]
+label = "thm:american-put-superhedging-price"
+title = "The American put value is the superhedging price"
+statement = "In the complete Black–Scholes market the American put value (the supremum of discounted expected payoffs over stopping rules) equals the superreplication price of the American put, that is, the least initial capital of a self-financing strategy dominating the put payoff at every date. Needs the superreplication price of a path-dependent claim in Market, which is not defined yet."
+uses = ["thm:american-put-dominates-european", "thm:market-completeness"]
+area = "valuation/diffusions"
+family = "diffusions"

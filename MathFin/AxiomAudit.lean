@@ -2613,6 +2613,13 @@ bounded-coefficient process class. -/
 #guard_msgs in
 #print axioms MathFin.portfolioVarN_minVarWeightTwo_le
 
+/-- info: 'MathFin.exists_pos_smul_eq_of_stationary' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.exists_pos_smul_eq_of_stationary
+
+/-- info: 'MathFin.exists_isEMM_of_isLocalMaxOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.exists_isEMM_of_isLocalMaxOn
 /-! ## Blueprint landmarks
 
 The landmarks of `docs/blueprint.md` that no section above pins: one `#print axioms` each. -/
@@ -2723,3 +2730,40 @@ The landmarks of `docs/blueprint.md` that no section above pins: one `#print axi
 
 end MathFin.AxiomAudit
 
+/-- info: 'MathFin.Execution.isPricingMeasure_toMarket_condExp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Execution.isPricingMeasure_toMarket_condExp
+
+/-- info: 'MathFin.isCopula_gaussianFactorCopula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.isCopula_gaussianFactorCopula
+
+/-- info: 'MathFin.DeFi.sqrtObs' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.sqrtObs
+
+/-- info: 'MathFin.DeFi.constantProductPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.constantProductPayoff
+
+/-- info: 'MathFin.DeFi.lpPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.lpPayoff
+
+/-- info: 'MathFin.Contracts.trancheLossPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.trancheLossPayoff
+
+/-- info: 'MathFin.Contracts.trancheLeg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.trancheLeg
+
+end MathFin.AxiomAudit
+
+/-- info: 'MathFin.DeFi.price_lpPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.DeFi.price_lpPayoff
+
+/-- info: 'MathFin.Contracts.value_trancheLeg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Contracts.value_trancheLeg
