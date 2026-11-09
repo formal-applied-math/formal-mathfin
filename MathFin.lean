@@ -325,6 +325,7 @@ import MathFin.Contracts.Adapted
 import MathFin.Contracts.Instruments.Options
 import MathFin.Contracts.Instruments.FixedIncome
 import MathFin.Contracts.Instruments.Credit
+import MathFin.Risk.Credit.TrancheLeg
 
 -- Pricing
 -- Continuous-time first FTAP: discounted GBM price is a Q-martingale (Wald exponential)
@@ -369,6 +370,7 @@ import MathFin.Pricing.FTAP.FTAPOnePeriodVector
 import MathFin.Pricing.FTAP.NoArbitrageLocal
 import MathFin.Pricing.FTAP.DensityPasting
 import MathFin.Pricing.FTAP.DalangMortonWillinger
+import MathFin.Pricing.FTAP.MarketFTAP
 -- Phase 20: first-principles core derivations
 import MathFin.Pricing.NoArbitrageDerivations
 -- Phase 1 (convex-duality unification): fundamental superhedging bound — every EMM prices a claim
@@ -830,6 +832,8 @@ import MathFin.Risk.StudentTValueAtRisk
 import MathFin.Risk.Elicitability
 import MathFin.Risk.JointElicitability
 import MathFin.Risk.Expectile
+import MathFin.Risk.EntropicRisk
+import MathFin.Risk.LawInvariance
 import MathFin.Risk.Credit.BernoulliMixture
 import MathFin.Risk.Credit.CreditMetrics
 import MathFin.Risk.Credit.VasicekIRB
@@ -886,6 +890,7 @@ import MathFin.Choice.Performance.PurgedCV
 -- the mixture, and the vNM axioms verified for the induced preference (the soundness half,
 -- plus invariance of the preference under positive affine rescaling of the utility)
 import MathFin.Choice.Utility.VonNeumannMorgenstern
+import MathFin.Choice.Utility.StatePriceDensity
 -- QRM bridges: equicorrelation, Gaussian VaR/ES-optimal = Markowitz portfolios, the HHI
 -- systematic floor, and the square-root-of-time rule for GBM losses
 import MathFin.Choice.Portfolio.Equicorrelation
@@ -921,6 +926,8 @@ import MathFin.Markets.Microstructure.RollSpread
 import MathFin.Markets.DeFi.ConstantProductLPLognormal
 import MathFin.Markets.DeFi.LiquidationAsStructuralDefault
 import MathFin.Markets.DeFi.UniswapV3CoveredCallPrice
+import MathFin.Markets.DeFi.LPContract
 import MathFin.Markets.Microstructure.GlostenMilgromCondExp
 -- FX smile quotes: risk reversal and butterfly as delta-space quoting conventions
 import MathFin.Markets.FxSmileQuotes
+import MathFin.Markets.Microstructure.GlostenMilgromMarket

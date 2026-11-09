@@ -174,7 +174,7 @@ G2 #156 · G3 #157 · G4 #158 (umbrella #138).
 - **H0 · `mf-hjm-model`** — the `HJMModel` bundle (`W, f(t,T), α, σ` + adapted /
   measurable / integrable fields) and `hjmBond`, `hjmShortRate`, `bankAccount`,
   `discountedBond`, `starDrift α*`, `starVol σ*`. Defs + basic well-definedness.
-  *(new-defs, area:fixed-income · ready · scaffolding)*
+  *(new-defs, area:valuation/term · ready · scaffolding)*
 
 ### Tier 1 — stochastic Fubini, the shared primitive · `Probability/Brownian/Ito/StochasticFubini*.lean`
 - **F1 · `sc-stochastic-fubini-clm`** (#141, folds in the dissolved #140) — the
