@@ -40,14 +40,18 @@ no support hypothesis.
 
 ## Main definitions
 
+* `IsConvexRiskMeasure`: the base object of the theory (Föllmer and Schied 2002): almost-sure
+  monotonicity, translation `ρ (X + m) = ρ X + m`, and convexity on the integrable losses.
 * `IsCoherentRiskMeasure`: the four axioms of a coherent risk measure `ρ` of losses on a measure
   space `(Ω, P)`: almost-sure monotonicity, translation `ρ (X + m) = ρ X + m`, positive
   homogeneity `ρ (c X) = c ρ X` for `c ≥ 0`, and subadditivity.
 
 ## Main results
 
+* `IsCoherentRiskMeasure.toIsConvexRiskMeasure`: a coherent risk measure is a convex one (a parent
+  projection).
 * `IsCoherentRiskMeasure.rho_zero`: `ρ 0 = 0`.
-* `IsCoherentRiskMeasure.convexOn`: `ρ` is convex on the integrable losses.
+* `convexOn_of_const_mul_of_add_le`: positive homogeneity and subadditivity give convexity.
 * `IsCoherentRiskMeasure.mono_of_le`, `IsCoherentRiskMeasure.continuous`: on a finite state space
   `ρ` is pointwise-monotone and continuous.
 
@@ -71,17 +75,43 @@ lemma ae_iff_forall_of_singleton_ne_zero {P : Measure Ω} {p : Ω → Prop} [Cou
     (hP : ∀ ω, P {ω} ≠ 0) : (∀ᵐ ω ∂P, p ω) ↔ ∀ ω, p ω :=
   ae_iff_of_countable.trans <| forall_congr' fun ω ↦ ⟨fun h ↦ h (hP ω), fun h _ ↦ h⟩
 
+/-- The three axioms of a **convex risk measure** (Föllmer and Schied, *Convex measures of risk
+and trading constraints*, Finance Stoch. 6 (2002)) for a functional `ρ` on the integrable losses of
+`(Ω, P)`, in the loss convention of `IsCoherentRiskMeasure`: almost-sure monotonicity,
+translation `ρ (X + m) = ρ X + m`, and convexity. This is the base object: the entropic risk
+measure and shortfall risk are convex and not coherent, and `IsCoherentRiskMeasure` extends it
+with positive homogeneity and subadditivity. -/
+structure IsConvexRiskMeasure (P : Measure Ω) (ρ : (Ω → ℝ) → ℝ) : Prop where
+  mono : ∀ ⦃X Y : Ω → ℝ⦄, Integrable X P → Integrable Y P → X ≤ᵐ[P] Y → ρ X ≤ ρ Y
+  add_const : ∀ ⦃X : Ω → ℝ⦄, Integrable X P → ∀ m : ℝ, ρ (fun ω ↦ X ω + m) = ρ X + m
+  convexOn : ConvexOn ℝ {X | Integrable X P} ρ
+
+/-- Positive homogeneity and subadditivity give convexity on the integrable losses. -/
+lemma convexOn_of_const_mul_of_add_le {P : Measure Ω} {ρ : (Ω → ℝ) → ℝ}
+    (const_mul : ∀ ⦃X : Ω → ℝ⦄, Integrable X P → ∀ ⦃c : ℝ⦄, 0 ≤ c →
+      ρ (fun ω ↦ c * X ω) = c * ρ X)
+    (add_le : ∀ ⦃X Y : Ω → ℝ⦄, Integrable X P → Integrable Y P →
+      ρ (fun ω ↦ X ω + Y ω) ≤ ρ X + ρ Y) :
+    ConvexOn ℝ {X | Integrable X P} ρ := by
+  refine ⟨fun x hx y hy a b _ _ _ ↦ ?_, fun x hx y hy a b ha hb _ ↦ ?_⟩
+  · exact (hx.smul a).add (hy.smul b)
+  · have h := add_le (hx.const_mul a) (hy.const_mul b)
+    rw [const_mul hx ha, const_mul hy hb] at h
+    exact h
+
 /-- The four axioms of a **coherent risk measure** (Artzner, Delbaen, Eber and Heath 1999;
 McNeil–Frey–Embrechts, Definition 2.18) for a functional `ρ` on the integrable losses of
 `(Ω, P)`: monotonicity, translation invariance, positive homogeneity and subadditivity. A loss is
-signed as a loss, so a larger `X` is worse and `ρ` increases with it. -/
-structure IsCoherentRiskMeasure (P : Measure Ω) (ρ : (Ω → ℝ) → ℝ) : Prop where
-  mono : ∀ ⦃X Y : Ω → ℝ⦄, Integrable X P → Integrable Y P → X ≤ᵐ[P] Y → ρ X ≤ ρ Y
-  add_const : ∀ ⦃X : Ω → ℝ⦄, Integrable X P → ∀ m : ℝ, ρ (fun ω ↦ X ω + m) = ρ X + m
+signed as a loss, so a larger `X` is worse and `ρ` increases with it. It is a convex risk measure
+(`toIsConvexRiskMeasure`): convexity is the default of that field, derived from positive
+homogeneity and subadditivity, so a constructor supplies the four axioms only. -/
+structure IsCoherentRiskMeasure (P : Measure Ω) (ρ : (Ω → ℝ) → ℝ) : Prop
+    extends IsConvexRiskMeasure P ρ where
   const_mul : ∀ ⦃X : Ω → ℝ⦄, Integrable X P → ∀ ⦃c : ℝ⦄, 0 ≤ c →
     ρ (fun ω ↦ c * X ω) = c * ρ X
   add_le : ∀ ⦃X Y : Ω → ℝ⦄, Integrable X P → Integrable Y P →
     ρ (fun ω ↦ X ω + Y ω) ≤ ρ X + ρ Y
+  convexOn := convexOn_of_const_mul_of_add_le const_mul add_le
 
 namespace IsCoherentRiskMeasure
 
@@ -92,15 +122,6 @@ lemma rho_zero (hρ : IsCoherentRiskMeasure P ρ) : ρ 0 = 0 := by
   have h := hρ.const_mul (integrable_zero Ω ℝ P) (c := 2) (by norm_num)
   rw [show (fun ω ↦ 2 * (0 : Ω → ℝ) ω) = 0 by ext; simp] at h
   linarith
-
-/-- A coherent risk measure is convex on the integrable losses (positive homogeneity and
-subadditivity). -/
-lemma convexOn (hρ : IsCoherentRiskMeasure P ρ) : ConvexOn ℝ {X | Integrable X P} ρ := by
-  refine ⟨fun x hx y hy a b _ _ _ ↦ ?_, fun x hx y hy a b ha hb _ ↦ ?_⟩
-  · exact (hx.smul a).add (hy.smul b)
-  · have h := hρ.add_le (hx.const_mul a) (hy.const_mul b)
-    rw [hρ.const_mul hx ha, hρ.const_mul hy hb] at h
-    exact h
 
 section Finite
 

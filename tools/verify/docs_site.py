@@ -35,7 +35,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from . import doc_standard, library
+from . import chain_reach, doc_standard, library, taxonomy
 from .blueprint_issues import issues_url
 from .program_tree import tree_data
 from .corpus import iter_entries
@@ -49,60 +49,22 @@ BLUEPRINT_NODES = Path("docs/blueprint_nodes.json")
 FRONTIER = Path("docs/blueprint_frontier.toml")
 LANDMARKS = Path("docs/landmarks.toml")
 
-# The sections of the library: display name, layer (the map's colour), one line of what is there.
-# A section is a layer (`MathFin.<Layer>`), or for the two broad layers a subdirectory of it
-# (`MathFin.Probability.<Sub>`, `MathFin.Models.<Sub>`).
-SECTIONS: dict[str, tuple[str, str, str]] = {
-    "Probability.Discrete": ("Discrete time", "roots",
-                             "Martingale transforms, Doob decomposition, the Snell envelope, path "
-                             "measures."),
-    "Probability.Martingales": ("Martingales", "roots",
-                                "Changes of measure, localisation, convergence, stopped processes."),
-    "Probability.Brownian": ("Brownian calculus", "roots",
-                             "Brownian motion, the Itô integral and formula, Girsanov, Wiener "
-                             "integrals, martingale representation, SDEs."),
-    "Probability.Jumps": ("Jumps", "roots",
-                          "Poisson processes and random measures, the compensated integral, "
-                          "compound Poisson laws."),
-    "Probability.Gaussian": ("Gaussian analysis", "roots",
-                             "Φ and its moments, the bivariate normal, the heat equation."),
-    "Probability.Laws": ("Laws", "roots",
-                         "Quantiles, the Esscher tilt, Student-t, extreme value and Pareto laws."),
-    "Probability.Dependence": ("Dependence", "roots",
-                               "Copulas, Sklar's theorem, Hoeffding's covariance identity."),
-    "Probability.Analysis": ("Analysis", "roots",
-                             "Real and measure-theoretic tools: bisection, Jensen, isometries."),
-    "Contracts": ("Contracts", "trunk",
-                  "The payoff language: payoffs, observables, measurability, instruments."),
-    "Pricing": ("Pricing", "trunk",
-                "The pricing functional: martingale measures, the fundamental theorems, state "
-                "prices, numéraires, replication, completeness, superhedging, contract value."),
-    "Models.BlackScholes": ("Black–Scholes", "limbs",
-                            "The Black–Scholes family, Greeks, exotics, implied volatility and the "
-                            "American put."),
-    "Models.Bachelier": ("Bachelier", "limbs", "The normal model and its Greeks."),
-    "Models.Jumps": ("Jump diffusions", "limbs",
-                     "Merton and general jump-diffusion models, their prices and Greeks."),
-    "Models.StochVol": ("Stochastic volatility", "limbs", "Heston, SABR, local-stochastic volatility."),
-    "Models.LocalVol": ("Local volatility", "limbs", "Dupire's formula and the forward smile."),
-    "Models.ModelFree": ("Model-free", "limbs",
-                         "Static replication, price bounds, variance swaps, SVI."),
-    "Models.Binomial": ("Binomial trees", "limbs",
-                        "Discrete-time trees, replication, CRR convergence, American and Bermudan "
-                        "exercise."),
-    "Models.Rates": ("Rates", "limbs",
-                     "Bonds, yield curves, short-rate models, forward measures, swaps."),
-    "Models.Credit": ("Credit", "limbs", "Hazard rates, default times, CDS, CVA, structural credit."),
-    "Models.Forwards": ("Forwards", "limbs", "FX, futures, Black-76 and commodities."),
-    "Risk": ("Risk", "limbs",
-             "Value at risk, expected shortfall, coherent and convex risk measures, credit "
-             "portfolio risk, exposure."),
-    "Choice": ("Choice", "limbs", "Utility, portfolio theory, CAPM, performance and Kelly."),
-    "Insurance": ("Insurance", "limbs", "Premiums, mortality, survival models."),
-    "Markets": ("Markets", "limbs", "Microstructure, execution, AMMs and lending protocols."),
-}
-LAYER_NAMES = {"roots": "Probability", "trunk": "Contracts and pricing", "limbs": "Models and applications"}
+# The layers of the map (its colour): the taxonomy's roots, trunk and limbs.
+LAYER_NAMES = {"roots": "Probability and statistics", "trunk": "Positions and markets",
+               "limbs": "Valuation, choice and risk"}
 LAYER_VAR = {"roots": "--s1", "trunk": "--s2", "limbs": "--s3"}
+LAYER_OF_KIND = {"root": "roots", "trunk": "trunk", "limb": "limbs"}
+
+
+def section_info(sec: str) -> tuple[str, str, str]:
+    """(name, layer, blurb) of a section: a cell of docs/taxonomy.toml."""
+    cell = taxonomy.cells().get(sec)
+    if cell is None:
+        return sec, "limbs", ""
+    kind = taxonomy.cells()[taxonomy.part_of(sec)]["kind"]
+    return taxonomy.label(sec), LAYER_OF_KIND[kind], cell["blurb"]
+
+
 STATUS = {"full": "full statement", "library_wrapper": "library wrapper",
           "reduced_core": "reduced core", "placeholder": "placeholder"}
 STATUS_VAR = {"full": "--s1", "library_wrapper": "--s2", "reduced_core": "--s3",
@@ -275,14 +237,12 @@ def decl_url(d: IndexedDecl) -> str:
 
 
 def section_of(module: str) -> str:
-    parts = module.split(".")
-    if len(parts) < 3:
-        return ""
-    return ".".join(parts[1:3]) if parts[1] in ("Probability", "Models") and len(parts) > 3 else parts[1]
+    """The taxonomy cell holding a module; "" for the library's own machinery."""
+    return taxonomy.cell_of(module) or ""
 
 
 def section_url(sec: str) -> str:
-    return f"s/{sec}.html"
+    return f"s/{sec.replace('/', '-')}.html"
 
 
 @dataclass
@@ -442,8 +402,8 @@ def build_home(site: Site, out: Path, blueprint: list[dict]) -> None:
     for s, ms in by_sec.items():
         if not s:
             continue
-        name, layer, _ = SECTIONS.get(s, (s, "limbs", ""))
-        nodes.append({"id": s, "label": name, "layer": layer, "url": section_url(s),
+        _, layer, _ = section_info(s)
+        nodes.append({"id": s, "label": taxonomy.cells()[s]["title"], "layer": layer, "url": section_url(s),
                       "sz": round(22 + 3.2 * sec_decls[s] ** 0.5, 1),
                       "info": f"{len(ms)} modules · {sec_decls[s]} declarations · "
                               f"{sec_entries[s]} corpus entries"})
@@ -452,8 +412,8 @@ def build_home(site: Site, out: Path, blueprint: list[dict]) -> None:
     the_map = graph("map", {"kind": "map", "nodes": nodes, "edges": edges,
                             "label": "Map of the library's sections"}, "tall")
     table = "".join(
-        f'<tr><td><a href="{section_url(s)}">{esc(SECTIONS.get(s, (s,))[0])}</a></td>'
-        f'<td>{LAYER_NAMES[SECTIONS.get(s, (s, "limbs"))[1]]}</td>'
+        f'<tr><td><a href="{section_url(s)}">{esc(section_info(s)[0])}</a></td>'
+        f'<td>{LAYER_NAMES[section_info(s)[1]]}</td>'
         f'<td class="n">{len(by_sec[s])}</td><td class="n">{sec_decls[s]}</td>'
         f'<td class="n">{sec_entries[s]}</td></tr>'
         for s in sorted(by_sec, key=lambda s: -sec_decls[s]) if s)
@@ -489,7 +449,7 @@ def build_home(site: Site, out: Path, blueprint: list[dict]) -> None:
     for s in sorted(by_sec, key=lambda s: -sec_decls[s]):
         if not s:
             continue
-        name, layer, blurb = SECTIONS.get(s, (s, "limbs", ""))
+        name, layer, blurb = section_info(s)
         cards.append(f'<a class="card" href="{section_url(s)}"><h3><span class="dot" '
                      f'style="background:var({LAYER_VAR[layer]})">'
                      f'</span>{esc(name)}</h3><div class="sub">{esc(blurb)}</div>'
@@ -511,14 +471,14 @@ by the build, to Lean's three standard axioms.</p>
 </div></section>
 
 <h2>The map</h2>
-<p class="ink2">Each disc is a section of the library, sized by its declarations; an arrow runs from a
-section to one that builds on it, thicker the more of its modules are imported; probability sits
-at the centre, contracts and pricing around it, the models and applications outside. Hover to see a
-section's neighbours, click to open it.</p>
+<p class="ink2">Each disc is a cell of the <a href="tree.html">taxonomy</a> (<code>docs/taxonomy.toml</code>),
+sized by its declarations: probability and statistics at the centre, positions and markets around
+them, valuation, choice and risk outside. An arrow runs from a cell to one that builds on it,
+thicker the more of its modules are imported. Hover to see a cell's neighbours, click to open it.</p>
 {the_map}
 {legend([(LAYER_VAR[k], v, "") for k, v in LAYER_NAMES.items()])}
 <details class="tableview"><summary>Table view</summary><table class="data"><thead><tr>
-<th>Section</th><th>Layer</th><th>Modules</th><th>Declarations</th><th>Corpus entries</th></tr></thead>
+<th>Cell</th><th>Layer</th><th>Modules</th><th>Declarations</th><th>Corpus entries</th></tr></thead>
 <tbody>{table}</tbody></table></details>
 
 <h2>Landmarks</h2>
@@ -526,7 +486,7 @@ section's neighbours, click to open it.</p>
 other results build on.</p>
 <div class="cards">{"".join(landmarks)}</div>
 
-<h2>Sections</h2>
+<h2>Cells</h2>
 <div class="cards">{"".join(cards)}</div>
 """
     (out / "index.html").write_text(page("MathFin — mathematical finance in Lean", body, "",
@@ -536,11 +496,11 @@ other results build on.</p>
 
 
 def build_section(site: Site, out: Path, sec: str, mods: list[str]) -> None:
-    name, layer, blurb = SECTIONS.get(sec, (sec, "limbs", ""))
+    name, layer, blurb = section_info(sec)
     inside = set(mods)
     edges = {(i, m) for m in mods for i in site.imports[m] if i in inside}
     red = transitive_reduction(inside, edges)
-    rel = lambda m: m.removeprefix(f"MathFin.{sec}.")  # noqa: E731
+    rel = lambda m: m.removeprefix("MathFin.")  # noqa: E731
     nodes = [{"id": m, "label": rel(m), "full": site.title(m), "url": module_url(m),
               "info": f"{len(site.decls.get(m, ()))} declarations · "
                       f"{len(site.entries.get(m, ()))} corpus entries",
@@ -600,7 +560,7 @@ def build_module(site: Site, out: Path, m: str, link: Linker) -> None:
     mdoc = site.docs.get(m)
     title = site.title(m)
     sec = section_of(m)
-    sname = SECTIONS.get(sec, (sec,))[0]
+    sname = section_info(sec)[0]
     body_doc = markdown(re.sub(r"^\s*#\s+.*\n", "", mdoc.text.strip() + "\n"), "../") if mdoc else ""
     chips = "".join(f'<a class="chip" href="../subjects.html#{esc(c.replace(" ", "-"))}" '
                     f'title="{esc(site.subjects.get(c, ""))}">{esc(c)}</a>'
@@ -719,11 +679,24 @@ TREE_KINDS = (("rests-on-node", "rests on a node", "--tr-leaf-2"),
 
 
 def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dict],
-               issues: list[dict] | None) -> None:
+               issues: list[dict] | None, connectors: list[dict] = ()) -> None:
     """The program tree: the blueprint as a tree, with the corpus as its leaves
     (tools/verify/program_tree.py places every entry)."""
-    data = tree_data(site.idx, nodes_json, frontier, issues)
+    data = tree_data(site.idx, nodes_json, frontier, issues, connectors)
     data["repo"] = REPO_URL
+    m = data["metrics"]
+    strip = (
+        '<div class="tiles t-metrics">'
+        f'<div class="tile"><div class="v">{m["R3"]:g}%</div><div class="k">R3 <small>· finance '
+        f'theorems within 3 statement hops of the trunk, of {m["theorems"]:,}</small></div></div>'
+        f'<div class="tile"><div class="v">{len(m["sockets"])}/{m["families"]}</div><div class="k">'
+        f'sockets <small>· model families that are a market with a proved pricing measure'
+        f'</small></div></div>'
+        f'<div class="tile"><div class="v">{m["span"]}</div><div class="k">joint span '
+        f'<small>· theorems whose statements join two limbs</small></div></div>'
+        f'<div class="tile"><div class="v">{m["islands"]}</div><div class="k">islands '
+        f'<small>· {m["unreached"]} reached by no connector and declared nowhere</small>'
+        f'</div></div></div>')
     for n in data["nodes"]:
         d = site.idx.decls.get(n.get("d") or "")
         if d and not d.private:
@@ -731,16 +704,17 @@ def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dic
     areas, total = data["areas"], data["corpus"]
     off = sum(c.get("off-map", 0) for c in areas.values())
     on = sum(c.get("rests-on-node", 0) + c.get("feeds-node", 0) for c in areas.values())
+    names = data["cellName"]
     bars = []
     for a in sorted(areas, key=lambda a: -sum(areas[a].values())):
         c, t = areas[a], sum(areas[a].values())
         segs = "".join(f'<span title="{label}: {c[k]}" style="width:{100 * c[k] / t:.2f}%;'
                        f'background:var({var})"></span>'
                        for k, label, var in TREE_KINDS if c.get(k))
-        bars.append(f'<div class="t-bar"><span>{esc(a)}</span><div class="t-track">{segs}</div>'
+        bars.append(f'<div class="t-bar"><span>{esc(names.get(a, a))}</span><div class="t-track">{segs}</div>'
                     f'<span class="ink2">{t - c.get("off-map", 0)} / {t}</span></div>')
     plots = "".join(
-        f'<div class="t-plot"><p><b>{esc(a)}</b> <span class="ink2">{len(es)} off the map</span></p>'
+        f'<div class="t-plot"><p><b>{esc(names.get(a, a))}</b> <span class="ink2">{len(es)} off the map</span></p>'
         f'<div class="t-seeds">' + "".join(f'<i title="{esc(e)} — {esc(nm)}"></i>' for e, nm in es)
         + "</div></div>"
         for a, es in sorted(data["off"].items(), key=lambda kv: -len(kv[1])))
@@ -752,19 +726,35 @@ def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dic
     proved = sum(n["s"] == "proved" for n in data["nodes"])
     nfront = sum(n["s"] == "frontier" for n in data["nodes"])
     payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+    fam_legend = '<div class="legend">' + "".join(
+        f'<span><i style="background:var({f["hue"]})"></i>{esc(f["title"])}'
+        + ('<b class="sock" title="a proved theorem makes this family\'s model a Market with a '
+           'pricing measure">socket</b>' if f["socket"] else "") + "</span>"
+        for f in data["families"]) + '<span><i style="background:var(--tr-bark)"></i>general '\
+        'theory</span></div>'
     body = f"""<h1>The program tree</h1>
-<p class="lede ink2">The blueprint drawn on a map of financial mathematics. The pale tree is the
-map: four roots in the soil (discrete time, Gaussian analysis, Brownian calculus, jumps), one trunk
-(the pricing functional: martingale measures, deflators, numéraires), and five limbs, from insurance
-and risk on the left to pricing models and markets on the right. Where a result sits is a reading,
-kept in <code>tools/verify/tree_map.toml</code>; the dark wood drawn over the map is the proofs. Each
-of the {proved} proved results is joined to every node its proof uses, and wood thickens with the
-corpus it carries. Where the wood bypasses the trunk, the result rests on a root directly. A knot's
-size counts the corpus entries whose proof rests deepest on it; the Leaves button hangs them on the
-tree. The {nfront} frontier results are dashed blueprint shoots, each bud coloured by the state of
-its issue, with the open problems as stars. Proved results that rest on no node grow straight from
-the soil; entries that touch no node lie on the ground. Click a node to trace its lineage; drag to
-pan, scroll to zoom; names fill in as you zoom.</p>
+<p class="lede ink2">The blueprint drawn on the library's taxonomy (<code>docs/taxonomy.toml</code>),
+the one statement of how it organizes financial mathematics. The roots in the soil are the tools:
+probability in its branches, and statistics. The trunk is positions and markets: payoffs, the
+market and its numéraire, strategies and their gains. Three limbs grow from it, one for each
+question asked of a position: <em>what is it worth</em> (valuation, in the middle), <em>whether to
+hold it</em> (choice, on the left) and <em>how dangerous is it</em> (risk, on the right). Each
+limb's branches are its cells. A theorem between two limbs sits in the fork between them. Colour
+is the model family, the same hue in every limb, so credit in valuation and credit in risk read as
+one family seen by two questions; nodes with no family are general theory and keep the wood's
+colour. Height is measured: a result sits at its distance, in statements, from the trunk (the
+<em>hop</em> of <code>chain_reach</code>), so a pricing formula that states a market is low and one
+that only restates its own formula is high. Results at infinite distance float beside their limb
+as islands, ringed red when nothing reaches them; a tower of modules is one node; a hollow dashed
+dot between two nodes is a connector, a theorem stated and not yet proved, sized by the theorems
+it would bring within three hops. A <em>socket</em> badge in the legend marks a family whose model is a market with a proved pricing measure. The dark wood drawn over the pale map is the proofs: each of the {proved}
+proved results is joined to every node its proof uses, and wood thickens with the corpus it
+carries. A knot's size counts the corpus entries whose proof rests deepest on it; the Leaves button
+hangs them on the tree. The {nfront} frontier results are dashed blueprint shoots, each bud coloured
+by the state of its issue, with the open problems as stars. Proved results that rest on no node
+grow straight from the soil; entries that touch no node lie on the ground. Click a node to trace
+its lineage; drag to pan, scroll to zoom; names fill in as you zoom.</p>
+{strip}
 <div class="t-box" id="tree-box"><div class="t-tools">
 <input id="t-q" type="search" placeholder="Find a node: Itô, VaR, Heston…" aria-label="Find a node" autocomplete="off">
 <button type="button" id="t-grow">Grow it again</button>
@@ -774,6 +764,7 @@ pan, scroll to zoom; names fill in as you zoom.</p>
 <div class="t-stage"><svg id="tree" role="img" aria-label="The MathFin blueprint as a tree"></svg>
 <aside class="t-panel" id="tree-panel" aria-live="polite"></aside></div>
 <div id="tree-tip" hidden></div></div>
+{fam_legend}
 <h2>Where the corpus sits</h2>
 <p class="ink2">{on} of the {total} corpus entries are on the map: their proofs rest on a blueprint
 node, or a node's proof uses what they cite. {off} cite MathFin results in no relation the map
@@ -782,7 +773,7 @@ does not show them. The count is a ratchet (<code>corpus_off_blueprint</code>): 
 may not rise.</p>
 <div class="t-bars">{"".join(bars)}</div>
 {legend([(v, label, "") for _, label, v in TREE_KINDS])}
-<h2>Off the map, by area</h2><p class="ink2">One dot per entry; hover for its id.</p>
+<h2>Off the map, by cell</h2><p class="ink2">One dot per entry; hover for its id.</p>
 <div class="t-bed">{plots}</div>
 <h2>Frontier with a proved core</h2>
 <p class="ink2">Frontier results that corpus entries already prove in part (the node's
@@ -1022,7 +1013,8 @@ def build_references(site: Site, out: Path) -> None:
                                               "references.html"), encoding="utf-8")
 
 
-def build(index_path: str | Path, out: str | Path, issues_path: str | Path | None = None) -> int:
+def build(index_path: str | Path, out: str | Path, issues_path: str | Path | None = None,
+          frontier_index: str | Path | None = None) -> int:
     site = Site.load(index_path)
     out = Path(out)
     if out.exists():
@@ -1059,7 +1051,9 @@ def build(index_path: str | Path, out: str | Path, issues_path: str | Path | Non
     build_blueprint(site, out, nodes_json, frontier)
     issues = ([json.loads(line) for line in Path(issues_path).read_text(encoding="utf-8").splitlines()
                if line.strip()] if issues_path else None)
-    build_tree(site, out, nodes_json, frontier, issues)
+    connectors = (chain_reach.load(frontier_index)
+                  if frontier_index and Path(frontier_index).exists() else [])
+    build_tree(site, out, nodes_json, frontier, issues, connectors)
     build_landmarks(site, out, landmarks, nodes_json, Linker(site.idx, "", public))
     build_corpus(site, out)
     build_subjects(site, out)
@@ -1074,8 +1068,10 @@ def main() -> int:
     ap.add_argument("--out", default="site")
     ap.add_argument("--issues", help="issues and pull requests, one JSON object per line "
                     "(gh api …/issues --jq '.[] | {number,title,state,body,labels,is_pr}')")
+    ap.add_argument("--frontier", help="the connector library's index (frontier-index.json); "
+                    "its theorems are drawn as phantoms on the tree")
     args = ap.parse_args()
-    n = build(args.index, args.out, args.issues)
+    n = build(args.index, args.out, args.issues, args.frontier)
     print(f"docs site: {n} module pages in {args.out}/")
     return 0
 
