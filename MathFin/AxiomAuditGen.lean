@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (960 MathFin constants, 29 upstream). Citations
+  corpus (972 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -2895,6 +2895,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.knockIn_add_knockOut_eq_vanilla
 
+/-- info: 'MathFin.le_mpUpperEdge' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.le_mpUpperEdge
+
 /-- info: 'MathFin.le_superhedgingPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.le_superhedgingPrice
@@ -3107,6 +3111,30 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.monotone_pow_apply_absorbing
 
+/-- info: 'MathFin.mpLowerEdge_inv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.mpLowerEdge_inv
+
+/-- info: 'MathFin.mpLowerEdge_le_variance_of_le_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.mpLowerEdge_le_variance_of_le_one
+
+/-- info: 'MathFin.mpUpperEdge_const_mul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.mpUpperEdge_const_mul
+
+/-- info: 'MathFin.mpUpperEdge_eq_variance_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.mpUpperEdge_eq_variance_iff
+
+/-- info: 'MathFin.mpUpperEdge_inv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.mpUpperEdge_inv
+
+/-- info: 'MathFin.mpUpperEdge_sub_mpLowerEdge' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.mpUpperEdge_sub_mpLowerEdge
+
 /-- info: 'MathFin.mul_le_portfolioVarN_equicorrelated' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.mul_le_portfolioVarN_equicorrelated
@@ -3214,6 +3242,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.portfolioVarN_equal_weights_iid' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.portfolioVarN_equal_weights_iid
+
+/-- info: 'MathFin.portfolioVarN_equicorrelation_equal_weights' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.portfolioVarN_equicorrelation_equal_weights
 
 /-- info: 'MathFin.portfolioVarN_le_of_lagrangian_FOC' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3586,6 +3618,22 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.tendsto_juValueRaw_zero_rate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.tendsto_juValueRaw_zero_rate
+
+/-- info: 'MathFin.tendsto_mpLowerEdge_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.tendsto_mpLowerEdge_one
+
+/-- info: 'MathFin.tendsto_mpLowerEdge_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.tendsto_mpLowerEdge_zero
+
+/-- info: 'MathFin.tendsto_mpUpperEdge_atTop' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.tendsto_mpUpperEdge_atTop
+
+/-- info: 'MathFin.tendsto_mpUpperEdge_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.tendsto_mpUpperEdge_zero
 
 /-- info: 'MathFin.tendsto_oneFactorLossFraction_ae' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
