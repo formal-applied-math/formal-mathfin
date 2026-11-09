@@ -78,8 +78,8 @@ extremum's law, which is the piece this file's transcription route sidesteps.
   could break the bound — `(S/m)^{−2r/σ²}·Φ(−a₁ + 2r√T/σ) − e^{rT}·Φ(−a₁)`, the term with a
   removable singularity at `r = 0` — and showing it always has the same sign as `r`, via a
   Mills-ratio monotonicity argument reusing `neg_mul_Phi_le_gaussianPDFReal`
-  (`Probability/Gaussian/NormalTail.lean`) in a new role: there it bounds a normal tail, here it supplies a
-  derivative sign. **Not a counterpart of `Lookback.lean`'s `lookback_payoff_ge_vanilla`**: that
+  (`Probability/Gaussian/NormalTail.lean`) in a new role: there it bounds a normal tail, here it
+  supplies a derivative sign. **Not a counterpart of `Lookback.lean`'s `lookback_payoff_ge_vanilla`**: that
   lemma is a same-strike fixed-strike statement (`max(S−K,0) ≤ max(M−K,0)` given `S ≤ M`, the
   running *maximum*); this theorem is a floating-strike statement about the running *minimum*,
   with no `max(·,0)` on either side, proved independently. The two share only the theme that a
