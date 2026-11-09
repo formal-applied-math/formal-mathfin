@@ -96,8 +96,11 @@ theorem isCoherentRiskMeasure_neg_iff {ι : Type*} [Finite ι] [MeasurableSpace 
       ∀ X Y : ι → ℝ, ρ (X + Y) ≤ ρ X + ρ Y := by
   refine ⟨IsCoherentRiskMeasure.positions_of_neg, ?_⟩
   rintro ⟨hm, hc, hh, hs⟩
-  refine { mono := fun X Y _ _ h ↦ ?_, add_const := fun X _ m ↦ ?_,
-    const_mul := fun X _ c hc' ↦ ?_, add_le := fun X Y _ _ ↦ ?_ }
+  refine
+    { mono := fun X Y _ _ h ↦ ?_
+      add_const := fun X _ m ↦ ?_
+      const_mul := fun X _ c hc' ↦ ?_
+      add_le := fun X Y _ _ ↦ ?_ }
   · exact hm (-Y) (-X) fun i ↦ neg_le_neg ((ae_iff_forall_of_singleton_ne_zero hP).1 h i)
   · have e : (-fun ω ↦ X ω + m) = fun i ↦ (-X) i + -m := by
       ext i; simp only [Pi.neg_apply]; ring
