@@ -22,11 +22,21 @@ The invariants, checked by ``check``:
    working towards is not on the program, and one whose issues all closed has either been
    delivered (tag it in ``MathFin/Blueprint.lean`` and delete the frontier entry) or dropped;
 4. every proved MathFin node is named by at least one issue or pull request, open or closed:
-   its delivery record.
+   its delivery record;
+5. a retired label (``docs/blueprint_retired.toml``: a waypoint folded into a landmark) is named
+   by no open issue or pull request, only by closed ones as history; it is never also a
+   live node, and what it folded into is one;
+6. every open issue naming nodes carries exactly the taxonomy labels its nodes derive: an
+   ``area:<cell>`` label for each node's cell and a ``family:<family>`` label for each node's
+   model family (``docs/taxonomy.toml``; a Lean node's cell and family are its module's, a
+   frontier node's are its ``area`` and ``family``). Nobody sets them by hand: ``labels
+   --apply`` (blueprint-sync, on every issue event) writes them.
 
     python3 -m tools.verify.blueprint_issues check            # all issues, via `gh api`
     python3 -m tools.verify.blueprint_issues check --issues issues.json
     python3 -m tools.verify.blueprint_issues comment 412      # bot comment on one issue
+    python3 -m tools.verify.blueprint_issues labels --apply   # derive area:/family: labels
+    python3 -m tools.verify.blueprint_issues labels 412 --apply
 
 Host-side; reads GitHub through the ``gh`` CLI (``GH_TOKEN`` in CI).
 """
@@ -41,9 +51,12 @@ import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from . import taxonomy
+
 REPO = "formal-applied-math/formal-mathfin"
 NODES_JSON = Path("docs/blueprint_nodes.json")
 FRONTIER_TOML = Path("docs/blueprint_frontier.toml")
+RETIRED_TOML = Path("docs/blueprint_retired.toml")
 
 MATH_LABELS = frozenset({"type:proof", "type:research", "open-problem", "frontier"})
 EXEMPT_LABELS = frozenset({"tracking"})
@@ -62,9 +75,18 @@ class Node:
     status: str  # proved | upstream | partial | frontier
     uses: tuple[str, ...] = ()
     statement: str = ""
-    area: str = ""
+    area: str = ""  # a cell key of docs/taxonomy.toml
+    family: str = ""  # a family key of the same file, or ""
     ground: str = ""  # frontier only: the upstream material a Mathlib-only result builds on
     core: tuple[str, ...] = ()  # frontier only: corpus entries already proving part of it
+    lean: str = ""  # frontier only: the connector's statement in MathFinFrontier/, if stated
+
+
+@dataclass(frozen=True)
+class Retired:
+    label: str
+    folded_into: str  # the surviving node (a live node or a frontier label)
+    reason: str = ""
 
 
 @dataclass
@@ -112,19 +134,36 @@ def load_frontier(path: Path = FRONTIER_TOML) -> list[Node]:
     data = tomllib.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
     return [Node(label=r["label"], title=r["title"], status="frontier",
                  uses=tuple(r.get("uses", ())), statement=r.get("statement", ""),
-                 area=r.get("area", ""), ground=r.get("ground", ""),
-                 core=tuple(r.get("core", ())))
+                 area=r.get("area", ""), family=r.get("family", ""), ground=r.get("ground", ""),
+                 core=tuple(r.get("core", ())), lean=r.get("lean", ""))
             for r in data.get("node", [])]
 
 
-def load_nodes(nodes_json: Path = NODES_JSON, frontier: Path = FRONTIER_TOML) -> dict[str, Node]:
+def load_retired(path: Path = RETIRED_TOML) -> dict[str, Retired]:
+    data = tomllib.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    return {r["label"]: Retired(r["label"], r["folded_into"], r.get("reason", ""))
+            for r in data.get("retired", [])}
+
+
+def load_nodes(nodes_json: Path = NODES_JSON, frontier: Path = FRONTIER_TOML,
+               retired: Path = RETIRED_TOML) -> dict[str, Node]:
+    """The live nodes: the exported Lean tags (a retired label is never one, even in an export
+    older than its retirement) and the frontier."""
+    gone = load_retired(retired)
     nodes: dict[str, Node] = {}
     for n in json.loads(nodes_json.read_text(encoding="utf-8")):
+        if n["label"] in gone:
+            continue
+        module = n.get("module", "")
         nodes[n["label"]] = Node(label=n["label"], title=n.get("title") or n["label"],
-                                 status=_lean_status(n), uses=tuple(n.get("uses", ())))
+                                 status=_lean_status(n), uses=tuple(n.get("uses", ())),
+                                 area=taxonomy.cell_of(module) or "",
+                                 family=taxonomy.family_of(module) or "")
     for n in load_frontier(frontier):
         if n.label in nodes:
             raise ValueError(f"frontier node {n.label} is also a Lean-tagged node")
+        if n.label in gone:
+            raise ValueError(f"frontier node {n.label} is also a retired label")
         nodes[n.label] = n
     return nodes
 
@@ -143,6 +182,37 @@ def grows_from_wood(label: str, nodes: dict[str, Node]) -> bool:
             return True
         stack.extend(n.uses)
     return False
+
+
+CONNECTORS_DIR = Path("MathFinFrontier")
+_CONNECTOR = re.compile(r"^theorem\s+([^\s:({\[]+)", re.M)
+
+
+def connector_names(root: Path = CONNECTORS_DIR) -> set[str]:
+    """The theorems stated in the connector library, by full name (each file's `namespace`
+    lines are not used: connectors are written with their full name, `MathFinFrontier.x`)."""
+    return {m.group(1) for p in sorted(root.rglob("*.lean"))
+            for m in _CONNECTOR.finditer(p.read_text(encoding="utf-8"))}
+
+
+def connector_problems(nodes: dict[str, Node], stated: set[str] | None = None) -> list[str]:
+    """Every connector theorem is named by exactly one frontier node's `lean`, and every `lean`
+    names a connector theorem."""
+    stated = connector_names() if stated is None else stated
+    out = []
+    named: dict[str, list[str]] = {}
+    for n in nodes.values():
+        if n.lean:
+            named.setdefault(n.lean, []).append(n.label)
+            if n.lean not in stated:
+                out.append(f"frontier node `{n.label}`: `lean` names `{n.lean}`, which is not a "
+                           "theorem of MathFinFrontier/")
+    for name in sorted(stated):
+        labels = named.get(name, [])
+        if len(labels) != 1:
+            out.append(f"connector `{name}` is named by {len(labels)} frontier nodes "
+                       f"({', '.join(labels) or 'none'}); it needs exactly one")
+    return out
 
 
 def frontier_problems(nodes: dict[str, Node],
@@ -178,6 +248,19 @@ def frontier_problems(nodes: dict[str, Node],
     return out
 
 
+def retired_problems(retired: dict[str, Retired], nodes: dict[str, Node]) -> list[str]:
+    """Static checks of the retired file (no network): a retired label is not a live node, and it
+    folded into one."""
+    out = []
+    for r in retired.values():
+        if r.label in nodes:
+            out.append(f"retired label `{r.label}` is also a live node")
+        if r.folded_into not in nodes:
+            out.append(f"retired label `{r.label}` folded into `{r.folded_into}`, "
+                       "which is not a node")
+    return out
+
+
 # ------------------------------------------------------------------ issues
 
 def fetch_issues(repo: str = REPO) -> list[Issue]:
@@ -200,6 +283,59 @@ def load_issues(path: str | Path) -> list[Issue]:
     return [_issue(r) for r in json.loads(Path(path).read_text(encoding="utf-8"))]
 
 
+# ------------------------------------------------------------------ taxonomy labels
+
+AREA, FAMILY = "area:", "family:"
+
+
+def taxonomy_labels() -> dict[str, tuple[str, str]]:
+    """Every label the taxonomy defines: name -> (color, description). One ``area:`` label
+    per cell, coloured by its part (roots, the trunk, each limb); one ``family:`` label per
+    model family."""
+    part_color = {"probability": "c5def5", "statistics": "c5def5", "market": "d4c5f9",
+                  "valuation": "1d76db", "choice": "0e8a16", "risk": "b60205"}
+    out = {f"{AREA}{k}": (part_color.get(taxonomy.part_of(k), "ededed"),
+                          _short(f"{taxonomy.label(k)}: {c['blurb']}"))
+           for k, c in taxonomy.cells().items()}
+    out |= {f"{FAMILY}{k}": ("fbca04", _short(f"{f['title']}: {f.get('blurb', '')}"))
+            for k, f in taxonomy.families().items()}
+    return out
+
+
+def _short(text: str, limit: int = 100) -> str:  # GitHub caps a label description at 100
+    text = " ".join(text.split()).rstrip(": ")
+    return text if len(text) <= limit else text[:limit - 1].rstrip() + "…"
+
+
+def is_taxonomy_label(name: str) -> bool:
+    return (name.startswith(AREA) and name[len(AREA):] in taxonomy.cells()) or (
+        name.startswith(FAMILY) and name[len(FAMILY):] in taxonomy.families())
+
+
+def derived_labels(issue: Issue, nodes: dict[str, Node]) -> frozenset[str]:
+    """The area:/family: labels an issue's nodes give it."""
+    out: set[str] = set()
+    for label in issue.nodes:
+        n = nodes.get(label)
+        if n is None:
+            continue
+        if n.area:
+            out.add(AREA + n.area)
+        if n.family:
+            out.add(FAMILY + n.family)
+    return frozenset(out)
+
+
+def label_drift(issue: Issue, nodes: dict[str, Node]) -> tuple[set[str], set[str]]:
+    """(labels to add, labels to remove) to bring an issue's taxonomy labels in line. Closed
+    issues get them too, so a cell's history is one filter; only open ones are checked."""
+    if issue.is_pr or not issue.nodes:
+        return set(), set()
+    want = derived_labels(issue, nodes)
+    have = {name for name in issue.labels if is_taxonomy_label(name)}
+    return set(want - have), have - want
+
+
 # ------------------------------------------------------------------ the check
 
 @dataclass(frozen=True)
@@ -209,12 +345,26 @@ class Problem:
 
 
 def check(issues: list[Issue], nodes: dict[str, Node],
-          corpus_status: dict[str, str] | None = None) -> list[Problem]:
+          corpus_status: dict[str, str] | None = None,
+          retired: dict[str, Retired] | None = None,
+          connectors: set[str] | None = None) -> list[Problem]:
+    """``connectors``: the theorems of the connector library (``connector_names()``); none when
+    omitted, like ``retired``, so a fixture is not read against the repository's files."""
+    retired = retired or {}
     problems = [Problem(m) for m in frontier_problems(nodes, corpus_status)]
+    problems += [Problem(m) for m in connector_problems(nodes, connectors or set())]
+    problems += [Problem(m) for m in retired_problems(retired, nodes)]
     open_named: dict[str, list[int]] = {}
     any_named: dict[str, list[int]] = {}
     for i in issues:
         for label in i.nodes:
+            if label in retired and label not in nodes:
+                # a closed issue or pull request naming a folded label is history
+                if i.state == "open":
+                    problems.append(Problem(
+                        f"#{i.number} names `{label}`, which was folded into "
+                        f"`{retired[label].folded_into}`: name that node instead", i.number))
+                continue
             if label not in nodes:
                 if i.is_pr and i.state == "open":
                     continue  # a node the PR itself adds: its own build checks it on its branch
@@ -228,6 +378,13 @@ def check(issues: list[Issue], nodes: dict[str, Node],
             problems.append(Problem(
                 f"#{i.number} ({i.title}) is open math work but names no blueprint node",
                 i.number))
+        add, drop = label_drift(i, nodes) if i.state == "open" else ((), ())
+        if add or drop:
+            problems.append(Problem(
+                f"#{i.number}: its nodes give it the labels "
+                f"{', '.join(sorted(derived_labels(i, nodes))) or '(none)'}; "
+                f"add {', '.join(sorted(add)) or 'nothing'}, remove "
+                f"{', '.join(sorted(drop)) or 'nothing'} (`blueprint_issues labels --apply`)"))
     for n in nodes.values():
         if n.status in ("frontier", "partial") and n.label not in open_named:
             closed = any_named.get(n.label, [])
@@ -279,17 +436,60 @@ def _upsert_comment(repo: str, number: int, body: str, resolved: bool) -> None:
                         "-f", f"body={body}"], check=True, capture_output=True)
 
 
+def _gh(*args: str) -> None:
+    subprocess.run(["gh", "api", *args], check=True, capture_output=True)
+
+
+def apply_labels(repo: str, issues: list[Issue], nodes: dict[str, Node], *,
+                 dry_run: bool) -> int:
+    """Create the taxonomy's labels that GitHub lacks, then set each open issue's area:/family:
+    labels to the ones its nodes derive. Returns the number of issues changed."""
+    from urllib.parse import quote
+
+    if not dry_run:
+        existing = set(subprocess.run(
+            ["gh", "api", "--paginate", f"repos/{repo}/labels?per_page=100", "--jq",
+             ".[].name"], check=True, capture_output=True, text=True).stdout.split("\n"))
+        for name, (color, desc) in taxonomy_labels().items():
+            if name not in existing:
+                _gh("-X", "POST", f"repos/{repo}/labels", "-f", f"name={name}",
+                    "-f", f"color={color}", "-f", f"description={desc}")
+    changed = 0
+    for i in issues:
+        add, drop = label_drift(i, nodes)
+        if not (add or drop):
+            continue
+        changed += 1
+        print(f"#{i.number}: +{sorted(add)} -{sorted(drop)}")
+        if dry_run:
+            continue
+        if add:
+            _gh("-X", "POST", f"repos/{repo}/issues/{i.number}/labels",
+                *[a for name in sorted(add) for a in ("-f", f"labels[]={name}")])
+        for name in sorted(drop):
+            _gh("-X", "DELETE", f"repos/{repo}/issues/{i.number}/labels/{quote(name, safe='')}")
+    return changed
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="python3 -m tools.verify.blueprint_issues")
-    ap.add_argument("cmd", choices=["check", "comment"])
-    ap.add_argument("number", nargs="?", type=int, help="issue number (comment)")
+    ap.add_argument("cmd", choices=["check", "comment", "labels"])
+    ap.add_argument("number", nargs="?", type=int, help="issue number (comment; labels)")
     ap.add_argument("--issues", help="issues JSON instead of fetching with gh")
     ap.add_argument("--repo", default=REPO)
+    ap.add_argument("--apply", action="store_true", help="labels: write them (else dry run)")
     args = ap.parse_args(argv)
 
     nodes = load_nodes()
     issues = load_issues(args.issues) if args.issues else fetch_issues(args.repo)
-    problems = check(issues, nodes)
+
+    if args.cmd == "labels":
+        if args.number is not None:
+            issues = [i for i in issues if i.number == args.number]
+        apply_labels(args.repo, issues, nodes, dry_run=not args.apply)
+        return 0
+
+    problems = check(issues, nodes, retired=load_retired(), connectors=connector_names())
 
     if args.cmd == "comment":
         if args.number is None:
