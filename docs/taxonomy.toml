@@ -19,6 +19,15 @@
 #                       proved lists none and has a frontier node with its key as `area`.
 # [[family]] key, title, blurb, hue (a tree colour token), modules (prefixes, longest wins)
 # [[joint]]  a theorem whose statement involves two limbs: limbs, node (blueprint label), title
+# [[tower]]  a deep module tree the program tree draws as ONE node, labelled with its module
+#            count (an American-put tower of 174 modules must not be 174 leaves):
+#            key, title, modules (prefixes). Its height is the best hop among its members.
+# [[standalone]]  a cluster that legitimately has no chain to the trunk (a law functional, an
+#            algebraic certificate, a deterministic mechanism, a convex programme): modules
+#            (prefixes), reason (one sentence: why it needs no link), socket (the market-side
+#            result that reads it, or where it will be read), optional title (the island's name
+#            on the tree). The tree draws a disconnected cluster as an island beside its limb,
+#            ringed red when it is neither reached by a connector nor declared here. None yet.
 #
 # Every module under MathFin/ belongs to exactly one cell (tests/test_taxonomy.py); the files
 # directly under MathFin/ (Init, Blueprint, the audits) are the library's own machinery.
@@ -526,3 +535,15 @@ title = "Superhedging duality"
 limbs = ["valuation", "risk"]
 node = "thm:hedged-position-risk"
 title = "The risk of a hedged position"
+
+# ───────────────────────────── towers ─────────────────────────────
+
+[[tower]]
+key = "american-put"
+title = "American put"
+modules = ["MathFin.Models.BlackScholes.American"]
+
+[[tower]]
+key = "svi"
+title = "SVI"
+modules = ["MathFin.Models.ModelFree.SVI"]

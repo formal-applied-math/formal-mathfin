@@ -35,7 +35,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from . import doc_standard, library, taxonomy
+from . import chain_reach, doc_standard, library, taxonomy
 from .blueprint_issues import issues_url
 from .program_tree import tree_data
 from .corpus import iter_entries
@@ -679,11 +679,24 @@ TREE_KINDS = (("rests-on-node", "rests on a node", "--tr-leaf-2"),
 
 
 def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dict],
-               issues: list[dict] | None) -> None:
+               issues: list[dict] | None, connectors: list[dict] = ()) -> None:
     """The program tree: the blueprint as a tree, with the corpus as its leaves
     (tools/verify/program_tree.py places every entry)."""
-    data = tree_data(site.idx, nodes_json, frontier, issues)
+    data = tree_data(site.idx, nodes_json, frontier, issues, connectors)
     data["repo"] = REPO_URL
+    m = data["metrics"]
+    strip = (
+        '<div class="tiles t-metrics">'
+        f'<div class="tile"><div class="v">{m["R3"]:g}%</div><div class="k">R3 <small>· finance '
+        f'theorems within 3 statement hops of the trunk, of {m["theorems"]:,}</small></div></div>'
+        f'<div class="tile"><div class="v">{len(m["sockets"])}/{m["families"]}</div><div class="k">'
+        f'sockets <small>· model families that are a market with a proved pricing measure'
+        f'</small></div></div>'
+        f'<div class="tile"><div class="v">{m["span"]}</div><div class="k">joint span '
+        f'<small>· theorems whose statements join two limbs</small></div></div>'
+        f'<div class="tile"><div class="v">{m["islands"]}</div><div class="k">islands '
+        f'<small>· {m["unreached"]} reached by no connector and declared nowhere</small>'
+        f'</div></div></div>')
     for n in data["nodes"]:
         d = site.idx.decls.get(n.get("d") or "")
         if d and not d.private:
@@ -713,6 +726,12 @@ def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dic
     proved = sum(n["s"] == "proved" for n in data["nodes"])
     nfront = sum(n["s"] == "frontier" for n in data["nodes"])
     payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+    fam_legend = '<div class="legend">' + "".join(
+        f'<span><i style="background:var({f["hue"]})"></i>{esc(f["title"])}'
+        + ('<b class="sock" title="a proved theorem makes this family\'s model a Market with a '
+           'pricing measure">socket</b>' if f["socket"] else "") + "</span>"
+        for f in data["families"]) + '<span><i style="background:var(--tr-bark)"></i>general '\
+        'theory</span></div>'
     body = f"""<h1>The program tree</h1>
 <p class="lede ink2">The blueprint drawn on the library's taxonomy (<code>docs/taxonomy.toml</code>),
 the one statement of how it organizes financial mathematics. The roots in the soil are the tools:
@@ -723,14 +742,19 @@ hold it</em> (choice, on the left) and <em>how dangerous is it</em> (risk, on th
 limb's branches are its cells. A theorem between two limbs sits in the fork between them. Colour
 is the model family, the same hue in every limb, so credit in valuation and credit in risk read as
 one family seen by two questions; nodes with no family are general theory and keep the wood's
-colour. Height is generality: the general theorems sit near the fork, instances above them, product
-formulas at the tips. The dark wood drawn over the pale map is the proofs: each of the {proved}
+colour. Height is measured: a result sits at its distance, in statements, from the trunk (the
+<em>hop</em> of <code>chain_reach</code>), so a pricing formula that states a market is low and one
+that only restates its own formula is high. Results at infinite distance float beside their limb
+as islands, ringed red when nothing reaches them; a tower of modules is one node; a hollow dashed
+dot between two nodes is a connector, a theorem stated and not yet proved, sized by the theorems
+it would bring within three hops. A <em>socket</em> badge in the legend marks a family whose model is a market with a proved pricing measure. The dark wood drawn over the pale map is the proofs: each of the {proved}
 proved results is joined to every node its proof uses, and wood thickens with the corpus it
 carries. A knot's size counts the corpus entries whose proof rests deepest on it; the Leaves button
 hangs them on the tree. The {nfront} frontier results are dashed blueprint shoots, each bud coloured
 by the state of its issue, with the open problems as stars. Proved results that rest on no node
 grow straight from the soil; entries that touch no node lie on the ground. Click a node to trace
 its lineage; drag to pan, scroll to zoom; names fill in as you zoom.</p>
+{strip}
 <div class="t-box" id="tree-box"><div class="t-tools">
 <input id="t-q" type="search" placeholder="Find a node: Itô, VaR, Heston…" aria-label="Find a node" autocomplete="off">
 <button type="button" id="t-grow">Grow it again</button>
@@ -740,7 +764,7 @@ its lineage; drag to pan, scroll to zoom; names fill in as you zoom.</p>
 <div class="t-stage"><svg id="tree" role="img" aria-label="The MathFin blueprint as a tree"></svg>
 <aside class="t-panel" id="tree-panel" aria-live="polite"></aside></div>
 <div id="tree-tip" hidden></div></div>
-{legend([(f["hue"], f["title"], "") for f in data["families"]] + [("--tr-bark", "general theory", "")])}
+{fam_legend}
 <h2>Where the corpus sits</h2>
 <p class="ink2">{on} of the {total} corpus entries are on the map: their proofs rest on a blueprint
 node, or a node's proof uses what they cite. {off} cite MathFin results in no relation the map
@@ -989,7 +1013,8 @@ def build_references(site: Site, out: Path) -> None:
                                               "references.html"), encoding="utf-8")
 
 
-def build(index_path: str | Path, out: str | Path, issues_path: str | Path | None = None) -> int:
+def build(index_path: str | Path, out: str | Path, issues_path: str | Path | None = None,
+          frontier_index: str | Path | None = None) -> int:
     site = Site.load(index_path)
     out = Path(out)
     if out.exists():
@@ -1026,7 +1051,9 @@ def build(index_path: str | Path, out: str | Path, issues_path: str | Path | Non
     build_blueprint(site, out, nodes_json, frontier)
     issues = ([json.loads(line) for line in Path(issues_path).read_text(encoding="utf-8").splitlines()
                if line.strip()] if issues_path else None)
-    build_tree(site, out, nodes_json, frontier, issues)
+    connectors = (chain_reach.load(frontier_index)
+                  if frontier_index and Path(frontier_index).exists() else [])
+    build_tree(site, out, nodes_json, frontier, issues, connectors)
     build_landmarks(site, out, landmarks, nodes_json, Linker(site.idx, "", public))
     build_corpus(site, out)
     build_subjects(site, out)
@@ -1041,8 +1068,10 @@ def main() -> int:
     ap.add_argument("--out", default="site")
     ap.add_argument("--issues", help="issues and pull requests, one JSON object per line "
                     "(gh api …/issues --jq '.[] | {number,title,state,body,labels,is_pr}')")
+    ap.add_argument("--frontier", help="the connector library's index (frontier-index.json); "
+                    "its theorems are drawn as phantoms on the tree")
     args = ap.parse_args()
-    n = build(args.index, args.out, args.issues)
+    n = build(args.index, args.out, args.issues, args.frontier)
     print(f"docs site: {n} module pages in {args.out}/")
     return 0
 

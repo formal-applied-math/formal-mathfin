@@ -276,7 +276,7 @@ details.tableview summary { cursor: pointer; color: var(--ink-2); }
 #tree-box .branch.sec { fill: var(--tr-bark-2); opacity: .26; }
 #tree.focus .branch.sec.on { opacity: .95; }
 #tree-box .root { fill: var(--tr-bark); opacity: .55; }
-#tree-box .shoot { fill: none; stroke: var(--tr-blue); stroke-width: 1.3; stroke-dasharray: 3.4 2.8; opacity: .62; }
+#tree-box .shoot { fill: none; stroke: var(--tr-blue); stroke-width: 1.3; stroke-dasharray: 3.4 2.8; opacity: .34; }
 #tree-box .shoot.sec { display: none; }
 #tree.focus .shoot.sec.on { display: inline; opacity: .8; }
 #tree-box .leaf { opacity: .92; }
@@ -324,3 +324,21 @@ details.tableview summary { cursor: pointer; color: var(--ink-2); }
 .t-seeds i { width: 7px; height: 7px; border-radius: 50%; background: var(--tr-fallen); display: block; }
 .t-table td { padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 0.88rem; }
 @media (prefers-reduced-motion: reduce) { #tree.focus .dimmable { transition: none; } }
+/* measured tree: towers, islands, connectors */
+#tree-box { --tr-alert: #c0392b; }
+@media (prefers-color-scheme: dark) { :root:where(:not([data-theme="light"])) #tree-box { --tr-alert: #ff7b6b; } }
+:root[data-theme="dark"] #tree-box { --tr-alert: #ff7b6b; }
+#tree-box .tower { stroke: var(--surface); stroke-width: 1.2; }
+#tree-box .tower-n { font: 700 10px var(--sans); fill: var(--surface); pointer-events: none; }
+#tree-box .phantom { fill: var(--surface); fill-opacity: .92; stroke: var(--tr-blue); stroke-width: 2.2; stroke-dasharray: 4 3; }
+#tree-box .ph-n { font: 700 10.5px var(--sans); fill: var(--tr-blue); pointer-events: none; }
+#tree-box .shoot.ph { stroke-dasharray: 5 3; opacity: .85; }
+#tree-box .shoot.ph.sec { display: none; }
+#tree.focus .shoot.ph.sec.on { display: inline; }
+#tree-box .lbl.ph { fill: var(--tr-blue); font-style: italic; }
+#tree-box .isl-ring { fill: var(--surface); fill-opacity: .8; stroke: var(--tr-bark-2); stroke-width: 1.2; stroke-dasharray: 2 4; opacity: .7; }
+#tree-box .isl.ring .isl-ring, #tree-box .isl-ring.ring { stroke: var(--tr-alert); stroke-width: 1.8; stroke-dasharray: 5 3; opacity: .95; }
+#tree-box .isl-lbl { font: italic 600 12px var(--serif); fill: var(--tr-soil-ink); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }
+#tree-box .isl.ring .isl-lbl { fill: var(--tr-alert); }
+.t-metrics .tile .v { font-size: 1.5rem; }
+.sock { display: inline-block; font-size: 0.68rem; border: 1px solid currentColor; border-radius: 999px; padding: 0 6px; margin-left: 4px; color: var(--good, #23896f); }

@@ -44,6 +44,18 @@ def joints() -> list[dict]:
     return list(load().get("joint", []))
 
 
+def towers() -> list[dict]:
+    return list(load().get("tower", []))
+
+
+def standalones() -> list[dict]:
+    return list(load().get("standalone", []))
+
+
+def in_prefixes(module: str, prefixes: list[str]) -> bool:
+    return any(_matches(module, p) for p in prefixes)
+
+
 def meta() -> list[str]:
     return list(load().get("meta", []))
 
