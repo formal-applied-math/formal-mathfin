@@ -180,7 +180,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.emm_le_superReplication (MathFin/Pricing/SuperhedgingDuality.lean). SCOPE: q ranges over martingaleProbVectors z (q ≥ 0, possibly vanishing on some states), which contains every EMM (hasEMMMultiState_iff_exists_pos_mem), so the statement is stronger than the EMM bound it is named after. Proof: q-weight the super-replication inequality; fairness (Σ_n q n z m n = 0) kills the portfolio term and Σq = 1 leaves x. Not proved: the strong-duality equality, which needs closedness of the finitely generated super-replication cone (Mathlib at this pin has PointedCone.DualFG but no Minkowski–Weyl)."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.emm_le_superReplication (MathFin/Pricing/SuperhedgingDuality.lean). SCOPE: q ranges over martingaleProbVectors z (q ≥ 0, possibly vanishing on some states), which contains every EMM (hasEMMMultiState_iff_exists_pos_mem), so the statement is stronger than the EMM bound it is named after. Proof: q-weight the super-replication inequality; fairness (Σ_n q n z m n = 0) kills the portfolio term and Σq = 1 leaves x. The strong-duality equality (superhedging price = supremum of these prices) is the separate entry mf-superhedging-duality."
       }
     },
     {
@@ -689,6 +689,30 @@
       },
       "code": {
         "lean": "import MathFin.Pricing.DiscreteMarket\n\nopen MeasureTheory MathFin MathFin.Contracts.DiscreteMarket\n\n/-- On a finite full-support space, no arbitrage iff the discrete market has a pricing measure. -/\ntheorem discrete_market_ftap_finite {Ω : Type*} [Finite Ω] [Nonempty Ω] {mΩ : MeasurableSpace Ω}\n    [MeasurableSingletonClass Ω] {𝓕 : Filtration ℕ mΩ} {P : Measure Ω} [IsFiniteMeasure P]\n    {S : ℕ → Ω → ℝ} {T : ℕ} (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :\n    NoArbitrage 𝓕 P S T ↔ ∃ Q, (toMarket P 𝓕 S T fun n _ ↦ hS n).IsPricingMeasure T Q :=\n  noArbitrage_iff_exists_isPricingMeasure_of_finite hS hP\n"
+      }
+    },
+    {
+      "id": "mf-market-ftap-finite",
+      "name": "The Fundamental Theorem of Asset Pricing for a Market on a Finite Sample Space: No Arbitrage on a Grid iff the Market Traded on the Grid Has a Pricing Measure",
+      "domain": "mathematical_finance",
+      "description": "For a one-asset Market on a finite sample space whose finite reference measure charges every state, and a monotone grid of dates t 0 <= ... <= t N, the market has no arbitrage on the grid (Market.NoArbitrage: NoArbitrage of the deflated asset sampled along the grid, for the sampled filtration) if and only if the market traded on the grid (Market.onGrid: the sampled deflated asset, constant between the dates, unit numeraire) has a pricing measure at N (Market.IsPricingMeasure). A pricing measure of the market itself up to a horizon T with t N <= T rules out arbitrage on the grid (Market.IsPricingMeasure.noArbitrage, stated in the module, not in this entry). The equivalence for a general probability space is not claimed: it is proved only assuming ConditionalOnePeriodFTAP.",
+      "metadata": {
+        "reference": "Harrison and Pliska (1981); Foellmer and Schied, Stochastic Finance, sec. 5.2",
+        "citations": [
+          {
+            "key": "HarrisonPliska1981"
+          },
+          {
+            "key": "FollmerSchied",
+            "locator": "sec. 5.2"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Market.noArbitrage_iff_exists_isPricingMeasure_of_finite in MathFin/Pricing/FTAP/MarketFTAP.lean, the finite-state theorem noArbitrage_iff_exists_isPricingMeasure_of_finite of MathFin/Pricing/DiscreteMarket.lean (itself ftap_discrete read through isPricingMeasure_toMarket_iff) applied to the deflated asset sampled along the grid, which is adapted for the sampled filtration (Market.stronglyAdapted_deflated). SCOPE: one asset, real-valued; finite sample space with P charging every state; the pricing measure is a pricing measure of the market traded on the grid (Market.onGrid), not of the continuous-time market itself: the grid FTAP says nothing about dates between the grid points. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.Pricing.FTAP.MarketFTAP\n\nopen MeasureTheory MathFin\nopen scoped NNReal\n\n/-- On a finite full-support space, a one-asset market has no arbitrage on a grid iff the market\ntraded on the grid has a pricing measure. -/\ntheorem market_ftap_finite {Ω : Type*} [Finite Ω] [Nonempty Ω] {mΩ : MeasurableSpace Ω}\n    [MeasurableSingletonClass Ω] (M : Market Unit Ω) [IsFiniteMeasure M.P] {t : ℕ → ℝ≥0}\n    (ht : Monotone t) (N : ℕ) (hP : ∀ ω, 0 < M.P {ω}) :\n    M.NoArbitrage ht N ↔ ∃ Q, (M.onGrid ht N).IsPricingMeasure N Q :=\n  Market.noArbitrage_iff_exists_isPricingMeasure_of_finite ht hP\n"
       }
     },
     {

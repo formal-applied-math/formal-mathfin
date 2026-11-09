@@ -29,6 +29,12 @@ Run on the runner after `lake build` (the load is the same as `lake lint`'s), or
 the daemon down:
 
   `lake exe mathfin_index decl-index.json`
+  `lake exe mathfin_index frontier-index.json 1 MathFinFrontier`
+
+The optional third argument is the root module to load and index instead of `MathFin`: the
+connector library `MathFinFrontier` (stated, unproved bridges; never imported by `MathFin`) is
+indexed on its own, so its statements can be placed against the library's without entering the
+library's own index.
 -/
 
 open Lean Meta
@@ -45,16 +51,19 @@ def moduleOf (env : Environment) (n : Name) : Option Name := do
   env.header.moduleNames[idx]?
 
 /-- Declared in a library module (aggregators included: their auxiliary constants are still
-library constants, only not indexed). -/
+library constants, only not indexed). The connector library counts as library too, so a
+connector's uses resolve to the MathFin declarations it states things about. -/
 def inLibrary (env : Environment) (n : Name) : Bool :=
   match moduleOf env n with
-  | some m => (`MathFin).isPrefixOf m
+  | some m => (`MathFin).isPrefixOf m || (`MathFinFrontier).isPrefixOf m
   | none => false
 
 /-- The declaration a reader would name: not compiler-generated, not a constructor or recursor,
-declared in a non-aggregator library module. A private name is judged by its user-facing part. -/
-def indexed (env : Environment) (n : Name) (ci : ConstantInfo) : Bool :=
-  inLibrary env n && !(aggregators.contains ((moduleOf env n).getD .anonymous)) &&
+declared in a non-aggregator module under `root`. A private name is judged by its user-facing
+part. -/
+def indexed (root : Name) (env : Environment) (n : Name) (ci : ConstantInfo) : Bool :=
+  inLibrary env n && root.isPrefixOf ((moduleOf env n).getD .anonymous) &&
+    !(aggregators.contains ((moduleOf env n).getD .anonymous)) &&
     !(ci matches .ctorInfo _ | .recInfo _ | .quotInfo _) &&
     !env.isAutoDecl (privateToUserName n)
 
@@ -116,9 +125,9 @@ def record (env : Environment) (simps : SimpTheorems) (isIndexed : Name → Bool
     ("attrs", Json.arr attrs)]
 
 /-- The indexed declarations, sorted. -/
-def indexedNames (env : Environment) : Array Name :=
+def indexedNames (root : Name) (env : Environment) : Array Name :=
   (env.constants.map₁.fold (init := #[]) fun acc n ci =>
-    if indexed env n ci then acc.push n else acc).qsort Name.lt
+    if indexed root env n ci then acc.push n else acc).qsort Name.lt
 
 /-- The records of one slice of the declarations. -/
 def records (names : Array Name) (isIndexed : Name → Bool) : MetaM (Array Json) := do
@@ -131,20 +140,21 @@ def records (names : Array Name) (isIndexed : Name → Bool) : MetaM (Array Json
 end MathFinTools.Index
 
 open MathFinTools.Index in
-/-- `lake exe mathfin_index OUT.json [JOBS]`: pretty-printing the statements is the cost, so
-the declarations are split into `JOBS` slices (default 4) elaborated on separate threads over
-the same, immutable environment. -/
+/-- `lake exe mathfin_index OUT.json [JOBS] [ROOT]`: pretty-printing the statements is the cost,
+so the declarations are split into `JOBS` slices (default 4) elaborated on separate threads over
+the same, immutable environment. `ROOT` (default `MathFin`) is the module loaded and indexed. -/
 unsafe def main (args : List String) : IO UInt32 := do
   let some outPath := args.head?
-    | IO.eprintln "usage: lake exe mathfin_index OUT.json [JOBS]"; return 2
+    | IO.eprintln "usage: lake exe mathfin_index OUT.json [JOBS] [ROOT]"; return 2
   let jobs := max 1 ((args[1]?.bind String.toNat?).getD 4)
+  let root := (args[2]?.map String.toName).getD `MathFin
   initSearchPath (← findSysroot)
   Lean.enableInitializersExecution
-  let env ← importModules #[{ module := `MathFin }] {} (trustLevel := 1024) (loadExts := true)
+  let env ← importModules #[{ module := root }] {} (trustLevel := 1024) (loadExts := true)
   let ctx : Core.Context := {
     fileName := "<mathfin_index>", fileMap := default, maxHeartbeats := 0,
     options := ({} : Options).setBool `pp.universes false }
-  let names := indexedNames env
+  let names := indexedNames root env
   let set : NameHashSet := names.foldl (·.insert ·) {}
   let size := (names.size + jobs - 1) / jobs
   let tasks ← (List.range jobs).toArray.mapM fun j =>

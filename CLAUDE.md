@@ -121,6 +121,9 @@ the declaration in `MathFin/Blueprint.lean` under the same label and deletes the
 directions. Every frontier node grows from the proved blueprint: its `uses` reach a Lean-tagged
 node (through other frontier nodes if need be), or its `ground` field says what Mathlib material
 it builds on; a `core` field lists the corpus entries that already prove part of it.
+A node is a landmark, a joint or a shared definition (design spec §5), never a waypoint: a tag
+removed from `MathFin/Blueprint.lean` because it folded into a landmark is recorded in
+`docs/blueprint_retired.toml`, so closed issues naming it stay valid and an open one is flagged.
 **The corpus sits on the map** (`tools/verify/program_tree.py`): an entry rests on a node when its
 proof's citations depend on the node's declaration. The program's central objects are nodes too
 (`def:quantile`, `def:emm`, `def:contract-value`, …), since most entries reach the library through
