@@ -30,9 +30,10 @@ flips as the traded asset, and the money market `e^{ρ n}` after `n` steps as nu
   deflator `e^{−ρ ⌊t/h⌋}` is the binomial discount `e^{−ρ t/h}`, so the market's price is the
   `Contract.value` of `Binomial.lean` (`price_market`), and a European payoff is priced at its
   backward-induction tree price (`price_market_pay_eq_binomialPrice`).
-* **The pricing measure is unique.** At a horizon of `N` steps every pricing measure agrees with
-  the risk-neutral law on the first `N` flips (`trim_eq_of_isPricingMeasure`): it maps to an
-  equivalent martingale measure of the `N`-period tree (`isEMM_horizonSpot_map`), which is unique
+* **The pricing measure is unique on the information at the horizon.** At a horizon of `N` steps
+  every pricing measure agrees with the risk-neutral law on the first `N` flips
+  (`trim_eq_of_isPricingMeasure`): it maps to an equivalent martingale measure of the `N`-period
+  tree (`isEMM_horizonSpot_map`), which is unique
   (`IsEMM.eq_horizonMeasure`). So every pricing measure gives a European payoff its tree price
   (`price_pay_eq_binomialPrice_of_isPricingMeasure`).
 * **The fundamental theorem.** For `S₀ > 0`, `0 < d < u` and at least one step, the market has a
