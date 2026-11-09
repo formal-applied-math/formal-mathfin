@@ -1781,6 +1781,8 @@
             "key": "CarrMadan2001"
           }
         ],
+        "cell": "valuation/model-free",
+        "family": "model-free",
         "difficulty": "intermediate",
         "formalization_status": "library_wrapper",
         "formalization_scope": "Direct invocation of Mathlib's Real.log_div (statement-identical algebra step of the Carr-Madan log-contract chain). Relabeled full->library_wrapper in the 2026-06-03 audit; the former MathFin alias lemma was deleted. The genuine Carr-Madan content lives in mf-carr-madan-spanning and mf-carr-madan-log-contract (both full)."
@@ -2418,6 +2420,34 @@
             "key": "DaiKwokWu2004"
           }
         ]
+      }
+    },
+    {
+      "id": "mf-black-scholes-market-pricing-measure",
+      "name": "The Girsanov Measure of the Market Price of Risk Is a Pricing Measure of the Black-Scholes Market and Prices the European Call at the Black-Scholes Formula",
+      "domain": "mathematical_finance",
+      "description": "The Black-Scholes model of a pre-Brownian motion W under a probability measure mu (BlackScholes.market: the filtration W generates, the asset S_0 exp((m - sigma^2/2) t + sigma W_t) with physical drift m, the numeraire e^(rt)) is a Market. For sigma != 0, the Girsanov measure Q of the constant market price of risk theta = (m - r)/sigma at a horizon H (constGirsanovMeasure) is a pricing measure of it at every horizon T <= H (Market.IsPricingMeasure: equivalent to mu, and the deflated asset frozen at T is a martingale), and for S_0, K, sigma > 0 and T > 0 the market's price (Market.price) of the European call at maturity T under Q is S_0 Phi(d_1) - K e^(-rT) Phi(d_2), whatever the physical drift m. That Q is the only pricing measure is not claimed.",
+      "metadata": {
+        "reference": "Black and Scholes (1973); Shreve, Stochastic Calculus for Finance II, sec. 5.2; Saporito, Stochastic Processes, Thm 9.1.8",
+        "citations": [
+          {
+            "key": "BlackScholes1973"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "sec. 5.2"
+          },
+          {
+            "key": "Saporito",
+            "locator": "Thm 9.1.8"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. isPricingMeasure_constGirsanovMeasure and price_europeanCall_constGirsanovMeasure in MathFin/Models/BlackScholes/Market.lean: Q is equivalent to the physical measure (isEquivProbMeasure_constGirsanovMeasure, a positive exponential density), B^theta is a Brownian motion for the filtration under Q (isFilteredPreBrownian_constBtheta, Girsanov for bounded predictable theta), and before H the deflated asset is Q-almost surely S_0 exp(sigma B^theta_t - sigma^2 t/2), a Wald exponential martingale; the price is the contract value with the discount e^(-rt) on the physical asset (price_market), which value_europeanCall_physical evaluates. SCOPE: existence of a pricing measure and the call price under it; uniqueness of the pricing measure is the frontier node thm:bs-arbitrage-free-price. The Brownian motion is pre-Brownian (no path continuity is used). Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.Market\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Contracts MathFin.Contracts.BlackScholes\nopen scoped NNReal\n\n/-- The Girsanov measure of the market price of risk `(m - r) / σ` is a pricing measure of the\nBlack-Scholes market, and under it the European call is worth the Black-Scholes formula. -/\ntheorem black_scholes_market_pricing_measure {Ω : Type*} [mΩ : MeasurableSpace Ω]\n    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) {S₀ K m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hS₀ : 0 < S₀)\n    (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) :\n    (market μ hWmeas S₀ m r σ).IsPricingMeasure T\n        (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) ∧\n      (market μ hWmeas S₀ m r σ).price (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)\n          (europeanCall K T)\n        = S₀ * Phi (bsd1 S₀ K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S₀ K r σ T) :=\n  ⟨isPricingMeasure_constGirsanovMeasure hW hWmeas hσ.ne' hTH,\n    price_europeanCall_constGirsanovMeasure hW hWmeas hTH hS₀ hK hσ hT⟩\n"
       }
     }
   ]

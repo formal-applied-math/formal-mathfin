@@ -60,7 +60,9 @@ jobs:
             > issues.jsonl
 
       - name: Generate
-        run: python3 -m tools.verify.docs_site decl-index.json --out site --issues issues.jsonl
+        run: |
+          python3 -m tools.verify.docs_site decl-index.json --out site --issues issues.jsonl \
+            --frontier frontier-index.json
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

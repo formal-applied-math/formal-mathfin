@@ -9,6 +9,25 @@ around the field's actual organizing principles, with the deep connections made 
 
 Written 2026-06-29 from a whole-program architectural validation (grounded in code at every seam).
 
+## How the pillars sit in the organization (2026-11-08)
+
+[`organization.md`](organization.md) is the library's organization. It has one object (positions
+in a market), three questions about it (valuation, choice, risk), the joints between the
+questions, and the model families as a second axis. The pillars below are not a rival
+organization. They are the **methods**: what the joints are proved with, and what the families
+are made of.
+
+| pillar | the method | where it does its work |
+|---|---|---|
+| I. Convex duality | separation of a cone from a simplex; Legendre–Fenchel | the fundamental theorems and the superhedging duality (valuation); the robust representation of a risk measure (risk). The joints are dualities between the questions' functionals: marginal utility as a state-price density (choice and valuation), the superhedging price as a coherent risk measure (valuation and risk). |
+| II. Itô calculus | the stochastic integral, Itô's formula, Girsanov, martingale representation | the tool cell `probability/brownian`; consumed by the diffusion, volatility and term-structure families, and by completeness in arbitrage theory |
+| III. Generator and PDE | Feynman–Kac, the Kolmogorov backward equation | `probability/brownian` again; it turns a valuation in the diffusion and term-structure families into a PDE |
+| IV. Intensity and exponential families | the exponential of an integrated intensity; the exponential tilt | the jump, default and mortality-and-claims families. Its joint is the Esscher premium, a premium principle that is a price under the Esscher measure (valuation, risk). |
+
+The "connective tissue" table below names the seams between the pillars. Where a seam is a joint
+between two questions, `organization.md` carries its current status; the history recorded here
+is the record of how each was wired.
+
 ## The spine: four pillars + connective tissue
 
 Mathematical finance is a few deep principles whose *consequences* are the models. The library has the

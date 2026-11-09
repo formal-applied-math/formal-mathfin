@@ -106,23 +106,32 @@ exact statement of each one, and what it leaves out.
   swaplet are priced under the annuity measure
   ([`value_payerSwaption`](MathFin/Models/Rates/CMSContract.lean)).
 
-## Contents
+## How the library is organized
 
-| Area | Topics |
+Financial mathematics has one economic object, a price system: positions in a market and the set
+of pricing measures that price them. Its deep theorems are three dualities of that set: with the
+gains of trading strategies (valuation: the fundamental theorems, superhedging), with the
+positions a risk measure accepts (risk: the robust representation), and with the positions an
+investor prefers (choice: marginal utility is a state-price density). The model families (trees,
+diffusions, volatility, jumps, term structures, default, mortality and claims, market
+mechanisms) are a second axis; probability and statistics are the tools.
+
+[`docs/organization.md`](docs/organization.md) gives the account, and says how much of the
+library already hangs from the trunk: the library measures that from its own statements
+(`tools/verify/chain_reach.py`), and states each missing link as a Lean theorem in the connector
+library [`MathFinFrontier`](MathFinFrontier.lean), carried by an issue. The module directories,
+the [blueprint](docs/blueprint.md), the issue labels and the
+[documentation site](https://formal-applied-math.github.io/formal-mathfin/) read the structure
+from one file, [`docs/taxonomy.toml`](docs/taxonomy.toml).
+
+| | Topics |
 |---|---|
-| Probability | conditional expectation, martingales and stopping times, Brownian motion, Poisson processes, Markov chains |
-| Stochastic calculus | Itô integral and isometry, quadratic variation, Itô's formula, Girsanov's theorem, martingale representation, SDEs, Feynman–Kac, compensated Poisson integral |
-| No-arbitrage | fundamental theorems, equivalent martingale measures, change of numéraire, market completeness, superreplication |
-| Option pricing | Black–Scholes prices and Greeks, the Black–Scholes PDE, implied volatility, dividends, FX (Garman–Kohlhagen), Bachelier, Black-76, jump-diffusions (Merton's formula and Greeks, Esscher pricing, incompleteness at one date), Breeden–Litzenberger, a polynomial-sign certificate for strike-convexity of raw SVI |
-| Exotic options | digital, exchange (Margrabe), chooser, barrier, lookback, geometric Asian, power and quanto options; spreads; variance swaps |
-| Lattice models | binomial replication, American and Bermudan options via the Snell envelope, Cox–Ross–Rubinstein convergence, André's reflection principle |
-| Fixed income and credit | bonds, duration and convexity, immunization, yield curves, forward rates, FRAs, swaps, caps and caplets, swaptions and CMS under the annuity measure, the forward measure, Vasicek, Hull–White and GSR, Jamshidian's bond options, hazard rates, CDS, CVA, first-to-default, KMV–Merton |
-| Portfolio theory | Markowitz, CAPM, two-fund separation, the tangency portfolio, risk parity, Black–Litterman; Sharpe, Sortino, Treynor and information ratios; the Kelly criterion |
-| Risk measures | the quantile function; value-at-risk and expected shortfall for every law: Rockafellar–Uryasev, coherence of ES, its dual representation, failure of VaR subadditivity (the exact range for independent defaults; infinite-mean Pareto), elicitability of VaR by the pinball loss and non-elicitability of ES, expectiles; coherent and spectral risk measures, expected utility, concentration indices |
-| Dependence and extremes | copulas and Sklar's theorem (continuous margins), Fréchet–Hoeffding bounds, Hoeffding's covariance identity, Marshall–Olkin common shocks; GEV and GPD domains of attraction, maxima of Poisson-many losses |
-| Credit portfolios | Bernoulli mixtures, the one-factor Gaussian threshold model, and the Basel IRB formula as the limit of portfolio VaR |
-| Market microstructure | Avellaneda–Stoikov market making, the Glosten–Milgrom spread |
-| Other | a contract language that separates payoffs from pricing models, with prices in Black–Scholes, the binomial tree and the Gaussian short-rate models; survival models, mortality and annuities; compound Poisson losses; constant-product AMMs |
+| **Probability** | conditional expectation, martingales and stopping times, the Snell envelope, Markov chains; Brownian motion, the Itô integral and isometry, quadratic variation, Itô's formula, Girsanov's theorem, martingale representation, SDEs, Feynman–Kac; Poisson processes and the compensated Poisson integral; the quantile function, GEV and GPD domains of attraction, maxima of Poisson-many losses; copulas and Sklar's theorem (continuous margins), Fréchet–Hoeffding bounds, Hoeffding's covariance identity, Marshall–Olkin common shocks; convex separation |
+| **Statistics** | Sharpe, Sortino, Treynor and information ratios; estimators, empirical quantiles, the Roll spread, calibration of an AR(1) to an Ornstein–Uhlenbeck process |
+| **Positions and markets** | a contract language that separates payoffs from pricing models; markets, numéraires, self-financing strategies and their gains; the value of a contract under a measure |
+| **Valuation** | *arbitrage theory:* the fundamental theorems, equivalent martingale measures, change of numéraire, market completeness, superreplication · *trees:* binomial replication, American and Bermudan options via the Snell envelope, Cox–Ross–Rubinstein convergence, André's reflection principle · *Black–Scholes and Bachelier:* prices and Greeks, the PDE, implied volatility, dividends; digital, exchange (Margrabe), chooser, barrier, lookback, geometric Asian, power and quanto options, spreads · *volatility:* a polynomial-sign certificate for strike-convexity of raw SVI · *jumps:* Merton's formula and Greeks, Esscher pricing, incompleteness at one date · *term structures:* bonds, yield curves, forward rates, FRAs, swaps, caps and caplets, swaptions and CMS under the annuity measure, the forward measure, Vasicek, Hull–White and GSR, Jamshidian's bond options, Black-76, FX (Garman–Kohlhagen), duration, convexity and immunization · *credit:* hazard rates, CDS, CVA, first-to-default, KMV–Merton · *life contracts:* survival models, mortality and annuities · *mechanisms:* constant-product AMMs · *model-free:* Breeden–Litzenberger, variance swaps |
+| **Choice** | *preferences:* expected utility · *portfolios:* Markowitz, two-fund separation, the tangency portfolio, risk parity, Black–Litterman · *equilibrium:* CAPM · *dynamic:* the Kelly criterion · *strategic trading:* Avellaneda–Stoikov market making, the Glosten–Milgrom spread |
+| **Risk** | *risk measures:* coherent and spectral risk measures, coherence of expected shortfall and its dual representation, elicitability of value-at-risk by the pinball loss and non-elicitability of expected shortfall, expectiles · *value-at-risk and expected shortfall* for every law, Rockafellar–Uryasev · *aggregation:* failure of VaR subadditivity (the exact range for independent defaults; infinite-mean Pareto), concentration indices · *credit portfolios:* Bernoulli mixtures, the one-factor Gaussian threshold model, the Basel IRB formula as the limit of portfolio VaR · *premiums and ruin:* compound Poisson losses |
 
 ## Limitations
 
