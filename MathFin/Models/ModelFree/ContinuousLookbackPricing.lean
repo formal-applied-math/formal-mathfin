@@ -108,7 +108,7 @@ transcription, Black-Scholes reduction, MSC 91G20, JEL G13
 
 namespace MathFin
 
-open Real Filter Topology ProbabilityTheory
+open Real Filter Topology ProbabilityTheory MeasureTheory
 open scoped NNReal
 
 /-- **Floating-strike lookback price**, Haug's cost-of-carry closed form (`b = r − q`),
@@ -264,7 +264,7 @@ market prices the European call at the closed form (`price_europeanCall_constGir
 under its constant market-price-of-risk measure, so the dominance composes with that identity
 one line deep: whatever prices the call on the trunk, the lookback is worth at least as much. -/
 theorem lookbackFloatingCall_ge_marketPrice
-    {Ω : Type u_1} [MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω}
+    {Ω : Type*} [MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω}
     [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ) (hWmeas : ∀ t, Measurable (W t))
     {m r σ S : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hT : 0 < (T : ℝ))
     (hm : 0 < m) (hS : m ≤ S) (hσ : 0 < σ) :
