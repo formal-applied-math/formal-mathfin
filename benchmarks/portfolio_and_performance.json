@@ -891,6 +891,55 @@
       }
     },
     {
+      "id": "mf-utility-state-price-density",
+      "name": "Marginal Utility Is a State-Price Density (Finite-State Expected-Utility Optimum)",
+      "description": "In a finite-state market with payoff matrix A (asset k pays A k ω in state ω) and prices pr, let θ be a local maximum of the expected utility Σ_ω p_ω u(W_ω), W_ω = Σ_k θ_k A k ω, on the budget set {θ' | Σ_k θ'_k pr_k = w₀}. Assume p_ω > 0, w₀ > 0, W_ω > 0 and u'(W_ω) > 0 at the optimum (so u is differentiable there). Then q_ω = p_ω u'(W_ω)/μ, for some μ > 0, is a strictly positive vector with Σ_ω q_ω A k ω = pr_k for every asset k, and the excess returns A k ω − pr_k/Σq admit the strictly positive probability q/Σq as an equivalent martingale measure (HasEMMMultiState). Concavity of u is not needed (first-order necessity only); the converse (a state-price density yields an optimum) is not proved.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Choice.Utility.StatePriceDensity\n\nopen MathFin\n\ntheorem utility_state_price_density {N M : ℕ} [NeZero N] {p : Fin N → ℝ} {u : ℝ → ℝ}\n    {A : Fin M → Fin N → ℝ} {pr : Fin M → ℝ} {w₀ : ℝ} {θ : Fin M → ℝ}\n    (hmax : IsLocalMaxOn (fun θ' ↦ ∑ ω, p ω * u (∑ k, θ' k * A k ω))\n      {θ' | ∑ k, θ' k * pr k = w₀} θ)\n    (hθ : ∑ k, θ k * pr k = w₀) (hw₀ : 0 < w₀) (hp : ∀ ω, 0 < p ω)\n    (hW : ∀ ω, 0 < ∑ k, θ k * A k ω) (hu : ∀ ω, 0 < deriv u (∑ k, θ k * A k ω)) :\n    ∃ q : Fin N → ℝ, (∀ ω, 0 < q ω) ∧\n      (∃ μ : ℝ, 0 < μ ∧ ∀ ω, q ω = p ω * deriv u (∑ k, θ k * A k ω) / μ) ∧\n      (∀ k, ∑ ω, q ω * A k ω = pr k) ∧\n      HasEMMMultiState fun k ω ↦ A k ω - pr k / ∑ ω', q ω' :=\n  MathFin.exists_hasEMMMultiState_of_isLocalMaxOn hmax hθ hw₀ hp hW hu\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Marginal utility as stochastic discount factor / state-price density (Föllmer–Schied §1.2; Long 1990 for the logarithmic case)",
+        "citations": [
+          {
+            "key": "FollmerSchied",
+            "locator": "§1.2"
+          },
+          {
+            "key": "Long1990"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. MathFin.exists_hasEMMMultiState_of_isLocalMaxOn in MathFin/Choice/Utility/StatePriceDensity.lean: Fermat along every budget-neutral line of portfolios (hasDerivAt_portfolioUtility_line, IsLocalMax.hasDerivAt_eq_zero) says the vector (p_ω u'(W_ω)) annihilates the payoff of each direction d with cost 0; picking an asset with nonzero price, the budget-neutral directions e_k·pr_k0 − e_k0·pr_k give proportionality to the prices with factor μ, positive because Σ p u' W = μ w₀ > 0; normalising gives state prices and hasEMM_multi_of_pos_dual gives the EMM. HONEST SCOPE: a local maximum on the affine budget set is assumed (a global optimum is an instance); positivity of wealth, of the budget and of marginal utility at the optimum are hypotheses; necessity only (no existence of an optimum, no sufficiency). Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-kelly-state-price-density",
+      "name": "The Kelly Deflated Probabilities Are the State Prices of the Kelly Market",
+      "description": "In the two-state Kelly market (asset 0 the unit bond, price 1, payoff 1; asset 1 the bet, price 0, payoff b if the bet wins and −1 if it loses; 0 < p < 1, b > 0), the vector (p/W*₊, (1−p)/W*₋) of physical probabilities deflated by the Kelly-portfolio wealths W*₊ = 1 + f*b, W*₋ = 1 − f* prices both assets: Σ_ω q_ω A k ω = price_k for k = 0, 1 (so q₊ + q₋ = 1 and q₊·b − q₋ = 0). It is the logarithmic-utility instance of the marginal-utility state-price density, with the Kelly first-order condition (kellyNumeraire_isRiskNeutral) as the stationarity input; optimality of f* itself is not re-proved here.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Choice.Performance.KellyNumeraire\n\nopen MathFin\n\ntheorem kelly_statePrices_thm {p b : ℝ} (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) (k : Fin 2) :\n    statePricePricing Finset.univ\n      ![p / (1 + kellyFraction p b * b), (1 - p) / (1 - kellyFraction p b)]\n      (kellyPayoff b k) = kellyPrice k :=\n  MathFin.kelly_statePrices hp hp1 hb k\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Numéraire portfolio / benchmark approach (Long 1990); Kelly growth-optimal criterion",
+        "citations": [
+          {
+            "key": "Long1990"
+          },
+          {
+            "key": "Kelly1956"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. MathFin.kelly_statePrices in MathFin/Choice/Performance/KellyNumeraire.lean applies logUtility_statePrices_of_stationary (StatePriceDensity.lean; for u = log the density is w₀·p/W) to the Kelly market (kellyPayoff, kellyPrice) at the portfolio (1, f*); stationarity along the bet direction is kellyNumeraire_isRiskNeutral, positivity of the wealths is kellyGOPWealth_win/lose. HONEST SCOPE: the stationarity hypothesis is the Kelly first-order condition itself, so the bet row of the conclusion is the already proved kellyNumeraire_isRiskNeutral; what the general theorem adds is the bond row (q₊ + q₋ = 1, derived rather than computed) and the identification of the deflated probabilities as the marginal-utility state-price density. Two states, one bond and one bet only. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-performance-gain_to_pain",
       "name": "Gain-to-Pain Ratio is Nonnegative",
       "description": "The gain-to-pain ratio, total gains over total losses on a finite period set, is nonnegative — unconditionally.",

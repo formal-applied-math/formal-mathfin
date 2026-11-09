@@ -1,7 +1,11 @@
 /* The program tree (tree.html): the blueprint drawn as a tree, grown from Mathlib and
- BrownianMotion. Height is conceptual depth: a node sits above everything it rests on, Foundations
- is the trunk, every use is drawn as wood, and wood thickens with the corpus it carries; the use
- that sets a node's height is drawn in bark, the others lighter. Corpus entries are leaves on the
+ BrownianMotion. On a limb, height is MEASURED: a node sits at its hop, the distance in statements
+ from the trunk (tools/verify/chain_reach.py), not at the order of the taxonomy; the roots and the
+ trunk keep their depth of use. A node at infinite distance is an island, floating beside its limb
+ under its cluster's name (red ring: nothing reaches it, nothing declares it); a tower of modules
+ is one square node; a connector is a hollow dashed phantom between the nodes its statement
+ mentions, sized by its gain. Every use is drawn as wood, and wood thickens with the corpus it
+ carries; the use that sets a node's primary parent is drawn in bark, the others lighter. Corpus entries are leaves on the
  deepest node their proof rests on; off-map entries lie on the ground. Labels are sized in screen
  pixels and fill in with zoom. Data: the JSON block #tree-data, written by tools/verify/docs_site.py
  from program_tree.tree_data. Needs d3 and KaTeX (loaded by the page). */
@@ -18,8 +22,10 @@ const isWood = n => n.s === "proved" || n.s === "partial";
 const STATUS_RANK = ["in-progress","ready","research","blocked-design","blocked-upstream","needs-info"];
 const STATUS_TXT = {"in-progress":"in progress", ready:"ready to pick up", research:"research", "blocked-design":"blocked on design", "blocked-upstream":"blocked upstream", "needs-info":"needs info"};
 const STATUS_VAR = {"in-progress":"--tr-progress", ready:"--tr-ready", research:"--tr-research", "blocked-design":"--tr-blocked", "blocked-upstream":"--tr-blocked", "needs-info":"--tr-blocked"};
-const AREA_TXT = {foundations:"foundations","black-scholes":"Black–Scholes","fixed-income":"fixed income",portfolio:"portfolio",risk:"risk",actuarial:"actuarial","stoch-vol":"stochastic vol",defi:"DeFi",binomial:"binomial",credit:"credit",contracts:"contracts",execution:"execution",futures:"futures",fx:"FX",commodities:"commodities",upstream:"upstream"};
-const areaName = a => AREA_TXT[a] || a;
+// cells, parts and families come from docs/taxonomy.toml, through program_tree.tree_data
+const cellName = c => D.cellName[c] || c;
+const FAM = new Map(D.families.map(f => [f.key, f]));
+const famVar = n => n.f && FAM.get(n.f) ? `var(${FAM.get(n.f).hue})` : null;
 // statement prose: TeX between dollars is typeset (KaTeX, MathML output: no stylesheet or fonts to fetch);
 // outside it, `code` and *emphasis* are the blueprint's own markup
 const tex = m => { try { return window.katex.renderToString(m, {throwOnError:false}); } catch (e) { return esc("$" + m + "$"); } };
@@ -46,10 +52,11 @@ function depth(l, seen = new Set()){
 function hash(s){ let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return (h >>> 0) / 4294967296; }
 function rng(seed){ let s = Math.floor(hash(seed) * 4294967295) | 0; return () => ((s = Math.imul(s ^ (s >>> 15), 2246822507) + 0x6D2B79F5 | 0) >>> 0) / 4294967296; }
 
-// ---------- layout: the map places the nodes (tree_map.toml); the proofs draw the wood ----------
-// Four roots in the soil, the pricing functional as the trunk, the limbs in sectors across the crown.
-// A node's height counts only the uses inside its own part; an edge from another part is drawn as it
-// is, so a pricing formula resting on a root rather than on the trunk shows as wood that bypasses it.
+// ---------- layout: the taxonomy places the nodes (docs/taxonomy.toml); the proofs draw the wood ----------
+// The roots in the soil (one sector per root cell), positions and markets as the trunk, three limbs in
+// sectors across the crown, each split into its branches; a joint sits in the gap between the two limbs
+// it joins. A node's height counts only the uses inside its own part; an edge from another part is drawn
+// as it is, so a pricing formula resting on a root rather than on the trunk shows as wood that bypasses it.
 const W = 1600, CX = 800;
 const pxPerUnit = () => (document.getElementById("tree").getBoundingClientRect().width || W) / W;
 // the plate's fixed captions are drawn for a ~1300px stage; on a narrower one they grow, up to 1.7×
@@ -58,13 +65,16 @@ const cap = (sel, px) => sel.style("font-size", (px * TF).toFixed(1) + "px");
 const PARTS = new Map(D.parts.map(p => [p.key, p]));
 const kindOf = n => PARTS.get(n.p)?.kind || "limb";
 const isRoot = n => kindOf(n) === "root", isTrunk = n => kindOf(n) === "trunk";
+const isJoint = n => !!n.j;
 const partTitle = p => PARTS.get(p)?.title || p;
-const branchName = b => (D.branch || {})[b] || b;
+const cellKey = n => n.p + (n.b ? "/" + n.b : "");
+const cellTitle = k => cellName(k).split(" · ").pop();
+const TRUNK = D.parts.find(p => p.kind === "trunk").key;
 const live = D.nodes;
 for (const n of live) n.depth = depth(n.l);
 const mfUses = n => n.u.filter(u => N.has(u));
 // a proved node outside the roots that rests on no node grows straight from the soil (Mathlib)
-for (const n of live) n.sucker = !mfUses(n).length && !isRoot(n);
+for (const n of live) n.sucker = !mfUses(n).length && !isRoot(n) && !n.isl;
 
 // depth inside a node's own part
 const pdMemo = new Map();
@@ -76,6 +86,10 @@ function pdepth(l, seen = new Set()){
   pdMemo.set(l, d); return d;
 }
 for (const n of live) n.pd = pdepth(n.l);
+// on a limb the level is the measured hop (a frontier node with no measured base sits at the first level)
+const MAXLV = 6;
+for (const n of live) if (kindOf(n) === "limb" && !isJoint(n))
+  n.pd = n.isl ? 0 : Math.min(MAXLV, Math.max(0, (n.hp ?? 1) - 1));
 
 // corpus flow: what each node carries, split evenly among the nodes it rests on
 const own = n => isWood(n) ? 1 + n.e : .45;
@@ -92,38 +106,57 @@ function sectors(keys, x0, x1, weight){
   keys.forEach((k, i) => { const w = (x1 - x0) * ws[i] / tot; out.set(k, {x0:acc, x1:acc + w, cx:acc + w / 2}); acc += w; });
   return out;
 }
-const inPart = p => live.filter(n => n.p === p);
+const inPart = p => live.filter(n => n.p === p && !isJoint(n) && !n.isl && !n.ph);
+const islIn = k => D.islands.filter(c => c.p === k);
+const islW = c => Math.max(7, 1.8 * Math.pow(c.nodes.length, .8));
 const limbKeys = D.parts.filter(p => p.kind === "limb" && inPart(p.key).length).map(p => p.key);
-const rootKeys = D.parts.filter(p => p.kind === "root" && inPart(p.key).length).map(p => p.key);
-const SEC = sectors(limbKeys, 40, W - 40, k => Math.max(6, Math.pow(inPart(k).length, .8)));
-const RSEC = sectors(rootKeys, 150, W - 150, k => Math.max(6, Math.pow(inPart(k).length, .8)));
+// a root sector per root cell that holds a node: the branches of a root part, or the part itself
+const rootKeys = D.parts.filter(p => p.kind === "root").flatMap(p => p.branches.length ? p.branches.map(b => p.key + "/" + b.key) : [p.key])
+  .filter(k => live.some(n => isRoot(n) && cellKey(n) === k));
+const inRoot = k => live.filter(n => isRoot(n) && cellKey(n) === k);
+const GAP = 90;   // between neighbouring limbs: the fork, where the joints sit
+const SEC = sectors(limbKeys, 40, W - 40, k => Math.max(6, Math.pow(inPart(k).length, .8) + d3.sum(islIn(k), islW)));
+limbKeys.forEach((k, i) => { const s = SEC.get(k); if (i) s.x0 += GAP / 2; if (i < limbKeys.length - 1) s.x1 -= GAP / 2; });
+const RSEC = sectors(rootKeys, 150, W - 150, k => Math.max(6, Math.pow(inRoot(k).length, .8)));
 const BSEC = new Map();   // "limb/branch" -> sector
 for (const k of limbKeys){
-  const s = SEC.get(k), order = PARTS.get(k).branches || [];
+  const s = SEC.get(k), order = PARTS.get(k).branches.map(b => b.key);
   const present = [...order.filter(b => inPart(k).some(n => n.b === b)), ...(inPart(k).some(n => !order.includes(n.b)) ? [""] : [])];
-  for (const [b, bs] of sectors(present, s.x0 + 6, s.x1 - 6, b => Math.max(3, Math.pow(inPart(k).filter(n => (order.includes(n.b) ? n.b : "") === b).length, .8))))
+  const isls = islIn(k).map(c => "~" + c.key);
+  for (const [b, bs] of sectors([...present, ...isls], s.x0 + 6, s.x1 - 6, b => b[0] === "~" ? islW(islIn(k).find(c => "~" + c.key === b)) : Math.max(3, Math.pow(inPart(k).filter(n => (order.includes(n.b) ? n.b : "") === b).length, .8))))
     BSEC.set(k + "/" + b, bs);
 }
-const secOf = n => isTrunk(n) ? {x0:CX - 120, x1:CX + 120, cx:CX} : isRoot(n) ? RSEC.get(n.p)
-  : BSEC.get(n.p + "/" + ((PARTS.get(n.p).branches || []).includes(n.b) ? n.b : "")) || SEC.get(n.p);
+// a joint sits in the fork between its two limbs
+const jointKey = n => n.j.slice().sort().join("|");
+const JSEC = n => { const [a, b] = n.j.map(k => SEC.get(k)).sort((p, q) => p.cx - q.cx);
+  const x = a && b ? (a.x1 + b.x0) / 2 : CX; return {x0:x - GAP / 2 - 20, x1:x + GAP / 2 + 20, cx:x}; };
+const ISL = new Map(D.islands.map(c => [c.key, c]));
+const secOf = n => n.isl ? BSEC.get(ISL.get(n.isl).p + "/~" + n.isl) : isJoint(n) ? JSEC(n) : isTrunk(n) ? {x0:CX - 120, x1:CX + 120, cx:CX} : isRoot(n) ? RSEC.get(cellKey(n))
+  : BSEC.get(n.p + "/" + (PARTS.get(n.p).branches.some(b => b.key === n.b) ? n.b : "")) || SEC.get(n.p);
 
 // heights: the crown, the trunk, the ground, the roots, the bedrock. A level of a sector holding more
 // knots than fit across it wraps into sub-rows, and the level grows by them, so a crowded branch
 // grows taller instead of packing its results into one line.
 const TOP = 30;
 const LH = 92, TSTEP = 54, RSTEP = 46, SUBH = 46;
-const rad = n => isWood(n) ? 10 + Math.sqrt(n.e) * 2.2 : n.op ? 14 : 8;
+const phR = n => 9 + Math.min(12, Math.sqrt(n.ph.gain || 0) * 2.6);   // a connector: its gain
+const rad = n => n.tw ? 16 : n.ph ? phR(n) + 4 : isWood(n) ? 10 + Math.sqrt(n.e) * 2.2 : n.op ? 14 : 8;
 const sub = new Map(), subRows = new Map();   // node -> its sub-row; "kind|pd" -> most sub-rows
-{ const groups = d3.group(live.filter(n => !isRoot(n) && !isUp(n) && !n.sucker),
-    n => (isTrunk(n) ? "pricing" : n.p + "/" + (n.b || "")) + "|" + n.pd);
+{ const groups = d3.group(live.filter(n => !isRoot(n) && !isUp(n) && !n.sucker && !n.isl && !n.ph),
+    n => (isJoint(n) ? "joint/" + jointKey(n) : isTrunk(n) ? "trunk" : n.p + "/" + (n.b || "")) + "|" + n.pd);
   for (const [, g] of groups){
     const s = secOf(g[0]), need = d3.sum(g, n => 2 * rad(n) + 16);
     const k = Math.max(1, Math.ceil(need / Math.max(40, s.x1 - s.x0)));
     g.slice().sort((x, y) => hash(x.l) - hash(y.l)).forEach((n, i) => sub.set(n.l, i % k));
-    const key = (isTrunk(g[0]) ? "trunk" : "limb") + "|" + g[0].pd;
+    const key = (isJoint(g[0]) ? "joint" : isTrunk(g[0]) ? "trunk" : "limb") + "|" + g[0].pd;
     subRows.set(key, Math.max(subRows.get(key) || 1, k));
   } }
-const maxIn = kind => d3.max(live.filter(n => kindOf(n) === kind), n => n.pd) || 0;
+// islands float: each cluster wraps into its own sub-rows, and they do not raise the limb
+for (const [, g] of d3.group(live.filter(n => n.isl), n => n.isl)){
+  const s = secOf(g[0]), k = Math.max(1, Math.ceil(d3.sum(g, n => 2 * rad(n) + 16) / Math.max(40, s.x1 - s.x0)));
+  g.slice().sort((x, y) => hash(x.l) - hash(y.l)).forEach((n, i) => sub.set(n.l, i % k));
+}
+const maxIn = kind => d3.max(live.filter(n => kindOf(n) === kind && !isJoint(n) && !n.isl && !n.ph), n => n.pd) || 0;
 // offset of each level above the first: the levels below it, each with its sub-rows
 const offsets = (kind, step) => { const o = [0];
   for (let d = 1; d <= maxIn(kind); d++) o.push(o[d - 1] + step + ((subRows.get(kind + "|" + (d - 1)) || 1) - 1) * SUBH);
@@ -135,24 +168,27 @@ const LB = TOP + 40 + crown;                      // a limb's first level
 const TT = LB + 70;                               // the trunk's top, where the limbs fork
 const GY = TT + 60 + bole;                        // the ground
 const ROW0 = GY + 10 + 14 * TF, ROWH = 17 * TF;   // pile labels just under the ground
-const RT = ROW0 + 3 * ROWH + 14;                  // the root band
-const rootMax = new Map(rootKeys.map(k => [k, d3.max(inPart(k), n => n.pd) || 0]));
+const PROWS = 4;
+const RT = ROW0 + PROWS * ROWH + 14;                  // the root band
+const rootMax = new Map(rootKeys.map(k => [k, d3.max(inRoot(k), n => n.pd) || 0]));
 // root captions sit under their root; one that would run into its left neighbour drops a line
 const rootCap = new Map();
 { const placed = [];
   for (const k of rootKeys){
-    const s = RSEC.get(k), w = Math.max(partTitle(k).length * 10.5, (PARTS.get(k).blurb || "").length * 5.9) * TF / 2 + 6;
+    const s = RSEC.get(k), w = cellTitle(k).length * 10.5 * TF / 2 + 6;
     let y = RT + 14 + rootMax.get(k) * RSTEP + 46 * TF;
     while (placed.some(q => Math.abs(q.x - s.cx) < q.w + w && Math.abs(q.y - y) < 44 * TF)) y += 40 * TF;
     placed.push({x:s.cx, y, w}); rootCap.set(k, y);
   } }
 const BED = Math.max(...rootCap.values()) + 30 * TF;
 const H = Math.round(BED + 64 * TF);
-const yTarget = n => isUp(n) ? BED + 24 : isRoot(n) ? RT + 14 + (rootMax.get(n.p) - n.pd) * RSTEP
+const yTarget = n => isUp(n) ? BED + 24 : isRoot(n) ? RT + 14 + (rootMax.get(cellKey(n)) - n.pd) * RSTEP
+  : isJoint(n) ? LB + 24 - (sub.get(n.l) || 0) * SUBH
   : isTrunk(n) ? GY - 40 - TOFF[n.pd] - (sub.get(n.l) || 0) * SUBH
+  : n.isl ? LB - Math.max(LH * 1.4, crown * .5) - (sub.get(n.l) || 0) * SUBH
   : n.sucker ? LB + 60 + hash(n.l) * 90
   : LB - LOFF[n.pd] - (sub.get(n.l) || 0) * SUBH;
-const sim = live.map(n => { const s = secOf(n); return {id:n.l, n, s, x:s.cx + (hash(n.l + "x") - .5) * (s.x1 - s.x0) * .8, y:yTarget(n)}; });
+const sim = live.filter(n => !n.ph).map(n => { const s = secOf(n); return {id:n.l, n, s, x:s.cx + (hash(n.l + "x") - .5) * (s.x1 - s.x0) * .8, y:yTarget(n)}; });
 d3.forceSimulation(sim)
   .force("x", d3.forceX(s => s.s.cx).strength(.06))
   .force("y", d3.forceY(s => yTarget(s.n)).strength(.9))
@@ -160,6 +196,27 @@ d3.forceSimulation(sim)
   .on("tick", () => { for (const s of sim) s.x = Math.max(s.s.x0 + 8, Math.min(s.s.x1 - 8, s.x)); })
   .stop().tick(360);
 for (const s of sim) s.x = Math.max(s.s.x0 + 8, Math.min(s.s.x1 - 8, s.x));
+// phantoms (connectors): between the nodes the statement mentions, at the height the hop would give it if proved
+{ const at = new Map(sim.map(s => [s.id, s]));
+  const ph = live.filter(n => n.ph).map(n => {
+    // between the far end (an island, else the highest node it mentions) and the node it mentions
+    // nearest the trunk, at the height of the far end
+    const ends = n.u.map(u => at.get(u)).filter(Boolean);
+    const far = ends.filter(e => !isTrunk(e.n)).sort((a, b) => (!!b.n.isl - !!a.n.isl) || a.y - b.y)[0] || ends[0];
+    const near = ends.filter(e => e !== far).sort((a, b) => (isTrunk(a.n) - isTrunk(b.n)) || b.y - a.y)[0];
+    n.phEnds = [far, near].filter(Boolean).map(e => e.id);
+    const ex = !far ? CX : near ? (far.x + near.x) / 2 : far.x + 40, ey = far ? far.y - 30 : LB;
+    return {id:n.l, n, x:ex, y:ey, tx:ex};
+  });
+  const fixed = sim.map(s => ({fx:s.x, fy:s.y, r:rad(s.n) * .5}));
+  const all = [...fixed, ...ph];
+  d3.forceSimulation(all)
+    .force("x", d3.forceX(s => s.tx ?? s.fx).strength(s => s.n ? .08 : 0))
+    .force("y", d3.forceY(s => s.n ? s.y : s.fy).strength(s => s.n ? .4 : 1))
+    .force("collide", d3.forceCollide(s => s.n ? rad(s.n) : s.r).strength(.8).iterations(3))
+    .stop().tick(240);
+  for (const q of ph){ q.x = Math.max(24, Math.min(W - 24, q.x)); sim.push({id:q.id, n:q.n, x:q.x, y:q.y}); }
+}
 // levels for the growth animation: roots, then the trunk, then the limbs
 const lvlOf = n => isRoot(n) ? n.pd : isTrunk(n) ? 8 + n.pd : 14 + n.pd;
 const byId = new Map();
@@ -181,8 +238,8 @@ for (const n of live){
 const edges = [];
 for (const n of live){
   const t = byId.get(n.l), us = mfUses(n);
-  for (const u of us) edges.push({s:byId.get(u), t, f:flow.get(n.l) / us.length, prim:u === n.prim});
-  if (!us.length && !isRoot(n)) edges.push({s:null, base:[(isTrunk(n) ? CX : t.px) + (hash(n.l + "stem") - .5) * 20, GY + 6], t, f:flow.get(n.l), prim:true});
+  for (const u of us) edges.push({s:byId.get(u), t, f:flow.get(n.l) / us.length, prim:n.ph ? !!n.phEnds?.includes(u) : u === n.prim});
+  if (!us.length && !isRoot(n) && !n.isl) edges.push({s:null, base:[(isTrunk(n) ? CX : t.px) + (hash(n.l + "stem") - .5) * 20, GY + 6], t, f:flow.get(n.l), prim:true});
 }
 const BW = f => Math.min(22, .9 + 1.2 * Math.sqrt(f));
 function dirOf(d){
@@ -227,20 +284,24 @@ function taper(P, c1, c2, C, w0, w1, steps = 18){
 
 // the map, in pale wood: the trunk, a limb to each sector, a twig to each branch, a root to each root
 const ghost = view.append("g").attr("class", "map-ghost dimmable");
-const gw = k => 10 + 3.2 * Math.sqrt(inPart(k).length);
-ghost.append("path").attr("class", "ghost").attr("d", taper([CX, GY + 8], [CX, GY - 60], [CX, TT + 40], [CX, TT], gw("pricing") * 1.8, gw("pricing") * 1.3));
+const gw = k => 10 + 3.2 * Math.sqrt((PARTS.get(k) ? inPart(k) : inRoot(k)).length);
+ghost.append("path").attr("class", "ghost").attr("d", taper([CX, GY + 8], [CX, GY - 60], [CX, TT + 40], [CX, TT], gw(TRUNK) * 1.8, gw(TRUNK) * 1.3));
+// the pale wood of a limb ends at its highest measured node: no rays run on past the data
+const topOf = (k, b) => d3.min(live.filter(n => n.p === k && !n.isl && !n.ph && !isJoint(n) && (b === undefined || (n.b || "") === b)), n => byId.get(n.l).py);
 for (const k of limbKeys){
-  const s = SEC.get(k), w = gw(k);
-  const mid = LB - .5 * (LB - TOP);
+  const s = SEC.get(k), w = gw(k), ytop = Math.max(TOP + 20, topOf(k) ?? LB);
+  const mid = LB - .5 * (LB - ytop);
   ghost.append("path").attr("class", "ghost").attr("d", taper([CX, TT + 6], [CX + (s.cx - CX) * .15, TT - 60], [s.cx, LB - 40], [s.cx, mid], w, w * .55));
-  for (const [key, bs] of BSEC) if (key.startsWith(k + "/"))
-    ghost.append("path").attr("class", "ghost").attr("d", taper([s.cx, mid + 4], [s.cx, mid - 50], [bs.cx, TOP + 90], [bs.cx, TOP + 24], w * .4, 2.5));
+  for (const [key, bs] of BSEC) if (key.startsWith(k + "/") && key[k.length + 1] !== "~"){
+    const yb = Math.max(TOP + 20, topOf(k, key.slice(k.length + 1)) ?? mid) - 6;
+    ghost.append("path").attr("class", "ghost").attr("d", taper([s.cx, mid + 4], [s.cx, mid - 20], [bs.cx, yb + 30], [bs.cx, yb], w * .4, 2.5));
+  }
 }
 for (const k of rootKeys){
   const s = RSEC.get(k), w = gw(k), y1 = RT + 14 + rootMax.get(k) * RSTEP;
   ghost.append("path").attr("class", "ghost").attr("d", taper([CX, GY - 2], [CX, GY + 40], [s.cx, RT - 20], [s.cx, y1], w, 3));
 }
-const trunkLbl = cap(view.append("text").attr("class", "trunk-lbl").attr("x", CX).attr("y", ROW0).attr("text-anchor", "middle").text(partTitle("pricing")), 12);
+const trunkLbl = cap(view.append("text").attr("class", "trunk-lbl").attr("x", CX).attr("y", ROW0).attr("text-anchor", "middle").text(partTitle(TRUNK)), 12);
 
 // the proofs, in dark wood (and in blueprint ink where the node is still frontier)
 const roots = view.append("g");          // kept for the growth animation
@@ -254,8 +315,43 @@ const shootEdges = edges.filter(e => !isWood(e.t.data.node) && !e.t.up);
 const branchSel = linkG.selectAll("path").data(woodEdges.slice().sort((a, b) => a.prim - b.prim || b.f - a.f)).join("path")
   .attr("class", e => "branch dimmable" + (e.prim ? "" : " sec"))
   .attr("d", e => { const g = edgeGeom(e), w = BW(e.f); return taper(g.P, g.c1, g.c2, g.C, w * 1.15, Math.max(.8, w * .62)); });
-const shootSel = shootG.selectAll("path").data(shootEdges).join("path").attr("class", e => "shoot dimmable" + (e.prim ? "" : " sec"))
-  .attr("d", e => { const g = edgeGeom(e); return `M${g.P}C${g.c1} ${g.c2} ${g.C}`; });
+// a connector's edges are dashed and straight-ish, heavier with its gain; a plain shoot rises from its base
+// a plain frontier edge is a faint stub toward what it rests on (the full curve shows on hover or selection)
+const STUB = 46;
+function shootD(e, full){
+  const n = e.t.data.node, C = [e.t.px, e.t.py];
+  if (n.ph){ const P = [e.s.px, e.s.py]; return `M${P}Q${(P[0] + C[0]) / 2},${Math.min(P[1], C[1]) - 18} ${C}`; }
+  const g = edgeGeom(e), len = Math.hypot(g.P[0] - C[0], g.P[1] - C[1]);
+  if (full || len <= 150) return `M${g.P}C${g.c1} ${g.c2} ${g.C}`;
+  const k = STUB / len; return `M${C[0] + (g.P[0] - C[0]) * k},${C[1] + (g.P[1] - C[1]) * k}L${C}`;
+}
+const shootSel = shootG.selectAll("path").data(shootEdges).join("path")
+  .attr("class", e => e.t.data.node.ph ? "shoot ph dimmable" + (e.prim ? "" : " sec") : "shoot dimmable" + (e.prim ? "" : " sec"))
+  .attr("d", e => shootD(e, false))
+  .style("stroke-width", e => e.t.data.node.ph ? (1.2 + Math.sqrt(e.t.data.node.ph.gain || 0) * .45).toFixed(2) : null);
+
+// islands: a dashed outline round each floating cluster, named; red when nothing reaches it
+const islG = view.append("g").attr("class", "dimmable");
+const islSel = islG.selectAll("g").data(D.islands.filter(c => c.nodes.some(l => byId.has(l)))).join("g").attr("class", c => "isl" + (c.ring ? " ring" : ""));
+islSel.each(function(c){
+  const g = d3.select(this), pts = c.nodes.map(l => byId.get(l)).filter(Boolean);
+  const x0 = d3.min(pts, p => p.px) - 22, x1 = d3.max(pts, p => p.px) + 22, y0 = d3.min(pts, p => p.py) - 26, y1 = d3.max(pts, p => p.py) + 22;
+  c.box = {cx:(x0 + x1) / 2, cy:(y0 + y1) / 2, rx:Math.max(34, (x1 - x0) / 2), ry:Math.max(30, (y1 - y0) / 2), top:y0, bot:y1};
+  g.append("ellipse").attr("class", "isl-ring").attr("cx", c.box.cx).attr("cy", c.box.cy).attr("rx", c.box.rx).attr("ry", c.box.ry);
+  const t = cap(g.append("text").attr("class", "isl-lbl").attr("x", c.box.cx).attr("y", islIn(c.p).indexOf(c) % 2 ? y1 + 15 * TF : y0 - 6).attr("text-anchor", "middle"), 12.5);
+  const words = c.title.replace(/^[^·]*·\s*/, "");
+  t.text(words.length > 22 ? words.slice(0, 21).trimEnd() + "…" : words);
+  c.lbl = t;
+  g.append("title").text(c.declared ? `${c.title}: standalone. ${c.reason}${c.socket ? " Read in a market by " + c.socket + "." : ""}` : c.ring ? `${c.title}: no statement joins it to the trunk, no connector reaches it, and nothing declares why.` : `${c.title}: no statement joins it to the trunk yet; a connector would.`);
+  g.append("rect").attr("class", "hit").attr("x", x0).attr("y", y0 - 16).attr("width", x1 - x0).attr("height", 18);
+});
+
+// island labels: inside the canvas and apart, above or below the ring in turn, then pushed along x
+for (const row of [0, 1]){
+  const items = D.islands.filter(c => c.lbl && islIn(c.p).indexOf(c) % 2 === row).map(c => ({c, x:c.box.cx, w:c.lbl.node().getComputedTextLength() + 26}));
+  relax(items);
+  for (const L of items) L.c.lbl.attr("x", L.x);
+}
 
 // captions: root names in the soil
 const limbLbl = view.append("g").attr("class", "dimmable");
@@ -271,8 +367,8 @@ function relax(items){
 }
 for (const k of rootKeys){
   const s = RSEC.get(k), y = rootCap.get(k);
-  cap(limbLbl.append("text").attr("class", "root-lbl").attr("x", s.cx).attr("y", y).attr("text-anchor", "middle").text(partTitle(k)), 13.5);
-  cap(limbLbl.append("text").attr("class", "root-sub").attr("x", s.cx).attr("y", y + 16 * TF).attr("text-anchor", "middle").text(PARTS.get(k).blurb || ""), 12.5);
+  cap(limbLbl.append("text").attr("class", "root-lbl").attr("x", s.cx).attr("y", y).attr("text-anchor", "middle").text(cellTitle(k)), 13.5)
+    .append("title").text(D.cellBlurb[k] || cellName(k));
 }
 
 // leaves: one per corpus entry resting on the node
@@ -293,8 +389,14 @@ const leafSel = leafG.selectAll("path").data(leafData).join("path")
 
 // fallen leaves: proved entries off the map, under the part of the map their directory belongs to
 const litterG = view.append("g");
-const piles = Object.entries(D.off).map(([a, list]) => ({a, list}));
-const pileHome = a => { const [p, b] = (D.pile?.[a] || "pricing").split("/"); return (b && BSEC.get(p + "/" + b)) || SEC.get(p) || RSEC.get(p) || {cx:CX}; };
+// piles: a root cell keeps its own, a limb's cells share the limb's pile
+const pileKey = c => RSEC.has(c) ? c : c.split("/")[0];
+const pileName = a => (PARTS.has(a) ? partTitle(a) : cellTitle(a)).split(" and ")[0].slice(0, 18);
+const byPile = new Map();
+for (const [c, l] of Object.entries(D.off)) for (const e of l){
+  const a = pileKey(c); if (!byPile.has(a)) byPile.set(a, []); byPile.get(a).push([...e, cellTitle(c)]); }
+const piles = [...byPile].map(([a, list]) => ({a, list}));
+const pileHome = a => RSEC.get(a) || SEC.get(a) || {cx:CX};
 const pileX = new Map(); { const used = [{x:CX, half:trunkLbl.node().getComputedTextLength() / 2 + 4}];
   for (const p of piles.sort((x, y) => y.list.length - x.list.length)){
     let x = pileHome(p.a).cx; const half = 14 + Math.sqrt(p.list.length) * 6.5;
@@ -309,14 +411,17 @@ pileSel.each(function(p){
     const fx = x + (r() + r() - 1) * half, fy = GY - 4 + (r() - .3) * 9 - Math.max(0, 1 - Math.abs(fx - x) / half) * 5;
     g.append("path").attr("class", "fallen").attr("d", LEAF).attr("transform", `translate(${fx.toFixed(1)},${fy.toFixed(1)}) rotate(${(r() * 360).toFixed(0)}) scale(${(.75 + r() * .4).toFixed(2)})`);
   }
-  cap(g.append("text").attr("class", "pile-lbl").attr("x", x).attr("y", ROW0).text(`${p.list.length} ${areaName(p.a)}`), 13.5);
+  cap(g.append("text").attr("class", "pile-lbl").attr("x", x).attr("y", ROW0).text(`${p.list.length} ${pileName(p.a)}`), 13.5);
+  g.append("title").text(`${p.list.length} ${pileName(p.a)} entries off the map`);
   g.append("rect").attr("class", "hit").attr("x", x - half - 8).attr("y", GY - 18).attr("width", 2 * half + 16).attr("height", 24 + 20 * TF);
 });
 // pile labels, measured: the first row with room, else the next one down
-{ const rows = [[{x:CX, lw:trunkLbl.node().getComputedTextLength() / 2 + 8 * TF}], [], []], pad = 8 * TF;
+{ const rows = [[{x:CX, lw:trunkLbl.node().getComputedTextLength() / 2 + 8 * TF}], ...Array.from({length:PROWS - 1}, () => [])], pad = 10 * TF;
   const lbls = []; pileSel.each(function(p){ const t = d3.select(this).select(".pile-lbl"); lbls.push({t, x:pileX.get(p.a).x, lw:t.node().getComputedTextLength() / 2 + pad}); });
+  for (const L of lbls){ L.x = Math.max(L.lw + 6, Math.min(W - L.lw - 6, L.x)); L.t.attr("x", L.x); }
   for (const L of lbls.sort((a, b) => a.x - b.x)){
-    const r = Math.max(0, rows.findIndex(row => !row.some(u => Math.abs(u.x - L.x) < u.lw + L.lw)));
+    const r = rows.findIndex(row => !row.some(u => Math.abs(u.x - L.x) < u.lw + L.lw));
+    if (r < 0){ L.t.attr("display", "none"); continue; }   // no free row: the pile keeps its tooltip
     rows[r].push(L); L.t.attr("y", ROW0 + r * ROWH);
   } }
 // upstream-only entries as seeds in the bedrock
@@ -336,15 +441,28 @@ const nodeSel = nodeG.selectAll("g").data(nodeData).join("g").attr("class", "nd 
 nodeSel.each(function(d){
   const g = d3.select(this), n = d.data.node;
   if (d.up){ g.append("ellipse").attr("rx", 11).attr("ry", 6.5).attr("class", "knot"); cap(g.append("text").attr("class", "stratum-sub").attr("x", 18).attr("y", 5).text(n.t), 16); }
-  else if (isWood(n)){ g.append("circle").attr("r", 2.6 + Math.min(6.4, Math.sqrt(n.e) * 1.05)).attr("class", "knot" + (n.s === "partial" ? " partial" : "")); }
+  else if (n.tw){
+    const r = 12, k = g.append("rect").attr("class", "knot tower").attr("x", -r).attr("y", -r).attr("width", 2 * r).attr("height", 2 * r).attr("rx", 3);
+    if (famVar(n)) k.style("fill", famVar(n));
+    g.append("text").attr("class", "tower-n").attr("y", 3.5).attr("text-anchor", "middle").text(n.tw); }
+  else if (isWood(n)){
+    const k = g.append("circle").attr("r", 2.6 + Math.min(6.4, Math.sqrt(n.e) * 1.05)).attr("class", "knot" + (n.s === "partial" ? " partial" : ""));
+    if (famVar(n)) k.style(n.s === "partial" ? "stroke" : "fill", famVar(n)); }
+  else if (n.ph){
+    const fv = famVar(n), r = phR(n);
+    g.append("circle").attr("r", r).attr("class", "phantom").style("stroke", fv);
+    g.append("text").attr("class", "ph-n").attr("y", 4).attr("text-anchor", "middle").text("+" + (n.ph.gain || 0)); }
   else if (isOP(n)){ g.append("circle").attr("r", 13).attr("class", "halo"); g.append("path").attr("class", "star").attr("d", "M" + STAR(7.5).join("L") + "Z"); }
   else {
-    g.append("circle").attr("r", 4.6).attr("class", "bud");
-    if (n.core && n.core.length) g.append("path").attr("class", "bud-core").attr("d", "M0,-4.6 A4.6,4.6 0 0 0 0,4.6 Z");
+    const fv = famVar(n);
+    g.append("circle").attr("r", 4.6).attr("class", "bud").style("stroke", fv);
+    if (n.core && n.core.length) g.append("path").attr("class", "bud-core").attr("d", "M0,-4.6 A4.6,4.6 0 0 0 0,4.6 Z").style("fill", fv);
     g.append("circle").attr("r", 1.7).attr("cx", n.core && n.core.length ? 1.9 : 0).attr("class", "bud-dot st-" + (n.st || "none"));
   }
   g.append("circle").attr("r", d.up ? 14 : 9).attr("class", "hit");
 });
+
+nodeSel.filter(d => d.data.node.ph).raise();   // connectors sit above everything else
 
 // labels: sized in screen pixels, tried at four spots around the node, never over a knot or another label
 const lblG = view.append("g");
@@ -352,23 +470,24 @@ function shortTitle(t, max){ let s = t.replace(/\s*\(.*?\)\s*/g, " ").replace(/\
 const lblData = nodeData.filter(d => !d.up).map(d => {
   const n = d.data.node, [ux, uy] = d.seed ? [0, -1] : dirOf(d);
   const side = Math.abs(ux) < .28 ? 0 : (ux < 0 ? -1 : 1);
-  const pr = isOP(n) ? 1e6 : isWood(n) ? d.value * 10 + n.e : (n.st === "ready" ? 3 : 1);
-  return {d, n, side, pr, full: shortTitle(n.t, 46), short: shortTitle(n.t, 34)};
+  const pr = isOP(n) ? 1e6 : n.ph ? 5e5 + n.ph.gain : isWood(n) ? d.value * 10 + n.e : (n.st === "ready" ? 3 : 1);
+  const tail = n.tw ? ` · ${n.tw} modules` : "";
+  return {d, n, side, pr, full: shortTitle(n.t, 46) + tail, short: shortTitle(n.t, 34) + tail};
 });
 const lblSel = lblG.selectAll("text").data(lblData).join("text")
-  .attr("class", L => "lbl dimmable" + (isOP(L.n) ? " op" : !isWood(L.n) ? " fr" : ""));
-const glyphR = d => { const n = d.data.node; return isWood(n) ? 2.6 + Math.min(6.4, Math.sqrt(n.e) * 1.05) : isOP(n) ? 8 : 4.6; };
+  .attr("class", L => "lbl dimmable" + (isOP(L.n) ? " op" : L.n.ph ? " ph" : !isWood(L.n) ? " fr" : ""));
+const glyphR = d => { const n = d.data.node; return n.tw ? 12 : n.ph ? phR(n) : isWood(n) ? 2.6 + Math.min(6.4, Math.sqrt(n.e) * 1.05) : isOP(n) ? 8 : 4.6; };
 let curK = 1, litSet = null;
 function placeLabels(k = curK, set = litSet){
   curK = k;
   const s = pxPerUnit() * k, fs = (k < 1.4 ? 13 : 12.5) / s, h = fs * 1.2, pad = 3 / s;
   const boxes = [];
-  if (!set) for (const el of document.querySelectorAll("#tree .root-lbl, #tree .root-sub, #tree .trunk-lbl")){
+  if (!set) for (const el of document.querySelectorAll("#tree .root-lbl, #tree .root-sub, #tree .trunk-lbl, #tree .isl-lbl")){
     const b = el.getBBox(); boxes.push([b.x, b.y, b.x + b.width, b.y + b.height, "cap"]); }
   for (const d of nodeData) if (!d.up && (!set || set.has(d.id))){ const r = glyphR(d) + 1.5; boxes.push([d.px - r, d.py - r, d.px + r, d.py + r, d.id]); }
   const hit = (b, self) => boxes.some(c => c[4] !== self && !(b[2] < c[0] || b[0] > c[2] || b[3] < c[1] || b[1] > c[3]));
   const eligible = L => set ? set.has(L.d.id)
-    : k < 1.4 ? isWood(L.n) || isOP(L.n)
+    : k < 1.4 ? isWood(L.n) || isOP(L.n) || !!L.n.ph
     : k < 2.4 ? isWood(L.n) || isOP(L.n) || L.n.st === "ready" : true;
   const budget = set ? 1e9 : k < 1.4 ? 30 : k < 2.4 ? 80 : 1e9;
   const order = lblData.filter(eligible).sort((a, b) => (b.d.id === selected) - (a.d.id === selected) || b.pr - a.pr);
@@ -421,7 +540,7 @@ function light(set, extra){
   svg.classed("focus", !!set); litSet = set && set.size ? set : null; placeLabels();
   nodeSel.classed("on", d => on(d.id));
   branchSel.classed("on", e => on(e.t.id) && (!e.s || on(e.s.id)));
-  shootSel.classed("on", e => on(e.t.id) && (!e.s || on(e.s.id)));
+  shootSel.classed("on", e => on(e.t.id) && (!e.s || on(e.s.id))).attr("d", e => shootD(e, !!set));
   leafSel.classed("on", f => on(f.d.id));
   pileSel.classed("on", p => extra === "pile:" + p.a);
   seedbed.classed("on", extra === "seedbed");
@@ -436,7 +555,9 @@ function showTip(ev, html){
 const hideTip = () => { tip.hidden = true; };
 function statusLine(n){
   if (isUp(n)) return "upstream (BrownianMotion)";
+  if (n.tw) return `tower of ${n.tw} modules · best hop ${n.hp ?? "∞"}`;
   if (isWood(n)) return (n.s === "partial" ? "proved in part" : "proved") + (n.e ? ` · ${n.e} corpus ${n.e === 1 ? "entry rests" : "entries rest"} here` : "");
+  if (n.ph) return `connector · proving it brings ${n.ph.gain} more ${n.ph.gain === 1 ? "theorem" : "theorems"} within 3 hops` + (n.open.length ? " · " + n.open.map(x => "#" + x[0]).join(" ") : "");
   const bits = [n.op ? "open problem" : "frontier"]; if (n.core?.length) bits.push("core proved"); if (n.st) bits.push(STATUS_TXT[n.st]);
   if (n.seed || n.ground) bits.push("grows from upstream");
   return bits.join(" · ");
@@ -445,8 +566,8 @@ nodeSel.on("mouseenter", (ev, d) => { if (!selected) light(lineage(d.id)); showT
   .on("mousemove", (ev, d) => showTip(ev, `<b>${esc(d.data.node.t)}</b>${esc(statusLine(d.data.node))}`))
   .on("mouseleave", () => { hideTip(); if (!selected) light(null); })
   .on("click", (ev, d) => { ev.stopPropagation(); select(d.id); });
-pileSel.on("mouseenter", (ev, p) => { if (!selected) light(new Set(), "pile:" + p.a); showTip(ev, `<b>${p.list.length} ${esc(areaName(p.a))} entries off the map</b>proved, but resting on no node and feeding none`); })
-  .on("mousemove", (ev, p) => showTip(ev, `<b>${p.list.length} ${esc(areaName(p.a))} entries off the map</b>proved, but resting on no node and feeding none`))
+pileSel.on("mouseenter", (ev, p) => { if (!selected) light(new Set(), "pile:" + p.a); showTip(ev, `<b>${p.list.length} ${esc(pileName(p.a))} entries off the map</b>proved, but resting on no node and feeding none`); })
+  .on("mousemove", (ev, p) => showTip(ev, `<b>${p.list.length} ${esc(pileName(p.a))} entries off the map</b>proved, but resting on no node and feeding none`))
   .on("mouseleave", () => { hideTip(); if (!selected) light(null); })
   .on("click", (ev, p) => { ev.stopPropagation(); selectPile(p.a); });
 seedbed.on("mouseenter", ev => { if (!selected) light(new Set(), "seedbed"); showTip(ev, `<b>${upOnly} upstream-only entries</b>their proofs cite Mathlib and no MathFin constant`); })
@@ -459,16 +580,19 @@ const chip = l => { const m = N.get(l); return m ? `<button class="chip${m.s ===
 const pill = (txt, v) => `<span class="pill"><i style="background:var(${v})"></i>${esc(txt)}</span>`;
 function nodePanel(n){
   const d = byId.get(n.l);
-  const kind = isUp(n) ? pill("upstream", "--tr-soil-ink") : isWood(n) ? pill(n.s === "partial" ? "proved in part" : "proved", "--tr-bark") : n.op ? pill("open problem", "--tr-star") : pill("frontier", "--tr-blue");
+  const kind = isUp(n) ? pill("upstream", "--tr-soil-ink") : n.ph ? pill("connector, not proved", "--tr-blue") : n.tw ? pill("tower", "--tr-bark") : isWood(n) ? pill(n.s === "partial" ? "proved in part" : "proved", "--tr-bark") : n.op ? pill("open problem", "--tr-star") : pill("frontier", "--tr-blue");
   const st = n.st ? pill(STATUS_TXT[n.st], STATUS_VAR[n.st]) : "";
   const iss = n.i.slice().sort((a, b) => (a[1] === "o" ? 0 : 1) - (b[1] === "o" ? 0 : 1) || b[0] - a[0]);
   const li = x => `<li><a class="num${x[1] === "o" ? "" : " closed"}" href="${GH}${x[0]}" target="_blank" rel="noopener">#${x[0]}</a><span class="${x[1] === "o" ? "" : "closed"}">${esc(x[3])}${x[2] ? " <span class='muted'>(PR)</span>" : ""}${x[1] === "o" && x[4][0] ? ` <span class="muted">· ${esc(STATUS_TXT[x[4][0]] || x[4][0])}</span>` : ""}${x[1] !== "o" ? " <span class='muted'>· closed</span>" : ""}</span></li>`;
   const uses = n.u.filter(u => N.has(u)), users = n.users;
   return `
     <button class="backbtn" type="button" data-back>← How to read the tree</button>
-    <div style="display:flex; gap:6px; flex-wrap:wrap">${kind}${st}<span class="pill">${esc(partTitle(n.p) + (n.b ? " · " + branchName(n.b) : ""))}</span></div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap">${kind}${st}<span class="pill">${esc(cellName(cellKey(n)))}</span>${n.f && FAM.get(n.f) ? `<span class="pill"><i style="background:${famVar(n)}"></i>${esc(FAM.get(n.f).title)}</span>` : ""}${isJoint(n) ? `<span class="pill">joint · ${esc(n.j.map(partTitle).join(" and "))}</span>` : ""}</div>
     <h2>${esc(n.t)}</h2>
     ${n.x ? `<p class="stmt">${prose(n.x)}</p>` : ""}
+    ${n.ph ? `<div><h3>Connector</h3><p>A theorem stated in MathFinFrontier and closed by <code>sorry</code>. Proved, it would bring <b>${n.ph.gain}</b> more finance ${n.ph.gain === 1 ? "theorem" : "theorems"} within 3 statement hops of the trunk${n.hp ? `, and it would itself sit at hop ${n.hp}` : ""}.${n.open.length ? " Issue " + n.open.map(x => `<a href="${GH}${x[0]}" target="_blank" rel="noopener">#${x[0]}</a>`).join(", ") + "." : ""}</p></div>` : ""}
+    ${!n.ph && n.hp != null && kindOf(n) === "limb" ? `<div><h3>Distance from the trunk</h3><p>Hop ${n.hp}: ${n.hp === 1 ? "its statement mentions the trunk itself" : `its statement mentions an object ${n.hp - 1} ${n.hp === 2 ? "statement" : "statements"} from the trunk`}.</p></div>` : ""}
+    ${n.isl ? `<div><h3>Island</h3><p>No statement joins this to the trunk (infinite hop). ${(D.islands.find(c => c.key === n.isl) || {}).declared ? "Declared standalone: " + esc(D.islands.find(c => c.key === n.isl).reason) : "A connector or a declared reason is missing."}</p></div>` : ""}
     ${n.d ? `<div><h3>Lean</h3><div class="mono">${n.h ? `<a href="${esc(n.h)}">${esc(n.d)}</a>` : esc(n.d)}</div>${n.m ? `<div class="muted" style="font-size:12.5px">${esc(n.m)}</div>` : ""}</div>` : ""}
     ${isWood(n) ? `<div><h3>Corpus</h3><p>${n.e ? `<b>${n.e}</b> ${n.e === 1 ? "entry hangs" : "entries hang"} here as leaves: this is the deepest node ${n.e === 1 ? "its proof rests" : "their proofs rest"} on.` : "No entry has this as its deepest node; entries reach it through the nodes above."}</p></div>` : ""}
     ${n.core?.length ? `<div><h3>Core already proved</h3><ul class="entries">${n.core.map(c => `<li><span class="mono">${esc(c)}</span></li>`).join("")}</ul></div>` : ""}
@@ -490,6 +614,11 @@ function glyph(kind){
     sucker:`<rect x="0" y="18" width="34" height="8" class="soil-1"/><path class="branch" d="M7,22 C8,14 13,10 18,7 L19,8.5 C14,12 10,15 9.5,22Z"/><circle class="knot" cx="19" cy="7" r="3.6"/>`,
     seed:`<rect x="0" y="18" width="34" height="8" class="soil-1"/><path class="shoot" d="M8,22 C10,14 16,10 20,6"/><circle class="bud" cx="20" cy="6" r="4.2"/><circle class="bud-dot st-ready" cx="20" cy="6" r="1.6"/>`,
     ghost:`<path class="ghost" style="opacity:1" d="M4,23 C10,14 14,10 30,4 L31,8 C17,13 14,17 11,23Z"/>`,
+    fam:`<circle class="knot" cx="7" cy="12" r="4.5" style="fill:var(--fam-diffusions)"/><circle class="knot" cx="17" cy="12" r="4.5" style="fill:var(--fam-default)"/><circle class="knot" cx="27" cy="12" r="4.5" style="fill:var(--fam-jumps)"/>`,
+    hop:`<line x1="6" x2="6" y1="22" y2="3" class="ground-line" style="opacity:1"/><circle class="knot" cx="6" cy="20" r="2.6"/><circle class="knot" cx="6" cy="12" r="2.6"/><circle class="knot" cx="6" cy="5" r="2.6"/><text x="12" y="22" font-size="8" fill="currentColor">1</text><text x="12" y="6" font-size="8" fill="currentColor">3</text>`,
+    island:`<ellipse class="isl-ring ring" cx="17" cy="12" rx="15" ry="9"/><circle class="knot" cx="12" cy="12" r="3"/><circle class="knot" cx="21" cy="11" r="3"/>`,
+    tower:`<rect class="knot tower" x="8" y="3" width="18" height="18" rx="3"/><text x="17" y="16" text-anchor="middle" font-size="9" font-weight="700" fill="var(--surface)">9</text>`,
+    phantom:`<path class="shoot ph" d="M3,20 Q10,2 17,8"/><path class="shoot ph" d="M31,20 Q24,2 17,8"/><circle class="phantom" cx="17" cy="9" r="6"/>`,
     vein:`<path class="vein on" style="opacity:.6" d="M2,20 Q17,4 32,20"/>`
   }[kind];
   return `<svg viewBox="0 0 34 24" aria-hidden="true">${s}</svg>`;
@@ -501,7 +630,12 @@ function defaultPanel(){
   folio.innerHTML = `
     <h2>How to read the tree</h2>
     <div class="legend">
-      <div>${glyph("ghost")}<span><b>The map</b>, in pale wood: four roots (discrete time, Gaussian analysis, Brownian calculus, jumps), the pricing functional as the trunk, and five limbs. It is a reading of financial mathematics; a node's place on it is a choice, not a proof.</span></div>
+      <div>${glyph("ghost")}<span><b>The map</b>, in pale wood, is docs/taxonomy.toml: the tools as roots (probability in its branches, statistics), positions and markets as the trunk, and three limbs, one for each question asked of a position (choice, valuation, risk). Each limb's wood ends at its highest measured node. A node's place on it is a reading, not a proof.</span></div>
+      <div>${glyph("fam")}<span><b>Colour</b> is the model family, the same hue in every limb; a node in wood colour is general theory. A <b>joint</b> sits in the fork between the two limbs its statement joins.</span></div>
+      <div>${glyph("hop")}<span><b>Height is measured</b>: on a limb a node sits at its hop, its distance in statements from the trunk (the metric of <code>chain_reach</code>). Probability tools stay in the roots.</span></div>
+      <div>${glyph("island")}<span><b>Islands</b>: nodes at infinite distance float beside their limb under their cluster's name; a red ring means no connector reaches it and no standalone reason is declared.</span></div>
+      <div>${glyph("tower")}<span><b>Towers</b> are single nodes, the module count inside.</span></div>
+      <div>${glyph("phantom")}<span><b>Connectors</b>: hollow dashed dots between the nodes a not-yet-proved theorem would join, at the height it would have; the size is its gain.</span></div>
       <div>${glyph("knot")}<span><b>Dark wood and knots</b>: the proved blueprint nodes and every use their proofs make. Wood thickens with the corpus it carries; where it skips the trunk, a result rests on a root directly. A knot's size counts the corpus entries resting deepest on it.</span></div>
       <div>${glyph("leaf")}<span><b>Leaves</b> (the Leaves button): the same corpus entries drawn one by one, hung on the deepest node their proof rests on.</span></div>
       <div>${glyph("bud")}<span><b>Blueprint shoots and buds</b>: frontier nodes. The bud's centre shows the state of its issue.</span></div>
@@ -517,12 +651,12 @@ function defaultPanel(){
 }
 function selectPile(a){
   selected = "pile:" + a; light(new Set(), selected); selRing.attr("visibility", "hidden");
-  const list = D.off[a] || [];
+  const list = piles.find(p => p.a === a)?.list || [];
   folio.innerHTML = `<button class="backbtn" type="button" data-back>← How to read the tree</button>
     <span class="pill"><i style="background:var(--tr-fallen)"></i>off the map</span>
-    <h2>${list.length} ${esc(areaName(a))} entries on the ground</h2>
+    <h2>${list.length} ${esc(pileName(a))} entries on the ground</h2>
     <p>Proved and imported by the library, but no constant they cite reaches a blueprint node, and no node depends on them. A tag on the object they share, or a bridge to the node they illustrate, lifts them onto the tree.</p>
-    <ul class="entries">${list.map(([id, name]) => `<li>${esc(name)}<br><span class="mono">${esc(id)}</span></li>`).join("")}</ul>`;
+    <ul class="entries">${list.map(([id, name, c]) => `<li>${esc(name)}<br><span class="mono">${esc(id)}</span>${PARTS.has(a) ? ` <span class="muted">· ${esc(c)}</span>` : ""}</li>`).join("")}</ul>`;
 }
 function select(l){
   selected = l; hideTip();

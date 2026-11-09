@@ -187,6 +187,30 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.integral_discounted_v3PositionValue_le (MathFin/Markets/DeFi/UniswapV3CoveredCallPrice.lean): the pointwise covered-call bound MathFin.DeFi.v3PositionValue_le_coveredCall at s = sqrt(S_T), integral_mono (the position value is measurable and bounded by x_max * ab), then discounted_terminal_eq_S0 (MathFin/Models/BlackScholes/Forward.lean) and bs_call_formula (MathFin/Models/BlackScholes/Call.lean). SCOPE: an upper bound, not the price; the position is held to T with no fees, no rebalancing and Y as the numeraire; the expected in-range gap is not computed."
       }
+    },
+    {
+      "id": "mf-lp-position-price",
+      "name": "An AMM Liquidity Position Is Priced as a Contract",
+      "domain": "mathematical_finance",
+      "description": "In a market with a positive price of X in Y at T, under any measure Q: paying the concentrated-liquidity payoff (a payoff in the square root of the price, range 0 < a <= b) at T is worth the integral of the deflator times v3PositionValue L a b (sqrt P_T), and paying the constant-product payoff of invariant x0 y0 is worth the integral of the deflator times the rebalanced reserves impermanentLossReservesX/Y valued at P_T. Q is arbitrary: the price is a pricing-measure price only when Q is one, and no closed form under Black-Scholes is stated.",
+      "code": {
+        "lean": "import MathFin.Markets.DeFi.LPContract\n\nopen MathFin MathFin.DeFi MeasureTheory\nopen scoped NNReal\n\n/-- A liquidity position is a contract: its price is the discounted expectation of its value. -/\ntheorem lp_position_price {Ω : Type*} [MeasurableSpace Ω] (M : Market Unit Ω) (Q : Measure Ω)\n    (T : ℝ≥0) (hS : ∀ ω, 0 < M.asset () T ω) :\n    (∀ L a b : ℝ, 0 < a → a ≤ b →\n      M.price Q (.pay T (lpPayoff L a b T)) =\n        ∫ ω, M.deflator T ω * v3PositionValue L a b (Real.sqrt (M.asset () T ω)) ∂Q) ∧\n    (∀ x₀ y₀ : ℝ, 0 < x₀ → 0 < y₀ →\n      M.price Q (.pay T (constantProductPayoff (x₀ * y₀) T)) =\n        ∫ ω, M.deflator T ω *\n          (impermanentLossReservesX x₀ y₀ (M.asset () T ω * x₀ / y₀) * M.asset () T ω +\n            impermanentLossReservesY x₀ y₀ (M.asset () T ω * x₀ / y₀)) ∂Q) :=\n  price_lpPayoff M Q T hS\n"
+      },
+      "metadata": {
+        "reference": "H. Adams, N. Zinsmeister, M. Salem, R. Keefer, D. Robinson, Uniswap v3 Core (2021), §6.4.1 (eqs. 6.29-6.30); G. Angeris, H.-T. Kao, R. Chiang, C. Noyes, T. Chitra, An analysis of Uniswap markets (2021)",
+        "citations": [
+          {
+            "key": "AdamsEtAl2021",
+            "locator": "§6.4.1 (eqs. 6.29-6.30)"
+          },
+          {
+            "key": "AngerisKaoChiangNoyesChitra2021"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.DeFi.price_lpPayoff (MathFin/Markets/DeFi/LPContract.lean): Contract.value_pay plus the pointwise evaluations eval_lpPayoff (case analysis on the position's three regimes against v3PositionValue) and eval_constantProductPayoff (via lpPortfolioValue_eq). SCOPE: the price is Market.price under an arbitrary measure Q, so it is the discounted expectation of the position value and a pricing-measure price only when Q is a pricing measure; fee-free positions; the Black-Scholes closed form in Phi is not stated."
+      }
     }
   ]
 }
