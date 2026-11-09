@@ -110,6 +110,7 @@ graph TD
   stochasticFubini["Stochastic Fubini theorem"]:::proved
   superhedgingPriceLowerBound["The superhedging price dominates every martingale price"]:::proved
   uniswapV3CoveredCall["A concentrated-liquidity position is dominated by a covered call"]:::proved
+  utilityStatePriceDensity["Marginal utility is a state-price density"]:::proved
   vasicekBondPde["Vasicek bond price"]:::proved
   contractValue["Value of a contract"]:::proved
   hjmModel["Heath–Jarrow–Morton model"]:::proved
@@ -148,7 +149,6 @@ graph TD
   sdeStrongSolution["Existence and uniqueness of solutions of Lipschitz SDEs"]:::proved
   secondFtap["Second fundamental theorem of asset pricing"]:::proved
   superhedgingCoherent["The superhedging price is a coherent risk measure"]:::proved
-  utilityStatePriceDensity["Marginal utility is a state-price density"]:::proved
   varianceSwapJumpBias["Variance swap and the log contract"]:::proved
   expectedShortfall["Expected shortfall"]:::proved
   pricingFunctional["The pricing functional"]:::proved
@@ -374,12 +374,11 @@ graph TD
   martingaleTransform --> secondFtap
   coherentRiskMeasure --> superhedgingCoherent
   superhedgingPriceLowerBound --> superhedgingCoherent
-  emm --> utilityStatePriceDensity
-  martingaleTransform --> utilityStatePriceDensity
   compoundPoissonMgf --> varianceSwapJumpBias
   valueAtRisk --> expectedShortfall
   contract --> pricingFunctional
   contractValue --> pricingFunctional
+  market --> pricingFunctional
   contract --> black76Caplet
   contractValue --> black76Caplet
   standardNormalCdf --> black76Caplet
@@ -669,6 +668,7 @@ graph TD
 | `thm:stochastic-fubini` Stochastic Fubini theorem | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astochastic-fubini%22%20in%3Abody) |
 | `thm:superhedging-price-lower-bound` The superhedging price dominates every martingale price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-price-lower-bound%22%20in%3Abody) |
 | `thm:uniswap-v3-covered-call` A concentrated-liquidity position is dominated by a covered call | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Auniswap-v3-covered-call%22%20in%3Abody) |
+| `thm:utility-state-price-density` Marginal utility is a state-price density | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Autility-state-price-density%22%20in%3Abody) |
 | `thm:vasicek-bond-pde` Vasicek bond price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avasicek-bond-pde%22%20in%3Abody) |
 | `def:contract-value` Value of a contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acontract-value%22%20in%3Abody) |
 | `def:hjm-model` Heath–Jarrow–Morton model | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Ahjm-model%22%20in%3Abody) |
@@ -707,7 +707,6 @@ graph TD
 | `thm:sde-strong-solution` Existence and uniqueness of solutions of Lipschitz SDEs | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asde-strong-solution%22%20in%3Abody) |
 | `thm:second-ftap` Second fundamental theorem of asset pricing | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asecond-ftap%22%20in%3Abody) |
 | `thm:superhedging-coherent` The superhedging price is a coherent risk measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-coherent%22%20in%3Abody) |
-| `thm:utility-state-price-density` Marginal utility is a state-price density | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Autility-state-price-density%22%20in%3Abody) |
 | `thm:variance-swap-jump-bias` Variance swap and the log contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-swap-jump-bias%22%20in%3Abody) |
 | `def:expected-shortfall` Expected shortfall | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aexpected-shortfall%22%20in%3Abody) |
 | `def:pricing-functional` The pricing functional | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Apricing-functional%22%20in%3Abody) |
