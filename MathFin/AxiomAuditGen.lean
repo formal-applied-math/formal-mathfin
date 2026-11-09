@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (960 MathFin constants, 29 upstream). Citations
+  corpus (961 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -550,6 +550,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.Contracts.value_trancheLeg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.value_trancheLeg
+
+/-- info: 'MathFin.CubicSpline.exists_unique_moments' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.CubicSpline.exists_unique_moments
 
 /-- info: 'MathFin.DeFi.Compound.borrowIndex_le_inv_zcb' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
