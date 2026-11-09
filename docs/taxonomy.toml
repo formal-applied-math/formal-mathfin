@@ -208,7 +208,8 @@ landmarks = [
 key = "valuation/volatility"
 title = "Volatility"
 blurb = "local and stochastic volatility, the smile and its parametrisations"
-modules = ["MathFin.Models.LocalVol", "MathFin.Models.StochVol", "MathFin.Models.ModelFree.SVI"]
+modules = ["MathFin.Models.LocalVol", "MathFin.Models.StochVol", "MathFin.Models.ModelFree.SVI",
+  "MathFin.Markets.FxSmileQuotes"]
 subjects = ["MSC 91G20"]
 landmarks = [
   "MathFin.Dupire.breedenLitzenberger_weak", "MathFin.Dupire.dupire_pointwise",
@@ -441,7 +442,8 @@ key = "volatility"
 title = "Volatility"
 blurb = "local, stochastic and rough volatility, the smile"
 hue = "--fam-volatility"
-modules = ["MathFin.Models.LocalVol", "MathFin.Models.StochVol", "MathFin.Models.ModelFree.SVI"]
+modules = ["MathFin.Models.LocalVol", "MathFin.Models.StochVol", "MathFin.Models.ModelFree.SVI",
+  "MathFin.Markets.FxSmileQuotes"]
 
 [[family]]
 key = "jumps"
