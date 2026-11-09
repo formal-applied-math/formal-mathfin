@@ -109,7 +109,21 @@ structure IsArbitrageFreeQuotes (K C : ℕ → ℝ) (n : ℕ) : Prop where
   strikes_mono : StrictMonoOn K (Iic n)
   /-- Prices are non-increasing: no vertical call spread has a negative price. -/
   prices_anti : AntitoneOn C (Iic n)
-  /-- If `L` bounds the secant from `y` into the junction `b`, and `f` is affine with slope `s ≥ L`
+  /-- Secant slopes are non-decreasing: no butterfly spread has a negative price. -/
+  no_butterfly : ∀ i, i + 2 ≤ n →
+      (C (i + 1) - C i) / (K (i + 1) - K i) ≤ (C (i + 2) - C (i + 1)) / (K (i + 2) - K (i + 1))
+
+/-! ### Two generic gluing lemmas
+
+Neither mentions `piecewiseLinear`: they glue an arbitrary convex piece on the left to an
+arbitrary *affine* piece on the right, which is the shape the inductive step below always has
+(the newest segment is always affine). Monotonicity glues by `AntitoneOn.union_right` over the
+ two `Icc` pieces; convexity
+needs one quantitative hypothesis, `hjump`, bounding every secant from the left piece into the
+junction by the new piece's slope — the discrete no-butterfly condition, carried to the
+continuum. -/
+
+/-- If `L` bounds the secant from `y` into the junction `b`, and `f` is affine with slope `s ≥ L`
 beyond `b`, then `L` also bounds the secant from `y` into any point beyond `b`. The algebraic core
 of gluing a convex piece to an affine one. -/
 lemma slope_le_of_affine_beyond {f : ℝ → ℝ} {y b z s L : ℝ} (hyb : y < b) (hbz : b < z)
@@ -170,8 +184,6 @@ lemma convexOn_glue {f : ℝ → ℝ} {a b c s : ℝ} (hab : a < b)
         have h3 : (f z - f y) / (z - y) = s := by
           rw [hay, haz, div_eq_iff (sub_ne_zero.mpr hyz.ne')]; ring
         rw [h3]; exact h2
-
-/-! ### Restricting arbitrage-free quotes to a shorter prefix -/
 
 private lemma IsArbitrageFreeQuotes.restrict {K C : ℕ → ℝ} {n m : ℕ} (hmn : m ≤ n)
     (h : IsArbitrageFreeQuotes K C n) : IsArbitrageFreeQuotes K C m where
