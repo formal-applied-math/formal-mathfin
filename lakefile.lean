@@ -48,6 +48,13 @@ lean_lib MathFinExamples where
 lean_lib MathFinTest where
   globs := #[.andSubmodules `MathFinTest]
 
+-- Connectors: bridges the library does not prove yet, stated as Lean and closed by `sorry`
+-- (docs/specs/2026-11-08-chain-design.md §3.5). Nothing in `MathFin/` imports them. A default
+-- target, like `Challenge`, so `lake build` checks that every connector still elaborates.
+@[default_target]
+lean_lib MathFinFrontier where
+  globs := #[.andSubmodules `MathFinFrontier]
+
 -- Palomar registry submission (https://palomar-registry.org). `Challenge.lean`
 -- is the small, Mathlib-only statement of record that a mathematical reader is
 -- expected to audit; `Solution.lean` repeats those declarations verbatim and

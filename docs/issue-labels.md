@@ -3,7 +3,7 @@
 This taxonomy gives maintainers and contributors a shared vocabulary for
 triaging work. Labels should answer four questions:
 
-- **What part of the project is affected?** Use one `area:*` label.
+- **Where does the result sit?** `area:<cell>` and `family:<family>`, derived (below).
 - **What kind of work is it?** Use one `type:*` label.
 - **How hard is it for a contributor?** Use one `difficulty:*` label.
 - **What is the current state?** Use one `status:*` label.
@@ -19,27 +19,30 @@ and formalization status are recorded independently in the
 [research catalogue](research-problems/README.md).
 
 Colors are consistent per dimension so an issue's labels read at a glance:
-`area:*` share one hue, `type:*` another, while `difficulty:*` and `status:*`
+`area:*` take the hue of their part (roots, trunk, valuation, choice, risk), `family:*` one
+hue, `type:*` another, while `difficulty:*` and `status:*`
 use a semantic scale (green → amber → red).
 
-## Area labels
+## Area and family labels
 
-The mathematical areas mirror the `MathFin/` subdirectories, so a contributor
-can filter to the part of the library they know; the last three are
-cross-cutting.
+The library has one organization, stated once in [`docs/taxonomy.toml`](taxonomy.toml) and
+explained in [`docs/organization.md`](organization.md): a **cell** says where a result sits (a
+root, the trunk of positions and markets, or a branch of the valuation, choice or risk limb), a
+**family** says which kind of randomness it is about (trees, diffusions, volatility, jumps, term
+structures, default, insurance, mechanisms, model-free).
+
+The issue labels are that taxonomy, one `area:<cell>` per cell (`area:valuation/term`,
+`area:risk/measures`, `area:probability/brownian`, ...) and one `family:<family>` per family.
+**Nobody sets them by hand.** An issue's `Blueprint:` line names its nodes; a Lean node's cell
+and family are its module's, a frontier node's are its `area` and `family` in
+`docs/blueprint_frontier.toml`. `blueprint-sync` writes the derived labels on every issue event
+and nightly (`python3 -m tools.verify.blueprint_issues labels --apply`), and the check fails on
+an open issue whose labels disagree with its nodes. To move an issue, move its node.
+
+Three labels are not mathematics and stay hand-set:
 
 | Label | Use for |
 |---|---|
-| `area:foundations` | `MathFin/Probability/` — Itô calculus, Brownian motion, stochastic integration, martingales, Poisson, Markov, and SDEs. |
-| `area:black-scholes` | `MathFin/Models/BlackScholes/` — the Black-Scholes model, greeks, and the pricing PDE. |
-| `area:futures` | `MathFin/Models/Forwards/` — Black-76 futures options, caplets, and swaptions. |
-| `area:binomial` | `MathFin/Models/Binomial/` — CRR binomial trees and convergence to Black-Scholes. |
-| `area:fixed-income` | `MathFin/Models/Rates/` — bonds, term structure, and interest-rate models. |
-| `area:portfolio` | `MathFin/Choice/Portfolio/` — portfolio choice, Kelly, and Merton problems. |
-| `area:performance` | `MathFin/Choice/Performance/` — Sharpe ratio and other performance measures. |
-| `area:risk` | `MathFin/Risk/` — VaR, CVaR, and coherent risk measures. |
-| `area:actuarial` | `MathFin/Insurance/` — actuarial and insurance pricing. |
-| `area:defi` | `MathFin/Markets/DeFi/` — decentralized-finance models. |
 | `area:tooling` | Python verification tools, scripts, ledger logic, and generated audits under `tools/` and `scripts/`. |
 | `area:docs` | Markdown docs, README content, onboarding, coverage/blueprint prose, and cross-links. |
 | `area:ci` | GitHub Actions, Docker images, build gates, and release automation. |
@@ -121,31 +124,26 @@ corrects itself rather than needing a manual fix.
 |---|---|
 | Add a glossary entry for no-arbitrage terms | `area:docs`, `type:docs`, `difficulty:good-first`, `status:ready`, `good first issue` |
 | Repair a stale coverage row after a theorem rename | `area:docs`, `type:docs`, `difficulty:small`, `status:ready` |
-| Prove a new Black-Scholes Greek | `area:black-scholes`, `type:proof`, `difficulty:medium`, `status:ready` |
-| Generalize an Itô-formula hypothesis | `area:foundations`, `type:proof`, `difficulty:hard`, `status:ready` |
-| Draft an upstream BrownianMotion issue | `area:foundations`, `type:research`, `difficulty:hard`, `status:blocked-upstream` |
-| Catalogue a sourced unresolved mathematical question | `open-problem`, one `area:*`, `type:research`, `difficulty:hard`, `status:research` |
+| Prove a new Black-Scholes Greek | `type:proof`, `difficulty:medium`, `status:ready` |
+| Generalize an Itô-formula hypothesis | `type:proof`, `difficulty:hard`, `status:ready` |
+| Draft an upstream BrownianMotion issue | `type:research`, `difficulty:hard`, `status:blocked-upstream` |
+| Catalogue a sourced unresolved mathematical question | `open-problem`, `type:research`, `difficulty:hard`, `status:research` |
 | Fix a failing build workflow | `area:ci`, `type:bug`, `difficulty:medium`, `status:ready` |
+
+The mathematical rows carry no `area:` label by hand: their `Blueprint:` line gives it.
 
 ## Bootstrap commands
 
 Maintainers can create the taxonomy with `gh label create`:
 
 ```bash
-# area:* — one shared blue
-gh label create "area:foundations"  --color "1d76db" --description "Probability/ — Itô, Brownian motion, stochastic integration, martingales, Poisson, Markov, SDEs"
-gh label create "area:black-scholes" --color "1d76db" --description "Models/BlackScholes/ — the Black-Scholes model, greeks, and the pricing PDE"
-gh label create "area:futures"      --color "1d76db" --description "Models/Forwards/ — Black-76 futures options, caplets, and swaptions"
-gh label create "area:binomial"     --color "1d76db" --description "Models/Binomial/ — CRR binomial trees and convergence to Black-Scholes"
-gh label create "area:fixed-income" --color "1d76db" --description "Models/Rates/ — bonds, term structure, and interest-rate models"
-gh label create "area:portfolio"    --color "1d76db" --description "Choice/Portfolio/ — portfolio choice, Kelly, and Merton problems"
-gh label create "area:performance"  --color "1d76db" --description "Choice/Performance/ — Sharpe ratio and other performance measures"
-gh label create "area:risk"         --color "1d76db" --description "Risk/ — VaR, CVaR, and coherent risk measures"
-gh label create "area:actuarial"    --color "1d76db" --description "Insurance/ — actuarial and insurance pricing"
-gh label create "area:defi"         --color "1d76db" --description "Markets/DeFi/ — decentralized-finance models"
-gh label create "area:tooling"      --color "1d76db" --description "Verification tools, scripts, ledger logic, and generated audits"
-gh label create "area:docs"         --color "1d76db" --description "Markdown docs, onboarding, coverage/blueprint prose, and cross-links"
-gh label create "area:ci"           --color "1d76db" --description "GitHub Actions, Docker images, build gates, and release automation"
+# area:<cell> and family:<family> — created from docs/taxonomy.toml, then derived per issue
+python3 -m tools.verify.blueprint_issues labels --apply
+
+# the three hand-set area labels
+gh label create "area:tooling"      --color "ededed" --description "Verification tools, scripts, ledger logic, and generated audits"
+gh label create "area:docs"         --color "ededed" --description "Markdown docs, onboarding, coverage/blueprint prose, and cross-links"
+gh label create "area:ci"           --color "ededed" --description "GitHub Actions, Docker images, build gates, and release automation"
 
 # type:* — one shared purple
 gh label create "type:bug"         --color "5319e7" --description "Something expected to work is broken"
