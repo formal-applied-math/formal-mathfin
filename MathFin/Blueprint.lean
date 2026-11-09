@@ -885,13 +885,16 @@ attribute [blueprint "def:expected-utility"
 
 attribute [blueprint "thm:utility-state-price-density"
   (title := "Marginal utility is a state-price density")
-  (statement := /-- In the finite-state market with payoff matrix $A$ and prices $\pi$, let $\theta$
-  be a local maximum of $\sum_\omega p_\omega u(W_\omega)$, $W = A^\top\theta$, on the budget set
-  $\{\theta' : \pi\cdot\theta' = w_0\}$, with $p>0$, $w_0>0$, $W>0$ and $u'(W_\omega)>0$. Then
-  $q_\omega = p_\omega u'(W_\omega)/\mu$, for some $\mu>0$, is a strictly positive state-price
-  vector pricing every asset, and on a finite probability space charging every state there is an
-  equivalent martingale measure for the excess returns. -/)]
-  MathFin.exists_isEMM_of_isLocalMaxOn
+  (statement := /-- In the finite-state market with payoff matrix $A$ and prices $\pi$, let the
+  portfolio $\theta$ cost $w_0>0$, with payoff $W = A^\top\theta > 0$, probabilities $p>0$ and
+  marginal utility $u'(W_\omega)>0$, and let it be stationary for $\sum_\omega p_\omega
+  u(W_\omega)$ on the budget set: $\sum_\omega p_\omega u'(W_\omega) W^d_\omega = 0$ for every
+  portfolio $d$ of zero cost. Then there is $\mu>0$ with $\sum_\omega p_\omega u'(W_\omega)
+  A_{k\omega} = \mu\,\pi_k$ for every asset $k$: the normalised marginal utility
+  $p_\omega u'(W_\omega)/\mu$ is a state-price vector (the Euler equation). A local maximum on the
+  budget set is stationary, and on a finite probability space charging every state the state prices
+  give an equivalent martingale measure (`exists_isEMM_of_isLocalMaxOn`). -/)]
+  MathFin.exists_pos_smul_eq_of_stationary
 
 -- ===== choice/portfolio: Portfolio choice =====
 
