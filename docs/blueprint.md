@@ -69,11 +69,13 @@ graph TD
   brownianMotion["Brownian motion (Mathlib, upstream)"]:::upstream
   coherentRiskMeasure["Coherent risk measure"]:::proved
   contract["Contract"]:::proved
+  convexRiskMeasure["Convex risk measure"]:::proved
   copula["Copula"]:::proved
   emm["Equivalent martingale measure"]:::proved
   expectedUtility["Expected utility"]:::proved
   gaussianFactorCopula["One-factor Gaussian copula"]:::proved
   gbm["Geometric Brownian motion"]:::proved
+  lawInvariant["Law-invariant risk functional"]:::proved
   market["Market"]:::proved
   portfolioVariance["Portfolio variance"]:::proved
   quantile["Quantile function"]:::proved
@@ -128,6 +130,7 @@ graph TD
   coherentRiskRepresentation["Robust representation of coherent risk measures"]:::proved
   continuousFtap["Fundamental theorem of asset pricing in continuous time"]:::proved
   dupireZeroRates["Dupire's local volatility formula"]:::proved
+  entropicRiskCertaintyEquivalent["Entropic risk is the certainty equivalent of exponential utility"]:::proved
   expectedUtilityAxioms["von Neumann–Morgenstern expected utility"]:::proved
   firstFtap["First fundamental theorem of asset pricing"]:::proved
   forwardMeasure["Forward measure"]:::proved
@@ -162,6 +165,7 @@ graph TD
   potentialFutureExposure["Potential future exposure"]:::proved
   putCallParity["Put-call parity"]:::proved
   sklar["Sklar's theorem"]:::proved
+  superhedgingDuality["Superhedging duality"]:::proved
   tangentPortfolioEfficient["Tangent portfolio"]:::proved
   unilateralCva["Credit valuation adjustment"]:::proved
   varNotSubadditive["Value-at-risk is not subadditive"]:::proved
@@ -347,6 +351,7 @@ graph TD
   martingaleTransform --> continuousFtap
   brownianMotion --> dupireZeroRates
   carrMadan --> dupireZeroRates
+  expectedUtility --> entropicRiskCertaintyEquivalent
   expectedUtility --> expectedUtilityAxioms
   emm --> firstFtap
   martingaleTransform --> firstFtap
@@ -410,6 +415,9 @@ graph TD
   contractValue --> putCallParity
   quantile --> sklar
   quantileTransform --> sklar
+  coherentRiskRepresentation --> superhedgingDuality
+  superhedgingCoherent --> superhedgingDuality
+  superhedgingPriceLowerBound --> superhedgingDuality
   portfolioVariance --> tangentPortfolioEfficient
   markowitzLagrangian --> tangentPortfolioEfficient
   standardNormalCdf --> unilateralCva
@@ -631,11 +639,13 @@ graph TD
 | `def:brownian-motion` Brownian motion (Mathlib, upstream) | ✅ upstream | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Abrownian-motion%22%20in%3Abody) |
 | `def:coherent-risk-measure` Coherent risk measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acoherent-risk-measure%22%20in%3Abody) |
 | `def:contract` Contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acontract%22%20in%3Abody) |
+| `def:convex-risk-measure` Convex risk measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aconvex-risk-measure%22%20in%3Abody) |
 | `def:copula` Copula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acopula%22%20in%3Abody) |
 | `def:emm` Equivalent martingale measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aemm%22%20in%3Abody) |
 | `def:expected-utility` Expected utility | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aexpected-utility%22%20in%3Abody) |
 | `def:gaussian-factor-copula` One-factor Gaussian copula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Agaussian-factor-copula%22%20in%3Abody) |
 | `def:gbm` Geometric Brownian motion | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Agbm%22%20in%3Abody) |
+| `def:law-invariant` Law-invariant risk functional | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Alaw-invariant%22%20in%3Abody) |
 | `def:market` Market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Amarket%22%20in%3Abody) |
 | `def:portfolio-variance` Portfolio variance | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aportfolio-variance%22%20in%3Abody) |
 | `def:quantile` Quantile function | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aquantile%22%20in%3Abody) |
@@ -690,6 +700,7 @@ graph TD
 | `thm:coherent-risk-representation` Robust representation of coherent risk measures | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acoherent-risk-representation%22%20in%3Abody) |
 | `thm:continuous-ftap` Fundamental theorem of asset pricing in continuous time | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acontinuous-ftap%22%20in%3Abody) |
 | `thm:dupire-zero-rates` Dupire's local volatility formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Adupire-zero-rates%22%20in%3Abody) |
+| `thm:entropic-risk-certainty-equivalent` Entropic risk is the certainty equivalent of exponential utility | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aentropic-risk-certainty-equivalent%22%20in%3Abody) |
 | `thm:expected-utility-axioms` von Neumann–Morgenstern expected utility | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-utility-axioms%22%20in%3Abody) |
 | `thm:first-ftap` First fundamental theorem of asset pricing | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Afirst-ftap%22%20in%3Abody) |
 | `thm:forward-measure` Forward measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aforward-measure%22%20in%3Abody) |
@@ -724,6 +735,7 @@ graph TD
 | `thm:potential-future-exposure` Potential future exposure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Apotential-future-exposure%22%20in%3Abody) |
 | `thm:put-call-parity` Put-call parity | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aput-call-parity%22%20in%3Abody) |
 | `thm:sklar` Sklar's theorem | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asklar%22%20in%3Abody) |
+| `thm:superhedging-duality` Superhedging duality | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-duality%22%20in%3Abody) |
 | `thm:tangent-portfolio-efficient` Tangent portfolio | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atangent-portfolio-efficient%22%20in%3Abody) |
 | `thm:unilateral-cva` Credit valuation adjustment | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aunilateral-cva%22%20in%3Abody) |
 | `thm:var-not-subadditive` Value-at-risk is not subadditive | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avar-not-subadditive%22%20in%3Abody) |
