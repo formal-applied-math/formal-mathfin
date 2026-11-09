@@ -15,10 +15,10 @@ import MathFin.Choice.Portfolio.RiskParityFOC
 import MathFin.Choice.Utility.VonNeumannMorgenstern
 import MathFin.Contracts.Core
 import MathFin.Insurance.SurvivalModel
+import MathFin.Markets.DeFi.LPContract
 import MathFin.Markets.DeFi.LiquidationAsStructuralDefault
 import MathFin.Markets.DeFi.UniswapMechanics
 import MathFin.Markets.Microstructure.GlostenMilgromCondExp
-import MathFin.Markets.DeFi.LPContract
 import MathFin.Markets.Microstructure.GlostenMilgromMarket
 import MathFin.Models.Bachelier.Bachelier
 import MathFin.Models.Binomial.CRRClosedForm
@@ -30,7 +30,6 @@ import MathFin.Models.BlackScholes.DeltaHedge
 import MathFin.Models.BlackScholes.GaussianGirsanov
 import MathFin.Models.BlackScholes.MargrabeGrounding
 import MathFin.Models.BlackScholes.PDE
-import MathFin.Contracts.Instruments.Tranche
 import MathFin.Models.Credit.CVA
 import MathFin.Models.Credit.Cox
 import MathFin.Models.Credit.KMVMertonStructural
@@ -93,15 +92,16 @@ import MathFin.Risk.AcceptanceSet
 import MathFin.Risk.Coherent
 import MathFin.Risk.ComponentVaR
 import MathFin.Risk.ContractRisk
+import MathFin.Risk.Credit.TrancheLeg
 import MathFin.Risk.Credit.VasicekIRB
 import MathFin.Risk.Elicitability
 import MathFin.Risk.ExpectedShortfall
 import MathFin.Risk.ExposureMeasures
 import MathFin.Risk.GaussianRiskMarkowitz
+import MathFin.Risk.Superhedging
 import MathFin.Risk.UtilityDerivation
 import MathFin.Risk.VaRSuperadditivity
 import MathFin.Risk.ValueAtRisk
-import MathFin.Risk.Superhedging
 import Architect
 
 /-!

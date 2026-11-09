@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (952 MathFin constants, 29 upstream). Citations
+  corpus (955 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -547,6 +547,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.value_payerSwaption_black_forwardSwapRate
 
+/-- info: 'MathFin.Contracts.value_trancheLeg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.value_trancheLeg
+
 /-- info: 'MathFin.DeFi.Compound.borrowIndex_le_inv_zcb' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.DeFi.Compound.borrowIndex_le_inv_zcb
@@ -582,6 +586,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.DeFi.impermanentLoss_nonpos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.DeFi.impermanentLoss_nonpos
+
+/-- info: 'MathFin.DeFi.price_lpPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.price_lpPayoff
 
 /-- info: 'MathFin.DeFi.v3PositionValue_at_lower' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -634,6 +642,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.Execution.condExp_payoff_eq_quote' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Execution.condExp_payoff_eq_quote
+
+/-- info: 'MathFin.Execution.isPricingMeasure_toMarket_condExp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Execution.isPricingMeasure_toMarket_condExp
 
 /-- info: 'MathFin.Execution.measureReal_mul_ask_add_measureReal_mul_bid' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

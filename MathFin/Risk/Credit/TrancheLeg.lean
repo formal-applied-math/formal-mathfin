@@ -37,6 +37,7 @@ large-pool limit of `Risk/Credit/TrancheLoss.lean`) is not part of these stateme
 
 * [A. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management*][McNeilFreyEmbrechts],
   §11
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], ch. 25
 
 ## Tags
 

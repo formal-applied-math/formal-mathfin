@@ -651,7 +651,7 @@
       "domain": "mathematical_finance",
       "description": "The tranche leg trancheLeg a d T, the tranche loss ((L - a)^+ - (L - d)^+)/(d - a) paid at T as a Contract on the portfolio loss fraction L observed at T, is worth on a deterministic discount curve D the amount D T times the Q-integral of tranchePayoff a d (L_T). The loss process L is an arbitrary given process: its law (for instance the large-pool limit) is not part of the statement, and no integrability is assumed (the Bochner integral's junk value is the same on both sides).",
       "code": {
-        "lean": "import MathFin.Contracts.Instruments.Tranche\n\nopen MathFin MathFin.Contracts\nopen scoped NNReal\n\n/-- The tranche leg is worth the discounted expected tranche loss. -/\ntheorem tranche_leg_price {Ω : Type*} [MeasurableSpace Ω] (Q : MeasureTheory.Measure Ω)\n    (D : ℝ≥0 → ℝ) (X : Unit → ℝ≥0 → Ω → ℝ) (a d : ℝ) (T : ℝ≥0) :\n    (trancheLeg a d T).value Q (fun t _ ↦ D t) X\n      = D T * ∫ ω, tranchePayoff a d (X () T ω) ∂Q :=\n  value_trancheLeg Q D X a d T\n"
+        "lean": "import MathFin.Risk.Credit.TrancheLeg\n\nopen MathFin MathFin.Contracts\nopen scoped NNReal\n\n/-- The tranche leg is worth the discounted expected tranche loss. -/\ntheorem tranche_leg_price {Ω : Type*} [MeasurableSpace Ω] (Q : MeasureTheory.Measure Ω)\n    (D : ℝ≥0 → ℝ) (X : Unit → ℝ≥0 → Ω → ℝ) (a d : ℝ) (T : ℝ≥0) :\n    (trancheLeg a d T).value Q (fun t _ ↦ D t) X\n      = D T * ∫ ω, tranchePayoff a d (X () T ω) ∂Q :=\n  value_trancheLeg Q D X a d T\n"
       },
       "metadata": {
         "reference": "A. McNeil, R. Frey, P. Embrechts, Quantitative Risk Management (2015), §11; J. C. Hull, Options, Futures, and Other Derivatives, ch. 25",
@@ -666,7 +666,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.Contracts.value_trancheLeg (MathFin/Contracts/Instruments/Tranche.lean): Contract.value_pay, integral_const_mul and the evaluation eval_trancheLossPayoff. SCOPE: a deterministic discount curve; the portfolio loss fraction is an arbitrary process, so nothing is said about its law or about the pool."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.Contracts.value_trancheLeg (MathFin/Risk/Credit/TrancheLeg.lean): Contract.value_pay, integral_const_mul and the evaluation eval_trancheLossPayoff. SCOPE: a deterministic discount curve; the portfolio loss fraction is an arbitrary process, so nothing is said about its law or about the pool."
       }
     }
   ]
