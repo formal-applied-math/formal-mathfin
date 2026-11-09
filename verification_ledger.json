@@ -1868,9 +1868,9 @@
     "mf-conditional-expectation-pricing-measure": {
       "benchmark_file": "market_microstructure.json",
       "date": "2026-11-09",
-      "elapsed_s": 3.1,
-      "input_hash": "b85f64969a56c7be06fdab2cf3833499fc14f7f8506d45ed58edb2dfa8631ad1",
-      "verified_at_commit": "06061d0"
+      "elapsed_s": 2.9,
+      "input_hash": "be0c9927cb0f743e507bdcd1a2befc1d28651012dfb70149f6595b2d64a0d48a",
+      "verified_at_commit": "f9aaaba"
     },
     "mf-continuous-emm-sampled": {
       "benchmark_file": "no_arbitrage.json",
@@ -3604,9 +3604,9 @@
     "mf-lp-position-price": {
       "benchmark_file": "defi.json",
       "date": "2026-11-09",
-      "elapsed_s": 3.1,
-      "input_hash": "e8c43d872bf7e9d7ab65924129046927566515485a1441bcbd12cbda9a70fc0f",
-      "verified_at_commit": "06061d0"
+      "elapsed_s": 2.9,
+      "input_hash": "7ece4435971c78771d316e12a8b30b98abec72de0b2fc9e1c76bf45772d0ec2d",
+      "verified_at_commit": "f9aaaba"
     },
     "mf-lsv-coin-toss-posterior-nonflat": {
       "benchmark_file": "black_scholes.json",
