@@ -285,7 +285,6 @@ import MathFin.Probability.Brownian.Ito.DoleansStepRepresentation
 import MathFin.Probability.Brownian.WienerExponentialTotality
 -- Martingale representation, step 5: the Itô integral is onto the centered `𝓕ᴮ_T`-measurable
 -- part of `L²(μ)` — terminal, submodule and process forms of the representation theorem
-<<<<<<< HEAD
 import MathFin.Probability.Brownian.MartingaleRepresentation
 -- Martingale representation, step 6: its finance reading — replication, superreplication
 -- duality, and uniqueness of the pricing measure on the Brownian filtration
@@ -311,13 +310,6 @@ import MathFin.Markets.DeFi.Aave
 import MathFin.Markets.DeFi.Compound
 -- Dai stability fee and vault liquidation condition
 import MathFin.Markets.DeFi.Dai
-=======
-import MathFin.Probability.Brownian.MartingaleRepresentation
-import MathFin.Probability.Brownian.Ito.ItoFormulaProcess
-import MathFin.Probability.Brownian.ExitTime
-import MathFin.Probability.Brownian.Ito.ItoFormulaCutoff
-import MathFin.Probability.Brownian.Ito.ItoFormulaUnrestrictedLocMart
->>>>>>> origin/main
 -- Phase 39: Itô structural drift formula + GBM log-drift (after Nagy 2026)
 import MathFin.Probability.Brownian.Ito.ItoLemma
 -- Time-dependent (2D) Itô formula + GBM-as-SDE-solution (genuine exp partials)
