@@ -148,6 +148,7 @@ graph TD
   schwartzCommodityFutures["Schwartz commodity futures price"]:::proved
   sdeStrongSolution["Existence and uniqueness of solutions of Lipschitz SDEs"]:::proved
   secondFtap["Second fundamental theorem of asset pricing"]:::proved
+  trinomialMomentMatching["Trinomial moment matching"]:::proved
   varianceSwapJumpBias["Variance swap and the log contract"]:::proved
   expectedShortfall["Expected shortfall"]:::proved
   gaussianFactorCopula["One-factor Gaussian copula"]:::proved
@@ -385,6 +386,7 @@ graph TD
   brownianMotion --> sdeStrongSolution
   emm --> secondFtap
   martingaleTransform --> secondFtap
+  gbm --> trinomialMomentMatching
   compoundPoissonMgf --> varianceSwapJumpBias
   valueAtRisk --> expectedShortfall
   copula --> gaussianFactorCopula
@@ -767,6 +769,7 @@ graph TD
 | `thm:schwartz-commodity-futures` Schwartz commodity futures price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aschwartz-commodity-futures%22%20in%3Abody) |
 | `thm:sde-strong-solution` Existence and uniqueness of solutions of Lipschitz SDEs | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asde-strong-solution%22%20in%3Abody) |
 | `thm:second-ftap` Second fundamental theorem of asset pricing | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asecond-ftap%22%20in%3Abody) |
+| `thm:trinomial-moment-matching` Trinomial moment matching | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atrinomial-moment-matching%22%20in%3Abody) |
 | `thm:variance-swap-jump-bias` Variance swap and the log contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-swap-jump-bias%22%20in%3Abody) |
 | `def:expected-shortfall` Expected shortfall | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aexpected-shortfall%22%20in%3Abody) |
 | `def:gaussian-factor-copula` One-factor Gaussian copula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Agaussian-factor-copula%22%20in%3Abody) |

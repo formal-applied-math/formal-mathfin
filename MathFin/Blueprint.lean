@@ -24,6 +24,7 @@ import MathFin.Markets.Microstructure.GlostenMilgromMarket
 import MathFin.Models.Bachelier.Bachelier
 import MathFin.Models.Binomial.CRRClosedForm
 import MathFin.Models.Binomial.MartingaleRepresentation
+import MathFin.Models.Binomial.TrinomialMomentMatching
 import MathFin.Models.BlackScholes.American.Stopping.ActualOptimality
 import MathFin.Models.BlackScholes.BlackScholesPhysical
 import MathFin.Models.BlackScholes.Call
@@ -598,6 +599,18 @@ attribute [blueprint "thm:crr-bs-convergence"
   Lévy continuity → weak convergence, with put–call parity lifting the (bounded) put's
   convergence to the call. -/)]
   MathFin.binomialPrice_call_tendsto_bs_closed
+
+attribute [blueprint "thm:trinomial-moment-matching"
+  (title := "Trinomial moment matching")
+  (uses := ["def:gbm"])
+  (statement := /-- For `dx ≠ 0`, the weights of a one-step trinomial lattice solving the mass,
+  mean and second-moment equations about the central node are unique: `q₁ = trinomialProbDown`,
+  `q₂ = trinomialProbMid`, `q₃ = trinomialProbUp`. With the classical spacing `dx = √3 v`,
+  `v2 = v²` they are the classical trinomial weights, and the validity window keeps them in
+  `[0, 1]`. The lattice matches the per-step log-return moments of the GBM (the `e`, `v2`
+  parameters, supplied by `GBMLogMoments`), so the tree is the discrete law matching the
+  GBM increment's first two moments. -/)]
+  MathFin.trinomialProb_unique
 
 -- ===== valuation/diffusions: Black–Scholes and Bachelier =====
 

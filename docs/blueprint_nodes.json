@@ -1504,4 +1504,17 @@
   "latexEnv": "theorem",
   "label": "thm:utility-state-price-density",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/StatePriceDensity.lean"}]
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/StatePriceDensity.lean"},
+  {
+  "name": "MathFin.trinomialProb_unique",
+  "label": "thm:trinomial-moment-matching",
+  "title": "Trinomial moment matching",
+  "latexEnv": "theorem",
+  "text":
+  "For `dx \u2260 0`, the weights of a one-step trinomial lattice solving the mass,\n  mean and second-moment equations about the central node are unique: `q\u2081 = trinomialProbDown`,\n  `q\u2082 = trinomialProbMid`, `q\u2083 = trinomialProbUp`. With the classical spacing `dx = \u221a3 v`,\n  `v2 = v\u00b2` they are the classical trinomial weights, and the validity window keeps them in\n  `[0, 1]`. The lattice matches the per-step log-return moments of the GBM (the `e`, `v2`\n  parameters, supplied by `GBMLogMoments`), so the tree is the discrete law matching the\n  GBM increment's first two moments.",
+  "module": "MathFin.Models.Binomial.TrinomialMomentMatching",
+  "line": 127,
+  "leanOk": true,
+  "file":
+  "MathFin/Models/Binomial/TrinomialMomentMatching.lean",
+  "uses": ["def:gbm"]}]
