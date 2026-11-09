@@ -1042,9 +1042,9 @@
     "mf-black-scholes-market-pricing-measure": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-09",
-      "elapsed_s": 3.7,
-      "input_hash": "83175b97dc7e8f862b9d239d1612d4894e970f7e8ba1e993a1728ddc41e23485",
-      "verified_at_commit": "92f7034"
+      "elapsed_s": 3.1,
+      "input_hash": "5e02c461035047f37b71dbbdc6c99d4dfcadcc3b32b79aa6d6d49ccae26786db",
+      "verified_at_commit": "cdc898e"
     },
     "mf-black-scholes-price-law": {
       "benchmark_file": "jumps_and_variance_swaps.json",
@@ -1304,6 +1304,20 @@
       "elapsed_s": 2.5,
       "input_hash": "164c5043792f6c485860aab061c2536a6de5c63fe424747f7a8a6f120124ac3c",
       "verified_at_commit": "f68ab19"
+    },
+    "mf-bs-market-call-price": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-11-09",
+      "elapsed_s": 3.2,
+      "input_hash": "02b1056221155002406983e7b95e7bf655cadb0c439af4e571fca077286095b7",
+      "verified_at_commit": "cdc898e"
+    },
+    "mf-bs-market-pricing-measure": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-11-09",
+      "elapsed_s": 3.1,
+      "input_hash": "0559f45a567ab10a766f4a2f34b7249ced056905adacefd7b381ba1409abd7ee",
+      "verified_at_commit": "cdc898e"
     },
     "mf-bs-merton-delta": {
       "benchmark_file": "black_scholes.json",
@@ -3632,9 +3646,9 @@
     "mf-market-ftap-finite": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-11-09",
-      "elapsed_s": 3.3,
-      "input_hash": "7f402034a74fbab800b217f1320ca6419d0a0a19ace62a6cf23b2607a3f555b5",
-      "verified_at_commit": "92f7034"
+      "elapsed_s": 2.8,
+      "input_hash": "609e837c5e0b1ea82bac27053191a2eab32edf07f59a68743e364ccfa6d5b1f1",
+      "verified_at_commit": "cdc898e"
     },
     "mf-market-price-law-invariance": {
       "benchmark_file": "no_arbitrage.json",
