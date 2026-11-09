@@ -1,0 +1,23 @@
+{
+  "_doc": "Debt counts that may fall and may not rise (tools/verify/ratchet.py). Lower with `python3 -m tools.verify.ratchet update`; never edit a value upward.",
+  "baseline": {
+    "max_heartbeats": 9,
+    "whole_mathlib_imports": 0,
+    "long_files": 0,
+    "nolints": 0,
+    "modules_without_tags": 0,
+    "private_mathlib_shaped": 0,
+    "duplicate_statements": 0,
+    "modules_without_main_results": 0,
+    "modules_without_main_definitions": 0,
+    "modules_with_uncited_sources": 0,
+    "long_lines": 0,
+    "corpus_off_blueprint": 298,
+    "blueprint_islands": 26,
+    "prices_off_trunk": 41,
+    "price_entries_off_trunk": 171,
+    "pricing_devices_unbridged": 0,
+    "concept_duplicates": 9,
+    "layer_violations": 0
+  }
+}

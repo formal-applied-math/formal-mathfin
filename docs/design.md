@@ -86,7 +86,7 @@ representations needs its own bridge theorems, and the two definitions drift apa
 
 The library's bridges are this principle at the scale of modules
 ([`architecture.md`](architecture.md#the-bridge-methodology), [`bridges.md`](bridges.md)): a
-constructor such as `BSCallHyp.of_isPreBrownian` turns a Foundations object into the
+constructor such as `BSCallHyp.of_isPreBrownian` turns a `Probability/` object into the
 hypothesis a pricing module already consumes, instead of a second pricing module built on Brownian
 motion. The same discipline applies to smaller changes: a discounted price process, a change of
 numéraire, a pushforward of the pricing measure, an `Lp` class and its representative.
@@ -103,6 +103,19 @@ form, never for both directions of an equation.
 A named abstraction is expensive, because users must find it and maintainers must keep it. Add one
 when it has a second consumer, supports a theorem shared by several applications, or lets one proof
 replace several. Otherwise keep the expression local.
+
+The interface includes the automation. A hub definition (one with many users in the declaration
+index) carries its evaluation lemmas as `@[simp]`, its measurability and continuity facts under
+`@[fun_prop]`, its monotonicity under `@[gcongr]`, its sign facts as `positivity` extensions, and
+the pricing identities it takes part in (parity, discounting, forward prices) in the library's grind
+set, `grind [pricing]` (`MathFin/Init.lean`). `MathFinTest/Automation.lean` pins what each tactic
+is expected to close. CSLib's rule applies as written: *if a simple fact needs a complicated proof,
+add the missing lemma, improve the interface, or reconsider the abstraction.*
+
+**Notation.** Notation shared by several types goes through a typeclass. Any other notation is
+`scoped` in the namespace of the object it writes, and opened where it is used. Nothing is global.
+A conventions file, `MathFin/Init.lean`, is imported by every module. It holds the library's
+attributes, and a new convention goes there, so adding one never needs a sweep.
 
 ## 6. A headline result is shown to apply
 

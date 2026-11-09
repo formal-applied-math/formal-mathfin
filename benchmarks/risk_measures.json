@@ -8,14 +8,20 @@
       "description": "For a gaussian loss L ~ N(μ, σ²), VaR_α(aL + b) = a·VaR_α(L) + b for a ≥ 0.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.Gaussian\n\nopen MathFin\n\ntheorem gaussian_var_affine_thm (μ σ z a b : ℝ) (ha : 0 ≤ a) :\n    MathFin.gaussianVaR (a * μ + b) (|a| * σ) z =\n      a * MathFin.gaussianVaR μ σ z + b :=\n  MathFin.gaussianVaR_affine μ σ z a b ha\n"
+        "lean": "import MathFin.Risk.Gaussian\n\nopen MathFin\n\ntheorem gaussian_var_affine_thm (μ σ z a b : ℝ) (ha : 0 ≤ a) :\n    MathFin.gaussianVaR (a * μ + b) (|a| * σ) z =\n      a * MathFin.gaussianVaR μ σ z + b :=\n  MathFin.gaussianVaR_affine μ σ z a b ha\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Value-at-Risk affine invariance (McNeil-Frey-Embrechts, Quantitative Risk Management, Ch 2)",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Ch 2"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via ring on the definition VaR = μ + σ·z. Lives in MathFin/RiskMeasures/Gaussian.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via ring on the definition VaR = μ + σ·z. Lives in MathFin/Risk/Gaussian.lean. Axioms-clean."
       }
     },
     {
@@ -24,14 +30,20 @@
       "description": "For a gaussian loss L ~ N(μ, σ²), CVaR_α(aL + b) = a·CVaR_α(L) + b for a ≥ 0.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.Gaussian\n\nopen MathFin\n\ntheorem gaussian_cvar_affine_thm (μ σ z α a b : ℝ) (ha : 0 ≤ a) :\n    MathFin.gaussianCVaR (a * μ + b) (|a| * σ) z α =\n      a * MathFin.gaussianCVaR μ σ z α + b :=\n  MathFin.gaussianCVaR_affine μ σ z α a b ha\n"
+        "lean": "import MathFin.Risk.Gaussian\n\nopen MathFin\n\ntheorem gaussian_cvar_affine_thm (μ σ z α a b : ℝ) (ha : 0 ≤ a) :\n    MathFin.gaussianCVaR (a * μ + b) (|a| * σ) z α =\n      a * MathFin.gaussianCVaR μ σ z α + b :=\n  MathFin.gaussianCVaR_affine μ σ z α a b ha\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Conditional Value-at-Risk affine invariance (McNeil-Frey-Embrechts, QRM Ch 2)",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Ch 2"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via ring on the definition CVaR = μ + σ·φ(z)/(1-α). Lives in MathFin/RiskMeasures/Gaussian.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via ring on the definition CVaR = μ + σ·φ(z)/(1-α). Lives in MathFin/Risk/Gaussian.lean. Axioms-clean."
       }
     },
     {
@@ -40,14 +52,20 @@
       "description": "Standard normal VaR collapses to the quantile: VaR_α(N(0,1)) = z_α.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.Gaussian\n\nopen MathFin\n\ntheorem gaussian_var_standard_thm (z : ℝ) :\n    MathFin.gaussianVaR 0 1 z = z :=\n  MathFin.gaussianVaR_standard z\n"
+        "lean": "import MathFin.Risk.Gaussian\n\nopen MathFin\n\ntheorem gaussian_var_standard_thm (z : ℝ) :\n    MathFin.gaussianVaR 0 1 z = z :=\n  MathFin.gaussianVaR_standard z\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Standard normal VaR (McNeil-Frey-Embrechts, QRM Ch 2)",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Ch 2"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof from the definition 0 + 1·z = z. Lives in MathFin/RiskMeasures/Gaussian.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof from the definition 0 + 1·z = z. Lives in MathFin/Risk/Gaussian.lean. Axioms-clean."
       }
     },
     {
@@ -56,14 +74,20 @@
       "description": "Standard normal CVaR equals ϕ(z)/(1-α): CVaR_α(N(0,1)) = ϕ(z_α)/(1-α).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.Gaussian\n\nopen MathFin ProbabilityTheory\n\ntheorem gaussian_cvar_standard_thm (z α : ℝ) :\n    MathFin.gaussianCVaR 0 1 z α = gaussianPDFReal 0 1 z / (1 - α) :=\n  MathFin.gaussianCVaR_standard z α\n"
+        "lean": "import MathFin.Risk.Gaussian\n\nopen MathFin ProbabilityTheory\n\ntheorem gaussian_cvar_standard_thm (z α : ℝ) :\n    MathFin.gaussianCVaR 0 1 z α = gaussianPDFReal 0 1 z / (1 - α) :=\n  MathFin.gaussianCVaR_standard z α\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Standard normal CVaR closed form (McNeil-Frey-Embrechts, QRM Ch 2.2.4)",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Ch 2.2.4"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof from the definition 0 + 1·ϕ(z)/(1-α). Lives in MathFin/RiskMeasures/Gaussian.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof from the definition 0 + 1·ϕ(z)/(1-α). Lives in MathFin/Risk/Gaussian.lean. Axioms-clean."
       }
     },
     {
@@ -72,14 +96,20 @@
       "description": "CVaR_α(L) − VaR_α(L) = σ·(ϕ(z)/(1-α) − z) for gaussian L ~ N(μ, σ²). The two coincide only when ϕ(z)/(1-α) = z (rarely true in practice).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.Gaussian\n\nopen MathFin ProbabilityTheory\n\ntheorem gaussian_cvar_sub_var_thm (μ σ z α : ℝ) :\n    MathFin.gaussianCVaR μ σ z α - MathFin.gaussianVaR μ σ z =\n      σ * (gaussianPDFReal 0 1 z / (1 - α) - z) :=\n  MathFin.gaussianCVaR_sub_VaR μ σ z α\n"
+        "lean": "import MathFin.Risk.Gaussian\n\nopen MathFin ProbabilityTheory\n\ntheorem gaussian_cvar_sub_var_thm (μ σ z α : ℝ) :\n    MathFin.gaussianCVaR μ σ z α - MathFin.gaussianVaR μ σ z =\n      σ * (gaussianPDFReal 0 1 z / (1 - α) - z) :=\n  MathFin.gaussianCVaR_sub_VaR μ σ z α\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "CVaR/VaR difference (McNeil-Frey-Embrechts, QRM Ch 2.2.4)",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Ch 2.2.4"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via ring on the definitions. Lives in MathFin/RiskMeasures/Gaussian.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via ring on the definitions. Lives in MathFin/Risk/Gaussian.lean. Axioms-clean."
       }
     },
     {
@@ -88,14 +118,20 @@
       "description": "For iid gaussian increments aggregating to L_T ~ N(T·μ, T·σ²), VaR_α(L_T) = T·μ + σ·√T·z. The √T volatility scaling rule.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.Gaussian\n\nopen MathFin Real\n\ntheorem gaussian_var_vol_scaling_thm (μ σ z T : ℝ) :\n    MathFin.gaussianVaR (T * μ) (σ * Real.sqrt T) z =\n      T * μ + σ * Real.sqrt T * z :=\n  MathFin.gaussianVaR_volatility_scaling μ σ z T\n"
+        "lean": "import MathFin.Risk.Gaussian\n\nopen MathFin Real\n\ntheorem gaussian_var_vol_scaling_thm (μ σ z T : ℝ) :\n    MathFin.gaussianVaR (T * μ) (σ * Real.sqrt T) z =\n      T * μ + σ * Real.sqrt T * z :=\n  MathFin.gaussianVaR_volatility_scaling μ σ z T\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "VaR volatility scaling under iid aggregation (McNeil-Frey-Embrechts, QRM Ch 2.3)",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Ch 2.3"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via ring on VaR(T·μ, σ√T, z) = T·μ + σ√T·z. Lives in MathFin/RiskMeasures/Gaussian.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via ring on VaR(T·μ, σ√T, z) = T·μ + σ√T·z. Lives in MathFin/Risk/Gaussian.lean. Axioms-clean."
       }
     },
     {
@@ -104,14 +140,23 @@
       "description": "gaussianVaR (μ + c) σ z = gaussianVaR μ σ z + c for all real μ, σ, z, c: translation of the closed-form function μ + σ z in its location parameter, the parameter form of the Artzner-Delbaen-Eber-Heath translation axiom. A statement about real numbers, not about random variables or a risk measure. The closed-form lemma behind mf-gaussian-var-translation-law.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_var_translation_thm (μ σ z c : ℝ) :\n    MathFin.gaussianVaR (μ + c) σ z = MathFin.gaussianVaR μ σ z + c :=\n  MathFin.gaussianVaR_translation μ σ z c\n"
+        "lean": "import MathFin.Risk.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_var_translation_thm (μ σ z c : ℝ) :\n    MathFin.gaussianVaR (μ + c) σ z = MathFin.gaussianVaR μ σ z + c :=\n  MathFin.gaussianVaR_translation μ σ z c\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Coherent risk measure axioms (Artzner-Delbaen-Eber-Heath 1999; McNeil-Frey-Embrechts Ch 2.3)",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Ch 2.3"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via ring. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via ring. Lives in MathFin/Risk/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -120,14 +165,23 @@
       "description": "gaussianCVaR (μ + c) σ z α = gaussianCVaR μ σ z α + c for all real μ, σ, z, α, c: location shift of the closed form μ + σ φ(z)/(1 − α), the parameter form of the translation axiom. A statement about real numbers, not about random variables or a risk measure. The closed-form lemma behind mf-gaussian-es-translation-law.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_cvar_translation_thm (μ σ z α c : ℝ) :\n    MathFin.gaussianCVaR (μ + c) σ z α =\n      MathFin.gaussianCVaR μ σ z α + c :=\n  MathFin.gaussianCVaR_translation μ σ z α c\n"
+        "lean": "import MathFin.Risk.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_cvar_translation_thm (μ σ z α c : ℝ) :\n    MathFin.gaussianCVaR (μ + c) σ z α =\n      MathFin.gaussianCVaR μ σ z α + c :=\n  MathFin.gaussianCVaR_translation μ σ z α c\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Coherent risk measure axioms (Artzner-Delbaen-Eber-Heath 1999; McNeil-Frey-Embrechts Ch 2.3)",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Ch 2.3"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via ring. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via ring. Lives in MathFin/Risk/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -136,14 +190,19 @@
       "description": "gaussianVaR (λ μ) (|λ| σ) z = λ · gaussianVaR μ σ z for λ ≥ 0 and all real μ, σ, z: scaling both parameters of the closed form μ + σ z, the parameter form of the Artzner-Delbaen-Eber-Heath positive-homogeneity axiom. A statement about real numbers, not about random variables or a risk measure. The closed-form lemma behind mf-gaussian-var-pos-homog-law.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_var_pos_homog_thm (μ σ z : ℝ) {l : ℝ} (hl : 0 ≤ l) :\n    MathFin.gaussianVaR (l * μ) (|l| * σ) z = l * MathFin.gaussianVaR μ σ z :=\n  MathFin.gaussianVaR_positiveHomogeneity μ σ z hl\n"
+        "lean": "import MathFin.Risk.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_var_pos_homog_thm (μ σ z : ℝ) {l : ℝ} (hl : 0 ≤ l) :\n    MathFin.gaussianVaR (l * μ) (|l| * σ) z = l * MathFin.gaussianVaR μ σ z :=\n  MathFin.gaussianVaR_positiveHomogeneity μ σ z hl\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Coherent risk measure axioms (Artzner-Delbaen-Eber-Heath 1999)",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via ring. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via ring. Lives in MathFin/Risk/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -152,14 +211,19 @@
       "description": "gaussianCVaR (λ μ) (|λ| σ) z α = λ · gaussianCVaR μ σ z α for λ ≥ 0 and all real μ, σ, z, α: scaling both parameters of the closed form μ + σ φ(z)/(1 − α), the parameter form of the positive-homogeneity axiom. A statement about real numbers, not about random variables or a risk measure. The closed-form lemma behind mf-gaussian-es-pos-homog-law.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_cvar_pos_homog_thm (μ σ z α : ℝ) {l : ℝ} (hl : 0 ≤ l) :\n    MathFin.gaussianCVaR (l * μ) (|l| * σ) z α =\n      l * MathFin.gaussianCVaR μ σ z α :=\n  MathFin.gaussianCVaR_positiveHomogeneity μ σ z α hl\n"
+        "lean": "import MathFin.Risk.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_cvar_pos_homog_thm (μ σ z α : ℝ) {l : ℝ} (hl : 0 ≤ l) :\n    MathFin.gaussianCVaR (l * μ) (|l| * σ) z α =\n      l * MathFin.gaussianCVaR μ σ z α :=\n  MathFin.gaussianCVaR_positiveHomogeneity μ σ z α hl\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Coherent risk measure axioms (Artzner-Delbaen-Eber-Heath 1999)",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via ring. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via ring. Lives in MathFin/Risk/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -168,14 +232,19 @@
       "description": "gaussianVaR μ₁ σ z ≤ gaussianVaR μ₂ σ z when μ₁ ≤ μ₂, for the same real σ and z: monotonicity of the closed form μ + σ z in the mean parameter. Not the Artzner-Delbaen-Eber-Heath monotonicity axiom, which orders random variables.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_var_monotone_thm {μ₁ μ₂ σ z : ℝ} (hμ : μ₁ ≤ μ₂) :\n    MathFin.gaussianVaR μ₁ σ z ≤ MathFin.gaussianVaR μ₂ σ z :=\n  MathFin.gaussianVaR_monotone_mean hμ\n"
+        "lean": "import MathFin.Risk.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_var_monotone_thm {μ₁ μ₂ σ z : ℝ} (hμ : μ₁ ≤ μ₂) :\n    MathFin.gaussianVaR μ₁ σ z ≤ MathFin.gaussianVaR μ₂ σ z :=\n  MathFin.gaussianVaR_monotone_mean hμ\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Coherent risk measure axioms — monotonicity (Artzner-Delbaen-Eber-Heath 1999)",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via linarith on the definition. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via linarith on the definition. Lives in MathFin/Risk/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -184,14 +253,19 @@
       "description": "gaussianCVaR μ₁ σ z α ≤ gaussianCVaR μ₂ σ z α when μ₁ ≤ μ₂, for the same real σ, z and α: monotonicity of the closed form μ + σ φ(z)/(1 − α) in the mean parameter. Not the Artzner-Delbaen-Eber-Heath monotonicity axiom, which orders random variables.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_cvar_monotone_thm {μ₁ μ₂ σ z α : ℝ} (hμ : μ₁ ≤ μ₂) :\n    MathFin.gaussianCVaR μ₁ σ z α ≤ MathFin.gaussianCVaR μ₂ σ z α :=\n  MathFin.gaussianCVaR_monotone_mean hμ\n"
+        "lean": "import MathFin.Risk.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_cvar_monotone_thm {μ₁ μ₂ σ z α : ℝ} (hμ : μ₁ ≤ μ₂) :\n    MathFin.gaussianCVaR μ₁ σ z α ≤ MathFin.gaussianCVaR μ₂ σ z α :=\n  MathFin.gaussianCVaR_monotone_mean hμ\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Coherent risk measure axioms — monotonicity (Artzner-Delbaen-Eber-Heath 1999)",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via linarith on the definition. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via linarith on the definition. Lives in MathFin/Risk/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -200,14 +274,15 @@
       "description": "√(σ₁² + 2·ρ·σ₁·σ₂ + σ₂²) ≤ σ₁ + σ₂ whenever σ₁, σ₂ ≥ 0 and ρ ≤ 1 — in particular for every correlation |ρ| ≤ 1. The substantive inequality behind gaussian subadditivity.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem joint_stdev_triangle_thm {σ₁ σ₂ ρ : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) :\n    Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2) ≤ σ₁ + σ₂ :=\n  MathFin.joint_stdev_le h₁ h₂ hρ\n"
+        "lean": "import MathFin.Risk.CoherentAxioms\n\nopen MathFin\n\ntheorem joint_stdev_triangle_thm {σ₁ σ₂ ρ : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) :\n    Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2) ≤ σ₁ + σ₂ :=\n  MathFin.joint_stdev_le h₁ h₂ hρ\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Joint-gaussian stdev triangle inequality (used for VaR/CVaR subadditivity)",
+        "citations": [],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via nlinarith on (σ₁+σ₂)² - (σ₁²+2ρσ₁σ₂+σ₂²) = 2(1-ρ)σ₁σ₂ ≥ 0, then Real.sqrt monotonicity. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via nlinarith on (σ₁+σ₂)² - (σ₁²+2ρσ₁σ₂+σ₂²) = 2(1-ρ)σ₁σ₂ ≥ 0, then Real.sqrt monotonicity. Lives in MathFin/Risk/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -216,14 +291,19 @@
       "description": "For real parameters μ₁, μ₂, σ₁, σ₂ ≥ 0, a free ρ ≤ 1 and z ≥ 0: gaussianVaR (μ₁ + μ₂) √(σ₁² + 2ρσ₁σ₂ + σ₂²) z ≤ gaussianVaR μ₁ σ₁ z + gaussianVaR μ₂ σ₂ z, for the closed form μ + σ z. Not a statement about random variables: for a jointly Gaussian pair see mf-gaussian-var-subadditive-jointly-gaussian (α ≥ 1/2) and qrm-var-gaussian-subadditive-iff. The genuine content is the triangle inequality for the combined volatility.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_var_subadditive_thm {μ₁ μ₂ σ₁ σ₂ ρ z : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) (hz : 0 ≤ z) :\n    MathFin.gaussianVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2)) z ≤\n      MathFin.gaussianVaR μ₁ σ₁ z + MathFin.gaussianVaR μ₂ σ₂ z :=\n  MathFin.gaussianVaR_subadditive h₁ h₂ hρ hz\n"
+        "lean": "import MathFin.Risk.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_var_subadditive_thm {μ₁ μ₂ σ₁ σ₂ ρ z : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) (hz : 0 ≤ z) :\n    MathFin.gaussianVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2)) z ≤\n      MathFin.gaussianVaR μ₁ σ₁ z + MathFin.gaussianVaR μ₂ σ₂ z :=\n  MathFin.gaussianVaR_subadditive h₁ h₂ hρ hz\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Coherent risk measure axioms — gaussian VaR subadditivity (Artzner-Delbaen-Eber-Heath 1999)",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via joint-stdev triangle inequality + nlinarith. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via joint-stdev triangle inequality + nlinarith. Lives in MathFin/Risk/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -232,14 +312,19 @@
       "description": "Same parameter setup as the closed-form VaR subadditivity with level α < 1: the closed-form CVaR at the combined volatility is at most the sum of the closed forms. A statement about the real function gaussianCVaR on parameters (σ_i ≥ 0, ρ ≤ 1 free), not about random variables; for jointly Gaussian random variables see mf-gaussian-cvar-subadditive-jointly-gaussian.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_cvar_subadditive_thm {μ₁ μ₂ σ₁ σ₂ ρ z α : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) (hα : α < 1) :\n    MathFin.gaussianCVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2)) z α ≤\n      MathFin.gaussianCVaR μ₁ σ₁ z α + MathFin.gaussianCVaR μ₂ σ₂ z α :=\n  MathFin.gaussianCVaR_subadditive h₁ h₂ hρ hα\n"
+        "lean": "import MathFin.Risk.CoherentAxioms\n\nopen MathFin\n\ntheorem gaussian_cvar_subadditive_thm {μ₁ μ₂ σ₁ σ₂ ρ z α : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) (hα : α < 1) :\n    MathFin.gaussianCVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2)) z α ≤\n      MathFin.gaussianCVaR μ₁ σ₁ z α + MathFin.gaussianCVaR μ₂ σ₂ z α :=\n  MathFin.gaussianCVaR_subadditive h₁ h₂ hρ hα\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Coherent risk measure axioms — gaussian CVaR subadditivity (Artzner-Delbaen-Eber-Heath 1999)",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via joint-stdev triangle inequality + PDF non-negativity + linarith. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via joint-stdev triangle inequality + PDF non-negativity + linarith. Lives in MathFin/Risk/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -248,14 +333,24 @@
       "description": "For a jointly Gaussian pair (X, Y) of losses and a level α ∈ (0, 1) with α ≥ 1/2: VaR_α(X + Y) ≤ VaR_α(X) + VaR_α(Y). A statement about random variables, with no hypothesis on the correlation; value-at-risk is not subadditive for general laws, and for a Gaussian pair with correlation below one the inequality fails below the median (see qrm-var-gaussian-subadditive-iff).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.VaRSuperadditivity\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_add_le_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X Y : Ω → ℝ}\n    (h : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) (hα : α ∈ Ioo 0 1) (hα₂ : 1 / 2 ≤ α) :\n    valueAtRisk (fun ω ↦ X ω + Y ω) P α ≤ valueAtRisk X P α + valueAtRisk Y P α :=\n  MathFin.valueAtRisk_add_le_of_hasGaussianLaw h hα hα₂\n"
+        "lean": "import MathFin.Risk.VaRSuperadditivity\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_add_le_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X Y : Ω → ℝ}\n    (h : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) (hα : α ∈ Ioo 0 1) (hα₂ : 1 / 2 ≤ α) :\n    valueAtRisk (fun ω ↦ X ω + Y ω) P α ≤ valueAtRisk X P α + valueAtRisk Y P α :=\n  MathFin.valueAtRisk_add_le_of_hasGaussianLaw h hα hα₂\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Gaussian VaR subadditivity (McNeil-Frey-Embrechts, Quantitative Risk Management, Ch 2.3; QRM Exercise Book Ex. 2.22)",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Ch 2.3"
+          },
+          {
+            "key": "QRMExerciseBook",
+            "locator": "Ex. 2.22"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. VaR of each Gaussian loss and of the sum is E + sd Φ⁻¹(α); the standard deviation is subadditive (discriminant of t ↦ Var(tX + Y)); Φ⁻¹(α) ≥ 0 for α ≥ 1/2. Lives in MathFin/RiskMeasures/VaRSuperadditivity.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. VaR of each Gaussian loss and of the sum is E + sd Φ⁻¹(α); the standard deviation is subadditive (discriminant of t ↦ Var(tX + Y)); Φ⁻¹(α) ≥ 0 for α ≥ 1/2. Lives in MathFin/Risk/VaRSuperadditivity.lean. Axioms-clean."
       }
     },
     {
@@ -264,14 +359,23 @@
       "description": "For a jointly Gaussian pair (X, Y) with Var X, Var Y and Var(X + Y) positive and α ∈ (0, 1): the closed form gaussianCVaR at mean E X + E Y and volatility sd(X + Y) is at most the sum of the closed forms at the margins (E X, sd X) and (E Y, sd Y), at the normal quantile Φ⁻¹(α). Derived from the subadditivity of expected shortfall on the general coherence structure and the Gaussian closed form of expected shortfall; the bare-parameter statement is mf-gaussian-cvar-subadditive.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem gaussianCVaR_sd_add_le_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X Y : Ω → ℝ}\n    (h : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) (hα : α ∈ Ioo 0 1)\n    (_hX : 0 < Var[X; P]) (_hY : 0 < Var[Y; P])\n    (_hXY : 0 < Var[fun ω ↦ X ω + Y ω; P]) :\n    gaussianCVaR (P[X] + P[Y]) √Var[fun ω ↦ X ω + Y ω; P] (PhiInv α) α ≤\n      gaussianCVaR P[X] √Var[X; P] (PhiInv α) α + gaussianCVaR P[Y] √Var[Y; P] (PhiInv α) α :=\n  MathFin.gaussianCVaR_sd_add_le h hα\n"
+        "lean": "import MathFin.Risk.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem gaussianCVaR_sd_add_le_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X Y : Ω → ℝ}\n    (h : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P) (hα : α ∈ Ioo 0 1)\n    (_hX : 0 < Var[X; P]) (_hY : 0 < Var[Y; P])\n    (_hXY : 0 < Var[fun ω ↦ X ω + Y ω; P]) :\n    gaussianCVaR (P[X] + P[Y]) √Var[fun ω ↦ X ω + Y ω; P] (PhiInv α) α ≤\n      gaussianCVaR P[X] √Var[X; P] (PhiInv α) α + gaussianCVaR P[Y] √Var[Y; P] (PhiInv α) α :=\n  MathFin.gaussianCVaR_sd_add_le h hα\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Coherence of expected shortfall (Acerbi-Tasche 2002) on the Gaussian family; McNeil-Frey-Embrechts Ch 2.3",
+        "citations": [
+          {
+            "key": "AcerbiTasche2002"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Ch 2.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof, a corollary of expectedShortfall_add_le (the subadditivity axiom of expectedShortfall_isCoherentRiskMeasure) and expectedShortfall_of_hasGaussianLaw. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean. The library theorem holds without the three positivity hypotheses (a degenerate Gaussian is a.s. constant); the entry keeps them, so its claim is the nondegenerate case."
+        "formalization_scope": "Full formal proof, a corollary of expectedShortfall_add_le (the subadditivity axiom of expectedShortfall_isCoherentRiskMeasure) and expectedShortfall_of_hasGaussianLaw. Lives in MathFin/Risk/CoherentAxioms.lean. Axioms-clean. The library theorem holds without the three positivity hypotheses (a degenerate Gaussian is a.s. constant); the entry keeps them, so its claim is the nondegenerate case."
       }
     },
     {
@@ -280,14 +384,20 @@
       "description": "For a real random variable X with a Gaussian law (HasGaussianLaw, degenerate included) and a level α ∈ (0, 1): valueAtRisk X P α = E[X] + sd(X) Φ⁻¹(α), with sd(X) = √Var[X]. A statement about the random variable, with the mean and variance read off its law; the bare-parameter form is gaussianVaR in mf-gaussian-var-standard and mf-gaussian-var-affine.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X : Ω → ℝ}\n    (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) :\n    valueAtRisk X P α = P[X] + √Var[X; P] * PhiInv α :=\n  MathFin.valueAtRisk_of_hasGaussianLaw hX hα\n"
+        "lean": "import MathFin.Risk.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X : Ω → ℝ}\n    (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) :\n    valueAtRisk X P α = P[X] + √Var[X; P] * PhiInv α :=\n  MathFin.valueAtRisk_of_hasGaussianLaw hX hα\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "McNeil-Frey-Embrechts, Quantitative Risk Management, Ch 2.3 (VaR of a normal loss)",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Ch 2.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. The law of X is N(E X, Var X) (HasGaussianLaw.map_eq_gaussianReal), whose quantile at α is m + σ Φ⁻¹(α) (quantile_gaussianReal). Lives in MathFin/RiskMeasures/GaussianValueAtRisk.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. The law of X is N(E X, Var X) (HasGaussianLaw.map_eq_gaussianReal), whose quantile at α is m + σ Φ⁻¹(α) (quantile_gaussianReal). Lives in MathFin/Risk/GaussianValueAtRisk.lean. Axioms-clean."
       }
     },
     {
@@ -296,14 +406,23 @@
       "description": "For a real random variable X with a Gaussian law (HasGaussianLaw, degenerate included) and a level α ∈ (0, 1): expectedShortfall X P α = gaussianCVaR E[X] sd(X) Φ⁻¹(α) α, i.e. E[X] + sd(X) ϕ(Φ⁻¹(α))/(1 − α) with sd(X) = √Var[X]. A statement about the random variable, with the mean and variance read off its law; a degenerate Gaussian is almost surely constant and its expected shortfall is that constant.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem expectedShortfall_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X : Ω → ℝ}\n    (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) :\n    expectedShortfall X P α = gaussianCVaR P[X] √Var[X; P] (PhiInv α) α :=\n  MathFin.expectedShortfall_of_hasGaussianLaw hX hα\n"
+        "lean": "import MathFin.Risk.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem expectedShortfall_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X : Ω → ℝ}\n    (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) :\n    expectedShortfall X P α = gaussianCVaR P[X] √Var[X; P] (PhiInv α) α :=\n  MathFin.expectedShortfall_of_hasGaussianLaw hX hα\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Acerbi-Tasche 2002; McNeil-Frey-Embrechts, Quantitative Risk Management, Ch 2.3 (ES of a normal loss)",
+        "citations": [
+          {
+            "key": "AcerbiTasche2002"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Ch 2.3"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. For Var X > 0 the Rockafellar-Uryasev minimiser of the Gaussian law N(E X, Var X) is the closed form (gaussianCVaR_isLeast_ruObjective); a degenerate Gaussian is a.s. constant (evariance_eq_zero_iff, expectedShortfall_const, expectedShortfall_mono). Lives in MathFin/RiskMeasures/GaussianExpectedShortfall.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. For Var X > 0 the Rockafellar-Uryasev minimiser of the Gaussian law N(E X, Var X) is the closed form (gaussianCVaR_isLeast_ruObjective); a degenerate Gaussian is a.s. constant (evariance_eq_zero_iff, expectedShortfall_const, expectedShortfall_mono). Lives in MathFin/Risk/GaussianExpectedShortfall.lean. Axioms-clean."
       }
     },
     {
@@ -312,14 +431,19 @@
       "description": "For a Gaussian random variable X, a level α ∈ (0, 1) and a constant c: valueAtRisk (X + c) P α = gaussianVaR E[X] sd(X) Φ⁻¹(α) + c. A statement about the random variable X + c, through its Gaussian law N(E X + c, Var X); the parameter identity it consumes is mf-gaussian-var-translation.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_add_const_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X : Ω → ℝ}\n    (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) (c : ℝ) :\n    valueAtRisk (fun ω ↦ X ω + c) P α = gaussianVaR P[X] √Var[X; P] (PhiInv α) + c :=\n  MathFin.valueAtRisk_add_const_of_hasGaussianLaw hX hα c\n"
+        "lean": "import MathFin.Risk.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_add_const_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X : Ω → ℝ}\n    (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) (c : ℝ) :\n    valueAtRisk (fun ω ↦ X ω + c) P α = gaussianVaR P[X] √Var[X; P] (PhiInv α) + c :=\n  MathFin.valueAtRisk_add_const_of_hasGaussianLaw hX hα c\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Coherent risk measure axioms - translation invariance (Artzner-Delbaen-Eber-Heath 1999)",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Mathlib's gaussianReal_add_const gives X + c the law N(E X + c, Var X); valueAtRisk_of_hasLaw_gaussianReal and gaussianVaR_translation finish. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Mathlib's gaussianReal_add_const gives X + c the law N(E X + c, Var X); valueAtRisk_of_hasLaw_gaussianReal and gaussianVaR_translation finish. Lives in MathFin/Risk/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -328,14 +452,19 @@
       "description": "For a Gaussian random variable X, a level α ∈ (0, 1) and a scalar l ≥ 0: valueAtRisk (l · X) P α = l · gaussianVaR E[X] sd(X) Φ⁻¹(α). A statement about the random variable l · X, through its Gaussian law N(l E X, l² Var X); the parameter identity it consumes is mf-gaussian-var-pos-homog.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_const_mul_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X : Ω → ℝ}\n    (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) {l : ℝ} (hl : 0 ≤ l) :\n    valueAtRisk (fun ω ↦ l * X ω) P α = l * gaussianVaR P[X] √Var[X; P] (PhiInv α) :=\n  MathFin.valueAtRisk_const_mul_of_hasGaussianLaw hX hα hl\n"
+        "lean": "import MathFin.Risk.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_const_mul_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X : Ω → ℝ}\n    (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) {l : ℝ} (hl : 0 ≤ l) :\n    valueAtRisk (fun ω ↦ l * X ω) P α = l * gaussianVaR P[X] √Var[X; P] (PhiInv α) :=\n  MathFin.valueAtRisk_const_mul_of_hasGaussianLaw hX hα hl\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Coherent risk measure axioms - positive homogeneity (Artzner-Delbaen-Eber-Heath 1999)",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Mathlib's gaussianReal_const_mul gives l X the law N(l E X, l² Var X); the volatility √(l² Var X) = |l| sd X, then valueAtRisk_of_hasLaw_gaussianReal and gaussianVaR_positiveHomogeneity. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Mathlib's gaussianReal_const_mul gives l X the law N(l E X, l² Var X); the volatility √(l² Var X) = |l| sd X, then valueAtRisk_of_hasLaw_gaussianReal and gaussianVaR_positiveHomogeneity. Lives in MathFin/Risk/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -344,14 +473,22 @@
       "description": "For a Gaussian random variable X, a level α ∈ (0, 1) and a constant c: expectedShortfall (X + c) P α = gaussianCVaR E[X] sd(X) Φ⁻¹(α) α + c. A statement about the random variable X + c, through its Gaussian law and the closed form of expected shortfall; the parameter identity it consumes is mf-gaussian-cvar-translation.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem expectedShortfall_add_const_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X : Ω → ℝ}\n    (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) (c : ℝ) :\n    expectedShortfall (fun ω ↦ X ω + c) P α =\n      gaussianCVaR P[X] √Var[X; P] (PhiInv α) α + c :=\n  MathFin.expectedShortfall_add_const_of_hasGaussianLaw hX hα c\n"
+        "lean": "import MathFin.Risk.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem expectedShortfall_add_const_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X : Ω → ℝ}\n    (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) (c : ℝ) :\n    expectedShortfall (fun ω ↦ X ω + c) P α =\n      gaussianCVaR P[X] √Var[X; P] (PhiInv α) α + c :=\n  MathFin.expectedShortfall_add_const_of_hasGaussianLaw hX hα c\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Coherent risk measure axioms - translation invariance (Artzner-Delbaen-Eber-Heath 1999); Acerbi-Tasche 2002",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          },
+          {
+            "key": "AcerbiTasche2002"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. X + c is Gaussian with mean E X + c and variance Var X (gaussianReal_add_const, variance_add_const); expectedShortfall_of_hasGaussianLaw and gaussianCVaR_translation finish. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. X + c is Gaussian with mean E X + c and variance Var X (gaussianReal_add_const, variance_add_const); expectedShortfall_of_hasGaussianLaw and gaussianCVaR_translation finish. Lives in MathFin/Risk/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -360,14 +497,22 @@
       "description": "For a Gaussian random variable X, a level α ∈ (0, 1) and a scalar l ≥ 0: expectedShortfall (l · X) P α = l · gaussianCVaR E[X] sd(X) Φ⁻¹(α) α. A statement about the random variable l · X, through its Gaussian law and the closed form of expected shortfall; the parameter identity it consumes is mf-gaussian-cvar-pos-homog.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem expectedShortfall_const_mul_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X : Ω → ℝ}\n    (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) {l : ℝ} (hl : 0 ≤ l) :\n    expectedShortfall (fun ω ↦ l * X ω) P α =\n      l * gaussianCVaR P[X] √Var[X; P] (PhiInv α) α :=\n  MathFin.expectedShortfall_const_mul_of_hasGaussianLaw hX hα hl\n"
+        "lean": "import MathFin.Risk.CoherentAxioms\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem expectedShortfall_const_mul_of_hasGaussianLaw_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {α : ℝ} {X : Ω → ℝ}\n    (hX : HasGaussianLaw X P) (hα : α ∈ Ioo 0 1) {l : ℝ} (hl : 0 ≤ l) :\n    expectedShortfall (fun ω ↦ l * X ω) P α =\n      l * gaussianCVaR P[X] √Var[X; P] (PhiInv α) α :=\n  MathFin.expectedShortfall_const_mul_of_hasGaussianLaw hX hα hl\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Coherent risk measure axioms - positive homogeneity (Artzner-Delbaen-Eber-Heath 1999); Acerbi-Tasche 2002",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          },
+          {
+            "key": "AcerbiTasche2002"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. l X is Gaussian with mean l E X and variance l² Var X (gaussianReal_const_mul, variance_const_mul); expectedShortfall_of_hasGaussianLaw and gaussianCVaR_positiveHomogeneity finish. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. l X is Gaussian with mean l E X and variance l² Var X (gaussianReal_const_mul, variance_const_mul); expectedShortfall_of_hasGaussianLaw and gaussianCVaR_positiveHomogeneity finish. Lives in MathFin/Risk/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -376,14 +521,20 @@
       "description": "At ρ = 1 (perfect positive correlation), gaussian VaR is additive: VaR(L₁+L₂) = VaR(L₁) + VaR(L₂). The extremal case where diversification gives no benefit.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.Additivity\n\nopen MathFin\n\ntheorem gaussian_var_additive_thm {μ₁ μ₂ σ₁ σ₂ z : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) :\n    MathFin.gaussianVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁^2 + 2 * 1 * σ₁ * σ₂ + σ₂^2)) z =\n      MathFin.gaussianVaR μ₁ σ₁ z + MathFin.gaussianVaR μ₂ σ₂ z :=\n  MathFin.gaussianVaR_additive_at_rho_one h₁ h₂\n"
+        "lean": "import MathFin.Risk.Additivity\n\nopen MathFin\n\ntheorem gaussian_var_additive_thm {μ₁ μ₂ σ₁ σ₂ z : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) :\n    MathFin.gaussianVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁^2 + 2 * 1 * σ₁ * σ₂ + σ₂^2)) z =\n      MathFin.gaussianVaR μ₁ σ₁ z + MathFin.gaussianVaR μ₂ σ₂ z :=\n  MathFin.gaussianVaR_additive_at_rho_one h₁ h₂\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Gaussian VaR at ρ=1 (McNeil-Frey-Embrechts, QRM Ch 8)",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Ch 8"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: σ₁²+2σ₁σ₂+σ₂² = (σ₁+σ₂)² + Real.sqrt_sq + ring. Lives in MathFin/RiskMeasures/Additivity.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: σ₁²+2σ₁σ₂+σ₂² = (σ₁+σ₂)² + Real.sqrt_sq + ring. Lives in MathFin/Risk/Additivity.lean. Axioms-clean."
       }
     },
     {
@@ -392,14 +543,20 @@
       "description": "At ρ = 1, gaussian CVaR is additive: CVaR(L₁+L₂) = CVaR(L₁) + CVaR(L₂).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.Additivity\n\nopen MathFin\n\ntheorem gaussian_cvar_additive_thm {μ₁ μ₂ σ₁ σ₂ z α : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) :\n    MathFin.gaussianCVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁^2 + 2 * 1 * σ₁ * σ₂ + σ₂^2)) z α =\n      MathFin.gaussianCVaR μ₁ σ₁ z α + MathFin.gaussianCVaR μ₂ σ₂ z α :=\n  MathFin.gaussianCVaR_additive_at_rho_one h₁ h₂\n"
+        "lean": "import MathFin.Risk.Additivity\n\nopen MathFin\n\ntheorem gaussian_cvar_additive_thm {μ₁ μ₂ σ₁ σ₂ z α : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) :\n    MathFin.gaussianCVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁^2 + 2 * 1 * σ₁ * σ₂ + σ₂^2)) z α =\n      MathFin.gaussianCVaR μ₁ σ₁ z α + MathFin.gaussianCVaR μ₂ σ₂ z α :=\n  MathFin.gaussianCVaR_additive_at_rho_one h₁ h₂\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Gaussian CVaR at ρ=1 (McNeil-Frey-Embrechts, QRM Ch 8)",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Ch 8"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: σ₁²+2σ₁σ₂+σ₂² = (σ₁+σ₂)² + Real.sqrt_sq + ring. Lives in MathFin/RiskMeasures/Additivity.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: σ₁²+2σ₁σ₂+σ₂² = (σ₁+σ₂)² + Real.sqrt_sq + ring. Lives in MathFin/Risk/Additivity.lean. Axioms-clean."
       }
     },
     {
@@ -408,14 +565,19 @@
       "description": "The Rockafellar–Uryasev variational theorem for the Gaussian loss L = μ + σ·Z with σ > 0, quantile-parametrized by z with Φ(z) = α < 1: CVaR_α = μ + σ·ϕ(z)/(1−α) is the least value of the objective c ↦ c + E[(L−c)⁺]/(1−α), and that least value is attained (IsLeast over the objective's range). The statement does not name the minimizer; the proof attains it at c = VaR_α (gaussianVaR).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.RockafellarUryasev\n\nopen MeasureTheory ProbabilityTheory Real\nopen MathFin\n\ntheorem gaussian_cvar_rockafellar_uryasev_thm (μ σ z α : ℝ) (hσ : 0 < σ)\n    (hzα : MathFin.Phi z = α) (hα1 : α < 1) :\n    IsLeast (Set.range (MathFin.ruObjective μ σ α)) (MathFin.gaussianCVaR μ σ z α) :=\n  MathFin.gaussianCVaR_isLeast_ruObjective μ σ z α hσ hzα hα1\n"
+        "lean": "import MathFin.Risk.RockafellarUryasev\n\nopen MeasureTheory ProbabilityTheory Real\nopen MathFin\n\ntheorem gaussian_cvar_rockafellar_uryasev_thm (μ σ z α : ℝ) (hσ : 0 < σ)\n    (hzα : MathFin.Phi z = α) (hα1 : α < 1) :\n    IsLeast (Set.range (MathFin.ruObjective μ σ α)) (MathFin.gaussianCVaR μ σ z α) :=\n  MathFin.gaussianCVaR_isLeast_ruObjective μ σ z α hσ hzα hα1\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Rockafellar-Uryasev 2000 (CVaR optimization)",
+        "citations": [
+          {
+            "key": "RockafellarUryasev2000"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the genuine Rockafellar-Uryasev VARIATIONAL theorem for the Gaussian loss L = mu + sigma*Z — IsLeast: CVaR_alpha is the least value of g(c) = c + E[(L-c)+]/(1-alpha) over all thresholds c, attained at c = VaR_alpha (gaussianCVaR_isLeast_ruObjective, RiskMeasures/RockafellarUryasev.lean). Minimality by the pointwise certificate (L-c)+ >= (L-c)*1_{Z>z} integrated against the Gaussian density; the attained value via the expected-shortfall closed form E[(Z-z)+] = phi(z) - z(1-Phi(z)) built on the truncated-first-moment primitive. Quantile-parametrized (z with Phi(z) = alpha; no Phi-inverse API exists at the Mathlib pin). Replaces the former algebraic additive-identity shadow. Axioms-clean."
+        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the genuine Rockafellar-Uryasev VARIATIONAL theorem for the Gaussian loss L = mu + sigma*Z — IsLeast: CVaR_alpha is the least value of g(c) = c + E[(L-c)+]/(1-alpha) over all thresholds c, attained at c = VaR_alpha (gaussianCVaR_isLeast_ruObjective, Risk/RockafellarUryasev.lean). Minimality by the pointwise certificate (L-c)+ >= (L-c)*1_{Z>z} integrated against the Gaussian density; the attained value via the expected-shortfall closed form E[(Z-z)+] = phi(z) - z(1-Phi(z)) built on the truncated-first-moment primitive. Quantile-parametrized (z with Phi(z) = alpha; no Phi-inverse API exists at the Mathlib pin). Replaces the former algebraic additive-identity shadow. Axioms-clean."
       }
     },
     {
@@ -424,11 +586,16 @@
       "description": "Discrete spectral risk Σ φ_i Q_i with normalized weights (Σ φ = 1) satisfies translation invariance: ρ(Q + c) = ρ(Q) + c.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.Spectral\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem spectralRisk_translation_thm {ι : Type*} (s : Finset ι) (φ : ι → ℝ)\n    (Q : ι → ℝ) (c : ℝ) (h_norm : ∑ i ∈ s, φ i = 1) :\n    MathFin.spectralRiskFinite s φ (fun i => Q i + c) =\n      MathFin.spectralRiskFinite s φ Q + c :=\n  MathFin.spectralRisk_translation s φ Q c h_norm\n"
+        "lean": "import MathFin.Risk.Spectral\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem spectralRisk_translation_thm {ι : Type*} (s : Finset ι) (φ : ι → ℝ)\n    (Q : ι → ℝ) (c : ℝ) (h_norm : ∑ i ∈ s, φ i = 1) :\n    MathFin.spectralRiskFinite s φ (fun i => Q i + c) =\n      MathFin.spectralRiskFinite s φ Q + c :=\n  MathFin.spectralRisk_translation s φ Q c h_norm\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Spectral risk measures (Acerbi 2002)",
+        "citations": [
+          {
+            "key": "Acerbi2002"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -440,11 +607,16 @@
       "description": "Under the unit-budget constraint Σ w_i = 1, which forces the index set s to be nonempty, the Cauchy-Schwarz inequality gives HHI = Σ w_i² ≥ 1/n where n = card s. The equality case (equal weights) is not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.Concentration\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem herfindahl_card_inv_le_of_sum_one_thm {ι : Type*}\n    (s : Finset ι) (w : ι → ℝ) (h_sum : ∑ i ∈ s, w i = 1) :\n    (s.card : ℝ)⁻¹ ≤ MathFin.herfindahl s w :=\n  MathFin.herfindahl_card_inv_le_of_sum_one s w h_sum\n"
+        "lean": "import MathFin.Risk.Concentration\n\nopen Real\nopen MathFin\n\ntheorem herfindahl_card_inv_le_of_sum_one_thm {ι : Type*}\n    (s : Finset ι) (w : ι → ℝ) (h_sum : ∑ i ∈ s, w i = 1) :\n    (s.card : ℝ)⁻¹ ≤ MathFin.herfindahl s w :=\n  MathFin.herfindahl_card_inv_le_of_sum_one s w h_sum\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Concentration risk via Herfindahl (Hirschman 1945; Cauchy-Schwarz)",
+        "citations": [
+          {
+            "key": "Hirschman1945"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
@@ -456,14 +628,19 @@
       "description": "A coherent risk measure of losses on a finite state space — the four Artzner–Delbaen–Eber–Heath axioms in the loss convention (monotone a.s., ρ(L + m) = ρ(L) + m, positively homogeneous, subadditive), for any finite measure on the states — is the least upper bound of expected loss ∑ qᵢ Lᵢ over its representing probability vectors, those q with ∑ qᵢ Zᵢ ≤ 0 on every acceptable loss Z (ρ Z ≤ 0). The proof separates a rejected loss from the acceptance set {L : ρ(L) ≤ 0}, a closed convex cone, by a representing density — the same Hahn–Banach separation the FTAP uses for the equivalent martingale measure; the cone properties are library lemmas (IsCoherentRiskMeasure.acceptance_closed, cone, convex_acceptance), not part of this entry's statement. Finite state space only; the infinite-dimensional representation is not claimed.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.AcceptanceSet\n\nopen scoped BigOperators\n\n/-- **Coherent-risk representation (Artzner–Delbaen–Eber–Heath, finite state).** A coherent risk\n    measure `ρ` of losses on `ι → ℝ` is the least upper bound of expected loss `∑ qᵢ Lᵢ` over its\n    representing probability vectors `q ∈ representingSet ρ`. The separating density realising the\n    bound is the point-from-cone Hahn–Banach functional — the risk-side instance of the FTAP's\n    separating root. Re-exports `MathFin.coherentRisk_isLUB`. -/\ntheorem coherent_risk_representation {ι : Type*} [Fintype ι] [MeasurableSpace ι]\n    [MeasurableSingletonClass ι] {P : MeasureTheory.Measure ι} [MeasureTheory.IsFiniteMeasure P]\n    {ρ : (ι → ℝ) → ℝ} (hρ : MathFin.IsCoherentRiskMeasure P ρ) (L : ι → ℝ) :\n    IsLUB ((fun q => ∑ i, q i * L i) '' MathFin.representingSet ρ) (ρ L) :=\n  MathFin.coherentRisk_isLUB hρ L\n"
+        "lean": "import MathFin.Risk.AcceptanceSet\n\nopen scoped BigOperators\n\n/-- **Coherent-risk representation (Artzner–Delbaen–Eber–Heath, finite state).** A coherent risk\n    measure `ρ` of losses on `ι → ℝ` is the least upper bound of expected loss `∑ qᵢ Lᵢ` over its\n    representing probability vectors `q ∈ representingSet ρ`. The separating density realising the\n    bound is the point-from-cone Hahn–Banach functional — the risk-side instance of the FTAP's\n    separating root. Re-exports `MathFin.coherentRisk_isLUB`. -/\ntheorem coherent_risk_representation {ι : Type*} [Fintype ι] [MeasurableSpace ι]\n    [MeasurableSingletonClass ι] {P : MeasureTheory.Measure ι} [MeasureTheory.IsFiniteMeasure P]\n    {ρ : (ι → ℝ) → ℝ} (hρ : MathFin.IsCoherentRiskMeasure P ρ) (L : ι → ℝ) :\n    IsLUB ((fun q => ∑ i, q i * L i) '' MathFin.representingSet ρ) (ρ L) :=\n  MathFin.coherentRisk_isLUB hρ L\n"
       },
       "metadata": {
         "chapter": 14,
         "reference": "Artzner–Delbaen–Eber–Heath 1999 (coherent measures of risk); finite-state representation via convex duality",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full proof of the finite-state ADEH representation re-exported from MathFin/RiskMeasures/AcceptanceSet.lean, in the loss convention of the library's single coherence structure MathFin.IsCoherentRiskMeasure (MathFin/RiskMeasures/Coherent.lean): monotone for the almost-sure order, ρ(L + m) = ρ(L) + m, positively homogeneous, subadditive, on the integrable losses of a finite measure on a finite state space. The measure is arbitrary: on a finite space the axioms imply the pointwise order, which is all the proof uses. ρ equals the supremum (stated as IsLUB) of expected loss ∑ qᵢ Lᵢ over its representing probability vectors, those q with ∑ qᵢ Zᵢ ≤ 0 on the acceptance set {Z : ρ Z ≤ 0}. Closedness of the acceptance set is derived from the axioms (ρ convex hence continuous on ℝ^ι), not assumed. The least-upper-bound direction separates the rejected loss L − b, for an upper bound b < ρ L, from the acceptance cone via the point-from-cone primitive MathFin.exists_separating_of_not_mem_cone and normalises the separating functional to a representing density — the same Hahn–Banach root as the FTAP. The positions convention of Artzner–Delbaen–Eber–Heath (ρ decreasing, ρ(X + m) = ρ(X) − m) is the same structure at L ↦ ρ(−L) with counting measure (MathFin.isCoherentRiskMeasure_neg_iff); the Challenge/Solution pair discharges the positions statement through it. Finite state space only. No axioms beyond Mathlib defaults."
+        "formalization_scope": "Full proof of the finite-state ADEH representation re-exported from MathFin/Risk/AcceptanceSet.lean, in the loss convention of the library's single coherence structure MathFin.IsCoherentRiskMeasure (MathFin/Risk/Coherent.lean): monotone for the almost-sure order, ρ(L + m) = ρ(L) + m, positively homogeneous, subadditive, on the integrable losses of a finite measure on a finite state space. The measure is arbitrary: on a finite space the axioms imply the pointwise order, which is all the proof uses. ρ equals the supremum (stated as IsLUB) of expected loss ∑ qᵢ Lᵢ over its representing probability vectors, those q with ∑ qᵢ Zᵢ ≤ 0 on the acceptance set {Z : ρ Z ≤ 0}. Closedness of the acceptance set is derived from the axioms (ρ convex hence continuous on ℝ^ι), not assumed. The least-upper-bound direction separates the rejected loss L − b, for an upper bound b < ρ L, from the acceptance cone via the point-from-cone primitive MathFin.exists_separating_of_not_mem_cone and normalises the separating functional to a representing density — the same Hahn–Banach root as the FTAP. The positions convention of Artzner–Delbaen–Eber–Heath (ρ decreasing, ρ(X + m) = ρ(X) − m) is the same structure at L ↦ ρ(−L) with counting measure (MathFin.isCoherentRiskMeasure_neg_iff); the Challenge/Solution pair discharges the positions statement through it. Finite state space only. No axioms beyond Mathlib defaults."
       }
     },
     {
@@ -472,14 +649,23 @@
       "description": "On a finite state space, under any finite measure P charging every state (P{i} ≠ 0), a functional ρ on payoffs satisfies the four Artzner–Delbaen–Eber–Heath axioms for positions (X ≤ Y ⟹ ρ(Y) ≤ ρ(X); ρ(X + m) = ρ(X) − m; ρ(l·X) = l·ρ(X) for l ≥ 0; ρ(X + Y) ≤ ρ(X) + ρ(Y)) if and only if L ↦ ρ(−L) is a coherent risk measure of losses (IsCoherentRiskMeasure P). The positions and loss conventions are one structure seen through the sign flip L = −X. Finite state space only; counting measure is the model case.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.PositionsConvention\n\n/-- **Positions versus losses.** On a finite state space with a finite measure `P` charging every\n    state, `ρ` satisfies the four ADEH axioms for positions (monotone decreasing,\n    `ρ (X + m) = ρ X − m`, positively homogeneous, subadditive) iff `L ↦ ρ (−L)` is a coherent\n    risk measure of losses. Re-exports `MathFin.isCoherentRiskMeasure_neg_iff`. -/\ntheorem coherent_positions_iff_losses {ι : Type*} [Fintype ι] [MeasurableSpace ι]\n    [MeasurableSingletonClass ι] {P : MeasureTheory.Measure ι} [MeasureTheory.IsFiniteMeasure P]\n    (hP : ∀ i, P {i} ≠ 0) {ρ : (ι → ℝ) → ℝ} :\n    MathFin.IsCoherentRiskMeasure P (fun L ↦ ρ (-L)) ↔\n      (∀ X Y : ι → ℝ, (∀ i, X i ≤ Y i) → ρ Y ≤ ρ X) ∧\n      (∀ X : ι → ℝ, ∀ m : ℝ, ρ (fun i ↦ X i + m) = ρ X - m) ∧\n      (∀ l : ℝ, 0 ≤ l → ∀ X : ι → ℝ, ρ (l • X) = l * ρ X) ∧\n      ∀ X Y : ι → ℝ, ρ (X + Y) ≤ ρ X + ρ Y :=\n  MathFin.isCoherentRiskMeasure_neg_iff hP\n"
+        "lean": "import MathFin.Risk.PositionsConvention\n\n/-- **Positions versus losses.** On a finite state space with a finite measure `P` charging every\n    state, `ρ` satisfies the four ADEH axioms for positions (monotone decreasing,\n    `ρ (X + m) = ρ X − m`, positively homogeneous, subadditive) iff `L ↦ ρ (−L)` is a coherent\n    risk measure of losses. Re-exports `MathFin.isCoherentRiskMeasure_neg_iff`. -/\ntheorem coherent_positions_iff_losses {ι : Type*} [Fintype ι] [MeasurableSpace ι]\n    [MeasurableSingletonClass ι] {P : MeasureTheory.Measure ι} [MeasureTheory.IsFiniteMeasure P]\n    (hP : ∀ i, P {i} ≠ 0) {ρ : (ι → ℝ) → ℝ} :\n    MathFin.IsCoherentRiskMeasure P (fun L ↦ ρ (-L)) ↔\n      (∀ X Y : ι → ℝ, (∀ i, X i ≤ Y i) → ρ Y ≤ ρ X) ∧\n      (∀ X : ι → ℝ, ∀ m : ℝ, ρ (fun i ↦ X i + m) = ρ X - m) ∧\n      (∀ l : ℝ, 0 ≤ l → ∀ X : ι → ℝ, ρ (l • X) = l * ρ X) ∧\n      ∀ X Y : ι → ℝ, ρ (X + Y) ≤ ρ X + ρ Y :=\n  MathFin.isCoherentRiskMeasure_neg_iff hP\n"
       },
       "metadata": {
         "chapter": 14,
         "reference": "Artzner–Delbaen–Eber–Heath 1999 (coherent measures of risk, positions convention); McNeil–Frey–Embrechts 2015, Definition 2.18 (loss convention)",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Definition 2.18"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full proof re-exported from MathFin/RiskMeasures/PositionsConvention.lean. The library has one coherence structure, IsCoherentRiskMeasure (MathFin/RiskMeasures/Coherent.lean), in the loss convention; the positions axioms are written out in the statement rather than bundled in a second structure. SCOPE: finite state space with a finite measure charging every state (counting measure is the model case), where almost-sure order is the pointwise order and every function is integrable; for a measure with null states, or an infinite space, the two conventions are related by the same sign flip but the equivalence is not stated. The Challenge/Solution pair (Challenge.lean, Solution.lean) discharges the positions-convention representation theorem through this equivalence. No axioms beyond Mathlib defaults."
+        "formalization_scope": "Full proof re-exported from MathFin/Risk/PositionsConvention.lean. The library has one coherence structure, IsCoherentRiskMeasure (MathFin/Risk/Coherent.lean), in the loss convention; the positions axioms are written out in the statement rather than bundled in a second structure. SCOPE: finite state space with a finite measure charging every state (counting measure is the model case), where almost-sure order is the pointwise order and every function is integrable; for a measure with null states, or an infinite space, the two conventions are related by the same sign flip but the equivalence is not stated. The Challenge/Solution pair (Challenge.lean, Solution.lean) discharges the positions-convention representation theorem through this equivalence. No axioms beyond Mathlib defaults."
       }
     },
     {
@@ -488,14 +674,19 @@
       "description": "The worst-case loss maxᵢ Lᵢ is the least upper bound of expected loss ∑ qᵢ Lᵢ over the entire probability simplex — the ADEH representation made concrete on a recognisable risk measure of losses. Its coherence is a separate theorem (worstCase_isCoherent) and not part of this entry's statement.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.WorstCaseRisk\n\nopen scoped BigOperators\n\n/-- **Worst-case loss = sup of expected loss over the probability simplex.** The worst-case\n    loss `worstCase L = maxᵢ Lᵢ` is the least upper bound of expected loss over the entire\n    probability simplex — the ADEH representation made concrete. Its coherence is\n    `MathFin.worstCase_isCoherent`, not restated here. Re-exports `MathFin.worstCase_isLUB`. -/\ntheorem worstcase_risk_representation {ι : Type*} [Fintype ι] [Nonempty ι] (L : ι → ℝ) :\n    IsLUB (Set.range fun w : Convexity.StdSimplex ℝ ι ↦ ∑ i, w.weights i * L i)\n      (MathFin.worstCase L) :=\n  MathFin.worstCase_isLUB L\n"
+        "lean": "import MathFin.Risk.WorstCaseRisk\n\nopen scoped BigOperators\n\n/-- **Worst-case loss = sup of expected loss over the probability simplex.** The worst-case\n    loss `worstCase L = maxᵢ Lᵢ` is the least upper bound of expected loss over the entire\n    probability simplex — the ADEH representation made concrete. Its coherence is\n    `MathFin.worstCase_isCoherent`, not restated here. Re-exports `MathFin.worstCase_isLUB`. -/\ntheorem worstcase_risk_representation {ι : Type*} [Fintype ι] [Nonempty ι] (L : ι → ℝ) :\n    IsLUB (Set.range fun w : Convexity.StdSimplex ℝ ι ↦ ∑ i, w.weights i * L i)\n      (MathFin.worstCase L) :=\n  MathFin.worstCase_isLUB L\n"
       },
       "metadata": {
         "chapter": 14,
         "reference": "Worst-case (sup-norm) coherent risk measure; concrete instance of the ADEH representation",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full proof re-exported from MathFin/RiskMeasures/WorstCaseRisk.lean: the worst-case loss maxᵢ Lᵢ is shown to be an IsCoherentRiskMeasure (the library's loss-convention structure) for any measure charging every state, counting measure included (worstCase_isCoherent), its acceptance set is the nonpositive orthant and its representing set is the entire probability simplex (representingSet_worstCase), so the abstract representation coherentRisk_isLUB specialises to IsLUB over stdSimplex. A concrete, recognisable instance making the finite-state ADEH representation tangible. The entry's statement is the representation only; coherence is the separate theorem worstCase_isCoherent. No axioms beyond Mathlib defaults."
+        "formalization_scope": "Full proof re-exported from MathFin/Risk/WorstCaseRisk.lean: the worst-case loss maxᵢ Lᵢ is shown to be an IsCoherentRiskMeasure (the library's loss-convention structure) for any measure charging every state, counting measure included (worstCase_isCoherent), its acceptance set is the nonpositive orthant and its representing set is the entire probability simplex (representingSet_worstCase), so the abstract representation coherentRisk_isLUB specialises to IsLUB over stdSimplex. A concrete, recognisable instance making the finite-state ADEH representation tangible. The entry's statement is the representation only; coherence is the separate theorem worstCase_isCoherent. No axioms beyond Mathlib defaults."
       }
     },
     {
@@ -504,14 +695,19 @@
       "description": "Expected utility over finite-outcome lotteries is affine in the lottery mixture; the induced preference satisfies independence and Archimedean continuity (an indifference weight α ∈ (0,1) exists); and, for normalized lotteries, the preference is invariant under positive affine rescaling of the utility. Completeness and transitivity of the preference are proved in the source module (prefersEU_total, prefersEU_trans) but are not restated in this entry. Soundness direction only: the vNM representation theorem (axioms imply an expected-utility form) is not delivered.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.VonNeumannMorgenstern\n\nopen MathFin\n\n/-- The pivot of the vNM development: expected utility is affine in the lottery mixture,\n    `EU(αp + (1−α)q) = α·EU(p) + (1−α)·EU(q)`. Needs no hypotheses on the lotteries —\n    it is linearity of the finite sum, and it is exactly what fails for the non-linear\n    functionals invented to explain the Allais paradox. -/\ntheorem vnm_expected_utility_mix\n    {ι : Type*} (s : Finset ι) (u : ι → ℝ) (α : ℝ) (p q : ι → ℝ) :\n    MathFin.expectedUtility s u (MathFin.mix α p q)\n      = α * MathFin.expectedUtility s u p + (1 - α) * MathFin.expectedUtility s u q :=\n  MathFin.expectedUtility_mix s u α p q\n\n/-- vNM independence: mixing a common lottery into both sides preserves the\n    expected-utility preference, at any nonnegative weight. -/\ntheorem vnm_independence\n    {ι : Type*} (s : Finset ι) (u : ι → ℝ) {α : ℝ} (hα : 0 ≤ α)\n    {p q r : ι → ℝ} (h : MathFin.prefersEU s u p q) :\n    MathFin.prefersEU s u (MathFin.mix α p r) (MathFin.mix α q r) :=\n  MathFin.prefersEU_independence s u hα h\n\n/-- vNM continuity (the Archimedean axiom): strictly between a better and a worse lottery,\n    some strict mixture of the outer pair is exactly indifferent to the middle one; the\n    weight is exhibited as the position of the middle utility on the outer utility\n    interval, not obtained from a limit. -/\ntheorem vnm_continuity\n    {ι : Type*} (s : Finset ι) (u : ι → ℝ) {p q r : ι → ℝ}\n    (hpq : MathFin.expectedUtility s u q < MathFin.expectedUtility s u p)\n    (hqr : MathFin.expectedUtility s u r < MathFin.expectedUtility s u q) :\n    ∃ α : ℝ, 0 < α ∧ α < 1 ∧\n      MathFin.expectedUtility s u (MathFin.mix α p r) = MathFin.expectedUtility s u q :=\n  MathFin.prefersEU_continuity s u hpq hqr\n\n/-- vNM cardinality: a positive affine rescaling of the utility induces exactly the same\n    preference on lotteries — utility is cardinal only up to origin and scale. -/\ntheorem vnm_affine_invariance\n    {ι : Type*} (s : Finset ι) (u : ι → ℝ) {a b : ℝ} (ha : 0 < a)\n    {p q : ι → ℝ} (hp : ∑ i ∈ s, p i = 1) (hq : ∑ i ∈ s, q i = 1) :\n    MathFin.prefersEU s (fun i ↦ a * u i + b) p q ↔ MathFin.prefersEU s u p q :=\n  MathFin.prefersEU_affine_invariant s u ha hp hq\n"
+        "lean": "import MathFin.Choice.Utility.VonNeumannMorgenstern\n\nopen MathFin\n\n/-- The pivot of the vNM development: expected utility is affine in the lottery mixture,\n    `EU(αp + (1−α)q) = α·EU(p) + (1−α)·EU(q)`. Needs no hypotheses on the lotteries —\n    it is linearity of the finite sum, and it is exactly what fails for the non-linear\n    functionals invented to explain the Allais paradox. -/\ntheorem vnm_expected_utility_mix\n    {ι : Type*} (s : Finset ι) (u : ι → ℝ) (α : ℝ) (p q : ι → ℝ) :\n    MathFin.expectedUtility s u (MathFin.mix α p q)\n      = α * MathFin.expectedUtility s u p + (1 - α) * MathFin.expectedUtility s u q :=\n  MathFin.expectedUtility_mix s u α p q\n\n/-- vNM independence: mixing a common lottery into both sides preserves the\n    expected-utility preference, at any nonnegative weight. -/\ntheorem vnm_independence\n    {ι : Type*} (s : Finset ι) (u : ι → ℝ) {α : ℝ} (hα : 0 ≤ α)\n    {p q r : ι → ℝ} (h : MathFin.prefersEU s u p q) :\n    MathFin.prefersEU s u (MathFin.mix α p r) (MathFin.mix α q r) :=\n  MathFin.prefersEU_independence s u hα h\n\n/-- vNM continuity (the Archimedean axiom): strictly between a better and a worse lottery,\n    some strict mixture of the outer pair is exactly indifferent to the middle one; the\n    weight is exhibited as the position of the middle utility on the outer utility\n    interval, not obtained from a limit. -/\ntheorem vnm_continuity\n    {ι : Type*} (s : Finset ι) (u : ι → ℝ) {p q r : ι → ℝ}\n    (hpq : MathFin.expectedUtility s u q < MathFin.expectedUtility s u p)\n    (hqr : MathFin.expectedUtility s u r < MathFin.expectedUtility s u q) :\n    ∃ α : ℝ, 0 < α ∧ α < 1 ∧\n      MathFin.expectedUtility s u (MathFin.mix α p r) = MathFin.expectedUtility s u q :=\n  MathFin.prefersEU_continuity s u hpq hqr\n\n/-- vNM cardinality: a positive affine rescaling of the utility induces exactly the same\n    preference on lotteries — utility is cardinal only up to origin and scale. -/\ntheorem vnm_affine_invariance\n    {ι : Type*} (s : Finset ι) (u : ι → ℝ) {a b : ℝ} (ha : 0 < a)\n    {p q : ι → ℝ} (hp : ∑ i ∈ s, p i = 1) (hq : ∑ i ∈ s, q i = 1) :\n    MathFin.prefersEU s (fun i ↦ a * u i + b) p q ↔ MathFin.prefersEU s u p q :=\n  MathFin.prefersEU_affine_invariant s u ha hp hq\n"
       },
       "metadata": {
         "chapter": 14,
-        "reference": "von Neumann-Morgenstern (1944), Theory of Games and Economic Behavior; the layer beneath RiskMeasures/UtilityDerivation",
+        "reference": "von Neumann-Morgenstern (1944), Theory of Games and Economic Behavior; the layer beneath Risk/UtilityDerivation",
+        "citations": [
+          {
+            "key": "VonNeumannMorgenstern1944"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Finite-outcome lotteries as normalized nonnegative weight vectors; the mixture algebra (identity, commutation, compounding, closure), affinity of expected utility in the mixture, the vNM axioms verified for the induced preference, and cardinal uniqueness as an iff (positive affine rescaling leaves the preference exactly unchanged). The representation theorem (axioms imply existence of a utility) is deliberately out of scope, recorded in the module doc. Lives in MathFin/RiskMeasures/VonNeumannMorgenstern.lean. Axioms-clean."
+        "formalization_scope": "Finite-outcome lotteries as normalized nonnegative weight vectors; the mixture algebra (identity, commutation, compounding, closure), affinity of expected utility in the mixture, the vNM axioms verified for the induced preference, and cardinal uniqueness as an iff (positive affine rescaling leaves the preference exactly unchanged). The representation theorem (axioms imply existence of a utility) is deliberately out of scope, recorded in the module doc. Lives in MathFin/Choice/Utility/VonNeumannMorgenstern.lean. Axioms-clean."
       }
     },
     {
@@ -520,11 +716,16 @@
       "description": "Basel SA-CCR's EAD = alpha * (RC + PFE) is jointly nondecreasing in the replacement cost RC and the PFE add-on, for any fixed alpha >= 0 -- raising either component never lowers the capital exposure.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.SACCRExposure\n\nopen MathFin\n\ntheorem saccrEAD_mono_thm {α : ℝ} (hα : 0 ≤ α) {RC₁ RC₂ PFE₁ PFE₂ : ℝ}\n    (hRC : RC₁ ≤ RC₂) (hPFE : PFE₁ ≤ PFE₂) :\n    MathFin.saccrEAD α RC₁ PFE₁ ≤ MathFin.saccrEAD α RC₂ PFE₂ :=\n  MathFin.saccrEAD_mono hα hRC hPFE\n"
+        "lean": "import MathFin.Risk.SACCRExposure\n\nopen MathFin\n\ntheorem saccrEAD_mono_thm {α : ℝ} (hα : 0 ≤ α) {RC₁ RC₂ PFE₁ PFE₂ : ℝ}\n    (hRC : RC₁ ≤ RC₂) (hPFE : PFE₁ ≤ PFE₂) :\n    MathFin.saccrEAD α RC₁ PFE₁ ≤ MathFin.saccrEAD α RC₂ PFE₂ :=\n  MathFin.saccrEAD_mono hα hRC hPFE\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Basel Committee on Banking Supervision, The standardised approach for measuring counterparty credit risk exposures (BCBS 279), 2014",
+        "citations": [
+          {
+            "key": "BCBS279"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof, via gcongr, that EAD = alpha * (RC + PFE) is jointly nondecreasing in (RC, PFE) for alpha >= 0. RC and PFE enter as free real numbers; their construction (replacement cost, PFE multiplier, asset-class add-ons) is not formalized; the regulatory constant alpha = 1.4 is kept as a free parameter since only alpha >= 0 is used. No claim beyond monotonicity is formalized."
@@ -536,11 +737,20 @@
       "description": "The SA-CCR interest-rate effective notional of a hedging set, sqrt(D1^2 + D2^2 + D3^2 + 1.4*D1*D2 + 1.4*D2*D3 + 0.6*D1*D3) for the signed effective notionals D1, D2, D3 of its three maturity buckets (Basel Framework CRE52.57), never exceeds |D1| + |D2| + |D3|: recognising offset across buckets never gives more than adding the absolute bucket notionals.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.RiskMeasures.SACCRExposure\n\nopen MathFin\n\ntheorem effNotionalIR_le_abs_add_thm (D₁ D₂ D₃ : ℝ) :\n    MathFin.effNotionalIR D₁ D₂ D₃ ≤ |D₁| + |D₂| + |D₃| :=\n  MathFin.effNotionalIR_le_abs_add D₁ D₂ D₃\n"
+        "lean": "import MathFin.Risk.SACCRExposure\n\nopen MathFin\n\ntheorem effNotionalIR_le_abs_add_thm (D₁ D₂ D₃ : ℝ) :\n    MathFin.effNotionalIR D₁ D₂ D₃ ≤ |D₁| + |D₂| + |D₃| :=\n  MathFin.effNotionalIR_le_abs_add D₁ D₂ D₃\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Basel Committee on Banking Supervision, The standardised approach for measuring counterparty credit risk exposures (BCBS 279), 2014; Basel Framework CRE52.57 (interest-rate effective notional)",
+        "citations": [
+          {
+            "key": "BCBS279"
+          },
+          {
+            "key": "BaselFrameworkCRE52",
+            "locator": "CRE52.57"
+          }
+        ],
         "difficulty": "beginner",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of effNotionalIR D1 D2 D3 <= |D1| + |D2| + |D3|, where effNotionalIR is the CRE52.57 three-bucket formula with Basel's coefficients 1.4, 1.4 and 0.6 (written 7/5 and 3/5). Proof by sqrt monotonicity and the cross-term bounds Di*Dj <= |Di|*|Dj|. In the module, effNotionalIR_third_zero and effNotionalIR_second_zero reduce it to the two-bucket form effNotionalPair at rho = 0.7 and 0.3. LIMITS: the bucket effective notionals themselves (supervisory duration, delta, maturity factor), the add-on and PFE multiplier, and the single-factor aggregation of the credit, equity and commodity classes are not formalized."
@@ -552,14 +762,20 @@
       "domain": "mathematical_finance",
       "description": "For weights w_k ≥ 0 with Σ w_k = 1 and levels α_k ∈ (0, 1), the spectral risk measure ρ_φ(X) = ∫₀¹ φ(u) VaR_u(X) du with the nondecreasing step spectrum φ = Σ_k w_k (1 − α_k)⁻¹ 1_(α_k, 1) equals Σ_k w_k ES_{α_k}(X) for every integrable loss X, and is a coherent risk measure on the integrable losses (monotone, translation invariant, positively homogeneous, subadditive). Acerbi's theorem for a general nondecreasing spectrum is not proved; only these step spectra are.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.Spectral\n\nopen MeasureTheory Set\nopen MathFin\n\n/-- The spectral risk of the step spectrum `∑ₖ wₖ (1 − αₖ)⁻¹ 𝟙_{(αₖ, 1)}` is the mixture\n`∑ₖ wₖ ES_{αₖ}(X)` of expected shortfalls. -/\ntheorem spectral_step_spectrum_eq_es_mixture_thm {ι Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] {X : Ω → ℝ} (hX : Integrable X P) (s : Finset ι)\n    (w : ι → ℝ) {α : ι → ℝ} (hα : ∀ k ∈ s, α k ∈ Ioo 0 1) :\n    spectralRiskMeasure (fun u ↦ ∑ k ∈ s, w k * esSpectrum (α k) u) X P =\n      spectralRiskFinite s w fun k ↦ expectedShortfall X P (α k) :=\n  spectralRiskMeasure_sum_esSpectrum hX s w hα\n\n/-- For weights `w ≥ 0` summing to one, the step-spectrum spectral risk measure is a coherent\nrisk measure on the integrable losses. -/\ntheorem spectral_step_spectrum_coherent_thm {ι Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] (s : Finset ι) {w α : ι → ℝ}\n    (hw : ∀ k ∈ s, 0 ≤ w k) (hw1 : ∑ k ∈ s, w k = 1) (hα : ∀ k ∈ s, α k ∈ Ioo 0 1) :\n    IsCoherentRiskMeasure P\n      (spectralRiskMeasure (fun u ↦ ∑ k ∈ s, w k * esSpectrum (α k) u) · P) :=\n  isCoherentRiskMeasure_spectralRiskMeasure_sum_esSpectrum s hw hw1 hα\n"
+        "lean": "import MathFin.Risk.Spectral\n\nopen MeasureTheory Set\nopen MathFin\n\n/-- The spectral risk of the step spectrum `∑ₖ wₖ (1 − αₖ)⁻¹ 𝟙_{(αₖ, 1)}` is the mixture\n`∑ₖ wₖ ES_{αₖ}(X)` of expected shortfalls. -/\ntheorem spectral_step_spectrum_eq_es_mixture_thm {ι Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] {X : Ω → ℝ} (hX : Integrable X P) (s : Finset ι)\n    (w : ι → ℝ) {α : ι → ℝ} (hα : ∀ k ∈ s, α k ∈ Ioo 0 1) :\n    spectralRiskMeasure (fun u ↦ ∑ k ∈ s, w k * esSpectrum (α k) u) X P =\n      spectralRiskFinite s w fun k ↦ expectedShortfall X P (α k) :=\n  spectralRiskMeasure_sum_esSpectrum hX s w hα\n\n/-- For weights `w ≥ 0` summing to one, the step-spectrum spectral risk measure is a coherent\nrisk measure on the integrable losses. -/\ntheorem spectral_step_spectrum_coherent_thm {ι Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} [IsProbabilityMeasure P] (s : Finset ι) {w α : ι → ℝ}\n    (hw : ∀ k ∈ s, 0 ≤ w k) (hw1 : ∑ k ∈ s, w k = 1) (hα : ∀ k ∈ s, α k ∈ Ioo 0 1) :\n    IsCoherentRiskMeasure P\n      (spectralRiskMeasure (fun u ↦ ∑ k ∈ s, w k * esSpectrum (α k) u) · P) :=\n  isCoherentRiskMeasure_spectralRiskMeasure_sum_esSpectrum s hw hw1 hα\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "C. Acerbi, Spectral measures of risk: A coherent representation of subjective risk aversion, Journal of Banking & Finance 26(7) (2002), 1505–1518, Theorem 4.1 (step-spectrum case)",
+        "citations": [
+          {
+            "key": "Acerbi2002",
+            "locator": "Theorem 4.1"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.spectralRiskMeasure_sum_esSpectrum and MathFin.isCoherentRiskMeasure_spectralRiskMeasure_sum_esSpectrum (MathFin/RiskMeasures/Spectral.lean). spectralRiskMeasure φ X P := ∫ u in (0,1), φ u · valueAtRisk X P u, with valueAtRisk the quantile of the law (MathFin/RiskMeasures/ValueAtRisk.lean); coherence is IsCoherentRiskMeasure (MathFin/RiskMeasures/ExpectedShortfall.lean), each axiom derived from expectedShortfall_isCoherentRiskMeasure through the finite-weight lemmas spectralRisk_translation and spectralRisk_mono. SCOPE: step spectra (finite convex mixtures of expected-shortfall spectra) only; coherence for a general nonnegative nondecreasing spectrum integrating to one (Acerbi 2002, Theorem 4.1) is not proved. The module also proves that φ ≡ 1 gives the mean and that the expected-shortfall spectrum gives expected shortfall."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.spectralRiskMeasure_sum_esSpectrum and MathFin.isCoherentRiskMeasure_spectralRiskMeasure_sum_esSpectrum (MathFin/Risk/Spectral.lean). spectralRiskMeasure φ X P := ∫ u in (0,1), φ u · valueAtRisk X P u, with valueAtRisk the quantile of the law (MathFin/Risk/ValueAtRisk.lean); coherence is IsCoherentRiskMeasure (MathFin/Risk/ExpectedShortfall.lean), each axiom derived from expectedShortfall_isCoherentRiskMeasure through the finite-weight lemmas spectralRisk_translation and spectralRisk_mono. SCOPE: step spectra (finite convex mixtures of expected-shortfall spectra) only; coherence for a general nonnegative nondecreasing spectrum integrating to one (Acerbi 2002, Theorem 4.1) is not proved. The module also proves that φ ≡ 1 gives the mean and that the expected-shortfall spectrum gives expected shortfall."
       }
     },
     {
@@ -568,14 +784,22 @@
       "domain": "mathematical_finance",
       "description": "For α ∈ (0, 1) and every probability law μ on ℝ with finite second moment, each expected asymmetric squared loss ∫ α((y − e)⁺)² + (1 − α)((e − y)⁺)² dμ(y) is finite, and the α-expectile of μ (the root e of α E[(Y − e)⁺] = (1 − α) E[(e − Y)⁺]) is its unique minimizer over forecasts e ∈ ℝ. Also, for an integrable Y the 1/2-expectile is the mean E[Y].",
       "code": {
-        "lean": "import MathFin.RiskMeasures.Expectile\n\nopen MeasureTheory Set\nopen MathFin\n\n/-- The asymmetric squared loss `α ((y − e)⁺)² + (1 − α) ((e − y)⁺)²` strictly elicits the\n`α`-expectile on the probability laws on `ℝ` with finite second moment. -/\ntheorem expectile_elicitable_thm {α : ℝ} (hα : α ∈ Ioo 0 1) :\n    StrictlyElicits (expectileLoss α) (fun μ ↦ expectile α id μ)\n      {μ | IsProbabilityMeasure μ ∧ MemLp id 2 μ} :=\n  strictlyElicits_expectileLoss hα\n\n/-- The `1/2`-expectile of an integrable loss is its mean. -/\ntheorem expectile_half_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {Y : Ω → ℝ} (hY : Integrable Y P) :\n    expectile (1 / 2) Y P = ∫ ω, Y ω ∂P :=\n  expectile_half hY\n"
+        "lean": "import MathFin.Risk.Expectile\n\nopen MeasureTheory Set\nopen MathFin\n\n/-- The asymmetric squared loss `α ((y − e)⁺)² + (1 − α) ((e − y)⁺)²` strictly elicits the\n`α`-expectile on the probability laws on `ℝ` with finite second moment. -/\ntheorem expectile_elicitable_thm {α : ℝ} (hα : α ∈ Ioo 0 1) :\n    StrictlyElicits (expectileLoss α) (fun μ ↦ expectile α id μ)\n      {μ | IsProbabilityMeasure μ ∧ MemLp id 2 μ} :=\n  strictlyElicits_expectileLoss hα\n\n/-- The `1/2`-expectile of an integrable loss is its mean. -/\ntheorem expectile_half_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {Y : Ω → ℝ} (hY : Integrable Y P) :\n    expectile (1 / 2) Y P = ∫ ω, Y ω ∂P :=\n  expectile_half hY\n"
       },
       "metadata": {
         "chapter": 8,
         "reference": "W. K. Newey and J. L. Powell, Asymmetric Least Squares Estimation and Testing, Econometrica 55(4) (1987), 819–847; T. Gneiting, Making and Evaluating Point Forecasts, J. Amer. Statist. Assoc. 106(494) (2011), 746–762",
+        "citations": [
+          {
+            "key": "NeweyPowell1987"
+          },
+          {
+            "key": "Gneiting2011"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.strictlyElicits_expectileLoss and MathFin.expectile_half (MathFin/RiskMeasures/Expectile.lean). StrictlyElicits is the strict-consistency notion of MathFin/RiskMeasures/Elicitability.lean (finite expected scores, unique minimizer). Proof: the loss is strongly convex in the forecast with modulus min(α, 1 − α) (expectileLoss_ge, a four-case pointwise bound); integrating at the expectile, where the expectile gap vanishes, gives E[S(e, Y)] − E[S(e_α, Y)] ≥ min(α, 1 − α)(e − e_α)². SCOPE: laws with finite second moment; the characterization of all consistent scoring functions for expectiles and the coherence of expectiles for α ≥ 1/2 are not proved."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.strictlyElicits_expectileLoss and MathFin.expectile_half (MathFin/Risk/Expectile.lean). StrictlyElicits is the strict-consistency notion of MathFin/Risk/Elicitability.lean (finite expected scores, unique minimizer). Proof: the loss is strongly convex in the forecast with modulus min(α, 1 − α) (expectileLoss_ge, a four-case pointwise bound); integrating at the expectile, where the expectile gap vanishes, gives E[S(e, Y)] − E[S(e_α, Y)] ≥ min(α, 1 − α)(e − e_α)². SCOPE: laws with finite second moment; the characterization of all consistent scoring functions for expectiles and the coherence of expectiles for α ≥ 1/2 are not proved."
       }
     },
     {
@@ -584,14 +808,20 @@
       "domain": "mathematical_finance",
       "description": "For a loss X with law N(m, v) and α ∈ (0, 1): VaR_α(X) = E[X] + Φ⁻¹(α)·sd(X), the standard-deviation principle with loading Φ⁻¹(α); and if v ≠ 0, ES_α(X) = E[X] + (ϕ(Φ⁻¹(α))/(1 − α))·sd(X), the principle with loading ϕ(Φ⁻¹(α))/(1 − α), where ϕ is the standard normal density. VaR and ES are the library's general (quantile-based) definitions.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.StandardDeviationPrinciple\n\nopen MeasureTheory ProbabilityTheory Set\nopen scoped NNReal\nopen MathFin\n\n/-- On a Gaussian loss, value-at-risk is the standard-deviation principle with loading\n`Φ⁻¹(α)`. -/\ntheorem sd_principle_gaussian_var_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    {X : Ω → ℝ} {m : ℝ} {v : ℝ≥0} (hX : HasLaw X (gaussianReal m v) P) {α : ℝ}\n    (hα : α ∈ Ioo 0 1) :\n    stdDevPrinciple (PhiInv α) X P = valueAtRisk X P α :=\n  stdDevPrinciple_eq_valueAtRisk_of_hasLaw_gaussianReal hX hα\n\n/-- On a nondegenerate Gaussian loss, expected shortfall is the standard-deviation principle with\nloading `ϕ(Φ⁻¹(α))/(1 − α)`. -/\ntheorem sd_principle_gaussian_es_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {X : Ω → ℝ} {m : ℝ} {v : ℝ≥0} (hv : v ≠ 0)\n    (hX : HasLaw X (gaussianReal m v) P) {α : ℝ} (hα : α ∈ Ioo 0 1) :\n    stdDevPrinciple (gaussianPDFReal 0 1 (PhiInv α) / (1 - α)) X P = expectedShortfall X P α :=\n  stdDevPrinciple_eq_expectedShortfall_of_hasLaw_gaussianReal hv hX hα\n"
+        "lean": "import MathFin.Insurance.StandardDeviationPrinciple\n\nopen MeasureTheory ProbabilityTheory Set\nopen scoped NNReal\nopen MathFin\n\n/-- On a Gaussian loss, value-at-risk is the standard-deviation principle with loading\n`Φ⁻¹(α)`. -/\ntheorem sd_principle_gaussian_var_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    {X : Ω → ℝ} {m : ℝ} {v : ℝ≥0} (hX : HasLaw X (gaussianReal m v) P) {α : ℝ}\n    (hα : α ∈ Ioo 0 1) :\n    stdDevPrinciple (PhiInv α) X P = valueAtRisk X P α :=\n  stdDevPrinciple_eq_valueAtRisk_of_hasLaw_gaussianReal hX hα\n\n/-- On a nondegenerate Gaussian loss, expected shortfall is the standard-deviation principle with\nloading `ϕ(Φ⁻¹(α))/(1 − α)`. -/\ntheorem sd_principle_gaussian_es_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {X : Ω → ℝ} {m : ℝ} {v : ℝ≥0} (hv : v ≠ 0)\n    (hX : HasLaw X (gaussianReal m v) P) {α : ℝ} (hα : α ∈ Ioo 0 1) :\n    stdDevPrinciple (gaussianPDFReal 0 1 (PhiInv α) / (1 - α)) X P = expectedShortfall X P α :=\n  stdDevPrinciple_eq_expectedShortfall_of_hasLaw_gaussianReal hv hX hα\n"
       },
       "metadata": {
         "chapter": 2,
         "reference": "A. J. McNeil, R. Frey and P. Embrechts, Quantitative Risk Management, revised ed. (2015), Examples 2.11 and 2.14",
+        "citations": [
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Examples 2.11 and 2.14"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.stdDevPrinciple_eq_valueAtRisk_of_hasLaw_gaussianReal and MathFin.stdDevPrinciple_eq_expectedShortfall_of_hasLaw_gaussianReal (MathFin/RiskMeasures/StandardDeviationPrinciple.lean). stdDevPrinciple k X P is defined as stdDevPremium k E[X] sd(X), the premium principle of MathFin/Actuarial/ActuarialInsurance.lean; the proofs combine the Gaussian closed forms valueAtRisk_of_hasLaw_gaussianReal (MathFin/RiskMeasures/GaussianValueAtRisk.lean) and expectedShortfall_of_hasLaw_gaussianReal (MathFin/RiskMeasures/GaussianExpectedShortfall.lean) with Mathlib's mean and variance of gaussianReal. SCOPE: Gaussian losses only; general elliptical laws are not treated."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.stdDevPrinciple_eq_valueAtRisk_of_hasLaw_gaussianReal and MathFin.stdDevPrinciple_eq_expectedShortfall_of_hasLaw_gaussianReal (MathFin/Insurance/StandardDeviationPrinciple.lean). stdDevPrinciple k X P is defined as stdDevPremium k E[X] sd(X), the premium principle of MathFin/Insurance/ActuarialInsurance.lean; the proofs combine the Gaussian closed forms valueAtRisk_of_hasLaw_gaussianReal (MathFin/Risk/GaussianValueAtRisk.lean) and expectedShortfall_of_hasLaw_gaussianReal (MathFin/Risk/GaussianExpectedShortfall.lean) with Mathlib's mean and variance of gaussianReal. SCOPE: Gaussian losses only; general elliptical laws are not treated."
       }
     },
     {
@@ -600,14 +830,25 @@
       "domain": "mathematical_finance",
       "description": "On a finite state space with weights p ≥ 0, a position X is acceptable to an expected-utility agent with utility u and wealth W if u(W) ≤ Σ p_i u(W + X_i). For concave u, every convex combination of two acceptable positions is acceptable. A binary Kelly bet of fraction f at odds b (win probability p) is acceptable under log utility at unit wealth iff its expected log-growth p log(1 + fb) + (1 − p) log(1 − f) is nonnegative. On a fair coin at unit wealth, log utility accepts X = (1/2, −1/4) but rejects 3X, so no coherent risk measure of losses (Artzner–Delbaen–Eber–Heath axioms in the loss convention, for any finite measure on the two states) has the log-utility acceptance set {L : ρ(L) ≤ 0}, where a loss L is acceptable when the position −L is (log is Mathlib's Real.log, equal to log|x| at nonpositive wealth). Only this explicit counterexample is proved, not a general statement about all strictly concave utilities.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.UtilityDerivation\n\nopen MathFin\n\n/-- A concave utility makes the acceptance set convex. -/\ntheorem utility_acceptance_convex_thm {ι : Type*} (s : Finset ι) (p : ι → ℝ) (u : ℝ → ℝ)\n    (W : ℝ) (hp : ∀ i ∈ s, 0 ≤ p i)\n    (hu : ∀ x y : ℝ, ∀ α : ℝ, 0 ≤ α → α ≤ 1 →\n      α * u x + (1 - α) * u y ≤ u (α * x + (1 - α) * y))\n    {X Y : ι → ℝ} {α : ℝ} (hα : 0 ≤ α) (hα1 : α ≤ 1)\n    (hX : acceptableUnderUtility s p u W X) (hY : acceptableUnderUtility s p u W Y) :\n    acceptableUnderUtility s p u W (fun i ↦ α * X i + (1 - α) * Y i) :=\n  acceptableUnderUtility_convex s p u W hp hu hα hα1 hX hY\n\n/-- A Kelly bet is acceptable under log utility at unit wealth iff its expected log-growth is\nnonnegative. -/\ntheorem kelly_log_acceptance_thm (p b f : ℝ) :\n    acceptableUnderUtility Finset.univ ![p, 1 - p] Real.log 1 ![f * b, -f] ↔\n      0 ≤ kellyGrowth p b f :=\n  acceptableUnderUtility_log_iff_kellyGrowth p b f\n\n/-- The log-utility acceptance set of a fair coin is the acceptance set of no coherent risk\nmeasure of losses: it is not a cone. -/\ntheorem log_acceptance_not_coherent_thm :\n    ¬∃ (P : MeasureTheory.Measure (Fin 2)) (_ : MeasureTheory.IsFiniteMeasure P)\n      (ρ : (Fin 2 → ℝ) → ℝ), IsCoherentRiskMeasure P ρ ∧\n      ∀ L, ρ L ≤ 0 ↔ acceptableUnderUtility Finset.univ ![1 / 2, 1 / 2] Real.log 1 (-L) :=\n  not_exists_isCoherentRiskMeasure_log_acceptance\n"
+        "lean": "import MathFin.Risk.UtilityDerivation\n\nopen MathFin\n\n/-- A concave utility makes the acceptance set convex. -/\ntheorem utility_acceptance_convex_thm {ι : Type*} (s : Finset ι) (p : ι → ℝ) (u : ℝ → ℝ)\n    (W : ℝ) (hp : ∀ i ∈ s, 0 ≤ p i)\n    (hu : ∀ x y : ℝ, ∀ α : ℝ, 0 ≤ α → α ≤ 1 →\n      α * u x + (1 - α) * u y ≤ u (α * x + (1 - α) * y))\n    {X Y : ι → ℝ} {α : ℝ} (hα : 0 ≤ α) (hα1 : α ≤ 1)\n    (hX : acceptableUnderUtility s p u W X) (hY : acceptableUnderUtility s p u W Y) :\n    acceptableUnderUtility s p u W (fun i ↦ α * X i + (1 - α) * Y i) :=\n  acceptableUnderUtility_convex s p u W hp hu hα hα1 hX hY\n\n/-- A Kelly bet is acceptable under log utility at unit wealth iff its expected log-growth is\nnonnegative. -/\ntheorem kelly_log_acceptance_thm (p b f : ℝ) :\n    acceptableUnderUtility Finset.univ ![p, 1 - p] Real.log 1 ![f * b, -f] ↔\n      0 ≤ kellyGrowth p b f :=\n  acceptableUnderUtility_log_iff_kellyGrowth p b f\n\n/-- The log-utility acceptance set of a fair coin is the acceptance set of no coherent risk\nmeasure of losses: it is not a cone. -/\ntheorem log_acceptance_not_coherent_thm :\n    ¬∃ (P : MeasureTheory.Measure (Fin 2)) (_ : MeasureTheory.IsFiniteMeasure P)\n      (ρ : (Fin 2 → ℝ) → ℝ), IsCoherentRiskMeasure P ρ ∧\n      ∀ L, ρ L ≤ 0 ↔ acceptableUnderUtility Finset.univ ![1 / 2, 1 / 2] Real.log 1 (-L) :=\n  not_exists_isCoherentRiskMeasure_log_acceptance\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "P. Artzner, F. Delbaen, J.-M. Eber and D. Heath, Coherent Measures of Risk, Mathematical Finance 9(3) (1999), 203–228; H. Föllmer and A. Schied, Convex Measures of Risk and Trading Constraints, Finance and Stochastics 6(4) (2002), 429–447; J. L. Kelly, A New Interpretation of Information Rate, Bell System Technical Journal 35(4) (1956), 917–926",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          },
+          {
+            "key": "FollmerSchied2002"
+          },
+          {
+            "key": "Kelly1956"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.acceptableUnderUtility_convex, MathFin.acceptableUnderUtility_log_iff_kellyGrowth and MathFin.not_exists_isCoherentRiskMeasure_log_acceptance (MathFin/RiskMeasures/UtilityDerivation.lean). acceptableUnderUtility is defined through the von Neumann–Morgenstern expectedUtility (MathFin/RiskMeasures/VonNeumannMorgenstern.lean); kellyGrowth is from MathFin/Performance/Ratios.lean; IsCoherentRiskMeasure (MathFin/RiskMeasures/Coherent.lean) and its cone property are from MathFin/RiskMeasures/AcceptanceSet.lean. The coherence axioms are the library's loss convention (monotone a.s., ρ(L + m) = ρ(L) + m, positively homogeneous, subadditive) for an arbitrary finite measure on the two states; a loss L is acceptable when the position −L is. SCOPE: finite state spaces; the risk measure inf{m : X + m acceptable} induced by the acceptance set is not constructed, and its convexity is not proved; the non-coherence is one explicit counterexample (log utility, fair coin, odds 2, fractions 1/4 and 3/4). Real.log extends to nonpositive wealth as log|x| (log 0 = 0), so the stated acceptance set also admits positions that make wealth nonpositive. The two counterexample positions keep wealth positive, but the positive-wealth acceptance set itself is not the set stated."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.acceptableUnderUtility_convex, MathFin.acceptableUnderUtility_log_iff_kellyGrowth and MathFin.not_exists_isCoherentRiskMeasure_log_acceptance (MathFin/Risk/UtilityDerivation.lean). acceptableUnderUtility is defined through the von Neumann–Morgenstern expectedUtility (MathFin/Choice/Utility/VonNeumannMorgenstern.lean); kellyGrowth is from MathFin/Choice/Performance/Ratios.lean; IsCoherentRiskMeasure (MathFin/Risk/Coherent.lean) and its cone property are from MathFin/Risk/AcceptanceSet.lean. The coherence axioms are the library's loss convention (monotone a.s., ρ(L + m) = ρ(L) + m, positively homogeneous, subadditive) for an arbitrary finite measure on the two states; a loss L is acceptable when the position −L is. SCOPE: finite state spaces; the risk measure inf{m : X + m acceptable} induced by the acceptance set is not constructed, and its convexity is not proved; the non-coherence is one explicit counterexample (log utility, fair coin, odds 2, fractions 1/4 and 3/4). Real.log extends to nonpositive wealth as log|x| (log 0 = 0), so the stated acceptance set also admits positions that make wealth nonpositive. The two counterexample positions keep wealth positive, but the positive-wealth acceptance set itself is not the set stated."
       }
     },
     {
@@ -616,14 +857,23 @@
       "domain": "mathematical_finance",
       "description": "For a Gaussian vector X of risk-factor changes, weights w with positive portfolio variance wᵀΣw (Σ the covariance kernel of X) and α ∈ (0, 1): the value-at-risk of the portfolio loss Σ wᵢXᵢ is its mean Σ wᵢ E Xᵢ plus the parametric VaR Φ⁻¹(α)√(wᵀΣw), and the component VaRs wᵢ Φ⁻¹(α)(Σw)ᵢ/√(wᵀΣw) sum to VaR_α(Σ wᵢXᵢ) − Σ wᵢ E Xᵢ. For any symmetric kernel with positive portfolio variance, the marginal VaRs α(Σx)ᵢ/√(xᵀΣx) are the partial derivatives of x ↦ α√(xᵀΣx): its derivative along any direction d is Σ dᵢ · marginalVaRᵢ.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.ComponentVaR\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\n/-- The VaR of a Gaussian portfolio loss is its mean plus the parametric VaR at `Φ⁻¹(α)`. -/\ntheorem gaussian_var_eq_portfolioVaRN_thm {ι : Type*} [Fintype ι] {Ω : Type*}\n    {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : ι → Ω → ℝ} {α : ℝ}\n    (hX : HasGaussianLaw (fun ω ↦ (X · ω)) P) (w : ι → ℝ) (hα : α ∈ Ioo 0 1) :\n    valueAtRisk (fun ω ↦ ∑ i, w i * X i ω) P α =\n      ∑ i, w i * P[X i] +\n        portfolioVaRN Finset.univ w (fun i j ↦ cov[X i, X j; P]) (PhiInv α) :=\n  valueAtRisk_portfolio_gaussian_eq_portfolioVaRN hX w hα\n\n/-- The component VaRs allocate the Gaussian portfolio VaR in excess of the mean. -/\ntheorem component_var_gaussian_euler_thm {ι : Type*} [Fintype ι] {Ω : Type*}\n    {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : ι → Ω → ℝ} {α : ℝ}\n    (hX : HasGaussianLaw (fun ω ↦ (X · ω)) P) (w : ι → ℝ) (hα : α ∈ Ioo 0 1)\n    (hvar : 0 < portfolioVarN Finset.univ w fun i j ↦ cov[X i, X j; P]) :\n    ∑ i, componentVaR Finset.univ w (fun i j ↦ cov[X i, X j; P]) (PhiInv α) i =\n      valueAtRisk (fun ω ↦ ∑ i, w i * X i ω) P α - ∑ i, w i * P[X i] :=\n  sum_componentVaR_eq_valueAtRisk_sub hX w hα hvar\n\n/-- For a symmetric kernel and positive portfolio variance, the derivative of the parametric VaR\n`α √(xᵀΣx)` along any direction `d` is `∑ᵢ dᵢ · marginalVaRᵢ`. -/\ntheorem marginal_var_is_derivative_thm {ι : Type*} (s : Finset ι) (x : ι → ℝ)\n    (σ : ι → ι → ℝ) (α : ℝ) (hσ : ∀ i ∈ s, ∀ j ∈ s, σ i j = σ j i)\n    (hvar : 0 < portfolioVarN s x σ) (d : ι → ℝ) :\n    HasDerivAt (fun t ↦ portfolioVaRN s (fun k ↦ x k + t * d k) σ α)\n      (∑ i ∈ s, d i * marginalVaR s x σ α i) 0 :=\n  hasDerivAt_portfolioVaRN s x σ α hσ hvar d\n"
+        "lean": "import MathFin.Risk.ComponentVaR\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\n/-- The VaR of a Gaussian portfolio loss is its mean plus the parametric VaR at `Φ⁻¹(α)`. -/\ntheorem gaussian_var_eq_portfolioVaRN_thm {ι : Type*} [Fintype ι] {Ω : Type*}\n    {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : ι → Ω → ℝ} {α : ℝ}\n    (hX : HasGaussianLaw (fun ω ↦ (X · ω)) P) (w : ι → ℝ) (hα : α ∈ Ioo 0 1) :\n    valueAtRisk (fun ω ↦ ∑ i, w i * X i ω) P α =\n      ∑ i, w i * P[X i] +\n        portfolioVaRN Finset.univ w (fun i j ↦ cov[X i, X j; P]) (PhiInv α) :=\n  valueAtRisk_portfolio_gaussian_eq_portfolioVaRN hX w hα\n\n/-- The component VaRs allocate the Gaussian portfolio VaR in excess of the mean. -/\ntheorem component_var_gaussian_euler_thm {ι : Type*} [Fintype ι] {Ω : Type*}\n    {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : ι → Ω → ℝ} {α : ℝ}\n    (hX : HasGaussianLaw (fun ω ↦ (X · ω)) P) (w : ι → ℝ) (hα : α ∈ Ioo 0 1)\n    (hvar : 0 < portfolioVarN Finset.univ w fun i j ↦ cov[X i, X j; P]) :\n    ∑ i, componentVaR Finset.univ w (fun i j ↦ cov[X i, X j; P]) (PhiInv α) i =\n      valueAtRisk (fun ω ↦ ∑ i, w i * X i ω) P α - ∑ i, w i * P[X i] :=\n  sum_componentVaR_eq_valueAtRisk_sub hX w hα hvar\n\n/-- For a symmetric kernel and positive portfolio variance, the derivative of the parametric VaR\n`α √(xᵀΣx)` along any direction `d` is `∑ᵢ dᵢ · marginalVaRᵢ`. -/\ntheorem marginal_var_is_derivative_thm {ι : Type*} (s : Finset ι) (x : ι → ℝ)\n    (σ : ι → ι → ℝ) (α : ℝ) (hσ : ∀ i ∈ s, ∀ j ∈ s, σ i j = σ j i)\n    (hvar : 0 < portfolioVarN s x σ) (d : ι → ℝ) :\n    HasDerivAt (fun t ↦ portfolioVaRN s (fun k ↦ x k + t * d k) σ α)\n      (∑ i ∈ s, d i * marginalVaR s x σ α i) 0 :=\n  hasDerivAt_portfolioVaRN s x σ α hσ hvar d\n"
       },
       "metadata": {
         "chapter": 8,
         "reference": "D. Tasche, Capital Allocation to Business Units and Sub-Portfolios: the Euler Principle, arXiv:0708.2542 (2008); A. J. McNeil, R. Frey and P. Embrechts, Quantitative Risk Management, revised ed. (2015), Corollary 8.43",
+        "citations": [
+          {
+            "key": "Tasche2008"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Corollary 8.43"
+          }
+        ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.valueAtRisk_portfolio_gaussian_eq_portfolioVaRN, MathFin.sum_componentVaR_eq_valueAtRisk_sub and MathFin.hasDerivAt_portfolioVaRN (MathFin/RiskMeasures/ComponentVaR.lean), built on valueAtRisk_portfolio_gaussian (MathFin/Bridges/GaussianRiskMarkowitz.lean) and the algebraic Euler identity sum_componentVaR_eq_portfolioVaRN (Σ xᵢ(Σx)ᵢ = xᵀΣx). SCOPE: Gaussian risk factors for the VaR identities; the derivative statement is the directional derivative of the parametric formula α√(xᵀΣx) for a symmetric kernel, not a derivative of VaR under a general law; non-Gaussian (elliptical) laws are not treated."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.valueAtRisk_portfolio_gaussian_eq_portfolioVaRN, MathFin.sum_componentVaR_eq_valueAtRisk_sub and MathFin.hasDerivAt_portfolioVaRN (MathFin/Risk/ComponentVaR.lean), built on valueAtRisk_portfolio_gaussian (MathFin/Risk/GaussianRiskMarkowitz.lean) and the algebraic Euler identity sum_componentVaR_eq_portfolioVaRN (Σ xᵢ(Σx)ᵢ = xᵀΣx). SCOPE: Gaussian risk factors for the VaR identities; the derivative statement is the directional derivative of the parametric formula α√(xᵀΣx) for a symmetric kernel, not a derivative of VaR under a general law; non-Gaussian (elliptical) laws are not treated."
       }
     },
     {
@@ -632,14 +882,19 @@
       "domain": "mathematical_finance",
       "description": "Let L be the loss of a bond that loses 100 with probability 1/25 and 0 otherwise. At level 0.95 the library's expected shortfall of the law of L, ES₀.₉₅ = 20 ∫_{0.95}^{1} VaR_u du, is 80, while the conditional tail mean E[L | L ≥ VaR₀.₉₅] is 4: VaR₀.₉₅ = 0 sits on the atom at 0, so the tail event {L ≥ 0} is the whole space and the conditional tail mean is the unconditional mean.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.DiscreteVaR\n\nopen MeasureTheory Set\nopen MathFin MathFin.DiscreteVaR\n\n/-- For the bond losing `100` with probability `1/25`, expected shortfall at `0.95` is `80`\nwhile the conditional tail mean `E[L | L ≥ VaR₀.₉₅]` is `4`. -/\ntheorem discrete_es_vs_tail_mean_thm :\n    expectedShortfall oneL (finiteLaw oneQ) (19 / 20) = 80 ∧\n      condTailMean oneQ oneL (19 / 20) = 4 :=\n  ⟨(finiteES_eq_expectedShortfall (q := oneQ) (L := oneL) (α := 19 / 20)\n    ⟨by norm_num, by norm_num⟩).symm.trans finiteES_one_bond, condTailMean_one_bond⟩\n"
+        "lean": "import MathFin.Risk.DiscreteVaR\n\nopen MeasureTheory Set\nopen MathFin MathFin.DiscreteVaR\n\n/-- For the bond losing `100` with probability `1/25`, expected shortfall at `0.95` is `80`\nwhile the conditional tail mean `E[L | L ≥ VaR₀.₉₅]` is `4`. -/\ntheorem discrete_es_vs_tail_mean_thm :\n    expectedShortfall oneL (finiteLaw oneQ) (19 / 20) = 80 ∧\n      condTailMean oneQ oneL (19 / 20) = 4 :=\n  ⟨(finiteES_eq_expectedShortfall (q := oneQ) (L := oneL) (α := 19 / 20)\n    ⟨by norm_num, by norm_num⟩).symm.trans finiteES_one_bond, condTailMean_one_bond⟩\n"
       },
       "metadata": {
         "chapter": 2,
         "reference": "C. Acerbi and D. Tasche, On the Coherence of Expected Shortfall, Journal of Banking & Finance 26(7) (2002), 1487–1503",
+        "citations": [
+          {
+            "key": "AcerbiTasche2002"
+          }
+        ],
         "difficulty": "introductory",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Combines MathFin.DiscreteVaR.finiteES_eq_expectedShortfall (the finite-law ES equals the library's expectedShortfall at the law Σ qᵢ δᵢ, for α ∈ (0, 1)), MathFin.DiscreteVaR.finiteES_one_bond and MathFin.DiscreteVaR.condTailMean_one_bond (MathFin/RiskMeasures/DiscreteVaR.lean). SCOPE: one explicit two-point law; the general statement that ES and the conditional tail mean agree for continuous laws is not proved here."
+        "formalization_scope": "Full formal proof. Combines MathFin.DiscreteVaR.finiteES_eq_expectedShortfall (the finite-law ES equals the library's expectedShortfall at the law Σ qᵢ δᵢ, for α ∈ (0, 1)), MathFin.DiscreteVaR.finiteES_one_bond and MathFin.DiscreteVaR.condTailMean_one_bond (MathFin/Risk/DiscreteVaR.lean). SCOPE: one explicit two-point law; the general statement that ES and the conditional tail mean agree for continuous laws is not proved here."
       }
     },
     {
@@ -648,14 +903,20 @@
       "domain": "mathematical_finance",
       "description": "In the profit sign convention, for α ∈ (0, 1) the Fissler–Ziegel score S(v, e, y) = exp(e)(e − v + α⁻¹ 1{y ≤ v}(v − y)) − exp(e) (the member G₁ = 0, 𝒢₂ = G₂ = exp, a = 0 of their family) strictly elicits the pair (lower α-quantile, lower-tail expected shortfall α⁻¹ ∫₀^α q_u du) on probability laws on ℝ with finite mean and unique α-quantile: the true pair is the unique minimizer of the expected score over all of ℝ². Strict consistency of the rest of the Fissler–Ziegel family, and the loss-convention pair (VaR, upper-tail ES), are not proved.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.JointElicitability\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\n/-- The exponential Fissler–Ziegel score strictly elicits the pair (lower `α`-quantile,\nlower-tail expected shortfall) on the laws with finite mean and unique `α`-quantile. -/\ntheorem fissler_ziegel_joint_elicitability_thm {α : ℝ} (hα : α ∈ Ioo 0 1) :\n    StrictlyElicits (fisslerZiegelExpScore α)\n      (fun μ ↦ (quantile μ α, lowerExpectedShortfall μ α))\n      {μ | IsProbabilityMeasure μ ∧ Integrable id μ ∧ ∀ x, quantile μ α < x → α < cdf μ x} :=\n  strictlyElicits_fisslerZiegelExpScore hα\n"
+        "lean": "import MathFin.Risk.JointElicitability\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\n/-- The exponential Fissler–Ziegel score strictly elicits the pair (lower `α`-quantile,\nlower-tail expected shortfall) on the laws with finite mean and unique `α`-quantile. -/\ntheorem fissler_ziegel_joint_elicitability_thm {α : ℝ} (hα : α ∈ Ioo 0 1) :\n    StrictlyElicits (fisslerZiegelExpScore α)\n      (fun μ ↦ (quantile μ α, lowerExpectedShortfall μ α))\n      {μ | IsProbabilityMeasure μ ∧ Integrable id μ ∧ ∀ x, quantile μ α < x → α < cdf μ x} :=\n  strictlyElicits_fisslerZiegelExpScore hα\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "T. Fissler and J. F. Ziegel, Higher Order Elicitability and Osband's Principle, Annals of Statistics 44(4) (2016), 1680–1707, Corollary 5.5 and eq. (5.5)",
+        "citations": [
+          {
+            "key": "FisslerZiegel2016",
+            "locator": "Corollary 5.5"
+          }
+        ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.strictlyElicits_fisslerZiegelExpScore (MathFin/RiskMeasures/JointElicitability.lean), stated in the library's single elicitability notion StrictlyElicits at value type ℝ × ℝ, and reduced to the strict elicitation of the quantile by the pinball loss (strictlyElicits_pinballLoss, MathFin/RiskMeasures/Elicitability.lean) and 1 + t < exp t. SCOPE: profit convention of Fissler–Ziegel (lower quantile, lower-tail ES); one member of the scoring family (G₁ = 0, 𝒢₂ = exp, a = 0), shown strictly consistent on all of ℝ² rather than the paper's domain x₁ ≥ x₂; the full family of Corollary 5.5 and the loss-convention pair (valueAtRisk, expectedShortfall) are not proved."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.strictlyElicits_fisslerZiegelExpScore (MathFin/Risk/JointElicitability.lean), stated in the library's single elicitability notion StrictlyElicits at value type ℝ × ℝ, and reduced to the strict elicitation of the quantile by the pinball loss (strictlyElicits_pinballLoss, MathFin/Risk/Elicitability.lean) and 1 + t < exp t. SCOPE: profit convention of Fissler–Ziegel (lower quantile, lower-tail ES); one member of the scoring family (G₁ = 0, 𝒢₂ = exp, a = 0), shown strictly consistent on all of ℝ² rather than the paper's domain x₁ ≥ x₂; the full family of Corollary 5.5 and the loss-convention pair (valueAtRisk, expectedShortfall) are not proved."
       }
     },
     {
@@ -664,14 +925,23 @@
       "domain": "mathematical_finance",
       "description": "Let D₀, D₁, D₂ be the signed effective notionals of the three maturity buckets of an SA-CCR interest-rate hedging set. If Z₀, Z₁, Z₂ are square-integrable random variables whose covariances equal the Basel CRE52.57 supervisory correlations (1 on the diagonal, 0.7 between adjacent buckets, 0.3 between the first and third), then the effective notional √(D₀² + D₁² + D₂² + 1.4D₀D₁ + 1.4D₁D₂ + 0.6D₀D₂) equals the standard deviation of Σ Dᵢ Zᵢ. Also, the radicand is nonnegative for every D. The factors Z are a hypothesis of the statement, not part of the Basel formula, and their existence is not constructed here.",
       "code": {
-        "lean": "import MathFin.RiskMeasures.SACCRExposure\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\n/-- Under unit-variance bucket factors with the supervisory correlations, the SA-CCR\ninterest-rate effective notional is the standard deviation of the hedging-set exposure. -/\ntheorem saccr_effnotional_std_dev_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsFiniteMeasure μ] {Z : Fin 3 → Ω → ℝ} (hZ : ∀ i, MemLp (Z i) 2 μ)\n    (hcov : ∀ i j, cov[Z i, Z j; μ] = saccrIRCorrelation i j) (D : Fin 3 → ℝ) :\n    effNotionalIR (D 0) (D 1) (D 2) = √Var[∑ i, D i • Z i; μ] :=\n  effNotionalIR_eq_sqrt_variance hZ hcov D\n\n/-- The supervisory correlation matrix is positive semidefinite: the effective-notional radicand\nis nonnegative. -/\ntheorem saccr_effnotional_radicand_nonneg_thm (D₁ D₂ D₃ : ℝ) :\n    0 ≤ D₁ ^ 2 + D₂ ^ 2 + D₃ ^ 2 + 7 / 5 * D₁ * D₂ + 7 / 5 * D₂ * D₃ + 3 / 5 * D₁ * D₃ :=\n  effNotionalIR_radicand_nonneg D₁ D₂ D₃\n"
+        "lean": "import MathFin.Risk.SACCRExposure\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\n/-- Under unit-variance bucket factors with the supervisory correlations, the SA-CCR\ninterest-rate effective notional is the standard deviation of the hedging-set exposure. -/\ntheorem saccr_effnotional_std_dev_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsFiniteMeasure μ] {Z : Fin 3 → Ω → ℝ} (hZ : ∀ i, MemLp (Z i) 2 μ)\n    (hcov : ∀ i j, cov[Z i, Z j; μ] = saccrIRCorrelation i j) (D : Fin 3 → ℝ) :\n    effNotionalIR (D 0) (D 1) (D 2) = √Var[∑ i, D i • Z i; μ] :=\n  effNotionalIR_eq_sqrt_variance hZ hcov D\n\n/-- The supervisory correlation matrix is positive semidefinite: the effective-notional radicand\nis nonnegative. -/\ntheorem saccr_effnotional_radicand_nonneg_thm (D₁ D₂ D₃ : ℝ) :\n    0 ≤ D₁ ^ 2 + D₂ ^ 2 + D₃ ^ 2 + 7 / 5 * D₁ * D₂ + 7 / 5 * D₂ * D₃ + 3 / 5 * D₁ * D₃ :=\n  effNotionalIR_radicand_nonneg D₁ D₂ D₃\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Basel Committee on Banking Supervision, The Basel Framework, CRE52.57 (interest-rate effective notional); Basel Committee on Banking Supervision, The standardised approach for measuring counterparty credit risk exposures (BCBS 279), 2014",
+        "citations": [
+          {
+            "key": "BaselFrameworkCRE52",
+            "locator": "CRE52.57"
+          },
+          {
+            "key": "BCBS279"
+          }
+        ],
         "difficulty": "introductory",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.effNotionalIR_eq_sqrt_variance and MathFin.effNotionalIR_radicand_nonneg (MathFin/RiskMeasures/SACCRExposure.lean). The effective notional is the square root of the Markowitz quadratic form portfolioVarN under saccrIRCorrelation (effNotionalIR_eq_sqrt_portfolioVarN), and portfolioVarN_covariance_eq_variance (MathFin/Portfolio/CovariancePSD.lean) identifies that form with Var[Σ Dᵢ Zᵢ]. SCOPE: the bucket effective notionals Dᵢ (supervisory duration, delta, maturity factor) are inputs; the factor model Z is a hypothesis that interprets the formula and is not part of the regulation."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.effNotionalIR_eq_sqrt_variance and MathFin.effNotionalIR_radicand_nonneg (MathFin/Risk/SACCRExposure.lean). The effective notional is the square root of the Markowitz quadratic form portfolioVarN under saccrIRCorrelation (effNotionalIR_eq_sqrt_portfolioVarN), and portfolioVarN_covariance_eq_variance (MathFin/Choice/Portfolio/CovariancePSD.lean) identifies that form with Var[Σ Dᵢ Zᵢ]. SCOPE: the bucket effective notionals Dᵢ (supervisory duration, delta, maturity factor) are inputs; the factor model Z is a hypothesis that interprets the formula and is not part of the regulation."
       }
     },
     {
@@ -680,14 +950,118 @@
       "domain": "mathematical_finance",
       "description": "For a Gaussian vector X of pairwise uncorrelated risk factors with common variance v, weights w and α ∈ (0, 1), the value-at-risk of the portfolio loss Σ wᵢXᵢ is Σ wᵢ E Xᵢ + √(v · HHI(w)) · Φ⁻¹(α), where HHI(w) = Σ wᵢ² is the Herfindahl–Hirschman concentration index of the weights.",
       "code": {
-        "lean": "import MathFin.Bridges.ConcentrationVariance\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\n/-- The VaR of an uncorrelated Gaussian portfolio is its mean plus `√(v · HHI(w)) · Φ⁻¹(α)`. -/\ntheorem uncorrelated_gaussian_var_herfindahl_thm {ι : Type*} [Fintype ι] [DecidableEq ι]\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : ι → Ω → ℝ} {α v : ℝ}\n    (hX : HasGaussianLaw (fun ω ↦ (X · ω)) P) (hvar : ∀ i, Var[X i; P] = v)\n    (hcov : ∀ i j, i ≠ j → cov[X i, X j; P] = 0) (w : ι → ℝ) (hα : α ∈ Ioo 0 1) :\n    valueAtRisk (fun ω ↦ ∑ i, w i * X i ω) P α =\n      ∑ i, w i * P[X i] + √(v * herfindahl Finset.univ w) * PhiInv α :=\n  valueAtRisk_portfolio_gaussian_uncorrelated hX hvar hcov w hα\n"
+        "lean": "import MathFin.Risk.ConcentrationVariance\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\n/-- The VaR of an uncorrelated Gaussian portfolio is its mean plus `√(v · HHI(w)) · Φ⁻¹(α)`. -/\ntheorem uncorrelated_gaussian_var_herfindahl_thm {ι : Type*} [Fintype ι] [DecidableEq ι]\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : ι → Ω → ℝ} {α v : ℝ}\n    (hX : HasGaussianLaw (fun ω ↦ (X · ω)) P) (hvar : ∀ i, Var[X i; P] = v)\n    (hcov : ∀ i j, i ≠ j → cov[X i, X j; P] = 0) (w : ι → ℝ) (hα : α ∈ Ioo 0 1) :\n    valueAtRisk (fun ω ↦ ∑ i, w i * X i ω) P α =\n      ∑ i, w i * P[X i] + √(v * herfindahl Finset.univ w) * PhiInv α :=\n  valueAtRisk_portfolio_gaussian_uncorrelated hX hvar hcov w hα\n"
       },
       "metadata": {
         "chapter": 8,
         "reference": "H. Markowitz, Portfolio Selection, Journal of Finance 7(1) (1952), 77–91; A. J. McNeil, R. Frey and P. Embrechts, Quantitative Risk Management, revised ed. (2015), Example 2.11",
+        "citations": [
+          {
+            "key": "Markowitz1952"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "Example 2.11"
+          }
+        ],
         "difficulty": "introductory",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.valueAtRisk_portfolio_gaussian_uncorrelated (MathFin/Bridges/ConcentrationVariance.lean): valueAtRisk_portfolio_gaussian (MathFin/Bridges/GaussianRiskMarkowitz.lean) with the variance identity portfolioVarN_diag_eq_herfindahl, the ρ = 0 case of portfolioVarN_equicorrelated_eq_herfindahl (MathFin/Bridges/EquicorrelationConcentration.lean). SCOPE: Gaussian factors, pairwise uncorrelated with a common variance; the equicorrelated case is in EquicorrelationConcentration for the variance only."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.valueAtRisk_portfolio_gaussian_uncorrelated (MathFin/Risk/ConcentrationVariance.lean): valueAtRisk_portfolio_gaussian (MathFin/Risk/GaussianRiskMarkowitz.lean) with the variance identity portfolioVarN_diag_eq_herfindahl, the ρ = 0 case of portfolioVarN_equicorrelated_eq_herfindahl (MathFin/Risk/EquicorrelationConcentration.lean). SCOPE: Gaussian factors, pairwise uncorrelated with a common variance; the equicorrelated case is in EquicorrelationConcentration for the variance only."
+      }
+    },
+    {
+      "id": "mf-expected-shortfall-representing-set",
+      "name": "The Representing Set of Expected Shortfall",
+      "domain": "mathematical_finance",
+      "description": "On a finite probability space (any reference probability measure P, atoms of null mass allowed) and for α ∈ (0, 1), the Artzner–Delbaen–Eber–Heath representing set of expected shortfall ES_α, the probability vectors q with ∑ qᵢ Zᵢ ≤ 0 for every loss Z with ES_α(Z) ≤ 0, equals the set of probability vectors q with qᵢ ≤ (1 − α)⁻¹ P{i} for every state i, that is, the probability densities q/P bounded by (1 − α)⁻¹ (a state of null P-mass carries no q-mass).",
+      "code": {
+        "lean": "import MathFin.Risk.ExpectedShortfall\n\nopen MeasureTheory Set\nopen MathFin\n\n/-- On a finite probability space the ADEH representing set of expected shortfall is the set of\nprobability vectors `q` with `qᵢ ≤ (1 − α)⁻¹ P{i}`. -/\ntheorem representingSet_expectedShortfall_thm {ι : Type*} [Fintype ι] [MeasurableSpace ι]\n    [MeasurableSingletonClass ι] (P : Measure ι) [IsProbabilityMeasure P] {α : ℝ}\n    (hα : α ∈ Ioo 0 1) :\n    representingSet (fun L : ι → ℝ ↦ expectedShortfall L P α) =\n      {q | (∀ i, 0 ≤ q i) ∧ ∑ i, q i = 1 ∧ ∀ i, q i ≤ (1 - α)⁻¹ * P.real {i}} :=\n  MathFin.representingSet_expectedShortfall P hα\n"
+      },
+      "metadata": {
+        "reference": "P. Artzner, F. Delbaen, J.-M. Eber and D. Heath, Coherent measures of risk, Mathematical Finance 9(3) (1999), 203–228; C. Acerbi and D. Tasche, On the coherence of expected shortfall, Journal of Banking & Finance 26(7) (2002), 1487–1503",
+        "citations": [
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          },
+          {
+            "key": "AcerbiTasche2002"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. representingSet_expectedShortfall in MathFin/Risk/ExpectedShortfall.lean. The inclusion of the density set is the dual bound integral_mul_le_expectedShortfall applied to the density q/P; the converse tests the acceptable loss 1{i} − (1 − α)⁻¹ P{i}, whose shortfall is nonpositive by the Rockafellar–Uryasev bound at c = 0 and cash-invariance. Finite state space only; the general-space dual is isGreatest_integral_mul_expectedShortfall. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-superhedging-price-coherent",
+      "name": "The Superhedging Price Is a Coherent Risk Measure",
+      "domain": "mathematical_finance",
+      "description": "In the one-period market with M assets and N states, excess-return matrix z, and at least one martingale probability vector (a probability vector q with ∑ qₙ zₘₙ = 0 for every asset m; implied by no arbitrage when there is at least one state), let the superhedging price of a claim Y be the infimum of the initial capitals x for which some portfolio θ gives x + ∑ θₘ zₘₙ ≥ Yₙ in every state. For a reference measure P charging every state, this price, read as a loss, is a coherent risk measure (monotone, ρ(Y + m) = ρ(Y) + m, ρ(cY) = cρ(Y) for c ≥ 0, subadditive), and it is bounded below by ∑ qₙ Yₙ for every martingale probability vector q. The supremum of these prices is the superhedging price (mf-superhedging-duality).",
+      "code": {
+        "lean": "import MathFin.Risk.Superhedging\n\nopen MeasureTheory\nopen MathFin\n\n/-- The superhedging price of a claim, read as a loss, is a coherent risk measure, and dominates\nthe price under every martingale probability vector. -/\ntheorem superhedgingPrice_coherent_thm {M N : ℕ} (z : Fin M → Fin N → ℝ)\n    (hz : (martingaleProbVectors z).Nonempty) {P : Measure (Fin N)}\n    (hP : ∀ n, P {n} ≠ 0) :\n    IsCoherentRiskMeasure P (superhedgingPrice z) ∧\n      ∀ q ∈ martingaleProbVectors z, ∀ Y : Fin N → ℝ, ∑ n, q n * Y n ≤ superhedgingPrice z Y :=\n  ⟨MathFin.isCoherentRiskMeasure_superhedgingPrice hz hP,\n    fun _ hq Y ↦ MathFin.le_superhedgingPrice hq Y⟩\n"
+      },
+      "metadata": {
+        "reference": "H. Föllmer and A. Schied, Stochastic Finance: An Introduction in Discrete Time, 4th ed. (2016), Sections 1.3 and 7.1; P. Artzner, F. Delbaen, J.-M. Eber and D. Heath, Coherent measures of risk, Mathematical Finance 9(3) (1999), 203–228",
+        "citations": [
+          {
+            "key": "FollmerSchied",
+            "locator": "Section 1.3"
+          },
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. isCoherentRiskMeasure_superhedgingPrice and le_superhedgingPrice in MathFin/Risk/Superhedging.lean. Each axiom is a transport of superreplicating pairs (x, θ) (shift, scaling, sum, pointwise order) through the infimum; the lower bound is emm_le_superReplication (MathFin/Pricing/SuperhedgingDuality.lean) passed to the infimum. Hypotheses: a martingale probability vector exists (it makes the infimum finite) and P charges every state (superhedging is a pointwise order, the axioms ask it almost surely). SCOPE: the equality of the price with the supremum of the martingale prices is the separate entry mf-superhedging-duality (superhedgingPrice_isLUB). Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-superhedging-duality",
+      "name": "Superhedging Duality in the One-Period Finite-State Market",
+      "domain": "mathematical_finance",
+      "description": "In the one-period market with M assets and N states, excess-return matrix z, and at least one martingale probability vector (a probability vector q with ∑ qₙ zₘₙ = 0 for every asset m; implied by no arbitrage when there is at least one state), the superhedging price of a claim Y (the infimum of the initial capitals x for which some portfolio θ gives x + ∑ θₘ zₘₙ ≥ Yₙ in every state) is the least upper bound of the prices ∑ qₙ Yₙ over the martingale probability vectors q.",
+      "code": {
+        "lean": "import MathFin.Risk.Superhedging\n\nopen MathFin\n\n/-- **Superhedging duality.** The superhedging price is the least upper bound of the prices under\nthe martingale probability vectors. -/\ntheorem superhedging_duality_thm {M N : ℕ} (z : Fin M → Fin N → ℝ)\n    (hz : (martingaleProbVectors z).Nonempty) (Y : Fin N → ℝ) :\n    IsLUB ((fun q ↦ ∑ n, q n * Y n) '' martingaleProbVectors z) (superhedgingPrice z Y) :=\n  superhedgingPrice_isLUB hz Y\n"
+      },
+      "metadata": {
+        "reference": "H. Föllmer and A. Schied, Stochastic Finance: An Introduction in Discrete Time, 4th ed. (2016), Sections 1.3 and 7.1; P. Artzner, F. Delbaen, J.-M. Eber and D. Heath, Coherent measures of risk, Mathematical Finance 9(3) (1999), 203–228",
+        "citations": [
+          {
+            "key": "FollmerSchied",
+            "locator": "Section 1.3"
+          },
+          {
+            "key": "ArtznerDelbaenEberHeath1999"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. superhedgingPrice_isLUB in MathFin/Risk/Superhedging.lean. Proof: the superhedging price is a coherent risk measure (isCoherentRiskMeasure_superhedgingPrice, for counting measure on the states), so the finite-state Artzner–Delbaen–Eber–Heath representation coherentRisk_isLUB expresses it as the least upper bound over its representing set; representingSet_superhedgingPrice shows that set is martingaleProbVectors z (a representing vector prices the gain of every portfolio, which that portfolio and its negative superreplicate at capital 0, at both ≤ 0 and ≥ 0). No Minkowski–Weyl theorem is needed. Hypothesis: a martingale probability vector exists (implied by no arbitrage, martingaleProbVectors_nonempty_of_not_hasArbitrage). The supremum is over martingale probability vectors, which may vanish on states, not only equivalent martingale measures; whether the supremum is attained is not claimed. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-entropic-risk-certainty-equivalent",
+      "name": "Acceptance Under Exponential Utility Is Entropic Risk at Most Zero",
+      "domain": "mathematical_finance",
+      "description": "On a finite state space with a probability measure P and risk aversion γ > 0, the position −L is acceptable under the exponential utility u(x) = −exp(−γx) at wealth 0 (expected utility with the weights P{i} at least u(0)) if and only if the entropic risk γ⁻¹ log E[exp(γL)] of the loss L is at most 0.",
+      "code": {
+        "lean": "import MathFin.Risk.EntropicRisk\n\nopen MeasureTheory Real\nopen MathFin\n\n/-- **Exponential-utility acceptance is entropic risk at most zero.** -/\ntheorem exp_utility_acceptance_thm {ι : Type*} [Fintype ι] [MeasurableSpace ι]\n    [MeasurableSingletonClass ι] (P : Measure ι) [IsProbabilityMeasure P] {γ : ℝ} (hγ : 0 < γ)\n    (L : ι → ℝ) :\n    acceptableUnderUtility Finset.univ (fun i ↦ P.real {i}) (fun x ↦ -exp (-γ * x)) 0 (-L) ↔\n      γ⁻¹ * log (∫ ω, exp (γ * L ω) ∂P) ≤ 0 :=\n  acceptableUnderUtility_exp_iff hγ L\n"
+      },
+      "metadata": {
+        "reference": "H. Föllmer and A. Schied, Stochastic Finance: An Introduction in Discrete Time, 4th ed. (2016), Section 4.9; H. Föllmer and A. Schied, Convex measures of risk and trading constraints, Finance and Stochastics 6 (2002), 429–447",
+        "citations": [
+          {
+            "key": "FollmerSchied",
+            "locator": "Section 4.9"
+          },
+          {
+            "key": "FollmerSchied2002"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. acceptableUnderUtility_exp_iff in MathFin/Risk/EntropicRisk.lean, stated against acceptableUnderUtility (MathFin/Risk/UtilityDerivation.lean), which works on finite weights: the state space is finite and the weights are p i = P {i}. The same module proves the entropic risk measure is a convex risk measure on a finite probability space (isConvexRiskMeasure_entropicRisk, by Hölder) and is not coherent (not_isCoherentRiskMeasure_entropicRisk, an existence statement: positive homogeneity fails on a fair coin for every γ > 0), and that it is law invariant on any space (isLawInvariant_entropicRisk). SCOPE: this entry states only the acceptance equivalence; convexity is stated on finite state spaces because on a general space E[exp(γX)] may be infinite, which the Bochner integral reads as 0. Axioms-clean."
       }
     }
   ]

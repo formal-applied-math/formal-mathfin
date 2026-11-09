@@ -1,0 +1,72 @@
+name: docs site
+
+# The documentation site (docs/specs/2026-11-05-library-practices-design.md §7), generated from
+# the `decl-index` artifact that `build` uploads, so it shows exactly the library main built:
+# the map of the library, section and module pages (every public declaration's statement with
+# linked names, docstring, source and used-by), the blueprint graph, the program tree (the
+# blueprint with the corpus as its leaves and the issues as its buds), the corpus by status, the
+# subjects, the bibliography and a search. The generator is pure stdlib
+# (tools/verify/docs_site.py, assets in tools/verify/site_assets/); no Lean here.
+#
+# Requires GitHub Pages with source "GitHub Actions" (repository settings → Pages).
+
+on:
+  workflow_run:
+    workflows: [build]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+  actions: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: docs-site
+  cancel-in-progress: true
+
+jobs:
+  site:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: The declaration index of that build
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          if [ -z "$RUN_ID" ]; then
+            RUN_ID=$(gh run list --workflow build --branch main --status success --limit 1 \
+              --json databaseId --jq '.[0].databaseId')
+          fi
+          gh run download "$RUN_ID" --name decl-index --dir .
+
+      - name: The issues and pull requests (the tree's buds and delivery records)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --paginate "repos/${{ github.repository }}/issues?state=all&per_page=100" \
+            --jq '.[] | {number, title, state, body, labels: [.labels[].name], is_pr: (.pull_request != null)}' \
+            > issues.jsonl
+
+      - name: Generate
+        run: |
+          python3 -m tools.verify.docs_site decl-index.json --out site --issues issues.jsonl \
+            --frontier frontier-index.json
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4

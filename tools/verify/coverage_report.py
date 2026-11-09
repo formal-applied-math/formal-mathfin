@@ -6,6 +6,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
+from . import taxonomy
 from .models import Domain
 
 
@@ -91,6 +92,21 @@ def main() -> int:
             f"reduced {counts['status_reduced_core']}, "
             f"placeholder {counts['status_placeholder']}"
         )
+
+    print("\nBy cell (docs/organization.md)")
+    from .hf_dataset import entry_place
+    from .corpus import iter_entries
+    by_cell: dict[str, Counter[str]] = {}
+    for _, t in iter_entries():
+        c = by_cell.setdefault(entry_place(t)[0], Counter())
+        c["theorems"] += 1
+        c[(t.get("metadata") or {}).get("formalization_status", "")] += 1
+    order = list(taxonomy.cells())
+    for cell in sorted(by_cell, key=lambda k: order.index(k) if k in order else len(order)):
+        counts = by_cell[cell]
+        print(f"- {taxonomy.label(cell) if cell in order else cell}: {counts['theorems']}, "
+              f"full {counts['full']}, library {counts['library_wrapper']}, "
+              f"reduced {counts['reduced_core']}")
 
     if formal_gaps:
         print("\nFormal gaps")

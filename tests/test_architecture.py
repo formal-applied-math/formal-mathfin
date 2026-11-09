@@ -8,13 +8,23 @@ were honest, but the honesty gates could not see them, and they did not connect 
 The repair was to build the missing bridges, not to fence the modules off. These tests keep
 the library one graph:
 
-* ``test_foundations_imports_only_foundations``: ``Foundations/`` is the layer the pricing
-  sections stand on, so it imports nothing above it. A model lives in its market's section;
-  a module that joins a foundation to a model lives in ``Bridges/``.
+* ``test_every_module_has_a_layer``: every module lives in a layer (``tools/verify/layers.py``):
+  ``Probability/`` → ``Contracts/`` → ``Pricing/`` → the limbs ``Models/``, ``Risk/``,
+  ``Choice/``, ``Insurance/``, ``Markets/`` (docs/specs/2026-11-07-one-trunk-design.md, §3 I4).
+  Imports point that way, and a limb reaches another limb only through a declared edge; the
+  imports against the direction are the ratchet count ``layer_violations``, which may not rise.
+  A join belongs to the module that consumes it: there is no ``Bridges/``.
+* ``test_limb_edges_are_acyclic``: the declared limb-to-limb edges form a DAG.
 * ``test_every_module_is_connected``: every module has an edge in the import graph. It
   imports a library module, or a library module imports it.
 * ``test_every_module_is_used``: every module is imported by another library module or by a
   corpus entry. A result that nothing uses and nothing cites is a claim nobody checks.
+* ``test_every_module_reaches_init``: ``MathFin/Init.lean`` holds the library's conventions
+  (its attributes, the ``pricing`` grind set), and every module sees it: a module importing no
+  library module imports it directly (CSLib's ``Cslib.Init``). An edge to ``Init`` connects a
+  module to nothing, so the two tests above do not count it.
+* ``test_notation_is_scoped``: notation is ``scoped`` or ``local``, never global
+  (``docs/design.md`` §5).
 
 ``STAGING`` admits a module whose consumer is being built in an open issue. It names the
 issue, and it is meant to stay short-lived. It is not a place to park a module that does
@@ -24,35 +34,32 @@ not connect: that module needs a bridge.
 from __future__ import annotations
 
 import re
-from pathlib import Path
 
+from tools.verify import layers, library
 from tools.verify.corpus import iter_entries
+from tools.verify.library import INIT
 
-MATHFIN_DIR = Path("MathFin")
-IMPORT_RE = re.compile(r"^(?:public\s+)?(?:meta\s+)?import\s+(?:all\s+)?(MathFin(?:\.[\w']+)+)", re.M)
-SNIPPET_IMPORT_RE = re.compile(r"^import\s+(MathFin(?:\.[\w']+)+)", re.M)
-
-# Aggregators: they import everything, so an edge from them shows nothing.
-AGGREGATORS = frozenset({"MathFin.AxiomAudit", "MathFin.AxiomAuditGen", "MathFin.Blueprint"})
+NOTATION_RE = re.compile(r"^[ \t]*(?:@\[[^\]]*\][ \t]*)?(?:(scoped|local)[ \t]+)?"
+                         r"(?:notation|infixl|infixr|infix|prefix|postfix)\b[ \t]*[\"(:]", re.M)
 
 # module -> open issue whose work adds its consumer. Keep it short-lived.
 STAGING: dict[str, str] = {}
 
 
-def _module_name(path: Path) -> str:
-    return ".".join(path.with_suffix("").parts)
+def _all_modules() -> dict[str, list[str]]:
+    """Every library module (aggregators, `Init` and the umbrella `MathFin` included) and its
+    library imports."""
+    paths = [library.UMBRELLA] + library.modules(aggregators=True)
+    return {library.module_name(p): library.library_imports(p.read_text(encoding="utf-8"))
+            for p in paths}
 
 
 def _modules() -> dict[str, list[str]]:
-    mods = {}
-    for path in sorted(MATHFIN_DIR.rglob("*.lean")):
-        if path.name.startswith("."):  # tool temp files (`ledger verify --exec`), not modules
-            continue
-        name = _module_name(path)
-        if name in AGGREGATORS or name.startswith("MathFin.Blueprint."):
-            continue
-        mods[name] = IMPORT_RE.findall(path.read_text(encoding="utf-8"))
-    return mods
+    """The library's graph: aggregators (`library.AGGREGATORS`) and `Init` are not nodes, and
+    edges to `Init` are dropped."""
+    graph = _all_modules()
+    return {m: [i for i in imps if i != INIT] for m, imps in graph.items()
+            if m not in library.AGGREGATORS and m not in {INIT, "MathFin"}}
 
 
 def _importers(mods: dict[str, list[str]]) -> dict[str, set[str]]:
@@ -67,22 +74,27 @@ def _importers(mods: dict[str, list[str]]) -> dict[str, set[str]]:
 def _cited_by_corpus() -> set[str]:
     cited = set()
     for _, entry in iter_entries():
-        cited.update(SNIPPET_IMPORT_RE.findall(entry["code"]["lean"]))
+        cited.update(library.library_imports(entry["code"]["lean"]))
     return cited
 
 
-def test_foundations_imports_only_foundations() -> None:
-    bad = {
-        m: [i for i in imps if not i.startswith("MathFin.Foundations.")]
-        for m, imps in _modules().items()
-        if m.startswith("MathFin.Foundations.")
-    }
-    bad = {m: v for m, v in bad.items() if v}
-    assert not bad, (
-        "Foundations/ imports only Foundations/. Move the module to the section of the model "
-        "it uses, or to Bridges/ if it joins a foundation to a model:\n"
-        + "\n".join(f"  {m} imports {', '.join(v)}" for m, v in sorted(bad.items()))
-    )
+def test_every_module_has_a_layer() -> None:
+    stray = sorted(m for m in _modules() if layers.layer(m) is None)
+    assert not stray, (
+        "every module lives under one of " + ", ".join(f"{x}/" for x in layers.LAYERS)
+        + " (tools/verify/layers.py):\n  " + "\n  ".join(stray))
+
+
+def test_limb_edges_are_acyclic() -> None:
+    succ: dict[str, set[str]] = {}
+    for a, b in layers.EDGES:
+        assert a in layers.LIMBS and b in layers.LIMBS, (a, b)
+        succ.setdefault(a, set()).add(b)
+
+    def reaches(a: str, b: str, seen: frozenset[str] = frozenset()) -> bool:
+        return any(c == b or (c not in seen and reaches(c, b, seen | {c}))
+                   for c in succ.get(a, ()))
+    assert not [x for x in layers.LIMBS if reaches(x, x)], "the declared limb edges have a cycle"
 
 
 def test_every_module_is_connected() -> None:
@@ -110,6 +122,33 @@ def test_every_module_is_used() -> None:
         "result a corpus entry, or let the module that needs it import it:\n  "
         + "\n  ".join(unused)
     )
+
+
+def test_every_module_reaches_init() -> None:
+    mods = _all_modules()
+    reach: dict[str, bool] = {INIT: True}
+
+    def sees_init(m: str) -> bool:  # the import graph is acyclic
+        if m not in reach:
+            reach[m] = any(sees_init(i) for i in mods.get(m, ()))
+        return reach[m]
+
+    blind = sorted(m for m in mods if m != INIT and not sees_init(m))
+    assert not blind, (
+        "these modules do not import `MathFin.Init`, directly or through another library "
+        "module. A module that imports no library module starts with "
+        "`public import MathFin.Init`:\n  " + "\n  ".join(blind))
+
+
+def test_notation_is_scoped() -> None:
+    from tools.verify.mathfin_index import strip_comments
+
+    glob = sorted(f"{p}:{m.group(0).strip()}" for p in library.modules(aggregators=True)
+                  for m in NOTATION_RE.finditer(strip_comments(p.read_text(encoding="utf-8")))
+                  if not m.group(1))
+    assert not glob, (
+        "global notation: make it `scoped` in the namespace of the object it writes, or "
+        "`local` (docs/design.md §5):\n  " + "\n  ".join(glob))
 
 
 def test_staging_entries_name_an_issue_and_exist() -> None:

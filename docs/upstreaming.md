@@ -8,7 +8,7 @@ reusable workflow.
 
 ## Executive summary
 
-Some `MathFin/Foundations/` results are general-interest probability /
+Some `MathFin/Probability/` results are general-interest probability /
 stochastic-process lemmas that belong *upstream*, not in a mathematical-finance library.
 Draft files targeting other repos' module trees live under `upstream/` (our `lake`
 never builds them; catalogue in `upstream/README.md`). This doc logs what has been

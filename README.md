@@ -12,15 +12,15 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 779 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 744 are proved in full, 18 restate a lemma from Mathlib or
-BrownianMotion, and 17 are reduced cores that prove less than the result they are named after.
+The corpus records 804 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 766 are proved in full, 18 restate a lemma from Mathlib or
+BrownianMotion, and 20 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
 axioms `propext`, `Classical.choice` and `Quot.sound`.
 
 Here, for example, is the convergence of the Cox–Ross–Rubinstein call price to the Black–Scholes
-price, from [`CRRClosedForm.lean`](MathFin/Binomial/CRRClosedForm.lean):
+price, from [`CRRClosedForm.lean`](MathFin/Models/Binomial/CRRClosedForm.lean):
 
 ```lean
 theorem binomialPrice_call_tendsto_bs_closed {r σ T S₀ K : ℝ}
@@ -33,193 +33,138 @@ theorem binomialPrice_call_tendsto_bs_closed {r σ T S₀ K : ℝ}
 ```
 
 The hypothesis `hna`, that the $`n`$-step tree is free of arbitrage for every $`n \ge 1`$, holds
-whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Binomial/CRRConvergence.lean)).
+whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Models/Binomial/CRRConvergence.lean)).
 
 ## Main results
 
-- **Itô's formula.** For $`f(t,x)`$ with continuous $`f`$, $`\partial_t f`$, $`\partial_x f`$ and
-  $`\partial_x^2 f`$, and no growth condition, the process
-  $`f(t,B_t) - f(0,B_0) - \int_0^t \big(\partial_t f + \tfrac12 \partial_x^2 f\big)(s,B_s)\,ds`$
-  is a continuous local martingale
-  ([`ito_formula_unrestricted`](MathFin/Foundations/ItoFormulaUnrestrictedLocMart.lean)). For an
-  Itô process $`X = x_0 + \int b\,ds + \int \sigma\,dB`$ with continuous adapted coefficients and
-  no bounds on them or on $`f`$, almost surely, at every $`t \le T`$ at once,
+Each result below links to its Lean declaration. The
+[landmarks page](https://formal-applied-math.github.io/formal-mathfin/landmarks.html) prints the
+exact statement of each one, and what it leaves out.
 
-  ```math
-  f(t,X_t) - f(0,x_0) = \int_0^t f_x(s,X_s)\,\sigma_s\,dB_s
-    + \int_0^t \Big(f_t + f_x\,b_s + \tfrac12 f_{xx}\,\sigma_s^2\Big)(s,X_s)\,ds,
-  ```
+- **Itô's formula.** For f(t,x) with continuous partial derivatives and no growth condition,
+  f(t,B_t) minus its drift integral agrees, at each time almost surely, with a continuous local
+  martingale ([`ito_formula_unrestricted`](MathFin/Probability/Brownian/Ito/ItoFormulaUnrestrictedLocMart.lean)).
+  For an Itô process with continuous adapted coefficients, the change-of-variables formula holds
+  almost surely at every t ≤ T at once
+  ([`ito_formula_adapted_unbounded_process`](MathFin/Probability/Brownian/Ito/ItoFormulaAdaptedProcess.lean)).
+- **Lévy's characterization.** A continuous adapted M with M₀ = 0 such that M and M² − t are local
+  martingales is a Brownian motion for the filtration
+  ([`isFilteredPreBrownian_of_localMartingale`](MathFin/Probability/Brownian/LevyCharacterization.lean)).
+- **Girsanov's theorem.** For bounded predictable θ, under dQ = exp(−∫₀ᵀ θ dB − ½∫₀ᵀ θ² dt) dP, a
+  modification of B + ∫ θ dt has independent N(0, t − s) increments for the Brownian filtration, and
+  continuous paths when B has them
+  ([`Btheta_isFilteredPreBrownian_predictable_of_bdd`](MathFin/Probability/Brownian/Girsanov/GirsanovFiltered.lean)).
+- **Martingale representation.** For a Brownian motion with every path continuous, every
+  square-integrable F^B_T-measurable H is E[H] + ∫₀ᵀ φ dB for a unique φ, so it is replicated from
+  E[H] by a unique strategy
+  ([`exists_replicating_strategy`](MathFin/Pricing/MarketCompleteness.lean)).
+- **Stochastic differential equations.** For Lipschitz coefficients and any horizon, the Picard map
+  of dX = b(X) dt + σ(X) dB has a unique fixed point in the predictable L² space
+  ([`picardMap_exists_unique_fixedPoint_any_horizon`](MathFin/Probability/Brownian/SDE/SDEExistence.lean)).
+- **Fundamental theorem of asset pricing.** On a finite probability space of full support with one
+  risky asset, no arbitrage holds if and only if there is an equivalent martingale measure, and,
+  with full information at the horizon, the market is complete if and only if that measure is unique
+  ([`ftap_discrete`](MathFin/Pricing/FTAP/FTAPDiscrete.lean),
+  [`ftap_two`](MathFin/Pricing/FTAP/FTAPComplete.lean)). On any probability space, multi-period no
+  arbitrage is equivalent to no arbitrage in each conditional one-period market
+  ([`noArbitrage_iff_noArbitrageLocal`](MathFin/Pricing/FTAP/NoArbitrageLocal.lean)).
+- **Coherent risk measures.** On a finite state space, a coherent risk measure is the supremum of
+  expected losses over the probability vectors that price every acceptable loss nonpositively
+  ([`coherentRisk_isLUB`](MathFin/Risk/AcceptanceSet.lean)).
+- **The Black–Scholes PDE from Feynman–Kac.** The call price is a heat-kernel integral of the
+  payoff, and the PDE follows from the heat equation for the kernel
+  ([`bsV_satisfies_bs_pde_via_feynmanKac`](MathFin/Models/BlackScholes/PDEFromFeynmanKac.lean)).
+- **The delta hedge.** Almost surely, for all t ≤ T′ < T at once, e^(−rt) C(t, S_t) = C(0, S₀) + ∫₀ᵗ
+  Φ(d₁) σ e^(−rs) S_s dB_s, and C(0, S₀) is the value of the call contract
+  ([`bs_delta_hedge_replication`](MathFin/Models/BlackScholes/DeltaHedge.lean),
+  [`europeanCall_deltaHedge`](MathFin/Models/BlackScholes/BlackScholesHedge.lean)).
+- **Jump-diffusions.** For an assumed jump-diffusion, the discounted price is a martingale exactly
+  at the compensated drift, and with Gaussian log-jumps at that drift the conditional call price is
+  Merton's series
+  ([`JumpDiffusionProcess.martingale_iff`](MathFin/Models/Jumps/JumpDiffusionProcess.lean),
+  [`condExp_call_eq_mertonCallPrice`](MathFin/Models/Jumps/JumpDiffusionMerton.lean)).
+- **The American put.** For r > 0 and dividend yield 0 ≤ q ≤ r, the early-exercise boundary is
+  strictly convex in the time to expiry, and its logarithm is convex
+  ([`PhysicalBoundaryConvexity.lean`](MathFin/Models/BlackScholes/American/Stopping/PhysicalBoundaryConvexity.lean)).
+- **Raw SVI.** A polynomial-sign formula in the five parameters holds exactly when the parameters
+  are admissible and the call priced through the smile is convex in the strike. With one more sign,
+  it holds exactly when that call is a normalized call price, free of butterfly arbitrage
+  ([`extendedCertificateFormula_iff_bsSmile_convex`](MathFin/Models/ModelFree/SVI/ExtendedFormula.lean),
+  [`butterflyFreeFormula_iff_isNormalizedCallPrice`](MathFin/Models/ModelFree/SVI/TailCondition.lean)).
+- **Contracts, separate from models.** One contract term is priced in interchangeable models. A call
+  less a put is worth the forward in any martingale model
+  ([`value_europeanCall_sub_put_of_martingale`](MathFin/Pricing/Parity.lean)), and the call's
+  values in the binomial tree converge to its Black–Scholes value when |r|√T < σ
+  ([`tendsto_binomial_value_europeanCall`](MathFin/Models/Binomial/BinomialLimit.lean)). Every
+  fixed-dated contract on the physical Black–Scholes asset has, under the Girsanov measure, its
+  risk-neutral value
+  ([`value_physical_eq_riskNeutral`](MathFin/Models/BlackScholes/BlackScholesPhysical.lean)).
+- **Interest rates.** In Vasicek and Hull–White, the bond price at t is an exponential-affine
+  function of the short rate, and the bond put is a Black put under the forward measure
+  ([`bondPrice_hullWhite`](MathFin/Models/Rates/HullWhiteBond.lean),
+  [`value_bondPut_hullWhite`](MathFin/Models/Rates/Jamshidian.lean)). Swaptions and the CMS
+  swaplet are priced under the annuity measure
+  ([`value_payerSwaption`](MathFin/Models/Rates/CMSContract.lean)).
 
-  and the stochastic integral has a version that is a continuous local martingale for the
-  augmented Brownian filtration
-  ([`ito_formula_adapted_unbounded_process`](MathFin/Foundations/ItoFormulaAdaptedProcess.lean),
-  [`exists_localMartingale_ito_formula`](MathFin/Foundations/ItoFormulaAdaptedProcess.lean)).
+## How the library is organized
 
-- **Lévy's characterization.** A continuous adapted process $`M`$ with $`M_0 = 0`$ such that $`M`$
-  and $`M^2 - t`$ are local martingales for a filtration $`\mathcal{F}`$ is an
-  $`\mathcal{F}`$-Brownian motion
-  ([`isFilteredPreBrownian_of_localMartingale`](MathFin/Foundations/LevyCharacterization.lean)).
+Financial mathematics has one economic object, a price system: positions in a market and the set
+of pricing measures that price them. Its deep theorems are three dualities of that set: with the
+gains of trading strategies (valuation: the fundamental theorems, superhedging), with the
+positions a risk measure accepts (risk: the robust representation), and with the positions an
+investor prefers (choice: marginal utility is a state-price density). The model families (trees,
+diffusions, volatility, jumps, term structures, default, mortality and claims, market
+mechanisms) are a second axis; probability and statistics are the tools.
 
-- **Girsanov's theorem.** For bounded predictable $`\theta`$, let
-  $`dQ = \exp\big(-\int_0^T \theta\,dB - \tfrac12 \int_0^T \theta^2\,dt\big)\,dP`$. Under $`Q`$, on
-  $`[0,T]`$, the process $`B_t + \int_0^t \theta_s\,ds`$ starts at $`0`$ and has independent
-  $`\mathcal{N}(0,t-s)`$ increments
-  ([`Btheta_isQBrownianMotion_predictable_of_bdd`](MathFin/Foundations/GirsanovPredictableTheta.lean),
-  stated for an adapted modification, which has the same finite-dimensional laws).
+[`docs/organization.md`](docs/organization.md) gives the account, and says how much of the
+library already hangs from the trunk: the library measures that from its own statements
+(`tools/verify/chain_reach.py`), and states each missing link as a Lean theorem in the connector
+library [`MathFinFrontier`](MathFinFrontier.lean), carried by an issue. The module directories,
+the [blueprint](docs/blueprint.md), the issue labels and the
+[documentation site](https://formal-applied-math.github.io/formal-mathfin/) read the structure
+from one file, [`docs/taxonomy.toml`](docs/taxonomy.toml).
 
-- **Martingale representation.** Every square-integrable $`\mathcal{F}^B_T`$-measurable $`H`$ is
-  $`\mathbb{E}[H] + \int_0^T \varphi\,dB`$ for a unique $`\varphi`$: each such claim is replicated
-  from initial wealth $`\mathbb{E}[H]`$ by a unique strategy
-  ([`exists_replicating_strategy`](MathFin/Foundations/MarketCompleteness.lean)).
-
-- **Stochastic differential equations.** For Lipschitz $`b`$ and $`\sigma`$ (constants $`L_b`$,
-  $`L_\sigma`$), the Picard map of $`dX = b(X)\,dt + \sigma(X)\,dB`$ has a unique fixed point in
-  the $`L^2`$ space of predictable processes on $`[0,T]`$ when $`T L_b + \sqrt{T} L_\sigma < 1`$
-  ([`picardMap_exists_unique_fixedPoint`](MathFin/Foundations/SDEExistence.lean)).
-
-- **Fundamental theorem of asset pricing.** A finite-horizon market with one risky asset on a finite
-  probability space of full support has no arbitrage if and only if it has an equivalent martingale
-  measure ([`ftap_discrete`](MathFin/Foundations/FTAPDiscrete.lean)); the one-period theorem holds
-  on any probability space with finitely many assets
-  ([`ftap_one_period_vector`](MathFin/Foundations/FTAPOnePeriodVector.lean)).
-
-- **Coherent risk measures.** On a finite state space a coherent risk measure of losses is
-  $`\rho(L) = \sup_{q \in \mathcal{Q}_\rho} \mathbb{E}_q[L]`$, the supremum over the probability
-  vectors that price every acceptable loss nonpositively
-  ([`coherentRisk_isLUB`](MathFin/RiskMeasures/AcceptanceSet.lean)). It and the finite FTAP both
-  come from the cone-separation lemmas in
-  [`ConvexDuality.lean`](MathFin/Foundations/ConvexDuality.lean).
-
-- **The Black–Scholes PDE from Feynman–Kac.** The call price is a heat-kernel integral, and the
-  PDE follows from the heat equation for the kernel, without differentiating the closed form
-  ([`bsV_satisfies_bs_pde_via_feynmanKac`](MathFin/BlackScholes/PDEFromFeynmanKac.lean)).
-
-- **Jump-diffusions.** Let $`X`$ be adapted, start at $`0`$, and have increments over $`\tau`$
-  independent of the past and distributed as $`b\tau + \sigma\sqrt{\tau}\,Z + \sum_{i<N} J_i`$,
-  with $`Z \sim \mathcal{N}(0,1)`$, $`N \sim \mathrm{Poisson}(\Lambda\tau)`$ and i.i.d. jumps of
-  law $`\nu`$, all independent. If $`S_0 \neq 0`$ and $`\int e^x\,d\nu < \infty`$, the discounted
-  price $`e^{-rt} S_0 e^{X_t}`$ is a martingale exactly when
-  $`b = r - \sigma^2/2 - \Lambda\big(\int e^x\,d\nu - 1\big)`$
-  ([`JumpDiffusionProcess.martingale_iff`](MathFin/BlackScholes/JumpDiffusionProcess.lean)). With
-  Gaussian jumps and $`\sigma, S_0, K > 0`$, the conditional value of the call at every date
-  before maturity is then Merton's 1976 series
-  ([`condExp_call_eq_mertonCallPrice`](MathFin/BlackScholes/JumpDiffusionMerton.lean)).
-
-- **The American put.** A supermartingale dominating the discounted reward bounds the value, and a
-  stopping rule attaining its initial value is optimal
-  ([`value_eq_of_attained`](MathFin/BlackScholes/AmericanPut/Stopping/Verification.lean)). With
-  $`r > 0`$ and dividend yield $`0 \le q \le r`$, the early-exercise boundary $`B(\tau)`$ is
-  strictly convex in the time to expiry and $`\log(B(\tau)/K)`$ is convex
-  ([`PhysicalBoundaryConvexity.lean`](MathFin/BlackScholes/AmericanPut/Stopping/PhysicalBoundaryConvexity.lean),
-  [`docs/american-put-boundary.md`](docs/american-put-boundary.md)).
-
-- **Raw SVI.** A fixed Boolean combination of polynomial signs in $`(a, b, \rho, m, \sigma)`$ holds
-  exactly when $`\sigma, b \ge 0`$, $`\rho^2 \le 1`$, the total variance is positive and the
-  Black–Scholes call with the SVI volatility is convex in the strike (Durrleman's condition for
-  $`\sigma > 0`$). With one more sign, $`b(1+\rho) < 2`$, it holds exactly when that call is also
-  nonincreasing, lies between $`(1-K)^+`$ and $`1`$, and has the limits of a call price
-  ([`extendedCertificateFormula_iff_bsSmile_convex`](MathFin/BlackScholes/SVI/ExtendedFormula.lean),
-  [`butterflyFreeFormula_iff_isNormalizedCallPrice`](MathFin/BlackScholes/SVI/TailCondition.lean)).
-
-- **Contracts, separate from models.** Payoffs are terms of a contract language, priced by
-  interchangeable models:
-  - the values of `europeanCall K T` in the $`n`$-step CRR tree converge to its Black–Scholes
-    value when $`|r|\sqrt{T} < \sigma`$
-    ([`tendsto_binomial_value_europeanCall`](MathFin/Contracts/Models/BinomialLimit.lean));
-  - in any model whose discounted price is a martingale from $`S_0`$, a call less a put is worth
-    the forward, $`S_0 - K D(T)`$
-    ([`value_europeanCall_sub_put_of_martingale`](MathFin/Contracts/Parity.lean));
-  - the power call, the exchange option and the geometric Asian call are worth their Black–Scholes
-    closed forms, and the chooser's replicating portfolio is worth Rubinstein's
-    ([`Contracts/Models/`](MathFin/Contracts/Models)).
-
-- **Interest rates.** In Vasicek and in Hull–White with continuous forcing, discounting by
-  $`e^{-\int_0^t r_s\,ds}`$:
-  - the bond price at $`t`$ is $`A_t(T-t)\,e^{-B(T-t)\,r_t}`$ almost surely
-    ([`bondPrice_hullWhite`](MathFin/Contracts/Models/HullWhiteBond.lean));
-  - the bond put is a Black put on the bond, which is lognormal under the forward measure
-    (Jamshidian), and a caplet is $`1+\delta K`$ such puts
-    ([`valueDisc_bondPut_hullWhite`](MathFin/Contracts/Models/Jamshidian.lean),
-    [`valueDisc_caplet_eq_bondPut`](MathFin/Contracts/Models/Caplet.lean)).
-
-  For any discount factor, a swap rate tied to the bonds by a model bundle gives:
-  - the payer swaption as $`A(0)\,\mathbb{E}^A[(S-K)^+]`$ under the annuity measure;
-  - the CMS swaplet as its forward value plus an exact covariance adjustment
-    ([`valueDisc_payerSwaption`](MathFin/Contracts/Models/CMS.lean),
-    [`SwapModel.valueDisc_cmsSwaplet_eq`](MathFin/Contracts/Models/CMS.lean)).
-
-## Contents
-
-| Area | Topics |
+| | Topics |
 |---|---|
-| Probability | conditional expectation, martingales and stopping times, Brownian motion, Poisson processes, Markov chains |
-| Stochastic calculus | Itô integral and isometry, quadratic variation, Itô's formula, Girsanov's theorem, martingale representation, SDEs, Feynman–Kac, compensated Poisson integral |
-| No-arbitrage | fundamental theorems, equivalent martingale measures, change of numéraire, market completeness, superreplication |
-| Option pricing | Black–Scholes prices and Greeks, the Black–Scholes PDE, implied volatility, dividends, FX (Garman–Kohlhagen), Bachelier, Black-76, jump-diffusions (Merton's formula and Greeks, Esscher pricing, incompleteness at one date), Breeden–Litzenberger, a polynomial-sign certificate for strike-convexity of raw SVI |
-| Exotic options | digital, exchange (Margrabe), chooser, barrier, lookback, geometric Asian, power and quanto options; spreads; variance swaps |
-| Lattice models | binomial replication, American and Bermudan options via the Snell envelope, Cox–Ross–Rubinstein convergence, André's reflection principle |
-| Fixed income and credit | bonds, duration and convexity, immunization, yield curves, forward rates, FRAs, swaps, caps and caplets, swaptions and CMS under the annuity measure, the forward measure, Vasicek, Hull–White and GSR, Jamshidian's bond options, hazard rates, CDS, CVA, first-to-default, KMV–Merton |
-| Portfolio theory | Markowitz, CAPM, two-fund separation, the tangency portfolio, risk parity, Black–Litterman; Sharpe, Sortino, Treynor and information ratios; the Kelly criterion |
-| Risk measures | the quantile function; value-at-risk and expected shortfall for every law: Rockafellar–Uryasev, coherence of ES, its dual representation, VaR superadditivity, elicitability (VaR yes, ES no), expectiles; coherent and spectral risk measures, expected utility, concentration indices |
-| Dependence and extremes | copulas and Sklar's theorem (continuous margins), Fréchet–Hoeffding bounds, Hoeffding's covariance identity, Marshall–Olkin common shocks; GEV and GPD domains of attraction, maxima of Poisson-many losses |
-| Credit portfolios | Bernoulli mixtures, the one-factor Gaussian threshold model, and the Basel IRB formula as the limit of portfolio VaR |
-| Market microstructure | Avellaneda–Stoikov market making, the Glosten–Milgrom spread |
-| Other | a contract language that separates payoffs from pricing models, with prices in Black–Scholes, the binomial tree and the Gaussian short-rate models; survival models, mortality and annuities; compound Poisson losses; constant-product AMMs |
+| **Probability** | conditional expectation, martingales and stopping times, the Snell envelope, Markov chains; Brownian motion, the Itô integral and isometry, quadratic variation, Itô's formula, Girsanov's theorem, martingale representation, SDEs, Feynman–Kac; Poisson processes and the compensated Poisson integral; the quantile function, GEV and GPD domains of attraction, maxima of Poisson-many losses; copulas and Sklar's theorem (continuous margins), Fréchet–Hoeffding bounds, Hoeffding's covariance identity, Marshall–Olkin common shocks; convex separation |
+| **Statistics** | Sharpe, Sortino, Treynor and information ratios; estimators, empirical quantiles, the Roll spread, calibration of an AR(1) to an Ornstein–Uhlenbeck process |
+| **Positions and markets** | a contract language that separates payoffs from pricing models; markets, numéraires, self-financing strategies and their gains; the value of a contract under a measure |
+| **Valuation** | *arbitrage theory:* the fundamental theorems, equivalent martingale measures, change of numéraire, market completeness, superreplication · *trees:* binomial replication, American and Bermudan options via the Snell envelope, Cox–Ross–Rubinstein convergence, André's reflection principle · *Black–Scholes and Bachelier:* prices and Greeks, the PDE, implied volatility, dividends; digital, exchange (Margrabe), chooser, barrier, lookback, geometric Asian, power and quanto options, spreads · *volatility:* a polynomial-sign certificate for strike-convexity of raw SVI · *jumps:* Merton's formula and Greeks, Esscher pricing, incompleteness at one date · *term structures:* bonds, yield curves, forward rates, FRAs, swaps, caps and caplets, swaptions and CMS under the annuity measure, the forward measure, Vasicek, Hull–White and GSR, Jamshidian's bond options, Black-76, FX (Garman–Kohlhagen), duration, convexity and immunization · *credit:* hazard rates, CDS, CVA, first-to-default, KMV–Merton · *life contracts:* survival models, mortality and annuities · *mechanisms:* constant-product AMMs · *model-free:* Breeden–Litzenberger, variance swaps |
+| **Choice** | *preferences:* expected utility · *portfolios:* Markowitz, two-fund separation, the tangency portfolio, risk parity, Black–Litterman · *equilibrium:* CAPM · *dynamic:* the Kelly criterion · *strategic trading:* Avellaneda–Stoikov market making, the Glosten–Milgrom spread |
+| **Risk** | *risk measures:* coherent and spectral risk measures, coherence of expected shortfall and its dual representation, elicitability of value-at-risk by the pinball loss and non-elicitability of expected shortfall, expectiles · *value-at-risk and expected shortfall* for every law, Rockafellar–Uryasev · *aggregation:* failure of VaR subadditivity (the exact range for independent defaults; infinite-mean Pareto), concentration indices · *credit portfolios:* Bernoulli mixtures, the one-factor Gaussian threshold model, the Basel IRB formula as the limit of portfolio VaR · *premiums and ruin:* compound Poisson losses |
 
 ## Limitations
 
-- Seventeen of the 779 results are reduced cores. Eleven assume a structure whose fields include the
-  textbook conclusion, so the conclusion is not derived: the reflection principle, nowhere
-  differentiability and the law of the iterated logarithm for Brownian motion, Novikov's condition,
-  the general form of Girsanov's theorem, the two-dimensional Itô formula,
-  and five theorems on Markov chains. The other six prove special cases: the first interarrival
-  time of a Poisson process is exponential; Stulz's call on the maximum is checked only in its
-  zero-strike limit, and the Heynen–Kat two-asset barrier only at zero correlation, neither formula
-  being derived as an expected payoff; the Ornstein–Uhlenbeck Hermite modes decay at their
-  eigenvalues only for degree at most 2; Haug's partial-time-start barrier and Rubinstein–Reiner's
-  binary barrier are transcribed closed forms with proved identities between their terms, neither derived
-  as an expected payoff (only the binary's vanilla leg is shown to be the digital call's price).
-- Girsanov's theorem is proved only for bounded $`\theta`$ (predictable, or adapted with continuous
-  paths), and only at the level of finite-dimensional laws: neither path continuity of the new
-  process nor independence of its increments from the past is stated.
-- The second fundamental theorem is proved in both directions only for one risky asset on a finite
-  probability space of full support, with no arbitrage and full information at the horizon
-  ($`\mathcal{F}_T = \top`$): the market is complete if and only if its equivalent martingale
-  measure is unique ([`ftap_two`](MathFin/Foundations/FTAPComplete.lean)); for the binomial tree
-  this holds under `BinomialNoArb`
-  ([`isCompleteMarket_horizonSpot_iff`](MathFin/Binomial/MultiPeriodFTAP.lean)). In the Brownian
-  market only the direction from completeness to uniqueness is proved: for a price
-  $`S = S_0 + \int_0^t \sigma\,dB`$ with $`\sigma \neq 0`$ almost everywhere, a probability
-  measure with square-integrable density with respect to $`P`$, under which $`S`$ is a
-  martingale, agrees with $`P`$ on $`\mathcal{F}^B_T`$.
-- Martingale representation proves that a hedge exists and is unique, but does not identify it;
-  that needs the Clark–Ocone formula
-  ([#182](https://github.com/formal-applied-math/formal-mathfin/issues/182), open).
-- The SVI certificate's formula is defined structurally, not written out as a list of
-  inequalities. Butterfly-freeness is proved as a list of properties of the call price as a
-  function of the strike; the risk-neutral law is not constructed from them. At $`\sigma = 0`$
-  convexity of the call is not tied to Durrleman's condition.
-- Itô's formula for an Itô process is proved on a finite horizon $`[0, T]`$, for a process built
-  from a single Brownian motion with continuous adapted coefficients and a deterministic starting
-  point. Itô's formula for a continuous semimartingale not built from $`B`$ is not proved, and
-  neither is a quadratic-variation process for a general continuous local martingale, so Lévy's
-  characterization asks that $`M^2 - t`$ be a local martingale rather than that
-  $`\langle M\rangle_t = t`$.
-- The jump-diffusion results on a process assume the properties listed above
-  (`JumpDiffusionProcess`). A process with them is constructed only without jumps, as Brownian
-  motion with drift. A change of measure on the process that alters the jump rate or the jump law
-  is not covered.
-- Existence for SDEs with Lipschitz coefficients is proved only on horizons with
-  $`T L_b + \sqrt{T} L_\sigma < 1`$.
-- The binomial limit is proved for call prices and for the law of the terminal log-return.
-  Convergence of the price process (Donsker's invariance principle) is not formalized.
-- The multi-period fundamental theorem and the representation of coherent risk measures are proved
-  on finite probability spaces only.
-- Bond options and caplets are priced in Vasicek and in Hull–White with continuous forcing, where
-  the bond prices are derived. Elsewhere the observed bond is a hypothesis of the model bundle, and
-  so is the lognormality behind the Black-76 caplet and Black's swaption formula. The CMS
-  adjustment is exact for payment at the fixing date. Its sign is proved only when every bond but
-  the last is known at the fixing date.
+- **Reduced cores.** Twenty of the 804 results prove less than the theorem they are named after.
+  - Eleven assume a structure whose fields include the textbook conclusion: the reflection
+    principle, nowhere differentiability and the law of the iterated logarithm for Brownian motion,
+    Novikov's condition, the general Girsanov theorem, the two-dimensional Itô formula, and five
+    theorems on Markov chains.
+  - Three rest on a named hypothesis that is not proved. The general Dalang–Morton–Willinger theorem
+    and the parity it gives in a discrete market assume the conditional one-period fundamental
+    theorem. Fixed cash flows in a Heath–Jarrow–Morton model assume the bond-pricing identity that
+    the drift condition would deliver.
+  - Six prove a special case or check transcribed closed forms against each other: the first arrival
+    of a Poisson process, the Ornstein–Uhlenbeck Hermite modes up to degree 2, Stulz's call on the
+    maximum at zero strike, the Heynen–Kat barrier at zero correlation, and Haug's and
+    Rubinstein–Reiner's barrier formulas.
+- **Girsanov.** Only bounded θ. Novikov's condition is not proved.
+- **Completeness.** In the Brownian market only completeness ⇒ uniqueness of the pricing measure is
+  proved, and the hedge is not identified (Clark–Ocone,
+  [#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)).
+- **Itô calculus.** The Itô process is built from one Brownian motion with continuous coefficients.
+  Itô's formula for a general continuous semimartingale and a quadratic-variation process are not
+  proved.
+- **SDEs.** The solution is a fixed point in the L² space of predictable processes, not a process
+  with continuous adapted paths, and pathwise uniqueness is not proved. The Black–Scholes path
+  solves its SDE but is not identified with the fixed point.
+- **Jump-diffusions.** The process is assumed. Only the jump-free case is constructed.
+- **Interest rates.** That the Wiener-integral representation of the short rate solves its SDE is
+  cited, not proved. Outside Vasicek and Hull–White, the bonds are hypotheses of the model.
+
+Each landmark's scope on the
+[landmarks page](https://formal-applied-math.github.io/formal-mathfin/landmarks.html) gives the
+details, and every corpus entry publishes its own in `formalization_scope`.
 
 ## Building
 
@@ -231,6 +176,12 @@ cd formal-mathfin
 lake exe cache get   # prebuilt Mathlib
 lake build
 ```
+
+To reproduce a release's claims in one command, run
+[`scripts/reproduce.sh`](scripts/reproduce.sh) from a clone at its tag: it builds the library
+(every proof, and the axiom pins below), then runs the repository's checks on the sources and the
+corpus. `scripts/reproduce.sh --corpus` also re-checks every benchmark snippet against the library,
+which takes hours on one machine.
 
 [`lean-toolchain`](lean-toolchain) pins the Lean version and
 [`lake-manifest.json`](lake-manifest.json) pins Mathlib and BrownianMotion. BrownianMotion and the
@@ -246,7 +197,7 @@ dependency to its `lakefile.toml`:
 [[require]]
 name = "MathFin"
 git = "https://github.com/formal-applied-math/formal-mathfin"
-rev = "v1.9.0"
+rev = "v1.11.0"
 ```
 
 Then fetch it and the prebuilt Mathlib files:
@@ -266,67 +217,44 @@ requires this repository.
 
 ## Verification
 
-A successful `lake build` checks every proof in the library. The benchmark entries are not Lake
-targets and are checked separately (see Benchmark below). In this repository, `sorry` appears only
-in the two theorems of [`Challenge.lean`](Challenge.lean), which are left unproved on purpose (see
-Comparator below).
+A successful `lake build` checks every proof in the library. In this repository `sorry` appears only
+in [`Challenge.lean`](Challenge.lean), whose two theorems are left unproved on purpose for the
+comparator.
 
 - **Axioms.** [`MathFin/AxiomAudit.lean`](MathFin/AxiomAudit.lean) and the generated
-  [`MathFin/AxiomAuditGen.lean`](MathFin/AxiomAuditGen.lean) run `#print axioms` on a curated list
-  of headline results and on every library constant that a benchmark entry's proof cites, and
-  compare the output with `#guard_msgs`. A `sorry` or an extra axiom anywhere in the proof of one of
-  them fails the build. Citations are found by where a name is declared, so a name cited under
-  `open`, by dot notation, or from a namespace other than `MathFin` is covered. The Mathlib and
-  BrownianMotion theorems that `library_wrapper` entries re-export are pinned too: BrownianMotion
-  has `sorry`s of its own, and none of those theorems depends on one.
-
-- **Comparator.** [`Challenge.lean`](Challenge.lean) states the coherent-risk representation
-  theorem, with a witness that its hypothesis is satisfiable, using only Mathlib;
-  [`Solution.lean`](Solution.lean) proves both from the library, converting the Challenge's
-  positions convention to the library's loss convention with
-  [`isCoherentRiskMeasure_neg_iff`](MathFin/RiskMeasures/PositionsConvention.lean).
-  [Comparator](https://github.com/leanprover/comparator), configured by
-  [`comparator.json`](comparator.json), checks that the two files state the same theorems and that
-  the proofs use only the three standard axioms. It accepted an earlier Solution at commit
-  `06f88ca`. It has not been re-run on the current one and is not part of CI; see
-  [`docs/palomar.md`](docs/palomar.md).
-
-- **Benchmark.** Each entry in [`benchmarks/`](benchmarks) records a result's Lean statement, its
-  status and its scope. The ledger runner, `tools/verify/ledger.py`, checks each entry's snippet
-  against the library, and [`verification_ledger.json`](verification_ledger.json) stores a hash of
-  the inputs it was checked under; CI fails if any entry's inputs have changed since. The entries
-  are published as a
+  [`MathFin/AxiomAuditGen.lean`](MathFin/AxiomAuditGen.lean) pin the `#print axioms` output of the
+  headline results and of every constant a benchmark proof cites. The pins include the upstream
+  theorems that `library_wrapper` entries re-export: BrownianMotion has `sorry`s of its own, and
+  none of those theorems depends on one.
+- **Comparator.** [`Solution.lean`](Solution.lean) proves the Mathlib-only statement of the
+  coherent-risk representation in [`Challenge.lean`](Challenge.lean). `lake comparator --paranoid`
+  checks that the statements match, that only the three standard axioms are used, and that every
+  kernel bundled with Lean accepts the proofs ([`docs/palomar.md`](docs/palomar.md)).
+- **Benchmark.** Each entry in [`benchmarks/`](benchmarks) records a result's Lean statement, status
+  and scope. [`verification_ledger.json`](verification_ledger.json) stores a hash of the inputs each
+  entry was checked under, and CI fails if they change without a re-check. The entries are
+  published as a
   [Hugging Face dataset](https://huggingface.co/datasets/formal-applied-math/formal-mathfin-theorems).
-
-- **Kernel replay.** A workflow replays every declaration through `leanchecker`, but the full
-  Mathlib environment it loads does not fit on a 16 GB hosted runner, and the replay has not
-  completed.
-
-- **Provenance.** [`formalization.yaml`](formalization.yaml) describes how the library was written,
-  including AI assistance and the entries drafted by an automated pipeline. The American put port
-  records its own provenance in [`docs/american-put-boundary.md`](docs/american-put-boundary.md).
+- **Kernel replay.** A monthly workflow replays every module through `leanchecker`, below the
+  elaborator.
+- **Provenance.** [`formalization.yaml`](formalization.yaml) records how the library was written,
+  including AI assistance.
 
 ## Documentation
 
-- [`docs/beginners-manual.md`](docs/beginners-manual.md): Lean and the library for mathematicians who
-  have not used Lean, with exercises.
-- [`docs/coverage.md`](docs/coverage.md): a dated log of status changes and corrections, with
-  verification evidence.
-- [`docs/blueprint.md`](docs/blueprint.md): a dependency graph from Brownian motion to Black–Scholes,
-  generated from the Lean source.
-- [`docs/mathematical-architecture.md`](docs/mathematical-architecture.md): the principles the
-  library is organized around, and the theorems that connect them.
-- [`MathFinExamples/Tour.lean`](MathFinExamples/Tour.lean): five representative proofs.
+- [The docs site](https://formal-applied-math.github.io/formal-mathfin/): a map of the library, the
+  landmarks, the blueprint as a graph, the corpus, and a page per module.
+- [`docs/beginners-manual.md`](docs/beginners-manual.md): Lean and the library for mathematicians,
+  with exercises.
 - [`MathFinExamples/Applications/`](MathFinExamples/Applications): the library applied to concrete
-  problems: a capped call, put–call parity on quotes, a binomial tree, a Gaussian risk report, a
-  bootstrapped curve, default correlation in a credit pool and a minimum-variance portfolio. Each
-  ends in one statement the build checks.
+  problems, from a capped call to a minimum-variance portfolio.
+- [`docs/coverage.md`](docs/coverage.md): a dated log of status changes and corrections.
+- [`docs/mathematical-architecture.md`](docs/mathematical-architecture.md): the principles the
+  library is organized around.
 - [`docs/open-problems.md`](docs/open-problems.md): a survey of open problems in mathematical
   finance.
-- [`docs/status.md`](docs/status.md): where the program stands, and its backlog, the
-  [issue tracker](https://github.com/formal-applied-math/formal-mathfin/issues).
-- [`docs/roadmap.md`](docs/roadmap.md): where it is going and why.
-- [`docs/README.md`](docs/README.md): an index of the remaining documents.
+- [`docs/status.md`](docs/status.md) and [`docs/roadmap.md`](docs/roadmap.md): where the program
+  stands and where it is going. [`docs/README.md`](docs/README.md) indexes the rest.
 
 ## Contributing
 

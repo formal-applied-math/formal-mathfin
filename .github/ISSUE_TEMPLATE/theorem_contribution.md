@@ -2,13 +2,21 @@
 name: Theorem contribution
 about: Propose formalizing a new theorem or upgrading a reduced_core entry to full
 title: "Formalize: <theorem name>"
-labels: enhancement
+labels: "type:proof"
 assignees: ""
 ---
 
 ## Theorem
 
 <!-- State the mathematical result in plain prose + the standard reference (author, year, textbook section). -->
+
+## Blueprint
+
+<!-- The blueprint node(s) this advances (docs/blueprint.md, the program's map). Name an
+existing node, or add a frontier node to docs/blueprint_frontier.toml and name it here.
+A bot checks this line; keep it on its own line. -->
+
+Blueprint: thm:<node-label>
 
 ## Lean location
 

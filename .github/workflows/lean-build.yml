@@ -1,0 +1,63 @@
+name: lean build
+
+# A Lean-only build of a branch, without build.yml's Python gates, for work in progress whose
+# corpus entries, ledger rows and audit regeneration come later. Dispatch it on the branch:
+#   gh workflow run lean-build.yml --ref <branch> [-f targets="MathFin.X MathFin.Y"] [-f blueprint=true]
+# With blueprint=true it also runs `lake exe blueprint_export` and uploads docs/blueprint_nodes.json
+# as the artifact `blueprint-nodes`; render it host-side with `python3 tools/blueprint_render.py`.
+# With no targets it builds the default targets. The log keeps every error (no `| tail`).
+
+on:
+  workflow_dispatch:
+    inputs:
+      targets:
+        description: "lake build targets (blank: the default targets)"
+        required: false
+        default: ""
+      blueprint:
+        description: "also export the blueprint graph (artifact blueprint-nodes)"
+        type: boolean
+        required: false
+        default: false
+
+concurrency:
+  group: lean-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lean + Mathlib cache
+        uses: leanprover/lean-action@v1
+        with:
+          build: "false"
+          lint: "false"
+          use-mathlib-cache: "true"
+
+      - name: lake build
+        env:
+          TARGETS: ${{ inputs.targets }}
+        run: |
+          set -o pipefail
+          lake build $TARGETS 2>&1 | tee build.log
+      - name: Errors
+        if: always()
+        run: grep -nE '^error|error:' build.log | head -200 || true
+
+      - name: Blueprint export
+        if: ${{ inputs.blueprint }}
+        run: |
+          set -o pipefail
+          lake build MathFin.Blueprint blueprint_export
+          lake exe blueprint_export MathFin.Blueprint > blueprint_nodes.json
+
+      - name: Upload blueprint nodes
+        if: ${{ inputs.blueprint }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blueprint-nodes
+          path: blueprint_nodes.json

@@ -1,0 +1,65 @@
+name: doc-gen4 spike
+
+# Measures whether doc-gen4 is affordable for this library on a hosted runner
+# (docs/specs/2026-11-05-library-practices-design.md §7). doc-gen4 documents every imported
+# module, Mathlib included, so its cost is Mathlib's, not ours; the index-driven site
+# (docs-site.yml) is the site unless this run shows doc-gen4 fits. Dispatch-only: the result is
+# the job's duration and the size of the uploaded docs, recorded in the spec.
+#
+# The docs build lives in a throwaway nested project (`docbuild/`), the layout Mathlib uses, so
+# doc-gen4 never enters the library's own manifest.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  docgen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Nested docs project
+        run: |
+          mkdir docbuild && cp lean-toolchain docbuild/
+          tag="v$(sed 's/.*:v\{0,1\}//' lean-toolchain)"
+          cat > docbuild/lakefile.toml <<TOML
+          name = "docbuild"
+          reservoir = false
+
+          [[require]]
+          name = "MathFin"
+          path = "../"
+
+          [[require]]
+          scope = "leanprover"
+          name = "doc-gen4"
+          rev = "$tag"
+          TOML
+          cat docbuild/lakefile.toml
+
+      - name: Mathlib cache
+        working-directory: docbuild
+        run: |
+          lake update doc-gen4
+          for i in 1 2 3 4; do lake exe cache get && break; sleep $((i * 20)); done
+
+      - name: doc-gen4 (timed)
+        working-directory: docbuild
+        run: |
+          start=$(date +%s)
+          lake build MathFin:docs
+          echo "doc-gen4 took $(( $(date +%s) - start )) s" | tee -a "$GITHUB_STEP_SUMMARY"
+          du -sh .lake/build/doc | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docgen
+          path: docbuild/.lake/build/doc
+          retention-days: 7

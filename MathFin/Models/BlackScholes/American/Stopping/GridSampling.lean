@@ -1,0 +1,178 @@
+/-
+Copyright (c) 2026 Robert Martin. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Robert Martin
+-/
+module
+
+public import MathFin.Models.BlackScholes.American.Stopping.Rules
+public import MathFin.Pricing.ContinuousMarket
+public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.MeasureTheory.Function.Floor
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.Probability.Martingale.OptionalStopping
+public import Mathlib.MeasureTheory.Integral.DominatedConvergence
+
+/-!
+# Sampling continuous-time stopping rules on a uniform grid
+
+Rounding is upwards, so the rounded index is a stopping time for the sampled
+filtration. No right-continuity or usual augmentation of the filtration is
+assumed.
+
+## Main definitions
+
+* `gridFiltration`: the continuous filtration sampled at the uniform grid times `i*δ`.
+* `gridIndex`: the first grid index at or after a rule's time, `⌈θ.time ω/δ⌉₊`.
+* `gridStep`: the mesh `(n+1)⁻¹` of the `n`-th grid refinement.
+
+## Main results
+
+* `gridIndex_le_iff`: for `0 < δ`, `gridIndex θ δ ω ≤ i` iff `θ.time ω ≤ i*δ`.
+* `gridIndex_stopping`, `isStoppingTime_sampledFiltration`: the grid index of a rule is a stopping
+  time of the sampled filtration (the latter for any monotone schedule and any index satisfying
+  the same equivalence).
+* `gridTime_mono`: the grid times `i*δ` are monotone in `i`.
+* `expected_gridValue_tendsto`: for a bounded continuous supermartingale `U`, the expectation of
+  `U` at the rounded-up grid times of `θ` tends to its expectation at `θ.time` as the mesh
+  `gridStep n` shrinks.
+
+## Tags
+
+sampled filtration, rounded stopping rule, exercise grid, discretization, stopping time, MSC 60G40,
+MSC 91G20, JEL G13
+-/
+
+@[expose] public section
+
+namespace MathFin.BlackScholes.AmericanPut.Stopping
+
+open MeasureTheory Set Filter
+open scoped NNReal Topology
+
+variable {Ω : Type*} [MeasurableSpace Ω]
+
+/-- The uniform grid times `i*δ` increase with the index. -/
+theorem gridTime_mono (δ : ℝ≥0) : Monotone fun i : ℕ => (i : ℝ≥0)*δ := fun _ _ hij =>
+  mul_le_mul_of_nonneg_right (by exact_mod_cast hij) zero_le
+
+/-- The continuous filtration sampled at the uniform grid times `i*δ`: the sampled filtration
+`ContinuousMarket.sampledFiltration` along the schedule `i ↦ i*δ`. -/
+def gridFiltration (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›) (δ : ℝ≥0) :
+    Filtration ℕ ‹MeasurableSpace Ω› :=
+  ContinuousMarket.sampledFiltration 𝓕 (gridTime_mono δ)
+
+/-- The first grid index at or after a rule's time, `⌈θ.time ω/δ⌉₊`. -/
+noncomputable def gridIndex {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T : ℝ≥0}
+    (θ : StoppingRule 𝓕 T) (δ : ℝ≥0) (ω : Ω) : ℕ :=
+  ⌈θ.time ω / δ⌉₊
+
+theorem gridIndex_le_iff {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T δ : ℝ≥0}
+    (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) (ω : Ω) (i : ℕ) :
+    gridIndex θ δ ω ≤ i ↔ θ.time ω ≤ (i : ℝ≥0)*δ := by
+  simp only [gridIndex,Nat.ceil_le,div_le_iff₀ hδ]
+
+/-- **A discrete index is a stopping time of the sampled filtration** once it is the first index at
+which the schedule `s` reaches the stopping time: if `i ω ≤ n ↔ θ.time ω ≤ s n` for every `n`, then
+`i` is a stopping time of `ContinuousMarket.sampledFiltration 𝓕 hs`. This is the one place where a
+continuous-time rule is read on a sampled filtration; the uniform grid (`gridIndex_stopping`) and
+the capped grid (`StoppingRule.toGridIndexRule`) are its instances. -/
+theorem isStoppingTime_sampledFiltration {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T : ℝ≥0}
+    {s : ℕ → ℝ≥0} (hs : Monotone s) (θ : StoppingRule 𝓕 T) {i : Ω → ℕ}
+    (h : ∀ ω n, i ω ≤ n ↔ θ.time ω ≤ s n) :
+    IsStoppingTime (ContinuousMarket.sampledFiltration 𝓕 hs) (fun ω => WithTop.some (i ω)) := by
+  intro n
+  change MeasurableSet[𝓕 (s n)] _
+  simpa only [WithTop.coe_le_coe, h] using θ.stopping (s n)
+
+theorem gridIndex_stopping {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T δ : ℝ≥0}
+    (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) :
+    IsStoppingTime (gridFiltration 𝓕 δ) (fun ω => (gridIndex θ δ ω : ℕ∞)) :=
+  isStoppingTime_sampledFiltration _ θ (i := gridIndex θ δ) (gridIndex_le_iff θ hδ)
+
+theorem gridIndex_bounded {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T δ : ℝ≥0}
+    (θ : StoppingRule 𝓕 T) (ω : Ω) : gridIndex θ δ ω ≤ ⌈T/δ⌉₊ :=
+  Nat.ceil_mono (div_le_div_of_nonneg_right (θ.le_horizon ω) zero_le)
+
+theorem supermartingale_grid {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
+    {P : Measure Ω} {U : ℝ≥0 → Ω → ℝ} (hU : Supermartingale U 𝓕 P) (δ : ℝ≥0) :
+    Supermartingale (fun i : ℕ => U ((i : ℝ≥0)*δ)) (gridFiltration 𝓕 δ) P := by
+  refine ⟨fun i => hU.stronglyAdapted _, ?_, fun i => hU.integrable _⟩
+  intro i j hij
+  exact hU.2.1 _ _ (gridTime_mono δ hij)
+
+theorem expected_gridValue_le {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
+    {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ}
+    (hU : Supermartingale U 𝓕 P) {T δ : ℝ≥0}
+    (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) :
+    (∫ ω, U ((gridIndex θ δ ω : ℝ≥0)*δ) ω ∂P) ≤ ∫ ω, U 0 ω ∂P := by
+  have hh := (supermartingale_grid hU δ).neg.expected_stoppedValue_mono
+    (isStoppingTime_const (gridFiltration 𝓕 δ) 0) (gridIndex_stopping θ hδ)
+    (fun ω => bot_le) (fun ω => show (gridIndex θ δ ω : ℕ∞) ≤ (⌈T/δ⌉₊ : ℕ) by
+      exact_mod_cast gridIndex_bounded θ ω)
+  simpa [stoppedValue,integral_neg] using hh
+
+/-- The mesh `((n : ℝ≥0)+1)⁻¹` of the `n`-th grid refinement. -/
+noncomputable def gridStep (n : ℕ) : ℝ≥0 := ((n : ℝ≥0)+1)⁻¹
+
+theorem gridStep_pos (n : ℕ) : 0 < gridStep n := by
+  unfold gridStep
+  positivity
+
+theorem gridValue_time_tendsto {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T : ℝ≥0}
+    (θ : StoppingRule 𝓕 T) (ω : Ω) :
+    Tendsto (fun n => (gridIndex θ (gridStep n) ω : ℝ≥0)*gridStep n)
+      atTop (𝓝 (θ.time ω)) := by
+  apply NNReal.tendsto_coe.mp
+  have hh :=
+      (tendsto_nat_ceil_mul_div_atTop (R := ℝ) (a := (θ.time ω : ℝ)) (θ.time ω).coe_nonneg).comp
+    (tendsto_atTop_add_const_right atTop 1 tendsto_natCast_atTop_atTop)
+  have hceil (x : ℝ≥0) : ⌈x⌉₊ = ⌈(x : ℝ)⌉₊ := by
+    apply Nat.le_antisymm
+    · rw [Nat.ceil_le]
+      exact_mod_cast Nat.le_ceil (x : ℝ)
+    · rw [Nat.ceil_le]
+      exact_mod_cast Nat.le_ceil x
+  simpa [Function.comp_def,gridIndex,gridStep,div_eq_mul_inv,hceil] using hh
+
+theorem gridIndex_measurable {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T δ : ℝ≥0}
+    (θ : StoppingRule 𝓕 T) : Measurable (gridIndex θ δ) :=
+  Nat.measurable_ceil.comp (θ.measurable_time.div_const δ)
+
+theorem expected_gridValue_tendsto {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
+    {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ}
+    (hU : Supermartingale U 𝓕 P) (hc : ∀ ω, Continuous (fun t => U t ω))
+    {C : ℝ} (hb : ∀ t ω, ‖U t ω‖ ≤ C) {T : ℝ≥0} (θ : StoppingRule 𝓕 T) :
+    Tendsto (fun n => ∫ ω, U ((gridIndex θ (gridStep n) ω : ℝ≥0)*gridStep n) ω ∂P)
+      atTop (𝓝 (∫ ω, U (θ.time ω) ω ∂P)) := by
+  have hm : Measurable U.uncurry := measurable_uncurry_of_continuous_of_measurable hc
+    (fun t => (hU.stronglyAdapted t).measurable.mono (𝓕.le t) le_rfl)
+  exact tendsto_integral_of_dominated_convergence (fun _ => C)
+    (fun n => (hm.comp ((show Measurable (fun ω =>
+      (gridIndex θ (gridStep n) ω : ℝ≥0)*gridStep n) by
+        exact ((measurable_from_nat : Measurable (fun i : ℕ => (i : ℝ≥0))).comp
+          (gridIndex_measurable θ)).mul_const _).prodMk measurable_id)).aestronglyMeasurable)
+    (integrable_const C) (fun _ => Eventually.of_forall (fun ω => hb _ ω))
+    (Eventually.of_forall (fun ω => ((hc ω).tendsto (θ.time ω)).comp (gridValue_time_tendsto θ ω)))
+
+/-- Bounded continuous-path optional stopping. This is derived from discrete
+optional stopping, not assumed as an axiom or as a pricing-contract field. -/
+theorem expected_stoppedValue_le_initial {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
+    {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ}
+    (hU : Supermartingale U 𝓕 P) (hcont : ∀ ω, Continuous (fun t => U t ω))
+    {C : ℝ} (hbound : ∀ t ω, ‖U t ω‖ ≤ C) {T : ℝ≥0} (θ : StoppingRule 𝓕 T) :
+    (∫ ω, U (θ.time ω) ω ∂P) ≤ ∫ ω, U 0 ω ∂P :=
+  le_of_tendsto (expected_gridValue_tendsto hU hcont hbound θ) (Filter.Eventually.of_forall
+    (fun n => expected_gridValue_le hU θ (gridStep_pos n)))
+
+theorem expected_stoppedValue_eq_initial {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
+    {P : Measure Ω} [IsFiniteMeasure P] {U : ℝ≥0 → Ω → ℝ}
+    (hU : Martingale U 𝓕 P) (hcont : ∀ ω, Continuous (fun t => U t ω))
+    {C : ℝ} (hbound : ∀ t ω, ‖U t ω‖ ≤ C) {T : ℝ≥0} (θ : StoppingRule 𝓕 T) :
+    (∫ ω, U (θ.time ω) ω ∂P) = ∫ ω, U 0 ω ∂P := by
+  apply le_antisymm (expected_stoppedValue_le_initial hU.supermartingale hcont hbound θ)
+  have hh := expected_stoppedValue_le_initial hU.neg.supermartingale
+    (fun ω => (hcont ω).neg) (fun t ω => by simpa using hbound t ω) θ
+  simpa only [Pi.neg_apply,integral_neg,neg_le_neg_iff] using hh
+
+end MathFin.BlackScholes.AmericanPut.Stopping

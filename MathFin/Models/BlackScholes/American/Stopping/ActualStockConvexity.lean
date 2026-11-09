@@ -1,0 +1,89 @@
+/-
+Copyright (c) 2026 Robert Martin. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Robert Martin
+-/
+module
+
+public import MathFin.Models.BlackScholes.American.Stopping.ActualLogConvexity
+public import MathFin.Models.BlackScholes.American.Stopping.ActualNoFlatTail
+public import MathFin.Models.BlackScholes.American.Boundary.ConvexStrictMonotonicity
+public import Mathlib.Analysis.Convex.Continuous
+
+/-! # Strict decrease and stock convexity of the actual exercise boundary
+
+These are function-level results for the constructed stopping value, without
+a classical-solution or boundary-smoothness premise. In particular, strict
+convexity does not assert existence or positivity of classical second derivatives.
+
+## Main results
+
+* `canonicalLogBoundary_strictAntiOn`: for `0 < k` and `0 ≤ h ≤ k`, the log boundary is strictly
+  decreasing on `(0, ∞)`.
+* `canonicalStockBoundary_strictAntiOn`, `canonicalStockBoundary_strictConvexOn`: under the same
+  hypotheses, the stock boundary is strictly decreasing and strictly convex on `(0, ∞)`.
+* `canonicalLogBoundary_locallyLipschitzOn`, `canonicalStockBoundary_locallyLipschitzOn`: under
+  the same hypotheses, both boundaries are locally Lipschitz on `(0, ∞)`.
+* `zeroDividend_canonicalLogBoundary_strictAntiOn`,
+  `zeroDividend_canonicalStockBoundary_strictConvexOn`,
+  `liuRange_canonicalLogBoundary_strictAntiOn`, `liuRange_canonicalStockBoundary_strictConvexOn`:
+  the strict decrease and strict stock convexity for `0 < k` with no dividend, and for
+  `h + 1 ≤ k`.
+
+## Tags
+
+stock boundary convexity, strictly decreasing boundary, Lipschitz boundary, exercise boundary,
+American put, MSC 35R35, MSC 91G20, JEL G13
+-/
+
+@[expose] public section
+
+namespace MathFin.BlackScholes.AmericanPut.Stopping
+
+open Set Boundary
+
+theorem canonicalLogBoundary_strictAntiOn {k h : ℝ} (hk : 0 < k)
+    (hh : 0 ≤ h) (hhk : h ≤ k) : StrictAntiOn (canonicalLogBoundary k h) (Ioi 0) := by
+  exact strictAntiOn_of_convex_antitone_no_flat_tail (canonicalLogBoundary_convexOn hk hh hhk)
+    ((canonicalLogBoundary_antitoneOn hk hh hhk).mono Ioi_subset_Ici_self)
+    (fun _ hA => canonicalLogBoundary_no_flat_tail hk hh hhk hA)
+
+theorem canonicalStockBoundary_strictAntiOn {k h : ℝ} (hk : 0 < k)
+    (hh : 0 ≤ h) (hhk : h ≤ k) : StrictAntiOn (canonicalStockBoundary k h) (Ioi 0) := by
+  intro s hs t ht hst
+  rw [← exp_canonicalLogBoundary hk hh hhk hs.le,← exp_canonicalLogBoundary hk hh hhk ht.le]
+  exact Real.exp_lt_exp.mpr (canonicalLogBoundary_strictAntiOn hk hh hhk hs ht hst)
+
+theorem canonicalStockBoundary_strictConvexOn {k h : ℝ} (hk : 0 < k)
+    (hh : 0 ≤ h) (hhk : h ≤ k) : StrictConvexOn ℝ (Ioi 0) (canonicalStockBoundary k h) := by
+  apply (strictConvexOn_exp_of_convex_injective (canonicalLogBoundary_convexOn hk hh hhk)
+    (canonicalLogBoundary_strictAntiOn hk hh hhk).injOn).congr
+  intro t ht
+  exact exp_canonicalLogBoundary hk hh hhk ht.le
+
+theorem canonicalLogBoundary_locallyLipschitzOn {k h : ℝ} (hk : 0 < k)
+    (hh : 0 ≤ h) (hhk : h ≤ k) : LocallyLipschitzOn (Ioi 0) (canonicalLogBoundary k h) :=
+  (canonicalLogBoundary_convexOn hk hh hhk).locallyLipschitzOn isOpen_Ioi
+
+theorem canonicalStockBoundary_locallyLipschitzOn {k h : ℝ} (hk : 0 < k)
+    (hh : 0 ≤ h) (hhk : h ≤ k) : LocallyLipschitzOn (Ioi 0) (canonicalStockBoundary k h) :=
+  (canonicalStockBoundary_strictConvexOn hk hh hhk).convexOn.locallyLipschitzOn isOpen_Ioi
+
+theorem zeroDividend_canonicalLogBoundary_strictAntiOn {k : ℝ} (hk : 0 < k) :
+    StrictAntiOn (canonicalLogBoundary k 0) (Ioi 0) :=
+  canonicalLogBoundary_strictAntiOn hk le_rfl hk.le
+
+theorem liuRange_canonicalLogBoundary_strictAntiOn {k h : ℝ}
+    (hh : 0 ≤ h) (hliu : h + 1 ≤ k) : StrictAntiOn (canonicalLogBoundary k h) (Ioi 0) :=
+  canonicalLogBoundary_strictAntiOn (by linarith) hh (by linarith)
+
+theorem zeroDividend_canonicalStockBoundary_strictConvexOn {k : ℝ} (hk : 0 < k) :
+    StrictConvexOn ℝ (Ioi 0) (canonicalStockBoundary k 0) :=
+  canonicalStockBoundary_strictConvexOn hk le_rfl hk.le
+
+theorem liuRange_canonicalStockBoundary_strictConvexOn {k h : ℝ}
+    (hh : 0 ≤ h) (hliu : h + 1 ≤ k) :
+    StrictConvexOn ℝ (Ioi 0) (canonicalStockBoundary k h) :=
+  canonicalStockBoundary_strictConvexOn (by linarith) hh (by linarith)
+
+end MathFin.BlackScholes.AmericanPut.Stopping

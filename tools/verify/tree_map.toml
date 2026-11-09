@@ -1,0 +1,17 @@
+# The exceptions to where the program tree (tree.html; program_tree.tree_data reads this file)
+# puts a proved node.
+#
+# A proved node sits in the cell of the module that declares it (docs/taxonomy.toml, by
+# `taxonomy.cell_of`); a frontier node sits in its `area`. A node needs a line here only when its
+# declaration module is not its conceptual cell. The page's edges are still proofs (a node's
+# `uses`); this file only decides where a node sits, so an edge that crosses cells shows where the
+# proofs and the concepts part ways.
+#
+# Format: [place] maps a blueprint label to a cell key, each with a one-line reason.
+
+[place]
+"def:gbm" = "valuation/diffusions"                 # declared in the Itô lemma file; it is the Black–Scholes asset
+"thm:esscher-tilt" = "probability/laws"            # declared beside Girsanov; the Gaussian tilt is a law
+"thm:feynman-kac-heat-eq" = "probability/brownian"  # declared with the heat kernel; Feynman–Kac lives in Brownian calculus
+"thm:levy-characterization" = "probability/martingales"  # declared with the Brownian files; it is martingale theory
+"thm:forward-measure" = "valuation/term"           # declared among the pricing files; it is the bond-numéraire measure
