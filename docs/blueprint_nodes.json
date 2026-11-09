@@ -1504,4 +1504,17 @@
   "latexEnv": "theorem",
   "label": "thm:utility-state-price-density",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/StatePriceDensity.lean"}]
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/StatePriceDensity.lean"},
+  {
+  "name": "MathFin.willowBeta_eq_sqrt_div",
+  "label": "thm:willow-beta-identity",
+  "title": "The willow tree's beta identity",
+  "latexEnv": "theorem",
+  "text":
+  "On a grid whose time step widens by the factor `1 + \u03b1`, the willow\n  tree's de-correlation coefficient is `\u03b2 = 1 / \u221a(1 + \u03b1) = \u221a(t / t')` \u2014 the identity that\n  keeps the tree's nodal locations and weights consistent with Curran's moment and\n  marginal constraints when the step is rescaled. The willow tree is a lattice\n  discretization of the GBM, whose marginals the constraints preserve.",
+  "module": "MathFin.Models.Binomial.WillowTree",
+  "line": 117,
+  "leanOk": true,
+  "file":
+  "MathFin/Models/Binomial/WillowTree.lean",
+  "uses": ["def:gbm"]}]

@@ -149,6 +149,7 @@ graph TD
   sdeStrongSolution["Existence and uniqueness of solutions of Lipschitz SDEs"]:::proved
   secondFtap["Second fundamental theorem of asset pricing"]:::proved
   varianceSwapJumpBias["Variance swap and the log contract"]:::proved
+  willowBetaIdentity["The willow tree's beta identity"]:::proved
   expectedShortfall["Expected shortfall"]:::proved
   gaussianFactorCopula["One-factor Gaussian copula"]:::proved
   pricingFunctional["The pricing functional"]:::proved
@@ -386,6 +387,7 @@ graph TD
   emm --> secondFtap
   martingaleTransform --> secondFtap
   compoundPoissonMgf --> varianceSwapJumpBias
+  gbm --> willowBetaIdentity
   valueAtRisk --> expectedShortfall
   copula --> gaussianFactorCopula
   quantile --> gaussianFactorCopula
@@ -768,6 +770,7 @@ graph TD
 | `thm:sde-strong-solution` Existence and uniqueness of solutions of Lipschitz SDEs | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asde-strong-solution%22%20in%3Abody) |
 | `thm:second-ftap` Second fundamental theorem of asset pricing | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asecond-ftap%22%20in%3Abody) |
 | `thm:variance-swap-jump-bias` Variance swap and the log contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-swap-jump-bias%22%20in%3Abody) |
+| `thm:willow-beta-identity` The willow tree's beta identity | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Awillow-beta-identity%22%20in%3Abody) |
 | `def:expected-shortfall` Expected shortfall | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aexpected-shortfall%22%20in%3Abody) |
 | `def:gaussian-factor-copula` One-factor Gaussian copula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Agaussian-factor-copula%22%20in%3Abody) |
 | `def:pricing-functional` The pricing functional | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Apricing-functional%22%20in%3Abody) |
