@@ -215,7 +215,7 @@ theorem finiteVaR_le_of_forall_le (hα0 : 0 < α) (hα1 : α ≤ 1) {c : ℝ} (h
 
 /-- **Positive homogeneity** of `finiteVaR`: scaling every outcome's loss by a nonnegative constant
 `c` scales VaR by the same constant, inherited from `valueAtRisk_const_mul`
-(`RiskMeasures/ValueAtRisk.lean`) through the bridge `finiteVaR_eq_valueAtRisk`. The *statement*
+(`Risk/ValueAtRisk.lean`) through the bridge `finiteVaR_eq_valueAtRisk`. The *statement*
 needs no measurable-space structure on `ι` (`finiteVaR` is pure `Finset` arithmetic); the proof
 borrows an arbitrary one locally to reach the bridge, so this lemma is usable for any `Fintype ι`,
 not only one that happens to carry a `MeasurableSpace` instance. -/

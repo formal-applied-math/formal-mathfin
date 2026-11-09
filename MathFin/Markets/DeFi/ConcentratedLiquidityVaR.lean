@@ -5,9 +5,8 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib
-public import MathFin.DeFi.UniswapMechanics
-public import MathFin.RiskMeasures.DiscreteVaR
+public import MathFin.Markets.DeFi.UniswapMechanics
+public import MathFin.Risk.DiscreteVaR
 
 /-!
 # Historical-simulation value-at-risk for a Uniswap v3 concentrated-liquidity position
@@ -17,7 +16,7 @@ risk factor, treats the resulting `n` hypothetical losses as equally likely (`1/
 reports the empirical `α`-quantile of that loss distribution — the standard methodology of
 P. Jorion, *Value at Risk* (3rd ed., 2007), ch. 10 "VAR Methods" — applied here to a Uniswap v3
 concentrated-liquidity LP position (`MathFin.DeFi.v3PositionValue`,
-`MathFin/DeFi/UniswapMechanics.lean`) whose risk factor is the square-root price `√P`.
+`MathFin/Markets/DeFi/UniswapMechanics.lean`) whose risk factor is the square-root price `√P`.
 
 This file does **not** model fees, re-ranging, or multi-day return compounding: a genuine
 "99%/10-day" VaR additionally needs a horizon-scaling convention applied to the `n` historical
@@ -25,8 +24,9 @@ scenarios themselves (e.g. overlapping 10-day log-return windows), which is a mo
 upstream of this file on the scenario data, not a theorem about the risk measure. What is
 formalized is the historical-simulation *risk measure applied to the position's deterministic value
 function*, reusing the general finite-law VaR machinery of `MathFin.DiscreteVaR`
-(`RiskMeasures/DiscreteVaR.lean`) rather than re-deriving quantile mechanics, together with the
-already-proved Uniswap v3 virtual-reserve curve (`MathFin/DeFi/UniswapMechanics.lean`). The two
+(`Risk/DiscreteVaR.lean`) rather than re-deriving quantile mechanics, together with the
+already-proved Uniswap v3 virtual-reserve curve
+(`MathFin/Markets/DeFi/UniswapMechanics.lean`). The two
 theorems below rest only on the position's value being nonnegative and linear in liquidity — true
 of any such value function, not special to the concentrated-liquidity range shape — so they do not
 yet use the v3 curve's own monotonicity in price. A genuine "VaR is the full revaluation at the
@@ -54,9 +54,15 @@ empirical price quantile" result is future work, not claimed here.
 
 ## References
 
-* H. Adams, N. Zinsmeister, M. Salem, R. Keefer, D. Robinson, *Uniswap v3 Core* (2021), §2, §6.4.1.
-* P. Jorion, *Value at Risk: The New Benchmark for Managing Financial Risk*, 3rd ed. (2007),
-  ch. 10 "VAR Methods" (historical simulation).
+* [H. Adams, N. Zinsmeister, M. Salem, R. Keefer, D. Robinson, *Uniswap v3 Core*][AdamsEtAl2021],
+  §2, §6.4.1.
+* [P. Jorion, *Value at Risk: The New Benchmark for Managing Financial Risk*,
+  3rd ed. (2007)][Jorion2007], ch. 10 "VAR Methods" (historical simulation).
+
+## Tags
+
+historical simulation, value-at-risk, Uniswap v3, concentrated liquidity, liquidity provider,
+scenario revaluation, MSC 91G70, JEL G23
 -/
 
 @[expose] public section
