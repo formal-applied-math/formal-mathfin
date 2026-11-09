@@ -219,7 +219,8 @@ private theorem piecewiseLinear_spec (K C : ℕ → ℝ) : ∀ n, 1 ≤ n →
         refine (((sl • LinearMap.id : ℝ →ₗ[ℝ] ℝ).convexOn (convex_Icc _ _)).add_const
           (C 0 - sl * K 0)).congr ?_
         intro x _
-        simp only [smul_eq_mul, LinearMap.id_apply]
+        show sl • LinearMap.id x + (C 0 - sl * K 0) = C 0 + sl * (x - K 0)
+        simp only [LinearMap.id_apply, smul_eq_mul]
         ring
       have hanti : AntitoneOn (piecewiseLinear K C 1) (Icc (K 0) (K 1)) :=
         (((monotone_id.add_const (-(K 0))).const_mul_of_nonpos hslnp).const_add (C 0)).antitoneOn _
