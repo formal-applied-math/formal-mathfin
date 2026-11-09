@@ -2152,7 +2152,7 @@ than definitionally, since `driftContinuousMod 0` is a `limUnder` along a chosen
 #print axioms MathFin.expectedShortfall_isCoherentRiskMeasure
 
 /-- info: 'MathFin.expectedShortfall_isCoherentRiskMeasure_and_isLawInvariant' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in
+#guard_msgs (whitespace := lax) in
 #print axioms MathFin.expectedShortfall_isCoherentRiskMeasure_and_isLawInvariant
 
 /-- info: 'MathFin.isGreatest_integral_mul_expectedShortfall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
