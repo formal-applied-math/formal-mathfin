@@ -136,7 +136,7 @@ theorem momentMatrix_apply_self (x : ℕ → ℝ) (n : ℕ) (j : Fin (n - 1)) :
 
 /-- A finite sum of an indicator function supported on at most one point, as picked out by
 an injective-on-its-support predicate `P`, is bounded by the indicator's value. -/
-private theorem sum_indicator_le {m : ℕ} (P : Fin m → Prop) [DecidablePred P]
+theorem sum_indicator_le {m : ℕ} (P : Fin m → Prop) [DecidablePred P]
     (hP : ∀ a b, P a → P b → a = b) {c : ℝ} (hc : 0 ≤ c) :
     ∑ k : Fin m, (if P k then c else 0) ≤ c := by
   classical
