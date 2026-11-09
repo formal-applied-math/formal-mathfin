@@ -2533,9 +2533,9 @@
     "mf-entropic-risk-certainty-equivalent": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-11-09",
-      "elapsed_s": 2.6,
-      "input_hash": "1eeec277de926e3426f64a2ec8d830733e8f6d67a8f26a08fec02a72f4cf2ea3",
-      "verified_at_commit": "ce5e263"
+      "elapsed_s": 2.4,
+      "input_hash": "f15818b6784ea25a87de6d0bd266fb2ba96004378ad5a8643921b494552b80cc",
+      "verified_at_commit": "e054b81"
     },
     "mf-exchange-numeraire": {
       "benchmark_file": "exotic_options.json",
