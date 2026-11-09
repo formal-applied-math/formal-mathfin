@@ -32,6 +32,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
+from tools.verify import taxonomy  # noqa: E402
 from tools.verify.blueprint_issues import issues_url, load_frontier  # noqa: E402
 
 NODES_JSON = REPO / "docs" / "blueprint_nodes.json"
@@ -41,7 +42,7 @@ BEGIN = "<!-- BEGIN GENERATED SPINE (tools/blueprint_render.py — do not hand-e
 END = "<!-- END GENERATED SPINE -->"
 
 def mermaid_id(label: str) -> str:
-    """`thm:ito-formula-l2` → `itoFormulaL2` (mermaid-safe camelCase)."""
+    """`thm:ito-formula-c2` → `itoFormulaC2` (mermaid-safe camelCase)."""
     stem = label.split(":", 1)[-1]
     parts = re.split(r"[^A-Za-z0-9]+", stem)
     return parts[0] + "".join(p.capitalize() for p in parts[1:] if p)
@@ -88,11 +89,12 @@ def render(nodes: list[dict], frontier: list) -> str:
         title = n.get("title") or n["label"]
         lines.append(f'  {ids[n["label"]]}["{title}"]:::{node_class(n)}')
     by_area: dict[str, list] = {}
+    titles = {k: taxonomy.label(k) for k in taxonomy.cells()}
     for f in frontier:
         ids[f.label] = mermaid_id(f.label)
         by_area.setdefault(f.area or "other", []).append(f)
     for area in sorted(by_area):
-        lines.append(f'  subgraph frontier_{mermaid_id(area)}["⏳ frontier · {area}"]')
+        lines.append(f'  subgraph frontier_{mermaid_id(area)}["⏳ frontier · {titles.get(area, area)}"]')
         for f in sorted(by_area[area], key=lambda f: f.label):
             lines.append(f'    {ids[f.label]}["{f.title}"]:::frontier')
         lines.append("  end")

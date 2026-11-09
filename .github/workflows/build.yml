@@ -89,13 +89,18 @@ jobs:
       - name: Declaration index
         run: |
           lake exe mathfin_index decl-index.json 4
+          lake exe mathfin_index frontier-index.json 1 MathFinFrontier
           python3 -m tools.verify.decl_index report decl-index.json >> "$GITHUB_STEP_SUMMARY"
+          python3 -m tools.verify.chain_reach decl-index.json --frontier frontier-index.json \
+            >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload declaration index
         uses: actions/upload-artifact@v4
         with:
           name: decl-index
-          path: decl-index.json
+          path: |
+            decl-index.json
+            frontier-index.json
           retention-days: 90
 
       - name: Ratchet and index checks
