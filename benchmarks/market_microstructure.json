@@ -215,6 +215,26 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.covariance_rollPriceChange and MathFin.rollSpread_eq_two_mul_sqrt (MathFin/Markets/Microstructure/RollSpread.lean), built on Mathlib's covariance bilinearity and IndepFun.covariance_eq_zero and the Rademacher law of MathFin/Probability/Dependence/CorrelationFallacies.lean. SCOPE: Roll's implicit assumptions are explicit hypotheses (Rademacher signs, square-integrable increments, the eight cross-change pairwise independences); three signs and two increments, no time-indexed process; the sample autocovariance and any property of the estimator are NOT formalized."
       }
+    },
+    {
+      "id": "mf-conditional-expectation-pricing-measure",
+      "name": "A Conditional-Expectation Price Process Is Priced by Its Own Measure",
+      "domain": "mathematical_finance",
+      "description": "For a probability measure P, a filtration G on the naturals and an arbitrary value V, P is a pricing measure, at every horizon T, of the discrete market with unit numeraire whose single asset is n -> E_P[V | G_n]: that process is a P-martingale, so P is an equivalent martingale measure and prices the market. It is not a statement about the Glosten-Milgrom dealer: that the dealer's quotes along a sequence of trades are such conditional expectations is not shown (one trade is the entry on quotes as conditional expectations).",
+      "code": {
+        "lean": "import MathFin.Markets.Microstructure.GlostenMilgromMarket\n\nopen MathFin MathFin.Execution MeasureTheory ProbabilityTheory\n\n/-- The measure that defines a conditional-expectation price process prices the market. -/\ntheorem conditional_expectation_pricing_measure {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (P : Measure Ω) [IsProbabilityMeasure P] (𝓖 : Filtration ℕ mΩ) (V : Ω → ℝ) (T : ℕ) :\n    (Contracts.DiscreteMarket.toMarket P 𝓖 (fun n ↦ P[V | 𝓖 n]) T\n      fun _ _ ↦ stronglyMeasurable_condExp).IsPricingMeasure T P :=\n  isPricingMeasure_toMarket_condExp P 𝓖 V T\n"
+      },
+      "metadata": {
+        "reference": "L. R. Glosten, P. R. Milgrom, Bid, ask and transaction prices in a specialist market with heterogeneously informed traders, J. Financial Economics 14 (1985) 71-100",
+        "citations": [
+          {
+            "key": "GlostenMilgrom1985"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.Execution.isPricingMeasure_toMarket_condExp (MathFin/Markets/Microstructure/GlostenMilgromMarket.lean): Mathlib's martingale_condExp and the library's isPricingMeasure_toMarket_of_isEMM. SCOPE: the value V and the information G are arbitrary and the unit numeraire is fixed; the entry does not model the market maker or show that the dealer's quotes along a sequence of trades are these conditional expectations."
+      }
     }
   ]
 }

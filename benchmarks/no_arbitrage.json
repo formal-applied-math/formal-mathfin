@@ -692,6 +692,30 @@
       }
     },
     {
+      "id": "mf-market-ftap-finite",
+      "name": "The Fundamental Theorem of Asset Pricing for a Market on a Finite Sample Space: No Arbitrage on a Grid iff the Market Traded on the Grid Has a Pricing Measure",
+      "domain": "mathematical_finance",
+      "description": "For a one-asset Market on a finite sample space whose finite reference measure charges every state, and a monotone grid of dates t 0 <= ... <= t N, the market has no arbitrage on the grid (Market.NoArbitrage: NoArbitrage of the deflated asset sampled along the grid, for the sampled filtration) if and only if the market traded on the grid (Market.onGrid: the sampled deflated asset, constant between the dates, unit numeraire) has a pricing measure at N (Market.IsPricingMeasure). A pricing measure of the market itself up to a horizon T with t N <= T rules out arbitrage on the grid (Market.IsPricingMeasure.noArbitrage, stated in the module, not in this entry). The equivalence for a general probability space is not claimed: it is proved only assuming ConditionalOnePeriodFTAP.",
+      "metadata": {
+        "reference": "Harrison and Pliska (1981); Foellmer and Schied, Stochastic Finance, sec. 5.2",
+        "citations": [
+          {
+            "key": "HarrisonPliska1981"
+          },
+          {
+            "key": "FollmerSchied",
+            "locator": "sec. 5.2"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Market.noArbitrage_iff_exists_isPricingMeasure_of_finite in MathFin/Pricing/FTAP/MarketFTAP.lean, the finite-state theorem noArbitrage_iff_exists_isPricingMeasure_of_finite of MathFin/Pricing/DiscreteMarket.lean (itself ftap_discrete read through isPricingMeasure_toMarket_iff) applied to the deflated asset sampled along the grid, which is adapted for the sampled filtration (Market.stronglyAdapted_deflated). SCOPE: one asset, real-valued; finite sample space with P charging every state; the pricing measure is a pricing measure of the market traded on the grid (Market.onGrid), not of the continuous-time market itself: the grid FTAP says nothing about dates between the grid points. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.Pricing.FTAP.MarketFTAP\n\nopen MeasureTheory MathFin\nopen scoped NNReal\n\n/-- On a finite full-support space, a one-asset market has no arbitrage on a grid iff the market\ntraded on the grid has a pricing measure. -/\ntheorem market_ftap_finite {Ω : Type*} [Finite Ω] [Nonempty Ω] {mΩ : MeasurableSpace Ω}\n    [MeasurableSingletonClass Ω] (M : Market Unit Ω) [IsFiniteMeasure M.P] {t : ℕ → ℝ≥0}\n    (ht : Monotone t) (N : ℕ) (hP : ∀ ω, 0 < M.P {ω}) :\n    M.NoArbitrage ht N ↔ ∃ Q, (M.onGrid ht N).IsPricingMeasure N Q :=\n  Market.noArbitrage_iff_exists_isPricingMeasure_of_finite ht hP\n"
+      }
+    },
+    {
       "id": "mf-market-price-law-invariance",
       "name": "The price depends only on the law of what the contract reads",
       "description": "For two markets M and M', on possibly different sample spaces, with measures Q and Q', and a fixed-dated contract c (no payment at a hitting time): if the joint law of the assets at c's observations and the deflator N 0 / N t at c's payment dates is the same under Q and under Q', then c has the same Market.price in both. The markets' prices and numeraires are measurable because they are adapted; nothing is assumed about Q or Q' beyond the equality of laws, so the statement covers every measure, pricing or not.",

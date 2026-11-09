@@ -81,6 +81,9 @@ def test_taxonomy_labels_are_derived_from_the_nodes() -> None:
     # closed issues are relabelled by `labels --apply` but never fail the check
     closed = _issue(3, "Blueprint: thm:a, thm:f", state="closed")
     assert bi.label_drift(closed, nodes)[0] and bi.check([right, closed], nodes) == []
+    # an issue naming a node only an open pull request adds keeps the labels that branch gave it
+    pending = _issue(4, "Blueprint: thm:a, thm:new", labels=("type:proof", "area:choice/trading"))
+    assert bi.label_drift(pending, nodes) == (set(), set())
 
 
 def test_every_taxonomy_label_fits_github() -> None:

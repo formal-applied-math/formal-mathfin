@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Models.BlackScholes.BlackScholesPhysical
+public import MathFin.Pricing.FTAP.MarketFTAP
 public import MathFin.Pricing.Market
 public import MathFin.Probability.Brownian.BrownianMartingale
 
@@ -33,6 +34,10 @@ proved here: it is the uniqueness half of the completeness argument of
 `Pricing/MarketCompleteness.lean`, which needs the gains of a strategy to be fair under every
 pricing measure.
 
+The Black–Scholes market has no arbitrage on any grid of dates inside the Girsanov horizon
+(`noArbitrage_market`): a pricing measure rules out arbitrage
+(`Market.IsPricingMeasure.noArbitrage`).
+
 ## Main definitions
 
 * `MathFin.Contracts.BlackScholes.market`: the Black–Scholes market of a pre-Brownian motion `W`,
@@ -46,6 +51,8 @@ pricing measure.
   of a constant price of risk is equivalent to `μ`.
 * `MathFin.Contracts.BlackScholes.isPricingMeasure_constGirsanovMeasure`: for `σ ≠ 0` the
   Girsanov measure of `θ = (m − r)/σ` at a horizon `H` is a pricing measure at every `T ≤ H`.
+* `MathFin.Contracts.BlackScholes.noArbitrage_market`: for `σ ≠ 0` the market has no arbitrage on
+  any grid of dates up to the horizon `H`.
 * `MathFin.Contracts.BlackScholes.price_market`: a contract's price is its value with the discount
   `e^{−rt}` on the physical asset.
 * `MathFin.Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure`: under that pricing
@@ -175,5 +182,16 @@ theorem price_europeanCall_constGirsanovMeasure {K : ℝ} {T H : ℝ≥0} (hTH :
     (by simp [europeanCall, Contract.FixedDated]) (fun t ht ↦ ?_) fun _ _ ↦ rfl)
   obtain rfl : t = T := by simpa [europeanCall, Contract.dates] using ht
   rfl
+
+include hW in
+/-- **The Black–Scholes market has no arbitrage on any grid inside the Girsanov horizon.** For
+`σ ≠ 0` and dates `t 0 ≤ ⋯ ≤ t N ≤ H`, no bounded predictable strategy trading the deflated asset at
+those dates is an arbitrage: the Girsanov measure is a pricing measure
+(`isPricingMeasure_constGirsanovMeasure`), and a pricing measure rules out arbitrage
+(`Market.IsPricingMeasure.noArbitrage`). -/
+theorem noArbitrage_market (hσ : σ ≠ 0) {t : ℕ → ℝ≥0} (ht : Monotone t) {N : ℕ} {H : ℝ≥0}
+    (hH : t N ≤ H) : (market μ hWmeas S_0 m r σ).NoArbitrage ht N :=
+  haveI : IsFiniteMeasure (market μ hWmeas S_0 m r σ).P := inferInstanceAs (IsFiniteMeasure μ)
+  (isPricingMeasure_constGirsanovMeasure hW hWmeas hσ (le_refl H)).noArbitrage ht hH
 
 end MathFin.Contracts.BlackScholes

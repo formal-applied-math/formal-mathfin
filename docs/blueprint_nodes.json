@@ -991,15 +991,19 @@
   "label": "thm:margrabe",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/MargrabeGrounding.lean"},
- {"uses": [],
+ {"uses":
+  ["def:copula",
+   "thm:quantile-transform",
+   "def:quantile",
+   "def:standard-normal-cdf"],
   "title": "One-factor Gaussian copula",
   "text":
-  "The copula on $n$ names of the latent vector $X_i = \\rho Z_0 +\n  \\sqrt{1-\\rho^2}\\,Z_i$ with independent standard normals; it is a copula for $\\rho \\in\n  [-1,1]$.",
-  "name": "MathFin.gaussianFactorCopula",
+  "The copula on $n$ names of the latent vector $X_i = \\rho Z_0 +\n  \\sqrt{1-\\rho^2}\\,Z_i$ with independent standard normals; it is a copula for $\\rho \\in\n  [-1,1]$ (`isCopula_gaussianFactorCopula`, the tagged declaration).",
+  "name": "MathFin.isCopula_gaussianFactorCopula",
   "module": "MathFin.Probability.Dependence.GaussianCopula",
-  "line": 233,
+  "line": 251,
   "leanOk": true,
-  "latexEnv": "definition",
+  "latexEnv": "theorem",
   "label": "def:gaussian-factor-copula",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Dependence/GaussianCopula.lean"},
@@ -1414,4 +1418,90 @@
   "latexEnv": "theorem",
   "label": "thm:feynman-kac-heat-eq",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Gaussian/FeynmanKacHeatEquation.lean"}]
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Gaussian/FeynmanKacHeatEquation.lean"},
+ {"uses":
+  ["def:market",
+   "def:pricing-measure",
+   "def:emm",
+   "thm:first-ftap",
+   "thm:martingale-transform"],
+  "title": "The fundamental theorem of asset pricing for a market",
+  "text":
+  "A one-asset market on a finite sample space whose reference measure charges\n  every state has no arbitrage when trading at the dates of a grid (no bounded predictable\n  strategy on the deflated price sampled along the grid is an arbitrage) if and only if the\n  market traded on the grid has a pricing measure. A pricing measure of the market itself up to a\n  horizon rules out arbitrage on every grid inside the horizon, on any space. On a general\n  probability space the equivalence is proved assuming the conditional one-period theorem\n  (`ConditionalOnePeriodFTAP`, not proved); unconditionally it is the frontier node\n  `thm:dmw-ftap`.",
+  "name": "MathFin.Market.noArbitrage_iff_exists_isPricingMeasure_of_finite",
+  "module": "MathFin.Pricing.FTAP.MarketFTAP",
+  "line": 105,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:market-ftap",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/FTAP/MarketFTAP.lean"},
+ {"uses":
+  ["def:market",
+   "def:brownian-motion",
+   "def:pricing-measure",
+   "thm:girsanov-brownian-characterisation"],
+  "title": "Black–Scholes is a market",
+  "text":
+  "The Black–Scholes model of a pre-Brownian motion $W$ (asset $S_0e^{(m -\n  \\sigma^2/2)t + \\sigma W_t}$, numéraire $e^{rt}$, the filtration $W$ generates) is a market,\n  and for $\\sigma \\ne 0$ the Girsanov measure of the constant market price of risk\n  $\\theta = (m-r)/\\sigma$ at a horizon $H$ is a pricing measure of it at every horizon $T \\le\n  H$: equivalent to the physical measure, with the deflated asset a martingale. Under it the\n  European call is worth $S_0\\Phi(d_1) - Ke^{-rT}\\Phi(d_2)$ whatever the physical drift\n  (`price_europeanCall_constGirsanovMeasure`). That it is the only pricing measure is not proved\n  here: it is the frontier node `thm:bs-arbitrage-free-price`.",
+  "name":
+  "MathFin.Contracts.BlackScholes.isPricingMeasure_constGirsanovMeasure",
+  "module": "MathFin.Models.BlackScholes.Market",
+  "line": 141,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:black-scholes-market",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/Market.lean"},
+ {"uses": ["def:market", "def:pricing-measure", "def:emm"],
+  "title": "A conditional-expectation process is priced by its own measure",
+  "text":
+  "For a probability measure $P$, a filtration $\\mathcal G$ on $\\mathbb N$ and\n  an arbitrary value $V$, $P$ is a pricing measure, at every horizon, of the discrete market\n  with unit numéraire whose asset is $n \\mapsto \\mathbb E_P[V \\mid \\mathcal G_n]$, because\n  that process is a $P$-martingale and the equivalent martingale measure $P$ of it is a pricing\n  measure. That the Glosten–Milgrom dealer's quotes along a sequence of trades are such\n  conditional expectations is not part of this statement.",
+  "name": "MathFin.Execution.isPricingMeasure_toMarket_condExp",
+  "module": "MathFin.Markets.Microstructure.GlostenMilgromMarket",
+  "line": 51,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:conditional-expectation-pricing-measure",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/Microstructure/GlostenMilgromMarket.lean"},
+ {"uses": ["def:contract", "def:contract-value"],
+  "title": "A CDO tranche leg is a contract",
+  "text":
+  "The tranche leg, the tranche loss $((L-a)^+ - (L-d)^+)/(d-a)$ paid at $T$ as a\n  contract on the portfolio loss fraction $L$, is worth on a deterministic discount curve $D$\n  the discounted expected tranche loss $D_T\\,\\mathbb E_Q[\\mathrm{tranchePayoff}(L_T)]$. The law\n  of the loss fraction is not part of the statement.",
+  "name": "MathFin.Contracts.value_trancheLeg",
+  "module": "MathFin.Risk.Credit.TrancheLeg",
+  "line": 70,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:tranche-leg-price",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Credit/TrancheLeg.lean"},
+ {"uses":
+  ["def:market",
+   "def:contract",
+   "def:pricing-functional",
+   "def:contract-value"],
+  "title": "An AMM liquidity position is a contract",
+  "text":
+  "In a market with positive price of $X$ in $Y$ at $T$, under any measure $Q$, the\n  concentrated-liquidity payoff (a payoff in $\\sqrt P$) paid at $T$ is worth $\\int D_T\\,\n  v_3(\\sqrt{P_T})\\,dQ$ for the position value $v_3$ of Uniswap v3, and the constant-product\n  payoff of invariant $x_0y_0$ is worth the discounted expectation of the rebalanced reserves\n  valued at $P_T$. It is a price in the sense of a pricing measure when $Q$ is one; its closed\n  form under Black--Scholes is not stated.",
+  "name": "MathFin.DeFi.price_lpPayoff",
+  "module": "MathFin.Markets.DeFi.LPContract",
+  "line": 135,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:lp-position-price",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/LPContract.lean"},
+ {"uses": [],
+  "title": "Marginal utility is a state-price density",
+  "text":
+  "In the finite-state market with payoff matrix $A$ and prices $\\pi$, let the\n  portfolio $\\theta$ cost $w_0>0$, with payoff $W = A^\\top\\theta > 0$, probabilities $p>0$ and\n  marginal utility $u'(W_\\omega)>0$, and let it be stationary for $\\sum_\\omega p_\\omega\n  u(W_\\omega)$ on the budget set: $\\sum_\\omega p_\\omega u'(W_\\omega) W^d_\\omega = 0$ for every\n  portfolio $d$ of zero cost. Then there is $\\mu>0$ with $\\sum_\\omega p_\\omega u'(W_\\omega)\n  A_{k\\omega} = \\mu\\,\\pi_k$ for every asset $k$: the normalised marginal utility\n  $p_\\omega u'(W_\\omega)/\\mu$ is a state-price vector (the Euler equation). A local maximum on the\n  budget set is stationary, and on a finite probability space charging every state the state prices\n  give an equivalent martingale measure (`exists_isEMM_of_isLocalMaxOn`).",
+  "name": "MathFin.exists_pos_smul_eq_of_stationary",
+  "module": "MathFin.Choice.Utility.StatePriceDensity",
+  "line": 176,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:utility-state-price-density",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/StatePriceDensity.lean"}]
