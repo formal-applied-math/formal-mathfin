@@ -273,7 +273,11 @@ theorem lookbackFloatingCall_ge_marketPrice
         (Contracts.europeanCall m T)
       ≤ lookbackFloatingPrice 1 S m r 0 σ (T : ℝ) := by
   have hS0 : 0 < S := hm.trans_le hS
-  rw [Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure hW hWmeas hTH hS0 hm hσ hT]
+  have key := Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure
+    (m := r) hW hWmeas hTH hS0 hm hσ hT
+  have hzero : (r - r) / σ = 0 := by field_simp
+  rw [hzero] at key
+  rw [key]
   exact lookbackFloatingCall_ge_bsV hm hS hσ hT
 
 end MathFin
