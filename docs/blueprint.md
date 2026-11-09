@@ -152,6 +152,7 @@ graph TD
   expectedShortfall["Expected shortfall"]:::proved
   gaussianFactorCopula["One-factor Gaussian copula"]:::proved
   pricingFunctional["The pricing functional"]:::proved
+  blackScholesMarket["Black–Scholes is a market"]:::proved
   black76Caplet["Black's caplet formula"]:::proved
   conditionalExpectationPricingMeasure["A conditional-expectation process is priced by its own measure"]:::proved
   crrBsConvergence["Cox–Ross–Rubinstein convergence to Black–Scholes"]:::proved
@@ -160,6 +161,7 @@ graph TD
   jumpDiffusionMixing["Merton's jump-diffusion formula"]:::proved
   margrabe["Margrabe's exchange option formula"]:::proved
   marketCompleteness["Completeness of the Brownian market"]:::proved
+  marketFtap["The fundamental theorem of asset pricing for a market"]:::proved
   martingaleRepresentation["Martingale representation theorem"]:::proved
   physicalMeasurePricing["Black–Scholes pricing under the physical measure"]:::proved
   potentialFutureExposure["Potential future exposure"]:::proved
@@ -392,6 +394,10 @@ graph TD
   contract --> pricingFunctional
   contractValue --> pricingFunctional
   market --> pricingFunctional
+  brownianMotion --> blackScholesMarket
+  market --> blackScholesMarket
+  pricingMeasure --> blackScholesMarket
+  girsanovBrownianCharacterisation --> blackScholesMarket
   contract --> black76Caplet
   contractValue --> black76Caplet
   standardNormalCdf --> black76Caplet
@@ -417,6 +423,11 @@ graph TD
   esscherTilt --> margrabe
   brownianMotion --> marketCompleteness
   itoIntegralClm --> marketCompleteness
+  emm --> marketFtap
+  market --> marketFtap
+  pricingMeasure --> marketFtap
+  firstFtap --> marketFtap
+  martingaleTransform --> marketFtap
   brownianMotion --> martingaleRepresentation
   itoIntegralClm --> martingaleRepresentation
   brownianMotion --> physicalMeasurePricing
@@ -508,6 +519,7 @@ graph TD
   itoIntegralMartingale --> bracketQuadraticVariation
   brownianMotion --> brownianNowhereDifferentiable
   pricingFunctional --> bsArbitrageFreePrice
+  blackScholesMarket --> bsArbitrageFreePrice
   bsCall --> bsArbitrageFreePrice
   physicalMeasurePricing --> bsArbitrageFreePrice
   marketCompleteness --> bsArbitrageFreePrice
@@ -527,6 +539,7 @@ graph TD
   expectedShortfallDual --> delbaenRepresentation
   firstFtap --> dmwFtap
   emm --> dmwFtap
+  marketFtap --> dmwFtap
   bsPde --> dupireLocalVol
   feynmanKacVariableCoefficient --> dupireLocalVol
   dupireZeroRates --> dupireLocalVol
@@ -745,6 +758,7 @@ graph TD
 | `def:expected-shortfall` Expected shortfall | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aexpected-shortfall%22%20in%3Abody) |
 | `def:gaussian-factor-copula` One-factor Gaussian copula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Agaussian-factor-copula%22%20in%3Abody) |
 | `def:pricing-functional` The pricing functional | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Apricing-functional%22%20in%3Abody) |
+| `thm:black-scholes-market` Black–Scholes is a market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ablack-scholes-market%22%20in%3Abody) |
 | `thm:black76-caplet` Black's caplet formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ablack76-caplet%22%20in%3Abody) |
 | `thm:conditional-expectation-pricing-measure` A conditional-expectation process is priced by its own measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aconditional-expectation-pricing-measure%22%20in%3Abody) |
 | `thm:crr-bs-convergence` Cox–Ross–Rubinstein convergence to Black–Scholes | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acrr-bs-convergence%22%20in%3Abody) |
@@ -753,6 +767,7 @@ graph TD
 | `thm:jump-diffusion-mixing` Merton's jump-diffusion formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ajump-diffusion-mixing%22%20in%3Abody) |
 | `thm:margrabe` Margrabe's exchange option formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amargrabe%22%20in%3Abody) |
 | `thm:market-completeness` Completeness of the Brownian market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarket-completeness%22%20in%3Abody) |
+| `thm:market-ftap` The fundamental theorem of asset pricing for a market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarket-ftap%22%20in%3Abody) |
 | `thm:martingale-representation` Martingale representation theorem | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amartingale-representation%22%20in%3Abody) |
 | `thm:physical-measure-pricing` Black–Scholes pricing under the physical measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aphysical-measure-pricing%22%20in%3Abody) |
 | `thm:potential-future-exposure` Potential future exposure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Apotential-future-exposure%22%20in%3Abody) |
