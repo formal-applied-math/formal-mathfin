@@ -8,17 +8,11 @@
 # `MathFin/Blueprint.lean` with the same label and delete the entry here.
 #
 # Fields: label (`thm:`/`def:` + kebab-case), title, statement (one honest sentence of what
-# proving it would establish), uses (labels it builds on), area (a cell key of docs/taxonomy.toml).
-# Optional `family` (a family key of the same file) names the randomness it is about.
+# proving it would establish), uses (labels it builds on), area (the issue's `area:*`).
 #
 # Every frontier node grows from the proved blueprint: following `uses` (through other frontier
 # nodes) reaches a node with a Lean declaration. A result that builds only on Mathlib says so in
 # `ground` instead ("Mathlib: …", what it draws on). `blueprint_issues check` enforces this.
-#
-# Optional `lean` makes the node a **connector**: the full name of a theorem in `MathFinFrontier/`
-# that states it as Lean, closed by `sorry` (docs/specs/2026-11-08-chain-design.md §3.5). The
-# statement elaborates against the library, so both ends of the link are real declarations;
-# `blueprint_issues check` keeps the theorems and the nodes one to one.
 #
 # Optional `core` lists the corpus entries that already prove part of the node: the node stays on
 # the frontier, and the map draws it as partly grown. Each entry must exist; the check flags a
@@ -762,13 +756,6 @@ statement = "The Merton jump-diffusion market has a pricing measure (the Esscher
 uses = ["def:pricing-functional", "thm:esscher-emm-levy", "thm:jump-diffusion-mixing", "thm:merton-risk-neutral-drift"]
 area = "valuation/jumps"
 family = "jumps"
-
-[[node]]
-label = "thm:utility-state-price-density"
-title = "Marginal utility is a state-price density"
-statement = "At the optimum of a finite-state expected-utility problem with a budget constraint, marginal utility of optimal wealth is proportional to a state-price density, so the optimum defines a pricing measure; Kelly is the logarithmic case."
-uses = ["def:pricing-functional", "thm:kelly-criterion"]
-area = "choice/preferences"
 
 [[node]]
 label = "thm:sdf-capm-hansen-jagannathan"

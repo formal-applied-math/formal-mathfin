@@ -109,6 +109,7 @@ graph TD
   stochasticFubini["Stochastic Fubini theorem"]:::proved
   superhedgingPriceLowerBound["The superhedging price dominates every martingale price"]:::proved
   uniswapV3CoveredCall["A concentrated-liquidity position is dominated by a covered call"]:::proved
+  utilityStatePriceDensity["Marginal utility is a state-price density"]:::proved
   vasicekBondPde["Vasicek bond price"]:::proved
   contractValue["Value of a contract"]:::proved
   hjmModel["Heath–Jarrow–Morton model"]:::proved
@@ -193,7 +194,6 @@ graph TD
   end
   subgraph frontier_choicePreferences["⏳ frontier · Choice · Preferences"]
     expectedUtilityRiskAversion["Expected utility and risk aversion"]:::frontier
-    utilityStatePriceDensity["Marginal utility is a state-price density"]:::frontier
     vonNeumannMorgenstern["von Neumann–Morgenstern representation theorem"]:::frontier
   end
   subgraph frontier_choiceTrading["⏳ frontier · Choice · Strategic trading"]
@@ -642,8 +642,6 @@ graph TD
   sdeStrongSolution --> timeInconsistentEquilibrium
   margrabe --> twoAssetOptionFormulas
   bsCall --> twoAssetOptionFormulas
-  pricingFunctional --> utilityStatePriceDensity
-  kellyCriterion --> utilityStatePriceDensity
   bsCall --> varianceGammaCall
   martingaleTransform --> varianceOptimalHedging
   emm --> varianceOptimalHedging
@@ -704,6 +702,7 @@ graph TD
 | `thm:stochastic-fubini` Stochastic Fubini theorem | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astochastic-fubini%22%20in%3Abody) |
 | `thm:superhedging-price-lower-bound` The superhedging price dominates every martingale price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-price-lower-bound%22%20in%3Abody) |
 | `thm:uniswap-v3-covered-call` A concentrated-liquidity position is dominated by a covered call | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Auniswap-v3-covered-call%22%20in%3Abody) |
+| `thm:utility-state-price-density` Marginal utility is a state-price density | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Autility-state-price-density%22%20in%3Abody) |
 | `thm:vasicek-bond-pde` Vasicek bond price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avasicek-bond-pde%22%20in%3Abody) |
 | `def:contract-value` Value of a contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acontract-value%22%20in%3Abody) |
 | `def:hjm-model` Heath–Jarrow–Morton model | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Ahjm-model%22%20in%3Abody) |
@@ -876,7 +875,6 @@ graph TD
 | `thm:thiele-reserve` Thiele reserve | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Athiele-reserve%22%20in%3Abody) |
 | `thm:time-inconsistent-equilibrium` Relaxed equilibria under time inconsistency | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atime-inconsistent-equilibrium%22%20in%3Abody) |
 | `thm:two-asset-option-formulas` Stulz and Heynen–Kat two-asset formulas | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atwo-asset-option-formulas%22%20in%3Abody) |
-| `thm:utility-state-price-density` Marginal utility is a state-price density | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Autility-state-price-density%22%20in%3Abody) |
 | `thm:variance-gamma-call` Variance-gamma European call | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-gamma-call%22%20in%3Abody) |
 | `thm:variance-optimal-hedging` Variance-optimal hedging | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-optimal-hedging%22%20in%3Abody) |
 | `thm:von-neumann-morgenstern` von Neumann–Morgenstern representation theorem | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avon-neumann-morgenstern%22%20in%3Abody) |

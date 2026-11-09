@@ -12,6 +12,7 @@ import MathFin.Choice.Portfolio.ConvexQPKKT
 import MathFin.Choice.Portfolio.MarkowitzLagrangian
 import MathFin.Choice.Portfolio.MarkowitzNAsset
 import MathFin.Choice.Portfolio.RiskParityFOC
+import MathFin.Choice.Utility.StatePriceDensity
 import MathFin.Choice.Utility.VonNeumannMorgenstern
 import MathFin.Contracts.Core
 import MathFin.Insurance.SurvivalModel
@@ -894,6 +895,19 @@ attribute [blueprint "def:expected-utility"
   (statement := /-- The expected utility $E_p[u] = \sum_{i \in s} p_iu_i$ of a lottery $p$
   over a finite support $s$ under the utility $u$. -/)]
   MathFin.expectedUtility
+
+attribute [blueprint "thm:utility-state-price-density"
+  (title := "Marginal utility is a state-price density")
+  (statement := /-- In the finite-state market with payoff matrix $A$ and prices $\pi$, let the
+  portfolio $\theta$ cost $w_0>0$, with payoff $W = A^\top\theta > 0$, probabilities $p>0$ and
+  marginal utility $u'(W_\omega)>0$, and let it be stationary for $\sum_\omega p_\omega
+  u(W_\omega)$ on the budget set: $\sum_\omega p_\omega u'(W_\omega) W^d_\omega = 0$ for every
+  portfolio $d$ of zero cost. Then there is $\mu>0$ with $\sum_\omega p_\omega u'(W_\omega)
+  A_{k\omega} = \mu\,\pi_k$ for every asset $k$: the normalised marginal utility
+  $p_\omega u'(W_\omega)/\mu$ is a state-price vector (the Euler equation). A local maximum on the
+  budget set is stationary, and on a finite probability space charging every state the state prices
+  give an equivalent martingale measure (`exists_isEMM_of_isLocalMaxOn`). -/)]
+  MathFin.exists_pos_smul_eq_of_stationary
 
 -- ===== choice/portfolio: Portfolio choice =====
 

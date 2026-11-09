@@ -1399,4 +1399,16 @@
   "latexEnv": "theorem",
   "label": "thm:feynman-kac-heat-eq",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Gaussian/FeynmanKacHeatEquation.lean"}]
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Gaussian/FeynmanKacHeatEquation.lean"},
+ {"uses": [],
+  "title": "Marginal utility is a state-price density",
+  "text":
+  "In the finite-state market with payoff matrix $A$ and prices $\\pi$, let the\n  portfolio $\\theta$ cost $w_0>0$, with payoff $W = A^\\top\\theta > 0$, probabilities $p>0$ and\n  marginal utility $u'(W_\\omega)>0$, and let it be stationary for $\\sum_\\omega p_\\omega\n  u(W_\\omega)$ on the budget set: $\\sum_\\omega p_\\omega u'(W_\\omega) W^d_\\omega = 0$ for every\n  portfolio $d$ of zero cost. Then there is $\\mu>0$ with $\\sum_\\omega p_\\omega u'(W_\\omega)\n  A_{k\\omega} = \\mu\\,\\pi_k$ for every asset $k$: the normalised marginal utility\n  $p_\\omega u'(W_\\omega)/\\mu$ is a state-price vector (the Euler equation). A local maximum on the\n  budget set is stationary, and on a finite probability space charging every state the state prices\n  give an equivalent martingale measure (`exists_isEMM_of_isLocalMaxOn`).",
+  "name": "MathFin.exists_pos_smul_eq_of_stationary",
+  "module": "MathFin.Choice.Utility.StatePriceDensity",
+  "line": 176,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:utility-state-price-density",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/StatePriceDensity.lean"}]

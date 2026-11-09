@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (955 MathFin constants, 29 upstream). Citations
+  corpus (957 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -1883,6 +1883,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.exists_gaussian_uncorrelated_not_indepFun
 
+/-- info: 'MathFin.exists_hasEMMMultiState_of_isLocalMaxOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.exists_hasEMMMultiState_of_isLocalMaxOn
+
 /-- info: 'MathFin.exists_impliedVol_gt_of_bsV_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.exists_impliedVol_gt_of_bsV_lt
@@ -2862,6 +2866,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.kelly_n_periods_deriv_at_kelly' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.kelly_n_periods_deriv_at_kelly
+
+/-- info: 'MathFin.kelly_statePrices' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.kelly_statePrices
 
 /-- info: 'MathFin.kirkSpreadPrice_zero_eq_expected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
