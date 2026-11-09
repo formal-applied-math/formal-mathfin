@@ -26,7 +26,7 @@ def test_site_builds(tmp_path):
     docs_site.build(_index(tmp_path / "idx.json"), out)
     for page in ("index.html", "blueprint.html", "corpus.html", "subjects.html",
                  "references.html", "search.json", "assets/site.css", "assets/site.js",
-                 f"m/{MODULE}.html", "s/Models.BlackScholes.html"):
+                 f"m/{MODULE}.html", "s/valuation-diffusions.html"):
         assert (out / page).is_file(), page
     mod = (out / f"m/{MODULE}.html").read_text(encoding="utf-8")
     assert 'id="MathFin.bsCall_pos"' in mod
@@ -113,21 +113,19 @@ def test_landmark_path_is_restricted_to_anchors():
     assert dict(path)["mid"] == "Base"
 
 
-# ---- the tree's map (tools/verify/tree_map.toml): a drawing aid, so only its shape is checked
+# ---- the tree's exceptions (tools/verify/tree_map.toml): a drawing aid, so only its shape is checked
 
-def test_tree_map_places_name_real_parts_and_branches():
-    from tools.verify import program_tree
-    m = program_tree.load_map()
-    kinds = [p["kind"] for p in m["parts"]]
-    assert kinds.count("trunk") == 1 and "root" in kinds and "limb" in kinds
-    assert set(kinds) <= {"root", "trunk", "limb"}
-    branches = {p["key"]: set(p.get("branches", [])) for p in m["parts"]}
-    assert len(branches) == len(m["parts"]), "duplicate part key"
-    for p in m["parts"]:
-        assert p.get("title", "").strip(), p["key"]
-    assert set(m["branch"]) <= set().union(*branches.values()), "a display name for no branch"
-    places = (list(m["place"].items()) + [(f"area:{a}", w) for a, w in program_tree.AREA_PLACE.items()]
-              + [(f"dir:{d}", w) for d, w in program_tree.DIR_PLACE.items()])
-    for label, where in places:
-        part, _, branch = where.partition("/")
-        assert part in branches and (not branch or branch in branches[part]), (label, where)
+def test_tree_map_places_name_real_cells():
+    from tools.verify import program_tree, taxonomy
+    exceptions = program_tree.load_map()
+    assert exceptions
+    for label, cell in exceptions.items():
+        assert cell in taxonomy.cells(), (label, cell)
+    # a proved node sits in the cell of its module unless the map says otherwise
+    node = {"s": "proved", "l": "thm:x", "m": "MathFin.Models.BlackScholes.Call"}
+    assert program_tree.place_node(node, {}) == ("valuation/diffusions", "diffusions")
+    assert program_tree.place_node(node, {"thm:x": "probability/laws"})[0] == "probability/laws"
+    front = {"s": "frontier", "l": "thm:y", "area": "risk/credit", "family": "default"}
+    assert program_tree.place_node(front, {}) == ("risk/credit", "default")
+    parts = program_tree.crown_order(taxonomy.parts())
+    assert [p["key"] for p in parts if p["kind"] == "limb"] == ["choice", "valuation", "risk"]

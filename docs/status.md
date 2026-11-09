@@ -49,17 +49,10 @@ Three rules keep it one library, each enforced by a test:
 ## The backlog
 
 The single backlog is the [issue tracker](https://github.com/formal-applied-math/formal-mathfin/issues).
-Labels follow [`issue-labels.md`](issue-labels.md). By area:
-
-| Area | Open issues |
-|---|---|
-| Foundations | [area:foundations](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3Aarea%3Afoundations) |
-| Fixed income | [area:fixed-income](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3Aarea%3Afixed-income) |
-| Credit | [area:credit](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3Aarea%3Acredit) |
-| Risk | [area:risk](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3Aarea%3Arisk) |
-| Black–Scholes and stochastic volatility | [area:black-scholes](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3Aarea%3Ablack-scholes), [area:stoch-vol](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3Aarea%3Astoch-vol) |
-| Actuarial | [area:actuarial](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3Aarea%3Aactuarial) |
-| Futures, FX, DeFi, execution, binomial | [futures](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3Aarea%3Afutures), [fx](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3Aarea%3Afx), [defi](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3Aarea%3Adefi), [execution](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3Aarea%3Aexecution), [binomial](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3Aarea%3Abinomial) |
+Labels follow [`issue-labels.md`](issue-labels.md). Every mathematical issue carries the
+`area:<cell>` and `family:<family>` labels its blueprint nodes derive, from the one taxonomy of
+[`organization.md`](organization.md): for instance [`area:valuation/term`](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3Aarea%3Avaluation%2Fterm),
+[`area:choice/equilibrium`](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3Aarea%3Achoice%2Fequilibrium), [`area:risk/measures`](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3Aarea%3Arisk%2Fmeasures), [`family:jumps`](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3Afamily%3Ajumps).
 
 Work that is ready to pick up carries
 [`status:ready`](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3Astatus%3Aready);

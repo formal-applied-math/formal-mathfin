@@ -22,8 +22,8 @@ frozen at `T`, is a martingale.
 Equivalence is asked on `𝓕 T` only, as in Föllmer–Schied (§5.2) and Delbaen–Schachermayer: a
 horizon-`T` market cannot tell measures apart beyond `𝓕 T`, and on an infinite path space the
 risk-neutral and the physical laws are typically singular (i.i.d. coin flips with two
-up-probabilities, Brownian motions with two drifts) while equivalent on every `𝓕 T`. Nothing is
-lost: a pricing measure agrees on `𝓕 T` with one equivalent to `P` everywhere
+up-probabilities, Brownian motions with two drifts) while equivalent on every `𝓕 T`. For a finite
+`P` nothing is lost: a pricing measure agrees on `𝓕 T` with one equivalent to `P` everywhere
 (`IsPricingMeasure.exists_isEquivProbMeasure`), and a measure equivalent everywhere under which the
 frozen deflated assets are martingales is a pricing measure
 (`IsPricingMeasure.of_isEquivProbMeasure`). **The price** of a contract under a measure `Q` is its
@@ -45,8 +45,8 @@ Two facts make it the price rather than one more integral:
   markets, on two sample spaces, whose assets and deflators at the contract's observations and
   payment dates have one law under their measures give the same price
   (`price_eq_of_map_observation_eq`).
-  A parametric price defined in one concrete model is therefore the price in every market with
-  that law.
+  A parametric price of a fixed-dated contract defined in one concrete model is therefore its
+  price in every market with that law.
 
 The price at an intermediate date `t` is the conditional expectation of the deflated cash flows
 given `𝓕 t`, re-expressed at `t` (`priceAt`); deflated to `0`, it averages to the price
