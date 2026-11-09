@@ -331,6 +331,10 @@ def label_drift(issue: Issue, nodes: dict[str, Node]) -> tuple[set[str], set[str
     issues get them too, so a cell's history is one filter; only open ones are checked."""
     if issue.is_pr or not issue.nodes:
         return set(), set()
+    if any(label not in nodes for label in issue.nodes):
+        # it names a node this tree does not have yet (an open pull request adds it): the
+        # labels are that branch's to derive, so they are neither added nor removed here
+        return set(), set()
     want = derived_labels(issue, nodes)
     have = {name for name in issue.labels if is_taxonomy_label(name)}
     return set(want - have), have - want
