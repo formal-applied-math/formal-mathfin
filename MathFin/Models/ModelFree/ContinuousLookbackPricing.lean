@@ -5,6 +5,7 @@ Authors: Yang Ye
 -/
 module
 
+public import MathFin.Models.BlackScholes.Market
 public import MathFin.Models.BlackScholes.PDE
 public import MathFin.Probability.Gaussian.NormalTail
 public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
@@ -83,8 +84,12 @@ extremum's law, which is the piece this file's transcription route sidesteps.
   `lookback_payoff_ge_vanilla`**: that lemma is a same-strike fixed-strike statement (`max(S−K,0)
   ≤ max(M−K,0)` given `S ≤ M`, the running *maximum*); this theorem is a floating-strike statement
   about the running *minimum*, with no `max(·,0)` on either side, proved independently. The two
-  share only the theme that a lookback value dominates a vanilla one, not a derivation route or a
   payoff identity.
+* `lookbackFloatingCall_ge_marketPrice`: **the trunk-grounded comparison**. The same dominance
+  composed with the Black-Scholes market's own pricing of the European call
+  (`price_europeanCall_constGirsanovMeasure`): the lookback call dominates whatever the market
+  charges for the vanilla call struck at the running minimum, so the bound holds at the level
+  of the pricing functional, not only at the level of the transcribed closed form.
 
 ## References
 
@@ -252,5 +257,23 @@ theorem lookbackFloatingCall_ge_bsV {S m r σ T : ℝ} (hm : 0 < m) (hS : m ≤ 
       have : 0 < S * (σ ^ 2 / (2 * r ^ 2)) := by positivity
       exact mul_nonneg this.le hsign
     linarith [hcarry]
+
+/-- **The trunk-grounded comparison**: the floating-strike lookback call dominates the
+Black-Scholes market's own price of the vanilla call struck at the running minimum. The
+market prices the European call at the closed form (`price_europeanCall_constGirsanovMeasure`)
+under its constant market-price-of-risk measure, so the dominance composes with that identity
+one line deep: whatever prices the call on the trunk, the lookback is worth at least as much. -/
+theorem lookbackFloatingCall_ge_marketPrice
+    {Ω : Type u_1} [MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω}
+    [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ) (hWmeas : ∀ t, Measurable (W t))
+    {m r σ S : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hT : 0 < (T : ℝ))
+    (hm : 0 < m) (hS : m ≤ S) (hσ : 0 < σ) :
+    (Contracts.BlackScholes.market μ hWmeas S r r σ).price
+        (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas 0 H)
+        (Contracts.europeanCall m T)
+      ≤ lookbackFloatingPrice 1 S m r 0 σ (T : ℝ) := by
+  have hS0 : 0 < S := hm.trans_le hS
+  rw [Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure hW hWmeas hTH hS0 hm hσ hT]
+  exact lookbackFloatingCall_ge_bsV hm hS hσ hT
 
 end MathFin
