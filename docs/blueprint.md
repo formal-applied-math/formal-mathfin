@@ -67,7 +67,6 @@ edge is a genuine logical root.
 ```mermaid
 graph TD
   brownianMotion["Brownian motion (Mathlib, upstream)"]:::upstream
-  coherentRiskMeasure["Coherent risk measure"]:::proved
   contract["Contract"]:::proved
   convexRiskMeasure["Convex risk measure"]:::proved
   copula["Copula"]:::proved
@@ -113,6 +112,7 @@ graph TD
   superhedgingPriceLowerBound["The superhedging price dominates every martingale price"]:::proved
   uniswapV3CoveredCall["A concentrated-liquidity position is dominated by a covered call"]:::proved
   vasicekBondPde["Vasicek bond price"]:::proved
+  coherentRiskMeasure["Coherent risk measure"]:::proved
   contractValue["Value of a contract"]:::proved
   hjmModel["Heath–Jarrow–Morton model"]:::proved
   itoIntegralClm["Itô integral and Itô isometry"]:::proved
@@ -127,7 +127,6 @@ graph TD
   bsDelta["Black–Scholes Greeks"]:::proved
   bsPde["Black–Scholes partial differential equation"]:::proved
   capmEquilibrium["Capital asset pricing model"]:::proved
-  coherentRiskRepresentation["Robust representation of coherent risk measures"]:::proved
   continuousFtap["Fundamental theorem of asset pricing in continuous time"]:::proved
   dupireZeroRates["Dupire's local volatility formula"]:::proved
   entropicRiskCertaintyEquivalent["Entropic risk is the certainty equivalent of exponential utility"]:::proved
@@ -140,7 +139,6 @@ graph TD
   jumpDiffusionIncompleteness["Incompleteness of jump-diffusion markets"]:::proved
   largePortfolioLimit["Vasicek's large-portfolio limit"]:::proved
   levyCharacterization["Lévy's characterization of Brownian motion"]:::proved
-  logUtilityAcceptance["Acceptance sets from expected utility"]:::proved
   markowitzLagrangian["Markowitz mean–variance optimality"]:::proved
   martingaleConvergence["Martingale convergence theorem"]:::proved
   mertonRiskNeutralDrift["Risk-neutral drift of a jump-diffusion"]:::proved
@@ -150,15 +148,16 @@ graph TD
   schwartzCommodityFutures["Schwartz commodity futures price"]:::proved
   sdeStrongSolution["Existence and uniqueness of solutions of Lipschitz SDEs"]:::proved
   secondFtap["Second fundamental theorem of asset pricing"]:::proved
-  superhedgingCoherent["The superhedging price is a coherent risk measure"]:::proved
   varianceSwapJumpBias["Variance swap and the log contract"]:::proved
   expectedShortfall["Expected shortfall"]:::proved
   pricingFunctional["The pricing functional"]:::proved
   black76Caplet["Black's caplet formula"]:::proved
+  coherentRiskRepresentation["Robust representation of coherent risk measures"]:::proved
   crrBsConvergence["Cox–Ross–Rubinstein convergence to Black–Scholes"]:::proved
   gaussianPortfolioVar["Value-at-risk of a Gaussian portfolio"]:::proved
   itoFormulaC2["Itô's formula"]:::proved
   jumpDiffusionMixing["Merton's jump-diffusion formula"]:::proved
+  logUtilityAcceptance["Acceptance sets from expected utility"]:::proved
   margrabe["Margrabe's exchange option formula"]:::proved
   marketCompleteness["Completeness of the Brownian market"]:::proved
   martingaleRepresentation["Martingale representation theorem"]:::proved
@@ -166,19 +165,20 @@ graph TD
   potentialFutureExposure["Potential future exposure"]:::proved
   putCallParity["Put-call parity"]:::proved
   sklar["Sklar's theorem"]:::proved
-  superhedgingDuality["Superhedging duality"]:::proved
+  superhedgingCoherent["The superhedging price is a coherent risk measure"]:::proved
   tangentPortfolioEfficient["Tangent portfolio"]:::proved
   unilateralCva["Credit valuation adjustment"]:::proved
   varNotSubadditive["Value-at-risk is not subadditive"]:::proved
   bsDeltaHedge["Black–Scholes delta hedging"]:::proved
   eulerAllocation["Euler allocation of value-at-risk"]:::proved
-  expectedShortfallCoherent["Expected shortfall is coherent"]:::proved
+  expectedShortfallCoherent["Expected shortfall is a law-invariant coherent risk measure"]:::proved
   expectedShortfallDual["Dual representation of expected shortfall"]:::proved
   expectedShortfallNotElicitable["Expected shortfall is not elicitable"]:::proved
   hedgedPositionRisk["Risk of a hedged position"]:::proved
   itoProductRule["Itô's product rule"]:::proved
   quantileElicitability["Elicitability of the quantile"]:::proved
   rockafellarUryasev["Rockafellar–Uryasev formula"]:::proved
+  superhedgingDuality["Superhedging duality"]:::proved
   subgraph frontier_choiceDynamic["⏳ frontier · Choice · Dynamic choice"]
     logOptimalNumeraire["Log-optimal portfolio is the numéraire"]:::frontier
     mertonPortfolioFraction["Merton myopic risky fraction"]:::frontier
@@ -330,6 +330,7 @@ graph TD
     smileNoArbitrage["Smile no-arbitrage (Roper, SVI)"]:::frontier
   end
 
+  convexRiskMeasure --> coherentRiskMeasure
   contract --> contractValue
   brownianMotion --> hjmModel
   brownianMotion --> itoIntegralClm
@@ -345,8 +346,6 @@ graph TD
   standardNormalCdf --> bsDelta
   standardNormalCdf --> bsPde
   portfolioVariance --> capmEquilibrium
-  coherentRiskMeasure --> coherentRiskRepresentation
-  coneSeparation --> coherentRiskRepresentation
   emm --> continuousFtap
   martingaleTransform --> continuousFtap
   brownianMotion --> dupireZeroRates
@@ -364,8 +363,6 @@ graph TD
   standardNormalCdf --> largePortfolioLimit
   empiricalCdfStrongLaw --> largePortfolioLimit
   brownianMotion --> levyCharacterization
-  coherentRiskMeasure --> logUtilityAcceptance
-  expectedUtility --> logUtilityAcceptance
   portfolioVariance --> markowitzLagrangian
   kktSufficiency --> markowitzLagrangian
   doobMaximalInequality --> martingaleConvergence
@@ -377,17 +374,19 @@ graph TD
   brownianMotion --> sdeStrongSolution
   emm --> secondFtap
   martingaleTransform --> secondFtap
-  coherentRiskMeasure --> superhedgingCoherent
-  superhedgingPriceLowerBound --> superhedgingCoherent
   compoundPoissonMgf --> varianceSwapJumpBias
   valueAtRisk --> expectedShortfall
   contract --> pricingFunctional
   contractValue --> pricingFunctional
+  market --> pricingFunctional
   contract --> black76Caplet
   contractValue --> black76Caplet
   standardNormalCdf --> black76Caplet
   bsCall --> black76Caplet
   forwardMeasure --> black76Caplet
+  coherentRiskMeasure --> coherentRiskRepresentation
+  convexRiskMeasure --> coherentRiskRepresentation
+  coneSeparation --> coherentRiskRepresentation
   contract --> crrBsConvergence
   contractValue --> crrBsConvergence
   standardNormalCdf --> crrBsConvergence
@@ -400,6 +399,8 @@ graph TD
   standardNormalCdf --> jumpDiffusionMixing
   bsCall --> jumpDiffusionMixing
   compoundPoissonMgf --> jumpDiffusionMixing
+  coherentRiskMeasure --> logUtilityAcceptance
+  expectedUtility --> logUtilityAcceptance
   standardNormalCdf --> margrabe
   bsCall --> margrabe
   esscherTilt --> margrabe
@@ -417,9 +418,9 @@ graph TD
   contractValue --> putCallParity
   quantile --> sklar
   quantileTransform --> sklar
-  coherentRiskRepresentation --> superhedgingDuality
-  superhedgingCoherent --> superhedgingDuality
-  superhedgingPriceLowerBound --> superhedgingDuality
+  coherentRiskMeasure --> superhedgingCoherent
+  convexRiskMeasure --> superhedgingCoherent
+  superhedgingPriceLowerBound --> superhedgingCoherent
   portfolioVariance --> tangentPortfolioEfficient
   markowitzLagrangian --> tangentPortfolioEfficient
   standardNormalCdf --> unilateralCva
@@ -438,7 +439,9 @@ graph TD
   valueAtRisk --> eulerAllocation
   gaussianPortfolioVar --> eulerAllocation
   coherentRiskMeasure --> expectedShortfallCoherent
+  convexRiskMeasure --> expectedShortfallCoherent
   expectedShortfall --> expectedShortfallCoherent
+  lawInvariant --> expectedShortfallCoherent
   quantile --> expectedShortfallCoherent
   valueAtRisk --> expectedShortfallCoherent
   quantileTransform --> expectedShortfallCoherent
@@ -466,6 +469,9 @@ graph TD
   quantile --> rockafellarUryasev
   valueAtRisk --> rockafellarUryasev
   quantileTransform --> rockafellarUryasev
+  coherentRiskRepresentation --> superhedgingDuality
+  superhedgingCoherent --> superhedgingDuality
+  superhedgingPriceLowerBound --> superhedgingDuality
   standardNormalCdf --> realErf
   aaveLiquidationKmv --> aaveHealthFactorBound
   vasicekBondPde --> affineTermStructure
@@ -634,7 +640,6 @@ graph TD
 | node | status | issues and pull requests |
 |---|---|---|
 | `def:brownian-motion` Brownian motion (Mathlib, upstream) | ✅ upstream | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Abrownian-motion%22%20in%3Abody) |
-| `def:coherent-risk-measure` Coherent risk measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acoherent-risk-measure%22%20in%3Abody) |
 | `def:contract` Contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acontract%22%20in%3Abody) |
 | `def:convex-risk-measure` Convex risk measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aconvex-risk-measure%22%20in%3Abody) |
 | `def:copula` Copula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acopula%22%20in%3Abody) |
@@ -680,6 +685,7 @@ graph TD
 | `thm:superhedging-price-lower-bound` The superhedging price dominates every martingale price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-price-lower-bound%22%20in%3Abody) |
 | `thm:uniswap-v3-covered-call` A concentrated-liquidity position is dominated by a covered call | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Auniswap-v3-covered-call%22%20in%3Abody) |
 | `thm:vasicek-bond-pde` Vasicek bond price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avasicek-bond-pde%22%20in%3Abody) |
+| `def:coherent-risk-measure` Coherent risk measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acoherent-risk-measure%22%20in%3Abody) |
 | `def:contract-value` Value of a contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acontract-value%22%20in%3Abody) |
 | `def:hjm-model` Heath–Jarrow–Morton model | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Ahjm-model%22%20in%3Abody) |
 | `def:ito-integral-clm` Itô integral and Itô isometry | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aito-integral-clm%22%20in%3Abody) |
@@ -694,7 +700,6 @@ graph TD
 | `thm:bs-delta` Black–Scholes Greeks | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-delta%22%20in%3Abody) |
 | `thm:bs-pde` Black–Scholes partial differential equation | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-pde%22%20in%3Abody) |
 | `thm:capm-equilibrium` Capital asset pricing model | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acapm-equilibrium%22%20in%3Abody) |
-| `thm:coherent-risk-representation` Robust representation of coherent risk measures | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acoherent-risk-representation%22%20in%3Abody) |
 | `thm:continuous-ftap` Fundamental theorem of asset pricing in continuous time | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acontinuous-ftap%22%20in%3Abody) |
 | `thm:dupire-zero-rates` Dupire's local volatility formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Adupire-zero-rates%22%20in%3Abody) |
 | `thm:entropic-risk-certainty-equivalent` Entropic risk is the certainty equivalent of exponential utility | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aentropic-risk-certainty-equivalent%22%20in%3Abody) |
@@ -707,7 +712,6 @@ graph TD
 | `thm:jump-diffusion-incompleteness` Incompleteness of jump-diffusion markets | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ajump-diffusion-incompleteness%22%20in%3Abody) |
 | `thm:large-portfolio-limit` Vasicek's large-portfolio limit | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alarge-portfolio-limit%22%20in%3Abody) |
 | `thm:levy-characterization` Lévy's characterization of Brownian motion | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alevy-characterization%22%20in%3Abody) |
-| `thm:log-utility-acceptance` Acceptance sets from expected utility | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alog-utility-acceptance%22%20in%3Abody) |
 | `thm:markowitz-lagrangian` Markowitz mean–variance optimality | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarkowitz-lagrangian%22%20in%3Abody) |
 | `thm:martingale-convergence` Martingale convergence theorem | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amartingale-convergence%22%20in%3Abody) |
 | `thm:merton-risk-neutral-drift` Risk-neutral drift of a jump-diffusion | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amerton-risk-neutral-drift%22%20in%3Abody) |
@@ -717,15 +721,16 @@ graph TD
 | `thm:schwartz-commodity-futures` Schwartz commodity futures price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aschwartz-commodity-futures%22%20in%3Abody) |
 | `thm:sde-strong-solution` Existence and uniqueness of solutions of Lipschitz SDEs | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asde-strong-solution%22%20in%3Abody) |
 | `thm:second-ftap` Second fundamental theorem of asset pricing | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asecond-ftap%22%20in%3Abody) |
-| `thm:superhedging-coherent` The superhedging price is a coherent risk measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-coherent%22%20in%3Abody) |
 | `thm:variance-swap-jump-bias` Variance swap and the log contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-swap-jump-bias%22%20in%3Abody) |
 | `def:expected-shortfall` Expected shortfall | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aexpected-shortfall%22%20in%3Abody) |
 | `def:pricing-functional` The pricing functional | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Apricing-functional%22%20in%3Abody) |
 | `thm:black76-caplet` Black's caplet formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ablack76-caplet%22%20in%3Abody) |
+| `thm:coherent-risk-representation` Robust representation of coherent risk measures | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acoherent-risk-representation%22%20in%3Abody) |
 | `thm:crr-bs-convergence` Cox–Ross–Rubinstein convergence to Black–Scholes | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acrr-bs-convergence%22%20in%3Abody) |
 | `thm:gaussian-portfolio-var` Value-at-risk of a Gaussian portfolio | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Agaussian-portfolio-var%22%20in%3Abody) |
 | `thm:ito-formula-c2` Itô's formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-formula-c2%22%20in%3Abody) |
 | `thm:jump-diffusion-mixing` Merton's jump-diffusion formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ajump-diffusion-mixing%22%20in%3Abody) |
+| `thm:log-utility-acceptance` Acceptance sets from expected utility | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alog-utility-acceptance%22%20in%3Abody) |
 | `thm:margrabe` Margrabe's exchange option formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amargrabe%22%20in%3Abody) |
 | `thm:market-completeness` Completeness of the Brownian market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarket-completeness%22%20in%3Abody) |
 | `thm:martingale-representation` Martingale representation theorem | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amartingale-representation%22%20in%3Abody) |
@@ -733,19 +738,20 @@ graph TD
 | `thm:potential-future-exposure` Potential future exposure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Apotential-future-exposure%22%20in%3Abody) |
 | `thm:put-call-parity` Put-call parity | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aput-call-parity%22%20in%3Abody) |
 | `thm:sklar` Sklar's theorem | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asklar%22%20in%3Abody) |
-| `thm:superhedging-duality` Superhedging duality | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-duality%22%20in%3Abody) |
+| `thm:superhedging-coherent` The superhedging price is a coherent risk measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-coherent%22%20in%3Abody) |
 | `thm:tangent-portfolio-efficient` Tangent portfolio | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atangent-portfolio-efficient%22%20in%3Abody) |
 | `thm:unilateral-cva` Credit valuation adjustment | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aunilateral-cva%22%20in%3Abody) |
 | `thm:var-not-subadditive` Value-at-risk is not subadditive | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avar-not-subadditive%22%20in%3Abody) |
 | `thm:bs-delta-hedge` Black–Scholes delta hedging | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-delta-hedge%22%20in%3Abody) |
 | `thm:euler-allocation` Euler allocation of value-at-risk | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aeuler-allocation%22%20in%3Abody) |
-| `thm:expected-shortfall-coherent` Expected shortfall is coherent | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-shortfall-coherent%22%20in%3Abody) |
+| `thm:expected-shortfall-coherent` Expected shortfall is a law-invariant coherent risk measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-shortfall-coherent%22%20in%3Abody) |
 | `thm:expected-shortfall-dual` Dual representation of expected shortfall | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-shortfall-dual%22%20in%3Abody) |
 | `thm:expected-shortfall-not-elicitable` Expected shortfall is not elicitable | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-shortfall-not-elicitable%22%20in%3Abody) |
 | `thm:hedged-position-risk` Risk of a hedged position | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ahedged-position-risk%22%20in%3Abody) |
 | `thm:ito-product-rule` Itô's product rule | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-product-rule%22%20in%3Abody) |
 | `thm:quantile-elicitability` Elicitability of the quantile | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aquantile-elicitability%22%20in%3Abody) |
 | `thm:rockafellar-uryasev` Rockafellar–Uryasev formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Arockafellar-uryasev%22%20in%3Abody) |
+| `thm:superhedging-duality` Superhedging duality | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-duality%22%20in%3Abody) |
 | `def:real-erf` erf / erfc / erfinv for Mathlib | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Areal-erf%22%20in%3Abody) |
 | `thm:aave-health-factor-bound` Aave multi-asset health factor: a liquidation bound | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaave-health-factor-bound%22%20in%3Abody) |
 | `thm:affine-term-structure` Affine term structure | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaffine-term-structure%22%20in%3Abody) |
