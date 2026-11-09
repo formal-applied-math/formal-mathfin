@@ -36,6 +36,18 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Credit/KMVMertonStructural.lean"},
  {"uses": [],
+  "title": "Law-invariant risk functional",
+  "text":
+  "A functional $\\rho$ of losses on $(\\Omega, P)$ such that measurable losses\n  with the same law have the same risk. Value-at-risk, expected shortfall, the spectral risk\n  measures, expectiles and the entropic risk measure are law invariant.",
+  "name": "MathFin.IsLawInvariant",
+  "module": "MathFin.Risk.LawInvariance",
+  "line": 58,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:law-invariant",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/LawInvariance.lean"},
+ {"uses": [],
   "title": "Equivalent martingale measure",
   "text":
   "$Q$ is a probability measure equivalent to $P$ under which the price $S$,\n  frozen at the horizon $T$ ($t \\mapsto S_{\\min(t,T)}$), is a martingale for the filtration.",
@@ -119,18 +131,6 @@
   "label": "thm:glosten-milgrom-quote",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/Microstructure/GlostenMilgromCondExp.lean"},
- {"uses": [],
-  "title": "Coherent risk measure",
-  "text":
-  "The Artzner–Delbaen–Eber–Heath axioms for a functional on the integrable\n  losses of $(\\Omega, P)$: monotonicity, translation invariance, positive homogeneity and\n  subadditivity.",
-  "name": "MathFin.IsCoherentRiskMeasure",
-  "module": "MathFin.Risk.Coherent",
-  "line": 74,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:coherent-risk-measure",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Coherent.lean"},
  {"uses": ["def:quantile"],
   "title": "Value-at-risk",
   "text":
@@ -156,17 +156,17 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/MartingaleRepresentation.lean"},
  {"uses": [],
-  "title": "Doob decomposition",
+  "title": "Convex risk measure",
   "text":
-  "Every adapted integrable process $f$ with values in a Banach space, over a\n  discrete filtration, is $f = M + A$ with $M$ a martingale and $A$ predictable ($A_{n+1}$ is\n  $\\mathcal{F}_n$-measurable) with $A_0 = 0$; the decomposition is unique up to almost-sure\n  equality. It is Mathlib's `martingalePart` and `predictablePart`, packaged as the textbook\n  existence-and-uniqueness statement.",
-  "name": "MathFin.doob_decomposition",
-  "module": "MathFin.Probability.Discrete.DoobDecomposition",
-  "line": 79,
+  "A functional on the integrable losses of $(\\Omega, P)$ that is monotone,\n  translation invariant, $\\rho(X + m) = \\rho(X) + m$, and convex. Every coherent risk measure is\n  one: `IsCoherentRiskMeasure` extends it.",
+  "name": "MathFin.IsConvexRiskMeasure",
+  "module": "MathFin.Risk.Coherent",
+  "line": 78,
   "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:doob-decomposition",
+  "latexEnv": "definition",
+  "label": "def:convex-risk-measure",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/DoobDecomposition.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Coherent.lean"},
  {"uses": [],
   "title": "Sharpe ratio",
   "text":
@@ -192,17 +192,36 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ValueAtRisk.lean"},
  {"uses": [],
-  "title": "Quantile function",
+  "title": "Doob decomposition",
   "text":
-  "The quantile function of a law $\\mu$ on $\\mathbb{R}$, $q_\\mu(p) = \\inf\\{x\n  \\mid p \\le F_\\mu(x)\\}$, the generalized inverse of its CDF. Its values are meaningful for $p\n  \\in (0,1)$.",
-  "name": "MathFin.quantile",
-  "module": "MathFin.Probability.Laws.Quantile",
-  "line": 80,
+  "Every adapted integrable process $f$ with values in a Banach space, over a\n  discrete filtration, is $f = M + A$ with $M$ a martingale and $A$ predictable ($A_{n+1}$ is\n  $\\mathcal{F}_n$-measurable) with $A_0 = 0$; the decomposition is unique up to almost-sure\n  equality. It is Mathlib's `martingalePart` and `predictablePart`, packaged as the textbook\n  existence-and-uniqueness statement.",
+  "name": "MathFin.doob_decomposition",
+  "module": "MathFin.Probability.Discrete.DoobDecomposition",
+  "line": 79,
   "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:quantile",
+  "latexEnv": "theorem",
+  "label": "thm:doob-decomposition",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Laws/Quantile.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/DoobDecomposition.lean"},
+ {"uses":
+  ["def:expected-shortfall",
+   "def:coherent-risk-measure",
+   "def:law-invariant",
+   "def:value-at-risk",
+   "thm:quantile-transform",
+   "def:quantile",
+   "def:convex-risk-measure"],
+  "title": "Expected shortfall is a law-invariant coherent risk measure",
+  "text":
+  "For $\\alpha \\in (0,1)$, expected shortfall is a coherent risk measure on\n  the integrable losses (`expectedShortfall_isCoherentRiskMeasure`) and is law invariant. Kusuoka's\n  theorem, the converse, is not proved.",
+  "name": "MathFin.expectedShortfall_isCoherentRiskMeasure_and_isLawInvariant",
+  "module": "MathFin.Risk.LawInvariance",
+  "line": 79,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:expected-shortfall-coherent",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/LawInvariance.lean"},
  {"uses": ["def:standard-normal-cdf"],
   "title": "Bachelier call price formula",
   "text":
@@ -216,6 +235,18 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Bachelier/Bachelier.lean"},
  {"uses": [],
+  "title": "Quantile function",
+  "text":
+  "The quantile function of a law $\\mu$ on $\\mathbb{R}$, $q_\\mu(p) = \\inf\\{x\n  \\mid p \\le F_\\mu(x)\\}$, the generalized inverse of its CDF. Its values are meaningful for $p\n  \\in (0,1)$.",
+  "name": "MathFin.quantile",
+  "module": "MathFin.Probability.Laws.Quantile",
+  "line": 80,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:quantile",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Laws/Quantile.lean"},
+ {"uses": [],
   "title": "Optional sampling theorem",
   "text":
   "For a real submartingale $f$ on a discrete filtration and stopping times\n  $\\sigma \\le \\tau \\le n$, $f_\\sigma \\le E[f_\\tau \\mid \\mathcal{F}_\\sigma]$ almost surely: the\n  conditional form, for stopping times bounded by a constant.",
@@ -227,18 +258,6 @@
   "label": "thm:optional-sampling",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/OptionalSamplingInequality.lean"},
- {"uses": ["def:value-at-risk", "def:quantile", "thm:gaussian-quantile"],
-  "title": "Potential future exposure",
-  "text":
-  "For $Z \\sim N(0,1)$, $\\sigma \\ge 0$, $\\alpha \\in (0,1)$ and the exposure\n  $V_s = m + \\sigma\\sqrt{s}\\,Z$, $\\mathrm{PFE}_\\alpha(s) = \\max(m +\n  \\sigma\\sqrt{s}\\,\\Phi^{-1}(\\alpha), 0)$. Gaussian exposure profile only: no exposure\n  dynamics, netting or collateral.",
-  "name": "MathFin.CVA.potentialFutureExposure_gaussian",
-  "module": "MathFin.Risk.ExposureMeasures",
-  "line": 86,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:potential-future-exposure",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ExposureMeasures.lean"},
  {"uses": ["def:brownian-motion"],
   "title": "Schwartz commodity futures price",
   "text":
@@ -251,6 +270,18 @@
   "label": "thm:schwartz-commodity-futures",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Forwards/SchwartzOneFactor.lean"},
+ {"uses": ["def:value-at-risk", "def:quantile", "thm:gaussian-quantile"],
+  "title": "Potential future exposure",
+  "text":
+  "For $Z \\sim N(0,1)$, $\\sigma \\ge 0$, $\\alpha \\in (0,1)$ and the exposure\n  $V_s = m + \\sigma\\sqrt{s}\\,Z$, $\\mathrm{PFE}_\\alpha(s) = \\max(m +\n  \\sigma\\sqrt{s}\\,\\Phi^{-1}(\\alpha), 0)$. Gaussian exposure profile only: no exposure\n  dynamics, netting or collateral.",
+  "name": "MathFin.CVA.potentialFutureExposure_gaussian",
+  "module": "MathFin.Risk.ExposureMeasures",
+  "line": 86,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:potential-future-exposure",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ExposureMeasures.lean"},
  {"uses": [],
   "title": "Survival function",
   "text":
@@ -299,7 +330,10 @@
   "label": "thm:compound-poisson-mgf",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Jumps/CompoundPoissonMGF.lean"},
- {"uses": ["def:coherent-risk-measure", "thm:cone-separation"],
+ {"uses":
+  ["def:coherent-risk-measure",
+   "thm:cone-separation",
+   "def:convex-risk-measure"],
   "title": "Robust representation of coherent risk measures",
   "text":
   "On a finite state space a coherent risk measure $\\rho$ of losses is the\n  least upper bound of the expected losses $\\sum_i q_i L_i$ over its representing set of\n  probability vectors. Finite state space only: the representation on $L^\\infty(\\Omega,P)$ is\n  the frontier node `thm:delbaen-representation`.",
@@ -323,6 +357,18 @@
   "label": "thm:crr-bs-convergence",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/CRRClosedForm.lean"},
+ {"uses": ["def:convex-risk-measure"],
+  "title": "Coherent risk measure",
+  "text":
+  "The Artzner–Delbaen–Eber–Heath axioms for a functional on the integrable\n  losses of $(\\Omega, P)$: monotonicity, translation invariance, positive homogeneity and\n  subadditivity.",
+  "name": "MathFin.IsCoherentRiskMeasure",
+  "module": "MathFin.Risk.Coherent",
+  "line": 102,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:coherent-risk-measure",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Coherent.lean"},
  {"uses": ["thm:change-of-numeraire"],
   "title": "Forward measure",
   "text":
@@ -335,23 +381,6 @@
   "label": "thm:forward-measure",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/ForwardMeasure.lean"},
- {"uses":
-  ["def:market",
-   "def:pricing-measure",
-   "def:emm",
-   "thm:first-ftap",
-   "thm:martingale-transform"],
-  "title": "The fundamental theorem of asset pricing for a market",
-  "text":
-  "A one-asset market on a finite sample space whose reference measure charges\n  every state has no arbitrage when trading at the dates of a grid (no bounded predictable\n  strategy on the deflated price sampled along the grid is an arbitrage) if and only if the\n  market traded on the grid has a pricing measure. A pricing measure of the market itself up to a\n  horizon rules out arbitrage on every grid inside the horizon, on any space. On a general\n  probability space the equivalence is proved assuming the conditional one-period theorem\n  (`ConditionalOnePeriodFTAP`, not proved); unconditionally it is the frontier node\n  `thm:dmw-ftap`.",
-  "name": "MathFin.Market.noArbitrage_iff_exists_isPricingMeasure_of_finite",
-  "module": "MathFin.Pricing.FTAP.MarketFTAP",
-  "line": 105,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:market-ftap",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/FTAP/MarketFTAP.lean"},
  {"uses": [],
   "title": "Stochastic Fubini theorem",
   "text":
@@ -376,18 +405,6 @@
   "label": "thm:bond-immunization",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/Immunization.lean"},
- {"uses": ["def:standard-normal-cdf"],
-  "title": "Liquidation of a lending position is Merton default",
-  "text":
-  "With lognormal collateral, liquidation threshold $LT > 0$ and debt $B + F\n  > 0$, the probability that the single-collateral (v1) health factor is below $1$ at the\n  horizon is the Merton–KMV default probability with barrier $(B+F)/LT$.",
-  "name": "MathFin.prob_healthFactorV1_lt_one_eq_kmvPD",
-  "module": "MathFin.Markets.DeFi.LiquidationAsStructuralDefault",
-  "line": 107,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:aave-liquidation-kmv",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/LiquidationAsStructuralDefault.lean"},
  {"uses": ["def:portfolio-variance"],
   "title": "Capital asset pricing model",
   "text":
@@ -400,6 +417,18 @@
   "label": "thm:capm-equilibrium",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/CAPMEquilibrium.lean"},
+ {"uses": ["def:standard-normal-cdf"],
+  "title": "Liquidation of a lending position is Merton default",
+  "text":
+  "With lognormal collateral, liquidation threshold $LT > 0$ and debt $B + F\n  > 0$, the probability that the single-collateral (v1) health factor is below $1$ at the\n  horizon is the Merton–KMV default probability with barrier $(B+F)/LT$.",
+  "name": "MathFin.prob_healthFactorV1_lt_one_eq_kmvPD",
+  "module": "MathFin.Markets.DeFi.LiquidationAsStructuralDefault",
+  "line": 107,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:aave-liquidation-kmv",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/LiquidationAsStructuralDefault.lean"},
  {"uses": ["thm:compound-poisson-mgf"],
   "title": "Incompleteness of jump-diffusion markets",
   "text":
@@ -460,18 +489,6 @@
   "label": "def:market",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Market.lean"},
- {"uses": ["thm:quantile-transform", "def:quantile"],
-  "title": "Sklar's theorem",
-  "text":
-  "Let $X$ be a random vector on a probability space with continuous marginal\n  distribution functions $F_i$. Then $P(X \\le x) = C(F_1(x_1), \\dots, F_d(x_d))$ for the\n  copula $C$ of $X$, the joint law of the probability-integral transforms $F_i(X_i)$\n  (`copulaOf`, a copula by `isCopula_copulaOf`). Conversely, for any copula $C$ and any\n  margins $\\mu_i$, the quantile transform $(q_{\\mu_i}(V_i))_i$ of $V \\sim C$ has joint\n  distribution function $C(F_{\\mu_i}(x_i))$ (`measureReal_quantile_le_eq`). Continuous margins\n  for the first statement: the general case is the frontier node `thm:sklar-general`.",
-  "name": "MathFin.measureReal_le_eq_copulaOf",
-  "module": "MathFin.Probability.Dependence.Sklar",
-  "line": 121,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:sklar",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Dependence/Sklar.lean"},
  {"uses": [],
   "title": "Risk parity",
   "text":
@@ -484,18 +501,18 @@
   "label": "thm:risk-parity-foc",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/RiskParityFOC.lean"},
- {"uses": [],
-  "title": "The superhedging price dominates every martingale price",
+ {"uses": ["thm:quantile-transform", "def:quantile"],
+  "title": "Sklar's theorem",
   "text":
-  "For every martingale probability vector $q$ and every claim $Y$,\n  $\\sum_n q_n Y_n$ is at most the superhedging price of $Y$.",
-  "name": "MathFin.le_superhedgingPrice",
-  "module": "MathFin.Risk.Superhedging",
-  "line": 125,
+  "Let $X$ be a random vector on a probability space with continuous marginal\n  distribution functions $F_i$. Then $P(X \\le x) = C(F_1(x_1), \\dots, F_d(x_d))$ for the\n  copula $C$ of $X$, the joint law of the probability-integral transforms $F_i(X_i)$\n  (`copulaOf`, a copula by `isCopula_copulaOf`). Conversely, for any copula $C$ and any\n  margins $\\mu_i$, the quantile transform $(q_{\\mu_i}(V_i))_i$ of $V \\sim C$ has joint\n  distribution function $C(F_{\\mu_i}(x_i))$ (`measureReal_quantile_le_eq`). Continuous margins\n  for the first statement: the general case is the frontier node `thm:sklar-general`.",
+  "name": "MathFin.measureReal_le_eq_copulaOf",
+  "module": "MathFin.Probability.Dependence.Sklar",
+  "line": 121,
   "leanOk": true,
   "latexEnv": "theorem",
-  "label": "thm:superhedging-price-lower-bound",
+  "label": "thm:sklar",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Dependence/Sklar.lean"},
  {"uses": ["def:contract"],
   "title": "Value of a contract",
   "text":
@@ -574,6 +591,18 @@
   "label": "thm:cone-separation",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Duality/ConvexDuality.lean"},
+ {"uses": [],
+  "title": "The superhedging price dominates every martingale price",
+  "text":
+  "For every martingale probability vector $q$ and every claim $Y$,\n  $\\sum_n q_n Y_n$ is at most the superhedging price of $Y$.",
+  "name": "MathFin.le_superhedgingPrice",
+  "module": "MathFin.Risk.Superhedging",
+  "line": 136,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:superhedging-price-lower-bound",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"},
  {"uses":
   ["def:quantile", "def:standard-normal-cdf", "thm:empirical-cdf-strong-law"],
   "title": "Vasicek's large-portfolio limit",
@@ -611,23 +640,6 @@
   "label": "thm:empirical-cdf-strong-law",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Laws/QuantileConvergence.lean"},
- {"uses":
-  ["def:market",
-   "def:brownian-motion",
-   "def:pricing-measure",
-   "thm:girsanov-brownian-characterisation"],
-  "title": "Black–Scholes is a market",
-  "text":
-  "The Black–Scholes model of a pre-Brownian motion $W$ (asset $S_0e^{(m -\n  \\sigma^2/2)t + \\sigma W_t}$, numéraire $e^{rt}$, the filtration $W$ generates) is a market,\n  and for $\\sigma \\ne 0$ the Girsanov measure of the constant market price of risk\n  $\\theta = (m-r)/\\sigma$ at a horizon $H$ is a pricing measure of it at every horizon $T \\le\n  H$: equivalent to the physical measure, with the deflated asset a martingale. Under it the\n  European call is worth $S_0\\Phi(d_1) - Ke^{-rT}\\Phi(d_2)$ whatever the physical drift\n  (`price_europeanCall_constGirsanovMeasure`). That it is the only pricing measure is not proved\n  here: it is the frontier node `thm:bs-arbitrage-free-price`.",
-  "name":
-  "MathFin.Contracts.BlackScholes.isPricingMeasure_constGirsanovMeasure",
-  "module": "MathFin.Models.BlackScholes.Market",
-  "line": 141,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:black-scholes-market",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/Market.lean"},
  {"uses": ["def:market"],
   "title": "Pricing measure",
   "text":
@@ -640,18 +652,6 @@
   "label": "def:pricing-measure",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Market.lean"},
- {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
-  "title": "Completeness of the Brownian market",
-  "text":
-  "Every square-integrable $\\mathcal{F}^B_T$-claim is replicated from initial\n  wealth $E_\\mu[H]$ by a unique Itô-integrable strategy — the representation theorem read as a\n  trading statement, the integrand *being* the hedge. The strategy class is the predictable\n  $L^2$ integrands (piecewise-constant holdings could not hedge a general $L^2$ claim), and\n  the traded gain is the integral against $B$ itself: the stochastic integral\n  $\\int\\varphi\\,dS$ against a general price is absent by design.",
-  "name": "MathFin.exists_replicating_strategy",
-  "module": "MathFin.Pricing.MarketCompleteness",
-  "line": 148,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:market-completeness",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/MarketCompleteness.lean"},
  {"uses": ["def:quantile"],
   "title": "Gaussian quantile function",
   "text":
@@ -664,6 +664,18 @@
   "label": "thm:gaussian-quantile",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Gaussian/NormalQuantile.lean"},
+ {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
+  "title": "Completeness of the Brownian market",
+  "text":
+  "Every square-integrable $\\mathcal{F}^B_T$-claim is replicated from initial\n  wealth $E_\\mu[H]$ by a unique Itô-integrable strategy — the representation theorem read as a\n  trading statement, the integrand *being* the hedge. The strategy class is the predictable\n  $L^2$ integrands (piecewise-constant holdings could not hedge a general $L^2$ claim), and\n  the traded gain is the integral against $B$ itself: the stochastic integral\n  $\\int\\varphi\\,dS$ against a general price is absent by design.",
+  "name": "MathFin.exists_replicating_strategy",
+  "module": "MathFin.Pricing.MarketCompleteness",
+  "line": 148,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:market-completeness",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/MarketCompleteness.lean"},
  {"uses": ["def:standard-normal-cdf", "thm:bachelier-call"],
   "title": "Credit valuation adjustment",
   "text":
@@ -724,6 +736,18 @@
   "label": "thm:var-not-subadditive",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/VaRSuperadditivity.lean"},
+ {"uses": ["def:expected-utility"],
+  "title": "Entropic risk is the certainty equivalent of exponential utility",
+  "text":
+  "On a finite probability space with the weights $p_i = P\\{i\\}$, the position\n  $-L$ is acceptable under the exponential utility $u(x) = -e^{-\\gamma x}$ at wealth $0$ if and\n  only if the entropic risk $\\gamma^{-1}\\log E[e^{\\gamma L}]$ of the loss $L$ is at most $0$.\n  The entropic risk measure is a convex risk measure on a finite probability space\n  (`isConvexRiskMeasure_entropicRisk`) and is not coherent\n  (`not_isCoherentRiskMeasure_entropicRisk`: positive homogeneity fails on a fair coin).",
+  "name": "MathFin.acceptableUnderUtility_exp_iff",
+  "module": "MathFin.Risk.EntropicRisk",
+  "line": 160,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:entropic-risk-certainty-equivalent",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/EntropicRisk.lean"},
  {"uses":
   ["def:expected-shortfall",
    "def:value-at-risk",
@@ -900,35 +924,21 @@
   "label": "thm:markov-path-law",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/MarkovPathMeasure.lean"},
- {"uses": ["def:coherent-risk-measure", "thm:superhedging-price-lower-bound"],
+ {"uses":
+  ["def:coherent-risk-measure",
+   "thm:superhedging-price-lower-bound",
+   "def:convex-risk-measure"],
   "title": "The superhedging price is a coherent risk measure",
   "text":
-  "In the one-period finite-state market with a martingale probability vector, and\n  for a reference measure charging every state, the superhedging price of a claim, read as a\n  loss, is monotone, cash-invariant, positively homogeneous and subadditive. The equality with\n  the supremum of the martingale prices is not part of this statement.",
+  "In the one-period finite-state market with a martingale probability vector, and\n  for a reference measure charging every state, the superhedging price of a claim, read as a\n  loss, is monotone, cash-invariant, positively homogeneous and subadditive. The equality with\n  the supremum of the martingale prices is `thm:superhedging-duality`.",
   "name": "MathFin.isCoherentRiskMeasure_superhedgingPrice",
   "module": "MathFin.Risk.Superhedging",
-  "line": 198,
+  "line": 209,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:superhedging-coherent",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"},
- {"uses":
-  ["def:expected-shortfall",
-   "def:coherent-risk-measure",
-   "def:value-at-risk",
-   "thm:quantile-transform",
-   "def:quantile"],
-  "title": "Expected shortfall is coherent",
-  "text":
-  "For $\\alpha \\in (0,1)$, expected shortfall is a coherent risk measure on\n  the integrable losses.",
-  "name": "MathFin.expectedShortfall_isCoherentRiskMeasure",
-  "module": "MathFin.Risk.ExpectedShortfall",
-  "line": 202,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:expected-shortfall-coherent",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ExpectedShortfall.lean"},
  {"uses":
   ["def:value-at-risk",
    "def:quantile",
@@ -1009,6 +1019,21 @@
   "label": "thm:quadratic-variation",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/QuadraticVariationL2.lean"},
+ {"uses":
+  ["thm:superhedging-coherent",
+   "thm:superhedging-price-lower-bound",
+   "thm:coherent-risk-representation"],
+  "title": "Superhedging duality",
+  "text":
+  "In the one-period finite-state market with a martingale probability vector,\n  the superhedging price of a claim $Y$ is the least upper bound of $\\sum_n q_n Y_n$ over the\n  martingale probability vectors $q$. The supremum is over all martingale probability vectors,\n  which may vanish on states, and whether it is attained is not claimed.",
+  "name": "MathFin.superhedgingPrice_isLUB",
+  "module": "MathFin.Risk.Superhedging",
+  "line": 247,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:superhedging-duality",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"},
  {"uses":
   ["def:standard-normal-cdf",
    "def:contract",
@@ -1394,6 +1419,40 @@
   "label": "thm:feynman-kac-heat-eq",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Gaussian/FeynmanKacHeatEquation.lean"},
+ {"uses":
+  ["def:market",
+   "def:pricing-measure",
+   "def:emm",
+   "thm:first-ftap",
+   "thm:martingale-transform"],
+  "title": "The fundamental theorem of asset pricing for a market",
+  "text":
+  "A one-asset market on a finite sample space whose reference measure charges\n  every state has no arbitrage when trading at the dates of a grid (no bounded predictable\n  strategy on the deflated price sampled along the grid is an arbitrage) if and only if the\n  market traded on the grid has a pricing measure. A pricing measure of the market itself up to a\n  horizon rules out arbitrage on every grid inside the horizon, on any space. On a general\n  probability space the equivalence is proved assuming the conditional one-period theorem\n  (`ConditionalOnePeriodFTAP`, not proved); unconditionally it is the frontier node\n  `thm:dmw-ftap`.",
+  "name": "MathFin.Market.noArbitrage_iff_exists_isPricingMeasure_of_finite",
+  "module": "MathFin.Pricing.FTAP.MarketFTAP",
+  "line": 105,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:market-ftap",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/FTAP/MarketFTAP.lean"},
+ {"uses":
+  ["def:market",
+   "def:brownian-motion",
+   "def:pricing-measure",
+   "thm:girsanov-brownian-characterisation"],
+  "title": "Black–Scholes is a market",
+  "text":
+  "The Black–Scholes model of a pre-Brownian motion $W$ (asset $S_0e^{(m -\n  \\sigma^2/2)t + \\sigma W_t}$, numéraire $e^{rt}$, the filtration $W$ generates) is a market,\n  and for $\\sigma \\ne 0$ the Girsanov measure of the constant market price of risk\n  $\\theta = (m-r)/\\sigma$ at a horizon $H$ is a pricing measure of it at every horizon $T \\le\n  H$: equivalent to the physical measure, with the deflated asset a martingale. Under it the\n  European call is worth $S_0\\Phi(d_1) - Ke^{-rT}\\Phi(d_2)$ whatever the physical drift\n  (`price_europeanCall_constGirsanovMeasure`). That it is the only pricing measure is not proved\n  here: it is the frontier node `thm:bs-arbitrage-free-price`.",
+  "name":
+  "MathFin.Contracts.BlackScholes.isPricingMeasure_constGirsanovMeasure",
+  "module": "MathFin.Models.BlackScholes.Market",
+  "line": 141,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:black-scholes-market",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/Market.lean"},
  {"uses": ["def:market", "def:pricing-measure", "def:emm"],
   "title": "A conditional-expectation process is priced by its own measure",
   "text":

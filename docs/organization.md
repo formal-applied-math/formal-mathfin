@@ -59,7 +59,7 @@ parts it would join.
 | Marginal utility at the optimum is a state-price density. | choice, valuation | finite-state case in review (#473) |
 | CAPM and the Hansen–Jagannathan bound follow from the stochastic discount factor. | choice, valuation | in review (#475) |
 | The log-optimal (Kelly) portfolio is the numéraire portfolio. | choice, valuation | proved for a two-outcome bet (`KellyNumeraire`) |
-| The superhedging price is a coherent risk measure, represented by the pricing measures. | valuation, risk | coherence proved on a finite space; the representation awaits Minkowski–Weyl |
+| The superhedging price is a coherent risk measure, represented by the pricing measures. | valuation, risk | coherence and the representation (`superhedgingPrice_isLUB`) proved on a finite space |
 | A premium principle is a risk-loaded price; the Esscher premium is a price under the Esscher measure. | valuation, risk | frontier |
 
 Convex duality is the method behind all of them, and

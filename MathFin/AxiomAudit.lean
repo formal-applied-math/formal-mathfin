@@ -2151,6 +2151,10 @@ than definitionally, since `driftContinuousMod 0` is a `limUnder` along a chosen
 #guard_msgs in
 #print axioms MathFin.expectedShortfall_isCoherentRiskMeasure
 
+/-- info: 'MathFin.expectedShortfall_isCoherentRiskMeasure_and_isLawInvariant' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.expectedShortfall_isCoherentRiskMeasure_and_isLawInvariant
+
 /-- info: 'MathFin.isGreatest_integral_mul_expectedShortfall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.isGreatest_integral_mul_expectedShortfall
@@ -2394,6 +2398,22 @@ bounded-coefficient process class. -/
 /-- info: 'MathFin.expectedShortfall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.expectedShortfall
+
+/-- info: 'MathFin.IsConvexRiskMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.IsConvexRiskMeasure
+
+/-- info: 'MathFin.IsLawInvariant' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.IsLawInvariant
+
+/-- info: 'MathFin.acceptableUnderUtility_exp_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.acceptableUnderUtility_exp_iff
+
+/-- info: 'MathFin.superhedgingPrice_isLUB' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.superhedgingPrice_isLUB
 
 /-- info: 'MathFin.IsCoherentRiskMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in

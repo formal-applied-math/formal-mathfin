@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (958 MathFin constants, 29 upstream). Citations
+  corpus (960 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -1270,6 +1270,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.acceptableUnderUtility_convex' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.acceptableUnderUtility_convex
+
+/-- info: 'MathFin.acceptableUnderUtility_exp_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.acceptableUnderUtility_exp_iff
 
 /-- info: 'MathFin.acceptableUnderUtility_log_iff_kellyGrowth' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3498,6 +3502,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc
+
+/-- info: 'MathFin.superhedgingPrice_isLUB' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.superhedgingPrice_isLUB
 
 /-- info: 'MathFin.supermartingale_snell' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
