@@ -115,7 +115,7 @@ modules = ["MathFin.Probability.Dependence"]
 subjects = ["MSC 62H05"]
 landmarks = [
   "MathFin.IsCopula", "MathFin.IsCopula.measureReal_Iic_le", "MathFin.measureReal_le_eq_copulaOf",
-  "MathFin.covariance_eq_integral_cdf", "MathFin.gaussianFactorCopula",
+  "MathFin.covariance_eq_integral_cdf", "MathFin.isCopula_gaussianFactorCopula",
   "MathFin.marshallOlkin_firstToDefault_survival",
 ]
 
@@ -264,7 +264,10 @@ title = "Market mechanisms"
 blurb = "automated market makers and lending protocols, valued as contracts"
 modules = ["MathFin.Markets.DeFi"]
 subjects = ["MSC 91G15"]
-landmarks = ["MathFin.DeFi.impermanentLoss_nonpos", "MathFin.DeFi.v3PositionValue_le_coveredCall"]
+landmarks = [
+  "MathFin.DeFi.impermanentLoss_nonpos", "MathFin.DeFi.v3PositionValue_le_coveredCall",
+  "MathFin.DeFi.price_lpPayoff",
+]
 
 [[cell]]
 key = "valuation/model-free"
@@ -325,7 +328,10 @@ title = "Strategic trading"
 blurb = "price formation under asymmetric information, market making, optimal execution"
 modules = ["MathFin.Markets.Microstructure", "MathFin.Markets.Execution"]
 subjects = ["JEL G14", "JEL D82", "MSC 49L20"]
-landmarks = ["MathFin.Execution.condExp_payoff_eq_quote"]
+landmarks = [
+  "MathFin.Execution.condExp_payoff_eq_quote",
+  "MathFin.Execution.isPricingMeasure_toMarket_condExp",
+]
 
 [[cell]]
 key = "risk"
@@ -387,6 +393,7 @@ modules = [
 subjects = ["MSC 91G40", "JEL G32"]
 landmarks = [
   "MathFin.tendsto_oneFactorLossFraction_ae", "MathFin.prob_healthFactorV1_lt_one_eq_kmvPD",
+  "MathFin.Contracts.value_trancheLeg",
 ]
 
 [[cell]]
