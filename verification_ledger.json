@@ -1039,6 +1039,13 @@
       "input_hash": "87de2ec402f43430b6b7d562b8410aedd5589ca3e6209474572bea058579dc97",
       "verified_at_commit": "f68ab19"
     },
+    "mf-black-scholes-market-pricing-measure": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-11-09",
+      "elapsed_s": 3.7,
+      "input_hash": "83175b97dc7e8f862b9d239d1612d4894e970f7e8ba1e993a1728ddc41e23485",
+      "verified_at_commit": "92f7034"
+    },
     "mf-black-scholes-price-law": {
       "benchmark_file": "jumps_and_variance_swaps.json",
       "date": "2026-11-08",
@@ -1300,17 +1307,17 @@
     },
     "mf-bs-market-call-price": {
       "benchmark_file": "contracts.json",
-      "date": "2026-11-08",
-      "elapsed_s": 3.8,
-      "input_hash": "5b48ce6d08a124d50eafa945962ffd4dd87658a0fd474bb3ecdfe3ac1794d6d7",
-      "verified_at_commit": "90b674a"
+      "date": "2026-11-09",
+      "elapsed_s": 3.6,
+      "input_hash": "40cee8810fd3ebf645836eef972dca042e50f62650e8810f47987e2cecf578bf",
+      "verified_at_commit": "92f7034"
     },
     "mf-bs-market-pricing-measure": {
       "benchmark_file": "contracts.json",
-      "date": "2026-11-08",
-      "elapsed_s": 2.5,
-      "input_hash": "2b2d82e4cc17c7b46eef6d80666e5add27eda531859e9cee177d087c2ee528be",
-      "verified_at_commit": "90b674a"
+      "date": "2026-11-09",
+      "elapsed_s": 3.6,
+      "input_hash": "da678fcfc116495db3f54acf2085ac0df62dc684f7e1e529d996aefcdc99093a",
+      "verified_at_commit": "92f7034"
     },
     "mf-bs-merton-delta": {
       "benchmark_file": "black_scholes.json",
@@ -3614,6 +3621,13 @@
       "elapsed_s": 2.5,
       "input_hash": "b062a27ed2688726a55c06b85ee4b20e0688ffb250d8e544677272d1099eb8e8",
       "verified_at_commit": "1b60844"
+    },
+    "mf-market-ftap-finite": {
+      "benchmark_file": "no_arbitrage.json",
+      "date": "2026-11-09",
+      "elapsed_s": 3.3,
+      "input_hash": "7f402034a74fbab800b217f1320ca6419d0a0a19ace62a6cf23b2607a3f555b5",
+      "verified_at_commit": "92f7034"
     },
     "mf-market-price-law-invariance": {
       "benchmark_file": "no_arbitrage.json",
