@@ -5,7 +5,8 @@ name: blueprint-sync
 # a push: an issue opened without a node, a node's last open issue closed. This workflow
 # checks on every issue event and nightly; build.yml checks on every push. On an issue
 # event the bot leaves one comment on that issue naming what is missing, and edits the
-# same comment once it is fixed.
+# same comment once it is fixed. It also writes the issue's area:/family: labels, derived from
+# the nodes it names and docs/taxonomy.toml; nobody sets those by hand.
 
 on:
   issues:
@@ -35,10 +36,14 @@ jobs:
         if: github.event_name == 'issues'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python3 -m tools.verify.blueprint_issues comment ${{ github.event.issue.number }}
+        run: |
+          python3 -m tools.verify.blueprint_issues labels ${{ github.event.issue.number }} --apply
+          python3 -m tools.verify.blueprint_issues comment ${{ github.event.issue.number }}
 
       - name: Whole program
         if: github.event_name != 'issues'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python3 -m tools.verify.blueprint_issues check | tee -a "$GITHUB_STEP_SUMMARY"
+        run: |
+          python3 -m tools.verify.blueprint_issues labels --apply
+          python3 -m tools.verify.blueprint_issues check | tee -a "$GITHUB_STEP_SUMMARY"

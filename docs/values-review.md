@@ -231,6 +231,124 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-11-08 — corpus 817, modules 732 — the trunk's first sockets and three dualities, read before they land
+
+Scope: `v2/choice-utility-state-prices` (#473) with what it brings from main besides #474,
+whose trunk review is recorded separately (#470, #472, #476). There are 13 new corpus entries,
+from these modules:
+- `Pricing/Market` (the price system and the `𝓕 T` glue);
+- `Models/Binomial/Market` (the first socket);
+- `Pricing/DiscreteMarket`;
+- `Choice/Utility/StatePriceDensity` and `Choice/Performance/KellyNumeraire`;
+- `Risk/Superhedging`, `Risk/ExpectedShortfall` (the representing set);
+- `Risk/CompoundPoissonCVaR`.
+
+Two read-only reviewers split the lenses: the first pass with lenses 1–4, and lenses 5–8.
+
+### The standing first pass: prose against statement
+
+Five overclaims, all fixed in this session:
+- **The ES representing-set description** went on, "hence ES is the least upper bound, and by
+  the dual representation the greatest value, of ∑ qᵢLᵢ over that set". The entry proves the set
+  equality only. The least-upper-bound is `expectedShortfall_isLUB_representingSet`, and the
+  greatest value is taken over densities, not over these `q`. The sentence is gone.
+- **`Pricing/Market`, two dropped qualifiers.**
+  - "the price in every market with that law" holds for fixed-dated contracts, which is all
+    that `price_eq_of_map_observation_eq` covers.
+  - "nothing is lost" needs a finite `P` (`exists_isEquivProbMeasure`).
+- **Superhedging.** "implied by no arbitrage" needs at least one state (`[NeZero N]`).
+- **Kelly.**
+  - The fair-odds probabilities were called "unique", which is not stated.
+  - The module said the state-price form is absent, but `kelly_statePrices` in the same file
+    gives it.
+
+The panel also showed that one *scope disclosure* overstated an obstruction. `Superhedging` and
+two corpus scopes said the duality needs Minkowski–Weyl, which is absent from the pinned
+Mathlib. It does not:
+- `coherentRisk_isLUB` (`AcceptanceSet`) represents any coherent risk measure on a finite space
+  with no closedness hypothesis;
+- the superhedging price is coherent;
+- its representing set is exactly the martingale probability vectors. Trading gains `±θ·z` are
+  acceptable at zero cost, and a vector that prices them at zero is a martingale vector.
+
+The duality is being proved on `v2/risk-convex` (backlog 1), and that branch corrects the
+prose.
+
+### Lenses: exemplar, then the next upgrade
+
+1. **Inspired math.**
+   - Exemplar: the horizon glue (`IsPricingMeasure` on `𝓕 T`, with `exists_isEquivProbMeasure`
+     and `of_trim_eq`).
+   - Next: the superhedging duality above, and the ES representing set stated in Mathlib's
+     measure order (`Q ≤ (1−α)⁻¹ • P`), which removes the null-atom case split and extends
+     beyond finite spaces.
+2. **Coherence.**
+   - Exemplar: `Binomial/Market` consumes `Martingale.comp`/`of_comp`, `Filtration.comp` and
+     `integral_trim`.
+   - Next: `portfolioPayoff`, `SuperReplicates` and their `Finset.sum_comm` swaps are
+     `Matrix.vecMul` (`add_vecMul`, `smul_vecMul`, `dotProduct_vecMul`).
+   - `integral_abs_sum_le_of_identDistrib` is a general `IdentDistrib` lemma living in a Risk
+     file, and belongs in `Probability/`.
+3. **Zero slop.**
+   - Exemplar: `Superhedging`, where every lemma is used and the `sInf` junk value is documented.
+   - Next:
+     - `DiscreteMarket` repeats the floor-zero block in `value_forward` and
+       `value_europeanCall_sub_put` (extract `discreteAssets_zero`);
+     - `∑ i ∈ range (N ω), X i ω` is written ten times across `CompoundPoissonCVaR` and
+       `CompoundPoissonMGF` (a shared `compoundSum`).
+4. **Architecture (one trunk).**
+   - Exemplar: `DiscreteMarket.toMarket` with `isPricingMeasure_toMarket_iff`, which puts the
+     finite FTAP on the trunk.
+   - Next:
+     - `Binomial.market` builds a floor filtration by hand and repeats the `of_comp` argument.
+       Generalise `toMarket` to a step and a numéraire, and make the binomial market an instance.
+     - The superhedging and utility theorems never mention `Market`. Their joints are
+       `M.price Q c ≤ superhedgingPrice` (risk × valuation) and "marginal utility weighted by
+       `p` is a pricing measure of a finite `Market`" (choice × valuation). These are K4 and K6
+       of the chain design.
+5. **First principles.**
+   - Exemplar: `StatePriceDensity` derives the density from Fermat on the budget set, with no
+     concavity assumed.
+   - Next: `kelly_statePrices` takes the Kelly first-order condition from the closed form.
+     Proving `f*` is a local maximum of `portfolioUtility` for `log` (concavity) and calling
+     `exists_statePrices_of_isLocalMaxOn` makes it "the log-optimal portfolio has density p/W",
+     which is K5.
+6. **Idiomatic register.**
+   - Exemplar: the `SuperReplicates.mono/add_const/smul/add` dot-notation transport lemmas.
+   - Next, the golf list from the panel:
+     - `hθ ▸ hw₀.ne'` for a nested `have`;
+     - `fin_cases ω <;> simp` for three duplicated blocks;
+     - a redundant `ℝ` cast;
+     - shadowed anonymous `have`s in `of_trim_eq`;
+     - `portfolioCost` as `portfolioPayoff` of one row.
+7. **Concept clarity.**
+   - Exemplar: `Superhedging`'s docstring opens with its non-claims.
+   - Next: the hypothesis list of the stationary-point theorems is retyped four times. An
+     `IsStationary` bundle would show that the first-order condition is the only analytic
+     input.
+8. **Elegance.**
+   - Exemplar: each coherence axiom of the superhedging price is a two-line transport through
+     `sInf`.
+   - Next:
+     - cash invariance, homogeneity and subadditivity are one fact (`SuperReplicates` is a convex
+       cone in `(Y, x, θ)`), not three `linarith` proofs;
+     - in `exists_eq_smul_of_forall_cost_eq_zero`, "a functional vanishing on `ker cost` is a
+       multiple of `cost`" is `LinearMap.ker_le_ker_iff`-shaped, with no `k₀`.
+
+### Ranked backlog
+
+1. **The superhedging duality** by `coherentRisk_isLUB`, with no Minkowski–Weyl (on
+   `v2/risk-convex`).
+2. **The joints over `Market`**:
+   - K4: utility state prices are a pricing measure;
+   - K6: price ≤ superhedging price;
+   - K5: Kelly from optimality, not from the formula.
+
+   These are the choice workstream after #473.
+3. **One discrete market.** `Binomial.market` as an instance of a stepped `toMarket`.
+4. **`Matrix.vecMul`** for portfolio payoffs, and `compoundSum`.
+5. **The golf list** of lens 6, and the `discreteAssets_zero` extraction.
+
 ## 2026-11-07 — corpus 804, modules 725 — the RiO foundations, read before they land
 
 Scope: `feat/rio-foundations`, six foundation results, each with a seam into the contracts
