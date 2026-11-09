@@ -2728,7 +2728,6 @@ The landmarks of `docs/blueprint.md` that no section above pins: one `#print axi
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.BlackScholes.isPricingMeasure_constGirsanovMeasure
 
-end MathFin.AxiomAudit
 
 /-- info: 'MathFin.Execution.isPricingMeasure_toMarket_condExp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
