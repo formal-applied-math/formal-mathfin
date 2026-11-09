@@ -153,6 +153,7 @@ graph TD
   superhedgingCoherent["The superhedging price is a coherent risk measure"]:::proved
   varianceSwapJumpBias["Variance swap and the log contract"]:::proved
   expectedShortfall["Expected shortfall"]:::proved
+  pricingFunctional["The pricing functional"]:::proved
   black76Caplet["Black's caplet formula"]:::proved
   crrBsConvergence["Cox–Ross–Rubinstein convergence to Black–Scholes"]:::proved
   gaussianPortfolioVar["Value-at-risk of a Gaussian portfolio"]:::proved
@@ -269,7 +270,6 @@ graph TD
     twoAssetOptionFormulas["Stulz and Heynen–Kat two-asset formulas"]:::frontier
   end
   subgraph frontier_valuationGeneral["⏳ frontier · Valuation · Arbitrage theory"]
-    pricingFunctional["The pricing functional"]:::frontier
     dmwFtap["Dalang–Morton–Willinger FTAP"]:::frontier
     secondFtapConverse["Second FTAP: uniqueness implies completeness"]:::frontier
     semistaticFtap["Semistatic FTAP with entropy"]:::frontier
@@ -381,6 +381,8 @@ graph TD
   superhedgingPriceLowerBound --> superhedgingCoherent
   compoundPoissonMgf --> varianceSwapJumpBias
   valueAtRisk --> expectedShortfall
+  contract --> pricingFunctional
+  contractValue --> pricingFunctional
   contract --> black76Caplet
   contractValue --> black76Caplet
   standardNormalCdf --> black76Caplet
@@ -464,11 +466,6 @@ graph TD
   quantile --> rockafellarUryasev
   valueAtRisk --> rockafellarUryasev
   quantileTransform --> rockafellarUryasev
-  emm --> pricingFunctional
-  contractValue --> pricingFunctional
-  changeOfNumeraire --> pricingFunctional
-  secondFtap --> pricingFunctional
-  marketCompleteness --> pricingFunctional
   standardNormalCdf --> realErf
   aaveLiquidationKmv --> aaveHealthFactorBound
   vasicekBondPde --> affineTermStructure
@@ -723,6 +720,7 @@ graph TD
 | `thm:superhedging-coherent` The superhedging price is a coherent risk measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-coherent%22%20in%3Abody) |
 | `thm:variance-swap-jump-bias` Variance swap and the log contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-swap-jump-bias%22%20in%3Abody) |
 | `def:expected-shortfall` Expected shortfall | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aexpected-shortfall%22%20in%3Abody) |
+| `def:pricing-functional` The pricing functional | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Apricing-functional%22%20in%3Abody) |
 | `thm:black76-caplet` Black's caplet formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ablack76-caplet%22%20in%3Abody) |
 | `thm:crr-bs-convergence` Cox–Ross–Rubinstein convergence to Black–Scholes | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acrr-bs-convergence%22%20in%3Abody) |
 | `thm:gaussian-portfolio-var` Value-at-risk of a Gaussian portfolio | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Agaussian-portfolio-var%22%20in%3Abody) |
@@ -748,7 +746,6 @@ graph TD
 | `thm:ito-product-rule` Itô's product rule | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-product-rule%22%20in%3Abody) |
 | `thm:quantile-elicitability` Elicitability of the quantile | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aquantile-elicitability%22%20in%3Abody) |
 | `thm:rockafellar-uryasev` Rockafellar–Uryasev formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Arockafellar-uryasev%22%20in%3Abody) |
-| `def:pricing-functional` The pricing functional | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Apricing-functional%22%20in%3Abody) |
 | `def:real-erf` erf / erfc / erfinv for Mathlib | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Areal-erf%22%20in%3Abody) |
 | `thm:aave-health-factor-bound` Aave multi-asset health factor: a liquidation bound | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaave-health-factor-bound%22%20in%3Abody) |
 | `thm:affine-term-structure` Affine term structure | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaffine-term-structure%22%20in%3Abody) |

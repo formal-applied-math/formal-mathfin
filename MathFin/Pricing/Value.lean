@@ -14,9 +14,10 @@ public import Mathlib.Probability.Martingale.Basic
 
 A `Contract` is still model-agnostic data until it meets a stochastic model. `Scenario`
 becomes a random variable once a model `X : ι → ℝ≥0 → Ω → ℝ` and an outcome `ω : Ω` are
-fixed (`scenarioAt`); `Contract.value` integrates the resulting `pathPV` against a pricing
-measure `Q` and a deflator `D : ℝ≥0 → Ω → ℝ`, each outcome's cash flows discounted along that
-outcome's path `t ↦ D t ω`. A deterministic discount curve is the deflator `fun t _ ↦ D t`.
+fixed (`scenarioAt`); `Contract.value` integrates the resulting `pathPV` against a measure `Q` and
+a deflator `D : ℝ≥0 → Ω → ℝ`, each outcome's cash flows discounted along that outcome's path
+`t ↦ D t ω`. It is a price when `Q` is a pricing measure of a market whose deflator is `D`
+(`Market.price`). A deterministic discount curve is the deflator `fun t _ ↦ D t`.
 
 This file's connection to the market vocabulary is through `Martingale`, not `IsEMM`:
 `value_deliverAsset`'s pricing identity needs a `Q`-martingale price process and `Q` a

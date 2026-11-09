@@ -2435,6 +2435,10 @@ bounded-coefficient process class. -/
 #guard_msgs in
 #print axioms MathFin.Contracts.Contract.value
 
+/-- info: 'MathFin.Market.price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Market.price
+
 /-- info: 'MathFin.zcb' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.zcb
