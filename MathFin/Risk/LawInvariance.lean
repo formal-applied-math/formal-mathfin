@@ -93,7 +93,7 @@ theorem isLawInvariant_spectralRiskMeasure (φ : ℝ → ℝ) :
 
 /-- **Expectiles are law invariant**: the expectile gap at a threshold `e` is a function of the
 law, through `∫ (Y − e)⁺ dP = ∫ (y − e)⁺ d(P.map Y)`. -/
-theorem isLawInvariant_expectile [IsProbabilityMeasure P] (α : ℝ) :
+theorem isLawInvariant_expectile (α : ℝ) :
     IsLawInvariant P fun Y ↦ expectile α Y P := by
   have key {Y : Ω → ℝ} (hY : AEMeasurable Y P) (e : ℝ) :
       expectileGap α Y P e = α * ∫ y, max (y - e) 0 ∂(P.map Y) -
