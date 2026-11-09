@@ -1504,4 +1504,17 @@
   "latexEnv": "theorem",
   "label": "thm:utility-state-price-density",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/StatePriceDensity.lean"}]
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/StatePriceDensity.lean"},
+  {
+  "name": "MathFin.CubicSpline.exists_unique_moments",
+  "label": "thm:cubic-spline-moments-unique",
+  "title": "Natural cubic spline: the moment system's unique solution",
+  "latexEnv": "theorem",
+  "text":
+  "For `2 \u2264 n` strictly increasing pillars, the natural cubic spline's\n  moment system `(momentMatrix x n).mulVec M = rhs x y` has exactly one solution: the\n  tridiagonal coefficient matrix is strictly diagonally dominant (`momentMatrix_dominant`),\n  hence invertible. The spline exists to price claims between quoted pillars of a\n  contract's price surface; its moments are what the pillar quotes pin down.",
+  "module": "MathFin.Models.ModelFree.CubicSplineSmile",
+  "line": 232,
+  "leanOk": true,
+  "file":
+  "MathFin/Models/ModelFree/CubicSplineSmile.lean",
+  "uses": ["def:contract"]}]

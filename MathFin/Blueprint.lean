@@ -32,6 +32,7 @@ import MathFin.Models.BlackScholes.GaussianGirsanov
 import MathFin.Models.BlackScholes.Market
 import MathFin.Models.BlackScholes.MargrabeGrounding
 import MathFin.Models.BlackScholes.PDE
+import MathFin.Models.ModelFree.CubicSplineSmile
 import MathFin.Models.Credit.CVA
 import MathFin.Models.Credit.Cox
 import MathFin.Models.Credit.KMVMertonStructural
@@ -598,6 +599,16 @@ attribute [blueprint "thm:crr-bs-convergence"
   Lévy continuity → weak convergence, with put–call parity lifting the (bounded) put's
   convergence to the call. -/)]
   MathFin.binomialPrice_call_tendsto_bs_closed
+
+attribute [blueprint "thm:cubic-spline-moments-unique"
+  (title := "Natural cubic spline: the moment system's unique solution")
+  (uses := ["def:contract"])
+  (statement := /-- For `2 ≤ n` strictly increasing pillars, the natural cubic spline's
+  moment system `(momentMatrix x n).mulVec M = rhs x y` has exactly one solution: the
+  tridiagonal coefficient matrix is strictly diagonally dominant (`momentMatrix_dominant`),
+  hence invertible. The spline exists to price claims between quoted pillars of a
+  contract's price surface; its moments are what the pillar quotes pin down. -/)]
+  MathFin.CubicSpline.exists_unique_moments
 
 -- ===== valuation/diffusions: Black–Scholes and Bachelier =====
 
