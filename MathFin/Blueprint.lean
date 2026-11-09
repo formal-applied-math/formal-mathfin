@@ -883,7 +883,8 @@ attribute [blueprint "def:expected-utility"
   over a finite support $s$ under the utility $u$. -/)]
   MathFin.expectedUtility
 
-attribute [blueprint "thm:utility-state-price-density" (title := "Marginal utility is a state-price density")
+attribute [blueprint "thm:utility-state-price-density"
+  (title := "Marginal utility is a state-price density")
   (statement := /-- In the finite-state market with payoff matrix $A$ and prices $\pi$, let $\theta$
   be a local maximum of $\sum_\omega p_\omega u(W_\omega)$, $W = A^\top\theta$, on the budget set
   $\{\theta' : \pi\cdot\theta' = w_0\}$, with $p>0$, $w_0>0$, $W>0$ and $u'(W_\omega)>0$. Then
