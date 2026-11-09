@@ -236,7 +236,7 @@ theorem not_exists_nonneg_lattice_scheme {c dx e v2 : ℝ} (hv : v2 < e * (dx - 
 The weights' purpose is to discretize a diffusion's one-step first two moments. The
 Black–Scholes log-return over a step of length `dt` has mean `(r - σ²/2) dt` and variance
 `σ² dt` under the risk-neutral measure (`bsLogReturn_mean`, `bsLogReturn_variance` in
-`MathFin/BlackScholes/GBMLogMoments.lean`). At the classical spacing `dx = √3 σ √dt` the
+`MathFin/Models/BlackScholes/GBMLogMoments.lean`). At the classical spacing `dx = √3 σ √dt` the
 variance sits at the top of the validity window `dx² ≤ 4 v2 ≤ 3 dx²`, so
 `trinomialProb_mem_Icc_classical` keeps the weights in `[0, 1]` for every nearest-node
 offset; the two theorems below record that the weights then match the log-return's two
