@@ -282,6 +282,7 @@ theorem lookbackFloatingCall_ge_marketPrice
   -- Girsanov measure, whose shifted Brownian `constBtheta hWmeas 0 H` makes the risk-neutral
   -- hypothesis); `bsV`'s definition is not exposed across modules, so the bridge is needed
   have hW₀ := Contracts.BlackScholes.isPreBrownianReal_constBtheta hW hWmeas 0 H
+  haveI := Contracts.BlackScholes.constGirsanovMeasure_isProbabilityMeasure hW hWmeas 0 H
   have hBSC : BSCallHyp (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas 0 H) S m r σ
       (T : ℝ) (fun ω => Contracts.BlackScholes.constBtheta hWmeas 0 H (Real.toNNReal (T : ℝ)) ω
         / √(T : ℝ)) :=
