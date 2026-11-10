@@ -283,7 +283,8 @@ theorem lookbackFloatingCall_ge_marketPrice
   -- hypothesis); `bsV`'s definition is not exposed across modules, so the bridge is needed
   have hW₀ := Contracts.BlackScholes.isPreBrownianReal_constBtheta hW hWmeas 0 H
   have hBSC : BSCallHyp (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas 0 H) S m r σ
-      (T : ℝ) (fun ω => Contracts.BlackScholes.constBtheta hWmeas 0 H T.toNNReal ω / √(T : ℝ)) :=
+      (T : ℝ) (fun ω => Contracts.BlackScholes.constBtheta hWmeas 0 H (Real.toNNReal (T : ℝ)) ω
+        / √(T : ℝ)) :=
     BSCallHyp.of_isPreBrownian _ _ hW₀ hm hm hσ hT
   have hbsv : bsV m r σ S (T : ℝ) =
       S * Phi (bsd1 S m r σ (T : ℝ)) - m * rexp (-(r * (T : ℝ))) * Phi (bsd2 S m r σ (T : ℝ)) :=
