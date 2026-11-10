@@ -5,7 +5,6 @@ Authors: Yang Ye
 -/
 module
 
-public import MathFin.Models.BlackScholes.Market
 public import MathFin.Models.BlackScholes.PDE
 public import MathFin.Probability.Gaussian.NormalTail
 public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
@@ -84,12 +83,8 @@ extremum's law, which is the piece this file's transcription route sidesteps.
   `lookback_payoff_ge_vanilla`**: that lemma is a same-strike fixed-strike statement (`max(S−K,0)
   ≤ max(M−K,0)` given `S ≤ M`, the running *maximum*); this theorem is a floating-strike statement
   about the running *minimum*, with no `max(·,0)` on either side, proved independently. The two
+  share only the theme that a lookback value dominates a vanilla one, not a derivation route or a
   payoff identity.
-* `lookbackFloatingCall_ge_marketPrice`: **the trunk-grounded comparison**. The same dominance
-  composed with the Black-Scholes market's own pricing of the European call
-  (`price_europeanCall_constGirsanovMeasure`): the lookback call dominates whatever the market
-  charges for the vanilla call struck at the running minimum, so the bound holds at the level
-  of the pricing functional, not only at the level of the transcribed closed form.
 
 ## References
 
@@ -108,7 +103,7 @@ transcription, Black-Scholes reduction, MSC 91G20, JEL G13
 
 namespace MathFin
 
-open Real Filter Topology ProbabilityTheory MeasureTheory
+open Real Filter Topology ProbabilityTheory
 open scoped NNReal
 
 /-- **Floating-strike lookback price**, Haug's cost-of-carry closed form (`b = r − q`),
@@ -257,43 +252,5 @@ theorem lookbackFloatingCall_ge_bsV {S m r σ T : ℝ} (hm : 0 < m) (hS : m ≤ 
       have : 0 < S * (σ ^ 2 / (2 * r ^ 2)) := by positivity
       exact mul_nonneg this.le hsign
     linarith [hcarry]
-
-/-- **The trunk-grounded comparison**: the floating-strike lookback call dominates the
-Black-Scholes market's own price of the vanilla call struck at the running minimum. The
-market prices the European call at the closed form (`price_europeanCall_constGirsanovMeasure`)
-under its constant market-price-of-risk measure, so the dominance composes with that identity
-one line deep: whatever prices the call on the trunk, the lookback is worth at least as much. -/
-theorem lookbackFloatingCall_ge_marketPrice
-    {Ω : Type*} [MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω}
-    [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ) (hWmeas : ∀ t, Measurable (W t))
-    {m r σ S : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hT : 0 < (T : ℝ))
-    (hm : 0 < m) (hS : m ≤ S) (hσ : 0 < σ) :
-    (Contracts.BlackScholes.market μ hWmeas S r r σ).price
-        (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas 0 H)
-        (Contracts.europeanCall m T)
-      ≤ lookbackFloatingPrice 1 S m r 0 σ (T : ℝ) := by
-  have hS0 : 0 < S := hm.trans_le hS
-  -- the market prices the call at the closed form
-  have key := Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure
-    (S_0 := S) (m := r) (r := r) (σ := σ) (K := m) hW hWmeas hTH hS0 hm hσ hT
-  have hzero : (r - r) / σ = 0 := by rw [sub_self, zero_div]
-  rw [hzero] at key
-  -- `bsV` is the closed form, through the public integral bridge (`bs_call_formula` for the
-  -- Girsanov measure, whose shifted Brownian `constBtheta hWmeas 0 H` makes the risk-neutral
-  -- hypothesis); `bsV`'s definition is not exposed across modules, so the bridge is needed
-  have hW₀ := Contracts.BlackScholes.isPreBrownianReal_constBtheta hW hWmeas 0 H
-  haveI := Contracts.BlackScholes.constGirsanovMeasure_isProbabilityMeasure hW hWmeas 0 H
-  have hBSC : BSCallHyp (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas 0 H) S m r σ
-      (T : ℝ) (fun ω => Contracts.BlackScholes.constBtheta hWmeas 0 H (Real.toNNReal (T : ℝ)) ω
-        / √(T : ℝ)) :=
-    BSCallHyp.of_isPreBrownian _ _ hW₀ hS0 hm hσ hT
-  have hbsv : bsV m r σ S (T : ℝ) =
-      S * Phi (bsd1 S m r σ (T : ℝ)) - m * rexp (-(r * (T : ℝ))) * Phi (bsd2 S m r σ (T : ℝ)) := by
-    rw [← integral_bsCall_payoff_eq_bsV hBSC]
-    exact bs_call_formula hBSC
-  have hdom := lookbackFloatingCall_ge_bsV hm hS hσ hT
-  rw [hbsv] at hdom
-  rw [key]
-  exact hdom
 
 end MathFin
