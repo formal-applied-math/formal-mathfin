@@ -273,12 +273,24 @@ theorem lookbackFloatingCall_ge_marketPrice
         (Contracts.europeanCall m T)
       ≤ lookbackFloatingPrice 1 S m r 0 σ (T : ℝ) := by
   have hS0 : 0 < S := hm.trans_le hS
+  -- the market prices the call at the closed form
   have key := Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure
     (S_0 := S) (m := r) (r := r) (σ := σ) (K := m) hW hWmeas hTH hS0 hm hσ hT
   have hzero : (r - r) / σ = 0 := by rw [sub_self, zero_div]
   rw [hzero] at key
+  -- `bsV` is the closed form, through the public integral bridge (`bs_call_formula` for the
+  -- Girsanov measure, whose shifted Brownian `constBtheta hWmeas 0 H` makes the risk-neutral
+  -- hypothesis); `bsV`'s definition is not exposed across modules, so the bridge is needed
+  have hW₀ := Contracts.BlackScholes.isPreBrownianReal_constBtheta hW hWmeas 0 H
+  have hBSC : BSCallHyp (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas 0 H) S m r σ
+      (T : ℝ) (fun ω => Contracts.BlackScholes.constBtheta hWmeas 0 H T.toNNReal ω / √(T : ℝ)) :=
+    BSCallHyp.of_isPreBrownian _ _ hW₀ hm hm hσ hT
+  have hbsv : bsV m r σ S (T : ℝ) =
+      S * Phi (bsd1 S m r σ (T : ℝ)) - m * rexp (-(r * (T : ℝ))) * Phi (bsd2 S m r σ (T : ℝ)) :=
+    (integral_bsCall_payoff_eq_bsV hBSC).symm.trans (bs_call_formula hBSC)
+  have hdom := lookbackFloatingCall_ge_bsV hm hS hσ hT
+  rw [hbsv] at hdom
   rw [key]
-  show bsV m r σ S (T : ℝ) ≤ lookbackFloatingPrice 1 S m r 0 σ (T : ℝ)
-  exact lookbackFloatingCall_ge_bsV hm hS hσ hT
+  exact hdom
 
 end MathFin
