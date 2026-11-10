@@ -6,6 +6,8 @@ Authors: Yang Ye
 module
 
 public import MathFin.Models.BlackScholes.DividendsGreeks
+public import MathFin.Models.BlackScholes.Market
+public import MathFin.Models.BlackScholes.PDE
 public import Mathlib.Algebra.Order.Star.Real
 public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
 public import Mathlib.RingTheory.Etale.Weakly
@@ -62,6 +64,9 @@ stopping-value wiring is built here.
 * `shoutFloor_g_eq_bsP` — Dai–Kwok–Wu's own first reduction, Appendix A (p. 397):
   `e^{qτ} P(τ; r, q) = P(τ; r - q, 0)`, i.e. `g(τ)` is literally the ordinary
   (no-dividend) ATM put `bsP 1 (r - q) σ 1 τ` at the shifted rate `r - q`.
+* `shoutFloorAtmPut_eq_marketPut` — the trunk-grounded form: the market's own price of the
+  ATM European put (spot `1`, drift and rate `r - q`) is `e^{qτ} · g(τ)`, so the reward whose
+  monotonicity is proved here is literally a market price.
 * `hasDerivAt_shoutFloor_g` — `g`'s `τ`-derivative follows immediately via
   `shoutFloor_g_eq_bsP` from the library's own `hasDerivAt_bsP_tau` (at
   `K = S = 1`, rate `r - q`) — no new differentiation needed, matching the
@@ -113,6 +118,33 @@ theorem shoutFloor_g_eq_bsP (r q σ τ : ℝ) :
   unfold shoutFloorAtmPut bsPDiv
   rw [← mul_assoc, ← Real.exp_add]
   simp
+
+/-- **The trunk-grounded form of the ATM put**: the Black–Scholes market's own price of the
+European put struck at the spot (spot `1`, drift and rate both `r - q`) under the
+zero-price-of-risk measure is exactly `e^{qτ} · g(τ)` — by the market's put pricing
+(`price_europeanPut_constGirsanovMeasure`), the reduction `shoutFloor_g_eq_bsP`, and the
+closed-form parity chain (`bsP_eq_bsV`, `bsV_eq_closedForm`). Whatever the market charges for
+the ATM put, the shout-floor reward is that scaled by `e^{qτ}`, so the monotonicity below
+operates at the level of the pricing functional, not only at the closed-form level. -/
+theorem shoutFloorAtmPut_eq_marketPut {Ω : Type*} [MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ}
+    {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)
+    (hWmeas : ∀ t, Measurable (W t)) {r q σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H)
+    (hT : 0 < (T : ℝ)) (hσ : 0 < σ) :
+    (Contracts.BlackScholes.market μ hWmeas 1 (r - q) (r - q) σ).price
+        (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas 0 H)
+        (Contracts.europeanPut 1 T)
+      = Real.exp (q * (T : ℝ)) * shoutFloorAtmPut r q σ (T : ℝ) := by
+  have hS0 : 0 < (1 : ℝ) := one_pos
+  have hK : 0 < (1 : ℝ) := one_pos
+  have key := Contracts.BlackScholes.price_europeanPut_constGirsanovMeasure
+    (S_0 := 1) (m := r - q) (r := r - q) (σ := σ) (K := 1) hW hWmeas hTH hS0 hK hσ hT
+  have hzero : ((r - q) - (r - q)) / σ = 0 := by rw [sub_self, zero_div]
+  rw [hzero] at key
+  rw [key, shoutFloor_g_eq_bsP r q σ (T : ℝ), bsP_eq_bsV 1 (r - q) σ 1 (T : ℝ),
+    bsV_eq_closedForm 1 (r - q) σ 1 (T : ℝ)]
+  have h1 := Phi_add_Phi_neg (bsd1 1 1 (r - q) σ (T : ℝ))
+  have h2 := Phi_add_Phi_neg (bsd2 1 1 (r - q) σ (T : ℝ))
+  linear_combination (norm := ring) (Real.exp (-(r - q) * (T : ℝ))) * h2 - h1
 
 /-- **The shout-floor discriminant is strictly positive** whenever `r ≤ q`.
 This is the formula-level content of Lemma 2.1(i): `g(τ) = e^{qτ} P(τ)`'s

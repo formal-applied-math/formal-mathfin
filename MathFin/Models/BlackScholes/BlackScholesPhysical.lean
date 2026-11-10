@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
@@ -207,6 +207,34 @@ theorem value_europeanCall_physical {S_0 K m r σ : ℝ} {T H : ℝ≥0} (hTH : 
         subst hp
         exact .of_forall fun ω ↦ pathAssets_eq_bsTerminal _ hT S_0 r σ ω)]
   refine value_europeanCall ?_
+  simpa using BSCallHyp.of_isPreBrownian (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+    (constBtheta (μ := μ) hWmeas ((m - r) / σ) H) hB hS₀ hK hσ hT
+
+include hW in
+/-- **The European put on the physical asset** is worth the Black–Scholes put price
+`K e^{−rT} Φ(−d₂) − S₀ Φ(−d₁)` under the Girsanov measure `Q` of the market price of risk
+`θ = (m − r)/σ`, for a maturity `T` in the horizon `[0, H]`. Same route as the call: the
+scenario is rewritten from the physical asset to the risk-neutral one (`Contract.value_congr_ae`)
+and the existing `value_europeanPut` is applied. -/
+theorem value_europeanPut_physical {S_0 K m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H)
+    (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) :
+    (europeanPut K T).value (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+        (fun _ _ ↦ Real.exp (-r * T)) (pathAssets S_0 m σ W)
+      = K * Real.exp (-r * T) * Phi (-bsd2 S_0 K r σ T) - S_0 * Phi (-bsd1 S_0 K r σ T) := by
+  have := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
+  have hB := isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
+  have hfix : (europeanPut K T).FixedDated := by simp [europeanPut, Contract.FixedDated]
+  rw [value_physical_eq_riskNeutral hW hWmeas hσ.ne' H _ hfix (by simp [europeanPut,
+      Contract.obsList, Payoff.obsList, List.mem_singleton, hTH]),
+    Contract.value_congr_ae (Q := constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+      (X := pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H))
+      (Y := assets S_0 r σ T
+        (fun ω ↦ constBtheta (μ := μ) hWmeas ((m - r) / σ) H T ω / Real.sqrt T))
+      (europeanPut K T) hfix (fun p hp ↦ by
+        rw [europeanPut, Contract.obsList, Payoff.obsList, List.mem_singleton] at hp
+        obtain rfl := hp
+        exact .of_forall fun ω ↦ pathAssets_eq_bsTerminal _ hT S_0 r σ ω)]
+  refine value_europeanPut ?_
   simpa using BSCallHyp.of_isPreBrownian (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
     (constBtheta (μ := μ) hWmeas ((m - r) / σ) H) hB hS₀ hK hσ hT
 
