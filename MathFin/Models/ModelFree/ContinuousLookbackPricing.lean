@@ -286,7 +286,7 @@ theorem lookbackFloatingCall_ge_marketPrice
   have hBSC : BSCallHyp (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas 0 H) S m r σ
       (T : ℝ) (fun ω => Contracts.BlackScholes.constBtheta hWmeas 0 H (Real.toNNReal (T : ℝ)) ω
         / √(T : ℝ)) :=
-    BSCallHyp.of_isPreBrownian _ _ hW₀ hm hm hσ hT
+    BSCallHyp.of_isPreBrownian _ _ hW₀ hS0 hm hσ hT
   have hbsv : bsV m r σ S (T : ℝ) =
       S * Phi (bsd1 S m r σ (T : ℝ)) - m * rexp (-(r * (T : ℝ))) * Phi (bsd2 S m r σ (T : ℝ)) :=
     (integral_bsCall_payoff_eq_bsV hBSC).symm.trans (bs_call_formula hBSC)
