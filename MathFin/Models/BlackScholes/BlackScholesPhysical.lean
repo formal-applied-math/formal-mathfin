@@ -231,7 +231,8 @@ theorem value_europeanPut_physical {S_0 K m r σ : ℝ} {T H : ℝ≥0} (hTH : T
       (Y := assets S_0 r σ T
         (fun ω ↦ constBtheta (μ := μ) hWmeas ((m - r) / σ) H T ω / Real.sqrt T))
       (europeanPut K T) hfix (fun p hp ↦ by
-        rw [europeanPut, Contract.obsList, Payoff.obsList, List.mem_singleton] at hp
+        simp only [europeanPut, Contract.obsList, Payoff.obsList, List.append_nil,
+          List.nil_append, List.mem_append, List.mem_singleton] at hp
         obtain rfl := hp
         exact .of_forall fun ω ↦ pathAssets_eq_bsTerminal _ hT S_0 r σ ω)]
   refine value_europeanPut ?_
