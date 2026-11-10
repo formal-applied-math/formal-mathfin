@@ -278,7 +278,7 @@ theorem lookbackFloatingCall_ge_marketPrice
     (S_0 := S) (m := r) (r := r) (σ := σ) (K := m) hW hWmeas hTH hS0 hm hσ hT
   have hzero : (r - r) / σ = 0 := by rw [sub_self, zero_div]
   rw [hzero] at key
-  have hdom := lookbackFloatingCall_ge_bsV hm hS hσ hT
+  have hdom := lookbackFloatingCall_ge_bsV (r := r) hm hS hσ hT
   rw [bsV_eq_closedForm] at hdom
   rw [key]
   exact hdom
