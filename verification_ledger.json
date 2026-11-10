@@ -1888,10 +1888,10 @@
     },
     "mf-continuous-lookback-floating-strike": {
       "benchmark_file": "exotic_options.json",
-      "date": "2026-11-09",
-      "elapsed_s": 3.6,
-      "input_hash": "ebe92b689970354cb13d10170403305b498aa1cdd825cff405b9a12922a7383c",
-      "verified_at_commit": "f55a8b6"
+      "date": "2026-11-10",
+      "elapsed_s": 3.4,
+      "input_hash": "6fea6faaf2a0f8f83dfaff4f5e354fe9043dce5a34b28ffb69e3c60634726dc7",
+      "verified_at_commit": "d664520"
     },
     "mf-contract-binomial-capped-call": {
       "benchmark_file": "contracts.json",
