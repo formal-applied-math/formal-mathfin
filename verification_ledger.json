@@ -1889,9 +1889,9 @@
     "mf-continuous-lookback-floating-strike": {
       "benchmark_file": "exotic_options.json",
       "date": "2026-11-10",
-      "elapsed_s": 3.4,
-      "input_hash": "6fea6faaf2a0f8f83dfaff4f5e354fe9043dce5a34b28ffb69e3c60634726dc7",
-      "verified_at_commit": "d664520"
+      "elapsed_s": 4.8,
+      "input_hash": "f773c7525ae560acb60d8ed2bb8a4f6e5f25e3afbbdda34cdad0aa4522f79c5b",
+      "verified_at_commit": "e193509"
     },
     "mf-contract-binomial-capped-call": {
       "benchmark_file": "contracts.json",
