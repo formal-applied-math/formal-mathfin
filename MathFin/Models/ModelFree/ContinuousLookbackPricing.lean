@@ -280,7 +280,7 @@ theorem lookbackFloatingCall_ge_marketPrice
   rw [hzero] at key
   have hdom := lookbackFloatingCall_ge_bsV (r := r) hm hS hσ hT
   rw [bsV_eq_closedForm] at hdom
-  rw [key]
+  rw [key, neg_mul]
   exact hdom
 
 end MathFin
