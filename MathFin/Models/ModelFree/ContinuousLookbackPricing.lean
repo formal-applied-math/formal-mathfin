@@ -289,7 +289,9 @@ theorem lookbackFloatingCall_ge_marketPrice
     BSCallHyp.of_isPreBrownian _ _ hW₀ hS0 hm hσ hT
   have hbsv : bsV m r σ S (T : ℝ) =
       S * Phi (bsd1 S m r σ (T : ℝ)) - m * rexp (-(r * (T : ℝ))) * Phi (bsd2 S m r σ (T : ℝ)) :=
-    (integral_bsCall_payoff_eq_bsV hBSC).symm.trans (bs_call_formula hBSC)
+    := by
+    rw [← integral_bsCall_payoff_eq_bsV hBSC]
+    exact bs_call_formula hBSC
   have hdom := lookbackFloatingCall_ge_bsV hm hS hσ hT
   rw [hbsv] at hdom
   rw [key]
