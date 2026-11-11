@@ -2786,23 +2786,23 @@ The landmarks of `docs/blueprint.md` that no section above pins: one `#print axi
 #print axioms MathFin.abs_sharpeRatio_le_of_discountFactor
 
 /-- info: 'MathFin.Market.IsPricingMeasure.abs_sharpeRatio_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in
+#guard_msgs (whitespace := lax) in
 #print axioms MathFin.Market.IsPricingMeasure.abs_sharpeRatio_le
 
 /-- info: 'MathFin.Market.IsPricingMeasure.capm_of_affine_sdf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in
+#guard_msgs (whitespace := lax) in
 #print axioms MathFin.Market.IsPricingMeasure.capm_of_affine_sdf
 
 /-- info: 'MathFin.Market.IsPricingMeasure.exists_deriv_eq_mul_sdf_of_stationary' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in
+#guard_msgs (whitespace := lax) in
 #print axioms MathFin.Market.IsPricingMeasure.exists_deriv_eq_mul_sdf_of_stationary
 
 /-- info: 'MathFin.Market.IsPricingMeasure.sdf_eq_div_of_logOptimal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in
+#guard_msgs (whitespace := lax) in
 #print axioms MathFin.Market.IsPricingMeasure.sdf_eq_div_of_logOptimal
 
 /-- info: 'MathFin.expectedUtility_eq_integral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in
+#guard_msgs (whitespace := lax) in
 #print axioms MathFin.expectedUtility_eq_integral
 
 end MathFin.AxiomAudit
