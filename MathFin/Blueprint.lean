@@ -15,6 +15,8 @@ import MathFin.Choice.Portfolio.RiskParityFOC
 import MathFin.Choice.Utility.StatePriceDensity
 import MathFin.Choice.Utility.VonNeumannMorgenstern
 import MathFin.Contracts.Core
+import MathFin.Insurance.AnnuityValue
+import MathFin.Insurance.EsscherPremium
 import MathFin.Insurance.SurvivalModel
 import MathFin.Markets.DeFi.LPContract
 import MathFin.Markets.DeFi.LiquidationAsStructuralDefault
@@ -45,6 +47,7 @@ import MathFin.Models.Jumps.JumpDiffusionIncompleteness
 import MathFin.Models.Jumps.JumpDiffusionMixing
 import MathFin.Models.Jumps.JumpDiffusionProcess
 import MathFin.Models.Jumps.JumpDiffusionVarianceSwap
+import MathFin.Models.Jumps.Market
 import MathFin.Models.LocalVol.Dupire
 import MathFin.Models.LocalVol.TimeDependentVol
 import MathFin.Models.ModelFree.CarrMadan
@@ -66,6 +69,7 @@ import MathFin.Pricing.ForwardMeasure
 import MathFin.Pricing.Market
 import MathFin.Pricing.MarketCompleteness
 import MathFin.Pricing.Numeraire
+import MathFin.Pricing.OneDateMarket
 import MathFin.Pricing.Parity
 import MathFin.Pricing.Value
 import MathFin.Probability.Brownian.Girsanov.GirsanovFiltered
@@ -505,6 +509,16 @@ attribute [blueprint "thm:change-of-numeraire"
   to $Q$ (`numeraireMeasure_isEquivProbMeasure`). A pricing identity at one date; no dynamics. -/)]
   MathFin.changeOfNumeraire
 
+attribute [blueprint "thm:one-date-market"
+  (title := "The one-date market and its pricing measures")
+  (statement := /-- The market with one asset, quoted at $s_0e^{rt}$ before a date $\tau$ and at a
+  random value $X$ from $\tau$ on, with the money market $e^{rt}$ as numéraire and no
+  information before $\tau$, is priced up to $\tau$ by every probability measure $Q$ equivalent
+  to the reference measure with $X$ integrable and $E^Q[X] = s_0e^{r\tau}$. The claim paying $X$
+  at $\tau$ is worth $E^Q[e^{-r\tau}X]$. The model has no dynamics before $\tau$; the
+  jump-diffusion and insured markets are its instances. -/)]
+  MathFin.Market.isPricingMeasure_oneDate
+
 -- ===== valuation/general: Arbitrage theory =====
 
 attribute [blueprint "thm:continuous-ftap"
@@ -823,6 +837,34 @@ attribute [blueprint "thm:jump-diffusion-incompleteness"
   One date: the statement is about laws of the log return, not about the processes. -/)]
   MathFin.exists_call_esscher_ne_merton
 
+attribute [blueprint "thm:jump-diffusion-market"
+  (title := "The jump-diffusion market at one date")
+  (statement := /-- The log return over a date $\tau$ of a jump-diffusion, with its physical law as
+  reference measure and the asset $Se^y$ at $\tau$ against the money market $e^{rt}$, is a
+  market, and the Esscher law of an Esscher parameter $\theta$ (the physical law tilted by
+  $e^{\theta y}$, with $\kappa(1 + \theta) - \kappa(\theta) = r$, for a jump law with
+  exponential moments near $\theta$ and at $1 + \theta$) is a pricing measure of it. So is the
+  Merton measure's law, which moves the drift to the compensated drift when $\sigma \ne 0$.
+  One date: the process between $0$ and $\tau$ is not modelled. -/)]
+  MathFin.JumpDiffusion.isPricingMeasure_esscher
+
+attribute [blueprint "thm:jump-diffusion-price"
+  (title := "Jump-diffusion prices under the Esscher pricing measure")
+  (statement := /-- In the one-date jump-diffusion market, under the Esscher pricing measure the
+  European call of strike $K > 0$ is worth Merton's formula for the tilted characteristics: the
+  $\mathrm{Poisson}(\Lambda m(\theta)\tau)$ mixture of Black--Scholes prices over jumps of law
+  $\nu_\theta$, for $\sigma > 0$ and the exponential moments of the Esscher parameter. -/)]
+  MathFin.JumpDiffusion.price_europeanCall_esscher
+
+attribute [blueprint "thm:jump-diffusion-market-incomplete"
+  (title := "The jump-diffusion market has two pricing measures")
+  (statement := /-- For $\sigma \ne 0$, nontrivial jumps, exponential moments of the jump law
+  and a physical drift that is not the compensated drift, the Esscher law and the Merton law
+  are two pricing measures of the one-date jump-diffusion market at every date $\tau > 0$, and
+  for every spot some strike gives the European call different prices under them: the price is
+  not unique. -/)]
+  MathFin.JumpDiffusion.exists_isPricingMeasure_price_call_ne
+
 -- ===== valuation/term: Term structures =====
 
 attribute [blueprint "thm:schwartz-commodity-futures"
@@ -925,6 +967,30 @@ attribute [blueprint "def:survival-function"
   (statement := /-- $S_X(t) = P(X > t)$, the probability that the age at death $X$ exceeds
   $t$. -/)]
   MathFin.SurvivalModel.survivalFunction
+
+attribute [blueprint "thm:premium-is-price"
+  (title := "Insurance premiums are prices")
+  (statement := /-- For a lifetime $\tau$ with the survival probabilities of a force of mortality
+  $\mu$ at the dates $k < n$, the life annuity-due is the value, on the flat-rate discount, of
+  the contract paying one at each date $k < n$ while the default indicator $1_{\tau \le k}$ is
+  still zero. -/)]
+  MathFin.lifeAnnuityDue_eq_value
+
+attribute [blueprint "thm:esscher-premium-is-price"
+  (title := "The Esscher premium is a price")
+  (statement := /-- In a market with the unit numéraire, the claim paying the asset at $T$ is
+  worth, under the Esscher tilt of the reference measure with parameter $h$ (density
+  $e^{hX}/E[e^{hX}]$), the Esscher premium $E[Xe^{hX}]/E[e^{hX}]$ of the asset at $T$. -/)]
+  MathFin.esscherPremium_eq_price
+
+attribute [blueprint "thm:insured-market"
+  (title := "The insured market and its Esscher pricing measure")
+  (statement := /-- The market of a loss $X$ quoted at its Esscher premium until a date $T$ and
+  equal to $X$ at $T$, with the unit numéraire, is priced up to $T$ by the Esscher tilt of the
+  reference probability measure when $e^{hX}$ and $Xe^{hX}$ are integrable; under it the claim
+  paying the loss is worth the Esscher premium. The market is built to quote the loss at that
+  premium, with no dynamics before $T$. -/)]
+  MathFin.isPricingMeasure_insuredMarket_tilted
 
 -- ===== valuation/mechanisms: Market mechanisms =====
 

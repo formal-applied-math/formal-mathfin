@@ -8,7 +8,6 @@ import MathFinFrontier.MarketValuation
 import MathFinFrontier.ModelFree
 import MathFinFrontier.Microstructure
 import MathFinFrontier.Credit
-import MathFinFrontier.Insurance
 
 /-!
 # Connectors: the bridges the library does not prove yet, stated exactly
