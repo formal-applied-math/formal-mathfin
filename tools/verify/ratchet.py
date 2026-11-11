@@ -71,7 +71,18 @@ def index_metrics(index_path: str | Path) -> dict[str, int]:
         # corpus entries in no relation the program map records (tools/verify/program_tree.py)
         "corpus_off_blueprint": sum(p.kind == "off-map"
                                     for p in place_corpus(idx, load_nodes())),
-    } | {k: len(v) for k, v in trunk_reach.offenders(idx).items()}  # the one-trunk counts
+    } | {k: len(v) for k, v in trunk_reach.offenders(idx).items()} | reach_metrics(index_path)
+
+
+def reach_metrics(index_path: str | Path) -> dict[str, int]:
+    """Chain reach as debt (``tools/verify/chain_reach.py``): the per-mille of finance theorems
+    beyond three statement hops of the spine, so R3 may not fall, and the model families
+    with no socket."""
+    from . import chain_reach, taxonomy
+
+    r = chain_reach.compute(chain_reach.load(index_path))
+    return {"chain_beyond_r3_permille": round(1000 * (1 - r.share(3))),
+            "families_without_socket": len(set(taxonomy.families()) - r.sockets)}
 
 
 def load_baseline() -> dict[str, int]:
