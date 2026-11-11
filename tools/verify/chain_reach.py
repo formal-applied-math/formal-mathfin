@@ -70,6 +70,8 @@ class Reach:
     cell: dict[str, str]  # finance theorem -> its cell
     sockets: set[str]  # model families with a pricing-measure theorem
     joint_span: Counter  # (limb, limb) -> theorems
+    socket_theorems: dict[str, list[str]] = field(default_factory=dict)  # family -> its sockets
+    joint_theorems: dict[tuple[str, str], list[str]] = field(default_factory=dict)  # pair -> joints
     dist: dict[str, int] = field(default_factory=dict)  # concept -> distance from the spine
     mentioned: Callable[[dict], set[str]] = lambda d: set()  # the concepts a record states
 
@@ -167,6 +169,8 @@ def compute(decls: list[dict], *, guard: bool = True,
     tcell: dict[str, str] = {}
     sockets: set[str] = set()
     span: Counter = Counter()
+    socket_thms: dict[str, list[str]] = defaultdict(list)
+    joint_thms: dict[tuple[str, str], list[str]] = defaultdict(list)
     spine_theorems: set[str] = set()
     for d in theorems:
         c = cell[d["name"]]
@@ -177,9 +181,11 @@ def compute(decls: list[dict], *, guard: bool = True,
             fam = taxonomy.family_of(d["module"])
             if fam:
                 sockets.add(fam)
+                socket_thms[fam].append(d["name"])
         limbs = {_LIMBS[taxonomy.part_of(cell[n])] for n in ns if cell[n]}
         for pair in {tuple(sorted((a, b))) for a in limbs for b in limbs if a < b}:
             span[pair] += 1
+            joint_thms[pair].append(d["name"])
         if _is_spine(c):
             spine_theorems.add(d["name"])
             continue
@@ -187,7 +193,8 @@ def compute(decls: list[dict], *, guard: bool = True,
                                   default=float("inf"))
         tcell[d["name"]] = c
     return Reach(hops=hops, cell=tcell, sockets=sockets, joint_span=span, dist=dist,
-                 mentioned=mentioned, spine_theorems=frozenset(spine_theorems))
+                 mentioned=mentioned, spine_theorems=frozenset(spine_theorems),
+                 socket_theorems=dict(socket_thms), joint_theorems=dict(joint_thms))
 
 
 def connector_gains(decls: list[dict], connectors: list[dict], *,
@@ -202,6 +209,12 @@ def connector_gains(decls: list[dict], connectors: list[dict], *,
            if c["kind"] == "theorem" and not c["private"]}
     out["*"] = reached([c for c in connectors if c["kind"] == "theorem"]) - base
     return out
+
+
+def records(idx) -> list[dict]:
+    """A loaded ``DeclIndex`` in the shape this module reads."""
+    return [dict(name=d.name, kind=d.kind, module=d.module, private=d.private, type=d.type,
+                 uses=list(d.uses)) for d in idx.decls.values()]
 
 
 def load(path: str | Path) -> list[dict]:
