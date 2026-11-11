@@ -2788,7 +2788,7 @@ end MathFin.AxiomAudit
 #print axioms MathFin.Contracts.value_trancheLeg
 
 /-- info: 'MathFin.Contracts.BlackScholes.price_europeanPut_le_americanPutValue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in
+#guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.BlackScholes.price_europeanPut_le_americanPutValue
 
 /-- info: 'MathFin.americanPrice_eq_snellEnvelope' depends on axioms: [propext, Classical.choice, Quot.sound] -/
