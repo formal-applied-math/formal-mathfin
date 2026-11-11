@@ -185,6 +185,7 @@ graph TD
   quantileElicitability["Elicitability of the quantile"]:::proved
   rockafellarUryasev["Rockafellar–Uryasev formula"]:::proved
   superhedgingDuality["Superhedging duality"]:::proved
+  timeDependentVolMarket["Black–Scholes with a deterministic volatility clock is a market"]:::proved
   zeroCouponBondPrice["The zero-coupon bond price is a price"]:::proved
   subgraph frontier_choiceDynamic["⏳ frontier · Choice · Dynamic choice"]
     logOptimalNumeraire["Log-optimal portfolio is the numéraire"]:::frontier
@@ -512,6 +513,10 @@ graph TD
   coherentRiskRepresentation --> superhedgingDuality
   superhedgingCoherent --> superhedgingDuality
   superhedgingPriceLowerBound --> superhedgingDuality
+  brownianMotion --> timeDependentVolMarket
+  market --> timeDependentVolMarket
+  pricingMeasure --> timeDependentVolMarket
+  blackScholesMarket --> timeDependentVolMarket
   contract --> zeroCouponBondPrice
   contractValue --> zeroCouponBondPrice
   market --> zeroCouponBondPrice
@@ -806,6 +811,7 @@ graph TD
 | `thm:quantile-elicitability` Elicitability of the quantile | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aquantile-elicitability%22%20in%3Abody) |
 | `thm:rockafellar-uryasev` Rockafellar–Uryasev formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Arockafellar-uryasev%22%20in%3Abody) |
 | `thm:superhedging-duality` Superhedging duality | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-duality%22%20in%3Abody) |
+| `thm:time-dependent-vol-market` Black–Scholes with a deterministic volatility clock is a market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atime-dependent-vol-market%22%20in%3Abody) |
 | `thm:zero-coupon-bond-price` The zero-coupon bond price is a price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Azero-coupon-bond-price%22%20in%3Abody) |
 | `def:real-erf` erf / erfc / erfinv for Mathlib | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Areal-erf%22%20in%3Abody) |
 | `thm:aave-health-factor-bound` Aave multi-asset health factor: a liquidation bound | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaave-health-factor-bound%22%20in%3Abody) |

@@ -1534,4 +1534,20 @@
   "latexEnv": "theorem",
   "label": "thm:feynman-kac-heat-eq",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Gaussian/FeynmanKacHeatEquation.lean"}]
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Gaussian/FeynmanKacHeatEquation.lean"},
+ {"uses":
+  ["def:market",
+   "def:brownian-motion",
+   "def:pricing-measure",
+   "thm:black-scholes-market"],
+  "title": "Black–Scholes with a deterministic volatility clock is a market",
+  "text":
+  "For a pre-Brownian motion $W$ and a monotone clock $v$ (the total variance\n  $\\int_0^t\\sigma^2$ of a deterministic volatility), the asset $e^{rt}S_0e^{(\\theta -\n  1/2)v(t) + W_{v(t)}}$ with numéraire $e^{rt}$ and the information $W$ generates up to $v(t)$\n  is a market, and the Girsanov measure of the constant price of risk $\\theta$ at a horizon $H$\n  is a pricing measure of it at every $T$ with $v(T) \\le H$. Under it the European call is worth\n  the Black–Scholes formula of the total variance $v(T)$ at the strike $Ke^{-rT}$ of the\n  deflated asset (`price_europeanCall_constGirsanovMeasure`). The asset is defined, not derived\n  from an SDE; a general $\\sigma(t,S)$ and uniqueness of the pricing measure are not proved.",
+  "name": "MathFin.Contracts.TimeDepVol.isPricingMeasure_constGirsanovMeasure",
+  "module": "MathFin.Models.LocalVol.TimeDependentVol",
+  "line": 114,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:time-dependent-vol-market",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/LocalVol/TimeDependentVol.lean"}]
