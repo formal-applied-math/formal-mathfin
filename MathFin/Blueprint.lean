@@ -45,6 +45,7 @@ import MathFin.Models.LocalVol.Dupire
 import MathFin.Models.ModelFree.CarrMadan
 import MathFin.Models.Rates.AffineTermStructurePDE
 import MathFin.Models.Rates.Caplet
+import MathFin.Models.Rates.DeterministicMarket
 import MathFin.Models.Rates.HJM
 import MathFin.Models.Rates.Immunization
 import MathFin.Models.Rates.KeyRateDuration
@@ -809,6 +810,18 @@ attribute [blueprint "def:hjm-model"
   with drift $\alpha$ and volatility $\sigma$ satisfying $f(t,T) = f(0,T) + \int_0^t
   \alpha(s,T)\,ds + \int_0^t \sigma(s,T)\,dB_s$ almost surely, for $t \le T$ and $t \le H$. -/)]
   MathFin.HJM.HJMModel
+
+attribute [blueprint "thm:zero-coupon-bond-price"
+  (title := "The zero-coupon bond price is a price")
+  (statement := /-- In any market whose numéraire is the money market $e^{rt}$, under any
+  probability measure, the flat-rate value $\sum_i w_i e^{-rT_i}$ of a zero-coupon portfolio
+  is the market price of the schedule of fixed cash flows $w_i$ at $T_i$; and in any market whose
+  numéraire is $(1+y)^{\lfloor t\rfloor}$ the annually compounded price $\sum_i c_i/(1+y)^{t_i}$
+  of a coupon bond is the price of its cash flows. The numéraire is deterministic, so the
+  deflator is a discount curve (`value_fixedFlows_deterministic`), and the deterministic bond
+  market is a market priced by every probability measure
+  (`isPricingMeasure_deterministicMarket`). Stochastic short rates are not covered. -/)]
+  MathFin.Rates.bondPortfolioValue_eq_price
 
 attribute [blueprint "thm:bond-immunization"
   (title := "Duration and immunization")

@@ -668,6 +668,33 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.Contracts.value_trancheLeg (MathFin/Risk/Credit/TrancheLeg.lean): Contract.value_pay, integral_const_mul and the evaluation eval_trancheLossPayoff. SCOPE: a deterministic discount curve; the portfolio loss fraction is an arbitrary process, so nothing is said about its law or about the pool."
       }
+    },
+    {
+      "id": "mf-merton-structural-market",
+      "name": "Merton's Structural Credit Model Is a Market: Equity Is a Call, Debt Is the Firm Less the Call, Default Probability Is kmvPD",
+      "description": "Let the firm's assets be the Black-Scholes market of a pre-Brownian motion W (BlackScholes.market: spot V0 > 0, physical drift m, rate r, volatility sigma > 0) and debt of face F > 0 fall due at T <= H, T > 0. The Girsanov measure Q of the constant market price of risk (m - r)/sigma at horizon H is a pricing measure of that market (Market.IsPricingMeasure); under Q the market price (Market.price) of the equity, the European call on the assets with strike F, is V0 Phi(d1) - F e^{-rT} Phi(d2); the market price of the defaultable zero-coupon bond (defaultableZCB F T, paying min(V_T, F) at T) is V0 minus the equity price; and Q(V_T <= F) = kmvPD V0 F r sigma T = Phi(-d2). Default is the event at the maturity T: first-passage (Black-Cox) default, coupons, and a stochastic rate are not covered, and that Q is the only pricing measure is not claimed.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.Credit.MertonMarket\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Contracts MathFin.Contracts.BlackScholes\nopen scoped NNReal\n\n/-- Merton's structural model as a Black-Scholes market: the Girsanov measure is a pricing measure,\nthe equity is the Black-Scholes call, the defaultable bond is the firm less the equity, and the\ndefault probability is `kmvPD`. -/\ntheorem merton_structural_market {Ω : Type*} [mΩ : MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ}\n    {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) {V₀ F m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hV₀ : 0 < V₀)\n    (hF : 0 < F) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) :\n    (market μ hWmeas V₀ m r σ).IsPricingMeasure T\n        (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) ∧\n      (market μ hWmeas V₀ m r σ).price (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)\n          (europeanCall F T)\n        = V₀ * Phi (bsd1 V₀ F r σ T) - F * Real.exp (-r * T) * Phi (bsd2 V₀ F r σ T) ∧\n      (market μ hWmeas V₀ m r σ).price (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)\n          (defaultableZCB F T)\n        = V₀ - (V₀ * Phi (bsd1 V₀ F r σ T) - F * Real.exp (-r * T) * Phi (bsd2 V₀ F r σ T)) ∧\n      (constGirsanovMeasure hW hWmeas ((m - r) / σ) H).real\n          {ω | (market μ hWmeas V₀ m r σ).asset () T ω ≤ F}\n        = kmvPD V₀ F r σ T :=\n  Merton.merton_market hW hWmeas hTH hV₀ hF hσ hT\n"
+      },
+      "metadata": {
+        "reference": "R. C. Merton, On the pricing of corporate debt: the risk structure of interest rates, J. Finance 29 (1974) 449-470; D. Lando, Credit Risk Modeling, Princeton (2004), sec. 2.2",
+        "citations": [
+          {
+            "key": "Merton1974"
+          },
+          {
+            "key": "Lando2004",
+            "locator": "sec. 2.2"
+          },
+          {
+            "key": "BlackScholes1973"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. merton_market in MathFin/Models/Credit/MertonMarket.lean: the pricing measure and the call price are isPricingMeasure_constGirsanovMeasure and price_europeanCall_constGirsanovMeasure (MathFin/Models/BlackScholes/Market.lean); the debt price is price_defaultableZCB_add_price_europeanCall (min(V_T, F) + (V_T - F)^+ = V_T, integrable by the martingale property, and the price of the claim paying V_T is V0 by Market.IsPricingMeasure.price_pay_obs); the default probability is kmvPD_eq_one_sub_survival_probability_via_brownian read on the Brownian motion B^theta of the Girsanov measure, the market asset being Q-almost surely the risk-neutral asset. SCOPE: default only at the maturity T, one asset (the firm), constant rate and volatility, Brownian motion without path continuity; no uniqueness of the pricing measure."
+      }
     }
   ]
 }

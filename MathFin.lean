@@ -625,6 +625,7 @@ import MathFin.Models.Rates.DurationSensitivity
 import MathFin.Models.Rates.ConvexitySensitivity
 -- Phase 27: KMV-Merton structural derivation (probabilistic content of `kmvPD`)
 import MathFin.Models.Credit.KMVMertonStructural
+import MathFin.Models.Credit.MertonMarket
 -- Phase 28: CDS fair spread under time-varying hazard (cash-flow balance)
 import MathFin.Models.Credit.CDSTimeVarying
 import MathFin.Models.Credit.Cox
@@ -674,6 +675,7 @@ import MathFin.Models.Rates.InterestRateSwap
 import MathFin.Models.Rates.CMS
 import MathFin.Models.Rates.FRA
 import MathFin.Models.Rates.DeterministicCurve
+import MathFin.Models.Rates.DeterministicMarket
 import MathFin.Models.Rates.NelsonSiegelSvensson
 import MathFin.Models.BlackScholes.BlackScholes
 import MathFin.Models.BlackScholes.BlackScholesExchange
