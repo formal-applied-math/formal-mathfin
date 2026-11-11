@@ -125,9 +125,12 @@ import MathFin.Models.LocalVol.Dupire
 import MathFin.Models.LocalVol.TimeDependentVol
 import MathFin.Models.ModelFree.CarrMadan
 import MathFin.Models.ModelFree.MarketCallPrice
+import MathFin.Models.ModelFree.RoperConverse
+import MathFin.Models.ModelFree.SVI.MarketRealisation
 import MathFin.Models.Rates.AffineTermStructurePDE
 import MathFin.Models.Rates.Caplet
 import MathFin.Models.Rates.DeterministicMarket
+import MathFin.Models.Rates.VasicekMarket
 import MathFin.Models.Rates.HJM
 import MathFin.Models.Rates.Immunization
 import MathFin.Models.Rates.KeyRateDuration
