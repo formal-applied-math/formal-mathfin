@@ -4553,6 +4553,13 @@
       "input_hash": "6e8dc7086783d004527a645c53145652b5ef7153e218d3d804c45f3ed76ee6fc",
       "verified_at_commit": "f68ab19"
     },
+    "mf-time-dependent-vol-market-pricing-measure": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-11-11",
+      "elapsed_s": 3.1,
+      "input_hash": "beffe4c119bc8cac5163e26d20e2c1e3fbb6a7d419d2f23d09857992e5821ac7",
+      "verified_at_commit": "f64c936"
+    },
     "mf-tracking-error-cauchy-bound": {
       "benchmark_file": "portfolio_and_performance.json",
       "date": "2026-11-08",
