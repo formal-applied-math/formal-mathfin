@@ -431,8 +431,9 @@ def float_islands(nodes: list[dict], part_kind: dict[str, str], reached: set[str
             cl = clusters.setdefault(c["key"], dict(c, p=n["p"], nodes=[]))
             cl["nodes"].append(n["l"])
             n["isl"] = c["key"]
-    for n in nodes:  # a frontier node that builds on an island sits with it
-        if n["s"] == "frontier" and n["hp"] is None and not n.get("isl"):
+    for n in nodes:  # a frontier node on a limb that builds on an island sits with it
+        if (n["s"] == "frontier" and n["hp"] is None and not n.get("isl")
+                and part_kind.get(n["p"]) == "limb"):
             hosts = [by[u]["isl"] for u in n["u"] if u in by and by[u].get("isl")]
             if hosts:
                 n["isl"] = hosts[0]
