@@ -11,8 +11,8 @@ import MathFin
 Call prices in the strike are the static face of the fundamental theorem. A market with a pricing
 measure produces a normalised call price function (proved:
 `Market.IsPricingMeasure.isNormalizedCallPrice`); the converse, that every normalised call price
-function (hence every butterfly-free SVI smile) is produced by a market, is stated here. Docs: `docs/specs/2026-11-08-chain-design.md`
-§5 (K2).
+function (hence every butterfly-free SVI smile) is produced by a market, is stated here.
+Docs: `docs/specs/2026-11-08-chain-design.md` §5 (K2).
 -/
 
 open MathFin MathFin.Contracts MeasureTheory
