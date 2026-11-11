@@ -1,4 +1,4 @@
-[{"uses": ["def:gbm", "def:brownian-motion"],
+[{"uses": ["def:brownian-motion"],
   "title": "Optimal exercise of the American put",
   "text":
   "On Wiener space with strike $1$, volatility $\\sqrt2$, interest rate $k \\ge\n  0$ and dividend yield $h$ (the normalisation of the library's canonical American put), the\n  expected discounted put payoff at the first time the stock reaches the exercise boundary\n  (`brownianUsualActualContactTime`) equals the American put value `canonicalPrice` at spot\n  $e^x$ and horizon $T$, the value being the supremum over stopping rules bounded by $T$\n  (`brownianUsualAmericanPut`): first contact is an optimal exercise rule. For $K, \\sigma >\n  0$, $r > 0$ and $0 \\le q \\le r$ the exercise boundary tends to the strike as time to expiry\n  tends to $0$ (`tendsto_brownianUsualExerciseBoundary_expiry`). Normalised parameters only;\n  the early-exercise premium decomposition and the perpetual case are not proved.",
@@ -246,18 +246,24 @@
   "label": "def:sharpe-ratio",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Performance/Ratios.lean"},
- {"uses": ["def:standard-normal-cdf"],
+ {"uses":
+  ["def:market",
+   "def:brownian-motion",
+   "def:standard-normal-cdf",
+   "def:contract",
+   "def:pricing-functional",
+   "def:contract-value"],
   "title": "Bachelier call price formula",
   "text":
-  "Under `BachelierHyp`, with terminal price $S_T = S_0 + \\sigma\\sqrt{T}\\,Z$\n  and $Z \\sim N(0,1)$ under $Q$, $E_Q[(S_T - K)^+] = (S_0 - K)\\Phi(d) +\n  \\sigma\\sqrt{T}\\,\\varphi(d)$, with $d$ the standardised distance to the strike. Undiscounted,\n  and the pricing measure is a hypothesis.",
-  "name": "MathFin.bachelier_call_formula",
-  "module": "MathFin.Models.Bachelier.Bachelier",
-  "line": 80,
+  "In the Bachelier market of a pre-Brownian motion $W$ (asset $S_0 + \\sigma W_t$,\n  numéraire $1$, the filtration $W$ generates) the reference measure is a pricing measure, and for\n  $K, \\sigma, T > 0$ the market price of the European call under it is $(S_0 - K)\\Phi(d) +\n  \\sigma\\sqrt{T}\\,\\varphi(d)$, with $d = (S_0 - K)/(\\sigma\\sqrt{T})$. Zero interest, no drift:\n  the pricing measure is the reference measure itself. `bachelier_call_formula` is the\n  hypothesis form $E_Q[(S_T - K)^+]$ it rests on.",
+  "name": "MathFin.Bachelier.price_europeanCall",
+  "module": "MathFin.Models.Bachelier.BachelierMarket",
+  "line": 131,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:bachelier-call",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Bachelier/Bachelier.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Bachelier/BachelierMarket.lean"},
  {"uses": [],
   "title": "Quantile function",
   "text":
@@ -715,6 +721,7 @@
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Numeraire.lean"},
  {"uses":
   ["def:market",
+   "def:gbm",
    "def:brownian-motion",
    "def:pricing-measure",
    "thm:girsanov-brownian-characterisation"],
@@ -742,13 +749,20 @@
   "label": "def:pricing-measure",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Market.lean"},
- {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
+ {"uses":
+  ["def:market",
+   "def:brownian-motion",
+   "def:pricing-measure",
+   "def:contract",
+   "def:pricing-functional",
+   "def:contract-value",
+   "def:ito-integral-clm"],
   "title": "Completeness of the Brownian market",
   "text":
-  "Every square-integrable $\\mathcal{F}^B_T$-claim is replicated from initial\n  wealth $E_\\mu[H]$ by a unique Itô-integrable strategy — the representation theorem read as a\n  trading statement, the integrand *being* the hedge. The strategy class is the predictable\n  $L^2$ integrands (piecewise-constant holdings could not hedge a general $L^2$ claim), and\n  the traded gain is the integral against $B$ itself: the stochastic integral\n  $\\int\\varphi\\,dS$ against a general price is absent by design.",
-  "name": "MathFin.exists_replicating_strategy",
+  "In a market on the Brownian information $\\mathcal{F}^B$ for which the reference\n  measure $\\mu$ is a pricing measure up to $T$, every measure $Q \\ll \\mu$ that prices the\n  traded gains at zero is a pricing measure, and a contract whose deflated present value is\n  square-integrable and known at $T$ has under $Q$ its superreplication price — the least initial\n  wealth from which an Itô-integrable strategy in the driver $B$ dominates it — as its market\n  price. The underlying fact is the representation theorem: every square-integrable\n  $\\mathcal{F}^B_T$-claim is replicated from initial wealth $E_\\mu[H]$ by a unique predictable\n  $L^2$ integrand (`exists_replicating_strategy`). The traded gain is the integral against $B$\n  itself; the integral against a general price is not used here. In the Bachelier market\n  `Bachelier.superReplicationPrice_europeanCall` is the instance for the call.",
+  "name": "MathFin.Market.superReplicationPrice_eq_price",
   "module": "MathFin.Pricing.MarketCompleteness",
-  "line": 148,
+  "line": 323,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:market-completeness",
@@ -778,7 +792,7 @@
   "label": "def:pricing-functional",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Market.lean"},
- {"uses": ["def:standard-normal-cdf", "thm:bachelier-call"],
+ {"uses": ["def:standard-normal-cdf"],
   "title": "Credit valuation adjustment",
   "text":
   "With exposure $V_s = m(s) + \\sigma(s)\\sqrt s\\,Z$, $Z \\sim N(0,1)$,\n  independent of a default time with continuous hazard $h \\ge 0$ (no wrong-way risk), and $D$,\n  $m$, $\\sigma$ measurable and bounded with $\\sigma > 0$: $\\mathrm{CVA} = \\mathrm{LGD}\\int_0^T\n  D(s)\\,[m(s)\\Phi(d_s) + \\sigma(s)\\sqrt s\\, \\varphi(d_s)]\\,h(s)Q(s)\\,ds$, $d_s =\n  m(s)/(\\sigma(s)\\sqrt s)$. Only the marginal laws of the exposure enter; no exposure dynamics\n  are modelled.",
@@ -857,15 +871,15 @@
  {"uses": [],
   "title": "Geometric Brownian motion",
   "text":
-  "The GBM value function $S(t,x) = S_0 \\exp((\\mu - \\tfrac12\\sigma^2)t +\n  \\sigma x)$; at $x = B_t$ it is geometric Brownian motion.",
-  "name": "MathFin.gbmValue",
-  "module": "MathFin.Probability.Brownian.Ito.ItoLemma2D",
-  "line": 162,
+  "The model map of the Black–Scholes market along a Brownian path $B$: the\n  asset at time $u$ is $S_u = S_0 \\exp((r - \\tfrac12\\sigma^2)u + \\sigma B_u)$, the GBM value\n  function $S(t,x) = S_0 \\exp((r - \\tfrac12\\sigma^2)t + \\sigma x)$ at $x = B_u$\n  (`pathAssets_eq_gbmValue`). It is the asset of `BlackScholes.market`, with the physical drift\n  in the place of $r$.",
+  "name": "MathFin.Contracts.BlackScholes.pathAssets",
+  "module": "MathFin.Models.BlackScholes.BlackScholesAsian",
+  "line": 58,
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:gbm",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoLemma2D.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/BlackScholesAsian.lean"},
  {"uses": [],
   "title": "Contract",
   "text":
@@ -902,7 +916,8 @@
   "label": "thm:vasicek-bond-pde",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/AffineTermStructurePDE.lean"},
- {"uses": ["def:brownian-motion", "def:contract", "def:contract-value"],
+ {"uses":
+  ["def:gbm", "def:brownian-motion", "def:contract", "def:contract-value"],
   "title": "Black–Scholes pricing under the physical measure",
   "text":
   "For the physical asset $S_u = S_0 e^{(m-\\sigma^2/2)u + \\sigma W_u}$ and\n  the constant market price of risk $\\theta = (m-r)/\\sigma$, under the horizon-$H$ Girsanov\n  measure every fixed-dated contract observed in $[0,H]$ has the same value on the physical\n  asset as on the risk-neutral asset $S_0 e^{(r-\\sigma^2/2)u + \\sigma B^\\theta_u}$, for any\n  discount curve. So the European call with maturity $T \\le H$ is worth $S_0\\Phi(d_1) -\n  Ke^{-rT}\\Phi(d_2)$ (`value_europeanCall_physical`), and the chooser and the geometric Asian\n  call their closed forms. The asset identity behind it holds almost surely at each date. The\n  one-date Gaussian version: for a standard normal $W$ under $P$ and any shift $c$, the tilt\n  $Q = P\\,e^{cW - c^2/2}$ makes $W - c$ standard normal, and the call is worth the\n  Black–Scholes closed form under $Q$ (`bs_call_formula_of_physical`).",
@@ -1190,8 +1205,7 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Martingales/BracketCompensator.lean"},
  {"uses":
-  ["def:gbm",
-   "def:brownian-motion",
+  ["def:brownian-motion",
    "def:standard-normal-cdf",
    "thm:ito-formula-c2",
    "thm:feynman-kac-heat-eq",

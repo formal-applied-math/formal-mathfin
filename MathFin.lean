@@ -511,6 +511,7 @@ import MathFin.Models.Jumps.JumpDiffusionMoments
 import MathFin.Models.Jumps.JumpDiffusionVarianceSwap
 import MathFin.Models.Bachelier.Bachelier
 import MathFin.Models.Bachelier.BachelierGreeks
+import MathFin.Models.Bachelier.BachelierMarket
 import MathFin.Models.BlackScholes.Chooser
 import MathFin.Models.ModelFree.Spreads
 -- Call spreads tend to the digital, so call prices at every strike determine the law (the first-

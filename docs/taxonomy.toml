@@ -199,8 +199,8 @@ modules = [
 subjects = ["MSC 91G20", "JEL G13"]
 landmarks = [
   "MathFin.bs_call_formula", "MathFin.bs_pde_holds", "MathFin.hasDerivAt_bsV_S",
-  "MathFin.bs_delta_hedge_replication", "MathFin.exists_replicating_strategy",
-  "MathFin.margrabe_exchange_price", "MathFin.bachelier_call_formula",
+  "MathFin.bs_delta_hedge_replication", "MathFin.Market.superReplicationPrice_eq_price",
+  "MathFin.margrabe_exchange_price", "MathFin.Bachelier.price_europeanCall",
   "MathFin.Contracts.BlackScholes.value_physical_eq_riskNeutral",
 ]
 
