@@ -773,6 +773,20 @@
       "input_hash": "8dead3980bd7b235b45906498d012e1027e029f332c617112a13d8f2b550471b",
       "verified_at_commit": "f68ab19"
     },
+    "mf-bachelier-market-call-price": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-11-11",
+      "elapsed_s": 3.0,
+      "input_hash": "4d15f9d593e6447bf6ae9195e82aef31d824db0bd48749ef5f22c7ec67e2ab6a",
+      "verified_at_commit": "51b6c41"
+    },
+    "mf-bachelier-market-superreplication": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-11-11",
+      "elapsed_s": 3.0,
+      "input_hash": "ab7ca5f33b4b2d151c26b8003acc8f10c01754e971902704cf7a35124347a86f",
+      "verified_at_commit": "51b6c41"
+    },
     "mf-bachelier-theta": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-08",
