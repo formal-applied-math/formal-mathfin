@@ -300,7 +300,7 @@ class Site:
 # ------------------------------------------------------------------ page shell
 
 NAV = [("index.html", "Map"), ("landmarks.html", "Landmarks"), ("blueprint.html", "Blueprint"),
-       ("tree.html", "Tree"), ("corpus.html", "Corpus"),
+       ("tree.html", "Tree"), ("joints.html", "Joints"), ("corpus.html", "Corpus"),
        ("subjects.html", "Subjects"), ("references.html", "References")]
 
 
@@ -789,6 +789,88 @@ may not rise.</p>
 LANDMARK_KEYS = ("decl", "title", "summary", "scope")
 
 
+LIMB_TITLES = {"valuation": "Valuation", "choice": "Choice", "risk": "Risk"}
+
+
+def build_joints(site: Site, out: Path, nodes_json: list[dict], frontier: list[dict]) -> None:
+    """Sockets and joints, as the statements have them (``chain_reach``): for each model family
+    the theorems stating that a measure prices its market; for each pair of limbs the theorems
+    whose statements mention objects of both; and the joints the taxonomy names, proved or not."""
+    r = chain_reach.compute(chain_reach.records(site.idx))
+    by_label = {n["label"]: n for n in nodes_json} | {f["label"]: dict(f, frontier=True)
+                                                       for f in frontier}
+
+    def thm(name: str) -> str:
+        d = site.idx.decls.get(name)
+        if d is None or d.private:
+            return f"<code>{esc(name)}</code>"
+        gist = first_sentence(d.doc, 160)
+        return (f'<li><a class="mono" href="{decl_url(d)}">{esc(name.removeprefix("MathFin."))}'
+                f'</a>{" — " + esc(gist) if gist else ""}</li>')
+
+    socket_rows = []
+    for key, fam in taxonomy.families().items():
+        names = sorted(r.socket_theorems.get(key, ()))
+        waiting = [f for f in frontier if f.get("family") == key and f.get("lean")]
+        if names:
+            state = f'<span class="badge">{len(names)} socket{"s" * (len(names) != 1)}</span>'
+            inner = "<ul>" + "".join(thm(n) for n in names) + "</ul>"
+        else:
+            state = '<span class="badge muted">no socket</span>'
+            inner = ""
+        if waiting:
+            inner += ('<p class="muted">connectors: ' + ", ".join(
+                f'<code>{esc(f["lean"].removeprefix("MathFinFrontier."))}</code> '
+                f'({esc(f.get("title", f["label"]))})' for f in waiting) + "</p>")
+        socket_rows.append(f'<details{" open" if not names else ""}><summary><b>{esc(fam["title"])}'
+                           f'</b> {state}</summary>{inner}</details>')
+
+    declared = []
+    for j in taxonomy.joints():
+        n = by_label.get(j["node"], {})
+        limbs = " × ".join(LIMB_TITLES.get(x, x) for x in j["limbs"])
+        if n.get("frontier"):
+            what = (f'<span class="badge muted">frontier</span> '
+                    + (f'<code>{esc(n["lean"])}</code>' if n.get("lean") else ""))
+        elif n:
+            d = site.idx.decls.get(n.get("name", ""))
+            what = (f'<a class="mono" href="{decl_url(d)}">{esc(d.name.removeprefix("MathFin."))}'
+                    f'</a>' if d and not d.private else f'<code>{esc(n.get("name", ""))}</code>')
+        else:
+            what = '<span class="badge muted">not on the blueprint</span>'
+        declared.append(f'<tr><td>{esc(limbs)}</td><td>{esc(j["title"])}</td><td>{what}</td></tr>')
+
+    measured = []
+    for (a, b), names in sorted(r.joint_theorems.items(), key=lambda kv: -len(kv[1])):
+        measured.append(f'<details><summary><b>{esc(LIMB_TITLES.get(a, a))} × '
+                        f'{esc(LIMB_TITLES.get(b, b))}</b> <span class="muted">{len(names)} '
+                        f'theorems</span></summary><ul>'
+                        + "".join(thm(n) for n in sorted(names)) + "</ul></details>")
+
+    body = f"""<h1>Sockets and joints</h1>
+<p class="lede ink2">The library is one structure when every model family is a market with a
+pricing measure, its <b>socket</b>, and when the limbs share statements, its <b>joints</b>. Both
+are read from what the theorems state (<code>tools/verify/chain_reach.py</code>), never from
+where a module sits; the <a href="tree.html">tree</a> draws the same measure.</p>
+<h2>Sockets <span class="muted">{len(r.sockets)} of {len(taxonomy.families())} families</span></h2>
+<p class="ink2">A socket is a theorem, in a module of the family, whose statement says that a
+measure prices a <code>Market</code> (<code>Market.IsPricingMeasure</code>). A family without one
+has formulas, not yet prices.</p>
+{"".join(socket_rows)}
+<h2>Joints the program names</h2>
+<p class="ink2">From <code>docs/taxonomy.toml</code>: the results that join two limbs by design.
+A frontier joint is a stated, unproved connector.</p>
+<div class="scroll-x"><table class="data"><thead><tr><th>limbs</th><th>joint</th><th>declaration</th></tr></thead>
+<tbody>{"".join(declared)}</tbody></table></div>
+<h2>Joints as measured</h2>
+<p class="ink2">Every public theorem whose statement mentions objects of two limbs (the joint span
+on the <a href="tree.html">tree</a>), by pair.</p>
+{"".join(measured)}"""
+    (out / "joints.html").write_text(page("Sockets and joints — MathFin", body, "", "joints.html",
+                                          "Which model families are markets, and which theorems "
+                                          "join two limbs."), encoding="utf-8")
+
+
 def load_landmarks(path: Path = LANDMARKS) -> list[dict]:
     """The curated landmark list; a malformed entry is an error, never a silently dropped card."""
     if not path.exists():
@@ -1054,6 +1136,7 @@ def build(index_path: str | Path, out: str | Path, issues_path: str | Path | Non
     connectors = (chain_reach.load(frontier_index)
                   if frontier_index and Path(frontier_index).exists() else [])
     build_tree(site, out, nodes_json, frontier, issues, connectors)
+    build_joints(site, out, nodes_json, frontier)
     build_landmarks(site, out, landmarks, nodes_json, Linker(site.idx, "", public))
     build_corpus(site, out)
     build_subjects(site, out)

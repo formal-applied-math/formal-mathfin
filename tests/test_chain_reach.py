@@ -53,3 +53,17 @@ def test_a_connector_would_join_and_says_how_much() -> None:
            type_="∀ (M : MathFin.Market), M.IsPricingMeasure → MathFin.expectedUtility 0 = 0")
     assert cr.compute(_lib(), connectors=[k]).hops["MathFin.eu_pos"] == 2
     assert cr.connector_gains(_lib(), [k]) == {"MathFinFrontier.utility_state_price": 1, "*": 1}
+
+
+def test_the_ratchet_reads_reach_as_debt(tmp_path) -> None:
+    """R3 enters the ratchet as the per-mille beyond three hops, sockets as families without
+    one: both rise when the library comes apart, so neither may."""
+    import json
+
+    from tools.verify import ratchet, taxonomy
+
+    p = tmp_path / "decl-index.json"
+    p.write_text(json.dumps({"decls": _lib()}), encoding="utf-8")
+    m = ratchet.reach_metrics(p)
+    assert m["chain_beyond_r3_permille"] == 333               # eu_pos of three theorems
+    assert m["families_without_socket"] == len(taxonomy.families()) - 1
