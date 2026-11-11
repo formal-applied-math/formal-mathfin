@@ -16,13 +16,13 @@
   "text":
   "Under the risk-neutral coin flips, the Snell envelope of the discounted\n  intrinsic value along the spot path, for Mathlib's conditional expectation on the flip\n  filtration with exercise at every date, is almost surely the binomial American price at time\n  zero.",
   "name": "MathFin.americanPrice_eq_snellEnvelope",
-  "module": "MathFin.Models.Binomial.AmericanSnell",
+  "module": "MathFin.Models.Binomial.American",
   "line": 48,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:american-price-snell-envelope",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/AmericanSnell.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin.Models.Binomial.American.lean"},
  {"uses": ["def:market", "def:pricing-measure", "def:emm"],
   "title": "A conditional-expectation process is priced by its own measure",
   "text":
@@ -59,13 +59,13 @@
   "For $\\sigma \\ne 0$ and $T \\le H$, at the Girsanov pricing measure $Q$ of\n  $\\theta = (m - r)/\\sigma$ the price of the European put in the Black–Scholes market is at most\n  the American put value (no dividends) of $B^\\theta$ over the natural filtration of $W$, the\n  supremum of expected discounted payoffs over stopping rules bounded by $T$. The deterministic\n  rule $T$ is admissible and the physical asset is $Q$-almost surely the risk-neutral asset of\n  $B^\\theta$. Not proved: strictness, or the superhedging characterization.",
   "name":
   "MathFin.Contracts.BlackScholes.price_europeanPut_le_americanPutValue",
-  "module": "MathFin.Models.BlackScholes.American.Summit",
+  "module": "MathFin.Models.BlackScholes.American.AmericanPutMarketBound",
   "line": 55,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:american-put-dominates-european",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/American/Summit.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/American/AmericanPutMarketBound.lean"},
  {"uses": ["def:standard-normal-cdf"],
   "title": "Merton's structural model of default",
   "text":

@@ -17,7 +17,8 @@ set `s`: the single adaptor between the library's `Finset`-indexed weight vector
 state prices, spectral weights) and Mathlib's measures. For non-negative weights its integral is
 the weighted sum, `∫ f ∂ofWeights s p = ∑ i ∈ s, p i * f i`, so a statement about weighted sums is
 a statement about an integral, and a finite measure on a finite space is the law of its own
-point masses (`ofWeights_univ_real_singleton`).
+point masses (`ofWeights_univ_real_singleton`). It lives in `MeasureTheory.Measure` as an upstream
+candidate (cf. `PMF.toMeasure`, which needs weights summing to one).
 
 ## Main definitions
 

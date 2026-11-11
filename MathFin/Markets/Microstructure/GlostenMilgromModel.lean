@@ -6,6 +6,7 @@ Authors: Alfredo Garcia
 module
 
 public import MathFin.Markets.Microstructure.GlostenMilgrom
+public import MathFin.Probability.Laws.FiniteWeights
 
 /-!
 # A model satisfying the Glosten-Milgrom hypotheses
@@ -72,7 +73,7 @@ noncomputable def gmWeight (θ p : ℝ) : Fin 6 → ℝ :=
 
 /-- The model measure: the six masses on the six outcomes. -/
 noncomputable def gmMeasure (θ p : ℝ) : Measure (Fin 6) :=
-  Measure.sum fun i => ENNReal.ofReal (gmWeight θ p i) • Measure.dirac i
+  Measure.ofWeights Finset.univ (gmWeight θ p)
 
 /-- The value is high. -/
 def gmHigh : Set (Fin 6) := {0, 1, 2}
@@ -85,7 +86,10 @@ def gmInformed : Set (Fin 6) := {0, 3}
 theorem gmMeasure_apply (θ p : ℝ) (s : Set (Fin 6)) :
     gmMeasure θ p s
       = ∑ i, Set.indicator s (fun j => ENNReal.ofReal (gmWeight θ p j)) i := by
-  rw [gmMeasure, Measure.sum_apply _ MeasurableSet.of_discrete, tsum_fintype]
+  have h : gmMeasure θ p
+      = Measure.sum fun i => ENNReal.ofReal (gmWeight θ p i) • Measure.dirac i := by
+    rw [gmMeasure, Measure.ofWeights, Measure.sum_fintype]
+  rw [h, Measure.sum_apply _ MeasurableSet.of_discrete, tsum_fintype]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [Measure.smul_apply, Measure.dirac_apply' i MeasurableSet.of_discrete, smul_eq_mul]
   by_cases h : i ∈ s <;> simp [h]
