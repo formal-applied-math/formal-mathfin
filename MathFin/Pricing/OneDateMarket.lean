@@ -107,7 +107,8 @@ theorem dateStep_of_not_lt {τ t : ℝ≥0} (h : ¬ t < τ) : dateStep τ t = 1 
 
 /-- **The information of the one-date market**: nothing is known before `τ`, everything from `τ`
 on. It is the two-step filtration read along the step of the date. -/
-noncomputable def dateFiltration (Ω : Type*) [mΩ : MeasurableSpace Ω] (τ : ℝ≥0) : Filtration ℝ≥0 mΩ :=
+noncomputable def dateFiltration (Ω : Type*) [mΩ : MeasurableSpace Ω] (τ : ℝ≥0) :
+    Filtration ℝ≥0 mΩ :=
   (twoStepFiltration Ω).comp (monotone_dateStep τ)
 
 section DateFiltration
@@ -199,7 +200,8 @@ theorem isPricingMeasure_oneDate {Q : Measure Ω} [IsProbabilityMeasure Q] (hQP 
       · have hc : StronglyMeasurable[(⊥ : MeasurableSpace Ω)] (fun _ : Ω ↦ s₀) :=
           stronglyMeasurable_const
         exact hc.mono (twoStepFiltration_zero Ω).ge
-      · exact (hX.div_const (Real.exp (r * τ))).stronglyMeasurable.mono (twoStepFiltration_one Ω).ge
+      · exact (hX.div_const (Real.exp (r * τ))).stronglyMeasurable.mono
+          (twoStepFiltration_one Ω).ge
     · rcases Nat.le_one_iff_eq_zero_or_eq_one.mp ht with rfl | rfl
       · exact integrable_const s₀
       · exact hint.div_const (Real.exp (r * τ))

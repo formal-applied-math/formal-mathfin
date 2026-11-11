@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Pricing.OneDateMarket
+public import Mathlib.MeasureTheory.Measure.Tilted
 
 /-!
 # The Esscher premium is a price
@@ -55,7 +56,7 @@ MSC 91G05, MSC 91G20, JEL G22
 
 namespace MathFin
 
-open MeasureTheory MathFin.Contracts
+open MeasureTheory ProbabilityTheory MathFin.Contracts
 open scoped NNReal
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω]
@@ -73,7 +74,7 @@ theorem integral_tilted_eq_esscherPremium (P : Measure Ω) (X : Ω → ℝ) (h :
     ∫ ω, X ω ∂(P.tilted fun ω ↦ h * X ω) = esscherPremium P X h := by
   rw [integral_tilted, esscherPremium, ← integral_div]
   refine integral_congr_ae (.of_forall fun ω ↦ ?_)
-  simp only [smul_eq_mul]
+  try simp only [smul_eq_mul]
   ring
 
 /-- **The Esscher premium is the price under the Esscher tilt.** In a market with the unit
@@ -112,7 +113,7 @@ theorem isPricingMeasure_insuredMarket_tilted [IsProbabilityMeasure P] (hX : Mea
     (absolutelyContinuous_tilted hexp) ?_ ?_
   · rw [integrable_tilted_iff hexp]
     refine hXexp.congr (.of_forall fun ω ↦ ?_)
-    simp only [smul_eq_mul]
+    try simp only [smul_eq_mul]
     exact mul_comm _ _
   · rw [integral_tilted_eq_esscherPremium]
     simp

@@ -194,6 +194,6 @@ theorem not_subsingleton_isPricingMeasure {c : ℝ} (hS : 0 < S) (hσ : σ ≠ 0
     exists_isPricingMeasure_price_call_ne hS hσ hΛ hν0 h0 h1 hθν h1θ hθ hc hb hτ
   have hQ₁ : Q ∈ {Q | (market b σ Λ ν S r τ).IsPricingMeasure τ Q} := hQ
   have hQ₂ : Q' ∈ {Q | (market b σ Λ ν S r τ).IsPricingMeasure τ Q} := hQ'
-  exact fun h ↦ hne (by rw [h.eq_of_mem hQ₁ hQ₂])
+  exact fun h ↦ hne (by rw [h hQ₁ hQ₂])
 
 end MathFin.JumpDiffusion
