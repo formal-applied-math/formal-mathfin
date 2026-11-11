@@ -25,6 +25,8 @@ import MathFin.Models.Bachelier.Bachelier
 import MathFin.Models.Binomial.CRRClosedForm
 import MathFin.Models.Binomial.MartingaleRepresentation
 import MathFin.Models.BlackScholes.American.Stopping.ActualOptimality
+import MathFin.Models.Bachelier.BachelierMarket
+import MathFin.Models.BlackScholes.BlackScholesAsian
 import MathFin.Models.BlackScholes.BlackScholesPhysical
 import MathFin.Models.BlackScholes.Call
 import MathFin.Models.BlackScholes.DeltaHedge
@@ -310,12 +312,6 @@ attribute [blueprint "thm:ito-product-rule"
   $\int\sigma\tau\,ds$ is derived, by polarisation from the one-process formula. This is Itô's
   formula for $f(x,y) = xy$ only. -/)]
   MathFin.ItoFormulaAdapted.ito_product_rule_process
-
-attribute [blueprint "def:gbm"
-  (title := "Geometric Brownian motion")
-  (statement := /-- The GBM value function $S(t,x) = S_0 \exp((\mu - \tfrac12\sigma^2)t +
-  \sigma x)$; at $x = B_t$ it is geometric Brownian motion. -/)]
-  MathFin.gbmValue
 
 attribute [blueprint "thm:levy-characterization"
   (title := "Lévy's characterization of Brownian motion")
@@ -610,13 +606,26 @@ attribute [blueprint "thm:esscher-tilt"
 
 attribute [blueprint "thm:market-completeness"
   (title := "Completeness of the Brownian market")
-  (statement := /-- Every square-integrable $\mathcal{F}^B_T$-claim is replicated from initial
-  wealth $E_\mu[H]$ by a unique Itô-integrable strategy — the representation theorem read as a
-  trading statement, the integrand *being* the hedge. The strategy class is the predictable
-  $L^2$ integrands (piecewise-constant holdings could not hedge a general $L^2$ claim), and
-  the traded gain is the integral against $B$ itself: the stochastic integral
-  $\int\varphi\,dS$ against a general price is absent by design. -/)]
-  MathFin.exists_replicating_strategy
+  (statement := /-- In a market on the Brownian information $\mathcal{F}^B$ for which the reference
+  measure $\mu$ is a pricing measure up to $T$, every measure $Q \ll \mu$ that prices the
+  traded gains at zero is a pricing measure, and a contract whose deflated present value is
+  square-integrable and known at $T$ has under $Q$ its superreplication price — the least initial
+  wealth from which an Itô-integrable strategy in the driver $B$ dominates it — as its market
+  price. The underlying fact is the representation theorem: every square-integrable
+  $\mathcal{F}^B_T$-claim is replicated from initial wealth $E_\mu[H]$ by a unique predictable
+  $L^2$ integrand (`exists_replicating_strategy`). The traded gain is the integral against $B$
+  itself; the integral against a general price is not used here. In the Bachelier market
+  `Bachelier.superReplicationPrice_europeanCall` is the instance for the call. -/)]
+  MathFin.Market.superReplicationPrice_eq_price
+
+attribute [blueprint "def:gbm"
+  (title := "Geometric Brownian motion")
+  (statement := /-- The model map of the Black–Scholes market along a Brownian path $B$: the
+  asset at time $u$ is $S_u = S_0 \exp((r - \tfrac12\sigma^2)u + \sigma B_u)$, the GBM value
+  function $S(t,x) = S_0 \exp((r - \tfrac12\sigma^2)t + \sigma x)$ at $x = B_u$
+  (`pathAssets_eq_gbmValue`). It is the asset of `BlackScholes.market`, with the physical drift
+  in the place of $r$. -/)]
+  MathFin.Contracts.BlackScholes.pathAssets
 
 attribute [blueprint "thm:bs-call"
   (title := "Black–Scholes call price formula")
@@ -694,11 +703,13 @@ attribute [blueprint "thm:bs-delta-hedge"
 
 attribute [blueprint "thm:bachelier-call"
   (title := "Bachelier call price formula")
-  (statement := /-- Under `BachelierHyp`, with terminal price $S_T = S_0 + \sigma\sqrt{T}\,Z$
-  and $Z \sim N(0,1)$ under $Q$, $E_Q[(S_T - K)^+] = (S_0 - K)\Phi(d) +
-  \sigma\sqrt{T}\,\varphi(d)$, with $d$ the standardised distance to the strike. Undiscounted,
-  and the pricing measure is a hypothesis. -/)]
-  MathFin.bachelier_call_formula
+  (statement := /-- In the Bachelier market of a pre-Brownian motion $W$ (asset $S_0 + \sigma W_t$,
+  numéraire $1$, the filtration $W$ generates) the reference measure is a pricing measure, and for
+  $K, \sigma, T > 0$ the market price of the European call under it is $(S_0 - K)\Phi(d) +
+  \sigma\sqrt{T}\,\varphi(d)$, with $d = (S_0 - K)/(\sigma\sqrt{T})$. Zero interest, no drift:
+  the pricing measure is the reference measure itself. `bachelier_call_formula` is the
+  hypothesis form $E_Q[(S_T - K)^+]$ it rests on. -/)]
+  MathFin.Bachelier.price_europeanCall
 
 attribute [blueprint "thm:american-put-optimal-exercise"
   (title := "Optimal exercise of the American put")

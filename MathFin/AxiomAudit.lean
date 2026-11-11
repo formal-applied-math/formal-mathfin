@@ -2786,3 +2786,19 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.Contracts.value_trancheLeg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.Contracts.value_trancheLeg
+
+/-- info: 'MathFin.Bachelier.price_europeanCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Bachelier.price_europeanCall
+
+/-- info: 'MathFin.Bachelier.superReplicationPrice_europeanCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Bachelier.superReplicationPrice_europeanCall
+
+/-- info: 'MathFin.Contracts.BlackScholes.pathAssets' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Contracts.BlackScholes.pathAssets
+
+/-- info: 'MathFin.Market.superReplicationPrice_eq_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Market.superReplicationPrice_eq_price
