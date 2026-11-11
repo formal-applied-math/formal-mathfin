@@ -211,7 +211,7 @@ theorem merton_market {V₀ F m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hV�
         = V₀ - (V₀ * Phi (bsd1 V₀ F r σ T) - F * Real.exp (-r * T) * Phi (bsd2 V₀ F r σ T)) ∧
       (constGirsanovMeasure hW hWmeas ((m - r) / σ) H).real
           {ω | (market μ hWmeas V₀ m r σ).asset () T ω ≤ F}
-        = kmvPD V₀ F r σ T := by
+        = kmvPD V₀ F r σ T :=
   ⟨isPricingMeasure_constGirsanovMeasure hW hWmeas (S_0 := V₀) (m := m) (r := r) hσ.ne' hTH,
     price_europeanCall_constGirsanovMeasure hW hWmeas (m := m) (r := r) (K := F) hTH hV₀ hF hσ hT,
     price_defaultableZCB_constGirsanovMeasure hW hWmeas hTH hV₀ hF hσ hT,

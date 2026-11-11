@@ -240,7 +240,7 @@ theorem integral_eq_of_isPricingMeasure_oneDate {Q : Measure Ω} (hτ : 0 < τ)
   · field_simp
   · have he : ∫ ω in Set.univ, (oneDate P hX s₀ r τ).deflated () (min 0 τ) ω ∂Q
         = ∫ ω in Set.univ, (oneDate P hX s₀ r τ).deflated () (min τ τ) ω ∂Q :=
-      hm.setIntegral_eq (i := 0) (j := τ) (zero_le τ) (s := Set.univ) MeasurableSet.univ
+      hm.setIntegral_eq (i := 0) (j := τ) (zero_le (a := τ)) (s := Set.univ) MeasurableSet.univ
     simp only [h0, hτ', Measure.restrict_univ] at he
     have e1 : ∫ _ : Ω, s₀ ∂Q = s₀ := by simp
     rw [e1, integral_div, eq_div_iff (Real.exp_pos _).ne'] at he
