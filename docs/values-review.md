@@ -124,11 +124,230 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   that finds nothing to improve.
 
 ## Review log
+## 2026-11-08 — corpus 817, modules 731 — the one trunk, phases 0–2, read before it lands
+
+Scope: the one-trunk work since the RiO review (#450, #451; branches `v2/phase2c-horizon` and
+`v2/phase2d-black-scholes`). `Market`, `IsPricingMeasure` (equivalence on `𝓕 T` only), `price` and
+`priceAt` (`Pricing/Market.lean`) and `Contract.value` with a stochastic deflator
+(`Pricing/Value.lean`). Three markets on it: discrete (`Pricing/DiscreteMarket.lean`), binomial
+(`Models/Binomial/Market.lean`) and Black–Scholes (`Models/BlackScholes/Market.lean`).
+Superreplication and gains-neutral measures as instances (`Pricing/MarketCompleteness.lean`). The
+support lemmas: `MartingaleFrozen`, `EquivMeasure`'s gluing lemma and `TimeChange`. 13 new corpus
+entries. Three read-only reviewers split the lenses:
+- the first pass with lenses 7 and 8;
+- lenses 2, 3 and 6;
+- lenses 1, 4 and 5.
+
+### The standing first pass: prose against statement
+
+- Twelve of the thirteen entries are faithful. `gir-market-superreplication-price` named
+  `M.price Q c` for a merely gains-neutral `Q`, never shown to be a pricing measure of `M`, and
+  its description said the market was "driven additively by `B`", which nothing in the statement
+  says. This is the junk-value case. The theorem now takes `M.𝓕 T = 𝓕ᴮ_T` and
+  `M.IsPricingMeasure T μ` and concludes `M.IsPricingMeasure T Q` alongside the price identity. The
+  description says when the hypothesis on `μ` holds (a Bachelier-type market, not Black–Scholes
+  under its physical measure).
+- Module docstrings, fixed:
+  - `Market.lean` said the change of numéraire "changes the pricing measure". Only the price
+    identity is proved, and the docstring now says that `Q^N` being a pricing measure is not proved.
+  - `Market.lean` said "a measure equivalent everywhere is one" without the martingale condition.
+  - `Binomial/Market.lean` led with "the pricing measure is unique". It is unique on the
+    information at the horizon, and the lead now says so.
+  - `MarketCompleteness.lean` did not say that "the market driven by `B`" means its deflated asset
+    is `B`.
+  - `BlackScholes/Market.lean` said "Brownian motion" for a pre-Brownian hypothesis.
+  - `DiscreteMarket.lean` had a stale title and a stale model count.
+  - `Value.lean` said `value` integrates against "a pricing measure".
+- Dissolved on adjudication:
+  - the claim that the Black–Scholes pricing-measure proof re-proves `deflated_market` inline (it
+    rewrites through `B^θ`, not `W`, so the lemma does not apply);
+  - the claim that `Value.lean`'s "no theorem here needs `IsEMM`" is stale (it is true);
+  - the claim that the Wald exponential has no Itô representation in the library
+    (`discountedGBM_eq_itoIntegral`, `constDoleans_sub_one_mem_range`).
+
+### Upgrades executed
+
+- `Market.superReplicationPrice_eq_price` restated with a genuine pricing measure (above).
+- `Martingale.congr_ae` (an adapted a.e.-equal copy of a martingale is one) and
+  `Market.stronglyAdapted_deflated`, the general lemmas the Black–Scholes pricing measure needed, in
+  the general modules rather than inline.
+- The seven docstring corrections above.
+
+### Lens gradients
+
+- **Inspired math.** The exemplar is `IsPricingMeasure` with `of_trim_eq` and
+  `exists_isEquivProbMeasure`: the Föllmer–Schied notion, lossless in both directions. The next
+  upgrade is a trunk notion of strategy: `Market.NoArbitrage` with self-financing gains, so that the
+  three FTAPs are statements about a `Market` rather than about raw data or a parameter condition.
+- **Coherence.** The exemplar is `martingale_min_iff` and `martingale_min_of_trim_eq`, general and
+  consumed thinly by the trunk. The next upgrade is one `Martingale.integral_eq` lemma replacing the
+  seven re-derivations of "a martingale has constant mean".
+- **Zero slop.** The exemplar is the module docstrings' "not proved" disclosures. The next upgrade
+  covers the duplicated blocks in `Binomial/Market.lean` (the two `map_flips` bullets, the two
+  `crrUpProb` casts, `hgrid`/`hfl`), the duplicated `hS₀` shim and the `D ≡ 1` residue in
+  `DiscreteMarket.lean`.
+- **Architectural ingenuity.** The exemplar is the time change: the discrete market and the tree
+  become markets on `ℝ≥0` by `Filtration.comp`. The next upgrade is one `Market.ofDiscrete` along a
+  step `h` with a numéraire, of which `toMarket` and `Binomial.market` are both instances.
+- **First principles.** The exemplar is the Black–Scholes uniqueness gap, stated as a gap. The next
+  upgrade is `exists_isEquivProbMeasure` under `SigmaFinite (P.trim _)` instead of
+  `IsFiniteMeasure P`.
+- **Idiomatic register.** The exemplar is `exists_isEquivProbMeasure` as a two-line term. The next
+  upgrade is `trim_eq_trim_iff` and `isProbabilityMeasure_of_trim_eq`, replacing four hand-rolled
+  `Measure.ext`/`trim_measurableSet_eq` blocks.
+- **Concept clarity.** The exemplar is `Market.lean`'s header (definition, then why `𝓕 T`, then
+  when the total `price` is a price). The next upgrade is to state `IsPricingMeasure` through
+  `IsEquivProbMeasure (P.trim _) (Q.trim _)` instead of a bare `ac`/`ac'` pair.
+- **Beautiful math.** The exemplar is the gluing lemma `exists_isEquivProbMeasure_trim_eq` (weight
+  `P` by `d(Q|m)/d(P|m)`). The next upgrade is the Black–Scholes keystone itself (#452).
+
+### Ranked backlog
+
+1. Black–Scholes uniqueness among pricing measures with an `L²` density (#452, phase 3). The route:
+   under the Girsanov measure the deflated asset is `S₀ + ∫ σS dB^θ`
+   (`discountedGBM_eq_itoIntegral`), so `pricesGainsAtZero_of_density` applies. The filtration of
+   `B^θ` against that of `W` is the step to settle first. The `L¹`-density case (localisation) stays
+   on the frontier.
+2. `Market.NoArbitrage` / self-financing gains on the trunk, with the discrete, binomial and
+   Black–Scholes FTAPs as instances (phase 5 or after v2.0).
+3. `Market.ofDiscrete` with a numéraire and a step, merging `toMarket` and `Binomial.market`. This
+   also opens the short-rate limb: `Market.ofShortRate`, with `value_fixedFlows_vasicek`/`hullWhite`/
+   `gsr` restated as `Market.price` (#453).
+4. `bondPrice` and `HasBondPrice` over a `Market` (`priceAt`), retiring the parallel definition
+   (#453).
+5. `Martingale.integral_eq`, `trim_eq_trim_iff` and `isProbabilityMeasure_of_trim_eq`, with their
+   callers migrated, as upstream candidates alongside `Martingale.congr_ae`, `Filtration.comp` /
+   `Martingale.comp` / `of_comp` and `exists_isEquivProbMeasure_trim_eq`.
+6. Binomial API friction: derive `hq` from `hna`, use `T = N h` as the single grid hypothesis, and
+   derive `BinomialNoArb` from `hQ` in `trim_eq_of_isPricingMeasure`.
+7. `Market.superPrice` over the set of pricing measures, convex and monotone, for the risk,
+   insurance and incomplete jump limbs (#454, #456, #459).
+8. A Mathlib-style home for `integral_abs_sum_le_of_identDistrib` (`Risk/CompoundPoissonCVaR.lean`),
+   and the mean-based domination there in place of `2ⁿ`.
+
 
 Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the **upgrade-driven model**
 (per-lens exemplar → next upgrade; upgrades executed + ranked backlog). Earlier entries are historical
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
+
+## 2026-11-08 — corpus 817, modules 732 — the trunk's first sockets and three dualities, read before they land
+
+Scope: `v2/choice-utility-state-prices` (#473) with what it brings from main besides #474,
+whose trunk review is recorded separately (#470, #472, #476). There are 13 new corpus entries,
+from these modules:
+- `Pricing/Market` (the price system and the `𝓕 T` glue);
+- `Models/Binomial/Market` (the first socket);
+- `Pricing/DiscreteMarket`;
+- `Choice/Utility/StatePriceDensity` and `Choice/Performance/KellyNumeraire`;
+- `Risk/Superhedging`, `Risk/ExpectedShortfall` (the representing set);
+- `Risk/CompoundPoissonCVaR`.
+
+Two read-only reviewers split the lenses: the first pass with lenses 1–4, and lenses 5–8.
+
+### The standing first pass: prose against statement
+
+Five overclaims, all fixed in this session:
+- **The ES representing-set description** went on, "hence ES is the least upper bound, and by
+  the dual representation the greatest value, of ∑ qᵢLᵢ over that set". The entry proves the set
+  equality only. The least-upper-bound is `expectedShortfall_isLUB_representingSet`, and the
+  greatest value is taken over densities, not over these `q`. The sentence is gone.
+- **`Pricing/Market`, two dropped qualifiers.**
+  - "the price in every market with that law" holds for fixed-dated contracts, which is all
+    that `price_eq_of_map_observation_eq` covers.
+  - "nothing is lost" needs a finite `P` (`exists_isEquivProbMeasure`).
+- **Superhedging.** "implied by no arbitrage" needs at least one state (`[NeZero N]`).
+- **Kelly.**
+  - The fair-odds probabilities were called "unique", which is not stated.
+  - The module said the state-price form is absent, but `kelly_statePrices` in the same file
+    gives it.
+
+The panel also showed that one *scope disclosure* overstated an obstruction. `Superhedging` and
+two corpus scopes said the duality needs Minkowski–Weyl, which is absent from the pinned
+Mathlib. It does not:
+- `coherentRisk_isLUB` (`AcceptanceSet`) represents any coherent risk measure on a finite space
+  with no closedness hypothesis;
+- the superhedging price is coherent;
+- its representing set is exactly the martingale probability vectors. Trading gains `±θ·z` are
+  acceptable at zero cost, and a vector that prices them at zero is a martingale vector.
+
+The duality is being proved on `v2/risk-convex` (backlog 1), and that branch corrects the
+prose.
+
+### Lenses: exemplar, then the next upgrade
+
+1. **Inspired math.**
+   - Exemplar: the horizon glue (`IsPricingMeasure` on `𝓕 T`, with `exists_isEquivProbMeasure`
+     and `of_trim_eq`).
+   - Next: the superhedging duality above, and the ES representing set stated in Mathlib's
+     measure order (`Q ≤ (1−α)⁻¹ • P`), which removes the null-atom case split and extends
+     beyond finite spaces.
+2. **Coherence.**
+   - Exemplar: `Binomial/Market` consumes `Martingale.comp`/`of_comp`, `Filtration.comp` and
+     `integral_trim`.
+   - Next: `portfolioPayoff`, `SuperReplicates` and their `Finset.sum_comm` swaps are
+     `Matrix.vecMul` (`add_vecMul`, `smul_vecMul`, `dotProduct_vecMul`).
+   - `integral_abs_sum_le_of_identDistrib` is a general `IdentDistrib` lemma living in a Risk
+     file, and belongs in `Probability/`.
+3. **Zero slop.**
+   - Exemplar: `Superhedging`, where every lemma is used and the `sInf` junk value is documented.
+   - Next:
+     - `DiscreteMarket` repeats the floor-zero block in `value_forward` and
+       `value_europeanCall_sub_put` (extract `discreteAssets_zero`);
+     - `∑ i ∈ range (N ω), X i ω` is written ten times across `CompoundPoissonCVaR` and
+       `CompoundPoissonMGF` (a shared `compoundSum`).
+4. **Architecture (one trunk).**
+   - Exemplar: `DiscreteMarket.toMarket` with `isPricingMeasure_toMarket_iff`, which puts the
+     finite FTAP on the trunk.
+   - Next:
+     - `Binomial.market` builds a floor filtration by hand and repeats the `of_comp` argument.
+       Generalise `toMarket` to a step and a numéraire, and make the binomial market an instance.
+     - The superhedging and utility theorems never mention `Market`. Their joints are
+       `M.price Q c ≤ superhedgingPrice` (risk × valuation) and "marginal utility weighted by
+       `p` is a pricing measure of a finite `Market`" (choice × valuation). These are K4 and K6
+       of the chain design.
+5. **First principles.**
+   - Exemplar: `StatePriceDensity` derives the density from Fermat on the budget set, with no
+     concavity assumed.
+   - Next: `kelly_statePrices` takes the Kelly first-order condition from the closed form.
+     Proving `f*` is a local maximum of `portfolioUtility` for `log` (concavity) and calling
+     `exists_statePrices_of_isLocalMaxOn` makes it "the log-optimal portfolio has density p/W",
+     which is K5.
+6. **Idiomatic register.**
+   - Exemplar: the `SuperReplicates.mono/add_const/smul/add` dot-notation transport lemmas.
+   - Next, the golf list from the panel:
+     - `hθ ▸ hw₀.ne'` for a nested `have`;
+     - `fin_cases ω <;> simp` for three duplicated blocks;
+     - a redundant `ℝ` cast;
+     - shadowed anonymous `have`s in `of_trim_eq`;
+     - `portfolioCost` as `portfolioPayoff` of one row.
+7. **Concept clarity.**
+   - Exemplar: `Superhedging`'s docstring opens with its non-claims.
+   - Next: the hypothesis list of the stationary-point theorems is retyped four times. An
+     `IsStationary` bundle would show that the first-order condition is the only analytic
+     input.
+8. **Elegance.**
+   - Exemplar: each coherence axiom of the superhedging price is a two-line transport through
+     `sInf`.
+   - Next:
+     - cash invariance, homogeneity and subadditivity are one fact (`SuperReplicates` is a convex
+       cone in `(Y, x, θ)`), not three `linarith` proofs;
+     - in `exists_eq_smul_of_forall_cost_eq_zero`, "a functional vanishing on `ker cost` is a
+       multiple of `cost`" is `LinearMap.ker_le_ker_iff`-shaped, with no `k₀`.
+
+### Ranked backlog
+
+1. **The superhedging duality** by `coherentRisk_isLUB`, with no Minkowski–Weyl (on
+   `v2/risk-convex`).
+2. **The joints over `Market`**:
+   - K4: utility state prices are a pricing measure;
+   - K6: price ≤ superhedging price;
+   - K5: Kelly from optimality, not from the formula.
+
+   These are the choice workstream after #473.
+3. **One discrete market.** `Binomial.market` as an instance of a stepped `toMarket`.
+4. **`Matrix.vecMul`** for portfolio payoffs, and `compoundSum`.
+5. **The golf list** of lens 6, and the `discreteAssets_zero` extraction.
 
 ## 2026-11-07 — corpus 804, modules 725 — the RiO foundations, read before they land
 

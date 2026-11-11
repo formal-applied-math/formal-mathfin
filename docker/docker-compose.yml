@@ -103,6 +103,8 @@ services:
       - ../MathFinExamples.lean:/app/MathFinExamples.lean
       - ../MathFinTest:/app/MathFinTest
       - ../MathFinTest.lean:/app/MathFinTest.lean
+      - ../MathFinFrontier:/app/MathFinFrontier
+      - ../MathFinFrontier.lean:/app/MathFinFrontier.lean
       # Lean tooling exes (`lake exe mathfin_index`, `lake exe blueprint_export`).
       - ../MathFinTools:/app/MathFinTools
       - ../lakefile.lean:/app/lakefile.lean
@@ -165,6 +167,8 @@ services:
       - ../MathFinExamples.lean:/app/MathFinExamples.lean
       - ../MathFinTest:/app/MathFinTest
       - ../MathFinTest.lean:/app/MathFinTest.lean
+      - ../MathFinFrontier:/app/MathFinFrontier
+      - ../MathFinFrontier.lean:/app/MathFinFrontier.lean
       # Lean tooling exes (`lake exe mathfin_index`, `lake exe blueprint_export`).
       - ../MathFinTools:/app/MathFinTools
       - ../lakefile.lean:/app/lakefile.lean

@@ -59,6 +59,9 @@ Acerbi and Tasche (`expectedShortfall_eq_acerbiTasche`).
 * `expectedShortfall_eq_acerbiTasche`: the Acerbi–Tasche formula.
 * `expectedShortfall_eq_setIntegral_tail`: without atoms, ES is the mean of the `α`-tail.
 * `isGreatest_integral_mul_expectedShortfall`: the dual representation of ES.
+* `representingSet_expectedShortfall`: on a finite probability space the ADEH representing set of
+  ES is exactly the probability vectors `q` with `qᵢ ≤ (1 − α)⁻¹ P{i}`, the densities bounded by
+  `(1 − α)⁻¹`.
 * `expectedShortfall_isLUB_representingSet`: on a finite probability space ES is a coherent risk
   measure of `Risk/AcceptanceSet.lean`, so the finite representation theorem
   `coherentRisk_isLUB` applies to it.
@@ -409,12 +412,72 @@ theorem expectedShortfall_mono_level (hX : Integrable X P) (hα : α ∈ Ioo 0 1
 
 /-! ### Finite state spaces: ES in the ADEH framework -/
 
+/-- **The representing set of expected shortfall**: on a finite probability space the ADEH
+representing set of `ES_α` is exactly the set of probability vectors `q` with `qᵢ ≤ (1 − α)⁻¹ P{i}`,
+that is, the probability densities `q/P` bounded by `(1 − α)⁻¹` (a state of null mass carries no
+`q`-mass). `⊇` is the dual bound `integral_mul_le_expectedShortfall` for the density `q/P`;
+`⊆` tests the acceptable loss `𝟙{i} − (1 − α)⁻¹ P{i}`, whose shortfall is nonpositive by the
+Rockafellar–Uryasev bound at `c = 0`. -/
+theorem representingSet_expectedShortfall {ι : Type*} [Fintype ι] [MeasurableSpace ι]
+    [MeasurableSingletonClass ι] (P : Measure ι) [IsProbabilityMeasure P] (hα : α ∈ Ioo 0 1) :
+    representingSet (fun L : ι → ℝ ↦ expectedShortfall L P α) =
+      {q | (∀ i, 0 ≤ q i) ∧ ∑ i, q i = 1 ∧ ∀ i, q i ≤ (1 - α)⁻¹ * P.real {i}} := by
+  classical
+  have h1α : 0 < (1 - α)⁻¹ := inv_pos.2 (sub_pos.2 hα.2)
+  ext q
+  constructor
+  · rintro ⟨hq0, hq1, hq⟩
+    refine ⟨hq0, hq1, fun i ↦ ?_⟩
+    have hint : ∫ ω, max ((Pi.single i 1 : ι → ℝ) ω - 0) 0 ∂P = P.real {i} := by
+      have : (fun ω ↦ max ((Pi.single i 1 : ι → ℝ) ω - 0) 0) = Pi.single i 1 := by
+        ext ω
+        by_cases h : ω = i <;> simp [Pi.single_apply, h]
+      rw [this, integral_fintype (μ := P) Integrable.of_finite]
+      simp [Pi.single_apply]
+    have hZ : expectedShortfall
+        (fun j ↦ (Pi.single i 1 : ι → ℝ) j + -((1 - α)⁻¹ * P.real {i})) P α ≤ 0 := by
+      rw [expectedShortfall_add_const Integrable.of_finite hα]
+      have := expectedShortfall_le_rockafellarUryasev
+        (Integrable.of_finite : Integrable ((Pi.single i 1 : ι → ℝ)) P) hα 0
+      rw [rockafellarUryasev, hint, zero_add] at this
+      linarith
+    have h2 : ∑ j, q j * (Pi.single i 1 : ι → ℝ) j = q i := by simp [Pi.single_apply]
+    have h3 := hq _ hZ
+    rw [Finset.sum_congr rfl fun j _ ↦ mul_add (q j) _ _, Finset.sum_add_distrib, h2,
+      ← Finset.sum_mul, hq1, one_mul] at h3
+    linarith
+  · rintro ⟨hq0, hq1, hqp⟩
+    refine ⟨hq0, hq1, fun Z hZ ↦ ?_⟩
+    set D : ι → ℝ := fun i ↦ q i / P.real {i} with hD
+    have hDp (i : ι) : D i * P.real {i} = q i := by
+      by_cases hp : P.real {i} = 0
+      · have h := hqp i
+        rw [hp, mul_zero] at h
+        rw [hp, mul_zero]
+        exact (le_antisymm h (hq0 i)).symm
+      · exact div_mul_cancel₀ _ hp
+    have hDle (i : ι) : D i ≤ (1 - α)⁻¹ := by
+      by_cases hp : P.real {i} = 0
+      · simpa [hD, hp] using h1α.le
+      · exact (div_le_iff₀ (lt_of_le_of_ne measureReal_nonneg (Ne.symm hp))).2 (hqp i)
+    have hDint : ∫ ω, D ω ∂P = 1 := by
+      rw [integral_fintype (μ := P) Integrable.of_finite]
+      simp only [smul_eq_mul]
+      rw [← hq1]
+      exact Finset.sum_congr rfl fun i _ ↦ by rw [mul_comm]; exact hDp i
+    have hle := integral_mul_le_expectedShortfall (Integrable.of_finite : Integrable Z P) hα
+      (Integrable.of_finite : Integrable D P).aestronglyMeasurable
+      (ae_of_all _ fun i ↦ div_nonneg (hq0 i) measureReal_nonneg) (ae_of_all _ hDle) hDint
+    rw [integral_fintype (μ := P) Integrable.of_finite] at hle
+    refine le_trans (le_of_eq ?_) (hle.trans hZ)
+    exact Finset.sum_congr rfl fun i _ ↦ by
+      rw [smul_eq_mul]; linear_combination (-(Z i)) * hDp i
+
 /-- **ES has an ADEH representation**: on a finite probability space, `ES_α(L)` is the least upper
 bound of the expected losses `∑ qᵢ Lᵢ` over the representing set of `ES_α`
-(`coherentRisk_isLUB` applied to `expectedShortfall_isCoherentRiskMeasure`). The dual
-representation `isGreatest_integral_mul_expectedShortfall` says the same supremum is attained over
-the densities bounded by `(1 − α)⁻¹`. That this set *is* the representing set is not proved
-here. -/
+(`coherentRisk_isLUB` applied to `expectedShortfall_isCoherentRiskMeasure`). By
+`representingSet_expectedShortfall` that set is the densities bounded by `(1 − α)⁻¹`, the set over
+which `isGreatest_integral_mul_expectedShortfall` attains the same supremum. -/
 theorem expectedShortfall_isLUB_representingSet {ι : Type*} [Fintype ι] [MeasurableSpace ι]
     [MeasurableSingletonClass ι] (P : Measure ι) [IsProbabilityMeasure P] (hα : α ∈ Ioo 0 1)
     (L : ι → ℝ) :

@@ -65,6 +65,51 @@ def test_a_pull_request_is_a_delivery_record() -> None:
     assert bi.check(issues, NODES) == []
 
 
+def test_taxonomy_labels_are_derived_from_the_nodes() -> None:
+    nodes = {
+        "thm:a": bi.Node("thm:a", "A", "proved", area="valuation/term", family="term"),
+        "thm:f": bi.Node("thm:f", "F", "frontier", uses=("thm:a",), statement="F holds.",
+                         area="risk/measures"),
+    }
+    right = _issue(1, "Blueprint: thm:a, thm:f", labels=(
+        "type:proof", "area:valuation/term", "family:term", "area:risk/measures", "area:ci"))
+    assert bi.check([right], nodes) == []
+    wrong = _issue(2, "Blueprint: thm:a, thm:f", labels=("type:proof", "area:risk"))
+    assert bi.label_drift(wrong, nodes) == (
+        {"area:valuation/term", "family:term", "area:risk/measures"}, {"area:risk"})
+    assert any(p.message.startswith("#2: ") for p in bi.check([wrong], nodes))
+    # closed issues are relabelled by `labels --apply` but never fail the check
+    closed = _issue(3, "Blueprint: thm:a, thm:f", state="closed")
+    assert bi.label_drift(closed, nodes)[0] and bi.check([right, closed], nodes) == []
+    # an issue naming a node only an open pull request adds keeps the labels that branch gave it
+    pending = _issue(4, "Blueprint: thm:a, thm:new", labels=("type:proof", "area:choice/trading"))
+    assert bi.label_drift(pending, nodes) == (set(), set())
+
+
+def test_every_taxonomy_label_fits_github() -> None:
+    labels = bi.taxonomy_labels()
+    assert all(len(name) <= 50 and len(desc) <= 100 for name, (_, desc) in labels.items())
+    assert all(bi.is_taxonomy_label(name) for name in labels)
+    assert not bi.is_taxonomy_label("area:ci") and not bi.is_taxonomy_label("area:foundations")
+
+
+def test_lean_nodes_take_their_module_cell() -> None:
+    nodes = bi.load_nodes(REPO / "docs/blueprint_nodes.json", REPO / "docs/blueprint_frontier.toml")
+    unplaced = [n.label for n in nodes.values() if n.status != "upstream" and not n.area]
+    assert unplaced == []
+
+
+def test_an_open_pull_request_may_name_the_node_it_adds() -> None:
+    """A node an open PR adds exists only on its branch: that PR's own build checks the name, and
+    other branches do not fail on it. A merged PR's names must be nodes."""
+    base = [_issue(8, "Blueprint: thm:f"), _issue(9, "Blueprint: thm:a", is_pr=True,
+                                                  state="closed")]
+    assert bi.check(base + [_issue(10, "Blueprint: thm:new", is_pr=True)], NODES) == []
+    msgs = [p.message for p in bi.check(
+        base + [_issue(11, "Blueprint: thm:new", is_pr=True, state="closed")], NODES)]
+    assert any("#11 names `thm:new`" in m for m in msgs)
+
+
 def test_every_frontier_node_grows_from_the_wood() -> None:
     nodes = dict(NODES)
     nodes["thm:g"] = bi.Node("thm:g", "G", "frontier", uses=("thm:f",), statement="G.")
@@ -89,8 +134,91 @@ def test_core_names_corpus_proofs() -> None:
 
 
 def test_frontier_file_is_well_formed() -> None:
-    nodes = bi.load_nodes(REPO / bi.NODES_JSON, REPO / bi.FRONTIER_TOML)
+    nodes = bi.load_nodes(REPO / bi.NODES_JSON, REPO / bi.FRONTIER_TOML, REPO / bi.RETIRED_TOML)
     assert bi.frontier_problems(nodes) == []
+    assert bi.connector_problems(nodes, bi.connector_names(REPO / bi.CONNECTORS_DIR)) == []
+
+
+def test_connectors_and_their_nodes_are_one_to_one() -> None:
+    nodes = {"thm:k": bi.Node("thm:k", "K", "frontier", lean="MathFinFrontier.k"),
+             "thm:j": bi.Node("thm:j", "J", "frontier", lean="MathFinFrontier.gone")}
+    msgs = bi.connector_problems(nodes, {"MathFinFrontier.k", "MathFinFrontier.orphan"})
+    assert any("`MathFinFrontier.gone`" in m for m in msgs)
+    assert any("`MathFinFrontier.orphan` is named by 0" in m for m in msgs)
+    assert not any("`MathFinFrontier.k`" in m for m in msgs)
+
+
+RETIRED = {"thm:old": bi.Retired("thm:old", "thm:a", "a waypoint")}
+
+
+def test_a_retired_label_is_history_when_closed_and_a_problem_when_open() -> None:
+    closed = [_issue(1, "Blueprint: thm:old", state="closed"),
+              _issue(2, "Blueprint: thm:old", state="closed", is_pr=True),
+              _issue(3, "Blueprint: thm:f"), _issue(4, "Blueprint: thm:a", state="closed")]
+    assert bi.check(closed, NODES, retired=RETIRED) == []
+    problems = bi.check([_issue(5, "Blueprint: thm:old, thm:f"),
+                         _issue(6, "Blueprint: thm:old", is_pr=True),
+                         _issue(7, "Blueprint: thm:a", state="closed")], NODES, retired=RETIRED)
+    msgs = [p.message for p in problems if p.issue is not None]
+    assert len(msgs) == 2
+    assert all("folded into `thm:a`" in m for m in msgs)
+    assert {p.issue for p in problems if p.issue is not None} == {5, 6}
+    # without the retired file the same name is just an unknown node
+    assert any("not a blueprint node" in p.message
+               for p in bi.check([_issue(8, "Blueprint: thm:old")], NODES))
+
+
+def test_a_retired_label_is_never_a_node_and_folds_into_one() -> None:
+    live = dict(NODES, **{"thm:old": bi.Node("thm:old", "Old", "proved")})
+    msgs = [p.message for p in bi.check([_issue(1, "Blueprint: thm:f")], live, retired=RETIRED)]
+    assert any("retired label `thm:old` is also a live node" in m for m in msgs)
+    lost = {"thm:old": bi.Retired("thm:old", "thm:gone")}
+    msgs = [p.message for p in bi.check([_issue(1, "Blueprint: thm:f")], NODES, retired=lost)]
+    assert any("folded into `thm:gone`, which is not a node" in m for m in msgs)
+
+
+def test_load_nodes_drops_a_retired_label_from_an_older_export(tmp_path) -> None:
+    nodes_json = tmp_path / "nodes.json"
+    nodes_json.write_text(json.dumps([{"label": "thm:a", "title": "A", "module": "MathFin.X"},
+                                      {"label": "thm:old", "title": "O", "module": "MathFin.X"}]))
+    retired = tmp_path / "retired.toml"
+    retired.write_text('[[retired]]\nlabel = "thm:old"\nfolded_into = "thm:a"\nreason = "x"\n')
+    frontier = tmp_path / "frontier.toml"
+    frontier.write_text("")
+    assert set(bi.load_nodes(nodes_json, frontier, retired)) == {"thm:a"}
+    frontier.write_text('[[node]]\nlabel = "thm:old"\ntitle = "O"\nstatement = "s"\narea = "x"\n')
+    try:
+        bi.load_nodes(nodes_json, frontier, retired)
+    except ValueError as e:
+        assert "retired" in str(e)
+    else:
+        raise AssertionError("a frontier node may not reuse a retired label")
+
+
+def _lean_tag_labels() -> set[str]:
+    text = (REPO / "MathFin/Blueprint.lean").read_text(encoding="utf-8")
+    return set(re.findall(r'^attribute \[blueprint "([^"]+)"', text, re.M))
+
+
+def test_retired_file_is_consistent_with_the_tags_and_the_frontier() -> None:
+    """Read from the Lean source, so it holds before docs/blueprint_nodes.json is re-exported."""
+    retired = bi.load_retired(REPO / bi.RETIRED_TOML)
+    assert retired, "docs/blueprint_retired.toml is empty or unreadable"
+    tags = _lean_tag_labels()
+    frontier = {n.label for n in bi.load_frontier(REPO / bi.FRONTIER_TOML)}
+    assert not set(retired) & tags, f"retired labels still tagged: {sorted(set(retired) & tags)}"
+    assert not set(retired) & frontier, "retired labels on the frontier"
+    lost = [r.label for r in retired.values() if r.folded_into not in tags | frontier]
+    assert not lost, f"retired labels folded into a label that is no node: {lost}"
+    assert all(r.reason.strip() for r in retired.values()), "a retired label states no reason"
+
+
+def test_frontier_uses_name_live_nodes() -> None:
+    tags = _lean_tag_labels()
+    frontier = bi.load_frontier(REPO / bi.FRONTIER_TOML)
+    live = tags | {n.label for n in frontier}
+    bad = [(n.label, u) for n in frontier for u in n.uses if u not in live]
+    assert not bad, f"frontier `uses` naming no live node: {bad}"
 
 
 def test_exported_nodes_match_the_lean_tags() -> None:

@@ -15,9 +15,19 @@ public import MathFin.Pricing.Numeraire
 
 **A market** is a filtered measurable space with a reference measure `P`, the adapted prices
 `S i t` of the traded assets and a strictly positive adapted numéraire `N t`. **A pricing
-measure** up to a horizon `T` is a probability measure equivalent to `P` under which every
-deflated price `S i t / N t`, frozen at `T`, is a martingale. **The price** of a contract under a
-measure `Q` is its value (`Contract.value`) with the deflator `N 0 / N t` on the market's assets:
+measure** up to a horizon `T` is a probability measure with the null events of `P` among the
+events known at `T` (equivalent to `P` on `𝓕 T`) under which every deflated price `S i t / N t`,
+frozen at `T`, is a martingale.
+
+Equivalence is asked on `𝓕 T` only, as in Föllmer–Schied (§5.2) and Delbaen–Schachermayer: a
+horizon-`T` market cannot tell measures apart beyond `𝓕 T`, and on an infinite path space the
+risk-neutral and the physical laws are typically singular (i.i.d. coin flips with two
+up-probabilities, Brownian motions with two drifts) while equivalent on every `𝓕 T`. For a finite
+`P` nothing is lost: a pricing measure agrees on `𝓕 T` with one equivalent to `P` everywhere
+(`IsPricingMeasure.exists_isEquivProbMeasure`), and a measure equivalent everywhere under which the
+frozen deflated assets are martingales is a pricing measure
+(`IsPricingMeasure.of_isEquivProbMeasure`). **The price** of a contract under a measure `Q` is its
+value (`Contract.value`) with the deflator `N 0 / N t` on the market's assets:
 
   `price Q c = 𝔼_Q[∑ (N 0 / N tₖ) · cₖ]` over the contract's cash flows `cₖ` at `tₖ`.
 
@@ -35,8 +45,8 @@ Two facts make it the price rather than one more integral:
   markets, on two sample spaces, whose assets and deflators at the contract's observations and
   payment dates have one law under their measures give the same price
   (`price_eq_of_map_observation_eq`).
-  A parametric price defined in one concrete model is therefore the price in every market with
-  that law.
+  A parametric price of a fixed-dated contract defined in one concrete model is therefore its
+  price in every market with that law.
 
 The price at an intermediate date `t` is the conditional expectation of the deflated cash flows
 given `𝓕 t`, re-expressed at `t` (`priceAt`); deflated to `0`, it averages to the price
@@ -44,10 +54,11 @@ given `𝓕 t`, re-expressed at `t` (`priceAt`); deflated to `0`, it averages to
 rates models is the price at `t` of one unit paid at `T`
 (`Contracts.bondPrice_deflator_eq_priceAt`, in `Models/Rates/Caplet.lean`).
 
-Changing the numéraire changes the pricing measure and not the price: the market with numéraire `N`
+Changing the numéraire changes the measure and not the price: the market with numéraire `N`
 in place of `B` prices a payment at `T` under the numéraire measure `Q^N` exactly as the original
 market does under `Q` (`price_pay_withNumeraire`, the change-of-numéraire theorem
-`changeOfNumeraire` read through the price).
+`changeOfNumeraire` read through the price). That `Q^N` is a pricing measure of the new market is
+not proved here.
 
 On a finite sample space the price of a single payment is `statePricePricing` with the state
 prices `q ω = (N 0 / N t)(ω) · Q {ω}` (`price_pay_eq_statePricePricing`), non-negative for every
@@ -57,15 +68,20 @@ prices `q ω = (N 0 / N t)(ω) · Q {ω}` (`price_pay_eq_statePricePricing`), no
 
 * `Market`: a filtered measurable space, its reference measure, the traded assets and a numéraire.
 * `Market.deflator`: `N 0 / N t`. `Market.deflated`: `S i t / N t`.
-* `Market.IsPricingMeasure`: an equivalent probability measure making every deflated asset a
-  martingale up to the horizon.
+* `Market.IsPricingMeasure`: a probability measure equivalent to `P` on `𝓕 T` making every
+  deflated asset a martingale up to the horizon `T`.
 * `Market.price`: the value of a contract under a measure, deflated by the numéraire.
 * `Market.priceAt`: the price at an intermediate date, a random variable.
 * `Market.withNumeraire`: the same market with another numéraire.
 
 ## Main results
 
-* `Market.IsPricingMeasure.isEMM`: a pricing measure is an `IsEMM` for each deflated asset.
+* `Market.IsPricingMeasure.of_isEquivProbMeasure`: a measure equivalent to `P` everywhere that
+  makes the deflated assets frozen martingales is a pricing measure.
+* `Market.IsPricingMeasure.of_trim_eq`: a measure that agrees with a pricing measure on `𝓕 T` is
+  one.
+* `Market.IsPricingMeasure.exists_isEquivProbMeasure`: a pricing measure agrees on `𝓕 T` with a
+  pricing measure equivalent to `P` everywhere.
 * `Market.IsPricingMeasure.price_pay_obs`: a traded asset is priced at its initial price.
 * `Market.price_eq_of_map_observation_eq`: law invariance of the price.
 * `Market.integral_deflator_mul_priceAt`: the deflated price at `t` averages to the price.
@@ -79,7 +95,9 @@ prices `q ω = (N 0 / N t)(ω) · Q {ω}` (`price_pay_eq_statePricePricing`), no
   continuous trading*][HarrisonPliska1981]
 * [H. Geman, N. El Karoui and J.-C. Rochet, *Changes of numéraire, changes of probability measure
   and option pricing*][GemanElKarouiRochet1995]
-* [H. Föllmer and A. Schied, *Stochastic Finance: An Introduction in Discrete Time*][FollmerSchied]
+* [H. Föllmer and A. Schied, *Stochastic Finance: An Introduction in Discrete Time*][FollmerSchied],
+  §5.2
+* [F. Delbaen and W. Schachermayer, *The Mathematics of Arbitrage*][DelbaenSchachermayer]
 * [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
 
 ## Tags
@@ -122,10 +140,13 @@ noncomputable def deflator (M : Market ι Ω) (t : ℝ≥0) (ω : Ω) : ℝ :=
 noncomputable def deflated (M : Market ι Ω) (i : ι) (t : ℝ≥0) (ω : Ω) : ℝ :=
   M.asset i t ω / M.numeraire t ω
 
-/-- **`Q` prices the market up to `T`**: a probability measure equivalent to `P` under which every
-deflated asset, frozen at `T`, is an `𝓕`-martingale. -/
-structure IsPricingMeasure (M : Market ι Ω) (T : ℝ≥0) (Q : Measure Ω) : Prop
-    extends IsEquivProbMeasure M.P Q where
+/-- **`Q` prices the market up to `T`**: a probability measure with the null events of `P` among
+the events known at `T` (`Q` and `P` restricted to `𝓕 T` are mutually absolutely continuous), under
+which every deflated asset, frozen at `T`, is an `𝓕`-martingale. -/
+structure IsPricingMeasure (M : Market ι Ω) (T : ℝ≥0) (Q : Measure Ω) : Prop where
+  isProb : IsProbabilityMeasure Q
+  ac : Q.trim (M.𝓕.le T) ≪ M.P.trim (M.𝓕.le T)
+  ac' : M.P.trim (M.𝓕.le T) ≪ Q.trim (M.𝓕.le T)
   martingale (i : ι) : Martingale (fun t ↦ M.deflated i (min t T)) M.𝓕 Q
 
 /-- **The price of a contract** under `Q`: its value with the deflator `N 0 / N t` on the market's
@@ -147,10 +168,56 @@ theorem measurable_numeraire (M : Market ι Ω) (t : ℝ≥0) : Measurable (M.nu
 theorem measurable_deflator (M : Market ι Ω) (t : ℝ≥0) : Measurable (M.deflator t) :=
   (M.measurable_numeraire 0).div (M.measurable_numeraire t)
 
-/-- A pricing measure is an equivalent martingale measure for each deflated asset. -/
+/-- Each deflated asset is adapted. -/
+theorem stronglyAdapted_deflated (M : Market ι Ω) (i : ι) : StronglyAdapted M.𝓕 (M.deflated i) :=
+  fun t ↦
+    ((M.asset_adapted i t).measurable.div (M.numeraire_adapted t).measurable).stronglyMeasurable
+
+/-- **A measure equivalent to `P` everywhere is a pricing measure** as soon as every deflated asset,
+frozen at `T`, is a martingale under it. -/
+theorem IsPricingMeasure.of_isEquivProbMeasure {M : Market ι Ω} {T : ℝ≥0} {Q : Measure Ω}
+    (hQ : IsEquivProbMeasure M.P Q)
+    (hmart : ∀ i, Martingale (fun t ↦ M.deflated i (min t T)) M.𝓕 Q) :
+    M.IsPricingMeasure T Q :=
+  ⟨hQ.isProb, hQ.ac.trim _, hQ.ac'.trim _, hmart⟩
+
+/-- **A pricing measure equivalent to `P` everywhere** is an equivalent martingale measure for each
+deflated asset. -/
 theorem IsPricingMeasure.isEMM {M : Market ι Ω} {T : ℝ≥0} {Q : Measure Ω}
-    (hQ : M.IsPricingMeasure T Q) (i : ι) : IsEMM M.𝓕 M.P (M.deflated i) T Q :=
-  ⟨hQ.toIsEquivProbMeasure, hQ.martingale i⟩
+    (hQ : M.IsPricingMeasure T Q) (hQP : IsEquivProbMeasure M.P Q) (i : ι) :
+    IsEMM M.𝓕 M.P (M.deflated i) T Q :=
+  ⟨hQP, hQ.martingale i⟩
+
+/-- **A pricing measure is determined by its restriction to `𝓕 T`**: a measure that agrees with a
+pricing measure on `𝓕 T` is one. The deflated assets frozen at `T` are `𝓕 T`-measurable, so they
+are martingales under both (`martingale_min_of_trim_eq`). -/
+theorem IsPricingMeasure.of_trim_eq {M : Market ι Ω} {T : ℝ≥0} {Q Q' : Measure Ω}
+    (hQ : M.IsPricingMeasure T Q) (h : Q.trim (M.𝓕.le T) = Q'.trim (M.𝓕.le T)) :
+    M.IsPricingMeasure T Q' := by
+  have := hQ.isProb
+  have : IsProbabilityMeasure Q' := ⟨by
+    rw [← trim_measurableSet_eq (M.𝓕.le T) (@MeasurableSet.univ _ (M.𝓕 T)), ← h,
+      trim_measurableSet_eq (M.𝓕.le T) (@MeasurableSet.univ _ (M.𝓕 T)), measure_univ]⟩
+  refine ⟨this, ?_, ?_, fun i ↦ martingale_min_of_trim_eq h (hQ.martingale i)⟩
+  · rw [← h]
+    exact hQ.ac
+  · rw [← h]
+    exact hQ.ac'
+
+/-- **A pricing measure agrees on `𝓕 T` with one equivalent to `P` everywhere.** Weight `P` by the
+density of `Q` with respect to `P` on `𝓕 T` (`exists_isEquivProbMeasure_trim_eq`); the deflated
+assets frozen at `T` are `𝓕 T`-measurable, so they stay martingales under the new measure
+(`martingale_min_of_trim_eq`). This is how a pricing measure meets the theorems stated for an
+`IsEMM`. -/
+theorem IsPricingMeasure.exists_isEquivProbMeasure {M : Market ι Ω} [IsFiniteMeasure M.P]
+    {T : ℝ≥0} {Q : Measure Ω} (hQ : M.IsPricingMeasure T Q) :
+    ∃ Q', IsEquivProbMeasure M.P Q' ∧ M.IsPricingMeasure T Q' ∧
+      Q'.trim (M.𝓕.le T) = Q.trim (M.𝓕.le T) := by
+  have := hQ.isProb
+  obtain ⟨Q', hQ', htrim⟩ := exists_isEquivProbMeasure_trim_eq (M.𝓕.le T) hQ.ac hQ.ac'
+  have := hQ'.isProb
+  exact ⟨Q', hQ', .of_isEquivProbMeasure hQ' fun i ↦
+    martingale_min_of_trim_eq htrim.symm (hQ.martingale i), htrim⟩
 
 /-- **A traded asset is priced at its price.** Under a pricing measure up to `T`, with a
 deterministic initial numéraire `N 0 = n₀`, the claim that delivers asset `i` at a date `t ≤ T` is

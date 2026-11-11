@@ -7,15 +7,16 @@ module
 
 public import MathFin.Pricing.Parity
 public import MathFin.Pricing.FTAP.DalangMortonWillinger
+public import MathFin.Pricing.FTAP.FTAPDiscrete
 public import MathFin.Pricing.Market
 public import MathFin.Probability.Martingales.TimeChange
 
 /-!
-# The contracts priced in a discrete-time market with an equivalent martingale measure
+# The discrete-time market on the trunk
 
-The third model for the instruments of `Contracts/Instruments/Options.lean`, after the
-Black–Scholes and binomial ones, and the seam between the contracts layer and the multi-period
-FTAP. A one-asset discrete-time market on a general filtered probability space, a price
+A model for the instruments of `Contracts/Instruments/Options.lean`, its fundamental theorems of
+asset pricing read on the trunk's `Market`, and the seam between the contracts layer and the
+multi-period FTAP. A one-asset discrete-time market on a general filtered probability space, a price
 `S : ℕ → Ω → ℝ` with an equivalent martingale measure `IsEMM 𝓕 P S T Q`, is a contract model
 map: between integer dates the underlying is constant, `discreteAssets S T () t = S ⌊t⌋₊` frozen
 at the horizon `T` (the price is a `Q`-martingale only up to `T`). The price `S` is quoted in
@@ -29,15 +30,23 @@ maturity (`value_forward`, `value_europeanCall_sub_put`); at an integer maturity
 underlying is `S (min n T)` (`discreteAssets_natCast`). Parity is not re-proved here.
 
 The discrete market is a `Market` (`toMarket`): the frozen price, the floor filtration and the
-unit numéraire. Its pricing measures at the horizon are exactly its equivalent martingale measures
-(`isPricingMeasure_toMarket_iff`, the converse direction through `Martingale.of_comp`), and its
-price is the contract value with `D ≡ 1` (`price_toMarket`).
+unit numéraire. An equivalent martingale measure is a pricing measure of it
+(`isPricingMeasure_toMarket_of_isEMM`), and a pricing measure, which is equivalent to `P` only on
+the information at the horizon, agrees there with an equivalent martingale measure
+(`isPricingMeasure_toMarket_iff`, the converse direction through `Martingale.of_comp` and
+`Market.IsPricingMeasure.exists_isEquivProbMeasure`). Its price is the contract value with `D ≡ 1`
+(`price_toMarket`).
 
-The composite `exists_isPricingMeasure_parity` closes the loop with the Dalang–Morton–Willinger
-reduction: **assuming `ConditionalOnePeriodFTAP`** (the conditional one-period FTAP, not proved in
-this library), an arbitrage-free adapted integrable market has one pricing measure `Q` under which,
-for every strike and maturity, the forward's price is `S₀ − K` and the call's price less the put's
-is `S₀ − K`.
+**The fundamental theorem on the trunk.** A pricing measure rules out arbitrage
+(`Market.IsPricingMeasure.noArbitrage_toMarket`). On a finite sample space with full support, no
+arbitrage is equivalent to the existence of a pricing measure
+(`noArbitrage_iff_exists_isPricingMeasure_of_finite`, Harrison–Pliska through `ftap_discrete`); on
+a general space the same holds **assuming `ConditionalOnePeriodFTAP`** (the conditional one-period
+FTAP, not proved in this library; `noArbitrage_iff_exists_isPricingMeasure`, through the
+Dalang–Morton–Willinger reduction). The composite `exists_isPricingMeasure_parity` adds parity:
+under that hypothesis an arbitrage-free adapted integrable market has one pricing measure `Q` under
+which, for every strike and maturity, the forward's price is `S₀ − K` and the call's price less the
+put's is `S₀ − K`.
 
 ## Main definitions
 
@@ -49,13 +58,19 @@ is `S₀ − K`.
 ## Main results
 
 * `value_forward`, `value_europeanCall_sub_put`: forward value and put–call parity under an `IsEMM`.
-* `isPricingMeasure_toMarket_iff`: the pricing measures of `toMarket` are the `IsEMM`s.
+* `isPricingMeasure_toMarket_iff`: the pricing measures of `toMarket` are the measures that agree
+  with an `IsEMM` on the information at the horizon.
+* `noArbitrage_iff_exists_isPricingMeasure_of_finite`: the finite-`Ω` FTAP on the trunk.
+* `noArbitrage_iff_exists_isPricingMeasure`: the FTAP on the trunk, given
+  `ConditionalOnePeriodFTAP`.
 * `exists_isPricingMeasure_parity`: no arbitrage gives a pricing measure under which parity holds,
   given `ConditionalOnePeriodFTAP`.
 
 ## References
 
 * [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
+* [J. M. Harrison and S. R. Pliska, *Martingales and stochastic integrals in the theory of
+  continuous trading*][HarrisonPliska1981]
 * [H. Föllmer and A. Schied, *Stochastic Finance: An Introduction in Discrete Time*][FollmerSchied],
   §5.2
 
@@ -155,26 +170,78 @@ theorem price_toMarket (c : Contract Unit) :
   show c.value Q (toMarket P 𝓕 S T hS).deflator (discreteAssets S T) = _
   rw [deflator_toMarket]
 
-/-- **The pricing measures of the discrete market are its equivalent martingale measures.** The
-deflated asset frozen at `T` is the floor extension of `n ↦ S (min n T)`, which is a martingale for
-the floor filtration exactly when `S` frozen at `T` is a martingale for `𝓕` (`Martingale.comp`,
-`Martingale.of_comp` with the right inverse `Nat.cast`). -/
-theorem isPricingMeasure_toMarket_iff :
-    (toMarket P 𝓕 S T hS).IsPricingMeasure T Q ↔ IsEMM 𝓕 P S T Q := by
-  have h (u : Unit) : (fun t ↦ (toMarket P 𝓕 S T hS).deflated u (min t T))
-      = fun t ω ↦ S (min ⌊t⌋₊ T) ω := by
-    funext t ω
-    have hfl : ⌊min t (T : ℝ≥0)⌋₊ = min ⌊t⌋₊ T := by
-      rw [Nat.floor_mono.map_min, Nat.floor_natCast]
-    simp [Market.deflated, toMarket, discreteAssets, hfl, min_assoc]
-  refine ⟨fun hQ ↦ ⟨hQ.toIsEquivProbMeasure, ?_⟩,
-    fun hQ ↦ ⟨hQ.toIsEquivProbMeasure, fun _ ↦ ?_⟩⟩
-  · have hM := hQ.martingale ()
-    rw [h ()] at hM
-    exact Martingale.of_comp (f := fun n ↦ S (min n T)) (Nat.floor_mono (R := ℝ≥0))
-      Nat.mono_cast Nat.floor_natCast hM
-  · rw [h]
+/-- The deflated asset of the discrete market, frozen at the horizon, is the floor extension of
+`n ↦ S (min n T)`. -/
+theorem deflated_toMarket_min (u : Unit) :
+    (fun t ↦ (toMarket P 𝓕 S T hS).deflated u (min t T)) = fun t ω ↦ S (min ⌊t⌋₊ T) ω := by
+  funext t ω
+  have hfl : ⌊min t (T : ℝ≥0)⌋₊ = min ⌊t⌋₊ T := by
+    rw [Nat.floor_mono.map_min, Nat.floor_natCast]
+  simp [Market.deflated, toMarket, discreteAssets, hfl, min_assoc]
+
+/-- **An equivalent martingale measure is a pricing measure of the discrete market**: the floor
+extension of the frozen price is a martingale for the floor filtration (`Martingale.comp`). -/
+theorem isPricingMeasure_toMarket_of_isEMM (hQ : IsEMM 𝓕 P S T Q) :
+    (toMarket P 𝓕 S T hS).IsPricingMeasure T Q :=
+  .of_isEquivProbMeasure hQ.toIsEquivProbMeasure fun u ↦ by
+    rw [deflated_toMarket_min]
     exact hQ.martingale.comp (Nat.floor_mono (R := ℝ≥0))
+
+/-- **A pricing measure of the discrete market that is equivalent to `P` everywhere is an
+equivalent martingale measure**: the frozen price is read back from its floor extension at the
+integer dates (`Martingale.of_comp`, with the right inverse `Nat.cast`). -/
+theorem isEMM_of_isPricingMeasure_toMarket (hQ : (toMarket P 𝓕 S T hS).IsPricingMeasure T Q)
+    (hQP : IsEquivProbMeasure P Q) : IsEMM 𝓕 P S T Q := by
+  have hM := hQ.martingale ()
+  rw [deflated_toMarket_min] at hM
+  exact ⟨hQP, Martingale.of_comp (f := fun n ↦ S (min n T)) (Nat.floor_mono (R := ℝ≥0))
+    Nat.mono_cast Nat.floor_natCast hM⟩
+
+/-- **The pricing measures of the discrete market are the measures that agree with an equivalent
+martingale measure on the information at the horizon.** A pricing measure is equivalent to `P` on
+`𝓕 T` only; it agrees there with one equivalent to `P` everywhere
+(`Market.IsPricingMeasure.exists_isEquivProbMeasure`), which is an `IsEMM`. Conversely an `IsEMM`
+is a pricing measure, and so is every measure agreeing with a pricing measure on `𝓕 T`
+(`Market.IsPricingMeasure.of_trim_eq`). -/
+theorem isPricingMeasure_toMarket_iff [IsFiniteMeasure P] :
+    (toMarket P 𝓕 S T hS).IsPricingMeasure T Q ↔
+      ∃ Q', IsEMM 𝓕 P S T Q' ∧
+        Q'.trim ((toMarket P 𝓕 S T hS).𝓕.le T) = Q.trim ((toMarket P 𝓕 S T hS).𝓕.le T) := by
+  refine ⟨fun hQ ↦ ?_, fun ⟨Q', hQ', htrim⟩ ↦ (isPricingMeasure_toMarket_of_isEMM hQ').of_trim_eq
+    htrim⟩
+  have : IsFiniteMeasure (toMarket P 𝓕 S T hS).P := inferInstanceAs (IsFiniteMeasure P)
+  obtain ⟨Q', hQP, hQ', htrim⟩ := hQ.exists_isEquivProbMeasure
+  exact ⟨Q', isEMM_of_isPricingMeasure_toMarket hQ' hQP, htrim⟩
+
+/-- **A pricing measure rules out arbitrage** in the discrete market: it agrees on the information
+at the horizon with an equivalent martingale measure (`isPricingMeasure_toMarket_iff`), which does
+(`IsEMM.noArbitrage`). -/
+theorem _root_.MathFin.Market.IsPricingMeasure.noArbitrage_toMarket [IsFiniteMeasure P]
+    (hQ : (toMarket P 𝓕 S T hS).IsPricingMeasure T Q) : NoArbitrage 𝓕 P S T :=
+  (isPricingMeasure_toMarket_iff.1 hQ).elim fun _ h ↦ h.1.noArbitrage
+
+/-- **The fundamental theorem of asset pricing on the trunk, finite sample space**
+(Harrison–Pliska): a one-asset discrete market on a finite space whose reference measure charges
+every state has no arbitrage iff it has a pricing measure. This is `ftap_discrete` read through
+`isPricingMeasure_toMarket_iff`. -/
+theorem noArbitrage_iff_exists_isPricingMeasure_of_finite [Finite Ω] [Nonempty Ω]
+    [MeasurableSingletonClass Ω] [IsFiniteMeasure P] (hSa : StronglyAdapted 𝓕 S)
+    (hP : ∀ ω, 0 < P {ω}) :
+    NoArbitrage 𝓕 P S T ↔ ∃ Q, (toMarket P 𝓕 S T fun n _ ↦ hSa n).IsPricingMeasure T Q :=
+  ⟨fun hNA ↦ ((ftap_discrete 𝓕 P S T hSa hP).1 hNA).imp fun _ ↦ isPricingMeasure_toMarket_of_isEMM,
+    fun ⟨_, hQ⟩ ↦ hQ.noArbitrage_toMarket⟩
+
+variable (hS) in
+/-- **The fundamental theorem of asset pricing on the trunk, assuming the conditional one-period
+FTAP** (Dalang–Morton–Willinger): for an adapted integrable one-asset price, if
+`ConditionalOnePeriodFTAP` holds (an hypothesis, **not proved** in this library: see
+`DalangMortonWillinger.lean`), no arbitrage is equivalent to the existence of a pricing measure of
+the discrete market. Only the forward direction uses the hypothesis. -/
+theorem noArbitrage_iff_exists_isPricingMeasure [IsProbabilityMeasure P]
+    (hint : ∀ t ≤ T, Integrable (S t) P) (hcond : ConditionalOnePeriodFTAP 𝓕 P S T) :
+    NoArbitrage 𝓕 P S T ↔ ∃ Q, (toMarket P 𝓕 S T hS).IsPricingMeasure T Q :=
+  ⟨fun hNA ↦ (exists_isEMM_of_noArbitrage_of_conditionalFTAP hS hint hcond hNA).imp
+    fun _ ↦ isPricingMeasure_toMarket_of_isEMM, fun ⟨_, hQ⟩ ↦ hQ.noArbitrage_toMarket⟩
 
 variable (hS) in
 /-- **No arbitrage gives a pricing measure under which the contracts satisfy parity**, assuming the
@@ -191,7 +258,7 @@ theorem exists_isPricingMeasure_parity [IsProbabilityMeasure P] (hint : ∀ t �
       (toMarket P 𝓕 S T hS).price Q (europeanCall K τ)
         - (toMarket P 𝓕 S T hS).price Q (europeanPut K τ) = S₀ - K := by
   obtain ⟨Q, hQ⟩ := exists_isEMM_of_noArbitrage_of_conditionalFTAP hS hint hcond hNA
-  refine ⟨Q, isPricingMeasure_toMarket_iff.2 hQ, fun K τ ↦ ?_⟩
+  refine ⟨Q, isPricingMeasure_toMarket_of_isEMM hQ, fun K τ ↦ ?_⟩
   simp only [price_toMarket]
   exact ⟨value_forward hQ hS₀ K τ, value_europeanCall_sub_put hQ hS₀ K τ⟩
 

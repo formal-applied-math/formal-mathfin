@@ -325,6 +325,7 @@ import MathFin.Contracts.Adapted
 import MathFin.Contracts.Instruments.Options
 import MathFin.Contracts.Instruments.FixedIncome
 import MathFin.Contracts.Instruments.Credit
+import MathFin.Risk.Credit.TrancheLeg
 
 -- Pricing
 -- Continuous-time first FTAP: discounted GBM price is a Q-martingale (Wald exponential)
@@ -369,6 +370,7 @@ import MathFin.Pricing.FTAP.FTAPOnePeriodVector
 import MathFin.Pricing.FTAP.NoArbitrageLocal
 import MathFin.Pricing.FTAP.DensityPasting
 import MathFin.Pricing.FTAP.DalangMortonWillinger
+import MathFin.Pricing.FTAP.MarketFTAP
 -- Phase 20: first-principles core derivations
 import MathFin.Pricing.NoArbitrageDerivations
 -- Phase 1 (convex-duality unification): fundamental superhedging bound — every EMM prices a claim
@@ -680,6 +682,7 @@ import MathFin.Models.BlackScholes.BlackScholesSDE
 import MathFin.Models.BlackScholes.BlackScholesChooser
 import MathFin.Models.BlackScholes.BlackScholesHedge
 import MathFin.Models.BlackScholes.BlackScholesPhysical
+import MathFin.Models.BlackScholes.Market
 -- The Black–Scholes delta hedge is self-financing: the product rule with the factor e^{rt}
 import MathFin.Models.BlackScholes.BlackScholesSelfFinancing
 import MathFin.Models.Binomial.Binomial
@@ -801,6 +804,7 @@ import MathFin.Risk.PositionsConvention
 -- Phase 1 (convex-duality unification): coherent-risk ADEH representation — acceptance cone
 -- separation giving the representing probability measures (risk-side Hahn–Banach)
 import MathFin.Risk.AcceptanceSet
+import MathFin.Risk.Superhedging
 -- Phase 1 (convex-duality unification): worst-case loss — the most conservative coherent risk
 -- measure, concrete instance of the ADEH representation (sup over the entire probability simplex)
 import MathFin.Risk.WorstCaseRisk
@@ -828,6 +832,8 @@ import MathFin.Risk.StudentTValueAtRisk
 import MathFin.Risk.Elicitability
 import MathFin.Risk.JointElicitability
 import MathFin.Risk.Expectile
+import MathFin.Risk.EntropicRisk
+import MathFin.Risk.LawInvariance
 import MathFin.Risk.Credit.BernoulliMixture
 import MathFin.Risk.Credit.CreditMetrics
 import MathFin.Risk.Credit.VasicekIRB
@@ -921,4 +927,6 @@ import MathFin.Markets.Microstructure.RollSpread
 import MathFin.Markets.DeFi.ConstantProductLPLognormal
 import MathFin.Markets.DeFi.LiquidationAsStructuralDefault
 import MathFin.Markets.DeFi.UniswapV3CoveredCallPrice
+import MathFin.Markets.DeFi.LPContract
 import MathFin.Markets.Microstructure.GlostenMilgromCondExp
+import MathFin.Markets.Microstructure.GlostenMilgromMarket

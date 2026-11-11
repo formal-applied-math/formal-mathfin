@@ -2151,9 +2151,25 @@ than definitionally, since `driftContinuousMod 0` is a `limUnder` along a chosen
 #guard_msgs in
 #print axioms MathFin.expectedShortfall_isCoherentRiskMeasure
 
+/-- info: 'MathFin.expectedShortfall_isCoherentRiskMeasure_and_isLawInvariant' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.expectedShortfall_isCoherentRiskMeasure_and_isLawInvariant
+
 /-- info: 'MathFin.isGreatest_integral_mul_expectedShortfall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.isGreatest_integral_mul_expectedShortfall
+
+/-- info: 'MathFin.isCoherentRiskMeasure_superhedgingPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.isCoherentRiskMeasure_superhedgingPrice
+
+/-- info: 'MathFin.le_superhedgingPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.le_superhedgingPrice
+
+/-- info: 'MathFin.representingSet_expectedShortfall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.representingSet_expectedShortfall
 
 /-- info: 'MathFin.expectedShortfall_of_hasLaw_gaussianReal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
@@ -2383,6 +2399,22 @@ bounded-coefficient process class. -/
 #guard_msgs in
 #print axioms MathFin.expectedShortfall
 
+/-- info: 'MathFin.IsConvexRiskMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.IsConvexRiskMeasure
+
+/-- info: 'MathFin.IsLawInvariant' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.IsLawInvariant
+
+/-- info: 'MathFin.acceptableUnderUtility_exp_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.acceptableUnderUtility_exp_iff
+
+/-- info: 'MathFin.superhedgingPrice_isLUB' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.superhedgingPrice_isLUB
+
 /-- info: 'MathFin.IsCoherentRiskMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.IsCoherentRiskMeasure
@@ -2406,6 +2438,10 @@ bounded-coefficient process class. -/
 /-- info: 'MathFin.Contracts.Contract.value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.Contracts.Contract.value
+
+/-- info: 'MathFin.Market.price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Market.price
 
 /-- info: 'MathFin.zcb' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
@@ -2597,9 +2633,149 @@ bounded-coefficient process class. -/
 #guard_msgs in
 #print axioms MathFin.portfolioVarN_minVarWeightTwo_le
 
+/-- info: 'MathFin.exists_pos_smul_eq_of_stationary' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.exists_pos_smul_eq_of_stationary
+
 /-- info: 'MathFin.exists_isEMM_of_isLocalMaxOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.exists_isEMM_of_isLocalMaxOn
+/-! ## Blueprint landmarks
+
+The landmarks of `docs/blueprint.md` that no section above pins: one `#print axioms` each. -/
+
+/-- info: 'MathFin.doob_decomposition' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.doob_decomposition
+
+/-- info: 'MeasureTheory.maximal_ineq_Lp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MeasureTheory.maximal_ineq_Lp
+
+/-- info: 'MathFin.martingale_ae_tendsto_and_eLpNorm_two_tendsto' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.martingale_ae_tendsto_and_eLpNorm_two_tendsto
+
+/-- info: 'MathFin.LevyCharacterization.isBrownianReal_of_localMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.LevyCharacterization.isBrownianReal_of_localMartingale
+
+/-- info: 'MathFin.quantile_gaussianReal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.quantile_gaussianReal
+
+/-- info: 'MathFin.IsCopula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.IsCopula
+
+/-- info: 'MathFin.IsCopula.measureReal_Iic_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.IsCopula.measureReal_Iic_le
+
+/-- info: 'MathFin.kkt_sufficient' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.kkt_sufficient
+
+/-- info: 'MathFin.Market' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Market
+
+/-- info: 'MathFin.Market.IsPricingMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Market.IsPricingMeasure
+
+/-- info: 'MathFin.forwardMeasure_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.forwardMeasure_price
+
+/-- info: 'MathFin.ftap_two' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ftap_two
+
+/-- info: 'MathFin.bachelier_call_formula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.bachelier_call_formula
+
+/-- info: 'MathFin.Dupire.breedenLitzenberger_weak' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Dupire.breedenLitzenberger_weak
+
+/-- info: 'MathFin.kmvPD_eq_one_sub_survival_probability' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.kmvPD_eq_one_sub_survival_probability
+
+/-- info: 'MathFin.Cox.cox_survival_timeVarying' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Cox.cox_survival_timeVarying
+
+/-- info: 'MathFin.sum_componentVaR_eq_valueAtRisk_sub' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.sum_componentVaR_eq_valueAtRisk_sub
+
+/-- info: 'MathFin.not_isElicitable_expectedShortfall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.not_isElicitable_expectedShortfall
+
+/-- info: 'MathFin.CVA.potentialFutureExposure_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.CVA.potentialFutureExposure_gaussian
+
+/-- info: 'MathFin.prefersEU_independence' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.prefersEU_independence
+
+/-- info: 'MathFin.expectedUtility' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.expectedUtility
+
+/-- info: 'MathFin.kelly_n_periods_deriv_at_kelly' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.kelly_n_periods_deriv_at_kelly
+
+/-- info: 'MathFin.not_exists_isCoherentRiskMeasure_log_acceptance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.not_exists_isCoherentRiskMeasure_log_acceptance
+
+/-- info: 'MathFin.BlackScholes.AmericanPut.Stopping.brownianUsualActualContactRule_optimal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.BlackScholes.AmericanPut.Stopping.brownianUsualActualContactRule_optimal
+
+/-- info: 'MathFin.Market.noArbitrage_iff_exists_isPricingMeasure_of_finite' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Market.noArbitrage_iff_exists_isPricingMeasure_of_finite
+
+/-- info: 'MathFin.Contracts.BlackScholes.isPricingMeasure_constGirsanovMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.isPricingMeasure_constGirsanovMeasure
+
+
+/-- info: 'MathFin.Execution.isPricingMeasure_toMarket_condExp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Execution.isPricingMeasure_toMarket_condExp
+
+/-- info: 'MathFin.isCopula_gaussianFactorCopula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.isCopula_gaussianFactorCopula
+
+/-- info: 'MathFin.DeFi.sqrtObs' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.sqrtObs
+
+/-- info: 'MathFin.DeFi.constantProductPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.constantProductPayoff
+
+/-- info: 'MathFin.DeFi.lpPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.lpPayoff
+
+/-- info: 'MathFin.Contracts.trancheLossPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.trancheLossPayoff
+
+/-- info: 'MathFin.Contracts.trancheLeg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.trancheLeg
 
 /-- info: 'MathFin.capm_of_affine_discountFactor' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
@@ -2610,3 +2786,11 @@ bounded-coefficient process class. -/
 #print axioms MathFin.abs_sharpeRatio_le_of_discountFactor
 
 end MathFin.AxiomAudit
+
+/-- info: 'MathFin.DeFi.price_lpPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.DeFi.price_lpPayoff
+
+/-- info: 'MathFin.Contracts.value_trancheLeg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Contracts.value_trancheLeg

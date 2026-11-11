@@ -15,12 +15,21 @@ declaration index (``lake exe mathfin_index``):
 
 ``off_map_count`` is a ratchet count (``ratchet.json``: ``corpus_off_blueprint``), and so is the
 number of ``islands`` of the proved blueprint (``blueprint_islands``); the docs site
-draws the whole picture as the program tree (``tree.html``, ``tree_data``), laid out on the map in
-``tree_map.toml``: four roots, the pricing functional as the trunk, five limbs. The map is a way of
-drawing the library and nothing else reads it.
+draws the whole picture as the program tree (``tree.html``, ``tree_data``). Where a node sits is
+read from ``docs/taxonomy.toml`` (``tools/verify/taxonomy.py``): a proved node in the cell of its
+declaration module, a frontier node in its ``area``, both with a family; ``tree_map.toml`` lists
+the few proved nodes whose declaration module is not their conceptual cell.
 
-    python3 -m tools.verify.program_tree decl-index.json            # summary by area
-    python3 -m tools.verify.program_tree decl-index.json --off risk # the off-map entries of an area
+Height on the tree is measured, not ordered: a node on a limb sits at its **hop**, the distance
+in statements from the trunk that ``chain_reach`` computes from the same index (a theorem's hop;
+for a definition, its concept distance plus one). A node of infinite hop is an **island**, drawn
+beside its limb under its cluster's name (a declared ``[[standalone]]`` of the taxonomy, else its
+cell) and ringed when nothing reaches it. A ``[[tower]]`` of the taxonomy is one node. A
+**connector** (a frontier node with a ``lean`` field) is a phantom: placed between the nodes its
+statement mentions, at the hop it would have if proved, sized by ``connector_gains``.
+
+    python3 -m tools.verify.program_tree decl-index.json                    # summary by cell
+    python3 -m tools.verify.program_tree decl-index.json --off risk/credit  # a cell's off-map
 """
 
 from __future__ import annotations
@@ -33,6 +42,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .corpus import iter_entries
+from . import chain_reach, taxonomy
 from .decl_index import DeclIndex
 from .mathfin_index import cited_constants, declaration_index
 
@@ -40,77 +50,30 @@ NODES_JSON = Path("docs/blueprint_nodes.json")
 TREE_MAP = Path(__file__).with_name("tree_map.toml")
 FRONTIER_TOML = Path("docs/blueprint_frontier.toml")
 
-# Where a module sits (`MathFin.<Layer>.<Sub>.…`, longest prefix first) and the `area:*` label
-# its work carries.
-SECTION_AREA = {
-    "Probability": "foundations", "Pricing": "foundations", "Contracts": "contracts",
-    "Models": "black-scholes", "Models.StochVol": "stoch-vol", "Models.Binomial": "binomial",
-    "Models.Rates": "fixed-income", "Models.Credit": "credit", "Models.Forwards": "futures",
-    "Risk": "risk", "Choice": "portfolio", "Insurance": "actuarial", "Markets": "execution",
-    "Markets.DeFi": "defi",
-}
-
 KINDS = ("rests-on-node", "feeds-node", "upstream-only", "off-map")
 
-# Where the tree puts a node the map does not name, and an area's fallen leaves: by directory.
-AREA_PLACE = {
-    "foundations": "pricing", "contracts": "pricing", "black-scholes": "models/black-scholes",
-    "binomial": "models/discrete", "stoch-vol": "models/stoch-vol", "fixed-income": "models/rates",
-    "credit": "models/credit", "futures": "models/fx-futures", "commodities": "models/fx-futures",
-    "fx": "models/fx-futures", "portfolio": "choice", "risk": "risk/measures",
-    "actuarial": "insurance", "execution": "markets/execution", "defi": "markets/amm",
-    "upstream": "brownian",
-}
+UPSTREAM = "upstream"  # the cell of an entry that cites no MathFin module
 
 
-def load_map(path: Path = TREE_MAP) -> dict:
-    """The tree's map: its parts in drawing order, branch names, and each named node's place."""
-    raw = tomllib.loads(path.read_text(encoding="utf-8"))
-    return dict(parts=raw.get("part", []), branch=raw.get("branch", {}), place=raw.get("place", {}))
+def load_map(path: Path = TREE_MAP) -> dict[str, str]:
+    """The per-node exceptions: blueprint label -> cell key."""
+    return tomllib.loads(path.read_text(encoding="utf-8")).get("place", {})
 
 
-# Where the tree puts a module's nodes by default: its directory, longest prefix first. The map
-# names only the nodes that sit elsewhere.
-DIR_PLACE = {
-    "Probability": "pricing", "Probability.Discrete": "discrete",
-    "Probability.Brownian": "brownian", "Probability.BrownianMotion": "brownian",
-    "Probability.Martingales": "brownian", "Probability.Gaussian": "analysis",
-    "Probability.Analysis": "analysis", "Probability.Laws": "analysis",
-    "Probability.Jumps": "jumps", "Probability.Dependence": "risk/dependence",
-    "Contracts": "pricing", "Pricing": "pricing",
-    "Models.BlackScholes": "models/black-scholes", "Models.Bachelier": "models/black-scholes",
-    "Models.Binomial": "models/discrete", "Models.Jumps": "models/jumps",
-    "Models.StochVol": "models/stoch-vol", "Models.LocalVol": "models/local-vol",
-    "Models.ModelFree": "models/model-free", "Models.Rates": "models/rates",
-    "Models.Credit": "models/credit", "Models.Forwards": "models/fx-futures",
-    "Risk": "risk/measures", "Risk.Credit": "risk/dependence",
-    "Choice": "choice/static", "Choice.Performance": "choice/performance",
-    "Insurance": "insurance/survival",
-    "Markets": "markets/execution", "Markets.DeFi": "markets/amm",
-    "Markets.Microstructure": "markets/price-formation",
-}
+def cell_of_module(module: str) -> str:
+    """The taxonomy cell of a MathFin module (the trunk for the library's own machinery)."""
+    return taxonomy.cell_of(module) or "market"
 
 
-def dir_place(module: str) -> str | None:
-    parts = module.split(".")[1:-1]
-    return next((DIR_PLACE[sec] for k in range(len(parts), 0, -1)
-                 if (sec := ".".join(parts[:k])) in DIR_PLACE), None)
-
-
-def map_place(label: str, area: str, tree_map: dict, module: str = "") -> tuple[str, str]:
-    """(part, branch) of a node: the map's place for it, else its directory's, else its area's."""
-    where = (tree_map["place"].get(label) or (module and dir_place(module))
-             or AREA_PLACE.get(area, "pricing"))
-    part, _, branch = where.partition("/")
-    return part, branch
-
-
-def area_of_module(module: str) -> str:
-    parts = module.split(".")[1:-1]
-    for k in range(len(parts), 0, -1):
-        if (sec := ".".join(parts[:k])) in SECTION_AREA:
-            return SECTION_AREA[sec]
-    return parts[0].lower() if parts else "upstream"
+def place_node(n: dict, exceptions: dict[str, str]) -> tuple[str, str | None]:
+    """(cell, family) of a node of the tree: a proved node by its exception, else by its
+    declaration module; a frontier node by its ``area`` and ``family``; upstream in the soil."""
+    if n["s"] == "frontier":
+        return n["area"], n.get("family") or None
+    module = n.get("m") or ""
+    if n["s"] == "upstream":
+        return "probability/brownian", None
+    return exceptions.get(n["l"]) or cell_of_module(module), taxonomy.family_of(module)
 
 
 @dataclass(frozen=True)
@@ -119,7 +82,8 @@ class Placement:
     name: str
     status: str
     kind: str  # one of KINDS
-    area: str
+    cell: str
+    family: str | None
     rests_on: tuple[str, ...]  # node labels, all of them
     nearest: str | None  # the deepest node it rests on: where the tree hangs it
 
@@ -203,13 +167,40 @@ def place_corpus(idx: DeclIndex, nodes: list[dict]) -> list[Placement]:
         out.append(Placement(
             entry=t["id"], name=t.get("name", ""),
             status=t.get("metadata", {}).get("formalization_status", ""), kind=kind,
-            area=area_of_module(mods[0]) if mods else "upstream", rests_on=tuple(sorted(on)),
+            cell=cell_of_module(mods[0]) if mods else UPSTREAM,
+            family=taxonomy.family_of(mods[0]) if mods else None, rests_on=tuple(sorted(on)),
             nearest=max(on, key=lambda label: (depth.get(label, 0), label)) if on else None))
     return out
 
 
 def load_nodes(path: Path = NODES_JSON) -> list[dict]:
-    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+    """The exported Lean-tagged nodes, minus any label retired since the export.
+
+    An export older than a retirement still lists the retired node. The graph the next export
+    draws walks through an untagged declaration to what it uses, so a retired node is removed
+    here the same way: its users inherit its own `uses`."""
+    from .blueprint_issues import load_retired
+
+    gone = set(load_retired(path.parent / "blueprint_retired.toml"))
+    nodes = json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+    if not gone:
+        return nodes
+    by = {n["label"]: n for n in nodes}
+
+    def through(label: str, seen: frozenset[str] = frozenset()) -> list[str]:
+        if label not in gone:
+            return [label]
+        if label in seen or label not in by:
+            return []
+        return [u for v in by[label].get("uses", ()) for u in through(v, seen | {label})]
+
+    out = []
+    for n in nodes:
+        if n["label"] in gone:
+            continue
+        uses = list(dict.fromkeys(u for v in n.get("uses", ()) for u in through(v)))
+        out.append({**n, "uses": uses})
+    return out
 
 
 def load_frontier(path: Path = FRONTIER_TOML) -> list[dict]:
@@ -265,11 +256,18 @@ def _statement(text: str, limit: int = 480) -> str:
     return cut + " …"
 
 
+def _records(idx: DeclIndex) -> list[dict]:
+    """The index in the shape ``chain_reach`` reads."""
+    return [dict(name=d.name, kind=d.kind, module=d.module, private=d.private, type=d.type,
+                 uses=list(d.uses)) for d in idx.decls.values()]
+
+
 def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
-              issues: list[dict] | None = None) -> dict:
-    """Everything the tree page draws, as one JSON-ready dict."""
+              issues: list[dict] | None = None, connectors: list[dict] = ()) -> dict:
+    """Everything the tree page draws, as one JSON-ready dict. ``connectors`` are the records
+    of the connector library's index (``MathFinFrontier.*``)."""
     places = place_corpus(idx, nodes)
-    tree_map = load_map()
+    exceptions = load_map()
     nearest = Counter(p.nearest for p in places if p.nearest)
     named: dict[str, list[list]] = defaultdict(list)
     open_problem: set[str] = set()  # nodes an open `open-problem` issue carries
@@ -288,47 +286,230 @@ def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
                   else "proved" if n.get("leanOk", True) else "partial")
         out_nodes.append(dict(
             l=n["label"], t=n.get("title") or n["label"], s=status, u=n.get("uses", []),
-            a=area_of_module(n.get("module", "")) if status != "upstream" else "upstream",
             x=_statement(n.get("text", "")), d=n.get("name"), m=n.get("module"),
             e=nearest.get(n["label"], 0), i=named.get(n["label"], [])))
     for f in frontier:
         out_nodes.append(dict(
-            l=f["label"], t=f["title"], s="frontier", u=f.get("uses", []), a=f.get("area", ""),
+            l=f["label"], t=f["title"], s="frontier", u=f.get("uses", []),
+            area=f["area"], family=f.get("family", ""),
             x=f.get("statement", ""), ground=f.get("ground", ""), core=f.get("core", []),
-            e=0, i=named.get(f["label"], []), op=int(f["label"] in open_problem)))
+            e=0, i=named.get(f["label"], []), op=int(f["label"] in open_problem),
+            **({"ln": f["lean"]} if f.get("lean") else {})))
+    joint_of = {j["node"]: j["limbs"] for j in taxonomy.joints()}
     for n in out_nodes:
-        n["p"], n["b"] = map_place(n["l"], n["a"], tree_map, n.get("m") or "")
-    by_area: dict[str, Counter] = defaultdict(Counter)
+        cell, family = place_node(n, exceptions)
+        n["p"], _, n["b"] = cell.partition("/")
+        if family:
+            n["f"] = family
+        if n["l"] in joint_of:
+            n["j"] = joint_of[n["l"]]
+        n.pop("area", None)
+        n.pop("family", None)
+    # the measure: heights, towers, islands, phantoms
+    records = _records(idx)
+    reach = chain_reach.compute(records)
+    by_rec = {r["name"]: r for r in records}
+    hops = {r["name"]: reach.hop_of(r) for r in records}
+    part_kind = {p["key"]: p["kind"] for p in taxonomy.parts()}
+    assign_hops(out_nodes, hops)
+    out_nodes = collapse_towers(out_nodes, sorted({r["module"] for r in records}),
+                                taxonomy.towers())
+    by_conn = {c["name"]: c for c in connectors}
+    gains = chain_reach.connector_gains(records, list(connectors)) if connectors else {}
+    conn_nodes = [(n["l"], by_conn[n["ln"]]) for n in out_nodes if n.get("ln") in by_conn]
+    phantom = phantoms(out_nodes, conn_nodes, reach,
+                       {r["name"]: r["module"] for r in records}, gains)
+    for n in out_nodes:
+        if n["l"] in phantom:
+            ph = phantom[n["l"]]
+            n["ph"] = dict(gain=ph["gain"])
+            n["hp"] = ph["hp"]
+            if ph["ends"]:
+                n["u"] = ph["ends"]
+        elif n.get("ln"):
+            n["ph"] = dict(gain=0)
+    reached = {e for ph in phantom.values() for e in ph["ends"]}
+    island_list = float_islands(out_nodes, part_kind, reached)
+    metric = metrics(reach, len(taxonomy.families()), island_list)
+    by_cell: dict[str, Counter] = defaultdict(Counter)
     off: dict[str, list[list[str]]] = defaultdict(list)
     for p in places:
-        by_area[p.area][p.kind] += 1
+        by_cell[p.cell][p.kind] += 1
         if p.kind == "off-map":
-            off[p.area].append([p.entry, p.name[:90]])
-    return dict(nodes=out_nodes, areas={a: dict(c) for a, c in by_area.items()},
-                off={a: v for a, v in off.items()}, issues=issues is not None,
-                corpus=len(places), parts=tree_map["parts"], branch=tree_map["branch"],
-                pile={a: "/".join(filter(None, map_place("", a, tree_map))) for a in by_area})
+            off[p.cell].append([p.entry, p.name[:90]])
+    return dict(nodes=out_nodes, areas={a: dict(c) for a, c in by_cell.items()},
+                off=dict(off), issues=issues is not None, corpus=len(places),
+                parts=crown_order(taxonomy.parts()),
+                cellName={k: taxonomy.label(k) for k in taxonomy.cells()} | {UPSTREAM: UPSTREAM},
+                cellBlurb={k: c["blurb"] for k, c in taxonomy.cells().items()},
+                families=[dict(key=k, title=f["title"], blurb=f["blurb"], hue=f["hue"],
+                               socket=k in reach.sockets)
+                          for k, f in taxonomy.families().items()],
+                joints=taxonomy.joints(), islands=island_list, metrics=metric)
+
+
+def _hop(h: float) -> int | None:
+    return None if h == float("inf") else int(h)
+
+
+def assign_hops(nodes: list[dict], hops: dict[str, float]) -> None:
+    """Set ``hp`` on every node: the measured hop of its declaration (``None`` when infinite or
+    when the node has no declaration). A frontier node with no declaration takes one more than
+    the least hop among the nodes it builds on, ``None`` if none of them is measured."""
+    by = {n["l"]: n for n in nodes}
+    for n in nodes:
+        n["hp"] = _hop(hops.get(n.get("d") or "", float("inf")))
+    memo: dict[str, int | None] = {}
+
+    def frontier_hop(label: str, seen: frozenset[str] = frozenset()) -> int | None:
+        n = by[label]
+        if n["s"] != "frontier" or n.get("d"):
+            return n["hp"]
+        if label in memo:
+            return memo[label]
+        us = [u for u in n["u"] if u in by and u not in seen]
+        hs = [h for h in (frontier_hop(u, seen | {label}) for u in us) if h is not None]
+        memo[label] = 1 + min(hs) if hs else None
+        return memo[label]
+
+    for n in nodes:
+        if n["s"] == "frontier" and not n.get("d"):
+            n["hp"] = frontier_hop(n["l"])
+
+
+def collapse_towers(nodes: list[dict], modules: list[str], towers: list[dict]) -> list[dict]:
+    """Each tower of the taxonomy becomes one node. Its members' modules are counted in
+    ``modules`` (every module of the index), its hop is the best of its members' (the summit),
+    its corpus count the sum, its issues the union, and every ``uses`` edge into a member points
+    at the tower. A tower with no blueprint node stays absent."""
+    out = list(nodes)
+    for t in towers:
+        mem = [n for n in out if n["s"] != "frontier" and n.get("m")
+               and taxonomy.in_prefixes(n["m"], t["modules"])]
+        if not mem:
+            continue
+        gone = {n["l"] for n in mem}
+        hs = [n["hp"] for n in mem if n["hp"] is not None]
+        summit = min(mem, key=lambda n: (n["hp"] is None, n["hp"] or 0, n["l"]))
+        label = "tower:" + t["key"]
+        count = sum(taxonomy.in_prefixes(m, t["modules"]) for m in modules)
+        uses = list(dict.fromkeys(label if u in gone else u for n in mem for u in n["u"]
+                                  if u not in gone))
+        tower = dict(
+            summit, l=label, t=f"{t['title']} tower", tw=count, u=uses,
+            s="partial" if any(n["s"] == "partial" for n in mem) else "proved",
+            hp=min(hs) if hs else None, e=sum(n["e"] for n in mem),
+            i=[x for n in mem for x in n["i"]],
+            x=f"{len(mem)} blueprint nodes in {count} modules under "
+              f"{', '.join(t['modules'])}; the summit is {summit['t']}.")
+        out = [n for n in out if n["l"] not in gone]
+        for n in out:
+            if gone & set(n["u"]):
+                n["u"] = list(dict.fromkeys(label if u in gone else u for u in n["u"]))
+        out.append(tower)
+    return out
+
+
+def float_islands(nodes: list[dict], part_kind: dict[str, str], reached: set[str],
+                  standalone: list[dict] | None = None) -> list[dict]:
+    """The clusters of infinite hop, drawn beside their limb. A proved node on a limb whose hop
+    is infinite belongs to the ``[[standalone]]`` entry covering its module, else to its cell; a
+    frontier node joins the cluster of an island node it builds on. A cluster is **declared**
+    when a standalone entry covers it and **reached** when a connector mentions one of its
+    nodes; one that is neither gets the red ring (``ring``). Sets ``isl`` on each member."""
+    standalone = taxonomy.standalones() if standalone is None else standalone
+    by = {n["l"]: n for n in nodes}
+    clusters: dict[str, dict] = {}
+
+    def home(n: dict) -> dict:
+        for k, st in enumerate(standalone):
+            if n.get("m") and taxonomy.in_prefixes(n["m"], st["modules"]):
+                return dict(key=f"standalone:{k}", title=st.get("title") or st["reason"][:48],
+                            declared=True, reason=st["reason"], socket=st.get("socket", ""))
+        cell = n["p"] + ("/" + n["b"] if n.get("b") else "")
+        return dict(key="cell:" + cell, title=taxonomy.label(cell), declared=False,
+                    reason="", socket="")
+
+    for n in nodes:
+        if (part_kind.get(n["p"]) == "limb" and not n.get("j") and n["hp"] is None
+                and n["s"] in ("proved", "partial")):
+            c = home(n)
+            cl = clusters.setdefault(c["key"], dict(c, p=n["p"], nodes=[]))
+            cl["nodes"].append(n["l"])
+            n["isl"] = c["key"]
+    for n in nodes:  # a frontier node that builds on an island sits with it
+        if n["s"] == "frontier" and n["hp"] is None and not n.get("isl"):
+            hosts = [by[u]["isl"] for u in n["u"] if u in by and by[u].get("isl")]
+            if hosts:
+                n["isl"] = hosts[0]
+                clusters[hosts[0]]["nodes"].append(n["l"])
+    for cl in clusters.values():
+        cl["ring"] = not cl["declared"] and not (set(cl["nodes"]) & reached)
+    return sorted(clusters.values(), key=lambda c: (-len(c["nodes"]), c["key"]))
+
+
+def phantoms(nodes: list[dict], connectors: list[tuple[str, dict]], reach: chain_reach.Reach,
+             module_of: dict[str, str], gains: dict[str, int]) -> dict[str, dict]:
+    """Where each connector sits. ``connectors`` pairs a node label with its record in the
+    connector library's index. The ends are the blueprint nodes of the concepts its statement
+    mentions (the node whose declaration is the concept, else a node of the concept's module,
+    ``module_of``); the hop is one more than the least concept distance, what it would be if
+    proved; the gain is ``connector_gains`` (theorems brought within three hops)."""
+    by_decl = {n["d"]: n["l"] for n in nodes if n.get("d")}
+    by_mod: dict[str, list[str]] = defaultdict(list)
+    for n in nodes:
+        if n.get("m") and n["s"] != "frontier":
+            by_mod[n["m"]].append(n["l"])
+    out: dict[str, dict] = {}
+    for label, rec in connectors:
+        ends: list[str] = []
+        ds = []
+        for c in sorted(reach.mentioned(rec)):
+            ds.append(reach.dist.get(c, float("inf")))
+            hit = by_decl.get(c) or next(iter(by_mod.get(module_of.get(c, ""), [])), None)
+            if hit and hit not in ends:
+                ends.append(hit)
+        out[label] = dict(ends=ends, hp=_hop(1 + min(ds)) if ds else None,
+                          gain=gains.get(rec["name"], 0))
+    return out
+
+
+def metrics(reach: chain_reach.Reach, families: int, island_list: list[dict]) -> dict:
+    """The strip above the tree: how connected the library is, from the same index."""
+    s = chain_reach.summary(reach)
+    return dict(R3=s["R3"], sockets=s["sockets"], families=families,
+                span=sum(s["joint_span"].values()), islands=len(island_list),
+                unreached=sum(c["ring"] for c in island_list), theorems=s["theorems"])
+
+
+def crown_order(parts: list[dict]) -> list[dict]:
+    """The parts as drawn: roots, the trunk, then the limbs from the centre out, the first limb
+    in the middle, the second to its left, the third to its right."""
+    limbs: list[dict] = []
+    for i, p in enumerate(q for q in parts if q["kind"] == "limb"):
+        limbs.insert(0, p) if i % 2 else limbs.append(p)
+    return [p for p in parts if p["kind"] != "limb"] + limbs
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="python3 -m tools.verify.program_tree")
     ap.add_argument("index", help="decl-index.json (lake exe mathfin_index)")
-    ap.add_argument("--off", metavar="AREA", help="list the off-map entries of an area")
+    ap.add_argument("--off", metavar="CELL", help="list the off-map entries of a taxonomy cell")
     args = ap.parse_args(argv)
     places = place_corpus(DeclIndex.load(args.index), load_nodes())
     if args.off:
         for p in places:
-            if p.kind == "off-map" and p.area == args.off:
+            if p.kind == "off-map" and p.cell == args.off:
                 print(f"{p.entry}\t{p.name}")
         return 0
     by_area: dict[str, Counter] = defaultdict(Counter)
     for p in places:
-        by_area[p.area][p.kind] += 1
+        by_area[p.cell][p.kind] += 1
     total = Counter(p.kind for p in places)
-    print(f"{'area':<16}" + "".join(f"{k:>15}" for k in KINDS))
+    print(f"{'cell':<24}" + "".join(f"{k:>15}" for k in KINDS))
     for a in sorted(by_area, key=lambda a: -sum(by_area[a].values())):
-        print(f"{a:<16}" + "".join(f"{by_area[a][k]:>15}" for k in KINDS))
-    print(f"{'all':<16}" + "".join(f"{total[k]:>15}" for k in KINDS))
+        print(f"{a:<24}" + "".join(f"{by_area[a][k]:>15}" for k in KINDS))
+    print(f"{'all':<24}" + "".join(f"{total[k]:>15}" for k in KINDS))
     return 0
 
 

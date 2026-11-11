@@ -14,9 +14,9 @@ public import MathFin.Choice.Utility.StatePriceDensity
 The growth-optimal (log-optimal) portfolio is the **numéraire portfolio**: deflating
 the physical measure by the growth-optimal wealth turns it into the equivalent
 martingale measure (Long 1990 / Platen's benchmark approach). This file realizes that
-identity in the two-outcome Kelly market — the discrete, fully elementary shadow of the
-continuous statement (which needs a state-price-density / market model absent from the
-Itô tower).
+identity in the two-outcome Kelly market, the discrete, fully elementary shadow of the
+continuous statement, which is not proved here. Its state-price form is `kelly_statePrices`
+below, an instance of the first-order condition of `Choice/Utility/StatePriceDensity`.
 
 Setup (`Choice/Performance/Ratios`): a binary bet at fraction `f` pays odds `b` (wealth
 multiplier `1 + f·b`) with physical probability `p`, or loses the stake (multiplier
@@ -31,7 +31,7 @@ by the growth-optimal wealth there) gives `q₊ = p/W*₊`, `q₋ = (1-p)/W*₋`
 
   `q₊ = 1/(b+1)`,   `q₋ = b/(b+1)`   — **independent of the physical `p`** —
 
-the unique *fair-odds* (risk-neutral) probabilities for a bet paying `b`-to-`1`. They sum
+the *fair-odds* (risk-neutral) probabilities for a bet paying `b`-to-`1`. They sum
 to `1` (a probability measure) and price the bet as a martingale
 (`q₊·b + q₋·(−1) = 0`, zero expected excess return): the GOP-deflated measure **is** the
 EMM. The `p`-independence is exactly the content of the Kelly first-order condition —
