@@ -30,7 +30,9 @@ The invariants, checked by ``check``:
    ``area:<cell>`` label for each node's cell and a ``family:<family>`` label for each node's
    model family (``docs/taxonomy.toml``; a Lean node's cell and family are its module's, a
    frontier node's are its ``area`` and ``family``). Nobody sets them by hand: ``labels
-   --apply`` (blueprint-sync, on every issue event) writes them.
+   --apply`` (blueprint-sync, on every issue event) writes them. An issue an open pull request
+   closes is skipped: delivering a frontier node can move its cell, and main relabels the issue
+   from the merged tree.
 
     python3 -m tools.verify.blueprint_issues check            # all issues, via `gh api`
     python3 -m tools.verify.blueprint_issues check --issues issues.json
@@ -62,6 +64,7 @@ MATH_LABELS = frozenset({"type:proof", "type:research", "open-problem", "frontie
 EXEMPT_LABELS = frozenset({"tracking"})
 
 # `Blueprint: a, b` at the start of a line; tolerate markdown bold and list bullets.
+_CLOSES = re.compile(r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)", re.I)
 _LINE = re.compile(r"^[\s>*-]*\**blueprint\**\s*:\**\s*(.+?)\s*$", re.I | re.M)
 _NODE_LABEL = re.compile(r"^(?:thm|def|lem|cor|prop):[a-z0-9][a-z0-9-]*$")
 
@@ -360,6 +363,10 @@ def check(issues: list[Issue], nodes: dict[str, Node],
     problems += [Problem(m) for m in retired_problems(retired, nodes)]
     open_named: dict[str, list[int]] = {}
     any_named: dict[str, list[int]] = {}
+    # an issue an open pull request closes takes its labels from that branch's tree once it
+    # merges (blueprint-sync relabels it from main), so its drift here is the branch's, not a fault
+    closing = {int(k) for i in issues if i.is_pr and i.state == "open"
+               for k in _CLOSES.findall(i.body)}
     for i in issues:
         for label in i.nodes:
             if label in retired and label not in nodes:
@@ -382,7 +389,8 @@ def check(issues: list[Issue], nodes: dict[str, Node],
             problems.append(Problem(
                 f"#{i.number} ({i.title}) is open math work but names no blueprint node",
                 i.number))
-        add, drop = label_drift(i, nodes) if i.state == "open" else ((), ())
+        live = i.state == "open" and i.number not in closing
+        add, drop = label_drift(i, nodes) if live else ((), ())
         if add or drop:
             problems.append(Problem(
                 f"#{i.number}: its nodes give it the labels "
