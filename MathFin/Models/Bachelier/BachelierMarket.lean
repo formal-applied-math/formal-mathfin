@@ -168,14 +168,14 @@ theorem superReplicationPrice_europeanCall (hWcont : ∀ ω, Continuous fun s : 
         (scenarioAt (market μ hWmeas S_0 σ).asset ω)) = fun ω ↦ max (S_0 + σ * W T ω - K) 0 := by
     funext ω
     simp [Contract.pathPV, Contract.cashflows, europeanCall, europeanCallPayoff, Payoff.eval,
-      scenarioAt, deflator_market, market]
+      scenarioAt, market, Market.deflator]
   have hm : Measurable (fun ω ↦ max (S_0 + σ * W T ω - K) 0) :=
     ((((hWmeas T).const_mul σ).const_add S_0).sub_const K).max measurable_const
   have hmem : MemLp (fun ω ↦ max (S_0 + σ * W T ω - K) 0) 2 μ := by
     have hWT : MemLp (W T) 2 μ := (hW.hasLaw_eval T).memLp (memLp_id_gaussianReal 2)
     refine MemLp.of_le ((memLp_const (S_0 - K)).add (hWT.const_mul σ)) hm.aestronglyMeasurable
       (.of_forall fun ω ↦ ?_)
-    show ‖max (S_0 + σ * W T ω - K) 0‖ ≤ ‖S_0 - K + σ * W T ω‖
+    change ‖max (S_0 + σ * W T ω - K) 0‖ ≤ ‖S_0 - K + σ * W T ω‖
     simp only [Real.norm_eq_abs]
     rcases le_total (S_0 + σ * W T ω - K) 0 with h | h
     · rw [max_eq_right h, abs_zero]
