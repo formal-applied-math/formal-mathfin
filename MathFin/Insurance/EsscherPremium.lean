@@ -25,7 +25,9 @@ The Esscher tilt is a pricing measure of it when `e^{hX}` and `X e^{hX}` are int
 (`isPricingMeasure_insuredMarket_tilted`): it is equivalent to `P`, and the premium is the tilt's
 mean of the loss. So the Esscher premium is the price of the loss under a pricing measure of an
 insured market, where the market is built to quote the loss at that premium
-(`price_insuredMarket_tilted`). The model has no dynamics before `T`.
+(`price_insuredMarket_tilted`). Another tilt prices it exactly when its premium is the quote
+(`isPricingMeasure_insuredMarket_tilted_iff`); uniqueness of the parameter is not proved here. The
+model has no dynamics before `T`.
 
 ## Main definitions
 
@@ -40,6 +42,8 @@ insured market, where the market is built to quote the loss at that premium
 * `isPricingMeasure_insuredMarket_tilted`: the Esscher tilt is a pricing measure of the insured
   market.
 * `price_insuredMarket_tilted`: under it the claim paying the loss is worth the Esscher premium.
+* `isPricingMeasure_insuredMarket_tilted_iff`: for a date `T > 0`, the `h'`-tilt prices the market
+  quoting the `h`-premium exactly when the two premiums agree.
 
 ## References
 
@@ -127,5 +131,36 @@ theorem price_insuredMarket_tilted (hX : Measurable X) (T : ℝ≥0) :
   rw [insuredMarket, Market.price_pay_obs_oneDate]
   simp only [neg_zero, zero_mul, Real.exp_zero, one_mul]
   exact integral_tilted_eq_esscherPremium P X h
+
+/-- **Which Esscher tilts price the insured market.** For a date `T > 0`, the `h'`-tilt of `P` is a
+pricing measure of the insured market `insuredMarket P hX h T`, the one that quotes the loss at the
+`h`-premium, exactly when the `h'`-premium is that quote,
+`esscherPremium P X h' = esscherPremium P X h`.
+The tilts of the other parameters price the market only through that coincidence: the pricing
+measure fixes the premium, not the parameter (`Market.isPricingMeasure_oneDate` and its converse
+`Market.integral_eq_of_isPricingMeasure_oneDate`). That the premium is strictly increasing in the
+parameter for a non-degenerate loss, so that `h' = h` follows, is not proved here. -/
+theorem isPricingMeasure_insuredMarket_tilted_iff [IsProbabilityMeasure P] (hX : Measurable X)
+    {T : ℝ≥0} (hT : 0 < T) {h' : ℝ} (hexp : Integrable (fun ω ↦ Real.exp (h' * X ω)) P)
+    (hXexp : Integrable (fun ω ↦ X ω * Real.exp (h' * X ω)) P) :
+    (insuredMarket P hX h T).IsPricingMeasure T (P.tilted fun ω ↦ h' * X ω)
+      ↔ esscherPremium P X h' = esscherPremium P X h := by
+  constructor
+  · intro hp
+    have hp' : (Market.oneDate P hX (esscherPremium P X h) 0 T).IsPricingMeasure T
+        (P.tilted fun ω ↦ h' * X ω) := hp
+    have hmean := (Market.integral_eq_of_isPricingMeasure_oneDate hT hp').2
+    rw [integral_tilted_eq_esscherPremium] at hmean
+    simpa using hmean
+  · intro heq
+    have : IsProbabilityMeasure (P.tilted fun ω ↦ h' * X ω) := isProbabilityMeasure_tilted hexp
+    refine Market.isPricingMeasure_oneDate (tilted_absolutelyContinuous _ _)
+      (absolutelyContinuous_tilted hexp) ?_ ?_
+    · rw [integrable_tilted_iff hexp]
+      refine hXexp.congr (.of_forall fun ω ↦ ?_)
+      simp only [smul_eq_mul]
+      exact mul_comm _ _
+    · rw [integral_tilted_eq_esscherPremium, heq]
+      simp
 
 end MathFin

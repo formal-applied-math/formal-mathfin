@@ -97,11 +97,11 @@ import MathFin.Markets.DeFi.UniswapMechanics
 import MathFin.Markets.Microstructure.GlostenMilgromCondExp
 import MathFin.Markets.Microstructure.GlostenMilgromMarket
 import MathFin.Models.Bachelier.Bachelier
-import MathFin.Models.Binomial.AmericanSnell
+import MathFin.Models.Binomial.American
 import MathFin.Models.Binomial.CRRClosedForm
 import MathFin.Models.Binomial.MartingaleRepresentation
 import MathFin.Models.BlackScholes.American.Stopping.ActualOptimality
-import MathFin.Models.BlackScholes.American.Summit
+import MathFin.Models.BlackScholes.American.AmericanPutMarketBound
 import MathFin.Models.Bachelier.BachelierMarket
 import MathFin.Models.BlackScholes.BlackScholesAsian
 import MathFin.Models.BlackScholes.BlackScholesPhysical
