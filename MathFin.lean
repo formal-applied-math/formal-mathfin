@@ -689,6 +689,7 @@ import MathFin.Models.Binomial.Binomial
 import MathFin.Models.Binomial.BinomialCompleteMarket
 import MathFin.Models.Binomial.BinomialLimit
 import MathFin.Models.Binomial.Market
+import MathFin.Models.LocalVol.TimeDependentVol
 import MathFin.Models.Rates.Caplet
 import MathFin.Models.Rates.CMSContract
 import MathFin.Models.Rates.ShortRate

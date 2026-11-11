@@ -42,6 +42,7 @@ import MathFin.Models.Jumps.JumpDiffusionMixing
 import MathFin.Models.Jumps.JumpDiffusionProcess
 import MathFin.Models.Jumps.JumpDiffusionVarianceSwap
 import MathFin.Models.LocalVol.Dupire
+import MathFin.Models.LocalVol.TimeDependentVol
 import MathFin.Models.ModelFree.CarrMadan
 import MathFin.Models.Rates.AffineTermStructurePDE
 import MathFin.Models.Rates.Caplet
@@ -737,6 +738,18 @@ attribute [blueprint "thm:breeden-litzenberger"
   E[(X_s - K)^+]$ is the call surface at zero rates: $\partial_K^2 C(s,\cdot)$ is the law of
   $X_s$ as a distribution. The weak form, for an arbitrary law. -/)]
   MathFin.Dupire.breedenLitzenberger_weak
+
+attribute [blueprint "thm:time-dependent-vol-market"
+  (title := "Black–Scholes with a deterministic volatility clock is a market")
+  (statement := /-- For a pre-Brownian motion $W$ and a monotone clock $v$ (the total variance
+  $\int_0^t\sigma^2$ of a deterministic volatility), the asset $e^{rt}S_0e^{(\theta -
+  1/2)v(t) + W_{v(t)}}$ with numéraire $e^{rt}$ and the information $W$ generates up to $v(t)$
+  is a market, and the Girsanov measure of the constant price of risk $\theta$ at a horizon $H$
+  is a pricing measure of it at every $T$ with $v(T) \le H$. Under it the European call is worth
+  the Black–Scholes formula of the total variance $v(T)$ at the strike $Ke^{-rT}$ of the
+  deflated asset (`price_europeanCall_constGirsanovMeasure`). The asset is defined, not derived
+  from an SDE; a general $\sigma(t,S)$ and uniqueness of the pricing measure are not proved. -/)]
+  MathFin.Contracts.TimeDepVol.isPricingMeasure_constGirsanovMeasure
 
 -- ===== valuation/jumps: Jump models =====
 

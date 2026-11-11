@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (960 MathFin constants, 29 upstream). Citations
+  corpus (962 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -386,6 +386,14 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.Contracts.SwapModel.zeroCurve_mul_forwardSwapRate_le_value_cmsSwaplet' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.SwapModel.zeroCurve_mul_forwardSwapRate_le_value_cmsSwaplet
+
+/-- info: 'MathFin.Contracts.TimeDepVol.isPricingMeasure_constGirsanovMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.TimeDepVol.isPricingMeasure_constGirsanovMeasure
+
+/-- info: 'MathFin.Contracts.TimeDepVol.price_europeanCall_constGirsanovMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.TimeDepVol.price_europeanCall_constGirsanovMeasure
 
 /-- info: 'MathFin.Contracts.bondPrice_gsr' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

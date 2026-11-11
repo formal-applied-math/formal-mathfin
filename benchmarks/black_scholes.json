@@ -2428,6 +2428,33 @@
       "code": {
         "lean": "import MathFin.Models.BlackScholes.Market\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Contracts MathFin.Contracts.BlackScholes\nopen scoped NNReal\n\n/-- The Girsanov measure of the market price of risk `(m - r) / σ` is a pricing measure of the\nBlack-Scholes market, and under it the European call is worth the Black-Scholes formula. -/\ntheorem black_scholes_market_pricing_measure {Ω : Type*} [mΩ : MeasurableSpace Ω]\n    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) {S₀ K m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hS₀ : 0 < S₀)\n    (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) :\n    (market μ hWmeas S₀ m r σ).IsPricingMeasure T\n        (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) ∧\n      (market μ hWmeas S₀ m r σ).price (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)\n          (europeanCall K T)\n        = S₀ * Phi (bsd1 S₀ K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S₀ K r σ T) :=\n  ⟨isPricingMeasure_constGirsanovMeasure hW hWmeas hσ.ne' hTH,\n    price_europeanCall_constGirsanovMeasure hW hWmeas hTH hS₀ hK hσ hT⟩\n"
       }
+    },
+    {
+      "id": "mf-time-dependent-vol-market-pricing-measure",
+      "name": "The Girsanov Measure Is a Pricing Measure of the Black-Scholes Market with a Deterministic Volatility Clock and Prices the European Call at the Black-Scholes Formula of the Total Variance",
+      "domain": "mathematical_finance",
+      "description": "The Black-Scholes market with a deterministic volatility clock v (TimeDepVol.market: v monotone, the total variance of a deterministic volatility; the information a pre-Brownian motion W generates up to v(t), the asset e^(rt) S_0 exp((theta - 1/2) v(t) + W_(v(t))), the numeraire e^(rt)) is a Market. The Girsanov measure Q of the constant price of risk theta at a horizon H (constGirsanovMeasure) is a pricing measure of it at every horizon T with v(T) <= H, and for S_0, K > 0 and v(T) > 0 the market's price (Market.price) of the European call at maturity T under Q is S_0 Phi(d_1) - K' Phi(d_2) with K' = K e^(-rT), sigma = 1, rate 0 and maturity v(T), the Black-Scholes formula of the total variance. The asset is defined as the clocked exponential, not derived from an SDE; a general local volatility sigma(t, S) and the uniqueness of the pricing measure are not claimed.",
+      "metadata": {
+        "reference": "Black and Scholes (1973); Shreve, Stochastic Calculus for Finance II, sec. 5.2; Gatheral, The Volatility Surface (2006)",
+        "citations": [
+          {
+            "key": "BlackScholes1973"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "sec. 5.2"
+          },
+          {
+            "key": "Gatheral2006"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. isPricingMeasure_constGirsanovMeasure and price_europeanCall_constGirsanovMeasure in MathFin/Models/LocalVol/TimeDependentVol.lean: the Black-Scholes socket (sigma = 1, rate 0, drift theta) at the clock horizon v(T), whose frozen deflated asset is read along the monotone clock (Martingale.comp, Filtration.comp); the call price is value_europeanCall_physical at maturity v(T) and strike K e^(-rT), the deflated strike. SCOPE: the model is the clocked exponential asset with a price of risk theta sigma(t) proportional to the volatility when v' = sigma^2; it is not shown to solve an SDE, no general sigma(t, S), no non-constant price of risk in the clock, no uniqueness of the pricing measure. The Brownian motion is pre-Brownian. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.Models.LocalVol.TimeDependentVol\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Contracts MathFin.Contracts.TimeDepVol\nopen scoped NNReal\n\n/-- The Girsanov measure of the constant price of risk is a pricing measure of the Black-Scholes\nmarket with a deterministic volatility clock, and under it the European call is worth the\nBlack-Scholes formula of the total variance. -/\ntheorem time_dependent_vol_market_pricing_measure {Ω : Type*} [mΩ : MeasurableSpace Ω]\n    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) {S₀ r θ K : ℝ} {v : ℝ≥0 → ℝ≥0} (hv : Monotone v)\n    {T H : ℝ≥0} (hTH : v T ≤ H) (hS₀ : 0 < S₀) (hK : 0 < K) (hT : 0 < (v T : ℝ)) :\n    (market μ hWmeas S₀ r θ hv).IsPricingMeasure T\n        (BlackScholes.constGirsanovMeasure hW hWmeas θ H) ∧\n      (market μ hWmeas S₀ r θ hv).price (BlackScholes.constGirsanovMeasure hW hWmeas θ H)\n          (europeanCall K T)\n        = S₀ * Phi (bsd1 S₀ (K * Real.exp (-r * T)) 0 1 (v T))\n          - K * Real.exp (-r * T) * Phi (bsd2 S₀ (K * Real.exp (-r * T)) 0 1 (v T)) :=\n  ⟨isPricingMeasure_constGirsanovMeasure hW hWmeas hv hTH,\n    price_europeanCall_constGirsanovMeasure hW hWmeas hv hTH hS₀ hK hT⟩\n"
+      }
     }
   ]
 }
