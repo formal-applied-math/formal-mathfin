@@ -888,9 +888,9 @@
     "mf-binomial-american-price-snell-envelope": {
       "benchmark_file": "binomial.json",
       "date": "2026-11-11",
-      "elapsed_s": 3.1,
-      "input_hash": "0d8f6eeb0d70b9dfbf5590ad9bd0e3d49c441347eae40cf8a5eb77ae64d87aa8",
-      "verified_at_commit": "e353bd6"
+      "elapsed_s": 3.4,
+      "input_hash": "b9507086339532a74e348a05fd08b9010be21cde0eea3ddb5300b326adda6f6a",
+      "verified_at_commit": "52e8a47"
     },
     "mf-binomial-complete-hedge-capital-is-value": {
       "benchmark_file": "binomial.json",
