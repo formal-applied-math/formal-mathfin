@@ -125,9 +125,12 @@ import MathFin.Models.LocalVol.Dupire
 import MathFin.Models.LocalVol.TimeDependentVol
 import MathFin.Models.ModelFree.CarrMadan
 import MathFin.Models.ModelFree.MarketCallPrice
+import MathFin.Models.ModelFree.RoperConverse
+import MathFin.Models.ModelFree.SVI.MarketRealisation
 import MathFin.Models.Rates.AffineTermStructurePDE
 import MathFin.Models.Rates.Caplet
 import MathFin.Models.Rates.DeterministicMarket
+import MathFin.Models.Rates.VasicekMarket
 import MathFin.Models.Rates.HJM
 import MathFin.Models.Rates.Immunization
 import MathFin.Models.Rates.KeyRateDuration
@@ -996,6 +999,18 @@ attribute [blueprint "thm:vasicek-bond-pde"
   \tfrac12\sigma^2\partial_r^2 u - ru = 0$. -/)]
   MathFin.vasicekBondPrice_solves_pde
 
+attribute [blueprint "thm:vasicek-market"
+  (title := "The Vasicek bond market")
+  (statement := /-- For a pre-Brownian motion $B$, the market of the bank account
+  $N_t = \exp\int_0^t r$ of the Vasicek short rate as numéraire and the zero-coupon bond of
+  maturity $T$ as the one asset, under the natural filtration of $B$, is priced by the reference
+  measure at the horizon $T$: the deflated bond is $\mathbb{E}[\exp(-\int_0^T r) \mid
+  \mathcal{F}_t]$ almost surely, a martingale; and the price of a unit payment at $T$ is
+  $A(T)e^{-B(T)r_0}$. The model is specified under the pricing measure (no physical measure), the
+  market uses $\mathcal{F}_t$-measurable representatives of the Wiener integrals, and uniqueness
+  of the pricing measure is not proved. -/)]
+  MathFin.Rates.isPricingMeasure_vasicekMarket
+
 attribute [blueprint "thm:black76-caplet"
   (title := "Black's caplet formula")
   (statement := /-- If the simple rate $L(T_0,T_1)$ is lognormal under the $T_1$-forward
@@ -1111,8 +1126,26 @@ attribute [blueprint "thm:market-call-price-normalized"
   $k \mapsto \mathbb E_Q[(S_T/F - k)^+]$ of a positive mean-one variable, and these are convex
   and nonincreasing, between $(1-k)^+$ and $1$, with limits $1$ at $0^+$ and $0$ at infinity.
   This is the forward direction of Roper's theorem; the converse, a market from a call price
-  function, is not proved. -/)]
+  function, is `thm:smile-no-arbitrage`. -/)]
   MathFin.Market.IsPricingMeasure.isNormalizedCallPrice
+
+attribute [blueprint "thm:smile-no-arbitrage"
+  (title := "Roper's converse: every normalised call price function is a market's")
+  (statement := /-- Every normalised call price function $C$ (convex and nonincreasing, between
+  $(1-k)^+$ and $1$, with limits $1$ at $0^+$ and $0$ at infinity) is the call price function, at
+  maturity one, of a market with unit numéraire, a nonnegative asset of forward one and a pricing
+  measure: the call at every strike $k > 0$ is worth $C(k)$. The law is the Breeden--Litzenberger
+  measure $\mu(k, \infty) = -C'_+(k)$, and may carry an atom at $0$, so the asset is nonnegative
+  rather than positive. The left wing and calendar spreads are not stated here. -/)]
+  MathFin.exists_market_of_isNormalizedCallPrice
+
+attribute [blueprint "thm:svi-market-realisation"
+  (title := "A butterfly-free SVI slice is a market")
+  (statement := /-- If the raw SVI parameters satisfy the butterfly-free sign formula, the
+  SVI-smiled Black call is the call price function at maturity one of a market with unit
+  numéraire, a nonnegative asset of forward one and a pricing measure: the formula makes the smile
+  a normalised call price function, and Roper's converse realises it. -/)]
+  MathFin.SVI.exists_market_of_butterflyFreeFormula
 
 -- ===== choice/preferences: Preferences =====
 

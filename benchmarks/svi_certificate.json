@@ -113,7 +113,7 @@
       "id": "mf-market-call-price-normalized",
       "name": "A Pricing Measure Gives a Normalised Call Price Function; a Market Pricing the SVI Smile Makes It Butterfly-Free",
       "domain": "mathematical_finance",
-      "description": "In a market with unit numeraire and a strictly positive asset S, priced up to T by a pricing measure Q, let F be the price of the claim paying S_T. Then k -> price(call at strike kF)/F is a normalised call price function: convex and nonincreasing on (0, infinity), between max(1-k,0) and 1, tending to 1 as k tends to 0+ and to 0 as k tends to infinity. This is the forward direction of Roper's Theorem 2.1 (a market gives a call price function), proved from the martingale property of the asset; the converse, a market from a call price function, is not proved. Composed with the SVI sign formula: if those normalised calls equal the SVI-smiled Black call bsSmile p at every k > 0, and sigma >= 0, b >= 0, rho^2 <= 1 with positive variance at every log-strike, then butterflyFreeFormula holds at p.",
+      "description": "In a market with unit numeraire and a strictly positive asset S, priced up to T by a pricing measure Q, let F be the price of the claim paying S_T. Then k -> price(call at strike kF)/F is a normalised call price function: convex and nonincreasing on (0, infinity), between max(1-k,0) and 1, tending to 1 as k tends to 0+ and to 0 as k tends to infinity. This is the forward direction of Roper's Theorem 2.1 (a market gives a call price function), proved from the martingale property of the asset; the converse, a market with a nonnegative asset from a call price function, is mf-roper-converse. Composed with the SVI sign formula: if those normalised calls equal the SVI-smiled Black call bsSmile p at every k > 0, and sigma >= 0, b >= 0, rho^2 <= 1 with positive variance at every log-strike, then butterflyFreeFormula holds at p.",
       "code": {
         "lean": "import MathFin.Models.ModelFree.SVI.MarketRealisation\n\nopen MathFin MathFin.Contracts MeasureTheory\nopen scoped NNReal\n\n/-- **A pricing measure gives a normalised call price function.** With unit numéraire and a\n    positive asset, the calls at the strikes `k F`, in units of the forward `F`, are a normalised\n    call price function. Re-export of `MathFin.Market.IsPricingMeasure.isNormalizedCallPrice`. -/\ntheorem pricing_measure_call_price_normalized {Ω : Type*} [MeasurableSpace Ω] {M : Market Unit Ω}\n    {T : ℝ≥0} {Q : Measure Ω} (hQ : M.IsPricingMeasure T Q) (hN : ∀ t ω, M.numeraire t ω = 1)\n    (hpos : ∀ ω, 0 < M.asset () T ω) {F : ℝ} (hF : F = M.price Q (.pay T (.obs () T))) :\n    IsNormalizedCallPrice fun k ↦ M.price Q (europeanCall (k * F) T) / F :=\n  MathFin.Market.IsPricingMeasure.isNormalizedCallPrice hQ hN hpos hF\n\n/-- **A market that prices the SVI smile makes the slice butterfly-free.** Re-export of\n    `MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure`. -/\ntheorem svi_market_butterfly_free {Ω : Type*} [MeasurableSpace Ω] {M : Market Unit Ω}\n    {T : ℝ≥0} {Q : Measure Ω} {p : SVI.Params}\n    (hp : 0 ≤ p.sigma ∧ 0 ≤ p.b ∧ 0 ≤ 1 - p.rho ^ 2 ∧ ∀ k, 0 < SVI.variance p k)\n    (hQ : M.IsPricingMeasure T Q) (hN : ∀ t ω, M.numeraire t ω = 1)\n    (hpos : ∀ ω, 0 < M.asset () T ω) {F : ℝ} (hF : F = M.price Q (.pay T (.obs () T)))\n    (hsmile : ∀ k > 0, M.price Q (europeanCall (k * F) T) / F = SVI.bsSmile p k) :\n    SVI.butterflyFreeFormula.eval p = true :=\n  SVI.butterflyFreeFormula_of_isPricingMeasure hp hQ hN hpos hF hsmile\n"
       },
@@ -132,7 +132,64 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Re-export of MathFin.Market.IsPricingMeasure.isNormalizedCallPrice (MathFin/Models/ModelFree/MarketCallPrice.lean) and MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure (MathFin/Models/ModelFree/SVI/MarketRealisation.lean). Proof. The asset is a Q-martingale (unit numeraire), so S_T is Q-integrable with mean F > 0; X = S_T/F is positive with mean one, the call at strike kF in units of F is E[(X-k)^+]; convexity is that of the payoff carried through the integral (convexOn_integral_call), the intrinsic bound is E[(X-k)^+] >= E[X-k] = 1-k, the upper bound is (X-k)^+ <= X, the limit at infinity is dominated convergence, and monotonicity and the limit at 0+ follow (IsNormalizedCallPrice.of_convexOn). The SVI statement transports this to bsSmile p by the equality on (0, infinity) and applies butterflyFreeFormula_iff_isNormalizedCallPrice. SCOPE. (1) Forward direction only: the construction of a market, and hence of the mean-one random variable with prescribed call prices (Roper's converse, Breeden-Litzenberger and Kellerer), is not proved, so it is NOT shown that every butterfly-free SVI slice is realised by a market. (2) Single maturity, unit numeraire, a single asset, positive at T; the asset need not have a constant initial price. (3) The SVI statement assumes the market's normalised calls are the smile; it does not construct such a market. (4) Strikes are positive; no calendar-spread statement.",
+        "formalization_scope": "Re-export of MathFin.Market.IsPricingMeasure.isNormalizedCallPrice (MathFin/Models/ModelFree/MarketCallPrice.lean) and MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure (MathFin/Models/ModelFree/SVI/MarketRealisation.lean). Proof. The asset is a Q-martingale (unit numeraire), so S_T is Q-integrable with mean F > 0; X = S_T/F is positive with mean one, the call at strike kF in units of F is E[(X-k)^+]; convexity is that of the payoff carried through the integral (convexOn_integral_call), the intrinsic bound is E[(X-k)^+] >= E[X-k] = 1-k, the upper bound is (X-k)^+ <= X, the limit at infinity is dominated convergence, and monotonicity and the limit at 0+ follow (IsNormalizedCallPrice.of_convexOn). The SVI statement transports this to bsSmile p by the equality on (0, infinity) and applies butterflyFreeFormula_iff_isNormalizedCallPrice. SCOPE. (1) Forward direction only in this entry: the converse, a market with a nonnegative asset realising a call price function, is mf-roper-converse, and its SVI form is mf-svi-butterfly-free-market. (2) Single maturity, unit numeraire, a single asset, positive at T; the asset need not have a constant initial price. (3) The SVI statement assumes the market's normalised calls are the smile; it does not construct such a market. (4) Strikes are positive; no calendar-spread statement.",
+        "provenance": {
+          "source": "mathfin"
+        }
+      }
+    },
+    {
+      "id": "mf-roper-converse",
+      "name": "Roper's Converse: Every Normalised Call Price Function Is the Call Price Function of a Market",
+      "domain": "mathematical_finance",
+      "description": "Let C be a normalised call price function: convex and nonincreasing on (0, infinity), between max(1-k,0) and 1, tending to 1 as k tends to 0+ and to 0 as k tends to infinity. Then there is a market with a single asset, unit numeraire and a pricing measure Q such that the asset is nonnegative at time one, the claim paying the asset at time one is worth 1, and the call at every strike k > 0 is worth C k. This is the converse direction of Roper's Theorem 2.1, for nonnegative asset values: the asset may vanish (a call price function can have an atom at 0, e.g. C(K) = max(1-(1-p)K, 0)), and a strictly positive asset is then impossible, so the statement is not claimed for positive assets. Single maturity, positive strikes, one asset; the market is the one-date market on the real line with the Breeden-Litzenberger law of C as both reference and pricing measure.",
+      "code": {
+        "lean": "import MathFin.Models.ModelFree.RoperConverse\n\nopen MathFin MathFin.Contracts MeasureTheory\nopen scoped NNReal\n\n/-- **Roper's converse.** Every normalised call price function is the call price function of a\n    market with unit numéraire, a nonnegative asset at time one and a pricing measure under which\n    the asset claim is worth one. Re-export of `MathFin.exists_market_of_isNormalizedCallPrice`. -/\ntheorem roper_converse {C : ℝ → ℝ} (hC : IsNormalizedCallPrice C) :\n    ∃ (M : Market Unit ℝ) (Q : Measure ℝ), (∀ t ω, M.numeraire t ω = 1) ∧\n      (∀ ω, 0 ≤ M.asset () 1 ω) ∧ M.IsPricingMeasure 1 Q ∧\n      M.price Q (.pay 1 (.obs () 1)) = 1 ∧ ∀ k > 0, M.price Q (europeanCall k 1) = C k :=\n  exists_market_of_isNormalizedCallPrice hC\n"
+      },
+      "metadata": {
+        "alignment_source": "Roper (2010), Theorem 2.1; Breeden and Litzenberger (1978)",
+        "reference": "Roper, Arbitrage free implied volatility surfaces (2010), Theorem 2.1, converse direction.",
+        "citations": [
+          {
+            "key": "Roper2010",
+            "locator": "Theorem 2.1"
+          },
+          {
+            "key": "BreedenLitzenberger1978"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Re-export of MathFin.exists_market_of_isNormalizedCallPrice (MathFin/Models/ModelFree/RoperConverse.lean). Proof. The right derivative C'+ of the convex C is monotone (Mathlib), right-continuous (ConvexOn.continuousWithinAt_Ici_rightDeriv, proved here), between -1 and 0, and tends to 0 at infinity. The right limit of K -> 1 + C'+(K) on (0, infinity), extended by 0, is a Stieltjes function whose measure mu is a probability measure on [0, infinity) with mu(K, infinity) = -C'+(K). The layer-cake formula and the fundamental theorem of calculus for a right derivative give the integral of (x-K)^+ against mu equal to C K for K > 0, and monotone convergence as K decreases to 0 gives mean one. The market is Market.oneDate on the reals with reference and pricing measure mu, rate 0, date 1, and asset max(omega, 0); mu is a pricing measure (isPricingMeasure_oneDate), the asset claim is worth the mean, and the call is worth the integral of (x-K)^+. SCOPE. (1) The asset is nonnegative, not strictly positive: a normalised call price function may have an atom at 0, and a pricing measure equivalent to the reference measure gives a strictly positive asset no mass at 0, so the strictly positive version is false and is not claimed. (2) Single maturity, a single asset, unit numeraire, positive strikes; the forward is normalised to one. (3) The market is the trivial two-date one-date market, not a continuous-time model; no martingale or diffusion representation of the law (Kellerer, Dupire) is claimed.",
+        "provenance": {
+          "source": "mathfin"
+        }
+      }
+    },
+    {
+      "id": "mf-svi-butterfly-free-market",
+      "name": "A Butterfly-Free SVI Slice Is the Call Price Function of a Market",
+      "domain": "mathematical_finance",
+      "description": "If the raw SVI parameters p satisfy the finite butterfly-free sign formula (butterflyFreeFormula), there is a market with a single asset, unit numeraire and a pricing measure Q such that the asset is nonnegative at time one, the claim paying the asset at time one is worth 1, and the call at every strike k > 0 is worth the SVI-smiled forward-normalised Black call bsSmile p k. The sign formula makes bsSmile p a normalised call price function and Roper's converse (mf-roper-converse) realises it. Single maturity (one), forward one, positive strikes; the asset is nonnegative, not strictly positive; no calendar-spread or surface statement.",
+      "code": {
+        "lean": "import MathFin.Models.ModelFree.SVI.MarketRealisation\n\nopen MathFin MathFin.Contracts MeasureTheory\nopen scoped NNReal\n\n/-- **A butterfly-free SVI slice is the call price function of a market.** Re-export of\n    `MathFin.SVI.exists_market_of_butterflyFreeFormula`. -/\ntheorem svi_butterfly_free_market {p : SVI.Params}\n    (h : SVI.butterflyFreeFormula.eval p = true) :\n    ∃ (M : Market Unit ℝ) (Q : Measure ℝ), (∀ t ω, M.numeraire t ω = 1) ∧\n      (∀ ω, 0 ≤ M.asset () 1 ω) ∧ M.IsPricingMeasure 1 Q ∧\n      M.price Q (.pay 1 (.obs () 1)) = 1 ∧\n      ∀ k > 0, M.price Q (europeanCall k 1) = SVI.bsSmile p k :=\n  SVI.exists_market_of_butterflyFreeFormula h\n"
+      },
+      "metadata": {
+        "alignment_source": "Gatheral and Jacquier (2014), Lemma 2.2; Roper (2010), Theorem 2.1",
+        "reference": "Gatheral and Jacquier, Arbitrage-free SVI volatility surfaces (2014), Lemma 2.2, with Roper (2010), Theorem 2.1, converse direction.",
+        "citations": [
+          {
+            "key": "GatheralJacquier2014",
+            "locator": "Lemma 2.2"
+          },
+          {
+            "key": "Roper2010",
+            "locator": "Theorem 2.1"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Re-export of MathFin.SVI.exists_market_of_butterflyFreeFormula (MathFin/Models/ModelFree/SVI/MarketRealisation.lean). Proof. butterflyFreeFormula_iff_isNormalizedCallPrice turns the sign formula into IsNormalizedCallPrice (bsSmile p), and exists_market_of_isNormalizedCallPrice (Roper's converse) gives the market: the one-date market on the reals with the Breeden-Litzenberger law of the smile as reference and pricing measure. SCOPE. (1) The asset is nonnegative, not strictly positive (a call price function may have an atom at 0). (2) One maturity, forward normalised to one, unit numeraire, positive strikes. (3) No calendar-spread condition and no SVI surface across maturities; no continuous-time model realising the smile.",
         "provenance": {
           "source": "mathfin"
         }

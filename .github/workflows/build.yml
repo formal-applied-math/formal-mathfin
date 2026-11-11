@@ -51,11 +51,14 @@ jobs:
       # The blueprint and the issue tracker are connected in both directions: every open
       # math issue names its node, every frontier node has an open issue, every proved node
       # has a delivery record (tools/verify/blueprint_issues.py; blueprint-sync.yml checks
-      # the same on issue events).
+      # the same on issue events). On a pull request the labels an issue's nodes derive are
+      # reported, not enforced: labels follow main's tree, and blueprint-sync relabels at merge.
       - name: Blueprint ↔ issues
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python3 -m tools.verify.blueprint_issues check
+        run: >-
+          python3 -m tools.verify.blueprint_issues check
+          ${{ github.event_name == 'pull_request' && '--branch' || '' }}
 
       # The Mathlib cache download flakes ("download failed", "Broken pipe") often enough
       # that one bad mirror read used to fail the job. `lake exe cache get` only fetches

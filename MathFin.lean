@@ -544,6 +544,7 @@ import MathFin.Models.BlackScholes.SpotConvexity
 import MathFin.Models.ModelFree.PriceBounds
 import MathFin.Models.ModelFree.CallPriceFunction
 import MathFin.Models.ModelFree.MarketCallPrice
+import MathFin.Models.ModelFree.RoperConverse
 -- Phase 13 additions:
 -- Quanto correction derived from a joint-Gaussian FX model (Girsanov-grounded)
 import MathFin.Models.BlackScholes.QuantoGrounding
@@ -652,6 +653,8 @@ import MathFin.Models.Rates.CIRSquaredOU
 import MathFin.Models.Rates.VasicekBondPrice
 -- Vasicek bond price at t > 0: the conditional discount factor is affine in the short rate
 import MathFin.Models.Rates.VasicekBondPriceAt
+-- The Vasicek bond market: bank-account numéraire, zero-coupon bond, reference measure prices it
+import MathFin.Models.Rates.VasicekMarket
 -- Vasicek real-world vs. risk-neutral terminal mean; an Esscher tilt reproducing the
 -- risk-neutral terminal law
 import MathFin.Models.Rates.VasicekMarketPriceOfRisk

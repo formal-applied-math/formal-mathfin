@@ -2863,6 +2863,10 @@ end MathFin.AxiomAudit
 #guard_msgs in
 #print axioms MathFin.Rates.isPricingMeasure_deterministicMarket
 
+/-- info: 'MathFin.Rates.isPricingMeasure_vasicekMarket' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Rates.isPricingMeasure_vasicekMarket
+
 /-- info: 'MathFin.Rates.bondPortfolioValue_eq_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.Rates.bondPortfolioValue_eq_price
@@ -2891,6 +2895,14 @@ end MathFin.AxiomAudit
 #guard_msgs in
 #print axioms MathFin.Market.IsPricingMeasure.isNormalizedCallPrice
 
+/-- info: 'MathFin.exists_market_of_isNormalizedCallPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.exists_market_of_isNormalizedCallPrice
+
 /-- info: 'MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure
+
+/-- info: 'MathFin.SVI.exists_market_of_butterflyFreeFormula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.SVI.exists_market_of_butterflyFreeFormula

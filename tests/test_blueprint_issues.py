@@ -77,7 +77,9 @@ def test_taxonomy_labels_are_derived_from_the_nodes() -> None:
     wrong = _issue(2, "Blueprint: thm:a, thm:f", labels=("type:proof", "area:risk"))
     assert bi.label_drift(wrong, nodes) == (
         {"area:valuation/term", "family:term", "area:risk/measures"}, {"area:risk"})
-    assert any(p.message.startswith("#2: ") for p in bi.check([wrong], nodes))
+    assert [p.drift for p in bi.check([wrong], nodes) if p.message.startswith("#2: ")] == [True]
+    # a pull request's build reports drift without failing (`check --branch`); main's sync fixes it
+    assert all(p.drift for p in bi.check([wrong], nodes))
     # closed issues are relabelled by `labels --apply` but never fail the check
     closed = _issue(3, "Blueprint: thm:a, thm:f", state="closed")
     assert bi.label_drift(closed, nodes)[0] and bi.check([right, closed], nodes) == []

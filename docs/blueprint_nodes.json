@@ -10,7 +10,7 @@
   "latexEnv": "theorem",
   "label": "thm:american-put-optimal-exercise",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/American/Stopping/ActualOptimality.lean"},
+  "/app/MathFin/Models/BlackScholes/American/Stopping/ActualOptimality.lean"},
  {"uses": ["def:market", "def:pricing-measure", "def:emm"],
   "title": "A conditional-expectation process is priced by its own measure",
   "text":
@@ -21,8 +21,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:conditional-expectation-pricing-measure",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/Microstructure/GlostenMilgromMarket.lean"},
+  "file": "/app/MathFin/Markets/Microstructure/GlostenMilgromMarket.lean"},
  {"uses": [],
   "title": "Portfolio variance",
   "text":
@@ -33,20 +32,7 @@
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:portfolio-variance",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzNAsset.lean"},
- {"uses": ["def:standard-normal-cdf"],
-  "title": "Merton's structural model of default",
-  "text":
-  "Under the Black–Scholes lognormal hypothesis for the firm value, $V_T =\n  V_0\\exp((r - \\tfrac12\\sigma_V^2)T + \\sigma_V\\sqrt{T}\\,Z)$, the KMV default probability\n  $\\Phi(-d_2)$ equals $1 - Q(V_T > F)$, one minus the risk-neutral probability that the firm\n  value exceeds the debt face value $F$ at maturity; equivalently $1 - \\mathrm{PD} =\n  \\Phi(d_2)$ (`kmv_survival_eq_Phi_d2`). Default at maturity only: first passage (Black–Cox)\n  is not covered.",
-  "name": "MathFin.kmvPD_eq_one_sub_survival_probability",
-  "module": "MathFin.Models.Credit.KMVMertonStructural",
-  "line": 55,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:merton-structural-default",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Credit/KMVMertonStructural.lean"},
+  "file": "/app/MathFin/Choice/Portfolio/MarkowitzNAsset.lean"},
  {"uses":
   ["def:market",
    "def:gbm",
@@ -65,7 +51,18 @@
   "latexEnv": "theorem",
   "label": "thm:american-put-dominates-european",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/American/AmericanPutMarketBound.lean"},
+  "/app/MathFin/Models/BlackScholes/American/AmericanPutMarketBound.lean"},
+ {"uses": ["def:standard-normal-cdf"],
+  "title": "Merton's structural model of default",
+  "text":
+  "Under the Black–Scholes lognormal hypothesis for the firm value, $V_T =\n  V_0\\exp((r - \\tfrac12\\sigma_V^2)T + \\sigma_V\\sqrt{T}\\,Z)$, the KMV default probability\n  $\\Phi(-d_2)$ equals $1 - Q(V_T > F)$, one minus the risk-neutral probability that the firm\n  value exceeds the debt face value $F$ at maturity; equivalently $1 - \\mathrm{PD} =\n  \\Phi(d_2)$ (`kmv_survival_eq_Phi_d2`). Default at maturity only: first passage (Black–Cox)\n  is not covered.",
+  "name": "MathFin.kmvPD_eq_one_sub_survival_probability",
+  "module": "MathFin.Models.Credit.KMVMertonStructural",
+  "line": 55,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:merton-structural-default",
+  "file": "/app/MathFin/Models/Credit/KMVMertonStructural.lean"},
  {"uses": ["def:survival-function", "def:contract", "def:contract-value"],
   "title": "Insurance premiums are prices",
   "text":
@@ -76,8 +73,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:premium-is-price",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/AnnuityValue.lean"},
+  "file": "/app/MathFin/Insurance/AnnuityValue.lean"},
  {"uses": [],
   "title": "Geometric Brownian motion",
   "text":
@@ -88,8 +84,7 @@
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:gbm",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/BlackScholesAsian.lean"},
+  "file": "/app/MathFin/Models/BlackScholes/BlackScholesAsian.lean"},
  {"uses": [],
   "title": "Law-invariant risk functional",
   "text":
@@ -100,8 +95,7 @@
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:law-invariant",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/LawInvariance.lean"},
+  "file": "/app/MathFin/Risk/LawInvariance.lean"},
  {"uses": [],
   "title": "Equivalent martingale measure",
   "text":
@@ -112,8 +106,7 @@
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:emm",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/EquivMartingaleMeasure.lean"},
+  "file": "/app/MathFin/Pricing/EquivMartingaleMeasure.lean"},
  {"uses": ["thm:doob-maximal-inequality"],
   "title": "Martingale convergence theorem",
   "text":
@@ -124,8 +117,25 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:martingale-convergence",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/L2MartingaleConvergence.lean"},
+  "file": "/app/MathFin/Probability/Discrete/L2MartingaleConvergence.lean"},
+ {"uses":
+  ["def:market",
+   "def:standard-normal-cdf",
+   "def:pricing-measure",
+   "def:contract",
+   "def:pricing-functional",
+   "thm:smile-no-arbitrage",
+   "thm:bs-call"],
+  "title": "A butterfly-free SVI slice is a market",
+  "text":
+  "If the raw SVI parameters satisfy the butterfly-free sign formula, the\n  SVI-smiled Black call is the call price function at maturity one of a market with unit\n  numéraire, a nonnegative asset of forward one and a pricing measure: the formula makes the smile\n  a normalised call price function, and Roper's converse realises it.",
+  "name": "MathFin.SVI.exists_market_of_butterflyFreeFormula",
+  "module": "MathFin.Models.ModelFree.SVI.MarketRealisation",
+  "line": 63,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:svi-market-realisation",
+  "file": "/app/MathFin/Models/ModelFree/SVI/MarketRealisation.lean"},
  {"uses": [],
   "title": "Standard normal distribution function Φ",
   "text":
@@ -136,8 +146,7 @@
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:standard-normal-cdf",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Gaussian/StandardNormal.lean"},
+  "file": "/app/MathFin/Probability/Gaussian/StandardNormal.lean"},
  {"uses": ["def:brownian-motion"],
   "title": "Heath–Jarrow–Morton model",
   "text":
@@ -148,8 +157,7 @@
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:hjm-model",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/HJM.lean"},
+  "file": "/app/MathFin/Models/Rates/HJM.lean"},
  {"uses": ["def:brownian-motion"],
   "title": "Itô integral and Itô isometry",
   "text":
@@ -160,8 +168,7 @@
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:ito-integral-clm",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoIntegralCovariation.lean"},
+  "file": "/app/MathFin/Probability/Brownian/Ito/ItoIntegralCovariation.lean"},
  {"uses": [],
   "title": "Brownian motion (Mathlib, upstream)",
   "text":
@@ -173,7 +180,7 @@
   "latexEnv": "definition",
   "label": "def:brownian-motion",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/.lake/packages/mathlib/Mathlib/Probability/BrownianMotion/Basic.lean"},
+  "/app/.lake/packages/mathlib/Mathlib/Probability/BrownianMotion/Basic.lean"},
  {"uses": ["def:contract", "def:contract-value"],
   "title": "A CDO tranche leg is a contract",
   "text":
@@ -184,8 +191,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:tranche-leg-price",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Credit/TrancheLeg.lean"},
+  "file": "/app/MathFin/Risk/Credit/TrancheLeg.lean"},
  {"uses": [],
   "title": "Glosten–Milgrom bid and ask quotes",
   "text":
@@ -196,8 +202,18 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:glosten-milgrom-quote",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/Microstructure/GlostenMilgromCondExp.lean"},
+  "file": "/app/MathFin/Markets/Microstructure/GlostenMilgromCondExp.lean"},
+ {"uses": ["def:quantile"],
+  "title": "Value-at-risk",
+  "text":
+  "$\\mathrm{VaR}_\\alpha(X) = \\inf\\{x \\mid \\alpha \\le P(X \\le x)\\}$, the\n  $\\alpha$-quantile of the law of the loss $X$.",
+  "name": "MathFin.valueAtRisk",
+  "module": "MathFin.Risk.ValueAtRisk",
+  "line": 74,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:value-at-risk",
+  "file": "/app/MathFin/Risk/ValueAtRisk.lean"},
  {"uses":
   ["def:market",
    "def:pricing-measure",
@@ -216,20 +232,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:marginal-utility-is-sdf",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/MarketMarginalUtility.lean"},
- {"uses": ["def:quantile"],
-  "title": "Value-at-risk",
-  "text":
-  "$\\mathrm{VaR}_\\alpha(X) = \\inf\\{x \\mid \\alpha \\le P(X \\le x)\\}$, the\n  $\\alpha$-quantile of the law of the loss $X$.",
-  "name": "MathFin.valueAtRisk",
-  "module": "MathFin.Risk.ValueAtRisk",
-  "line": 74,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:value-at-risk",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ValueAtRisk.lean"},
+  "file": "/app/MathFin/Choice/Utility/MarketMarginalUtility.lean"},
  {"uses": [],
   "title": "Martingale representation in the binomial model",
   "text":
@@ -240,8 +243,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:binomial-representation",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/MartingaleRepresentation.lean"},
+  "file": "/app/MathFin/Models/Binomial/MartingaleRepresentation.lean"},
  {"uses": [],
   "title": "Convex risk measure",
   "text":
@@ -252,8 +254,7 @@
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:convex-risk-measure",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Coherent.lean"},
+  "file": "/app/MathFin/Risk/Coherent.lean"},
  {"uses": [],
   "title": "Sharpe ratio",
   "text":
@@ -264,8 +265,7 @@
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:sharpe-ratio",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Performance/Ratios.lean"},
+  "file": "/app/MathFin/Choice/Performance/Ratios.lean"},
  {"uses": [],
   "title": "Doob decomposition",
   "text":
@@ -276,8 +276,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:doob-decomposition",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/DoobDecomposition.lean"},
+  "file": "/app/MathFin/Probability/Discrete/DoobDecomposition.lean"},
  {"uses": ["def:value-at-risk"],
   "title": "Expected shortfall",
   "text":
@@ -288,8 +287,7 @@
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:expected-shortfall",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ValueAtRisk.lean"},
+  "file": "/app/MathFin/Risk/ValueAtRisk.lean"},
  {"uses":
   ["def:expected-shortfall",
    "def:coherent-risk-measure",
@@ -307,8 +305,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:expected-shortfall-coherent",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/LawInvariance.lean"},
+  "file": "/app/MathFin/Risk/LawInvariance.lean"},
  {"uses": [],
   "title": "Quantile function",
   "text":
@@ -319,8 +316,7 @@
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:quantile",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Laws/Quantile.lean"},
+  "file": "/app/MathFin/Probability/Laws/Quantile.lean"},
  {"uses": [],
   "title": "Optional sampling theorem",
   "text":
@@ -331,8 +327,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:optional-sampling",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/OptionalSamplingInequality.lean"},
+  "file": "/app/MathFin/Probability/Discrete/OptionalSamplingInequality.lean"},
  {"uses":
   ["def:market",
    "def:pricing-measure",
@@ -341,15 +336,14 @@
    "def:contract-value"],
   "title": "A pricing measure gives a normalised call price function",
   "text":
-  "In a market with unit numéraire and a positive asset $S$, priced at $T$ by a\n  pricing measure $Q$, the asset is a $Q$-martingale, so its forward is $F = \\mathbb E_Q[S_T]$.\n  The calls at the strikes $kF$, in units of $F$, are the call prices\n  $k \\mapsto \\mathbb E_Q[(S_T/F - k)^+]$ of a positive mean-one variable, and these are convex\n  and nonincreasing, between $(1-k)^+$ and $1$, with limits $1$ at $0^+$ and $0$ at infinity.\n  This is the forward direction of Roper's theorem; the converse, a market from a call price\n  function, is not proved.",
+  "In a market with unit numéraire and a positive asset $S$, priced at $T$ by a\n  pricing measure $Q$, the asset is a $Q$-martingale, so its forward is $F = \\mathbb E_Q[S_T]$.\n  The calls at the strikes $kF$, in units of $F$, are the call prices\n  $k \\mapsto \\mathbb E_Q[(S_T/F - k)^+]$ of a positive mean-one variable, and these are convex\n  and nonincreasing, between $(1-k)^+$ and $1$, with limits $1$ at $0^+$ and $0$ at infinity.\n  This is the forward direction of Roper's theorem; the converse, a market from a call price\n  function, is `thm:smile-no-arbitrage`.",
   "name": "MathFin.Market.IsPricingMeasure.isNormalizedCallPrice",
   "module": "MathFin.Models.ModelFree.MarketCallPrice",
-  "line": 83,
+  "line": 84,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:market-call-price-normalized",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/ModelFree/MarketCallPrice.lean"},
+  "file": "/app/MathFin/Models/ModelFree/MarketCallPrice.lean"},
  {"uses":
   ["def:market",
    "def:contract",
@@ -364,8 +358,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:esscher-premium-is-price",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/EsscherPremium.lean"},
+  "file": "/app/MathFin/Insurance/EsscherPremium.lean"},
  {"uses": ["def:value-at-risk", "def:quantile", "thm:gaussian-quantile"],
   "title": "Potential future exposure",
   "text":
@@ -376,8 +369,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:potential-future-exposure",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ExposureMeasures.lean"},
+  "file": "/app/MathFin/Risk/ExposureMeasures.lean"},
  {"uses": ["def:brownian-motion"],
   "title": "Schwartz commodity futures price",
   "text":
@@ -388,8 +380,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:schwartz-commodity-futures",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Forwards/SchwartzOneFactor.lean"},
+  "file": "/app/MathFin/Models/Forwards/SchwartzOneFactor.lean"},
  {"uses": [],
   "title": "Survival function",
   "text":
@@ -400,8 +391,7 @@
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:survival-function",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/SurvivalModel.lean"},
+  "file": "/app/MathFin/Insurance/SurvivalModel.lean"},
  {"uses": [],
   "title": "Copula",
   "text":
@@ -412,8 +402,7 @@
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:copula",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Dependence/Copula.lean"},
+  "file": "/app/MathFin/Probability/Dependence/Copula.lean"},
  {"uses": [],
   "title": "Carr–Madan static replication",
   "text":
@@ -424,8 +413,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:carr-madan",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/ModelFree/CarrMadan.lean"},
+  "file": "/app/MathFin/Models/ModelFree/CarrMadan.lean"},
  {"uses": [],
   "title": "The binomial American price is the Snell envelope",
   "text":
@@ -436,8 +424,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:american-price-snell-envelope",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/American.lean"},
+  "file": "/app/MathFin/Models/Binomial/American.lean"},
  {"uses": [],
   "title": "Compound Poisson moment generating function",
   "text":
@@ -448,8 +435,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:compound-poisson-mgf",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Jumps/CompoundPoissonMGF.lean"},
+  "file": "/app/MathFin/Probability/Jumps/CompoundPoissonMGF.lean"},
  {"uses":
   ["def:market",
    "def:pricing-measure",
@@ -464,8 +450,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:jump-diffusion-market",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Jumps/Market.lean"},
+  "file": "/app/MathFin/Models/Jumps/Market.lean"},
  {"uses":
   ["def:coherent-risk-measure",
    "thm:cone-separation",
@@ -479,8 +464,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:coherent-risk-representation",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/AcceptanceSet.lean"},
+  "file": "/app/MathFin/Risk/AcceptanceSet.lean"},
  {"uses": ["def:standard-normal-cdf", "def:contract", "def:contract-value"],
   "title": "Cox–Ross–Rubinstein convergence to Black–Scholes",
   "text":
@@ -491,8 +475,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:crr-bs-convergence",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/CRRClosedForm.lean"},
+  "file": "/app/MathFin/Models/Binomial/CRRClosedForm.lean"},
  {"uses": ["def:convex-risk-measure"],
   "title": "Coherent risk measure",
   "text":
@@ -503,8 +486,7 @@
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:coherent-risk-measure",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Coherent.lean"},
+  "file": "/app/MathFin/Risk/Coherent.lean"},
  {"uses": ["thm:change-of-numeraire"],
   "title": "Forward measure",
   "text":
@@ -515,8 +497,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:forward-measure",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/ForwardMeasure.lean"},
+  "file": "/app/MathFin/Pricing/ForwardMeasure.lean"},
  {"uses": [],
   "title": "Stochastic Fubini theorem",
   "text":
@@ -527,8 +508,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:stochastic-fubini",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/StochasticFubini.lean"},
+  "file": "/app/MathFin/Probability/Brownian/Ito/StochasticFubini.lean"},
  {"uses": ["def:market", "def:pricing-measure", "thm:one-date-market"],
   "title": "The insured market and its Esscher pricing measure",
   "text":
@@ -539,8 +519,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:insured-market",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/EsscherPremium.lean"},
+  "file": "/app/MathFin/Insurance/EsscherPremium.lean"},
  {"uses":
   ["def:market",
    "def:pricing-measure",
@@ -556,8 +535,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:market-ftap",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/FTAP/MarketFTAP.lean"},
+  "file": "/app/MathFin/Pricing/FTAP/MarketFTAP.lean"},
  {"uses": [],
   "title": "Duration and immunization",
   "text":
@@ -568,8 +546,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:bond-immunization",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/Immunization.lean"},
+  "file": "/app/MathFin/Models/Rates/Immunization.lean"},
  {"uses": ["def:standard-normal-cdf"],
   "title": "Liquidation of a lending position is Merton default",
   "text":
@@ -580,8 +557,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:aave-liquidation-kmv",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/LiquidationAsStructuralDefault.lean"},
+  "file": "/app/MathFin/Markets/DeFi/LiquidationAsStructuralDefault.lean"},
  {"uses": ["def:portfolio-variance"],
   "title": "Capital asset pricing model",
   "text":
@@ -592,8 +568,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:capm-equilibrium",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/CAPMEquilibrium.lean"},
+  "file": "/app/MathFin/Choice/Portfolio/CAPMEquilibrium.lean"},
  {"uses": ["thm:compound-poisson-mgf"],
   "title": "Incompleteness of jump-diffusion markets",
   "text":
@@ -604,8 +579,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:jump-diffusion-incompleteness",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Jumps/JumpDiffusionIncompleteness.lean"},
+  "file": "/app/MathFin/Models/Jumps/JumpDiffusionIncompleteness.lean"},
  {"uses": ["def:sharpe-ratio"],
   "title": "The Hansen–Jagannathan bound",
   "text":
@@ -616,8 +590,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:hansen-jagannathan-bound",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/StochasticDiscountFactor.lean"},
+  "file": "/app/MathFin/Choice/Portfolio/StochasticDiscountFactor.lean"},
  {"uses":
   ["def:market",
    "def:gbm",
@@ -633,8 +606,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:time-dependent-vol-market",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/LocalVol/TimeDependentVol.lean"},
+  "file": "/app/MathFin/Models/LocalVol/TimeDependentVol.lean"},
  {"uses": [],
   "title": "Covered interest-rate parity",
   "text":
@@ -645,8 +617,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:interest-rate-parity",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Forwards/FxForwardParity.lean"},
+  "file": "/app/MathFin/Models/Forwards/FxForwardParity.lean"},
  {"uses": ["def:emm", "thm:martingale-transform"],
   "title": "Second fundamental theorem of asset pricing",
   "text":
@@ -657,8 +628,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:second-ftap",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/FTAP/FTAPComplete.lean"},
+  "file": "/app/MathFin/Pricing/FTAP/FTAPComplete.lean"},
  {"uses": [],
   "title": "Esscher transform of a Gaussian",
   "text":
@@ -669,8 +639,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:esscher-tilt",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/GaussianGirsanov.lean"},
+  "file": "/app/MathFin/Models/BlackScholes/GaussianGirsanov.lean"},
  {"uses": ["thm:quantile-transform", "def:quantile"],
   "title": "Sklar's theorem",
   "text":
@@ -681,20 +650,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:sklar",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Dependence/Sklar.lean"},
- {"uses": [],
-  "title": "Market",
-  "text":
-  "A market: a measurable space with a reference measure $P$ and a filtration\n  $\\mathcal{F}$, the adapted prices of the traded assets, and a strictly positive adapted\n  numéraire.",
-  "name": "MathFin.Market",
-  "module": "MathFin.Pricing.Market",
-  "line": 121,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:market",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Market.lean"},
+  "file": "/app/MathFin/Probability/Dependence/Sklar.lean"},
  {"uses": [],
   "title": "Risk parity",
   "text":
@@ -705,8 +661,18 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:risk-parity-foc",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/RiskParityFOC.lean"},
+  "file": "/app/MathFin/Choice/Portfolio/RiskParityFOC.lean"},
+ {"uses": [],
+  "title": "Market",
+  "text":
+  "A market: a measurable space with a reference measure $P$ and a filtration\n  $\\mathcal{F}$, the adapted prices of the traded assets, and a strictly positive adapted\n  numéraire.",
+  "name": "MathFin.Market",
+  "module": "MathFin.Pricing.Market",
+  "line": 121,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:market",
+  "file": "/app/MathFin/Pricing/Market.lean"},
  {"uses": ["def:contract"],
   "title": "Value of a contract",
   "text":
@@ -717,8 +683,7 @@
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:contract-value",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Value.lean"},
+  "file": "/app/MathFin/Pricing/Value.lean"},
  {"uses": [],
   "title": "Key-rate durations",
   "text":
@@ -729,8 +694,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:key-rate-duration",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/KeyRateDuration.lean"},
+  "file": "/app/MathFin/Models/Rates/KeyRateDuration.lean"},
  {"uses": ["def:copula"],
   "title": "Fréchet–Hoeffding bounds",
   "text":
@@ -741,26 +705,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:frechet-hoeffding",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Dependence/Copula.lean"},
- {"uses":
-  ["def:value-at-risk",
-   "def:expected-shortfall",
-   "def:contract",
-   "def:contract-value",
-   "def:quantile",
-   "thm:binomial-representation"],
-  "title": "Risk of a hedged position",
-  "text":
-  "In the binomial tree under no arbitrage, a seller of a European contract\n  who receives its value and follows the hedge loses $\\mathrm{pathPV} - (\\mathrm{value} +\n  \\mathrm{gains}) = 0$ on every path; so under every law $P$ of the coin flips, physical or\n  not, the hedged position has zero value-at-risk and zero expected shortfall at every level\n  $\\alpha \\in (0,1)$.",
-  "name": "MathFin.Contracts.Binomial.valueAtRisk_hedged_eq_zero",
-  "module": "MathFin.Risk.ContractRisk",
-  "line": 131,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:hedged-position-risk",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ContractRisk.lean"},
+  "file": "/app/MathFin/Probability/Dependence/Copula.lean"},
  {"uses":
   ["def:market",
    "def:brownian-motion",
@@ -777,32 +722,24 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:bachelier-call",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Bachelier/BachelierMarket.lean"},
- {"uses": [],
-  "title": "Separation theorem for closed convex cones",
+  "file": "/app/MathFin/Models/Bachelier/BachelierMarket.lean"},
+ {"uses":
+  ["def:value-at-risk",
+   "def:expected-shortfall",
+   "def:contract",
+   "def:contract-value",
+   "def:quantile",
+   "thm:binomial-representation"],
+  "title": "Risk of a hedged position",
   "text":
-  "In $\\mathbb{R}^\\iota$ with $\\iota$ finite, if $C$ is a closed convex cone\n  and $x_0 \\notin C$, there is $p$ with $\\langle p, v\\rangle \\le 0$ for all $v \\in C$ and\n  $\\langle p, x_0\\rangle > 0$. A closed convex cone disjoint from the simplex has a strictly\n  positive separating functional (`exists_pos_separating_of_cone_disjoint_simplex`): the\n  engine of the finite-state fundamental theorem. Finite dimension only.",
-  "name": "MathFin.exists_separating_of_not_mem_cone",
-  "module": "MathFin.Pricing.Duality.ConvexDuality",
-  "line": 135,
+  "In the binomial tree under no arbitrage, a seller of a European contract\n  who receives its value and follows the hedge loses $\\mathrm{pathPV} - (\\mathrm{value} +\n  \\mathrm{gains}) = 0$ on every path; so under every law $P$ of the coin flips, physical or\n  not, the hedged position has zero value-at-risk and zero expected shortfall at every level\n  $\\alpha \\in (0,1)$.",
+  "name": "MathFin.Contracts.Binomial.valueAtRisk_hedged_eq_zero",
+  "module": "MathFin.Risk.ContractRisk",
+  "line": 131,
   "leanOk": true,
   "latexEnv": "theorem",
-  "label": "thm:cone-separation",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Duality/ConvexDuality.lean"},
- {"uses": [],
-  "title": "Expected utility",
-  "text":
-  "The expected utility $E_p[u] = \\sum_{i \\in s} p_iu_i$ of a lottery $p$\n  over a finite support $s$ under the utility $u$.",
-  "name": "MathFin.expectedUtility",
-  "module": "MathFin.Choice.Utility.VonNeumannMorgenstern",
-  "line": 135,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:expected-utility",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/VonNeumannMorgenstern.lean"},
+  "label": "thm:hedged-position-risk",
+  "file": "/app/MathFin/Risk/ContractRisk.lean"},
  {"uses":
   ["def:market",
    "def:contract",
@@ -817,8 +754,29 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:lp-position-price",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/LPContract.lean"},
+  "file": "/app/MathFin/Markets/DeFi/LPContract.lean"},
+ {"uses": [],
+  "title": "Expected utility",
+  "text":
+  "The expected utility $E_p[u] = \\sum_{i \\in s} p_iu_i$ of a lottery $p$\n  over a finite support $s$ under the utility $u$.",
+  "name": "MathFin.expectedUtility",
+  "module": "MathFin.Choice.Utility.VonNeumannMorgenstern",
+  "line": 135,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:expected-utility",
+  "file": "/app/MathFin/Choice/Utility/VonNeumannMorgenstern.lean"},
+ {"uses": [],
+  "title": "Separation theorem for closed convex cones",
+  "text":
+  "In $\\mathbb{R}^\\iota$ with $\\iota$ finite, if $C$ is a closed convex cone\n  and $x_0 \\notin C$, there is $p$ with $\\langle p, v\\rangle \\le 0$ for all $v \\in C$ and\n  $\\langle p, x_0\\rangle > 0$. A closed convex cone disjoint from the simplex has a strictly\n  positive separating functional (`exists_pos_separating_of_cone_disjoint_simplex`): the\n  engine of the finite-state fundamental theorem. Finite dimension only.",
+  "name": "MathFin.exists_separating_of_not_mem_cone",
+  "module": "MathFin.Pricing.Duality.ConvexDuality",
+  "line": 135,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:cone-separation",
+  "file": "/app/MathFin/Pricing/Duality/ConvexDuality.lean"},
  {"uses": [],
   "title": "The superhedging price dominates every martingale price",
   "text":
@@ -829,8 +787,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:superhedging-price-lower-bound",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"},
+  "file": "/app/MathFin/Risk/Superhedging.lean"},
  {"uses":
   ["def:quantile", "def:standard-normal-cdf", "thm:empirical-cdf-strong-law"],
   "title": "Vasicek's large-portfolio limit",
@@ -842,20 +799,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:large-portfolio-limit",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Credit/VasicekIRB.lean"},
- {"uses": [],
-  "title": "Change of numéraire",
-  "text":
-  "For positive $B_T, N_T$ and $B_0 \\ge 0$, $N_0 > 0$, the measure $Q^N$ with\n  density $N_TB_0/(N_0B_T)$ with respect to $Q$ satisfies $N_0E^{Q^N}[X/N_T] = B_0E^Q[X/B_T]$.\n  When $E^Q[N_T/B_T] = N_0/B_0$ and $B_0, N_0 > 0$, $Q^N$ is a probability measure equivalent\n  to $Q$ (`numeraireMeasure_isEquivProbMeasure`). A pricing identity at one date; no dynamics.",
-  "name": "MathFin.changeOfNumeraire",
-  "module": "MathFin.Pricing.Numeraire",
-  "line": 138,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:change-of-numeraire",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Numeraire.lean"},
+  "file": "/app/MathFin/Risk/Credit/VasicekIRB.lean"},
  {"uses": [],
   "title": "Strong law for the empirical distribution function",
   "text":
@@ -866,8 +810,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:empirical-cdf-strong-law",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Laws/QuantileConvergence.lean"},
+  "file": "/app/MathFin/Probability/Laws/QuantileConvergence.lean"},
  {"uses": ["def:market", "def:pricing-measure", "thm:marginal-utility-is-sdf"],
   "title": "A stationary log portfolio is the numéraire portfolio, one period",
   "text":
@@ -878,8 +821,18 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:log-optimal-numeraire-one-period",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/MarketMarginalUtility.lean"},
+  "file": "/app/MathFin/Choice/Utility/MarketMarginalUtility.lean"},
+ {"uses": [],
+  "title": "Change of numéraire",
+  "text":
+  "For positive $B_T, N_T$ and $B_0 \\ge 0$, $N_0 > 0$, the measure $Q^N$ with\n  density $N_TB_0/(N_0B_T)$ with respect to $Q$ satisfies $N_0E^{Q^N}[X/N_T] = B_0E^Q[X/B_T]$.\n  When $E^Q[N_T/B_T] = N_0/B_0$ and $B_0, N_0 > 0$, $Q^N$ is a probability measure equivalent\n  to $Q$ (`numeraireMeasure_isEquivProbMeasure`). A pricing identity at one date; no dynamics.",
+  "name": "MathFin.changeOfNumeraire",
+  "module": "MathFin.Pricing.Numeraire",
+  "line": 138,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:change-of-numeraire",
+  "file": "/app/MathFin/Pricing/Numeraire.lean"},
  {"uses":
   ["def:market",
    "def:gbm",
@@ -896,8 +849,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:black-scholes-market",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/Market.lean"},
+  "file": "/app/MathFin/Models/BlackScholes/Market.lean"},
  {"uses": ["def:expected-utility"],
   "title": "Expected utility is the integral against the lottery",
   "text":
@@ -908,8 +860,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:expected-utility-integral",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/VonNeumannMorgenstern.lean"},
+  "file": "/app/MathFin/Choice/Utility/VonNeumannMorgenstern.lean"},
  {"uses":
   ["def:market",
    "def:standard-normal-cdf",
@@ -928,20 +879,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:jump-diffusion-price",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Jumps/Market.lean"},
- {"uses": ["def:market"],
-  "title": "Pricing measure",
-  "text":
-  "$Q$ prices the market up to $T$: a probability measure with the same null\n  events as $P$ among the events known at $T$ (the restrictions to $\\mathcal{F}_T$ are\n  mutually absolutely continuous), under which every deflated asset, frozen at $T$, is an\n  $\\mathcal{F}$-martingale.",
-  "name": "MathFin.Market.IsPricingMeasure",
-  "module": "MathFin.Pricing.Market",
-  "line": 148,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:pricing-measure",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Market.lean"},
+  "file": "/app/MathFin/Models/Jumps/Market.lean"},
  {"uses": ["def:quantile"],
   "title": "Gaussian quantile function",
   "text":
@@ -952,8 +890,18 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:gaussian-quantile",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Gaussian/NormalQuantile.lean"},
+  "file": "/app/MathFin/Probability/Gaussian/NormalQuantile.lean"},
+ {"uses": ["def:market"],
+  "title": "Pricing measure",
+  "text":
+  "$Q$ prices the market up to $T$: a probability measure with the same null\n  events as $P$ among the events known at $T$ (the restrictions to $\\mathcal{F}_T$ are\n  mutually absolutely continuous), under which every deflated asset, frozen at $T$, is an\n  $\\mathcal{F}$-martingale.",
+  "name": "MathFin.Market.IsPricingMeasure",
+  "module": "MathFin.Pricing.Market",
+  "line": 148,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:pricing-measure",
+  "file": "/app/MathFin/Pricing/Market.lean"},
  {"uses": ["def:standard-normal-cdf"],
   "title": "Credit valuation adjustment",
   "text":
@@ -964,8 +912,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:unilateral-cva",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Credit/CVA.lean"},
+  "file": "/app/MathFin/Models/Credit/CVA.lean"},
  {"uses": [],
   "title": "Karush–Kuhn–Tucker sufficiency for convex quadratic programs",
   "text":
@@ -976,8 +923,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:kkt-sufficiency",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/ConvexQPKKT.lean"},
+  "file": "/app/MathFin/Choice/Portfolio/ConvexQPKKT.lean"},
  {"uses":
   ["def:market",
    "def:contract",
@@ -992,8 +938,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:zero-coupon-bond-price",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicMarket.lean"},
+  "file": "/app/MathFin/Models/Rates/DeterministicMarket.lean"},
  {"uses": [],
   "title": "Kelly criterion",
   "text":
@@ -1004,8 +949,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:kelly-criterion",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Performance/Kelly.lean"},
+  "file": "/app/MathFin/Choice/Performance/Kelly.lean"},
  {"uses": ["def:market", "def:contract", "def:contract-value"],
   "title": "The pricing functional",
   "text":
@@ -1016,8 +960,7 @@
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:pricing-functional",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Market.lean"},
+  "file": "/app/MathFin/Pricing/Market.lean"},
  {"uses":
   ["def:sharpe-ratio",
    "def:market",
@@ -1035,8 +978,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:market-hansen-jagannathan",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarketSDF.lean"},
+  "file": "/app/MathFin/Choice/Portfolio/MarketSDF.lean"},
  {"uses": ["def:value-at-risk", "def:quantile"],
   "title": "Value-at-risk is not subadditive",
   "text":
@@ -1047,8 +989,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:var-not-subadditive",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/VaRSuperadditivity.lean"},
+  "file": "/app/MathFin/Risk/VaRSuperadditivity.lean"},
  {"uses": ["def:expected-utility"],
   "title": "Entropic risk is the certainty equivalent of exponential utility",
   "text":
@@ -1059,8 +1000,22 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:entropic-risk-certainty-equivalent",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/EntropicRisk.lean"},
+  "file": "/app/MathFin/Risk/EntropicRisk.lean"},
+ {"uses":
+  ["def:expected-shortfall",
+   "def:value-at-risk",
+   "thm:quantile-transform",
+   "def:quantile"],
+  "title": "Rockafellar–Uryasev formula",
+  "text":
+  "For an integrable loss $X$ and $\\alpha \\in (0,1)$, $\\mathrm{ES}_\\alpha(X)$\n  is the least value of $c \\mapsto c + (1-\\alpha)^{-1}E[(X-c)^+]$. No continuity of the law is\n  assumed. The same minimisation holds for a compound-Poisson loss $L = \\sum_{i<N}X_i$ with $N\n  \\sim \\mathrm{Poisson}(\\lambda)$ independent of identically distributed integrable claims\n  (`isLeast_rockafellarUryasev_compoundPoisson`).",
+  "name": "MathFin.isLeast_rockafellarUryasev",
+  "module": "MathFin.Risk.ExpectedShortfall",
+  "line": 161,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:rockafellar-uryasev",
+  "file": "/app/MathFin/Risk/ExpectedShortfall.lean"},
  {"uses":
   ["def:market",
    "def:pricing-measure",
@@ -1080,24 +1035,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:jump-diffusion-market-incomplete",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Jumps/Market.lean"},
- {"uses":
-  ["def:expected-shortfall",
-   "def:value-at-risk",
-   "thm:quantile-transform",
-   "def:quantile"],
-  "title": "Rockafellar–Uryasev formula",
-  "text":
-  "For an integrable loss $X$ and $\\alpha \\in (0,1)$, $\\mathrm{ES}_\\alpha(X)$\n  is the least value of $c \\mapsto c + (1-\\alpha)^{-1}E[(X-c)^+]$. No continuity of the law is\n  assumed. The same minimisation holds for a compound-Poisson loss $L = \\sum_{i<N}X_i$ with $N\n  \\sim \\mathrm{Poisson}(\\lambda)$ independent of identically distributed integrable claims\n  (`isLeast_rockafellarUryasev_compoundPoisson`).",
-  "name": "MathFin.isLeast_rockafellarUryasev",
-  "module": "MathFin.Risk.ExpectedShortfall",
-  "line": 161,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:rockafellar-uryasev",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ExpectedShortfall.lean"},
+  "file": "/app/MathFin/Models/Jumps/Market.lean"},
  {"uses": [],
   "title": "CAPM from a discount factor affine in the market return",
   "text":
@@ -1108,8 +1046,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:sdf-capm-hansen-jagannathan",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/StochasticDiscountFactor.lean"},
+  "file": "/app/MathFin/Choice/Portfolio/StochasticDiscountFactor.lean"},
  {"uses": [],
   "title": "Contract",
   "text":
@@ -1120,8 +1057,7 @@
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:contract",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Contracts/Core.lean"},
+  "file": "/app/MathFin/Contracts/Core.lean"},
  {"uses": ["def:contract", "def:contract-value"],
   "title": "Put-call parity",
   "text":
@@ -1132,8 +1068,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:put-call-parity",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Parity.lean"},
+  "file": "/app/MathFin/Pricing/Parity.lean"},
  {"uses": [],
   "title": "Vasicek bond price",
   "text":
@@ -1144,8 +1079,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:vasicek-bond-pde",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/AffineTermStructurePDE.lean"},
+  "file": "/app/MathFin/Models/Rates/AffineTermStructurePDE.lean"},
  {"uses":
   ["def:gbm", "def:brownian-motion", "def:contract", "def:contract-value"],
   "title": "Black–Scholes pricing under the physical measure",
@@ -1157,8 +1091,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:physical-measure-pricing",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/BlackScholesPhysical.lean"},
+  "file": "/app/MathFin/Models/BlackScholes/BlackScholesPhysical.lean"},
  {"uses": ["def:quantile"],
   "title": "Quantile transform and probability integral transform",
   "text":
@@ -1169,8 +1102,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:quantile-transform",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Laws/Quantile.lean"},
+  "file": "/app/MathFin/Probability/Laws/Quantile.lean"},
  {"uses": [],
   "title": "Marginal utility is a state-price density",
   "text":
@@ -1181,8 +1113,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:utility-state-price-density",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/StatePriceDensity.lean"},
+  "file": "/app/MathFin/Choice/Utility/StatePriceDensity.lean"},
  {"uses":
   ["def:market",
    "def:pricing-measure",
@@ -1199,8 +1130,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:market-sdf-capm",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarketSDF.lean"},
+  "file": "/app/MathFin/Choice/Portfolio/MarketSDF.lean"},
  {"uses":
   ["def:value-at-risk",
    "def:quantile",
@@ -1215,8 +1145,18 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:euler-allocation",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ComponentVaR.lean"},
+  "file": "/app/MathFin/Risk/ComponentVaR.lean"},
+ {"uses": ["def:market", "def:brownian-motion", "def:pricing-measure"],
+  "title": "The Vasicek bond market",
+  "text":
+  "For a pre-Brownian motion $B$, the market of the bank account\n  $N_t = \\exp\\int_0^t r$ of the Vasicek short rate as numéraire and the zero-coupon bond of\n  maturity $T$ as the one asset, under the natural filtration of $B$, is priced by the reference\n  measure at the horizon $T$: the deflated bond is $\\mathbb{E}[\\exp(-\\int_0^T r) \\mid\n  \\mathcal{F}_t]$ almost surely, a martingale; and the price of a unit payment at $T$ is\n  $A(T)e^{-B(T)r_0}$. The model is specified under the pricing measure (no physical measure), the\n  market uses $\\mathcal{F}_t$-measurable representatives of the Wiener integrals, and uniqueness\n  of the pricing measure is not proved.",
+  "name": "MathFin.Rates.isPricingMeasure_vasicekMarket",
+  "module": "MathFin.Models.Rates.VasicekMarket",
+  "line": 178,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:vasicek-market",
+  "file": "/app/MathFin/Models/Rates/VasicekMarket.lean"},
  {"uses": [],
   "title": "Martingale transform",
   "text":
@@ -1227,8 +1167,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:martingale-transform",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/MartingaleTransform.lean"},
+  "file": "/app/MathFin/Probability/Discrete/MartingaleTransform.lean"},
  {"uses": ["thm:compound-poisson-mgf"],
   "title": "Variance swap and the log contract",
   "text":
@@ -1239,8 +1178,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:variance-swap-jump-bias",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Jumps/JumpDiffusionVarianceSwap.lean"},
+  "file": "/app/MathFin/Models/Jumps/JumpDiffusionVarianceSwap.lean"},
  {"uses": [],
   "title": "Snell envelope",
   "text":
@@ -1251,8 +1189,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:snell-envelope",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/SnellEnvelope.lean"},
+  "file": "/app/MathFin/Probability/Discrete/SnellEnvelope.lean"},
  {"uses": ["def:market", "def:pricing-measure"],
   "title": "The one-date market and its pricing measures",
   "text":
@@ -1263,8 +1200,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:one-date-market",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/OneDateMarket.lean"},
+  "file": "/app/MathFin/Pricing/OneDateMarket.lean"},
  {"uses": [],
   "title": "Impermanent loss",
   "text":
@@ -1275,8 +1211,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:impermanent-loss",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/UniswapMechanics.lean"},
+  "file": "/app/MathFin/Markets/DeFi/UniswapMechanics.lean"},
  {"uses": ["def:coherent-risk-measure", "def:expected-utility"],
   "title": "Acceptance sets from expected utility",
   "text":
@@ -1287,8 +1222,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:log-utility-acceptance",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/UtilityDerivation.lean"},
+  "file": "/app/MathFin/Risk/UtilityDerivation.lean"},
  {"uses": [],
   "title": "Ionescu–Tulcea theorem: the law of a Markov chain",
   "text":
@@ -1299,8 +1233,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:markov-path-law",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/MarkovPathMeasure.lean"},
+  "file": "/app/MathFin/Probability/Discrete/MarkovPathMeasure.lean"},
  {"uses":
   ["def:coherent-risk-measure",
    "thm:superhedging-price-lower-bound",
@@ -1314,8 +1247,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:superhedging-coherent",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"},
+  "file": "/app/MathFin/Risk/Superhedging.lean"},
  {"uses":
   ["def:value-at-risk",
    "def:quantile",
@@ -1330,8 +1262,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:gaussian-portfolio-var",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/GaussianRiskMarkowitz.lean"},
+  "file": "/app/MathFin/Risk/GaussianRiskMarkowitz.lean"},
  {"uses": ["def:standard-normal-cdf"],
   "title": "Black–Scholes call price formula",
   "text":
@@ -1342,8 +1273,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:bs-call",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/Call.lean"},
+  "file": "/app/MathFin/Models/BlackScholes/Call.lean"},
  {"uses": ["def:standard-normal-cdf", "thm:esscher-tilt", "thm:bs-call"],
   "title": "Margrabe's exchange option formula",
   "text":
@@ -1354,8 +1284,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:margrabe",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/MargrabeGrounding.lean"},
+  "file": "/app/MathFin/Models/BlackScholes/MargrabeGrounding.lean"},
  {"uses": ["def:brownian-motion"],
   "title": "Quadratic variation of Brownian motion",
   "text":
@@ -1366,8 +1295,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:quadratic-variation",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/QuadraticVariationL2.lean"},
+  "file": "/app/MathFin/Probability/Brownian/QuadraticVariationL2.lean"},
  {"uses": ["def:expected-utility"],
   "title": "von Neumann–Morgenstern expected utility",
   "text":
@@ -1378,8 +1306,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:expected-utility-axioms",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/VonNeumannMorgenstern.lean"},
+  "file": "/app/MathFin/Choice/Utility/VonNeumannMorgenstern.lean"},
  {"uses":
   ["thm:superhedging-coherent",
    "thm:superhedging-price-lower-bound",
@@ -1393,8 +1320,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:superhedging-duality",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"},
+  "file": "/app/MathFin/Risk/Superhedging.lean"},
  {"uses":
   ["def:copula",
    "thm:quantile-transform",
@@ -1409,8 +1335,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "def:gaussian-factor-copula",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Dependence/GaussianCopula.lean"},
+  "file": "/app/MathFin/Probability/Dependence/GaussianCopula.lean"},
  {"uses":
   ["def:standard-normal-cdf",
    "def:contract",
@@ -1426,8 +1351,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:black76-caplet",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/Caplet.lean"},
+  "file": "/app/MathFin/Models/Rates/Caplet.lean"},
  {"uses": ["def:portfolio-variance", "thm:kkt-sufficiency"],
   "title": "Markowitz mean–variance optimality",
   "text":
@@ -1438,8 +1362,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:markowitz-lagrangian",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
+  "file": "/app/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
  {"uses": ["def:brownian-motion"],
   "title": "Bracket of the Itô integral",
   "text":
@@ -1450,8 +1373,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:bracket-compensator",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Martingales/BracketCompensator.lean"},
+  "file": "/app/MathFin/Probability/Martingales/BracketCompensator.lean"},
  {"uses": ["thm:carr-madan"],
   "title": "Breeden–Litzenberger formula",
   "text":
@@ -1462,8 +1384,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:breeden-litzenberger",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/LocalVol/Dupire.lean"},
+  "file": "/app/MathFin/Models/LocalVol/Dupire.lean"},
  {"uses":
   ["def:brownian-motion",
    "def:standard-normal-cdf",
@@ -1480,8 +1401,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:bs-delta-hedge",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/DeltaHedge.lean"},
+  "file": "/app/MathFin/Models/BlackScholes/DeltaHedge.lean"},
  {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
   "title": "Itô's formula",
   "text":
@@ -1493,7 +1413,7 @@
   "latexEnv": "theorem",
   "label": "thm:ito-formula-c2",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoFormulaAdaptedProcess.lean"},
+  "/app/MathFin/Probability/Brownian/Ito/ItoFormulaAdaptedProcess.lean"},
  {"uses": ["def:emm", "thm:martingale-transform"],
   "title": "Fundamental theorem of asset pricing in continuous time",
   "text":
@@ -1504,8 +1424,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:continuous-ftap",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/ContinuousMarket.lean"},
+  "file": "/app/MathFin/Pricing/ContinuousMarket.lean"},
  {"uses": ["def:emm", "thm:martingale-transform"],
   "title": "First fundamental theorem of asset pricing",
   "text":
@@ -1516,8 +1435,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:first-ftap",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/FTAP/FTAPDiscrete.lean"},
+  "file": "/app/MathFin/Pricing/FTAP/FTAPDiscrete.lean"},
  {"uses":
   ["def:quantile",
    "def:value-at-risk",
@@ -1532,8 +1450,18 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:quantile-elicitability",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Elicitability.lean"},
+  "file": "/app/MathFin/Risk/Elicitability.lean"},
+ {"uses": ["def:brownian-motion"],
+  "title": "Lévy's characterization of Brownian motion",
+  "text":
+  "A continuous adapted real process $M$ with $M_0 = 0$ such that $M$ and\n  $M_t^2 - t$ are local martingales for a filtration $\\mathbb{F}$ is a Brownian motion; the\n  filtered version, with increments independent of $\\mathbb{F}$, is\n  `isFilteredPreBrownian_of_localMartingale`. The hypothesis is that $M^2 - t$ is a local\n  martingale, not that a quadratic variation process $\\langle M\\rangle$ equals $t$: no\n  quadratic variation is constructed for a general continuous local martingale.",
+  "name": "MathFin.LevyCharacterization.isBrownianReal_of_localMartingale",
+  "module": "MathFin.Probability.Brownian.LevyCharacterization",
+  "line": 323,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:levy-characterization",
+  "file": "/app/MathFin/Probability/Brownian/LevyCharacterization.lean"},
  {"uses": ["def:portfolio-variance", "thm:markowitz-lagrangian"],
   "title": "Tangent portfolio",
   "text":
@@ -1544,8 +1472,18 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:tangent-portfolio-efficient",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
+  "file": "/app/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
+ {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
+  "title": "Martingale representation theorem",
+  "text":
+  "Let $B$ be a Brownian motion with continuous paths and $\\mathbb{F}^B$ its\n  natural filtration. Every square-integrable martingale $M$ of $\\mathbb{F}^B$ is, up to a\n  horizon $T$, its initial value plus an Itô integral process, $M_t = M_0 + (\\varphi\\cdot\n  B)_t$ almost surely for $t \\le T$, for a predictable $L^2$ integrand $\\varphi$. That $M_0$\n  is a.e. constant is not assumed: it is the representation read at $t = 0$. At the horizon,\n  every $F \\in L^2(\\mathcal{F}^B_T)$ is $F = E[F] + \\int_0^T \\varphi\\,dB$ for a *unique*\n  $\\varphi$ (`exists_itoIntegral_representation`): the range of the Itô isometry is closed,\n  and Wiener-exponential totality kills the orthogonal remainder. One dimension, $L^2$ only.",
+  "name": "MathFin.martingale_representation",
+  "module": "MathFin.Probability.Brownian.MartingaleRepresentation",
+  "line": 323,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:martingale-representation",
+  "file": "/app/MathFin/Probability/Brownian/MartingaleRepresentation.lean"},
  {"uses":
   ["def:market",
    "def:brownian-motion",
@@ -1563,32 +1501,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:market-completeness",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/MarketCompleteness.lean"},
- {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
-  "title": "Martingale representation theorem",
-  "text":
-  "Let $B$ be a Brownian motion with continuous paths and $\\mathbb{F}^B$ its\n  natural filtration. Every square-integrable martingale $M$ of $\\mathbb{F}^B$ is, up to a\n  horizon $T$, its initial value plus an Itô integral process, $M_t = M_0 + (\\varphi\\cdot\n  B)_t$ almost surely for $t \\le T$, for a predictable $L^2$ integrand $\\varphi$. That $M_0$\n  is a.e. constant is not assumed: it is the representation read at $t = 0$. At the horizon,\n  every $F \\in L^2(\\mathcal{F}^B_T)$ is $F = E[F] + \\int_0^T \\varphi\\,dB$ for a *unique*\n  $\\varphi$ (`exists_itoIntegral_representation`): the range of the Itô isometry is closed,\n  and Wiener-exponential totality kills the orthogonal remainder. One dimension, $L^2$ only.",
-  "name": "MathFin.martingale_representation",
-  "module": "MathFin.Probability.Brownian.MartingaleRepresentation",
-  "line": 323,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:martingale-representation",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/MartingaleRepresentation.lean"},
- {"uses": ["def:brownian-motion"],
-  "title": "Lévy's characterization of Brownian motion",
-  "text":
-  "A continuous adapted real process $M$ with $M_0 = 0$ such that $M$ and\n  $M_t^2 - t$ are local martingales for a filtration $\\mathbb{F}$ is a Brownian motion; the\n  filtered version, with increments independent of $\\mathbb{F}$, is\n  `isFilteredPreBrownian_of_localMartingale`. The hypothesis is that $M^2 - t$ is a local\n  martingale, not that a quadratic variation process $\\langle M\\rangle$ equals $t$: no\n  quadratic variation is constructed for a general continuous local martingale.",
-  "name": "MathFin.LevyCharacterization.isBrownianReal_of_localMartingale",
-  "module": "MathFin.Probability.Brownian.LevyCharacterization",
-  "line": 323,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:levy-characterization",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/LevyCharacterization.lean"},
+  "file": "/app/MathFin/Pricing/MarketCompleteness.lean"},
  {"uses": ["def:standard-normal-cdf"],
   "title": "Black–Scholes Greeks",
   "text":
@@ -1599,8 +1512,25 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:bs-delta",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/PDE.lean"},
+  "file": "/app/MathFin/Models/BlackScholes/PDE.lean"},
+ {"uses":
+  ["def:market",
+   "def:pricing-measure",
+   "def:contract",
+   "def:pricing-functional",
+   "thm:one-date-market",
+   "def:contract-value"],
+  "title":
+  "Roper's converse: every normalised call price function is a market's",
+  "text":
+  "Every normalised call price function $C$ (convex and nonincreasing, between\n  $(1-k)^+$ and $1$, with limits $1$ at $0^+$ and $0$ at infinity) is the call price function, at\n  maturity one, of a market with unit numéraire, a nonnegative asset of forward one and a pricing\n  measure: the call at every strike $k > 0$ is worth $C(k)$. The law is the Breeden--Litzenberger\n  measure $\\mu(k, \\infty) = -C'_+(k)$, and may carry an atom at $0$, so the asset is nonnegative\n  rather than positive. The left wing and calendar spreads are not stated here.",
+  "name": "MathFin.exists_market_of_isNormalizedCallPrice",
+  "module": "MathFin.Models.ModelFree.RoperConverse",
+  "line": 330,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:smile-no-arbitrage",
+  "file": "/app/MathFin/Models/ModelFree/RoperConverse.lean"},
  {"uses": [],
   "title": "Pathwise uniqueness for SDEs with Lipschitz coefficients",
   "text":
@@ -1611,8 +1541,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:sde-pathwise-uniqueness",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/SDE/SDEUniqueness.lean"},
+  "file": "/app/MathFin/Probability/Brownian/SDE/SDEUniqueness.lean"},
  {"uses": ["thm:compound-poisson-mgf"],
   "title": "Risk-neutral drift of a jump-diffusion",
   "text":
@@ -1623,8 +1552,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:merton-risk-neutral-drift",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Jumps/JumpDiffusionProcess.lean"},
+  "file": "/app/MathFin/Models/Jumps/JumpDiffusionProcess.lean"},
  {"uses":
   ["def:standard-normal-cdf", "thm:bs-call", "thm:compound-poisson-mgf"],
   "title": "Merton's jump-diffusion formula",
@@ -1636,8 +1564,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:jump-diffusion-mixing",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Jumps/JumpDiffusionMixing.lean"},
+  "file": "/app/MathFin/Models/Jumps/JumpDiffusionMixing.lean"},
  {"uses": [],
   "title": "Marshall–Olkin first-to-default",
   "text":
@@ -1648,8 +1575,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:marshall-olkin",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Dependence/MarshallOlkin.lean"},
+  "file": "/app/MathFin/Probability/Dependence/MarshallOlkin.lean"},
  {"uses": ["def:brownian-motion", "thm:ito-formula-c2"],
   "title": "Itô's product rule",
   "text":
@@ -1660,8 +1586,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:ito-product-rule",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoProductRule.lean"},
+  "file": "/app/MathFin/Probability/Brownian/Ito/ItoProductRule.lean"},
  {"uses": ["def:brownian-motion"],
   "title": "Girsanov's theorem",
   "text":
@@ -1672,8 +1597,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:girsanov-brownian-characterisation",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Girsanov/GirsanovFiltered.lean"},
+  "file": "/app/MathFin/Probability/Brownian/Girsanov/GirsanovFiltered.lean"},
  {"uses": [],
   "title": "Hoeffding's covariance identity",
   "text":
@@ -1684,8 +1608,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:hoeffding-covariance",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Dependence/HoeffdingCovariance.lean"},
+  "file": "/app/MathFin/Probability/Dependence/HoeffdingCovariance.lean"},
  {"uses":
   ["def:expected-shortfall",
    "def:value-at-risk",
@@ -1700,8 +1623,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:expected-shortfall-dual",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ExpectedShortfall.lean"},
+  "file": "/app/MathFin/Risk/ExpectedShortfall.lean"},
  {"uses": [],
   "title": "Intensity model of default",
   "text":
@@ -1712,8 +1634,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:intensity-default-model",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Credit/Cox.lean"},
+  "file": "/app/MathFin/Models/Credit/Cox.lean"},
  {"uses": [],
   "title": "A concentrated-liquidity position is dominated by a covered call",
   "text":
@@ -1724,8 +1645,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:uniswap-v3-covered-call",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/UniswapMechanics.lean"},
+  "file": "/app/MathFin/Markets/DeFi/UniswapMechanics.lean"},
  {"uses":
   ["def:expected-shortfall",
    "def:value-at-risk",
@@ -1740,8 +1660,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:expected-shortfall-not-elicitable",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Elicitability.lean"},
+  "file": "/app/MathFin/Risk/Elicitability.lean"},
  {"uses": ["def:standard-normal-cdf"],
   "title": "Black–Scholes partial differential equation",
   "text":
@@ -1752,8 +1671,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:bs-pde",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/PDE.lean"},
+  "file": "/app/MathFin/Models/BlackScholes/PDE.lean"},
  {"uses": ["def:brownian-motion"],
   "title": "Existence and uniqueness of solutions of Lipschitz SDEs",
   "text":
@@ -1764,8 +1682,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:sde-strong-solution",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/SDE/SDEExistence.lean"},
+  "file": "/app/MathFin/Probability/Brownian/SDE/SDEExistence.lean"},
  {"uses": [],
   "title": "Heston model pricing equation",
   "text":
@@ -1776,8 +1693,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:heston-pde",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/StochVol/Heston.lean"},
+  "file": "/app/MathFin/Models/StochVol/Heston.lean"},
  {"uses": ["def:brownian-motion", "thm:carr-madan"],
   "title": "Dupire's local volatility formula",
   "text":
@@ -1788,8 +1704,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:dupire-zero-rates",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/LocalVol/Dupire.lean"},
+  "file": "/app/MathFin/Models/LocalVol/Dupire.lean"},
  {"uses": [],
   "title": "Doob's $L^p$ maximal inequality",
   "text":
@@ -1800,8 +1715,7 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:doob-maximal-inequality",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/DoobLpMaximalInequality.lean"},
+  "file": "/app/MathFin/Probability/Discrete/DoobLpMaximalInequality.lean"},
  {"uses": [],
   "title": "Feynman–Kac formula for the heat equation",
   "text":
@@ -1812,5 +1726,4 @@
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:feynman-kac-heat-eq",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Gaussian/FeynmanKacHeatEquation.lean"}]
+  "file": "/app/MathFin/Probability/Gaussian/FeynmanKacHeatEquation.lean"}]

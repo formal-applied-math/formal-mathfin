@@ -178,6 +178,7 @@ graph TD
   tangentPortfolioEfficient["Tangent portfolio"]:::proved
   trancheLegPrice["A CDO tranche leg is a contract"]:::proved
   varNotSubadditive["Value-at-risk is not subadditive"]:::proved
+  vasicekMarket["The Vasicek bond market"]:::proved
   americanPutDominatesEuropean["The American put value dominates the Black–Scholes European price"]:::proved
   bachelierCall["Bachelier call price formula"]:::proved
   bsDeltaHedge["Black–Scholes delta hedging"]:::proved
@@ -199,11 +200,13 @@ graph TD
   marketSdfCapm["The security market line for a market with a pricing measure"]:::proved
   quantileElicitability["Elicitability of the quantile"]:::proved
   rockafellarUryasev["Rockafellar–Uryasev formula"]:::proved
+  smileNoArbitrage["Roper's converse: every normalised call price function is a market's"]:::proved
   superhedgingDuality["Superhedging duality"]:::proved
   timeDependentVolMarket["Black–Scholes with a deterministic volatility clock is a market"]:::proved
   zeroCouponBondPrice["The zero-coupon bond price is a price"]:::proved
   jumpDiffusionMarketIncomplete["The jump-diffusion market has two pricing measures"]:::proved
   logOptimalNumeraireOnePeriod["A stationary log portfolio is the numéraire portfolio, one period"]:::proved
+  sviMarketRealisation["A butterfly-free SVI slice is a market"]:::proved
   subgraph frontier_choiceDynamic["⏳ frontier · Choice · Dynamic choice"]
     logOptimalNumeraire["Log-optimal portfolio is the numéraire"]:::frontier
     mertonPortfolioFraction["Merton myopic risky fraction"]:::frontier
@@ -348,8 +351,6 @@ graph TD
     roughHestonPathwiseUniqueness["Rough-Heston pathwise uniqueness"]:::frontier
     sabrHagan["SABR Hagan asymptotic implied vol"]:::frontier
     schrodingerSpxVix["Schrödinger calibration of SPX/VIX"]:::frontier
-    smileNoArbitrage["Smile no-arbitrage (Roper, SVI)"]:::frontier
-    sviMarketRealisation["A butterfly-free SVI slice is a market"]:::frontier
   end
 
   convexRiskMeasure --> coherentRiskMeasure
@@ -471,6 +472,9 @@ graph TD
   contractValue --> trancheLegPrice
   quantile --> varNotSubadditive
   valueAtRisk --> varNotSubadditive
+  brownianMotion --> vasicekMarket
+  market --> vasicekMarket
+  pricingMeasure --> vasicekMarket
   brownianMotion --> americanPutDominatesEuropean
   contract --> americanPutDominatesEuropean
   contractValue --> americanPutDominatesEuropean
@@ -578,6 +582,12 @@ graph TD
   quantile --> rockafellarUryasev
   valueAtRisk --> rockafellarUryasev
   quantileTransform --> rockafellarUryasev
+  contract --> smileNoArbitrage
+  contractValue --> smileNoArbitrage
+  market --> smileNoArbitrage
+  pricingFunctional --> smileNoArbitrage
+  pricingMeasure --> smileNoArbitrage
+  oneDateMarket --> smileNoArbitrage
   coherentRiskRepresentation --> superhedgingDuality
   superhedgingCoherent --> superhedgingDuality
   superhedgingPriceLowerBound --> superhedgingDuality
@@ -602,6 +612,13 @@ graph TD
   market --> logOptimalNumeraireOnePeriod
   pricingMeasure --> logOptimalNumeraireOnePeriod
   marginalUtilityIsSdf --> logOptimalNumeraireOnePeriod
+  contract --> sviMarketRealisation
+  market --> sviMarketRealisation
+  pricingFunctional --> sviMarketRealisation
+  pricingMeasure --> sviMarketRealisation
+  standardNormalCdf --> sviMarketRealisation
+  bsCall --> sviMarketRealisation
+  smileNoArbitrage --> sviMarketRealisation
   standardNormalCdf --> realErf
   aaveLiquidationKmv --> aaveHealthFactorBound
   vasicekBondPde --> affineTermStructure
@@ -734,14 +751,10 @@ graph TD
   carrMadan --> semistaticFtap
   itoFormulaC2 --> siegelParadox
   quantile --> sklarGeneral
-  carrMadan --> smileNoArbitrage
-  bsCall --> smileNoArbitrage
   brownianMotion --> stefanUniqueness
   stochasticFubini --> stochasticFubiniLevy
   stochasticFubini --> stochasticFubiniProcess
   survivalFunction --> survivalModel
-  smileNoArbitrage --> sviMarketRealisation
-  pricingMeasure --> sviMarketRealisation
   survivalModel --> thieleReserve
   survivalFunction --> thieleReserve
   sdeStrongSolution --> timeInconsistentEquilibrium
@@ -873,6 +886,7 @@ graph TD
 | `thm:tangent-portfolio-efficient` Tangent portfolio | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atangent-portfolio-efficient%22%20in%3Abody) |
 | `thm:tranche-leg-price` A CDO tranche leg is a contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atranche-leg-price%22%20in%3Abody) |
 | `thm:var-not-subadditive` Value-at-risk is not subadditive | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avar-not-subadditive%22%20in%3Abody) |
+| `thm:vasicek-market` The Vasicek bond market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avasicek-market%22%20in%3Abody) |
 | `thm:american-put-dominates-european` The American put value dominates the Black–Scholes European price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-dominates-european%22%20in%3Abody) |
 | `thm:bachelier-call` Bachelier call price formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abachelier-call%22%20in%3Abody) |
 | `thm:bs-delta-hedge` Black–Scholes delta hedging | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-delta-hedge%22%20in%3Abody) |
@@ -894,11 +908,13 @@ graph TD
 | `thm:market-sdf-capm` The security market line for a market with a pricing measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarket-sdf-capm%22%20in%3Abody) |
 | `thm:quantile-elicitability` Elicitability of the quantile | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aquantile-elicitability%22%20in%3Abody) |
 | `thm:rockafellar-uryasev` Rockafellar–Uryasev formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Arockafellar-uryasev%22%20in%3Abody) |
+| `thm:smile-no-arbitrage` Roper's converse: every normalised call price function is a market's | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asmile-no-arbitrage%22%20in%3Abody) |
 | `thm:superhedging-duality` Superhedging duality | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-duality%22%20in%3Abody) |
 | `thm:time-dependent-vol-market` Black–Scholes with a deterministic volatility clock is a market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atime-dependent-vol-market%22%20in%3Abody) |
 | `thm:zero-coupon-bond-price` The zero-coupon bond price is a price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Azero-coupon-bond-price%22%20in%3Abody) |
 | `thm:jump-diffusion-market-incomplete` The jump-diffusion market has two pricing measures | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ajump-diffusion-market-incomplete%22%20in%3Abody) |
 | `thm:log-optimal-numeraire-one-period` A stationary log portfolio is the numéraire portfolio, one period | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alog-optimal-numeraire-one-period%22%20in%3Abody) |
+| `thm:svi-market-realisation` A butterfly-free SVI slice is a market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asvi-market-realisation%22%20in%3Abody) |
 | `def:real-erf` erf / erfc / erfinv for Mathlib | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Areal-erf%22%20in%3Abody) |
 | `thm:aave-health-factor-bound` Aave multi-asset health factor: a liquidation bound | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaave-health-factor-bound%22%20in%3Abody) |
 | `thm:affine-term-structure` Affine term structure | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaffine-term-structure%22%20in%3Abody) |
@@ -986,12 +1002,10 @@ graph TD
 | `thm:semistatic-ftap` Semistatic FTAP with entropy | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asemistatic-ftap%22%20in%3Abody) |
 | `thm:siegel-paradox` Siegel's paradox | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asiegel-paradox%22%20in%3Abody) |
 | `thm:sklar-general` Sklar's theorem for arbitrary margins | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asklar-general%22%20in%3Abody) |
-| `thm:smile-no-arbitrage` Smile no-arbitrage (Roper, SVI) | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asmile-no-arbitrage%22%20in%3Abody) |
 | `thm:stefan-uniqueness` Stefan uniqueness with accumulating jumps | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astefan-uniqueness%22%20in%3Abody) |
 | `thm:stochastic-fubini-levy` Stochastic Fubini for Itô–Lévy integrals | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astochastic-fubini-levy%22%20in%3Abody) |
 | `thm:stochastic-fubini-process` Stochastic Fubini for the integral process | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astochastic-fubini-process%22%20in%3Abody) |
 | `thm:survival-model` Survival model and life tables | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asurvival-model%22%20in%3Abody) |
-| `thm:svi-market-realisation` A butterfly-free SVI slice is a market | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asvi-market-realisation%22%20in%3Abody) |
 | `thm:thiele-reserve` Thiele reserve | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Athiele-reserve%22%20in%3Abody) |
 | `thm:time-inconsistent-equilibrium` Relaxed equilibria under time inconsistency | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atime-inconsistent-equilibrium%22%20in%3Abody) |
 | `thm:two-asset-option-formulas` Stulz and Heynen–Kat two-asset formulas | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atwo-asset-option-formulas%22%20in%3Abody) |

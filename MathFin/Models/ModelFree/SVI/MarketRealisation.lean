@@ -7,22 +7,25 @@ module
 
 public import MathFin.Init
 public import MathFin.Models.ModelFree.MarketCallPrice
+public import MathFin.Models.ModelFree.RoperConverse
 public import MathFin.Models.ModelFree.SVI.TailCondition
 
 /-!
-# A market that prices the SVI smile makes the slice butterfly-free
+# The SVI smile and the market: butterfly-free exactly when realised
 
-The forward direction of the static fundamental theorem
-(`Market.IsPricingMeasure.isNormalizedCallPrice`) meets the SVI sign formula: if the calls of a
-market with a pricing measure, in units of the forward, are the SVI-smiled Black prices, and the
-parameters are admissible, then `butterflyFreeFormula` holds. The converse (every butterfly-free
-slice is the call price function of a market) needs the construction of a measure from a convex
-call price function and is not proved here.
+The static fundamental theorem meets the SVI sign formula in both directions. Forward
+(`Market.IsPricingMeasure.isNormalizedCallPrice`): if the calls of a market with a pricing
+measure, in units of the forward, are the SVI-smiled Black prices, and the parameters are
+admissible, then `butterflyFreeFormula` holds. Converse (`exists_market_of_isNormalizedCallPrice`,
+Roper's converse): a butterfly-free slice is the call price function, at maturity one, of a market
+with unit numéraire, a nonnegative asset of forward one and a pricing measure.
 
 ## Main results
 
 * `SVI.butterflyFreeFormula_of_isPricingMeasure`: a pricing measure whose normalised calls are the
   SVI smile forces the finite sign formula `butterflyFreeFormula`.
+* `SVI.exists_market_of_butterflyFreeFormula`: a butterfly-free slice is the call price function
+  of a market.
 
 ## References
 
@@ -56,5 +59,19 @@ theorem butterflyFreeFormula_of_isPricingMeasure {Ω : Type*} {mΩ : MeasurableS
   (butterflyFreeFormula_iff_isNormalizedCallPrice p).2
     ⟨hp.1, hp.2.1, hp.2.2.1, hp.2.2.2,
       (hQ.isNormalizedCallPrice hN hpos hF).of_eqOn fun k hk ↦ hsmile k hk⟩
+
+/-- **A butterfly-free SVI slice is the call price function of a market.** If the raw SVI
+parameters satisfy `butterflyFreeFormula`, there is a market with unit numéraire, a nonnegative
+asset of forward one at maturity one and a pricing measure, in which the call at every strike
+`k > 0` is worth the SVI-smiled Black call `bsSmile p k`: the sign formula makes `bsSmile p` a
+normalised call price function (`butterflyFreeFormula_iff_isNormalizedCallPrice`), and Roper's
+converse realises it. -/
+theorem exists_market_of_butterflyFreeFormula {p : Params}
+    (h : butterflyFreeFormula.eval p = true) :
+    ∃ (M : Market Unit ℝ) (Q : Measure ℝ), (∀ t ω, M.numeraire t ω = 1) ∧
+      (∀ ω, 0 ≤ M.asset () 1 ω) ∧ M.IsPricingMeasure 1 Q ∧
+      M.price Q (.pay 1 (.obs () 1)) = 1 ∧ ∀ k > 0, M.price Q (europeanCall k 1) = bsSmile p k :=
+  exists_market_of_isNormalizedCallPrice
+    ((butterflyFreeFormula_iff_isNormalizedCallPrice p).1 h).2.2.2.2
 
 end MathFin.SVI
