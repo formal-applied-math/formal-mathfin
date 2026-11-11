@@ -3772,9 +3772,9 @@
     "mf-market-call-price-normalized": {
       "benchmark_file": "svi_certificate.json",
       "date": "2026-11-11",
-      "elapsed_s": 3.6,
-      "input_hash": "f428534239d87437638b1989772bf338716f1157a819869b6ce30c94462dbc56",
-      "verified_at_commit": "4d1cfbf"
+      "elapsed_s": 5.5,
+      "input_hash": "506f1f03cf586a52862816407679cbd909ab97130bc79ef1eb4968d03de1e115",
+      "verified_at_commit": "9d013e9c"
     },
     "mf-market-capm-from-affine-sdf": {
       "benchmark_file": "portfolio_and_performance.json",
@@ -4371,6 +4371,13 @@
       "input_hash": "ec5b5f3153cd3ee1a06c35832a1fe8dd56b9ab25905bb779b65627af9e8be068",
       "verified_at_commit": "f68ab19"
     },
+    "mf-roper-converse": {
+      "benchmark_file": "svi_certificate.json",
+      "date": "2026-11-11",
+      "elapsed_s": 1.3,
+      "input_hash": "fa78ac5c97bd5da0bebe68995b93cb05a10d805037afdca156f822e5f2af9ed3",
+      "verified_at_commit": "9d013e9c"
+    },
     "mf-sabr-atm-black76-price": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-08",
@@ -4644,6 +4651,13 @@
       "input_hash": "fc90669b1e88b762a0041989c785caf40bb2b5c28861a6eb29d135f996f6cc99",
       "verified_at_commit": "f68ab19"
     },
+    "mf-svi-butterfly-free-market": {
+      "benchmark_file": "svi_certificate.json",
+      "date": "2026-11-11",
+      "elapsed_s": 8.5,
+      "input_hash": "7b7f63a97f83bdbee82b6a5ac21e559b933c53fb33b36421a13e1fc98788ad20",
+      "verified_at_commit": "9d013e9c"
+    },
     "mf-svi-butterfly-free-sign-formula": {
       "benchmark_file": "svi_certificate.json",
       "date": "2026-11-11",
@@ -4860,6 +4874,13 @@
       "elapsed_s": 2.6,
       "input_hash": "cff354f15750a1d372f86639fd98159703a26bf7295b2449d2020577e0faed12",
       "verified_at_commit": "f68ab19"
+    },
+    "mf-vasicek-market-pricing-measure": {
+      "benchmark_file": "interest_rates.json",
+      "date": "2026-11-11",
+      "elapsed_s": 4.2,
+      "input_hash": "193d6a82e1acbb003b68604ac98bcf7abaa1a50dae834c9cd3f46bd386befb4b",
+      "verified_at_commit": "9d013e9c"
     },
     "mf-vasicek-sde-terminal-gaussian": {
       "benchmark_file": "interest_rates.json",
