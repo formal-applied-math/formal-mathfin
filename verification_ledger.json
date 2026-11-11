@@ -612,6 +612,13 @@
       "input_hash": "5ac96895bb5e06ddf9fdac4426291e86ec85c29f978315c8688b9ea4c4a4cce0",
       "verified_at_commit": "90b674a"
     },
+    "mf-american-put-ge-market-european-put": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-11-11",
+      "elapsed_s": 3.3,
+      "input_hash": "6bed2dc267b7a645b5e0eba5314c6243af2880142f7b8ba4bfcb28e2f8ac7478",
+      "verified_at_commit": "e353bd6"
+    },
     "mf-american-put-local-price-ito": {
       "benchmark_file": "american_put_boundary.json",
       "date": "2026-11-08",
@@ -863,6 +870,13 @@
       "elapsed_s": 3.5,
       "input_hash": "8d762c38eefa9ce392db7bb65e6e53c5e004ca86a80912991531031977bd3018",
       "verified_at_commit": "90b674a"
+    },
+    "mf-binomial-american-price-snell-envelope": {
+      "benchmark_file": "binomial.json",
+      "date": "2026-11-11",
+      "elapsed_s": 3.1,
+      "input_hash": "0d8f6eeb0d70b9dfbf5590ad9bd0e3d49c441347eae40cf8a5eb77ae64d87aa8",
+      "verified_at_commit": "e353bd6"
     },
     "mf-binomial-complete-hedge-capital-is-value": {
       "benchmark_file": "binomial.json",
