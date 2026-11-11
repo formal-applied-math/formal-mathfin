@@ -996,6 +996,18 @@ attribute [blueprint "thm:vasicek-bond-pde"
   \tfrac12\sigma^2\partial_r^2 u - ru = 0$. -/)]
   MathFin.vasicekBondPrice_solves_pde
 
+attribute [blueprint "thm:vasicek-market"
+  (title := "The Vasicek bond market")
+  (statement := /-- For a pre-Brownian motion $B$, the market of the bank account
+  $N_t = \exp\int_0^t r$ of the Vasicek short rate as numéraire and the zero-coupon bond of
+  maturity $T$ as the one asset, under the natural filtration of $B$, is priced by the reference
+  measure at the horizon $T$: the deflated bond is $\mathbb{E}[\exp(-\int_0^T r) \mid
+  \mathcal{F}_t]$ almost surely, a martingale; and the price of a unit payment at $T$ is
+  $A(T)e^{-B(T)r_0}$. The model is specified under the pricing measure (no physical measure), the
+  market uses $\mathcal{F}_t$-measurable representatives of the Wiener integrals, and uniqueness
+  of the pricing measure is not proved. -/)]
+  MathFin.Rates.isPricingMeasure_vasicekMarket
+
 attribute [blueprint "thm:black76-caplet"
   (title := "Black's caplet formula")
   (statement := /-- If the simple rate $L(T_0,T_1)$ is lognormal under the $T_1$-forward

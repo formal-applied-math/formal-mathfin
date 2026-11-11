@@ -1560,6 +1560,30 @@
       }
     },
     {
+      "id": "mf-vasicek-market-pricing-measure",
+      "name": "The Reference Measure Prices the Vasicek Bond Market, and a Unit Payment at Maturity Is Worth the Vasicek Bond Price",
+      "description": "The Vasicek bond market (vasicekMarket hB hBm r0 theta sigma hkappa T: for a pre-Brownian motion B under the probability measure mu, read as the pricing measure, with the natural filtration of B, the bank account exp(int_0^t r) of the Vasicek short rate as stochastic numeraire, and one asset, the zero-coupon bond of maturity T, worth A(T-t) exp(-B(T-t) r_t) before T and its proceeds held in the bank account after T) is a Market; mu is a pricing measure of it at the horizon T (Market.IsPricingMeasure: the deflated bond frozen at T is almost surely the Doob martingale E[exp(-int_0^T r) | F_(t^T)]); and the market price (Market.price) of a unit payment at T under mu is the Vasicek bond price A(T) exp(-B(T) r_0). The model is specified under the pricing measure (kappa > 0); no physical measure and no uniqueness of the pricing measure are proved.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.Rates.VasicekMarket\n\nopen MathFin MathFin.Contracts MathFin.Rates MeasureTheory\nopen scoped NNReal\n\n/-- The reference measure prices the Vasicek bond market, and a unit payment at `T` is worth the\nVasicek bond price `A(T) exp(-B(T) r₀)`. -/\ntheorem vasicek_market_pricing_measure {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}\n    [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBm : ∀ s, Measurable (B s)) (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :\n    (vasicekMarket hB hBm r₀ θ σ hκ T).IsPricingMeasure T μ ∧\n      (vasicekMarket hB hBm r₀ θ σ hκ T).price μ (.pay T (.const 1))\n        = vasicekBondA θ σ κ (T : ℝ) * Real.exp (-(vasicekBondB κ (T : ℝ) * r₀)) :=\n  ⟨isPricingMeasure_vasicekMarket hB hBm r₀ θ σ hκ T, price_pay_vasicekMarket hB hBm r₀ θ σ hκ T⟩\n"
+      },
+      "metadata": {
+        "reference": "D. Brigo and F. Mercurio, Interest Rate Models - Theory and Practice, 2nd ed., Springer (2006), sec. 3.2.1; O. Vasicek, An equilibrium characterization of the term structure, J. Financial Economics 5 (1977). No code copied.",
+        "citations": [
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "sec. 3.2.1"
+          },
+          {
+            "key": "Vasicek1977"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. isPricingMeasure_vasicekMarket and price_pay_vasicekMarket in MathFin/Models/Rates/VasicekMarket.lean: the deflated bond is almost surely the conditional expectation of the discount factor exp(-int_0^T r) (vasicekBondPrice_condExp), a martingale (martingale_condExp, frozen at T by martingale_min_of_martingale, carried across the almost-sure equality by Martingale.congr_ae), and the unit payment's price is the integral of exp(-int_0^T r) (vasicekBondPrice_affine). SCOPE: the Market requires exact adaptedness, but the Wiener integrals are L2 classes, so the market uses the F_t-measurable representatives mu[. | F_t] of the integrated rate and the short rate, which equal the Wiener integrals almost surely; the model is specified risk-neutrally (mu is the pricing measure, no physical measure or market price of risk is constructed); that the short rate solves the Vasicek SDE is cited, not proved (the Wiener representation is the definition); after maturity the bond's proceeds are held in the bank account; uniqueness of the pricing measure is not proved."
+      }
+    },
+    {
       "id": "mf-bond-portfolio-value-is-market-price",
       "name": "The Flat-Rate Value of a Zero-Coupon Portfolio and the Discrete Price of a Coupon Bond Are Market Prices",
       "description": "For any Market whose numeraire is the money market e^{rt}, under any probability measure Q, the zero-coupon portfolio value bondPortfolioValue (faces w i, maturities T i >= 0) at time 0 and rate r is the market price (Market.price) of the schedule of fixed cash flows fixedFlows paying w i at T i; and for any Market whose numeraire is (1 + y)^floor(t), the coupon bond price bondPriceDisc at the annually compounded yield y, with integer payment times, is the market price of its schedule. The numeraire is deterministic, so the flat-rate zero-coupon portfolio value and the annually compounded coupon-bond price, the quantities the immunization and key-rate-duration results differentiate, are values of contracts, whatever the assets of the market; it does not construct a market with a stochastic short rate.",
