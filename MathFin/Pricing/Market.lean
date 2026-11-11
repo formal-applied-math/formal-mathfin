@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Contracts.Instruments.Options
 public import MathFin.Pricing.Value
 public import MathFin.Pricing.EquivMartingaleMeasure
 public import MathFin.Pricing.StatePrices
@@ -76,6 +77,9 @@ prices `q ω = (N 0 / N t)(ω) · Q {ω}` (`price_pay_eq_statePricePricing`), no
 
 ## Main results
 
+* `Market.price_eq_value_of_numeraire`: a deterministic numéraire prices by the deterministic
+  deflator `f 0 / f t`; `Market.price_europeanCall_of_numeraire_eq_one`: with unit numéraire the
+  call is the plain integral of its payoff.
 * `Market.IsPricingMeasure.of_isEquivProbMeasure`: a measure equivalent to `P` everywhere that
   makes the deflated assets frozen martingales is a pricing measure.
 * `Market.IsPricingMeasure.of_trim_eq`: a measure that agrees with a pricing measure on `𝓕 T` is
@@ -181,6 +185,21 @@ theorem deflator_of_numeraire_exp {M : Market ι Ω} {r : ℝ}
     M.deflator t ω = Real.exp (-r * t) := by
   simp only [deflator_of_numeraire hN, NNReal.coe_zero, mul_zero, Real.exp_zero, one_div, neg_mul,
     Real.exp_neg]
+
+/-- **A deterministic numéraire prices by a deterministic deflator**: if `N t ω = f t`, the price
+of a contract is its value with the deflator `f 0 / f t`. The money-market, Bachelier,
+clocked-volatility and one-date markets are instances. -/
+theorem price_eq_value_of_numeraire {M : Market ι Ω} {f : ℝ≥0 → ℝ}
+    (hf : ∀ t ω, M.numeraire t ω = f t) (Q : Measure Ω) (c : Contract ι) :
+    M.price Q c = c.value Q (fun t _ ↦ f 0 / f t) M.asset :=
+  congrArg (fun D ↦ c.value Q D M.asset) (funext fun t ↦ funext (deflator_of_numeraire hf t))
+
+/-- With unit numéraire the call is priced by the plain `Q`-integral of its payoff. -/
+theorem price_europeanCall_of_numeraire_eq_one {M : Market Unit Ω} {T : ℝ≥0} {Q : Measure Ω}
+    (hN : ∀ t ω, M.numeraire t ω = 1) (K : ℝ) :
+    M.price Q (europeanCall K T) = ∫ ω, max (M.asset () T ω - K) 0 ∂Q := by
+  simp [price, europeanCall, europeanCallPayoff, Contract.value_pay, Payoff.eval, scenarioAt,
+    deflator, hN]
 
 /-- Each deflated asset is adapted. -/
 theorem stronglyAdapted_deflated (M : Market ι Ω) (i : ι) : StronglyAdapted M.𝓕 (M.deflated i) :=

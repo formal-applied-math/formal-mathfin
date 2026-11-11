@@ -90,7 +90,8 @@ variable (μ : Measure Ω) (hWmeas : ∀ t, Measurable (W t)) (S_0 σ : ℝ)
 
 /-- The deflator of the Bachelier market is `1`. -/
 theorem deflator_market (t : ℝ≥0) (ω : Ω) : (market μ hWmeas S_0 σ).deflator t ω = 1 := by
-  simp [Market.deflator, market]
+  simpa using Market.deflator_of_numeraire (M := market μ hWmeas S_0 σ) (f := fun _ ↦ (1 : ℝ))
+    (fun _ _ ↦ rfl) t ω
 
 /-- The deflated asset of the Bachelier market is the asset `S₀ + σ W_t`. -/
 theorem deflated_market (t : ℝ≥0) (ω : Ω) :
@@ -169,19 +170,9 @@ theorem superReplicationPrice_europeanCall (hWcont : ∀ ω, Continuous fun s : 
     funext ω
     simp [Contract.pathPV, Contract.cashflows, europeanCall, europeanCallPayoff, Payoff.eval,
       scenarioAt, market, Market.deflator]
-  have hm : Measurable (fun ω ↦ max (S_0 + σ * W T ω - K) 0) :=
-    ((((hWmeas T).const_mul σ).const_add S_0).sub_const K).max measurable_const
-  have hmem : MemLp (fun ω ↦ max (S_0 + σ * W T ω - K) 0) 2 μ := by
-    have hWT : MemLp (W T) 2 μ := (hW.hasLaw_eval T).memLp (memLp_id_gaussianReal 2)
-    refine MemLp.of_le ((memLp_const (S_0 - K)).add (hWT.const_mul σ)) hm.aestronglyMeasurable
-      (.of_forall fun ω ↦ ?_)
-    change ‖max (S_0 + σ * W T ω - K) 0‖ ≤ ‖S_0 - K + σ * W T ω‖
-    simp only [Real.norm_eq_abs]
-    rcases le_total (S_0 + σ * W T ω - K) 0 with h | h
-    · rw [max_eq_right h, abs_zero]
-      exact abs_nonneg _
-    · rw [max_eq_left h]
-      exact le_of_eq (by congr 1; ring)
+  have hmem : MemLp (fun ω ↦ max (S_0 + σ * W T ω - K) 0) 2 μ :=
+    (((memLp_const S_0).add (((hW.hasLaw_eval T).memLp (memLp_id_gaussianReal 2)).const_mul σ)).sub
+      (memLp_const K)).pos_part
   have hmeasT : AEStronglyMeasurable[natFiltration hWmeas T]
       (fun ω ↦ max (S_0 + σ * W T ω - K) 0) μ :=
     (((((stronglyAdapted_natFiltration hWmeas T).measurable.const_mul σ).const_add
