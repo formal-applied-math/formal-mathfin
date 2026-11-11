@@ -93,7 +93,7 @@ theorem twoStepFiltration_one : twoStepFiltration Ω 1 = mΩ := rfl
 end TwoStep
 
 /-- The step of a date: `0` before `τ`, `1` from `τ` on. -/
-def dateStep (τ t : ℝ≥0) : ℕ := if t < τ then 0 else 1
+noncomputable def dateStep (τ t : ℝ≥0) : ℕ := if t < τ then 0 else 1
 
 theorem monotone_dateStep (τ : ℝ≥0) : Monotone (dateStep τ) := by
   intro a b hab
@@ -101,13 +101,13 @@ theorem monotone_dateStep (τ : ℝ≥0) : Monotone (dateStep τ) := by
   · simp [dateStep, hb, hab.trans_lt hb]
   · by_cases ha : a < τ <;> simp [dateStep, ha, hb]
 
-theorem dateStep_of_lt {τ t : ℝ≥0} (h : t < τ) : dateStep τ t = 0 := if_pos h
+theorem dateStep_of_lt {τ t : ℝ≥0} (h : t < τ) : dateStep τ t = 0 := by simp [dateStep, h]
 
-theorem dateStep_of_not_lt {τ t : ℝ≥0} (h : ¬ t < τ) : dateStep τ t = 1 := if_neg h
+theorem dateStep_of_not_lt {τ t : ℝ≥0} (h : ¬ t < τ) : dateStep τ t = 1 := by simp [dateStep, h]
 
 /-- **The information of the one-date market**: nothing is known before `τ`, everything from `τ`
 on. It is the two-step filtration read along the step of the date. -/
-def dateFiltration (Ω : Type*) [mΩ : MeasurableSpace Ω] (τ : ℝ≥0) : Filtration ℝ≥0 mΩ :=
+noncomputable def dateFiltration (Ω : Type*) [mΩ : MeasurableSpace Ω] (τ : ℝ≥0) : Filtration ℝ≥0 mΩ :=
   (twoStepFiltration Ω).comp (monotone_dateStep τ)
 
 section DateFiltration
@@ -115,12 +115,12 @@ section DateFiltration
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {τ t : ℝ≥0}
 
 theorem dateFiltration_of_lt (h : t < τ) : dateFiltration Ω τ t = ⊥ := by
-  show twoStepFiltration Ω (dateStep τ t) = ⊥
+  change twoStepFiltration Ω (dateStep τ t) = ⊥
   rw [dateStep_of_lt h]
   try exact twoStepFiltration_zero Ω
 
 theorem dateFiltration_of_not_lt (h : ¬ t < τ) : dateFiltration Ω τ t = mΩ := by
-  show twoStepFiltration Ω (dateStep τ t) = mΩ
+  change twoStepFiltration Ω (dateStep τ t) = mΩ
   rw [dateStep_of_not_lt h]
   try exact twoStepFiltration_one Ω
 
@@ -141,19 +141,19 @@ noncomputable def oneDate (P : Measure Ω) {X : Ω → ℝ} (hX : Measurable X) 
   numeraire_pos _ _ := Real.exp_pos _
   asset_adapted _ t := by
     by_cases h : t < τ
-    · simp only [if_pos h]
+    · simp only [h, ↓reduceIte]
       have hc : StronglyMeasurable[(⊥ : MeasurableSpace Ω)]
           (fun _ : Ω ↦ s₀ * Real.exp (r * t)) := stronglyMeasurable_const
       exact hc.mono (dateFiltration_of_lt h).ge
-    · simp only [if_neg h]
+    · simp only [h, ↓reduceIte]
       exact hX.stronglyMeasurable.mono (dateFiltration_of_not_lt h).ge
   numeraire_adapted _ := stronglyMeasurable_const
 
 variable (P : Measure Ω) {X : Ω → ℝ} (hX : Measurable X) (s₀ r : ℝ) (τ : ℝ≥0)
 
 /-- The asset of the one-date market at the date `τ` is `X`. -/
-theorem asset_oneDate_self (ω : Ω) : (oneDate P hX s₀ r τ).asset () τ ω = X ω :=
-  if_neg (lt_irrefl τ)
+theorem asset_oneDate_self (ω : Ω) : (oneDate P hX s₀ r τ).asset () τ ω = X ω := by
+  simp [oneDate]
 
 /-- The deflator of the one-date market at `τ` is the discount `e^{−rτ}`. -/
 theorem deflator_oneDate (ω : Ω) : (oneDate P hX s₀ r τ).deflator τ ω = Real.exp (-r * τ) := by
@@ -172,14 +172,16 @@ theorem deflated_oneDate_min (i : Unit) (t : ℝ≥0) (ω : Ω) :
       = deflatedStep X s₀ r τ (min (dateStep τ t) 1) ω := by
   by_cases h : t < τ
   · rw [dateStep_of_lt h, Nat.zero_min]
-    show (if min t τ < τ then s₀ * Real.exp (r * ((min t τ : ℝ≥0) : ℝ)) else X ω)
+    change (if min t τ < τ then s₀ * Real.exp (r * ((min t τ : ℝ≥0) : ℝ)) else X ω)
         / Real.exp (r * ((min t τ : ℝ≥0) : ℝ)) = s₀
-    rw [min_eq_left h.le, if_pos h]
+    rw [min_eq_left h.le]
+    simp only [h, ↓reduceIte]
     exact mul_div_cancel_right₀ _ (Real.exp_pos _).ne'
   · rw [dateStep_of_not_lt h, min_self]
-    show (if min t τ < τ then s₀ * Real.exp (r * ((min t τ : ℝ≥0) : ℝ)) else X ω)
+    change (if min t τ < τ then s₀ * Real.exp (r * ((min t τ : ℝ≥0) : ℝ)) else X ω)
         / Real.exp (r * ((min t τ : ℝ≥0) : ℝ)) = X ω / Real.exp (r * τ)
-    rw [min_eq_right (not_lt.1 h), if_neg (lt_irrefl τ)]
+    rw [min_eq_right (not_lt.1 h)]
+    simp only [lt_self_iff_false, ↓reduceIte]
 
 variable {P hX s₀ r τ}
 
@@ -204,7 +206,7 @@ theorem isPricingMeasure_oneDate {Q : Measure Ω} [IsProbabilityMeasure Q] (hQP 
     · obtain rfl : t = 0 := Nat.lt_one_iff.mp ht
       rw [twoStepFiltration_zero, condExp_bot]
       refine Filter.Eventually.of_forall fun ω ↦ ?_
-      show s₀ = ∫ x, X x / Real.exp (r * τ) ∂Q
+      change s₀ = ∫ x, X x / Real.exp (r * τ) ∂Q
       rw [integral_div, hmean, mul_div_assoc, div_self (Real.exp_pos _).ne', mul_one]
   refine .of_isEquivProbMeasure ⟨inferInstance, hQP, hPQ⟩ fun i ↦ ?_
   have e : (fun t ↦ (oneDate P hX s₀ r τ).deflated i (min t τ))
