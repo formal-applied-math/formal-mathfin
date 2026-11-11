@@ -108,6 +108,7 @@ theorem price_defaultableZCB_add_price_europeanCall {Ω : Type*} [mΩ : Measurab
     Payoff.eval, scenarioAt]
   rw [← integral_add h1 h2]
   refine integral_congr_ae (.of_forall fun ω ↦ ?_)
+  beta_reduce
   rw [← mul_add]
   congr 1
   rcases le_total (M.asset () T ω) F with h | h
@@ -162,7 +163,7 @@ theorem merton_market {V₀ F m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hV�
   have hB := isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
   have hkmv := kmvPD_eq_one_sub_survival_probability_via_brownian
     (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
-    (constBtheta (μ := μ) hWmeas ((m - r) / σ) H) hB hV₀ hF hσ hT
+    (constBtheta (μ := μ) hWmeas ((m - r) / σ) H) hB hV₀ hF hσ hT (r := r)
   simp only [Real.toNNReal_coe] at hkmv
   have hae : ∀ᵐ ω ∂(constGirsanovMeasure hW hWmeas ((m - r) / σ) H),
       (market μ hWmeas V₀ m r σ).asset () T ω

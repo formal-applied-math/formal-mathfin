@@ -134,7 +134,7 @@ theorem bondPortfolioValue_eq_price (Q : Measure Ω) [IsProbabilityMeasure Q] (n
       MathFin.bondPriceDisc (Finset.range n) t w y =
         M.price Q (fixedFlows (fun i ↦ ((t i : ℕ) : ℝ≥0)) w n)) := by
   refine ⟨fun M r hM ↦ ?_, fun M y t hM ↦ ?_⟩
-  · have hD : M.deflator = fun s _ ↦ Real.exp (-(r * s)) := by
+  · have hD : M.deflator = fun (s : ℝ≥0) _ ↦ Real.exp (-(r * s)) := by
       funext s ω
       simp only [Market.deflator, hM, NNReal.coe_zero, mul_zero, Real.exp_zero, one_div,
         Real.exp_neg]
@@ -142,7 +142,7 @@ theorem bondPortfolioValue_eq_price (Q : Measure Ω) [IsProbabilityMeasure Q] (n
     refine Finset.sum_congr rfl fun i _ ↦ ?_
     simp only [Real.coe_toNNReal _ (hT i), sub_zero]
     ring
-  · have hD : M.deflator = fun s _ ↦ ((1 + y) ^ ⌊s⌋₊)⁻¹ := by
+  · have hD : M.deflator = fun (s : ℝ≥0) _ ↦ ((1 + y) ^ ⌊s⌋₊)⁻¹ := by
       funext s ω
       simp only [Market.deflator, hM, Nat.floor_zero, pow_zero, one_div]
     rw [Market.price, hD, value_fixedFlows_deterministic, MathFin.bondPriceDisc]
