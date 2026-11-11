@@ -882,7 +882,7 @@
       "domain": "mathematical_finance",
       "description": "Let L be the loss of a bond that loses 100 with probability 1/25 and 0 otherwise. At level 0.95 the library's expected shortfall of the law of L, ES₀.₉₅ = 20 ∫_{0.95}^{1} VaR_u du, is 80, while the conditional tail mean E[L | L ≥ VaR₀.₉₅] is 4: VaR₀.₉₅ = 0 sits on the atom at 0, so the tail event {L ≥ 0} is the whole space and the conditional tail mean is the unconditional mean.",
       "code": {
-        "lean": "import MathFin.Risk.DiscreteVaR\n\nopen MeasureTheory Set\nopen MathFin MathFin.DiscreteVaR\n\n/-- For the bond losing `100` with probability `1/25`, expected shortfall at `0.95` is `80`\nwhile the conditional tail mean `E[L | L ≥ VaR₀.₉₅]` is `4`. -/\ntheorem discrete_es_vs_tail_mean_thm :\n    expectedShortfall oneL (finiteLaw oneQ) (19 / 20) = 80 ∧\n      condTailMean oneQ oneL (19 / 20) = 4 :=\n  ⟨(finiteES_eq_expectedShortfall (q := oneQ) (L := oneL) (α := 19 / 20)\n    ⟨by norm_num, by norm_num⟩).symm.trans finiteES_one_bond, condTailMean_one_bond⟩\n"
+        "lean": "import MathFin.Risk.DiscreteVaR\n\nopen MeasureTheory Set\nopen MathFin MathFin.DiscreteVaR\n\n/-- For the bond losing `100` with probability `1/25`, expected shortfall at `0.95` is `80`\nwhile the conditional tail mean `E[L | L ≥ VaR₀.₉₅]` is `4`. -/\ntheorem discrete_es_vs_tail_mean_thm :\n    expectedShortfall oneL (Measure.ofWeights Finset.univ oneQ.weights) (19 / 20) = 80 ∧\n      condTailMean oneQ oneL (19 / 20) = 4 :=\n  ⟨(finiteES_eq_expectedShortfall (q := oneQ) (L := oneL) (α := 19 / 20)\n    ⟨by norm_num, by norm_num⟩).symm.trans finiteES_one_bond, condTailMean_one_bond⟩\n"
       },
       "metadata": {
         "chapter": 2,
