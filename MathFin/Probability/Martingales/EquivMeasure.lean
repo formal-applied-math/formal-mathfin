@@ -110,7 +110,7 @@ theorem isEquivProbMeasure_withDensity {Ω : Type*} {mΩ : MeasurableSpace Ω} (
 /-- **Weighting `P` by the density of the restrictions reproduces `Q` on `m`.** If `Q|m ≪ P|m`, the
 measure `P.withDensity (d(Q|m)/d(P|m))` restricts to `Q|m` on `m ≤ m0`. -/
 theorem trim_withDensity_rnDeriv_trim {Ω : Type*} {m m0 : MeasurableSpace Ω} (hm : m ≤ m0)
-    {P Q : Measure Ω} [IsFiniteMeasure P] (hQP : Q.trim hm ≪ P.trim hm) :
+    {P Q : Measure Ω} [IsFiniteMeasure P] [IsFiniteMeasure Q] (hQP : Q.trim hm ≪ P.trim hm) :
     (P.withDensity ((Q.trim hm).rnDeriv (P.trim hm))).trim hm = Q.trim hm := by
   rw [trim_withDensity hm (Measure.measurable_rnDeriv _ _), Measure.withDensity_rnDeriv_eq _ _ hQP]
 
@@ -118,8 +118,8 @@ theorem trim_withDensity_rnDeriv_trim {Ω : Type*} {m m0 : MeasurableSpace Ω} (
 `P`-expectation against the density `d(Q|m)/d(P|m)` of the restrictions equal to its
 `Q`-expectation. -/
 theorem integral_rnDeriv_trim_mul {Ω : Type*} {m m0 : MeasurableSpace Ω} (hm : m ≤ m0)
-    {P Q : Measure Ω} [IsFiniteMeasure P] (hQP : Q.trim hm ≪ P.trim hm) {g : Ω → ℝ}
-    (hg : StronglyMeasurable[m] g) :
+    {P Q : Measure Ω} [IsFiniteMeasure P] [IsFiniteMeasure Q] (hQP : Q.trim hm ≪ P.trim hm)
+    {g : Ω → ℝ} (hg : StronglyMeasurable[m] g) :
     ∫ ω, ((Q.trim hm).rnDeriv (P.trim hm) ω).toReal * g ω ∂P = ∫ ω, g ω ∂Q := by
   have hf : Measurable[m] ((Q.trim hm).rnDeriv (P.trim hm)) := Measure.measurable_rnDeriv _ _
   calc ∫ ω, ((Q.trim hm).rnDeriv (P.trim hm) ω).toReal * g ω ∂P

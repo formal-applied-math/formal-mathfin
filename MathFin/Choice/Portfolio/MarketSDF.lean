@@ -94,8 +94,9 @@ has `P`-expectation against the density of `Q` equal to its `Q`-expectation. -/
 theorem IsPricingMeasure.integral_rnDeriv_mul [IsFiniteMeasure M.P] (hQ : M.IsPricingMeasure T Q)
     {g : Ω → ℝ} (hg : StronglyMeasurable[M.𝓕 T] g) :
     ∫ ω, ((Q.trim (M.𝓕.le T)).rnDeriv (M.P.trim (M.𝓕.le T)) ω).toReal * g ω ∂M.P
-      = ∫ ω, g ω ∂Q :=
-  integral_rnDeriv_trim_mul (M.𝓕.le T) hQ.ac hg
+      = ∫ ω, g ω ∂Q := by
+  have := hQ.isProb
+  exact integral_rnDeriv_trim_mul (M.𝓕.le T) hQ.ac hg
 
 /-- **The `sdf` prices every payoff known at `T`**: `E_P[sdf * X] = E_Q[(N 0 / N T) X]`. -/
 theorem IsPricingMeasure.integral_sdf_mul [IsFiniteMeasure M.P] (hQ : M.IsPricingMeasure T Q)
@@ -111,6 +112,7 @@ theorem IsPricingMeasure.integral_sdf_mul [IsFiniteMeasure M.P] (hQ : M.IsPricin
 theorem IsPricingMeasure.sdf_mul_real_singleton [IsFiniteMeasure M.P] [MeasurableSingletonClass Ω]
     (hQ : M.IsPricingMeasure T Q) (hT : ∀ ω, MeasurableSet[M.𝓕 T] {ω}) (ω : Ω) :
     M.sdf Q T ω * M.P.real {ω} = M.statePrice Q T ω := by
+  have := hQ.isProb
   have h := integral_rnDeriv_trim_mul (M.𝓕.le T) hQ.ac
     (stronglyMeasurable_const.indicator (hT ω) : StronglyMeasurable[M.𝓕 T]
       (({ω} : Set Ω).indicator fun _ ↦ (1 : ℝ)))
