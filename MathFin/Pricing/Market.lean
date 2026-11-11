@@ -80,6 +80,7 @@ prices `q ω = (N 0 / N t)(ω) · Q {ω}` (`price_pay_eq_statePricePricing`), no
 * `Market.price_eq_value_of_numeraire`: a deterministic numéraire prices by the deterministic
   deflator `f 0 / f t`; `Market.price_europeanCall_of_numeraire_eq_one`: with unit numéraire the
   call is the plain integral of its payoff.
+* `Market.stronglyMeasurable_deflator`: the deflator `N 0 / N T` is `𝓕 T`-measurable.
 * `Market.IsPricingMeasure.of_isEquivProbMeasure`: a measure equivalent to `P` everywhere that
   makes the deflated assets frozen martingales is a pricing measure.
 * `Market.IsPricingMeasure.of_trim_eq`: a measure that agrees with a pricing measure on `𝓕 T` is
@@ -205,6 +206,12 @@ theorem price_europeanCall_of_numeraire_eq_one {M : Market Unit Ω} {T : ℝ≥0
 theorem stronglyAdapted_deflated (M : Market ι Ω) (i : ι) : StronglyAdapted M.𝓕 (M.deflated i) :=
   fun t ↦
     ((M.asset_adapted i t).measurable.div (M.numeraire_adapted t).measurable).stronglyMeasurable
+
+/-- The deflator `N 0 / N T` is known at `T`. -/
+theorem stronglyMeasurable_deflator (M : Market ι Ω) (T : ℝ≥0) :
+    StronglyMeasurable[M.𝓕 T] (M.deflator T) :=
+  (((M.numeraire_adapted 0).mono (M.𝓕.mono (zero_le (a := T)))).measurable.div
+    (M.numeraire_adapted T).measurable).stronglyMeasurable
 
 /-- **A measure equivalent to `P` everywhere is a pricing measure** as soon as every deflated asset,
 frozen at `T`, is a martingale under it. -/
