@@ -2863,6 +2863,10 @@ end MathFin.AxiomAudit
 #guard_msgs in
 #print axioms MathFin.Rates.isPricingMeasure_deterministicMarket
 
+/-- info: 'MathFin.Rates.isPricingMeasure_vasicekMarket' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Rates.isPricingMeasure_vasicekMarket
+
 /-- info: 'MathFin.Rates.bondPortfolioValue_eq_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.Rates.bondPortfolioValue_eq_price

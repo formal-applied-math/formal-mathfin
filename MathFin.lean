@@ -652,6 +652,8 @@ import MathFin.Models.Rates.CIRSquaredOU
 import MathFin.Models.Rates.VasicekBondPrice
 -- Vasicek bond price at t > 0: the conditional discount factor is affine in the short rate
 import MathFin.Models.Rates.VasicekBondPriceAt
+-- The Vasicek bond market: bank-account numéraire, zero-coupon bond, reference measure prices it
+import MathFin.Models.Rates.VasicekMarket
 -- Vasicek real-world vs. risk-neutral terminal mean; an Esscher tilt reproducing the
 -- risk-neutral terminal law
 import MathFin.Models.Rates.VasicekMarketPriceOfRisk
