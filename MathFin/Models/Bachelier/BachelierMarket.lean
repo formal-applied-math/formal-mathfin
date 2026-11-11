@@ -90,8 +90,7 @@ variable (μ : Measure Ω) (hWmeas : ∀ t, Measurable (W t)) (S_0 σ : ℝ)
 
 /-- The deflator of the Bachelier market is `1`. -/
 theorem deflator_market (t : ℝ≥0) (ω : Ω) : (market μ hWmeas S_0 σ).deflator t ω = 1 := by
-  simpa using Market.deflator_of_numeraire (M := market μ hWmeas S_0 σ) (f := fun _ ↦ (1 : ℝ))
-    (fun _ _ ↦ rfl) t ω
+  simp [Market.deflator, market]
 
 /-- The deflated asset of the Bachelier market is the asset `S₀ + σ W_t`. -/
 theorem deflated_market (t : ℝ≥0) (ω : Ω) :
