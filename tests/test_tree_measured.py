@@ -48,6 +48,20 @@ def test_islands_ring_unless_reached_or_declared() -> None:
     assert next(n for n in nodes if n["l"] == "ok").get("isl") is None
 
 
+
+def test_only_a_limb_frontier_node_joins_an_island() -> None:
+    """A frontier node in the roots that builds on an island stays in the roots: the island's
+    ring bounds its members, and a member drawn in the soil would stretch it down the tree."""
+    nodes = [_n("a", d="A", m="MathFin.M.A", b="diffusions"),
+             _n("f", s="frontier", u=["a"], b="diffusions"),
+             _n("r", s="frontier", u=["a"], p="probability", b="brownian")]
+    pt.assign_hops(nodes, {"A": INF})
+    isl = pt.float_islands(nodes, {"valuation": "limb", "probability": "root"}, reached=set(),
+                           standalone=[])
+    assert isl[0]["nodes"] == ["a", "f"]
+    assert next(n for n in nodes if n["l"] == "r").get("isl") is None
+
+
 SPINE, BS = "MathFin.Pricing.Market", "MathFin.Models.BlackScholes.Call"
 
 

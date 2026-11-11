@@ -723,8 +723,6 @@ def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dic
         f'<tr><td><button type="button" class="t-chip" data-focus="{esc(n["l"])}">'
         f'{esc(n["t"])}</button></td><td>{", ".join(f"<code>{esc(c)}</code>" for c in n["core"])}'
         f"</td></tr>" for n in partial)
-    proved = sum(n["s"] == "proved" for n in data["nodes"])
-    nfront = sum(n["s"] == "frontier" for n in data["nodes"])
     payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     fam_legend = '<div class="legend">' + "".join(
         f'<span><i style="background:var({f["hue"]})"></i>{esc(f["title"])}'
@@ -733,32 +731,19 @@ def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dic
         for f in data["families"]) + '<span><i style="background:var(--tr-bark)"></i>general '\
         'theory</span></div>'
     body = f"""<h1>The program tree</h1>
-<p class="lede ink2">The blueprint drawn on the library's taxonomy (<code>docs/taxonomy.toml</code>),
-the one statement of how it organizes financial mathematics. The roots in the soil are the tools:
-probability in its branches, and statistics. The trunk is positions and markets: payoffs, the
-market and its numéraire, strategies and their gains. Three limbs grow from it, one for each
-question asked of a position: <em>what is it worth</em> (valuation, in the middle), <em>whether to
-hold it</em> (choice, on the left) and <em>how dangerous is it</em> (risk, on the right). Each
-limb's branches are its cells. A theorem between two limbs sits in the fork between them. Colour
-is the model family, the same hue in every limb, so credit in valuation and credit in risk read as
-one family seen by two questions; nodes with no family are general theory and keep the wood's
-colour. Height is measured: a result sits at its distance, in statements, from the trunk (the
-<em>hop</em> of <code>chain_reach</code>), so a pricing formula that states a market is low and one
-that only restates its own formula is high. Results at infinite distance float beside their limb
-as islands, ringed red when nothing reaches them; a tower of modules is one node; a hollow dashed
-dot between two nodes is a connector, a theorem stated and not yet proved, sized by the theorems
-it would bring within three hops. A <em>socket</em> badge in the legend marks a family whose model is a market with a proved pricing measure. The dark wood drawn over the pale map is the proofs: each of the {proved}
-proved results is joined to every node its proof uses, and wood thickens with the corpus it
-carries. A knot's size counts the corpus entries whose proof rests deepest on it; the Leaves button
-hangs them on the tree. The {nfront} frontier results are dashed blueprint shoots, each bud coloured
-by the state of its issue, with the open problems as stars. Proved results that rest on no node
-grow straight from the soil; entries that touch no node lie on the ground. Click a node to trace
-its lineage; drag to pan, scroll to zoom; names fill in as you zoom.</p>
+<p class="lede ink2">The library as a tree: probability and statistics are the roots, positions
+and markets the trunk, and valuation, choice and risk the three limbs. Each proved result sits at its
+measured distance from the trunk, in statements (<code>chain_reach</code>), and the dark wood is what
+its proof uses, so a result the library has not yet connected stands high or floats; colour is the
+model family. The buttons add the gaps (connectors and islands), the unproved frontier and the corpus
+as leaves; click a node to trace its lineage, and the panel beside the tree explains every mark.</p>
 {strip}
 <div class="t-box" id="tree-box"><div class="t-tools">
 <input id="t-q" type="search" placeholder="Find a node: Itô, VaR, Heston…" aria-label="Find a node" autocomplete="off">
 <button type="button" id="t-grow">Grow it again</button>
-<button type="button" id="t-leaves" aria-pressed="false">Leaves</button>
+<button type="button" data-layer="gaps" aria-pressed="true" title="connectors (stated, not yet proved) and islands">Gaps</button>
+<button type="button" data-layer="frontier" aria-pressed="false" title="unproved blueprint nodes and open problems">Frontier</button>
+<button type="button" data-layer="leaves" aria-pressed="false" title="corpus entries, on the tree and on the ground">Leaves</button>
 <span class="t-zoom"><button type="button" id="t-zin" aria-label="Zoom in">+</button><button type="button" id="t-zout" aria-label="Zoom out">−</button></span>
 <button type="button" id="t-reset">Reset view</button></div>
 <div class="t-stage"><svg id="tree" role="img" aria-label="The MathFin blueprint as a tree"></svg>

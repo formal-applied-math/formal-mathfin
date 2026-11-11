@@ -7,7 +7,8 @@
  mentions, sized by its gain. Every use is drawn as wood, and wood thickens with the corpus it
  carries; the use that sets a node's primary parent is drawn in bark, the others lighter. Corpus entries are leaves on the
  deepest node their proof rests on; off-map entries lie on the ground. Labels are sized in screen
- pixels and fill in with zoom. Data: the JSON block #tree-data, written by tools/verify/docs_site.py
+ pixels and fill in with zoom. The gaps (connectors, islands), the frontier and the leaves are
+ layers behind buttons, and a proof's secondary uses show only with its lineage. Data: the JSON block #tree-data, written by tools/verify/docs_site.py
  from program_tree.tree_data. Needs d3 and KaTeX (loaded by the page). */
 (function () {
 "use strict";
@@ -70,6 +71,11 @@ const partTitle = p => PARTS.get(p)?.title || p;
 const cellKey = n => n.p + (n.b ? "/" + n.b : "");
 const cellTitle = k => cellName(k).split(" · ").pop();
 const TRUNK = D.parts.find(p => p.kind === "trunk").key;
+// layers the default view can leave out, each behind a button (data-layer in tree.html): the proofs,
+// the map, towers and joints always show. "gaps": connectors and islands; "frontier": unproved
+// blueprint nodes; "leaves": the corpus, on the tree and on the ground.
+const layerOf = n => n.ph ? "gaps" : !isWood(n) && !isUp(n) && !n.tw ? "frontier" : null;
+const layerCls = n => layerOf(n) ? " layer-" + layerOf(n) : "";
 const live = D.nodes;
 for (const n of live) n.depth = depth(n.l);
 const mfUses = n => n.u.filter(u => N.has(u));
@@ -326,12 +332,12 @@ function shootD(e, full){
   const k = STUB / len; return `M${C[0] + (g.P[0] - C[0]) * k},${C[1] + (g.P[1] - C[1]) * k}L${C}`;
 }
 const shootSel = shootG.selectAll("path").data(shootEdges).join("path")
-  .attr("class", e => e.t.data.node.ph ? "shoot ph dimmable" + (e.prim ? "" : " sec") : "shoot dimmable" + (e.prim ? "" : " sec"))
+  .attr("class", e => (e.t.data.node.ph ? "shoot ph dimmable" : "shoot dimmable") + (e.prim ? "" : " sec") + layerCls(e.t.data.node))
   .attr("d", e => shootD(e, false))
   .style("stroke-width", e => e.t.data.node.ph ? (1.2 + Math.sqrt(e.t.data.node.ph.gain || 0) * .45).toFixed(2) : null);
 
 // islands: a dashed outline round each floating cluster, named; red when nothing reaches it
-const islG = view.append("g").attr("class", "dimmable");
+const islG = view.append("g").attr("class", "dimmable layer-gaps");
 const islSel = islG.selectAll("g").data(D.islands.filter(c => c.nodes.some(l => byId.has(l)))).join("g").attr("class", c => "isl" + (c.ring ? " ring" : ""));
 islSel.each(function(c){
   const g = d3.select(this), pts = c.nodes.map(l => byId.get(l)).filter(Boolean);
@@ -372,7 +378,7 @@ for (const k of rootKeys){
 }
 
 // leaves: one per corpus entry resting on the node
-const leafG = view.append("g").attr("display", "none");
+const leafG = view.append("g").attr("class", "layer-leaves");
 const LEAF = "M0,0 C2.2,-2.6 5.6,-2.6 8,0 C5.6,2.6 2.2,2.6 0,0Z";
 const leafData = [];
 for (const d of byId.values()){
@@ -388,7 +394,7 @@ const leafSel = leafG.selectAll("path").data(leafData).join("path")
   .attr("transform", f => `translate(${f.x.toFixed(1)},${f.y.toFixed(1)}) rotate(${f.rot.toFixed(0)}) scale(${f.s.toFixed(2)})`);
 
 // fallen leaves: proved entries off the map, under the part of the map their directory belongs to
-const litterG = view.append("g");
+const litterG = view.append("g").attr("class", "layer-leaves");
 // piles: a root cell keeps its own, a limb's cells share the limb's pile
 const pileKey = c => RSEC.has(c) ? c : c.split("/")[0];
 const pileName = a => (PARTS.has(a) ? partTitle(a) : cellTitle(a)).split(" and ")[0].slice(0, 18);
@@ -426,7 +432,7 @@ pileSel.each(function(p){
   } }
 // upstream-only entries as seeds in the bedrock
 const upOnly = Object.values(D.areas).reduce((s, c) => s + (c["upstream-only"] || 0), 0);
-const seedbed = view.append("g").attr("class", "seedbed dimmable");
+const seedbed = view.append("g").attr("class", "seedbed dimmable layer-leaves");
 { const r = rng("seedbed"), x0 = W - 330;
   for (let k = 0; k < upOnly; k++) seedbed.append("ellipse").attr("class", "seedmark").attr("cx", x0 + r() * 270).attr("cy", BED + 16 + r() * (H - BED - 44)).attr("rx", 2.4).attr("ry", 1.5);
   cap(seedbed.append("text").attr("class", "stratum-sub").attr("x", x0 + 270).attr("y", H - 12).attr("text-anchor", "end").text(`${upOnly} entries cite Mathlib alone`), 16);
@@ -437,7 +443,7 @@ const nodeG = view.append("g");
 const nodeData = [...byId.values()].filter(d => d.data && d.data.node);
 const STAR = (r) => d3.range(12).map(i => { const a = -Math.PI / 2 + i * Math.PI / 6, rr = i % 2 ? r * .45 : r; return [Math.cos(a) * rr, Math.sin(a) * rr]; });
 const isOP = n => !!n.op;
-const nodeSel = nodeG.selectAll("g").data(nodeData).join("g").attr("class", "nd dimmable").attr("transform", d => `translate(${d.px},${d.py})`);
+const nodeSel = nodeG.selectAll("g").data(nodeData).join("g").attr("class", d => "nd dimmable" + layerCls(d.data.node)).attr("transform", d => `translate(${d.px},${d.py})`);
 nodeSel.each(function(d){
   const g = d3.select(this), n = d.data.node;
   if (d.up){ g.append("ellipse").attr("rx", 11).attr("ry", 6.5).attr("class", "knot"); cap(g.append("text").attr("class", "stratum-sub").attr("x", 18).attr("y", 5).text(n.t), 16); }
@@ -475,18 +481,20 @@ const lblData = nodeData.filter(d => !d.up).map(d => {
   return {d, n, side, pr, full: shortTitle(n.t, 46) + tail, short: shortTitle(n.t, 34) + tail};
 });
 const lblSel = lblG.selectAll("text").data(lblData).join("text")
-  .attr("class", L => "lbl dimmable" + (isOP(L.n) ? " op" : L.n.ph ? " ph" : !isWood(L.n) ? " fr" : ""));
+  .attr("class", L => "lbl dimmable" + (isOP(L.n) ? " op" : L.n.ph ? " ph" : !isWood(L.n) ? " fr" : "") + layerCls(L.n));
 const glyphR = d => { const n = d.data.node; return n.tw ? 12 : n.ph ? phR(n) : isWood(n) ? 2.6 + Math.min(6.4, Math.sqrt(n.e) * 1.05) : isOP(n) ? 8 : 4.6; };
 let curK = 1, litSet = null;
+const layerOn = l => svg.classed("show-" + l);
+const shown = n => !layerOf(n) || layerOn(layerOf(n));
 function placeLabels(k = curK, set = litSet){
   curK = k;
   const s = pxPerUnit() * k, fs = (k < 1.4 ? 13 : 12.5) / s, h = fs * 1.2, pad = 3 / s;
   const boxes = [];
-  if (!set) for (const el of document.querySelectorAll("#tree .root-lbl, #tree .root-sub, #tree .trunk-lbl, #tree .isl-lbl")){
+  if (!set) for (const el of document.querySelectorAll("#tree .root-lbl, #tree .root-sub, #tree .trunk-lbl" + (layerOn("gaps") ? ", #tree .isl-lbl" : ""))){
     const b = el.getBBox(); boxes.push([b.x, b.y, b.x + b.width, b.y + b.height, "cap"]); }
-  for (const d of nodeData) if (!d.up && (!set || set.has(d.id))){ const r = glyphR(d) + 1.5; boxes.push([d.px - r, d.py - r, d.px + r, d.py + r, d.id]); }
+  for (const d of nodeData) if (!d.up && (set ? set.has(d.id) : shown(d.data.node))){ const r = glyphR(d) + 1.5; boxes.push([d.px - r, d.py - r, d.px + r, d.py + r, d.id]); }
   const hit = (b, self) => boxes.some(c => c[4] !== self && !(b[2] < c[0] || b[0] > c[2] || b[3] < c[1] || b[1] > c[3]));
-  const eligible = L => set ? set.has(L.d.id)
+  const eligible = L => set ? set.has(L.d.id) : !shown(L.n) ? false
     : k < 1.4 ? isWood(L.n) || isOP(L.n) || !!L.n.ph
     : k < 2.4 ? isWood(L.n) || isOP(L.n) || L.n.st === "ready" : true;
   const budget = set ? 1e9 : k < 1.4 ? 30 : k < 2.4 ? 80 : 1e9;
@@ -629,21 +637,31 @@ function defaultPanel(){
   const ready = D.nodes.filter(n => n.s === "frontier" && n.st === "ready" && !n.op);
   folio.innerHTML = `
     <h2>How to read the tree</h2>
+    <h3>Always on the tree</h3>
     <div class="legend">
-      <div>${glyph("ghost")}<span><b>The map</b>, in pale wood, is docs/taxonomy.toml: the tools as roots (probability in its branches, statistics), positions and markets as the trunk, and three limbs, one for each question asked of a position (choice, valuation, risk). Each limb's wood ends at its highest measured node. A node's place on it is a reading, not a proof.</span></div>
-      <div>${glyph("fam")}<span><b>Colour</b> is the model family, the same hue in every limb; a node in wood colour is general theory. A <b>joint</b> sits in the fork between the two limbs its statement joins.</span></div>
+      <div>${glyph("ghost")}<span><b>The map</b>, in pale wood, is docs/taxonomy.toml: the tools as roots (probability in its branches, statistics), positions and markets as the trunk, and three limbs, one for each question asked of a position (choice, valuation, risk). A node's place on it is a reading, not a proof.</span></div>
       <div>${glyph("hop")}<span><b>Height is measured</b>: on a limb a node sits at its hop, its distance in statements from the trunk (the metric of <code>chain_reach</code>). Probability tools stay in the roots.</span></div>
-      <div>${glyph("island")}<span><b>Islands</b>: nodes at infinite distance float beside their limb under their cluster's name; a red ring means no connector reaches it and no standalone reason is declared.</span></div>
+      <div>${glyph("knot")}<span><b>Dark wood and knots</b>: the proved blueprint nodes and the main use each proof makes; select a node to see all of them. Wood thickens with the corpus it carries; a knot's size counts the corpus entries resting deepest on it.</span></div>
+      <div>${glyph("fam")}<span><b>Colour</b> is the model family, the same hue in every limb; a node in wood colour is general theory. A <b>joint</b> sits in the fork between the two limbs its statement joins.</span></div>
       <div>${glyph("tower")}<span><b>Towers</b> are single nodes, the module count inside.</span></div>
-      <div>${glyph("phantom")}<span><b>Connectors</b>: hollow dashed dots between the nodes a not-yet-proved theorem would join, at the height it would have; the size is its gain.</span></div>
-      <div>${glyph("knot")}<span><b>Dark wood and knots</b>: the proved blueprint nodes and every use their proofs make. Wood thickens with the corpus it carries; where it skips the trunk, a result rests on a root directly. A knot's size counts the corpus entries resting deepest on it.</span></div>
-      <div>${glyph("leaf")}<span><b>Leaves</b> (the Leaves button): the same corpus entries drawn one by one, hung on the deepest node their proof rests on.</span></div>
-      <div>${glyph("bud")}<span><b>Blueprint shoots and buds</b>: frontier nodes. The bud's centre shows the state of its issue.</span></div>
-      <div>${glyph("core")}<span><b>Half-filled bud</b>: a frontier node whose core is already proved in the corpus.</span></div>
-      <div>${glyph("star")}<span><b>Stars</b>: frontier nodes carried by an open-problem issue.</span></div>
-      <div>${glyph("sucker")}<span><b>Stems from the soil</b>: proved nodes off the roots that rest on no blueprint node, only on Mathlib. Their build-up on the library is not recorded yet.</span></div>
-      <div>${glyph("seed")}<span><b>Seedlings</b>: frontier that grows straight from Mathlib or BrownianMotion, with no proved node beneath it yet.</span></div>
-      <div>${glyph("fallen")}<span><b>Fallen leaves</b>: proved entries that rest on no node. Each one is a missing tag or bridge.</span></div>
+      <div>${glyph("sucker")}<span><b>Stems from the soil</b>: proved nodes off the roots that rest on no blueprint node, only on Mathlib.</span></div>
+    </div>
+    <h3>Gaps</h3>
+    <div class="legend">
+      <div>${glyph("island")}<span><b>Islands</b>: proved nodes at infinite distance float beside their limb; a red ring means no connector reaches them and no standalone reason is declared.</span></div>
+      <div>${glyph("phantom")}<span><b>Connectors</b>: hollow dashed dots between the nodes a stated, not yet proved theorem would join; the number is how many theorems proving it brings within 3 hops.</span></div>
+    </div>
+    <h3>Frontier</h3>
+    <div class="legend">
+      <div>${glyph("bud")}<span><b>Buds</b>: unproved blueprint nodes; the centre shows the state of the issue that carries it.</span></div>
+      <div>${glyph("core")}<span><b>Half-filled bud</b>: its core is already proved in the corpus.</span></div>
+      <div>${glyph("star")}<span><b>Stars</b>: open problems.</span></div>
+      <div>${glyph("seed")}<span><b>Seedlings</b>: frontier that grows straight from Mathlib or BrownianMotion.</span></div>
+    </div>
+    <h3>Leaves</h3>
+    <div class="legend">
+      <div>${glyph("leaf")}<span><b>Leaves</b>: the corpus entries, hung on the deepest node their proof rests on.</span></div>
+      <div>${glyph("fallen")}<span><b>Fallen leaves</b>: proved entries that rest on no node; each one is a missing tag or bridge.</span></div>
     </div>
     <div class="chips">${dots()}</div>
     <div><h3>Open problems</h3><div class="chips">${ops.map(n => chip(n.l)).join("")}</div></div>
@@ -679,10 +697,12 @@ q.addEventListener("input", () => { if (selected) return; const m = matches(q.va
 q.addEventListener("keydown", e => { if (e.key !== "Enter") return; const m = matches(q.value); if (!m.length) return;
   m.sort((a, b) => (b.s !== "frontier") - (a.s !== "frontier")); select(m[0].l); const d = byId.get(m[0].l); if (d) focusOn(d); });
 
-// ---------- leaves on demand ----------
-const leavesBtn = document.getElementById("t-leaves");
-leavesBtn.onclick = () => { const on = leavesBtn.getAttribute("aria-pressed") !== "true";
-  leavesBtn.setAttribute("aria-pressed", on); leafG.attr("display", on ? null : "none"); };
+// ---------- layers on demand ----------
+for (const b of document.querySelectorAll("#tree-box [data-layer]")){
+  const set = on => { b.setAttribute("aria-pressed", on); svg.classed("show-" + b.dataset.layer, on); };
+  set(b.getAttribute("aria-pressed") === "true");
+  b.onclick = () => { set(b.getAttribute("aria-pressed") !== "true"); placeLabels(); };
+}
 
 // ---------- growth ----------
 const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
