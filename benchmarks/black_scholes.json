@@ -2428,6 +2428,31 @@
       "code": {
         "lean": "import MathFin.Models.BlackScholes.Market\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Contracts MathFin.Contracts.BlackScholes\nopen scoped NNReal\n\n/-- The Girsanov measure of the market price of risk `(m - r) / σ` is a pricing measure of the\nBlack-Scholes market, and under it the European call is worth the Black-Scholes formula. -/\ntheorem black_scholes_market_pricing_measure {Ω : Type*} [mΩ : MeasurableSpace Ω]\n    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) {S₀ K m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hS₀ : 0 < S₀)\n    (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) :\n    (market μ hWmeas S₀ m r σ).IsPricingMeasure T\n        (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) ∧\n      (market μ hWmeas S₀ m r σ).price (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)\n          (europeanCall K T)\n        = S₀ * Phi (bsd1 S₀ K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S₀ K r σ T) :=\n  ⟨isPricingMeasure_constGirsanovMeasure hW hWmeas hσ.ne' hTH,\n    price_europeanCall_constGirsanovMeasure hW hWmeas hTH hS₀ hK hσ hT⟩\n"
       }
+    },
+    {
+      "id": "mf-american-put-ge-market-european-put",
+      "name": "American Put Value Dominates the Black–Scholes Market's European Put Price",
+      "domain": "mathematical_finance",
+      "description": "For a pre-Brownian motion W under a probability measure μ, nonzero volatility σ, K, S₀ ≥ 0, r ≥ 0 and T ≤ H, the price of the European put in the Black–Scholes market (Market.price of europeanPut K T) under the Girsanov pricing measure of θ = (m − r)/σ at horizon H is at most the American put value (no dividends) of the drift-corrected Brownian motion B^θ over the natural filtration of W, the supremum of expected discounted put payoffs over stopping rules bounded by T. The deterministic rule T is admissible. Strictness and the superhedging characterization are not proved.",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.American.Summit\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.Contracts.BlackScholes MathFin.BlackScholes.AmericanPut.Stopping\n\n/-- **The American put value dominates the Black–Scholes market's European put price.**\nRe-export of `MathFin.Contracts.BlackScholes.price_europeanPut_le_americanPutValue`. -/\ntheorem american_put_ge_market_european_put {Ω : Type*} [mΩ : MeasurableSpace Ω]\n    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    (hW : IsPreBrownianReal W μ) (hWmeas : ∀ t, Measurable (W t))\n    {S_0 m r σ K : ℝ} {T H : ℝ≥0} (hσ : σ ≠ 0) (hTH : T ≤ H)\n    (hB : Measurable (constBtheta (μ := μ) hWmeas ((m - r) / σ) H).uncurry)\n    (hK : 0 ≤ K) (hr : 0 ≤ r) (hS : 0 ≤ S_0) :\n    (market μ hWmeas S_0 m r σ).price (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)\n        (europeanPut K T) ≤\n      americanPutValue (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)\n        (ItoIntegralL2.natFiltration hWmeas)\n        (constBtheta (μ := μ) hWmeas ((m - r) / σ) H) K r 0 σ S_0 T :=\n  price_europeanPut_le_americanPutValue hW hWmeas hσ hTH hB hK hr hS\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "R. C. Merton, Theory of Rational Option Pricing, Bell J. Econ. Manag. Sci. 4(1) (1973) 141–183; I. Karatzas and S. E. Shreve, Methods of Mathematical Finance, Springer (1998), §2.5",
+        "citations": [
+          {
+            "key": "Merton1973"
+          },
+          {
+            "key": "KaratzasShreve1998",
+            "locator": "§2.5"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the stated inequality (MathFin/Models/BlackScholes/American/Summit.lean). The market price is the value with discount e^{−rt} on the physical asset (price_market); under the Girsanov measure that asset is almost surely the risk-neutral asset of B^θ (pathAssets_physical_ae_eq), so the price is the expected discounted payoff of the deterministic rule T, which is admissible (european_expectation_le_value). SCOPE: an inequality only; no strictness, no optimal rule, no superhedging characterization. The hypothesis σ ≠ 0 is needed (at σ = 0 the statement fails); joint measurability of B^θ is a hypothesis."
+      }
     }
   ]
 }

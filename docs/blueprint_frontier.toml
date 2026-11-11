@@ -849,24 +849,6 @@ family = "insurance"
 lean = "MathFinFrontier.esscherPremium_eq_price"
 
 [[node]]
-label = "thm:american-price-snell-envelope"
-title = "The binomial American price is the Snell envelope of the market"
-statement = "Under the risk-neutral coin flips, the binomial americanPrice is the Snell envelope, for Mathlib's conditional expectation on the flip filtration, of the discounted intrinsic value along the spot path, at time zero."
-uses = ["thm:snell-envelope", "def:pricing-measure"]
-area = "valuation/trees"
-family = "trees"
-lean = "MathFinFrontier.americanPrice_eq_snellEnvelope"
-
-[[node]]
-label = "thm:american-put-dominates-european"
-title = "The American put value dominates the Black–Scholes European price"
-statement = "At the Girsanov pricing measure of the Black–Scholes market, the price of the European put is at most the American put value over stopping rules bounded by the maturity."
-uses = ["def:pricing-measure", "thm:american-put-optimal-exercise", "thm:bs-call"]
-area = "valuation/diffusions"
-family = "diffusions"
-lean = "MathFinFrontier.price_europeanPut_le_americanPutValue"
-
-[[node]]
 label = "thm:american-put-superhedging-price"
 title = "The American put value is the superhedging price"
 statement = "In the complete Black–Scholes market the American put value (the supremum of discounted expected payoffs over stopping rules) equals the superreplication price of the American put, that is, the least initial capital of a self-financing strategy dominating the put payoff at every date. Needs the superreplication price of a path-dependent claim in Market, which is not defined yet."
