@@ -87,7 +87,7 @@ theorem sdf_nonneg (ω : Ω) : 0 ≤ M.sdf Q T ω :=
 
 theorem stronglyMeasurable_deflator (M : Market ι Ω) (T : ℝ≥0) :
     StronglyMeasurable[M.𝓕 T] (M.deflator T) :=
-  (((M.numeraire_adapted 0).mono (M.𝓕.mono (zero_le T))).measurable.div
+  (((M.numeraire_adapted 0).mono (M.𝓕.mono (zero_le (a := T)))).measurable.div
     (M.numeraire_adapted T).measurable).stronglyMeasurable
 
 /-- **Change of measure on `𝓕 T`.** For a pricing measure `Q` up to `T`, a payoff `g` known at `T`

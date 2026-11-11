@@ -1054,10 +1054,10 @@ attribute [blueprint "thm:kkt-sufficiency"
 
 attribute [blueprint "thm:sdf-capm-hansen-jagannathan"
   (title := "CAPM from a discount factor affine in the market return")
-  (statement := /-- If $m = a - bR_m$ prices a return $R_i$, the market return $R_m$ and the riskless
-  return $r_f$ ($E[mR_i] = E[mR_m] = 1$, $r_f E[m] = 1$) and $\operatorname{Var}R_m \ne 0$, then
-  $E[R_i] = r_f + \beta_i (E[R_m] - r_f)$ with $\beta_i = \operatorname{Cov}(R_i, R_m) /
-  \operatorname{Var} R_m$. -/)]
+  (statement := /-- If $m = a - bR_m$ prices a return $R_i$, the market return $R_m$ and the
+  riskless return $r_f$ ($E[mR_i] = E[mR_m] = 1$, $r_f E[m] = 1$) and
+  $\operatorname{Var}R_m \ne 0$, then $E[R_i] = r_f + \beta_i (E[R_m] - r_f)$ with
+  $\beta_i = \operatorname{Cov}(R_i, R_m) / \operatorname{Var} R_m$. -/)]
   MathFin.capm_of_affine_discountFactor
 
 attribute [blueprint "thm:hansen-jagannathan-bound"
@@ -1104,7 +1104,8 @@ attribute [blueprint "thm:log-optimal-numeraire-one-period"
   (title := "The log-optimal portfolio is the numéraire portfolio, one period")
   (statement := /-- In the market of `thm:marginal-utility-is-sdf` with $u = \log$, a stationary
   portfolio of cost $w_0 > 0$ and wealth $W > 0$ has $\mathrm{sdf}(\omega) = w_0 / W_\omega$ in
-  every state, so $E_P[S_k(T)/W] = S_k(0)/w_0$ for every asset $k$ (`integral_div_logOptimal_mul`): prices
+  every state, so $E_P[S_k(T)/W] = S_k(0)/w_0$ for every asset $k$
+  (`integral_div_logOptimal_mul`): prices
   deflated by the log-optimal wealth are $P$-martingales over the one period. The continuous-time
   statement is `thm:log-optimal-numeraire`. -/)]
   MathFin.Market.IsPricingMeasure.sdf_eq_div_of_logOptimal
