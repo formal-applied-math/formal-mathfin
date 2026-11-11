@@ -8,7 +8,6 @@ import MathFinFrontier.MarketValuation
 import MathFinFrontier.ModelFree
 import MathFinFrontier.Microstructure
 import MathFinFrontier.Credit
-import MathFinFrontier.Insurance
 import MathFinFrontier.American
 import MathFinFrontier.Rates
 

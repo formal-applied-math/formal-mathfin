@@ -2748,6 +2748,34 @@ The landmarks of `docs/blueprint.md` that no section above pins: one `#print axi
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.BlackScholes.isPricingMeasure_constGirsanovMeasure
 
+/-- info: 'MathFin.Market.isPricingMeasure_oneDate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Market.isPricingMeasure_oneDate
+
+/-- info: 'MathFin.JumpDiffusion.isPricingMeasure_esscher' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.JumpDiffusion.isPricingMeasure_esscher
+
+/-- info: 'MathFin.JumpDiffusion.price_europeanCall_esscher' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.JumpDiffusion.price_europeanCall_esscher
+
+/-- info: 'MathFin.JumpDiffusion.exists_isPricingMeasure_price_call_ne' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.JumpDiffusion.exists_isPricingMeasure_price_call_ne
+
+/-- info: 'MathFin.lifeAnnuityDue_eq_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.lifeAnnuityDue_eq_value
+
+/-- info: 'MathFin.esscherPremium_eq_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.esscherPremium_eq_price
+
+/-- info: 'MathFin.isPricingMeasure_insuredMarket_tilted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.isPricingMeasure_insuredMarket_tilted
+
 
 /-- info: 'MathFin.Execution.isPricingMeasure_toMarket_condExp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

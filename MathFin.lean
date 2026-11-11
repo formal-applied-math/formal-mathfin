@@ -379,6 +379,7 @@ import MathFin.Pricing.NoArbitrageDerivations
 import MathFin.Pricing.SuperhedgingDuality
 import MathFin.Pricing.Value
 import MathFin.Pricing.Market
+import MathFin.Pricing.OneDateMarket
 import MathFin.Pricing.Parity
 import MathFin.Pricing.DiscreteMarket
 -- The law of a Wiener-represented rate under the forward measure of a Wiener-represented account
@@ -481,6 +482,7 @@ import MathFin.Models.Jumps.JumpDiffusionIdentifiability
 -- equivalent to the physical law (with any drift) and compensated, yet price some call
 -- differently when the jumps are nontrivial
 import MathFin.Models.Jumps.JumpDiffusionIncompleteness
+import MathFin.Models.Jumps.Market
 -- The log-return law is a Gaussian mixture; with σ ≠ 0 and τ > 0 it has a continuous density, so
 -- no atoms, and with σ = 0 it has an atom at bτ; the tail of a law with a density is
 -- differentiable where the density is continuous; the law of the price Seʸ has the density
@@ -904,6 +906,8 @@ import MathFin.Insurance.Mortality
 -- Survival model (re-formalized from Yosuke Ito's AFP `Survival_Model`, BSD, cited)
 import MathFin.Insurance.SurvivalModel
 import MathFin.Insurance.ActuarialInsurance
+import MathFin.Insurance.AnnuityValue
+import MathFin.Insurance.EsscherPremium
 
 -- Markets
 import MathFin.Markets.Execution.AlmgrenChriss

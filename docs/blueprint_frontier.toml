@@ -752,28 +752,11 @@ family = "term"
 lean = "MathFinFrontier.bondPortfolioValue_eq_price"
 
 [[node]]
-label = "thm:jump-diffusion-price"
-title = "Jump-diffusion prices under the Esscher pricing measure"
-statement = "The Merton jump-diffusion market has a pricing measure (the Esscher one), and under it the European call's price is the Poisson mixture of Black–Scholes prices."
-uses = ["def:pricing-functional", "thm:esscher-emm-levy", "thm:jump-diffusion-mixing", "thm:merton-risk-neutral-drift"]
-area = "valuation/jumps"
-family = "jumps"
-
-[[node]]
 label = "thm:sdf-capm-hansen-jagannathan"
 title = "CAPM and Hansen–Jagannathan from the discount factor"
 statement = "A stochastic discount factor affine in the market return yields the CAPM security market line, and Cauchy–Schwarz on state prices bounds every Sharpe ratio by σ(m)/E[m]."
 uses = ["thm:utility-state-price-density", "thm:capm-equilibrium", "def:sharpe-ratio"]
 area = "choice/equilibrium"
-
-[[node]]
-label = "thm:premium-is-price"
-title = "Insurance premiums are prices"
-statement = "The life annuity-due for a force of mortality is the value, on the flat-rate discount, of the contract paying one at each date while the default indicator of the lifetime is still zero."
-uses = ["def:contract-value", "def:survival-function"]
-area = "valuation/insurance"
-family = "insurance"
-lean = "MathFinFrontier.lifeAnnuityDue_eq_value"
 
 [[node]]
 label = "thm:glosten-milgrom-pricing-measure"
@@ -838,15 +821,6 @@ uses = ["def:gaussian-factor-copula", "thm:large-pool-loss"]
 area = "risk/credit"
 family = "default"
 lean = "MathFinFrontier.condDefault_eq_oneFactorPD"
-
-[[node]]
-label = "thm:esscher-premium-is-price"
-title = "The Esscher premium is a price"
-statement = "With unit numéraire and the insured loss as the asset at T, the claim paying the loss is worth, under the Esscher-tilted measure, the Esscher premium E[X e^{hX}]/E[e^{hX}]."
-uses = ["def:pricing-measure", "thm:esscher-tilt"]
-area = "valuation/insurance"
-family = "insurance"
-lean = "MathFinFrontier.esscherPremium_eq_price"
 
 [[node]]
 label = "thm:american-price-snell-envelope"
