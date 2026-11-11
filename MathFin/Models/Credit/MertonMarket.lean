@@ -41,7 +41,9 @@ of the debt only, so first-passage (Black–Cox) default and coupons are not cov
 * `MathFin.Contracts.Merton.merton_market`: in the Black–Scholes market of the firm, the
   Girsanov measure of the market price of risk is a pricing measure; it prices the equity at the
   Black–Scholes call price and the debt at `V₀` less that; and the default probability is
-  `kmvPD`.
+  `kmvPD`. Its conjuncts are named: `price_defaultableZCB_constGirsanovMeasure` (the debt is
+  worth `V₀` less the equity) and `real_default_constGirsanovMeasure` (the default probability),
+  beside the pricing-measure and call-price theorems of `BlackScholes`.
 
 ## References
 
@@ -120,31 +122,17 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ} {�
   [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ) (hWmeas : ∀ t, Measurable (W t))
 
 include hW in
-/-- **Merton's structural model is a market with a pricing measure.** Let the firm's assets be
-the Black–Scholes market of a pre-Brownian motion `W` (spot `V₀ > 0`, physical drift `m`, rate
-`r`, volatility `σ > 0`), with debt of face `F > 0` due at `T ≤ H`. The Girsanov measure `Q` of the
-constant market price of risk `(m − r)/σ` at the horizon `H` is a pricing measure of the market,
-and under it
-
-* the equity, the European call on the assets, is worth the Black–Scholes price
-  `V₀ Φ(d₁) − F e^{−rT} Φ(d₂)` (for `0 < T`);
-* the defaultable zero-coupon bond is worth `V₀` less the equity;
-* the probability of default `V_T ≤ F` is the Merton–KMV default probability `kmvPD`.
-
-Default is the event at the maturity `T`, not a first passage. -/
-theorem merton_market {V₀ F m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hV₀ : 0 < V₀) (hF : 0 < F)
-    (hσ : 0 < σ) (hT : 0 < (T : ℝ)) :
-    (market μ hWmeas V₀ m r σ).IsPricingMeasure T
-        (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) ∧
-      (market μ hWmeas V₀ m r σ).price (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
-          (europeanCall F T)
-        = V₀ * Phi (bsd1 V₀ F r σ T) - F * Real.exp (-r * T) * Phi (bsd2 V₀ F r σ T) ∧
-      (market μ hWmeas V₀ m r σ).price (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
-          (defaultableZCB F T)
-        = V₀ - (V₀ * Phi (bsd1 V₀ F r σ T) - F * Real.exp (-r * T) * Phi (bsd2 V₀ F r σ T)) ∧
-      (constGirsanovMeasure hW hWmeas ((m - r) / σ) H).real
-          {ω | (market μ hWmeas V₀ m r σ).asset () T ω ≤ F}
-        = kmvPD V₀ F r σ T := by
+/-- **The defaultable bond of Merton's firm** is worth `V₀` less the equity: under the Girsanov
+measure `Q` of the constant market price of risk `(m − r)/σ` at the horizon `H ≥ T`, in the
+Black–Scholes market of the firm (spot `V₀ > 0`, drift `m`, rate `r`, volatility `σ > 0`), the
+defaultable zero-coupon bond of face `F > 0` due at `T` is worth `V₀` less the Black–Scholes call
+price. It is the balance-sheet identity (`price_defaultableZCB_add_price_europeanCall`) at the
+pricing measure `Q`, with the equity priced by `price_europeanCall_constGirsanovMeasure`. -/
+theorem price_defaultableZCB_constGirsanovMeasure {V₀ F m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H)
+    (hV₀ : 0 < V₀) (hF : 0 < F) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) :
+    (market μ hWmeas V₀ m r σ).price (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+        (defaultableZCB F T)
+      = V₀ - (V₀ * Phi (bsd1 V₀ F r σ T) - F * Real.exp (-r * T) * Phi (bsd2 V₀ F r σ T)) := by
   have hQp := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
   have hQ := isPricingMeasure_constGirsanovMeasure hW hWmeas (S_0 := V₀) (m := m) (r := r)
     hσ.ne' hTH
@@ -159,7 +147,19 @@ theorem merton_market {V₀ F m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hV�
     (n₀ := 1) (fun ω ↦ by simp [market]) (F := F)
     (fun ω ↦ (mul_pos hV₀ (Real.exp_pos _)).le) hF.le
   rw [integral_congr_ae h0, integral_const, probReal_univ, one_smul, hcall] at hsum
-  refine ⟨hQ, hcall, by linarith, ?_⟩
+  linarith
+
+include hW in
+/-- **The default probability of Merton's firm** under the Girsanov measure `Q` of the constant
+market price of risk at the horizon `H ≥ T` is `kmvPD`, the Merton–KMV default probability
+`Φ(−d₂)`: the event `V_T ≤ F` has `Q`-measure `kmvPD V₀ F r σ T`. Default is the event at the
+maturity `T`, not a first passage. -/
+theorem real_default_constGirsanovMeasure {V₀ F m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H)
+    (hV₀ : 0 < V₀) (hF : 0 < F) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) :
+    (constGirsanovMeasure hW hWmeas ((m - r) / σ) H).real
+        {ω | (market μ hWmeas V₀ m r σ).asset () T ω ≤ F}
+      = kmvPD V₀ F r σ T := by
+  have hQp := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
   have hB := isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
   have hkmv := kmvPD_eq_one_sub_survival_probability_via_brownian
     (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
@@ -183,6 +183,39 @@ theorem merton_market {V₀ F m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hV�
   simp only [measureReal_def] at this
   rw [hkmv, measureReal_def]
   linarith
+
+include hW in
+/-- **Merton's structural model is a market with a pricing measure.** Let the firm's assets be
+the Black–Scholes market of a pre-Brownian motion `W` (spot `V₀ > 0`, physical drift `m`, rate
+`r`, volatility `σ > 0`), with debt of face `F > 0` due at `T ≤ H`. The Girsanov measure `Q` of the
+constant market price of risk `(m − r)/σ` at the horizon `H` is a pricing measure of the market,
+and under it
+
+* the equity, the European call on the assets, is worth the Black–Scholes price
+  `V₀ Φ(d₁) − F e^{−rT} Φ(d₂)` (for `0 < T`);
+* the defaultable zero-coupon bond is worth `V₀` less the equity;
+* the probability of default `V_T ≤ F` is the Merton–KMV default probability `kmvPD`.
+
+Default is the event at the maturity `T`, not a first passage. The four conjuncts are
+`isPricingMeasure_constGirsanovMeasure`, `price_europeanCall_constGirsanovMeasure`,
+`price_defaultableZCB_constGirsanovMeasure` and `real_default_constGirsanovMeasure`. -/
+theorem merton_market {V₀ F m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hV₀ : 0 < V₀) (hF : 0 < F)
+    (hσ : 0 < σ) (hT : 0 < (T : ℝ)) :
+    (market μ hWmeas V₀ m r σ).IsPricingMeasure T
+        (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) ∧
+      (market μ hWmeas V₀ m r σ).price (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+          (europeanCall F T)
+        = V₀ * Phi (bsd1 V₀ F r σ T) - F * Real.exp (-r * T) * Phi (bsd2 V₀ F r σ T) ∧
+      (market μ hWmeas V₀ m r σ).price (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+          (defaultableZCB F T)
+        = V₀ - (V₀ * Phi (bsd1 V₀ F r σ T) - F * Real.exp (-r * T) * Phi (bsd2 V₀ F r σ T)) ∧
+      (constGirsanovMeasure hW hWmeas ((m - r) / σ) H).real
+          {ω | (market μ hWmeas V₀ m r σ).asset () T ω ≤ F}
+        = kmvPD V₀ F r σ T :=
+  ⟨isPricingMeasure_constGirsanovMeasure hW hWmeas (S_0 := V₀) (m := m) (r := r) hσ.ne' hTH,
+    price_europeanCall_constGirsanovMeasure hW hWmeas (m := m) (r := r) (K := F) hTH hV₀ hF hσ hT,
+    price_defaultableZCB_constGirsanovMeasure hW hWmeas hTH hV₀ hF hσ hT,
+    real_default_constGirsanovMeasure hW hWmeas hTH hV₀ hF hσ hT⟩
 
 end Merton
 

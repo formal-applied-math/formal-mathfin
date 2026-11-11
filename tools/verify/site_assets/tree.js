@@ -216,7 +216,9 @@ for (const s of sim) s.x = Math.max(s.s.x0 + 8, Math.min(s.s.x1 - 8, s.x));
     const far = ends.filter(e => !isTrunk(e.n)).sort((a, b) => (!!b.n.isl - !!a.n.isl) || a.y - b.y)[0] || ends[0];
     const near = ends.filter(e => e !== far).sort((a, b) => (isTrunk(a.n) - isTrunk(b.n)) || b.y - a.y)[0];
     n.phEnds = [far, near].filter(Boolean).map(e => e.id);
-    const ex = !far ? CX : near ? (far.x + near.x) / 2 : far.x + 40, ey = far ? far.y - 30 : LB;
+    // toward the limb when the near end is on the trunk, so connectors do not crowd the centre
+    const w = near && isTrunk(near.n) ? .25 : .5;
+    const ex = !far ? CX : near ? far.x + (near.x - far.x) * w : far.x + 40, ey = far ? far.y - 30 : LB;
     return {id:n.l, n, x:ex, y:ey, tx:ex};
   });
   const fixed = sim.map(s => ({fx:s.x, fy:s.y, r:rad(s.n) * .5}));

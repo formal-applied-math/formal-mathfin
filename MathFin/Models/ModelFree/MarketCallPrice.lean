@@ -80,12 +80,6 @@ namespace Market
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {M : Market Unit Ω} {T : ℝ≥0} {Q : Measure Ω}
 
-/-- With unit numéraire the call is priced by the plain `Q`-integral of its payoff. -/
-theorem price_europeanCall_of_numeraire_eq_one (hN : ∀ t ω, M.numeraire t ω = 1) (K : ℝ) :
-    M.price Q (europeanCall K T) = ∫ ω, max (M.asset () T ω - K) 0 ∂Q := by
-  simp [price, europeanCall, europeanCallPayoff, Contract.value_pay, Payoff.eval, scenarioAt,
-    deflator, hN]
-
 /-- **A pricing measure gives a normalised call price function.** In a market with unit numéraire
 and a positive asset, priced at `T` by `Q`, the forward `F` of the asset is its price, and the
 calls at the strikes `k F` priced in units of `F` are a normalised call price function: convex,

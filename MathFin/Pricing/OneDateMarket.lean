@@ -47,6 +47,8 @@ which law of `X` and which `Q` they read in it.
 
 * `Market.isPricingMeasure_oneDate`: a probability measure equivalent to `P`, with `X` integrable
   and `𝔼_Q[X] = s₀ e^{rτ}`, is a pricing measure up to `τ`.
+* `Market.integral_eq_of_isPricingMeasure_oneDate`: the converse for `τ > 0`: a pricing measure
+  makes `X` integrable with mean `s₀ e^{rτ}`.
 * `Market.price_pay_obs_oneDate`: the claim paying the asset at `τ` is worth `𝔼_Q[e^{−rτ} X]`.
 * `Market.price_europeanCall_oneDate`: the call struck at `K` is worth `𝔼_Q[e^{−rτ} (X − K)⁺]`.
 
@@ -216,6 +218,33 @@ theorem isPricingMeasure_oneDate {Q : Measure Ω} [IsProbabilityMeasure Q] (hQP 
     funext fun t ↦ funext fun ω ↦ deflated_oneDate_min P hX s₀ r τ i t ω
   rw [e]
   exact hmart.comp (monotone_dateStep τ)
+
+/-- **A pricing measure of the one-date market has the quoted mean.** For a date `τ > 0`, a
+pricing measure `Q` of the one-date market makes `X` integrable with mean `s₀ e^{rτ}`: the deflated
+asset is the constant `s₀` at `0` and `X e^{−rτ}` at `τ`, and a martingale keeps its mean
+(`Martingale.setIntegral_eq`). This is the converse of `isPricingMeasure_oneDate`. For `τ = 0` the
+quote `s₀` is never read, so no such constraint holds. -/
+theorem integral_eq_of_isPricingMeasure_oneDate {Q : Measure Ω} (hτ : 0 < τ)
+    (hQ : (oneDate P hX s₀ r τ).IsPricingMeasure τ Q) :
+    Integrable X Q ∧ ∫ ω, X ω ∂Q = s₀ * Real.exp (r * τ) := by
+  haveI := hQ.isProb
+  have hm := hQ.martingale ()
+  have h0 (ω : Ω) : (oneDate P hX s₀ r τ).deflated () (min 0 τ) ω = s₀ := by
+    rw [deflated_oneDate_min, dateStep_of_lt hτ, Nat.zero_min] <;> rfl
+  have hτ' (ω : Ω) :
+      (oneDate P hX s₀ r τ).deflated () (min τ τ) ω = X ω / Real.exp (r * τ) := by
+    rw [deflated_oneDate_min, dateStep_of_not_lt (lt_irrefl τ), min_self] <;> rfl
+  have hi : Integrable (fun ω ↦ X ω / Real.exp (r * τ)) Q :=
+    (hm.integrable τ).congr (.of_forall hτ')
+  refine ⟨(hi.mul_const (Real.exp (r * τ))).congr (.of_forall fun ω ↦ ?_), ?_⟩
+  · field_simp
+  · have he : ∫ ω in Set.univ, (oneDate P hX s₀ r τ).deflated () (min 0 τ) ω ∂Q
+        = ∫ ω in Set.univ, (oneDate P hX s₀ r τ).deflated () (min τ τ) ω ∂Q :=
+      hm.setIntegral_eq (i := 0) (j := τ) (zero_le (a := τ)) (s := Set.univ) MeasurableSet.univ
+    simp only [h0, hτ', Measure.restrict_univ] at he
+    have e1 : ∫ _ : Ω, s₀ ∂Q = s₀ := by simp
+    rw [e1, integral_div, eq_div_iff (Real.exp_pos _).ne'] at he
+    exact he.symm
 
 /-- **The claim paying the asset at `τ`** is worth the discounted expectation `𝔼_Q[e^{−rτ} X]`,
 under any measure `Q`: the market's price is the contract value (`price`), and the asset at `τ` is

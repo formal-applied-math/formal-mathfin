@@ -45,8 +45,10 @@ proved here.
   bond's market price `N 0 / N τᵢ`.
 * `MathFin.Rates.price_fixedFlows_deterministicMarket`: a schedule of fixed cash flows is worth
   its flows discounted by the numéraire.
-* `MathFin.Rates.bondPortfolioValue_eq_price`: the flat-rate value of a zero-coupon portfolio and
-  the annually compounded price of a coupon bond are market prices.
+* `MathFin.Rates.bondPortfolioValue_eq_price_exp`, `bondPriceDisc_eq_price`: the flat-rate value of
+  a zero-coupon portfolio (numéraire `e^{rt}`) and the annually compounded price of a coupon bond
+  (numéraire `(1 + y)^⌊t⌋`) are market prices.
+* `MathFin.Rates.bondPortfolioValue_eq_price`: the two in one conjunction.
 
 ## References
 
@@ -118,12 +120,42 @@ theorem price_fixedFlows_deterministicMarket (P : Measure Ω) (N : ℝ≥0 → �
       = ∑ i ∈ Finset.range n, N 0 / N (t i) * c i :=
   value_fixedFlows_deterministic (fun s ↦ N 0 / N s) _ t c n
 
+/-- **The flat-rate value of a bond portfolio is a market price.** In any market with the money
+market `e^{rt}` as numéraire, under any probability measure `Q`, the portfolio of zero-coupon
+bonds of face `w i` and maturity `T i ≥ 0` (`bondPortfolioValue` at time `0`) is the price of the
+schedule `fixedFlows`. -/
+theorem bondPortfolioValue_eq_price_exp (Q : Measure Ω) [IsProbabilityMeasure Q] (n : ℕ)
+    (w T : ℕ → ℝ) (hT : ∀ i, 0 ≤ T i) (M : Market ι Ω) (r : ℝ)
+    (hM : ∀ t ω, M.numeraire t ω = Real.exp (r * t)) :
+    MathFin.bondPortfolioValue (Finset.range n) w T 0 r =
+      M.price Q (fixedFlows (fun i ↦ (T i).toNNReal) w n) := by
+  have hD : M.deflator = fun (s : ℝ≥0) _ ↦ Real.exp (-(r * s)) := by
+    funext s ω
+    simp only [Market.deflator_of_numeraire_exp hM, neg_mul]
+  rw [Market.price, hD, value_fixedFlows_deterministic, MathFin.bondPortfolioValue]
+  refine Finset.sum_congr rfl fun i _ ↦ ?_
+  simp only [Real.coe_toNNReal _ (hT i), sub_zero]
+  ring
+
+/-- **The annually compounded price of a coupon bond is a market price.** In any market with the
+numéraire `(1 + y)^⌊t⌋`, under any probability measure `Q`, the coupon bond at the annually
+compounded yield `y` (`bondPriceDisc`) is the price of its cash flows. -/
+theorem bondPriceDisc_eq_price (Q : Measure Ω) [IsProbabilityMeasure Q] (n : ℕ)
+    (w : ℕ → ℝ) (M : Market ι Ω) (y : ℝ) (t : ℕ → ℕ)
+    (hM : ∀ s ω, M.numeraire s ω = (1 + y) ^ ⌊s⌋₊) :
+    MathFin.bondPriceDisc (Finset.range n) t w y =
+      M.price Q (fixedFlows (fun i ↦ ((t i : ℕ) : ℝ≥0)) w n) := by
+  have hD : M.deflator = fun (s : ℝ≥0) _ ↦ ((1 + y) ^ ⌊s⌋₊)⁻¹ := by
+    funext s ω
+    simp only [Market.deflator_of_numeraire hM, Nat.floor_zero, pow_zero, one_div]
+  rw [Market.price, hD, value_fixedFlows_deterministic, MathFin.bondPriceDisc]
+  refine Finset.sum_congr rfl fun i _ ↦ ?_
+  simp only [Nat.floor_natCast]
+  ring
+
 /-- **The flat-rate value of a bond portfolio and the discrete price of a coupon bond are market
-prices.** In any market with the money market `e^{rt}` as numéraire, under any probability
-measure `Q`, the portfolio of zero-coupon bonds of face `w i` and maturity `T i ≥ 0`
-(`bondPortfolioValue` at time `0`) is the price of the schedule `fixedFlows`; and in any market
-with the numéraire `(1 + y)^⌊t⌋`, the coupon bond at the annually compounded yield `y`
-(`bondPriceDisc`) is the price of its cash flows. -/
+prices** (`bondPortfolioValue_eq_price_exp`, `bondPriceDisc_eq_price`): the two facts in one
+statement, one per numéraire, `e^{rt}` and `(1 + y)^⌊t⌋`. -/
 theorem bondPortfolioValue_eq_price (Q : Measure Ω) [IsProbabilityMeasure Q] (n : ℕ)
     (w T : ℕ → ℝ) (hT : ∀ i, 0 ≤ T i) :
     (∀ (M : Market ι Ω) (r : ℝ), (∀ t ω, M.numeraire t ω = Real.exp (r * t)) →
@@ -132,22 +164,8 @@ theorem bondPortfolioValue_eq_price (Q : Measure Ω) [IsProbabilityMeasure Q] (n
     (∀ (M : Market ι Ω) (y : ℝ) (t : ℕ → ℕ),
       (∀ s ω, M.numeraire s ω = (1 + y) ^ ⌊s⌋₊) →
       MathFin.bondPriceDisc (Finset.range n) t w y =
-        M.price Q (fixedFlows (fun i ↦ ((t i : ℕ) : ℝ≥0)) w n)) := by
-  refine ⟨fun M r hM ↦ ?_, fun M y t hM ↦ ?_⟩
-  · have hD : M.deflator = fun (s : ℝ≥0) _ ↦ Real.exp (-(r * s)) := by
-      funext s ω
-      simp only [Market.deflator, hM, NNReal.coe_zero, mul_zero, Real.exp_zero, one_div,
-        Real.exp_neg]
-    rw [Market.price, hD, value_fixedFlows_deterministic, MathFin.bondPortfolioValue]
-    refine Finset.sum_congr rfl fun i _ ↦ ?_
-    simp only [Real.coe_toNNReal _ (hT i), sub_zero]
-    ring
-  · have hD : M.deflator = fun (s : ℝ≥0) _ ↦ ((1 + y) ^ ⌊s⌋₊)⁻¹ := by
-      funext s ω
-      simp only [Market.deflator, hM, Nat.floor_zero, pow_zero, one_div]
-    rw [Market.price, hD, value_fixedFlows_deterministic, MathFin.bondPriceDisc]
-    refine Finset.sum_congr rfl fun i _ ↦ ?_
-    simp only [Nat.floor_natCast]
-    ring
+        M.price Q (fixedFlows (fun i ↦ ((t i : ℕ) : ℝ≥0)) w n)) :=
+  ⟨fun M r hM ↦ bondPortfolioValue_eq_price_exp Q n w T hT M r hM,
+    fun M y t hM ↦ bondPriceDisc_eq_price Q n w M y t hM⟩
 
 end MathFin.Rates

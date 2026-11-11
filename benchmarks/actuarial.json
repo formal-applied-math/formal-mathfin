@@ -230,6 +230,29 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. isPricingMeasure_insuredMarket_tilted and price_insuredMarket_tilted in MathFin/Insurance/EsscherPremium.lean, on the one-date market Market.oneDate (MathFin/Pricing/OneDateMarket.lean) with its initial price the Esscher premium: the tilt is a probability measure equivalent to P (isProbabilityMeasure_tilted, tilted_absolutelyContinuous, absolutelyContinuous_tilted), X is integrable under it (integrable_tilted_iff) with mean the premium (integral_tilted_eq_esscherPremium), and a measure with those properties prices the one-date market (Market.isPricingMeasure_oneDate). The general price identity for an arbitrary market with unit numeraire is esscherPremium_eq_price in the same module. SCOPE: the insured market quotes the loss at the Esscher premium by construction, and there is no dynamics before T; the statement does not derive the premium from a hedging or equilibrium argument. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-esscher-premium-pricing-measure-iff",
+      "name": "An Esscher Tilt Prices the Insured Market Exactly When Its Premium Is the Market Quote",
+      "domain": "mathematical_finance",
+      "description": "Let X be a measurable loss under a probability measure P, T > 0 a date, and h, h' two Esscher parameters with e^(h'X) and X e^(h'X) integrable. In the insured market of parameter h (insuredMarket: the one-date market with the unit numeraire in which the loss is quoted at its Esscher premium for h until T and equals X at T), the Esscher tilt of P with parameter h' is a pricing measure (Market.IsPricingMeasure at T) if and only if the Esscher premium for h' equals the Esscher premium for h. So the pricing measure fixes the premium, not the parameter. No integrability is assumed for h: when E[e^(hX)] or E[X e^(hX)] is not finite, the quote is the Bochner integral's junk value, and the statement is about that number. Strict monotonicity of the premium in the parameter, which would give h' = h for a non-degenerate loss, is not proved.",
+      "code": {
+        "lean": "import MathFin.Insurance.EsscherPremium\n\nopen MeasureTheory MathFin MathFin.Contracts\nopen scoped NNReal\n\n/-- The `h'`-Esscher tilt prices the insured market of parameter `h` exactly when the premiums\nagree. -/\ntheorem esscher_tilt_prices_insured_market_iff {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}\n    [IsProbabilityMeasure P] {X : Ω → ℝ} (hX : Measurable X) {h h' : ℝ} {T : ℝ≥0} (hT : 0 < T)\n    (hexp : Integrable (fun ω ↦ Real.exp (h' * X ω)) P)\n    (hXexp : Integrable (fun ω ↦ X ω * Real.exp (h' * X ω)) P) :\n    (insuredMarket P hX h T).IsPricingMeasure T (P.tilted fun ω ↦ h' * X ω)\n      ↔ esscherPremium P X h' = esscherPremium P X h :=\n  isPricingMeasure_insuredMarket_tilted_iff hX hT hexp hXexp\n"
+      },
+      "metadata": {
+        "reference": "Gerber and Shiu, Option pricing by Esscher transforms (1994); Esscher, On the probability function in the collective theory of risk (1932)",
+        "citations": [
+          {
+            "key": "GerberShiu1994"
+          },
+          {
+            "key": "Esscher1932"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. isPricingMeasure_insuredMarket_tilted_iff in MathFin/Insurance/EsscherPremium.lean: the forward direction is Market.integral_eq_of_isPricingMeasure_oneDate (MathFin/Pricing/OneDateMarket.lean), where the martingale property of the deflated asset between 0 and T keeps its mean (Martingale.setIntegral_eq), combined with the mean of X under the tilt being the premium (integral_tilted_eq_esscherPremium); the converse is Market.isPricingMeasure_oneDate. SCOPE: the hypothesis T > 0 is needed (at T = 0 the quote is never read); uniqueness of the parameter (strict monotonicity of the premium in h) is not proved; the insured market quotes the loss at the Esscher premium by construction and has no dynamics before T. Axioms-clean."
+      }
     }
   ]
 }

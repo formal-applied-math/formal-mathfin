@@ -8,6 +8,7 @@ module
 public import MathFin.Init
 public import Mathlib.Analysis.InnerProductSpace.Basic
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 public import Mathlib.MeasureTheory.Measure.Decomposition.RadonNikodym
 
 /-!
@@ -44,6 +45,10 @@ measures equivalent on the whole space.
   strictly positive density `g` is equivalent to `P` as soon as it is a probability measure.
 * `isEquivProbMeasure_withDensity`: for a strictly positive, `P`-integrable `g` with `∫ g ∂P = 1`,
   `P.withDensity (ofReal g)` is an equivalent probability measure.
+* `trim_withDensity_rnDeriv_trim`: `P` weighted by `d(Q|m)/d(P|m)` restricts to `Q|m` on `m`, when
+  `Q|m ≪ P|m`.
+* `integral_rnDeriv_trim_mul`: `∫ (d(Q|m)/d(P|m)) * g ∂P = ∫ g ∂Q` for `m`-measurable `g`, when
+  `Q|m ≪ P|m`.
 * `exists_isEquivProbMeasure_trim_eq`: a probability measure equivalent to `P` on a sub-σ-algebra
   agrees there with one equivalent to `P` on the whole space.
 
@@ -102,6 +107,29 @@ theorem isEquivProbMeasure_withDensity {Ω : Type*} {mΩ : MeasurableSpace Ω} (
         ← ofReal_integral_eq_lintegral_ofReal hint (ae_of_all _ fun ω ↦ (hpos ω).le), hsum,
         ENNReal.ofReal_one]⟩
 
+/-- **Weighting `P` by the density of the restrictions reproduces `Q` on `m`.** If `Q|m ≪ P|m`, the
+measure `P.withDensity (d(Q|m)/d(P|m))` restricts to `Q|m` on `m ≤ m0`. -/
+theorem trim_withDensity_rnDeriv_trim {Ω : Type*} {m m0 : MeasurableSpace Ω} (hm : m ≤ m0)
+    {P Q : Measure Ω} [IsFiniteMeasure P] [IsFiniteMeasure Q] (hQP : Q.trim hm ≪ P.trim hm) :
+    (P.withDensity ((Q.trim hm).rnDeriv (P.trim hm))).trim hm = Q.trim hm := by
+  rw [trim_withDensity hm (Measure.measurable_rnDeriv _ _), Measure.withDensity_rnDeriv_eq _ _ hQP]
+
+/-- **Change of measure on a sub-σ-algebra.** If `Q|m ≪ P|m`, an `m`-measurable `g` has
+`P`-expectation against the density `d(Q|m)/d(P|m)` of the restrictions equal to its
+`Q`-expectation. -/
+theorem integral_rnDeriv_trim_mul {Ω : Type*} {m m0 : MeasurableSpace Ω} (hm : m ≤ m0)
+    {P Q : Measure Ω} [IsFiniteMeasure P] [IsFiniteMeasure Q] (hQP : Q.trim hm ≪ P.trim hm)
+    {g : Ω → ℝ} (hg : StronglyMeasurable[m] g) :
+    ∫ ω, ((Q.trim hm).rnDeriv (P.trim hm) ω).toReal * g ω ∂P = ∫ ω, g ω ∂Q := by
+  have hf : Measurable[m] ((Q.trim hm).rnDeriv (P.trim hm)) := Measure.measurable_rnDeriv _ _
+  calc ∫ ω, ((Q.trim hm).rnDeriv (P.trim hm) ω).toReal * g ω ∂P
+      = ∫ ω, g ω ∂P.withDensity ((Q.trim hm).rnDeriv (P.trim hm)) :=
+        (integral_withDensity_eq_integral_toReal_smul (hf.mono hm le_rfl)
+          (ae_of_ae_trim hm (Measure.rnDeriv_lt_top _ _)) g).symm
+    _ = ∫ ω, g ω ∂(P.withDensity ((Q.trim hm).rnDeriv (P.trim hm))).trim hm :=
+        integral_trim hm hg
+    _ = ∫ ω, g ω ∂Q := by rw [trim_withDensity_rnDeriv_trim hm hQP, ← integral_trim hm hg]
+
 /-- **An equivalence on a sub-σ-algebra extends to the whole space.** If the probability measure `Q`
 has the null sets of `P` among the events of `m ≤ m0`, then `P` weighted by the density
 `d(Q|m)/d(P|m)` of the restrictions is a probability measure equivalent to `P` on all of `m0` that
@@ -111,8 +139,7 @@ theorem exists_isEquivProbMeasure_trim_eq {Ω : Type*} {m m0 : MeasurableSpace �
     (hPQ : P.trim hm ≪ Q.trim hm) :
     ∃ Q' : Measure Ω, IsEquivProbMeasure P Q' ∧ Q'.trim hm = Q.trim hm := by
   have hf : Measurable[m] ((Q.trim hm).rnDeriv (P.trim hm)) := Measure.measurable_rnDeriv _ _
-  have htrim : (P.withDensity ((Q.trim hm).rnDeriv (P.trim hm))).trim hm = Q.trim hm := by
-    rw [trim_withDensity hm hf, Measure.withDensity_rnDeriv_eq _ _ hQP]
+  have htrim := trim_withDensity_rnDeriv_trim hm hQP
   refine ⟨P.withDensity ((Q.trim hm).rnDeriv (P.trim hm)),
     ⟨⟨?_⟩, withDensity_absolutelyContinuous _ _, ?_⟩, htrim⟩
   · rw [← trim_measurableSet_eq hm (@MeasurableSet.univ _ m), htrim,

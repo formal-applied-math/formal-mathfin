@@ -33,8 +33,12 @@ the gross return `R = S_i(T) / S_i(0)` (`integral_sdf_mul_grossReturn`). So the 
 
 ## Main results
 
+* `Market.IsPricingMeasure.integral_rnDeriv_mul`: the change of measure on `𝓕 T`, an instance of
+  `integral_rnDeriv_trim_mul`.
 * `Market.IsPricingMeasure.integral_sdf_mul`: `E_P[sdf * X] = E_Q[(N 0 / N T) X]` for a payoff `X`
   known at `T`.
+* `Market.IsPricingMeasure.sdf_mul_real_singleton`: `sdf(ω) * P{ω} = (N 0 / N T)(ω) * Q{ω}`, the
+  state price (`Market.statePrice`), when the singletons are known at `T`.
 * `Market.IsPricingMeasure.integral_sdf_mul_grossReturn`: `E_P[sdf * R_i] = 1` for the gross
   return of an asset with a deterministic initial price.
 * `Market.IsPricingMeasure.abs_sharpeRatio_le`: the Hansen–Jagannathan bound,
@@ -85,11 +89,6 @@ variable {M} {T : ℝ≥0} {Q : Measure Ω}
 theorem sdf_nonneg (ω : Ω) : 0 ≤ M.sdf Q T ω :=
   mul_nonneg ENNReal.toReal_nonneg (M.deflator_pos T ω).le
 
-theorem stronglyMeasurable_deflator (M : Market ι Ω) (T : ℝ≥0) :
-    StronglyMeasurable[M.𝓕 T] (M.deflator T) :=
-  (((M.numeraire_adapted 0).mono (M.𝓕.mono (zero_le (a := T)))).measurable.div
-    (M.numeraire_adapted T).measurable).stronglyMeasurable
-
 /-- **Change of measure on `𝓕 T`.** For a pricing measure `Q` up to `T`, a payoff `g` known at `T`
 has `P`-expectation against the density of `Q` equal to its `Q`-expectation. -/
 theorem IsPricingMeasure.integral_rnDeriv_mul [IsFiniteMeasure M.P] (hQ : M.IsPricingMeasure T Q)
@@ -97,25 +96,40 @@ theorem IsPricingMeasure.integral_rnDeriv_mul [IsFiniteMeasure M.P] (hQ : M.IsPr
     ∫ ω, ((Q.trim (M.𝓕.le T)).rnDeriv (M.P.trim (M.𝓕.le T)) ω).toReal * g ω ∂M.P
       = ∫ ω, g ω ∂Q := by
   have := hQ.isProb
-  have hm := M.𝓕.le T
-  have hf : Measurable[M.𝓕 T] ((Q.trim hm).rnDeriv (M.P.trim hm)) := Measure.measurable_rnDeriv _ _
-  have htrim : (M.P.withDensity ((Q.trim hm).rnDeriv (M.P.trim hm))).trim hm = Q.trim hm := by
-    rw [trim_withDensity hm hf, Measure.withDensity_rnDeriv_eq _ _ hQ.ac]
-  calc ∫ ω, ((Q.trim hm).rnDeriv (M.P.trim hm) ω).toReal * g ω ∂M.P
-      = ∫ ω, g ω ∂M.P.withDensity ((Q.trim hm).rnDeriv (M.P.trim hm)) :=
-        (integral_withDensity_eq_integral_toReal_smul (hf.mono hm le_rfl)
-          (ae_of_ae_trim hm (Measure.rnDeriv_lt_top _ _)) g).symm
-    _ = ∫ ω, g ω ∂(M.P.withDensity ((Q.trim hm).rnDeriv (M.P.trim hm))).trim hm :=
-        integral_trim hm hg
-    _ = ∫ ω, g ω ∂Q := by rw [htrim, ← integral_trim hm hg]
+  exact integral_rnDeriv_trim_mul (M.𝓕.le T) hQ.ac hg
 
 /-- **The `sdf` prices every payoff known at `T`**: `E_P[sdf * X] = E_Q[(N 0 / N T) X]`. -/
 theorem IsPricingMeasure.integral_sdf_mul [IsFiniteMeasure M.P] (hQ : M.IsPricingMeasure T Q)
     {X : Ω → ℝ} (hX : StronglyMeasurable[M.𝓕 T] X) :
     ∫ ω, M.sdf Q T ω * X ω ∂M.P = ∫ ω, M.deflator T ω * X ω ∂Q := by
-  have h := hQ.integral_rnDeriv_mul ((stronglyMeasurable_deflator M T).mul hX)
+  have h := hQ.integral_rnDeriv_mul ((M.stronglyMeasurable_deflator T).mul hX)
   simp only [Pi.mul_apply, ← mul_assoc] at h
   exact h
+
+/-- **The `sdf` is the state-price density.** When the singletons are known at `T`
+(`{ω} ∈ 𝓕 T`, as on a finite sample space with `𝓕 T = ⊤`), `sdf(ω) * P{ω}` is the state price
+`(N 0 / N T)(ω) * Q{ω}` of `ω`. -/
+theorem IsPricingMeasure.sdf_mul_real_singleton [IsFiniteMeasure M.P] [MeasurableSingletonClass Ω]
+    (hQ : M.IsPricingMeasure T Q) (hT : ∀ ω, MeasurableSet[M.𝓕 T] {ω}) (ω : Ω) :
+    M.sdf Q T ω * M.P.real {ω} = M.statePrice Q T ω := by
+  have := hQ.isProb
+  have h := integral_rnDeriv_trim_mul (M.𝓕.le T) hQ.ac
+    (stronglyMeasurable_const.indicator (hT ω) : StronglyMeasurable[M.𝓕 T]
+      (({ω} : Set Ω).indicator fun _ ↦ (1 : ℝ)))
+  have e (x : Ω) : ((Q.trim (M.𝓕.le T)).rnDeriv (M.P.trim (M.𝓕.le T)) x).toReal *
+      ({ω} : Set Ω).indicator (fun _ ↦ (1 : ℝ)) x =
+      ({ω} : Set Ω).indicator
+        (fun _ ↦ ((Q.trim (M.𝓕.le T)).rnDeriv (M.P.trim (M.𝓕.le T)) ω).toReal) x := by
+    by_cases hx : x = ω
+    · subst hx
+      simp [Set.indicator_apply]
+    · simp [Set.indicator_apply, hx]
+  simp_rw [e] at h
+  rw [integral_indicator_const _ (measurableSet_singleton ω),
+    integral_indicator_const _ (measurableSet_singleton ω)] at h
+  simp only [smul_eq_mul, mul_one] at h
+  simp only [sdf, statePrice]
+  linear_combination M.deflator T ω * h
 
 /-- **An asset with a deterministic initial price `c` is priced by the `sdf`**:
 `E_P[sdf * S_i(T)] = c`. -/

@@ -9,7 +9,7 @@ public import MathFin.Models.BlackScholes.Market
 public import MathFin.Models.BlackScholes.American.Stopping.AmericanValue
 
 /-!
-# The summit of the American put tower: it dominates the market's European price
+# The American put dominates the Black–Scholes market's European put
 
 The American put tower (`Models/BlackScholes/American/`) values the put as a supremum of expected
 discounted payoffs over stopping rules bounded by the horizon, on the risk-neutral asset driven by

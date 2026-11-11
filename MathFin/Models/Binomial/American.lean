@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Models.Binomial.Model
+public import MathFin.Models.Binomial.PathMeasure
 
 /-!
 # American option pricing in the binomial tree
@@ -24,7 +25,16 @@ This is the exercise-everywhere case of the tree's one recursion `bermudanPrice`
 (`Models/Binomial/SnellEnvelope.lean`) and its monotonicity in the exercise set, hence the
 European ≤ American ordering (`Models/Binomial/Bermudan.lean`), all apply to it.
 
-This file defines `americanPrice`, with the one-step Bellman equation `americanPrice_succ`.
+This file defines `americanPrice`, with the one-step Bellman equation `americanPrice_succ`, and
+identifies it with the Snell envelope. Under the risk-neutral coin flips `coinFlipMeasure q`, with
+`q = crrUpProb u d ρ`, the price is the time-`0` value of the library's Snell envelope
+`snellEnvelope` (`Probability/Discrete/SnellEnvelope.lean`, Mathlib's conditional expectation on
+the flip filtration) of the discounted intrinsic value `e^{−ρn} g(Sₙ)` along the spot path, with
+every date an exercise date: the exercise-everywhere case of
+`snellEnvelope_discounted_bermudanPrice` at time `0`.
+
+Not proved here: the envelope as a supremum over stopping times, or any statement about the
+price at a later time.
 
 ## Main definitions
 
@@ -35,6 +45,8 @@ This file defines `americanPrice`, with the one-step Bellman equation `americanP
 
 * `americanPrice_zero`: with no steps remaining, the price is the intrinsic payoff `g S`.
 * `americanPrice_succ`: one-step Bellman equation `V_{n+1}(S) = max(g(S), continuation)`.
+* `americanPrice_eq_snellEnvelope`: almost surely under `coinFlipMeasure q`, the Snell envelope at
+  time `0` of the discounted intrinsic value is `americanPrice u d ρ g N S₀`.
 
 ## References
 
@@ -45,14 +57,15 @@ This file defines `americanPrice`, with the one-step Bellman equation `americanP
 ## Tags
 
 American option, early exercise, Bellman equation, binomial tree, dynamic programming,
-optimal exercise, MSC 91G20, MSC 49L20, JEL G13
+optimal exercise, Snell envelope, optimal stopping, MSC 91G20, MSC 49L20, MSC 60G40, JEL G13
 -/
 
 @[expose] public section
 
 namespace MathFin
 
-open Real
+open Real MeasureTheory
+open scoped NNReal
 
 /-- American option price in the binomial tree: the Bellman recursion taking, at each
 step, the maximum of immediate exercise (`g S`) and the discounted expected continuation,
@@ -73,5 +86,22 @@ lemma americanPrice_succ (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
         (americanPrice u d r g n (S * u))
         (americanPrice u d r g n (S * d))) :=
   bermudanPrice_succ_of_mem (Set.mem_univ _) u d r g S
+
+/-- **The binomial American price is the Snell envelope.** Under the risk-neutral coin flips
+(`crrUpProb u d ρ = q`), the Snell envelope of the discounted intrinsic value `e^{−ρn} g(Sₙ)`
+along the spot path, for the flip filtration, horizon `N` and exercise at every date, is at time
+`0` almost surely `americanPrice u d ρ g N S₀`. -/
+theorem americanPrice_eq_snellEnvelope {u d ρ : ℝ} {q : ℝ≥0} (hq : q ≤ 1)
+    (hqcrr : crrUpProb u d ρ = q) (g : ℝ → ℝ) (S₀ : ℝ) (N : ℕ) :
+    ∀ᵐ ω ∂coinFlipMeasure q hq,
+      snellEnvelope (coinFlipMeasure q hq) flipFiltration Set.univ
+        (fun n ω ↦ Real.exp (-ρ * n) * g (spotPath S₀ u d n ω)) N 0 ω
+      = americanPrice u d ρ g N S₀ := by
+  have h := snellEnvelope_discounted_bermudanPrice (E := Set.univ) hq u d ρ g S₀ hqcrr
+    (N := N) (k := 0) (Nat.zero_le N)
+  simp only [Set.mem_univ, Set.setOf_true] at h
+  filter_upwards [h] with ω hω
+  rw [hω]
+  simp [americanPrice, spotPath]
 
 end MathFin

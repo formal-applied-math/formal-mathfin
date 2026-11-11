@@ -234,6 +234,30 @@ Three read-only reviewers split the lenses:
    rename `American/Summit.lean` after its content.
 9. The Esscher uniqueness statement (Inspired math above).
 
+### Backlog executed the same day (`v2/backlog-2026-11-11`)
+
+1. In part. `Market.price_eq_value_of_numeraire`, and `price_europeanCall_of_numeraire_eq_one`
+   moved to `Pricing/Market.lean`; the bond-portfolio deflator blocks are instances. The
+   constructor was not built: redefining the four markets through it would rewrite their `simp`
+   proofs for no new content. Merton's numéraire is not deterministic, so its blocks stay.
+2. Done. `trim_withDensity_rnDeriv_trim` and `integral_rnDeriv_trim_mul` (`EquivMeasure.lean`)
+   carry both former proofs; `stronglyMeasurable_deflator` is in `Pricing/Market.lean`.
+3. Done. `IsPricingMeasure.sdf_mul_real_singleton`: `sdf(ω) P{ω}` is the state price of `ω`
+   when the singletons are known at `T`.
+4. In part. Bachelier's `MemLp` block is one `MemLp.pos_part` chain; Merton's integrability is
+   not lifted.
+5. Done. `merton_market` and `bondPortfolioValue_eq_price` are conjunctions of named lemmas.
+6. Done as a `variable` block. The `terminalPayoff` abbreviation was tried and dropped: goals in
+   the abbreviation and lemmas in `portfolioPayoff` defeat `rw`.
+7. Done. Glosten–Milgrom's law is `Measure.ofWeights`; `ofWeights` stays in Mathlib's namespace
+   as an upstream candidate.
+8. Done. `americanPrice_eq_snellEnvelope` is in `Binomial/American.lean` (the Snell module would
+   close an import cycle); `Summit.lean` is `AmericanPutMarketBound.lean`.
+9. In part. `isPricingMeasure_insuredMarket_tilted_iff`: for `T > 0`, the `h'`-tilt prices the
+   insured market exactly when its premium is the quote, from the new converse
+   `Market.integral_eq_of_isPricingMeasure_oneDate`. Uniqueness of the parameter (strict
+   monotonicity of the premium) is not proved.
+
 ## 2026-11-08 — corpus 817, modules 731 — the one trunk, phases 0–2, read before it lands
 
 Scope: the one-trunk work since the RiO review (#450, #451; branches `v2/phase2c-horizon` and

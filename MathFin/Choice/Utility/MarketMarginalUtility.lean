@@ -60,6 +60,17 @@ namespace MathFin.Market
 
 variable {N K : ℕ} [NeZero N] {M : Market (Fin K) (Fin N)} {T : ℝ≥0} {Q : Measure (Fin N)}
 
+/-! The standing hypotheses of the section: `P` is a probability measure charging every state, `Q`
+prices the market up to `T`, the numéraire and the asset prices at `0` are deterministic, and the
+terminal payoffs span the states. -/
+
+variable [IsProbabilityMeasure M.P] (hP : ∀ ω, 0 < M.P.real {ω}) (hQ : M.IsPricingMeasure T Q)
+  {n₀ : ℝ} (hN₀ : ∀ ω, M.numeraire 0 ω = n₀) {pr : Fin K → ℝ}
+  (hpr : ∀ k ω, M.asset k 0 ω = pr k)
+  (hcomplete : ∀ x : Fin N → ℝ, (∀ k, ∑ ω, x ω * M.asset k T ω = 0) → x = 0)
+
+include hP hQ hN₀ hpr hcomplete
+
 /-- **Marginal utility is the stochastic discount factor.** In a market on a finite sample space
 with a pricing measure `Q` up to `T`, a probability measure `P` charging every state and
 deterministic initial prices `pr`, suppose the terminal payoffs span the states (no non-zero
@@ -68,10 +79,7 @@ deterministic initial prices `pr`, suppose the terminal payoffs span the states 
 expected utility on the budget set (the marginal-utility vector annihilates the payoff of every
 budget-neutral direction), there is `μ > 0` with `μ * w₀ = E_P[u'(W) W]` and
 `u'(W ω) = μ * sdf ω` in every state. -/
-theorem IsPricingMeasure.exists_deriv_eq_mul_sdf_of_stationary [IsProbabilityMeasure M.P]
-    (hP : ∀ ω, 0 < M.P.real {ω}) (hQ : M.IsPricingMeasure T Q) {n₀ : ℝ}
-    (hN₀ : ∀ ω, M.numeraire 0 ω = n₀) {pr : Fin K → ℝ} (hpr : ∀ k ω, M.asset k 0 ω = pr k)
-    (hcomplete : ∀ x : Fin N → ℝ, (∀ k, ∑ ω, x ω * M.asset k T ω = 0) → x = 0) {u : ℝ → ℝ}
+theorem IsPricingMeasure.exists_deriv_eq_mul_sdf_of_stationary {u : ℝ → ℝ}
     {w₀ : ℝ} {θ : Fin K → ℝ} (hθ : portfolioCost pr θ = w₀) (hw₀ : 0 < w₀)
     (hW : ∀ ω, 0 < portfolioPayoff (fun j ↦ M.asset j T) θ ω)
     (hu : ∀ ω, 0 < deriv u (portfolioPayoff (fun j ↦ M.asset j T) θ ω))
@@ -108,10 +116,7 @@ theorem IsPricingMeasure.exists_deriv_eq_mul_sdf_of_stationary [IsProbabilityMea
 hypotheses of `exists_deriv_eq_mul_sdf_of_stationary`, with stationarity replaced by `θ` being a
 local maximum on the budget set `{θ' | cost θ' = w₀}` of the expected utility `∫ u(W) ∂P` (the
 integral against the reference measure), `u'(W ω) = μ * sdf ω` for some `μ > 0`. -/
-theorem IsPricingMeasure.exists_deriv_eq_mul_sdf_of_isLocalMaxOn [IsProbabilityMeasure M.P]
-    (hP : ∀ ω, 0 < M.P.real {ω}) (hQ : M.IsPricingMeasure T Q) {n₀ : ℝ}
-    (hN₀ : ∀ ω, M.numeraire 0 ω = n₀) {pr : Fin K → ℝ} (hpr : ∀ k ω, M.asset k 0 ω = pr k)
-    (hcomplete : ∀ x : Fin N → ℝ, (∀ k, ∑ ω, x ω * M.asset k T ω = 0) → x = 0) {u : ℝ → ℝ}
+theorem IsPricingMeasure.exists_deriv_eq_mul_sdf_of_isLocalMaxOn {u : ℝ → ℝ}
     {w₀ : ℝ} {θ : Fin K → ℝ}
     (hmax : IsLocalMaxOn (fun θ' ↦ ∫ ω, u (portfolioPayoff (fun j ↦ M.asset j T) θ' ω) ∂M.P)
       {θ' | portfolioCost pr θ' = w₀} θ)
@@ -134,10 +139,7 @@ theorem IsPricingMeasure.exists_deriv_eq_mul_sdf_of_isLocalMaxOn [IsProbabilityM
 `exists_deriv_eq_mul_sdf_of_stationary` with `u = log`, a stationary portfolio of cost `w₀ > 0` and
 positive terminal wealth `W` has `sdf ω = w₀ / W ω`: the stochastic discount factor is the
 reciprocal of the wealth, scaled by its initial value. -/
-theorem IsPricingMeasure.sdf_eq_div_of_logOptimal [IsProbabilityMeasure M.P]
-    (hP : ∀ ω, 0 < M.P.real {ω}) (hQ : M.IsPricingMeasure T Q) {n₀ : ℝ}
-    (hN₀ : ∀ ω, M.numeraire 0 ω = n₀) {pr : Fin K → ℝ} (hpr : ∀ k ω, M.asset k 0 ω = pr k)
-    (hcomplete : ∀ x : Fin N → ℝ, (∀ k, ∑ ω, x ω * M.asset k T ω = 0) → x = 0)
+theorem IsPricingMeasure.sdf_eq_div_of_logOptimal
     {w₀ : ℝ} {θ : Fin K → ℝ} (hθ : portfolioCost pr θ = w₀) (hw₀ : 0 < w₀)
     (hW : ∀ ω, 0 < portfolioPayoff (fun j ↦ M.asset j T) θ ω)
     (hfoc : ∀ d, portfolioCost pr d = 0 →
@@ -166,10 +168,7 @@ theorem IsPricingMeasure.sdf_eq_div_of_logOptimal [IsProbabilityMeasure M.P]
 /-- **Prices deflated by the stationary log wealth are martingales under `P` in one period.** In
 the market of `sdf_eq_div_of_logOptimal`, `E_P[S_k(T) / W] = S_k(0) / w₀` for every asset `k`:
 the deflated price has the same mean at `T` as at `0`, where the wealth is `w₀`. -/
-theorem IsPricingMeasure.integral_div_logOptimal_mul [IsProbabilityMeasure M.P]
-    (hP : ∀ ω, 0 < M.P.real {ω}) (hQ : M.IsPricingMeasure T Q) {n₀ : ℝ}
-    (hN₀ : ∀ ω, M.numeraire 0 ω = n₀) {pr : Fin K → ℝ} (hpr : ∀ k ω, M.asset k 0 ω = pr k)
-    (hcomplete : ∀ x : Fin N → ℝ, (∀ k, ∑ ω, x ω * M.asset k T ω = 0) → x = 0)
+theorem IsPricingMeasure.integral_div_logOptimal_mul
     {w₀ : ℝ} {θ : Fin K → ℝ} (hθ : portfolioCost pr θ = w₀) (hw₀ : 0 < w₀)
     (hW : ∀ ω, 0 < portfolioPayoff (fun j ↦ M.asset j T) θ ω)
     (hfoc : ∀ d, portfolioCost pr d = 0 →
