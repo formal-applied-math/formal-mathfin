@@ -1151,6 +1151,13 @@
       "input_hash": "3bbdee4cdeea333b0fb940d2cf1d8531b07ed65ae9e396f43bdd00a908ff442e",
       "verified_at_commit": "f68ab19"
     },
+    "mf-bond-portfolio-value-is-market-price": {
+      "benchmark_file": "interest_rates.json",
+      "date": "2026-11-11",
+      "elapsed_s": 2.4,
+      "input_hash": "bfa81847647a3c857aff2e06697c85985f2dd9d856adca202f58a13f0ee5a10e",
+      "verified_at_commit": "01d1c7f"
+    },
     "mf-bond-single-conv": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-11-08",
@@ -2473,6 +2480,13 @@
       "elapsed_s": 2.5,
       "input_hash": "70e0e0d2c395bec4093f67f4fa3b85650cdf717650d469ecd17befa4bbeaaa21",
       "verified_at_commit": "90b674a"
+    },
+    "mf-deterministic-bond-market-pricing-measure": {
+      "benchmark_file": "interest_rates.json",
+      "date": "2026-11-11",
+      "elapsed_s": 2.4,
+      "input_hash": "83bc8854573fdd3a8c25b68e4c2ae12b4a5e775f3c90542b146961d4c7564d5c",
+      "verified_at_commit": "01d1c7f"
     },
     "mf-dirty-price-drops-by-coupon": {
       "benchmark_file": "interest_rates.json",
@@ -3936,6 +3950,13 @@
       "elapsed_s": 3.3,
       "input_hash": "45f7aa462a7038b23334622d16db3ef4a1acd5a51cc85aff12bc8b3d78539d82",
       "verified_at_commit": "f68ab19"
+    },
+    "mf-merton-structural-market": {
+      "benchmark_file": "credit.json",
+      "date": "2026-11-11",
+      "elapsed_s": 2.7,
+      "input_hash": "8bc9eec08c4dcb32d3e8be7024d29f3d8fb631b7486eacd9d06c31c1222f7a21",
+      "verified_at_commit": "01d1c7f"
     },
     "mf-merton-vega": {
       "benchmark_file": "jumps_and_variance_swaps.json",

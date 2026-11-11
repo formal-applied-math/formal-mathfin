@@ -1530,6 +1530,58 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. value_fixedFlows_hjm_flat in MathFin/Models/Rates/HJMBond.lean: from hflat the integrated short rate is r t (setIntegral_congr_fun and the volume of (0, t]), so the HJM discount factor is zcb r 0 t pointwise, and value_fixedFlows_of_zeroCurve_eq closes it. SCOPE: the curve is flat and deterministic as a hypothesis on every outcome; this is a consistency check of the contract valuation against the zero-coupon bond, not a test of the HJM no-arbitrage drift condition. Not a legal instrument. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-deterministic-bond-market-pricing-measure",
+      "name": "Every Probability Measure Prices the Deterministic-Rates Bond Market, and the Bond Price Is the Price of a Unit Payment",
+      "description": "The deterministic-rates bond market (deterministicMarket P N hN tau: a deterministic positive numeraire N, the bank account, and for each i the zero-coupon bond of maturity tau i worth N t / N (tau i) at t, with the trivial filtration) is a Market, every probability measure P is a pricing measure of it at every horizon T (Market.IsPricingMeasure: the deflated bond 1 / N (tau i) is constant, hence a martingale), and the market price (Market.price) of a unit payment at tau i, under any probability measure, is the bond's price N 0 / N (tau i) = asset i 0. After its maturity a bond is worth what its proceeds earn in the bank account. Deterministic rates only: stochastic short-rate models (Vasicek, Hull-White) are not shown to be markets here.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.Rates.DeterministicMarket\n\nopen MathFin MathFin.Contracts MathFin.Rates MeasureTheory\nopen scoped NNReal\n\n/-- Every probability measure prices the deterministic bond market, and a unit payment at the\nmaturity of a bond is worth the bond's price. -/\ntheorem deterministic_bond_market_pricing_measure {ι Ω : Type*} [MeasurableSpace Ω]\n    (P : Measure Ω) [IsProbabilityMeasure P] (N : ℝ≥0 → ℝ) (hN : ∀ t, 0 < N t) (τ : ι → ℝ≥0)\n    (T : ℝ≥0) :\n    (deterministicMarket P N hN τ).IsPricingMeasure T P ∧\n      ∀ (i : ι) (ω : Ω), (deterministicMarket P N hN τ).price P (.pay (τ i) (.const 1))\n        = (deterministicMarket P N hN τ).asset i 0 ω :=\n  ⟨isPricingMeasure_deterministicMarket P N hN τ T,\n    fun i ω ↦ price_pay_deterministicMarket P N hN τ P i ω⟩\n"
+      },
+      "metadata": {
+        "reference": "D. Brigo and F. Mercurio, Interest Rate Models - Theory and Practice, 2nd ed., Springer (2006), sec. 1.5; J. C. Hull, Options, Futures, and Other Derivatives, ch. 4. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026); no code copied.",
+        "citations": [
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "sec. 1.5"
+          },
+          {
+            "key": "Hull",
+            "locator": "ch. 4"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. isPricingMeasure_deterministicMarket and price_pay_deterministicMarket in MathFin/Models/Rates/DeterministicMarket.lean: the deflated bond is the constant function 1 / N (tau i) (martingale_const) and the price of the unit payment is the Bochner integral of a constant over a probability measure. SCOPE: a deterministic numeraire, so there is nothing random in the model and the statement that P is a pricing measure carries no probabilistic content beyond constancy; this is the term-structure socket for the deterministic case, not a stochastic short-rate market. The bond is held to maturity and its proceeds stay in the bank account afterwards."
+      }
+    },
+    {
+      "id": "mf-bond-portfolio-value-is-market-price",
+      "name": "The Flat-Rate Value of a Zero-Coupon Portfolio and the Discrete Price of a Coupon Bond Are Market Prices",
+      "description": "For any Market whose numeraire is the money market e^{rt}, under any probability measure Q, the zero-coupon portfolio value bondPortfolioValue (faces w i, maturities T i >= 0) at time 0 and rate r is the market price (Market.price) of the schedule of fixed cash flows fixedFlows paying w i at T i; and for any Market whose numeraire is (1 + y)^floor(t), the coupon bond price bondPriceDisc at the annually compounded yield y, with integer payment times, is the market price of its schedule. The numeraire is deterministic, so this says the immunization and key-rate-duration formulas are values of contracts, whatever the assets of the market; it does not construct a market with a stochastic short rate.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.Rates.DeterministicMarket\n\nopen MathFin MathFin.Contracts MathFin.Rates MeasureTheory\nopen scoped NNReal\n\n/-- The flat-rate value of a zero-coupon portfolio, and the annually compounded price of a coupon\nbond, are market prices of their schedules of fixed cash flows. -/\ntheorem bond_portfolio_value_is_market_price {ι Ω : Type*} [MeasurableSpace Ω]\n    (Q : Measure Ω) [IsProbabilityMeasure Q] (n : ℕ) (w T : ℕ → ℝ) (hT : ∀ i, 0 ≤ T i) :\n    (∀ (M : Market ι Ω) (r : ℝ), (∀ t ω, M.numeraire t ω = Real.exp (r * t)) →\n      bondPortfolioValue (Finset.range n) w T 0 r =\n        M.price Q (fixedFlows (fun i ↦ (T i).toNNReal) w n)) ∧\n    (∀ (M : Market ι Ω) (y : ℝ) (t : ℕ → ℕ),\n      (∀ s ω, M.numeraire s ω = (1 + y) ^ ⌊s⌋₊) →\n      bondPriceDisc (Finset.range n) t w y =\n        M.price Q (fixedFlows (fun i ↦ ((t i : ℕ) : ℝ≥0)) w n)) :=\n  bondPortfolioValue_eq_price Q n w T hT\n"
+      },
+      "metadata": {
+        "reference": "J. C. Hull, Options, Futures, and Other Derivatives, ch. 4; F. Fabozzi, Fixed Income Mathematics, ch. 5. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026); no code copied.",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "ch. 4"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. bondPortfolioValue_eq_price in MathFin/Models/Rates/DeterministicMarket.lean: the deflator of a market with numeraire e^{rt} (resp. (1+y)^floor t) is the discount curve e^{-rt} (resp. 1/(1+y)^floor t), and value_fixedFlows_deterministic evaluates the schedule. SCOPE: deterministic numeraire only; Q is any probability measure, not necessarily a pricing measure, because the schedule's deflated payoff is the same along every outcome. Integer payment times for the coupon bond."
+      }
     }
   ]
 }

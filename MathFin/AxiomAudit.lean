@@ -2794,3 +2794,15 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.americanPrice_eq_snellEnvelope' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.americanPrice_eq_snellEnvelope
+
+/-- info: 'MathFin.Rates.isPricingMeasure_deterministicMarket' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Rates.isPricingMeasure_deterministicMarket
+
+/-- info: 'MathFin.Rates.bondPortfolioValue_eq_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Rates.bondPortfolioValue_eq_price
+
+/-- info: 'MathFin.Contracts.Merton.merton_market' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Contracts.Merton.merton_market

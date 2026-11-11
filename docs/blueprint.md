@@ -185,6 +185,7 @@ graph TD
   quantileElicitability["Elicitability of the quantile"]:::proved
   rockafellarUryasev["Rockafellar–Uryasev formula"]:::proved
   superhedgingDuality["Superhedging duality"]:::proved
+  zeroCouponBondPrice["The zero-coupon bond price is a price"]:::proved
   subgraph frontier_choiceDynamic["⏳ frontier · Choice · Dynamic choice"]
     logOptimalNumeraire["Log-optimal portfolio is the numéraire"]:::frontier
     mertonPortfolioFraction["Merton myopic risky fraction"]:::frontier
@@ -320,7 +321,6 @@ graph TD
     hjmShortRate["HJM induces a short-rate model"]:::frontier
     lmmForwardMartingale["LIBOR market model forward martingale"]:::frontier
     siegelParadox["Siegel's paradox"]:::frontier
-    zeroCouponBondPrice["The zero-coupon bond price is a price"]:::frontier
   end
   subgraph frontier_valuationTrees["⏳ frontier · Valuation · Trees"]
     americanPriceSnellEnvelope["The binomial American price is the Snell envelope of the market"]:::frontier
@@ -505,6 +505,10 @@ graph TD
   coherentRiskRepresentation --> superhedgingDuality
   superhedgingCoherent --> superhedgingDuality
   superhedgingPriceLowerBound --> superhedgingDuality
+  contract --> zeroCouponBondPrice
+  contractValue --> zeroCouponBondPrice
+  market --> zeroCouponBondPrice
+  pricingFunctional --> zeroCouponBondPrice
   standardNormalCdf --> realErf
   aaveLiquidationKmv --> aaveHealthFactorBound
   vasicekBondPde --> affineTermStructure
@@ -673,9 +677,6 @@ graph TD
   emm --> varianceOptimalHedging
   expectedUtilityAxioms --> vonNeumannMorgenstern
   expectedUtility --> vonNeumannMorgenstern
-  pricingMeasure --> zeroCouponBondPrice
-  bondImmunization --> zeroCouponBondPrice
-  keyRateDuration --> zeroCouponBondPrice
 
   classDef proved fill:#d4edda,stroke:#28a745,color:#111;
   classDef upstream fill:#d9e8f6,stroke:#1f6fb2,color:#111;
@@ -804,6 +805,7 @@ graph TD
 | `thm:quantile-elicitability` Elicitability of the quantile | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aquantile-elicitability%22%20in%3Abody) |
 | `thm:rockafellar-uryasev` Rockafellar–Uryasev formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Arockafellar-uryasev%22%20in%3Abody) |
 | `thm:superhedging-duality` Superhedging duality | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-duality%22%20in%3Abody) |
+| `thm:zero-coupon-bond-price` The zero-coupon bond price is a price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Azero-coupon-bond-price%22%20in%3Abody) |
 | `def:real-erf` erf / erfc / erfinv for Mathlib | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Areal-erf%22%20in%3Abody) |
 | `thm:aave-health-factor-bound` Aave multi-asset health factor: a liquidation bound | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaave-health-factor-bound%22%20in%3Abody) |
 | `thm:affine-term-structure` Affine term structure | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaffine-term-structure%22%20in%3Abody) |
@@ -910,7 +912,6 @@ graph TD
 | `thm:variance-gamma-call` Variance-gamma European call | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-gamma-call%22%20in%3Abody) |
 | `thm:variance-optimal-hedging` Variance-optimal hedging | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-optimal-hedging%22%20in%3Abody) |
 | `thm:von-neumann-morgenstern` von Neumann–Morgenstern representation theorem | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avon-neumann-morgenstern%22%20in%3Abody) |
-| `thm:zero-coupon-bond-price` The zero-coupon bond price is a price | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Azero-coupon-bond-price%22%20in%3Abody) |
 <!-- END GENERATED SPINE -->
 
 ---

@@ -743,15 +743,6 @@ area = "valuation/diffusions"
 family = "diffusions"
 
 [[node]]
-label = "thm:zero-coupon-bond-price"
-title = "The zero-coupon bond price is a price"
-statement = "The flat-rate value of a zero-coupon portfolio, and the annually compounded price of a coupon bond, are the market price of the corresponding schedule of fixed cash flows when the numéraire is the money market at that rate, so the immunization and key-rate duration results are statements about a price."
-uses = ["def:pricing-measure", "thm:bond-immunization", "thm:key-rate-duration"]
-area = "valuation/term"
-family = "term"
-lean = "MathFinFrontier.bondPortfolioValue_eq_price"
-
-[[node]]
 label = "thm:jump-diffusion-price"
 title = "Jump-diffusion prices under the Esscher pricing measure"
 statement = "The Merton jump-diffusion market has a pricing measure (the Esscher one), and under it the European call's price is the Poisson mixture of Black–Scholes prices."
