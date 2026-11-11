@@ -27,8 +27,8 @@ integral that is almost surely `𝓕_t`-measurable is almost surely its own cond
 (`condExp_of_aestronglyMeasurable'`), so the representatives change nothing but a null set.
 
 Before `T` the bond is worth `P(t, T) = A(T − t) exp(−B(T − t) r_t)` (`vasicekBondPriceRep`). After
-`T` its proceeds are held in the bank account, so the asset is `N_t P(t∧T, T) / N_{t∧T}`: a
-self-financing position, and the deflated asset frozen at `T` is `P(t∧T, T) / N_{t∧T}`.
+`T` its proceeds are held in the bank account, so the asset is `N_t P(t∧T, T) / N_{t∧T}`, and the
+deflated asset frozen at `T` is `P(t∧T, T) / N_{t∧T}`.
 
 ## Main definitions
 
