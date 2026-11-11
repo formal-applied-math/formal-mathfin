@@ -1655,6 +1655,20 @@
       "input_hash": "0d47f79ec486ec7b128134e79b860c11c4b25b6554dba72e8f2d86f4816677bb",
       "verified_at_commit": "f68ab19"
     },
+    "mf-capm-equilibrium-from-discount-factor": {
+      "benchmark_file": "portfolio_and_performance.json",
+      "date": "2026-11-08",
+      "elapsed_s": 2.9,
+      "input_hash": "c9f9eea23a84f7ef3974496deabd3de36d9ee00f04e8fd587919df1ae7ed3a1f",
+      "verified_at_commit": "ece25a9"
+    },
+    "mf-capm-from-affine-discount-factor": {
+      "benchmark_file": "portfolio_and_performance.json",
+      "date": "2026-11-08",
+      "elapsed_s": 2.9,
+      "input_hash": "03b19022112345cc4d8fb190368220abc3a1c7b24dd8f06a3474d233d73db688",
+      "verified_at_commit": "ece25a9"
+    },
     "mf-capped-call-bull-spread": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-08",
@@ -3005,6 +3019,13 @@
       "elapsed_s": 3.2,
       "input_hash": "a252765590c32aebc4e148c56a62a136791ea7d18aff162ef3760359e9ca2ee8",
       "verified_at_commit": "f68ab19"
+    },
+    "mf-hansen-jagannathan-bound": {
+      "benchmark_file": "portfolio_and_performance.json",
+      "date": "2026-11-08",
+      "elapsed_s": 2.9,
+      "input_hash": "f345f5a31f6712520f07d33c1d395797295f5b073a01aa9318c3de711e636866",
+      "verified_at_commit": "ece25a9"
     },
     "mf-hazard-survival-const": {
       "benchmark_file": "credit.json",

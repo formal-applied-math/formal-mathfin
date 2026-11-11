@@ -1676,4 +1676,28 @@
   "latexEnv": "theorem",
   "label": "thm:one-date-market",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/OneDateMarket.lean"}]
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/OneDateMarket.lean"},
+ {"uses": ["def:sharpe-ratio"],
+  "title": "The Hansen–Jagannathan bound",
+  "text":
+  "If a discount factor $m$ with $E[m] > 0$ prices a gross return $R$ with\n  $\\operatorname{Var} R > 0$ ($E[mR] = 1$) and the riskless return $r_f$ ($r_f E[m] = 1$), then the\n  Sharpe ratio of $R$ satisfies $|E[R] - r_f| / \\sigma(R) \\le \\sigma(m) / E[m]$, by\n  Cauchy–Schwarz for $\\operatorname{Cov}(m, R)$.",
+  "name": "MathFin.abs_sharpeRatio_le_of_discountFactor",
+  "module": "MathFin.Choice.Portfolio.StochasticDiscountFactor",
+  "line": 112,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:hansen-jagannathan-bound",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/StochasticDiscountFactor.lean"},
+ {"uses": ["def:capm-beta"],
+  "title": "CAPM from a discount factor affine in the market return",
+  "text":
+  "If $m = a - bR_m$ prices a return $R_i$, the market return $R_m$ and the riskless\n  return $r_f$ ($E[mR_i] = E[mR_m] = 1$, $r_f E[m] = 1$) and $\\operatorname{Var}R_m \\ne 0$, then\n  $E[R_i] = r_f + \\beta_i (E[R_m] - r_f)$ with $\\beta_i = \\operatorname{Cov}(R_i, R_m) /\n  \\operatorname{Var} R_m$.",
+  "name": "MathFin.capm_of_affine_discountFactor",
+  "module": "MathFin.Choice.Portfolio.StochasticDiscountFactor",
+  "line": 164,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:sdf-capm-hansen-jagannathan",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/StochasticDiscountFactor.lean"}]

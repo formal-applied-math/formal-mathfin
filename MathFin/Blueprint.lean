@@ -5,6 +5,80 @@ Authors: Raphael Coelho
 -/
 module
 
+import MathFin.Probability.Brownian.QuadraticVariationL2
+import MathFin.Probability.Brownian.Wiener.WienerIntegralL2
+import MathFin.Probability.Brownian.Ito.ItoIsometryAdapted
+import MathFin.Probability.Brownian.Ito.ItoIntegralCLM
+import MathFin.Probability.Martingales.BracketCompensator
+import MathFin.Probability.Brownian.Ito.ItoIntegralBrownian
+import MathFin.Probability.Discrete.DiscreteIto
+import MathFin.Probability.Brownian.Ito.ItoFormulaSquaredL2
+import MathFin.Probability.Brownian.Ito.ItoFormulaCLM
+import MathFin.Probability.Brownian.Ito.ItoFormulaTD
+import MathFin.Probability.Brownian.Ito.ItoLemma2D
+import MathFin.Probability.Gaussian.FeynmanKacHeatEquation
+import MathFin.Models.BlackScholes.GaussianGirsanov
+import MathFin.Models.BlackScholes.BSCallHypFromBrownian
+import MathFin.Pricing.FTAP.ContinuousFTAP
+import MathFin.Pricing.MarketCompleteness
+import MathFin.Models.ModelFree.CarrMadan
+import MathFin.Models.BlackScholes.Call
+import MathFin.Models.BlackScholes.PDE
+import MathFin.Models.BlackScholes.PDEFromIto
+import MathFin.Models.BlackScholes.PDEFromFeynmanKac
+import MathFin.Models.BlackScholes.MargrabeGrounding
+import MathFin.Models.Binomial.MartingaleRepresentation
+import MathFin.Models.Binomial.CRRCharFun
+import MathFin.Models.Binomial.CRRClosedForm
+import MathFin.Models.Jumps.MertonDominance
+import MathFin.Probability.Discrete.MarkovPathMeasure
+import MathFin.Probability.Brownian.Ito.ItoFormulaAdaptedProcess
+import MathFin.Models.Forwards.SchwartzOneFactor
+import MathFin.Models.Credit.CVA
+import MathFin.Models.Forwards.FxForwardParity
+import MathFin.Models.Jumps.JumpDiffusionProcess
+import MathFin.Models.Jumps.JumpDiffusionVarianceSwap
+import MathFin.Pricing.Numeraire
+import MathFin.Probability.Discrete.SnellEnvelope
+import MathFin.Probability.Dependence.MarshallOlkin
+import MathFin.Models.Rates.KeyRateDuration
+import MathFin.Models.BlackScholes.DeltaHedge
+import MathFin.Probability.Brownian.Girsanov.GirsanovFiltered
+import MathFin.Probability.Brownian.SDE.SDEExistence
+import MathFin.Probability.Brownian.Ito.StochasticFubini
+import MathFin.Pricing.FTAP.NoArbitrageLocal
+import MathFin.Pricing.FTAP.DensityPasting
+import MathFin.Models.BlackScholes.BlackScholesPhysical
+import MathFin.Probability.Brownian.Ito.ItoProductRule
+import MathFin.Models.BlackScholes.BlackScholesSelfFinancing
+import MathFin.Probability.Gaussian.StandardNormal
+import MathFin.Probability.Laws.Quantile
+import MathFin.Probability.Laws.QuantileConvergence
+import MathFin.Probability.Martingales.EquivMeasure
+import MathFin.Pricing.EquivMartingaleMeasure
+import MathFin.Probability.Discrete.MartingaleTransform
+import MathFin.Probability.Dependence.GaussianCopula
+import MathFin.Risk.ValueAtRisk
+import MathFin.Risk.Coherent
+import MathFin.Risk.ExpectedShortfall
+import MathFin.Risk.CompoundPoissonCVaR
+import MathFin.Contracts.Core
+import MathFin.Pricing.Value
+import MathFin.Models.Rates.ZCB
+import MathFin.Models.Rates.HJM
+import MathFin.Models.Rates.Immunization
+import MathFin.Models.Rates.AffineTermStructurePDE
+import MathFin.Choice.Portfolio.MarkowitzNAsset
+import MathFin.Choice.Portfolio.MarkowitzLagrangian
+import MathFin.Choice.Portfolio.RiskParityFOC
+import MathFin.Choice.Portfolio.Markowitz
+import MathFin.Choice.Portfolio.CAPM
+import MathFin.Choice.Utility.StatePriceDensity
+import MathFin.Choice.Portfolio.StochasticDiscountFactor
+import MathFin.Choice.Portfolio.MarketSDF
+import MathFin.Choice.Utility.MarketMarginalUtility
+import MathFin.Probability.Laws.FiniteWeights
+import MathFin.Choice.Portfolio.TangentPortfolio
 import MathFin.Choice.Performance.Kelly
 import MathFin.Choice.Performance.Ratios
 import MathFin.Choice.Portfolio.CAPMEquilibrium
@@ -12,7 +86,6 @@ import MathFin.Choice.Portfolio.ConvexQPKKT
 import MathFin.Choice.Portfolio.MarkowitzLagrangian
 import MathFin.Choice.Portfolio.MarkowitzNAsset
 import MathFin.Choice.Portfolio.RiskParityFOC
-import MathFin.Choice.Utility.StatePriceDensity
 import MathFin.Choice.Utility.VonNeumannMorgenstern
 import MathFin.Contracts.Core
 import MathFin.Insurance.AnnuityValue
@@ -1114,6 +1187,71 @@ attribute [blueprint "thm:kkt-sufficiency"
   `kkt_point_unique_of_posDef`. -/)]
   MathFin.kkt_sufficient
 
+attribute [blueprint "thm:sdf-capm-hansen-jagannathan"
+  (title := "CAPM from a discount factor affine in the market return")
+  (statement := /-- If $m = a - bR_m$ prices a return $R_i$, the market return $R_m$ and the
+  riskless return $r_f$ ($E[mR_i] = E[mR_m] = 1$, $r_f E[m] = 1$) and
+  $\operatorname{Var}R_m \ne 0$, then $E[R_i] = r_f + \beta_i (E[R_m] - r_f)$ with
+  $\beta_i = \operatorname{Cov}(R_i, R_m) / \operatorname{Var} R_m$. -/)]
+  MathFin.capm_of_affine_discountFactor
+
+attribute [blueprint "thm:hansen-jagannathan-bound"
+  (title := "The Hansen–Jagannathan bound")
+  (statement := /-- If a discount factor $m$ with $E[m] > 0$ prices a gross return $R$ with
+  $\operatorname{Var} R > 0$ ($E[mR] = 1$) and the riskless return $r_f$ ($r_f E[m] = 1$), then the
+  Sharpe ratio of $R$ satisfies $|E[R] - r_f| / \sigma(R) \le \sigma(m) / E[m]$, by
+  Cauchy–Schwarz for $\operatorname{Cov}(m, R)$. -/)]
+  MathFin.abs_sharpeRatio_le_of_discountFactor
+
+attribute [blueprint "thm:market-hansen-jagannathan"
+  (title := "The Hansen–Jagannathan bound for a market with a pricing measure")
+  (statement := /-- Let $Q$ be a pricing measure up to $T$ of a market, $\mathrm{sdf} =
+  \frac{d(Q|\mathcal F_T)}{d(P|\mathcal F_T)}\,\frac{N_0}{N_T}$, and let asset $i$ have a
+  deterministic initial price $c \ne 0$ and a gross return $R_i = S_i(T)/S_i(0)$ with $R_i$ and
+  $\mathrm{sdf}$ square integrable under $P$ and $\operatorname{Var}_P R_i > 0$. If
+  $r_f\,E_P[\mathrm{sdf}] = 1$, then $|E_P[R_i] - r_f| / \sigma_P(R_i) \le
+  \sigma_P(\mathrm{sdf}) / E_P[\mathrm{sdf}]$. The bound is the one for an abstract discount
+  factor, applied to $\mathrm{sdf}$, which prices $R_i$ because $Q$ prices $S_i$. -/)]
+  MathFin.Market.IsPricingMeasure.abs_sharpeRatio_le
+
+attribute [blueprint "thm:market-sdf-capm"
+  (title := "The security market line for a market with a pricing measure")
+  (statement := /-- In the market of `thm:market-hansen-jagannathan`, if $\mathrm{sdf} = a - b R_j$
+  is affine in the gross return of an asset $j$ with deterministic nonzero initial price, if $r_f
+  E_P[\mathrm{sdf}] = 1$ and $\operatorname{Var}_P R_j \ne 0$, then every asset $i$ with a
+  deterministic nonzero initial price and square-integrable return has $E_P[R_i] = r_f + \beta_i
+  (E_P[R_j] - r_f)$, $\beta_i = \operatorname{Cov}_P(R_i, R_j)/\operatorname{Var}_P R_j$. -/)]
+  MathFin.Market.IsPricingMeasure.capm_of_affine_sdf
+
+attribute [blueprint "thm:marginal-utility-is-sdf"
+  (title := "Marginal utility is the stochastic discount factor of a complete market")
+  (statement := /-- Let a market on a finite sample space have a pricing measure $Q$ up to $T$, a
+  reference measure $P$ charging every state, deterministic initial prices $\pi_k$, and terminal
+  payoffs that span the states. At a portfolio $\theta$ of cost $w_0 > 0$ with terminal wealth
+  $W > 0$, $u'(W) > 0$, and $\sum_\omega P\{\omega\}\,u'(W_\omega)\,W^d_\omega = 0$ for every
+  budget-neutral $d$, there is $\mu > 0$ with $u'(W_\omega) = \mu\,\mathrm{sdf}(\omega)$ for every
+  state $\omega$. A local maximum of $\int u(W)\,dP$ on the budget set is stationary
+  (`exists_deriv_eq_mul_sdf_of_isLocalMaxOn`). Global optimality and incomplete markets are not
+  covered. -/)]
+  MathFin.Market.IsPricingMeasure.exists_deriv_eq_mul_sdf_of_stationary
+
+attribute [blueprint "thm:log-optimal-numeraire-one-period"
+  (title := "The log-optimal portfolio is the numéraire portfolio, one period")
+  (statement := /-- In the market of `thm:marginal-utility-is-sdf` with $u = \log$, a stationary
+  portfolio of cost $w_0 > 0$ and wealth $W > 0$ has $\mathrm{sdf}(\omega) = w_0 / W_\omega$ in
+  every state, so $E_P[S_k(T)/W] = S_k(0)/w_0$ for every asset $k$
+  (`integral_div_logOptimal_mul`): prices
+  deflated by the log-optimal wealth are $P$-martingales over the one period. The continuous-time
+  statement is `thm:log-optimal-numeraire`. -/)]
+  MathFin.Market.IsPricingMeasure.sdf_eq_div_of_logOptimal
+
+attribute [blueprint "thm:expected-utility-integral"
+  (title := "Expected utility is the integral against the lottery")
+  (statement := /-- For non-negative weights $p$ on a finite set $s$, the expected utility
+  $\sum_{i \in s} p_i u_i$ is $\int u \, d\mu$ for $\mu = \sum_{i \in s} p_i \delta_i$
+  (`Measure.ofWeights s p`); on a finite type, a finite measure $\mu$ is $\sum_i \mu\{i\}\,\delta_i$
+  and its expected utility $\sum_i \mu\{i\}\,u_i$ is $\int u \, d\mu$. -/)]
+  MathFin.expectedUtility_eq_integral
 -- ===== choice/equilibrium: Equilibrium =====
 
 attribute [blueprint "thm:capm-equilibrium"

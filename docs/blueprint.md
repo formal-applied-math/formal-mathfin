@@ -106,6 +106,7 @@ graph TD
   optionalSampling["Optional sampling theorem"]:::proved
   riskParityFoc["Risk parity"]:::proved
   sdePathwiseUniqueness["Pathwise uniqueness for SDEs with Lipschitz coefficients"]:::proved
+  sdfCapmHansenJagannathan["CAPM from a discount factor affine in the market return"]:::proved
   snellEnvelope["Snell envelope"]:::proved
   stochasticFubini["Stochastic Fubini theorem"]:::proved
   superhedgingPriceLowerBound["The superhedging price dominates every martingale price"]:::proved
@@ -135,6 +136,7 @@ graph TD
   frechetHoeffding["Fréchet–Hoeffding bounds"]:::proved
   gaussianQuantile["Gaussian quantile function"]:::proved
   girsanovBrownianCharacterisation["Girsanov's theorem"]:::proved
+  hansenJagannathanBound["The Hansen–Jagannathan bound"]:::proved
   jumpDiffusionIncompleteness["Incompleteness of jump-diffusion markets"]:::proved
   largePortfolioLimit["Vasicek's large-portfolio limit"]:::proved
   levyCharacterization["Lévy's characterization of Brownian motion"]:::proved
@@ -202,7 +204,6 @@ graph TD
   end
   subgraph frontier_choiceEquilibrium["⏳ frontier · Choice · Equilibrium"]
     aptPricing["APT exact-factor pricing"]:::frontier
-    sdfCapmHansenJagannathan["CAPM and Hansen–Jagannathan from the discount factor"]:::frontier
   end
   subgraph frontier_choicePortfolio["⏳ frontier · Choice · Portfolio choice"]
     markowitzKktNecessity["Markowitz first-order conditions are necessary"]:::frontier
@@ -370,6 +371,7 @@ graph TD
   copula --> frechetHoeffding
   quantile --> gaussianQuantile
   brownianMotion --> girsanovBrownianCharacterisation
+  sharpeRatio --> hansenJagannathanBound
   compoundPoissonMgf --> jumpDiffusionIncompleteness
   quantile --> largePortfolioLimit
   standardNormalCdf --> largePortfolioLimit
@@ -688,9 +690,6 @@ graph TD
   bsCall --> sabrHagan
   modelFreeVariance --> schrodingerSpxVix
   sdeStrongSolution --> sdeContinuousSolution
-  utilityStatePriceDensity --> sdfCapmHansenJagannathan
-  capmEquilibrium --> sdfCapmHansenJagannathan
-  sharpeRatio --> sdfCapmHansenJagannathan
   marketCompleteness --> secondFtapConverse
   secondFtap --> secondFtapConverse
   dmwFtap --> semistaticFtap
@@ -764,6 +763,7 @@ graph TD
 | `thm:optional-sampling` Optional sampling theorem | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aoptional-sampling%22%20in%3Abody) |
 | `thm:risk-parity-foc` Risk parity | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Arisk-parity-foc%22%20in%3Abody) |
 | `thm:sde-pathwise-uniqueness` Pathwise uniqueness for SDEs with Lipschitz coefficients | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asde-pathwise-uniqueness%22%20in%3Abody) |
+| `thm:sdf-capm-hansen-jagannathan` CAPM from a discount factor affine in the market return | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asdf-capm-hansen-jagannathan%22%20in%3Abody) |
 | `thm:snell-envelope` Snell envelope | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asnell-envelope%22%20in%3Abody) |
 | `thm:stochastic-fubini` Stochastic Fubini theorem | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astochastic-fubini%22%20in%3Abody) |
 | `thm:superhedging-price-lower-bound` The superhedging price dominates every martingale price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-price-lower-bound%22%20in%3Abody) |
@@ -793,6 +793,7 @@ graph TD
 | `thm:frechet-hoeffding` Fréchet–Hoeffding bounds | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Afrechet-hoeffding%22%20in%3Abody) |
 | `thm:gaussian-quantile` Gaussian quantile function | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Agaussian-quantile%22%20in%3Abody) |
 | `thm:girsanov-brownian-characterisation` Girsanov's theorem | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Agirsanov-brownian-characterisation%22%20in%3Abody) |
+| `thm:hansen-jagannathan-bound` The Hansen–Jagannathan bound | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ahansen-jagannathan-bound%22%20in%3Abody) |
 | `thm:jump-diffusion-incompleteness` Incompleteness of jump-diffusion markets | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ajump-diffusion-incompleteness%22%20in%3Abody) |
 | `thm:large-portfolio-limit` Vasicek's large-portfolio limit | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alarge-portfolio-limit%22%20in%3Abody) |
 | `thm:levy-characterization` Lévy's characterization of Brownian motion | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alevy-characterization%22%20in%3Abody) |
@@ -936,7 +937,6 @@ graph TD
 | `thm:sabr-hagan` SABR Hagan asymptotic implied vol | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asabr-hagan%22%20in%3Abody) |
 | `thm:schrodinger-spx-vix` Schrödinger calibration of SPX/VIX | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aschrodinger-spx-vix%22%20in%3Abody) |
 | `thm:sde-continuous-solution` Continuous strong solutions on every horizon | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asde-continuous-solution%22%20in%3Abody) |
-| `thm:sdf-capm-hansen-jagannathan` CAPM and Hansen–Jagannathan from the discount factor | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asdf-capm-hansen-jagannathan%22%20in%3Abody) |
 | `thm:second-ftap-converse` Second FTAP: uniqueness implies completeness | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asecond-ftap-converse%22%20in%3Abody) |
 | `thm:semistatic-ftap` Semistatic FTAP with entropy | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asemistatic-ftap%22%20in%3Abody) |
 | `thm:siegel-paradox` Siegel's paradox | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asiegel-paradox%22%20in%3Abody) |

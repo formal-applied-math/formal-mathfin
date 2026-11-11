@@ -743,13 +743,6 @@ area = "valuation/diffusions"
 family = "diffusions"
 
 [[node]]
-label = "thm:sdf-capm-hansen-jagannathan"
-title = "CAPM and Hansen–Jagannathan from the discount factor"
-statement = "A stochastic discount factor affine in the market return yields the CAPM security market line, and Cauchy–Schwarz on state prices bounds every Sharpe ratio by σ(m)/E[m]."
-uses = ["thm:utility-state-price-density", "thm:capm-equilibrium", "def:sharpe-ratio"]
-area = "choice/equilibrium"
-
-[[node]]
 label = "thm:glosten-milgrom-pricing-measure"
 title = "The Glosten–Milgrom quote process is a martingale"
 statement = "The Glosten–Milgrom dealer's quote after n trades is the conditional expectation of the value given the observed history of trade directions, which extends the one-trade identification to a sequence; with the proved fact that a conditional-expectation process is priced by its own measure (thm:conditional-expectation-pricing-measure) the quote sequence is a martingale for the dealer's measure."

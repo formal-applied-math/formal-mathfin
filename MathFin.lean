@@ -65,6 +65,7 @@ import MathFin.Probability.Gaussian.GaussianCDFDeriv
 -- The Esscher transform of a law on ℝ (Mathlib's `Measure.tilted`): tilted moments, a law with
 -- every exponential moment is fixed by its MGF, and the Gaussian tilt N(m, v) ↦ N(m + θv, v)
 import MathFin.Probability.Laws.Esscher
+import MathFin.Probability.Laws.FiniteWeights
 import MathFin.Probability.Gaussian.FeynmanKacHeatEquation
 import MathFin.Probability.Brownian.BrownianMartingale
 -- Bayes change-of-measure engine + Black–Scholes EMM via an explicit Girsanov density
@@ -875,6 +876,8 @@ import MathFin.Choice.Portfolio.TangentPortfolio
 -- Phase 21: first-principles Sharpe-FOC and CAPM-equilibrium derivations
 import MathFin.Choice.Portfolio.SharpeFOCDerivation
 import MathFin.Choice.Portfolio.CAPMEquilibrium
+import MathFin.Choice.Portfolio.StochasticDiscountFactor
+import MathFin.Choice.Portfolio.MarketSDF
 -- Phase 23: N-asset Markowitz Lagrangian FOC (forward direction)
 import MathFin.Choice.Portfolio.MarkowitzLagrangian
 -- Phase 26: N-asset risk parity from log-barrier Lagrangian FOC
@@ -901,6 +904,7 @@ import MathFin.Choice.Performance.PurgedCV
 -- plus invariance of the preference under positive affine rescaling of the utility)
 import MathFin.Choice.Utility.VonNeumannMorgenstern
 import MathFin.Choice.Utility.StatePriceDensity
+import MathFin.Choice.Utility.MarketMarginalUtility
 -- QRM bridges: equicorrelation, Gaussian VaR/ES-optimal = Markowitz portfolios, the HHI
 -- systematic floor, and the square-root-of-time rule for GBM losses
 import MathFin.Choice.Portfolio.Equicorrelation
