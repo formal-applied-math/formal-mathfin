@@ -763,10 +763,12 @@ import MathFin.Models.Forwards.TheoryOfStorage
 -- AR(1) <-> Ornstein-Uhlenbeck parameter inversion for commodity calibration
 import MathFin.Models.Forwards.AR1OUCalibration
 import MathFin.Models.Binomial.PathMeasure
+import MathFin.Models.Binomial.AmericanSnell
 import MathFin.Models.Binomial.MultiPeriodFTAP
 import MathFin.Models.Jumps.JumpDiffusionThinning
 import MathFin.Models.Rates.ABCDBlack76
 import MathFin.Models.BlackScholes.American.AmericanPutEuropeanBound
+import MathFin.Models.BlackScholes.American.Summit
 import MathFin.Models.Rates.OUHermiteVasicek
 import MathFin.Models.Rates.AffineTermStructurePDE
 import MathFin.Models.Rates.PeriodicCompounding

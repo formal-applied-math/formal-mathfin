@@ -22,9 +22,11 @@ import MathFin.Markets.DeFi.UniswapMechanics
 import MathFin.Markets.Microstructure.GlostenMilgromCondExp
 import MathFin.Markets.Microstructure.GlostenMilgromMarket
 import MathFin.Models.Bachelier.Bachelier
+import MathFin.Models.Binomial.AmericanSnell
 import MathFin.Models.Binomial.CRRClosedForm
 import MathFin.Models.Binomial.MartingaleRepresentation
 import MathFin.Models.BlackScholes.American.Stopping.ActualOptimality
+import MathFin.Models.BlackScholes.American.Summit
 import MathFin.Models.BlackScholes.BlackScholesPhysical
 import MathFin.Models.BlackScholes.Call
 import MathFin.Models.BlackScholes.DeltaHedge
@@ -712,6 +714,24 @@ attribute [blueprint "thm:american-put-optimal-exercise"
   tends to $0$ (`tendsto_brownianUsualExerciseBoundary_expiry`). Normalised parameters only;
   the early-exercise premium decomposition and the perpetual case are not proved. -/)]
   MathFin.BlackScholes.AmericanPut.Stopping.brownianUsualActualContactRule_optimal
+
+attribute [blueprint "thm:american-put-dominates-european"
+  (title := "The American put value dominates the Black–Scholes European price")
+  (statement := /-- For $\sigma \ne 0$ and $T \le H$, at the Girsanov pricing measure $Q$ of
+  $\theta = (m - r)/\sigma$ the price of the European put in the Black–Scholes market is at most
+  the American put value (no dividends) of $B^\theta$ over the natural filtration of $W$, the
+  supremum of expected discounted payoffs over stopping rules bounded by $T$. The deterministic
+  rule $T$ is admissible and the physical asset is $Q$-almost surely the risk-neutral asset of
+  $B^\theta$. Not proved: strictness, or the superhedging characterization. -/)]
+  MathFin.Contracts.BlackScholes.price_europeanPut_le_americanPutValue
+
+attribute [blueprint "thm:american-price-snell-envelope"
+  (title := "The binomial American price is the Snell envelope")
+  (statement := /-- Under the risk-neutral coin flips, the Snell envelope of the discounted
+  intrinsic value along the spot path, for Mathlib's conditional expectation on the flip
+  filtration with exercise at every date, is almost surely the binomial American price at time
+  zero. -/)]
+  MathFin.americanPrice_eq_snellEnvelope
 
 -- ===== valuation/volatility: Volatility =====
 

@@ -830,6 +830,28 @@
       "code": {
         "lean": "import MathFin.Models.Binomial.Market\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.Contracts.Binomial\n\n/-- The binomial market has a pricing measure exactly when `d < e^ρ < u`. -/\ntheorem binomial_market_ftap {S₀ u d ρ h : ℝ} (hS₀ : 0 < S₀) (hd : 0 < d) (hdu : d < u)\n    (hh : 0 < h) {p : ℝ≥0} (hp0 : 0 < p) (hp : p < 1) {T : ℝ≥0} {N : ℕ} (hN : 0 < N)\n    (hTN : (T : ℝ) / h = N) :\n    (∃ Q, (market (coinFlipMeasure p hp.le) S₀ u d ρ hh.le).IsPricingMeasure T Q)\n      ↔ BinomialNoArb u d ρ :=\n  exists_isPricingMeasure_iff hS₀ hd hdu hh hp0 hp hN hTN\n"
       }
+    },
+    {
+      "id": "mf-binomial-american-price-snell-envelope",
+      "name": "The Binomial American Price Is the Snell Envelope",
+      "domain": "mathematical_finance",
+      "description": "Under the risk-neutral coin flips (up-probability crrUpProb u d ρ = q), the Snell envelope, for Mathlib's conditional expectation on the flip filtration with exercise at every date and horizon N, of the discounted intrinsic value e^{−ρn} g(Sₙ) along the spot path is at time 0, almost surely, the binomial American price americanPrice u d ρ g N S₀. No stopping-time supremum representation and no statement at later times.",
+      "code": {
+        "lean": "import MathFin.Models.Binomial.AmericanSnell\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin\n\n/-- **The binomial American price is the Snell envelope.** Re-export of\n`MathFin.americanPrice_eq_snellEnvelope`. -/\ntheorem american_price_eq_snell_envelope {u d ρ : ℝ} {q : ℝ≥0} (hq : q ≤ 1)\n    (hqcrr : crrUpProb u d ρ = q) (g : ℝ → ℝ) (S₀ : ℝ) (N : ℕ) :\n    ∀ᵐ ω ∂coinFlipMeasure q hq,\n      snellEnvelope (coinFlipMeasure q hq) flipFiltration Set.univ\n        (fun n ω ↦ Real.exp (-ρ * n) * g (spotPath S₀ u d n ω)) N 0 ω\n      = americanPrice u d ρ g N S₀ :=\n  americanPrice_eq_snellEnvelope hq hqcrr g S₀ N\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "S. E. Shreve, Stochastic Calculus for Finance I: The Binomial Asset Pricing Model, Springer (2004), §4.4",
+        "citations": [
+          {
+            "key": "ShreveSCFI",
+            "locator": "§4.4"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof (MathFin/Models/Binomial/AmericanSnell.lean): the exercise-everywhere case at time 0 of snellEnvelope_discounted_bermudanPrice. SCOPE: the equality is almost sure under coinFlipMeasure q; no supremum-over-stopping-times representation. The no-arbitrage hypothesis is not needed."
+      }
     }
   ]
 }
