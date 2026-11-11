@@ -23,7 +23,7 @@ constant.
 In any market with a deterministic numéraire a schedule of fixed cash flows is worth its flows
 discounted by `N 0 / N` (`price_fixedFlows_deterministicMarket`), and the price of a unit payment
 at `τᵢ` is the bond's price (`price_pay_deterministicMarket`). The first-order immunization and
-the key-rate durations of `Models/Rates/` are statements about such a flat-rate value: the value
+the key-rate durations of `Models/Rates/` differentiate such a flat-rate value, and the value
 of a zero-coupon portfolio is the price of its schedule when the numéraire is `e^{rt}`, and the
 price of a coupon bond at an annually compounded yield `y` is the price of its schedule when the
 numéraire is `(1 + y)^⌊t⌋` (`bondPortfolioValue_eq_price`).

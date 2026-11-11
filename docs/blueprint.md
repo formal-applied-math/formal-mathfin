@@ -80,6 +80,7 @@ graph TD
   sharpeRatio["Sharpe ratio"]:::proved
   standardNormalCdf["Standard normal distribution function Φ"]:::proved
   survivalFunction["Survival function"]:::proved
+  americanPriceSnellEnvelope["The binomial American price is the Snell envelope"]:::proved
   binomialRepresentation["Martingale representation in the binomial model"]:::proved
   bondImmunization["Duration and immunization"]:::proved
   carrMadan["Carr–Madan static replication"]:::proved
@@ -131,6 +132,7 @@ graph TD
   dupireZeroRates["Dupire's local volatility formula"]:::proved
   entropicRiskCertaintyEquivalent["Entropic risk is the certainty equivalent of exponential utility"]:::proved
   expectedUtilityAxioms["von Neumann–Morgenstern expected utility"]:::proved
+  expectedUtilityIntegral["Expected utility is the integral against the lottery"]:::proved
   firstFtap["First fundamental theorem of asset pricing"]:::proved
   forwardMeasure["Forward measure"]:::proved
   frechetHoeffding["Fréchet–Hoeffding bounds"]:::proved
@@ -176,6 +178,7 @@ graph TD
   tangentPortfolioEfficient["Tangent portfolio"]:::proved
   trancheLegPrice["A CDO tranche leg is a contract"]:::proved
   varNotSubadditive["Value-at-risk is not subadditive"]:::proved
+  americanPutDominatesEuropean["The American put value dominates the Black–Scholes European price"]:::proved
   bachelierCall["Bachelier call price formula"]:::proved
   bsDeltaHedge["Black–Scholes delta hedging"]:::proved
   esscherPremiumIsPrice["The Esscher premium is a price"]:::proved
@@ -189,14 +192,18 @@ graph TD
   jumpDiffusionMarket["The jump-diffusion market at one date"]:::proved
   jumpDiffusionPrice["Jump-diffusion prices under the Esscher pricing measure"]:::proved
   lpPositionPrice["An AMM liquidity position is a contract"]:::proved
+  marginalUtilityIsSdf["Marginal utility is the stochastic discount factor of a complete market"]:::proved
   marketCallPriceNormalized["A pricing measure gives a normalised call price function"]:::proved
   marketCompleteness["Completeness of the Brownian market"]:::proved
+  marketHansenJagannathan["The Hansen–Jagannathan bound for a market with a pricing measure"]:::proved
+  marketSdfCapm["The security market line for a market with a pricing measure"]:::proved
   quantileElicitability["Elicitability of the quantile"]:::proved
   rockafellarUryasev["Rockafellar–Uryasev formula"]:::proved
   superhedgingDuality["Superhedging duality"]:::proved
   timeDependentVolMarket["Black–Scholes with a deterministic volatility clock is a market"]:::proved
   zeroCouponBondPrice["The zero-coupon bond price is a price"]:::proved
   jumpDiffusionMarketIncomplete["The jump-diffusion market has two pricing measures"]:::proved
+  logOptimalNumeraireOnePeriod["The log-optimal portfolio is the numéraire portfolio, one period"]:::proved
   subgraph frontier_choiceDynamic["⏳ frontier · Choice · Dynamic choice"]
     logOptimalNumeraire["Log-optimal portfolio is the numéraire"]:::frontier
     mertonPortfolioFraction["Merton myopic risky fraction"]:::frontier
@@ -365,6 +372,7 @@ graph TD
   carrMadan --> dupireZeroRates
   expectedUtility --> entropicRiskCertaintyEquivalent
   expectedUtility --> expectedUtilityAxioms
+  expectedUtility --> expectedUtilityIntegral
   emm --> firstFtap
   martingaleTransform --> firstFtap
   changeOfNumeraire --> forwardMeasure
@@ -463,6 +471,12 @@ graph TD
   contractValue --> trancheLegPrice
   quantile --> varNotSubadditive
   valueAtRisk --> varNotSubadditive
+  brownianMotion --> americanPutDominatesEuropean
+  contract --> americanPutDominatesEuropean
+  contractValue --> americanPutDominatesEuropean
+  gbm --> americanPutDominatesEuropean
+  market --> americanPutDominatesEuropean
+  pricingFunctional --> americanPutDominatesEuropean
   brownianMotion --> bachelierCall
   contract --> bachelierCall
   contractValue --> bachelierCall
@@ -525,6 +539,12 @@ graph TD
   contractValue --> lpPositionPrice
   market --> lpPositionPrice
   pricingFunctional --> lpPositionPrice
+  contract --> marginalUtilityIsSdf
+  contractValue --> marginalUtilityIsSdf
+  market --> marginalUtilityIsSdf
+  pricingFunctional --> marginalUtilityIsSdf
+  pricingMeasure --> marginalUtilityIsSdf
+  utilityStatePriceDensity --> marginalUtilityIsSdf
   contract --> marketCallPriceNormalized
   contractValue --> marketCallPriceNormalized
   market --> marketCallPriceNormalized
@@ -537,6 +557,19 @@ graph TD
   market --> marketCompleteness
   pricingFunctional --> marketCompleteness
   pricingMeasure --> marketCompleteness
+  contract --> marketHansenJagannathan
+  contractValue --> marketHansenJagannathan
+  market --> marketHansenJagannathan
+  pricingFunctional --> marketHansenJagannathan
+  pricingMeasure --> marketHansenJagannathan
+  sharpeRatio --> marketHansenJagannathan
+  hansenJagannathanBound --> marketHansenJagannathan
+  contract --> marketSdfCapm
+  contractValue --> marketSdfCapm
+  market --> marketSdfCapm
+  pricingFunctional --> marketSdfCapm
+  pricingMeasure --> marketSdfCapm
+  sdfCapmHansenJagannathan --> marketSdfCapm
   expectedShortfall --> quantileElicitability
   quantile --> quantileElicitability
   valueAtRisk --> quantileElicitability
@@ -549,6 +582,7 @@ graph TD
   superhedgingCoherent --> superhedgingDuality
   superhedgingPriceLowerBound --> superhedgingDuality
   brownianMotion --> timeDependentVolMarket
+  gbm --> timeDependentVolMarket
   market --> timeDependentVolMarket
   pricingMeasure --> timeDependentVolMarket
   blackScholesMarket --> timeDependentVolMarket
@@ -565,10 +599,14 @@ graph TD
   jumpDiffusionIncompleteness --> jumpDiffusionMarketIncomplete
   jumpDiffusionMarket --> jumpDiffusionMarketIncomplete
   oneDateMarket --> jumpDiffusionMarketIncomplete
+  market --> logOptimalNumeraireOnePeriod
+  pricingMeasure --> logOptimalNumeraireOnePeriod
+  marginalUtilityIsSdf --> logOptimalNumeraireOnePeriod
   standardNormalCdf --> realErf
   aaveLiquidationKmv --> aaveHealthFactorBound
   vasicekBondPde --> affineTermStructure
   snellEnvelope --> americanPutPremium
+  americanPutDominatesEuropean --> americanPutSuperhedgingPrice
   marketCompleteness --> americanPutSuperhedgingPrice
   emm --> aptPricing
   capmEquilibrium --> aptPricing
@@ -737,6 +775,7 @@ graph TD
 | `def:sharpe-ratio` Sharpe ratio | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Asharpe-ratio%22%20in%3Abody) |
 | `def:standard-normal-cdf` Standard normal distribution function Φ | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Astandard-normal-cdf%22%20in%3Abody) |
 | `def:survival-function` Survival function | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Asurvival-function%22%20in%3Abody) |
+| `thm:american-price-snell-envelope` The binomial American price is the Snell envelope | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-price-snell-envelope%22%20in%3Abody) |
 | `thm:binomial-representation` Martingale representation in the binomial model | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abinomial-representation%22%20in%3Abody) |
 | `thm:bond-immunization` Duration and immunization | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abond-immunization%22%20in%3Abody) |
 | `thm:carr-madan` Carr–Madan static replication | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acarr-madan%22%20in%3Abody) |
@@ -788,6 +827,7 @@ graph TD
 | `thm:dupire-zero-rates` Dupire's local volatility formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Adupire-zero-rates%22%20in%3Abody) |
 | `thm:entropic-risk-certainty-equivalent` Entropic risk is the certainty equivalent of exponential utility | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aentropic-risk-certainty-equivalent%22%20in%3Abody) |
 | `thm:expected-utility-axioms` von Neumann–Morgenstern expected utility | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-utility-axioms%22%20in%3Abody) |
+| `thm:expected-utility-integral` Expected utility is the integral against the lottery | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-utility-integral%22%20in%3Abody) |
 | `thm:first-ftap` First fundamental theorem of asset pricing | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Afirst-ftap%22%20in%3Abody) |
 | `thm:forward-measure` Forward measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aforward-measure%22%20in%3Abody) |
 | `thm:frechet-hoeffding` Fréchet–Hoeffding bounds | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Afrechet-hoeffding%22%20in%3Abody) |
@@ -833,6 +873,7 @@ graph TD
 | `thm:tangent-portfolio-efficient` Tangent portfolio | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atangent-portfolio-efficient%22%20in%3Abody) |
 | `thm:tranche-leg-price` A CDO tranche leg is a contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atranche-leg-price%22%20in%3Abody) |
 | `thm:var-not-subadditive` Value-at-risk is not subadditive | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avar-not-subadditive%22%20in%3Abody) |
+| `thm:american-put-dominates-european` The American put value dominates the Black–Scholes European price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-dominates-european%22%20in%3Abody) |
 | `thm:bachelier-call` Bachelier call price formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abachelier-call%22%20in%3Abody) |
 | `thm:bs-delta-hedge` Black–Scholes delta hedging | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-delta-hedge%22%20in%3Abody) |
 | `thm:esscher-premium-is-price` The Esscher premium is a price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aesscher-premium-is-price%22%20in%3Abody) |
@@ -846,14 +887,18 @@ graph TD
 | `thm:jump-diffusion-market` The jump-diffusion market at one date | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ajump-diffusion-market%22%20in%3Abody) |
 | `thm:jump-diffusion-price` Jump-diffusion prices under the Esscher pricing measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ajump-diffusion-price%22%20in%3Abody) |
 | `thm:lp-position-price` An AMM liquidity position is a contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alp-position-price%22%20in%3Abody) |
+| `thm:marginal-utility-is-sdf` Marginal utility is the stochastic discount factor of a complete market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarginal-utility-is-sdf%22%20in%3Abody) |
 | `thm:market-call-price-normalized` A pricing measure gives a normalised call price function | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarket-call-price-normalized%22%20in%3Abody) |
 | `thm:market-completeness` Completeness of the Brownian market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarket-completeness%22%20in%3Abody) |
+| `thm:market-hansen-jagannathan` The Hansen–Jagannathan bound for a market with a pricing measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarket-hansen-jagannathan%22%20in%3Abody) |
+| `thm:market-sdf-capm` The security market line for a market with a pricing measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarket-sdf-capm%22%20in%3Abody) |
 | `thm:quantile-elicitability` Elicitability of the quantile | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aquantile-elicitability%22%20in%3Abody) |
 | `thm:rockafellar-uryasev` Rockafellar–Uryasev formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Arockafellar-uryasev%22%20in%3Abody) |
 | `thm:superhedging-duality` Superhedging duality | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asuperhedging-duality%22%20in%3Abody) |
 | `thm:time-dependent-vol-market` Black–Scholes with a deterministic volatility clock is a market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atime-dependent-vol-market%22%20in%3Abody) |
 | `thm:zero-coupon-bond-price` The zero-coupon bond price is a price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Azero-coupon-bond-price%22%20in%3Abody) |
 | `thm:jump-diffusion-market-incomplete` The jump-diffusion market has two pricing measures | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ajump-diffusion-market-incomplete%22%20in%3Abody) |
+| `thm:log-optimal-numeraire-one-period` The log-optimal portfolio is the numéraire portfolio, one period | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alog-optimal-numeraire-one-period%22%20in%3Abody) |
 | `def:real-erf` erf / erfc / erfinv for Mathlib | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Areal-erf%22%20in%3Abody) |
 | `thm:aave-health-factor-bound` Aave multi-asset health factor: a liquidation bound | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaave-health-factor-bound%22%20in%3Abody) |
 | `thm:affine-term-structure` Affine term structure | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaffine-term-structure%22%20in%3Abody) |

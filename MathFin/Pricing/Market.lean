@@ -168,6 +168,20 @@ theorem measurable_numeraire (M : Market ι Ω) (t : ℝ≥0) : Measurable (M.nu
 theorem measurable_deflator (M : Market ι Ω) (t : ℝ≥0) : Measurable (M.deflator t) :=
   (M.measurable_numeraire 0).div (M.measurable_numeraire t)
 
+/-- **A deterministic numéraire gives a deterministic deflator**: if `N t ω = f t` for every date
+and state, the deflator is `f 0 / f t`. -/
+theorem deflator_of_numeraire {M : Market ι Ω} {f : ℝ≥0 → ℝ}
+    (hf : ∀ t ω, M.numeraire t ω = f t) (t : ℝ≥0) (ω : Ω) : M.deflator t ω = f 0 / f t := by
+  simp only [deflator, hf]
+
+/-- **The money-market deflator**: with the numéraire `e^{rt}` the deflator is the discount
+`e^{−rt}`. The Black–Scholes, clocked-volatility and one-date markets are instances. -/
+theorem deflator_of_numeraire_exp {M : Market ι Ω} {r : ℝ}
+    (hN : ∀ t ω, M.numeraire t ω = Real.exp (r * t)) (t : ℝ≥0) (ω : Ω) :
+    M.deflator t ω = Real.exp (-r * t) := by
+  simp only [deflator_of_numeraire hN, NNReal.coe_zero, mul_zero, Real.exp_zero, one_div, neg_mul,
+    Real.exp_neg]
+
 /-- Each deflated asset is adapted. -/
 theorem stronglyAdapted_deflated (M : Market ι Ω) (i : ι) : StronglyAdapted M.𝓕 (M.deflated i) :=
   fun t ↦

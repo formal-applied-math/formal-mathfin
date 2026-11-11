@@ -1236,12 +1236,12 @@ attribute [blueprint "thm:marginal-utility-is-sdf"
   MathFin.Market.IsPricingMeasure.exists_deriv_eq_mul_sdf_of_stationary
 
 attribute [blueprint "thm:log-optimal-numeraire-one-period"
-  (title := "The log-optimal portfolio is the numéraire portfolio, one period")
+  (title := "A stationary log portfolio is the numéraire portfolio, one period")
   (statement := /-- In the market of `thm:marginal-utility-is-sdf` with $u = \log$, a stationary
   portfolio of cost $w_0 > 0$ and wealth $W > 0$ has $\mathrm{sdf}(\omega) = w_0 / W_\omega$ in
   every state, so $E_P[S_k(T)/W] = S_k(0)/w_0$ for every asset $k$
   (`integral_div_logOptimal_mul`): prices
-  deflated by the log-optimal wealth are $P$-martingales over the one period. The continuous-time
+  deflated by that wealth are $P$-martingales over the one period. The continuous-time
   statement is `thm:log-optimal-numeraire`. -/)]
   MathFin.Market.IsPricingMeasure.sdf_eq_div_of_logOptimal
 
@@ -1249,8 +1249,7 @@ attribute [blueprint "thm:expected-utility-integral"
   (title := "Expected utility is the integral against the lottery")
   (statement := /-- For non-negative weights $p$ on a finite set $s$, the expected utility
   $\sum_{i \in s} p_i u_i$ is $\int u \, d\mu$ for $\mu = \sum_{i \in s} p_i \delta_i$
-  (`Measure.ofWeights s p`); on a finite type, a finite measure $\mu$ is $\sum_i \mu\{i\}\,\delta_i$
-  and its expected utility $\sum_i \mu\{i\}\,u_i$ is $\int u \, d\mu$. -/)]
+  (`Measure.ofWeights s p`). -/)]
   MathFin.expectedUtility_eq_integral
 -- ===== choice/equilibrium: Equilibrium =====
 

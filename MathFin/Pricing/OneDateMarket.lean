@@ -29,7 +29,10 @@ along the time change (`Martingale.comp`).
 The price of a contract that reads the asset at `τ` only is the integral against `Q` of its payoff,
 discounted by `e^{−rτ}` (`Market.price_pay_obs_oneDate`, `Market.price_europeanCall_oneDate`).
 
-The model is as small as can be: the initial price is a parameter, with no dynamics before `τ`.
+The model is as small as can be: the initial price is a parameter, with no dynamics before `τ`,
+so that a measure prices the market says only that it is equivalent to `P` and calibrated to the
+quote `s₀`. A family's socket here certifies that its law prices a market, and the work is in the
+family's own moment identity (the Esscher or Merton compensator, the tilted mean).
 The families that instantiate it (`Models/Jumps/Market.lean`, `Insurance/EsscherPremium.lean`) say
 which law of `X` and which `Q` they read in it.
 
@@ -117,13 +120,11 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {τ t : ℝ≥0}
 
 theorem dateFiltration_of_lt (h : t < τ) : dateFiltration Ω τ t = ⊥ := by
   change twoStepFiltration Ω (dateStep τ t) = ⊥
-  rw [dateStep_of_lt h]
-  try exact twoStepFiltration_zero Ω
+  rw [dateStep_of_lt h, twoStepFiltration_zero]
 
 theorem dateFiltration_of_not_lt (h : ¬ t < τ) : dateFiltration Ω τ t = mΩ := by
   change twoStepFiltration Ω (dateStep τ t) = mΩ
-  rw [dateStep_of_not_lt h]
-  try exact twoStepFiltration_one Ω
+  rw [dateStep_of_not_lt h, twoStepFiltration_one]
 
 end DateFiltration
 
@@ -157,9 +158,8 @@ theorem asset_oneDate_self (ω : Ω) : (oneDate P hX s₀ r τ).asset () τ ω =
   simp [oneDate]
 
 /-- The deflator of the one-date market at `τ` is the discount `e^{−rτ}`. -/
-theorem deflator_oneDate (ω : Ω) : (oneDate P hX s₀ r τ).deflator τ ω = Real.exp (-r * τ) := by
-  simp only [Market.deflator, oneDate, NNReal.coe_zero, mul_zero, Real.exp_zero, one_div,
-    neg_mul, Real.exp_neg]
+theorem deflator_oneDate (ω : Ω) : (oneDate P hX s₀ r τ).deflator τ ω = Real.exp (-r * τ) :=
+  Market.deflator_of_numeraire_exp (fun _ _ ↦ rfl) τ ω
 
 /-- The deflated price at step `0` is `s₀`, and from step `1` on it is `X e^{−rτ}`. -/
 noncomputable def deflatedStep (X : Ω → ℝ) (s₀ r : ℝ) (τ : ℝ≥0) : ℕ → Ω → ℝ

@@ -95,9 +95,8 @@ variable (μ : Measure Ω) (hWmeas : ∀ t, Measurable (W t)) (S_0 r θ : ℝ)
 
 /-- The deflator of the clocked market is the discount `e^{−rt}`. -/
 theorem deflator_market (t : ℝ≥0) (ω : Ω) :
-    (market μ hWmeas S_0 r θ hv).deflator t ω = Real.exp (-r * t) := by
-  simp only [Market.deflator, market, NNReal.coe_zero, mul_zero, Real.exp_zero, one_div, neg_mul,
-    Real.exp_neg]
+    (market μ hWmeas S_0 r θ hv).deflator t ω = Real.exp (-r * t) :=
+  Market.deflator_of_numeraire_exp (fun _ _ ↦ rfl) t ω
 
 /-- The deflated asset of the clocked market is the Black–Scholes asset
 `S₀ exp((θ − 1/2) u + W_u)` at the clock time `u = v t`. -/

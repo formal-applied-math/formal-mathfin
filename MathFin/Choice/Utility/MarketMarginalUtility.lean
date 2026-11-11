@@ -17,9 +17,12 @@ factor `μ > 0`. This file reads it in a `Market` on a finite sample space. When
 complete (no non-zero state vector annihilates every terminal payoff), the state prices are
 unique, so the marginal utility is the market's own stochastic discount factor up to the constant
 `μ`: `u'(W ω) = μ * sdf ω` (`exists_deriv_eq_mul_sdf_of_stationary`). For the logarithmic utility
-this is the numéraire-portfolio identity, `sdf = w₀ / W*`: the density of the pricing measure is
-the reciprocal of the growth-optimal wealth (`sdf_eq_div_of_logOptimal`), so deflating by the
-growth-optimal portfolio prices the assets under the physical measure.
+this is the numéraire-portfolio identity, `sdf = w₀ / W`: the stochastic discount factor (the
+density of the pricing measure times the deflator `N 0 / N T`) is `w₀` over the wealth of a
+portfolio at which the expected log-wealth is stationary on the budget set
+(`sdf_eq_div_of_logOptimal`), so deflating by that wealth prices the assets under the physical
+measure. The hypothesis is the first-order condition only; that the portfolio maximises the
+expected log-wealth is not used or proved.
 
 ## Main results
 
@@ -29,7 +32,7 @@ growth-optimal portfolio prices the assets under the physical measure.
 * `Market.IsPricingMeasure.exists_deriv_eq_mul_sdf_of_isLocalMaxOn`: the same at a local maximum of
   the expected utility `∫ u(W) ∂P` on the budget set.
 * `Market.IsPricingMeasure.sdf_eq_div_of_logOptimal`: for `u = log`, `sdf ω = w₀ / W ω`.
-* `Market.IsPricingMeasure.integral_div_logOptimal_mul`: the prices deflated by the log-optimal
+* `Market.IsPricingMeasure.integral_div_logOptimal_mul`: the prices deflated by the stationary log
   wealth are `P`-martingales in one period, `E_P[S_k(T) / W] = S_k(0) / w₀`.
 
 The initial prices `pr k` are deterministic. Completeness of the market is a hypothesis.
@@ -127,10 +130,10 @@ theorem IsPricingMeasure.exists_deriv_eq_mul_sdf_of_isLocalMaxOn [IsProbabilityM
       (fun ω ↦ differentiableAt_of_deriv_ne_zero (hu ω).ne') hd
   exact ⟨μ, hμ, h⟩
 
-/-- **The log-optimal portfolio is the numéraire portfolio.** In the market of
+/-- **A stationary log portfolio is the numéraire portfolio.** In the market of
 `exists_deriv_eq_mul_sdf_of_stationary` with `u = log`, a stationary portfolio of cost `w₀ > 0` and
-positive terminal wealth `W` has `sdf ω = w₀ / W ω`: the density of the pricing measure is the
-reciprocal of the growth-optimal wealth, scaled by its initial value. -/
+positive terminal wealth `W` has `sdf ω = w₀ / W ω`: the stochastic discount factor is the
+reciprocal of the wealth, scaled by its initial value. -/
 theorem IsPricingMeasure.sdf_eq_div_of_logOptimal [IsProbabilityMeasure M.P]
     (hP : ∀ ω, 0 < M.P.real {ω}) (hQ : M.IsPricingMeasure T Q) {n₀ : ℝ}
     (hN₀ : ∀ ω, M.numeraire 0 ω = n₀) {pr : Fin K → ℝ} (hpr : ∀ k ω, M.asset k 0 ω = pr k)
@@ -160,9 +163,9 @@ theorem IsPricingMeasure.sdf_eq_div_of_logOptimal [IsProbabilityMeasure M.P]
     _ = w₀ * (μ * M.sdf Q T ω) := by ring
     _ = w₀ / portfolioPayoff (fun j ↦ M.asset j T) θ ω := by rw [← h1, div_eq_mul_inv]
 
-/-- **Prices deflated by the log-optimal wealth are martingales under `P` in one period.** In the
-market of `sdf_eq_div_of_logOptimal`, `E_P[S_k(T) / W] = S_k(0) / w₀` for every asset `k`:
-the deflated price has the same mean at `T` as at `0`, where the log-optimal wealth is `w₀`. -/
+/-- **Prices deflated by the stationary log wealth are martingales under `P` in one period.** In
+the market of `sdf_eq_div_of_logOptimal`, `E_P[S_k(T) / W] = S_k(0) / w₀` for every asset `k`:
+the deflated price has the same mean at `T` as at `0`, where the wealth is `w₀`. -/
 theorem IsPricingMeasure.integral_div_logOptimal_mul [IsProbabilityMeasure M.P]
     (hP : ∀ ω, 0 < M.P.real {ω}) (hQ : M.IsPricingMeasure T Q) {n₀ : ℝ}
     (hN₀ : ∀ ω, M.numeraire 0 ω = n₀) {pr : Fin K → ℝ} (hpr : ∀ k ω, M.asset k 0 ω = pr k)

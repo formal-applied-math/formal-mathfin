@@ -100,9 +100,8 @@ variable (μ : Measure Ω) (hWmeas : ∀ t, Measurable (W t)) (S_0 m r σ : ℝ)
 
 /-- The deflator of the Black–Scholes market is the discount `e^{−rt}`. -/
 theorem deflator_market (t : ℝ≥0) (ω : Ω) :
-    (market μ hWmeas S_0 m r σ).deflator t ω = Real.exp (-r * t) := by
-  simp only [Market.deflator, market, NNReal.coe_zero, mul_zero, Real.exp_zero, one_div, neg_mul,
-    Real.exp_neg]
+    (market μ hWmeas S_0 m r σ).deflator t ω = Real.exp (-r * t) :=
+  Market.deflator_of_numeraire_exp (fun _ _ ↦ rfl) t ω
 
 /-- The deflated asset of the Black–Scholes market is `S₀ exp((m − r − σ²/2)t + σ W_t)`. -/
 theorem deflated_market (t : ℝ≥0) (ω : Ω) :

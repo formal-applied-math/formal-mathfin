@@ -26,12 +26,13 @@ Under the Esscher pricing measure the European call is worth the Poisson mixture
 Black–Scholes prices (`JumpDiffusion.price_europeanCall_esscher`), Merton's formula for the
 tilted jump characteristics.
 
-**The market is incomplete** at one date: for `σ ≠ 0`, nontrivial jumps and a physical drift that
-is not already compensated, the two pricing measures give the call different prices at some
-strike, so the market has two pricing measures and `Market.price` is not unique
+**The market has more than one pricing measure** at one date: for `σ ≠ 0`, nontrivial jumps and
+a physical drift that is not already compensated, the two pricing measures give the call different
+prices at some strike, so `Market.price` is not unique
 (`JumpDiffusion.exists_isPricingMeasure_price_call_ne`,
 `JumpDiffusion.not_subsingleton_isPricingMeasure`). This is the pricing-measure form of
-`exists_call_esscher_ne_merton`, which is about the two laws.
+`exists_call_esscher_ne_merton`, which is about the two laws. That some claim cannot be
+replicated is not proved here.
 
 The scope is one date. The Esscher and Merton laws of the log return are pricing measures of the
 market that only reads the asset at `τ`. That they are the time-`τ` marginals of equivalent
@@ -61,7 +62,7 @@ not proved here.
 
 ## Tags
 
-jump-diffusion market, Esscher pricing measure, incomplete market, non-unique pricing measure,
+jump-diffusion market, Esscher pricing measure, non-unique pricing measure,
 Merton formula, MSC 91G20, MSC 60G51, JEL G13
 -/
 
