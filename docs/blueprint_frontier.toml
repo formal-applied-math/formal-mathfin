@@ -708,15 +708,6 @@ area = "valuation/volatility"
 family = "volatility"
 
 [[node]]
-label = "thm:smile-no-arbitrage"
-title = "Smile no-arbitrage (Roper, SVI)"
-statement = "Roper's converse: every normalised call price function (convex, nonincreasing, between the intrinsic value and one, with limits one and zero) is the call price function, at maturity one, of a market with unit numéraire, a positive asset of forward one and a pricing measure. Raw SVI slices and the left wing, calendar spreads are further instances not stated here."
-uses = ["thm:carr-madan", "thm:bs-call"]
-area = "valuation/volatility"
-family = "volatility"
-lean = "MathFinFrontier.exists_market_of_isNormalizedCallPrice"
-
-[[node]]
 label = "thm:sde-continuous-solution"
 title = "Continuous strong solutions on every horizon"
 statement = "The every-horizon Picard fixed point has a continuous adapted representative solving dX=b(X)dt+σ(X)dB pathwise, unique up to indistinguishability."

@@ -544,6 +544,7 @@ import MathFin.Models.BlackScholes.SpotConvexity
 import MathFin.Models.ModelFree.PriceBounds
 import MathFin.Models.ModelFree.CallPriceFunction
 import MathFin.Models.ModelFree.MarketCallPrice
+import MathFin.Models.ModelFree.RoperConverse
 -- Phase 13 additions:
 -- Quanto correction derived from a joint-Gaussian FX model (Girsanov-grounded)
 import MathFin.Models.BlackScholes.QuantoGrounding

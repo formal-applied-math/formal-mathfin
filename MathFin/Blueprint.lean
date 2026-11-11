@@ -1123,8 +1123,19 @@ attribute [blueprint "thm:market-call-price-normalized"
   $k \mapsto \mathbb E_Q[(S_T/F - k)^+]$ of a positive mean-one variable, and these are convex
   and nonincreasing, between $(1-k)^+$ and $1$, with limits $1$ at $0^+$ and $0$ at infinity.
   This is the forward direction of Roper's theorem; the converse, a market from a call price
-  function, is not proved. -/)]
+  function, is `thm:smile-no-arbitrage`. -/)]
   MathFin.Market.IsPricingMeasure.isNormalizedCallPrice
+
+attribute [blueprint "thm:smile-no-arbitrage"
+  (title := "Roper's converse: every normalised call price function is a market's")
+  (statement := /-- Every normalised call price function $C$ (convex and nonincreasing, between
+  $(1-k)^+$ and $1$, with limits $1$ at $0^+$ and $0$ at infinity) is the call price function, at
+  maturity one, of a market with unit numéraire, a nonnegative asset of forward one and a pricing
+  measure: the call at every strike $k > 0$ is worth $C(k)$. The law is the Breeden--Litzenberger
+  measure $\mu(k, \infty) = -C'_+(k)$, and may carry an atom at $0$, so the asset is nonnegative
+  rather than positive. Raw SVI slices and the left wing, calendar spreads are further instances
+  not stated here. -/)]
+  MathFin.exists_market_of_isNormalizedCallPrice
 
 -- ===== choice/preferences: Preferences =====
 

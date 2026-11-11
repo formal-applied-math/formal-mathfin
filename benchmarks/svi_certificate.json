@@ -137,6 +137,34 @@
           "source": "mathfin"
         }
       }
+    },
+    {
+      "id": "mf-roper-converse",
+      "name": "Roper's Converse: Every Normalised Call Price Function Is the Call Price Function of a Market",
+      "domain": "mathematical_finance",
+      "description": "Let C be a normalised call price function: convex and nonincreasing on (0, infinity), between max(1-k,0) and 1, tending to 1 as k tends to 0+ and to 0 as k tends to infinity. Then there is a market with a single asset, unit numeraire and a pricing measure Q such that the asset is nonnegative at time one, the claim paying the asset at time one is worth 1, and the call at every strike k > 0 is worth C k. This is the converse direction of Roper's Theorem 2.1, for nonnegative asset values: the asset may vanish (a call price function can have an atom at 0, e.g. C(K) = max(1-(1-p)K, 0)), and a strictly positive asset is then impossible, so the statement is not claimed for positive assets. Single maturity, positive strikes, one asset; the market is the one-date market on the real line with the Breeden-Litzenberger law of C as both reference and pricing measure.",
+      "code": {
+        "lean": "import MathFin.Models.ModelFree.RoperConverse\n\nopen MathFin MathFin.Contracts MeasureTheory\nopen scoped NNReal\n\n/-- **Roper's converse.** Every normalised call price function is the call price function of a\n    market with unit numéraire, a nonnegative asset at time one and a pricing measure under which\n    the asset claim is worth one. Re-export of `MathFin.exists_market_of_isNormalizedCallPrice`. -/\ntheorem roper_converse {C : ℝ → ℝ} (hC : IsNormalizedCallPrice C) :\n    ∃ (M : Market Unit ℝ) (Q : Measure ℝ), (∀ t ω, M.numeraire t ω = 1) ∧\n      (∀ ω, 0 ≤ M.asset () 1 ω) ∧ M.IsPricingMeasure 1 Q ∧\n      M.price Q (.pay 1 (.obs () 1)) = 1 ∧ ∀ k > 0, M.price Q (europeanCall k 1) = C k :=\n  exists_market_of_isNormalizedCallPrice hC\n"
+      },
+      "metadata": {
+        "alignment_source": "Roper (2010), Theorem 2.1; Breeden and Litzenberger (1978)",
+        "reference": "Roper, Arbitrage free implied volatility surfaces (2010), Theorem 2.1, converse direction.",
+        "citations": [
+          {
+            "key": "Roper2010",
+            "locator": "Theorem 2.1"
+          },
+          {
+            "key": "BreedenLitzenberger1978"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Re-export of MathFin.exists_market_of_isNormalizedCallPrice (MathFin/Models/ModelFree/RoperConverse.lean). Proof. The right derivative C'+ of the convex C is monotone (Mathlib), right-continuous (ConvexOn.continuousWithinAt_Ici_rightDeriv, proved here), between -1 and 0, and tends to 0 at infinity. The right limit of K -> 1 + C'+(K) on (0, infinity), extended by 0, is a Stieltjes function whose measure mu is a probability measure on [0, infinity) with mu(K, infinity) = -C'+(K). The layer-cake formula and the fundamental theorem of calculus for a right derivative give the integral of (x-K)^+ against mu equal to C K for K > 0, and monotone convergence as K decreases to 0 gives mean one. The market is Market.oneDate on the reals with reference and pricing measure mu, rate 0, date 1, and asset max(omega, 0); mu is a pricing measure (isPricingMeasure_oneDate), the asset claim is worth the mean, and the call is worth the integral of (x-K)^+. SCOPE. (1) The asset is nonnegative, not strictly positive: a normalised call price function may have an atom at 0, and a pricing measure equivalent to the reference measure gives a strictly positive asset no mass at 0, so the strictly positive version is false and is not claimed. (2) Single maturity, a single asset, unit numeraire, positive strikes; the forward is normalised to one. (3) The market is the trivial two-date one-date market, not a continuous-time model; no martingale or diffusion representation of the law (Kellerer, Dupire) is claimed.",
+        "provenance": {
+          "source": "mathfin"
+        }
+      }
     }
   ]
 }
