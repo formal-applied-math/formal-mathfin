@@ -735,14 +735,16 @@ def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dic
 and markets the trunk, and valuation, choice and risk the three limbs. Each proved result sits at its
 measured distance from the trunk, in statements (<code>chain_reach</code>), and the dark wood is what
 its proof uses, so a result the library has not yet connected stands high or floats; colour is the
-model family. The buttons add the gaps (connectors and islands), the unproved frontier and the corpus
-as leaves; click a node to trace its lineage, and the panel beside the tree explains every mark.</p>
+model family. The buttons add the gaps (connectors and islands), the future work the open issues
+map out, the field's open problems and the corpus as leaves; click a node to trace its lineage,
+and the panel beside the tree explains every mark.</p>
 {strip}
 <div class="t-box" id="tree-box"><div class="t-tools">
 <input id="t-q" type="search" placeholder="Find a node: Itô, VaR, Heston…" aria-label="Find a node" autocomplete="off">
 <button type="button" id="t-grow">Grow it again</button>
 <button type="button" data-layer="gaps" aria-pressed="true" title="connectors (stated, not yet proved) and islands">Gaps</button>
-<button type="button" data-layer="frontier" aria-pressed="false" title="unproved blueprint nodes and open problems">Frontier</button>
+<button type="button" data-layer="future" aria-pressed="false" title="open issues, joined to the proved results they build on">Future work</button>
+<button type="button" data-layer="open" aria-pressed="false" title="open problems of the field">Open problems</button>
 <button type="button" data-layer="leaves" aria-pressed="false" title="corpus entries, on the tree and on the ground">Leaves</button>
 <span class="t-zoom"><button type="button" id="t-zin" aria-label="Zoom in">+</button><button type="button" id="t-zout" aria-label="Zoom out">−</button></span>
 <button type="button" id="t-reset">Reset view</button></div>

@@ -312,9 +312,11 @@ details.tableview summary { cursor: pointer; color: var(--ink-2); }
 #tree-box .ground-line { fill: none; stroke: var(--tr-soil-ink); stroke-width: 1; opacity: .5; }
 #tree-box .sel-ring { fill: none; stroke: var(--ink); stroke-width: 1.4; }
 /* layers behind the buttons (tree.js layerOf): hidden unless shown, except what a selection lights */
-#tree:not(.show-frontier) .layer-frontier, #tree:not(.show-gaps) .layer-gaps,
-#tree:not(.show-leaves) .layer-leaves { display: none; }
-#tree.focus:not(.show-frontier) .layer-frontier.on { display: inline; }
+#tree:not(.show-future) .layer-future, #tree:not(.show-open) .layer-open,
+#tree:not(.show-gaps) .layer-gaps, #tree:not(.show-leaves) .layer-leaves { display: none; }
+#tree.focus:not(.show-future) .layer-future.on, #tree.focus:not(.show-open) .layer-open.on { display: inline; }
+#tree-box .iss-ring { fill: none; stroke-width: 1.6; opacity: .9; }
+#tree.show-future .shoot.layer-future, #tree.show-open .shoot.layer-open { opacity: .55; }
 /* the secondary uses of a proof show with its lineage, not on the resting tree */
 #tree:not(.focus) .branch.sec { display: none; }
 #tree.focus .dimmable { opacity: .12; transition: opacity .2s; }

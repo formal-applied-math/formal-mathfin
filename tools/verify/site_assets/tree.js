@@ -37,7 +37,8 @@ for (const n of D.nodes){
   n.users = [];
   n.open = n.i.filter(x => x[1] === "o");
   const sts = n.open.map(x => x[4][0] || "ready");
-  n.st = n.s === "frontier" ? (STATUS_RANK.find(s => sts.includes(s)) || (n.open.length ? "ready" : null)) : null;
+  n.ist = STATUS_RANK.find(s => sts.includes(s)) || (n.open.length ? "ready" : null);   // its open issues
+  n.st = n.s === "frontier" ? n.ist : null;
 }
 for (const n of D.nodes) for (const u of n.u) N.get(u)?.users.push(n.l);
 
@@ -72,9 +73,13 @@ const cellKey = n => n.p + (n.b ? "/" + n.b : "");
 const cellTitle = k => cellName(k).split(" · ").pop();
 const TRUNK = D.parts.find(p => p.kind === "trunk").key;
 // layers the default view can leave out, each behind a button (data-layer in tree.html): the proofs,
-// the map, towers and joints always show. "gaps": connectors and islands; "frontier": unproved
-// blueprint nodes; "leaves": the corpus, on the tree and on the ground.
-const layerOf = n => n.ph ? "gaps" : !isWood(n) && !isUp(n) && !n.tw ? "frontier" : null;
+// the map, towers and joints always show. "gaps": connectors and islands; "future": the mapped future
+// work, the unproved blueprint nodes the open issues carry, joined in full to the proved node each
+// rests on, and a ring on every proved node an open issue works on; "open": the open problems of the
+// field (issues labelled open-problem); "leaves": the corpus, on the tree and on the ground.
+const layerOf = n => n.ph ? "gaps" : n.op ? "open" : !isWood(n) && !isUp(n) && !n.tw ? "future" : null;
+function layerOn(l){ return svg.classed("show-" + l); }   // svg is drawn before any caller runs
+function shown(n){ return !layerOf(n) || layerOn(layerOf(n)); }
 const layerCls = n => layerOf(n) ? " layer-" + layerOf(n) : "";
 const live = D.nodes;
 for (const n of live) n.depth = depth(n.l);
@@ -324,6 +329,8 @@ const branchSel = linkG.selectAll("path").data(woodEdges.slice().sort((a, b) => 
 // a connector's edges are dashed and straight-ish, heavier with its gain; a plain shoot rises from its base
 // a plain frontier edge is a faint stub toward what it rests on (the full curve shows on hover or selection)
 const STUB = 46;
+// with its layer shown, a bud's primary shoot is drawn in full, down to the node it rests on
+const fullShoot = e => e.prim && !e.t.data.node.ph && layerOn(layerOf(e.t.data.node));
 function shootD(e, full){
   const n = e.t.data.node, C = [e.t.px, e.t.py];
   if (n.ph){ const P = [e.s.px, e.s.py]; return `M${P}Q${(P[0] + C[0]) / 2},${Math.min(P[1], C[1]) - 18} ${C}`; }
@@ -333,7 +340,7 @@ function shootD(e, full){
 }
 const shootSel = shootG.selectAll("path").data(shootEdges).join("path")
   .attr("class", e => (e.t.data.node.ph ? "shoot ph dimmable" : "shoot dimmable") + (e.prim ? "" : " sec") + layerCls(e.t.data.node))
-  .attr("d", e => shootD(e, false))
+  .attr("d", e => shootD(e, fullShoot(e)))
   .style("stroke-width", e => e.t.data.node.ph ? (1.2 + Math.sqrt(e.t.data.node.ph.gain || 0) * .45).toFixed(2) : null);
 
 // islands: a dashed outline round each floating cluster, named; red when nothing reaches it
@@ -453,7 +460,9 @@ nodeSel.each(function(d){
     g.append("text").attr("class", "tower-n").attr("y", 3.5).attr("text-anchor", "middle").text(n.tw); }
   else if (isWood(n)){
     const k = g.append("circle").attr("r", 2.6 + Math.min(6.4, Math.sqrt(n.e) * 1.05)).attr("class", "knot" + (n.s === "partial" ? " partial" : ""));
-    if (famVar(n)) k.style(n.s === "partial" ? "stroke" : "fill", famVar(n)); }
+    if (famVar(n)) k.style(n.s === "partial" ? "stroke" : "fill", famVar(n));
+    if (n.open.length) g.append("circle").attr("r", 2.6 + Math.min(6.4, Math.sqrt(n.e) * 1.05) + 3.2)
+      .attr("class", "iss-ring layer-future").style("stroke", `var(${STATUS_VAR[n.ist]})`); }
   else if (n.ph){
     const fv = famVar(n), r = phR(n);
     g.append("circle").attr("r", r).attr("class", "phantom").style("stroke", fv);
@@ -484,8 +493,6 @@ const lblSel = lblG.selectAll("text").data(lblData).join("text")
   .attr("class", L => "lbl dimmable" + (isOP(L.n) ? " op" : L.n.ph ? " ph" : !isWood(L.n) ? " fr" : "") + layerCls(L.n));
 const glyphR = d => { const n = d.data.node; return n.tw ? 12 : n.ph ? phR(n) : isWood(n) ? 2.6 + Math.min(6.4, Math.sqrt(n.e) * 1.05) : isOP(n) ? 8 : 4.6; };
 let curK = 1, litSet = null;
-const layerOn = l => svg.classed("show-" + l);
-const shown = n => !layerOf(n) || layerOn(layerOf(n));
 function placeLabels(k = curK, set = litSet){
   curK = k;
   const s = pxPerUnit() * k, fs = (k < 1.4 ? 13 : 12.5) / s, h = fs * 1.2, pad = 3 / s;
@@ -548,7 +555,7 @@ function light(set, extra){
   svg.classed("focus", !!set); litSet = set && set.size ? set : null; placeLabels();
   nodeSel.classed("on", d => on(d.id));
   branchSel.classed("on", e => on(e.t.id) && (!e.s || on(e.s.id)));
-  shootSel.classed("on", e => on(e.t.id) && (!e.s || on(e.s.id))).attr("d", e => shootD(e, !!set));
+  shootSel.classed("on", e => on(e.t.id) && (!e.s || on(e.s.id))).attr("d", e => shootD(e, !!set || fullShoot(e)));
   leafSel.classed("on", f => on(f.d.id));
   pileSel.classed("on", p => extra === "pile:" + p.a);
   seedbed.classed("on", extra === "seedbed");
@@ -564,7 +571,8 @@ const hideTip = () => { tip.hidden = true; };
 function statusLine(n){
   if (isUp(n)) return "upstream (BrownianMotion)";
   if (n.tw) return `tower of ${n.tw} modules · best hop ${n.hp ?? "∞"}`;
-  if (isWood(n)) return (n.s === "partial" ? "proved in part" : "proved") + (n.e ? ` · ${n.e} corpus ${n.e === 1 ? "entry rests" : "entries rest"} here` : "");
+  if (isWood(n)) return (n.s === "partial" ? "proved in part" : "proved") + (n.e ? ` · ${n.e} corpus ${n.e === 1 ? "entry rests" : "entries rest"} here` : "")
+    + (n.open.length ? ` · ${n.open.length} open ${n.open.length === 1 ? "issue" : "issues"}` : "");
   if (n.ph) return `connector · proving it brings ${n.ph.gain} more ${n.ph.gain === 1 ? "theorem" : "theorems"} within 3 hops` + (n.open.length ? " · " + n.open.map(x => "#" + x[0]).join(" ") : "");
   const bits = [n.op ? "open problem" : "frontier"]; if (n.core?.length) bits.push("core proved"); if (n.st) bits.push(STATUS_TXT[n.st]);
   if (n.seed || n.ground) bits.push("grows from upstream");
@@ -624,6 +632,7 @@ function glyph(kind){
     ghost:`<path class="ghost" style="opacity:1" d="M4,23 C10,14 14,10 30,4 L31,8 C17,13 14,17 11,23Z"/>`,
     fam:`<circle class="knot" cx="7" cy="12" r="4.5" style="fill:var(--fam-diffusions)"/><circle class="knot" cx="17" cy="12" r="4.5" style="fill:var(--fam-default)"/><circle class="knot" cx="27" cy="12" r="4.5" style="fill:var(--fam-jumps)"/>`,
     hop:`<line x1="6" x2="6" y1="22" y2="3" class="ground-line" style="opacity:1"/><circle class="knot" cx="6" cy="20" r="2.6"/><circle class="knot" cx="6" cy="12" r="2.6"/><circle class="knot" cx="6" cy="5" r="2.6"/><text x="12" y="22" font-size="8" fill="currentColor">1</text><text x="12" y="6" font-size="8" fill="currentColor">3</text>`,
+    issring:`<circle class="knot" cx="17" cy="12" r="4"/><circle class="iss-ring" cx="17" cy="12" r="7.5" style="stroke:var(--tr-ready)"/>`,
     island:`<ellipse class="isl-ring ring" cx="17" cy="12" rx="15" ry="9"/><circle class="knot" cx="12" cy="12" r="3"/><circle class="knot" cx="21" cy="11" r="3"/>`,
     tower:`<rect class="knot tower" x="8" y="3" width="18" height="18" rx="3"/><text x="17" y="16" text-anchor="middle" font-size="9" font-weight="700" fill="var(--surface)">9</text>`,
     phantom:`<path class="shoot ph" d="M3,20 Q10,2 17,8"/><path class="shoot ph" d="M31,20 Q24,2 17,8"/><circle class="phantom" cx="17" cy="9" r="6"/>`,
@@ -651,12 +660,16 @@ function defaultPanel(){
       <div>${glyph("island")}<span><b>Islands</b>: proved nodes at infinite distance float beside their limb; a red ring means no connector reaches them and no standalone reason is declared.</span></div>
       <div>${glyph("phantom")}<span><b>Connectors</b>: hollow dashed dots between the nodes a stated, not yet proved theorem would join; the number is how many theorems proving it brings within 3 hops.</span></div>
     </div>
-    <h3>Frontier</h3>
+    <h3>Future work</h3>
     <div class="legend">
-      <div>${glyph("bud")}<span><b>Buds</b>: unproved blueprint nodes; the centre shows the state of the issue that carries it.</span></div>
+      <div>${glyph("bud")}<span><b>Buds</b>: unproved blueprint nodes, each carried by an open issue and joined to the proved node it rests on; the centre shows the issue's state.</span></div>
+      <div>${glyph("issring")}<span><b>Ringed knots</b>: proved nodes an open issue works on (a refactor, an upgrade, a generalisation), ringed in the issue's state.</span></div>
       <div>${glyph("core")}<span><b>Half-filled bud</b>: its core is already proved in the corpus.</span></div>
-      <div>${glyph("star")}<span><b>Stars</b>: open problems.</span></div>
-      <div>${glyph("seed")}<span><b>Seedlings</b>: frontier that grows straight from Mathlib or BrownianMotion.</span></div>
+      <div>${glyph("seed")}<span><b>Seedlings</b>: future work that grows straight from Mathlib or BrownianMotion.</span></div>
+    </div>
+    <h3>Open problems</h3>
+    <div class="legend">
+      <div>${glyph("star")}<span><b>Stars</b>: open problems of the field, statements nobody has proved, carried by an issue labelled open-problem.</span></div>
     </div>
     <h3>Leaves</h3>
     <div class="legend">
@@ -701,7 +714,7 @@ q.addEventListener("keydown", e => { if (e.key !== "Enter") return; const m = ma
 for (const b of document.querySelectorAll("#tree-box [data-layer]")){
   const set = on => { b.setAttribute("aria-pressed", on); svg.classed("show-" + b.dataset.layer, on); };
   set(b.getAttribute("aria-pressed") === "true");
-  b.onclick = () => { set(b.getAttribute("aria-pressed") !== "true"); placeLabels(); };
+  b.onclick = () => { set(b.getAttribute("aria-pressed") !== "true"); light(litSet); };
 }
 
 // ---------- growth ----------
