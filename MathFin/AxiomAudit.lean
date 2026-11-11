@@ -2748,6 +2748,42 @@ The landmarks of `docs/blueprint.md` that no section above pins: one `#print axi
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.BlackScholes.isPricingMeasure_constGirsanovMeasure
 
+/-- info: 'MathFin.Contracts.TimeDepVol.isPricingMeasure_constGirsanovMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.TimeDepVol.isPricingMeasure_constGirsanovMeasure
+
+/-- info: 'MathFin.Contracts.TimeDepVol.price_europeanCall_constGirsanovMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.TimeDepVol.price_europeanCall_constGirsanovMeasure
+
+/-- info: 'MathFin.Market.isPricingMeasure_oneDate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Market.isPricingMeasure_oneDate
+
+/-- info: 'MathFin.JumpDiffusion.isPricingMeasure_esscher' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.JumpDiffusion.isPricingMeasure_esscher
+
+/-- info: 'MathFin.JumpDiffusion.price_europeanCall_esscher' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.JumpDiffusion.price_europeanCall_esscher
+
+/-- info: 'MathFin.JumpDiffusion.exists_isPricingMeasure_price_call_ne' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.JumpDiffusion.exists_isPricingMeasure_price_call_ne
+
+/-- info: 'MathFin.lifeAnnuityDue_eq_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.lifeAnnuityDue_eq_value
+
+/-- info: 'MathFin.esscherPremium_eq_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.esscherPremium_eq_price
+
+/-- info: 'MathFin.isPricingMeasure_insuredMarket_tilted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.isPricingMeasure_insuredMarket_tilted
+
 
 /-- info: 'MathFin.Execution.isPricingMeasure_toMarket_condExp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -2777,6 +2813,34 @@ The landmarks of `docs/blueprint.md` that no section above pins: one `#print axi
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.trancheLeg
 
+/-- info: 'MathFin.capm_of_affine_discountFactor' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.capm_of_affine_discountFactor
+
+/-- info: 'MathFin.abs_sharpeRatio_le_of_discountFactor' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.abs_sharpeRatio_le_of_discountFactor
+
+/-- info: 'MathFin.Market.IsPricingMeasure.abs_sharpeRatio_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Market.IsPricingMeasure.abs_sharpeRatio_le
+
+/-- info: 'MathFin.Market.IsPricingMeasure.capm_of_affine_sdf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Market.IsPricingMeasure.capm_of_affine_sdf
+
+/-- info: 'MathFin.Market.IsPricingMeasure.exists_deriv_eq_mul_sdf_of_stationary' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Market.IsPricingMeasure.exists_deriv_eq_mul_sdf_of_stationary
+
+/-- info: 'MathFin.Market.IsPricingMeasure.sdf_eq_div_of_logOptimal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Market.IsPricingMeasure.sdf_eq_div_of_logOptimal
+
+/-- info: 'MathFin.expectedUtility_eq_integral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.expectedUtility_eq_integral
+
 end MathFin.AxiomAudit
 
 /-- info: 'MathFin.DeFi.price_lpPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -2786,3 +2850,47 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.Contracts.value_trancheLeg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.Contracts.value_trancheLeg
+
+/-- info: 'MathFin.Contracts.BlackScholes.price_europeanPut_le_americanPutValue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.price_europeanPut_le_americanPutValue
+
+/-- info: 'MathFin.americanPrice_eq_snellEnvelope' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.americanPrice_eq_snellEnvelope
+
+/-- info: 'MathFin.Rates.isPricingMeasure_deterministicMarket' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Rates.isPricingMeasure_deterministicMarket
+
+/-- info: 'MathFin.Rates.bondPortfolioValue_eq_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Rates.bondPortfolioValue_eq_price
+
+/-- info: 'MathFin.Contracts.Merton.merton_market' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Contracts.Merton.merton_market
+
+/-- info: 'MathFin.Bachelier.price_europeanCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Bachelier.price_europeanCall
+
+/-- info: 'MathFin.Bachelier.superReplicationPrice_europeanCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Bachelier.superReplicationPrice_europeanCall
+
+/-- info: 'MathFin.Contracts.BlackScholes.pathAssets' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Contracts.BlackScholes.pathAssets
+
+/-- info: 'MathFin.Market.superReplicationPrice_eq_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Market.superReplicationPrice_eq_price
+
+/-- info: 'MathFin.Market.IsPricingMeasure.isNormalizedCallPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Market.IsPricingMeasure.isNormalizedCallPrice
+
+/-- info: 'MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure

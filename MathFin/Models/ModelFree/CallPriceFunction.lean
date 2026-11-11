@@ -33,6 +33,7 @@ direction, the convexity holds for any law with a finite mean (`convexOn_integra
 
 * `ConvexOn.antitoneOn_Ioi_of_le`: a convex function on `Ioi a` that is bounded above is
   nonincreasing.
+* `IsNormalizedCallPrice.of_eqOn`: the conditions concern only the values on `(0, ∞)`.
 * `IsNormalizedCallPrice.of_convexOn`: convexity on `(0, ∞)`, the bounds `max (1 − K) 0 ≤ C K ≤ 1`
   and the limit `0` at infinity give `IsNormalizedCallPrice C`; monotonicity and the limit `1`
   at strike `0⁺` are derived.
@@ -103,5 +104,18 @@ theorem IsNormalizedCallPrice.of_convexOn {C : ℝ → ℝ} (hC : ConvexOn ℝ (
       (by filter_upwards [self_mem_nhdsWithin] with K hK using (le_max_left _ _).trans (hlow K hK))
       (by filter_upwards [self_mem_nhdsWithin] with K hK using hup K hK)
   tendsto_zero := h0
+
+/-- Call price functions are determined by their values on the positive strikes: every field of
+`IsNormalizedCallPrice` concerns only `(0, ∞)`. -/
+theorem IsNormalizedCallPrice.of_eqOn {C C' : ℝ → ℝ} (h : IsNormalizedCallPrice C)
+    (he : EqOn C C' (Ioi 0)) : IsNormalizedCallPrice C' where
+  convexOn := h.convexOn.congr he
+  antitoneOn a ha b hb hab := by rw [← he ha, ← he hb]; exact h.antitoneOn ha hb hab
+  intrinsic_le K hK := by rw [← he hK]; exact h.intrinsic_le K hK
+  le_one K hK := by rw [← he hK]; exact h.le_one K hK
+  tendsto_one := h.tendsto_one.congr'
+    (by filter_upwards [self_mem_nhdsWithin] with K hK using he hK)
+  tendsto_zero := h.tendsto_zero.congr'
+    (by filter_upwards [eventually_gt_atTop 0] with K hK using he hK)
 
 end MathFin

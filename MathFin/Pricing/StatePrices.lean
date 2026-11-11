@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
+public import MathFin.Probability.Laws.FiniteWeights
 public import Mathlib.Analysis.Complex.Exponential
 
 /-!
@@ -37,6 +38,8 @@ specific `q` given by the model.
 
 ## Main results
 
+* `statePricePricing_eq_integral`: for non-negative state prices, `V_0(X)` is the integral of `X`
+  against `Measure.ofWeights s q`.
 * `statePricePricing_zero`: `V_0(0) = 0`.
 * `statePricePricing_one`: `V_0(1) = ∑ q_i` (unit-payoff price = ∑ state prices).
 * `statePricePricing_const`: `V_0(c · 1) = c · ∑ q_i` (unit-payoff times constant).
@@ -70,6 +73,14 @@ variable {ι : Type*}
 `V_0(X) = ∑ q_i · X_i`. -/
 noncomputable def statePricePricing (s : Finset ι) (q : ι → ℝ) (X : ι → ℝ) : ℝ :=
   ∑ i ∈ s, q i * X i
+
+open MeasureTheory in
+/-- **State-price pricing is an integral**: for non-negative state prices `q`, the price of `X` is
+`∫ X ∂(∑ i ∈ s, q i • δ_i)`, the integral against the state prices as a measure. -/
+theorem statePricePricing_eq_integral [MeasurableSpace ι] [MeasurableSingletonClass ι]
+    (s : Finset ι) {q : ι → ℝ} (hq : ∀ i ∈ s, 0 ≤ q i) (X : ι → ℝ) :
+    statePricePricing s q X = ∫ i, X i ∂Measure.ofWeights s q :=
+  (Measure.integral_ofWeights s hq X).symm
 
 /-- **Zero payoff has zero price**. -/
 lemma statePricePricing_zero (s : Finset ι) (q : ι → ℝ) :

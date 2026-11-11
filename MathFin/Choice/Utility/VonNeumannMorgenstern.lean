@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
+public import MathFin.Probability.Laws.FiniteWeights
 public import Mathlib.Algebra.BigOperators.Ring.Finset
 public import Mathlib.Basic.Real.Basic
 public import Mathlib.Tactic.FieldSimp
@@ -96,6 +97,8 @@ the same calibration argument and belongs with it.
 
 ## Main results
 
+* `expectedUtility_eq_integral`, `expectedUtility_univ_real_eq_integral`: expected utility is the
+  integral of the utility against the lottery as a measure (`Measure.ofWeights`).
 * `expectedUtility_mix`: expected utility is affine in the mixture,
   `EU(α p + (1 − α) q) = α EU(p) + (1 − α) EU(q)`.
 * `prefersEU_total`, `prefersEU_trans`, `prefersEU_refl`: the expected-utility preference is
@@ -110,6 +113,8 @@ the same calibration argument and belongs with it.
 ## References
 
 * [von Neumann and Morgenstern, *Theory of Games and Economic Behavior*][VonNeumannMorgenstern1944]
+* [H. Föllmer and A. Schied, *Stochastic Finance: An Introduction in Discrete Time*][FollmerSchied],
+  §1.1
 
 ## Tags
 
@@ -131,6 +136,23 @@ def mix (α : ℝ) (p q : ι → ℝ) : ι → ℝ := fun i ↦ α * p i + (1 - 
 support `s`. -/
 def expectedUtility (s : Finset ι) (u : ι → ℝ) (p : ι → ℝ) : ℝ :=
   ∑ i ∈ s, p i * u i
+
+open MeasureTheory in
+/-- **Expected utility is an integral**: for non-negative weights `p`, `expectedUtility s u p` is
+`∫ u ∂(∑ i ∈ s, p i • δ_i)`, the integral of the utility against the lottery as a measure. -/
+theorem expectedUtility_eq_integral [MeasurableSpace ι] [MeasurableSingletonClass ι]
+    (s : Finset ι) {p : ι → ℝ} (hp : ∀ i ∈ s, 0 ≤ p i) (u : ι → ℝ) :
+    expectedUtility s u p = ∫ i, u i ∂Measure.ofWeights s p :=
+  (Measure.integral_ofWeights s hp u).symm
+
+open MeasureTheory in
+/-- **The expected utility of a finite measure's point masses is its integral**:
+`∑ i, μ {i} * u i = ∫ u ∂μ` on a finite type with measurable singletons. -/
+theorem expectedUtility_univ_real_eq_integral [Fintype ι] [MeasurableSpace ι]
+    [MeasurableSingletonClass ι] (μ : Measure ι) [IsFiniteMeasure μ] (u : ι → ℝ) :
+    expectedUtility Finset.univ u (fun i ↦ μ.real {i}) = ∫ i, u i ∂μ := by
+  rw [expectedUtility_eq_integral _ fun i _ ↦ measureReal_nonneg,
+    Measure.ofWeights_univ_real_singleton]
 
 /-- `p` is **weakly preferred** to `q` under expected utility. -/
 def prefersEU (s : Finset ι) (u : ι → ℝ) (p q : ι → ℝ) : Prop :=

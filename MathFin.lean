@@ -65,6 +65,7 @@ import MathFin.Probability.Gaussian.GaussianCDFDeriv
 -- The Esscher transform of a law on ℝ (Mathlib's `Measure.tilted`): tilted moments, a law with
 -- every exponential moment is fixed by its MGF, and the Gaussian tilt N(m, v) ↦ N(m + θv, v)
 import MathFin.Probability.Laws.Esscher
+import MathFin.Probability.Laws.FiniteWeights
 import MathFin.Probability.Gaussian.FeynmanKacHeatEquation
 import MathFin.Probability.Brownian.BrownianMartingale
 -- Bayes change-of-measure engine + Black–Scholes EMM via an explicit Girsanov density
@@ -379,6 +380,7 @@ import MathFin.Pricing.NoArbitrageDerivations
 import MathFin.Pricing.SuperhedgingDuality
 import MathFin.Pricing.Value
 import MathFin.Pricing.Market
+import MathFin.Pricing.OneDateMarket
 import MathFin.Pricing.Parity
 import MathFin.Pricing.DiscreteMarket
 -- The law of a Wiener-represented rate under the forward measure of a Wiener-represented account
@@ -481,6 +483,7 @@ import MathFin.Models.Jumps.JumpDiffusionIdentifiability
 -- equivalent to the physical law (with any drift) and compensated, yet price some call
 -- differently when the jumps are nontrivial
 import MathFin.Models.Jumps.JumpDiffusionIncompleteness
+import MathFin.Models.Jumps.Market
 -- The log-return law is a Gaussian mixture; with σ ≠ 0 and τ > 0 it has a continuous density, so
 -- no atoms, and with σ = 0 it has an atom at bτ; the tail of a law with a density is
 -- differentiable where the density is continuous; the law of the price Seʸ has the density
@@ -511,6 +514,7 @@ import MathFin.Models.Jumps.JumpDiffusionMoments
 import MathFin.Models.Jumps.JumpDiffusionVarianceSwap
 import MathFin.Models.Bachelier.Bachelier
 import MathFin.Models.Bachelier.BachelierGreeks
+import MathFin.Models.Bachelier.BachelierMarket
 import MathFin.Models.BlackScholes.Chooser
 import MathFin.Models.ModelFree.Spreads
 -- Call spreads tend to the digital, so call prices at every strike determine the law (the first-
@@ -539,6 +543,7 @@ import MathFin.Models.BlackScholes.StrikeConvexity
 import MathFin.Models.BlackScholes.SpotConvexity
 import MathFin.Models.ModelFree.PriceBounds
 import MathFin.Models.ModelFree.CallPriceFunction
+import MathFin.Models.ModelFree.MarketCallPrice
 -- Phase 13 additions:
 -- Quanto correction derived from a joint-Gaussian FX model (Girsanov-grounded)
 import MathFin.Models.BlackScholes.QuantoGrounding
@@ -625,6 +630,7 @@ import MathFin.Models.Rates.DurationSensitivity
 import MathFin.Models.Rates.ConvexitySensitivity
 -- Phase 27: KMV-Merton structural derivation (probabilistic content of `kmvPD`)
 import MathFin.Models.Credit.KMVMertonStructural
+import MathFin.Models.Credit.MertonMarket
 -- Phase 28: CDS fair spread under time-varying hazard (cash-flow balance)
 import MathFin.Models.Credit.CDSTimeVarying
 import MathFin.Models.Credit.Cox
@@ -674,6 +680,7 @@ import MathFin.Models.Rates.InterestRateSwap
 import MathFin.Models.Rates.CMS
 import MathFin.Models.Rates.FRA
 import MathFin.Models.Rates.DeterministicCurve
+import MathFin.Models.Rates.DeterministicMarket
 import MathFin.Models.Rates.NelsonSiegelSvensson
 import MathFin.Models.BlackScholes.BlackScholes
 import MathFin.Models.BlackScholes.BlackScholesExchange
@@ -689,6 +696,7 @@ import MathFin.Models.Binomial.Binomial
 import MathFin.Models.Binomial.BinomialCompleteMarket
 import MathFin.Models.Binomial.BinomialLimit
 import MathFin.Models.Binomial.Market
+import MathFin.Models.LocalVol.TimeDependentVol
 import MathFin.Models.Rates.Caplet
 import MathFin.Models.Rates.CMSContract
 import MathFin.Models.Rates.ShortRate
@@ -728,6 +736,7 @@ import MathFin.Models.ModelFree.SVI.ExtendedFormula
 import MathFin.Models.ModelFree.SVI.FiniteCertificate
 import MathFin.Models.ModelFree.SVI.HermiteIdentity
 import MathFin.Models.ModelFree.SVI.ImaginaryTraceSignature
+import MathFin.Models.ModelFree.SVI.MarketRealisation
 import MathFin.Models.ModelFree.SVI.Matrices
 import MathFin.Models.ModelFree.SVI.MatrixCertificate
 import MathFin.Models.ModelFree.SVI.MatrixSignature
@@ -763,10 +772,12 @@ import MathFin.Models.Forwards.TheoryOfStorage
 -- AR(1) <-> Ornstein-Uhlenbeck parameter inversion for commodity calibration
 import MathFin.Models.Forwards.AR1OUCalibration
 import MathFin.Models.Binomial.PathMeasure
+import MathFin.Models.Binomial.AmericanSnell
 import MathFin.Models.Binomial.MultiPeriodFTAP
 import MathFin.Models.Jumps.JumpDiffusionThinning
 import MathFin.Models.Rates.ABCDBlack76
 import MathFin.Models.BlackScholes.American.AmericanPutEuropeanBound
+import MathFin.Models.BlackScholes.American.Summit
 import MathFin.Models.Rates.OUHermiteVasicek
 import MathFin.Models.Rates.AffineTermStructurePDE
 import MathFin.Models.Rates.PeriodicCompounding
@@ -865,6 +876,8 @@ import MathFin.Choice.Portfolio.TangentPortfolio
 -- Phase 21: first-principles Sharpe-FOC and CAPM-equilibrium derivations
 import MathFin.Choice.Portfolio.SharpeFOCDerivation
 import MathFin.Choice.Portfolio.CAPMEquilibrium
+import MathFin.Choice.Portfolio.StochasticDiscountFactor
+import MathFin.Choice.Portfolio.MarketSDF
 -- Phase 23: N-asset Markowitz Lagrangian FOC (forward direction)
 import MathFin.Choice.Portfolio.MarkowitzLagrangian
 -- Phase 26: N-asset risk parity from log-barrier Lagrangian FOC
@@ -891,6 +904,7 @@ import MathFin.Choice.Performance.PurgedCV
 -- plus invariance of the preference under positive affine rescaling of the utility)
 import MathFin.Choice.Utility.VonNeumannMorgenstern
 import MathFin.Choice.Utility.StatePriceDensity
+import MathFin.Choice.Utility.MarketMarginalUtility
 -- QRM bridges: equicorrelation, Gaussian VaR/ES-optimal = Markowitz portfolios, the HHI
 -- systematic floor, and the square-root-of-time rule for GBM losses
 import MathFin.Choice.Portfolio.Equicorrelation
@@ -904,6 +918,8 @@ import MathFin.Insurance.Mortality
 -- Survival model (re-formalized from Yosuke Ito's AFP `Survival_Model`, BSD, cited)
 import MathFin.Insurance.SurvivalModel
 import MathFin.Insurance.ActuarialInsurance
+import MathFin.Insurance.AnnuityValue
+import MathFin.Insurance.EsscherPremium
 
 -- Markets
 import MathFin.Markets.Execution.AlmgrenChriss

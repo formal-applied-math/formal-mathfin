@@ -36,8 +36,8 @@ risky annuity `riskyAnnuity_eq` of `Models/Credit/Cox.lean`, where a constant de
 intensity adds to the rate in the same way.
 
 `lifeAnnuityDue` is written directly as the sum `∑ B(0, k) S(k)`. That it is the
-expected present value of the payments made to a random lifetime with survival
-function `S` is the standard actuarial reading; it is not proved here.
+value of the payments made while a random lifetime with survival function `S` has not
+ended is `lifeAnnuityDue_eq_value` (`Insurance/AnnuityValue.lean`).
 
 ## Main definitions
 

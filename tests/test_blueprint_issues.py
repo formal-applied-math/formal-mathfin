@@ -84,6 +84,9 @@ def test_taxonomy_labels_are_derived_from_the_nodes() -> None:
     # an issue naming a node only an open pull request adds keeps the labels that branch gave it
     pending = _issue(4, "Blueprint: thm:a, thm:new", labels=("type:proof", "area:choice/trading"))
     assert bi.label_drift(pending, nodes) == (set(), set())
+    # an issue an open pull request closes is relabelled from the merged tree, not checked here
+    delivering = _issue(5, "Blueprint: thm:a\n\ncloses #2", is_pr=True)
+    assert bi.check([wrong, delivering], nodes) == []
 
 
 def test_every_taxonomy_label_fits_github() -> None:

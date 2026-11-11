@@ -5,6 +5,80 @@ Authors: Raphael Coelho
 -/
 module
 
+import MathFin.Probability.Brownian.QuadraticVariationL2
+import MathFin.Probability.Brownian.Wiener.WienerIntegralL2
+import MathFin.Probability.Brownian.Ito.ItoIsometryAdapted
+import MathFin.Probability.Brownian.Ito.ItoIntegralCLM
+import MathFin.Probability.Martingales.BracketCompensator
+import MathFin.Probability.Brownian.Ito.ItoIntegralBrownian
+import MathFin.Probability.Discrete.DiscreteIto
+import MathFin.Probability.Brownian.Ito.ItoFormulaSquaredL2
+import MathFin.Probability.Brownian.Ito.ItoFormulaCLM
+import MathFin.Probability.Brownian.Ito.ItoFormulaTD
+import MathFin.Probability.Brownian.Ito.ItoLemma2D
+import MathFin.Probability.Gaussian.FeynmanKacHeatEquation
+import MathFin.Models.BlackScholes.GaussianGirsanov
+import MathFin.Models.BlackScholes.BSCallHypFromBrownian
+import MathFin.Pricing.FTAP.ContinuousFTAP
+import MathFin.Pricing.MarketCompleteness
+import MathFin.Models.ModelFree.CarrMadan
+import MathFin.Models.BlackScholes.Call
+import MathFin.Models.BlackScholes.PDE
+import MathFin.Models.BlackScholes.PDEFromIto
+import MathFin.Models.BlackScholes.PDEFromFeynmanKac
+import MathFin.Models.BlackScholes.MargrabeGrounding
+import MathFin.Models.Binomial.MartingaleRepresentation
+import MathFin.Models.Binomial.CRRCharFun
+import MathFin.Models.Binomial.CRRClosedForm
+import MathFin.Models.Jumps.MertonDominance
+import MathFin.Probability.Discrete.MarkovPathMeasure
+import MathFin.Probability.Brownian.Ito.ItoFormulaAdaptedProcess
+import MathFin.Models.Forwards.SchwartzOneFactor
+import MathFin.Models.Credit.CVA
+import MathFin.Models.Forwards.FxForwardParity
+import MathFin.Models.Jumps.JumpDiffusionProcess
+import MathFin.Models.Jumps.JumpDiffusionVarianceSwap
+import MathFin.Pricing.Numeraire
+import MathFin.Probability.Discrete.SnellEnvelope
+import MathFin.Probability.Dependence.MarshallOlkin
+import MathFin.Models.Rates.KeyRateDuration
+import MathFin.Models.BlackScholes.DeltaHedge
+import MathFin.Probability.Brownian.Girsanov.GirsanovFiltered
+import MathFin.Probability.Brownian.SDE.SDEExistence
+import MathFin.Probability.Brownian.Ito.StochasticFubini
+import MathFin.Pricing.FTAP.NoArbitrageLocal
+import MathFin.Pricing.FTAP.DensityPasting
+import MathFin.Models.BlackScholes.BlackScholesPhysical
+import MathFin.Probability.Brownian.Ito.ItoProductRule
+import MathFin.Models.BlackScholes.BlackScholesSelfFinancing
+import MathFin.Probability.Gaussian.StandardNormal
+import MathFin.Probability.Laws.Quantile
+import MathFin.Probability.Laws.QuantileConvergence
+import MathFin.Probability.Martingales.EquivMeasure
+import MathFin.Pricing.EquivMartingaleMeasure
+import MathFin.Probability.Discrete.MartingaleTransform
+import MathFin.Probability.Dependence.GaussianCopula
+import MathFin.Risk.ValueAtRisk
+import MathFin.Risk.Coherent
+import MathFin.Risk.ExpectedShortfall
+import MathFin.Risk.CompoundPoissonCVaR
+import MathFin.Contracts.Core
+import MathFin.Pricing.Value
+import MathFin.Models.Rates.ZCB
+import MathFin.Models.Rates.HJM
+import MathFin.Models.Rates.Immunization
+import MathFin.Models.Rates.AffineTermStructurePDE
+import MathFin.Choice.Portfolio.MarkowitzNAsset
+import MathFin.Choice.Portfolio.MarkowitzLagrangian
+import MathFin.Choice.Portfolio.RiskParityFOC
+import MathFin.Choice.Portfolio.Markowitz
+import MathFin.Choice.Portfolio.CAPM
+import MathFin.Choice.Utility.StatePriceDensity
+import MathFin.Choice.Portfolio.StochasticDiscountFactor
+import MathFin.Choice.Portfolio.MarketSDF
+import MathFin.Choice.Utility.MarketMarginalUtility
+import MathFin.Probability.Laws.FiniteWeights
+import MathFin.Choice.Portfolio.TangentPortfolio
 import MathFin.Choice.Performance.Kelly
 import MathFin.Choice.Performance.Ratios
 import MathFin.Choice.Portfolio.CAPMEquilibrium
@@ -12,9 +86,10 @@ import MathFin.Choice.Portfolio.ConvexQPKKT
 import MathFin.Choice.Portfolio.MarkowitzLagrangian
 import MathFin.Choice.Portfolio.MarkowitzNAsset
 import MathFin.Choice.Portfolio.RiskParityFOC
-import MathFin.Choice.Utility.StatePriceDensity
 import MathFin.Choice.Utility.VonNeumannMorgenstern
 import MathFin.Contracts.Core
+import MathFin.Insurance.AnnuityValue
+import MathFin.Insurance.EsscherPremium
 import MathFin.Insurance.SurvivalModel
 import MathFin.Markets.DeFi.LPContract
 import MathFin.Markets.DeFi.LiquidationAsStructuralDefault
@@ -22,9 +97,13 @@ import MathFin.Markets.DeFi.UniswapMechanics
 import MathFin.Markets.Microstructure.GlostenMilgromCondExp
 import MathFin.Markets.Microstructure.GlostenMilgromMarket
 import MathFin.Models.Bachelier.Bachelier
+import MathFin.Models.Binomial.AmericanSnell
 import MathFin.Models.Binomial.CRRClosedForm
 import MathFin.Models.Binomial.MartingaleRepresentation
 import MathFin.Models.BlackScholes.American.Stopping.ActualOptimality
+import MathFin.Models.BlackScholes.American.Summit
+import MathFin.Models.Bachelier.BachelierMarket
+import MathFin.Models.BlackScholes.BlackScholesAsian
 import MathFin.Models.BlackScholes.BlackScholesPhysical
 import MathFin.Models.BlackScholes.Call
 import MathFin.Models.BlackScholes.DeltaHedge
@@ -41,10 +120,14 @@ import MathFin.Models.Jumps.JumpDiffusionIncompleteness
 import MathFin.Models.Jumps.JumpDiffusionMixing
 import MathFin.Models.Jumps.JumpDiffusionProcess
 import MathFin.Models.Jumps.JumpDiffusionVarianceSwap
+import MathFin.Models.Jumps.Market
 import MathFin.Models.LocalVol.Dupire
+import MathFin.Models.LocalVol.TimeDependentVol
 import MathFin.Models.ModelFree.CarrMadan
+import MathFin.Models.ModelFree.MarketCallPrice
 import MathFin.Models.Rates.AffineTermStructurePDE
 import MathFin.Models.Rates.Caplet
+import MathFin.Models.Rates.DeterministicMarket
 import MathFin.Models.Rates.HJM
 import MathFin.Models.Rates.Immunization
 import MathFin.Models.Rates.KeyRateDuration
@@ -59,6 +142,7 @@ import MathFin.Pricing.ForwardMeasure
 import MathFin.Pricing.Market
 import MathFin.Pricing.MarketCompleteness
 import MathFin.Pricing.Numeraire
+import MathFin.Pricing.OneDateMarket
 import MathFin.Pricing.Parity
 import MathFin.Pricing.Value
 import MathFin.Probability.Brownian.Girsanov.GirsanovFiltered
@@ -311,12 +395,6 @@ attribute [blueprint "thm:ito-product-rule"
   formula for $f(x,y) = xy$ only. -/)]
   MathFin.ItoFormulaAdapted.ito_product_rule_process
 
-attribute [blueprint "def:gbm"
-  (title := "Geometric Brownian motion")
-  (statement := /-- The GBM value function $S(t,x) = S_0 \exp((\mu - \tfrac12\sigma^2)t +
-  \sigma x)$; at $x = B_t$ it is geometric Brownian motion. -/)]
-  MathFin.gbmValue
-
 attribute [blueprint "thm:levy-characterization"
   (title := "Lévy's characterization of Brownian motion")
   (statement := /-- A continuous adapted real process $M$ with $M_0 = 0$ such that $M$ and
@@ -504,6 +582,16 @@ attribute [blueprint "thm:change-of-numeraire"
   to $Q$ (`numeraireMeasure_isEquivProbMeasure`). A pricing identity at one date; no dynamics. -/)]
   MathFin.changeOfNumeraire
 
+attribute [blueprint "thm:one-date-market"
+  (title := "The one-date market and its pricing measures")
+  (statement := /-- The market with one asset, quoted at $s_0e^{rt}$ before a date $\tau$ and at a
+  random value $X$ from $\tau$ on, with the money market $e^{rt}$ as numéraire and no
+  information before $\tau$, is priced up to $\tau$ by every probability measure $Q$ equivalent
+  to the reference measure with $X$ integrable and $E^Q[X] = s_0e^{r\tau}$. The claim paying $X$
+  at $\tau$ is worth $E^Q[e^{-r\tau}X]$. The model has no dynamics before $\tau$; the
+  jump-diffusion and insured markets are its instances. -/)]
+  MathFin.Market.isPricingMeasure_oneDate
+
 -- ===== valuation/general: Arbitrage theory =====
 
 attribute [blueprint "thm:continuous-ftap"
@@ -610,13 +698,26 @@ attribute [blueprint "thm:esscher-tilt"
 
 attribute [blueprint "thm:market-completeness"
   (title := "Completeness of the Brownian market")
-  (statement := /-- Every square-integrable $\mathcal{F}^B_T$-claim is replicated from initial
-  wealth $E_\mu[H]$ by a unique Itô-integrable strategy — the representation theorem read as a
-  trading statement, the integrand *being* the hedge. The strategy class is the predictable
-  $L^2$ integrands (piecewise-constant holdings could not hedge a general $L^2$ claim), and
-  the traded gain is the integral against $B$ itself: the stochastic integral
-  $\int\varphi\,dS$ against a general price is absent by design. -/)]
-  MathFin.exists_replicating_strategy
+  (statement := /-- In a market on the Brownian information $\mathcal{F}^B$ for which the reference
+  measure $\mu$ is a pricing measure up to $T$, every measure $Q \ll \mu$ that prices the
+  traded gains at zero is a pricing measure, and a contract whose deflated present value is
+  square-integrable and known at $T$ has under $Q$ its superreplication price — the least initial
+  wealth from which an Itô-integrable strategy in the driver $B$ dominates it — as its market
+  price. The underlying fact is the representation theorem: every square-integrable
+  $\mathcal{F}^B_T$-claim is replicated from initial wealth $E_\mu[H]$ by a unique predictable
+  $L^2$ integrand (`exists_replicating_strategy`). The traded gain is the integral against $B$
+  itself; the integral against a general price is not used here. In the Bachelier market
+  `Bachelier.superReplicationPrice_europeanCall` is the instance for the call. -/)]
+  MathFin.Market.superReplicationPrice_eq_price
+
+attribute [blueprint "def:gbm"
+  (title := "Geometric Brownian motion")
+  (statement := /-- The model map of the Black–Scholes market along a Brownian path $B$: the
+  asset at time $u$ is $S_u = S_0 \exp((r - \tfrac12\sigma^2)u + \sigma B_u)$, the GBM value
+  function $S(t,x) = S_0 \exp((r - \tfrac12\sigma^2)t + \sigma x)$ at $x = B_u$
+  (`pathAssets_eq_gbmValue`). It is the asset of `BlackScholes.market`, with the physical drift
+  in the place of $r$. -/)]
+  MathFin.Contracts.BlackScholes.pathAssets
 
 attribute [blueprint "thm:bs-call"
   (title := "Black–Scholes call price formula")
@@ -694,11 +795,13 @@ attribute [blueprint "thm:bs-delta-hedge"
 
 attribute [blueprint "thm:bachelier-call"
   (title := "Bachelier call price formula")
-  (statement := /-- Under `BachelierHyp`, with terminal price $S_T = S_0 + \sigma\sqrt{T}\,Z$
-  and $Z \sim N(0,1)$ under $Q$, $E_Q[(S_T - K)^+] = (S_0 - K)\Phi(d) +
-  \sigma\sqrt{T}\,\varphi(d)$, with $d$ the standardised distance to the strike. Undiscounted,
-  and the pricing measure is a hypothesis. -/)]
-  MathFin.bachelier_call_formula
+  (statement := /-- In the Bachelier market of a pre-Brownian motion $W$ (asset $S_0 + \sigma W_t$,
+  numéraire $1$, the filtration $W$ generates) the reference measure is a pricing measure, and for
+  $K, \sigma, T > 0$ the market price of the European call under it is $(S_0 - K)\Phi(d) +
+  \sigma\sqrt{T}\,\varphi(d)$, with $d = (S_0 - K)/(\sigma\sqrt{T})$. Zero interest, no drift:
+  the pricing measure is the reference measure itself. `bachelier_call_formula` is the
+  hypothesis form $E_Q[(S_T - K)^+]$ it rests on. -/)]
+  MathFin.Bachelier.price_europeanCall
 
 attribute [blueprint "thm:american-put-optimal-exercise"
   (title := "Optimal exercise of the American put")
@@ -712,6 +815,24 @@ attribute [blueprint "thm:american-put-optimal-exercise"
   tends to $0$ (`tendsto_brownianUsualExerciseBoundary_expiry`). Normalised parameters only;
   the early-exercise premium decomposition and the perpetual case are not proved. -/)]
   MathFin.BlackScholes.AmericanPut.Stopping.brownianUsualActualContactRule_optimal
+
+attribute [blueprint "thm:american-put-dominates-european"
+  (title := "The American put value dominates the Black–Scholes European price")
+  (statement := /-- For $\sigma \ne 0$ and $T \le H$, at the Girsanov pricing measure $Q$ of
+  $\theta = (m - r)/\sigma$ the price of the European put in the Black–Scholes market is at most
+  the American put value (no dividends) of $B^\theta$ over the natural filtration of $W$, the
+  supremum of expected discounted payoffs over stopping rules bounded by $T$. The deterministic
+  rule $T$ is admissible and the physical asset is $Q$-almost surely the risk-neutral asset of
+  $B^\theta$. Not proved: strictness, or the superhedging characterization. -/)]
+  MathFin.Contracts.BlackScholes.price_europeanPut_le_americanPutValue
+
+attribute [blueprint "thm:american-price-snell-envelope"
+  (title := "The binomial American price is the Snell envelope")
+  (statement := /-- Under the risk-neutral coin flips, the Snell envelope of the discounted
+  intrinsic value along the spot path, for Mathlib's conditional expectation on the flip
+  filtration with exercise at every date, is almost surely the binomial American price at time
+  zero. -/)]
+  MathFin.americanPrice_eq_snellEnvelope
 
 -- ===== valuation/volatility: Volatility =====
 
@@ -737,6 +858,18 @@ attribute [blueprint "thm:breeden-litzenberger"
   E[(X_s - K)^+]$ is the call surface at zero rates: $\partial_K^2 C(s,\cdot)$ is the law of
   $X_s$ as a distribution. The weak form, for an arbitrary law. -/)]
   MathFin.Dupire.breedenLitzenberger_weak
+
+attribute [blueprint "thm:time-dependent-vol-market"
+  (title := "Black–Scholes with a deterministic volatility clock is a market")
+  (statement := /-- For a pre-Brownian motion $W$ and a monotone clock $v$ (the total variance
+  $\int_0^t\sigma^2$ of a deterministic volatility), the asset $e^{rt}S_0e^{(\theta -
+  1/2)v(t) + W_{v(t)}}$ with numéraire $e^{rt}$ and the information $W$ generates up to $v(t)$
+  is a market, and the Girsanov measure of the constant price of risk $\theta$ at a horizon $H$
+  is a pricing measure of it at every $T$ with $v(T) \le H$. Under it the European call is worth
+  the Black–Scholes formula of the total variance $v(T)$ at the strike $Ke^{-rT}$ of the
+  deflated asset (`price_europeanCall_constGirsanovMeasure`). The asset is defined, not derived
+  from an SDE; a general $\sigma(t,S)$ and uniqueness of the pricing measure are not proved. -/)]
+  MathFin.Contracts.TimeDepVol.isPricingMeasure_constGirsanovMeasure
 
 -- ===== valuation/jumps: Jump models =====
 
@@ -777,6 +910,34 @@ attribute [blueprint "thm:jump-diffusion-incompleteness"
   One date: the statement is about laws of the log return, not about the processes. -/)]
   MathFin.exists_call_esscher_ne_merton
 
+attribute [blueprint "thm:jump-diffusion-market"
+  (title := "The jump-diffusion market at one date")
+  (statement := /-- The log return over a date $\tau$ of a jump-diffusion, with its physical law as
+  reference measure and the asset $Se^y$ at $\tau$ against the money market $e^{rt}$, is a
+  market, and the Esscher law of an Esscher parameter $\theta$ (the physical law tilted by
+  $e^{\theta y}$, with $\kappa(1 + \theta) - \kappa(\theta) = r$, for a jump law with
+  exponential moments near $\theta$ and at $1 + \theta$) is a pricing measure of it. So is the
+  Merton measure's law, which moves the drift to the compensated drift when $\sigma \ne 0$.
+  One date: the process between $0$ and $\tau$ is not modelled. -/)]
+  MathFin.JumpDiffusion.isPricingMeasure_esscher
+
+attribute [blueprint "thm:jump-diffusion-price"
+  (title := "Jump-diffusion prices under the Esscher pricing measure")
+  (statement := /-- In the one-date jump-diffusion market, under the Esscher pricing measure the
+  European call of strike $K > 0$ is worth Merton's formula for the tilted characteristics: the
+  $\mathrm{Poisson}(\Lambda m(\theta)\tau)$ mixture of Black--Scholes prices over jumps of law
+  $\nu_\theta$, for $\sigma > 0$ and the exponential moments of the Esscher parameter. -/)]
+  MathFin.JumpDiffusion.price_europeanCall_esscher
+
+attribute [blueprint "thm:jump-diffusion-market-incomplete"
+  (title := "The jump-diffusion market has two pricing measures")
+  (statement := /-- For $\sigma \ne 0$, nontrivial jumps, exponential moments of the jump law
+  and a physical drift that is not the compensated drift, the Esscher law and the Merton law
+  are two pricing measures of the one-date jump-diffusion market at every date $\tau > 0$, and
+  for every spot some strike gives the European call different prices under them: the price is
+  not unique. -/)]
+  MathFin.JumpDiffusion.exists_isPricingMeasure_price_call_ne
+
 -- ===== valuation/term: Term structures =====
 
 attribute [blueprint "thm:schwartz-commodity-futures"
@@ -809,6 +970,18 @@ attribute [blueprint "def:hjm-model"
   with drift $\alpha$ and volatility $\sigma$ satisfying $f(t,T) = f(0,T) + \int_0^t
   \alpha(s,T)\,ds + \int_0^t \sigma(s,T)\,dB_s$ almost surely, for $t \le T$ and $t \le H$. -/)]
   MathFin.HJM.HJMModel
+
+attribute [blueprint "thm:zero-coupon-bond-price"
+  (title := "The zero-coupon bond price is a price")
+  (statement := /-- In any market whose numéraire is the money market $e^{rt}$, under any
+  probability measure, the flat-rate value $\sum_i w_i e^{-rT_i}$ of a zero-coupon portfolio
+  is the market price of the schedule of fixed cash flows $w_i$ at $T_i$; and in any market whose
+  numéraire is $(1+y)^{\lfloor t\rfloor}$ the annually compounded price $\sum_i c_i/(1+y)^{t_i}$
+  of a coupon bond is the price of its cash flows. The numéraire is deterministic, so the
+  deflator is a discount curve (`value_fixedFlows_deterministic`), and the deterministic bond
+  market is a market priced by every probability measure
+  (`isPricingMeasure_deterministicMarket`). Stochastic short rates are not covered. -/)]
+  MathFin.Rates.bondPortfolioValue_eq_price
 
 attribute [blueprint "thm:bond-immunization"
   (title := "Duration and immunization")
@@ -868,6 +1041,30 @@ attribute [blueprint "def:survival-function"
   $t$. -/)]
   MathFin.SurvivalModel.survivalFunction
 
+attribute [blueprint "thm:premium-is-price"
+  (title := "Insurance premiums are prices")
+  (statement := /-- For a lifetime $\tau$ with the survival probabilities of a force of mortality
+  $\mu$ at the dates $k < n$, the life annuity-due is the value, on the flat-rate discount, of
+  the contract paying one at each date $k < n$ while the default indicator $1_{\tau \le k}$ is
+  still zero. -/)]
+  MathFin.lifeAnnuityDue_eq_value
+
+attribute [blueprint "thm:esscher-premium-is-price"
+  (title := "The Esscher premium is a price")
+  (statement := /-- In a market with the unit numéraire, the claim paying the asset at $T$ is
+  worth, under the Esscher tilt of the reference measure with parameter $h$ (density
+  $e^{hX}/E[e^{hX}]$), the Esscher premium $E[Xe^{hX}]/E[e^{hX}]$ of the asset at $T$. -/)]
+  MathFin.esscherPremium_eq_price
+
+attribute [blueprint "thm:insured-market"
+  (title := "The insured market and its Esscher pricing measure")
+  (statement := /-- The market of a loss $X$ quoted at its Esscher premium until a date $T$ and
+  equal to $X$ at $T$, with the unit numéraire, is priced up to $T$ by the Esscher tilt of the
+  reference probability measure when $e^{hX}$ and $Xe^{hX}$ are integrable; under it the claim
+  paying the loss is worth the Esscher premium. The market is built to quote the loss at that
+  premium, with no dynamics before $T$. -/)]
+  MathFin.isPricingMeasure_insuredMarket_tilted
+
 -- ===== valuation/mechanisms: Market mechanisms =====
 
 attribute [blueprint "thm:impermanent-loss"
@@ -905,6 +1102,17 @@ attribute [blueprint "thm:carr-madan"
   positive-part case split. The unbounded-strike form is not proved. The log payoff
   specializes to the variance-swap $1/K^2$ strip. -/)]
   MathFin.carrMadan_spanning
+
+attribute [blueprint "thm:market-call-price-normalized"
+  (title := "A pricing measure gives a normalised call price function")
+  (statement := /-- In a market with unit numéraire and a positive asset $S$, priced at $T$ by a
+  pricing measure $Q$, the asset is a $Q$-martingale, so its forward is $F = \mathbb E_Q[S_T]$.
+  The calls at the strikes $kF$, in units of $F$, are the call prices
+  $k \mapsto \mathbb E_Q[(S_T/F - k)^+]$ of a positive mean-one variable, and these are convex
+  and nonincreasing, between $(1-k)^+$ and $1$, with limits $1$ at $0^+$ and $0$ at infinity.
+  This is the forward direction of Roper's theorem; the converse, a market from a call price
+  function, is not proved. -/)]
+  MathFin.Market.IsPricingMeasure.isNormalizedCallPrice
 
 -- ===== choice/preferences: Preferences =====
 
@@ -979,6 +1187,70 @@ attribute [blueprint "thm:kkt-sufficiency"
   `kkt_point_unique_of_posDef`. -/)]
   MathFin.kkt_sufficient
 
+attribute [blueprint "thm:sdf-capm-hansen-jagannathan"
+  (title := "CAPM from a discount factor affine in the market return")
+  (statement := /-- If $m = a - bR_m$ prices a return $R_i$, the market return $R_m$ and the
+  riskless return $r_f$ ($E[mR_i] = E[mR_m] = 1$, $r_f E[m] = 1$) and
+  $\operatorname{Var}R_m \ne 0$, then $E[R_i] = r_f + \beta_i (E[R_m] - r_f)$ with
+  $\beta_i = \operatorname{Cov}(R_i, R_m) / \operatorname{Var} R_m$. -/)]
+  MathFin.capm_of_affine_discountFactor
+
+attribute [blueprint "thm:hansen-jagannathan-bound"
+  (title := "The Hansen–Jagannathan bound")
+  (statement := /-- If a discount factor $m$ with $E[m] > 0$ prices a gross return $R$ with
+  $\operatorname{Var} R > 0$ ($E[mR] = 1$) and the riskless return $r_f$ ($r_f E[m] = 1$), then the
+  Sharpe ratio of $R$ satisfies $|E[R] - r_f| / \sigma(R) \le \sigma(m) / E[m]$, by
+  Cauchy–Schwarz for $\operatorname{Cov}(m, R)$. -/)]
+  MathFin.abs_sharpeRatio_le_of_discountFactor
+
+attribute [blueprint "thm:market-hansen-jagannathan"
+  (title := "The Hansen–Jagannathan bound for a market with a pricing measure")
+  (statement := /-- Let $Q$ be a pricing measure up to $T$ of a market, $\mathrm{sdf} =
+  \frac{d(Q|\mathcal F_T)}{d(P|\mathcal F_T)}\,\frac{N_0}{N_T}$, and let asset $i$ have a
+  deterministic initial price $c \ne 0$ and a gross return $R_i = S_i(T)/S_i(0)$ with $R_i$ and
+  $\mathrm{sdf}$ square integrable under $P$ and $\operatorname{Var}_P R_i > 0$. If
+  $r_f\,E_P[\mathrm{sdf}] = 1$, then $|E_P[R_i] - r_f| / \sigma_P(R_i) \le
+  \sigma_P(\mathrm{sdf}) / E_P[\mathrm{sdf}]$. The bound is the one for an abstract discount
+  factor, applied to $\mathrm{sdf}$, which prices $R_i$ because $Q$ prices $S_i$. -/)]
+  MathFin.Market.IsPricingMeasure.abs_sharpeRatio_le
+
+attribute [blueprint "thm:market-sdf-capm"
+  (title := "The security market line for a market with a pricing measure")
+  (statement := /-- In the market of `thm:market-hansen-jagannathan`, if $\mathrm{sdf} = a - b R_j$
+  is affine in the gross return of an asset $j$ with deterministic nonzero initial price, if $r_f
+  E_P[\mathrm{sdf}] = 1$ and $\operatorname{Var}_P R_j \ne 0$, then every asset $i$ with a
+  deterministic nonzero initial price and square-integrable return has $E_P[R_i] = r_f + \beta_i
+  (E_P[R_j] - r_f)$, $\beta_i = \operatorname{Cov}_P(R_i, R_j)/\operatorname{Var}_P R_j$. -/)]
+  MathFin.Market.IsPricingMeasure.capm_of_affine_sdf
+
+attribute [blueprint "thm:marginal-utility-is-sdf"
+  (title := "Marginal utility is the stochastic discount factor of a complete market")
+  (statement := /-- Let a market on a finite sample space have a pricing measure $Q$ up to $T$, a
+  reference measure $P$ charging every state, deterministic initial prices $\pi_k$, and terminal
+  payoffs that span the states. At a portfolio $\theta$ of cost $w_0 > 0$ with terminal wealth
+  $W > 0$, $u'(W) > 0$, and $\sum_\omega P\{\omega\}\,u'(W_\omega)\,W^d_\omega = 0$ for every
+  budget-neutral $d$, there is $\mu > 0$ with $u'(W_\omega) = \mu\,\mathrm{sdf}(\omega)$ for every
+  state $\omega$. A local maximum of $\int u(W)\,dP$ on the budget set is stationary
+  (`exists_deriv_eq_mul_sdf_of_isLocalMaxOn`). Global optimality and incomplete markets are not
+  covered. -/)]
+  MathFin.Market.IsPricingMeasure.exists_deriv_eq_mul_sdf_of_stationary
+
+attribute [blueprint "thm:log-optimal-numeraire-one-period"
+  (title := "A stationary log portfolio is the numéraire portfolio, one period")
+  (statement := /-- In the market of `thm:marginal-utility-is-sdf` with $u = \log$, a stationary
+  portfolio of cost $w_0 > 0$ and wealth $W > 0$ has $\mathrm{sdf}(\omega) = w_0 / W_\omega$ in
+  every state, so $E_P[S_k(T)/W] = S_k(0)/w_0$ for every asset $k$
+  (`integral_div_logOptimal_mul`): prices
+  deflated by that wealth are $P$-martingales over the one period. The continuous-time
+  statement is `thm:log-optimal-numeraire`. -/)]
+  MathFin.Market.IsPricingMeasure.sdf_eq_div_of_logOptimal
+
+attribute [blueprint "thm:expected-utility-integral"
+  (title := "Expected utility is the integral against the lottery")
+  (statement := /-- For non-negative weights $p$ on a finite set $s$, the expected utility
+  $\sum_{i \in s} p_i u_i$ is $\int u \, d\mu$ for $\mu = \sum_{i \in s} p_i \delta_i$
+  (`Measure.ofWeights s p`). -/)]
+  MathFin.expectedUtility_eq_integral
 -- ===== choice/equilibrium: Equilibrium =====
 
 attribute [blueprint "thm:capm-equilibrium"

@@ -13,13 +13,13 @@
     "modules_with_uncited_sources": 0,
     "long_lines": 0,
     "corpus_off_blueprint": 298,
-    "blueprint_islands": 23,
+    "blueprint_islands": 21,
     "prices_off_trunk": 41,
     "price_entries_off_trunk": 171,
     "pricing_devices_unbridged": 0,
-    "concept_duplicates": 9,
+    "concept_duplicates": 8,
     "layer_violations": 0,
-    "chain_beyond_r3_permille": 490,
-    "families_without_socket": 6
+    "chain_beyond_r3_permille": 389,
+    "families_without_socket": 0
   }
 }

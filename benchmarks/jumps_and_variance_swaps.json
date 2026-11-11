@@ -1892,6 +1892,58 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.JumpDiffusionHyp.jumpCounts_split (MathFin/Models/Jumps/JumpDiffusionThinning.lean): PoissonThinning.thinned_streams_of_iid_marks to measurable modifications of the jump sizes (they are only a.e.-measurable, JumpDiffusionHyp.aemeasurable_J; the counts and their independence are unchanged on a null set) with the fields N_law, J_indep, J_ident and the lemma N_indep_J of JumpDiffusionHyp (MathFin/Models/Jumps/JumpDiffusionMixing.lean). SCOPE: the jump count at one horizon; the time structure of the jump-diffusion process is not used."
       }
+    },
+    {
+      "id": "mf-jump-diffusion-market-esscher-pricing",
+      "name": "The Esscher Law Is a Pricing Measure of the One-Date Jump-Diffusion Market and Prices the European Call as the Poisson Mixture of Black-Scholes Prices",
+      "domain": "mathematical_finance",
+      "description": "In the one-date jump-diffusion market (JumpDiffusion.market: the line of log returns y with the jump-diffusion log-return law over a date tau, with drift b, volatility coefficient sigma, jump rate Lambda and jump law nu, as reference measure; the asset S e^y at tau, quoted at S e^(rt) before tau; the money market e^(rt) as numeraire), let theta be an Esscher parameter, kappa(1 + theta) - kappa(theta) = r for the Laplace exponent kappa, with the moment-generating function of nu finite near theta and at 1 + theta. Then the physical log-return law tilted by e^(theta y) is a pricing measure of the market (Market.IsPricingMeasure at tau: equivalent to the physical law, the deflated asset a martingale), and, for sigma > 0, S, K > 0 and tau > 0, the market's price (Market.price) of the European call under it is the Poisson(Lambda m(theta) tau) mixture, over the jumps of law nu tilted by e^(theta x), of Black-Scholes prices (Merton's formula for the tilted characteristics). The statement is about the market that reads the asset at the one date tau: the process between 0 and tau is not modelled, and uniqueness of the pricing measure is not claimed (see mf-jump-diffusion-market-incomplete).",
+      "code": {
+        "lean": "import MathFin.Models.Jumps.Market\n\nopen MeasureTheory ProbabilityTheory Real MathFin MathFin.Contracts\nopen scoped NNReal\n\n/-- The Esscher law is a pricing measure of the one-date jump-diffusion market, and under it the\nEuropean call is the Poisson mixture of Black-Scholes prices. -/\ntheorem jump_diffusion_market_esscher_pricing {b σ r S K θ : ℝ} {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν] {τ : ℝ≥0}\n    (hS : 0 < S) (hK : 0 < K) (hσ : 0 < σ) (hθν : θ ∈ interior (integrableExpSet id ν))\n    (h1θ : Integrable (fun x ↦ rexp ((1 + θ) * x)) ν)\n    (hθ : jumpDiffusionExponent b σ Λ ν (1 + θ) - jumpDiffusionExponent b σ Λ ν θ = r)\n    (hτ : 0 < τ) :\n    (JumpDiffusion.market b σ Λ ν S r τ).IsPricingMeasure τ\n        ((jumpDiffusionIncrementLaw b σ Λ ν τ).tilted (θ * ·)) ∧\n      (JumpDiffusion.market b σ Λ ν S r τ).price\n          ((jumpDiffusionIncrementLaw b σ Λ ν τ).tilted (θ * ·)) (europeanCall K τ)\n        = ∫ n, ∫ j, bsV K r σ (S * rexp (-((Λ * jumpMoment ν θ : ℝ≥0) * τ\n            * (∫ x, rexp x ∂(ν.tilted (θ * ·)) - 1)) + ∑ i ∈ Finset.range n, j i)) τ\n            ∂(Measure.infinitePi fun _ : ℕ ↦ ν.tilted (θ * ·))\n            ∂(poissonMeasure (Λ * jumpMoment ν θ * τ)) :=\n  ⟨JumpDiffusion.isPricingMeasure_esscher hθν h1θ hθ,\n    JumpDiffusion.price_europeanCall_esscher hS hK hσ hθν h1θ hθ hτ⟩\n"
+      },
+      "metadata": {
+        "reference": "Gerber and Shiu, Option pricing by Esscher transforms (1994); Merton, Option pricing when underlying stock returns are discontinuous (1976); Cont and Tankov, Financial Modelling with Jump Processes (2004)",
+        "citations": [
+          {
+            "key": "GerberShiu1994"
+          },
+          {
+            "key": "Merton1976"
+          },
+          {
+            "key": "ContTankov2004"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. isPricingMeasure_esscher and price_europeanCall_esscher in MathFin/Models/Jumps/Market.lean, on the one-date market Market.oneDate (MathFin/Pricing/OneDateMarket.lean): the Esscher law is equivalent to the physical law (tilted_absolutelyContinuous, absolutelyContinuous_tilted) and compensated (jumpDiffusionIncrementLaw_tilted, compensated_tilted_iff), and the deflated asset, constant before tau and S e^y e^(-r tau) at tau, is then a martingale for the two-step filtration read along the date; the price is the integral of the discounted call payoff against the Esscher law, which integral_call_tilted_eq_merton evaluates. SCOPE: one date. The sample space is the line of log returns, so the statement does not say that the Esscher law is the time-tau marginal of an equivalent martingale measure of the jump-diffusion process for the filtration of its path. Uniqueness of the pricing measure is not claimed. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-jump-diffusion-market-incomplete",
+      "name": "The One-Date Jump-Diffusion Market Has Two Pricing Measures That Price Some European Call Differently",
+      "domain": "mathematical_finance",
+      "description": "In the one-date jump-diffusion market (JumpDiffusion.market, as in mf-jump-diffusion-market-esscher-pricing), let sigma != 0, let the jumps be nontrivial (Lambda > 0 and nu not the point mass at 0), let the moment-generating function of nu be finite near 0 and near an Esscher parameter theta, with finite exponential moments of orders 1 and 1 + theta, and let the physical drift b differ from the compensated drift c = r - sigma^2/2 - Lambda (E[e^J] - 1). Then at every date tau > 0 and for every spot S > 0 there are a strike K > 0 and two pricing measures of the market (Market.IsPricingMeasure at tau), the Esscher law and the Merton measure's law (the same sigma, Lambda, nu and the compensated drift), under which the market's price (Market.price) of the European call struck at K differs. So Market.price is not unique: the pricing measures of the market are not a subsingleton (JumpDiffusion.not_subsingleton_isPricingMeasure). The statement is about the market that reads the asset at the one date tau, not about the process.",
+      "code": {
+        "lean": "import MathFin.Models.Jumps.Market\n\nopen MeasureTheory ProbabilityTheory Real MathFin MathFin.Contracts\nopen scoped NNReal\n\n/-- The one-date jump-diffusion market has two pricing measures giving some call different\nprices. -/\ntheorem jump_diffusion_market_incomplete {S r b c σ θ : ℝ} {Λ : ℝ≥0} {ν : Measure ℝ} [IsProbabilityMeasure ν] {τ : ℝ≥0}\n    (hS : 0 < S) (hσ : σ ≠ 0) (hΛ : 0 < Λ) (hν0 : ν ≠ Measure.dirac 0)\n    (h0 : 0 ∈ interior (integrableExpSet id ν)) (h1 : Integrable rexp ν)\n    (hθν : θ ∈ interior (integrableExpSet id ν))\n    (h1θ : Integrable (fun x ↦ rexp ((1 + θ) * x)) ν)\n    (hθ : jumpDiffusionExponent b σ Λ ν (1 + θ) - jumpDiffusionExponent b σ Λ ν θ = r)\n    (hc : c = r - σ ^ 2 / 2 - Λ * (∫ x, rexp x ∂ν - 1)) (hb : b ≠ c) (hτ : 0 < τ) :\n    ∃ K, 0 < K ∧ ∃ Q Q', (JumpDiffusion.market b σ Λ ν S r τ).IsPricingMeasure τ Q ∧\n      (JumpDiffusion.market b σ Λ ν S r τ).IsPricingMeasure τ Q' ∧\n      (JumpDiffusion.market b σ Λ ν S r τ).price Q (europeanCall K τ)\n        ≠ (JumpDiffusion.market b σ Λ ν S r τ).price Q' (europeanCall K τ) :=\n  JumpDiffusion.exists_isPricingMeasure_price_call_ne hS hσ hΛ hν0 h0 h1 hθν h1θ hθ hc hb hτ\n"
+      },
+      "metadata": {
+        "reference": "Cont and Tankov, Financial Modelling with Jump Processes (2004); Gerber and Shiu, Option pricing by Esscher transforms (1994); Merton, Option pricing when underlying stock returns are discontinuous (1976)",
+        "citations": [
+          {
+            "key": "ContTankov2004"
+          },
+          {
+            "key": "GerberShiu1994"
+          },
+          {
+            "key": "Merton1976"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. exists_isPricingMeasure_price_call_ne in MathFin/Models/Jumps/Market.lean: the Esscher law (isPricingMeasure_esscher) and the Merton measure's law (isPricingMeasure_merton) are pricing measures of the one-date market, and exists_call_esscher_ne_merton (MathFin/Models/Jumps/JumpDiffusionIncompleteness.lean) gives a strike at which the discounted call integrals against them differ; the market's price is that integral (Market.price_europeanCall_oneDate). SCOPE: one date; the market's sample space is the line of log returns, so the two measures are pricing measures of the market that reads the asset at tau, not shown to be time-tau marginals of equivalent martingale measures of the jump-diffusion process for the filtration of its path. Axioms-clean."
+      }
     }
   ]
 }

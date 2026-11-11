@@ -6,6 +6,7 @@ Authors: Yang Ye, Raphael Coelho
 module
 
 public import MathFin.Probability.Analysis.StdSimplexProd
+public import MathFin.Probability.Laws.FiniteWeights
 public import MathFin.Risk.ValueAtRisk
 
 /-!
@@ -41,7 +42,8 @@ For an integrable loss and `α ∈ (0, 1)`, the dual representation of ES over b
 * `finiteVaR`: value-at-risk at a finite law, `inf {x | α ≤ ∑_{L i ≤ x} qᵢ}`, for a loss `L` and
   a bundled probability vector `q`.
 * `finiteES`: expected shortfall at a finite law, `(1 − α)⁻¹ ∫_α^1 finiteVaR q L u du`.
-* `finiteLaw`: the law `∑ᵢ qᵢ • δᵢ` of a probability vector, a probability measure.
+* `Measure.ofWeights univ q.weights`: the law `∑ᵢ qᵢ • δᵢ` of a probability vector
+  (`Probability/Laws/FiniteWeights`), a probability measure.
 * `condTailMean`: the `q`-weighted mean of `L` over the tail event `{i | finiteVaR q L α ≤ L i}`,
   divided by the tail mass.
 * `oneQ`, `oneL`, `jointQ`, `halfL₁`, `halfL₂`: the data of the worked example, a single `$100`
@@ -58,7 +60,7 @@ For an integrable loss and `α ∈ (0, 1)`, the dual representation of ES over b
   for the split position.
 * `finiteVaR_subadditivity_fails`: on the joint space of the two half-bonds, the halves' `VaR₀.₉₅`
   sum to less than the total's (which is `50` by `finiteVaR_two_halves`).
-  `valueAtRisk_finiteLaw_subadditivity_fails` states the same failure for the library's
+  `valueAtRisk_ofWeights_subadditivity_fails` states the same failure for the library's
   `valueAtRisk` at the law `∑ p, jointQ p • δ_p`.
 * `finiteVaR_counterexample_window`: for the two half-bonds and `α ∈ (0, 1]`, subadditivity fails
   exactly for `(24/25)² < α ≤ 24/25`.
@@ -107,24 +109,22 @@ is negative. -/
 noncomputable def finiteES (q : StdSimplex ℝ ι) (L : ι → ℝ) (α : ℝ) : ℝ :=
   (1 - α)⁻¹ * ∫ u in α..1, finiteVaR q L u
 
-/-- The law `∑ i, q i • δ_i` of the probability vector `q`, a probability measure. -/
-noncomputable def finiteLaw [MeasurableSpace ι] (q : StdSimplex ℝ ι) : Measure ι :=
-  ∑ i, ENNReal.ofReal (q.weights i) • Measure.dirac i
-
 section Bridge
 
 variable [MeasurableSpace ι] {q : StdSimplex ℝ ι}
 
-/-- The law of a probability vector is a probability measure. -/
-instance : IsProbabilityMeasure (finiteLaw q) :=
-  ⟨by simp [finiteLaw, ← ENNReal.ofReal_sum_of_nonneg fun i _ ↦ q.weights_nonneg i]⟩
+/-- The law `Measure.ofWeights univ q.weights = ∑ i, q i • δ_i` of a probability vector is a
+probability measure. -/
+instance : IsProbabilityMeasure (Measure.ofWeights Finset.univ q.weights) :=
+  Measure.isProbabilityMeasure_ofWeights (fun i _ ↦ q.weights_nonneg i) (by simp)
 
 variable [MeasurableSingletonClass ι]
 
-/-- Under `finiteLaw q` the mass of `{L ≤ x}` is the sum in `finiteVaR`. -/
-lemma finiteLaw_real_le (L : ι → ℝ) (x : ℝ) :
-    (finiteLaw q).real {i | L i ≤ x} = ∑ i with L i ≤ x, q.weights i := by
-  rw [measureReal_def, finiteLaw, Measure.coe_finsetSum, Finset.sum_apply]
+/-- Under `Measure.ofWeights univ q.weights` the mass of `{L ≤ x}` is the sum in `finiteVaR`. -/
+lemma ofWeights_real_le (L : ι → ℝ) (x : ℝ) :
+    (Measure.ofWeights Finset.univ q.weights).real {i | L i ≤ x}
+      = ∑ i with L i ≤ x, q.weights i := by
+  rw [measureReal_def, Measure.ofWeights, Measure.coe_finsetSum, Finset.sum_apply]
   simp_rw [Measure.smul_apply, smul_eq_mul]
   rw [ENNReal.toReal_sum fun i _ ↦ ENNReal.mul_ne_top ENNReal.ofReal_ne_top (measure_ne_top _ _),
     Finset.sum_filter]
@@ -133,16 +133,16 @@ lemma finiteLaw_real_le (L : ι → ℝ) (x : ℝ) :
 
 /-- For `α ∈ (0, 1)`, `finiteVaR` is `valueAtRisk` at the law `∑ i, q i • δ_i`. -/
 theorem finiteVaR_eq_valueAtRisk {L : ι → ℝ} {α : ℝ} (hα : α ∈ Ioo 0 1) :
-    finiteVaR q L α = valueAtRisk L (finiteLaw q) α := by
+    finiteVaR q L α = valueAtRisk L (Measure.ofWeights Finset.univ q.weights) α := by
   have hset : {x | α ≤ ∑ i with L i ≤ x, q.weights i}
-      = Ici (valueAtRisk L (finiteLaw q) α) := by
+      = Ici (valueAtRisk L (Measure.ofWeights Finset.univ q.weights) α) := by
     ext x
-    simp [valueAtRisk_le_iff (measurable_of_finite L).aemeasurable hα, finiteLaw_real_le]
+    simp [valueAtRisk_le_iff (measurable_of_finite L).aemeasurable hα, ofWeights_real_le]
   rw [finiteVaR, hset, csInf_Ici]
 
 /-- For `α ∈ (0, 1)`, `finiteES` is `expectedShortfall` at the law `∑ i, q i • δ_i`. -/
 theorem finiteES_eq_expectedShortfall {L : ι → ℝ} {α : ℝ} (hα : α ∈ Ioo 0 1) :
-    finiteES q L α = expectedShortfall L (finiteLaw q) α := by
+    finiteES q L α = expectedShortfall L (Measure.ofWeights Finset.univ q.weights) α := by
   rw [finiteES, expectedShortfall, intervalIntegral.integral_of_le hα.2.le,
     integral_Ioc_eq_integral_Ioo]
   exact congrArg _ <| setIntegral_congr_fun measurableSet_Ioo fun u hu ↦
@@ -327,10 +327,10 @@ theorem finiteVaR_subadditivity_fails :
 /-- **Subadditivity of `valueAtRisk` fails**: the same failure for the library's `valueAtRisk`
 at the law `∑ p, jointQ p • δ_p` of the two half-bonds, through the bridge
 `finiteVaR_eq_valueAtRisk`. -/
-theorem valueAtRisk_finiteLaw_subadditivity_fails :
-    valueAtRisk halfL₁ (finiteLaw jointQ) (19 / 20) +
-        valueAtRisk halfL₂ (finiteLaw jointQ) (19 / 20)
-      < valueAtRisk (halfL₁ + halfL₂) (finiteLaw jointQ) (19 / 20) := by
+theorem valueAtRisk_ofWeights_subadditivity_fails :
+    valueAtRisk halfL₁ (Measure.ofWeights Finset.univ jointQ.weights) (19 / 20) +
+        valueAtRisk halfL₂ (Measure.ofWeights Finset.univ jointQ.weights) (19 / 20)
+      < valueAtRisk (halfL₁ + halfL₂) (Measure.ofWeights Finset.univ jointQ.weights) (19 / 20) := by
   have hα : (19 / 20 : ℝ) ∈ Ioo 0 1 := ⟨by norm_num, by norm_num⟩
   rw [← finiteVaR_eq_valueAtRisk hα, ← finiteVaR_eq_valueAtRisk hα,
     ← finiteVaR_eq_valueAtRisk hα]

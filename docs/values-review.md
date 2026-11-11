@@ -124,6 +124,116 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   that finds nothing to improve.
 
 ## Review log
+## 2026-11-11 — corpus 849, modules 755 — the wave's sockets and connectors, read before they land
+
+Scope: the v2 wave of 2026-11-11 (`v2/wave-2026-11-11`), seven workstreams integrated on one branch
+and verified once. Sockets (a family theorem whose statement names `Market.IsPricingMeasure`) for
+rates (`Models/Rates/DeterministicMarket.lean`), volatility
+(`Models/LocalVol/TimeDependentVol.lean`), jumps (`Models/Jumps/Market.lean`), credit (`Models/Credit/MertonMarket.lean`) and insurance
+(`Insurance/EsscherPremium.lean`, `Insurance/AnnuityValue.lean`), on the new one-date market
+(`Pricing/OneDateMarket.lean`). Bachelier as a market. The American summit
+(`Models/Binomial/AmericanSnell.lean`, `Models/BlackScholes/American/Summit.lean`). The model-free
+connector (`Models/ModelFree/MarketCallPrice.lean`, `SVI/MarketRealisation.lean`). The choice
+connectors: the market's stochastic discount factor, Hansen–Jagannathan and CAPM from it, and
+marginal utility as an sdf (`Choice/Portfolio/MarketSDF.lean`,
+`Choice/Portfolio/StochasticDiscountFactor.lean`, `Choice/Utility/MarketMarginalUtility.lean`).
+`Probability/Laws/FiniteWeights.lean` replaces `finiteLaw`. 23 corpus entries are new or changed.
+Three read-only reviewers split the lenses:
+- the first pass;
+- lenses 2, 4 and 5;
+- lenses 1, 3, 6, 7 and 8.
+
+### The standing first pass: prose against statement
+
+- Twenty of the twenty-three entries are faithful, each with its narrowing in the same field
+  (Bachelier "μ itself, not constructed", the binomial Snell envelope as the recursion only, the
+  Esscher market "built to quote the loss at that premium").
+- Fixed:
+  - `Models/Jumps/Market.lean` said "the market is incomplete". It proves two pricing measures
+    that price a call differently. It now says that, and that non-replicability is not proved. The
+    tag "incomplete market" is gone.
+  - `Choice/Utility/MarketMarginalUtility.lean` and the blueprint node
+    `thm:log-optimal-numeraire-one-period` said "log-optimal" and "growth-optimal" for a portfolio
+    that is only stationary, and called the sdf "the density of the pricing measure" (it is the
+    density times the deflator). Both are fixed, and the entry `mf-log-optimal-sdf-numeraire` is
+    renamed "A Stationary Log Portfolio Is the Numéraire Portfolio in One Period".
+  - `mf-expected-utility-integral` and its blueprint node claimed the finite-measure form, which
+    is a sibling lemma the snippet does not state.
+  - `mf-deterministic-bond-market-pricing-measure` said "under any probability measure" where the
+    snippet states the reference measure. The post-maturity convention moved to the scope.
+  - `mf-bond-portfolio-value-is-market-price` and `DeterministicMarket.lean` said the immunization
+    and key-rate formulas "are values of contracts". It is the values they differentiate.
+  - The four market-sdf entries did not say that the numéraire at time 0 is a constant (a
+    hypothesis of every statement).
+  - `mf-esscher-premium-is-price` now marks `esscherPremium_eq_price` as not restated.
+- Disclosed: the one-date socket is a calibration. A measure prices `Market.oneDate` when it is
+  equivalent to `P` and has mean `s₀ e^{rτ}`, so a family's socket there certifies routing, and
+  its content is the family's own moment identity. `OneDateMarket.lean` now says so.
+
+### Upgrades executed
+
+- `Market.deflator_of_numeraire` and `Market.deflator_of_numeraire_exp` (`Pricing/Market.lean`):
+  a deterministic numéraire gives the deflator `f 0 / f t`, and `e^{rt}` gives `e^{−rt}`. The
+  Black–Scholes, clocked-volatility and one-date `deflator_*` lemmas are now one-line instances
+  instead of three copies of the same `simp only` chain.
+- The four `try` hedges in `OneDateMarket.lean` and `EsscherPremium.lean` are gone. The two
+  filtration lemmas rewrite through `twoStepFiltration_zero`/`_one`, and the `smul_eq_mul` step
+  fires because Mathlib's `integral_tilted` and `integrable_tilted_iff` are stated with `•`.
+- The prose corrections above.
+
+### Lens gradients
+
+- **Inspired math.** The exemplar is `esscherPremium_eq_price` with
+  `isPricingMeasure_insuredMarket_tilted`: the actuary's premium principle is the arbitrage price
+  under Mathlib's `tilted`. The next upgrade is to state the Esscher result without the
+  calibration: the Esscher parameter is the only tilt for which the quote equals the premium.
+- **Coherence.** The exemplar is `Measure.integral_ofWeights`: one lemma under expected utility,
+  state-price pricing and discrete VaR, built from Mathlib's `integral_finsetSum_measure` and
+  `sum_smul_dirac`. The next upgrade is the bridge `M.sdf Q T ω = M.statePrice Q T ω / P{ω}` on
+  a finite space, so the finite Euler equation and the market sdf are one statement.
+- **Zero slop.** The exemplar is the four-line core of
+  `capm_from_market_equilibrium_of_discountFactor`. The next upgrade covers the hand-rolled
+  `MemLp`/integrability blocks in `BachelierMarket.lean` and `MertonMarket.lean`, replaced by
+  `MemLp.pos_part` and one `IsPricingMeasure.integrable_deflator_mul_of_le`.
+- **Architectural ingenuity.** The exemplar is `Market.oneDate`: the two-step filtration
+  time-changed along the date, so one construction serves jumps and insurance. The next upgrade is
+  one constructor for a market with a deterministic numéraire, of which `oneDate`,
+  `Bachelier.market`, `TimeDepVol.market` and `deterministicMarket` are instances.
+- **First principles.** The exemplar is `JumpDiffusion.exists_isPricingMeasure_price_call_ne`:
+  two pricing measures, two prices, a socket doing real work. The next upgrade is to say which of
+  the sockets are calibrations in every family docstring, not only in `OneDateMarket.lean`.
+- **Idiomatic register.** The exemplar is `IsNormalizedCallPrice.of_eqOn` in structure-`where`
+  form. The next upgrade is a `variable` bundle (or a structure) for the finite one-period market
+  hypotheses that `MarketMarginalUtility.lean` repeats verbatim in four theorems, and
+  `abbrev Market.terminalPayoff`.
+- **Concept clarity.** The exemplar is the `OneDateMarket.lean` header (what the model is, what
+  the initial price is, what the families supply). The next upgrade is to split `merton_market`,
+  a four-conjunct statement with the Girsanov measure retyped twenty times, into named lemmas.
+- **Beautiful math.** The exemplar is `expectedUtility_univ_real_eq_integral`: expected utility
+  is the integral against the lottery, from one two-line lemma. The next upgrade is
+  `price_oneDate_eq_integral` for any payoff of the asset at `τ`, so that the call and the claim
+  on the asset are instances.
+
+### Ranked backlog
+
+1. A deterministic-numéraire `Market` constructor, with `price_pay_of_numeraire`. The Merton and
+   `bondPortfolioValue_eq_price` deflator blocks and `price_europeanCall_of_numeraire_eq_one` (a
+   pricing fact in `ModelFree/`) become instances.
+2. Move `stronglyMeasurable_deflator` to `Pricing/Market.lean`. Lift the `trim`/`withDensity` core
+   shared by `IsPricingMeasure.integral_rnDeriv_mul` (`MarketSDF.lean`) and
+   `exists_isEquivProbMeasure_trim_eq` (`EquivMeasure.lean`) into one change-of-measure lemma on a
+   sub-σ-algebra.
+3. The bridge from `sdf` to `statePrice` on a finite space (Coherence above).
+4. Integrability: `MemLp.pos_part` in Bachelier and one integrability lemma under a pricing
+   measure for Merton and the market sdf.
+5. Split `merton_market` and `bondPortfolioValue_eq_price` into named lemmas.
+6. The hypothesis bundle in `MarketMarginalUtility.lean`.
+7. Move Glosten–Milgrom's hand-written finite law onto `Measure.ofWeights`. Decide whether
+   `ofWeights` stays in Mathlib's `MeasureTheory.Measure` namespace or is upstreamed.
+8. Fold `americanPrice_eq_snellEnvelope`, a one-line wrapper, into the binomial Snell module, and
+   rename `American/Summit.lean` after its content.
+9. The Esscher uniqueness statement (Inspired math above).
+
 ## 2026-11-08 — corpus 817, modules 731 — the one trunk, phases 0–2, read before it lands
 
 Scope: the one-trunk work since the RiO review (#450, #451; branches `v2/phase2c-horizon` and

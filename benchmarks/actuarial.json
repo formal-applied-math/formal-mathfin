@@ -169,7 +169,7 @@
       "id": "mf-life-annuity-due-constant-force",
       "name": "Life Annuity-Due Under a Constant Force of Mortality",
       "domain": "mathematical_finance",
-      "description": "With flat-rate discount factors B(0, k) = e^{−rk} (zero-coupon bond prices) and survival probabilities S(k) = exp(−∫₀ᵏ μ) for a constant force of mortality μ ≡ m, the n-payment life annuity-due Σ_{k<n} B(0, k)·S(k) equals (1 − vⁿ)/(1 − v) with v = e^{−(r+m)}, provided v ≠ 1: a constant force of mortality acts as an addition to the interest rate. The life annuity-due is defined as this sum; its identification with the expected present value of payments to a random lifetime is not proved.",
+      "description": "With flat-rate discount factors B(0, k) = e^{−rk} (zero-coupon bond prices) and survival probabilities S(k) = exp(−∫₀ᵏ μ) for a constant force of mortality μ ≡ m, the n-payment life annuity-due Σ_{k<n} B(0, k)·S(k) equals (1 − vⁿ)/(1 − v) with v = e^{−(r+m)}, provided v ≠ 1: a constant force of mortality acts as an addition to the interest rate. The life annuity-due is defined as this sum; its identification with the value of the payments made while a random lifetime has not ended is the entry mf-life-annuity-due-is-contract-value.",
       "code": {
         "lean": "import MathFin.Insurance.Insurance\n\nopen MathFin\n\n/-- Under a constant force of mortality `m`, the life annuity-due is the annuity-certain at the\ndiscount factor `e^{−(r + m)}`. -/\ntheorem life_annuity_due_constant_force_thm {r m : ℝ} (n : ℕ)\n    (hv : Real.exp (-(r + m)) ≠ 1) :\n    lifeAnnuityDue r (fun _ ↦ m) n =\n      (1 - Real.exp (-(r + m)) ^ n) / (1 - Real.exp (-(r + m))) :=\n  lifeAnnuityDue_const n hv\n"
       },
@@ -184,7 +184,51 @@
         ],
         "difficulty": "introductory",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.lifeAnnuityDue_const (MathFin/Insurance/Insurance.lean). lifeAnnuityDue r μ n := Σ_{k<n} zcb r 0 k · survivalFromForce μ k, with zcb from MathFin/Models/Rates/ZCB.lean and survivalFromForce from MathFin/Insurance/Mortality.lean; the closed form is the annuity-due geometric sum annuityDue_closed_form at v = e^{−(r+m)}. SCOPE: constant force of mortality and flat rate; the probabilistic reading of the sum as an expected present value is not proved."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.lifeAnnuityDue_const (MathFin/Insurance/Insurance.lean). lifeAnnuityDue r μ n := Σ_{k<n} zcb r 0 k · survivalFromForce μ k, with zcb from MathFin/Models/Rates/ZCB.lean and survivalFromForce from MathFin/Insurance/Mortality.lean; the closed form is the annuity-due geometric sum annuityDue_closed_form at v = e^{−(r+m)}. SCOPE: constant force of mortality and flat rate; the probabilistic reading of the sum as the value of payments to a random lifetime is lifeAnnuityDue_eq_value (MathFin/Insurance/AnnuityValue.lean), a separate entry."
+      }
+    },
+    {
+      "id": "mf-life-annuity-due-is-contract-value",
+      "name": "The Life Annuity-Due Is the Value of Payments Made While the Default Indicator of the Lifetime Is Zero",
+      "domain": "mathematical_finance",
+      "description": "Let tau be a measurable lifetime under a probability measure Q whose survival probabilities S_tau(k) = Q(tau > k) at the dates k < n are those of a force of mortality mu, survivalFromForce mu k. Then the life annuity-due of n payments, the sum over k < n of the flat-rate zero-coupon bond price zcb r 0 k times survivalFromForce mu k (lifeAnnuityDue), is the value (Contract.value) under Q, on the deterministic flat-rate discount t -> zcb r 0 t, of the contract that pays one at each date k < n while the default indicator 1{tau <= k} of the lifetime is still zero (the schedule of payments payFlows of 1 - 1{tau <= k}). The value is under the law of the lifetime: no market is involved, and the survival probabilities at the other dates are not used.",
+      "code": {
+        "lean": "import MathFin.Insurance.AnnuityValue\n\nopen MeasureTheory MathFin MathFin.Contracts\nopen scoped NNReal\n\n/-- The life annuity-due is the value, on the flat-rate discount, of the payments of one made\nwhile the default indicator of the lifetime is zero. -/\ntheorem life_annuity_due_is_contract_value {Ω : Type*} {mΩ : MeasurableSpace Ω} (Q : Measure Ω) [IsProbabilityMeasure Q]\n    {τ : Ω → ℝ} (hτ : Measurable τ) (r : ℝ) (μ : ℝ → ℝ) (n : ℕ)\n    (hS : ∀ k < n, SurvivalModel.survivalFunction Q τ k = survivalFromForce μ k) :\n    lifeAnnuityDue r μ n =\n      (payFlows (fun k ↦ (k : ℝ≥0)) (fun k ↦ (.sub (.const 1) (.obs () k) : Payoff Unit)) n).value\n        Q (fun t _ ↦ zcb r 0 t) (defaultIndicator τ) :=\n  lifeAnnuityDue_eq_value Q hτ r μ n hS\n"
+      },
+      "metadata": {
+        "reference": "D. C. M. Dickson, M. R. Hardy and H. R. Waters, Actuarial Mathematics for Life Contingent Risks, 2nd ed., Cambridge University Press (2013), Chapter 5 (annuities)",
+        "citations": [
+          {
+            "key": "DicksonHardyWaters2013",
+            "locator": "Chapter 5"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. lifeAnnuityDue_eq_value in MathFin/Insurance/AnnuityValue.lean: along every scenario the schedule is worth the sum of the discounted payoffs (pathPV_payFlows), the integral of the sum is the sum of the integrals, and the integral of 1 - 1{tau <= k} is 1 - Q(tau <= k), which is the survival function at k (probReal_compl_eq_one_sub); the contract is the one of the credit module (defaultIndicator, Models/Credit/DefaultTime.lean). SCOPE: a deterministic discount and a lifetime under Q; the identification is for the dates k < n at which the survival function is that of the force of mortality. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-esscher-premium-is-price",
+      "name": "The Esscher Premium Is the Price of the Loss Under the Esscher Pricing Measure of the Insured Market",
+      "domain": "mathematical_finance",
+      "description": "Let X be a measurable loss under a probability measure P with e^(hX) and X e^(hX) integrable. In the insured market (insuredMarket: the one-date market with the unit numeraire in which the loss is quoted at its Esscher premium E[X e^(hX)] / E[e^(hX)] until the date T and equals X at T), the Esscher tilt of P with density e^(hX)/E[e^(hX)] is a pricing measure (Market.IsPricingMeasure at T), and under it the market's price (Market.price) of the claim paying the loss at T is the Esscher premium E[X e^(hX)] / E[e^(hX)]. The market is built to quote the loss at that premium and has no dynamics before T. For an arbitrary market with the unit numeraire the same price identity holds for the claim paying the asset at T under the Esscher tilt of its reference measure (esscherPremium_eq_price, a library lemma not restated in this entry).",
+      "code": {
+        "lean": "import MathFin.Insurance.EsscherPremium\n\nopen MeasureTheory MathFin MathFin.Contracts\nopen scoped NNReal\n\n/-- The Esscher tilt is a pricing measure of the insured market, and under it the loss is worth\nthe Esscher premium. -/\ntheorem esscher_premium_is_price {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} [IsProbabilityMeasure P] {X : Ω → ℝ}\n    (hX : Measurable X) {h : ℝ} (hexp : Integrable (fun ω ↦ Real.exp (h * X ω)) P)\n    (hXexp : Integrable (fun ω ↦ X ω * Real.exp (h * X ω)) P) (T : ℝ≥0) :\n    (insuredMarket P hX h T).IsPricingMeasure T (P.tilted fun ω ↦ h * X ω) ∧\n      (insuredMarket P hX h T).price (P.tilted fun ω ↦ h * X ω) (.pay T (.obs () T))\n        = (∫ ω, X ω * Real.exp (h * X ω) ∂P) / ∫ ω, Real.exp (h * X ω) ∂P :=\n  ⟨isPricingMeasure_insuredMarket_tilted hX hexp hXexp T, price_insuredMarket_tilted hX T⟩\n"
+      },
+      "metadata": {
+        "reference": "Gerber and Shiu, Option pricing by Esscher transforms (1994); Esscher, On the probability function in the collective theory of risk (1932)",
+        "citations": [
+          {
+            "key": "GerberShiu1994"
+          },
+          {
+            "key": "Esscher1932"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. isPricingMeasure_insuredMarket_tilted and price_insuredMarket_tilted in MathFin/Insurance/EsscherPremium.lean, on the one-date market Market.oneDate (MathFin/Pricing/OneDateMarket.lean) with its initial price the Esscher premium: the tilt is a probability measure equivalent to P (isProbabilityMeasure_tilted, tilted_absolutelyContinuous, absolutelyContinuous_tilted), X is integrable under it (integrable_tilted_iff) with mean the premium (integral_tilted_eq_esscherPremium), and a measure with those properties prices the one-date market (Market.isPricingMeasure_oneDate). The general price identity for an arbitrary market with unit numeraire is esscherPremium_eq_price in the same module. SCOPE: the insured market quotes the loss at the Esscher premium by construction, and there is no dynamics before T; the statement does not derive the premium from a hedging or equilibrium argument. Axioms-clean."
       }
     }
   ]
