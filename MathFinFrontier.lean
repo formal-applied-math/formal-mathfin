@@ -5,7 +5,6 @@ Authors: Raphael Coelho
 -/
 import MathFin
 import MathFinFrontier.MarketValuation
-import MathFinFrontier.ModelFree
 import MathFinFrontier.Microstructure
 import MathFinFrontier.Credit
 

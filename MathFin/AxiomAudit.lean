@@ -2902,3 +2902,7 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure
+
+/-- info: 'MathFin.SVI.exists_market_of_butterflyFreeFormula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.SVI.exists_market_of_butterflyFreeFormula

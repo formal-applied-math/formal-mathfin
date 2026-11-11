@@ -1133,9 +1133,16 @@ attribute [blueprint "thm:smile-no-arbitrage"
   maturity one, of a market with unit numéraire, a nonnegative asset of forward one and a pricing
   measure: the call at every strike $k > 0$ is worth $C(k)$. The law is the Breeden--Litzenberger
   measure $\mu(k, \infty) = -C'_+(k)$, and may carry an atom at $0$, so the asset is nonnegative
-  rather than positive. Raw SVI slices and the left wing, calendar spreads are further instances
-  not stated here. -/)]
+  rather than positive. The left wing and calendar spreads are not stated here. -/)]
   MathFin.exists_market_of_isNormalizedCallPrice
+
+attribute [blueprint "thm:svi-market-realisation"
+  (title := "A butterfly-free SVI slice is a market")
+  (statement := /-- If the raw SVI parameters satisfy the butterfly-free sign formula, the
+  SVI-smiled Black call is the call price function at maturity one of a market with unit
+  numéraire, a nonnegative asset of forward one and a pricing measure: the formula makes the smile
+  a normalised call price function, and Roper's converse realises it. -/)]
+  MathFin.SVI.exists_market_of_butterflyFreeFormula
 
 -- ===== choice/preferences: Preferences =====
 

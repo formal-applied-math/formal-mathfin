@@ -19,7 +19,8 @@ numéraire and a positive asset, a pricing measure `Q` up to `T` makes the asset
 so its forward `F` is its mean, and the calls at the strikes `k F`, priced in units of `F`, are the
 call prices `k ↦ 𝔼[(X − k)⁺]` of the positive mean-one variable `X = S_T / F`. Those are a
 normalised call price function (`IsNormalizedCallPrice`): this is the forward direction of Roper's
-Theorem 2.1. The converse, a market from a call price function, is not proved here.
+Theorem 2.1. The converse, a market with a nonnegative asset for every normalised call price
+function, is `exists_market_of_isNormalizedCallPrice` (`RoperConverse.lean`).
 
 ## Main results
 
