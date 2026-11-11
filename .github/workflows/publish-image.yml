@@ -21,6 +21,8 @@ on:
       - 'MathFinExamples.lean'
       - 'MathFinTest/**'
       - 'MathFinTest.lean'
+      - 'MathFinFrontier/**'
+      - 'MathFinFrontier.lean'
       - 'MathFinTools/**'
       - 'lakefile.lean'
       - 'lake-manifest.json'
