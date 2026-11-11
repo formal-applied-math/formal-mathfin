@@ -540,6 +540,7 @@ import MathFin.Models.BlackScholes.StrikeConvexity
 import MathFin.Models.BlackScholes.SpotConvexity
 import MathFin.Models.ModelFree.PriceBounds
 import MathFin.Models.ModelFree.CallPriceFunction
+import MathFin.Models.ModelFree.MarketCallPrice
 -- Phase 13 additions:
 -- Quanto correction derived from a joint-Gaussian FX model (Girsanov-grounded)
 import MathFin.Models.BlackScholes.QuantoGrounding
@@ -732,6 +733,7 @@ import MathFin.Models.ModelFree.SVI.ExtendedFormula
 import MathFin.Models.ModelFree.SVI.FiniteCertificate
 import MathFin.Models.ModelFree.SVI.HermiteIdentity
 import MathFin.Models.ModelFree.SVI.ImaginaryTraceSignature
+import MathFin.Models.ModelFree.SVI.MarketRealisation
 import MathFin.Models.ModelFree.SVI.Matrices
 import MathFin.Models.ModelFree.SVI.MatrixCertificate
 import MathFin.Models.ModelFree.SVI.MatrixSignature

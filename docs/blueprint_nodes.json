@@ -1550,4 +1550,21 @@
   "latexEnv": "theorem",
   "label": "thm:time-dependent-vol-market",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/LocalVol/TimeDependentVol.lean"}]
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/LocalVol/TimeDependentVol.lean"},
+ {"uses":
+  ["def:market",
+   "def:pricing-measure",
+   "def:contract",
+   "def:pricing-functional",
+   "def:contract-value"],
+  "title": "A pricing measure gives a normalised call price function",
+  "text":
+  "In a market with unit numéraire and a positive asset $S$, priced at $T$ by a\n  pricing measure $Q$, the asset is a $Q$-martingale, so its forward is $F = \\mathbb E_Q[S_T]$.\n  The calls at the strikes $kF$, in units of $F$, are the call prices\n  $k \\mapsto \\mathbb E_Q[(S_T/F - k)^+]$ of a positive mean-one variable, and these are convex\n  and nonincreasing, between $(1-k)^+$ and $1$, with limits $1$ at $0^+$ and $0$ at infinity.\n  This is the forward direction of Roper's theorem; the converse, a market from a call price\n  function, is not proved.",
+  "name": "MathFin.Market.IsPricingMeasure.isNormalizedCallPrice",
+  "module": "MathFin.Models.ModelFree.MarketCallPrice",
+  "line": 89,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:market-call-price-normalized",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/ModelFree/MarketCallPrice.lean"}]

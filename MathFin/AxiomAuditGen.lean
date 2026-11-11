@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (971 MathFin constants, 29 upstream). Citations
+  corpus (973 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -1087,6 +1087,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Market.IsPricingMeasure.exists_isEquivProbMeasure
 
+/-- info: 'MathFin.Market.IsPricingMeasure.isNormalizedCallPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Market.IsPricingMeasure.isNormalizedCallPrice
+
 /-- info: 'MathFin.Market.IsPricingMeasure.of_pricesGainsAtZero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Market.IsPricingMeasure.of_pricesGainsAtZero
@@ -1242,6 +1246,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.SVI.butterflyFreeFormula_iff_isNormalizedCallPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.SVI.butterflyFreeFormula_iff_isNormalizedCallPrice
+
+/-- info: 'MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure
 
 /-- info: 'MathFin.SVI.extendedCertificateFormula_iff_bsSmile_convex' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

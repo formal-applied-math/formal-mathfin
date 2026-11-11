@@ -3692,6 +3692,13 @@
       "input_hash": "b062a27ed2688726a55c06b85ee4b20e0688ffb250d8e544677272d1099eb8e8",
       "verified_at_commit": "1b60844"
     },
+    "mf-market-call-price-normalized": {
+      "benchmark_file": "svi_certificate.json",
+      "date": "2026-11-11",
+      "elapsed_s": 3.6,
+      "input_hash": "85f65277ad22624a5cbef8f54cc9148451732472c55e8cd09cf7ca1b965fe39c",
+      "verified_at_commit": "9007afd"
+    },
     "mf-market-ftap-finite": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-11-09",
@@ -4544,13 +4551,6 @@
       "date": "2026-11-08",
       "elapsed_s": 2.5,
       "input_hash": "fc90669b1e88b762a0041989c785caf40bb2b5c28861a6eb29d135f996f6cc99",
-      "verified_at_commit": "f68ab19"
-    },
-    "mf-svi-butterfly-free-sign-formula": {
-      "benchmark_file": "svi_certificate.json",
-      "date": "2026-11-08",
-      "elapsed_s": 2.7,
-      "input_hash": "92a705bf82215b3f2b2d6eb64be2bd4bb49938875208ebb254b8760869e4221c",
       "verified_at_commit": "f68ab19"
     },
     "mf-svi-calendar-free-iff": {

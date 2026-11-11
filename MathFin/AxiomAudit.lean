@@ -2830,3 +2830,11 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.Market.superReplicationPrice_eq_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.Market.superReplicationPrice_eq_price
+
+/-- info: 'MathFin.Market.IsPricingMeasure.isNormalizedCallPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Market.IsPricingMeasure.isNormalizedCallPrice
+
+/-- info: 'MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure
