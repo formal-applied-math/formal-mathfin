@@ -8,25 +8,15 @@ import MathFin
 /-!
 # Connectors: call-price functions and the market
 
-Call prices in the strike are the static face of the fundamental theorem: a market with a pricing
-measure produces a normalised call price function, and every normalised call price function (hence
-every butterfly-free SVI smile) is produced by one. Docs: `docs/specs/2026-11-08-chain-design.md`
+Call prices in the strike are the static face of the fundamental theorem. A market with a pricing
+measure produces a normalised call price function (proved:
+`Market.IsPricingMeasure.isNormalizedCallPrice`); the converse, that every normalised call price
+function (hence every butterfly-free SVI smile) is produced by a market, is stated here. Docs: `docs/specs/2026-11-08-chain-design.md`
 §5 (K2).
 -/
 
 open MathFin MathFin.Contracts MeasureTheory
 open scoped NNReal
-
-/-- **A pricing measure gives a normalised call price function.** In a market with unit numéraire
-and a positive asset, priced at `T` by `Q`, the forward `F` of the asset is its price, and the
-calls at the strikes `k F` priced in units of `F` are a normalised call price function: convex,
-nonincreasing, between the intrinsic value and one, with limits one and zero. -/
-theorem MathFinFrontier.isNormalizedCallPrice_of_isPricingMeasure
-    {Ω : Type*} [MeasurableSpace Ω] {M : Market Unit Ω} {T : ℝ≥0} {Q : Measure Ω}
-    (hQ : M.IsPricingMeasure T Q) (hN : ∀ t ω, M.numeraire t ω = 1)
-    (hpos : ∀ ω, 0 < M.asset () T ω) {F : ℝ} (hF : F = M.price Q (.pay T (.obs () T))) :
-    IsNormalizedCallPrice fun k ↦ M.price Q (europeanCall (k * F) T) / F := by
-  sorry
 
 /-- **Roper's converse.** Every normalised call price function is the call price function of a
 market with unit numéraire, a positive asset of forward one at time one, and a pricing measure. -/

@@ -43,6 +43,7 @@ import MathFin.Models.Jumps.JumpDiffusionProcess
 import MathFin.Models.Jumps.JumpDiffusionVarianceSwap
 import MathFin.Models.LocalVol.Dupire
 import MathFin.Models.ModelFree.CarrMadan
+import MathFin.Models.ModelFree.MarketCallPrice
 import MathFin.Models.Rates.AffineTermStructurePDE
 import MathFin.Models.Rates.Caplet
 import MathFin.Models.Rates.HJM
@@ -905,6 +906,17 @@ attribute [blueprint "thm:carr-madan"
   positive-part case split. The unbounded-strike form is not proved. The log payoff
   specializes to the variance-swap $1/K^2$ strip. -/)]
   MathFin.carrMadan_spanning
+
+attribute [blueprint "thm:market-call-price-normalized"
+  (title := "A pricing measure gives a normalised call price function")
+  (statement := /-- In a market with unit numéraire and a positive asset $S$, priced at $T$ by a
+  pricing measure $Q$, the asset is a $Q$-martingale, so its forward is $F = \mathbb E_Q[S_T]$.
+  The calls at the strikes $kF$, in units of $F$, are the call prices
+  $k \mapsto \mathbb E_Q[(S_T/F - k)^+]$ of a positive mean-one variable, and these are convex
+  and nonincreasing, between $(1-k)^+$ and $1$, with limits $1$ at $0^+$ and $0$ at infinity.
+  This is the forward direction of Roper's theorem; the converse, a market from a call price
+  function, is not proved. -/)]
+  MathFin.Market.IsPricingMeasure.isNormalizedCallPrice
 
 -- ===== choice/preferences: Preferences =====
 

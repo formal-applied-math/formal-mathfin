@@ -2786,3 +2786,11 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.Contracts.value_trancheLeg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.Contracts.value_trancheLeg
+
+/-- info: 'MathFin.Market.IsPricingMeasure.isNormalizedCallPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Market.IsPricingMeasure.isNormalizedCallPrice
+
+/-- info: 'MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure
