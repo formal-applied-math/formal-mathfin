@@ -349,6 +349,7 @@ def label_drift(issue: Issue, nodes: dict[str, Node]) -> tuple[set[str], set[str
 class Problem:
     message: str
     issue: int | None = None  # the issue to comment on, when one is at fault
+    drift: bool = False  # label drift: blueprint-sync on main repairs it from main's tree
 
 
 def check(issues: list[Issue], nodes: dict[str, Node],
@@ -396,7 +397,8 @@ def check(issues: list[Issue], nodes: dict[str, Node],
                 f"#{i.number}: its nodes give it the labels "
                 f"{', '.join(sorted(derived_labels(i, nodes))) or '(none)'}; "
                 f"add {', '.join(sorted(add)) or 'nothing'}, remove "
-                f"{', '.join(sorted(drop)) or 'nothing'} (`blueprint_issues labels --apply`)"))
+                f"{', '.join(sorted(drop)) or 'nothing'} (`blueprint_issues labels --apply`)",
+                drift=True))
     for n in nodes.values():
         if n.status in ("frontier", "partial") and n.label not in open_named:
             closed = any_named.get(n.label, [])
@@ -490,6 +492,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--issues", help="issues JSON instead of fetching with gh")
     ap.add_argument("--repo", default=REPO)
     ap.add_argument("--apply", action="store_true", help="labels: write them (else dry run)")
+    ap.add_argument("--branch", action="store_true",
+                    help="check: a branch's tree, so label drift is reported, not a failure "
+                         "(labels follow main's tree; blueprint-sync relabels at merge)")
     args = ap.parse_args(argv)
 
     nodes = load_nodes()
@@ -517,6 +522,10 @@ def main(argv: list[str] | None = None) -> int:
             print(p.message)
         return 1 if mine else 0
 
+    if args.branch:
+        for p in (p for p in problems if p.drift):
+            print(f"note (relabelled from main at merge): {p.message}")
+        problems = [p for p in problems if not p.drift]
     for p in problems:
         print(p.message)
     n_frontier = sum(n.status == "frontier" for n in nodes.values())
