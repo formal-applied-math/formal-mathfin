@@ -96,15 +96,16 @@ theorem IsPricingMeasure.isNormalizedCallPrice (hQ : M.IsPricingMeasure T Q)
     (hF : F = M.price Q (.pay T (.obs () T))) :
     IsNormalizedCallPrice fun k ↦ M.price Q (europeanCall (k * F) T) / F := by
   have := hQ.isProb
-  have hint : Integrable (M.asset () T) Q := by
-    simpa [deflated, hN] using (hQ.martingale ()).integrable T
+  have hint : Integrable (M.asset () T) Q :=
+    ((hQ.martingale ()).integrable T).congr (.of_forall fun ω ↦ by simp [deflated, hN])
   have hF' : F = ∫ ω, M.asset () T ω ∂Q := by
     simp [hF, price, Contract.value_pay, Payoff.eval, scenarioAt, deflator, hN]
   have hFpos : 0 < F := by
     rw [hF']
     refine (integral_pos_iff_support_of_nonneg (fun ω ↦ (hpos ω).le) hint).2 ?_
-    rw [Set.eq_univ_of_forall (fun ω ↦ (hpos ω).ne' : ∀ ω, ω ∈ Function.support (M.asset () T)),
-      measure_univ]
+    have hsupp : Function.support (M.asset () T) = univ :=
+      eq_univ_of_forall fun ω ↦ (hpos ω).ne'
+    rw [hsupp, measure_univ]
     exact one_pos
   have key := isNormalizedCallPrice_integral_call (μ := Q) (X := fun ω ↦ M.asset () T ω / F)
     (hint.div_const F) (fun ω ↦ div_pos (hpos ω) hFpos)
