@@ -256,12 +256,6 @@ def _statement(text: str, limit: int = 480) -> str:
     return cut + " …"
 
 
-def _records(idx: DeclIndex) -> list[dict]:
-    """The index in the shape ``chain_reach`` reads."""
-    return [dict(name=d.name, kind=d.kind, module=d.module, private=d.private, type=d.type,
-                 uses=list(d.uses)) for d in idx.decls.values()]
-
-
 def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
               issues: list[dict] | None = None, connectors: list[dict] = ()) -> dict:
     """Everything the tree page draws, as one JSON-ready dict. ``connectors`` are the records
@@ -306,7 +300,7 @@ def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
         n.pop("area", None)
         n.pop("family", None)
     # the measure: heights, towers, islands, phantoms
-    records = _records(idx)
+    records = chain_reach.records(idx)
     reach = chain_reach.compute(records)
     by_rec = {r["name"]: r for r in records}
     hops = {r["name"]: reach.hop_of(r) for r in records}
