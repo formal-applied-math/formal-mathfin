@@ -26,7 +26,8 @@ sure nonnegative, non-null gain) holds if and only if every one-period market co
   hypothesis gives `V_T = 0`, and then `g ≥ 0` forces `g = 0`.
 
 This is the first half of the multi-period FTAP on a general space; the conditional one-period
-FTAP (the measurable-selection step) is not proved here.
+step is `OneAssetDMW.lean` for one asset and the hypothesis of `DalangMortonWillinger.lean` for
+several.
 
 ## Main definitions
 
@@ -40,6 +41,8 @@ FTAP (the measurable-selection step) is not proved here.
 * `noArbitrageLocal_of_noArbitrage`: multi-period no arbitrage gives the local one.
 * `noArbitrage_of_noArbitrageLocal`: the local one gives the multi-period one (adapted price).
 * `noArbitrage_iff_noArbitrageLocal`: the equivalence.
+* `NoArbitrageAt.of_absolutelyContinuous`: conditional no arbitrage passes to an equivalent
+  measure.
 
 ## References
 
@@ -73,6 +76,12 @@ def NoArbitrageAt (𝓕 : Filtration ℕ m0) (P : Measure Ω) (S : ℕ → Ω �
 /-- **No arbitrage in each conditional one-period market** of the periods `t < T`. -/
 def NoArbitrageLocal (𝓕 : Filtration ℕ m0) (P : Measure Ω) (S : ℕ → Ω → F) (T : ℕ) : Prop :=
   ∀ t < T, NoArbitrageAt 𝓕 P S t
+
+/-- No arbitrage in a conditional one-period market passes to an equivalent measure. -/
+theorem NoArbitrageAt.of_absolutelyContinuous {𝓕 : Filtration ℕ m0} {S : ℕ → Ω → F}
+    {μ ν : Measure Ω} {t : ℕ} (h : NoArbitrageAt 𝓕 μ S t) (hνμ : ν ≪ μ) (hμν : μ ≪ ν) :
+    NoArbitrageAt 𝓕 ν S t :=
+  fun θ hθ hpos ↦ hνμ.ae_eq (h θ hθ (hμν.ae_le hpos))
 
 /-- The strategy holding `θ` over the single period `(t, t+1]` and nothing else. -/
 def singleStrategy (t : ℕ) (θ : Ω → F) : ℕ → Ω → F :=
