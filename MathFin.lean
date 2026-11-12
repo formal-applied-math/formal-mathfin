@@ -367,10 +367,11 @@ import MathFin.Pricing.FTAP.FTAPOnePeriod
 -- General-Ω one-period FTAP, d assets (Esscher minimal-divergence EMM, full — finite-dim market)
 import MathFin.Pricing.FTAP.FTAPOnePeriodVector
 -- Multi-period FTAP on a general space: no arbitrage is local, one-period densities paste, and
--- the Dalang–Morton–Willinger theorem reduces to the conditional one-period FTAP
+-- the Dalang–Morton–Willinger theorem: the reduction, pasting and the one-asset theorem
 import MathFin.Pricing.FTAP.NoArbitrageLocal
 import MathFin.Pricing.FTAP.DensityPasting
 import MathFin.Pricing.FTAP.DalangMortonWillinger
+import MathFin.Pricing.FTAP.OneAssetDMW
 import MathFin.Pricing.FTAP.MarketFTAP
 -- Phase 20: first-principles core derivations
 import MathFin.Pricing.NoArbitrageDerivations

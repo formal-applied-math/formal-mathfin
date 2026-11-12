@@ -2906,3 +2906,21 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.SVI.exists_market_of_butterflyFreeFormula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.SVI.exists_market_of_butterflyFreeFormula
+
+/-! ### Dalang–Morton–Willinger for one asset on a general space (`OneAssetDMW.lean`) -/
+
+/-- info: 'MathFin.exists_weight_of_noArbitrage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.exists_weight_of_noArbitrage
+
+/-- info: 'MathFin.OneAsset.exists_isEMM_of_noArbitrage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.OneAsset.exists_isEMM_of_noArbitrage
+
+/-- info: 'MathFin.OneAsset.noArbitrage_iff_exists_isEMM' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.OneAsset.noArbitrage_iff_exists_isEMM
+
+/-- info: 'MathFin.Market.noArbitrage_iff_exists_isPricingMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Market.noArbitrage_iff_exists_isPricingMeasure
