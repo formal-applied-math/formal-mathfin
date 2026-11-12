@@ -1,10 +1,11 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
+public import MathFin.Probability.Brownian.Wiener.WienerIntegralL2
 public import MathFin.Probability.Gaussian.BivariateNormalCDF
 public import Mathlib.Analysis.Real.Sqrt
 public import Mathlib.Tactic.FieldSimp
@@ -64,6 +65,9 @@ rows above.
 * `willowMarginal_crossMoment_eq_willowBeta` — the join: the chain's standardized
   cross moment is the construction's own `willowBeta` coefficient once `β k` is tied
   to the grid.
+* `willowScaled_secondMoment_eq_integral_sq`, `willowScaled_crossMoment_eq_integral_mul` — **the
+  Brownian join**: against a pre-Brownian motion `W` on the grid `t k`, the scaled chain's second
+  moment is `E[W_{t k}²]` and its cross moment is `E[W_{t k} W_{t (k+1)}]`.
 * `WillowMomentConstraints.sq_le_one`,
   `WillowMomentConstraints.bivariateNormal_moments` — **feasibility**: an
   honest (non-negative, summing-to-one) transition row forces `β k ^ 2 ≤ 1`, the
@@ -102,6 +106,7 @@ de-correlation, Markov chain, Brownian motion, MSC 60J10, MSC 91G60, JEL G13
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory
+open scoped NNReal
 
 /-- **Curran's de-correlation coefficient**: for a grid step widening time by the factor
 `1 + α > 0`, the willow tree pairs times `t` and `t' = (1 + α) t` through
@@ -409,5 +414,35 @@ theorem WillowMomentConstraints.bivariateNormal_moments (hP : WillowMomentConstr
   have h := hP.sq_le_one k i hrow
   ⟨h, variance_fst_bivariateNormalLaw h, variance_snd_bivariateNormalLaw _,
     covariance_fst_snd_bivariateNormalLaw _⟩
+
+/-! ### The chain against a Brownian motion
+
+The moments the scaled chain reproduces are those of a pre-Brownian motion `W` read at the grid
+times: `E[W_s W_t] = min s t` (`WienerIntegralL2.integral_mul_eval`). -/
+
+variable {Ω : Type*} [MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω}
+
+/-- **The scaled chain's second moment is the Brownian one**: for a pre-Brownian motion `W`
+and a willow chain started at a marginal of unit mass and unit second moment, the second moment of
+`X k = √(t k) Z k` is `E[W_{t k}²]`. -/
+theorem willowScaled_secondMoment_eq_integral_sq [IsProbabilityMeasure μ]
+    (hP : WillowMomentConstraints z β P) (hq : ∑ i, q i = 1) (hq2 : ∑ i, q i * z i ^ 2 = 1)
+    (hW : IsPreBrownianReal W μ) (t : ℕ → ℝ≥0) (k : ℕ) :
+    ∑ j, willowMarginal P q k j * (√(t k : ℝ) * z j) ^ 2 = ∫ ω, W (t k) ω ^ 2 ∂μ := by
+  rw [willowScaled_secondMoment hP hq hq2 (fun k ↦ (t k : ℝ)) k (t k).2]
+  simpa [sq] using (WienerIntegralL2.integral_mul_eval hW (t k) (t k)).symm
+
+/-- **The scaled chain's cross moment is the Brownian one**: on an increasing grid with
+`t (k+1) > 0` and the chain's coefficient tied to it by `β k = √(t k / t (k+1))`, the cross moment
+of `X k`, `X (k+1)` is `E[W_{t k} W_{t (k+1)}]`. -/
+theorem willowScaled_crossMoment_eq_integral_mul [IsProbabilityMeasure μ]
+    (hP : WillowMomentConstraints z β P) (hq : ∑ i, q i = 1) (hq2 : ∑ i, q i * z i ^ 2 = 1)
+    (hW : IsPreBrownianReal W μ) (t : ℕ → ℝ≥0) (k : ℕ) (hk : t k ≤ t (k + 1))
+    (ht1 : 0 < (t (k + 1) : ℝ)) (hβ : β k = √((t k : ℝ) / t (k + 1))) :
+    ∑ i, willowMarginal P q k i * (√(t k : ℝ) * z i)
+        * ∑ j, P k i j * (√(t (k + 1) : ℝ) * z j)
+      = ∫ ω, W (t k) ω * W (t (k + 1)) ω ∂μ := by
+  rw [willowScaled_crossMoment hP hq hq2 (fun k ↦ (t k : ℝ)) k (t k).2 ht1 hβ,
+    WienerIntegralL2.integral_mul_eval hW, min_eq_left hk]
 
 end MathFin

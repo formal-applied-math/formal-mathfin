@@ -8,13 +8,6 @@ module
 public import MathFin.Models.BlackScholes.DividendsGreeks
 public import MathFin.Models.BlackScholes.Market
 public import MathFin.Models.BlackScholes.PDE
-public import Mathlib.Algebra.Order.Star.Real
-public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
-public import Mathlib.RingTheory.Etale.Weakly
-public import Mathlib.RingTheory.Flat.TorsionFree
-public import Mathlib.RingTheory.TotallySplit
-public import Mathlib.RingTheory.WittVector.IsPoly
-public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Shout-floor monotonicity: Dai–Kwok–Wu (2004), Lemma 2.1(i)

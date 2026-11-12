@@ -2952,3 +2952,41 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.Market.noArbitrage_iff_exists_isPricingMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.Market.noArbitrage_iff_exists_isPricingMeasure
+
+/-! ### Lattice, put-by-parity, VaR and spectral bridges (the lattice review, 2026-11-12) -/
+
+/-- info: 'MathFin.isPricingMeasure_trinomialLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.isPricingMeasure_trinomialLaw
+
+/-- info: 'MathFin.trinomial_exp_moment_of_isPricingMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.trinomial_exp_moment_of_isPricingMeasure
+
+/-- info: 'MathFin.integral_trinomialNodes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.integral_trinomialNodes
+
+/-- info: 'MathFin.willowScaled_secondMoment_eq_integral_sq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.willowScaled_secondMoment_eq_integral_sq
+
+/-- info: 'MathFin.willowScaled_crossMoment_eq_integral_mul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.willowScaled_crossMoment_eq_integral_mul
+
+/-- info: 'MathFin.Contracts.BlackScholes.price_europeanPut_constGirsanovMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Contracts.BlackScholes.price_europeanPut_constGirsanovMeasure
+
+/-- info: 'MathFin.DeFi.clHistoricalVaR_eq_valueAtRisk' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.DeFi.clHistoricalVaR_eq_valueAtRisk
+
+/-- info: 'MathFin.sum_eigenvalues_eq_card' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.sum_eigenvalues_eq_card
+
+/-- info: 'MathFin.average_eigenvalue_mem_Icc_mpEdges' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.average_eigenvalue_mem_Icc_mpEdges
