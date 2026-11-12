@@ -901,6 +901,8 @@ import MathFin.Choice.Performance.FracDiffWeights
 import MathFin.Choice.Performance.LabelUniqueness
 import MathFin.Choice.Performance.BetSizeSigmoid
 import MathFin.Choice.Performance.PurgedCV
+-- Marchenko-Pastur support edges: closed form, width, sandwich, limits, de Prado form
+import MathFin.Choice.Performance.MarchenkoPasturEdge
 -- The layer beneath UtilityDerivation, which takes the expected-utility form as given:
 -- von Neumann-Morgenstern lotteries, the mixture algebra, affinity of expected utility in
 -- the mixture, and the vNM axioms verified for the induced preference (the soundness half,

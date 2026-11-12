@@ -2978,6 +2978,13 @@
       "input_hash": "ac8ecf95bc7a727f10d4f6c6875762ab9f2300fa84d4f518342566cfb58213e3",
       "verified_at_commit": "f68ab19"
     },
+    "mf-marchenko-pastur-edges": {
+      "benchmark_file": "portfolio_and_performance.json",
+      "date": "2026-11-08",
+      "elapsed_s": 3.8,
+      "input_hash": "fc2e63caed76a9a0761904871189c442e6b31d7b516cce24eed0a07da67c2421",
+      "verified_at_commit": "902f009"
+    },
     "mf-marginal-utility-is-sdf": {
       "benchmark_file": "portfolio_and_performance.json",
       "date": "2026-11-11",
