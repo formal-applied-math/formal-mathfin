@@ -8,12 +8,6 @@ module
 public import MathFin.Models.BlackScholes.Market
 public import MathFin.Models.BlackScholes.PDE
 public import MathFin.Probability.Gaussian.NormalTail
-public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
-public import Mathlib.RingTheory.WittVector.IsPoly
-public import Mathlib.Tactic.Basify
-public import Mathlib.Tactic.ENatToNat
-public import Mathlib.Tactic.Polynomial.Basic
-public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Continuous-monitoring floating-strike lookback option: Haug's closed form
