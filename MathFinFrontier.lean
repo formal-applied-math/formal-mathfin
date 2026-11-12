@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
 import MathFin
-import MathFinFrontier.MarketValuation
 import MathFinFrontier.Microstructure
 import MathFinFrontier.Credit
 

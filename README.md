@@ -151,7 +151,11 @@ from one file, [`docs/taxonomy.toml`](docs/taxonomy.toml).
 - **Girsanov.** Only bounded θ. Novikov's condition is not proved.
 - **Completeness.** In the Brownian market only completeness ⇒ uniqueness of the pricing measure is
   proved, and the hedge is not identified (Clark–Ocone,
-  [#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)).
+  [#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)). In the Black–Scholes
+  market the pricing measure is unique among those with a density square-integrable under the
+  Girsanov measure, in particular among bounded densities against the physical measure
+  (`BlackScholes.trim_eq_of_isPricingMeasure_withDensity`); a pricing measure with an arbitrary
+  density is not covered.
 - **Itô calculus.** The Itô process is built from one Brownian motion with continuous coefficients.
   Itô's formula for a general continuous semimartingale and a quadratic-variation process are not
   proved.

@@ -716,15 +716,6 @@ area = "probability/brownian"
 # ---- the one-trunk hinges (docs/specs/2026-11-07-one-trunk-design.md §5)
 
 [[node]]
-label = "thm:bs-arbitrage-free-price"
-title = "The Black–Scholes price is the arbitrage-free price"
-statement = "In the Black–Scholes market every pricing measure with a square-integrable density gives the European call the price bsCallPrice. That this is also the superreplication price and the initial capital of the delta hedge is not part of the connector."
-uses = ["def:pricing-functional", "thm:black-scholes-market", "thm:bs-call", "thm:physical-measure-pricing", "thm:market-completeness", "thm:bs-delta-hedge"]
-lean = "MathFinFrontier.bs_call_price_unique"
-area = "valuation/diffusions"
-family = "diffusions"
-
-[[node]]
 label = "thm:glosten-milgrom-pricing-measure"
 title = "The Glosten–Milgrom quote process is a martingale"
 statement = "The Glosten–Milgrom dealer's quote after n trades is the conditional expectation of the value given the observed history of trade directions, which extends the one-trade identification to a sequence; with the proved fact that a conditional-expectation process is priced by its own measure (thm:conditional-expectation-pricing-measure) the quote sequence is a martingale for the dealer's measure."
