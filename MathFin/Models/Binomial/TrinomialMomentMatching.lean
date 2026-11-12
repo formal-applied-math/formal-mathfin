@@ -1,11 +1,12 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
 public import MathFin.Models.BlackScholes.GBMLogMoments
+public import MathFin.Pricing.OneDateMarket
 public import Mathlib.Algebra.Order.BigOperators.Group.Finset
 public import Mathlib.Algebra.Order.Group.Abs
 public import Mathlib.Analysis.Real.Sqrt
@@ -63,10 +64,19 @@ the `dx = √3 v`, `v2 = v²` substitution of the same solution.
   mean offset tied to one step of the Black–Scholes log-price, the weights match the
   log-return's mean and variance (`bsLogReturn_mean`, `bsLogReturn_variance`).
 
+* `trinomialLaw`, `trinomialNodes`: the weights as a probability law on the three children and the
+  asset values `c e^{-dx}, c, c e^{dx}` they carry.
+* `isPricingMeasure_trinomialLaw`, `trinomial_exp_moment_of_isPricingMeasure`: the law is a pricing
+  measure of the one-date market of `Pricing/OneDateMarket.lean` (`Market.oneDate`) on those nodes
+  exactly when the exponential moment `c (1 + (v2 + e²)(cosh dx - 1)/dx² + e sinh dx/dx)` equals
+  `s₀ e^{rτ}` (the weights positive; the converse for `τ > 0`).
+
 ## Scope
 
-The statements are about one-step weights and finitely supported laws on a lattice. Nothing
-here is a multi-period tree object, and nothing is claimed about the prices a tree built
+The statements are about one-step weights and finitely supported laws on a lattice, and one
+no-arbitrage socket: the one-date market. Nothing here is a multi-period tree object, the
+two-moment matching does not imply the exponential-moment (pricing) condition, which is a third
+equation a calibrated tree must also satisfy, and nothing is claimed about the prices a tree built
 from these weights produces or about their convergence. Non-negativity of the weights is
 guaranteed only on the window above; outside it the same formulas produce signed weights
 (the tradeoff the transcribed source documents and accepts).
@@ -276,5 +286,116 @@ theorem trinomialProb_bsStep_variance (h : BSCallHyp Q S_0 K r σ dt Z) (e : ℝ
       (Real.sqrt_pos.mpr h.T_pos).ne'
   rw [bsLogReturn_variance h, trinomialProb_secondMoment hdx]
   ring
+
+/-! ### The trinomial law prices a one-date market
+
+The three weights are a probability law on the three children, `trinomialLaw`, and the
+children are the values `c e^{-dx}, c, c e^{dx}` a one-date asset takes after the step. The
+one-date market of `Pricing/OneDateMarket.lean` (`Market.oneDate`) is the smallest market with a
+pricing measure, and the law prices it exactly when the lattice reproduces the money-market
+growth of the quoted price, `E[X] = s₀ e^{rτ}`. Matching two moments of the log-return does not by
+itself give that: the condition below is a third, exponential-moment equation in the same
+parameters, so a calibrated tree chooses the offset `e` (or the centre `c`) to satisfy it. -/
+
+open scoped NNReal
+
+/-- The three branch weights as a vector over the children `x_k - dx, x_k, x_k + dx`. -/
+noncomputable def trinomialWeights (v2 e dx : ℝ) : Fin 3 → ℝ :=
+  ![trinomialProbDown v2 e dx, trinomialProbMid v2 e dx, trinomialProbUp v2 e dx]
+
+/-- **The trinomial law**: the weights `p₁, p₂, p₃` on the three children, as a measure on
+`Fin 3` (`0` the down child, `1` the central one, `2` the up child). -/
+noncomputable def trinomialLaw (v2 e dx : ℝ) : Measure (Fin 3) :=
+  Measure.ofWeights Finset.univ (trinomialWeights v2 e dx)
+
+/-- The values of an asset at the three children when the central child is `c`:
+`c e^{-dx}, c, c e^{dx}`, the nodes of a tree for the log-price with spacing `dx`. -/
+noncomputable def trinomialNodes (c dx : ℝ) : Fin 3 → ℝ :=
+  ![c * Real.exp (-dx), c, c * Real.exp dx]
+
+/-- Positive weights give a probability law. -/
+theorem isProbabilityMeasure_trinomialLaw {v2 e dx : ℝ} (hdx : dx ≠ 0)
+    (h : ∀ k, 0 ≤ trinomialWeights v2 e dx k) : IsProbabilityMeasure (trinomialLaw v2 e dx) :=
+  Measure.isProbabilityMeasure_ofWeights (fun k _ ↦ h k) (by
+    simpa [Fin.sum_univ_three, trinomialWeights] using trinomialProb_sum (v2 := v2) (e := e) hdx)
+
+/-- **Mean and variance of the trinomial law.** The law's mean displacement is `e` and its
+second moment is `v2 + e²` (the equations of `trinomialProb_mean`, `trinomialProb_secondMoment`
+read as integrals against the law), with the displacement `-dx, 0, dx`. -/
+theorem integral_trinomialLaw {v2 e dx : ℝ} (hdx : dx ≠ 0)
+    (h : ∀ k, 0 ≤ trinomialWeights v2 e dx k) :
+    (∫ k, ![-dx, 0, dx] k ∂trinomialLaw v2 e dx) = e ∧
+      (∫ k, (![-dx, 0, dx] k) ^ 2 ∂trinomialLaw v2 e dx) = v2 + e ^ 2 := by
+  unfold trinomialLaw
+  rw [Measure.integral_ofWeights _ (fun k _ ↦ h k), Measure.integral_ofWeights _ (fun k _ ↦ h k)]
+  simp only [Fin.sum_univ_three, trinomialWeights]
+  simp
+  constructor
+  · have := trinomialProb_mean (v2 := v2) (e := e) hdx
+    linarith
+  · have := trinomialProb_secondMoment (v2 := v2) (e := e) hdx
+    linarith
+
+/-- **The exponential moment of the trinomial step.** Writing `cosh`, `sinh` for the hyperbolic
+functions, the law's mean node value is
+`c (1 + (v2 + e²)(cosh dx - 1)/dx² + e sinh dx / dx)`. -/
+theorem integral_trinomialNodes {v2 e dx : ℝ} (hdx : dx ≠ 0) (c : ℝ)
+    (h : ∀ k, 0 ≤ trinomialWeights v2 e dx k) :
+    ∫ k, trinomialNodes c dx k ∂trinomialLaw v2 e dx
+      = c * (1 + (v2 + e ^ 2) * (Real.cosh dx - 1) / dx ^ 2 + e * Real.sinh dx / dx) := by
+  unfold trinomialLaw
+  rw [Measure.integral_ofWeights _ (fun k _ ↦ h k)]
+  simp only [Fin.sum_univ_three, trinomialWeights, trinomialNodes, Real.cosh_eq, Real.sinh_eq,
+    trinomialProbDown, trinomialProbMid, trinomialProbUp]
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, Matrix.head_cons,
+    Matrix.tail_cons, Real.exp_neg]
+  field_simp
+  ring
+
+/-- Two fully supported probability weight vectors on a finite type give mutually absolutely
+continuous laws. -/
+theorem ofWeights_absolutelyContinuous_of_pos {ι : Type*} [MeasurableSpace ι] [Fintype ι]
+    [MeasurableSingletonClass ι] {p q : ι → ℝ} (hp : ∀ i, 0 < p i) :
+    Measure.ofWeights Finset.univ q ≪ Measure.ofWeights Finset.univ p := by
+  intro s hs
+  have hs' : s = ∅ := by
+    refine Set.eq_empty_of_forall_notMem fun i hi ↦ ?_
+    have := hs
+    simp only [Measure.ofWeights, Measure.coe_finsetSum, Finset.sum_apply, Measure.smul_apply,
+      smul_eq_mul, Finset.sum_eq_zero_iff, mul_eq_zero] at this
+    rcases this i (Finset.mem_univ i) with h | h
+    · exact absurd (ENNReal.ofReal_eq_zero.mp h) (not_le.mpr (hp i))
+    · simp [Measure.dirac_apply' _ (Set.toFinite s).measurableSet, hi] at h
+  simp [hs']
+
+/-- **The trinomial law prices the one-date market** whose asset is `trinomialNodes c dx` at the
+date `τ` and `s₀ e^{rt}` before it, whenever the three weights are positive and the lattice
+reproduces the money-market growth of the quote: `c (1 + (v2 + e²)(cosh dx - 1)/dx² +
+e sinh dx / dx) = s₀ e^{rτ}`. The reference measure is the uniform law on the three children. -/
+theorem isPricingMeasure_trinomialLaw {v2 e dx : ℝ} (hdx : dx ≠ 0)
+    (h : ∀ k, 0 < trinomialWeights v2 e dx k) (c s₀ r : ℝ) (τ : ℝ≥0)
+    (hmean : c * (1 + (v2 + e ^ 2) * (Real.cosh dx - 1) / dx ^ 2 + e * Real.sinh dx / dx)
+      = s₀ * Real.exp (r * τ)) :
+    (Market.oneDate (Measure.ofWeights Finset.univ (fun _ : Fin 3 ↦ (3 : ℝ)⁻¹))
+        (measurable_of_finite (trinomialNodes c dx)) s₀ r τ).IsPricingMeasure τ
+      (trinomialLaw v2 e dx) := by
+  have := isProbabilityMeasure_trinomialLaw hdx fun k ↦ (h k).le
+  refine Market.isPricingMeasure_oneDate
+    (ofWeights_absolutelyContinuous_of_pos fun _ ↦ by norm_num)
+    (ofWeights_absolutelyContinuous_of_pos h) (.of_finite) ?_
+  rw [integral_trinomialNodes hdx c fun k ↦ (h k).le, hmean]
+
+/-- **The converse**: for a date `τ > 0`, a trinomial law that prices the one-date market of
+`trinomialNodes c dx` has the lattice's exponential moment equal to `s₀ e^{rτ}`. So the weights
+price the market if and only if that one equation holds. -/
+theorem trinomial_exp_moment_of_isPricingMeasure {v2 e dx : ℝ} (hdx : dx ≠ 0)
+    (h : ∀ k, 0 < trinomialWeights v2 e dx k) (c s₀ r : ℝ) {τ : ℝ≥0} (hτ : 0 < τ)
+    (hQ : (Market.oneDate (Measure.ofWeights Finset.univ (fun _ : Fin 3 ↦ (3 : ℝ)⁻¹))
+        (measurable_of_finite (trinomialNodes c dx)) s₀ r τ).IsPricingMeasure τ
+      (trinomialLaw v2 e dx)) :
+    c * (1 + (v2 + e ^ 2) * (Real.cosh dx - 1) / dx ^ 2 + e * Real.sinh dx / dx)
+      = s₀ * Real.exp (r * τ) := by
+  rw [← integral_trinomialNodes hdx c fun k ↦ (h k).le]
+  exact (Market.integral_eq_of_isPricingMeasure_oneDate hτ hQ).2
 
 end MathFin

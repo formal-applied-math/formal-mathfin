@@ -706,13 +706,16 @@ attribute [blueprint "thm:crr-bs-convergence"
   MathFin.binomialPrice_call_tendsto_bs_closed
 
 attribute [blueprint "thm:trinomial-moment-matching"
-  (title := "Trinomial moment matching")
-  (statement := /-- For `dx ≠ 0`, the weights of a one-step trinomial lattice solving the mass,
-  mean and second-moment equations about the central node are unique: `q₁ = trinomialProbDown`,
-  `q₂ = trinomialProbMid`, `q₃ = trinomialProbUp`. With the classical spacing `dx = √3 v`,
-  `v2 = v²` they are the classical trinomial weights, and a validity window keeps them in
-  `[0, 1]`. One step only: no multi-period tree and no prices are claimed. -/)]
-  MathFin.trinomialProb_unique
+  (title := "Trinomial lattice step as a pricing measure")
+  (uses := ["def:pricing-measure"])
+  (statement := /-- The one-step trinomial weights `trinomialProbDown/Mid/Up`, the unique solution
+  of the mass, mean and second-moment equations about the central node (`trinomialProb_unique`),
+  form a probability law on the three children. For positive weights it is a pricing measure of
+  the one-date market whose asset takes the values `c e^{-dx}, c, c e^{dx}` if and only if the
+  lattice's exponential moment equals the money-market growth of the quote,
+  `E[X] = s_0 e^{r\tau}`. One step only: no multi-period tree and no prices of path-dependent
+  claims are claimed. -/)]
+  MathFin.isPricingMeasure_trinomialLaw
 attribute [blueprint "thm:cubic-spline-moments-unique"
   (title := "Natural cubic spline: the moment system's unique solution")
   (uses := ["def:contract"])
