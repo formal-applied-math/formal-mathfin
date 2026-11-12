@@ -24,6 +24,7 @@ import MathFin.Pricing.MarketCompleteness
 import MathFin.Models.ModelFree.CarrMadan
 import MathFin.Models.BlackScholes.Call
 import MathFin.Models.BlackScholes.PDE
+import MathFin.Models.Binomial.WillowTree
 import MathFin.Models.BlackScholes.PDEFromIto
 import MathFin.Models.BlackScholes.PDEFromFeynmanKac
 import MathFin.Models.BlackScholes.MargrabeGrounding
@@ -716,6 +717,18 @@ attribute [blueprint "thm:trinomial-moment-matching"
   `E[X] = s_0 e^{r\tau}`. One step only: no multi-period tree and no prices of path-dependent
   claims are claimed. -/)]
   MathFin.isPricingMeasure_trinomialLaw
+attribute [blueprint "thm:willow-tree-brownian-covariance"
+  (title := "The willow tree reproduces Brownian covariance")
+  (uses := ["def:brownian-motion"])
+  (statement := /-- A willow tree is a Markov chain on a fixed node set whose transition matrices
+  satisfy Curran's row constraints: stochasticity and the two conditional moments of a standardized
+  Brownian pair with correlation $\beta_k = \sqrt{t_k/t_{k+1}}$. Started at a marginal of unit mass
+  and unit second moment, the scaled chain $X_k = \sqrt{t_k} Z_k$ has second moment
+  $E[W_{t_k}^2]$ and cross moment $E[X_k X_{k+1}] = E[W_{t_k} W_{t_{k+1}}]$ for a pre-Brownian
+  motion $W$ (`willowScaled_crossMoment_eq_integral_mul`). Only these first two moments of the
+  chain are matched; the linear program that finds admissible matrices and the prices computed on
+  the lattice are not part of the claim. -/)]
+  MathFin.willowScaled_crossMoment_eq_integral_mul
 attribute [blueprint "thm:cubic-spline-moments-unique"
   (title := "Natural cubic spline: the moment system's unique solution")
   (uses := ["def:contract"])
