@@ -189,4 +189,36 @@ theorem trim_eq_of_isPricingMeasure_withDensity
     exact key
   exact hgen _ hfil.symm
 
+include hW in
+/-- **Every pricing measure with a square-integrable density prices the European call at the
+Black–Scholes formula.** A pricing measure `Q` of the Black–Scholes market up to `T ≤ H` whose
+density with respect to the Girsanov measure `Q*` of `θ = (m − r)/σ` is a nonnegative
+`D ∈ L²(Q*)` prices the call at `S₀ Φ(d₁) − K e^{−rT} Φ(d₂)`: it agrees with `Q*` on `𝓕_T`
+(`trim_eq_of_isPricingMeasure_withDensity`), and the discounted call payoff is `𝓕_T`-measurable,
+so its `Q`-integral is its `Q*`-integral (`price_europeanCall_constGirsanovMeasure`). -/
+theorem price_europeanCall_of_isPricingMeasure_withDensity
+    (hWcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ W s ω) {K : ℝ} {T H : ℝ≥0} (hTH : T ≤ H)
+    (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) {Q : Measure Ω}
+    (hQ : (market μ hWmeas S_0 m r σ).IsPricingMeasure T Q)
+    (D : Lp ℝ 2 (constGirsanovMeasure hW hWmeas ((m - r) / σ) H))
+    (hD : ∀ᵐ ω ∂(constGirsanovMeasure hW hWmeas ((m - r) / σ) H), 0 ≤ D ω)
+    (hQD : Q = (constGirsanovMeasure hW hWmeas ((m - r) / σ) H).withDensity
+      fun ω ↦ ENNReal.ofReal (D ω)) :
+    (market μ hWmeas S_0 m r σ).price Q (europeanCall K T)
+      = S_0 * Phi (bsd1 S_0 K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) := by
+  have htrim : Q.trim ((natFiltration hWmeas).le T)
+      = (constGirsanovMeasure hW hWmeas ((m - r) / σ) H).trim ((natFiltration hWmeas).le T) :=
+    trim_eq_of_isPricingMeasure_withDensity hW hWmeas hWcont hS₀ hσ hTH hQ D hD hQD
+  set F : ℝ → ℝ := fun x ↦
+    Real.exp (-r * T) * max (S_0 * Real.exp ((m - σ ^ 2 / 2) * T + σ * x) - K) 0 with hF
+  have hprice (P : Measure Ω) :
+      (market μ hWmeas S_0 m r σ).price P (europeanCall K T) = ∫ ω, F (W T ω) ∂P := by
+    simp [price_market, europeanCall, europeanCallPayoff, Contract.value_pay, Payoff.eval,
+      scenarioAt, pathAssets, hF]
+  have hFm : StronglyMeasurable[natFiltration hWmeas T] fun ω ↦ F (W T ω) :=
+    (by fun_prop : Continuous F).comp_stronglyMeasurable (stronglyAdapted_natFiltration hWmeas T)
+  rw [hprice, integral_trim ((natFiltration hWmeas).le T) hFm, htrim,
+    ← integral_trim ((natFiltration hWmeas).le T) hFm, ← hprice]
+  exact price_europeanCall_constGirsanovMeasure hW hWmeas hTH hS₀ hK hσ hT
+
 end MathFin.Contracts.BlackScholes
