@@ -212,7 +212,7 @@ theorem lattice_variance_lower_bound {c dx e : ℝ} (s : Finset ℤ) (w : ℤ �
     (hmean : ∑ n ∈ s, w n * (c + dx * n) = c + e) :
     e * (dx - e) ≤ ∑ n ∈ s, w n * (c + dx * n - (c + e)) ^ 2 := by
   have hkey : 0 ≤ ∑ n ∈ s, w n * (dx * n * (dx * n - dx)) := by
-    refine Finset.sum_nonneg fun n hn => mul_nonneg (hw n hn) ?_
+    refine Finset.sum_nonneg fun n hn ↦ mul_nonneg (hw n hn) ?_
     have hint : (0 : ℤ) ≤ n * (n - 1) := by
       rcases le_or_gt n 0 with h | h <;> nlinarith
     have hreal : (0 : ℝ) ≤ (n : ℝ) * ((n : ℝ) - 1) := by exact_mod_cast hint
@@ -223,7 +223,7 @@ theorem lattice_variance_lower_bound {c dx e : ℝ} (s : Finset ℤ) (w : ℤ �
       ∑ n ∈ s, w n * (dx * n * (dx * n - dx)) + (dx - 2 * e) * ∑ n ∈ s, w n * (c + dx * n) +
         (e ^ 2 - (dx - 2 * e) * c) * ∑ n ∈ s, w n := by
     rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
-    exact Finset.sum_congr rfl fun n _ => by ring
+    exact Finset.sum_congr rfl fun n _ ↦ by ring
   rw [hsplit, hmean, hsum]
   nlinarith
 

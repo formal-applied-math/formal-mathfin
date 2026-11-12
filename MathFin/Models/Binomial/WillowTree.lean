@@ -80,11 +80,8 @@ full system, the objective, sparsity): the statements are unconditional in the m
 `P`, which is what makes them usable against any solver output. No claim is made about
 prices computed on the lattice.
 
-The chain is stated entrywise — finite sums over the node set, matching the entrywise
-form of Curran's constraint rows. Over Mathlib's matrix API the recursion is `vecMul`
-and the roll-up lemma below is the entrywise form of `Matrix.dotProduct_mulVec`; the
-entrywise form was kept because every hypothesis here is itself an entrywise statement
-about rows.
+The chain is stated entrywise, as finite sums over the node set, matching the form of
+Curran's constraint rows (the recursion is `Matrix.vecMul` over the matrix API).
 
 ## References
 

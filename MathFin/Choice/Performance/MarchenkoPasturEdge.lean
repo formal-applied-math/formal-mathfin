@@ -38,11 +38,11 @@ in `c`, homogeneity `λ±(kσ, c) = k²λ±(σ, c)`, the limits `λ±(σ, c) →
 reaches zero at the rank boundary `N = T`), `λ₊(σ, c) → ∞`, and the de Prado
 parameterization `λ₊(σ, 1/q) = σ²(1 + 1/√q)²`.
 
-A bridge to the portfolio layer ties the edges to the objects the denoising cut is applied
-to: the trace of an equicorrelation matrix is the number of assets, so its average
-eigenvalue is exactly `1` — the entry variance `σ² = 1` of a correlation matrix, which
-sits inside the `[mpLowerEdge 1 c, mpUpperEdge 1 c]` support interval for every aspect
-ratio `c ≤ 1` and is the point both edges collapse to as `c → 0⁺`.
+The edges meet the matrices the denoising cut is applied to through the spectrum's mean: the
+eigenvalues of a unit-diagonal Hermitian matrix (a correlation matrix, e.g. an equicorrelation
+matrix) sum to its dimension, so their average is `1 = σ²`, which lies in
+`[mpLowerEdge 1 c, mpUpperEdge 1 c]` for every aspect ratio `c ≤ 1` and is the point both edges
+collapse to as `c → 0⁺`.
 
 Nothing here is probabilistic: the convergence of the empirical spectrum to the
 Marchenko-Pastur law (the theorem the endpoints are the support of) is not proved, and no
@@ -79,9 +79,8 @@ restriction.
   `sum_eigenvalues_equicorrelationMatrix`: the eigenvalues of a unit-diagonal Hermitian matrix sum
   to its dimension, so their average `1` lies in `[λ₋(1, c), λ₊(1, c)]` for `c ≤ 1` (only the mean
   of the spectrum, not each eigenvalue).
-* `trace_equicorrelationMatrix_eq_card`: an equicorrelation matrix's trace is its dimension,
-  so its average eigenvalue is `1 = σ²` for a correlation matrix — the bridge to
-  `Choice/Portfolio/Equicorrelation.lean`.
+* `trace_equicorrelationMatrix_eq_card`: an equicorrelation matrix
+  (`Choice/Portfolio/Equicorrelation.lean`) has trace its dimension.
 
 ## References
 
@@ -270,13 +269,9 @@ theorem mpLowerEdge_const_mul (k σ c : ℝ) :
   rw [mpLowerEdge, mpLowerEdge]
   ring
 
-/-! ### Bridge to the portfolio layer -/
+/-! ### The average eigenvalue of a correlation matrix -/
 
-/-- An equicorrelation matrix has `1` on the diagonal, so its trace is the number of assets
-and its average eigenvalue is exactly `1` — the entry variance `σ² = 1` of the correlation
-matrices the denoising cut is applied to, which `le_mpUpperEdge` and
-`mpLowerEdge_le_variance_of_le_one` sandwich inside `[mpLowerEdge 1 c, mpUpperEdge 1 c]`
-for every aspect ratio `c ≤ 1`. -/
+/-- An equicorrelation matrix has `1` on the diagonal, so its trace is the number of assets. -/
 theorem trace_equicorrelationMatrix_eq_card (n : Type*) [Fintype n] [DecidableEq n] (ρ : ℝ) :
     (equicorrelationMatrix n ρ).trace = (Fintype.card n : ℝ) := by
   simp [Matrix.trace, Matrix.diag, equicorrelationMatrix]

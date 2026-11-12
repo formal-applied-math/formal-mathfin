@@ -92,21 +92,21 @@ noncomputable def historicalScenarioLoss (L a b s0 : ℝ) {n : ℕ} (scenarios :
   v3PositionValue L a b s0 - v3PositionValue L a b (scenarios i)
 
 /-- **Historical-simulation VaR** of a v3 concentrated-liquidity position: the `finiteVaR` of
-`historicalScenarioLoss` at the equal weights `uniformWeights n hn` — the empirical `α`-quantile of
+`historicalScenarioLoss` at the equal weights `uniformWeights n` — the empirical `α`-quantile of
 `n` historical hypothetical losses, each equally likely. -/
-noncomputable def clHistoricalVaR (L a b s0 : ℝ) {n : ℕ} (hn : 0 < n) (scenarios : Fin n → ℝ)
+noncomputable def clHistoricalVaR (L a b s0 : ℝ) {n : ℕ} [NeZero n] (scenarios : Fin n → ℝ)
     (α : ℝ) : ℝ :=
-  finiteVaR (uniformWeights n hn) (historicalScenarioLoss L a b s0 scenarios) α
+  finiteVaR (uniformWeights n) (historicalScenarioLoss L a b s0 scenarios) α
 
 /-- **Historical VaR scales with deployed liquidity.** Holding the range `[a, b]`, the mark `s0`
 and the historical scenarios fixed, scaling the liquidity `L` by a nonnegative factor `c` scales the
 position's historical-simulation VaR by the same factor: the loss function scales by `c` pointwise
 (`v3PositionValue_const_mul`), and VaR is positively homogeneous in the loss
 (`MathFin.DiscreteVaR.finiteVaR_const_mul`). -/
-theorem clHistoricalVaR_const_mul {n : ℕ} (hn : 0 < n) (L a b s0 : ℝ)
+theorem clHistoricalVaR_const_mul {n : ℕ} [NeZero n] (L a b s0 : ℝ)
     (scenarios : Fin n → ℝ) {α : ℝ} (hα : α ∈ Ioo (0 : ℝ) 1) {c : ℝ} (hc : 0 ≤ c) :
-    clHistoricalVaR (c * L) a b s0 hn scenarios α
-      = c * clHistoricalVaR L a b s0 hn scenarios α := by
+    clHistoricalVaR (c * L) a b s0 scenarios α
+      = c * clHistoricalVaR L a b s0 scenarios α := by
   have hloss : historicalScenarioLoss (c * L) a b s0 scenarios
       = fun i ↦ c * historicalScenarioLoss L a b s0 scenarios i := by
     funext i
@@ -121,9 +121,9 @@ nonnegative (`v3PositionValue_nonneg`), so no historical scenario can produce a 
 today's mark `v3PositionValue L a b s0` — and VaR is attained at a loss value
 (`MathFin.DiscreteVaR.finiteVaR_eq_value_min`, via `MathFin.DiscreteVaR.finiteVaR_le_of_forall_le`).
 -/
-theorem clHistoricalVaR_le_value {n : ℕ} (hn : 0 < n) {L a b : ℝ} (hL : 0 ≤ L) (ha : 0 < a)
+theorem clHistoricalVaR_le_value {n : ℕ} [NeZero n] {L a b : ℝ} (hL : 0 ≤ L) (ha : 0 < a)
     (hab : a ≤ b) (s0 : ℝ) (scenarios : Fin n → ℝ) {α : ℝ} (hα0 : 0 < α) (hα1 : α ≤ 1) :
-    clHistoricalVaR L a b s0 hn scenarios α ≤ v3PositionValue L a b s0 :=
+    clHistoricalVaR L a b s0 scenarios α ≤ v3PositionValue L a b s0 :=
   finiteVaR_le_of_forall_le hα0 hα1 fun _ ↦ sub_le_self _ (v3PositionValue_nonneg hL ha hab)
 
 /-- **Historical VaR is the library's `valueAtRisk` at the empirical law.** The scenario losses
@@ -131,13 +131,12 @@ are a random variable on the `n` scenarios under the equal-weight law `∑ i, n�
 (`Measure.ofWeights`), and `clHistoricalVaR` is `valueAtRisk` of it at level `α ∈ (0, 1)`. So
 everything proved of `valueAtRisk` (monotonicity, law invariance, comonotone additivity, the
 Gaussian closed forms) applies to historical simulation of a v3 position. -/
-theorem clHistoricalVaR_eq_valueAtRisk {n : ℕ} (hn : 0 < n) (L a b s0 : ℝ)
+theorem clHistoricalVaR_eq_valueAtRisk {n : ℕ} [NeZero n] (L a b s0 : ℝ)
     (scenarios : Fin n → ℝ) {α : ℝ} (hα : α ∈ Ioo (0 : ℝ) 1) :
-    clHistoricalVaR L a b s0 hn scenarios α
+    clHistoricalVaR L a b s0 scenarios α
       = valueAtRisk (historicalScenarioLoss L a b s0 scenarios)
           (Measure.ofWeights Finset.univ fun _ : Fin n ↦ (n : ℝ)⁻¹) α := by
-  have : Nonempty (Fin n) := ⟨⟨0, hn⟩⟩
-  have hw : ⇑(uniformWeights n hn).weights = fun _ ↦ (n : ℝ)⁻¹ := by
+  have hw : ⇑(uniformWeights n).weights = fun _ ↦ (n : ℝ)⁻¹ := by
     funext i
     simp [uniformWeights, Convexity.StdSimplex.weights_barycenter_apply]
   rw [clHistoricalVaR, finiteVaR_eq_valueAtRisk hα, hw]
@@ -150,16 +149,16 @@ position, a full revaluation at the scenario price with no discounting. The hist
 `valueAtRisk`, under the equal-weight law on the scenarios, of the loss `v3PositionValue` at the
 mark `s0` minus that revaluation. The mark `s0` stays the position's value as a function of the
 square-root price; the scenarios are taken as given data. -/
-theorem clHistoricalVaR_eq_valueAtRisk_contractValue {n : ℕ} (hn : 0 < n) {L a b : ℝ}
+theorem clHistoricalVaR_eq_valueAtRisk_contractValue {n : ℕ} [NeZero n] {L a b : ℝ}
     (ha : 0 < a) (hab : a ≤ b) (s0 : ℝ) (T : ℝ≥0) (scenarios : Fin n → ℝ)
     (hs : ∀ i, 0 ≤ scenarios i) {α : ℝ} (hα : α ∈ Ioo (0 : ℝ) 1) :
-    clHistoricalVaR L a b s0 hn scenarios α
+    clHistoricalVaR L a b s0 scenarios α
       = valueAtRisk
           (fun i ↦ v3PositionValue L a b s0
             - (Contract.pay T (lpPayoff L a b T)).value (Measure.dirac i) (fun _ _ ↦ 1)
                 (fun _ _ j ↦ scenarios j ^ 2))
           (Measure.ofWeights Finset.univ fun _ : Fin n ↦ (n : ℝ)⁻¹) α := by
-  rw [clHistoricalVaR_eq_valueAtRisk hn L a b s0 scenarios hα]
+  rw [clHistoricalVaR_eq_valueAtRisk L a b s0 scenarios hα]
   refine congrArg (fun f ↦ valueAtRisk f _ α) (funext fun i ↦ ?_)
   rw [Contract.value_pay, integral_dirac, eval_lpPayoff ha hab]
   simp [historicalScenarioLoss, scenarioAt, Real.sqrt_sq (hs i)]

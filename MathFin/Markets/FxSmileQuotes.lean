@@ -258,11 +258,7 @@ theorem existsUnique_fxDelta_eq {w : ℝ} (hw : 0 < w) {Δ : ℝ} (hΔ : Δ ∈ 
   ⟨fxDeltaStrike w (PhiInv Δ), by
     change Phi (dpl (fxDeltaStrike w (PhiInv Δ)) w) = Δ
     rw [dpl_fxDeltaStrike hw]
-    exact Phi_PhiInv hΔ, by
-    intro k hk
-    refine (fxDelta_eq_iff hw).1 ?_
-    rw [hk]
-    exact (Phi_PhiInv hΔ).symm⟩
+    exact Phi_PhiInv hΔ, fun k hk ↦ (fxDelta_eq_iff hw).1 (by rw [hk]; exact (Phi_PhiInv hΔ).symm)⟩
 
 /-- **The `Δ`-call and `Δ`-put strikes are reflections about the ATM strike**: their
 log-strikes sum to `w`, so both sit at distance `√w·|Φ⁻¹(Δ)|` from the delta-neutral-straddle
@@ -307,12 +303,9 @@ the `Δ`-call strike is strictly beyond the ATM strike `w/2` (and, by
 the two wings straddling the ATM pillar. -/
 theorem fxDeltaStrike_call_gt_atm {w : ℝ} (hw : 0 < w) {Δ : ℝ}
     (hΔ : Δ ∈ Set.Ioo 0 1) (h : Δ < 1 / 2) : w / 2 < fxDeltaStrike w (PhiInv Δ) := by
-  have hnzi : PhiInv Δ ≠ 0 := by
-    intro h0
-    have h1 : Δ = 1 / 2 := by
-      have hpp := Phi_PhiInv hΔ
-      rw [h0, Phi_zero] at hpp
-      exact hpp.symm
+  have hnzi : PhiInv Δ ≠ 0 := fun h0 ↦ by
+    have hpp := Phi_PhiInv hΔ
+    rw [h0, Phi_zero] at hpp
     linarith
   have hneg : PhiInv Δ < 0 := by
     rcases lt_or_ge (PhiInv Δ) 0 with hn | hp

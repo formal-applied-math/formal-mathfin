@@ -708,13 +708,13 @@ attribute [blueprint "thm:trinomial-moment-matching"
   (title := "Trinomial lattice step as a pricing measure")
   (uses := ["def:pricing-measure"])
   (statement := /-- The one-step trinomial weights `trinomialProbDown/Mid/Up`, the unique solution
-  of the mass, mean and second-moment equations about the central node (`trinomialProb_unique`),
-  form a probability law on the three children. For positive weights it is a pricing measure of
-  the one-date market whose asset takes the values `c e^{-dx}, c, c e^{dx}` if the lattice's
-  exponential moment equals the money-market growth of the quote, `E[X] = s_0 e^{r\tau}`;
-  conversely, for $\tau > 0$, a pricing trinomial law has that exponential moment
-  (`trinomial_exp_moment_of_isPricingMeasure`). One step only: no multi-period tree and no prices of path-dependent
-  claims are claimed. -/)]
+  of the mass, mean and second-moment equations about the central node (`trinomialProb_unique`).
+  When all three are positive they form a probability law on the three children, and that law is a
+  pricing measure of the one-date market whose asset takes the values `c e^{-dx}, c, c e^{dx}` if
+  the lattice's exponential moment equals the money-market growth of the quote,
+  `E[X] = s_0 e^{r\tau}` (`isPricingMeasure_trinomialLaw`); conversely, for $\tau > 0$, a pricing
+  trinomial law has that exponential moment (`trinomial_exp_moment_of_isPricingMeasure`). One step
+  only: no multi-period tree and no prices of path-dependent claims are claimed. -/)]
   MathFin.isPricingMeasure_trinomialLaw
 
 attribute [blueprint "thm:willow-tree-brownian-covariance"
@@ -724,8 +724,9 @@ attribute [blueprint "thm:willow-tree-brownian-covariance"
   satisfy Curran's row constraints: stochasticity and the two conditional moments of a standardized
   Brownian pair with correlation $\beta_k = \sqrt{t_k/t_{k+1}}$. Started at a marginal of unit mass
   and unit second moment, the scaled chain $X_k = \sqrt{t_k} Z_k$ has second moment
-  $E[W_{t_k}^2]$ and cross moment $E[X_k X_{k+1}] = E[W_{t_k} W_{t_{k+1}}]$ for a pre-Brownian
-  motion $W$ (`willowScaled_crossMoment_eq_integral_mul`). Only these first two moments of the
+  $E[W_{t_k}^2]$ (`willowScaled_secondMoment_eq_integral_sq`) and cross moment
+  $E[X_k X_{k+1}] = E[W_{t_k} W_{t_{k+1}}]$ for a pre-Brownian motion $W$
+  (`willowScaled_crossMoment_eq_integral_mul`), with $\beta_k$ tied to the grid. Only these first two moments of the
   chain are matched; the linear program that finds admissible matrices and the prices computed on
   the lattice are not part of the claim. -/)]
   MathFin.willowScaled_crossMoment_eq_integral_mul

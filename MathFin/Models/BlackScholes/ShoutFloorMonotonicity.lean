@@ -34,17 +34,10 @@ K · P(τ)` (`bsPDiv_diagonal_eq_shoutFloorAtmPut`; the `log(S/K)` term in
 of the repo's existing `bsPDiv` (`DividendsGreeks.lean`):
 `shoutFloorAtmPut r q σ τ := bsPDiv 1 r q σ 1 τ`.
 
-**Scope**: `shoutFloor_g_strictMonoOn` is exactly Lemma 2.1(i), not the
-paper's Theorem 3.1 (the shout-floor pricing identity `R(S, τ) = S · P(τ)`
-itself, for `r ≤ q`). Reaching Theorem 3.1(i) from here needs the shout-floor
-value as an optimal-stopping value on the library's Brownian model, plus
-optional stopping for the *unbounded* discounted-stock martingale
-`e^{-(r−q)t} S_t` — this library's optimal-stopping substrate
-(`MathFin/Models/BlackScholes/American/Stopping/*`) is built around the bounded,
-time-independent vanilla put reward, so it does not apply here as stated; a
-truncation argument (`min(·, N)` plus monotone convergence) would avoid
-needing a full uniform-integrability bridge, but neither that nor the
-stopping-value wiring is built here.
+**Scope**: `shoutFloor_g_strictMonoOn` is exactly Lemma 2.1(i), not the paper's Theorem 3.1
+(the shout-floor pricing identity `R(S, τ) = S · P(τ)` for `r ≤ q`), which would need the
+shout-floor value as an optimal-stopping value with optional stopping for the unbounded
+discounted stock; the library's stopping substrate covers only the bounded vanilla put reward.
 
 ## Main definitions
 
@@ -58,8 +51,8 @@ stopping-value wiring is built here.
   `e^{qτ} P(τ; r, q) = P(τ; r - q, 0)`, i.e. `g(τ)` is literally the ordinary
   (no-dividend) ATM put `bsP 1 (r - q) σ 1 τ` at the shifted rate `r - q`.
 * `shoutFloorAtmPut_eq_marketPut` — the trunk-grounded form: the market's own price of the
-  ATM European put (spot `1`, drift and rate `r - q`) is `e^{qτ} · g(τ)`, so the reward whose
-  monotonicity is proved here is literally a market price.
+  ATM European put (spot `1`, drift and rate `r - q`) is `g(τ) = e^{qτ} · P(τ)`, so the
+  function whose monotonicity is proved here is literally a market price.
 * `hasDerivAt_shoutFloor_g` — `g`'s `τ`-derivative follows immediately via
   `shoutFloor_g_eq_bsP` from the library's own `hasDerivAt_bsP_tau` (at
   `K = S = 1`, rate `r - q`) — no new differentiation needed, matching the
@@ -114,11 +107,10 @@ theorem shoutFloor_g_eq_bsP (r q σ τ : ℝ) :
 
 /-- **The trunk-grounded form of the ATM put**: the Black–Scholes market's own price of the
 European put struck at the spot (spot `1`, drift and rate both `r - q`) under the
-zero-price-of-risk measure is exactly `e^{qτ} · g(τ)` — by the market's put pricing
+zero-price-of-risk measure is exactly `g(τ) = e^{qτ} · P(τ)` — by the market's put pricing
 (`price_europeanPut_constGirsanovMeasure`), the reduction `shoutFloor_g_eq_bsP`, and the
-closed-form parity chain (`bsP_eq_bsV`, `bsV_eq_closedForm`). Whatever the market charges for
-the ATM put, the shout-floor reward is that scaled by `e^{qτ}`, so the monotonicity below
-operates at the level of the pricing functional, not only at the closed-form level. -/
+closed-form parity chain (`bsP_eq_bsV`, `bsV_eq_closedForm`). So the monotonicity below holds
+at the level of the pricing functional, not only at the closed-form level. -/
 theorem shoutFloorAtmPut_eq_marketPut {Ω : Type*} [MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ}
     {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)
     (hWmeas : ∀ t, Measurable (W t)) {r q σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H)
@@ -194,10 +186,9 @@ their Theorem 3.1(i) (`R(S, τ) = S · P(τ)` for `r ≤ q`) — see the module
 docstring for exactly what is and is not proved here. -/
 theorem shoutFloor_g_strictMonoOn {r q σ : ℝ} (hrq : r ≤ q) (hσ : 0 < σ) :
     StrictMonoOn (fun t ↦ Real.exp (q * t) * shoutFloorAtmPut r q σ t) (Set.Ioi 0) := by
-  apply strictMonoOn_of_deriv_pos (convex_Ioi 0) (shoutFloor_g_continuousOn hσ)
-  intro τ hτ_int
-  rw [interior_Ioi] at hτ_int
-  rw [(hasDerivAt_shoutFloor_g hσ hτ_int).deriv]
-  exact shoutFloor_discriminant_pos hrq hσ hτ_int
+  refine strictMonoOn_of_deriv_pos (convex_Ioi 0) (shoutFloor_g_continuousOn hσ) fun τ hτ ↦ ?_
+  rw [interior_Ioi] at hτ
+  rw [(hasDerivAt_shoutFloor_g hσ hτ).deriv]
+  exact shoutFloor_discriminant_pos hrq hσ hτ
 
 end MathFin

@@ -57,8 +57,7 @@ For an integrable loss and `α ∈ (0, 1)`, the dual representation of ES over b
 * `finiteVaR_le_of_forall_le`: a uniform cap on every outcome's loss caps VaR the same way.
 * `finiteVaR_const_mul`: positive homogeneity,
   `finiteVaR q (fun i ↦ c * L i) α = c * finiteVaR q L α` for `c ≥ 0`, inherited from
-  `valueAtRisk_const_mul` through the bridge (needs no `MeasurableSpace` on `ι` in its statement,
-  only in the proof, which borrows one locally).
+  `valueAtRisk_const_mul` through the bridge.
 * `finiteVaR_two_point`: for `α ∈ (0, 1]`, VaR of a loss that is `0` with mass `a` and `c > 0` with
   mass `1 - a`.
 * `uniformWeights`: the equal-`1/n`-weights `StdSimplex` on `n` observations.
@@ -215,14 +214,10 @@ theorem finiteVaR_le_of_forall_le (hα0 : 0 < α) (hα1 : α ≤ 1) {c : ℝ} (h
 
 /-- **Positive homogeneity** of `finiteVaR`: scaling every outcome's loss by a nonnegative constant
 `c` scales VaR by the same constant, inherited from `valueAtRisk_const_mul`
-(`Risk/ValueAtRisk.lean`) through the bridge `finiteVaR_eq_valueAtRisk`. The *statement*
-needs no measurable-space structure on `ι` (`finiteVaR` is pure `Finset` arithmetic); the proof
-borrows an arbitrary one locally to reach the bridge, so this lemma is usable for any `Fintype ι`,
-not only one that happens to carry a `MeasurableSpace` instance. -/
-theorem finiteVaR_const_mul (hα : α ∈ Ioo 0 1) {c : ℝ} (hc : 0 ≤ c) :
+(`Risk/ValueAtRisk.lean`) through the bridge `finiteVaR_eq_valueAtRisk`. -/
+theorem finiteVaR_const_mul [MeasurableSpace ι] [MeasurableSingletonClass ι]
+    (hα : α ∈ Ioo 0 1) {c : ℝ} (hc : 0 ≤ c) :
     finiteVaR q (fun i ↦ c * L i) α = c * finiteVaR q L α := by
-  let _ : MeasurableSpace ι := ⊤
-  have _ : MeasurableSingletonClass ι := ⟨fun _ ↦ trivial⟩
   rw [finiteVaR_eq_valueAtRisk hα, finiteVaR_eq_valueAtRisk hα]
   exact valueAtRisk_const_mul (measurable_of_finite L).aemeasurable hα hc
 
@@ -242,13 +237,10 @@ end Evaluation
 /-! ## Uniform weights on `n` observations -/
 
 /-- **Equal weights on `n` observations**: the `1/n` probability historical simulation (and any
-other equally-likely-scenario construction) assigns to each of `n` observations, for `n ≥ 1` —
+other equally-likely-scenario construction) assigns to each of `n ≥ 1` observations —
 `Convexity.StdSimplex.barycenter` (`Mathlib.Geometry.Convex.ConvexSpace.Barycenter`) specialized to
-`Fin n`, under a name that takes the hypothesis `0 < n` historical-simulation callers already carry
-rather than the library's own `Nonempty (Fin n)` instance. `weights_barycenter_apply` gives the
-closed form `weights i = (n : ℝ)⁻¹` for every `i`. -/
-noncomputable def uniformWeights (n : ℕ) (hn : 0 < n) : StdSimplex ℝ (Fin n) :=
-  haveI : Nonempty (Fin n) := ⟨⟨0, hn⟩⟩
+`Fin n`. `weights_barycenter_apply` gives the closed form `weights i = (n : ℝ)⁻¹` for every `i`. -/
+noncomputable def uniformWeights (n : ℕ) [NeZero n] : StdSimplex ℝ (Fin n) :=
   StdSimplex.barycenter
 
 /-! ## The single bond -/
