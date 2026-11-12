@@ -115,6 +115,7 @@ import MathFin.Models.BlackScholes.Market
 import MathFin.Models.BlackScholes.MargrabeGrounding
 import MathFin.Models.BlackScholes.PDE
 import MathFin.Models.ModelFree.CubicSplineSmile
+import MathFin.Models.Binomial.WillowTree
 import MathFin.Models.ModelFree.CallPriceInterpolation
 import MathFin.Models.Credit.CVA
 import MathFin.Models.Credit.Cox
@@ -721,15 +722,22 @@ attribute [blueprint "thm:cubic-spline-moments-unique"
   hence invertible. The spline exists to price claims between quoted pillars of a
   contract's price surface; its moments are what the pillar quotes pin down. -/)]
   MathFin.CubicSpline.exists_unique_moments
+attribute [blueprint "thm:willow-beta-identity"
+  (title := "The willow tree's beta identity")
+  (uses := ["def:gbm"])
+  (statement := /-- On a grid whose time step widens by the factor `1 + α`, the willow
+  tree's de-correlation coefficient is `β = 1 / √(1 + α) = √(t / t')` — the identity that
+  keeps the tree's nodal locations and weights consistent with Curran's moment and
+  marginal constraints when the step is rescaled. The willow tree is a lattice
+  discretization of the GBM, whose marginals the constraints preserve. -/)]
+  MathFin.willowBeta_eq_sqrt_div
 attribute [blueprint "thm:arbitrage-free-smile-interpolation"
   (title := "Piecewise-linear arbitrage-free interpolation of a quoted call-price smile")
-  (uses := ["def:emm"])
   (statement := /-- A finite dataset of arbitrage-free call-price quotes (increasing
   strikes, non-increasing prices, non-decreasing secant slopes) admits a piecewise-linear
   interpolant that is itself convex and non-increasing across the whole quoted strike
-  range and matches the quotes exactly, at the knots and along every segment. The quoted
-  conditions are the smile-side face of no-arbitrage: convexity and monotonicity of call
-  prices in strike are what an equivalent martingale measure implies for the price surface. -/)]
+  range and matches the quotes exactly, at the knots and along every segment. No price
+  bounds and no behaviour outside the quoted range are stated. -/)]
   MathFin.convexOn_piecewiseLinear
 
 -- ===== valuation/diffusions: Black–Scholes and Bachelier =====

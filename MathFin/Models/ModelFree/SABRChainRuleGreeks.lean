@@ -72,10 +72,8 @@ at `f = K` but their slopes there differ by the smile's ATM strike-slope. Nor is
 
 ## References
 
-* [P. S. Hagan, D. Kumar, A. S. Lesniewski and D. E. Woodward, *Managing smile risk*][Hagan2003],
-  §3.2, eqs. 3.5, 3.6, 3.9
 * [P. S. Hagan, D. Kumar, A. S. Lesniewski and D. E. Woodward,
-  *Managing smile risk*][HaganKumarLesniewskiWoodward2002]
+  *Managing smile risk*][HaganKumarLesniewskiWoodward2002], §3.2, eqs. 3.5, 3.6, 3.9
 
 ## Tags
 
