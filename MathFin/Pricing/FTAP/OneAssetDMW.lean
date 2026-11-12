@@ -41,6 +41,11 @@ conditional one-period step needs a measurable selection of the one-period marti
 (Dalang–Morton–Willinger; Rogers 1994; Kabanov–Stricker 2001), and remains open in this library; it
 is the hypothesis of `DalangMortonWillinger.lean`.
 
+## Main definitions
+
+* `balanceWeight x y`: the weight `y / (x + y)` (and `1` when `x = y = 0`) that balances
+  two nonnegative reals, `balanceWeight x y * x = balanceWeight y x * y`.
+
 ## Main results
 
 * `exists_balancing_weights`: weights `u = b / (a + b)`, `w = a / (a + b)` with `u a = w b`.
@@ -135,17 +140,19 @@ theorem ae_condExp_posPart_eq_zero [IsFiniteMeasure μ] (hm : m ≤ m0) (hY : In
       ha_int.integrableOn).1 haA)
 
 /-- The **balancing weight** `y / (x + y)` of two nonnegative reals, and `1` when both vanish. -/
-noncomputable def balance (x y : ℝ) : ℝ := if x + y = 0 then 1 else y / (x + y)
+noncomputable def balanceWeight (x y : ℝ) : ℝ := if x + y = 0 then 1 else y / (x + y)
 
-theorem balance_mem_Icc {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) : balance x y ∈ Set.Icc (0 : ℝ) 1 := by
-  unfold balance
+theorem balanceWeight_mem_Icc {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) :
+    balanceWeight x y ∈ Set.Icc (0 : ℝ) 1 := by
+  unfold balanceWeight
   split_ifs with h
   · exact ⟨zero_le_one, le_rfl⟩
   · have hs : 0 < x + y := lt_of_le_of_ne (add_nonneg hx hy) (Ne.symm h)
     exact ⟨div_nonneg hy hs.le, (div_le_one hs).2 (by linarith)⟩
 
-theorem balance_pos {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) (h : 0 < x ↔ 0 < y) : 0 < balance x y := by
-  unfold balance
+theorem balanceWeight_pos {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) (h : 0 < x ↔ 0 < y) :
+    0 < balanceWeight x y := by
+  unfold balanceWeight
   split_ifs with hs
   · exact one_pos
   · have hs' : 0 < x + y := lt_of_le_of_ne (add_nonneg hx hy) (Ne.symm hs)
@@ -153,9 +160,9 @@ theorem balance_pos {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) (h : 0 < x ↔ 0 <
     by_contra hy0
     exact hs (by linarith [not_lt.1 hy0, not_lt.1 (h.mp.mt hy0)])
 
-theorem balance_mul_self {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) :
-    balance x y * x = balance y x * y := by
-  unfold balance
+theorem balanceWeight_mul_self {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) :
+    balanceWeight x y * x = balanceWeight y x * y := by
+  unfold balanceWeight
   by_cases h : x + y = 0
   · have hx0 : x = 0 := by linarith
     have hy0 : y = 0 := by linarith
@@ -164,8 +171,8 @@ theorem balance_mul_self {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) :
     simp only [h, ↓reduceIte]
     field_simp
 
-theorem stronglyMeasurable_balance {a b : Ω → ℝ} (ha : StronglyMeasurable[m] a)
-    (hb : StronglyMeasurable[m] b) : StronglyMeasurable[m] fun ω ↦ balance (a ω) (b ω) :=
+theorem stronglyMeasurable_balanceWeight {a b : Ω → ℝ} (ha : StronglyMeasurable[m] a)
+    (hb : StronglyMeasurable[m] b) : StronglyMeasurable[m] fun ω ↦ balanceWeight (a ω) (b ω) :=
   StronglyMeasurable.ite ((ha.add hb).measurable (measurableSet_singleton 0))
     stronglyMeasurable_const (hb.div (ha.add hb))
 
@@ -178,11 +185,13 @@ theorem exists_balancing_weights {a b : Ω → ℝ} (ha_m : StronglyMeasurable[m
     ∃ u w : Ω → ℝ, StronglyMeasurable[m] u ∧ StronglyMeasurable[m] w ∧
       (∀ ω, u ω ∈ Set.Icc (0 : ℝ) 1) ∧ (∀ ω, w ω ∈ Set.Icc (0 : ℝ) 1) ∧
       (∀ᵐ ω ∂μ, 0 < u ω ∧ 0 < w ω) ∧ ∀ ω, u ω * a ω = w ω * b ω :=
-  ⟨fun ω ↦ balance (a ω) (b ω), fun ω ↦ balance (b ω) (a ω), stronglyMeasurable_balance ha_m hb_m,
-    stronglyMeasurable_balance hb_m ha_m, fun ω ↦ balance_mem_Icc (ha0 ω) (hb0 ω),
-    fun ω ↦ balance_mem_Icc (hb0 ω) (ha0 ω),
-    hboth.mono fun ω h ↦ ⟨balance_pos (ha0 ω) (hb0 ω) h, balance_pos (hb0 ω) (ha0 ω) h.symm⟩,
-    fun ω ↦ balance_mul_self (ha0 ω) (hb0 ω)⟩
+  ⟨fun ω ↦ balanceWeight (a ω) (b ω), fun ω ↦ balanceWeight (b ω) (a ω),
+    stronglyMeasurable_balanceWeight ha_m hb_m,
+    stronglyMeasurable_balanceWeight hb_m ha_m, fun ω ↦ balanceWeight_mem_Icc (ha0 ω) (hb0 ω),
+    fun ω ↦ balanceWeight_mem_Icc (hb0 ω) (ha0 ω),
+    hboth.mono fun ω h ↦
+      ⟨balanceWeight_pos (ha0 ω) (hb0 ω) h, balanceWeight_pos (hb0 ω) (ha0 ω) h.symm⟩,
+    fun ω ↦ balanceWeight_mul_self (ha0 ω) (hb0 ω)⟩
 
 /-- **A conditionally balancing weight for an arbitrage-free one-period gain.** If `X` is a
 `μ`-integrable `m₁`-measurable gain that is arbitrage free over `m ≤ m₁`, some `m₁`-measurable

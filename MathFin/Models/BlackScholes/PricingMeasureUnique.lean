@@ -10,8 +10,7 @@ public import MathFin.Probability.Brownian.MartingaleMeasureUniqueness
 public import MathFin.Probability.Brownian.Ito.ItoFormulaGBM
 
 /-!
-# Pricing measures of the Black–Scholes market with a square-integrable (or bounded) density price
-the call at the Black–Scholes formula
+# Black–Scholes pricing measures with a square-integrable or bounded density
 
 The Girsanov measure `Q*` of the market price of risk `θ = (m − r)/σ` is a pricing measure of the
 Black–Scholes market (`isPricingMeasure_constGirsanovMeasure`). This file shows it is the only one

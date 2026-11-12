@@ -68,8 +68,9 @@ extremum's law, which is the piece this file's transcription route sidesteps.
   nonzero rate `r ≠ 0` (the closed form divides by the carry) and `0 < m`, `0 < S`, the
   transcribed floating-strike call closed form is at least the vanilla Black–Scholes call struck
   at the running minimum: `bsV m r σ S T ≤ lookbackFloatingPrice 1 S m r 0 σ T`. This is proved
-  directly from the transcribed closed form (not via any payoff-dominance argument), by isolating the one term that
-  could break the bound — `(S/m)^{−2r/σ²}·Φ(−a₁ + 2r√T/σ) − e^{rT}·Φ(−a₁)`, the term with a
+  directly from the transcribed closed form (not via any payoff-dominance argument), by isolating
+  the one term that could break the bound —
+  `(S/m)^{−2r/σ²}·Φ(−a₁ + 2r√T/σ) − e^{rT}·Φ(−a₁)`, the term with a
   removable singularity at zero carry — and showing it always has the same sign as `r`, via a
   Mills-ratio monotonicity argument reusing `neg_mul_Phi_le_gaussianPDFReal`
   (`Probability/Gaussian/NormalTail.lean`) in a new role: there it bounds a normal tail, here it

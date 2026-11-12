@@ -395,6 +395,20 @@
       "input_hash": "9061bf08d0b17c22d3122eab61d2e4837ab7e182c9d1e2aa69395645bf79272c",
       "verified_at_commit": "f68ab19"
     },
+    "mf-american-ge-european": {
+      "benchmark_file": "binomial.json",
+      "date": "2026-11-11",
+      "elapsed_s": 2.4,
+      "input_hash": "0cc03a683f0945725dcd88516355ccdff82b0cce1b3b43718d37809e9620f5c0",
+      "verified_at_commit": "4d1cfbf"
+    },
+    "mf-american-intrinsic-bound": {
+      "benchmark_file": "binomial.json",
+      "date": "2026-11-11",
+      "elapsed_s": 2.7,
+      "input_hash": "47409a8bfe1253c2962bab6d367b0e10d520f004140a9c051663a5e4970a6670",
+      "verified_at_commit": "4d1cfbf"
+    },
     "mf-american-put-ae-horizon-invariance": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-08",
@@ -409,12 +423,26 @@
       "input_hash": "9d5b87d48f0db49ae14c6fc8ddb0e04e726624a080d9c4c418f88e5a9994766f",
       "verified_at_commit": "4d1cfbf"
     },
+    "mf-american-supermartingale": {
+      "benchmark_file": "binomial.json",
+      "date": "2026-11-11",
+      "elapsed_s": 3.1,
+      "input_hash": "7c2ff8660b5b572ee910255baa82370555269a2b11851fdfe2c72f9256bea673",
+      "verified_at_commit": "4d1cfbf"
+    },
     "mf-annuity-closed-form": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-11-08",
       "elapsed_s": 2.7,
       "input_hash": "3915233b23b6b7d1b7e8c9e879b218d5ef231d2a1b4b57da25d874081cdadfe4",
       "verified_at_commit": "f68ab19"
+    },
+    "mf-annuity-due-closed-form": {
+      "benchmark_file": "actuarial.json",
+      "date": "2026-11-11",
+      "elapsed_s": 3.0,
+      "input_hash": "2d089c839a1c6e6f76580435c9774bd65f82f501da9563185fabaf1781eac171",
+      "verified_at_commit": "da93d95"
     },
     "mf-ar1-ou-one-step-residual": {
       "benchmark_file": "commodities.json",
@@ -514,6 +542,13 @@
       "input_hash": "47f3b9a37f301eb4cd9c191adb5c636b8ea6cabe5008bf79438b76a3848cdf0d",
       "verified_at_commit": "f68ab19"
     },
+    "mf-bermudan-sandwich": {
+      "benchmark_file": "binomial.json",
+      "date": "2026-11-11",
+      "elapsed_s": 2.4,
+      "input_hash": "2c039a3c4521c575ca842453a70de3321034ae7538319ba8156e43b744f3abb0",
+      "verified_at_commit": "4d1cfbf"
+    },
     "mf-bet-size-sigmoid-zscore-kelly": {
       "benchmark_file": "portfolio_and_performance.json",
       "date": "2026-11-08",
@@ -527,6 +562,13 @@
       "elapsed_s": 2.4,
       "input_hash": "d899d5bd1dfee8a0674997aaa284b058248aeed25e087907830357d0195b302f",
       "verified_at_commit": "90b674a"
+    },
+    "mf-binomial-american-call-eq-european": {
+      "benchmark_file": "binomial.json",
+      "date": "2026-11-11",
+      "elapsed_s": 3.3,
+      "input_hash": "7aa6381de52b2d89fb7e7478803df9e1141128049d951fd075d93dd79b740a9d",
+      "verified_at_commit": "4d1cfbf"
     },
     "mf-binomial-american-price-snell-envelope": {
       "benchmark_file": "binomial.json",
@@ -1249,6 +1291,20 @@
       "input_hash": "eb7f82d1a76f50d71cbfbdb95409bc5e0cb65d8207b8ede9e82dba05abdfd0ab",
       "verified_at_commit": "f68ab19"
     },
+    "mf-cpmm-impermanent-loss-nonpositive": {
+      "benchmark_file": "defi.json",
+      "date": "2026-11-09",
+      "elapsed_s": 2.8,
+      "input_hash": "edee97260c3162f11468ee2884e293fbc49a592d17044cbef45bfee5dbf84ac7",
+      "verified_at_commit": "44e5f42"
+    },
+    "mf-cpmm-lp-expected-value-lognormal": {
+      "benchmark_file": "defi.json",
+      "date": "2026-11-09",
+      "elapsed_s": 3.5,
+      "input_hash": "59729b7e92e073699efde6ea90e864ebc10e4a6432a39a6beeb3b5cf36bd25a1",
+      "verified_at_commit": "44e5f42"
+    },
     "mf-credit-spread-eq-hazard": {
       "benchmark_file": "credit.json",
       "date": "2026-11-08",
@@ -1283,6 +1339,13 @@
       "elapsed_s": 2.4,
       "input_hash": "dd061e93b9ee8934b4168b0ece937ffcc1ca4a0799a2c90072211f3b08d9ec90",
       "verified_at_commit": "f68ab19"
+    },
+    "mf-crr-american-call-tendsto-bs": {
+      "benchmark_file": "binomial.json",
+      "date": "2026-11-11",
+      "elapsed_s": 3.0,
+      "input_hash": "a7e72d6dae6623f40925b0ebe02a7c9eadbfd0989ccdfa8954d2e9bc780d04c5",
+      "verified_at_commit": "4d1cfbf"
     },
     "mf-crr-bs-call-convergence": {
       "benchmark_file": "binomial.json",
@@ -1956,6 +2019,13 @@
       "input_hash": "bf889bc7d34f8042edfc8408c6d47308da42b58e19f1944bdce9cd7f981e3126",
       "verified_at_commit": "f68ab19"
     },
+    "mf-life-annuity-due-constant-force": {
+      "benchmark_file": "actuarial.json",
+      "date": "2026-11-11",
+      "elapsed_s": 3.1,
+      "input_hash": "273d1db99e0e1d5ad8ae1d5634ad5743e0a8118683b2a5f2f952dbe7a76e5824",
+      "verified_at_commit": "da93d95"
+    },
     "mf-life-annuity-due-is-contract-value": {
       "benchmark_file": "actuarial.json",
       "date": "2026-11-11",
@@ -2605,6 +2675,20 @@
       "date": "2026-11-09",
       "elapsed_s": 2.5,
       "input_hash": "7e295737c9272453c6b2251c36580b93a4655c2843164328aa286e006aed2e57",
+      "verified_at_commit": "44e5f42"
+    },
+    "mf-uniswap-v3-position-bs-price-bound": {
+      "benchmark_file": "defi.json",
+      "date": "2026-11-09",
+      "elapsed_s": 3.6,
+      "input_hash": "3c7fc9635a7ee7add35301527e9f22b8781869f68a760810a97e6afbbd27c600",
+      "verified_at_commit": "44e5f42"
+    },
+    "mf-uniswap-v3-position-covered-call": {
+      "benchmark_file": "defi.json",
+      "date": "2026-11-09",
+      "elapsed_s": 3.6,
+      "input_hash": "0fbf55c1f772bda3bfd3e00f0040b3797be4c509b4ea2c5c51cc64b65ab90249",
       "verified_at_commit": "44e5f42"
     },
     "mf-variance-swap-drift-immunity": {

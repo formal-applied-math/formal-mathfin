@@ -124,6 +124,110 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   that finds nothing to improve.
 
 ## Review log
+## 2026-11-12 — corpus 870, modules 769 — one-asset DMW, Black–Scholes uniqueness and ten contributed modules, read before they land
+
+Scope: the integration branch `v2/integrate-2026-11-12`. Two frontier nodes delivered:
+`thm:dmw-ftap` for one asset (`Pricing/FTAP/OneAssetDMW.lean`, on a rewritten
+`Pricing/FTAP/DensityPasting.lean`) and `thm:bs-arbitrage-free-price`
+(`Probability/Brownian/MartingaleMeasureUniqueness.lean`, `Models/BlackScholes/PricingMeasureUnique.lean`).
+Ten pull requests from Yang Ye (#432–#467): trinomial and willow lattices, piecewise-linear and
+natural-spline interpolation, FX smile quotes, SABR chain-rule Greeks, the continuous lookback, the
+shout floor, Marchenko–Pastur edges and concentrated-liquidity VaR. Each was reviewed against the
+practices before merging, then joined to the library. 17 corpus entries are new and 9 changed.
+Three read-only reviewers split the lenses: the first pass; lenses 2, 4 and 5; lenses 1, 3, 6, 7
+and 8.
+
+### The standing first pass: prose against statement
+
+- Faithful as written: the DMW, uniqueness, willow, FX, lookback and quotes-to-market entries.
+- Fixed:
+  - `mf-natural-cubic-spline-exists-unique` and its module bullet said the glued spline is C². The
+    theorem gives slope matching at the interior pillars (C¹) and natural ends; no glued function
+    and no `ContDiff` statement. Its sibling entry already said so.
+  - The shout-floor docstrings gave the market's ATM put price as `e^{qτ}·g(τ)`; it is `g(τ)`.
+  - The uniqueness module title and the blueprint node said "every pricing measure"; the theorem
+    covers densities square-integrable under the Girsanov measure (and bounded ones against μ), and
+    only the restriction to 𝓕_T is identified. The README says the same now.
+  - "Equivalent to μ" where `IsPricingMeasure` (mutual absolute continuity on 𝓕_T) is meant.
+  - The trinomial node and entry said "if and only if" for the "if" direction; the converse is now
+    in the snippet and named in the node.
+  - `mf-piecewise-linear-arbitrage-free-interpolation` still said nothing extends the interpolant;
+    it now points to `mf-quotes-market-realisation`.
+  - The Marchenko–Pastur entry called a conjunction a bridge; the link that exists is the average
+    eigenvalue theorem, and the entry says so.
+  - README counts and the reduced-core list (21, with the interpolation and the lookback).
+- The branch's own merge damage, found by the first pass: a union merge of `Blueprint.lean` brought
+  back two tags the reviewers had deleted (`thm:willow-beta-identity`, `thm:cubic-spline-moments-unique`).
+  Union resolution is now limited to append-only files.
+
+### Upgrades executed
+
+- **One pasting trunk.** `ConditionalOnePeriodFTAP` asked for a bounded one-period density with
+  conditional mean one, which an arbitrage-free market need not have (`ΔS = ±1` with
+  `P(ΔS = 1 | 𝓕ₜ) = u` forces `1/(2u)`). `IsOnePeriodDensity` is now the unnormalised weight in
+  `[0, 1]` that is fair against bounded 𝓕ₜ-measurable variables under the already-weighted measure;
+  `DensityPasting` composes such weights backwards and normalises once
+  (`exists_isEMM_of_onePeriodDensities`). One asset supplies the weight
+  (`OneAsset.exists_onePeriodDensity`), so `Market.noArbitrage_iff_exists_isPricingMeasure` holds
+  with no hypothesis; for `d` assets the hypothesis is now true as stated.
+- **Contributed modules joined to the trunk**: arbitrage-free quotes are a market's call prices
+  (`exists_market_of_isArbitrageFreeQuotes`, via Roper's converse); the trinomial law is a pricing
+  measure of the one-date market iff its exponential moment is `s₀e^{rτ}`; the willow chain has the
+  second and cross moments of a pre-Brownian motion; the SABR Greeks are derivatives of the
+  Black–Scholes market price; concentrated-liquidity VaR is the VaR of contract revaluations. The
+  ratchet `price_entries_off_trunk` had risen by three; it is back at its baseline.
+- **Duplicates folded**: the put price by parity from the call (the parallel physical-measure proof
+  is gone); `bsd1_eq_dpl` once in `ForwardSmile` for three sites; the generic Black–Scholes chain
+  rules moved to `HigherGreeks` with `DifferentiableAt` signatures.
+- **Lifted**: the balancing weight (`balanceWeight`), `NoArbitrageAt.of_absolutelyContinuous`,
+  `exists_memLp_two_withDensity_of_bdd` (a bounded density is an L² density against `Z·μ` when
+  `1/Z` is integrable), `processToLpPredictable_neg`, `Measure.ofWeights_absolutelyContinuous_of_pos`.
+- **Junk value**: the lookback bound held at `r = 0` only through a division by zero; it now assumes
+  `r ≠ 0`.
+- **Slop**: junk Mathlib imports in four contributed files, gratuitous `classical`, hand-rolled
+  `obtain … rfl` and duplicated arguments in the DMW proof, essays in docstrings, four unguarded
+  `#print axioms` lines.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: the one-asset DMW, which found that the textbook conditional step is
+  stronger than the theorem and that unnormalised weights are the primitive. Next: the `d`-asset
+  weight by measurable selection.
+- **Coherence.** Exemplar: the uniqueness pair consumes martingale representation, the isometry and
+  the π-λ theorem without reproving any of them. Next: `integral_mul_condExp` upstream.
+- **Zero slop.** The merge-induced resurrection above is the instructive one: a gate-green tree that
+  had silently undone a review.
+- **Architecture.** Exemplar: the pasting trunk serving both theorems. Next: the knot-based APIs
+  (spline, interpolant, quotes) share no interface.
+- **First principles.** Exemplar: `lattice_variance_lower_bound` (`n(n−1) ≥ 0` gives the variance
+  floor). Next: the trinomial step as an extension of the CRR tree.
+- **Idiom.** The contributed files now follow the checklist; the willow marginals still reimplement
+  `Matrix.vecMul` entrywise.
+- **Concept clarity.** Exemplar: the DMW and uniqueness module docstrings (counterexample, plan,
+  scope). Next: `bsV_eq_closedForm` keeps its name though the premise of its docstring was false.
+- **Beauty.** Exemplar: `exists_integrable_equivalent`, the `exp(−Σ‖Sₙ‖)` reweighting.
+
+### Ranked backlog
+
+1. Bachelier and time-dependent volatility uniqueness from `trim_eq_of_martingale_withDensity` (S–M).
+2. Black–Scholes uniqueness for an arbitrary equivalent density by localisation (L).
+3. The `d`-asset conditional weight, closing `thm:dmw-ftap` in general (#313, L).
+4. A shared knot interface for `CubicSplineSmile`, `CallPriceInterpolation` and the quotes (M).
+5. Willow marginals through `Matrix.vecMul`; the willow step law as a bivariate normal coupling (M).
+6. The Marchenko–Pastur law as a measure with the edges as its support (L), or a narrower module.
+7. The v3 VaR at the empirical price quantile (full revaluation through monotonicity) (M).
+8. A shout-option `Contract` on the American stopping substrate (L).
+9. `bsV_eq_closedForm` retired in favour of unfolding `bsV` at its three users (S).
+
+### Evidence
+
+`lake build` of every default target, the blueprint export and the declaration index green
+(the umbrella build caught one name clash, `balance`, now `balanceWeight`); `pytest` green apart
+from the ledger rows, which the runner sweep re-verified (388 entries whose imports changed);
+ratchets lowered: chain beyond three hops 389 → 382 ‰, corpus off the blueprint 298 → 297; prices
+off the trunk back at 171; two private Mathlib-shaped spline helpers made public under the names of
+what they prove (`sum_fin_ite_const_le`, `sum_fin_ite_val_eq`).
+
 ## 2026-11-11 — corpus 849, modules 755 — the wave's sockets and connectors, read before they land
 
 Scope: the v2 wave of 2026-11-11 (`v2/wave-2026-11-11`), seven workstreams integrated on one branch

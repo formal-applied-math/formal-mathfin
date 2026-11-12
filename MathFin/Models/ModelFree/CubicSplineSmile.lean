@@ -152,9 +152,9 @@ theorem momentMatrix_apply_self (x : ℕ → ℝ) (n : ℕ) (j : Fin (n - 1)) :
     momentMatrix x n j j = 2 := by
   simp [momentMatrix]
 
-/-- A finite sum of an indicator function supported on at most one point, as picked out by
-an injective-on-its-support predicate `P`, is bounded by the indicator's value. -/
-private theorem sum_indicator_le {m : ℕ} (P : Fin m → Prop) [DecidablePred P]
+/-- A sum over `Fin m` that takes the value `c ≥ 0` where `P` holds and `0` elsewhere is at
+most `c` when at most one index satisfies `P`. -/
+theorem sum_fin_ite_const_le {m : ℕ} (P : Fin m → Prop) [DecidablePred P]
     (hP : ∀ a b, P a → P b → a = b) {c : ℝ} (hc : 0 ≤ c) :
     ∑ k : Fin m, (if P k then c else 0) ≤ c := by
   have hcard : (Finset.univ.filter P).card ≤ 1 :=
@@ -212,9 +212,9 @@ theorem momentMatrix_dominant {n : ℕ} (x : ℕ → ℝ) (hn : 2 ≤ n)
         Finset.sum_add_distrib
     _ ≤ mu x ((j : ℕ) + 1) + lam x ((j : ℕ) + 1) := by
         gcongr
-        · exact sum_indicator_le (fun k : Fin (n - 1) ↦ (k : ℕ) + 1 = (j : ℕ))
+        · exact sum_fin_ite_const_le (fun k : Fin (n - 1) ↦ (k : ℕ) + 1 = (j : ℕ))
             (fun a b ha hb ↦ Fin.ext (by omega)) hmunn
-        · exact sum_indicator_le (fun k : Fin (n - 1) ↦ (j : ℕ) + 1 = (k : ℕ))
+        · exact sum_fin_ite_const_le (fun k : Fin (n - 1) ↦ (j : ℕ) + 1 = (k : ℕ))
             (fun a b ha hb ↦ Fin.ext (by omega)) hlamnn
     _ = 1 := hsum1
     _ < 2 := by norm_num
@@ -381,8 +381,9 @@ theorem deriv_interpSpline_match_iff (x y M : ℕ → ℝ) {i : ℕ} (h0 : 0 < g
     lam x (i + 1) * M (i + 2)), key, mul_eq_zero]
   simp [hs]
 
-/-- A finite sum of an indicator on `Fin m` that fires at the single index `a`. -/
-private theorem sum_fin_ite_eq {m : ℕ} (a : ℕ) (c : ℝ) :
+/-- A sum over `Fin m` that takes the value `c` at the index whose value is `a : ℕ` and `0`
+elsewhere is `c` when `a < m` and `0` otherwise. -/
+theorem sum_fin_ite_val_eq {m : ℕ} (a : ℕ) (c : ℝ) :
     ∑ k : Fin m, (if (k : ℕ) = a then c else 0) = if a < m then c else 0 := by
   split_ifs with h
   · rw [Finset.sum_eq_single (⟨a, h⟩ : Fin m)]
@@ -409,7 +410,7 @@ theorem momentMatrix_mulVec_apply {n : ℕ} (x M : ℕ → ℝ) (hM0 : M 0 = 0) 
     all_goals (simp only [add_zero, zero_add, zero_mul]; try (congr 1; try (congr 1; try omega)))
   have s1 : ∑ k : Fin (n - 1), (if (k : ℕ) = j then 2 * M ((j : ℕ) + 1) else 0) =
       2 * M ((j : ℕ) + 1) := by
-    rw [sum_fin_ite_eq]; exact ite_eq_left hj
+    rw [sum_fin_ite_val_eq]; exact ite_eq_left hj
   have s2 : ∑ k : Fin (n - 1),
       (if (k : ℕ) + 1 = j then mu x ((j : ℕ) + 1) * M j else 0) =
         mu x ((j : ℕ) + 1) * M j := by
@@ -419,12 +420,12 @@ theorem momentMatrix_mulVec_apply {n : ℕ} (x M : ℕ → ℝ) (hM0 : M 0 = 0) 
       exact Finset.sum_eq_zero fun k _ ↦ ite_eq_right (by omega)
     · obtain ⟨j', hj'⟩ : ∃ j', (j : ℕ) = j' + 1 := ⟨j - 1, by omega⟩
       simp_rw [hj', Nat.add_right_cancel_iff]
-      rw [sum_fin_ite_eq]
+      rw [sum_fin_ite_val_eq]
       exact ite_eq_left (by omega)
   have s3 : ∑ k : Fin (n - 1),
       (if (k : ℕ) = j + 1 then lam x ((j : ℕ) + 1) * M ((j : ℕ) + 2) else 0) =
         lam x ((j : ℕ) + 1) * M ((j : ℕ) + 2) := by
-    rw [sum_fin_ite_eq]
+    rw [sum_fin_ite_val_eq]
     by_cases hlt : (j : ℕ) + 1 < n - 1
     · exact ite_eq_left hlt
     · rw [ite_eq_right hlt, show (j : ℕ) + 2 = n by omega, hMn, mul_zero]

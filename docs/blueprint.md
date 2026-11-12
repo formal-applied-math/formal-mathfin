@@ -129,7 +129,6 @@ graph TD
   bsPde["Black–Scholes partial differential equation"]:::proved
   capmEquilibrium["Capital asset pricing model"]:::proved
   continuousFtap["Fundamental theorem of asset pricing in continuous time"]:::proved
-  cubicSplineMomentsUnique["Natural cubic spline: the moment system's unique solution"]:::proved
   dupireZeroRates["Dupire's local volatility formula"]:::proved
   entropicRiskCertaintyEquivalent["Entropic risk is the certainty equivalent of exponential utility"]:::proved
   expectedUtilityAxioms["von Neumann–Morgenstern expected utility"]:::proved
@@ -154,7 +153,6 @@ graph TD
   secondFtap["Second fundamental theorem of asset pricing"]:::proved
   unilateralCva["Credit valuation adjustment"]:::proved
   varianceSwapJumpBias["Variance swap and the log contract"]:::proved
-  willowBetaIdentity["The willow tree's beta identity"]:::proved
   willowTreeBrownianCovariance["The willow tree reproduces Brownian covariance"]:::proved
   expectedShortfall["Expected shortfall"]:::proved
   gaussianFactorCopula["One-factor Gaussian copula"]:::proved
@@ -164,7 +162,7 @@ graph TD
   coherentRiskRepresentation["Robust representation of coherent risk measures"]:::proved
   conditionalExpectationPricingMeasure["A conditional-expectation process is priced by its own measure"]:::proved
   crrBsConvergence["Cox–Ross–Rubinstein convergence to Black–Scholes"]:::proved
-  dmwFtap["Dalang–Morton–Willinger FTAP"]:::proved
+  dmwFtap["Dalang–Morton–Willinger FTAP (one asset)"]:::proved
   gaussianPortfolioVar["Value-at-risk of a Gaussian portfolio"]:::proved
   itoFormulaC2["Itô's formula"]:::proved
   jumpDiffusionMixing["Merton's jump-diffusion formula"]:::proved
@@ -185,7 +183,7 @@ graph TD
   vasicekMarket["The Vasicek bond market"]:::proved
   americanPutDominatesEuropean["The American put value dominates the Black–Scholes European price"]:::proved
   bachelierCall["Bachelier call price formula"]:::proved
-  bsArbitrageFreePrice["The Black–Scholes price is the arbitrage-free price"]:::proved
+  bsArbitrageFreePrice["Uniqueness of the Black–Scholes pricing measure among square-integrable densities"]:::proved
   bsDeltaHedge["Black–Scholes delta hedging"]:::proved
   esscherPremiumIsPrice["The Esscher premium is a price"]:::proved
   eulerAllocation["Euler allocation of value-at-risk"]:::proved
@@ -374,7 +372,6 @@ graph TD
   portfolioVariance --> capmEquilibrium
   emm --> continuousFtap
   martingaleTransform --> continuousFtap
-  contract --> cubicSplineMomentsUnique
   brownianMotion --> dupireZeroRates
   carrMadan --> dupireZeroRates
   expectedUtility --> entropicRiskCertaintyEquivalent
@@ -405,7 +402,6 @@ graph TD
   martingaleTransform --> secondFtap
   standardNormalCdf --> unilateralCva
   compoundPoissonMgf --> varianceSwapJumpBias
-  gbm --> willowBetaIdentity
   brownianMotion --> willowTreeBrownianCovariance
   valueAtRisk --> expectedShortfall
   copula --> gaussianFactorCopula
@@ -861,7 +857,6 @@ graph TD
 | `thm:bs-pde` Black–Scholes partial differential equation | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-pde%22%20in%3Abody) |
 | `thm:capm-equilibrium` Capital asset pricing model | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acapm-equilibrium%22%20in%3Abody) |
 | `thm:continuous-ftap` Fundamental theorem of asset pricing in continuous time | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acontinuous-ftap%22%20in%3Abody) |
-| `thm:cubic-spline-moments-unique` Natural cubic spline: the moment system's unique solution | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acubic-spline-moments-unique%22%20in%3Abody) |
 | `thm:dupire-zero-rates` Dupire's local volatility formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Adupire-zero-rates%22%20in%3Abody) |
 | `thm:entropic-risk-certainty-equivalent` Entropic risk is the certainty equivalent of exponential utility | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aentropic-risk-certainty-equivalent%22%20in%3Abody) |
 | `thm:expected-utility-axioms` von Neumann–Morgenstern expected utility | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-utility-axioms%22%20in%3Abody) |
@@ -886,7 +881,6 @@ graph TD
 | `thm:second-ftap` Second fundamental theorem of asset pricing | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asecond-ftap%22%20in%3Abody) |
 | `thm:unilateral-cva` Credit valuation adjustment | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aunilateral-cva%22%20in%3Abody) |
 | `thm:variance-swap-jump-bias` Variance swap and the log contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-swap-jump-bias%22%20in%3Abody) |
-| `thm:willow-beta-identity` The willow tree's beta identity | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Awillow-beta-identity%22%20in%3Abody) |
 | `thm:willow-tree-brownian-covariance` The willow tree reproduces Brownian covariance | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Awillow-tree-brownian-covariance%22%20in%3Abody) |
 | `def:expected-shortfall` Expected shortfall | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aexpected-shortfall%22%20in%3Abody) |
 | `def:gaussian-factor-copula` One-factor Gaussian copula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Agaussian-factor-copula%22%20in%3Abody) |
@@ -896,7 +890,7 @@ graph TD
 | `thm:coherent-risk-representation` Robust representation of coherent risk measures | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acoherent-risk-representation%22%20in%3Abody) |
 | `thm:conditional-expectation-pricing-measure` A conditional-expectation process is priced by its own measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aconditional-expectation-pricing-measure%22%20in%3Abody) |
 | `thm:crr-bs-convergence` Cox–Ross–Rubinstein convergence to Black–Scholes | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acrr-bs-convergence%22%20in%3Abody) |
-| `thm:dmw-ftap` Dalang–Morton–Willinger FTAP | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Admw-ftap%22%20in%3Abody) |
+| `thm:dmw-ftap` Dalang–Morton–Willinger FTAP (one asset) | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Admw-ftap%22%20in%3Abody) |
 | `thm:gaussian-portfolio-var` Value-at-risk of a Gaussian portfolio | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Agaussian-portfolio-var%22%20in%3Abody) |
 | `thm:ito-formula-c2` Itô's formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-formula-c2%22%20in%3Abody) |
 | `thm:jump-diffusion-mixing` Merton's jump-diffusion formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ajump-diffusion-mixing%22%20in%3Abody) |
@@ -917,7 +911,7 @@ graph TD
 | `thm:vasicek-market` The Vasicek bond market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avasicek-market%22%20in%3Abody) |
 | `thm:american-put-dominates-european` The American put value dominates the Black–Scholes European price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-dominates-european%22%20in%3Abody) |
 | `thm:bachelier-call` Bachelier call price formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abachelier-call%22%20in%3Abody) |
-| `thm:bs-arbitrage-free-price` The Black–Scholes price is the arbitrage-free price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-arbitrage-free-price%22%20in%3Abody) |
+| `thm:bs-arbitrage-free-price` Uniqueness of the Black–Scholes pricing measure among square-integrable densities | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-arbitrage-free-price%22%20in%3Abody) |
 | `thm:bs-delta-hedge` Black–Scholes delta hedging | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-delta-hedge%22%20in%3Abody) |
 | `thm:esscher-premium-is-price` The Esscher premium is a price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aesscher-premium-is-price%22%20in%3Abody) |
 | `thm:euler-allocation` Euler allocation of value-at-risk | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aeuler-allocation%22%20in%3Abody) |

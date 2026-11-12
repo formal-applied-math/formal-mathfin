@@ -32,8 +32,8 @@ candidate (cf. `PMF.toMeasure`, which needs weights summing to one).
   probability measure.
 * `MeasureTheory.Measure.ofWeights_univ_real_singleton`: a finite measure on a finite type with
   measurable singletons is `ofWeights univ (fun i ↦ μ.real {i})`.
-* `Measure.ofWeights_absolutelyContinuous_of_pos`: the law of any weights is absolutely continuous with
-  respect to the law of a positive weight vector.
+* `Measure.ofWeights_absolutelyContinuous_of_pos`: the law of any weights is absolutely continuous
+  with respect to the law of a positive weight vector.
 
 ## References
 
