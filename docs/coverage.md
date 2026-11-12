@@ -89,6 +89,43 @@ One `full` entry in `benchmarks/binomial.json`. Corpus 781 → 782 (746 full bef
   Hull–White and Clewlow). Disclosed out of scope: no multi-period tree object, no lattice
   prices, no convergence; outside the window the same formulas produce signed weights (the
   tradeoff the transcribed source documents). Axioms-clean, `full`.
+### The willow tree: the beta identity and moment/marginal preservation (2026-11-06)
+
+One `full` entry in `benchmarks/binomial.json`. Corpus 781 → 782 (746 full before this
+entry, 747 after; 764 → 765 delivery-ready). At authoring time origin/main's README
+lagged at 779/744; upstream v1.10.0 has since brought it to 781/746, which this entry
+takes to 782/747.
+
+- **`mf-willow-tree-moment-marginal-constraints`** (MathFin/Binomial/WillowTree.lean):
+  Curran's willow tree prices against a Brownian motion with a time-inhomogeneous
+  Markov chain on a fixed node set with a fixed discrete marginal — the lattice has a
+  constant node count per step and widens like `sqrt(t)` only through the scaling
+  `X_k = sqrt(t_k) Z_k`. The module proves the construction's formalizable core:
+  the beta identity `1/sqrt(1 + alpha) = sqrt(t_k/t_{k+1})` for the de-correlation
+  coefficient on a grid with `t_{k+1} = (1 + alpha_k) t_k` (`willowBeta_eq_sqrt_div`,
+  `willowBeta_eq_sqrt_div'`); the moment-propagation induction — any family of
+  row-stochastic transition matrices satisfying the conditional first/second moment
+  rows `sum_j P_k(i,j) z_j = beta_k z_i`, `sum_j P_k(i,j) z_j^2 = beta_k^2 z_i^2 +
+  (1 - beta_k^2)` keeps a chain started at mass 1, mean 0 and unit second moment at
+  mass 1, mean 0 and unit second moment at every step, needing neither the marginal
+  constraint `qP = q` nor non-negative entries (`willowMarginal_mass`,
+  `willowMarginal_mean`, `willowMarginal_secondMoment`); marginal preservation — under
+  `qP = q` the marginal at every step is the same law `q` (`willowMarginal_eq`); the
+  cross moments `E[Z_k Z_{k+1}] = beta_k` and `E[X_k X_{k+1}] = t_k` in the scaled
+  variables on a grid with `beta_k = sqrt(t_k/t_{k+1})` — the Brownian covariance the
+  constraint system encodes (`willowMarginal_crossMoment`; the scaled second moment
+  `willowScaled_secondMoment`; the cross moment `willowScaled_crossMoment`); the join — the chain's standardized cross moment is the
+  construction's own `willowBeta` coefficient once `beta_k` is tied to the grid
+  (`willowMarginal_crossMoment_eq_willowBeta`); and the correlation bound — an honest
+  (non-negative, summing-to-one) transition row forces `beta_k^2 <= 1`, and at such a
+  coefficient the standard bivariate normal law has unit variances and covariance
+  `beta_k` (`WillowMomentConstraints.sq_le_one`,
+  `WillowMomentConstraints.bivariateNormal_moments`). Cited: Curran, Willow
+  Power: Optimizing Derivative Pricing Trees, ALGO Research Quarterly 4(4) (2001);
+  Ho, Willow Tree, MSc thesis, UBC (2000); the constraint set as implemented in the
+  open-source willowtree package (`willowtree/lp.py`). The linear program that finds
+  admissible transition matrices is disclosed out of scope; nothing is claimed about
+  lattice prices. Axioms-clean, `full`.
 
 
 ### Removable singularities in two stochastic-vol smile models (2026-11-01)

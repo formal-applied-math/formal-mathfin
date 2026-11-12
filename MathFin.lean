@@ -557,6 +557,8 @@ import MathFin.Models.Forwards.SchwartzOneFactor
 import MathFin.Models.Binomial.Model
 -- Trinomial tree: one-step moment matching, the validity window, a variance bound
 import MathFin.Models.Binomial.TrinomialMomentMatching
+-- Willow tree lattice: the beta identity and moment/marginal preservation
+import MathFin.Models.Binomial.WillowTree
 import MathFin.Models.Binomial.American
 import MathFin.Models.Binomial.CRRConvergence
 import MathFin.Models.Binomial.DriftLimit

@@ -3979,6 +3979,13 @@
       "input_hash": "398126770d3cf7e3846c6504ea0bb8cf1c4e25aa923a3abe7cf8e3b46fe9feac",
       "verified_at_commit": "f68ab19"
     },
+    "mf-willow-tree-moment-marginal-constraints": {
+      "benchmark_file": "binomial.json",
+      "date": "2026-11-08",
+      "elapsed_s": 3.3,
+      "input_hash": "a239fb0783da4492071326ce44058d10beefb634f95124c7a336864bb3684009",
+      "verified_at_commit": "0248c6f"
+    },
     "mf-worstcase-risk-representation": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-11-09",

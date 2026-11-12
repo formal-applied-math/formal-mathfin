@@ -458,6 +458,8 @@ namespace MathFin.AxiomAudit
 #print axioms MathFin.binomialPrice_call_tendsto_bs_closed
 -- info: 'MathFin.trinomialProb_unique' depends on axioms: [propext, Classical.choice, Quot.sound]
 #print axioms MathFin.trinomialProb_unique
+-- info: 'MathFin.willowBeta_eq_sqrt_div' depends on axioms: [propext, Classical.choice, Quot.sound]
+#print axioms MathFin.willowBeta_eq_sqrt_div
 
 /-! ## Summit A: bounded-derivative continuous-time Itô formula in L² (CLM-identified) -/
 

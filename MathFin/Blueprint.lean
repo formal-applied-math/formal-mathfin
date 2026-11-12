@@ -113,6 +113,7 @@ import MathFin.Models.BlackScholes.GaussianGirsanov
 import MathFin.Models.BlackScholes.Market
 import MathFin.Models.BlackScholes.MargrabeGrounding
 import MathFin.Models.BlackScholes.PDE
+import MathFin.Models.Binomial.WillowTree
 import MathFin.Models.Credit.CVA
 import MathFin.Models.Credit.Cox
 import MathFin.Models.Credit.KMVMertonStructural
@@ -712,6 +713,15 @@ attribute [blueprint "thm:trinomial-moment-matching"
   parameters, supplied by `GBMLogMoments`), so the tree is the discrete law matching the
   GBM increment's first two moments. -/)]
   MathFin.trinomialProb_unique
+attribute [blueprint "thm:willow-beta-identity"
+  (title := "The willow tree's beta identity")
+  (uses := ["def:gbm"])
+  (statement := /-- On a grid whose time step widens by the factor `1 + α`, the willow
+  tree's de-correlation coefficient is `β = 1 / √(1 + α) = √(t / t')` — the identity that
+  keeps the tree's nodal locations and weights consistent with Curran's moment and
+  marginal constraints when the step is rescaled. The willow tree is a lattice
+  discretization of the GBM, whose marginals the constraints preserve. -/)]
+  MathFin.willowBeta_eq_sqrt_div
 
 -- ===== valuation/diffusions: Black–Scholes and Bachelier =====
 
