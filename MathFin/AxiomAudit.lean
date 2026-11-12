@@ -456,13 +456,17 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.binomialPrice_call_tendsto_bs_closed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.binomialPrice_call_tendsto_bs_closed
--- info: 'MathFin.trinomialProb_unique' depends on axioms: [propext, Classical.choice, Quot.sound]
+/-- info: 'MathFin.trinomialProb_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms MathFin.trinomialProb_unique
--- info: 'MathFin.willowBeta_eq_sqrt_div' depends on axioms: [propext, Classical.choice, Quot.sound]
+/-- info: 'MathFin.willowBeta_eq_sqrt_div' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms MathFin.willowBeta_eq_sqrt_div
--- info: 'MathFin.CubicSpline.exists_unique_moments' depends on axioms: [propext, Classical.choice, Quot.sound]
+/-- info: 'MathFin.CubicSpline.exists_unique_moments' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms MathFin.CubicSpline.exists_unique_moments
--- info: 'MathFin.convexOn_piecewiseLinear' depends on axioms: [propext, Classical.choice, Quot.sound]
+/-- info: 'MathFin.convexOn_piecewiseLinear' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms MathFin.convexOn_piecewiseLinear
 
 /-! ## Summit A: bounded-derivative continuous-time Itô formula in L² (CLM-identified) -/
@@ -2992,7 +2996,7 @@ end MathFin.AxiomAudit
 #print axioms MathFin.willowScaled_crossMoment_eq_integral_mul
 
 /-- info: 'MathFin.Contracts.BlackScholes.price_europeanPut_constGirsanovMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in
+#guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.BlackScholes.price_europeanPut_constGirsanovMeasure
 
 /-- info: 'MathFin.DeFi.clHistoricalVaR_eq_valueAtRisk' depends on axioms: [propext, Classical.choice, Quot.sound] -/
