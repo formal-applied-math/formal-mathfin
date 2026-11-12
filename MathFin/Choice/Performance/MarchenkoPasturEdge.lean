@@ -291,9 +291,10 @@ theorem sum_eigenvalues_eq_card {n : Type*} [Fintype n] [DecidableEq n] {A : Mat
 
 /-- **The average eigenvalue of a correlation matrix lies in the Marchenko–Pastur support** for
 every aspect ratio `c ≤ 1`: it is `1 = σ²`, the entry variance, which the edges sandwich
-(`mpLowerEdge_le_variance_of_le_one`, `le_mpUpperEdge`). Unlike `trace_equicorrelationMatrix_eq_card`
-this is a statement about the matrix's eigenvalues, though it is still only about their mean: nothing
-says the individual eigenvalues of a sample correlation matrix fall in the support. -/
+(`mpLowerEdge_le_variance_of_le_one`, `le_mpUpperEdge`). Unlike
+`trace_equicorrelationMatrix_eq_card` this is a statement about the matrix's eigenvalues, though it
+is still only about their mean: nothing says the individual eigenvalues of a sample correlation
+matrix fall in the support. -/
 theorem average_eigenvalue_mem_Icc_mpEdges {n : Type*} [Fintype n] [DecidableEq n] [Nonempty n]
     {A : Matrix n n ℝ} (hA : A.IsHermitian) (hdiag : ∀ i, A i i = 1) {c : ℝ} (hc : c ≤ 1) :
     (∑ i, hA.eigenvalues i) / Fintype.card n ∈ Set.Icc (mpLowerEdge 1 c) (mpUpperEdge 1 c) := by
