@@ -5,6 +5,9 @@ Authors: Yang Ye
 -/
 module
 
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.Deriv.Pow
 public import Mathlib.LinearAlgebra.Matrix.Gershgorin
 public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 public import MathFin.Models.ModelFree.SVI.Reduction
@@ -277,6 +280,109 @@ theorem interpSpline_right_eq (x y M : ℕ → ℝ) {i : ℕ} (hgap : gap x i �
   have hgap' : x (i + 1) - x i ≠ 0 := hgap
   field_simp
   ring
+
+/-! ## Derivatives: the moment system is the `C¹` gluing condition -/
+
+/-- The first derivative of the piecewise cubic on `[x i, x (i+1)]`, in moment form. -/
+theorem hasDerivAt_interpSpline (x y M : ℕ → ℝ) (i : ℕ) (t : ℝ) :
+    HasDerivAt (interpSpline x y M i)
+      (-(M i * (x (i + 1) - t) ^ 2 / (2 * gap x i)) + M (i + 1) * (t - x i) ^ 2 / (2 * gap x i)
+        - (y i / gap x i - M i * gap x i / 6) + (y (i + 1) / gap x i - M (i + 1) * gap x i / 6))
+      t := by
+  have h1 : HasDerivAt (fun u : ℝ ↦ x (i + 1) - u) (-1) t :=
+    ((hasDerivAt_id' t).neg).const_add (x (i + 1))
+  have h2 : HasDerivAt (fun u : ℝ ↦ u - x i) 1 t := (hasDerivAt_id' t).sub_const (x i)
+  have h3 := (h1.mul (h1.mul h1)).const_mul (M i)
+  have h4 := (h2.mul (h2.mul h2)).const_mul (M (i + 1))
+  have h := (((h3.div_const (6 * gap x i)).add (h4.div_const (6 * gap x i))).add
+    (h1.const_mul (y i / gap x i - M i * gap x i / 6))).add
+    (h2.const_mul (y (i + 1) / gap x i - M (i + 1) * gap x i / 6))
+  convert h using 1
+  · funext u
+    simp only [interpSpline, Pi.add_apply, Pi.mul_apply]
+    ring
+  · simp only [Pi.mul_apply]
+    ring
+
+/-- The second derivative of the piecewise cubic on `[x i, x (i+1)]`: linear interpolation of the
+two moments. -/
+theorem hasDerivAt_deriv_interpSpline (x y M : ℕ → ℝ) (i : ℕ) (t : ℝ) :
+    HasDerivAt (deriv (interpSpline x y M i))
+      (M i * (x (i + 1) - t) / gap x i + M (i + 1) * (t - x i) / gap x i) t := by
+  have hfun : deriv (interpSpline x y M i) = fun t ↦
+      -(M i * (x (i + 1) - t) ^ 2 / (2 * gap x i)) + M (i + 1) * (t - x i) ^ 2 / (2 * gap x i)
+        - (y i / gap x i - M i * gap x i / 6) + (y (i + 1) / gap x i - M (i + 1) * gap x i / 6) :=
+    funext fun t ↦ (hasDerivAt_interpSpline x y M i t).deriv
+  rw [hfun]
+  have h1 : HasDerivAt (fun u : ℝ ↦ x (i + 1) - u) (-1) t :=
+    ((hasDerivAt_id' t).neg).const_add (x (i + 1))
+  have h2 : HasDerivAt (fun u : ℝ ↦ u - x i) 1 t := (hasDerivAt_id' t).sub_const (x i)
+  have h3 := (h1.mul h1).const_mul (M i)
+  have h4 := (h2.mul h2).const_mul (M (i + 1))
+  have h := (((h3.div_const (2 * gap x i)).neg.add (h4.div_const (2 * gap x i))).sub_const
+    (y i / gap x i - M i * gap x i / 6)).add_const
+    (y (i + 1) / gap x i - M (i + 1) * gap x i / 6)
+  convert h using 1
+  · funext u
+    simp only [Pi.add_apply, Pi.mul_apply, Pi.neg_apply]
+    ring
+  · ring
+
+/-- The slope of the piece `[x i, x (i+1)]` at its right end. -/
+theorem deriv_interpSpline_right (x y M : ℕ → ℝ) {i : ℕ} (hgap : gap x i ≠ 0) :
+    deriv (interpSpline x y M i) (x (i + 1)) =
+      (y (i + 1) - y i) / gap x i + gap x i * M i / 6 + gap x i * M (i + 1) / 3 := by
+  rw [(hasDerivAt_interpSpline x y M i _).deriv]
+  unfold gap at *
+  field_simp
+  ring
+
+/-- The slope of the piece `[x i, x (i+1)]` at its left end. -/
+theorem deriv_interpSpline_left (x y M : ℕ → ℝ) {i : ℕ} (hgap : gap x i ≠ 0) :
+    deriv (interpSpline x y M i) (x i) =
+      (y (i + 1) - y i) / gap x i - gap x i * M i / 3 - gap x i * M (i + 1) / 6 := by
+  rw [(hasDerivAt_interpSpline x y M i _).deriv]
+  unfold gap at *
+  field_simp
+  ring
+
+/-- The curvature of the piece `[x i, x (i+1)]` at its left end is the moment `M i`. -/
+theorem deriv_deriv_interpSpline_left (x y M : ℕ → ℝ) {i : ℕ} (hgap : gap x i ≠ 0) :
+    deriv (deriv (interpSpline x y M i)) (x i) = M i := by
+  rw [(hasDerivAt_deriv_interpSpline x y M i _).deriv]
+  unfold gap at *
+  field_simp
+  ring
+
+/-- The curvature of the piece `[x i, x (i+1)]` at its right end is the moment `M (i+1)`. -/
+theorem deriv_deriv_interpSpline_right (x y M : ℕ → ℝ) {i : ℕ} (hgap : gap x i ≠ 0) :
+    deriv (deriv (interpSpline x y M i)) (x (i + 1)) = M (i + 1) := by
+  rw [(hasDerivAt_deriv_interpSpline x y M i _).deriv]
+  unfold gap at *
+  field_simp
+  ring
+
+/-- **The moment equation at an interior pillar is the first-derivative matching of the two
+adjacent pieces.** For consecutive gaps `h i, h (i+1) ≠ 0` with positive sum, the pieces on
+`[x i, x (i+1)]` and `[x (i+1), x (i+2)]` have the same slope at `x (i+1)` exactly when row `i`
+of the moment system holds: `μ M i + 2 M (i+1) + λ M (i+2) = rhs`. -/
+theorem deriv_interpSpline_match_iff (x y M : ℕ → ℝ) {i : ℕ} (h0 : 0 < gap x i)
+    (h1 : 0 < gap x (i + 1)) :
+    deriv (interpSpline x y M i) (x (i + 1)) = deriv (interpSpline x y M (i + 1)) (x (i + 1)) ↔
+      mu x (i + 1) * M i + 2 * M (i + 1) + lam x (i + 1) * M (i + 2) = rhs x y (i + 1) := by
+  rw [deriv_interpSpline_right x y M h0.ne', deriv_interpSpline_left x y M h1.ne']
+  have hs : gap x i + gap x (i + 1) ≠ 0 := by positivity
+  have key : mu x (i + 1) * M i + 2 * M (i + 1) + lam x (i + 1) * M (i + 2) - rhs x y (i + 1) =
+      6 / (gap x i + gap x (i + 1)) *
+        (((y (i + 1) - y i) / gap x i + gap x i * M i / 6 + gap x i * M (i + 1) / 3) -
+          ((y (i + 1 + 1) - y (i + 1)) / gap x (i + 1) - gap x (i + 1) * M (i + 1) / 3 -
+            gap x (i + 1) * M (i + 1 + 1) / 6)) := by
+    simp only [mu, lam, rhs, Nat.add_sub_cancel]
+    field_simp
+    ring
+  rw [← sub_eq_zero, ← sub_eq_zero (a := mu x (i + 1) * M i + 2 * M (i + 1) +
+    lam x (i + 1) * M (i + 2)), key, mul_eq_zero]
+  simp [hs]
 
 /-! ## Connection to the SVI smile -/
 
