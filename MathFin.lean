@@ -947,4 +947,6 @@ import MathFin.Markets.DeFi.LiquidationAsStructuralDefault
 import MathFin.Markets.DeFi.UniswapV3CoveredCallPrice
 import MathFin.Markets.DeFi.LPContract
 import MathFin.Markets.Microstructure.GlostenMilgromCondExp
+-- FX smile quotes: risk reversal and butterfly as delta-space quoting conventions
+import MathFin.Markets.FxSmileQuotes
 import MathFin.Markets.Microstructure.GlostenMilgromMarket
