@@ -32,7 +32,7 @@ candidate (cf. `PMF.toMeasure`, which needs weights summing to one).
   probability measure.
 * `MeasureTheory.Measure.ofWeights_univ_real_singleton`: a finite measure on a finite type with
   measurable singletons is `ofWeights univ (fun i ↦ μ.real {i})`.
-* `ofWeights_absolutelyContinuous_of_pos`: the law of any weights is absolutely continuous with
+* `Measure.ofWeights_absolutelyContinuous_of_pos`: the law of any weights is absolutely continuous with
   respect to the law of a positive weight vector.
 
 ## References
@@ -83,8 +83,6 @@ theorem ofWeights_univ_real_singleton [Fintype ι] [MeasurableSingletonClass ι]
   refine Finset.sum_congr rfl fun i _ ↦ ?_
   rw [measureReal_def, ENNReal.ofReal_toReal (measure_ne_top μ _)]
 
-end MeasureTheory.Measure
-
 /-- A fully supported weight vector on a finite type dominates every weight vector: the law of `q`
 is absolutely continuous with respect to the law of `p` when `p` is positive everywhere. Two
 fully supported weight vectors give mutually absolutely continuous laws. -/
@@ -101,3 +99,5 @@ theorem ofWeights_absolutelyContinuous_of_pos {ι : Type*} [MeasurableSpace ι] 
     · exact absurd (ENNReal.ofReal_eq_zero.mp h) (not_le.mpr (hp i))
     · simp [Measure.dirac_apply' _ (Set.toFinite s).measurableSet, hi] at h
   simp [hs']
+
+end MeasureTheory.Measure

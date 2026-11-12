@@ -365,8 +365,8 @@ theorem isPricingMeasure_trinomialLaw {v2 e dx : ℝ} (hdx : dx ≠ 0)
       (trinomialLaw v2 e dx) := by
   have := isProbabilityMeasure_trinomialLaw hdx fun k ↦ (h k).le
   refine Market.isPricingMeasure_oneDate
-    (ofWeights_absolutelyContinuous_of_pos fun _ ↦ by norm_num)
-    (ofWeights_absolutelyContinuous_of_pos h) (.of_finite) ?_
+    (Measure.ofWeights_absolutelyContinuous_of_pos fun _ ↦ by norm_num)
+    (Measure.ofWeights_absolutelyContinuous_of_pos h) (.of_finite) ?_
   rw [integral_trinomialNodes hdx c fun k ↦ (h k).le, hmean]
 
 /-- **The converse**: for a date `τ > 0`, a trinomial law that prices the one-date market of
