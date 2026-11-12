@@ -287,6 +287,7 @@ import MathFin.Probability.Brownian.WienerExponentialTotality
 -- Martingale representation, step 5: the Itô integral is onto the centered `𝓕ᴮ_T`-measurable
 -- part of `L²(μ)` — terminal, submodule and process forms of the representation theorem
 import MathFin.Probability.Brownian.MartingaleRepresentation
+import MathFin.Probability.Brownian.MartingaleMeasureUniqueness
 import MathFin.Probability.Brownian.Ito.ItoFormulaProcess
 import MathFin.Probability.Brownian.ExitTime
 import MathFin.Probability.Brownian.Ito.ItoFormulaCutoff
@@ -693,6 +694,7 @@ import MathFin.Models.BlackScholes.BlackScholesChooser
 import MathFin.Models.BlackScholes.BlackScholesHedge
 import MathFin.Models.BlackScholes.BlackScholesPhysical
 import MathFin.Models.BlackScholes.Market
+import MathFin.Models.BlackScholes.PricingMeasureUnique
 -- The Black–Scholes delta hedge is self-financing: the product rule with the factor e^{rt}
 import MathFin.Models.BlackScholes.BlackScholesSelfFinancing
 import MathFin.Models.Binomial.Binomial

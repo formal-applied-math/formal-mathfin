@@ -49,6 +49,7 @@ import MathFin.Probability.Brownian.Ito.StochasticFubini
 import MathFin.Pricing.FTAP.NoArbitrageLocal
 import MathFin.Pricing.FTAP.DensityPasting
 import MathFin.Models.BlackScholes.BlackScholesPhysical
+import MathFin.Models.BlackScholes.PricingMeasureUnique
 import MathFin.Probability.Brownian.Ito.ItoProductRule
 import MathFin.Models.BlackScholes.BlackScholesSelfFinancing
 import MathFin.Probability.Gaussian.StandardNormal
@@ -779,9 +780,25 @@ attribute [blueprint "thm:black-scholes-market"
   $\theta = (m-r)/\sigma$ at a horizon $H$ is a pricing measure of it at every horizon $T \le
   H$: equivalent to the physical measure, with the deflated asset a martingale. Under it the
   European call is worth $S_0\Phi(d_1) - Ke^{-rT}\Phi(d_2)$ whatever the physical drift
-  (`price_europeanCall_constGirsanovMeasure`). That it is the only pricing measure is not proved
-  here: it is the frontier node `thm:bs-arbitrage-free-price`. -/)]
+  (`price_europeanCall_constGirsanovMeasure`). Among the pricing measures it is the only one
+  with a density square-integrable under it, as `thm:bs-arbitrage-free-price` proves; a pricing
+  measure with a density not square-integrable under the Girsanov measure is not covered. -/)]
   MathFin.Contracts.BlackScholes.isPricingMeasure_constGirsanovMeasure
+
+attribute [blueprint "thm:bs-arbitrage-free-price"
+  (title := "The Black–Scholes price is the arbitrage-free price")
+  (statement := /-- In the Black–Scholes market of a continuous Brownian motion $W$ with $S_0,
+  \sigma > 0$, let $Q^*$ be the Girsanov measure of the market price of risk $\theta =
+  (m-r)/\sigma$ at a horizon $H \ge T$. Every pricing measure $Q$ up to $T$ of the form $Q =
+  D\cdot Q^*$ with $D \ge 0$ square-integrable under $Q^*$ agrees with $Q^*$ on
+  $\mathcal F_T$ (`trim_eq_of_isPricingMeasure_withDensity`), hence prices the European call at
+  $S_0\Phi(d_1) - Ke^{-rT}\Phi(d_2)$. The proof is the martingale representation of the
+  conditional density against the Brownian motion $W_u + \theta\min(u,H)$ of $Q^*$: the
+  discounted asset is the Itô integral of $\sigma\tilde S$, so the integrand of the density is
+  orthogonal to every predictable rectangle weighted by $\tilde S$ and vanishes. A pricing
+  measure whose density is only in $L^2(\mu)$ is not covered, and the price is not shown to be
+  the superreplication price or the initial capital of the delta hedge. -/)]
+  MathFin.Contracts.BlackScholes.price_europeanCall_of_isPricingMeasure_withDensity
 
 attribute [blueprint "thm:bs-delta-hedge"
   (title := "Black–Scholes delta hedging")

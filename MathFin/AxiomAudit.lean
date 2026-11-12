@@ -2748,6 +2748,18 @@ The landmarks of `docs/blueprint.md` that no section above pins: one `#print axi
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.BlackScholes.isPricingMeasure_constGirsanovMeasure
 
+/-- info: 'MathFin.trim_eq_of_martingale_withDensity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.trim_eq_of_martingale_withDensity
+
+/-- info: 'MathFin.Contracts.BlackScholes.trim_eq_of_isPricingMeasure_withDensity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.trim_eq_of_isPricingMeasure_withDensity
+
+/-- info: 'MathFin.Contracts.BlackScholes.price_europeanCall_of_isPricingMeasure_withDensity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.price_europeanCall_of_isPricingMeasure_withDensity
+
 /-- info: 'MathFin.Contracts.TimeDepVol.isPricingMeasure_constGirsanovMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.TimeDepVol.isPricingMeasure_constGirsanovMeasure
