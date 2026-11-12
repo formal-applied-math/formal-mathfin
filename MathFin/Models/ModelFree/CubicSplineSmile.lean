@@ -9,14 +9,17 @@ public import Mathlib.LinearAlgebra.Matrix.Gershgorin
 public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 public import MathFin.Models.ModelFree.SVI.Reduction
 
-/-! # The natural cubic spline over pillars: the moment system and its unique solution
+/-!
+# The natural cubic spline over pillars: the moment system and its unique solution
 
 A natural cubic spline interpolating values `y 0, …, y n` at strictly increasing pillars
-`x 0 < ⋯ < x n` (e.g. an FX/equity vol smile sampled at pillar deltas) reduces, after
-imposing the natural boundary conditions `M 0 = M n = 0`, to a linear system in the
-unknown interior second derivatives (*moments*) `M 1, …, M (n-1)`. The system formalized
-here is the normalized moment form of J. Stoer & R. Bulirsch, *Introduction to Numerical
-Analysis*, 3rd ed. (Springer, 2002), §2.4.2: dividing each row of the standard natural-
+`x 0 < ⋯ < x n` (e.g. an FX/equity vol smile sampled at pillar deltas) reduces, by the
+textbook derivation (matching first derivatives at the interior pillars and imposing the
+natural boundary conditions `M 0 = M n = 0`), to a linear system in the unknown interior
+second derivatives (*moments*) `M 1, …, M (n-1)`. The derivation itself is not formalized:
+the system is *defined* here, as the textbook states it. It is the normalized moment form of
+J. Stoer & R. Bulirsch, *Introduction to Numerical Analysis*, 3rd ed. (Springer, 2002),
+§2.4.2: dividing each row of the standard natural-
 spline system (stated on the same unknowns `M i`, with diagonal `2(h (i-1) + h i)`) by
 `h (i-1) + h i` turns that diagonal into a constant `2` with off-diagonal weights
 `μ i, λ i ≥ 0` summing to `1`. Existence and uniqueness of the natural cubic spline is
@@ -24,7 +27,7 @@ R. L. Burden & J. D. Faires, *Numerical Analysis*, 9th ed. (2011), Theorem 3.11;
 strict-diagonal-dominance step formalized here is the same nonsingularity argument that
 theorem's proof uses, run on the normalized system.
 Distinct from the parametric SVI smile already in the repository
-(`MathFin.BlackScholes.SVI`): this is a pillar-interpolation scheme, not a functional form.
+(`MathFin.SVI`): this is a pillar-interpolation scheme, not a functional form.
 
 ## Main definitions
 
@@ -45,9 +48,8 @@ Distinct from the parametric SVI smile already in the repository
 * `exists_unique_moments` — consequently the moment system has exactly one solution
   (`Matrix.mulVec_injective_iff_isUnit` for uniqueness, `A⁻¹ *ᵥ d` for existence): this is
   the textbook's "the matrix is nonsingular" step of natural-cubic-spline uniqueness.
-* `interpSpline` — the standard piecewise-cubic formula built from the pillars, the data
-  and a candidate moment sequence, and `interpSpline_left_eq`, `interpSpline_right_eq` —
-  it matches the pillar values `y i`, `y (i+1)` exactly at both ends of each piece
+* `interpSpline_left_eq`, `interpSpline_right_eq` — the piecewise cubic `interpSpline`
+  matches the pillar values `y i`, `y (i+1)` exactly at both ends of each piece
   `[x i, x (i+1)]`, for *any* moment sequence (the interpolation property does not depend
   on which system the moments solve).
 * `svi_pillar_interpSpline_eq`, `svi_pillar_moments_unique` — the connection to the
@@ -60,8 +62,11 @@ Distinct from the parametric SVI smile already in the repository
 
 This module formalizes the linear-algebra core of natural-cubic-spline uniqueness (the
 diagonally-dominant tridiagonal system) and the exact-interpolation identity of the
-piecewise-cubic formula at the pillars. It does not construct a single global function
-glued across all pieces, and does not prove the global `C²` matching of one-sided
+piecewise-cubic formula at the pillars. The two halves are not tied together in Lean: nothing
+here proves that the solution of the moment system, fed to `interpSpline`, glues to a `C¹` or
+`C²` function or satisfies the natural boundary conditions, so "natural cubic spline" names the
+textbook object these two pieces serve, not a Lean definition. It does not construct a single
+global function glued across all pieces, and does not prove the global `C²` matching of one-sided
 derivatives at interior knots — the first-derivative-continuity equations are exactly
 what the moment system encodes, but deriving "the glued function is `C²`" as a two-sided
 `HasDerivAt` statement needs a one-sided-derivative-patching argument this module leaves
