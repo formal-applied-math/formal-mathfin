@@ -3825,6 +3825,13 @@
       "input_hash": "de62e1ce0c81b9d163b4bbe46be5b8b684c255bcf04a4546c1b543a66a2d1547",
       "verified_at_commit": "f68ab19"
     },
+    "mf-trinomial-moment-matching": {
+      "benchmark_file": "binomial.json",
+      "date": "2026-11-09",
+      "elapsed_s": 2.6,
+      "input_hash": "2e112f18a2556ff2f8f89533be4420ceace9019ba64c430efb60d75f5f3c9590",
+      "verified_at_commit": "3438a66"
+    },
     "mf-uncorrelated-gaussian-var-herfindahl": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-11-08",

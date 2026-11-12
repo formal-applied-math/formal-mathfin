@@ -555,6 +555,8 @@ import MathFin.Models.Forwards.Black76Greeks
 import MathFin.Models.Forwards.SchwartzOneFactor
 -- Phase 13 additions:
 import MathFin.Models.Binomial.Model
+-- Trinomial tree: one-step moment matching, the validity window, a variance bound
+import MathFin.Models.Binomial.TrinomialMomentMatching
 import MathFin.Models.Binomial.American
 import MathFin.Models.Binomial.CRRConvergence
 import MathFin.Models.Binomial.DriftLimit

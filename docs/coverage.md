@@ -61,6 +61,35 @@ tree (767 full before, 768 after; 785 → 786 delivery-ready).
   probabilistic — no random matrix, sample covariance, eigenvalue, or convergence of the
   empirical spectral distribution; the atom at zero for `c > 1` and the support density are
   not treated. Axioms-clean, `full`.
+### Trinomial lattice branch weights: moment matching and a variance bound (2026-11-08)
+
+One `full` entry in `benchmarks/binomial.json`. Corpus 781 → 782 (746 full before, 747 after;
+764 → 765 delivery-ready).
+
+- **`mf-trinomial-moment-matching`** (MathFin/Binomial/TrinomialMomentMatching.lean): one step
+  of a recombining trinomial lattice sends a node `x_k` to `x_k - dx`, `x_k`, `x_k + dx`;
+  matching mass, mean `x_k + e` and variance `v2` gives a 3×3 linear system, solved uniquely
+  for `dx ≠ 0` (`trinomialProb_sum`/`_mean`/`_secondMoment`, `trinomialProb_unique`), the
+  general-spacing branch weights transcribed from QuantLib's
+  `ql/methods/lattices/trinomialtree.cpp`. The classical substitution `dx = √3 v`, `v2 = v²`
+  recovers the closed form (`trinomialProb_classical`, the `(1/6, 2/3, 1/6)` triple at
+  `e = 0`). Exact non-negativity: outer weights iff `|e| (dx − |e|) ≤ v2`, central iff
+  `v2 + e² ≤ dx²` (`trinomialProbDownUp_nonneg_iff`, `trinomialProbMid_nonneg_iff`); the
+  window `dx² ≤ 4 v2 ≤ 3 dx²` keeps every nearest-node offset `|e| ≤ dx/2` inside `[0, 1]`
+  (`trinomialProb_mem_Icc_of_window`, `trinomialProb_mem_Icc_classical`). A lattice variance
+  bound: any non-negative weighting of `c + dx ℤ` with mean `c + e` has variance at least
+  `e (dx − e)` (`lattice_variance_lower_bound`), so no non-negative scheme on that lattice,
+  with any number of branches, matches a variance below it
+  (`not_exists_nonneg_lattice_scheme`). At the classical spacing `dx = √3 σ √dt`,
+  `v2 = σ² dt`, the lattice law matches the Black–Scholes log-return's mean `(r − σ²/2) dt`
+  and variance `σ² dt` exactly (`trinomialProb_bsStep_mean`, `trinomialProb_bsStep_variance`,
+  composing with `bsLogReturn_mean`/`bsLogReturn_variance`). Cited: QuantLib
+  `ql/methods/lattices/trinomialtree.cpp` (transcribed); Hull ch. 21 for the trinomial tree's
+  context (the formulas are the QuantLib source's, whose classical branch it attributes to
+  Hull–White and Clewlow). Disclosed out of scope: no multi-period tree object, no lattice
+  prices, no convergence; outside the window the same formulas produce signed weights (the
+  tradeoff the transcribed source documents). Axioms-clean, `full`.
+
 
 ### Removable singularities in two stochastic-vol smile models (2026-11-01)
 
