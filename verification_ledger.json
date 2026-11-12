@@ -976,6 +976,13 @@
       "input_hash": "8012d920e8cc39a5c80091864a44dbcf9729aa77c074a6fe68dfcc3c4e543dee",
       "verified_at_commit": "f68ab19"
     },
+    "mf-continuous-lookback-floating-strike": {
+      "benchmark_file": "exotic_options.json",
+      "date": "2026-11-10",
+      "elapsed_s": 4.8,
+      "input_hash": "f773c7525ae560acb60d8ed2bb8a4f6e5f25e3afbbdda34cdad0aa4522f79c5b",
+      "verified_at_commit": "e193509"
+    },
     "mf-contract-binomial-capped-call": {
       "benchmark_file": "contracts.json",
       "date": "2026-11-08",
