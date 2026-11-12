@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (1064 MathFin constants, 29 upstream). Citations
+  corpus (1065 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -1558,6 +1558,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.binomial_replication_cost_eq_pricingKernel' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.binomial_replication_cost_eq_pricingKernel
+
+/-- info: 'MathFin.blackForm_tendsto_zero_iff_dpl_tendsto_atBot' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.blackForm_tendsto_zero_iff_dpl_tendsto_atBot
 
 /-- info: 'MathFin.blackLitterman_mean_eq_precision_weighted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
