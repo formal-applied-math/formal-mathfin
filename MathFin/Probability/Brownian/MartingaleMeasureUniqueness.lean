@@ -35,6 +35,9 @@ so `φψ = 0`, hence `φ = 0` since `ψ ≠ 0`, and `F = 1`.
 * `MathFin.exists_rectIntegrand`: the Itô integral of `1_{(s,u]×A}·ψ` is `1_A (X_u − X_s)`.
 * `MathFin.ae_mul_eq_zero_of_orthogonal_increments`: an integrand `φ` whose integral is
   orthogonal to every increment `1_A (X_u − X_s)` satisfies `φψ = 0`.
+* `MathFin.exists_itoIntegral_eq_condExp_sub_one`: the conditional density is `1 + ∫ φ dB`.
+* `MathFin.setIntegral_itoIntegral_mul_increment_eq_zero`: that integral is orthogonal to the
+  increments of a martingale under which `Q = D·μ` is a martingale measure.
 * `MathFin.trim_eq_of_martingale_withDensity`: a probability measure with an `L²(μ)` density that
   makes `X` a martingale equals `μ` on `𝓕_T`.
 
@@ -211,13 +214,104 @@ lemma memLp_of_martingale_increment (T : ℝ≥0) (hX : Martingale X (natFiltrat
     (itoProcessCLM_ae_eq_of_martingale hB hBmeas T hX ψ hψ ht)).add hX0
   exact h.ae_eq (.of_forall fun ω ↦ sub_add_cancel (X t ω) (X 0 ω))
 
+/-- **The conditional density of an `L²` density is `1` plus an Itô integral.** For a density
+`D ∈ L²(μ)` of mass one, martingale representation writes the conditional density
+`𝔼_μ[D | 𝓕_T]`, which has mean one, as `1 + ∫₀ᵀ φ dB`. -/
+lemma exists_itoIntegral_eq_condExp_sub_one (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
+    (T : ℝ≥0) (D : Lp ℝ 2 μ) (hD : ∫ ω, D ω ∂μ = 1) :
+    ∃ φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas), itoIntegralCLM hB T hBmeas φ =ᵐ[μ]
+      fun ω ↦ (μ[D | natFiltration hBmeas T]) ω - 1 := by
+  set F : Ω → ℝ := μ[D | natFiltration hBmeas T]
+  have hF2 : MemLp F 2 μ := (Lp.memLp D).condExp one_le_two
+  have hFae : ⇑(hF2.toLp F) =ᵐ[μ] F := hF2.coeFn_toLp
+  obtain ⟨φ, hφ, -⟩ := exists_itoIntegral_representation hB hBmeas hBcont T (hF2.toLp F)
+    (stronglyMeasurable_condExp.aestronglyMeasurable.congr hFae.symm)
+  have hint : ∫ x, (hF2.toLp F) x ∂μ = 1 := by
+    rw [integral_congr_ae hFae, integral_condExp ((natFiltration hBmeas).le T), hD]
+  refine ⟨φ, ?_⟩
+  filter_upwards [hφ, hFae] with ω h1 h2
+  rw [← h2, h1, hint]
+  ring
+
+/-- **A martingale measure is orthogonal to the increments.** Let `X` be a martingale of the
+Brownian filtration with `X_T − X_0 = ∫₀ᵀ ψ dB` and `X_0 ∈ L²`, and `Q = D·μ` a probability measure
+with `D ∈ L²(μ)` nonnegative under which `X`, frozen at `T`, is a martingale. If
+`∫₀ᵀ φ dB = 𝔼_μ[D | 𝓕_T] − 1`, then `∫₀ᵀ φ dB` is orthogonal to every increment `1_A (X_u − X_s)`,
+`s ≤ u ≤ T`, `A ∈ 𝓕_s`: both `Q` and `μ` give the increment mean zero on `A`, and `Q = D·μ`. -/
+lemma setIntegral_itoIntegral_mul_increment_eq_zero (T : ℝ≥0)
+    (hX : Martingale X (natFiltration hBmeas) μ) (ψ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
+    (hψ : (fun ω ↦ X T ω - X 0 ω) =ᵐ[μ] itoIntegralCLM hB T hBmeas ψ) (hX0 : MemLp (X 0) 2 μ)
+    (D : Lp ℝ 2 μ) (hD0 : ∀ᵐ ω ∂μ, 0 ≤ D ω) {Q : Measure Ω} [IsProbabilityMeasure Q]
+    (hQD : Q = μ.withDensity fun ω ↦ ENNReal.ofReal (D ω))
+    (hQ : Martingale (fun t ↦ X (min t T)) (natFiltration hBmeas) Q)
+    {φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)}
+    (hφ : itoIntegralCLM hB T hBmeas φ =ᵐ[μ] fun ω ↦ (μ[D | natFiltration hBmeas T]) ω - 1)
+    {s u : ℝ≥0} (hsu : s ≤ u) (huT : u ≤ T) {A : Set Ω}
+    (hA : MeasurableSet[natFiltration hBmeas s] A) :
+    ∫ ω in A, itoIntegralCLM hB T hBmeas φ ω * (X u ω - X s ω) ∂μ = 0 := by
+  set 𝓕 := natFiltration hBmeas
+  set F : Ω → ℝ := μ[D | 𝓕 T]
+  have hD1 : Integrable D μ := (Lp.memLp D).integrable one_le_two
+  have hsT : s ≤ T := hsu.trans huT
+  have hAm : MeasurableSet A := 𝓕.le s A hA
+  have hAT : MeasurableSet[𝓕 T] A := 𝓕.mono hsT _ hA
+  have hXu := memLp_of_martingale_increment hB hBmeas T hX ψ hψ hX0 huT
+  have hXs := memLp_of_martingale_increment hB hBmeas T hX ψ hψ hX0 hsT
+  have hg2 : MemLp (fun ω ↦ X u ω - X s ω) 2 μ := hXu.sub hXs
+  have hgint : Integrable (fun ω ↦ X u ω - X s ω) μ := hg2.integrable one_le_two
+  -- `∫_A g dμ = 0`
+  have hμg : ∫ ω in A, (X u ω - X s ω) ∂μ = 0 := by
+    rw [integral_sub (hX.integrable u).integrableOn (hX.integrable s).integrableOn,
+      hX.setIntegral_eq hsu hA, sub_self]
+  -- `∫_A g dQ = 0`
+  have hQg : ∫ ω in A, (X u ω - X s ω) ∂Q = 0 := by
+    have h := hQ.setIntegral_eq hsu hA
+    simp only [min_eq_left hsT, min_eq_left huT] at h
+    have hiu : Integrable (X u) Q := by simpa [min_eq_left huT] using hQ.integrable u
+    have his : Integrable (X s) Q := by simpa [min_eq_left hsT] using hQ.integrable s
+    rw [integral_sub hiu.integrableOn his.integrableOn, h, sub_self]
+  -- `∫_A g dQ = ∫_A g D dμ`
+  have hQg' : ∫ ω in A, (X u ω - X s ω) ∂Q = ∫ ω in A, (X u ω - X s ω) * D ω ∂μ := by
+    rw [hQD, setIntegral_withDensity_eq_setIntegral_toReal_smul₀
+      (Lp.memLp D).aestronglyMeasurable.aemeasurable.ennreal_ofReal.restrict
+      (ae_of_all _ fun _ ↦ ENNReal.ofReal_lt_top) _ hAm]
+    exact setIntegral_congr_ae hAm (hD0.mono fun ω h _ ↦ by
+      rw [ENNReal.toReal_ofReal h, smul_eq_mul, mul_comm])
+  -- `∫_A D g dμ = ∫_A F g dμ`: pull the `𝓕_T`-measurable `1_A g` out of `μ[· | 𝓕_T]`
+  have hFg : ∫ ω in A, (X u ω - X s ω) * D ω ∂μ = ∫ ω in A, F ω * (X u ω - X s ω) ∂μ := by
+    set h : Ω → ℝ := A.indicator fun ω ↦ X u ω - X s ω with hh
+    have hhsm : StronglyMeasurable[𝓕 T] h :=
+      (((hX.stronglyAdapted u).mono (𝓕.mono huT)).sub
+        ((hX.stronglyAdapted s).mono (𝓕.mono hsT))).indicator hAT
+    have hhD : Integrable (h * ⇑D) μ :=
+      (hg2.indicator hAm.nullMeasurableSet).integrable_mul (Lp.memLp D)
+    calc ∫ ω in A, (X u ω - X s ω) * D ω ∂μ = ∫ ω, (h * ⇑D) ω ∂μ := by
+          rw [← integral_indicator hAm]
+          refine integral_congr_ae (.of_forall fun ω ↦ ?_)
+          by_cases hω : ω ∈ A <;> simp [hh, Set.indicator, hω]
+      _ = ∫ ω, (μ[h * ⇑D | 𝓕 T]) ω ∂μ := (integral_condExp (𝓕.le T)).symm
+      _ = ∫ ω, (h * F) ω ∂μ :=
+          integral_congr_ae (condExp_mul_of_stronglyMeasurable_left hhsm hhD hD1)
+      _ = ∫ ω in A, F ω * (X u ω - X s ω) ∂μ := by
+          rw [← integral_indicator hAm]
+          refine integral_congr_ae (.of_forall fun ω ↦ ?_)
+          by_cases hω : ω ∈ A <;> simp [hh, Set.indicator, hω, mul_comm]
+  have hFgint : Integrable (fun ω ↦ F ω * (X u ω - X s ω)) μ :=
+    ((Lp.memLp D).condExp one_le_two).integrable_mul hg2
+  calc ∫ ω in A, itoIntegralCLM hB T hBmeas φ ω * (X u ω - X s ω) ∂μ
+      = ∫ ω in A, (F ω * (X u ω - X s ω) - (X u ω - X s ω)) ∂μ :=
+        setIntegral_congr_ae hAm (hφ.mono fun ω h _ ↦ by rw [h]; ring)
+    _ = 0 := by
+        rw [integral_sub hFgint.integrableOn hgint.integrableOn, ← hFg, ← hQg', hQg, hμg, sub_zero]
+
 /-- **Uniqueness of the martingale measure with a square-integrable density.** Let `X` be a
 martingale of the Brownian filtration with `X_T − X_0 = ∫₀ᵀ ψ dB`, `ψ ≠ 0` almost everywhere,
 and `X_0` square-integrable. A probability measure `Q = D·μ` with `D ∈ L²(μ)` nonnegative under
 which `X`, frozen at `T`, is a martingale of the Brownian filtration agrees with `μ` on `𝓕_T`.
-The conditional density `𝔼_μ[D | 𝓕_T]` is `1 + ∫₀ᵀ φ dB` (martingale representation), and the
-martingale property under `Q` and under `μ` makes `∫₀ᵀ φ dB` orthogonal to every increment
-`1_A (X_u − X_s)`, so `φψ = 0` (`ae_mul_eq_zero_of_orthogonal_increments`), `φ = 0`. -/
+The conditional density `𝔼_μ[D | 𝓕_T]` is `1 + ∫₀ᵀ φ dB`
+(`exists_itoIntegral_eq_condExp_sub_one`), `∫₀ᵀ φ dB` is orthogonal to every increment
+`1_A (X_u − X_s)` (`setIntegral_itoIntegral_mul_increment_eq_zero`), so `φψ = 0`
+(`ae_mul_eq_zero_of_orthogonal_increments`), `φ = 0`, and the conditional density is `1`. -/
 theorem trim_eq_of_martingale_withDensity (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω)
     (T : ℝ≥0) (hX : Martingale X (natFiltration hBmeas) μ)
     (ψ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
@@ -229,95 +323,24 @@ theorem trim_eq_of_martingale_withDensity (hBcont : ∀ ω, Continuous fun s : �
     Q.trim ((natFiltration hBmeas).le T) = μ.trim ((natFiltration hBmeas).le T) := by
   set 𝓕 := natFiltration hBmeas
   have hD1 : Integrable D μ := (Lp.memLp D).integrable one_le_two
-  have hDp : ∀ ω, 0 ≤ max (D ω) 0 := fun ω ↦ le_max_right _ _
-  have hDpD : (fun ω ↦ max (D ω) 0) =ᵐ[μ] D := by
-    filter_upwards [hD0] with ω hω using max_eq_left hω
-  have hQp : Q = μ.withDensity fun ω ↦ ENNReal.ofReal (max (D ω) 0) := by
-    rw [hQD]
-    congr 1
-    funext ω
-    rw [ENNReal.ofReal_max, ENNReal.ofReal_zero]
-    simp
   have hD : ∫ ω, D ω ∂μ = 1 := by
     have h1 : ENNReal.ofReal (∫ ω, D ω ∂μ) = 1 := by
       rw [ofReal_integral_eq_lintegral_ofReal hD1 hD0, ← setLIntegral_univ, ← withDensity_apply _
         MeasurableSet.univ, ← hQD, measure_univ]
     exact (ENNReal.ofReal_eq_one.1 h1)
-  -- the conditional density and its representation
-  set F : Ω → ℝ := μ[D | 𝓕 T] with hFdef
-  have hF2 : MemLp F 2 μ := (Lp.memLp D).condExp one_le_two
-  have hFae : ⇑(hF2.toLp F) =ᵐ[μ] F := hF2.coeFn_toLp
-  obtain ⟨φ, hφ, -⟩ := exists_itoIntegral_representation hB hBmeas hBcont T (hF2.toLp F)
-    (stronglyMeasurable_condExp.aestronglyMeasurable.congr hFae.symm)
-  have hint : ∫ x, (hF2.toLp F) x ∂μ = 1 := by
-    rw [integral_congr_ae hFae, hFdef, integral_condExp (𝓕.le T), hD]
-  -- the pairings against the increments
-  have hφ0 : ∀ {s u : ℝ≥0}, s ≤ u → u ≤ T → ∀ {A : Set Ω}, MeasurableSet[𝓕 s] A →
-      ∫ ω in A, itoIntegralCLM hB T hBmeas φ ω * (X u ω - X s ω) ∂μ = 0 := by
-    intro s u hsu huT A hA
-    have hsT : s ≤ T := hsu.trans huT
-    have hAm : MeasurableSet A := 𝓕.le s A hA
-    have hAT : MeasurableSet[𝓕 T] A := 𝓕.mono hsT _ hA
-    have hXu := memLp_of_martingale_increment hB hBmeas T hX ψ hψ hX0 huT
-    have hXs := memLp_of_martingale_increment hB hBmeas T hX ψ hψ hX0 hsT
-    have hg2 : MemLp (fun ω ↦ X u ω - X s ω) 2 μ := hXu.sub hXs
-    have hgint : Integrable (fun ω ↦ X u ω - X s ω) μ := hg2.integrable one_le_two
-    -- `∫_A g dμ = 0`
-    have hμg : ∫ ω in A, (X u ω - X s ω) ∂μ = 0 := by
-      rw [integral_sub (hX.integrable u).integrableOn (hX.integrable s).integrableOn,
-        hX.setIntegral_eq hsu hA, sub_self]
-    -- `∫_A g dQ = 0`
-    have hQg : ∫ ω in A, (X u ω - X s ω) ∂Q = 0 := by
-      have h := hQ.setIntegral_eq hsu hA
-      simp only [min_eq_left hsT, min_eq_left huT] at h
-      have hiu : Integrable (X u) Q := by simpa [min_eq_left huT] using hQ.integrable u
-      have his : Integrable (X s) Q := by simpa [min_eq_left hsT] using hQ.integrable s
-      rw [integral_sub hiu.integrableOn his.integrableOn, h, sub_self]
-    -- `∫_A g dQ = ∫_A D g dμ`
-    have hQg' : ∫ ω in A, (X u ω - X s ω) ∂Q = ∫ ω in A, (X u ω - X s ω) * D ω ∂μ := by
-      rw [hQp, setIntegral_withDensity_ofReal
-        ((Lp.memLp D).aestronglyMeasurable.aemeasurable.max aemeasurable_const).aestronglyMeasurable
-        hDp _ hAm]
-      exact setIntegral_congr_ae hAm (hDpD.mono fun ω h _ ↦ by rw [show max (D ω) 0 = D ω from h])
-    -- `∫_A D g dμ = ∫_A F g dμ`: pull the `𝓕_T`-measurable `1_A g` out of `μ[· | 𝓕_T]`
-    have hFg : ∫ ω in A, (X u ω - X s ω) * D ω ∂μ = ∫ ω in A, F ω * (X u ω - X s ω) ∂μ := by
-      set h : Ω → ℝ := A.indicator fun ω ↦ X u ω - X s ω with hh
-      have hhsm : StronglyMeasurable[𝓕 T] h :=
-        (((hX.stronglyAdapted u).mono (𝓕.mono huT)).sub
-          ((hX.stronglyAdapted s).mono (𝓕.mono hsT))).indicator hAT
-      have hhD : Integrable (h * ⇑D) μ :=
-        (hg2.indicator hAm.nullMeasurableSet).integrable_mul (Lp.memLp D)
-      calc ∫ ω in A, (X u ω - X s ω) * D ω ∂μ = ∫ ω, (h * ⇑D) ω ∂μ := by
-            rw [← integral_indicator hAm]
-            refine integral_congr_ae (.of_forall fun ω ↦ ?_)
-            by_cases hω : ω ∈ A <;> simp [hh, Set.indicator, hω]
-        _ = ∫ ω, (μ[h * ⇑D | 𝓕 T]) ω ∂μ := (integral_condExp (𝓕.le T)).symm
-        _ = ∫ ω, (h * F) ω ∂μ :=
-            integral_congr_ae (condExp_mul_of_stronglyMeasurable_left hhsm hhD hD1)
-        _ = ∫ ω in A, F ω * (X u ω - X s ω) ∂μ := by
-            rw [← integral_indicator hAm]
-            refine integral_congr_ae (.of_forall fun ω ↦ ?_)
-            by_cases hω : ω ∈ A <;> simp [hh, Set.indicator, hω, mul_comm]
-    have hIφ : ∀ᵐ ω ∂μ, itoIntegralCLM hB T hBmeas φ ω = F ω - 1 := by
-      filter_upwards [hφ, hFae] with ω h1 h2
-      rw [← h2, h1, hint]
-      ring
-    have hFgint : Integrable (fun ω ↦ F ω * (X u ω - X s ω)) μ := hF2.integrable_mul hg2
-    calc ∫ ω in A, itoIntegralCLM hB T hBmeas φ ω * (X u ω - X s ω) ∂μ
-        = ∫ ω in A, (F ω * (X u ω - X s ω) - (X u ω - X s ω)) ∂μ :=
-          setIntegral_congr_ae hAm (hIφ.mono fun ω h _ ↦ by rw [h]; ring)
-      _ = 0 := by
-          rw [integral_sub hFgint.integrableOn hgint.integrableOn, ← hFg, ← hQg', hQg, hμg,
-            sub_zero]
-  have hφψ := ae_mul_eq_zero_of_orthogonal_increments hB hBmeas T hX ψ φ hψ hφ0
+  obtain ⟨φ, hφ⟩ := exists_itoIntegral_eq_condExp_sub_one hB hBmeas hBcont T D hD
+  have hφψ := ae_mul_eq_zero_of_orthogonal_increments hB hBmeas T hX ψ φ hψ
+    fun hsu huT _ hA ↦ setIntegral_itoIntegral_mul_increment_eq_zero hB hBmeas T hX ψ hψ hX0 D hD0
+      hQD hQ hφ hsu huT hA
   have hφz : φ = 0 := by
     refine Lp.eq_zero_iff_ae_eq_zero.2 ?_
     filter_upwards [hφψ, hψ0] with z h1 h2
     simpa [h2] using h1
-  have hF1 : F =ᵐ[μ] fun _ ↦ 1 := by
-    filter_upwards [hφ, hFae] with ω h1 h2
-    rw [← h2, h1, hint, hφz, map_zero]
-    simp
+  have hF1 : μ[D | 𝓕 T] =ᵐ[μ] fun _ ↦ 1 := by
+    filter_upwards [hφ, Lp.coeFn_zero ℝ 2 μ] with ω h1 h2
+    rw [hφz, map_zero, h2] at h1
+    simp only [Pi.zero_apply] at h1
+    linarith
   refine @Measure.ext Ω (𝓕 T) _ _ fun A hA ↦ ?_
   rw [trim_measurableSet_eq _ hA, trim_measurableSet_eq _ hA]
   have hAm := 𝓕.le T A hA

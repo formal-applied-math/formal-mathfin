@@ -197,4 +197,19 @@ theorem processToLpPredictable_ae_slice (T : ℝ≥0) (hBmeas : ∀ t, Measurabl
     ((Measure.measurePreserving_swap (μ := μ) (ν := timeMeasureHorizon T)).quasiMeasurePreserving.ae
       (ae_eq_of_ae_eq_trim (processToLpPredictable_coeFn (μ := μ) T hBmeas hpred hbdd)))
 
+/-- **The predictable realization is odd.** The realization of `σ'` with `σ' = −σ` is the negative
+of the realization of `σ`. -/
+theorem processToLpPredictable_neg (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    {σ σ' : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) σ)
+    (hpred' : IsStronglyPredictable (natFiltration hBmeas) σ') {C C' : ℝ}
+    (hbdd : ∀ t ω, |σ t ω| ≤ C) (hbdd' : ∀ t ω, |σ' t ω| ≤ C') (h : ∀ t ω, σ' t ω = -σ t ω) :
+    processToLpPredictable (μ := μ) T hBmeas hpred' hbdd'
+      = -processToLpPredictable (μ := μ) T hBmeas hpred hbdd := by
+  refine Lp.ext ?_
+  filter_upwards [processToLpPredictable_coeFn (μ := μ) T hBmeas hpred' hbdd',
+    processToLpPredictable_coeFn (μ := μ) T hBmeas hpred hbdd,
+    Lp.coeFn_neg (processToLpPredictable (μ := μ) T hBmeas hpred hbdd)] with z h1 h2 h3
+  rw [h1, h3, Pi.neg_apply, h2]
+  exact h z.1 z.2
+
 end MathFin

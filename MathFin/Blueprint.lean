@@ -673,7 +673,7 @@ attribute [blueprint "thm:market-ftap"
   MathFin.Market.noArbitrage_iff_exists_isPricingMeasure_of_finite
 
 attribute [blueprint "thm:dmw-ftap"
-  (title := "Dalang–Morton–Willinger FTAP")
+  (title := "Dalang–Morton–Willinger FTAP (one asset)")
   (statement := /-- For one asset on a general probability space, no integrability, no
   finiteness of the space and no measurable-selection hypothesis: a one-asset market has no
   arbitrage when trading at the dates of a grid if and only if the market traded on the grid
@@ -829,7 +829,8 @@ attribute [blueprint "thm:black-scholes-market"
   \sigma^2/2)t + \sigma W_t}$, numéraire $e^{rt}$, the filtration $W$ generates) is a market,
   and for $\sigma \ne 0$ the Girsanov measure of the constant market price of risk
   $\theta = (m-r)/\sigma$ at a horizon $H$ is a pricing measure of it at every horizon $T \le
-  H$: equivalent to the physical measure, with the deflated asset a martingale. Under it the
+  H$: mutually absolutely continuous with the physical measure on the information up to $T$,
+  with the deflated asset a martingale. Under it the
   European call is worth $S_0\Phi(d_1) - Ke^{-rT}\Phi(d_2)$ whatever the physical drift
   (`price_europeanCall_constGirsanovMeasure`). Among the pricing measures it is the only one
   with a density square-integrable under it, as `thm:bs-arbitrage-free-price` proves; a pricing
@@ -837,7 +838,7 @@ attribute [blueprint "thm:black-scholes-market"
   MathFin.Contracts.BlackScholes.isPricingMeasure_constGirsanovMeasure
 
 attribute [blueprint "thm:bs-arbitrage-free-price"
-  (title := "The Black–Scholes price is the arbitrage-free price")
+  (title := "Uniqueness of the Black–Scholes pricing measure among square-integrable densities")
   (statement := /-- In the Black–Scholes market of a continuous Brownian motion $W$ with $S_0,
   \sigma > 0$, let $Q^*$ be the Girsanov measure of the market price of risk $\theta =
   (m-r)/\sigma$ at a horizon $H \ge T$. Every pricing measure $Q$ up to $T$ of the form $Q =

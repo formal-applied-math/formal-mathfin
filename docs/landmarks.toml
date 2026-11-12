@@ -86,10 +86,11 @@ with finitely many assets."""
 scope = """The multi-period theorem is proved for one asset only, on any probability space, \
 with no integrability assumption. For several assets on a general space, multi-period no \
 arbitrage is equivalent to conditional one-period no arbitrage \
-(noArbitrage_iff_noArbitrageLocal) and one-period densities paste to an equivalent martingale \
-measure (LocalEMMDensities.isEMM_pastedMeasure), so the Dalang–Morton–Willinger theorem follows \
-from a conditional one-period hypothesis (ConditionalOnePeriodFTAP of \
-noArbitrage_iff_exists_isEMM), which is not proved and can fail. In continuous time \
+(noArbitrage_iff_noArbitrageLocal) and unnormalised one-period densities paste backward to an \
+equivalent martingale measure (exists_isEMM_of_onePeriodDensities), so the \
+Dalang–Morton–Willinger theorem follows from a conditional one-period hypothesis \
+(ConditionalOnePeriodFTAP of noArbitrage_iff_exists_isEMM: conditional no arbitrage yields such a \
+density), the step proved for one asset (OneAsset.exists_onePeriodDensity) and open for several. In continuous time \
 only the easy direction is proved: an equivalent martingale measure precludes arbitrage by simple \
 strategies. The second theorem (completeness iff a unique measure) is proved in both directions \
 only for one risky asset on a finite space of full support; in the Brownian market only \
@@ -98,7 +99,7 @@ also = [
   "MathFin.OnePeriodVector.ftap_one_period_vector",
   "MathFin.ftap_two",
   "MathFin.noArbitrage_iff_noArbitrageLocal",
-  "MathFin.LocalEMMDensities.isEMM_pastedMeasure",
+  "MathFin.exists_isEMM_of_onePeriodDensities",
   "MathFin.noArbitrage_iff_exists_isEMM",
   "MathFin.OneAsset.noArbitrage_iff_exists_isEMM",
 ]

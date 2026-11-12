@@ -10,7 +10,8 @@ public import MathFin.Probability.Brownian.MartingaleMeasureUniqueness
 public import MathFin.Probability.Brownian.Ito.ItoFormulaGBM
 
 /-!
-# Every pricing measure of the Black–Scholes market prices the call at the Black–Scholes formula
+# Pricing measures of the Black–Scholes market with a square-integrable (or bounded) density price
+the call at the Black–Scholes formula
 
 The Girsanov measure `Q*` of the market price of risk `θ = (m − r)/σ` is a pricing measure of the
 Black–Scholes market (`isPricingMeasure_constGirsanovMeasure`). This file shows it is the only one
@@ -125,6 +126,11 @@ theorem isPreBrownianReal_girsanovDriver (θ : ℝ) (H : ℝ≥0) :
   (isPreBrownianReal_constBtheta hW hWmeas θ H).congr fun u ↦
     (withDensity_absolutelyContinuous _ _).ae_le
       (constBtheta_ae_eq_girsanovDriver (μ := μ) hWmeas θ H u)
+
+/-- The Doléans density `Z_H(θ)` of the constant integrand `θ` at the horizon `H` (`ZTpred` for
+`θ`), the density of the Girsanov measure `constGirsanovMeasure`. -/
+noncomputable abbrev ZTconst (θ : ℝ) (H : ℝ≥0) : Ω → ℝ :=
+  ZTpred hW H hWmeas (isStronglyPredictable_const hWmeas θ) (fun _ _ ↦ le_rfl)
 
 variable {S_0 m r σ : ℝ}
 
@@ -263,28 +269,15 @@ include hW in
 /-- **The Doléans densities of `θ` and `−θ` multiply to a constant.** For the constant integrand
 the Itô integral is odd and the bracket is `θ²H`, so `Z_H(θ)·Z_H(−θ) = exp(−θ²H)` almost surely. -/
 lemma ae_mul_ZTpred_const_neg (θ : ℝ) (H : ℝ≥0) :
-    ∀ᵐ ω ∂μ,
-      ZTpred hW H hWmeas (isStronglyPredictable_const hWmeas θ) (fun _ _ ↦ le_rfl) ω
-        * ZTpred hW H hWmeas (isStronglyPredictable_const hWmeas (-θ)) (fun _ _ ↦ le_rfl) ω
-        = Real.exp (-(θ ^ 2 * H)) := by
-  have hP : processToLpPredictable (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas (-θ))
-      (fun _ _ ↦ le_rfl)
-      = -processToLpPredictable (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas θ)
-        (fun _ _ ↦ le_rfl) := by
-    refine Lp.ext ?_
-    filter_upwards [processToLpPredictable_coeFn (μ := μ) H hWmeas
-        (isStronglyPredictable_const hWmeas (-θ)) (fun _ _ ↦ le_rfl),
-      processToLpPredictable_coeFn (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas θ)
-        (fun _ _ ↦ le_rfl), Lp.coeFn_neg (processToLpPredictable (μ := μ) H hWmeas
-          (isStronglyPredictable_const hWmeas θ) (fun _ _ ↦ le_rfl))] with z h1 h2 h3
-    rw [h1, h3, Pi.neg_apply, h2]
-    rfl
+    ∀ᵐ ω ∂μ, ZTconst hW hWmeas θ H ω * ZTconst hW hWmeas (-θ) H ω = Real.exp (-(θ ^ 2 * H)) := by
+  have hP := processToLpPredictable_neg (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas θ)
+    (isStronglyPredictable_const hWmeas (-θ)) (fun _ _ ↦ le_rfl) (fun _ _ ↦ le_rfl) fun _ _ ↦ rfl
   filter_upwards [ae_integral_sq_processToLpPredictable_const (μ := μ) hWmeas θ H,
     ae_integral_sq_processToLpPredictable_const (μ := μ) hWmeas (-θ) H,
     Lp.coeFn_neg (ItoIntegralCLM.itoIntegralCLM hW H hWmeas
       (processToLpPredictable (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas θ)
         (fun _ _ ↦ le_rfl)))] with ω h1 h2 h3
-  simp only [ZTpred, contDoleansExp, itoIntPred]
+  simp only [ZTconst, ZTpred, contDoleansExp, itoIntPred]
   rw [h1, h2, ← Real.exp_add, hP, map_neg, h3]
   congr 1
   simp only [Pi.neg_apply]
@@ -294,65 +287,33 @@ include hW in
 /-- **The inverse Doléans density is integrable.** `1/Z_H(θ) = exp(θ²H)·Z_H(−θ)` almost surely
 (`ae_mul_ZTpred_const_neg`), and `Z_H(−θ)` is integrable. -/
 lemma integrable_inv_ZTpred_const (θ : ℝ) (H : ℝ≥0) :
-    Integrable (fun ω ↦
-      (ZTpred hW H hWmeas (isStronglyPredictable_const hWmeas θ) (fun _ _ ↦ le_rfl) ω)⁻¹) μ := by
+    Integrable (fun ω ↦ (ZTconst hW hWmeas θ H ω)⁻¹) μ := by
   obtain ⟨V, hV⟩ := exists_approxSeq (μ := μ) hWmeas H
     (isStronglyPredictable_const hWmeas (-θ)) (fun _ _ ↦ le_rfl)
   have h := (memLp_ZTpred_one hW hWmeas H (isStronglyPredictable_const hWmeas (-θ))
     (fun _ _ ↦ le_rfl) V hV).integrable le_rfl
   refine (h.const_mul (Real.exp (θ ^ 2 * H))).congr ?_
   filter_upwards [ae_mul_ZTpred_const_neg hW hWmeas θ H] with ω hω
-  refine eq_inv_of_mul_eq_one_left ?_
-  calc _ = Real.exp (θ ^ 2 * H) * (ZTpred hW H hWmeas (isStronglyPredictable_const hWmeas θ)
-        (fun _ _ ↦ le_rfl) ω * ZTpred hW H hWmeas (isStronglyPredictable_const hWmeas (-θ))
-        (fun _ _ ↦ le_rfl) ω) := by ring
-    _ = 1 := by rw [hω, ← Real.exp_add]; simp
+  exact eq_inv_of_mul_eq_one_left (by rw [mul_assoc, mul_comm _ (ZTconst hW hWmeas θ H ω), hω,
+    ← Real.exp_add, add_neg_cancel, Real.exp_zero])
 
 include hW in
 /-- **A bounded density against the physical measure is a square-integrable density against the
 Girsanov measure.** If `Q = D·μ` with `0 ≤ D ≤ C`, then `Q = D'·Q*` with `D' = D/Z_H`, and
-`𝔼_{Q*}[D'²] = 𝔼_μ[D²/Z_H] ≤ C² 𝔼_μ[1/Z_H] < ∞` (`integrable_inv_ZTpred_const`). -/
+`𝔼_{Q*}[D'²] = 𝔼_μ[D²/Z_H] ≤ C² 𝔼_μ[1/Z_H] < ∞` (`integrable_inv_ZTpred_const`): the instance
+`exists_memLp_two_withDensity_of_bdd` at `Z = Z_H(θ)`. -/
 lemma exists_memLp_two_density_of_bdd (θ : ℝ) (H : ℝ≥0) {D : Ω → ℝ} (hDm : Measurable D)
     (hD0 : ∀ ω, 0 ≤ D ω) {C : ℝ} (hDC : ∀ ω, D ω ≤ C)
     {Q : Measure Ω} (hQD : Q = μ.withDensity fun ω ↦ ENNReal.ofReal (D ω)) :
     ∃ D' : Lp ℝ 2 (constGirsanovMeasure hW hWmeas θ H),
       (∀ᵐ ω ∂(constGirsanovMeasure hW hWmeas θ H), 0 ≤ D' ω) ∧
       Q = (constGirsanovMeasure hW hWmeas θ H).withDensity fun ω ↦ ENNReal.ofReal (D' ω) := by
-  set Z := ZTpred hW H hWmeas (isStronglyPredictable_const hWmeas θ) (fun _ _ ↦ le_rfl) with hZdef
-  have hZpos (ω : Ω) : 0 < Z ω := contDoleansExp_pos _ _ _ _
   have hZ := aestronglyMeasurable_ZTpred hW hWmeas (isStronglyPredictable_const hWmeas θ)
     (fun _ _ ↦ le_rfl) H
-  have hZamb : AEStronglyMeasurable Z μ :=
-    (hZ.stronglyMeasurable_mk.mono ((natFiltration hWmeas).le H)).aestronglyMeasurable.congr
-      hZ.ae_eq_mk.symm
-  have hD'm : AEMeasurable (fun ω ↦ D ω / Z ω) μ := hDm.aemeasurable.div hZamb.aemeasurable
-  have hac : constGirsanovMeasure hW hWmeas θ H ≪ μ := withDensity_absolutelyContinuous _ _
-  have hQD' : Q = (constGirsanovMeasure hW hWmeas θ H).withDensity
-      fun ω ↦ ENNReal.ofReal (D ω / Z ω) := by
-    rw [hQD, constGirsanovMeasure, ← withDensity_mul₀ hZamb.aemeasurable.ennreal_ofReal
-      hD'm.ennreal_ofReal]
-    congr 1
-    funext ω
-    rw [Pi.mul_apply, ← ENNReal.ofReal_mul (hZpos ω).le, mul_div_cancel₀ _ (hZpos ω).ne']
-  have hmem : MemLp (fun ω ↦ D ω / Z ω) 2 (constGirsanovMeasure hW hWmeas θ H) := by
-    rw [memLp_two_iff_integrable_sq (hD'm.aestronglyMeasurable.mono_ac hac)]
-    refine (integrable_withDensity_iff_integrable_smul₀' hZamb.aemeasurable.ennreal_ofReal
-      (.of_forall fun _ ↦ ENNReal.ofReal_lt_top)).2 ?_
-    refine ((integrable_inv_ZTpred_const hW hWmeas θ H).const_mul (C ^ 2)).mono' ?_ ?_
-    · exact (hZamb.aemeasurable.ennreal_ofReal.ennreal_toReal.smul
-        (hD'm.pow_const 2)).aestronglyMeasurable
-    · refine .of_forall fun ω ↦ ?_
-      rw [ENNReal.toReal_ofReal (hZpos ω).le, smul_eq_mul, Real.norm_eq_abs,
-        abs_of_nonneg (mul_nonneg (hZpos ω).le (sq_nonneg _)), div_pow,
-        show Z ω * (D ω ^ 2 / Z ω ^ 2) = D ω ^ 2 * (Z ω)⁻¹ by field_simp]
-      exact mul_le_mul_of_nonneg_right (pow_le_pow_left₀ (hD0 ω) (hDC ω) 2)
-        (inv_nonneg.2 (hZpos ω).le)
-  refine ⟨hmem.toLp _, ?_, ?_⟩
-  · filter_upwards [hmem.coeFn_toLp] with ω hω
-    rw [hω]
-    exact div_nonneg (hD0 ω) (hZpos ω).le
-  · rw [hQD']
-    exact withDensity_congr_ae (hmem.coeFn_toLp.mono fun ω hω ↦ congrArg ENNReal.ofReal hω.symm)
+  exact exists_memLp_two_withDensity_of_bdd
+    ((hZ.stronglyMeasurable_mk.mono ((natFiltration hWmeas).le H)).aestronglyMeasurable.congr
+      hZ.ae_eq_mk.symm) (fun _ ↦ contDoleansExp_pos _ _ _ _)
+    (integrable_inv_ZTpred_const hW hWmeas θ H) hDm hD0 hDC hQD
 
 include hW in
 /-- **Every pricing measure with a bounded density against the physical measure prices the

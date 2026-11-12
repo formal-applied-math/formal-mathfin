@@ -37,8 +37,8 @@ The proof leverages:
 * `bs_identity` — `S · ϕ(d₁) = K · e^{-r τ} · ϕ(d₂)`,
 * `hasDerivAt_bsd1_S`, `hasDerivAt_bsd1_tau` — chain-rule pieces for d₁,
 * `bs_pde_holds` — the BS price satisfies the BS PDE.
-* `bsV_eq_closedForm` — the closed form stated as a lemma, so other modules can
-  convert between `bsV` and its `Φ(d₁)/Φ(d₂)` expression without unfolding the definition.
+* `bsV_eq_closedForm` — the definition of `bsV` as a rewriting equation, so other modules can
+  convert between `bsV` and its `Φ(d₁)/Φ(d₂)` expression with one `rw`.
 
 ## References
 
@@ -320,9 +320,9 @@ lemma hasDerivAt_bsd2_r (S K σ τ : ℝ) (hσ : 0 < σ) (hτ : 0 < τ)
 noncomputable def bsV (K r σ : ℝ) (S τ : ℝ) : ℝ :=
   S * Phi (bsd1 S K r σ τ) - K * Real.exp (-(r * τ)) * Phi (bsd2 S K r σ τ)
 
-/-- The closed form of the Black–Scholes call price as a standalone lemma. The definition
-is not unfoldable from other modules (module-system expose rules), so results elsewhere that
-compare a price against `bsV`'s closed form go through this. -/
+/-- The closed form of the Black–Scholes call price as a rewriting equation: `bsV` unfolds to
+its `Φ(d₁)/Φ(d₂)` expression by `rfl` (the definition is exposed), and results elsewhere that
+compare a price against `bsV`'s closed form rewrite with this. -/
 theorem bsV_eq_closedForm (K r σ S τ : ℝ) :
     bsV K r σ S τ = S * Phi (bsd1 S K r σ τ) - K * Real.exp (-(r * τ)) * Phi (bsd2 S K r σ τ) :=
   rfl

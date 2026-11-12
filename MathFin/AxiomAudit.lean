@@ -2382,9 +2382,9 @@ bounded-coefficient process class. -/
 /-- info: 'MathFin.noArbitrage_iff_noArbitrageLocal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.noArbitrage_iff_noArbitrageLocal
-/-- info: 'MathFin.LocalEMMDensities.isEMM_pastedMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.exists_isEMM_of_onePeriodDensities' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.LocalEMMDensities.isEMM_pastedMeasure
+#print axioms MathFin.exists_isEMM_of_onePeriodDensities
 
 /-- info: 'MathFin.ItoFormulaAdapted.ito_product_rule_process' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
