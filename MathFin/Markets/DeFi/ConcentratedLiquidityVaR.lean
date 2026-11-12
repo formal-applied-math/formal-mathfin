@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
@@ -46,6 +46,8 @@ empirical price quantile" result is future work, not claimed here.
   a nonnegative factor (holding the range and the historical scenarios fixed) scales its
   historical-simulation VaR by the same factor, via `MathFin.DeFi.v3PositionValue_const_mul`
   (linear in `L` for any real `c`) and `MathFin.DiscreteVaR.finiteVaR_const_mul`.
+* `clHistoricalVaR_eq_valueAtRisk`: `clHistoricalVaR` is the library's `valueAtRisk` of the scenario
+  losses under the equal-weight law `Measure.ofWeights`, so the general VaR theory applies to it.
 * `clHistoricalVaR_le_value`: historical VaR never exceeds the position's current mark-to-market
   value — a concentrated-liquidity LP position is worth at least `0` at every price
   (`v3PositionValue_nonneg`), so no historical scenario's loss can exceed today's value, and VaR is
@@ -71,7 +73,7 @@ namespace MathFin
 
 namespace DeFi
 
-open MathFin.DiscreteVaR Set
+open MeasureTheory MathFin.DiscreteVaR Set
 
 /-! ## Historical-simulation VaR -/
 
@@ -116,6 +118,22 @@ theorem clHistoricalVaR_le_value {n : ℕ} (hn : 0 < n) {L a b : ℝ} (hL : 0 �
     (hab : a ≤ b) (s0 : ℝ) (scenarios : Fin n → ℝ) {α : ℝ} (hα0 : 0 < α) (hα1 : α ≤ 1) :
     clHistoricalVaR L a b s0 hn scenarios α ≤ v3PositionValue L a b s0 :=
   finiteVaR_le_of_forall_le hα0 hα1 fun _ ↦ sub_le_self _ (v3PositionValue_nonneg hL ha hab)
+
+/-- **Historical VaR is the library's `valueAtRisk` at the empirical law.** The scenario losses
+are a random variable on the `n` scenarios under the equal-weight law `∑ i, n⁻¹ • δ_i`
+(`Measure.ofWeights`), and `clHistoricalVaR` is `valueAtRisk` of it at level `α ∈ (0, 1)`. So
+everything proved of `valueAtRisk` (monotonicity, law invariance, comonotone additivity, the
+Gaussian closed forms) applies to historical simulation of a v3 position. -/
+theorem clHistoricalVaR_eq_valueAtRisk {n : ℕ} (hn : 0 < n) (L a b s0 : ℝ)
+    (scenarios : Fin n → ℝ) {α : ℝ} (hα : α ∈ Ioo (0 : ℝ) 1) :
+    clHistoricalVaR L a b s0 hn scenarios α
+      = valueAtRisk (historicalScenarioLoss L a b s0 scenarios)
+          (Measure.ofWeights Finset.univ fun _ : Fin n ↦ (n : ℝ)⁻¹) α := by
+  have : Nonempty (Fin n) := ⟨⟨0, hn⟩⟩
+  have hw : ⇑(uniformWeights n hn).weights = fun _ ↦ (n : ℝ)⁻¹ := by
+    funext i
+    simp [uniformWeights, Convexity.StdSimplex.weights_barycenter_apply]
+  rw [clHistoricalVaR, finiteVaR_eq_valueAtRisk hα, hw]
 
 end DeFi
 
