@@ -67,7 +67,9 @@ exact statement of each one, and what it leaves out.
   ([`ftap_discrete`](MathFin/Pricing/FTAP/FTAPDiscrete.lean),
   [`ftap_two`](MathFin/Pricing/FTAP/FTAPComplete.lean)). On any probability space, multi-period no
   arbitrage is equivalent to no arbitrage in each conditional one-period market
-  ([`noArbitrage_iff_noArbitrageLocal`](MathFin/Pricing/FTAP/NoArbitrageLocal.lean)).
+  ([`noArbitrage_iff_noArbitrageLocal`](MathFin/Pricing/FTAP/NoArbitrageLocal.lean)), and for one
+  real asset no arbitrage is equivalent to an equivalent martingale measure
+  ([`OneAsset.noArbitrage_iff_exists_isEMM`](MathFin/Pricing/FTAP/OneAssetDMW.lean)).
 - **Coherent risk measures.** On a finite state space, a coherent risk measure is the supremum of
   expected losses over the probability vectors that price every acceptable loss nonpositively
   ([`coherentRisk_isLUB`](MathFin/Risk/AcceptanceSet.lean)).
@@ -152,8 +154,8 @@ from one file, [`docs/taxonomy.toml`](docs/taxonomy.toml).
 - **Completeness.** In the Brownian market only completeness ⇒ uniqueness of the pricing measure is
   proved, and the hedge is not identified (Clark–Ocone,
   [#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)). In the Black–Scholes
-  market the pricing measure is unique among those with a density square-integrable under the
-  Girsanov measure, in particular among bounded densities against the physical measure
+  market the pricing measure's restriction to 𝓕_T is unique among those with a density
+  square-integrable under the Girsanov measure, in particular among bounded densities against the physical measure
   (`BlackScholes.trim_eq_of_isPricingMeasure_withDensity`); a pricing measure with an arbitrary
   density is not covered.
 - **Itô calculus.** The Itô process is built from one Brownian motion with continuous coefficients.
