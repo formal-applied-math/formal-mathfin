@@ -19,8 +19,10 @@ A natural cubic spline interpolating values `y 0, …, y n` at strictly increasi
 `x 0 < ⋯ < x n` (e.g. an FX/equity vol smile sampled at pillar deltas) reduces, by the
 textbook derivation (matching first derivatives at the interior pillars and imposing the
 natural boundary conditions `M 0 = M n = 0`), to a linear system in the unknown interior
-second derivatives (*moments*) `M 1, …, M (n-1)`. The derivation itself is not formalized:
-the system is *defined* here, as the textbook states it. It is the normalized moment form of
+second derivatives (*moments*) `M 1, …, M (n-1)`. The system is defined here as the textbook
+states it, and then proved to be that condition: it holds exactly when adjacent cubic pieces
+have the same slope at the shared pillar (`momentMatrix_mulVec_eq_iff`). It is the normalized
+moment form of
 J. Stoer & R. Bulirsch, *Introduction to Numerical Analysis*, 3rd ed. (Springer, 2002),
 §2.4.2: dividing each row of the standard natural-
 spline system (stated on the same unknowns `M i`, with diagonal `2(h (i-1) + h i)`) by
@@ -51,6 +53,16 @@ Distinct from the parametric SVI smile already in the repository
 * `exists_unique_moments` — consequently the moment system has exactly one solution
   (`Matrix.mulVec_injective_iff_isUnit` for uniqueness, `A⁻¹ *ᵥ d` for existence): this is
   the textbook's "the matrix is nonsingular" step of natural-cubic-spline uniqueness.
+* `hasDerivAt_interpSpline`, `hasDerivAt_deriv_interpSpline`, `deriv_interpSpline_left`,
+  `deriv_interpSpline_right`, `deriv_deriv_interpSpline_left`, `deriv_deriv_interpSpline_right`
+  — the slopes of a piece at its two ends, and its second derivative `M i`, `M (i+1)` there.
+* `deriv_interpSpline_match_iff`, `momentMatrix_mulVec_eq_iff` — the moment equation at a pillar
+  is exactly the slope matching of the two adjacent pieces, so the moment system (with natural
+  ends) is exactly the `C¹` gluing condition.
+* `exists_unique_natural_spline_moments` — **the natural cubic spline exists and is unique**:
+  one moment sequence with `M 0 = M n = 0` makes adjacent pieces match in slope at every interior
+  pillar; the pieces interpolate the data and agree in second derivative `M i` at each pillar,
+  so the glued function is `C²` at the pillars with zero curvature at both ends.
 * `interpSpline_left_eq`, `interpSpline_right_eq` — the piecewise cubic `interpSpline`
   matches the pillar values `y i`, `y (i+1)` exactly at both ends of each piece
   `[x i, x (i+1)]`, for *any* moment sequence (the interpolation property does not depend
@@ -63,17 +75,13 @@ Distinct from the parametric SVI smile already in the repository
 
 ## Scope
 
-This module formalizes the linear-algebra core of natural-cubic-spline uniqueness (the
-diagonally-dominant tridiagonal system) and the exact-interpolation identity of the
-piecewise-cubic formula at the pillars. The two halves are not tied together in Lean: nothing
-here proves that the solution of the moment system, fed to `interpSpline`, glues to a `C¹` or
-`C²` function or satisfies the natural boundary conditions, so "natural cubic spline" names the
-textbook object these two pieces serve, not a Lean definition. It does not construct a single
-global function glued across all pieces, and does not prove the global `C²` matching of one-sided
-derivatives at interior knots — the first-derivative-continuity equations are exactly
-what the moment system encodes, but deriving "the glued function is `C²`" as a two-sided
-`HasDerivAt` statement needs a one-sided-derivative-patching argument this module leaves
-to future work.
+The glued function is not a single Lean object: the spline is the family of pieces `interpSpline`
+with the moments of `exists_unique_natural_spline_moments`, and its `C¹` and `C²` matching is the
+statement that adjacent pieces agree in slope (`deriv_interpSpline_match_iff`) and in second
+derivative at the shared pillar, not a `ContDiff` statement about one function on `[x 0, x n]`.
+The derivation of the moment system from the spline conditions is replaced by the equivalence
+`momentMatrix_mulVec_eq_iff`. The pillar values are arbitrary: nothing here says a spline through
+a vol smile or call price smile is free of arbitrage.
 
 ## References
 
@@ -383,6 +391,117 @@ theorem deriv_interpSpline_match_iff (x y M : ℕ → ℝ) {i : ℕ} (h0 : 0 < g
   rw [← sub_eq_zero, ← sub_eq_zero (a := mu x (i + 1) * M i + 2 * M (i + 1) +
     lam x (i + 1) * M (i + 2)), key, mul_eq_zero]
   simp [hs]
+
+/-- A finite sum of an indicator on `Fin m` that fires at the single index `a`. -/
+theorem sum_fin_ite_eq {m : ℕ} (a : ℕ) (c : ℝ) :
+    ∑ k : Fin m, (if (k : ℕ) = a then c else 0) = if a < m then c else 0 := by
+  split_ifs with h
+  · rw [Finset.sum_eq_single (⟨a, h⟩ : Fin m)]
+    · simp
+    · intro k _ hk
+      exact ite_eq_right fun hka ↦ hk (Fin.ext hka)
+    · simp
+  · exact Finset.sum_eq_zero fun k _ ↦ ite_eq_right fun hk ↦ h (by have := k.2; omega)
+
+/-- **A row of the moment system.** Applied to the interior moments `M 1, …, M (n-1)` of a
+sequence with natural ends `M 0 = M n = 0`, row `j` of `momentMatrix` reads
+`μ M j + 2 M (j+1) + λ M (j+2)`: the missing neighbours at the two ends are the zero moments. -/
+theorem momentMatrix_mulVec_apply {n : ℕ} (x M : ℕ → ℝ) (hM0 : M 0 = 0) (hMn : M n = 0)
+    (j : Fin (n - 1)) :
+    (momentMatrix x n).mulVec (fun k : Fin (n - 1) ↦ M ((k : ℕ) + 1)) j =
+      mu x ((j : ℕ) + 1) * M j + 2 * M ((j : ℕ) + 1) +
+        lam x ((j : ℕ) + 1) * M ((j : ℕ) + 2) := by
+  have hj := j.2
+  have hpt : ∀ k : Fin (n - 1), momentMatrix x n j k * M ((k : ℕ) + 1) =
+      (if (k : ℕ) = j then 2 * M ((j : ℕ) + 1) else 0) +
+        (if (k : ℕ) + 1 = j then mu x ((j : ℕ) + 1) * M j else 0) +
+        (if (k : ℕ) = j + 1 then lam x ((j : ℕ) + 1) * M ((j : ℕ) + 2) else 0) := by
+    intro k
+    simp only [momentMatrix, Matrix.of_apply, Fin.ext_iff]
+    split_ifs <;> try (exfalso; omega)
+    all_goals (simp only [add_zero, zero_add, zero_mul]; try (congr 1; try (congr 1; try omega)))
+  have s1 : ∑ k : Fin (n - 1), (if (k : ℕ) = j then 2 * M ((j : ℕ) + 1) else 0) =
+      2 * M ((j : ℕ) + 1) := by
+    rw [sum_fin_ite_eq]; exact ite_eq_left hj
+  have s2 : ∑ k : Fin (n - 1),
+      (if (k : ℕ) + 1 = j then mu x ((j : ℕ) + 1) * M j else 0) =
+        mu x ((j : ℕ) + 1) * M j := by
+    rcases Nat.eq_zero_or_pos (j : ℕ) with h0 | hpos
+    · have h : M (j : ℕ) = 0 := by rw [h0, hM0]
+      rw [h, mul_zero]
+      exact Finset.sum_eq_zero fun k _ ↦ ite_eq_right (by omega)
+    · obtain ⟨j', hj'⟩ : ∃ j', (j : ℕ) = j' + 1 := ⟨j - 1, by omega⟩
+      simp_rw [hj', Nat.add_right_cancel_iff]
+      rw [sum_fin_ite_eq]
+      exact ite_eq_left (by omega)
+  have s3 : ∑ k : Fin (n - 1),
+      (if (k : ℕ) = j + 1 then lam x ((j : ℕ) + 1) * M ((j : ℕ) + 2) else 0) =
+        lam x ((j : ℕ) + 1) * M ((j : ℕ) + 2) := by
+    rw [sum_fin_ite_eq]
+    by_cases hlt : (j : ℕ) + 1 < n - 1
+    · exact ite_eq_left hlt
+    · rw [ite_eq_right hlt, show (j : ℕ) + 2 = n by omega, hMn, mul_zero]
+  simp only [Matrix.mulVec, dotProduct, hpt, Finset.sum_add_distrib, s1, s2, s3]
+  ring
+
+/-- **The moment system is exactly the `C¹` gluing condition.** For moments with natural ends
+`M 0 = M n = 0`, the interior moments solve the moment system if and only if every pair of
+adjacent pieces `interpSpline x y M i`, `interpSpline x y M (i+1)` has the same slope at the
+shared pillar `x (i+1)`. -/
+theorem momentMatrix_mulVec_eq_iff {n : ℕ} (x y M : ℕ → ℝ)
+    (hgap : ∀ i < n, x i < x (i + 1)) (hM0 : M 0 = 0) (hMn : M n = 0) :
+    (momentMatrix x n).mulVec (fun k : Fin (n - 1) ↦ M ((k : ℕ) + 1)) =
+        (fun j : Fin (n - 1) ↦ rhs x y ((j : ℕ) + 1)) ↔
+      ∀ i, i + 2 ≤ n →
+        deriv (interpSpline x y M i) (x (i + 1)) =
+          deriv (interpSpline x y M (i + 1)) (x (i + 1)) := by
+  constructor
+  · intro h i hi
+    have := congrFun h ⟨i, by omega⟩
+    rw [momentMatrix_mulVec_apply x M hM0 hMn] at this
+    exact (deriv_interpSpline_match_iff x y M (gap_pos x hgap (by omega))
+      (gap_pos x hgap (by omega))).2 this
+  · intro h
+    funext j
+    rw [momentMatrix_mulVec_apply x M hM0 hMn]
+    exact (deriv_interpSpline_match_iff x y M (gap_pos x hgap (by omega))
+      (gap_pos x hgap (by omega))).1 (h j (by omega))
+
+/-- **The natural cubic spline exists and is unique.** For strictly increasing pillars
+`x 0 < ⋯ < x n` (`2 ≤ n`) and any values `y`, there is a moment sequence with natural ends
+`M 0 = M n = 0` for which adjacent pieces of `interpSpline` match in slope at every interior
+pillar, and it is the only one on `0, …, n`. The pieces interpolate the data
+(`interpSpline_left_eq`, `interpSpline_right_eq`), have second derivative `M i` at `x i` from both
+sides (`deriv_deriv_interpSpline_left`, `deriv_deriv_interpSpline_right`), so the glued function
+is `C²` at the pillars with vanishing curvature at the two ends. -/
+theorem exists_unique_natural_spline_moments {n : ℕ} (x y : ℕ → ℝ) (hn : 2 ≤ n)
+    (hgap : ∀ i < n, x i < x (i + 1)) :
+    ∃ M : ℕ → ℝ, M 0 = 0 ∧ M n = 0 ∧
+      (∀ i, i + 2 ≤ n → deriv (interpSpline x y M i) (x (i + 1)) =
+        deriv (interpSpline x y M (i + 1)) (x (i + 1))) ∧
+      ∀ M' : ℕ → ℝ, M' 0 = 0 → M' n = 0 →
+        (∀ i, i + 2 ≤ n → deriv (interpSpline x y M' i) (x (i + 1)) =
+          deriv (interpSpline x y M' (i + 1)) (x (i + 1))) → ∀ k ≤ n, M' k = M k := by
+  obtain ⟨Mv, hMv, huniq⟩ := exists_unique_moments x y hn hgap
+  let M : ℕ → ℝ := fun k ↦ if h : 1 ≤ k ∧ k < n then Mv ⟨k - 1, by omega⟩ else 0
+  have hM0 : M 0 = 0 := dite_eq_right (by omega)
+  have hMn : M n = 0 := dite_eq_right (by omega)
+  have hMk : (fun k : Fin (n - 1) ↦ M ((k : ℕ) + 1)) = Mv := by
+    funext k
+    have h : 1 ≤ (k : ℕ) + 1 ∧ (k : ℕ) + 1 < n := ⟨by omega, by have := k.2; omega⟩
+    simp only [M, dite_eq_left h]
+    rfl
+  refine ⟨M, hM0, hMn, (momentMatrix_mulVec_eq_iff x y M hgap hM0 hMn).1 (hMk ▸ hMv), ?_⟩
+  intro M' h0 hn' hmatch k hk
+  have hM' := huniq (fun k : Fin (n - 1) ↦ M' ((k : ℕ) + 1))
+    ((momentMatrix_mulVec_eq_iff x y M' hgap h0 hn').2 hmatch)
+  rcases Nat.eq_zero_or_pos k with rfl | hk0
+  · rw [h0, hM0]
+  · by_cases hkn : k = n
+    · rw [hkn, hn', hMn]
+    · have := congrFun hM' ⟨k - 1, by omega⟩
+      rw [← hMk] at this
+      simpa [show k - 1 + 1 = k by omega] using this
 
 /-! ## Connection to the SVI smile -/
 
