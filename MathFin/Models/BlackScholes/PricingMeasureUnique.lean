@@ -28,6 +28,11 @@ discounted geometric Brownian motion of the driver `W*`, whose increment is the 
 `σ S̃` (`discountedGBM_eq_itoIntegral`). The abstract uniqueness theorem
 `trim_eq_of_martingale_withDensity` for martingale measures on a Brownian filtration then applies.
 
+## Main definitions
+
+* `BlackScholes.girsanovDriver`: the driver `W_u + θ min(u, H)`, a pre-Brownian motion under the
+  Girsanov measure.
+
 ## Main results
 
 * `BlackScholes.trim_eq_of_isPricingMeasure_withDensity`: a pricing measure `Q = D·Q*` of the
@@ -47,6 +52,7 @@ square-integrable under `Q*`; the Brownian motion is continuous and `σ > 0`, `S
 
 * [F. Black and M. Scholes, *The pricing of options and corporate liabilities*][BlackScholes1973]
 * [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], 5.4
+* [I. Karatzas and S. E. Shreve, *Brownian Motion and Stochastic Calculus*][KaratzasShreve1991], 3.4
 * [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 9.1.8
 
 ## Tags

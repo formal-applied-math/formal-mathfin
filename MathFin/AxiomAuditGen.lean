@@ -591,6 +591,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.CubicSpline.exists_unique_moments
 
+/-- info: 'MathFin.CubicSpline.exists_unique_natural_spline_moments' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.CubicSpline.exists_unique_natural_spline_moments
+
 /-- info: 'MathFin.DeFi.Compound.borrowIndex_le_inv_zcb' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.DeFi.Compound.borrowIndex_le_inv_zcb
@@ -2059,6 +2063,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.exists_isCopula_fgm_iff
 
+/-- info: 'MathFin.exists_market_of_isArbitrageFreeQuotes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.exists_market_of_isArbitrageFreeQuotes
+
 /-- info: 'MathFin.exists_market_of_isNormalizedCallPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.exists_market_of_isNormalizedCallPrice
@@ -2622,14 +2630,6 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.hasDerivAt_riccatiCoeff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.hasDerivAt_riccatiCoeff
-
-/-- info: 'MathFin.hasDerivAt_sabrATMVol_F' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.hasDerivAt_sabrATMVol_F
-
-/-- info: 'MathFin.hasDerivAt_sabrATMVol_alpha' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.hasDerivAt_sabrATMVol_alpha
 
 /-- info: 'MathFin.hasDerivAt_tau_deriv_bsV_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
