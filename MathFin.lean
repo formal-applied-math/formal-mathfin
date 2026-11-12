@@ -287,6 +287,7 @@ import MathFin.Probability.Brownian.WienerExponentialTotality
 -- Martingale representation, step 5: the Itô integral is onto the centered `𝓕ᴮ_T`-measurable
 -- part of `L²(μ)` — terminal, submodule and process forms of the representation theorem
 import MathFin.Probability.Brownian.MartingaleRepresentation
+import MathFin.Probability.Brownian.MartingaleMeasureUniqueness
 import MathFin.Probability.Brownian.Ito.ItoFormulaProcess
 import MathFin.Probability.Brownian.ExitTime
 import MathFin.Probability.Brownian.Ito.ItoFormulaCutoff
@@ -367,10 +368,11 @@ import MathFin.Pricing.FTAP.FTAPOnePeriod
 -- General-Ω one-period FTAP, d assets (Esscher minimal-divergence EMM, full — finite-dim market)
 import MathFin.Pricing.FTAP.FTAPOnePeriodVector
 -- Multi-period FTAP on a general space: no arbitrage is local, one-period densities paste, and
--- the Dalang–Morton–Willinger theorem reduces to the conditional one-period FTAP
+-- the Dalang–Morton–Willinger theorem: the reduction, pasting and the one-asset theorem
 import MathFin.Pricing.FTAP.NoArbitrageLocal
 import MathFin.Pricing.FTAP.DensityPasting
 import MathFin.Pricing.FTAP.DalangMortonWillinger
+import MathFin.Pricing.FTAP.OneAssetDMW
 import MathFin.Pricing.FTAP.MarketFTAP
 -- Phase 20: first-principles core derivations
 import MathFin.Pricing.NoArbitrageDerivations
@@ -693,6 +695,7 @@ import MathFin.Models.BlackScholes.BlackScholesChooser
 import MathFin.Models.BlackScholes.BlackScholesHedge
 import MathFin.Models.BlackScholes.BlackScholesPhysical
 import MathFin.Models.BlackScholes.Market
+import MathFin.Models.BlackScholes.PricingMeasureUnique
 -- The Black–Scholes delta hedge is self-financing: the product rule with the factor e^{rt}
 import MathFin.Models.BlackScholes.BlackScholesSelfFinancing
 import MathFin.Models.Binomial.Binomial
@@ -947,3 +950,15 @@ import MathFin.Markets.DeFi.UniswapV3CoveredCallPrice
 import MathFin.Markets.DeFi.LPContract
 import MathFin.Markets.Microstructure.GlostenMilgromCondExp
 import MathFin.Markets.Microstructure.GlostenMilgromMarket
+-- Contributed 2026-11 (#432–#467): lattices, smile interpolation and quoting, SABR Greeks,
+-- lookback and shout options, Marchenko–Pastur edges, concentrated-liquidity VaR
+import MathFin.Models.Binomial.TrinomialMomentMatching
+import MathFin.Models.Binomial.WillowTree
+import MathFin.Models.ModelFree.CallPriceInterpolation
+import MathFin.Models.ModelFree.CubicSplineSmile
+import MathFin.Markets.FxSmileQuotes
+import MathFin.Models.ModelFree.SABRChainRuleGreeks
+import MathFin.Models.BlackScholes.ContinuousLookbackPricing
+import MathFin.Models.BlackScholes.ShoutFloorMonotonicity
+import MathFin.Choice.Performance.MarchenkoPasturEdge
+import MathFin.Markets.DeFi.ConcentratedLiquidityVaR

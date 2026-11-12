@@ -31,6 +31,8 @@ EDGES: dict[tuple[str, str], str] = {
     ("Insurance", "Risk"): "a premium principle is a risk measure",
     ("Risk", "Models"): "the risk of a position is the law of its value in a model",
     ("Risk", "Choice"): "risk allocation is portfolio variance",
+    ("Markets", "Risk"):
+        "a position's historical-simulation VaR is a risk measure of its scenario losses",
 }
 
 

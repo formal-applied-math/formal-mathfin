@@ -24,6 +24,7 @@ import MathFin.Pricing.MarketCompleteness
 import MathFin.Models.ModelFree.CarrMadan
 import MathFin.Models.BlackScholes.Call
 import MathFin.Models.BlackScholes.PDE
+import MathFin.Models.Binomial.WillowTree
 import MathFin.Models.BlackScholes.PDEFromIto
 import MathFin.Models.BlackScholes.PDEFromFeynmanKac
 import MathFin.Models.BlackScholes.MargrabeGrounding
@@ -48,7 +49,9 @@ import MathFin.Probability.Brownian.SDE.SDEExistence
 import MathFin.Probability.Brownian.Ito.StochasticFubini
 import MathFin.Pricing.FTAP.NoArbitrageLocal
 import MathFin.Pricing.FTAP.DensityPasting
+import MathFin.Pricing.FTAP.OneAssetDMW
 import MathFin.Models.BlackScholes.BlackScholesPhysical
+import MathFin.Models.BlackScholes.PricingMeasureUnique
 import MathFin.Probability.Brownian.Ito.ItoProductRule
 import MathFin.Models.BlackScholes.BlackScholesSelfFinancing
 import MathFin.Probability.Gaussian.StandardNormal
@@ -100,6 +103,7 @@ import MathFin.Models.Bachelier.Bachelier
 import MathFin.Models.Binomial.American
 import MathFin.Models.Binomial.CRRClosedForm
 import MathFin.Models.Binomial.MartingaleRepresentation
+import MathFin.Models.Binomial.TrinomialMomentMatching
 import MathFin.Models.BlackScholes.American.Stopping.ActualOptimality
 import MathFin.Models.BlackScholes.American.AmericanPutMarketBound
 import MathFin.Models.Bachelier.BachelierMarket
@@ -111,6 +115,7 @@ import MathFin.Models.BlackScholes.GaussianGirsanov
 import MathFin.Models.BlackScholes.Market
 import MathFin.Models.BlackScholes.MargrabeGrounding
 import MathFin.Models.BlackScholes.PDE
+import MathFin.Models.ModelFree.CallPriceInterpolation
 import MathFin.Models.Credit.CVA
 import MathFin.Models.Credit.Cox
 import MathFin.Models.Credit.KMVMertonStructural
@@ -641,7 +646,7 @@ attribute [blueprint "thm:first-ftap"
   and only if there is an equivalent martingale measure (Harrison–Pliska). Finite $\Omega$
   only: one period with a finite-dimensional vector price on an arbitrary probability space is
   `ftap_one_period_vector`, an equivalent martingale measure precludes arbitrage on any space
-  (`IsEMM.noArbitrage`), and the general discrete-time theorem is the frontier node
+  (`IsEMM.noArbitrage`), and the general discrete-time theorem for one asset is
   `thm:dmw-ftap`. -/)]
   MathFin.ftap_discrete
 
@@ -664,10 +669,19 @@ attribute [blueprint "thm:market-ftap"
   strategy on the deflated price sampled along the grid is an arbitrage) if and only if the
   market traded on the grid has a pricing measure. A pricing measure of the market itself up to a
   horizon rules out arbitrage on every grid inside the horizon, on any space. On a general
-  probability space the equivalence is proved assuming the conditional one-period theorem
-  (`ConditionalOnePeriodFTAP`, not proved); unconditionally it is the frontier node
-  `thm:dmw-ftap`. -/)]
+  probability space, for one asset, the equivalence is `thm:dmw-ftap`. -/)]
   MathFin.Market.noArbitrage_iff_exists_isPricingMeasure_of_finite
+
+attribute [blueprint "thm:dmw-ftap"
+  (title := "Dalang–Morton–Willinger FTAP (one asset)")
+  (statement := /-- For one asset on a general probability space, no integrability, no
+  finiteness of the space and no measurable-selection hypothesis: a one-asset market has no
+  arbitrage when trading at the dates of a grid if and only if the market traded on the grid
+  has a pricing measure. The bare process version is that an adapted real price has no
+  arbitrage up to a finite horizon if and only if it has an equivalent martingale measure
+  (`OneAsset.noArbitrage_iff_exists_isEMM`), built by backward induction with unnormalised
+  one-period weights. Several assets ($d > 1$) are not covered. -/)]
+  MathFin.Market.noArbitrage_iff_exists_isPricingMeasure
 
 -- ===== valuation/trees: Trees =====
 
@@ -689,6 +703,44 @@ attribute [blueprint "thm:crr-bs-convergence"
   Lévy continuity → weak convergence, with put–call parity lifting the (bounded) put's
   convergence to the call. -/)]
   MathFin.binomialPrice_call_tendsto_bs_closed
+
+attribute [blueprint "thm:trinomial-moment-matching"
+  (title := "Trinomial lattice step as a pricing measure")
+  (uses := ["def:pricing-measure"])
+  (statement := /-- The one-step trinomial weights `trinomialProbDown/Mid/Up`, the unique solution
+  of the mass, mean and second-moment equations about the central node (`trinomialProb_unique`).
+  When all three are positive they form a probability law on the three children, and that law is a
+  pricing measure of the one-date market whose asset takes the values `c e^{-dx}, c, c e^{dx}` if
+  the lattice's exponential moment equals the money-market growth of the quote,
+  `E[X] = s_0 e^{r\tau}` (`isPricingMeasure_trinomialLaw`); conversely, for $\tau > 0$, a pricing
+  trinomial law has that exponential moment (`trinomial_exp_moment_of_isPricingMeasure`). One step
+  only: no multi-period tree and no prices of path-dependent claims are claimed. -/)]
+  MathFin.isPricingMeasure_trinomialLaw
+
+attribute [blueprint "thm:willow-tree-brownian-covariance"
+  (title := "The willow tree reproduces Brownian covariance")
+  (uses := ["def:brownian-motion"])
+  (statement := /-- A willow tree is a Markov chain on a fixed node set whose transition matrices
+  satisfy Curran's row constraints: stochasticity and the two conditional moments of a standardized
+  Brownian pair with correlation $\beta_k = \sqrt{t_k/t_{k+1}}$. Started at a marginal of unit mass
+  and unit second moment, the scaled chain $X_k = \sqrt{t_k} Z_k$ has second moment
+  $E[W_{t_k}^2]$ (`willowScaled_secondMoment_eq_integral_sq`) and cross moment
+  $E[X_k X_{k+1}] = E[W_{t_k} W_{t_{k+1}}]$ for a pre-Brownian motion $W$
+  (`willowScaled_crossMoment_eq_integral_mul`), with $\beta_k$ tied to the grid. Only these first two moments of the
+  chain are matched; the linear program that finds admissible matrices and the prices computed on
+  the lattice are not part of the claim. -/)]
+  MathFin.willowScaled_crossMoment_eq_integral_mul
+
+attribute [blueprint "thm:quotes-market-realisation"
+  (title := "Arbitrage-free call quotes are the prices of a market")
+  (uses := ["thm:smile-no-arbitrage"])
+  (statement := /-- Finitely many call-price quotes at increasing strikes $0 = K_0 < \dots < K_n$,
+  with $C_0 = 1$, $C_n = 0$, non-increasing, with non-decreasing secant slopes, and above the
+  intrinsic value $(1-K_i)^+$, are the call prices at maturity one of a market with unit
+  numéraire, a nonnegative asset of forward one and a pricing measure. The piecewise-linear
+  interpolant, continued by $0$ beyond $K_n$, is a normalised call price function, and Roper's
+  converse realises it. -/)]
+  MathFin.exists_market_of_isArbitrageFreeQuotes
 
 -- ===== valuation/diffusions: Black–Scholes and Bachelier =====
 
@@ -777,11 +829,28 @@ attribute [blueprint "thm:black-scholes-market"
   \sigma^2/2)t + \sigma W_t}$, numéraire $e^{rt}$, the filtration $W$ generates) is a market,
   and for $\sigma \ne 0$ the Girsanov measure of the constant market price of risk
   $\theta = (m-r)/\sigma$ at a horizon $H$ is a pricing measure of it at every horizon $T \le
-  H$: equivalent to the physical measure, with the deflated asset a martingale. Under it the
+  H$: mutually absolutely continuous with the physical measure on the information up to $T$,
+  with the deflated asset a martingale. Under it the
   European call is worth $S_0\Phi(d_1) - Ke^{-rT}\Phi(d_2)$ whatever the physical drift
-  (`price_europeanCall_constGirsanovMeasure`). That it is the only pricing measure is not proved
-  here: it is the frontier node `thm:bs-arbitrage-free-price`. -/)]
+  (`price_europeanCall_constGirsanovMeasure`). Among the pricing measures it is the only one
+  with a density square-integrable under it, as `thm:bs-arbitrage-free-price` proves; a pricing
+  measure with a density not square-integrable under the Girsanov measure is not covered. -/)]
   MathFin.Contracts.BlackScholes.isPricingMeasure_constGirsanovMeasure
+
+attribute [blueprint "thm:bs-arbitrage-free-price"
+  (title := "Uniqueness of the Black–Scholes pricing measure among square-integrable densities")
+  (statement := /-- In the Black–Scholes market of a continuous Brownian motion $W$ with $S_0,
+  \sigma > 0$, let $Q^*$ be the Girsanov measure of the market price of risk $\theta =
+  (m-r)/\sigma$ at a horizon $H \ge T$. Every pricing measure $Q$ up to $T$ of the form $Q =
+  D\cdot Q^*$ with $D \ge 0$ square-integrable under $Q^*$ agrees with $Q^*$ on
+  $\mathcal F_T$ (`trim_eq_of_isPricingMeasure_withDensity`), hence prices the European call at
+  $S_0\Phi(d_1) - Ke^{-rT}\Phi(d_2)$. The proof is the martingale representation of the
+  conditional density against the Brownian motion $W_u + \theta\min(u,H)$ of $Q^*$: the
+  discounted asset is the Itô integral of $\sigma\tilde S$, so the integrand of the density is
+  orthogonal to every predictable rectangle weighted by $\tilde S$ and vanishes. A pricing
+  measure whose density is only in $L^2(\mu)$ is not covered, and the price is not shown to be
+  the superreplication price or the initial capital of the delta hedge. -/)]
+  MathFin.Contracts.BlackScholes.price_europeanCall_of_isPricingMeasure_withDensity
 
 attribute [blueprint "thm:bs-delta-hedge"
   (title := "Black–Scholes delta hedging")

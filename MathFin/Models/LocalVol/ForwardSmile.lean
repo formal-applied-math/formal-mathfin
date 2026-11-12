@@ -209,25 +209,33 @@ theorem exp_mul_pdf_dmi {k w : ℝ} (hw : 0 < w) :
     ← Real.exp_add,
     show k + -(dmi k w) ^ 2 / 2 = -(dpl k w) ^ 2 / 2 from by linarith [hsq]]
 
+/-- **`d₁` in `(k, w)` coordinates**: at zero rates and strike `K = F·e^k`, `bsd1` is the upper
+standardized normal argument `d₊(k, σ²T)`. -/
+theorem bsd1_eq_dpl {F k σ T : ℝ} (hF : F ≠ 0) (hσ : 0 < σ) (hT : 0 < T) :
+    bsd1 F (F * Real.exp k) 0 σ T = dpl k (σ ^ 2 * T) := by
+  have hlog : Real.log (F / (F * Real.exp k)) = -k := by
+    rw [show F / (F * Real.exp k) = (Real.exp k)⁻¹ by field_simp, Real.log_inv, Real.log_exp]
+  have hden : σ * Real.sqrt T ≠ 0 := mul_ne_zero hσ.ne' (Real.sqrt_pos.mpr hT).ne'
+  have hsplit : Real.sqrt (σ ^ 2 * T) = σ * Real.sqrt T := by
+    rw [Real.sqrt_mul (sq_nonneg σ) T, Real.sqrt_sq hσ.le]
+  unfold bsd1 dpl
+  rw [hlog, hsplit]
+  field_simp [hden]
+  ring
+
 /-- **The `(k, w)` unfolding**: at zero rates with `K = F·e^k`, the `bsV`
 composite on the tilted surface is the forward-normalized Black form at the
 total variance `w = σ_BS²·T`. -/
 theorem bsCallSmile_eq {F σ ψ₁ T₀ ε k T : ℝ} (hF : 0 < F) (hT : 0 < T)
     (hst : 0 < smileSurface σ ψ₁ T₀ ε k T) :
     bsCallSmile F σ ψ₁ T₀ ε k T = F * blackForm k (totalVar σ ψ₁ T₀ ε k T) := by
-  have hlog : Real.log (F / (F * Real.exp k)) = -k := by
-    rw [show F / (F * Real.exp k) = (Real.exp k)⁻¹ by field_simp, Real.log_inv, Real.log_exp]
   have hne : smileSurface σ ψ₁ T₀ ε k T * Real.sqrt T ≠ 0 :=
     mul_ne_zero hst.ne' (Real.sqrt_pos.mpr hT).ne'
   have hsplit : Real.sqrt (smileSurface σ ψ₁ T₀ ε k T ^ 2 * T)
       = smileSurface σ ψ₁ T₀ ε k T * Real.sqrt T := by
     rw [Real.sqrt_mul (sq_nonneg _) T, Real.sqrt_sq hst.le]
   have hbsd1 : bsd1 F (F * Real.exp k) 0 (smileSurface σ ψ₁ T₀ ε k T) T
-      = dpl k (totalVar σ ψ₁ T₀ ε k T) := by
-    unfold bsd1 dpl totalVar
-    rw [hlog, hsplit]
-    field_simp [hne]
-    ring
+      = dpl k (totalVar σ ψ₁ T₀ ε k T) := bsd1_eq_dpl hF.ne' hst hT
   have hbsd2 : bsd2 F (F * Real.exp k) 0 (smileSurface σ ψ₁ T₀ ε k T) T
       = dmi k (totalVar σ ψ₁ T₀ ε k T) := by
     unfold bsd2

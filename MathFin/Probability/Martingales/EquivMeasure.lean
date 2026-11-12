@@ -8,6 +8,7 @@ module
 public import MathFin.Init
 public import Mathlib.Analysis.InnerProductSpace.Basic
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.MeasureTheory.Function.L2Space
 public import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 public import Mathlib.MeasureTheory.Measure.Decomposition.RadonNikodym
 
@@ -51,6 +52,8 @@ measures equivalent on the whole space.
   `Q|m ≪ P|m`.
 * `exists_isEquivProbMeasure_trim_eq`: a probability measure equivalent to `P` on a sub-σ-algebra
   agrees there with one equivalent to `P` on the whole space.
+* `exists_memLp_two_withDensity_of_bdd`: for `Z > 0` with `1/Z` integrable, a bounded density `D`
+  against `μ` is the square-integrable density `D/Z` against `Z·μ`.
 
 ## Tags
 
@@ -146,5 +149,46 @@ theorem exists_isEquivProbMeasure_trim_eq {Ω : Type*} {m m0 : MeasurableSpace �
       trim_measurableSet_eq hm (@MeasurableSet.univ _ m), measure_univ]
   · exact withDensity_absolutelyContinuous' (hf.mono hm le_rfl).aemeasurable
       ((ae_of_ae_trim hm (hPQ.ae_le (Measure.rnDeriv_pos hQP))).mono fun _ h ↦ h.ne')
+
+/-- **A bounded density against `μ` is a square-integrable density against `Z·μ`.** For a positive
+density `Z` with `1/Z` integrable, a measure `Q = D·μ` with `0 ≤ D ≤ C` is `Q = D'·ν` with
+`ν = Z·μ` and `D' = D/Z ∈ L²(ν)`: `𝔼_ν[D'²] = 𝔼_μ[D²/Z] ≤ C² 𝔼_μ[1/Z] < ∞`. -/
+theorem exists_memLp_two_withDensity_of_bdd {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
+    {Z : Ω → ℝ} (hZ : AEStronglyMeasurable Z μ) (hZpos : ∀ ω, 0 < Z ω)
+    (hZinv : Integrable (fun ω ↦ (Z ω)⁻¹) μ) {D : Ω → ℝ} (hDm : Measurable D)
+    (hD0 : ∀ ω, 0 ≤ D ω) {C : ℝ} (hDC : ∀ ω, D ω ≤ C) {Q : Measure Ω}
+    (hQD : Q = μ.withDensity fun ω ↦ ENNReal.ofReal (D ω)) :
+    ∃ D' : Lp ℝ 2 (μ.withDensity fun ω ↦ ENNReal.ofReal (Z ω)),
+      (∀ᵐ ω ∂(μ.withDensity fun ω ↦ ENNReal.ofReal (Z ω)), 0 ≤ D' ω) ∧
+      Q = (μ.withDensity fun ω ↦ ENNReal.ofReal (Z ω)).withDensity
+        fun ω ↦ ENNReal.ofReal (D' ω) := by
+  have hD'm : AEMeasurable (fun ω ↦ D ω / Z ω) μ := hDm.aemeasurable.div hZ.aemeasurable
+  have hac : (μ.withDensity fun ω ↦ ENNReal.ofReal (Z ω)) ≪ μ :=
+    withDensity_absolutelyContinuous _ _
+  have hQD' : Q = (μ.withDensity fun ω ↦ ENNReal.ofReal (Z ω)).withDensity
+      fun ω ↦ ENNReal.ofReal (D ω / Z ω) := by
+    rw [hQD, ← withDensity_mul₀ hZ.aemeasurable.ennreal_ofReal hD'm.ennreal_ofReal]
+    congr 1
+    funext ω
+    rw [Pi.mul_apply, ← ENNReal.ofReal_mul (hZpos ω).le, mul_div_cancel₀ _ (hZpos ω).ne']
+  have hmem : MemLp (fun ω ↦ D ω / Z ω) 2 (μ.withDensity fun ω ↦ ENNReal.ofReal (Z ω)) := by
+    rw [memLp_two_iff_integrable_sq (hD'm.aestronglyMeasurable.mono_ac hac)]
+    refine (integrable_withDensity_iff_integrable_smul₀' hZ.aemeasurable.ennreal_ofReal
+      (.of_forall fun _ ↦ ENNReal.ofReal_lt_top)).2 ?_
+    refine (hZinv.const_mul (C ^ 2)).mono' ?_ ?_
+    · exact (hZ.aemeasurable.ennreal_ofReal.ennreal_toReal.smul
+        (hD'm.pow_const 2)).aestronglyMeasurable
+    · refine .of_forall fun ω ↦ ?_
+      rw [ENNReal.toReal_ofReal (hZpos ω).le, smul_eq_mul, Real.norm_eq_abs,
+        abs_of_nonneg (mul_nonneg (hZpos ω).le (sq_nonneg _)), div_pow,
+        show Z ω * (D ω ^ 2 / Z ω ^ 2) = D ω ^ 2 * (Z ω)⁻¹ by field_simp]
+      exact mul_le_mul_of_nonneg_right (pow_le_pow_left₀ (hD0 ω) (hDC ω) 2)
+        (inv_nonneg.2 (hZpos ω).le)
+  refine ⟨hmem.toLp _, ?_, ?_⟩
+  · filter_upwards [hmem.coeFn_toLp] with ω hω
+    rw [hω]
+    exact div_nonneg (hD0 ω) (hZpos ω).le
+  · rw [hQD']
+    exact withDensity_congr_ae (hmem.coeFn_toLp.mono fun ω hω ↦ congrArg ENNReal.ofReal hω.symm)
 
 end MathFin

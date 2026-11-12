@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
@@ -29,8 +29,11 @@ surely `S₀ exp(σ B^θ_t − σ²t/2)`, the Wald exponential martingale of `B^
 
 The price of a contract in this market is its value with the discount `e^{−rt}` on the physical
 asset (`price_market`); under `Q` the European call is worth the Black–Scholes formula
-(`price_europeanCall_constGirsanovMeasure`). That `Q` is the only pricing measure on `𝓕 T` is not
-proved here: it is the uniqueness half of the completeness argument of
+(`price_europeanCall_constGirsanovMeasure`). Among the pricing measures it is the only one, on
+`𝓕 T`, with a density square-integrable under it, and every pricing measure with a bounded density
+against `μ` is of that kind: `Models/BlackScholes/PricingMeasureUnique.lean` proves such a measure
+agrees with `Q` on `𝓕 T` and prices the call alike. A pricing measure with an arbitrary density is
+not covered; that is the general uniqueness half of the completeness argument of
 `Pricing/MarketCompleteness.lean`, which needs the gains of a strategy to be fair under every
 pricing measure.
 
@@ -51,12 +54,16 @@ The Black–Scholes market has no arbitrage on any grid of dates inside the Girs
   of a constant price of risk is equivalent to `μ`.
 * `MathFin.Contracts.BlackScholes.isPricingMeasure_constGirsanovMeasure`: for `σ ≠ 0` the
   Girsanov measure of `θ = (m − r)/σ` at a horizon `H` is a pricing measure at every `T ≤ H`.
+* `MathFin.Contracts.BlackScholes.integrable_integral_discounted_pathAssets`: under a pricing
+  measure `Q ≪ μ` the discounted asset is integrable with mean `S₀`.
 * `MathFin.Contracts.BlackScholes.noArbitrage_market`: for `σ ≠ 0` the market has no arbitrage on
   any grid of dates up to the horizon `H`.
 * `MathFin.Contracts.BlackScholes.price_market`: a contract's price is its value with the discount
   `e^{−rt}` on the physical asset.
 * `MathFin.Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure`: under that pricing
   measure the European call is worth `S₀ Φ(d₁) − K e^{−rT} Φ(d₂)`.
+* `MathFin.Contracts.BlackScholes.price_europeanPut_constGirsanovMeasure`: under the same
+  pricing measure the European put is worth `K e^{−rT} Φ(−d₂) − S₀ Φ(−d₁)`.
 
 ## References
 
@@ -139,8 +146,9 @@ theorem isEquivProbMeasure_constGirsanovMeasure (θ : ℝ) (H : ℝ≥0) :
 
 /-- **The Girsanov measure is a pricing measure of the Black–Scholes market.** For `σ ≠ 0` the
 Girsanov measure `Q` of the market price of risk `θ = (m − r)/σ` at a horizon `H` prices the market
-at every horizon `T ≤ H`. It is equivalent to `μ`
-(`isEquivProbMeasure_constGirsanovMeasure`), and before `H` the deflated asset is almost surely
+at every horizon `T ≤ H`: mutually absolutely continuous with `μ` on the information up to `T`
+(it is even equivalent to `μ` on the whole space, `isEquivProbMeasure_constGirsanovMeasure`), and
+before `H` the deflated asset is almost surely
 `S₀ exp(σ B^θ_t − σ²t/2)` (`pathAssets_physical_ae_eq`), a martingale since `B^θ` is a Brownian
 motion for the filtration under `Q` (`isFilteredPreBrownian_constBtheta`,
 `IsFilteredPreBrownian.waldExponential_isMartingale`). -/
@@ -181,6 +189,57 @@ theorem price_europeanCall_constGirsanovMeasure {K : ℝ} {T H : ℝ≥0} (hTH :
     (by simp [europeanCall, Contract.FixedDated]) (fun t ht ↦ ?_) fun _ _ ↦ rfl)
   obtain rfl : t = T := by simpa [europeanCall, Contract.dates] using ht
   rfl
+
+omit [IsProbabilityMeasure μ] in
+include hW in
+/-- **A pricing measure gives the discounted asset the mean `S₀`.** Under a pricing measure `Q ≪ μ`
+of the Black–Scholes market up to `T` the discounted asset `e^{−rT} S_T` is integrable with mean
+`S₀`: the deflated asset is a `Q`-martingale (`Market.IsPricingMeasure.price_pay_obs`) started at
+`S₀` because `W₀ = 0` `Q`-almost surely. It is the one fact about `Q` that put–call parity needs
+(`price_europeanPut_constGirsanovMeasure`), so it prices the put under every pricing measure
+`Q ≪ μ`, for instance those of `price_europeanCall_of_isPricingMeasure_withDensity`. -/
+theorem integrable_integral_discounted_pathAssets {Q : Measure Ω} {T : ℝ≥0}
+    (hQ : (market μ hWmeas S_0 m r σ).IsPricingMeasure T Q) (hQμ : Q ≪ μ) :
+    Integrable (fun ω ↦ Real.exp (-r * T) * pathAssets S_0 m σ W () T ω) Q ∧
+      ∫ ω, Real.exp (-r * T) * pathAssets S_0 m σ W () T ω ∂Q = S_0 := by
+  have := hQ.isProb
+  have hdef (ω : Ω) : (market μ hWmeas S_0 m r σ).deflated () T ω
+      = Real.exp (-r * T) * pathAssets S_0 m σ W () T ω := by
+    simp [Market.deflated, market, Real.exp_neg, div_eq_inv_mul]
+  refine ⟨?_, ?_⟩
+  · have h := (hQ.martingale ()).integrable T
+    rw [min_self] at h
+    exact h.congr (.of_forall hdef)
+  · have h := hQ.price_pay_obs (n₀ := 1) (fun ω ↦ by simp [market]) () (le_refl T)
+    rw [price_market, Contract.value_pay] at h
+    have h0 : ∀ᵐ ω ∂Q, W 0 ω = 0 := hQμ.ae_le hW.eval_zero_ae_eq_zero
+    simp only [Payoff.eval, scenarioAt, market] at h
+    refine h.trans ?_
+    rw [integral_congr_ae (g := fun _ ↦ S_0)
+      (by filter_upwards [h0] with ω hω; simp [pathAssets, hω])]
+    simp
+
+/-- **The European put in the Black–Scholes market** is worth the Black–Scholes put formula
+`K e^{−rT} Φ(−d₂) − S₀ Φ(−d₁)` under the same Girsanov pricing measure as the call: put–call
+parity in the market (`value_europeanCall_sub_put_of_integral`, the deflated asset being a
+`Q`-martingale with mean `S₀`, `integrable_integral_discounted_pathAssets`) turns the call's price
+(`price_europeanCall_constGirsanovMeasure`) into the put's. -/
+theorem price_europeanPut_constGirsanovMeasure {K : ℝ} {T H : ℝ≥0} (hTH : T ≤ H)
+    (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) :
+    (market μ hWmeas S_0 m r σ).price (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+        (europeanPut K T)
+      = K * Real.exp (-r * T) * Phi (-bsd2 S_0 K r σ T) - S_0 * Phi (-bsd1 S_0 K r σ T) := by
+  have := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
+  obtain ⟨hint, hmean⟩ := integrable_integral_discounted_pathAssets hW hWmeas
+    (isPricingMeasure_constGirsanovMeasure hW hWmeas (S_0 := S_0) (m := m) (r := r) hσ.ne' hTH)
+    (isEquivProbMeasure_constGirsanovMeasure hW hWmeas ((m - r) / σ) H).ac
+  have hcall := price_europeanCall_constGirsanovMeasure hW hWmeas (m := m) (r := r) hTH hS₀ hK hσ hT
+  have hpar := value_europeanCall_sub_put_of_integral (K := K) (T := T)
+    (D := fun t ↦ Real.exp (-r * t)) hint hmean
+  rw [price_market] at hcall ⊢
+  have h1 := Phi_add_Phi_neg (bsd1 S_0 K r σ T)
+  have h2 := Phi_add_Phi_neg (bsd2 S_0 K r σ T)
+  linear_combination (norm := ring) hcall - hpar - (K * Real.exp (-r * T)) * h2 + S_0 * h1
 
 include hW in
 /-- **The Black–Scholes market has no arbitrage on any grid inside the Girsanov horizon.** For

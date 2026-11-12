@@ -12,9 +12,9 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 853 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 815 are proved in full, 18 restate a lemma from Mathlib or
-BrownianMotion, and 20 are reduced cores that prove less than the result they are named after.
+The corpus records 870 results from the literature in [`benchmarks/`](benchmarks), each with a
+Lean statement and proof. Of these, 831 are proved in full, 18 restate a lemma from Mathlib or
+BrownianMotion, and 21 are reduced cores that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
 axioms `propext`, `Classical.choice` and `Quot.sound`.
@@ -67,7 +67,9 @@ exact statement of each one, and what it leaves out.
   ([`ftap_discrete`](MathFin/Pricing/FTAP/FTAPDiscrete.lean),
   [`ftap_two`](MathFin/Pricing/FTAP/FTAPComplete.lean)). On any probability space, multi-period no
   arbitrage is equivalent to no arbitrage in each conditional one-period market
-  ([`noArbitrage_iff_noArbitrageLocal`](MathFin/Pricing/FTAP/NoArbitrageLocal.lean)).
+  ([`noArbitrage_iff_noArbitrageLocal`](MathFin/Pricing/FTAP/NoArbitrageLocal.lean)), and for one
+  real asset no arbitrage is equivalent to an equivalent martingale measure
+  ([`OneAsset.noArbitrage_iff_exists_isEMM`](MathFin/Pricing/FTAP/OneAssetDMW.lean)).
 - **Coherent risk measures.** On a finite state space, a coherent risk measure is the supremum of
   expected losses over the probability vectors that price every acceptable loss nonpositively
   ([`coherentRisk_isLUB`](MathFin/Risk/AcceptanceSet.lean)).
@@ -135,23 +137,28 @@ from one file, [`docs/taxonomy.toml`](docs/taxonomy.toml).
 
 ## Limitations
 
-- **Reduced cores.** Twenty of the 853 results prove less than the theorem they are named after.
+- **Reduced cores.** Twenty-one of the results prove less than the theorem they are named after.
   - Eleven assume a structure whose fields include the textbook conclusion: the reflection
     principle, nowhere differentiability and the law of the iterated logarithm for Brownian motion,
     Novikov's condition, the general Girsanov theorem, the two-dimensional Itô formula, and five
     theorems on Markov chains.
-  - Three rest on a named hypothesis that is not proved. The general Dalang–Morton–Willinger theorem
-    and the parity it gives in a discrete market assume the conditional one-period fundamental
-    theorem. Fixed cash flows in a Heath–Jarrow–Morton model assume the bond-pricing identity that
-    the drift condition would deliver.
-  - Six prove a special case or check transcribed closed forms against each other: the first arrival
-    of a Poisson process, the Ornstein–Uhlenbeck Hermite modes up to degree 2, Stulz's call on the
-    maximum at zero strike, the Heynen–Kat barrier at zero correlation, and Haug's and
-    Rubinstein–Reiner's barrier formulas.
+  - Two rest on a named hypothesis that is not proved. The Dalang–Morton–Willinger theorem for
+    several assets assumes a conditional one-period fundamental theorem (for one asset the theorem
+    is proved without it). Fixed cash flows in a Heath–Jarrow–Morton model assume the bond-pricing
+    identity that the drift condition would deliver.
+  - Eight prove a special case or check transcribed closed forms against each other: the first
+    arrival of a Poisson process, the Ornstein–Uhlenbeck Hermite modes up to degree 2, Stulz's call
+    on the maximum at zero strike, the Heynen–Kat barrier at zero correlation, Haug's and
+    Rubinstein–Reiner's barrier formulas, a piecewise-linear interpolation of call quotes weaker
+    than Kahalé's, and the transcribed Goldman–Sosin–Gatto lookback, bounded below by the call.
 - **Girsanov.** Only bounded θ. Novikov's condition is not proved.
 - **Completeness.** In the Brownian market only completeness ⇒ uniqueness of the pricing measure is
   proved, and the hedge is not identified (Clark–Ocone,
-  [#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)).
+  [#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)). In the Black–Scholes
+  market the pricing measure's restriction to 𝓕_T is unique among those with a density
+  square-integrable under the Girsanov measure, in particular among bounded densities against the
+  physical measure (`BlackScholes.trim_eq_of_isPricingMeasure_withDensity`); a pricing measure with an arbitrary
+  density is not covered.
 - **Itô calculus.** The Itô process is built from one Brownian motion with continuous coefficients.
   Itô's formula for a general continuous semimartingale and a quadratic-variation process are not
   proved.
@@ -279,7 +286,9 @@ Raphael Coelho maintains the library, with contributions from:
   calibration, a Monte Carlo pricer, Cox credit, CMS rates and curve bootstrapping; the bivariate
   normal CDF, the Schwartz futures price, CVA, inflation, the LHP tranche loss, calendar arbitrage,
   joint elicitability, CreditMetrics, SA-CCR, two-asset options and DeFi lending and AMM
-  mechanics.
+  mechanics; trinomial and willow lattices, arbitrage-free interpolation of call quotes, natural
+  cubic splines, FX smile quotes, SABR chain-rule Greeks, the continuous lookback and the shout
+  floor, Marchenko–Pastur edges and historical VaR for concentrated liquidity.
 
 Each module's header names its authors.
 

@@ -456,6 +456,18 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.binomialPrice_call_tendsto_bs_closed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.binomialPrice_call_tendsto_bs_closed
+/-- info: 'MathFin.trinomialProb_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.trinomialProb_unique
+/-- info: 'MathFin.willowBeta_eq_sqrt_div' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.willowBeta_eq_sqrt_div
+/-- info: 'MathFin.CubicSpline.exists_unique_moments' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.CubicSpline.exists_unique_moments
+/-- info: 'MathFin.convexOn_piecewiseLinear' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.convexOn_piecewiseLinear
 
 /-! ## Summit A: bounded-derivative continuous-time Itô formula in L² (CLM-identified) -/
 
@@ -2370,9 +2382,9 @@ bounded-coefficient process class. -/
 /-- info: 'MathFin.noArbitrage_iff_noArbitrageLocal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.noArbitrage_iff_noArbitrageLocal
-/-- info: 'MathFin.LocalEMMDensities.isEMM_pastedMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.exists_isEMM_of_onePeriodDensities' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.LocalEMMDensities.isEMM_pastedMeasure
+#print axioms MathFin.exists_isEMM_of_onePeriodDensities
 
 /-- info: 'MathFin.ItoFormulaAdapted.ito_product_rule_process' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -2748,6 +2760,26 @@ The landmarks of `docs/blueprint.md` that no section above pins: one `#print axi
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.BlackScholes.isPricingMeasure_constGirsanovMeasure
 
+/-- info: 'MathFin.trim_eq_of_martingale_withDensity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.trim_eq_of_martingale_withDensity
+
+/-- info: 'MathFin.Contracts.BlackScholes.trim_eq_of_isPricingMeasure_withDensity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.trim_eq_of_isPricingMeasure_withDensity
+
+/-- info: 'MathFin.Contracts.BlackScholes.price_europeanCall_of_isPricingMeasure_withDensity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.price_europeanCall_of_isPricingMeasure_withDensity
+
+/-- info: 'MathFin.exists_rectIntegrand' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.exists_rectIntegrand
+
+/-- info: 'MathFin.Contracts.BlackScholes.price_europeanCall_of_isPricingMeasure_bdd' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.price_europeanCall_of_isPricingMeasure_bdd
+
 /-- info: 'MathFin.Contracts.TimeDepVol.isPricingMeasure_constGirsanovMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.TimeDepVol.isPricingMeasure_constGirsanovMeasure
@@ -2899,6 +2931,38 @@ end MathFin.AxiomAudit
 #guard_msgs in
 #print axioms MathFin.exists_market_of_isNormalizedCallPrice
 
+/-- info: 'MathFin.exists_market_of_isArbitrageFreeQuotes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.exists_market_of_isArbitrageFreeQuotes
+
+/-- info: 'MathFin.CubicSpline.exists_unique_natural_spline_moments' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.CubicSpline.exists_unique_natural_spline_moments
+
+/-- info: 'MathFin.sabrATMVol_bsV_delta_chainRule' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.sabrATMVol_bsV_delta_chainRule
+
+/-- info: 'MathFin.sabrATMVol_bsV_vega_chainRule' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.sabrATMVol_bsV_vega_chainRule
+
+/-- info: 'MathFin.price_europeanCall_eq_bsV' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.price_europeanCall_eq_bsV
+
+/-- info: 'MathFin.sabrATMVol_marketPrice_delta_chainRule' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.sabrATMVol_marketPrice_delta_chainRule
+
+/-- info: 'MathFin.sabrATMVol_marketPrice_vega_chainRule' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.sabrATMVol_marketPrice_vega_chainRule
+
+/-- info: 'MathFin.DeFi.clHistoricalVaR_eq_valueAtRisk_contractValue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.clHistoricalVaR_eq_valueAtRisk_contractValue
+
 /-- info: 'MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure
@@ -2906,3 +2970,59 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.SVI.exists_market_of_butterflyFreeFormula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.SVI.exists_market_of_butterflyFreeFormula
+
+/-! ### Dalang–Morton–Willinger for one asset on a general space (`OneAssetDMW.lean`) -/
+
+/-- info: 'MathFin.exists_weight_of_noArbitrage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.exists_weight_of_noArbitrage
+
+/-- info: 'MathFin.OneAsset.exists_isEMM_of_noArbitrage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.OneAsset.exists_isEMM_of_noArbitrage
+
+/-- info: 'MathFin.OneAsset.noArbitrage_iff_exists_isEMM' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.OneAsset.noArbitrage_iff_exists_isEMM
+
+/-- info: 'MathFin.Market.noArbitrage_iff_exists_isPricingMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Market.noArbitrage_iff_exists_isPricingMeasure
+
+/-! ### Lattice, put-by-parity, VaR and spectral bridges (the lattice review, 2026-11-12) -/
+
+/-- info: 'MathFin.isPricingMeasure_trinomialLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.isPricingMeasure_trinomialLaw
+
+/-- info: 'MathFin.trinomial_exp_moment_of_isPricingMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.trinomial_exp_moment_of_isPricingMeasure
+
+/-- info: 'MathFin.integral_trinomialNodes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.integral_trinomialNodes
+
+/-- info: 'MathFin.willowScaled_secondMoment_eq_integral_sq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.willowScaled_secondMoment_eq_integral_sq
+
+/-- info: 'MathFin.willowScaled_crossMoment_eq_integral_mul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.willowScaled_crossMoment_eq_integral_mul
+
+/-- info: 'MathFin.Contracts.BlackScholes.price_europeanPut_constGirsanovMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.price_europeanPut_constGirsanovMeasure
+
+/-- info: 'MathFin.DeFi.clHistoricalVaR_eq_valueAtRisk' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.DeFi.clHistoricalVaR_eq_valueAtRisk
+
+/-- info: 'MathFin.sum_eigenvalues_eq_card' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.sum_eigenvalues_eq_card
+
+/-- info: 'MathFin.average_eigenvalue_mem_Icc_mpEdges' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.average_eigenvalue_mem_Icc_mpEdges

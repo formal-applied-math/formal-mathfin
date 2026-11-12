@@ -2457,10 +2457,52 @@
       }
     },
     {
+      "id": "mf-sabr-atm-chain-rule-delta",
+      "name": "SABR ATM Chain-Rule Delta",
+      "domain": "mathematical_finance",
+      "description": "The backbone-convention chain rule for the SABR ATM-vol curve: for the Black call with strike held fixed at K = f, spot s moving, and the vol given by the ATM-vol curve evaluated at the spot, sigma_ATM(s) (eq. 2.18 read as a function of the forward alone), the price's slope combines the ordinary Black-Scholes Delta with the vol curve's own movement, Delta_BS + Vega_BS * d(sigma_ATM)/df, the Delta under a convention that the vol re-marks along the ATM curve (the shape of Hagan-Kumar-Lesniewski-Woodward 2002, eq. 3.9, Delta_SABR = Delta_BS + Vega_BS * d(sigma_B(K,f))/df): d/ds[bsV(K=f, 0, sigma_ATM(s), s, tex)] at s = f equals Phi(d1) + f*phi(d1)*sqrt(tex)*d(sigma_ATM)/df. This is NOT eq. 3.9 itself: that differentiates the fixed-strike smile f -> sigma_B(K,f), whereas this differentiates the ATM curve f -> sigma_B(f,f); the two agree at f = K but their slopes differ by the smile's ATM strike-slope. The fixed-strike case is not attempted here. The entry also states the same derivative for the market price: in the Black-Scholes market with spot s, rate 0 and volatility sigma_ATM(s), the price of the European call struck at f under the Girsanov pricing measure of the constant price of risk m/sigma_ATM(s) (the measure moves with s; undiscounted, horizon H >= tex) has derivative Phi(d1) + f*phi(d1)*sqrt(tex)*d(sigma_ATM)/df at s = f; the proof identifies the market price with bsV pointwise near f (price_europeanCall_constGirsanovMeasure) and applies the chain rule.",
+      "code": {
+        "lean": "import MathFin.Models.ModelFree.SABRChainRuleGreeks\n\nopen MathFin ProbabilityTheory MeasureTheory MathFin.Contracts MathFin.Contracts.BlackScholes\nopen scoped NNReal\n\ntheorem sabr_atm_chain_rule_delta_thm {f α β ρ ν tex : ℝ} (hf : 0 < f)\n    (hσ : 0 < sabrATMVol f α β ρ ν tex) (htex : 0 < tex) :\n    HasDerivAt (fun s ↦ bsV f 0 (sabrATMVol s α β ρ ν tex) s tex)\n      (Phi (bsd1 f f 0 (sabrATMVol f α β ρ ν tex) tex)\n        + f * gaussianPDFReal 0 1 (bsd1 f f 0 (sabrATMVol f α β ρ ν tex) tex) * Real.sqrt tex *\n          (deriv (fun x ↦ sabrATMVol x α β ρ ν tex) f))\n      f :=\n  sabrATMVol_bsV_delta_chainRule hf hσ htex\n\n/-- The same Delta as the derivative of the Black-Scholes market price (rate `0`, Girsanov pricing\nmeasure of `m / sigma_ATM(s)`) of the European call struck at `f`. -/\ntheorem sabr_atm_market_price_delta_thm {Ω : Type*} [MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ}\n    {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) {f α β ρ ν m : ℝ} {T H : ℝ≥0} (hTH : T ≤ H)\n    (hf : 0 < f) (hσ : 0 < sabrATMVol f α β ρ ν T) (hT : 0 < (T : ℝ)) :\n    HasDerivAt (fun s ↦ (market μ hWmeas s m 0 (sabrATMVol s α β ρ ν T)).price\n        (constGirsanovMeasure hW hWmeas ((m - 0) / sabrATMVol s α β ρ ν T) H) (europeanCall f T))\n      (Phi (bsd1 f f 0 (sabrATMVol f α β ρ ν T) T)\n        + f * gaussianPDFReal 0 1 (bsd1 f f 0 (sabrATMVol f α β ρ ν T) T) * Real.sqrt T *\n          (deriv (fun x ↦ sabrATMVol x α β ρ ν T) f))\n      f :=\n  sabrATMVol_marketPrice_delta_chainRule hW hWmeas hTH hf hσ hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hagan, Kumar, Lesniewski & Woodward, \"Managing Smile Risk,\" Wilmott Magazine, September 2002, pp. 84-108, section 3.2, eq. 3.9 (the chain-rule Delta risk) applied with the ATM vol of eq. 2.18 as the vol curve",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the ATM-vol-curve chain-rule Delta. Lives in MathFin/Models/ModelFree/SABRChainRuleGreeks.lean (sabrATMVol_bsV_delta_chainRule), built on a general bivariate Frechet-derivative chain rule for bsV (hasDerivAt_bsV_S_chainRule, in MathFin/Models/BlackScholes/HigherGreeks.lean, proved from the joint differentiability of bsV in (S, sigma) rather than by combining the two one-variable Greek formulas), instantiated at sabrATMVol, which is differentiable in the forward for f > 0 (differentiableAt_sabrATMVol_F). Axioms-clean. LIMITS: the strike is held fixed at K = f and only the spot (and the vol curve's argument) moves, but the vol curve differentiated is the ATM curve f -> sigma_ATM(f) = sigma_B(f,f) (eq. 2.18), not the fixed-strike smile f -> sigma_B(K,f) of Hagan's eq. 3.9. The fixed-strike case is not attempted: away from K = f it needs only a (routine, unformalized) chain rule through sabrImpliedVol's factors; at K = f the literal sabrImpliedVol evaluates its 0/0 factor to 0 (not even continuous there), so it would first need the ATM value redefined by its limit and then a second derivative of the sabrX building block, neither of which is in this repo. MARKET PRICE: sabrATMVol_marketPrice_delta_chainRule (same module) restates the derivative for Market.price of europeanCall under constGirsanovMeasure, via price_europeanCall_eq_bsV (price = bsV K 0 sigma S T, from price_europeanCall_constGirsanovMeasure and bsV_eq_closedForm) and eventual equality near f (sigma_ATM continuous at f, so positive nearby). Rate r = 0 and T = tex as a real horizon with T <= H are conventions of this statement.",
+        "citations": [
+          {
+            "key": "HaganKumarLesniewskiWoodward2002"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mf-sabr-atm-chain-rule-vega",
+      "name": "SABR ATM Chain-Rule Vega (in alpha)",
+      "domain": "mathematical_finance",
+      "description": "The companion chain-rule Vega to mf-sabr-atm-chain-rule-delta: with spot and strike both fixed at the forward f, and only alpha moving through the ATM vol sigma_ATM(f, alpha, ...) (eq. 2.18), the option price's sensitivity to alpha is the ordinary Black-Scholes Vega times the vol curve's own alpha-sensitivity, Vega_SABR^alpha = Vega_BS * d(sigma_ATM)/d(alpha). Unlike the Delta case this needs only the plain one-variable chain rule (alpha enters bsV through sigma alone). The entry also states the same derivative for the market price: in the Black-Scholes market with spot f, rate 0 and volatility sigma_ATM(a), the price of the European call struck at f under the Girsanov pricing measure of the constant price of risk m/sigma_ATM(a) (undiscounted, horizon H >= tex) has derivative, at a = alpha, equal to f*phi(d1)*sqrt(tex)*d(sigma_ATM)/d(alpha).",
+      "code": {
+        "lean": "import MathFin.Models.ModelFree.SABRChainRuleGreeks\n\nopen MathFin ProbabilityTheory MeasureTheory MathFin.Contracts MathFin.Contracts.BlackScholes\nopen scoped NNReal\n\ntheorem sabr_atm_chain_rule_vega_thm {f α β ρ ν tex : ℝ} (hf : 0 < f)\n    (hσ : 0 < sabrATMVol f α β ρ ν tex) (htex : 0 < tex) :\n    HasDerivAt (fun a ↦ bsV f 0 (sabrATMVol f a β ρ ν tex) f tex)\n      (f * gaussianPDFReal 0 1 (bsd1 f f 0 (sabrATMVol f α β ρ ν tex) tex) * Real.sqrt tex *\n        (deriv (fun a ↦ sabrATMVol f a β ρ ν tex) α))\n      α :=\n  sabrATMVol_bsV_vega_chainRule hf hσ htex\n\n/-- The same Vega as the derivative, in `alpha`, of the Black-Scholes market price of the European\ncall struck at `f` (rate `0`, Girsanov pricing measure of `m / sigma_ATM(a)`). -/\ntheorem sabr_atm_market_price_vega_thm {Ω : Type*} [MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ}\n    {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) {f α β ρ ν m : ℝ} {T H : ℝ≥0} (hTH : T ≤ H)\n    (hf : 0 < f) (hσ : 0 < sabrATMVol f α β ρ ν T) (hT : 0 < (T : ℝ)) :\n    HasDerivAt (fun a ↦ (market μ hWmeas f m 0 (sabrATMVol f a β ρ ν T)).price\n        (constGirsanovMeasure hW hWmeas ((m - 0) / sabrATMVol f a β ρ ν T) H) (europeanCall f T))\n      (f * gaussianPDFReal 0 1 (bsd1 f f 0 (sabrATMVol f α β ρ ν T) T) * Real.sqrt T *\n        (deriv (fun a ↦ sabrATMVol f a β ρ ν T) α))\n      α :=\n  sabrATMVol_marketPrice_vega_chainRule hW hWmeas hTH hf hσ hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hagan, Kumar, Lesniewski & Woodward, \"Managing Smile Risk,\" Wilmott Magazine, September 2002, pp. 84-108, section 3.2, eq. 3.6 (the vega risk in alpha) at the ATM strike, with the ATM vol of eq. 2.18",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Lives in MathFin/Models/ModelFree/SABRChainRuleGreeks.lean (sabrATMVol_bsV_vega_chainRule), the ordinary one-variable chain rule through the general hasDerivAt_bsV_param_chainRule (in MathFin/Models/BlackScholes/HigherGreeks.lean) and sigma_ATM's differentiability in alpha (differentiableAt_sabrATMVol_alpha). Axioms-clean. LIMITS: spot and strike are both held fixed at f for this one (only alpha moves), unlike the Delta case; the fixed-strike alpha-sensitivity away from K = f (eq. 3.6 at a general strike, through sabrImpliedVol's alpha-dependence, which also enters z) is not addressed either; it is a routine, unformalized chain rule, since z != 0 there and no 0/0 factor arises. At K = f itself only alpha moves and the strike stays at f, so there is no second curve to choose between: the theorem is eq. 3.6 at the ATM strike with sigma_B(f, f) taken as eq. 2.18. MARKET PRICE: sabrATMVol_marketPrice_vega_chainRule (same module) restates the derivative for Market.price of europeanCall under constGirsanovMeasure, via price_europeanCall_eq_bsV and eventual equality near alpha. Rate r = 0 and T = tex as a real horizon with T <= H are conventions of this statement.",
+        "citations": [
+          {
+            "key": "HaganKumarLesniewskiWoodward2002"
+          }
+        ]
+      }
+    },
+    {
       "id": "mf-black-scholes-market-pricing-measure",
       "name": "The Girsanov Measure of the Market Price of Risk Is a Pricing Measure of the Black-Scholes Market and Prices the European Call at the Black-Scholes Formula",
       "domain": "mathematical_finance",
-      "description": "The Black-Scholes model of a pre-Brownian motion W under a probability measure mu (BlackScholes.market: the filtration W generates, the asset S_0 exp((m - sigma^2/2) t + sigma W_t) with physical drift m, the numeraire e^(rt)) is a Market. For sigma != 0, the Girsanov measure Q of the constant market price of risk theta = (m - r)/sigma at a horizon H (constGirsanovMeasure) is a pricing measure of it at every horizon T <= H (Market.IsPricingMeasure: equivalent to mu, and the deflated asset frozen at T is a martingale), and for S_0, K, sigma > 0 and T > 0 the market's price (Market.price) of the European call at maturity T under Q is S_0 Phi(d_1) - K e^(-rT) Phi(d_2), whatever the physical drift m. That Q is the only pricing measure is not claimed.",
+      "description": "The Black-Scholes model of a pre-Brownian motion W under a probability measure mu (BlackScholes.market: the filtration W generates, the asset S_0 exp((m - sigma^2/2) t + sigma W_t) with physical drift m, the numeraire e^(rt)) is a Market. For sigma > 0, the Girsanov measure Q of the constant market price of risk theta = (m - r)/sigma at a horizon H (constGirsanovMeasure) is a pricing measure of it at every horizon T <= H (Market.IsPricingMeasure: mutually absolutely continuous with mu on the information up to T, and the deflated asset frozen at T is a martingale), and for S_0, K, sigma > 0 and T > 0 the market's price (Market.price) of the European call at maturity T under Q is S_0 Phi(d_1) - K e^(-rT) Phi(d_2), whatever the physical drift m. That Q is the only pricing measure is not claimed.",
       "metadata": {
         "reference": "Black and Scholes (1973); Shreve, Stochastic Calculus for Finance II, sec. 5.2; Saporito, Stochastic Processes, Thm 9.1.8",
         "citations": [
@@ -2478,10 +2520,74 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. isPricingMeasure_constGirsanovMeasure and price_europeanCall_constGirsanovMeasure in MathFin/Models/BlackScholes/Market.lean: Q is equivalent to the physical measure (isEquivProbMeasure_constGirsanovMeasure, a positive exponential density), B^theta is a Brownian motion for the filtration under Q (isFilteredPreBrownian_constBtheta, Girsanov for bounded predictable theta), and before H the deflated asset is Q-almost surely S_0 exp(sigma B^theta_t - sigma^2 t/2), a Wald exponential martingale; the price is the contract value with the discount e^(-rt) on the physical asset (price_market), which value_europeanCall_physical evaluates. SCOPE: existence of a pricing measure and the call price under it; uniqueness of the pricing measure is the frontier node thm:bs-arbitrage-free-price. The Brownian motion is pre-Brownian (no path continuity is used). Axioms-clean."
+        "formalization_scope": "Full formal proof. isPricingMeasure_constGirsanovMeasure and price_europeanCall_constGirsanovMeasure in MathFin/Models/BlackScholes/Market.lean: Q is equivalent to the physical measure (isEquivProbMeasure_constGirsanovMeasure, a positive exponential density), B^theta is a Brownian motion for the filtration under Q (isFilteredPreBrownian_constBtheta, Girsanov for bounded predictable theta), and before H the deflated asset is Q-almost surely S_0 exp(sigma B^theta_t - sigma^2 t/2), a Wald exponential martingale; the price is the contract value with the discount e^(-rt) on the physical asset (price_market), which value_europeanCall_physical evaluates. SCOPE: existence of a pricing measure and the call price under it; uniqueness of the pricing measure among those with a square-integrable or bounded density is mf-black-scholes-pricing-measure-unique-l2 and mf-black-scholes-pricing-measure-unique-bounded. The Brownian motion is pre-Brownian (no path continuity is used). Axioms-clean."
       },
       "code": {
         "lean": "import MathFin.Models.BlackScholes.Market\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Contracts MathFin.Contracts.BlackScholes\nopen scoped NNReal\n\n/-- The Girsanov measure of the market price of risk `(m - r) / σ` is a pricing measure of the\nBlack-Scholes market, and under it the European call is worth the Black-Scholes formula. -/\ntheorem black_scholes_market_pricing_measure {Ω : Type*} [mΩ : MeasurableSpace Ω]\n    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) {S₀ K m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hS₀ : 0 < S₀)\n    (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) :\n    (market μ hWmeas S₀ m r σ).IsPricingMeasure T\n        (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) ∧\n      (market μ hWmeas S₀ m r σ).price (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)\n          (europeanCall K T)\n        = S₀ * Phi (bsd1 S₀ K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S₀ K r σ T) :=\n  ⟨isPricingMeasure_constGirsanovMeasure hW hWmeas hσ.ne' hTH,\n    price_europeanCall_constGirsanovMeasure hW hWmeas hTH hS₀ hK hσ hT⟩\n"
+      }
+    },
+    {
+      "id": "mf-black-scholes-pricing-measure-unique-l2",
+      "name": "A Black-Scholes Pricing Measure with a Square-Integrable Density Prices the European Call at the Black-Scholes Formula",
+      "domain": "mathematical_finance",
+      "description": "In the Black-Scholes market of a pre-Brownian motion W with continuous paths under a probability measure mu (BlackScholes.market: spot S_0 > 0, physical drift m, rate r, volatility sigma > 0, the filtration W generates), let Q* be the Girsanov measure of the market price of risk (m - r)/sigma at a horizon H >= T. Every pricing measure Q up to T of the form Q = D.Q* with D >= 0 a square-integrable density under Q* prices the European call (strike K > 0, maturity T > 0) at S_0 Phi(d1) - K e^(-rT) Phi(d2): Q agrees with Q* on the information up to T. A pricing measure whose density is only in L^2 of the physical measure, or is not square-integrable under Q*, is not covered.",
+      "metadata": {
+        "reference": "Black and Scholes (1973); Shreve, Stochastic Calculus for Finance II, sec. 5.4; Saporito, Stochastic Processes, Thm 9.1.8; Karatzas and Shreve, Brownian Motion and Stochastic Calculus, 3.4",
+        "citations": [
+          {
+            "key": "BlackScholes1973"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "sec. 5.4"
+          },
+          {
+            "key": "Saporito",
+            "locator": "Thm 9.1.8"
+          },
+          {
+            "key": "KaratzasShreve1991",
+            "locator": "3.4"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. price_europeanCall_of_isPricingMeasure_withDensity in MathFin/Models/BlackScholes/PricingMeasureUnique.lean: under Q* the process W_u + theta min(u, H) is a pre-Brownian motion for the filtration of W (a.e. equal to B^theta at each date) and on [0, T] the deflated asset is S_0 exp(sigma W*_u - sigma^2 u/2), whose increment is the Ito integral of sigma times it (discountedGBM_eq_itoIntegral). The conditional density E_{Q*}[D | F_T] is 1 + an Ito integral (exists_itoIntegral_representation), the pricing property under Q and Q* makes that integral orthogonal to every increment 1_A (S_u - S_s), so by the Ito isometry and a pi-lambda argument over predictable rectangles (trim_eq_of_martingale_withDensity in MathFin/Probability/Brownian/MartingaleMeasureUniqueness.lean) the integrand vanishes and Q = Q* on F_T; the call's discounted payoff is F_T-measurable. SCOPE: the density is required to be square-integrable under the Girsanov measure Q*; a density merely in L^2 of the physical measure is not covered, nor is an arbitrary pricing measure (the general second fundamental theorem). The Brownian motion has continuous paths, S_0, K, sigma, T > 0, T <= H. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.PricingMeasureUnique\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Contracts MathFin.Contracts.BlackScholes\nopen scoped NNReal ENNReal\n\n/-- A pricing measure of the Black-Scholes market whose density with respect to the Girsanov\nmeasure of the market price of risk is nonnegative and square-integrable under it prices the\nEuropean call at the Black-Scholes formula. -/\ntheorem black_scholes_pricing_measure_l2_density {Ω : Type*} [mΩ : MeasurableSpace Ω]\n    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) (hWcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ W s ω)\n    {S₀ K m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hS₀ : 0 < S₀) (hK : 0 < K) (hσ : 0 < σ)\n    (hT : 0 < (T : ℝ)) {Q : Measure Ω}\n    (hQ : (market μ hWmeas S₀ m r σ).IsPricingMeasure T Q)\n    (D : Lp ℝ 2 (constGirsanovMeasure hW hWmeas ((m - r) / σ) H))\n    (hD : ∀ᵐ ω ∂(constGirsanovMeasure hW hWmeas ((m - r) / σ) H), 0 ≤ D ω)\n    (hQD : Q = (constGirsanovMeasure hW hWmeas ((m - r) / σ) H).withDensity\n      fun ω ↦ ENNReal.ofReal (D ω)) :\n    (market μ hWmeas S₀ m r σ).price Q (europeanCall K T)\n      = S₀ * Phi (bsd1 S₀ K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S₀ K r σ T) :=\n  price_europeanCall_of_isPricingMeasure_withDensity hW hWmeas hWcont hTH hS₀ hK hσ hT hQ D hD hQD\n"
+      }
+    },
+    {
+      "id": "mf-black-scholes-pricing-measure-unique-bounded",
+      "name": "A Black-Scholes Pricing Measure with a Bounded Density Against the Physical Measure Prices the European Call at the Black-Scholes Formula",
+      "domain": "mathematical_finance",
+      "description": "In the Black-Scholes market of a pre-Brownian motion W with continuous paths under a probability measure mu (BlackScholes.market: spot S_0 > 0, physical drift m, rate r, volatility sigma > 0, the filtration W generates), every pricing measure Q up to T of the form Q = D.mu with D measurable and 0 <= D <= C prices the European call (strike K > 0, maturity 0 < T <= H) at S_0 Phi(d1) - K e^(-rT) Phi(d2). A bounded density against mu is a square-integrable density against the Girsanov measure Q* of the market price of risk, since the inverse of the Girsanov density is integrable, so the result is the square-integrable case. A pricing measure with an unbounded density is not covered by this entry.",
+      "metadata": {
+        "reference": "Black and Scholes (1973); Shreve, Stochastic Calculus for Finance II, sec. 5.4; Saporito, Stochastic Processes, Thm 9.1.8; Karatzas and Shreve, Brownian Motion and Stochastic Calculus, 3.4",
+        "citations": [
+          {
+            "key": "BlackScholes1973"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "sec. 5.4"
+          },
+          {
+            "key": "Saporito",
+            "locator": "Thm 9.1.8"
+          },
+          {
+            "key": "KaratzasShreve1991",
+            "locator": "3.4"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. price_europeanCall_of_isPricingMeasure_bdd in MathFin/Models/BlackScholes/PricingMeasureUnique.lean: D/Z_H, with Z_H the Girsanov density, is nonnegative and Q* = Z_H.mu, and 1/Z_H = exp(theta^2 H) Z_H(-theta) almost surely (ae_mul_ZTpred_const_neg: the Ito integral of a constant is odd and the bracket is theta^2 H) is integrable, so E_{Q*}[(D/Z_H)^2] = E_mu[D^2/Z_H] <= C^2 E_mu[1/Z_H] is finite (exists_memLp_two_density_of_bdd); then price_europeanCall_of_isPricingMeasure_withDensity applies. SCOPE: the density is bounded against the physical measure mu; an unbounded density that is square-integrable under the Girsanov measure is the entry mf-black-scholes-pricing-measure-unique-l2, and an arbitrary pricing measure is not covered. The Brownian motion has continuous paths, S_0, K, sigma, T > 0, T <= H. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.PricingMeasureUnique\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Contracts MathFin.Contracts.BlackScholes\nopen scoped NNReal ENNReal\n\n/-- A pricing measure of the Black-Scholes market with a bounded density against the physical\nmeasure prices the European call at the Black-Scholes formula. -/\ntheorem black_scholes_pricing_measure_bounded_density {Ω : Type*} [mΩ : MeasurableSpace Ω]\n    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) (hWcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ W s ω)\n    {S₀ K m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hS₀ : 0 < S₀) (hK : 0 < K) (hσ : 0 < σ)\n    (hT : 0 < (T : ℝ)) {Q : Measure Ω}\n    (hQ : (market μ hWmeas S₀ m r σ).IsPricingMeasure T Q)\n    {D : Ω → ℝ} (hDm : Measurable D) (hD0 : ∀ ω, 0 ≤ D ω) {C : ℝ} (hDC : ∀ ω, D ω ≤ C)\n    (hQD : Q = μ.withDensity fun ω ↦ ENNReal.ofReal (D ω)) :\n    (market μ hWmeas S₀ m r σ).price Q (europeanCall K T)\n      = S₀ * Phi (bsd1 S₀ K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S₀ K r σ T) :=\n  price_europeanCall_of_isPricingMeasure_bdd hW hWmeas hWcont hTH hS₀ hK hσ hT hQ hDm hD0 hDC hQD\n"
       }
     },
     {
@@ -2534,6 +2640,73 @@
       },
       "code": {
         "lean": "import MathFin.Models.LocalVol.TimeDependentVol\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Contracts MathFin.Contracts.TimeDepVol\nopen scoped NNReal\n\n/-- The Girsanov measure of the constant price of risk is a pricing measure of the Black-Scholes\nmarket with a deterministic volatility clock, and under it the European call is worth the\nBlack-Scholes formula of the total variance. -/\ntheorem time_dependent_vol_market_pricing_measure {Ω : Type*} [mΩ : MeasurableSpace Ω]\n    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) {S₀ r θ K : ℝ} {v : ℝ≥0 → ℝ≥0} (hv : Monotone v)\n    {T H : ℝ≥0} (hTH : v T ≤ H) (hS₀ : 0 < S₀) (hK : 0 < K) (hT : 0 < (v T : ℝ)) :\n    (market μ hWmeas S₀ r θ hv).IsPricingMeasure T\n        (BlackScholes.constGirsanovMeasure hW hWmeas θ H) ∧\n      (market μ hWmeas S₀ r θ hv).price (BlackScholes.constGirsanovMeasure hW hWmeas θ H)\n          (europeanCall K T)\n        = S₀ * Phi (bsd1 S₀ (K * Real.exp (-r * T)) 0 1 (v T))\n          - K * Real.exp (-r * T) * Phi (bsd2 S₀ (K * Real.exp (-r * T)) 0 1 (v T)) :=\n  ⟨isPricingMeasure_constGirsanovMeasure hW hWmeas hv hTH,\n    price_europeanCall_constGirsanovMeasure hW hWmeas hv hTH hS₀ hK hT⟩\n"
+      }
+    },
+    {
+      "id": "mf-shout-floor-g-strict-mono",
+      "name": "Shout-Floor Scaled ATM Put e^{q tau} P(tau) Is Strictly Increasing (Dai-Kwok-Wu Lemma 2.1(i))",
+      "description": "For r <= q and sigma > 0, the ATM Black-Scholes put with continuous dividend yield q, P(tau) = shoutFloorAtmPut r q sigma tau, scaled by e^{q*tau}, is strictly increasing in tau on (0, infinity). This is a *supporting* calculus lemma (Dai-Kwok-Wu's Lemma 2.1, case (i)) behind their Theorem 3.1(i), the shout-floor option's pricing identity R(S, tau) = S * P(tau) for r <= q; the pricing identity itself, which needs the library's optimal-stopping substrate applied to the unbounded discounted-stock martingale, is not proved by this entry.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.ShoutFloorMonotonicity\n\nopen MathFin MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- Dai-Kwok-Wu (2004) Lemma 2.1(i): for `r <= q` and `sigma > 0`, the ATM Black-Scholes put\nwith dividend yield `q`, `P(tau) = shoutFloorAtmPut r q sigma tau`, scaled by `e^{q*tau}`, is\nstrictly increasing in `tau` on `(0, infinity)`. -/\ntheorem shout_floor_g_strict_mono_thm {r q σ : ℝ} (hrq : r ≤ q) (hσ : 0 < σ) :\n    StrictMonoOn (fun t ↦ Real.exp (q * t) * MathFin.shoutFloorAtmPut r q σ t) (Set.Ioi 0) :=\n  MathFin.shoutFloor_g_strictMonoOn hrq hσ\n\n/-- The trunk-grounded form: the market's own price of the ATM European put is\n`g(τ) = e^{qτ} · P(τ)`. -/\ntheorem shout_floor_g_eq_marketPut {Ω : Type} [MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ}\n    {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) {r q σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hT : 0 < (T : ℝ))\n    (hσ : 0 < σ) :\n    (Contracts.BlackScholes.market μ hWmeas 1 (r - q) (r - q) σ).price\n        (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas 0 H)\n        (Contracts.europeanPut 1 T) = Real.exp (q * (T : ℝ)) * shoutFloorAtmPut r q σ (T : ℝ) :=\n  MathFin.shoutFloorAtmPut_eq_marketPut hW hWmeas hTH hT hσ\n"
+      },
+      "metadata": {
+        "chapter": null,
+        "reference": "Dai, Kwok & Wu (2004), \"Optimal Shouting Policies of Options with Strike Reset Right,\" Mathematical Finance 14(3), 383-401, Lemma 2.1(i), p. 386",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, MathFin/Models/BlackScholes/ShoutFloorMonotonicity.lean. Proves exactly Lemma 2.1(i): via the paper's own Appendix A reduction (g(tau) = e^{q*tau}*P(tau) equals the ordinary no-dividend ATM put at the shifted rate r-q, shoutFloor_g_eq_bsP), g's derivative is a direct instance of the library's existing hasDerivAt_bsP_tau -- a strictly positive first term plus a nonnegative second term when r <= q. Does NOT prove Theorem 3.1(i) (the shout-floor value R(S, tau) = S * P(tau)): that needs (a) the shout-floor value as the stoppingValue of the discounted reward on the library's Brownian model, and (b) optional stopping for the unbounded nonnegative discounted-stock martingale e^{-(r-q)t} S_t, which the library's bounded-supermartingale verification (expected_stoppedValue_le_initial, MathFin/Models/BlackScholes/American/Stopping/GridSampling.lean) does not cover as stated. Axioms-clean. The entry also carries the trunk-grounded form: the market's own price of the ATM European put equals the scaled shout-floor reward (price_europeanPut_constGirsanovMeasure), so the monotonicity operates at the pricing functional, not only at the closed-form level.",
+        "citations": [
+          {
+            "key": "DaiKwokWu2004"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mf-cubic-spline-moments-unique",
+      "name": "Natural Cubic Spline Moment System Has a Unique Solution",
+      "domain": "mathematical_finance",
+      "description": "A natural cubic spline interpolating values y_0, ..., y_n at strictly increasing pillars x_0 < ... < x_n -- e.g. an FX/equity vol smile sampled at pillar deltas -- has, by the textbook derivation, a linear system in the interior second derivatives (moments) M_1, ..., M_(n-1) once the natural boundary conditions M_0 = M_n = 0 are substituted in; this entry defines that system (Stoer-Bulirsch normal form) and proves it uniquely solvable (the companion entry mf-natural-cubic-spline-exists-unique proves the system is the C^1 matching condition of the cubic pieces). Its coefficient matrix has diagonal entries 2 and off-diagonal entries mu_i, lambda_i >= 0 with mu_i + lambda_i = 1 < 2 in every row, so it is strictly row diagonally dominant and therefore a unit; the moment system has exactly one solution for any data y and any strictly increasing pillars x. In the module, not in the snippet: the piecewise-cubic formula built from any candidate moment sequence also matches the pillar values exactly at both ends of each piece, independent of which system the moments solve.",
+      "code": {
+        "lean": "import MathFin.Models.ModelFree.CubicSplineSmile\n\nopen MathFin.CubicSpline\n\ntheorem natural_cubic_spline_moments_unique {n : ℕ} (x y : ℕ → ℝ) (hn : 2 ≤ n) (hgap : ∀ i < n, x i < x (i + 1)) :\n    ∃! M : Fin (n - 1) → ℝ,\n      (momentMatrix x n).mulVec M = fun j : Fin (n - 1) ↦ rhs x y ((j : ℕ) + 1) :=\n  exists_unique_moments x y hn hgap\n"
+      },
+      "metadata": {
+        "reference": "The nonsingularity (strict-diagonal-dominance) step is formalized on the normalized moment system of J. Stoer & R. Bulirsch, Introduction to Numerical Analysis, 3rd ed. (Springer, 2002), section 2.4.2. Existence and uniqueness of the natural cubic spline itself is R. L. Burden & J. D. Faires, Numerical Analysis, 9th ed. (Brooks/Cole, 2011), Theorem 3.11; the strict-diagonal-dominance step formalized here is the same nonsingularity argument that theorem's proof uses, run on the normalized system rather than on B&F's own unnormalized one.",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal derivation that the moment system's coefficient matrix is a unit: strict row diagonal dominance (every row has diagonal entry 2 and at most two off-diagonal entries mu_i, lambda_i >= 0 summing to 1) proved from the gap positivity of a strictly increasing pillar sequence, then Mathlib's det_ne_zero_of_sum_row_lt_diag (LinearAlgebra/Matrix/Gershgorin.lean, a corollary of Gershgorin's circle theorem) gives nonzero determinant and hence invertibility; existence and uniqueness of the solution follow via Matrix.mulVec_injective_iff_isUnit and the inverse matrix. Lives in MathFin/Models/ModelFree/CubicSplineSmile.lean (exists_unique_moments), which also proves the piecewise-cubic formula interpSpline matches the pillar values exactly at both ends of each piece (interpSpline_left_eq, interpSpline_right_eq, for any candidate moment sequence) and connects the scheme to the repository's SVI smile (svi_pillar_interpSpline_eq): pillar values sampled from an SVI slice's total variance interpolate exactly at the pillars, and that the moment system for those SVI-sampled pillars also has exactly one solution (svi_pillar_moments_unique). Axioms-clean. SCOPE: this entry is the unique solvability of the defined system; its tie to interpSpline (the system is the C^1 slope-matching condition) is the companion entry mf-natural-cubic-spline-exists-unique. Does not construct a single global function glued across all pieces and does not prove global C^2 matching of one-sided derivatives at interior knots -- the first-derivative-continuity equations are exactly what the moment system encodes, but a two-sided HasDerivAt gluing statement is left to future work. Distinct from the parametric SVI functional form already in the repository: this is a pillar-interpolation scheme, not a model for the smile between pillars.",
+        "citations": [
+          {
+            "key": "StoerBulirsch2002"
+          },
+          {
+            "key": "BurdenFaires2011"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mf-natural-cubic-spline-exists-unique",
+      "name": "Natural Cubic Spline Exists and Is Unique (C^1 Matching of the Moment Form)",
+      "domain": "mathematical_finance",
+      "description": "For strictly increasing pillars x_0 < ... < x_n (n >= 2) and any data y, there is exactly one moment sequence M_0, ..., M_n with natural ends M_0 = M_n = 0 for which the moment-form cubic pieces on consecutive pillar intervals have equal slopes (C^1 matching) at every interior pillar. In the module, not in the snippet, separate lemmas show each piece interpolates the data and has second derivative M_i at x_i and M_(i+1) at x_(i+1); there is no single glued function and no C^2 or ContDiff statement. Proved by showing the Stoer-Bulirsch moment system is exactly the slope-matching condition and is uniquely solvable by strict diagonal dominance. Scope: the spline is the family of pieces, not a single function on [x_0, x_n] with a ContDiff statement; the data are arbitrary and nothing says a spline of a smile is arbitrage-free.",
+      "code": {
+        "lean": "import MathFin.Models.ModelFree.CubicSplineSmile\n\nopen MathFin.CubicSpline\n\n/-- **The natural cubic spline exists and is unique.** For strictly increasing pillars and any\ndata there is one moment sequence with `M 0 = M n = 0` for which adjacent cubic pieces match in\nslope at every interior pillar. -/\ntheorem natural_cubic_spline_exists_unique {n : ℕ} (x y : ℕ → ℝ) (hn : 2 ≤ n)\n    (hgap : ∀ i < n, x i < x (i + 1)) :\n    ∃ M : ℕ → ℝ, M 0 = 0 ∧ M n = 0 ∧\n      (∀ i, i + 2 ≤ n → deriv (interpSpline x y M i) (x (i + 1)) =\n        deriv (interpSpline x y M (i + 1)) (x (i + 1))) ∧\n      ∀ M' : ℕ → ℝ, M' 0 = 0 → M' n = 0 →\n        (∀ i, i + 2 ≤ n → deriv (interpSpline x y M' i) (x (i + 1)) =\n          deriv (interpSpline x y M' (i + 1)) (x (i + 1))) → ∀ k ≤ n, M' k = M k :=\n  exists_unique_natural_spline_moments x y hn hgap\n"
+      },
+      "metadata": {
+        "reference": "J. Stoer & R. Bulirsch, Introduction to Numerical Analysis, 3rd ed. (2002), section 2.4.2; R. L. Burden & J. D. Faires, Numerical Analysis, 9th ed. (2011), Theorem 3.11",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Models/ModelFree/CubicSplineSmile.lean (exists_unique_natural_spline_moments): the first and second derivatives of the moment-form piece are computed (hasDerivAt_interpSpline, hasDerivAt_deriv_interpSpline), the moment equation at a pillar is shown equivalent to slope matching of the two adjacent pieces (deriv_interpSpline_match_iff), the system with natural ends is the conjunction of these (momentMatrix_mulVec_eq_iff), and exists_unique_moments gives existence and uniqueness. Axioms-clean. SCOPE: pieces, not a single glued function with a ContDiff statement; arbitrary data.",
+        "citations": [
+          {
+            "key": "StoerBulirsch2002"
+          },
+          {
+            "key": "BurdenFaires2011"
+          }
+        ]
       }
     }
   ]

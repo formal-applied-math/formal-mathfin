@@ -26,6 +26,139 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Marchenko-Pastur support edges (2026-11-08)
+
+One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 805 → 806 on the merged
+tree (767 full before, 768 after; 785 → 786 delivery-ready).
+
+- **`mf-marchenko-pastur-edges`** (MathFin/Choice/Performance/MarchenkoPasturEdge.lean): the support
+  endpoints `λ₊ = σ²(1+√c)²`, `λ₋ = σ²(1−√c)²` of the Marchenko-Pastur law for the sample
+  covariance of an `N × T` i.i.d. matrix with entry variance `σ²`, aspect ratio `c = N/T` —
+  the closed forms only. Proved: the width `λ₊ − λ₋ = 4σ²√c` (`mpUpperEdge_sub_mpLowerEdge`),
+  the ordering `λ₋ ≤ λ₊` and the variance sandwich `λ₋ ≤ σ² ≤ λ₊` (the lower side for
+  `c ≤ 1`; `mpLowerEdge_le_mpUpperEdge`, `le_mpUpperEdge`,
+  `mpLowerEdge_le_variance_of_le_one`), the degeneracy characterization `λ₊ = σ² ↔ σ = 0 ∨
+  c = 0` (`mpUpperEdge_eq_variance_iff`), the rank-boundary `λ₋ = 0 ↔ c = 1` for `σ ≠ 0`
+  (`mpLowerEdge_eq_zero_iff`), the product `λ₊λ₋ = σ⁴(1−c)²`
+  (`mpUpperEdge_mul_mpLowerEdge`), strict monotonicity in `c` and divergence
+  (`mpUpperEdge_lt_of_lt`, `tendsto_mpUpperEdge_atTop`), continuity of both edge maps
+  (`Real.sqrt` is total; `continuous_mpUpperEdge`, `continuous_mpLowerEdge`), the bulk
+  collapse `λ± → σ²` as `c → 0⁺` and `λ₋ → 0` as `c → 1`
+  (`tendsto_mpUpperEdge_zero`, `tendsto_mpLowerEdge_zero`, `tendsto_mpLowerEdge_one`),
+  López de Prado's reciprocal form `λ±(σ, q⁻¹) = σ²(1 ± (√q)⁻¹)²` with `q = T/N` — the
+  `eMin`/`eMax` of Snippet 2.1 of *Machine Learning for Asset Managers*, where `eMax` is the
+  noise/signal cut (`mpUpperEdge_inv`, `mpLowerEdge_inv`) — and the quadratic scaling
+  `λ±(kσ, c) = k²λ±(σ, c)` (`mpUpperEdge_const_mul`, `mpLowerEdge_const_mul`). The snippet
+  additionally composes the equal-weight diversification floor `ρ + (1 − ρ)/d` of QRM Ex. 6.16
+  (`portfolioVarN_equicorrelation_equal_weights`) with the `c ≤ 1` sandwich. A bridge to
+  the portfolio layer: an equicorrelation matrix's trace is its dimension, so its average
+  eigenvalue is `1 = σ²` for a correlation matrix — the variance the `σ = 1` support interval
+  sandwiches for every `c ≤ 1` (`trace_equicorrelationMatrix_eq_card`, importing
+  `Choice/Portfolio/Equicorrelation.lean`). Cited:
+  Marchenko & Pastur (1967), Bai & Silverstein 2nd ed. (2010) ch. 3 (the law these endpoints
+  support), López de Prado (2020) ch. 2 Snippet 2.1 (the parameterization actually
+  transcribed, from the book's code repository). Disclosed out of scope: nothing
+  probabilistic — no random matrix, sample covariance, eigenvalue, or convergence of the
+  empirical spectral distribution; the atom at zero for `c > 1` and the support density are
+  not treated. Axioms-clean, `full`.
+### Trinomial lattice branch weights: moment matching and a variance bound (2026-11-08)
+
+One `full` entry in `benchmarks/binomial.json`. Corpus 781 → 782 (746 full before, 747 after;
+764 → 765 delivery-ready).
+
+- **`mf-trinomial-moment-matching`** (MathFin/Models/Binomial/TrinomialMomentMatching.lean): one step
+  of a recombining trinomial lattice sends a node `x_k` to `x_k - dx`, `x_k`, `x_k + dx`;
+  matching mass, mean `x_k + e` and variance `v2` gives a 3×3 linear system, solved uniquely
+  for `dx ≠ 0` (`trinomialProb_sum`/`_mean`/`_secondMoment`, `trinomialProb_unique`), the
+  general-spacing branch weights transcribed from QuantLib's
+  `ql/methods/lattices/trinomialtree.cpp`. The classical substitution `dx = √3 v`, `v2 = v²`
+  recovers the closed form (`trinomialProb_classical`, the `(1/6, 2/3, 1/6)` triple at
+  `e = 0`). Exact non-negativity: outer weights iff `|e| (dx − |e|) ≤ v2`, central iff
+  `v2 + e² ≤ dx²` (`trinomialProbDownUp_nonneg_iff`, `trinomialProbMid_nonneg_iff`); the
+  window `dx² ≤ 4 v2 ≤ 3 dx²` keeps every nearest-node offset `|e| ≤ dx/2` inside `[0, 1]`
+  (`trinomialProb_mem_Icc_of_window`, `trinomialProb_mem_Icc_classical`). A lattice variance
+  bound: any non-negative weighting of `c + dx ℤ` with mean `c + e` has variance at least
+  `e (dx − e)` (`lattice_variance_lower_bound`), so no non-negative scheme on that lattice,
+  with any number of branches, matches a variance below it
+  (`not_exists_nonneg_lattice_scheme`). At the classical spacing `dx = √3 σ √dt`,
+  `v2 = σ² dt`, the lattice law matches the Black–Scholes log-return's mean `(r − σ²/2) dt`
+  and variance `σ² dt` exactly (`trinomialProb_bsStep_mean`, `trinomialProb_bsStep_variance`,
+  composing with `bsLogReturn_mean`/`bsLogReturn_variance`). Cited: QuantLib
+  `ql/methods/lattices/trinomialtree.cpp` (transcribed); Hull ch. 21 for the trinomial tree's
+  context (the formulas are the QuantLib source's, whose classical branch it attributes to
+  Hull–White and Clewlow). Disclosed out of scope: no multi-period tree object, no lattice
+  prices, no convergence; outside the window the same formulas produce signed weights (the
+  tradeoff the transcribed source documents). Axioms-clean, `full`.
+### The willow tree: the beta identity and moment/marginal preservation (2026-11-06)
+
+One `full` entry in `benchmarks/binomial.json`. Corpus 781 → 782 (746 full before this
+entry, 747 after; 764 → 765 delivery-ready). At authoring time origin/main's README
+lagged at 779/744; upstream v1.10.0 has since brought it to 781/746, which this entry
+takes to 782/747.
+
+- **`mf-willow-tree-moment-marginal-constraints`** (MathFin/Models/Binomial/WillowTree.lean):
+  Curran's willow tree prices against a Brownian motion with a time-inhomogeneous
+  Markov chain on a fixed node set with a fixed discrete marginal — the lattice has a
+  constant node count per step and widens like `sqrt(t)` only through the scaling
+  `X_k = sqrt(t_k) Z_k`. The module proves the construction's formalizable core:
+  the beta identity `1/sqrt(1 + alpha) = sqrt(t_k/t_{k+1})` for the de-correlation
+  coefficient on a grid with `t_{k+1} = (1 + alpha_k) t_k` (`willowBeta_eq_sqrt_div`,
+  `willowBeta_eq_sqrt_div'`); the moment-propagation induction — any family of
+  row-stochastic transition matrices satisfying the conditional first/second moment
+  rows `sum_j P_k(i,j) z_j = beta_k z_i`, `sum_j P_k(i,j) z_j^2 = beta_k^2 z_i^2 +
+  (1 - beta_k^2)` keeps a chain started at mass 1, mean 0 and unit second moment at
+  mass 1, mean 0 and unit second moment at every step, needing neither the marginal
+  constraint `qP = q` nor non-negative entries (`willowMarginal_mass`,
+  `willowMarginal_mean`, `willowMarginal_secondMoment`); marginal preservation — under
+  `qP = q` the marginal at every step is the same law `q` (`willowMarginal_eq`); the
+  cross moments `E[Z_k Z_{k+1}] = beta_k` and `E[X_k X_{k+1}] = t_k` in the scaled
+  variables on a grid with `beta_k = sqrt(t_k/t_{k+1})` — the Brownian covariance the
+  constraint system encodes (`willowMarginal_crossMoment`; the scaled second moment
+  `willowScaled_secondMoment`; the cross moment `willowScaled_crossMoment`); the join — the chain's standardized cross moment is the
+  construction's own `willowBeta` coefficient once `beta_k` is tied to the grid
+  (`willowMarginal_crossMoment_eq_willowBeta`); and the correlation bound — an honest
+  (non-negative, summing-to-one) transition row forces `beta_k^2 <= 1`, and at such a
+  coefficient the standard bivariate normal law has unit variances and covariance
+  `beta_k` (`WillowMomentConstraints.sq_le_one`,
+  `WillowMomentConstraints.bivariateNormal_moments`). Cited: Curran, Willow
+  Power: Optimizing Derivative Pricing Trees, ALGO Research Quarterly 4(4) (2001);
+  Ho, Willow Tree, MSc thesis, UBC (2000); the constraint set as implemented in the
+  open-source willowtree package (`willowtree/lp.py`). The linear program that finds
+  admissible transition matrices is disclosed out of scope; nothing is claimed about
+  lattice prices. Axioms-clean, `full`.
+
+### Natural cubic spline pillar interpolation: the moment system is a unit (2026-11-05)
+
+One `full` entry in `benchmarks/black_scholes.json`. Corpus 779 → 780.
+
+- **`mf-cubic-spline-moments-unique`** (`MathFin.CubicSpline.exists_unique_moments`,
+  `MathFin/Models/ModelFree/CubicSplineSmile.lean`): a natural cubic spline interpolating
+  pillar values `y 0, …, y n` at strictly increasing pillars `x 0 < ⋯ < x n` (e.g. an
+  FX/equity vol smile sampled at pillar deltas) has, by the textbook derivation (not
+  formalized: the system is defined as Stoer–Bulirsch state it), a tridiagonal linear
+  system in the interior moments `M 1, …, M (n-1)` once the natural boundary conditions
+  `M 0 = M n = 0` are substituted in. Every row of that system's coefficient matrix has
+  diagonal entry `2` and off-diagonal entries `μᵢ, λᵢ ≥ 0` with `μᵢ + λᵢ = 1 < 2`, so it is
+  strictly row diagonally dominant; Mathlib's `det_ne_zero_of_sum_row_lt_diag`
+  (`LinearAlgebra/Matrix/Gershgorin.lean`, a corollary of Gershgorin's circle theorem)
+  gives nonzero determinant, hence the system has exactly one solution for any data and
+  pillars. The same file's `interpSpline_left_eq`/`interpSpline_right_eq` show the
+  standard piecewise-cubic formula matches the pillar values exactly at both ends of each
+  piece for *any* candidate moment sequence, and `svi_pillar_interpSpline_eq`/
+  `svi_pillar_moments_unique` connect the scheme to the repository's parametric SVI smile
+  (`MathFin.SVI`): pillar values sampled from an SVI slice's total variance
+  interpolate exactly at the pillars, and the moment system for those SVI-sampled pillars
+  also has exactly one solution.
+  Reference: the nonsingularity step is formalized on the normalized moment system of
+  J. Stoer & R. Bulirsch, *Introduction to Numerical Analysis*, 3rd ed. (2002), §2.4.2;
+  existence and uniqueness of the natural cubic spline itself is R. L. Burden &
+  J. D. Faires, *Numerical Analysis*, 9th ed. (2011), Theorem 3.11. The strict-diagonal-
+  dominance step formalized here is the same nonsingularity argument that theorem's proof
+  uses, run on the normalized system rather than on B&F's own unnormalized one. SCOPE:
+  does not construct a single global function glued across all
+  pieces and does not prove global `C²` matching of one-sided derivatives at interior
+  knots (left to future work).
+
 ### Removable singularities in two stochastic-vol smile models (2026-11-01)
 
 Three `full` entries in `benchmarks/black_scholes.json`. Corpus 754 → 757.
@@ -483,7 +616,12 @@ split by area. What each bridge proves, by area:
   required equivalence); the law of one price and a positive super-replication lower bound
   (`mf-replication-martingale-price`, `mf-superhedging-bounded-below`; the duality equality stays
   open). Triangular no-arbitrage is derived from the multi-state FTAP
-  (`mf-triangle-arbitrage-ftap`; frictionless trades, positive rates).
+  (`mf-triangle-arbitrage-ftap`; frictionless trades, positive rates). A finite arbitrage-free
+  smile (increasing strikes, non-increasing prices, non-decreasing secant slopes) admits a
+  piecewise-linear interpolant that is itself convex and non-increasing on the whole quoted
+  range (`mf-piecewise-linear-arbitrage-free-interpolation`, reduced core — the existence half of
+  Kahalé's 2004 arbitrage-free interpolation problem for the simplest scheme; his own `C²`
+  construction is not formalized).
 - **Risk measures** (`risk_measures.json`, `actuarial.json`). Spectral risk on the quantile, with
   ES mixtures coherent (`mf-spectral-es-mixture-coherent`; step spectra only); expectiles strictly
   elicitable (`mf-expectile-elicitable`); the standard-deviation principle is VaR and ES at
@@ -515,7 +653,10 @@ split by area. What each bridge proves, by area:
   vanilla leg identified with the digital call contract's value
   (`mf-partial-time-barrier-down-add-up`, `mf-binary-barrier-inout-parity`, both `reduced_core`).
   `MargrabeGrounding`'s two existential theorems no longer claim to derive their hypothesis: they
-  now exhibit the measure and driver.
+  now exhibit the measure and driver. The Goldman–Sosin–Gatto continuous floating-strike lookback
+  closed form dominates the vanilla call struck at the running minimum, via a Mills-ratio
+  monotonicity argument on its removable-singularity carry term
+  (`mf-continuous-lookback-floating-strike`, `reduced_core`).
 - **Structural** (`black_scholes.json`, `binomial.json`). The American put is at least the
   Black–Scholes(–Merton) put (`mf-american-put-ge-bsm-european-put`; the early-exercise premium's
   positivity is not proved); its value is unchanged by null-set horizon changes
@@ -560,7 +701,10 @@ split by area. What each bridge proves, by area:
   the Uniswap v3 position against a covered call, and its price bound
   (`mf-uniswap-v3-position-covered-call`, `mf-uniswap-v3-position-bs-price-bound`, #92); the LP
   value under a lognormal price (`mf-cpmm-lp-expected-value-lognormal`); an AMM arbitrage exists iff
-  the pool price differs from the oracle (the direction of the profitable trade is a separate lemma) (`mf-cpmm-arbitrage-iff-price-divergence`); Glosten–Milgrom
+  the pool price differs from the oracle (the direction of the profitable trade is a separate lemma) (`mf-cpmm-arbitrage-iff-price-divergence`); historical-simulation VaR of a v3
+  concentrated-liquidity position never exceeds its current value and scales linearly with
+  deployed liquidity (`mf-uniswap-v3-concentrated-liquidity-historical-var`; fees, re-ranging and
+  horizon-scaling of the historical scenarios are not modelled); Glosten–Milgrom
   quotes as conditional expectations, and the model's witness (`mf-glosten-milgrom-quote-condexp`,
   `mf-glosten-milgrom-model-witness`); Roll's spread from the autocovariance
   (`mf-roll-spread-autocovariance`). Fees, gas and block timing are not modelled.

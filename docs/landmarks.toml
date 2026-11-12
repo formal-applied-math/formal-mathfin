@@ -78,15 +78,19 @@ also = [
 [[landmark]]
 decl = "MathFin.ftap_discrete"
 title = "Fundamental theorem of asset pricing"
-summary = """A discrete-time, finite-horizon market with one discounted risky asset on a finite \
-probability space of full support has no arbitrage if and only if it has an equivalent martingale \
-measure; the one-period theorem holds on any probability space with finitely many assets."""
-scope = """The multi-period theorem is proved unconditionally on finite probability spaces \
-only. On a general space, multi-period no arbitrage is equivalent to conditional one-period no \
-arbitrage (noArbitrage_iff_noArbitrageLocal) and one-period densities paste to an equivalent \
-martingale measure (LocalEMMDensities.isEMM_pastedMeasure), so the Dalang–Morton–Willinger \
-theorem follows from the conditional one-period theorem, which is not proved (the hypothesis \
-ConditionalOnePeriodFTAP of noArbitrage_iff_exists_isEMM). In continuous time \
+summary = """A discrete-time, finite-horizon market with one discounted risky asset has no \
+arbitrage if and only if it has an equivalent martingale measure, on a finite probability space \
+of full support (Harrison–Pliska) and on any probability space (Dalang–Morton–Willinger, \
+OneAsset.noArbitrage_iff_exists_isEMM); the one-period theorem holds on any probability space \
+with finitely many assets."""
+scope = """The multi-period theorem is proved for one asset only, on any probability space, \
+with no integrability assumption. For several assets on a general space, multi-period no \
+arbitrage is equivalent to conditional one-period no arbitrage \
+(noArbitrage_iff_noArbitrageLocal) and unnormalised one-period densities paste backward to an \
+equivalent martingale measure (exists_isEMM_of_onePeriodDensities), so the \
+Dalang–Morton–Willinger theorem follows from a conditional one-period hypothesis \
+(ConditionalOnePeriodFTAP of noArbitrage_iff_exists_isEMM: conditional no arbitrage yields such a \
+density), the step proved for one asset (OneAsset.exists_onePeriodDensity) and open for several. In continuous time \
 only the easy direction is proved: an equivalent martingale measure precludes arbitrage by simple \
 strategies. The second theorem (completeness iff a unique measure) is proved in both directions \
 only for one risky asset on a finite space of full support; in the Brownian market only \
@@ -95,8 +99,9 @@ also = [
   "MathFin.OnePeriodVector.ftap_one_period_vector",
   "MathFin.ftap_two",
   "MathFin.noArbitrage_iff_noArbitrageLocal",
-  "MathFin.LocalEMMDensities.isEMM_pastedMeasure",
+  "MathFin.exists_isEMM_of_onePeriodDensities",
   "MathFin.noArbitrage_iff_exists_isEMM",
+  "MathFin.OneAsset.noArbitrage_iff_exists_isEMM",
 ]
 
 [[landmark]]

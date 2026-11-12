@@ -6,8 +6,8 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Pricing.Parity
-public import MathFin.Pricing.FTAP.DalangMortonWillinger
 public import MathFin.Pricing.FTAP.FTAPDiscrete
+public import MathFin.Pricing.FTAP.OneAssetDMW
 public import MathFin.Pricing.Market
 public import MathFin.Probability.Martingales.TimeChange
 
@@ -41,12 +41,11 @@ the information at the horizon, agrees there with an equivalent martingale measu
 (`Market.IsPricingMeasure.noArbitrage_toMarket`). On a finite sample space with full support, no
 arbitrage is equivalent to the existence of a pricing measure
 (`noArbitrage_iff_exists_isPricingMeasure_of_finite`, Harrison–Pliska through `ftap_discrete`); on
-a general space the same holds **assuming `ConditionalOnePeriodFTAP`** (the conditional one-period
-FTAP, not proved in this library; `noArbitrage_iff_exists_isPricingMeasure`, through the
-Dalang–Morton–Willinger reduction). The composite `exists_isPricingMeasure_parity` adds parity:
-under that hypothesis an arbitrage-free adapted integrable market has one pricing measure `Q` under
-which, for every strike and maturity, the forward's price is `S₀ − K` and the call's price less the
-put's is `S₀ − K`.
+a general space the same holds with no assumption (`noArbitrage_iff_exists_isPricingMeasure`,
+Dalang–Morton–Willinger for one asset, `OneAsset.noArbitrage_iff_exists_isEMM`). The composite
+`exists_isPricingMeasure_parity` adds parity: an arbitrage-free adapted one-asset market has one
+pricing measure `Q` under which, for every strike and maturity, the forward's price is `S₀ − K` and
+the call's price less the put's is `S₀ − K`.
 
 ## Main definitions
 
@@ -61,10 +60,8 @@ put's is `S₀ − K`.
 * `isPricingMeasure_toMarket_iff`: the pricing measures of `toMarket` are the measures that agree
   with an `IsEMM` on the information at the horizon.
 * `noArbitrage_iff_exists_isPricingMeasure_of_finite`: the finite-`Ω` FTAP on the trunk.
-* `noArbitrage_iff_exists_isPricingMeasure`: the FTAP on the trunk, given
-  `ConditionalOnePeriodFTAP`.
-* `exists_isPricingMeasure_parity`: no arbitrage gives a pricing measure under which parity holds,
-  given `ConditionalOnePeriodFTAP`.
+* `noArbitrage_iff_exists_isPricingMeasure`: the FTAP on the trunk, on a general probability space.
+* `exists_isPricingMeasure_parity`: no arbitrage gives a pricing measure under which parity holds.
 
 ## References
 
@@ -232,32 +229,27 @@ theorem noArbitrage_iff_exists_isPricingMeasure_of_finite [Finite Ω] [Nonempty 
     fun ⟨_, hQ⟩ ↦ hQ.noArbitrage_toMarket⟩
 
 variable (hS) in
-/-- **The fundamental theorem of asset pricing on the trunk, assuming the conditional one-period
-FTAP** (Dalang–Morton–Willinger): for an adapted integrable one-asset price, if
-`ConditionalOnePeriodFTAP` holds (an hypothesis, **not proved** in this library: see
-`DalangMortonWillinger.lean`), no arbitrage is equivalent to the existence of a pricing measure of
-the discrete market. Only the forward direction uses the hypothesis. -/
-theorem noArbitrage_iff_exists_isPricingMeasure [IsProbabilityMeasure P]
-    (hint : ∀ t ≤ T, Integrable (S t) P) (hcond : ConditionalOnePeriodFTAP 𝓕 P S T) :
+/-- **The fundamental theorem of asset pricing on the trunk** (Dalang–Morton–Willinger for one
+asset): for an adapted one-asset price on a general probability space, no arbitrage is equivalent
+to the existence of a pricing measure of the discrete market. Only the forward direction is deep
+(`OneAsset.exists_isEMM_of_noArbitrage`). -/
+theorem noArbitrage_iff_exists_isPricingMeasure [IsProbabilityMeasure P] :
     NoArbitrage 𝓕 P S T ↔ ∃ Q, (toMarket P 𝓕 S T hS).IsPricingMeasure T Q :=
-  ⟨fun hNA ↦ (exists_isEMM_of_noArbitrage_of_conditionalFTAP hS hint hcond hNA).imp
+  ⟨fun hNA ↦ (OneAsset.exists_isEMM_of_noArbitrage hS hNA).imp
     fun _ ↦ isPricingMeasure_toMarket_of_isEMM, fun ⟨_, hQ⟩ ↦ hQ.noArbitrage_toMarket⟩
 
 variable (hS) in
-/-- **No arbitrage gives a pricing measure under which the contracts satisfy parity**, assuming the
-conditional one-period FTAP. For an adapted integrable one-asset price with
-`ConditionalOnePeriodFTAP` (an hypothesis, **not proved** in this library: see
-`DalangMortonWillinger.lean`), no arbitrage yields one pricing measure `Q` of `toMarket` under
+/-- **No arbitrage gives a pricing measure under which the contracts satisfy parity.** For an
+adapted one-asset price with no arbitrage there is one pricing measure `Q` of `toMarket` under
 which, for every strike and maturity, the forward's price is `S₀ - K` and the call's price less the
 put's is `S₀ - K`. -/
-theorem exists_isPricingMeasure_parity [IsProbabilityMeasure P] (hint : ∀ t ≤ T, Integrable (S t) P)
-    (hcond : ConditionalOnePeriodFTAP 𝓕 P S T) (hNA : NoArbitrage 𝓕 P S T)
+theorem exists_isPricingMeasure_parity [IsProbabilityMeasure P] (hNA : NoArbitrage 𝓕 P S T)
     (hS₀ : ∀ ω, S 0 ω = S₀) :
     ∃ Q, (toMarket P 𝓕 S T hS).IsPricingMeasure T Q ∧ ∀ (K : ℝ) (τ : ℝ≥0),
       (toMarket P 𝓕 S T hS).price Q (forward K τ) = S₀ - K ∧
       (toMarket P 𝓕 S T hS).price Q (europeanCall K τ)
         - (toMarket P 𝓕 S T hS).price Q (europeanPut K τ) = S₀ - K := by
-  obtain ⟨Q, hQ⟩ := exists_isEMM_of_noArbitrage_of_conditionalFTAP hS hint hcond hNA
+  obtain ⟨Q, hQ⟩ := OneAsset.exists_isEMM_of_noArbitrage hS hNA
   refine ⟨Q, isPricingMeasure_toMarket_of_isEMM hQ, fun K τ ↦ ?_⟩
   simp only [price_toMarket]
   exact ⟨value_forward hQ hS₀ K τ, value_europeanCall_sub_put hQ hS₀ K τ⟩
