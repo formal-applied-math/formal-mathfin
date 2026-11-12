@@ -44,14 +44,15 @@ arbitrage among the quotes) and non-decreasing secant slopes (no butterfly arbit
 quotes) extends to a function that is convex and non-increasing on the whole strike range
 `[K 0, K n]`, and agrees with the quoted data exactly at every knot and along every linear piece
 (`convexOn_piecewiseLinear`, `antitoneOn_piecewiseLinear`, `piecewiseLinear_eq_knot`,
-`piecewiseLinear_eq_segment`). **Not formalised**: Kahalé's `C²` construction itself and any smoothness beyond
-piecewise-linearity. `IsArbitrageFreeQuotes` is the convexity-and-monotonicity trace only, with
-no price bounds, and the first four theorems say nothing outside `[K 0, K n]`. The last section
+`piecewiseLinear_eq_segment`). **Not formalised**: Kahalé's `C²` construction itself and any
+smoothness beyond piecewise-linearity. `IsArbitrageFreeQuotes` is the
+convexity-and-monotonicity trace only, with no price bounds, and the first four theorems say
+nothing outside `[K 0, K n]`. The last section
 joins the interpolant to the library's market: when the quotes also start at the forward `1` at
 strike `0`, end at the worthless call `0` and lie above intrinsic value, the interpolant continued
 by `0` is `IsNormalizedCallPrice`, so by Roper's converse the quotes are the call prices of a
-market (`exists_market_of_isArbitrageFreeQuotes`). Without the end-point hypotheses no arbitrage-free
-continuation to all strikes need exist.
+market (`exists_market_of_isArbitrageFreeQuotes`). Without the end-point hypotheses no
+arbitrage-free continuation to all strikes need exist.
 
 ## Main definitions
 
@@ -417,7 +418,8 @@ theorem isNormalizedCallPrice_callPriceExtension {K C : ℕ → ℝ} {n : ℕ} (
     hq.strikes_mono.monotoneOn (mem_Iic.2 hn) (mem_Iic.2 le_rfl) hn
   have hEf : ∀ x ∈ Icc (K 0) (K n), E x = f x := fun x hx ↦ ite_eq_left hx.2
   have hEgt : ∀ x, K n < x → E x = 0 := fun x hx ↦ ite_eq_right (not_le.2 hx)
-  have hfK : ∀ {i : ℕ}, i ≤ n → f (K i) = C i := fun hi ↦ piecewiseLinear_eq_knot K C hn hq hi
+  have hfK : ∀ {i : ℕ}, i ≤ n → f (K i) = C i := fun hi ↦
+    piecewiseLinear_eq_knot K C hn hq hi
   have hEn : E (K n) = 0 := by rw [hEf _ ⟨hK0n.le, le_rfl⟩, hfK le_rfl, hCn]
   have hE0 : E (K 0) = 1 := by rw [hEf _ ⟨le_rfl, hK0n.le⟩, hfK (Nat.zero_le _), hC0]
   have hanti := antitoneOn_piecewiseLinear K C hn hq
@@ -461,7 +463,8 @@ theorem isNormalizedCallPrice_callPriceExtension {K C : ℕ → ℝ} {n : ℕ} (
     refine max_le ?_ (hEnonneg x hx0)
     by_cases hxn : x ≤ K n
     · by_cases hx1 : x ≤ K 1
-      · rw [hEf x ⟨hx0, hxn⟩, hf, piecewiseLinear_eq_segment K C hn hq (i := 0) hn ⟨hx0, hx1⟩]
+      · rw [hEf x ⟨hx0, hxn⟩, hf,
+          piecewiseLinear_eq_segment K C hn hq (i := 0) hn ⟨hx0, hx1⟩]
         show 1 - x ≤ C 0 + (C 1 - C 0) / (K 1 - K 0) * (x - K 0)
         rw [hC0, h0, sub_zero, sub_zero]
         linarith [mul_le_mul_of_nonneg_right hslope hx.le]
