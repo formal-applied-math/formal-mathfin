@@ -221,4 +221,74 @@ theorem price_europeanCall_of_isPricingMeasure_withDensity
     ← integral_trim ((natFiltration hWmeas).le T) hFm, ← hprice]
   exact price_europeanCall_constGirsanovMeasure hW hWmeas hTH hS₀ hK hσ hT
 
+/-! ### Bounded densities against the physical measure -/
+
+section Bounded
+
+open ItoIntegralCLM in
+/-- The sliced integral of the squared constant integrand is `c²H`, on almost every path. -/
+lemma ae_integral_sq_processToLpPredictable_const (c : ℝ) (H : ℝ≥0) :
+    ∀ᵐ ω ∂μ, ∫ s in Set.Ioc (0 : ℝ≥0) H,
+      (processToLpPredictable (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas c)
+        (fun _ _ ↦ le_rfl) (s, ω)) ^ 2 ∂ItoIntegralL2.timeMeasure = c ^ 2 * H := by
+  filter_upwards [processToLpPredictable_ae_slice (μ := μ) H hWmeas
+    (isStronglyPredictable_const hWmeas c) (fun _ _ ↦ le_rfl)] with ω h
+  have h3 : ∀ᵐ s ∂(ItoIntegralL2.timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) H)),
+      (processToLpPredictable (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas c)
+        (fun _ _ ↦ le_rfl) (s, ω)) ^ 2 = c ^ 2 := h.mono fun s hs ↦ by rw [hs]
+  rw [integral_congr_ae h3, setIntegral_const, smul_eq_mul, measureReal_def,
+    ItoIntegralL2.timeMeasure_Ioc, ENNReal.toReal_ofReal (by simp), NNReal.coe_zero, sub_zero]
+  ring
+
+include hW in
+/-- **The Doléans densities of `θ` and `−θ` multiply to a constant.** For the constant integrand
+the Itô integral is odd and the bracket is `θ²H`, so `Z_H(θ)·Z_H(−θ) = exp(−θ²H)` almost surely. -/
+lemma ae_mul_ZTpred_const_neg (θ : ℝ) (H : ℝ≥0) :
+    ∀ᵐ ω ∂μ,
+      ZTpred hW H hWmeas (isStronglyPredictable_const hWmeas θ) (fun _ _ ↦ le_rfl) ω
+        * ZTpred hW H hWmeas (isStronglyPredictable_const hWmeas (-θ)) (fun _ _ ↦ le_rfl) ω
+        = Real.exp (-(θ ^ 2 * H)) := by
+  have hP : processToLpPredictable (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas (-θ))
+      (fun _ _ ↦ le_rfl)
+      = -processToLpPredictable (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas θ)
+        (fun _ _ ↦ le_rfl) := by
+    refine Lp.ext ?_
+    filter_upwards [processToLpPredictable_coeFn (μ := μ) H hWmeas
+        (isStronglyPredictable_const hWmeas (-θ)) (fun _ _ ↦ le_rfl),
+      processToLpPredictable_coeFn (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas θ)
+        (fun _ _ ↦ le_rfl), Lp.coeFn_neg (processToLpPredictable (μ := μ) H hWmeas
+          (isStronglyPredictable_const hWmeas θ) (fun _ _ ↦ le_rfl))] with z h1 h2 h3
+    rw [h1, h3, Pi.neg_apply, h2]
+    rfl
+  filter_upwards [ae_integral_sq_processToLpPredictable_const (μ := μ) hWmeas θ H,
+    ae_integral_sq_processToLpPredictable_const (μ := μ) hWmeas (-θ) H,
+    Lp.coeFn_neg (ItoIntegralCLM.itoIntegralCLM hW H hWmeas
+      (processToLpPredictable (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas θ)
+        (fun _ _ ↦ le_rfl)))] with ω h1 h2 h3
+  simp only [ZTpred, contDoleansExp, itoIntPred]
+  rw [h1, h2, ← Real.exp_add, hP, map_neg, h3]
+  congr 1
+  simp only [Pi.neg_apply]
+  ring
+
+include hW in
+/-- **The inverse Doléans density is integrable.** `1/Z_H(θ) = exp(θ²H)·Z_H(−θ)` almost surely
+(`ae_mul_ZTpred_const_neg`), and `Z_H(−θ)` is integrable. -/
+lemma integrable_inv_ZTpred_const (θ : ℝ) (H : ℝ≥0) :
+    Integrable (fun ω ↦
+      (ZTpred hW H hWmeas (isStronglyPredictable_const hWmeas θ) (fun _ _ ↦ le_rfl) ω)⁻¹) μ := by
+  obtain ⟨V, hV⟩ := exists_approxSeq (μ := μ) hWmeas H
+    (isStronglyPredictable_const hWmeas (-θ)) (fun _ _ ↦ le_rfl)
+  have h := (memLp_ZTpred_one hW hWmeas H (isStronglyPredictable_const hWmeas (-θ))
+    (fun _ _ ↦ le_rfl) V hV).integrable le_rfl
+  refine (h.const_mul (Real.exp (θ ^ 2 * H))).congr ?_
+  filter_upwards [ae_mul_ZTpred_const_neg hW hWmeas θ H] with ω hω
+  refine eq_inv_of_mul_eq_one_left ?_
+  calc _ = Real.exp (θ ^ 2 * H) * (ZTpred hW H hWmeas (isStronglyPredictable_const hWmeas θ)
+        (fun _ _ ↦ le_rfl) ω * ZTpred hW H hWmeas (isStronglyPredictable_const hWmeas (-θ))
+        (fun _ _ ↦ le_rfl) ω) := by ring
+    _ = 1 := by rw [hω, ← Real.exp_add]; simp
+
+end Bounded
+
 end MathFin.Contracts.BlackScholes
