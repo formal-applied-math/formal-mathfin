@@ -6,6 +6,7 @@ Authors: Yang Ye
 module
 
 public import MathFin.Models.ModelFree.CallPriceFunction
+public import MathFin.Models.ModelFree.RoperConverse
 public import Mathlib.Algebra.Order.Star.Real
 public import Mathlib.Analysis.RCLike.Basic
 public import Mathlib.Order.Monotone.Union
@@ -43,12 +44,15 @@ arbitrage among the quotes) and non-decreasing secant slopes (no butterfly arbit
 quotes) extends to a function that is convex and non-increasing on the whole strike range
 `[K 0, K n]`, and agrees with the quoted data exactly at every knot and along every linear piece
 (`convexOn_piecewiseLinear`, `antitoneOn_piecewiseLinear`, `piecewiseLinear_eq_knot`,
-`piecewiseLinear_eq_segment`). **Not formalised**: Kahalé's `C²` construction itself, any
-smoothness beyond piecewise-linearity, and any extrapolation outside `[K 0, K n]` — the
-asymptotic conditions `IsNormalizedCallPrice` also carries (the limits at strike `0` and at
-infinity) are a separate, unrelated concern this file says nothing about. Nor are the price
-bounds of `IsNormalizedCallPrice` (`intrinsic_le`, `le_one`) assumed on the quotes or derived
-for the interpolant: `IsArbitrageFreeQuotes` is the convexity-and-monotonicity trace only.
+`piecewiseLinear_eq_segment`). **Not formalised**: Kahalé's `C²` construction itself and any
+smoothness beyond piecewise-linearity. `IsArbitrageFreeQuotes` is the
+convexity-and-monotonicity trace only, with no price bounds, and the first four theorems say
+nothing outside `[K 0, K n]`. The last section
+joins the interpolant to the library's market: when the quotes also start at the forward `1` at
+strike `0`, end at the worthless call `0` and lie above intrinsic value, the interpolant continued
+by `0` is `IsNormalizedCallPrice`, so by Roper's converse the quotes are the call prices of a
+market (`exists_market_of_isArbitrageFreeQuotes`). Without the end-point hypotheses no
+arbitrage-free continuation to all strikes need exist.
 
 ## Main definitions
 
@@ -72,6 +76,11 @@ for the interpolant: `IsArbitrageFreeQuotes` is the convexity-and-monotonicity t
   satisfies `IsArbitrageFreeQuotes` — real market quotes sampled from one automatically do. (One
   direction only: `IsArbitrageFreeQuotes` carries no price bounds, so it is weaker than being
   such a trace.)
+* `callPriceExtension`: the interpolant continued by `0` beyond the last strike.
+* `isNormalizedCallPrice_callPriceExtension`: quotes that start at the forward `1` at strike `0`,
+  end at `0` and lie above intrinsic value extend to a normalised call price function.
+* `exists_market_of_isArbitrageFreeQuotes`: such quotes are the call prices, at the quoted
+  strikes, of a market with a pricing measure (Roper's converse applied to the extension).
 
 ## References
 
@@ -88,7 +97,7 @@ butterfly arbitrage, vertical spread arbitrage, MSC 91G20, JEL G13
 
 namespace MathFin
 
-open Set
+open Set Filter Topology MeasureTheory MathFin.Contracts
 
 /-- The piecewise-linear interpolant through `n + 1` quoted points `(K 0, C 0), …, (K n, C n)`,
 for `n ≥ 1` (the `n = 0` case returns the junk value `0`, never used by the theorems below).
@@ -376,5 +385,123 @@ theorem isArbitrageFreeQuotes_of_isNormalizedCallPrice {Cc : ℝ → ℝ} (hCc :
     hCc.convexOn.slope_mono_adjacent (hKpos i (by omega)) (hKpos (i + 2) hi)
       (hK (mem_Iic.2 (by omega)) (mem_Iic.2 (by omega)) (by omega))
       (hK (mem_Iic.2 (by omega)) (mem_Iic.2 (by omega)) (by omega))
+
+/-! ### From arbitrage-free quotes to a market
+
+Finitely many quotes that are free of static arbitrage and that reach the two ends of the call
+price function (the forward `1` at strike `0`, the worthless call `0` at the last strike) are the
+call prices of a market: the piecewise-linear interpolant, continued by `0` beyond the last strike,
+is a normalised call price function, and Roper's converse
+(`exists_market_of_isNormalizedCallPrice`) realises it. -/
+
+/-- The piecewise-linear interpolant through `n + 1` quotes, continued by `0` beyond the last
+strike `K n`: the candidate call price function on `(0, ∞)`. -/
+noncomputable def callPriceExtension (K C : ℕ → ℝ) (n : ℕ) (x : ℝ) : ℝ :=
+  if x ≤ K n then piecewiseLinear K C n x else 0
+
+/-- **Arbitrage-free quotes that reach both ends of the call price function extend to a
+normalised call price function.** The quotes are arbitrage-free (`IsArbitrageFreeQuotes`), start
+at the forward `1` at strike `0`, end at the worthless call `0`, and lie above intrinsic value
+(`max (1 - K i) 0 ≤ C i`). Then the piecewise-linear interpolant continued by `0` is
+`IsNormalizedCallPrice`. -/
+theorem isNormalizedCallPrice_callPriceExtension {K C : ℕ → ℝ} {n : ℕ} (hn : 1 ≤ n)
+    (hq : IsArbitrageFreeQuotes K C n) (h0 : K 0 = 0) (hC0 : C 0 = 1) (hCn : C n = 0)
+    (hint : ∀ i ≤ n, max (1 - K i) 0 ≤ C i) :
+    IsNormalizedCallPrice (callPriceExtension K C n) := by
+  set f := piecewiseLinear K C n with hf
+  set E := callPriceExtension K C n with hE
+  have hK0n : K 0 < K n :=
+    hq.strikes_mono (mem_Iic.2 (by omega)) (mem_Iic.2 le_rfl) (by omega)
+  have hK01 : K 0 < K 1 :=
+    hq.strikes_mono (mem_Iic.2 (by omega)) (mem_Iic.2 hn) one_pos
+  have hK1n : K 1 ≤ K n :=
+    hq.strikes_mono.monotoneOn (mem_Iic.2 hn) (mem_Iic.2 le_rfl) hn
+  have hEf : ∀ x ∈ Icc (K 0) (K n), E x = f x := fun x hx ↦ ite_eq_left hx.2
+  have hEgt : ∀ x, K n < x → E x = 0 := fun x hx ↦ ite_eq_right (not_le.2 hx)
+  have hfK : ∀ {i : ℕ}, i ≤ n → f (K i) = C i := fun hi ↦
+    piecewiseLinear_eq_knot K C hn hq hi
+  have hEn : E (K n) = 0 := by rw [hEf _ ⟨hK0n.le, le_rfl⟩, hfK le_rfl, hCn]
+  have hE0 : E (K 0) = 1 := by rw [hEf _ ⟨le_rfl, hK0n.le⟩, hfK (Nat.zero_le _), hC0]
+  have hanti := antitoneOn_piecewiseLinear K C hn hq
+  have hconv : ConvexOn ℝ (Icc (K 0) (K n)) E :=
+    (convexOn_piecewiseLinear K C hn hq).congr fun x hx ↦ (hEf x hx).symm
+  have hEnonneg : ∀ x, K 0 ≤ x → 0 ≤ E x := by
+    intro x hx0
+    by_cases hx : x ≤ K n
+    · rw [hEf x ⟨hx0, hx⟩, ← hCn, ← hfK le_rfl]
+      exact hanti ⟨hx0, hx⟩ ⟨hK0n.le, le_rfl⟩ hx
+    · rw [hEgt x (not_le.1 hx)]
+  have hglue : ∀ c, ConvexOn ℝ (Icc (K 0) c) E := fun c ↦
+    convexOn_glue (s := 0) hK0n hconv
+      (fun y hy ↦ by
+        rw [hEn]
+        exact div_nonpos_of_nonpos_of_nonneg (by linarith [hEnonneg y hy.1])
+          (sub_nonneg.2 hy.2.le))
+      (fun z hz ↦ by
+        rcases hz.1.eq_or_lt with rfl | hz'
+        · simp
+        · rw [hEgt z hz', hEn]; simp)
+  have hconvI : ConvexOn ℝ (Ioi 0) E := by
+    refine ⟨convex_Ioi 0, fun x hx y hy a b ha hb hab ↦ ?_⟩
+    exact (hglue (max x (max y (K n)))).2 ⟨h0 ▸ hx.le, le_max_left _ _⟩
+      ⟨h0 ▸ hy.le, (le_max_left _ _).trans (le_max_right _ _)⟩ ha hb hab
+  have hup : ∀ x ∈ Ioi (0 : ℝ), E x ≤ 1 := by
+    intro x hx
+    have hx0 : K 0 ≤ x := h0 ▸ hx.le
+    by_cases hxn : x ≤ K n
+    · rw [hEf x ⟨hx0, hxn⟩, ← hC0, ← hfK (Nat.zero_le _)]
+      exact hanti ⟨le_rfl, hK0n.le⟩ ⟨hx0, hxn⟩ hx0
+    · rw [hEgt x (not_le.1 hxn)]; exact zero_le_one
+  -- the first slope is at least `-1`: the first quote lies above intrinsic value
+  have hslope : -1 ≤ (C 1 - 1) / K 1 := by
+    rw [le_div_iff₀ (h0 ▸ hK01)]
+    have := (le_max_left _ _).trans (hint 1 hn)
+    linarith
+  have hlow : ∀ x ∈ Ioi (0 : ℝ), max (1 - x) 0 ≤ E x := by
+    intro x hx
+    have hx0 : K 0 ≤ x := h0 ▸ hx.le
+    refine max_le ?_ (hEnonneg x hx0)
+    by_cases hxn : x ≤ K n
+    · by_cases hx1 : x ≤ K 1
+      · rw [hEf x ⟨hx0, hxn⟩, hf,
+          piecewiseLinear_eq_segment K C hn hq (i := 0) hn ⟨hx0, hx1⟩]
+        show 1 - x ≤ C 0 + (C 1 - C 0) / (K 1 - K 0) * (x - K 0)
+        rw [hC0, h0, sub_zero, sub_zero]
+        linarith [mul_le_mul_of_nonneg_right hslope hx.le]
+      · replace hx1 := not_le.1 hx1
+        have hsec := hconv.secant_mono (a := K 0) ⟨le_rfl, hK0n.le⟩ (x := K 1)
+          ⟨hK01.le, hK1n⟩ (y := x) ⟨hx0, hxn⟩ hK01.ne' (by rw [h0]; exact hx.ne') hx1.le
+        have hE1 : E (K 1) = C 1 := by rw [hEf _ ⟨hK01.le, hK1n⟩, hfK hn]
+        rw [hE1, hE0, h0, sub_zero, sub_zero] at hsec
+        have h2 := hslope.trans hsec
+        rw [le_div_iff₀ hx] at h2
+        linarith
+    · rw [hEgt x (not_le.1 hxn)]
+      have := (le_max_left _ _).trans (hint n le_rfl)
+      rw [hCn] at this
+      linarith [not_le.1 hxn]
+  exact IsNormalizedCallPrice.of_convexOn hconvI hlow hup
+    (tendsto_const_nhds.congr' (by
+      filter_upwards [eventually_gt_atTop (K n)] with x hx using (hEgt x hx).symm))
+
+/-- **Arbitrage-free quotes are the call prices of a market.** Arbitrage-free quotes that start
+at the forward `1` at strike `0`, end at the worthless call `0` and lie above intrinsic value are
+the call prices, at the quoted strikes, of a market with unit numéraire, a nonnegative asset of
+forward one and a pricing measure. By Roper's converse, applied to the piecewise-linear
+interpolant continued by `0` (`isNormalizedCallPrice_callPriceExtension`). -/
+theorem exists_market_of_isArbitrageFreeQuotes {K C : ℕ → ℝ} {n : ℕ} (hn : 1 ≤ n)
+    (hq : IsArbitrageFreeQuotes K C n) (h0 : K 0 = 0) (hC0 : C 0 = 1) (hCn : C n = 0)
+    (hint : ∀ i ≤ n, max (1 - K i) 0 ≤ C i) :
+    ∃ (M : Market Unit ℝ) (Q : Measure ℝ), (∀ t ω, M.numeraire t ω = 1) ∧
+      (∀ ω, 0 ≤ M.asset () 1 ω) ∧ M.IsPricingMeasure 1 Q ∧
+      M.price Q (.pay 1 (.obs () 1)) = 1 ∧
+      ∀ i, 1 ≤ i → i ≤ n → M.price Q (europeanCall (K i) 1) = C i := by
+  obtain ⟨M, Q, hnum, hasset, hQ, hfwd, hcall⟩ :=
+    exists_market_of_isNormalizedCallPrice
+      (isNormalizedCallPrice_callPriceExtension hn hq h0 hC0 hCn hint)
+  refine ⟨M, Q, hnum, hasset, hQ, hfwd, fun i hi1 hin ↦ ?_⟩
+  have hKi : 0 < K i := h0 ▸ hq.strikes_mono (mem_Iic.2 (by omega)) (mem_Iic.2 hin) hi1
+  rw [hcall _ hKi, callPriceExtension, ite_eq_left (hq.strikes_mono.monotoneOn (mem_Iic.2 hin)
+    (mem_Iic.2 le_rfl) hin), piecewiseLinear_eq_knot K C hn hq hin]
 
 end MathFin

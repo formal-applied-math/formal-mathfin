@@ -112,7 +112,7 @@ convexity, ATM strike, delta-neutral straddle, MSC 91G15, MSC 91G20, JEL G13
 namespace MathFin
 
 open Real
-open MathFin.ForwardSmile (dpl dmi dpl_eq)
+open MathFin.ForwardSmile (dpl dmi dpl_eq bsd1_eq_dpl)
 
 /-! ## The quoting conventions in delta space -/
 
@@ -213,23 +213,6 @@ quote names through its delta. On the flat slice `d₊` is affine in `k` with sl
 so the parametrization by `z` (equivalently by `Φ(z) ∈ (0, 1)`) is a bijection; see
 `dpl_fxDeltaStrike`, `fxDelta_eq_iff`, `existsUnique_fxDelta_eq`. -/
 noncomputable def fxDeltaStrike (w z : ℝ) : ℝ := w / 2 - Real.sqrt w * z
-
-/-- The flat-slice identification of `d₁` with `d₊`: at zero rates and strike `K = F·e^k`,
-`bsd1` is exactly the `(k, w)` upper argument `dpl k (σ²T)` of
-`MathFin.Models.LocalVol.ForwardSmile`. -/
-theorem bsd1_eq_dpl {F k σ T : ℝ} (hF : F ≠ 0) (hσ : 0 < σ) (hT : 0 < T) :
-    bsd1 F (F * Real.exp k) 0 σ T = dpl k (σ ^ 2 * T) := by
-  have hlog : Real.log (F / (F * Real.exp k)) = -k := by
-    rw [show F / (F * Real.exp k) = (Real.exp k)⁻¹ by field_simp, Real.log_inv, Real.log_exp]
-  have hden : σ * Real.sqrt T ≠ 0 :=
-    mul_ne_zero hσ.ne' (Real.sqrt_pos.mpr hT).ne'
-  unfold bsd1 dpl
-  rw [hlog]
-  have hsplit : Real.sqrt (σ ^ 2 * T) = σ * Real.sqrt T := by
-    rw [Real.sqrt_mul (sq_nonneg σ) T, Real.sqrt_sq hσ.le]
-  rw [hsplit]
-  field_simp [hden]
-  ring
 
 /-- **The flat-slice delta is `Φ(d₊)`** (BRSD eq. (4), the driftless forward delta): the
 spot derivative of the zero-rate call at spot `S = F`, strike `K = F·e^k`, volatility `σ`,

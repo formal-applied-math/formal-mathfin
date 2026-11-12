@@ -747,14 +747,16 @@ attribute [blueprint "thm:willow-beta-identity"
   marginal constraints when the step is rescaled. The willow tree is a lattice
   discretization of the GBM, whose marginals the constraints preserve. -/)]
   MathFin.willowBeta_eq_sqrt_div
-attribute [blueprint "thm:arbitrage-free-smile-interpolation"
-  (title := "Piecewise-linear arbitrage-free interpolation of a quoted call-price smile")
-  (statement := /-- A finite dataset of arbitrage-free call-price quotes (increasing
-  strikes, non-increasing prices, non-decreasing secant slopes) admits a piecewise-linear
-  interpolant that is itself convex and non-increasing across the whole quoted strike
-  range and matches the quotes exactly, at the knots and along every segment. No price
-  bounds and no behaviour outside the quoted range are stated. -/)]
-  MathFin.convexOn_piecewiseLinear
+attribute [blueprint "thm:quotes-market-realisation"
+  (title := "Arbitrage-free call quotes are the prices of a market")
+  (uses := ["thm:smile-no-arbitrage"])
+  (statement := /-- Finitely many call-price quotes at increasing strikes $0 = K_0 < \dots < K_n$,
+  with $C_0 = 1$, $C_n = 0$, non-increasing, with non-decreasing secant slopes, and above the
+  intrinsic value $(1-K_i)^+$, are the call prices at maturity one of a market with unit
+  numéraire, a nonnegative asset of forward one and a pricing measure. The piecewise-linear
+  interpolant, continued by $0$ beyond $K_n$, is a normalised call price function, and Roper's
+  converse realises it. -/)]
+  MathFin.exists_market_of_isArbitrageFreeQuotes
 
 -- ===== valuation/diffusions: Black–Scholes and Bachelier =====
 

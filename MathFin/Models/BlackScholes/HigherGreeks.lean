@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Models.BlackScholes.PDE
+public import Mathlib.Analysis.Calculus.Deriv.Prod
 
 /-!
 # Higher-order Black–Scholes Greeks
@@ -40,6 +41,10 @@ All for `K, σ, S, τ > 0`.
 * `hasDerivAt_deriv_deriv_bsV_S`: speed, `∂³V/∂S³ = −ϕ(d₁) (d₁ + σ√τ) / (S² σ² τ)`.
 * `hasDerivAt_bsV_SSS`: the `S`-derivative of the gamma formula `ϕ(d₁) / (S σ √τ)`, which is
   the speed formula.
+* `hasDerivAt_bsV_S_chainRule`, `hasDerivAt_bsV_param_chainRule`: when the volatility is itself
+  a differentiable function `v` of the spot (substituted for both arguments of `bsV`) or of some
+  other parameter, the price's derivative is `Δ_BS + Λ_BS · v'` resp. `Λ_BS · v'`. The first is
+  proved from the joint Fréchet derivative of `bsV` in `(S, σ)`.
 
 ## References
 
@@ -212,5 +217,92 @@ theorem hasDerivAt_deriv_deriv_bsV_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   hasDerivAt_deriv_of_eventually
     ((eventually_gt_nhds hS).mono fun _ hs ↦ hasDerivAt_deriv_bsV_S hK hσ hs hτ)
     (hasDerivAt_bsV_SSS hK hσ hS hτ)
+
+
+/-! ### Chain rule when the volatility is itself a function
+
+These hold for any differentiable vol function `v`: the price's derivative is the Black–Scholes
+delta and vega combined with the slope of `v`. -/
+
+/-- **The vol-curve Delta chain rule**: if the implied vol used to price a call is
+itself a differentiable function `v` of the spot/forward — substituted for *both*
+arguments of `bsV` simultaneously, `s ↦ bsV K r (v s) s τ` — the price's derivative at
+`S` is `Δ_BS + Λ_BS · v'`, the ordinary Black-Scholes delta and vega (both evaluated at
+`σ = v S`) combined with the vol curve's own slope `v'`.
+
+The proof is a genuine total derivative, not formula-splicing: `bsV` is shown
+differentiable as a function of `(S, σ) ∈ ℝ × ℝ` jointly (`fun_prop` over its elementary
+pieces, with `Phi`'s own `HasDerivAt` supplied for the two composed `Phi ∘ bsd1`,
+`Phi ∘ bsd2` legs), and the resulting unknown Fréchet derivative's two partial
+directions are identified with the already-proved `hasDerivAt_bsV_S`/`hasDerivAt_bsV_sigma`
+values via uniqueness of one-variable derivatives
+(`HasFDerivAt.comp_hasDerivAt` along the two coordinate paths). Composing that Fréchet
+derivative with the diagonal path `s ↦ (s, v s)` and using linearity gives the stated
+sum. -/
+theorem hasDerivAt_bsV_S_chainRule {K r : ℝ} (hK : 0 < K) {S σ τ : ℝ} (hS : 0 < S)
+    (hσ : 0 < σ) (hτ : 0 < τ) {v : ℝ → ℝ} {v' : ℝ} (hv : HasDerivAt v v' S) (hvS : v S = σ) :
+    HasDerivAt (fun s ↦ bsV K r (v s) s τ)
+      (Phi (bsd1 S K r σ τ) + S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) * Real.sqrt τ * v')
+      S := by
+  have h1 : S / K ≠ 0 := div_ne_zero hS.ne' hK.ne'
+  have h2 : σ * Real.sqrt τ ≠ 0 := mul_ne_zero hσ.ne' (Real.sqrt_pos.mpr hτ).ne'
+  have hd1 : DifferentiableAt ℝ (fun p : ℝ × ℝ ↦ bsd1 p.1 K r p.2 τ) (S, σ) := by
+    unfold bsd1; fun_prop (disch := assumption)
+  have hd2 : DifferentiableAt ℝ (fun p : ℝ × ℝ ↦ bsd2 p.1 K r p.2 τ) (S, σ) := by
+    unfold bsd2 bsd1; fun_prop (disch := assumption)
+  have hPhi1 : DifferentiableAt ℝ Phi (bsd1 S K r σ τ) := (hasDerivAt_Phi _).differentiableAt
+  have hPhi2 : DifferentiableAt ℝ Phi (bsd2 S K r σ τ) := (hasDerivAt_Phi _).differentiableAt
+  have hcomp1 : DifferentiableAt ℝ (fun p : ℝ × ℝ ↦ Phi (bsd1 p.1 K r p.2 τ)) (S, σ) :=
+    DifferentiableAt.comp (f := fun p : ℝ × ℝ ↦ bsd1 p.1 K r p.2 τ) (x := (S, σ)) hPhi1 hd1
+  have hcomp2 : DifferentiableAt ℝ (fun p : ℝ × ℝ ↦ Phi (bsd2 p.1 K r p.2 τ)) (S, σ) :=
+    DifferentiableAt.comp (f := fun p : ℝ × ℝ ↦ bsd2 p.1 K r p.2 τ) (x := (S, σ)) hPhi2 hd2
+  have hg : DifferentiableAt ℝ (fun p : ℝ × ℝ ↦ bsV K r p.2 p.1 τ) (S, σ) := by
+    unfold bsV; fun_prop (disch := assumption)
+  set g : ℝ × ℝ → ℝ := fun p ↦ bsV K r p.2 p.1 τ with hgdef
+  obtain ⟨f', hf'⟩ := hg
+  -- Extract the S-partial and identify it with the known Delta value.
+  have hpathS : HasDerivAt (fun s : ℝ ↦ ((s, σ) : ℝ × ℝ)) ((1 : ℝ), (0 : ℝ)) S :=
+    (hasDerivAt_id S).prodMk (hasDerivAt_const S σ)
+  have hextractS : HasDerivAt (fun s ↦ g (s, σ)) (f' (1, 0)) S :=
+    (hf'.comp_hasDerivAt S hpathS : HasDerivAt (g ∘ fun s : ℝ ↦ (s, σ)) (f' (1, 0)) S)
+  have hextractS' : HasDerivAt (fun s ↦ bsV K r σ s τ) (f' (1, 0)) S := hextractS
+  have hS_eq : f' (1, 0) = Phi (bsd1 S K r σ τ) :=
+    hextractS'.unique (hasDerivAt_bsV_S hK hσ hS hτ)
+  -- Extract the σ-partial and identify it with the known Vega value.
+  have hpathSig : HasDerivAt (fun s : ℝ ↦ ((S, s) : ℝ × ℝ)) ((0 : ℝ), (1 : ℝ)) σ :=
+    (hasDerivAt_const σ S).prodMk (hasDerivAt_id σ)
+  have hextractSig : HasDerivAt (fun s ↦ g (S, s)) (f' (0, 1)) σ :=
+    (hf'.comp_hasDerivAt σ hpathSig : HasDerivAt (g ∘ fun s : ℝ ↦ (S, s)) (f' (0, 1)) σ)
+  have hextractSig' : HasDerivAt (fun s ↦ bsV K r s S τ) (f' (0, 1)) σ := hextractSig
+  have hSig_eq : f' (0, 1) = S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) * Real.sqrt τ :=
+    hextractSig'.unique (hasDerivAt_bsV_sigma hK hS hσ hτ)
+  -- Compose with the diagonal path s ↦ (s, v s), then use linearity of f'.
+  have hpath : HasDerivAt (fun s : ℝ ↦ ((s, v s) : ℝ × ℝ)) ((1 : ℝ), v') S :=
+    (hasDerivAt_id S).prodMk hv
+  have hvalAt : (S, v S) = (S, σ) := by rw [hvS]
+  have hfinal : HasDerivAt (fun s ↦ g (s, v s)) (f' (1, v')) S := by
+    rw [← hvalAt] at hf'
+    exact hf'.comp_hasDerivAt S hpath
+  have hlin : f' (1, v') = f' (1, 0) + v' • f' (0, 1) := by
+    have hre : ((1 : ℝ), v') = (1, (0 : ℝ)) + v' • ((0 : ℝ), (1 : ℝ)) := by simp
+    rw [hre, map_add, map_smul]
+  rw [hS_eq, hSig_eq] at hlin
+  have hh : HasDerivAt (fun s ↦ bsV K r (v s) s τ) (f' (1, v')) S := hfinal
+  rw [hlin] at hh
+  convert hh using 1
+  ring
+
+/-- **The vol-parameter Vega chain rule**: if the spot/forward is held FIXED and the vol
+moves only through some other parameter `a` (e.g. `α`), the price's derivative in `a` is
+just the ordinary Black-Scholes vega times the vol's own sensitivity, `Λ_BS · v'` — the
+plain one-variable chain rule through `hasDerivAt_bsV_sigma` (no bivariate argument
+needed, since only one argument of `bsV` moves). -/
+theorem hasDerivAt_bsV_param_chainRule {K r S σ τ : ℝ} (hK : 0 < K) (hS : 0 < S)
+    (hσ : 0 < σ) (hτ : 0 < τ) {v : ℝ → ℝ} {v' x : ℝ} (hv : HasDerivAt v v' x)
+    (hvx : v x = σ) :
+    HasDerivAt (fun a ↦ bsV K r (v a) S τ)
+      (S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) * Real.sqrt τ * v') x := by
+  subst hvx
+  exact (hasDerivAt_bsV_sigma hK hS hσ hτ).comp x hv
 
 end MathFin

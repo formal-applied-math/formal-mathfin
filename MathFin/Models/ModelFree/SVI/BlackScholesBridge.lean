@@ -41,7 +41,7 @@ SVI smile, convex call price, butterfly arbitrage, Durrleman condition, MSC 91G2
 namespace MathFin
 namespace SVI
 open Real Set
-open ForwardSmile (dpl dmi blackForm)
+open ForwardSmile (dpl dmi blackForm bsd1_eq_dpl)
 
 /-- The SVI-smiled Black–Scholes price in MathFin's existing price API,
 with spot, maturity and discount factor normalized to one. -/
@@ -53,9 +53,8 @@ theorem blackCall_eq_bsSmile (p : Params) (K : ℝ) (hK : 0 < K)
   have hn := ne_of_gt (rootVariance_pos p (Real.log K) hw)
   have hd1 : MathFin.bsd1 1 K 0 (rootVariance p (Real.log K)) 1 =
       dpl (Real.log K) (variance p (Real.log K)) := by
-    simp only [MathFin.bsd1, dpl_eq_rootVariance, Real.sqrt_one, mul_one, zero_add, one_div,
-      Real.log_inv]
-    field_simp
+    have h := bsd1_eq_dpl (F := 1) (k := Real.log K) one_ne_zero (rootVariance_pos p _ hw) one_pos
+    rwa [one_mul, Real.exp_log hK, mul_one, rootVariance_sq p _ hw.le] at h
   have hd2 : MathFin.bsd2 1 K 0 (rootVariance p (Real.log K)) 1 =
       dmi (Real.log K) (variance p (Real.log K)) := by
     rw [MathFin.bsd2, hd1]
