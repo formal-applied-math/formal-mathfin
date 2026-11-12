@@ -615,7 +615,12 @@ split by area. What each bridge proves, by area:
   required equivalence); the law of one price and a positive super-replication lower bound
   (`mf-replication-martingale-price`, `mf-superhedging-bounded-below`; the duality equality stays
   open). Triangular no-arbitrage is derived from the multi-state FTAP
-  (`mf-triangle-arbitrage-ftap`; frictionless trades, positive rates).
+  (`mf-triangle-arbitrage-ftap`; frictionless trades, positive rates). A finite arbitrage-free
+  smile (increasing strikes, non-increasing prices, non-decreasing secant slopes) admits a
+  piecewise-linear interpolant that is itself convex and non-increasing on the whole quoted
+  range (`mf-piecewise-linear-arbitrage-free-interpolation`, reduced core — the existence half of
+  Kahalé's 2004 arbitrage-free interpolation problem for the simplest scheme; his own `C²`
+  construction is not formalized).
 - **Risk measures** (`risk_measures.json`, `actuarial.json`). Spectral risk on the quantile, with
   ES mixtures coherent (`mf-spectral-es-mixture-coherent`; step spectra only); expectiles strictly
   elicitable (`mf-expectile-elicitable`); the standard-deviation principle is VaR and ES at

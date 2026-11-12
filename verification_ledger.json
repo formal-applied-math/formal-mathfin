@@ -2229,6 +2229,13 @@
       "input_hash": "cfa8726b414cc77c35d273a60015fa3d1b9480e37b6dd23e83dc5c30ae324df7",
       "verified_at_commit": "f68ab19"
     },
+    "mf-piecewise-linear-arbitrage-free-interpolation": {
+      "benchmark_file": "no_arbitrage.json",
+      "date": "2026-11-09",
+      "elapsed_s": 2.3,
+      "input_hash": "c2b25c1e3a6ebb9ce3f91d128ea5e70c72d0b603c3edb52d90051220a17e5968",
+      "verified_at_commit": "043e2b6"
+    },
     "mf-poisson-merged-arrivals": {
       "benchmark_file": "stochastic_foundations.json",
       "date": "2026-11-08",
