@@ -289,6 +289,71 @@ lemma integrable_inv_ZTpred_const (θ : ℝ) (H : ℝ≥0) :
         (fun _ _ ↦ le_rfl) ω) := by ring
     _ = 1 := by rw [hω, ← Real.exp_add]; simp
 
+include hW in
+/-- **A bounded density against the physical measure is a square-integrable density against the
+Girsanov measure.** If `Q = D·μ` with `0 ≤ D ≤ C`, then `Q = D'·Q*` with `D' = D/Z_H`, and
+`𝔼_{Q*}[D'²] = 𝔼_μ[D²/Z_H] ≤ C² 𝔼_μ[1/Z_H] < ∞` (`integrable_inv_ZTpred_const`). -/
+lemma exists_memLp_two_density_of_bdd (θ : ℝ) (H : ℝ≥0) {D : Ω → ℝ} (hDm : Measurable D)
+    (hD0 : ∀ ω, 0 ≤ D ω) {C : ℝ} (hDC : ∀ ω, D ω ≤ C)
+    {Q : Measure Ω} (hQD : Q = μ.withDensity fun ω ↦ ENNReal.ofReal (D ω)) :
+    ∃ D' : Lp ℝ 2 (constGirsanovMeasure hW hWmeas θ H),
+      (∀ᵐ ω ∂(constGirsanovMeasure hW hWmeas θ H), 0 ≤ D' ω) ∧
+      Q = (constGirsanovMeasure hW hWmeas θ H).withDensity fun ω ↦ ENNReal.ofReal (D' ω) := by
+  set Z := ZTpred hW H hWmeas (isStronglyPredictable_const hWmeas θ) (fun _ _ ↦ le_rfl) with hZdef
+  have hZpos (ω : Ω) : 0 < Z ω := contDoleansExp_pos _ _ _ _
+  have hZ := aestronglyMeasurable_ZTpred hW hWmeas (isStronglyPredictable_const hWmeas θ)
+    (fun _ _ ↦ le_rfl) H
+  have hZamb : AEStronglyMeasurable Z μ :=
+    (hZ.stronglyMeasurable_mk.mono ((natFiltration hWmeas).le H)).aestronglyMeasurable.congr
+      hZ.ae_eq_mk.symm
+  have hD'm : AEMeasurable (fun ω ↦ D ω / Z ω) μ := hDm.aemeasurable.div hZamb.aemeasurable
+  have hac : constGirsanovMeasure hW hWmeas θ H ≪ μ := withDensity_absolutelyContinuous _ _
+  have hQD' : Q = (constGirsanovMeasure hW hWmeas θ H).withDensity
+      fun ω ↦ ENNReal.ofReal (D ω / Z ω) := by
+    rw [hQD, constGirsanovMeasure, ← withDensity_mul₀ hZamb.aemeasurable.ennreal_ofReal
+      hD'm.ennreal_ofReal]
+    congr 1
+    funext ω
+    rw [Pi.mul_apply, ← ENNReal.ofReal_mul (hZpos ω).le, mul_div_cancel₀ _ (hZpos ω).ne']
+  have hmem : MemLp (fun ω ↦ D ω / Z ω) 2 (constGirsanovMeasure hW hWmeas θ H) := by
+    rw [memLp_two_iff_integrable_sq (hD'm.aestronglyMeasurable.mono_ac hac)]
+    refine (integrable_withDensity_iff_integrable_smul₀' hZamb.aemeasurable.ennreal_ofReal
+      (.of_forall fun _ ↦ ENNReal.ofReal_lt_top)).2 ?_
+    refine ((integrable_inv_ZTpred_const hW hWmeas θ H).const_mul (C ^ 2)).mono' ?_ ?_
+    · exact (hZamb.aemeasurable.ennreal_ofReal.ennreal_toReal.smul
+        (hD'm.pow_const 2)).aestronglyMeasurable
+    · refine .of_forall fun ω ↦ ?_
+      rw [ENNReal.toReal_ofReal (hZpos ω).le, smul_eq_mul, Real.norm_eq_abs,
+        abs_of_nonneg (mul_nonneg (hZpos ω).le (sq_nonneg _)), div_pow,
+        show Z ω * (D ω ^ 2 / Z ω ^ 2) = D ω ^ 2 * (Z ω)⁻¹ by field_simp]
+      exact mul_le_mul_of_nonneg_right (pow_le_pow_left₀ (hD0 ω) (hDC ω) 2)
+        (inv_nonneg.2 (hZpos ω).le)
+  refine ⟨hmem.toLp _, ?_, ?_⟩
+  · filter_upwards [hmem.coeFn_toLp] with ω hω
+    rw [hω]
+    exact div_nonneg (hD0 ω) (hZpos ω).le
+  · rw [hQD']
+    exact withDensity_congr_ae (hmem.coeFn_toLp.mono fun ω hω ↦ congrArg ENNReal.ofReal hω.symm)
+
+include hW in
+/-- **Every pricing measure with a bounded density against the physical measure prices the
+European call at the Black–Scholes formula.** A pricing measure `Q = D·μ` of the Black–Scholes
+market up to `T ≤ H`, with `0 ≤ D ≤ C`, prices the call at `S₀ Φ(d₁) − K e^{−rT} Φ(d₂)`: its
+density against the Girsanov measure is square-integrable
+(`exists_memLp_two_density_of_bdd`), so
+`price_europeanCall_of_isPricingMeasure_withDensity` applies. -/
+theorem price_europeanCall_of_isPricingMeasure_bdd
+    (hWcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ W s ω) {K : ℝ} {T H : ℝ≥0} (hTH : T ≤ H)
+    (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) {Q : Measure Ω}
+    (hQ : (market μ hWmeas S_0 m r σ).IsPricingMeasure T Q) {D : Ω → ℝ} (hDm : Measurable D)
+    (hD0 : ∀ ω, 0 ≤ D ω) {C : ℝ} (hDC : ∀ ω, D ω ≤ C)
+    (hQD : Q = μ.withDensity fun ω ↦ ENNReal.ofReal (D ω)) :
+    (market μ hWmeas S_0 m r σ).price Q (europeanCall K T)
+      = S_0 * Phi (bsd1 S_0 K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) :=
+  let ⟨_, hD', hQD'⟩ := exists_memLp_two_density_of_bdd hW hWmeas ((m - r) / σ) H hDm hD0 hDC hQD
+  price_europeanCall_of_isPricingMeasure_withDensity hW hWmeas hWcont hTH hS₀ hK hσ hT hQ _ hD'
+    hQD'
+
 end Bounded
 
 end MathFin.Contracts.BlackScholes
