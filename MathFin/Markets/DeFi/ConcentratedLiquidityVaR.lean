@@ -5,6 +5,8 @@ Authors: Yang Ye, Raphael Coelho
 -/
 module
 
+public import MathFin.Contracts.Core
+public import MathFin.Markets.DeFi.LPContract
 public import MathFin.Markets.DeFi.UniswapMechanics
 public import MathFin.Risk.DiscreteVaR
 
@@ -53,6 +55,10 @@ empirical price quantile" result is future work, not claimed here.
   (`v3PositionValue_nonneg`), so no historical scenario's loss can exceed today's value, and VaR is
   attained at a loss value (`MathFin.DiscreteVaR.finiteVaR_eq_value_min`,
   via `MathFin.DiscreteVaR.finiteVaR_le_of_forall_le`).
+* `clHistoricalVaR_eq_valueAtRisk_contractValue`: the scenario revaluation is the value of the
+  position as a contract, `Contract.value` of `lpPayoff` paid at the horizon, under the scenario's
+  Dirac law with deflator `1` (full revaluation at the scenario prices, no discounting), and
+  `clHistoricalVaR` is the `valueAtRisk` of the resulting losses.
 
 ## References
 
@@ -73,7 +79,8 @@ namespace MathFin
 
 namespace DeFi
 
-open MeasureTheory MathFin.DiscreteVaR Set
+open MeasureTheory MathFin.DiscreteVaR Set MathFin.Contracts
+open scoped NNReal
 
 /-! ## Historical-simulation VaR -/
 
@@ -134,6 +141,28 @@ theorem clHistoricalVaR_eq_valueAtRisk {n : ℕ} (hn : 0 < n) (L a b s0 : ℝ)
     funext i
     simp [uniformWeights, Convexity.StdSimplex.weights_barycenter_apply]
   rw [clHistoricalVaR, finiteVaR_eq_valueAtRisk hα, hw]
+
+/-- **Historical VaR is the VaR of the contract's revaluation losses.** The position is the contract
+`Contract.pay T (lpPayoff L a b T)` of `Markets/DeFi/LPContract.lean`. Scenario `i` is the market
+whose price of `X` in `Y` is `(scenarios i) ^ 2` (square-root price `scenarios i ≥ 0`), represented
+by the Dirac law at `i` and the deflator `1`: the contract's value there is `Contract.value` of the
+position, a full revaluation at the scenario price with no discounting. The historical VaR is the
+`valueAtRisk`, under the equal-weight law on the scenarios, of the loss `v3PositionValue` at the
+mark `s0` minus that revaluation. The mark `s0` stays the position's value as a function of the
+square-root price; the scenarios are taken as given data. -/
+theorem clHistoricalVaR_eq_valueAtRisk_contractValue {n : ℕ} (hn : 0 < n) {L a b : ℝ}
+    (ha : 0 < a) (hab : a ≤ b) (s0 : ℝ) (T : ℝ≥0) (scenarios : Fin n → ℝ)
+    (hs : ∀ i, 0 ≤ scenarios i) {α : ℝ} (hα : α ∈ Ioo (0 : ℝ) 1) :
+    clHistoricalVaR L a b s0 hn scenarios α
+      = valueAtRisk
+          (fun i ↦ v3PositionValue L a b s0
+            - (Contract.pay T (lpPayoff L a b T)).value (Measure.dirac i) (fun _ _ ↦ 1)
+                (fun _ _ j ↦ scenarios j ^ 2))
+          (Measure.ofWeights Finset.univ fun _ : Fin n ↦ (n : ℝ)⁻¹) α := by
+  rw [clHistoricalVaR_eq_valueAtRisk hn L a b s0 scenarios hα]
+  refine congrArg (fun f ↦ valueAtRisk f _ α) (funext fun i ↦ ?_)
+  rw [Contract.value_pay, integral_dirac, eval_lpPayoff ha hab]
+  simp [historicalScenarioLoss, scenarioAt, Real.sqrt_sq (hs i)]
 
 end DeFi
 

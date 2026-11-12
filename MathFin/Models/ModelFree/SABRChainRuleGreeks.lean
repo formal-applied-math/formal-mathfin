@@ -1,11 +1,12 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
 public import MathFin.Models.BlackScholes.HigherGreeks
+public import MathFin.Models.BlackScholes.Market
 public import MathFin.Models.StochVol.SABRImpliedVol
 
 /-!
@@ -184,5 +185,64 @@ theorem sabrATMVol_bsV_vega_chainRule {f α β ρ ν tex : ℝ} (hf : 0 < f)
       α :=
   hasDerivAt_bsV_param_chainRule hf hf hσ htex
     (hasDerivAt_sabrATMVol_alpha α).differentiableAt.hasDerivAt rfl
+
+/-! ### The same Greeks as derivatives of the market price -/
+
+section MarketPrice
+
+open scoped NNReal
+open Contracts Contracts.BlackScholes
+
+variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω}
+  [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ) (hWmeas : ∀ t, Measurable (W t))
+
+/-- The price of the European call in the Black-Scholes market at rate `0`, spot `S`, strike `K`
+and volatility `σ`, under the Girsanov pricing measure of `θ = m / σ`, is `bsV K 0 σ S T`. -/
+theorem price_europeanCall_eq_bsV {K S m σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hS : 0 < S)
+    (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) :
+    (market μ hWmeas S m 0 σ).price (constGirsanovMeasure hW hWmeas ((m - 0) / σ) H)
+        (europeanCall K T) = bsV K 0 σ S T := by
+  rw [price_europeanCall_constGirsanovMeasure hW hWmeas hTH hS hK hσ hT, bsV_eq_closedForm]
+  simp
+
+/-- **The SABR ATM chain-rule Delta is the derivative of the market price.** In the
+Black-Scholes market with spot `s`, rate `0` and the SABR ATM vol `σ_ATM(s)` as its volatility,
+the price of the European call struck at `f` under the Girsanov pricing measure of the constant
+price of risk `m / σ_ATM(s)` (the measure moves with `s`) has, at `s = f`, the derivative
+`Δ_BS + Λ_BS · ∂σ_ATM/∂f` of `sabrATMVol_bsV_delta_chainRule`. The price is undiscounted
+(`r = 0`) and the horizon `H ≥ T` is the Girsanov horizon. -/
+theorem sabrATMVol_marketPrice_delta_chainRule {f α β ρ ν m : ℝ} {T H : ℝ≥0} (hTH : T ≤ H)
+    (hf : 0 < f) (hσ : 0 < sabrATMVol f α β ρ ν T) (hT : 0 < (T : ℝ)) :
+    HasDerivAt (fun s ↦ (market μ hWmeas s m 0 (sabrATMVol s α β ρ ν T)).price
+        (constGirsanovMeasure hW hWmeas ((m - 0) / sabrATMVol s α β ρ ν T) H) (europeanCall f T))
+      (Phi (bsd1 f f 0 (sabrATMVol f α β ρ ν T) T)
+        + f * gaussianPDFReal 0 1 (bsd1 f f 0 (sabrATMVol f α β ρ ν T) T) * Real.sqrt T *
+          deriv (fun x ↦ sabrATMVol x α β ρ ν T) f)
+      f := by
+  refine (sabrATMVol_bsV_delta_chainRule hf hσ hT).congr_of_eventuallyEq ?_
+  have hc : ContinuousAt (fun x ↦ sabrATMVol x α β ρ ν T) f :=
+    (hasDerivAt_sabrATMVol_F hf).continuousAt
+  filter_upwards [hc.eventually (lt_mem_nhds hσ), lt_mem_nhds hf] with s hs hsf
+  exact price_europeanCall_eq_bsV hW hWmeas hTH (by linarith) hf hs hT
+
+/-- **The SABR ATM chain-rule Vega is the derivative of the market price.** In the
+Black-Scholes market with spot `f`, rate `0` and volatility `σ_ATM(a) = sabrATMVol f a ⋯`, the
+price of the European call struck at `f` under the Girsanov pricing measure of the constant price
+of risk `m / σ_ATM(a)` has, at `a = α`, the derivative `Λ_BS · ∂σ_ATM/∂α` of
+`sabrATMVol_bsV_vega_chainRule`. The price is undiscounted (`r = 0`). -/
+theorem sabrATMVol_marketPrice_vega_chainRule {f α β ρ ν m : ℝ} {T H : ℝ≥0} (hTH : T ≤ H)
+    (hf : 0 < f) (hσ : 0 < sabrATMVol f α β ρ ν T) (hT : 0 < (T : ℝ)) :
+    HasDerivAt (fun a ↦ (market μ hWmeas f m 0 (sabrATMVol f a β ρ ν T)).price
+        (constGirsanovMeasure hW hWmeas ((m - 0) / sabrATMVol f a β ρ ν T) H) (europeanCall f T))
+      (f * gaussianPDFReal 0 1 (bsd1 f f 0 (sabrATMVol f α β ρ ν T) T) * Real.sqrt T *
+        deriv (fun a ↦ sabrATMVol f a β ρ ν T) α)
+      α := by
+  refine (sabrATMVol_bsV_vega_chainRule hf hσ hT).congr_of_eventuallyEq ?_
+  have hc : ContinuousAt (fun a ↦ sabrATMVol f a β ρ ν T) α :=
+    (hasDerivAt_sabrATMVol_alpha α).continuousAt
+  filter_upwards [hc.eventually (lt_mem_nhds hσ)] with a ha
+  exact price_europeanCall_eq_bsV hW hWmeas hTH hf hf ha hT
+
+end MarketPrice
 
 end MathFin

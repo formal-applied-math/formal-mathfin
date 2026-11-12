@@ -2947,6 +2947,22 @@ end MathFin.AxiomAudit
 #guard_msgs in
 #print axioms MathFin.sabrATMVol_bsV_vega_chainRule
 
+/-- info: 'MathFin.price_europeanCall_eq_bsV' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.price_europeanCall_eq_bsV
+
+/-- info: 'MathFin.sabrATMVol_marketPrice_delta_chainRule' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.sabrATMVol_marketPrice_delta_chainRule
+
+/-- info: 'MathFin.sabrATMVol_marketPrice_vega_chainRule' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.sabrATMVol_marketPrice_vega_chainRule
+
+/-- info: 'MathFin.DeFi.clHistoricalVaR_eq_valueAtRisk_contractValue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.clHistoricalVaR_eq_valueAtRisk_contractValue
+
 /-- info: 'MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure
