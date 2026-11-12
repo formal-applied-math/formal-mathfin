@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (1053 MathFin constants, 29 upstream). Citations
+  corpus (1058 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -610,6 +610,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.DeFi.clHistoricalVaR_const_mul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.DeFi.clHistoricalVaR_const_mul
+
+/-- info: 'MathFin.DeFi.clHistoricalVaR_eq_valueAtRisk' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.clHistoricalVaR_eq_valueAtRisk
 
 /-- info: 'MathFin.DeFi.clHistoricalVaR_le_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1446,6 +1450,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.asian_payoff_geom_le_arith_two' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.asian_payoff_geom_le_arith_two
+
+/-- info: 'MathFin.average_eigenvalue_mem_Icc_mpEdges' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.average_eigenvalue_mem_Icc_mpEdges
 
 /-- info: 'MathFin.bachelier_call_formula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -2875,6 +2883,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.isPricingMeasure_insuredMarket_tilted_iff
 
+/-- info: 'MathFin.isPricingMeasure_trinomialLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.isPricingMeasure_trinomialLaw
+
 /-- info: 'MathFin.isRiskParity_two_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.isRiskParity_two_iff
@@ -4191,9 +4203,17 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.willowScaled_crossMoment
 
+/-- info: 'MathFin.willowScaled_crossMoment_eq_integral_mul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.willowScaled_crossMoment_eq_integral_mul
+
 /-- info: 'MathFin.willowScaled_secondMoment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.willowScaled_secondMoment
+
+/-- info: 'MathFin.willowScaled_secondMoment_eq_integral_sq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.willowScaled_secondMoment_eq_integral_sq
 
 /-- info: 'MathFin.worstCase_isLUB' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

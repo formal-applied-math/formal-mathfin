@@ -1,11 +1,12 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
 public import MathFin.Choice.Portfolio.Equicorrelation
+public import Mathlib.Analysis.Matrix.Spectrum
 public import Mathlib.Analysis.Real.Sqrt
 public import Mathlib.Algebra.Order.Ring.Abs
 public import Mathlib.LinearAlgebra.Matrix.Trace
@@ -74,6 +75,10 @@ restriction.
 * `tendsto_mpUpperEdge_atTop`: the upper edge diverges for `0 < σ`.
 * `mpUpperEdge_inv`, `mpLowerEdge_inv`: the de Prado form `λ±(σ, q⁻¹) = σ²(1 ± (√q)⁻¹)²`.
 * `mpUpperEdge_const_mul`, `mpLowerEdge_const_mul`: `λ±(kσ, c) = k²λ±(σ, c)`.
+* `sum_eigenvalues_eq_card`, `average_eigenvalue_mem_Icc_mpEdges`,
+  `sum_eigenvalues_equicorrelationMatrix`: the eigenvalues of a unit-diagonal Hermitian matrix sum
+  to its dimension, so their average `1` lies in `[λ₋(1, c), λ₊(1, c)]` for `c ≤ 1` (only the mean
+  of the spectrum, not each eigenvalue).
 * `trace_equicorrelationMatrix_eq_card`: an equicorrelation matrix's trace is its dimension,
   so its average eigenvalue is `1 = σ²` for a correlation matrix — the bridge to
   `Choice/Portfolio/Equicorrelation.lean`.
@@ -275,5 +280,31 @@ for every aspect ratio `c ≤ 1`. -/
 theorem trace_equicorrelationMatrix_eq_card (n : Type*) [Fintype n] [DecidableEq n] (ρ : ℝ) :
     (equicorrelationMatrix n ρ).trace = (Fintype.card n : ℝ) := by
   simp [Matrix.trace, Matrix.diag, equicorrelationMatrix]
+
+/-- **The spectrum of a correlation matrix averages to `1`.** The eigenvalues of a real symmetric
+matrix with unit diagonal sum to its trace, the number of assets. -/
+theorem sum_eigenvalues_eq_card {n : Type*} [Fintype n] [DecidableEq n] {A : Matrix n n ℝ}
+    (hA : A.IsHermitian) (hdiag : ∀ i, A i i = 1) :
+    ∑ i, hA.eigenvalues i = Fintype.card n := by
+  have h := hA.trace_eq_sum_eigenvalues
+  simpa [Matrix.trace, hdiag] using h.symm
+
+/-- **The average eigenvalue of a correlation matrix lies in the Marchenko–Pastur support** for
+every aspect ratio `c ≤ 1`: it is `1 = σ²`, the entry variance, which the edges sandwich
+(`mpLowerEdge_le_variance_of_le_one`, `le_mpUpperEdge`). Unlike `trace_equicorrelationMatrix_eq_card`
+this is a statement about the matrix's eigenvalues, though it is still only about their mean: nothing
+says the individual eigenvalues of a sample correlation matrix fall in the support. -/
+theorem average_eigenvalue_mem_Icc_mpEdges {n : Type*} [Fintype n] [DecidableEq n] [Nonempty n]
+    {A : Matrix n n ℝ} (hA : A.IsHermitian) (hdiag : ∀ i, A i i = 1) {c : ℝ} (hc : c ≤ 1) :
+    (∑ i, hA.eigenvalues i) / Fintype.card n ∈ Set.Icc (mpLowerEdge 1 c) (mpUpperEdge 1 c) := by
+  have hcard : (Fintype.card n : ℝ) ≠ 0 := Nat.cast_ne_zero.2 Fintype.card_ne_zero
+  rw [sum_eigenvalues_eq_card hA hdiag, div_self hcard]
+  exact ⟨by simpa using mpLowerEdge_le_variance_of_le_one 1 c hc, by simpa using le_mpUpperEdge 1 c⟩
+
+/-- The equicorrelation matrix instance: its eigenvalues average to `1`. -/
+theorem sum_eigenvalues_equicorrelationMatrix (n : Type*) [Fintype n] [DecidableEq n] (ρ : ℝ) :
+    ∑ i, (isHermitian_equicorrelationMatrix (n := n) (ρ := ρ)).eigenvalues i
+      = Fintype.card n :=
+  sum_eigenvalues_eq_card _ fun i ↦ by simp [equicorrelationMatrix]
 
 end MathFin
