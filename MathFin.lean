@@ -393,6 +393,8 @@ import MathFin.Models.Forwards.TriangleArbitrage
 import MathFin.Models.ModelFree.CarrMadan
 -- SABR ATM chain-rule Delta/Vega (Hagan et al. 2002, eqs. 3.6/3.9): a genuine bivariate
 import MathFin.Models.ModelFree.SABRChainRuleGreeks
+-- Shout-floor monotonicity: the discounted reward is increasing in the shout floor
+import MathFin.Models.ModelFree.ShoutFloorMonotonicity
 -- Phase 30 (Bridge A): BSCallHyp / BachelierHyp from IsPreBrownian
 import MathFin.Models.BlackScholes.BSCallHypFromBrownian
 -- Phase 31: Pricing entry points from IsPreBrownian (composite corollaries)

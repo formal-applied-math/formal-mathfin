@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
@@ -57,6 +57,8 @@ The Black–Scholes market has no arbitrage on any grid of dates inside the Girs
   `e^{−rt}` on the physical asset.
 * `MathFin.Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure`: under that pricing
   measure the European call is worth `S₀ Φ(d₁) − K e^{−rT} Φ(d₂)`.
+* `MathFin.Contracts.BlackScholes.price_europeanPut_constGirsanovMeasure`: under the same
+  pricing measure the European put is worth `K e^{−rT} Φ(−d₂) − S₀ Φ(−d₁)`.
 
 ## References
 
@@ -180,6 +182,22 @@ theorem price_europeanCall_constGirsanovMeasure {K : ℝ} {T H : ℝ≥0} (hTH :
   refine integral_congr_ae (.of_forall fun ω ↦ (europeanCall K T).pathPV_congr
     (by simp [europeanCall, Contract.FixedDated]) (fun t ht ↦ ?_) fun _ _ ↦ rfl)
   obtain rfl : t = T := by simpa [europeanCall, Contract.dates] using ht
+  rfl
+
+/-- **The European put in the Black–Scholes market** is worth the Black–Scholes put formula
+`K e^{−rT} Φ(−d₂) − S₀ Φ(−d₁)` under the same Girsanov pricing measure as the call
+(`price_europeanCall_constGirsanovMeasure`), by the identical route: the price is the put's
+value on the physical asset (`price_market`), and that value is `value_europeanPut_physical`. -/
+theorem price_europeanPut_constGirsanovMeasure {K : ℝ} {T H : ℝ≥0} (hTH : T ≤ H)
+    (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) :
+    (market μ hWmeas S_0 m r σ).price (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+        (europeanPut K T)
+      = K * Real.exp (-r * T) * Phi (-bsd2 S_0 K r σ T) - S_0 * Phi (-bsd1 S_0 K r σ T) := by
+  rw [price_market, ← value_europeanPut_physical hW hWmeas (m := m) hTH hS₀ hK hσ hT]
+  unfold Contract.value
+  refine integral_congr_ae (.of_forall fun ω ↦ (europeanPut K T).pathPV_congr
+    (by simp [europeanPut, Contract.FixedDated]) (fun t ht ↦ ?_) fun _ _ ↦ rfl)
+  obtain rfl : t = T := by simpa [europeanPut, Contract.dates] using ht
   rfl
 
 include hW in

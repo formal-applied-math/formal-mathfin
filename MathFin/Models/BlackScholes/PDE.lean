@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
@@ -37,6 +37,8 @@ The proof leverages:
 * `bs_identity` — `S · ϕ(d₁) = K · e^{-r τ} · ϕ(d₂)`,
 * `hasDerivAt_bsd1_S`, `hasDerivAt_bsd1_tau` — chain-rule pieces for d₁,
 * `bs_pde_holds` — the BS price satisfies the BS PDE.
+* `bsV_eq_closedForm` — the closed form stated as a lemma, so other modules can
+  convert between `bsV` and its `Φ(d₁)/Φ(d₂)` expression without unfolding the definition.
 
 ## References
 
@@ -317,6 +319,13 @@ lemma hasDerivAt_bsd2_r (S K σ τ : ℝ) (hσ : 0 < σ) (hτ : 0 < τ)
 `V(S, τ) = S · Φ(d₁) − K · e^{-rτ} · Φ(d₂)`. -/
 noncomputable def bsV (K r σ : ℝ) (S τ : ℝ) : ℝ :=
   S * Phi (bsd1 S K r σ τ) - K * Real.exp (-(r * τ)) * Phi (bsd2 S K r σ τ)
+
+/-- The closed form of the Black–Scholes call price as a standalone lemma. The definition
+is not unfoldable from other modules (module-system expose rules), so results elsewhere that
+compare a price against `bsV`'s closed form go through this. -/
+theorem bsV_eq_closedForm (K r σ S τ : ℝ) :
+    bsV K r σ S τ = S * Phi (bsd1 S K r σ τ) - K * Real.exp (-(r * τ)) * Phi (bsd2 S K r σ τ) :=
+  rfl
 
 /-- The Black–Scholes call price is the discounted expected call payoff: `bs_call_formula`,
 stated for `bsV`. -/
