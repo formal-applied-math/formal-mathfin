@@ -257,6 +257,33 @@ Three read-only reviewers split the lenses:
    insured market exactly when its premium is the quote, from the new converse
    `Market.integral_eq_of_isPricingMeasure_oneDate`. Uniqueness of the parameter (strict
    monotonicity of the premium) is not proved.
+## 2026-11-10 — corpus 830, modules 740 — the layered-trunk merge into the SABR chain-rule-Greeks branch
+
+Scope: no new proof content. The branch merged the layered trunk (origin/main through the
+tree-measured phase) and was brought back over the corpus gates: the module re-placed in its
+layer, the audit pin and formalization counts regenerated, docstrings re-checked against the doc
+standard, the benchmark citations resolved against the shared bibliography. The corpus delta past
+the last recorded review (817) is the trunk's own 13 entries, covered by the trunk-side reviews of
+2026-11-08; the branch's own two entries below were re-read now.
+
+### The standing first pass: prose against statement
+
+- `mf-sabr-atm-chain-rule-delta`: the description says the chain rule for the Black call with
+  strike held fixed at `K = f`, spot `s` moving, the vol re-marked along the ATM backbone —
+  exactly the theorem's `HasDerivAt (fun s ↦ bsV f 0 (sabrATMVol s ⋯) s tex)` shape, and the
+  module docstring explicitly says this is *not* eq. 3.9 restricted to `K = f` (the fixed-strike
+  smile derivative, whose `0/0` ATM factor is unresolved here). Faithful.
+- `mf-sabr-atm-chain-rule-vega`: the companion statement differentiated in `α` only; the
+  description matches, including the note that this case needs no smile-fix.
+- The module docstring's "what is proved and what is not" block stays the exemplar for scope
+  disclosure: it names the unresolved `x''(0)`, names the convention the proved quantity follows,
+  and says the two curves' slopes differ at `f = K`.
+
+### Evidence
+
+pytest green after the merge except the ledger rows the trunk move restaled (a stale-scope sweep
+re-verifies them on this branch); doc-standard hard problems zero; ratchet at baseline; audit pin
+regenerated (990 guards).
 
 ## 2026-11-08 — corpus 817, modules 731 — the one trunk, phases 0–2, read before it lands
 

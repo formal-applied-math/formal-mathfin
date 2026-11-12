@@ -391,6 +391,8 @@ import MathFin.Pricing.WienerIntegralForwardMeasure
 import MathFin.Models.BlackScholes.GaussianGirsanov
 import MathFin.Models.Forwards.TriangleArbitrage
 import MathFin.Models.ModelFree.CarrMadan
+-- SABR ATM chain-rule Delta/Vega (Hagan et al. 2002, eqs. 3.6/3.9): a genuine bivariate
+import MathFin.Models.ModelFree.SABRChainRuleGreeks
 -- Phase 30 (Bridge A): BSCallHyp / BachelierHyp from IsPreBrownian
 import MathFin.Models.BlackScholes.BSCallHypFromBrownian
 -- Phase 31: Pricing entry points from IsPreBrownian (composite corollaries)
