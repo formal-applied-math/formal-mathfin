@@ -50,6 +50,7 @@ scope — the same named gap as the time-independent layer.
 * `ito_formula_td_L2_bddDeriv`: with `f_x` also jointly continuous and bounded, there is an Itô
   `L²` integrand `gfx =ᵐ [f_x(·, B_·)]` with
   `f(T, B_T) − f(0, B_0) =ᵐ itoIntegralCLM gfx + ∫₀ᵀ (f_t + ½ f_xx)(s, B_s) ds`.
+* `exists_itoIntegral_const`: the constant integrand `c` has Itô integral `c (B_T − B_0)`.
 
 ## References
 
@@ -396,5 +397,27 @@ theorem ito_formula_td_L2_bddDeriv
         (f_t s (B s ω) + (1 / 2) * f_xx s (B s ω)) ∂ItoIntegralL2.timeMeasure
   rw [hsplit]
   linarith [hω]
+
+/-- **The Itô integral of a constant.** On `[0, T]` the constant integrand `c` is an Itô `L²`
+integrand whose integral is `c (B_T − B_0)`: the case `f(t, x) = c x` of
+`ito_formula_td_L2_bddDeriv`, whose time and second-order terms vanish. -/
+theorem exists_itoIntegral_const
+    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ B s ω))
+    (T : ℝ≥0) (c : ℝ) :
+    ∃ ψ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
+      (⇑ψ =ᵐ[trimMeasure (μ := μ) T hBmeas] fun _ ↦ c) ∧
+      (fun ω ↦ c * (B T ω - B 0 ω)) =ᵐ[μ] fun ω ↦ (itoIntegralCLM hB T hBmeas ψ) ω := by
+  obtain ⟨ψ, hψ, h⟩ := ito_formula_td_L2_bddDeriv hB hBmeas hBcont T
+    (f := fun _ x ↦ c * x) (f_t := fun _ _ ↦ 0) (f_x := fun _ _ ↦ c) (f_xx := fun _ _ ↦ 0)
+    (f_tt := fun _ _ ↦ 0) (f_tx := fun _ _ ↦ 0) (f_xxx := fun _ _ ↦ 0)
+    (fun _ _ ↦ hasDerivAt_const _ _) (fun _ _ ↦ hasDerivAt_const _ _)
+    (fun _ _ ↦ hasDerivAt_const _ _) (fun _ x ↦ by simpa using (hasDerivAt_id x).const_mul c)
+    (fun _ _ ↦ hasDerivAt_const _ _) (fun _ _ ↦ hasDerivAt_const _ _)
+    continuous_const continuous_const (Ct := 0) (C1 := |c|) (C2 := 0) (Ctt := 0) (Ctx := 0)
+    (Cxxx := 0) (fun _ _ ↦ by simp) (fun _ _ ↦ le_rfl) (fun _ _ ↦ by simp) (fun _ _ ↦ by simp)
+    (fun _ _ ↦ by simp) (fun _ _ ↦ by simp)
+  refine ⟨ψ, hψ, ?_⟩
+  filter_upwards [h] with ω hω
+  simpa [mul_sub] using hω
 
 end MathFin

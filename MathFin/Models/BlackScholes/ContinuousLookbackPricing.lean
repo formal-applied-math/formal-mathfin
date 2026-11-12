@@ -81,7 +81,7 @@ extremum's law, which is the piece this file's transcription route sidesteps.
   share only the theme that a lookback value dominates a vanilla one.
 * `lookbackFloatingCall_ge_marketPrice`: **the trunk-grounded comparison**. The same dominance
   composed with the Black-Scholes market's own pricing of the European call
-  (`price_europeanCall_constGirsanovMeasure`) and the closed-form lemma `bsV_eq_closedForm`:
+  (`price_europeanCall_constGirsanovMeasure`), with `bsV` unfolded to its closed form:
   the lookback call dominates whatever the market charges for the vanilla call struck at the
   running minimum, so the bound holds at the level of the pricing functional, not only at the
   level of the transcribed closed form.
@@ -215,9 +215,9 @@ theorem lookbackFloatingCall_ge_bsV {S m r σ T : ℝ} (hm : 0 < m) (hS : 0 < S)
 
 /-- **The trunk-grounded comparison**: the floating-strike lookback call dominates the
 Black-Scholes market's own price of the vanilla call struck at the running minimum. The market
-prices the European call at the closed form (`price_europeanCall_constGirsanovMeasure`); the
-closed form stated as a lemma (`bsV_eq_closedForm`) lets the dominance compose one `rw` deep:
-whatever prices the call on the trunk, the lookback is worth at least as much. -/
+prices the European call at the closed form (`price_europeanCall_constGirsanovMeasure`), which
+is `bsV` unfolded, so whatever prices the call on the trunk, the lookback is worth at least as
+much. -/
 theorem lookbackFloatingCall_ge_marketPrice
     {Ω : Type*} [MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω}
     [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ) (hWmeas : ∀ t, Measurable (W t))
@@ -232,7 +232,7 @@ theorem lookbackFloatingCall_ge_marketPrice
   have hzero : (r - r) / σ = 0 := by rw [sub_self, zero_div]
   rw [hzero] at key
   have hdom := lookbackFloatingCall_ge_bsV (r := r) hm hS hr hσ hT
-  rw [bsV_eq_closedForm] at hdom
+  rw [bsV] at hdom
   rw [key, neg_mul]
   exact hdom
 

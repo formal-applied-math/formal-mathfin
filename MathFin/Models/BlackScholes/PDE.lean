@@ -37,8 +37,6 @@ The proof leverages:
 * `bs_identity` — `S · ϕ(d₁) = K · e^{-r τ} · ϕ(d₂)`,
 * `hasDerivAt_bsd1_S`, `hasDerivAt_bsd1_tau` — chain-rule pieces for d₁,
 * `bs_pde_holds` — the BS price satisfies the BS PDE.
-* `bsV_eq_closedForm` — the definition of `bsV` as a rewriting equation, so other modules can
-  convert between `bsV` and its `Φ(d₁)/Φ(d₂)` expression with one `rw`.
 
 ## References
 
@@ -319,13 +317,6 @@ lemma hasDerivAt_bsd2_r (S K σ τ : ℝ) (hσ : 0 < σ) (hτ : 0 < τ)
 `V(S, τ) = S · Φ(d₁) − K · e^{-rτ} · Φ(d₂)`. -/
 noncomputable def bsV (K r σ : ℝ) (S τ : ℝ) : ℝ :=
   S * Phi (bsd1 S K r σ τ) - K * Real.exp (-(r * τ)) * Phi (bsd2 S K r σ τ)
-
-/-- The closed form of the Black–Scholes call price as a rewriting equation: `bsV` unfolds to
-its `Φ(d₁)/Φ(d₂)` expression by `rfl` (the definition is exposed), and results elsewhere that
-compare a price against `bsV`'s closed form rewrite with this. -/
-theorem bsV_eq_closedForm (K r σ S τ : ℝ) :
-    bsV K r σ S τ = S * Phi (bsd1 S K r σ τ) - K * Real.exp (-(r * τ)) * Phi (bsd2 S K r σ τ) :=
-  rfl
 
 /-- The Black–Scholes call price is the discounted expected call payoff: `bs_call_formula`,
 stated for `bsV`. -/

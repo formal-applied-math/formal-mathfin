@@ -223,6 +223,34 @@
       }
     },
     {
+      "id": "mf-bachelier-pricing-measure-unique-l2",
+      "name": "A Bachelier Pricing Measure with a Square-Integrable Density Is the Reference Measure up to T and Prices the Call at the Bachelier Formula",
+      "description": "In the Bachelier market of a pre-Brownian motion W with continuous paths under a probability measure mu (Bachelier.market: the filtration W generates, the asset S_0 + sigma W_t with sigma > 0, the numeraire 1), every pricing measure Q up to T of the form Q = D.mu with D >= 0 square-integrable under mu agrees with mu on the information up to T, and so prices the European call (strike K > 0, maturity T > 0) at the Bachelier formula (S_0 - K) Phi(d) + sigma sqrt(T) phi(d), d = (S_0 - K)/(sigma sqrt(T)). A pricing measure whose density is not square-integrable is not covered.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.Bachelier.BachelierMarket\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\nopen MathFin MathFin.Contracts\n\n/-- A pricing measure of the Bachelier market whose density with respect to the reference measure\nis nonnegative and square-integrable agrees with the reference measure up to `T`, and prices the\nEuropean call at the Bachelier formula. -/\ntheorem bachelier_pricing_measure_l2_density {Ω : Type*} [MeasurableSpace Ω]\n    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) (hWcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ W s ω)\n    {S₀ K σ : ℝ} {T : ℝ≥0} (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) {Q : Measure Ω}\n    (hQ : (Bachelier.market μ hWmeas S₀ σ).IsPricingMeasure T Q) (D : Lp ℝ 2 μ)\n    (hD : ∀ᵐ ω ∂μ, 0 ≤ D ω) (hQD : Q = μ.withDensity fun ω ↦ ENNReal.ofReal (D ω)) :\n    Q.trim ((Bachelier.market μ hWmeas S₀ σ).𝓕.le T)\n        = μ.trim ((Bachelier.market μ hWmeas S₀ σ).𝓕.le T) ∧\n      (Bachelier.market μ hWmeas S₀ σ).price Q (europeanCall K T)\n        = (S₀ - K) * Phi (bachelierD S₀ K σ T) +\n          σ * Real.sqrt T * gaussianPDFReal 0 1 (bachelierD S₀ K σ T) :=\n  ⟨Bachelier.trim_eq_of_isPricingMeasure_withDensity hW hWmeas hWcont hσ.ne' hQ D hD hQD,\n    Bachelier.price_europeanCall_of_isPricingMeasure_withDensity hW hWmeas hWcont hK hσ hT hQ D hD\n      hQD⟩\n"
+      },
+      "metadata": {
+        "reference": "Bachelier (1900); Shreve, Stochastic Calculus for Finance II, sec. 5.4; Karatzas and Shreve, Brownian Motion and Stochastic Calculus, 3.4",
+        "citations": [
+          {
+            "key": "Bachelier1900"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "sec. 5.4"
+          },
+          {
+            "key": "KaratzasShreve1991",
+            "locator": "3.4"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. trim_eq_of_isPricingMeasure_withDensity and price_europeanCall_of_isPricingMeasure_withDensity in MathFin/Models/Bachelier/BachelierMarket.lean: the asset S_0 + sigma W is a mu-martingale whose increment over [0, T] is the Ito integral of the constant sigma (exists_itoIntegral_const in MathFin/Probability/Brownian/Ito/ItoFormulaTD.lean, the case f(t, x) = sigma x of the time-dependent Ito formula), so the general uniqueness theorem trim_eq_of_martingale_withDensity (MathFin/Probability/Brownian/MartingaleMeasureUniqueness.lean: the conditional density is 1 plus an Ito integral orthogonal to every increment, hence 1) gives Q = mu on F_T; the call payoff is F_T-measurable, so its Q-price is its mu-price, the Bachelier formula (price_europeanCall). SCOPE: zero interest, no drift; the density must be square-integrable under mu; an arbitrary pricing measure is not covered. The Brownian motion has continuous paths. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-bachelier-market-superreplication",
       "name": "The Superreplication Price of the European Call in the Bachelier Market Is the Bachelier Formula",
       "description": "In the Bachelier market of a Brownian motion W with continuous paths under mu, with K, sigma, T > 0, the superreplication price of the call payoff max(S_0 + sigma W_T - K, 0), that is the least initial wealth x for which some Ito-integrable predictable strategy phi in the driver W has x + int_0^T phi dW dominating the payoff almost surely, is (S_0 - K) Phi(d) + sigma sqrt(T) phi(d), d = (S_0 - K)/(sigma sqrt(T)). The strategy class integrates against the driver W, not against the asset S_0 + sigma W; the theorem is Market.superReplicationPrice_eq_price at the reference measure.",
@@ -2469,7 +2497,7 @@
         "reference": "Hagan, Kumar, Lesniewski & Woodward, \"Managing Smile Risk,\" Wilmott Magazine, September 2002, pp. 84-108, section 3.2, eq. 3.9 (the chain-rule Delta risk) applied with the ATM vol of eq. 2.18 as the vol curve",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of the ATM-vol-curve chain-rule Delta. Lives in MathFin/Models/ModelFree/SABRChainRuleGreeks.lean (sabrATMVol_bsV_delta_chainRule), built on a general bivariate Frechet-derivative chain rule for bsV (hasDerivAt_bsV_S_chainRule, in MathFin/Models/BlackScholes/HigherGreeks.lean, proved from the joint differentiability of bsV in (S, sigma) rather than by combining the two one-variable Greek formulas), instantiated at sabrATMVol, which is differentiable in the forward for f > 0 (differentiableAt_sabrATMVol_F). Axioms-clean. LIMITS: the strike is held fixed at K = f and only the spot (and the vol curve's argument) moves, but the vol curve differentiated is the ATM curve f -> sigma_ATM(f) = sigma_B(f,f) (eq. 2.18), not the fixed-strike smile f -> sigma_B(K,f) of Hagan's eq. 3.9. The fixed-strike case is not attempted: away from K = f it needs only a (routine, unformalized) chain rule through sabrImpliedVol's factors; at K = f the literal sabrImpliedVol evaluates its 0/0 factor to 0 (not even continuous there), so it would first need the ATM value redefined by its limit and then a second derivative of the sabrX building block, neither of which is in this repo. MARKET PRICE: sabrATMVol_marketPrice_delta_chainRule (same module) restates the derivative for Market.price of europeanCall under constGirsanovMeasure, via price_europeanCall_eq_bsV (price = bsV K 0 sigma S T, from price_europeanCall_constGirsanovMeasure and bsV_eq_closedForm) and eventual equality near f (sigma_ATM continuous at f, so positive nearby). Rate r = 0 and T = tex as a real horizon with T <= H are conventions of this statement.",
+        "formalization_scope": "Full formal proof of the ATM-vol-curve chain-rule Delta. Lives in MathFin/Models/ModelFree/SABRChainRuleGreeks.lean (sabrATMVol_bsV_delta_chainRule), built on a general bivariate Frechet-derivative chain rule for bsV (hasDerivAt_bsV_S_chainRule, in MathFin/Models/BlackScholes/HigherGreeks.lean, proved from the joint differentiability of bsV in (S, sigma) rather than by combining the two one-variable Greek formulas), instantiated at sabrATMVol, which is differentiable in the forward for f > 0 (differentiableAt_sabrATMVol_F). Axioms-clean. LIMITS: the strike is held fixed at K = f and only the spot (and the vol curve's argument) moves, but the vol curve differentiated is the ATM curve f -> sigma_ATM(f) = sigma_B(f,f) (eq. 2.18), not the fixed-strike smile f -> sigma_B(K,f) of Hagan's eq. 3.9. The fixed-strike case is not attempted: away from K = f it needs only a (routine, unformalized) chain rule through sabrImpliedVol's factors; at K = f the literal sabrImpliedVol evaluates its 0/0 factor to 0 (not even continuous there), so it would first need the ATM value redefined by its limit and then a second derivative of the sabrX building block, neither of which is in this repo. MARKET PRICE: sabrATMVol_marketPrice_delta_chainRule (same module) restates the derivative for Market.price of europeanCall under constGirsanovMeasure, via price_europeanCall_eq_bsV (price = bsV K 0 sigma S T, from price_europeanCall_constGirsanovMeasure with bsV unfolded) and eventual equality near f (sigma_ATM continuous at f, so positive nearby). Rate r = 0 and T = tex as a real horizon with T <= H are conventions of this statement.",
         "citations": [
           {
             "key": "HaganKumarLesniewskiWoodward2002"

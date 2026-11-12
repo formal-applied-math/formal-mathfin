@@ -109,7 +109,7 @@ theorem shoutFloor_g_eq_bsP (r q σ τ : ℝ) :
 European put struck at the spot (spot `1`, drift and rate both `r - q`) under the
 zero-price-of-risk measure is exactly `g(τ) = e^{qτ} · P(τ)` — by the market's put pricing
 (`price_europeanPut_constGirsanovMeasure`), the reduction `shoutFloor_g_eq_bsP`, and the
-closed-form parity chain (`bsP_eq_bsV`, `bsV_eq_closedForm`). So the monotonicity below holds
+closed-form parity `bsP_eq_bsV` with `bsV` unfolded. So the monotonicity below holds
 at the level of the pricing functional, not only at the closed-form level. -/
 theorem shoutFloorAtmPut_eq_marketPut {Ω : Type*} [MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ}
     {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)
@@ -125,8 +125,7 @@ theorem shoutFloorAtmPut_eq_marketPut {Ω : Type*} [MeasurableSpace Ω] {W : ℝ
     (S_0 := 1) (m := r - q) (r := r - q) (σ := σ) (K := 1) hW hWmeas hTH hS0 hK hσ hT
   have hzero : ((r - q) - (r - q)) / σ = 0 := by rw [sub_self, zero_div]
   rw [hzero] at key
-  rw [key, shoutFloor_g_eq_bsP r q σ (T : ℝ), bsP_eq_bsV 1 (r - q) σ 1 (T : ℝ),
-    bsV_eq_closedForm 1 (r - q) σ 1 (T : ℝ)]
+  rw [key, shoutFloor_g_eq_bsP r q σ (T : ℝ), bsP_eq_bsV 1 (r - q) σ 1 (T : ℝ), bsV]
   have h1 := Phi_add_Phi_neg (bsd1 1 1 (r - q) σ (T : ℝ))
   have h2 := Phi_add_Phi_neg (bsd2 1 1 (r - q) σ (T : ℝ))
   linear_combination (norm := ring) (Real.exp (-(r - q) * (T : ℝ))) * h2 - h1

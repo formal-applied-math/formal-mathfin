@@ -228,6 +228,20 @@ ratchets lowered: chain beyond three hops 389 → 382 ‰, corpus off the bluepr
 off the trunk back at 171; two private Mathlib-shaped spline helpers made public under the names of
 what they prove (`sum_fin_ite_const_le`, `sum_fin_ite_val_eq`).
 
+### Backlog executed the next day (on main)
+
+- **1, in part.** Bachelier: a pricing measure with a nonnegative density in `L²(μ)` agrees with
+  `μ` on `𝓕_T` and prices the call at the Bachelier formula
+  (`Bachelier.trim_eq_of_isPricingMeasure_withDensity`, `mf-bachelier-pricing-measure-unique-l2`).
+  The increment of `S₀ + σW` is the Itô integral of the constant `σ`, now a lemma of its own
+  (`exists_itoIntegral_const`, the case `f(t, x) = σx` of the time-dependent Itô formula).
+  Time-dependent volatility is left: the clocked market's martingale property holds only at the
+  clock times `v(t)`, and the uniqueness argument needs every time in `[0, v(T)]`. That needs a
+  continuous clock with `v(0) = 0`, and the hypothesis is not decoration. A clock that jumps
+  reveals a one-period lognormal step at once, and that step has many pricing measures.
+- **9.** `bsV_eq_closedForm` is gone; its three users unfold `bsV`, and the prose that cited it
+  says so.
+
 ## 2026-11-11 — corpus 849, modules 755 — the wave's sockets and connectors, read before they land
 
 Scope: the v2 wave of 2026-11-11 (`v2/wave-2026-11-11`), seven workstreams integrated on one branch

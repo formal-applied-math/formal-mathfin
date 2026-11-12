@@ -10,6 +10,8 @@ public import MathFin.Models.Bachelier.Bachelier
 public import MathFin.Models.BlackScholes.BSCallHypFromBrownian
 public import MathFin.Pricing.MarketCompleteness
 public import MathFin.Probability.Martingales.MartingaleFrozen
+public import MathFin.Probability.Brownian.MartingaleMeasureUniqueness
+public import MathFin.Probability.Brownian.Ito.ItoFormulaTD
 
 /-!
 # The Bachelier market
@@ -32,6 +34,12 @@ The price of the European call in this market, under `μ`, is the Bachelier form
 result applies to it: the cheapest initial wealth from which an Itô-integrable strategy in the
 driver dominates the call is the Bachelier formula (`superReplicationPrice_europeanCall`).
 
+For `σ ≠ 0` the reference measure is also the only pricing measure among those with a
+square-integrable density against it: such a measure agrees with `μ` on `𝓕_T`
+(`trim_eq_of_isPricingMeasure_withDensity`, from the general uniqueness of
+`Probability/Brownian/MartingaleMeasureUniqueness.lean`), so it prices the call at the Bachelier
+formula too. A pricing measure whose density is not square-integrable is not covered.
+
 ## Main definitions
 
 * `MathFin.Bachelier.market`: the Bachelier market of a pre-Brownian motion `W`, with spot `S₀`
@@ -47,6 +55,10 @@ driver dominates the call is the Bachelier formula (`superReplicationPrice_europ
   of the European call under `μ` is `(S₀ - K) Φ(d) + σ √T ϕ(d)`, `d = (S₀ - K) / (σ √T)`.
 * `MathFin.Bachelier.superReplicationPrice_europeanCall`: for a Brownian motion with continuous
   paths, the superreplication price of the call is that formula.
+* `MathFin.Bachelier.trim_eq_of_isPricingMeasure_withDensity`: a pricing measure with a
+  nonnegative density in `L²(μ)` agrees with `μ` on `𝓕_T`.
+* `MathFin.Bachelier.price_europeanCall_of_isPricingMeasure_withDensity`: such a measure prices
+  the call at the Bachelier formula.
 
 ## References
 
@@ -54,11 +66,12 @@ driver dominates the call is the Bachelier formula (`superReplicationPrice_europ
 * [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006]
 * [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], 5.3
 * [Y. F. Saporito, *Stochastic Processes*][Saporito], Ch 9
+* [I. Karatzas and S. E. Shreve, *Brownian Motion and Stochastic Calculus*][KaratzasShreve1991], 3.4
 
 ## Tags
 
 Bachelier model, arithmetic Brownian motion, market, pricing measure, superreplication,
-market completeness, European call, MSC 91G20, MSC 60G44, JEL G13
+market completeness, uniqueness of the pricing measure, European call, MSC 91G20, MSC 60G44, JEL G13
 -/
 
 @[expose] public section
@@ -116,7 +129,7 @@ include hW in
 of a Brownian motion, and so is the same process frozen at the horizon `T`. -/
 theorem isPricingMeasure_market (T : ℝ≥0) :
     (market μ hWmeas S_0 σ).IsPricingMeasure T μ := by
-  haveI : IsFilteredPreBrownian W (natFiltration hWmeas) μ := hW.isFilteredPreBrownian hWmeas
+  have : IsFilteredPreBrownian W (natFiltration hWmeas) μ := hW.isFilteredPreBrownian hWmeas
   refine .of_isEquivProbMeasure ⟨inferInstance, Measure.AbsolutelyContinuous.rfl,
     Measure.AbsolutelyContinuous.rfl⟩ fun _ ↦ ?_
   have key : (fun t ↦ (market μ hWmeas S_0 σ).deflated () (min t T))
@@ -182,5 +195,72 @@ theorem superReplicationPrice_europeanCall (hWcont : ∀ ω, Continuous fun s : 
     Measure.AbsolutelyContinuous.rfl (pricesGainsAtZero_self hW T hWmeas)).2
   rw [hpv] at this
   exact this.trans (price_europeanCall hW hWmeas hK hσ hT)
+
+include hW in
+/-- **Uniqueness of the pricing measure of the Bachelier market with a square-integrable
+density.** For `σ ≠ 0`, a pricing measure `Q` of the Bachelier market up to `T` whose density with
+respect to the reference measure `μ` is a nonnegative `D ∈ L²(μ)` agrees with `μ` on `𝓕_T`.
+
+The asset `S₀ + σ W` is a `μ`-martingale whose increment over `[0, T]` is the Itô integral of the
+constant `σ` (`exists_itoIntegral_const`), so `trim_eq_of_martingale_withDensity` applies. A
+density that is not square-integrable is not covered. -/
+theorem trim_eq_of_isPricingMeasure_withDensity (hWcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ W s ω)
+    (hσ : σ ≠ 0) {T : ℝ≥0} {Q : Measure Ω} (hQ : (market μ hWmeas S_0 σ).IsPricingMeasure T Q)
+    (D : Lp ℝ 2 μ) (hD : ∀ᵐ ω ∂μ, 0 ≤ D ω)
+    (hQD : Q = μ.withDensity fun ω ↦ ENNReal.ofReal (D ω)) :
+    Q.trim ((market μ hWmeas S_0 σ).𝓕.le T) = μ.trim ((market μ hWmeas S_0 σ).𝓕.le T) := by
+  have : IsFilteredPreBrownian W (natFiltration hWmeas) μ := hW.isFilteredPreBrownian hWmeas
+  have : IsProbabilityMeasure Q := hQ.isProb
+  let X : ℝ≥0 → Ω → ℝ := fun t ω ↦ S_0 + σ * W t ω
+  have hX : Martingale X (natFiltration hWmeas) μ :=
+    (martingale_const (natFiltration hWmeas) μ S_0).add
+      ((IsPreBrownianReal.isMartingale W (natFiltration hWmeas) μ).smul σ)
+  have hXQ : Martingale (fun t ↦ X (min t T)) (natFiltration hWmeas) Q := by
+    have h : Martingale (fun t ↦ (market μ hWmeas S_0 σ).deflated () (min t T))
+        (natFiltration hWmeas) Q := hQ.martingale ()
+    rwa [show (fun t ↦ (market μ hWmeas S_0 σ).deflated () (min t T)) = fun t ↦ X (min t T) from
+      funext fun t ↦ funext (deflated_market μ hWmeas S_0 σ (min t T))] at h
+  obtain ⟨ψ, hψc, hψ⟩ := exists_itoIntegral_const hW hWmeas hWcont T σ
+  have hψ' : (fun ω ↦ X T ω - X 0 ω) =ᵐ[μ] ItoIntegralCLM.itoIntegralCLM hW T hWmeas ψ := by
+    filter_upwards [hψ] with ω h
+    rw [← h]
+    ring
+  have hψ0 : ∀ᵐ z ∂(ItoIntegralCLM.trimMeasure (μ := μ) T hWmeas), ψ z ≠ 0 := by
+    filter_upwards [hψc] with z hz
+    rw [hz]
+    exact hσ
+  have hX0 : MemLp (X 0) 2 μ := by
+    refine (memLp_const S_0).ae_eq ?_
+    filter_upwards [hW.eval_zero_ae_eq_zero] with ω h
+    simp [X, h]
+  exact trim_eq_of_martingale_withDensity hW hWmeas hWcont T hX ψ hψ' hψ0 hX0 D hD hQD hXQ
+
+include hW in
+/-- **Every pricing measure with a square-integrable density prices the European call at the
+Bachelier formula.** For `K, σ, T > 0`, a pricing measure `Q` of the Bachelier market up to `T`
+whose density with respect to `μ` is a nonnegative `D ∈ L²(μ)` prices the call at
+`(S₀ - K) Φ(d) + σ √T ϕ(d)`: it agrees with `μ` on `𝓕_T`
+(`trim_eq_of_isPricingMeasure_withDensity`), and the call payoff is `𝓕_T`-measurable, so its
+`Q`-integral is its `μ`-integral (`price_europeanCall`). -/
+theorem price_europeanCall_of_isPricingMeasure_withDensity
+    (hWcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ W s ω) {K : ℝ} {T : ℝ≥0} (hK : 0 < K) (hσ : 0 < σ)
+    (hT : 0 < (T : ℝ)) {Q : Measure Ω} (hQ : (market μ hWmeas S_0 σ).IsPricingMeasure T Q)
+    (D : Lp ℝ 2 μ) (hD : ∀ᵐ ω ∂μ, 0 ≤ D ω)
+    (hQD : Q = μ.withDensity fun ω ↦ ENNReal.ofReal (D ω)) :
+    (market μ hWmeas S_0 σ).price Q (europeanCall K T)
+      = (S_0 - K) * Phi (bachelierD S_0 K σ T) +
+        σ * Real.sqrt T * gaussianPDFReal 0 1 (bachelierD S_0 K σ T) := by
+  have htrim : Q.trim ((natFiltration hWmeas).le T) = μ.trim ((natFiltration hWmeas).le T) :=
+    trim_eq_of_isPricingMeasure_withDensity hW hWmeas hWcont hσ.ne' hQ D hD hQD
+  set F : ℝ → ℝ := fun x ↦ max (S_0 + σ * x - K) 0 with hF
+  have hprice (P : Measure Ω) :
+      (market μ hWmeas S_0 σ).price P (europeanCall K T) = ∫ ω, F (W T ω) ∂P := by
+    simp [price_market, europeanCall, europeanCallPayoff, Contract.value_pay, Payoff.eval,
+      scenarioAt, hF]
+  have hFm : StronglyMeasurable[natFiltration hWmeas T] fun ω ↦ F (W T ω) :=
+    (by fun_prop : Continuous F).comp_stronglyMeasurable (stronglyAdapted_natFiltration hWmeas T)
+  rw [hprice, integral_trim ((natFiltration hWmeas).le T) hFm, htrim,
+    ← integral_trim ((natFiltration hWmeas).le T) hFm, ← hprice]
+  exact price_europeanCall hW hWmeas hK hσ hT
 
 end MathFin.Bachelier

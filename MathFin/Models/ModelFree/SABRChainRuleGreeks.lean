@@ -125,7 +125,7 @@ theorem price_europeanCall_eq_bsV {K S m σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ 
     (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) :
     (market μ hWmeas S m 0 σ).price (constGirsanovMeasure hW hWmeas ((m - 0) / σ) H)
         (europeanCall K T) = bsV K 0 σ S T := by
-  rw [price_europeanCall_constGirsanovMeasure hW hWmeas hTH hS hK hσ hT, bsV_eq_closedForm]
+  rw [price_europeanCall_constGirsanovMeasure hW hWmeas hTH hS hK hσ hT, bsV]
   simp
 
 /-- **The SABR ATM chain-rule Delta is the derivative of the market price.** In the
