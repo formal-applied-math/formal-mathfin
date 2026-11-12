@@ -163,7 +163,8 @@ theorem exists_memLp_two_withDensity_of_bdd {Ω : Type*} {mΩ : MeasurableSpace 
       Q = (μ.withDensity fun ω ↦ ENNReal.ofReal (Z ω)).withDensity
         fun ω ↦ ENNReal.ofReal (D' ω) := by
   have hD'm : AEMeasurable (fun ω ↦ D ω / Z ω) μ := hDm.aemeasurable.div hZ.aemeasurable
-  have hac : (μ.withDensity fun ω ↦ ENNReal.ofReal (Z ω)) ≪ μ := withDensity_absolutelyContinuous _ _
+  have hac : (μ.withDensity fun ω ↦ ENNReal.ofReal (Z ω)) ≪ μ :=
+    withDensity_absolutelyContinuous _ _
   have hQD' : Q = (μ.withDensity fun ω ↦ ENNReal.ofReal (Z ω)).withDensity
       fun ω ↦ ENNReal.ofReal (D ω / Z ω) := by
     rw [hQD, ← withDensity_mul₀ hZ.aemeasurable.ennreal_ofReal hD'm.ennreal_ofReal]

@@ -154,7 +154,8 @@ theorem exists_isEMM_of_fair_measure [IsProbabilityMeasure P] {ν : Measure Ω} 
   exact ⟨Q, IsEMM.of_condExp_succ ⟨hQprob, hQν.trans hνP, hPν.trans hνQ⟩ hS hQint
     fun t ht ↦ ae_eq_condExp_of_forall_setIntegral_eq (𝓕.le t) (hQint (t + 1) ht)
       (fun A _ _ ↦ (hQint t ht.le).integrableOn)
-      (fun A hA _ ↦ by simp only [Q, Measure.restrict_smul, integral_smul_measure, hfair' t ht A hA])
+      (fun A hA _ ↦ by
+        simp only [Q, Measure.restrict_smul, integral_smul_measure, hfair' t ht A hA])
       (hS t ht.le).aestronglyMeasurable⟩
 
 /-- **One-period densities paste to an equivalent martingale measure.** For an adapted integrable

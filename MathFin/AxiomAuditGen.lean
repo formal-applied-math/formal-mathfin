@@ -1123,10 +1123,6 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.LevyCharacterization.isFilteredPreBrownian_of_localMartingale
 
-/-- info: 'MathFin.LocalEMMDensities.isEMM_pastedMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.LocalEMMDensities.isEMM_pastedMeasure
-
 /-- info: 'MathFin.Market.IsPricingMeasure.abs_sharpeRatio_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Market.IsPricingMeasure.abs_sharpeRatio_le
@@ -2066,6 +2062,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.exists_isCopula_fgm_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.exists_isCopula_fgm_iff
+
+/-- info: 'MathFin.exists_isEMM_of_onePeriodDensities' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.exists_isEMM_of_onePeriodDensities
 
 /-- info: 'MathFin.exists_market_of_isArbitrageFreeQuotes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

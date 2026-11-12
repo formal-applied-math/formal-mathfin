@@ -352,22 +352,6 @@ theorem integral_trinomialNodes {v2 e dx : ℝ} (hdx : dx ≠ 0) (c : ℝ)
   field_simp
   ring
 
-/-- Two fully supported probability weight vectors on a finite type give mutually absolutely
-continuous laws. -/
-theorem ofWeights_absolutelyContinuous_of_pos {ι : Type*} [MeasurableSpace ι] [Fintype ι]
-    [MeasurableSingletonClass ι] {p q : ι → ℝ} (hp : ∀ i, 0 < p i) :
-    Measure.ofWeights Finset.univ q ≪ Measure.ofWeights Finset.univ p := by
-  intro s hs
-  have hs' : s = ∅ := by
-    refine Set.eq_empty_of_forall_notMem fun i hi ↦ ?_
-    have := hs
-    simp only [Measure.ofWeights, Measure.coe_finsetSum, Finset.sum_apply, Measure.smul_apply,
-      smul_eq_mul, Finset.sum_eq_zero_iff, mul_eq_zero] at this
-    rcases this i (Finset.mem_univ i) with h | h
-    · exact absurd (ENNReal.ofReal_eq_zero.mp h) (not_le.mpr (hp i))
-    · simp [Measure.dirac_apply' _ (Set.toFinite s).measurableSet, hi] at h
-  simp [hs']
-
 /-- **The trinomial law prices the one-date market** whose asset is `trinomialNodes c dx` at the
 date `τ` and `s₀ e^{rt}` before it, whenever the three weights are positive and the lattice
 reproduces the money-market growth of the quote: `c (1 + (v2 + e²)(cosh dx - 1)/dx² +
