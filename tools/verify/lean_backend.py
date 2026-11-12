@@ -37,7 +37,7 @@ _SERVER_DEATH_MARKERS = (
 
 # Per-elaboration wall-clock bound. lean-interact's own DEFAULT_TIMEOUT is None
 # (an unbounded `t.join(None)` on the REPL read), so WITHOUT this a single spinning
-# tactic — e.g. a leanstral faithfulness-gate candidate running `nlinarith` on an
+# tactic — e.g. a faithfulness-gate candidate running `nlinarith` on an
 # unprovable `⊢ False` — wedges the daemon forever (the REPL never replies, the read
 # blocks, the client only ever hits its own socket timeout). Bounding each call lets
 # lean-interact kill the stuck REPL and respawn a fresh one. Generous (a real proof

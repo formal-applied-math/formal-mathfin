@@ -34,6 +34,18 @@ except ModuleNotFoundError:  # pragma: no cover
     tomllib = None
 
 AXIOMS = ["propext", "Classical.choice", "Quot.sound"]
+
+#: `provenance.source` of an entry the autoform pipeline (formal-foundry) contributed.
+#: The marker names the PIPELINE; the model that proved an entry is its `model`.
+#: Entries merged before 2026-11-12 carry the marker the pipeline used then, named after
+#: the prover it had (Leanstral); it is their history and is counted with the rest.
+LEGACY_AUTOFORM_SOURCE = "leanstral-autoform"
+AUTOFORM_SOURCES = ("foundry-autoform", LEGACY_AUTOFORM_SOURCE)
+#: What a legacy entry without a `model` was proved by (the only prover before 2026-09-28).
+LEGACY_PROVER_MODEL = "labs-leanstral-1-5"
+#: A current entry always records its prover. One that does not is disclosed as such,
+#: never as a guess, and `tests/test_generated_claims.py` refuses it.
+UNRECORDED_PROVER = "unrecorded"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "formalization.yaml")
 
@@ -160,9 +172,9 @@ def build_doc(root: str) -> dict:
     by_file: dict[str, dict] = {}
     totals = {"full": 0, "library_wrapper": 0, "reduced_core": 0, "placeholder": 0}
     n = 0
-    # provenance: entries the autoform pipeline scouted carry
-    # metadata.provenance.source == "leanstral-autoform" (+ the issue it closed, and the
-    # prover's model id — the marker names the pipeline, which predates other provers).
+    # provenance: entries the autoform pipeline scouted carry a
+    # metadata.provenance.source in AUTOFORM_SOURCES (+ the issue it closed, and the
+    # prover's model id).
     # Counting them here keeps the automation disclosure MECHANICAL — it can never
     # drift from a hand-set "0" once machine-scouted proofs start merging.
     autoform_count = 0
@@ -183,7 +195,7 @@ def build_doc(root: str) -> dict:
         status = md.get("formalization_status", "full")
         totals[status] = totals.get(status, 0) + 1
         prov = md.get("provenance") or {}
-        if prov.get("source") == "leanstral-autoform":
+        if prov.get("source") in AUTOFORM_SOURCES:
             autoform_count += 1
             if prov.get("issue") is not None:
                 autoform_issues.append(prov["issue"])
@@ -193,11 +205,13 @@ def build_doc(root: str) -> dict:
             # sentence stays accurate only until the next entry lands, and this file
             # is the public AI-disclosure artifact — the one place a stale claim is
             # least acceptable. Entries keep their own historical attribution.
-            # `source == leanstral-autoform` marks the pipeline, not the prover: the
-            # prover is the entry's `model` (Leanstral when absent, the only prover
-            # before 2026-09-28). The drafter model is whatever the entry recorded, and
-            # is simply absent once the convention went drafter-agnostic
-            prover_model = str(prov.get("model") or "labs-leanstral-1-5")
+            # `source` marks the pipeline, not the prover: the prover is the entry's
+            # `model`. Only a legacy-marker entry may omit it (Leanstral, the only
+            # prover before 2026-09-28). The drafter model is whatever the entry
+            # recorded, and is simply absent once the convention went drafter-agnostic
+            prover_model = str(prov.get("model") or (
+                LEGACY_PROVER_MODEL if prov.get("source") == LEGACY_AUTOFORM_SOURCE
+                else UNRECORDED_PROVER))
             autoform_models.add(prover_model)
             pname = _prover_name(prover_model)
             autoform_prover_counts[pname] = autoform_prover_counts.get(pname, 0) + 1
