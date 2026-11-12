@@ -601,7 +601,7 @@
     {
       "id": "mf-dmw-conditional",
       "name": "Dalang-Morton-Willinger, Assuming the Conditional One-Period FTAP",
-      "description": "For an adapted, integrable price S valued in an inner-product space F on a filtered probability space with finite horizon T, ASSUMING the hypothesis ConditionalOnePeriodFTAP 𝓕 P S T (conditional one-period no arbitrage at each period t < T yields a one-period density: a bounded, strictly positive, 𝓕 (t+1)-measurable weight with conditional mean one under which S is a conditional martingale), no arbitrage is equivalent to the existence of an equivalent martingale measure: NoArbitrage 𝓕 P S T iff there is Q with IsEMM 𝓕 P S T Q. The hypothesis ConditionalOnePeriodFTAP, the measurable-selection core of the Dalang-Morton-Willinger theorem (the one-period theorem carried out conditionally on a non-trivial 𝓕 t), is NOT proved in the library; the Dalang-Morton-Willinger theorem on a general probability space is not delivered here. What is proved is the reduction of no arbitrage to the conditional one-period markets (mf-no-arbitrage-local) and the pasting of one-period densities into an equivalent martingale measure (mf-density-pasting-emm), assembled under that hypothesis; the converse direction (an equivalent martingale measure precludes arbitrage) needs no hypothesis. The hypothesis is the conditional one-period FTAP of the literature only for F = R^d; for an infinite-dimensional F it need not hold, and the statement is then vacuous.",
+      "description": "For an adapted, integrable price S valued in an inner-product space F on a filtered probability space with finite horizon T, ASSUMING the hypothesis ConditionalOnePeriodFTAP 𝓕 P S T (conditional one-period no arbitrage at each period t < T yields a one-period density: a bounded, strictly positive, 𝓕 (t+1)-measurable weight with conditional mean one under which S is a conditional martingale), no arbitrage is equivalent to the existence of an equivalent martingale measure: NoArbitrage 𝓕 P S T iff there is Q with IsEMM 𝓕 P S T Q. The hypothesis ConditionalOnePeriodFTAP, the measurable-selection core of the Dalang-Morton-Willinger theorem (the one-period theorem carried out conditionally on a non-trivial 𝓕 t), is NOT proved in the library; the Dalang-Morton-Willinger theorem on a general probability space is not delivered here. What is proved is the reduction of no arbitrage to the conditional one-period markets (mf-no-arbitrage-local) and the pasting of one-period densities into an equivalent martingale measure (mf-density-pasting-emm), assembled under that hypothesis; the converse direction (an equivalent martingale measure precludes arbitrage) needs no hypothesis. The hypothesis asks for a bounded conditional-mean-one density and is stronger than the theorem needs: it fails for an arbitrage-free one-asset market in which, given a uniform u, the increment is +1 with probability u and -1 otherwise (the density would be 1/(2u) on the up move), and for an infinite-dimensional F it need not hold; the statement is then vacuous. For one real asset the theorem is proved without it (mf-dmw-one-asset); the case of several assets on a general space is open.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Pricing.FTAP.DalangMortonWillinger\n\nopen MeasureTheory\nopen MathFin\n\n/-- Dalang-Morton-Willinger, assuming the conditional one-period FTAP. -/\ntheorem dmw_conditional {Ω : Type*} {m0 : MeasurableSpace Ω} {F : Type*}\n    [NormedAddCommGroup F] [InnerProductSpace ℝ F] [CompleteSpace F] {𝓕 : Filtration ℕ m0}\n    {P : Measure Ω} {S : ℕ → Ω → F} [IsProbabilityMeasure P] {T : ℕ}\n    (hS : ∀ t ≤ T, StronglyMeasurable[𝓕 t] (S t)) (hint : ∀ t ≤ T, Integrable (S t) P)\n    (hcond : ConditionalOnePeriodFTAP 𝓕 P S T) :\n    NoArbitrage 𝓕 P S T ↔ ∃ Q, IsEMM 𝓕 P S T Q :=\n  MathFin.noArbitrage_iff_exists_isEMM hS hint hcond\n"
@@ -617,7 +617,29 @@
         ],
         "difficulty": "research",
         "formalization_status": "reduced_core",
-        "formalization_scope": "REDUCED CORE: the entry assumes ConditionalOnePeriodFTAP as a hypothesis, which is the genuinely hard step of Dalang-Morton-Willinger and is not proved in this library (issue #313). noArbitrage_iff_exists_isEMM in MathFin/Pricing/FTAP/DalangMortonWillinger.lean is the composition of the reduction noArbitrageLocal_of_noArbitrage (mf-no-arbitrage-local), the assumption ConditionalOnePeriodFTAP (a hypothesis of the statement, defined as: for t < T, NoArbitrageAt 𝓕 P S t implies HasOnePeriodDensity 𝓕 P S t), one-period densities chosen per period, and the pasting LocalEMMDensities.isEMM_pastedMeasure (mf-density-pasting-emm), which gives the explicit product measure pastedMeasure; the forward direction is IsEMM.noArbitrage. The hypothesis is the conditional version of OnePeriodVector.ftap_one_period_vector (Foellmer and Schied sec. 5.2) and needs a measurable selection of the one-period equivalent martingale measure over 𝓕 t or closedness of the gains cone in L0. SCOPE: assuming it, the iff holds for an adapted integrable price in an inner-product space; the statement is not the Dalang-Morton-Willinger theorem. Axioms-clean."
+        "formalization_scope": "REDUCED CORE: the entry assumes ConditionalOnePeriodFTAP as a hypothesis, which is the genuinely hard step of Dalang-Morton-Willinger and is not proved in this library (issue #313). noArbitrage_iff_exists_isEMM in MathFin/Pricing/FTAP/DalangMortonWillinger.lean is the composition of the reduction noArbitrageLocal_of_noArbitrage (mf-no-arbitrage-local), the assumption ConditionalOnePeriodFTAP (a hypothesis of the statement, defined as: for t < T, NoArbitrageAt 𝓕 P S t implies HasOnePeriodDensity 𝓕 P S t), one-period densities chosen per period, and the pasting LocalEMMDensities.isEMM_pastedMeasure (mf-density-pasting-emm), which gives the explicit product measure pastedMeasure; the forward direction is IsEMM.noArbitrage. The hypothesis is the conditional version of OnePeriodVector.ftap_one_period_vector (Foellmer and Schied sec. 5.2) but is stronger than the theorem needs and can fail (a bounded density of conditional mean one need not exist: with a uniform u and an increment +1 with probability u and -1 otherwise it would equal 1/(2u) on the up move); the unconditional one-asset theorem is mf-dmw-one-asset, and the several-asset case needs a measurable selection of the one-period equivalent martingale measure over 𝓕 t or closedness of the gains cone in L0. SCOPE: assuming it, the iff holds for an adapted integrable price in an inner-product space; the statement is not the Dalang-Morton-Willinger theorem. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-dmw-one-asset",
+      "name": "Dalang-Morton-Willinger for One Asset on a General Probability Space: No Arbitrage iff an Equivalent Martingale Measure Exists",
+      "description": "For an adapted real-valued price S on a filtered probability space (Omega, F, P) with a finite horizon N, with no integrability assumption on S, no finiteness or countability of the space and no measurable-selection or one-period-density hypothesis, the market has no arbitrage up to N (NoArbitrage: no bounded predictable strategy turns zero initial wealth into a P-almost surely non-negative gain that is not almost surely zero) if and only if there is a probability measure Q equivalent to P under which S, frozen at N, is a martingale (IsEMM). This is the one-asset case of the Dalang-Morton-Willinger theorem; the case of several assets (d > 1) is not covered.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Pricing.FTAP.OneAssetDMW\n\nopen MeasureTheory\nopen MathFin\n\n/-- Dalang-Morton-Willinger for one asset on a general probability space. -/\ntheorem dmw_one_asset {Ω : Type*} {m0 : MeasurableSpace Ω} {𝓕 : Filtration ℕ m0}\n    {P : Measure Ω} {S : ℕ → Ω → ℝ} [IsProbabilityMeasure P] {N : ℕ}\n    (hS : ∀ t ≤ N, StronglyMeasurable[𝓕 t] (S t)) :\n    NoArbitrage 𝓕 P S N ↔ ∃ Q, IsEMM 𝓕 P S N Q :=\n  OneAsset.noArbitrage_iff_exists_isEMM hS\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Dalang-Morton-Willinger fundamental theorem of asset pricing, one asset (Foellmer and Schied, Stochastic Finance, sec. 5.2)",
+        "citations": [
+          {
+            "key": "FollmerSchied",
+            "locator": "sec. 5.2"
+          }
+        ],
+        "difficulty": "research",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. OneAsset.noArbitrage_iff_exists_isEMM in MathFin/Pricing/FTAP/OneAssetDMW.lean. The converse (an equivalent martingale measure precludes arbitrage) is IsEMM.noArbitrage. The forward direction, OneAsset.exists_isEMM_of_noArbitrage: P is replaced by the equivalent finite measure with density exp(-sum_n |S_n|) under which every S_n is integrable (exists_integrable_equivalent); no arbitrage is local (noArbitrageLocal_of_noArbitrage, mf-no-arbitrage-local); backward in time, each conditional one-period market contributes an F_(t+1)-measurable weight Z_t in (0,1], equal on {X>0} to E[X^-|F_t]/(E[X^+|F_t]+E[X^-|F_t]) and on {X<0} to E[X^+|F_t]/(E[X^+|F_t]+E[X^-|F_t]) for the increment X, with E[Z_t X|F_t]=0, built under the measure already weighted by the later periods (exists_weight_of_noArbitrage, exists_measure_fair_increments); the weights are not normalised period by period, only the total mass is, at the end. This avoids ConditionalOnePeriodFTAP (mf-dmw-conditional), a bounded conditional-mean-one density that can fail to exist for an arbitrage-free market. SCOPE: one real-valued asset, finite horizon, price quoted in numeraire units; several assets are not covered. Axioms-clean."
       }
     },
     {
@@ -695,7 +717,7 @@
       "id": "mf-market-ftap-finite",
       "name": "The Fundamental Theorem of Asset Pricing for a Market on a Finite Sample Space: No Arbitrage on a Grid iff the Market Traded on the Grid Has a Pricing Measure",
       "domain": "mathematical_finance",
-      "description": "For a one-asset Market on a finite sample space whose finite reference measure charges every state, and a monotone grid of dates t 0 <= ... <= t N, the market has no arbitrage on the grid (Market.NoArbitrage: NoArbitrage of the deflated asset sampled along the grid, for the sampled filtration) if and only if the market traded on the grid (Market.onGrid: the sampled deflated asset, constant between the dates, unit numeraire) has a pricing measure at N (Market.IsPricingMeasure). A pricing measure of the market itself up to a horizon T with t N <= T rules out arbitrage on the grid (Market.IsPricingMeasure.noArbitrage, stated in the module, not in this entry). The equivalence for a general probability space is not claimed: it is proved only assuming ConditionalOnePeriodFTAP.",
+      "description": "For a one-asset Market on a finite sample space whose finite reference measure charges every state, and a monotone grid of dates t 0 <= ... <= t N, the market has no arbitrage on the grid (Market.NoArbitrage: NoArbitrage of the deflated asset sampled along the grid, for the sampled filtration) if and only if the market traded on the grid (Market.onGrid: the sampled deflated asset, constant between the dates, unit numeraire) has a pricing measure at N (Market.IsPricingMeasure). A pricing measure of the market itself up to a horizon T with t N <= T rules out arbitrage on the grid (Market.IsPricingMeasure.noArbitrage, stated in the module, not in this entry). The equivalence for a general probability space, which needs no finiteness of the space and no full support, is mf-market-ftap.",
       "metadata": {
         "reference": "Harrison and Pliska (1981); Foellmer and Schied, Stochastic Finance, sec. 5.2",
         "citations": [
@@ -713,6 +735,34 @@
       },
       "code": {
         "lean": "import MathFin.Pricing.FTAP.MarketFTAP\n\nopen MeasureTheory MathFin\nopen scoped NNReal\n\n/-- On a finite full-support space, a one-asset market has no arbitrage on a grid iff the market\ntraded on the grid has a pricing measure. -/\ntheorem market_ftap_finite {Ω : Type*} [Finite Ω] [Nonempty Ω] {mΩ : MeasurableSpace Ω}\n    [MeasurableSingletonClass Ω] (M : Market Unit Ω) [IsFiniteMeasure M.P] {t : ℕ → ℝ≥0}\n    (ht : Monotone t) (N : ℕ) (hP : ∀ ω, 0 < M.P {ω}) :\n    M.NoArbitrage ht N ↔ ∃ Q, (M.onGrid ht N).IsPricingMeasure N Q :=\n  Market.noArbitrage_iff_exists_isPricingMeasure_of_finite ht hP\n"
+      }
+    },
+    {
+      "id": "mf-market-ftap",
+      "name": "The Fundamental Theorem of Asset Pricing for a One-Asset Market on a General Probability Space: No Arbitrage on a Grid iff the Market Traded on the Grid Has a Pricing Measure",
+      "description": "For a one-asset Market on a probability space (no integrability of the deflated price, no finiteness of the space) and a monotone grid of dates t 0 <= ... <= t N, the market has no arbitrage on the grid (Market.NoArbitrage: NoArbitrage of the deflated asset sampled along the grid, for the sampled filtration) if and only if the market traded on the grid (Market.onGrid: the sampled deflated asset, constant between the dates, unit numeraire) has a pricing measure at N (Market.IsPricingMeasure). This is the one-asset Dalang-Morton-Willinger theorem read on the trunk's Market; the case of several assets is not covered, and the pricing measure is one of the market traded on the grid, not of the continuous-time market itself.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Pricing.FTAP.MarketFTAP\n\nopen MeasureTheory MathFin\nopen scoped NNReal\n\n/-- On a probability space, a one-asset market has no arbitrage on a grid iff the market traded on\nthe grid has a pricing measure. -/\ntheorem market_ftap {Ω : Type*} {mΩ : MeasurableSpace Ω} (M : Market Unit Ω)\n    [IsProbabilityMeasure M.P] {t : ℕ → ℝ≥0} (ht : Monotone t) (N : ℕ) :\n    M.NoArbitrage ht N ↔ ∃ Q, (M.onGrid ht N).IsPricingMeasure N Q :=\n  Market.noArbitrage_iff_exists_isPricingMeasure ht\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Dalang-Morton-Willinger (Foellmer and Schied, Stochastic Finance, sec. 5.2); Harrison and Pliska (1981); Delbaen and Schachermayer, The Mathematics of Arbitrage",
+        "citations": [
+          {
+            "key": "FollmerSchied",
+            "locator": "sec. 5.2"
+          },
+          {
+            "key": "HarrisonPliska1981"
+          },
+          {
+            "key": "DelbaenSchachermayer"
+          }
+        ],
+        "difficulty": "research",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Market.noArbitrage_iff_exists_isPricingMeasure in MathFin/Pricing/FTAP/MarketFTAP.lean, from noArbitrage_iff_exists_isPricingMeasure of MathFin/Pricing/DiscreteMarket.lean applied to the deflated asset sampled along the grid, which is adapted for the sampled filtration (Market.stronglyAdapted_deflated). The forward direction is OneAsset.exists_isEMM_of_noArbitrage (mf-dmw-one-asset) followed by isPricingMeasure_toMarket_of_isEMM; the converse is the pricing measure ruling out arbitrage (IsPricingMeasure.noArbitrage_toMarket). SCOPE: one asset, real-valued; the pricing measure is a pricing measure of the market traded on the grid (Market.onGrid), not of the continuous-time market itself: the grid FTAP says nothing about dates between the grid points; several assets are not covered. Axioms-clean."
       }
     },
     {

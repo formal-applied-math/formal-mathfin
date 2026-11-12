@@ -30,13 +30,13 @@ with an equivalent martingale measure of the sampled price (`isPricingMeasure_to
   (`Market.noArbitrage_iff_exists_isPricingMeasure_of_finite`, Harrison–Pliska through
   `ftap_discrete`): no arbitrage on the grid exists exactly when the market traded on the grid has
   a pricing measure.
-* On a general probability space the same equivalence holds **assuming
-  `ConditionalOnePeriodFTAP`**, which is not proved in this library
-  (`Market.noArbitrage_iff_exists_isPricingMeasure`, Dalang–Morton–Willinger through
-  `DalangMortonWillinger.lean`). The unconditional statement is the frontier node `thm:dmw-ftap`.
+* On a general probability space the same equivalence holds with no assumption
+  (`Market.noArbitrage_iff_exists_isPricingMeasure`, Dalang–Morton–Willinger for one asset through
+  `OneAssetDMW.lean`): no integrability of the price, no finiteness of the space, no measurable
+  selection. Several assets are not covered.
 
-The bare-process theorems (`ftap_discrete`, `noArbitrage_iff_exists_isEMM`) are what these are
-proved from; this page is the statement about markets.
+The bare-process theorems (`ftap_discrete`, `OneAsset.noArbitrage_iff_exists_isEMM`) are what
+these are proved from; this page is the statement about markets.
 
 ## Main definitions
 
@@ -49,8 +49,8 @@ proved from; this page is the statement about markets.
   inside its horizon.
 * `Market.noArbitrage_iff_exists_isPricingMeasure_of_finite`: the fundamental theorem on a finite
   sample space.
-* `Market.noArbitrage_iff_exists_isPricingMeasure`: the fundamental theorem, assuming the
-  conditional one-period FTAP.
+* `Market.noArbitrage_iff_exists_isPricingMeasure`: the fundamental theorem on a general
+  probability space, for one asset.
 
 ## References
 
@@ -112,17 +112,13 @@ theorem noArbitrage_iff_exists_isPricingMeasure_of_finite [Finite Ω] [Nonempty 
   Contracts.DiscreteMarket.noArbitrage_iff_exists_isPricingMeasure_of_finite
     (fun n ↦ M.stronglyAdapted_deflated () (t n)) hP
 
-/-- **The fundamental theorem of asset pricing for a market, assuming the conditional one-period
-FTAP** (Dalang–Morton–Willinger): on a probability space, for a deflated price integrable at the
-dates of the grid, if `ConditionalOnePeriodFTAP` holds (a hypothesis, **not proved** in this
-library: see `DalangMortonWillinger.lean`), no arbitrage on the grid is equivalent to a pricing
-measure of the market traded on the grid. Only the forward direction uses the hypothesis. -/
-theorem noArbitrage_iff_exists_isPricingMeasure [IsProbabilityMeasure M.P]
-    (hint : ∀ n ≤ N, Integrable (M.deflated () (t n)) M.P)
-    (hcond : ConditionalOnePeriodFTAP (ContinuousMarket.sampledFiltration M.𝓕 ht) M.P
-      (fun n ↦ M.deflated () (t n)) N) :
+/-- **The fundamental theorem of asset pricing for a market** (Dalang–Morton–Willinger, one
+asset): on a probability space, no arbitrage on the grid is equivalent to a pricing measure of the
+market traded on the grid. The forward direction is `OneAsset.exists_isEMM_of_noArbitrage` for the
+sampled deflated price, which needs no integrability. -/
+theorem noArbitrage_iff_exists_isPricingMeasure [IsProbabilityMeasure M.P] :
     M.NoArbitrage ht N ↔ ∃ Q, (M.onGrid ht N).IsPricingMeasure N Q :=
   Contracts.DiscreteMarket.noArbitrage_iff_exists_isPricingMeasure
-    (fun n _ ↦ M.stronglyAdapted_deflated () (t n)) hint hcond
+    (fun n _ ↦ M.stronglyAdapted_deflated () (t n))
 
 end MathFin.Market

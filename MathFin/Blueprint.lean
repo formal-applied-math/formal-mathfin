@@ -48,6 +48,7 @@ import MathFin.Probability.Brownian.SDE.SDEExistence
 import MathFin.Probability.Brownian.Ito.StochasticFubini
 import MathFin.Pricing.FTAP.NoArbitrageLocal
 import MathFin.Pricing.FTAP.DensityPasting
+import MathFin.Pricing.FTAP.OneAssetDMW
 import MathFin.Models.BlackScholes.BlackScholesPhysical
 import MathFin.Probability.Brownian.Ito.ItoProductRule
 import MathFin.Models.BlackScholes.BlackScholesSelfFinancing
@@ -641,7 +642,7 @@ attribute [blueprint "thm:first-ftap"
   and only if there is an equivalent martingale measure (Harrison–Pliska). Finite $\Omega$
   only: one period with a finite-dimensional vector price on an arbitrary probability space is
   `ftap_one_period_vector`, an equivalent martingale measure precludes arbitrage on any space
-  (`IsEMM.noArbitrage`), and the general discrete-time theorem is the frontier node
+  (`IsEMM.noArbitrage`), and the general discrete-time theorem for one asset is
   `thm:dmw-ftap`. -/)]
   MathFin.ftap_discrete
 
@@ -664,10 +665,19 @@ attribute [blueprint "thm:market-ftap"
   strategy on the deflated price sampled along the grid is an arbitrage) if and only if the
   market traded on the grid has a pricing measure. A pricing measure of the market itself up to a
   horizon rules out arbitrage on every grid inside the horizon, on any space. On a general
-  probability space the equivalence is proved assuming the conditional one-period theorem
-  (`ConditionalOnePeriodFTAP`, not proved); unconditionally it is the frontier node
-  `thm:dmw-ftap`. -/)]
+  probability space, for one asset, the equivalence is `thm:dmw-ftap`. -/)]
   MathFin.Market.noArbitrage_iff_exists_isPricingMeasure_of_finite
+
+attribute [blueprint "thm:dmw-ftap"
+  (title := "Dalang–Morton–Willinger FTAP")
+  (statement := /-- For one asset on a general probability space, no integrability, no
+  finiteness of the space and no measurable-selection hypothesis: a one-asset market has no
+  arbitrage when trading at the dates of a grid if and only if the market traded on the grid
+  has a pricing measure. The bare process version is that an adapted real price has no
+  arbitrage up to a finite horizon if and only if it has an equivalent martingale measure
+  (`OneAsset.noArbitrage_iff_exists_isEMM`), built by backward induction with unnormalised
+  one-period weights. Several assets ($d > 1$) are not covered. -/)]
+  MathFin.Market.noArbitrage_iff_exists_isPricingMeasure
 
 -- ===== valuation/trees: Trees =====
 

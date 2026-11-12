@@ -135,15 +135,15 @@ from one file, [`docs/taxonomy.toml`](docs/taxonomy.toml).
 
 ## Limitations
 
-- **Reduced cores.** Twenty of the 853 results prove less than the theorem they are named after.
+- **Reduced cores.** Nineteen of the results prove less than the theorem they are named after.
   - Eleven assume a structure whose fields include the textbook conclusion: the reflection
     principle, nowhere differentiability and the law of the iterated logarithm for Brownian motion,
     Novikov's condition, the general Girsanov theorem, the two-dimensional Itô formula, and five
     theorems on Markov chains.
-  - Three rest on a named hypothesis that is not proved. The general Dalang–Morton–Willinger theorem
-    and the parity it gives in a discrete market assume the conditional one-period fundamental
-    theorem. Fixed cash flows in a Heath–Jarrow–Morton model assume the bond-pricing identity that
-    the drift condition would deliver.
+  - Two rest on a named hypothesis that is not proved. The Dalang–Morton–Willinger theorem for
+    several assets assumes a conditional one-period fundamental theorem (for one asset the theorem
+    is proved without it). Fixed cash flows in a Heath–Jarrow–Morton model assume the bond-pricing
+    identity that the drift condition would deliver.
   - Six prove a special case or check transcribed closed forms against each other: the first arrival
     of a Poisson process, the Ornstein–Uhlenbeck Hermite modes up to degree 2, Stulz's call on the
     maximum at zero strike, the Heynen–Kat barrier at zero correlation, and Haug's and
