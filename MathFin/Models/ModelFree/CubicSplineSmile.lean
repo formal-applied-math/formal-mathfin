@@ -59,10 +59,11 @@ Distinct from the parametric SVI smile already in the repository
 * `deriv_interpSpline_match_iff`, `momentMatrix_mulVec_eq_iff` — the moment equation at a pillar
   is exactly the slope matching of the two adjacent pieces, so the moment system (with natural
   ends) is exactly the `C¹` gluing condition.
-* `exists_unique_natural_spline_moments` — **the natural cubic spline exists and is unique**:
-  one moment sequence with `M 0 = M n = 0` makes adjacent pieces match in slope at every interior
-  pillar; the pieces interpolate the data and agree in second derivative `M i` at each pillar,
-  so the glued function is `C²` at the pillars with zero curvature at both ends.
+* `exists_unique_natural_spline_moments` — there is exactly one moment sequence `M` with natural
+  ends `M 0 = M n = 0` whose moment-form pieces have equal slopes (`C¹` matching) at every
+  interior pillar. Separate lemmas show each piece interpolates the data and has second
+  derivative `M i` at `x i`; there is no single glued function and no `C²` / `ContDiff`
+  statement.
 * `interpSpline_left_eq`, `interpSpline_right_eq` — the piecewise cubic `interpSpline`
   matches the pillar values `y i`, `y (i+1)` exactly at both ends of each piece
   `[x i, x (i+1)]`, for *any* moment sequence (the interpolation property does not depend
@@ -76,9 +77,10 @@ Distinct from the parametric SVI smile already in the repository
 ## Scope
 
 The glued function is not a single Lean object: the spline is the family of pieces `interpSpline`
-with the moments of `exists_unique_natural_spline_moments`, and its `C¹` and `C²` matching is the
-statement that adjacent pieces agree in slope (`deriv_interpSpline_match_iff`) and in second
-derivative at the shared pillar, not a `ContDiff` statement about one function on `[x 0, x n]`.
+with the moments of `exists_unique_natural_spline_moments`, and its `C¹` matching is the statement
+that adjacent pieces agree in slope (`deriv_interpSpline_match_iff`). The second derivatives of
+each piece are computed (`deriv_deriv_interpSpline_left`/`_right`), but no `C²` or `ContDiff`
+statement about one function on `[x 0, x n]` is made.
 The derivation of the moment system from the spline conditions is replaced by the equivalence
 `momentMatrix_mulVec_eq_iff`. The pillar values are arbitrary: nothing here says a spline through
 a vol smile or call price smile is free of arbitrage.
@@ -140,7 +142,7 @@ theorem mu_add_lam_eq_one (x : ℕ → ℝ) {i : ℕ} (h1 : 0 < gap x (i - 1)) (
 boundary conditions `M 0 = M n = 0` have been substituted in. Row/column `j : Fin (n - 1)`
 corresponds to pillar index `j.val + 1`. -/
 noncomputable def momentMatrix (x : ℕ → ℝ) (n : ℕ) : Matrix (Fin (n - 1)) (Fin (n - 1)) ℝ :=
-  Matrix.of fun j k : Fin (n - 1) =>
+  Matrix.of fun j k : Fin (n - 1) ↦
     if k = j then (2 : ℝ)
     else if (k : ℕ) + 1 = (j : ℕ) then mu x ((j : ℕ) + 1)
     else if (j : ℕ) + 1 = (k : ℕ) then lam x ((j : ℕ) + 1)
@@ -152,23 +154,13 @@ theorem momentMatrix_apply_self (x : ℕ → ℝ) (n : ℕ) (j : Fin (n - 1)) :
 
 /-- A finite sum of an indicator function supported on at most one point, as picked out by
 an injective-on-its-support predicate `P`, is bounded by the indicator's value. -/
-theorem sum_indicator_le {m : ℕ} (P : Fin m → Prop) [DecidablePred P]
+private theorem sum_indicator_le {m : ℕ} (P : Fin m → Prop) [DecidablePred P]
     (hP : ∀ a b, P a → P b → a = b) {c : ℝ} (hc : 0 ≤ c) :
     ∑ k : Fin m, (if P k then c else 0) ≤ c := by
-  classical
   have hcard : (Finset.univ.filter P).card ≤ 1 :=
-    Finset.card_le_one.mpr (by
-      intro a ha b hb
-      simp only [Finset.mem_filter, Finset.mem_univ, true_and] at ha hb
-      exact hP a b ha hb)
-  calc ∑ k : Fin m, (if P k then c else (0 : ℝ))
-      = ∑ _k ∈ Finset.univ.filter P, c := by
-        rw [Finset.sum_ite, Finset.sum_const_zero, add_zero]
-    _ = (Finset.univ.filter P).card • c := Finset.sum_const c
-    _ = ((Finset.univ.filter P).card : ℝ) * c := by rw [nsmul_eq_mul]
-    _ ≤ (1 : ℝ) * c := by
-        gcongr
-        exact_mod_cast hcard
+    Finset.card_le_one.mpr fun a ha b hb ↦ hP a b (by simpa using ha) (by simpa using hb)
+  rw [← Finset.sum_filter, Finset.sum_const, nsmul_eq_mul]
+  calc ((Finset.univ.filter P).card : ℝ) * c ≤ (1 : ℝ) * c := by gcongr; exact_mod_cast hcard
     _ = c := one_mul c
 
 /-- **Strict row diagonal dominance of the moment-system matrix.** Every row has diagonal
@@ -177,7 +169,6 @@ has at most two nonzero off-diagonal entries (the left and right tridiagonal nei
 theorem momentMatrix_dominant {n : ℕ} (x : ℕ → ℝ) (hn : 2 ≤ n)
     (hgap : ∀ i < n, x i < x (i + 1)) (j : Fin (n - 1)) :
     ∑ k ∈ Finset.univ.erase j, ‖momentMatrix x n j k‖ < ‖momentMatrix x n j j‖ := by
-  classical
   have hjn : (j : ℕ) < n := by omega
   have hjn' : (j : ℕ) + 1 < n := by omega
   have h1 : 0 < gap x (j : ℕ) := gap_pos x hgap hjn
@@ -190,10 +181,9 @@ theorem momentMatrix_dominant {n : ℕ} (x : ℕ → ℝ) (hn : 2 ≤ n)
   have hsum1 : mu x ((j : ℕ) + 1) + lam x ((j : ℕ) + 1) = 1 := mu_add_lam_eq_one x h1' h2
   have hdiag : momentMatrix x n j j = 2 := momentMatrix_apply_self x n j
   rw [hdiag, Real.norm_eq_abs, abs_of_pos (by norm_num : (0:ℝ) < 2)]
-  have hpt : ∀ k ∈ Finset.univ.erase j, ‖momentMatrix x n j k‖ ≤
+  have hpt (k : Fin (n - 1)) (hk : k ∈ Finset.univ.erase j) : ‖momentMatrix x n j k‖ ≤
       (if (k : ℕ) + 1 = (j : ℕ) then mu x ((j : ℕ) + 1) else 0) +
         (if (j : ℕ) + 1 = (k : ℕ) then lam x ((j : ℕ) + 1) else 0) := by
-    intro k hk
     have hkj : k ≠ j := Finset.ne_of_mem_erase hk
     by_cases ha : (k : ℕ) + 1 = (j : ℕ)
     · have hb : ¬ (j : ℕ) + 1 = (k : ℕ) := by omega
@@ -215,18 +205,17 @@ theorem momentMatrix_dominant {n : ℕ} (x : ℕ → ℝ) (hn : 2 ≤ n)
     _ ≤ ∑ k : Fin (n - 1),
           ((if (k : ℕ) + 1 = (j : ℕ) then mu x ((j : ℕ) + 1) else 0) +
             (if (j : ℕ) + 1 = (k : ℕ) then lam x ((j : ℕ) + 1) else 0)) := by
-        apply Finset.sum_le_sum_of_subset_of_nonneg (Finset.erase_subset _ _)
-        intro k _ _
+        refine Finset.sum_le_sum_of_subset_of_nonneg (Finset.erase_subset _ _) fun k _ _ ↦ ?_
         positivity
     _ = (∑ k : Fin (n - 1), (if (k : ℕ) + 1 = (j : ℕ) then mu x ((j : ℕ) + 1) else 0)) +
           ∑ k : Fin (n - 1), (if (j : ℕ) + 1 = (k : ℕ) then lam x ((j : ℕ) + 1) else 0) :=
         Finset.sum_add_distrib
     _ ≤ mu x ((j : ℕ) + 1) + lam x ((j : ℕ) + 1) := by
         gcongr
-        · exact sum_indicator_le (fun k : Fin (n - 1) => (k : ℕ) + 1 = (j : ℕ))
-            (fun a b ha hb => Fin.ext (by omega)) hmunn
-        · exact sum_indicator_le (fun k : Fin (n - 1) => (j : ℕ) + 1 = (k : ℕ))
-            (fun a b ha hb => Fin.ext (by omega)) hlamnn
+        · exact sum_indicator_le (fun k : Fin (n - 1) ↦ (k : ℕ) + 1 = (j : ℕ))
+            (fun a b ha hb ↦ Fin.ext (by omega)) hmunn
+        · exact sum_indicator_le (fun k : Fin (n - 1) ↦ (j : ℕ) + 1 = (k : ℕ))
+            (fun a b ha hb ↦ Fin.ext (by omega)) hlamnn
     _ = 1 := hsum1
     _ < 2 := by norm_num
 
@@ -248,14 +237,14 @@ right-hand side `rhs` at each interior pillar — has exactly one solution `M`. 
 theorem exists_unique_moments {n : ℕ} (x y : ℕ → ℝ) (hn : 2 ≤ n)
     (hgap : ∀ i < n, x i < x (i + 1)) :
     ∃! M : Fin (n - 1) → ℝ,
-      (momentMatrix x n).mulVec M = fun j : Fin (n - 1) => rhs x y ((j : ℕ) + 1) := by
+      (momentMatrix x n).mulVec M = fun j : Fin (n - 1) ↦ rhs x y ((j : ℕ) + 1) := by
   have hU : IsUnit (momentMatrix x n) := momentMatrix_invertible x hn hgap
   have hdet : IsUnit (momentMatrix x n).det := (Matrix.isUnit_iff_isUnit_det _).mp hU
-  refine ⟨(momentMatrix x n)⁻¹.mulVec (fun j : Fin (n - 1) => rhs x y ((j : ℕ) + 1)), ?_, ?_⟩
+  refine ⟨(momentMatrix x n)⁻¹.mulVec (fun j : Fin (n - 1) ↦ rhs x y ((j : ℕ) + 1)), ?_,
+    fun M' hM' ↦ ?_⟩
   · dsimp only
     rw [Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ hdet, Matrix.one_mulVec]
-  · intro M' hM'
-    apply Matrix.mulVec_injective_iff_isUnit.mpr hU
+  · apply Matrix.mulVec_injective_iff_isUnit.mpr hU
     rw [hM', Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ hdet, Matrix.one_mulVec]
 
 /-! ## Exact interpolation at the pillars -/
@@ -393,13 +382,12 @@ theorem deriv_interpSpline_match_iff (x y M : ℕ → ℝ) {i : ℕ} (h0 : 0 < g
   simp [hs]
 
 /-- A finite sum of an indicator on `Fin m` that fires at the single index `a`. -/
-theorem sum_fin_ite_eq {m : ℕ} (a : ℕ) (c : ℝ) :
+private theorem sum_fin_ite_eq {m : ℕ} (a : ℕ) (c : ℝ) :
     ∑ k : Fin m, (if (k : ℕ) = a then c else 0) = if a < m then c else 0 := by
   split_ifs with h
   · rw [Finset.sum_eq_single (⟨a, h⟩ : Fin m)]
     · simp
-    · intro k _ hk
-      exact ite_eq_right fun hka ↦ hk (Fin.ext hka)
+    · exact fun k _ hk ↦ ite_eq_right fun hka ↦ hk (Fin.ext hka)
     · simp
   · exact Finset.sum_eq_zero fun k _ ↦ ite_eq_right fun hk ↦ h (by have := k.2; omega)
 
@@ -412,11 +400,10 @@ theorem momentMatrix_mulVec_apply {n : ℕ} (x M : ℕ → ℝ) (hM0 : M 0 = 0) 
       mu x ((j : ℕ) + 1) * M j + 2 * M ((j : ℕ) + 1) +
         lam x ((j : ℕ) + 1) * M ((j : ℕ) + 2) := by
   have hj := j.2
-  have hpt : ∀ k : Fin (n - 1), momentMatrix x n j k * M ((k : ℕ) + 1) =
+  have hpt (k : Fin (n - 1)) : momentMatrix x n j k * M ((k : ℕ) + 1) =
       (if (k : ℕ) = j then 2 * M ((j : ℕ) + 1) else 0) +
         (if (k : ℕ) + 1 = j then mu x ((j : ℕ) + 1) * M j else 0) +
         (if (k : ℕ) = j + 1 then lam x ((j : ℕ) + 1) * M ((j : ℕ) + 2) else 0) := by
-    intro k
     simp only [momentMatrix, Matrix.of_apply, Fin.ext_iff]
     split_ifs <;> try (exfalso; omega)
     all_goals (simp only [add_zero, zero_add, zero_mul]; try (congr 1; try (congr 1; try omega)))
@@ -461,8 +448,7 @@ theorem momentMatrix_mulVec_eq_iff {n : ℕ} (x y M : ℕ → ℝ)
     rw [momentMatrix_mulVec_apply x M hM0 hMn] at this
     exact (deriv_interpSpline_match_iff x y M (gap_pos x hgap (by omega))
       (gap_pos x hgap (by omega))).2 this
-  · intro h
-    funext j
+  · refine fun h ↦ funext fun j ↦ ?_
     rw [momentMatrix_mulVec_apply x M hM0 hMn]
     exact (deriv_interpSpline_match_iff x y M (gap_pos x hgap (by omega))
       (gap_pos x hgap (by omega))).1 (h j (by omega))
@@ -470,10 +456,10 @@ theorem momentMatrix_mulVec_eq_iff {n : ℕ} (x y M : ℕ → ℝ)
 /-- **The natural cubic spline exists and is unique.** For strictly increasing pillars
 `x 0 < ⋯ < x n` (`2 ≤ n`) and any values `y`, there is a moment sequence with natural ends
 `M 0 = M n = 0` for which adjacent pieces of `interpSpline` match in slope at every interior
-pillar, and it is the only one on `0, …, n`. The pieces interpolate the data
-(`interpSpline_left_eq`, `interpSpline_right_eq`), have second derivative `M i` at `x i` from both
-sides (`deriv_deriv_interpSpline_left`, `deriv_deriv_interpSpline_right`), so the glued function
-is `C²` at the pillars with vanishing curvature at the two ends. -/
+pillar, and it is the only one on `0, …, n`. Separately, each piece interpolates the data
+(`interpSpline_left_eq`, `interpSpline_right_eq`) and has second derivative `M i` at `x i` from
+the right and `M (i+1)` at `x (i+1)` from the left (`deriv_deriv_interpSpline_left`,
+`deriv_deriv_interpSpline_right`); this theorem makes no `C²` claim. -/
 theorem exists_unique_natural_spline_moments {n : ℕ} (x y : ℕ → ℝ) (hn : 2 ≤ n)
     (hgap : ∀ i < n, x i < x (i + 1)) :
     ∃ M : ℕ → ℝ, M 0 = 0 ∧ M n = 0 ∧
@@ -513,8 +499,8 @@ the pillar-interpolation reading of SVI's parametric smile: distinct from, and d
 derive, the parametric curve `MathFin.SVI.variance` itself between pillars. -/
 theorem svi_pillar_interpSpline_eq (p : SVI.Params) (x M : ℕ → ℝ) {i : ℕ}
     (hgap : gap x i ≠ 0) :
-    interpSpline x (fun j => SVI.variance p (x j)) M i (x i) = SVI.variance p (x i) ∧
-      interpSpline x (fun j => SVI.variance p (x j)) M i (x (i + 1)) =
+    interpSpline x (fun j ↦ SVI.variance p (x j)) M i (x i) = SVI.variance p (x i) ∧
+      interpSpline x (fun j ↦ SVI.variance p (x j)) M i (x (i + 1)) =
         SVI.variance p (x (i + 1)) :=
   ⟨interpSpline_left_eq x _ M hgap, interpSpline_right_eq x _ M hgap⟩
 
@@ -527,8 +513,8 @@ theorem svi_pillar_moments_unique {n : ℕ} (p : SVI.Params) (x : ℕ → ℝ) (
     (hgap : ∀ i < n, x i < x (i + 1)) :
     ∃! M : Fin (n - 1) → ℝ,
       (momentMatrix x n).mulVec M =
-        fun j : Fin (n - 1) => rhs x (fun k => SVI.variance p (x k)) ((j : ℕ) + 1) :=
-  exists_unique_moments x (fun k => SVI.variance p (x k)) hn hgap
+        fun j : Fin (n - 1) ↦ rhs x (fun k ↦ SVI.variance p (x k)) ((j : ℕ) + 1) :=
+  exists_unique_moments x (fun k ↦ SVI.variance p (x k)) hn hgap
 
 end CubicSpline
 end MathFin

@@ -150,8 +150,7 @@ lemma convexOn_glue {f : ℝ → ℝ} {a b c s : ℝ} (hab : a < b)
     (hjump : ∀ y ∈ Ico a b, (f b - f y) / (b - y) ≤ s)
     (haffine : ∀ z ∈ Icc b c, f z = f b + s * (z - b)) :
     ConvexOn ℝ (Icc a c) f := by
-  apply convexOn_of_slope_mono_adjacent (convex_Icc a c)
-  intro x y z hx hz hxy hyz
+  refine convexOn_of_slope_mono_adjacent (convex_Icc a c) fun {x y z} hx hz hxy hyz ↦ ?_
   by_cases hzb : z ≤ b
   · -- x < y < z ≤ b: all three lie in the left piece
     have hxm : x ∈ Icc a b := ⟨hx.1, (hxy.trans hyz).le.trans hzb⟩
@@ -198,7 +197,7 @@ private lemma IsArbitrageFreeQuotes.restrict {K C : ℕ → ℝ} {n m : ℕ} (hm
     (h : IsArbitrageFreeQuotes K C n) : IsArbitrageFreeQuotes K C m where
   strikes_mono := h.strikes_mono.mono (Iic_subset_Iic.2 hmn)
   prices_anti := h.prices_anti.mono (Iic_subset_Iic.2 hmn)
-  no_butterfly := fun i hi => h.no_butterfly i (hi.trans hmn)
+  no_butterfly := fun i hi ↦ h.no_butterfly i (hi.trans hmn)
 
 /-! ### The induction -/
 
@@ -206,14 +205,13 @@ private lemma IsArbitrageFreeQuotes.restrict {K C : ℕ → ℝ} {n m : ℕ} (hm
 piecewise-linear interpolant through `n + 1` arbitrage-free quotes is convex and non-increasing
 on the quoted strike range, reproduces every quote exactly, and on each quoted interval literally
 *is* the straight line through its two endpoint quotes. -/
-private theorem piecewiseLinear_spec (K C : ℕ → ℝ) : ∀ n, 1 ≤ n →
+private theorem piecewiseLinear_spec (K C : ℕ → ℝ) (n : ℕ) : 1 ≤ n →
     IsArbitrageFreeQuotes K C n →
       ConvexOn ℝ (Icc (K 0) (K n)) (piecewiseLinear K C n) ∧
       AntitoneOn (piecewiseLinear K C n) (Icc (K 0) (K n)) ∧
       (∀ i ≤ n, piecewiseLinear K C n (K i) = C i) ∧
       (∀ i, i + 1 ≤ n → ∀ x ∈ Icc (K i) (K (i + 1)),
         piecewiseLinear K C n x = C i + (C (i + 1) - C i) / (K (i + 1) - K i) * (x - K i)) := by
-  intro n
   induction n with
   | zero => omega
   | succ m ih =>
@@ -226,8 +224,7 @@ private theorem piecewiseLinear_spec (K C : ℕ → ℝ) : ∀ n, 1 ≤ n →
       have hslnp : sl ≤ 0 := div_nonpos_of_nonpos_of_nonneg (by linarith) (by linarith)
       have hconv : ConvexOn ℝ (Icc (K 0) (K 1)) (piecewiseLinear K C 1) := by
         refine (((sl • LinearMap.id : ℝ →ₗ[ℝ] ℝ).convexOn (convex_Icc _ _)).add_const
-          (C 0 - sl * K 0)).congr ?_
-        intro x _
+          (C 0 - sl * K 0)).congr fun x _ ↦ ?_
         show sl • LinearMap.id x + (C 0 - sl * K 0) = C 0 + sl * (x - K 0)
         simp only [LinearMap.id_apply, smul_eq_mul]
         ring
@@ -260,9 +257,8 @@ private theorem piecewiseLinear_spec (K C : ℕ → ℝ) : ∀ n, 1 ≤ n →
           else C (m' + 1) + sl * (x - K (m' + 1)) := fun x ↦ rfl
       have hfb : piecewiseLinear K C (m' + 2) (K (m' + 1)) = C (m' + 1) := by
         rw [hdef, ite_eq_left le_rfl]; exact hknot (m' + 1) le_rfl
-      have haffine : ∀ z ∈ Icc (K (m' + 1)) (K (m' + 2)),
+      have haffine (z : ℝ) (hz : z ∈ Icc (K (m' + 1)) (K (m' + 2))) :
           piecewiseLinear K C (m' + 2) z = C (m' + 1) + sl * (z - K (m' + 1)) := by
-        intro z hz
         rcases eq_or_lt_of_le hz.1 with hzn | hzn
         · rw [← hzn, hfb]; ring
         · rw [hdef, ite_eq_right (not_le.2 hzn)]
@@ -272,10 +268,9 @@ private theorem piecewiseLinear_spec (K C : ℕ → ℝ) : ∀ n, 1 ≤ n →
         hconv.congr heqOn_old
       have hanti' : AntitoneOn (piecewiseLinear K C (m' + 2)) (Icc (K 0) (K (m' + 1))) :=
         hanti.congr heqOn_old
-      have hjump_glue : ∀ y ∈ Ico (K 0) (K (m' + 1)),
+      have hjump_glue (y : ℝ) (hy : y ∈ Ico (K 0) (K (m' + 1))) :
           (piecewiseLinear K C (m' + 2) (K (m' + 1)) - piecewiseLinear K C (m' + 2) y) /
             (K (m' + 1) - y) ≤ sl := by
-        intro y hy
         rw [hfb, ← heqOn_old ⟨hy.1, hy.2.le⟩]
         have hKmm1 : K m' < K (m' + 1) :=
           hq.strikes_mono (mem_Iic.2 (by omega)) (mem_Iic.2 (by omega)) (by omega)
@@ -425,8 +420,7 @@ theorem isNormalizedCallPrice_callPriceExtension {K C : ℕ → ℝ} {n : ℕ} (
   have hanti := antitoneOn_piecewiseLinear K C hn hq
   have hconv : ConvexOn ℝ (Icc (K 0) (K n)) E :=
     (convexOn_piecewiseLinear K C hn hq).congr fun x hx ↦ (hEf x hx).symm
-  have hEnonneg : ∀ x, K 0 ≤ x → 0 ≤ E x := by
-    intro x hx0
+  have hEnonneg (x : ℝ) (hx0 : K 0 ≤ x) : 0 ≤ E x := by
     by_cases hx : x ≤ K n
     · rw [hEf x ⟨hx0, hx⟩, ← hCn, ← hfK le_rfl]
       exact hanti ⟨hx0, hx⟩ ⟨hK0n.le, le_rfl⟩ hx
@@ -445,8 +439,7 @@ theorem isNormalizedCallPrice_callPriceExtension {K C : ℕ → ℝ} {n : ℕ} (
     refine ⟨convex_Ioi 0, fun x hx y hy a b ha hb hab ↦ ?_⟩
     exact (hglue (max x (max y (K n)))).2 ⟨h0 ▸ hx.le, le_max_left _ _⟩
       ⟨h0 ▸ hy.le, (le_max_left _ _).trans (le_max_right _ _)⟩ ha hb hab
-  have hup : ∀ x ∈ Ioi (0 : ℝ), E x ≤ 1 := by
-    intro x hx
+  have hup (x : ℝ) (hx : x ∈ Ioi (0 : ℝ)) : E x ≤ 1 := by
     have hx0 : K 0 ≤ x := h0 ▸ hx.le
     by_cases hxn : x ≤ K n
     · rw [hEf x ⟨hx0, hxn⟩, ← hC0, ← hfK (Nat.zero_le _)]
@@ -457,8 +450,7 @@ theorem isNormalizedCallPrice_callPriceExtension {K C : ℕ → ℝ} {n : ℕ} (
     rw [le_div_iff₀ (h0 ▸ hK01)]
     have := (le_max_left _ _).trans (hint 1 hn)
     linarith
-  have hlow : ∀ x ∈ Ioi (0 : ℝ), max (1 - x) 0 ≤ E x := by
-    intro x hx
+  have hlow (x : ℝ) (hx : x ∈ Ioi (0 : ℝ)) : max (1 - x) 0 ≤ E x := by
     have hx0 : K 0 ≤ x := h0 ▸ hx.le
     refine max_le ?_ (hEnonneg x hx0)
     by_cases hxn : x ≤ K n
