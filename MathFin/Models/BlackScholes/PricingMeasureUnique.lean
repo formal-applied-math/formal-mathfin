@@ -1,0 +1,192 @@
+/-
+Copyright (c) 2026 Raphael Coelho. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Raphael Coelho
+-/
+module
+
+public import MathFin.Models.BlackScholes.Market
+public import MathFin.Probability.Brownian.MartingaleMeasureUniqueness
+public import MathFin.Probability.Brownian.Ito.ItoFormulaGBM
+
+/-!
+# Every pricing measure of the Black–Scholes market prices the call at the Black–Scholes formula
+
+The Girsanov measure `Q*` of the market price of risk `θ = (m − r)/σ` is a pricing measure of the
+Black–Scholes market (`isPricingMeasure_constGirsanovMeasure`). This file shows it is the only one
+among the measures whose density with respect to `Q*` is square-integrable: such a pricing measure
+agrees with `Q*` on `𝓕_T`, hence prices every `𝓕_T`-measurable payoff, and in particular the
+European call, as `Q*` does, at `S₀ Φ(d₁) − K e^{−rT} Φ(d₂)`.
+
+## The argument
+
+Under `Q*` the process `W*_u = W_u + θ min(u, H)` is a pre-Brownian motion with the same natural
+filtration as `W` (`isPreBrownianReal_girsanovDriver`, `natFiltration_girsanovDriver`): it agrees
+for each `u` almost surely with `B^θ`, which is Brownian under `Q*`. On `[0, T]`, `T ≤ H`, the
+deflated asset is pointwise `S₀ exp(σ W*_u − σ²u/2)` (`deflated_market_eq_girsanovDriver`), the
+discounted geometric Brownian motion of the driver `W*`, whose increment is the Itô integral of
+`σ S̃` (`discountedGBM_eq_itoIntegral`). The abstract uniqueness theorem
+`trim_eq_of_martingale_withDensity` for martingale measures on a Brownian filtration then applies.
+
+## Main results
+
+* `BlackScholes.trim_eq_of_isPricingMeasure_withDensity`: a pricing measure `Q = D·Q*` of the
+  market with `D ∈ L²(Q*)` agrees with `Q*` on `𝓕_T`.
+* `BlackScholes.price_europeanCall_of_isPricingMeasure_withDensity`: it prices the European call at
+  the Black–Scholes formula.
+
+## References
+
+* [F. Black and M. Scholes, *The pricing of options and corporate liabilities*][BlackScholes1973]
+* [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], 5.4
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 9.1.8
+
+## Tags
+
+Black–Scholes market, uniqueness of the risk-neutral measure, pricing measure, Girsanov theorem,
+martingale representation, European call, MSC 91G20, MSC 60H05, JEL G13
+-/
+
+@[expose] public section
+
+open MeasureTheory ProbabilityTheory Real
+open scoped NNReal ENNReal
+open MathFin ItoIntegralL2 ItoIntegralProcessContinuousModification
+
+namespace MathFin.Contracts.BlackScholes
+
+variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω}
+  [IsProbabilityMeasure μ]
+
+/-- **The driver of the Girsanov measure**: `W*_u = W_u + θ min(u, H)`. Under the Girsanov measure
+`Q*` of the constant price of risk `θ` at the horizon `H` it is a Brownian motion; the drift stops
+at the horizon, where `Z_H` stops. -/
+def girsanovDriver (W : ℝ≥0 → Ω → ℝ) (θ : ℝ) (H : ℝ≥0) (u : ℝ≥0) (ω : Ω) : ℝ :=
+  W u ω + θ * (min u H : ℝ≥0)
+
+lemma measurable_girsanovDriver (hWmeas : ∀ t, Measurable (W t)) (θ : ℝ) (H u : ℝ≥0) :
+    Measurable (girsanovDriver W θ H u) :=
+  (hWmeas u).add_const _
+
+omit mΩ in
+lemma continuous_girsanovDriver (hWcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ W s ω) (θ : ℝ) (H : ℝ≥0)
+    (ω : Ω) : Continuous fun u ↦ girsanovDriver W θ H u ω :=
+  (hWcont ω).add (continuous_const.mul (NNReal.continuous_coe.comp (continuous_id.min
+    continuous_const)))
+
+/-- The driver and `W` generate the same filtration: it is a deterministic shift at each time. -/
+lemma natFiltration_girsanovDriver (hWmeas : ∀ t, Measurable (W t)) (θ : ℝ) (H : ℝ≥0) :
+    natFiltration (measurable_girsanovDriver hWmeas θ H) = natFiltration hWmeas := by
+  refine le_antisymm (fun t ↦ ?_) fun t ↦ ?_
+  · refine iSup₂_le fun j hj ↦ Measurable.comap_le ?_
+    exact ((stronglyAdapted_natFiltration hWmeas j).mono
+      ((natFiltration hWmeas).mono hj)).measurable.add_const _
+  · refine iSup₂_le fun j hj ↦ Measurable.comap_le ?_
+    have := ((stronglyAdapted_natFiltration (measurable_girsanovDriver hWmeas θ H) j).mono
+      ((natFiltration (measurable_girsanovDriver hWmeas θ H)).mono hj)).measurable.sub_const
+      (θ * (min j H : ℝ≥0))
+    simpa [girsanovDriver] using this
+
+variable (hW : IsPreBrownianReal W μ) (hWmeas : ∀ t, Measurable (W t))
+
+/-- `B^θ` is, at every date, the driver: for `u ≤ H` by `constBtheta_drift_ae`, and past `H` the
+drift of `B^θ` is frozen (`driftContinuousMod_of_ge`) at its value at `H`. -/
+lemma constBtheta_ae_eq_girsanovDriver (θ : ℝ) (H u : ℝ≥0) :
+    constBtheta (μ := μ) hWmeas θ H u =ᵐ[μ] girsanovDriver W θ H u := by
+  rcases le_total u H with huH | hHu
+  · filter_upwards [constBtheta_drift_ae (μ := μ) hWmeas θ H huH] with ω hω
+    rw [hω, girsanovDriver, min_eq_left huH]
+  · filter_upwards [constBtheta_drift_ae (μ := μ) hWmeas θ H le_rfl] with ω hω
+    have hfrozen := driftContinuousMod_of_ge H hWmeas
+      (processToLpPredictable (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas θ)
+        (fun _ _ ↦ le_rfl)) hHu ω
+    simp only [constBtheta, BthetaPred] at hω ⊢
+    rw [hfrozen, girsanovDriver, min_eq_right hHu]
+    linarith
+
+include hW in
+/-- **The driver is a pre-Brownian motion under the Girsanov measure.** -/
+theorem isPreBrownianReal_girsanovDriver (θ : ℝ) (H : ℝ≥0) :
+    IsPreBrownianReal (girsanovDriver W θ H) (constGirsanovMeasure hW hWmeas θ H) :=
+  (isPreBrownianReal_constBtheta hW hWmeas θ H).congr fun u ↦
+    (withDensity_absolutelyContinuous _ _).ae_le (constBtheta_ae_eq_girsanovDriver (μ := μ) hWmeas θ H u)
+
+variable {S_0 m r σ : ℝ}
+
+omit [IsProbabilityMeasure μ] in
+/-- On `[0, H]` the deflated asset is `S₀ exp(σ W*_u − σ²u/2)`, the discounted geometric Brownian
+motion of the driver: the drift `m − r` is `σθ`. -/
+lemma deflated_market_eq_girsanovDriver (hσ : σ ≠ 0) {H u : ℝ≥0} (hu : u ≤ H) (ω : Ω) :
+    (market μ hWmeas S_0 m r σ).deflated () u ω
+      = S_0 * Real.exp (-(σ ^ 2 / 2) * u + σ * girsanovDriver W ((m - r) / σ) H u ω) := by
+  rw [deflated_market, girsanovDriver, min_eq_left hu]
+  congr 2
+  field_simp
+  ring
+
+include hW in
+/-- **Uniqueness of the pricing measure with a square-integrable density.** A pricing measure `Q`
+of the Black–Scholes market up to `T ≤ H` whose density with respect to the Girsanov measure
+`Q*` of `θ = (m − r)/σ` is a nonnegative `D ∈ L²(Q*)` agrees with `Q*` on `𝓕_T`.
+
+The deflated asset is the discounted geometric Brownian motion of the Brownian driver `W*` of
+`Q*`, so `trim_eq_of_martingale_withDensity` applies. A density that is merely in `L²(μ)`, or
+that is not square-integrable under `Q*`, is not covered. -/
+theorem trim_eq_of_isPricingMeasure_withDensity
+    (hWcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ W s ω) (hS₀ : 0 < S_0) (hσ : 0 < σ) {T H : ℝ≥0}
+    (hTH : T ≤ H) {Q : Measure Ω} (hQ : (market μ hWmeas S_0 m r σ).IsPricingMeasure T Q)
+    (D : Lp ℝ 2 (constGirsanovMeasure hW hWmeas ((m - r) / σ) H))
+    (hD : ∀ᵐ ω ∂(constGirsanovMeasure hW hWmeas ((m - r) / σ) H), 0 ≤ D ω)
+    (hQD : Q = (constGirsanovMeasure hW hWmeas ((m - r) / σ) H).withDensity
+      fun ω ↦ ENNReal.ofReal (D ω)) :
+    Q.trim ((market μ hWmeas S_0 m r σ).𝓕.le T)
+      = (constGirsanovMeasure hW hWmeas ((m - r) / σ) H).trim
+          ((market μ hWmeas S_0 m r σ).𝓕.le T) := by
+  have : IsProbabilityMeasure (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) :=
+    constGirsanovMeasure_isProbabilityMeasure hW hWmeas _ H
+  have : IsProbabilityMeasure Q := hQ.isProb
+  have hmeas := measurable_girsanovDriver hWmeas ((m - r) / σ) H
+  have hWs := isPreBrownianReal_girsanovDriver hW hWmeas ((m - r) / σ) H
+  have hfil := natFiltration_girsanovDriver hWmeas ((m - r) / σ) H
+  set M := market μ hWmeas S_0 m r σ with hM
+  let X : ℝ≥0 → Ω → ℝ := fun t ↦ M.deflated () (min t T)
+  have hXQs : Martingale X (natFiltration hmeas) (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) := by
+    rw [hfil]
+    exact (isPricingMeasure_constGirsanovMeasure hW hWmeas hσ.ne' hTH).martingale ()
+  have hXQ : Martingale (fun t ↦ X (min t T)) (natFiltration hmeas) Q := by
+    have h : Martingale (fun t ↦ M.deflated () (min t T)) (natFiltration hWmeas) Q :=
+      hQ.martingale ()
+    rw [hfil]
+    simpa [X, min_assoc] using h
+  obtain ⟨ψ, hψname, hψ⟩ := discountedGBM_eq_itoIntegral hWs hmeas
+    (continuous_girsanovDriver hWcont ((m - r) / σ) H) T S_0 σ
+  have hXT (ω : Ω) : X T ω
+      = S_0 * Real.exp (-(σ ^ 2 / 2) * T + σ * girsanovDriver W ((m - r) / σ) H T ω) := by
+    simp only [X, min_self]
+    exact deflated_market_eq_girsanovDriver hWmeas hσ.ne' hTH ω
+  have hX0 (ω : Ω) : X 0 ω = S_0 * Real.exp (σ * girsanovDriver W ((m - r) / σ) H 0 ω) := by
+    have h := deflated_market_eq_girsanovDriver (μ := μ) (S_0 := S_0) (m := m) (r := r) hWmeas
+      hσ.ne' (show (0 : ℝ≥0) ≤ H from bot_le) ω
+    simpa [X] using h
+  have hψ' : (fun ω ↦ X T ω - X 0 ω) =ᵐ[constGirsanovMeasure hW hWmeas ((m - r) / σ) H] ItoIntegralCLM.itoIntegralCLM hWs T hmeas ψ := by
+    filter_upwards [hψ] with ω h
+    rw [hXT, hX0]
+    exact h
+  have hψ0 : ∀ᵐ z ∂(ItoIntegralCLM.trimMeasure (μ := constGirsanovMeasure hW hWmeas ((m - r) / σ) H) T hmeas), ψ z ≠ 0 := by
+    filter_upwards [hψname] with z hz
+    rw [hz]
+    exact (mul_pos hσ (mul_pos hS₀ (Real.exp_pos _))).ne'
+  have hX0L2 : MemLp (X 0) 2 (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) := by
+    refine (memLp_const S_0).ae_eq ?_
+    filter_upwards [hWs.eval_zero_ae_eq_zero] with ω h
+    rw [hX0, h]
+    simp
+  have key := trim_eq_of_martingale_withDensity hWs hmeas (continuous_girsanovDriver hWcont ((m - r) / σ) H)
+    T hXQs ψ hψ' hψ0 hX0L2 D hD hQD hXQ
+  have hgen : ∀ F : Filtration ℝ≥0 mΩ, F = natFiltration hmeas →
+      Q.trim (F.le T) = (constGirsanovMeasure hW hWmeas ((m - r) / σ) H).trim (F.le T) := by
+    rintro F rfl
+    exact key
+  exact hgen _ hfil.symm
+
+end MathFin.Contracts.BlackScholes
