@@ -2927,6 +2927,10 @@ end MathFin.AxiomAudit
 #guard_msgs in
 #print axioms MathFin.exists_market_of_isNormalizedCallPrice
 
+/-- info: 'MathFin.exists_market_of_isArbitrageFreeQuotes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.exists_market_of_isArbitrageFreeQuotes
+
 /-- info: 'MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.SVI.butterflyFreeFormula_of_isPricingMeasure

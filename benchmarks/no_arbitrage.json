@@ -830,6 +830,29 @@
           }
         ]
       }
+    },
+    {
+      "id": "mf-quotes-market-realisation",
+      "name": "Arbitrage-Free Call Quotes Are the Prices of a Market",
+      "domain": "mathematical_finance",
+      "description": "Finitely many call-price quotes C_i at increasing strikes 0 = K_0 < ... < K_n that are free of static arbitrage (non-increasing prices, non-decreasing secant slopes), start at the forward 1 at strike 0, end at the worthless call C_n = 0 and lie above intrinsic value are the call prices, at the quoted strikes and maturity one, of a market with unit numeraire, a nonnegative asset of forward one and a pricing measure. Proved by showing the piecewise-linear interpolant, continued by 0 beyond K_n, is a normalised call price function and applying Roper's converse. Scope: existence of a market reproducing the quotes at maturity one; no uniqueness, no smoothness of the call price function, and no calendar-spread or multi-maturity content.",
+      "code": {
+        "lean": "import MathFin.Models.ModelFree.CallPriceInterpolation\n\nopen MathFin MathFin.Contracts MeasureTheory\n\n/-- **Arbitrage-free call quotes are the prices of a market.** Quotes at strikes\n`0 = K 0 < ⋯ < K n` that are free of static arbitrage, start at the forward `1`, end at the\nworthless call `0` and lie above intrinsic value are the call prices at the quoted strikes of a\nmarket with unit numéraire, a nonnegative asset of forward one and a pricing measure. -/\ntheorem quotes_market_realisation (K C : ℕ → ℝ) {n : ℕ} (hn : 1 ≤ n)\n    (hq : IsArbitrageFreeQuotes K C n) (h0 : K 0 = 0) (hC0 : C 0 = 1) (hCn : C n = 0)\n    (hint : ∀ i ≤ n, max (1 - K i) 0 ≤ C i) :\n    ∃ (M : Market Unit ℝ) (Q : Measure ℝ), (∀ t ω, M.numeraire t ω = 1) ∧\n      (∀ ω, 0 ≤ M.asset () 1 ω) ∧ M.IsPricingMeasure 1 Q ∧\n      M.price Q (.pay 1 (.obs () 1)) = 1 ∧\n      ∀ i, 1 ≤ i → i ≤ n → M.price Q (europeanCall (K i) 1) = C i :=\n  exists_market_of_isArbitrageFreeQuotes hn hq h0 hC0 hCn hint\n"
+      },
+      "metadata": {
+        "reference": "M. Roper, Arbitrage free implied volatility surfaces (2010), Theorem 2.1, applied to the piecewise-linear interpolant of N. Kahale, An arbitrage-free interpolation of volatilities, Risk 17(5) (2004)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Models/ModelFree/CallPriceInterpolation.lean (exists_market_of_isArbitrageFreeQuotes): the interpolant continued by 0 beyond the last strike is IsNormalizedCallPrice (isNormalizedCallPrice_callPriceExtension, from the interpolant's convexity and monotonicity, the end-point hypotheses C 0 = 1 and C n = 0, and the intrinsic bound at the knots), then exists_market_of_isNormalizedCallPrice (Roper's converse) gives the market. The end-point hypotheses are what the extension needs: with C 0 < 1 and a first slope below (C 0 - 1)/K 0 no convex continuation to strike 0 exists, and a positive last price with last slope 0 admits no convex tail tending to 0. Kahale's C^2 scheme is not formalised. Axioms-clean.",
+        "citations": [
+          {
+            "key": "Roper2010"
+          },
+          {
+            "key": "Kahale2004"
+          }
+        ]
+      }
     }
   ]
 }
