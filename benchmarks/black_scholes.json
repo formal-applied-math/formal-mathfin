@@ -2736,6 +2736,43 @@
           }
         ]
       }
+    },
+    {
+      "id": "mf-smile-black-form-tail-iff",
+      "name": "Smile no-arbitrage: Roper's theorem, the left wing, calendar spreads, one Black form",
+      "description": "For any everywhere-positive total variance `w`, the Black form `blackForm k (w k)` tends to 0 at large `k` exactly when `d₊(k, w k)` tends to `-∞`.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.ModelFree.BlackFormTail\n\nopen MathFin\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\n/-- For any everywhere-positive total variance `w`, the Black form `blackForm k (w k)` tends to 0 at large `k` exactly when `d₊(k, w k)` tends to `-∞`. -/\ntheorem mf_smile_black_form_tail_iff (w : ℝ → ℝ) (hw : ∀ k, 0 < w k) :\n    Filter.Tendsto (fun k ↦ MathFin.ForwardSmile.blackForm k (w k)) Filter.atTop (nhds 0) ↔\n      Filter.Tendsto (fun k ↦ MathFin.ForwardSmile.dpl k (w k)) Filter.atTop Filter.atBot :=\n  MathFin.blackForm_tendsto_zero_iff_dpl_tendsto_atBot w hw\n"
+      },
+      "metadata": {
+        "chapter": 0,
+        "reference": "Roper, Arbitrage free implied volatility surfaces",
+        "difficulty": "medium",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Models/ModelFree/BlackFormTail.lean (autoformalized statement, claude-sonnet-5-5 proof). Re-export from MathFin. Axioms-clean. Faithful SUBSET of issue #318; deferred to follow-up issues: SVI tail lemmas re-derived as corollaries of the general lemma; left-wing bound: IsNormalizedCallPrice (bsSmile p) implies b(1 - rho) ≤ 2, and the mass at zero; calendar-spread martingale step for any convex payoff via conditional Jensen; t > 0 calendar statements tied to the local-variance characterisation; unification of blackForm, totalVarianceCall and logBlackCall into one (k, w) Black form; IsNormalizedCallPrice from a nonnegative random variable with mean 1 (easy direction); port hygiene: scoped maxHeartbeats, maxRecDepth and open scoped Classical.",
+        "provenance": {
+          "statement_source": "autoform",
+          "statement_model": "autoform",
+          "source": "foundry-autoform",
+          "issue": 318,
+          "deferred": [
+            "SVI tail lemmas re-derived as corollaries of the general lemma",
+            "left-wing bound: IsNormalizedCallPrice (bsSmile p) implies b(1 - rho) ≤ 2, and the mass at zero",
+            "calendar-spread martingale step for any convex payoff via conditional Jensen",
+            "t > 0 calendar statements tied to the local-variance characterisation",
+            "unification of blackForm, totalVarianceCall and logBlackCall into one (k, w) Black form",
+            "IsNormalizedCallPrice from a nonnegative random variable with mean 1 (easy direction)",
+            "port hygiene: scoped maxHeartbeats, maxRecDepth and open scoped Classical"
+          ],
+          "model": "claude-sonnet-5-5"
+        },
+        "citations": [
+          {
+            "key": "Roper2010"
+          }
+        ]
+      }
     }
   ]
 }

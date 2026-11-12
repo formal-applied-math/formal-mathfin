@@ -4602,6 +4602,13 @@
       "input_hash": "6afa912fc4d28329d5eb5e24fa61be02b0c6e839e2a3a8af613633bf69dd5025",
       "verified_at_commit": "f68ab19"
     },
+    "mf-smile-black-form-tail-iff": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-11-12",
+      "elapsed_s": 2.1,
+      "input_hash": "9b6355a218b078e823755ea8859071e714ff4186d0f243c5965d32f2297b8ff2",
+      "verified_at_commit": "db261745"
+    },
     "mf-snell-doob-decomposition": {
       "benchmark_file": "stochastic_foundations.json",
       "date": "2026-11-08",
