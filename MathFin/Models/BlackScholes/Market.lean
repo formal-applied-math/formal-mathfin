@@ -188,20 +188,45 @@ theorem price_europeanCall_constGirsanovMeasure {K : ℝ} {T H : ℝ≥0} (hTH :
   rfl
 
 /-- **The European put in the Black–Scholes market** is worth the Black–Scholes put formula
-`K e^{−rT} Φ(−d₂) − S₀ Φ(−d₁)` under the same Girsanov pricing measure as the call
-(`price_europeanCall_constGirsanovMeasure`), by the identical route: the price is the put's
-value on the physical asset (`price_market`), and that value is `value_europeanPut_physical`. -/
+`K e^{−rT} Φ(−d₂) − S₀ Φ(−d₁)` under the same Girsanov pricing measure as the call: put–call
+parity in the market (`value_europeanCall_sub_put_of_integral`, the deflated asset being a
+`Q`-martingale with mean `S₀`) turns the call's price
+(`price_europeanCall_constGirsanovMeasure`) into the put's. -/
 theorem price_europeanPut_constGirsanovMeasure {K : ℝ} {T H : ℝ≥0} (hTH : T ≤ H)
     (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) :
     (market μ hWmeas S_0 m r σ).price (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
         (europeanPut K T)
       = K * Real.exp (-r * T) * Phi (-bsd2 S_0 K r σ T) - S_0 * Phi (-bsd1 S_0 K r σ T) := by
-  rw [price_market, ← value_europeanPut_physical hW hWmeas (m := m) hTH hS₀ hK hσ hT]
-  unfold Contract.value
-  refine integral_congr_ae (.of_forall fun ω ↦ (europeanPut K T).pathPV_congr
-    (by simp [europeanPut, Contract.FixedDated]) (fun t ht ↦ ?_) fun _ _ ↦ rfl)
-  obtain rfl : t = T := by simpa [europeanPut, Contract.dates] using ht
-  rfl
+  have hQ := isPricingMeasure_constGirsanovMeasure hW hWmeas (S_0 := S_0) (m := m) (r := r)
+    hσ.ne' hTH
+  have := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
+  have hdef (ω : Ω) : (market μ hWmeas S_0 m r σ).deflated () T ω
+      = Real.exp (-r * T) * pathAssets S_0 m σ W () T ω := by
+    simp [Market.deflated, market, Real.exp_neg, div_eq_inv_mul]
+  have hint : Integrable (fun ω ↦ Real.exp (-r * T) * pathAssets S_0 m σ W () T ω)
+      (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) := by
+    have h := (hQ.martingale ()).integrable T
+    rw [min_self] at h
+    exact h.congr (.of_forall hdef)
+  have hmean : ∫ ω, Real.exp (-r * T) * pathAssets S_0 m σ W () T ω
+      ∂constGirsanovMeasure hW hWmeas ((m - r) / σ) H = S_0 := by
+    have h := hQ.price_pay_obs (n₀ := 1) (fun ω ↦ by simp [market]) () (le_refl T)
+    rw [price_market, Contract.value_pay] at h
+    have hQμ := (isEquivProbMeasure_constGirsanovMeasure hW hWmeas ((m - r) / σ) H).ac
+    have h0 : ∀ᵐ ω ∂constGirsanovMeasure hW hWmeas ((m - r) / σ) H, W 0 ω = 0 :=
+      hQμ.ae_le hW.eval_zero_ae_eq_zero
+    simp only [Payoff.eval, scenarioAt, market] at h
+    refine h.trans ?_
+    rw [integral_congr_ae (g := fun _ ↦ S_0)
+      (by filter_upwards [h0] with ω hω; simp [pathAssets, hω])]
+    simp
+  have hcall := price_europeanCall_constGirsanovMeasure hW hWmeas (m := m) (r := r) hTH hS₀ hK hσ hT
+  have hpar := value_europeanCall_sub_put_of_integral (K := K) (T := T)
+    (D := fun t ↦ Real.exp (-r * t)) hint hmean
+  rw [price_market] at hcall ⊢
+  have h1 := Phi_add_Phi_neg (bsd1 S_0 K r σ T)
+  have h2 := Phi_add_Phi_neg (bsd2 S_0 K r σ T)
+  linear_combination (norm := ring) hcall - hpar - (K * Real.exp (-r * T)) * h2 + S_0 * h1
 
 include hW in
 /-- **The Black–Scholes market has no arbitrage on any grid inside the Girsanov horizon.** For
