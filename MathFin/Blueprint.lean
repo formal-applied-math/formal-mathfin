@@ -113,7 +113,6 @@ import MathFin.Models.BlackScholes.GaussianGirsanov
 import MathFin.Models.BlackScholes.Market
 import MathFin.Models.BlackScholes.MargrabeGrounding
 import MathFin.Models.BlackScholes.PDE
-import MathFin.Models.Binomial.WillowTree
 import MathFin.Models.ModelFree.CubicSplineSmile
 import MathFin.Models.ModelFree.CallPriceInterpolation
 import MathFin.Models.Credit.CVA
@@ -706,24 +705,12 @@ attribute [blueprint "thm:crr-bs-convergence"
 
 attribute [blueprint "thm:trinomial-moment-matching"
   (title := "Trinomial moment matching")
-  (uses := ["def:gbm"])
   (statement := /-- For `dx ≠ 0`, the weights of a one-step trinomial lattice solving the mass,
   mean and second-moment equations about the central node are unique: `q₁ = trinomialProbDown`,
   `q₂ = trinomialProbMid`, `q₃ = trinomialProbUp`. With the classical spacing `dx = √3 v`,
-  `v2 = v²` they are the classical trinomial weights, and the validity window keeps them in
-  `[0, 1]`. The lattice matches the per-step log-return moments of the GBM (the `e`, `v2`
-  parameters, supplied by `GBMLogMoments`), so the tree is the discrete law matching the
-  GBM increment's first two moments. -/)]
+  `v2 = v²` they are the classical trinomial weights, and a validity window keeps them in
+  `[0, 1]`. One step only: no multi-period tree and no prices are claimed. -/)]
   MathFin.trinomialProb_unique
-attribute [blueprint "thm:willow-beta-identity"
-  (title := "The willow tree's beta identity")
-  (uses := ["def:gbm"])
-  (statement := /-- On a grid whose time step widens by the factor `1 + α`, the willow
-  tree's de-correlation coefficient is `β = 1 / √(1 + α) = √(t / t')` — the identity that
-  keeps the tree's nodal locations and weights consistent with Curran's moment and
-  marginal constraints when the step is rescaled. The willow tree is a lattice
-  discretization of the GBM, whose marginals the constraints preserve. -/)]
-  MathFin.willowBeta_eq_sqrt_div
 attribute [blueprint "thm:cubic-spline-moments-unique"
   (title := "Natural cubic spline: the moment system's unique solution")
   (uses := ["def:contract"])

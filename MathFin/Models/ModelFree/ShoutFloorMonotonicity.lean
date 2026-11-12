@@ -47,7 +47,7 @@ itself, for `r ≤ q`). Reaching Theorem 3.1(i) from here needs the shout-floor
 value as an optimal-stopping value on the library's Brownian model, plus
 optional stopping for the *unbounded* discounted-stock martingale
 `e^{-(r−q)t} S_t` — this library's optimal-stopping substrate
-(`MathFin/BlackScholes/AmericanPut/Stopping/*`) is built around the bounded,
+(`MathFin/Models/BlackScholes/American/Stopping/*`) is built around the bounded,
 time-independent vanilla put reward, so it does not apply here as stated; a
 truncation argument (`min(·, N)` plus monotone convergence) would avoid
 needing a full uniform-integrability bridge, but neither that nor the

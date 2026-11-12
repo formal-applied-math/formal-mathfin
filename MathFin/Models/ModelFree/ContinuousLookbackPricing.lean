@@ -59,7 +59,7 @@ extremum's law, which is the piece this file's transcription route sidesteps.
 ## Main definitions
 
 * `lookbackFloatingPrice`: the transcribed closed form (`η = 1` call, `η = -1` put),
-  cost-of-carry parametrization.
+  cost-of-carry parametrization; a definition, not a proved price.
 * `lookbackTiltGap k d`: the one term of the closed form with a removable singularity at
   `r = 0`, written in the standardized pair `k = 2b√T/σ`, `d` the price's own `a₁`
   (`bsd1 S m b σ T`, the cost-of-carry `d1`), as
@@ -70,7 +70,6 @@ extremum's law, which is the piece this file's transcription route sidesteps.
 
 ## Main results
 
-* `lookbackFloatingPrice`: the transcribed closed form (`η = 1` call, `η = -1` put).
 * `lookbackFloatingCall_ge_bsV`: **the reduction**. With no dividend (`q = 0`, so `b = r`) and the
   running minimum already at or below the spot (`0 < m ≤ S`), the transcribed floating-strike
   call closed form is at least the vanilla Black–Scholes call struck at the running minimum:
@@ -84,7 +83,7 @@ extremum's law, which is the piece this file's transcription route sidesteps.
   `lookback_payoff_ge_vanilla`**: that lemma is a same-strike fixed-strike statement (`max(S−K,0)
   ≤ max(M−K,0)` given `S ≤ M`, the running *maximum*); this theorem is a floating-strike statement
   about the running *minimum*, with no `max(·,0)` on either side, proved independently. The two
-  payoff identity.
+  share only the theme that a lookback value dominates a vanilla one.
 * `lookbackFloatingCall_ge_marketPrice`: **the trunk-grounded comparison**. The same dominance
   composed with the Black-Scholes market's own pricing of the European call
   (`price_europeanCall_constGirsanovMeasure`) and the closed-form lemma `bsV_eq_closedForm`:
