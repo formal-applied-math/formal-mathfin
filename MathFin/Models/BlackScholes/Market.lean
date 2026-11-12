@@ -29,8 +29,11 @@ surely `S₀ exp(σ B^θ_t − σ²t/2)`, the Wald exponential martingale of `B^
 
 The price of a contract in this market is its value with the discount `e^{−rt}` on the physical
 asset (`price_market`); under `Q` the European call is worth the Black–Scholes formula
-(`price_europeanCall_constGirsanovMeasure`). That `Q` is the only pricing measure on `𝓕 T` is not
-proved here: it is the uniqueness half of the completeness argument of
+(`price_europeanCall_constGirsanovMeasure`). Among the pricing measures it is the only one, on
+`𝓕 T`, with a density square-integrable under it, and every pricing measure with a bounded density
+against `μ` is of that kind: `Models/BlackScholes/PricingMeasureUnique.lean` proves such a measure
+agrees with `Q` on `𝓕 T` and prices the call alike. A pricing measure with an arbitrary density is
+not covered; that is the general uniqueness half of the completeness argument of
 `Pricing/MarketCompleteness.lean`, which needs the gains of a strategy to be fair under every
 pricing measure.
 

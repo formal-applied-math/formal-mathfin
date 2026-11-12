@@ -276,7 +276,7 @@ theorem trim_eq_of_martingale_withDensity (hBcont : ∀ ω, Continuous fun s : �
     -- `∫_A g dQ = ∫_A D g dμ`
     have hQg' : ∫ ω in A, (X u ω - X s ω) ∂Q = ∫ ω in A, (X u ω - X s ω) * D ω ∂μ := by
       rw [hQp, setIntegral_withDensity_ofReal
-        (((Lp.memLp D).aestronglyMeasurable.aemeasurable.max aemeasurable_const).aestronglyMeasurable)
+        ((Lp.memLp D).aestronglyMeasurable.aemeasurable.max aemeasurable_const).aestronglyMeasurable
         hDp _ hAm]
       exact setIntegral_congr_ae hAm (hDpD.mono fun ω h _ ↦ by rw [show max (D ω) 0 = D ω from h])
     -- `∫_A D g dμ = ∫_A F g dμ`: pull the `𝓕_T`-measurable `1_A g` out of `μ[· | 𝓕_T]`

@@ -2478,10 +2478,74 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. isPricingMeasure_constGirsanovMeasure and price_europeanCall_constGirsanovMeasure in MathFin/Models/BlackScholes/Market.lean: Q is equivalent to the physical measure (isEquivProbMeasure_constGirsanovMeasure, a positive exponential density), B^theta is a Brownian motion for the filtration under Q (isFilteredPreBrownian_constBtheta, Girsanov for bounded predictable theta), and before H the deflated asset is Q-almost surely S_0 exp(sigma B^theta_t - sigma^2 t/2), a Wald exponential martingale; the price is the contract value with the discount e^(-rt) on the physical asset (price_market), which value_europeanCall_physical evaluates. SCOPE: existence of a pricing measure and the call price under it; uniqueness of the pricing measure is the frontier node thm:bs-arbitrage-free-price. The Brownian motion is pre-Brownian (no path continuity is used). Axioms-clean."
+        "formalization_scope": "Full formal proof. isPricingMeasure_constGirsanovMeasure and price_europeanCall_constGirsanovMeasure in MathFin/Models/BlackScholes/Market.lean: Q is equivalent to the physical measure (isEquivProbMeasure_constGirsanovMeasure, a positive exponential density), B^theta is a Brownian motion for the filtration under Q (isFilteredPreBrownian_constBtheta, Girsanov for bounded predictable theta), and before H the deflated asset is Q-almost surely S_0 exp(sigma B^theta_t - sigma^2 t/2), a Wald exponential martingale; the price is the contract value with the discount e^(-rt) on the physical asset (price_market), which value_europeanCall_physical evaluates. SCOPE: existence of a pricing measure and the call price under it; uniqueness of the pricing measure among those with a square-integrable or bounded density is mf-black-scholes-pricing-measure-unique-l2 and mf-black-scholes-pricing-measure-unique-bounded. The Brownian motion is pre-Brownian (no path continuity is used). Axioms-clean."
       },
       "code": {
         "lean": "import MathFin.Models.BlackScholes.Market\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Contracts MathFin.Contracts.BlackScholes\nopen scoped NNReal\n\n/-- The Girsanov measure of the market price of risk `(m - r) / σ` is a pricing measure of the\nBlack-Scholes market, and under it the European call is worth the Black-Scholes formula. -/\ntheorem black_scholes_market_pricing_measure {Ω : Type*} [mΩ : MeasurableSpace Ω]\n    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) {S₀ K m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hS₀ : 0 < S₀)\n    (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) :\n    (market μ hWmeas S₀ m r σ).IsPricingMeasure T\n        (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) ∧\n      (market μ hWmeas S₀ m r σ).price (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)\n          (europeanCall K T)\n        = S₀ * Phi (bsd1 S₀ K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S₀ K r σ T) :=\n  ⟨isPricingMeasure_constGirsanovMeasure hW hWmeas hσ.ne' hTH,\n    price_europeanCall_constGirsanovMeasure hW hWmeas hTH hS₀ hK hσ hT⟩\n"
+      }
+    },
+    {
+      "id": "mf-black-scholes-pricing-measure-unique-l2",
+      "name": "A Black-Scholes Pricing Measure with a Square-Integrable Density Prices the European Call at the Black-Scholes Formula",
+      "domain": "mathematical_finance",
+      "description": "In the Black-Scholes market of a pre-Brownian motion W with continuous paths under a probability measure mu (BlackScholes.market: spot S_0 > 0, physical drift m, rate r, volatility sigma > 0, the filtration W generates), let Q* be the Girsanov measure of the market price of risk (m - r)/sigma at a horizon H >= T. Every pricing measure Q up to T of the form Q = D.Q* with D >= 0 a square-integrable density under Q* prices the European call (strike K > 0, maturity T > 0) at S_0 Phi(d1) - K e^(-rT) Phi(d2): Q agrees with Q* on the information up to T. A pricing measure whose density is only in L^2 of the physical measure, or is not square-integrable under Q*, is not covered.",
+      "metadata": {
+        "reference": "Black and Scholes (1973); Shreve, Stochastic Calculus for Finance II, sec. 5.4; Saporito, Stochastic Processes, Thm 9.1.8; Karatzas and Shreve, Brownian Motion and Stochastic Calculus, 3.4",
+        "citations": [
+          {
+            "key": "BlackScholes1973"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "sec. 5.4"
+          },
+          {
+            "key": "Saporito",
+            "locator": "Thm 9.1.8"
+          },
+          {
+            "key": "KaratzasShreve1991",
+            "locator": "3.4"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. price_europeanCall_of_isPricingMeasure_withDensity in MathFin/Models/BlackScholes/PricingMeasureUnique.lean: under Q* the process W_u + theta min(u, H) is a pre-Brownian motion for the filtration of W (a.e. equal to B^theta at each date) and on [0, T] the deflated asset is S_0 exp(sigma W*_u - sigma^2 u/2), whose increment is the Ito integral of sigma times it (discountedGBM_eq_itoIntegral). The conditional density E_{Q*}[D | F_T] is 1 + an Ito integral (exists_itoIntegral_representation), the pricing property under Q and Q* makes that integral orthogonal to every increment 1_A (S_u - S_s), so by the Ito isometry and a pi-lambda argument over predictable rectangles (trim_eq_of_martingale_withDensity in MathFin/Probability/Brownian/MartingaleMeasureUniqueness.lean) the integrand vanishes and Q = Q* on F_T; the call's discounted payoff is F_T-measurable. SCOPE: the density is required to be square-integrable under the Girsanov measure Q*; a density merely in L^2 of the physical measure is not covered, nor is an arbitrary pricing measure (the general second fundamental theorem). The Brownian motion has continuous paths, S_0, K, sigma, T > 0, T <= H. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.PricingMeasureUnique\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Contracts MathFin.Contracts.BlackScholes\nopen scoped NNReal ENNReal\n\n/-- A pricing measure of the Black-Scholes market whose density with respect to the Girsanov\nmeasure of the market price of risk is nonnegative and square-integrable under it prices the\nEuropean call at the Black-Scholes formula. -/\ntheorem black_scholes_pricing_measure_l2_density {Ω : Type*} [mΩ : MeasurableSpace Ω]\n    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) (hWcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ W s ω)\n    {S₀ K m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hS₀ : 0 < S₀) (hK : 0 < K) (hσ : 0 < σ)\n    (hT : 0 < (T : ℝ)) {Q : Measure Ω}\n    (hQ : (market μ hWmeas S₀ m r σ).IsPricingMeasure T Q)\n    (D : Lp ℝ 2 (constGirsanovMeasure hW hWmeas ((m - r) / σ) H))\n    (hD : ∀ᵐ ω ∂(constGirsanovMeasure hW hWmeas ((m - r) / σ) H), 0 ≤ D ω)\n    (hQD : Q = (constGirsanovMeasure hW hWmeas ((m - r) / σ) H).withDensity\n      fun ω ↦ ENNReal.ofReal (D ω)) :\n    (market μ hWmeas S₀ m r σ).price Q (europeanCall K T)\n      = S₀ * Phi (bsd1 S₀ K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S₀ K r σ T) :=\n  price_europeanCall_of_isPricingMeasure_withDensity hW hWmeas hWcont hTH hS₀ hK hσ hT hQ D hD hQD\n"
+      }
+    },
+    {
+      "id": "mf-black-scholes-pricing-measure-unique-bounded",
+      "name": "A Black-Scholes Pricing Measure with a Bounded Density Against the Physical Measure Prices the European Call at the Black-Scholes Formula",
+      "domain": "mathematical_finance",
+      "description": "In the Black-Scholes market of a pre-Brownian motion W with continuous paths under a probability measure mu (BlackScholes.market: spot S_0 > 0, physical drift m, rate r, volatility sigma > 0, the filtration W generates), every pricing measure Q up to T of the form Q = D.mu with D measurable and 0 <= D <= C prices the European call (strike K > 0, maturity 0 < T <= H) at S_0 Phi(d1) - K e^(-rT) Phi(d2). A bounded density against mu is a square-integrable density against the Girsanov measure Q* of the market price of risk, since the inverse of the Girsanov density is integrable, so the result is the square-integrable case. A pricing measure with an unbounded density is not covered by this entry.",
+      "metadata": {
+        "reference": "Black and Scholes (1973); Shreve, Stochastic Calculus for Finance II, sec. 5.4; Saporito, Stochastic Processes, Thm 9.1.8; Karatzas and Shreve, Brownian Motion and Stochastic Calculus, 3.4",
+        "citations": [
+          {
+            "key": "BlackScholes1973"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "sec. 5.4"
+          },
+          {
+            "key": "Saporito",
+            "locator": "Thm 9.1.8"
+          },
+          {
+            "key": "KaratzasShreve1991",
+            "locator": "3.4"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. price_europeanCall_of_isPricingMeasure_bdd in MathFin/Models/BlackScholes/PricingMeasureUnique.lean: D/Z_H, with Z_H the Girsanov density, is nonnegative and Q* = Z_H.mu, and 1/Z_H = exp(theta^2 H) Z_H(-theta) almost surely (ae_mul_ZTpred_const_neg: the Ito integral of a constant is odd and the bracket is theta^2 H) is integrable, so E_{Q*}[(D/Z_H)^2] = E_mu[D^2/Z_H] <= C^2 E_mu[1/Z_H] is finite (exists_memLp_two_density_of_bdd); then price_europeanCall_of_isPricingMeasure_withDensity applies. SCOPE: the density is bounded against the physical measure mu; an unbounded density that is square-integrable under the Girsanov measure is the entry mf-black-scholes-pricing-measure-unique-l2, and an arbitrary pricing measure is not covered. The Brownian motion has continuous paths, S_0, K, sigma, T > 0, T <= H. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.PricingMeasureUnique\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Contracts MathFin.Contracts.BlackScholes\nopen scoped NNReal ENNReal\n\n/-- A pricing measure of the Black-Scholes market with a bounded density against the physical\nmeasure prices the European call at the Black-Scholes formula. -/\ntheorem black_scholes_pricing_measure_bounded_density {Ω : Type*} [mΩ : MeasurableSpace Ω]\n    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) (hWcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ W s ω)\n    {S₀ K m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H) (hS₀ : 0 < S₀) (hK : 0 < K) (hσ : 0 < σ)\n    (hT : 0 < (T : ℝ)) {Q : Measure Ω}\n    (hQ : (market μ hWmeas S₀ m r σ).IsPricingMeasure T Q)\n    {D : Ω → ℝ} (hDm : Measurable D) (hD0 : ∀ ω, 0 ≤ D ω) {C : ℝ} (hDC : ∀ ω, D ω ≤ C)\n    (hQD : Q = μ.withDensity fun ω ↦ ENNReal.ofReal (D ω)) :\n    (market μ hWmeas S₀ m r σ).price Q (europeanCall K T)\n      = S₀ * Phi (bsd1 S₀ K r σ T) - K * Real.exp (-r * T) * Phi (bsd2 S₀ K r σ T) :=\n  price_europeanCall_of_isPricingMeasure_bdd hW hWmeas hWcont hTH hS₀ hK hσ hT hQ hDm hD0 hDC hQD\n"
       }
     },
     {

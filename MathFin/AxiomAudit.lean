@@ -2760,6 +2760,14 @@ The landmarks of `docs/blueprint.md` that no section above pins: one `#print axi
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.BlackScholes.price_europeanCall_of_isPricingMeasure_withDensity
 
+/-- info: 'MathFin.exists_rectIntegrand' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.exists_rectIntegrand
+
+/-- info: 'MathFin.Contracts.BlackScholes.price_europeanCall_of_isPricingMeasure_bdd' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.price_europeanCall_of_isPricingMeasure_bdd
+
 /-- info: 'MathFin.Contracts.TimeDepVol.isPricingMeasure_constGirsanovMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.TimeDepVol.isPricingMeasure_constGirsanovMeasure

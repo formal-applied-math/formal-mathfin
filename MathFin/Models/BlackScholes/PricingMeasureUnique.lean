@@ -34,6 +34,14 @@ discounted geometric Brownian motion of the driver `W*`, whose increment is the 
   market with `D ∈ L²(Q*)` agrees with `Q*` on `𝓕_T`.
 * `BlackScholes.price_europeanCall_of_isPricingMeasure_withDensity`: it prices the European call at
   the Black–Scholes formula.
+* `BlackScholes.exists_memLp_two_density_of_bdd`: a bounded density `D` against the physical
+  measure is a square-integrable density `D/Z_H` against `Q*`, since `1/Z_H` is integrable
+  (`integrable_inv_ZTpred_const`: `1/Z_H(θ) = exp(θ²H)·Z_H(−θ)`).
+* `BlackScholes.price_europeanCall_of_isPricingMeasure_bdd`: a pricing measure `D·μ` with
+  `0 ≤ D ≤ C` prices the European call at the Black–Scholes formula.
+
+Not covered: a pricing measure with a density that is neither bounded against `μ` nor
+square-integrable under `Q*`; the Brownian motion is continuous and `σ > 0`, `S₀ > 0`.
 
 ## References
 
@@ -109,7 +117,8 @@ include hW in
 theorem isPreBrownianReal_girsanovDriver (θ : ℝ) (H : ℝ≥0) :
     IsPreBrownianReal (girsanovDriver W θ H) (constGirsanovMeasure hW hWmeas θ H) :=
   (isPreBrownianReal_constBtheta hW hWmeas θ H).congr fun u ↦
-    (withDensity_absolutelyContinuous _ _).ae_le (constBtheta_ae_eq_girsanovDriver (μ := μ) hWmeas θ H u)
+    (withDensity_absolutelyContinuous _ _).ae_le
+      (constBtheta_ae_eq_girsanovDriver (μ := μ) hWmeas θ H u)
 
 variable {S_0 m r σ : ℝ}
 
@@ -150,7 +159,8 @@ theorem trim_eq_of_isPricingMeasure_withDensity
   have hfil := natFiltration_girsanovDriver hWmeas ((m - r) / σ) H
   set M := market μ hWmeas S_0 m r σ with hM
   let X : ℝ≥0 → Ω → ℝ := fun t ↦ M.deflated () (min t T)
-  have hXQs : Martingale X (natFiltration hmeas) (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) := by
+  have hXQs : Martingale X (natFiltration hmeas)
+      (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) := by
     rw [hfil]
     exact (isPricingMeasure_constGirsanovMeasure hW hWmeas hσ.ne' hTH).martingale ()
   have hXQ : Martingale (fun t ↦ X (min t T)) (natFiltration hmeas) Q := by
@@ -168,11 +178,13 @@ theorem trim_eq_of_isPricingMeasure_withDensity
     have h := deflated_market_eq_girsanovDriver (μ := μ) (S_0 := S_0) (m := m) (r := r) hWmeas
       hσ.ne' (show (0 : ℝ≥0) ≤ H from bot_le) ω
     simpa [X] using h
-  have hψ' : (fun ω ↦ X T ω - X 0 ω) =ᵐ[constGirsanovMeasure hW hWmeas ((m - r) / σ) H] ItoIntegralCLM.itoIntegralCLM hWs T hmeas ψ := by
+  have hψ' : (fun ω ↦ X T ω - X 0 ω) =ᵐ[constGirsanovMeasure hW hWmeas ((m - r) / σ) H]
+      ItoIntegralCLM.itoIntegralCLM hWs T hmeas ψ := by
     filter_upwards [hψ] with ω h
     rw [hXT, hX0]
     exact h
-  have hψ0 : ∀ᵐ z ∂(ItoIntegralCLM.trimMeasure (μ := constGirsanovMeasure hW hWmeas ((m - r) / σ) H) T hmeas), ψ z ≠ 0 := by
+  have hψ0 : ∀ᵐ z ∂(ItoIntegralCLM.trimMeasure
+      (μ := constGirsanovMeasure hW hWmeas ((m - r) / σ) H) T hmeas), ψ z ≠ 0 := by
     filter_upwards [hψname] with z hz
     rw [hz]
     exact (mul_pos hσ (mul_pos hS₀ (Real.exp_pos _))).ne'
@@ -181,7 +193,8 @@ theorem trim_eq_of_isPricingMeasure_withDensity
     filter_upwards [hWs.eval_zero_ae_eq_zero] with ω h
     rw [hX0, h]
     simp
-  have key := trim_eq_of_martingale_withDensity hWs hmeas (continuous_girsanovDriver hWcont ((m - r) / σ) H)
+  have key := trim_eq_of_martingale_withDensity hWs hmeas
+    (continuous_girsanovDriver hWcont ((m - r) / σ) H)
     T hXQs ψ hψ' hψ0 hX0L2 D hD hQD hXQ
   have hgen : ∀ F : Filtration ℝ≥0 mΩ, F = natFiltration hmeas →
       Q.trim (F.le T) = (constGirsanovMeasure hW hWmeas ((m - r) / σ) H).trim (F.le T) := by
