@@ -129,6 +129,7 @@ graph TD
   bsPde["Black–Scholes partial differential equation"]:::proved
   capmEquilibrium["Capital asset pricing model"]:::proved
   continuousFtap["Fundamental theorem of asset pricing in continuous time"]:::proved
+  cubicSplineMomentsUnique["Natural cubic spline: the moment system's unique solution"]:::proved
   dupireZeroRates["Dupire's local volatility formula"]:::proved
   entropicRiskCertaintyEquivalent["Entropic risk is the certainty equivalent of exponential utility"]:::proved
   expectedUtilityAxioms["von Neumann–Morgenstern expected utility"]:::proved
@@ -370,6 +371,7 @@ graph TD
   portfolioVariance --> capmEquilibrium
   emm --> continuousFtap
   martingaleTransform --> continuousFtap
+  contract --> cubicSplineMomentsUnique
   brownianMotion --> dupireZeroRates
   carrMadan --> dupireZeroRates
   expectedUtility --> entropicRiskCertaintyEquivalent
@@ -839,6 +841,7 @@ graph TD
 | `thm:bs-pde` Black–Scholes partial differential equation | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-pde%22%20in%3Abody) |
 | `thm:capm-equilibrium` Capital asset pricing model | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acapm-equilibrium%22%20in%3Abody) |
 | `thm:continuous-ftap` Fundamental theorem of asset pricing in continuous time | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acontinuous-ftap%22%20in%3Abody) |
+| `thm:cubic-spline-moments-unique` Natural cubic spline: the moment system's unique solution | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acubic-spline-moments-unique%22%20in%3Abody) |
 | `thm:dupire-zero-rates` Dupire's local volatility formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Adupire-zero-rates%22%20in%3Abody) |
 | `thm:entropic-risk-certainty-equivalent` Entropic risk is the certainty equivalent of exponential utility | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aentropic-risk-certainty-equivalent%22%20in%3Abody) |
 | `thm:expected-utility-axioms` von Neumann–Morgenstern expected utility | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-utility-axioms%22%20in%3Abody) |

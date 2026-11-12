@@ -460,6 +460,8 @@ namespace MathFin.AxiomAudit
 #print axioms MathFin.trinomialProb_unique
 -- info: 'MathFin.willowBeta_eq_sqrt_div' depends on axioms: [propext, Classical.choice, Quot.sound]
 #print axioms MathFin.willowBeta_eq_sqrt_div
+-- info: 'MathFin.CubicSpline.exists_unique_moments' depends on axioms: [propext, Classical.choice, Quot.sound]
+#print axioms MathFin.CubicSpline.exists_unique_moments
 
 /-! ## Summit A: bounded-derivative continuous-time Itô formula in L² (CLM-identified) -/
 

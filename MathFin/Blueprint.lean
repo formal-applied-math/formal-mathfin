@@ -114,6 +114,7 @@ import MathFin.Models.BlackScholes.Market
 import MathFin.Models.BlackScholes.MargrabeGrounding
 import MathFin.Models.BlackScholes.PDE
 import MathFin.Models.Binomial.WillowTree
+import MathFin.Models.ModelFree.CubicSplineSmile
 import MathFin.Models.Credit.CVA
 import MathFin.Models.Credit.Cox
 import MathFin.Models.Credit.KMVMertonStructural
@@ -722,6 +723,15 @@ attribute [blueprint "thm:willow-beta-identity"
   marginal constraints when the step is rescaled. The willow tree is a lattice
   discretization of the GBM, whose marginals the constraints preserve. -/)]
   MathFin.willowBeta_eq_sqrt_div
+attribute [blueprint "thm:cubic-spline-moments-unique"
+  (title := "Natural cubic spline: the moment system's unique solution")
+  (uses := ["def:contract"])
+  (statement := /-- For `2 ≤ n` strictly increasing pillars, the natural cubic spline's
+  moment system `(momentMatrix x n).mulVec M = rhs x y` has exactly one solution: the
+  tridiagonal coefficient matrix is strictly diagonally dominant (`momentMatrix_dominant`),
+  hence invertible. The spline exists to price claims between quoted pillars of a
+  contract's price surface; its moments are what the pillar quotes pin down. -/)]
+  MathFin.CubicSpline.exists_unique_moments
 
 -- ===== valuation/diffusions: Black–Scholes and Bachelier =====
 

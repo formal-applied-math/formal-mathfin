@@ -127,6 +127,36 @@ takes to 782/747.
   admissible transition matrices is disclosed out of scope; nothing is claimed about
   lattice prices. Axioms-clean, `full`.
 
+### Natural cubic spline pillar interpolation: the moment system is a unit (2026-11-05)
+
+One `full` entry in `benchmarks/black_scholes.json`. Corpus 779 → 780.
+
+- **`mf-cubic-spline-moments-unique`** (`MathFin.CubicSpline.exists_unique_moments`,
+  `MathFin/BlackScholes/CubicSplineSmile.lean`): a natural cubic spline interpolating
+  pillar values `y 0, …, y n` at strictly increasing pillars `x 0 < ⋯ < x n` (e.g. an
+  FX/equity vol smile sampled at pillar deltas) reduces, after the natural boundary
+  conditions `M 0 = M n = 0` are substituted in, to a tridiagonal linear system in the
+  interior moments `M 1, …, M (n-1)`. Every row of that system's coefficient matrix has
+  diagonal entry `2` and off-diagonal entries `μᵢ, λᵢ ≥ 0` with `μᵢ + λᵢ = 1 < 2`, so it is
+  strictly row diagonally dominant; Mathlib's `det_ne_zero_of_sum_row_lt_diag`
+  (`LinearAlgebra/Matrix/Gershgorin.lean`, a corollary of Gershgorin's circle theorem)
+  gives nonzero determinant, hence the system has exactly one solution for any data and
+  pillars. The same file's `interpSpline_left_eq`/`interpSpline_right_eq` show the
+  standard piecewise-cubic formula matches the pillar values exactly at both ends of each
+  piece for *any* candidate moment sequence, and `svi_pillar_interpSpline_eq`/
+  `svi_pillar_moments_unique` connect the scheme to the repository's parametric SVI smile
+  (`MathFin.BlackScholes.SVI`): pillar values sampled from an SVI slice's total variance
+  interpolate exactly at the pillars, and the moment system for those SVI-sampled pillars
+  also has exactly one solution.
+  Reference: the nonsingularity step is formalized on the normalized moment system of
+  J. Stoer & R. Bulirsch, *Introduction to Numerical Analysis*, 3rd ed. (2002), §2.4.2;
+  existence and uniqueness of the natural cubic spline itself is R. L. Burden &
+  J. D. Faires, *Numerical Analysis*, 9th ed. (2011), Theorem 3.11. The strict-diagonal-
+  dominance step formalized here is the same nonsingularity argument that theorem's proof
+  uses, run on the normalized system rather than on B&F's own unnormalized one. SCOPE:
+  does not construct a single global function glued across all
+  pieces and does not prove global `C²` matching of one-sided derivatives at interior
+  knots (left to future work).
 
 ### Removable singularities in two stochastic-vol smile models (2026-11-01)
 
