@@ -1,4 +1,4 @@
-# Mem-capped Lean LSP service for the lean-lsp-mcp harness (Leanstral / vibe).
+# Mem-capped Lean LSP service for the lean-lsp-mcp harness (formal-foundry's drafter and prover).
 #
 # Runs lean-lsp-mcp INSIDE the pinned Lean image, reusing the already-built
 # oleans in the `lake_build_cache` volume — no host build, no root-owned

@@ -27,8 +27,9 @@ COMPONENT_WORDS = (
 
 # The narrower set the GENERATOR SOURCE may not hardcode: engines that can occupy the
 # DRAFTER slot, which is the part that changes. Leanstral (and Mistral, its vendor) are
-# excluded because the prover is fixed by `provenance.source == leanstral-autoform` —
-# naming it is a consequence of the data, not an assumption about the pipeline. Claude
+# excluded because the generator names them only for an entry under the legacy marker
+# `leanstral-autoform` that records no `model` — a fact about four merged entries, not
+# an assumption about the pipeline. Claude
 # is excluded here only because it appears in an unrelated method (the interactive
 # human-authoring disclosure); if it ever leaks into the MACHINE method,
 # `test_the_disclosure_names_only_components_the_corpus_records` catches it.
@@ -107,7 +108,7 @@ def _drafter_counts() -> tuple[int, dict]:
         data = json.load(open(path, encoding="utf-8"))
         for t in (data.get("theorems", data) if isinstance(data, dict) else data):
             prov = (t.get("metadata") or {}).get("provenance") or {}
-            if prov.get("source") != "leanstral-autoform":
+            if prov.get("source") not in F.AUTOFORM_SOURCES:
                 continue
             total += 1
             src = str(prov.get("statement_source") or "autoform").replace("-autoform", "")
