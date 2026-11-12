@@ -253,3 +253,18 @@ reason = "the cylinder events of the Ionescu–Tulcea construction"
 label = "def:martingale-transform"
 folded_into = "thm:martingale-transform"
 reason = "the definition of the discrete stochastic integral"
+
+[[retired]]
+label = "thm:arbitrage-free-smile-interpolation"
+folded_into = "thm:quotes-market-realisation"
+reason = "the piecewise-linear interpolant of arbitrage-free quotes, the step of the theorem that the quotes are a market's call prices"
+
+[[retired]]
+label = "thm:cubic-spline-moments-unique"
+folded_into = "thm:quotes-market-realisation"
+reason = "the natural cubic spline through quoted pillars (C¹ slope matching, unique moments), an interpolation scheme with no arbitrage statement; the smile-interpolation landmark is the quotes-to-market theorem"
+
+[[retired]]
+label = "thm:willow-beta-identity"
+folded_into = "thm:willow-tree-brownian-covariance"
+reason = "a moment identity of the willow lattice, a step of its Brownian second and cross moments"
