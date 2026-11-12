@@ -958,7 +958,7 @@ import MathFin.Models.ModelFree.CallPriceInterpolation
 import MathFin.Models.ModelFree.CubicSplineSmile
 import MathFin.Markets.FxSmileQuotes
 import MathFin.Models.ModelFree.SABRChainRuleGreeks
-import MathFin.Models.ModelFree.ContinuousLookbackPricing
-import MathFin.Models.ModelFree.ShoutFloorMonotonicity
+import MathFin.Models.BlackScholes.ContinuousLookbackPricing
+import MathFin.Models.BlackScholes.ShoutFloorMonotonicity
 import MathFin.Choice.Performance.MarchenkoPasturEdge
 import MathFin.Markets.DeFi.ConcentratedLiquidityVaR
