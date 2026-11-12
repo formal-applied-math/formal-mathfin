@@ -389,6 +389,15 @@ theorem v3PositionValue_nonneg {L a b s : ℝ} (hL : 0 ≤ L) (ha : 0 < a) (hab 
       (mul_nonneg (sq_nonneg s) (mul_nonneg hL (sub_nonneg.mpr (one_div_le_one_div_of_le hs' hsb))))
   · exact mul_nonneg hL (by linarith)
 
+/-- **A v3 position's value is linear in its liquidity.** `realReserveX`/`realReserveY` are
+literally `L` times a function of the price range and current price alone, and the three-way case
+split in `v3PositionValue` does not depend on `L` — so scaling `L` by any real `c` (not just
+`c ≥ 0`) scales the position's value at every square-root price `s` by the same factor. -/
+theorem v3PositionValue_const_mul (c L a b s : ℝ) :
+    v3PositionValue (c * L) a b s = c * v3PositionValue L a b s := by
+  unfold v3PositionValue realReserveX realReserveY
+  split_ifs <;> ring
+
 /-- **Below the range the position is the covered call**: for `0 ≤ s ≤ a`,
 `v3PositionValue L a b s = x_max · (s² − max (s² − ab) 0)` with `x_max = realReserveX L a b`
 (here `s² ≤ ab`, so the call is out of the money). -/

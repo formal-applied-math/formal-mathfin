@@ -287,10 +287,30 @@ import MathFin.Probability.Brownian.WienerExponentialTotality
 -- Martingale representation, step 5: the Itô integral is onto the centered `𝓕ᴮ_T`-measurable
 -- part of `L²(μ)` — terminal, submodule and process forms of the representation theorem
 import MathFin.Probability.Brownian.MartingaleRepresentation
+-- Martingale representation, step 6: its finance reading — replication, superreplication
+-- duality, and uniqueness of the pricing measure on the Brownian filtration
+import MathFin.Pricing.MarketCompleteness
+import MathFin.Pricing.MarketCompletenessInPrice
+-- The price with a drift, S = S₀ + ∫b ds + (σ●B), and the integral against it
+import MathFin.Pricing.PricePathDrift
+import MathFin.Pricing.PricingMeasureL2Density
 import MathFin.Probability.Brownian.Ito.ItoFormulaProcess
 import MathFin.Probability.Brownian.ExitTime
 import MathFin.Probability.Brownian.Ito.ItoFormulaCutoff
 import MathFin.Probability.Brownian.Ito.ItoFormulaUnrestrictedLocMart
+-- Phase 37: FTAP both directions, two-state market (adapted from Nagy 2026)
+import MathFin.Pricing.FTAP.FTAPTwoState
+-- Phase 38: Constant-product AMM (adapted from Pusceddu-Bartoletti FMBC 2024)
+import MathFin.Markets.DeFi.ConstantProductAMM
+-- DeFi/AMM group: Uniswap v2/v3 mechanics (impermanent loss, TWAP, fee invariant, v3 real reserves)
+import MathFin.Markets.DeFi.UniswapMechanics
+-- Historical-simulation VaR for a Uniswap v3 concentrated-liquidity position
+import MathFin.Markets.DeFi.ConcentratedLiquidityVaR
+-- DeFi/lending group: Aave kinked-rate + health factor, Compound cToken exchange rate
+import MathFin.Markets.DeFi.Aave
+import MathFin.Markets.DeFi.Compound
+-- Dai stability fee and vault liquidation condition
+import MathFin.Markets.DeFi.Dai
 -- Phase 39: Itô structural drift formula + GBM log-drift (after Nagy 2026)
 import MathFin.Probability.Brownian.Ito.ItoLemma
 -- Time-dependent (2D) Itô formula + GBM-as-SDE-solution (genuine exp partials)

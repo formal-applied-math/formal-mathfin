@@ -54,8 +54,14 @@ For an integrable loss and `α ∈ (0, 1)`, the dual representation of ES over b
 * `finiteVaR_eq_valueAtRisk`, `finiteES_eq_expectedShortfall`: for `α ∈ (0, 1)`, the finite forms
   agree with the general definitions at the law `∑ i, q i • δ_i`.
 * `finiteVaR_eq_value_min`: for `α ∈ (0, 1]`, VaR at a finite law is attained at a loss value.
+* `finiteVaR_le_of_forall_le`: a uniform cap on every outcome's loss caps VaR the same way.
+* `finiteVaR_const_mul`: positive homogeneity,
+  `finiteVaR q (fun i ↦ c * L i) α = c * finiteVaR q L α` for `c ≥ 0`, inherited from
+  `valueAtRisk_const_mul` through the bridge (needs no `MeasurableSpace` on `ι` in its statement,
+  only in the proof, which borrows one locally).
 * `finiteVaR_two_point`: for `α ∈ (0, 1]`, VaR of a loss that is `0` with mass `a` and `c > 0` with
   mass `1 - a`.
+* `uniformWeights`: the equal-`1/n`-weights `StdSimplex` on `n` observations.
 * `finiteVaR_one_bond`, `finiteVaR_two_halves`: `VaR₀.₉₅` is `0` for the single bond and `50`
   for the split position.
 * `finiteVaR_subadditivity_fails`: on the joint space of the two half-bonds, the halves' `VaR₀.₉₅`
@@ -194,6 +200,32 @@ theorem finiteVaR_eq_value_min (hα0 : 0 < α) (hα1 : α ≤ 1) :
   exact (Finset.min'_le _ _ (Finset.mem_filter.2 ⟨Finset.mem_image_of_mem _ (Finset.mem_univ j),
     hfilt ▸ hx⟩)).trans hjx
 
+/-- **Upper bound from a uniform cap.** If every outcome's loss is at most `c`, VaR at any level
+`α ∈ (0, 1]` is at most `c` too: VaR is attained at a loss value (`finiteVaR_eq_value_min`), and
+every loss value is itself at most `c`. -/
+theorem finiteVaR_le_of_forall_le (hα0 : 0 < α) (hα1 : α ≤ 1) {c : ℝ} (hc : ∀ i, L i ≤ c) :
+    finiteVaR q L α ≤ c := by
+  rw [finiteVaR_eq_value_min hα0 hα1]
+  have hmem : {v ∈ Finset.univ.image L | α ≤ ∑ i with L i ≤ v, q.weights i}.min'
+      (nonempty_values_mass_ge hα1) ∈ Finset.univ.image L :=
+    (Finset.mem_filter.mp (Finset.min'_mem _ (nonempty_values_mass_ge hα1))).1
+  obtain ⟨i, -, hi⟩ := Finset.mem_image.mp hmem
+  rw [← hi]
+  exact hc i
+
+/-- **Positive homogeneity** of `finiteVaR`: scaling every outcome's loss by a nonnegative constant
+`c` scales VaR by the same constant, inherited from `valueAtRisk_const_mul`
+(`Risk/ValueAtRisk.lean`) through the bridge `finiteVaR_eq_valueAtRisk`. The *statement*
+needs no measurable-space structure on `ι` (`finiteVaR` is pure `Finset` arithmetic); the proof
+borrows an arbitrary one locally to reach the bridge, so this lemma is usable for any `Fintype ι`,
+not only one that happens to carry a `MeasurableSpace` instance. -/
+theorem finiteVaR_const_mul (hα : α ∈ Ioo 0 1) {c : ℝ} (hc : 0 ≤ c) :
+    finiteVaR q (fun i ↦ c * L i) α = c * finiteVaR q L α := by
+  let _ : MeasurableSpace ι := ⊤
+  have _ : MeasurableSingletonClass ι := ⟨fun _ ↦ trivial⟩
+  rw [finiteVaR_eq_valueAtRisk hα, finiteVaR_eq_valueAtRisk hα]
+  exact valueAtRisk_const_mul (measurable_of_finite L).aemeasurable hα hc
+
 /-- **Two-point laws.** If the mass of `{L ≤ x}` is `0` for `x < 0`, `a` for `0 ≤ x < c` and
 `a + b = 1` for `x ≥ c`, with `c > 0`, then at every level `α ∈ (0, 1]` the VaR is `0` for
 `α ≤ a` and `c` above. -/
@@ -206,6 +238,18 @@ theorem finiteVaR_two_point {a b c : ℝ} (hab : a + b = 1) (hc : 0 < c)
     split_ifs <;> linarith
 
 end Evaluation
+
+/-! ## Uniform weights on `n` observations -/
+
+/-- **Equal weights on `n` observations**: the `1/n` probability historical simulation (and any
+other equally-likely-scenario construction) assigns to each of `n` observations, for `n ≥ 1` —
+`Convexity.StdSimplex.barycenter` (`Mathlib.Geometry.Convex.ConvexSpace.Barycenter`) specialized to
+`Fin n`, under a name that takes the hypothesis `0 < n` historical-simulation callers already carry
+rather than the library's own `Nonempty (Fin n)` instance. `weights_barycenter_apply` gives the
+closed form `weights i = (n : ℝ)⁻¹` for every `i`. -/
+noncomputable def uniformWeights (n : ℕ) (hn : 0 < n) : StdSimplex ℝ (Fin n) :=
+  haveI : Nonempty (Fin n) := ⟨⟨0, hn⟩⟩
+  StdSimplex.barycenter
 
 /-! ## The single bond -/
 

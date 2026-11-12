@@ -700,7 +700,10 @@ split by area. What each bridge proves, by area:
   the Uniswap v3 position against a covered call, and its price bound
   (`mf-uniswap-v3-position-covered-call`, `mf-uniswap-v3-position-bs-price-bound`, #92); the LP
   value under a lognormal price (`mf-cpmm-lp-expected-value-lognormal`); an AMM arbitrage exists iff
-  the pool price differs from the oracle (the direction of the profitable trade is a separate lemma) (`mf-cpmm-arbitrage-iff-price-divergence`); Glosten–Milgrom
+  the pool price differs from the oracle (the direction of the profitable trade is a separate lemma) (`mf-cpmm-arbitrage-iff-price-divergence`); historical-simulation VaR of a v3
+  concentrated-liquidity position never exceeds its current value and scales linearly with
+  deployed liquidity (`mf-uniswap-v3-concentrated-liquidity-historical-var`; fees, re-ranging and
+  horizon-scaling of the historical scenarios are not modelled); Glosten–Milgrom
   quotes as conditional expectations, and the model's witness (`mf-glosten-milgrom-quote-condexp`,
   `mf-glosten-milgrom-model-witness`); Roll's spread from the autocovariance
   (`mf-roll-spread-autocovariance`). Fees, gas and block timing are not modelled.
