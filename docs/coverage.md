@@ -66,7 +66,7 @@ tree (767 full before, 768 after; 785 → 786 delivery-ready).
 One `full` entry in `benchmarks/binomial.json`. Corpus 781 → 782 (746 full before, 747 after;
 764 → 765 delivery-ready).
 
-- **`mf-trinomial-moment-matching`** (MathFin/Binomial/TrinomialMomentMatching.lean): one step
+- **`mf-trinomial-moment-matching`** (MathFin/Models/Binomial/TrinomialMomentMatching.lean): one step
   of a recombining trinomial lattice sends a node `x_k` to `x_k - dx`, `x_k`, `x_k + dx`;
   matching mass, mean `x_k + e` and variance `v2` gives a 3×3 linear system, solved uniquely
   for `dx ≠ 0` (`trinomialProb_sum`/`_mean`/`_secondMoment`, `trinomialProb_unique`), the
@@ -96,7 +96,7 @@ entry, 747 after; 764 → 765 delivery-ready). At authoring time origin/main's R
 lagged at 779/744; upstream v1.10.0 has since brought it to 781/746, which this entry
 takes to 782/747.
 
-- **`mf-willow-tree-moment-marginal-constraints`** (MathFin/Binomial/WillowTree.lean):
+- **`mf-willow-tree-moment-marginal-constraints`** (MathFin/Models/Binomial/WillowTree.lean):
   Curran's willow tree prices against a Brownian motion with a time-inhomogeneous
   Markov chain on a fixed node set with a fixed discrete marginal — the lattice has a
   constant node count per step and widens like `sqrt(t)` only through the scaling
