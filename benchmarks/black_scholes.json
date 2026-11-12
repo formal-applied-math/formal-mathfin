@@ -2739,7 +2739,7 @@
     },
     {
       "id": "mf-smile-black-form-tail-iff",
-      "name": "Smile no-arbitrage: Roper's theorem, the left wing, calendar spreads, one Black form",
+      "name": "Tail condition for the Black form at general positive total variance",
       "description": "For any everywhere-positive total variance `w`, the Black form `blackForm k (w k)` tends to 0 at large `k` exactly when `d₊(k, w k)` tends to `-∞`.",
       "domain": "mathematical_finance",
       "code": {
