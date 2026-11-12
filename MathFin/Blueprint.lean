@@ -115,8 +115,6 @@ import MathFin.Models.BlackScholes.GaussianGirsanov
 import MathFin.Models.BlackScholes.Market
 import MathFin.Models.BlackScholes.MargrabeGrounding
 import MathFin.Models.BlackScholes.PDE
-import MathFin.Models.ModelFree.CubicSplineSmile
-import MathFin.Models.Binomial.WillowTree
 import MathFin.Models.ModelFree.CallPriceInterpolation
 import MathFin.Models.Credit.CVA
 import MathFin.Models.Credit.Cox
@@ -712,11 +710,13 @@ attribute [blueprint "thm:trinomial-moment-matching"
   (statement := /-- The one-step trinomial weights `trinomialProbDown/Mid/Up`, the unique solution
   of the mass, mean and second-moment equations about the central node (`trinomialProb_unique`),
   form a probability law on the three children. For positive weights it is a pricing measure of
-  the one-date market whose asset takes the values `c e^{-dx}, c, c e^{dx}` if and only if the
-  lattice's exponential moment equals the money-market growth of the quote,
-  `E[X] = s_0 e^{r\tau}`. One step only: no multi-period tree and no prices of path-dependent
+  the one-date market whose asset takes the values `c e^{-dx}, c, c e^{dx}` if the lattice's
+  exponential moment equals the money-market growth of the quote, `E[X] = s_0 e^{r\tau}`;
+  conversely, for $\tau > 0$, a pricing trinomial law has that exponential moment
+  (`trinomial_exp_moment_of_isPricingMeasure`). One step only: no multi-period tree and no prices of path-dependent
   claims are claimed. -/)]
   MathFin.isPricingMeasure_trinomialLaw
+
 attribute [blueprint "thm:willow-tree-brownian-covariance"
   (title := "The willow tree reproduces Brownian covariance")
   (uses := ["def:brownian-motion"])
@@ -729,24 +729,7 @@ attribute [blueprint "thm:willow-tree-brownian-covariance"
   chain are matched; the linear program that finds admissible matrices and the prices computed on
   the lattice are not part of the claim. -/)]
   MathFin.willowScaled_crossMoment_eq_integral_mul
-attribute [blueprint "thm:cubic-spline-moments-unique"
-  (title := "Natural cubic spline: the moment system's unique solution")
-  (uses := ["def:contract"])
-  (statement := /-- For `2 ≤ n` strictly increasing pillars, the natural cubic spline's
-  moment system `(momentMatrix x n).mulVec M = rhs x y` has exactly one solution: the
-  tridiagonal coefficient matrix is strictly diagonally dominant (`momentMatrix_dominant`),
-  hence invertible. The spline exists to price claims between quoted pillars of a
-  contract's price surface; its moments are what the pillar quotes pin down. -/)]
-  MathFin.CubicSpline.exists_unique_moments
-attribute [blueprint "thm:willow-beta-identity"
-  (title := "The willow tree's beta identity")
-  (uses := ["def:gbm"])
-  (statement := /-- On a grid whose time step widens by the factor `1 + α`, the willow
-  tree's de-correlation coefficient is `β = 1 / √(1 + α) = √(t / t')` — the identity that
-  keeps the tree's nodal locations and weights consistent with Curran's moment and
-  marginal constraints when the step is rescaled. The willow tree is a lattice
-  discretization of the GBM, whose marginals the constraints preserve. -/)]
-  MathFin.willowBeta_eq_sqrt_div
+
 attribute [blueprint "thm:quotes-market-realisation"
   (title := "Arbitrage-free call quotes are the prices of a market")
   (uses := ["thm:smile-no-arbitrage"])
