@@ -282,8 +282,8 @@ honesty-first library is a defensible position a larger, looser library cannot
 take.**
 
 **The foundry.** `formal-foundry`'s pipeline (Claude specifies → Claude formalizes
-agentically against lean-lsp → depth gate → triviality gate → kernel gates →
-Leanstral proves → refinery → human-merged PR) is domain-agnostic. Retargeting is
+agentically against lean-lsp → depth gate → map gate → triviality gate → a second
+Claude session proves → the library's CI → human-merged PR) is domain-agnostic. Retargeting is
 swapping the pointer modules and the house doctrine. **Marginal cost of library two
 is far below library one** — this is probably the single strongest argument for
 doing it at all.

@@ -174,7 +174,7 @@ def test_autoform_disclosure_is_derived_not_pinned_to_a_pipeline(tmp_path):
 
 
 def test_autoform_count_matches_corpus_provenance():
-    # the note reports the MECHANICAL count of leanstral-autoform provenance
+    # the note reports the MECHANICAL count of autoform-provenance
     # entries in the live corpus, so it stays honest as autoform PRs merge (0 on
     # a clean main, 1 once #88's PR lands, …) — never a hand-set snapshot.
     import glob
@@ -184,7 +184,7 @@ def test_autoform_count_matches_corpus_provenance():
         data = json.load(open(f, encoding="utf-8"))
         for t in (data.get("theorems", data) if isinstance(data, dict) else data):
             prov = (t.get("metadata") or {}).get("provenance") or {}
-            if prov.get("source") == "leanstral-autoform":
+            if prov.get("source") in F.AUTOFORM_SOURCES:
                 n += 1
     assert _machine_note(F.build_doc(ROOT)).startswith(f"{n} autoformalized proof")
 
@@ -219,6 +219,27 @@ def test_the_disclosure_names_the_prover_the_entries_record(tmp_path):
     assert "Claude (claude-sonnet-5) formalizes + proves it" in m["tool_setup"]
     assert m["cost"]["spend_usd"] == "subscription-based"
     assert "claude-sonnet-5" in m["models"]
+
+
+def test_the_pipeline_marker_is_counted_beside_the_legacy_one(tmp_path):
+    # from 2026-11-12 the foundry marks its entries `foundry-autoform`: the marker names
+    # the pipeline, and the prover is the entry's `model`. Both markers are counted.
+    m = _foundry_method(_corpus(
+        tmp_path,
+        {"source": "leanstral-autoform", "issue": 66},                 # historical: Leanstral
+        {"source": "foundry-autoform", "issue": 300, "model": "claude-sonnet-5-5"}))
+    note = m["prompting_notes"]
+    assert note.startswith("2 autoformalized proof")
+    assert "proof by Claude (claude-sonnet-5-5) (1) and Leanstral (1)" in note
+    assert "#66" in note and "#300" in note
+
+
+def test_a_current_entry_without_a_prover_is_never_credited_to_the_legacy_one(tmp_path):
+    # only a legacy-marker entry may omit `model`. A current one that does is disclosed
+    # as unrecorded (and the generated-claims gate then refuses it), not as Leanstral's.
+    m = _foundry_method(_corpus(tmp_path, {"source": "foundry-autoform", "issue": 301}))
+    assert "Leanstral" not in m["prompting_notes"] + m["tool_setup"]
+    assert F.UNRECORDED_PROVER in m["models"]
 
 
 def test_a_mixed_corpus_credits_each_prover_with_its_own_entries(tmp_path):
