@@ -84,7 +84,7 @@ for every choice of the parameters. This strengthens `hestonA_at_zero` by removi
 `hestonGamma ≠ 0` guard: at `γ = 0` the closed form's log sees the division `x/0`, which
 Lean evaluates to `0`, so `Real.log 0 = 0` and the closed form still vanishes — matching
 the true terminal data `â(0) = 0` of the Riccati system (the closed form is otherwise
-degenerate at `γ = 0`, as `hestonA_zero_volOfVol` documents for the `ξ = 0` face). -/
+degenerate at `γ = 0`, as `HestonSmallVolOfVol.lean` documents for the `ξ = 0` face). -/
 theorem hestonA_zeroMaturity (r κ θ ξ ρ u : ℝ) : hestonA r κ θ ξ ρ u 0 = 0 := by
   rcases eq_or_ne (hestonGamma κ ξ ρ u) 0 with h0 | h0
   · simp [hestonA, hestonBvDenom, h0]
