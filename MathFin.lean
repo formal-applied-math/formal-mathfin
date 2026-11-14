@@ -531,6 +531,8 @@ import MathFin.Models.StochVol.Heston
 -- The Heston transform at vanishing vol-of-vol: the Black-Scholes moment with the integrated
 -- deterministic variance
 import MathFin.Models.StochVol.HestonSmallVolOfVol
+-- The Heston transform at zero maturity: the Riccati flows vanish at τ = 0, the profile
+-- is the point-mass mgf, and the dirac-law European price is the undiscounted payoff
 import MathFin.Models.StochVol.HestonZeroMaturity
 import MathFin.Models.BlackScholes.Lookback
 import MathFin.Models.BlackScholes.BarrierParity

@@ -63,7 +63,7 @@ characteristic-function route (complex `iu`) is out of scope here, as in `Heston
 
 * [Heston, *A closed-form solution for options with stochastic volatility with applications to bond
   and currency options*][Heston1993]
-* [The QuantLib contributors, *QuantLib*][QuantLib], `AnalyticPTDHestonEngine`
+* [The QuantLib contributors, *QuantLib*][QuantLib], AnalyticPTDHestonEngine
 
 ## Tags
 
