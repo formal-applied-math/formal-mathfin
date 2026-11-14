@@ -30,7 +30,7 @@ at a fixed maturity `τ ≠ 0` in the decay-parameterized loading `s(κτ) = (1 
   while the numerator keeps its exact value evaluates the loading to `0` at `κ = 0` — the
   numerator `1 − exp(−0·τ) = 0` over a tiny denominator — a different value than the limit `1`.
   This is the same species as the hardcoded-to-0 guard of QuantLib's `Vasicek::A`
-  (`vasicek.cpp`, PR #2599), fixed upstream; the limits proved here are the values a correct
+  (`vasicek.cpp`, PR #2599); the limits proved here are the values a correct
   small-`κ` branch has to reach.
 
 ## Scope (disclosed)
@@ -142,7 +142,7 @@ theorem nelsonSiegelZeroRate_closedForm_zero_meanReversion (c0 c1 c2 t : ℝ) :
 /-- **The Svensson second loading term at vanishing decay**: `c₃·(s(κτ) − e^{−κτ}) → 0` as
 `κ → 0⁺`, at a fixed maturity `τ ≠ 0` — the slope loading tends to `1` while `e^{−κτ}` tends to
 `1`, so their difference cancels. This is the value a correct small-`κ` branch of the second
-loading has to reach: at `κ = 0` the term vanishes, whatever the coefficient `c₃`. -/
+loading has to reach: the limit the term has to reach at `κ = 0` is 0 — not the substituted value `−c₃` (`svenssonSecondLoading_closedForm_zero_meanReversion`), whatever the coefficient `c₃`. -/
 theorem tendsto_svenssonSecondLoading_zero_meanReversion (c3 t : ℝ) (ht : t ≠ 0) :
     Tendsto (fun κ => c3 * (nssSlope (κ * t) - Real.exp (-(κ * t)))) (𝓝[>] 0) (𝓝 0) := by
   have hL := tendsto_oneMinusExpOverX_zero_meanReversion t ht
