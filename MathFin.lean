@@ -531,6 +531,7 @@ import MathFin.Models.StochVol.Heston
 -- The Heston transform at vanishing vol-of-vol: the Black-Scholes moment with the integrated
 -- deterministic variance
 import MathFin.Models.StochVol.HestonSmallVolOfVol
+import MathFin.Models.StochVol.HestonZeroMaturity
 import MathFin.Models.BlackScholes.Lookback
 import MathFin.Models.BlackScholes.BarrierParity
 import MathFin.Models.BlackScholes.BinaryBarrierOption
