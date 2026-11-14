@@ -13,9 +13,11 @@ public import MathFin.Models.Rates.AffineTermStructurePDE
 
 At zero time to maturity a European claim's model price must collapse to the undiscounted
 payoff: a degenerate-maturity engine must return `(payoff)(spot)` when the computed time
-to maturity is exactly zero — the same zero-maturity convention `blackFormula` applies
-at zero standard deviation (returning the discounted intrinsic). This file proves the two halves of that
-convention for the Heston Riccati closed forms of `Models/StochVol/Heston.lean`: the
+to maturity is exactly zero — the same zero-maturity convention the Black formula applies
+at zero standard deviation (returning the discounted intrinsic; at zero variance the
+lognormal degenerates to the point mass at the forward). This file proves the two
+halves of that convention for the Heston Riccati closed forms of
+`Models/StochVol/Heston.lean`: the
 transform profile degenerates to a point mass at the initial log-spot, and the European
 expectation against that point mass is the undiscounted payoff.
 
