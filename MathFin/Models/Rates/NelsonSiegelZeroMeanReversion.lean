@@ -117,7 +117,7 @@ noncomputable def nelsonSiegelZeroRate (c0 c1 c2 κ t : ℝ) : ℝ :=
 fixed maturity `τ ≠ 0`. The slope loading `s(κτ)` tends to `1`
 (`tendsto_oneMinusExpOverX_zero_meanReversion`) while `e^{−κτ}` tends to `1`, so the curvature
 term `c₂·(s(κτ) − e^{−κτ})` vanishes and only level plus slope survive. This limit is the value
-a correct small-`κ` branch of the loading has to reach. -/
+a correct small-`κ` branch of the zero rate has to reach. -/
 theorem tendsto_nelsonSiegelZeroRate_zero_meanReversion (c0 c1 c2 t : ℝ) (ht : t ≠ 0) :
     Tendsto (fun κ => nelsonSiegelZeroRate c0 c1 c2 κ t) (𝓝[>] 0) (𝓝 (c0 + c1)) := by
   have hL := tendsto_oneMinusExpOverX_zero_meanReversion t ht
