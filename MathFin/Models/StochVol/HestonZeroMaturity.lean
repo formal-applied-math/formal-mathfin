@@ -15,12 +15,12 @@ At zero time to maturity a European claim's model price must collapse to the und
 payoff: a degenerate-maturity engine must return `(payoff)(spot)` when the computed time
 to maturity is exactly zero — the same zero-maturity convention the Black formula applies
 at zero standard deviation (returning the discounted intrinsic; at zero variance the
-lognormal degenerates to the point mass at the forward). This file proves the two
-halves of that convention for the Heston Riccati closed forms of
-`Models/StochVol/Heston.lean`: the
-transform profile degenerates to the moment-generating function of the point mass at the
-initial log-spot, and the European expectation under that degenerate law is the
-undiscounted payoff.
+lognormal degenerates to the point mass at the forward). This file proves the transform
+half of that convention for the Heston Riccati closed forms of
+`Models/StochVol/Heston.lean`: the transform profile degenerates to the
+moment-generating function of the point mass at the initial log-spot; the price half
+(the European expectation under that degenerate law is the undiscounted payoff,
+Mathlib's `integral_dirac`) is carried in prose below.
 
 The Riccati flows vanish at the zero-argument instance. `hestonBv_at_zero`
 (`Models/StochVol/Heston.lean`) gives `b̂(0) = 0` with no hypothesis, and
@@ -59,8 +59,6 @@ characteristic-function route (complex `iu`) is out of scope here, as in `Heston
   intrinsic — Mathlib's `integral_dirac` applied to the payoff (undiscounted: the τ = 0
   discount factor is 1); carried in prose rather than as theorems, per the no-thin-wrapper
   rule for single upstream results.
-  the spot is the undiscounted payoff `max(S − K, 0)` / `max(K − S, 0)`.
-  coordinates, `max(e^x − K, 0)` / `max(K − e^x, 0)`.
 
 ## References
 
@@ -122,9 +120,5 @@ theorem hestonTransform_zeroMaturity_pointMass (r κ θ ξ ρ u t x v : ℝ) :
       = mgf id (Measure.dirac x) u := by
   rw [hestonTransform_zeroMaturity, mgf_dirac']
   simp
-
-
-
-
 
 end MathFin.Heston
