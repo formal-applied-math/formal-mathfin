@@ -142,7 +142,8 @@ theorem nelsonSiegelZeroRate_closedForm_zero_meanReversion (c0 c1 c2 t : ℝ) :
 /-- **The Svensson second loading term at vanishing decay**: `c₃·(s(κτ) − e^{−κτ}) → 0` as
 `κ → 0⁺`, at a fixed maturity `τ ≠ 0` — the slope loading tends to `1` while `e^{−κτ}` tends to
 `1`, so their difference cancels. This is the value a correct small-`κ` branch of the second
-loading has to reach: the limit the term has to reach at `κ = 0` is 0 — not the substituted value `−c₃` (`svenssonSecondLoading_closedForm_zero_meanReversion`), whatever the coefficient `c₃`. -/
+loading has to reach at `κ = 0`: `0`, not the substituted value `−c₃`
+(`svenssonSecondLoading_closedForm_zero_meanReversion`), whatever the coefficient `c₃`. -/
 theorem tendsto_svenssonSecondLoading_zero_meanReversion (c3 t : ℝ) (ht : t ≠ 0) :
     Tendsto (fun κ => c3 * (nssSlope (κ * t) - Real.exp (-(κ * t)))) (𝓝[>] 0) (𝓝 0) := by
   have hL := tendsto_oneMinusExpOverX_zero_meanReversion t ht
