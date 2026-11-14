@@ -6,7 +6,7 @@ Authors: Yang Ye
 module
 
 public import MathFin.Models.StochVol.Heston
-public import MathFin.Models.Rates.AffineTermStructurePDE
+public import Mathlib.Probability.Moments.Basic
 
 /-!
 # The Heston transform at zero maturity
@@ -108,7 +108,7 @@ theorem hestonTransform_zeroMaturity (r κ θ ξ ρ u t x v : ℝ) :
   · simpa using hestonA_zeroMaturity r κ θ ξ ρ u
   · simpa using hestonBv_at_zero κ ξ ρ u
 
-/-! ### The point-mass identification and the price collapse -/
+/-! ### The point-mass identification -/
 
 /-- **The zero-maturity profile is the point-mass mgf**: the collapsed transform profile
 `e^{u·x}` equals `mgf id (Measure.dirac x) u`, the moment-generating function of the point
