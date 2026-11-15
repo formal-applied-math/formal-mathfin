@@ -854,6 +854,28 @@
       }
     },
     {
+      "id": "mf-binomial-american-put-market-price",
+      "name": "The Binomial American Put Is the Market's American Price",
+      "domain": "mathematical_finance",
+      "description": "Under no-arbitrage, the risk-neutral coin flips (up-probability crrUpProb u d ρ = q) are a pricing measure of the binomial market with unit step up to the horizon N, for the physical law of i.i.d. flips going up with any probability 0 < p < 1; and under them the American price of the put in that market (Market.americanPrice of the exercise right t ↦ (K − S_t)⁺: the supremum, over all stopping rules of the market's filtration bounded by N, of the expected deflated exercise value) equals the binomial American put price of the Bellman recursion with N steps. The put only, at time 0; the American price is not shown to be a superhedging price.",
+      "code": {
+        "lean": "import MathFin.Models.Binomial.AmericanMarket\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.Contracts.Binomial\n\n/-- **The binomial American put is the market's American price.** Under no-arbitrage the\nrisk-neutral coin flips price the binomial market with unit step up to the horizon `N`, and under\nthem the American price of the put in that market, the supremum over its stopping rules of the\nexpected deflated exercise value, is the Bellman price of the tree with `N` steps. -/\ntheorem binomial_american_put_market_price {S₀ u d ρ K : ℝ} {p q : ℝ≥0} (hq : q ≤ 1)\n    (hp0 : 0 < p) (hp : p < 1) (hna : BinomialNoArb u d ρ) (hqcrr : crrUpProb u d ρ = q)\n    (N : ℕ) :\n    (market (coinFlipMeasure p hp.le) S₀ u d ρ zero_le_one).IsPricingMeasure N\n        (coinFlipMeasure q hq) ∧\n      (market (coinFlipMeasure p hp.le) S₀ u d ρ zero_le_one).americanPrice\n          (coinFlipMeasure q hq) (europeanPutPayoff K) N\n        = americanPrice u d ρ (fun S ↦ max (K - S) 0) N S₀ :=\n  ⟨isPricingMeasure_coinFlipMeasure hq hna hqcrr S₀ zero_le_one hp0 hp N, by\n    simpa using americanPrice_market_europeanPutPayoff zero_lt_one hq hqcrr\n      (coinFlipMeasure p hp.le) S₀ K N⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "S. E. Shreve, Stochastic Calculus for Finance I: The Binomial Asset Pricing Model, Springer (2004), §4.4",
+        "citations": [
+          {
+            "key": "ShreveSCFI",
+            "locator": "§4.4"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. isPricingMeasure_coinFlipMeasure (MathFin/Models/Binomial/Market.lean) and americanPrice_market_europeanPutPayoff (MathFin/Models/Binomial/AmericanMarket.lean): the deflated exercise value is the discounted put payoff read on the grid, stopping on the grid is discrete stopping (stoppingValue_comp_floorDiv, MathFin/Probability/Martingales/GridStopping.lean), and Snell's theorem (snellEnvelope_optimalStopping) identifies the discrete stopping value with the Snell envelope, which is the Bellman price (americanPrice_eq_snellEnvelope). SCOPE: the put payoff only (the exercise right europeanPutPayoff K); the price at time 0; the American price is not shown to be the superhedging price; uniqueness of the pricing measure is not used."
+      }
+    },
+    {
       "id": "mf-trinomial-moment-matching",
       "name": "Trinomial Lattice Branch Weights: Unique Moment Matching, a Validity Window, and a Lattice Variance Bound",
       "domain": "mathematical_finance",
