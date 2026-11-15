@@ -662,6 +662,7 @@ import MathFin.Models.Rates.VasicekBondPriceAt
 import MathFin.Models.Rates.VasicekMarket
 -- Vasicek real-world vs. risk-neutral terminal mean; an Esscher tilt reproducing the
 -- risk-neutral terminal law
+import MathFin.Models.Rates.VasicekMarketPDE
 import MathFin.Models.Rates.VasicekMarketPriceOfRisk
 -- Vasicek bond price as κ → 0⁺: the three-term cancellation limit to the driftless model
 import MathFin.Models.Rates.VasicekZeroMeanReversionLimit

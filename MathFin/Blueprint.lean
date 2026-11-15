@@ -1124,6 +1124,30 @@ attribute [blueprint "thm:vasicek-market"
   of the pricing measure is not proved. -/)]
   MathFin.Rates.isPricingMeasure_vasicekMarket
 
+attribute [blueprint "thm:vasicek-price-solves-pde"
+  (title := "The Vasicek market price solves the Vasicek PDE")
+  (statement := /-- In the Vasicek bond market the reference measure is a pricing measure, the
+  market price of a unit payment at $T$ is $u(T, r_0)$ with $u(\tau, r) = A(\tau)e^{-B(\tau)r}$,
+  and $u$ satisfies $-\partial_\tau u + \kappa(\theta - r)\partial_r u +
+  \tfrac12\sigma^2\partial_r^2 u - ru = 0$ at $(T, r_0)$. Feynman--Kac for the family of
+  markets started at every $r_0$ is not proved. -/)]
+  MathFin.Rates.vasicekMarket_price_solves_pde
+
+attribute [blueprint "thm:immunization-market-price"
+  (title := "Immunization for market prices")
+  (statement := /-- In a family of markets $M_r$ with numéraire $e^{rt}$, if two zero-coupon
+  portfolios have equal duration-weighted values at $r$, the derivative in $r$ of the difference
+  of the market prices of their cash-flow schedules is zero. -/)]
+  MathFin.Rates.price_immunization_first_order
+
+attribute [blueprint "thm:key-rate-market-price"
+  (title := "Key-rate durations for market prices")
+  (statement := /-- In a family of markets $M_y$ with numéraire $(1+y)^{\lfloor t\rfloor}$, at a
+  flat curve $y$ with $1 + y \ne 0$ the key-rate partials of a coupon bond sum to the derivative
+  in $y$ of the market price of its cash-flow schedule. -/)
+  (uses := ["thm:zero-coupon-bond-price"])]
+  MathFin.Rates.sum_deriv_keyRate_eq_deriv_price
+
 attribute [blueprint "thm:black76-caplet"
   (title := "Black's caplet formula, given a lognormal forward rate")
   (statement := /-- If the simple rate $L(T_0,T_1)$ is lognormal under the $T_1$-forward

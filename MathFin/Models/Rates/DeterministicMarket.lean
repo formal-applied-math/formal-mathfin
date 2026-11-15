@@ -8,6 +8,7 @@ module
 public import MathFin.Pricing.Market
 public import MathFin.Models.Rates.DeterministicCurve
 public import MathFin.Models.Rates.Immunization
+public import MathFin.Models.Rates.KeyRateDuration
 
 /-!
 # The deterministic-rates bond market
@@ -49,6 +50,11 @@ proved here.
   a zero-coupon portfolio (numéraire `e^{rt}`) and the annually compounded price of a coupon bond
   (numéraire `(1 + y)^⌊t⌋`) are market prices.
 * `MathFin.Rates.bondPortfolioValue_eq_price`: the two in one conjunction.
+* `MathFin.Rates.price_immunization_first_order`: first-order immunization stated for the market
+  prices of the asset and liability schedules, in a family of markets with numéraires `e^{rt}`.
+* `MathFin.Rates.sum_deriv_keyRate_eq_deriv_price`: the key-rate partials of a coupon bond sum to
+  the derivative in `y` of the market price of its cash flows, in a family of markets with
+  numéraires `(1 + y)^⌊t⌋`.
 
 ## References
 
@@ -167,5 +173,44 @@ theorem bondPortfolioValue_eq_price (Q : Measure Ω) [IsProbabilityMeasure Q] (n
         M.price Q (fixedFlows (fun i ↦ ((t i : ℕ) : ℝ≥0)) w n)) :=
   ⟨fun M r hM ↦ bondPortfolioValue_eq_price_exp Q n w T hT M r hM,
     fun M y t hM ↦ bondPriceDisc_eq_price Q n w M y t hM⟩
+
+/-- **First-order immunization, for market prices.** Let `M r` be markets with the money market
+`e^{rt}` as numéraire, and let two zero-coupon portfolios (faces `wA`, `wL`, maturities `TA`,
+`TL ≥ 0`) have equal duration-weighted values at the rate `r`. Then the derivative in `r` of the
+difference of the market prices of their cash-flow schedules is zero at `r`
+(`bondPortfolio_immunization_first_order`, through `bondPortfolioValue_eq_price`). -/
+theorem price_immunization_first_order (Q : Measure Ω) [IsProbabilityMeasure Q] (n m : ℕ)
+    (wA TA wL TL : ℕ → ℝ) (hTA : ∀ i, 0 ≤ TA i) (hTL : ∀ i, 0 ≤ TL i)
+    (M : ℝ → Market ι Ω) (hM : ∀ r t ω, (M r).numeraire t ω = Real.exp (r * t)) (r : ℝ)
+    (h_match : MathFin.bondPortfolioDur (Finset.range n) wA TA 0 r =
+      MathFin.bondPortfolioDur (Finset.range m) wL TL 0 r) :
+    HasDerivAt (fun r' ↦ (M r').price Q (fixedFlows (fun i ↦ (TA i).toNNReal) wA n) -
+        (M r').price Q (fixedFlows (fun i ↦ (TL i).toNNReal) wL m)) 0 r := by
+  have e : (fun r' ↦ (M r').price Q (fixedFlows (fun i ↦ (TA i).toNNReal) wA n) -
+        (M r').price Q (fixedFlows (fun i ↦ (TL i).toNNReal) wL m)) =
+      fun r' ↦ MathFin.bondPortfolioValue (Finset.range n) wA TA 0 r' -
+        MathFin.bondPortfolioValue (Finset.range m) wL TL 0 r' :=
+    funext fun r' ↦ by
+      rw [(bondPortfolioValue_eq_price Q n wA TA hTA).1 (M r') r' (hM r'),
+        (bondPortfolioValue_eq_price Q m wL TL hTL).1 (M r') r' (hM r')]
+  rw [e]
+  exact MathFin.bondPortfolio_immunization_first_order _ _ _ _ _ _ 0 r h_match
+
+/-- **Key-rate durations, for market prices.** Let `M y` be markets with the numéraire
+`(1 + y)^⌊t⌋`. At a flat curve `y` with `1 + y ≠ 0`, the key-rate partial derivatives of the
+coupon bond with cash flows `c` at the integer dates `t` sum to the derivative in `y` of the
+market price of its cash-flow schedule
+(`sum_deriv_keyRate_eq_deriv_bondPriceDisc`, through `bondPriceDisc_eq_price`). -/
+theorem sum_deriv_keyRate_eq_deriv_price (Q : Measure Ω) [IsProbabilityMeasure Q] (n : ℕ)
+    (t : ℕ → ℕ) (c : ℕ → ℝ) (M : ℝ → Market ι Ω)
+    (hM : ∀ y s ω, (M y).numeraire s ω = (1 + y) ^ ⌊s⌋₊) {y : ℝ} (hy : 1 + y ≠ 0) :
+    ∑ j ∈ Finset.range n, deriv (fun x ↦ MathFin.bondPriceKeyRate (Finset.range n) t c
+        (Function.update (fun _ ↦ y) j x)) y =
+      deriv (fun y' ↦ (M y').price Q (fixedFlows (fun i ↦ ((t i : ℕ) : ℝ≥0)) c n)) y := by
+  have e : (fun y' ↦ (M y').price Q (fixedFlows (fun i ↦ ((t i : ℕ) : ℝ≥0)) c n)) =
+      MathFin.bondPriceDisc (Finset.range n) t c :=
+    funext fun y' ↦ (bondPriceDisc_eq_price Q n c (M y') y' t (hM y')).symm
+  rw [e]
+  exact MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc _ t c hy
 
 end MathFin.Rates
