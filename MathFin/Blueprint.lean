@@ -1407,6 +1407,18 @@ attribute [blueprint "thm:kelly-criterion"
   continuous-time case are not proved (`thm:log-optimal-numeraire`). -/)]
   MathFin.kelly_n_periods_deriv_at_kelly
 
+attribute [blueprint "thm:kelly-is-log-optimal"
+  (title := "The Kelly wealth is the numéraire portfolio of the betting market")
+  (statement := /-- In the two-state market of a bond (price $1$) and a bet of odds $b > 0$ won with
+  probability $p \in (0,1)$, the portfolio of one bond and the fraction $f^* = (pb - q)/b$ on the
+  bet is stationary for the expected log wealth (its derivative along the bet is
+  $g'(f^*) = 0$, `thm:kelly-criterion`), so by `thm:log-optimal-numeraire-one-period` its terminal
+  wealth $W$ satisfies $\mathrm{sdf} = 1/W$ under the fair-odds pricing measure
+  $q_+ = 1/(b+1)$, $q_- = b/(b+1)$, and $E_P[S_k(1)/W] = S_k(0)$ for the bond and the bet (price
+  $0$). The market is complete; first order only, global optimality is not proved. -/)
+  (uses := ["thm:kelly-criterion", "thm:log-optimal-numeraire-one-period"])]
+  MathFin.kellyMarket_numeraire_portfolio
+
 -- ===== choice/trading: Strategic trading =====
 
 attribute [blueprint "thm:glosten-milgrom-quote"
