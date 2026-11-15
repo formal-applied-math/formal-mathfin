@@ -69,28 +69,19 @@ noncomputable def floorDiv (hh : 0 < h) {T : ℝ≥0} (θ : StoppingRule (𝓖.c
     StoppingRule 𝓖 ⌊(T : ℝ) / h⌋₊ where
   time ω := ⌊(θ.time ω : ℝ) / h⌋₊
   stopping n := by
+    have key (x : ℝ≥0) : ⌊(x : ℝ) / h⌋₊ ≤ n ↔ x < (n + 1) * h.toNNReal := by
+      rw [floor_div_le_iff hh x.coe_nonneg, ← NNReal.coe_lt_coe]
+      simp [Real.coe_toNNReal _ hh.le]
     have hc : (0 : ℝ≥0) < (n + 1) * h.toNNReal := by positivity
     obtain ⟨s, -, hs, hlim⟩ := exists_seq_strictMono_tendsto' hc
-    have hsn (k : ℕ) : ⌊(s k : ℝ) / h⌋₊ ≤ n := by
-      rw [floor_div_le_iff hh (s k).coe_nonneg]
-      exact_mod_cast (show s k < (n + 1) * h.toNNReal from (hs k).2).trans_eq (by
-        simp [hh.le])
     have hset : {ω | ((⌊(θ.time ω : ℝ) / h⌋₊ : ℕ) : WithTop ℕ) ≤ n}
         = ⋃ k, {ω | ((θ.time ω : ℝ≥0) : WithTop ℝ≥0) ≤ s k} := by
       ext ω
-      simp only [mem_setOf_eq, mem_iUnion, WithTop.coe_le_coe,
-        floor_div_le_iff hh (θ.time ω).coe_nonneg]
-      constructor
-      · intro hθ
-        have : θ.time ω < (n + 1) * h.toNNReal := by
-          rw [← NNReal.coe_lt_coe]; simpa [hh.le] using hθ
-        exact ((hlim.eventually (lt_mem_nhds this)).exists).imp fun _ ↦ le_of_lt
-      · rintro ⟨k, hk⟩
-        have := hk.trans_lt (hs k).2
-        rw [← NNReal.coe_lt_coe] at this
-        simpa [hh.le] using this
-    exact (congrArg MeasurableSet hset).mpr
-      (MeasurableSet.iUnion fun k ↦ 𝓖.mono (hsn k) _ (θ.stopping (s k)))
+      simp only [mem_ofPred_eq, mem_iUnion, WithTop.coe_le_coe, Nat.cast_le, key]
+      exact ⟨fun hθ ↦ ((hlim.eventually (lt_mem_nhds hθ)).exists).imp fun _ ↦ le_of_lt,
+        fun ⟨k, hk⟩ ↦ hk.trans_lt (hs k).2⟩
+    exact (congrArg (MeasurableSet[𝓖 n] ·) hset).mpr
+      (MeasurableSet.iUnion fun k ↦ 𝓖.mono ((key (s k)).2 (hs k).2) _ (θ.stopping (s k)))
   le_horizon ω := hφ (θ.le_horizon ω)
 
 /-- A discrete stopping rule read in time: it stops at the date `σ h`, a stopping rule of the
@@ -102,7 +93,7 @@ noncomputable def mulStep (hh : 0 < h) {T : ℝ≥0} (σ : StoppingRule 𝓖 ⌊
     have hset : {ω | (((σ.time ω : ℝ≥0) * h.toNNReal : ℝ≥0) : WithTop ℝ≥0) ≤ t}
         = {ω | ((σ.time ω : ℕ) : WithTop ℕ) ≤ ⌊(t : ℝ) / h⌋₊} := by
       ext ω
-      simp only [mem_setOf_eq, WithTop.coe_le_coe, ← NNReal.coe_le_coe, NNReal.coe_mul,
+      simp only [mem_ofPred_eq, WithTop.coe_le_coe, ← NNReal.coe_le_coe, NNReal.coe_mul,
         NNReal.coe_natCast, Real.coe_toNNReal _ hh.le]
       rw [Nat.cast_le, Nat.le_floor_iff (div_nonneg t.coe_nonneg hh.le), le_div_iff₀ hh]
     rw [hset]

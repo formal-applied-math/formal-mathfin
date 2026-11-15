@@ -959,8 +959,7 @@ attribute [blueprint "thm:market-call-surface"
   smooth compactly supported $\psi$, $\int \psi''(K)\,\mathrm{price}(\mathrm{call}_K)\,dK =
   E_Q[\psi(S_T)]$: the second strike derivative of the market's call prices is the $Q$-law of
   $S_T$ as a distribution. Dupire's equation itself is not restated: it needs an Itô-process
-  asset, which a market does not carry. -/)
-  (uses := ["def:pricing-measure", "thm:breeden-litzenberger"])]
+  asset, which a market does not carry. -/)]
   MathFin.Market.IsPricingMeasure.integral_deriv_deriv_mul_price_europeanCall
 
 attribute [blueprint "thm:time-dependent-vol-market"
@@ -1401,11 +1400,12 @@ attribute [blueprint "thm:capm-equilibrium"
 attribute [blueprint "thm:kelly-criterion"
   (title := "Kelly criterion")
   (statement := /-- For win probability $p \in (0,1)$ and odds $b > 0$, the expected log
-  growth of $n$ repeated bets, $f \mapsto n\,g(f)$ with $g(f) = p\log(1+fb) + (1-p)\log(1-f)$,
-  has derivative zero at the Kelly fraction $f^* = (pb - q)/b$, $q = 1-p$, whatever $n$: the
-  first-order condition of growth-optimal betting. First order only: global optimality and the
+  growth of one bet, $g(f) = p\log(1+fb) + (1-p)\log(1-f)$, has derivative zero at the Kelly
+  fraction $f^* = (pb - q)/b$, $q = 1-p$: the first-order condition of growth-optimal betting.
+  Over $n$ repeated bets the growth is $n\,g$, with the same stationary fraction
+  (`kelly_n_periods_deriv_at_kelly`). First order only: global optimality and the
   continuous-time case are not proved (`thm:log-optimal-numeraire`). -/)]
-  MathFin.kelly_n_periods_deriv_at_kelly
+  MathFin.kellyGrowth_deriv_at_kelly
 
 attribute [blueprint "thm:kelly-is-log-optimal"
   (title := "The Kelly wealth is the numéraire portfolio of the betting market")
@@ -1415,8 +1415,7 @@ attribute [blueprint "thm:kelly-is-log-optimal"
   $g'(f^*) = 0$, `thm:kelly-criterion`), so by `thm:log-optimal-numeraire-one-period` its terminal
   wealth $W$ satisfies $\mathrm{sdf} = 1/W$ under the fair-odds pricing measure
   $q_+ = 1/(b+1)$, $q_- = b/(b+1)$, and $E_P[S_k(1)/W] = S_k(0)$ for the bond and the bet (price
-  $0$). The market is complete; first order only, global optimality is not proved. -/)
-  (uses := ["thm:kelly-criterion", "thm:log-optimal-numeraire-one-period"])]
+  $0$). The market is complete; first order only, global optimality is not proved. -/)]
   MathFin.kellyMarket_numeraire_portfolio
 
 -- ===== choice/trading: Strategic trading =====
@@ -1443,11 +1442,10 @@ attribute [blueprint "thm:glosten-milgrom-pricing-measure"
   (statement := /-- In the sequential Glosten–Milgrom model with value prior $\theta \in (0,1)$,
   informed share $p \in [0,1)$, informed traders trading on the value and uninformed traders
   tossing a fair coin, independently across trades, the dealer's quote after $n$ orders
-  (the belief iterated by the Bayes updates of the one-trade model) is almost surely the
+  (the belief iterated by the one-trade Bayes updates) is almost surely the
   conditional expectation $\mathbb E_P[V \mid \mathcal G_n]$ of the value given the first $n$
   order directions; hence $P$ is a pricing measure of the discrete market whose asset is
-  the quote process. -/)
-  (uses := ["thm:glosten-milgrom-quote", "thm:conditional-expectation-pricing-measure"])]
+  the quote process. -/)]
   MathFin.Execution.gmQuote_isPricingMeasure
 
 -- ===== risk/measures: Risk measures =====
