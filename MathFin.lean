@@ -423,6 +423,7 @@ import MathFin.Models.BlackScholes.HigherGreeks
 import MathFin.Models.BlackScholes.StrikeGreeks
 -- Local-vol skew of a tilted smile surface via Dupire's ratio; the rule of two
 import MathFin.Models.LocalVol.ForwardSmile
+import MathFin.Models.LocalVol.MarketCallSurface
 import MathFin.Models.BlackScholes.PutStrikeConvexity
 import MathFin.Models.BlackScholes.AsianInequality
 -- Geometric-average Asian: two-date log-driver is Gaussian with the covariance-sum variance

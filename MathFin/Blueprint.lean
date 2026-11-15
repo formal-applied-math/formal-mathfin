@@ -127,6 +127,7 @@ import MathFin.Models.Jumps.JumpDiffusionProcess
 import MathFin.Models.Jumps.JumpDiffusionVarianceSwap
 import MathFin.Models.Jumps.Market
 import MathFin.Models.LocalVol.Dupire
+import MathFin.Models.LocalVol.MarketCallSurface
 import MathFin.Models.LocalVol.TimeDependentVol
 import MathFin.Models.ModelFree.CarrMadan
 import MathFin.Models.ModelFree.MarketCallPrice
@@ -930,6 +931,17 @@ attribute [blueprint "thm:breeden-litzenberger"
   E[(X_s - K)^+]$ is the call surface at zero rates: $\partial_K^2 C(s,\cdot)$ is the law of
   $X_s$ as a distribution. The weak form, for an arbitrary law. -/)]
   MathFin.Dupire.breedenLitzenberger_weak
+
+attribute [blueprint "thm:market-call-surface"
+  (title := "Breeden–Litzenberger for a market's call prices")
+  (statement := /-- In a market with unit numéraire and a pricing measure $Q$ up to $T$, the price
+  of the call at strike $K$ is the call surface $E_Q[(S_T - K)^+]$ of the asset, so for every
+  smooth compactly supported $\psi$, $\int \psi''(K)\,\mathrm{price}(\mathrm{call}_K)\,dK =
+  E_Q[\psi(S_T)]$: the second strike derivative of the market's call prices is the $Q$-law of
+  $S_T$ as a distribution. Dupire's equation itself is not restated: it needs an Itô-process
+  asset, which a market does not carry. -/)
+  (uses := ["def:pricing-measure", "thm:breeden-litzenberger"])]
+  MathFin.Market.IsPricingMeasure.integral_deriv_deriv_mul_price_europeanCall
 
 attribute [blueprint "thm:time-dependent-vol-market"
   (title := "Black–Scholes with a deterministic volatility clock is a market")

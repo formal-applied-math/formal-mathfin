@@ -2384,6 +2384,30 @@
       }
     },
     {
+      "id": "mf-market-call-prices-breeden-litzenberger",
+      "name": "Breeden–Litzenberger for a Market's Call Prices",
+      "description": "In a market with unit numéraire and a pricing measure Q up to T (the deflated asset a Q-martingale), the call price at strike K is the call surface E_Q[(S_T − K)⁺], and for every smooth compactly supported ψ: ∫ ψ''(K)·price(call K, T) dK = E_Q[ψ(S_T)], i.e. the second strike derivative of the market's call prices is the Q-law of S_T as a distribution. Dupire's equation is not part of this entry: it needs an Itô-process asset, which a market does not carry.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.LocalVol.MarketCallSurface\n\nopen MeasureTheory\nopen scoped NNReal ContDiff\n\nnamespace MathFin\nopen Contracts\n\n/-- **Breeden–Litzenberger for a market's call prices.** In a market with unit numéraire and a\npricing measure `Q` up to `T`, for every smooth compactly supported `ψ`,\n`∫ ψ''(K) · price(call K, T) dK = 𝔼_Q[ψ(S_T)]`. -/\ntheorem market_call_prices_breeden_litzenberger {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {M : Market Unit Ω} {T : ℝ≥0} {Q : Measure Ω} (hQ : M.IsPricingMeasure T Q)\n    (hN : ∀ t x, M.numeraire t x = 1) {ψ : ℝ → ℝ} (hψ : ContDiff ℝ ∞ ψ)\n    (hψc : HasCompactSupport ψ) :\n    ∫ K, deriv (deriv ψ) K * M.price Q (europeanCall K T) = ∫ x, ψ (M.asset () T x) ∂Q :=\n  hQ.integral_deriv_deriv_mul_price_europeanCall hN hψ hψc\n\nend MathFin\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Breeden–Litzenberger (1978); Dupire, Pricing with a smile, Risk 7(1) (1994)",
+        "citations": [
+          {
+            "key": "BreedenLitzenberger1978"
+          },
+          {
+            "key": "Dupire1994"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, MathFin/Models/LocalVol/MarketCallSurface.lean: Market.price_europeanCall_eq_callSurface (unit numéraire) plus Dupire.breedenLitzenberger_weak. Weak form only; no density or strike-derivative hypothesis. The module also gives the strike-derivative form (the derivative of the call price in the strike is minus Q(S_T > K) where it exists) and the converse that every normalised call price function is a market's call surface at time one (Roper)."
+      }
+    },
+    {
       "id": "mf-heston-affine-pde",
       "name": "Heston Affine-Transform Pricing PDE",
       "description": "The 2D exponential-affine ansatz for the Heston model satisfies the pricing PDE: with Bx constant and Bv, A the explicit rho-shifted Riccati closed forms, d/ds Phi(s,x,v) + L Phi(s,x,v) = 0 at every (s,x,v), where L is the Heston generator (r - v/2) d_x + kappa(theta - v) d_v + (v/2) d_xx + rho xi v d_xv + (xi^2 v/2) d_vv. Strip: 0 < u < 1, xi != 0. That this profile equals E[e^{u log S_T}] is not proved; the Heston process is not constructed.",
