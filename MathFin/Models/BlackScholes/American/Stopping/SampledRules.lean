@@ -6,7 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.Pricing.ContinuousMarket
-public import MathFin.Models.BlackScholes.American.Stopping.Rules
+public import MathFin.Probability.Martingales.StoppingRule
 
 /-!
 # Discrete rules sampled at arbitrary deterministic increasing times

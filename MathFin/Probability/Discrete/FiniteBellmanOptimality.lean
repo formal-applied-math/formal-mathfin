@@ -5,7 +5,7 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.Models.BlackScholes.American.Stopping.DiscreteContactMartingale
+public import MathFin.Probability.Discrete.DiscreteContactMartingale
 public import MathFin.Probability.Discrete.SnellEnvelope
 public import Mathlib.Probability.Martingale.OptionalStopping
 
@@ -32,7 +32,7 @@ MSC 60G40, MSC 91G20, JEL G13
 
 @[expose] public section
 
-namespace MathFin.BlackScholes.AmericanPut.Stopping
+namespace MathFin
 
 open Set Filter MeasureTheory ProbabilityTheory
 
@@ -148,4 +148,4 @@ theorem snellContact_optimal (ha : Adapted 𝓕 Z)
   rw [snellContact_expected_payoff ha hi N]
   exact expected_discrete_payoff_le_snellEnvelope ha hi hτ hb
 
-end MathFin.BlackScholes.AmericanPut.Stopping
+end MathFin

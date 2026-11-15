@@ -56,7 +56,7 @@ MSC 60G40, MSC 91G20, JEL G13
 
 @[expose] public section
 
-namespace MathFin.BlackScholes.AmericanPut.Stopping
+namespace MathFin
 
 open MeasureTheory Set
 open scoped NNReal
@@ -169,4 +169,4 @@ theorem exists_lt_of_lt_stoppingValue {a : ℝ} (h : a < stoppingValue P 𝓕 Z 
   obtain ⟨_,⟨θ,hθ,rfl⟩,h⟩ := exists_lt_of_lt_csSup (hR.image _) h
   exact ⟨θ,hθ,h⟩
 
-end MathFin.BlackScholes.AmericanPut.Stopping
+end MathFin

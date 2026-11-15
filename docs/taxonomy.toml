@@ -516,7 +516,7 @@ title = "The superhedging price is a coherent risk measure"
 [[joint]]
 limbs = ["valuation", "risk"]
 node = "thm:premium-is-price"
-title = "Insurance premiums are prices"
+title = "The life annuity-due is a contract value"
 
 [[joint]]
 limbs = ["choice", "risk"]

@@ -25,7 +25,7 @@ The capped call is *defined* by composition, as a long call at `K₁` and a shor
 
 ## Main definitions
 
-* `europeanCallPayoff` — the call's payoff on its own.
+* `europeanCallPayoff`, `europeanPutPayoff` — the call's and the put's payoff on their own.
 * `europeanCall`, `europeanPut`, `digitalCall`, `forward` — the single-maturity instruments.
 * `cappedCall` — a long `europeanCall K₁ T` combined with a short `europeanCall K₂ T`.
 * `powerCall` — the call on `S_T ^ a`, the power being the payoff language's `rpow` node.
@@ -90,9 +90,14 @@ noncomputable def europeanCallPayoff (K : ℝ) (T : ℝ≥0) : Payoff Unit :=
 noncomputable def europeanCall (K : ℝ) (T : ℝ≥0) : Contract Unit :=
   .pay T (europeanCallPayoff K T)
 
+/-- The European put payoff `max (K - S_T) 0`. As a family in `T` it is the exercise right of the
+American put (`Market.americanPrice`). -/
+noncomputable def europeanPutPayoff (K : ℝ) (T : ℝ≥0) : Payoff Unit :=
+  .max (.sub (.const K) (.obs () T)) (.const 0)
+
 /-- The reified European put: pays `max (K - S_T) 0` at maturity `T`. -/
 noncomputable def europeanPut (K : ℝ) (T : ℝ≥0) : Contract Unit :=
-  .pay T (.max (.sub (.const K) (.obs () T)) (.const 0))
+  .pay T (europeanPutPayoff K T)
 
 /-- The reified cash-or-nothing digital call: pays `1` at maturity `T` iff `S_T > K`. -/
 noncomputable def digitalCall (K : ℝ) (T : ℝ≥0) : Contract Unit :=
@@ -167,7 +172,8 @@ theorem pathPV_europeanCall_eq_put_add_forward (D : ℝ≥0 → ℝ) (s : Scenar
     (T : ℝ≥0) :
     (europeanCall K T).pathPV D s
       = (Contract.both (europeanPut K T) (forward K T)).pathPV D s := by
-  simp only [europeanCall, europeanCallPayoff, europeanPut, forward, Contract.pathPV,
+  simp only [europeanCall, europeanCallPayoff, europeanPut, europeanPutPayoff, forward,
+    Contract.pathPV,
     Contract.cashflows, Payoff.eval, List.map_append, List.map_cons, List.map_nil,
     List.sum_append, List.sum_cons, List.sum_nil, add_zero, ← mul_add]
   have h := max_zero_sub_max_neg_zero_eq_self (s () T - K)

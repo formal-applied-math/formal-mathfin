@@ -5,8 +5,8 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.Models.BlackScholes.American.Stopping.FiniteBellmanOptimality
-public import MathFin.Models.BlackScholes.American.Stopping.Rules
+public import MathFin.Probability.Discrete.FiniteBellmanOptimality
+public import MathFin.Probability.Martingales.StoppingRule
 
 /-! # Snell envelope (the Bellman recursion) and the stopping value over `ℕ`
 
@@ -33,7 +33,7 @@ MSC 60G40, MSC 91G20, JEL G13
 
 @[expose] public section
 
-namespace MathFin.BlackScholes.AmericanPut.Stopping
+namespace MathFin
 
 open Set Filter MeasureTheory ProbabilityTheory
 
@@ -63,4 +63,4 @@ theorem snellRule_attains_value {P : Measure Ω} [IsProbabilityMeasure P]
   rw [stoppingValue_eq_integral_snellEnvelope ha hi N]
   exact snellContact_expected_payoff ha hi N
 
-end MathFin.BlackScholes.AmericanPut.Stopping
+end MathFin

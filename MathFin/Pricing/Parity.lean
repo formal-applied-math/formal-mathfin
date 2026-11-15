@@ -92,7 +92,8 @@ theorem integrable_of_integrable_discount_mul (hX : Integrable (fun ω ↦ D T *
 theorem integrable_europeanPut_pathPV [IsFiniteMeasure Q]
     (hX : Integrable (fun ω ↦ D T * X () T ω) Q) :
     Integrable (fun ω ↦ (europeanPut K T).pathPV D (scenarioAt X ω)) Q := by
-  simp only [europeanPut, Contract.pathPV, Contract.cashflows, Payoff.eval, scenarioAt,
+  simp only [europeanPut, europeanPutPayoff, Contract.pathPV, Contract.cashflows, Payoff.eval,
+    scenarioAt,
     List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, add_zero]
   rcases eq_or_ne (D T) 0 with hD | hD
   · simp [hD]

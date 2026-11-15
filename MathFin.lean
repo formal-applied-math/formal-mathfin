@@ -382,6 +382,7 @@ import MathFin.Pricing.NoArbitrageDerivations
 import MathFin.Pricing.SuperhedgingDuality
 import MathFin.Pricing.Value
 import MathFin.Pricing.Market
+import MathFin.Pricing.AmericanPrice
 import MathFin.Pricing.OneDateMarket
 import MathFin.Pricing.Parity
 import MathFin.Pricing.DiscreteMarket

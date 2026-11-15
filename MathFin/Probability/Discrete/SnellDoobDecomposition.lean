@@ -28,7 +28,7 @@ two results of `Probability/` to it.
   `σ ≤ τ ≤ N`, `𝔼[Z_τ | 𝓕_σ] ≤ U_σ` almost surely: at any stopping time the envelope dominates
   the conditional expected reward of every later bounded stopping rule. At `σ = 0` and in
   expectation this is `expected_discrete_payoff_le_snellEnvelope`
-  (`Models/BlackScholes/American/Stopping/FiniteBellmanOptimality.lean`).
+  (`Probability/Discrete/FiniteBellmanOptimality.lean`).
 
 ## Main results
 

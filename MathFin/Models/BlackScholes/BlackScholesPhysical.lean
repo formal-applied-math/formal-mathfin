@@ -222,9 +222,10 @@ theorem value_chooser_physical {S_0 K m r σ : ℝ} {T t₁ H : ℝ≥0} (hTH : 
   have := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
   have hB := isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
   have hfix : (chooser K r T t₁).FixedDated := by
-    simp [chooser, europeanCall, europeanPut, Contract.FixedDated]
+    simp [chooser, europeanCall, europeanPut, europeanPutPayoff, Contract.FixedDated]
   rw [value_physical_eq_riskNeutral hW hWmeas hσ.ne' H _ hfix fun p hp ↦ by
-    simp only [chooser, europeanCall, europeanPut, Contract.obsList, Payoff.obsList,
+    simp only [chooser, europeanCall, europeanPut, europeanPutPayoff, Contract.obsList,
+      Payoff.obsList,
       europeanCallPayoff, List.append_nil, List.nil_append, List.mem_append,
       List.mem_singleton] at hp
     rcases hp with rfl | rfl <;> assumption]

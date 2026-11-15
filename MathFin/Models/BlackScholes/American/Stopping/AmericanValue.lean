@@ -6,7 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.Models.BlackScholes.American.Stopping.Reward
-public import MathFin.Models.BlackScholes.American.Stopping.Rules
+public import MathFin.Probability.Martingales.StoppingRule
 public import Mathlib.Algebra.Order.Star.Real
 
 /-!

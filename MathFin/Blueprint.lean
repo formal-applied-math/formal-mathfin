@@ -297,7 +297,7 @@ attribute [blueprint "thm:doob-maximal-inequality"
   MeasureTheory.maximal_ineq_Lp
 
 attribute [blueprint "thm:martingale-convergence"
-  (title := "Martingale convergence theorem")
+  (title := "Convergence of L²-bounded martingales")
   (statement := /-- A real martingale on a finite measure space with $\sup_n \|f_n\|_{L^2} \le
   R$ converges almost surely and in $L^2$ to its limit process. The $L^2$-bounded case only;
   the $L^1$-bounded theorem by upcrossings is Mathlib's and is not restated. -/)]
@@ -603,7 +603,7 @@ attribute [blueprint "thm:one-date-market"
 -- ===== valuation/general: Arbitrage theory =====
 
 attribute [blueprint "thm:continuous-ftap"
-  (title := "Fundamental theorem of asset pricing in continuous time")
+  (title := "An equivalent martingale measure excludes simple arbitrage in continuous time")
   (statement := /-- If $Q$ is an equivalent martingale measure on $[0,T]$ for a
   finite-dimensional price process $S$ (equivalent to $P$, with $S$ stopped at $T$ a
   martingale), then no simple strategy (piecewise constant, predictable, bounded) trading on
@@ -640,7 +640,7 @@ attribute [blueprint "thm:put-call-parity"
   MathFin.Contracts.value_europeanCall_sub_put_of_martingale
 
 attribute [blueprint "thm:first-ftap"
-  (title := "First fundamental theorem of asset pricing")
+  (title := "First fundamental theorem on a finite space (Harrison–Pliska)")
   (statement := /-- On a finite probability space with $P\{\omega\} > 0$, a discrete
   filtration and a real adapted price process on $\{0, \dots, T\}$, there is no arbitrage if
   and only if there is an equivalent martingale measure (Harrison–Pliska). Finite $\Omega$
@@ -651,7 +651,7 @@ attribute [blueprint "thm:first-ftap"
   MathFin.ftap_discrete
 
 attribute [blueprint "thm:second-ftap"
-  (title := "Second fundamental theorem of asset pricing")
+  (title := "Second fundamental theorem on a finite space")
   (statement := /-- On a finite probability space with $P\{\omega\} > 0$, a filtration with
   $\mathcal{F}_T$ the full $\sigma$-algebra and an arbitrage-free adapted price, the market is
   complete if and only if there is exactly one equivalent martingale measure. In general,
@@ -752,7 +752,7 @@ attribute [blueprint "thm:esscher-tilt"
   MathFin.hasLaw_esscher_tilt
 
 attribute [blueprint "thm:market-completeness"
-  (title := "Completeness of the Brownian market")
+  (title := "Brownian market: the superreplication price is the market price")
   (statement := /-- In a market on the Brownian information $\mathcal{F}^B$ for which the reference
   measure $\mu$ is a pricing measure up to $T$, every measure $Q \ll \mu$ that prices the
   traded gains at zero is a pricing measure, and a contract whose deflated present value is
@@ -791,7 +791,7 @@ attribute [blueprint "thm:bs-delta"
   MathFin.hasDerivAt_bsV_S
 
 attribute [blueprint "thm:bs-pde"
-  (title := "Black–Scholes partial differential equation")
+  (title := "The Black–Scholes formula solves the Black–Scholes equation")
   (statement := /-- The closed-form price satisfies $\theta + rS\delta +
   \tfrac12\sigma^2S^2\gamma - rV = 0$, verified through the Greeks and `bs_identity`. It is a
   statement about the closed form `bsV`, not about the price of a contract under a model. The
@@ -909,14 +909,14 @@ attribute [blueprint "thm:american-price-snell-envelope"
 -- ===== valuation/volatility: Volatility =====
 
 attribute [blueprint "thm:heston-pde"
-  (title := "Heston model pricing equation")
+  (title := "The Heston transform solves the pricing equation, given the Riccati flows")
   (statement := /-- If coefficient flows $A, B$ solve the Heston Riccati system, the transform
   profile built from them satisfies the backward Heston pricing equation $\partial_t\Phi +
   L\Phi = 0$. Existence of the Riccati solutions is a hypothesis. -/)]
   MathFin.Heston.hestonProfile_pde
 
 attribute [blueprint "thm:dupire-zero-rates"
-  (title := "Dupire's local volatility formula")
+  (title := "Dupire's formula at zero rates, from the conditional local variance")
   (statement := /-- For an Itô process whose local variance $\sigma_{loc}(K)^2 K^2$ is a
   continuous version of $E[\delta_t^2 \mid X_t = K]$ on a window of strikes, at every strike
   of the window with $\partial_K^2 C > 0$: $\sigma_{loc}(K)^2 = 2\,\partial_T C / (K^2
@@ -1081,7 +1081,7 @@ attribute [blueprint "thm:vasicek-market"
   MathFin.Rates.isPricingMeasure_vasicekMarket
 
 attribute [blueprint "thm:black76-caplet"
-  (title := "Black's caplet formula")
+  (title := "Black's caplet formula, given a lognormal forward rate")
   (statement := /-- If the simple rate $L(T_0,T_1)$ is lognormal under the $T_1$-forward
   measure (a hypothesis, not derived from a rate model), the caplet is worth
   $P(0,T_1)\,\delta\,[F\Phi(d_1) - K\Phi(d_2)]$. -/)]
@@ -1126,7 +1126,7 @@ attribute [blueprint "def:survival-function"
   MathFin.SurvivalModel.survivalFunction
 
 attribute [blueprint "thm:premium-is-price"
-  (title := "Insurance premiums are prices")
+  (title := "The life annuity-due is a contract value")
   (statement := /-- For a lifetime $\tau$ with the survival probabilities of a force of mortality
   $\mu$ at the dates $k < n$, the life annuity-due is the value, on the flat-rate discount, of
   the contract paying one at each date $k < n$ while the default indicator $1_{\tau \le k}$ is
@@ -1219,7 +1219,7 @@ attribute [blueprint "thm:svi-market-realisation"
 -- ===== choice/preferences: Preferences =====
 
 attribute [blueprint "thm:expected-utility-axioms"
-  (title := "von Neumann–Morgenstern expected utility")
+  (title := "Expected utility satisfies independence and continuity")
   (statement := /-- A preference defined by finite expected utility, $p \succeq q$ iff $\sum_i
   p_iu_i \ge \sum_i q_iu_i$, satisfies independence: if $p \succeq q$ then $\alpha p +
   (1-\alpha)r \succeq \alpha q + (1-\alpha)r$ for every weight $\alpha \ge 0$; it also
@@ -1356,7 +1356,7 @@ attribute [blueprint "thm:expected-utility-integral"
 -- ===== choice/equilibrium: Equilibrium =====
 
 attribute [blueprint "thm:capm-equilibrium"
-  (title := "Capital asset pricing model")
+  (title := "CAPM beta relation, given tangency of the market portfolio")
   (statement := /-- If the market portfolio $w_M$ meets the tangency cross-product condition
   and $w_M^\top \Sigma w_M \ne 0$, every asset's excess return is its beta times the market's:
   $\mu_i - r_f = \beta_i (\mu_M - r_f)$ with $\beta_i = (\Sigma w_M)_i / w_M^\top \Sigma w_M$.
@@ -1414,7 +1414,7 @@ attribute [blueprint "thm:superhedging-coherent"
   MathFin.isCoherentRiskMeasure_superhedgingPrice
 
 attribute [blueprint "thm:superhedging-duality"
-  (title := "Superhedging duality")
+  (title := "Superhedging duality, one period and finitely many states")
   (statement := /-- In the one-period finite-state market with a martingale probability vector,
   the superhedging price of a claim $Y$ is the least upper bound of $\sum_n q_n Y_n$ over the
   martingale probability vectors $q$. The supremum is over all martingale probability vectors,
@@ -1442,7 +1442,7 @@ attribute [blueprint "def:coherent-risk-measure"
   MathFin.IsCoherentRiskMeasure
 
 attribute [blueprint "thm:coherent-risk-representation"
-  (title := "Robust representation of coherent risk measures")
+  (title := "Robust representation of coherent risk measures on a finite space")
   (statement := /-- On a finite state space a coherent risk measure $\rho$ of losses is the
   least upper bound of the expected losses $\sum_i q_i L_i$ over its representing set of
   probability vectors. Finite state space only: the representation on $L^\infty(\Omega,P)$ is

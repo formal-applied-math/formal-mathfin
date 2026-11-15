@@ -5,7 +5,7 @@ Authors: Robert Martin
 -/
 module
 
-public import MathFin.Models.BlackScholes.American.Stopping.Rules
+public import MathFin.Probability.Martingales.StoppingRule
 
 /-!
 # First contact for a nonnegative continuous adapted process

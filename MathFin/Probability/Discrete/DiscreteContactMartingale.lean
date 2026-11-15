@@ -25,7 +25,7 @@ MSC 60G40, MSC 91G20, JEL G13
 
 @[expose] public section
 
-namespace MathFin.BlackScholes.AmericanPut.Stopping
+namespace MathFin
 
 open Set Filter MeasureTheory ProbabilityTheory
 
@@ -65,4 +65,4 @@ theorem discrete_stopped_martingale_of_before
     exact sub_eq_zero.mpr (hbefore i ω hω)
   · exact indicator_of_notMem hω _
 
-end MathFin.BlackScholes.AmericanPut.Stopping
+end MathFin
