@@ -716,15 +716,6 @@ area = "probability/brownian"
 # ---- the one-trunk hinges (docs/specs/2026-11-07-one-trunk-design.md §5)
 
 [[node]]
-label = "thm:glosten-milgrom-pricing-measure"
-title = "The Glosten–Milgrom quote process is a martingale"
-statement = "The Glosten–Milgrom dealer's quote after n trades is the conditional expectation of the value given the observed history of trade directions, which extends the one-trade identification to a sequence; with the proved fact that a conditional-expectation process is priced by its own measure (thm:conditional-expectation-pricing-measure) the quote sequence is a martingale for the dealer's measure."
-uses = ["thm:glosten-milgrom-quote", "thm:conditional-expectation-pricing-measure"]
-area = "choice/trading"
-family = "mechanisms"
-lean = "MathFinFrontier.condExp_payoff_eq_quote_history"
-
-[[node]]
 label = "thm:cva-is-price"
 title = "CVA is the price of the default loss"
 statement = "Unilateral CVA is the price of the default-contingent exposure loss as a contract under a pricing measure with an independent default time, and the Gaussian-exposure closed form is a theorem about it."

@@ -99,6 +99,7 @@ import MathFin.Markets.DeFi.LiquidationAsStructuralDefault
 import MathFin.Markets.DeFi.UniswapMechanics
 import MathFin.Markets.Microstructure.GlostenMilgromCondExp
 import MathFin.Markets.Microstructure.GlostenMilgromMarket
+import MathFin.Markets.Microstructure.GlostenMilgromSequential
 import MathFin.Models.Bachelier.Bachelier
 import MathFin.Models.Binomial.American
 import MathFin.Models.Binomial.CRRClosedForm
@@ -1393,6 +1394,18 @@ attribute [blueprint "thm:conditional-expectation-pricing-measure"
   measure. That the Glosten–Milgrom dealer's quotes along a sequence of trades are such
   conditional expectations is not part of this statement. -/)]
   MathFin.Execution.isPricingMeasure_toMarket_condExp
+
+attribute [blueprint "thm:glosten-milgrom-pricing-measure"
+  (title := "The Glosten–Milgrom quote sequence is a martingale for the dealer's measure")
+  (statement := /-- In the sequential Glosten–Milgrom model with value prior $\theta \in (0,1)$,
+  informed share $p \in [0,1)$, informed traders trading on the value and uninformed traders
+  tossing a fair coin, independently across trades, the dealer's quote after $n$ orders
+  (the belief iterated by the Bayes updates of the one-trade model) is almost surely the
+  conditional expectation $\mathbb E_P[V \mid \mathcal G_n]$ of the value given the first $n$
+  order directions; hence $P$ is a pricing measure of the discrete market whose asset is
+  the quote process. -/)
+  (uses := ["thm:glosten-milgrom-quote", "thm:conditional-expectation-pricing-measure"])]
+  MathFin.Execution.gmQuote_isPricingMeasure
 
 -- ===== risk/measures: Risk measures =====
 
