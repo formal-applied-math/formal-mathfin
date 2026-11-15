@@ -698,7 +698,6 @@ attribute [blueprint "thm:binomial-representation"
 
 attribute [blueprint "thm:binomial-barrier-reflection"
   (title := "Binomial barrier prices via reflection")
-  (uses := ["thm:binomial-representation"])
   (statement := /-- On the symmetric binomial walk (every path of weight $2^{-n}$, the law
   `coinFlipMeasure (1/2)` of the flips), for a barrier $a > 0$ and any payoff $g$ of the terminal
   position $S_n$, the up-and-in price is

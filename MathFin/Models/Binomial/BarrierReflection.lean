@@ -188,10 +188,11 @@ theorem integral_flips_symm (hq : (1 / 2 : ℝ≥0) ≤ 1) (F : (Fin n → Bool)
   refine Finset.sum_congr rfl fun x _ ↦ ?_
   have : (∏ i, if x i then ((1 / 2 : ℝ≥0) : ℝ) else 1 - ((1 / 2 : ℝ≥0) : ℝ))
       = (1 / 2) ^ n := by
-    rw [← Finset.card_univ (α := Fin n), ← Finset.prod_const]
-    refine Finset.prod_congr rfl fun i _ ↦ ?_
-    cases x i <;> norm_num
-  rw [this]; ring
+    have hi (i : Fin n) : (if x i then ((1 / 2 : ℝ≥0) : ℝ) else 1 - ((1 / 2 : ℝ≥0) : ℝ))
+        = 1 / 2 := by cases x i <;> norm_num
+    rw [Finset.prod_congr rfl fun i _ ↦ hi i]
+    simp
+  rw [this, one_div, inv_pow, div_eq_mul_inv, mul_comm]
 
 /-- The measure-theoretic form of the average: the symmetric probability of an event of the first
 `n` flips is the proportion of paths in it. -/
@@ -203,7 +204,7 @@ theorem measureReal_flips_symm (hq : (1 / 2 : ℝ≥0) ≤ 1) (A : Set (Fin n �
     (measurable_flips n) (MeasurableSet.of_discrete (s := A))
   rw [← integral_indicator_one hm]
   have := integral_flips_symm (n := n) hq fun x ↦ if x ∈ A then 1 else 0
-  simp only [Set.indicator, Set.mem_setOf_eq, Pi.one_apply]
+  simp only [Set.indicator, Set.mem_ofPred_eq, Pi.one_apply]
   rw [this, Finset.sum_boole]
 
 /-- **The reflected sum.** For `0 < a`, summing `G` of the terminal position over the paths that
@@ -228,10 +229,12 @@ theorem sum_hits_eq (a : ℤ) (ha : 0 < a) (G : ℤ → ℝ) :
   refine Finset.sum_nbij' (reflectAtFirstHit a) (reflectAtFirstHit a) ?_ ?_
     (fun x _ ↦ reflectAtFirstHit_involutive a x) (fun x _ ↦ reflectAtFirstHit_involutive a x) ?_
   · intro x hx
-    simpa using (reflectHitLtGt a ⟨x, by simpa using hx⟩).2.2
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    exact (reflectHitLtGt a ⟨x, by simpa using hx⟩).2.2
   · intro y hy
     have hy : a < walkPos y n := by simpa using hy
-    simpa using ((reflectHitLtGt a).symm ⟨y, HitsLevel_of_endpoint_gt ha.le hy, hy⟩).2
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    exact ((reflectHitLtGt a).symm ⟨y, HitsLevel_of_endpoint_gt ha.le hy, hy⟩).2
   · intro x hx
     have hx : HitsLevel a x := (Finset.mem_filter.1 hx).2.1
     rw [walkPos_reflectAtFirstHit_endpoint x a _ hx rfl]
@@ -260,7 +263,7 @@ theorem binomial_upAndIn_reflection (a : ℤ) (ha : 0 < a) (g : ℤ → ℝ) :
 
 /-- **Binomial up-and-out price by reflection**: the vanilla price less the up-and-in price,
 `E[g(Sₙ); max < a] = E[g(Sₙ); Sₙ < a] − E[g(2a − Sₙ); Sₙ > a]`. -/
-theorem binomial_upAndOut_reflection (a : ℤ) (ha : 0 < a) (g : ℤ → ℝ) :
+theorem binomial_upAndOut_reflection (a : ℤ) (g : ℤ → ℝ) :
     ∫ ω, (if HitsLevel a (flips n ω) then 0 else g (walkPos (flips n ω) n))
         ∂coinFlipMeasure (1 / 2) hq
       = (∫ ω, g (walkPos (flips n ω) n) ∂coinFlipMeasure (1 / 2) hq)
@@ -287,7 +290,7 @@ theorem binomial_upAndOut_eq (a : ℤ) (ha : 0 < a) (g : ℤ → ℝ) :
   classical
   have hI : ∀ F : (Fin n → Bool) → ℝ, ∫ ω, F (flips n ω) ∂coinFlipMeasure (1 / 2) hq
       = (∑ x, F x) / 2 ^ n := integral_flips_symm hq
-  rw [binomial_upAndOut_reflection hq a ha g, binomial_upAndIn_reflection hq a ha g,
+  rw [binomial_upAndOut_reflection hq a g, binomial_upAndIn_reflection hq a ha g,
     hI (fun x ↦ g (walkPos x n)), hI (fun x ↦ if a ≤ walkPos x n then g (walkPos x n) else 0),
     hI (fun x ↦ if walkPos x n < a then g (walkPos x n) else 0)]
   have : (∑ x : Fin n → Bool, g (walkPos x n))
@@ -312,7 +315,7 @@ theorem binomial_maximal_distribution (a : ℤ) (ha : 0 < a) :
   have h3 := measureReal_flips_symm (n := n) hq {x | walkPos x n = a}
   have hc := binomial_maximal_distribution_card (n := n) a ha
   simp only [Nat.card_eq_fintype_card, Fintype.card_subtype] at hc
-  simp only [Set.mem_setOf_eq] at h1 h2 h3 ⊢
+  simp only [Set.mem_ofPred_eq] at h1 h2 h3 ⊢
   rw [h1, h2, h3]
   have : ((Finset.univ.filter fun x : Fin n → Bool ↦ HitsLevel a x).card : ℝ)
       = 2 * (Finset.univ.filter fun x : Fin n → Bool ↦ a < walkPos x n).card
