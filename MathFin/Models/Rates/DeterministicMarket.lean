@@ -200,7 +200,7 @@ theorem price_immunization_first_order (Q : Measure Ω) [IsProbabilityMeasure Q]
 `(1 + y)^⌊t⌋`. At a flat curve `y` with `1 + y ≠ 0`, the key-rate partial derivatives of the
 coupon bond with cash flows `c` at the integer dates `t` sum to the derivative in `y` of the
 market price of its cash-flow schedule
-(`sum_deriv_keyRate_eq_deriv_bondPriceDisc`, through `bondPriceDisc_eq_price`). -/
+(`sum_deriv_keyRate_eq_deriv_bondPriceDisc`, through `bondPortfolioValue_eq_price`). -/
 theorem sum_deriv_keyRate_eq_deriv_price (Q : Measure Ω) [IsProbabilityMeasure Q] (n : ℕ)
     (t : ℕ → ℕ) (c : ℕ → ℝ) (M : ℝ → Market ι Ω)
     (hM : ∀ y s ω, (M y).numeraire s ω = (1 + y) ^ ⌊s⌋₊) {y : ℝ} (hy : 1 + y ≠ 0) :
@@ -209,7 +209,8 @@ theorem sum_deriv_keyRate_eq_deriv_price (Q : Measure Ω) [IsProbabilityMeasure 
       deriv (fun y' ↦ (M y').price Q (fixedFlows (fun i ↦ ((t i : ℕ) : ℝ≥0)) c n)) y := by
   have e : (fun y' ↦ (M y').price Q (fixedFlows (fun i ↦ ((t i : ℕ) : ℝ≥0)) c n)) =
       MathFin.bondPriceDisc (Finset.range n) t c :=
-    funext fun y' ↦ (bondPriceDisc_eq_price Q n c (M y') y' t (hM y')).symm
+    funext fun y' ↦ ((bondPortfolioValue_eq_price Q n c (fun _ ↦ 0) fun _ ↦ le_rfl).2 (M y') y' t
+      (hM y')).symm
   rw [e]
   exact MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc _ t c hy
 

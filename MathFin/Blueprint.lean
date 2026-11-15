@@ -1144,8 +1144,7 @@ attribute [blueprint "thm:key-rate-market-price"
   (title := "Key-rate durations for market prices")
   (statement := /-- In a family of markets $M_y$ with numéraire $(1+y)^{\lfloor t\rfloor}$, at a
   flat curve $y$ with $1 + y \ne 0$ the key-rate partials of a coupon bond sum to the derivative
-  in $y$ of the market price of its cash-flow schedule. -/)
-  (uses := ["thm:zero-coupon-bond-price"])]
+  in $y$ of the market price of its cash-flow schedule. -/)]
   MathFin.Rates.sum_deriv_keyRate_eq_deriv_price
 
 attribute [blueprint "thm:black76-caplet"
