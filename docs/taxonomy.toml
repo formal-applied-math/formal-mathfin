@@ -361,7 +361,7 @@ title = "Dynamic choice"
 blurb = "growth-optimal and log-utility investment, Merton's problem, time consistency"
 modules = ["MathFin.Choice.Performance.Kelly", "MathFin.Choice.Performance.KellyNumeraire"]
 subjects = ["MSC 91G10", "MSC 49L20"]
-landmarks = ["MathFin.kelly_n_periods_deriv_at_kelly"]
+landmarks = ["MathFin.kellyGrowth_deriv_at_kelly"]
 
 [[cell]]
 key = "choice/trading"

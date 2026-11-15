@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (1064 MathFin constants, 29 upstream). Citations
+  corpus (1072 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -234,6 +234,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.ContinuousMarket.martingale_comp_monotone' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ContinuousMarket.martingale_comp_monotone
+
+/-- info: 'MathFin.Contracts.Binomial.americanPrice_market_europeanPutPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.Binomial.americanPrice_market_europeanPutPayoff
 
 /-- info: 'MathFin.Contracts.Binomial.assets' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -711,6 +715,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Execution.condExp_payoff_eq_quote
 
+/-- info: 'MathFin.Execution.gmQuote_isPricingMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Execution.gmQuote_isPricingMeasure
+
 /-- info: 'MathFin.Execution.isPricingMeasure_toMarket_condExp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Execution.isPricingMeasure_toMarket_condExp
@@ -1147,6 +1155,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Market.IsPricingMeasure.exists_isEquivProbMeasure
 
+/-- info: 'MathFin.Market.IsPricingMeasure.integral_deriv_deriv_mul_price_europeanCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Market.IsPricingMeasure.integral_deriv_deriv_mul_price_europeanCall
+
 /-- info: 'MathFin.Market.IsPricingMeasure.isNormalizedCallPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Market.IsPricingMeasure.isNormalizedCallPrice
@@ -1287,6 +1299,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Rates.isPricingMeasure_vasicekMarket
 
+/-- info: 'MathFin.Rates.price_immunization_first_order' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Rates.price_immunization_first_order
+
 /-- info: 'MathFin.Rates.price_pay_deterministicMarket' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Rates.price_pay_deterministicMarket
@@ -1294,6 +1310,14 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.Rates.price_pay_vasicekMarket' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Rates.price_pay_vasicekMarket
+
+/-- info: 'MathFin.Rates.sum_deriv_keyRate_eq_deriv_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Rates.sum_deriv_keyRate_eq_deriv_price
+
+/-- info: 'MathFin.Rates.vasicekMarket_price_solves_pde' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Rates.vasicekMarket_price_solves_pde
 
 /-- info: 'MathFin.SDEExistence.picardMap_exists_unique_fixedPoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1558,6 +1582,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.binomial_replication_cost_eq_pricingKernel' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.binomial_replication_cost_eq_pricingKernel
+
+/-- info: 'MathFin.binomial_upAndIn_reflection' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.binomial_upAndIn_reflection
 
 /-- info: 'MathFin.blackLitterman_mean_eq_precision_weighted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3110,6 +3138,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.kellyGrowth_n_periods' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.kellyGrowth_n_periods
+
+/-- info: 'MathFin.kellyMarket_numeraire_portfolio' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.kellyMarket_numeraire_portfolio
 
 /-- info: 'MathFin.kellyNumeraire_isRiskNeutral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

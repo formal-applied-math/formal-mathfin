@@ -61,7 +61,9 @@ proved here.
 * [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
 * [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
   Section 1.5
+* [Fabozzi, *Fixed Income Mathematics*][FabozziFIM], Ch 5
 * [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], ch. 4
+* [Redington (1952)][Redington1952]
 
 ## Tags
 
