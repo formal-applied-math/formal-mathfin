@@ -1463,6 +1463,18 @@ attribute [blueprint "thm:expected-shortfall-not-elicitable"
   `esLevelWitness` and their mixture `esLevelMixture` (Gneiting 2011). -/)]
   MathFin.not_isElicitable_expectedShortfall
 
+attribute [blueprint "thm:fissler-ziegel"
+  (title := "Value at risk and expected shortfall are jointly elicitable")
+  (statement := /-- For $\alpha \in (0,1)$, in the profit sign convention, the pair of the lower
+  $\alpha$-quantile and the lower-tail expected shortfall
+  $\alpha^{-1}\int_0^\alpha q_\mu(u)\,du$ is elicitable on the laws with finite mean and a unique
+  $\alpha$-quantile: the member $G_1 = 0$, $\mathcal G_2 = G_2 = \exp$ of the Fissler–Ziegel
+  family strictly elicits it (Fissler and Ziegel 2016, Corollary 5.5). The lower-tail shortfall
+  is $-\mathrm{ES}_{1-\alpha}$ of the negated position
+  (`lowerExpectedShortfall_eq_neg_expectedShortfall`). Only this member of the family is proved
+  strictly consistent, and the loss-convention pair is not treated. -/)]
+  MathFin.isElicitable_quantile_lowerExpectedShortfall
+
 attribute [blueprint "thm:log-utility-acceptance"
   (title := "Acceptance sets from expected utility")
   (statement := /-- On a fair two-state coin at unit wealth, no coherent risk measure has the
