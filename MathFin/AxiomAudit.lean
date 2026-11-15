@@ -3070,3 +3070,11 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.Execution.gmQuote_isPricingMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Execution.gmQuote_isPricingMeasure
+
+/-- info: 'MathFin.condDefault_eq_oneFactorPD' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.condDefault_eq_oneFactorPD
+
+/-- info: 'MathFin.kmvPD' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.kmvPD

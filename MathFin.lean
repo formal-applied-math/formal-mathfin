@@ -871,6 +871,7 @@ import MathFin.Risk.SquareRootOfTime
 import MathFin.Risk.ComponentVaR
 import MathFin.Risk.Credit.CreditRiskPlus
 import MathFin.Risk.Credit.OneFactorCopula
+import MathFin.Risk.Credit.OneFactorMerton
 
 -- Choice
 import MathFin.Choice.Portfolio.Markowitz

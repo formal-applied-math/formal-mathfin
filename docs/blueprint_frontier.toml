@@ -736,15 +736,6 @@ uses = ["thm:coherent-risk-representation", "thm:expected-shortfall-dual"]
 area = "risk/measures"
 
 [[node]]
-label = "thm:credit-portfolio-is-merton"
-title = "The one-factor credit portfolio is Merton's"
-statement = "With the standardised log firm value equal to the root of rho times a systematic normal plus the root of one minus rho times an independent normal, a Merton name defaults at T, given the systematic factor, with probability oneFactorPD of its Merton default probability kmvPD."
-uses = ["def:gaussian-factor-copula", "thm:large-pool-loss"]
-area = "risk/credit"
-family = "default"
-lean = "MathFinFrontier.condDefault_eq_oneFactorPD"
-
-[[node]]
 label = "thm:american-put-superhedging-price"
 title = "The American put value is the superhedging price"
 statement = "In the complete Black–Scholes market the American put value (the supremum of discounted expected payoffs over stopping rules) equals the superreplication price of the American put, that is, the least initial capital of a self-financing strategy dominating the put payoff at every date. Needs the superreplication price of a path-dependent claim in Market, which is not defined yet."
