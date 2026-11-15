@@ -927,6 +927,27 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the chain-side statements in MathFin/Models/Binomial/WillowTree.lean: willowBeta_eq_sqrt_div and its grid instantiation willowBeta_eq_sqrt_div' (the beta identity 1 / sqrt(1 + alpha) = sqrt(t / t') when t' = (1 + alpha) * t), the moment-propagation induction (willowMarginal_mass, willowMarginal_mean, willowMarginal_secondMoment -- unconditional in the transition matrices beyond the three row constraints, needing neither the marginal constraint nor entry non-negativity), marginal preservation (willowMarginal_eq, from the marginal constraint alone), the scaled second moment and the cross moments (willowMarginal_crossMoment, willowScaled_secondMoment, willowScaled_crossMoment), the join corollary (willowMarginal_crossMoment_eq_willowBeta: the chain's standardized cross moment is the construction's own willowBeta coefficient once beta k is tied to the grid), and the correlation bound (WillowMomentConstraints.sq_le_one, by Cauchy-Schwarz on an honest row -- the lattice-side analogue of sq_le_one_of_covariance_unit; and WillowMomentConstraints.bivariateNormal_moments, instantiating the standard bivariate normal law at the willow coefficient via Probability/Gaussian/BivariateNormalCDF). The linear program that produces admissible transition matrices in Curran's construction is not formalized: solving the full constraint system with non-negative entries, its objective and its output are out of scope -- entry non-negativity is assumed where the correlation bound uses it, not produced -- and nothing is claimed about prices computed on the lattice. Axioms-clean. The Brownian join (willowScaled_secondMoment_eq_integral_sq, willowScaled_crossMoment_eq_integral_mul) composes the chain-side moment theorems with WienerIntegralL2.integral_mul_eval (E[W_s W_t] = min s t for a pre-Brownian motion); it matches the second moment at one grid time and the cross moment across one step, not the finite-dimensional law of the chain."
       }
+    },
+    {
+      "id": "mf-binomial-upandin-reflection",
+      "name": "Binomial up-and-in price by reflection",
+      "description": "On the symmetric binomial walk (every n-step path of weight 2^-n, the law coinFlipMeasure (1/2) of the flips), for a barrier a > 0 and any payoff g of the terminal position S_n: E[g(S_n); max >= a] = E[g(S_n); S_n >= a] + E[g(2a - S_n); S_n > a], by the discrete intermediate value theorem and reflection at the first hit. The prices are expectations of a payoff of the walk position under the symmetric flip law; the entry does not state them as Market.price of a spot-valued contract.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.Binomial.BarrierReflection\nimport MathFin.Models.Binomial.PathMeasure\n\nopen MeasureTheory\n\n/-- **Up-and-in barrier price by reflection** on the symmetric binomial walk: for a barrier\n`0 < a` and any payoff `g` of the terminal position, the price of the paths that touch `a`\nis the price on `{Sₙ ≥ a}` plus the price of `g (2a − ·)` on `{Sₙ > a}`. -/\ntheorem binomial_up_and_in_reflection {n : ℕ} (hq : (1 / 2 : NNReal) ≤ 1) (a : ℤ) (ha : 0 < a)\n    (g : ℤ → ℝ) :\n    ∫ ω, (if MathFin.HitsLevel a (MathFin.flips n ω) then\n        g (MathFin.walkPos (MathFin.flips n ω) n) else 0)\n        ∂MathFin.coinFlipMeasure (1 / 2) hq\n      = (∫ ω, (if a ≤ MathFin.walkPos (MathFin.flips n ω) n then\n          g (MathFin.walkPos (MathFin.flips n ω) n) else 0) ∂MathFin.coinFlipMeasure (1 / 2) hq)\n        + ∫ ω, (if a < MathFin.walkPos (MathFin.flips n ω) n then\n          g (2 * a - MathFin.walkPos (MathFin.flips n ω) n) else 0)\n          ∂MathFin.coinFlipMeasure (1 / 2) hq :=\n  MathFin.binomial_upAndIn_reflection hq a ha g"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Andre (1887) reflection principle; Shreve, Stochastic Calculus for Finance I, section 5.2 (knock-in options on the symmetric random walk)",
+        "citations": [
+          {
+            "key": "Andre1887"
+          }
+        ],
+        "difficulty": "medium",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Models/Binomial/BarrierReflection.lean (sum_hits_eq, binomial_upAndIn_reflection) on the symmetric coin-flip law, reusing reflectHitLtGt and the discrete IVT. Statement is for the walk position S_n (not a discounted spot); the same file proves the up-and-out price (binomial_upAndOut_eq) and the running-maximum law (binomial_maximal_distribution)."
+      }
     }
   ]
 }

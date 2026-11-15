@@ -698,6 +698,19 @@ attribute [blueprint "thm:binomial-representation"
   tree price, is the discounted payoff on every path (`binomialPrice_replication`). -/)]
   MathFin.binomial_martingale_representation
 
+attribute [blueprint "thm:binomial-barrier-reflection"
+  (title := "Binomial barrier prices via reflection")
+  (statement := /-- On the symmetric binomial walk (every path of weight $2^{-n}$, the law
+  `coinFlipMeasure (1/2)` of the flips), for a barrier $a > 0$ and any payoff $g$ of the terminal
+  position $S_n$, the up-and-in price is
+  $E[g(S_n);\max \ge a] = E[g(S_n); S_n \ge a] + E[g(2a - S_n); S_n > a]$: the paths that end
+  at or above $a$ touch it (discrete intermediate value), and those that touch it and end below
+  are reflected at the first hit onto the paths ending above (André's reflection). The up-and-out
+  price is the vanilla price less this, and the running maximum has
+  $P(\max \ge a) = 2P(S_n > a) + P(S_n = a)$. The prices are expectations under the symmetric
+  flip law of a payoff of the walk's position, not `Market.price` of a spot-valued contract. -/)]
+  MathFin.binomial_upAndIn_reflection
+
 attribute [blueprint "thm:crr-bs-convergence"
   (title := "Cox–Ross–Rubinstein convergence to Black–Scholes")
   (statement := /-- When every $n$-step tree is arbitrage-free, the binomial call price

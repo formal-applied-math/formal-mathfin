@@ -84,14 +84,6 @@ area = "valuation/american"
 family = "trees"
 
 [[node]]
-label = "thm:binomial-barrier-reflection"
-title = "Binomial barrier prices via reflection"
-statement = "Binomial barrier option prices follow from the discrete reflection principle."
-uses = ["thm:binomial-representation"]
-area = "valuation/trees"
-family = "trees"
-
-[[node]]
 label = "thm:barrier-lookback-closed-forms"
 title = "Barrier and lookback closed forms"
 statement = "Down-and-out call and floating-strike lookback call closed forms via the reflection principle."
