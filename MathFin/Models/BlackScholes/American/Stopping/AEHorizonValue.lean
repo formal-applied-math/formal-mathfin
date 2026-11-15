@@ -100,22 +100,22 @@ theorem clip_integral (θ : AEBoundedRule P 𝓕 T) (Z : ℝ≥0 → Ω → ℝ)
 
 end AEBoundedRule
 
-namespace StoppingRule
+section ToAEBoundedRule
 
 variable {P : Measure Ω} {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T : ℝ≥0}
 
 /-- A pointwise bounded rule read as an almost-surely bounded one. -/
-def toAEBoundedRule (θ : StoppingRule 𝓕 T) : AEBoundedRule P 𝓕 T where
+def _root_.MathFin.StoppingRule.toAEBoundedRule (θ : StoppingRule 𝓕 T) : AEBoundedRule P 𝓕 T where
   time := fun ω => θ.time ω
   stopping := θ.stopping
   ae_le_horizon := Filter.Eventually.of_forall (fun ω => WithTop.coe_le_coe.mpr (θ.le_horizon ω))
 
-theorem toAEBoundedRule_finiteTime (θ : StoppingRule 𝓕 T) :
+theorem _root_.MathFin.StoppingRule.toAEBoundedRule_finiteTime (θ : StoppingRule 𝓕 T) :
     (θ.toAEBoundedRule (P := P)).finiteTime = θ.time := by
   funext ω
-  simp only [AEBoundedRule.finiteTime,toAEBoundedRule,WithTop.untopD_coe]
+  simp only [AEBoundedRule.finiteTime,StoppingRule.toAEBoundedRule,WithTop.untopD_coe]
 
-end StoppingRule
+end ToAEBoundedRule
 
 /-- The value of the payoff process `Z` over almost-surely bounded rules: the supremum of the
 expected payoffs `∫ Z (θ.finiteTime ω) ω`.

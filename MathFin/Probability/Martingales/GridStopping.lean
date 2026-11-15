@@ -72,14 +72,14 @@ noncomputable def floorDiv (hh : 0 < h) {T : ℝ≥0} (θ : StoppingRule (𝓖.c
     have hc : (0 : ℝ≥0) < (n + 1) * h.toNNReal := by positivity
     obtain ⟨s, -, hs, hlim⟩ := exists_seq_strictMono_tendsto' hc
     have hsn (k : ℕ) : ⌊(s k : ℝ) / h⌋₊ ≤ n := by
-      rw [floor_div_le_iff hh (s k).2]
+      rw [floor_div_le_iff hh (s k).coe_nonneg]
       exact_mod_cast (show s k < (n + 1) * h.toNNReal from (hs k).2).trans_eq (by
         simp [hh.le])
     have hset : {ω | ((⌊(θ.time ω : ℝ) / h⌋₊ : ℕ) : WithTop ℕ) ≤ n}
         = ⋃ k, {ω | ((θ.time ω : ℝ≥0) : WithTop ℝ≥0) ≤ s k} := by
       ext ω
       simp only [mem_setOf_eq, mem_iUnion, WithTop.coe_le_coe,
-        floor_div_le_iff hh (θ.time ω).2]
+        floor_div_le_iff hh (θ.time ω).coe_nonneg]
       constructor
       · intro hθ
         have : θ.time ω < (n + 1) * h.toNNReal := by
@@ -89,8 +89,8 @@ noncomputable def floorDiv (hh : 0 < h) {T : ℝ≥0} (θ : StoppingRule (𝓖.c
         have := hk.trans_lt (hs k).2
         rw [← NNReal.coe_lt_coe] at this
         simpa [hh.le] using this
-    rw [hset]
-    exact MeasurableSet.iUnion fun k ↦ 𝓖.mono (hsn k) _ (θ.stopping (s k))
+    exact (congrArg MeasurableSet hset).mpr
+      (MeasurableSet.iUnion fun k ↦ 𝓖.mono (hsn k) _ (θ.stopping (s k)))
   le_horizon ω := hφ (θ.le_horizon ω)
 
 /-- A discrete stopping rule read in time: it stops at the date `σ h`, a stopping rule of the
@@ -104,13 +104,13 @@ noncomputable def mulStep (hh : 0 < h) {T : ℝ≥0} (σ : StoppingRule 𝓖 ⌊
       ext ω
       simp only [mem_setOf_eq, WithTop.coe_le_coe, ← NNReal.coe_le_coe, NNReal.coe_mul,
         NNReal.coe_natCast, Real.coe_toNNReal _ hh.le]
-      rw [Nat.le_floor_iff (div_nonneg t.2 hh.le), le_div_iff₀ hh]
+      rw [Nat.cast_le, Nat.le_floor_iff (div_nonneg t.coe_nonneg hh.le), le_div_iff₀ hh]
     rw [hset]
     exact σ.stopping _
   le_horizon ω := by
     rw [← NNReal.coe_le_coe, NNReal.coe_mul, NNReal.coe_natCast, Real.coe_toNNReal _ hh.le,
       ← le_div_iff₀ hh]
-    exact (Nat.cast_le.2 (σ.le_horizon ω)).trans (Nat.floor_le (div_nonneg T.2 hh.le))
+    exact (Nat.cast_le.2 (σ.le_horizon ω)).trans (Nat.floor_le (div_nonneg T.coe_nonneg hh.le))
 
 theorem floorDiv_mulStep (hh : 0 < h) {T : ℝ≥0} (σ : StoppingRule 𝓖 ⌊(T : ℝ) / h⌋₊) (ω : Ω) :
     ((σ.mulStep hφ hh).floorDiv hφ hh).time ω = σ.time ω := by

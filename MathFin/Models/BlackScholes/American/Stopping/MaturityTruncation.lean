@@ -45,7 +45,8 @@ open scoped NNReal Topology
 variable {Ω : Type*} [MeasurableSpace Ω] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
 
 /-- The rule `θ` capped at the new horizon `U`, stopping at `min (θ.time ω) U`. -/
-def StoppingRule.truncate {T : ℝ≥0} (θ : StoppingRule 𝓕 T) (U : ℝ≥0) : StoppingRule 𝓕 U where
+def _root_.MathFin.StoppingRule.truncate {T : ℝ≥0} (θ : StoppingRule 𝓕 T)
+    (U : ℝ≥0) : StoppingRule 𝓕 U where
   time := fun ω => min (θ.time ω) U
   stopping := by
     convert! θ.stopping.min (isStoppingTime_const 𝓕 U) using 1

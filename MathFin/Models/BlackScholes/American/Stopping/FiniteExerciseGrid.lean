@@ -85,7 +85,7 @@ def cappedGridFiltration (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›) (T
 
 /-- A rule read as a rule for `cappedGridFiltration`, indexed by `gridIndex θ δ` and bounded by
 `⌈T/δ⌉₊`: the first capped grid time at or after `θ.time ω`. -/
-noncomputable def StoppingRule.toGridIndexRule (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) :
+noncomputable def _root_.MathFin.StoppingRule.toGridIndexRule (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) :
     StoppingRule (cappedGridFiltration 𝓕 T δ) ⌈T/δ⌉₊ where
   time := gridIndex θ δ
   stopping := isStoppingTime_sampledFiltration (cappedGridTime_mono T δ) θ (i := gridIndex θ δ)
@@ -96,11 +96,11 @@ noncomputable def StoppingRule.toGridIndexRule (θ : StoppingRule 𝓕 T) (hδ :
 /-- A rule for `cappedGridFiltration` read back in physical time, stopping at the capped grid
 time `cappedGridTime T δ (η.time ω)`: `StoppingRule.toSampledRule` along the capped grid, which
 ends at the horizon `T`. -/
-noncomputable def StoppingRule.toPhysicalRule
+noncomputable def _root_.MathFin.StoppingRule.toPhysicalRule
     (η : StoppingRule (cappedGridFiltration 𝓕 T δ) ⌈T / δ⌉₊) (hδ : 0 < δ) : StoppingRule 𝓕 T :=
   η.toSampledRule.extend (cappedGridTime_ceil T hδ).le
 
-theorem StoppingRule.toPhysicalRule_mem_grid
+theorem _root_.MathFin.StoppingRule.toPhysicalRule_mem_grid
     (η : StoppingRule (cappedGridFiltration 𝓕 T δ) ⌈T / δ⌉₊) (hδ : 0 < δ) :
     η.toPhysicalRule hδ ∈ StoppingRule.valuedIn 𝓕 T (exerciseGrid T δ) := fun ω ↦
   Finset.mem_image.mpr ⟨η.time ω,Finset.mem_range.mpr (Nat.lt_succ_of_le (η.le_horizon ω)),rfl⟩
@@ -108,21 +108,22 @@ theorem StoppingRule.toPhysicalRule_mem_grid
 /-- The rule `θ` rounded up to the next multiple of `δ` and capped at maturity, exercising at
 `min ((⌈θ.time ω/δ⌉₊ : ℝ≥0)*δ) T`: the rule sampled on the capped grid and read back in physical
 time. -/
-noncomputable def StoppingRule.roundUp (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) : StoppingRule 𝓕 T :=
+noncomputable def _root_.MathFin.StoppingRule.roundUp (θ : StoppingRule 𝓕 T)
+    (hδ : 0 < δ) : StoppingRule 𝓕 T :=
   (θ.toGridIndexRule hδ).toPhysicalRule hδ
 
-theorem StoppingRule.roundUp_time (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) (ω : Ω) :
+theorem _root_.MathFin.StoppingRule.roundUp_time (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) (ω : Ω) :
     (θ.roundUp hδ).time ω = min ((gridIndex θ δ ω : ℝ≥0)*δ) T := rfl
 
-theorem StoppingRule.le_roundUp (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) (ω : Ω) :
+theorem _root_.MathFin.StoppingRule.le_roundUp (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) (ω : Ω) :
     θ.time ω ≤ (θ.roundUp hδ).time ω :=
   le_min ((div_le_iff₀ hδ).mp (Nat.le_ceil (θ.time ω/δ))) (θ.le_horizon ω)
 
-theorem StoppingRule.roundUp_mem_grid (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) (ω : Ω) :
+theorem _root_.MathFin.StoppingRule.roundUp_mem_grid (θ : StoppingRule 𝓕 T) (hδ : 0 < δ) (ω : Ω) :
     (θ.roundUp hδ).time ω ∈ exerciseGrid T δ :=
   ((θ.toGridIndexRule hδ).toPhysicalRule_mem_grid hδ) ω
 
-theorem StoppingRule.roundUp_time_tendsto (θ : StoppingRule 𝓕 T) (ω : Ω) :
+theorem _root_.MathFin.StoppingRule.roundUp_time_tendsto (θ : StoppingRule 𝓕 T) (ω : Ω) :
     Tendsto (fun n => (θ.roundUp (gridStep_pos n)).time ω) atTop (𝓝 (θ.time ω)) := by
   have hh := (gridValue_time_tendsto θ ω).min (tendsto_const_nhds (x := T))
   simpa only [StoppingRule.roundUp_time,min_eq_left (θ.le_horizon ω)] using hh
