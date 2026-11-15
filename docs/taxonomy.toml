@@ -52,7 +52,7 @@ landmarks = [
   "MathFin.doob_decomposition", "MathFin.martingaleTransform_isMartingale",
   "MathFin.submartingale_optional_sampling", "MeasureTheory.maximal_ineq_Lp",
   "MathFin.martingale_ae_tendsto_and_eLpNorm_two_tendsto",
-  "MathFin.snellEnvelope_le_supermartingale", "MathFin.markovPathMeasure_cylinder",
+  "MathFin.snellEnvelope_optimalStopping", "MathFin.markovPathMeasure_cylinder",
 ]
 
 [[cell]]
@@ -211,12 +211,14 @@ title = "American options and optimal stopping"
 blurb = "early exercise as optimal stopping: the Snell envelope in trees, the American put and its free boundary"
 modules = [
   "MathFin.Models.BlackScholes.American", "MathFin.Models.Binomial.American",
-  "MathFin.Models.Binomial.Bermudan", "MathFin.Models.Binomial.SnellEnvelope",
+  "MathFin.Models.Binomial.AmericanMarket", "MathFin.Models.Binomial.Bermudan",
+  "MathFin.Models.Binomial.SnellEnvelope",
   "MathFin.Models.Binomial.MertonAmericanCallTree",
 ]
 subjects = ["MSC 91G20", "MSC 60G40", "MSC 49L20"]
 landmarks = [
   "MathFin.americanPrice_eq_snellEnvelope",
+  "MathFin.Contracts.Binomial.americanPrice_market_europeanPutPayoff",
   "MathFin.Contracts.BlackScholes.price_europeanPut_le_americanPutValue",
   "MathFin.BlackScholes.AmericanPut.Stopping.brownianUsualActualContactRule_optimal",
 ]

@@ -258,14 +258,14 @@ attribute [blueprint "thm:markov-path-law"
   MathFin.markovPathMeasure_cylinder
 
 attribute [blueprint "thm:snell-envelope"
-  (title := "Snell envelope")
-  (statement := /-- For an integrable reward with exercise dates $X$ and horizon $N$ on a
-  discrete-time filtered probability space, the Snell envelope lies almost surely below every
-  supermartingale that dominates the reward at the exercise dates and at $N$: it is the
-  smallest such supermartingale (it is one, and dominates the reward, by
-  `snellEnvelope_supermartingale` and `snellEnvelope_dominates`). The first-contact time
-  attains it in expectation (`snellContact_expected_payoff`). -/)]
-  MathFin.snellEnvelope_le_supermartingale
+  (title := "Snell's theorem: the envelope is the value of optimal stopping")
+  (statement := /-- For an adapted integrable reward $Z$ with horizon $N$ on a discrete-time
+  filtered probability space, exercisable at every date, the Snell envelope is a supermartingale,
+  it lies almost surely below every supermartingale that dominates $Z$ up to $N$, and its
+  expectation at $0$ is the supremum of $E[Z_\tau]$ over the stopping times $\tau \le N$,
+  attained by the first time the envelope meets the reward. The minimality holds more generally
+  for a set of exercise dates (`snellEnvelope_le_supermartingale`). -/)]
+  MathFin.snellEnvelope_optimalStopping
 
 attribute [blueprint "thm:martingale-transform"
   (title := "Martingale transform")
@@ -905,6 +905,25 @@ attribute [blueprint "thm:american-price-snell-envelope"
   filtration with exercise at every date, is almost surely the binomial American price at time
   zero. -/)]
   MathFin.americanPrice_eq_snellEnvelope
+
+attribute [blueprint "def:american-price"
+  (title := "The American price of an exercise right")
+  (statement := /-- In a market $M$ under a measure $Q$, the right to receive the payoff $g_t$ at a
+  time $t \le T$ of the holder's choosing is priced at the supremum, over the stopping rules of the
+  market's filtration bounded by $T$, of $E_Q[(N_0/N_\tau)\, g_\tau(S)]$. It is a price when $Q$
+  is a pricing measure and the expected exercise values are integrable and bounded above; under
+  that bound the European claim paying $g_T$ at $T$ is worth at most it
+  (`price_pay_le_americanPrice`). -/)]
+  MathFin.Market.americanPrice
+
+attribute [blueprint "thm:binomial-american-market"
+  (title := "The binomial American put is the market's American price")
+  (statement := /-- For a step $h > 0$ and the risk-neutral probability $q$ of the tree, the
+  American price of the put in the binomial market under the coin flips, the supremum over all
+  stopping rules of the market of the expected deflated exercise value with horizon $T$, is the
+  Bellman price of the tree with $\lfloor T/h \rfloor$ steps: stopping on the grid is discrete
+  stopping, whose value is the Snell envelope's (Snell's theorem). -/)]
+  MathFin.Contracts.Binomial.americanPrice_market_europeanPutPayoff
 
 -- ===== valuation/volatility: Volatility =====
 

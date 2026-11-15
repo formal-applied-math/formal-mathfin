@@ -24,6 +24,9 @@ and the Snell first-contact rule attains it.
   value with horizon `N` is the expectation of the Snell envelope at index `0`.
 * `snellRule_attains_value`: the expected reward at the Snell first-contact rule equals the
   stopping value.
+* `snellEnvelope_optimalStopping`: Snell's theorem — the envelope is the least supermartingale
+  dominating the reward, and its expectation at `0` is the stopping value, attained at first
+  contact.
 
 ## Tags
 
@@ -62,5 +65,21 @@ theorem snellRule_attains_value {P : Measure Ω} [IsProbabilityMeasure P]
     (∫ ω, Z ((snellRule (P := P) ha N).time ω) ω ∂P) = stoppingValue P 𝓕 Z N := by
   rw [stoppingValue_eq_integral_snellEnvelope ha hi N]
   exact snellContact_expected_payoff ha hi N
+
+/-- **Snell's theorem.** For an adapted integrable reward `Z` with horizon `N`, exercisable at every
+date, the Snell envelope is a supermartingale, it lies almost surely below every supermartingale
+that dominates `Z` up to `N`, and its expectation at `0` is the value of the optimal stopping
+problem, attained by the first time it meets the reward. -/
+theorem snellEnvelope_optimalStopping {P : Measure Ω} [IsProbabilityMeasure P]
+    {𝓕 : Filtration ℕ ‹MeasurableSpace Ω›} {Z : ℕ → Ω → ℝ}
+    (ha : Adapted 𝓕 Z) (hi : ∀ i, Integrable (Z i) P) (N : ℕ) :
+    Supermartingale (snellEnvelope P 𝓕 univ Z N) 𝓕 P ∧
+      (∀ ⦃U : ℕ → Ω → ℝ⦄, Supermartingale U 𝓕 P → (∀ j ≤ N, Z j ≤ᵐ[P] U j) →
+        ∀ i ≤ N, snellEnvelope P 𝓕 univ Z N i ≤ᵐ[P] U i) ∧
+      stoppingValue P 𝓕 Z N = ∫ ω, snellEnvelope P 𝓕 univ Z N 0 ω ∂P ∧
+      ∫ ω, Z ((snellRule (P := P) ha N).time ω) ω ∂P = stoppingValue P 𝓕 Z N :=
+  ⟨snellEnvelope_supermartingale ha hi N,
+    fun _ hU hdom _ hiN ↦ snellEnvelope_le_supermartingale hU hi (fun j hj _ ↦ hdom j hj) hiN,
+    stoppingValue_eq_integral_snellEnvelope ha hi N, snellRule_attains_value ha hi N⟩
 
 end MathFin

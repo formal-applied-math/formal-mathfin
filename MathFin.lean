@@ -558,6 +558,7 @@ import MathFin.Models.Forwards.SchwartzOneFactor
 -- Phase 13 additions:
 import MathFin.Models.Binomial.Model
 import MathFin.Models.Binomial.American
+import MathFin.Models.Binomial.AmericanMarket
 import MathFin.Models.Binomial.CRRConvergence
 import MathFin.Models.Binomial.DriftLimit
 import MathFin.Models.Binomial.Bermudan
