@@ -49,14 +49,14 @@ price at the Brownian log-state at remaining time `T-min t T`. -/
 theorem canonicalDiscountedPrice_apply (k h x : ℝ) (T t : ℝ≥0) (ω : ℝ≥0 → ℝ) :
     canonicalDiscountedPrice k h x T t ω =
       Real.exp (-k*(min t T : ℝ≥0))*canonicalPrice k h
-        (brownianLogState (k-h-1) (Real.sqrt 2) x (min t T) ω) ((T : ℝ)-(min t T : ℝ≥0)) := by
+        (logState brownian (k-h-1) (Real.sqrt 2) x (min t T) ω) ((T : ℝ)-(min t T : ℝ≥0)) := by
   unfold canonicalDiscountedPrice
-  simp [classicalCandidate,brownianLogState]
+  simp [classicalCandidate,logState]
 
 theorem canonicalDiscountedPrice_initial (k h x : ℝ) (T : ℝ≥0) :
     canonicalDiscountedPrice k h x T 0 =ᵐ[gaussianLimit] fun _ => canonicalPrice k h x (T : ℝ) := by
   filter_upwards [isBrownianReal_brownian.eval_zero_ae_eq_zero] with ω hω
-  simp [canonicalDiscountedPrice_apply,brownianLogState,hω]
+  simp [canonicalDiscountedPrice_apply,logState,hω]
 
 theorem canonicalDiscountedPrice_dominates {k h : ℝ} (hk : 0 ≤ k) (x : ℝ)
     (T t : ℝ≥0) (ω : ℝ≥0 → ℝ) :

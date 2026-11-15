@@ -9,24 +9,24 @@ public import MathFin.Probability.Analysis.IndepFreezing
 public import MathFin.Models.BlackScholes.American.Stopping.BrownianHeatFlow
 public import MathFin.Models.BlackScholes.American.Stopping.BrownianModel
 
-/-! # Conditional Brownian transitions in the raw natural filtration
+/-! # Conditional transitions of a filtered pre-Brownian motion
 
 ## Main definitions
 
-* `brownianLogState`: the log state `x + β*t + σ*B_t`, with drift `β` and volatility `σ` applied to
-  the constructed Brownian motion, started at `x`.
+* `logState`: the log state `x + β*t + σ*W_t`, with drift `β` and volatility `σ` applied to the
+  process `W`, started at `x`.
 * `IsGaussianMarkov`: the Gaussian Markov property of a log state `L` with drift `β` and volatility
   `σ` in the filtration `𝓕` under `P`.
 
 ## Main results
 
-* `brownian_scaled_increment_heatFlow`: for continuous `f` and `i ≤ j`, the expectation of
-  `f (x + σ (B_j - B_i))` is `brownianHeatFlow f (σ² (j - i)) x`.
-* `brownian_condExp_transition`: for continuous bounded `f`, `i ≤ j` and an `𝓕 i`-measurable
-  `X`, the conditional expectation of `f (X + σ (B_j - B_i))` given `𝓕 i` is almost surely
-  `brownianHeatFlow f (σ² (j - i)) (X ω)`.
-* `brownianLogState_isGaussianMarkov`: `brownianLogState β σ x` is `IsGaussianMarkov` in
-  `brownianFiltration` under `gaussianLimit`.
+* `scaled_increment_heatFlow`: for a pre-Brownian motion `W`, continuous `f` and `i ≤ j`, the
+  expectation of `f (x + σ (W_j - W_i))` is `brownianHeatFlow f (σ² (j - i)) x`.
+* `condExp_transition`: for a filtered pre-Brownian motion `W`, continuous bounded `f`, `i ≤ j` and
+  an `𝓕 i`-measurable `X`, the conditional expectation of `f (X + σ (W_j - W_i))` given `𝓕 i` is
+  almost surely `brownianHeatFlow f (σ² (j - i)) (X ω)`.
+* `logState_isGaussianMarkov`: for a filtered pre-Brownian motion `W`, `logState W β σ x` is
+  `IsGaussianMarkov` in `𝓕` under `P`.
 
 ## Tags
 
@@ -41,51 +41,6 @@ namespace MathFin.BlackScholes.AmericanPut.Stopping
 open Set Filter MeasureTheory ProbabilityTheory
 open scoped NNReal Topology
 
-/-- The log state `x+β*t+σ*B_t`: drift `β` and volatility `σ` applied to the constructed
-Brownian motion, started at `x`. -/
-noncomputable def brownianLogState (β σ x : ℝ) (t : ℝ≥0) (ω : ℝ≥0 → ℝ) : ℝ :=
-  x+β*(t : ℝ)+σ*brownian t ω
-
-theorem brownian_scaled_increment_heatFlow {f : ℝ → ℝ} (hf : Continuous f)
-    {i j : ℝ≥0} (hij : i ≤ j) (σ x : ℝ) :
-    (∫ ω, f (x+σ*(brownian j ω-brownian i ω)) ∂gaussianLimit) =
-      brownianHeatFlow f (σ^2*((j : ℝ)-(i : ℝ))).toNNReal x := by
-  have hΔ : 0 ≤ (j : ℝ)-(i : ℝ) := sub_nonneg.mpr (by exact_mod_cast hij)
-  have hv : (NNReal.mk (σ^2) (sq_nonneg σ))*nndist j i =
-      (σ^2*((j : ℝ)-(i : ℝ))).toNNReal := by
-    apply NNReal.eq
-    simp only [NNReal.coe_mul,coe_nndist,NNReal.dist_eq,
-      abs_of_nonneg hΔ,Real.coe_toNNReal _ (mul_nonneg (sq_nonneg σ) hΔ)]
-    rfl
-  have hl := gaussianReal_const_mul (hasLaw_brownian_sub (s := j) (t := i)) σ
-  simp only [mul_zero,hv] at hl
-  have hm : Continuous (fun y => f (x+y)) := hf.comp (continuous_const.add continuous_id)
-  have he := hl.integral_comp hm.aestronglyMeasurable
-  have he' := (hasLaw_brownian_eval (t := (σ^2*((j : ℝ)-(i : ℝ))).toNNReal)).integral_comp
-    hm.aestronglyMeasurable
-  exact he.trans he'.symm
-
-theorem brownian_condExp_transition {f : ℝ → ℝ} (hf : Continuous f) {C : ℝ}
-    (hb : ∀ x, ‖f x‖ ≤ C) {i j : ℝ≥0} (hij : i ≤ j)
-    {X : (ℝ≥0 → ℝ) → ℝ} (hX : Measurable[brownianFiltration i] X) (σ : ℝ) :
-    gaussianLimit[fun ω => f (X ω+σ*(brownian j ω-brownian i ω)) | brownianFiltration i]
-        =ᵐ[gaussianLimit]
-      fun ω => brownianHeatFlow f (σ^2*((j : ℝ)-(i : ℝ))).toNNReal (X ω) := by
-  have hY : Measurable (fun ω => brownian j ω-brownian i ω) :=
-    (measurable_brownian j).sub (measurable_brownian i)
-  have hH : Continuous (fun z : ℝ × ℝ => f (z.1+σ*z.2)) := by fun_prop
-  have hint : Integrable (fun ω => f (X ω+σ*(brownian j ω-brownian i ω))) gaussianLimit :=
-    (integrable_const C).mono' (hH.measurable.comp
-      ((hX.mono (brownianFiltration.le i) le_rfl).prodMk hY)).aestronglyMeasurable
-      (Eventually.of_forall fun ω => hb _)
-  have he := condExp_comp_prodMk_of_indep (brownianFiltration.le i) hX hY.aemeasurable
-    (brownian_filtered.indep i j hij) hH.stronglyMeasurable hint
-  filter_upwards [he] with ω hω
-  rw [hω]
-  have hmap := integral_map (μ := gaussianLimit) hY.aemeasurable
-    (hf.comp (show Continuous (fun y : ℝ => X ω+σ*y) by fun_prop)).aestronglyMeasurable
-  exact hmap.trans (brownian_scaled_increment_heatFlow hf hij σ (X ω))
-
 /-- The **Gaussian Markov property** of a log state `L` with drift `β` and volatility `σ` in the
 filtration `𝓕` under `P`: for bounded continuous `f` and `i ≤ j`, the conditional expectation of
 `f (L j)` given `𝓕 i` is the `brownianHeatFlow` of `f` over the variance `σ^2*(j-i)`, started at the
@@ -97,18 +52,71 @@ def IsGaussianMarkov {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω)
       fun ω => brownianHeatFlow f (σ^2*((j : ℝ)-(i : ℝ))).toNNReal
         (L i ω+β*((j : ℝ)-(i : ℝ)))
 
-theorem brownianLogState_isGaussianMarkov (β σ x : ℝ) :
-    IsGaussianMarkov gaussianLimit brownianFiltration β σ (brownianLogState β σ x) := by
+variable {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} [IsProbabilityMeasure P]
+  {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {W : ℝ≥0 → Ω → ℝ}
+
+/-- The log state `x+β*t+σ*W_t`: drift `β` and volatility `σ` applied to the process `W`, started
+at `x`. -/
+noncomputable def logState (W : ℝ≥0 → Ω → ℝ) (β σ x : ℝ) (t : ℝ≥0) (ω : Ω) : ℝ :=
+  x+β*(t : ℝ)+σ*W t ω
+
+/-- For a pre-Brownian motion `W` and `i ≤ j`, the expectation of `f (x + σ (W_j - W_i))` is the
+heat flow of `f` over the variance `σ² (j - i)`, from `x`. -/
+theorem scaled_increment_heatFlow (hW : IsPreBrownianReal W P) {f : ℝ → ℝ} (hf : Continuous f)
+    {i j : ℝ≥0} (hij : i ≤ j) (σ x : ℝ) :
+    (∫ ω, f (x+σ*(W j ω-W i ω)) ∂P) =
+      brownianHeatFlow f (σ^2*((j : ℝ)-(i : ℝ))).toNNReal x := by
+  have hΔ : 0 ≤ (j : ℝ)-(i : ℝ) := sub_nonneg.mpr (by exact_mod_cast hij)
+  have hv : (NNReal.mk (σ^2) (sq_nonneg σ))*nndist j i =
+      (σ^2*((j : ℝ)-(i : ℝ))).toNNReal := by
+    apply NNReal.eq
+    simp only [NNReal.coe_mul,coe_nndist,NNReal.dist_eq,
+      abs_of_nonneg hΔ,Real.coe_toNNReal _ (mul_nonneg (sq_nonneg σ) hΔ)]
+    rfl
+  have hl := gaussianReal_const_mul (hW.hasLaw_sub j i) σ
+  simp only [mul_zero,hv] at hl
+  have hm : Continuous (fun y => f (x+y)) := hf.comp (continuous_const.add continuous_id)
+  have he := hl.integral_comp hm.aestronglyMeasurable
+  have he' := (hasLaw_brownian_eval (t := (σ^2*((j : ℝ)-(i : ℝ))).toNNReal)).integral_comp
+    hm.aestronglyMeasurable
+  exact he.trans he'.symm
+
+/-- **The conditional transition of a filtered pre-Brownian motion.** For continuous bounded `f`,
+`i ≤ j` and an `𝓕 i`-measurable `X`, the conditional expectation of `f (X + σ (W_j - W_i))` given
+`𝓕 i` is almost surely the heat flow of `f` over `σ² (j - i)`, evaluated at `X`. -/
+theorem condExp_transition (hW : IsFilteredPreBrownian W 𝓕 P) {f : ℝ → ℝ} (hf : Continuous f)
+    {C : ℝ} (hb : ∀ x, ‖f x‖ ≤ C) {i j : ℝ≥0} (hij : i ≤ j)
+    {X : Ω → ℝ} (hX : Measurable[𝓕 i] X) (σ : ℝ) :
+    P[fun ω => f (X ω+σ*(W j ω-W i ω)) | 𝓕 i] =ᵐ[P]
+      fun ω => brownianHeatFlow f (σ^2*((j : ℝ)-(i : ℝ))).toNNReal (X ω) := by
+  have hY : AEMeasurable (fun ω => W j ω-W i ω) P := (hW.hasLaw_sub j i).aemeasurable
+  have hH : Continuous (fun z : ℝ × ℝ => f (z.1+σ*z.2)) := by fun_prop
+  have hint : Integrable (fun ω => f (X ω+σ*(W j ω-W i ω))) P :=
+    (integrable_const C).mono' (hH.measurable.comp_aemeasurable
+      ((hX.mono (𝓕.le i) le_rfl).aemeasurable.prodMk hY)).aestronglyMeasurable
+      (Eventually.of_forall fun ω => hb _)
+  have he := condExp_comp_prodMk_of_indep (𝓕.le i) hX hY (hW.indep i j hij)
+    hH.stronglyMeasurable hint
+  filter_upwards [he] with ω hω
+  rw [hω]
+  have hmap := integral_map (μ := P) hY
+    (hf.comp (show Continuous (fun y : ℝ => X ω+σ*y) by fun_prop)).aestronglyMeasurable
+  exact hmap.trans (scaled_increment_heatFlow hW.toIsPreBrownianReal hf hij σ (X ω))
+
+/-- A filtered pre-Brownian motion has a Gaussian Markov log state, whatever its probability
+space and filtration. -/
+theorem logState_isGaussianMarkov (hW : IsFilteredPreBrownian W 𝓕 P) (β σ x : ℝ) :
+    IsGaussianMarkov P 𝓕 β σ (logState W β σ x) := by
   intro f C hf hb i j hij
-  let X : (ℝ≥0 → ℝ) → ℝ := fun ω => brownianLogState β σ x i ω+β*((j : ℝ)-(i : ℝ))
-  have hX : Measurable[brownianFiltration i] X :=
-    (measurable_const.add (measurable_const.mul (brownian_adapted i))).add measurable_const
-  have he := brownian_condExp_transition hf hb hij hX σ
-  have heq : (fun ω => f (X ω+σ*(brownian j ω-brownian i ω))) =
-      fun ω => f (brownianLogState β σ x j ω) := by
+  let X : Ω → ℝ := fun ω => logState W β σ x i ω+β*((j : ℝ)-(i : ℝ))
+  have hX : Measurable[𝓕 i] X :=
+    (measurable_const.add (measurable_const.mul (hW.stronglyAdapted i).measurable)).add
+      measurable_const
+  have he := condExp_transition hW hf hb hij hX σ
+  have heq : (fun ω => f (X ω+σ*(W j ω-W i ω))) = fun ω => f (logState W β σ x j ω) := by
     funext ω
     congr 1
-    dsimp [X,brownianLogState]
+    dsimp [X,logState]
     ring
   rw [heq] at he
   exact he

@@ -42,14 +42,15 @@ open scoped NNReal Topology
 open MathFin.ItoLocalMartingale (nullAugmentation supermartingale_nullAugmentation)
 
 /-- The `brownianHeatFlow` of `f` over time `(σ^2*(T-min t T)).toNNReal`, started from the log
-state `brownianLogState β σ x (min t T) ω` shifted by `β*(T-min t T)`. -/
+state `logState brownian β σ x (min t T) ω` shifted by `β*(T-min t T)`. -/
 noncomputable def brownianTerminalValue (f : ℝ → ℝ) (β σ x : ℝ) (T t : ℝ≥0)
     (ω : ℝ≥0 → ℝ) : ℝ :=
   brownianHeatFlow f (σ^2*((T : ℝ)-(min t T : ℝ≥0))).toNNReal
-    (brownianLogState β σ x (min t T) ω+β*((T : ℝ)-(min t T : ℝ≥0)))
+    (logState brownian β σ x (min t T) ω+β*((T : ℝ)-(min t T : ℝ≥0)))
 
 theorem brownianTerminalValue_at_maturity (f : ℝ → ℝ) (β σ x : ℝ) {T t : ℝ≥0}
-    (ht : T ≤ t) : brownianTerminalValue f β σ x T t = fun ω => f (brownianLogState β σ x T ω) := by
+    (ht : T ≤ t) :
+    brownianTerminalValue f β σ x T t = fun ω => f (logState brownian β σ x T ω) := by
   funext ω
   simp [brownianTerminalValue,min_eq_right ht,brownianHeatFlow_zero]
 
@@ -64,8 +65,8 @@ theorem brownianTerminalValue_continuous {f : ℝ → ℝ} {C : ℝ}
     (continuous_brownian ω).comp (continuous_id.min continuous_const)
   exact (brownianHeatFlow_continuous hf hb).comp
     ((show Continuous (fun t : ℝ≥0 => (σ^2*((T : ℝ)-(min t T : ℝ≥0))).toNNReal) by fun_prop).prodMk
-      (show Continuous (fun t : ℝ≥0 => brownianLogState β σ x (min t T) ω+
-        β*((T : ℝ)-(min t T : ℝ≥0))) by unfold brownianLogState; fun_prop))
+      (show Continuous (fun t : ℝ≥0 => logState brownian β σ x (min t T) ω+
+        β*((T : ℝ)-(min t T : ℝ≥0))) by unfold logState; fun_prop))
 
 theorem brownianTerminalValue_adapted {f : ℝ → ℝ} {C : ℝ}
     (hf : Continuous f) (hb : ∀ y, ‖f y‖ ≤ C) (β σ x : ℝ) (T : ℝ≥0) :
@@ -78,15 +79,15 @@ theorem brownianTerminalValue_adapted {f : ℝ → ℝ} {C : ℝ}
 
 theorem brownianTerminalValue_eq_condExp {f : ℝ → ℝ} {C : ℝ}
     (hf : Continuous f) (hb : ∀ y, ‖f y‖ ≤ C) (β σ x : ℝ) (T t : ℝ≥0) :
-    gaussianLimit[fun ω => f (brownianLogState β σ x T ω) | brownianFiltration t] =ᵐ[gaussianLimit]
+    gaussianLimit[fun ω => f (logState brownian β σ x T ω) | brownianFiltration t] =ᵐ[gaussianLimit]
       brownianTerminalValue f β σ x T t := by
   by_cases ht : t ≤ T
-  · convert! brownianLogState_isGaussianMarkov β σ x hf hb ht using 1
+  · convert! logState_isGaussianMarkov brownian_filtered β σ x hf hb ht using 1
     ext ω
     simp only [brownianTerminalValue,min_eq_left ht]
   · have hTt := le_of_not_ge ht
     rw [brownianTerminalValue_at_maturity f β σ x hTt]
-    have hm : Measurable[brownianFiltration t] (fun ω => f (brownianLogState β σ x T ω)) :=
+    have hm : Measurable[brownianFiltration t] (fun ω => f (logState brownian β σ x T ω)) :=
       hf.measurable.comp (measurable_const.add (measurable_const.mul
         ((brownian_adapted T).mono (brownianFiltration.mono hTt) le_rfl)))
     rw [condExp_of_stronglyMeasurable (brownianFiltration.le t) hm.stronglyMeasurable
@@ -126,7 +127,7 @@ theorem brownianTerminalValue_usual_martingale {f : ℝ → ℝ} {C : ℝ}
 
 theorem brownianLogState_usual_isGaussianMarkov (β σ x : ℝ) :
     @IsGaussianMarkov (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit)
-      (completedMeasure gaussianLimit) brownianUsualFiltration β σ (brownianLogState β σ x) := by
+      (completedMeasure gaussianLimit) brownianUsualFiltration β σ (logState brownian β σ x) := by
   intro f C hf hb i j hij
   have he := (brownianTerminalValue_usual_martingale hf hb β σ x j).2 i j hij
   rw [brownianTerminalValue_at_maturity f β σ x le_rfl] at he

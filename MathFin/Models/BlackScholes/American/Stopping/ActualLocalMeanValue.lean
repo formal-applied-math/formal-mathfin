@@ -46,14 +46,14 @@ open Set Filter MeasureTheory ProbabilityTheory Boundary
 open scoped NNReal Topology
 
 theorem brownianLogState_continuous (β σ x : ℝ) (ω : ℝ≥0 → ℝ) :
-    Continuous (fun t => brownianLogState β σ x t ω) := by
+    Continuous (fun t => logState brownian β σ x t ω) := by
   have hw := continuous_brownian ω
-  unfold brownianLogState
+  unfold logState
   fun_prop
 
 theorem brownianLogState_usual_adapted (β σ x : ℝ) :
     @Adapted _ _ (completedMeasurableSpace gaussianLimit) _ _ _ brownianUsualFiltration
-      (brownianLogState β σ x) := by
+      (logState brownian β σ x) := by
   intro t
   exact measurable_const.add (measurable_const.mul (brownianUsual_adapted t))
 
@@ -63,7 +63,7 @@ noncomputable def actualRectangleExitRule (k h x R : ℝ) (δ : ℝ≥0) :
     @StoppingRule (ℝ≥0 → ℝ) (completedMeasurableSpace gaussianLimit) ℝ≥0 _
       brownianUsualFiltration δ :=
   @rectangleExitRule _ (completedMeasurableSpace gaussianLimit) brownianUsualFiltration
-    (brownianLogState (k-h-1) (Real.sqrt 2) x)
+    (logState brownian (k-h-1) (Real.sqrt 2) x)
     (brownianLogState_usual_adapted (k-h-1) (Real.sqrt 2) x)
     (brownianLogState_continuous (k-h-1) (Real.sqrt 2) x) x R δ
 
@@ -76,14 +76,14 @@ theorem actualRectangleExit_boundary_ae (k h x : ℝ) {R : ℝ} (hR : 0 < R)
     {δ : ℝ≥0} (hδ : 0 < δ) :
     ∀ᵐ ω ∂completedMeasure gaussianLimit,
       let s := actualRectangleExitTime k h x R δ ω
-      0 < s ∧ |brownianLogState (k-h-1) (Real.sqrt 2) x s ω-x| ≤ R ∧
-        (|brownianLogState (k-h-1) (Real.sqrt 2) x s ω-x| = R ∨ s = δ) := by
+      0 < s ∧ |logState brownian (k-h-1) (Real.sqrt 2) x s ω-x| ≤ R ∧
+        (|logState brownian (k-h-1) (Real.sqrt 2) x s ω-x| = R ∨ s = δ) := by
   let μ := completedMeasure gaussianLimit
   have hz : ∀ᵐ ω ∂μ, brownian 0 ω = 0 := isBrownianReal_brownian.eval_zero_ae_eq_zero
   let : MeasurableSpace (ℝ≥0 → ℝ) := completedMeasurableSpace gaussianLimit
   filter_upwards [hz] with ω hω
-  have hs : |brownianLogState (k-h-1) (Real.sqrt 2) x 0 ω-x| < R := by
-    simpa only [brownianLogState,NNReal.coe_zero,mul_zero,add_zero,hω,sub_self,abs_zero] using hR
+  have hs : |logState brownian (k-h-1) (Real.sqrt 2) x 0 ω-x| < R := by
+    simpa only [logState,NNReal.coe_zero,mul_zero,add_zero,hω,sub_self,abs_zero] using hR
   have hp := rectangleExitRule_pos (brownianLogState_usual_adapted (k-h-1) (Real.sqrt 2) x)
     (brownianLogState_continuous (k-h-1) (Real.sqrt 2) x) hδ ω hs
   exact ⟨hp,rectangleExitRule_spatial_bound _ _ ω hp,rectangleExitRule_boundary _ _ ω hp⟩
@@ -99,7 +99,7 @@ theorem actualRectangleExit_le_contact {k h : ℝ} (hk : 0 ≤ k) {x R : ℝ} {T
   have hs := rectangleExitRule_before (brownianLogState_usual_adapted (k-h-1) (Real.sqrt 2) x)
     (brownianLogState_continuous (k-h-1) (Real.sqrt 2) x) ω hlt
   have hp :=
-      hrect (τ.time ω) hs.2.le (brownianLogState (k-h-1) (Real.sqrt 2) x (τ.time ω) ω) hs.1.le
+      hrect (τ.time ω) hs.2.le (logState brownian (k-h-1) (Real.sqrt 2) x (τ.time ω) ω) hs.1.le
   have hz := canonicalContactRule_price_eq (h := h) hk brownianUsual_adapted
     continuous_brownian x T ω
   exact hp.2.ne' hz
@@ -108,7 +108,7 @@ theorem canonicalPrice_rectangle_meanValue {k h : ℝ} (hk : 0 ≤ k) {x R : ℝ
     (hδT : δ ≤ T) (hrect : InContinuationRectangle k h x T R δ) :
     (∫ ω, Real.exp (-k*(actualRectangleExitTime k h x R δ ω : ℝ))*
       canonicalPrice k h
-        (brownianLogState (k-h-1) (Real.sqrt 2) x (actualRectangleExitTime k h x R δ ω) ω)
+        (logState brownian (k-h-1) (Real.sqrt 2) x (actualRectangleExitTime k h x R δ ω) ω)
         ((T : ℝ)-(actualRectangleExitTime k h x R δ ω : ℝ)) ∂completedMeasure gaussianLimit) =
       canonicalPrice k h x (T : ℝ) := by
   let μ := completedMeasure gaussianLimit
@@ -120,7 +120,7 @@ theorem canonicalPrice_rectangle_meanValue {k h : ℝ} (hk : 0 ≤ k) {x R : ℝ
       (min (η.time ω) (brownianUsualActualContactTime (h := h) hk x T ω)) ω) =
       fun ω => Real.exp (-k*(actualRectangleExitTime k h x R δ ω : ℝ))*
         canonicalPrice k h
-          (brownianLogState (k-h-1) (Real.sqrt 2) x (actualRectangleExitTime k h x R δ ω) ω)
+          (logState brownian (k-h-1) (Real.sqrt 2) x (actualRectangleExitTime k h x R δ ω) ω)
           ((T : ℝ)-(actualRectangleExitTime k h x R δ ω : ℝ)) := by
     funext ω
     have hle := actualRectangleExit_le_contact hk hrect ω
