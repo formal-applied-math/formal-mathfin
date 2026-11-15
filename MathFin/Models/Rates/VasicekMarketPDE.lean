@@ -45,8 +45,9 @@ Vasicek model, bond price, term-structure PDE, pricing measure, MSC 91G30, JEL E
 
 @[expose] public section
 
-open MeasureTheory MathFin MathFin.Contracts
+open MeasureTheory ProbabilityTheory MathFin MathFin.Contracts
 open scoped NNReal
+open ItoIntegralL2
 
 namespace MathFin.Rates
 

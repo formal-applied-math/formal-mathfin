@@ -178,7 +178,7 @@ theorem bondPortfolioValue_eq_price (Q : Measure Ω) [IsProbabilityMeasure Q] (n
 `e^{rt}` as numéraire, and let two zero-coupon portfolios (faces `wA`, `wL`, maturities `TA`,
 `TL ≥ 0`) have equal duration-weighted values at the rate `r`. Then the derivative in `r` of the
 difference of the market prices of their cash-flow schedules is zero at `r`
-(`bondPortfolio_immunization_first_order`, through `bondPortfolioValue_eq_price_exp`). -/
+(`bondPortfolio_immunization_first_order`, through `bondPortfolioValue_eq_price`). -/
 theorem price_immunization_first_order (Q : Measure Ω) [IsProbabilityMeasure Q] (n m : ℕ)
     (wA TA wL TL : ℕ → ℝ) (hTA : ∀ i, 0 ≤ TA i) (hTL : ∀ i, 0 ≤ TL i)
     (M : ℝ → Market ι Ω) (hM : ∀ r t ω, (M r).numeraire t ω = Real.exp (r * t)) (r : ℝ)
@@ -191,8 +191,8 @@ theorem price_immunization_first_order (Q : Measure Ω) [IsProbabilityMeasure Q]
       fun r' ↦ MathFin.bondPortfolioValue (Finset.range n) wA TA 0 r' -
         MathFin.bondPortfolioValue (Finset.range m) wL TL 0 r' :=
     funext fun r' ↦ by
-      rw [bondPortfolioValue_eq_price_exp Q n wA TA hTA (M r') r' (hM r'),
-        bondPortfolioValue_eq_price_exp Q m wL TL hTL (M r') r' (hM r')]
+      rw [(bondPortfolioValue_eq_price Q n wA TA hTA).1 (M r') r' (hM r'),
+        (bondPortfolioValue_eq_price Q m wL TL hTL).1 (M r') r' (hM r')]
   rw [e]
   exact MathFin.bondPortfolio_immunization_first_order _ _ _ _ _ _ 0 r h_match
 
