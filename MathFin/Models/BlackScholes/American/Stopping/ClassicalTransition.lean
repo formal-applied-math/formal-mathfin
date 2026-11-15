@@ -103,7 +103,7 @@ theorem classicalCandidate_condExp_le_before_maturity {K r q σ S : ℝ} {p : �
       mul_le_mul_of_nonneg_left hpy (norm_nonneg (Real.exp (-r*(j : ℝ))*K))
   have hX : Measurable[brownianFiltration i] X :=
     (measurable_const.add (measurable_const.mul (brownian_adapted i))).add measurable_const
-  have he := brownian_condExp_transition hf hb hij hX σ
+  have he := condExp_transition brownian_filtered hf hb hij hX σ
   have heq : (fun ω => f (X ω+σ*(brownian j ω-brownian i ω))) =
       classicalCandidate brownian K r q σ S p T j := by
     funext ω
