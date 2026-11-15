@@ -189,6 +189,7 @@ import MathFin.Risk.EntropicRisk
 import MathFin.Risk.LawInvariance
 import MathFin.Risk.ComponentVaR
 import MathFin.Risk.ContractRisk
+import MathFin.Risk.Credit.OneFactorMerton
 import MathFin.Risk.Credit.TrancheLeg
 import MathFin.Risk.Credit.VasicekIRB
 import MathFin.Risk.Elicitability
@@ -1108,6 +1109,19 @@ attribute [blueprint "thm:merton-structural-default"
   \Phi(d_2)$ (`kmv_survival_eq_Phi_d2`). Default at maturity only: first passage (Black–Cox)
   is not covered. -/)]
   MathFin.kmvPD_eq_one_sub_survival_probability
+
+attribute [blueprint "thm:credit-portfolio-is-merton"
+  (title := "The one-factor credit portfolio is Merton's")
+  (statement := /-- With the standardised log firm value $\sqrt\rho\,M + \sqrt{1-\rho}\,\varepsilon$,
+  $M$ (measurable) and $\varepsilon$ independent standard normals, a Merton name defaults at $T$
+  when $V_T < F$; given $M$ it does so with probability
+  $\Phi\big((\Phi^{-1}(\mathrm{PD}) - \sqrt\rho\,M)/\sqrt{1-\rho}\big)$, that is
+  `oneFactorPD` of the Merton default probability $\mathrm{PD} = $ `kmvPD`
+  (`condDefault_eq_oneFactorPD`, an almost-sure identity of the conditional expectation of the
+  default indicator given $\sigma(M)$). One name; the loss of a pool or a tranche is not
+  covered. -/)
+  (uses := ["thm:merton-structural-default"])]
+  MathFin.condDefault_eq_oneFactorPD
 
 attribute [blueprint "thm:intensity-default-model"
   (title := "Intensity model of default")
