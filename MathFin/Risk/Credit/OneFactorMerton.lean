@@ -47,11 +47,12 @@ namespace MathFin
 open MeasureTheory ProbabilityTheory
 
 /-- **The conditional default probability of a Merton name is `oneFactorPD`.** If the standardised
-log firm value is `√ρ M + √(1 − ρ) ε` with `M`, `ε` independent standard normals (`M` measurable),
+log firm value is `√ρ M + √(1 − ρ) ε` with `ε` a standard normal independent of the measurable
+systematic factor `M` (the law of `M` is not used; in the one-factor model it is standard normal),
 then given `M` the name defaults at `T` (firm value below the face value `F`) with probability
 `oneFactorPD (kmvPD V₀ F r σ T) ρ M`. -/
 theorem condDefault_eq_oneFactorPD {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}
-    [IsProbabilityMeasure Q] {M ε : Ω → ℝ} (hMm : Measurable M) (hM : HasLaw M (gaussianReal 0 1) Q)
+    [IsProbabilityMeasure Q] {M ε : Ω → ℝ} (hMm : Measurable M)
     (hε : HasLaw ε (gaussianReal 0 1) Q) (hind : M ⟂ᵢ[Q] ε) {V₀ F r σ T ρ : ℝ} (hV₀ : 0 < V₀)
     (hF : 0 < F) (hσ : 0 < σ) (hT : 0 < T) (hρ1 : ρ < 1) :
     Q[{ω | bsTerminal V₀ r σ T (√ρ * M ω + √(1 - ρ) * ε ω) < F}.indicator
@@ -73,19 +74,22 @@ theorem condDefault_eq_oneFactorPD {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : 
       (ae_of_all _ fun ω ↦ by by_cases h : (M ω, ε ω) ∈ S <;> simp [h])
   have key := condExp_comp_prodMk_of_indep (m := MeasurableSpace.comap M inferInstance)
     hMm.comap_le (comap_measurable M) hε.aemeasurable hind.symm hg hgi
-  rw [hev, ← Set.indicator_comp_right (fun ω ↦ (M ω, ε ω)) (f := fun _ ↦ (1 : ℝ))]
+  have hfun : ((fun ω ↦ (M ω, ε ω)) ⁻¹' S).indicator (fun _ ↦ (1 : ℝ)) =
+      fun ω ↦ S.indicator (fun _ : ℝ × ℝ ↦ (1 : ℝ)) (M ω, ε ω) :=
+    funext fun ω ↦ by by_cases h : (M ω, ε ω) ∈ S <;> simp [h]
+  rw [hev, hfun]
   refine key.trans (Filter.Eventually.of_forall fun ω ↦ ?_)
   have : NullSingletonClass (gaussianReal (0 : ℝ) 1) := nullSingletonClass_gaussianReal one_ne_zero
-  have hset : {y | (M ω, y) ∈ S} = Set.Iio ((PhiInv (kmvPD V₀ F r σ T) - √ρ * M ω) / √(1 - ρ)) := by
+  have hset : Prod.mk (M ω) ⁻¹' S =
+      Set.Iio ((PhiInv (kmvPD V₀ F r σ T) - √ρ * M ω) / √(1 - ρ)) := by
     ext y
-    simp only [hS, Set.mem_setOf_eq, Set.mem_Iio, hc, lt_div_iff₀ hs]
+    simp only [hS, Set.mem_preimage, Set.mem_ofPred_eq, Set.mem_Iio, hc, lt_div_iff₀ hs]
     constructor <;> intro h <;> linarith
   have h1 : ∫ y, S.indicator (fun _ : ℝ × ℝ ↦ (1 : ℝ)) (M ω, y) ∂(Q.map ε) =
-      ∫ y, {y | (M ω, y) ∈ S}.indicator (fun _ ↦ (1 : ℝ)) y ∂(Q.map ε) := rfl
-  rw [Function.comp_apply, Function.comp_def] at *
-  simp only [Function.comp_def]
-  rw [h1, integral_indicator_one (by exact measurable_prodMk_left hSm), hε.map_eq, hset,
-    Measure.real, measure_congr Iio_ae_eq_Iic, ← Phi_def]
+      ∫ y, (Prod.mk (M ω) ⁻¹' S).indicator (fun _ ↦ (1 : ℝ)) y ∂(Q.map ε) := rfl
+  beta_reduce
+  rw [h1, integral_indicator_const _ (measurable_prodMk_left hSm), smul_eq_mul, mul_one,
+    hε.map_eq, hset, Measure.real, measure_congr Iio_ae_eq_Iic, ← Phi_def]
   rfl
 
 end MathFin

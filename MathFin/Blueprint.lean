@@ -1112,9 +1112,10 @@ attribute [blueprint "thm:merton-structural-default"
 
 attribute [blueprint "thm:credit-portfolio-is-merton"
   (title := "The one-factor credit portfolio is Merton's")
-  (statement := /-- With the standardised log firm value $\sqrt\rho\,M + \sqrt{1-\rho}\,\varepsilon$,
-  $M$ (measurable) and $\varepsilon$ independent standard normals, a Merton name defaults at $T$
-  when $V_T < F$; given $M$ it does so with probability
+  (statement := /-- With the standardised log firm value
+  $\sqrt\rho\,M + \sqrt{1-\rho}\,\varepsilon$,
+  $M$ measurable and $\varepsilon$ a standard normal independent of $M$, a Merton name
+  defaults at $T$ when $V_T < F$; given $M$ it does so with probability
   $\Phi\big((\Phi^{-1}(\mathrm{PD}) - \sqrt\rho\,M)/\sqrt{1-\rho}\big)$, that is
   `oneFactorPD` of the Merton default probability $\mathrm{PD} = $ `kmvPD`
   (`condDefault_eq_oneFactorPD`, an almost-sure identity of the conditional expectation of the
