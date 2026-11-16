@@ -49,9 +49,9 @@ Three steps chain.
 * `americanPrice_market_europeanPutPayoff`: for `σ ≠ 0`, `T ≤ H`, continuous paths of `W`,
   `K, r ≥ 0` and `S₀ > 0`, the American price of the put in `BlackScholes.market` under the
   Girsanov measure is `brownianAmericanPut K r 0 σ S₀ T`.
-* `americanPrice_market_europeanPutPayoff_eq_canonicalPrice`: for `K, σ > 0` it is
-  `K · canonicalPrice` at the normalized rate `2r/σ²`, log-moneyness `log(S₀/K)` and normalized
-  time `σ²T/2`.
+* `americanPrice_market_europeanPutPayoff_eq_canonicalPrice`: for `K, σ > 0` the Girsanov
+  measure is a pricing measure up to `T`, and the price is `K · canonicalPrice` at the normalized
+  rate `2r/σ²`, log-moneyness `log(S₀/K)` and normalized time `σ²T/2`.
 
 ## References
 
@@ -151,16 +151,20 @@ theorem americanPrice_market_europeanPutPayoff (hpaths : ∀ ω, Continuous fun 
     exerciseValue_europeanPutPayoff_eq_putRewardAt hWmeas hσ (ht.trans hTH) ω
 
 /-- **The American put of the Black–Scholes market in normalized coordinates.** For `K, σ > 0`
-it is `K · canonicalPrice` of the normalized rates, log-moneyness `log(S₀/K)` and normalized time
-`σ²T/2`: the value of the canonical free-boundary problem. -/
+the Girsanov measure is a pricing measure of the market up to `T`, and the American price of the
+put under it is `K · canonicalPrice` of the normalized rates, log-moneyness `log(S₀/K)` and
+normalized time `σ²T/2`: the value of the canonical free-boundary problem. -/
 theorem americanPrice_market_europeanPutPayoff_eq_canonicalPrice
     (hpaths : ∀ ω, Continuous fun t ↦ W t ω) {S_0 m r σ K : ℝ} {T H : ℝ≥0} (hσ : 0 < σ)
     (hTH : T ≤ H) (hK : 0 < K) (hr : 0 ≤ r) (hS : 0 < S_0) :
-    (market μ hWmeas S_0 m r σ).americanPrice (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
-        (europeanPutPayoff K) T =
-      K * canonicalPrice (normalizedRate r σ) (normalizedRate 0 σ) (Real.log (S_0 / K))
-        (σ ^ 2 / 2 * (T : ℝ)) := by
-  rw [americanPrice_market_europeanPutPayoff hWmeas hW hpaths hσ.ne' hTH hK.le hr hS,
-    brownianAmericanPut_normalization hK hr hσ hS T]
+    (market μ hWmeas S_0 m r σ).IsPricingMeasure T
+        (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) ∧
+      (market μ hWmeas S_0 m r σ).americanPrice (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+          (europeanPutPayoff K) T =
+        K * canonicalPrice (normalizedRate r σ) (normalizedRate 0 σ) (Real.log (S_0 / K))
+          (σ ^ 2 / 2 * (T : ℝ)) :=
+  ⟨isPricingMeasure_constGirsanovMeasure hW hWmeas hσ.ne' hTH, by
+    rw [americanPrice_market_europeanPutPayoff hWmeas hW hpaths hσ.ne' hTH hK.le hr hS,
+      brownianAmericanPut_normalization hK hr hσ hS T]⟩
 
 end MathFin.Contracts.BlackScholes

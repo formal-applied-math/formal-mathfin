@@ -936,11 +936,12 @@ attribute [blueprint "thm:american-put-dominates-european"
 
 attribute [blueprint "thm:bs-american-market"
   (title := "The Black–Scholes market's American put is the canonical American put")
-  (statement := /-- For $\sigma \ne 0$, $T \le H$, a driving $W$ with continuous paths, $K, r
-  \ge 0$ and $S_0 > 0$, the American price of the put in the Black–Scholes market under the
+  (statement := /-- For $\sigma > 0$, $T \le H$, a driving $W$ with continuous paths, $K > 0$,
+  $r \ge 0$ and $S_0 > 0$, the Girsanov measure of $\theta = (m - r)/\sigma$ is a pricing
+  measure of the Black–Scholes market up to $T$, and the American price of the put in the Black–Scholes market under the
   Girsanov pricing measure of $\theta = (m - r)/\sigma$ (the supremum over the stopping rules of
-  the information of $W$ bounded by $T$) is the canonical American put value, and for $K, \sigma
-  > 0$ it is $K$ times `canonicalPrice` at the normalized rate $2r/\sigma^2$, log-moneyness
+  the information of $W$ bounded by $T$) is the canonical American put value, $K$ times
+  `canonicalPrice` at the normalized rate $2r/\sigma^2$, log-moneyness
   $\log(S_0/K)$ and time $\sigma^2T/2$. The path $W_u + \theta\min(u, H)$ is an adapted
   modification of $B^\theta$, so a Brownian motion under $Q$; along it the deflated exercise value
   is the discounted risk-neutral put reward on every path, and the American put value is the same
