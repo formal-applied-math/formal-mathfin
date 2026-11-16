@@ -41,7 +41,7 @@ open scoped NNReal ENNReal
 
 namespace ProbabilityTheory
 
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
   {𝓕 : Filtration ℝ≥0 mΩ} {B : ℝ≥0 → Ω → ℝ}
 
 /-- **The `L²` norm of Brownian motion at time `t` is `√t`.** -/
@@ -65,8 +65,8 @@ pre-Brownian motion `B` and a monotone schedule `t`, the running maximum of `|B|
 `n + 1` grid times satisfies `‖max_{k ≤ n} |B_{t_k}|‖_{L²} ≤ 2 √(t_n)`: Doob's inequality
 (`maximal_ineq_Lp` through `Martingale.eLpNorm_norm_runMax_le`) for the sampled martingale
 `k ↦ B_{t_k}` of the sampled filtration, whose last `L²` norm is `√(t_n)`. -/
-theorem IsFilteredPreBrownian.eLpNorm_runMax_le (hB : IsFilteredPreBrownian B 𝓕 P)
-    {t : ℕ → ℝ≥0} (ht : Monotone t) (n : ℕ) :
+theorem IsFilteredPreBrownian.eLpNorm_runMax_le [IsProbabilityMeasure P]
+    (hB : IsFilteredPreBrownian B 𝓕 P) {t : ℕ → ℝ≥0} (ht : Monotone t) (n : ℕ) :
     eLpNorm (fun ω ↦ (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
         (fun k ↦ |B (t k) ω|)) 2 P ≤ 2 * ENNReal.ofReal (√(t n)) := by
   have hM : Martingale (B ∘ t) (𝓕.indexComap ht) P :=
