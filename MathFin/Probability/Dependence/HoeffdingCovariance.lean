@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Probability.Gaussian.BivariateNormalCDF
+public import MathFin.Probability.Dependence.Sklar
 public import Mathlib.Algebra.Order.Star.Real
 
 /-!
@@ -50,6 +51,9 @@ inclusion–exclusion. The identity is stated for the law of `(X, Y)` on `ℝ²`
   `r ∈ [−1, 1]`, `∫∫ (N₂(s, t; r) − Φ(s) Φ(t)) ds dt = r`.
 * `covariance_fst_snd_eq_integral`: Hoeffding's identity for a law on `ℝ²`.
 * `covariance_eq_integral_cdf`: Hoeffding's identity for random variables.
+* `covariance_eq_integral_copulaOf`: Hoeffding's identity in copula form,
+  `cov(X, Y) = ∫∫ (C(F_X(s), F_Y(t)) − F_X(s) F_Y(t)) ds dt` for the copula `C` of `(X, Y)`
+  (continuous margins), together with `IsCopula C` (Sklar's theorem).
 * `integrable_cdf_sub_mul`: the Hoeffding integrand is integrable on `ℝ²`.
 * `covariance_le_covariance_of_cdf_le`, `correlation_le_correlation_of_cdf_le`: ordering.
 * `variance_indicator_one`, `covariance_indicator_one_le`, `le_covariance_indicator_one`,
@@ -452,5 +456,49 @@ theorem integral_bivariateNormalCDF_sub_mul {r : ℝ} (hr : r ^ 2 ≤ 1) :
     ← map_measureReal_apply measurable_fst measurableSet_Iic,
     ← map_measureReal_apply measurable_snd measurableSet_Iic, map_fst_bivariateNormalLaw hr,
     map_snd_bivariateNormalLaw, ← cdf_eq_real, ← cdf_eq_real, cdf_gaussianReal_zero_one]
+
+/-! ### Hoeffding's identity in copula form -/
+
+section Copula
+
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+  {X Y : Ω → ℝ}
+
+/-- The distribution function of `X` at `s` is `P(X ≤ s)`. -/
+lemma cdf_map_eq_measureReal_le (hX : AEMeasurable X P) (s : ℝ) :
+    cdf (P.map X) s = P.real {ω | X ω ≤ s} := by
+  rw [cdf_eq_real, map_measureReal_apply_of_aemeasurable hX measurableSet_Iic] <;> rfl
+
+/-- **Hoeffding's covariance identity in copula form**: for square-integrable `X, Y` with
+continuous marginal distribution functions `F_X, F_Y`, the joint law of `(F_X(X), F_Y(Y))` is a
+copula `C` (Sklar's theorem), and
+`cov(X, Y) = ∫∫ (C([0, F_X(s)] × [0, F_Y(t)]) − F_X(s) F_Y(t)) ds dt`,
+where `C(Iic u)` is the copula's distribution function. -/
+theorem covariance_eq_integral_copulaOf (hX : MemLp X 2 P) (hY : MemLp Y 2 P)
+    (hFX : Continuous (cdf (P.map X))) (hFY : Continuous (cdf (P.map Y))) :
+    IsCopula (copulaOf (fun ω ↦ ![X ω, Y ω]) P) ∧
+      cov[X, Y; P] = ∫ p : ℝ × ℝ,
+        ((copulaOf (fun ω ↦ ![X ω, Y ω]) P).real
+            (Iic ![cdf (P.map X) p.1, cdf (P.map Y) p.2])
+          - cdf (P.map X) p.1 * cdf (P.map Y) p.2) := by
+  have hZ : AEMeasurable (fun ω ↦ ![X ω, Y ω]) P :=
+    aemeasurable_pi_iff.2 (Fin.forall_fin_two.2 ⟨hX.aemeasurable, hY.aemeasurable⟩)
+  have hF : ∀ i, Continuous (cdf (P.map fun ω ↦ ![X ω, Y ω] i)) :=
+    Fin.forall_fin_two.2 ⟨hFX, hFY⟩
+  refine ⟨isCopula_copulaOf hZ hF, ?_⟩
+  rw [covariance_eq_integral_cdf hX hY]
+  refine integral_congr_ae (ae_of_all _ fun p ↦ ?_)
+  have e₁ : {ω | ![X ω, Y ω] ≤ ![p.1, p.2]} = {ω | X ω ≤ p.1 ∧ Y ω ≤ p.2} := by
+    ext ω
+    simp [Pi.le_def, Fin.forall_fin_two]
+  have e₂ : (fun i ↦ cdf (P.map fun ω ↦ ![X ω, Y ω] i) (![p.1, p.2] i))
+      = ![cdf (P.map X) p.1, cdf (P.map Y) p.2] := by
+    funext i
+    fin_cases i <;> rfl
+  have h := measureReal_le_eq_copulaOf hZ hF ![p.1, p.2]
+  rw [e₁, e₂] at h
+  rw [h, ← cdf_map_eq_measureReal_le hX.aemeasurable, ← cdf_map_eq_measureReal_le hY.aemeasurable]
+
+end Copula
 
 end MathFin
