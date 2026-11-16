@@ -63,7 +63,7 @@ variable {u d ρ h : ℝ}
 after the steps made: `e^{−ρ n} (K − Sₙ)⁺` with `n = ⌊t / h⌋₊`. -/
 theorem exerciseValue_market_europeanPutPayoff (P : Measure (ℕ → Bool)) (S₀ K : ℝ)
     (hh : 0 ≤ h) :
-    (market P S₀ u d ρ hh).exerciseValue (europeanPutPayoff K) = fun t ω ↦
+    (market P S₀ u d ρ hh).exerciseValue (europeanPutPayoff K) = fun (t : ℝ≥0) ω ↦
       Real.exp (-ρ * ⌊(t : ℝ) / h⌋₊) * max (K - spotPath S₀ u d ⌊(t : ℝ) / h⌋₊ ω) 0 := by
   funext t ω
   simp [Market.exerciseValue, Market.deflator, market, europeanPutPayoff, Payoff.eval,
@@ -80,7 +80,7 @@ theorem americanPrice_market_europeanPutPayoff (hh : 0 < h) {q : ℝ≥0} (hq : 
       americanPrice u d ρ (fun S ↦ max (K - S) 0) ⌊(T : ℝ) / h⌋₊ S₀ := by
   have hZ (n : ℕ) :
       PathAdaptedAt n fun ω ↦ Real.exp (-ρ * n) * max (K - spotPath S₀ u d n ω) 0 :=
-    fun ω ω' hω ↦ by rw [pathAdaptedAt_spotPath S₀ u d n ω ω' hω]
+    fun ω ω' hω ↦ by dsimp only; rw [pathAdaptedAt_spotPath S₀ u d n ω ω' hω]
   rw [Market.americanPrice, exerciseValue_market_europeanPutPayoff]
   calc _ = stoppingValue (coinFlipMeasure q hq) flipFiltration
           (fun n ω ↦ Real.exp (-ρ * n) * max (K - spotPath S₀ u d n ω) 0) ⌊(T : ℝ) / h⌋₊ :=
