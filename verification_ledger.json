@@ -20,9 +20,9 @@
     "bm-doob-maximal-grid": {
       "benchmark_file": "brownian_motion.json",
       "date": "2026-11-16",
-      "elapsed_s": 2.2,
-      "input_hash": "a8560dc40e578b595b70d7a86a9b74b23158ce26262b1d0d0ebba320355be7c9",
-      "verified_at_commit": "74778e1"
+      "elapsed_s": 3.2,
+      "input_hash": "617167eee516f51e4c734fd44e48bab68ba8dfa9350b2ab50f0b58f7bd6df5ba",
+      "verified_at_commit": "1f99681"
     },
     "bm-prop-5.1.2": {
       "benchmark_file": "brownian_motion.json",
