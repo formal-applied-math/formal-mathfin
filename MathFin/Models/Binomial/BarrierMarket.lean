@@ -106,7 +106,7 @@ theorem price_upAndIn_market (hu : 1 < u) (hS : 0 < S₀) (hh : 0 < h)
         ((n : ℝ≥0) * h.toNNReal) (coinFlipMeasure (1 / 2) hq) ∧
       (market (coinFlipMeasure p hp.le) S₀ u u⁻¹ ρ hh.le).price (coinFlipMeasure (1 / 2) hq)
           (upAndIn (S₀ * u ^ a) f () ((n : ℝ≥0) * h.toNNReal)
-            ((List.range n).map fun k ↦ (k : ℝ≥0) * h.toNNReal)) =
+            ((List.range n).map fun k : ℕ ↦ (k : ℝ≥0) * h.toNNReal)) =
         Real.exp (-(ρ * n)) *
           ((∫ ω, (if a ≤ walkPos (flips n ω) n
               then f.eval (fun _ _ ↦ S₀ * u ^ walkPos (flips n ω) n) else 0)
@@ -121,7 +121,8 @@ theorem price_upAndIn_market (hu : 1 < u) (hS : 0 < S₀) (hh : 0 < h)
     simp only [assets]
     rw [floor_gridDate_div hh]
   have hmon (ω : ℕ → Bool) :
-      (∃ τ ∈ ((n : ℝ≥0) * h.toNNReal) :: (List.range n).map (fun k ↦ (k : ℝ≥0) * h.toNNReal),
+      (∃ τ ∈ ((n : ℝ≥0) * h.toNNReal) ::
+          (List.range n).map (fun k : ℕ ↦ (k : ℝ≥0) * h.toNNReal),
           S₀ * u ^ a ≤ assets S₀ u u⁻¹ h () τ ω) ↔ HitsLevel a (flips n ω) := by
     rw [← exists_le_spotPath_iff hS hu ha.le ω]
     constructor
@@ -139,7 +140,7 @@ theorem price_upAndIn_market (hu : 1 < u) (hS : 0 < S₀) (hh : 0 < h)
       f.eval (scenarioAt (assets S₀ u u⁻¹ h) ω)
         = f.eval (fun _ _ ↦ S₀ * u ^ walkPos (flips n ω) n) :=
     f.eval_congr fun o ho ↦ by
-      show assets S₀ u u⁻¹ h o.1 o.2 ω = S₀ * u ^ walkPos (flips n ω) n
+      change assets S₀ u u⁻¹ h o.1 o.2 ω = S₀ * u ^ walkPos (flips n ω) n
       rw [hf o ho, hspot n ω, spotPath_inv_eq_zpow S₀ hu0 ω le_rfl]
   have hdefl (ω : ℕ → Bool) :
       (market (coinFlipMeasure p hp.le) S₀ u u⁻¹ ρ hh.le).deflator
