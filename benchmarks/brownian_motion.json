@@ -246,6 +246,28 @@
         "formalization_status": "reduced_core",
         "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at the pinned toolchain."
       }
+    },
+    {
+      "id": "bm-doob-maximal-grid",
+      "name": "Doob's L² maximal inequality for Brownian motion on a grid",
+      "description": "For a filtered pre-Brownian motion B and a monotone schedule t₀ ≤ t₁ ≤ …, the L² norm of the running maximum max_{k≤n} |B_{t_k}| over the first n + 1 grid times is at most 2√(t_n). Proved as Doob's L^p maximal inequality (p = 2) for the discrete martingale k ↦ B_{t_k} of the sampled filtration, with ‖B_t‖_{L²} = √t. Finite grids only: the supremum over a continuous time interval is not treated.",
+      "domain": "brownian_motion",
+      "metadata": {
+        "chapter": 2,
+        "reference": "Theorem 2.4.6 (applied to Brownian motion on a grid)",
+        "citations": [
+          {
+            "key": "Saporito",
+            "locator": "Theorem 2.4.6"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof for finite grids: the sampled process k ↦ B_{t_k} is a martingale of the sampled filtration (BrownianMotion's Martingale.indexComap of IsPreBrownianReal.isMartingale), Doob's L^p maximal inequality (MeasureTheory.maximal_ineq_Lp through Martingale.eLpNorm_norm_runMax_le) gives the factor p/(p−1) = 2, and the Gaussian second moment gives ‖B_{t_n}‖_{L²} = √(t_n). The continuous-time bound E[sup_{s≤t} B_s²] ≤ 4t, which needs path regularity, is not proved here."
+      },
+      "code": {
+        "lean": "import MathFin.Probability.Brownian.BrownianDoobMaximal\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\n/-- Doob's `L²` maximal inequality for Brownian motion on a finite grid:\n`‖max_{k ≤ n} |B_{t_k}|‖_{L²} ≤ 2 √(t_n)` for a monotone schedule `t`. -/\ntheorem brownian_doob_maximal_grid {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {𝓕 : Filtration ℝ≥0 mΩ} {B : ℝ≥0 → Ω → ℝ}\n    (hB : IsFilteredPreBrownian B 𝓕 P) {t : ℕ → ℝ≥0} (ht : Monotone t) (n : ℕ) :\n    eLpNorm (fun ω ↦ (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one\n        (fun k ↦ |B (t k) ω|)) 2 P ≤ 2 * ENNReal.ofReal (√(t n)) :=\n  IsFilteredPreBrownian.eLpNorm_runMax_le hB ht n"
+      }
     }
   ]
 }

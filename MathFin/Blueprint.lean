@@ -218,6 +218,7 @@ import MathFin.Probability.Brownian.BrownianDoobMaximal
 import MathFin.Probability.Discrete.SnellDoobDecomposition
 import MathFin.Models.Credit.HazardCurve
 import MathFin.Probability.Brownian.Ito.StochasticFubiniIto
+import MathFin.Models.StochVol.HestonSmallVolOfVol
 
 /-!
 # The blueprint: a map of the field's landmarks
@@ -1052,6 +1053,23 @@ attribute [blueprint "thm:binomial-american-market"
 
 -- ===== valuation/volatility: Volatility =====
 
+attribute [blueprint "def:heston-transform"
+  (title := "The explicit Heston transform")
+  (statement := /-- For $0 < u < 1$, $\Phi(t, x, v) = \exp(\hat a(T - t) + ux + \hat b(T - t)v)$,
+  where $\hat a, \hat b$ are the closed-form (Möbius and logarithmic) solutions of the Heston
+  Riccati system from $\hat a(0) = \hat b(0) = 0$: the candidate for $E[e^{u\log S_T}]$. -/)]
+  MathFin.Heston.hestonTransform
+
+attribute [blueprint "thm:heston-bs-market-limit"
+  (title := "As vol-of-vol vanishes the Heston transform is a Black–Scholes price")
+  (statement := /-- In the Black–Scholes market with volatility $\sigma > 0$, the Girsanov
+  measure $Q$ of $\theta = (m - r)/\sigma$ at a horizon $H \ge T > 0$ is a pricing measure, and
+  for $\kappa > 0$, $0 < u < 1$ and the variance started at its mean $\theta = v = \sigma^2$, the
+  discounted explicit Heston transform $e^{-rT}\Phi_\xi(0, \log S_0, \sigma^2)$ tends, as the
+  vol-of-vol $\xi \to 0$, to the $Q$-price of the claim paying $S_T^u$ at $T$. A limit of the
+  Riccati-level transform, not of a Heston process. -/)]
+  MathFin.Heston.tendsto_hestonTransform_smallVolOfVol_marketPrice
+
 attribute [blueprint "thm:heston-pde"
   (title := "The explicit Heston transform solves the pricing equation")
   (statement := /-- For $0 < u < 1$ and $\xi \ne 0$, the profile $\Phi(t,x,v) = \exp(A(t) + ux +
@@ -1189,11 +1207,12 @@ attribute [blueprint "thm:schwartz-commodity-futures"
 
 attribute [blueprint "thm:interest-rate-parity"
   (title := "Covered interest-rate parity")
-  (statement := /-- In a finite-state market pricing the domestic bond at $e^{-r_dT}$ and the
-  foreign bond, in domestic currency, at $Se^{-r_fT}$, the forward priced to zero is $F =
-  Se^{(r_d-r_f)T}$; under the Garman–Kohlhagen risk-neutral measure it is also the expected
-  terminal spot. A statement about the pricing measure, not the physical one. -/)]
-  MathFin.covered_eq_uncovered_interest_parity
+  (statement := /-- In a finite-state market whose prices value the domestic bond at
+  $e^{-r_dT}$ and the foreign bond, in domestic currency, at $Se^{-r_fT}$, the forward paying
+  $S_T - F$ at $T$ is worth zero if and only if $F = Se^{(r_d-r_f)T}$. Under the Garman–Kohlhagen
+  lognormal law at drift $r_d - r_f$ this $F$ is also the expected terminal spot
+  (`covered_eq_uncovered_interest_parity`). -/)]
+  MathFin.market_covered_interest_parity
 
 attribute [blueprint "thm:key-rate-duration"
   (title := "Key-rate durations")
@@ -1372,8 +1391,11 @@ attribute [blueprint "thm:insured-market"
 attribute [blueprint "thm:impermanent-loss"
   (title := "Impermanent loss")
   (statement := /-- For a price ratio $r \ge 0$, the impermanent loss $2\sqrt r/(1+r) - 1$ of
-  a fee-free constant-product position is at most $0$. -/)]
-  MathFin.DeFi.impermanentLoss_nonpos
+  a fee-free constant-product position is at most $0$ (`impermanentLoss_nonpos`). Priced: in a
+  market with a positive price $P_T$ of $X$ in $Y$, under any measure $Q$ for which the deflated
+  hold value $D_T(x_0P_T + y_0)$ is integrable, the constant-product position of invariant
+  $x_0y_0$ paid at $T$ is worth at most the claim paying the deposit $x_0P_T + y_0$. -/)]
+  MathFin.DeFi.price_constantProductPayoff_le_hodl
 
 attribute [blueprint "def:v3-position-value"
   (title := "Value of a concentrated-liquidity position")
@@ -1636,8 +1658,10 @@ attribute [blueprint "thm:glosten-milgrom-quote"
   (title := "Glosten–Milgrom bid and ask quotes")
   (statement := /-- On a finite measure space, the conditional expectation of the asset value
   given the trade direction equals almost everywhere the ask $\int V\,d\mu[\cdot\mid B]$ on
-  the buy event and the bid $\int V\,d\mu[\cdot\mid B^c]$ on the sell event. -/)]
-  MathFin.Execution.condExp_payoff_eq_quote
+  the buy event and the bid $\int V\,d\mu[\cdot\mid B^c]$ on the sell event
+  (`condExp_payoff_eq_quote`). In the sequential model these are the dealer's quotes after the
+  first order: almost surely the ask if it is a buy and the bid if it is a sell. -/)]
+  MathFin.Execution.gmQuote_one_ae_eq_quote
 
 attribute [blueprint "thm:conditional-expectation-pricing-measure"
   (title := "A conditional-expectation process is priced by its own measure")

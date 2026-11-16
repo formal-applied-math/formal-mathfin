@@ -292,7 +292,7 @@ blurb = "forward and futures prices, interest-rate parity, storage and convenien
 modules = ["MathFin.Models.Forwards"]
 subjects = ["MSC 91G20", "JEL F31", "JEL Q02"]
 landmarks = [
-  "MathFin.schwartzFuturesPrice_eq_integral", "MathFin.covered_eq_uncovered_interest_parity",
+  "MathFin.schwartzFuturesPrice_eq_integral", "MathFin.market_covered_interest_parity",
 ]
 
 [[cell]]
@@ -323,7 +323,7 @@ subjects = ["MSC 91G20", "MSC 91G15"]
 landmarks = [
   "MathFin.Market.IsPricingMeasure.integral_eq_carrMadan",
   "MathFin.DeFi.v3PositionValue_le_coveredCall",
-  "MathFin.DeFi.price_lpPayoff", "MathFin.DeFi.impermanentLoss_nonpos",
+  "MathFin.DeFi.price_lpPayoff", "MathFin.DeFi.price_constantProductPayoff_le_hodl",
 ]
 
 [[cell]]
@@ -378,7 +378,7 @@ blurb = "price formation under asymmetric information, market making, price impa
 modules = ["MathFin.Markets.Microstructure", "MathFin.Markets.Execution"]
 subjects = ["JEL G14", "JEL D82", "MSC 49L20"]
 landmarks = [
-  "MathFin.Execution.condExp_payoff_eq_quote",
+  "MathFin.Execution.gmQuote_one_ae_eq_quote",
   "MathFin.Execution.isPricingMeasure_toMarket_condExp",
 ]
 

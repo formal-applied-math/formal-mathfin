@@ -3148,3 +3148,23 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.IsL2SolutionPair.uniqueness_ito' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.IsL2SolutionPair.uniqueness_ito
+
+/-- info: 'MathFin.market_covered_interest_parity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.market_covered_interest_parity
+
+/-- info: 'MathFin.Heston.hestonTransform' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Heston.hestonTransform
+
+/-- info: 'MathFin.Heston.tendsto_hestonTransform_smallVolOfVol_marketPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Heston.tendsto_hestonTransform_smallVolOfVol_marketPrice
+
+/-- info: 'MathFin.DeFi.price_constantProductPayoff_le_hodl' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.price_constantProductPayoff_le_hodl
+
+/-- info: 'MathFin.Execution.gmQuote_one_ae_eq_quote' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Execution.gmQuote_one_ae_eq_quote
