@@ -7,6 +7,7 @@ module
 
 public import MathFin.Models.ModelFree.CarrMadan
 public import MathFin.Pricing.Market
+public import Mathlib.MeasureTheory.Integral.Prod
 
 /-!
 # Carr–Madan replication in a market

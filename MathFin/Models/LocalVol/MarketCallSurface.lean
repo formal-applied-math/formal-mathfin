@@ -112,8 +112,8 @@ theorem dupire_price_europeanCall [IsProbabilityMeasure Q] (hN : ∀ t x, M.nume
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B Q) (hBmeas : ∀ t, Measurable (B t))
     {H : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ} {Y : ℝ≥0 → Ω → ℝ}
     (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas H δ Dd Y) (c : ℝ)
-    (hScont : ∀ ω, Continuous fun s : ℝ≥0 ↦ M.asset () s ω)
-    (hSrel : ∀ t : ℝ≥0, M.asset () t = fun ω : Ω ↦ c + Y t ω)
+    (hScont : ∀ x, Continuous fun s : ℝ≥0 ↦ M.asset () s x)
+    (hSrel : ∀ t : ℝ≥0, M.asset () t = fun x : Ω ↦ c + Y t x)
     (t : ℝ) (ht : 0 < t) (htH : Real.toNNReal t < H)
     {a b ε : ℝ} (ha : 0 ≤ a) (hε : 0 < ε) {CK CKK : ℝ → ℝ} {Ct : ℝ → ℝ → ℝ}
     (hCK : ∀ K ∈ Ioo a b,
@@ -124,9 +124,9 @@ theorem dupire_price_europeanCall [IsProbabilityMeasure Q] (hN : ∀ t x, M.nume
       HasDerivAt (fun s' ↦ M.price Q (europeanCall K (Real.toNNReal s'))) (Ct s K) s)
     (hCtc : ContinuousOn (Function.uncurry Ct) (Ioo (t - ε) (t + ε) ×ˢ Ioo a b))
     {σloc : ℝ → ℝ} (hσc : ContinuousOn σloc (Ioo a b))
-    (hσrep : ∀ᵐ ω ∂Q, M.asset () (Real.toNNReal t) ω ∈ Ioo a b →
-      diffCoeffSq Q (reindexed (M.asset ())) (reindexed δ) t ω
-        = σloc (M.asset () (Real.toNNReal t) ω) ^ 2 * M.asset () (Real.toNNReal t) ω ^ 2) :
+    (hσrep : ∀ᵐ x ∂Q, M.asset () (Real.toNNReal t) x ∈ Ioo a b →
+      diffCoeffSq Q (reindexed (M.asset ())) (reindexed δ) t x
+        = σloc (M.asset () (Real.toNNReal t) x) ^ 2 * M.asset () (Real.toNNReal t) x ^ 2) :
     ∀ K ∈ Ioo a b, 0 < CKK K → σloc K ^ 2 = 2 * Ct t K / (K ^ 2 * CKK K) := by
   have hC (s K : ℝ) :
       M.price Q (europeanCall K (Real.toNNReal s)) = Dupire.callSurface Q (M.asset ()) s K := by
