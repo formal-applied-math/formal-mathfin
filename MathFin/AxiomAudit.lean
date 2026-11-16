@@ -3122,3 +3122,23 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.covariance_eq_integral_copulaOf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.covariance_eq_integral_copulaOf
+
+/-- info: 'MathFin.snellEnvelope_doob_decomposition' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.snellEnvelope_doob_decomposition
+
+/-- info: 'MathFin.condExp_stoppedValue_le_snellEnvelope' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.condExp_stoppedValue_le_snellEnvelope
+
+/-- info: 'ProbabilityTheory.IsFilteredPreBrownian.eLpNorm_runMax_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms ProbabilityTheory.IsFilteredPreBrownian.eLpNorm_runMax_le
+
+/-- info: 'MathFin.coinFlipMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.coinFlipMeasure
+
+/-- info: 'MathFin.coinFlipMeasure_eq_markovPathMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.coinFlipMeasure_eq_markovPathMeasure

@@ -213,6 +213,11 @@ import MathFin.Models.Binomial.AmericanMarket
 import MathFin.Models.Rates.VasicekMarketPDE
 import MathFin.Choice.Performance.KellyNumeraire
 import MathFin.Risk.JointElicitability
+import MathFin.Models.Binomial.PathMeasure
+import MathFin.Probability.Brownian.BrownianDoobMaximal
+import MathFin.Probability.Discrete.SnellDoobDecomposition
+import MathFin.Models.Credit.HazardCurve
+import MathFin.Probability.Brownian.Ito.StochasticFubiniIto
 
 /-!
 # The blueprint: a map of the field's landmarks
@@ -278,6 +283,24 @@ attribute [blueprint "def:snell-envelope"
   \mathcal F_i]$ otherwise, frozen at $Z_N$ after the horizon. -/)]
   MathFin.snellEnvelope
 
+attribute [blueprint "thm:snell-doob-decomposition"
+  (title := "Doob decomposition of the Snell envelope")
+  (statement := /-- For an adapted integrable reward $Z$ with horizon $N$ on a discrete-time
+  filtered probability space, the Snell envelope is $U = M + A$ with $M$ a martingale and $A$
+  predictable, $A_0 = 0$, unique up to almost-sure equality (Doob's decomposition). Its
+  compensator $A$ is almost surely nonincreasing and does not move on the continuation region:
+  at a step $i < N$ where $Z_i < U_i$, $A_{i+1} = A_i$ almost surely. -/)]
+  MathFin.snellEnvelope_doob_decomposition
+
+attribute [blueprint "thm:snell-optional-sampling"
+  (title := "Optional sampling under the Snell envelope")
+  (statement := /-- For an adapted integrable reward $Z$ with horizon $N$ and stopping times
+  $\sigma \le \tau \le N$, $E[Z_\tau \mid \mathcal F_\sigma] \le U_\sigma$ almost surely,
+  where $U$ is the Snell envelope: at any stopping time the envelope dominates the conditional
+  expected reward of every later bounded stopping rule. The proof is the optional sampling
+  inequality for the supermartingale $U$. -/)]
+  MathFin.condExp_stoppedValue_le_snellEnvelope
+
 attribute [blueprint "thm:snell-envelope"
   (title := "Snell's theorem: the envelope is the value of optimal stopping")
   (statement := /-- For an adapted integrable reward $Z$ with horizon $N$ on a discrete-time
@@ -316,6 +339,15 @@ attribute [blueprint "thm:doob-maximal-inequality"
   (statement := /-- For a nonnegative submartingale $f$ on a finite measure space, $p > 1$ and
   $n \ge 0$, $\|\max_{k \le n} f_k\|_p \le \tfrac{p}{p-1}\|f_n\|_p$. -/)]
   MeasureTheory.maximal_ineq_Lp
+
+attribute [blueprint "thm:brownian-doob-maximal"
+  (title := "Doob's maximal inequality for Brownian motion on a grid")
+  (statement := /-- For a filtered pre-Brownian motion $B$ and times $t_0 \le t_1 \le \cdots$,
+  $\bigl\|\max_{k \le n} |B_{t_k}|\bigr\|_{L^2} \le 2\sqrt{t_n}$ for every $n$: Doob's $L^2$
+  maximal inequality for the discrete martingale $k \mapsto B_{t_k}$ of the sampled filtration,
+  with $\|B_t\|_{L^2} = \sqrt t$. A finite grid only; the continuous-time supremum is not
+  treated. -/)]
+  ProbabilityTheory.IsFilteredPreBrownian.eLpNorm_runMax_le
 
 attribute [blueprint "thm:martingale-convergence"
   (title := "Convergence of L²-bounded martingales")
@@ -719,6 +751,22 @@ attribute [blueprint "thm:dmw-ftap"
 
 -- ===== valuation/trees: Trees =====
 
+attribute [blueprint "def:coin-flip-measure"
+  (title := "The coin-flip path law")
+  (statement := /-- The law of independent Bernoulli$(q)$ coin flips on the path space
+  $\{0,1\}^{\mathbb N}$, the infinite product of Bernoulli$(q)$ measures: the probability space
+  of the binomial tree. -/)]
+  MathFin.coinFlipMeasure
+
+attribute [blueprint "thm:coin-flip-markov"
+  (title := "The coin-flip law is a Markov chain's path law")
+  (statement := /-- The infinite product of Bernoulli$(q)$ measures on $\{0,1\}^{\mathbb N}$ is the
+  Ionescu–Tulcea path law of the Markov chain on $\{0,1\}$ whose initial law and every
+  transition row are Bernoulli$(q)$: both give each cylinder $\{X_0 = x_0, \dots, X_n = x_n\}$
+  the probability $\prod_k \mathrm{Bernoulli}(q)(x_k)$, and the cylinders form a $\pi$-system
+  generating the product $\sigma$-algebra. -/)]
+  MathFin.coinFlipMeasure_eq_markovPathMeasure
+
 attribute [blueprint "thm:binomial-representation"
   (title := "Martingale representation in the binomial model")
   (statement := /-- On the binomial tree every martingale is the discrete stochastic integral
@@ -832,14 +880,6 @@ attribute [blueprint "def:gbm"
   (`pathAssets_eq_gbmValue`). It is the asset of `BlackScholes.market`, with the physical drift
   in the place of $r$. -/)]
   MathFin.Contracts.BlackScholes.pathAssets
-
-attribute [blueprint "def:risk-neutral-lognormal"
-  (title := "Risk-neutral lognormal terminal law")
-  (statement := /-- The hypothesis bundle of the Black–Scholes formulas: $S_0, K, \sigma, T > 0$
-  and a standard normal $Z$ under the measure $Q$, so that $S_T = S_0\exp((r -
-  \tfrac12\sigma^2)T + \sigma\sqrt T Z)$ is lognormal. It is not derived from a market;
-  `BSCallHyp.of_isPreBrownian` builds it from a Brownian motion. -/)]
-  MathFin.BSCallHyp
 
 attribute [blueprint "thm:bs-call"
   (title := "The Black–Scholes price of a call in the Black–Scholes market")
