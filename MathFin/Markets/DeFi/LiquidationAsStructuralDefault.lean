@@ -27,8 +27,6 @@ risk-neutral one (`μ = r`). The strike slot carries the barrier.
 
 ## Main results
 
-* `bsTerminal_lt_iff`: the shortfall region `S_T(z) < K ↔ z < −d₂`, the strict mirror of
-  `bsTerminal_gt_K_iff`.
 * `prob_bsTerminal_lt_eq_kmvPD`: `Q(S_T < K) = kmvPD S₀ K μ σ T = Φ(−d₂)`.
 * `prob_isLiquidatable_eq_kmvPD`: the probability that a Dai vault is liquidatable at `T`.
 * `prob_healthFactorV1_lt_one_eq_kmvPD`: the probability that an Aave single-asset health factor
@@ -58,21 +56,6 @@ MSC 91G40, MSC 91G80, JEL G33
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory
-
-/-- **Shortfall-region identification**: `S_T(z) < K ↔ z < −d₂`, the strict mirror of
-`bsTerminal_gt_K_iff`. -/
-lemma bsTerminal_lt_iff {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ)
-    (hT : 0 < T) (z : ℝ) :
-    bsTerminal S_0 r σ T z < K ↔ z < -bsd2 S_0 K r σ T := by
-  have hb : 0 < σ * Real.sqrt T := mul_pos hσ (Real.sqrt_pos.mpr hT)
-  have hcore : bsTerminal S_0 r σ T z < K ↔
-      (r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z < Real.log (K / S_0) := by
-    rw [bsTerminal, mul_comm S_0, ← lt_div_iff₀ hS_0]
-    exact (Real.lt_log_iff_exp_lt (div_pos hK hS_0)).symm
-  rw [hcore, bsd2_eq hσ hT, ← neg_div, lt_div_iff₀ hb,
-    show Real.log (K / S_0) = -Real.log (S_0 / K) by
-      rw [Real.log_div hK.ne' hS_0.ne', Real.log_div hS_0.ne' hK.ne']; ring]
-  constructor <;> intro h <;> linarith
 
 /-- **The lognormal shortfall probability is the Merton–KMV default probability**: under
 `BSCallHyp`, `Q(S_T < K) = kmvPD S₀ K μ σ T = Φ(−d₂)`. The strict and non-strict events have the

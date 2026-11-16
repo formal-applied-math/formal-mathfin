@@ -854,6 +854,28 @@
       }
     },
     {
+      "id": "mf-binomial-american-put-market-price",
+      "name": "The Binomial American Put Is the Market's American Price",
+      "domain": "mathematical_finance",
+      "description": "Under no-arbitrage, the risk-neutral coin flips (up-probability crrUpProb u d ρ = q) are a pricing measure of the binomial market with unit step up to the horizon N, for the physical law of i.i.d. flips going up with any probability 0 < p < 1; and under them the American price of the put in that market (Market.americanPrice of the exercise right t ↦ (K − S_t)⁺: the supremum, over all stopping rules of the market's filtration bounded by N, of the expected deflated exercise value) equals the binomial American put price of the Bellman recursion with N steps. The put only, at time 0; the American price is not shown to be a superhedging price.",
+      "code": {
+        "lean": "import MathFin.Models.Binomial.AmericanMarket\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.Contracts.Binomial\n\n/-- **The binomial American put is the market's American price.** Under no-arbitrage the\nrisk-neutral coin flips price the binomial market with unit step up to the horizon `N`, and under\nthem the American price of the put in that market, the supremum over its stopping rules of the\nexpected deflated exercise value, is the Bellman price of the tree with `N` steps. -/\ntheorem binomial_american_put_market_price {S₀ u d ρ K : ℝ} {p q : ℝ≥0} (hq : q ≤ 1)\n    (hp0 : 0 < p) (hp : p < 1) (hna : BinomialNoArb u d ρ) (hqcrr : crrUpProb u d ρ = q)\n    (N : ℕ) :\n    (market (coinFlipMeasure p hp.le) S₀ u d ρ zero_le_one).IsPricingMeasure N\n        (coinFlipMeasure q hq) ∧\n      (market (coinFlipMeasure p hp.le) S₀ u d ρ zero_le_one).americanPrice\n          (coinFlipMeasure q hq) (europeanPutPayoff K) N\n        = americanPrice u d ρ (fun S ↦ max (K - S) 0) N S₀ :=\n  ⟨isPricingMeasure_coinFlipMeasure hq hna hqcrr S₀ zero_le_one hp0 hp N, by\n    simpa using americanPrice_market_europeanPutPayoff zero_lt_one hq hqcrr\n      (coinFlipMeasure p hp.le) S₀ K N⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "S. E. Shreve, Stochastic Calculus for Finance I: The Binomial Asset Pricing Model, Springer (2004), §4.4",
+        "citations": [
+          {
+            "key": "ShreveSCFI",
+            "locator": "§4.4"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. isPricingMeasure_coinFlipMeasure (MathFin/Models/Binomial/Market.lean) and americanPrice_market_europeanPutPayoff (MathFin/Models/Binomial/AmericanMarket.lean): the deflated exercise value is the discounted put payoff read on the grid, stopping on the grid is discrete stopping (stoppingValue_comp_floorDiv, MathFin/Probability/Martingales/GridStopping.lean), and Snell's theorem (snellEnvelope_optimalStopping) identifies the discrete stopping value with the Snell envelope, which is the Bellman price (americanPrice_eq_snellEnvelope). SCOPE: the put payoff only (the exercise right europeanPutPayoff K); the price at time 0; the American price is not shown to be the superhedging price; uniqueness of the pricing measure is not used."
+      }
+    },
+    {
       "id": "mf-trinomial-moment-matching",
       "name": "Trinomial Lattice Branch Weights: Unique Moment Matching, a Validity Window, and a Lattice Variance Bound",
       "domain": "mathematical_finance",
@@ -904,6 +926,51 @@
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the chain-side statements in MathFin/Models/Binomial/WillowTree.lean: willowBeta_eq_sqrt_div and its grid instantiation willowBeta_eq_sqrt_div' (the beta identity 1 / sqrt(1 + alpha) = sqrt(t / t') when t' = (1 + alpha) * t), the moment-propagation induction (willowMarginal_mass, willowMarginal_mean, willowMarginal_secondMoment -- unconditional in the transition matrices beyond the three row constraints, needing neither the marginal constraint nor entry non-negativity), marginal preservation (willowMarginal_eq, from the marginal constraint alone), the scaled second moment and the cross moments (willowMarginal_crossMoment, willowScaled_secondMoment, willowScaled_crossMoment), the join corollary (willowMarginal_crossMoment_eq_willowBeta: the chain's standardized cross moment is the construction's own willowBeta coefficient once beta k is tied to the grid), and the correlation bound (WillowMomentConstraints.sq_le_one, by Cauchy-Schwarz on an honest row -- the lattice-side analogue of sq_le_one_of_covariance_unit; and WillowMomentConstraints.bivariateNormal_moments, instantiating the standard bivariate normal law at the willow coefficient via Probability/Gaussian/BivariateNormalCDF). The linear program that produces admissible transition matrices in Curran's construction is not formalized: solving the full constraint system with non-negative entries, its objective and its output are out of scope -- entry non-negativity is assumed where the correlation bound uses it, not produced -- and nothing is claimed about prices computed on the lattice. Axioms-clean. The Brownian join (willowScaled_secondMoment_eq_integral_sq, willowScaled_crossMoment_eq_integral_mul) composes the chain-side moment theorems with WienerIntegralL2.integral_mul_eval (E[W_s W_t] = min s t for a pre-Brownian motion); it matches the second moment at one grid time and the cross moment across one step, not the finite-dimensional law of the chain."
+      }
+    },
+    {
+      "id": "mf-binomial-upandin-reflection",
+      "name": "Binomial up-and-in price by reflection",
+      "description": "On the symmetric binomial walk (every n-step path of weight 2^-n, the law coinFlipMeasure (1/2) of the flips), for a barrier a > 0 and any payoff g of the terminal position S_n: E[g(S_n); max >= a] = E[g(S_n); S_n >= a] + E[g(2a - S_n); S_n > a], by the discrete intermediate value theorem and reflection at the first hit. The prices are expectations of a payoff of the walk position under the symmetric flip law; the entry does not state them as Market.price of a spot-valued contract.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.Binomial.BarrierReflection\n\nopen MeasureTheory\n\n/-- **Up-and-in barrier price by reflection** on the symmetric binomial walk: for a barrier\n`0 < a` and any payoff `g` of the terminal position, the price of the paths that touch `a`\nis the price on `{Sₙ ≥ a}` plus the price of `g (2a − ·)` on `{Sₙ > a}`. -/\ntheorem binomial_up_and_in_reflection {n : ℕ} (hq : (1 / 2 : NNReal) ≤ 1) (a : ℤ) (ha : 0 < a)\n    (g : ℤ → ℝ) :\n    ∫ ω, (if MathFin.HitsLevel a (MathFin.flips n ω) then\n        g (MathFin.walkPos (MathFin.flips n ω) n) else 0)\n        ∂MathFin.coinFlipMeasure (1 / 2) hq\n      = (∫ ω, (if a ≤ MathFin.walkPos (MathFin.flips n ω) n then\n          g (MathFin.walkPos (MathFin.flips n ω) n) else 0) ∂MathFin.coinFlipMeasure (1 / 2) hq)\n        + ∫ ω, (if a < MathFin.walkPos (MathFin.flips n ω) n then\n          g (2 * a - MathFin.walkPos (MathFin.flips n ω) n) else 0)\n          ∂MathFin.coinFlipMeasure (1 / 2) hq :=\n  MathFin.binomial_upAndIn_reflection hq a ha g"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Andre (1887) reflection principle; Shreve, Stochastic Calculus for Finance I, section 5.2 (knock-in options on the symmetric random walk)",
+        "citations": [
+          {
+            "key": "Andre1887"
+          }
+        ],
+        "difficulty": "medium",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Models/Binomial/BarrierReflection.lean (sum_hits_eq, binomial_upAndIn_reflection) on the symmetric coin-flip law, reusing reflectHitLtGt and the discrete IVT. Statement is for the walk position S_n (not a discounted spot); the same file proves the up-and-out price (binomial_upAndOut_eq) and the running-maximum law (binomial_maximal_distribution)."
+      }
+    },
+    {
+      "id": "mf-binomial-market-upandin-price",
+      "name": "The Binomial Market Prices the Up-and-In Knock-In by Reflection",
+      "domain": "mathematical_finance",
+      "description": "In the binomial market with u > 1, d = 1/u, S₀ > 0 and step h > 0, suppose the risk-neutral up-probability crrUpProb u u⁻¹ ρ is 1/2 (and no-arbitrage holds). Then the symmetric coin flips are a pricing measure up to T = nh, for any physical law of i.i.d. flips with up-probability 0 < p < 1, and the market price under them of the discretely monitored up-and-in knock-in upAndIn on a payoff f that reads the spot only at T, with barrier S₀uᵃ (a > 0) watched at the dates 0, h, …, nh, is e^{−ρn}(E[g(Wₙ); Wₙ ≥ a] + E[g(2a − Wₙ); Wₙ > a]), where W is the ±1 walk of the flips and g(j) is f at the spot S₀uʲ. Discrete monitoring on the step grid only; the symmetric tree only.",
+      "code": {
+        "lean": "import MathFin.Models.Binomial.BarrierMarket\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.Contracts.Binomial\n\n/-- **The binomial market prices the up-and-in knock-in by reflection.** With `u > 1`, `d = u⁻¹`\nand the risk-neutral up-probability `1/2`, the symmetric coin flips price the market, and under\nthem the knock-in on a payoff `f` of the spot at `T = nh`, with barrier `S₀ uᵃ` watched at the grid\ndates, is worth `e^{−ρn}(E[g(Wₙ); Wₙ ≥ a] + E[g(2a − Wₙ); Wₙ > a])`. Re-export of\n`price_upAndIn_market`. -/\ntheorem binomial_market_upAndIn_price {n : ℕ} {u ρ h S₀ : ℝ} (hu : 1 < u) (hS : 0 < S₀)\n    (hh : 0 < h) (hq : (1 / 2 : ℝ≥0) ≤ 1) (hna : BinomialNoArb u u⁻¹ ρ)\n    (hqcrr : crrUpProb u u⁻¹ ρ = (1 / 2 : ℝ≥0)) {p : ℝ≥0} (hp0 : 0 < p) (hp : p < 1)\n    {a : ℤ} (ha : 0 < a) (f : Payoff Unit)\n    (hf : ∀ o ∈ f.obsList, o.2 = (n : ℝ≥0) * h.toNNReal) :\n    (market (coinFlipMeasure p hp.le) S₀ u u⁻¹ ρ hh.le).IsPricingMeasure\n        ((n : ℝ≥0) * h.toNNReal) (coinFlipMeasure (1 / 2) hq) ∧\n      (market (coinFlipMeasure p hp.le) S₀ u u⁻¹ ρ hh.le).price (coinFlipMeasure (1 / 2) hq)\n          (upAndIn (S₀ * u ^ a) f () ((n : ℝ≥0) * h.toNNReal)\n            ((List.range n).map fun k : ℕ ↦ (k : ℝ≥0) * h.toNNReal)) =\n        Real.exp (-(ρ * n)) *\n          ((∫ ω, (if a ≤ walkPos (flips n ω) n\n              then f.eval (fun _ _ ↦ S₀ * u ^ walkPos (flips n ω) n) else 0)\n              ∂coinFlipMeasure (1 / 2) hq) +\n            ∫ ω, (if a < walkPos (flips n ω) n\n              then f.eval (fun _ _ ↦ S₀ * u ^ (2 * a - walkPos (flips n ω) n)) else 0)\n              ∂coinFlipMeasure (1 / 2) hq) :=\n  price_upAndIn_market hu hS hh hq hna hqcrr hp0 hp ha f hf\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Andre (1887) reflection principle; J. C. Cox, S. A. Ross and M. Rubinstein, Option pricing: a simplified approach, J. Financ. Econ. 7 (1979) 229–263; Shreve, Stochastic Calculus for Finance I, section 5.2 (knock-in options on the symmetric random walk)",
+        "citations": [
+          {
+            "key": "Andre1887"
+          },
+          {
+            "key": "CoxRossRubinstein1979"
+          }
+        ],
+        "difficulty": "medium",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. price_upAndIn_market in MathFin/Models/Binomial/BarrierMarket.lean. With d = u⁻¹ the spot after k ≤ n steps is S₀u^{W_k} (spotPath_inv_eq_zpow); the spot is at or above S₀uᵃ at a step k ≤ n exactly when the walk hits a (exists_le_spotPath_iff, through the discrete IVT HitsLevel_of_le_walkPos); the knock-in contract (upAndIn, MathFin/Contracts/Instruments/Options.lean, from the running maximum Payoff.obsMax and indicatorLt) pays f on those paths (eval_upAndInPayoff); f reads only the spot at T (Payoff.eval_congr), and binomial_upAndIn_reflection gives the reflection formula. The pricing-measure clause is isPricingMeasure_coinFlipMeasure. SCOPE: d = 1/u and risk-neutral up-probability exactly 1/2; monitoring at the step grid; the price at time 0; f must read the spot only at T."
       }
     }
   ]

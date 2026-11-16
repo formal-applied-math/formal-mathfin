@@ -17,7 +17,8 @@ the terminal wealth of a predictable strategy started from some initial wealth) 
 equivalent martingale measure is **unique**.
 
 * `complete ⇒ unique` is general (`IsEMM.measure_eq_of_isCompleteMarket`, `Pricing/FTAP/FTAP.lean`):
-  replicate the indicator of an event and read off its probability.
+  replicate the indicator of an event and read off its probability. The measure it is unique
+  among exists by the first fundamental theorem (`ftap_discrete`).
 * `unique ⇒ complete` is the geometric half, by contraposition. The claims replicable from some
   wealth are `constants ⊔ gainsSubspace`. If that subspace is proper, a nonzero functional `η`
   vanishes on it, i.e. `∑ η = 0` and `η` annihilates every gain. Perturbing the strictly positive
@@ -120,7 +121,7 @@ theorem ftap_two [Finite Ω] [Nonempty Ω] (hS : StronglyAdapted 𝓕 S) (hP : �
     (hT : 𝓕 T = mΩ)
     (hNA : NoArbitrage 𝓕 P S T) : IsCompleteMarket 𝓕 P S T ↔ ∃! Q, IsEMM 𝓕 P S T Q := by
   refine ⟨fun hc ↦ ?_, fun ⟨Q₀, h₀, hu⟩ ↦ isCompleteMarket_of_unique 𝓕 P S T hS hP h₀ hu⟩
-  obtain ⟨Q₀, h₀⟩ := exists_isEMM_of_noArbitrage 𝓕 P S T hS hP hNA
+  obtain ⟨Q₀, h₀⟩ := (ftap_discrete 𝓕 P S T hS hP).mp hNA
   exact ⟨Q₀, h₀, fun Q hQ ↦ Measure.ext fun A hA ↦
     hQ.measure_eq_of_isCompleteMarket hc h₀ (by rw [hT]; exact hA)⟩
 

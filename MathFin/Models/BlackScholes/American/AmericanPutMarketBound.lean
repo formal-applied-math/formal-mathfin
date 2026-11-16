@@ -68,7 +68,7 @@ theorem price_europeanPut_le_americanPutValue (hW : IsPreBrownianReal W μ)
       americanPutValue (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) (natFiltration hWmeas)
         (constBtheta (μ := μ) hWmeas ((m - r) / σ) H) K r 0 σ S_0 T := by
   haveI := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
-  rw [price_market, europeanPut, Contract.value_pay]
+  rw [price_market, europeanPut, europeanPutPayoff, Contract.value_pay]
   refine (integral_congr_ae ?_).trans_le (european_expectation_le_value hB hK hr hS)
   filter_upwards [pathAssets_physical_ae_eq hW hWmeas (S_0 := S_0) (m := m) (r := r) hσ H hTH]
     with ω hω

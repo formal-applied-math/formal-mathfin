@@ -1,12 +1,14 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
 public import MathFin.Models.StochVol.Heston
 public import MathFin.Models.Rates.AffineTermStructurePDE
+public import MathFin.Models.BlackScholes.Call
+public import MathFin.Models.BlackScholes.Market
 
 /-!
 # The Heston transform at vanishing vol-of-vol
@@ -66,6 +68,12 @@ algebra is the same under `u ↦ iz`: QuantLib's `D = √((κ − iρσz)² + (z
 * `tendsto_hestonProfile_smallVolOfVol_blackScholes`: for `v, θ ≥ 0` and `t ≤ T`, the profile
   tends to `mgf id (gaussianReal (x + r(T − t) − W/2) W) u`, the lognormal log-spot moment.
   This is a limit of the Riccati-level profile, not of a Heston process.
+* `integral_bsTerminal_rpow`, `tendsto_hestonTransform_smallVolOfVol_bsMoment`: under `BSCallHyp`,
+  `E_Q[S_T ^ u]` is the Black–Scholes moment, and at `v = θ = σ²` the Heston transform tends to it
+  as `ξ → 0`.
+* `tendsto_hestonTransform_smallVolOfVol_marketPrice`: in the Black–Scholes market, under the
+  Girsanov pricing measure, the discounted Heston transform tends to the price of the claim paying
+  `S_T ^ u`.
 
 ## References
 
@@ -81,7 +89,7 @@ MSC 91G20, MSC 60J60, JEL G13
 
 @[expose] public section
 
-open Filter Topology ProbabilityTheory
+open Filter Topology MeasureTheory ProbabilityTheory
 open scoped NNReal
 
 namespace MathFin.Heston
@@ -226,14 +234,13 @@ theorem tendsto_hestonA_smallVolOfVol {κ u : ℝ} (hκ : 0 < κ) (hu1 : 0 < u) 
 deterministic variance (`HullWhite.integratedMean_const`, `HullWhite.deterministic_const`). -/
 theorem tendsto_hestonProfile_smallVolOfVol {κ u : ℝ} (hκ : 0 < κ) (hu1 : 0 < u) (hu2 : u < 1)
     (r θ ρ T t x v : ℝ) :
-    Tendsto (fun ξ => hestonProfile u (fun w => hestonA r κ θ ξ ρ u (T - w))
-        (fun w => hestonBv κ ξ ρ u (T - w)) t x v) (𝓝[≠] 0)
+    Tendsto (fun ξ => hestonTransform r κ θ ξ ρ u T t x v) (𝓝[≠] 0)
       (𝓝 (Real.exp (u * x + r * u * (T - t)
         + (u ^ 2 - u) / 2 * vasicekIntegratedMean v θ κ (T - t)))) := by
   have hA := tendsto_hestonA_smallVolOfVol hκ hu1 hu2 r θ ρ (T - t)
   have hB := (tendsto_hestonBv_smallVolOfVol hκ hu1 hu2 ρ (T - t)).mono_left
     (nhdsWithin_le_nhds (s := {0}ᶜ))
-  simp only [hestonProfile]
+  simp only [hestonTransform, hestonProfile]
   refine (Real.continuous_exp.tendsto _).comp ?_
   convert (hA.add_const (u * x)).add (hB.mul_const v) using 2
   rw [vasicekIntegratedMean]
@@ -256,13 +263,128 @@ variance.** For `κ > 0`, `0 < u < 1`, `v, θ ≥ 0`, `t ≤ T`, as the vol-of-v
 `W = ∫₀^{T−t} v(s) ds`, `v(s) = θ + (v − θ)e^{−κs}` the `ξ = 0` variance path. -/
 theorem tendsto_hestonProfile_smallVolOfVol_blackScholes {κ u : ℝ} (hκ : 0 < κ) (hu1 : 0 < u)
     (hu2 : u < 1) (r θ ρ T t x v : ℝ) (hv : 0 ≤ v) (hθ : 0 ≤ θ) (htT : t ≤ T) :
-    Tendsto (fun ξ => hestonProfile u (fun w => hestonA r κ θ ξ ρ u (T - w))
-        (fun w => hestonBv κ ξ ρ u (T - w)) t x v) (𝓝[≠] 0)
+    Tendsto (fun ξ => hestonTransform r κ θ ξ ρ u T t x v) (𝓝[≠] 0)
       (𝓝 (mgf id
         (gaussianReal (x + r * (T - t) - (vasicekIntegratedMean v θ κ (T - t)).toNNReal / 2)
           (vasicekIntegratedMean v θ κ (T - t)).toNNReal) u)) := by
   rw [mgf_gaussianReal_logSpot, Real.coe_toNNReal _
     (vasicekIntegratedMean_nonneg hκ hv hθ (sub_nonneg.mpr htT))]
   exact tendsto_hestonProfile_smallVolOfVol hκ hu1 hu2 r θ ρ T t x v
+
+/-! ### The joint with Black–Scholes -/
+
+/-- The Black–Scholes real moment of the terminal price: under `BSCallHyp`,
+`E_Q[S_T ^ u] = exp(u log S₀ + r u T + ((u² − u)/2) σ² T)` for `S_T = bsTerminal S₀ r σ T Z`. -/
+theorem integral_bsTerminal_rpow {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}
+    [IsProbabilityMeasure Q] {S_0 K r σ T : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z)
+    (u : ℝ) :
+    ∫ ω, bsTerminal S_0 r σ T (Z ω) ^ u ∂Q
+      = Real.exp (u * Real.log S_0 + r * u * T + (u ^ 2 - u) / 2 * (σ ^ 2 * T)) := by
+  obtain ⟨hS_0, -, -, hT, hZ⟩ := h
+  have hsq : Real.sqrt T ^ 2 = T := Real.sq_sqrt hT.le
+  have key (z : ℝ) : bsTerminal S_0 r σ T z ^ u
+      = Real.exp (u * Real.log S_0 + u * ((r - σ ^ 2 / 2) * T))
+        * Real.exp ((u * σ * Real.sqrt T) * z) := by
+    have h1 : bsTerminal S_0 r σ T z
+        = Real.exp (Real.log S_0 + ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)) := by
+      unfold bsTerminal
+      rw [Real.exp_add (Real.log S_0), Real.exp_log hS_0]
+    rw [h1, ← Real.exp_mul, ← Real.exp_add]
+    congr 1
+    ring
+  have hmgf (d : ℝ) : ∫ z, Real.exp (d * z) ∂(gaussianReal 0 1) = Real.exp (d ^ 2 / 2) := by
+    have h := congr_fun (mgf_id_gaussianReal (μ := 0) (v := 1)) d
+    change mgf id (gaussianReal 0 1) d = _
+    rw [h]
+    simp
+  have hd : (u * σ * Real.sqrt T) ^ 2 = u ^ 2 * σ ^ 2 * T := by
+    calc (u * σ * Real.sqrt T) ^ 2 = u ^ 2 * σ ^ 2 * Real.sqrt T ^ 2 := by ring
+      _ = u ^ 2 * σ ^ 2 * T := by rw [hsq]
+  have hmeas : Measurable fun z : ℝ ↦
+      Real.exp (u * Real.log S_0 + u * ((r - σ ^ 2 / 2) * T))
+        * Real.exp ((u * σ * Real.sqrt T) * z) := by fun_prop
+  calc ∫ ω, bsTerminal S_0 r σ T (Z ω) ^ u ∂Q
+      = ∫ ω, (fun z : ℝ ↦ Real.exp (u * Real.log S_0 + u * ((r - σ ^ 2 / 2) * T))
+          * Real.exp ((u * σ * Real.sqrt T) * z)) (Z ω) ∂Q :=
+        integral_congr_ae (ae_of_all _ fun ω ↦ key (Z ω))
+    _ = ∫ z, Real.exp (u * Real.log S_0 + u * ((r - σ ^ 2 / 2) * T))
+          * Real.exp ((u * σ * Real.sqrt T) * z) ∂(gaussianReal 0 1) :=
+        hZ.integral_comp hmeas.aestronglyMeasurable
+    _ = Real.exp (u * Real.log S_0 + u * ((r - σ ^ 2 / 2) * T))
+          * Real.exp ((u * σ * Real.sqrt T) ^ 2 / 2) := by
+        rw [integral_const_mul, hmgf]
+    _ = _ := by
+        rw [← Real.exp_add, hd]
+        congr 1
+        ring
+
+/-- **The Heston transform tends to the Black–Scholes moment of the terminal price.** Let
+`BSCallHyp Q S₀ K r σ T Z` be the Black–Scholes terminal-law bundle, `κ > 0`, `0 < u < 1`. Start the
+Heston variance at the Black–Scholes level `v = θ = σ²`, so that the integrated variance over
+`[0, T]` is `σ² T`. Then as the vol-of-vol `ξ → 0` (`ξ ≠ 0`) the explicit Heston transform
+`hestonTransform` at `(t, x, v) = (0, log S₀, σ²)` tends to `E_Q[S_T ^ u]`, `S_T = bsTerminal S₀ r σ
+T Z`. The limit is of the Riccati-level transform, not of a Heston process. -/
+theorem tendsto_hestonTransform_smallVolOfVol_bsMoment {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {Q : Measure Ω} [IsProbabilityMeasure Q] {S_0 K r σ T : ℝ} {Z : Ω → ℝ}
+    (h : BSCallHyp Q S_0 K r σ T Z) {κ u : ℝ} (hκ : 0 < κ) (hu1 : 0 < u) (hu2 : u < 1) (ρ : ℝ) :
+    Tendsto (fun ξ => hestonTransform r κ (σ ^ 2) ξ ρ u T 0 (Real.log S_0) (σ ^ 2))
+      (𝓝[≠] 0) (𝓝 (∫ ω, bsTerminal S_0 r σ T (Z ω) ^ u ∂Q)) := by
+  have hlim := tendsto_hestonProfile_smallVolOfVol hκ hu1 hu2 r (σ ^ 2) ρ T 0
+    (Real.log S_0) (σ ^ 2)
+  have hW : vasicekIntegratedMean (σ ^ 2) (σ ^ 2) κ (T - 0) = σ ^ 2 * T := by
+    rw [vasicekIntegratedMean, sub_zero]
+    ring
+  rw [hW] at hlim
+  have heq : Real.exp (u * Real.log S_0 + r * u * T + (u ^ 2 - u) / 2 * (σ ^ 2 * T))
+      = Real.exp (u * Real.log S_0 + r * u * (T - 0) + (u ^ 2 - u) / 2 * (σ ^ 2 * T)) := by
+    congr 1
+    ring
+  rw [integral_bsTerminal_rpow h u, heq]
+  exact hlim
+
+/-- **The Heston transform tends to a price in the Black–Scholes market.** In the Black–Scholes
+market (physical drift `m`, rate `r`, volatility `σ > 0`) the Girsanov measure `Q` of
+`θ = (m − r)/σ` at a horizon `H ≥ T > 0` is a pricing measure, and as the vol-of-vol `ξ → 0`
+(`ξ ≠ 0`) the discounted explicit Heston transform `e^{−rT} Φ_ξ(0, log S₀, σ²)` (`κ > 0`,
+`0 < u < 1`, variance started at `v = θ = σ²`) tends to the price, under `Q`, of the claim
+paying `S_T ^ u` at `T`. The limit is of the Riccati-level transform, not of a Heston process. -/
+theorem tendsto_hestonTransform_smallVolOfVol_marketPrice {Ω : Type*} [mΩ : MeasurableSpace Ω]
+    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)
+    (hWmeas : ∀ t, Measurable (W t)) {S_0 m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H)
+    (hS₀ : 0 < S_0) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) {κ u : ℝ} (hκ : 0 < κ) (hu1 : 0 < u)
+    (hu2 : u < 1) (ρ : ℝ) :
+    (Contracts.BlackScholes.market μ hWmeas S_0 m r σ).IsPricingMeasure T
+        (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H) ∧
+      Tendsto (fun ξ ↦ Real.exp (-r * T) *
+          hestonTransform r κ (σ ^ 2) ξ ρ u T 0 (Real.log S_0) (σ ^ 2)) (𝓝[≠] 0)
+        (𝓝 ((Contracts.BlackScholes.market μ hWmeas S_0 m r σ).price
+          (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+          (.pay T (.rpow (.obs () T) u.toNNReal)))) := by
+  refine ⟨Contracts.BlackScholes.isPricingMeasure_constGirsanovMeasure hW hWmeas
+    (S_0 := S_0) (m := m) (r := r) hσ.ne' hTH, ?_⟩
+  have := Contracts.BlackScholes.constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
+  have hB := Contracts.BlackScholes.isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
+  have h : BSCallHyp (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+      S_0 S_0 r σ (T : ℝ) (fun ω ↦ Contracts.BlackScholes.constBtheta (μ := μ) hWmeas
+        ((m - r) / σ) H T ω / Real.sqrt T) := by
+    simpa using BSCallHyp.of_isPreBrownian
+      (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+      (Contracts.BlackScholes.constBtheta (μ := μ) hWmeas ((m - r) / σ) H) hB hS₀ hS₀ hσ hT
+  have hlim := (tendsto_hestonTransform_smallVolOfVol_bsMoment h hκ hu1 hu2 ρ).const_mul
+    (Real.exp (-r * T))
+  have hprice : (Contracts.BlackScholes.market μ hWmeas S_0 m r σ).price
+      (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+      (.pay T (.rpow (.obs () T) u.toNNReal))
+      = Real.exp (-r * T) * ∫ ω, bsTerminal S_0 r σ T (Contracts.BlackScholes.constBtheta
+          (μ := μ) hWmeas ((m - r) / σ) H T ω / Real.sqrt T) ^ u
+          ∂(Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H) := by
+    rw [Contracts.BlackScholes.price_market, Contracts.Contract.value_pay, ← integral_const_mul]
+    refine integral_congr_ae ?_
+    filter_upwards [Contracts.BlackScholes.pathAssets_physical_ae_eq hW hWmeas
+      (S_0 := S_0) (m := m) (r := r) hσ.ne' H hTH] with ω hω
+    simp only [Contracts.Payoff.eval, Contracts.scenarioAt]
+    rw [hω, Contracts.BlackScholes.pathAssets_eq_bsTerminal _ hT, Real.coe_toNNReal _ hu1.le]
+  rw [hprice]
+  exact hlim
 
 end MathFin.Heston

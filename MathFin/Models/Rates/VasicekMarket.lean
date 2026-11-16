@@ -206,7 +206,7 @@ under the reference measure, the pricing measure of `isPricingMeasure_vasicekMar
 of the unit payment with the stochastic deflator `N₀/N_T = exp(−∫₀ᵀ r)` (almost surely). -/
 theorem price_pay_vasicekMarket (T : ℝ≥0) :
     (vasicekMarket hB hBm r₀ θ σ hκ T).price μ (.pay T (.const 1))
-      = vasicekBondA θ σ κ (T : ℝ) * Real.exp (-(vasicekBondB κ (T : ℝ) * r₀)) := by
+      = vasicekBondPrice θ σ κ T r₀ := by
   rw [← vasicekBondPrice_affine hB r₀ θ σ hκ T, Market.price, Contract.value_pay]
   refine integral_congr_ae ?_
   filter_upwards [vasicekBankAccount_ae_eq hB hBm r₀ θ σ hκ 0,

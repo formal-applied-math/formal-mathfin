@@ -25,12 +25,14 @@ The capped call is *defined* by composition, as a long call at `K₁` and a shor
 
 ## Main definitions
 
-* `europeanCallPayoff` — the call's payoff on its own.
+* `europeanCallPayoff`, `europeanPutPayoff` — the call's and the put's payoff on their own.
 * `europeanCall`, `europeanPut`, `digitalCall`, `forward` — the single-maturity instruments.
 * `cappedCall` — a long `europeanCall K₁ T` combined with a short `europeanCall K₂ T`.
 * `powerCall` — the call on `S_T ^ a`, the power being the payoff language's `rpow` node.
 * `geomAsianCall` — the call on the geometric average of the underlying over `n` dates, from
   `Payoff.obsProd` and `rpow` at `1/n`.
+* `upAndIn` — the discretely monitored up-and-in knock-in on a payoff `f`, from the running
+  maximum `Payoff.obsMax` and `indicatorLt`.
 * `chooser` — the chooser option as the static portfolio of a call and a put at the chooser date.
 * `exchangeOption` — pays `max (S¹_T − S²_T) 0`.
 
@@ -38,6 +40,8 @@ The capped call is *defined* by composition, as a long call at `K₁` and a shor
 
 * `pathPV_europeanCall_eq_put_add_forward` — a call pays a put plus a forward on every path.
 * `cappedCall_payoff_eq` — for `K₁ ≤ K₂`, `cappedCall K₁ K₂ T` pays the capped payoff.
+* `eval_upAndInPayoff` — the knock-in pays `f` exactly on the scenarios observed at or above the
+  barrier at a monitoring date.
 
 ## Source
 
@@ -69,7 +73,7 @@ written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 ## Tags
 
 European option, digital option, capped call, chooser option, power call, exchange option,
-geometric Asian, MSC 91G20, JEL G13
+geometric Asian, barrier option, knock-in, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -90,9 +94,14 @@ noncomputable def europeanCallPayoff (K : ℝ) (T : ℝ≥0) : Payoff Unit :=
 noncomputable def europeanCall (K : ℝ) (T : ℝ≥0) : Contract Unit :=
   .pay T (europeanCallPayoff K T)
 
+/-- The European put payoff `max (K - S_T) 0`. As a family in `T` it is the exercise right of the
+American put (`Market.americanPrice`). -/
+noncomputable def europeanPutPayoff (K : ℝ) (T : ℝ≥0) : Payoff Unit :=
+  .max (.sub (.const K) (.obs () T)) (.const 0)
+
 /-- The reified European put: pays `max (K - S_T) 0` at maturity `T`. -/
 noncomputable def europeanPut (K : ℝ) (T : ℝ≥0) : Contract Unit :=
-  .pay T (.max (.sub (.const K) (.obs () T)) (.const 0))
+  .pay T (europeanPutPayoff K T)
 
 /-- The reified cash-or-nothing digital call: pays `1` at maturity `T` iff `S_T > K`. -/
 noncomputable def digitalCall (K : ℝ) (T : ℝ≥0) : Contract Unit :=
@@ -114,6 +123,57 @@ theorem Payoff.eval_obsProd {ι : Type*} (s : Scenario ι) (i : ι) (ts : List �
   induction ts with
   | nil => simp [Payoff.obsProd, Payoff.eval]
   | cons t ts ih => simp [Payoff.obsProd, Payoff.eval, ih]
+
+/-- The running maximum of the observations of underlying `i` at the dates `t :: ts`, built from
+`Payoff.max`. -/
+def Payoff.obsMax {ι : Type*} (i : ι) (t : ℝ≥0) : List ℝ≥0 → Payoff ι
+  | [] => .obs i t
+  | s :: ts => .max (.obs i s) (obsMax i t ts)
+
+/-- The running maximum reaches a level exactly when one of the observations does. -/
+theorem Payoff.le_eval_obsMax_iff {ι : Type*} (sc : Scenario ι) (i : ι) (t : ℝ≥0)
+    (ts : List ℝ≥0) (B : ℝ) : B ≤ (Payoff.obsMax i t ts).eval sc ↔ ∃ τ ∈ t :: ts, B ≤ sc i τ := by
+  induction ts with
+  | nil => simp [Payoff.obsMax, Payoff.eval]
+  | cons s ts ih =>
+    simp only [Payoff.obsMax, Payoff.eval, le_max_iff, ih]
+    constructor
+    · rintro (h | ⟨τ, hτ, h⟩)
+      · exact ⟨s, List.mem_cons_of_mem _ List.mem_cons_self, h⟩
+      · rcases List.mem_cons.1 hτ with rfl | hτ
+        · exact ⟨_, List.mem_cons_self, h⟩
+        · exact ⟨τ, List.mem_cons_of_mem _ (List.mem_cons_of_mem _ hτ), h⟩
+    · rintro ⟨τ, hτ, h⟩
+      rcases List.mem_cons.1 hτ with rfl | hτ
+      · exact Or.inr ⟨_, List.mem_cons_self, h⟩
+      · rcases List.mem_cons.1 hτ with rfl | hτ
+        · exact Or.inl h
+        · exact Or.inr ⟨τ, List.mem_cons_of_mem _ hτ, h⟩
+
+/-- The payoff of the up-and-in knock-in on `f`: `f` when underlying `i` is observed at or above
+the barrier `B` at one of the monitoring dates `T :: ts`, and `0` otherwise. -/
+noncomputable def upAndInPayoff {ι : Type*} (B : ℝ) (f : Payoff ι) (i : ι) (T : ℝ≥0)
+    (ts : List ℝ≥0) : Payoff ι :=
+  .mul (.sub (.const 1) (.indicatorLt (.obsMax i T ts) (.const B))) f
+
+/-- The reified discretely monitored up-and-in knock-in: pays `f` at `T` if underlying `i` has
+been observed at or above the barrier `B` at one of the monitoring dates `T :: ts`. -/
+noncomputable def upAndIn {ι : Type*} (B : ℝ) (f : Payoff ι) (i : ι) (T : ℝ≥0)
+    (ts : List ℝ≥0) : Contract ι :=
+  .pay T (upAndInPayoff B f i T ts)
+
+/-- **The knock-in pays `f` on the paths that reach the barrier.** -/
+theorem eval_upAndInPayoff {ι : Type*} (sc : Scenario ι) (B : ℝ) (f : Payoff ι) (i : ι)
+    (T : ℝ≥0) (ts : List ℝ≥0) :
+    (upAndInPayoff B f i T ts).eval sc
+      = if ∃ τ ∈ T :: ts, B ≤ sc i τ then f.eval sc else 0 := by
+  split_ifs with h
+  · have hB : ¬ (Payoff.obsMax i T ts).eval sc < B :=
+      not_lt.2 ((Payoff.le_eval_obsMax_iff sc i T ts B).2 h)
+    simp [upAndInPayoff, Payoff.eval, hB]
+  · have hB : (Payoff.obsMax i T ts).eval sc < B :=
+      lt_of_not_ge fun h' ↦ h ((Payoff.le_eval_obsMax_iff sc i T ts B).1 h')
+    simp [upAndInPayoff, Payoff.eval, hB]
 
 /-- The reified geometric-average Asian call over the `n` averaging dates `τ`: pays
 `max ((∏ᵢ S_{τᵢ}) ^ (1/n) - K) 0` at maturity `T`, the geometric average being `Payoff.obsProd`
@@ -167,7 +227,8 @@ theorem pathPV_europeanCall_eq_put_add_forward (D : ℝ≥0 → ℝ) (s : Scenar
     (T : ℝ≥0) :
     (europeanCall K T).pathPV D s
       = (Contract.both (europeanPut K T) (forward K T)).pathPV D s := by
-  simp only [europeanCall, europeanCallPayoff, europeanPut, forward, Contract.pathPV,
+  simp only [europeanCall, europeanCallPayoff, europeanPut, europeanPutPayoff, forward,
+    Contract.pathPV,
     Contract.cashflows, Payoff.eval, List.map_append, List.map_cons, List.map_nil,
     List.sum_append, List.sum_cons, List.sum_nil, add_zero, ← mul_add]
   have h := max_zero_sub_max_neg_zero_eq_self (s () T - K)

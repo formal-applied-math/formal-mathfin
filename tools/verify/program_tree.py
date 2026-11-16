@@ -373,7 +373,8 @@ def assign_hops(nodes: list[dict], hops: dict[str, float]) -> None:
 
 def collapse_towers(nodes: list[dict], modules: list[str], towers: list[dict]) -> list[dict]:
     """Each tower of the taxonomy becomes one node. Its members' modules are counted in
-    ``modules`` (every module of the index), its hop is the best of its members' (the summit),
+    ``modules`` (every module of the index), its hop is the best of its members', its summit
+    (the member whose statement it shows) the taxonomy's ``summit`` or else the member of best hop,
     its corpus count the sum, its issues the union, and every ``uses`` edge into a member points
     at the tower. A tower with no blueprint node stays absent."""
     out = list(nodes)
@@ -384,7 +385,9 @@ def collapse_towers(nodes: list[dict], modules: list[str], towers: list[dict]) -
             continue
         gone = {n["l"] for n in mem}
         hs = [n["hp"] for n in mem if n["hp"] is not None]
-        summit = min(mem, key=lambda n: (n["hp"] is None, n["hp"] or 0, n["l"]))
+        named = [n for n in mem if n["l"] == t.get("summit")]
+        summit = named[0] if named else min(
+            mem, key=lambda n: (n["hp"] is None, n["hp"] or 0, n["l"]))
         label = "tower:" + t["key"]
         count = sum(taxonomy.in_prefixes(m, t["modules"]) for m in modules)
         uses = list(dict.fromkeys(label if u in gone else u for n in mem for u in n["u"]

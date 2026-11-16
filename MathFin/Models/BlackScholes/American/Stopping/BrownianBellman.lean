@@ -143,13 +143,14 @@ theorem discountedLogPayoff_bound {K r : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r)
   rw [discountedLogPayoff,Real.norm_eq_abs,abs_of_nonneg (mul_nonneg (Real.exp_pos _).le hp)]
   exact (mul_le_mul_of_nonneg_right he hp).trans (by simpa using hpK)
 
-theorem gridReward_eq_discountedLogPayoff (K r q σ x : ℝ) (T δ : ℝ≥0) :
-    gridReward brownian K r q σ (Real.exp x) T δ =
+theorem gridReward_eq_discountedLogPayoff {Ω : Type*} (W : ℝ≥0 → Ω → ℝ) (K r q σ x : ℝ)
+    (T δ : ℝ≥0) :
+    gridReward W K r q σ (Real.exp x) T δ =
       fun i ω => discountedLogPayoff K r (cappedGridTime T δ i)
-        (brownianLogState (r-q-σ^2/2) σ x (cappedGridTime T δ i) ω) := by
+        (logState W (r-q-σ^2/2) σ x (cappedGridTime T δ i) ω) := by
   funext i ω
   simp only [gridReward,putRewardAt,putReward,MathFin.gbmValue,discountedLogPayoff,
-    brownianLogState,cappedGridTime,Real.exp_add,mul_assoc]
+    logState,cappedGridTime,Real.exp_add,mul_assoc]
 
 /-- Deterministic Gaussian recursion for the actual capped-grid put value. -/
 noncomputable def brownianGridPrice (K r q σ : ℝ) (T δ : ℝ≥0) (x : ℝ) : ℝ :=
@@ -162,23 +163,23 @@ theorem brownianGridPrice_continuous {K r : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r)
     (fun _ x => discountedLogPayoff_bound hK hr _ x) _ (r-q-σ^2/2) σ _ _
 
 /-- **The Gaussian recursion prices the grid put in any filtration where the log state is Gaussian
-Markov.** Raw and usual Brownian filtrations are the two instances; `P` and `𝓕` are free. -/
-theorem brownianGridPrice_eq_gridAmericanPutValue [MeasurableSpace (ℝ≥0 → ℝ)]
-    {P : Measure (ℝ≥0 → ℝ)} [IsProbabilityMeasure P]
-    {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace (ℝ≥0 → ℝ)›}
-    (hW : Measurable (Function.uncurry brownian)) (ha : Adapted 𝓕 brownian)
-    (hz : ∀ᵐ ω ∂P, brownian 0 ω = 0)
-    (hL : ∀ β σ x, IsGaussianMarkov P 𝓕 β σ (brownianLogState β σ x))
+Markov.** `P`, `𝓕` and the process `W` are free: the raw and usual Brownian filtrations and every
+filtered pre-Brownian motion (`logState_isGaussianMarkov`) are instances. -/
+theorem brownianGridPrice_eq_gridAmericanPutValue {Ω : Type*} [MeasurableSpace Ω]
+    {P : Measure Ω} [IsProbabilityMeasure P] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
+    {W : ℝ≥0 → Ω → ℝ} (hW : Measurable W.uncurry) (ha : Adapted 𝓕 W)
+    (hz : ∀ᵐ ω ∂P, W 0 ω = 0)
+    (hL : ∀ β σ x, IsGaussianMarkov P 𝓕 β σ (logState W β σ x))
     {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r) (T : ℝ≥0) {δ : ℝ≥0} (hδ : 0 < δ) (x : ℝ) :
     brownianGridPrice K r q σ T δ x =
-      gridAmericanPutValue P 𝓕 brownian K r q σ (Real.exp x) T δ := by
+      gridAmericanPutValue P 𝓕 W K r q σ (Real.exp x) T δ := by
   rw [gridValue_eq_integral_snellEnvelope hW ha hK hr (Real.exp_pos x).le hδ]
   have he : snellEnvelopeAux P (cappedGridFiltration 𝓕 T δ) Set.univ
       (fun j ω => discountedLogPayoff K r (cappedGridTime T δ j)
-        (brownianLogState (r-q-σ^2/2) σ x (cappedGridTime T δ j) ω)) ⌈T/δ⌉₊ 0 =ᵐ[P]
+        (logState W (r-q-σ^2/2) σ x (cappedGridTime T δ j) ω)) ⌈T/δ⌉₊ 0 =ᵐ[P]
       fun ω => brownianGridMarkovAux (fun i => discountedLogPayoff K r (cappedGridTime T δ i))
         (cappedGridTime T δ) (r-q-σ^2/2) σ ⌈T/δ⌉₊ 0
-        (brownianLogState (r-q-σ^2/2) σ x (cappedGridTime T δ 0) ω) :=
+        (logState W (r-q-σ^2/2) σ x (cappedGridTime T δ 0) ω) :=
     snellEnvelopeAux_eq_brownianGridMarkovAux (cappedGridTime_mono T δ) (hL (r-q-σ^2/2) σ x)
       (fun i => discountedLogPayoff_continuous K r (cappedGridTime T δ i))
       (fun i y => discountedLogPayoff_bound hK hr (cappedGridTime T δ i) y) ⌈T/δ⌉₊ 0
@@ -188,10 +189,10 @@ theorem brownianGridPrice_eq_gridAmericanPutValue [MeasurableSpace (ℝ≥0 → 
   have he0 : (fun ω => brownianGridMarkovAux
       (fun i => discountedLogPayoff K r (cappedGridTime T δ i))
       (cappedGridTime T δ) (r-q-σ^2/2) σ ⌈T/δ⌉₊ 0
-      (brownianLogState (r-q-σ^2/2) σ x (cappedGridTime T δ 0) ω)) =ᵐ[P]
+      (logState W (r-q-σ^2/2) σ x (cappedGridTime T δ 0) ω)) =ᵐ[P]
       fun _ => brownianGridPrice K r q σ T δ x := by
     filter_upwards [hz] with ω hω
-    simp [cappedGridTime,brownianLogState,hω,brownianGridPrice]
+    simp [cappedGridTime,logState,hω,brownianGridPrice]
   rw [integral_congr_ae he0]
   simp
 
@@ -200,7 +201,8 @@ theorem brownianGridPrice_eq_gridValue {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 �
     brownianGridPrice K r q σ T δ x =
       gridAmericanPutValue gaussianLimit brownianFiltration brownian K r q σ (Real.exp x) T δ :=
   brownianGridPrice_eq_gridAmericanPutValue measurable_brownian_uncurry brownian_adapted
-    isBrownianReal_brownian.eval_zero_ae_eq_zero brownianLogState_isGaussianMarkov hK hr T hδ x
+    isBrownianReal_brownian.eval_zero_ae_eq_zero (logState_isGaussianMarkov brownian_filtered)
+    hK hr T hδ x
 
 theorem brownianGridPrice_tendsto {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r)
     (T : ℝ≥0) (x : ℝ) :
@@ -213,5 +215,27 @@ theorem brownianGridPrice_tendsto {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r)
   rw [he]
   exact gridValue_tendsto_americanValue measurable_brownian_uncurry continuous_brownian hK hr
       (Real.exp_pos x).le
+
+/-- **Law invariance of the American put value.** In any filtered probability space carrying a
+filtered pre-Brownian motion `W` with continuous paths, the American put value is the one computed
+on path space, `brownianAmericanPut`: both are the limit of the same Gaussian grid prices. -/
+theorem americanPutValue_eq_brownianAmericanPut {Ω : Type*} [MeasurableSpace Ω]
+    {P : Measure Ω} [IsProbabilityMeasure P] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
+    {W : ℝ≥0 → Ω → ℝ} (hW : IsFilteredPreBrownian W 𝓕 P)
+    (hpaths : ∀ ω, Continuous fun t ↦ W t ω) {K r q σ S : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r)
+    (hS : 0 < S) (T : ℝ≥0) :
+    americanPutValue P 𝓕 W K r q σ S T = brownianAmericanPut K r q σ S T := by
+  have ha : Adapted 𝓕 W := fun t ↦ (hW.stronglyAdapted t).measurable
+  have hWm : Measurable W.uncurry :=
+    measurable_uncurry_of_continuous_of_measurable hpaths fun t ↦ (ha t).mono (𝓕.le t) le_rfl
+  have hg : (fun n => brownianGridPrice K r q σ T (gridStep n) (Real.log S)) =
+      fun n => gridAmericanPutValue P 𝓕 W K r q σ (Real.exp (Real.log S)) T (gridStep n) :=
+    funext fun n ↦ brownianGridPrice_eq_gridAmericanPutValue hWm ha hW.eval_zero_ae_eq_zero
+      (logState_isGaussianMarkov hW) hK hr T (gridStep_pos n) _
+  have h1 := gridValue_tendsto_americanValue (P := P) (𝓕 := 𝓕) (q := q) (σ := σ) (T := T) hWm
+    hpaths hK hr (Real.exp_pos (Real.log S)).le
+  have h2 := brownianGridPrice_tendsto (q := q) (σ := σ) hK hr T (Real.log S)
+  rw [← hg] at h1
+  simpa only [Real.exp_log hS] using tendsto_nhds_unique h1 h2
 
 end MathFin.BlackScholes.AmericanPut.Stopping

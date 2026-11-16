@@ -170,14 +170,14 @@ theorem hasDerivAt_log_vasicekBondA (θ σ : ℝ) {κ : ℝ} (hκ : κ ≠ 0) (T
 By `vasicekBondPrice_affine`, for `κ > 0` and `τ = T ≥ 0` this `u` is the bond price
 `𝔼[exp(−∫₀ᵀ r_s ds)]` of the Vasicek short rate started at `r`. -/
 theorem vasicekBondPrice_solves_pde (θ σ : ℝ) {κ : ℝ} (hκ : κ ≠ 0) (τ r : ℝ) :
-    -deriv (fun t ↦ vasicekBondA θ σ κ t * Real.exp (-(vasicekBondB κ t * r))) τ
-      + κ * (θ - r) * deriv (fun x ↦ vasicekBondA θ σ κ τ * Real.exp (-(vasicekBondB κ τ * x))) r
-      + σ ^ 2 / 2
-        * deriv (deriv fun x ↦ vasicekBondA θ σ κ τ * Real.exp (-(vasicekBondB κ τ * x))) r
-      - r * (vasicekBondA θ σ κ τ * Real.exp (-(vasicekBondB κ τ * r))) = 0 := by
-  have hfun (t x : ℝ) : vasicekBondA θ σ κ t * Real.exp (-(vasicekBondB κ t * x))
-      = Real.exp (Real.log (vasicekBondA θ σ κ t) - vasicekBondB κ t * x) := by
-    rw [log_vasicekBondA, vasicekBondA, ← Real.exp_add]
+    -deriv (fun t ↦ vasicekBondPrice θ σ κ t r) τ
+      + κ * (θ - r) * deriv (vasicekBondPrice θ σ κ τ) r
+      + σ ^ 2 / 2 * deriv (deriv (vasicekBondPrice θ σ κ τ)) r
+      - r * vasicekBondPrice θ σ κ τ r = 0 := by
+  have hfun : vasicekBondPrice θ σ κ
+      = fun t x ↦ Real.exp (Real.log (vasicekBondA θ σ κ t) - vasicekBondB κ t * x) := by
+    funext t x
+    rw [vasicekBondPrice, log_vasicekBondA, vasicekBondA, ← Real.exp_add]
     rfl
   simp only [hfun]
   have h := affineBondPrice_solves_pde (κ := κ) (θ := θ) (α := σ ^ 2) (β := 0)

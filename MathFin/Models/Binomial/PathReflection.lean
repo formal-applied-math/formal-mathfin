@@ -78,8 +78,8 @@ to both sides, and the suffix-sign-flip is what produces the
 * `walkPos_reflectAfter_endpoint`: endpoint statement: if the original
   hits `a` at `τ` and ends at `b`, the reflected ends at `2a − b`.
 * `reflectAtFirstHit_involutive`: reflection at the first hit is its own inverse.
-* `HitsLevel_of_walkPos_endpoint_ge`: discrete IVT — a walk ending at or
-  above a level `a ≥ 0` has hit `a`.
+* `HitsLevel_of_le_walkPos`: discrete IVT — a walk at or above a level `a ≥ 0` at some time
+  `k₀ ≤ n` has hit `a`; `HitsLevel_of_walkPos_endpoint_ge` is the case `k₀ = n`.
 
 ## References
 
@@ -418,7 +418,7 @@ lemma walkPos_succ (ω : Fin n → Bool) {k : ℕ} (hk : k < n) :
   rw [h_split, Finset.sum_union h_disj, Finset.sum_singleton]
 
 /-- **Discrete intermediate value theorem for ±1 walks**: if the walk
-ends at or above level `a ≥ 0`, it hits level `a` at some time `k ≤ n`.
+is at or above level `a ≥ 0` at some time `k₀ ≤ n`, it hits level `a` by time `n`.
 
 Proof: take `τ` = smallest `k ≤ n` with `walkPos ω k ≥ a`. Either `τ = 0`
 (so `walkPos ω 0 = 0 ≥ a ≥ 0`, hence `a = 0` and we hit at 0), or `τ > 0`
@@ -426,16 +426,16 @@ with `walkPos ω (τ−1) < a` (minimality) and `walkPos ω τ ≥ a`. Since eac
 step is `±1`, `walkPos τ = walkPos (τ−1) ± 1`; the `-1` case would give
 `walkPos τ < a`, contradicting `≥ a`; the `+1` case gives
 `walkPos τ = walkPos (τ−1) + 1 ≤ a`, combined with `≥ a` gives `= a`. -/
-theorem HitsLevel_of_walkPos_endpoint_ge (ω : Fin n → Bool) (a : ℤ)
-    (ha : 0 ≤ a) (h_end : a ≤ walkPos ω n) : HitsLevel a ω := by
+theorem HitsLevel_of_le_walkPos (ω : Fin n → Bool) (a : ℤ) (ha : 0 ≤ a) {k₀ : ℕ} (hk₀ : k₀ ≤ n)
+    (h_end : a ≤ walkPos ω k₀) : HitsLevel a ω := by
   -- Use Finset.min' on the set of k ≤ n with walkPos ω k ≥ a.
   let S : Finset ℕ :=
     (Finset.range (n + 1)).filter (fun k ↦ a ≤ walkPos ω k)
-  have h_n_mem : n ∈ S := by
-    show n ∈ S
+  have h_n_mem : k₀ ∈ S := by
+    show k₀ ∈ S
     rw [show S = _ from rfl, Finset.mem_filter, Finset.mem_range]
-    exact ⟨Nat.lt_succ_self n, h_end⟩
-  have hS_nonempty : S.Nonempty := ⟨n, h_n_mem⟩
+    exact ⟨Nat.lt_succ_of_le hk₀, h_end⟩
+  have hS_nonempty : S.Nonempty := ⟨k₀, h_n_mem⟩
   let τ := S.min' hS_nonempty
   have h_τ_mem_filter :
       τ ∈ (Finset.range (n + 1)).filter (fun k ↦ a ≤ walkPos ω k) :=
@@ -482,6 +482,12 @@ theorem HitsLevel_of_walkPos_endpoint_ge (ω : Fin n → Bool) (a : ℤ)
   refine ⟨τ, ?_⟩
   rw [hittingSet, Finset.mem_filter, Finset.mem_range]
   exact ⟨by omega, h_eq⟩
+
+/-- **A walk ending at or above a level `a ≥ 0` has hit it**: `HitsLevel_of_le_walkPos` at the
+endpoint. -/
+theorem HitsLevel_of_walkPos_endpoint_ge (ω : Fin n → Bool) (a : ℤ)
+    (ha : 0 ≤ a) (h_end : a ≤ walkPos ω n) : HitsLevel a ω :=
+  HitsLevel_of_le_walkPos ω a ha le_rfl h_end
 
 /-- **Endpoint-above-barrier ⟹ hits barrier** (alias / corollary).
 Same as `HitsLevel_of_walkPos_endpoint_ge`, stated as a one-line use. -/

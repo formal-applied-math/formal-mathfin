@@ -68,6 +68,7 @@ import MathFin.Probability.Laws.Esscher
 import MathFin.Probability.Laws.FiniteWeights
 import MathFin.Probability.Gaussian.FeynmanKacHeatEquation
 import MathFin.Probability.Brownian.BrownianMartingale
+import MathFin.Probability.Brownian.BrownianDoobMaximal
 -- Bayes change-of-measure engine + Black–Scholes EMM via an explicit Girsanov density
 import MathFin.Probability.Martingales.ChangeOfMeasure
 import MathFin.Probability.Brownian.ExpMartingaleQBrownian
@@ -382,6 +383,7 @@ import MathFin.Pricing.NoArbitrageDerivations
 import MathFin.Pricing.SuperhedgingDuality
 import MathFin.Pricing.Value
 import MathFin.Pricing.Market
+import MathFin.Pricing.AmericanPrice
 import MathFin.Pricing.OneDateMarket
 import MathFin.Pricing.Parity
 import MathFin.Pricing.DiscreteMarket
@@ -392,6 +394,7 @@ import MathFin.Pricing.WienerIntegralForwardMeasure
 import MathFin.Models.BlackScholes.GaussianGirsanov
 import MathFin.Models.Forwards.TriangleArbitrage
 import MathFin.Models.ModelFree.CarrMadan
+import MathFin.Models.ModelFree.CarrMadanMarket
 -- Phase 30 (Bridge A): BSCallHyp / BachelierHyp from IsPreBrownian
 import MathFin.Models.BlackScholes.BSCallHypFromBrownian
 -- Phase 31: Pricing entry points from IsPreBrownian (composite corollaries)
@@ -423,6 +426,7 @@ import MathFin.Models.BlackScholes.HigherGreeks
 import MathFin.Models.BlackScholes.StrikeGreeks
 -- Local-vol skew of a tilted smile surface via Dupire's ratio; the rule of two
 import MathFin.Models.LocalVol.ForwardSmile
+import MathFin.Models.LocalVol.MarketCallSurface
 import MathFin.Models.BlackScholes.PutStrikeConvexity
 import MathFin.Models.BlackScholes.AsianInequality
 -- Geometric-average Asian: two-date log-driver is Gaussian with the covariance-sum variance
@@ -560,6 +564,7 @@ import MathFin.Models.Forwards.SchwartzOneFactor
 -- Phase 13 additions:
 import MathFin.Models.Binomial.Model
 import MathFin.Models.Binomial.American
+import MathFin.Models.Binomial.AmericanMarket
 import MathFin.Models.Binomial.CRRConvergence
 import MathFin.Models.Binomial.DriftLimit
 import MathFin.Models.Binomial.Bermudan
@@ -577,6 +582,7 @@ import MathFin.Models.BlackScholes.GreekSigns
 import MathFin.Models.Binomial.PathReflection
 -- Barrier-option counting: reflection card identity + maximal-distribution (running-max law)
 import MathFin.Models.Binomial.BarrierReflection
+import MathFin.Models.Binomial.BarrierMarket
 -- Phase 19: Snell envelope characterization of americanPrice
 import MathFin.Models.Binomial.SnellEnvelope
 -- Phase 43: Binomial up-probability as two-state FTAP EMM
@@ -662,6 +668,7 @@ import MathFin.Models.Rates.VasicekBondPriceAt
 import MathFin.Models.Rates.VasicekMarket
 -- Vasicek real-world vs. risk-neutral terminal mean; an Esscher tilt reproducing the
 -- risk-neutral terminal law
+import MathFin.Models.Rates.VasicekMarketPDE
 import MathFin.Models.Rates.VasicekMarketPriceOfRisk
 -- Vasicek bond price as κ → 0⁺: the three-term cancellation limit to the driftless model
 import MathFin.Models.Rates.VasicekZeroMeanReversionLimit
@@ -785,6 +792,7 @@ import MathFin.Models.Binomial.MultiPeriodFTAP
 import MathFin.Models.Jumps.JumpDiffusionThinning
 import MathFin.Models.Rates.ABCDBlack76
 import MathFin.Models.BlackScholes.American.AmericanPutEuropeanBound
+import MathFin.Models.BlackScholes.American.AmericanMarketPrice
 import MathFin.Models.BlackScholes.American.AmericanPutMarketBound
 import MathFin.Models.Rates.OUHermiteVasicek
 import MathFin.Models.Rates.AffineTermStructurePDE
@@ -870,6 +878,7 @@ import MathFin.Risk.SquareRootOfTime
 import MathFin.Risk.ComponentVaR
 import MathFin.Risk.Credit.CreditRiskPlus
 import MathFin.Risk.Credit.OneFactorCopula
+import MathFin.Risk.Credit.OneFactorMerton
 
 -- Choice
 import MathFin.Choice.Portfolio.Markowitz
@@ -953,6 +962,7 @@ import MathFin.Markets.DeFi.UniswapV3CoveredCallPrice
 import MathFin.Markets.DeFi.LPContract
 import MathFin.Markets.Microstructure.GlostenMilgromCondExp
 import MathFin.Markets.Microstructure.GlostenMilgromMarket
+import MathFin.Markets.Microstructure.GlostenMilgromSequential
 -- Contributed 2026-11 (#432–#467): lattices, smile interpolation and quoting, SABR Greeks,
 -- lookback and shout options, Marchenko–Pastur edges, concentrated-liquidity VaR
 import MathFin.Models.Binomial.TrinomialMomentMatching

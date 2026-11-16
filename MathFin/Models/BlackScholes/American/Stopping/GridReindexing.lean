@@ -50,7 +50,7 @@ theorem rounded_grid_time_eq {T δ t : ℝ≥0} (hδ : 0 < δ) (ht : t ∈ exerc
 
 variable {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T δ : ℝ≥0}
 
-theorem StoppingRule.toGridIndexRule_time (θ : StoppingRule 𝓕 T)
+theorem _root_.MathFin.StoppingRule.toGridIndexRule_time (θ : StoppingRule 𝓕 T)
     (hθ : θ ∈ StoppingRule.valuedIn 𝓕 T (exerciseGrid T δ)) (hδ : 0 < δ) (ω : Ω) :
     cappedGridTime T δ ((θ.toGridIndexRule hδ).time ω) = θ.time ω :=
   rounded_grid_time_eq hδ (hθ ω)

@@ -27,7 +27,8 @@ quotes is a pricing measure of it, since a conditional expectation process is a 
 
 The value `V` and the information `𝓖` are arbitrary; that the quotes of the Glosten–Milgrom
 dealer along a sequence of trades are these conditional expectations is not shown here (one
-trade is `condExp_payoff_eq_quote`).
+trade is `condExp_payoff_eq_quote`; the sequence is `gmQuote_ae_eq_condExp` in
+`GlostenMilgromSequential`).
 
 ## References
 
