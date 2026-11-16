@@ -74,83 +74,47 @@ open scoped NNReal ENNReal
 
 namespace MathFin
 
-/-- Grönwall, integral form, `a = 0`, for `g` continuous on all of `[0,∞)`; the public
-`gronwall_zero_of_le_const_mul_integral` reduces to it by clamping the time at `b`. The primitive
-`G t = ∫₀ᵗ g` is `C¹` with `G' = g` (FTC, `g` continuous), `G 0 = 0`, and
-`‖G' x‖ = g x ≤ K·G x = K‖G x‖`, so
-`eq_zero_of_abs_deriv_le_mul_abs_self_of_eq_zero_right` gives `G ≡ 0`; then
-`g t ≤ K·G t = 0` with `g ≥ 0` gives `g t = 0`. -/
-private theorem gronwall_zero_aux {g : ℝ → ℝ} {K b : ℝ}
-    (hg0 : ∀ t, 0 ≤ g t) (hgc : ContinuousOn g (Set.Ici 0))
-    (hle : ∀ t ∈ Set.Icc 0 b, g t ≤ K * ∫ s in (0 : ℝ)..t, g s) :
-    ∀ t ∈ Set.Icc 0 b, g t = 0 := by
-  intro t ht
-  obtain ⟨ht0, htb⟩ := ht
-  set G : ℝ → ℝ := fun u ↦ ∫ s in (0:ℝ)..u, g s with hGdef
-  -- g is interval-integrable on every [0,u] with u ≥ 0 (continuous on Ici 0)
-  have hgii : ∀ u, 0 ≤ u → IntervalIntegrable g volume 0 u := by
-    intro u hu
-    apply ContinuousOn.intervalIntegrable
-    rw [Set.uIcc_of_le hu]
-    exact hgc.mono Set.Icc_subset_Ici_self
-  -- G ≥ 0 on [0,∞)
-  have hGnonneg : ∀ u, 0 ≤ u → 0 ≤ G u := by
-    intro u hu
-    exact intervalIntegral.integral_nonneg hu (fun s _ ↦ hg0 s)
-  -- G continuous on [0,t]
-  have hGcont : ContinuousOn G (Set.Icc 0 t) := by
-    have hInt : IntegrableOn g (Set.uIcc 0 t) volume := by
-      apply ContinuousOn.integrableOn_uIcc
-      rw [Set.uIcc_of_le ht0]; exact hgc.mono Set.Icc_subset_Ici_self
-    have hc := intervalIntegral.continuousOn_primitive_interval hInt
-    rwa [Set.uIcc_of_le ht0] at hc
-  -- FTC: G' = g on [0,t)
-  have hGderiv : ∀ x ∈ Set.Ico 0 t, HasDerivWithinAt G (g x) (Set.Ici x) x := by
-    intro x hx
-    have hmono : Set.Ioi x ⊆ Set.Ici 0 :=
-      Set.Ioi_subset_Ici_self.trans (Set.Ici_subset_Ici.mpr hx.1)
-    have hcont : ContinuousWithinAt g (Set.Ioi x) x := (hgc x hx.1).mono hmono
-    have hmeas : StronglyMeasurableAtFilter g (𝓝[Set.Ioi x] x) volume :=
-      ((hgc.mono (Set.Ici_subset_Ici.mpr hx.1)).stronglyMeasurableAtFilter_nhdsWithin
-        measurableSet_Ici x).filter_mono (nhdsWithin_mono x Set.Ioi_subset_Ici_self)
-    exact intervalIntegral.integral_hasDerivWithinAt_right (hgii x hx.1) hmeas hcont
-  have hG0 : G 0 = 0 := by simp [hGdef]
-  -- the Grönwall bound ‖G' x‖ = g x ≤ K G x = K‖G x‖
-  have hbound : ∀ x ∈ Set.Ico 0 t, ‖g x‖ ≤ K * ‖G x‖ := by
-    intro x hx
-    rw [Real.norm_of_nonneg (hg0 x), Real.norm_of_nonneg (hGnonneg x hx.1)]
-    exact hle x ⟨hx.1, hx.2.le.trans htb⟩
-  have hGzero := eq_zero_of_abs_deriv_le_mul_abs_self_of_eq_zero_right hGcont hGderiv hG0 hbound
-  have hGt : G t = 0 := hGzero t (Set.right_mem_Icc.mpr ht0)
-  -- g t ≤ K * G t = 0, and g t ≥ 0
-  have hint0 : (∫ s in (0:ℝ)..t, g s) = 0 := hGt
-  have hlt := hle t ⟨ht0, htb⟩
-  rw [hint0, mul_zero] at hlt
-  exact le_antisymm hlt (hg0 t)
-
 /-- **Grönwall, integral form, `a = 0`.** A nonnegative `g`, continuous on `[0,b]`, with
-`g t ≤ K · ∫₀ᵗ g` for every `t ∈ [0,b]`, vanishes on `[0,b]`. The clamped function
-`u ↦ g (min u b)` is continuous on `[0,∞)` and agrees with `g` on `[0,b]`, so
-`gronwall_zero_aux` applies to it. -/
+`g t ≤ K · ∫₀ᵗ g` for every `t ∈ [0,b]`, vanishes on `[0,b]`. The primitive `G t = ∫₀ᵗ g` has
+`G' = g` from the right on `[0,t)` (FTC, `g` continuous), `G 0 = 0`, and
+`‖G' x‖ = g x ≤ K·G x = K‖G x‖`, so `eq_zero_of_abs_deriv_le_mul_abs_self_of_eq_zero_right` gives
+`G ≡ 0`; then `g t ≤ K·G t = 0` with `g ≥ 0` gives `g t = 0`. -/
 theorem gronwall_zero_of_le_const_mul_integral {g : ℝ → ℝ} {K b : ℝ}
     (hg0 : ∀ t, 0 ≤ g t) (hgc : ContinuousOn g (Set.Icc 0 b))
     (hle : ∀ t ∈ Set.Icc 0 b, g t ≤ K * ∫ s in (0 : ℝ)..t, g s) :
     ∀ t ∈ Set.Icc 0 b, g t = 0 := by
-  intro t ht
-  have hb : 0 ≤ b := ht.1.trans ht.2
-  have hcont : ContinuousOn (fun u : ℝ ↦ g (min u b)) (Set.Ici 0) :=
-    hgc.comp (continuous_id.min continuous_const).continuousOn
-      fun u hu ↦ ⟨le_min hu hb, min_le_right _ _⟩
-  have key := gronwall_zero_aux (g := fun u ↦ g (min u b)) (K := K) (b := b)
-    (fun u ↦ hg0 _) hcont (fun s hs ↦ by
-      have hint : ∫ u in (0 : ℝ)..s, g (min u b) = ∫ u in (0 : ℝ)..s, g u :=
-        intervalIntegral.integral_congr fun u hu ↦ by
-          rw [Set.uIcc_of_le hs.1] at hu
-          simp only [min_eq_left (hu.2.trans hs.2)]
-      show g (min s b) ≤ K * ∫ u in (0 : ℝ)..s, g (min u b)
-      rw [hint, min_eq_left hs.2]
-      exact hle s hs) t ht
-  simpa [min_eq_left ht.2] using key
+  intro t ⟨ht0, htb⟩
+  set G : ℝ → ℝ := fun u ↦ ∫ s in (0:ℝ)..u, g s with hGdef
+  have hgii (u : ℝ) (hu : u ∈ Set.Icc 0 b) : IntervalIntegrable g volume 0 u := by
+    apply ContinuousOn.intervalIntegrable
+    rw [Set.uIcc_of_le hu.1]
+    exact hgc.mono (Set.Icc_subset_Icc_right hu.2)
+  have hGcont : ContinuousOn G (Set.Icc 0 t) := by
+    have hInt : IntegrableOn g (Set.uIcc 0 t) volume := by
+      apply ContinuousOn.integrableOn_uIcc
+      rw [Set.uIcc_of_le ht0]
+      exact hgc.mono (Set.Icc_subset_Icc_right htb)
+    have hc := intervalIntegral.continuousOn_primitive_interval hInt
+    rwa [Set.uIcc_of_le ht0] at hc
+  have hGderiv (x : ℝ) (hx : x ∈ Set.Ico 0 t) : HasDerivWithinAt G (g x) (Set.Ici x) x := by
+    have hxb : x ∈ Set.Ico 0 b := ⟨hx.1, hx.2.trans_le htb⟩
+    have hmem : Set.Icc 0 b ∈ 𝓝[>] x := Icc_mem_nhdsGT_of_mem hxb
+    have hcont : ContinuousWithinAt g (Set.Ioi x) x :=
+      (hgc x (Set.Ico_subset_Icc_self hxb)).mono_of_mem_nhdsWithin hmem
+    have hmeas : StronglyMeasurableAtFilter g (𝓝[Set.Ioi x] x) volume :=
+      (hgc.stronglyMeasurableAtFilter_nhdsWithin measurableSet_Icc x).filter_mono
+        (nhdsWithin_le_of_mem hmem)
+    exact intervalIntegral.integral_hasDerivWithinAt_right
+      (hgii x (Set.Ico_subset_Icc_self hxb)) hmeas hcont
+  have hbound (x : ℝ) (hx : x ∈ Set.Ico 0 t) : ‖g x‖ ≤ K * ‖G x‖ := by
+    rw [Real.norm_of_nonneg (hg0 x),
+      Real.norm_of_nonneg (intervalIntegral.integral_nonneg hx.1 fun s _ ↦ hg0 s : 0 ≤ G x)]
+    exact hle x ⟨hx.1, hx.2.le.trans htb⟩
+  have hGt : G t = 0 := eq_zero_of_abs_deriv_le_mul_abs_self_of_eq_zero_right hGcont hGderiv
+    (by simp [hGdef]) hbound t (Set.right_mem_Icc.mpr ht0)
+  have hlt := hle t ⟨ht0, htb⟩
+  rw [show (∫ s in (0:ℝ)..t, g s) = 0 from hGt, mul_zero] at hlt
+  exact le_antisymm hlt (hg0 t)
 
 /-- **Cauchy–Schwarz in time** (interval-integral form): `(∫₀ˢ f)² ≤ s·∫₀ˢ f²` for `0 ≤ s`,
 given `f ∈ L²` on `(0,s]`. -/
