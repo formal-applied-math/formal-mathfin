@@ -56,6 +56,7 @@ derived. `∫₀ᵀ g(u) dB_u` is the Wiener integral of the *deterministic* int
 * `vasicekIntegratedRate`: the integrated short rate in its Wiener representation,
   `∫₀ᵀ r_s ds = M(T) + σ·∫₀ᵀ g(u) dB_u`.
 * `vasicekBondA`: the affine coefficient `A(T) = exp(−θ(T − B(T)) + σ²V(T)/2)`.
+* `vasicekBondPrice`: the bond price function `u(τ, r) = A(τ) exp(−B(τ) r)`.
 
 ## Main results
 
@@ -71,7 +72,8 @@ derived. `∫₀ᵀ g(u) dB_u` is the Wiener integral of the *deterministic* int
   instance `m = M(T)`, `c = σ`, `f = g` of the Wiener bond-price lemma
   `integral_exp_neg_add_mul_wienerIntegralLp`
   (`Probability/Brownian/Wiener/WienerIntegralExpMoment`).
-* `vasicekBondPrice_affine` — the affine form `P(0,T) = A(T)·exp(−B(T)·r₀)`.
+* `vasicekBondPrice_affine` — the affine form `P(0,T) = vasicekBondPrice θ σ κ T r₀ =
+  A(T)·exp(−B(T)·r₀)`.
 
 ## References
 
@@ -321,14 +323,22 @@ the bond price factors as `P(0,T) = A(T)·exp(−B(T)·r₀)`. -/
 noncomputable def vasicekBondA (θ σ κ T : ℝ) : ℝ :=
   Real.exp (-(θ * (T - vasicekBondB κ T)) + σ ^ 2 * vasicekBondV κ T / 2)
 
+/-- **The Vasicek bond price function** `u(τ, r) = A(τ) exp(−B(τ) r)`, in the time to maturity
+`τ` and the short rate `r`: the price of the bond (`vasicekBondPrice_affine`), the market price of
+the unit payment (`Rates.price_pay_vasicekMarket`) and the solution of the Vasicek pricing PDE
+(`vasicekBondPrice_solves_pde`). -/
+noncomputable def vasicekBondPrice (θ σ κ τ r : ℝ) : ℝ :=
+  vasicekBondA θ σ κ τ * Real.exp (-(vasicekBondB κ τ * r))
+
 /-- **The affine term structure**: the Vasicek bond price separates the initial
 short rate into `P(0,T) = A(T)·exp(−B(T)·r₀)` — the defining shape of an affine
 term-structure model, the exponential-affine dependence on `r₀`. -/
 theorem vasicekBondPrice_affine (hB : IsPreBrownianReal B μ)
     (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
     ∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω)) ∂μ
-      = vasicekBondA θ σ κ (T : ℝ) * Real.exp (-(vasicekBondB κ (T : ℝ) * r₀)) := by
-  rw [vasicekBondPrice_eq hB r₀ θ σ hκ T, vasicekBondA, vasicekIntegratedMean, ← Real.exp_add]
+      = vasicekBondPrice θ σ κ T r₀ := by
+  rw [vasicekBondPrice_eq hB r₀ θ σ hκ T, vasicekBondPrice, vasicekBondA, vasicekIntegratedMean,
+    ← Real.exp_add]
   congr 1
   ring
 

@@ -14,17 +14,13 @@ public import MathFin.Models.Rates.AffineTermStructurePDE
 The Vasicek bond market (`Models/Rates/VasicekMarket.lean`) and the term-structure PDE
 (`Models/Rates/AffineTermStructurePDE.lean`) share the loadings `vasicekBondA`, `vasicekBondB`:
 the market prices a unit payment at `T` at `A(T) e^{-B(T) r₀}`, and `u(τ, r) = A(τ) e^{-B(τ) r}`
-solves the PDE. This module names that function (`vasicekBondPrice`) and states the two facts
-about the one object: the market price of the unit payment at `T` is `vasicekBondPrice` at
+solves the PDE. Both are stated for the one function `vasicekBondPrice`, and this module puts the
+two facts together: the market price of the unit payment at `T` is `vasicekBondPrice` at
 `(T, r₀)`, and `vasicekBondPrice` satisfies the Vasicek PDE at `(T, r₀)`.
 
 The PDE is verified for the function; that the market price solves it is by the identification
 of the price with that function at the single point `(T, r₀)`. Feynman–Kac for the family of
 markets started at every `r₀` is not proved.
-
-## Main definitions
-
-* `MathFin.Rates.vasicekBondPrice`: `A(τ) exp(−B(τ) r)`.
 
 ## Main results
 
@@ -50,11 +46,6 @@ open scoped NNReal
 open ItoIntegralL2
 
 namespace MathFin.Rates
-
-/-- **The Vasicek bond price function** `u(τ, r) = A(τ) exp(−B(τ) r)`, in the time to maturity
-`τ` and the short rate `r`. -/
-noncomputable def vasicekBondPrice (θ σ κ τ r : ℝ) : ℝ :=
-  vasicekBondA θ σ κ τ * Real.exp (-(vasicekBondB κ τ * r))
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} {B : ℝ≥0 → Ω → ℝ}
   [IsProbabilityMeasure μ] (hB : IsPreBrownianReal B μ) (hBm : ∀ s, Measurable (B s))

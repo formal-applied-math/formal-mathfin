@@ -47,6 +47,7 @@ of expected payoffs; the lemmas carry the nonemptiness, integrability and bound 
   `stoppingValue ≤ C`.
 * `exists_lt_of_lt_stoppingValue`: if `a < stoppingValue` and the class is nonempty, some rule has
   expected payoff above `a`.
+* `stoppingValue_congr`: payoff processes agreeing up to the horizon have the same value.
 
 ## Tags
 
@@ -168,5 +169,13 @@ theorem exists_lt_of_lt_stoppingValue {a : ℝ} (h : a < stoppingValue P 𝓕 Z 
     (hR : R.Nonempty) : ∃ θ ∈ R, a < ∫ ω, Z (θ.time ω) ω ∂P := by
   obtain ⟨_,⟨θ,hθ,rfl⟩,h⟩ := exists_lt_of_lt_csSup (hR.image _) h
   exact ⟨θ,hθ,h⟩
+
+/-- **The value sees the payoff only up to the horizon.** Two payoff processes that agree at every
+time up to `T` have the same stopping value with horizon `T`. -/
+theorem stoppingValue_congr {Z' : ι → Ω → ℝ} (h : ∀ t ≤ T, ∀ ω, Z t ω = Z' t ω) :
+    stoppingValue P 𝓕 Z T R = stoppingValue P 𝓕 Z' T R := by
+  unfold stoppingValue
+  congr 1
+  exact image_congr fun θ _ ↦ integral_congr_ae (ae_of_all _ fun ω ↦ h _ (θ.le_horizon ω) ω)
 
 end MathFin

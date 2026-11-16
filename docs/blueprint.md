@@ -162,6 +162,7 @@ graph TD
   binomialAmericanMarket["The binomial American put is the market's American price"]:::proved
   blackScholesMarket["Black–Scholes is a market"]:::proved
   black76Caplet["Black's caplet formula, given a lognormal forward rate"]:::proved
+  bsAmericanMarket["The Black–Scholes market's American put is the canonical American put"]:::proved
   coherentRiskRepresentation["Robust representation of coherent risk measures on a finite space"]:::proved
   conditionalExpectationPricingMeasure["A conditional-expectation process is priced by its own measure"]:::proved
   creditPortfolioIsMerton["The one-factor credit portfolio is Merton's"]:::proved
@@ -188,6 +189,7 @@ graph TD
   vasicekMarket["The Vasicek bond market"]:::proved
   americanPutDominatesEuropean["The American put value dominates the Black–Scholes European price"]:::proved
   bachelierCall["Bachelier call price formula"]:::proved
+  binomialKnockInMarket["The binomial market prices the knock-in by reflection"]:::proved
   bsArbitrageFreePrice["Uniqueness of the Black–Scholes pricing measure among square-integrable densities"]:::proved
   bsDeltaHedge["Black–Scholes delta hedging"]:::proved
   esscherPremiumIsPrice["The Esscher premium is a price"]:::proved
@@ -443,6 +445,11 @@ graph TD
   standardNormalCdf --> black76Caplet
   bsCall --> black76Caplet
   forwardMeasure --> black76Caplet
+  americanPrice --> bsAmericanMarket
+  brownianMotion --> bsAmericanMarket
+  gbm --> bsAmericanMarket
+  market --> bsAmericanMarket
+  girsanovBrownianCharacterisation --> bsAmericanMarket
   coherentRiskMeasure --> coherentRiskRepresentation
   convexRiskMeasure --> coherentRiskRepresentation
   coneSeparation --> coherentRiskRepresentation
@@ -522,6 +529,12 @@ graph TD
   market --> bachelierCall
   pricingFunctional --> bachelierCall
   standardNormalCdf --> bachelierCall
+  contract --> binomialKnockInMarket
+  contractValue --> binomialKnockInMarket
+  market --> binomialKnockInMarket
+  pricingFunctional --> binomialKnockInMarket
+  pricingMeasure --> binomialKnockInMarket
+  binomialBarrierReflection --> binomialKnockInMarket
   brownianMotion --> bsArbitrageFreePrice
   contract --> bsArbitrageFreePrice
   contractValue --> bsArbitrageFreePrice
@@ -959,6 +972,7 @@ graph TD
 | `thm:binomial-american-market` The binomial American put is the market's American price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abinomial-american-market%22%20in%3Abody) |
 | `thm:black-scholes-market` Black–Scholes is a market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ablack-scholes-market%22%20in%3Abody) |
 | `thm:black76-caplet` Black's caplet formula, given a lognormal forward rate | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ablack76-caplet%22%20in%3Abody) |
+| `thm:bs-american-market` The Black–Scholes market's American put is the canonical American put | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-american-market%22%20in%3Abody) |
 | `thm:coherent-risk-representation` Robust representation of coherent risk measures on a finite space | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acoherent-risk-representation%22%20in%3Abody) |
 | `thm:conditional-expectation-pricing-measure` A conditional-expectation process is priced by its own measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aconditional-expectation-pricing-measure%22%20in%3Abody) |
 | `thm:credit-portfolio-is-merton` The one-factor credit portfolio is Merton's | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acredit-portfolio-is-merton%22%20in%3Abody) |
@@ -985,6 +999,7 @@ graph TD
 | `thm:vasicek-market` The Vasicek bond market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avasicek-market%22%20in%3Abody) |
 | `thm:american-put-dominates-european` The American put value dominates the Black–Scholes European price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-dominates-european%22%20in%3Abody) |
 | `thm:bachelier-call` Bachelier call price formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abachelier-call%22%20in%3Abody) |
+| `thm:binomial-knock-in-market` The binomial market prices the knock-in by reflection | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abinomial-knock-in-market%22%20in%3Abody) |
 | `thm:bs-arbitrage-free-price` Uniqueness of the Black–Scholes pricing measure among square-integrable densities | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-arbitrage-free-price%22%20in%3Abody) |
 | `thm:bs-delta-hedge` Black–Scholes delta hedging | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-delta-hedge%22%20in%3Abody) |
 | `thm:esscher-premium-is-price` The Esscher premium is a price | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aesscher-premium-is-price%22%20in%3Abody) |

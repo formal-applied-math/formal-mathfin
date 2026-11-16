@@ -3043,6 +3043,14 @@ end MathFin.AxiomAudit
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.Binomial.americanPrice_market_europeanPutPayoff
 
+/-- info: 'MathFin.Contracts.Binomial.price_upAndIn_market' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.Binomial.price_upAndIn_market
+
+/-- info: 'MathFin.Contracts.BlackScholes.americanPrice_market_europeanPutPayoff_eq_canonicalPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.americanPrice_market_europeanPutPayoff_eq_canonicalPrice
+
 /-- info: 'MathFin.Market.IsPricingMeasure.integral_deriv_deriv_mul_price_europeanCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Market.IsPricingMeasure.integral_deriv_deriv_mul_price_europeanCall

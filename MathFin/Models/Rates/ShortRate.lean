@@ -107,10 +107,8 @@ theorem value_fixedFlows_vasicek (hB : IsPreBrownianReal B μ) (r₀ θ σ : ℝ
     (hκ : 0 < κ) (X : ι → ℝ≥0 → Ω → ℝ) (t : ℕ → ℝ≥0) (c : ℕ → ℝ) (n : ℕ) :
     (fixedFlows t c n : Contract ι).value μ
         (shortRateDiscount (vasicekIntegratedRate hB r₀ θ σ hκ)) X
-      = ∑ i ∈ Finset.range n,
-          vasicekBondA θ σ κ (t i) * Real.exp (-(vasicekBondB κ (t i) * r₀)) * c i :=
-  value_fixedFlows_of_zeroCurve_eq (P := fun s ↦
-      vasicekBondA θ σ κ s * Real.exp (-(vasicekBondB κ s * r₀))) X t c n
+      = ∑ i ∈ Finset.range n, vasicekBondPrice θ σ κ (t i) r₀ * c i :=
+  value_fixedFlows_of_zeroCurve_eq (P := fun s ↦ vasicekBondPrice θ σ κ s r₀) X t c n
     (fun i _ ↦ vasicekBondPrice_affine hB r₀ θ σ hκ (t i))
     fun _ _ ↦ (mul_pos (Real.exp_pos _) (Real.exp_pos _)).ne'
 

@@ -577,6 +577,7 @@ import MathFin.Models.BlackScholes.GreekSigns
 import MathFin.Models.Binomial.PathReflection
 -- Barrier-option counting: reflection card identity + maximal-distribution (running-max law)
 import MathFin.Models.Binomial.BarrierReflection
+import MathFin.Models.Binomial.BarrierMarket
 -- Phase 19: Snell envelope characterization of americanPrice
 import MathFin.Models.Binomial.SnellEnvelope
 -- Phase 43: Binomial up-probability as two-state FTAP EMM
@@ -786,6 +787,7 @@ import MathFin.Models.Binomial.MultiPeriodFTAP
 import MathFin.Models.Jumps.JumpDiffusionThinning
 import MathFin.Models.Rates.ABCDBlack76
 import MathFin.Models.BlackScholes.American.AmericanPutEuropeanBound
+import MathFin.Models.BlackScholes.American.AmericanMarketPrice
 import MathFin.Models.BlackScholes.American.AmericanPutMarketBound
 import MathFin.Models.Rates.OUHermiteVasicek
 import MathFin.Models.Rates.AffineTermStructurePDE

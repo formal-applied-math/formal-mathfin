@@ -220,6 +220,7 @@ landmarks = [
   "MathFin.americanPrice_eq_snellEnvelope",
   "MathFin.Contracts.Binomial.americanPrice_market_europeanPutPayoff",
   "MathFin.Contracts.BlackScholes.price_europeanPut_le_americanPutValue",
+  "MathFin.Contracts.BlackScholes.americanPrice_market_europeanPutPayoff_eq_canonicalPrice",
   "MathFin.BlackScholes.AmericanPut.Stopping.brownianUsualActualContactRule_optimal",
 ]
 
