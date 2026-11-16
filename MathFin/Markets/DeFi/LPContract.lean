@@ -36,6 +36,11 @@ language with exponent `1/2`:
   `UniswapMechanics` valued at `P`.
 * `price_lpPayoff`: in any market, paying either position at `T` is worth the discounted
   expectation of that position's value.
+* `hodlPayoff`: holding the deposit `x₀` of X and `y₀` of Y, as a payoff.
+* `price_constantProductPayoff_eq`: the constant-product position is worth the discounted
+  expectation of the hold value times `1 + impermanentLoss r`, `r = P x₀ / y₀`.
+* `price_constantProductPayoff_le_hodl`: hence, for an integrable hold value, it is worth no more
+  than the hold (`impermanentLoss_nonpos`).
 
 ## Scope
 
@@ -156,5 +161,83 @@ theorem price_lpPayoff {Ω : Type*} [MeasurableSpace Ω] (M : Market Unit Ω) (Q
     congr 1
     funext ω
     exact congrArg _ (eval_constantProductPayoff hx hy T _ (hS ω))
+
+/-- **Holding the deposit** of `x₀` units of X and `y₀` units of Y, as a payoff on the price of X
+in Y observed at `T`: `x₀ P + y₀`. -/
+noncomputable def hodlPayoff (x₀ y₀ : ℝ) (T : ℝ≥0) : Payoff Unit :=
+  .add (.mul (.const x₀) (.obs () T)) (.const y₀)
+
+theorem eval_hodlPayoff (x₀ y₀ : ℝ) (T : ℝ≥0) (s : Scenario Unit) :
+    (hodlPayoff x₀ y₀ T).eval s = x₀ * s () T + y₀ := by
+  simp [hodlPayoff, Payoff.eval]
+
+/-- **The constant-product payoff is the hold value times `1 + impermanentLoss`**: at a positive
+price `P`, the position of invariant `x₀ y₀` is worth `(x₀ P + y₀) (1 + IL(P x₀ / y₀))`, where
+`impermanentLoss` is the closed form `2√r/(1 + r) − 1` of `UniswapMechanics`. -/
+theorem eval_constantProductPayoff_eq_hodl_mul {x₀ y₀ : ℝ} (hx : 0 < x₀) (hy : 0 < y₀) (T : ℝ≥0)
+    (s : Scenario Unit) (hP : 0 < s () T) :
+    (constantProductPayoff (x₀ * y₀) T).eval s =
+      (x₀ * s () T + y₀) * (1 + impermanentLoss (s () T * x₀ / y₀)) := by
+  have hr : s () T * x₀ / y₀ * y₀ / x₀ = s () T := by field_simp
+  have h := impermanentLoss_eq x₀ y₀ (s () T * x₀ / y₀) hx hy (by positivity)
+  rw [hr] at h
+  have hne : x₀ * s () T + y₀ ≠ 0 := by positivity
+  rw [eval_constantProductPayoff hx hy T s hP]
+  calc impermanentLossReservesX x₀ y₀ (s () T * x₀ / y₀) * s () T
+        + impermanentLossReservesY x₀ y₀ (s () T * x₀ / y₀)
+      = (x₀ * s () T + y₀) * ((impermanentLossReservesX x₀ y₀ (s () T * x₀ / y₀) * s () T
+        + impermanentLossReservesY x₀ y₀ (s () T * x₀ / y₀)) / (x₀ * s () T + y₀)) := by
+        field_simp
+    _ = _ := by rw [← h]; ring
+
+/-- **The price of the constant-product position is the discounted expectation of the hold value
+times `1 + impermanentLoss`**, in any market with a positive price of X in Y at `T`, under any
+measure `Q`: `∫ D_T (x₀ P_T + y₀)(1 + IL(P_T x₀ / y₀))`. -/
+theorem price_constantProductPayoff_eq {Ω : Type*} [MeasurableSpace Ω] (M : Market Unit Ω)
+    (Q : Measure Ω) (T : ℝ≥0) (hS : ∀ ω, 0 < M.asset () T ω) {x₀ y₀ : ℝ} (hx : 0 < x₀)
+    (hy : 0 < y₀) :
+    M.price Q (.pay T (constantProductPayoff (x₀ * y₀) T)) =
+      ∫ ω, M.deflator T ω * ((x₀ * M.asset () T ω + y₀) *
+        (1 + impermanentLoss (M.asset () T ω * x₀ / y₀))) ∂Q := by
+  rw [Market.price, Contract.value_pay]
+  congr 1
+  funext ω
+  exact congrArg _ (eval_constantProductPayoff_eq_hodl_mul hx hy T _ (hS ω))
+
+/-- **Impermanent loss, priced.** In a market with a positive price of X in Y at `T`, under any
+measure `Q` for which the deflated hold value `D_T (x₀ P_T + y₀)` is integrable, the
+constant-product position of invariant `x₀ y₀` is worth no more than holding the deposit:
+`price (pay T (constantProductPayoff (x₀ y₀) T)) ≤ price (pay T (hodlPayoff x₀ y₀ T))`. It is the
+pathwise `impermanentLoss_nonpos` integrated against the deflator. -/
+theorem price_constantProductPayoff_le_hodl {Ω : Type*} [MeasurableSpace Ω] (M : Market Unit Ω)
+    (Q : Measure Ω) (T : ℝ≥0) (hS : ∀ ω, 0 < M.asset () T ω) {x₀ y₀ : ℝ} (hx : 0 < x₀)
+    (hy : 0 < y₀)
+    (hint : Integrable (fun ω ↦ M.deflator T ω * (x₀ * M.asset () T ω + y₀)) Q) :
+    M.price Q (.pay T (constantProductPayoff (x₀ * y₀) T)) ≤
+      M.price Q (.pay T (hodlPayoff x₀ y₀ T)) := by
+  rw [price_constantProductPayoff_eq M Q T hS hx hy, Market.price, Contract.value_pay]
+  simp only [eval_hodlPayoff]
+  have hpos (ω : Ω) : 0 < M.deflator T ω * (x₀ * M.asset () T ω + y₀) :=
+    mul_pos (M.deflator_pos T ω) (by have := hS ω; positivity)
+  refine integral_mono_of_nonneg (Filter.Eventually.of_forall fun ω ↦ ?_) hint
+    (Filter.Eventually.of_forall fun ω ↦ ?_)
+  · have h1 : 0 ≤ 1 + impermanentLoss (M.asset () T ω * x₀ / y₀) := by
+      have hr : 0 ≤ M.asset () T ω * x₀ / y₀ := by have := hS ω; positivity
+      rw [impermanentLoss]
+      have : 0 ≤ 2 * Real.sqrt (M.asset () T ω * x₀ / y₀) / (1 + M.asset () T ω * x₀ / y₀) :=
+        by positivity
+      linarith
+    exact mul_nonneg (M.deflator_pos T ω).le
+      (mul_nonneg (by have := hS ω; positivity) h1)
+  · have := impermanentLoss_nonpos (r := M.asset () T ω * x₀ / y₀)
+      (by have := hS ω; positivity)
+    have h0 := hpos ω
+    calc M.deflator T ω * ((x₀ * M.asset () T ω + y₀) *
+          (1 + impermanentLoss (M.asset () T ω * x₀ / y₀)))
+        = (M.deflator T ω * (x₀ * M.asset () T ω + y₀)) *
+          (1 + impermanentLoss (M.asset () T ω * x₀ / y₀)) := by ring
+      _ ≤ (M.deflator T ω * (x₀ * M.asset () T ω + y₀)) * 1 :=
+        mul_le_mul_of_nonneg_left (by linarith) h0.le
+      _ = M.deflator T ω * (x₀ * M.asset () T ω + y₀) := mul_one _
 
 end MathFin.DeFi
