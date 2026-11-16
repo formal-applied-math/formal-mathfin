@@ -24,6 +24,7 @@ For a filtered pre-Brownian motion `X`, the following are martingales w.r.t. the
 
 ## Main results
 
+* `IsFilteredPreBrownian.congr`: an adapted modification of a filtered pre-Brownian motion is one
 * `IsFilteredPreBrownian.squareSubTime_isMartingale`
 * `IsFilteredPreBrownian.waldExponential_isMartingale`
 
@@ -46,6 +47,25 @@ namespace ProbabilityTheory
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
   {𝓕 : Filtration ℝ≥0 mΩ} {X : ℝ≥0 → Ω → ℝ}
+
+/-- **An adapted modification of a filtered pre-Brownian motion is one.** If `Y t = X t` almost
+surely at each time and `Y` is adapted, then `Y` has the finite-dimensional laws of `X`
+(`IsPreBrownianReal.congr`), and each increment `Y t − Y s` differs from `X t − X s` on a null set,
+so it is independent of `𝓕 s` as well. -/
+lemma IsFilteredPreBrownian.congr {Y : ℝ≥0 → Ω → ℝ} (hX : IsFilteredPreBrownian X 𝓕 P)
+    (hY : StronglyAdapted 𝓕 Y) (h : ∀ t, X t =ᵐ[P] Y t) : IsFilteredPreBrownian Y 𝓕 P where
+  toIsPreBrownianReal := hX.toIsPreBrownianReal.congr h
+  stronglyAdapted := hY
+  indep s t hst := by
+    have hXi := hX.indep s t hst
+    rw [Indep_iff] at hXi ⊢
+    rintro _ C ⟨B, hB, rfl⟩ hC
+    have he : (Y t - Y s) ⁻¹' B =ᵐ[P] (X t - X s) ⁻¹' B := by
+      filter_upwards [h s, h t] with ω h1 h2
+      change (Y t ω - Y s ω ∈ B) = (X t ω - X s ω ∈ B)
+      rw [h1, h2]
+    rw [measure_congr (he.inter (EventuallyEq.refl _ C)), measure_congr he]
+    exact hXi _ _ ⟨B, hB, rfl⟩ hC
 
 /-- MGF specialization: for `α : ℝ` and `v : ℝ≥0`,
 `∫ x, exp(α x) ∂(gaussianReal 0 v) = exp(α² v / 2)`. The Gaussian-MGF-along-a-law base

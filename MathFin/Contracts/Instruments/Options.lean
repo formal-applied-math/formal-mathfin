@@ -31,6 +31,8 @@ The capped call is *defined* by composition, as a long call at `K₁` and a shor
 * `powerCall` — the call on `S_T ^ a`, the power being the payoff language's `rpow` node.
 * `geomAsianCall` — the call on the geometric average of the underlying over `n` dates, from
   `Payoff.obsProd` and `rpow` at `1/n`.
+* `upAndIn` — the discretely monitored up-and-in knock-in on a payoff `f`, from the running
+  maximum `Payoff.obsMax` and `indicatorLt`.
 * `chooser` — the chooser option as the static portfolio of a call and a put at the chooser date.
 * `exchangeOption` — pays `max (S¹_T − S²_T) 0`.
 
@@ -38,6 +40,8 @@ The capped call is *defined* by composition, as a long call at `K₁` and a shor
 
 * `pathPV_europeanCall_eq_put_add_forward` — a call pays a put plus a forward on every path.
 * `cappedCall_payoff_eq` — for `K₁ ≤ K₂`, `cappedCall K₁ K₂ T` pays the capped payoff.
+* `eval_upAndInPayoff` — the knock-in pays `f` exactly on the scenarios observed at or above the
+  barrier at a monitoring date.
 
 ## Source
 
@@ -69,7 +73,7 @@ written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 ## Tags
 
 European option, digital option, capped call, chooser option, power call, exchange option,
-geometric Asian, MSC 91G20, JEL G13
+geometric Asian, barrier option, knock-in, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -119,6 +123,48 @@ theorem Payoff.eval_obsProd {ι : Type*} (s : Scenario ι) (i : ι) (ts : List �
   induction ts with
   | nil => simp [Payoff.obsProd, Payoff.eval]
   | cons t ts ih => simp [Payoff.obsProd, Payoff.eval, ih]
+
+/-- The running maximum of the observations of underlying `i` at the dates `t :: ts`, built from
+`Payoff.max`. -/
+def Payoff.obsMax {ι : Type*} (i : ι) (t : ℝ≥0) : List ℝ≥0 → Payoff ι
+  | [] => .obs i t
+  | s :: ts => .max (.obs i s) (obsMax i t ts)
+
+/-- The running maximum reaches a level exactly when one of the observations does. -/
+theorem Payoff.le_eval_obsMax_iff {ι : Type*} (sc : Scenario ι) (i : ι) (t : ℝ≥0)
+    (ts : List ℝ≥0) (B : ℝ) : B ≤ (Payoff.obsMax i t ts).eval sc ↔ ∃ τ ∈ t :: ts, B ≤ sc i τ := by
+  induction ts with
+  | nil => simp [Payoff.obsMax, Payoff.eval]
+  | cons s ts ih =>
+    simp only [Payoff.obsMax, Payoff.eval, le_max_iff, ih, List.exists_mem_cons]
+    tauto
+
+/-- The payoff of the up-and-in knock-in on `f`: `f` when underlying `i` is observed at or above
+the barrier `B` at one of the monitoring dates `T :: ts`, and `0` otherwise. -/
+noncomputable def upAndInPayoff {ι : Type*} (B : ℝ) (f : Payoff ι) (i : ι) (T : ℝ≥0)
+    (ts : List ℝ≥0) : Payoff ι :=
+  .mul (.sub (.const 1) (.indicatorLt (.obsMax i T ts) (.const B))) f
+
+/-- The reified discretely monitored up-and-in knock-in: pays `f` at `T` if underlying `i` has
+been observed at or above the barrier `B` at one of the monitoring dates `T :: ts`. -/
+noncomputable def upAndIn {ι : Type*} (B : ℝ) (f : Payoff ι) (i : ι) (T : ℝ≥0)
+    (ts : List ℝ≥0) : Contract ι :=
+  .pay T (upAndInPayoff B f i T ts)
+
+/-- **The knock-in pays `f` on the paths that reach the barrier.** -/
+theorem eval_upAndInPayoff {ι : Type*} (sc : Scenario ι) (B : ℝ) (f : Payoff ι) (i : ι)
+    (T : ℝ≥0) (ts : List ℝ≥0) :
+    (upAndInPayoff B f i T ts).eval sc
+      = if ∃ τ ∈ T :: ts, B ≤ sc i τ then f.eval sc else 0 := by
+  by_cases h : ∃ τ ∈ T :: ts, B ≤ sc i τ
+  · have hB : ¬ (Payoff.obsMax i T ts).eval sc < B :=
+      not_lt.2 ((Payoff.le_eval_obsMax_iff sc i T ts B).2 h)
+    rw [if_pos h]
+    simp [upAndInPayoff, Payoff.eval, hB]
+  · have hB : (Payoff.obsMax i T ts).eval sc < B :=
+      lt_of_not_ge fun h' ↦ h ((Payoff.le_eval_obsMax_iff sc i T ts B).1 h')
+    rw [if_neg h]
+    simp [upAndInPayoff, Payoff.eval, hB]
 
 /-- The reified geometric-average Asian call over the `n` averaging dates `τ`: pays
 `max ((∏ᵢ S_{τᵢ}) ^ (1/n) - K) 0` at maturity `T`, the geometric average being `Payoff.obsProd`
