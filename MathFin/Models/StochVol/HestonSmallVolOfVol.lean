@@ -8,6 +8,7 @@ module
 public import MathFin.Models.StochVol.Heston
 public import MathFin.Models.Rates.AffineTermStructurePDE
 public import MathFin.Models.BlackScholes.Call
+public import MathFin.Models.BlackScholes.Market
 
 /-!
 # The Heston transform at vanishing vol-of-vol
@@ -70,6 +71,9 @@ algebra is the same under `u ↦ iz`: QuantLib's `D = √((κ − iρσz)² + (z
 * `integral_bsTerminal_rpow`, `tendsto_hestonTransform_smallVolOfVol_bsMoment`: under `BSCallHyp`,
   `E_Q[S_T ^ u]` is the Black–Scholes moment, and at `v = θ = σ²` the Heston transform tends to it
   as `ξ → 0`.
+* `tendsto_hestonTransform_smallVolOfVol_marketPrice`: in the Black–Scholes market, under the
+  Girsanov pricing measure, the discounted Heston transform tends to the price of the claim paying
+  `S_T ^ u`.
 
 ## References
 
@@ -336,6 +340,51 @@ theorem tendsto_hestonTransform_smallVolOfVol_bsMoment {Ω : Type*} {mΩ : Measu
     congr 1
     ring
   rw [integral_bsTerminal_rpow h u, heq]
+  exact hlim
+
+/-- **The Heston transform tends to a price in the Black–Scholes market.** In the Black–Scholes
+market (physical drift `m`, rate `r`, volatility `σ > 0`) the Girsanov measure `Q` of
+`θ = (m − r)/σ` at a horizon `H ≥ T > 0` is a pricing measure, and as the vol-of-vol `ξ → 0`
+(`ξ ≠ 0`) the discounted explicit Heston transform `e^{−rT} Φ_ξ(0, log S₀, σ²)` (`κ > 0`,
+`0 < u < 1`, variance started at `v = θ = σ²`) tends to the price, under `Q`, of the claim
+paying `S_T ^ u` at `T`. The limit is of the Riccati-level transform, not of a Heston process. -/
+theorem tendsto_hestonTransform_smallVolOfVol_marketPrice {Ω : Type*} [mΩ : MeasurableSpace Ω]
+    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)
+    (hWmeas : ∀ t, Measurable (W t)) {S_0 m r σ : ℝ} {T H : ℝ≥0} (hTH : T ≤ H)
+    (hS₀ : 0 < S_0) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) {κ u : ℝ} (hκ : 0 < κ) (hu1 : 0 < u)
+    (hu2 : u < 1) (ρ : ℝ) :
+    (Contracts.BlackScholes.market μ hWmeas S_0 m r σ).IsPricingMeasure T
+        (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H) ∧
+      Tendsto (fun ξ ↦ Real.exp (-r * T) *
+          hestonTransform r κ (σ ^ 2) ξ ρ u T 0 (Real.log S_0) (σ ^ 2)) (𝓝[≠] 0)
+        (𝓝 ((Contracts.BlackScholes.market μ hWmeas S_0 m r σ).price
+          (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+          (.pay T (.rpow (.obs () T) u.toNNReal)))) := by
+  refine ⟨Contracts.BlackScholes.isPricingMeasure_constGirsanovMeasure hW hWmeas
+    (S_0 := S_0) (m := m) (r := r) hσ.ne' hTH, ?_⟩
+  have := Contracts.BlackScholes.constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
+  have hB := Contracts.BlackScholes.isPreBrownianReal_constBtheta hW hWmeas ((m - r) / σ) H
+  have h : BSCallHyp (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+      S_0 S_0 r σ (T : ℝ) (fun ω ↦ Contracts.BlackScholes.constBtheta (μ := μ) hWmeas
+        ((m - r) / σ) H T ω / Real.sqrt T) := by
+    simpa using BSCallHyp.of_isPreBrownian
+      (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+      (Contracts.BlackScholes.constBtheta (μ := μ) hWmeas ((m - r) / σ) H) hB hS₀ hS₀ hσ hT
+  have hlim := (tendsto_hestonTransform_smallVolOfVol_bsMoment h hκ hu1 hu2 ρ).const_mul
+    (Real.exp (-r * T))
+  have hprice : (Contracts.BlackScholes.market μ hWmeas S_0 m r σ).price
+      (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+      (.pay T (.rpow (.obs () T) u.toNNReal))
+      = Real.exp (-r * T) * ∫ ω, bsTerminal S_0 r σ T (Contracts.BlackScholes.constBtheta
+          (μ := μ) hWmeas ((m - r) / σ) H T ω / Real.sqrt T) ^ u
+          ∂(Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H) := by
+    rw [Contracts.BlackScholes.price_market, Contracts.Contract.value_pay, ← integral_const_mul]
+    refine integral_congr_ae ?_
+    filter_upwards [Contracts.BlackScholes.pathAssets_physical_ae_eq hW hWmeas
+      (S_0 := S_0) (m := m) (r := r) hσ.ne' H hTH] with ω hω
+    simp only [Contracts.Payoff.eval, Contracts.scenarioAt]
+    rw [hω, Contracts.BlackScholes.pathAssets_eq_bsTerminal _ hT, Real.coe_toNNReal _ hu1.le]
+  rw [hprice]
   exact hlim
 
 end MathFin.Heston
