@@ -142,7 +142,8 @@ theorem IsPricingMeasure.integral_eq_carrMadan (hQ : M.IsPricingMeasure T Q)
       + ∫ K in Ioc L κ, f'' K * max (K - M.asset () T x) 0) Q := hcash.add hputi
   rw [integral_congr_ae hpt, integral_add hcashput hcalli, integral_add hcash hputi,
     integral_add (integrable_const (f κ)) hlin, hputp, hcallp,
-    intervalIntegral.integral_of_le hLκ, intervalIntegral.integral_of_le hκU, integral_const_mul, integral_sub hY (integrable_const κ)]
+    intervalIntegral.integral_of_le hLκ, intervalIntegral.integral_of_le hκU, integral_const_mul,
+    integral_sub hY (integrable_const κ)]
   simp
 
 end Market
