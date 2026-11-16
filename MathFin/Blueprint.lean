@@ -269,6 +269,14 @@ attribute [blueprint "thm:markov-path-law"
   recursion of the marginals (Saporito 1.1.2). -/)]
   MathFin.markovPathMeasure_cylinder
 
+attribute [blueprint "def:snell-envelope"
+  (title := "Snell envelope")
+  (statement := /-- For an adapted reward $Z$ on a discrete-time filtered probability space, a
+  horizon $N$ and a set $X$ of exercise dates, the backward recursion $U_N = Z_N$,
+  $U_i = \max(Z_i, E[U_{i+1} \mid \mathcal F_i])$ at $i \in X$ and $U_i = E[U_{i+1} \mid
+  \mathcal F_i]$ otherwise, frozen at $Z_N$ after the horizon. -/)]
+  MathFin.snellEnvelope
+
 attribute [blueprint "thm:snell-envelope"
   (title := "Snell's theorem: the envelope is the value of optimal stopping")
   (statement := /-- For an adapted integrable reward $Z$ with horizon $N$ on a discrete-time
@@ -819,14 +827,23 @@ attribute [blueprint "def:gbm"
   in the place of $r$. -/)]
   MathFin.Contracts.BlackScholes.pathAssets
 
+attribute [blueprint "def:risk-neutral-lognormal"
+  (title := "Risk-neutral lognormal terminal law")
+  (statement := /-- The hypothesis bundle of the Black–Scholes formulas: $S_0, K, \sigma, T > 0$
+  and a standard normal $Z$ under the measure $Q$, so that $S_T = S_0\exp((r -
+  \tfrac12\sigma^2)T + \sigma\sqrt T Z)$ is lognormal. It is not derived from a market;
+  `BSCallHyp.of_isPreBrownian` builds it from a Brownian motion. -/)]
+  MathFin.BSCallHyp
+
 attribute [blueprint "thm:bs-call"
-  (title := "Black–Scholes call price formula")
-  (statement := /-- Under `BSCallHyp`, that is $S_0, K, \sigma, T > 0$ and $S_T = S_0\exp((r -
-  \tfrac12\sigma^2)T + \sigma\sqrt{T}\,Z)$ with $Z \sim N(0,1)$ under the pricing measure $Q$,
-  the call price is $e^{-rT}E_Q[(S_T - K)^+] = S_0\Phi(d_1) - Ke^{-rT}\Phi(d_2)$. The pricing
-  measure is a hypothesis, not derived from no arbitrage; `BSCallHyp.of_isPreBrownian` builds
-  the hypothesis from a Brownian motion. -/)]
-  MathFin.bs_call_formula
+  (title := "The Black–Scholes price of a call in the Black–Scholes market")
+  (statement := /-- In the Black–Scholes market of a pre-Brownian motion $W$ with $S_0, K, \sigma,
+  T > 0$, the European call struck at $K$ with maturity $T$ is worth $S_0\Phi(d_1) -
+  Ke^{-rT}\Phi(d_2)$ under the Girsanov pricing measure of the market price of risk
+  $\theta = (m - r)/\sigma$ at any horizon $H \ge T$, whatever the physical drift $m$. The
+  computation is the lognormal expectation $e^{-rT}E_Q[(S_T - K)^+]$ (`bs_call_formula`);
+  the uniqueness of the pricing measure is `thm:bs-arbitrage-free-price`. -/)]
+  MathFin.Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure
 
 attribute [blueprint "thm:bs-delta"
   (title := "Black–Scholes Greeks")
@@ -1254,6 +1271,13 @@ attribute [blueprint "thm:credit-portfolio-is-merton"
   covered. -/)]
   MathFin.condDefault_eq_oneFactorPD
 
+attribute [blueprint "def:hazard-survival"
+  (title := "Survival curve of a hazard rate")
+  (statement := /-- The survival probability $S(t) = e^{-\int_0^t h}$ of a deterministic hazard
+  rate $h$: the credit curve that discounts the premium and protection legs of a default swap and
+  the exposure of a counterparty. -/)]
+  MathFin.hazardSurvival
+
 attribute [blueprint "thm:intensity-default-model"
   (title := "Intensity model of default")
   (statement := /-- For a continuous positive hazard rate $h$ with $\int_0^\infty h = \infty$
@@ -1301,6 +1325,13 @@ attribute [blueprint "thm:impermanent-loss"
   (statement := /-- For a price ratio $r \ge 0$, the impermanent loss $2\sqrt r/(1+r) - 1$ of
   a fee-free constant-product position is at most $0$. -/)]
   MathFin.DeFi.impermanentLoss_nonpos
+
+attribute [blueprint "def:v3-position-value"
+  (title := "Value of a concentrated-liquidity position")
+  (statement := /-- The value in token $Y$, at square-root price $s$, of a Uniswap v3 position with
+  liquidity $L$ on the square-root price range $[a, b]$: only token $X$ below the range, only
+  token $Y$ above it, and the real reserves of both inside it. -/)]
+  MathFin.DeFi.v3PositionValue
 
 attribute [blueprint "thm:uniswap-v3-covered-call"
   (title := "A concentrated-liquidity position is dominated by a covered call")
@@ -1422,6 +1453,13 @@ attribute [blueprint "thm:markowitz-lagrangian"
   the first-order condition only; necessity is the frontier node
   `thm:markowitz-kkt-necessity`. -/)]
   MathFin.portfolioVarN_le_of_lagrangian_FOC
+
+attribute [blueprint "def:risk-contribution"
+  (title := "Risk contribution")
+  (statement := /-- The contribution $w_i(\Sigma w)_i$ of asset $i$ to the variance $w^\top\Sigma w$
+  of a portfolio $w$ with covariance matrix $\Sigma$; the contributions sum to the variance
+  (`sum_riskContribution_eq_variance`). -/)]
+  MathFin.riskContribution
 
 attribute [blueprint "thm:risk-parity-foc"
   (title := "The log-barrier first-order condition gives risk parity")
