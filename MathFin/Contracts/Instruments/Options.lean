@@ -136,8 +136,19 @@ theorem Payoff.le_eval_obsMax_iff {ι : Type*} (sc : Scenario ι) (i : ι) (t : 
   induction ts with
   | nil => simp [Payoff.obsMax, Payoff.eval]
   | cons s ts ih =>
-    simp only [Payoff.obsMax, Payoff.eval, le_max_iff, ih, List.exists_mem_cons]
-    tauto
+    simp only [Payoff.obsMax, Payoff.eval, le_max_iff, ih]
+    constructor
+    · rintro (h | ⟨τ, hτ, h⟩)
+      · exact ⟨s, List.mem_cons_of_mem _ List.mem_cons_self, h⟩
+      · rcases List.mem_cons.1 hτ with rfl | hτ
+        · exact ⟨_, List.mem_cons_self, h⟩
+        · exact ⟨τ, List.mem_cons_of_mem _ (List.mem_cons_of_mem _ hτ), h⟩
+    · rintro ⟨τ, hτ, h⟩
+      rcases List.mem_cons.1 hτ with rfl | hτ
+      · exact Or.inr ⟨_, List.mem_cons_self, h⟩
+      · rcases List.mem_cons.1 hτ with rfl | hτ
+        · exact Or.inl h
+        · exact Or.inr ⟨τ, List.mem_cons_of_mem _ hτ, h⟩
 
 /-- The payoff of the up-and-in knock-in on `f`: `f` when underlying `i` is observed at or above
 the barrier `B` at one of the monitoring dates `T :: ts`, and `0` otherwise. -/
@@ -156,14 +167,12 @@ theorem eval_upAndInPayoff {ι : Type*} (sc : Scenario ι) (B : ℝ) (f : Payoff
     (T : ℝ≥0) (ts : List ℝ≥0) :
     (upAndInPayoff B f i T ts).eval sc
       = if ∃ τ ∈ T :: ts, B ≤ sc i τ then f.eval sc else 0 := by
-  by_cases h : ∃ τ ∈ T :: ts, B ≤ sc i τ
+  split_ifs with h
   · have hB : ¬ (Payoff.obsMax i T ts).eval sc < B :=
       not_lt.2 ((Payoff.le_eval_obsMax_iff sc i T ts B).2 h)
-    rw [if_pos h]
     simp [upAndInPayoff, Payoff.eval, hB]
   · have hB : (Payoff.obsMax i T ts).eval sc < B :=
       lt_of_not_ge fun h' ↦ h ((Payoff.le_eval_obsMax_iff sc i T ts B).1 h')
-    rw [if_neg h]
     simp [upAndInPayoff, Payoff.eval, hB]
 
 /-- The reified geometric-average Asian call over the `n` averaging dates `τ`: pays

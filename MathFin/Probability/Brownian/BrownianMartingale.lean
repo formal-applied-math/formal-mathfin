@@ -64,7 +64,7 @@ lemma IsFilteredPreBrownian.congr {Y : ℝ≥0 → Ω → ℝ} (hX : IsFilteredP
       filter_upwards [h s, h t] with ω h1 h2
       change (Y t ω - Y s ω ∈ B) = (X t ω - X s ω ∈ B)
       rw [h1, h2]
-    rw [measure_congr (he.inter (EventuallyEq.refl _ C)), measure_congr he]
+    rw [measure_congr (he.inter (ae_eq_refl C)), measure_congr he]
     exact hXi _ _ ⟨B, hB, rfl⟩ hC
 
 /-- MGF specialization: for `α : ℝ` and `v : ℝ≥0`,
