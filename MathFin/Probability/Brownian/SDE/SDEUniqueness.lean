@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Probability.Analysis.FiniteMeasureCauchySchwarz
+public import MathFin.Probability.Brownian.SDE.SDEExistence
 public import Mathlib.Algebra.Ring.IsFormallyReal
 public import Mathlib.Analysis.ODE.Gronwall
 public import Mathlib.Order.CompletePartialOrder
@@ -30,13 +31,15 @@ integral equations (the initial condition `η` cancels) and taking `L²` norms,
 
 Together `g t ≤ K ∫₀ᵗ g` with `K = 2(t·Lμ² + Lσ²)`, and Grönwall (in the `a = 0` form
 `eq_zero_of_abs_deriv_le_mul_abs_self_of_eq_zero_right`, fed the primitive `G t = ∫₀ᵗ g`)
-forces `g ≡ 0`, i.e. `Xₜ = Yₜ` a.s. for every `t`.
+forces `g ≡ 0`, i.e. `Xₜ = Yₜ` a.s. for every `t` of the horizon `[0,T]`.
 
 **Honest scope.** This is the *uniqueness* half only; existence of a strong solution is
 delivered separately (and, at the current toolchain, conditionally in the `L²` space `E`) by
 `MathFin.SDEExistence.picardMap_exists_unique_fixedPoint`. The diffusion operator enters through
 an abstract `Iσ` whose only assumed property is the isometric energy bound `hIso` — a genuine
-theorem about the Itô integral, not the uniqueness conclusion in disguise.
+theorem about the Itô integral, not the uniqueness conclusion in disguise. For the actual Itô
+integral of `σ ∘ X` that bound is derived (`IsL2SolutionPair.uniqueness_ito`) from the Itô
+isometry on bands, on a finite horizon `[0,T]`, the horizon of the library's Itô integral.
 
 ## Main definitions
 
@@ -46,11 +49,13 @@ theorem about the Itô integral, not the uniqueness conclusion in disguise.
 ## Main results
 
 * `gronwall_zero_of_le_const_mul_integral`: Grönwall in integral form with `a = 0`: a nonnegative
-  `g`, continuous on `[0,∞)`, with `g t ≤ K · ∫₀ᵗ g` on `[0, b]` vanishes there.
+  `g`, continuous on `[0,b]`, with `g t ≤ K · ∫₀ᵗ g` on `[0, b]` vanishes there.
 * `sde_pathwise_uniqueness`: the `L²`-energy Grönwall argument showing two solutions agree almost
-  surely at every time, under the drift and diffusion bounds taken as hypotheses.
+  surely at every time of `[0,T]`, under the drift and diffusion bounds taken as hypotheses.
 * `IsL2SolutionPair.uniqueness`: two `L²` strong solutions sharing a driver agree almost surely
-  at every time.
+  at every time of `[0,T]`, given the Itô-isometry bound on the diffusion difference.
+* `IsL2SolutionPair.uniqueness_ito`: the same when the diffusion terms are the Itô integrals
+  (`itoProcessCLM`) of `σ ∘ X` and `σ ∘ Y` for a Lipschitz `σ`; the isometry bound is derived.
 
 ## References
 
@@ -69,13 +74,13 @@ open scoped NNReal ENNReal
 
 namespace MathFin
 
-/-- **Grönwall, integral form, `a = 0`.** A nonnegative `g`, continuous on `[0,∞)`, with
-`g t ≤ K · ∫₀ᵗ g` for every `t ≥ 0` (and `K ≥ 0`), vanishes on `[0,∞)`. The primitive
+/-- Grönwall, integral form, `a = 0`, for `g` continuous on all of `[0,∞)`; the public
+`gronwall_zero_of_le_const_mul_integral` reduces to it by clamping the time at `b`. The primitive
 `G t = ∫₀ᵗ g` is `C¹` with `G' = g` (FTC, `g` continuous), `G 0 = 0`, and
 `‖G' x‖ = g x ≤ K·G x = K‖G x‖`, so
 `eq_zero_of_abs_deriv_le_mul_abs_self_of_eq_zero_right` gives `G ≡ 0`; then
 `g t ≤ K·G t = 0` with `g ≥ 0` gives `g t = 0`. -/
-theorem gronwall_zero_of_le_const_mul_integral {g : ℝ → ℝ} {K b : ℝ}
+private theorem gronwall_zero_aux {g : ℝ → ℝ} {K b : ℝ}
     (hg0 : ∀ t, 0 ≤ g t) (hgc : ContinuousOn g (Set.Ici 0))
     (hle : ∀ t ∈ Set.Icc 0 b, g t ≤ K * ∫ s in (0 : ℝ)..t, g s) :
     ∀ t ∈ Set.Icc 0 b, g t = 0 := by
@@ -122,6 +127,30 @@ theorem gronwall_zero_of_le_const_mul_integral {g : ℝ → ℝ} {K b : ℝ}
   have hlt := hle t ⟨ht0, htb⟩
   rw [hint0, mul_zero] at hlt
   exact le_antisymm hlt (hg0 t)
+
+/-- **Grönwall, integral form, `a = 0`.** A nonnegative `g`, continuous on `[0,b]`, with
+`g t ≤ K · ∫₀ᵗ g` for every `t ∈ [0,b]`, vanishes on `[0,b]`. The clamped function
+`u ↦ g (min u b)` is continuous on `[0,∞)` and agrees with `g` on `[0,b]`, so
+`gronwall_zero_aux` applies to it. -/
+theorem gronwall_zero_of_le_const_mul_integral {g : ℝ → ℝ} {K b : ℝ}
+    (hg0 : ∀ t, 0 ≤ g t) (hgc : ContinuousOn g (Set.Icc 0 b))
+    (hle : ∀ t ∈ Set.Icc 0 b, g t ≤ K * ∫ s in (0 : ℝ)..t, g s) :
+    ∀ t ∈ Set.Icc 0 b, g t = 0 := by
+  intro t ht
+  have hb : 0 ≤ b := ht.1.trans ht.2
+  have hcont : ContinuousOn (fun u : ℝ ↦ g (min u b)) (Set.Ici 0) :=
+    hgc.comp (continuous_id.min continuous_const).continuousOn
+      fun u hu ↦ ⟨le_min hu hb, min_le_right _ _⟩
+  have key := gronwall_zero_aux (g := fun u ↦ g (min u b)) (K := K) (b := b)
+    (fun u ↦ hg0 _) hcont (fun s hs ↦ by
+      have hint : ∫ u in (0 : ℝ)..s, g (min u b) = ∫ u in (0 : ℝ)..s, g u :=
+        intervalIntegral.integral_congr fun u hu ↦ by
+          rw [Set.uIcc_of_le hs.1] at hu
+          simp only [min_eq_left (hu.2.trans hs.2)]
+      show g (min s b) ≤ K * ∫ u in (0 : ℝ)..s, g (min u b)
+      rw [hint, min_eq_left hs.2]
+      exact hle s hs) t ht
+  simpa [min_eq_left ht.2] using key
 
 /-- **Cauchy–Schwarz in time** (interval-integral form): `(∫₀ˢ f)² ≤ s·∫₀ˢ f²` for `0 ≤ s`,
 given `f ∈ L²` on `(0,s]`. -/
@@ -210,28 +239,28 @@ prefactor is dominated by the constant `K = 2·Cdrift·t + 2·Cdiff`, and
 theorem sde_pathwise_uniqueness
     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
     {μ_coef : ℝ → ℝ} {X Y : ℝ → Ω → ℝ} {Iσ : (ℝ → Ω → ℝ) → ℝ → Ω → ℝ}
-    {Cdrift Cdiff : ℝ} (hCd : 0 ≤ Cdrift)
-    (hXYint : ∀ s, 0 ≤ s → Integrable (fun ω ↦ (X s ω - Y s ω) ^ 2) μ)
-    (hDint : ∀ s, 0 ≤ s →
+    {Cdrift Cdiff T : ℝ} (hCd : 0 ≤ Cdrift)
+    (hXYint : ∀ s ∈ Set.Icc 0 T, Integrable (fun ω ↦ (X s ω - Y s ω) ^ 2) μ)
+    (hDint : ∀ s ∈ Set.Icc 0 T,
       Integrable (fun ω ↦ (∫ u in (0 : ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2) μ)
-    (hJint : ∀ s, 0 ≤ s → Integrable (fun ω ↦ ((Iσ X) s ω - (Iσ Y) s ω) ^ 2) μ)
-    (hEcont : ContinuousOn (fun s ↦ ∫ ω, (X s ω - Y s ω) ^ 2 ∂μ) (Set.Ici 0))
-    (hdecomp : ∀ s, 0 ≤ s → ∀ᵐ ω ∂μ, X s ω - Y s ω
+    (hJint : ∀ s ∈ Set.Icc 0 T, Integrable (fun ω ↦ ((Iσ X) s ω - (Iσ Y) s ω) ^ 2) μ)
+    (hEcont : ContinuousOn (fun s ↦ ∫ ω, (X s ω - Y s ω) ^ 2 ∂μ) (Set.Icc 0 T))
+    (hdecomp : ∀ s ∈ Set.Icc 0 T, ∀ᵐ ω ∂μ, X s ω - Y s ω
       = (∫ u in (0 : ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) + ((Iσ X) s ω - (Iσ Y) s ω))
-    (hdrift : ∀ s, 0 ≤ s →
+    (hdrift : ∀ s ∈ Set.Icc 0 T,
       (∫ ω, (∫ u in (0 : ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2 ∂μ)
         ≤ Cdrift * s * ∫ u in (0 : ℝ)..s, (∫ ω, (X u ω - Y u ω) ^ 2 ∂μ))
-    (hIso : ∀ s, 0 ≤ s →
+    (hIso : ∀ s ∈ Set.Icc 0 T,
       (∫ ω, ((Iσ X) s ω - (Iσ Y) s ω) ^ 2 ∂μ)
         ≤ Cdiff * ∫ u in (0 : ℝ)..s, (∫ ω, (X u ω - Y u ω) ^ 2 ∂μ)) :
-    ∀ t, 0 ≤ t → ∀ᵐ ω ∂μ, X t ω = Y t ω := by
+    ∀ t ∈ Set.Icc 0 T, ∀ᵐ ω ∂μ, X t ω = Y t ω := by
   -- the L² energy of the state error
   set E : ℝ → ℝ := fun s ↦ ∫ ω, (X s ω - Y s ω) ^ 2 ∂μ
   have hE0 : ∀ s, 0 ≤ E s := fun s ↦ integral_nonneg fun ω ↦ sq_nonneg _
   have hAnn : ∀ s, 0 ≤ s → 0 ≤ ∫ u in (0:ℝ)..s, E u := fun s hs ↦
     intervalIntegral.integral_nonneg hs fun u _ ↦ hE0 u
   -- per-time energy inequality:  E s ≤ 2·Cdrift·s·(∫₀ˢ E) + 2·Cdiff·(∫₀ˢ E)
-  have hEbound : ∀ s, 0 ≤ s →
+  have hEbound : ∀ s ∈ Set.Icc 0 T,
       E s ≤ 2 * Cdrift * s * (∫ u in (0:ℝ)..s, E u) + 2 * Cdiff * (∫ u in (0:ℝ)..s, E u) := by
     intro s hs
     have hEeq : E s = ∫ ω, ((∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω))
@@ -269,13 +298,14 @@ theorem sde_pathwise_uniqueness
   -- conclude via Grönwall on each [0,t]
   intro t ht
   have hEt : E t = 0 := by
-    refine gronwall_zero_of_le_const_mul_integral hE0 hEcont (K := 2 * Cdrift * t + 2 * Cdiff)
-      (b := t) ?_ t ⟨ht, le_rfl⟩
+    refine gronwall_zero_of_le_const_mul_integral hE0
+      (hEcont.mono (Set.Icc_subset_Icc_right ht.2)) (K := 2 * Cdrift * t + 2 * Cdiff)
+      (b := t) ?_ t ⟨ht.1, le_rfl⟩
     intro s hs
     obtain ⟨hs0, hst⟩ := hs
     have hAs : 0 ≤ ∫ u in (0:ℝ)..s, E u := hAnn s hs0
     calc E s ≤ 2 * Cdrift * s * (∫ u in (0:ℝ)..s, E u) + 2 * Cdiff * (∫ u in (0:ℝ)..s, E u) :=
-          hEbound s hs0
+          hEbound s ⟨hs0, hst.trans ht.2⟩
       _ ≤ (2 * Cdrift * t + 2 * Cdiff) * ∫ u in (0:ℝ)..s, E u := by
           have hmono : 2 * Cdrift * s ≤ 2 * Cdrift * t :=
             mul_le_mul_of_nonneg_left hst (mul_nonneg (by norm_num) hCd)
@@ -288,70 +318,121 @@ theorem sde_pathwise_uniqueness
   simp only [Pi.zero_apply] at hω
   exact sub_eq_zero.mp (sq_eq_zero_iff.mp hω)
 
-/-- **A pair of `L²` strong solutions** of `dZ = μ(Z)dt + σ(Z)dB`, `Z₀ = η`, sharing the driver,
-packaged with the regularity the `L²`-energy Grönwall uniqueness argument consumes. This is the
-honest re-encoding of the textbook existence/uniqueness structure: uniqueness is **not** a field but
-a *theorem* (`IsL2SolutionPair.uniqueness`) derived from these hypotheses. The diffusion enters
-through the operator `Iσ` (read `Iσ Z ≈ ∫₀ᵗ σ(Zₛ)dB`); its only assumed property is the **Itô
-isometry bound** `isometry` — a genuine property of the Itô integral
-(`MathFin.ItoIntegralProcessGeneral.itoProcessCLM_norm_sq`), not the uniqueness conclusion. The
-drift is **not** assumed controlled: `lipschitz` (plus the drift regularity) *derives* its energy
-bound via `drift_energy_le`. -/
+/-- **A pair of `L²` strong solutions on `[0,T]`** of `dZ = μ(Z)dt + σ(Z)dB`, `Z₀ = η`, sharing
+the driver, packaged with the regularity the `L²`-energy Grönwall uniqueness argument consumes.
+Uniqueness is **not** a field but a *theorem* (`IsL2SolutionPair.uniqueness`) derived from these
+hypotheses. The diffusion enters through the operator `Iσ` (read `Iσ Z ≈ ∫₀ᵗ σ(Zₛ)dB`); its
+energy bound, the **Itô isometry** estimate, is the extra hypothesis of `uniqueness`, discharged
+for the genuine Itô integral by `IsL2SolutionPair.uniqueness_ito`. The drift is **not** assumed
+controlled: `lipschitz` (plus the drift regularity) *derives* its energy bound via
+`drift_energy_le`. -/
 structure IsL2SolutionPair {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)
-    (μ_coef : ℝ → ℝ) (Lμ : ℝ≥0) (Cdiff : ℝ)
+    (μ_coef : ℝ → ℝ) (Lμ : ℝ≥0) (T : ℝ)
     (X Y : ℝ → Ω → ℝ) (Iσ : (ℝ → Ω → ℝ) → ℝ → Ω → ℝ) : Prop where
   /-- The drift coefficient is `Lμ`-Lipschitz (Theorem 8.2.5 hypothesis). -/
   lipschitz : LipschitzWith Lμ μ_coef
-  /-- Both processes solve the SDE integral equation; the common initial condition `η` cancels in
-  the difference. -/
-  solvesDiff : ∀ s, 0 ≤ s → ∀ᵐ ω ∂μ, X s ω - Y s ω
+  /-- Both processes solve the SDE integral equation on `[0,T]`; the common initial condition `η`
+  cancels in the difference. -/
+  solvesDiff : ∀ s ∈ Icc 0 T, ∀ᵐ ω ∂μ, X s ω - Y s ω
     = (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) + ((Iσ X) s ω - (Iσ Y) s ω)
-  /-- The `L²` error `s ↦ 𝔼[(Xₛ−Yₛ)²]` is continuous (continuous `L²` solution paths). -/
-  energyCont : ContinuousOn (fun s ↦ ∫ ω, (X s ω - Y s ω) ^ 2 ∂μ) (Set.Ici 0)
-  /-- **Itô isometry bound** for the diffusion difference — the sole assumed property of `Iσ`. -/
-  isometry : ∀ s, 0 ≤ s → (∫ ω, ((Iσ X) s ω - (Iσ Y) s ω) ^ 2 ∂μ)
-    ≤ Cdiff * ∫ u in (0:ℝ)..s, (∫ ω, (X u ω - Y u ω) ^ 2 ∂μ)
+  /-- The `L²` error `s ↦ 𝔼[(Xₛ−Yₛ)²]` is continuous on `[0,T]` (continuous `L²` solution
+  paths). -/
+  energyCont : ContinuousOn (fun s ↦ ∫ ω, (X s ω - Y s ω) ^ 2 ∂μ) (Icc 0 T)
   /-- The state error is square-integrable at each time. -/
-  stateSq : ∀ s, 0 ≤ s → Integrable (fun ω ↦ (X s ω - Y s ω) ^ 2) μ
+  stateSq : ∀ s ∈ Icc 0 T, Integrable (fun ω ↦ (X s ω - Y s ω) ^ 2) μ
   /-- The drift-difference integrand is `L²` in time, a.e. `ω`. -/
-  driftMemL2 : ∀ s, 0 ≤ s → ∀ᵐ ω ∂μ,
-    MemLp (fun u ↦ μ_coef (X u ω) - μ_coef (Y u ω)) 2 (volume.restrict (Set.Ioc 0 s))
+  driftMemL2 : ∀ s ∈ Icc 0 T, ∀ᵐ ω ∂μ,
+    MemLp (fun u ↦ μ_coef (X u ω) - μ_coef (Y u ω)) 2 (volume.restrict (Ioc 0 s))
   /-- The drift term is square-integrable. -/
-  driftSq : ∀ s, 0 ≤ s →
+  driftSq : ∀ s ∈ Icc 0 T,
     Integrable (fun ω ↦ (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2) μ
   /-- The diffusion term is square-integrable. -/
-  diffSq : ∀ s, 0 ≤ s → Integrable (fun ω ↦ ((Iσ X) s ω - (Iσ Y) s ω) ^ 2) μ
+  diffSq : ∀ s ∈ Icc 0 T, Integrable (fun ω ↦ ((Iσ X) s ω - (Iσ Y) s ω) ^ 2) μ
   /-- The squared state error is jointly integrable on `(0,s] × Ω` (for Tonelli). Its two
   marginals — interval-integrability in time and integrability of the time-integral — are Fubini
   consequences, derived inside `drift_energy_le` rather than carried as separate fields. -/
-  stateSqProdInt : ∀ s, 0 ≤ s → Integrable (Function.uncurry fun u ω ↦ (X u ω - Y u ω) ^ 2)
-    ((volume.restrict (Set.uIoc 0 s)).prod μ)
+  stateSqProdInt : ∀ s ∈ Icc 0 T, Integrable (Function.uncurry fun u ω ↦ (X u ω - Y u ω) ^ 2)
+    ((volume.restrict (uIoc 0 s)).prod μ)
 
-/-- **Theorem 8.2.5 (uniqueness), pathwise `L²` form.** Two `L²` strong solutions sharing a driver
-agree almost surely at every time. The drift energy bound is derived from Lipschitz `μ`
-(`drift_energy_le`), the diffusion from the Itô isometry (`isometry` field), and the `L²`-energy
-Grönwall argument (`sde_pathwise_uniqueness`) closes it. -/
+/-- **Theorem 8.2.5 (uniqueness), pathwise `L²` form on `[0,T]`.** Two `L²` strong solutions
+sharing a driver agree almost surely at every time of `[0,T]`, provided the diffusion differences
+satisfy the Itô-isometry energy bound `hIso` with some constant `Cdiff`. The drift energy bound is
+derived from Lipschitz `μ` (`drift_energy_le`) and the `L²`-energy Grönwall argument
+(`sde_pathwise_uniqueness`) closes it. -/
 theorem IsL2SolutionPair.uniqueness {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
-    [IsProbabilityMeasure μ] {μ_coef : ℝ → ℝ} {Lμ : ℝ≥0} {Cdiff : ℝ}
+    [IsProbabilityMeasure μ] {μ_coef : ℝ → ℝ} {Lμ : ℝ≥0} {T Cdiff : ℝ}
     {X Y : ℝ → Ω → ℝ} {Iσ : (ℝ → Ω → ℝ) → ℝ → Ω → ℝ}
-    (h : IsL2SolutionPair μ μ_coef Lμ Cdiff X Y Iσ) :
-    ∀ t, 0 ≤ t → ∀ᵐ ω ∂μ, X t ω = Y t ω :=
+    (h : IsL2SolutionPair μ μ_coef Lμ T X Y Iσ)
+    (hIso : ∀ s ∈ Icc 0 T, (∫ ω, ((Iσ X) s ω - (Iσ Y) s ω) ^ 2 ∂μ)
+      ≤ Cdiff * ∫ u in (0:ℝ)..s, (∫ ω, (X u ω - Y u ω) ^ 2 ∂μ)) :
+    ∀ t ∈ Icc 0 T, ∀ᵐ ω ∂μ, X t ω = Y t ω :=
   sde_pathwise_uniqueness (Cdrift := (Lμ : ℝ) ^ 2) (sq_nonneg _)
     h.stateSq h.driftSq h.diffSq h.energyCont h.solvesDiff
-    (fun s hs ↦ drift_energy_le h.lipschitz hs (h.driftMemL2 s hs) (h.driftSq s hs)
+    (fun s hs ↦ drift_energy_le h.lipschitz hs.1 (h.driftMemL2 s hs) (h.driftSq s hs)
       (h.stateSqProdInt s hs))
-    h.isometry
+    hIso
+
+open ProbabilityTheory ItoIntegralL2 ItoIntegralCLM ItoIntegralProcessGeneral SDEExistence in
+/-- **Pathwise uniqueness for Itô SDEs with Lipschitz coefficients on `[0,T]`.** Let `X, Y` be two
+`L²` solutions of `dZ = μ(Z)dt + σ(Z)dB`, `σ` being `Lσ`-Lipschitz, whose diffusion terms are the
+Itô integrals of `σ ∘ X` and `σ ∘ Y`: `φX, φY` are predictable `L²` classes (elements of
+`Lp ℝ 2 (trimMeasure T)`), the difference `φX − φY` is the class of the pointwise difference
+`X − Y` (`hrep`), and for each `s ∈ [0,T]` the diffusion difference `Iσ X s − Iσ Y s` is almost
+surely the difference of the Itô integrals at time `s` of `σ ∘ φX` and `σ ∘ φY`
+(`itoProcessCLM … (lipComp σ φX)`, `hIσ`). Then `X t = Y t` almost surely for every `t ∈ [0,T]`.
+The isometry bound `hIso` of `IsL2SolutionPair.uniqueness`, with `Cdiff = Lσ²`, is derived from
+the Itô isometry on bands (`norm_sq_itoProcessCLM_lipComp_sub_le`), the representation of the band
+energy as a time integral (`bandEnergy_toLp`) and the passage from `timeMeasure` on `ℝ≥0` to the
+interval integral over `ℝ` (`timeMeasure_Ioc_eq_interval`). -/
+theorem IsL2SolutionPair.uniqueness_ito {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
+    [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+    (hBmeas : ∀ t, Measurable (B t)) {μ_coef σ : ℝ → ℝ} {Lμ Lσ : ℝ≥0}
+    (hσ : LipschitzWith Lσ σ) {X Y : ℝ → Ω → ℝ} {Iσ : (ℝ → Ω → ℝ) → ℝ → Ω → ℝ}
+    (h : IsL2SolutionPair μ μ_coef Lμ (T : ℝ) X Y Iσ)
+    (φX φY : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
+    (hg : StronglyMeasurable[(natFiltration (mΩ := mΩ) hBmeas).predictable]
+      (Function.uncurry fun (t : ℝ≥0) ω ↦ X t ω - Y t ω))
+    (hmem : MemLp (Function.uncurry fun (t : ℝ≥0) ω ↦ X t ω - Y t ω) 2
+      (trimMeasure (μ := μ) T hBmeas))
+    (hrep : φX - φY = hmem.toLp _)
+    (hIσ : ∀ s ∈ Icc (0 : ℝ) T, ∀ᵐ ω ∂μ, (Iσ X) s ω - (Iσ Y) s ω
+      = ((itoProcessCLM hB T s.toNNReal hBmeas (lipComp T hBmeas σ Lσ hσ φX)
+          - itoProcessCLM hB T s.toNNReal hBmeas (lipComp T hBmeas σ Lσ hσ φY) : Lp ℝ 2 μ) :
+            Ω → ℝ) ω) :
+    ∀ t ∈ Icc (0 : ℝ) T, ∀ᵐ ω ∂μ, X t ω = Y t ω := by
+  refine h.uniqueness (Cdiff := (Lσ : ℝ) ^ 2) fun s hs ↦ ?_
+  have hsT : s.toNNReal ≤ T := Real.toNNReal_le_iff_le_coe.2 hs.2
+  have hc : (s.toNNReal : ℝ) = s := Real.coe_toNNReal s hs.1
+  have h1 : ∫ ω, ((Iσ X) s ω - (Iσ Y) s ω) ^ 2 ∂μ
+      = ‖itoProcessCLM hB T s.toNNReal hBmeas (lipComp T hBmeas σ Lσ hσ φX)
+        - itoProcessCLM hB T s.toNNReal hBmeas (lipComp T hBmeas σ Lσ hσ φY)‖ ^ 2 :=
+    (integral_congr_ae (by filter_upwards [hIσ s hs] with ω hω; simp only [hω])).trans
+      (lp_two_norm_sq _).symm
+  have h3 : bandEnergy T s.toNNReal hBmeas (φX - φY)
+      = ∫ t in Set.Ioc (0 : ℝ≥0) s.toNNReal, ∫ ω, (X t ω - Y t ω) ^ 2 ∂μ ∂timeMeasure := by
+    rw [hrep]
+    exact bandEnergy_toLp T hBmeas (g := fun t ω ↦ X t ω - Y t ω) hg hmem hsT
+  have h4 : ∫ t in Set.Ioc (0 : ℝ≥0) s.toNNReal, ∫ ω, (X t ω - Y t ω) ^ 2 ∂μ ∂timeMeasure
+      = ∫ u in (0 : ℝ)..s, ∫ ω, (X u ω - Y u ω) ^ 2 ∂μ := by
+    refine (timeMeasure_Ioc_eq_interval
+      (g := fun t : ℝ≥0 ↦ ∫ ω, (X t ω - Y t ω) ^ 2 ∂μ) s.toNNReal).trans ?_
+    rw [hc]
+    refine intervalIntegral.integral_congr fun x hx ↦ ?_
+    rw [Set.uIcc_of_le hs.1] at hx
+    simp only [Real.coe_toNNReal x hx.1]
+  rw [h1]
+  exact (norm_sq_itoProcessCLM_lipComp_sub_le hB T hBmeas hσ φX φY hsT).trans_eq
+    (by rw [h3, h4])
 
 /-- **Non-vacuity guard**: the hypothesis bundle is satisfiable — the zero solution on any
 probability space is an `IsL2SolutionPair`. So `IsL2SolutionPair.uniqueness` is not vacuously
 true of a contradictory hypothesis set. -/
-example {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω) [IsProbabilityMeasure μ] :
-    IsL2SolutionPair μ (μ_coef := fun _ ↦ 0) (Lμ := 0) (Cdiff := 0)
+example {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω) [IsProbabilityMeasure μ] (T : ℝ) :
+    IsL2SolutionPair μ (μ_coef := fun _ ↦ 0) (Lμ := 0) (T := T)
       (X := fun _ _ ↦ 0) (Y := fun _ _ ↦ 0) (Iσ := fun _ _ _ ↦ 0) where
   lipschitz := (LipschitzWith.const (0 : ℝ)).weaken (le_refl 0)
   solvesDiff := fun s _ ↦ ae_of_all _ fun ω ↦ by simp
   energyCont := by simpa using continuousOn_const
-  isometry := fun s _ ↦ by simp
   stateSq := fun s _ ↦ by simp
   driftMemL2 := fun s _ ↦ ae_of_all _ fun ω ↦ by simp
   driftSq := fun s _ ↦ by simp
