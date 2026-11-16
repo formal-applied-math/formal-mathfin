@@ -61,7 +61,7 @@ variable {Ω : Type*} [MeasurableSpace Ω]
 
 /-- The rule `θ` reread in a larger filtration `𝓖 ≥ 𝓕`: the same exercise time, still a
 stopping time and still bounded by `T`. -/
-def StoppingRule.enlargeFiltration {𝓕 𝓖 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
+def _root_.MathFin.StoppingRule.enlargeFiltration {𝓕 𝓖 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
     {T : ℝ≥0} (θ : StoppingRule 𝓕 T) (hFG : 𝓕 ≤ 𝓖) : StoppingRule 𝓖 T where
   time := θ.time
   stopping := fun t => hFG t _ (θ.stopping t)

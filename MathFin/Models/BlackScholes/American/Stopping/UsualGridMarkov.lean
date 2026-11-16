@@ -46,9 +46,11 @@ theorem brownianGridPrice_eq_usualGridValue {K r q σ : ℝ} (hK : 0 ≤ K) (hr 
         K r q σ (Real.exp x) T δ := by
   have hz : ∀ᵐ ω ∂completedMeasure gaussianLimit, brownian 0 ω = 0 :=
     isBrownianReal_brownian.eval_zero_ae_eq_zero
-  exact @brownianGridPrice_eq_gridAmericanPutValue (completedMeasurableSpace gaussianLimit)
-    (completedMeasure gaussianLimit) _ brownianUsualFiltration brownian_completed_measurable
-    brownianUsual_adapted hz brownianLogState_usual_isGaussianMarkov _ _ _ _ hK hr T _ hδ x
+  exact @brownianGridPrice_eq_gridAmericanPutValue (ℝ≥0 → ℝ)
+    (completedMeasurableSpace gaussianLimit) (completedMeasure gaussianLimit) _
+    brownianUsualFiltration brownian
+    brownian_completed_measurable brownianUsual_adapted hz brownianLogState_usual_isGaussianMarkov
+    _ _ _ _ hK hr T _ hδ x
 
 theorem brownianGridPrice_tendsto_usual {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r)
     (T : ℝ≥0) (x : ℝ) :

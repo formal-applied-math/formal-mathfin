@@ -124,6 +124,114 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   that finds nothing to improve.
 
 ## Review log
+## 2026-11-16 — corpus 883, modules 779 — the RiO panel's second reading, and the wave it asked for
+
+Scope: #506 and #507 (merged 2026-11-15 and 16) and the branch `feat/rio-panel-2` that answers the
+panel. The panel: three read-only reviewers in the roles of a researcher in arbitrage theory, one
+in volatility and numerics, and one in risk and decision theory. They read the program tree
+regenerated from main's declaration index after #507, judged it fresh, then compared it with their
+2026-11-15 reports item by item. That is lenses 1, 2, 4 and 7 read from outside; the first pass
+and lenses 3, 5, 6 and 8 on the new Lean were the session's own.
+
+### The standing first pass: prose against statement
+
+- Titles that said more than the statement, fixed: `thm:vasicek-bond-pde` ("Vasicek bond price"
+  for a check that `A·e^{−Br}` solves the PDE), `thm:fissler-ziegel` (one member of the family is
+  proved strictly consistent, not the characterisation), `thm:euler-allocation` (Gaussian only),
+  `thm:kelly-criterion` (a first-order condition), `thm:risk-parity-foc` (assumes the condition).
+- A title that said less: `thm:dmw-ftap` read "(one asset)" for a theorem on a general probability
+  space with no integrability hypothesis.
+- `thm:cone-separation` claimed the simplex-separation root as its own; that root now sits under
+  `thm:stiemke`, the node whose declaration the first FTAP actually uses.
+- `thm:market-call-surface` said Dupire's equation is not restated for a market. It is now
+  (`thm:market-dupire`), and the sentence is gone.
+- New prose read against its statements: the market Carr–Madan node and entry say "expectation"
+  for the left side (the payoff language has no general `f(S_T)` contract), a bounded strike
+  range holding `S_T` almost surely, and zero rates; the market Dupire node says "under a
+  probability measure" (no pricing measure is assumed) and that the price-surface derivatives are
+  hypotheses; the Heston node now states the explicit transform and that no market link is proved.
+
+### Upgrades executed
+
+- **The fundamental theorems on the trunk.** The equivalent martingale measure, the FTAP family,
+  the no-arbitrage core and the discrete and continuous market adapters moved from the
+  `valuation/general` branch to the trunk (`docs/taxonomy.toml`); the branch is now *arbitrage
+  pricing*: state prices, replication and completeness, superhedging duality, parity, the American
+  price. The trees family no longer claims `Pricing.FTAP`. Three FTAP frontier nodes moved with
+  them.
+- **Distinct FTAP edges, from proofs.** `ftap_two` takes its measure from `ftap_discrete`, so the
+  second theorem uses the first; `exists_pos_dual_of_disjoint_stdSimplex` is tagged as Stiemke's
+  lemma, which the first theorem uses. The three FTAP nodes no longer share one use list.
+- **Superhedging duality** sits in arbitrage pricing (its module is placed there), with the joint
+  to risk kept: its proof runs through the coherent representation.
+- **Carr–Madan as prices.** `Market.IsPricingMeasure.integral_eq_carrMadan`: under a pricing
+  measure of a unit-numéraire market, `𝔼_Q[f(S_T)]` is cash, the forward and the market's put and
+  call prices weighted by `f''`, by Fubini on a bounded strike range. The pathwise identity is
+  drawn among the analysis tools (`tools/verify/tree_map.toml`); the variance-swap and semistatic
+  frontier nodes now build on the market statement.
+- **Dupire for a market.** `Market.dupire_price_europeanCall` states Dupire's formula for the
+  market's own call prices when its asset is an Itô process under `Q`.
+- **Heston.** `thm:heston-pde` now tags the explicit transform (`hestonTransform_pde`, no
+  Riccati hypothesis) instead of the hypothesis version.
+- **Joints.** Dropped `thm:log-utility-acceptance` (a counterexample) and
+  `thm:hedged-position-risk` (a perfect hedge carries no risk); added `thm:esscher-premium-is-price`,
+  a premium principle that is a price.
+- **Tower summit.** A `[[tower]]` may name its summit; the American put tower shows
+  `thm:bs-american-market`, not the dominance bound that won the old alphabetical tie-break.
+
+### Panel verdicts, second reading
+
+| | fixed since 11-15 | still standing |
+|---|---|---|
+| arbitrage | scoped FTAP and superhedging titles; the semimartingale gap labelled | EMM and FTAPs off the trunk, superhedging under risk, identical FTAP edges (all three addressed above); Black–Scholes formula nodes do not touch the EMM; tool vocabulary |
+| volatility | American and smile branches; forwards split from rates; scoped Black–Scholes, Heston, Dupire, Black-76 titles | Heston, Dupire, Carr–Madan not markets (the last two addressed above); Heston CF, SABR, general Dupire, HJM drift on the frontier; no numerics |
+| risk | scoped titles; Fissler–Ziegel proved; vocabulary of the risk branches | Kusuoka, Delbaen, von Neumann–Morgenstern, Lundberg, comonotonic additivity on the frontier; collective risk theory has no proved node; weak joints (addressed above) |
+
+All three judged the tree clearly better and more honest than on 11-15; none judged it a map of
+their whole field yet.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: the market Carr–Madan, a pathwise Taylor identity becoming a
+  statement about prices by one Fubini. Next: the unbounded strip with the moment conditions of
+  Carr and Lee.
+- **Coherence.** Exemplar: the second FTAP now consumes the first. Next: the Black–Scholes call
+  formula through `Market.price` under the Girsanov measure, so `thm:bs-call` uses the EMM.
+- **Zero slop.** The integrability lemma that two files would have needed is one public lemma
+  (`Market.IsPricingMeasure.integrable_asset`), not a second private copy.
+- **Architecture.** The trunk now carries the theorems that justify it, not only its objects.
+- **First principles.** Exemplar: Stiemke's lemma as the named engine of Harrison–Pliska.
+- **Idiom.** The Fubini step is a local `have` generic in the strike measure and the option
+  payoff, used for the put and the call alike.
+- **Concept clarity.** Next: the reading guide and the vocabulary (socket, joint, island, R3), held
+  until the organization pass is exhausted, by the maintainer's order.
+- **Beauty.** Exemplar: the domination `|φ(y, K)| ≤ |y| + |K|` that serves both legs.
+
+### Ranked backlog
+
+1. A Heston market: the CIR variance process and the two-dimensional Itô formula, then the price
+   of `e^{u log S_T}` as the transform (L; blocks `thm:heston-cf` as a market statement).
+2. `thm:bs-call` and `thm:margrabe` through the EMM (M).
+3. A first proved node in collective risk theory: premium principles or Cramér–Lundberg (M).
+4. Kusuoka, Föllmer–Schied on `L^∞`, von Neumann–Morgenstern, Lundberg (L each).
+5. Kyle's equilibrium (M).
+6. Frontier nodes for numerics: Monte Carlo pricing, finite differences, Longstaff–Schwartz (S).
+7. Comonotonic additivity and the distortion representation (M).
+8. The reading guide, the vocabulary and the 3,798-theorems-versus-entries count (M; last).
+
+### Evidence
+
+- `lean-build.yml` run 43814075174 (with the blueprint export): the whole library green. The run
+  before it caught a missing `Mathlib.MeasureTheory.Integral.Prod` import in
+  `CarrMadanMarket.lean` and an `ω` binder that `open scoped ContDiff` makes a token.
+- The ledger sweep re-verified the changed entries and `mf-carr-madan-market`.
+- The first PR builds caught a long line and a chain-reach rise, 290 → 291 per mille. Nothing had
+  moved away from the spine. Moving the FTAP family onto the trunk took 19 theorems that were
+  within three hops out of the denominator. The fix was a real connection, not a baseline change:
+  `premiumLeg_const_intensity` and `protectionLeg_const_intensity` state the time-varying CDS legs
+  at constant intensity in terms of the risky annuity. This brings five constant-intensity Cox
+  theorems within three hops (back to 290). `corpus_off_blueprint` fell 295 → 294.
+
 ## 2026-11-12 — corpus 870, modules 769 — one-asset DMW, Black–Scholes uniqueness and ten contributed modules, read before they land
 
 Scope: the integration branch `v2/integrate-2026-11-12`. Two frontier nodes delivered:

@@ -71,9 +71,9 @@ theorem delayedGridReward_integrable {K r q σ x : ℝ} (hK : 0 ≤ K) (hr : 0 �
 theorem delayedGridReward_eq (K r q σ x : ℝ) (u T δ : ℝ≥0) :
     delayedGridReward K r q σ x u T δ = fun i ω => Real.exp (-r*(u : ℝ))*
       discountedLogPayoff K r (cappedGridTime T δ i)
-        (brownianLogState (r-q-σ^2/2) σ x (delayedGridTime u T δ i) ω) := by
+        (logState brownian (r-q-σ^2/2) σ x (delayedGridTime u T δ i) ω) := by
   funext i ω
-  unfold delayedGridReward putReward discountedLogPayoff MathFin.gbmValue brownianLogState
+  unfold delayedGridReward putReward discountedLogPayoff MathFin.gbmValue logState
   dsimp only
   have he : Real.exp (-r*(delayedGridTime u T δ i : ℝ)) =
       Real.exp (-r*(u : ℝ))*Real.exp (-r*(cappedGridTime T δ i : ℝ)) := by
@@ -89,21 +89,21 @@ theorem delayedGrid_snellEnvelope_ae_eq {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 
     snellEnvelope gaussianLimit (delayedGridFiltration u T δ) Set.univ
       (delayedGridReward K r q σ x u T δ) ⌈T/δ⌉₊ 0 =ᵐ[gaussianLimit]
       fun ω => Real.exp (-r*(u : ℝ))*brownianGridPrice K r q σ T δ
-        (brownianLogState (r-q-σ^2/2) σ x u ω) := by
+        (logState brownian (r-q-σ^2/2) σ x u ω) := by
   rw [delayedGridReward_eq]
   simp only [snellEnvelope,Nat.sub_zero,min_eq_left (Nat.zero_le _)]
   have hm := snellEnvelopeAux_const_mul (P := gaussianLimit) (𝓕 := delayedGridFiltration u T δ)
     (X := Set.univ) (Z := fun i ω => discountedLogPayoff K r (cappedGridTime T δ i)
-      (brownianLogState (r-q-σ^2/2) σ x (delayedGridTime u T δ i) ω))
+      (logState brownian (r-q-σ^2/2) σ x (delayedGridTime u T δ i) ω))
     (Real.exp_pos (-r*(u : ℝ))).le ⌈T/δ⌉₊ 0
   have he : snellEnvelopeAux gaussianLimit (delayedGridFiltration u T δ) Set.univ
       (fun i ω => discountedLogPayoff K r (cappedGridTime T δ i)
-        (brownianLogState (r-q-σ^2/2) σ x (delayedGridTime u T δ i) ω)) ⌈T/δ⌉₊ 0 =ᵐ[gaussianLimit]
+        (logState brownian (r-q-σ^2/2) σ x (delayedGridTime u T δ i) ω)) ⌈T/δ⌉₊ 0 =ᵐ[gaussianLimit]
       fun ω => brownianGridMarkovAux (fun i => discountedLogPayoff K r (cappedGridTime T δ i))
         (cappedGridTime T δ) (r-q-σ^2/2) σ ⌈T/δ⌉₊ 0
-        (brownianLogState (r-q-σ^2/2) σ x (delayedGridTime u T δ 0) ω) := by
+        (logState brownian (r-q-σ^2/2) σ x (delayedGridTime u T δ 0) ω) := by
     have h := snellEnvelopeAux_eq_brownianGridMarkovAux (delayedGridTime_mono u T δ)
-      (brownianLogState_isGaussianMarkov (r-q-σ^2/2) σ x)
+      (logState_isGaussianMarkov brownian_filtered (r-q-σ^2/2) σ x)
       (fun i => discountedLogPayoff_continuous K r (cappedGridTime T δ i))
       (fun i y => discountedLogPayoff_bound hK hr (cappedGridTime T δ i) y) ⌈T/δ⌉₊ 0
     rw [brownianGridMarkovAux_add_left _ u (s' := delayedGridTime u T δ)
@@ -116,7 +116,7 @@ theorem delayedGrid_snellEnvelope_ae_eq {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 
 theorem delayedGridPrice_le_american {K r q σ : ℝ} (hK : 0 ≤ K) (hr : 0 ≤ r)
     (u T : ℝ≥0) {δ : ℝ≥0} (hδ : 0 < δ) (x : ℝ) :
     (∫ ω, Real.exp (-r*(u : ℝ))*brownianGridPrice K r q σ T δ
-      (brownianLogState (r-q-σ^2/2) σ x u ω) ∂gaussianLimit) ≤
+      (logState brownian (r-q-σ^2/2) σ x u ω) ∂gaussianLimit) ≤
       brownianAmericanPut K r q σ (Real.exp x) (u+T) := by
   let η := snellRule (P := gaussianLimit) (delayedGridReward_adapted K r q σ x u T δ) ⌈T/δ⌉₊
   have hsT : delayedGridTime u T δ ⌈T/δ⌉₊ = u+T := by

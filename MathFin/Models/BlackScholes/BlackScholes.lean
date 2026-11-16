@@ -124,7 +124,7 @@ theorem value_europeanPut {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K r σ : ℝ} {T : ℝ≥0} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :
     (europeanPut K T).value Q (fun _ _ ↦ Real.exp (-r * T)) (assets S_0 r σ T Z)
       = K * Real.exp (-r * T) * Phi (-(bsd2 S_0 K r σ T)) - S_0 * Phi (-(bsd1 S_0 K r σ T)) := by
-  rw [europeanPut, Contract.value_pay]
+  rw [europeanPut, europeanPutPayoff, Contract.value_pay]
   exact MathFin.bs_put_formula h
 
 /-- **The forward's Black–Scholes value** is `S₀ − K e^{−rT}`: the discounted terminal price has

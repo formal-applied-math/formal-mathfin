@@ -1893,6 +1893,27 @@
       }
     },
     {
+      "id": "mf-carr-madan-market",
+      "name": "Carr-Madan Replication in a Market",
+      "description": "In a market with unit numéraire, under a pricing measure Q with S_T in a bounded range [L,U] almost surely, the Q-expectation of a payoff f(S_T), f twice differentiable on [L,U] with continuous f'', equals f(κ) + f'(κ)(E_Q[S_T] − κ) plus the market's put prices on [L,κ] and call prices on [κ,U], each weighted by f''. Bounded strike range and zero rates only.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.ModelFree.CarrMadanMarket\n\nopen MeasureTheory MathFin MathFin.Contracts Set\nopen scoped NNReal\n\n/-- **Carr–Madan replication in a market.** Under a pricing measure of a market with unit\nnuméraire, with `S_T ∈ [L, U]` almost surely, the expectation of a `C²` payoff of `S_T` is cash,\nthe forward and the market's put and call prices weighted by `f''`. -/\ntheorem carrMadan_market_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {M : Market Unit Ω}\n    {T : ℝ≥0} {Q : Measure Ω} (hQ : M.IsPricingMeasure T Q) (hN : ∀ t x, M.numeraire t x = 1)\n    {f f' f'' : ℝ → ℝ} {L U κ : ℝ} (hLκ : L ≤ κ) (hκU : κ ≤ U)\n    (hS : ∀ᵐ x ∂Q, M.asset () T x ∈ Icc L U)\n    (hf : ∀ t ∈ Icc L U, HasDerivAt f (f' t) t) (hf' : ∀ t ∈ Icc L U, HasDerivAt f' (f'' t) t)\n    (hf'' : ContinuousOn f'' (Icc L U)) :\n    ∫ x, f (M.asset () T x) ∂Q = f κ + f' κ * (∫ x, M.asset () T x ∂Q - κ)\n      + (∫ K in L..κ, f'' K * M.price Q (europeanPut K T))\n      + ∫ K in κ..U, f'' K * M.price Q (europeanCall K T) :=\n  MathFin.Market.IsPricingMeasure.integral_eq_carrMadan hQ hN hLκ hκU hS hf hf' hf''\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Carr-Madan static replication (Carr-Madan 2001), read as prices",
+        "citations": [
+          {
+            "key": "CarrMadan2001"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: the pathwise spanning identity carrMadan_spanning integrated under the pricing measure, with Fubini (option payoffs dominated by |S| + |K|) turning the strike integrals of payoffs into strike integrals of the market's put and call prices. Lives in MathFin/Models/ModelFree/CarrMadanMarket.lean. The strike range is bounded and S_T is assumed to stay in it; the unbounded strip and nonzero rates are not treated."
+      }
+    },
+    {
       "id": "mf-carr-madan-log-contract",
       "name": "Carr-Madan Log-Contract Replication",
       "description": "The log payoff log(S) replicates as a forward plus a strip of OTM options weighted by 1/K-squared -- the variance-swap building block.",
@@ -2384,6 +2405,30 @@
       }
     },
     {
+      "id": "mf-market-call-prices-breeden-litzenberger",
+      "name": "Breeden–Litzenberger for a Market's Call Prices",
+      "description": "In a market with unit numéraire and a pricing measure Q up to T (the deflated asset a Q-martingale), the call price at strike K is the call surface E_Q[(S_T − K)⁺], and for every smooth compactly supported ψ: ∫ ψ''(K)·price(call K, T) dK = E_Q[ψ(S_T)], i.e. the second strike derivative of the market's call prices is the Q-law of S_T as a distribution. Dupire's equation is not part of this entry: it needs an Itô-process asset, which a market does not carry.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.LocalVol.MarketCallSurface\n\nopen MeasureTheory\nopen scoped NNReal ContDiff\n\nnamespace MathFin\nopen Contracts\n\n/-- **Breeden–Litzenberger for a market's call prices.** In a market with unit numéraire and a\npricing measure `Q` up to `T`, for every smooth compactly supported `ψ`,\n`∫ ψ''(K) · price(call K, T) dK = 𝔼_Q[ψ(S_T)]`. -/\ntheorem market_call_prices_breeden_litzenberger {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {M : Market Unit Ω} {T : ℝ≥0} {Q : Measure Ω} (hQ : M.IsPricingMeasure T Q)\n    (hN : ∀ t x, M.numeraire t x = 1) {ψ : ℝ → ℝ} (hψ : ContDiff ℝ ∞ ψ)\n    (hψc : HasCompactSupport ψ) :\n    ∫ K, deriv (deriv ψ) K * M.price Q (europeanCall K T) = ∫ x, ψ (M.asset () T x) ∂Q :=\n  Market.IsPricingMeasure.integral_deriv_deriv_mul_price_europeanCall hQ hN hψ hψc\n\nend MathFin\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Breeden–Litzenberger (1978); Dupire, Pricing with a smile, Risk 7(1) (1994)",
+        "citations": [
+          {
+            "key": "BreedenLitzenberger1978"
+          },
+          {
+            "key": "Dupire1994"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, MathFin/Models/LocalVol/MarketCallSurface.lean: Market.price_europeanCall_eq_callSurface (unit numéraire) plus Dupire.breedenLitzenberger_weak. Weak form only; no density or strike-derivative hypothesis. The module also gives the strike-derivative form (the derivative of the call price in the strike is minus Q(S_T > K) where it exists) and the converse that every normalised call price function is a market's call surface at time one (Roper)."
+      }
+    },
+    {
       "id": "mf-heston-affine-pde",
       "name": "Heston Affine-Transform Pricing PDE",
       "description": "The 2D exponential-affine ansatz for the Heston model satisfies the pricing PDE: with Bx constant and Bv, A the explicit rho-shifted Riccati closed forms, d/ds Phi(s,x,v) + L Phi(s,x,v) = 0 at every (s,x,v), where L is the Heston generator (r - v/2) d_x + kappa(theta - v) d_v + (v/2) d_xx + rho xi v d_xv + (xi^2 v/2) d_vv. Strip: 0 < u < 1, xi != 0. That this profile equals E[e^{u log S_T}] is not proved; the Heston process is not constructed.",
@@ -2641,6 +2686,31 @@
         "difficulty": "intermediate",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the stated inequality (MathFin/Models/BlackScholes/American/AmericanPutMarketBound.lean). The market price is the value with discount e^{−rt} on the physical asset (price_market); under the Girsanov measure that asset is almost surely the risk-neutral asset of B^θ (pathAssets_physical_ae_eq), so the price is the expected discounted payoff of the deterministic rule T, which is admissible (european_expectation_le_value). SCOPE: an inequality only; no strictness, no optimal rule, no superhedging characterization. The hypothesis σ ≠ 0 is needed (at σ = 0 the statement fails); joint measurability of B^θ is a hypothesis."
+      }
+    },
+    {
+      "id": "mf-bs-market-american-put-price",
+      "name": "The Black–Scholes Market's American Put Is the Canonical American Put",
+      "domain": "mathematical_finance",
+      "description": "For a pre-Brownian W with continuous paths, σ > 0, T ≤ H, K > 0, r ≥ 0 and S₀ > 0, the Girsanov measure of θ = (m − r)/σ with horizon H is a pricing measure of the Black–Scholes market up to T, and under it the American price of the put (Market.americanPrice of the exercise right t ↦ (K − S_t)⁺: the supremum, over the stopping rules of the natural filtration of W bounded by T, of the expected deflated exercise value) equals K · canonicalPrice(2r/σ², 0, log(S₀/K), σ²T/2), the library's canonical American put value without dividends. The price at time 0 only; not shown to be a superhedging price; no closed form is claimed for canonicalPrice.",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.American.AmericanMarketPrice\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.Contracts.BlackScholes MathFin.BlackScholes.AmericanPut.Stopping\n  MathFin.BlackScholes.AmericanPut.Boundary\n\n/-- **The Black–Scholes market's American put is the canonical American put.** For `σ > 0`,\n`T ≤ H`, `W` with continuous paths, `K > 0`, `r ≥ 0` and `S₀ > 0`, the Girsanov measure is a\npricing measure up to `T`, and the American price of the put in\n`BlackScholes.market` under the Girsanov pricing measure of `θ = (m − r)/σ` is\n`K · canonicalPrice` at the normalized rate `2r/σ²`, log-moneyness `log(S₀/K)` and time `σ²T/2`.\nRe-export of `americanPrice_market_europeanPutPayoff_eq_canonicalPrice`. -/\ntheorem bs_market_american_put_price {Ω : Type*} [mΩ : MeasurableSpace Ω]\n    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    (hW : IsPreBrownianReal W μ) (hWmeas : ∀ t, Measurable (W t))\n    (hpaths : ∀ ω, Continuous fun t ↦ W t ω) {S_0 m r σ K : ℝ} {T H : ℝ≥0} (hσ : 0 < σ)\n    (hTH : T ≤ H) (hK : 0 < K) (hr : 0 ≤ r) (hS : 0 < S_0) :\n    (market μ hWmeas S_0 m r σ).IsPricingMeasure T\n        (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) ∧\n      (market μ hWmeas S_0 m r σ).americanPrice (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)\n          (europeanPutPayoff K) T =\n        K * canonicalPrice (normalizedRate r σ) (normalizedRate 0 σ) (Real.log (S_0 / K))\n          (σ ^ 2 / 2 * (T : ℝ)) :=\n  americanPrice_market_europeanPutPayoff_eq_canonicalPrice hWmeas hW hpaths hσ hTH hK hr hS\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "I. Karatzas and S. E. Shreve, Methods of Mathematical Finance, Springer (1998), §2.5; G. Peskir and A. Shiryaev, Optimal Stopping and Free-Boundary Problems, Birkhäuser (2006)",
+        "citations": [
+          {
+            "key": "KaratzasShreve1998",
+            "locator": "§2.5"
+          },
+          {
+            "key": "PeskirShiryaev2006"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The pricing-measure clause is isPricingMeasure_constGirsanovMeasure (MathFin/Models/BlackScholes/Market.lean). americanPrice_market_europeanPutPayoff and its normalized form in MathFin/Models/BlackScholes/American/AmericanMarketPrice.lean. The path W_u + θ min(u, H) (constBthetaPath) is at each time almost surely the Girsanov Brownian motion B^θ (constBtheta_ae_eq_path: constBtheta_drift_ae up to H, driftContinuousMod_of_ge after), so as an adapted modification it is a filtered pre-Brownian motion under the Girsanov measure (IsFilteredPreBrownian.congr, MathFin/Probability/Brownian/BrownianMartingale.lean). Up to H the deflated exercise value equals the discounted risk-neutral put reward of that path on every path (exerciseValue_europeanPutPayoff_eq_putRewardAt), so the stopping values agree (stoppingValue_congr); law invariance (americanPutValue_eq_brownianAmericanPut) and the normalization (brownianAmericanPut_normalization) finish. SCOPE: the put without dividends, the price at time 0; the American price is not shown to be a superhedging price; hypotheses: W pre-Brownian, each W t measurable, continuous paths, σ > 0, T ≤ H, K > 0, r ≥ 0, S₀ > 0."
       }
     },
     {

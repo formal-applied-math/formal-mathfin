@@ -21,7 +21,9 @@
 # [[joint]]  a theorem whose statement involves two limbs: limbs, node (blueprint label), title
 # [[tower]]  a deep module tree the program tree draws as ONE node, labelled with its module
 #            count (an American-put tower of 174 modules must not be 174 leaves):
-#            key, title, modules (prefixes). Its height is the best hop among its members.
+#            key, title, modules (prefixes), optional summit (the member whose statement the
+#            tower shows; else the member of best hop). Its height is the best hop among its
+#            members.
 # [[standalone]]  a cluster that legitimately has no chain to the trunk (a law functional, an
 #            algebraic certificate, a deterministic mechanism, a convex programme): modules
 #            (prefixes), reason (one sentence: why it needs no link), socket (the market-side
@@ -52,13 +54,13 @@ landmarks = [
   "MathFin.doob_decomposition", "MathFin.martingaleTransform_isMartingale",
   "MathFin.submartingale_optional_sampling", "MeasureTheory.maximal_ineq_Lp",
   "MathFin.martingale_ae_tendsto_and_eLpNorm_two_tendsto",
-  "MathFin.snellEnvelope_le_supermartingale", "MathFin.markovPathMeasure_cylinder",
+  "MathFin.snellEnvelope_optimalStopping", "MathFin.markovPathMeasure_cylinder",
 ]
 
 [[cell]]
 key = "probability/martingales"
 title = "Continuous martingales"
-blurb = "changes of measure, localisation, brackets, convergence, stopped and time-changed processes"
+blurb = "changes of measure, localisation, brackets, convergence, stopped and time-changed processes; no semimartingale integral yet"
 modules = ["MathFin.Probability.Martingales"]
 subjects = ["MSC 60G44", "MSC 60G48"]
 landmarks = [
@@ -69,7 +71,7 @@ landmarks = [
 [[cell]]
 key = "probability/brownian"
 title = "Brownian calculus"
-blurb = "the Itô integral and formula, Girsanov, martingale representation, Feynman–Kac, SDEs"
+blurb = "integration against Brownian motion: the Itô integral and formula, Girsanov, martingale representation, Feynman–Kac, SDEs"
 modules = ["MathFin.Probability.Brownian"]
 subjects = ["MSC 60H05", "MSC 60H10", "MSC 60J65"]
 landmarks = [
@@ -78,9 +80,9 @@ landmarks = [
   "MathFin.ItoFormulaAdapted.ito_product_rule_process",
   "MathFin.Btheta_isFilteredPreBrownian_predictable_of_bdd", "MathFin.martingale_representation",
   "MathFin.FeynmanKacHeatEquation.feynmanU_heat_equation",
-  "MathFin.StochasticFubini.stochFubini_ofCLM",
+  "MathFin.StochasticFubini.stochFubini_ito",
   "MathFin.SDEExistence.picardMap_exists_unique_fixedPoint_any_horizon",
-  "MathFin.IsL2SolutionPair.uniqueness",
+  "MathFin.IsL2SolutionPair.uniqueness_ito",
 ]
 
 [[cell]]
@@ -115,8 +117,8 @@ modules = ["MathFin.Probability.Dependence"]
 subjects = ["MSC 62H05"]
 landmarks = [
   "MathFin.IsCopula", "MathFin.IsCopula.measureReal_Iic_le", "MathFin.measureReal_le_eq_copulaOf",
-  "MathFin.covariance_eq_integral_cdf", "MathFin.isCopula_gaussianFactorCopula",
-  "MathFin.marshallOlkin_firstToDefault_survival",
+  "MathFin.covariance_eq_integral_copulaOf", "MathFin.isCopula_gaussianFactorCopula",
+  "MathFin.marshallOlkin_firstToDefault_survivalFunction",
 ]
 
 [[cell]]
@@ -146,15 +148,20 @@ landmarks = ["MathFin.tendsto_empiricalCDF_ae", "MathFin.sharpeRatio"]
 key = "market"
 kind = "trunk"
 title = "Positions and markets"
-blurb = "payoffs and contracts, the market and its numéraire, strategies and their gains, value under a measure"
+blurb = "payoffs and contracts, the market and its numéraire, strategies and their gains, value under a measure, and the fundamental theorems: no arbitrage is the existence of an equivalent martingale measure"
 modules = [
   "MathFin.Contracts", "MathFin.Pricing.Market", "MathFin.Pricing.Numeraire",
   "MathFin.Pricing.Value", "MathFin.Pricing.OneDateMarket",
+  "MathFin.Pricing.EquivMartingaleMeasure", "MathFin.Pricing.FTAP", "MathFin.Pricing.NoArbitrageCore",
+  "MathFin.Pricing.ContinuousMarket", "MathFin.Pricing.DiscreteMarket",
 ]
-subjects = ["MSC 91G15", "JEL G10"]
+subjects = ["MSC 91G15", "MSC 91G20", "JEL G10"]
 landmarks = [
   "MathFin.Market", "MathFin.Market.IsPricingMeasure", "MathFin.Contracts.Contract",
   "MathFin.Contracts.Contract.value", "MathFin.changeOfNumeraire",
+  "MathFin.IsEMM", "MathFin.ftap_discrete", "MathFin.ftap_two",
+  "MathFin.Market.noArbitrage_iff_exists_isPricingMeasure",
+  "MathFin.ContinuousMarket.isEMM_noArbitrageSimple",
 ]
 
 # ───────────────────────────── limbs ─────────────────────────────
@@ -163,24 +170,23 @@ landmarks = [
 key = "valuation"
 kind = "limb"
 title = "Valuation"
-blurb = "what a position is worth: pricing measures, the fundamental theorems, replication, superhedging"
+blurb = "what a position is worth: arbitrage pricing, replication, superhedging, and the models"
 
 [[cell]]
 key = "valuation/general"
-title = "Arbitrage theory"
-blurb = "the fundamental theorems, state prices and the pricing kernel, completeness, superhedging duality"
-modules = ["MathFin.Pricing"]
+title = "Arbitrage pricing"
+blurb = "what no arbitrage fixes: state prices and the pricing kernel, replication and completeness, superhedging duality, parity, the American price"
+modules = ["MathFin.Pricing", "MathFin.Risk.Superhedging"]
 subjects = ["MSC 91G20", "JEL G12", "JEL G13"]
 landmarks = [
-  "MathFin.IsEMM", "MathFin.ftap_discrete", "MathFin.ftap_two",
-  "MathFin.ContinuousMarket.isEMM_noArbitrageSimple",
+  "MathFin.superhedgingPrice_isLUB",
   "MathFin.Contracts.value_europeanCall_sub_put_of_martingale",
 ]
 
 [[cell]]
 key = "valuation/trees"
 title = "Trees"
-blurb = "one-period and binomial markets, CRR and its limit, American and Bermudan exercise"
+blurb = "one-period, binomial and trinomial markets, replication, CRR and its Black–Scholes limit"
 modules = ["MathFin.Models.Binomial"]
 subjects = ["MSC 91G20", "MSC 60G42"]
 landmarks = [
@@ -190,30 +196,70 @@ landmarks = [
 [[cell]]
 key = "valuation/diffusions"
 title = "Black–Scholes and Bachelier"
-blurb = "the Gaussian diffusion models: formula, PDE, Greeks, hedging, exotics, the American put"
+blurb = "the Gaussian diffusion models: the market and its pricing measure, formula, PDE, Greeks, hedging, exotics"
 modules = [
   "MathFin.Models.BlackScholes", "MathFin.Models.Bachelier", "MathFin.Pricing.MarketCompleteness",
   "MathFin.Pricing.MarketCompletenessInPrice", "MathFin.Pricing.PricingMeasureL2Density",
-  "MathFin.Pricing.FTAP.ContinuousFTAP", "MathFin.Pricing.Girsanov",
+  "MathFin.Pricing.Girsanov",
 ]
 subjects = ["MSC 91G20", "JEL G13"]
 landmarks = [
-  "MathFin.bs_call_formula", "MathFin.bs_pde_holds", "MathFin.hasDerivAt_bsV_S",
+  "MathFin.Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure", "MathFin.bs_pde_holds",
+  "MathFin.hasDerivAt_bsV_S",
   "MathFin.bs_delta_hedge_replication", "MathFin.Market.superReplicationPrice_eq_price",
   "MathFin.margrabe_exchange_price", "MathFin.Bachelier.price_europeanCall",
   "MathFin.Contracts.BlackScholes.value_physical_eq_riskNeutral",
 ]
 
 [[cell]]
+key = "valuation/american"
+title = "American options and optimal stopping"
+blurb = "early exercise as optimal stopping: the Snell envelope in trees, the American put and its free boundary"
+modules = [
+  "MathFin.Models.BlackScholes.American", "MathFin.Models.Binomial.American",
+  "MathFin.Models.Binomial.AmericanMarket", "MathFin.Models.Binomial.Bermudan",
+  "MathFin.Models.Binomial.SnellEnvelope",
+  "MathFin.Models.Binomial.MertonAmericanCallTree",
+]
+subjects = ["MSC 91G20", "MSC 60G40", "MSC 49L20"]
+landmarks = [
+  "MathFin.americanPrice_eq_snellEnvelope",
+  "MathFin.Contracts.Binomial.americanPrice_market_europeanPutPayoff",
+  "MathFin.Contracts.BlackScholes.price_europeanPut_le_americanPutValue",
+  "MathFin.Contracts.BlackScholes.americanPrice_market_europeanPutPayoff_eq_canonicalPrice",
+  "MathFin.BlackScholes.AmericanPut.Stopping.brownianUsualActualContactRule_optimal",
+]
+
+[[cell]]
 key = "valuation/volatility"
-title = "Volatility"
-blurb = "local and stochastic volatility, the smile and its parametrisations"
-modules = ["MathFin.Models.LocalVol", "MathFin.Models.StochVol", "MathFin.Models.ModelFree.SVI",
-  "MathFin.Markets.FxSmileQuotes"]
+title = "Volatility models"
+blurb = "local and stochastic volatility: Dupire, Heston, SABR, time-dependent volatility"
+modules = ["MathFin.Models.LocalVol", "MathFin.Models.StochVol",
+  "MathFin.Models.ModelFree.SABRChainRuleGreeks"]
 subjects = ["MSC 91G20"]
 landmarks = [
   "MathFin.Dupire.breedenLitzenberger_weak", "MathFin.Dupire.dupire_pointwise",
-  "MathFin.Heston.hestonProfile_pde",
+  "MathFin.Market.dupire_price_europeanCall", "MathFin.Heston.hestonTransform_pde",
+]
+
+[[cell]]
+key = "valuation/smile"
+title = "The smile"
+blurb = "call prices across strikes and their static no-arbitrage: Roper's theorem, implied volatility, SVI"
+modules = [
+  "MathFin.Models.ModelFree.SVI", "MathFin.Models.ModelFree.CallPriceFunction",
+  "MathFin.Models.ModelFree.CallPriceInterpolation", "MathFin.Models.ModelFree.CubicSplineSmile",
+  "MathFin.Models.ModelFree.MarketCallPrice", "MathFin.Models.ModelFree.RoperConverse",
+  "MathFin.Models.ModelFree.BreedenLitzenberger", "MathFin.Models.ModelFree.CalendarArbitrage",
+  "MathFin.Markets.FxSmileQuotes", "MathFin.Models.BlackScholes.ImpliedVolatility",
+  "MathFin.Models.BlackScholes.BisectionIV",
+]
+subjects = ["MSC 91G20", "JEL G13"]
+landmarks = [
+  "MathFin.exists_market_of_isNormalizedCallPrice",
+  "MathFin.Market.IsPricingMeasure.isNormalizedCallPrice",
+  "MathFin.exists_market_of_isArbitrageFreeQuotes",
+  "MathFin.SVI.exists_market_of_butterflyFreeFormula",
 ]
 
 [[cell]]
@@ -229,15 +275,24 @@ landmarks = [
 
 [[cell]]
 key = "valuation/term"
-title = "Term structures"
-blurb = "bonds and curves, short-rate and affine models, HJM, forward measures, FX, futures, commodities"
-modules = ["MathFin.Models.Rates", "MathFin.Models.Forwards"]
-subjects = ["MSC 91G30", "JEL E43", "JEL F31", "JEL Q02"]
+title = "Interest rates"
+blurb = "bonds and curves, durations, short-rate and affine models, HJM, forward measures, caps"
+modules = ["MathFin.Models.Rates"]
+subjects = ["MSC 91G30", "JEL E43"]
 landmarks = [
   "MathFin.forwardMeasure_price", "MathFin.vasicekBondPrice_solves_pde", "MathFin.HJM.HJMModel",
   "MathFin.Contracts.value_caplet_black76", "MathFin.bondPortfolio_immunization_first_order",
-  "MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc", "MathFin.schwartzFuturesPrice_eq_integral",
-  "MathFin.covered_eq_uncovered_interest_parity",
+  "MathFin.sum_deriv_keyRate_eq_deriv_bondPriceDisc",
+]
+
+[[cell]]
+key = "valuation/forwards"
+title = "Forwards, FX and commodities"
+blurb = "forward and futures prices, interest-rate parity, storage and convenience yield, Black-76"
+modules = ["MathFin.Models.Forwards"]
+subjects = ["MSC 91G20", "JEL F31", "JEL Q02"]
+landmarks = [
+  "MathFin.schwartzFuturesPrice_eq_integral", "MathFin.market_covered_interest_parity",
 ]
 
 [[cell]]
@@ -253,36 +308,29 @@ landmarks = [
 
 [[cell]]
 key = "valuation/insurance"
-title = "Life and insurance contracts"
-blurb = "survival models, annuities and insurances, reserves"
+title = "Life contingencies"
+blurb = "survival models, annuities and life insurances valued as contracts, reserves"
 modules = ["MathFin.Insurance"]
 subjects = ["MSC 91G05", "JEL G22"]
 landmarks = ["MathFin.SurvivalModel.survivalFunction"]
 
 [[cell]]
-key = "valuation/mechanisms"
-title = "Market mechanisms"
-blurb = "automated market makers and lending protocols, valued as contracts"
-modules = ["MathFin.Markets.DeFi"]
-subjects = ["MSC 91G15"]
-landmarks = [
-  "MathFin.DeFi.impermanentLoss_nonpos", "MathFin.DeFi.v3PositionValue_le_coveredCall",
-  "MathFin.DeFi.price_lpPayoff",
-]
-
-[[cell]]
 key = "valuation/model-free"
-title = "Model-free"
-blurb = "static replication, price bounds, variance swaps, the call-price function"
-modules = ["MathFin.Models.ModelFree"]
-subjects = ["MSC 91G20"]
-landmarks = ["MathFin.carrMadan_spanning"]
+title = "Static replication and model-free bounds"
+blurb = "Carr–Madan spanning, price bounds, variance swaps, liquidity-pool positions as option portfolios"
+modules = ["MathFin.Models.ModelFree", "MathFin.Markets.DeFi"]
+subjects = ["MSC 91G20", "MSC 91G15"]
+landmarks = [
+  "MathFin.Market.IsPricingMeasure.integral_eq_carrMadan",
+  "MathFin.DeFi.v3PositionValue_le_coveredCall",
+  "MathFin.DeFi.price_lpPayoff", "MathFin.DeFi.price_constantProductPayoff_le_hodl",
+]
 
 [[cell]]
 key = "choice"
 kind = "limb"
 title = "Choice"
-blurb = "whether to hold a position: preferences, portfolios, equilibrium, dynamic and strategic trading"
+blurb = "whether to hold a position: preferences, portfolios, equilibrium, dynamic choice, microstructure"
 
 [[cell]]
 key = "choice/preferences"
@@ -321,16 +369,16 @@ title = "Dynamic choice"
 blurb = "growth-optimal and log-utility investment, Merton's problem, time consistency"
 modules = ["MathFin.Choice.Performance.Kelly", "MathFin.Choice.Performance.KellyNumeraire"]
 subjects = ["MSC 91G10", "MSC 49L20"]
-landmarks = ["MathFin.kelly_n_periods_deriv_at_kelly"]
+landmarks = ["MathFin.kellyGrowth_deriv_at_kelly"]
 
 [[cell]]
 key = "choice/trading"
-title = "Strategic trading"
-blurb = "price formation under asymmetric information, market making, optimal execution"
+title = "Market microstructure"
+blurb = "price formation under asymmetric information, market making, price impact, optimal execution"
 modules = ["MathFin.Markets.Microstructure", "MathFin.Markets.Execution"]
 subjects = ["JEL G14", "JEL D82", "MSC 49L20"]
 landmarks = [
-  "MathFin.Execution.condExp_payoff_eq_quote",
+  "MathFin.Execution.gmQuote_one_ae_eq_quote",
   "MathFin.Execution.isPricingMeasure_toMarket_condExp",
 ]
 
@@ -354,6 +402,7 @@ subjects = ["MSC 91G70", "JEL G32"]
 landmarks = [
   "MathFin.IsCoherentRiskMeasure", "MathFin.coherentRisk_isLUB",
   "MathFin.strictlyElicits_pinballLoss", "MathFin.not_isElicitable_expectedShortfall",
+  "MathFin.isElicitable_quantile_lowerExpectedShortfall",
 ]
 
 [[cell]]
@@ -371,8 +420,8 @@ landmarks = [
 
 [[cell]]
 key = "risk/aggregation"
-title = "Aggregation"
-blurb = "diversification and its failure, risk contributions, concentration"
+title = "Aggregation and diversification"
+blurb = "dependence and diversification, its failure, risk contributions, concentration"
 modules = [
   "MathFin.Risk.VaRSuperadditivity", "MathFin.Risk.ComponentVaR", "MathFin.Risk.Concentration",
   "MathFin.Risk.ConcentrationVariance", "MathFin.Risk.EquicorrelationConcentration",
@@ -411,8 +460,8 @@ landmarks = ["MathFin.CVA.potentialFutureExposure_gaussian"]
 
 [[cell]]
 key = "risk/insurance"
-title = "Premiums and ruin"
-blurb = "premium principles as risk-loaded functionals, collective risk theory"
+title = "Collective risk theory"
+blurb = "premium principles as risk-loaded functionals, the compound claims process, ruin"
 modules = ["MathFin.Insurance.StandardDeviationPrinciple", "MathFin.Insurance.ActuarialInsurance"]
 subjects = ["MSC 91G05", "JEL G22"]
 
@@ -424,7 +473,7 @@ key = "trees"
 title = "Trees"
 blurb = "finite and binomial randomness"
 hue = "--fam-trees"
-modules = ["MathFin.Models.Binomial", "MathFin.Pricing.DiscreteMarket", "MathFin.Pricing.FTAP"]
+modules = ["MathFin.Models.Binomial", "MathFin.Pricing.DiscreteMarket"]
 
 [[family]]
 key = "diffusions"
@@ -516,12 +565,7 @@ title = "The superhedging price is a coherent risk measure"
 [[joint]]
 limbs = ["valuation", "risk"]
 node = "thm:premium-is-price"
-title = "Insurance premiums are prices"
-
-[[joint]]
-limbs = ["choice", "risk"]
-node = "thm:log-utility-acceptance"
-title = "Acceptance sets from expected utility"
+title = "The life annuity-due is a contract value"
 
 [[joint]]
 limbs = ["choice", "risk"]
@@ -535,8 +579,8 @@ title = "Superhedging duality"
 
 [[joint]]
 limbs = ["valuation", "risk"]
-node = "thm:hedged-position-risk"
-title = "The risk of a hedged position"
+node = "thm:esscher-premium-is-price"
+title = "The Esscher premium is a price"
 
 # ───────────────────────────── towers ─────────────────────────────
 
@@ -544,6 +588,7 @@ title = "The risk of a hedged position"
 key = "american-put"
 title = "American put"
 modules = ["MathFin.Models.BlackScholes.American"]
+summit = "thm:bs-american-market"
 
 [[tower]]
 key = "svi"

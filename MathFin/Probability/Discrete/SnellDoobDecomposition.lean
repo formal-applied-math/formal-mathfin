@@ -21,14 +21,14 @@ two results of `Probability/` to it.
 
 * **Doob decomposition** (`Probability/Discrete/DoobDecomposition`). `U = M + A` with `M` a
   martingale and `A` predictable with `A₀ = 0`, unique up to a.e. equality at every time
-  (`doob_decomposition_unique`). For the Snell envelope the compensator `A` is a.e.
+  (`doob_decomposition`). For the Snell envelope the compensator `A` is a.e.
   nonincreasing, and it does not move on the continuation region: at a step `i < N` where
   `Z_i < U_i`, `A_{i+1} = A_i` almost surely, because there `U_i = 𝔼[U_{i+1} | 𝓕_i]`.
 * **Optional sampling** (`Probability/Discrete/OptionalSamplingInequality`). For stopping times
   `σ ≤ τ ≤ N`, `𝔼[Z_τ | 𝓕_σ] ≤ U_σ` almost surely: at any stopping time the envelope dominates
   the conditional expected reward of every later bounded stopping rule. At `σ = 0` and in
   expectation this is `expected_discrete_payoff_le_snellEnvelope`
-  (`Models/BlackScholes/American/Stopping/FiniteBellmanOptimality.lean`).
+  (`Probability/Discrete/FiniteBellmanOptimality.lean`).
 
 ## Main results
 
@@ -62,7 +62,7 @@ martingale and `A` predictable (`A (n + 1)` is `𝓕 n`-measurable) with `A 0 = 
 * `A` is a.e. nonincreasing (`U` is a supermartingale);
 * `A` is constant across every step `i < N` taken in the continuation region `Z_i < U_i`;
 * the pair `(M, A)` is unique up to a.e. equality at every time
-  (`doob_decomposition_unique`). -/
+  (the uniqueness clause of `doob_decomposition`). -/
 theorem snellEnvelope_doob_decomposition (ha : Adapted 𝓕 Z) (hi : ∀ i, Integrable (Z i) P)
     (N : ℕ) :
     ∃ M A : ℕ → Ω → ℝ,
@@ -91,7 +91,21 @@ theorem snellEnvelope_doob_decomposition (ha : Adapted 𝓕 Z) (hi : ∀ i, Inte
   refine ⟨martingalePart U 𝓕 P, predictablePart U 𝓕 P,
     ⟨martingale_martingalePart hUa hUi, stronglyAdapted_predictablePart, predictablePart_zero,
       martingalePart_add_predictablePart 𝓕 P U⟩, ?_, fun i hiN ↦ ?_,
-    fun M' A' hM' hA' hA'0 hA'i hM'A' n ↦ doob_decomposition_unique hM' hA' hA'0 hA'i hM'A' n⟩
+    fun M' A' hM' hA' hA'0 hA'i hM'A' n ↦ ?_⟩
+  rotate_left 2
+  · -- uniqueness: both `(M', A')` and the canonical parts are compared with the witnesses of
+    -- `doob_decomposition`, whose uniqueness clause is the one cited
+    obtain ⟨M₀, A₀, -, huniq⟩ := doob_decomposition hUa hUi
+    have hMi := martingale_martingalePart hUa hUi
+    have hAi (k : ℕ) : Integrable (predictablePart U 𝓕 P k) P := by
+      have h := congrFun (martingalePart_add_predictablePart 𝓕 P U) k
+      rw [Pi.add_apply] at h
+      rw [eq_sub_of_add_eq' h]
+      exact (hUi k).sub (hMi.integrable k)
+    have h1 := huniq M' A' hM' hA' hA'0 hA'i hM'A' n
+    have h2 := huniq _ _ hMi stronglyAdapted_predictablePart predictablePart_zero hAi
+      (martingalePart_add_predictablePart 𝓕 P U) n
+    exact ⟨h1.1.trans h2.1.symm, h1.2.trans h2.2.symm⟩
   · filter_upwards [ae_all_iff.2 hinc] with ω h
     refine antitone_nat_of_succ_le fun n ↦ ?_
     have hn := h n

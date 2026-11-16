@@ -42,6 +42,7 @@ PD-as-probability bounds.
   the *structural identity*, the same `d_2` from BS).
 * `kmvPD_nonneg`, `kmvPD_le_one`: probability bounds.
 * `kmv_survival_eq_Phi_d2`: `1 − PD = Φ(d_2)`.
+* `bsTerminal_lt_iff`: the default event `V_T(z) < F ↔ z < −d₂`.
 
 ## Tags
 
@@ -90,5 +91,20 @@ theorem kmv_survival_eq_Phi_d2 (V_0 F r σ_V T : ℝ) :
   unfold kmvPD
   have := Phi_add_Phi_neg (kmvDistanceToDefault V_0 F r σ_V T)
   linarith
+
+/-- **Shortfall-region identification**: `S_T(z) < K ↔ z < −d₂`, the default event of the
+Merton model, the strict mirror of `bsTerminal_gt_K_iff`. -/
+lemma bsTerminal_lt_iff {S_0 K r σ T : ℝ} (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ)
+    (hT : 0 < T) (z : ℝ) :
+    bsTerminal S_0 r σ T z < K ↔ z < -bsd2 S_0 K r σ T := by
+  have hb : 0 < σ * Real.sqrt T := mul_pos hσ (Real.sqrt_pos.mpr hT)
+  have hcore : bsTerminal S_0 r σ T z < K ↔
+      (r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z < Real.log (K / S_0) := by
+    rw [bsTerminal, mul_comm S_0, ← lt_div_iff₀ hS_0]
+    exact (Real.lt_log_iff_exp_lt (div_pos hK hS_0)).symm
+  rw [hcore, bsd2_eq hσ hT, ← neg_div, lt_div_iff₀ hb,
+    show Real.log (K / S_0) = -Real.log (S_0 / K) by
+      rw [Real.log_div hK.ne' hS_0.ne', Real.log_div hS_0.ne' hK.ne']; ring]
+  constructor <;> intro h <;> linarith
 
 end MathFin

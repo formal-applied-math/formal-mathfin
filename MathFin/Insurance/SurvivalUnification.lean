@@ -9,6 +9,7 @@ public import MathFin.Insurance.Mortality
 public import MathFin.Insurance.SurvivalModel
 public import MathFin.Models.Credit.HazardCurve
 public import MathFin.Models.Credit.DefaultDensity
+public import MathFin.Probability.Dependence.MarshallOlkin
 
 /-!
 # Actuarial survival ≡ reduced-form credit survival
@@ -30,6 +31,9 @@ form the credit layer uses: `P(τ ≤ a) = 1 − exp(−∫₀ᵃ h)` for `a ≥
 * `survive_eq_exp_neg_integral`: `ₜpₓ = P(τ > x + t ∣ τ > x) = exp(−∫ₓ^{x+t} h)` for `x, t ≥ 0`;
 * `hasDerivAt_survivalFunction`: `S_τ' = −h · S_τ` on `t > 0`, so `h` is the force of mortality
   `−S_τ'/S_τ` of the lifetime;
+* `marshallOlkin_firstToDefault_survivalFunction`: the first-to-default time of two names under a
+  Marshall–Olkin common shock has survival function `hazardSurvival` of the constant hazard
+  `λ₁ + λ₂ + λ₃`;
 * `survive_coxDefaultTime`: the hypotheses hold for the Cox default time of `Models/Credit/Cox.lean`
   (a unit-exponential clock inverted through `∫₀ᵗ h`, for `h` continuous and positive with
   `∫₀ᵗ h → ∞`), so they are satisfiable.
@@ -53,6 +57,10 @@ the survival probability is the mixture `E[exp(−Λ_t)]` (`Cox.cox_mixing_survi
   `-(h t * survivalFunction P τ t)` at `t > 0`.
 * `survive_coxDefaultTime`: for `h` continuous and positive with cumulative hazard tending to
   `∞`, and `ξ` unit exponential, the Cox default time has `ₜpₓ = exp (-∫ s in x..x + t, h s)`.
+
+* `marshallOlkin_firstToDefault_survivalFunction`: for independent exponential clocks
+  `T₁, T₂, T₃` of rates `λ₁, λ₂, λ₃`, the survival function of `min(min(T₁, T₃), min(T₂, T₃))` is
+  `hazardSurvival (fun _ ↦ λ₁ + λ₂ + λ₃)` for `t ≥ 0`.
 
 ## References
 
@@ -153,5 +161,28 @@ theorem survive_coxDefaultTime (hh : Continuous h) (hpos : ∀ s, 0 < h s)
     (fun _ ha ↦ Cox.cox_cdf_timeVarying hh hpos hdiv hξmeas hξlaw ha) hx ht
 
 end Lifetime
+
+/-! ### First to default under a common shock -/
+
+section MarshallOlkin
+
+variable {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} {T : Fin 3 → Ω → ℝ} {rate : Fin 3 → ℝ}
+
+/-- **The first-to-default time under a common shock has a constant credit hazard.** For
+independent exponential clocks `T₁, T₂, T₃` of positive rates, the first-to-default time
+`min(min(T₁, T₃), min(T₂, T₃))` of the Marshall–Olkin pair has actuarial survival function
+`S(t) = hazardSurvival (λ₁ + λ₂ + λ₃) t` for `t ≥ 0`. -/
+theorem marshallOlkin_firstToDefault_survivalFunction (hrate : ∀ i, 0 < rate i)
+    (hT : ∀ i, HasLaw (T i) (expMeasure (rate i)) P) (hind : iIndepFun T P) {t : ℝ}
+    (ht : 0 ≤ t) :
+    SurvivalModel.survivalFunction P
+        (fun ω ↦ min (min (T 0 ω) (T 2 ω)) (min (T 1 ω) (T 2 ω))) t
+      = hazardSurvival (fun _ ↦ rate 0 + rate 1 + rate 2) t := by
+  rw [hazardSurvival, survivalFromIntensity,
+    show cumulativeIntensity (fun _ ↦ rate 0 + rate 1 + rate 2) t
+      = (rate 0 + rate 1 + rate 2) * t from cumHazard_const _ t]
+  exact marshallOlkin_firstToDefault_survival hrate hT hind ht
+
+end MarshallOlkin
 
 end MathFin

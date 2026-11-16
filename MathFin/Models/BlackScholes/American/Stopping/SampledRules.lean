@@ -6,7 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.Pricing.ContinuousMarket
-public import MathFin.Models.BlackScholes.American.Stopping.Rules
+public import MathFin.Probability.Martingales.StoppingRule
 
 /-!
 # Discrete rules sampled at arbitrary deterministic increasing times
@@ -33,7 +33,7 @@ variable {Ω : Type*} [MeasurableSpace Ω]
 
 /-- A discrete rule `η` for `ContinuousMarket.sampledFiltration 𝓕 hs` read back in continuous
 time as `ω ↦ s (η.time ω)`, with horizon `s N`. -/
-def StoppingRule.toSampledRule {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
+def _root_.MathFin.StoppingRule.toSampledRule {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
     {s : ℕ → ℝ≥0} {hs : Monotone s} {N : ℕ}
     (η : StoppingRule (ContinuousMarket.sampledFiltration 𝓕 hs) N) : StoppingRule 𝓕 (s N) where
   time := fun ω => s (η.time ω)

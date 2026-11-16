@@ -50,7 +50,7 @@ open scoped NNReal Topology
 variable {Ω : Type*} [MeasurableSpace Ω] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
 
 /-- The two-valued rule stopping at `i` on the event `A ∈ 𝓕 i` and at `j` off it. -/
-noncomputable def StoppingRule.binary {i j : ℝ≥0} (hij : i ≤ j) (A : Set Ω)
+noncomputable def _root_.MathFin.StoppingRule.binary {i j : ℝ≥0} (hij : i ≤ j) (A : Set Ω)
     (hA : MeasurableSet[𝓕 i] A) : StoppingRule 𝓕 j := by
   classical
   refine ⟨fun ω => if ω ∈ A then i else j,?_,?_⟩

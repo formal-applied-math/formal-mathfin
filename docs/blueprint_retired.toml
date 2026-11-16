@@ -155,11 +155,6 @@ folded_into = "def:emm"
 reason = "the prefix of the equivalent martingale measure"
 
 [[retired]]
-label = "def:snell-envelope"
-folded_into = "thm:snell-envelope"
-reason = "the recursion that defines the Snell envelope"
-
-[[retired]]
 label = "thm:american-put-boundary-expiry"
 folded_into = "thm:american-put-optimal-exercise"
 reason = "one regularity property of the free boundary"

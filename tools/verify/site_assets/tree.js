@@ -357,7 +357,7 @@ islSel.each(function(c){
   const words = c.title.replace(/^[^·]*·\s*/, "");
   t.text(words.length > 22 ? words.slice(0, 21).trimEnd() + "…" : words);
   c.lbl = t;
-  g.append("title").text(c.declared ? `${c.title}: standalone. ${c.reason}${c.socket ? " Read in a market by " + c.socket + "." : ""}` : c.ring ? `${c.title}: no statement joins it to the trunk, no connector reaches it, and nothing declares why.` : `${c.title}: no statement joins it to the trunk yet; a connector would.`);
+  g.append("title").text(c.declared ? `${c.title}: standalone. ${c.reason}${c.socket ? " Read in a market by " + c.socket + "." : ""}` : c.ring ? `${c.title}: no statement joins it to the trunk, no stated bridge reaches it, and nothing declares why.` : `${c.title}: no statement joins it to the trunk yet; a stated bridge would, once proved.`);
   g.append("rect").attr("class", "hit").attr("x", x0).attr("y", y0 - 16).attr("width", x1 - x0).attr("height", 18);
 });
 
@@ -572,10 +572,10 @@ function showTip(ev, html){
 const hideTip = () => { tip.hidden = true; };
 function statusLine(n){
   if (isUp(n)) return "upstream (BrownianMotion)";
-  if (n.tw) return `tower of ${n.tw} modules · best hop ${n.hp ?? "∞"}`;
+  if (n.tw) return `group of ${n.tw} modules · ${n.hp == null ? "not yet connected" : n.hp + (n.hp === 1 ? " step" : " steps") + " from the trunk"}`;
   if (isWood(n)) return (n.s === "partial" ? "proved in part" : "proved") + (n.e ? ` · ${n.e} corpus ${n.e === 1 ? "entry rests" : "entries rest"} here` : "")
     + (n.open.length ? ` · ${n.open.length} open ${n.open.length === 1 ? "issue" : "issues"}` : "");
-  if (n.ph) return `connector · proving it brings ${n.ph.gain} more ${n.ph.gain === 1 ? "theorem" : "theorems"} within 3 hops` + (n.open.length ? " · " + n.open.map(x => "#" + x[0]).join(" ") : "");
+  if (n.ph) return `stated bridge, not yet proved · proving it brings ${n.ph.gain} more ${n.ph.gain === 1 ? "theorem" : "theorems"} within three steps of the trunk` + (n.open.length ? " · " + n.open.map(x => "#" + x[0]).join(" ") : "");
   const bits = [n.op ? "open problem" : "frontier"]; if (n.core?.length) bits.push("core proved"); if (n.st) bits.push(STATUS_TXT[n.st]);
   if (n.seed || n.ground) bits.push("grows from upstream");
   return bits.join(" · ");
@@ -598,19 +598,19 @@ const chip = l => { const m = N.get(l); return m ? `<button class="chip${m.s ===
 const pill = (txt, v) => `<span class="pill"><i style="background:var(${v})"></i>${esc(txt)}</span>`;
 function nodePanel(n){
   const d = byId.get(n.l);
-  const kind = isUp(n) ? pill("upstream", "--tr-soil-ink") : n.ph ? pill("connector, not proved", "--tr-blue") : n.tw ? pill("tower", "--tr-bark") : isWood(n) ? pill(n.s === "partial" ? "proved in part" : "proved", "--tr-bark") : n.op ? pill("open problem", "--tr-star") : pill("frontier", "--tr-blue");
+  const kind = isUp(n) ? pill("upstream", "--tr-soil-ink") : n.ph ? pill("bridge, not yet proved", "--tr-blue") : n.tw ? pill("module group", "--tr-bark") : isWood(n) ? pill(n.s === "partial" ? "proved in part" : "proved", "--tr-bark") : n.op ? pill("open problem", "--tr-star") : pill("frontier", "--tr-blue");
   const st = n.st ? pill(STATUS_TXT[n.st], STATUS_VAR[n.st]) : "";
   const iss = n.i.slice().sort((a, b) => (a[1] === "o" ? 0 : 1) - (b[1] === "o" ? 0 : 1) || b[0] - a[0]);
   const li = x => `<li><a class="num${x[1] === "o" ? "" : " closed"}" href="${GH}${x[0]}" target="_blank" rel="noopener">#${x[0]}</a><span class="${x[1] === "o" ? "" : "closed"}">${esc(x[3])}${x[2] ? " <span class='muted'>(PR)</span>" : ""}${x[1] === "o" && x[4][0] ? ` <span class="muted">· ${esc(STATUS_TXT[x[4][0]] || x[4][0])}</span>` : ""}${x[1] !== "o" ? " <span class='muted'>· closed</span>" : ""}</span></li>`;
   const uses = n.u.filter(u => N.has(u)), users = n.users;
   return `
     <button class="backbtn" type="button" data-back>← How to read the tree</button>
-    <div style="display:flex; gap:6px; flex-wrap:wrap">${kind}${st}<span class="pill">${esc(cellName(cellKey(n)))}</span>${n.f && FAM.get(n.f) ? `<span class="pill"><i style="background:${famVar(n)}"></i>${esc(FAM.get(n.f).title)}</span>` : ""}${isJoint(n) ? `<span class="pill">joint · ${esc(n.j.map(partTitle).join(" and "))}</span>` : ""}</div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap">${kind}${st}<span class="pill">${esc(cellName(cellKey(n)))}</span>${n.f && FAM.get(n.f) ? `<span class="pill"><i style="background:${famVar(n)}"></i>${esc(FAM.get(n.f).title)}</span>` : ""}${isJoint(n) ? `<span class="pill">bridge between ${esc(n.j.map(partTitle).join(" and "))}</span>` : ""}</div>
     <h2>${esc(n.t)}</h2>
     ${n.x ? `<p class="stmt">${prose(n.x)}</p>` : ""}
-    ${n.ph ? `<div><h3>Connector</h3><p>A theorem stated in MathFinFrontier and closed by <code>sorry</code>. Proved, it would bring <b>${n.ph.gain}</b> more finance ${n.ph.gain === 1 ? "theorem" : "theorems"} within 3 statement hops of the trunk${n.hp ? `, and it would itself sit at hop ${n.hp}` : ""}.${n.open.length ? " Issue " + n.open.map(x => `<a href="${GH}${x[0]}" target="_blank" rel="noopener">#${x[0]}</a>`).join(", ") + "." : ""}</p></div>` : ""}
-    ${!n.ph && n.hp != null && kindOf(n) === "limb" ? `<div><h3>Distance from the trunk</h3><p>Hop ${n.hp}: ${n.hp === 1 ? "its statement mentions the trunk itself" : `its statement mentions an object ${n.hp - 1} ${n.hp === 2 ? "statement" : "statements"} from the trunk`}.</p></div>` : ""}
-    ${n.isl ? `<div><h3>Island</h3><p>No statement joins this to the trunk (infinite hop). ${(D.islands.find(c => c.key === n.isl) || {}).declared ? "Declared standalone: " + esc(D.islands.find(c => c.key === n.isl).reason) : "A connector or a declared reason is missing."}</p></div>` : ""}
+    ${n.ph ? `<div><h3>Stated bridge</h3><p>A theorem stated in MathFinFrontier and closed by <code>sorry</code>. Proved, it would bring <b>${n.ph.gain}</b> more finance ${n.ph.gain === 1 ? "theorem" : "theorems"} within three steps of the trunk${n.hp ? `, and it would itself sit ${n.hp} ${n.hp === 1 ? "step" : "steps"} from the trunk` : ""}.${n.open.length ? " Issue " + n.open.map(x => `<a href="${GH}${x[0]}" target="_blank" rel="noopener">#${x[0]}</a>`).join(", ") + "." : ""}</p></div>` : ""}
+    ${!n.ph && n.hp != null && kindOf(n) === "limb" ? `<div><h3>Distance from the trunk</h3><p>${n.hp} ${n.hp === 1 ? "step" : "steps"}: ${n.hp === 1 ? "its statement mentions the trunk itself" : `its statement mentions an object ${n.hp - 1} ${n.hp === 2 ? "statement" : "statements"} from the trunk`}.</p></div>` : ""}
+    ${n.isl ? `<div><h3>Not yet connected</h3><p>No chain of statements joins this to the trunk. ${(D.islands.find(c => c.key === n.isl) || {}).declared ? "Declared standalone: " + esc(D.islands.find(c => c.key === n.isl).reason) : "No stated bridge reaches it, and no reason for standing alone is declared."}</p></div>` : ""}
     ${n.d ? `<div><h3>Lean</h3><div class="mono">${n.h ? `<a href="${esc(n.h)}">${esc(n.d)}</a>` : esc(n.d)}</div>${n.m ? `<div class="muted" style="font-size:12.5px">${esc(n.m)}</div>` : ""}</div>` : ""}
     ${isWood(n) ? `<div><h3>Corpus</h3><p>${n.e ? `<b>${n.e}</b> ${n.e === 1 ? "entry hangs" : "entries hang"} here as leaves: this is the deepest node ${n.e === 1 ? "its proof rests" : "their proofs rest"} on.` : "No entry has this as its deepest node; entries reach it through the nodes above."}</p></div>` : ""}
     ${n.core?.length ? `<div><h3>Core already proved</h3><ul class="entries">${n.core.map(c => `<li><span class="mono">${esc(c)}</span></li>`).join("")}</ul></div>` : ""}
@@ -651,16 +651,16 @@ function defaultPanel(){
     <h3>Always on the tree</h3>
     <div class="legend">
       <div>${glyph("ghost")}<span><b>The map</b>, in pale wood, is docs/taxonomy.toml: the tools as roots (probability in its branches, statistics), positions and markets as the trunk, and three limbs, one for each question asked of a position (choice, valuation, risk). A node's place on it is a reading, not a proof.</span></div>
-      <div>${glyph("hop")}<span><b>Height is measured</b>: on a limb a node sits at its hop, its distance in statements from the trunk (the metric of <code>chain_reach</code>). Probability tools stay in the roots.</span></div>
+      <div>${glyph("hop")}<span><b>Height is measured</b>: on a limb a node sits at its distance from the trunk, in steps: one step if its statement mentions a market object, two if it mentions an object one step away, and so on. Probability tools stay in the roots.</span></div>
       <div>${glyph("knot")}<span><b>Dark wood and knots</b>: the proved blueprint nodes and the main use each proof makes; select a node to see all of them. Wood thickens with the corpus it carries; a knot's size counts the corpus entries resting deepest on it.</span></div>
-      <div>${glyph("fam")}<span><b>Colour</b> is the model family, the same hue in every limb; a node in wood colour is general theory. A <b>joint</b> sits in the fork between the two limbs its statement joins.</span></div>
-      <div>${glyph("tower")}<span><b>Towers</b> are single nodes, the module count inside.</span></div>
+      <div>${glyph("fam")}<span><b>Colour</b> is the model family, the same hue in every limb; a node in wood colour is general theory. A <b>bridge between limbs</b> sits in the fork between the two limbs its statement joins.</span></div>
+      <div>${glyph("tower")}<span><b>Module groups</b>: a family of modules drawn as one square node, the module count inside; it shows its headline result.</span></div>
       <div>${glyph("sucker")}<span><b>Stems from the soil</b>: proved nodes off the roots that rest on no blueprint node, only on Mathlib.</span></div>
     </div>
     <h3>Gaps</h3>
     <div class="legend">
-      <div>${glyph("island")}<span><b>Islands</b>: proved nodes at infinite distance float beside their limb; a red ring means no connector reaches them and no standalone reason is declared.</span></div>
-      <div>${glyph("phantom")}<span><b>Connectors</b>: hollow dashed dots between the nodes a stated, not yet proved theorem would join; the number is how many theorems proving it brings within 3 hops.</span></div>
+      <div>${glyph("island")}<span><b>Not yet connected</b>: proved clusters that no chain of statements joins to the trunk float beside their limb; a red outline means no stated bridge reaches them and no reason for standing alone is declared.</span></div>
+      <div>${glyph("phantom")}<span><b>Stated bridges</b>: hollow dashed dots between the nodes a stated, not yet proved theorem would join; the number is how many theorems proving it brings within three steps of the trunk.</span></div>
     </div>
     <h3>Future work</h3>
     <div class="legend">

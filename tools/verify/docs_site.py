@@ -300,7 +300,7 @@ class Site:
 # ------------------------------------------------------------------ page shell
 
 NAV = [("index.html", "Map"), ("landmarks.html", "Landmarks"), ("blueprint.html", "Blueprint"),
-       ("tree.html", "Tree"), ("joints.html", "Joints"), ("corpus.html", "Corpus"),
+       ("tree.html", "Tree"), ("joints.html", "Bridges"), ("corpus.html", "Corpus"),
        ("subjects.html", "Subjects"), ("references.html", "References")]
 
 
@@ -687,16 +687,17 @@ def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dic
     m = data["metrics"]
     strip = (
         '<div class="tiles t-metrics">'
-        f'<div class="tile"><div class="v">{m["R3"]:g}%</div><div class="k">R3 <small>· finance '
-        f'theorems within 3 statement hops of the trunk, of {m["theorems"]:,}</small></div></div>'
+        f'<div class="tile"><div class="v">{m["R3"]:g}%</div><div class="k">close to the market '
+        f'<small>· of the {m["theorems"]:,} finance theorems, the share within three steps of '
+        f'the trunk</small></div></div>'
         f'<div class="tile"><div class="v">{len(m["sockets"])}/{m["families"]}</div><div class="k">'
-        f'sockets <small>· model families that are a market with a proved pricing measure'
+        f'priced in a market <small>· model families with a proved pricing measure on a market'
         f'</small></div></div>'
-        f'<div class="tile"><div class="v">{m["span"]}</div><div class="k">joint span '
+        f'<div class="tile"><div class="v">{m["span"]}</div><div class="k">across limbs '
         f'<small>· theorems whose statements join two limbs</small></div></div>'
-        f'<div class="tile"><div class="v">{m["islands"]}</div><div class="k">islands '
-        f'<small>· {m["unreached"]} reached by no connector and declared nowhere</small>'
-        f'</div></div></div>')
+        f'<div class="tile"><div class="v">{m["islands"]}</div><div class="k">not yet connected '
+        f'<small>· proved clusters no proof ties to the rest; {m["unreached"]} with no stated '
+        f'bridge and no declared reason</small></div></div></div>')
     for n in data["nodes"]:
         d = site.idx.decls.get(n.get("d") or "")
         if d and not d.private:
@@ -727,22 +728,31 @@ def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dic
     fam_legend = '<div class="legend">' + "".join(
         f'<span><i style="background:var({f["hue"]})"></i>{esc(f["title"])}'
         + ('<b class="sock" title="a proved theorem makes this family\'s model a Market with a '
-           'pricing measure">socket</b>' if f["socket"] else "") + "</span>"
+           'pricing measure">priced in a market</b>' if f["socket"] else "") + "</span>"
         for f in data["families"]) + '<span><i style="background:var(--tr-bark)"></i>general '\
         'theory</span></div>'
+    public = sum(1 for d in site.idx.decls.values() if d.kind == "theorem" and not d.private)
+    proved = sum(1 for n in nodes_json if n.get("leanOk", True))
     body = f"""<h1>The program tree</h1>
 <p class="lede ink2">The library as a tree: probability and statistics are the roots, positions
-and markets the trunk, and valuation, choice and risk the three limbs. Each proved result sits at its
-measured distance from the trunk, in statements (<code>chain_reach</code>), and the dark wood is what
-its proof uses, so a result the library has not yet connected stands high or floats; colour is the
-model family. The buttons add the gaps (connectors and islands), the future work the open issues
-map out, the field's open problems and the corpus as leaves; click a node to trace its lineage,
-and the panel beside the tree explains every mark.</p>
+and markets the trunk, and valuation, choice and risk the three limbs. On a limb, a result's
+height is its distance from the trunk: one step if its statement mentions a market object, two if
+it mentions an object one step away, and so on. The dark wood is what its proof uses, so a result
+the library has not yet connected stands high or floats beside its limb. Colour is the model
+family. The buttons add the gaps (stated bridges not yet proved, and unconnected clusters), the
+future work the open issues map out, the field's open problems and the corpus as leaves. Click a
+node to trace its lineage; the panel beside the tree explains every mark.</p>
+<p class="ink2"><b>What the numbers count.</b> The library proves {public:,} public theorems.
+{m["theorems"]:,} of them are finance theorems on the limbs; the rest are probability tools in
+the roots, statements about the market itself, and lemmas. The tree draws {proved} of them as
+proved nodes: landmarks, the theorems that join two parts, and the shared definitions they rest
+on. The corpus is {total:,} benchmark entries, each a statement of its own re-proved by citing
+the library; they hang as leaves on the node their proof rests on.</p>
 {strip}
 <div class="t-box" id="tree-box"><div class="t-tools">
 <input id="t-q" type="search" placeholder="Find a node: Itô, VaR, Heston…" aria-label="Find a node" autocomplete="off">
 <button type="button" id="t-grow">Grow it again</button>
-<button type="button" data-layer="gaps" aria-pressed="true" title="connectors (stated, not yet proved) and islands">Gaps</button>
+<button type="button" data-layer="gaps" aria-pressed="true" title="stated bridges not yet proved, and unconnected clusters">Gaps</button>
 <button type="button" data-layer="future" aria-pressed="false" title="open issues, joined to the proved results they build on">Future work</button>
 <button type="button" data-layer="open" aria-pressed="false" title="open problems of the field">Open problems</button>
 <button type="button" data-layer="leaves" aria-pressed="false" title="corpus entries, on the tree and on the ground">Leaves</button>
@@ -800,13 +810,13 @@ def build_joints(site: Site, out: Path, nodes_json: list[dict], frontier: list[d
         names = sorted(r.socket_theorems.get(key, ()))
         waiting = [f for f in frontier if f.get("family") == key and f.get("lean")]
         if names:
-            state = f'<span class="badge">{len(names)} socket{"s" * (len(names) != 1)}</span>'
+            state = f'<span class="badge">{len(names)} pricing theorem{"s" * (len(names) != 1)}</span>'
             inner = "<ul>" + "".join(thm(n) for n in names) + "</ul>"
         else:
-            state = '<span class="badge muted">no socket</span>'
+            state = '<span class="badge muted">not yet priced in a market</span>'
             inner = ""
         if waiting:
-            inner += ('<p class="muted">connectors: ' + ", ".join(
+            inner += ('<p class="muted">stated, not yet proved: ' + ", ".join(
                 f'<code>{esc(f["lean"].removeprefix("MathFinFrontier."))}</code> '
                 f'({esc(f.get("title", f["label"]))})' for f in waiting) + "</p>")
         socket_rows.append(f'<details{" open" if not names else ""}><summary><b>{esc(fam["title"])}'
@@ -834,26 +844,26 @@ def build_joints(site: Site, out: Path, nodes_json: list[dict], frontier: list[d
                         f'theorems</span></summary><ul>'
                         + "".join(thm(n) for n in sorted(names)) + "</ul></details>")
 
-    body = f"""<h1>Sockets and joints</h1>
-<p class="lede ink2">The library is one structure when every model family is a market with a
-pricing measure, its <b>socket</b>, and when the limbs share statements, its <b>joints</b>. Both
-are read from what the theorems state (<code>tools/verify/chain_reach.py</code>), never from
-where a module sits; the <a href="tree.html">tree</a> draws the same measure.</p>
-<h2>Sockets <span class="muted">{len(r.sockets)} of {len(taxonomy.families())} families</span></h2>
-<p class="ink2">A socket is a theorem, in a module of the family, whose statement says that a
+    body = f"""<h1>Markets and bridges</h1>
+<p class="lede ink2">The library is one structure when every model family is priced in a market,
+and when the limbs share statements. Both are read from what the theorems state, never from where
+a module sits; the <a href="tree.html">tree</a> draws the same measure.</p>
+<h2>Families priced in a market <span class="muted">{len(r.sockets)} of
+{len(taxonomy.families())}</span></h2>
+<p class="ink2">A family is priced in a market when a theorem in one of its modules states that a
 measure prices a <code>Market</code> (<code>Market.IsPricingMeasure</code>). A family without one
 has formulas, not yet prices.</p>
 {"".join(socket_rows)}
-<h2>Joints the program names</h2>
+<h2>Bridges the program names</h2>
 <p class="ink2">From <code>docs/taxonomy.toml</code>: the results that join two limbs by design.
-A frontier joint is a stated, unproved connector.</p>
-<div class="scroll-x"><table class="data"><thead><tr><th>limbs</th><th>joint</th><th>declaration</th></tr></thead>
+A frontier bridge is stated but not yet proved.</p>
+<div class="scroll-x"><table class="data"><thead><tr><th>limbs</th><th>bridge</th><th>declaration</th></tr></thead>
 <tbody>{"".join(declared)}</tbody></table></div>
-<h2>Joints as measured</h2>
-<p class="ink2">Every public theorem whose statement mentions objects of two limbs (the joint span
-on the <a href="tree.html">tree</a>), by pair.</p>
+<h2>Bridges as measured</h2>
+<p class="ink2">Every public theorem whose statement mentions objects of two limbs (the
+"across limbs" count on the <a href="tree.html">tree</a>), by pair.</p>
 {"".join(measured)}"""
-    (out / "joints.html").write_text(page("Sockets and joints — MathFin", body, "", "joints.html",
+    (out / "joints.html").write_text(page("Markets and bridges — MathFin", body, "", "joints.html",
                                           "Which model families are markets, and which theorems "
                                           "join two limbs."), encoding="utf-8")
 
