@@ -6,6 +6,7 @@ Authors: Yang Ye
 module
 
 public import MathFin.Models.BlackScholes.Forward
+public import MathFin.Pricing.Market
 public import MathFin.Pricing.NoArbitrageDerivations
 
 /-!
@@ -67,6 +68,7 @@ interest rate differential, MSC 91G20, JEL F31, JEL G13
 namespace MathFin
 
 open MeasureTheory
+open scoped NNReal
 
 /-- Covered-interest-parity FX forward rate for maturity `T`, continuous
 compounding: `F(0, T) = S · exp((r_d - r_f) · T)`. -/
@@ -124,5 +126,28 @@ theorem covered_eq_uncovered_interest_parity {ι : Type*} (s : Finset ι) (q S_T
     F = ∫ ω, bsTerminal S (r_d - r_f) σ T (Z ω) ∂Q :=
   ((covered_interest_parity s q S_T S r_d r_f T F h_dom h_for).mp hF).trans
     (uncovered_interest_parity h).symm
+
+/-- **The market forward priced to zero is the Garman–Kohlhagen expected spot.** In a finite-state
+market `M` with the price `Market.price` under a finite measure `Q`: if the claim paying `1` at `T`
+is worth `e^{−r_d T}`, the claim paying the spot `S_T` is worth `S e^{−r_f T}` (the foreign bond in
+domestic currency), and the forward paying `S_T − F` is worth `0`, then `F` is the expected
+terminal spot `∫ bsTerminal S (r_d − r_f) σ T Z ∂Q'` under any `BSCallHyp` at the drift
+`r_d − r_f`. The prices go through state prices (`Market.price_pay_eq_statePricePricing`) into
+`covered_eq_uncovered_interest_parity`. -/
+theorem market_forward_eq_expected_terminal {Ω : Type*} [MeasurableSpace Ω] [Fintype Ω]
+    [MeasurableSingletonClass Ω] (M : Market Unit Ω) (Q : Measure Ω) [IsFiniteMeasure Q]
+    (T : ℝ≥0) {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {Q' : Measure Ω'}
+    [IsProbabilityMeasure Q'] {S K r_d r_f σ F : ℝ} {Z : Ω' → ℝ}
+    (h_dom : M.price Q (.pay T (.const 1)) = Real.exp (-(r_d * T)))
+    (h_for : M.price Q (.pay T (.obs () T)) = S * Real.exp (-(r_f * T)))
+    (hF : M.price Q (.pay T (.sub (.obs () T) (.const F))) = 0)
+    (h : BSCallHyp Q' S K (r_d - r_f) σ T Z) :
+    F = ∫ ω, bsTerminal S (r_d - r_f) σ T (Z ω) ∂Q' := by
+  rw [Market.price_pay_eq_statePricePricing] at h_dom h_for hF
+  refine covered_eq_uncovered_interest_parity (s := Finset.univ) (q := M.statePrice Q T)
+    (S_T := fun ω ↦ M.asset () T ω) ?_ ?_ ?_ h
+  · simpa [statePricePricing, Contracts.Payoff.eval] using h_dom
+  · simpa [statePricePricing, Contracts.Payoff.eval, Contracts.scenarioAt] using h_for
+  · simpa [statePricePricing, Contracts.Payoff.eval, Contracts.scenarioAt] using hF
 
 end MathFin
