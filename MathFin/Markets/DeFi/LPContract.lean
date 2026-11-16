@@ -199,10 +199,11 @@ theorem price_constantProductPayoff_eq {Ω : Type*} [MeasurableSpace Ω] (M : Ma
     M.price Q (.pay T (constantProductPayoff (x₀ * y₀) T)) =
       ∫ ω, M.deflator T ω * ((x₀ * M.asset () T ω + y₀) *
         (1 + impermanentLoss (M.asset () T ω * x₀ / y₀))) ∂Q := by
-  rw [Market.price, Contract.value_pay]
+  rw [(price_lpPayoff M Q T hS).2 x₀ y₀ hx hy]
   congr 1
   funext ω
-  exact congrArg _ (eval_constantProductPayoff_eq_hodl_mul hx hy T _ (hS ω))
+  exact congrArg _ ((eval_constantProductPayoff hx hy T (scenarioAt M.asset ω) (hS ω)).symm.trans
+    (eval_constantProductPayoff_eq_hodl_mul hx hy T _ (hS ω)))
 
 /-- **Impermanent loss, priced.** In a market with a positive price of X in Y at `T`, under any
 measure `Q` for which the deflated hold value `D_T (x₀ P_T + y₀)` is integrable, the
