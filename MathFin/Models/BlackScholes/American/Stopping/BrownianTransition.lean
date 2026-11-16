@@ -61,6 +61,7 @@ at `x`. -/
 noncomputable def logState (W : ℝ≥0 → Ω → ℝ) (β σ x : ℝ) (t : ℝ≥0) (ω : Ω) : ℝ :=
   x+β*(t : ℝ)+σ*W t ω
 
+omit [IsProbabilityMeasure P] in
 /-- For a pre-Brownian motion `W` and `i ≤ j`, the expectation of `f (x + σ (W_j - W_i))` is the
 heat flow of `f` over the variance `σ² (j - i)`, from `x`. -/
 theorem scaled_increment_heatFlow (hW : IsPreBrownianReal W P) {f : ℝ → ℝ} (hf : Continuous f)
