@@ -81,6 +81,8 @@ by path: `W_u + θ min(u, H)`. -/
 noncomputable def constBthetaPath (W : ℝ≥0 → Ω → ℝ) (θ : ℝ) (H u : ℝ≥0) (ω : Ω) : ℝ :=
   W u ω + θ * ((min u H : ℝ≥0) : ℝ)
 
+omit mΩ in
+/-- The pathwise `B^θ` has continuous paths wherever `W` does. -/
 theorem continuous_constBthetaPath {ω : Ω} (hpaths : Continuous fun t ↦ W t ω) (θ : ℝ)
     (H : ℝ≥0) : Continuous fun u ↦ constBthetaPath W θ H u ω :=
   hpaths.add (continuous_const.mul
