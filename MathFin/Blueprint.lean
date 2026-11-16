@@ -107,6 +107,7 @@ import MathFin.Models.Binomial.MartingaleRepresentation
 import MathFin.Models.Binomial.TrinomialMomentMatching
 import MathFin.Models.BlackScholes.American.Stopping.ActualOptimality
 import MathFin.Models.BlackScholes.American.AmericanPutMarketBound
+import MathFin.Models.BlackScholes.American.AmericanMarketPrice
 import MathFin.Models.Bachelier.BachelierMarket
 import MathFin.Models.BlackScholes.BlackScholesAsian
 import MathFin.Models.BlackScholes.BlackScholesPhysical
@@ -204,6 +205,7 @@ import MathFin.Risk.VaRSuperadditivity
 import MathFin.Risk.ValueAtRisk
 import Architect
 import MathFin.Models.Binomial.BarrierReflection
+import MathFin.Models.Binomial.BarrierMarket
 import MathFin.Pricing.AmericanPrice
 import MathFin.Models.Binomial.AmericanMarket
 import MathFin.Models.Rates.VasicekMarketPDE
@@ -715,8 +717,20 @@ attribute [blueprint "thm:binomial-barrier-reflection"
   are reflected at the first hit onto the paths ending above (André's reflection). The up-and-out
   price is the vanilla price less this, and the running maximum has
   $P(\max \ge a) = 2P(S_n > a) + P(S_n = a)$. The prices are expectations under the symmetric
-  flip law of a payoff of the walk's position, not `Market.price` of a spot-valued contract. -/)]
+  flip law of a payoff of the walk's position; `thm:binomial-knock-in-market` reads them as the
+  binomial market's price of the knock-in contract. -/)]
   MathFin.binomial_upAndIn_reflection
+
+attribute [blueprint "thm:binomial-knock-in-market"
+  (title := "The binomial market prices the knock-in by reflection")
+  (statement := /-- In the binomial market with $u > 1$, $d = u^{-1}$, $S_0 > 0$ and step
+  $h > 0$, the spot after $k$ steps is $S_0u^{W_k}$, $W$ the $\pm1$ walk of the flips. When the
+  risk-neutral up-probability is $1/2$ the symmetric coin flips are a pricing measure, and the
+  market price under them of the up-and-in knock-in on a payoff $f$ of the spot at $T = nh$, with
+  barrier $S_0u^a$ ($a > 0$) watched at the dates $0, h, \dots, nh$, is
+  $e^{-\rho n}(E[g(W_n); W_n \ge a] + E[g(2a - W_n); W_n > a])$, $g(j)$ the payoff at the spot
+  $S_0u^j$: the reflection formula, as `Market.price` of a contract of the payoff language. -/)]
+  MathFin.Contracts.Binomial.price_upAndIn_market
 
 attribute [blueprint "thm:crr-bs-convergence"
   (title := "Cox–Ross–Rubinstein convergence to Black–Scholes")
@@ -919,6 +933,19 @@ attribute [blueprint "thm:american-put-dominates-european"
   rule $T$ is admissible and the physical asset is $Q$-almost surely the risk-neutral asset of
   $B^\theta$. Not proved: strictness, or the superhedging characterization. -/)]
   MathFin.Contracts.BlackScholes.price_europeanPut_le_americanPutValue
+
+attribute [blueprint "thm:bs-american-market"
+  (title := "The Black–Scholes market's American put is the canonical American put")
+  (statement := /-- For $\sigma \ne 0$, $T \le H$, a driving $W$ with continuous paths, $K, r
+  \ge 0$ and $S_0 > 0$, the American price of the put in the Black–Scholes market under the
+  Girsanov pricing measure of $\theta = (m - r)/\sigma$ (the supremum over the stopping rules of
+  the information of $W$ bounded by $T$) is the canonical American put value, and for $K, \sigma
+  > 0$ it is $K$ times `canonicalPrice` at the normalized rate $2r/\sigma^2$, log-moneyness
+  $\log(S_0/K)$ and time $\sigma^2T/2$. The path $W_u + \theta\min(u, H)$ is an adapted
+  modification of $B^\theta$, so a Brownian motion under $Q$; along it the deflated exercise value
+  is the discounted risk-neutral put reward on every path, and the American put value is the same
+  over every Brownian motion with continuous paths. -/)]
+  MathFin.Contracts.BlackScholes.americanPrice_market_europeanPutPayoff_eq_canonicalPrice
 
 attribute [blueprint "thm:american-price-snell-envelope"
   (title := "The binomial American price is the Snell envelope")
