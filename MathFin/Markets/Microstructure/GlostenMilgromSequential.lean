@@ -233,13 +233,6 @@ theorem gmStep_eq {θ p : ℝ} (hθ0 : 0 < θ) (hθ1 : θ < 1) (hp0 : 0 ≤ p) (
     rw [gmLik_self, gmLik_ne p (by decide : false ≠ true)] at hden ⊢
     rw [e, postBuy, div_eq_div_iff hd.ne' hden.ne']; ring
 
-private theorem bayes_step_alg {u v A C : ℝ} (hu : 0 < u) (hv : 0 < v) :
-    u / (u + v) * A / (u / (u + v) * A + (1 - u / (u + v)) * C) = u * A / (u * A + v * C) := by
-  have h1 : u + v ≠ 0 := (add_pos hu hv).ne'
-  have e : 1 - u / (u + v) = v / (u + v) := by
-    rw [eq_div_iff h1, sub_mul, div_mul_cancel₀ _ h1]; ring
-  rw [e, div_mul_eq_mul_div, div_mul_eq_mul_div, ← add_div, div_div_div_cancel_right₀ h1]
-
 /-- **The iterated Bayes updates are the likelihood-ratio posterior**: after a history `l` the
 belief `gmBelief θ p l` is `θ ∏ lik_high / (θ ∏ lik_high + (1 - θ) ∏ lik_low)`. -/
 theorem gmBelief_eq {p : ℝ} (hp0 : 0 ≤ p) (hp1 : p < 1) :
@@ -264,7 +257,15 @@ theorem gmBelief_eq {p : ℝ} (hp0 : 0 ≤ p) (hp1 : p < 1) :
       rw [hs, div_lt_one (add_pos hu hv)]; linarith
     have e : gmBelief θ p (b :: l) = gmBelief (gmStep p θ b) p l := rfl
     rw [e, ih _ h0' h1', hs, List.map_cons, List.map_cons, List.prod_cons, List.prod_cons]
-    exact (bayes_step_alg hu hv).trans (by ring)
+    -- one Bayes step: normalizing by `u + v` and then reweighting is reweighting directly
+    have bayes {u v A C : ℝ} (hu : 0 < u) (hv : 0 < v) :
+        u / (u + v) * A / (u / (u + v) * A + (1 - u / (u + v)) * C)
+          = u * A / (u * A + v * C) := by
+      have h1 : u + v ≠ 0 := (add_pos hu hv).ne'
+      have e : 1 - u / (u + v) = v / (u + v) := by
+        rw [eq_div_iff h1, sub_mul, div_mul_cancel₀ _ h1]; ring
+      rw [e, div_mul_eq_mul_div, div_mul_eq_mul_div, ← add_div, div_div_div_cancel_right₀ h1]
+    exact (bayes hu hv).trans (by ring)
 
 /-! ### Cylinder probabilities and the identification with the conditional expectation -/
 
