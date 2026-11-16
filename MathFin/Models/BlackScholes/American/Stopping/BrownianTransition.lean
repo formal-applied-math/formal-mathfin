@@ -67,14 +67,15 @@ theorem scaled_increment_heatFlow (hW : IsPreBrownianReal W P) {f : ℝ → ℝ}
     (∫ ω, f (x+σ*(W j ω-W i ω)) ∂P) =
       brownianHeatFlow f (σ^2*((j : ℝ)-(i : ℝ))).toNNReal x := by
   have hΔ : 0 ≤ (j : ℝ)-(i : ℝ) := sub_nonneg.mpr (by exact_mod_cast hij)
-  have hv : (NNReal.mk (σ^2) (sq_nonneg σ))*nndist (j : ℝ) (i : ℝ) =
-      (σ^2*((j : ℝ)-(i : ℝ))).toNNReal := by
+  have hv : (NNReal.mk (σ^2) (sq_nonneg σ))*(j-i) = (σ^2*((j : ℝ)-(i : ℝ))).toNNReal := by
     apply NNReal.eq
-    simp only [NNReal.coe_mul,coe_nndist,Real.dist_eq,
-      abs_of_nonneg hΔ,Real.coe_toNNReal _ (mul_nonneg (sq_nonneg σ) hΔ)]
+    rw [NNReal.coe_mul, NNReal.coe_sub hij, Real.coe_toNNReal _ (mul_nonneg (sq_nonneg σ) hΔ)]
     rfl
-  have hl := gaussianReal_const_mul (hW.hasLaw_sub j i) σ
-  simp only [mul_zero,hv] at hl
+  have hl : HasLaw (fun ω ↦ σ*(W j ω-W i ω))
+      (gaussianReal 0 (σ^2*((j : ℝ)-(i : ℝ))).toNNReal) P := by
+    convert gaussianReal_const_mul (hasLaw_increment hW hij) σ using 2
+    · simp
+    · exact hv.symm
   have hm : Continuous (fun y => f (x+y)) := hf.comp (continuous_const.add continuous_id)
   have he := hl.integral_comp hm.aestronglyMeasurable
   have he' := (hasLaw_brownian_eval (t := (σ^2*((j : ℝ)-(i : ℝ))).toNNReal)).integral_comp

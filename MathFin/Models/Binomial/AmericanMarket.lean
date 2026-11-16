@@ -93,7 +93,8 @@ theorem americanPrice_market_europeanPutPayoff (hh : 0 < h) {q : ℝ≥0} (hq : 
           (fun n ↦ (hZ n).integrable hq) _).2.2.1
     _ = ∫ _, americanPrice u d ρ (fun S ↦ max (K - S) 0) ⌊(T : ℝ) / h⌋₊ S₀
           ∂coinFlipMeasure q hq :=
-        integral_congr_ae (americanPrice_eq_snellEnvelope hq hqcrr _ S₀ _)
+        integral_congr_ae
+          (americanPrice_eq_snellEnvelope hq hqcrr (fun S ↦ max (K - S) 0) S₀ ⌊(T : ℝ) / h⌋₊)
     _ = _ := by simp
 
 end MathFin.Contracts.Binomial
