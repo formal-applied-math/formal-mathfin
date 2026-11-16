@@ -3090,6 +3090,13 @@
       "input_hash": "8cde74288a074d11ea2b028f8cd3abf5c3643f5137934dde91496997dcdf5623",
       "verified_at_commit": "f68ab19"
     },
+    "mf-glosten-milgrom-quote-sequence-pricing-measure": {
+      "benchmark_file": "market_microstructure.json",
+      "date": "2026-11-16",
+      "elapsed_s": 2.7,
+      "input_hash": "ccde64978c63159fa2194552d71b627d92a23fdb07e6762426c3b1b5f1756d21",
+      "verified_at_commit": "b8164e6"
+    },
     "mf-glosten-milgrom-spread-positive": {
       "benchmark_file": "market_microstructure.json",
       "date": "2026-11-08",
