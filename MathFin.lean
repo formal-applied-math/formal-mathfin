@@ -393,6 +393,7 @@ import MathFin.Pricing.WienerIntegralForwardMeasure
 import MathFin.Models.BlackScholes.GaussianGirsanov
 import MathFin.Models.Forwards.TriangleArbitrage
 import MathFin.Models.ModelFree.CarrMadan
+import MathFin.Models.ModelFree.CarrMadanMarket
 -- Phase 30 (Bridge A): BSCallHyp / BachelierHyp from IsPreBrownian
 import MathFin.Models.BlackScholes.BSCallHypFromBrownian
 -- Phase 31: Pricing entry points from IsPreBrownian (composite corollaries)

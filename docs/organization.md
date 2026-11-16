@@ -20,6 +20,13 @@ its deflated cash flows. A price depends on the market only through the law of w
 reads (`price_eq_of_map_observation_eq`), so a formula proved in one concrete model is the price
 in every market with that law.
 
+The **fundamental theorems** sit on the trunk as well, because they are what makes the pricing
+measures its object rather than an assumption: no arbitrage is the existence of an equivalent
+martingale measure (`ftap_discrete` on a finite space, by Stiemke's lemma;
+`Market.noArbitrage_iff_exists_isPricingMeasure` for one asset on a general space), and on a
+finite space completeness is its uniqueness (`ftap_two`, whose existence half is the first
+theorem).
+
 ## Three dualities of one set of measures
 
 | primal set | what the duality says | in the library |

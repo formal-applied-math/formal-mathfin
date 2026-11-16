@@ -34,6 +34,14 @@ def test_towers_collapse_to_one_node() -> None:
     assert next(n for n in out if n["l"] == "z")["u"] == ["tower:t"]
 
 
+def test_tower_shows_its_named_summit() -> None:
+    nodes = [_n("x", d="X", m="MathFin.T.A.One"), _n("y", d="Y", m="MathFin.T.A.Two")]
+    pt.assign_hops(nodes, {"X": 4, "Y": 2})
+    tw = [dict(key="t", title="T", modules=["MathFin.T.A"], summit="x")]
+    tower = pt.collapse_towers(nodes, ["MathFin.T.A.One", "MathFin.T.A.Two"], tw)[0]
+    assert tower["d"] == "X" and tower["hp"] == 2
+
+
 def test_islands_ring_unless_reached_or_declared() -> None:
     nodes = [_n("a", d="A", m="MathFin.M.A", b="diffusions"), _n("b", d="B", m="MathFin.M.B", b="model-free"),
              _n("c", d="C", m="MathFin.M.C", b="term"), _n("ok", d="O", m="MathFin.M.O")]

@@ -78,8 +78,9 @@ prices `q ω = (N 0 / N t)(ω) · Q {ω}` (`price_pay_eq_statePricePricing`), no
 ## Main results
 
 * `Market.price_eq_value_of_numeraire`: a deterministic numéraire prices by the deterministic
-  deflator `f 0 / f t`; `Market.price_europeanCall_of_numeraire_eq_one`: with unit numéraire the
-  call is the plain integral of its payoff.
+  deflator `f 0 / f t`; `Market.price_europeanCall_of_numeraire_eq_one` and
+  `Market.price_europeanPut_of_numeraire_eq_one`: with unit numéraire the call and the put are the
+  plain integrals of their payoffs.
 * `Market.stronglyMeasurable_deflator`: the deflator `N 0 / N T` is `𝓕 T`-measurable.
 * `Market.IsPricingMeasure.of_isEquivProbMeasure`: a measure equivalent to `P` everywhere that
   makes the deflated assets frozen martingales is a pricing measure.
@@ -87,7 +88,8 @@ prices `q ω = (N 0 / N t)(ω) · Q {ω}` (`price_pay_eq_statePricePricing`), no
   one.
 * `Market.IsPricingMeasure.exists_isEquivProbMeasure`: a pricing measure agrees on `𝓕 T` with a
   pricing measure equivalent to `P` everywhere.
-* `Market.IsPricingMeasure.price_pay_obs`: a traded asset is priced at its initial price.
+* `Market.IsPricingMeasure.price_pay_obs`: a traded asset is priced at its initial price;
+  `Market.IsPricingMeasure.integrable_asset`: with unit numéraire the asset is `Q`-integrable.
 * `Market.price_eq_of_map_observation_eq`: law invariance of the price.
 * `Market.integral_deflator_mul_priceAt`: the deflated price at `t` averages to the price.
 * `Market.price_pay_withNumeraire`: the price is invariant under the change of numéraire.
@@ -202,6 +204,13 @@ theorem price_europeanCall_of_numeraire_eq_one {M : Market Unit Ω} {T : ℝ≥0
   simp [price, europeanCall, europeanCallPayoff, Contract.value_pay, Payoff.eval, scenarioAt,
     deflator, hN]
 
+/-- With unit numéraire the put is priced by the plain `Q`-integral of its payoff. -/
+theorem price_europeanPut_of_numeraire_eq_one {M : Market Unit Ω} {T : ℝ≥0} {Q : Measure Ω}
+    (hN : ∀ t ω, M.numeraire t ω = 1) (K : ℝ) :
+    M.price Q (europeanPut K T) = ∫ ω, max (K - M.asset () T ω) 0 ∂Q := by
+  simp [price, europeanPut, europeanPutPayoff, Contract.value_pay, Payoff.eval, scenarioAt,
+    deflator, hN]
+
 /-- Each deflated asset is adapted. -/
 theorem stronglyAdapted_deflated (M : Market ι Ω) (i : ι) : StronglyAdapted M.𝓕 (M.deflated i) :=
   fun t ↦
@@ -284,6 +293,13 @@ theorem IsPricingMeasure.price_pay_obs {M : Market ι Ω} {T : ℝ≥0} {Q : Mea
         have hn₀ : n₀ ≠ 0 := (hN₀ ω ▸ M.numeraire_pos 0 ω).ne'
         simp only [deflated, hN₀]
         field_simp
+
+/-- With unit numéraire the asset at `T` is integrable under a pricing measure up to `T`: it is
+its own deflated value, a `Q`-martingale. -/
+theorem IsPricingMeasure.integrable_asset {M : Market Unit Ω} {T : ℝ≥0} {Q : Measure Ω}
+    (hQ : M.IsPricingMeasure T Q) (hN : ∀ t ω, M.numeraire t ω = 1) :
+    Integrable (M.asset () T) Q :=
+  ((hQ.martingale ()).integrable T).congr (.of_forall fun ω ↦ by simp [deflated, hN])
 
 /-- **Law invariance of the price.** A fixed-dated contract has the same price in two markets, on
 two sample spaces, if what it reads has one law: the assets at its observations and the deflator at
