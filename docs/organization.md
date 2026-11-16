@@ -44,24 +44,25 @@ that they stand alone and say how their object reads in a market.
 ## How connected it is today
 
 The library measures connection from statements only (`tools/verify/chain_reach.py`, reported on
-every build): a theorem is near the trunk when its statement mentions an object that some proved
-statement ties to the trunk. Renaming, moving or relabelling changes nothing; only a theorem does.
-On 2026-11-08:
+every build). A finance theorem is one step from the trunk when its statement mentions a market
+object, two steps when it mentions an object one step away, and so on. Renaming, moving or
+relabelling changes nothing; only a theorem does. On 2026-11-16:
 
-- half of the 3,471 finance theorems (R3 49.7%) are within three statement hops of the trunk;
-- **one** of nine model families is proved to be a market with a pricing measure (the binomial
-  tree): Black–Scholes, jumps, rates, credit and the rest value contracts under a hypothesis
-  bundle, not yet as markets;
-- most of choice (58% of its theorems) and a quarter of risk are not connected at all.
+- of the 3,783 finance theorems on the limbs, 70.9% are within three steps of the trunk;
+- each of the nine model families has a theorem stating that a measure prices it as a market
+  (the binomial tree, Black–Scholes, jumps, term structures, default, insurance, volatility,
+  market mechanisms and model-free pricing). Several families still have results stated outside
+  their market: Heston, for one, is a pricing equation, not yet a market;
+- 15% of valuation, a quarter of risk and a third of choice are not connected at all.
 
-The missing links are stated as Lean theorems in the connector library `MathFinFrontier`, each
-carried by an issue: a **socket** proves a model family is a market, a **joint** joins two limbs,
-a **summit** gives a tower one capstone. The program tree draws each as a phantom between the
-parts it would join.
+The missing links are stated as Lean theorems in the bridge library `MathFinFrontier`, each
+carried by an issue: a **market statement** proves a model family is a market, a **bridge
+between limbs** joins two limbs, a **summit** gives a module group one headline result. The
+program tree draws each as a dashed dot between the parts it would join.
 
-## The joints
+## The bridges between limbs
 
-| joint | limbs | status |
+| bridge | limbs | status |
 |---|---|---|
 | Marginal utility at the optimum is a state-price density. | choice, valuation | finite-state case in review (#473) |
 | CAPM and the Hansen–Jagannathan bound follow from the stochastic discount factor. | choice, valuation | in review (#475) |
@@ -124,8 +125,9 @@ the heat kernel is its constant-coefficient case.
   match (statistics modules under `Choice/Performance`, the static no-arbitrage theory under
   `Models/ModelFree`), the taxonomy says where it belongs and the module moves are scheduled.
 - A blueprint node is a landmark (a definition or theorem with a textbook name, at the generality
-  proved), a joint, a socket, or a definition several limbs share. A frontier node is stated and
-  not proved; a frontier node with a `lean` field is a connector, stated in `MathFinFrontier/`.
+  proved), a bridge between limbs, a market statement for a model family, or a definition several
+  limbs share. A frontier node is stated and not proved; a frontier node with a `lean` field is
+  stated in Lean in `MathFinFrontier/`, closed by `sorry`.
 - An issue carries the cell and the family of the blueprint node it advances (`area:`,
   `family:`), written by the blueprint-sync bot.
 - The [documentation site](https://formal-applied-math.github.io/formal-mathfin/) has a page per

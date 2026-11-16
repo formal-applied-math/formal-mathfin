@@ -3114,3 +3114,11 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure
+
+/-- info: 'MathFin.marshallOlkin_firstToDefault_survivalFunction' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.marshallOlkin_firstToDefault_survivalFunction
+
+/-- info: 'MathFin.covariance_eq_integral_copulaOf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.covariance_eq_integral_copulaOf

@@ -171,6 +171,7 @@ import MathFin.Probability.Brownian.SDE.SDEUniqueness
 import MathFin.Probability.Dependence.Copula
 import MathFin.Probability.Dependence.GaussianCopula
 import MathFin.Probability.Dependence.HoeffdingCovariance
+import MathFin.Insurance.SurvivalUnification
 import MathFin.Probability.Dependence.MarshallOlkin
 import MathFin.Probability.Dependence.Sklar
 import MathFin.Probability.Discrete.DoobDecomposition
@@ -404,14 +405,15 @@ attribute [blueprint "thm:sde-strong-solution"
   MathFin.SDEExistence.picardMap_exists_unique_fixedPoint_any_horizon
 
 attribute [blueprint "thm:stochastic-fubini"
-  (title := "Stochastic Fubini theorem")
-  (statement := /-- For a continuous linear map $I$ out of $L^2(m)$, $m$ finite, and a
-  Bochner-integrable family $\varphi : A \to L^2(m)$ with jointly integrable representatives
-  $\psi$, $\int I(\varphi_u)\,d\nu(u) = I(g)$ for any $g \in L^2(m)$ representing $x \mapsto
-  \int \psi_u(x)\,d\nu(u)$; instances at the horizon-$T$ Itô integral and the Wiener integral
-  (`stochFubini_ito`, `stochFubini_wiener`). The swap for the integral as a process in $t$ is
-  the frontier node `thm:stochastic-fubini-process`. -/)]
-  MathFin.StochasticFubini.stochFubini_ofCLM
+  (title := "Stochastic Fubini theorem for the Itô integral")
+  (statement := /-- Let $I_T$ be the Itô integral on $[0,T]$, a linear isometry out of $L^2$ of
+  the predictable measure. For a Bochner-integrable family $\varphi : A \to L^2$ with jointly
+  integrable representatives $\psi$, $\int I_T(\varphi_u)\,d\nu(u) = I_T(g)$ in $L^2(\mu)$ for
+  any $g$ representing $s \mapsto \int \psi_u(s)\,d\nu(u)$. The argument holds for any
+  continuous linear map out of $L^2$ of a finite measure (`stochFubini_ofCLM`), the Wiener
+  integral included (`stochFubini_wiener`). The swap for the integral as a process in $t$ is the
+  frontier node `thm:stochastic-fubini-process`. -/)]
+  MathFin.StochasticFubini.stochFubini_ito
 
 attribute [blueprint "thm:ito-product-rule"
   (title := "Itô's product rule")
@@ -502,10 +504,11 @@ attribute [blueprint "thm:marshall-olkin"
   (title := "Marshall–Olkin first-to-default")
   (statement := /-- With independent exponential clocks $T_0, T_1, T_2$ of positive rates and
   default times $\min(T_0,T_2)$, $\min(T_1,T_2)$ (a common shock $T_2$), the first default
-  survives past $t \ge 0$ with probability $e^{-(\lambda_0+\lambda_1+\lambda_2)t}$. The
-  default-indicator covariance is `covariance_indicator_marshallOlkin`; it is not normalised
-  to a correlation. -/)]
-  MathFin.marshallOlkin_firstToDefault_survival
+  survives past $t \ge 0$ with probability $e^{-(\lambda_0+\lambda_1+\lambda_2)t}$: its
+  survival function is the credit survival curve of the constant hazard
+  $\lambda_0+\lambda_1+\lambda_2$. The default-indicator covariance is
+  `covariance_indicator_marshallOlkin`; it is not normalised to a correlation. -/)]
+  MathFin.marshallOlkin_firstToDefault_survivalFunction
 
 attribute [blueprint "def:gaussian-factor-copula"
   (title := "One-factor Gaussian copula")
@@ -544,8 +547,11 @@ attribute [blueprint "thm:sklar"
 attribute [blueprint "thm:hoeffding-covariance"
   (title := "Hoeffding's covariance identity")
   (statement := /-- For square-integrable $X, Y$, $\mathrm{Cov}(X,Y) = \iint \bigl(P(X \le x,
-  Y \le y) - P(X \le x)P(Y \le y)\bigr)\,dx\,dy$. -/)]
-  MathFin.covariance_eq_integral_cdf
+  Y \le y) - P(X \le x)P(Y \le y)\bigr)\,dx\,dy$ (`covariance_eq_integral_cdf`). When the
+  distribution functions $F_X, F_Y$ are continuous, the joint law $C$ of $(F_X(X), F_Y(Y))$ is a
+  copula (Sklar) and $\mathrm{Cov}(X,Y) = \iint \bigl(C(F_X(x), F_Y(y)) -
+  F_X(x)F_Y(y)\bigr)\,dx\,dy$, with $C(u, v)$ its distribution function. -/)]
+  MathFin.covariance_eq_integral_copulaOf
 
 -- ===== probability/analysis: Analysis and convexity =====
 
