@@ -5050,6 +5050,13 @@
       "input_hash": "cff354f15750a1d372f86639fd98159703a26bf7295b2449d2020577e0faed12",
       "verified_at_commit": "f68ab19"
     },
+    "mf-vasicek-market-price-solves-pde": {
+      "benchmark_file": "interest_rates.json",
+      "date": "2026-11-16",
+      "elapsed_s": 2.8,
+      "input_hash": "e1960a375c785b98927397eec7d8d508dffd77a4c65b9a1615569882629a2fb7",
+      "verified_at_commit": "2612ab0"
+    },
     "mf-vasicek-market-pricing-measure": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-11-16",
