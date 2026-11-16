@@ -36,7 +36,7 @@ theorem).
 | the positions an investor prefers | **choice**: at an optimum, marginal utility is a state-price density, so the investor's optimum defines a pricing measure | for a two-outcome bet (Kelly); the finite-state case is in review |
 
 The three questions (what a position is worth, how dangerous it is, whether to hold it) are the
-limbs; the dualities are where they meet, and the library calls those theorems **joints**. Not
+limbs; the dualities are where they meet, and the library calls those theorems **bridges**. Not
 everything should be forced through a market: a value at risk is a quantile of a law, a Sharpe
 ratio is a ratio of moments, a Markowitz frontier is a quadratic programme. Such cells declare
 that they stand alone and say how their object reads in a market.

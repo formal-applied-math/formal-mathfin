@@ -396,6 +396,10 @@ theorem coinFlipMeasure_eq_markovPathMeasure (q : ℝ≥0) (hq : q ≤ 1) :
     (fun s ⟨path, n, hs⟩ ↦ ?_) (by simp)
   rw [hs, coinFlipMeasure_cylinder, markovPathMeasure_cylinder, prod_range_succ', mul_comm]
   simp only [PMF.bernoulli_apply, cond_eq_ite]
+  congr 1
+  · split_ifs <;> simp [ENNReal.coe_sub]
+  · refine prod_congr rfl fun k _ ↦ ?_
+    split_ifs <;> simp [ENNReal.coe_sub]
 
 section Martingale
 
