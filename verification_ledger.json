@@ -6166,9 +6166,9 @@
     "sc-thm-8.2.5": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-11-16",
-      "elapsed_s": 2.7,
-      "input_hash": "b3bc3a62e76aaf81a66a18aa9b46a1bfb4d61edee30d4a6080717020d33abd09",
-      "verified_at_commit": "74778e1"
+      "elapsed_s": 2.6,
+      "input_hash": "b644fc8a3d527afd627c9d660fce93030d7b7a2d4719d6a193cc8b655488ada6",
+      "verified_at_commit": "494d08f"
     },
     "sc-thm-9.1.1": {
       "benchmark_file": "stochastic_calculus.json",
