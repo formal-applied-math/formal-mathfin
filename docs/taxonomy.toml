@@ -21,7 +21,9 @@
 # [[joint]]  a theorem whose statement involves two limbs: limbs, node (blueprint label), title
 # [[tower]]  a deep module tree the program tree draws as ONE node, labelled with its module
 #            count (an American-put tower of 174 modules must not be 174 leaves):
-#            key, title, modules (prefixes). Its height is the best hop among its members.
+#            key, title, modules (prefixes), optional summit (the member whose statement the
+#            tower shows; else the member of best hop). Its height is the best hop among its
+#            members.
 # [[standalone]]  a cluster that legitimately has no chain to the trunk (a law functional, an
 #            algebraic certificate, a deterministic mechanism, a convex programme): modules
 #            (prefixes), reason (one sentence: why it needs no link), socket (the market-side
@@ -146,15 +148,20 @@ landmarks = ["MathFin.tendsto_empiricalCDF_ae", "MathFin.sharpeRatio"]
 key = "market"
 kind = "trunk"
 title = "Positions and markets"
-blurb = "payoffs and contracts, the market and its numéraire, strategies and their gains, value under a measure"
+blurb = "payoffs and contracts, the market and its numéraire, strategies and their gains, value under a measure, and the fundamental theorems: no arbitrage is the existence of an equivalent martingale measure"
 modules = [
   "MathFin.Contracts", "MathFin.Pricing.Market", "MathFin.Pricing.Numeraire",
   "MathFin.Pricing.Value", "MathFin.Pricing.OneDateMarket",
+  "MathFin.Pricing.EquivMartingaleMeasure", "MathFin.Pricing.FTAP", "MathFin.Pricing.NoArbitrageCore",
+  "MathFin.Pricing.ContinuousMarket", "MathFin.Pricing.DiscreteMarket",
 ]
-subjects = ["MSC 91G15", "JEL G10"]
+subjects = ["MSC 91G15", "MSC 91G20", "JEL G10"]
 landmarks = [
   "MathFin.Market", "MathFin.Market.IsPricingMeasure", "MathFin.Contracts.Contract",
   "MathFin.Contracts.Contract.value", "MathFin.changeOfNumeraire",
+  "MathFin.IsEMM", "MathFin.ftap_discrete", "MathFin.ftap_two",
+  "MathFin.Market.noArbitrage_iff_exists_isPricingMeasure",
+  "MathFin.ContinuousMarket.isEMM_noArbitrageSimple",
 ]
 
 # ───────────────────────────── limbs ─────────────────────────────
@@ -163,18 +170,16 @@ landmarks = [
 key = "valuation"
 kind = "limb"
 title = "Valuation"
-blurb = "what a position is worth: pricing measures, the fundamental theorems, replication, superhedging"
+blurb = "what a position is worth: arbitrage pricing, replication, superhedging, and the models"
 
 [[cell]]
 key = "valuation/general"
-title = "Arbitrage theory"
-blurb = "the fundamental theorems, state prices and the pricing kernel, completeness, superhedging duality, the American price"
-modules = ["MathFin.Pricing"]
+title = "Arbitrage pricing"
+blurb = "what no arbitrage fixes: state prices and the pricing kernel, replication and completeness, superhedging duality, parity, the American price"
+modules = ["MathFin.Pricing", "MathFin.Risk.Superhedging"]
 subjects = ["MSC 91G20", "JEL G12", "JEL G13"]
 landmarks = [
-  "MathFin.IsEMM", "MathFin.ftap_discrete", "MathFin.ftap_two",
-  "MathFin.Market.noArbitrage_iff_exists_isPricingMeasure",
-  "MathFin.ContinuousMarket.isEMM_noArbitrageSimple",
+  "MathFin.superhedgingPrice_isLUB",
   "MathFin.Contracts.value_europeanCall_sub_put_of_martingale",
 ]
 
@@ -233,7 +238,7 @@ modules = ["MathFin.Models.LocalVol", "MathFin.Models.StochVol",
 subjects = ["MSC 91G20"]
 landmarks = [
   "MathFin.Dupire.breedenLitzenberger_weak", "MathFin.Dupire.dupire_pointwise",
-  "MathFin.Heston.hestonProfile_pde",
+  "MathFin.Market.dupire_price_europeanCall", "MathFin.Heston.hestonTransform_pde",
 ]
 
 [[cell]]
@@ -315,7 +320,8 @@ blurb = "Carr–Madan spanning, price bounds, variance swaps, liquidity-pool pos
 modules = ["MathFin.Models.ModelFree", "MathFin.Markets.DeFi"]
 subjects = ["MSC 91G20", "MSC 91G15"]
 landmarks = [
-  "MathFin.carrMadan_spanning", "MathFin.DeFi.v3PositionValue_le_coveredCall",
+  "MathFin.Market.IsPricingMeasure.integral_eq_carrMadan",
+  "MathFin.DeFi.v3PositionValue_le_coveredCall",
   "MathFin.DeFi.price_lpPayoff", "MathFin.DeFi.impermanentLoss_nonpos",
 ]
 
@@ -466,7 +472,7 @@ key = "trees"
 title = "Trees"
 blurb = "finite and binomial randomness"
 hue = "--fam-trees"
-modules = ["MathFin.Models.Binomial", "MathFin.Pricing.DiscreteMarket", "MathFin.Pricing.FTAP"]
+modules = ["MathFin.Models.Binomial", "MathFin.Pricing.DiscreteMarket"]
 
 [[family]]
 key = "diffusions"
@@ -562,11 +568,6 @@ title = "The life annuity-due is a contract value"
 
 [[joint]]
 limbs = ["choice", "risk"]
-node = "thm:log-utility-acceptance"
-title = "Acceptance sets from expected utility"
-
-[[joint]]
-limbs = ["choice", "risk"]
 node = "thm:entropic-risk-certainty-equivalent"
 title = "Entropic risk is the certainty equivalent of exponential utility"
 
@@ -577,8 +578,8 @@ title = "Superhedging duality"
 
 [[joint]]
 limbs = ["valuation", "risk"]
-node = "thm:hedged-position-risk"
-title = "The risk of a hedged position"
+node = "thm:esscher-premium-is-price"
+title = "The Esscher premium is a price"
 
 # ───────────────────────────── towers ─────────────────────────────
 
@@ -586,6 +587,7 @@ title = "The risk of a hedged position"
 key = "american-put"
 title = "American put"
 modules = ["MathFin.Models.BlackScholes.American"]
+summit = "thm:bs-american-market"
 
 [[tower]]
 key = "svi"

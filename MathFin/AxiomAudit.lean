@@ -3086,3 +3086,15 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.kmvPD' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.kmvPD
+
+/-- info: 'MathFin.Heston.hestonTransform_pde' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Heston.hestonTransform_pde
+
+/-- info: 'MathFin.Market.IsPricingMeasure.integral_eq_carrMadan' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Market.IsPricingMeasure.integral_eq_carrMadan
+
+/-- info: 'MathFin.Market.dupire_price_europeanCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Market.dupire_price_europeanCall

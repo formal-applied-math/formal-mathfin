@@ -22,6 +22,7 @@ import MathFin.Models.BlackScholes.BSCallHypFromBrownian
 import MathFin.Pricing.FTAP.ContinuousFTAP
 import MathFin.Pricing.MarketCompleteness
 import MathFin.Models.ModelFree.CarrMadan
+import MathFin.Models.ModelFree.CarrMadanMarket
 import MathFin.Models.BlackScholes.Call
 import MathFin.Models.BlackScholes.PDE
 import MathFin.Models.Binomial.WillowTree
@@ -544,10 +545,18 @@ attribute [blueprint "thm:cone-separation"
   (title := "Separation theorem for closed convex cones")
   (statement := /-- In $\mathbb{R}^\iota$ with $\iota$ finite, if $C$ is a closed convex cone
   and $x_0 \notin C$, there is $p$ with $\langle p, v\rangle \le 0$ for all $v \in C$ and
-  $\langle p, x_0\rangle > 0$. A closed convex cone disjoint from the simplex has a strictly
-  positive separating functional (`exists_pos_separating_of_cone_disjoint_simplex`): the
-  engine of the finite-state fundamental theorem. Finite dimension only. -/)]
+  $\langle p, x_0\rangle > 0$. The engine of the finite-state representation of coherent risk
+  measures. Finite dimension only. -/)]
   MathFin.exists_separating_of_not_mem_cone
+
+attribute [blueprint "thm:stiemke"
+  (title := "Stiemke's lemma")
+  (statement := /-- In $\mathbb{R}^\iota$ with $\iota$ finite, a subspace $V$ containing no
+  probability vector has a strictly positive $q$ with $\langle q, v\rangle = 0$ for every
+  $v \in V$. Derived from the separation of a closed convex cone from the simplex. The
+  engine of the finite-space fundamental theorem: applied to the gains subspace it yields
+  the equivalent martingale measure. -/)]
+  MathFin.exists_pos_dual_of_disjoint_stdSimplex
 
 -- ===== statistics: Statistics =====
 
@@ -611,7 +620,7 @@ attribute [blueprint "thm:one-date-market"
   jump-diffusion and insured markets are its instances. -/)]
   MathFin.Market.isPricingMeasure_oneDate
 
--- ===== valuation/general: Arbitrage theory =====
+-- ===== valuation/general: Arbitrage pricing =====
 
 attribute [blueprint "thm:continuous-ftap"
   (title := "An equivalent martingale measure excludes simple arbitrage in continuous time")
@@ -684,7 +693,7 @@ attribute [blueprint "thm:market-ftap"
   MathFin.Market.noArbitrage_iff_exists_isPricingMeasure_of_finite
 
 attribute [blueprint "thm:dmw-ftap"
-  (title := "Dalang–Morton–Willinger FTAP (one asset)")
+  (title := "Dalang–Morton–Willinger FTAP for one asset on a general space")
   (statement := /-- For one asset on a general probability space, no integrability, no
   finiteness of the space and no measurable-selection hypothesis: a one-asset market has no
   arbitrage when trading at the dates of a grid if and only if the market traded on the grid
@@ -978,11 +987,13 @@ attribute [blueprint "thm:binomial-american-market"
 -- ===== valuation/volatility: Volatility =====
 
 attribute [blueprint "thm:heston-pde"
-  (title := "The Heston transform solves the pricing equation, given the Riccati flows")
-  (statement := /-- If coefficient flows $A, B$ solve the Heston Riccati system, the transform
-  profile built from them satisfies the backward Heston pricing equation $\partial_t\Phi +
-  L\Phi = 0$. Existence of the Riccati solutions is a hypothesis. -/)]
-  MathFin.Heston.hestonProfile_pde
+  (title := "The explicit Heston transform solves the pricing equation")
+  (statement := /-- For $0 < u < 1$ and $\xi \ne 0$, the profile $\Phi(t,x,v) = \exp(A(t) + ux +
+  B(t)v)$ built from the explicit solutions $A(t) = \hat a(T-t)$, $B(t) = \hat b(T-t)$ of the
+  Heston Riccati system satisfies the backward Heston pricing equation $\partial_t\Phi + L\Phi =
+  0$, and $\Phi(T,x,v) = e^{ux}$ (`hestonTransform_terminal`). The Heston variance process is
+  not constructed, so the link from $\Phi$ to a market's prices is not proved. -/)]
+  MathFin.Heston.hestonTransform_pde
 
 attribute [blueprint "thm:dupire-zero-rates"
   (title := "Dupire's formula at zero rates, from the conditional local variance")
@@ -1006,9 +1017,20 @@ attribute [blueprint "thm:market-call-surface"
   of the call at strike $K$ is the call surface $E_Q[(S_T - K)^+]$ of the asset, so for every
   smooth compactly supported $\psi$, $\int \psi''(K)\,\mathrm{price}(\mathrm{call}_K)\,dK =
   E_Q[\psi(S_T)]$: the second strike derivative of the market's call prices is the $Q$-law of
-  $S_T$ as a distribution. Dupire's equation itself is not restated: it needs an Itô-process
-  asset, which a market does not carry. -/)]
+  $S_T$ as a distribution. -/)]
   MathFin.Market.IsPricingMeasure.integral_deriv_deriv_mul_price_europeanCall
+
+attribute [blueprint "thm:market-dupire"
+  (title := "Dupire's formula for a market's call prices, at zero rates")
+  (statement := /-- In a market with unit numéraire whose asset is, under a probability measure
+  $Q$, an Itô process $c + Y$ driven by a Brownian motion, let $\sigma_{loc}(K)^2K^2$ be a
+  continuous version of $E_Q[\delta_t^2 \mid S_t = K]$ on a window of strikes in $[0,\infty)$.
+  If the market's call prices $C(T,K)$ have the strike derivatives $\partial_K C$,
+  $\partial_K^2 C$ and the maturity derivative $\partial_T C$ on the window, then
+  $\sigma_{loc}(K)^2 = 2\,\partial_T C/(K^2\partial_K^2 C)$ wherever $\partial_K^2 C > 0$. The
+  derivatives of the price surface are hypotheses; the local-volatility SDE is not
+  constructed. -/)]
+  MathFin.Market.dupire_price_europeanCall
 
 attribute [blueprint "thm:time-dependent-vol-market"
   (title := "Black–Scholes with a deterministic volatility clock is a market")
@@ -1141,7 +1163,7 @@ attribute [blueprint "thm:bond-immunization"
   MathFin.bondPortfolio_immunization_first_order
 
 attribute [blueprint "thm:vasicek-bond-pde"
-  (title := "Vasicek bond price")
+  (title := "The Vasicek bond price solves the term-structure equation")
   (statement := /-- For $\kappa \ne 0$, $u(\tau, r) = A(\tau)e^{-B(\tau)r}$ with the Vasicek
   loadings satisfies $-\partial_\tau u + \kappa(\theta - r)\partial_r u +
   \tfrac12\sigma^2\partial_r^2 u - ru = 0$. -/)]
@@ -1302,13 +1324,24 @@ attribute [blueprint "thm:lp-position-price"
 -- ===== valuation/model-free: Model-free =====
 
 attribute [blueprint "thm:carr-madan"
-  (title := "Carr–Madan static replication")
+  (title := "Carr–Madan spanning identity")
   (statement := /-- A payoff $f$ twice differentiable on $[L,U]$ with continuous $f''$
   decomposes, at every spot in $[L,U]$, as cash, a forward, and a static book of OTM options
   on the strikes in $[L,U]$ weighted by its convexity $f''$ — one integration by parts plus a
-  positive-part case split. The unbounded-strike form is not proved. The log payoff
+  positive-part case split. A pathwise identity; its reading as prices is
+  `thm:market-carr-madan`. The unbounded-strike form is not proved. The log payoff
   specializes to the variance-swap $1/K^2$ strip. -/)]
   MathFin.carrMadan_spanning
+
+attribute [blueprint "thm:market-carr-madan"
+  (title := "Carr–Madan replication in a market")
+  (statement := /-- In a market with unit numéraire, let $Q$ be a pricing measure up to $T$
+  under which $S_T \in [L,U]$ almost surely. For a payoff $f$ twice differentiable on $[L,U]$
+  with continuous $f''$ and $\kappa \in [L,U]$, $E_Q[f(S_T)] = f(\kappa) + f'(\kappa)(E_Q[S_T]
+  - \kappa) + \int_L^\kappa f''(K)\,P(K)\,dK + \int_\kappa^U f''(K)\,C(K)\,dK$, where $P(K)$ and
+  $C(K)$ are the market's prices of the European put and call at strike $K$ and maturity $T$.
+  Bounded strike range and zero rates only. -/)]
+  MathFin.Market.IsPricingMeasure.integral_eq_carrMadan
 
 attribute [blueprint "thm:market-call-price-normalized"
   (title := "A pricing measure gives a normalised call price function")
@@ -1391,7 +1424,7 @@ attribute [blueprint "thm:markowitz-lagrangian"
   MathFin.portfolioVarN_le_of_lagrangian_FOC
 
 attribute [blueprint "thm:risk-parity-foc"
-  (title := "Risk parity")
+  (title := "The log-barrier first-order condition gives risk parity")
   (statement := /-- If every asset's marginal variance equals $c / w_i$ for one constant $c$
   (the uniform-budget log-barrier first-order condition), all risk contributions are equal. -/)]
   MathFin.isRiskParity_of_uniform_log_barrier_FOC
@@ -1490,7 +1523,7 @@ attribute [blueprint "thm:capm-equilibrium"
 -- ===== choice/dynamic: Dynamic choice =====
 
 attribute [blueprint "thm:kelly-criterion"
-  (title := "Kelly criterion")
+  (title := "The Kelly fraction is a critical point of the growth rate")
   (statement := /-- For win probability $p \in (0,1)$ and odds $b > 0$, the expected log
   growth of one bet, $g(f) = p\log(1+fb) + (1-p)\log(1-f)$, has derivative zero at the Kelly
   fraction $f^* = (pb - q)/b$, $q = 1-p$: the first-order condition of growth-optimal betting.
@@ -1610,7 +1643,7 @@ attribute [blueprint "thm:expected-shortfall-not-elicitable"
   MathFin.not_isElicitable_expectedShortfall
 
 attribute [blueprint "thm:fissler-ziegel"
-  (title := "Value at risk and expected shortfall are jointly elicitable")
+  (title := "A strictly consistent score for value at risk and expected shortfall")
   (statement := /-- For $\alpha \in (0,1)$, in the profit sign convention, the pair of the lower
   $\alpha$-quantile and the lower-tail expected shortfall
   $\alpha^{-1}\int_0^\alpha q_\mu(u)\,du$ is elicitable on the laws with finite mean and a unique
@@ -1713,7 +1746,7 @@ attribute [blueprint "thm:var-not-subadditive"
   MathFin.valueAtRisk_sum_bernoulli_superadditive_iff
 
 attribute [blueprint "thm:euler-allocation"
-  (title := "Euler allocation of value-at-risk")
+  (title := "Euler allocation of Gaussian value at risk")
   (statement := /-- For a Gaussian vector $X$, weights $w$ with positive portfolio variance
   and $\alpha \in (0,1)$, the component VaRs $\mathrm{CVaR}_i = w_i\cdot$marginal VaR$_i$ at
   the multiplier $\Phi^{-1}(\alpha)$ sum to the portfolio VaR in excess of its mean: $\sum_i

@@ -1893,6 +1893,27 @@
       }
     },
     {
+      "id": "mf-carr-madan-market",
+      "name": "Carr-Madan Replication in a Market",
+      "description": "In a market with unit numéraire, under a pricing measure Q with S_T in a bounded range [L,U] almost surely, the Q-expectation of a payoff f(S_T), f twice differentiable on [L,U] with continuous f'', equals f(κ) + f'(κ)(E_Q[S_T] − κ) plus the market's put prices on [L,κ] and call prices on [κ,U], each weighted by f''. Bounded strike range and zero rates only.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.ModelFree.CarrMadanMarket\n\nopen MeasureTheory MathFin MathFin.Contracts Set\nopen scoped NNReal\n\n/-- **Carr–Madan replication in a market.** Under a pricing measure of a market with unit\nnuméraire, with `S_T ∈ [L, U]` almost surely, the expectation of a `C²` payoff of `S_T` is cash,\nthe forward and the market's put and call prices weighted by `f''`. -/\ntheorem carrMadan_market_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {M : Market Unit Ω}\n    {T : ℝ≥0} {Q : Measure Ω} (hQ : M.IsPricingMeasure T Q) (hN : ∀ t x, M.numeraire t x = 1)\n    {f f' f'' : ℝ → ℝ} {L U κ : ℝ} (hLκ : L ≤ κ) (hκU : κ ≤ U)\n    (hS : ∀ᵐ x ∂Q, M.asset () T x ∈ Icc L U)\n    (hf : ∀ t ∈ Icc L U, HasDerivAt f (f' t) t) (hf' : ∀ t ∈ Icc L U, HasDerivAt f' (f'' t) t)\n    (hf'' : ContinuousOn f'' (Icc L U)) :\n    ∫ x, f (M.asset () T x) ∂Q = f κ + f' κ * (∫ x, M.asset () T x ∂Q - κ)\n      + (∫ K in L..κ, f'' K * M.price Q (europeanPut K T))\n      + ∫ K in κ..U, f'' K * M.price Q (europeanCall K T) :=\n  MathFin.Market.IsPricingMeasure.integral_eq_carrMadan hQ hN hLκ hκU hS hf hf' hf''\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Carr-Madan static replication (Carr-Madan 2001), read as prices",
+        "citations": [
+          {
+            "key": "CarrMadan2001"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: the pathwise spanning identity carrMadan_spanning integrated under the pricing measure, with Fubini (option payoffs dominated by |S| + |K|) turning the strike integrals of payoffs into strike integrals of the market's put and call prices. Lives in MathFin/Models/ModelFree/CarrMadanMarket.lean. The strike range is bounded and S_T is assumed to stay in it; the unbounded strip and nonzero rates are not treated."
+      }
+    },
+    {
       "id": "mf-carr-madan-log-contract",
       "name": "Carr-Madan Log-Contract Replication",
       "description": "The log payoff log(S) replicates as a forward plus a strip of OTM options weighted by 1/K-squared -- the variance-swap building block.",

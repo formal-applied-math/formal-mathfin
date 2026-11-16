@@ -94,7 +94,8 @@ this.
   annuity is positive, and the premium and protection legs balance if and only if
   `c = cdsFairSpreadTV r h R T`.
 * `cdsFairSpreadTV_const`: for `T > 0`, the time-varying fair spread at constant intensity `λ`
-  equals `cdsFairSpread λ R`.
+  equals `cdsFairSpread λ R`; `premiumLeg_const_intensity`, `protectionLeg_const_intensity`: at
+  constant intensity the legs are `c · riskyAnnuity` and `(1 − R) · λ · riskyAnnuity`.
 * `cox_mixed_survival`: on the product of a path space with an `Exp(1)` clock, for a measurable
   nonnegative `Λ` and a `τ` with `t < τ ↔ Λ_t < clock`, `P(τ > t) = ∫ e^{−Λ_t} dμ₁`.
 
@@ -582,6 +583,20 @@ theorem cdsFairSpreadTV_const (r lam R T : ℝ) (hT : 0 < T) :
   unfold cdsFairSpreadTV
   rw [cdsAnnuity_eq_riskyAnnuity, cdsLosses_eq_riskyAnnuity_mul,
     show cdsFairSpread lam R = lam * (1 - R) from rfl, div_eq_iff hA]
+  ring
+
+/-- **The premium leg at constant intensity** is the spread times the risky annuity:
+`premiumLeg c r λ T = c · riskyAnnuity r λ T`. The constant-intensity formulas of the first
+section are the legs of the time-varying CDS at a constant intensity. -/
+theorem premiumLeg_const_intensity (c r lam T : ℝ) :
+    premiumLeg c r (fun _ ↦ lam) T = c * riskyAnnuity r lam T := by
+  rw [premiumLeg, cdsAnnuity_eq_riskyAnnuity]
+
+/-- **The protection leg at constant intensity** is the loss rate times the risky annuity:
+`protectionLeg R r λ T = (1 − R) · λ · riskyAnnuity r λ T`. -/
+theorem protectionLeg_const_intensity (R r lam T : ℝ) :
+    protectionLeg R r (fun _ ↦ lam) T = (1 - R) * lam * riskyAnnuity r lam T := by
+  rw [protectionLeg, cdsLosses_eq_riskyAnnuity_mul]
   ring
 
 /-- **Default probability as the integral of the default density**
