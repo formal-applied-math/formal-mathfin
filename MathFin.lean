@@ -68,6 +68,7 @@ import MathFin.Probability.Laws.Esscher
 import MathFin.Probability.Laws.FiniteWeights
 import MathFin.Probability.Gaussian.FeynmanKacHeatEquation
 import MathFin.Probability.Brownian.BrownianMartingale
+import MathFin.Probability.Brownian.BrownianDoobMaximal
 -- Bayes change-of-measure engine + Black–Scholes EMM via an explicit Girsanov density
 import MathFin.Probability.Martingales.ChangeOfMeasure
 import MathFin.Probability.Brownian.ExpMartingaleQBrownian
