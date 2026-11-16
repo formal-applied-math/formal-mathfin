@@ -120,7 +120,7 @@ mechanisms) are a second axis; probability and statistics are the tools.
 
 [`docs/organization.md`](docs/organization.md) gives the account, and says how much of the
 library already hangs from the trunk: the library measures that from its own statements
-(`tools/verify/chain_reach.py`), and states each missing link as a Lean theorem in the connector
+(`tools/verify/chain_reach.py`), and states each missing link as a Lean theorem in the bridge
 library [`MathFinFrontier`](MathFinFrontier.lean), carried by an issue. The module directories,
 the [blueprint](docs/blueprint.md), the issue labels and the
 [documentation site](https://formal-applied-math.github.io/formal-mathfin/) read the structure

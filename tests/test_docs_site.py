@@ -29,7 +29,7 @@ def test_site_builds(tmp_path):
                  f"m/{MODULE}.html", "s/valuation-diffusions.html"):
         assert (out / page).is_file(), page
     joints = (out / "joints.html").read_text(encoding="utf-8")
-    assert "Sockets" in joints and "no socket" in joints  # the fixture prices no market
+    assert "Markets and bridges" in joints and "not yet priced in a market" in joints  # the fixture prices no market
     mod = (out / f"m/{MODULE}.html").read_text(encoding="utf-8")
     assert 'id="MathFin.bsCall_pos"' in mod
     assert 'class="mf" href="../m/MathFin.Models.BlackScholes.Call.html#MathFin.bsCall"' in mod

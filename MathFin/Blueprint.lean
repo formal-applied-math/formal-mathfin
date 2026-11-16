@@ -171,6 +171,7 @@ import MathFin.Probability.Brownian.SDE.SDEUniqueness
 import MathFin.Probability.Dependence.Copula
 import MathFin.Probability.Dependence.GaussianCopula
 import MathFin.Probability.Dependence.HoeffdingCovariance
+import MathFin.Insurance.SurvivalUnification
 import MathFin.Probability.Dependence.MarshallOlkin
 import MathFin.Probability.Dependence.Sklar
 import MathFin.Probability.Discrete.DoobDecomposition
@@ -212,6 +213,12 @@ import MathFin.Models.Binomial.AmericanMarket
 import MathFin.Models.Rates.VasicekMarketPDE
 import MathFin.Choice.Performance.KellyNumeraire
 import MathFin.Risk.JointElicitability
+import MathFin.Models.Binomial.PathMeasure
+import MathFin.Probability.Brownian.BrownianDoobMaximal
+import MathFin.Probability.Discrete.SnellDoobDecomposition
+import MathFin.Models.Credit.HazardCurve
+import MathFin.Probability.Brownian.Ito.StochasticFubiniIto
+import MathFin.Models.StochVol.HestonSmallVolOfVol
 
 /-!
 # The blueprint: a map of the field's landmarks
@@ -269,6 +276,32 @@ attribute [blueprint "thm:markov-path-law"
   recursion of the marginals (Saporito 1.1.2). -/)]
   MathFin.markovPathMeasure_cylinder
 
+attribute [blueprint "def:snell-envelope"
+  (title := "Snell envelope")
+  (statement := /-- For an adapted reward $Z$ on a discrete-time filtered probability space, a
+  horizon $N$ and a set $X$ of exercise dates, the backward recursion $U_N = Z_N$,
+  $U_i = \max(Z_i, E[U_{i+1} \mid \mathcal F_i])$ at $i \in X$ and $U_i = E[U_{i+1} \mid
+  \mathcal F_i]$ otherwise, frozen at $Z_N$ after the horizon. -/)]
+  MathFin.snellEnvelope
+
+attribute [blueprint "thm:snell-doob-decomposition"
+  (title := "Doob decomposition of the Snell envelope")
+  (statement := /-- For an adapted integrable reward $Z$ with horizon $N$ on a discrete-time
+  filtered probability space, the Snell envelope is $U = M + A$ with $M$ a martingale and $A$
+  predictable, $A_0 = 0$, unique up to almost-sure equality (Doob's decomposition). Its
+  compensator $A$ is almost surely nonincreasing and does not move on the continuation region:
+  at a step $i < N$ where $Z_i < U_i$, $A_{i+1} = A_i$ almost surely. -/)]
+  MathFin.snellEnvelope_doob_decomposition
+
+attribute [blueprint "thm:snell-optional-sampling"
+  (title := "Optional sampling under the Snell envelope")
+  (statement := /-- For an adapted integrable reward $Z$ with horizon $N$ and stopping times
+  $\sigma \le \tau \le N$, $E[Z_\tau \mid \mathcal F_\sigma] \le U_\sigma$ almost surely,
+  where $U$ is the Snell envelope: at any stopping time the envelope dominates the conditional
+  expected reward of every later bounded stopping rule. The proof is the optional sampling
+  inequality for the supermartingale $U$. -/)]
+  MathFin.condExp_stoppedValue_le_snellEnvelope
+
 attribute [blueprint "thm:snell-envelope"
   (title := "Snell's theorem: the envelope is the value of optimal stopping")
   (statement := /-- For an adapted integrable reward $Z$ with horizon $N$ on a discrete-time
@@ -307,6 +340,15 @@ attribute [blueprint "thm:doob-maximal-inequality"
   (statement := /-- For a nonnegative submartingale $f$ on a finite measure space, $p > 1$ and
   $n \ge 0$, $\|\max_{k \le n} f_k\|_p \le \tfrac{p}{p-1}\|f_n\|_p$. -/)]
   MeasureTheory.maximal_ineq_Lp
+
+attribute [blueprint "thm:brownian-doob-maximal"
+  (title := "Doob's maximal inequality for Brownian motion on a grid")
+  (statement := /-- For a filtered pre-Brownian motion $B$ and times $t_0 \le t_1 \le \cdots$,
+  $\bigl\|\max_{k \le n} |B_{t_k}|\bigr\|_{L^2} \le 2\sqrt{t_n}$ for every $n$: Doob's $L^2$
+  maximal inequality for the discrete martingale $k \mapsto B_{t_k}$ of the sampled filtration,
+  with $\|B_t\|_{L^2} = \sqrt t$. A finite grid only; the continuous-time supremum is not
+  treated. -/)]
+  ProbabilityTheory.IsFilteredPreBrownian.eLpNorm_runMax_le
 
 attribute [blueprint "thm:martingale-convergence"
   (title := "Convergence of L²-bounded martingales")
@@ -396,14 +438,15 @@ attribute [blueprint "thm:sde-strong-solution"
   MathFin.SDEExistence.picardMap_exists_unique_fixedPoint_any_horizon
 
 attribute [blueprint "thm:stochastic-fubini"
-  (title := "Stochastic Fubini theorem")
-  (statement := /-- For a continuous linear map $I$ out of $L^2(m)$, $m$ finite, and a
-  Bochner-integrable family $\varphi : A \to L^2(m)$ with jointly integrable representatives
-  $\psi$, $\int I(\varphi_u)\,d\nu(u) = I(g)$ for any $g \in L^2(m)$ representing $x \mapsto
-  \int \psi_u(x)\,d\nu(u)$; instances at the horizon-$T$ Itô integral and the Wiener integral
-  (`stochFubini_ito`, `stochFubini_wiener`). The swap for the integral as a process in $t$ is
-  the frontier node `thm:stochastic-fubini-process`. -/)]
-  MathFin.StochasticFubini.stochFubini_ofCLM
+  (title := "Stochastic Fubini theorem for the Itô integral")
+  (statement := /-- Let $I_T$ be the Itô integral on $[0,T]$, a linear isometry out of $L^2$ of
+  the predictable measure. For a Bochner-integrable family $\varphi : A \to L^2$ with jointly
+  integrable representatives $\psi$, $\int I_T(\varphi_u)\,d\nu(u) = I_T(g)$ in $L^2(\mu)$ for
+  any $g$ representing $s \mapsto \int \psi_u(s)\,d\nu(u)$. The argument holds for any
+  continuous linear map out of $L^2$ of a finite measure (`stochFubini_ofCLM`), the Wiener
+  integral included (`stochFubini_wiener`). The swap for the integral as a process in $t$ is the
+  frontier node `thm:stochastic-fubini-process`. -/)]
+  MathFin.StochasticFubini.stochFubini_ito
 
 attribute [blueprint "thm:ito-product-rule"
   (title := "Itô's product rule")
@@ -426,13 +469,16 @@ attribute [blueprint "thm:levy-characterization"
   MathFin.LevyCharacterization.isBrownianReal_of_localMartingale
 
 attribute [blueprint "thm:sde-pathwise-uniqueness"
-  (title := "Pathwise uniqueness for SDEs with Lipschitz coefficients")
-  (statement := /-- Two $L^2$ strong solutions of $dZ = \mu(Z)\,dt + \sigma(Z)\,dB$ with the
-  same initial value and driver, for Lipschitz coefficients, agree almost surely at every time
-  $t \ge 0$ (an $L^2$-energy Grönwall argument). The Itô isometry bound for the
-  stochastic-integral operator is a hypothesis of the structure `IsL2SolutionPair`, supplied
-  by the library's Itô integral (`itoProcessCLM_norm_sq`). -/)]
-  MathFin.IsL2SolutionPair.uniqueness
+  (title := "Pathwise uniqueness for Itô SDEs with Lipschitz coefficients")
+  (statement := /-- Let $B$ be a Brownian motion, $T \ge 0$, $\mu$ Lipschitz and $\sigma$
+  $L_\sigma$-Lipschitz. Two $L^2$ solutions $X, Y$ of $dZ = \mu(Z)\,dt + \sigma(Z)\,dB$ on
+  $[0, T]$ with the same initial value, whose diffusion terms differ at each time $s \le T$
+  almost surely by the Itô integral $\int_0^s (\sigma(\varphi^X_u) - \sigma(\varphi^Y_u))\,dB_u$
+  of predictable $L^2$ processes with $\varphi^X - \varphi^Y = X - Y$, agree almost surely at
+  every $t \in [0, T]$. The Itô isometry on $[0, s]$ gives the diffusion energy bound with
+  constant $L_\sigma^2$, and an $L^2$-energy Grönwall argument
+  (`IsL2SolutionPair.uniqueness`, for any diffusion operator with such a bound) closes it. -/)]
+  MathFin.IsL2SolutionPair.uniqueness_ito
 
 -- ===== probability/jumps: Jumps =====
 
@@ -494,10 +540,11 @@ attribute [blueprint "thm:marshall-olkin"
   (title := "Marshall–Olkin first-to-default")
   (statement := /-- With independent exponential clocks $T_0, T_1, T_2$ of positive rates and
   default times $\min(T_0,T_2)$, $\min(T_1,T_2)$ (a common shock $T_2$), the first default
-  survives past $t \ge 0$ with probability $e^{-(\lambda_0+\lambda_1+\lambda_2)t}$. The
-  default-indicator covariance is `covariance_indicator_marshallOlkin`; it is not normalised
-  to a correlation. -/)]
-  MathFin.marshallOlkin_firstToDefault_survival
+  survives past $t \ge 0$ with probability $e^{-(\lambda_0+\lambda_1+\lambda_2)t}$: its
+  survival function is the credit survival curve of the constant hazard
+  $\lambda_0+\lambda_1+\lambda_2$. The default-indicator covariance is
+  `covariance_indicator_marshallOlkin`; it is not normalised to a correlation. -/)]
+  MathFin.marshallOlkin_firstToDefault_survivalFunction
 
 attribute [blueprint "def:gaussian-factor-copula"
   (title := "One-factor Gaussian copula")
@@ -536,8 +583,11 @@ attribute [blueprint "thm:sklar"
 attribute [blueprint "thm:hoeffding-covariance"
   (title := "Hoeffding's covariance identity")
   (statement := /-- For square-integrable $X, Y$, $\mathrm{Cov}(X,Y) = \iint \bigl(P(X \le x,
-  Y \le y) - P(X \le x)P(Y \le y)\bigr)\,dx\,dy$. -/)]
-  MathFin.covariance_eq_integral_cdf
+  Y \le y) - P(X \le x)P(Y \le y)\bigr)\,dx\,dy$ (`covariance_eq_integral_cdf`). When the
+  distribution functions $F_X, F_Y$ are continuous, the joint law $C$ of $(F_X(X), F_Y(Y))$ is a
+  copula (Sklar) and $\mathrm{Cov}(X,Y) = \iint \bigl(C(F_X(x), F_Y(y)) -
+  F_X(x)F_Y(y)\bigr)\,dx\,dy$, with $C(u, v)$ its distribution function. -/)]
+  MathFin.covariance_eq_integral_copulaOf
 
 -- ===== probability/analysis: Analysis and convexity =====
 
@@ -705,6 +755,22 @@ attribute [blueprint "thm:dmw-ftap"
 
 -- ===== valuation/trees: Trees =====
 
+attribute [blueprint "def:coin-flip-measure"
+  (title := "The coin-flip path law")
+  (statement := /-- The law of independent Bernoulli$(q)$ coin flips on the path space
+  $\{0,1\}^{\mathbb N}$, the infinite product of Bernoulli$(q)$ measures: the probability space
+  of the binomial tree. -/)]
+  MathFin.coinFlipMeasure
+
+attribute [blueprint "thm:coin-flip-markov"
+  (title := "The coin-flip law is a Markov chain's path law")
+  (statement := /-- The infinite product of Bernoulli$(q)$ measures on $\{0,1\}^{\mathbb N}$ is the
+  Ionescu–Tulcea path law of the Markov chain on $\{0,1\}$ whose initial law and every
+  transition row are Bernoulli$(q)$: both give each cylinder $\{X_0 = x_0, \dots, X_n = x_n\}$
+  the probability $\prod_k \mathrm{Bernoulli}(q)(x_k)$, and the cylinders form a $\pi$-system
+  generating the product $\sigma$-algebra. -/)]
+  MathFin.coinFlipMeasure_eq_markovPathMeasure
+
 attribute [blueprint "thm:binomial-representation"
   (title := "Martingale representation in the binomial model")
   (statement := /-- On the binomial tree every martingale is the discrete stochastic integral
@@ -820,13 +886,14 @@ attribute [blueprint "def:gbm"
   MathFin.Contracts.BlackScholes.pathAssets
 
 attribute [blueprint "thm:bs-call"
-  (title := "Black–Scholes call price formula")
-  (statement := /-- Under `BSCallHyp`, that is $S_0, K, \sigma, T > 0$ and $S_T = S_0\exp((r -
-  \tfrac12\sigma^2)T + \sigma\sqrt{T}\,Z)$ with $Z \sim N(0,1)$ under the pricing measure $Q$,
-  the call price is $e^{-rT}E_Q[(S_T - K)^+] = S_0\Phi(d_1) - Ke^{-rT}\Phi(d_2)$. The pricing
-  measure is a hypothesis, not derived from no arbitrage; `BSCallHyp.of_isPreBrownian` builds
-  the hypothesis from a Brownian motion. -/)]
-  MathFin.bs_call_formula
+  (title := "The Black–Scholes price of a call in the Black–Scholes market")
+  (statement := /-- In the Black–Scholes market of a pre-Brownian motion $W$ with $S_0, K, \sigma,
+  T > 0$, the European call struck at $K$ with maturity $T$ is worth $S_0\Phi(d_1) -
+  Ke^{-rT}\Phi(d_2)$ under the Girsanov pricing measure of the market price of risk
+  $\theta = (m - r)/\sigma$ at any horizon $H \ge T$, whatever the physical drift $m$. The
+  computation is the lognormal expectation $e^{-rT}E_Q[(S_T - K)^+]$ (`bs_call_formula`);
+  the uniqueness of the pricing measure is `thm:bs-arbitrage-free-price`. -/)]
+  MathFin.Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure
 
 attribute [blueprint "thm:bs-delta"
   (title := "Black–Scholes Greeks")
@@ -986,6 +1053,23 @@ attribute [blueprint "thm:binomial-american-market"
 
 -- ===== valuation/volatility: Volatility =====
 
+attribute [blueprint "def:heston-transform"
+  (title := "The explicit Heston transform")
+  (statement := /-- For $0 < u < 1$, $\Phi(t, x, v) = \exp(\hat a(T - t) + ux + \hat b(T - t)v)$,
+  where $\hat a, \hat b$ are the closed-form (Möbius and logarithmic) solutions of the Heston
+  Riccati system from $\hat a(0) = \hat b(0) = 0$: the candidate for $E[e^{u\log S_T}]$. -/)]
+  MathFin.Heston.hestonTransform
+
+attribute [blueprint "thm:heston-bs-market-limit"
+  (title := "As vol-of-vol vanishes the Heston transform is a Black–Scholes price")
+  (statement := /-- In the Black–Scholes market with volatility $\sigma > 0$, the Girsanov
+  measure $Q$ of $\theta = (m - r)/\sigma$ at a horizon $H \ge T > 0$ is a pricing measure, and
+  for $\kappa > 0$, $0 < u < 1$ and the variance started at its mean $\theta = v = \sigma^2$, the
+  discounted explicit Heston transform $e^{-rT}\Phi_\xi(0, \log S_0, \sigma^2)$ tends, as the
+  vol-of-vol $\xi \to 0$, to the $Q$-price of the claim paying $S_T^u$ at $T$. A limit of the
+  Riccati-level transform, not of a Heston process. -/)]
+  MathFin.Heston.tendsto_hestonTransform_smallVolOfVol_marketPrice
+
 attribute [blueprint "thm:heston-pde"
   (title := "The explicit Heston transform solves the pricing equation")
   (statement := /-- For $0 < u < 1$ and $\xi \ne 0$, the profile $\Phi(t,x,v) = \exp(A(t) + ux +
@@ -1123,11 +1207,12 @@ attribute [blueprint "thm:schwartz-commodity-futures"
 
 attribute [blueprint "thm:interest-rate-parity"
   (title := "Covered interest-rate parity")
-  (statement := /-- In a finite-state market pricing the domestic bond at $e^{-r_dT}$ and the
-  foreign bond, in domestic currency, at $Se^{-r_fT}$, the forward priced to zero is $F =
-  Se^{(r_d-r_f)T}$; under the Garman–Kohlhagen risk-neutral measure it is also the expected
-  terminal spot. A statement about the pricing measure, not the physical one. -/)]
-  MathFin.covered_eq_uncovered_interest_parity
+  (statement := /-- In a finite-state market whose prices value the domestic bond at
+  $e^{-r_dT}$ and the foreign bond, in domestic currency, at $Se^{-r_fT}$, the forward paying
+  $S_T - F$ at $T$ is worth zero if and only if $F = Se^{(r_d-r_f)T}$. Under the Garman–Kohlhagen
+  lognormal law at drift $r_d - r_f$ this $F$ is also the expected terminal spot
+  (`covered_eq_uncovered_interest_parity`). -/)]
+  MathFin.market_covered_interest_parity
 
 attribute [blueprint "thm:key-rate-duration"
   (title := "Key-rate durations")
@@ -1254,6 +1339,13 @@ attribute [blueprint "thm:credit-portfolio-is-merton"
   covered. -/)]
   MathFin.condDefault_eq_oneFactorPD
 
+attribute [blueprint "def:hazard-survival"
+  (title := "Survival curve of a hazard rate")
+  (statement := /-- The survival probability $S(t) = e^{-\int_0^t h}$ of a deterministic hazard
+  rate $h$: the credit curve that discounts the premium and protection legs of a default swap and
+  the exposure of a counterparty. -/)]
+  MathFin.hazardSurvival
+
 attribute [blueprint "thm:intensity-default-model"
   (title := "Intensity model of default")
   (statement := /-- For a continuous positive hazard rate $h$ with $\int_0^\infty h = \infty$
@@ -1299,8 +1391,18 @@ attribute [blueprint "thm:insured-market"
 attribute [blueprint "thm:impermanent-loss"
   (title := "Impermanent loss")
   (statement := /-- For a price ratio $r \ge 0$, the impermanent loss $2\sqrt r/(1+r) - 1$ of
-  a fee-free constant-product position is at most $0$. -/)]
-  MathFin.DeFi.impermanentLoss_nonpos
+  a fee-free constant-product position is at most $0$ (`impermanentLoss_nonpos`). Priced: in a
+  market with a positive price $P_T$ of $X$ in $Y$, under any measure $Q$ for which the deflated
+  hold value $D_T(x_0P_T + y_0)$ is integrable, the constant-product position of invariant
+  $x_0y_0$ paid at $T$ is worth at most the claim paying the deposit $x_0P_T + y_0$. -/)]
+  MathFin.DeFi.price_constantProductPayoff_le_hodl
+
+attribute [blueprint "def:v3-position-value"
+  (title := "Value of a concentrated-liquidity position")
+  (statement := /-- The value in token $Y$, at square-root price $s$, of a Uniswap v3 position with
+  liquidity $L$ on the square-root price range $[a, b]$: only token $X$ below the range, only
+  token $Y$ above it, and the real reserves of both inside it. -/)]
+  MathFin.DeFi.v3PositionValue
 
 attribute [blueprint "thm:uniswap-v3-covered-call"
   (title := "A concentrated-liquidity position is dominated by a covered call")
@@ -1422,6 +1524,13 @@ attribute [blueprint "thm:markowitz-lagrangian"
   the first-order condition only; necessity is the frontier node
   `thm:markowitz-kkt-necessity`. -/)]
   MathFin.portfolioVarN_le_of_lagrangian_FOC
+
+attribute [blueprint "def:risk-contribution"
+  (title := "Risk contribution")
+  (statement := /-- The contribution $w_i(\Sigma w)_i$ of asset $i$ to the variance $w^\top\Sigma w$
+  of a portfolio $w$ with covariance matrix $\Sigma$; the contributions sum to the variance
+  (`sum_riskContribution_eq_variance`). -/)]
+  MathFin.riskContribution
 
 attribute [blueprint "thm:risk-parity-foc"
   (title := "The log-barrier first-order condition gives risk parity")
@@ -1549,8 +1658,10 @@ attribute [blueprint "thm:glosten-milgrom-quote"
   (title := "Glosten–Milgrom bid and ask quotes")
   (statement := /-- On a finite measure space, the conditional expectation of the asset value
   given the trade direction equals almost everywhere the ask $\int V\,d\mu[\cdot\mid B]$ on
-  the buy event and the bid $\int V\,d\mu[\cdot\mid B^c]$ on the sell event. -/)]
-  MathFin.Execution.condExp_payoff_eq_quote
+  the buy event and the bid $\int V\,d\mu[\cdot\mid B^c]$ on the sell event
+  (`condExp_payoff_eq_quote`). In the sequential model these are the dealer's quotes after the
+  first order: almost surely the ask if it is a buy and the bid if it is a sell. -/)]
+  MathFin.Execution.gmQuote_one_ae_eq_quote
 
 attribute [blueprint "thm:conditional-expectation-pricing-measure"
   (title := "A conditional-expectation process is priced by its own measure")

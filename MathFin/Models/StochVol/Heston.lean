@@ -103,7 +103,8 @@ module is the generator/PDE level only.
   `t ↦ b̂(T − t)`, `t ↦ â(T − t)`.
 * `hestonProfile_pde`: for any `A, B` solving the calendar-time Riccati system,
   `∂_t Φ + LΦ = 0` for `Φ = hestonProfile`.
-* `hestonTransform_pde`, `hestonTransform_terminal`: for `ξ ≠ 0` and `0 < u < 1`, the profile
+* `hestonTransform`: the explicit transform, `hestonProfile` along `â(T − ·)`, `b̂(T − ·)`.
+* `hestonTransform_pde`, `hestonTransform_terminal`: for `ξ ≠ 0` and `0 < u < 1`, the transform
   built from `hestonA` and `hestonBv` solves `∂_t Φ + LΦ = 0` and equals `e^{u x}` at `t = T`.
   The identification of the profile with `E[e^{u log S_T}]` for a Heston process is not
   proved.
@@ -697,28 +698,31 @@ theorem hestonProfile_pde (r κ θ ξ ρ u : ℝ) (A B : ℝ → ℝ)
   rw [htime', hf, hestonGenerator_expAffine2]
   ring
 
+/-- The **explicit Heston transform** `Φ(t, x, v) = exp(â(T − t) + u·x + b̂(T − t)·v)`: the
+`hestonProfile` built from the explicit Riccati closed forms `hestonA`, `hestonBv` run backward
+from the maturity `T`. -/
+noncomputable def hestonTransform (r κ θ ξ ρ u T t x v : ℝ) : ℝ :=
+  hestonProfile u (fun w ↦ hestonA r κ θ ξ ρ u (T - w))
+    (fun w ↦ hestonBv κ ξ ρ u (T - w)) t x v
+
 /-- **The PDE verification (explicit version, the `cirBondPrice_solves_pde` mirror).**
-The transform profile built from the explicit Möbius flows
-`A(t) = â(T − t)`, `B(t) = b̂(T − t)` satisfies `∂_t Φ + L Φ = 0` for every
+The explicit transform `hestonTransform`, built from the Möbius flows
+`A(t) = â(T − t)`, `B(t) = b̂(T − t)`, satisfies `∂_t Φ + L Φ = 0` for every
 `(t, x, v)`. Guards: the strip `0 < u < 1`, `ξ ≠ 0`. -/
 theorem hestonTransform_pde (r κ θ ξ ρ u T : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u)
     (hu2 : u < 1) (t x v : ℝ) :
-    deriv (fun s => hestonProfile u (fun w => hestonA r κ θ ξ ρ u (T - w))
-        (fun w => hestonBv κ ξ ρ u (T - w)) s x v) t
-      + hestonGenerator r κ θ ξ ρ (hestonProfile u (fun w => hestonA r κ θ ξ ρ u (T - w))
-          (fun w => hestonBv κ ξ ρ u (T - w)) t) x v = 0 :=
-  hestonProfile_pde r κ θ ξ ρ u (fun w => hestonA r κ θ ξ ρ u (T - w))
-    (fun w => hestonBv κ ξ ρ u (T - w))
-    (fun s => hasDerivAt_hestonBvCalendar κ ξ ρ u T hξ hu1 hu2 s)
-    (fun s => hasDerivAt_hestonACalendar r κ θ ξ ρ u T hξ hu1 hu2 s) t x v
+    deriv (fun s ↦ hestonTransform r κ θ ξ ρ u T s x v) t
+      + hestonGenerator r κ θ ξ ρ (hestonTransform r κ θ ξ ρ u T t) x v = 0 :=
+  hestonProfile_pde r κ θ ξ ρ u (fun w ↦ hestonA r κ θ ξ ρ u (T - w))
+    (fun w ↦ hestonBv κ ξ ρ u (T - w))
+    (fun s ↦ hasDerivAt_hestonBvCalendar κ ξ ρ u T hξ hu1 hu2 s)
+    (fun s ↦ hasDerivAt_hestonACalendar r κ θ ξ ρ u T hξ hu1 hu2 s) t x v
 
 /-- Terminal condition of the explicit transform: `Φ(T, x, v) = e^{u·x}`
 (`â(0) = 0`, `b̂(0) = 0`). -/
 theorem hestonTransform_terminal (r κ θ ξ ρ u T x v : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u)
     (hu2 : u < 1) :
-    hestonProfile u (fun w => hestonA r κ θ ξ ρ u (T - w))
-        (fun w => hestonBv κ ξ ρ u (T - w)) T x v
-      = Real.exp (u * x) :=
+    hestonTransform r κ θ ξ ρ u T T x v = Real.exp (u * x) :=
   hestonProfile_terminal u _ _ T x v
     (by simpa using hestonA_at_zero r κ θ ξ ρ u (hestonGamma_ne_zero κ ξ ρ u hξ hu1 hu2))
     (by simpa using hestonBv_at_zero κ ξ ρ u)

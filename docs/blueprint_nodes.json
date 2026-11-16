@@ -1,4 +1,4 @@
-[{"uses": ["def:brownian-motion"],
+[{"uses": ["def:brownian-motion", "def:snell-envelope"],
   "title": "Optimal exercise of the American put",
   "text":
   "On Wiener space with strike $1$, volatility $\\sqrt2$, interest rate $k \\ge\n  0$ and dividend yield $h$ (the normalisation of the library's canonical American put), the\n  expected discounted put payoff at the first time the stock reaches the exercise boundary\n  (`brownianUsualActualContactTime`) equals the American put value `canonicalPrice` at spot\n  $e^x$ and horizon $T$, the value being the supremum over stopping rules bounded by $T$\n  (`brownianUsualAmericanPut`): first contact is an optimal exercise rule. For $K, \\sigma >\n  0$, $r > 0$ and $0 \\le q \\le r$ the exercise boundary tends to the strike as time to expiry\n  tends to $0$ (`tendsto_brownianUsualExerciseBoundary_expiry`). Normalised parameters only;\n  the early-exercise premium decomposition and the perpetual case are not proved.",
@@ -36,6 +36,18 @@
   "label": "thm:credit-portfolio-is-merton",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Credit/OneFactorMerton.lean"},
+ {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
+  "title": "Stochastic Fubini theorem for the Itô integral",
+  "text":
+  "Let $I_T$ be the Itô integral on $[0,T]$, a linear isometry out of $L^2$ of\n  the predictable measure. For a Bochner-integrable family $\\varphi : A \\to L^2$ with jointly\n  integrable representatives $\\psi$, $\\int I_T(\\varphi_u)\\,d\\nu(u) = I_T(g)$ in $L^2(\\mu)$ for\n  any $g$ representing $s \\mapsto \\int \\psi_u(s)\\,d\\nu(u)$. The argument holds for any\n  continuous linear map out of $L^2$ of a finite measure (`stochFubini_ofCLM`), the Wiener\n  integral included (`stochFubini_wiener`). The swap for the integral as a process in $t$ is the\n  frontier node `thm:stochastic-fubini-process`.",
+  "name": "MathFin.StochasticFubini.stochFubini_ito",
+  "module": "MathFin.Probability.Brownian.Ito.StochasticFubiniIto",
+  "line": 51,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:stochastic-fubini",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/StochasticFubiniIto.lean"},
  {"uses": ["def:market", "def:pricing-measure", "def:emm"],
   "title": "A conditional-expectation process is priced by its own measure",
   "text":
@@ -80,6 +92,25 @@
   "label": "def:portfolio-variance",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzNAsset.lean"},
+ {"uses":
+  ["def:market",
+   "def:gbm",
+   "def:brownian-motion",
+   "def:contract",
+   "def:pricing-functional",
+   "def:contract-value"],
+  "title": "The American put value dominates the Black–Scholes European price",
+  "text":
+  "For $\\sigma \\ne 0$ and $T \\le H$, at the Girsanov pricing measure $Q$ of\n  $\\theta = (m - r)/\\sigma$ the price of the European put in the Black–Scholes market is at most\n  the American put value (no dividends) of $B^\\theta$ over the natural filtration of $W$, the\n  supremum of expected discounted payoffs over stopping rules bounded by $T$. The deterministic\n  rule $T$ is admissible and the physical asset is $Q$-almost surely the risk-neutral asset of\n  $B^\\theta$. Not proved: strictness, or the superhedging characterization.",
+  "name":
+  "MathFin.Contracts.BlackScholes.price_europeanPut_le_americanPutValue",
+  "module": "MathFin.Models.BlackScholes.American.AmericanPutMarketBound",
+  "line": 55,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:american-put-dominates-european",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/American/AmericanPutMarketBound.lean"},
  {"uses": ["def:merton-default-probability", "def:standard-normal-cdf"],
   "title": "Merton's structural model of default",
   "text":
@@ -106,25 +137,6 @@
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/AnnuityValue.lean"},
  {"uses":
   ["def:market",
-   "def:gbm",
-   "def:brownian-motion",
-   "def:contract",
-   "def:pricing-functional",
-   "def:contract-value"],
-  "title": "The American put value dominates the Black–Scholes European price",
-  "text":
-  "For $\\sigma \\ne 0$ and $T \\le H$, at the Girsanov pricing measure $Q$ of\n  $\\theta = (m - r)/\\sigma$ the price of the European put in the Black–Scholes market is at most\n  the American put value (no dividends) of $B^\\theta$ over the natural filtration of $W$, the\n  supremum of expected discounted payoffs over stopping rules bounded by $T$. The deterministic\n  rule $T$ is admissible and the physical asset is $Q$-almost surely the risk-neutral asset of\n  $B^\\theta$. Not proved: strictness, or the superhedging characterization.",
-  "name":
-  "MathFin.Contracts.BlackScholes.price_europeanPut_le_americanPutValue",
-  "module": "MathFin.Models.BlackScholes.American.AmericanPutMarketBound",
-  "line": 55,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:american-put-dominates-european",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/American/AmericanPutMarketBound.lean"},
- {"uses":
-  ["def:market",
    "def:pricing-measure",
    "def:contract",
    "def:pricing-functional",
@@ -142,18 +154,6 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/ModelFree/CarrMadanMarket.lean"},
  {"uses": [],
-  "title": "Law-invariant risk functional",
-  "text":
-  "A functional $\\rho$ of losses on $(\\Omega, P)$ such that measurable losses\n  with the same law have the same risk. Value-at-risk, expected shortfall, the spectral risk\n  measures, expectiles and the entropic risk measure are law invariant.",
-  "name": "MathFin.IsLawInvariant",
-  "module": "MathFin.Risk.LawInvariance",
-  "line": 58,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:law-invariant",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/LawInvariance.lean"},
- {"uses": [],
   "title": "Geometric Brownian motion",
   "text":
   "The model map of the Black–Scholes market along a Brownian path $B$: the\n  asset at time $u$ is $S_u = S_0 \\exp((r - \\tfrac12\\sigma^2)u + \\sigma B_u)$, the GBM value\n  function $S(t,x) = S_0 \\exp((r - \\tfrac12\\sigma^2)t + \\sigma x)$ at $x = B_u$\n  (`pathAssets_eq_gbmValue`). It is the asset of `BlackScholes.market`, with the physical drift\n  in the place of $r$.",
@@ -165,6 +165,42 @@
   "label": "def:gbm",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/BlackScholesAsian.lean"},
+ {"uses": [],
+  "title": "Law-invariant risk functional",
+  "text":
+  "A functional $\\rho$ of losses on $(\\Omega, P)$ such that measurable losses\n  with the same law have the same risk. Value-at-risk, expected shortfall, the spectral risk\n  measures, expectiles and the entropic risk measure are law invariant.",
+  "name": "MathFin.IsLawInvariant",
+  "module": "MathFin.Risk.LawInvariance",
+  "line": 58,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:law-invariant",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/LawInvariance.lean"},
+ {"uses": ["def:snell-envelope", "thm:doob-decomposition"],
+  "title": "Doob decomposition of the Snell envelope",
+  "text":
+  "For an adapted integrable reward $Z$ with horizon $N$ on a discrete-time\n  filtered probability space, the Snell envelope is $U = M + A$ with $M$ a martingale and $A$\n  predictable, $A_0 = 0$, unique up to almost-sure equality (Doob's decomposition). Its\n  compensator $A$ is almost surely nonincreasing and does not move on the continuation region:\n  at a step $i < N$ where $Z_i < U_i$, $A_{i+1} = A_i$ almost surely.",
+  "name": "MathFin.snellEnvelope_doob_decomposition",
+  "module": "MathFin.Probability.Discrete.SnellDoobDecomposition",
+  "line": 58,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:snell-doob-decomposition",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/SnellDoobDecomposition.lean"},
+ {"uses": [],
+  "title": "Survival curve of a hazard rate",
+  "text":
+  "The survival probability $S(t) = e^{-\\int_0^t h}$ of a deterministic hazard\n  rate $h$: the credit curve that discounts the premium and protection legs of a default swap and\n  the exposure of a counterparty.",
+  "name": "MathFin.hazardSurvival",
+  "module": "MathFin.Models.Credit.HazardCurve",
+  "line": 59,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:hazard-survival",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Credit/HazardCurve.lean"},
  {"uses": [],
   "title": "Equivalent martingale measure",
   "text":
@@ -195,8 +231,7 @@
    "def:pricing-measure",
    "def:contract",
    "def:pricing-functional",
-   "thm:smile-no-arbitrage",
-   "thm:bs-call"],
+   "thm:smile-no-arbitrage"],
   "title": "A butterfly-free SVI slice is a market",
   "text":
   "If the raw SVI parameters satisfy the butterfly-free sign formula, the\n  SVI-smiled Black call is the call price function at maturity one of a market with unit\n  numéraire, a nonnegative asset of forward one and a pricing measure: the formula makes the smile\n  a normalised call price function, and Roper's converse realises it.",
@@ -208,6 +243,18 @@
   "label": "thm:svi-market-realisation",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/ModelFree/SVI/MarketRealisation.lean"},
+ {"uses": ["def:brownian-motion", "thm:doob-maximal-inequality"],
+  "title": "Doob's maximal inequality for Brownian motion on a grid",
+  "text":
+  "For a filtered pre-Brownian motion $B$ and times $t_0 \\le t_1 \\le \\cdots$,\n  $\\bigl\\|\\max_{k \\le n} |B_{t_k}|\\bigr\\|_{L^2} \\le 2\\sqrt{t_n}$ for every $n$: Doob's $L^2$\n  maximal inequality for the discrete martingale $k \\mapsto B_{t_k}$ of the sampled filtration,\n  with $\\|B_t\\|_{L^2} = \\sqrt t$. A finite grid only; the continuous-time supremum is not\n  treated.",
+  "name": "ProbabilityTheory.IsFilteredPreBrownian.eLpNorm_runMax_le",
+  "module": "MathFin.Probability.Brownian.BrownianDoobMaximal",
+  "line": 63,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:brownian-doob-maximal",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/BrownianDoobMaximal.lean"},
  {"uses": [],
   "title": "Standard normal distribution function Φ",
   "text":
@@ -256,7 +303,7 @@
   "label": "def:brownian-motion",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/.lake/packages/mathlib/Mathlib/Probability/BrownianMotion/Basic.lean"},
- {"uses": [],
+ {"uses": ["def:snell-envelope"],
   "title": "Snell's theorem: the envelope is the value of optimal stopping",
   "text":
   "For an adapted integrable reward $Z$ with horizon $N$ on a discrete-time\n  filtered probability space, exercisable at every date, the Snell envelope is a supermartingale,\n  it lies almost surely below every supermartingale that dominates $Z$ up to $N$, and its\n  expectation at $0$ is the supremum of $E[Z_\\tau]$ over the stopping times $\\tau \\le N$,\n  attained by the first time the envelope meets the reward. The minimality holds more generally\n  for a set of exercise dates (`snellEnvelope_le_supermartingale`).",
@@ -268,18 +315,6 @@
   "label": "thm:snell-envelope",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/DiscreteStoppingValue.lean"},
- {"uses": [],
-  "title": "Glosten–Milgrom bid and ask quotes",
-  "text":
-  "On a finite measure space, the conditional expectation of the asset value\n  given the trade direction equals almost everywhere the ask $\\int V\\,d\\mu[\\cdot\\mid B]$ on\n  the buy event and the bid $\\int V\\,d\\mu[\\cdot\\mid B^c]$ on the sell event.",
-  "name": "MathFin.Execution.condExp_payoff_eq_quote",
-  "module": "MathFin.Markets.Microstructure.GlostenMilgromCondExp",
-  "line": 70,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:glosten-milgrom-quote",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/Microstructure/GlostenMilgromCondExp.lean"},
  {"uses": ["def:contract", "def:contract-value"],
   "title": "A CDO tranche leg is a contract",
   "text":
@@ -294,9 +329,11 @@
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Credit/TrancheLeg.lean"},
  {"uses":
   ["def:market",
+   "def:coin-flip-measure",
    "def:american-price",
    "thm:american-price-snell-envelope",
-   "thm:snell-envelope"],
+   "thm:snell-envelope",
+   "def:snell-envelope"],
   "title": "The binomial American put is the market's American price",
   "text":
   "For a step $h > 0$ and the risk-neutral probability $q$ of the tree, the\n  American price of the put in the binomial market under the coin flips, the supremum over all\n  stopping rules of the market of the expected deflated exercise value with horizon $T$, is the\n  Bellman price of the tree with $\\lfloor T/h \\rfloor$ steps: stopping on the grid is discrete\n  stopping, whose value is the Snell envelope's (Snell's theorem).",
@@ -308,26 +345,6 @@
   "label": "thm:binomial-american-market",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/AmericanMarket.lean"},
- {"uses":
-  ["def:market",
-   "def:pricing-measure",
-   "def:contract",
-   "thm:utility-state-price-density",
-   "def:pricing-functional",
-   "def:contract-value"],
-  "title":
-  "Marginal utility is the stochastic discount factor of a complete market",
-  "text":
-  "Let a market on a finite sample space have a pricing measure $Q$ up to $T$, a\n  reference measure $P$ charging every state, deterministic initial prices $\\pi_k$, and terminal\n  payoffs that span the states. At a portfolio $\\theta$ of cost $w_0 > 0$ with terminal wealth\n  $W > 0$, $u'(W) > 0$, and $\\sum_\\omega P\\{\\omega\\}\\,u'(W_\\omega)\\,W^d_\\omega = 0$ for every\n  budget-neutral $d$, there is $\\mu > 0$ with $u'(W_\\omega) = \\mu\\,\\mathrm{sdf}(\\omega)$ for every\n  state $\\omega$. A local maximum of $\\int u(W)\\,dP$ on the budget set is stationary\n  (`exists_deriv_eq_mul_sdf_of_isLocalMaxOn`). Global optimality and incomplete markets are not\n  covered.",
-  "name":
-  "MathFin.Market.IsPricingMeasure.exists_deriv_eq_mul_sdf_of_stationary",
-  "module": "MathFin.Choice.Utility.MarketMarginalUtility",
-  "line": 74,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:marginal-utility-is-sdf",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/MarketMarginalUtility.lean"},
  {"uses": ["def:market"],
   "title": "The American price of an exercise right",
   "text":
@@ -352,6 +369,38 @@
   "label": "def:value-at-risk",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ValueAtRisk.lean"},
+ {"uses":
+  ["def:market",
+   "def:pricing-measure",
+   "def:contract",
+   "thm:utility-state-price-density",
+   "def:pricing-functional",
+   "def:contract-value"],
+  "title":
+  "Marginal utility is the stochastic discount factor of a complete market",
+  "text":
+  "Let a market on a finite sample space have a pricing measure $Q$ up to $T$, a\n  reference measure $P$ charging every state, deterministic initial prices $\\pi_k$, and terminal\n  payoffs that span the states. At a portfolio $\\theta$ of cost $w_0 > 0$ with terminal wealth\n  $W > 0$, $u'(W) > 0$, and $\\sum_\\omega P\\{\\omega\\}\\,u'(W_\\omega)\\,W^d_\\omega = 0$ for every\n  budget-neutral $d$, there is $\\mu > 0$ with $u'(W_\\omega) = \\mu\\,\\mathrm{sdf}(\\omega)$ for every\n  state $\\omega$. A local maximum of $\\int u(W)\\,dP$ on the budget set is stationary\n  (`exists_deriv_eq_mul_sdf_of_isLocalMaxOn`). Global optimality and incomplete markets are not\n  covered.",
+  "name":
+  "MathFin.Market.IsPricingMeasure.exists_deriv_eq_mul_sdf_of_stationary",
+  "module": "MathFin.Choice.Utility.MarketMarginalUtility",
+  "line": 74,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:marginal-utility-is-sdf",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/MarketMarginalUtility.lean"},
+ {"uses": ["def:coin-flip-measure"],
+  "title": "Martingale representation in the binomial model",
+  "text":
+  "On the binomial tree every martingale is the discrete stochastic integral\n  of a *predictable* hedge: $H = \\Delta M/\\Delta S$, fixed before the flip — completeness, the\n  second pillar of the FTAP. The martingale is Mathlib's, for the natural filtration of the\n  flips; the conditional expectation is the node average, so the proof is the one-period delta\n  hedge, telescoped. Equivalently, under $0 < d < e^r < u$ and $S_0 \\ne 0$, every payoff has a\n  predictable strategy whose martingale transform against the discounted spot, added to the\n  tree price, is the discounted payoff on every path (`binomialPrice_replication`).",
+  "name": "MathFin.binomial_martingale_representation",
+  "module": "MathFin.Models.Binomial.MartingaleRepresentation",
+  "line": 75,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:binomial-representation",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/MartingaleRepresentation.lean"},
  {"uses": ["def:standard-normal-cdf"],
   "title": "Merton's default probability",
   "text":
@@ -365,17 +414,29 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Credit/KMVMerton.lean"},
  {"uses": [],
-  "title": "Martingale representation in the binomial model",
+  "title": "Snell envelope",
   "text":
-  "On the binomial tree every martingale is the discrete stochastic integral\n  of a *predictable* hedge: $H = \\Delta M/\\Delta S$, fixed before the flip — completeness, the\n  second pillar of the FTAP. The martingale is Mathlib's, for the natural filtration of the\n  flips; the conditional expectation is the node average, so the proof is the one-period delta\n  hedge, telescoped. Equivalently, under $0 < d < e^r < u$ and $S_0 \\ne 0$, every payoff has a\n  predictable strategy whose martingale transform against the discounted spot, added to the\n  tree price, is the discounted payoff on every path (`binomialPrice_replication`).",
-  "name": "MathFin.binomial_martingale_representation",
-  "module": "MathFin.Models.Binomial.MartingaleRepresentation",
-  "line": 75,
+  "For an adapted reward $Z$ on a discrete-time filtered probability space, a\n  horizon $N$ and a set $X$ of exercise dates, the backward recursion $U_N = Z_N$,\n  $U_i = \\max(Z_i, E[U_{i+1} \\mid \\mathcal F_i])$ at $i \\in X$ and $U_i = E[U_{i+1} \\mid\n  \\mathcal F_i]$ otherwise, frozen at $Z_N$ after the horizon.",
+  "name": "MathFin.snellEnvelope",
+  "module": "MathFin.Probability.Discrete.SnellEnvelope",
+  "line": 76,
   "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:binomial-representation",
+  "latexEnv": "definition",
+  "label": "def:snell-envelope",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/MartingaleRepresentation.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/SnellEnvelope.lean"},
+ {"uses": [],
+  "title": "Risk contribution",
+  "text":
+  "The contribution $w_i(\\Sigma w)_i$ of asset $i$ to the variance $w^\\top\\Sigma w$\n  of a portfolio $w$ with covariance matrix $\\Sigma$; the contributions sum to the variance\n  (`sum_riskContribution_eq_variance`).",
+  "name": "MathFin.riskContribution",
+  "module": "MathFin.Choice.Portfolio.RiskParityFOC",
+  "line": 76,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:risk-contribution",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/RiskParityFOC.lean"},
  {"uses": [],
   "title": "Convex risk measure",
   "text":
@@ -388,42 +449,6 @@
   "label": "def:convex-risk-measure",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Coherent.lean"},
- {"uses": [],
-  "title": "Doob decomposition",
-  "text":
-  "Every adapted integrable process $f$ with values in a Banach space, over a\n  discrete filtration, is $f = M + A$ with $M$ a martingale and $A$ predictable ($A_{n+1}$ is\n  $\\mathcal{F}_n$-measurable) with $A_0 = 0$; the decomposition is unique up to almost-sure\n  equality. It is Mathlib's `martingalePart` and `predictablePart`, packaged as the textbook\n  existence-and-uniqueness statement.",
-  "name": "MathFin.doob_decomposition",
-  "module": "MathFin.Probability.Discrete.DoobDecomposition",
-  "line": 79,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:doob-decomposition",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/DoobDecomposition.lean"},
- {"uses": [],
-  "title": "Sharpe ratio",
-  "text":
-  "$(\\mu - r_f)/\\sigma$, the excess return per unit of volatility, of given\n  numbers $\\mu$, $r_f$, $\\sigma$.",
-  "name": "MathFin.sharpeRatio",
-  "module": "MathFin.Choice.Performance.Ratios",
-  "line": 79,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:sharpe-ratio",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Performance/Ratios.lean"},
- {"uses": ["def:value-at-risk"],
-  "title": "Expected shortfall",
-  "text":
-  "$\\mathrm{ES}_\\alpha(X) = (1-\\alpha)^{-1}\\int_\\alpha^1\n  \\mathrm{VaR}_u(X)\\,du$, the average value-at-risk over the levels above $\\alpha$.",
-  "name": "MathFin.expectedShortfall",
-  "module": "MathFin.Risk.ValueAtRisk",
-  "line": 79,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:expected-shortfall",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ValueAtRisk.lean"},
  {"uses":
   ["def:expected-shortfall",
    "def:coherent-risk-measure",
@@ -443,6 +468,42 @@
   "label": "thm:expected-shortfall-coherent",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/LawInvariance.lean"},
+ {"uses": ["def:value-at-risk"],
+  "title": "Expected shortfall",
+  "text":
+  "$\\mathrm{ES}_\\alpha(X) = (1-\\alpha)^{-1}\\int_\\alpha^1\n  \\mathrm{VaR}_u(X)\\,du$, the average value-at-risk over the levels above $\\alpha$.",
+  "name": "MathFin.expectedShortfall",
+  "module": "MathFin.Risk.ValueAtRisk",
+  "line": 79,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:expected-shortfall",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ValueAtRisk.lean"},
+ {"uses": [],
+  "title": "Sharpe ratio",
+  "text":
+  "$(\\mu - r_f)/\\sigma$, the excess return per unit of volatility, of given\n  numbers $\\mu$, $r_f$, $\\sigma$.",
+  "name": "MathFin.sharpeRatio",
+  "module": "MathFin.Choice.Performance.Ratios",
+  "line": 79,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:sharpe-ratio",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Performance/Ratios.lean"},
+ {"uses": [],
+  "title": "Doob decomposition",
+  "text":
+  "Every adapted integrable process $f$ with values in a Banach space, over a\n  discrete filtration, is $f = M + A$ with $M$ a martingale and $A$ predictable ($A_{n+1}$ is\n  $\\mathcal{F}_n$-measurable) with $A_0 = 0$; the decomposition is unique up to almost-sure\n  equality. It is Mathlib's `martingalePart` and `predictablePart`, packaged as the textbook\n  existence-and-uniqueness statement.",
+  "name": "MathFin.doob_decomposition",
+  "module": "MathFin.Probability.Discrete.DoobDecomposition",
+  "line": 79,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:doob-decomposition",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/DoobDecomposition.lean"},
  {"uses": [],
   "title": "Quantile function",
   "text":
@@ -591,7 +652,7 @@
   "label": "thm:aave-liquidation-kmv",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/LiquidationAsStructuralDefault.lean"},
- {"uses": [],
+ {"uses": ["def:coin-flip-measure", "def:snell-envelope"],
   "title": "The binomial American price is the Snell envelope",
   "text":
   "Under the risk-neutral coin flips, the Snell envelope of the discounted\n  intrinsic value along the spot path, for Mathlib's conditional expectation on the flip\n  filtration with exercise at every date, is almost surely the binomial American price at time\n  zero.",
@@ -606,6 +667,7 @@
  {"uses":
   ["def:market",
    "def:pricing-measure",
+   "def:coin-flip-measure",
    "def:contract",
    "def:pricing-functional",
    "thm:binomial-barrier-reflection",
@@ -676,7 +738,11 @@
   "label": "def:coherent-risk-measure",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Coherent.lean"},
- {"uses": ["def:standard-normal-cdf", "def:contract", "def:contract-value"],
+ {"uses":
+  ["def:standard-normal-cdf",
+   "def:coin-flip-measure",
+   "def:contract",
+   "def:contract-value"],
   "title": "Cox–Ross–Rubinstein convergence to Black–Scholes",
   "text":
   "When every $n$-step tree is arbitrage-free, the binomial call price\n  converges to the Black–Scholes closed form $S_0\\Phi(d_1) - Ke^{-rT}\\Phi(d_2)$: charFun →\n  Lévy continuity → weak convergence, with put–call parity lifting the (bounded) put's\n  convergence to the call.",
@@ -718,18 +784,18 @@
   "label": "thm:forward-measure",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/ForwardMeasure.lean"},
- {"uses": [],
-  "title": "Stochastic Fubini theorem",
+ {"uses": ["def:market", "def:pricing-measure", "thm:one-date-market"],
+  "title": "The insured market and its Esscher pricing measure",
   "text":
-  "For a continuous linear map $I$ out of $L^2(m)$, $m$ finite, and a\n  Bochner-integrable family $\\varphi : A \\to L^2(m)$ with jointly integrable representatives\n  $\\psi$, $\\int I(\\varphi_u)\\,d\\nu(u) = I(g)$ for any $g \\in L^2(m)$ representing $x \\mapsto\n  \\int \\psi_u(x)\\,d\\nu(u)$; instances at the horizon-$T$ Itô integral and the Wiener integral\n  (`stochFubini_ito`, `stochFubini_wiener`). The swap for the integral as a process in $t$ is\n  the frontier node `thm:stochastic-fubini-process`.",
-  "name": "MathFin.StochasticFubini.stochFubini_ofCLM",
-  "module": "MathFin.Probability.Brownian.Ito.StochasticFubini",
+  "The market of a loss $X$ quoted at its Esscher premium until a date $T$ and\n  equal to $X$ at $T$, with the unit numéraire, is priced up to $T$ by the Esscher tilt of the\n  reference probability measure when $e^{hX}$ and $Xe^{hX}$ are integrable; under it the claim\n  paying the loss is worth the Esscher premium. The market is built to quote the loss at that\n  premium, with no dynamics before $T$.",
+  "name": "MathFin.isPricingMeasure_insuredMarket_tilted",
+  "module": "MathFin.Insurance.EsscherPremium",
   "line": 105,
   "leanOk": true,
   "latexEnv": "theorem",
-  "label": "thm:stochastic-fubini",
+  "label": "thm:insured-market",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/StochasticFubini.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/EsscherPremium.lean"},
  {"uses":
   ["def:market",
    "def:pricing-measure",
@@ -747,18 +813,6 @@
   "label": "thm:market-ftap",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/FTAP/MarketFTAP.lean"},
- {"uses": ["def:market", "def:pricing-measure", "thm:one-date-market"],
-  "title": "The insured market and its Esscher pricing measure",
-  "text":
-  "The market of a loss $X$ quoted at its Esscher premium until a date $T$ and\n  equal to $X$ at $T$, with the unit numéraire, is priced up to $T$ by the Esscher tilt of the\n  reference probability measure when $e^{hX}$ and $Xe^{hX}$ are integrable; under it the claim\n  paying the loss is worth the Esscher premium. The market is built to quote the loss at that\n  premium, with no dynamics before $T$.",
-  "name": "MathFin.isPricingMeasure_insuredMarket_tilted",
-  "module": "MathFin.Insurance.EsscherPremium",
-  "line": 105,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:insured-market",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/EsscherPremium.lean"},
  {"uses": [],
   "title": "Duration and immunization",
   "text":
@@ -824,18 +878,6 @@
   "label": "thm:time-dependent-vol-market",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/LocalVol/TimeDependentVol.lean"},
- {"uses": [],
-  "title": "Covered interest-rate parity",
-  "text":
-  "In a finite-state market pricing the domestic bond at $e^{-r_dT}$ and the\n  foreign bond, in domestic currency, at $Se^{-r_fT}$, the forward priced to zero is $F =\n  Se^{(r_d-r_f)T}$; under the Garman–Kohlhagen risk-neutral measure it is also the expected\n  terminal spot. A statement about the pricing measure, not the physical one.",
-  "name": "MathFin.covered_eq_uncovered_interest_parity",
-  "module": "MathFin.Models.Forwards.FxForwardParity",
-  "line": 114,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:interest-rate-parity",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Forwards/FxForwardParity.lean"},
  {"uses":
   ["def:market", "def:pricing-measure", "def:emm", "thm:martingale-transform"],
   "title": "Dalang–Morton–Willinger FTAP for one asset on a general space",
@@ -849,6 +891,18 @@
   "label": "thm:dmw-ftap",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/FTAP/MarketFTAP.lean"},
+ {"uses": [],
+  "title": "Esscher transform of a Gaussian",
+  "text":
+  "Tilting the physical Gaussian by an exponential density yields an\n  equivalent probability measure with shifted mean — static Girsanov, constructed, not\n  assumed.",
+  "name": "MathFin.hasLaw_esscher_tilt",
+  "module": "MathFin.Models.BlackScholes.GaussianGirsanov",
+  "line": 116,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:esscher-tilt",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/GaussianGirsanov.lean"},
  {"uses": ["def:emm", "thm:first-ftap", "thm:martingale-transform"],
   "title": "Second fundamental theorem on a finite space",
   "text":
@@ -862,18 +916,18 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/FTAP/FTAPComplete.lean"},
  {"uses": [],
-  "title": "Esscher transform of a Gaussian",
+  "title": "The coin-flip path law",
   "text":
-  "Tilting the physical Gaussian by an exponential density yields an\n  equivalent probability measure with shifted mean — static Girsanov, constructed, not\n  assumed.",
-  "name": "MathFin.hasLaw_esscher_tilt",
-  "module": "MathFin.Models.BlackScholes.GaussianGirsanov",
-  "line": 116,
+  "The law of independent Bernoulli$(q)$ coin flips on the path space\n  $\\{0,1\\}^{\\mathbb N}$, the infinite product of Bernoulli$(q)$ measures: the probability space\n  of the binomial tree.",
+  "name": "MathFin.coinFlipMeasure",
+  "module": "MathFin.Models.Binomial.PathMeasure",
+  "line": 119,
   "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:esscher-tilt",
+  "latexEnv": "definition",
+  "label": "def:coin-flip-measure",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/GaussianGirsanov.lean"},
- {"uses": [],
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/PathMeasure.lean"},
+ {"uses": ["def:risk-contribution"],
   "title": "The log-barrier first-order condition gives risk parity",
   "text":
   "If every asset's marginal variance equals $c / w_i$ for one constant $c$\n  (the uniform-budget log-barrier first-order condition), all risk contributions are equal.",
@@ -909,6 +963,18 @@
   "label": "def:market",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Market.lean"},
+ {"uses": ["def:snell-envelope", "thm:optional-sampling"],
+  "title": "Optional sampling under the Snell envelope",
+  "text":
+  "For an adapted integrable reward $Z$ with horizon $N$ and stopping times\n  $\\sigma \\le \\tau \\le N$, $E[Z_\\tau \\mid \\mathcal F_\\sigma] \\le U_\\sigma$ almost surely,\n  where $U$ is the Snell envelope: at any stopping time the envelope dominates the conditional\n  expected reward of every later bounded stopping rule. The proof is the optional sampling\n  inequality for the supermartingale $U$.",
+  "name": "MathFin.condExp_stoppedValue_le_snellEnvelope",
+  "module": "MathFin.Probability.Discrete.SnellDoobDecomposition",
+  "line": 126,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:snell-optional-sampling",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/SnellDoobDecomposition.lean"},
  {"uses": ["def:contract"],
   "title": "Value of a contract",
   "text":
@@ -948,6 +1014,7 @@
  {"uses":
   ["def:value-at-risk",
    "def:expected-shortfall",
+   "def:coin-flip-measure",
    "def:contract",
    "def:contract-value",
    "def:quantile",
@@ -963,6 +1030,22 @@
   "label": "thm:hedged-position-risk",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ContractRisk.lean"},
+ {"uses":
+  ["def:market",
+   "def:contract",
+   "def:pricing-functional",
+   "def:contract-value"],
+  "title": "Covered interest-rate parity",
+  "text":
+  "In a finite-state market whose prices value the domestic bond at\n  $e^{-r_dT}$ and the foreign bond, in domestic currency, at $Se^{-r_fT}$, the forward paying\n  $S_T - F$ at $T$ is worth zero if and only if $F = Se^{(r_d-r_f)T}$. Under the Garman–Kohlhagen\n  lognormal law at drift $r_d - r_f$ this $F$ is also the expected terminal spot\n  (`covered_eq_uncovered_interest_parity`).",
+  "name": "MathFin.market_covered_interest_parity",
+  "module": "MathFin.Models.Forwards.FxForwardParity",
+  "line": 132,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:interest-rate-parity",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Forwards/FxForwardParity.lean"},
  {"uses": [],
   "title": "Expected utility",
   "text":
@@ -987,22 +1070,6 @@
   "label": "thm:cone-separation",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Duality/ConvexDuality.lean"},
- {"uses":
-  ["def:market",
-   "def:contract",
-   "def:pricing-functional",
-   "def:contract-value"],
-  "title": "An AMM liquidity position is a contract",
-  "text":
-  "In a market with positive price of $X$ in $Y$ at $T$, under any measure $Q$, the\n  concentrated-liquidity payoff (a payoff in $\\sqrt P$) paid at $T$ is worth $\\int D_T\\,\n  v_3(\\sqrt{P_T})\\,dQ$ for the position value $v_3$ of Uniswap v3, and the constant-product\n  payoff of invariant $x_0y_0$ is worth the discounted expectation of the rebalanced reserves\n  valued at $P_T$. It is a price in the sense of a pricing measure when $Q$ is one; its closed\n  form under Black--Scholes is not stated.",
-  "name": "MathFin.DeFi.price_lpPayoff",
-  "module": "MathFin.Markets.DeFi.LPContract",
-  "line": 135,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:lp-position-price",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/LPContract.lean"},
  {"uses": [],
   "title": "The superhedging price dominates every martingale price",
   "text":
@@ -1040,18 +1107,6 @@
   "label": "thm:change-of-numeraire",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Numeraire.lean"},
- {"uses": ["def:market", "def:pricing-measure", "thm:marginal-utility-is-sdf"],
-  "title": "A stationary log portfolio is the numéraire portfolio, one period",
-  "text":
-  "In the market of `thm:marginal-utility-is-sdf` with $u = \\log$, a stationary\n  portfolio of cost $w_0 > 0$ and wealth $W > 0$ has $\\mathrm{sdf}(\\omega) = w_0 / W_\\omega$ in\n  every state, so $E_P[S_k(T)/W] = S_k(0)/w_0$ for every asset $k$\n  (`integral_div_logOptimal_mul`): prices\n  deflated by that wealth are $P$-martingales over the one period. The continuous-time\n  statement is `thm:log-optimal-numeraire`.",
-  "name": "MathFin.Market.IsPricingMeasure.sdf_eq_div_of_logOptimal",
-  "module": "MathFin.Choice.Utility.MarketMarginalUtility",
-  "line": 138,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:log-optimal-numeraire-one-period",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/MarketMarginalUtility.lean"},
  {"uses": [],
   "title": "Strong law for the empirical distribution function",
   "text":
@@ -1064,6 +1119,35 @@
   "label": "thm:empirical-cdf-strong-law",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Laws/QuantileConvergence.lean"},
+ {"uses": ["def:market", "def:pricing-measure", "thm:marginal-utility-is-sdf"],
+  "title": "A stationary log portfolio is the numéraire portfolio, one period",
+  "text":
+  "In the market of `thm:marginal-utility-is-sdf` with $u = \\log$, a stationary\n  portfolio of cost $w_0 > 0$ and wealth $W > 0$ has $\\mathrm{sdf}(\\omega) = w_0 / W_\\omega$ in\n  every state, so $E_P[S_k(T)/W] = S_k(0)/w_0$ for every asset $k$\n  (`integral_div_logOptimal_mul`): prices\n  deflated by that wealth are $P$-martingales over the one period. The continuous-time\n  statement is `thm:log-optimal-numeraire`.",
+  "name": "MathFin.Market.IsPricingMeasure.sdf_eq_div_of_logOptimal",
+  "module": "MathFin.Choice.Utility.MarketMarginalUtility",
+  "line": 138,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:log-optimal-numeraire-one-period",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/MarketMarginalUtility.lean"},
+ {"uses":
+  ["def:market",
+   "def:contract",
+   "def:pricing-functional",
+   "def:v3-position-value",
+   "def:contract-value"],
+  "title": "An AMM liquidity position is a contract",
+  "text":
+  "In a market with positive price of $X$ in $Y$ at $T$, under any measure $Q$, the\n  concentrated-liquidity payoff (a payoff in $\\sqrt P$) paid at $T$ is worth $\\int D_T\\,\n  v_3(\\sqrt{P_T})\\,dQ$ for the position value $v_3$ of Uniswap v3, and the constant-product\n  payoff of invariant $x_0y_0$ is worth the discounted expectation of the rebalanced reserves\n  valued at $P_T$. It is a price in the sense of a pricing measure when $Q$ is one; its closed\n  form under Black--Scholes is not stated.",
+  "name": "MathFin.DeFi.price_lpPayoff",
+  "module": "MathFin.Markets.DeFi.LPContract",
+  "line": 140,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:lp-position-price",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/LPContract.lean"},
  {"uses": ["def:expected-utility"],
   "title": "Expected utility is the integral against the lottery",
   "text":
@@ -1076,6 +1160,25 @@
   "label": "thm:expected-utility-integral",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/VonNeumannMorgenstern.lean"},
+ {"uses":
+  ["def:market",
+   "def:standard-normal-cdf",
+   "def:contract",
+   "def:pricing-functional",
+   "thm:jump-diffusion-mixing",
+   "def:contract-value",
+   "thm:compound-poisson-mgf"],
+  "title": "Jump-diffusion prices under the Esscher pricing measure",
+  "text":
+  "In the one-date jump-diffusion market, under the Esscher pricing measure the\n  European call of strike $K > 0$ is worth Merton's formula for the tilted characteristics: the\n  $\\mathrm{Poisson}(\\Lambda m(\\theta)\\tau)$ mixture of Black--Scholes prices over jumps of law\n  $\\nu_\\theta$, for $\\sigma > 0$ and the exponential moments of the Esscher parameter.",
+  "name": "MathFin.JumpDiffusion.price_europeanCall_esscher",
+  "module": "MathFin.Models.Jumps.Market",
+  "line": 144,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:jump-diffusion-price",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Jumps/Market.lean"},
  {"uses":
   ["def:market",
    "def:brownian-motion",
@@ -1094,26 +1197,6 @@
   "label": "thm:bachelier-call",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Bachelier/BachelierMarket.lean"},
- {"uses":
-  ["def:market",
-   "def:standard-normal-cdf",
-   "def:contract",
-   "def:pricing-functional",
-   "thm:jump-diffusion-mixing",
-   "thm:bs-call",
-   "def:contract-value",
-   "thm:compound-poisson-mgf"],
-  "title": "Jump-diffusion prices under the Esscher pricing measure",
-  "text":
-  "In the one-date jump-diffusion market, under the Esscher pricing measure the\n  European call of strike $K > 0$ is worth Merton's formula for the tilted characteristics: the\n  $\\mathrm{Poisson}(\\Lambda m(\\theta)\\tau)$ mixture of Black--Scholes prices over jumps of law\n  $\\nu_\\theta$, for $\\sigma > 0$ and the exponential moments of the Esscher parameter.",
-  "name": "MathFin.JumpDiffusion.price_europeanCall_esscher",
-  "module": "MathFin.Models.Jumps.Market",
-  "line": 144,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:jump-diffusion-price",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Jumps/Market.lean"},
  {"uses":
   ["def:market",
    "def:gbm",
@@ -1156,7 +1239,7 @@
   "label": "def:pricing-measure",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Market.lean"},
- {"uses": ["def:standard-normal-cdf"],
+ {"uses": ["def:standard-normal-cdf", "def:hazard-survival"],
   "title": "Credit valuation adjustment",
   "text":
   "With exposure $V_s = m(s) + \\sigma(s)\\sqrt s\\,Z$, $Z \\sim N(0,1)$,\n  independent of a default time with continuous hazard $h \\ge 0$ (no wrong-way risk), and $D$,\n  $m$, $\\sigma$ measurable and bounded with $\\sigma > 0$: $\\mathrm{CVA} = \\mathrm{LGD}\\int_0^T\n  D(s)\\,[m(s)\\Phi(d_s) + \\sigma(s)\\sqrt s\\, \\varphi(d_s)]\\,h(s)Q(s)\\,ds$, $d_s =\n  m(s)/(\\sigma(s)\\sqrt s)$. Only the marginal laws of the exposure enter; no exposure dynamics\n  are modelled.",
@@ -1175,7 +1258,8 @@
    "def:pricing-measure",
    "def:american-price",
    "thm:girsanov-brownian-characterisation",
-   "thm:black-scholes-market"],
+   "thm:black-scholes-market",
+   "def:snell-envelope"],
   "title":
   "The Black–Scholes market's American put is the canonical American put",
   "text":
@@ -1293,30 +1377,6 @@
   "label": "thm:rockafellar-uryasev",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ExpectedShortfall.lean"},
- {"uses": [],
-  "title": "CAPM from a discount factor affine in the market return",
-  "text":
-  "If $m = a - bR_m$ prices a return $R_i$, the market return $R_m$ and the\n  riskless return $r_f$ ($E[mR_i] = E[mR_m] = 1$, $r_f E[m] = 1$) and\n  $\\operatorname{Var}R_m \\ne 0$, then $E[R_i] = r_f + \\beta_i (E[R_m] - r_f)$ with\n  $\\beta_i = \\operatorname{Cov}(R_i, R_m) / \\operatorname{Var} R_m$.",
-  "name": "MathFin.capm_of_affine_discountFactor",
-  "module": "MathFin.Choice.Portfolio.StochasticDiscountFactor",
-  "line": 164,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:sdf-capm-hansen-jagannathan",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/StochasticDiscountFactor.lean"},
- {"uses": [],
-  "title": "The Kelly fraction is a critical point of the growth rate",
-  "text":
-  "For win probability $p \\in (0,1)$ and odds $b > 0$, the expected log\n  growth of one bet, $g(f) = p\\log(1+fb) + (1-p)\\log(1-f)$, has derivative zero at the Kelly\n  fraction $f^* = (pb - q)/b$, $q = 1-p$: the first-order condition of growth-optimal betting.\n  Over $n$ repeated bets the growth is $n\\,g$, with the same stationary fraction\n  (`kelly_n_periods_deriv_at_kelly`). First order only: global optimality and the\n  continuous-time case are not proved (`thm:log-optimal-numeraire`).",
-  "name": "MathFin.kellyGrowth_deriv_at_kelly",
-  "module": "MathFin.Choice.Performance.Ratios",
-  "line": 164,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:kelly-criterion",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Performance/Ratios.lean"},
  {"uses":
   ["def:market",
    "def:contract",
@@ -1333,6 +1393,30 @@
   "label": "thm:zero-coupon-bond-price",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicMarket.lean"},
+ {"uses": [],
+  "title": "The Kelly fraction is a critical point of the growth rate",
+  "text":
+  "For win probability $p \\in (0,1)$ and odds $b > 0$, the expected log\n  growth of one bet, $g(f) = p\\log(1+fb) + (1-p)\\log(1-f)$, has derivative zero at the Kelly\n  fraction $f^* = (pb - q)/b$, $q = 1-p$: the first-order condition of growth-optimal betting.\n  Over $n$ repeated bets the growth is $n\\,g$, with the same stationary fraction\n  (`kelly_n_periods_deriv_at_kelly`). First order only: global optimality and the\n  continuous-time case are not proved (`thm:log-optimal-numeraire`).",
+  "name": "MathFin.kellyGrowth_deriv_at_kelly",
+  "module": "MathFin.Choice.Performance.Ratios",
+  "line": 164,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:kelly-criterion",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Performance/Ratios.lean"},
+ {"uses": [],
+  "title": "CAPM from a discount factor affine in the market return",
+  "text":
+  "If $m = a - bR_m$ prices a return $R_i$, the market return $R_m$ and the\n  riskless return $r_f$ ($E[mR_i] = E[mR_m] = 1$, $r_f E[m] = 1$) and\n  $\\operatorname{Var}R_m \\ne 0$, then $E[R_i] = r_f + \\beta_i (E[R_m] - r_f)$ with\n  $\\beta_i = \\operatorname{Cov}(R_i, R_m) / \\operatorname{Var} R_m$.",
+  "name": "MathFin.capm_of_affine_discountFactor",
+  "module": "MathFin.Choice.Portfolio.StochasticDiscountFactor",
+  "line": 164,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:sdf-capm-hansen-jagannathan",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/StochasticDiscountFactor.lean"},
  {"uses": [],
   "title": "Contract",
   "text":
@@ -1369,6 +1453,18 @@
   "label": "thm:vasicek-bond-pde",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/AffineTermStructurePDE.lean"},
+ {"uses": ["def:survival-function", "def:hazard-survival"],
+  "title": "Marshall–Olkin first-to-default",
+  "text":
+  "With independent exponential clocks $T_0, T_1, T_2$ of positive rates and\n  default times $\\min(T_0,T_2)$, $\\min(T_1,T_2)$ (a common shock $T_2$), the first default\n  survives past $t \\ge 0$ with probability $e^{-(\\lambda_0+\\lambda_1+\\lambda_2)t}$: its\n  survival function is the credit survival curve of the constant hazard\n  $\\lambda_0+\\lambda_1+\\lambda_2$. The default-indicator covariance is\n  `covariance_indicator_marshallOlkin`; it is not normalised to a correlation.",
+  "name": "MathFin.marshallOlkin_firstToDefault_survivalFunction",
+  "module": "MathFin.Insurance.SurvivalUnification",
+  "line": 171,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:marshall-olkin",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/SurvivalUnification.lean"},
  {"uses":
   ["def:gbm", "def:brownian-motion", "def:contract", "def:contract-value"],
   "title": "Black–Scholes pricing under the physical measure",
@@ -1408,6 +1504,28 @@
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/StatePriceDensity.lean"},
  {"uses":
   ["def:market",
+   "def:gbm",
+   "def:brownian-motion",
+   "def:standard-normal-cdf",
+   "def:contract",
+   "def:pricing-functional",
+   "thm:physical-measure-pricing",
+   "thm:girsanov-brownian-characterisation",
+   "def:contract-value"],
+  "title": "The Black–Scholes price of a call in the Black–Scholes market",
+  "text":
+  "In the Black–Scholes market of a pre-Brownian motion $W$ with $S_0, K, \\sigma,\n  T > 0$, the European call struck at $K$ with maturity $T$ is worth $S_0\\Phi(d_1) -\n  Ke^{-rT}\\Phi(d_2)$ under the Girsanov pricing measure of the market price of risk\n  $\\theta = (m - r)/\\sigma$ at any horizon $H \\ge T$, whatever the physical drift $m$. The\n  computation is the lognormal expectation $e^{-rT}E_Q[(S_T - K)^+]$ (`bs_call_formula`);\n  the uniqueness of the pricing measure is `thm:bs-arbitrage-free-price`.",
+  "name":
+  "MathFin.Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure",
+  "module": "MathFin.Models.BlackScholes.Market",
+  "line": 176,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:bs-call",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/Market.lean"},
+ {"uses":
+  ["def:market",
    "def:pricing-measure",
    "thm:sdf-capm-hansen-jagannathan",
    "def:contract",
@@ -1424,22 +1542,11 @@
   "label": "thm:market-sdf-capm",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarketSDF.lean"},
- {"uses": ["def:market", "def:brownian-motion", "def:pricing-measure"],
-  "title": "The Vasicek bond market",
-  "text":
-  "For a pre-Brownian motion $B$, the market of the bank account\n  $N_t = \\exp\\int_0^t r$ of the Vasicek short rate as numéraire and the zero-coupon bond of\n  maturity $T$ as the one asset, under the natural filtration of $B$, is priced by the reference\n  measure at the horizon $T$: the deflated bond is $\\mathbb{E}[\\exp(-\\int_0^T r) \\mid\n  \\mathcal{F}_t]$ almost surely, a martingale; and the price of a unit payment at $T$ is\n  $A(T)e^{-B(T)r_0}$. The model is specified under the pricing measure (no physical measure), the\n  market uses $\\mathcal{F}_t$-measurable representatives of the Wiener integrals, and uniqueness\n  of the pricing measure is not proved.",
-  "name": "MathFin.Rates.isPricingMeasure_vasicekMarket",
-  "module": "MathFin.Models.Rates.VasicekMarket",
-  "line": 178,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:vasicek-market",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/VasicekMarket.lean"},
  {"uses":
   ["def:value-at-risk",
    "def:quantile",
    "def:portfolio-variance",
+   "def:risk-contribution",
    "thm:gaussian-portfolio-var"],
   "title": "Euler allocation of Gaussian value at risk",
   "text":
@@ -1452,6 +1559,18 @@
   "label": "thm:euler-allocation",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ComponentVaR.lean"},
+ {"uses": ["def:market", "def:brownian-motion", "def:pricing-measure"],
+  "title": "The Vasicek bond market",
+  "text":
+  "For a pre-Brownian motion $B$, the market of the bank account\n  $N_t = \\exp\\int_0^t r$ of the Vasicek short rate as numéraire and the zero-coupon bond of\n  maturity $T$ as the one asset, under the natural filtration of $B$, is priced by the reference\n  measure at the horizon $T$: the deflated bond is $\\mathbb{E}[\\exp(-\\int_0^T r) \\mid\n  \\mathcal{F}_t]$ almost surely, a martingale; and the price of a unit payment at $T$ is\n  $A(T)e^{-B(T)r_0}$. The model is specified under the pricing measure (no physical measure), the\n  market uses $\\mathcal{F}_t$-measurable representatives of the Wiener integrals, and uniqueness\n  of the pricing measure is not proved.",
+  "name": "MathFin.Rates.isPricingMeasure_vasicekMarket",
+  "module": "MathFin.Models.Rates.VasicekMarket",
+  "line": 178,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:vasicek-market",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/VasicekMarket.lean"},
  {"uses":
   ["def:market",
    "def:contract",
@@ -1505,18 +1624,6 @@
   "label": "thm:one-date-market",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/OneDateMarket.lean"},
- {"uses": [],
-  "title": "Impermanent loss",
-  "text":
-  "For a price ratio $r \\ge 0$, the impermanent loss $2\\sqrt r/(1+r) - 1$ of\n  a fee-free constant-product position is at most $0$.",
-  "name": "MathFin.DeFi.impermanentLoss_nonpos",
-  "module": "MathFin.Markets.DeFi.UniswapMechanics",
-  "line": 194,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:impermanent-loss",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/UniswapMechanics.lean"},
  {"uses": ["def:coherent-risk-measure", "def:expected-utility"],
   "title": "Acceptance sets from expected utility",
   "text":
@@ -1559,21 +1666,23 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicMarket.lean"},
  {"uses":
-  ["def:value-at-risk",
-   "def:quantile",
-   "def:portfolio-variance",
-   "thm:gaussian-quantile"],
-  "title": "Value-at-risk of a Gaussian portfolio",
+  ["def:market",
+   "def:contract",
+   "def:pricing-functional",
+   "thm:lp-position-price",
+   "def:contract-value",
+   "def:v3-position-value"],
+  "title": "Impermanent loss",
   "text":
-  "For a Gaussian vector $X$ and $\\alpha \\in (0,1)$,\n  $\\mathrm{VaR}_\\alpha(\\sum_i w_i X_i) = \\sum_i w_i E X_i + \\sqrt{w^\\top \\Sigma\n  w}\\,\\Phi^{-1}(\\alpha)$ with $\\Sigma$ the covariance matrix of $X$.",
-  "name": "MathFin.valueAtRisk_portfolio_gaussian",
-  "module": "MathFin.Risk.GaussianRiskMarkowitz",
-  "line": 209,
+  "For a price ratio $r \\ge 0$, the impermanent loss $2\\sqrt r/(1+r) - 1$ of\n  a fee-free constant-product position is at most $0$ (`impermanentLoss_nonpos`). Priced: in a\n  market with a positive price $P_T$ of $X$ in $Y$, under any measure $Q$ for which the deflated\n  hold value $D_T(x_0P_T + y_0)$ is integrable, the constant-product position of invariant\n  $x_0y_0$ paid at $T$ is worth at most the claim paying the deposit $x_0P_T + y_0$.",
+  "name": "MathFin.DeFi.price_constantProductPayoff_le_hodl",
+  "module": "MathFin.Markets.DeFi.LPContract",
+  "line": 208,
   "leanOk": true,
   "latexEnv": "theorem",
-  "label": "thm:gaussian-portfolio-var",
+  "label": "thm:impermanent-loss",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/GaussianRiskMarkowitz.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/LPContract.lean"},
  {"uses":
   ["def:coherent-risk-measure",
    "thm:superhedging-price-lower-bound",
@@ -1590,6 +1699,22 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"},
  {"uses":
+  ["def:value-at-risk",
+   "def:quantile",
+   "def:portfolio-variance",
+   "thm:gaussian-quantile"],
+  "title": "Value-at-risk of a Gaussian portfolio",
+  "text":
+  "For a Gaussian vector $X$ and $\\alpha \\in (0,1)$,\n  $\\mathrm{VaR}_\\alpha(\\sum_i w_i X_i) = \\sum_i w_i E X_i + \\sqrt{w^\\top \\Sigma\n  w}\\,\\Phi^{-1}(\\alpha)$ with $\\Sigma$ the covariance matrix of $X$.",
+  "name": "MathFin.valueAtRisk_portfolio_gaussian",
+  "module": "MathFin.Risk.GaussianRiskMarkowitz",
+  "line": 209,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:gaussian-portfolio-var",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/GaussianRiskMarkowitz.lean"},
+ {"uses":
   ["def:market",
    "def:gbm",
    "def:brownian-motion",
@@ -1597,7 +1722,6 @@
    "def:pricing-measure",
    "def:contract",
    "def:pricing-functional",
-   "thm:physical-measure-pricing",
    "thm:girsanov-brownian-characterisation",
    "thm:black-scholes-market",
    "thm:bs-call",
@@ -1616,19 +1740,7 @@
   "label": "thm:bs-arbitrage-free-price",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/PricingMeasureUnique.lean"},
- {"uses": ["def:standard-normal-cdf"],
-  "title": "Black–Scholes call price formula",
-  "text":
-  "Under `BSCallHyp`, that is $S_0, K, \\sigma, T > 0$ and $S_T = S_0\\exp((r -\n  \\tfrac12\\sigma^2)T + \\sigma\\sqrt{T}\\,Z)$ with $Z \\sim N(0,1)$ under the pricing measure $Q$,\n  the call price is $e^{-rT}E_Q[(S_T - K)^+] = S_0\\Phi(d_1) - Ke^{-rT}\\Phi(d_2)$. The pricing\n  measure is a hypothesis, not derived from no arbitrage; `BSCallHyp.of_isPreBrownian` builds\n  the hypothesis from a Brownian motion.",
-  "name": "MathFin.bs_call_formula",
-  "module": "MathFin.Models.BlackScholes.Call",
-  "line": 223,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:bs-call",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/Call.lean"},
- {"uses": ["def:standard-normal-cdf", "thm:esscher-tilt", "thm:bs-call"],
+ {"uses": ["def:standard-normal-cdf", "thm:esscher-tilt"],
   "title": "Margrabe's exchange option formula",
   "text":
   "For two geometric Brownian motions with correlated Gaussian drivers, the\n  discounted expected exchange payoff $\\mathbb E[e^{-rT}(S^1_T - S^2_T)^+]$ equals Margrabe's\n  price: a Black–Scholes call on the ratio at effective volatility $\\sqrt{\\sigma_1^2 +\n  \\sigma_2^2 - 2\\rho\\sigma_1\\sigma_2}$, by splitting off an independent residual.",
@@ -1652,7 +1764,7 @@
   "label": "thm:quadratic-variation",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/QuadraticVariationL2.lean"},
- {"uses": [],
+ {"uses": ["def:coin-flip-measure"],
   "title": "Binomial barrier prices via reflection",
   "text":
   "On the symmetric binomial walk (every path of weight $2^{-n}$, the law\n  `coinFlipMeasure (1/2)` of the flips), for a barrier $a > 0$ and any payoff $g$ of the terminal\n  position $S_n$, the up-and-in price is\n  $E[g(S_n);\\max \\ge a] = E[g(S_n); S_n \\ge a] + E[g(2a - S_n); S_n > a]$: the paths that end\n  at or above $a$ touch it (discrete intermediate value), and those that touch it and end below\n  are reflected at the first hit onto the paths ending above (André's reflection). The up-and-out\n  price is the vanilla price less this, and the running maximum has\n  $P(\\max \\ge a) = 2P(S_n > a) + P(S_n = a)$. The prices are expectations under the symmetric\n  flip law of a payoff of the walk's position; `thm:binomial-knock-in-market` reads them as the\n  binomial market's price of the knock-in contract.",
@@ -1711,8 +1823,7 @@
   ["def:standard-normal-cdf",
    "def:contract",
    "def:contract-value",
-   "thm:forward-measure",
-   "thm:bs-call"],
+   "thm:forward-measure"],
   "title": "Black's caplet formula, given a lognormal forward rate",
   "text":
   "If the simple rate $L(T_0,T_1)$ is lognormal under the $T_1$-forward\n  measure (a hypothesis, not derived from a rate model), the caplet is worth\n  $P(0,T_1)\\,\\delta\\,[F\\Phi(d_1) - K\\Phi(d_2)]$.",
@@ -1748,18 +1859,6 @@
   "label": "thm:bracket-compensator",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Martingales/BracketCompensator.lean"},
- {"uses": ["thm:carr-madan"],
-  "title": "Breeden–Litzenberger formula",
-  "text":
-  "For a price process whose time-$s$ marginal is integrable and any smooth\n  compactly supported $\\psi$, $\\int \\psi''(K)\\,C(s,K)\\,dK = E[\\psi(X_s)]$, where $C(s,K) =\n  E[(X_s - K)^+]$ is the call surface at zero rates: $\\partial_K^2 C(s,\\cdot)$ is the law of\n  $X_s$ as a distribution. The weak form, for an arbitrary law.",
-  "name": "MathFin.Dupire.breedenLitzenberger_weak",
-  "module": "MathFin.Models.LocalVol.Dupire",
-  "line": 267,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:breeden-litzenberger",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/LocalVol/Dupire.lean"},
  {"uses":
   ["def:quantile",
    "def:value-at-risk",
@@ -1778,12 +1877,23 @@
   "label": "thm:fissler-ziegel",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/JointElicitability.lean"},
+ {"uses": ["thm:carr-madan"],
+  "title": "Breeden–Litzenberger formula",
+  "text":
+  "For a price process whose time-$s$ marginal is integrable and any smooth\n  compactly supported $\\psi$, $\\int \\psi''(K)\\,C(s,K)\\,dK = E[\\psi(X_s)]$, where $C(s,K) =\n  E[(X_s - K)^+]$ is the call surface at zero rates: $\\partial_K^2 C(s,\\cdot)$ is the law of\n  $X_s$ as a distribution. The weak form, for an arbitrary law.",
+  "name": "MathFin.Dupire.breedenLitzenberger_weak",
+  "module": "MathFin.Models.LocalVol.Dupire",
+  "line": 267,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:breeden-litzenberger",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/LocalVol/Dupire.lean"},
  {"uses":
   ["def:brownian-motion",
    "def:standard-normal-cdf",
    "thm:ito-formula-c2",
    "thm:feynman-kac-heat-eq",
-   "thm:bs-call",
    "thm:bs-delta"],
   "title": "Black–Scholes delta hedging",
   "text":
@@ -1849,18 +1959,18 @@
   "label": "thm:quantile-elicitability",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Elicitability.lean"},
- {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
-  "title": "Martingale representation theorem",
+ {"uses": ["def:portfolio-variance", "thm:markowitz-lagrangian"],
+  "title": "Tangent portfolio",
   "text":
-  "Let $B$ be a Brownian motion with continuous paths and $\\mathbb{F}^B$ its\n  natural filtration. Every square-integrable martingale $M$ of $\\mathbb{F}^B$ is, up to a\n  horizon $T$, its initial value plus an Itô integral process, $M_t = M_0 + (\\varphi\\cdot\n  B)_t$ almost surely for $t \\le T$, for a predictable $L^2$ integrand $\\varphi$. That $M_0$\n  is a.e. constant is not assumed: it is the representation read at $t = 0$. At the horizon,\n  every $F \\in L^2(\\mathcal{F}^B_T)$ is $F = E[F] + \\int_0^T \\varphi\\,dB$ for a *unique*\n  $\\varphi$ (`exists_itoIntegral_representation`): the range of the Itô isometry is closed,\n  and Wiener-exponential totality kills the orthogonal remainder. One dimension, $L^2$ only.",
-  "name": "MathFin.martingale_representation",
-  "module": "MathFin.Probability.Brownian.MartingaleRepresentation",
+  "For positive semidefinite $\\Sigma$, a fully invested portfolio with\n  $\\Sigma w = \\lambda(\\mu - r_f)$ is a tangent portfolio and has the least variance among the\n  fully invested portfolios with the same expected return.",
+  "name": "MathFin.isTangentPortfolioN_and_portfolioVarN_le",
+  "module": "MathFin.Choice.Portfolio.MarkowitzLagrangian",
   "line": 323,
   "leanOk": true,
   "latexEnv": "theorem",
-  "label": "thm:martingale-representation",
+  "label": "thm:tangent-portfolio-efficient",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/MartingaleRepresentation.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
  {"uses":
   ["def:market",
    "def:brownian-motion",
@@ -1880,6 +1990,18 @@
   "label": "thm:market-completeness",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/MarketCompleteness.lean"},
+ {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
+  "title": "Martingale representation theorem",
+  "text":
+  "Let $B$ be a Brownian motion with continuous paths and $\\mathbb{F}^B$ its\n  natural filtration. Every square-integrable martingale $M$ of $\\mathbb{F}^B$ is, up to a\n  horizon $T$, its initial value plus an Itô integral process, $M_t = M_0 + (\\varphi\\cdot\n  B)_t$ almost surely for $t \\le T$, for a predictable $L^2$ integrand $\\varphi$. That $M_0$\n  is a.e. constant is not assumed: it is the representation read at $t = 0$. At the horizon,\n  every $F \\in L^2(\\mathcal{F}^B_T)$ is $F = E[F] + \\int_0^T \\varphi\\,dB$ for a *unique*\n  $\\varphi$ (`exists_itoIntegral_representation`): the range of the Itô isometry is closed,\n  and Wiener-exponential totality kills the orthogonal remainder. One dimension, $L^2$ only.",
+  "name": "MathFin.martingale_representation",
+  "module": "MathFin.Probability.Brownian.MartingaleRepresentation",
+  "line": 323,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:martingale-representation",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/MartingaleRepresentation.lean"},
  {"uses": ["def:brownian-motion"],
   "title": "Lévy's characterization of Brownian motion",
   "text":
@@ -1892,18 +2014,6 @@
   "label": "thm:levy-characterization",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/LevyCharacterization.lean"},
- {"uses": ["def:portfolio-variance", "thm:markowitz-lagrangian"],
-  "title": "Tangent portfolio",
-  "text":
-  "For positive semidefinite $\\Sigma$, a fully invested portfolio with\n  $\\Sigma w = \\lambda(\\mu - r_f)$ is a tangent portfolio and has the least variance among the\n  fully invested portfolios with the same expected return.",
-  "name": "MathFin.isTangentPortfolioN_and_portfolioVarN_le",
-  "module": "MathFin.Choice.Portfolio.MarkowitzLagrangian",
-  "line": 323,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:tangent-portfolio-efficient",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
  {"uses": ["def:standard-normal-cdf"],
   "title": "Black–Scholes Greeks",
   "text":
@@ -1916,18 +2026,6 @@
   "label": "thm:bs-delta",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/PDE.lean"},
- {"uses": [],
-  "title": "Pathwise uniqueness for SDEs with Lipschitz coefficients",
-  "text":
-  "Two $L^2$ strong solutions of $dZ = \\mu(Z)\\,dt + \\sigma(Z)\\,dB$ with the\n  same initial value and driver, for Lipschitz coefficients, agree almost surely at every time\n  $t \\ge 0$ (an $L^2$-energy Grönwall argument). The Itô isometry bound for the\n  stochastic-integral operator is a hypothesis of the structure `IsL2SolutionPair`, supplied\n  by the library's Itô integral (`itoProcessCLM_norm_sq`).",
-  "name": "MathFin.IsL2SolutionPair.uniqueness",
-  "module": "MathFin.Probability.Brownian.SDE.SDEUniqueness",
-  "line": 330,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:sde-pathwise-uniqueness",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/SDE/SDEUniqueness.lean"},
  {"uses":
   ["def:market",
    "def:pricing-measure",
@@ -1947,22 +2045,6 @@
   "label": "thm:smile-no-arbitrage",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/ModelFree/RoperConverse.lean"},
- {"uses":
-  ["def:market",
-   "def:pricing-measure",
-   "thm:conditional-expectation-pricing-measure"],
-  "title":
-  "The Glosten–Milgrom quote sequence is a martingale for the dealer's measure",
-  "text":
-  "In the sequential Glosten–Milgrom model with value prior $\\theta \\in (0,1)$,\n  informed share $p \\in [0,1)$, informed traders trading on the value and uninformed traders\n  tossing a fair coin, independently across trades, the dealer's quote after $n$ orders\n  (the belief iterated by the one-trade Bayes updates) is almost surely the\n  conditional expectation $\\mathbb E_P[V \\mid \\mathcal G_n]$ of the value given the first $n$\n  order directions; hence $P$ is a pricing measure of the discrete market whose asset is\n  the quote process.",
-  "name": "MathFin.Execution.gmQuote_isPricingMeasure",
-  "module": "MathFin.Markets.Microstructure.GlostenMilgromSequential",
-  "line": 342,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:glosten-milgrom-pricing-measure",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/Microstructure/GlostenMilgromSequential.lean"},
  {"uses":
   ["def:market",
    "thm:log-optimal-numeraire-one-period",
@@ -1995,6 +2077,45 @@
   "label": "thm:merton-risk-neutral-drift",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Jumps/JumpDiffusionProcess.lean"},
+ {"uses":
+  ["def:market",
+   "def:heston-transform",
+   "def:gbm",
+   "def:brownian-motion",
+   "def:pricing-measure",
+   "def:contract",
+   "def:pricing-functional",
+   "thm:girsanov-brownian-characterisation",
+   "thm:black-scholes-market",
+   "def:contract-value"],
+  "title":
+  "As vol-of-vol vanishes the Heston transform is a Black–Scholes price",
+  "text":
+  "In the Black–Scholes market with volatility $\\sigma > 0$, the Girsanov\n  measure $Q$ of $\\theta = (m - r)/\\sigma$ at a horizon $H \\ge T > 0$ is a pricing measure, and\n  for $\\kappa > 0$, $0 < u < 1$ and the variance started at its mean $\\theta = v = \\sigma^2$, the\n  discounted explicit Heston transform $e^{-rT}\\Phi_\\xi(0, \\log S_0, \\sigma^2)$ tends, as the\n  vol-of-vol $\\xi \\to 0$, to the $Q$-price of the claim paying $S_T^u$ at $T$. A limit of the\n  Riccati-level transform, not of a Heston process.",
+  "name": "MathFin.Heston.tendsto_hestonTransform_smallVolOfVol_marketPrice",
+  "module": "MathFin.Models.StochVol.HestonSmallVolOfVol",
+  "line": 345,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:heston-bs-market-limit",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/StochVol/HestonSmallVolOfVol.lean"},
+ {"uses":
+  ["def:market",
+   "def:pricing-measure",
+   "thm:conditional-expectation-pricing-measure"],
+  "title":
+  "The Glosten–Milgrom quote sequence is a martingale for the dealer's measure",
+  "text":
+  "In the sequential Glosten–Milgrom model with value prior $\\theta \\in (0,1)$,\n  informed share $p \\in [0,1)$, informed traders trading on the value and uninformed traders\n  tossing a fair coin, independently across trades, the dealer's quote after $n$ orders\n  (the belief iterated by the one-trade Bayes updates) is almost surely the\n  conditional expectation $\\mathbb E_P[V \\mid \\mathcal G_n]$ of the value given the first $n$\n  order directions; hence $P$ is a pricing measure of the discrete market whose asset is\n  the quote process.",
+  "name": "MathFin.Execution.gmQuote_isPricingMeasure",
+  "module": "MathFin.Markets.Microstructure.GlostenMilgromSequential",
+  "line": 346,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:glosten-milgrom-pricing-measure",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/Microstructure/GlostenMilgromSequential.lean"},
  {"uses": ["def:market", "def:pricing-measure", "thm:one-date-market"],
   "title": "Trinomial lattice step as a pricing measure",
   "text":
@@ -2007,8 +2128,7 @@
   "label": "thm:trinomial-moment-matching",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/TrinomialMomentMatching.lean"},
- {"uses":
-  ["def:standard-normal-cdf", "thm:bs-call", "thm:compound-poisson-mgf"],
+ {"uses": ["def:standard-normal-cdf", "thm:compound-poisson-mgf"],
   "title": "Merton's jump-diffusion formula",
   "text":
   "For a jump-diffusion whose Poisson jump count is independent of the\n  Gaussian driver and of the i.i.d. jump sizes, the discounted expected call payoff is the\n  Black–Scholes price averaged over the jump part $-\\kappa + \\sum_{i<N} J_i$. Consequently the\n  Merton call price dominates the Black–Scholes price at the diffusion volatility, for every\n  intensity, mean jump size $k > -1$ and jump volatility (`bsV_le_mertonCallPrice`).",
@@ -2021,17 +2141,17 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Jumps/JumpDiffusionMixing.lean"},
  {"uses": [],
-  "title": "Marshall–Olkin first-to-default",
+  "title": "Value of a concentrated-liquidity position",
   "text":
-  "With independent exponential clocks $T_0, T_1, T_2$ of positive rates and\n  default times $\\min(T_0,T_2)$, $\\min(T_1,T_2)$ (a common shock $T_2$), the first default\n  survives past $t \\ge 0$ with probability $e^{-(\\lambda_0+\\lambda_1+\\lambda_2)t}$. The\n  default-indicator covariance is `covariance_indicator_marshallOlkin`; it is not normalised\n  to a correlation.",
-  "name": "MathFin.marshallOlkin_firstToDefault_survival",
-  "module": "MathFin.Probability.Dependence.MarshallOlkin",
-  "line": 358,
+  "The value in token $Y$, at square-root price $s$, of a Uniswap v3 position with\n  liquidity $L$ on the square-root price range $[a, b]$: only token $X$ below the range, only\n  token $Y$ above it, and the real reserves of both inside it.",
+  "name": "MathFin.DeFi.v3PositionValue",
+  "module": "MathFin.Markets.DeFi.UniswapMechanics",
+  "line": 357,
   "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:marshall-olkin",
+  "latexEnv": "definition",
+  "label": "def:v3-position-value",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Dependence/MarshallOlkin.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/UniswapMechanics.lean"},
  {"uses": ["def:brownian-motion", "thm:ito-formula-c2"],
   "title": "Itô's product rule",
   "text":
@@ -2056,18 +2176,30 @@
   "label": "thm:girsanov-brownian-characterisation",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Girsanov/GirsanovFiltered.lean"},
- {"uses": [],
-  "title": "Hoeffding's covariance identity",
+ {"uses": ["def:coin-flip-measure", "thm:markov-path-law"],
+  "title": "The coin-flip law is a Markov chain's path law",
   "text":
-  "For square-integrable $X, Y$, $\\mathrm{Cov}(X,Y) = \\iint \\bigl(P(X \\le x,\n  Y \\le y) - P(X \\le x)P(Y \\le y)\\bigr)\\,dx\\,dy$.",
-  "name": "MathFin.covariance_eq_integral_cdf",
-  "module": "MathFin.Probability.Dependence.HoeffdingCovariance",
-  "line": 374,
+  "The infinite product of Bernoulli$(q)$ measures on $\\{0,1\\}^{\\mathbb N}$ is the\n  Ionescu–Tulcea path law of the Markov chain on $\\{0,1\\}$ whose initial law and every\n  transition row are Bernoulli$(q)$: both give each cylinder $\\{X_0 = x_0, \\dots, X_n = x_n\\}$\n  the probability $\\prod_k \\mathrm{Bernoulli}(q)(x_k)$, and the cylinders form a $\\pi$-system\n  generating the product $\\sigma$-algebra.",
+  "name": "MathFin.coinFlipMeasure_eq_markovPathMeasure",
+  "module": "MathFin.Models.Binomial.PathMeasure",
+  "line": 366,
   "leanOk": true,
   "latexEnv": "theorem",
-  "label": "thm:hoeffding-covariance",
+  "label": "thm:coin-flip-markov",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Dependence/HoeffdingCovariance.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/PathMeasure.lean"},
+ {"uses": ["def:brownian-motion"],
+  "title": "Pathwise uniqueness for Itô SDEs with Lipschitz coefficients",
+  "text":
+  "Let $B$ be a Brownian motion, $T \\ge 0$, $\\mu$ Lipschitz and $\\sigma$\n  $L_\\sigma$-Lipschitz. Two $L^2$ solutions $X, Y$ of $dZ = \\mu(Z)\\,dt + \\sigma(Z)\\,dB$ on\n  $[0, T]$ with the same initial value, whose diffusion terms differ at each time $s \\le T$\n  almost surely by the Itô integral $\\int_0^s (\\sigma(\\varphi^X_u) - \\sigma(\\varphi^Y_u))\\,dB_u$\n  of predictable $L^2$ processes with $\\varphi^X - \\varphi^Y = X - Y$, agree almost surely at\n  every $t \\in [0, T]$. The Itô isometry on $[0, s]$ gives the diffusion energy bound with\n  constant $L_\\sigma^2$, and an $L^2$-energy Grönwall argument\n  (`IsL2SolutionPair.uniqueness`, for any diffusion operator with such a bound) closes it.",
+  "name": "MathFin.IsL2SolutionPair.uniqueness_ito",
+  "module": "MathFin.Probability.Brownian.SDE.SDEUniqueness",
+  "line": 376,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:sde-pathwise-uniqueness",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/SDE/SDEUniqueness.lean"},
  {"uses":
   ["def:expected-shortfall",
    "def:value-at-risk",
@@ -2084,13 +2216,26 @@
   "label": "thm:expected-shortfall-dual",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ExpectedShortfall.lean"},
- {"uses": [],
+ {"uses":
+  ["def:market", "def:pricing-measure", "thm:glosten-milgrom-pricing-measure"],
+  "title": "Glosten–Milgrom bid and ask quotes",
+  "text":
+  "On a finite measure space, the conditional expectation of the asset value\n  given the trade direction equals almost everywhere the ask $\\int V\\,d\\mu[\\cdot\\mid B]$ on\n  the buy event and the bid $\\int V\\,d\\mu[\\cdot\\mid B^c]$ on the sell event\n  (`condExp_payoff_eq_quote`). In the sequential model these are the dealer's quotes after the\n  first order: almost surely the ask if it is a buy and the bid if it is a sell.",
+  "name": "MathFin.Execution.gmQuote_one_ae_eq_quote",
+  "module": "MathFin.Markets.Microstructure.GlostenMilgromSequential",
+  "line": 399,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:glosten-milgrom-quote",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/Microstructure/GlostenMilgromSequential.lean"},
+ {"uses": ["def:hazard-survival"],
   "title": "Intensity model of default",
   "text":
   "For a continuous positive hazard rate $h$ with $\\int_0^\\infty h = \\infty$\n  and a unit-exponential random variable $\\xi$, the default time $\\tau = \\Lambda^{-1}(\\xi)$\n  with $\\Lambda(t) = \\int_0^t h$ has survival probability $P(\\tau > t) = e^{-\\Lambda(t)}$. A\n  deterministic intensity: a stochastic intensity is not covered.",
   "name": "MathFin.Cox.cox_survival_timeVarying",
   "module": "MathFin.Models.Credit.Cox",
-  "line": 405,
+  "line": 406,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:intensity-default-model",
@@ -2124,7 +2269,7 @@
   "label": "thm:expected-shortfall-not-elicitable",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Elicitability.lean"},
- {"uses": [],
+ {"uses": ["def:v3-position-value"],
   "title": "A concentrated-liquidity position is dominated by a covered call",
   "text":
   "A v3 position with liquidity $L \\ge 0$ on the range $[a, b]$ is worth at\n  most $x_{\\max}(s^2 - \\max(s^2 - ab, 0))$: long its full $X$ holding and short a call struck\n  at $ab$. Under the Black–Scholes model the discounted expected value of the position is\n  accordingly at most $x_{max}(S_0 - C)$, where $C$ is the Black–Scholes call struck at the\n  geometric-mean price $ab$ (`integral_discounted_v3PositionValue_le`).",
@@ -2136,6 +2281,18 @@
   "label": "thm:uniswap-v3-covered-call",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/UniswapMechanics.lean"},
+ {"uses": ["def:copula", "thm:quantile-transform", "def:quantile", "thm:sklar"],
+  "title": "Hoeffding's covariance identity",
+  "text":
+  "For square-integrable $X, Y$, $\\mathrm{Cov}(X,Y) = \\iint \\bigl(P(X \\le x,\n  Y \\le y) - P(X \\le x)P(Y \\le y)\\bigr)\\,dx\\,dy$ (`covariance_eq_integral_cdf`). When the\n  distribution functions $F_X, F_Y$ are continuous, the joint law $C$ of $(F_X(X), F_Y(Y))$ is a\n  copula (Sklar) and $\\mathrm{Cov}(X,Y) = \\iint \\bigl(C(F_X(x), F_Y(y)) -\n  F_X(x)F_Y(y)\\bigr)\\,dx\\,dy$, with $C(u, v)$ its distribution function.",
+  "name": "MathFin.covariance_eq_integral_copulaOf",
+  "module": "MathFin.Probability.Dependence.HoeffdingCovariance",
+  "line": 472,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:hoeffding-covariance",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Dependence/HoeffdingCovariance.lean"},
  {"uses":
   ["def:market",
    "def:pricing-measure",
@@ -2171,19 +2328,31 @@
   "For Lipschitz $b$, $\\sigma$, any horizon $T$ and any initial value in the\n  predictable $L^2$ space $E$ on $[0,T]$, the Picard map of $dX = b(X)dt + \\sigma(X)dB$ has\n  exactly one fixed point in $E$, with no smallness condition: its $n$-th iterate contracts\n  with constant $(2(TL_b^2+L_\\sigma^2)T)^n/n!$. The fixed point is an $L^2(dt\\otimes dP)$\n  class; a continuous adapted representative on every horizon is the frontier node\n  `thm:sde-continuous-solution`.",
   "name": "MathFin.SDEExistence.picardMap_exists_unique_fixedPoint_any_horizon",
   "module": "MathFin.Probability.Brownian.SDE.SDEExistence",
-  "line": 624,
+  "line": 654,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:sde-strong-solution",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/SDE/SDEExistence.lean"},
  {"uses": [],
+  "title": "The explicit Heston transform",
+  "text":
+  "For $0 < u < 1$, $\\Phi(t, x, v) = \\exp(\\hat a(T - t) + ux + \\hat b(T - t)v)$,\n  where $\\hat a, \\hat b$ are the closed-form (Möbius and logarithmic) solutions of the Heston\n  Riccati system from $\\hat a(0) = \\hat b(0) = 0$: the candidate for $E[e^{u\\log S_T}]$.",
+  "name": "MathFin.Heston.hestonTransform",
+  "module": "MathFin.Models.StochVol.Heston",
+  "line": 701,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:heston-transform",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/StochVol/Heston.lean"},
+ {"uses": ["def:heston-transform"],
   "title": "The explicit Heston transform solves the pricing equation",
   "text":
   "For $0 < u < 1$ and $\\xi \\ne 0$, the profile $\\Phi(t,x,v) = \\exp(A(t) + ux +\n  B(t)v)$ built from the explicit solutions $A(t) = \\hat a(T-t)$, $B(t) = \\hat b(T-t)$ of the\n  Heston Riccati system satisfies the backward Heston pricing equation $\\partial_t\\Phi + L\\Phi =\n  0$, and $\\Phi(T,x,v) = e^{ux}$ (`hestonTransform_terminal`). The Heston variance process is\n  not constructed, so the link from $\\Phi$ to a market's prices is not proved.",
   "name": "MathFin.Heston.hestonTransform_pde",
   "module": "MathFin.Models.StochVol.Heston",
-  "line": 700,
+  "line": 708,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:heston-pde",

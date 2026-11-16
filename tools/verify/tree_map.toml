@@ -16,3 +16,4 @@
 "thm:levy-characterization" = "probability/martingales"  # declared with the Brownian files; it is martingale theory
 "thm:forward-measure" = "valuation/term"           # declared among the pricing files; it is the bond-numéraire measure
 "thm:carr-madan" = "probability/analysis"           # a pathwise Taylor identity; its market reading is thm:market-carr-madan
+"thm:marshall-olkin" = "probability/dependence"      # stated through the survival function in Insurance/; it is a dependence model

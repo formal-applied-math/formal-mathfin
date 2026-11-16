@@ -5,22 +5,23 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Probability.Brownian.Ito.ItoIntegralCLM
+public import MathFin.Probability.Brownian.Ito.ItoIntegralCovariation
 public import MathFin.Probability.Brownian.Ito.StochasticFubini
 public import MathFin.Probability.Brownian.Wiener.WienerIntegralL2
 
 /-!
 # Stochastic Fubini for the Itô and Wiener integrals
 
-The Itô integral `itoIntegralCLM` on `[0,T]` and the Wiener integral `wienerIntegralLp` are
-continuous linear maps out of `L²` of a finite measure, so `stochFubini_ofCLM` applies to each:
+The Itô integral on `[0,T]` (the linear isometry `ItoIntegralCovariation.itoIsometry`, whose map
+is `itoIntegralCLM`) and the Wiener integral `wienerIntegralLp` are continuous linear maps out of
+`L²` of a finite measure, so `stochFubini_ofCLM` applies to each:
 a parameter integral of Itô (Wiener) integrals is the Itô (Wiener) integral of the parameter
 integral of the integrands.
 
 ## Main results
 
-* `stochFubini_ito`: `∫ u, itoIntegralCLM (φ u) ∂ν = itoIntegralCLM g` for `g` representing the
-  integrated integrand `s ↦ ∫ u, ψ u s ∂ν`.
+* `stochFubini_ito`: `∫ u, I_T (φ u) ∂ν = I_T g` for the Itô integral `I_T = itoIsometry` and
+  `g` representing the integrated integrand `s ↦ ∫ u, ψ u s ∂ν`.
 * `stochFubini_wiener`: the same for `wienerIntegralLp` on `L²(Ioc 0 T)`.
 
 ## References
@@ -57,8 +58,10 @@ theorem stochFubini_ito (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hφψ : ∀ u, ⇑(φ u) =ᵐ[trimMeasure (μ := μ) T hBmeas] ψ u)
     (g : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
     (hg : ⇑g =ᵐ[trimMeasure (μ := μ) T hBmeas] fun s ↦ ∫ u, ψ u s ∂ν) :
-    ∫ u, itoIntegralCLM hB T hBmeas (φ u) ∂ν = itoIntegralCLM hB T hBmeas g :=
-  stochFubini_ofCLM (itoIntegralCLM hB T hBmeas) φ hφ ψ hψ hφψ g hg
+    ∫ u, ItoIntegralCovariation.itoIsometry hB T hBmeas (φ u) ∂ν
+      = ItoIntegralCovariation.itoIsometry hB T hBmeas g :=
+  stochFubini_ofCLM (ItoIntegralCovariation.itoIsometry hB T hBmeas).toContinuousLinearMap
+    φ hφ ψ hψ hφψ g hg
 
 end Ito
 

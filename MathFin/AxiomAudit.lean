@@ -1608,9 +1608,11 @@ field. `gronwall_zero_of_le_const_mul_integral` is the reusable integral Grönwa
 `g t ≤ K·∫₀ᵗ g` on `[0,b]` ⟹ `g ≡ 0`), obtained from Mathlib's differential
 `eq_zero_of_abs_deriv_le_mul_abs_self_of_eq_zero_right` fed the primitive `G t = ∫₀ᵗ g` (FTC).
 `sde_pathwise_uniqueness` runs the `L²`-energy method: `E t = 𝔼[(Xₜ−Yₜ)²]` satisfies
-`E t ≤ (2·Cdrift·t + 2·Cdiff)·∫₀ᵗ E` and Grönwall forces `E ≡ 0`. `IsL2SolutionPair.uniqueness`
-is the packaged Theorem 8.2.5 (uniqueness): the drift energy bound is *derived* from Lipschitz `μ`
-(via `drift_energy_le`, Cauchy–Schwarz + Tonelli), the diffusion from the Itô isometry field. -/
+`E t ≤ (2·Cdrift·t + 2·Cdiff)·∫₀ᵗ E` on `[0, T]` and Grönwall forces `E ≡ 0`.
+`IsL2SolutionPair.uniqueness` is the packaged Theorem 8.2.5 (uniqueness) on a horizon `[0, T]`:
+the drift energy bound is *derived* from Lipschitz `μ` (via `drift_energy_le`, Cauchy–Schwarz +
+Tonelli), the diffusion bound is a hypothesis, and `IsL2SolutionPair.uniqueness_ito` derives it
+from the Itô isometry when the diffusion term is the Itô integral of `σ`. -/
 
 /-- info: 'MathFin.gronwall_zero_of_le_const_mul_integral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3098,3 +3100,71 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.Market.dupire_price_europeanCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Market.dupire_price_europeanCall
+
+/-- info: 'MathFin.riskContribution' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.riskContribution
+
+/-- info: 'MathFin.hazardSurvival' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.hazardSurvival
+
+/-- info: 'MathFin.DeFi.v3PositionValue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.v3PositionValue
+
+/-- info: 'MathFin.Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure
+
+/-- info: 'MathFin.marshallOlkin_firstToDefault_survivalFunction' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.marshallOlkin_firstToDefault_survivalFunction
+
+/-- info: 'MathFin.covariance_eq_integral_copulaOf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.covariance_eq_integral_copulaOf
+
+/-- info: 'MathFin.snellEnvelope_doob_decomposition' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.snellEnvelope_doob_decomposition
+
+/-- info: 'MathFin.condExp_stoppedValue_le_snellEnvelope' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.condExp_stoppedValue_le_snellEnvelope
+
+/-- info: 'ProbabilityTheory.IsFilteredPreBrownian.eLpNorm_runMax_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms ProbabilityTheory.IsFilteredPreBrownian.eLpNorm_runMax_le
+
+/-- info: 'MathFin.coinFlipMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.coinFlipMeasure
+
+/-- info: 'MathFin.coinFlipMeasure_eq_markovPathMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.coinFlipMeasure_eq_markovPathMeasure
+
+/-- info: 'MathFin.IsL2SolutionPair.uniqueness_ito' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.IsL2SolutionPair.uniqueness_ito
+
+/-- info: 'MathFin.market_covered_interest_parity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.market_covered_interest_parity
+
+/-- info: 'MathFin.Heston.hestonTransform' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Heston.hestonTransform
+
+/-- info: 'MathFin.Heston.tendsto_hestonTransform_smallVolOfVol_marketPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Heston.tendsto_hestonTransform_smallVolOfVol_marketPrice
+
+/-- info: 'MathFin.DeFi.price_constantProductPayoff_le_hodl' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.price_constantProductPayoff_le_hodl
+
+/-- info: 'MathFin.Execution.gmQuote_one_ae_eq_quote' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Execution.gmQuote_one_ae_eq_quote

@@ -11,6 +11,7 @@ public import MathFin.Probability.Discrete.SnellEnvelope
 public import MathFin.Probability.Discrete.MarkovPathMeasure
 public import Mathlib.Probability.ConditionalExpectation
 public import Mathlib.Probability.Distributions.Bernoulli
+public import Mathlib.Probability.ProbabilityMassFunction.Constructions
 public import Mathlib.Probability.Independence.InfinitePi
 public import Mathlib.Topology.Separation.CompletelyRegular
 
@@ -42,6 +43,8 @@ library's other probabilistic form of the price, `binomialPrice_eq_integral_conv
 
 ## Main results
 
+* `coinFlipMeasure_eq_markovPathMeasure` — the coin-flip measure is the Markov path measure of the
+  constant `Bernoulli(q)` kernel (`Probability/Discrete/MarkovPathMeasure`).
 * `coinFlipMeasure_cylinder` — the first `n + 1` flips of a path have probability
   `∏_{k ≤ n} Bernoulli(q)(path k)`.
 * `integral_comp_flips` — the integral of a function of the first `N` flips is the finite sum
@@ -345,6 +348,58 @@ theorem abs_spotPath_le (S₀ u d : ℝ) (k : ℕ) (ω : ℕ → Bool) :
   calc ∏ i ∈ range k, |if ω i then u else d| ≤ ∏ _i ∈ range k, max |u| |d| :=
         prod_le_prod₀ (fun _ _ ↦ abs_nonneg _) fun i _ ↦ by split_ifs <;> simp
     _ = max |u| |d| ^ k := by simp
+
+/-- Cylinders `pathCylinder path n` form a π-system. -/
+private lemma isPiSystem_pathCylinder :
+    IsPiSystem {s : Set (ℕ → Bool) | ∃ (path : ℕ → Bool) (n : ℕ), s = pathCylinder path n} := by
+  rintro _ ⟨p, n, rfl⟩ _ ⟨p', m, rfl⟩ ⟨ω, h1, h2⟩
+  refine ⟨ω, max n m, ?_⟩
+  ext η
+  simp only [pathCylinder, Set.mem_inter_iff, Set.mem_setOf_eq]
+  refine ⟨fun h k hk ↦ ?_, fun h ↦ ⟨fun k hk ↦ ?_, fun k hk ↦ ?_⟩⟩
+  · rcases le_or_gt k n with hkn | hkn
+    · exact (h.1 k hkn).trans (h1 k hkn).symm
+    · exact (h.2 k (by omega)).trans (h2 k (by omega)).symm
+  · exact (h k (hk.trans (le_max_left _ _))).trans (h1 k hk)
+  · exact (h k (hk.trans (le_max_right _ _))).trans (h2 k hk)
+
+/-- **The coin-flip measure is the Markov path measure of the constant kernel.** The law of i.i.d.
+`Bernoulli(q)` flips, `coinFlipMeasure q`, equals the law of the Markov chain on `Bool` with
+initial law and every transition row `Bernoulli(q)` (`markovPathMeasure`): both are probability
+measures that agree on the cylinders `pathCylinder path n`
+(`coinFlipMeasure_cylinder`, `markovPathMeasure_cylinder`), a π-system that generates the product
+σ-algebra. -/
+theorem coinFlipMeasure_eq_markovPathMeasure (q : ℝ≥0) (hq : q ≤ 1) :
+    coinFlipMeasure q hq
+      = markovPathMeasure (PMF.bernoulli q hq) fun _ ↦ PMF.bernoulli q hq := by
+  set S : Set (Set (ℕ → Bool)) :=
+    {s | ∃ (path : ℕ → Bool) (n : ℕ), s = pathCylinder path n} with hS
+  have hflip (k : ℕ) (T : Set (Fin (k + 1) → Bool)) :
+      MeasurableSet[MeasurableSpace.generateFrom S] (flips (k + 1) ⁻¹' T) := by
+    have e : flips (k + 1) ⁻¹' T = ⋃ x ∈ T, flips (k + 1) ⁻¹' {x} := by
+      ext ω
+      simp
+    rw [e]
+    exact MeasurableSet.biUnion T.to_countable fun x _ ↦
+      MeasurableSpace.measurableSet_generateFrom ⟨_, k, flips_preimage_singleton k x⟩
+  have hgen : (inferInstance : MeasurableSpace (ℕ → Bool)) = MeasurableSpace.generateFrom S := by
+    refine le_antisymm (iSup_le fun k ↦ ?_)
+      (MeasurableSpace.generateFrom_le fun s ⟨path, n, hs⟩ ↦ hs ▸ measurableSet_pathCylinder path n)
+    refine measurable_iff_comap_le.1 (measurable_to_bool ?_)
+    have e : ((fun ω : ℕ → Bool ↦ ω k) ⁻¹' {true})
+        = flips (k + 1) ⁻¹' {x | x (Fin.last k) = true} := by
+      ext ω
+      simp [flips]
+    rw [e]
+    exact hflip k _
+  refine ext_of_generate_finite S hgen isPiSystem_pathCylinder
+    (fun s ⟨path, n, hs⟩ ↦ ?_) (by simp)
+  rw [hs, coinFlipMeasure_cylinder, markovPathMeasure_cylinder, prod_range_succ', mul_comm]
+  simp only [PMF.bernoulli_apply, cond_eq_ite]
+  congr 1
+  · split_ifs <;> simp [ENNReal.coe_sub]
+  · refine prod_congr rfl fun k _ ↦ ?_
+    split_ifs <;> simp [ENNReal.coe_sub]
 
 section Martingale
 

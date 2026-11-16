@@ -6,6 +6,7 @@ Authors: Yang Ye
 module
 
 public import MathFin.Models.BlackScholes.Forward
+public import MathFin.Pricing.Market
 public import MathFin.Pricing.NoArbitrageDerivations
 
 /-!
@@ -50,6 +51,8 @@ forward a static market prices to zero is the model's expected spot.
   Garman–Kohlhagen risk-neutral hypothesis.
 * `covered_eq_uncovered_interest_parity`: the CIP forward equals the
   risk-neutral expected spot.
+* `market_covered_interest_parity`: covered interest parity for a `Market`'s own prices: given
+  the domestic and foreign bond prices, the forward is worth zero iff `F = fxForward`.
 
 ## References
 
@@ -67,6 +70,7 @@ interest rate differential, MSC 91G20, JEL F31, JEL G13
 namespace MathFin
 
 open MeasureTheory
+open scoped NNReal
 
 /-- Covered-interest-parity FX forward rate for maturity `T`, continuous
 compounding: `F(0, T) = S · exp((r_d - r_f) · T)`. -/
@@ -124,5 +128,25 @@ theorem covered_eq_uncovered_interest_parity {ι : Type*} (s : Finset ι) (q S_T
     F = ∫ ω, bsTerminal S (r_d - r_f) σ T (Z ω) ∂Q :=
   ((covered_interest_parity s q S_T S r_d r_f T F h_dom h_for).mp hF).trans
     (uncovered_interest_parity h).symm
+
+/-- **Covered interest parity in a market.** In a finite-state market `M` priced under a
+finite measure `Q` (`Market.price`), suppose the claim paying `1` at `T` is worth `e^{−r_d T}`
+(the domestic bond) and the claim paying the spot `S_T` is worth `S e^{−r_f T}` (the foreign
+bond, held in domestic currency). Then the forward paying `S_T − F` at `T` is worth zero if and
+only if `F = S e^{(r_d − r_f)T}`. The prices are state-price sums
+(`Market.price_pay_eq_statePricePricing`), and `covered_interest_parity` solves for `F`. -/
+theorem market_covered_interest_parity {Ω : Type*} [MeasurableSpace Ω] [Fintype Ω]
+    [MeasurableSingletonClass Ω] (M : Market Unit Ω) (Q : Measure Ω) [IsFiniteMeasure Q]
+    (T : ℝ≥0) {S r_d r_f F : ℝ}
+    (h_dom : M.price Q (.pay T (.const 1)) = Real.exp (-(r_d * T)))
+    (h_for : M.price Q (.pay T (.obs () T)) = S * Real.exp (-(r_f * T))) :
+    M.price Q (.pay T (.sub (.obs () T) (.const F))) = 0 ↔ F = fxForward S r_d r_f T := by
+  rw [Market.price_pay_eq_statePricePricing] at h_dom h_for ⊢
+  have key := covered_interest_parity Finset.univ (M.statePrice Q T)
+    (fun ω ↦ M.asset () T ω) S r_d r_f T F
+    (by simpa [statePricePricing, Contracts.Payoff.eval] using h_dom)
+    (by simpa [statePricePricing, Contracts.Payoff.eval, Contracts.scenarioAt] using h_for)
+  rw [← key]
+  simp [statePricePricing, Contracts.Payoff.eval, Contracts.scenarioAt]
 
 end MathFin
