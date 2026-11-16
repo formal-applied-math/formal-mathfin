@@ -127,8 +127,9 @@ theorem exerciseValue_europeanPutPayoff_eq_putRewardAt {S_0 m r σ K : ℝ} (hσ
     rw [constBthetaPath, min_eq_left ht]
     field_simp
     ring
-  simp only [Market.exerciseValue, deflator_market, europeanPutPayoff, Payoff.eval, scenarioAt,
-    market, pathAssets, putRewardAt, putReward, gbmValue, key]
+  rw [Market.exerciseValue, deflator_market]
+  simp only [europeanPutPayoff, Payoff.eval, scenarioAt, market, pathAssets, putRewardAt, putReward,
+    gbmValue, key]
 
 /-- **The American put of the Black–Scholes market.** For `σ ≠ 0`, a horizon `T ≤ H`, `W` with
 continuous paths, `K, r ≥ 0` and `S₀ > 0`, the American price of the put
@@ -140,7 +141,7 @@ theorem americanPrice_market_europeanPutPayoff (hpaths : ∀ ω, Continuous fun 
     (hS : 0 < S_0) :
     (market μ hWmeas S_0 m r σ).americanPrice (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
         (europeanPutPayoff K) T = brownianAmericanPut K r 0 σ S_0 T := by
-  haveI := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
+  have := constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
   rw [Market.americanPrice, ← americanPutValue_eq_brownianAmericanPut
     (isFilteredPreBrownian_constBthetaPath hWmeas hW ((m - r) / σ) H)
     (fun ω ↦ continuous_constBthetaPath (hpaths ω) _ H) hK hr hS T, americanPutValue]
