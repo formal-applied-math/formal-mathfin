@@ -203,6 +203,12 @@ import MathFin.Risk.UtilityDerivation
 import MathFin.Risk.VaRSuperadditivity
 import MathFin.Risk.ValueAtRisk
 import Architect
+import MathFin.Models.Binomial.BarrierReflection
+import MathFin.Pricing.AmericanPrice
+import MathFin.Models.Binomial.AmericanMarket
+import MathFin.Models.Rates.VasicekMarketPDE
+import MathFin.Choice.Performance.KellyNumeraire
+import MathFin.Risk.JointElicitability
 
 /-!
 # The blueprint: a map of the field's landmarks
