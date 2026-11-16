@@ -1608,9 +1608,11 @@ field. `gronwall_zero_of_le_const_mul_integral` is the reusable integral Grönwa
 `g t ≤ K·∫₀ᵗ g` on `[0,b]` ⟹ `g ≡ 0`), obtained from Mathlib's differential
 `eq_zero_of_abs_deriv_le_mul_abs_self_of_eq_zero_right` fed the primitive `G t = ∫₀ᵗ g` (FTC).
 `sde_pathwise_uniqueness` runs the `L²`-energy method: `E t = 𝔼[(Xₜ−Yₜ)²]` satisfies
-`E t ≤ (2·Cdrift·t + 2·Cdiff)·∫₀ᵗ E` and Grönwall forces `E ≡ 0`. `IsL2SolutionPair.uniqueness`
-is the packaged Theorem 8.2.5 (uniqueness): the drift energy bound is *derived* from Lipschitz `μ`
-(via `drift_energy_le`, Cauchy–Schwarz + Tonelli), the diffusion from the Itô isometry field. -/
+`E t ≤ (2·Cdrift·t + 2·Cdiff)·∫₀ᵗ E` on `[0, T]` and Grönwall forces `E ≡ 0`.
+`IsL2SolutionPair.uniqueness` is the packaged Theorem 8.2.5 (uniqueness) on a horizon `[0, T]`:
+the drift energy bound is *derived* from Lipschitz `μ` (via `drift_energy_le`, Cauchy–Schwarz +
+Tonelli), the diffusion bound is a hypothesis, and `IsL2SolutionPair.uniqueness_ito` derives it
+from the Itô isometry when the diffusion term is the Itô integral of `σ`. -/
 
 /-- info: 'MathFin.gronwall_zero_of_le_const_mul_integral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3142,3 +3144,7 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.coinFlipMeasure_eq_markovPathMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.coinFlipMeasure_eq_markovPathMeasure
+
+/-- info: 'MathFin.IsL2SolutionPair.uniqueness_ito' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.IsL2SolutionPair.uniqueness_ito

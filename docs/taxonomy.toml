@@ -80,9 +80,9 @@ landmarks = [
   "MathFin.ItoFormulaAdapted.ito_product_rule_process",
   "MathFin.Btheta_isFilteredPreBrownian_predictable_of_bdd", "MathFin.martingale_representation",
   "MathFin.FeynmanKacHeatEquation.feynmanU_heat_equation",
-  "MathFin.StochasticFubini.stochFubini_ofCLM",
+  "MathFin.StochasticFubini.stochFubini_ito",
   "MathFin.SDEExistence.picardMap_exists_unique_fixedPoint_any_horizon",
-  "MathFin.IsL2SolutionPair.uniqueness",
+  "MathFin.IsL2SolutionPair.uniqueness_ito",
 ]
 
 [[cell]]
@@ -117,8 +117,8 @@ modules = ["MathFin.Probability.Dependence"]
 subjects = ["MSC 62H05"]
 landmarks = [
   "MathFin.IsCopula", "MathFin.IsCopula.measureReal_Iic_le", "MathFin.measureReal_le_eq_copulaOf",
-  "MathFin.covariance_eq_integral_cdf", "MathFin.isCopula_gaussianFactorCopula",
-  "MathFin.marshallOlkin_firstToDefault_survival",
+  "MathFin.covariance_eq_integral_copulaOf", "MathFin.isCopula_gaussianFactorCopula",
+  "MathFin.marshallOlkin_firstToDefault_survivalFunction",
 ]
 
 [[cell]]

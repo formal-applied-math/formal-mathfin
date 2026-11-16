@@ -468,13 +468,16 @@ attribute [blueprint "thm:levy-characterization"
   MathFin.LevyCharacterization.isBrownianReal_of_localMartingale
 
 attribute [blueprint "thm:sde-pathwise-uniqueness"
-  (title := "Pathwise uniqueness for SDEs with Lipschitz coefficients")
-  (statement := /-- Two $L^2$ strong solutions of $dZ = \mu(Z)\,dt + \sigma(Z)\,dB$ with the
-  same initial value and driver, for Lipschitz coefficients, agree almost surely at every time
-  $t \ge 0$ (an $L^2$-energy Grönwall argument). The Itô isometry bound for the
-  stochastic-integral operator is a hypothesis of the structure `IsL2SolutionPair`, supplied
-  by the library's Itô integral (`itoProcessCLM_norm_sq`). -/)]
-  MathFin.IsL2SolutionPair.uniqueness
+  (title := "Pathwise uniqueness for Itô SDEs with Lipschitz coefficients")
+  (statement := /-- Let $B$ be a Brownian motion, $T \ge 0$, $\mu$ Lipschitz and $\sigma$
+  $L_\sigma$-Lipschitz. Two $L^2$ solutions $X, Y$ of $dZ = \mu(Z)\,dt + \sigma(Z)\,dB$ on
+  $[0, T]$ with the same initial value, whose diffusion terms differ at each time $s \le T$
+  almost surely by the Itô integral $\int_0^s (\sigma(\varphi^X_u) - \sigma(\varphi^Y_u))\,dB_u$
+  of predictable $L^2$ processes with $\varphi^X - \varphi^Y = X - Y$, agree almost surely at
+  every $t \in [0, T]$. The Itô isometry on $[0, s]$ gives the diffusion energy bound with
+  constant $L_\sigma^2$, and an $L^2$-energy Grönwall argument
+  (`IsL2SolutionPair.uniqueness`, for any diffusion operator with such a bound) closes it. -/)]
+  MathFin.IsL2SolutionPair.uniqueness_ito
 
 -- ===== probability/jumps: Jumps =====
 
