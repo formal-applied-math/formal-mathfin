@@ -1743,8 +1743,8 @@
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-16",
       "elapsed_s": 2.6,
-      "input_hash": "7d53a973a6d492f97c87cd66309afb4102979f2a1e77e665b4eca5019eb831d0",
-      "verified_at_commit": "b7af8ec"
+      "input_hash": "efb9495f9ec0fc4e8f21d3a87fc196102e6cc6670d24cba4453e172f577d75d8",
+      "verified_at_commit": "c4b0515"
     },
     "mf-carr-madan-spanning": {
       "benchmark_file": "black_scholes.json",
