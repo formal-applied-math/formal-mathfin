@@ -221,7 +221,16 @@ their whole field yet.
 
 ### Evidence
 
-Pending the runner build and the ledger sweep of this branch.
+- `lean-build.yml` run 43814075174 (with the blueprint export): the whole library green. The run
+  before it caught a missing `Mathlib.MeasureTheory.Integral.Prod` import in
+  `CarrMadanMarket.lean` and an `ω` binder that `open scoped ContDiff` makes a token.
+- The ledger sweep re-verified the changed entries and `mf-carr-madan-market`.
+- The first PR builds caught a long line and a chain-reach rise, 290 → 291 per mille. Nothing had
+  moved away from the spine. Moving the FTAP family onto the trunk took 19 theorems that were
+  within three hops out of the denominator. The fix was a real connection, not a baseline change:
+  `premiumLeg_const_intensity` and `protectionLeg_const_intensity` state the time-varying CDS legs
+  at constant intensity in terms of the risky annuity. This brings five constant-intensity Cox
+  theorems within three hops (back to 290). `corpus_off_blueprint` fell 295 → 294.
 
 ## 2026-11-12 — corpus 870, modules 769 — one-asset DMW, Black–Scholes uniqueness and ten contributed modules, read before they land
 
