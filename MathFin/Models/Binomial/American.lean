@@ -33,8 +33,10 @@ the flip filtration) of the discounted intrinsic value `e^{−ρn} g(Sₙ)` alon
 every date an exercise date: the exercise-everywhere case of
 `snellEnvelope_discounted_bermudanPrice` at time `0`.
 
-Not proved here: the envelope as a supremum over stopping times, or any statement about the
-price at a later time.
+That this price is also the supremum, over all stopping rules of the binomial market, of the
+expected deflated exercise value (`Market.americanPrice`) is
+`americanPrice_market_europeanPutPayoff` (`Models/Binomial/AmericanMarket.lean`), for the put.
+Not proved here: any statement about the price at a later time.
 
 ## Main definitions
 

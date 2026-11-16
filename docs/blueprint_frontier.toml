@@ -80,15 +80,7 @@ label = "thm:american-put-premium"
 title = "American put early-exercise premium"
 statement = "The American put is strictly worth more than the European put in the binomial model."
 uses = ["thm:snell-envelope"]
-area = "valuation/trees"
-family = "trees"
-
-[[node]]
-label = "thm:binomial-barrier-reflection"
-title = "Binomial barrier prices via reflection"
-statement = "Binomial barrier option prices follow from the discrete reflection principle."
-uses = ["thm:binomial-representation"]
-area = "valuation/trees"
+area = "valuation/american"
 family = "trees"
 
 [[node]]
@@ -104,7 +96,7 @@ label = "thm:carr-lee-moment"
 title = "Carr–Lee moment formula"
 statement = "Wing decay of the smile is bounded by the finiteness of the moments E[S_T^p]."
 uses = ["thm:bs-call"]
-area = "valuation/volatility"
+area = "valuation/smile"
 family = "volatility"
 
 [[node]]
@@ -120,7 +112,7 @@ label = "thm:implied-vol-existence"
 title = "Implied volatility for every arbitrage-free price"
 statement = "Every arbitrage-free call price has a unique implied volatility, computed by bisection and safeguarded Newton."
 uses = ["thm:bs-call", "thm:bs-delta"]
-area = "valuation/diffusions"
+area = "valuation/smile"
 family = "diffusions"
 
 [[node]]
@@ -152,7 +144,7 @@ label = "thm:perpetual-american"
 title = "Perpetual American option"
 statement = "Closed form for the perpetual American option with its optimal exercise boundary."
 uses = ["thm:snell-envelope", "thm:bs-pde"]
-area = "valuation/diffusions"
+area = "valuation/american"
 family = "diffusions"
 
 [[node]]
@@ -226,7 +218,7 @@ label = "thm:balancer-invariant"
 title = "Balancer constant-mean AMM"
 statement = "The weighted product invariant and spot price of the constant-mean AMM."
 uses = ["thm:impermanent-loss"]
-area = "valuation/mechanisms"
+area = "valuation/model-free"
 family = "mechanisms"
 
 [[node]]
@@ -234,7 +226,7 @@ label = "thm:compound-exchange-rate-bridge"
 title = "Compound's exchange rate as a money-market account"
 statement = "Compound's cToken exchange rate is the deposit index of a money-market account under the borrow index, tying Markets/DeFi/Compound to the library's lending indices, or the gap is recorded."
 uses = ["thm:bond-immunization"]
-area = "valuation/mechanisms"
+area = "valuation/model-free"
 family = "mechanisms"
 
 [[node]]
@@ -294,7 +286,7 @@ label = "thm:futures-forward-convexity"
 title = "Futures–forward convexity adjustment"
 statement = "The futures-forward convexity adjustment in a Gaussian short-rate model."
 uses = ["thm:affine-term-structure"]
-area = "valuation/term"
+area = "valuation/forwards"
 family = "term"
 
 [[node]]
@@ -485,7 +477,7 @@ title = "Transient-impact propagator no-arbitrage"
 statement = "A positive-semidefinite criterion for no price manipulation under transient impact, with certified counterexamples (open problem)."
 uses = []
 ground = "Mathlib: positive-semidefinite kernels"
-area = "valuation/mechanisms"
+area = "choice/trading"
 family = "mechanisms"
 
 [[node]]
@@ -521,7 +513,7 @@ label = "thm:futures-basis-convergence"
 title = "Contango, backwardation and basis convergence"
 statement = "For F=Se^{(r-δ)T} the curve is in contango or backwardation by the sign of r-δ and the basis converges."
 uses = ["thm:interest-rate-parity"]
-area = "valuation/term"
+area = "valuation/forwards"
 family = "term"
 
 [[node]]
@@ -529,7 +521,7 @@ label = "thm:siegel-paradox"
 title = "Siegel's paradox"
 statement = "E[S_T]E[1/S_T]=e^{σ²T}>1."
 uses = ["thm:ito-formula-c2"]
-area = "valuation/term"
+area = "valuation/forwards"
 family = "term"
 
 [[node]]
@@ -716,15 +708,6 @@ area = "probability/brownian"
 # ---- the one-trunk hinges (docs/specs/2026-11-07-one-trunk-design.md §5)
 
 [[node]]
-label = "thm:glosten-milgrom-pricing-measure"
-title = "The Glosten–Milgrom quote process is a martingale"
-statement = "The Glosten–Milgrom dealer's quote after n trades is the conditional expectation of the value given the observed history of trade directions, which extends the one-trade identification to a sequence; with the proved fact that a conditional-expectation process is priced by its own measure (thm:conditional-expectation-pricing-measure) the quote sequence is a martingale for the dealer's measure."
-uses = ["thm:glosten-milgrom-quote", "thm:conditional-expectation-pricing-measure"]
-area = "choice/trading"
-family = "mechanisms"
-lean = "MathFinFrontier.condExp_payoff_eq_quote_history"
-
-[[node]]
 label = "thm:cva-is-price"
 title = "CVA is the price of the default loss"
 statement = "Unilateral CVA is the price of the default-contingent exposure loss as a contract under a pricing measure with an independent default time, and the Gaussian-exposure closed form is a theorem about it."
@@ -753,18 +736,30 @@ uses = ["thm:coherent-risk-representation", "thm:expected-shortfall-dual"]
 area = "risk/measures"
 
 [[node]]
-label = "thm:credit-portfolio-is-merton"
-title = "The one-factor credit portfolio is Merton's"
-statement = "With the standardised log firm value equal to the root of rho times a systematic normal plus the root of one minus rho times an independent normal, a Merton name defaults at T, given the systematic factor, with probability oneFactorPD of its Merton default probability kmvPD."
-uses = ["def:gaussian-factor-copula", "thm:large-pool-loss"]
-area = "risk/credit"
-family = "default"
-lean = "MathFinFrontier.condDefault_eq_oneFactorPD"
-
-[[node]]
 label = "thm:american-put-superhedging-price"
 title = "The American put value is the superhedging price"
 statement = "In the complete Black–Scholes market the American put value (the supremum of discounted expected payoffs over stopping rules) equals the superreplication price of the American put, that is, the least initial capital of a self-financing strategy dominating the put payoff at every date. Needs the superreplication price of a path-dependent claim in Market, which is not defined yet."
 uses = ["thm:american-put-dominates-european", "thm:market-completeness"]
-area = "valuation/diffusions"
+area = "valuation/american"
 family = "diffusions"
+
+[[node]]
+label = "thm:semimartingale-integral"
+title = "The stochastic integral against a semimartingale"
+statement = "For a continuous semimartingale X = M + A and a locally bounded predictable integrand H, the integral ∫H dX exists, is the limit in probability of its Riemann sums and is a semimartingale; the library's stochastic integral is Brownian only (def:ito-integral-clm), and this node is the gap that keeps the general fundamental theorems out of reach."
+uses = ["def:ito-integral-clm", "thm:levy-characterization"]
+area = "probability/martingales"
+
+[[node]]
+label = "thm:dmw-multi-asset"
+title = "Dalang–Morton–Willinger for several assets"
+statement = "In discrete time with finitely many dates and d risky assets on a general probability space, there is no arbitrage if and only if there is an equivalent martingale measure, with bounded density; the library proves the case d = 1 (thm:dmw-ftap) and the finite-state case (thm:first-ftap)."
+uses = ["thm:dmw-ftap", "thm:cone-separation"]
+area = "valuation/general"
+
+[[node]]
+label = "thm:delbaen-schachermayer"
+title = "Delbaen–Schachermayer: no free lunch with vanishing risk"
+statement = "For a locally bounded semimartingale price process, no free lunch with vanishing risk holds if and only if there is an equivalent local martingale measure; the library proves only that an equivalent martingale measure excludes simple arbitrage (thm:continuous-ftap)."
+uses = ["thm:continuous-ftap", "thm:semimartingale-integral", "thm:dmw-multi-asset"]
+area = "valuation/general"

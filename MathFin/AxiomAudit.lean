@@ -3026,3 +3026,55 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.average_eigenvalue_mem_Icc_mpEdges' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.average_eigenvalue_mem_Icc_mpEdges
+
+/-- info: 'MathFin.snellEnvelope_optimalStopping' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.snellEnvelope_optimalStopping
+
+/-- info: 'MathFin.binomial_upAndIn_reflection' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.binomial_upAndIn_reflection
+
+/-- info: 'MathFin.Market.americanPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Market.americanPrice
+
+/-- info: 'MathFin.Contracts.Binomial.americanPrice_market_europeanPutPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.Binomial.americanPrice_market_europeanPutPayoff
+
+/-- info: 'MathFin.Market.IsPricingMeasure.integral_deriv_deriv_mul_price_europeanCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Market.IsPricingMeasure.integral_deriv_deriv_mul_price_europeanCall
+
+/-- info: 'MathFin.Rates.vasicekMarket_price_solves_pde' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Rates.vasicekMarket_price_solves_pde
+
+/-- info: 'MathFin.Rates.price_immunization_first_order' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Rates.price_immunization_first_order
+
+/-- info: 'MathFin.Rates.sum_deriv_keyRate_eq_deriv_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Rates.sum_deriv_keyRate_eq_deriv_price
+
+/-- info: 'MathFin.kellyGrowth_deriv_at_kelly' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.kellyGrowth_deriv_at_kelly
+
+/-- info: 'MathFin.kellyMarket_numeraire_portfolio' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.kellyMarket_numeraire_portfolio
+
+/-- info: 'MathFin.Execution.gmQuote_isPricingMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Execution.gmQuote_isPricingMeasure
+
+/-- info: 'MathFin.condDefault_eq_oneFactorPD' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.condDefault_eq_oneFactorPD
+
+/-- info: 'MathFin.kmvPD' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.kmvPD

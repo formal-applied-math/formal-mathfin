@@ -940,6 +940,30 @@
       }
     },
     {
+      "id": "mf-kelly-is-log-optimal",
+      "name": "The Kelly Wealth Is the Numéraire Portfolio of the Betting Market",
+      "description": "In the two-state market of a unit bond and a bet of odds b > 0 won with probability 0 < p < 1 (the library's Market structure, with the fair-odds pricing measure q₊ = 1/(b+1), q₋ = b/(b+1)), let W be the terminal wealth of one unit in the bond plus the Kelly fraction f* on the bet. Then the stochastic discount factor of the pricing measure is 1/W in each state, and E_P[S_k(1)/W] = S_k(0) for the bond (value 1) and the bet (price 0). The stationarity of the Kelly portfolio for the expected log-wealth is derived from the Kelly first-order condition; that it maximises the expected log-wealth is not part of the statement.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Choice.Performance.KellyNumeraire\n\nopen MathFin\n\n/-- **The Kelly wealth is the numéraire portfolio of the betting market.** In the Kelly market\n(a bond and a bet of odds `b` won with probability `p`), with `W` the terminal wealth of one unit\nin the bond and the Kelly fraction on the bet, the stochastic discount factor of the fair-odds\npricing measure is `1 / W`, and `E_P[S_k(1) / W] = S_k(0)` for the bond and the bet. Re-exports\n`MathFin.kellyMarket_numeraire_portfolio`. -/\ntheorem kelly_market_numeraire_portfolio {p b : ℝ} (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :\n    (∀ ω, (kellyMarket p b).sdf (kellyFairLaw b) 1 ω =\n        1 / portfolioPayoff (kellyPayoff b) ![1, kellyFraction p b] ω) ∧\n      ∀ k, ∫ ω, kellyPayoff b k ω / portfolioPayoff (kellyPayoff b) ![1, kellyFraction p b] ω\n        ∂(kellyLaw p) = kellyPrice k :=\n  MathFin.kellyMarket_numeraire_portfolio hp hp1 hb\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Numéraire portfolio / benchmark approach (Long 1990); Kelly (1956)",
+        "citations": [
+          {
+            "key": "Long1990"
+          },
+          {
+            "key": "Kelly1956"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the first-order, one-period statement. Re-export of MathFin.kellyMarket_numeraire_portfolio (MathFin/Choice/Performance/KellyNumeraire.lean): the Kelly market is a Market (Fin 2) (Fin 2) built on the one-date market of the bet plus a unit bond; the Kelly portfolio satisfies the log first-order condition (kelly_foc, from kellyGrowth_deriv_at_kelly), and Market.IsPricingMeasure.sdf_eq_div_of_logOptimal / integral_div_logOptimal_mul give sdf = 1/W and the deflated prices. HONEST SCOPE: first-order stationarity only (global optimality of the Kelly fraction is not proved); one period; two states. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
       "id": "mf-hansen-jagannathan-bound",
       "name": "Hansen–Jagannathan Bound on the Sharpe Ratio",
       "description": "On a probability space let the stochastic discount factor m and the gross return R be square-integrable with E[m] > 0 and Var R > 0, let m price R (E[m R] = 1) and the riskless return r_f (r_f E[m] = 1). Then |sharpeRatio(E R, r_f, σ(R))| = |E[R] − r_f| / σ(R) ≤ σ(m) / E[m]. The proof is Cauchy–Schwarz for Cov(m, R − r_f) = −E[m] E[R − r_f]. The existence of the discount factor, and the minimum-variance discount factor attaining the bound, are not part of this entry.",

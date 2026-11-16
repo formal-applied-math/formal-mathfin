@@ -53,7 +53,7 @@ open Set Filter MeasureTheory ProbabilityTheory
 open scoped NNReal Topology
 
 theorem brownianLogState_adapted (β σ x : ℝ) :
-    Adapted brownianFiltration (brownianLogState β σ x) := by
+    Adapted brownianFiltration (logState brownian β σ x) := by
   intro t
   exact measurable_const.add (measurable_const.mul (brownian_adapted t))
 
@@ -81,7 +81,7 @@ theorem canonicalDiscountedPlane_path (k h x : ℝ) {T s : ℝ≥0} (hs : s ≤ 
     (ω : ℝ≥0 → ℝ) :
     canonicalDiscountedPlane k h x T (s,brownian s ω) = canonicalDiscountedPrice k h x T s ω := by
   simp only [canonicalDiscountedPlane,canonicalDiscountedPrice_apply,min_eq_left hs,
-    brownianLogState]
+    logState]
 
 theorem rawRectangleExit_path_mem_ae (k h x : ℝ) {R : ℝ} (hR : 0 < R)
     {δ : ℝ≥0} (hδ : 0 < δ) :
@@ -91,21 +91,21 @@ theorem rawRectangleExit_path_mem_ae (k h x : ℝ) {R : ℝ} (hR : 0 < R)
         ((s : ℝ),brownian s ω) ∈ driverRectangle k h R δ := by
   filter_upwards [isBrownianReal_brownian.eval_zero_ae_eq_zero] with ω hω
   let θ := rawRectangleExitRule k h x R δ
-  have hs : |brownianLogState (k-h-1) (Real.sqrt 2) x 0 ω-x| < R := by
-    simpa only [brownianLogState,NNReal.coe_zero,mul_zero,add_zero,hω,sub_self,abs_zero] using hR
+  have hs : |logState brownian (k-h-1) (Real.sqrt 2) x 0 ω-x| < R := by
+    simpa only [logState,NNReal.coe_zero,mul_zero,add_zero,hω,sub_self,abs_zero] using hR
   have hp := rectangleExitRule_pos (brownianLogState_adapted (k-h-1) (Real.sqrt 2) x)
     (brownianLogState_continuous (k-h-1) (Real.sqrt 2) x) hδ ω hs
   refine ⟨hp,?_⟩
   intro s hst
   refine ⟨s.coe_nonneg,by exact_mod_cast hst.trans (θ.le_horizon ω),?_⟩
-  have hb : |brownianLogState (k-h-1) (Real.sqrt 2) x s ω-x| ≤ R := by
+  have hb : |logState brownian (k-h-1) (Real.sqrt 2) x s ω-x| ≤ R := by
     rcases lt_or_eq_of_le hst with hl | he
     · exact (rectangleExitRule_before (brownianLogState_adapted (k-h-1) (Real.sqrt 2) x)
         (brownianLogState_continuous (k-h-1) (Real.sqrt 2) x) ω hl).1.le
     · subst s
       exact rectangleExitRule_spatial_bound _ _ ω hp
-  have he : brownianLogState (k-h-1) (Real.sqrt 2) x s ω-x =
-      (k-h-1)*(s : ℝ)+Real.sqrt 2*brownian s ω := by unfold brownianLogState; ring
+  have he : logState brownian (k-h-1) (Real.sqrt 2) x s ω-x =
+      (k-h-1)*(s : ℝ)+Real.sqrt 2*brownian s ω := by unfold logState; ring
   rwa [he] at hb
 
 theorem canonicalPrice_rectangle_meanValue_raw {k h : ℝ} (hk : 0 ≤ k)
@@ -125,7 +125,7 @@ theorem canonicalPrice_rectangle_meanValue_raw {k h : ℝ} (hk : 0 ≤ k)
   have hfun : (fun ω => canonicalDiscountedPrice k h x T (θ.time ω) ω) =
       fun ω => Real.exp (-k*(actualRectangleExitTime k h x R δ ω : ℝ))*
         canonicalPrice k h
-          (brownianLogState (k-h-1) (Real.sqrt 2) x (actualRectangleExitTime k h x R δ ω) ω)
+          (logState brownian (k-h-1) (Real.sqrt 2) x (actualRectangleExitTime k h x R δ ω) ω)
           ((T : ℝ)-(actualRectangleExitTime k h x R δ ω : ℝ)) := by
     funext ω
     have ht : θ.time ω ≤ T := (θ.le_horizon ω).trans hδT

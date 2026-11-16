@@ -1606,6 +1606,75 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. bondPortfolioValue_eq_price in MathFin/Models/Rates/DeterministicMarket.lean: the deflator of a market with numeraire e^{rt} (resp. (1+y)^floor t) is the discount curve e^{-rt} (resp. 1/(1+y)^floor t), and value_fixedFlows_deterministic evaluates the schedule. SCOPE: deterministic numeraire only; Q is any probability measure, not necessarily a pricing measure, because the schedule's deflated payoff is the same along every outcome. Integer payment times for the coupon bond."
       }
+    },
+    {
+      "id": "mf-vasicek-market-price-solves-pde",
+      "name": "The Vasicek Market Price Solves the Vasicek Pricing PDE",
+      "description": "In the Vasicek bond market (bank account numeraire, zero-coupon bond of maturity T, reference measure mu with kappa > 0), mu is a pricing measure at horizon T, the market price of a unit payment at T equals vasicekBondPrice θ σ κ T r₀ = A(T)exp(-B(T)r₀), and the function u(τ,r) = A(τ)exp(-B(τ)r) satisfies -u_τ + κ(θ-r)u_r + ½σ²u_rr - r u = 0 at (T, r₀). The PDE is checked for the function at that point; Feynman-Kac for the family of markets over all starting rates is not proved.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.Rates.VasicekMarketPDE\n\nopen MathFin MathFin.Contracts MathFin.Rates MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- The Vasicek market price of a unit payment at `T` is the Vasicek affine price, which solves the\nVasicek pricing PDE. -/\ntheorem vasicek_market_price_solves_pde {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}\n    {B : ℝ≥0 → Ω → ℝ} [IsProbabilityMeasure μ] (hB : IsPreBrownianReal B μ)\n    (hBm : ∀ s, Measurable (B s)) (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :\n    (vasicekMarket hB hBm r₀ θ σ hκ T).IsPricingMeasure T μ ∧\n      (vasicekMarket hB hBm r₀ θ σ hκ T).price μ (.pay T (.const 1))\n        = vasicekBondPrice θ σ κ T r₀ ∧\n      -deriv (fun t ↦ vasicekBondPrice θ σ κ t r₀) T\n        + κ * (θ - r₀) * deriv (vasicekBondPrice θ σ κ T) r₀\n        + σ ^ 2 / 2 * deriv (deriv (vasicekBondPrice θ σ κ T)) r₀\n        - r₀ * vasicekBondPrice θ σ κ T r₀ = 0 :=\n  vasicekMarket_price_solves_pde hB hBm r₀ θ σ hκ T\n"
+      },
+      "metadata": {
+        "reference": "O. Vasicek 1977; Brigo and Mercurio, Interest Rate Models, 3.2.3",
+        "citations": [
+          {
+            "key": "Vasicek1977"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "3.2.3"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. vasicekMarket_price_solves_pde in MathFin/Models/Rates/VasicekMarketPDE.lean is the conjunction of isPricingMeasure_vasicekMarket, price_pay_vasicekMarket and vasicekBondPrice_solves_pde (affineBondPrice_solves_pde with the Vasicek Riccati loadings). SCOPE: the PDE holds for the explicit function at one point; the market price is identified with that function at (T, r0); no Feynman-Kac for the PDE, and the market is specified under the pricing measure."
+      }
+    },
+    {
+      "id": "mf-immunization-market-price",
+      "name": "First-Order Immunization for Market Prices",
+      "description": "In a family of markets M r whose numeraire is the money market e^{rt}, under any probability measure Q, if two zero-coupon portfolios (faces wA, wL, maturities TA, TL >= 0) have equal duration-times-value at rate r, the derivative in r of the difference of the market prices of their fixed cash-flow schedules is zero at r. Deterministic numeraire only; the market family is a hypothesis.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.Rates.DeterministicMarket\n\nopen MathFin MathFin.Contracts MathFin.Rates MeasureTheory\nopen scoped NNReal\n\n/-- First-order immunization stated for the market prices of the asset and liability schedules. -/\ntheorem immunization_market_price {ι Ω : Type*} [MeasurableSpace Ω]\n    (Q : Measure Ω) [IsProbabilityMeasure Q] (n m : ℕ)\n    (wA TA wL TL : ℕ → ℝ) (hTA : ∀ i, 0 ≤ TA i) (hTL : ∀ i, 0 ≤ TL i)\n    (M : ℝ → Market ι Ω) (hM : ∀ r t ω, (M r).numeraire t ω = Real.exp (r * t)) (r : ℝ)\n    (h_match : bondPortfolioDur (Finset.range n) wA TA 0 r =\n      bondPortfolioDur (Finset.range m) wL TL 0 r) :\n    HasDerivAt (fun r' ↦ (M r').price Q (fixedFlows (fun i ↦ (TA i).toNNReal) wA n) -\n        (M r').price Q (fixedFlows (fun i ↦ (TL i).toNNReal) wL m)) 0 r :=\n  price_immunization_first_order Q n m wA TA wL TL hTA hTL M hM r h_match\n"
+      },
+      "metadata": {
+        "reference": "Redington 1952; Fabozzi, Fixed Income Mathematics, ch. 5",
+        "citations": [
+          {
+            "key": "Redington1952"
+          },
+          {
+            "key": "FabozziFIM",
+            "locator": "Ch 5"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. price_immunization_first_order in MathFin/Models/Rates/DeterministicMarket.lean rewrites the market prices as bondPortfolioValue (bondPortfolioValue_eq_price_exp) and applies bondPortfolio_immunization_first_order. SCOPE: deterministic numeraire e^{rt} in every market of the family; zero-coupon portfolios; first order only."
+      }
+    },
+    {
+      "id": "mf-key-rate-market-price",
+      "name": "Key-Rate Durations for Market Prices",
+      "description": "In a family of markets M y whose numeraire is (1+y)^floor(t), under any probability measure Q, at a flat curve y with 1 + y != 0 the key-rate partial derivatives of a coupon bond (cash flows c at integer dates t) sum to the derivative in y of the market price of its fixed cash-flow schedule. These are dollar durations (no division by price); deterministic numeraire only; the market family is a hypothesis.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.Rates.DeterministicMarket\n\nopen MathFin MathFin.Contracts MathFin.Rates MeasureTheory\nopen scoped NNReal\n\n/-- The key-rate partials of a coupon bond sum to the yield-derivative of the market price of its\ncash flows. -/\ntheorem key_rate_market_price {ι Ω : Type*} [MeasurableSpace Ω]\n    (Q : Measure Ω) [IsProbabilityMeasure Q] (n : ℕ) (t : ℕ → ℕ) (c : ℕ → ℝ)\n    (M : ℝ → Market ι Ω) (hM : ∀ y s ω, (M y).numeraire s ω = (1 + y) ^ ⌊s⌋₊)\n    {y : ℝ} (hy : 1 + y ≠ 0) :\n    ∑ j ∈ Finset.range n, deriv (fun x ↦ bondPriceKeyRate (Finset.range n) t c\n        (Function.update (fun _ ↦ y) j x)) y =\n      deriv (fun y' ↦ (M y').price Q (fixedFlows (fun i ↦ ((t i : ℕ) : ℝ≥0)) c n)) y :=\n  sum_deriv_keyRate_eq_deriv_price Q n t c M hM hy\n"
+      },
+      "metadata": {
+        "reference": "Fabozzi, Fixed Income Mathematics, ch. 5",
+        "citations": [
+          {
+            "key": "FabozziFIM",
+            "locator": "Ch 5"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. sum_deriv_keyRate_eq_deriv_price in MathFin/Models/Rates/DeterministicMarket.lean rewrites the market price as bondPriceDisc (bondPriceDisc_eq_price) and applies sum_deriv_keyRate_eq_deriv_bondPriceDisc. SCOPE: deterministic numeraire (1+y)^floor t; integer payment dates; dollar durations."
+      }
     }
   ]
 }

@@ -77,8 +77,8 @@ theorem value_chooser {μ : Measure Ω} [IsProbabilityMeasure μ] {B : ℝ≥0 �
   rw [chooser, Contract.value_both _ _ _ _ _ (integrable_europeanCall_pathPV (hX hT))
       (integrable_europeanPut_pathPV (hX ht₁)), europeanCall, europeanPut, Contract.value_pay,
     Contract.value_pay]
-  simp only [europeanCallPayoff, Payoff.eval, scenarioAt, pathAssets_eq_bsTerminal B hT,
-    pathAssets_eq_bsTerminal B ht₁]
+  simp only [europeanCallPayoff, europeanPutPayoff, Payoff.eval, scenarioAt,
+    pathAssets_eq_bsTerminal B hT, pathAssets_eq_bsTerminal B ht₁]
   rw [bs_call_formula (hyp hT hK), bs_put_formula (hyp ht₁ hKd), chooserPrice_expanded]
   simp only [neg_mul]
 

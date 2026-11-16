@@ -42,7 +42,7 @@ open scoped NNReal Topology
 variable {Ω : Type*} [MeasurableSpace Ω] {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›}
   {T : ℝ≥0} {δ : ℕ → ℝ≥0}
 
-theorem StoppingRule.roundUp_time_tendsto_of_mesh (θ : StoppingRule 𝓕 T)
+theorem _root_.MathFin.StoppingRule.roundUp_time_tendsto_of_mesh (θ : StoppingRule 𝓕 T)
     (hδ : ∀ n, 0 < δ n) (hlim : Tendsto δ atTop (𝓝 0)) (ω : Ω) :
     Tendsto (fun n => (θ.roundUp (hδ n)).time ω) atTop (𝓝 (θ.time ω)) := by
   apply tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds

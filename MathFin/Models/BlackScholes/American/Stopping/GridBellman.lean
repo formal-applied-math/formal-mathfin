@@ -7,7 +7,7 @@ module
 
 public import MathFin.Models.BlackScholes.American.Stopping.GridReindexing
 public import MathFin.Models.BlackScholes.American.Stopping.ActualContact
-public import MathFin.Models.BlackScholes.American.Stopping.DiscreteStoppingValue
+public import MathFin.Probability.Discrete.DiscreteStoppingValue
 
 /-! # Snell envelope (the Bellman recursion) and attained optimality on physical exercise grids
 
