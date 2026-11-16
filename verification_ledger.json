@@ -601,16 +601,16 @@
     "mf-american-put-boundary-expiry-limit": {
       "benchmark_file": "american_put_boundary.json",
       "date": "2026-11-16",
-      "elapsed_s": 3.4,
-      "input_hash": "1723b94e1fc80b95517f245a90b0f31bc52762c728a773a01e61288175d416fa",
-      "verified_at_commit": "8796bf4"
+      "elapsed_s": 3.5,
+      "input_hash": "d718872c72fd2abf45b77ec96de8ca487785487afd5a23b5884a5c979411fde4",
+      "verified_at_commit": "cbacabd"
     },
     "mf-american-put-ge-bsm-european-put": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-16",
-      "elapsed_s": 2.3,
-      "input_hash": "3e6af483bd712c4e9dd3098183a039589143b4b5999c3080bef3c3b1bae17326",
-      "verified_at_commit": "8796bf4"
+      "elapsed_s": 3.5,
+      "input_hash": "0353e006fd5d51c12128e59d9a756f84b8062d8117a1745c0404d261a5abdbfb",
+      "verified_at_commit": "cbacabd"
     },
     "mf-american-put-ge-market-european-put": {
       "benchmark_file": "black_scholes.json",
@@ -629,9 +629,9 @@
     "mf-american-put-log-boundary-convex": {
       "benchmark_file": "american_put_boundary.json",
       "date": "2026-11-16",
-      "elapsed_s": 3.3,
-      "input_hash": "4263e447af4c9073892ad3eae59bdd1fd2c6e6a5629cd3905335dea8424af524",
-      "verified_at_commit": "8796bf4"
+      "elapsed_s": 3.6,
+      "input_hash": "f807e4fa947d9dcc531cec675786f8ce7af5afe3c24b8fa0a8cea9ab94ea78a9",
+      "verified_at_commit": "cbacabd"
     },
     "mf-american-put-optimal-rule-stopped-martingale": {
       "benchmark_file": "american_put_boundary.json",
@@ -643,16 +643,16 @@
     "mf-american-put-right-augmentation-invariance": {
       "benchmark_file": "american_put_boundary.json",
       "date": "2026-11-16",
-      "elapsed_s": 3.0,
-      "input_hash": "ade3a0fe8dd857fe48f795817dfcc5837d66f46d83412c335acc83b02e8a4c44",
-      "verified_at_commit": "8796bf4"
+      "elapsed_s": 3.6,
+      "input_hash": "395dbc168d3c2127523fefd05e2457a2779461787dfbd26002d87f791556c2be",
+      "verified_at_commit": "cbacabd"
     },
     "mf-american-put-stock-boundary-strict-convex": {
       "benchmark_file": "american_put_boundary.json",
       "date": "2026-11-16",
-      "elapsed_s": 2.5,
-      "input_hash": "c2ad9b004d65599e65d10cfeb28c8f93401eee2f7fe383d2bce660549d7cfe00",
-      "verified_at_commit": "8796bf4"
+      "elapsed_s": 3.5,
+      "input_hash": "56f5033c9df4c7b84b97862362c9d054f36fe095c89106959e9858fc95cf4f27",
+      "verified_at_commit": "cbacabd"
     },
     "mf-american-supermartingale": {
       "benchmark_file": "binomial.json",
