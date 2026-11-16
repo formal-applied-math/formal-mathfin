@@ -6,6 +6,7 @@ Authors: Robert Martin
 module
 
 public import MathFin.Probability.Analysis.IndepFreezing
+public import MathFin.Probability.Gaussian.GaussianMoments
 public import MathFin.Models.BlackScholes.American.Stopping.BrownianHeatFlow
 public import MathFin.Models.BlackScholes.American.Stopping.BrownianModel
 
