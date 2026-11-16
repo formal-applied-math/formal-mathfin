@@ -393,7 +393,8 @@ theorem gmFiltration_one : gmFiltration 1 = generateFrom {gmFirstBuy} := by
     rw [hset]
     exact (hB.inter (.const _)).union (hB.compl.inter (.const _))
   · rw [Set.mem_singleton_iff.mp ht]
-    exact ⟨{fun _ ↦ true}, measurableSet_singleton _, rfl⟩
+    change MeasurableSet[MeasurableSpace.comap (gmHist 1) inferInstance] gmFirstBuy
+    exact MeasurableSpace.measurableSet_comap.2 ⟨{fun _ ↦ true}, measurableSet_singleton _, rfl⟩
 
 /-- **The sequential quote after one order is the one-trade quote.** In the sequential
 Glosten–Milgrom model, the dealer's quote after the first order is, `P`-almost surely, the ask
