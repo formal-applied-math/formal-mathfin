@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Probability.Brownian.Ito.DriftProcessPredictable
+public import MathFin.Probability.Brownian.Ito.ItoIntegralCovariation
 public import MathFin.Probability.Brownian.Ito.ItoProcessPredictable
 public import Mathlib.Topology.Algebra.Order.Floor
 public import Mathlib.Topology.MetricSpace.Contracting
@@ -68,6 +69,9 @@ The remaining bridge to the benchmark `sc-thm-8.2.5` (its `ℝ`-time, pointwise-
 * `picardMap_contractingWith`: `picardMap` is a contraction on `E` once `T·L_b + √T·L_σ < 1`.
 * `picardMap_exists_unique_fixedPoint`: in that regime `picardSolution` is a fixed point of the
   Picard map and the only one in `E`.
+* `norm_itoIsometry_lipComp_sub_le`: the Itô integrals of `σ ∘ X` and `σ ∘ Y` (through
+  `itoIsometry`) are `Lσ ‖X − Y‖` apart; `norm_sq_itoProcessCLM_lipComp_sub_le`: at time `s ≤ T`
+  the squared distance is at most `Lσ²` times the band energy of `X − Y`.
 * `bandEnergy_itoProcessAssembled`, `bandEnergy_driftProcessAssembled_le`,
   `bandEnergy_picardMap_sub_le`: the band-by-band (Volterra) estimates.
 * `picardMap_iterate_norm_sq_le`: `‖Φⁿ X − Φⁿ Y‖² ≤ (2(T L_b² + L_σ²) T)ⁿ/n! · ‖X − Y‖²`.
@@ -506,6 +510,32 @@ theorem bandEnergy_lipComp_sub_le (T s : ℝ≥0) (hBmeas : ∀ t, Measurable (B
     (lipschitz_sub_const hf).coeFn_compLp (by simp) Y, Lp.coeFn_sub X Y] with z h1 h2 h3 h4
   simp only [h1, Pi.sub_apply, h2, h3, h4, Function.comp_apply]
   exact key _ _
+
+/-- **The diffusion term of two Picard iterates, through the Itô isometry.** The Itô integral of
+the coefficient composition `σ ∘ X` is an isometry of the predictable `L²` space (`itoIsometry`),
+so the `L²` distance of `∫ σ(X) dB` and `∫ σ(Y) dB` is the `E`-distance of `σ ∘ X` and `σ ∘ Y`,
+which an `Lσ`-Lipschitz `σ` bounds by `Lσ ‖X − Y‖`. -/
+theorem norm_itoIsometry_lipComp_sub_le (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+    (hBmeas : ∀ t, Measurable (B t)) {σ : ℝ → ℝ} {Lσ : ℝ≥0} (hσ : LipschitzWith Lσ σ)
+    (X Y : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
+    ‖ItoIntegralCovariation.itoIsometry hB T hBmeas (lipComp T hBmeas σ Lσ hσ X)
+        - ItoIntegralCovariation.itoIsometry hB T hBmeas (lipComp T hBmeas σ Lσ hσ Y)‖
+      ≤ (Lσ : ℝ) * ‖X - Y‖ := by
+  rw [← map_sub (ItoIntegralCovariation.itoIsometry hB T hBmeas), LinearIsometry.norm_map]
+  exact lipComp_sub_norm_le T hBmeas hσ X Y
+
+/-- **The Itô isometry field of the uniqueness argument, time by time.** For `s ≤ T`, the
+`L²` energy of the difference of the Itô integrals `(σ∘X)●B` and `(σ∘Y)●B` at time `s` is at most
+`Lσ²` times the band energy `∫_{(0,s]×Ω} (X − Y)²`: the isometry on bands
+(`itoProcessCLM_norm_sq`) followed by the Lipschitz bound `bandEnergy_lipComp_sub_le`. -/
+theorem norm_sq_itoProcessCLM_lipComp_sub_le (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+    (hBmeas : ∀ t, Measurable (B t)) {σ : ℝ → ℝ} {Lσ : ℝ≥0} (hσ : LipschitzWith Lσ σ)
+    (X Y : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {s : ℝ≥0} (hsT : s ≤ T) :
+    ‖itoProcessCLM hB T s hBmeas (lipComp T hBmeas σ Lσ hσ X)
+        - itoProcessCLM hB T s hBmeas (lipComp T hBmeas σ Lσ hσ Y)‖ ^ 2
+      ≤ (Lσ : ℝ) ^ 2 * bandEnergy T s hBmeas (X - Y) := by
+  rw [← map_sub (itoProcessCLM hB T s hBmeas), itoProcessCLM_norm_sq hB hsT hBmeas]
+  exact bandEnergy_lipComp_sub_le T s hBmeas hσ X Y
 
 /-- The Volterra rate constant `2 (T L_b² + L_σ²)` of the Picard difference. -/
 noncomputable def picardRate (T Lb Lσ : ℝ≥0) : ℝ := 2 * ((T : ℝ) * (Lb : ℝ) ^ 2 + (Lσ : ℝ) ^ 2)

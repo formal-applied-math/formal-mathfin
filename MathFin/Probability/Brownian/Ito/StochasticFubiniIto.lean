@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Probability.Brownian.Ito.ItoIntegralCLM
+public import MathFin.Probability.Brownian.Ito.ItoIntegralCovariation
 public import MathFin.Probability.Brownian.Ito.StochasticFubini
 public import MathFin.Probability.Brownian.Wiener.WienerIntegralL2
 
@@ -21,6 +22,9 @@ integral of the integrands.
 
 * `stochFubini_ito`: `∫ u, itoIntegralCLM (φ u) ∂ν = itoIntegralCLM g` for `g` representing the
   integrated integrand `s ↦ ∫ u, ψ u s ∂ν`.
+* `stochFubini_itoIsometry`: the same statement for the bundled linear isometry `itoIsometry`
+  (the form the Itô isometry and its covariation are stated in; the two integrals have the same
+  underlying map).
 * `stochFubini_wiener`: the same for `wienerIntegralLp` on `L²(Ioc 0 T)`.
 
 ## References
@@ -59,6 +63,23 @@ theorem stochFubini_ito (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hg : ⇑g =ᵐ[trimMeasure (μ := μ) T hBmeas] fun s ↦ ∫ u, ψ u s ∂ν) :
     ∫ u, itoIntegralCLM hB T hBmeas (φ u) ∂ν = itoIntegralCLM hB T hBmeas g :=
   stochFubini_ofCLM (itoIntegralCLM hB T hBmeas) φ hφ ψ hψ hφψ g hg
+
+/-- **Stochastic Fubini for the bundled Itô isometry** `itoIsometry`, the linear isometry
+`Lp ℝ 2 trim_T →ₗᵢ[ℝ] Lp ℝ 2 μ` whose underlying map is `itoIntegralCLM`
+(`stochFubini_ito` is the statement for the continuous linear map). Same hypotheses, same
+conclusion: the parameter integral of the Itô integrals is the Itô integral of the parameter
+integral of the integrands. -/
+theorem stochFubini_itoIsometry (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+    (hBmeas : ∀ t, Measurable (B t)) (φ : A → Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
+    (hφ : Integrable φ ν) (ψ : A → ℝ≥0 × Ω → ℝ)
+    (hψ : JointIntegrable ψ ν (trimMeasure (μ := μ) T hBmeas))
+    (hφψ : ∀ u, ⇑(φ u) =ᵐ[trimMeasure (μ := μ) T hBmeas] ψ u)
+    (g : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
+    (hg : ⇑g =ᵐ[trimMeasure (μ := μ) T hBmeas] fun s ↦ ∫ u, ψ u s ∂ν) :
+    ∫ u, ItoIntegralCovariation.itoIsometry hB T hBmeas (φ u) ∂ν
+      = ItoIntegralCovariation.itoIsometry hB T hBmeas g :=
+  stochFubini_ofCLM (ItoIntegralCovariation.itoIsometry hB T hBmeas).toContinuousLinearMap
+    φ hφ ψ hψ hφψ g hg
 
 end Ito
 
