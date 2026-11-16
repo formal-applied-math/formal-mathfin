@@ -406,7 +406,7 @@ theorem IsL2SolutionPair.uniqueness_ito {Ω : Type*} {mΩ : MeasurableSpace Ω} 
   have h1 : ∫ ω, ((Iσ X) s ω - (Iσ Y) s ω) ^ 2 ∂μ
       = ‖itoProcessCLM hB T s.toNNReal hBmeas (lipComp T hBmeas σ Lσ hσ φX)
         - itoProcessCLM hB T s.toNNReal hBmeas (lipComp T hBmeas σ Lσ hσ φY)‖ ^ 2 :=
-    (integral_congr_ae (by filter_upwards [hIσ s hs] with ω hω; simp only [hω])).trans
+    (MeasureTheory.integral_congr_ae (by filter_upwards [hIσ s hs] with ω hω; simp only [hω])).trans
       (lp_two_norm_sq _).symm
   have h3 : bandEnergy T s.toNNReal hBmeas (φX - φY)
       = ∫ t in Set.Ioc (0 : ℝ≥0) s.toNNReal, ∫ ω, (X t ω - Y t ω) ^ 2 ∂μ ∂timeMeasure := by

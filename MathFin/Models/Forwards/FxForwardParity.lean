@@ -129,12 +129,12 @@ theorem covered_eq_uncovered_interest_parity {ι : Type*} (s : Finset ι) (q S_T
   ((covered_interest_parity s q S_T S r_d r_f T F h_dom h_for).mp hF).trans
     (uncovered_interest_parity h).symm
 
-/-- **Covered interest parity in a market.** In a finite-state market `M` priced under a finite
-measure `Q` (`Market.price`), suppose the claim paying `1` at `T` is worth `e^{−r_d T}` (the domestic
-bond) and the claim paying the spot `S_T` is worth `S e^{−r_f T}` (the foreign bond, held in domestic
-currency). Then the forward paying `S_T − F` at `T` is worth zero if and only if
-`F = S e^{(r_d − r_f)T}`. The prices are state-price sums (`Market.price_pay_eq_statePricePricing`),
-and `covered_interest_parity` solves for `F`. -/
+/-- **Covered interest parity in a market.** In a finite-state market `M` priced under a
+finite measure `Q` (`Market.price`), suppose the claim paying `1` at `T` is worth `e^{−r_d T}`
+(the domestic bond) and the claim paying the spot `S_T` is worth `S e^{−r_f T}` (the foreign
+bond, held in domestic currency). Then the forward paying `S_T − F` at `T` is worth zero if and
+only if `F = S e^{(r_d − r_f)T}`. The prices are state-price sums
+(`Market.price_pay_eq_statePricePricing`), and `covered_interest_parity` solves for `F`. -/
 theorem market_covered_interest_parity {Ω : Type*} [MeasurableSpace Ω] [Fintype Ω]
     [MeasurableSingletonClass Ω] (M : Market Unit Ω) (Q : Measure Ω) [IsFiniteMeasure Q]
     (T : ℝ≥0) {S r_d r_f F : ℝ}

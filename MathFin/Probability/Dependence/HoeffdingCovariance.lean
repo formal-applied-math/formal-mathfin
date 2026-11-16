@@ -497,6 +497,7 @@ theorem covariance_eq_integral_copulaOf (hX : MemLp X 2 P) (hY : MemLp Y 2 P)
     fin_cases i <;> rfl
   have h := measureReal_le_eq_copulaOf hZ hF ![p.1, p.2]
   rw [e₁, e₂] at h
+  dsimp only
   rw [h, ← cdf_map_eq_measureReal_le hX.aemeasurable, ← cdf_map_eq_measureReal_le hY.aemeasurable]
 
 end Copula

@@ -384,8 +384,8 @@ theorem gmFiltration_one : gmFiltration 1 = generateFrom {gmFirstBuy} := by
     obtain ⟨s, -, rfl⟩ := ht
     have hB : MeasurableSet[generateFrom {gmFirstBuy}] gmFirstBuy :=
       measurableSet_generateFrom (Set.mem_singleton _)
-    have hset : gmHist 1 ⁻¹' s = (gmFirstBuy ∩ {_ | (fun _ : Fin 1 ↦ true) ∈ s}) ∪
-        (gmFirstBuyᶜ ∩ {_ | (fun _ : Fin 1 ↦ false) ∈ s}) := by
+    have hset : gmHist 1 ⁻¹' s = (gmFirstBuy ∩ {_ω | (fun _ : Fin 1 ↦ true) ∈ s}) ∪
+        (gmFirstBuyᶜ ∩ {_ω | (fun _ : Fin 1 ↦ false) ∈ s}) := by
       ext ω
       simp only [Set.mem_preimage, Set.mem_union, Set.mem_inter_iff, Set.mem_setOf_eq,
         Set.mem_compl_iff, gmFirstBuy, Set.mem_singleton_iff]

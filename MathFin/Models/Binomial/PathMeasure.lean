@@ -11,6 +11,7 @@ public import MathFin.Probability.Discrete.SnellEnvelope
 public import MathFin.Probability.Discrete.MarkovPathMeasure
 public import Mathlib.Probability.ConditionalExpectation
 public import Mathlib.Probability.Distributions.Bernoulli
+public import Mathlib.Probability.ProbabilityMassFunction.Constructions
 public import Mathlib.Probability.Independence.InfinitePi
 public import Mathlib.Topology.Separation.CompletelyRegular
 
@@ -356,7 +357,7 @@ private lemma isPiSystem_pathCylinder :
   ext η
   simp only [pathCylinder, Set.mem_inter_iff, Set.mem_setOf_eq]
   refine ⟨fun h k hk ↦ ?_, fun h ↦ ⟨fun k hk ↦ ?_, fun k hk ↦ ?_⟩⟩
-  · rcases le_total k n with hkn | hkn
+  · rcases le_or_gt k n with hkn | hkn
     · exact (h.1 k hkn).trans (h1 k hkn).symm
     · exact (h.2 k (by omega)).trans (h2 k (by omega)).symm
   · exact (h k (hk.trans (le_max_left _ _))).trans (h1 k hk)
