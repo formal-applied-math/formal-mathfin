@@ -1385,9 +1385,9 @@
     "mf-bs-market-american-put-price": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-16",
-      "elapsed_s": 2.1,
-      "input_hash": "9bbc97f8a9e06b34a9dea4ba406b23452e7f25c82bfc74f7962853e11a6716b5",
-      "verified_at_commit": "f9c3292"
+      "elapsed_s": 3.6,
+      "input_hash": "fb0001b2de9d63cb6fda84f5c09c8146e6eb87e0edd31960341a8a468b7de240",
+      "verified_at_commit": "4eb130a"
     },
     "mf-bs-market-call-price": {
       "benchmark_file": "contracts.json",
