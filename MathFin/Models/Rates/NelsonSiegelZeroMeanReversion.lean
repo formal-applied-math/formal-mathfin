@@ -6,13 +6,15 @@ Authors: Yang Ye
 module
 
 public import MathFin.Models.Rates.NelsonSiegelSvensson
+public import MathFin.Models.Rates.VasicekZeroMeanReversionLimit
+public import MathFin.Models.Rates.VasicekYieldNelsonSiegel
 
 /-!
 # The Nelson–Siegel loading at vanishing decay
 
 `Models/Rates/NelsonSiegelSvensson.lean` defines the Nelson–Siegel–Svensson curve through the
 slope factor `s(x) = (1 − e^{−x})/x` (`nssSlope`), and `Models/Rates/VasicekYieldNelsonSiegel.lean`
-reads the Vasicek zero yield in the same factors. This file takes the decay parameter `κ → 0⁺`
+reads the Vasicek zero yield in the same factors. This file takes the decay rate `κ` (the reciprocal `1/l` of Svensson's decay constant; `κ → 0⁺` is `l → ∞`, the flat-`c₀ + c₁` degeneration) `κ → 0⁺`
 at a fixed maturity `τ ≠ 0` in the decay-parameterized loading `s(κτ) = (1 − e^{−κτ})/(κτ)`:
 
   `(1 − e^{−κτ})/(κτ) → 1`, so the Nelson–Siegel zero rate
@@ -41,7 +43,7 @@ at a fixed maturity `τ ≠ 0` in the decay-parameterized loading `s(κτ) = (1 
   is `Models/Rates/NelsonSiegelSvensson.lean`'s `tendsto_nssYield_nhdsNE_zero`, not anything
   here.
 * The epsilon-guard behaviour is described as the motivating defect species only; no engine is
-  formalized here and no claim is made about any current implementation's guard.
+  formalized here and no engine is formalized here; the limits are stated as the values any correct small-κ branch must reach.
 
 ## Main definitions
 
@@ -89,20 +91,25 @@ theorem tendsto_exp_neg_mul_zero_meanReversion (t : ℝ) :
     (by simp)).mono_left nhdsWithin_le_nhds
 
 /-- **The Nelson–Siegel loading at vanishing decay**: `(1 − e^{−κτ})/(κτ) → 1` as `κ → 0⁺`, at a
-fixed maturity `τ ≠ 0`. The expression is the slope factor `s = nssSlope` composed with
-`κ ↦ κ·τ`, so the limit transports `tendsto_nssSlope_nhdsNE_zero` (`x → 0` through nonzero
-values) along that map, which sends `κ → 0⁺` into nonzero values. -/
+fixed maturity `τ ≠ 0`. Derived from the existing two-sided Vasicek `B` limit
+(`tendsto_vasicekBondB_zero_meanReversion`, which is the stronger `𝓝[≠] 0` statement) through
+the library's own bridge `vasicekBondB_div_eq_nssSlope` — the loading is the Vasicek
+discount-factor slope divided by the maturity, so no independent analysis is needed. -/
 theorem tendsto_oneMinusExpOverX_zero_meanReversion (t : ℝ) (ht : t ≠ 0) :
     Tendsto (fun κ => (1 - Real.exp (-(κ * t))) / (κ * t)) (𝓝[>] 0) (𝓝 1) := by
-  have hdiv : Tendsto (fun κ : ℝ => κ * t) (𝓝[>] 0) (𝓝[≠] 0) := by
-    rw [tendsto_nhdsWithin_iff]
-    refine ⟨?_, ?_⟩
-    · have h0 : Continuous fun κ : ℝ => κ * t := by fun_prop
-      exact (h0.tendsto' 0 0 (by simp)).mono_left nhdsWithin_le_nhds
-    · filter_upwards [self_mem_nhdsWithin] with κ hκ
-      simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
-      exact mul_ne_zero (ne_of_gt (Set.mem_Ioi.mp hκ)) ht
-  exact tendsto_nssSlope_nhdsNE_zero.comp hdiv
+  have hsub : Set.Ioi (0:ℝ) ⊆ {x : ℝ | x ≠ 0} := fun x hx => ne_of_gt hx
+  have hfil : 𝓝[Set.Ioi (0:ℝ)] (0:ℝ) ≤ 𝓝[{x : ℝ | x ≠ 0}] (0:ℝ) := nhdsWithin_mono (0:ℝ) hsub
+  have hB : Tendsto (fun κ : ℝ => vasicekBondB κ t) (𝓝[>] 0) (𝓝 t) :=
+    (tendsto_vasicekBondB_zero_meanReversion t).mono_left hfil
+  have hbridge : (fun κ : ℝ => (1 - Real.exp (-(κ * t))) / (κ * t))
+      = fun κ : ℝ => vasicekBondB κ t / t := by
+    funext κ
+    rw [vasicekBondB_div_eq_nssSlope]
+    rfl
+  rw [hbridge]
+  have hdiv : Tendsto (fun κ : ℝ => vasicekBondB κ t / t) (𝓝[>] 0) (𝓝 (t / t)) :=
+    ((tendsto_vasicekBondB_zero_meanReversion t).div_const t).mono_left hfil
+  simpa [div_self ht] using hdiv
 
 /-- The **Nelson–Siegel zero rate** in the decay-parameter form, with the loading written
 through the library's slope factor (`nssSlope`, `Models/Rates/NelsonSiegelSvensson.lean`):
