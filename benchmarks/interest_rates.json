@@ -1678,7 +1678,7 @@
     },
     {
       "id": "mf-nelson-siegel-zero-rate-zero-decay-limit",
-      "name": "Nelson-Siegel Loading Tends to 1 and the Zero Rate to c0 + c1 at Vanishing Decay",
+      "name": "Nelson–Siegel Loading Tends to 1 and the Zero Rate to c0 + c1 at Vanishing Decay",
       "description": "At a fixed maturity t != 0 the Nelson-Siegel loading s(kappa*t) = (1 - exp(-kappa*t))/(kappa*t) tends to 1 as the decay parameter kappa -> 0+, so the decay-parameterized zero rate c0 + c1*s(kappa*t) + c2*(s(kappa*t) - exp(-kappa*t)) tends to c0 + c1, and the Svensson second loading term c3*(s(kappa*t) - exp(-kappa*t)) tends to 0. Substitution is not the limit: Lean's x/0 = 0 sends the loading to 0 at kappa = 0 exactly (numerator 1 - exp(0) = 0), so a denominator-epsilon guard evaluates the zero rate to c0 - c2 and the second term to -c3 at kappa = 0 -- values of a different model, recorded as companion theorems. A small-kappa branch must return the limits. The same guarded-limit species as the Vasicek A(t,T) hardcoded-to-0 guard fixed upstream (VasicekZeroMeanReversionLimit.lean's motivating precedent). The core limit transports the repo's existing nssSlope short-end limit tendsto_nssSlope_nhdsNE_zero (NelsonSiegelSvensson.lean) along kappa -> kappa*t via tendsto_div_const_nhdsNE_zero -- no parallel loading analysis.",
       "domain": "mathematical_finance",
       "metadata": {
