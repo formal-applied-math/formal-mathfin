@@ -7,6 +7,7 @@ module
 
 public import MathFin.Insurance.Mortality
 public import MathFin.Models.Rates.ZCB
+import Mathlib.Tactic.LinearCombination
 
 /-!
 # Net premium principle and the life annuity-due
@@ -50,6 +51,8 @@ ended is `lifeAnnuityDue_eq_value` (`Insurance/AnnuityValue.lean`).
 * `net_premium_principle`: `P · A = B ↔ P = B / A` for `A ≠ 0`.
 * `lifeAnnuityDue_const`: under a constant force of mortality `m` and `e^{-(r + m)} ≠ 1`, the life
   annuity-due is the geometric closed form at the discount factor `e^{-(r + m)}`.
+* `term_add_endowment_eq_annuityDue`: finite term insurance plus survivor endowment equals
+  `1 - (1 - v) * ä_n`, with `ä_n` the annuity-due survival-payment sum.
 
 ## References
 
@@ -106,5 +109,19 @@ theorem lifeAnnuityDue_const {r m : ℝ} (n : ℕ) (hv : Real.exp (-(r + m)) ≠
     intervalIntegral.integral_const, ← Real.exp_add, ← Real.exp_nat_mul, smul_eq_mul]
   congr 1
   ring
+
+/-- **Finite term insurance plus survivor endowment**: the death sum is the
+`value_cdsProtectionLeg` unit-grid value at recovery `R = 0`, and the annuity sum is the
+`lifeAnnuityDue` survival-payment schedule at dates `k` (not the arrears CDS premium leg,
+which pays at `k + 1`). -/
+theorem term_add_endowment_eq_annuityDue (S : ℕ → ℝ) (hS0 : S 0 = 1)
+    (v : ℝ) (n : ℕ) :
+    (∑ k ∈ Finset.range n, v ^ (k + 1) * (S k - S (k + 1))) + v ^ n * S n
+      = 1 - (1 - v) * ∑ k ∈ Finset.range n, v ^ k * S k := by
+  induction n with
+  | zero => simp [hS0]
+  | succ n IH =>
+      rw [Finset.sum_range_succ, Finset.sum_range_succ, pow_succ v n]
+      linear_combination IH
 
 end MathFin
