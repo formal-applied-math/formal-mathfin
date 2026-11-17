@@ -6,8 +6,6 @@ Authors: Yang Ye
 module
 
 public import MathFin.Models.Rates.NelsonSiegelSvensson
-public import MathFin.Models.Rates.VasicekZeroMeanReversionLimit
-public import MathFin.Models.Rates.VasicekYieldNelsonSiegel
 
 /-!
 # The Nelson–Siegel loading at vanishing decay
@@ -107,8 +105,7 @@ theorem tendsto_oneMinusExpOverX_zero_meanReversion (t : ℝ) (ht : t ≠ 0) :
 through the library's slope factor (`nssSlope`, `Models/Rates/NelsonSiegelSvensson.lean`):
 `c₀ + c₁·s(κτ) + c₂·(s(κτ) − e^{−κτ})`. For `κ ≠ 0` this is the specialization
 `nssYield c0 c1 c2 0 κ⁻¹ 0 t` of the library's decay-constant form. The plain three-factor
-Nelson–Siegel curve as a
-function of the decay `κ` at a fixed maturity `τ`; the Svensson extension adds one more term of
+Nelson–Siegel curve as a function of the decay `κ` at a fixed maturity `τ`; the Svensson extension adds one more term of
 the same second-loading shape (see `tendsto_svenssonSecondLoading_zero_meanReversion`). -/
 noncomputable def nelsonSiegelZeroRate (c0 c1 c2 κ t : ℝ) : ℝ :=
   c0 + c1 * nssSlope (κ * t)
