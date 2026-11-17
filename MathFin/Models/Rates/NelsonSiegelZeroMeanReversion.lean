@@ -99,9 +99,6 @@ the library's own bridge `vasicekBondB_div_eq_nssSlope` — the loading is the V
 discount-factor slope divided by the maturity, so no independent analysis is needed. -/
 theorem tendsto_oneMinusExpOverX_zero_meanReversion (t : ℝ) (ht : t ≠ 0) :
     Tendsto (fun κ => (1 - Real.exp (-(κ * t))) / (κ * t)) (𝓝[>] 0) (𝓝 1) := by
-  have hsub : Set.Ioi (0:ℝ) ⊆ {x : ℝ | x ≠ 0} := fun x hx => ne_of_gt hx
-  have hfil : 𝓝[Set.Ioi (0:ℝ)] (0:ℝ) ≤ 𝓝[{x : ℝ | x ≠ 0}] (0:ℝ) := nhdsWithin_mono (0:ℝ) hsub
-  have hfil : 𝓝[Set.Ioi (0:ℝ)] (0:ℝ) ≤ 𝓝[{x : ℝ | x ≠ 0}] (0:ℝ) := nhdsWithin_mono (0:ℝ) hsub
   have hbridge : (fun κ : ℝ => (1 - Real.exp (-(κ * t))) / (κ * t))
       = fun κ : ℝ => vasicekBondB κ t / t := by
     funext κ
@@ -109,7 +106,7 @@ theorem tendsto_oneMinusExpOverX_zero_meanReversion (t : ℝ) (ht : t ≠ 0) :
     rfl
   rw [hbridge]
   have hdiv : Tendsto (fun κ : ℝ => vasicekBondB κ t / t) (𝓝[>] 0) (𝓝 (t / t)) :=
-    ((tendsto_vasicekBondB_zero_meanReversion t).div_const t).mono_left hfil
+    ((tendsto_vasicekBondB_zero_meanReversion t).div_const t).mono_left (nhdsGT_le_nhdsNE 0)
   simpa [div_self ht] using hdiv
 
 /-- The **Nelson–Siegel zero rate** in the decay-parameter form, with the loading written
