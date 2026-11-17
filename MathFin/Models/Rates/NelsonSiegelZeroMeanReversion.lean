@@ -60,11 +60,11 @@ degeneration) `κ → 0⁺` at a fixed maturity `τ ≠ 0` in the decay-paramete
 * `tendsto_nelsonSiegelZeroRate_zero_meanReversion`: the Nelson–Siegel zero rate tends to
   `c₀ + c₁` as `κ → 0⁺`.
 * `nelsonSiegelZeroRate_closedForm_zero_meanReversion`: the `κ = 0` substitution gives
-  `c₀ − c₂`, not the limit.
+  `c₀ − c₂`, where the limit is `c₀ + c₁`.
 * `tendsto_svenssonSecondLoading_zero_meanReversion`: the Svensson second loading term
   `c₃·(s(κτ) − e^{−κτ})` tends to `0` as `κ → 0⁺`.
 * `svenssonSecondLoading_closedForm_zero_meanReversion`: the `κ = 0` substitution gives `−c₃`,
-  not the limit.
+  where the limit is `0`.
 
 ## References
 
@@ -86,7 +86,8 @@ namespace MathFin
 open Filter Topology
 
 /-- `exp(−κ·τ) → 1` as `κ → 0⁺`, at a fixed maturity `τ` — the exponential building block of
-the two vanishing-decay limits below. -/
+the two composite vanishing-decay limits below (the zero rate and the Svensson second
+loading term). -/
 theorem tendsto_exp_neg_mul_zero_meanReversion (t : ℝ) :
     Tendsto (fun κ : ℝ => Real.exp (-(κ * t))) (𝓝[>] 0) (𝓝 1) :=
   ((Real.continuous_exp.comp (continuous_id.mul continuous_const).neg).tendsto' 0 1
@@ -95,8 +96,8 @@ theorem tendsto_exp_neg_mul_zero_meanReversion (t : ℝ) :
 /-- **The Nelson–Siegel loading at vanishing decay**: `(1 − e^{−κτ})/(κτ) → 1` as `κ → 0⁺`, at a
 fixed maturity `τ ≠ 0`. Derived from the existing two-sided Vasicek `B` limit
 (`tendsto_vasicekBondB_zero_meanReversion`, which is the stronger `𝓝[≠] 0` statement) through
-the library's own bridge `vasicekBondB_div_eq_nssSlope` — the loading is the Vasicek
-discount-factor slope divided by the maturity, so no independent analysis is needed. -/
+the library's own bridge `vasicekBondB_div_eq_nssSlope` — the loading is the Vasicek rate loading `vasicekBondB` divided by the maturity, so no
+independent analysis is needed. -/
 theorem tendsto_oneMinusExpOverX_zero_meanReversion (t : ℝ) (ht : t ≠ 0) :
     Tendsto (fun κ => (1 - Real.exp (-(κ * t))) / (κ * t)) (𝓝[>] 0) (𝓝 1) := by
   have hbridge : (fun κ : ℝ => (1 - Real.exp (-(κ * t))) / (κ * t))
