@@ -12,9 +12,9 @@ public import MathFin.Models.Rates.NelsonSiegelSvensson
 
 `Models/Rates/NelsonSiegelSvensson.lean` defines the Nelson–Siegel–Svensson curve through the
 slope factor `s(x) = (1 − e^{−x})/x` (`nssSlope`), and `Models/Rates/VasicekYieldNelsonSiegel.lean`
-reads the Vasicek zero yield in the same factors. This file takes the decay rate `κ` (the
-reciprocal `1/l` of Svensson's decay constant; `κ → 0⁺` is `l → ∞`, the flat-`c₀ + c₁`
-degeneration) `κ → 0⁺` at a fixed maturity `τ ≠ 0` in the decay-parameterized loading
+reads the Vasicek zero yield in the same factors. This file takes the decay rate `κ` — the
+reciprocal `1/l` of Svensson's decay constant (`κ → 0⁺` is `l → ∞`, the flat-`c₀ + c₁`
+degeneration) — to `0⁺` at a fixed maturity `τ ≠ 0` in the decay-parameterized loading
 `s(κτ) = (1 − e^{−κτ})/(κτ)`:
 
   `(1 − e^{−κτ})/(κτ) → 1`, so the Nelson–Siegel zero rate
