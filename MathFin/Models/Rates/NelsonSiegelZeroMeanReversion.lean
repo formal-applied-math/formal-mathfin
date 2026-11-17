@@ -89,30 +89,25 @@ open Filter Topology
 the two composite vanishing-decay limits below (the zero rate and the Svensson second
 loading term). -/
 theorem tendsto_exp_neg_mul_zero_meanReversion (t : ℝ) :
-    Tendsto (fun κ : ℝ => Real.exp (-(κ * t))) (𝓝[>] 0) (𝓝 1) :=
+    Tendsto (fun κ : ℝ ↦ Real.exp (-(κ * t))) (𝓝[>] 0) (𝓝 1) :=
   ((Real.continuous_exp.comp (continuous_id.mul continuous_const).neg).tendsto' 0 1
     (by simp)).mono_left nhdsWithin_le_nhds
 
 /-- **The Nelson–Siegel loading at vanishing decay**: `(1 − e^{−κτ})/(κτ) → 1` as `κ → 0⁺`, at a
-fixed maturity `τ ≠ 0`. Derived from the existing two-sided Vasicek `B` limit
-(`tendsto_vasicekBondB_zero_meanReversion`, which is the stronger `𝓝[≠] 0` statement) through
-the library's own bridge `vasicekBondB_div_eq_nssSlope` — the loading is the Vasicek rate loading `vasicekBondB` divided by the maturity, so no
-independent analysis is needed. -/
+fixed maturity `τ ≠ 0`. Derived by transporting the repo's own `nssSlope` limit
+(`tendsto_nssSlope_nhdsNE_zero`, `Models/Rates/NelsonSiegelSvensson.lean`) along
+`κ ↦ κ·τ` — no parallel loading analysis. -/
 theorem tendsto_oneMinusExpOverX_zero_meanReversion (t : ℝ) (ht : t ≠ 0) :
-    Tendsto (fun κ => (1 - Real.exp (-(κ * t))) / (κ * t)) (𝓝[>] 0) (𝓝 1) := by
-  have hbridge : (fun κ : ℝ => (1 - Real.exp (-(κ * t))) / (κ * t))
-      = fun κ : ℝ => vasicekBondB κ t / t := by
-    funext κ
-    rw [vasicekBondB_div_eq_nssSlope]
-    rfl
-  rw [hbridge]
-  have hdiv : Tendsto (fun κ : ℝ => vasicekBondB κ t / t) (𝓝[>] 0) (𝓝 (t / t)) :=
-    ((tendsto_vasicekBondB_zero_meanReversion t).div_const t).mono_left (nhdsGT_le_nhdsNE 0)
-  simpa [div_self ht] using hdiv
+    Tendsto (fun κ ↦ (1 - Real.exp (-(κ * t))) / (κ * t)) (𝓝[>] 0) (𝓝 1) := by
+  have hcomp : Tendsto (fun κ : ℝ ↦ κ * t) (𝓝[≠] (0 : ℝ)) (𝓝[≠] (0 : ℝ)) := by
+    simpa using tendsto_div_const_nhdsNE_zero (inv_ne_zero ht)
+  exact (tendsto_nssSlope_nhdsNE_zero.comp hcomp).mono_left (nhdsGT_le_nhdsNE 0)
 
 /-- The **Nelson–Siegel zero rate** in the decay-parameter form, with the loading written
 through the library's slope factor (`nssSlope`, `Models/Rates/NelsonSiegelSvensson.lean`):
-`c₀ + c₁·s(κτ) + c₂·(s(κτ) − e^{−κτ})`. The plain three-factor Nelson–Siegel curve as a
+`c₀ + c₁·s(κτ) + c₂·(s(κτ) − e^{−κτ})`. For `κ ≠ 0` this is the specialization
+`nssYield c0 c1 c2 0 κ⁻¹ 0 t` of the library's decay-constant form. The plain three-factor
+Nelson–Siegel curve as a
 function of the decay `κ` at a fixed maturity `τ`; the Svensson extension adds one more term of
 the same second-loading shape (see `tendsto_svenssonSecondLoading_zero_meanReversion`). -/
 noncomputable def nelsonSiegelZeroRate (c0 c1 c2 κ t : ℝ) : ℝ :=
@@ -125,10 +120,10 @@ fixed maturity `τ ≠ 0`. The slope loading `s(κτ)` tends to `1`
 term `c₂·(s(κτ) − e^{−κτ})` vanishes and only level plus slope survive. This limit is the value
 a correct small-`κ` branch of the zero rate has to reach. -/
 theorem tendsto_nelsonSiegelZeroRate_zero_meanReversion (c0 c1 c2 t : ℝ) (ht : t ≠ 0) :
-    Tendsto (fun κ => nelsonSiegelZeroRate c0 c1 c2 κ t) (𝓝[>] 0) (𝓝 (c0 + c1)) := by
+    Tendsto (fun κ ↦ nelsonSiegelZeroRate c0 c1 c2 κ t) (𝓝[>] 0) (𝓝 (c0 + c1)) := by
   have hL := tendsto_oneMinusExpOverX_zero_meanReversion t ht
   have hE := tendsto_exp_neg_mul_zero_meanReversion t
-  have h : Tendsto (fun κ => nelsonSiegelZeroRate c0 c1 c2 κ t) (𝓝[>] 0)
+  have h : Tendsto (fun κ ↦ nelsonSiegelZeroRate c0 c1 c2 κ t) (𝓝[>] 0)
       (𝓝 (c0 + c1 * 1 + c2 * (1 - 1))) := by
     refine ((tendsto_const_nhds.add (hL.const_mul c1)).add
       ((hL.sub hE).const_mul c2)).congr' ?_
@@ -138,7 +133,8 @@ theorem tendsto_nelsonSiegelZeroRate_zero_meanReversion (c0 c1 c2 t : ℝ) (ht :
 
 /-- **The `κ = 0` substitution is not the limit.** Lean's `x / 0 = 0` sends the loading
 `s(κτ)` to `0` at `κ = 0` (numerator `1 − e^0 = 0`, junk denominator), so the zero rate
-evaluates to `c₀ − c₂` there — a different value than the limit `c₀ + c₁`
+evaluates to `c₀ − c₂` there — the κ = 0 junk value, independent of `c₁`; the limit
+`tendsto_nelsonSiegelZeroRate_zero_meanReversion` is `c₀ + c₁` instead
 (`tendsto_nelsonSiegelZeroRate_zero_meanReversion`): the removable singularity at `κ = 0` has
 to be filled by the limit, not by substitution. -/
 theorem nelsonSiegelZeroRate_closedForm_zero_meanReversion (c0 c1 c2 t : ℝ) :
@@ -151,10 +147,10 @@ theorem nelsonSiegelZeroRate_closedForm_zero_meanReversion (c0 c1 c2 t : ℝ) :
 loading has to reach at `κ = 0`: `0`, not the substituted value `−c₃`
 (`svenssonSecondLoading_closedForm_zero_meanReversion`), whatever the coefficient `c₃`. -/
 theorem tendsto_svenssonSecondLoading_zero_meanReversion (c3 t : ℝ) (ht : t ≠ 0) :
-    Tendsto (fun κ => c3 * (nssSlope (κ * t) - Real.exp (-(κ * t)))) (𝓝[>] 0) (𝓝 0) := by
+    Tendsto (fun κ ↦ c3 * (nssSlope (κ * t) - Real.exp (-(κ * t)))) (𝓝[>] 0) (𝓝 0) := by
   have hL := tendsto_oneMinusExpOverX_zero_meanReversion t ht
   have hE := tendsto_exp_neg_mul_zero_meanReversion t
-  have h : Tendsto (fun κ => c3 * (nssSlope (κ * t) - Real.exp (-(κ * t)))) (𝓝[>] 0)
+  have h : Tendsto (fun κ ↦ c3 * (nssSlope (κ * t) - Real.exp (-(κ * t)))) (𝓝[>] 0)
       (𝓝 (c3 * (1 - 1))) := by
     refine ((hL.sub hE).const_mul c3).congr' ?_
     filter_upwards [self_mem_nhdsWithin] with κ _
