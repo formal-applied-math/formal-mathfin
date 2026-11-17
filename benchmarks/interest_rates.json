@@ -1683,7 +1683,7 @@
    "domain": "mathematical_finance",
    "metadata": {
     "chapter": null,
-    "reference": "Nelson, C. R., Siegel, A. F. (1987), Parsimonious Modeling of Yield Curves, Journal of Business 60(4), 473-489; Svensson, L. E. O. (1994), Estimating and Interpreting Forward Interest Rates: Sweden 1992-1994, IMF WP/94/114; cf. the guarded limit of QuantLib's NelsonSiegelFitting/SvenssonFitting decay parameter",
+    "reference": "C. R. Nelson and A. F. Siegel, Parsimonious Modeling of Yield Curves, Journal of Business 60(4) (1987), 473–489",
     "citations": [
      {
       "key": "NelsonSiegel1987"
