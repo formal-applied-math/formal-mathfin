@@ -1682,7 +1682,7 @@
    "description": "At a fixed maturity t != 0 the Nelson-Siegel loading s(kappa*t) = (1 - exp(-kappa*t))/(kappa*t) tends to 1 as the decay parameter kappa -> 0+, so the decay-parameterized zero rate c0 + c1*s(kappa*t) + c2*(s(kappa*t) - exp(-kappa*t)) tends to c0 + c1, and the Svensson second loading term c3*(s(kappa*t) - exp(-kappa*t)) tends to 0. Substitution is not the limit: Lean's x/0 = 0 sends the loading to 0 at kappa = 0 exactly (numerator 1 - exp(0) = 0), so a denominator-epsilon guard evaluates the zero rate to c0 - c2 and the second term to -c3 at kappa = 0 -- values of a different model, recorded as companion theorems. A small-kappa branch must return the limits. The same guarded-limit species as the Vasicek A(t,T) hardcoded-to-0 guard fixed upstream (VasicekZeroMeanReversionLimit.lean's motivating precedent). Limits proved from the repo's existing two-sided Vasicek B limit (VasicekZeroMeanReversionLimit.lean) through the bridge vasicekBondB_div_eq_nssSlope (VasicekYieldNelsonSiegel.lean) -- no parallel loading analysis.",
    "domain": "mathematical_finance",
    "metadata": {
-    "chapter": 14,
+    "chapter": null,
     "reference": "Nelson, C. R., Siegel, A. F. (1987), Parsimonious Modeling of Yield Curves, Journal of Business 60(4), 473-489; Svensson, L. E. O. (1994), Estimating and Interpreting Forward Interest Rates: Sweden 1992-1994, IMF WP/94/114; cf. the guarded limit of QuantLib's NelsonSiegelFitting/SvenssonFitting decay parameter",
     "citations": [
      {
