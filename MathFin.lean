@@ -669,7 +669,7 @@ import MathFin.Models.Rates.VasicekMarketPDE
 import MathFin.Models.Rates.VasicekMarketPriceOfRisk
 -- Vasicek bond price as κ → 0⁺: the three-term cancellation limit to the driftless model
 import MathFin.Models.Rates.VasicekZeroMeanReversionLimit
--- The Nelson-Siegel/Svensson zero-rate at vanishing decay: the loading tends
+-- The Nelson–Siegel/Svensson zero-rate at vanishing decay: the loading tends
 -- to 1, the zero rate to c0 + c1, the Svensson second term to 0 (the guarded-limit values)
 import MathFin.Models.Rates.NelsonSiegelZeroMeanReversion
 -- CIR loadings: B solves the Riccati equation, A solves A' = −κθB
