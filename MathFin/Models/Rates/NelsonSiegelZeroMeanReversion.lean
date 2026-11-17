@@ -43,7 +43,7 @@ degeneration) `κ → 0⁺` at a fixed maturity `τ ≠ 0` in the decay-paramete
   is `Models/Rates/NelsonSiegelSvensson.lean`'s `tendsto_nssYield_nhdsNE_zero`, not anything
   here.
 * The epsilon-guard behaviour is described as the motivating defect species only; no engine is
-  formalized here; the limits are stated as the values any correct small-κ branch must reach.
+  formalized here; the limits are stated as the values any correct small-`κ` branch must reach.
 
 ## Main definitions
 
@@ -131,10 +131,9 @@ theorem tendsto_nelsonSiegelZeroRate_zero_meanReversion (c0 c1 c2 t : ℝ) (ht :
 
 /-- **The `κ = 0` substitution is not the limit.** Lean's `x / 0 = 0` sends the loading
 `s(κτ)` to `0` at `κ = 0` (numerator `1 − e^0 = 0`, junk denominator), so the zero rate
-evaluates to `c₀ − c₂` there — the κ = 0 junk value, independent of `c₁`; the limit
+evaluates to `c₀ − c₂` there — the `κ = 0` junk value, independent of `c₁`; the limit
 `tendsto_nelsonSiegelZeroRate_zero_meanReversion` is `c₀ + c₁` instead: the removable
 singularity at `κ = 0` has to be filled by the limit, not by substitution. -/
-
 theorem nelsonSiegelZeroRate_closedForm_zero_meanReversion (c0 c1 c2 t : ℝ) :
     nelsonSiegelZeroRate c0 c1 c2 0 t = c0 - c2 := by
   simp [nelsonSiegelZeroRate, nssSlope, sub_eq_add_neg]
