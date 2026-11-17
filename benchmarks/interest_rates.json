@@ -1698,7 +1698,7 @@
     ],
     "difficulty": "intermediate",
     "formalization_status": "full",
-    "formalization_scope": "Full formal proof, MathFin/Models/Rates/NelsonSiegelZeroMeanReversion.lean. The core limit derives from the repo's existing two-sided Vasicek B limit (VasicekZeroMeanReversionLimit.lean) through the bridge vasicekBondB_div_eq_nssSlope (VasicekYieldNelsonSiegel.lean) -- no parallel loading analysis. The substitution companions record the junk values Lean's total division produces at kappa = 0. Scope: kappa -> 0+ at fixed maturity; no engine is formalized. Axioms-clean."
+    "formalization_scope": "Full formal proof, MathFin/Models/Rates/NelsonSiegelZeroMeanReversion.lean. The core limit transports the repo's existing nssSlope short-end limit tendsto_nssSlope_nhdsNE_zero (MathFin/Models/Rates/NelsonSiegelSvensson.lean) along kappa -> kappa*t via tendsto_div_const_nhdsNE_zero -- no parallel loading analysis. The substitution companions record the junk values Lean's total division produces at kappa = 0. Scope: kappa -> 0+ at fixed maturity; no engine is formalized. Axioms-clean."
    },
    "code": {
     "lean": "import MathFin.Models.Rates.NelsonSiegelZeroMeanReversion\n\nopen Filter Topology Set\n\nnamespace MathFin\n\ntheorem nelson_siegel_zero_rate_zero_decay_limit_thm (c0 c1 c2 t : ℝ) (ht : t ≠ 0) :\n    Tendsto (fun κ => nelsonSiegelZeroRate c0 c1 c2 κ t) (nhdsWithin 0 (Set.Ioi 0))\n      (nhds (c0 + c1)) :=\n  tendsto_nelsonSiegelZeroRate_zero_meanReversion c0 c1 c2 t ht\n\nend MathFin\n"

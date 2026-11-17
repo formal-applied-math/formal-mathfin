@@ -104,9 +104,10 @@ theorem tendsto_oneMinusExpOverX_zero_meanReversion (t : ℝ) (ht : t ≠ 0) :
 /-- The **Nelson–Siegel zero rate** in the decay-parameter form, with the loading written
 through the library's slope factor (`nssSlope`, `Models/Rates/NelsonSiegelSvensson.lean`):
 `c₀ + c₁·s(κτ) + c₂·(s(κτ) − e^{−κτ})`. For `κ ≠ 0` this is the specialization
-`nssYield c0 c1 c2 0 κ⁻¹ 0 t` of the library's decay-constant form. The plain three-factor
-Nelson–Siegel curve as a function of the decay `κ` at a fixed maturity `τ`; the Svensson extension adds one more term of
-the same second-loading shape (see `tendsto_svenssonSecondLoading_zero_meanReversion`). -/
+`nssYield c0 c1 c2 0 κ⁻¹ 0 t` of the library's decay-constant form — the plain three-factor
+Nelson–Siegel curve as a function of the decay `κ` at a fixed maturity `τ`; the Svensson
+extension adds one more term of the same second-loading shape
+(see `tendsto_svenssonSecondLoading_zero_meanReversion`). -/
 noncomputable def nelsonSiegelZeroRate (c0 c1 c2 κ t : ℝ) : ℝ :=
   c0 + c1 * nssSlope (κ * t)
     + c2 * (nssSlope (κ * t) - Real.exp (-(κ * t)))
@@ -131,9 +132,9 @@ theorem tendsto_nelsonSiegelZeroRate_zero_meanReversion (c0 c1 c2 t : ℝ) (ht :
 /-- **The `κ = 0` substitution is not the limit.** Lean's `x / 0 = 0` sends the loading
 `s(κτ)` to `0` at `κ = 0` (numerator `1 − e^0 = 0`, junk denominator), so the zero rate
 evaluates to `c₀ − c₂` there — the κ = 0 junk value, independent of `c₁`; the limit
-`tendsto_nelsonSiegelZeroRate_zero_meanReversion` is `c₀ + c₁` instead
-(`tendsto_nelsonSiegelZeroRate_zero_meanReversion`): the removable singularity at `κ = 0` has
-to be filled by the limit, not by substitution. -/
+`tendsto_nelsonSiegelZeroRate_zero_meanReversion` is `c₀ + c₁` instead: the removable
+singularity at `κ = 0` has to be filled by the limit, not by substitution. -/
+
 theorem nelsonSiegelZeroRate_closedForm_zero_meanReversion (c0 c1 c2 t : ℝ) :
     nelsonSiegelZeroRate c0 c1 c2 0 t = c0 - c2 := by
   simp [nelsonSiegelZeroRate, nssSlope, sub_eq_add_neg]
