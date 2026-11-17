@@ -9,7 +9,7 @@ import MathFin
 /-!
 # Finite life-table law tests
 
-Tests for `MathFin.SurvivalModel.survive_lifeTable` (F11 leaf `f11:ACT-01.L01`):
+Tests for `MathFin.SurvivalModel.survive_lifeTable`:
 conditional survival ratios on a concrete four-year table, survival `1` on a
 constant table, the first death cell weight, and the probability-law instance.
 Values go through the endpoint and its helpers, not bare definitions.
