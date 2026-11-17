@@ -14,8 +14,10 @@ public import MathFin.Models.Rates.VasicekYieldNelsonSiegel
 
 `Models/Rates/NelsonSiegelSvensson.lean` defines the Nelson–Siegel–Svensson curve through the
 slope factor `s(x) = (1 − e^{−x})/x` (`nssSlope`), and `Models/Rates/VasicekYieldNelsonSiegel.lean`
-reads the Vasicek zero yield in the same factors. This file takes the decay rate `κ` (the reciprocal `1/l` of Svensson's decay constant; `κ → 0⁺` is `l → ∞`, the flat-`c₀ + c₁` degeneration) `κ → 0⁺`
-at a fixed maturity `τ ≠ 0` in the decay-parameterized loading `s(κτ) = (1 − e^{−κτ})/(κτ)`:
+reads the Vasicek zero yield in the same factors. This file takes the decay rate `κ` (the
+reciprocal `1/l` of Svensson's decay constant; `κ → 0⁺` is `l → ∞`, the flat-`c₀ + c₁`
+degeneration) `κ → 0⁺` at a fixed maturity `τ ≠ 0` in the decay-parameterized loading
+`s(κτ) = (1 − e^{−κτ})/(κτ)`:
 
   `(1 − e^{−κτ})/(κτ) → 1`, so the Nelson–Siegel zero rate
   `c₀ + c₁·s(κτ) + c₂·(s(κτ) − e^{−κτ})` tends to `c₀ + c₁`, and the Svensson second loading
@@ -43,7 +45,7 @@ at a fixed maturity `τ ≠ 0` in the decay-parameterized loading `s(κτ) = (1 
   is `Models/Rates/NelsonSiegelSvensson.lean`'s `tendsto_nssYield_nhdsNE_zero`, not anything
   here.
 * The epsilon-guard behaviour is described as the motivating defect species only; no engine is
-  formalized here and no engine is formalized here; the limits are stated as the values any correct small-κ branch must reach.
+  formalized here; the limits are stated as the values any correct small-κ branch must reach.
 
 ## Main definitions
 
@@ -99,8 +101,7 @@ theorem tendsto_oneMinusExpOverX_zero_meanReversion (t : ℝ) (ht : t ≠ 0) :
     Tendsto (fun κ => (1 - Real.exp (-(κ * t))) / (κ * t)) (𝓝[>] 0) (𝓝 1) := by
   have hsub : Set.Ioi (0:ℝ) ⊆ {x : ℝ | x ≠ 0} := fun x hx => ne_of_gt hx
   have hfil : 𝓝[Set.Ioi (0:ℝ)] (0:ℝ) ≤ 𝓝[{x : ℝ | x ≠ 0}] (0:ℝ) := nhdsWithin_mono (0:ℝ) hsub
-  have hB : Tendsto (fun κ : ℝ => vasicekBondB κ t) (𝓝[>] 0) (𝓝 t) :=
-    (tendsto_vasicekBondB_zero_meanReversion t).mono_left hfil
+  have hfil : 𝓝[Set.Ioi (0:ℝ)] (0:ℝ) ≤ 𝓝[{x : ℝ | x ≠ 0}] (0:ℝ) := nhdsWithin_mono (0:ℝ) hsub
   have hbridge : (fun κ : ℝ => (1 - Real.exp (-(κ * t))) / (κ * t))
       = fun κ : ℝ => vasicekBondB κ t / t := by
     funext κ
