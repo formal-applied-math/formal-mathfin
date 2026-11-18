@@ -818,21 +818,35 @@ theorem variance_sampleMean {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
         congr 1
         exact (Finset.mul_sum _ _ _).symm
 
-/-- The mixture weights sum to one: `mixtureLaw` is a probability law. -/
-private theorem mixtureWeight_sum_one {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
-    (n : ℕ) (p : Θ → ℝ) (w : Θ → Ξ → ℝ)
-    (hp1 : ∑ θ, p θ = 1) (hw1 : ∀ θ, ∑ ξ, w θ ξ = 1) :
-    (∑ ω : Θ × (Fin n → Ξ), p ω.1 * ∏ i, w ω.1 (ω.2 i)) = 1 := by
+/-- The mixture law is a probability measure: the mixture weights sum to one. -/
+theorem isProbabilityMeasure_mixtureLaw {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
+    [MeasurableSpace Θ] [MeasurableSingletonClass Θ] [MeasurableSpace Ξ]
+    [MeasurableSingletonClass Ξ] (n : ℕ) (p : Θ → ℝ) (w : Θ → Ξ → ℝ)
+    (hp : ∀ θ, 0 ≤ p θ) (hp1 : ∑ θ, p θ = 1)
+    (hw : ∀ θ ξ, 0 ≤ w θ ξ) (hw1 : ∀ θ, ∑ ξ, w θ ξ = 1) :
+    IsProbabilityMeasure (mixtureLaw n p w) := by
   have hθ : ∀ θ : Θ, (∑ x : Fin n → Ξ, p θ * ∏ i, w θ (x i)) = p θ := by
     intro θ
     calc (∑ x : Fin n → Ξ, p θ * ∏ i, w θ (x i))
         = p θ * ∑ x : Fin n → Ξ, ∏ i, w θ (x i) := (Finset.mul_sum _ _ _).symm
       _ = p θ := by rw [weight_sum_one n θ w hw1, mul_one]
-  calc (∑ ω : Θ × (Fin n → Ξ), p ω.1 * ∏ i, w ω.1 (ω.2 i))
-      = ∑ θ, p θ := by
-        simp only [Fintype.sum_prod_type]
-        exact Finset.sum_congr rfl (fun θ _ => hθ θ)
-    _ = 1 := hp1
+  have hsum : (∑ ω : Θ × (Fin n → Ξ), p ω.1 * ∏ i, w ω.1 (ω.2 i)) = 1 := by
+    calc (∑ ω : Θ × (Fin n → Ξ), p ω.1 * ∏ i, w ω.1 (ω.2 i))
+        = ∑ θ, p θ := by
+          simp only [Fintype.sum_prod_type]
+          exact Finset.sum_congr rfl (fun θ _ => hθ θ)
+      _ = 1 := hp1
+  have hInt : (∫ _, (1 : ℝ) ∂(mixtureLaw n p w))
+      = ∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) * 1 :=
+    integral_mixture n p w _ hp hw
+  have hC : (∫ _, (1 : ℝ) ∂(mixtureLaw n p w))
+      = (mixtureLaw n p w).real Set.univ := by
+    rw [MeasureTheory.integral_const, smul_eq_mul, mul_one]
+  rw [MeasureTheory.isProbabilityMeasure_iff_real]
+  rw [hC] at hInt
+  simp only [mul_one] at hInt
+  rw [hsum] at hInt
+  exact hInt
 
 /-- Each conditional variance is nonnegative. -/
 private theorem condVar_nonneg {Ξ : Type*} [Fintype Ξ] (w : Ξ → ℝ) (v : Ξ → ℝ)
@@ -868,8 +882,17 @@ private theorem mse_sum_eq {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
       (fun ω : Θ × (Fin n → Ξ) => (n : ℝ)⁻¹ * ∑ i, v (ω.2 i))
       (mixtureLaw n p w) :=
     (measurable_of_finite _).aemeasurable
-  have hW1 : (∑ ω : Θ × (Fin n → Ξ), p ω.1 * ∏ i, w ω.1 (ω.2 i)) = 1 :=
-    mixtureWeight_sum_one n p w hp1 hw1
+  have hW1 : (∑ ω : Θ × (Fin n → Ξ), p ω.1 * ∏ i, w ω.1 (ω.2 i)) = 1 := by
+    have hθ : ∀ θ : Θ, (∑ x : Fin n → Ξ, p θ * ∏ i, w θ (x i)) = p θ := by
+      intro θ
+      calc (∑ x : Fin n → Ξ, p θ * ∏ i, w θ (x i))
+          = p θ * ∑ x : Fin n → Ξ, ∏ i, w θ (x i) := (Finset.mul_sum _ _ _).symm
+        _ = p θ := by rw [weight_sum_one n θ w hw1, mul_one]
+    calc (∑ ω : Θ × (Fin n → Ξ), p ω.1 * ∏ i, w ω.1 (ω.2 i))
+        = ∑ θ, p θ := by
+          simp only [Fintype.sum_prod_type]
+          exact Finset.sum_congr rfl (fun θ _ => hθ θ)
+      _ = 1 := hp1
   have hVar : variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
       (mixtureLaw n p w)
       = ∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
