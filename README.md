@@ -274,8 +274,8 @@ are the usual starting point.
 
 Raphael Coelho maintains the library, with contributions from:
 
-- [Adam Kiezun](https://github.com/akiezun): the two-life last-survivor annuity identity.
 - [Godstime Aburu](https://github.com/BboyGT): the issue-label taxonomy.
+- [Adam Kiezun](https://github.com/akiezun): the two-life last-survivor annuity identity.
 - [Alfredo Garcia](https://github.com/oxarbitrage): Glosten–Milgrom adverse selection, a drift term
   in the Itô-process price and the CIR bond loadings.
 - [Robert Martin](https://github.com/robertmartin8): log-convexity of the American put exercise
