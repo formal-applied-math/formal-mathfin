@@ -253,6 +253,26 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. isPricingMeasure_insuredMarket_tilted_iff in MathFin/Insurance/EsscherPremium.lean: the forward direction is Market.integral_eq_of_isPricingMeasure_oneDate (MathFin/Pricing/OneDateMarket.lean), where the martingale property of the deflated asset between 0 and T keeps its mean (Martingale.setIntegral_eq), combined with the mean of X under the tilt being the premium (integral_tilted_eq_esscherPremium); the converse is Market.isPricingMeasure_oneDate. SCOPE: the hypothesis T > 0 is needed (at T = 0 the quote is never read); uniqueness of the parameter (strict monotonicity of the premium in h) is not proved; the insured market quotes the loss at the Esscher premium by construction and has no dynamics before T. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-credibility-covariance",
+      "name": "Finite Credibility Covariance Identity",
+      "description": "In a finite latent-iid mixture, Cov(m(Theta), Xbar) = Var(m(Theta)), where m is the conditional mean and Xbar the sample mean of n >= 1 conditionally iid observations.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Insurance.FiniteCredibilityCovariance\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\ntheorem credibility_covariance_thm {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]\n    [MeasurableSpace Θ] [MeasurableSingletonClass Θ] [MeasurableSpace Ξ]\n    [MeasurableSingletonClass Ξ] (n : ℕ) (hn : 0 < n) (p : Θ → ℝ) (w : Θ → Ξ → ℝ)\n    (v : Ξ → ℝ) (hp : ∀ θ, 0 ≤ p θ) (hp1 : ∑ θ, p θ = 1)\n    (hw : ∀ θ ξ, 0 ≤ w θ ξ) (hw1 : ∀ θ, ∑ ξ, w θ ξ = 1) :\n    covariance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)\n      (fun ω : Θ × (Fin n → Ξ) => (n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) (mixtureLaw n p w)\n      = variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w) :=\n  MathFin.covariance_condMean_sampleMean n hn p w v hp hp1 hw hw1\n"
+      },
+      "metadata": {
+        "reference": "Credibility theory variance decomposition (Buhlmann & Gisler, A Course in Credibility Theory and its Applications)",
+        "citations": [
+          {
+            "key": "BuhlmannGisler2005"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "library_wrapper",
+        "formalization_scope": "Library wrapper. Re-export from MathFin. Axioms-clean."
+      }
     }
   ]
 }

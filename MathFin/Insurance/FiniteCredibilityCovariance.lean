@@ -28,8 +28,8 @@ function with the sample mean equals the variance of the conditional mean.
 
 ## References
 
-* Bühlmann, H. and Gisler, A., *A Course in Credibility Theory and its
-  Applications*, Springer, 2005.
+* [H. Bühlmann and A. Gisler, *A Course in Credibility Theory and its
+  Applications*][BuhlmannGisler2005]
 
 ## Tags
 
