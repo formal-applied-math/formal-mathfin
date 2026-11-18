@@ -20,10 +20,14 @@ function with the sample mean equals the variance of the conditional mean.
 * `MathFin.mixtureLaw`: joint law on `Θ × (Fin n → Ξ)` with weight
   `p θ * ∏ i, w θ (x i)`; observations are conditionally iid given `θ`.
 * `MathFin.condMean`: conditional mean `∑ ξ, w ξ * v ξ`.
+* `MathFin.condVar`: conditional variance `∑ ξ, w ξ * (v ξ - m) ^ 2`
+  around the conditional mean `m`.
 
 ## Main results
 
 * `MathFin.covariance_condMean_sampleMean`: `Cov(m(Θ), X̄) = Var(m(Θ))`
+  under the joint mixture law.
+* `MathFin.variance_sampleMean`: `Var(X̄) = Var(m(Θ)) + E[v(Θ)] / n`
   under the joint mixture law.
 
 ## References
@@ -358,5 +362,442 @@ theorem covariance_condMean_sampleMean {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
             rw [hP]
     exact hL.trans hR.symm
   exact Finset.sum_congr rfl (fun θ _ => hθ θ)
+
+def condVar {Ξ : Type*} [Fintype Ξ] (w : Ξ → ℝ) (v : Ξ → ℝ) : ℝ :=
+  ∑ ξ, w ξ * (v ξ - condMean w v) ^ 2
+
+/-- Each coordinate has second moment `condVar` around the mean. -/
+private theorem diag_moment_cond {Θ Ξ : Type*} [Fintype Ξ]
+    (n : ℕ) (θ : Θ) (j : Fin n) (w : Θ → Ξ → ℝ) (v : Ξ → ℝ)
+    (hw1 : ∀ θ, ∑ ξ, w θ ξ = 1) :
+    (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+      (v (x j) - condMean (w θ) v) ^ 2)
+      = condVar (w θ) v := by
+  have hx : ∀ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+      (v (x j) - condMean (w θ) v) ^ 2
+      = ∏ i, (w θ (x i) *
+        (if i = j then (v (x i) - condMean (w θ) v) ^ 2 else (1 : ℝ))) := by
+    intro x
+    have hite : (∏ i, (if i = j then (v (x i) - condMean (w θ) v) ^ 2
+        else (1 : ℝ))) = (v (x j) - condMean (w θ) v) ^ 2 :=
+      Fintype.prod_ite_eq' j
+        (fun i => (v (x i) - condMean (w θ) v) ^ 2)
+    rw [Finset.prod_mul_distrib, hite]
+  have hi : ∀ i : Fin n, (∑ ξ, w θ ξ *
+      (if i = j then (v ξ - condMean (w θ) v) ^ 2 else (1 : ℝ)))
+      = (if i = j then condVar (w θ) v else 1) := by
+    intro i
+    by_cases h : i = j
+    · simp [h, condVar]
+    · simp [h, hw1 θ]
+  calc (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+        (v (x j) - condMean (w θ) v) ^ 2)
+      = ∑ x : Fin n → Ξ,
+        ∏ i, (w θ (x i) *
+          (if i = j then (v (x i) - condMean (w θ) v) ^ 2 else 1)) :=
+        Finset.sum_congr rfl (fun x _ => hx x)
+    _ = ∏ i : Fin n, ∑ ξ, w θ ξ *
+        (if i = j then (v ξ - condMean (w θ) v) ^ 2 else 1) :=
+        (Fintype.prod_sum
+          (fun (i : Fin n) (ξ : Ξ) =>
+            w θ ξ * (if i = j then (v ξ - condMean (w θ) v) ^ 2 else 1))).symm
+    _ = ∏ i : Fin n, (if i = j then condVar (w θ) v else 1) :=
+        Finset.prod_congr rfl (fun i _ => hi i)
+    _ = condVar (w θ) v :=
+        Fintype.prod_ite_eq' j (fun _ => condVar (w θ) v)
+
+/-- Distinct coordinates are uncorrelated around the mean, given the risk. -/
+private theorem offdiag_moment_cond {Θ Ξ : Type*} [Fintype Ξ]
+    (n : ℕ) (θ : Θ) (i j : Fin n) (hji : j ≠ i) (w : Θ → Ξ → ℝ)
+    (v : Ξ → ℝ) (hw1 : ∀ θ, ∑ ξ, w θ ξ = 1) :
+    (∑ x : Fin n → Ξ, (∏ k, w θ (x k)) *
+      ((v (x i) - condMean (w θ) v) * (v (x j) - condMean (w θ) v)))
+      = 0 := by
+  have hij : i ≠ j := Ne.symm hji
+  have hx : ∀ x : Fin n → Ξ, (∏ k, w θ (x k)) *
+      ((v (x i) - condMean (w θ) v) * (v (x j) - condMean (w θ) v))
+      = ∏ k, (w θ (x k) *
+        ((if k = i then (v (x k) - condMean (w θ) v) else 1) *
+          (if k = j then (v (x k) - condMean (w θ) v) else 1))) := by
+    intro x
+    have h1 : (∏ k, (if k = i then (v (x k) - condMean (w θ) v)
+        else (1 : ℝ))) = (v (x i) - condMean (w θ) v) :=
+      Fintype.prod_ite_eq' i (fun k => (v (x k) - condMean (w θ) v))
+    have h2 : (∏ k, (if k = j then (v (x k) - condMean (w θ) v)
+        else (1 : ℝ))) = (v (x j) - condMean (w θ) v) :=
+      Fintype.prod_ite_eq' j (fun k => (v (x k) - condMean (w θ) v))
+    rw [Finset.prod_mul_distrib, Finset.prod_mul_distrib, h1, h2]
+  have hSi : (∑ ξ, w θ ξ * ((v ξ - condMean (w θ) v) * 1)) = 0 := by
+    have hterm : ∀ ξ : Ξ, w θ ξ * ((v ξ - condMean (w θ) v) * 1)
+        = w θ ξ * v ξ - condMean (w θ) v * w θ ξ := fun ξ => by ring
+    have hsub : (∑ ξ, w θ ξ * ((v ξ - condMean (w θ) v) * 1))
+        = (∑ ξ, w θ ξ * v ξ) - ∑ ξ, condMean (w θ) v * w θ ξ := by
+      rw [← Finset.sum_sub_distrib]
+      exact Finset.sum_congr rfl (fun ξ _ => hterm ξ)
+    have hmul : (∑ ξ, condMean (w θ) v * w θ ξ)
+        = condMean (w θ) v := by
+      rw [(Finset.mul_sum _ _ _).symm, hw1 θ, mul_one]
+    rw [hsub, hmul]
+    simp [condMean]
+  have hSi' : (∑ ξ, w θ ξ *
+      ((if i = i then (v ξ - condMean (w θ) v) else 1) *
+        (if i = j then (v ξ - condMean (w θ) v) else 1))) = 0 := by
+    calc (∑ ξ, w θ ξ *
+            ((if i = i then (v ξ - condMean (w θ) v) else 1) *
+              (if i = j then (v ξ - condMean (w θ) v) else 1)))
+        = (∑ ξ, w θ ξ * ((v ξ - condMean (w θ) v) * 1)) :=
+          Finset.sum_congr rfl (fun ξ _ => by simp [hij])
+      _ = 0 := hSi
+  calc (∑ x : Fin n → Ξ, (∏ k, w θ (x k)) *
+          ((v (x i) - condMean (w θ) v) *
+            (v (x j) - condMean (w θ) v)))
+      = ∑ x : Fin n → Ξ, ∏ k, (w θ (x k) *
+          ((if k = i then (v (x k) - condMean (w θ) v) else 1) *
+            (if k = j then (v (x k) - condMean (w θ) v) else 1))) :=
+        Finset.sum_congr rfl (fun x _ => hx x)
+    _ = ∏ k : Fin n, ∑ ξ, w θ ξ *
+        ((if k = i then (v ξ - condMean (w θ) v) else 1) *
+          (if k = j then (v ξ - condMean (w θ) v) else 1)) :=
+        (Fintype.prod_sum
+          (fun (k : Fin n) (ξ : Ξ) =>
+            w θ ξ * ((if k = i then (v ξ - condMean (w θ) v) else 1) *
+              (if k = j then (v ξ - condMean (w θ) v) else 1)))).symm
+    _ = 0 := by
+      apply Finset.prod_eq_zero (Finset.mem_univ i)
+      exact hSi'
+
+/-- Fixed-risk squared-deviation identity for the sample mean. -/
+private theorem sqDev_sampleMean_cond {Θ Ξ : Type*} [Fintype Ξ]
+    (n : ℕ) (θ : Θ) (w : Θ → Ξ → ℝ) (v : Ξ → ℝ) (c : ℝ)
+    (hw1 : ∀ θ, ∑ ξ, w θ ξ = 1) (hn : 0 < n) :
+    (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+      (((n : ℝ)⁻¹ * ∑ i, v (x i)) - c) ^ 2)
+      = condVar (w θ) v * (n : ℝ)⁻¹
+        + (condMean (w θ) v - c) ^ 2 := by
+  have hn0 : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
+  have hinv : (n : ℝ)⁻¹ * (n : ℝ) = 1 := inv_mul_cancel₀ hn0
+  have hpair : ∀ i j : Fin n,
+      (∑ x : Fin n → Ξ, (∏ k, w θ (x k)) *
+        ((v (x i) - condMean (w θ) v) * (v (x j) - condMean (w θ) v)))
+      = (if j = i then condVar (w θ) v else 0) := by
+    intro i j
+    by_cases h : j = i
+    · subst j
+      rw [ite_eq_left rfl]
+      calc (∑ x : Fin n → Ξ, (∏ k, w θ (x k)) *
+              ((v (x i) - condMean (w θ) v) *
+                (v (x i) - condMean (w θ) v)))
+          = ∑ x : Fin n → Ξ, (∏ k, w θ (x k)) *
+              (v (x i) - condMean (w θ) v) ^ 2 :=
+            Finset.sum_congr rfl (fun x _ => by ring)
+        _ = condVar (w θ) v := diag_moment_cond n θ i w v hw1
+    · rw [ite_eq_right h]
+      exact offdiag_moment_cond n θ i j h w v hw1
+  have hinner : ∀ i : Fin n,
+      (∑ j : Fin n, ∑ x : Fin n → Ξ, (∏ k, w θ (x k)) *
+        ((v (x i) - condMean (w θ) v) * (v (x j) - condMean (w θ) v)))
+      = condVar (w θ) v := by
+    intro i
+    calc (∑ j : Fin n, ∑ x : Fin n → Ξ, (∏ k, w θ (x k)) *
+            ((v (x i) - condMean (w θ) v) *
+              (v (x j) - condMean (w θ) v)))
+        = ∑ j : Fin n, (if j = i then condVar (w θ) v else 0) :=
+          Finset.sum_congr rfl (fun j _ => hpair i j)
+      _ = condVar (w θ) v := Fintype.sum_ite_eq' i (fun _ => condVar (w θ) v)
+  have hx : ∀ x : Fin n → Ξ, ((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v
+      = (n : ℝ)⁻¹ * ∑ i, (v (x i) - condMean (w θ) v) := by
+    intro x
+    have hcard : (∑ _i : Fin n, condMean (w θ) v)
+        = (n : ℝ) * condMean (w θ) v := by
+      rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+    have hsum : (∑ i, (v (x i) - condMean (w θ) v))
+        = (∑ i, v (x i)) - (n : ℝ) * condMean (w θ) v := by
+      rw [Finset.sum_sub_distrib, hcard]
+    have hkey : (n : ℝ)⁻¹ * ((n : ℝ) * condMean (w θ) v)
+        = condMean (w θ) v := by
+      calc (n : ℝ)⁻¹ * ((n : ℝ) * condMean (w θ) v)
+          = ((n : ℝ)⁻¹ * (n : ℝ)) * condMean (w θ) v := by ring
+        _ = condMean (w θ) v := by rw [hinv, one_mul]
+    rw [hsum, mul_sub, hkey]
+  have hsq : ∀ x : Fin n → Ξ,
+      (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v) ^ 2
+      = (n : ℝ)⁻¹ * (n : ℝ)⁻¹ * ∑ i : Fin n, ∑ j : Fin n,
+        (v (x i) - condMean (w θ) v) * (v (x j) - condMean (w θ) v) := by
+    intro x
+    have hmul : (∑ i : Fin n, (v (x i) - condMean (w θ) v)) *
+        (∑ i : Fin n, (v (x i) - condMean (w θ) v))
+        = ∑ i : Fin n, ∑ j : Fin n,
+          (v (x i) - condMean (w θ) v) * (v (x j) - condMean (w θ) v) :=
+      Finset.sum_mul_sum _ _ _ _
+    calc (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v) ^ 2
+        = ((n : ℝ)⁻¹ * ∑ i, (v (x i) - condMean (w θ) v)) ^ 2 := by rw [hx x]
+      _ = (n : ℝ)⁻¹ * (n : ℝ)⁻¹ *
+          ((∑ i : Fin n, (v (x i) - condMean (w θ) v)) *
+            (∑ i : Fin n, (v (x i) - condMean (w θ) v))) := by ring
+      _ = (n : ℝ)⁻¹ * (n : ℝ)⁻¹ * ∑ i : Fin n, ∑ j : Fin n,
+          (v (x i) - condMean (w θ) v) * (v (x j) - condMean (w θ) v) := by
+          rw [hmul]
+  have hpush : ∀ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+      (∑ i : Fin n, ∑ j : Fin n,
+        (v (x i) - condMean (w θ) v) * (v (x j) - condMean (w θ) v))
+      = ∑ i : Fin n, ∑ j : Fin n, (∏ k, w θ (x k)) *
+        ((v (x i) - condMean (w θ) v) * (v (x j) - condMean (w θ) v)) := by
+    intro x
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    exact Finset.mul_sum _ _ _
+  have hC : (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+      (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v) ^ 2)
+      = condVar (w θ) v * (n : ℝ)⁻¹ := by
+    have hterm : ∀ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+        (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v) ^ 2
+        = (n : ℝ)⁻¹ * (n : ℝ)⁻¹ * ∑ i : Fin n, ∑ j : Fin n,
+          (∏ k, w θ (x k)) *
+            ((v (x i) - condMean (w θ) v) *
+              (v (x j) - condMean (w θ) v)) := by
+      intro x
+      calc (∏ i, w θ (x i)) *
+              (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v) ^ 2
+          = (∏ i, w θ (x i)) * ((n : ℝ)⁻¹ * (n : ℝ)⁻¹ *
+              ∑ i : Fin n, ∑ j : Fin n,
+                (v (x i) - condMean (w θ) v) *
+                  (v (x j) - condMean (w θ) v)) := by rw [hsq x]
+        _ = (n : ℝ)⁻¹ * (n : ℝ)⁻¹ * ((∏ i, w θ (x i)) *
+            (∑ i : Fin n, ∑ j : Fin n,
+              (v (x i) - condMean (w θ) v) *
+                (v (x j) - condMean (w θ) v))) := by
+            ring
+        _ = (n : ℝ)⁻¹ * (n : ℝ)⁻¹ * ∑ i : Fin n, ∑ j : Fin n,
+            (∏ k, w θ (x k)) *
+              ((v (x i) - condMean (w θ) v) *
+                (v (x j) - condMean (w θ) v)) := by rw [hpush x]
+    calc (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+            (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v) ^ 2)
+        = ∑ x : Fin n → Ξ, (n : ℝ)⁻¹ * (n : ℝ)⁻¹ * ∑ i : Fin n, ∑ j : Fin n,
+          (∏ k, w θ (x k)) *
+            ((v (x i) - condMean (w θ) v) *
+              (v (x j) - condMean (w θ) v)) :=
+          Finset.sum_congr rfl (fun x _ => hterm x)
+      _ = (n : ℝ)⁻¹ * (n : ℝ)⁻¹ * ∑ x : Fin n → Ξ, ∑ i : Fin n, ∑ j : Fin n,
+          (∏ k, w θ (x k)) *
+            ((v (x i) - condMean (w θ) v) *
+              (v (x j) - condMean (w θ) v)) :=
+          (Finset.mul_sum _ _ _).symm
+      _ = (n : ℝ)⁻¹ * (n : ℝ)⁻¹ * ∑ i : Fin n, ∑ j : Fin n, ∑ x : Fin n → Ξ,
+          (∏ k, w θ (x k)) *
+            ((v (x i) - condMean (w θ) v) *
+              (v (x j) - condMean (w θ) v)) := by
+          congr 1
+          rw [Finset.sum_comm]
+          refine Finset.sum_congr rfl (fun i _ => ?_)
+          exact Finset.sum_comm
+      _ = (n : ℝ)⁻¹ * (n : ℝ)⁻¹ * ∑ _i : Fin n, condVar (w θ) v := by
+          congr 1
+          refine Finset.sum_congr rfl (fun i _ => ?_)
+          exact hinner i
+      _ = condVar (w θ) v * (n : ℝ)⁻¹ := by
+          rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin,
+            nsmul_eq_mul]
+          calc ((n : ℝ)⁻¹ * (n : ℝ)⁻¹) * ((n : ℝ) * condVar (w θ) v)
+              = ((n : ℝ)⁻¹ * (n : ℝ)) * ((n : ℝ)⁻¹ * condVar (w θ) v) := by
+                ring
+            _ = condVar (w θ) v * (n : ℝ)⁻¹ := by
+                rw [hinv, one_mul]
+                exact mul_comm _ _
+  have hE0 : (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+      (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v)) = 0 := by
+    have hterm : ∀ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+        (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v)
+        = (∏ i, w θ (x i)) * ((n : ℝ)⁻¹ * ∑ i, v (x i))
+          - (∏ i, w θ (x i)) * condMean (w θ) v :=
+      fun x => mul_sub _ _ _
+    have hS1 : (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) * condMean (w θ) v)
+        = condMean (w θ) v := by
+      have hSc : ∀ x : Fin n → Ξ, (∏ i, w θ (x i)) * condMean (w θ) v
+          = condMean (w θ) v * ∏ i, w θ (x i) := fun x => mul_comm _ _
+      calc (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) * condMean (w θ) v)
+          = ∑ x : Fin n → Ξ, condMean (w θ) v * ∏ i, w θ (x i) :=
+            Finset.sum_congr rfl (fun x _ => hSc x)
+        _ = condMean (w θ) v * ∑ x : Fin n → Ξ, ∏ i, w θ (x i) :=
+            (Finset.mul_sum _ _ _).symm
+        _ = condMean (w θ) v := by rw [weight_sum_one n θ w hw1, mul_one]
+    calc (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+            (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v))
+        = (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) * ((n : ℝ)⁻¹ * ∑ i, v (x i)))
+          - ∑ x : Fin n → Ξ, (∏ i, w θ (x i)) * condMean (w θ) v := by
+          rw [← Finset.sum_sub_distrib]
+          exact Finset.sum_congr rfl (fun x _ => hterm x)
+      _ = condMean (w θ) v - condMean (w θ) v := by
+          rw [mean_sampleMean_cond n θ w v hw1 hn, hS1]
+      _ = 0 := sub_self _
+  have hS2 : (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+      (condMean (w θ) v - c) ^ 2) = (condMean (w θ) v - c) ^ 2 := by
+    have hSc : ∀ x : Fin n → Ξ, (∏ i, w θ (x i)) * (condMean (w θ) v - c) ^ 2
+        = (condMean (w θ) v - c) ^ 2 * ∏ i, w θ (x i) :=
+      fun x => mul_comm _ _
+    calc (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) * (condMean (w θ) v - c) ^ 2)
+        = ∑ x : Fin n → Ξ, (condMean (w θ) v - c) ^ 2 * ∏ i, w θ (x i) :=
+          Finset.sum_congr rfl (fun x _ => hSc x)
+      _ = (condMean (w θ) v - c) ^ 2 * ∑ x : Fin n → Ξ, ∏ i, w θ (x i) :=
+          (Finset.mul_sum _ _ _).symm
+      _ = (condMean (w θ) v - c) ^ 2 := by
+          rw [weight_sum_one n θ w hw1, mul_one]
+  have hEq : (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+      (((n : ℝ)⁻¹ * ∑ i, v (x i)) - c) ^ 2)
+      = (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+          (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v) ^ 2)
+        + ((2 * (condMean (w θ) v - c)) *
+          (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+            (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v))
+          + ∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+            (condMean (w θ) v - c) ^ 2) := by
+    have h1 : ∀ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+        (((n : ℝ)⁻¹ * ∑ i, v (x i)) - c) ^ 2
+        = ((∏ i, w θ (x i)) *
+            (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v) ^ 2
+          + (2 * (condMean (w θ) v - c)) * ((∏ i, w θ (x i)) *
+            (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v)))
+          + (∏ i, w θ (x i)) * (condMean (w θ) v - c) ^ 2 := by
+      intro x
+      have hsplit : ((n : ℝ)⁻¹ * ∑ i, v (x i)) - c
+          = (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v)
+            + (condMean (w θ) v - c) := by ring
+      rw [hsplit]
+      ring
+    calc (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+            (((n : ℝ)⁻¹ * ∑ i, v (x i)) - c) ^ 2)
+        = ∑ x : Fin n → Ξ, (((∏ i, w θ (x i)) *
+              (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v) ^ 2
+            + (2 * (condMean (w θ) v - c)) * ((∏ i, w θ (x i)) *
+              (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v)))
+            + (∏ i, w θ (x i)) * (condMean (w θ) v - c) ^ 2) :=
+          Finset.sum_congr rfl (fun x _ => h1 x)
+      _ = (∑ x : Fin n → Ξ, ((∏ i, w θ (x i)) *
+              (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v) ^ 2
+            + (2 * (condMean (w θ) v - c)) * ((∏ i, w θ (x i)) *
+              (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v))))
+          + ∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+            (condMean (w θ) v - c) ^ 2 := by
+          rw [Finset.sum_add_distrib]
+      _ = ((∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+              (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v) ^ 2)
+            + ∑ x : Fin n → Ξ, (2 * (condMean (w θ) v - c)) *
+              ((∏ i, w θ (x i)) *
+                (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v)))
+          + ∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+            (condMean (w θ) v - c) ^ 2 := by
+          congr 1
+          rw [Finset.sum_add_distrib]
+      _ = (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+              (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v) ^ 2)
+          + ((2 * (condMean (w θ) v - c)) *
+            (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+              (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v))
+            + ∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+              (condMean (w θ) v - c) ^ 2) := by
+          rw [(Finset.mul_sum _ _ _).symm]
+          ring
+  calc (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+          (((n : ℝ)⁻¹ * ∑ i, v (x i)) - c) ^ 2)
+      = (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+          (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v) ^ 2)
+        + ((2 * (condMean (w θ) v - c)) *
+          (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+            (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v))
+          + ∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+            (condMean (w θ) v - c) ^ 2) := hEq
+    _ = condVar (w θ) v * (n : ℝ)⁻¹ + (condMean (w θ) v - c) ^ 2 := by
+        rw [hC, hE0, hS2]
+        ring
+
+theorem variance_sampleMean {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
+    [MeasurableSpace Θ] [MeasurableSingletonClass Θ] [MeasurableSpace Ξ]
+    [MeasurableSingletonClass Ξ] (n : ℕ) (hn : 0 < n) (p : Θ → ℝ) (w : Θ → Ξ → ℝ)
+    (v : Ξ → ℝ) (hp : ∀ θ, 0 ≤ p θ) (_hp1 : ∑ θ, p θ = 1)
+    (hw : ∀ θ ξ, 0 ≤ w θ ξ) (hw1 : ∀ θ, ∑ ξ, w θ ξ = 1) :
+    variance (fun ω : Θ × (Fin n → Ξ) => (n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) (mixtureLaw n p w)
+      = variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+        + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v := by
+  have hX : AEMeasurable (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+      (mixtureLaw n p w) := aemeasurable_fst n p w v
+  have hY : AEMeasurable
+      (fun ω : Θ × (Fin n → Ξ) => (n : ℝ)⁻¹ * ∑ i, v (ω.2 i))
+      (mixtureLaw n p w) :=
+    (measurable_of_finite _).aemeasurable
+  have hmeanX : (∫ ω, condMean (w ω.1) v ∂(mixtureLaw n p w))
+      = ∑ φ, p φ * condMean (w φ) v :=
+    mean_fst n p w v hp hw hw1
+  have hmeanY : (∫ ω, (n : ℝ)⁻¹ * ∑ i, v (ω.2 i) ∂(mixtureLaw n p w))
+      = ∑ φ, p φ * condMean (w φ) v :=
+    mean_snd n hn p w v hp hw hw1
+  simp only [variance_eq_integral hY, variance_eq_integral hX]
+  rw [hmeanX, hmeanY, integral_mixture n p w _ hp hw,
+    integral_mixture n p w _ hp hw]
+  simp only [Fintype.sum_prod_type]
+  have hθ : ∀ θ : Θ,
+      (∑ x : Fin n → Ξ, (p θ * ∏ i, w θ (x i)) *
+        (((n : ℝ)⁻¹ * ∑ i, v (x i)) - ∑ φ, p φ * condMean (w φ) v) ^ 2)
+      = (∑ x : Fin n → Ξ, (p θ * ∏ i, w θ (x i)) *
+          (condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v) ^ 2)
+        + (n : ℝ)⁻¹ * (p θ * condVar (w θ) v) := by
+    intro θ
+    have hL : (∑ x : Fin n → Ξ, (p θ * ∏ i, w θ (x i)) *
+        (((n : ℝ)⁻¹ * ∑ i, v (x i)) - ∑ φ, p φ * condMean (w φ) v) ^ 2)
+        = p θ * (condVar (w θ) v * (n : ℝ)⁻¹
+          + (condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v) ^ 2) := by
+      have hterm : ∀ x : Fin n → Ξ, (p θ * ∏ i, w θ (x i)) *
+          (((n : ℝ)⁻¹ * ∑ i, v (x i)) - ∑ φ, p φ * condMean (w φ) v) ^ 2
+          = p θ * ((∏ i, w θ (x i)) *
+            (((n : ℝ)⁻¹ * ∑ i, v (x i))
+              - ∑ φ, p φ * condMean (w φ) v) ^ 2) := fun x => by ring
+      calc (∑ x : Fin n → Ξ, (p θ * ∏ i, w θ (x i)) *
+              (((n : ℝ)⁻¹ * ∑ i, v (x i))
+                - ∑ φ, p φ * condMean (w φ) v) ^ 2)
+          = ∑ x : Fin n → Ξ, p θ * ((∏ i, w θ (x i)) *
+              (((n : ℝ)⁻¹ * ∑ i, v (x i))
+                - ∑ φ, p φ * condMean (w φ) v) ^ 2) :=
+            Finset.sum_congr rfl (fun x _ => hterm x)
+        _ = p θ * ∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
+            (((n : ℝ)⁻¹ * ∑ i, v (x i))
+              - ∑ φ, p φ * condMean (w φ) v) ^ 2 :=
+            (Finset.mul_sum _ _ _).symm
+        _ = p θ * (condVar (w θ) v * (n : ℝ)⁻¹
+            + (condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v) ^ 2) := by
+            rw [sqDev_sampleMean_cond n θ w v _ hw1 hn]
+    have hR : (∑ x : Fin n → Ξ, (p θ * ∏ i, w θ (x i)) *
+        (condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v) ^ 2)
+        = p θ * (condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v) ^ 2 := by
+      have hterm : ∀ x : Fin n → Ξ, (p θ * ∏ i, w θ (x i)) *
+          (condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v) ^ 2
+          = (p θ * (condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v) ^ 2) *
+            ∏ i, w θ (x i) := fun x => by ring
+      calc (∑ x : Fin n → Ξ, (p θ * ∏ i, w θ (x i)) *
+              (condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v) ^ 2)
+          = ∑ x : Fin n → Ξ,
+              (p θ * (condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v) ^ 2) *
+              ∏ i, w θ (x i) :=
+            Finset.sum_congr rfl (fun x _ => hterm x)
+        _ = (p θ * (condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v) ^ 2) *
+            ∑ x : Fin n → Ξ, ∏ i, w θ (x i) :=
+            (Finset.mul_sum _ _ _).symm
+        _ = p θ * (condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v) ^ 2 := by
+            rw [weight_sum_one n θ w hw1, mul_one]
+    rw [hL, hR]
+    ring
+  calc (∑ θ : Θ, ∑ x : Fin n → Ξ, (p θ * ∏ i, w θ (x i)) *
+          (((n : ℝ)⁻¹ * ∑ i, v (x i)) - ∑ φ, p φ * condMean (w φ) v) ^ 2)
+      = ∑ θ : Θ, ((∑ x : Fin n → Ξ, (p θ * ∏ i, w θ (x i)) *
+            (condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v) ^ 2)
+          + (n : ℝ)⁻¹ * (p θ * condVar (w θ) v)) :=
+        Finset.sum_congr rfl (fun θ _ => hθ θ)
+    _ = (∑ θ : Θ, ∑ x : Fin n → Ξ, (p θ * ∏ i, w θ (x i)) *
+          (condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v) ^ 2)
+        + ∑ θ : Θ, (n : ℝ)⁻¹ * (p θ * condVar (w θ) v) := by
+        rw [Finset.sum_add_distrib]
+    _ = (∑ θ : Θ, ∑ x : Fin n → Ξ, (p θ * ∏ i, w θ (x i)) *
+          (condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v) ^ 2)
+        + (n : ℝ)⁻¹ * ∑ θ : Θ, p θ * condVar (w θ) v := by
+        congr 1
+        exact (Finset.mul_sum _ _ _).symm
 
 end MathFin
