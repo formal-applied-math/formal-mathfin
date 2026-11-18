@@ -811,9 +811,9 @@
     "mf-bachelier-spread-call": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-18",
-      "elapsed_s": 2.1,
-      "input_hash": "98950a1711c931cd2e351d6cdbd775e508703f92aca2d5dd4014ca882a9f1265",
-      "verified_at_commit": "9a24a0d3"
+      "elapsed_s": 1.9,
+      "input_hash": "0d3e0d95e27f4a848b8ceff04994414f17d916c078dde47013e7f0c3ee0836ee",
+      "verified_at_commit": "aec57c17"
     },
     "mf-bachelier-theta": {
       "benchmark_file": "black_scholes.json",
