@@ -53,6 +53,8 @@ ended is `lifeAnnuityDue_eq_value` (`Insurance/AnnuityValue.lean`).
   annuity-due is the geometric closed form at the discount factor `e^{-(r + m)}`.
 * `term_add_endowment_eq_annuityDue`: finite term insurance plus survivor endowment equals
   `1 - (1 - v) * ä_n`, with `ä_n` the annuity-due survival-payment sum.
+* `wholeLife_add_endowment_eq_annuityDue`: the whole-life limit of that identity,
+  `A = 1 - (1 - v) * ä`, under summability and a vanishing discounted survival tail.
 
 ## References
 
@@ -70,7 +72,7 @@ actuarial present value, MSC 91G05, JEL G22
 
 namespace MathFin
 
-open Finset
+open Finset Filter Topology
 
 /-- **Annuity-due geometric closed form**: `Σ_{k=0}^{n-1} v^k = (1 − v^n)/(1 − v)`
 for `v ≠ 1`. -/
@@ -123,5 +125,32 @@ theorem term_add_endowment_eq_annuityDue (S : ℕ → ℝ) (hS0 : S 0 = 1)
   | succ n IH =>
       rw [Finset.sum_range_succ, Finset.sum_range_succ, pow_succ v n]
       linear_combination IH
+
+/-- **Whole-life limit of the term insurance plus endowment identity**: the finite identity
+`term_add_endowment_eq_annuityDue` passes to the limit as the term tends to infinity. The term
+insurance partial sums converge to the whole-life EPV, the endowment term vanishes by the tail
+hypothesis, and the annuity-certain partial sums converge to the annuity-due, giving the
+whole-life identity `A = 1 - d * ä`. -/
+theorem wholeLife_add_endowment_eq_annuityDue (S : ℕ → ℝ) (hS0 : S 0 = 1)
+    (v : ℝ) (_hv : 0 < v)
+    (hdeath : Summable fun k => v ^ (k + 1) * (S k - S (k + 1)))
+    (hann : Summable fun k => v ^ k * S k)
+    (htail : Tendsto (fun n => v ^ n * S n) atTop (𝓝 0)) :
+    ∑' k, v ^ (k + 1) * (S k - S (k + 1)) = 1 - (1 - v) * ∑' k, v ^ k * S k := by
+  have hfin : ∀ n : ℕ, (∑ k ∈ Finset.range n, v ^ (k + 1) * (S k - S (k + 1)))
+      + v ^ n * S n = 1 - (1 - v) * ∑ k ∈ Finset.range n, v ^ k * S k :=
+    fun n => term_add_endowment_eq_annuityDue S hS0 v n
+  have hL : Tendsto (fun n : ℕ => (∑ k ∈ Finset.range n, v ^ (k + 1) * (S k - S (k + 1)))
+      + v ^ n * S n) atTop (𝓝 ((∑' k, v ^ (k + 1) * (S k - S (k + 1))) + 0)) :=
+    hdeath.hasSum.tendsto_sum_nat.add htail
+  have hA := hann.hasSum.tendsto_sum_nat
+  have hM : Tendsto (fun n : ℕ => (1 - v) * ∑ k ∈ Finset.range n, v ^ k * S k)
+      atTop (𝓝 ((1 - v) * ∑' k, v ^ k * S k)) :=
+    tendsto_const_nhds.mul hA
+  have hR : Tendsto (fun n : ℕ => 1 - (1 - v) * ∑ k ∈ Finset.range n, v ^ k * S k)
+      atTop (𝓝 (1 - (1 - v) * ∑' k, v ^ k * S k)) :=
+    tendsto_const_nhds.sub hM
+  have heq := tendsto_nhds_unique_of_forall hL hR hfin
+  simpa using heq
 
 end MathFin
