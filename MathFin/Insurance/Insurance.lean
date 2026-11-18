@@ -57,7 +57,8 @@ ended is `lifeAnnuityDue_eq_value` (`Insurance/AnnuityValue.lean`).
   annuity-due is the geometric closed form at the discount factor `e^{-(r + m)}`.
 * `chainComplete_unobserved`: on unobserved cells the completion equals the last observed
   cell times the product of the selected factors over the unobserved development periods.
-* `le_chainComplete`: with monotone cumulative rows and positive denominators, the
+* `le_chainComplete`: with nonnegative cumulative rows, monotone on observed cells,
+  and positive denominators, the
   completed ultimate is at least the last observed diagonal value, so predicted
   outstanding claims are nonnegative.
 
