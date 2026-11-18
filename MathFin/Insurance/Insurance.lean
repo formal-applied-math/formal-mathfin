@@ -57,6 +57,9 @@ ended is `lifeAnnuityDue_eq_value` (`Insurance/AnnuityValue.lean`).
   annuity-due is the geometric closed form at the discount factor `e^{-(r + m)}`.
 * `chainComplete_unobserved`: on unobserved cells the completion equals the last observed
   cell times the product of the selected factors over the unobserved development periods.
+* `le_chainComplete`: with monotone cumulative rows and positive denominators, the
+  completed ultimate is at least the last observed diagonal value, so predicted
+  outstanding claims are nonnegative.
 
 ## References
 
@@ -168,5 +171,32 @@ theorem chainComplete_unobserved (n : ℕ) (C : ℕ → ℕ → ℝ) (i j : ℕ)
         have hle : n - i ≤ j := by omega
         rw [Finset.prod_Ico_succ_top hle]
         ring
+
+/-- **Chain-ladder monotonicity**: with monotone cumulative rows (`hmono`), positive
+selected-factor denominators (`hdenom`) and nonnegative cumulative values (`hC`), the
+completed ultimate `chainComplete n C i n` is at least the last observed diagonal value
+`C i (n - i)`, so the predicted outstanding claims are nonnegative. Each selected factor
+is at least one, hence so is their product. -/
+theorem le_chainComplete (n : ℕ) (C : ℕ → ℕ → ℝ)
+    (hC : ∀ i j, 0 ≤ C i j) (hmono : ∀ i j, i + (j + 1) ≤ n → C i j ≤ C i (j + 1))
+    (hdenom : ∀ j < n, 0 < ∑ i ∈ Finset.range (n - j), C i j) (i : ℕ) :
+    C i (n - i) ≤ chainComplete n C i n := by
+  by_cases hobs : i + n ≤ n
+  · rw [chainComplete_eq n C i n hobs]
+    have hi0 : i = 0 := by omega
+    subst hi0
+    rw [Nat.sub_zero]
+  · have hlt : n < i + n := by omega
+    rw [chainComplete_unobserved n C i n hlt]
+    apply le_mul_of_one_le_right (hC i (n - i))
+    apply Finset.one_le_prod₀
+    intro k hk
+    obtain ⟨_, hk_lt⟩ := Finset.mem_Ico.mp hk
+    have hpos : 0 < ∑ i ∈ Finset.range (n - k), C i k := hdenom k hk_lt
+    rw [chainFactor, one_le_div hpos]
+    apply Finset.sum_le_sum
+    intro i' hi'
+    rw [Finset.mem_range] at hi'
+    exact hmono i' k (by omega)
 
 end MathFin
