@@ -829,7 +829,13 @@ theorem isProbabilityMeasure_mixtureLaw {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ
     intro θ
     calc (∑ x : Fin n → Ξ, p θ * ∏ i, w θ (x i))
         = p θ * ∑ x : Fin n → Ξ, ∏ i, w θ (x i) := (Finset.mul_sum _ _ _).symm
-      _ = p θ := by rw [weight_sum_one n θ w hw1, mul_one]
+      _ = p θ := by
+        have hW : (∑ x : Fin n → Ξ, ∏ i, w θ (x i)) = 1 := by
+          have h1 : (∏ _i : Fin n, ∑ xi, w θ xi) = (1 : ℝ) := by simp [hw1 θ]
+          have hpi := Fintype.prod_sum (fun (_i : Fin n) (xi : Ξ) => w θ xi)
+          rw [← hpi]
+          exact h1
+        rw [hW, mul_one]
   have hsum : (∑ ω : Θ × (Fin n → Ξ), p ω.1 * ∏ i, w ω.1 (ω.2 i)) = 1 := by
     calc (∑ ω : Θ × (Fin n → Ξ), p ω.1 * ∏ i, w ω.1 (ω.2 i))
         = ∑ θ, p θ := by
@@ -887,7 +893,13 @@ private theorem mse_sum_eq {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
       intro θ
       calc (∑ x : Fin n → Ξ, p θ * ∏ i, w θ (x i))
           = p θ * ∑ x : Fin n → Ξ, ∏ i, w θ (x i) := (Finset.mul_sum _ _ _).symm
-        _ = p θ := by rw [weight_sum_one n θ w hw1, mul_one]
+        _ = p θ := by
+          have hW : (∑ x : Fin n → Ξ, ∏ i, w θ (x i)) = 1 := by
+            have h1 : (∏ _i : Fin n, ∑ xi, w θ xi) = (1 : ℝ) := by simp [hw1 θ]
+            have hpi := Fintype.prod_sum (fun (_i : Fin n) (xi : Ξ) => w θ xi)
+            rw [← hpi]
+            exact h1
+          rw [hW, mul_one]
     calc (∑ ω : Θ × (Fin n → Ξ), p ω.1 * ∏ i, w ω.1 (ω.2 i))
         = ∑ θ, p θ := by
           simp only [Fintype.sum_prod_type]
