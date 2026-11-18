@@ -34,6 +34,8 @@ under the measure `Q` of the lifetime: the statement is about the lifetime's law
   payments of one while the default indicator is zero.
 * `lastSurvivor_annuity_eq_value`: the last-survivor annuity is the sum of the single-life
   annuity values minus the joint-life value, on the same schedule.
+* `reversionary_annuity_eq_value`: the reversionary annuity to the second life after the
+  first dies is the second life's annuity value minus the joint-life value.
 
 ## References
 
