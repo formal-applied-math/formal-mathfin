@@ -29,7 +29,7 @@ because `√V` is again lognormal with half the log-volatility, and the library'
 `expected_terminal_eq_forward` (`Models/BlackScholes/Forward.lean`) gives its mean. The factor
 `exp(−s²/8)` is the *convexity adjustment* of the volatility swap against the square root of the
 variance swap strike. To first order in `s²` it agrees with the approximation
-`E[√V] ≈ √E[V] − Var(V)/(8 E[V]^{3/2})` of Brockhaus and Long (2000), since
+`E[√V] ≈ √E[V] − Var(V)/(8 E[V]^{3/2})` of Brockhaus and Long (Risk, January 2000), since
 `Var(V) = K²(e^{s²} − 1)` under the assumed law; neither that variance identity nor the
 approximation is proved here.
 
