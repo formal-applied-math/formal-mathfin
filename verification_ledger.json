@@ -4317,17 +4317,17 @@
     },
     "mf-on-caplet-jensen-ordering": {
       "benchmark_file": "black_scholes.json",
-      "date": "2026-11-18",
-      "elapsed_s": 2.1,
-      "input_hash": "b64fbca954a2fc4c41469fdfa9f6ddb656a9475c902447295104fe4d78a5a1ca",
-      "verified_at_commit": "c47908ea"
+      "date": "2026-11-19",
+      "elapsed_s": 2.2,
+      "input_hash": "e0e715e56e3ef8d0eee816a4836fcbd5d934efd2d574d7f01dd5c2c51827e12b",
+      "verified_at_commit": "d6c59e4c"
     },
     "mf-on-damping-variance-time": {
       "benchmark_file": "black_scholes.json",
-      "date": "2026-11-18",
-      "elapsed_s": 2.0,
-      "input_hash": "2f4e00587ea1f2d0c10229fcc7ebe59ce9c0afe126a5e519dc6b4ef08f88e724",
-      "verified_at_commit": "c47908ea"
+      "date": "2026-11-19",
+      "elapsed_s": 1.9,
+      "input_hash": "0852b5e63730f238d3cae1514aff2467ec8e357e9ed3d036f9c78c38ac4217a6",
+      "verified_at_commit": "d6c59e4c"
     },
     "mf-one-factor-copula-joint-default": {
       "benchmark_file": "credit.json",

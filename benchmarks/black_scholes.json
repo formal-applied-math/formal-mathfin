@@ -2834,7 +2834,7 @@
     {
       "id": "mf-on-caplet-jensen-ordering",
       "name": "Forward-looking caplet is worth at most the backward-looking caplet",
-      "description": "For an integrable rate R and a sub-sigma-algebra m, E[(E[R | m] - K)^+] <= E[(R - K)^+] by conditional Jensen on the convex call payoff. With m the information at the start of the accrual period and R the compounded rate at its end, the forward-looking caplet is worth at most the backward-looking one. The martingale property R(tau0) = E[R(tau1) | F_tau0] is the interpretation, not a hypothesis of the theorem.",
+      "description": "For an integrable rate R and a sub-sigma-algebra m, E[(E[R | m] - K)^+] <= E[(R - K)^+] by conditional Jensen on the convex call payoff. With m the information at the start of the accrual period and R the compounded rate at its end, the forward-looking caplet is worth at most the backward-looking one. The martingale property R(tau0) = E[R(tau1) | F_tau0] is the interpretation and is not derived here, and strictness of the inequality is not derived here either.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Models.Rates.OvernightCompounding\n\nopen MeasureTheory MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n\ntheorem forward_caplet_le_backward_example {m : MeasurableSpace Ω} (hm : m ≤ mΩ)\n    {R : Ω → ℝ} (hR : Integrable R μ) (K : ℝ) :\n    ∫ ω, max (μ[R | m] ω - K) 0 ∂μ ≤ ∫ ω, max (R ω - K) 0 ∂μ :=\n  forwardCaplet_le_backwardCaplet hm hR K\n"

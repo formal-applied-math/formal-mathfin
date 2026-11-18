@@ -25,29 +25,37 @@ realised fixings, and its volatility is damped by
 damping from `1` at `τ₀` to `0` at `τ₁`). For constant volatility `σ` the log-variance of
 `R(τ₁)` is `σ² · ∫₀^{τ₁} ψ(t)² dt`.
 
-This file proves, from the definition of `ψ`:
+This file proves, from the definition of `ψ`, the damping-time integral, its linear case,
+its bounds and monotonicity in `q`, the reduction of the caplet to the Black formula, and the
+Jensen ordering of forward- and backward-looking caplets.
 
-* the **damping-time identity** (`integral_onDamping_sq`):
-  `∫₀^{τ₁} ψ(t)² dt = s + (τ₁ − s)·x^{2q}/(2q + 1)`, `s = max τ₀ 0`,
-  `x = (τ₁ − s)/(τ₁ − τ₀)`, i.e. `onEffectiveTime τ₀ τ₁ q`;
-* the **linear case** (`onEffectiveTime_one`): for `q = 1` this is
-  `s + (τ₁ − s)³ / (3 (τ₁ − τ₀)²)`;
-* **bounds and monotonicity** (`le_onEffectiveTime`, `onEffectiveTime_le`,
-  `onEffectiveTime_anti`): `s ≤ Θ ≤ τ₁`, and `Θ` is non-increasing in `q`;
-* the **caplet reduction** (`backwardCaplet_black`): if `R(τ₁) = R₀ exp(−σ²Θ/2 + σ√Θ·Z)`
-  with `Z` standard normal, the caplet equals the Black formula at total variance
-  `σ²Θ`, written with the library's `bsd1`/`bsd2`;
-* the **Jensen ordering** (`forwardCaplet_le_backwardCaplet`): replacing the payoff
-  rate `R(τ₁)` by its conditional expectation at an earlier time can only lower the
-  caplet value, so the forward-looking caplet is worth at most the backward-looking one.
+## Main definitions
+
+* `onDamping`: the volatility damping `ψ(t) = min 1 (((τ₁ − t)/(τ₁ − τ₀))^q)`.
+* `onEffectiveTime`: the variance time `s + (τ₁ − s)·x^{2q}/(2q + 1)` with `s = max τ₀ 0` and
+  `x = (τ₁ − s)/(τ₁ − τ₀)`.
+
+## Main results
+
+* `integral_onDamping_sq`: `∫₀^{τ₁} ψ(t)² dt = onEffectiveTime τ₀ τ₁ q`, derived from the
+  definition of `ψ`.
+* `onEffectiveTime_one`: for `q = 1` it is `s + (τ₁ − s)³ / (3 (τ₁ − τ₀)²)`.
+* `le_onEffectiveTime`, `onEffectiveTime_le`, `onEffectiveTime_anti`: `s ≤ Θ ≤ τ₁`, and `Θ` is
+  non-increasing in `q`.
+* `backwardCaplet_black`: if `R(τ₁) = R₀ exp(−σ²Θ/2 + σ√Θ·Z)` with `Z` standard normal, the
+  caplet equals the Black formula at total variance `σ²Θ`, written with the library's
+  `bsd1`/`bsd2`.
+* `forwardCaplet_le_backwardCaplet`: `E[(E[R | m] − K)⁺] ≤ E[(R − K)⁺]`, so replacing the payoff
+  rate by its conditional expectation at an earlier time can only lower the caplet value.
 
 ## Scope and hypotheses
 
 The model `dR = ψ σ R dB` itself is not constructed here: `backwardCaplet_black` takes the
-lognormal law of `R(τ₁)` with total variance `σ²Θ` as its hypothesis (`BSCallHyp`) and
-proves the pricing reduction. The identity `Var(log R(τ₁)) = σ²Θ` for deterministic
-integrands is the Itô isometry and is not re-derived. Constant volatility is assumed;
-smiles enter through the volatility level only.
+lognormal law of `R(τ₁)` with total variance `σ²Θ` as its hypothesis (`BSCallHyp`) and proves
+the pricing reduction. The identity `Var(log R(τ₁)) = σ²Θ` for deterministic integrands is the
+Itô isometry and is not re-derived. Constant volatility is assumed. The Jensen theorem does not
+derive that the compounded rate is a martingale, and equality holds exactly when `R` is
+`m`-measurable, which is not asserted.
 
 ## Relation to `Inflation.lean`
 
@@ -55,6 +63,17 @@ smiles enter through the volatility level only.
 between two *different* numeraire-measures. Here the quantity is a martingale under its own
 payment measure; the compounding structure changes the variance, via the time-dependent
 integrand `ψ²`, not the mean.
+
+## References
+
+* [A. Lyashenko and F. Mercurio, *Looking forward to backward-looking rates: A modeling
+  framework for term rates replacing LIBOR*][LyashenkoMercurio2019]
+* [S. Willems, *SABR smiles for RFR caplets*][Willems2020], §3
+
+## Tags
+
+overnight rate, compounded rate, backward-looking caplet, volatility damping, variance time,
+Jensen inequality, Black formula, MSC 91G30, JEL G12
 -/
 
 @[expose] public section
