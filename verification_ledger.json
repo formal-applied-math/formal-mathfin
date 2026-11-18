@@ -4315,6 +4315,13 @@
       "input_hash": "06a06e197b0d25e7405e1d94568de15f19dd925a9c4a3c2dcdf7fcea36392cd5",
       "verified_at_commit": "f68ab19"
     },
+    "mf-on-backward-caplet-black": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-11-19",
+      "elapsed_s": 2.2,
+      "input_hash": "7e237c22793bdef498cbf49b9ab04494c899dc01472e42e6f27b71aa2b31c1d0",
+      "verified_at_commit": "b7458a5f"
+    },
     "mf-on-caplet-jensen-ordering": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-19",

@@ -45,6 +45,7 @@ Jensen ordering of forward- and backward-looking caplets.
 * `backwardCaplet_black`: if `R(τ₁) = R₀ exp(−σ²Θ/2 + σ√Θ·Z)` with `Z` standard normal, the
   caplet equals the Black formula at total variance `σ²Θ`, written with the library's
   `bsd1`/`bsd2`.
+* `backwardCaplet_black_integral`: the same with `Θ` written as `∫₀^{τ₁} ψ(t)² dt`.
 * `forwardCaplet_le_backwardCaplet`: `E[(E[R | m] − K)⁺] ≤ E[(R − K)⁺]`, so replacing the payoff
   rate by its conditional expectation at an earlier time can only lower the caplet value.
 
@@ -121,34 +122,33 @@ private lemma continuous_onDamping (hq : 0 < q) :
   refine continuous_const.min ?_
   exact (Continuous.rpow_const (by fun_prop) fun _ => Or.inr hq.le)
 
-/-- The tail integral `∫_s^{τ₁} ((τ₁ − t)/L)^{2q} dt = (τ₁ − s)·x^{2q}/(2q + 1)`. -/
-private lemma integral_tail {s L : ℝ} (hq : 0 < q) (hL : 0 < L) (hs : s < τ₁) :
-    ∫ t in s..τ₁, ((τ₁ - t) / L) ^ (2 * q)
-      = (τ₁ - s) * (((τ₁ - s) / L) ^ (2 * q)) / (2 * q + 1) := by
-  have h2q : 0 < 2 * q := by linarith
-  have hsub : ∫ t in s..τ₁, ((τ₁ - t) / L) ^ (2 * q)
-      = ∫ u in (0 : ℝ)..(τ₁ - s), (u / L) ^ (2 * q) := by
-    have := intervalIntegral.integral_comp_sub_left
-      (fun u : ℝ => (u / L) ^ (2 * q)) (a := s) (b := τ₁) τ₁
-    simpa using this
-  rw [hsub]
-  have hinner : ∀ u ∈ Set.uIcc (0 : ℝ) (τ₁ - s),
-      (u / L) ^ (2 * q) = (L ^ (2 * q))⁻¹ * u ^ (2 * q) := by
-    intro u hu
-    have hu0 : 0 ≤ u := by
-      rw [Set.uIcc_of_le (by linarith)] at hu; exact hu.1
-    rw [Real.div_rpow hu0 hL.le]; ring
-  rw [intervalIntegral.integral_congr hinner, intervalIntegral.integral_const_mul,
-    integral_rpow (Or.inl (by linarith))]
-  have hs' : 0 ≤ τ₁ - s := by linarith
-  rw [Real.zero_rpow (by linarith), sub_zero, Real.div_rpow hs' hL.le,
-    Real.rpow_add_one (by linarith [h2q]) ]
-  field_simp
-
 /-- **Damping-time identity.** For `0 < q`, `τ₀ < τ₁` and `0 < τ₁`, the integral of the
 squared damping over `[0, τ₁]` is `onEffectiveTime τ₀ τ₁ q`. -/
 theorem integral_onDamping_sq (hq : 0 < q) (hτ : τ₀ < τ₁) (hτ1 : 0 < τ₁) :
     ∫ t in (0 : ℝ)..τ₁, onDamping τ₀ τ₁ q t ^ 2 = onEffectiveTime τ₀ τ₁ q := by
+  have integral_tail : ∀ {s L : ℝ}, 0 < L → s < τ₁ →
+      ∫ t in s..τ₁, ((τ₁ - t) / L) ^ (2 * q)
+        = (τ₁ - s) * (((τ₁ - s) / L) ^ (2 * q)) / (2 * q + 1) := by
+    intro s L hL hs
+    have h2q : 0 < 2 * q := by linarith
+    have hsub : ∫ t in s..τ₁, ((τ₁ - t) / L) ^ (2 * q)
+        = ∫ u in (0 : ℝ)..(τ₁ - s), (u / L) ^ (2 * q) := by
+      have := intervalIntegral.integral_comp_sub_left
+        (fun u : ℝ => (u / L) ^ (2 * q)) (a := s) (b := τ₁) τ₁
+      simpa using this
+    rw [hsub]
+    have hinner : ∀ u ∈ Set.uIcc (0 : ℝ) (τ₁ - s),
+        (u / L) ^ (2 * q) = (L ^ (2 * q))⁻¹ * u ^ (2 * q) := by
+      intro u hu
+      have hu0 : 0 ≤ u := by
+        rw [Set.uIcc_of_le (by linarith)] at hu; exact hu.1
+      rw [Real.div_rpow hu0 hL.le]; ring
+    rw [intervalIntegral.integral_congr hinner, intervalIntegral.integral_const_mul,
+      integral_rpow (Or.inl (by linarith))]
+    have hs' : 0 ≤ τ₁ - s := by linarith
+    rw [Real.zero_rpow (by linarith), sub_zero, Real.div_rpow hs' hL.le,
+      Real.rpow_add_one (by linarith [h2q]) ]
+    field_simp
   have hL : 0 < τ₁ - τ₀ := sub_pos.mpr hτ
   have hs0 : 0 ≤ max τ₀ 0 := le_max_right _ _
   have hs1 : max τ₀ 0 < τ₁ := max_lt hτ hτ1
@@ -170,7 +170,7 @@ theorem integral_onDamping_sq (hq : 0 < q) (hτ : τ₀ < τ₁) (hτ1 : 0 < τ�
     exact onDamping_sq_of_le hq hτ (le_trans (le_max_left _ _) ht.1) ht.2
   rw [← intervalIntegral.integral_add_adjacent_intervals
       (hcont.intervalIntegrable 0 (max τ₀ 0)) (hcont.intervalIntegrable (max τ₀ 0) τ₁),
-    hhead, htail, integral_tail hq hL hs1, onEffectiveTime]
+    hhead, htail, integral_tail hL hs1, onEffectiveTime]
 
 /-- Linear case `q = 1`: `Θ = s + (τ₁ − s)³ / (3 (τ₁ − τ₀)²)`. -/
 theorem onEffectiveTime_one (hτ : τ₀ < τ₁) :
@@ -273,6 +273,20 @@ theorem backwardCaplet_black {Q : Measure Ω} [IsProbabilityMeasure Q]
   have := bs_call_formula (Q := Q) (S_0 := R₀) (K := K) (r := 0) (σ := σ)
     (T := onEffectiveTime τ₀ τ₁ q) (Z := Z) ⟨hR₀, hK, hσ, hT, hZ⟩
   simpa using this
+
+/-- **Backward-looking caplet at the integrated damping.** The caplet value of
+`backwardCaplet_black` with the variance time written as the integral of the squared damping,
+`Θ = ∫₀^{τ₁} ψ(t)² dt`. The lognormal law of `R(τ₁)` with total variance `σ²Θ` is a
+hypothesis; the identification of `Θ` with the integral is proved
+(`integral_onDamping_sq`). -/
+theorem backwardCaplet_black_integral {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {R₀ K σ τ₀ τ₁ q : ℝ} {Z : Ω → ℝ} (hq : 0 < q) (hτ : τ₀ < τ₁) (hτ1 : 0 < τ₁)
+    (hR₀ : 0 < R₀) (hK : 0 < K) (hσ : 0 < σ) (hZ : HasLaw Z (gaussianReal 0 1) Q) :
+    ∫ ω, max (bsTerminal R₀ 0 σ (∫ t in (0 : ℝ)..τ₁, onDamping τ₀ τ₁ q t ^ 2) (Z ω) - K) 0 ∂Q
+      = R₀ * Phi (bsd1 R₀ K 0 σ (∫ t in (0 : ℝ)..τ₁, onDamping τ₀ τ₁ q t ^ 2))
+        - K * Phi (bsd2 R₀ K 0 σ (∫ t in (0 : ℝ)..τ₁, onDamping τ₀ τ₁ q t ^ 2)) := by
+  rw [integral_onDamping_sq hq hτ hτ1]
+  exact backwardCaplet_black hq hτ hτ1 hR₀ hK hσ hZ
 
 /-- **Jensen ordering of caplets.** For a sub-σ-algebra `m` (the information at an earlier
 time) and an integrable rate `R`, the call payoff on the conditional expectation
