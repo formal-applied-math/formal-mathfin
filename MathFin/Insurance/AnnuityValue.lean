@@ -32,6 +32,8 @@ under the measure `Q` of the lifetime: the statement is about the lifetime's law
 
 * `lifeAnnuityDue_eq_value`: the life annuity-due is the value, on the flat-rate discount, of the
   payments of one while the default indicator is zero.
+* `lastSurvivor_annuity_eq_value`: the last-survivor annuity is the sum of the single-life
+  annuity values minus the joint-life value, on the same schedule.
 
 ## References
 
@@ -82,5 +84,122 @@ theorem lifeAnnuityDue_eq_value {Ω : Type*} {mΩ : MeasurableSpace Ω}
     simp [SurvivalModel.alive]
   rw [SurvivalModel.survivalFunction, halive, ← measureReal_def,
     probReal_compl_eq_one_sub (measurableSet_le hτ measurable_const)]
+
+/-- **Last-survivor annuity identity.** The value of the annuity paying while either of two lives
+survives is the sum of the two single-life values minus the joint-life value, for the same
+payment schedule, discount and lifetimes. The identity is pointwise min/max algebra on the
+survival payoffs, with no independence hypothesis. -/
+theorem lastSurvivor_annuity_eq_value {Ω : Type*} [MeasurableSpace Ω]
+    (Q : Measure Ω) [IsProbabilityMeasure Q] (T1 T2 : Ω → ℝ)
+    (hT1 : Measurable T1) (hT2 : Measurable T2) (D : ℝ≥0 → ℝ) (t : ℕ → ℝ≥0)
+    (b : ℕ → ℝ) (n : ℕ) :
+    (payFlows t (fun k ↦ .mul (.const (b k))
+      (.max (.sub (.const 1) (.obs true (t k))) (.sub (.const 1) (.obs false (t k))))) n).value
+        Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ())
+      = (payFlows t (fun k ↦ .mul (.const (b k))
+          (.sub (.const 1) (.obs true (t k)))) n).value
+          Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ())
+        + (payFlows t (fun k ↦ .mul (.const (b k))
+            (.sub (.const 1) (.obs false (t k)))) n).value
+            Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ())
+        - (payFlows t (fun k ↦ .mul (.const (b k))
+            (.min (.sub (.const 1) (.obs true (t k)))
+              (.sub (.const 1) (.obs false (t k))))) n).value
+            Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ()) := by
+  have hind1 (k : ℕ) :
+      Integrable (defaultIndicator (bif true then T1 else T2) () (t k)) Q :=
+    (integrable_const (1 : ℝ)).indicator (measurableSet_le hT1 measurable_const)
+  have hind2 (k : ℕ) :
+      Integrable (defaultIndicator (bif false then T1 else T2) () (t k)) Q :=
+    (integrable_const (1 : ℝ)).indicator (measurableSet_le hT2 measurable_const)
+  have hs1 (k : ℕ) :
+      Integrable (fun ω ↦ 1 - defaultIndicator (bif true then T1 else T2) () (t k) ω) Q :=
+    (integrable_const (1 : ℝ)).sub (hind1 k)
+  have hs2 (k : ℕ) :
+      Integrable (fun ω ↦ 1 - defaultIndicator (bif false then T1 else T2) () (t k) ω) Q :=
+    (integrable_const (1 : ℝ)).sub (hind2 k)
+  have hmin (k : ℕ) :
+      Integrable (fun ω ↦ min (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)
+        (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)) Q :=
+    (hs1 k).inf (hs2 k)
+  have hmax (k : ℕ) :
+      Integrable (fun ω ↦ max (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)
+        (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)) Q :=
+    (hs1 k).sup (hs2 k)
+  have hval (k : ℕ) :
+      (∫ ω, D (t k) * (b k * max (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)
+        (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)) ∂Q)
+      = (∫ ω, D (t k) * (b k * (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)) ∂Q)
+        + (∫ ω, D (t k) * (b k * (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)) ∂Q)
+        - (∫ ω, D (t k) *
+          (b k * min (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)
+            (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)) ∂Q) := by
+    have h1 : Integrable (fun ω ↦ D (t k) *
+        (b k * (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω))) Q :=
+      ((hs1 k).const_mul (b k)).const_mul (D (t k))
+    have h2 : Integrable (fun ω ↦ D (t k) *
+        (b k * (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω))) Q :=
+      ((hs2 k).const_mul (b k)).const_mul (D (t k))
+    have h3 : Integrable (fun ω ↦ D (t k) *
+        (b k * min (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)
+          (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω))) Q :=
+      ((hmin k).const_mul (b k)).const_mul (D (t k))
+    have hsum : (∫ ω, D (t k) *
+          (b k * (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)) ∂Q)
+          + (∫ ω, D (t k) *
+            (b k * (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)) ∂Q)
+          - (∫ ω, D (t k) *
+            (b k * min (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)
+              (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)) ∂Q)
+        = ∫ ω, (D (t k) * (b k * (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω))
+          + D (t k) * (b k * (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω))
+          - D (t k) *
+            (b k * min (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)
+              (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω))) ∂Q := by
+      rw [← integral_add h1 h2]
+      exact (integral_sub (h1.add h2) h3).symm
+    rw [hsum]
+    apply integral_congr_ae
+    filter_upwards with ω
+    linear_combination D (t k) * b k *
+      max_add_min (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)
+        (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)
+  have eL : (payFlows t (fun k ↦ .mul (.const (b k))
+      (.max (.sub (.const 1) (.obs true (t k))) (.sub (.const 1) (.obs false (t k))))) n).value
+        Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ())
+      = ∑ k ∈ Finset.range n, ∫ ω, D (t k) *
+        (b k * max (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)
+          (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)) ∂Q := by
+    rw [Contract.value]
+    simp only [pathPV_payFlows, Payoff.eval, scenarioAt]
+    rw [integral_finsetSum _ (fun k _ ↦ ((hmax k).const_mul (b k)).const_mul (D (t k)))]
+  have eA : (payFlows t (fun k ↦ .mul (.const (b k))
+        (.sub (.const 1) (.obs true (t k)))) n).value
+        Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ())
+      = ∑ k ∈ Finset.range n, ∫ ω, D (t k) *
+        (b k * (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)) ∂Q := by
+    rw [Contract.value]
+    simp only [pathPV_payFlows, Payoff.eval, scenarioAt]
+    rw [integral_finsetSum _ (fun k _ ↦ ((hs1 k).const_mul (b k)).const_mul (D (t k)))]
+  have eB : (payFlows t (fun k ↦ .mul (.const (b k))
+        (.sub (.const 1) (.obs false (t k)))) n).value
+        Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ())
+      = ∑ k ∈ Finset.range n, ∫ ω, D (t k) *
+        (b k * (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)) ∂Q := by
+    rw [Contract.value]
+    simp only [pathPV_payFlows, Payoff.eval, scenarioAt]
+    rw [integral_finsetSum _ (fun k _ ↦ ((hs2 k).const_mul (b k)).const_mul (D (t k)))]
+  have eC : (payFlows t (fun k ↦ .mul (.const (b k))
+        (.min (.sub (.const 1) (.obs true (t k)))
+          (.sub (.const 1) (.obs false (t k))))) n).value
+        Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ())
+      = ∑ k ∈ Finset.range n, ∫ ω, D (t k) *
+        (b k * min (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)
+          (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)) ∂Q := by
+    rw [Contract.value]
+    simp only [pathPV_payFlows, Payoff.eval, scenarioAt]
+    rw [integral_finsetSum _ (fun k _ ↦ ((hmin k).const_mul (b k)).const_mul (D (t k)))]
+  rw [eL, eA, eB, eC, ← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
+  exact Finset.sum_congr rfl fun k _ ↦ hval k
 
 end MathFin
