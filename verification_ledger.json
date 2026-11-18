@@ -2448,10 +2448,10 @@
     },
     "mf-cpmm-lp-expected-value-lognormal": {
       "benchmark_file": "defi.json",
-      "date": "2026-11-09",
-      "elapsed_s": 3.5,
-      "input_hash": "59729b7e92e073699efde6ea90e864ebc10e4a6432a39a6beeb3b5cf36bd25a1",
-      "verified_at_commit": "44e5f42"
+      "date": "2026-11-19",
+      "elapsed_s": 2.2,
+      "input_hash": "c938eb78cbb6c891e5e72090d8c9378d0c3bc28bd29ffe3d77f5055963024cb7",
+      "verified_at_commit": "4bdd37a6"
     },
     "mf-credit-spread-eq-hazard": {
       "benchmark_file": "credit.json",
@@ -5143,10 +5143,10 @@
     },
     "mf-volatility-swap-lognormal-variance": {
       "benchmark_file": "jumps_and_variance_swaps.json",
-      "date": "2026-11-18",
-      "elapsed_s": 5.6,
-      "input_hash": "68b385bb7f086270f3a0cacd8134f33d113eafd38a8cb77bc1e99cdef2afa5f1",
-      "verified_at_commit": "bbcdea55"
+      "date": "2026-11-19",
+      "elapsed_s": 2.3,
+      "input_hash": "49200c6964baeeb47aa5814dd268cbf704d55d226bf5da49b1e00ee0a726ef31",
+      "verified_at_commit": "4bdd37a6"
     },
     "mf-weak-forward-uniqueness-const": {
       "benchmark_file": "stochastic_calculus.json",

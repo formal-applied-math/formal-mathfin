@@ -6,6 +6,7 @@ Authors: Yang Ye
 module
 
 public import MathFin.Models.BlackScholes.Forward
+public import MathFin.Models.BlackScholes.SqrtTerminal
 public import MathFin.Models.Jumps.JumpDiffusionVarianceSwap
 public import MathFin.Pricing.ForwardMeasure
 
@@ -96,17 +97,13 @@ structure VolSwapHyp {Ω : Type*} {mΩ : MeasurableSpace Ω} (Q : Measure Ω)
   s_pos : 0 < s
   Z_law : HasLaw Z (gaussianReal 0 1) Q
 
-/-- The square root of a driftless unit-horizon lognormal factor is lognormal with half the
-log-volatility. This is `sqrt_bsTerminal_one` (`Markets/DeFi/ConstantProductLPLognormal.lean`)
-with the factor `K` carried along; it is restated here so that this module does not import a
-`Markets/DeFi` module: `√(K · exp(−s²/2 + s z)) = √K · bsTerminal 1 (−s²/8) (s/2) 1 z`. -/
+/-- The driftless unit-horizon case of `sqrt_bsTerminal`:
+`√(K · exp(−s²/2 + s z)) = √K · bsTerminal 1 (−s²/8) (s/2) 1 z`. -/
 lemma sqrt_bsTerminal_driftless {K : ℝ} (hK : 0 < K) (s z : ℝ) :
     Real.sqrt (bsTerminal K 0 s 1 z)
       = Real.sqrt K * bsTerminal 1 (-(s ^ 2 / 8)) (s / 2) 1 z := by
-  rw [bsTerminal, bsTerminal, Real.sqrt_mul hK.le, one_mul, ← Real.exp_half]
-  congr 2
-  simp only [Real.sqrt_one, mul_one]
-  ring
+  rw [sqrt_bsTerminal hK.le]
+  simp
 
 /-- `√V` has the lognormal factor of half the log-volatility, so it is integrable. -/
 lemma integrable_sqrt_lognormalVariance {Ω : Type*} {mΩ : MeasurableSpace Ω}
@@ -184,11 +181,12 @@ theorem volSwapFairStrike_at_varianceSwap {S_0 : ℝ} (hS : 0 < S_0) (r σ T : �
 log-volatility `s`) under the `T`-forward measure `forwardMeasure Q (fun _ ↦ exp(r·T))`. The swap
 pays `N · (√V − K_vol)` at `T`; its time-0 value under `Q`, `𝔼^Q[payoff / exp(r·T)]`, is
 `exp(−r·T) · N · (volSwapFairStrike K s − K_vol)`: the deterministic discount factor times the
-payoff at the fair strike. The lognormal law under the forward measure is an assumption.
-For a constant bank account the forward measure is `Q` itself (its density is identically
-`1`), so this is `Q`-pricing with a deterministic discount factor, stated through
-`forwardMeasure_price` to tie it to the library's bond-numéraire theorem; it is not a result for
-stochastic rates. -/
+payoff at the fair strike. The lognormal law under the forward measure is an assumption; the
+instance argument always holds for a constant positive bank account
+(`forwardMeasure_isProbabilityMeasure`). For a constant bank account the forward measure is `Q`
+itself (its density is identically `1`), so this is `Q`-pricing with a deterministic discount
+factor, stated through `forwardMeasure_price` to tie it to the library's bond-numéraire theorem;
+it is not a result for stochastic rates. -/
 theorem volSwapValue_forwardMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}
     [IsProbabilityMeasure Q] {r T K s : ℝ} {Z : Ω → ℝ}
     [IsProbabilityMeasure (forwardMeasure Q fun _ : Ω ↦ Real.exp (r * T))]
