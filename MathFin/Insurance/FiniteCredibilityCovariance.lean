@@ -482,6 +482,12 @@ private theorem sqDev_sampleMean_cond {Θ Ξ : Type*} [Fintype Ξ]
         + (condMean (w θ) v - c) ^ 2 := by
   have hn0 : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
   have hinv : (n : ℝ)⁻¹ * (n : ℝ) = 1 := inv_mul_cancel₀ hn0
+  have h_weight_sum_one : (∑ x : Fin n → Ξ, ∏ i, w θ (x i)) = 1 := by
+    have h1 : (∏ _i : Fin n, ∑ ξ, w θ ξ) = (1 : ℝ) := by
+      simp [hw1 θ]
+    have hpi := Fintype.prod_sum (fun (_i : Fin n) (ξ : Ξ) => w θ ξ)
+    rw [← hpi]
+    exact h1
   have hpair : ∀ i j : Fin n,
       (∑ x : Fin n → Ξ, (∏ k, w θ (x k)) *
         ((v (x i) - condMean (w θ) v) * (v (x j) - condMean (w θ) v)))
@@ -626,7 +632,7 @@ private theorem sqDev_sampleMean_cond {Θ Ξ : Type*} [Fintype Ξ]
             Finset.sum_congr rfl (fun x _ => hSc x)
         _ = condMean (w θ) v * ∑ x : Fin n → Ξ, ∏ i, w θ (x i) :=
             (Finset.mul_sum _ _ _).symm
-        _ = condMean (w θ) v := by rw [weight_sum_one n θ w hw1, mul_one]
+        _ = condMean (w θ) v := by rw [h_weight_sum_one, mul_one]
     calc (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
             (((n : ℝ)⁻¹ * ∑ i, v (x i)) - condMean (w θ) v))
         = (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) * ((n : ℝ)⁻¹ * ∑ i, v (x i)))
@@ -647,7 +653,7 @@ private theorem sqDev_sampleMean_cond {Θ Ξ : Type*} [Fintype Ξ]
       _ = (condMean (w θ) v - c) ^ 2 * ∑ x : Fin n → Ξ, ∏ i, w θ (x i) :=
           (Finset.mul_sum _ _ _).symm
       _ = (condMean (w θ) v - c) ^ 2 := by
-          rw [weight_sum_one n θ w hw1, mul_one]
+          rw [h_weight_sum_one, mul_one]
   have hEq : (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
       (((n : ℝ)⁻¹ * ∑ i, v (x i)) - c) ^ 2)
       = (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
@@ -747,6 +753,12 @@ theorem variance_sampleMean {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
           (condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v) ^ 2)
         + (n : ℝ)⁻¹ * (p θ * condVar (w θ) v) := by
     intro θ
+    have h_weight_sum_one : (∑ x : Fin n → Ξ, ∏ i, w θ (x i)) = 1 := by
+      have h1 : (∏ _i : Fin n, ∑ ξ, w θ ξ) = (1 : ℝ) := by
+        simp [hw1 θ]
+      have hpi := Fintype.prod_sum (fun (_i : Fin n) (ξ : Ξ) => w θ ξ)
+      rw [← hpi]
+      exact h1
     have hL : (∑ x : Fin n → Ξ, (p θ * ∏ i, w θ (x i)) *
         (((n : ℝ)⁻¹ * ∑ i, v (x i)) - ∑ φ, p φ * condMean (w φ) v) ^ 2)
         = p θ * (condVar (w θ) v * (n : ℝ)⁻¹
@@ -787,7 +799,7 @@ theorem variance_sampleMean {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
             ∑ x : Fin n → Ξ, ∏ i, w θ (x i) :=
             (Finset.mul_sum _ _ _).symm
         _ = p θ * (condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v) ^ 2 := by
-            rw [weight_sum_one n θ w hw1, mul_one]
+            rw [h_weight_sum_one, mul_one]
     rw [hL, hR]
     ring
   calc (∑ θ : Θ, ∑ x : Fin n → Ξ, (p θ * ∏ i, w θ (x i)) *
