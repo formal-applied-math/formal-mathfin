@@ -5141,6 +5141,13 @@
       "input_hash": "94a1620d3799196c12fa5c456507c8dce976ff86b3a9c668cdd9f4095451611d",
       "verified_at_commit": "b4a02bd"
     },
+    "mf-volatility-swap-lognormal-variance": {
+      "benchmark_file": "jumps_and_variance_swaps.json",
+      "date": "2026-11-18",
+      "elapsed_s": 3.3,
+      "input_hash": "c384aab0b57c2bcc7638e4af3c03dcb0f26768ab4860c5d0fb32db3bdb45891b",
+      "verified_at_commit": "c47908ea"
+    },
     "mf-weak-forward-uniqueness-const": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-11-08",

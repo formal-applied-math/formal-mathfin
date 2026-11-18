@@ -518,6 +518,7 @@ import MathFin.Models.Jumps.JumpDiffusionMoments
 -- to the jump bias; Black–Scholes (Brownian motion) is a corollary on the process, and Merton's
 -- Gaussian jumps a corollary at the level of the law (log contract against Var[Y]/τ)
 import MathFin.Models.Jumps.JumpDiffusionVarianceSwap
+import MathFin.Models.ModelFree.VolatilitySwapLognormal
 import MathFin.Models.Bachelier.Bachelier
 import MathFin.Models.Bachelier.BachelierGreeks
 import MathFin.Models.Bachelier.BachelierMarket
