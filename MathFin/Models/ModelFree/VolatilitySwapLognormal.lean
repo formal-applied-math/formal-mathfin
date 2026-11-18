@@ -7,6 +7,7 @@ module
 
 public import MathFin.Models.BlackScholes.Forward
 public import MathFin.Models.Jumps.JumpDiffusionVarianceSwap
+public import MathFin.Pricing.ForwardMeasure
 
 /-!
 # Volatility swap fair strike under lognormal realized variance
@@ -49,6 +50,11 @@ approximation is proved here.
 * `volSwapFairStrike_at_varianceSwap`: evaluated at the fair variance strike `σ²` produced by
   the log-contract replication `varianceSwap_fairStrike`, the volatility strike is
   `σ · exp(−s²/8) < σ`.
+
+* `volSwapValue_forwardMeasure`: the time-0 value of the swap, paid at `T`, is the discount
+  factor `exp(−rT)` times `N · (volSwapFairStrike K s − K_vol)`, when the realized variance is
+  lognormal under the `T`-forward measure of a constant bank account `exp(rT)`
+  (`forwardMeasure_price`).
 
 ## Scope
 
@@ -167,5 +173,25 @@ theorem volSwapFairStrike_at_varianceSwap {S_0 : ℝ} (hS : 0 < S_0) (r σ T : �
   refine ⟨rfl, ?_⟩
   have := volSwapFairStrike_lt_sqrt (K := σ ^ 2) (pow_pos hσ 2) hs
   rwa [volSwapFairStrike, Real.sqrt_sq hσ.le] at this
+
+/-- **Value of the volatility swap under the `T`-forward measure.** For a constant bank account
+`exp(r·T)`, let the annualized realized variance be lognormal (`VolSwapHyp`, mean `K`,
+log-volatility `s`) under the `T`-forward measure `forwardMeasure Q (fun _ ↦ exp(r·T))`. The swap
+pays `N · (√V − K_vol)` at `T`; its time-0 value under `Q`, `𝔼^Q[payoff / exp(r·T)]`, is
+`exp(−r·T) · N · (volSwapFairStrike K s − K_vol)`: the deterministic discount factor times the
+payoff at the fair strike. The lognormal law under the forward measure is an assumption. -/
+theorem volSwapValue_forwardMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}
+    [IsProbabilityMeasure Q] {r T K s : ℝ} {Z : Ω → ℝ}
+    [IsProbabilityMeasure (forwardMeasure Q fun _ : Ω ↦ Real.exp (r * T))]
+    (h : VolSwapHyp (forwardMeasure Q fun _ : Ω ↦ Real.exp (r * T)) K s Z) (N Kvol : ℝ) :
+    ∫ ω, N * (Real.sqrt (bsTerminal K 0 s 1 (Z ω)) - Kvol) / Real.exp (r * T) ∂Q
+      = Real.exp (-(r * T)) * (N * (volSwapFairStrike K s - Kvol)) := by
+  have hP0 : 0 < ∫ _ : Ω, 1 / Real.exp (r * T) ∂Q := by
+    simp [integral_const, Real.exp_pos]
+  have hp := forwardMeasure_price (Q := Q) (B := fun _ : Ω ↦ Real.exp (r * T))
+    (fun ω ↦ N * (Real.sqrt (bsTerminal K 0 s 1 (Z ω)) - Kvol)) measurable_const
+    (fun _ ↦ Real.exp_pos _) hP0
+  rw [← hp, integral_const_mul, integral_volSwapPayoff h Kvol]
+  simp [integral_const, Real.exp_neg]
 
 end MathFin

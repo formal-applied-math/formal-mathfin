@@ -1948,10 +1948,10 @@
     {
       "id": "mf-volatility-swap-lognormal-variance",
       "name": "Volatility swap fair strike under lognormal realized variance",
-      "description": "If the annualized realized variance V is lognormal with mean K (the fair variance strike) and log-volatility s, then E[sqrt V] = sqrt K * exp(-s^2/8): sqrt V is lognormal with half the log-volatility, so the forward identity gives its mean. The volatility swap is therefore fair at sqrt K * exp(-s^2/8), strictly below the square root of the variance strike. The law of V is an assumed input, not derived from a price process, and s is a free parameter.",
+      "description": "If the annualized realized variance V is lognormal with mean K (the fair variance strike) and log-volatility s, then E[sqrt V] = sqrt K * exp(-s^2/8): sqrt V is lognormal with half the log-volatility, so the forward identity gives its mean. The volatility swap is therefore fair at sqrt K * exp(-s^2/8), strictly below the square root of the variance strike. The law of V is an assumed input, not derived from a price process, and s is a free parameter. Under the T-forward measure of a constant bank account the swap's time-0 value is the deterministic discount factor times N * (fair strike - K).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Models.ModelFree.VolatilitySwapLognormal\n\nopen MeasureTheory ProbabilityTheory MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} [IsProbabilityMeasure Q]\n  {K s : ℝ} {Z : Ω → ℝ}\n\ntheorem volatility_swap_fair_strike_example (h : VolSwapHyp Q K s Z) :\n    ∫ ω, Real.sqrt (bsTerminal K 0 s 1 (Z ω)) ∂Q = Real.sqrt K * Real.exp (-(s ^ 2 / 8)) :=\n  integral_sqrt_lognormalVariance h\n"
+        "lean": "import MathFin.Models.ModelFree.VolatilitySwapLognormal\nimport MathFin.Pricing.ForwardMeasure\n\nopen MeasureTheory ProbabilityTheory MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} [IsProbabilityMeasure Q]\n  {K s : ℝ} {Z : Ω → ℝ}\n\ntheorem volatility_swap_fair_strike_example (h : VolSwapHyp Q K s Z) :\n    ∫ ω, Real.sqrt (bsTerminal K 0 s 1 (Z ω)) ∂Q = Real.sqrt K * Real.exp (-(s ^ 2 / 8)) :=\n  integral_sqrt_lognormalVariance h\n\ntheorem volatility_swap_value_example {r T : ℝ} {Z : Ω → ℝ}\n    [IsProbabilityMeasure (forwardMeasure Q fun _ : Ω ↦ Real.exp (r * T))]\n    (h : VolSwapHyp (forwardMeasure Q fun _ : Ω ↦ Real.exp (r * T)) K s Z) (N Kvol : ℝ) :\n    ∫ ω, N * (Real.sqrt (bsTerminal K 0 s 1 (Z ω)) - Kvol) / Real.exp (r * T) ∂Q\n      = Real.exp (-(r * T)) * (N * (volSwapFairStrike K s - Kvol)) :=\n  volSwapValue_forwardMeasure h N Kvol\n"
       },
       "metadata": {
         "chapter": null,
@@ -1963,7 +1963,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of the conditional statement via sqrt_bsTerminal_driftless (sqrt of a lognormal factor is lognormal with half the log-volatility) and expected_terminal_eq_forward. Scope: the lognormal law of the realized variance, with mean the fair variance strike and a supplied log-volatility s, is a hypothesis (VolSwapHyp); it is not derived from any price process. Undiscounted, unseasoned, annualized; no time dimension."
+        "formalization_scope": "Full formal proof of the conditional statements via sqrt_bsTerminal_driftless (sqrt of a lognormal factor is lognormal with half the log-volatility) and expected_terminal_eq_forward. Scope: the lognormal law of the realized variance, with mean the fair variance strike and a supplied log-volatility s, is a hypothesis (VolSwapHyp); it is not derived from any price process. Undiscounted, unseasoned, annualized; no time dimension."
       }
     }
   ]
