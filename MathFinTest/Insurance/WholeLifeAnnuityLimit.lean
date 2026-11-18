@@ -10,13 +10,14 @@ import MathFin
 # Whole-life annuity limit checks
 
 Specializations and negation checks for `MathFin.wholeLife_add_endowment_eq_annuityDue`
-(the finite term-plus-endowment identity converges to the whole-life `A = 1 - d * ä`):
+(the finite term-plus-endowment identity converges to the whole-life `A = 1 - (1 - v) * ä`):
 
 * geometric survival (`S k = q ^ k`, `v * q < 1`): the death sum is
   `v * (1 - q) / (1 - v * q)`, both by direct tsum computation and via the endpoint.
 * `v = 1` with geometric survival: the death sum equals `1`.
-* immortal (`S ≡ 1`) at `v = 1`: the annuity series is not summable and the tail does not
-  vanish, so the summability hypotheses cannot be dropped.
+* immortal (`S ≡ 1`) at `v = 1`: the annuity series is not summable, the tail does not
+  vanish, and the endpoint equation itself is false (death sum `0` versus `1`), so the
+  hypotheses cannot be dropped.
 -/
 
 open Filter Topology
@@ -122,3 +123,19 @@ theorem immortal_tail_not_vanishing :
   have h1 : Tendsto (fun _ : ℕ => (1 : ℝ)) atTop (𝓝 1) := tendsto_const_nhds
   have h01 := tendsto_nhds_unique h h1
   exact zero_ne_one h01
+
+-- Immortal (S ≡ 1) at v = 1: the endpoint equation is false.
+theorem immortal_endpoint_eq_false :
+    ¬ (∑' k, (1 : ℝ) ^ (k + 1) * ((fun _ : ℕ => (1 : ℝ)) k - (fun _ : ℕ => (1 : ℝ)) (k + 1))
+      = 1 - (1 - (1 : ℝ)) * ∑' k, (1 : ℝ) ^ k * (fun _ : ℕ => (1 : ℝ)) k) := by
+  have hL : (∑' k, (1 : ℝ) ^ (k + 1) * ((1 : ℝ) - 1)) = 0 := by
+    have hpoint : ∀ k : ℕ, (1 : ℝ) ^ (k + 1) * ((1 : ℝ) - 1) = 0 := fun k => by simp
+    have hfeq : (fun k : ℕ => (1 : ℝ) ^ (k + 1) * ((1 : ℝ) - 1)) = (fun _ : ℕ => (0 : ℝ)) :=
+      funext hpoint
+    rw [hfeq, tsum_zero]
+  have hR : (1 : ℝ) - (1 - 1) * ∑' k, (1 : ℝ) ^ k * 1 = 1 := by simp
+  intro h
+  change (∑' k, (1 : ℝ) ^ (k + 1) * ((1 : ℝ) - 1))
+      = 1 - (1 - (1 : ℝ)) * ∑' k, (1 : ℝ) ^ k * 1 at h
+  rw [hL, hR] at h
+  exact zero_ne_one h
