@@ -50,6 +50,8 @@ ended is `lifeAnnuityDue_eq_value` (`Insurance/AnnuityValue.lean`).
 * `net_premium_principle`: `P · A = B ↔ P = B / A` for `A ≠ 0`.
 * `lifeAnnuityDue_const`: under a constant force of mortality `m` and `e^{-(r + m)} ≠ 1`, the life
   annuity-due is the geometric closed form at the discount factor `e^{-(r + m)}`.
+* `stopLoss_succ`: on the integer lattice `S ∈ h * ℕ` a.s. with `h > 0`, stop-loss expectations
+  satisfy `SL(j+1) = SL(j) - h * P(S > j * h)`.
 
 ## References
 
@@ -106,5 +108,67 @@ theorem lifeAnnuityDue_const {r m : ℝ} (n : ℕ) (hv : Real.exp (-(r + m)) ≠
     intervalIntegral.integral_const, ← Real.exp_add, ← Real.exp_nat_mul, smul_eq_mul]
   congr 1
   ring
+
+open MeasureTheory
+
+/-- **Stop-loss recurrence on the integer lattice**: if `S ≥ 0` is integrable and `S ∈ h * ℕ`
+a.s. with `h > 0`, then `E[(S - (j+1) * h)⁺] = E[(S - j * h)⁺] - h * P(S > j * h)`. -/
+theorem stopLoss_succ (Ω : Type*) [MeasurableSpace Ω] (μ : Measure Ω)
+    [IsProbabilityMeasure μ] (S : Ω → ℝ) (hSmeas : Measurable S)
+    (hSint : Integrable S μ) (hS0 : ∀ᵐ ω ∂μ, 0 ≤ S ω) (h : ℝ) (hh : 0 < h)
+    (hlat : ∀ᵐ ω ∂μ, ∃ n : ℕ, S ω = n * h) (j : ℕ) :
+    ∫ ω, max (S ω - (j + 1 : ℕ) * h) 0 ∂μ
+      = ∫ ω, max (S ω - (j : ℝ) * h) 0 ∂μ - h * μ.real {ω | (j : ℝ) * h < S ω} := by
+  have hs : MeasurableSet {ω | (j : ℝ) * h < S ω} :=
+    measurableSet_lt measurable_const hSmeas
+  have hc0 : (0 : ℝ) ≤ (j : ℝ) * h := mul_nonneg (Nat.cast_nonneg _) (le_of_lt hh)
+  have hInt : ∀ c : ℝ, 0 ≤ c → Integrable (fun ω => max (S ω - c) 0) μ := by
+    intro c hc
+    refine Integrable.mono' hSint ?_ ?_
+    · exact ((hSmeas.sub_const c).max measurable_const).aestronglyMeasurable
+    · filter_upwards [hS0] with ω hω
+      have hnn : (0 : ℝ) ≤ max (S ω - c) 0 := le_max_right _ _
+      rw [Real.norm_eq_abs, abs_of_nonneg hnn]
+      exact max_le (by linarith) hω
+  have hInt0 : Integrable (fun ω => max (S ω - (j : ℝ) * h) 0) μ := hInt _ hc0
+  have hgInt : Integrable ({ω | (j : ℝ) * h < S ω}.indicator (fun _ => h)) μ :=
+    (integrable_const h).indicator hs
+  have hpt : ∀ᵐ ω ∂μ, max (S ω - (j + 1 : ℕ) * h) 0
+      = max (S ω - (j : ℝ) * h) 0
+        - {ω | (j : ℝ) * h < S ω}.indicator (fun _ => h) ω := by
+    filter_upwards [hlat] with ω hω
+    obtain ⟨n, hn⟩ := hω
+    rw [hn]
+    by_cases hmem : ω ∈ {ω | (j : ℝ) * h < S ω}
+    · rw [Set.indicator_of_mem hmem]
+      show max (↑n * h - (j + 1 : ℕ) * h) 0 = max (↑n * h - (j : ℝ) * h) 0 - h
+      rw [Set.mem_ofPred_eq] at hmem
+      rw [hn] at hmem
+      have hlt : (j : ℝ) < (n : ℝ) := lt_of_mul_lt_mul_right hmem (le_of_lt hh)
+      have hjn : j < n := Nat.cast_lt.mp hlt
+      have hjn1 : j + 1 ≤ n := by omega
+      have hle : ((j + 1 : ℕ) : ℝ) ≤ (n : ℝ) := Nat.cast_le.mpr hjn1
+      have hmul := mul_le_mul_of_nonneg_right hle (le_of_lt hh)
+      have h2 : (0 : ℝ) ≤ ↑n * h - ((j + 1 : ℕ) : ℝ) * h := by linarith
+      have h1 : (0 : ℝ) ≤ ↑n * h - (j : ℝ) * h := by linarith
+      rw [max_eq_left h2, max_eq_left h1]
+      have hcast : ((j + 1 : ℕ) : ℝ) * h = (j : ℝ) * h + h := by
+        rw [Nat.cast_add, Nat.cast_one]; ring
+      rw [hcast]; ring
+    · rw [Set.indicator_of_notMem hmem, sub_zero]
+      have hle' : S ω ≤ (j : ℝ) * h := le_of_not_gt (by simpa using hmem)
+      rw [hn] at hle'
+      have g2 : (n : ℝ) * h - (j : ℝ) * h ≤ 0 := by linarith
+      have g1 : (n : ℝ) * h - ((j + 1 : ℕ) : ℝ) * h ≤ 0 := by
+        have hcast : ((j + 1 : ℕ) : ℝ) * h = (j : ℝ) * h + h := by
+          rw [Nat.cast_add, Nat.cast_one]; ring
+        linarith
+      rw [max_eq_right g1, max_eq_right g2]
+  have htail : ∫ ω, {ω | (j : ℝ) * h < S ω}.indicator (fun _ => h) ω ∂μ
+      = h * μ.real {ω | (j : ℝ) * h < S ω} := by
+    rw [integral_indicator hs]
+    simp only [setIntegral_const, smul_eq_mul]
+    ring
+  rw [integral_congr_ae hpt, integral_sub hInt0 hgInt, htail]
 
 end MathFin
