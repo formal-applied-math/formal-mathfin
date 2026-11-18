@@ -129,8 +129,8 @@ theorem term_add_endowment_eq_annuityDue (S : ℕ → ℝ) (hS0 : S 0 = 1)
 /-- **Whole-life limit of the term insurance plus endowment identity**: the finite identity
 `term_add_endowment_eq_annuityDue` passes to the limit as the term tends to infinity. The term
 insurance partial sums converge to the whole-life EPV, the endowment term vanishes by the tail
-hypothesis, and the annuity-certain partial sums converge to the annuity-due, giving the
-whole-life identity `A = 1 - d * ä`. -/
+hypothesis, and the life annuity-due partial sums converge to the annuity-due, giving the
+whole-life identity `A = 1 - (1 - v) * ä`. -/
 theorem wholeLife_add_endowment_eq_annuityDue (S : ℕ → ℝ) (hS0 : S 0 = 1)
     (v : ℝ) (_hv : 0 < v)
     (hdeath : Summable fun k => v ^ (k + 1) * (S k - S (k + 1)))
