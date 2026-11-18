@@ -61,6 +61,10 @@ ended is `lifeAnnuityDue_eq_value` (`Insurance/AnnuityValue.lean`).
   and positive denominators, the
   completed ultimate is at least the last observed diagonal value, so predicted
   outstanding claims are nonnegative.
+* `cast_chainCompleteRat?_some`: wherever the exact rational chain-ladder evaluator
+  succeeds inside the horizon, its value casts to the real completion `chainComplete`.
+* `chainCompleteRat?_none_of_denom_eq_zero`: a zero factor denominator needed by a cell
+  makes the rational evaluator reject that cell.
 
 ## References
 
@@ -199,5 +203,93 @@ theorem le_chainComplete (n : ℕ) (C : ℕ → ℕ → ℝ)
     intro i' hi'
     rw [Finset.mem_range] at hi'
     exact hmono i' k (by omega)
+
+/-- The **rational chain-ladder development factor** over `ℚ`: the same ratio of
+successive column sums as `chainFactor`, returning `none` when the denominator sum
+is zero instead of totalizing division by zero. -/
+def chainFactorRat? (n : ℕ) (C : ℕ → ℕ → ℚ) (j : ℕ) : Option ℚ :=
+  if (∑ i ∈ Finset.range (n - j), C i j) = 0 then none
+  else some ((∑ i ∈ Finset.range (n - j), C i (j + 1)) / ∑ i ∈ Finset.range (n - j), C i j)
+
+/-- The **rational chain-ladder completion** over `ℚ`: observed cells (`i + j ≤ n`) keep
+`C i j`; each unobserved cell multiplies the previous cell by the rational selected
+factor, propagating `none` from any rejected factor. -/
+def chainCompleteRat? : ℕ → (ℕ → ℕ → ℚ) → ℕ → ℕ → Option ℚ
+  | _, C, i, 0 => some (C i 0)
+  | n, C, i, j + 1 =>
+      if i + (j + 1) ≤ n then some (C i (j + 1))
+      else (chainCompleteRat? n C i j).bind fun q =>
+        (chainFactorRat? n C j).map fun f => q * f
+
+/-- **Rational decode**: when every in-horizon denominator sum is nonzero, the rational
+completion succeeds at every cell within the horizon and its cast equals the real
+completion `chainComplete` of the cast triangle. -/
+theorem cast_chainCompleteRat?_some (n : ℕ) (C : ℕ → ℕ → ℚ)
+    (hdenom : ∀ j, j < n → (∑ i ∈ Finset.range (n - j), C i j) ≠ 0)
+    (i j : ℕ) (hj : j ≤ n) :
+    ∃ q : ℚ, chainCompleteRat? n C i j = some q
+      ∧ ((q : ℝ)) = chainComplete n (fun a b => ((C a b : ℚ) : ℝ)) i j := by
+  revert hj
+  induction j with
+  | zero =>
+      intro _
+      exact ⟨C i 0, rfl, rfl⟩
+  | succ j ih =>
+      intro hj
+      have hj' : j ≤ n := by omega
+      have hlt : j < n := by omega
+      obtain ⟨q, heq, hcast⟩ := ih hj'
+      by_cases h : i + (j + 1) ≤ n
+      · refine ⟨C i (j + 1), ?_, ?_⟩
+        · simp only [chainCompleteRat?, h, ↓reduceIte]
+        · exact (chainComplete_eq n (fun a b => ((C a b : ℚ) : ℝ)) i (j + 1) h).symm
+      · have hfac : chainFactorRat? n C j
+            = some ((∑ i ∈ Finset.range (n - j), C i (j + 1))
+              / ∑ i ∈ Finset.range (n - j), C i j) := by
+          simp only [chainFactorRat?, hdenom j hlt, ↓reduceIte]
+        refine ⟨q * ((∑ i ∈ Finset.range (n - j), C i (j + 1))
+          / ∑ i ∈ Finset.range (n - j), C i j), ?_, ?_⟩
+        · simp only [chainCompleteRat?, h, ↓reduceIte, heq, hfac,
+            Option.bind_some, Option.map_some]
+        · have hfactor : ((((∑ i ∈ Finset.range (n - j), C i (j + 1))
+                / ∑ i ∈ Finset.range (n - j), C i j : ℚ)) : ℝ)
+              = chainFactor n (fun a b => ((C a b : ℚ) : ℝ)) j := by
+            rw [chainFactor, Rat.cast_div, Rat.cast_sum, Rat.cast_sum]
+          have hcc : chainComplete n (fun a b => ((C a b : ℚ) : ℝ)) i (j + 1)
+              = chainComplete n (fun a b => ((C a b : ℚ) : ℝ)) i j
+                * chainFactor n (fun a b => ((C a b : ℚ) : ℝ)) j := by
+            simp only [chainComplete, h, ↓reduceIte]
+          rw [Rat.cast_mul, hcast, hfactor, hcc]
+
+/-- **Denominator failure propagates**: a zero denominator sum at a needed factor makes
+the rational completion `none`. -/
+theorem chainCompleteRat?_none_of_denom_eq_zero (n : ℕ) (C : ℕ → ℕ → ℚ)
+    (i j j' : ℕ) (hj1 : n - i ≤ j') (hj2 : j' < j)
+    (h0 : (∑ a ∈ Finset.range (n - j'), C a j') = 0) :
+    chainCompleteRat? n C i j = none := by
+  revert hj2
+  induction j with
+  | zero =>
+      intro hj2
+      have hfalse : False := by omega
+      exact False.elim hfalse
+  | succ j ih =>
+      intro hj2
+      by_cases h : i + (j + 1) ≤ n
+      · have hfalse : False := by omega
+        exact False.elim hfalse
+      · by_cases hlt : j' < j
+        · have hnone : chainCompleteRat? n C i j = none := ih hlt
+          simp only [chainCompleteRat?, h, ↓reduceIte, hnone, Option.bind_none]
+        · have hjj : j = j' := by omega
+          have hsum : (∑ a ∈ Finset.range (n - j), C a j) = 0 := by
+            rw [hjj]
+            exact h0
+          have hfac : chainFactorRat? n C j = none := by
+            simp [chainFactorRat?, hsum]
+          simp only [chainCompleteRat?, h, ↓reduceIte]
+          cases hq : chainCompleteRat? n C i j
+          · simp only [Option.bind_none]
+          · simp only [Option.bind_some, hfac, Option.map_none]
 
 end MathFin
