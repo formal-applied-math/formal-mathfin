@@ -61,8 +61,9 @@ ended is `lifeAnnuityDue_eq_value` (`Insurance/AnnuityValue.lean`).
   and positive denominators, the
   completed ultimate is at least the last observed diagonal value, so predicted
   outstanding claims are nonnegative.
-* `cast_chainCompleteRat?_some`: wherever the exact rational chain-ladder evaluator
-  succeeds inside the horizon, its value casts to the real completion `chainComplete`.
+* `cast_chainCompleteRat?_some`: when every in-horizon factor denominator is nonzero,
+  the exact rational chain-ladder evaluator succeeds inside the horizon and its value
+  casts to the real completion `chainComplete`.
 * `chainCompleteRat?_none_of_denom_eq_zero`: a zero factor denominator needed by a cell
   makes the rational evaluator reject that cell.
 
