@@ -123,71 +123,9 @@ theorem almgrenChrissPath_satisfies_EL (X_0 κ T t : ℝ) :
 noncomputable def liquidationCost (N : ℕ) (Δ η c : ℝ) (x : Fin (N + 1) → ℝ) : ℝ :=
   ∑ k : Fin N, Δ * (η * ((x k.succ - x k.castSucc) / Δ) ^ 2 + c * (x k.castSucc) ^ 2)
 
-/-- A real square vanishes only at zero. -/
-theorem eq_zero_of_sq_eq_zero (d : ℝ) (h : d ^ 2 = 0) : d = 0 := by
-  rw [pow_two] at h
-  cases mul_eq_zero.mp h with
-  | inl hd => exact hd
-  | inr hd => exact hd
-
-/-- A sequence with all consecutive differences zero is constant. -/
-theorem const_of_succ_eq (V : ℕ → ℝ) (N : ℕ)
-    (h : ∀ j, j < N → V (j + 1) = V j) (j : ℕ) :
-    j ≤ N → V j = V 0 := by
-  induction j with
-  | zero => exact fun _ => rfl
-  | succ m ih =>
-    intro hm
-    have hmN : m < N := by omega
-    have h1 : V (m + 1) = V m := h m hmN
-    have h2 : V m = V 0 := ih (by omega)
-    exact h1.trans h2
-
-/-- Summation by parts for sums over `Finset.range`. -/
-theorem sum_range_by_parts (a d : ℕ → ℝ) (N : ℕ) :
-    (∑ k ∈ Finset.range (N + 1), a k * (d (k + 1) - d k))
-      = a N * d (N + 1) - a 0 * d 0
-        + ∑ k ∈ Finset.range N, (a k - a (k + 1)) * d (k + 1) := by
-  induction N with
-  | zero =>
-    simp
-    ring
-  | succ M ih =>
-    show (∑ k ∈ Finset.range ((M + 1) + 1), a k * (d (k + 1) - d k))
-      = a (M + 1) * d ((M + 1) + 1) - a 0 * d 0
-        + ∑ k ∈ Finset.range (M + 1), (a k - a (k + 1)) * d (k + 1)
-    rw [Finset.sum_range_succ, ih, Finset.sum_range_succ]
-    ring
-
-/-- Splitting off the first term of a range sum. -/
-theorem sum_range_first (f : ℕ → ℝ) (n : ℕ) :
-    (∑ x ∈ Finset.range (n + 1), f x)
-      = (∑ x ∈ Finset.range n, f (x + 1)) + f 0 := by
-  induction n with
-  | zero =>
-    rw [Finset.sum_range_succ]
-    simp
-  | succ m ih =>
-    show (∑ x ∈ Finset.range ((m + 1) + 1), f x)
-      = (∑ x ∈ Finset.range (m + 1), f (x + 1)) + f 0
-    rw [Finset.sum_range_succ, ih, Finset.sum_range_succ]
-    abel
-
 /-- Extend a path on `Fin (N+1)` to a total function on `ℕ`. -/
 def extPath (N : ℕ) (x : Fin (N + 1) → ℝ) : ℕ → ℝ :=
   fun j => if h : j < N + 1 then x ⟨j, h⟩ else 0
-
-/-- Values of the extension agree with the path below `N + 1`. -/
-theorem extPath_of_lt (N : ℕ) (x : Fin (N + 1) → ℝ) (j : ℕ)
-    (h : j < N + 1) : extPath N x j = x ⟨j, h⟩ := by
-  simp only [extPath]
-  exact dite_eq_left h
-
-/-- The extension vanishes at and above `N + 1`. -/
-theorem extPath_of_ge (N : ℕ) (x : Fin (N + 1) → ℝ) (j : ℕ)
-    (h : ¬ j < N + 1) : extPath N x j = 0 := by
-  simp only [extPath]
-  exact dite_eq_right h
 
 /-- The extension at a path index recovers the path value. -/
 theorem extPath_val (N : ℕ) (x : Fin (N + 1) → ℝ) (j : Fin (N + 1)) :
@@ -302,7 +240,7 @@ theorem sysTEnergy (V : ℕ → ℝ) (M : ℕ) (hM : 1 ≤ M) (a : ℝ) :
   have hP1 : (∑ j ∈ Finset.range M, V j * sysL V j)
       = ∑ j ∈ Finset.range (M - 1), V (j + 1) * V j := by
     conv_lhs => rw [hM2]
-    rw [sum_range_first]
+    rw [Finset.sum_range_succ']
     simp only [sysL_succ, sysL_zero, mul_zero, add_zero]
   have hP2 : (∑ j ∈ Finset.range M, V j * sysR M V j)
       = ∑ j ∈ Finset.range (M - 1), V j * V (j + 1) := by
@@ -336,7 +274,7 @@ theorem sysTEnergy (V : ℕ → ℝ) (M : ℕ) (hM : 1 ≤ M) (a : ℝ) :
     have hSeq : (∑ j ∈ Finset.range M, (V j) ^ 2)
         = (∑ j ∈ Finset.range (M - 1), (V (j + 1)) ^ 2) + (V 0) ^ 2 := by
       conv_lhs => rw [hM2]
-      rw [sum_range_first]
+      rw [Finset.sum_range_succ']
     linarith
   have hPrefix : (∑ j ∈ Finset.range (M - 1), (V j) ^ 2)
       = (∑ j ∈ Finset.range M, (V j) ^ 2) - (V (M - 1)) ^ 2 := by
@@ -440,7 +378,7 @@ theorem sysT_ker_eq_zero (M : ℕ) (hM : 1 ≤ M) (a : ℝ) (ha : 0 ≤ a)
         = (fun j => extVec M v j * ((2 + a) * extVec M v j
           - sysL (extVec M v) j - sysR M (extVec M v) j)) ↑i := by
       intro i
-      show v i * sysT M a v i = extVec M v ↑i * ((2 + a) * extVec M v ↑i
+      change v i * sysT M a v i = extVec M v ↑i * ((2 + a) * extVec M v ↑i
         - sysL (extVec M v) ↑i - sysR M (extVec M v) ↑i)
       have hk2 := i.2
       have hkc : (↑i : ℕ) = i.val := by simp
@@ -502,7 +440,7 @@ theorem sysT_ker_eq_zero (M : ℕ) (hM : 1 ≤ M) (a : ℝ) (ha : 0 ≤ a)
     have hx := sq_nonneg ((extVec M v) 0)
     have hy := sq_nonneg ((extVec M v) (M - 1))
     linarith [hB0, hx, hy]
-  have hV0 : extVec M v 0 = 0 := eq_zero_of_sq_eq_zero _ hV0sq
+  have hV0 : extVec M v 0 = 0 := sq_eq_zero_iff.mp hV0sq
   have hconsec : ∀ j, j < M - 1 → (extVec M v) (j + 1) = (extVec M v) j := by
     intro j hj
     have hmem : j ∈ Finset.range (M - 1) := Finset.mem_range.mpr hj
@@ -513,12 +451,22 @@ theorem sysT_ker_eq_zero (M : ℕ) (hM : 1 ≤ M) (a : ℝ) (ha : 0 ≤ a)
     have hall := (Finset.sum_eq_zero_iff_of_nonneg hnn).mp hD0
     have hterm := hall j hmem
     have hdiff : (extVec M v) (j + 1) - (extVec M v) j = 0 :=
-      eq_zero_of_sq_eq_zero _ hterm
+      sq_eq_zero_iff.mp hterm
     exact sub_eq_zero.mp hdiff
   have hconst : ∀ j, j < M → extVec M v j = 0 := by
     intro j hj
     have hj' : j ≤ M - 1 := by omega
-    have hc := const_of_succ_eq (extVec M v) (M - 1) hconsec j hj'
+    have hchain : ∀ k, k ≤ M - 1 → extVec M v k = extVec M v 0 := by
+      intro k
+      induction k with
+      | zero => exact fun _ => rfl
+      | succ m ih =>
+        intro hm
+        have hmN : m < M - 1 := by omega
+        have h1 : extVec M v (m + 1) = extVec M v m := hconsec m hmN
+        have h2 : extVec M v m = extVec M v 0 := ih (by omega)
+        exact h1.trans h2
+    have hc := hchain j hj'
     rw [hc, hV0]
   ext i
   have hi : i.val < M := i.2
@@ -704,7 +652,7 @@ theorem cost_bridge (N : ℕ) (Δ η c : ℝ) (x : Fin (N + 1) → ℝ) :
         = (fun j => Δ * (η * ((extPath N x (j + 1) - extPath N x j) / Δ) ^ 2
           + c * (extPath N x j) ^ 2)) ↑k := by
     intro k
-    show (Δ * (η * ((x k.succ - x k.castSucc) / Δ) ^ 2 + c * (x k.castSucc) ^ 2))
+    change (Δ * (η * ((x k.succ - x k.castSucc) / Δ) ^ 2 + c * (x k.castSucc) ^ 2))
       = Δ * (η * ((extPath N x (↑k + 1) - extPath N x ↑k) / Δ) ^ 2
         + c * (extPath N x ↑k) ^ 2)
     have hkc : (↑k : ℕ) = k.val := by simp
@@ -750,7 +698,7 @@ theorem stationarity_ext (N : ℕ) (Δ η c : ℝ) (x : Fin (N + 1) → ℝ)
   have hjN' : j < N := by omega
   have hjn : j < N := hjN'
   have h0 : 0 < (⟨j, hjn⟩ : Fin N).val := by
-    show 0 < j
+    change 0 < j
     omega
   have hS := hstat ⟨j, hjn⟩ h0
   have hk : (⟨j, hjn⟩ : Fin N).val = j := rfl
@@ -781,7 +729,20 @@ theorem linearR_eq_zero (N : ℕ) (hN : 0 < N) (Δ η c : ℝ) (hΔ : 0 < Δ)
         + (∑ j ∈ Finset.range N, 2 * Δ * c * X j * D j) := by
     simp only [linearR]
     rw [← Finset.sum_add_distrib]
-  have hSBP := sum_range_by_parts (statA Δ η X) D (N - 1)
+  have hSBPgen : ∀ n : ℕ, (∑ k ∈ Finset.range (n + 1),
+        statA Δ η X k * (D (k + 1) - D k))
+      = statA Δ η X n * D (n + 1) - statA Δ η X 0 * D 0
+        + ∑ k ∈ Finset.range n,
+          (statA Δ η X k - statA Δ η X (k + 1)) * D (k + 1) := by
+    intro n
+    induction n with
+    | zero =>
+      simp
+      ring
+    | succ M ih =>
+      rw [Finset.sum_range_succ, ih, Finset.sum_range_succ]
+      ring
+  have hSBP := hSBPgen (N - 1)
   rw [← hN1] at hSBP
   have hAB : ∀ k ∈ Finset.range (N - 1),
       (statA Δ η X k - statA Δ η X (k + 1)) * D (k + 1)
@@ -835,15 +796,15 @@ theorem linearR_eq_zero (N : ℕ) (hN : 0 < N) (Δ η c : ℝ) (hΔ : 0 < Δ)
       = (∑ j ∈ Finset.range (N - 1), (2 * Δ * c * X (j + 1)) * D (j + 1))
         + (2 * Δ * c * X 0) * D 0 := by
     conv_lhs => rw [hN1]
-    rw [sum_range_first]
+    rw [Finset.sum_range_succ']
   have hB0D0 : (2 * Δ * c * X 0) * D 0 = 0 := by
     rw [hD0, mul_zero]
   rw [hLsplit, hL1, hL2, hB0D0, add_zero, neg_add_cancel]
 
 /-- Vanishing energy forces the perturbation to zero. -/
-theorem energyR_eq_zero (N : ℕ) (_hN : 0 < N) (Δ η c : ℝ) (hΔ : 0 < Δ)
+theorem energyR_eq_zero (N : ℕ) (Δ η c : ℝ) (hΔ : 0 < Δ)
     (hη : 0 < η) (hc : 0 ≤ c) (D : ℕ → ℝ) (hE : energyR N Δ η c D = 0)
-    (hD0 : D 0 = 0) (_hDN : D N = 0) (j : ℕ) (hj : j ≤ N) : D j = 0 := by
+    (hD0 : D 0 = 0) (j : ℕ) (hj : j ≤ N) : D j = 0 := by
   have hΔne : Δ ≠ 0 := ne_of_gt hΔ
   have hηne : η ≠ 0 := ne_of_gt hη
   simp only [energyR] at hE
@@ -867,11 +828,21 @@ theorem energyR_eq_zero (N : ℕ) (_hN : 0 < N) (Δ η c : ℝ) (hΔ : 0 < Δ)
     have hsq : ((D (i + 1) - D i) / Δ) ^ 2 = 0 := by
       have hne : Δ * η ≠ 0 := mul_ne_zero hΔne hηne
       exact (mul_eq_zero.mp hAi).resolve_left hne
-    have hdiv : (D (i + 1) - D i) / Δ = 0 := eq_zero_of_sq_eq_zero _ hsq
+    have hdiv : (D (i + 1) - D i) / Δ = 0 := sq_eq_zero_iff.mp hsq
     have hdiff : D (i + 1) - D i = 0 :=
       (div_eq_zero_iff.mp hdiv).resolve_right hΔne
     exact sub_eq_zero.mp hdiff
-  exact (const_of_succ_eq D N hDE j hj).trans hD0
+  have hchain : ∀ k, k ≤ N → D k = D 0 := by
+    intro k
+    induction k with
+    | zero => exact fun _ => rfl
+    | succ m ih =>
+      intro hm
+      have hmN : m < N := by omega
+      have h1 : D (m + 1) = D m := hDE m hmN
+      have h2 : D m = D 0 := ih (by omega)
+      exact h1.trans h2
+  exact (hchain j hj).trans hD0
 
 /-- Cost difference equals the perturbation energy for stationary paths. -/
 theorem cost_sub_eq_energy (N : ℕ) (hN : 0 < N) (Δ η c : ℝ) (hΔ : 0 < Δ)
@@ -897,10 +868,10 @@ theorem cost_sub_eq_energy (N : ℕ) (hN : 0 < N) (Δ η c : ℝ) (hΔ : 0 < Δ)
   have hYN : extPath N y N = 0 := extPath_last N y hyN
   have hXN : extPath N x N = 0 := extPath_last N x hxN
   have hD0 : (fun j => extPath N y j - extPath N x j) 0 = 0 := by
-    show extPath N y 0 - extPath N x 0 = 0
+    change extPath N y 0 - extPath N x 0 = 0
     rw [hY0, hX0, sub_self]
   have hDN : (fun j => extPath N y j - extPath N x j) N = 0 := by
-    show extPath N y N - extPath N x N = 0
+    change extPath N y N - extPath N x N = 0
     rw [hYN, hXN, sub_self]
   have hL0 : linearR N Δ η c (extPath N x)
       (fun j => extPath N y j - extPath N x j) = 0 :=
@@ -1007,24 +978,17 @@ theorem existsUnique_minimizer_liquidationCost (N : ℕ) (hN : 0 < N)
     have hY0 : extPath N y 0 = X0 := extPath_zero N y X0 hy0
     have hX0 : extPath N (xStar N hN2 u X0) 0 = X0 :=
       extPath_zero N _ X0 (xStar_zero N hN2 u X0)
-    have hYN : extPath N y N = 0 := extPath_last N y hyN
-    have hXN : extPath N (xStar N hN2 u X0) N = 0 :=
-      extPath_last N _ (xStar_last N hN2 u X0)
     have hD0 : (fun j => extPath N y j - extPath N (xStar N hN2 u X0) j) 0
         = 0 := by
-      show extPath N y 0 - extPath N (xStar N hN2 u X0) 0 = 0
+      change extPath N y 0 - extPath N (xStar N hN2 u X0) 0 = 0
       rw [hY0, hX0, sub_self]
-    have hDN : (fun j => extPath N y j - extPath N (xStar N hN2 u X0) j) N
-        = 0 := by
-      show extPath N y N - extPath N (xStar N hN2 u X0) N = 0
-      rw [hYN, hXN, sub_self]
     ext j
     have hjN : j.val ≤ N := by
       have h2 := j.2
       omega
-    have h1 := energyR_eq_zero N hN Δ η c hΔ hη hc
+    have h1 := energyR_eq_zero N Δ η c hΔ hη hc
       (fun k => extPath N y k - extPath N (xStar N hN2 u X0) k)
-      hE0 hD0 hDN j.val hjN
+      hE0 hD0 j.val hjN
     have hYj : extPath N y j.val = y j := extPath_val N y j
     have hXj : extPath N (xStar N hN2 u X0) j.val
         = xStar N hN2 u X0 j :=
