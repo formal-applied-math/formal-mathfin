@@ -50,6 +50,7 @@ as the mesh goes to zero (`Models/Credit/DefaultTimeMesh.lean`).
 * `value_cdsBuyer_coxDefaultTime`, `cdsLossesGrid_one_eq_cdsLosses`.
 * `hitTime_defaultIndicator`, `pathPV_cdsProtectionAtDefault`, `value_cdsProtectionAtDefault`,
   `value_cdsProtectionAtDefault_coxDefaultTime` — the protection leg paid at the default time.
+* `recoveryTiming_value_sub` — recovery paid at default vs at maturity.
 
 ## References
 
@@ -237,6 +238,133 @@ theorem value_cdsProtectionAtDefault (D : ℝ≥0 → ℝ) (τ : Ω → ℝ) (T 
   · simp [defaultIndicator, Set.indicator, h]
     ring
   · simp [defaultIndicator, Set.indicator, h]
+
+/-- **Recovery paid at default vs at maturity.** Scaling `cdsProtectionAtDefault` by `ρ` and
+adding the surviving face at `T` vs paying `ρ` on default at `T` plus the same face leg. The
+face legs cancel, leaving `ρ * E[(D(τ) - D(T)) * 1{τ ≤ T}]` under `Q`. -/
+theorem recoveryTiming_value_sub (Ω : Type*) [MeasurableSpace Ω]
+    (Q : Measure Ω) [IsProbabilityMeasure Q] (τ : Ω → ℝ) (hτ : Measurable τ)
+    (D : ℝ≥0 → ℝ) (hD : Measurable D) (T : ℝ≥0) (F ρ : ℝ)
+    (hDpos : ∀ t : ℝ≥0, t ≤ T → 0 < D t)
+    (hDbound : ∃ B : ℝ, ∀ t : ℝ≥0, t ≤ T → D t ≤ B) :
+    ((Contract.both (Contract.scale ρ (cdsProtectionAtDefault T 0))
+        (Contract.pay T (Payoff.mul (Payoff.const F)
+          (Payoff.sub (Payoff.const 1) (Payoff.obs () T))))).value
+          Q (fun t _ ↦ D t) (defaultIndicator τ))
+      - ((Contract.both (Contract.pay T (Payoff.mul (Payoff.const ρ) (Payoff.obs () T)))
+          (Contract.pay T (Payoff.mul (Payoff.const F)
+            (Payoff.sub (Payoff.const 1) (Payoff.obs () T))))).value
+            Q (fun t _ ↦ D t) (defaultIndicator τ))
+      = ρ * ∫ ω, (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal - D T) (τ ω) ∂Q := by
+  obtain ⟨B, hB⟩ := hDbound
+  have hBpos : 0 < B := lt_of_lt_of_le (hDpos 0 zero_le) (hB 0 zero_le)
+  have hNQ : Integrable (defaultIndicator τ () T) Q :=
+    integrable_defaultIndicator (Q := Q) hτ T
+  have h1NQ : Integrable (fun ω ↦ 1 - defaultIndicator τ () T ω) Q :=
+    integrable_one_sub_defaultIndicator (Q := Q) hτ T
+  have hmeasD : Measurable (fun ω : Ω ↦ D (τ ω).toNNReal) :=
+    hD.comp hτ.real_toNNReal
+  have hD_ae : AEStronglyMeasurable (fun ω : Ω ↦ D (τ ω).toNNReal) Q :=
+    hmeasD.aestronglyMeasurable
+  have hbase_ae : AEStronglyMeasurable
+      (fun ω : Ω ↦ D (τ ω).toNNReal * defaultIndicator τ () T ω) Q :=
+    AEStronglyMeasurable.mul hD_ae hNQ.aestronglyMeasurable
+  have hbase_ineq : ∀ᵐ ω ∂Q,
+      ‖D (τ ω).toNNReal * defaultIndicator τ () T ω‖ ≤ B := by
+    refine ae_of_all _ fun ω ↦ ?_
+    by_cases h : τ ω ≤ (T : ℝ)
+    · have hle : (τ ω).toNNReal ≤ T := Real.toNNReal_le_iff_le_coe.2 h
+      have h1 : 0 < D (τ ω).toNNReal := hDpos _ hle
+      have h2 : D (τ ω).toNNReal ≤ B := hB _ hle
+      simp only [defaultIndicator, Set.indicator, Set.mem_ofPred_eq, h, ↓reduceIte,
+        Pi.one_apply, mul_one, Real.norm_eq_abs, abs_of_pos h1, ge_iff_le]
+      exact h2
+    · simp only [defaultIndicator, Set.indicator, Set.mem_ofPred_eq, h, ↓reduceIte, mul_zero,
+        norm_zero]
+      exact hBpos.le
+  have hbase : Integrable
+      (fun ω : Ω ↦ D (τ ω).toNNReal * defaultIndicator τ () T ω) Q :=
+    Integrable.mono' (integrable_const B) hbase_ae hbase_ineq
+  have hmat_pw : ∀ ω, (Contract.pay T
+      (Payoff.mul (Payoff.const ρ) (Payoff.obs () T))).pathPV D
+      (scenarioAt (defaultIndicator τ) ω)
+      = D T * (ρ * defaultIndicator τ () T ω) := fun ω ↦ by
+    simp [Contract.pathPV, Contract.cashflows, Payoff.eval, scenarioAt]
+  have hface_pw : ∀ ω, (Contract.pay T (Payoff.mul (Payoff.const F)
+      (Payoff.sub (Payoff.const 1) (Payoff.obs () T)))).pathPV D
+      (scenarioAt (defaultIndicator τ) ω)
+      = D T * (F * (1 - defaultIndicator τ () T ω)) := fun ω ↦ by
+    simp [Contract.pathPV, Contract.cashflows, Payoff.eval, scenarioAt]
+  have hmat_int : Integrable (fun ω ↦ (Contract.pay T
+      (Payoff.mul (Payoff.const ρ) (Payoff.obs () T))).pathPV D
+      (scenarioAt (defaultIndicator τ) ω)) Q := by
+    simpa [hmat_pw] using (hNQ.const_mul ρ).const_mul (D T)
+  have hface_int : Integrable (fun ω ↦ (Contract.pay T (Payoff.mul (Payoff.const F)
+      (Payoff.sub (Payoff.const 1) (Payoff.obs () T)))).pathPV D
+      (scenarioAt (defaultIndicator τ) ω)) Q := by
+    simpa [hface_pw] using (h1NQ.const_mul F).const_mul (D T)
+  have hprot : Integrable (fun ω ↦ (cdsProtectionAtDefault T 0).pathPV D
+      (scenarioAt (defaultIndicator τ) ω)) Q := by
+    simpa [pathPV_cdsProtectionAtDefault] using hbase
+  have hscale : Integrable (fun ω ↦ (Contract.scale ρ
+      (cdsProtectionAtDefault T 0)).pathPV D (scenarioAt (defaultIndicator τ) ω)) Q := by
+    simp only [Contract.pathPV_scale]
+    exact hprot.const_mul ρ
+  have hP1 : (Contract.scale ρ (cdsProtectionAtDefault T 0)).value Q (fun t _ ↦ D t)
+      (defaultIndicator τ)
+      = ρ * ∫ ω, (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal) (τ ω) ∂Q := by
+    rw [Contract.value_scale, value_cdsProtectionAtDefault, sub_zero, one_mul]
+  have hM : (Contract.pay T (Payoff.mul (Payoff.const ρ) (Payoff.obs () T))).value Q
+      (fun t _ ↦ D t) (defaultIndicator τ)
+      = ∫ ω, D T * (ρ * defaultIndicator τ () T ω) ∂Q := by
+    rw [Contract.value]
+    exact integral_congr_ae (ae_of_all _ hmat_pw)
+  have hF : (Contract.pay T (Payoff.mul (Payoff.const F)
+      (Payoff.sub (Payoff.const 1) (Payoff.obs () T)))).value Q (fun t _ ↦ D t)
+      (defaultIndicator τ)
+      = ∫ ω, D T * (F * (1 - defaultIndicator τ () T ω)) ∂Q := by
+    rw [Contract.value]
+    exact integral_congr_ae (ae_of_all _ hface_pw)
+  have hA : Integrable (fun ω ↦ (Set.Iic (T : ℝ)).indicator
+      (fun s ↦ D s.toNNReal) (τ ω)) Q :=
+    hbase.congr (ae_of_all _ fun ω ↦ by
+      by_cases h : τ ω ≤ (T : ℝ)
+      · simp [defaultIndicator, Set.indicator, h]
+      · simp [defaultIndicator, Set.indicator, h])
+  have hρA : Integrable (fun ω ↦ ρ * (Set.Iic (T : ℝ)).indicator
+      (fun s ↦ D s.toNNReal) (τ ω)) Q :=
+    hA.const_mul ρ
+  have hg : Integrable (fun ω ↦ D T * (ρ * defaultIndicator τ () T ω)) Q :=
+    (hNQ.const_mul ρ).const_mul (D T)
+  have hpoint : ∀ ω, ρ * (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal) (τ ω)
+      - D T * (ρ * defaultIndicator τ () T ω)
+      = ρ * (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal - D T) (τ ω) := fun ω ↦ by
+    by_cases h : τ ω ≤ (T : ℝ)
+    · simp [defaultIndicator, Set.indicator, h]
+      ring
+    · simp [defaultIndicator, Set.indicator, h]
+  have hmain : ρ * (∫ ω, (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal) (τ ω) ∂Q)
+      - (∫ ω, D T * (ρ * defaultIndicator τ () T ω) ∂Q)
+      = ρ * ∫ ω, (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal - D T) (τ ω) ∂Q := by
+    have e1 : ρ * (∫ ω, (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal) (τ ω) ∂Q)
+        = ∫ ω, ρ * (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal) (τ ω) ∂Q :=
+      (integral_const_mul ρ _).symm
+    have e2 : (∫ ω, ρ * (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal) (τ ω) ∂Q)
+        - (∫ ω, D T * (ρ * defaultIndicator τ () T ω) ∂Q)
+        = ∫ ω, (ρ * (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal) (τ ω)
+          - D T * (ρ * defaultIndicator τ () T ω)) ∂Q :=
+      (integral_sub hρA hg).symm
+    have e3 : (∫ ω, (ρ * (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal) (τ ω)
+          - D T * (ρ * defaultIndicator τ () T ω)) ∂Q)
+        = ∫ ω, ρ * (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal - D T) (τ ω) ∂Q :=
+      integral_congr_ae (ae_of_all _ hpoint)
+    have e4 : (∫ ω, ρ * (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal - D T) (τ ω) ∂Q)
+        = ρ * ∫ ω, (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal - D T) (τ ω) ∂Q :=
+      integral_const_mul ρ _
+    rw [e1, e2, e3, e4]
+  rw [Contract.value_both _ _ _ _ _ hscale hface_int,
+    Contract.value_both _ _ _ _ _ hmat_int hface_int, hP1, hM, hF]
+  linear_combination hmain
 
 end AtDefault
 
