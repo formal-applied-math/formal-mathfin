@@ -2806,6 +2806,54 @@
           }
         ]
       }
+    },
+    {
+      "id": "mf-on-damping-variance-time",
+      "name": "Backward-looking rate: variance-damping time",
+      "description": "For a compounded overnight rate on the accrual period [tau0, tau1], the volatility damping psi(t) = min(1, ((tau1 - t)/(tau1 - tau0))^q) gives total variance time integral_0^tau1 psi(t)^2 dt = s + (tau1 - s) x^(2q)/(2q + 1), with s = max(tau0, 0) and x = (tau1 - s)/(tau1 - tau0). The integral is derived from the definition of psi; the rate is a martingale under the tau1-forward measure, so this variance time is the only effect of compounding on the caplet.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.Rates.OvernightCompounding\n\nopen MathFin\n\ntheorem on_damping_variance_time_example {tau0 tau1 q : ℝ} (hq : 0 < q)\n    (h : tau0 < tau1) (h1 : 0 < tau1) :\n    ∫ t in (0 : ℝ)..tau1, onDamping tau0 tau1 q t ^ 2 = onEffectiveTime tau0 tau1 q :=\n  integral_onDamping_sq hq h h1\n"
+      },
+      "metadata": {
+        "chapter": null,
+        "reference": "Lyashenko and Mercurio (2019), Looking forward to backward-looking rates (SSRN 3330240); Willems (2020), SABR smiles for RFR caplets (arXiv:2004.04501), Section 3",
+        "citations": [
+          {
+            "key": "LyashenkoMercurio2019"
+          },
+          {
+            "key": "Willems2020"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the damping-time integral by splitting at max(tau0, 0) and the power-rule substitution. Scope: constant volatility, deterministic damping psi; the lognormal law of the compounded rate is not derived here."
+      }
+    },
+    {
+      "id": "mf-on-caplet-jensen-ordering",
+      "name": "Forward-looking caplet is worth at most the backward-looking caplet",
+      "description": "For an integrable rate R and a sub-sigma-algebra m, E[(E[R | m] - K)^+] <= E[(R - K)^+] by conditional Jensen on the convex call payoff. With m the information at the start of the accrual period and R the compounded rate at its end, the forward-looking caplet is worth at most the backward-looking one. The martingale property R(tau0) = E[R(tau1) | F_tau0] is the interpretation, not a hypothesis of the theorem.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.Rates.OvernightCompounding\n\nopen MeasureTheory MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n\ntheorem forward_caplet_le_backward_example {m : MeasurableSpace Ω} (hm : m ≤ mΩ)\n    {R : Ω → ℝ} (hR : Integrable R μ) (K : ℝ) :\n    ∫ ω, max (μ[R | m] ω - K) 0 ∂μ ≤ ∫ ω, max (R ω - K) 0 ∂μ :=\n  forwardCaplet_le_backwardCaplet hm hR K\n"
+      },
+      "metadata": {
+        "chapter": null,
+        "reference": "Lyashenko and Mercurio (2019) (SSRN 3330240); Willems (2020), equation (2)",
+        "citations": [
+          {
+            "key": "LyashenkoMercurio2019"
+          },
+          {
+            "key": "Willems2020"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Proves the Jensen inequality for the call payoff under a conditional expectation (Mathlib's conditional Jensen). Not derived: that the compounded overnight rate is a martingale under the payment-date forward measure, and the strictness of the inequality."
+      }
     }
   ]
 }
