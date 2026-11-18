@@ -5,6 +5,7 @@ Authors: Yang Ye
 -/
 module
 
+public import MathFin.Models.Bachelier.Bachelier
 public import MathFin.Probability.Gaussian.GaussianPairLinearLaw
 public import MathFin.Probability.Gaussian.GaussianPartialMoments
 public import MathFin.Probability.Gaussian.GaussianMoments
@@ -59,6 +60,10 @@ one. This is the normal-model analogue of the reduction
   equals `(f₁ − f₂ − K)·Φ(d) + √(σ₁² + σ₂² − 2ρσ₁σ₂)·ϕ(d)` with `d = bachelierSpreadD`.
 * `bachelier_spread_put`: the put mirror, priced at the same effective standard
   deviation.
+* `bachelierSpreadD_eq_bachelierD`: the spread `d` is the single-name `bachelierD` of the
+  spread mean at the effective standard deviation and unit time.
+* `bachelier_spread_call_eq_bachelier`: the spread-call price written with the
+  single-name `bachelierD`, i.e. in the form of `bachelier_call_formula`.
 
 ## References
 
@@ -295,5 +300,35 @@ theorem bachelier_spread_put {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (hasLaw_sub_gaussianPair hUV hU hV hcov f₁ f₂ σ₁ σ₂) hvnn K
   rw [hcoe] at hput
   exact hput
+
+/-! ### The single-name form -/
+
+/-- The spread `d` is the single-name Bachelier `d` (`bachelierD`) of the spread mean
+`f₁ − f₂` at volatility `√(σ₁² + σ₂² − 2ρσ₁σ₂)` and unit time. -/
+theorem bachelierSpreadD_eq_bachelierD (f₁ f₂ K σ₁ σ₂ ρ : ℝ) :
+    bachelierSpreadD f₁ f₂ K σ₁ σ₂ ρ
+      = bachelierD (f₁ - f₂) K (Real.sqrt (bachelierSpreadVariance σ₁ σ₂ ρ)) 1 := by
+  simp [bachelierSpreadD, bachelierD]
+
+/-- **Bachelier spread call, in the single-name form**: under `BachelierSpreadHyp`, the
+expected payoff of the spread call is the right-hand side of `bachelier_call_formula` for
+spot `f₁ − f₂`, strike `K`, volatility `√(σ₁² + σ₂² − 2ρσ₁σ₂)` and unit time:
+
+    E_Q[max(F₁ − F₂ − K, 0)] = (f₁ − f₂ − K)·Φ(d) + √v·ϕ(d),
+
+with `d = bachelierD (f₁ − f₂) K √v 1` — `bachelier_spread_call` with `bachelierSpreadD`
+rewritten by `bachelierSpreadD_eq_bachelierD`. -/
+theorem bachelier_spread_call_eq_bachelier {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {f₁ f₂ K σ₁ σ₂ ρ : ℝ} {U V : Ω → ℝ}
+    (h : BachelierSpreadHyp Q f₁ f₂ σ₁ σ₂ ρ U V) :
+    ∫ ω, max ((f₁ + σ₁ * U ω) - (f₂ + σ₂ * V ω) - K) 0 ∂Q
+      = (f₁ - f₂ - K)
+          * Phi (bachelierD (f₁ - f₂) K (Real.sqrt (bachelierSpreadVariance σ₁ σ₂ ρ)) 1)
+        + Real.sqrt (bachelierSpreadVariance σ₁ σ₂ ρ)
+          * gaussianPDFReal 0 1
+              (bachelierD (f₁ - f₂) K (Real.sqrt (bachelierSpreadVariance σ₁ σ₂ ρ)) 1) := by
+  rw [← bachelierSpreadD_eq_bachelierD]
+  exact bachelier_spread_call h
 
 end MathFin
