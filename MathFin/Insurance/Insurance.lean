@@ -43,6 +43,11 @@ ended is `lifeAnnuityDue_eq_value` (`Insurance/AnnuityValue.lean`).
 
 * `lifeAnnuityDue`: the life annuity-due of `n` unit payments at times `0, …, n − 1`, each paid
   only if the insured is alive, for a rate `r` and a force of mortality `μ`.
+* `chainFactor`: the selected chain-ladder development factor `f̂_j` of a cumulative
+  triangle `C` with `n` development periods: the ratio of successive column sums over
+  the rows `i < n - j` observed in both columns.
+* `chainComplete`: the chain-ladder completion of `C`, defined for all cells; it agrees
+  with `C` on observed cells and multiplies forward by selected factors afterwards.
 
 ## Main results
 
@@ -50,12 +55,16 @@ ended is `lifeAnnuityDue_eq_value` (`Insurance/AnnuityValue.lean`).
 * `net_premium_principle`: `P · A = B ↔ P = B / A` for `A ≠ 0`.
 * `lifeAnnuityDue_const`: under a constant force of mortality `m` and `e^{-(r + m)} ≠ 1`, the life
   annuity-due is the geometric closed form at the discount factor `e^{-(r + m)}`.
+* `chainComplete_unobserved`: on unobserved cells the completion equals the last observed
+  cell times the product of the selected factors over the unobserved development periods.
 
 ## References
 
 * [D. C. M. Dickson, M. R. Hardy and H. R. Waters, *Actuarial Mathematics for Life
   Contingent Risks*][DicksonHardyWaters2013], Chapter 5 (annuities).
 * [Bowers and others, *Actuarial Mathematics*][BowersEtAl]
+* [T. Mack, *Distribution-free Calculation of the Standard Error of Chain Ladder
+  Reserve Estimates*][Mack1993], the chain-ladder development-factor method.
 
 ## Tags
 
@@ -106,5 +115,58 @@ theorem lifeAnnuityDue_const {r m : ℝ} (n : ℕ) (hv : Real.exp (-(r + m)) ≠
     intervalIntegral.integral_const, ← Real.exp_add, ← Real.exp_nat_mul, smul_eq_mul]
   congr 1
   ring
+
+/-- The **chain-ladder development factor** `f̂_j` of a cumulative triangle `C` with `n`
+development periods: the ratio of the column-`j+1` sum to the column-`j` sum over the
+rows `i < n - j` observed in both columns (`Finset.range (n - j)`). -/
+noncomputable def chainFactor (n : ℕ) (C : ℕ → ℕ → ℝ) (j : ℕ) : ℝ :=
+  (∑ i ∈ Finset.range (n - j), C i (j + 1)) / ∑ i ∈ Finset.range (n - j), C i j
+
+/-- The **chain-ladder completion** of `C`: observed cells (`i + j ≤ n`) keep `C i j`;
+each unobserved cell multiplies the previous cell in its row by the selected factor
+`chainFactor n C j`. -/
+noncomputable def chainComplete : ℕ → (ℕ → ℕ → ℝ) → ℕ → ℕ → ℝ
+  | _, C, i, 0 => C i 0
+  | n, C, i, j + 1 =>
+      if i + (j + 1) ≤ n then C i (j + 1)
+      else chainComplete n C i j * chainFactor n C j
+
+/-- Observed cells are preserved by the completion. -/
+theorem chainComplete_eq (n : ℕ) (C : ℕ → ℕ → ℝ) (i j : ℕ) (h : i + j ≤ n) :
+    chainComplete n C i j = C i j := by
+  revert h
+  induction j with
+  | zero => intro h; rfl
+  | succ j _ => intro h; simp [chainComplete, h]
+
+/-- **Product-of-selected-factors formula**: on unobserved cells (`n < i + j`) the
+completion equals the last observed cell `C i (n - i)` times the product of the
+selected factors over `[n - i, j)`. -/
+theorem chainComplete_unobserved (n : ℕ) (C : ℕ → ℕ → ℝ) (i j : ℕ)
+    (hij : n < i + j) :
+    chainComplete n C i j
+      = C i (n - i) * ∏ k ∈ Finset.Ico (n - i) j, chainFactor n C k := by
+  revert hij
+  induction j with
+  | zero =>
+      intro hij
+      have hni : n - i = 0 := by omega
+      simp [chainComplete, hni]
+  | succ j ih =>
+      intro hij
+      have hneg : ¬ i + (j + 1) ≤ n := by omega
+      simp only [chainComplete, hneg, ↓reduceIte]
+      by_cases hobs : i + j ≤ n
+      · rw [chainComplete_eq n C i j hobs]
+        have hji : j = n - i := by omega
+        subst hji
+        have hle : n - i ≤ n - i := le_refl _
+        rw [Finset.prod_Ico_succ_top hle]
+        rw [Finset.Ico_self, Finset.prod_empty, one_mul]
+      · have hlt : n < i + j := by omega
+        rw [ih hlt]
+        have hle : n - i ≤ j := by omega
+        rw [Finset.prod_Ico_succ_top hle]
+        ring
 
 end MathFin
