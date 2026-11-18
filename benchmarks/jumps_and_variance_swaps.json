@@ -1966,7 +1966,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Proves the conditional statements via sqrt_bsTerminal_driftless (sqrt of a lognormal factor is lognormal with half the log-volatility) and expected_terminal_eq_forward. Scope: the lognormal law of the realized variance, with mean the fair variance strike and a supplied log-volatility s, is assumed (hypothesis VolSwapHyp) and not derived from any price process; the Brockhaus-Long agreement to first order is not proved. The fair strikes are undiscounted, unseasoned and annualized; discounting enters only through the constant-bank-account forward-measure theorem."
+        "formalization_scope": "MathFin/Models/ModelFree/VolatilitySwapLognormal.lean proves the conditional statements via sqrt_bsTerminal_driftless (sqrt of a lognormal factor is lognormal with half the log-volatility) and expected_terminal_eq_forward; the time-0 value via forwardMeasure_price (MathFin/Pricing/ForwardMeasure.lean). Scope: the lognormal law of the realized variance, with mean the fair variance strike and a supplied log-volatility s, is assumed (hypothesis VolSwapHyp) and not derived from any price process; the Brockhaus-Long agreement to first order is not proved. The fair strikes are undiscounted, unseasoned and annualized; discounting enters only through the constant-bank-account forward-measure theorem."
       }
     }
   ]
