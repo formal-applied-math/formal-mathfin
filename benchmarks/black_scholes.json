@@ -2813,7 +2813,7 @@
       "description": "Spread call under independent normal forwards: the difference of two Gaussian-distributed forwards is Gaussian with mean mu1 - mu2 and variance sigma1^2 + sigma2^2, so the price collapses to the standard normal stop-loss transform evaluated at that combined distribution — the exact normal-model analog of the single-asset Bachelier call formula.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Models.Bachelier.BachelierSpread\n\nopen MathFin\n\nexample {f1 f2 K sigma1 sigma2 : Real} (hsigma1 : 0 < sigma1) (hsigma2 : 0 < sigma2)\n    (hf1 : f1 = 105.0) (hf2 : f2 = 100.0) (hK : K = 3.0) :\n    MathFin.bachelier_spread_call (f := fun _ => f1) (fun _ => f2) K sigma1 sigma2 0.0\n      = MathFin.gaussian_call_formula (f1 - f2 - K) ((sigma1^2 + sigma2^2)^(1/2 : Real)) := by\n  rw [hf1, hf2, hK]\n  exact MathFin.bachelier_spread_call zero_le' zero_le' zero_le'\n"
+        "lean": "import MathFin.Models.Bachelier.BachelierSpread\n\nopen MeasureTheory ProbabilityTheory Real MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} [IsProbabilityMeasure Q]\n  {f₁ f₂ K σ₁ σ₂ ρ : ℝ} {U V : Ω → ℝ}\n\ntheorem bachelier_spread_call_example (h : BachelierSpreadHyp Q f₁ f₂ σ₁ σ₂ ρ U V) :\n    ∫ ω, max ((f₁ + σ₁ * U ω) - (f₂ + σ₂ * V ω) - K) 0 ∂Q\n      = (f₁ - f₂ - K) * Phi (bachelierSpreadD f₁ f₂ K σ₁ σ₂ ρ)\n        + Real.sqrt (bachelierSpreadVariance σ₁ σ₂ ρ)\n          * gaussianPDFReal 0 1 (bachelierSpreadD f₁ f₂ K σ₁ σ₂ ρ) :=\n  bachelier_spread_call h\n"
       },
       "metadata": {
         "chapter": null,
