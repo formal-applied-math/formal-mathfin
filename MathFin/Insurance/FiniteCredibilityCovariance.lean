@@ -72,17 +72,6 @@ private theorem integral_mixture {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
     (fun ω => p ω.1 * ∏ i, w ω.1 (ω.2 i))) = _
   exact MeasureTheory.Measure.integral_ofWeights _ hnonneg f
 
-/-- The conditionally-iid product weights sum to one for each risk. -/
-private theorem weight_sum_one {Θ Ξ : Type*} [Fintype Ξ]
-    (n : ℕ) (θ : Θ) (w : Θ → Ξ → ℝ)
-    (hw1 : ∀ θ, ∑ ξ, w θ ξ = 1) :
-    (∑ x : Fin n → Ξ, ∏ i, w θ (x i)) = 1 := by
-  have h1 : (∏ _i : Fin n, ∑ ξ, w θ ξ) = (1 : ℝ) := by
-    simp [hw1 θ]
-  have hpi := Fintype.prod_sum (fun (_i : Fin n) (ξ : Ξ) => w θ ξ)
-  rw [← hpi]
-  exact h1
-
 /-- Each coordinate has conditional mean `condMean`, given the risk. -/
 private theorem coord_marginal {Θ Ξ : Type*} [Fintype Ξ]
     (n : ℕ) (θ : Θ) (j : Fin n) (w : Θ → Ξ → ℝ) (v : Ξ → ℝ)
@@ -173,6 +162,12 @@ private theorem mean_fst {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
       (∑ x : Fin n → Ξ, (p θ * ∏ i, w θ (x i)) * condMean (w θ) v)
         = p θ * condMean (w θ) v := by
     intro θ
+    have h_weight_sum_one : (∑ x : Fin n → Ξ, ∏ i, w θ (x i)) = 1 := by
+      have h1 : (∏ _i : Fin n, ∑ ξ, w θ ξ) = (1 : ℝ) := by
+        simp [hw1 θ]
+      have hpi := Fintype.prod_sum (fun (_i : Fin n) (ξ : Ξ) => w θ ξ)
+      rw [← hpi]
+      exact h1
     have hterm : ∀ x : Fin n → Ξ,
         (p θ * ∏ i, w θ (x i)) * condMean (w θ) v
           = (p θ * condMean (w θ) v) * ∏ i, w θ (x i) :=
@@ -183,7 +178,7 @@ private theorem mean_fst {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
       _ = (p θ * condMean (w θ) v) * ∑ x : Fin n → Ξ, ∏ i, w θ (x i) :=
           (Finset.mul_sum _ _ _).symm
       _ = p θ * condMean (w θ) v := by
-          rw [weight_sum_one n θ w hw1, mul_one]
+          rw [h_weight_sum_one, mul_one]
   exact Finset.sum_congr rfl (fun θ _ => hθ θ)
 
 /-- Expectation of the sample mean under the mixture. -/
@@ -253,6 +248,12 @@ theorem covariance_condMean_sampleMean {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
       = ∑ x : Fin n → Ξ, (p θ * ∏ i, w θ (x i)) *
         (condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v) ^ 2 := by
     intro θ
+    have h_weight_sum_one : (∑ x : Fin n → Ξ, ∏ i, w θ (x i)) = 1 := by
+      have h1 : (∏ _i : Fin n, ∑ ξ, w θ ξ) = (1 : ℝ) := by
+        simp [hw1 θ]
+      have hpi := Fintype.prod_sum (fun (_i : Fin n) (ξ : Ξ) => w θ ξ)
+      rw [← hpi]
+      exact h1
     have hJ : (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
             (((n : ℝ)⁻¹ * ∑ i, v (x i)) - ∑ φ, p φ * condMean (w φ) v))
           = condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v := by
@@ -277,7 +278,7 @@ theorem covariance_condMean_sampleMean {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
                 ∑ x : Fin n → Ξ, ∏ i, w θ (x i) :=
               (Finset.mul_sum _ _ _).symm
           _ = ∑ φ, p φ * condMean (w φ) v := by
-              rw [weight_sum_one n θ w hw1, mul_one]
+              rw [h_weight_sum_one, mul_one]
       calc (∑ x : Fin n → Ξ, (∏ i, w θ (x i)) *
               (((n : ℝ)⁻¹ * ∑ i, v (x i)) - ∑ φ, p φ * condMean (w φ) v))
           = ∑ x : Fin n → Ξ, ((∏ i, w θ (x i)) * ((n : ℝ)⁻¹ * ∑ i, v (x i))
@@ -308,7 +309,7 @@ theorem covariance_condMean_sampleMean {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
               ∑ x : Fin n → Ξ, ∏ i, w θ (x i) :=
             (Finset.mul_sum _ _ _).symm
         _ = condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v := by
-            rw [weight_sum_one n θ w hw1, mul_one]
+            rw [h_weight_sum_one, mul_one]
     have hL : (∑ x : Fin n → Ξ, (p θ * ∏ i, w θ (x i)) *
             ((condMean (w θ) v - ∑ φ, p φ * condMean (w φ) v) *
               (((n : ℝ)⁻¹ * ∑ i, v (x i)) - ∑ φ, p φ * condMean (w φ) v)))
