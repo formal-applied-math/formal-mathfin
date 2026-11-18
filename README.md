@@ -274,9 +274,7 @@ are the usual starting point.
 
 Raphael Coelho maintains the library, with contributions from:
 
-- [Adam Kiezun](https://github.com/akiezun): the finite term insurance plus survivor
-  endowment identity, the finite life-table law, the finite credibility covariance
-  identity, the lattice stop-loss recurrence and the two-life annuity identity.
+- [Adam Kiezun](https://github.com/akiezun): the finite credibility covariance identity.
 - [Godstime Aburu](https://github.com/BboyGT): the issue-label taxonomy.
 - [Alfredo Garcia](https://github.com/oxarbitrage): Glosten–Milgrom adverse selection, a drift term
   in the Itô-process price and the CIR bond loadings.
