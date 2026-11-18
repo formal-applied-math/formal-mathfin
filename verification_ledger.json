@@ -5144,9 +5144,9 @@
     "mf-volatility-swap-lognormal-variance": {
       "benchmark_file": "jumps_and_variance_swaps.json",
       "date": "2026-11-18",
-      "elapsed_s": 2.2,
-      "input_hash": "4460723f44637b667d79f01e43676aa030a9d7dd9d3520cfb6dae16bbfff5b8c",
-      "verified_at_commit": "663074a1"
+      "elapsed_s": 2.3,
+      "input_hash": "8896f691d46a83087d8856349ccd76eba3de464c78cfe7827f8831da9bb6f2ef",
+      "verified_at_commit": "da1a395f"
     },
     "mf-weak-forward-uniqueness-const": {
       "benchmark_file": "stochastic_calculus.json",
