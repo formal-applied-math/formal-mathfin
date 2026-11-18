@@ -422,9 +422,9 @@ import MathFin.Models.BlackScholes.DigitalGreeks
 import MathFin.Models.BlackScholes.Dividends
 import MathFin.Models.BlackScholes.DividendsGreeks
 import MathFin.Models.BlackScholes.Forward
-import MathFin.Models.BlackScholes.SqrtTerminal
 import MathFin.Models.BlackScholes.HigherGreeks
 import MathFin.Models.BlackScholes.StrikeGreeks
+import MathFin.Models.BlackScholes.SqrtTerminal
 -- Local-vol skew of a tilted smile surface via Dupire's ratio; the rule of two
 import MathFin.Models.LocalVol.ForwardSmile
 import MathFin.Models.LocalVol.MarketCallSurface
@@ -443,6 +443,8 @@ import MathFin.Models.StochVol.SABRImpliedVol
 import MathFin.Models.StochVol.SABRFlochKennedyLimits
 import MathFin.Models.BlackScholes.LognormalMoments
 import MathFin.Models.ModelFree.VarianceSwap
+-- the volatility-swap fair strike under an assumed lognormal law of realized variance
+import MathFin.Models.ModelFree.VolatilitySwapLognormal
 -- Merton (1976) jump-diffusion: Poisson-mixture price, compensation
 -- identity, parity (consumes Probability.Jumps.PoissonPgf + Call/Put formulas)
 import MathFin.Models.Jumps.MertonJumpDiffusion
@@ -519,7 +521,6 @@ import MathFin.Models.Jumps.JumpDiffusionMoments
 -- to the jump bias; Black–Scholes (Brownian motion) is a corollary on the process, and Merton's
 -- Gaussian jumps a corollary at the level of the law (log contract against Var[Y]/τ)
 import MathFin.Models.Jumps.JumpDiffusionVarianceSwap
-import MathFin.Models.ModelFree.VolatilitySwapLognormal
 import MathFin.Models.Bachelier.Bachelier
 import MathFin.Models.Bachelier.BachelierGreeks
 import MathFin.Models.Bachelier.BachelierMarket

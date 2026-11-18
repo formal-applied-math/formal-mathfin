@@ -184,9 +184,9 @@ pays `N · (√V − K_vol)` at `T`; its time-0 value under `Q`, `𝔼^Q[payoff 
 payoff at the fair strike. The lognormal law under the forward measure is an assumption; the
 instance argument always holds for a constant positive bank account
 (`forwardMeasure_isProbabilityMeasure`). For a constant bank account the forward measure is `Q`
-itself (its density is identically `1`), so this is `Q`-pricing with a deterministic discount
-factor, stated through `forwardMeasure_price` to tie it to the library's bond-numéraire theorem;
-it is not a result for stochastic rates. -/
+itself (a remark, not proved here: its density is identically `1`), so this is `Q`-pricing
+with a deterministic discount factor, stated through `forwardMeasure_price` to tie it to the
+library's bond-numéraire theorem; it is not a result for stochastic rates. -/
 theorem volSwapValue_forwardMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}
     [IsProbabilityMeasure Q] {r T K s : ℝ} {Z : Ω → ℝ}
     [IsProbabilityMeasure (forwardMeasure Q fun _ : Ω ↦ Real.exp (r * T))]
