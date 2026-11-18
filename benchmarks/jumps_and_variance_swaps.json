@@ -1955,15 +1955,18 @@
       },
       "metadata": {
         "chapter": null,
-        "reference": "K. Demeterfi, E. Derman, M. Kamal, J. Zou, More than you ever wanted to know about volatility swaps, Goldman Sachs Quantitative Strategies Research Notes (1999)",
+        "reference": "K. Demeterfi, E. Derman, M. Kamal, J. Zou, More than you ever wanted to know about volatility swaps, Goldman Sachs Quantitative Strategies Research Notes (1999); O. Brockhaus and D. Long, Volatility swaps made simple, Risk, January 2000",
         "citations": [
           {
             "key": "DemeterfiDermanKamalZou1999"
+          },
+          {
+            "key": "BrockhausLong2000"
           }
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of the conditional statements via sqrt_bsTerminal_driftless (sqrt of a lognormal factor is lognormal with half the log-volatility) and expected_terminal_eq_forward. Scope: the lognormal law of the realized variance, with mean the fair variance strike and a supplied log-volatility s, is a hypothesis (VolSwapHyp); it is not derived from any price process. Undiscounted, unseasoned, annualized; no time dimension."
+        "formalization_scope": "Proves the conditional statements via sqrt_bsTerminal_driftless (sqrt of a lognormal factor is lognormal with half the log-volatility) and expected_terminal_eq_forward. Scope: the lognormal law of the realized variance, with mean the fair variance strike and a supplied log-volatility s, is assumed (hypothesis VolSwapHyp) and not derived from any price process; the Brockhaus-Long agreement to first order is not proved. The fair strikes are undiscounted, unseasoned and annualized; discounting enters only through the constant-bank-account forward-measure theorem."
       }
     }
   ]
