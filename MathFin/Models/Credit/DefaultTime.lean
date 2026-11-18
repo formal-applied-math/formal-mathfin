@@ -242,7 +242,7 @@ theorem value_cdsProtectionAtDefault (D : ℝ≥0 → ℝ) (τ : Ω → ℝ) (T 
 /-- **Recovery paid at default vs at maturity.** Scaling `cdsProtectionAtDefault` by `ρ` and
 adding the surviving face at `T` vs paying `ρ` on default at `T` plus the same face leg. The
 face legs cancel, leaving `ρ * E[(D(τ) - D(T)) * 1{τ ≤ T}]` under `Q`. -/
-theorem recoveryTiming_value_sub (Ω : Type*) [MeasurableSpace Ω]
+theorem recoveryTiming_value_sub (Ω : Type u_1) [MeasurableSpace Ω]
     (Q : Measure Ω) [IsProbabilityMeasure Q] (τ : Ω → ℝ) (hτ : Measurable τ)
     (D : ℝ≥0 → ℝ) (hD : Measurable D) (T : ℝ≥0) (F ρ : ℝ)
     (hDpos : ∀ t : ℝ≥0, t ≤ T → 0 < D t)
