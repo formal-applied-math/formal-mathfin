@@ -39,9 +39,10 @@ This module records what follows from that structure without the SDE calculus.
 * The zero-coupon inflation caplet and floorlet (`jyZcCaplet_price`, `jyZcFloorlet_price`):
   if the index under the nominal `T`-forward measure is lognormal
   with log-variance `V` and the index-linked bond is priced on the real curve, the priced caplet
-  payoff `𝔼^{Qn}[(I_T − K)⁺/B_T]` is the library's Black caplet on the curve forward
-  `I₀·Pʳ(0,T)/Pⁿ(0,T)` at total variance `V` (the caplet is the contract value of
-  `MathFin.Contracts.value_caplet_black76`). `jyForwardIndex_lognormal_eq_curves` puts the
+  payoff `𝔼^{Qn}[(I_T − K)⁺/B_T]` (the standard zero-coupon inflation caplet convention
+  `N[(I_T/I₀ − 1) − κ]⁺ = (N/I₀)·(I_T − K)⁺` with `K = I₀(1+κ)`) is the library's Black caplet
+  on the curve forward `I₀·Pʳ(0,T)/Pⁿ(0,T)` at total variance `V` (the caplet is the contract
+  value of `MathFin.Contracts.value_caplet_black76`). `jyForwardIndex_lognormal_eq_curves` puts the
   lognormal index on that curve forward.
 * `jyZcCaplet_price_deterministic_rates`: with `σ_r = σ_n = 0` the integrated variance is `σ_I²T`
   and the priced caplet is `blackCaplet (I₀Pʳ/Pⁿ) K σ_I T Pⁿ` (by `blackCaplet_sqrt_variance`: Black
@@ -212,7 +213,9 @@ theorem jyForwardIndex_lognormal_eq_curves (BT : Ω → ℝ) (Pn0T Pr0T I0 F0 V 
   simpa [bsTerminal] using h2.symm
 
 /-- **ZC inflation caplet: the priced payoff is the Black caplet on the curve forward.** The
-zero-coupon inflation caplet is the contract `caplet () 0 0 1 K` in
+zero-coupon inflation caplet, with payoff `(I_T − K)⁺` (the standard convention
+`N[(I_T/I₀ − 1) − κ]⁺ = (N/I₀)·(I_T − K)⁺` with `K = I₀(1+κ)`), is the contract
+`caplet () 0 0 1 K` in
 `MathFin.Contracts.value_caplet_black76`, instantiated with the time-constant deflator
 `fun _ => 1/B_T` and the time-constant observed index `fun _ _ => I_T` (the contract's time
 indices are dummies); `Pⁿ(0,T)` plays the role of `zeroCurve Qn D 0`. The forward is pinned to the

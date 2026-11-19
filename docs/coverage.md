@@ -571,8 +571,8 @@ split by area. What each bridge proves, by area:
   `mf-jarrow-yildirim-zc-inflation-caplet`: the priced zero-coupon inflation caplet is the Black caplet on
   the curve forward `I₀Pʳ/Pⁿ`, given the lognormal law of the index under the nominal `T`-forward
   measure with a free positive log-variance `V`. Not derived: the SDE-level derivation of `V` (the
-  integrated Jarrow–Yildirim variance `jyVariance`) and of the real-rate drift shift, the
-  lognormality under `Q^T`, and the exact year-on-year caplet.
+  integrated Jarrow–Yildirim variance `jyVariance`) and of the real-rate drift shift,
+  and the lognormality under `Q^T`.
   `mf-jarrow-yildirim-yoy-forward-convexity`: the year-on-year forward and the time-0 price of its
   payment, from the conditional-expectation (martingale) hypothesis for the forward index plus the
   tower property, closed by `yoyConvexity_eq`. Not derived: the martingale property of `F(·,T)`
