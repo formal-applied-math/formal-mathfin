@@ -581,6 +581,36 @@
           }
         ]
       }
+    },
+    {
+      "id": "mf-bgk-discrete-barrier-shift",
+      "name": "Broadie–Glasserman–Kou Barrier Shift for Discrete Monitoring",
+      "description": "Reduced core: for a down-and-out call with barrier H, the BGK price of the call monitored at m equally spaced dates is the continuous down-and-out price (Black–Scholes price minus the image term (H/S)^(2r/σ²−1) times the Black–Scholes price at H²/S) with the barrier moved to H·exp(−βσ√(T/m)). The shifted-barrier price tends to the continuous price as m grows, is unchanged under (r, σ, T) ↦ (cr, σ√c, T/c) at fixed m, and its knock-in counterpart (vanilla minus knock-out) inherits through in–out parity any error bound of the knock-out price against a knock-out value. NOT PROVED: the reflection-principle derivation of the image form, the numerical value of the constant β = −ζ(1/2)/√(2π) ≈ 0.5826, and the accuracy of the shift, namely that it reproduces the discretely monitored price to O(σ²T/m); a correct implementation must reach the discretely monitored price to that order.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.DiscreteBarrierCorrection\n\nopen Filter Topology MathFin\n\ntheorem bgk_many_dates_limit_example {β K H r σ S T : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    (hS : 0 < S) (hH : 0 < H) (hT : 0 < T) :\n    Tendsto (fun m : ℕ ↦ bgkDownOutCall β m K H r σ S T) atTop\n      (𝓝 (downOutCallCont K H r σ S T)) :=\n  tendsto_bgkDownOutCall hK hσ hS hH hT\n\ntheorem bgk_time_scaling_example {β : ℝ} {m : ℕ} {K H r σ S T c : ℝ} (hc : 0 < c)\n    (hT : 0 ≤ T) :\n    bgkDownOutCall β m K H (c * r) (σ * Real.sqrt c) S (T / c) =\n      bgkDownOutCall β m K H r σ S T :=\n  bgkDownOutCall_timeScale hc hT\n\ntheorem bgk_knock_in_error_example {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {Q : MeasureTheory.Measure Ω} [MeasureTheory.IsProbabilityMeasure Q]\n    {S K r σ T : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S K r σ T Z) {A : Set Ω}\n    (hA : MeasurableSet A) {β : ℝ} {m : ℕ} {H ε : ℝ}\n    (hout : |(Contracts.Contract.pay 0 (Contracts.Payoff.obs () 0)).value Q\n        (fun _ _ ↦ Real.exp (-r * T))\n        (fun _ _ ↦ Aᶜ.indicator (fun ω ↦ max (bsTerminal S r σ T (Z ω) - K) 0))\n        - bgkDownOutCall β m K H r σ S T| ≤ ε) :\n    |(Contracts.Contract.pay 0 (Contracts.Payoff.obs () 0)).value Q\n        (fun _ _ ↦ Real.exp (-r * T))\n        (fun _ _ ↦ A.indicator (fun ω ↦ max (bsTerminal S r σ T (Z ω) - K) 0))\n        - bgkKnockIn β m K H r σ S T| ≤ ε :=\n  abs_knockIn_sub_bgkKnockIn_le h hA hout\n"
+      },
+      "metadata": {
+        "chapter": null,
+        "reference": "M. Broadie, P. Glasserman and S. Kou, A continuity correction for discretely monitored barrier options, Mathematical Finance 7(4) (1997) 325–349, as restated in S. Howison and M. Steinberg, A matched asymptotic expansions approach to continuity corrections for discretely sampled options. Part 1: barrier options, working paper (2005), §1; image form from E. Reiner and M. Rubinstein, Breaking down the barriers, Risk 4(8) (1991) 28–35",
+        "citations": [
+          {
+            "key": "BroadieGlassermanKou1997"
+          },
+          {
+            "key": "HowisonSteinberg2005"
+          },
+          {
+            "key": "ReinerRubinstein1991"
+          },
+          {
+            "key": "Hull"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Reduced core. MathFin/Models/BlackScholes/DiscreteBarrierCorrection.lean: tendsto_bgkDownOutCall (continuity of the image form in the barrier and tendsto_bgkDownBarrier), bgkDownOutCall_timeScale (bsV_timeScale and the invariance of the shift σ√(T/m)), and abs_knockIn_sub_bgkKnockIn_le (knockIn_add_knockOut_eq_bsV). SCOPE: statements about the closed form and the definition of the shifted barrier. NOT PROVED: that the image form is the discounted expected knock-out payoff (the barrier density), the value of β, and the O(σ²T/m) accuracy of the BGK shift against the discretely monitored price, which enters only as the hypothesis of abs_knockIn_sub_bgkKnockIn_le. The closed form is for H below the strike and no dividends; no up-and-out closed form is given."
+      }
     }
   ]
 }

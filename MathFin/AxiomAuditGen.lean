@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (1077 MathFin constants, 29 upstream). Citations
+  corpus (1080 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -1439,6 +1439,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.abcdWienerIntegral_hasLaw
 
+/-- info: 'MathFin.abs_knockIn_sub_bgkKnockIn_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.abs_knockIn_sub_bgkKnockIn_le
+
 /-- info: 'MathFin.abs_sharpeRatio_le_of_discountFactor' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.abs_sharpeRatio_le_of_discountFactor
@@ -1550,6 +1554,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.beta_singleIndex' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.beta_singleIndex
+
+/-- info: 'MathFin.bgkDownOutCall_timeScale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.bgkDownOutCall_timeScale
 
 /-- info: 'MathFin.binomialOptionPriceOnePeriod' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3914,6 +3922,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.swaption_payer_receiver_parity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.swaption_payer_receiver_parity
+
+/-- info: 'MathFin.tendsto_bgkDownOutCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.tendsto_bgkDownOutCall
 
 /-- info: 'MathFin.tendsto_bisectMid_valueAtRisk' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
