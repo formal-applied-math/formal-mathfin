@@ -8,6 +8,7 @@ module
 public import MathFin.Models.BlackScholes.American.Stopping.GridSampling
 public import MathFin.Pricing.ContinuousMarket
 public import MathFin.Probability.Martingales.StoppingRule
+public import MathFin.Probability.Discrete.DiscreteStoppingValue
 
 /-!
 # Discrete rules sampled at arbitrary deterministic increasing times
@@ -172,5 +173,53 @@ theorem exists_bijective_sampledRules {Ω : Type*} [MeasurableSpace Ω]
     exact hscomp θ ω
   · intro η ω
     rfl
+
+theorem sampledStoppingValue_eq_and_attained {Ω : Type*} [MeasurableSpace Ω]
+    (𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›) (T : ℝ≥0) (m : ℕ)
+    (e : Fin (m + 1) → ℝ≥0) (he : StrictMono e) (heT : e (Fin.last m) = T)
+    (s : ℕ → ℝ≥0) (hs : ∀ n, s n = e ⟨min n m, by omega⟩) (hsmono : Monotone s)
+    (Q : Measure Ω) [IsProbabilityMeasure Q] (Z : ℝ≥0 → Ω → ℝ)
+    (hZa : Adapted (ContinuousMarket.sampledFiltration 𝓕 hsmono) (fun n ω => Z (s n) ω))
+    (hZi : ∀ n, Integrable (fun ω => Z (s n) ω) Q) :
+    stoppingValue Q 𝓕 Z T (StoppingRule.valuedIn 𝓕 T (Set.range e))
+        = ∫ ω, snellEnvelope Q (ContinuousMarket.sampledFiltration 𝓕 hsmono) Set.univ
+            (fun n ω => Z (s n) ω) m 0 ω ∂Q
+      ∧ ∃ θ ∈ StoppingRule.valuedIn 𝓕 T (Set.range e),
+          (∫ ω, Z (θ.time ω) ω ∂Q)
+            = stoppingValue Q 𝓕 Z T (StoppingRule.valuedIn 𝓕 T (Set.range e)) := by
+  obtain ⟨_hsmonoB, toIndex, toPhysical, _hL, _hR, ht1, ht2⟩ :=
+    exists_bijective_sampledRules 𝓕 T m e he heT s hs
+  have hImage : (fun θ : StoppingRule 𝓕 T => ∫ ω, Z (θ.time ω) ω ∂Q) ''
+        StoppingRule.valuedIn 𝓕 T (Set.range e)
+      = (fun η : StoppingRule (ContinuousMarket.sampledFiltration 𝓕 hsmono) m =>
+          ∫ ω, Z (s (η.time ω)) ω ∂Q) '' Set.univ := by
+    apply le_antisymm
+    · intro x hx
+      obtain ⟨θ, hθ, rfl⟩ := hx
+      refine ⟨toIndex ⟨θ, hθ⟩, Set.mem_univ _, ?_⟩
+      apply integral_congr_ae
+      exact ae_of_all _ fun ω => congrArg (fun t => Z t ω) (ht1 ⟨θ, hθ⟩ ω)
+    · intro x hx
+      obtain ⟨η, -, rfl⟩ := hx
+      refine ⟨(toPhysical η).val, (toPhysical η).property, ?_⟩
+      apply integral_congr_ae
+      exact ae_of_all _ fun ω => congrArg (fun t => Z t ω) (ht2 η ω)
+  have hval : stoppingValue Q 𝓕 Z T (StoppingRule.valuedIn 𝓕 T (Set.range e))
+      = stoppingValue Q (ContinuousMarket.sampledFiltration 𝓕 hsmono)
+        (fun n ω => Z (s n) ω) m :=
+    congrArg sSup hImage
+  constructor
+  · rw [hval]
+    exact stoppingValue_eq_integral_snellEnvelope hZa hZi m
+  · refine ⟨(toPhysical (snellRule (P := Q) hZa m)).val,
+      (toPhysical (snellRule (P := Q) hZa m)).property, ?_⟩
+    rw [hval]
+    have hpay : (∫ ω, Z ((toPhysical (snellRule (P := Q) hZa m)).val.time ω) ω ∂Q)
+        = ∫ ω, Z (s ((snellRule (P := Q) hZa m).time ω)) ω ∂Q := by
+      apply integral_congr_ae
+      exact ae_of_all _ fun ω =>
+        congrArg (fun t => Z t ω) (ht2 (snellRule (P := Q) hZa m) ω)
+    rw [hpay]
+    exact snellRule_attains_value hZa hZi m
 
 end MathFin
