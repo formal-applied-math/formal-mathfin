@@ -458,11 +458,10 @@
         "lean": "import MathFin.Insurance.ChainLadder\n\nopen MathFin\n\n/-- The chain-ladder completion of a triangle is the prediction by the selected factors on every\nunobserved cell, and with monotone nonnegative rows and positive denominators the completed\nultimate is at least the last observed value. -/\ntheorem chain_ladder_completion (n : ℕ) (C : ℕ → ℕ → ℝ) :\n    (∀ i j, n < i + j →\n      chainComplete n C i j = chainPrediction (chainFactor n C) (C i) j (n - i)) ∧\n    ((∀ i j, 0 ≤ C i j) → (∀ i j, i + (j + 1) ≤ n → C i j ≤ C i (j + 1)) →\n      (∀ j < n, 0 < ∑ i ∈ Finset.range (n - j), C i j) →\n      ∀ i, C i (n - i) ≤ chainComplete n C i n) :=\n  ⟨chainComplete_eq_chainPrediction n C, fun hC hmono hdenom ↦ le_chainComplete n C hC hmono hdenom⟩\n"
       },
       "metadata": {
-        "reference": "Mack (1993), §2",
+        "reference": "Mack (1993)",
         "citations": [
           {
-            "key": "Mack1993",
-            "locator": "§2"
+            "key": "Mack1993"
           }
         ],
         "difficulty": "elementary",
@@ -479,11 +478,10 @@
         "lean": "import MathFin.Insurance.ChainLadder\n\nopen MeasureTheory MathFin\n\n/-- Mack's model: the predictions of the ultimate are a martingale under the reference measure,\neach is the conditional expectation of the ultimate, and the claims development result has\nconditional mean zero. -/\ntheorem mack_chain_ladder {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {𝓕 : Filtration ℕ mΩ} {C : ℕ → Ω → ℝ} {f : ℕ → ℝ}\n    (h : IsMackRow P 𝓕 C f) {m N : ℕ} (hm : m < N) :\n    IsEMM 𝓕 P (fun k ω ↦ chainPrediction f (C · ω) N k) N P ∧\n      P[C N | 𝓕 m] =ᵐ[P] (fun ω ↦ chainPrediction f (C · ω) N m) ∧\n      P[fun ω ↦ chainPrediction f (C · ω) N (m + 1) - chainPrediction f (C · ω) N m | 𝓕 m]\n        =ᵐ[P] 0 :=\n  ⟨h.isEMM_chainPrediction N, h.condExp_eq hm.le, h.condExp_chainPrediction_succ_sub hm⟩\n"
       },
       "metadata": {
-        "reference": "Mack (1993), §2; Merz and Wüthrich (2008)",
+        "reference": "Mack (1993); Merz and Wüthrich (2008)",
         "citations": [
           {
-            "key": "Mack1993",
-            "locator": "§2"
+            "key": "Mack1993"
           },
           {
             "key": "MerzWuthrich2008"

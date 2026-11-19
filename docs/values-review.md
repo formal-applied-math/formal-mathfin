@@ -126,13 +126,13 @@ check "beautiful"; it can check "nobody refreshed the backlog."
 ## Review log
 ## 2026-11-18 — corpus 901, modules 788 — the November contributed wave, brought onto the library's objects before it lands
 
-Scope: the branch `review/pr-wave-final`, nineteen open pull requests reworked against the
-practices before merging. Adam Kiezun's insurance, credibility, stopping, credit and execution
-work (#510–#529), Yang Ye's (#502, #515, #523, #525) and #500. Four are held: the chain ladder
-(#516, #517, #524), which connects to nothing and whose natural form is Mack's martingale model,
-and #501, whose zero-maturity value at `γ = 0` is `log(0/0)`. Three frontier nodes are delivered
-(`thm:life-insurance-epv`, `thm:thiele-reserve`, `thm:buhlmann-credibility`) and the life table
-enters `thm:survival-model`'s core. Three read-only reviewers split the lenses: the first pass;
+Scope: the branch `review/pr-wave-final`, twenty-one open pull requests reworked against the
+practices before merging. Adam Kiezun's insurance, credibility, reserving, stopping, credit and
+execution work (#510–#529), Yang Ye's (#502, #515, #523, #525) and #500. Two are held: #524, an
+executable `Option ℚ` evaluator of the chain ladder, and #501, whose zero-maturity value at
+`γ = 0` is `log(0/0)`. Three frontier nodes are delivered (`thm:life-insurance-epv`,
+`thm:thiele-reserve`, `thm:buhlmann-credibility`), the life table enters `thm:survival-model`'s
+core, and one landmark is new (`thm:mack-chain-ladder`). Three read-only reviewers split the lenses: the first pass;
 lenses 2, 4 and 5; lenses 1, 3, 6, 7 and 8.
 
 ### The standing first pass: prose against statement
@@ -177,6 +177,13 @@ lenses 2, 4 and 5; lenses 1, 3, 6, 7 and 8.
   layer and `bachelier_call_formula` is its instance; the SVI tail condition is the Black-form
   tail condition at the SVI variance (one Mills argument, not two); the conditional-Jensen call
   bound serves calendar arbitrage and the overnight caplet.
+- **A connection built, not waited for.** The chain ladder (#516, #517) was triangle algebra with
+  nothing beneath it. Mack's model supplies it: with `E[C_{j+1} | 𝓕_j] = f_j C_j`, the prediction
+  `(∏_{k∈[m,N)} f_k) C_m` of the ultimate is `E[C_N | 𝓕_m]`, the reference measure is an EMM of the
+  prediction process (`IsMackRow.isEMM_chainPrediction`, so a pricing measure of the run-off
+  market), and the claims development result has conditional mean zero (Merz–Wüthrich). The
+  completion of a triangle is this prediction with the selected factors
+  (`chainComplete_eq_chainPrediction`); `Insurance/ChainLadder.lean`.
 - **Parallel objects removed.** `nelsonSiegelZeroRate` (the limit is now on `nssYield`), the
   `SqrtTerminal` module (into `Forward`), `thieleFactor` as a bare exponential, a forward-measure
   detour around a deterministic discount, about 40 public Almgren–Chriss helpers (the discrete
@@ -207,8 +214,8 @@ lenses 2, 4 and 5; lenses 1, 3, 6, 7 and 8.
    `λV − G/S`; Thiele becomes an instance (M).
 2. Bühlmann on `Measure.pi` and a kernel mixture, independence from Mathlib (M).
 3. Thiele's discrete recursion (#84) on the same factor (S–M).
-4. Mack's model for the chain ladder: the completion as a conditional expectation, then #516's
-   product formula as its algebra (L; with the contributor).
+4. Mack's other two assumptions: independent accident years make `f̂_j` unbiased given the
+   past columns, and the variance assumption gives the standard error of the reserve (M–L).
 5. `∫₀ᵃ (u/L)^p = a^{p+1}/(L^p (p+1))` lifted out of `OvernightCompounding` (S).
 6. `value_payFlows_add_sub` as a corollary of `value_payFlows_sub` (S).
 7. A compound-Poisson instance of the stop-loss recursion with lattice severities, joining

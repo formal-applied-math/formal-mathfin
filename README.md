@@ -293,7 +293,8 @@ Raphael Coelho maintains the library, with contributions from:
   volatility swap.
 - [Adam Kiezun](https://github.com/akiezun): whole-life insurance on the survival function, the
   life table, two-life annuities, Thiele's reserve equation, Bühlmann credibility, sampled stopping
-  rules, CDS recovery timing, the stop-loss recursion and discrete Almgren–Chriss liquidation.
+  rules, CDS recovery timing, the stop-loss recursion, discrete Almgren–Chriss liquidation and the
+  chain ladder.
 
 Each module's header names its authors.
 

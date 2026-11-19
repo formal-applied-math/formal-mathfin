@@ -57,7 +57,7 @@ without bias, and the standard error of the reserve, are not proved here.
 ## References
 
 * [T. Mack, *Distribution-free Calculation of the Standard Error of Chain Ladder Reserve
-  Estimates*][Mack1993], §2 (the model's first assumption and the chain-ladder estimator)
+  Estimates*][Mack1993] (the model's conditional-mean assumption and the chain-ladder estimator)
 * [M. Merz and M. V. Wüthrich, *Modelling the Claims Development Result for Solvency
   Purposes*][MerzWuthrich2008] (the claims development result)
 
