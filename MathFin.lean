@@ -933,6 +933,7 @@ import MathFin.Insurance.Mortality
 import MathFin.Insurance.SurvivalModel
 import MathFin.Insurance.ActuarialInsurance
 import MathFin.Insurance.AnnuityValue
+import MathFin.Insurance.FiniteCredibilityCovariance
 import MathFin.Insurance.EsscherPremium
 
 -- Markets

@@ -276,6 +276,7 @@ Raphael Coelho maintains the library, with contributions from:
 
 - [Godstime Aburu](https://github.com/BboyGT): the issue-label taxonomy.
 - [Alfredo Garcia](https://github.com/oxarbitrage): Glosten–Milgrom adverse selection, a drift term
+- [Adam Kiezun](https://github.com/akiezun): the finite credibility covariance identity.
   in the Itô-process price and the CIR bond loadings.
 - [Robert Martin](https://github.com/robertmartin8): log-convexity of the American put exercise
   boundary.
