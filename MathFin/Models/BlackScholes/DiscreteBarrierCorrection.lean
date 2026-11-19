@@ -5,7 +5,6 @@ Authors: Yang Ye
 -/
 module
 
-public import Mathlib.NumberTheory.LSeries.RiemannZeta
 public import MathFin.Models.BlackScholes.BarrierParity
 
 /-!
@@ -16,7 +15,8 @@ continuously monitored one, for a knock-out, because paths can cross the barrier
 and return. Broadie, Glasserman and Kou ([BroadieGlassermanKou1997]) give a correction: the
 discretely monitored price is approximated by the continuously monitored price with the
 barrier moved **away from the spot** by the factor `exp(± β σ √Δt)`, where
-`β = −ζ(1/2)/√(2π) ≈ 0.5826` and `ζ` is Riemann's zeta function.
+`β = −ζ(1/2)/√(2π) ≈ 0.5826` and `ζ` is Riemann's zeta function. The value of `β` is not
+proved here: every theorem below is stated for an arbitrary shift constant `β`.
 
 The statement, for a down-and-out call with barrier `B`, is
 `V_d(S, t; B) = V_cont(S, t; B e^{−βσ√(T/N)}) + O(σ² T/N)`, as restated in
@@ -28,8 +28,6 @@ This file takes that shift as a **definition** and proves what follows from the 
 
 ## Main definitions
 
-* `bgkBeta`: `−Re ζ(1/2)/√(2π)` (Mathlib's `riemannZeta`). Its numerical value `≈ 0.5826` is *not*
-  proved; every theorem below is stated for an arbitrary shift constant `β`.
 * `downOutCallCont`: the image-form expression `V(S) − (H/S)^{2r/σ²−1} · V(H²/S)`, where `V` is
   the Black–Scholes call price `bsV`. It is the continuously monitored down-and-out call price
   (transcribed from [ReinerRubinstein1991], see also [Hull]) only for `H ≤ K`, `S > H` and no
@@ -43,15 +41,20 @@ This file takes that shift as a **definition** and proves what follows from the 
 
 ## Main results
 
+* `bgkDownBarrier_lt_and_lt_bgkUpBarrier`: the shifted down barrier lies below `H` and the shifted
+  up barrier above it.
 * `downOutCallCont_at_barrier`: the continuous price vanishes at `S = H`.
-* `bsV_scale`, `downOutCallCont_scale`: spatial homogeneity, `(K, H, S) ↦ λ(K, H, S)` scales the
-  price by `λ`.
+* `bsV_scale`, `downOutCallCont_scale`: spatial homogeneity, `(K, H, S) ↦ c(K, H, S)` scales the
+  price by `c`.
 * `bsV_timeScale`, `downOutCallCont_timeScale`: the price is unchanged under
-  `(r, σ, τ) ↦ (λ r, σ√λ, τ/λ)`, which fixes `σ²τ` and `rτ`.
+  `(r, σ, τ) ↦ (c r, σ√c, τ/c)`, which fixes `σ²τ` and `rτ`.
 * `bgkDownBarrier_timeScale`, `bgkDownOutCall_timeScale`: the BGK shift `σ√(T/m)` is fixed by the
-  same scaling (for fixed `m`, `Δt ↦ Δt/λ`), so the BGK price is as well.
+  same scaling (for fixed `m`, `Δt ↦ Δt/c`), so the BGK price is as well.
 * `bgkDownOutCall_at_shifted_barrier`: the BGK price vanishes when the spot is at the shifted
   barrier.
+* `continuousAt_downOutCallCont_barrier`: `downOutCallCont` is continuous in the barrier at every
+  positive barrier.
+* `tendsto_bgkDownBarrier`: the shifted barrier tends to `H` as the number of dates `m → ∞`.
 * `tendsto_bgkDownOutCall`: as the number of dates `m → ∞` the BGK price tends to the continuous
   price.
 * `abs_knockIn_sub_bgkKnockIn_le`: a linear rearrangement of in–out parity
@@ -88,10 +91,6 @@ namespace MathFin
 
 open Filter Topology
 
-/-- The Broadie–Glasserman–Kou constant `β = −ζ(1/2)/√(2π)`, using the real part of Mathlib's
-`riemannZeta`. Its value `≈ 0.5826` is not proved here. -/
-noncomputable def bgkBeta : ℝ := -(riemannZeta (1 / 2)).re / Real.sqrt (2 * Real.pi)
-
 /-- The image-form expression `V(S) − (H/S)^{2r/σ²−1} V(H²/S)` with `V = bsV` the Black–Scholes
 call price, defined for any `H`. It is the continuously monitored down-and-out call price only for
 barrier `H ≤ K`, spot `S > H` and no dividends (a transcribed closed form; the
@@ -116,7 +115,7 @@ noncomputable def bgkUpBarrier (β : ℝ) (m : ℕ) (H σ T : ℝ) : ℝ :=
 
 /-- The shifted down barrier lies below `H` and the shifted up barrier above it, for positive
 `β σ`, positive barrier and `0 < T`, `0 < m`. -/
-theorem bgkDownBarrier_lt_lt_bgkUpBarrier {β σ H T : ℝ} {m : ℕ} (hβ : 0 < β) (hσ : 0 < σ)
+theorem bgkDownBarrier_lt_and_lt_bgkUpBarrier {β σ H T : ℝ} {m : ℕ} (hβ : 0 < β) (hσ : 0 < σ)
     (hH : 0 < H) (hT : 0 < T) (hm : 0 < m) :
     bgkDownBarrier β m H σ T < H ∧ H < bgkUpBarrier β m H σ T := by
   have hs : 0 < Real.sqrt (T / m) := Real.sqrt_pos.2 (by positivity)

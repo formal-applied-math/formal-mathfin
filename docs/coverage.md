@@ -652,6 +652,12 @@ split by area. What each bridge proves, by area:
   closed forms, the first reduced to the full-life down-and-out form at `t₁ = T`, the second's
   vanilla leg identified with the digital call contract's value
   (`mf-partial-time-barrier-down-add-up`, `mf-binary-barrier-inout-parity`, both `reduced_core`).
+  The Broadie–Glasserman–Kou shifted barrier for discretely monitored down-and-out calls
+  (`mf-bgk-discrete-barrier-shift`, `reduced_core`): the image-form expression at the barrier
+  `H·exp(−βσ√(T/m))` tends to its unshifted value as `m → ∞` and is unchanged under
+  `(r, σ, T) ↦ (cr, σ√c, T/c)` at fixed `m`, for an arbitrary constant `β`; it is a price only for
+  `H ≤ K`, `S > H`. Not derived: the image form as a discounted expected payoff, the value of `β`,
+  and the accuracy of the shift against the discretely monitored price.
   `MargrabeGrounding`'s two existential theorems no longer claim to derive their hypothesis: they
   now exhibit the measure and driver. The Goldman–Sosin–Gatto continuous floating-strike lookback
   closed form dominates the vanilla call struck at the running minimum, via a Mills-ratio

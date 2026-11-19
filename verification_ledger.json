@@ -888,9 +888,9 @@
     "mf-bgk-discrete-barrier-shift": {
       "benchmark_file": "exotic_options.json",
       "date": "2026-11-19",
-      "elapsed_s": 2.4,
-      "input_hash": "ed80e68734b744fb03a3504bc4b46f41d293dcc88b401edcc4aa163d80999c62",
-      "verified_at_commit": "5c89ff6a"
+      "elapsed_s": 4.4,
+      "input_hash": "3d523ad033b343f6000ca66db363c0670a6c0908ce85266a70e098a16bc0cf65",
+      "verified_at_commit": "9bf97310"
     },
     "mf-binary-barrier-inout-parity": {
       "benchmark_file": "exotic_options.json",
