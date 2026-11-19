@@ -2866,7 +2866,7 @@
         "reference": "Roper, Arbitrage free implied volatility surfaces, Theorem 2.1",
         "difficulty": "medium",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof in MathFin/Models/ModelFree/BlackFormTail.lean. Re-export from MathFin. Axioms-clean. A faithful subset of issue #318: the SVI tail lemmas are now corollaries of it (MathFin/Models/ModelFree/SVI/TailCondition.lean). Deferred to follow-ups: the left-wing bound IsNormalizedCallPrice (bsSmile p) → b(1 − ρ) ≤ 2 and the mass at zero; the calendar-spread martingale step for any convex payoff; the t > 0 calendar statements tied to the local-variance characterisation; one (k, w) Black form in place of blackForm, totalVarianceCall and logBlackCall; IsNormalizedCallPrice from a nonnegative random variable with mean 1; port hygiene (scoped maxHeartbeats, maxRecDepth, open scoped Classical).",
+        "formalization_scope": "Full formal proof in MathFin/Models/ModelFree/BlackFormTail.lean: the tail condition for the Black form of an everywhere-positive total variance. The SVI instance is tendsto_bsSmile_zero_iff (MathFin/Models/ModelFree/SVI/TailCondition.lean). Not covered: the left-wing bound b(1 − ρ) ≤ 2 and the mass at zero. Axioms-clean.",
         "provenance": {
           "statement_source": "autoform",
           "statement_model": "autoform",

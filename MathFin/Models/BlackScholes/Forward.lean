@@ -48,8 +48,8 @@ so `F = E_Q[S_T]`. Combined with `expected_terminal_eq_forward`, this gives
   `∫ e^{−rT} · S_T(Z) ∂Q = S_0`.
 * `sqrt_bsTerminal`: `√(bsTerminal S₀ μ σ T z) = √S₀ · bsTerminal 1 (μ/2 − σ²/8) (σ/2) T z`, the
   square root of a lognormal factor is lognormal with half the log-volatility; with the forward
-  identity it gives the mean of any square-root claim (the constant-product LP position, the
-  volatility-swap strike).
+  identity it gives the mean of the square root of a lognormal terminal price (the
+  constant-product LP position, the volatility-swap strike).
 
 ## References
 

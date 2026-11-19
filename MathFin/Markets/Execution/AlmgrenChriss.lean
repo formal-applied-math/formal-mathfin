@@ -141,7 +141,8 @@ def liquidationPaths (N : ℕ) (X₀ : ℝ) : Set (Fin (N + 1) → ℝ) :=
   {x | x 0 = X₀ ∧ x (Fin.last N) = 0}
 
 /-- The **discrete rate** `κ̃ = 2 arsinh (√(c/η) Δ / 2) / Δ`, the solution of
-`cosh (κ̃ Δ) = 1 + c Δ² / (2 η)` (`cosh_liquidationRate_mul`); it tends to `√(c/η)` as `Δ → 0`. -/
+`cosh (κ̃ Δ) = 1 + c Δ² / (2 η)` (`cosh_liquidationRate_mul`); as `Δ → 0` it should tend to
+the continuous rate `√(c/η)`, which is not proved here. -/
 noncomputable def liquidationRate (Δ η c : ℝ) : ℝ :=
   2 * Real.arsinh (√(c / η) * Δ / 2) / Δ
 

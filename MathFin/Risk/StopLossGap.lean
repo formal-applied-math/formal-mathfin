@@ -10,9 +10,9 @@ public import MathFin.Risk.ExpectedShortfall
 /-!
 # The stop-loss transform across a gap in the law
 
-The stop-loss transform `c ↦ E[(S − c)⁺]` of a loss `S` is convex with right derivative
-`−P(S > c)`. Where the law of `S` puts no mass strictly inside `(c, c + h)` the transform is affine
-on `[c, c + h]`, with that slope:
+The stop-loss transform `c ↦ E[(S − c)⁺]` of a loss `S` falls at rate `P(S > c)` just to the right
+of `c`. Where the law of `S` puts no mass strictly inside `(c, c + h)` it falls at that rate all the
+way to `c + h`: the values at the two ends differ by exactly `h · P(S > c)`,
 
   `E[(S − (c + h))⁺] = E[(S − c)⁺] − h · P(S > c)`.
 
@@ -20,8 +20,9 @@ On an arithmetic loss, `S ∈ hℤ` almost surely (aggregate claims on a monetar
 setting of Panjer's recursion), every interval `(jh, (j + 1)h)` is such a gap, and the identity is
 the recursion that computes stop-loss premiums at the lattice retentions from the tail
 probabilities. Through the Rockafellar–Uryasev objective `c + (1 − α)⁻¹E[(S − c)⁺]`, whose least
-value is expected shortfall (`isLeast_rockafellarUryasev`), it gives the objective's increment
-over each gap, `h · (1 − (1 − α)⁻¹ P(S > c))`.
+value is expected shortfall for `α ∈ (0, 1)` (`isLeast_rockafellarUryasev`), it gives the
+objective's increment over each gap, `h · (1 − (1 − α)⁻¹ P(S > c))`. The statements take a finite
+measure `P` and write `P(S > c)` for `P.real {c < S}`; it is a probability when `P` is one.
 
 ## Main results
 
@@ -103,8 +104,8 @@ theorem integral_max_sub_succ_mul_of_lattice (hSm : Measurable S) (hS : Integrab
   exact integral_max_sub_add_of_gap hSm hS hh (ae_notMem_Ioo_of_lattice hh hlat j)
 
 /-- **The Rockafellar–Uryasev objective across a gap.** If `S` takes no value in `(c, c + h)`
-and `0 ≤ h`, the objective `c ↦ c + (1 − α)⁻¹E[(S − c)⁺]`, whose least value is expected
-shortfall, increases by `h · (1 − (1 − α)⁻¹ P(S > c))` from `c` to `c + h`. -/
+and `0 ≤ h`, the objective `c ↦ c + (1 − α)⁻¹E[(S − c)⁺]` (whose least value is expected
+shortfall when `α ∈ (0, 1)`) increases by `h · (1 − (1 − α)⁻¹ P(S > c))` from `c` to `c + h`. -/
 theorem rockafellarUryasev_add_of_gap (hSm : Measurable S) (hS : Integrable S P) {c h : ℝ}
     (hh : 0 ≤ h) (hgap : ∀ᵐ ω ∂P, S ω ∉ Set.Ioo c (c + h)) (α : ℝ) :
     rockafellarUryasev S P α (c + h) =

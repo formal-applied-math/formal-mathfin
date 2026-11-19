@@ -18,9 +18,10 @@ Mathlib's conditional Jensen inequality for the convex payoff `x ↦ (x − L)�
 Two readings in the library. For a martingale `X` the call value `t ↦ E[(X_t − L)⁺]` is
 non-decreasing (`integral_posPart_sub_mono_of_martingale` in
 `Models/ModelFree/CalendarArbitrage`, the martingale half of the Gatheral–Jacquier calendar
-condition). For a backward-looking caplet, the rate fixed at the start of the accrual period is
-the conditional expectation of the compounded rate (`Models/Rates/OvernightCompounding`), so the
-forward-looking caplet is worth at most the backward-looking one.
+condition). For overnight caplets it would order the forward-looking caplet below the
+backward-looking one, once the rate fixed at the start of the accrual period is modelled as the
+conditional expectation of the compounded rate; `Models/Rates/OvernightCompounding` does not
+formalise that identification.
 
 ## Main results
 

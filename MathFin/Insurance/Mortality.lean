@@ -150,9 +150,10 @@ theorem lundberg_zero_at_zero (lam c : ℝ) (M : ℝ → ℝ) (hM0 : M 0 = 1) :
   ring
 
 /-- The **Thiele discount factor** from `t` to `s`: the discount `exp(−∫ₜˢ δ)` at the force of
-interest `δ`, times the probability `hazardSurvival μ s / hazardSurvival μ t` of surviving from `t`
-to `s` under the force of mortality `μ` (`survivalFromForce μ = hazardSurvival μ`, the credit
-survival curve of `Models/Credit/HazardCurve.lean`). -/
+interest `δ`, times the survival factor `hazardSurvival μ s / hazardSurvival μ t` from `t` to `s`
+under the force of mortality `μ`, a probability when `μ ≥ 0`
+(`survivalFromForce μ = hazardSurvival μ`, the credit survival curve of
+`Models/Credit/HazardCurve.lean`). -/
 noncomputable def thieleFactor (δ μ : ℝ → ℝ) (t s : ℝ) : ℝ :=
   Real.exp (-∫ u in t..s, δ u) * (hazardSurvival μ s / hazardSurvival μ t)
 

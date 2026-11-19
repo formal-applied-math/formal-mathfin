@@ -25,9 +25,11 @@ damping from `1` at `τ₀` to `0` at `τ₁`). For constant volatility `σ` the
 `R(τ₁)` is `σ² · ∫₀^{τ₁} ψ(t)² dt`.
 
 This file proves, from the definition of `ψ`, the damping-time integral, its linear case,
-its bounds and monotonicity in `q`, and the reduction of the caplet to the Black formula. The
-Jensen ordering of forward- and backward-looking caplets is the general
-`integral_posPart_sub_condExp_le` (`Probability/Martingales/CondExpCallJensen`).
+its bounds and monotonicity in `q`, and the reduction of the caplet to the Black formula. An
+ordering of forward- and backward-looking caplets would follow from
+`integral_posPart_sub_condExp_le` (`Probability/Martingales/CondExpCallJensen`) once the fixed
+rate is modelled as the conditional expectation of the compounded rate; that identification is
+not formalised here.
 
 ## Main definitions
 

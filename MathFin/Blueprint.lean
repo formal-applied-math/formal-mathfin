@@ -1386,8 +1386,8 @@ attribute [blueprint "thm:thiele-reserve"
   (statement := /-- For continuous force of interest $\delta$, force of mortality $\mu$, premium rate
   $\pi$ and death benefit $b$ on $[0, T]$, the prospective reserve $V(t)$, the discounted future
   death benefits less premiums plus the terminal payment (discounted by $e^{-\int \delta}$ times the
-  survival probability of the force $\mu$), satisfies $V'(t) = (\delta + \mu) V(t) + \pi - \mu b$
-  for $0 < t < T$. The discrete one-step recursion is not covered. -/)]
+  survival factor of the force $\mu$, a probability when $\mu \ge 0$), satisfies
+  $V'(t) = (\delta + \mu) V(t) + \pi - \mu b$ for $0 < t < T$. The discrete one-step recursion is not covered. -/)]
   MathFin.hasDerivAt_thieleReserve
 
 attribute [blueprint "thm:esscher-premium-is-price"

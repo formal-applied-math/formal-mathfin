@@ -184,7 +184,7 @@ law on the outcomes `Fin (n + 1)`: death cells `(i, i+1]` with mass
 `(l i - l (i+1)) / l 0` and one residual survivor outcome with mass
 `l n / l 0`, represented at lifetime `i + 1` (the residual at `n + 1`).
 Under this law the conditional survival at observed dates is the table
-ratio `l (x + k) / l x` (`survive_lifeTable`).
+ratio `l (x + k) / l x` (`survive_lifeTable`; for `l x > 0`, both sides being `0` otherwise).
 -/
 
 
@@ -250,7 +250,8 @@ theorem survivalFunction_lifeTable (n : ℕ) (l : ℕ → ℝ) (hl0 : 0 < l 0)
   ring
 
 /-- **Conditional survival in a life table**: a life aged `x` in the finite life table `l` survives
-`k` more years with probability `l (x + k) / l x` under the life-table law. -/
+`k` more years with probability `l (x + k) / l x` under the life-table law, when `l x > 0`. If
+`l x = 0` the conditioning event is null and both sides are `0`. -/
 theorem survive_lifeTable (n : ℕ) (l : ℕ → ℝ) (hl0 : 0 < l 0)
     (hmono : ∀ k < n, l (k + 1) ≤ l k) (hnonneg : ∀ k ≤ n, 0 ≤ l k)
     (x k : ℕ) (hxk : x + k ≤ n) :
