@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (1103 MathFin constants, 29 upstream). Citations
+  corpus (1108 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -826,6 +826,18 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.IsL2SolutionPair.uniqueness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.IsL2SolutionPair.uniqueness
+
+/-- info: 'MathFin.IsMackRow.condExp_chainPrediction_succ_sub' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.IsMackRow.condExp_chainPrediction_succ_sub
+
+/-- info: 'MathFin.IsMackRow.condExp_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.IsMackRow.condExp_eq
+
+/-- info: 'MathFin.IsMackRow.isEMM_chainPrediction' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.IsMackRow.isEMM_chainPrediction
 
 /-- info: 'MathFin.ItoFormulaAdapted.adaptedItoProcess_ae_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1834,6 +1846,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.cds_leg_equality' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.cds_leg_equality
+
+/-- info: 'MathFin.chainComplete_eq_chainPrediction' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.chainComplete_eq_chainPrediction
 
 /-- info: 'MathFin.changeOfMeasure_setIntegral_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3258,6 +3274,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.lattice_variance_lower_bound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.lattice_variance_lower_bound
+
+/-- info: 'MathFin.le_chainComplete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.le_chainComplete
 
 /-- info: 'MathFin.le_mpUpperEdge' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

@@ -3180,3 +3180,7 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.buhlmann_mse_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.buhlmann_mse_le
+
+/-- info: 'MathFin.IsMackRow.isEMM_chainPrediction' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.IsMackRow.isEMM_chainPrediction

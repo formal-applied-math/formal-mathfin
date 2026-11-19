@@ -78,6 +78,7 @@ import MathFin.Choice.Portfolio.RiskParityFOC
 import MathFin.Choice.Portfolio.Markowitz
 import MathFin.Choice.Portfolio.CAPM
 import MathFin.Insurance.BuhlmannCredibility
+import MathFin.Insurance.ChainLadder
 import MathFin.Choice.Utility.StatePriceDensity
 import MathFin.Choice.Portfolio.StochasticDiscountFactor
 import MathFin.Choice.Portfolio.MarketSDF
@@ -1545,6 +1546,18 @@ attribute [blueprint "thm:buhlmann-credibility"
   variance. Finite alphabet and finite parameter set only; companion results show the credibility
   factor lies in $[0,1]$ and $n/(n+\kappa)\to1$. -/)]
   MathFin.buhlmann_mse_le
+
+attribute [blueprint "thm:mack-chain-ladder"
+  (title := "Mack's model: the chain-ladder predictions are a martingale")
+  (statement := /-- For one accident year, let the cumulative claims $C_j$ after $j$ development
+  years be adapted and integrable with $\mathbb E[C_{j+1}\mid\mathcal F_j]=f_j C_j$ (Mack's
+  model). Then the reference measure is an equivalent martingale measure, up to the ultimate date
+  $N$, of the prediction $m\mapsto(\prod_{m\le k<N}f_k)\,C_m$ of the ultimate $C_N$; this
+  prediction is $\mathbb E[C_N\mid\mathcal F_m]$, and the claims development result from $m$ to
+  $m+1$ has conditional mean zero. The chain-ladder completion of a triangle is this prediction
+  with the selected factors $\hat f_j$ in place of $f_j$; their unbiasedness and the standard error
+  of the reserve are not covered. -/)]
+  MathFin.IsMackRow.isEMM_chainPrediction
 
 attribute [blueprint "thm:markowitz-lagrangian"
   (title := "Markowitz mean–variance optimality")

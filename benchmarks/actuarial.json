@@ -448,6 +448,51 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written: beta_latentMean_sampleMean and buhlmann_mse_le in MathFin/Insurance/BuhlmannCredibility.lean. The optimality is the least-squares property of the CAPM beta, integral_sq_affine_le in MathFin/Choice/Portfolio/RegressionBeta.lean (bias-variance decomposition, completing the square), applied to the moments of mf-buhlmann-sample-mean-variance-covariance. SCOPE: the model is the finite latent mixture (a finite parameter set Θ with prior weights p, a finite observation alphabet Ξ with conditional weights w, n observations iid given Θ); the observation is a function v of the alphabet, and the premium is for the hypothetical mean m(Θ), not for a future observation. No general measurable-space Bühlmann theorem, no Bühlmann–Straub weights, no empirical (estimated) structural parameters. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-chain-ladder-completion-prediction",
+      "name": "Chain-Ladder Completion by the Selected Factors",
+      "domain": "mathematical_finance",
+      "description": "For a cumulative run-off triangle C with n development periods, let f̂_j be the chain-ladder factor (the ratio of the column-(j+1) sum to the column-j sum over the rows observed in both) and let the completion keep observed cells (i + j ≤ n) and multiply forward by f̂ on the others. On every unobserved cell the completion equals C(i, n − i) · ∏_{n−i ≤ k < j} f̂_k, the prediction of the row's value at j from its last observed value. If the triangle is nonnegative, its rows are nondecreasing on observed cells and every factor denominator is positive, the completed ultimate is at least the last observed value, so the predicted outstanding claims are nonnegative.",
+      "code": {
+        "lean": "import MathFin.Insurance.ChainLadder\n\nopen MathFin\n\n/-- The chain-ladder completion of a triangle is the prediction by the selected factors on every\nunobserved cell, and with monotone nonnegative rows and positive denominators the completed\nultimate is at least the last observed value. -/\ntheorem chain_ladder_completion (n : ℕ) (C : ℕ → ℕ → ℝ) :\n    (∀ i j, n < i + j →\n      chainComplete n C i j = chainPrediction (chainFactor n C) (C i) j (n - i)) ∧\n    ((∀ i j, 0 ≤ C i j) → (∀ i j, i + (j + 1) ≤ n → C i j ≤ C i (j + 1)) →\n      (∀ j < n, 0 < ∑ i ∈ Finset.range (n - j), C i j) →\n      ∀ i, C i (n - i) ≤ chainComplete n C i n) :=\n  ⟨chainComplete_eq_chainPrediction n C, fun hC hmono hdenom ↦ le_chainComplete n C hC hmono hdenom⟩\n"
+      },
+      "metadata": {
+        "reference": "Mack (1993), §2",
+        "citations": [
+          {
+            "key": "Mack1993",
+            "locator": "§2"
+          }
+        ],
+        "difficulty": "elementary",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written: chainComplete_eq_chainPrediction and le_chainComplete in MathFin/Insurance/ChainLadder.lean (contributed in #516 and #517). Deterministic algebra of the triangle; the probabilistic reading is mf-mack-chain-ladder-martingale."
+      }
+    },
+    {
+      "id": "mf-mack-chain-ladder-martingale",
+      "name": "Mack's Model: the Chain-Ladder Predictions Are a Martingale",
+      "domain": "mathematical_finance",
+      "description": "Let the cumulative claims C_j of one accident year after j development years be adapted to a filtration and integrable under a probability measure P, with E[C_{j+1} | F_j] = f_j C_j (Mack's model). For m < N: P is an equivalent martingale measure, up to the ultimate date N, of the prediction k ↦ (∏_{k ≤ l < N} f_l) C_k of the ultimate; that prediction at m is E[C_N | F_m]; and the claims development result from m to m + 1, the revision of the prediction, has conditional mean zero given F_m. The factors f are the model's, not the chain-ladder estimates; their unbiasedness and the standard error of the reserve are not proved.",
+      "code": {
+        "lean": "import MathFin.Insurance.ChainLadder\n\nopen MeasureTheory MathFin\n\n/-- Mack's model: the predictions of the ultimate are a martingale under the reference measure,\neach is the conditional expectation of the ultimate, and the claims development result has\nconditional mean zero. -/\ntheorem mack_chain_ladder {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {𝓕 : Filtration ℕ mΩ} {C : ℕ → Ω → ℝ} {f : ℕ → ℝ}\n    (h : IsMackRow P 𝓕 C f) {m N : ℕ} (hm : m < N) :\n    IsEMM 𝓕 P (fun k ω ↦ chainPrediction f (C · ω) N k) N P ∧\n      P[C N | 𝓕 m] =ᵐ[P] (fun ω ↦ chainPrediction f (C · ω) N m) ∧\n      P[fun ω ↦ chainPrediction f (C · ω) N (m + 1) - chainPrediction f (C · ω) N m | 𝓕 m]\n        =ᵐ[P] 0 :=\n  ⟨h.isEMM_chainPrediction N, h.condExp_eq hm.le, h.condExp_chainPrediction_succ_sub hm⟩\n"
+      },
+      "metadata": {
+        "reference": "Mack (1993), §2; Merz and Wüthrich (2008)",
+        "citations": [
+          {
+            "key": "Mack1993",
+            "locator": "§2"
+          },
+          {
+            "key": "MerzWuthrich2008"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written: IsMackRow.isEMM_chainPrediction, IsMackRow.condExp_eq and IsMackRow.condExp_chainPrediction_succ_sub in MathFin/Insurance/ChainLadder.lean. One accident year; Mack's independence of accident years and his variance assumption are not used and not stated. The chain-ladder completion is this prediction with the selected factors (mf-chain-ladder-completion-prediction)."
+      }
     }
   ]
 }
