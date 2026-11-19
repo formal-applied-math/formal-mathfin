@@ -45,8 +45,8 @@ This module records what follows from that structure without the SDE calculus.
   value of `MathFin.Contracts.value_caplet_black76`). `jyForwardIndex_lognormal_eq_curves` puts the
   lognormal index on that curve forward.
 * `jyZcCaplet_price_deterministic_rates`: with `σ_r = σ_n = 0` the integrated variance is `σ_I²T`
-  and the priced caplet is `blackCaplet (I₀Pʳ/Pⁿ) K σ_I T Pⁿ` (by `blackCaplet_sqrt_variance`: Black
-  at total variance `σ²T` and maturity 1 is Black at volatility `σ` and maturity `T`).
+  and the priced caplet is `Pⁿ·blackCaplet (I₀Pʳ/Pⁿ) K σ_I T 1` (by `blackCaplet_sqrt_variance`:
+  Black at total variance `σ²T` and maturity 1 is Black at volatility `σ` and maturity `T`).
 * The year-on-year forward: `jyYoyForward_eq_bondRatio` is the tower-property step (Bagaria
   eq. 17.8) from the martingale property of `F(·,T)` under the `T`-forward measure to
   `𝔼^T[I_T/I_S] = 𝔼^T[Pʳ(S,T)/Pⁿ(S,T)]`; `jyYoyForward_eq_convexity` evaluates that expectation by
@@ -104,7 +104,10 @@ noncomputable def jyVarIntegrand (ar an σI σr σn ρrI ρnI ρnr T t : ℝ) : 
     + 2 * ρnI * σI * σn * vasicekBondB an (T - t)
     - 2 * ρnr * σn * σr * vasicekBondB an (T - t) * vasicekBondB ar (T - t)
 
-/-- The integrated variance `V(0,T) = ∫₀ᵀ jyVarIntegrand dt`. -/
+/-- The integrated variance `V(0,T) = ∫₀ᵀ jyVarIntegrand dt`. Junk value: where `a_r = 0` or
+`a_n = 0` the loading `vasicekBondB 0 τ` is `0` by Lean's division convention, not the Ho–Lee
+limit `τ`, so `V` has its meaning only for nonzero mean reversions (or zero rate volatilities, as
+in `jyVariance_zero_rate_vols`). -/
 noncomputable def jyVariance (ar an σI σr σn ρrI ρnI ρnr T : ℝ) : ℝ :=
   ∫ t in (0 : ℝ)..T, jyVarIntegrand ar an σI σr σn ρrI ρnI ρnr T t
 
@@ -192,7 +195,8 @@ measure, then the index-linked-bond
 identification forces `F₀ = I₀·Pʳ(0,T)/Pⁿ(0,T)` (`ZCSwap.forwardIndex_eq`). Hypotheses: `hBTpos`
 (`B_T > 0`), `hBTmeas` (`B_T` measurable), `hPn0T` (`0 < Pⁿ(0,T)`), `hP`
 (`Pⁿ(0,T) = 𝔼^{Qn}[1/B_T]`), `hident` (`𝔼^{Qn}[I_T/B_T] = I₀·Pʳ(0,T)`) and `hZ`. It needs no
-`IsProbabilityMeasure Qn`. -/
+`IsProbabilityMeasure Qn`. For `V < 0` Lean's `√V = 0`, so the hypotheses describe the constant
+index `F₀`, not a lognormal law; the pricing theorems below assume `V > 0`. -/
 theorem jyForwardIndex_lognormal_eq_curves (BT : Ω → ℝ) (Pn0T Pr0T I0 F0 V : ℝ) (Z : Ω → ℝ)
     (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (hPn0T : 0 < Pn0T)
     (hP : Pn0T = ∫ ω, 1 / BT ω ∂Qn)
@@ -222,7 +226,7 @@ indices are dummies); `Pⁿ(0,T)` plays the role of `zeroCurve Qn D 0`. The forw
 curve by `jyForwardIndex_lognormal_eq_curves`. Under `hident` and a
 lognormal index under `Q^T` with log-variance `V`, and `F₀ > 0`, `V > 0`, `K > 0`,
 
-  `𝔼^{Qn}[(I_T − K)⁺/B_T] = blackCaplet (I₀Pʳ(0,T)/Pⁿ(0,T)) K √V 1 Pⁿ(0,T)`,
+  `𝔼^{Qn}[(I_T − K)⁺/B_T] = Pⁿ(0,T)·blackCaplet (I₀Pʳ(0,T)/Pⁿ(0,T)) K √V 1 1`,
 
 i.e. `Pⁿ·[F Φ(d₁) − K Φ(d₂)]` with `d_i = bsd_i F K 0 √V 1`. Further hypotheses: `Qn` is a
 probability measure (inherited from the section variable of `value_caplet_black76`; the
@@ -238,7 +242,7 @@ theorem jyZcCaplet_price [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
     (hZ : HasLaw Z (gaussianReal 0 1) (MathFin.forwardMeasure Qn BT))
     (hF0 : 0 < F0) (hV : 0 < V) (hK : 0 < K) :
     ∫ ω, max (bsTerminal F0 0 (Real.sqrt V) 1 (Z ω) - K) 0 / BT ω ∂Qn
-      = blackCaplet (I0 * Pr0T / Pn0T) K (Real.sqrt V) 1 Pn0T := by
+      = Pn0T * blackCaplet (I0 * Pr0T / Pn0T) K (Real.sqrt V) 1 1 := by
   have hF := jyForwardIndex_lognormal_eq_curves BT Pn0T Pr0T I0 F0 V Z hBTpos hBTmeas hPn0T hP
     hident hZ
   have hQ' : IsProbabilityMeasure (MathFin.forwardMeasure Qn BT) :=
@@ -268,7 +272,6 @@ theorem jyZcCaplet_price [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
     refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
     simp [div_eq_inv_mul]
   rw [key']
-  simp only [blackCaplet, one_mul]
 
 /-- **ZC inflation floorlet: the priced payoff is the Black floorlet on the curve forward.** The
 put counterpart of `jyZcCaplet_price` under its hypotheses except `IsProbabilityMeasure Qn` (the
@@ -282,7 +285,7 @@ theorem jyZcFloorlet_price (BT : Ω → ℝ)
     (hZ : HasLaw Z (gaussianReal 0 1) (MathFin.forwardMeasure Qn BT))
     (hF0 : 0 < F0) (hV : 0 < V) (hK : 0 < K) :
     ∫ ω, max (K - bsTerminal F0 0 (Real.sqrt V) 1 (Z ω)) 0 / BT ω ∂Qn
-      = blackFloorlet (I0 * Pr0T / Pn0T) K (Real.sqrt V) 1 Pn0T := by
+      = Pn0T * blackFloorlet (I0 * Pr0T / Pn0T) K (Real.sqrt V) 1 1 := by
   have hF := jyForwardIndex_lognormal_eq_curves BT Pn0T Pr0T I0 F0 V Z hBTpos hBTmeas hPn0T hP
     hident hZ
   have hQ' : IsProbabilityMeasure (MathFin.forwardMeasure Qn BT) :=
@@ -300,15 +303,17 @@ theorem jyZcFloorlet_price (BT : Ω → ℝ)
   ring
 
 /-- **Black caplet at total variance.** At maturity `1`, the Black caplet at total variance `σ²T`
-is the Black caplet at volatility `σ` and maturity `T` (`σ ≥ 0`, `T ≥ 0`): `√(σ²T) = σ√T`, and
+is the Black caplet at volatility `σ` and maturity `T` (`σ > 0`, `T ≥ 0`): `√(σ²T) = σ√T`, and
 `bsd₁`, `bsd₂` depend on `(σ, T)` only through `σ√T` and `σ²T`. A general Black-76 fact (`σ` and
 `T` enter only through `σ√T`); it is stated here to keep this module self-contained, its natural
 home is next to `blackCaplet` in `Models/Forwards/Black76.lean`, and the same step appears inline
-in `bsV_eq_totalVarianceCall`. -/
-theorem blackCaplet_sqrt_variance (F K σ T α : ℝ) (hσ : 0 ≤ σ) (hT : 0 ≤ T) :
+in `bsV_eq_totalVarianceCall`. This is an identity of the total function `blackCaplet`: it has a
+financial meaning only for `F, K > 0` (`log(F/K)` is junk otherwise), and `σ > 0` is kept because
+at `σ = 0` both sides evaluate `bsd = x/0 = 0` rather than the intrinsic value. -/
+theorem blackCaplet_sqrt_variance (F K σ T α : ℝ) (hσ : 0 < σ) (hT : 0 ≤ T) :
     blackCaplet F K (Real.sqrt (σ ^ 2 * T)) 1 α = blackCaplet F K σ T α := by
   have hs : Real.sqrt (σ ^ 2 * T) = σ * Real.sqrt T := by
-    rw [Real.sqrt_mul (sq_nonneg σ), Real.sqrt_sq hσ]
+    rw [Real.sqrt_mul (sq_nonneg σ), Real.sqrt_sq hσ.le]
   have hsq : (σ * Real.sqrt T) ^ 2 = σ ^ 2 * T := by
     rw [mul_pow, Real.sq_sqrt hT]
   have hd1 : bsd1 F K 0 (Real.sqrt (σ ^ 2 * T)) 1 = bsd1 F K 0 σ T := by
@@ -325,7 +330,7 @@ theorem blackCaplet_sqrt_variance (F K σ T α : ℝ) (hσ : 0 ≤ σ) (hT : 0 �
 /-- **Deterministic rates reduce the zero-coupon inflation caplet to Black at the index
 volatility.** With `σ_r = σ_n = 0`, `σ_I > 0` and `T > 0`, the integrated variance is
 `jyVariance … = σ_I²T` (`jyVariance_zero_rate_vols`), and the priced caplet of
-`jyZcCaplet_price` at `V := jyVariance …` is `blackCaplet (I₀Pʳ/Pⁿ) K σ_I T Pⁿ`: Black on the
+`jyZcCaplet_price` at `V := jyVariance …` is `Pⁿ·blackCaplet (I₀Pʳ/Pⁿ) K σ_I T 1`: Black on the
 curve forward at the index volatility and maturity `T`. Hypotheses: all those of
 `jyZcCaplet_price`, including `[IsProbabilityMeasure Qn]`, except `hV`, which follows from
 `σ_I > 0` and `T > 0`; `hident` and `hZ` are stated at
@@ -341,12 +346,12 @@ theorem jyZcCaplet_price_deterministic_rates [IsProbabilityMeasure Qn] (BT : Ω 
     (hF0 : 0 < F0) (hK : 0 < K) :
     ∫ ω, max (bsTerminal F0 0
         (Real.sqrt (jyVariance ar an σI 0 0 ρrI ρnI ρnr T)) 1 (Z ω) - K) 0 / BT ω ∂Qn
-      = blackCaplet (I0 * Pr0T / Pn0T) K σI T Pn0T := by
+      = Pn0T * blackCaplet (I0 * Pr0T / Pn0T) K σI T 1 := by
   have hV : 0 < jyVariance ar an σI 0 0 ρrI ρnI ρnr T := by
     rw [jyVariance_zero_rate_vols]
     positivity
   rw [jyZcCaplet_price BT Pn0T Pr0T I0 F0 _ K Z hBTpos hBTmeas hPn0T hP hident hZ hF0 hV hK,
-    jyVariance_zero_rate_vols, blackCaplet_sqrt_variance _ _ _ _ _ hσI.le hT.le]
+    jyVariance_zero_rate_vols, blackCaplet_sqrt_variance _ _ _ _ _ hσI hT.le]
 
 end Caplet
 
@@ -400,7 +405,10 @@ i.e. the naive ratio times the convexity factor. The exponent is the same quanti
 `Z1, Z2` independent standard normals under `μ` (`hZ1`, `hZ2`, `hindep`), `0 ≤ Vⁿ`, `0 ≤ Vʳ`,
 `ρ² ≤ 1` and
 `hCov : Cov = ρ·√(Vⁿ·Vʳ)`. The means, variances, covariance, `hR` and `hmart` are hypotheses;
-they are not derived from the SDEs here. -/
+they are not derived from the SDEs here. Junk corner: the naive ratio
+`Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))` is `0` by Lean's division convention if `Pʳ(0,S)` or
+`Pⁿ(0,T)` is `0`; the bond prices are positive in the model, and the statement is an identity
+about `hR`, so it carries no such guard. -/
 theorem jyYoyForward_eq_convexity {mS : MeasurableSpace Ω} (hmS : mS ≤ m)
     [SigmaFinite (μ.trim hmS)] (IS IT RS : Ω → ℝ)
     (hIS : StronglyMeasurable[mS] IS) (hISpos : ∀ ω, 0 < IS ω)
@@ -442,7 +450,8 @@ naive ratio), the time-0 value of the payment `I_T/I_S` at `T` is
   `𝔼^{Qn}[(I_T/I_S)/B_T] = Pⁿ(0,T)·(naive ratio of forwards)·exp(−Bʳmʳ + Bⁿmⁿ + Bⁿ²Vⁿ − BʳBⁿ·Cov)`.
 
 It is `MathFin.forwardMeasure_price` composed with `jyYoyForward_eq_convexity`; the
-hypotheses of the latter are not derived. -/
+hypotheses of the latter are not derived. The naive ratio is junk (`0`) if `Pʳ(0,S) = 0`, as in
+`jyYoyForward_eq_convexity`; `Pⁿ(0,T) > 0` is carried (`hPn0T`). -/
 theorem jyYoyPayment_price {Ω : Type*} {mS m : MeasurableSpace Ω} {Qn : Measure Ω} (BT : Ω → ℝ)
     (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (Pn0T : ℝ)
     (hPn0T : 0 < Pn0T) (hP : Pn0T = ∫ ω, 1 / BT ω ∂Qn)
