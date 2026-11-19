@@ -1944,6 +1944,30 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. exists_isPricingMeasure_price_call_ne in MathFin/Models/Jumps/Market.lean: the Esscher law (isPricingMeasure_esscher) and the Merton measure's law (isPricingMeasure_merton) are pricing measures of the one-date market, and exists_call_esscher_ne_merton (MathFin/Models/Jumps/JumpDiffusionIncompleteness.lean) gives a strike at which the discounted call integrals against them differ; the market's price is that integral (Market.price_europeanCall_oneDate). SCOPE: one date; the market's sample space is the line of log returns, so the two measures are pricing measures of the market that reads the asset at tau, not shown to be time-tau marginals of equivalent martingale measures of the jump-diffusion process for the filtration of its path. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-volatility-swap-lognormal-variance",
+      "name": "Volatility swap fair strike under lognormal realized variance",
+      "description": "Under the assumption that the annualized realized variance V is lognormal with mean K (the fair variance strike) and a free log-volatility s (an assumed law, not derived from a price process), E[sqrt V] = sqrt K * exp(-s^2/8): sqrt V is lognormal with half the log-volatility, so the forward identity gives its mean. The volatility swap is therefore fair at sqrt K * exp(-s^2/8), strictly below sqrt K when s is positive. With a deterministic discount factor exp(-rT), the swap paid at T has time-0 expected discounted payoff exp(-rT) * N * (fair strike - K_vol), with K_vol the volatility strike; this is an expectation under the assumed law, not a Contract.value.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.ModelFree.VolatilitySwapLognormal\n\nopen MeasureTheory ProbabilityTheory MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} [IsProbabilityMeasure Q]\n  {K s : ℝ} {Z : Ω → ℝ}\n\ntheorem volatility_swap_fair_strike_example (h : VolSwapHyp Q K s Z) :\n    ∫ ω, Real.sqrt (bsTerminal K 0 s 1 (Z ω)) ∂Q = Real.sqrt K * Real.exp (-(s ^ 2 / 8)) :=\n  integral_sqrt_lognormalVariance h\n\ntheorem volatility_swap_value_example {r T : ℝ} (h : VolSwapHyp Q K s Z) (N Kvol : ℝ) :\n    ∫ ω, Real.exp (-(r * T)) * (N * (Real.sqrt (bsTerminal K 0 s 1 (Z ω)) - Kvol)) ∂Q\n      = Real.exp (-(r * T)) * (N * (volSwapFairStrike K s - Kvol)) :=\n  integral_discounted_volSwapPayoff h N Kvol\n\ntheorem volatility_swap_strike_lt_sqrt_example (h : VolSwapHyp Q K s Z) :\n    Real.sqrt K * Real.exp (-(s ^ 2 / 8)) < Real.sqrt K :=\n  volSwapFairStrike_lt_sqrt h.K_pos h.s_pos.ne'\n"
+      },
+      "metadata": {
+        "chapter": null,
+        "reference": "K. Demeterfi, E. Derman, M. Kamal, J. Zou, More than you ever wanted to know about volatility swaps, Goldman Sachs Quantitative Strategies Research Notes (1999); O. Brockhaus and D. Long, Volatility swaps made simple, Risk, January 2000",
+        "citations": [
+          {
+            "key": "DemeterfiDermanKamalZou1999"
+          },
+          {
+            "key": "BrockhausLong2000"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "MathFin/Models/ModelFree/VolatilitySwapLognormal.lean proves the conditional statements via sqrt_bsTerminal (MathFin/Models/BlackScholes/Forward.lean: sqrt of a lognormal factor is lognormal with half the log-volatility) and expected_terminal_eq_forward; the discounted value is integral_discounted_volSwapPayoff. Scope: the lognormal law of the realized variance, with mean the fair variance strike and a supplied log-volatility s, is assumed (hypothesis VolSwapHyp) and not derived from any price process; the Brockhaus-Long agreement to first order is not proved. The fair strikes are undiscounted, unseasoned and annualized; discounting enters only through a deterministic discount factor."
+      }
     }
   ]
 }

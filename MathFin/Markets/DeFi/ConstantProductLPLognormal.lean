@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
@@ -54,14 +54,6 @@ open MeasureTheory ProbabilityTheory DeFi
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} [IsProbabilityMeasure Q]
 
-/-- The square root of a lognormal factor is lognormal with half the log-mean and half the
-volatility: `√(bsTerminal 1 μ σ T z) = bsTerminal 1 (μ/2 − σ²/8) (σ/2) T z`. -/
-lemma sqrt_bsTerminal_one (μ σ T z : ℝ) :
-    Real.sqrt (bsTerminal 1 μ σ T z) = bsTerminal 1 (μ / 2 - σ ^ 2 / 8) (σ / 2) T z := by
-  rw [bsTerminal, bsTerminal, one_mul, one_mul, ← Real.exp_half]
-  congr 1
-  ring
-
 /-- **Expected value of a constant-product LP position under a lognormal price move.** Deposit
 `(x₀, y₀)` at the pool price `y₀ / x₀`; the price of X moves by the factor
 `r_T = bsTerminal 1 μ σ T Z`, lognormal under `Q` (`BSCallHyp`, rate slot read as the drift `μ`).
@@ -79,7 +71,8 @@ theorem integral_lpValue_lognormal {x0 y0 K μ σ T : ℝ} {Z : Ω → ℝ} (hx0
           * (bsTerminal 1 μ σ T (Z ω) * y0 / x0)
         + impermanentLossReservesY x0 y0 (bsTerminal 1 μ σ T (Z ω))
       = 2 * y0 * bsTerminal 1 (μ / 2 - σ ^ 2 / 8) (σ / 2) T (Z ω) := by
-    rw [lpPortfolioValue_eq x0 y0 _ hx0 hy0 (hr ω), sqrt_bsTerminal_one]
+    rw [lpPortfolioValue_eq x0 y0 _ hx0 hy0 (hr ω), sqrt_bsTerminal zero_le_one, Real.sqrt_one,
+      one_mul]
   have h' : BSCallHyp Q 1 K (μ / 2 - σ ^ 2 / 8) (σ / 2) T Z :=
     ⟨one_pos, h.K_pos, half_pos h.σ_pos, h.T_pos, h.Z_law⟩
   simp_rw [hpt]

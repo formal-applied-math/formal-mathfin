@@ -1680,9 +1680,9 @@
       "id": "mf-jarrow-yildirim-zc-inflation-caplet",
       "name": "Jarrow-Yildirim Zero-Coupon Inflation Caplet as a Black Caplet",
       "domain": "mathematical_finance",
-      "description": "If the index-linked bond is priced on the real curve and the price index I_T is lognormal under the nominal T-forward measure, I_T = F0 exp(-V/2 + sqrt(V) Z) with Z standard normal, V > 0, F0 > 0 and strike K > 0, then F0 = I0 P^r(0,T)/P^n(0,T) and the zero-coupon inflation caplet price P^n(0,T) E^T[(I_T - K)^+] equals the Black caplet on the curve forward F0 at total variance V: P^n [F0 Phi(d1) - K Phi(d2)]. Here V is an arbitrary positive input; that it equals the Jarrow-Yildirim integrated variance, and the lognormal law of the index itself, are hypotheses and are not derived from the SDEs.",
+      "description": "If the index-linked bond is priced on the real curve and the price index I_T is lognormal under the nominal T-forward measure, I_T = F0 exp(-V/2 + sqrt(V) Z) with Z standard normal, V > 0, F0 > 0 and strike K > 0, then F0 = I0 P^r(0,T)/P^n(0,T) and the zero-coupon inflation caplet price P^n(0,T) E^T[(I_T - K)^+] equals the Black caplet on the curve forward F0 at total variance V: P^n [F0 Phi(d1) - K Phi(d2)]. Hypotheses: Qn is a probability measure, B_T is positive and measurable, P^n(0,T) = E^Qn[1/B_T] > 0 (so the forward measure is a probability measure), the index-linked bond is priced on the real curve, and Z is standard normal under the forward measure with I_T = bsTerminal F0 0 (sqrt V) 1 Z. V is an arbitrary positive input: that it equals the Jarrow-Yildirim integrated variance, and the lognormal law of the index itself, are hypotheses and are not derived from the SDEs.",
       "code": {
-        "lean": "import MathFin.Models.Rates.JarrowYildirim\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Inflation.JarrowYildirim\n\n/-- **The zero-coupon inflation caplet is a Black caplet on the curve forward**. -/\ntheorem jy_zc_inflation_caplet\n    {Ω : Type*} [MeasurableSpace Ω] {Qn : Measure Ω} (BT : Ω → ℝ)\n    [IsProbabilityMeasure (forwardMeasure Qn BT)]\n    (Pn0T Pr0T I0 F0 V K : ℝ) (Z : Ω → ℝ)\n    (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (hPn0T : 0 < Pn0T)\n    (hP : Pn0T = ∫ ω, 1 / BT ω ∂Qn)\n    (hident : ∫ ω, bsTerminal F0 0 (Real.sqrt V) 1 (Z ω) / BT ω ∂Qn = I0 * Pr0T)\n    (hZ : HasLaw Z (gaussianReal 0 1) (forwardMeasure Qn BT))\n    (hF0 : 0 < F0) (hV : 0 < V) (hK : 0 < K) :\n    Pn0T * ∫ ω, max (bsTerminal F0 0 (Real.sqrt V) 1 (Z ω) - K) 0 ∂(forwardMeasure Qn BT)\n      = blackCaplet (I0 * Pr0T / Pn0T) K (Real.sqrt V) 1 Pn0T :=\n  jyZcCaplet_eq_black BT Pn0T Pr0T I0 F0 V K Z hBTpos hBTmeas hPn0T hP hident hZ hF0 hV hK\n"
+        "lean": "import MathFin.Models.Rates.JarrowYildirim\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Inflation.JarrowYildirim\n\n/-- **The zero-coupon inflation caplet is a Black caplet on the curve forward**. -/\ntheorem jy_zc_inflation_caplet\n    {Ω : Type*} [MeasurableSpace Ω] {Qn : Measure Ω} [IsProbabilityMeasure Qn] (BT : Ω → ℝ)\n    (Pn0T Pr0T I0 F0 V K : ℝ) (Z : Ω → ℝ)\n    (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (hPn0T : 0 < Pn0T)\n    (hP : Pn0T = ∫ ω, 1 / BT ω ∂Qn)\n    (hident : ∫ ω, bsTerminal F0 0 (Real.sqrt V) 1 (Z ω) / BT ω ∂Qn = I0 * Pr0T)\n    (hZ : HasLaw Z (gaussianReal 0 1) (forwardMeasure Qn BT))\n    (hF0 : 0 < F0) (hV : 0 < V) (hK : 0 < K) :\n    Pn0T * ∫ ω, max (bsTerminal F0 0 (Real.sqrt V) 1 (Z ω) - K) 0 ∂(forwardMeasure Qn BT)\n      = blackCaplet (I0 * Pr0T / Pn0T) K (Real.sqrt V) 1 Pn0T :=\n  jyZcCaplet_eq_black BT Pn0T Pr0T I0 F0 V K Z hBTpos hBTmeas hPn0T hP hident hZ hF0 hV hK\n"
       },
       "metadata": {
         "chapter": 17,
@@ -1698,25 +1698,25 @@
           },
           {
             "key": "BagariaFIDP",
-            "locator": "ch. 17"
+            "locator": "ch. 17 §17.3"
           }
         ],
         "difficulty": "advanced",
-        "formalization_status": "full",
-        "formalization_scope": "Full formal proof of the statement as written. jyZcCaplet_eq_black in MathFin/Models/Rates/JarrowYildirim.lean composes ZCSwap.forwardIndex_eq (MathFin/Models/Rates/Inflation.lean) with black_futures_formula (MathFin/Models/Forwards/Black76.lean). SCOPE: the lognormal law of the index under the nominal T-forward measure is a hypothesis; that its log-variance equals the integrated Jarrow-Yildirim variance (jyVariance) is not derived from the three short-rate and index SDEs, nor is the real-rate drift shift -rho_rI sigma_r sigma_I. The exact year-on-year caplet is not covered."
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Reduced core. Composes ZCSwap.forwardIndex_eq with black_futures_formula (jyZcCaplet_eq_black in MathFin/Models/Rates/JarrowYildirim.lean); the headline adds no Jarrow-Yildirim content beyond these existing results under model hypotheses. Not derived: the SDE-level derivation of the log-variance V (equal to jyVariance in the corollary jyZcCaplet_eq_black_of_jyVariance) and of the real-rate drift shift, the lognormality of the index under the nominal T-forward measure, and the exact year-on-year caplet. V is a free positive input."
       }
     },
     {
       "id": "mf-jarrow-yildirim-yoy-forward-convexity",
       "name": "Jarrow-Yildirim Year-on-Year Payment Price from the Forward-Index Martingale",
       "domain": "mathematical_finance",
-      "description": "Let the forward index F(S,T) = I_S P^r(S,T)/P^n(S,T) be a martingale under the nominal T-forward measure, so that E^T[I_T | F_S] = I_S R_S with R_S = P^r(S,T)/P^n(S,T). Then E^T[I_T/I_S] = E^T[R_S] by the tower property. With R_S in Hull-White reconstitution form with two correlated Gaussian rate deviations, the year-on-year forward is the naive ratio of forwards P^r(0,T) P^n(0,S)/(P^r(0,S) P^n(0,T)) times exp(B^n m^n - B^r m^r + (B^n)^2 V^n - B^r B^n Cov), the convexity adjustment of Bagaria eq. 17.10. Discounting with the nominal bond, the time-0 value of the payment I_T/I_S at T is P^n(0,T) times that expectation (forward-measure change of numeraire). Not derived: the martingale property of the forward index, the Hull-White reconstitution form of the bond ratio, and the means, variances and covariance of the rate deviations are hypotheses or inputs.",
+      "description": "Let the forward index F(S,T) = I_S P^r(S,T)/P^n(S,T) be a martingale under the nominal T-forward measure, so that E^T[I_T | F_S] = I_S R_S with R_S = P^r(S,T)/P^n(S,T). Then E^T[I_T/I_S] = E^T[R_S] by the tower property. With R_S in Hull-White reconstitution form with two correlated Gaussian rate deviations, the year-on-year forward is the naive ratio of forwards P^r(0,T) P^n(0,S)/(P^r(0,S) P^n(0,T)) times exp(B^n m^n - B^r m^r + (B^n)^2 V^n - B^r B^n Cov), the convexity adjustment of Bagaria ch. 17 §17.4, eq. 17.10. Discounting with the nominal bond, the time-0 value of the payment I_T/I_S at T is P^n(0,T) times that expectation (forward-measure change of numeraire). Hypotheses: I_S is positive and F_S-measurable; I_T and I_T/I_S are integrable under the forward measure Q^T; Z1, Z2 are independent standard normals under Q^T; rho^2 <= 1, V^n, V^r >= 0 and Cov = rho sqrt(V^n V^r); B_T is positive and measurable and P^n(0,T) = E[1/B_T] > 0; the trimmed measure is sigma-finite. Not derived: the martingale property of the forward index (the conditional-expectation hypothesis), the Hull-White reconstitution form of the bond ratio, and the means, variances and covariance of the rate deviations are hypotheses or inputs.",
       "code": {
-        "lean": "import MathFin.Models.Rates.JarrowYildirim\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Inflation\n\n/-- **The time-0 price of the year-on-year payment in the printed convexity shape**. -/\ntheorem jy_yoy_payment_price\n    {Ω : Type*} {mS m : MeasurableSpace Ω} {Qn : Measure Ω} (BT : Ω → ℝ)\n    (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (Pn0T : ℝ)\n    (hP : Pn0T = ∫ ω, 1 / BT ω ∂Qn) (hPpos : 0 < Pn0T)\n    (hmS : mS ≤ m)\n    [SigmaFinite ((forwardMeasure Qn BT).trim hmS)] (IS IT RS : Ω → ℝ)\n    (hIS : StronglyMeasurable[mS] IS) (hISpos : ∀ ω, 0 < IS ω)\n    (hIT : Integrable IT (forwardMeasure Qn BT))\n    (hITS : Integrable (fun ω => IT ω / IS ω) (forwardMeasure Qn BT))\n    (hmart : (forwardMeasure Qn BT)[IT | mS] =ᵐ[forwardMeasure Qn BT] fun ω => IS ω * RS ω)\n    (mn mr Vn Vr ρ Bn Br Pn0S Pr0T Pr0S Cov : ℝ)\n    (hVn : 0 ≤ Vn) (hVr : 0 ≤ Vr) (hρ : ρ ^ 2 ≤ 1) (hCov : Cov = ρ * Real.sqrt (Vn * Vr))\n    {Z1 Z2 : Ω → ℝ}\n    (hZ1 : HasLaw Z1 (gaussianReal 0 1) (forwardMeasure Qn BT))\n    (hZ2 : HasLaw Z2 (gaussianReal 0 1) (forwardMeasure Qn BT))\n    (hindep : IndepFun Z1 Z2 (forwardMeasure Qn BT))\n    (hR : ∀ ω, RS ω = (Pr0T * Pn0S / (Pr0S * Pn0T)) * Real.exp (Convexity.hwD Br Vr\n        - Convexity.hwD Bn Vn + (Bn * (mn + Real.sqrt Vn * Z1 ω)\n          - Br * (mr + Real.sqrt Vr * (ρ * Z1 ω + Real.sqrt (1 - ρ ^ 2) * Z2 ω))))) :\n    ∫ ω, IT ω / IS ω / BT ω ∂Qn\n      = Pn0T * ((Pr0T * Pn0S / (Pr0S * Pn0T))\n        * Real.exp (Bn * mn - Br * mr + Bn ^ 2 * Vn - Br * Bn * Cov)) :=\n  JarrowYildirim.jyYoyPayment_price BT hBTpos hBTmeas Pn0T hP hPpos hmS IS IT RS hIS hISpos hIT\n    hITS hmart mn mr Vn Vr ρ Bn Br Pn0S Pr0T Pr0S Cov hVn hVr hρ hCov hZ1 hZ2 hindep hR\n"
+        "lean": "import MathFin.Models.Rates.JarrowYildirim\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Inflation\n\n/-- **The time-0 price of the year-on-year payment in the printed convexity shape**. -/\ntheorem jy_yoy_payment_price\n    {Ω : Type*} {mS m : MeasurableSpace Ω} {Qn : Measure Ω} (BT : Ω → ℝ)\n    (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (Pn0T : ℝ)\n    (hP : Pn0T = ∫ ω, 1 / BT ω ∂Qn) (hPpos : 0 < Pn0T)\n    (hmS : mS ≤ m)\n    [SigmaFinite ((forwardMeasure Qn BT).trim hmS)] (IS IT RS : Ω → ℝ)\n    (hIS : StronglyMeasurable[mS] IS) (hISpos : ∀ ω, 0 < IS ω)\n    (hIT : Integrable IT (forwardMeasure Qn BT))\n    (hITS : Integrable (fun ω => IT ω / IS ω) (forwardMeasure Qn BT))\n    (hmart : (forwardMeasure Qn BT)[IT | mS] =ᵐ[forwardMeasure Qn BT] fun ω => IS ω * RS ω)\n    (mn mr Vn Vr ρ Bn Br Pn0S Pr0T Pr0S Cov : ℝ)\n    (hVn : 0 ≤ Vn) (hVr : 0 ≤ Vr) (hρ : ρ ^ 2 ≤ 1) (hCov : Cov = ρ * Real.sqrt (Vn * Vr))\n    {Z1 Z2 : Ω → ℝ}\n    (hZ1 : HasLaw Z1 (gaussianReal 0 1) (forwardMeasure Qn BT))\n    (hZ2 : HasLaw Z2 (gaussianReal 0 1) (forwardMeasure Qn BT))\n    (hindep : IndepFun Z1 Z2 (forwardMeasure Qn BT))\n    (hR : ∀ ω, RS ω = (Pr0T * Pn0S / (Pr0S * Pn0T)) * Real.exp (Convexity.hwD Br Vr\n        - Convexity.hwD Bn Vn\n        - Br * (mr + Real.sqrt Vr * (ρ * Z1 ω + Real.sqrt (1 - ρ ^ 2) * Z2 ω))\n        + Bn * (mn + Real.sqrt Vn * Z1 ω))) :\n    ∫ ω, IT ω / IS ω / BT ω ∂Qn\n      = Pn0T * ((Pr0T * Pn0S / (Pr0S * Pn0T))\n        * Real.exp (-(Br * mr) + Bn * mn + Bn ^ 2 * Vn - Br * Bn * Cov)) :=\n  JarrowYildirim.jyYoyPayment_price BT hBTpos hBTmeas Pn0T hP hPpos hmS IS IT RS hIS hISpos hIT\n    hITS hmart mn mr Vn Vr ρ Bn Br Pn0S Pr0T Pr0S Cov hVn hVr hρ hCov hZ1 hZ2 hindep hR\n"
       },
       "metadata": {
         "chapter": 17,
-        "reference": "R. Jarrow and Y. Yildirim, Pricing Treasury Inflation Protected Securities and Related Derivatives using an HJM Model, Journal of Financial and Quantitative Analysis 38(2) (2003), 337-358; D. Brigo & F. Mercurio, Interest Rate Models - Theory and Practice, 2nd ed. (Springer, 2006), ch. 15; S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 17 §17.3",
+        "reference": "R. Jarrow and Y. Yildirim, Pricing Treasury Inflation Protected Securities and Related Derivatives using an HJM Model, Journal of Financial and Quantitative Analysis 38(2) (2003), 337-358; D. Brigo & F. Mercurio, Interest Rate Models - Theory and Practice, 2nd ed. (Springer, 2006), ch. 15; S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 17 §17.4 (eqs. 17.8, 17.10)",
         "citations": [
           {
             "key": "JarrowYildirim2003",
@@ -1728,12 +1728,60 @@
           },
           {
             "key": "BagariaFIDP",
-            "locator": "ch. 17"
+            "locator": "ch. 17 §17.4"
           }
         ],
         "difficulty": "advanced",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Reduced core. jyYoyPayment_price in MathFin/Models/Rates/JarrowYildirim.lean adds only the conditional-expectation pull-out (condExp_mul_of_stronglyMeasurable_left, integral_condExp) and forwardMeasure_price; the Gaussian closed form is Inflation.Convexity.yoyConvexity_eq unchanged. Not derived: the SDE-level derivation of the means, variances, covariance and the real-rate drift shift, the martingale property of F(., T) under the T-forward measure, and the Hull-White reconstitution form of the bond ratio; all are hypotheses."
+      }
+    },
+    {
+      "id": "mf-nss-vanishing-decay-limit",
+      "name": "Nelson–Siegel–Svensson Yield at Vanishing Decay",
+      "description": "At a fixed maturity tau != 0, as both decay constants l1, l2 of the Nelson–Siegel–Svensson yield nssYield tend to infinity, the yield tends to beta0 + beta1: each argument tau/l_i tends to 0 through nonzero values, so the slope factor s(tau/l_i) = (1 - exp(-tau/l_i))/(tau/l_i) tends to 1 and exp(-tau/l_i) to 1, and both curvature terms (the Nelson–Siegel beta2 term and Svensson's beta3 term) vanish. A limit of the closed-form curve at fixed coefficients; no claim about a fitted curve, and the value at tau = 0 is not this limit.",
+      "domain": "mathematical_finance",
+      "metadata": {
+        "chapter": null,
+        "reference": "C. R. Nelson and A. F. Siegel, Parsimonious Modeling of Yield Curves, Journal of Business 60(4) (1987), 473–489; L. E. O. Svensson, Estimating and Interpreting Forward Interest Rates: Sweden 1992–1994 (NBER Working Paper 4871, 1994)",
+        "citations": [
+          {
+            "key": "NelsonSiegel1987"
+          },
+          {
+            "key": "Svensson1994"
+          }
+        ],
+        "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of the statement as written. jyYoyPayment_price in MathFin/Models/Rates/JarrowYildirim.lean (forwardMeasure_price composed with jyYoyForward_eq_convexity): the tower property (condExp_mul_of_stronglyMeasurable_left, integral_condExp) gives jyYoyForward_eq_bondRatio, and the Gaussian expectation is Inflation.Convexity.yoyConvexity_eq. SCOPE: the martingale property of the forward index under the T-forward measure, the Hull-White reconstitution form of the bond ratio, and the means, variances and covariance of the rate deviations are hypotheses; none is derived from the SDEs here."
+        "formalization_scope": "Full formal proof, MathFin/Models/Rates/NelsonSiegelSvensson.lean (tendsto_nssYield_decay_atTop), built on tendsto_nssSlope_nhdsNE_zero. Scope: fixed maturity and coefficients, both decay constants to infinity through the product filter; the short-end limit in the maturity direction is tendsto_nssYield_nhdsNE_zero. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.Models.Rates.NelsonSiegelSvensson\n\nopen Filter Topology\n\nnamespace MathFin\n\ntheorem nss_vanishing_decay_limit_thm (β₀ β₁ β₂ β₃ τ : ℝ) (hτ : τ ≠ 0) :\n    Tendsto (fun l : ℝ × ℝ => nssYield β₀ β₁ β₂ β₃ l.1 l.2 τ) (atTop ×ˢ atTop)\n      (𝓝 (β₀ + β₁)) :=\n  tendsto_nssYield_decay_atTop β₀ β₁ β₂ β₃ hτ\n\nend MathFin\n"
+      }
+    },
+    {
+      "id": "mf-on-backward-caplet-black",
+      "name": "Backward-looking caplet: Black formula at the integrated damping variance",
+      "description": "A caplet on a compounded overnight rate over [tau0, tau1], with the rate lognormal at total variance sigma^2 Theta under the payment measure, where Theta is the integral from 0 to tau1 of psi(t)^2 and psi(t) = min(1, ((tau1 - t)/(tau1 - tau0))^q) is the volatility damping, has expected undiscounted payoff equal to the Black formula R0 Phi(d1) - K Phi(d2) at that variance. The identification of Theta with s + (tau1 - s) x^(2q)/(2q + 1), s = max(tau0, 0), x = (tau1 - s)/(tau1 - tau0), is proved. The lognormal law of the compounded rate (the Ito isometry for dR = psi sigma R dB) and the martingale property of the rate are hypotheses, not derived; the entry is an expectation under that law, not a contract-level price.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.Rates.OvernightCompounding\n\nopen MeasureTheory ProbabilityTheory MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} [IsProbabilityMeasure Q]\n  {R₀ K σ τ₀ τ₁ q : ℝ} {Z : Ω → ℝ}\n\ntheorem on_backward_caplet_black_example (hq : 0 < q) (hτ : τ₀ < τ₁) (hτ1 : 0 < τ₁)\n    (hR₀ : 0 < R₀) (hK : 0 < K) (hσ : 0 < σ) (hZ : HasLaw Z (gaussianReal 0 1) Q) :\n    ∫ ω, max (bsTerminal R₀ 0 σ (∫ t in (0 : ℝ)..τ₁, onDamping τ₀ τ₁ q t ^ 2) (Z ω) - K) 0 ∂Q\n      = R₀ * Phi (bsd1 R₀ K 0 σ (∫ t in (0 : ℝ)..τ₁, onDamping τ₀ τ₁ q t ^ 2))\n        - K * Phi (bsd2 R₀ K 0 σ (∫ t in (0 : ℝ)..τ₁, onDamping τ₀ τ₁ q t ^ 2)) :=\n  backwardCaplet_black_integral hq hτ hτ1 hR₀ hK hσ hZ\n"
+      },
+      "metadata": {
+        "chapter": null,
+        "reference": "Lyashenko and Mercurio (2019), Looking forward to backward-looking rates (SSRN 3330240); Willems (2020), SABR smiles for RFR caplets (arXiv:2004.04501), Section 3",
+        "citations": [
+          {
+            "key": "LyashenkoMercurio2019"
+          },
+          {
+            "key": "Willems2020"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Proves the damping-time integral by splitting at max(tau0, 0) and the power-rule substitution, and composes it with the Black call formula. Conditional on the lognormal law of the compounded rate with variance sigma^2 Theta, which is a hypothesis. Not derived: the Ito isometry for the damped diffusion, and that the compounded rate is a martingale under the accrual-end forward measure. Constant volatility."
       }
     }
   ]

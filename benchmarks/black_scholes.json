@@ -2132,6 +2132,28 @@
       }
     },
     {
+      "id": "mf-american-sampled-value-snell-envelope",
+      "name": "Optimal Stopping Over a Finite Exercise Schedule Is the Expected Snell Envelope",
+      "domain": "mathematical_finance",
+      "description": "Let e 0 < ... < e m = T be a finite, not necessarily uniform, schedule of exercise dates, and Z a reward process adapted to the filtration sampled along the schedule and integrable at its dates. Then the supremum of E[Z_theta] over the stopping rules theta of the continuous filtration (bounded by T) that stop only at dates of the schedule equals the expectation at index 0 of the Snell envelope, exercisable at every date, of the reward sampled at the schedule for the sampled filtration, and some rule stopping only on the schedule attains it. No continuity, right-continuity or augmentation of the filtration is assumed.",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.American.Stopping.SampledRules\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin\n\n/-- The stopping value over a finite exercise schedule is the expected Snell envelope of the\nsampled reward, and is attained by a rule that stops on the schedule. -/\ntheorem american_sampled_value_snell_envelope {Ω : Type*} [MeasurableSpace Ω]\n    {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T : ℝ≥0} {m : ℕ} {e : Fin (m + 1) → ℝ≥0}\n    (he : StrictMono e) (heT : e (Fin.last m) = T) {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {Z : ℝ≥0 → Ω → ℝ}\n    (hZa : Adapted (ContinuousMarket.sampledFiltration 𝓕 (monotone_sampleTimes he.monotone))\n      fun n ω ↦ Z (sampleTimes e n) ω)\n    (hZi : ∀ n, Integrable (fun ω ↦ Z (sampleTimes e n) ω) Q) :\n    stoppingValue Q 𝓕 Z T (StoppingRule.valuedIn 𝓕 T (Set.range e))\n        = ∫ ω, snellEnvelope Q (ContinuousMarket.sampledFiltration 𝓕\n            (monotone_sampleTimes he.monotone)) Set.univ (fun n ω ↦ Z (sampleTimes e n) ω) m 0 ω\n            ∂Q\n      ∧ ∃ θ ∈ StoppingRule.valuedIn 𝓕 T (Set.range e),\n          (∫ ω, Z (θ.time ω) ω ∂Q)\n            = stoppingValue Q 𝓕 Z T (StoppingRule.valuedIn 𝓕 T (Set.range e)) :=\n  ⟨stoppingValue_valuedIn_range_eq_integral_snellEnvelope he heT hZa hZi,\n    exists_mem_valuedIn_range_integral_eq_stoppingValue he heT hZa hZi⟩\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "G. Peskir and A. Shiryaev, Optimal Stopping and Free-Boundary Problems, Birkhäuser (2006), Ch. I (the Snell envelope and optimal stopping in discrete time); the passage from a finite schedule of a continuous filtration to the sampled one is the library's",
+        "citations": [
+          {
+            "key": "PeskirShiryaev2006",
+            "locator": "Ch. I"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, MathFin/Models/BlackScholes/American/Stopping/SampledRules.lean. sampledRuleEquiv identifies the rules of the filtration sampled along the schedule (with horizon m) with the rules of the continuous filtration whose stopping times take values in the schedule, a rule eta corresponding to the physical rule omega -> e(eta(omega)); the stopping times read through isStoppingTime_sampledFiltration. stoppingValue_valuedIn_range transports the supremum along this bijection, and stoppingValue_eq_integral_snellEnvelope (Probability/Discrete/DiscreteStoppingValue.lean, Snell's theorem) and snellRule_attains_value give the two clauses. SCOPE: a finite strictly increasing schedule with last date T; the reward is only read at the schedule dates (sampleTimes e extends the schedule by its last date). The exercise class is the rules stopping on the schedule, a Bermudan right; the all-times American value is not this entry. The uniform capped grid of FiniteExerciseGrid.lean is a particular schedule, but this entry does not state that instance. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-monte-carlo-put-call-consistency",
       "name": "Monte Carlo Consistency for the Black–Scholes Put and Call",
       "domain": "mathematical_finance",
@@ -2803,6 +2825,66 @@
           },
           {
             "key": "BurdenFaires2011"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mf-bachelier-spread-call",
+      "name": "Bachelier spread call (difference-of-normals collapse)",
+      "description": "Spread call under jointly Gaussian normal-model forwards F1 = f1 + sigma1 U, F2 = f2 + sigma2 V with standard Gaussian drivers of correlation rho: the spread F1 - F2 is Gaussian with mean f1 - f2 and variance sigma1^2 + sigma2^2 - 2 rho sigma1 sigma2, so the expected payoff E[max(F1 - F2 - K, 0)] is the Bachelier expression (f1 - f2 - K) Phi(d) + s phi(d) at the effective standard deviation s = sqrt(sigma1^2 + sigma2^2 - 2 rho sigma1 sigma2), the normal-model analog of the single-asset Bachelier call formula. An expectation of the payoff under the measure carrying the drivers (zero rates), not a price on a two-asset market.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.Bachelier.BachelierSpread\n\nopen MeasureTheory ProbabilityTheory Real MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} [IsProbabilityMeasure Q]\n  {f₁ f₂ K σ₁ σ₂ ρ : ℝ} {U V : Ω → ℝ}\n\ntheorem bachelier_spread_call_example (h : BachelierSpreadHyp Q f₁ f₂ σ₁ σ₂ ρ U V) :\n    ∫ ω, max ((f₁ + σ₁ * U ω) - (f₂ + σ₂ * V ω) - K) 0 ∂Q\n      = (f₁ - f₂ - K) * Phi (bachelierSpreadD f₁ f₂ K σ₁ σ₂ ρ)\n        + Real.sqrt (bachelierSpreadVariance σ₁ σ₂ ρ)\n          * gaussianPDFReal 0 1 (bachelierSpreadD f₁ f₂ K σ₁ σ₂ ρ) :=\n  bachelier_spread_call h\n"
+      },
+      "metadata": {
+        "chapter": null,
+        "reference": "Louis Bachelier, Theorie de la speculation (1900); Margrabe 1978 (exchange-option degeneration)",
+        "citations": [
+          {
+            "key": "Bachelier1900"
+          },
+          {
+            "key": "Margrabe1978"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, MathFin/Models/Bachelier/BachelierSpread.lean: the difference reduction hasLaw_sub_gaussianPair composed with the stop-loss transform of a general Gaussian law gaussian_call_formula (MathFin/Probability/Gaussian/GaussianPartialMoments.lean, which bachelier_call_formula also instantiates). Scope: correlated standard drivers (BachelierSpreadHyp, 0 < sigma_i, rho^2 < 1), strike of either sign, no time dimension, expectation form: the library's Bachelier market has one traded asset, so no Market.price of the spread is stated."
+      }
+    },
+    {
+      "id": "mf-smile-black-form-tail-iff",
+      "name": "Tail condition for the Black form",
+      "description": "For an everywhere-positive total variance w, the forward-normalised Black call blackForm k (w k) tends to 0 as the log-strike k → ∞ exactly when d₊(k, w k) → −∞. The SVI tail condition (tendsto_bsSmile_zero_iff) is its instance at the raw SVI variance.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.ModelFree.BlackFormTail\n\nopen MathFin\n\n/-- For an everywhere-positive total variance `w`, the Black form `blackForm k (w k)` tends to `0`\nat large `k` exactly when `d₊(k, w k)` tends to `-∞`. -/\ntheorem mf_smile_black_form_tail_iff (w : ℝ → ℝ) (hw : ∀ k, 0 < w k) :\n    Filter.Tendsto (fun k ↦ MathFin.ForwardSmile.blackForm k (w k)) Filter.atTop (nhds 0) ↔\n      Filter.Tendsto (fun k ↦ MathFin.ForwardSmile.dpl k (w k)) Filter.atTop Filter.atBot :=\n  MathFin.blackForm_tendsto_zero_iff_dpl_tendsto_atBot w hw\n"
+      },
+      "metadata": {
+        "chapter": 0,
+        "reference": "Roper, Arbitrage free implied volatility surfaces, Theorem 2.1",
+        "difficulty": "medium",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Models/ModelFree/BlackFormTail.lean: the tail condition for the Black form of an everywhere-positive total variance. The SVI instance is tendsto_bsSmile_zero_iff (MathFin/Models/ModelFree/SVI/TailCondition.lean). Not covered: the left-wing bound b(1 − ρ) ≤ 2 and the mass at zero. Axioms-clean.",
+        "provenance": {
+          "statement_source": "autoform",
+          "statement_model": "autoform",
+          "source": "foundry-autoform",
+          "issue": 318,
+          "deferred": [
+            "left-wing bound: IsNormalizedCallPrice (bsSmile p) implies b(1 - rho) ≤ 2, and the mass at zero",
+            "calendar-spread martingale step for any convex payoff via conditional Jensen",
+            "t > 0 calendar statements tied to the local-variance characterisation",
+            "unification of blackForm, totalVarianceCall and logBlackCall into one (k, w) Black form",
+            "IsNormalizedCallPrice from a nonnegative random variable with mean 1 (easy direction)",
+            "port hygiene: scoped maxHeartbeats, maxRecDepth and open scoped Classical"
+          ],
+          "model": "claude-sonnet-5-5"
+        },
+        "citations": [
+          {
+            "key": "Roper2010"
           }
         ]
       }

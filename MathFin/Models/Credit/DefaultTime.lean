@@ -50,6 +50,8 @@ as the mesh goes to zero (`Models/Credit/DefaultTimeMesh.lean`).
 * `value_cdsBuyer_coxDefaultTime`, `cdsLossesGrid_one_eq_cdsLosses`.
 * `hitTime_defaultIndicator`, `pathPV_cdsProtectionAtDefault`, `value_cdsProtectionAtDefault`,
   `value_cdsProtectionAtDefault_coxDefaultTime` — the protection leg paid at the default time.
+* `value_scale_cdsProtectionAtDefault_sub_pay` — recovery paid at default vs at maturity: the
+  difference is `ρ·𝔼[(D(τ) − D(T))·1{τ ≤ T}]`.
 
 ## References
 
@@ -78,6 +80,11 @@ single underlying `()`. -/
 noncomputable def defaultIndicator (τ : Ω → ℝ) : Unit → ℝ≥0 → Ω → ℝ :=
   fun _ u ↦ {ω | τ ω ≤ u}.indicator 1
 
+/-- The default indicator takes the values `0` and `1`. -/
+theorem defaultIndicator_eq_zero_or_one (τ : Ω → ℝ) (u : ℝ≥0) (ω : Ω) :
+    defaultIndicator τ () u ω = 0 ∨ defaultIndicator τ () u ω = 1 := by
+  by_cases h : τ ω ≤ u <;> simp [defaultIndicator, h]
+
 /-- The **grid annuity** (premium-leg kernel) of the survival function `S` on the grid `t`:
 `∑ D(tᵢ₊₁) (tᵢ₊₁ − tᵢ) S(tᵢ₊₁)`. -/
 noncomputable def cdsAnnuityGrid (D : ℝ≥0 → ℝ) (S : ℝ → ℝ) (t : ℕ → ℝ≥0) (n : ℕ) : ℝ :=
@@ -96,7 +103,8 @@ section Value
 
 variable {Q : Measure Ω} [IsProbabilityMeasure Q] {τ : Ω → ℝ} {S : ℝ → ℝ}
 
-private theorem integrable_defaultIndicator (hτ : Measurable τ) (u : ℝ≥0) :
+/-- The default indicator at a date is integrable under a probability measure. -/
+theorem integrable_defaultIndicator (hτ : Measurable τ) (u : ℝ≥0) :
     Integrable (defaultIndicator τ () u) Q :=
   (integrable_const (1 : ℝ)).indicator (measurableSet_le hτ measurable_const)
 
@@ -237,6 +245,31 @@ theorem value_cdsProtectionAtDefault (D : ℝ≥0 → ℝ) (τ : Ω → ℝ) (T 
   · simp [defaultIndicator, Set.indicator, h]
     ring
   · simp [defaultIndicator, Set.indicator, h]
+
+/-- **Recovery paid at default vs at maturity.** The loss `ρ` paid at the default time (the
+protection leg `cdsProtectionAtDefault T 0` scaled by `ρ`) is worth `ρ·𝔼[(D(τ) − D(T))·1{τ ≤ T}]`
+more than the same `ρ` paid at the horizon `T` on default by `T` (`ρ·N_T` at `T`): the timing
+difference is the discount-curve gap between `τ` and `T`. The only hypothesis is that the
+discounted default payment `D(τ)·1{τ ≤ T}` is integrable (it is, for a discount curve bounded and
+measurable on `[0, T]`); without it `value_cdsProtectionAtDefault` is `0` while the other leg is
+not. -/
+theorem value_scale_cdsProtectionAtDefault_sub_pay {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {τ : Ω → ℝ} (hτ : Measurable τ) {D : ℝ≥0 → ℝ} {T : ℝ≥0}
+    (hD : Integrable (fun ω ↦ (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal) (τ ω)) Q)
+    (ρ : ℝ) :
+    (Contract.scale ρ (cdsProtectionAtDefault T 0)).value Q (fun t _ ↦ D t) (defaultIndicator τ)
+      - (Contract.pay T (.mul (.const ρ) (.obs () T))).value Q (fun t _ ↦ D t)
+          (defaultIndicator τ)
+      = ρ * ∫ ω, (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal - D T) (τ ω) ∂Q := by
+  have hpoint (ω : Ω) : (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal - D T) (τ ω)
+      = (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal) (τ ω)
+        - D T * defaultIndicator τ () T ω := by
+    by_cases h : τ ω ≤ T <;> simp [defaultIndicator, Set.indicator, h]
+  simp only [hpoint]
+  rw [integral_sub hD ((integrable_defaultIndicator hτ T).const_mul _), integral_const_mul,
+    Contract.value_scale, value_cdsProtectionAtDefault, Contract.value_pay]
+  simp [Payoff.eval, scenarioAt, integral_const_mul]
+  ring
 
 end AtDefault
 

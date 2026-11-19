@@ -27,6 +27,8 @@ a constant short rate `r`:
 
 * `zcb_at_maturity`: `B(T, T) = 1`.
 * `zcb_pos`: `B(t, T) > 0`; `positivity` proves it (`evalZcb`).
+* `zcb_zero_natCast`: at integer dates the bond is the geometric discount factor,
+  `B(0, k) = (e^{-r})^k`.
 * `zcb_yield_eq_rate`: under a constant `r`, the yield-to-maturity equals `r`.
 * `hasDerivAt_zcb_r`: `∂_r B(t, T) = -(T - t) · B(t, T)` — the bond duration is
   the time-to-maturity.
@@ -63,6 +65,12 @@ lemma zcb_at_maturity (r T : ℝ) : zcb r T T = 1 := by
 
 /-- The bond is positive. `positivity` proves it (`evalZcb`). -/
 lemma zcb_pos (r t T : ℝ) : 0 < zcb r t T := Real.exp_pos _
+
+/-- At integer dates the bond is the geometric discount factor: `B(0, k) = (e^{-r})^k`. -/
+lemma zcb_zero_natCast (r : ℝ) (k : ℕ) : zcb r 0 k = Real.exp (-r) ^ k := by
+  rw [zcb, sub_zero, ← Real.exp_nat_mul]
+  congr 1
+  ring
 
 /-- Yield-to-maturity for a ZCB under a constant rate equals the rate. -/
 lemma zcb_yield_eq_rate {r t T : ℝ} (htT : t < T) :
