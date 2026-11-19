@@ -803,9 +803,9 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Inflation.JarrowYildirim.jyYoyPayment_price
 
-/-- info: 'MathFin.Inflation.JarrowYildirim.jyZcCaplet_eq_black' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.Inflation.JarrowYildirim.jyZcCaplet_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.Inflation.JarrowYildirim.jyZcCaplet_eq_black
+#print axioms MathFin.Inflation.JarrowYildirim.jyZcCaplet_price
 
 /-- info: 'MathFin.IsBLPosteriorMean.blLoss_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

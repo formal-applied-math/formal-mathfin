@@ -568,7 +568,7 @@ split by area. What each bridge proves, by area:
   SDE is cited, not proved.
 - **Jarrow–Yildirim inflation** (`interest_rates.json`; `Models/Rates/JarrowYildirim.lean`). Two
   `reduced_core` entries, composing existing results under model hypotheses.
-  `mf-jarrow-yildirim-zc-inflation-caplet`: the zero-coupon inflation caplet is the Black caplet on
+  `mf-jarrow-yildirim-zc-inflation-caplet`: the priced zero-coupon inflation caplet is the Black caplet on
   the curve forward `I₀Pʳ/Pⁿ`, given the lognormal law of the index under the nominal `T`-forward
   measure with a free positive log-variance `V`. Not derived: the SDE-level derivation of `V` (the
   integrated Jarrow–Yildirim variance `jyVariance`) and of the real-rate drift shift, the
@@ -578,6 +578,7 @@ split by area. What each bridge proves, by area:
   tower property, closed by `yoyConvexity_eq`. Not derived: the martingale property of `F(·,T)`
   under `Q^T`, the Hull–White reconstitution form of the bond ratio, and the means, variances and
   covariance of the rate deviations (all hypotheses or inputs).
+  The module also supplies the eq. (17.8) tower step (`jyYoyForward_eq_bondRatio`).
 - **Curves and affine models** (`interest_rates.json`). The Vasicek yield in Nelson–Siegel slope
   factors, with its short and long ends (`mf-vasicek-yield-nelson-siegel-factors`,
   `mf-vasicek-yield-curve-ends`); the affine bond PDE from the Riccati equations, for CIR (closed
