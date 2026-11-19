@@ -5,9 +5,7 @@ Authors: Yang Ye
 -/
 module
 
-public import MathFin.Models.BlackScholes.Forward
 public import MathFin.Models.BlackScholes.Put
-public import MathFin.Models.Forwards.Black76
 public import MathFin.Models.Rates.Caplet
 public import MathFin.Models.Rates.Inflation
 public import MathFin.Models.Rates.VasicekBondPrice
@@ -37,8 +35,7 @@ This module records what follows from that structure without the SDE calculus.
   semidefinite (`jyVarIntegrand_nonneg`, and for `V(0,T)` with `T ≥ 0`, `jyVariance_nonneg`).
   Pairwise `|ρ| ≤ 1` is not enough for three factors;
   the condition used is `ρ_{rI}² ≤ 1`, `ρ_{nI}² ≤ 1` and the determinant form
-  `jyCorrDet ≥ 0`. Degenerate reductions:
-  `jyVariance_zero_rate_vols` and `jyVariance_zero_vols`.
+  `jyCorrDet ≥ 0`. Degenerate reduction: `jyVariance_zero_rate_vols`.
 * The zero-coupon inflation caplet and floorlet (`jyZcCaplet_price`, `jyZcFloorlet_price`,
   `jyZcCaplet_floorlet_parity`): if the index under the nominal `T`-forward measure is lognormal
   with log-variance `V` and the index-linked bond is priced on the real curve, the priced caplet
@@ -47,15 +44,14 @@ This module records what follows from that structure without the SDE calculus.
   `MathFin.Contracts.value_caplet_black76`). `jyForwardIndex_lognormal_eq_curves` puts the
   lognormal index on that curve forward.
 * `jyZcCaplet_price_deterministic_rates`: with `σ_r = σ_n = 0` the integrated variance is `σ_I²T`
-  and the priced caplet is `blackCaplet (I₀Pʳ/Pⁿ) K σ_I T Pⁿ` (`blackCaplet_sqrt_variance`: Black
-  at total variance `σ²T` and maturity 1 is Black at volatility `σ` and maturity `T`).
-* The year-on-year forward (`jyYoyForward_eq_bondRatio`, `jyYoyForward_eq_convexity`): from
-  the martingale property of `F(·,T)` under the `T`-forward measure, `𝔼^T[I_T/I_S]` is the
-  expectation of the bond-price ratio `Pʳ(S,T)/Pⁿ(S,T)`, which `yoyConvexity_eq` evaluates as
-  the naive ratio of forwards times the convexity factor. `jyYoyPayment_price` is the time-0
-  value of that payment (`MathFin.forwardMeasure_price`). `jyYoyForward_eq_bondRatio` is the
-  tower-property step from the martingale hypothesis to the bond-ratio expectation (Bagaria
-  eq. 17.8).
+  and the priced caplet is `blackCaplet (I₀Pʳ/Pⁿ) K σ_I T Pⁿ` (by `blackCaplet_sqrt_variance` of
+  `Models/Forwards/Black76.lean`: Black at total variance `σ²T` and maturity 1 is Black at
+  volatility `σ` and maturity `T`).
+* The year-on-year forward: `jyYoyForward_eq_bondRatio` is the tower-property step (Bagaria
+  eq. 17.8) from the martingale property of `F(·,T)` under the `T`-forward measure to
+  `𝔼^T[I_T/I_S] = 𝔼^T[Pʳ(S,T)/Pⁿ(S,T)]`; `jyYoyForward_eq_convexity` evaluates that expectation by
+  `yoyConvexity_eq` as the naive ratio of forwards times the convexity factor; and
+  `jyYoyPayment_price` is the time-0 value of the payment (`MathFin.forwardMeasure_price`).
 
 ## Scope
 
@@ -167,18 +163,13 @@ theorem jyVariance_nonneg {ar an σI σr σn ρrI ρnI ρnr : ℝ} {T : ℝ} (hT
   intervalIntegral.integral_nonneg hT fun t _ => jyVarIntegrand_nonneg T t hrI hnI hdet
 
 /-- **Zero rate volatilities.** With `σ_r = σ_n = 0` only the index volatility remains:
-`V(0,T) = σ_I²·T`. -/
+`V(0,T) = σ_I²·T`; in particular `V(0,T) = 0` when `σ_I = 0` as well. -/
 theorem jyVariance_zero_rate_vols (ar an σI ρrI ρnI ρnr T : ℝ) :
     jyVariance ar an σI 0 0 ρrI ρnI ρnr T = σI ^ 2 * T := by
   unfold jyVariance jyVarIntegrand
   simp only [mul_zero, zero_mul, zero_pow two_ne_zero, add_zero, sub_zero,
     intervalIntegral.integral_const, smul_eq_mul]
   ring
-
-/-- **All volatilities zero** gives `V(0,T) = 0`. -/
-theorem jyVariance_zero_vols (ar an ρrI ρnI ρnr T : ℝ) :
-    jyVariance ar an 0 0 0 ρrI ρnI ρnr T = 0 := by
-  simp [jyVariance_zero_rate_vols]
 
 /-! ### The zero-coupon inflation caplet and floorlet
 
@@ -221,15 +212,18 @@ theorem jyForwardIndex_lognormal_eq_curves (BT : Ω → ℝ) (Pn0T Pr0T I0 F0 V 
   simpa [bsTerminal] using h2.symm
 
 /-- **ZC inflation caplet: the priced payoff is the Black caplet on the curve forward.** The
-zero-coupon inflation caplet is the contract `caplet ℓ T T 1 K` with `X ℓ T = I_T` and deflator
-`D T = 1/B_T`; the proof is `MathFin.Contracts.value_caplet_black76` at the forward measure, with
-the forward pinned to the curve by `jyForwardIndex_lognormal_eq_curves`. Under `hident` and a
+zero-coupon inflation caplet is the contract `caplet () 0 0 1 K` in
+`MathFin.Contracts.value_caplet_black76`, instantiated with the time-constant deflator
+`fun _ => 1/B_T` and the time-constant observed index `fun _ _ => I_T` (the contract's time
+indices are dummies); `Pⁿ(0,T)` plays the role of `zeroCurve Qn D 0`. The forward is pinned to the
+curve by `jyForwardIndex_lognormal_eq_curves`. Under `hident` and a
 lognormal index under `Q^T` with log-variance `V`, and `F₀ > 0`, `V > 0`, `K > 0`,
 
   `𝔼^{Qn}[(I_T − K)⁺/B_T] = blackCaplet (I₀Pʳ(0,T)/Pⁿ(0,T)) K √V 1 Pⁿ(0,T)`,
 
 i.e. `Pⁿ·[F Φ(d₁) − K Φ(d₂)]` with `d_i = bsd_i F K 0 √V 1`. Further hypotheses: `Qn` is a
-probability measure (needed by the contract-value lemma), `B_T > 0` is measurable and
+probability measure (inherited from the section variable of `value_caplet_black76`; the
+floorlet, proved directly, does not need it), `B_T > 0` is measurable and
 `Pⁿ(0,T) = 𝔼^{Qn}[1/B_T] > 0`; that `Q^T` is a probability measure follows from `hZ`. The index
 law is a hypothesis; that its log-variance is `jyVariance` is the SDE-level content, not
 proved. -/
@@ -274,7 +268,8 @@ theorem jyZcCaplet_price [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
   simp only [blackCaplet, one_mul]
 
 /-- **ZC inflation floorlet: the priced payoff is the Black floorlet on the curve forward.** The
-put counterpart of `jyZcCaplet_price` under the same hypotheses, by `forwardMeasure_price` and
+put counterpart of `jyZcCaplet_price` under its hypotheses except `IsProbabilityMeasure Qn` (the
+floorlet is proved directly and does not need it), by `forwardMeasure_price` and
 `bs_put_formula`. -/
 theorem jyZcFloorlet_price (BT : Ω → ℝ)
     (Pn0T Pr0T I0 F0 V K : ℝ) (Z : Ω → ℝ)
@@ -303,7 +298,9 @@ theorem jyZcFloorlet_price (BT : Ω → ℝ)
 
 /-- **Priced caplet–floorlet parity.** Under the hypotheses of `jyZcCaplet_price`, the priced
 caplet payoff minus the priced floorlet payoff is `I₀Pʳ(0,T) − K·Pⁿ(0,T)`: the value of a forward
-on the index struck at `K` (`I₀` times the zero-coupon inflation swap when `K = I₀(1+k)^T`). -/
+on the index struck at `K` (`I₀` times the zero-coupon inflation swap when `K = I₀(1+k)^T`). The
+lognormal hypotheses are only inherited from the two pricing theorems; the identity itself is
+model-free, `max(x − K, 0) − max(K − x, 0) = x − K`. -/
 theorem jyZcCaplet_floorlet_parity [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
     (Pn0T Pr0T I0 F0 V K : ℝ) (Z : Ω → ℝ)
     (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (hPn0T : 0 < Pn0T)
@@ -318,26 +315,6 @@ theorem jyZcCaplet_floorlet_parity [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
     jyZcFloorlet_price BT Pn0T Pr0T I0 F0 V K Z hBTpos hBTmeas hPn0T hP hident hZ hF0 hV hK,
     caplet_floorlet_parity]
   field_simp
-
-/-- At maturity `1`, the Black caplet at total variance `σ²T` is the Black caplet at volatility
-`σ` and maturity `T` (`σ > 0`, `T ≥ 0`): `√(σ²T)` and `σ√T` agree, and `bsd₁`, `bsd₂` depend on
-`(σ, T)` only through `σ√T` and `σ²T`. -/
-theorem blackCaplet_sqrt_variance (F K σ T α : ℝ) (hσ : 0 < σ) (hT : 0 ≤ T) :
-    blackCaplet F K (Real.sqrt (σ ^ 2 * T)) 1 α = blackCaplet F K σ T α := by
-  have hs : Real.sqrt (σ ^ 2 * T) = σ * Real.sqrt T := by
-    rw [Real.sqrt_mul (sq_nonneg σ), Real.sqrt_sq hσ.le]
-  have hsq : (σ * Real.sqrt T) ^ 2 = σ ^ 2 * T := by
-    rw [mul_pow, Real.sq_sqrt hT]
-  have hd1 : bsd1 F K 0 (Real.sqrt (σ ^ 2 * T)) 1 = bsd1 F K 0 σ T := by
-    rw [hs]
-    unfold bsd1
-    rw [Real.sqrt_one, mul_one, hsq]
-    ring_nf
-  have hd2 : bsd2 F K 0 (Real.sqrt (σ ^ 2 * T)) 1 = bsd2 F K 0 σ T := by
-    unfold bsd2
-    rw [hd1, hs, Real.sqrt_one, mul_one]
-  unfold blackCaplet
-  rw [hd1, hd2]
 
 /-- **Deterministic rates reduce the zero-coupon inflation caplet to Black at the index
 volatility.** With `σ_r = σ_n = 0`, `σ_I > 0` and `T > 0`, the integrated variance is
@@ -361,7 +338,7 @@ theorem jyZcCaplet_price_deterministic_rates [IsProbabilityMeasure Qn] (BT : Ω 
     rw [jyVariance_zero_rate_vols]
     positivity
   rw [jyZcCaplet_price BT Pn0T Pr0T I0 F0 _ K Z hBTpos hBTmeas hPn0T hP hident hZ hF0 hV hK,
-    jyVariance_zero_rate_vols, blackCaplet_sqrt_variance _ _ _ _ _ hσI hT.le]
+    jyVariance_zero_rate_vols, blackCaplet_sqrt_variance _ _ _ _ _ hσI.le hT.le]
 
 end Caplet
 
