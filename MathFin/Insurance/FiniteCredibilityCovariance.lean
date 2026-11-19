@@ -29,6 +29,11 @@ function with the sample mean equals the variance of the conditional mean.
   under the joint mixture law.
 * `MathFin.variance_sampleMean`: `Var(X̄) = Var(m(Θ)) + E[v(Θ)] / n`
   under the joint mixture law.
+* `MathFin.buhlmann_mse_le`: the Bühlmann affine predictor
+  `μ + (a / (a + v / n)) (X̄ - μ)` minimizes the MSE over affine
+  functions of `X̄`.
+* `MathFin.buhlmann_coefficient_bounds`: the credibility factor
+  `a / (a + v / n)` lies in `[0, 1]`.
 
 ## References
 
@@ -812,5 +817,526 @@ theorem variance_sampleMean {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
         + (n : ℝ)⁻¹ * ∑ θ : Θ, p θ * condVar (w θ) v := by
         congr 1
         exact (Finset.mul_sum _ _ _).symm
+
+/-- The mixture law is a probability measure: the mixture weights sum to one. -/
+theorem isProbabilityMeasure_mixtureLaw {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
+    [MeasurableSpace Θ] [MeasurableSingletonClass Θ] [MeasurableSpace Ξ]
+    [MeasurableSingletonClass Ξ] (n : ℕ) (p : Θ → ℝ) (w : Θ → Ξ → ℝ)
+    (hp : ∀ θ, 0 ≤ p θ) (hp1 : ∑ θ, p θ = 1)
+    (hw : ∀ θ ξ, 0 ≤ w θ ξ) (hw1 : ∀ θ, ∑ ξ, w θ ξ = 1) :
+    IsProbabilityMeasure (mixtureLaw n p w) := by
+  have hθ : ∀ θ : Θ, (∑ x : Fin n → Ξ, p θ * ∏ i, w θ (x i)) = p θ := by
+    intro θ
+    calc (∑ x : Fin n → Ξ, p θ * ∏ i, w θ (x i))
+        = p θ * ∑ x : Fin n → Ξ, ∏ i, w θ (x i) := (Finset.mul_sum _ _ _).symm
+      _ = p θ := by
+        have hW : (∑ x : Fin n → Ξ, ∏ i, w θ (x i)) = 1 := by
+          have h1 : (∏ _i : Fin n, ∑ xi, w θ xi) = (1 : ℝ) := by simp [hw1 θ]
+          have hpi := Fintype.prod_sum (fun (_i : Fin n) (xi : Ξ) => w θ xi)
+          rw [← hpi]
+          exact h1
+        rw [hW, mul_one]
+  have hsum : (∑ ω : Θ × (Fin n → Ξ), p ω.1 * ∏ i, w ω.1 (ω.2 i)) = 1 := by
+    calc (∑ ω : Θ × (Fin n → Ξ), p ω.1 * ∏ i, w ω.1 (ω.2 i))
+        = ∑ θ, p θ := by
+          simp only [Fintype.sum_prod_type]
+          exact Finset.sum_congr rfl (fun θ _ => hθ θ)
+      _ = 1 := hp1
+  have hInt : (∫ _, (1 : ℝ) ∂(mixtureLaw n p w))
+      = ∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) * 1 :=
+    integral_mixture n p w _ hp hw
+  have hC : (∫ _, (1 : ℝ) ∂(mixtureLaw n p w))
+      = (mixtureLaw n p w).real Set.univ := by
+    rw [MeasureTheory.integral_const, smul_eq_mul, mul_one]
+  rw [MeasureTheory.isProbabilityMeasure_iff_real]
+  rw [hC] at hInt
+  simp only [mul_one] at hInt
+  rw [hsum] at hInt
+  exact hInt
+
+/-- Each conditional variance is nonnegative. -/
+private theorem condVar_nonneg {Ξ : Type*} [Fintype Ξ] (w : Ξ → ℝ) (v : Ξ → ℝ)
+    (hw : ∀ ξ, 0 ≤ w ξ) : 0 ≤ condVar w v := by
+  unfold condVar
+  exact Finset.sum_nonneg (fun ξ _ => mul_nonneg (hw ξ) (sq_nonneg _))
+
+/-- Affine mean-squared-error expansion around the mixture mean. -/
+private theorem mse_sum_eq {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
+    [MeasurableSpace Θ] [MeasurableSingletonClass Θ] [MeasurableSpace Ξ]
+    [MeasurableSingletonClass Ξ] (n : ℕ) (hn : 0 < n) (p : Θ → ℝ) (w : Θ → Ξ → ℝ)
+    (v : Ξ → ℝ) (hp : ∀ θ, 0 ≤ p θ) (hp1 : ∑ θ, p θ = 1)
+    (hw : ∀ θ ξ, 0 ≤ w θ ξ) (hw1 : ∀ θ, ∑ ξ, w θ ξ = 1) (b0 b1 : ℝ) :
+    (∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+      (condMean (w ω.1) v - (b0 + b1 * ((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)))) ^ 2)
+      = variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+          (mixtureLaw n p w)
+        - 2 * b1 * variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+          (mixtureLaw n p w)
+        + b1 ^ 2 * (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+          (mixtureLaw n p w) + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v)
+        + (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+          - ∑ θ, p θ * condMean (w θ) v) ^ 2 := by
+  have hmeanM : (∫ ω, condMean (w ω.1) v ∂(mixtureLaw n p w))
+      = ∑ θ, p θ * condMean (w θ) v :=
+    mean_fst n p w v hp hw hw1
+  have hmeanX : (∫ ω, (n : ℝ)⁻¹ * ∑ i, v (ω.2 i) ∂(mixtureLaw n p w))
+      = ∑ θ, p θ * condMean (w θ) v :=
+    mean_snd n hn p w v hp hw hw1
+  have hX : AEMeasurable (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+      (mixtureLaw n p w) := aemeasurable_fst n p w v
+  have hXbar : AEMeasurable
+      (fun ω : Θ × (Fin n → Ξ) => (n : ℝ)⁻¹ * ∑ i, v (ω.2 i))
+      (mixtureLaw n p w) :=
+    (measurable_of_finite _).aemeasurable
+  have hW1 : (∑ ω : Θ × (Fin n → Ξ), p ω.1 * ∏ i, w ω.1 (ω.2 i)) = 1 := by
+    have hθ : ∀ θ : Θ, (∑ x : Fin n → Ξ, p θ * ∏ i, w θ (x i)) = p θ := by
+      intro θ
+      calc (∑ x : Fin n → Ξ, p θ * ∏ i, w θ (x i))
+          = p θ * ∑ x : Fin n → Ξ, ∏ i, w θ (x i) := (Finset.mul_sum _ _ _).symm
+        _ = p θ := by
+          have hW : (∑ x : Fin n → Ξ, ∏ i, w θ (x i)) = 1 := by
+            have h1 : (∏ _i : Fin n, ∑ xi, w θ xi) = (1 : ℝ) := by simp [hw1 θ]
+            have hpi := Fintype.prod_sum (fun (_i : Fin n) (xi : Ξ) => w θ xi)
+            rw [← hpi]
+            exact h1
+          rw [hW, mul_one]
+    calc (∑ ω : Θ × (Fin n → Ξ), p ω.1 * ∏ i, w ω.1 (ω.2 i))
+        = ∑ θ, p θ := by
+          simp only [Fintype.sum_prod_type]
+          exact Finset.sum_congr rfl (fun θ _ => hθ θ)
+      _ = 1 := hp1
+  have hVar : variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+      (mixtureLaw n p w)
+      = ∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+        (condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v) ^ 2 := by
+    rw [variance_eq_integral hX, hmeanM, integral_mixture n p w _ hp hw]
+  have hCov : covariance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+      (fun ω : Θ × (Fin n → Ξ) => (n : ℝ)⁻¹ * ∑ i, v (ω.2 i))
+      (mixtureLaw n p w)
+      = ∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+        ((condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v) *
+          (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v)) := by
+    simp only [covariance]
+    rw [hmeanM, hmeanX, integral_mixture n p w _ hp hw]
+  have hVarX : variance
+      (fun ω : Θ × (Fin n → Ξ) => (n : ℝ)⁻¹ * ∑ i, v (ω.2 i))
+      (mixtureLaw n p w)
+      = ∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+        (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v) ^ 2 := by
+    rw [variance_eq_integral hXbar, hmeanX, integral_mixture n p w _ hp hw]
+  have hSumM : (∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) * condMean (w ω.1) v)
+      = ∑ θ, p θ * condMean (w θ) v :=
+    (integral_mixture n p w _ hp hw).symm.trans hmeanM
+  have hSumX : (∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+      ((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)))
+      = ∑ θ, p θ * condMean (w θ) v :=
+    (integral_mixture n p w _ hp hw).symm.trans hmeanX
+  have hZ1 : (∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+      (condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v)) = 0 := by
+    have e1 : ∀ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+        (condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v)
+        = (p ω.1 * ∏ i, w ω.1 (ω.2 i)) * condMean (w ω.1) v
+          - (∑ θ, p θ * condMean (w θ) v) * (p ω.1 * ∏ i, w ω.1 (ω.2 i)) :=
+      fun ω => by ring
+    calc (∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+            (condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v))
+        = ∑ ω : Θ × (Fin n → Ξ), ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) * condMean (w ω.1) v
+          - (∑ θ, p θ * condMean (w θ) v) * (p ω.1 * ∏ i, w ω.1 (ω.2 i))) :=
+          Finset.sum_congr rfl (fun ω _ => e1 ω)
+      _ = (∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) * condMean (w ω.1) v)
+          - ∑ ω : Θ × (Fin n → Ξ), (∑ θ, p θ * condMean (w θ) v) *
+            (p ω.1 * ∏ i, w ω.1 (ω.2 i)) :=
+          Finset.sum_sub_distrib _ _
+      _ = (∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) * condMean (w ω.1) v)
+          - (∑ θ, p θ * condMean (w θ) v) *
+            ∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) := by
+          congr 1
+          exact (Finset.mul_sum _ _ _).symm
+      _ = (∑ θ, p θ * condMean (w θ) v)
+          - (∑ θ, p θ * condMean (w θ) v) * 1 := by
+          rw [hSumM, hW1]
+      _ = 0 := by ring
+  have hZ2 : (∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+      (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v)) = 0 := by
+    have e2 : ∀ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+        (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v)
+        = (p ω.1 * ∏ i, w ω.1 (ω.2 i)) * ((n : ℝ)⁻¹ * ∑ i, v (ω.2 i))
+          - (∑ θ, p θ * condMean (w θ) v) * (p ω.1 * ∏ i, w ω.1 (ω.2 i)) :=
+      fun ω => by ring
+    calc (∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+            (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v))
+        = ∑ ω : Θ × (Fin n → Ξ), ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) * ((n : ℝ)⁻¹ * ∑ i, v (ω.2 i))
+          - (∑ θ, p θ * condMean (w θ) v) * (p ω.1 * ∏ i, w ω.1 (ω.2 i))) :=
+          Finset.sum_congr rfl (fun ω _ => e2 ω)
+      _ = (∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) * ((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)))
+          - ∑ ω : Θ × (Fin n → Ξ), (∑ θ, p θ * condMean (w θ) v) *
+            (p ω.1 * ∏ i, w ω.1 (ω.2 i)) :=
+          Finset.sum_sub_distrib _ _
+      _ = (∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) * ((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)))
+          - (∑ θ, p θ * condMean (w θ) v) *
+            ∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) := by
+          congr 1
+          exact (Finset.mul_sum _ _ _).symm
+      _ = (∑ θ, p θ * condMean (w θ) v)
+          - (∑ θ, p θ * condMean (w θ) v) * 1 := by
+          rw [hSumX, hW1]
+      _ = 0 := by ring
+  have hexpand : ∀ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+      (condMean (w ω.1) v - (b0 + b1 * ((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)))) ^ 2
+      = (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+          (condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v) ^ 2
+        - 2 * b1 * ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+          ((condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v) *
+            (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v)))
+        + b1 ^ 2 * ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+          (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i))
+            - ∑ θ, p θ * condMean (w θ) v) ^ 2)
+        + 2 * (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+            - ∑ θ, p θ * condMean (w θ) v) * b1 *
+          ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+            (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v))
+        - 2 * (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+            - ∑ θ, p θ * condMean (w θ) v) *
+          ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+            (condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v))
+        + (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+            - ∑ θ, p θ * condMean (w θ) v) ^ 2 *
+          (p ω.1 * ∏ i, w ω.1 (ω.2 i)) := by
+    intro ω
+    ring
+  have hsplit : (∑ ω : Θ × (Fin n → Ξ), ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+          (condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v) ^ 2
+        - 2 * b1 * ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+          ((condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v) *
+            (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v)))
+        + b1 ^ 2 * ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+          (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v) ^ 2)
+        + 2 * (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+            - ∑ θ, p θ * condMean (w θ) v) * b1 *
+          ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+            (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v))
+        - 2 * (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+            - ∑ θ, p θ * condMean (w θ) v) *
+          ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+            (condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v))
+        + (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+            - ∑ θ, p θ * condMean (w θ) v) ^ 2 *
+          (p ω.1 * ∏ i, w ω.1 (ω.2 i))))
+      = (∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+          (condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v) ^ 2)
+        - (∑ ω : Θ × (Fin n → Ξ), 2 * b1 * ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+          ((condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v) *
+            (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v))))
+        + (∑ ω : Θ × (Fin n → Ξ), b1 ^ 2 * ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+          (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v) ^ 2))
+        + (∑ ω : Θ × (Fin n → Ξ), 2 * (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+            - ∑ θ, p θ * condMean (w θ) v) * b1 *
+          ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+            (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v)))
+        - (∑ ω : Θ × (Fin n → Ξ), 2 * (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+            - ∑ θ, p θ * condMean (w θ) v) *
+          ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+            (condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v)))
+        + (∑ ω : Θ × (Fin n → Ξ), (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+            - ∑ θ, p θ * condMean (w θ) v) ^ 2 *
+          (p ω.1 * ∏ i, w ω.1 (ω.2 i))) := by
+    simp only [Finset.sum_add_distrib, Finset.sum_sub_distrib]
+  have s1 : (∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+      (condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v) ^ 2)
+      = variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+        (mixtureLaw n p w) :=
+    hVar.symm
+  have s2 : (∑ ω : Θ × (Fin n → Ξ), 2 * b1 * ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+      ((condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v) *
+        (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v))))
+      = 2 * b1 * covariance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+        (fun ω : Θ × (Fin n → Ξ) => (n : ℝ)⁻¹ * ∑ i, v (ω.2 i))
+        (mixtureLaw n p w) := by
+    rw [← Finset.mul_sum, hCov.symm]
+  have s3 : (∑ ω : Θ × (Fin n → Ξ), b1 ^ 2 * ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+      (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v) ^ 2))
+      = b1 ^ 2 * variance
+        (fun ω : Θ × (Fin n → Ξ) => (n : ℝ)⁻¹ * ∑ i, v (ω.2 i))
+        (mixtureLaw n p w) := by
+    rw [← Finset.mul_sum, hVarX.symm]
+  have s4 : (∑ ω : Θ × (Fin n → Ξ), 2 * (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+      - ∑ θ, p θ * condMean (w θ) v) * b1 *
+        ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+          (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v))) = 0 := by
+    rw [← Finset.mul_sum, hZ2, mul_zero]
+  have s5 : (∑ ω : Θ × (Fin n → Ξ), 2 * (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+      - ∑ θ, p θ * condMean (w θ) v) *
+        ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+          (condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v))) = 0 := by
+    rw [← Finset.mul_sum, hZ1, mul_zero]
+  have s6 : (∑ ω : Θ × (Fin n → Ξ), (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+      - ∑ θ, p θ * condMean (w θ) v) ^ 2 * (p ω.1 * ∏ i, w ω.1 (ω.2 i)))
+      = (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+        - ∑ θ, p θ * condMean (w θ) v) ^ 2 * 1 := by
+    rw [← Finset.mul_sum, hW1]
+  have hCovEq : covariance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+      (fun ω : Θ × (Fin n → Ξ) => (n : ℝ)⁻¹ * ∑ i, v (ω.2 i))
+      (mixtureLaw n p w)
+      = variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+        (mixtureLaw n p w) :=
+    covariance_condMean_sampleMean n hn p w v hp hp1 hw hw1
+  have hVarXEq : variance (fun ω : Θ × (Fin n → Ξ) => (n : ℝ)⁻¹ * ∑ i, v (ω.2 i))
+      (mixtureLaw n p w)
+      = variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+        (mixtureLaw n p w)
+        + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v :=
+    variance_sampleMean n hn p w v hp hp1 hw hw1
+  calc (∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+          (condMean (w ω.1) v - (b0 + b1 * ((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)))) ^ 2)
+      = ∑ ω : Θ × (Fin n → Ξ), ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+          (condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v) ^ 2
+        - 2 * b1 * ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+          ((condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v) *
+            (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v)))
+        + b1 ^ 2 * ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+          (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v) ^ 2)
+        + 2 * (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+            - ∑ θ, p θ * condMean (w θ) v) * b1 *
+          ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+            (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v))
+        - 2 * (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+            - ∑ θ, p θ * condMean (w θ) v) *
+          ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+            (condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v))
+        + (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+            - ∑ θ, p θ * condMean (w θ) v) ^ 2 *
+          (p ω.1 * ∏ i, w ω.1 (ω.2 i))) :=
+        Finset.sum_congr rfl (fun ω _ => hexpand ω)
+    _ = (∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+          (condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v) ^ 2)
+        - (∑ ω : Θ × (Fin n → Ξ), 2 * b1 * ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+          ((condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v) *
+            (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v))))
+        + (∑ ω : Θ × (Fin n → Ξ), b1 ^ 2 * ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+          (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v) ^ 2))
+        + (∑ ω : Θ × (Fin n → Ξ), 2 * (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+            - ∑ θ, p θ * condMean (w θ) v) * b1 *
+          ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+            (((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)) - ∑ θ, p θ * condMean (w θ) v)))
+        - (∑ ω : Θ × (Fin n → Ξ), 2 * (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+            - ∑ θ, p θ * condMean (w θ) v) *
+          ((p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+            (condMean (w ω.1) v - ∑ θ, p θ * condMean (w θ) v)))
+        + (∑ ω : Θ × (Fin n → Ξ), (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+            - ∑ θ, p θ * condMean (w θ) v) ^ 2 *
+          (p ω.1 * ∏ i, w ω.1 (ω.2 i))) :=
+        hsplit
+    _ = variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+          (mixtureLaw n p w)
+        - 2 * b1 * covariance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+          (fun ω : Θ × (Fin n → Ξ) => (n : ℝ)⁻¹ * ∑ i, v (ω.2 i))
+          (mixtureLaw n p w)
+        + b1 ^ 2 * variance
+          (fun ω : Θ × (Fin n → Ξ) => (n : ℝ)⁻¹ * ∑ i, v (ω.2 i))
+          (mixtureLaw n p w)
+        + 0 - 0
+        + (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+          - ∑ θ, p θ * condMean (w θ) v) ^ 2 * 1 := by
+        rw [s1, s2, s3, s4, s5, s6]
+    _ = variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+          (mixtureLaw n p w)
+        - 2 * b1 * variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+          (mixtureLaw n p w)
+        + b1 ^ 2 * (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+          (mixtureLaw n p w) + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v)
+        + (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+          - ∑ θ, p θ * condMean (w θ) v) ^ 2 := by
+        rw [hCovEq, hVarXEq]
+        ring
+
+/-- Bühlmann's affine predictor minimizes the mean squared error of
+predicting the conditional mean by an affine function of the sample mean. -/
+theorem buhlmann_mse_le {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
+    [MeasurableSpace Θ] [MeasurableSingletonClass Θ] [MeasurableSpace Ξ]
+    [MeasurableSingletonClass Ξ] (n : ℕ) (hn : 0 < n) (p : Θ → ℝ) (w : Θ → Ξ → ℝ)
+    (v : Ξ → ℝ) (hp : ∀ θ, 0 ≤ p θ) (_hp1 : ∑ θ, p θ = 1)
+    (hw : ∀ θ ξ, 0 ≤ w θ ξ) (hw1 : ∀ θ, ∑ ξ, w θ ξ = 1)
+    (hd : 0 < variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+      + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v) (b0 b1 : ℝ) :
+    ∫ ω, (condMean (w ω.1) v
+        - ((∑ θ, p θ * condMean (w θ) v)
+          + (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+            / (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+              + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v))
+          * ((n : ℝ)⁻¹ * ∑ i, v (ω.2 i) - ∑ θ, p θ * condMean (w θ) v))) ^ 2
+        ∂(mixtureLaw n p w)
+      ≤ ∫ ω, (condMean (w ω.1) v - (b0 + b1 * ((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)))) ^ 2
+          ∂(mixtureLaw n p w) := by
+  rw [integral_mixture n p w _ hp hw, integral_mixture n p w _ hp hw]
+  have hnormTerm : ∀ ω : Θ × (Fin n → Ξ), ∀ Z : ℝ,
+      (p ω.1 * ∏ i, w ω.1 (ω.2 i)) * (condMean (w ω.1) v
+        - ((∑ θ, p θ * condMean (w θ) v)
+          + Z * ((n : ℝ)⁻¹ * ∑ i, v (ω.2 i) - ∑ θ, p θ * condMean (w θ) v))) ^ 2
+      = (p ω.1 * ∏ i, w ω.1 (ω.2 i)) * (condMean (w ω.1) v
+        - (((∑ θ, p θ * condMean (w θ) v)
+          - Z * (∑ θ, p θ * condMean (w θ) v))
+          + Z * ((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)))) ^ 2 := fun ω Z => by ring
+  have hnorm : (∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+      (condMean (w ω.1) v
+        - ((∑ θ, p θ * condMean (w θ) v)
+          + (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+            (mixtureLaw n p w)
+            / (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+              (mixtureLaw n p w)
+              + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v))
+          * ((n : ℝ)⁻¹ * ∑ i, v (ω.2 i) - ∑ θ, p θ * condMean (w θ) v))) ^ 2)
+      = ∑ ω : Θ × (Fin n → Ξ), (p ω.1 * ∏ i, w ω.1 (ω.2 i)) *
+        (condMean (w ω.1) v - (((∑ θ, p θ * condMean (w θ) v)
+          - (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+            (mixtureLaw n p w)
+            / (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+              (mixtureLaw n p w)
+              + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v))
+            * (∑ θ, p θ * condMean (w θ) v))
+          + (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+            (mixtureLaw n p w)
+            / (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+              (mixtureLaw n p w)
+              + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v))
+            * ((n : ℝ)⁻¹ * ∑ i, v (ω.2 i)))) ^ 2 :=
+    Finset.sum_congr rfl (fun ω _ => hnormTerm ω _)
+  rw [hnorm, mse_sum_eq n hn p w v hp _hp1 hw hw1
+    ((∑ θ, p θ * condMean (w θ) v)
+      - (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+        / (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+          + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v))
+        * (∑ θ, p θ * condMean (w θ) v))
+    (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+      / (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+        + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v)),
+    mse_sum_eq n hn p w v hp _hp1 hw hw1 b0 b1]
+  have hA : 0 < variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+      (mixtureLaw n p w)
+      + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v := hd
+  have hAne : variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+      (mixtureLaw n p w)
+      + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v ≠ 0 :=
+    ne_of_gt hA
+  have hexcessGen : ∀ Z : ℝ, Z * (variance
+        (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+        + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v)
+      = variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+        (mixtureLaw n p w) →
+      (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+        - 2 * b1 * variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+          (mixtureLaw n p w)
+        + b1 ^ 2 * (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+          (mixtureLaw n p w) + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v)
+        + (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+          - ∑ θ, p θ * condMean (w θ) v) ^ 2)
+      = (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+        - 2 * Z * variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+          (mixtureLaw n p w)
+        + Z ^ 2 * (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+          (mixtureLaw n p w) + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v)
+        + (((∑ θ, p θ * condMean (w θ) v) - Z * (∑ θ, p θ * condMean (w θ) v))
+          + Z * (∑ θ, p θ * condMean (w θ) v) - ∑ θ, p θ * condMean (w θ) v) ^ 2)
+      + ((variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+          + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v) * (b1 - Z) ^ 2
+        + (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+          - ∑ θ, p θ * condMean (w θ) v) ^ 2) := by
+    intro Z hZA
+    linear_combination 2 * (b1 - Z) * hZA
+  have hZA : (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+      / (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+        + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v))
+      * (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+        + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v)
+      = variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w) :=
+    div_mul_cancel₀ _ hAne
+  have hkey : (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+        (mixtureLaw n p w)
+        - 2 * b1 * variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+          (mixtureLaw n p w)
+        + b1 ^ 2 * (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+          (mixtureLaw n p w) + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v)
+        + (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+          - ∑ θ, p θ * condMean (w θ) v) ^ 2)
+      = (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+          (mixtureLaw n p w)
+        - 2 * (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+            (mixtureLaw n p w)
+          / (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+            (mixtureLaw n p w)
+            + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v))
+          * variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+          (mixtureLaw n p w)
+        + (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+            (mixtureLaw n p w)
+          / (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+            (mixtureLaw n p w)
+            + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v)) ^ 2
+          * (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+            (mixtureLaw n p w) + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v)
+        + (((∑ θ, p θ * condMean (w θ) v)
+            - (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+              (mixtureLaw n p w)
+              / (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+                (mixtureLaw n p w)
+                + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v))
+              * (∑ θ, p θ * condMean (w θ) v))
+            + (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+              (mixtureLaw n p w)
+              / (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+                (mixtureLaw n p w)
+                + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v))
+              * (∑ θ, p θ * condMean (w θ) v)
+          - ∑ θ, p θ * condMean (w θ) v) ^ 2)
+      + ((variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+            (mixtureLaw n p w) + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v)
+          * (b1 - variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+            (mixtureLaw n p w)
+            / (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+              (mixtureLaw n p w)
+              + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v)) ^ 2
+        + (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+          - ∑ θ, p θ * condMean (w θ) v) ^ 2) :=
+    hexcessGen _ hZA
+  have hnonneg : 0 ≤ (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+        (mixtureLaw n p w) + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v)
+        * (b1 - variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+          (mixtureLaw n p w)
+          / (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+            (mixtureLaw n p w)
+            + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v)) ^ 2
+      + (b0 + b1 * (∑ θ, p θ * condMean (w θ) v)
+        - ∑ θ, p θ * condMean (w θ) v) ^ 2 :=
+    add_nonneg (mul_nonneg (le_of_lt hA) (sq_nonneg _)) (sq_nonneg _)
+  rw [hkey]
+  exact le_add_of_nonneg_right hnonneg
+
+/-- The Bühlmann coefficient lies between zero and one. -/
+theorem buhlmann_coefficient_bounds {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ]
+    [MeasurableSpace Θ] [MeasurableSingletonClass Θ] [MeasurableSpace Ξ]
+    [MeasurableSingletonClass Ξ] (n : ℕ) (hn : 0 < n) (p : Θ → ℝ) (w : Θ → Ξ → ℝ)
+    (v : Ξ → ℝ) (hp : ∀ θ, 0 ≤ p θ) (_hp1 : ∑ θ, p θ = 1)
+    (hw : ∀ θ ξ, 0 ≤ w θ ξ) (_hw1 : ∀ θ, ∑ ξ, w θ ξ = 1)
+    (hd : 0 < variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+      + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v) :
+    0 ≤ variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+        / (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+          + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v)
+      ∧ variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+          / (variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v) (mixtureLaw n p w)
+            + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v) ≤ 1 := by
+  have hnpos : 0 < (n : ℝ) := Nat.cast_pos.mpr hn
+  have hninv : 0 ≤ (n : ℝ)⁻¹ := inv_nonneg.mpr (le_of_lt hnpos)
+  have hV : 0 ≤ variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+      (mixtureLaw n p w) :=
+    variance_nonneg _ _
+  have hVsum : 0 ≤ ∑ θ, p θ * condVar (w θ) v :=
+    Finset.sum_nonneg (fun θ _ => mul_nonneg (hp θ) (condVar_nonneg _ _ (hw θ)))
+  have hnv : 0 ≤ (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v :=
+    mul_nonneg hninv hVsum
+  have hA : 0 < variance (fun ω : Θ × (Fin n → Ξ) => condMean (w ω.1) v)
+      (mixtureLaw n p w) + (n : ℝ)⁻¹ * ∑ θ, p θ * condVar (w θ) v := hd
+  refine ⟨div_nonneg hV (le_of_lt hA), ?_⟩
+  rw [div_le_one hA]
+  exact le_add_of_nonneg_right hnv
 
 end MathFin
