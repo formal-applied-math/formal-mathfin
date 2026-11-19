@@ -44,9 +44,8 @@ This module records what follows from that structure without the SDE calculus.
   `MathFin.Contracts.value_caplet_black76`). `jyForwardIndex_lognormal_eq_curves` puts the
   lognormal index on that curve forward.
 * `jyZcCaplet_price_deterministic_rates`: with `σ_r = σ_n = 0` the integrated variance is `σ_I²T`
-  and the priced caplet is `blackCaplet (I₀Pʳ/Pⁿ) K σ_I T Pⁿ` (by `blackCaplet_sqrt_variance` of
-  `Models/Forwards/Black76.lean`: Black at total variance `σ²T` and maturity 1 is Black at
-  volatility `σ` and maturity `T`).
+  and the priced caplet is `blackCaplet (I₀Pʳ/Pⁿ) K σ_I T Pⁿ` (by `blackCaplet_sqrt_variance`: Black
+  at total variance `σ²T` and maturity 1 is Black at volatility `σ` and maturity `T`).
 * The year-on-year forward: `jyYoyForward_eq_bondRatio` is the tower-property step (Bagaria
   eq. 17.8) from the martingale property of `F(·,T)` under the `T`-forward measure to
   `𝔼^T[I_T/I_S] = 𝔼^T[Pʳ(S,T)/Pⁿ(S,T)]`; `jyYoyForward_eq_convexity` evaluates that expectation by
@@ -315,6 +314,29 @@ theorem jyZcCaplet_floorlet_parity [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
     jyZcFloorlet_price BT Pn0T Pr0T I0 F0 V K Z hBTpos hBTmeas hPn0T hP hident hZ hF0 hV hK,
     caplet_floorlet_parity]
   field_simp
+
+/-- **Black caplet at total variance.** At maturity `1`, the Black caplet at total variance `σ²T`
+is the Black caplet at volatility `σ` and maturity `T` (`σ ≥ 0`, `T ≥ 0`): `√(σ²T) = σ√T`, and
+`bsd₁`, `bsd₂` depend on `(σ, T)` only through `σ√T` and `σ²T`. A general Black-76 fact (`σ` and
+`T` enter only through `σ√T`); it is stated here to keep this module self-contained, its natural
+home is next to `blackCaplet` in `Models/Forwards/Black76.lean`, and the same step appears inline
+in `bsV_eq_totalVarianceCall`. -/
+theorem blackCaplet_sqrt_variance (F K σ T α : ℝ) (hσ : 0 ≤ σ) (hT : 0 ≤ T) :
+    blackCaplet F K (Real.sqrt (σ ^ 2 * T)) 1 α = blackCaplet F K σ T α := by
+  have hs : Real.sqrt (σ ^ 2 * T) = σ * Real.sqrt T := by
+    rw [Real.sqrt_mul (sq_nonneg σ), Real.sqrt_sq hσ]
+  have hsq : (σ * Real.sqrt T) ^ 2 = σ ^ 2 * T := by
+    rw [mul_pow, Real.sq_sqrt hT]
+  have hd1 : bsd1 F K 0 (Real.sqrt (σ ^ 2 * T)) 1 = bsd1 F K 0 σ T := by
+    rw [hs]
+    unfold bsd1
+    rw [Real.sqrt_one, mul_one, hsq]
+    ring_nf
+  have hd2 : bsd2 F K 0 (Real.sqrt (σ ^ 2 * T)) 1 = bsd2 F K 0 σ T := by
+    unfold bsd2
+    rw [hd1, hs, Real.sqrt_one, mul_one]
+  unfold blackCaplet
+  rw [hd1, hd2]
 
 /-- **Deterministic rates reduce the zero-coupon inflation caplet to Black at the index
 volatility.** With `σ_r = σ_n = 0`, `σ_I > 0` and `T > 0`, the integrated variance is

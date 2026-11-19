@@ -44,8 +44,6 @@ direct algebraic specialization.
 * `black_futures_formula_atm`: at `K = F` it equals `e^{−rT} F (2Φ(σ√T/2) − 1)`.
 * `swaption_payer_receiver_parity`: `blackPayerSwaption − blackReceiverSwaption = A (F − K)`.
 * `caplet_floorlet_parity`: `blackCaplet − blackFloorlet = α (F − K)`.
-* `blackCaplet_sqrt_variance`: the Black caplet at total variance `σ²T` and maturity `1` is the
-  Black caplet at volatility `σ` and maturity `T` (`σ ≥ 0`, `T ≥ 0`).
 * `blackPayerSwaption_eq_bsVGarman`: for `A > 0`, the payer swaption is `bsVGarman (F·A) K A σ T`.
 * `blackCaplet_eq_blackPayerSwaption`, `blackFloorlet_eq_blackReceiverSwaption`: the caplet and
   floorlet are the payer and receiver swaption with the accrual `α` in place of the annuity.
@@ -210,27 +208,5 @@ forward-rate analogue of put-call parity. Given the structural identity above it
 theorem caplet_floorlet_parity (F K σ T α : ℝ) :
     blackCaplet F K σ T α - blackFloorlet F K σ T α = α * (F - K) :=
   swaption_payer_receiver_parity α F K σ T
-
-/-- **Black caplet at total variance.** At maturity `1`, the Black caplet at total variance `σ²T`
-is the Black caplet at volatility `σ` and maturity `T` (`σ ≥ 0`, `T ≥ 0`): `√(σ²T) = σ√T`, and
-`bsd₁`, `bsd₂` depend on `(σ, T)` only through `σ√T` and `σ²T`. The same step, for the
-Black–Scholes call, is inside `bsV_eq_totalVarianceCall`
-(`Models/ModelFree/CalendarArbitrage.lean`). -/
-theorem blackCaplet_sqrt_variance (F K σ T α : ℝ) (hσ : 0 ≤ σ) (hT : 0 ≤ T) :
-    blackCaplet F K (Real.sqrt (σ ^ 2 * T)) 1 α = blackCaplet F K σ T α := by
-  have hs : Real.sqrt (σ ^ 2 * T) = σ * Real.sqrt T := by
-    rw [Real.sqrt_mul (sq_nonneg σ), Real.sqrt_sq hσ]
-  have hsq : (σ * Real.sqrt T) ^ 2 = σ ^ 2 * T := by
-    rw [mul_pow, Real.sq_sqrt hT]
-  have hd1 : bsd1 F K 0 (Real.sqrt (σ ^ 2 * T)) 1 = bsd1 F K 0 σ T := by
-    rw [hs]
-    unfold bsd1
-    rw [Real.sqrt_one, mul_one, hsq]
-    ring_nf
-  have hd2 : bsd2 F K 0 (Real.sqrt (σ ^ 2 * T)) 1 = bsd2 F K 0 σ T := by
-    unfold bsd2
-    rw [hd1, hs, Real.sqrt_one, mul_one]
-  unfold blackCaplet
-  rw [hd1, hd2]
 
 end MathFin
