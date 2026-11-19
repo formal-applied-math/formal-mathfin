@@ -1680,13 +1680,13 @@
       "id": "mf-jarrow-yildirim-zc-inflation-caplet",
       "name": "Jarrow-Yildirim Zero-Coupon Inflation Caplet as a Black Caplet",
       "domain": "mathematical_finance",
-      "description": "If the index-linked bond is priced on the real curve and the price index I_T is lognormal under the nominal T-forward measure, I_T = F0 exp(-V/2 + sqrt(V) Z) with Z standard normal, V > 0, F0 > 0 and strike K > 0, then F0 = I0 P^r(0,T)/P^n(0,T) and the zero-coupon inflation caplet price P^n(0,T) E^T[(I_T - K)^+] equals the Black caplet on the curve forward F0 at total variance V: P^n [F0 Phi(d1) - K Phi(d2)]. Hypotheses: Qn is a probability measure, B_T is positive and measurable, P^n(0,T) = E^Qn[1/B_T] > 0 (so the forward measure is a probability measure), the index-linked bond is priced on the real curve, and Z is standard normal under the forward measure with I_T = bsTerminal F0 0 (sqrt V) 1 Z. V is an arbitrary positive input: that it equals the Jarrow-Yildirim integrated variance, and the lognormal law of the index itself, are hypotheses and are not derived from the SDEs.",
+      "description": "If the index-linked bond is priced on the real curve and the price index I_T is lognormal under the nominal T-forward measure, I_T = F0 exp(-V/2 + sqrt(V) Z) with Z standard normal, V > 0, F0 > 0 and strike K > 0, then the zero-coupon inflation caplet price P^n(0,T) E^T[(I_T - K)^+] equals the Black caplet on the curve forward I0 P^r(0,T)/P^n(0,T) at total variance V: P^n [F Phi(d1) - K Phi(d2)] with F = I0 P^r(0,T)/P^n(0,T). (That F0 equals this curve forward is the separate lemma jyForwardIndex_lognormal_eq_curves, which the theorem uses.) Hypotheses: Qn is a probability measure, B_T is positive and measurable, P^n(0,T) = E^Qn[1/B_T] > 0 (so the forward measure is a probability measure), the index-linked bond is priced on the real curve, and Z is standard normal under the forward measure with I_T = bsTerminal F0 0 (sqrt V) 1 Z. V is an arbitrary positive input: that it equals the Jarrow-Yildirim integrated variance, and the lognormal law of the index itself, are hypotheses and are not derived from the SDEs.",
       "code": {
         "lean": "import MathFin.Models.Rates.JarrowYildirim\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Inflation.JarrowYildirim\n\n/-- **The zero-coupon inflation caplet is a Black caplet on the curve forward**. -/\ntheorem jy_zc_inflation_caplet\n    {Ω : Type*} [MeasurableSpace Ω] {Qn : Measure Ω} [IsProbabilityMeasure Qn] (BT : Ω → ℝ)\n    (Pn0T Pr0T I0 F0 V K : ℝ) (Z : Ω → ℝ)\n    (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (hPn0T : 0 < Pn0T)\n    (hP : Pn0T = ∫ ω, 1 / BT ω ∂Qn)\n    (hident : ∫ ω, bsTerminal F0 0 (Real.sqrt V) 1 (Z ω) / BT ω ∂Qn = I0 * Pr0T)\n    (hZ : HasLaw Z (gaussianReal 0 1) (forwardMeasure Qn BT))\n    (hF0 : 0 < F0) (hV : 0 < V) (hK : 0 < K) :\n    Pn0T * ∫ ω, max (bsTerminal F0 0 (Real.sqrt V) 1 (Z ω) - K) 0 ∂(forwardMeasure Qn BT)\n      = blackCaplet (I0 * Pr0T / Pn0T) K (Real.sqrt V) 1 Pn0T :=\n  jyZcCaplet_eq_black BT Pn0T Pr0T I0 F0 V K Z hBTpos hBTmeas hPn0T hP hident hZ hF0 hV hK\n"
       },
       "metadata": {
         "chapter": 17,
-        "reference": "R. Jarrow and Y. Yildirim, Pricing Treasury Inflation Protected Securities and Related Derivatives using an HJM Model, Journal of Financial and Quantitative Analysis 38(2) (2003), 337-358; D. Brigo & F. Mercurio, Interest Rate Models - Theory and Practice, 2nd ed. (Springer, 2006), ch. 15; S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 17 §17.3",
+        "reference": "R. Jarrow and Y. Yildirim, Pricing Treasury Inflation Protected Securities and Related Derivatives using an HJM Model, Journal of Financial and Quantitative Analysis 38(2) (2003), 337-358; D. Brigo & F. Mercurio, Interest Rate Models - Theory and Practice, 2nd ed. (Springer, 2006), §15.3 (the JY model) and §17.1 (caplets/floorlets with the JY model); S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 17 §17.3, eq. 17.6 (the forward index)",
         "citations": [
           {
             "key": "JarrowYildirim2003",
@@ -1694,11 +1694,11 @@
           },
           {
             "key": "BrigoMercurio2006",
-            "locator": "ch. 15"
+            "locator": "§15.3, §17.1"
           },
           {
             "key": "BagariaFIDP",
-            "locator": "ch. 17 §17.3"
+            "locator": "ch. 17 §17.3, eq. 17.6"
           }
         ],
         "difficulty": "advanced",
@@ -1708,15 +1708,15 @@
     },
     {
       "id": "mf-jarrow-yildirim-yoy-forward-convexity",
-      "name": "Jarrow-Yildirim Year-on-Year Payment Price from the Forward-Index Martingale",
+      "name": "Jarrow-Yildirim Year-on-Year Forward Convexity (and Payment Price) from the Forward-Index Martingale",
       "domain": "mathematical_finance",
-      "description": "Let the forward index F(S,T) = I_S P^r(S,T)/P^n(S,T) be a martingale under the nominal T-forward measure, so that E^T[I_T | F_S] = I_S R_S with R_S = P^r(S,T)/P^n(S,T). Then E^T[I_T/I_S] = E^T[R_S] by the tower property. With R_S in Hull-White reconstitution form with two correlated Gaussian rate deviations, the year-on-year forward is the naive ratio of forwards P^r(0,T) P^n(0,S)/(P^r(0,S) P^n(0,T)) times exp(B^n m^n - B^r m^r + (B^n)^2 V^n - B^r B^n Cov), the convexity adjustment of Bagaria ch. 17 §17.4, eq. 17.10. Discounting with the nominal bond, the time-0 value of the payment I_T/I_S at T is P^n(0,T) times that expectation (forward-measure change of numeraire). Hypotheses: I_S is positive and F_S-measurable; I_T and I_T/I_S are integrable under the forward measure Q^T; Z1, Z2 are independent standard normals under Q^T; rho^2 <= 1, V^n, V^r >= 0 and Cov = rho sqrt(V^n V^r); B_T is positive and measurable and P^n(0,T) = E[1/B_T] > 0; the trimmed measure is sigma-finite. Not derived: the martingale property of the forward index (the conditional-expectation hypothesis), the Hull-White reconstitution form of the bond ratio, and the means, variances and covariance of the rate deviations are hypotheses or inputs.",
+      "description": "Let the forward index F(S,T) = I_S P^r(S,T)/P^n(S,T) be a martingale under the nominal T-forward measure, so that E^T[I_T | F_S] = I_S R_S with R_S = P^r(S,T)/P^n(S,T). Then E^T[I_T/I_S] = E^T[R_S] by the tower property. With R_S in Hull-White reconstitution form with two correlated Gaussian rate deviations, the year-on-year forward is the naive ratio of forwards P^r(0,T) P^n(0,S)/(P^r(0,S) P^n(0,T)) times exp(-B^r m^r + B^n m^n + (B^n)^2 V^n - B^r B^n Cov), the convexity adjustment of Bagaria ch. 17 §17.4, eq. 17.10. Discounting with the nominal bond, the time-0 value of the payment I_T/I_S at T is P^n(0,T) times that expectation (forward-measure change of numeraire). Hypotheses: I_S is positive and F_S-measurable; I_T and I_T/I_S are integrable under the forward measure Q^T; Z1, Z2 are independent standard normals under Q^T; rho^2 <= 1, V^n, V^r >= 0 and Cov = rho sqrt(V^n V^r); B_T is positive and measurable and P^n(0,T) = E[1/B_T] > 0; the trimmed measure is sigma-finite. Not derived: the martingale property of the forward index (the conditional-expectation hypothesis), the Hull-White reconstitution form of the bond ratio, and the means, variances and covariance of the rate deviations are hypotheses or inputs.",
       "code": {
         "lean": "import MathFin.Models.Rates.JarrowYildirim\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Inflation\n\n/-- **The time-0 price of the year-on-year payment in the printed convexity shape**. -/\ntheorem jy_yoy_payment_price\n    {Ω : Type*} {mS m : MeasurableSpace Ω} {Qn : Measure Ω} (BT : Ω → ℝ)\n    (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (Pn0T : ℝ)\n    (hP : Pn0T = ∫ ω, 1 / BT ω ∂Qn) (hPpos : 0 < Pn0T)\n    (hmS : mS ≤ m)\n    [SigmaFinite ((forwardMeasure Qn BT).trim hmS)] (IS IT RS : Ω → ℝ)\n    (hIS : StronglyMeasurable[mS] IS) (hISpos : ∀ ω, 0 < IS ω)\n    (hIT : Integrable IT (forwardMeasure Qn BT))\n    (hITS : Integrable (fun ω => IT ω / IS ω) (forwardMeasure Qn BT))\n    (hmart : (forwardMeasure Qn BT)[IT | mS] =ᵐ[forwardMeasure Qn BT] fun ω => IS ω * RS ω)\n    (mn mr Vn Vr ρ Bn Br Pn0S Pr0T Pr0S Cov : ℝ)\n    (hVn : 0 ≤ Vn) (hVr : 0 ≤ Vr) (hρ : ρ ^ 2 ≤ 1) (hCov : Cov = ρ * Real.sqrt (Vn * Vr))\n    {Z1 Z2 : Ω → ℝ}\n    (hZ1 : HasLaw Z1 (gaussianReal 0 1) (forwardMeasure Qn BT))\n    (hZ2 : HasLaw Z2 (gaussianReal 0 1) (forwardMeasure Qn BT))\n    (hindep : IndepFun Z1 Z2 (forwardMeasure Qn BT))\n    (hR : ∀ ω, RS ω = (Pr0T * Pn0S / (Pr0S * Pn0T)) * Real.exp (Convexity.hwD Br Vr\n        - Convexity.hwD Bn Vn\n        - Br * (mr + Real.sqrt Vr * (ρ * Z1 ω + Real.sqrt (1 - ρ ^ 2) * Z2 ω))\n        + Bn * (mn + Real.sqrt Vn * Z1 ω))) :\n    ∫ ω, IT ω / IS ω / BT ω ∂Qn\n      = Pn0T * ((Pr0T * Pn0S / (Pr0S * Pn0T))\n        * Real.exp (-(Br * mr) + Bn * mn + Bn ^ 2 * Vn - Br * Bn * Cov)) :=\n  JarrowYildirim.jyYoyPayment_price BT hBTpos hBTmeas Pn0T hP hPpos hmS IS IT RS hIS hISpos hIT\n    hITS hmart mn mr Vn Vr ρ Bn Br Pn0S Pr0T Pr0S Cov hVn hVr hρ hCov hZ1 hZ2 hindep hR\n"
       },
       "metadata": {
         "chapter": 17,
-        "reference": "R. Jarrow and Y. Yildirim, Pricing Treasury Inflation Protected Securities and Related Derivatives using an HJM Model, Journal of Financial and Quantitative Analysis 38(2) (2003), 337-358; D. Brigo & F. Mercurio, Interest Rate Models - Theory and Practice, 2nd ed. (Springer, 2006), ch. 15; S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 17 §17.4 (eqs. 17.8, 17.10)",
+        "reference": "R. Jarrow and Y. Yildirim, Pricing Treasury Inflation Protected Securities and Related Derivatives using an HJM Model, Journal of Financial and Quantitative Analysis 38(2) (2003), 337-358; D. Brigo & F. Mercurio, Interest Rate Models - Theory and Practice, 2nd ed. (Springer, 2006), §15.3 (the JY model) and §16.3 (YYIIS with the JY model); S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 17 §17.4 (eqs. 17.8, 17.10)",
         "citations": [
           {
             "key": "JarrowYildirim2003",
@@ -1724,11 +1724,11 @@
           },
           {
             "key": "BrigoMercurio2006",
-            "locator": "ch. 15"
+            "locator": "§15.3, §16.3"
           },
           {
             "key": "BagariaFIDP",
-            "locator": "ch. 17 §17.4"
+            "locator": "ch. 17 §17.4, eqs. 17.8, 17.10"
           }
         ],
         "difficulty": "advanced",

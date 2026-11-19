@@ -27,6 +27,8 @@ This module records what follows from that structure without the SDE calculus.
 
 ## Main results
 
+* `quad2_nonneg`, `quad3_nonneg`: the `2×2` and `3×3` quadratic-form lemmas behind the
+  non-negativity of the integrand.
 * The variance integrand of `log F(·,T)` for constant parameters (`jyVarIntegrand`) and its
   integral `V(0,T)` (`jyVariance`). The integrand is the quadratic form of the vector
   `(σ_I, −σ_r·B_r, σ_n·B_n)` against the `(I, r, n)` correlation matrix
@@ -49,7 +51,7 @@ This module records what follows from that structure without the SDE calculus.
   the naive ratio of forwards times the convexity factor. `jyYoyPayment_price` is the time-0
   value of that payment (`MathFin.forwardMeasure_price`).
 
-## What is not proved
+## Scope
 
 The SDE-level derivation of the `−ρ_{rI}σ_rσ_I` drift of the real rate and of `V` from the
 three SDEs is not claimed: `V` is defined, and the lognormality of the index
@@ -65,10 +67,10 @@ seasonality and Monte Carlo are out of scope.
   Derivatives using an HJM Model*, J. Financial and Quantitative Analysis 38(2) (2003),
   337–358][JarrowYildirim2003]
 * [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
-  2nd ed. (2006), ch. 15
-* [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 17 §17.3
-  (eqs. 17.6–17.7)
-  and §17.4 (eqs. 17.8, 17.10)
+  2nd ed. (2006), §15.3 (the JY model), §16.3 (YYIIS with the JY model), §17.1 (caplets/floorlets
+  with the JY model)
+* [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 17 §17.3, eq. 17.6 (the
+  forward index) and §17.4 (eqs. 17.8, 17.10)
 
 ## Tags
 
@@ -207,17 +209,6 @@ theorem jyForwardIndex_lognormal_eq_curves (BT : Ω → ℝ) (Pn0T Pr0T I0 F0 V 
   rw [← h]
   simpa [bsTerminal] using h2.symm
 
-/-- The nominal `T`-forward measure is a probability measure when `Qn` is, `B_T > 0` and
-`Pⁿ(0,T) = 𝔼^{Qn}[1/B_T] > 0`: the last forces `1/B_T` to be integrable, since a non-integrable
-integral is `0`. -/
-theorem jyForwardMeasure_isProbabilityMeasure [IsProbabilityMeasure Qn] (BT : Ω → ℝ) (Pn0T : ℝ)
-    (hBTpos : ∀ ω, 0 < BT ω) (hPn0T : 0 < Pn0T) (hP : Pn0T = ∫ ω, 1 / BT ω ∂Qn) :
-    IsProbabilityMeasure (MathFin.forwardMeasure Qn BT) := by
-  refine MathFin.forwardMeasure_isProbabilityMeasure hBTpos ?_
-  by_contra hint
-  rw [integral_undef hint] at hP
-  exact hPn0T.ne' hP
-
 /-- **ZC inflation caplet = Black caplet on the curve forward.** Under `hident` and a
 lognormal index under `Q^T` with log-variance `V`, and `F₀ > 0`, `V > 0`, `K > 0`,
 
@@ -225,7 +216,7 @@ lognormal index under `Q^T` with log-variance `V`, and `F₀ > 0`, `V > 0`, `K >
 
 i.e. `Pⁿ·[F Φ(d₁) − K Φ(d₂)]` with `d_i = bsd_i F K 0 √V 1`. Further hypotheses: `Qn` is a
 probability measure, `B_T > 0` is measurable and `Pⁿ(0,T) = 𝔼^{Qn}[1/B_T] > 0` (so `Q^T` is a
-probability measure, `jyForwardMeasure_isProbabilityMeasure`). The index law is a hypothesis;
+probability measure, `forwardMeasure_isProbabilityMeasure`). The index law is a hypothesis;
 that its log-variance is `jyVariance` is the SDE-level content, not proved. -/
 theorem jyZcCaplet_eq_black [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
     (Pn0T Pr0T I0 F0 V K : ℝ) (Z : Ω → ℝ)
@@ -239,7 +230,8 @@ theorem jyZcCaplet_eq_black [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
       = blackCaplet (I0 * Pr0T / Pn0T) K (Real.sqrt V) 1 Pn0T := by
   have hF := jyForwardIndex_lognormal_eq_curves BT Pn0T Pr0T I0 F0 V Z hBTpos hBTmeas hPn0T hP
     hident hZ
-  have := jyForwardMeasure_isProbabilityMeasure (Qn := Qn) BT Pn0T hBTpos hPn0T hP
+  have := MathFin.forwardMeasure_isProbabilityMeasure (Q := Qn) hBTpos
+    (Integrable.of_integral_ne_zero (by rw [← hP]; exact hPn0T.ne'))
   have hyp : BSCallHyp (MathFin.forwardMeasure Qn BT) F0 K 0 (Real.sqrt V) 1 Z :=
     ⟨hF0, hK, Real.sqrt_pos.2 hV, one_pos, hZ⟩
   have h := black_futures_formula hyp 0
@@ -262,7 +254,8 @@ theorem jyZcFloorlet_eq_black [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
       = blackFloorlet (I0 * Pr0T / Pn0T) K (Real.sqrt V) 1 Pn0T := by
   have hF := jyForwardIndex_lognormal_eq_curves BT Pn0T Pr0T I0 F0 V Z hBTpos hBTmeas hPn0T hP
     hident hZ
-  have := jyForwardMeasure_isProbabilityMeasure (Qn := Qn) BT Pn0T hBTpos hPn0T hP
+  have := MathFin.forwardMeasure_isProbabilityMeasure (Q := Qn) hBTpos
+    (Integrable.of_integral_ne_zero (by rw [← hP]; exact hPn0T.ne'))
   have hyp : BSCallHyp (MathFin.forwardMeasure Qn BT) F0 K 0 (Real.sqrt V) 1 Z :=
     ⟨hF0, hK, Real.sqrt_pos.2 hV, one_pos, hZ⟩
   have h := bs_put_formula hyp
@@ -314,9 +307,10 @@ section Yoy
 variable {Ω : Type*} {m : MeasurableSpace Ω} {μ : Measure Ω}
 
 /-- **YoY forward = bond-ratio expectation** (Bagaria ch. 17 §17.4, eq. 17.8).
-If `I_S` is `m_S`-measurable and positive,
-`I_T` and `I_T/I_S` are integrable and `𝔼^T[I_T | m_S] = I_S·R_S` a.e. (the martingale
-property of `F(·,T)`), then `𝔼^T[I_T/I_S] = 𝔼^T[R_S]`. -/
+Hypotheses: `hmS : m_S ≤ m` with `μ.trim hmS`
+σ-finite; `I_S` is `m_S`-measurable and positive; `I_T` and `I_T/I_S` are `μ`-integrable; and
+`𝔼^T[I_T | m_S] = I_S·R_S` a.e. (`hmart`, the martingale property of `F(·,T)`). Then
+`𝔼^T[I_T/I_S] = 𝔼^T[R_S]`. -/
 theorem jyYoyForward_eq_bondRatio {mS : MeasurableSpace Ω} (hmS : mS ≤ m)
     [SigmaFinite (μ.trim hmS)] (IS IT RS : Ω → ℝ)
     (hIS : StronglyMeasurable[mS] IS) (hISpos : ∀ ω, 0 < IS ω)
@@ -339,16 +333,17 @@ theorem jyYoyForward_eq_bondRatio {mS : MeasurableSpace Ω} (hmS : mS ≤ m)
   field_simp [(hISpos ω).ne']
 
 /-- **YoY forward in the printed convexity shape (Bagaria ch. 17 §17.4, eq. 17.10;
-Brigo–Mercurio ch. 15).** Under the hypotheses of `jyYoyForward_eq_bondRatio`, and with the
-bond ratio in
-Hull–White reconstitution form (`hR`: `R_S` is the naive ratio of forwards
+Brigo–Mercurio §16.3).** Under the hypotheses of `jyYoyForward_eq_bondRatio`, and with the
+bond ratio in Hull–White reconstitution form (`hR`: `R_S` is the naive ratio of forwards
 `Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))` times `exp(Dʳ − Dⁿ − Bʳyʳ + Bⁿyⁿ)` with the two
 Gaussian rate deviations of `yoyConvexity_eq`),
 
   `𝔼^T[I_T/I_S] = (Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T)))·exp(−Bʳmʳ + Bⁿmⁿ + Bⁿ²Vⁿ − BʳBⁿ·Cov)`,
 
-i.e. the naive ratio times the convexity factor. The means, variances, covariance, `hR`
-and `hmart` are hypotheses; they are not derived from the SDEs here. -/
+i.e. the naive ratio times the convexity factor. Further hypotheses: `Z1, Z2` independent standard
+normals under `μ` (`hZ1`, `hZ2`, `hindep`), `0 ≤ Vⁿ`, `0 ≤ Vʳ`, `ρ² ≤ 1` and
+`hCov : Cov = ρ·√(Vⁿ·Vʳ)`. The means, variances, covariance, `hR` and `hmart` are hypotheses;
+they are not derived from the SDEs here. -/
 theorem jyYoyForward_eq_convexity {mS : MeasurableSpace Ω} (hmS : mS ≤ m)
     [SigmaFinite (μ.trim hmS)] (IS IT RS : Ω → ℝ)
     (hIS : StronglyMeasurable[mS] IS) (hISpos : ∀ ω, 0 < IS ω)
@@ -384,9 +379,10 @@ end Yoy
 section YoyPrice
 
 /-- **Time-0 price of a year-on-year payment.** Under the nominal `T`-forward measure
-`Q^T = forwardMeasure Qn BT` and the hypotheses of `jyYoyForward_eq_convexity`, with
-`Pⁿ(0,T) = 𝔼^{Qn}[1/B_T] > 0` (the single variable `Pn0T`, also the one in the naive ratio), the
-time-0 value of the payment `I_T/I_S` at `T` is
+`Q^T = forwardMeasure Qn BT` and the hypotheses of `jyYoyForward_eq_convexity` (all stated under
+`Q^T`), with `B_T > 0` measurable (`hBTpos`, `hBTmeas`) and
+`Pⁿ(0,T) = 𝔼^{Qn}[1/B_T] > 0` (`hP`, `hPpos`; the single variable `Pn0T`, also the one in the
+naive ratio), the time-0 value of the payment `I_T/I_S` at `T` is
 
   `𝔼^{Qn}[(I_T/I_S)/B_T] = Pⁿ(0,T)·(naive ratio of forwards)·exp(−Bʳmʳ + Bⁿmⁿ + Bⁿ²Vⁿ − BʳBⁿ·Cov)`.
 
