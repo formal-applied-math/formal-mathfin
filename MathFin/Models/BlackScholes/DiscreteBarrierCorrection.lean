@@ -13,14 +13,16 @@ public import MathFin.Models.BlackScholes.BarrierParity
 
 A barrier option monitored only at `m` equally spaced dates (`Δt = T/m`) is worth more than the
 continuously monitored one, for a knock-out, because paths can cross the barrier between dates
-and return. Broadie, Glasserman and Kou ([BroadieGlassermanKou1997]) showed that the discretely
-monitored price is, up to an error of order `σ² Δt`, the continuously monitored price with the
+and return. Broadie, Glasserman and Kou ([BroadieGlassermanKou1997]) give a correction: the
+discretely monitored price is approximated by the continuously monitored price with the
 barrier moved **away from the spot** by the factor `exp(± β σ √Δt)`, where
 `β = −ζ(1/2)/√(2π) ≈ 0.5826` and `ζ` is Riemann's zeta function.
 
-The primary paper was not available to the author. The statement here is the one restated, for a
-down-and-out call with barrier `B`, as `V_d(S, t; B) = V_cont(S, t; B e^{−βσ√(T/N)}) + O(σ² T/N)`
-on the first page of Howison and Steinberg [HowisonSteinberg2005], against which it was checked.
+The statement, for a down-and-out call with barrier `B`, is
+`V_d(S, t; B) = V_cont(S, t; B e^{−βσ√(T/N)}) + O(σ² T/N)`, as restated in
+[HowisonSteinberg2005], §1 (the rate is theirs), which cites
+[BroadieGlassermanKou1997]. The BGK paper itself is neither
+reproduced nor derived here.
 
 This file takes that shift as a **definition** and proves what follows from the definition alone.
 
@@ -28,10 +30,11 @@ This file takes that shift as a **definition** and proves what follows from the 
 
 * `bgkBeta`: `−Re ζ(1/2)/√(2π)` (Mathlib's `riemannZeta`). Its numerical value `≈ 0.5826` is *not*
   proved; every theorem below is stated for an arbitrary shift constant `β`.
-* `downOutCallCont`: the continuously monitored down-and-out call for a barrier `H` below the
-  strike, no dividends, in the image form `V(S) − (H/S)^{2r/σ²−1} · V(H²/S)`, where `V` is the
-  Black–Scholes call price `bsV`. This closed form is transcribed from [ReinerRubinstein1991]
-  (see also [Hull]); the reflection-principle step that produces it is **not** derived here.
+* `downOutCallCont`: the image-form expression `V(S) − (H/S)^{2r/σ²−1} · V(H²/S)`, where `V` is
+  the Black–Scholes call price `bsV`. It is the continuously monitored down-and-out call price
+  (transcribed from [ReinerRubinstein1991], see also [Hull]) only for `H ≤ K`, `S > H` and no
+  dividends; the theorems below concern the expression for any positive `H`, and the
+  reflection-principle step that identifies it with the price is **not** derived here.
 * `bgkDownBarrier`, `bgkUpBarrier`: the shifted barriers `H e^{∓βσ√(T/m)}`.
 * `bgkDownOutCall`: the BGK price of the discretely monitored down-and-out call, the continuous
   price at the shifted barrier. There is no continuous up-and-out closed form in this library,
@@ -51,14 +54,16 @@ This file takes that shift as a **definition** and proves what follows from the 
   barrier.
 * `tendsto_bgkDownOutCall`: as the number of dates `m → ∞` the BGK price tends to the continuous
   price.
-* `abs_knockIn_sub_bgkKnockIn_le`: through in–out parity (`knockIn_add_knockOut_eq_bsV`), a bound
-  on the error of the BGK knock-out price against a knock-out value transfers to the knock-in.
+* `abs_knockIn_sub_bgkKnockIn_le`: a linear rearrangement of in–out parity
+  (`knockIn_add_knockOut_eq_bsV`), for an arbitrary measurable event `A`: a bound on the error of
+  the BGK knock-out price against a knock-out value transfers to the knock-in. It does not link `A`
+  to `H` or the monitoring dates.
 
 ## Scope
 
-The accuracy claim `O(σ² Δt)` of the BGK price against the true discretely monitored price is
-**not** proved; it is the content of [BroadieGlassermanKou1997], and Howison and Steinberg note
-that, as stated, the exponential form is only correct to that order. Nothing here is a model of
+The accuracy of the shift as an approximation to the discretely monitored price is **not**
+proved here. The rate `O(σ² Δt)` is attributed only to the restatement in
+[HowisonSteinberg2005], not to [BroadieGlassermanKou1997]. Nothing here is a model of
 discrete monitoring: the discretely monitored value never appears, except as the hypothesised
 benchmark in `abs_knockIn_sub_bgkKnockIn_le`.
 
@@ -69,7 +74,7 @@ benchmark in `abs_knockIn_sub_bgkKnockIn_le`.
 * [S. Howison, M. Steinberg, *A matched asymptotic expansions approach to continuity corrections
   for discretely sampled options. Part 1: barrier options*][HowisonSteinberg2005], §1
 * [E. Reiner and M. Rubinstein, *Breaking down the barriers*][ReinerRubinstein1991]
-* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull]
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull] (10th ed., Pearson, 2018), ch. 26
 
 ## Tags
 
@@ -87,9 +92,10 @@ open Filter Topology
 `riemannZeta`. Its value `≈ 0.5826` is not proved here. -/
 noncomputable def bgkBeta : ℝ := -(riemannZeta (1 / 2)).re / Real.sqrt (2 * Real.pi)
 
-/-- The continuously monitored down-and-out call, barrier `H ≤ K`, no dividends, in the image
-form `V(S) − (H/S)^{2r/σ²−1} V(H²/S)` with `V = bsV` the Black–Scholes call price. A transcribed
-closed form: the reflection-principle derivation is not proved here. -/
+/-- The image-form expression `V(S) − (H/S)^{2r/σ²−1} V(H²/S)` with `V = bsV` the Black–Scholes
+call price, defined for any `H`. It is the continuously monitored down-and-out call price only for
+barrier `H ≤ K`, spot `S > H` and no dividends (a transcribed closed form; the
+reflection-principle derivation is not proved here). -/
 noncomputable def downOutCallCont (K H r σ S τ : ℝ) : ℝ :=
   bsV K r σ S τ - (H / S) ^ (2 * r / σ ^ 2 - 1) * bsV K r σ (H ^ 2 / S) τ
 
@@ -122,8 +128,9 @@ theorem bgkDownBarrier_lt_lt_bgkUpBarrier {β σ H T : ℝ} {m : ℕ} (hβ : 0 <
     exact lt_mul_of_one_lt_right hH (by simpa using Real.exp_lt_exp.2 hp)
 
 /-- The **BGK price** of the discretely monitored down-and-out call with `m` equally spaced
-monitoring dates: the continuous price at the shifted barrier `bgkDownBarrier`. The `O(σ² T/m)`
-accuracy against the true discretely monitored price is not proved. -/
+monitoring dates: `downOutCallCont` at the shifted barrier `bgkDownBarrier`, a price reading only
+for `H ≤ K` and spot above the shifted barrier. The accuracy of the shift as an
+approximation to the discretely monitored price is not proved here. -/
 noncomputable def bgkDownOutCall (β : ℝ) (m : ℕ) (K H r σ S T : ℝ) : ℝ :=
   downOutCallCont K (bgkDownBarrier β m H σ T) r σ S T
 
@@ -235,8 +242,8 @@ theorem bgkDownOutCall_timeScale {β : ℝ} {m : ℕ} {K H r σ S T c : ℝ} (hc
 
 /-! ### The limit of many monitoring dates -/
 
-/-- For `0 < S`, `0 < K`, `0 < σ`, `0 < τ`, the continuous down-and-out call is continuous in the
-barrier at every positive barrier. -/
+/-- For `0 < S`, `0 < K`, `0 < σ`, `0 < τ`, the expression `downOutCallCont` is continuous in `H`
+at every positive `H`. No claim that it is a price: that needs `H ≤ K` and `S > H`. -/
 theorem continuousAt_downOutCallCont_barrier {K r σ S τ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     (hS : 0 < S) (hτ : 0 < τ) {H : ℝ} (hH : 0 < H) :
     ContinuousAt (fun h ↦ downOutCallCont K h r σ S τ) H := by
@@ -264,9 +271,10 @@ theorem tendsto_bgkDownBarrier (β H σ T : ℝ) :
   have := he.const_mul H
   rwa [mul_one] at this
 
-/-- **Many-dates limit.** As the number of monitoring dates `m → ∞` the BGK price of the
-discretely monitored down-and-out call tends to the continuously monitored price, for positive
-spot, strike, barrier, volatility and maturity. This is the consistency of the shift with the
+/-- **Many-dates limit.** As `m → ∞` the expression `bgkDownOutCall` tends to `downOutCallCont`,
+for positive spot, strike, barrier, volatility and maturity. It is a statement about the
+closed-form expression for any positive `H`; it reads as "discretely monitored price tends to the
+continuous price" only for `H ≤ K` and `S > H`. It is the consistency of the shift with the
 continuous limit, not the BGK accuracy theorem. -/
 theorem tendsto_bgkDownOutCall {β K H r σ S T : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hS : 0 < S)
     (hH : 0 < H) (hT : 0 < T) :
@@ -284,8 +292,9 @@ with `f` the call payoff and discount factor `e^{−rT}`. If the BGK knock-out p
 the knock-out value (for example `A` the event that some monitoring date has the price at or below
 the barrier, taken as a hypothesis), then the BGK knock-in price is within `ε` of the knock-in
 value: `knockIn + knockOut = bsV` (`knockIn_add_knockOut_eq_bsV`) and
-`bgkKnockIn = bsV − bgkDownOutCall`. The hypothesis is the BGK accuracy claim, which is not
-proved here. -/
+`bgkKnockIn = bsV − bgkDownOutCall`. This is a linear rearrangement of in–out parity with `A`
+arbitrary (not tied to `H` or to the monitoring dates), the weakest of the headline results here;
+the BGK accuracy claim enters only as the hypothesis and is not proved. -/
 theorem abs_knockIn_sub_bgkKnockIn_le {Ω : Type*} {mΩ : MeasurableSpace Ω}
     {Q : MeasureTheory.Measure Ω} [MeasureTheory.IsProbabilityMeasure Q]
     {S K r σ T : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S K r σ T Z) {A : Set Ω}
