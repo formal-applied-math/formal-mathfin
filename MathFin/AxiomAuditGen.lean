@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (1078 MathFin constants, 29 upstream). Citations
+  corpus (1103 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -602,6 +602,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.Contracts.value_payerSwaption_black_forwardSwapRate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.value_payerSwaption_black_forwardSwapRate
+
+/-- info: 'MathFin.Contracts.value_scale_cdsProtectionAtDefault_sub_pay' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.value_scale_cdsProtectionAtDefault_sub_pay
 
 /-- info: 'MathFin.Contracts.value_trancheLeg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1411,6 +1415,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.SurvivalModel.survive_eq_survivalFunction_ratio
 
+/-- info: 'MathFin.SurvivalModel.survive_lifeTable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.SurvivalModel.survive_lifeTable
+
 /-- info: 'MathFin.WienerIntegralIto.wienerIntegralLp_eq_itoIntegralCLM' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.WienerIntegralIto.wienerIntegralLp_eq_itoIntegralCLM
@@ -1454,6 +1462,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.acceptableUnderUtility_log_iff_kellyGrowth' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.acceptableUnderUtility_log_iff_kellyGrowth
+
+/-- info: 'MathFin.ae_notMem_Ioo_of_lattice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ae_notMem_Ioo_of_lattice
 
 /-- info: 'MathFin.affineBondPrice_solves_pde' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1511,6 +1523,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.bachelier_spread_call
 
+/-- info: 'MathFin.backwardCaplet_black_integral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.backwardCaplet_black_integral
+
 /-- info: 'MathFin.basketMomentMatchPrice_single_eq_integral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.basketMomentMatchPrice_single_eq_integral
@@ -1534,6 +1550,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.betSize_sqrt_mul_zScore' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.betSize_sqrt_mul_zScore
+
+/-- info: 'MathFin.beta_latentMean_sampleMean' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.beta_latentMean_sampleMean
 
 /-- info: 'MathFin.beta_linearity_finset' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1602,6 +1622,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.binomial_upAndIn_reflection' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.binomial_upAndIn_reflection
+
+/-- info: 'MathFin.blackForm_tendsto_zero_iff_dpl_tendsto_atBot' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.blackForm_tendsto_zero_iff_dpl_tendsto_atBot
 
 /-- info: 'MathFin.blackLitterman_mean_eq_precision_weighted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1762,6 +1786,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.bs_put_formula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.bs_put_formula
+
+/-- info: 'MathFin.buhlmann_mse_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.buhlmann_mse_le
 
 /-- info: 'MathFin.bull_call_spread_payoff_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1943,6 +1971,14 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.covariance_indicator_one_le
 
+/-- info: 'MathFin.covariance_latentMean_sampleMean' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.covariance_latentMean_sampleMean
+
+/-- info: 'MathFin.covariance_latentMean_shock' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.covariance_latentMean_shock
+
 /-- info: 'MathFin.covariance_le_covariance_of_cdf_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.covariance_le_covariance_of_cdf_le
@@ -1954,6 +1990,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.covariance_rollPriceChange' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.covariance_rollPriceChange
+
+/-- info: 'MathFin.covariance_shock_shock' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.covariance_shock_shock
 
 /-- info: 'MathFin.covered_eq_uncovered_interest_parity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -2130,6 +2170,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.exists_market_of_isNormalizedCallPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.exists_market_of_isNormalizedCallPrice
+
+/-- info: 'MathFin.exists_mem_valuedIn_range_integral_eq_stoppingValue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.exists_mem_valuedIn_range_integral_eq_stoppingValue
 
 /-- info: 'MathFin.exists_pos_price_le_superReplication' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -2695,6 +2739,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.hasDerivAt_tau_deriv_bsV_S
 
+/-- info: 'MathFin.hasDerivAt_thieleReserve' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.hasDerivAt_thieleReserve
+
 /-- info: 'MathFin.hasEMMMultiState_iff_exists_isEMM' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.hasEMMMultiState_iff_exists_isEMM
@@ -2819,6 +2867,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.integral_discounted_v3PositionValue_le
 
+/-- info: 'MathFin.integral_discounted_volSwapPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.integral_discounted_volSwapPayoff
+
 /-- info: 'MathFin.integral_exp_const_mul_jumpDiffusionIncrementLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.integral_exp_const_mul_jumpDiffusionIncrementLaw
@@ -2859,6 +2911,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.integral_max_sub_compoundPoisson
 
+/-- info: 'MathFin.integral_max_sub_succ_mul_of_lattice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.integral_max_sub_succ_mul_of_lattice
+
 /-- info: 'MathFin.integral_mertonSpot' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.integral_mertonSpot
@@ -2878,6 +2934,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.integral_sq_jumpDiffusionIncrementLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.integral_sq_jumpDiffusionIncrementLaw
+
+/-- info: 'MathFin.integral_sqrt_lognormalVariance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.integral_sqrt_lognormalVariance
 
 /-- info: 'MathFin.integral_sub_cond_gpdMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3190,6 +3250,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.knockIn_add_knockOut_eq_vanilla' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.knockIn_add_knockOut_eq_vanilla
+
+/-- info: 'MathFin.lastSurvivor_annuity_eq_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.lastSurvivor_annuity_eq_value
 
 /-- info: 'MathFin.lattice_variance_lower_bound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3707,6 +3771,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.representingSet_expectedShortfall
 
+/-- info: 'MathFin.reversionary_annuity_eq_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.reversionary_annuity_eq_value
+
 /-- info: 'MathFin.riskParityWeightTwo' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.riskParityWeightTwo
@@ -3714,6 +3782,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.risk_parity_equal_contribution' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.risk_parity_equal_contribution
+
+/-- info: 'MathFin.rockafellarUryasev_add_of_gap' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.rockafellarUryasev_add_of_gap
 
 /-- info: 'MathFin.rollSpread_eq_two_mul_sqrt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3838,6 +3910,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.stdDevPrinciple_not_monotone' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.stdDevPrinciple_not_monotone
+
+/-- info: 'MathFin.stoppingValue_valuedIn_range_eq_integral_snellEnvelope' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.stoppingValue_valuedIn_range_eq_integral_snellEnvelope
 
 /-- info: 'MathFin.storageForward_at_availability' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3987,9 +4063,9 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.tendsto_mpUpperEdge_zero
 
-/-- info: 'MathFin.tendsto_nelsonSiegelZeroRate_zero_meanReversion' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.tendsto_nssYield_decay_atTop' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.tendsto_nelsonSiegelZeroRate_zero_meanReversion
+#print axioms MathFin.tendsto_nssYield_decay_atTop
 
 /-- info: 'MathFin.tendsto_oneFactorLossFraction_ae' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -4050,6 +4126,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.tendsto_vasicekYield_nhdsGT_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.tendsto_vasicekYield_nhdsGT_zero
+
+/-- info: 'MathFin.termInsurance_add_pureEndowment_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.termInsurance_add_pureEndowment_eq
 
 /-- info: 'MathFin.thresholdMatrix_gaussianThresholds' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -4199,6 +4279,14 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.variance_le_of_lagrangian_FOC
 
+/-- info: 'MathFin.variance_sampleMean' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.variance_sampleMean
+
+/-- info: 'MathFin.variance_shock' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.variance_shock
+
 /-- info: 'MathFin.variance_singleIndex_portfolio' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.variance_singleIndex_portfolio
@@ -4243,9 +4331,17 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.vasicekYield_eq_nssSlope
 
+/-- info: 'MathFin.volSwapFairStrike_lt_sqrt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.volSwapFairStrike_lt_sqrt
+
 /-- info: 'MathFin.weakForwardUniqueConst' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.weakForwardUniqueConst
+
+/-- info: 'MathFin.wholeLife_epv_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.wholeLife_epv_eq
 
 /-- info: 'MathFin.willowBeta_eq_sqrt_div' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

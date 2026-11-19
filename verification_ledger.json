@@ -4329,6 +4329,27 @@
       "input_hash": "06a06e197b0d25e7405e1d94568de15f19dd925a9c4a3c2dcdf7fcea36392cd5",
       "verified_at_commit": "5ce8af3"
     },
+    "mf-on-backward-caplet-black": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-11-19",
+      "elapsed_s": 2.2,
+      "input_hash": "7e237c22793bdef498cbf49b9ab04494c899dc01472e42e6f27b71aa2b31c1d0",
+      "verified_at_commit": "b7458a5f"
+    },
+    "mf-on-caplet-jensen-ordering": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-11-19",
+      "elapsed_s": 2.2,
+      "input_hash": "e0e715e56e3ef8d0eee816a4836fcbd5d934efd2d574d7f01dd5c2c51827e12b",
+      "verified_at_commit": "d6c59e4c"
+    },
+    "mf-on-damping-variance-time": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-11-19",
+      "elapsed_s": 1.9,
+      "input_hash": "0852b5e63730f238d3cae1514aff2467ec8e357e9ed3d036f9c78c38ac4217a6",
+      "verified_at_commit": "d6c59e4c"
+    },
     "mf-one-factor-copula-joint-default": {
       "benchmark_file": "credit.json",
       "date": "2026-11-17",
