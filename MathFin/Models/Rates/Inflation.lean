@@ -272,7 +272,8 @@ below) — the Gaussian expectation collapses to the naive ratio times the corre
 
   `C = exp(Bⁿ·mⁿ − Bʳ·mʳ + Bⁿ²·Vⁿ − Bʳ·Bⁿ·Cov)`,
 
-the chapter's eq. (17.10) verbatim, with `Cov = ρ·√(VⁿVʳ)` (hypothesis `hCov`) the
+the chapter's eq. (17.10), equal by reordering (the chapter prints the real-rate term
+first: `−Bʳmʳ + Bⁿmⁿ + Bⁿ²Vⁿ − BʳBⁿCov`), with `Cov = ρ·√(VⁿVʳ)` (hypothesis `hCov`) the
 covariance of the two rate deviations. The exponent's composition is pure algebra on
 `yoyRatioExp_gaussian_cov`: `(Dʳ−Dⁿ) = (Bⁿ²Vⁿ − Bʳ²Vʳ)/2` cancels the *real*
 variance's half exactly and doubles the *nominal* variance's half. The means `mⁿ, mʳ`,
