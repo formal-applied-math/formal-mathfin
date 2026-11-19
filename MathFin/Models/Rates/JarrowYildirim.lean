@@ -42,7 +42,8 @@ This module records what follows from that structure without the SDE calculus.
   payoff `𝔼^{Qn}[(I_T − K)⁺/B_T]` (convention
   `N[(I_T/I₀ − 1) − κ]⁺ = (N/I₀)·(I_T − K)⁺` with `K = I₀(1+κ)`, `κ` the total, non-annualised
 strike over `[0,T]`; an annual quoted strike `k` is `K = I₀(1+k)^T`) is `Pⁿ(0,T)` times the
-library's Black caplet on the curve forward `I₀·Pʳ(0,T)/Pⁿ(0,T)` at total variance `V` (the caplet is the contract
+library's Black caplet on the curve forward `I₀·Pʳ(0,T)/Pⁿ(0,T)` at total variance
+`V` (the caplet is the contract
   value of `MathFin.Contracts.value_caplet_black76`). `jyForwardIndex_lognormal_eq_curves` puts the
   lognormal index on that curve forward.
 * `jyZcCaplet_price_deterministic_rates`: with `σ_r = σ_n = 0` the integrated variance is `σ_I²T`
