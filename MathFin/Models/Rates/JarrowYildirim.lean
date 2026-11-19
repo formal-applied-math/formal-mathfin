@@ -32,7 +32,8 @@ This module records what follows from that structure without the SDE calculus.
   `(σ_I, −σ_r·B_r, σ_n·B_n)` against the `(I, r, n)` correlation matrix
   (`jyVarIntegrand_eq_quadForm`), hence non-negative when that matrix is positive
   semidefinite (`jyVarIntegrand_nonneg`). Pairwise `|ρ| ≤ 1` is not enough for three factors;
-  the condition used is the determinant form `jyCorrDet ≥ 0`. Degenerate reductions:
+  the condition used is `ρ_{rI}² ≤ 1`, `ρ_{nI}² ≤ 1` and the determinant form
+  `jyCorrDet ≥ 0`. Degenerate reductions:
   `jyVariance_eq_of_zero_rate_vols` and `jyVariance_eq_zero_of_zero_vols`.
 * The zero-coupon inflation caplet and floorlet (`jyZcCaplet_eq_black`, `jyZcFloorlet_eq_black`,
   `jyZcCaplet_floorlet_parity`): if the index under the nominal `T`-forward measure is lognormal
@@ -79,7 +80,8 @@ namespace MathFin.Inflation.JarrowYildirim
 /-- The Jarrow–Yildirim variance integrand at time `t` for the forward index `F(·,T)`, with
 constant parameters: `a_r, a_n` mean reversions, `σ_I, σ_r, σ_n` volatilities, `ρ_{rI}, ρ_{nI},
 ρ_{nr}` correlations. The Hull–White loadings are the library's `vasicekBondB` at the
-remaining maturity `T − t`:
+remaining maturity `T − t`. Nonzero mean reversions `a_r, a_n ≠ 0` are implicit in this reading:
+`vasicekBondB 0 τ = 0` by Lean's division convention, not the Ho–Lee limit `τ`:
 
   `σ_I² + σ_r²B_r² + σ_n²B_n² − 2ρ_{rI}σ_Iσ_rB_r + 2ρ_{nI}σ_Iσ_nB_n − 2ρ_{nr}σ_nσ_rB_nB_r`. -/
 noncomputable def jyVarIntegrand (ar an σI σr σn ρrI ρnI ρnr T t : ℝ) : ℝ :=
@@ -114,12 +116,13 @@ theorem quad2_nonneg {A B C y z : ℝ} (hA : 0 ≤ A) (hC : 0 ≤ C) (hB : B ^ 2
 
 /-- **Three-factor quadratic form.** For correlations with `ρ_{rI}² ≤ 1`, `ρ_{nI}² ≤ 1`
 and `jyCorrDet ≥ 0`, `x² + y² + z² + 2ρ_{rI}xy + 2ρ_{nI}xz + 2ρ_{nr}yz ≥ 0`. -/
-theorem quad3_nonneg {a b c x y z : ℝ} (ha : a ^ 2 ≤ 1) (hb : b ^ 2 ≤ 1)
-    (hdet : 0 ≤ jyCorrDet a b c) :
-    0 ≤ x ^ 2 + y ^ 2 + z ^ 2 + 2 * a * x * y + 2 * b * x * z + 2 * c * y * z := by
-  have key := quad2_nonneg (A := 1 - a ^ 2) (B := c - a * b) (C := 1 - b ^ 2) (y := y) (z := z)
+theorem quad3_nonneg {ρrI ρnI ρnr x y z : ℝ} (ha : ρrI ^ 2 ≤ 1) (hb : ρnI ^ 2 ≤ 1)
+    (hdet : 0 ≤ jyCorrDet ρrI ρnI ρnr) :
+    0 ≤ x ^ 2 + y ^ 2 + z ^ 2 + 2 * ρrI * x * y + 2 * ρnI * x * z + 2 * ρnr * y * z := by
+  have key := quad2_nonneg (A := 1 - ρrI ^ 2) (B := ρnr - ρrI * ρnI) (C := 1 - ρnI ^ 2)
+    (y := y) (z := z)
     (by linarith) (by linarith) (by unfold jyCorrDet at hdet; nlinarith)
-  nlinarith [sq_nonneg (x + a * y + b * z)]
+  nlinarith [sq_nonneg (x + ρrI * y + ρnI * z)]
 
 /-- The integrand is the quadratic form of `(σ_I, −σ_r·B_r, σ_n·B_n)` against the
 `(I, r, n)` correlation matrix: the variance of `σ_I dW_I − σ_rB_r dW_r + σ_nB_n dW_n`. -/
@@ -160,13 +163,13 @@ theorem jyVariance_eq_zero_of_zero_vols (ar an ρrI ρnI ρnr T : ℝ) :
     jyVariance ar an 0 0 0 ρrI ρnI ρnr T = 0 := by
   simp [jyVariance_eq_of_zero_rate_vols]
 
-
 /-! ### The zero-coupon inflation caplet and floorlet
 
 `Qn` is the nominal pricing measure with money-market account `BT`, and `Q^T` its nominal
 `T`-forward measure (`MathFin.forwardMeasure`). The hypotheses are: the index-linked bond is
 priced on the real curve (`hident`, as in `ZCSwap.forwardIndex_eq`), and under `Q^T` the index
-is lognormal, `I_T = F₀·exp(−V/2 + √V·Z)` with `Z ~ N(0,1)` — the log-variance `V` being
+is lognormal, `I_T = bsTerminal F₀ 0 √V 1 Z` (`= F₀·exp(−V/2 + √V·Z)` for `V ≥ 0`) with
+`Z ~ N(0,1)` — the log-variance `V` being
 `jyVariance` when the SDE-level derivation is granted (not derived here). The caplet pays
 `(I_T − K)⁺` at `T` and is priced with the nominal bond `Pⁿ(0,T)` as numéraire. -/
 
@@ -174,8 +177,9 @@ section Caplet
 
 variable {Ω : Type*} [MeasurableSpace Ω] {Qn : Measure Ω}
 
-/-- **The lognormal forward index sits on the curve forward.** If `I_T = F₀·exp(−V/2 + √V·Z)`
-with `Z ~ N(0,1)` under the nominal `T`-forward measure, then the index-linked-bond
+/-- **The lognormal forward index sits on the curve forward.** If `I_T = bsTerminal F₀ 0 √V 1 Z`
+(`= F₀·exp(−V/2 + √V·Z)` for `V ≥ 0`) with `Z ~ N(0,1)` under the nominal `T`-forward
+measure, then the index-linked-bond
 identification forces `F₀ = I₀·Pʳ(0,T)/Pⁿ(0,T)` (`ZCSwap.forwardIndex_eq`). -/
 theorem jyForwardIndex_lognormal_eq_curves (BT : Ω → ℝ) (Pn0T Pr0T I0 F0 V : ℝ) (Z : Ω → ℝ)
     (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (hPn0T : 0 < Pn0T)
@@ -328,7 +332,8 @@ section YoyPrice
 
 /-- **Time-0 price of a year-on-year payment.** Under the nominal `T`-forward measure
 `Q^T = forwardMeasure Qn BT` and the hypotheses of `jyYoyForward_eq_convexity`, with
-`Pⁿ(0,T) = 𝔼^{Qn}[1/B_T] > 0` (the single variable `Pn0T`, also the one in the naive ratio), the time-0 value of the payment `I_T/I_S` at `T` is
+`Pⁿ(0,T) = 𝔼^{Qn}[1/B_T] > 0` (the single variable `Pn0T`, also the one in the naive ratio), the
+time-0 value of the payment `I_T/I_S` at `T` is
 
   `𝔼^{Qn}[(I_T/I_S)/B_T] = Pⁿ(0,T)·(naive ratio of forwards)·exp(Bⁿmⁿ − Bʳmʳ + Bⁿ²Vⁿ − BʳBⁿ·Cov)`.
 
