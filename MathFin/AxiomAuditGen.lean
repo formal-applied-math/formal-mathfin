@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (1077 MathFin constants, 29 upstream). Citations
+  corpus (1078 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -3982,6 +3982,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.tendsto_mpUpperEdge_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.tendsto_mpUpperEdge_zero
+
+/-- info: 'MathFin.tendsto_nelsonSiegelZeroRate_zero_meanReversion' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.tendsto_nelsonSiegelZeroRate_zero_meanReversion
 
 /-- info: 'MathFin.tendsto_oneFactorLossFraction_ae' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

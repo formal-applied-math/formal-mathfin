@@ -1675,6 +1675,34 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. sum_deriv_keyRate_eq_deriv_price in MathFin/Models/Rates/DeterministicMarket.lean rewrites the market price as bondPriceDisc (bondPriceDisc_eq_price) and applies sum_deriv_keyRate_eq_deriv_bondPriceDisc. SCOPE: deterministic numeraire (1+y)^floor t; integer payment dates; dollar durations."
       }
+    },
+    {
+      "id": "mf-nelson-siegel-zero-rate-zero-decay-limit",
+      "name": "Nelson–Siegel Loading Tends to 1 and the Zero Rate to c0 + c1 at Vanishing Decay",
+      "description": "At a fixed maturity t != 0 the Nelson–Siegel loading s(kappa*t) = (1 - exp(-kappa*t))/(kappa*t) tends to 1 as the decay parameter kappa -> 0+, so the decay-parameterized zero rate c0 + c1*s(kappa*t) + c2*(s(kappa*t) - exp(-kappa*t)) tends to c0 + c1, and the Svensson second loading term c3*(s(kappa*t) - exp(-kappa*t)) tends to 0. Substitution is not the limit: Lean's x/0 = 0 sends the loading to 0 at kappa = 0 exactly (numerator 1 - exp(0) = 0), so a denominator-epsilon guard evaluates the zero rate to c0 - c2 and the second term to -c3 at kappa = 0 -- values of a different model, recorded as companion theorems. A small-kappa branch must return the limits. The same guarded-limit species as the Vasicek A(t,T) hardcoded-to-0 guard fixed upstream (VasicekZeroMeanReversionLimit.lean's motivating precedent). The core limit transports the repo's existing nssSlope short-end limit tendsto_nssSlope_nhdsNE_zero (NelsonSiegelSvensson.lean) along kappa -> kappa*t via tendsto_div_const_nhdsNE_zero -- no parallel loading analysis.",
+      "domain": "mathematical_finance",
+      "metadata": {
+        "chapter": null,
+        "reference": "C. R. Nelson and A. F. Siegel, Parsimonious Modeling of Yield Curves, Journal of Business 60(4) (1987), 473–489; L. E. O. Svensson, Estimating and Interpreting Forward Interest Rates: Sweden 1992–1994 (NBER Working Paper 4871, 1994); QuantLib, NelsonSiegelFitting, ql/termstructures/yield/nonlinearfittingmethods.hpp",
+        "citations": [
+          {
+            "key": "NelsonSiegel1987"
+          },
+          {
+            "key": "Svensson1994"
+          },
+          {
+            "key": "QuantLib",
+            "locator": "NelsonSiegelFitting"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, MathFin/Models/Rates/NelsonSiegelZeroMeanReversion.lean. The core limit transports the repo's existing nssSlope short-end limit tendsto_nssSlope_nhdsNE_zero (MathFin/Models/Rates/NelsonSiegelSvensson.lean) along kappa -> kappa*t via tendsto_div_const_nhdsNE_zero -- no parallel loading analysis. The substitution companions record the junk values Lean's total division produces at kappa = 0. Scope: kappa -> 0+ at fixed maturity; no engine is formalized. Axioms-clean."
+      },
+      "code": {
+        "lean": "import MathFin.Models.Rates.NelsonSiegelZeroMeanReversion\n\nopen Filter Topology Set\n\nnamespace MathFin\n\ntheorem nelson_siegel_zero_rate_zero_decay_limit_thm (c0 c1 c2 t : ℝ) (ht : t ≠ 0) :\n    Tendsto (fun κ => nelsonSiegelZeroRate c0 c1 c2 κ t) (nhdsWithin 0 (Set.Ioi 0))\n      (nhds (c0 + c1)) :=\n  tendsto_nelsonSiegelZeroRate_zero_meanReversion c0 c1 c2 t ht\n\nend MathFin\n"
+      }
     }
   ]
 }
