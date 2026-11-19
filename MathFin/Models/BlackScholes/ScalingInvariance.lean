@@ -15,10 +15,9 @@ Two invariances of `bsd1`, `bsd2` and `bsV` that follow from the formulas alone.
 * Spatial homogeneity: scaling spot and strike by `c > 0` leaves `d₁`, `d₂` fixed and scales the
   price by `c`.
 * Time-volatility scaling: `(r, σ, τ) ↦ (c r, σ√c, τ/c)` fixes `r τ`, `σ² τ` and `σ √τ`, hence
-  `d₁`, `d₂` and the price. For zero rates this is the dependence on `σ² τ` alone that
-  `bsV_eq_totalVarianceCall` (`Models/ModelFree/CalendarArbitrage.lean`) records.
-
-They are kept apart from `PDE.lean` (where `bsV` is defined) to leave its imports unchanged.
+  `d₁`, `d₂` and the price. For zero rates and `c = τ` the scaling gives the dependence on
+  `σ² τ` alone, of which `bsV_eq_totalVarianceCall`
+  (`Models/ModelFree/CalendarArbitrage.lean`) is the `r = 0`, `c = τ` instance.
 
 ## Main results
 
@@ -80,10 +79,10 @@ theorem bsd2_timeScale {S K r σ τ c : ℝ} (hc : 0 < c) :
   rw [bsd2, bsd2, bsd1_timeScale hc, hden]
 
 /-- **Time-volatility scaling**: `bsV K (c r) (σ √c) S (τ / c) = bsV K r σ S τ` for `c > 0`.
-For `r = 0` this is the dependence of the call on `σ² τ` alone
-(`bsV_eq_totalVarianceCall`); here the rate is scaled with it so that `r τ` is fixed too. No
-hypothesis on `σ` or `τ`: `σ = 0` goes through the junk value of the division by zero in `bsd1`
-and `τ < 0` through `√τ = 0`, neither a price. -/
+For `r = 0` and `c = τ` this gives the dependence of the call on `σ² τ` alone, of which
+`bsV_eq_totalVarianceCall` is the instance; here the rate is scaled with it so that `r τ` is
+fixed too. No hypothesis on `σ` or `τ`: `σ = 0` goes through the junk value of the division by
+zero in `bsd1` and `τ < 0` through `√τ = 0`, neither a price. -/
 theorem bsV_timeScale {K r σ S τ c : ℝ} (hc : 0 < c) :
     bsV K (c * r) (σ * Real.sqrt c) S (τ / c) = bsV K r σ S τ := by
   have hexp : c * r * (τ / c) = r * τ := by field_simp

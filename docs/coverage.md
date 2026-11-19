@@ -660,7 +660,8 @@ split by area. What each bridge proves, by area:
   under `(r, σ, T) ↦ (cr, σ√c, T/c)` at fixed `m`, for an arbitrary constant `β`; it reads as a
   price only where `ptDownOutCall` does. Not derived: `ptDownOutCall` as a discounted expected
   payoff, the value of `β`, and the accuracy of the shift as an approximation to the discretely
-  monitored price.
+  monitored price. A further theorem is a rearrangement of in–out parity for an arbitrary barrier
+  event, not tied to the monitoring dates.
   `MargrabeGrounding`'s two existential theorems no longer claim to derive their hypothesis: they
   now exhibit the measure and driver. The Goldman–Sosin–Gatto continuous floating-strike lookback
   closed form dominates the vanilla call struck at the running minimum, via a Mills-ratio
