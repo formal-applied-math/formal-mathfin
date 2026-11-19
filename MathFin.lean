@@ -981,3 +981,4 @@ import MathFin.Models.BlackScholes.ContinuousLookbackPricing
 import MathFin.Models.BlackScholes.ShoutFloorMonotonicity
 import MathFin.Choice.Performance.MarchenkoPasturEdge
 import MathFin.Markets.DeFi.ConcentratedLiquidityVaR
+import MathFin.Models.ModelFree.BlackFormTail
