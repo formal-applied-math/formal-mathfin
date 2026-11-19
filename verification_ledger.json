@@ -3331,9 +3331,9 @@
     "mf-inflation-hw-reconstitution-normaliser": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-11-19",
-      "elapsed_s": 2.5,
-      "input_hash": "e0114eb01c84484f3943e83e3e72192f9544010ecd530047517adf58442ea704",
-      "verified_at_commit": "be41106"
+      "elapsed_s": 3.5,
+      "input_hash": "c5f59f9b568d837a94fd285128b5b93afd364327429bc86b5ca0e1c120bbf211",
+      "verified_at_commit": "7a1b014"
     },
     "mf-information-ratio-scale-invariant": {
       "benchmark_file": "portfolio_and_performance.json",
@@ -3373,16 +3373,16 @@
     "mf-jarrow-yildirim-yoy-forward-convexity": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-11-19",
-      "elapsed_s": 2.5,
-      "input_hash": "37b5cb7f280dfda5a9f61ea77e30f8fac6638bd16fa941b8161dbce21978622c",
-      "verified_at_commit": "be41106"
+      "elapsed_s": 3.6,
+      "input_hash": "5eb8d0b4dedab6280081d43d9516c9edbb8ca3240f2bb49f10d15436c58cc03e",
+      "verified_at_commit": "7a1b014"
     },
     "mf-jarrow-yildirim-zc-inflation-caplet": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-11-19",
-      "elapsed_s": 2.5,
-      "input_hash": "3da337b754e45527ad265a5e3061d167fe827a444abfc49531d728615bd76b66",
-      "verified_at_commit": "be41106"
+      "elapsed_s": 3.5,
+      "input_hash": "c693ec1704799913e25b2f0b56def6b87fc8aa36ee6df4c4643d1278a0e15ffb",
+      "verified_at_commit": "7a1b014"
     },
     "mf-joint-stdev-triangle": {
       "benchmark_file": "risk_measures.json",
