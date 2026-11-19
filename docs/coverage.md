@@ -568,7 +568,7 @@ split by area. What each bridge proves, by area:
   SDE is cited, not proved.
 - **Jarrow–Yildirim inflation** (`interest_rates.json`; `Models/Rates/JarrowYildirim.lean`). Two
   `reduced_core` entries, composing existing results under model hypotheses.
-  `mf-jarrow-yildirim-zc-inflation-caplet`: the priced zero-coupon inflation caplet is the Black caplet on
+  `mf-jarrow-yildirim-zc-inflation-caplet`: the priced zero-coupon inflation caplet is `Pⁿ(0,T)` times the Black caplet on
   the curve forward `I₀Pʳ/Pⁿ`, given the lognormal law of the index under the nominal `T`-forward
   measure with a free positive log-variance `V`. Not derived: the SDE-level derivation of `V` (the
   integrated Jarrow–Yildirim variance `jyVariance`) and of the real-rate drift shift,
