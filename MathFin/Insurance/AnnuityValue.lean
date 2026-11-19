@@ -34,6 +34,8 @@ under the measure `Q` of the lifetime: the statement is about the lifetime's law
   payments of one while the default indicator is zero.
 * `lastSurvivor_annuity_eq_value`: the last-survivor annuity is the sum of the single-life
   annuity values minus the joint-life value, on the same schedule.
+* `reversionary_annuity_eq_value`: the reversionary annuity to the second life after the
+  first dies is the second life's annuity value minus the joint-life value.
 
 ## References
 
@@ -200,6 +202,159 @@ theorem lastSurvivor_annuity_eq_value {Ω : Type*} [MeasurableSpace Ω]
     simp only [pathPV_payFlows, Payoff.eval, scenarioAt]
     rw [integral_finsetSum _ (fun k _ ↦ ((hmin k).const_mul (b k)).const_mul (D (t k)))]
   rw [eL, eA, eB, eC, ← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
+  exact Finset.sum_congr rfl fun k _ ↦ hval k
+
+/-- **Reversionary annuity identity.** The value of the annuity paying life2's benefit only
+after life1 has died is the life2 single-life value minus the joint-life value, for the same
+payment schedule, discount and lifetimes. The payoff is life1's death indicator times life2's
+survival payoff, pointwise the difference of life2's survival payoff and the joint survival
+payoff on the 0/1-valued default indicators, with no independence hypothesis. -/
+theorem reversionary_annuity_eq_value {Ω : Type*} [MeasurableSpace Ω]
+    (Q : Measure Ω) [IsProbabilityMeasure Q] (T1 T2 : Ω → ℝ)
+    (hT1 : Measurable T1) (hT2 : Measurable T2) (D : ℝ≥0 → ℝ) (t : ℕ → ℝ≥0)
+    (b : ℕ → ℝ) (n : ℕ) :
+    (payFlows t (fun k ↦ .mul (.const (b k))
+      (.mul (.obs true (t k)) (.sub (.const 1) (.obs false (t k))))) n).value
+        Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ())
+      = (payFlows t (fun k ↦ .mul (.const (b k))
+          (.sub (.const 1) (.obs false (t k)))) n).value
+          Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ())
+        - (payFlows t (fun k ↦ .mul (.const (b k))
+            (.min (.sub (.const 1) (.obs true (t k)))
+              (.sub (.const 1) (.obs false (t k))))) n).value
+            Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ()) := by
+  have hind1 (k : ℕ) :
+      Integrable (defaultIndicator (bif true then T1 else T2) () (t k)) Q :=
+    (integrable_const (1 : ℝ)).indicator (measurableSet_le hT1 measurable_const)
+  have hind2 (k : ℕ) :
+      Integrable (defaultIndicator (bif false then T1 else T2) () (t k)) Q :=
+    (integrable_const (1 : ℝ)).indicator (measurableSet_le hT2 measurable_const)
+  have hs1 (k : ℕ) :
+      Integrable (fun ω ↦ 1 - defaultIndicator (bif true then T1 else T2) () (t k) ω) Q :=
+    (integrable_const (1 : ℝ)).sub (hind1 k)
+  have hs2 (k : ℕ) :
+      Integrable (fun ω ↦ 1 - defaultIndicator (bif false then T1 else T2) () (t k) ω) Q :=
+    (integrable_const (1 : ℝ)).sub (hind2 k)
+  have hmin (k : ℕ) :
+      Integrable (fun ω ↦ min (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)
+        (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)) Q :=
+    (hs1 k).inf (hs2 k)
+  have hpt (k : ℕ) (ω : Ω) :
+      defaultIndicator (bif true then T1 else T2) () (t k) ω *
+          (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)
+        = (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)
+          - min (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)
+            (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω) := by
+    by_cases h1 : T1 ω ≤ ((t k : ℝ≥0) : ℝ)
+    · by_cases h2 : T2 ω ≤ ((t k : ℝ≥0) : ℝ)
+      · have e1 : defaultIndicator (bif true then T1 else T2) () (t k) ω = 1 := by
+          have hm : ω ∈ {x | (bif true then T1 else T2) x ≤ ((t k : ℝ≥0) : ℝ)} := h1
+          change Set.indicator {x | (bif true then T1 else T2) x ≤ ((t k : ℝ≥0) : ℝ)}
+            (1 : Ω → ℝ) ω = 1
+          exact Set.indicator_of_mem hm _
+        have e2 : defaultIndicator (bif false then T1 else T2) () (t k) ω = 1 := by
+          have hm : ω ∈ {x | (bif false then T1 else T2) x ≤ ((t k : ℝ≥0) : ℝ)} := h2
+          change Set.indicator {x | (bif false then T1 else T2) x ≤ ((t k : ℝ≥0) : ℝ)}
+            (1 : Ω → ℝ) ω = 1
+          exact Set.indicator_of_mem hm _
+        rw [e1, e2]
+        norm_num [min_def]
+      · have e1 : defaultIndicator (bif true then T1 else T2) () (t k) ω = 1 := by
+          have hm : ω ∈ {x | (bif true then T1 else T2) x ≤ ((t k : ℝ≥0) : ℝ)} := h1
+          change Set.indicator {x | (bif true then T1 else T2) x ≤ ((t k : ℝ≥0) : ℝ)}
+            (1 : Ω → ℝ) ω = 1
+          exact Set.indicator_of_mem hm _
+        have e2 : defaultIndicator (bif false then T1 else T2) () (t k) ω = 0 := by
+          have hm : ω ∉ {x | (bif false then T1 else T2) x ≤ ((t k : ℝ≥0) : ℝ)} := h2
+          change Set.indicator {x | (bif false then T1 else T2) x ≤ ((t k : ℝ≥0) : ℝ)}
+            (1 : Ω → ℝ) ω = 0
+          exact Set.indicator_of_notMem hm _
+        rw [e1, e2]
+        norm_num [min_def]
+    · by_cases h2 : T2 ω ≤ ((t k : ℝ≥0) : ℝ)
+      · have e1 : defaultIndicator (bif true then T1 else T2) () (t k) ω = 0 := by
+          have hm : ω ∉ {x | (bif true then T1 else T2) x ≤ ((t k : ℝ≥0) : ℝ)} := h1
+          change Set.indicator {x | (bif true then T1 else T2) x ≤ ((t k : ℝ≥0) : ℝ)}
+            (1 : Ω → ℝ) ω = 0
+          exact Set.indicator_of_notMem hm _
+        have e2 : defaultIndicator (bif false then T1 else T2) () (t k) ω = 1 := by
+          have hm : ω ∈ {x | (bif false then T1 else T2) x ≤ ((t k : ℝ≥0) : ℝ)} := h2
+          change Set.indicator {x | (bif false then T1 else T2) x ≤ ((t k : ℝ≥0) : ℝ)}
+            (1 : Ω → ℝ) ω = 1
+          exact Set.indicator_of_mem hm _
+        rw [e1, e2]
+        norm_num [min_def]
+      · have e1 : defaultIndicator (bif true then T1 else T2) () (t k) ω = 0 := by
+          have hm : ω ∉ {x | (bif true then T1 else T2) x ≤ ((t k : ℝ≥0) : ℝ)} := h1
+          change Set.indicator {x | (bif true then T1 else T2) x ≤ ((t k : ℝ≥0) : ℝ)}
+            (1 : Ω → ℝ) ω = 0
+          exact Set.indicator_of_notMem hm _
+        have e2 : defaultIndicator (bif false then T1 else T2) () (t k) ω = 0 := by
+          have hm : ω ∉ {x | (bif false then T1 else T2) x ≤ ((t k : ℝ≥0) : ℝ)} := h2
+          change Set.indicator {x | (bif false then T1 else T2) x ≤ ((t k : ℝ≥0) : ℝ)}
+            (1 : Ω → ℝ) ω = 0
+          exact Set.indicator_of_notMem hm _
+        rw [e1, e2]
+        norm_num [min_def]
+  have hrev (k : ℕ) :
+      Integrable (fun ω ↦ defaultIndicator (bif true then T1 else T2) () (t k) ω *
+        (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)) Q :=
+    ((hs2 k).sub (hmin k)).congr (Filter.Eventually.of_forall fun ω ↦ (hpt k ω).symm)
+  have hval (k : ℕ) :
+      (∫ ω, D (t k) * (b k * (defaultIndicator (bif true then T1 else T2) () (t k) ω *
+        (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω))) ∂Q)
+      = (∫ ω, D (t k) * (b k * (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)) ∂Q)
+        - (∫ ω, D (t k) *
+          (b k * min (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)
+            (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)) ∂Q) := by
+    have h1 : Integrable (fun ω ↦ D (t k) *
+        (b k * (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω))) Q :=
+      ((hs2 k).const_mul (b k)).const_mul (D (t k))
+    have h2 : Integrable (fun ω ↦ D (t k) *
+        (b k * min (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)
+          (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω))) Q :=
+      ((hmin k).const_mul (b k)).const_mul (D (t k))
+    calc (∫ ω, D (t k) * (b k * (defaultIndicator (bif true then T1 else T2) () (t k) ω *
+          (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω))) ∂Q)
+        = ∫ ω, (D (t k) * (b k * (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω))
+          - D (t k) * (b k * min (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)
+            (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω))) ∂Q := by
+          apply integral_congr_ae
+          filter_upwards with ω
+          linear_combination D (t k) * b k * (hpt k ω)
+      _ = (∫ ω, D (t k) * (b k * (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)) ∂Q)
+          - (∫ ω, D (t k) *
+            (b k * min (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)
+              (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)) ∂Q) :=
+          integral_sub h1 h2
+  have eR : (payFlows t (fun k ↦ .mul (.const (b k))
+      (.mul (.obs true (t k)) (.sub (.const 1) (.obs false (t k))))) n).value
+        Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ())
+      = ∑ k ∈ Finset.range n, ∫ ω, D (t k) *
+        (b k * (defaultIndicator (bif true then T1 else T2) () (t k) ω *
+          (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω))) ∂Q := by
+    rw [Contract.value]
+    simp only [pathPV_payFlows, Payoff.eval, scenarioAt]
+    rw [integral_finsetSum _ (fun k _ ↦ ((hrev k).const_mul (b k)).const_mul (D (t k)))]
+  have eS : (payFlows t (fun k ↦ .mul (.const (b k))
+        (.sub (.const 1) (.obs false (t k)))) n).value
+        Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ())
+      = ∑ k ∈ Finset.range n, ∫ ω, D (t k) *
+        (b k * (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)) ∂Q := by
+    rw [Contract.value]
+    simp only [pathPV_payFlows, Payoff.eval, scenarioAt]
+    rw [integral_finsetSum _ (fun k _ ↦ ((hs2 k).const_mul (b k)).const_mul (D (t k)))]
+  have eJ : (payFlows t (fun k ↦ .mul (.const (b k))
+        (.min (.sub (.const 1) (.obs true (t k)))
+          (.sub (.const 1) (.obs false (t k))))) n).value
+        Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ())
+      = ∑ k ∈ Finset.range n, ∫ ω, D (t k) *
+        (b k * min (1 - defaultIndicator (bif true then T1 else T2) () (t k) ω)
+          (1 - defaultIndicator (bif false then T1 else T2) () (t k) ω)) ∂Q := by
+    rw [Contract.value]
+    simp only [pathPV_payFlows, Payoff.eval, scenarioAt]
+    rw [integral_finsetSum _ (fun k _ ↦ ((hmin k).const_mul (b k)).const_mul (D (t k)))]
+  rw [eR, eS, eJ, ← Finset.sum_sub_distrib]
   exact Finset.sum_congr rfl fun k _ ↦ hval k
 
 end MathFin
