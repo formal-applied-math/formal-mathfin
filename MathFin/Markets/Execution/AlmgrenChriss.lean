@@ -286,8 +286,9 @@ private theorem liquidationCost_le_and_eq_of_stationary (hΔ : 0 < Δ) (hη : 0 
 
 /-- A profile `φ` with `φ (t + 1) + φ (t − 1) = (2 + a) φ t` and `φ 0 = 0`, `φ N ≠ 0`, scaled to
 `X k = X₀ φ (N − k) / φ N`, starts at `X₀`, ends at `0`, and satisfies the discrete
-Euler–Lagrange equation with coefficient `a`. -/
-private theorem stationary_of_profile {φ : ℝ → ℝ} {a X₀ : ℝ}
+Euler–Lagrange equation with coefficient `a`: it solves the discrete boundary-value problem
+`X k − 2 X (k+1) + X (k+2) = a X (k+1)`, `X 0 = X₀`, `X N = 0`. -/
+theorem solves_secondDifference_of_profile {φ : ℝ → ℝ} {a X₀ : ℝ}
     (hφ : ∀ t, φ (t + 1) + φ (t - 1) = (2 + a) * φ t) (h₀ : φ 0 = 0) (hN : φ N ≠ 0)
     {X : ℕ → ℝ} (hX : ∀ k, X k = X₀ * φ (N - k) / φ N) :
     X 0 = X₀ ∧ X N = 0 ∧ ∀ k, k + 2 ≤ N → X k - 2 * X (k + 1) + X (k + 2) = a * X (k + 1) := by
@@ -306,8 +307,8 @@ private theorem liquidationPath_spec (hN : 0 < N) (hΔ : 0 < Δ) (hη : 0 < η) 
       ∧ ∀ k, k + 2 ≤ N → X k - 2 * X (k + 1) + X (k + 2) = c * Δ ^ 2 / η * X (k + 1) := by
   rcases hc.eq_or_lt with h₀ | hpos
   · subst h₀
-    obtain ⟨h₁, h₂, h₃⟩ := stationary_of_profile (N := N) (φ := fun t ↦ t) (a := 0 * Δ ^ 2 / η)
-      (X₀ := X₀) (X := fun k ↦ X₀ * ((N : ℝ) - k) / N) (fun t ↦ by ring) rfl
+    obtain ⟨h₁, h₂, h₃⟩ := solves_secondDifference_of_profile (N := N) (φ := fun t ↦ t)
+      (a := 0 * Δ ^ 2 / η) (X₀ := X₀) (X := fun k ↦ X₀ * ((N : ℝ) - k) / N) (fun t ↦ by ring) rfl
       (by simpa using hN.ne') fun k ↦ rfl
     exact ⟨_, fun k ↦ by simp [liquidationPath], h₁, h₂, h₃⟩
   · have hθ : 0 < 2 * Real.arsinh (√(c / η) * Δ / 2) := by
@@ -316,7 +317,7 @@ private theorem liquidationPath_spec (hN : 0 < N) (hΔ : 0 < Δ) (hη : 0 < η) 
       exact div_pos (mul_pos (Real.sqrt_pos.2 (div_pos hpos hη)) hΔ) two_pos
     have hcosh := cosh_liquidationRate_mul hΔ.ne' (div_nonneg hc hη.le)
     rw [liquidationRate, div_mul_cancel₀ _ hΔ.ne'] at hcosh
-    obtain ⟨h₁, h₂, h₃⟩ := stationary_of_profile (N := N)
+    obtain ⟨h₁, h₂, h₃⟩ := solves_secondDifference_of_profile (N := N)
       (φ := fun t ↦ Real.sinh (2 * Real.arsinh (√(c / η) * Δ / 2) * t))
       (a := c * Δ ^ 2 / η) (X₀ := X₀)
       (X := fun k ↦ X₀ * Real.sinh (2 * Real.arsinh (√(c / η) * Δ / 2) * (N - k))
