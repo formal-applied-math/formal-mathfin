@@ -45,7 +45,8 @@ names = [
   # lattices and early exercise
   "MathFin.binomialPrice", "MathFin.binomialOptionPriceOnePeriod", "MathFin.americanPrice",
   "MathFin.bermudanPrice", "MathFin.BlackScholes.AmericanPut.Stopping.canonicalPrice",
-  # rates, credit, forwards
+  # rates, credit, forwards (`zcb` is a formula on real dates, so it stays off the trunk until the
+  # rates limb is re-founded; its tie is `Rates.priceAt_pay_eq_zcb`)
   "MathFin.zcb", "MathFin.bondPriceDisc", "MathFin.bondPriceKeyRate", "MathFin.vasicekBondV",
   "MathFin.cleanPrice", "MathFin.dirtyPrice", "MathFin.bondForwardPrice",
   "MathFin.schwartzFuturesPrice", "MathFin.CVA.cva", "MathFin.Cox.premiumLeg",
@@ -97,7 +98,7 @@ members = ["MathFin.survivalProbability", "MathFin.hazardSurvival",
 [[duplicate]]
 concept = "portfolio variance"
 canonical = "MathFin.portfolioVarN"
-members = ["MathFin.portfolioVarTwo", "MathFin.varianceTwo"]
+members = ["MathFin.portfolioVarTwo"]
 
 [[duplicate]]
 concept = "Black–Scholes call"

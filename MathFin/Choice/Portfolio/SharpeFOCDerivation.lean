@@ -21,12 +21,13 @@ This file closes that gap. It
 
 1. defines the two-asset Sharpe-ratio-squared
    `Sh²(w) = E(w)² / V(w)` where `E(w) = w r₁ + (1 − w) r₂`,
-   `V(w) = w² σ₁² + (1 − w)² σ₂² + 2 w (1 − w) ρ σ₁ σ₂`;
+   `V(w) = w² σ₁² + (1 − w)² σ₂² + 2 w (1 − w) ρ σ₁ σ₂` (the library's `portfolioVarTwo σ₁ σ₂ ρ w`,
+   `Choice/Portfolio/Markowitz.lean`);
 2. proves `HasDerivAt` of `Sh²` with the textbook formula
    `Sh²'(w) = (2 E E' V − E² V') / V²`;
 3. shows the numerator factors as
    `2 E E' V − E² V' = 2 E · (r₁ · (Σw)₂ − r₂ · (Σw)₁)`;
-4. concludes that the critical points of `Sh²` (where `E ≠ 0`, `V > 0`)
+4. concludes that the critical points of `Sh²` (where `E ≠ 0`, `V ≠ 0`)
    are precisely the points where the cross-product FOC holds.
 
 ## Why this is "first principles"
@@ -38,8 +39,6 @@ loop between the optimization-theoretic and algebraic perspectives.
 ## Main definitions
 
 * `expectedReturnTwo`: the two-asset expected return `w r₁ + (1 − w) r₂`.
-* `varianceTwo`: the two-asset variance as a function of the weight `w` on asset 1
-  (`portfolioVarTwo` of `Choice/Portfolio/Markowitz.lean` with the weight as first argument).
 * `marginalVarOne`, `marginalVarTwo`: the components `(Σw)₁`, `(Σw)₂` of the marginal variance.
 * `sharpeSqTwo`: the squared Sharpe ratio `E(w)² / V(w)` as a function of `w`.
 
@@ -47,13 +46,12 @@ loop between the optimization-theoretic and algebraic perspectives.
 
 * `sharpeSqTwo_eq_sharpeRatio_sq`: for `V(w) ≥ 0`, `Sh²(w)` is the squared `sharpeRatio` of the
   portfolio return (zero risk-free rate) at volatility `√V(w)`.
-* `varianceTwo_eq_w_dot_Sigma_w`: `V = w · (Σw)₁ + (1 − w) · (Σw)₂` (the
-  self-dot identity).
-* `hasDerivAt_varianceTwo`: `V'(w) = 2 · ((Σw)₁ − (Σw)₂)`.
+* `portfolioVarTwo_eq_sum_mul_marginalVar`: `V = w · (Σw)₁ + (1 − w) · (Σw)₂`.
+* `hasDerivAt_portfolioVarTwo`: `V'(w) = 2 · ((Σw)₁ − (Σw)₂)`.
 * `sharpeSqTwo_deriv_numerator_factored`: the derivative numerator
   factors through `r₁ (Σw)₂ − r₂ (Σw)₁`.
 * `sharpeSqTwo_critical_iff_crossProduct_FOC`: critical-point
-  characterisation (`E ≠ 0, V > 0` regime).
+  characterisation (`E ≠ 0, V ≠ 0` regime).
 
 ## References
 
@@ -74,11 +72,6 @@ namespace MathFin
 (with `1 − w` on asset 2). -/
 noncomputable def expectedReturnTwo (w r₁ r₂ : ℝ) : ℝ := w * r₁ + (1 - w) * r₂
 
-/-- Two-asset portfolio variance as a function of the weight `w`: the library's
-`portfolioVarTwo` (`Choice/Portfolio/Markowitz.lean`) with the weight as first argument. -/
-noncomputable def varianceTwo (w σ₁ σ₂ ρ : ℝ) : ℝ :=
-  portfolioVarTwo σ₁ σ₂ ρ w
-
 /-- Marginal variance contribution of asset 1: `(Σw)₁ = w σ₁² + (1−w) ρ σ₁ σ₂`. -/
 noncomputable def marginalVarOne (w σ₁ σ₂ ρ : ℝ) : ℝ :=
   w * σ₁^2 + (1 - w) * ρ * σ₁ * σ₂
@@ -89,22 +82,25 @@ noncomputable def marginalVarTwo (w σ₁ σ₂ ρ : ℝ) : ℝ :=
 
 /-- Two-asset Sharpe-ratio squared as a function of weight `w`. -/
 noncomputable def sharpeSqTwo (w r₁ r₂ σ₁ σ₂ ρ : ℝ) : ℝ :=
-  (expectedReturnTwo w r₁ r₂)^2 / (varianceTwo w σ₁ σ₂ ρ)
+  (expectedReturnTwo w r₁ r₂)^2 / (portfolioVarTwo σ₁ σ₂ ρ w)
 
 /-- **The two-asset Sharpe ratio squared is the squared Sharpe ratio** of the portfolio return
 with zero risk-free rate (`returns` are excess returns): `Sh²(w) = sharpeRatio E(w) 0 σ(w) ^ 2`,
 with `σ(w) = √V(w)` the portfolio volatility. `V(w)` is the variance of `w R₁ + (1 − w) R₂`
 (`portfolioVarTwo_eq_variance`, `Choice/Portfolio/MarkowitzLagrangian.lean`). -/
-theorem sharpeSqTwo_eq_sharpeRatio_sq (w r₁ r₂ σ₁ σ₂ ρ : ℝ) (hV : 0 ≤ varianceTwo w σ₁ σ₂ ρ) :
+theorem sharpeSqTwo_eq_sharpeRatio_sq (w r₁ r₂ σ₁ σ₂ ρ : ℝ)
+    (hV : 0 ≤ portfolioVarTwo σ₁ σ₂ ρ w) :
     sharpeSqTwo w r₁ r₂ σ₁ σ₂ ρ
-      = sharpeRatio (expectedReturnTwo w r₁ r₂) 0 (√(varianceTwo w σ₁ σ₂ ρ)) ^ 2 := by
+      = sharpeRatio (expectedReturnTwo w r₁ r₂) 0 (√(portfolioVarTwo σ₁ σ₂ ρ w)) ^ 2 := by
   rw [sharpeSqTwo, sharpeRatio, sub_zero, div_pow, Real.sq_sqrt hV]
 
-/-- **Self-dot identity for V**: `V(w) = w · (Σw)₁ + (1 − w) · (Σw)₂`. -/
-lemma varianceTwo_eq_w_dot_Sigma_w (w σ₁ σ₂ ρ : ℝ) :
-    varianceTwo w σ₁ σ₂ ρ =
+/-- **`V` is the weight-weighted sum of the marginal variances**:
+`V(w) = w · (Σw)₁ + (1 − w) · (Σw)₂` (for `N` assets, compare
+`portfolioVarN_eq_sum_mul_marginalVariance`, `Choice/Portfolio/CAPMEquilibrium.lean`). -/
+lemma portfolioVarTwo_eq_sum_mul_marginalVar (σ₁ σ₂ ρ w : ℝ) :
+    portfolioVarTwo σ₁ σ₂ ρ w =
       w * marginalVarOne w σ₁ σ₂ ρ + (1 - w) * marginalVarTwo w σ₁ σ₂ ρ := by
-  unfold varianceTwo portfolioVarTwo marginalVarOne marginalVarTwo
+  unfold portfolioVarTwo marginalVarOne marginalVarTwo
   ring
 
 /-- **Derivative of `E(w) = w r₁ + (1 − w) r₂`** is `r₁ − r₂`. -/
@@ -124,15 +120,15 @@ lemma hasDerivAt_expectedReturnTwo (w r₁ r₂ : ℝ) :
 /-- **Derivative of `V(w) = w² σ₁² + (1−w)² σ₂² + 2 w (1−w) ρ σ₁ σ₂`** is
 `V'(w) = 2 · ((Σw)₁ − (Σw)₂)`. Proof: polynomial rewrite of `V` in the form
 `A w² + B w + C`, then `(A w² + B w + C)' = 2 A w + B`. -/
-lemma hasDerivAt_varianceTwo (w σ₁ σ₂ ρ : ℝ) :
-    HasDerivAt (fun w' ↦ varianceTwo w' σ₁ σ₂ ρ)
+lemma hasDerivAt_portfolioVarTwo (σ₁ σ₂ ρ w : ℝ) :
+    HasDerivAt (portfolioVarTwo σ₁ σ₂ ρ)
                (2 * (marginalVarOne w σ₁ σ₂ ρ - marginalVarTwo w σ₁ σ₂ ρ)) w := by
   -- Rewrite V as A w² + B w + C
-  have h_v_poly : (fun w' : ℝ ↦ varianceTwo w' σ₁ σ₂ ρ) =
+  have h_v_poly : portfolioVarTwo σ₁ σ₂ ρ =
       (fun w' ↦ (σ₁^2 + σ₂^2 - 2*ρ*σ₁*σ₂) * w'^2 +
                  (-2*σ₂^2 + 2*ρ*σ₁*σ₂) * w' + σ₂^2) := by
     funext w'
-    unfold varianceTwo portfolioVarTwo
+    unfold portfolioVarTwo
     ring
   rw [h_v_poly]
   have h_sq : HasDerivAt (fun w' : ℝ ↦ w'^2) (2*w) w := by
@@ -153,16 +149,16 @@ lemma hasDerivAt_expectedReturnTwo_sq (w r₁ r₂ : ℝ) :
 
 /-- **Derivative of `Sh²(w) = E²/V`**: textbook formula `Sh²'(w) = (2EE'V − E²V')/V²`. -/
 theorem hasDerivAt_sharpeSqTwo (w r₁ r₂ σ₁ σ₂ ρ : ℝ)
-    (hV : varianceTwo w σ₁ σ₂ ρ ≠ 0) :
+    (hV : portfolioVarTwo σ₁ σ₂ ρ w ≠ 0) :
     HasDerivAt (fun w' ↦ sharpeSqTwo w' r₁ r₂ σ₁ σ₂ ρ)
                ((2 * expectedReturnTwo w r₁ r₂ * (r₁ - r₂) *
-                   varianceTwo w σ₁ σ₂ ρ -
+                   portfolioVarTwo σ₁ σ₂ ρ w -
                  (expectedReturnTwo w r₁ r₂)^2 *
                    (2 * (marginalVarOne w σ₁ σ₂ ρ - marginalVarTwo w σ₁ σ₂ ρ))) /
-                (varianceTwo w σ₁ σ₂ ρ)^2) w := by
+                (portfolioVarTwo σ₁ σ₂ ρ w)^2) w := by
   unfold sharpeSqTwo
   exact (hasDerivAt_expectedReturnTwo_sq w r₁ r₂).div
-        (hasDerivAt_varianceTwo w σ₁ σ₂ ρ) hV
+        (hasDerivAt_portfolioVarTwo σ₁ σ₂ ρ w) hV
 
 /-- **Algebraic factorization of the Sh² derivative numerator**:
 
@@ -175,15 +171,15 @@ The identity is proved by `ring` after unfolding all definitions; the
 non-trivial cancellation is that `(r₁ − r₂) V − E ((Σw)₁ − (Σw)₂)` simplifies
 exactly to `r₁ (Σw)₂ − r₂ (Σw)₁`. -/
 theorem sharpeSqTwo_deriv_numerator_factored (w r₁ r₂ σ₁ σ₂ ρ : ℝ) :
-    2 * expectedReturnTwo w r₁ r₂ * (r₁ - r₂) * varianceTwo w σ₁ σ₂ ρ -
+    2 * expectedReturnTwo w r₁ r₂ * (r₁ - r₂) * portfolioVarTwo σ₁ σ₂ ρ w -
         (expectedReturnTwo w r₁ r₂)^2 *
           (2 * (marginalVarOne w σ₁ σ₂ ρ - marginalVarTwo w σ₁ σ₂ ρ)) =
       2 * expectedReturnTwo w r₁ r₂ *
         (r₁ * marginalVarTwo w σ₁ σ₂ ρ - r₂ * marginalVarOne w σ₁ σ₂ ρ) := by
-  unfold expectedReturnTwo varianceTwo portfolioVarTwo marginalVarOne marginalVarTwo
+  unfold expectedReturnTwo portfolioVarTwo marginalVarOne marginalVarTwo
   ring
 
-/-- **Critical-point characterisation**: in the `E ≠ 0`, `V > 0` regime, the
+/-- **Critical-point characterisation**: in the `E ≠ 0`, `V ≠ 0` regime, the
 Sharpe-ratio squared has a critical point at `w` (i.e., `HasDerivAt Sh² 0 w`)
 *if and only if* the cross-product FOC `r₂ (Σw)₁ = r₁ (Σw)₂` holds.
 
@@ -191,7 +187,7 @@ This is the first-principles derivation: the FOC arises as the
 critical-point condition of a real maximization problem, not as a stated
 algebraic identity. -/
 theorem sharpeSqTwo_critical_iff_crossProduct_FOC
-    (w r₁ r₂ σ₁ σ₂ ρ : ℝ) (hV : varianceTwo w σ₁ σ₂ ρ ≠ 0)
+    (w r₁ r₂ σ₁ σ₂ ρ : ℝ) (hV : portfolioVarTwo σ₁ σ₂ ρ w ≠ 0)
     (hE : expectedReturnTwo w r₁ r₂ ≠ 0) :
     HasDerivAt (fun w' ↦ sharpeSqTwo w' r₁ r₂ σ₁ σ₂ ρ) 0 w ↔
       r₂ * marginalVarOne w σ₁ σ₂ ρ = r₁ * marginalVarTwo w σ₁ σ₂ ρ := by
@@ -202,14 +198,14 @@ theorem sharpeSqTwo_critical_iff_crossProduct_FOC
   · intro h_zero
     -- Uniqueness of HasDerivAt: both derivatives must agree
     have h_eq : (2 * expectedReturnTwo w r₁ r₂ * (r₁ - r₂) *
-                   varianceTwo w σ₁ σ₂ ρ -
+                   portfolioVarTwo σ₁ σ₂ ρ w -
                  (expectedReturnTwo w r₁ r₂)^2 *
                    (2 * (marginalVarOne w σ₁ σ₂ ρ - marginalVarTwo w σ₁ σ₂ ρ))) /
-                (varianceTwo w σ₁ σ₂ ρ)^2 = 0 := h_deriv.unique h_zero
-    have hV_sq : (varianceTwo w σ₁ σ₂ ρ)^2 ≠ 0 := pow_ne_zero _ hV
+                (portfolioVarTwo σ₁ σ₂ ρ w)^2 = 0 := h_deriv.unique h_zero
+    have hV_sq : (portfolioVarTwo σ₁ σ₂ ρ w)^2 ≠ 0 := pow_ne_zero _ hV
     -- Division-by-nonzero is zero implies numerator is zero
     have h_num : 2 * expectedReturnTwo w r₁ r₂ * (r₁ - r₂) *
-                   varianceTwo w σ₁ σ₂ ρ -
+                   portfolioVarTwo σ₁ σ₂ ρ w -
                  (expectedReturnTwo w r₁ r₂)^2 *
                    (2 * (marginalVarOne w σ₁ σ₂ ρ - marginalVarTwo w σ₁ σ₂ ρ)) = 0 :=
       (div_eq_zero_iff.mp h_eq).resolve_right hV_sq
@@ -231,16 +227,16 @@ theorem sharpeSqTwo_critical_iff_crossProduct_FOC
     have h_diff_zero : r₁ * marginalVarTwo w σ₁ σ₂ ρ -
                        r₂ * marginalVarOne w σ₁ σ₂ ρ = 0 := by linarith
     have h_num_zero : 2 * expectedReturnTwo w r₁ r₂ * (r₁ - r₂) *
-                        varianceTwo w σ₁ σ₂ ρ -
+                        portfolioVarTwo σ₁ σ₂ ρ w -
                       (expectedReturnTwo w r₁ r₂)^2 *
                         (2 * (marginalVarOne w σ₁ σ₂ ρ - marginalVarTwo w σ₁ σ₂ ρ)) = 0 := by
       rw [sharpeSqTwo_deriv_numerator_factored]
       rw [h_diff_zero]; ring
     have h_zero_div : (2 * expectedReturnTwo w r₁ r₂ * (r₁ - r₂) *
-                         varianceTwo w σ₁ σ₂ ρ -
+                         portfolioVarTwo σ₁ σ₂ ρ w -
                        (expectedReturnTwo w r₁ r₂)^2 *
                          (2 * (marginalVarOne w σ₁ σ₂ ρ - marginalVarTwo w σ₁ σ₂ ρ))) /
-                      (varianceTwo w σ₁ σ₂ ρ)^2 = 0 := by
+                      (portfolioVarTwo σ₁ σ₂ ρ w)^2 = 0 := by
       rw [h_num_zero]; simp
     rw [← h_zero_div]
     exact h_deriv

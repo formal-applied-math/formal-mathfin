@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Pricing.Market
+public import MathFin.Pricing.BondPrice
 public import MathFin.Models.Rates.DeterministicCurve
 public import MathFin.Models.Rates.Immunization
 public import MathFin.Models.Rates.KeyRateDuration
@@ -29,6 +30,14 @@ of a zero-coupon portfolio is the price of its schedule when the numéraire is `
 price of a coupon bond at an annually compounded yield `y` is the price of its schedule when the
 numéraire is `(1 + y)^⌊t⌋` (`bondPortfolioValue_eq_price`).
 
+The library's canonical bond price is `Contracts.bondPrice` (`P(t, T) = 𝔼_Q[D T ∣ 𝓕 t] / D t`,
+`Pricing/BondPrice.lean`), and three deterministic bond formulas are tied to it. The flat-rate bond
+`zcb r t T` is `P(t, T)` at the curve `D s = e^{−rs}` (`bondPrice_exp_eq_zcb`), and it is the
+market's price at `t` of one unit paid at `T` whenever the numéraire is `e^{rt}`
+(`priceAt_pay_eq_zcb`). The key-rate price is `∑ cᵢ P(0, tᵢ)` with one curve per cash flow, and the
+coupon bond at an annually compounded yield is its flat case
+(`bondPriceKeyRate_eq_sum_bondPrice`, `bondPriceDisc_eq_sum_bondPrice`).
+
 The stochastic short-rate models (`Models/Rates/ShortRate.lean`) price the same schedules through
 their zero curve; that their bonds are martingales after deflation by the bank account is not
 proved here.
@@ -50,6 +59,12 @@ proved here.
   a zero-coupon portfolio (numéraire `e^{rt}`) and the annually compounded price of a coupon bond
   (numéraire `(1 + y)^⌊t⌋`) are market prices.
 * `MathFin.Rates.bondPortfolioValue_eq_price`: the two in one conjunction.
+* `MathFin.Rates.bondPrice_exp_eq_zcb`, `MathFin.Rates.priceAt_pay_eq_zcb`: at the discount curve
+  `e^{−rs}` the bond price `P(t, T)` is `zcb r t T`, and so is the market price at `t` of one unit
+  paid at `T` when the numéraire is `e^{rt}`.
+* `MathFin.Rates.bondPriceKeyRate_eq_sum_bondPrice`, `MathFin.Rates.bondPriceDisc_eq_sum_bondPrice`:
+  the key-rate price is `∑ cᵢ P(0, tᵢ)`, each cash flow at its own curve `(1 + kᵢ)^{−⌊u⌋}`, and the
+  coupon bond at a yield is the flat case.
 * `MathFin.Rates.price_immunization_first_order`: first-order immunization stated for the market
   prices of the asset and liability schedules, in a family of markets with numéraires `e^{rt}`.
 * `MathFin.Rates.sum_deriv_keyRate_eq_deriv_price`: the key-rate partials of a coupon bond sum to
@@ -175,6 +190,57 @@ theorem bondPortfolioValue_eq_price (Q : Measure Ω) [IsProbabilityMeasure Q] (n
         M.price Q (fixedFlows (fun i ↦ ((t i : ℕ) : ℝ≥0)) w n)) :=
   ⟨fun M r hM ↦ bondPortfolioValue_eq_price_exp Q n w T hT M r hM,
     fun M y t hM ↦ bondPriceDisc_eq_price Q n w M y t hM⟩
+
+/-! ### The deterministic bond formulas and the bond price
+
+`zcb` is the bond price `Contracts.bondPrice` at the curve `e^{−rs}`; `bondPriceKeyRate` and
+`bondPriceDisc` are sums of cash flows times it (`bondPrice_deterministic`). -/
+
+/-- **Under a constant short rate the bond price is `zcb`**: at the money-market discount factor
+`D s = e^{−rs}`, under any finite measure and any information, the price at `t` of one unit paid
+at `T` is `zcb r t T = e^{−r(T−t)}`, on either side of maturity. -/
+theorem bondPrice_exp_eq_zcb (Q : Measure Ω) [IsFiniteMeasure Q] (𝓕 : Filtration ℝ≥0 mΩ)
+    (r : ℝ) (t T : ℝ≥0) :
+    bondPrice Q 𝓕 (fun s _ ↦ Real.exp (-(r * s))) t T = fun _ ↦ MathFin.zcb r t T := by
+  rw [bondPrice_deterministic]
+  funext ω
+  rw [MathFin.zcb, ← Real.exp_sub]
+  congr 1
+  ring
+
+/-- **`zcb` is the market price of the zero-coupon bond**: in any market whose numéraire is the
+money market `e^{rt}`, under any finite measure, the price at `t` of one unit paid at `T` is
+`zcb r t T` (`Market.priceAt_pay_one_of_numeraire`). -/
+theorem priceAt_pay_eq_zcb (M : Market ι Ω) (Q : Measure Ω) [IsFiniteMeasure Q] {r : ℝ}
+    (hN : ∀ t ω, M.numeraire t ω = Real.exp (r * t)) (t T : ℝ≥0) :
+    M.priceAt Q t (.pay T (.const 1)) = fun _ ↦ MathFin.zcb r t T := by
+  rw [Market.priceAt_pay_one_of_numeraire (f := fun s ↦ Real.exp (r * s)) hN]
+  funext ω
+  rw [MathFin.zcb, ← Real.exp_sub]
+  congr 1
+  ring
+
+/-- **The key-rate price is a sum of bond prices, one curve per cash flow**: the key-rate price
+`bondPriceKeyRate` of the cash flows `c i` at the integer dates `t i` is `∑ c i · P(0, t i)`, where
+`P` is the bond price at the cash flow's own curve `D u = (1 + k i)^{−⌊u⌋}`, under any finite
+measure and any information. The identity holds for every `k`; the curve is a discount curve, so
+that `P(0, t i)` is a bond price, when `k i > −1`. -/
+theorem bondPriceKeyRate_eq_sum_bondPrice {κ : Type*} (Q : Measure Ω) [IsFiniteMeasure Q]
+    (𝓕 : Filtration ℝ≥0 mΩ) (s : Finset κ) (t : κ → ℕ) (c k : κ → ℝ) (ω : Ω) :
+    MathFin.bondPriceKeyRate s t c k =
+      ∑ i ∈ s, c i * bondPrice Q 𝓕 (fun u _ ↦ ((1 + k i) ^ ⌊u⌋₊)⁻¹) 0 (t i) ω := by
+  simp [bondPrice_deterministic, MathFin.bondPriceKeyRate, div_eq_mul_inv]
+
+/-- **A coupon bond is a sum of its zero-coupon bond prices**: at the annually compounded yield
+`y`, the price `bondPriceDisc` of the cash flows `c i` at the integer dates `t i` is
+`∑ c i · P(0, t i)` at the curve `D u = (1 + y)^{−⌊u⌋}`, the key-rate identity at the flat curve
+(`bondPriceKeyRate_const`). It holds for every `y`; the curve is a discount curve, so that
+`P(0, t i)` is a bond price, when `y > −1`. -/
+theorem bondPriceDisc_eq_sum_bondPrice {κ : Type*} (Q : Measure Ω) [IsFiniteMeasure Q]
+    (𝓕 : Filtration ℝ≥0 mΩ) (s : Finset κ) (t : κ → ℕ) (c : κ → ℝ) (y : ℝ) (ω : Ω) :
+    MathFin.bondPriceDisc s t c y =
+      ∑ i ∈ s, c i * bondPrice Q 𝓕 (fun u _ ↦ ((1 + y) ^ ⌊u⌋₊)⁻¹) 0 (t i) ω :=
+  bondPriceKeyRate_eq_sum_bondPrice Q 𝓕 s t c (fun _ ↦ y) ω
 
 /-- **First-order immunization, for market prices.** Let `M r` be markets with the money market
 `e^{rt}` as numéraire, and let two zero-coupon portfolios (faces `wA`, `wL`, maturities `TA`,

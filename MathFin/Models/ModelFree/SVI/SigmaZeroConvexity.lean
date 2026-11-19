@@ -208,7 +208,7 @@ theorem sigmaZero_bsSmile_convex_iff (p : Params) (hs : p.sigma = 0)
     ConvexOn ℝ (Ioi 0) (bsSmile p) ↔
       ∀ k : ℝ, k ≠ p.m → 0 ≤ durrleman p k := by
   have he : EqOn (blackCall p) (bsSmile p) (Ioi 0) :=
-    fun K hK ↦ blackCall_eq_bsSmile p K hK (hw _)
+    fun K hK ↦ blackCall_eq_bsV p K hK (hw _)
   constructor
   · intro hc
     exact (sigmaZero_blackCall_convex_iff p hs hb hw).mp (hc.congr he.symm)

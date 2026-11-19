@@ -195,7 +195,7 @@ theorem one_sub_le_bsSmile (p : Params) {K : ℝ} (hK : 0 < K)
 /-- The SVI-smiled call is at most `1`. -/
 theorem bsSmile_le_one (p : Params) {K : ℝ} (hK : 0 < K) (hw : 0 < variance p (Real.log K)) :
     bsSmile p K ≤ 1 :=
-  (blackCall_eq_bsSmile p K hK hw).symm.trans_le
+  (blackCall_eq_bsV p K hK hw).symm.trans_le
     ((blackCall_le_Phi_dpl p K).trans (MathFin.Phi_le_one _))
 
 /-- **The smiled call at large strikes is the Black form at large log-strikes**: `bsSmile p`
@@ -204,7 +204,7 @@ theorem tendsto_bsSmile_zero_iff_blackForm (p : Params) (hw : ∀ k : ℝ, 0 < v
     Tendsto (bsSmile p) atTop (𝓝 0) ↔
       Tendsto (fun k ↦ blackForm k (variance p k)) atTop (𝓝 0) := by
   have hexp (k : ℝ) : bsSmile p (Real.exp k) = blackForm k (variance p k) := by
-    rw [← blackCall_eq_bsSmile p _ (Real.exp_pos k) (by rw [Real.log_exp]; exact hw k),
+    rw [bsSmile, ← blackCall_eq_bsV p _ (Real.exp_pos k) (by rw [Real.log_exp]; exact hw k),
       blackCall, Real.log_exp]
   refine ⟨fun h ↦ by simpa only [Function.comp_def, hexp] using h.comp Real.tendsto_exp_atTop,
     fun h ↦ (h.comp Real.tendsto_log_atTop).congr' ?_⟩
