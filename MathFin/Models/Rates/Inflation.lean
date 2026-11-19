@@ -38,8 +38,9 @@ Hull–White model (`Models/Rates/HullWhiteCalibration`) by `integral_exp_hwD_fo
 
 ## Scope
 
-Out of scope, and not claimed: eq. (17.8)'s conditional identity as a named lemma (the
-landed anchor is `MathFin.changeOfNumeraire_setIntegral_eq`); eq. (17.9)'s SDE-level
+Out of scope, and not claimed here: eq. (17.8)'s conditional identity (named as
+`MathFin.Inflation.JarrowYildirim.jyYoyForward_eq_bondRatio` in `Models/Rates/JarrowYildirim.lean`;
+the set-integral anchor is `MathFin.changeOfNumeraire_setIntegral_eq`); eq. (17.9)'s SDE-level
 drift-shift derivation `δ = −ρ_{rI}σ_rσ_I`; the two-correlated-Hull–White dynamics (the
 means, variances and covariance of the rate deviations are explicit inputs here); and the
 chapter's numeric tables. The Jarrow–Yildirim identification is a hypothesis (`hident`),
