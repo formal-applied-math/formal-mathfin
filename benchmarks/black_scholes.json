@@ -2806,6 +2806,30 @@
           }
         ]
       }
+    },
+    {
+      "id": "mf-bachelier-spread-call",
+      "name": "Bachelier spread call (difference-of-normals collapse)",
+      "description": "Spread call under independent normal forwards: the difference of two Gaussian-distributed forwards is Gaussian with mean mu1 - mu2 and variance sigma1^2 + sigma2^2, so the price collapses to the standard normal stop-loss transform evaluated at that combined distribution — the exact normal-model analog of the single-asset Bachelier call formula.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.Bachelier.BachelierSpread\n\nopen MeasureTheory ProbabilityTheory Real MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} [IsProbabilityMeasure Q]\n  {f₁ f₂ K σ₁ σ₂ ρ : ℝ} {U V : Ω → ℝ}\n\ntheorem bachelier_spread_call_example (h : BachelierSpreadHyp Q f₁ f₂ σ₁ σ₂ ρ U V) :\n    ∫ ω, max ((f₁ + σ₁ * U ω) - (f₂ + σ₂ * V ω) - K) 0 ∂Q\n      = (f₁ - f₂ - K) * Phi (bachelierSpreadD f₁ f₂ K σ₁ σ₂ ρ)\n        + Real.sqrt (bachelierSpreadVariance σ₁ σ₂ ρ)\n          * gaussianPDFReal 0 1 (bachelierSpreadD f₁ f₂ K σ₁ σ₂ ρ) :=\n  bachelier_spread_call h\n"
+      },
+      "metadata": {
+        "chapter": null,
+        "reference": "Louis Bachelier, Theorie de la speculation (1900); Margrabe 1978 (exchange-option degeneration)",
+        "citations": [
+          {
+            "key": "Bachelier1900"
+          },
+          {
+            "key": "Margrabe1978"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via the difference reduction hasLaw_sub_indepGaussian and the stop-loss transform gaussian_call_formula. The correlated-rho form is proved separately (hasLaw_sub_gaussianPair). Scope: independent forwards, total volatilities; no time dimension."
+      }
     }
   ]
 }

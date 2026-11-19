@@ -519,6 +519,7 @@ import MathFin.Models.Jumps.JumpDiffusionMoments
 -- Gaussian jumps a corollary at the level of the law (log contract against Var[Y]/τ)
 import MathFin.Models.Jumps.JumpDiffusionVarianceSwap
 import MathFin.Models.Bachelier.Bachelier
+import MathFin.Models.Bachelier.BachelierSpread
 import MathFin.Models.Bachelier.BachelierGreeks
 import MathFin.Models.Bachelier.BachelierMarket
 import MathFin.Models.BlackScholes.Chooser

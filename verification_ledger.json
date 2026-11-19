@@ -808,6 +808,13 @@
       "input_hash": "b6125a0a823694dd5991574a8e0d7b7524f75b300acbc028a28579f6eade7948",
       "verified_at_commit": "5ce8af3"
     },
+    "mf-bachelier-spread-call": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-11-18",
+      "elapsed_s": 1.9,
+      "input_hash": "0d3e0d95e27f4a848b8ceff04994414f17d916c078dde47013e7f0c3ee0836ee",
+      "verified_at_commit": "aec57c17"
+    },
     "mf-bachelier-theta": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-17",
