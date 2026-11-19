@@ -124,6 +124,7 @@ graph TD
   brownianDoobMaximal["Doob's maximal inequality for Brownian motion on a grid"]:::proved
   bsDelta["Black–Scholes Greeks"]:::proved
   bsPde["The Black–Scholes formula solves the Black–Scholes equation"]:::proved
+  buhlmannCredibility["Bühlmann credibility"]:::proved
   capmEquilibrium["CAPM beta relation, given tangency of the market portfolio"]:::proved
   coinFlipMarkov["The coin-flip law is a Markov chain's path law"]:::proved
   continuousFtap["An equivalent martingale measure excludes simple arbitrage in continuous time"]:::proved
@@ -143,6 +144,8 @@ graph TD
   jumpDiffusionMixing["Merton's jump-diffusion formula"]:::proved
   largePortfolioLimit["Vasicek's large-portfolio limit"]:::proved
   levyCharacterization["Lévy's characterization of Brownian motion"]:::proved
+  lifeInsuranceEpv["Whole-life insurance and the life annuity-due: A = 1 − d ä"]:::proved
+  mackChainLadder["Mack's model: the chain-ladder predictions are a martingale"]:::proved
   margrabe["Margrabe's exchange option formula"]:::proved
   markowitzLagrangian["Markowitz mean–variance optimality"]:::proved
   marshallOlkin["Marshall–Olkin first-to-default"]:::proved
@@ -157,6 +160,7 @@ graph TD
   snellDoobDecomposition["Doob decomposition of the Snell envelope"]:::proved
   snellEnvelope["Snell's theorem: the envelope is the value of optimal stopping"]:::proved
   snellOptionalSampling["Optional sampling under the Snell envelope"]:::proved
+  thieleReserve["Thiele's differential equation"]:::proved
   unilateralCva["Credit valuation adjustment"]:::proved
   uniswapV3CoveredCall["A concentrated-liquidity position is dominated by a covered call"]:::proved
   varianceSwapJumpBias["Variance swap and the log contract"]:::proved
@@ -315,7 +319,6 @@ graph TD
     riskMeasureFamilies["Entropic, distortion and expectile risk measures"]:::frontier
   end
   subgraph frontier_statistics["⏳ frontier · Statistics"]
-    buhlmannCredibility["Bühlmann credibility"]:::frontier
     glivenkoCantelli["Glivenko–Cantelli theorem"]:::frontier
     purgedCvIndependence["Purged cross-validation: σ-algebra independence"]:::frontier
     quantileConvergenceInDistribution["Quantiles under convergence in distribution"]:::frontier
@@ -348,9 +351,7 @@ graph TD
     varianceOptimalHedging["Variance-optimal hedging"]:::frontier
   end
   subgraph frontier_valuationInsurance["⏳ frontier · Valuation · Life contingencies"]
-    lifeInsuranceEpv["Life annuity and insurance EPV"]:::frontier
     survivalModel["Survival model and life tables"]:::frontier
-    thieleReserve["Thiele reserve"]:::frontier
   end
   subgraph frontier_valuationJumps["⏳ frontier · Valuation · Jump models"]
     esscherEmmLevy["Esscher EMM for exponential-Lévy markets"]:::frontier
@@ -410,6 +411,7 @@ graph TD
   doobMaximalInequality --> brownianDoobMaximal
   standardNormalCdf --> bsDelta
   standardNormalCdf --> bsPde
+  portfolioVariance --> buhlmannCredibility
   portfolioVariance --> capmEquilibrium
   coinFlipMeasure --> coinFlipMarkov
   markovPathLaw --> coinFlipMarkov
@@ -437,6 +439,8 @@ graph TD
   standardNormalCdf --> largePortfolioLimit
   empiricalCdfStrongLaw --> largePortfolioLimit
   brownianMotion --> levyCharacterization
+  survivalFunction --> lifeInsuranceEpv
+  emm --> mackChainLadder
   standardNormalCdf --> margrabe
   esscherTilt --> margrabe
   portfolioVariance --> markowitzLagrangian
@@ -456,6 +460,7 @@ graph TD
   snellEnvelope --> snellEnvelope
   snellEnvelope --> snellOptionalSampling
   optionalSampling --> snellOptionalSampling
+  hazardSurvival --> thieleReserve
   hazardSurvival --> unilateralCva
   standardNormalCdf --> unilateralCva
   v3PositionValue --> uniswapV3CoveredCall
@@ -901,8 +906,6 @@ graph TD
   standardNormalCdf --> largePoolLoss
   largePortfolioLimit --> largePoolLoss
   brownianMotion --> lawIteratedLogarithm
-  survivalModel --> lifeInsuranceEpv
-  survivalFunction --> lifeInsuranceEpv
   blackCoxDefault --> liquidationFirstPassage
   aaveLiquidationKmv --> liquidationFirstPassage
   changeOfNumeraire --> lmmForwardMartingale
@@ -949,8 +952,6 @@ graph TD
   stochasticFubini --> stochasticFubiniLevy
   stochasticFubini --> stochasticFubiniProcess
   survivalFunction --> survivalModel
-  survivalModel --> thieleReserve
-  survivalFunction --> thieleReserve
   sdeStrongSolution --> timeInconsistentEquilibrium
   margrabe --> twoAssetOptionFormulas
   bsCall --> twoAssetOptionFormulas
@@ -1026,6 +1027,7 @@ graph TD
 | `thm:brownian-doob-maximal` Doob's maximal inequality for Brownian motion on a grid | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abrownian-doob-maximal%22%20in%3Abody) |
 | `thm:bs-delta` Black–Scholes Greeks | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-delta%22%20in%3Abody) |
 | `thm:bs-pde` The Black–Scholes formula solves the Black–Scholes equation | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-pde%22%20in%3Abody) |
+| `thm:buhlmann-credibility` Bühlmann credibility | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abuhlmann-credibility%22%20in%3Abody) |
 | `thm:capm-equilibrium` CAPM beta relation, given tangency of the market portfolio | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acapm-equilibrium%22%20in%3Abody) |
 | `thm:coin-flip-markov` The coin-flip law is a Markov chain's path law | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acoin-flip-markov%22%20in%3Abody) |
 | `thm:continuous-ftap` An equivalent martingale measure excludes simple arbitrage in continuous time | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acontinuous-ftap%22%20in%3Abody) |
@@ -1045,6 +1047,8 @@ graph TD
 | `thm:jump-diffusion-mixing` Merton's jump-diffusion formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ajump-diffusion-mixing%22%20in%3Abody) |
 | `thm:large-portfolio-limit` Vasicek's large-portfolio limit | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alarge-portfolio-limit%22%20in%3Abody) |
 | `thm:levy-characterization` Lévy's characterization of Brownian motion | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alevy-characterization%22%20in%3Abody) |
+| `thm:life-insurance-epv` Whole-life insurance and the life annuity-due: A = 1 − d ä | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alife-insurance-epv%22%20in%3Abody) |
+| `thm:mack-chain-ladder` Mack's model: the chain-ladder predictions are a martingale | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amack-chain-ladder%22%20in%3Abody) |
 | `thm:margrabe` Margrabe's exchange option formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amargrabe%22%20in%3Abody) |
 | `thm:markowitz-lagrangian` Markowitz mean–variance optimality | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarkowitz-lagrangian%22%20in%3Abody) |
 | `thm:marshall-olkin` Marshall–Olkin first-to-default | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarshall-olkin%22%20in%3Abody) |
@@ -1059,6 +1063,7 @@ graph TD
 | `thm:snell-doob-decomposition` Doob decomposition of the Snell envelope | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asnell-doob-decomposition%22%20in%3Abody) |
 | `thm:snell-envelope` Snell's theorem: the envelope is the value of optimal stopping | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asnell-envelope%22%20in%3Abody) |
 | `thm:snell-optional-sampling` Optional sampling under the Snell envelope | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asnell-optional-sampling%22%20in%3Abody) |
+| `thm:thiele-reserve` Thiele's differential equation | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Athiele-reserve%22%20in%3Abody) |
 | `thm:unilateral-cva` Credit valuation adjustment | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aunilateral-cva%22%20in%3Abody) |
 | `thm:uniswap-v3-covered-call` A concentrated-liquidity position is dominated by a covered call | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Auniswap-v3-covered-call%22%20in%3Abody) |
 | `thm:variance-swap-jump-bias` Variance swap and the log contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-swap-jump-bias%22%20in%3Abody) |
@@ -1155,7 +1160,6 @@ graph TD
 | `thm:black-cox-default` Black–Cox first-passage default | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ablack-cox-default%22%20in%3Abody) |
 | `thm:bracket-quadratic-variation` Bracket is the quadratic variation of an Itô integral | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abracket-quadratic-variation%22%20in%3Abody) |
 | `thm:brownian-nowhere-differentiable` Brownian paths are nowhere differentiable | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abrownian-nowhere-differentiable%22%20in%3Abody) |
-| `thm:buhlmann-credibility` Bühlmann credibility | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abuhlmann-credibility%22%20in%3Abody) |
 | `thm:carr-lee-moment` Carr–Lee moment formula | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acarr-lee-moment%22%20in%3Abody) |
 | `thm:cev-call` CEV European call | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acev-call%22%20in%3Abody) |
 | `thm:cir-bond-loadings` CIR bond-price loadings | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acir-bond-loadings%22%20in%3Abody) |
@@ -1194,7 +1198,6 @@ graph TD
 | `thm:kyle-equilibrium` Kyle single-period equilibrium | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Akyle-equilibrium%22%20in%3Abody) |
 | `thm:large-pool-loss` Large homogeneous pool loss law | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alarge-pool-loss%22%20in%3Abody) |
 | `thm:law-iterated-logarithm` Law of the iterated logarithm | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alaw-iterated-logarithm%22%20in%3Abody) |
-| `thm:life-insurance-epv` Life annuity and insurance EPV | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alife-insurance-epv%22%20in%3Abody) |
 | `thm:liquidation-first-passage` Liquidation before maturity as first passage | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aliquidation-first-passage%22%20in%3Abody) |
 | `thm:lmm-forward-martingale` LIBOR market model forward martingale | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Almm-forward-martingale%22%20in%3Abody) |
 | `thm:log-optimal-numeraire` Log-optimal portfolio is the numéraire | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alog-optimal-numeraire%22%20in%3Abody) |
@@ -1231,7 +1234,6 @@ graph TD
 | `thm:stochastic-fubini-levy` Stochastic Fubini for Itô–Lévy integrals | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astochastic-fubini-levy%22%20in%3Abody) |
 | `thm:stochastic-fubini-process` Stochastic Fubini for the integral process | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Astochastic-fubini-process%22%20in%3Abody) |
 | `thm:survival-model` Survival model and life tables | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asurvival-model%22%20in%3Abody) |
-| `thm:thiele-reserve` Thiele reserve | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Athiele-reserve%22%20in%3Abody) |
 | `thm:time-inconsistent-equilibrium` Relaxed equilibria under time inconsistency | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atime-inconsistent-equilibrium%22%20in%3Abody) |
 | `thm:two-asset-option-formulas` Stulz and Heynen–Kat two-asset formulas | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atwo-asset-option-formulas%22%20in%3Abody) |
 | `thm:variance-gamma-call` Variance-gamma European call | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avariance-gamma-call%22%20in%3Abody) |

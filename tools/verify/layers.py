@@ -29,6 +29,8 @@ EDGES: dict[tuple[str, str], str] = {
     ("Markets", "Models"): "an AMM position or a lending rate is priced or discounted in a model",
     ("Insurance", "Models"): "premiums are discounted on a rate curve; survival is a credit intensity",
     ("Insurance", "Risk"): "a premium principle is a risk measure",
+    ("Insurance", "Choice"):
+        "the Bühlmann credibility model is Sharpe's single-index model and its factor a CAPM beta",
     ("Risk", "Models"): "the risk of a position is the law of its value in a model",
     ("Risk", "Choice"): "risk allocation is portfolio variance",
     ("Markets", "Risk"):

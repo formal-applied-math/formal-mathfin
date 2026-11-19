@@ -8,7 +8,7 @@ module
 public import MathFin.Models.ModelFree.SVI.ExtendedFormula
 public import MathFin.Models.ModelFree.PriceBounds
 public import MathFin.Models.ModelFree.CallPriceFunction
-public import MathFin.Probability.Gaussian.NormalTail
+public import MathFin.Models.ModelFree.BlackFormTail
 
 /-! # The tail condition for raw SVI, and butterfly-freeness
 
@@ -46,8 +46,11 @@ variable from such a function.
 * `blackCall_le_Phi_dpl`, `bsSmile_nonneg`, `one_sub_le_bsSmile`, `bsSmile_le_one`: for `K > 0` and
   positive variance at `log K`, the smiled call is at most `Φ(d₊)`, nonnegative, at least
   `1 - K` and at most `1`.
+* `tendsto_bsSmile_zero_iff_blackForm`: for positive variance, `bsSmile p` tends to `0` at `∞`
+  iff the Black form at the SVI variance does at large log-strikes.
 * `tendsto_bsSmile_zero_iff`: for `b ≥ 0` and positive variance, `bsSmile p` tends to `0` at
-  `∞` iff `b(1 + ρ) < 2`.
+  `∞` iff `b(1 + ρ) < 2`, the instance of the general tail condition for the Black form
+  (`blackForm_tendsto_zero_iff_dpl_tendsto_atBot`).
 * `isNormalizedCallPrice_bsSmile_iff`: for `b ≥ 0` and positive variance, `bsSmile p` is a
   normalised call price function iff it is convex on `(0, ∞)` and `b(1 + ρ) < 2`.
 * `butterflyFreeFormula_iff_isNormalizedCallPrice`: `butterflyFreeFormula` holds iff `σ ≥ 0`,
@@ -138,22 +141,19 @@ theorem tendsto_dpl_atBot (p : Params) (hb : 0 ≤ p.b)
   exact ((div_le_iff₀ (by positivity)).2
     (by linarith : _ ≤ -M * (2 * rootVariance p k))).trans (neg_le.1 (le_max_left _ _))
 
-/-- **A wing slope of at least `2` keeps `d₊` bounded below**, and sends the variance above any
-level: eventually `d₊ ≥ −|a − 2m|/2` and `√w ≥ R`. -/
+/-- **A wing slope of at least `2` keeps `d₊` bounded below**: eventually
+`d₊ ≥ −|a − 2m|/2`. -/
 theorem eventually_le_dpl (p : Params) (hb : 0 ≤ p.b)
-    (hw : ∀ k : ℝ, 0 < variance p k) (hc : 2 ≤ p.b * (1 + p.rho)) (R : ℝ) :
-    ∀ᶠ k in atTop,
-      -(|p.a - 2 * p.m| / 2) ≤ dpl k (variance p k) ∧ R ≤ rootVariance p k := by
-  filter_upwards [eventually_ge_atTop (max p.m (p.m + ((max R 1) ^ 2 - p.a) / 2))] with k hk
+    (hw : ∀ k : ℝ, 0 < variance p k) (hc : 2 ≤ p.b * (1 + p.rho)) :
+    ∀ᶠ k in atTop, -(|p.a - 2 * p.m| / 2) ≤ dpl k (variance p k) := by
+  filter_upwards [eventually_ge_atTop (max p.m (p.m + (1 - p.a) / 2))] with k hk
   have hkm : p.m ≤ k := (le_max_left _ _).trans hk
-  have hk1 : p.m + ((max R 1) ^ 2 - p.a) / 2 ≤ k := (le_max_right _ _).trans hk
+  have hk1 : p.m + (1 - p.a) / 2 ≤ k := (le_max_right _ _).trans hk
   have hw2 : p.a + 2 * (k - p.m) ≤ variance p k :=
     le_trans (by nlinarith [sub_nonneg.2 hkm]) (asymptote_le_variance p hb k)
   have hr := rootVariance_pos p k (hw k)
   have hr2 := rootVariance_sq p k (hw k).le
-  have hRr : max R 1 ≤ rootVariance p k := Real.le_sqrt_of_sq_le (by linarith)
-  have hr1 : 1 ≤ rootVariance p k := (le_max_right _ _).trans hRr
-  refine ⟨?_, (le_max_left _ _).trans hRr⟩
+  have hr1 : 1 ≤ rootVariance p k := Real.le_sqrt_of_sq_le (by rw [one_pow]; linarith)
   rw [dpl_eq_div p k (hw k), le_div_iff₀ (by positivity)]
   nlinarith [abs_nonneg (p.a - 2 * p.m), neg_abs_le (p.a - 2 * p.m),
     mul_nonneg (abs_nonneg (p.a - 2 * p.m)) (sub_nonneg.2 hr1)]
@@ -165,8 +165,8 @@ theorem tendsto_dpl_atBot_iff (p : Params) (hb : 0 ≤ p.b)
     Tendsto (fun k ↦ dpl k (variance p k)) atTop atBot ↔ p.b * (1 + p.rho) < 2 := by
   refine ⟨fun h ↦ not_le.1 fun hc ↦ ?_, tendsto_dpl_atBot p hb hw⟩
   obtain ⟨k, hlow, hk⟩ := ((tendsto_atBot.1 h (-(|p.a - 2 * p.m| / 2) - 1)).and
-    (eventually_le_dpl p hb hw hc 0)).exists
-  linarith [hk.1]
+    (eventually_le_dpl p hb hw hc)).exists
+  linarith
 
 /-! ### The call price at large and small strikes -/
 
@@ -198,59 +198,28 @@ theorem bsSmile_le_one (p : Params) {K : ℝ} (hK : 0 < K) (hw : 0 < variance p 
   (blackCall_eq_bsSmile p K hK hw).symm.trans_le
     ((blackCall_le_Phi_dpl p K).trans (MathFin.Phi_le_one _))
 
-/-- **Under the tail condition the call vanishes at large strikes**: it lies between `0` and
-`Φ(d₊)`. -/
-theorem tendsto_bsSmile_zero (p : Params) (hb : 0 ≤ p.b)
-    (hw : ∀ k : ℝ, 0 < variance p k) (hc : p.b * (1 + p.rho) < 2) :
-    Tendsto (bsSmile p) atTop (𝓝 0) := by
-  have hΦ : Tendsto (fun K ↦ MathFin.Phi (dpl (Real.log K) (variance p (Real.log K)))) atTop
-      (𝓝 0) :=
-    tendsto_Phi_atBot.comp ((tendsto_dpl_atBot p hb hw hc).comp Real.tendsto_log_atTop)
-  refine tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds hΦ ?_ ?_
-  · filter_upwards [eventually_gt_atTop 0] with K hK using bsSmile_nonneg p hK (hw _)
-  · filter_upwards [eventually_gt_atTop 0] with K hK
-    exact (blackCall_eq_bsSmile p K hK (hw _)).symm.trans_le (blackCall_le_Phi_dpl p K)
-
-/-- **With a wing slope of at least `2` the call does not vanish at large strikes.** Eventually
-`Φ(d₊) ≥ δ := Φ(−|a − 2m|/2) > 0`, while by the Mills bound
-`eᵏΦ(d₋) ≤ φ(d₊)/|d₋| ≤ 1/|d₋| ≤ 2/√w`, which is at most `δ/2` once `√w ≥ 4/δ`. -/
-theorem not_tendsto_bsSmile_zero (p : Params) (hb : 0 ≤ p.b)
-    (hw : ∀ k : ℝ, 0 < variance p k) (hc : 2 ≤ p.b * (1 + p.rho)) :
-    ¬ Tendsto (bsSmile p) atTop (𝓝 0) := by
-  intro h
-  set δ := MathFin.Phi (-(|p.a - 2 * p.m| / 2))
-  have hδ : 0 < δ := (MathFin.Phi_mem_Ioo _).1
-  obtain ⟨k, hsmall, ⟨hlow, hR⟩, hk0⟩ :=
-    ((Real.tendsto_exp_atTop.eventually ((tendsto_order.1 h).2 (δ / 2) (half_pos hδ))).and
-      ((eventually_le_dpl p hb hw hc (4 / δ)).and (eventually_ge_atTop 0))).exists
-  have hr := rootVariance_pos p k (hw k)
-  rw [← blackCall_eq_bsSmile p _ (Real.exp_pos k)
-    (by rw [Real.log_exp]; exact hw k)] at hsmall
-  simp only [blackCall, ForwardSmile.blackForm, Real.log_exp] at hsmall
-  have hE : 0 ≤ Real.exp k * MathFin.Phi (dmi k (variance p k)) :=
-    mul_nonneg (Real.exp_pos k).le (MathFin.Phi_nonneg _)
-  -- the Mills bound, transported by `eᵏφ(d₋) = φ(d₊)`
-  have hmills :
-      -dmi k (variance p k) * (Real.exp k * MathFin.Phi (dmi k (variance p k))) ≤ 1 := by
-    have := mul_le_mul_of_nonneg_left (neg_mul_Phi_le_gaussianPDFReal (dmi k (variance p k)))
-      (Real.exp_pos k).le
-    rw [ForwardSmile.exp_mul_pdf_dmi (hw k)] at this
-    linarith [gaussianPDFReal_zero_one_le_one (dpl k (variance p k))]
-  have hd : 2 / δ ≤ -dmi k (variance p k) := by
-    have h1 : 0 ≤ k / rootVariance p k := div_nonneg hk0 hr.le
-    have h2 : 4 / δ / 2 = 2 / δ := by ring
-    simp only [dmi_eq_rootVariance, neg_div]
-    linarith
-  have h3 := (mul_le_mul_of_nonneg_right hd hE).trans hmills
-  rw [div_mul_eq_mul_div, div_le_iff₀ hδ] at h3
-  linarith [MathFin.strictMono_Phi.monotone hlow]
+/-- **The smiled call at large strikes is the Black form at large log-strikes**: `bsSmile p`
+tends to `0` at `∞` iff `blackForm k (w k)` does, `w` the SVI total variance. -/
+theorem tendsto_bsSmile_zero_iff_blackForm (p : Params) (hw : ∀ k : ℝ, 0 < variance p k) :
+    Tendsto (bsSmile p) atTop (𝓝 0) ↔
+      Tendsto (fun k ↦ blackForm k (variance p k)) atTop (𝓝 0) := by
+  have hexp (k : ℝ) : bsSmile p (Real.exp k) = blackForm k (variance p k) := by
+    rw [← blackCall_eq_bsSmile p _ (Real.exp_pos k) (by rw [Real.log_exp]; exact hw k),
+      blackCall, Real.log_exp]
+  refine ⟨fun h ↦ by simpa only [Function.comp_def, hexp] using h.comp Real.tendsto_exp_atTop,
+    fun h ↦ (h.comp Real.tendsto_log_atTop).congr' ?_⟩
+  filter_upwards [eventually_gt_atTop 0] with K hK
+  simpa only [Function.comp_apply, Real.exp_log hK] using (hexp (Real.log K)).symm
 
 /-- **The call price at large strikes**: the SVI-smiled call tends to `0` exactly when the right
-wing slope `b(1 + ρ)` is below `2`. -/
+wing slope `b(1 + ρ)` is below `2`. The general tail condition for the Black form
+(`blackForm_tendsto_zero_iff_dpl_tendsto_atBot`) at the SVI variance, and the tail condition for
+`d₊` (`tendsto_dpl_atBot_iff`). -/
 theorem tendsto_bsSmile_zero_iff (p : Params) (hb : 0 ≤ p.b)
     (hw : ∀ k : ℝ, 0 < variance p k) :
     Tendsto (bsSmile p) atTop (𝓝 0) ↔ p.b * (1 + p.rho) < 2 :=
-  ⟨fun h ↦ not_le.1 fun hc ↦ not_tendsto_bsSmile_zero p hb hw hc h, tendsto_bsSmile_zero p hb hw⟩
+  (tendsto_bsSmile_zero_iff_blackForm p hw).trans
+    ((blackForm_tendsto_zero_iff_dpl_tendsto_atBot _ hw).trans (tendsto_dpl_atBot_iff p hb hw))
 
 /-! ### The call price function -/
 
@@ -263,7 +232,7 @@ theorem isNormalizedCallPrice_bsSmile_iff (p : Params) (hb : 0 ≤ p.b)
   ⟨fun h ↦ ⟨h.convexOn, (tendsto_bsSmile_zero_iff p hb hw).1 h.tendsto_zero⟩, fun h ↦
     .of_convexOn h.1
       (fun _ hK ↦ max_le (one_sub_le_bsSmile p hK (hw _)) (bsSmile_nonneg p hK (hw _)))
-      (fun _ hK ↦ bsSmile_le_one p hK (hw _)) (tendsto_bsSmile_zero p hb hw h.2)⟩
+      (fun _ hK ↦ bsSmile_le_one p hK (hw _)) ((tendsto_bsSmile_zero_iff p hb hw).2 h.2)⟩
 
 /-! ### The sign formula -/
 

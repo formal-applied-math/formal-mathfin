@@ -70,6 +70,7 @@ import MathFin.Probability.Gaussian.FeynmanKacHeatEquation
 import MathFin.Probability.Brownian.BrownianMartingale
 import MathFin.Probability.Brownian.BrownianDoobMaximal
 -- Bayes change-of-measure engine + Black–Scholes EMM via an explicit Girsanov density
+import MathFin.Probability.Martingales.CondExpCallJensen
 import MathFin.Probability.Martingales.ChangeOfMeasure
 import MathFin.Probability.Brownian.ExpMartingaleQBrownian
 import MathFin.Probability.Martingales.LevyQuadraticSums
@@ -442,6 +443,8 @@ import MathFin.Models.StochVol.SABRImpliedVol
 import MathFin.Models.StochVol.SABRFlochKennedyLimits
 import MathFin.Models.BlackScholes.LognormalMoments
 import MathFin.Models.ModelFree.VarianceSwap
+-- the volatility-swap fair strike under an assumed lognormal law of realized variance
+import MathFin.Models.ModelFree.VolatilitySwapLognormal
 -- Merton (1976) jump-diffusion: Poisson-mixture price, compensation
 -- identity, parity (consumes Probability.Jumps.PoissonPgf + Call/Put formulas)
 import MathFin.Models.Jumps.MertonJumpDiffusion
@@ -519,6 +522,7 @@ import MathFin.Models.Jumps.JumpDiffusionMoments
 -- Gaussian jumps a corollary at the level of the law (log contract against Var[Y]/τ)
 import MathFin.Models.Jumps.JumpDiffusionVarianceSwap
 import MathFin.Models.Bachelier.Bachelier
+import MathFin.Models.Bachelier.BachelierSpread
 import MathFin.Models.Bachelier.BachelierGreeks
 import MathFin.Models.Bachelier.BachelierMarket
 import MathFin.Models.BlackScholes.Chooser
@@ -535,6 +539,8 @@ import MathFin.Models.StochVol.Heston
 -- The Heston transform at vanishing vol-of-vol: the Black-Scholes moment with the integrated
 -- deterministic variance
 import MathFin.Models.StochVol.HestonSmallVolOfVol
+-- The Heston transform at zero maturity: the Riccati flows vanish at τ = 0 and the
+-- profile degenerates to the point-mass mgf (the undiscounted-payoff convention)
 import MathFin.Models.BlackScholes.Lookback
 import MathFin.Models.BlackScholes.BarrierParity
 import MathFin.Models.BlackScholes.BinaryBarrierOption
@@ -671,12 +677,15 @@ import MathFin.Models.Rates.VasicekMarketPDE
 import MathFin.Models.Rates.VasicekMarketPriceOfRisk
 -- Vasicek bond price as κ → 0⁺: the three-term cancellation limit to the driftless model
 import MathFin.Models.Rates.VasicekZeroMeanReversionLimit
+-- The Nelson–Siegel/Svensson zero-rate at vanishing decay: the loading tends
+-- to 1, the zero rate to c0 + c1, the Svensson second term to 0 (the guarded-limit values)
 -- CIR loadings: B solves the Riccati equation, A solves A' = −κθB
 import MathFin.Models.Rates.CIRRiccati
 -- The Black–Scholes forward price under the T-forward measure
 import MathFin.Models.Rates.ForwardMeasure
 -- Inflation is FX: the zero-coupon inflation swap and the YoY convexity
 import MathFin.Models.Rates.Inflation
+import MathFin.Models.Rates.OvernightCompounding
 -- ABCD instantaneous volatility: closed-form integrated variance over a window
 import MathFin.Models.Rates.ABCDVolatility
 -- GSR (Gaussian short rate): two-piece piecewise-constant-volatility bond price
@@ -849,6 +858,9 @@ import MathFin.Risk.CollateralizedExposureBrownian
 -- (VaR elicitable, ES not); Bernoulli mixtures and the Basel IRB limit theorem
 import MathFin.Risk.ExpectedShortfall
 import MathFin.Risk.CompoundPoissonCVaR
+-- The stop-loss transform across a gap in the law: the stop-loss recursion of an arithmetic loss
+-- and the Rockafellar–Uryasev objective on its lattice
+import MathFin.Risk.StopLossGap
 import MathFin.Risk.GaussianExpectedShortfall
 import MathFin.Risk.ValueAtRiskBisection
 import MathFin.Risk.VaRSuperadditivity
@@ -925,6 +937,7 @@ import MathFin.Choice.Utility.MarketMarginalUtility
 -- systematic floor, and the square-root-of-time rule for GBM losses
 import MathFin.Choice.Portfolio.Equicorrelation
 import MathFin.Choice.Portfolio.SingleIndexModel
+import MathFin.Choice.Portfolio.RegressionBeta
 
 -- Insurance
 import MathFin.Insurance.StandardDeviationPrinciple
@@ -935,6 +948,10 @@ import MathFin.Insurance.Mortality
 import MathFin.Insurance.SurvivalModel
 import MathFin.Insurance.ActuarialInsurance
 import MathFin.Insurance.AnnuityValue
+import MathFin.Insurance.BuhlmannCredibility
+-- The chain ladder and Mack's model: the completion is the prediction by the selected factors,
+-- and under Mack's model the predictions of the ultimate are a martingale
+import MathFin.Insurance.ChainLadder
 import MathFin.Insurance.EsscherPremium
 
 -- Markets
@@ -974,3 +991,4 @@ import MathFin.Models.BlackScholes.ContinuousLookbackPricing
 import MathFin.Models.BlackScholes.ShoutFloorMonotonicity
 import MathFin.Choice.Performance.MarchenkoPasturEdge
 import MathFin.Markets.DeFi.ConcentratedLiquidityVaR
+import MathFin.Models.ModelFree.BlackFormTail

@@ -47,6 +47,9 @@ as a limit.)
   curve's short end: `s(x) → 1` as `x → 0 (through nonzero values)`, obtained from `HasDerivAt` of
   `x ↦ 1 - e^{-x}` at `0` (the slope factor is literally a difference
   quotient of that function through the origin).
+* `tendsto_nssYield_decay_atTop` — **vanishing-decay limit**: at a fixed maturity `τ ≠ 0`,
+  `y → β₀ + β₁` as both decay constants `l₁, l₂ → ∞` (the Nelson–Siegel and Svensson curvature
+  terms vanish, the curve flattens to level plus slope).
 * `tendsto_nssSlope_atTop` — the slope factor's long end: `s(x) → 0` as `x → ∞`.
 * `tendsto_nssYield_nhdsNE_zero` — **short-end limit**:
   `y(τ) → β₀ + β₁` as `τ → 0 (through nonzero values)` (the two curvature terms vanish at the short
@@ -160,6 +163,36 @@ theorem tendsto_nssYield_nhdsNE_zero (β₀ β₁ β₂ β₃ l₁ l₂ : ℝ)
       (((tendsto_const_nhds.add (hs1.const_mul β₁)).add
             ((hs1.sub he1).const_mul β₂)).add
         ((hs2.sub he2).const_mul β₃))
+  simpa using h
+
+/-- **Vanishing-decay limit**: at a fixed maturity `τ ≠ 0`, as both decay constants `l₁, l₂`
+tend to `∞`, the Svensson curve tends to `β₀ + β₁` — the flat level-plus-slope curve. Each
+argument `τ/lᵢ` tends to `0` through nonzero values, so `s(τ/lᵢ) → 1` and `e^{−τ/lᵢ} → 1`: both
+curvature terms (the Nelson–Siegel `β₂` term and Svensson's `β₃` term) vanish. This is the
+short-end limit `tendsto_nssYield_nhdsNE_zero` read in the decay constants (`τ/l` is the only
+place `τ` and `l` enter). The value at `τ = 0` is not this limit, which is why `τ ≠ 0` is
+required. -/
+theorem tendsto_nssYield_decay_atTop (β₀ β₁ β₂ β₃ : ℝ) {τ : ℝ} (hτ : τ ≠ 0) :
+    Tendsto (fun l : ℝ × ℝ ↦ nssYield β₀ β₁ β₂ β₃ l.1 l.2 τ) (atTop ×ˢ atTop)
+      (𝓝 (β₀ + β₁)) := by
+  have hdiv : Tendsto (fun l : ℝ ↦ τ / l) atTop (𝓝[≠] (0 : ℝ)) :=
+    tendsto_nhdsWithin_iff.2 ⟨tendsto_const_nhds.div_atTop tendsto_id,
+      (eventually_gt_atTop 0).mono fun l hl ↦ div_ne_zero hτ hl.ne'⟩
+  have h1 : Tendsto (fun l : ℝ × ℝ ↦ τ / l.1) (atTop ×ˢ atTop) (𝓝[≠] (0 : ℝ)) :=
+    hdiv.comp tendsto_fst
+  have h2 : Tendsto (fun l : ℝ × ℝ ↦ τ / l.2) (atTop ×ˢ atTop) (𝓝[≠] (0 : ℝ)) :=
+    hdiv.comp tendsto_snd
+  have hs1 := tendsto_nssSlope_nhdsNE_zero.comp h1
+  have hs2 := tendsto_nssSlope_nhdsNE_zero.comp h2
+  have he : Tendsto (fun x : ℝ ↦ Real.exp (-x)) (𝓝[≠] (0 : ℝ)) (𝓝 1) :=
+    ((Real.continuous_exp.comp continuous_neg).tendsto' 0 1 (by simp)).mono_left
+      nhdsWithin_le_nhds
+  have he1 := he.comp h1
+  have he2 := he.comp h2
+  have h : Tendsto (fun l : ℝ × ℝ ↦ nssYield β₀ β₁ β₂ β₃ l.1 l.2 τ) (atTop ×ˢ atTop)
+      (𝓝 (β₀ + β₁ * 1 + β₂ * (1 - 1) + β₃ * (1 - 1))) :=
+    ((tendsto_const_nhds.add (hs1.const_mul β₁)).add ((hs1.sub he1).const_mul β₂)).add
+      ((hs2.sub he2).const_mul β₃)
   simpa using h
 
 /-- **Long end of the slope factor**: `s(x) = (1 − e^{−x})/x → 0` as `x → ∞` (the numerator

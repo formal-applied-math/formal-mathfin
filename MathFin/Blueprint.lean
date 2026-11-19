@@ -77,6 +77,8 @@ import MathFin.Choice.Portfolio.MarkowitzLagrangian
 import MathFin.Choice.Portfolio.RiskParityFOC
 import MathFin.Choice.Portfolio.Markowitz
 import MathFin.Choice.Portfolio.CAPM
+import MathFin.Insurance.BuhlmannCredibility
+import MathFin.Insurance.ChainLadder
 import MathFin.Choice.Utility.StatePriceDensity
 import MathFin.Choice.Portfolio.StochasticDiscountFactor
 import MathFin.Choice.Portfolio.MarketSDF
@@ -1370,6 +1372,25 @@ attribute [blueprint "thm:premium-is-price"
   still zero. -/)]
   MathFin.lifeAnnuityDue_eq_value
 
+attribute [blueprint "thm:life-insurance-epv"
+  (title := "Whole-life insurance and the life annuity-due: A = 1 − d ä")
+  (statement := /-- For a lifetime $\tau$ that is positive almost surely, with survival function
+  $S(k) = Q(\tau > k)$, a flat rate $r > 0$ and $d = 1 - e^{-r}$, the expected present value of one
+  paid at the end of the year of death satisfies
+  $\sum_{k \ge 0} e^{-r(k+1)}\,(S(k) - S(k+1)) = 1 - d \sum_{k \ge 0} e^{-rk} S(k)$, the right-hand
+  series being the life annuity-due. The term form, term insurance plus pure endowment, holds for
+  every $r$ (`termInsurance_add_pureEndowment_eq`). -/)]
+  MathFin.wholeLife_epv_eq
+
+attribute [blueprint "thm:thiele-reserve"
+  (title := "Thiele's differential equation")
+  (statement := /-- For continuous force of interest $\delta$, force of mortality $\mu$, premium rate
+  $\pi$ and death benefit $b$ on $[0, T]$, the prospective reserve $V(t)$, the discounted future
+  death benefits less premiums plus the terminal payment (discounted by $e^{-\int \delta}$ times the
+  survival factor of the force $\mu$, a probability when $\mu \ge 0$), satisfies
+  $V'(t) = (\delta + \mu) V(t) + \pi - \mu b$ for $0 < t < T$. The discrete one-step recursion is not covered. -/)]
+  MathFin.hasDerivAt_thieleReserve
+
 attribute [blueprint "thm:esscher-premium-is-price"
   (title := "The Esscher premium is a price")
   (statement := /-- In a market with the unit numéraire, the claim paying the asset at $T$ is
@@ -1512,6 +1533,31 @@ attribute [blueprint "def:portfolio-variance"
   (statement := /-- $\mathrm{Var}(w) = \sum_{i,j} w_i w_j \sigma_{ij}$, the variance of an
   $N$-asset portfolio with weights $w$ and covariance $\sigma$. -/)]
   MathFin.portfolioVarN
+
+attribute [blueprint "thm:buhlmann-credibility"
+  (title := "Bühlmann credibility")
+  (statement := /-- In the finite latent mixture, with observations $X_1,\dots,X_n$ iid given a latent
+  parameter $\Theta$, hypothetical mean $m(\Theta)$ with variance $a\ne0$, expected process
+  variance $s^2$ and $\kappa=s^2/a$: the credibility premium $\mu+Z(\bar X-\mu)$ with
+  $Z=n/(n+\kappa)$ (the regression coefficient $\mathrm{Cov}(m,\bar X)/\mathrm{Var}\,\bar X$) has the
+  least mean squared error, as a predictor of $m(\Theta)$, among all affine functions of the sample
+  mean $\bar X$. The model is Sharpe's single-index model, with $m(\Theta)$ the factor and
+  $X_i-m(\Theta)$ the shocks, and $\mathrm{Var}\,\bar X=a+s^2/n$ is its equal-weight portfolio
+  variance. Finite alphabet and finite parameter set only; companion results show the credibility
+  factor lies in $[0,1]$ and $n/(n+\kappa)\to1$. -/)]
+  MathFin.buhlmann_mse_le
+
+attribute [blueprint "thm:mack-chain-ladder"
+  (title := "Mack's model: the chain-ladder predictions are a martingale")
+  (statement := /-- For one accident year, let the cumulative claims $C_j$ after $j$ development
+  years be adapted and integrable with $\mathbb E[C_{j+1}\mid\mathcal F_j]=f_j C_j$ (Mack's
+  model). Then the reference measure is an equivalent martingale measure, up to the ultimate date
+  $N$, of the prediction $m\mapsto(\prod_{m\le k<N}f_k)\,C_m$ of the ultimate $C_N$; this
+  prediction is $\mathbb E[C_N\mid\mathcal F_m]$, and the claims development result from $m$ to
+  $m+1$ has conditional mean zero. The chain-ladder completion of a triangle is this prediction
+  with the selected factors $\hat f_j$ in place of $f_j$; their unbiasedness and the standard error
+  of the reserve are not covered. -/)]
+  MathFin.IsMackRow.isEMM_chainPrediction
 
 attribute [blueprint "thm:markowitz-lagrangian"
   (title := "Markowitz mean–variance optimality")

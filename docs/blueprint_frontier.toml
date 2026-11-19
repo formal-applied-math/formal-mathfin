@@ -19,27 +19,11 @@
 # `core` entry that is not `full` or `reduced_core`.
 
 [[node]]
-label = "thm:buhlmann-credibility"
-title = "Bühlmann credibility"
-statement = "The credibility premium Z·X̄+(1-Z)μ with Z=n/(n+k)."
-uses = []
-ground = "Mathlib: conditional expectation and L² projection"
-area = "statistics"
-
-[[node]]
 label = "thm:cramer-lundberg-claims"
 title = "Cramér–Lundberg claims"
 statement = "E[S_t]=λtμ₁ and the compensated claims process is a martingale."
 uses = ["thm:compound-poisson-mgf"]
 area = "risk/insurance"
-family = "insurance"
-
-[[node]]
-label = "thm:life-insurance-epv"
-title = "Life annuity and insurance EPV"
-statement = "Annuity and insurance expected present values satisfy A_x=1-dä_x."
-uses = ["thm:survival-model", "def:survival-function"]
-area = "valuation/insurance"
 family = "insurance"
 
 [[node]]
@@ -63,15 +47,7 @@ label = "thm:survival-model"
 title = "Survival model and life tables"
 statement = "Survival relations, curtate lifetime, expectation of life and life-table layer tied to the probabilistic survival model."
 uses = ["def:survival-function"]
-core = ["mf-survival-ccdf-ratio", "mf-survival-ccdf-zero"]
-area = "valuation/insurance"
-family = "insurance"
-
-[[node]]
-label = "thm:thiele-reserve"
-title = "Thiele reserve"
-statement = "Thiele's differential equation and its discrete recursion for the prospective reserve."
-uses = ["thm:survival-model", "def:survival-function"]
+core = ["mf-survival-ccdf-ratio", "mf-survival-ccdf-zero", "mf-life-table-survival-ratio"]
 area = "valuation/insurance"
 family = "insurance"
 
