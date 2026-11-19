@@ -93,8 +93,9 @@ noncomputable def jyVariance (ar an σI σr σn ρrI ρnI ρnr T : ℝ) : ℝ :=
   ∫ t in (0 : ℝ)..T, jyVarIntegrand ar an σI σr σn ρrI ρnI ρnr T t
 
 /-- The determinant of the `(I, r, n)` correlation matrix
-`[[1, ρ_{rI}, ρ_{nI}], [ρ_{rI}, 1, ρ_{nr}], [ρ_{nI}, ρ_{nr}, 1]]`. Together with
-`ρ_{rI}² ≤ 1` it is the positive-semidefiniteness condition. -/
+`[[1, ρ_{rI}, ρ_{nI}], [ρ_{rI}, 1, ρ_{nr}], [ρ_{nI}, ρ_{nr}, 1]]`. Positive
+semidefiniteness of the matrix needs `ρ_{rI}² ≤ 1`, `ρ_{nI}² ≤ 1` and this determinant `≥ 0`
+(the hypotheses of `quad3_nonneg`); the determinant alone does not suffice. -/
 def jyCorrDet (ρrI ρnI ρnr : ℝ) : ℝ :=
   1 + 2 * ρrI * ρnI * ρnr - ρrI ^ 2 - ρnI ^ 2 - ρnr ^ 2
 
@@ -150,7 +151,8 @@ theorem jyVariance_nonneg {ar an σI σr σn ρrI ρnI ρnr : ℝ} {T : ℝ} (hT
 theorem jyVariance_eq_of_zero_rate_vols (ar an σI ρrI ρnI ρnr T : ℝ) :
     jyVariance ar an σI 0 0 ρrI ρnI ρnr T = σI ^ 2 * T := by
   unfold jyVariance jyVarIntegrand
-  simp
+  simp only [mul_zero, zero_mul, zero_pow two_ne_zero, add_zero, sub_zero,
+    intervalIntegral.integral_const, smul_eq_mul]
   ring
 
 /-- **All volatilities zero** gives `V(0,T) = 0`. -/
@@ -178,7 +180,7 @@ identification forces `F₀ = I₀·Pʳ(0,T)/Pⁿ(0,T)` (`ZCSwap.forwardIndex_eq
 theorem jyForwardIndex_lognormal_eq_curves (BT : Ω → ℝ) (Pn0T Pr0T I0 F0 V : ℝ) (Z : Ω → ℝ)
     (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (hPn0T : 0 < Pn0T)
     (hP : Pn0T = ∫ ω, 1 / BT ω ∂Qn)
-    (hident : ∫ ω, (fun ω => bsTerminal F0 0 (Real.sqrt V) 1 (Z ω)) ω / BT ω ∂Qn = I0 * Pr0T)
+    (hident : ∫ ω, bsTerminal F0 0 (Real.sqrt V) 1 (Z ω) / BT ω ∂Qn = I0 * Pr0T)
     (hZ : HasLaw Z (gaussianReal 0 1) (MathFin.forwardMeasure Qn BT)) :
     F0 = I0 * Pr0T / Pn0T := by
   have h := ZCSwap.forwardIndex_eq (Qn := Qn) BT Pn0T Pr0T I0
@@ -195,7 +197,7 @@ theorem jyForwardIndex_lognormal_eq_curves (BT : Ω → ℝ) (Pn0T Pr0T I0 F0 V 
   simpa [bsTerminal] using h2.symm
 
 /-- **ZC inflation caplet = Black caplet on the curve forward.** Under `hident` and a
-lognormal index under `Q^T` with log-variance `V > 0`, positive `F₀`-curve forward and `K > 0`,
+lognormal index under `Q^T` with log-variance `V`, and `F₀ > 0`, `V > 0`, `K > 0`,
 
   `Pⁿ(0,T)·𝔼^{Q^T}[(I_T − K)⁺] = blackCaplet (I₀Pʳ(0,T)/Pⁿ(0,T)) K √V 1 Pⁿ(0,T)`,
 
@@ -205,7 +207,7 @@ theorem jyZcCaplet_eq_black (BT : Ω → ℝ) [IsProbabilityMeasure (MathFin.for
     (Pn0T Pr0T I0 F0 V K : ℝ) (Z : Ω → ℝ)
     (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (hPn0T : 0 < Pn0T)
     (hP : Pn0T = ∫ ω, 1 / BT ω ∂Qn)
-    (hident : ∫ ω, (fun ω => bsTerminal F0 0 (Real.sqrt V) 1 (Z ω)) ω / BT ω ∂Qn = I0 * Pr0T)
+    (hident : ∫ ω, bsTerminal F0 0 (Real.sqrt V) 1 (Z ω) / BT ω ∂Qn = I0 * Pr0T)
     (hZ : HasLaw Z (gaussianReal 0 1) (MathFin.forwardMeasure Qn BT))
     (hF0 : 0 < F0) (hV : 0 < V) (hK : 0 < K) :
     Pn0T * ∫ ω, max (bsTerminal F0 0 (Real.sqrt V) 1 (Z ω) - K) 0
@@ -227,7 +229,7 @@ theorem jyZcFloorlet_eq_black (BT : Ω → ℝ) [IsProbabilityMeasure (MathFin.f
     (Pn0T Pr0T I0 F0 V K : ℝ) (Z : Ω → ℝ)
     (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (hPn0T : 0 < Pn0T)
     (hP : Pn0T = ∫ ω, 1 / BT ω ∂Qn)
-    (hident : ∫ ω, (fun ω => bsTerminal F0 0 (Real.sqrt V) 1 (Z ω)) ω / BT ω ∂Qn = I0 * Pr0T)
+    (hident : ∫ ω, bsTerminal F0 0 (Real.sqrt V) 1 (Z ω) / BT ω ∂Qn = I0 * Pr0T)
     (hZ : HasLaw Z (gaussianReal 0 1) (MathFin.forwardMeasure Qn BT))
     (hF0 : 0 < F0) (hV : 0 < V) (hK : 0 < K) :
     Pn0T * ∫ ω, max (K - bsTerminal F0 0 (Real.sqrt V) 1 (Z ω)) 0
@@ -265,7 +267,7 @@ section Yoy
 
 variable {Ω : Type*} {m : MeasurableSpace Ω} {μ : Measure Ω}
 
-/-- **YoY forward = bond-ratio expectation.** If `I_S > 0` and `R_S` are `m_S`-measurable,
+/-- **YoY forward = bond-ratio expectation.** If `I_S` is `m_S`-measurable and positive,
 `I_T` and `I_T/I_S` are integrable and `𝔼^T[I_T | m_S] = I_S·R_S` a.e. (the martingale
 property of `F(·,T)`), then `𝔼^T[I_T/I_S] = 𝔼^T[R_S]`. -/
 theorem jyYoyForward_eq_bondRatio {mS : MeasurableSpace Ω} (hmS : mS ≤ m)
@@ -326,15 +328,15 @@ section YoyPrice
 
 /-- **Time-0 price of a year-on-year payment.** Under the nominal `T`-forward measure
 `Q^T = forwardMeasure Qn BT` and the hypotheses of `jyYoyForward_eq_convexity`, with
-`Pⁿ(0,T) = 𝔼^{Qn}[1/B_T] > 0`, the time-0 value of the payment `I_T/I_S` at `T` is
+`Pⁿ(0,T) = 𝔼^{Qn}[1/B_T] > 0` (the single variable `Pn0T`, also the one in the naive ratio), the time-0 value of the payment `I_T/I_S` at `T` is
 
   `𝔼^{Qn}[(I_T/I_S)/B_T] = Pⁿ(0,T)·(naive ratio of forwards)·exp(Bⁿmⁿ − Bʳmʳ + Bⁿ²Vⁿ − BʳBⁿ·Cov)`.
 
 It is `MathFin.forwardMeasure_price` composed with `jyYoyForward_eq_convexity`; the
 hypotheses of the latter are not derived. -/
 theorem jyYoyPayment_price {Ω : Type*} {mS m : MeasurableSpace Ω} {Qn : Measure Ω} (BT : Ω → ℝ)
-    (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (Pn0T' : ℝ)
-    (hP : Pn0T' = ∫ ω, 1 / BT ω ∂Qn) (hPpos : 0 < Pn0T')
+    (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (Pn0T : ℝ)
+    (hP : Pn0T = ∫ ω, 1 / BT ω ∂Qn) (hPpos : 0 < Pn0T)
     (hmS : mS ≤ m)
     [SigmaFinite ((MathFin.forwardMeasure Qn BT).trim hmS)] (IS IT RS : Ω → ℝ)
     (hIS : StronglyMeasurable[mS] IS) (hISpos : ∀ ω, 0 < IS ω)
@@ -342,7 +344,7 @@ theorem jyYoyPayment_price {Ω : Type*} {mS m : MeasurableSpace Ω} {Qn : Measur
     (hITS : Integrable (fun ω => IT ω / IS ω) (MathFin.forwardMeasure Qn BT))
     (hmart : (MathFin.forwardMeasure Qn BT)[IT | mS]
       =ᵐ[MathFin.forwardMeasure Qn BT] fun ω => IS ω * RS ω)
-    (mn mr Vn Vr ρ Bn Br Pn0T Pn0S Pr0T Pr0S Cov : ℝ)
+    (mn mr Vn Vr ρ Bn Br Pn0S Pr0T Pr0S Cov : ℝ)
     (hVn : 0 ≤ Vn) (hVr : 0 ≤ Vr) (hρ : ρ ^ 2 ≤ 1) (hCov : Cov = ρ * Real.sqrt (Vn * Vr))
     {Z1 Z2 : Ω → ℝ}
     (hZ1 : HasLaw Z1 (gaussianReal 0 1) (MathFin.forwardMeasure Qn BT))
@@ -352,7 +354,7 @@ theorem jyYoyPayment_price {Ω : Type*} {mS m : MeasurableSpace Ω} {Qn : Measur
         - Convexity.hwD Bn Vn + (Bn * (mn + Real.sqrt Vn * Z1 ω)
           - Br * (mr + Real.sqrt Vr * (ρ * Z1 ω + Real.sqrt (1 - ρ ^ 2) * Z2 ω))))) :
     ∫ ω, IT ω / IS ω / BT ω ∂Qn
-      = Pn0T' * ((Pr0T * Pn0S / (Pr0S * Pn0T))
+      = Pn0T * ((Pr0T * Pn0S / (Pr0S * Pn0T))
         * Real.exp (Bn * mn - Br * mr + Bn ^ 2 * Vn - Br * Bn * Cov)) := by
   have hprice := MathFin.forwardMeasure_price (Q := Qn) (fun ω => IT ω / IS ω) hBTmeas hBTpos
     (hP ▸ hPpos)

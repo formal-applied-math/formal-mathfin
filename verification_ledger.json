@@ -3317,16 +3317,16 @@
     "mf-jarrow-yildirim-yoy-forward-convexity": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-11-19",
-      "elapsed_s": 2.3,
-      "input_hash": "7bacd436100f759342d0e17e0df93500a2319db51fdcc78fa57c729aa896671d",
-      "verified_at_commit": "c47908ea"
+      "elapsed_s": 2.2,
+      "input_hash": "61ece50438b10ac6b226c63fb4f71f13d0958639fde21e765ec5f156799140e2",
+      "verified_at_commit": "203c317f"
     },
     "mf-jarrow-yildirim-zc-inflation-caplet": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-11-19",
-      "elapsed_s": 2.4,
-      "input_hash": "6e84b12dbfba61197e46f7636cb0409035445585a003bd009748434d649b6db8",
-      "verified_at_commit": "c47908ea"
+      "elapsed_s": 2.5,
+      "input_hash": "51c3d3a5df8570c0d745cb1b1eb86c8e5d3a2c844e3b3d3dacf122b5c73f5668",
+      "verified_at_commit": "203c317f"
     },
     "mf-joint-stdev-triangle": {
       "benchmark_file": "risk_measures.json",
