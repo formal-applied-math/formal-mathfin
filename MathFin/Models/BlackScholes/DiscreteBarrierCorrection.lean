@@ -58,7 +58,7 @@ the Reiner–Rubinstein/Hull formula is a matter of transcription, not proved in
 * `bgkDownBarrier_timeScale`, `bgkDownOutCall_timeScale`: the shift `σ√(T/m)` is fixed by the same
   scaling at fixed `m` (`Δt ↦ Δt/c`), so the BGK expression is as well.
 * `continuousAt_ptDownOutCall_barrier`: `ptDownOutCall` is continuous in the barrier at every
-  nonzero barrier, for nonzero spot.
+  nonzero barrier.
 * `tendsto_bgkDownBarrier`: the shifted barrier tends to `H` as the number of dates `m → ∞`.
 * `tendsto_bgkDownOutCall`: as `m → ∞` the BGK expression tends to `ptDownOutCall` at `H`.
 * `abs_knockIn_sub_bgkKnockIn_le`: a linear rearrangement of in–out parity
@@ -216,12 +216,14 @@ theorem bgkDownOutCall_timeScale {β : ℝ} {m : ℕ} {K H r σ S T c : ℝ} (hc
 
 /-! ### The limit of many monitoring dates -/
 
-/-- `ptDownOutCall` is continuous in the barrier at every nonzero barrier, for nonzero spot. No
+/-- `ptDownOutCall` is continuous in the barrier at every nonzero barrier. No
 claim that it is a price: that needs `H ≤ K` and `S > H`. -/
-theorem continuousAt_ptDownOutCall_barrier {K b r σ S T : ℝ} (hS : S ≠ 0) {H : ℝ} (hH : H ≠ 0) :
+theorem continuousAt_ptDownOutCall_barrier {K b r σ S T : ℝ} {H : ℝ} (hH : H ≠ 0) :
     ContinuousAt (fun h ↦ ptDownOutCall S K h b r σ T) H := by
-  have hl : ContinuousAt (fun h : ℝ ↦ Real.log (h / S)) H :=
-    ContinuousAt.log (continuousAt_id.div_const S) (div_ne_zero hH hS)
+  have hl : ContinuousAt (fun h : ℝ ↦ Real.log (h / S)) H := by
+    rcases eq_or_ne S 0 with hS | hS
+    · simpa [hS] using continuousAt_const (y := (0 : ℝ))
+    · exact ContinuousAt.log (continuousAt_id.div_const S) (div_ne_zero hH hS)
   have hPhi : ∀ {f : ℝ → ℝ}, ContinuousAt f H → ContinuousAt (fun h ↦ Phi (f h)) H :=
     fun hf ↦ continuous_Phi.continuousAt.comp hf
   have hE : ∀ a : ℝ, ContinuousAt (fun h ↦ Real.exp (a * Real.log (h / S))) H := fun a ↦
@@ -252,14 +254,14 @@ theorem tendsto_bgkDownBarrier (β H σ T : ℝ) :
   rwa [mul_one] at this
 
 /-- **Many-dates limit.** As `m → ∞` the expression `bgkDownOutCall` tends to `ptDownOutCall` at
-the unshifted barrier, for nonzero spot and barrier. It is a statement about the closed-form
+the unshifted barrier, for a nonzero barrier. It is a statement about the closed-form
 expression; it reads as "the BGK approximation tends to the continuous price" only where
 `ptDownOutCall` is a price. It is the consistency of the shift with the continuous limit, not an
 accuracy result. -/
-theorem tendsto_bgkDownOutCall {β K H r σ S T : ℝ} (hS : S ≠ 0) (hH : H ≠ 0) :
+theorem tendsto_bgkDownOutCall {β K H r σ S T : ℝ} (hH : H ≠ 0) :
     Tendsto (fun m : ℕ ↦ bgkDownOutCall β m K H r σ S T) atTop
       (𝓝 (ptDownOutCall S K H r r σ T)) :=
-  (continuousAt_ptDownOutCall_barrier hS hH).tendsto.comp (tendsto_bgkDownBarrier β H σ T)
+  (continuousAt_ptDownOutCall_barrier hH).tendsto.comp (tendsto_bgkDownBarrier β H σ T)
 
 /-! ### Connection to in–out parity -/
 

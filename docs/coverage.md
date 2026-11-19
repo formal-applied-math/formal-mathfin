@@ -654,7 +654,7 @@ split by area. What each bridge proves, by area:
   (`mf-partial-time-barrier-down-add-up`, `mf-binary-barrier-inout-parity`, both `reduced_core`).
   The Broadie–Glasserman–Kou shifted barrier for discretely monitored down-and-out calls
   (`mf-bgk-discrete-barrier-shift`, `reduced_core`): `ptDownOutCall` at carry `r` is proved equal to
-  the reciprocal-ratio form of the image form of Howison and Steinberg; `ptDownOutCall` is
+  the image form (the reciprocal-ratio form of Howison and Steinberg's display); `ptDownOutCall` is
   homogeneous of degree one under `(S, K, H) ↦ c(S, K, H)` (`ptDownOutCall_scale`); the
   Black–Scholes call price satisfies that spatial scaling and the time-volatility scaling
   (`bsV_scale`, `bsV_timeScale`); the shifted-barrier expression `ptDownOutCall` at
