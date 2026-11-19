@@ -42,8 +42,9 @@ the Reiner–Rubinstein/Hull formula is a matter of transcription, not proved in
 * `bgkDownBarrier`, `bgkUpBarrier`: the shifted barriers `H e^{∓βσ√(T/m)}`.
 * `bgkDownOutCall`: `ptDownOutCall` at the shifted down barrier, the BGK approximation to the
   discretely monitored down-and-out call. It reads as a price only when the closed form does
-  (`ptDownOutCall`: shifted barrier at most `K`, spot above it). There is no up-and-out closed
-  form in this library, so only the up-barrier shift is defined.
+  (`ptDownOutCall`: shifted barrier at most `K`, spot above it) and for `σ > 0`, `0 < T`,
+  `1 ≤ m`. There is no up-and-out closed form in this library, so only the up-barrier shift is
+  defined.
 * `bgkKnockIn`: the BGK knock-in expression, the vanilla price `bsV` minus `bgkDownOutCall`.
 
 ## Main results
@@ -102,9 +103,11 @@ down-and-out call, `X ≥ H` branch, at cost of carry `b = r`) equals
 `V(S) − (H/S)^{2r/σ²−1} · V(H²/S)` with `V = bsV`, equivalently the form of [HowisonSteinberg2005],
 §2 (restated as eq. (7) in §3.7) with the ratio reciprocated. The exponent `2r/σ² − 1` is
 `2 · ptMu r σ`, the term `(H/S)^{2r/σ²−1} · (H²/S)` is `S · ptHSmu1`, and `d₁, d₂` at `H²/S` are
-`ptF1, ptF2`. An identity between two closed forms; neither is proved here to be a price. -/
+`ptF1, ptF2`. An identity between two closed forms; neither is proved here to be a price. The
+maturity guard `0 < T` is not used by the algebra: at `T ≤ 0` the denominator `σ √T` is `0` and
+both closed forms are junk values. -/
 theorem ptDownOutCall_eq_image {K H r σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)
-    (hH : 0 < H) (hσ : 0 < σ) :
+    (hH : 0 < H) (hσ : 0 < σ) (_hT : 0 < T) :
     ptDownOutCall S K H r r σ T
       = bsV K r σ S T - (H / S) ^ (2 * r / σ ^ 2 - 1) * bsV K r σ (H ^ 2 / S) T := by
   have hHS : 0 < H / S := div_pos hH hS
@@ -135,16 +138,18 @@ theorem ptDownOutCall_eq_image {K H r σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)
 
 /-- Spatial homogeneity of the closed form: scaling spot, strike and barrier by `c > 0` scales
 `ptDownOutCall` by `c`, at any cost of carry `b`. -/
-theorem ptDownOutCall_scale {K H b r σ S T c : ℝ} (hc : 0 < c) :
+theorem ptDownOutCall_scale {K H b r σ S T c : ℝ} (hc : 0 < c) (hS : 0 < S) (hK : 0 < K)
+    (_hH : 0 < H) (_hσ : 0 < σ) (_hT : 0 < T) :
     ptDownOutCall (c * S) (c * K) (c * H) b r σ T = c * ptDownOutCall S K H b r σ T := by
-  simp only [ptDownOutCall, ptD1, ptD2, ptF1, ptF2, ptHSmu, ptHSmu1, bsd1_scale hc,
-    bsd2_scale hc, mul_div_mul_left _ _ hc.ne']
+  simp only [ptDownOutCall, ptD1, ptD2, ptF1, ptF2, ptHSmu, ptHSmu1, bsd1_scale hc hS hK,
+    bsd2_scale hc hS hK, mul_div_mul_left _ _ hc.ne']
   ring
 
 /-- The closed form is unchanged under `(b, r, σ, T) ↦ (c b, c r, σ √c, T / c)` for `c > 0`, at
 any cost of carry `b`: the quantities `(b - r) T`, `r T`, `σ √T`, `(b + σ²/2) T` and
 `(b - σ²/2) / σ²` are all fixed. -/
-theorem ptDownOutCall_timeScale {K H b r σ S T c : ℝ} (hc : 0 < c) :
+theorem ptDownOutCall_timeScale {K H b r σ S T c : ℝ} (hc : 0 < c) (hS : 0 < S) (hK : 0 < K)
+    (_hH : 0 < H) (hσ : 0 < σ) (hT : 0 < T) :
     ptDownOutCall S K H (c * b) (c * r) (σ * Real.sqrt c) (T / c)
       = ptDownOutCall S K H b r σ T := by
   have hsq : Real.sqrt c ^ 2 = c := Real.sq_sqrt hc.le
@@ -165,10 +170,10 @@ theorem ptDownOutCall_timeScale {K H b r σ S T c : ℝ} (hc : 0 < c) :
     unfold ptF2; rw [hF, hden]
   have e1 : (c * b - c * r) * (T / c) = (b - r) * T := by field_simp
   have e2 : -(c * r) * (T / c) = -r * T := by field_simp
-  have hD : ∀ Y, ptD1 S Y (c * b) (σ * Real.sqrt c) (T / c) = ptD1 S Y b σ T :=
-    fun Y => bsd1_timeScale hc
-  have hD2 : ∀ Y, ptD2 S Y (c * b) (σ * Real.sqrt c) (T / c) = ptD2 S Y b σ T :=
-    fun Y => bsd2_timeScale hc
+  have hD : ptD1 S K (c * b) (σ * Real.sqrt c) (T / c) = ptD1 S K b σ T :=
+    bsd1_timeScale hc hS hK hσ hT
+  have hD2 : ptD2 S K (c * b) (σ * Real.sqrt c) (T / c) = ptD2 S K b σ T :=
+    bsd2_timeScale hc hS hK hσ hT
   simp only [ptDownOutCall, ptHSmu, ptHSmu1, hmu, hF, hF2, hD, hD2, e1, e2]
 
 /-- The shifted barrier of a down option, `H · exp(−β σ √(T/m))`. It is `H` at `m = 0` and for
@@ -185,8 +190,8 @@ noncomputable def bgkUpBarrier (β : ℝ) (m : ℕ) (H σ T : ℝ) : ℝ :=
 spaced monitoring dates: `ptDownOutCall` at the shifted barrier `bgkDownBarrier`. It reads as a
 price only where `ptDownOutCall` does: the shifted barrier at most `K` and the spot above it
 (for an arbitrary `β` with `β σ < 0` the shifted barrier lies above `H`, so `H ≤ K` alone does
-not suffice). The accuracy of the shift as an approximation to the discretely monitored price is
-not proved here. -/
+not suffice), and for `σ > 0`, `0 < T`, `1 ≤ m`. The accuracy of the shift as an approximation
+to the discretely monitored price is not proved here. -/
 noncomputable def bgkDownOutCall (β : ℝ) (m : ℕ) (K H r σ S T : ℝ) : ℝ :=
   ptDownOutCall S K (bgkDownBarrier β m H σ T) r r σ T
 
@@ -195,8 +200,10 @@ noncomputable def bgkKnockIn (β : ℝ) (m : ℕ) (K H r σ S T : ℝ) : ℝ :=
   bsV K r σ S T - bgkDownOutCall β m K H r σ S T
 
 /-- The shifted down barrier is unchanged under `(σ, T) ↦ (σ √c, T / c)` with `m` fixed: the
-monitoring step becomes `Δt / c` and the shift `σ √Δt` is invariant. -/
-theorem bgkDownBarrier_timeScale {β : ℝ} {m : ℕ} {H σ T c : ℝ} (hc : 0 < c) :
+monitoring step becomes `Δt / c` and the shift `σ √Δt` is invariant. The guards `0 < m`, `0 < T`
+keep `T / m` and `√(T / m)` away from their junk values; the algebra does not use them. -/
+theorem bgkDownBarrier_timeScale {β : ℝ} {m : ℕ} {H σ T c : ℝ} (hc : 0 < c) (_hm : 0 < m)
+    (_hT : 0 < T) :
     bgkDownBarrier β m H (σ * Real.sqrt c) (T / c) = bgkDownBarrier β m H σ T := by
   have hsc : 0 < Real.sqrt c := Real.sqrt_pos.2 hc
   have hv : Real.sqrt (T / c / m) = Real.sqrt (T / m) / Real.sqrt c := by
@@ -208,22 +215,26 @@ theorem bgkDownBarrier_timeScale {β : ℝ} {m : ℕ} {H σ T c : ℝ} (hc : 0 <
 
 /-- The BGK expression is unchanged under `(r, σ, T) ↦ (c r, σ √c, T / c)` with the number of
 dates `m` fixed, so it is invariant under the same scaling that fixes `σ² T` and `r T`. -/
-theorem bgkDownOutCall_timeScale {β : ℝ} {m : ℕ} {K H r σ S T c : ℝ} (hc : 0 < c) :
+theorem bgkDownOutCall_timeScale {β : ℝ} {m : ℕ} {K H r σ S T c : ℝ} (hc : 0 < c) (hm : 0 < m)
+    (hS : 0 < S) (hK : 0 < K) (hH : 0 < H) (hσ : 0 < σ) (hT : 0 < T) :
     bgkDownOutCall β m K H (c * r) (σ * Real.sqrt c) S (T / c)
       = bgkDownOutCall β m K H r σ S T := by
   unfold bgkDownOutCall
-  rw [bgkDownBarrier_timeScale hc, ptDownOutCall_timeScale hc]
+  rw [bgkDownBarrier_timeScale hc hm hT,
+    ptDownOutCall_timeScale hc hS hK
+      (show 0 < bgkDownBarrier β m H σ T from mul_pos hH (Real.exp_pos _)) hσ hT]
 
 /-! ### The limit of many monitoring dates -/
 
-/-- `ptDownOutCall` is continuous in the barrier at every nonzero barrier. No
-claim that it is a price: that needs `H ≤ K` and `S > H`. -/
-theorem continuousAt_ptDownOutCall_barrier {K b r σ S T : ℝ} {H : ℝ} (hH : H ≠ 0) :
+/-- `ptDownOutCall` is continuous in the barrier at every positive barrier, for positive spot,
+strike, volatility and maturity (the strike, volatility and maturity guards are not used by the
+proof: they keep `σ √T` and the logarithms off their junk values). No claim that it is a price:
+that needs `H ≤ K` and `S > H`. -/
+theorem continuousAt_ptDownOutCall_barrier {K b r σ S T : ℝ} {H : ℝ} (_hK : 0 < K) (_hσ : 0 < σ)
+    (hS : 0 < S) (_hT : 0 < T) (hH : 0 < H) :
     ContinuousAt (fun h ↦ ptDownOutCall S K h b r σ T) H := by
-  have hl : ContinuousAt (fun h : ℝ ↦ Real.log (h / S)) H := by
-    rcases eq_or_ne S 0 with hS | hS
-    · simpa [hS] using continuousAt_const (y := (0 : ℝ))
-    · exact ContinuousAt.log (continuousAt_id.div_const S) (div_ne_zero hH hS)
+  have hl : ContinuousAt (fun h : ℝ ↦ Real.log (h / S)) H :=
+    ContinuousAt.log (continuousAt_id.div_const S) (div_ne_zero hH.ne' hS.ne')
   have hPhi : ∀ {f : ℝ → ℝ}, ContinuousAt f H → ContinuousAt (fun h ↦ Phi (f h)) H :=
     fun hf ↦ continuous_Phi.continuousAt.comp hf
   have hE : ∀ a : ℝ, ContinuousAt (fun h ↦ Real.exp (a * Real.log (h / S))) H := fun a ↦
@@ -238,8 +249,9 @@ theorem continuousAt_ptDownOutCall_barrier {K b r σ S T : ℝ} {H : ℝ} (hH : 
   exact (continuousAt_const.mul (continuousAt_const.sub ((hE _).mul (hPhi hF1)))).sub
     (continuousAt_const.mul (continuousAt_const.sub ((hE _).mul (hPhi hF2))))
 
-/-- The shifted barrier tends to `H` as the number of dates grows. -/
-theorem tendsto_bgkDownBarrier (β H σ T : ℝ) :
+/-- The shifted barrier tends to `H` as the number of dates grows. The guard `0 ≤ T` keeps
+`√(T / m)` away from the junk value `√(negative) = 0`; the algebra does not use it. -/
+theorem tendsto_bgkDownBarrier (β H σ T : ℝ) (_hT : 0 ≤ T) :
     Tendsto (fun m : ℕ ↦ bgkDownBarrier β m H σ T) atTop (𝓝 H) := by
   have h0 : Tendsto (fun m : ℕ ↦ T / (m : ℝ)) atTop (𝓝 0) :=
     tendsto_const_div_atTop_nhds_zero_nat T
@@ -254,14 +266,17 @@ theorem tendsto_bgkDownBarrier (β H σ T : ℝ) :
   rwa [mul_one] at this
 
 /-- **Many-dates limit.** As `m → ∞` the expression `bgkDownOutCall` tends to `ptDownOutCall` at
-the unshifted barrier, for a nonzero barrier. It is a statement about the closed-form
-expression; it reads as "the BGK approximation tends to the continuous price" only where
+the unshifted barrier, for positive spot, strike, barrier, volatility and maturity, with no
+rate of convergence in `m`. It is a statement about the closed-form expression;
+it reads as "the BGK approximation tends to the continuous price" only where
 `ptDownOutCall` is a price. It is the consistency of the shift with the continuous limit, not an
 accuracy result. -/
-theorem tendsto_bgkDownOutCall {β K H r σ S T : ℝ} (hH : H ≠ 0) :
+theorem tendsto_bgkDownOutCall {β K H r σ S T : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hS : 0 < S)
+    (hH : 0 < H) (hT : 0 < T) :
     Tendsto (fun m : ℕ ↦ bgkDownOutCall β m K H r σ S T) atTop
       (𝓝 (ptDownOutCall S K H r r σ T)) :=
-  (continuousAt_ptDownOutCall_barrier hH).tendsto.comp (tendsto_bgkDownBarrier β H σ T)
+  (continuousAt_ptDownOutCall_barrier hK hσ hS hT hH).tendsto.comp
+    (tendsto_bgkDownBarrier β H σ T hT.le)
 
 /-! ### Connection to in–out parity -/
 
