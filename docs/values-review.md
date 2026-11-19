@@ -124,6 +124,112 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   that finds nothing to improve.
 
 ## Review log
+## 2026-11-18 — corpus 901, modules 788 — the November contributed wave, brought onto the library's objects before it lands
+
+Scope: the branch `review/pr-wave-final`, twenty-one open pull requests reworked against the
+practices before merging. Adam Kiezun's insurance, credibility, reserving, stopping, credit and
+execution work (#510–#529), Yang Ye's (#502, #515, #523, #525) and #500. Two are held: #524, an
+executable `Option ℚ` evaluator of the chain ladder, and #501, whose zero-maturity value at
+`γ = 0` is `log(0/0)`. Three frontier nodes are delivered (`thm:life-insurance-epv`,
+`thm:thiele-reserve`, `thm:buhlmann-credibility`), the life table enters `thm:survival-model`'s
+core, and one landmark is new (`thm:mack-chain-ladder`). Three read-only reviewers split the lenses: the first pass;
+lenses 2, 4 and 5; lenses 1, 3, 6, 7 and 8.
+
+### The standing first pass: prose against statement
+
+- No definite overclaim; seven borderline phrasings fixed:
+  - `OvernightCompounding` and `CondExpCallJensen` stated an ordering of forward- and
+    backward-looking caplets. Only `E[(E[X|m] − L)⁺] ≤ E[(X − L)⁺]` is proved; the identification of
+    the fixed rate with a conditional expectation is not, and both docstrings now say so.
+  - `StopLossGap` said the transform is convex and affine across the gap; the theorem is the
+    identity at the two ends. The prose says that, and that expected shortfall is the objective's
+    least value only for `α ∈ (0, 1)`.
+  - `survive_lifeTable` lost its `0 < l x` hypothesis in the rework; its docstring now says the
+    ratio is a probability when `l x > 0` and both sides are `0` otherwise.
+  - The Thiele factor was "the probability of surviving" with no `μ ≥ 0`; it is a survival factor,
+    a probability when `μ ≥ 0` (docstring, blueprint node, corpus description).
+  - The discrete Almgren–Chriss rate "tends to `√(c/η)`": not proved, now said.
+  - `sqrt_bsTerminal` gave "the mean of any square-root claim"; it is the square root of a
+    lognormal terminal price.
+  - `mf-smile-black-form-tail-iff`'s scope carried porting residue (issue numbers, heartbeat
+    hygiene) into the published dataset; it now states the scope.
+- Junk values, found in the rework rather than the panel: the reworked #501 had dropped the
+  `γ ≠ 0` guard from `hestonA_at_zero`, making the terminal value at `γ = 0` hold through
+  `log(0/0) = 0`. Reverted; the guard stays.
+
+### Upgrades executed
+
+- **Objects, not sequences.** `A = 1 − dä` was stated on a bare sequence with summability
+  assumed. It is now on the survival function of a lifetime (`wholeLife_epv_eq`): term insurance is
+  the CDS protection leg at recovery `0`, the pure endowment a payment on survival, and summability
+  is derived. The life table goes through `Measure.ofWeights` (150 lines to 25); the two-life
+  annuities through `Contract.value_payFlows_add_sub` (120 lines to 25 each); Thiele's factor is
+  discount times conditional `hazardSurvival`.
+- **The bridge that was there.** Bühlmann credibility is Sharpe's single-index model: the class
+  mean is the factor, the shocks are uncorrelated (`covariance_latentMean_shock`), so
+  `Var X̄ = a + s²/n` is `variance_singleIndex_portfolio` at equal weights, and the credibility
+  premium is the least-squares predictor with slope `MathFin.beta` (`integral_sq_affine_le`,
+  `Choice/Portfolio/RegressionBeta.lean`). The contributed 1340-line sum manipulation is gone; the
+  layer edge Insurance → Choice is declared.
+- **General statement, old one an instance.** The stop-loss recursion holds across any gap in the
+  law (`integral_max_sub_add_of_gap`), the lattice and the Rockafellar–Uryasev increment are its
+  instances; the derivable `S ≥ 0` hypothesis is gone. `gaussian_call_formula` sits in the Gaussian
+  layer and `bachelier_call_formula` is its instance; the SVI tail condition is the Black-form
+  tail condition at the SVI variance (one Mills argument, not two); the conditional-Jensen call
+  bound serves calendar arbitrage and the overnight caplet.
+- **A connection built, not waited for.** The chain ladder (#516, #517) was triangle algebra with
+  nothing beneath it. Mack's model supplies it: with `E[C_{j+1} | 𝓕_j] = f_j C_j`, the prediction
+  `(∏_{k∈[m,N)} f_k) C_m` of the ultimate is `E[C_N | 𝓕_m]`, the reference measure is an EMM of the
+  prediction process (`IsMackRow.isEMM_chainPrediction`, so a pricing measure of the run-off
+  market), and the claims development result has conditional mean zero (Merz–Wüthrich). The
+  completion of a triangle is this prediction with the selected factors
+  (`chainComplete_eq_chainPrediction`); `Insurance/ChainLadder.lean`.
+- **Parallel objects removed.** `nelsonSiegelZeroRate` (the limit is now on `nssYield`), the
+  `SqrtTerminal` module (into `Forward`), `thieleFactor` as a bare exponential, a forward-measure
+  detour around a deterministic discount, about 40 public Almgren–Chriss helpers (the discrete
+  optimum is the continuous path sampled at the discrete rate `cosh κ̃Δ = 1 + cΔ²/2η`), and about
+  4000 lines of contributor tests in `MathFinTest/`, which holds the README and manual checks.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: the discrete Almgren–Chriss path as the continuous one at a modified
+  rate. Next: the cost as a quadratic form, so "cross terms vanish iff stationary" is polarisation.
+- **Coherence.** Exemplar: `CondExpCallJensen`, an instance of `ConvexOn.map_condExp_le` consumed
+  twice. Next: Bühlmann's draws as `Measure.pi` with the mixture as a kernel, replacing the
+  hand-rolled `Fin n → Ξ` sums.
+- **Zero slop.** The instructive item is the junk value the rework itself introduced at `γ = 0`.
+- **Architecture.** Exemplar: the spread call reduced to the one-name Gaussian call through
+  `hasLaw_linear_gaussianPair`. Next: `value_payFlows_add_sub` from `value_payFlows_sub`.
+- **First principles.** Exemplar: the credibility factor as a regression slope. Next: the
+  best-affine-predictor proof as Pythagoras (the residual is uncorrelated with `X`).
+- **Idiom.** The surface is clean; the debt is structural: the Thiele proof is a 25-step have
+  ladder, and `OvernightCompounding` computes a power integral inline.
+- **Concept clarity.** Exemplar: the `StopLossGap` docstring after the first pass. Next:
+  `SampledRules`' stopping proof inside a structure field.
+- **Beauty.** Exemplar: `ae_notMem_Ioo_of_lattice`, one `filter_upwards`.
+
+### Ranked backlog
+
+1. The integrating-factor reserve lemma: `u ↦ (∫ᵤᵀ G + c)/exp(−∫₀ᵘ λ)` has derivative
+   `λV − G/S`; Thiele becomes an instance (M).
+2. Bühlmann on `Measure.pi` and a kernel mixture, independence from Mathlib (M).
+3. Thiele's discrete recursion (#84) on the same factor (S–M).
+4. Mack's other two assumptions: independent accident years make `f̂_j` unbiased given the
+   past columns, and the variance assumption gives the standard error of the reserve (M–L).
+5. `∫₀ᵃ (u/L)^p = a^{p+1}/(L^p (p+1))` lifted out of `OvernightCompounding` (S).
+6. `value_payFlows_add_sub` as a corollary of `value_payFlows_sub` (S).
+7. A compound-Poisson instance of the stop-loss recursion with lattice severities, joining
+   `CompoundPoissonCVaR` (S–M).
+8. The best affine predictor by orthogonality (S); `SampledRules`' stopping set as a named lemma (S).
+
+### Evidence
+
+`pytest` green on the branch apart from the blueprint export, the ledger rows and this review
+before it was written; architecture and ratchets green (no layer violation, no module unused).
+`lean-build` of the default targets with the blueprint export and the runner ledger sweep of the
+stale rows are the branch's CI; every reworked module and new corpus entry was built and checked
+locally first, one Lean process at a time.
+
 ## 2026-11-16 — corpus 883, modules 779 — the RiO panel's second reading, and the wave it asked for
 
 Scope: #506 and #507 (merged 2026-11-15 and 16) and the branch `feat/rio-panel-2` that answers the

@@ -1617,6 +1617,31 @@
       }
     },
     {
+      "id": "mf-contract-cds-recovery-timing",
+      "name": "Recovery Paid at the Default Time Versus at the Horizon",
+      "domain": "mathematical_finance",
+      "description": "For a measurable default time tau, a discount curve D whose discounted default payment D(tau) 1{tau <= T} is integrable under Q, and a recovery payment rho, the contract that pays rho at the default time if tau <= T (cdsProtectionAtDefault T 0 scaled by rho, a Contract.payAtHit on the default indicator N u = 1{tau <= u}) is worth rho E_Q[(D(tau) - D(T)) 1{tau <= T}] more than the contract that pays rho at the horizon T if tau <= T (pay T (rho N_T)): the value difference is the discount-curve gap between tau and T, weighted by the default event. The discount curve is deterministic; the integrability hypothesis holds for any curve that is measurable and bounded on [0, T].",
+      "code": {
+        "lean": "import MathFin.Models.Credit.DefaultTime\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin.Contracts\n\n/-- Recovery paid at default versus at the horizon: the value difference is the discount gap. -/\ntheorem recovery_timing_value_sub {Ω : Type*} [MeasurableSpace Ω] {Q : Measure Ω}\n    [IsProbabilityMeasure Q] {τ : Ω → ℝ} (hτ : Measurable τ) {D : ℝ≥0 → ℝ} {T : ℝ≥0}\n    (hD : Integrable (fun ω ↦ (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal) (τ ω)) Q)\n    (ρ : ℝ) :\n    (Contract.scale ρ (cdsProtectionAtDefault T 0)).value Q (fun t _ ↦ D t) (defaultIndicator τ)\n      - (Contract.pay T (.mul (.const ρ) (.obs () T))).value Q (fun t _ ↦ D t)\n          (defaultIndicator τ)\n      = ρ * ∫ ω, (Set.Iic (T : ℝ)).indicator (fun s ↦ D s.toNNReal - D T) (τ ω) ∂Q :=\n  value_scale_cdsProtectionAtDefault_sub_pay hτ hD ρ\n"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "D. Lando, Credit Risk Modeling (2004), ch. 5 (the timing of the recovery payment in reduced-form models); the identity is the library's. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Lando2004",
+            "locator": "ch. 5"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written, MathFin/Models/Credit/DefaultTime.lean (value_scale_cdsProtectionAtDefault_sub_pay). Contract.value_scale pulls rho out of the protection leg, value_cdsProtectionAtDefault (mf-contract-cds-protection-at-default) gives its value rho E[D(tau) 1{tau <= T}] for recovery 0 in the leg, Contract.value_pay gives the horizon payment D(T) rho E[N_T], and the integrability of the discounted default payment splits E[(D(tau) - D(T)) 1{tau <= T}] into the two. SCOPE: a deterministic discount curve, a constant payment rho, the default indicator as the observed underlying; the only analytic hypothesis is the integrability of D(tau) 1{tau <= T} (without it value_cdsProtectionAtDefault is 0 while the horizon leg is not). A surviving face payment paid at T alongside both legs would cancel from the difference and is not part of this statement. Not a legal instrument. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-contract-cds-protection-grid-limit",
       "name": "The Grid CDS Protection Leg Converges to the Protection Leg Paid at the Default Time",
       "domain": "mathematical_finance",

@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Adam Kiezun
 -/
 
 /-
@@ -15,8 +15,10 @@ here with thanks and with the author's kind permission.
 module
 
 public import MathFin.Init
+public import MathFin.Probability.Laws.FiniteWeights
 public import Mathlib.Analysis.Normed.Order.Lattice
 public import Mathlib.MeasureTheory.Constructions.BorelSpace.Order
+import Mathlib.MeasureTheory.Integral.Bochner.Set
 public import Mathlib.Probability.ConditionalProbability
 
 /-!
@@ -50,6 +52,10 @@ For readers coming from the AFP entry, our declarations line up with its `Surviv
 * `survive`: the probability `tpₓ = P(X > x + t ∣ X > x)` that a life aged `x` survives `t` more
   years.
 * `die`: the probability `tqₓ = 1 − tpₓ` that a life aged `x` dies within `t` years.
+* `lifeTableWeights`: the death-cell and residual weights of a finite life table.
+* `lifeTableMeasure`: the finite probability law of a life table.
+* `lifeTableLifetime`: the representative lifetime of a life-table outcome (cell `i` at
+  `i + 1`, residual at `n + 1`).
 
 ## Main results
 
@@ -59,10 +65,17 @@ For readers coming from the AFP entry, our declarations line up with its `Surviv
 * `survive_zero` — `₀pₓ = 1` for a life alive at `x`.
 * `survive_eq_survivalFunction_ratio` — `tpₓ = S_X(x+t) / S_X(x)` for `t ≥ 0`, the survival-ratio
   keystone: the conditional-probability definition of `survive` collapses to the ratio.
+* `real_le_eq_one_sub_survivalFunction` — `P(X ≤ t) = 1 - S_X(t)`.
+* `survivalFunction_lifeTable` — under the life-table law, `S(m) = l m / l 0` at the observed dates
+  `m ≤ n`.
+* `survive_lifeTable` — a finite life table induces the conditional survival ratios
+  `l_{x+k} / l_x` under its finite-weights probability law.
 
 ## References
 
 * [Y. Ito, *AFP Actuarial Mathematics*][ItoAFPActuarial]
+* [D. C. M. Dickson, M. R. Hardy and H. R. Waters, *Actuarial Mathematics for Life
+  Contingent Risks*][DicksonHardyWaters2013], Chapter 3 (life tables)
 
 ## Tags
 
@@ -116,6 +129,17 @@ lemma survivalFunction_zero [IsProbabilityMeasure P] (hpos : ∀ᵐ ω ∂P, 0 <
     exact measure_congr (ae_eq_univ.mpr hcompl)
   rw [survivalFunction, h1, ENNReal.toReal_one]
 
+/-- `P(X ≤ t) = 1 - S_X(t)`: the survival function is the complement of the distribution function
+of the age at death. -/
+lemma real_le_eq_one_sub_survivalFunction [IsProbabilityMeasure P] (hX : Measurable X) (t : ℝ) :
+    P.real {ω | X ω ≤ t} = 1 - survivalFunction P X t := by
+  have h : alive X t = {ω | X ω ≤ t}ᶜ := by
+    ext ω
+    simp [alive]
+  rw [survivalFunction, h, ← measureReal_def,
+    probReal_compl_eq_one_sub (measurableSet_le hX measurable_const)]
+  ring
+
 /-- The survival function is bounded by `1`. -/
 lemma survivalFunction_le_one [IsProbabilityMeasure P] (t : ℝ) :
     survivalFunction P X t ≤ 1 := by
@@ -152,5 +176,89 @@ lemma survive_eq_survivalFunction_ratio (hX : Measurable X) (x : ℝ)
 /-- `tpₓ + tqₓ = 1` — the survival/death dichotomy. -/
 lemma survive_add_die (t x : ℝ) : survive P X t x + die P X t x = 1 := by
   rw [die]; ring
+
+/-! ### Finite life tables
+
+A finite nonincreasing life table `l` with `l 0 > 0` induces a probability
+law on the outcomes `Fin (n + 1)`: death cells `(i, i+1]` with mass
+`(l i - l (i+1)) / l 0` and one residual survivor outcome with mass
+`l n / l 0`, represented at lifetime `i + 1` (the residual at `n + 1`).
+Under this law the conditional survival at observed dates is the table
+ratio `l (x + k) / l x` (`survive_lifeTable`; for `l x > 0`, both sides being `0` otherwise).
+-/
+
+
+/-- Death-cell and residual weights of a finite life table: index `i < n`
+is the death cell `(i, i+1]` with mass `(l i - l (i+1)) / l 0`; index `n`
+is the residual survivor outcome with mass `l n / l 0`. -/
+noncomputable def lifeTableWeights (n : ℕ) (l : ℕ → ℝ) (i : Fin (n + 1)) : ℝ :=
+  if i.val < n then (l i.val - l (i.val + 1)) / l 0 else l n / l 0
+
+/-- The weights of a life table are nonnegative when `l` is nonnegative and nonincreasing. -/
+theorem lifeTableWeights_nonneg (n : ℕ) (l : ℕ → ℝ) (hl0 : 0 < l 0)
+    (hmono : ∀ k < n, l (k + 1) ≤ l k) (hnonneg : ∀ k ≤ n, 0 ≤ l k)
+    (i : Fin (n + 1)) : 0 ≤ lifeTableWeights n l i := by
+  unfold lifeTableWeights
+  by_cases h : i.val < n
+  · rw [ite_eq_left h]
+    exact div_nonneg (sub_nonneg.mpr (hmono i.val h)) (le_of_lt hl0)
+  · rw [ite_eq_right h]
+    exact div_nonneg (hnonneg n le_rfl) (le_of_lt hl0)
+
+/-- The weights of a life table sum to one: the death cells telescope to `(l 0 - l n) / l 0`
+and the residual outcome carries `l n / l 0`. -/
+theorem lifeTableWeights_sum (n : ℕ) (l : ℕ → ℝ) (hl0 : 0 < l 0) :
+    ∑ i : Fin (n + 1), lifeTableWeights n l i = 1 := by
+  simp only [lifeTableWeights]
+  rw [Fin.sum_univ_eq_sum_range
+    (fun k ↦ if k < n then (l k - l (k + 1)) / l 0 else l n / l 0), Finset.sum_range_succ,
+    Finset.sum_congr rfl fun k hk ↦ ite_eq_left (Finset.mem_range.1 hk), ite_eq_right n.lt_irrefl,
+    ← Finset.sum_div, Finset.sum_range_sub', ← add_div, sub_add_cancel, div_self hl0.ne']
+
+/-- The finite probability law of a life table, by the existing
+finite-weights constructor on all outcomes. -/
+noncomputable def lifeTableMeasure (n : ℕ) (l : ℕ → ℝ) : Measure (Fin (n + 1)) :=
+  MeasureTheory.Measure.ofWeights Finset.univ (lifeTableWeights n l)
+
+/-- Representative lifetime of a life-table outcome: death cell `i` at
+`i + 1`, residual survivor outcome at `n + 1`. -/
+def lifeTableLifetime (n : ℕ) (i : Fin (n + 1)) : ℝ := i.val + 1
+
+/-- **The survival function of the life-table law** at an observed date `m ≤ n` is the table
+ratio `l m / l 0`: the mass of the outcomes outliving `m` telescopes. -/
+theorem survivalFunction_lifeTable (n : ℕ) (l : ℕ → ℝ) (hl0 : 0 < l 0)
+    (hmono : ∀ k < n, l (k + 1) ≤ l k) (hnonneg : ∀ k ≤ n, 0 ≤ l k) {m : ℕ} (hm : m ≤ n) :
+    survivalFunction (lifeTableMeasure n l) (lifeTableLifetime n) m = l m / l 0 := by
+  rw [survivalFunction, ← measureReal_def,
+    ← integral_indicator_one (measurableSet_alive (measurable_of_finite _) _), lifeTableMeasure,
+    Measure.integral_ofWeights _ fun i _ ↦ lifeTableWeights_nonneg n l hl0 hmono hnonneg i]
+  have hind (i : Fin (n + 1)) :
+      (alive (lifeTableLifetime n) m).indicator (1 : Fin (n + 1) → ℝ) i
+        = if m ≤ i.val then 1 else 0 := by
+    have h : ((m : ℝ) < (i.val : ℝ) + 1) ↔ m ≤ i.val := by exact_mod_cast Nat.lt_succ_iff
+    simp [Set.indicator_apply, alive, lifeTableLifetime, h]
+  simp only [hind, mul_ite, mul_one, mul_zero, lifeTableWeights]
+  rw [Fin.sum_univ_eq_sum_range
+    (fun k ↦ if m ≤ k then (if k < n then (l k - l (k + 1)) / l 0 else l n / l 0) else 0),
+    Finset.sum_range_succ, ite_eq_left hm, ite_eq_right n.lt_irrefl,
+    Finset.sum_congr rfl fun k hk ↦
+      show _ = if m ≤ k then (l k - l (k + 1)) / l 0 else 0 by simp [Finset.mem_range.1 hk],
+    ← Finset.sum_filter,
+    show (Finset.range n).filter (m ≤ ·) = Finset.Ico m n by ext; simp [and_comm],
+    ← Finset.sum_div, Finset.sum_Ico_eq_sub _ hm, Finset.sum_range_sub', Finset.sum_range_sub',
+    ← add_div]
+  ring
+
+/-- **Conditional survival in a life table**: a life aged `x` in the finite life table `l` survives
+`k` more years with probability `l (x + k) / l x` under the life-table law, when `l x > 0`. If
+`l x = 0` the conditioning event is null and both sides are `0`. -/
+theorem survive_lifeTable (n : ℕ) (l : ℕ → ℝ) (hl0 : 0 < l 0)
+    (hmono : ∀ k < n, l (k + 1) ≤ l k) (hnonneg : ∀ k ≤ n, 0 ≤ l k)
+    (x k : ℕ) (hxk : x + k ≤ n) :
+    survive (lifeTableMeasure n l) (lifeTableLifetime n) k x = l (x + k) / l x := by
+  rw [survive_eq_survivalFunction_ratio (measurable_of_finite _) _ k.cast_nonneg, ← Nat.cast_add,
+    survivalFunction_lifeTable n l hl0 hmono hnonneg hxk,
+    survivalFunction_lifeTable n l hl0 hmono hnonneg ((x.le_add_right k).trans hxk),
+    div_div_div_cancel_right₀ hl0.ne']
 
 end MathFin.SurvivalModel

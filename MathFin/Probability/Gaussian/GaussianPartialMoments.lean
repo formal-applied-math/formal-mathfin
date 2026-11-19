@@ -1,12 +1,13 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
 public import MathFin.Probability.Gaussian.StandardNormal
 public import MathFin.Probability.Gaussian.GaussianCDFDeriv
+public import MathFin.Probability.Gaussian.GaussianMoments
 
 /-!
 # Partial moments of the standard normal
@@ -20,10 +21,12 @@ of the library are built from:
 * `integral_gaussianPDFReal_Ioi`: the tail mass `∫_(a,∞) ϕ = 1 − Φ(a)`.
 * `integral_max_sub_mul_gaussianPDFReal`: the stop-loss transform
   `E[(Z − z)⁺] = ϕ(z) − z·(1 − Φ(z))` for `Z ~ N(0,1)`.
+* `gaussian_call_formula`, `gaussian_put_formula`: the stop-loss transform of an arbitrary
+  Gaussian law `N(m, v)`, `v ≠ 0`, at a strike of either sign.
 
 The Bachelier call (`Models/Bachelier/Bachelier`), the Rockafellar–Uryasev characterisation of
 Gaussian CVaR (`Risk/RockafellarUryasev`) and the normal tail bounds
-(`Probability/Gaussian/NormalTail`) are all read off these four facts.
+(`Probability/Gaussian/NormalTail`) are all read off these facts.
 
 ## Main results
 
@@ -32,6 +35,8 @@ Gaussian CVaR (`Risk/RockafellarUryasev`) and the normal tail bounds
 * `integral_gaussianPDFReal_Ioi`: `∫_(a,∞) ϕ = 1 − Φ(a)`.
 * `integral_max_sub_mul_gaussianPDFReal`: `∫ max (x − z) 0 · ϕ(x) dx = ϕ(z) − z·(1 − Φ(z))`,
   the stop-loss transform of `N(0, 1)`.
+* `gaussian_call_formula`: for `W ~ N(m, v)` with `v ≠ 0`, `E[(W − K)⁺] = (m − K)·Φ(d) + √v·ϕ(d)`,
+  `d = (m − K)/√v`; `gaussian_put_formula` is the put mirror.
 
 ## Tags
 
@@ -155,5 +160,72 @@ lemma integral_max_sub_mul_gaussianPDFReal (z : ℝ) :
     _ = gaussianPDFReal 0 1 z - z * (1 - Phi z) := by
         rw [integral_id_mul_gaussianPDFReal_Ioi, integral_const_mul,
           integral_gaussianPDFReal_Ioi]
+
+/-! ### The stop-loss transform of a general Gaussian law -/
+
+/-- **Call payoff under a Gaussian law**: if `W ~ N(m, v)` with `v ≠ 0`, then for any
+strike `K` (of either sign),
+
+    E[(W − K)⁺] = (m − K)·Φ(d) + √v·ϕ(d),   d = (m − K)/√v.
+
+Standardize `W` to `Z = (W − m)/√v ~ N(0, 1)` (`hasLaw_sub_div_of_gaussianReal`), where the
+payoff is `√v·(Z + d)⁺`, and read the integral off the standard-normal stop-loss transform
+`integral_max_sub_mul_gaussianPDFReal` at `−d`. The Bachelier call
+(`Models/Bachelier/Bachelier`) is the instance `W = S_0 + σ√T·Z`. -/
+theorem gaussian_call_formula {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
+    {W : Ω → ℝ} {m : ℝ} {v : ℝ≥0}
+    (hW : HasLaw W (gaussianReal m v) P) (hv : v ≠ 0) (K : ℝ) :
+    ∫ ω, max (W ω - K) 0 ∂P
+      = (m - K) * Phi ((m - K) / Real.sqrt (v : ℝ))
+        + Real.sqrt (v : ℝ) * gaussianPDFReal 0 1 ((m - K) / Real.sqrt (v : ℝ)) := by
+  have hvpos : 0 < (v : ℝ) := NNReal.coe_pos.2 hv.bot_lt
+  set s : ℝ := Real.sqrt (v : ℝ)
+  have hs : 0 < s := Real.sqrt_pos.2 hvpos
+  set d : ℝ := (m - K) / s
+  have hsd : s * d = m - K := by simp only [d]; field_simp
+  have hZ : HasLaw (fun ω ↦ (W ω - m) / s) (gaussianReal 0 1) P :=
+    hasLaw_sub_div_of_gaussianReal hW hs (Real.sq_sqrt v.coe_nonneg).symm
+  have hWcomp : (fun ω ↦ max (W ω - K) 0)
+      = (fun z ↦ max (m + s * z - K) 0) ∘ (fun ω ↦ (W ω - m) / s) := by
+    funext ω
+    have hWω : W ω - K = m + s * ((W ω - m) / s) - K := by
+      field_simp
+      ring
+    rw [Function.comp_apply, hWω]
+  have h_payoff_meas : Measurable fun z : ℝ ↦ max (m + s * z - K) 0 := by fun_prop
+  -- The payoff is `s · (z + d)⁺`, so the integral is `s` times the stop-loss transform.
+  have hpt (z : ℝ) : gaussianPDFReal 0 1 z • max (m + s * z - K) 0
+      = s * (max (z - -d) 0 * gaussianPDFReal 0 1 z) := by
+    have h : m + s * z - K = s * (z - -d) := by linear_combination -hsd
+    have hmax := mul_max_of_nonneg (z - -d) 0 hs.le
+    rw [mul_zero] at hmax
+    rw [smul_eq_mul, h, ← hmax]; ring
+  rw [hWcomp, hZ.integral_comp h_payoff_meas.aestronglyMeasurable,
+    integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0),
+    integral_congr_ae (Filter.Eventually.of_forall hpt), integral_const_mul,
+    integral_max_sub_mul_gaussianPDFReal, gaussianPDFReal_zero_one_neg, Phi_neg]
+  linear_combination Phi d * hsd
+
+/-- **Put payoff under a Gaussian law**: if `W ~ N(m, v)` with `v ≠ 0`, then for any
+strike `K`,
+
+    E[(K − W)⁺] = (K − m)·Φ((K − m)/√v) + √v·ϕ((K − m)/√v),
+
+the put mirror of `gaussian_call_formula`: `(K − W)⁺` is the call `(-W − (-K))⁺` on the
+negated Gaussian `−W ~ N(−m, v)`, so the call formula applies verbatim (the normal-model
+put-call parity `put = call − forward` in disguise). -/
+theorem gaussian_put_formula {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
+    {W : Ω → ℝ} {m : ℝ} {v : ℝ≥0}
+    (hW : HasLaw W (gaussianReal m v) P) (hv : v ≠ 0) (K : ℝ) :
+    ∫ ω, max (K - W ω) 0 ∂P
+      = (K - m) * Phi ((K - m) / Real.sqrt (v : ℝ))
+        + Real.sqrt (v : ℝ) * gaussianPDFReal 0 1 ((K - m) / Real.sqrt (v : ℝ)) := by
+  have hcall := gaussian_call_formula (gaussianReal_neg hW) hv (-K)
+  have hmean : (-m : ℝ) - -K = K - m := by ring
+  rw [hmean] at hcall
+  have hfun : (fun ω ↦ max (K - W ω) 0) = (fun ω ↦ max (-W ω - -K) 0) := by
+    funext ω; congr 1; ring
+  rw [hfun]
+  exact hcall
 
 end MathFin

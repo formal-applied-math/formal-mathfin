@@ -20,9 +20,8 @@ Under `BachelierHyp`, the discounted call price is
     V_bach = (S_0 - K) · Φ(d) + σ √T · ϕ(d),
 
 where `d = (S_0 - K) / (σ √T)`, `Φ` and `ϕ` are the standard normal CDF and
-PDF. The proof is a HasLaw transfer to the standard normal, where the payoff is
-`σ √T · (z + d)⁺`, followed by the standard-normal stop-loss transform
-`integral_max_sub_mul_gaussianPDFReal` in `Probability/Gaussian/GaussianPartialMoments`.
+PDF. The terminal price is `N(S_0, σ² T)`, and the formula is the stop-loss transform of a
+general Gaussian law, `gaussian_call_formula` in `Probability/Gaussian/GaussianPartialMoments`.
 
 ## Main definitions
 
@@ -87,9 +86,8 @@ the expected payoff of the European call `max(S_T - K, 0)` is
 
 where `d = (S_0 - K) / (σ √T)`.
 
-Derivation: HasLaw transfer to the standard normal, where
-`max(S_T - K, 0) = σ √T · max(z + d, 0)`, so the integral is `σ √T` times the standard-normal
-stop-loss transform `integral_max_sub_mul_gaussianPDFReal` at `-d`. -/
+Derivation: `S_T ~ N(S_0, (σ √T)²)`, so this is the instance `m = S_0`, `v = (σ √T)²` of the
+stop-loss transform of a general Gaussian law, `gaussian_call_formula`. -/
 theorem bachelier_call_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
     {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K σ T : ℝ} {Z : Ω → ℝ}
@@ -98,26 +96,15 @@ theorem bachelier_call_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
       = (S_0 - K) * Phi (bachelierD S_0 K σ T) +
         σ * Real.sqrt T * gaussianPDFReal 0 1 (bachelierD S_0 K σ T) := by
   obtain ⟨_, hσ, hT, hZ⟩ := h
-  set d : ℝ := bachelierD S_0 K σ T
-  have hc : 0 < σ * Real.sqrt T := mul_pos hσ (Real.sqrt_pos.mpr hT)
-  have hcd : σ * Real.sqrt T * d = S_0 - K := by
-    simp only [d, bachelierD]; field_simp
-  have h_payoff_meas : Measurable fun z : ℝ ↦ max (bachelierTerminal S_0 σ T z - K) 0 := by
-    unfold bachelierTerminal; fun_prop
-  -- The payoff is `σ√T · (z + d)⁺`, so the integral is `σ√T` times the stop-loss transform.
-  have hpt (z : ℝ) : gaussianPDFReal 0 1 z • max (bachelierTerminal S_0 σ T z - K) 0
-      = σ * Real.sqrt T * (max (z - -d) 0 * gaussianPDFReal 0 1 z) := by
-    have h : bachelierTerminal S_0 σ T z - K = σ * Real.sqrt T * (z - -d) := by
-      unfold bachelierTerminal; linear_combination -hcd
-    have hmax := mul_max_of_nonneg (z - -d) 0 hc.le
-    rw [mul_zero] at hmax
-    rw [smul_eq_mul, h, ← hmax]; ring
-  rw [show (fun ω ↦ max (bachelierTerminal S_0 σ T (Z ω) - K) 0)
-        = (fun z ↦ max (bachelierTerminal S_0 σ T z - K) 0) ∘ Z from rfl,
-      hZ.integral_comp h_payoff_meas.aestronglyMeasurable,
-      integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0),
-      integral_congr_ae (Filter.Eventually.of_forall hpt), integral_const_mul,
-      integral_max_sub_mul_gaussianPDFReal, gaussianPDFReal_zero_one_neg, Phi_neg]
-  linear_combination Phi d * hcd
+  have hc : 0 < σ * Real.sqrt T := mul_pos hσ (Real.sqrt_pos.2 hT)
+  have hlaw : HasLaw (fun ω ↦ bachelierTerminal S_0 σ T (Z ω))
+      (gaussianReal S_0 (NNReal.mk ((σ * Real.sqrt T) ^ 2) (sq_nonneg _))) Q := by
+    have h := gaussianReal_const_add (gaussianReal_const_mul hZ (σ * Real.sqrt T)) S_0
+    rw [mul_zero, zero_add, mul_one] at h
+    exact h
+  have hv : NNReal.mk ((σ * Real.sqrt T) ^ 2) (sq_nonneg _) ≠ 0 :=
+    fun h ↦ (pow_pos hc 2).ne' (congrArg NNReal.toReal h)
+  have := gaussian_call_formula hlaw hv K
+  simpa only [NNReal.coe_mk, Real.sqrt_sq hc.le, bachelierD] using this
 
 end MathFin
