@@ -7,7 +7,7 @@ module
 
 public import MathFin.Models.BlackScholes.ImpliedVolatility
 public import MathFin.Models.ModelFree.SVI.BlackScholesBridge
-public import Mathlib.MeasureTheory.Function.ConditionalExpectation.CondJensen
+public import MathFin.Probability.Martingales.CondExpCallJensen
 public import Mathlib.Probability.Martingale.Basic
 
 /-!
@@ -75,29 +75,14 @@ open MeasureTheory Set
 /-- **Calls on a martingale are non-decreasing in maturity** (Gatheral–Jacquier 2014,
 Lemma 2.1, martingale half). For a real martingale `X` on a finite measure space and any level
 `L`, `s ≤ t` implies `∫ (X_s − L)⁺ ≤ ∫ (X_t − L)⁺`. The proof is conditional Jensen
-(`ConvexOn.map_condExp_le`) applied to the convex payoff `x ↦ (x − L)⁺`. -/
+(`integral_posPart_sub_condExp_le`, Mathlib's `ConvexOn.map_condExp_le` at the convex payoff
+`x ↦ (x − L)⁺`). -/
 theorem integral_posPart_sub_mono_of_martingale {Ω ι : Type*} [Preorder ι] {mΩ : MeasurableSpace Ω}
     {μ : Measure Ω} [IsFiniteMeasure μ] {ℱ : Filtration ι mΩ} {X : ι → Ω → ℝ}
     (hX : Martingale X ℱ μ) (L : ℝ) {s t : ι} (hst : s ≤ t) :
-    ∫ ω, (X s ω - L)⁺ ∂μ ≤ ∫ ω, (X t ω - L)⁺ ∂μ := by
-  set φ : ℝ → ℝ := fun x ↦ (x - L)⁺
-  have hφc : Continuous φ := by fun_prop
-  have hcvx : ConvexOn ℝ univ φ :=
-    ((convexOn_id convex_univ).sub (concaveOn_const L convex_univ)).sup
-      (convexOn_const 0 convex_univ)
-  have hint : ∀ u, Integrable (X u) μ := fun u ↦ hX.integrable u
-  have hφint : ∀ u, Integrable (φ ∘ X u) μ := fun u ↦
-    ((hint u).sub (integrable_const L)).pos_part
-  have hJ := hcvx.map_condExp_le (ℱ.le s) (hφc.lowerSemicontinuous.lowerSemicontinuousOn univ)
-    (by simp) isClosed_univ (hint t) (hφint t)
-  have heq : φ ∘ X s =ᵐ[μ] φ ∘ μ[X t | ℱ s] := by
-    filter_upwards [hX.2 s t hst] with ω hω
-    simp [Function.comp, hω]
-  calc ∫ ω, (X s ω - L)⁺ ∂μ = ∫ ω, (φ ∘ X s) ω ∂μ := rfl
-    _ = ∫ ω, (φ ∘ μ[X t | ℱ s]) ω ∂μ := integral_congr_ae heq
-    _ ≤ ∫ ω, (μ[φ ∘ X t | ℱ s]) ω ∂μ :=
-        integral_mono_ae ((hφint s).congr heq) integrable_condExp hJ
-    _ = ∫ ω, (X t ω - L)⁺ ∂μ := integral_condExp (ℱ.le s)
+    ∫ ω, (X s ω - L)⁺ ∂μ ≤ ∫ ω, (X t ω - L)⁺ ∂μ :=
+  (integral_congr_ae (by filter_upwards [hX.2 s t hst] with ω hω; rw [hω])).trans_le
+    (integral_posPart_sub_condExp_le (ℱ.le s) (hX.integrable t) L)
 
 /-- **`∂_T C ≥ 0`**: the maturity derivative of the undiscounted call value on a real-indexed
 martingale is nonnegative wherever it is taken (Mathlib's `deriv`, which is `0` where the

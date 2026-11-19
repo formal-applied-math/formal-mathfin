@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Adam Kiezun
 -/
 
 /-
@@ -18,6 +18,7 @@ public import MathFin.Init
 public import MathFin.Probability.Laws.FiniteWeights
 public import Mathlib.Analysis.Normed.Order.Lattice
 public import Mathlib.MeasureTheory.Constructions.BorelSpace.Order
+import Mathlib.MeasureTheory.Integral.Bochner.Set
 public import Mathlib.Probability.ConditionalProbability
 
 /-!
@@ -64,12 +65,17 @@ For readers coming from the AFP entry, our declarations line up with its `Surviv
 * `survive_zero` — `₀pₓ = 1` for a life alive at `x`.
 * `survive_eq_survivalFunction_ratio` — `tpₓ = S_X(x+t) / S_X(x)` for `t ≥ 0`, the survival-ratio
   keystone: the conditional-probability definition of `survive` collapses to the ratio.
+* `real_le_eq_one_sub_survivalFunction` — `P(X ≤ t) = 1 - S_X(t)`.
+* `survivalFunction_lifeTable` — under the life-table law, `S(m) = l m / l 0` at the observed dates
+  `m ≤ n`.
 * `survive_lifeTable` — a finite life table induces the conditional survival ratios
   `l_{x+k} / l_x` under its finite-weights probability law.
 
 ## References
 
 * [Y. Ito, *AFP Actuarial Mathematics*][ItoAFPActuarial]
+* [D. C. M. Dickson, M. R. Hardy and H. R. Waters, *Actuarial Mathematics for Life
+  Contingent Risks*][DicksonHardyWaters2013], Chapter 3 (life tables)
 
 ## Tags
 
@@ -122,6 +128,17 @@ lemma survivalFunction_zero [IsProbabilityMeasure P] (hpos : ∀ᵐ ω ∂P, 0 <
     rw [← measure_univ (μ := P)]
     exact measure_congr (ae_eq_univ.mpr hcompl)
   rw [survivalFunction, h1, ENNReal.toReal_one]
+
+/-- `P(X ≤ t) = 1 - S_X(t)`: the survival function is the complement of the distribution function
+of the age at death. -/
+lemma real_le_eq_one_sub_survivalFunction [IsProbabilityMeasure P] (hX : Measurable X) (t : ℝ) :
+    P.real {ω | X ω ≤ t} = 1 - survivalFunction P X t := by
+  have h : alive X t = {ω | X ω ≤ t}ᶜ := by
+    ext ω
+    simp [alive]
+  rw [survivalFunction, h, ← measureReal_def,
+    probReal_compl_eq_one_sub (measurableSet_le hX measurable_const)]
+  ring
 
 /-- The survival function is bounded by `1`. -/
 lemma survivalFunction_le_one [IsProbabilityMeasure P] (t : ℝ) :
@@ -177,6 +194,7 @@ is the residual survivor outcome with mass `l n / l 0`. -/
 noncomputable def lifeTableWeights (n : ℕ) (l : ℕ → ℝ) (i : Fin (n + 1)) : ℝ :=
   if i.val < n then (l i.val - l (i.val + 1)) / l 0 else l n / l 0
 
+/-- The weights of a life table are nonnegative when `l` is nonnegative and nonincreasing. -/
 theorem lifeTableWeights_nonneg (n : ℕ) (l : ℕ → ℝ) (hl0 : 0 < l 0)
     (hmono : ∀ k < n, l (k + 1) ≤ l k) (hnonneg : ∀ k ≤ n, 0 ≤ l k)
     (i : Fin (n + 1)) : 0 ≤ lifeTableWeights n l i := by
@@ -187,43 +205,15 @@ theorem lifeTableWeights_nonneg (n : ℕ) (l : ℕ → ℝ) (hl0 : 0 < l 0)
   · rw [ite_eq_right h]
     exact div_nonneg (hnonneg n le_rfl) (le_of_lt hl0)
 
+/-- The weights of a life table sum to one: the death cells telescope to `(l 0 - l n) / l 0`
+and the residual outcome carries `l n / l 0`. -/
 theorem lifeTableWeights_sum (n : ℕ) (l : ℕ → ℝ) (hl0 : 0 < l 0) :
     ∑ i : Fin (n + 1), lifeTableWeights n l i = 1 := by
-  have hl0' : l 0 ≠ 0 := ne_of_gt hl0
-  have hrange : (∑ i : Fin (n + 1), lifeTableWeights n l i)
-      = ∑ k ∈ Finset.range (n + 1),
-        (if k < n then (l k - l (k + 1)) / l 0 else l n / l 0) :=
-    Fin.sum_univ_eq_sum_range
-      (fun k => if k < n then (l k - l (k + 1)) / l 0 else l n / l 0) (n + 1)
-  have hsplit : (∑ k ∈ Finset.range (n + 1),
-        (if k < n then (l k - l (k + 1)) / l 0 else l n / l 0))
-      = (∑ k ∈ Finset.range n, (l k - l (k + 1)) / l 0) + l n / l 0 := by
-    have h1 : (∑ k ∈ Finset.range (n + 1),
-          (if k < n then (l k - l (k + 1)) / l 0 else l n / l 0))
-        = (∑ k ∈ Finset.range n,
-            (if k < n then (l k - l (k + 1)) / l 0 else l n / l 0))
-          + (if n < n then (l n - l (n + 1)) / l 0 else l n / l 0) :=
-      Finset.sum_range_succ
-        (fun k => if k < n then (l k - l (k + 1)) / l 0 else l n / l 0) n
-    have h2 : (∑ k ∈ Finset.range n,
-          (if k < n then (l k - l (k + 1)) / l 0 else l n / l 0))
-        = ∑ k ∈ Finset.range n, (l k - l (k + 1)) / l 0 := by
-      apply Finset.sum_congr rfl
-      intro k hk
-      rw [ite_eq_left (Finset.mem_range.mp hk)]
-    have h3 : (if n < n then (l n - l (n + 1)) / l 0 else l n / l 0)
-        = l n / l 0 :=
-      ite_eq_right (by omega : ¬n < n)
-    rw [h1, h2, h3]
-  have htele : (∑ k ∈ Finset.range n, (l k - l (k + 1)) / l 0)
-      = (l 0 - l n) / l 0 := by
-    have hdiv : (∑ k ∈ Finset.range n, (l k - l (k + 1)) / l 0)
-        = (∑ k ∈ Finset.range n, (l k - l (k + 1))) / l 0 := by
-      simp only [div_eq_mul_inv, ← Finset.sum_mul]
-    have hts : (∑ k ∈ Finset.range n, (l k - l (k + 1))) = l 0 - l n :=
-      Finset.sum_range_sub' l n
-    rw [hdiv, hts]
-  rw [hrange, hsplit, htele, ← add_div, sub_add_cancel, div_self hl0']
+  simp only [lifeTableWeights]
+  rw [Fin.sum_univ_eq_sum_range
+    (fun k ↦ if k < n then (l k - l (k + 1)) / l 0 else l n / l 0), Finset.sum_range_succ,
+    Finset.sum_congr rfl fun k hk ↦ ite_eq_left (Finset.mem_range.1 hk), ite_eq_right n.lt_irrefl,
+    ← Finset.sum_div, Finset.sum_range_sub', ← add_div, sub_add_cancel, div_self hl0.ne']
 
 /-- The finite probability law of a life table, by the existing
 finite-weights constructor on all outcomes. -/
@@ -234,138 +224,40 @@ noncomputable def lifeTableMeasure (n : ℕ) (l : ℕ → ℝ) : Measure (Fin (n
 `i + 1`, residual survivor outcome at `n + 1`. -/
 def lifeTableLifetime (n : ℕ) (i : Fin (n + 1)) : ℝ := i.val + 1
 
-/-- Survival function of the life-table law at an observed date: the mass of
-outcomes outliving `m` telescopes to `l m / l 0`. -/
-private theorem lifeTable_survivalFunction_eq (n : ℕ) (l : ℕ → ℝ) (hl0 : 0 < l 0)
-    (hmono : ∀ k < n, l (k + 1) ≤ l k) (hnonneg : ∀ k ≤ n, 0 ≤ l k)
-    (m : ℕ) (hm : m ≤ n) :
-    survivalFunction (lifeTableMeasure n l) (lifeTableLifetime n) (m : ℝ)
-      = l m / l 0 := by
-  classical
-  have hmeas : Measurable (lifeTableLifetime n) := by
-    apply measurable_of_finite
-  have hμ : (lifeTableMeasure n l) (alive (lifeTableLifetime n) (m : ℝ))
-      = ∑ a ∈ Finset.univ.filter (· ∈ alive (lifeTableLifetime n) (m : ℝ)),
-        ENNReal.ofReal (lifeTableWeights n l a) := by
-    have hA : MeasurableSet (alive (lifeTableLifetime n) (m : ℝ)) :=
-      measurableSet_alive hmeas _
-    simp only [lifeTableMeasure, MeasureTheory.Measure.ofWeights,
-      MeasureTheory.Measure.finsetSum_apply]
-    rw [Finset.sum_filter]
-    apply Finset.sum_congr rfl
-    intro i _
-    by_cases hi : i ∈ alive (lifeTableLifetime n) (m : ℝ)
-    · rw [MeasureTheory.Measure.smul_apply,
-        MeasureTheory.Measure.dirac_apply_of_mem hi, smul_eq_mul, mul_one,
-        ite_eq_left hi]
-    · rw [MeasureTheory.Measure.smul_apply,
-        MeasureTheory.Measure.dirac_apply' i hA, Set.indicator_of_notMem hi,
-        smul_eq_mul, mul_zero, ite_eq_right hi]
-  have hF : Finset.univ.filter (· ∈ alive (lifeTableLifetime n) (m : ℝ))
-      = Finset.univ.filter (fun a : Fin (n + 1) => m ≤ a.val) := by
-    rw [Finset.ext_iff]
-    intro a
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
-    simp only [alive, lifeTableLifetime, Set.mem_ofPred]
-    constructor
-    · intro h
-      have h' : m < a.val + 1 := by exact_mod_cast h
-      omega
-    · intro h
-      have h' : m < a.val + 1 := by omega
-      exact_mod_cast h'
-  have hnn : ∀ a ∈ Finset.univ.filter (· ∈ alive (lifeTableLifetime n) (m : ℝ)),
-      0 ≤ lifeTableWeights n l a := by
-    intro a _
-    exact lifeTableWeights_nonneg n l hl0 hmono hnonneg a
-  have hbridge : ENNReal.ofReal
-        (∑ a ∈ Finset.univ.filter (· ∈ alive (lifeTableLifetime n) (m : ℝ)),
-          lifeTableWeights n l a)
-      = ∑ a ∈ Finset.univ.filter (· ∈ alive (lifeTableLifetime n) (m : ℝ)),
-        ENNReal.ofReal (lifeTableWeights n l a) := by
-    apply ENNReal.ofReal_sum_of_nonneg
-    intro a ha
-    exact hnn a ha
-  have htr : (ENNReal.ofReal
-        (∑ a ∈ Finset.univ.filter (· ∈ alive (lifeTableLifetime n) (m : ℝ)),
-          lifeTableWeights n l a)).toReal
-      = ∑ a ∈ Finset.univ.filter (· ∈ alive (lifeTableLifetime n) (m : ℝ)),
-        lifeTableWeights n l a := by
-    apply ENNReal.toReal_ofReal
-    exact Finset.sum_nonneg (fun a ha => hnn a ha)
-  have hfilt : (∑ a ∈ Finset.univ.filter (fun a : Fin (n + 1) => m ≤ a.val),
-        lifeTableWeights n l a)
-      = ∑ a ∈ Finset.univ,
-        (if m ≤ a.val then lifeTableWeights n l a else 0) :=
-    Finset.sum_filter (fun a : Fin (n + 1) => m ≤ a.val) (lifeTableWeights n l)
-  have hrange : (∑ a ∈ Finset.univ,
-        (if m ≤ a.val then lifeTableWeights n l a else 0))
-      = ∑ k ∈ Finset.range (n + 1),
-        (if m ≤ k then (if k < n then (l k - l (k + 1)) / l 0 else l n / l 0)
-          else 0) :=
-    Fin.sum_univ_eq_sum_range
-      (fun k => if m ≤ k then (if k < n then (l k - l (k + 1)) / l 0 else l n / l 0)
-        else 0) (n + 1)
-  have hIco : (Finset.range (n + 1)).filter (fun k : ℕ => m ≤ k)
-      = Finset.Ico m (n + 1) := by
-    rw [Finset.ext_iff]
-    intro k
-    simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_Ico]
-    exact and_comm
-  have hfilt2 : (∑ k ∈ Finset.range (n + 1),
-        (if m ≤ k then (if k < n then (l k - l (k + 1)) / l 0 else l n / l 0)
-          else 0))
-      = ∑ k ∈ Finset.Ico m (n + 1),
-        (if k < n then (l k - l (k + 1)) / l 0 else l n / l 0) := by
-    rw [← hIco, Finset.sum_filter]
-  have hsplit : (∑ k ∈ Finset.Ico m (n + 1),
-        (if k < n then (l k - l (k + 1)) / l 0 else l n / l 0))
-      = (∑ k ∈ Finset.Ico m n, (l k - l (k + 1)) / l 0) + l n / l 0 := by
-    have h1 : (∑ k ∈ Finset.Ico m (n + 1),
-          (if k < n then (l k - l (k + 1)) / l 0 else l n / l 0))
-        = (∑ k ∈ Finset.Ico m n,
-            (if k < n then (l k - l (k + 1)) / l 0 else l n / l 0))
-          + (if n < n then (l n - l (n + 1)) / l 0 else l n / l 0) := by
-      apply Finset.sum_Ico_succ_top
-      exact hm
-    have h2 : (∑ k ∈ Finset.Ico m n,
-          (if k < n then (l k - l (k + 1)) / l 0 else l n / l 0))
-        = ∑ k ∈ Finset.Ico m n, (l k - l (k + 1)) / l 0 := by
-      apply Finset.sum_congr rfl
-      intro k hk
-      rw [ite_eq_left (Finset.mem_Ico.mp hk).2]
-    have h3 : (if n < n then (l n - l (n + 1)) / l 0 else l n / l 0)
-        = l n / l 0 :=
-      ite_eq_right (by omega : ¬n < n)
-    rw [h1, h2, h3]
-  have htele : (∑ k ∈ Finset.Ico m n, (l k - l (k + 1)) / l 0)
-      = (l m - l n) / l 0 := by
-    have hdiv : (∑ k ∈ Finset.Ico m n, (l k - l (k + 1)) / l 0)
-        = (∑ k ∈ Finset.Ico m n, (l k - l (k + 1))) / l 0 := by
-      simp only [div_eq_mul_inv, ← Finset.sum_mul]
-    have hts : (∑ k ∈ Finset.Ico m n, (l k - l (k + 1))) = l m - l n := by
-      rw [Finset.sum_Ico_eq_sub _ hm, Finset.sum_range_sub' _ n,
-        Finset.sum_range_sub' _ m]
-      ring
-    rw [hdiv, hts]
-  unfold survivalFunction
-  rw [hμ, ← hbridge, htr, hF, hfilt, hrange, hfilt2, hsplit, htele, ← add_div,
-    sub_add_cancel]
+/-- **The survival function of the life-table law** at an observed date `m ≤ n` is the table
+ratio `l m / l 0`: the mass of the outcomes outliving `m` telescopes. -/
+theorem survivalFunction_lifeTable (n : ℕ) (l : ℕ → ℝ) (hl0 : 0 < l 0)
+    (hmono : ∀ k < n, l (k + 1) ≤ l k) (hnonneg : ∀ k ≤ n, 0 ≤ l k) {m : ℕ} (hm : m ≤ n) :
+    survivalFunction (lifeTableMeasure n l) (lifeTableLifetime n) m = l m / l 0 := by
+  rw [survivalFunction, ← measureReal_def,
+    ← integral_indicator_one (measurableSet_alive (measurable_of_finite _) _), lifeTableMeasure,
+    Measure.integral_ofWeights _ fun i _ ↦ lifeTableWeights_nonneg n l hl0 hmono hnonneg i]
+  have hind (i : Fin (n + 1)) :
+      (alive (lifeTableLifetime n) m).indicator (1 : Fin (n + 1) → ℝ) i
+        = if m ≤ i.val then 1 else 0 := by
+    have h : ((m : ℝ) < (i.val : ℝ) + 1) ↔ m ≤ i.val := by exact_mod_cast Nat.lt_succ_iff
+    simp [Set.indicator_apply, alive, lifeTableLifetime, h]
+  simp only [hind, mul_ite, mul_one, mul_zero, lifeTableWeights]
+  rw [Fin.sum_univ_eq_sum_range
+    (fun k ↦ if m ≤ k then (if k < n then (l k - l (k + 1)) / l 0 else l n / l 0) else 0),
+    Finset.sum_range_succ, ite_eq_left hm, ite_eq_right n.lt_irrefl,
+    Finset.sum_congr rfl fun k hk ↦
+      show _ = if m ≤ k then (l k - l (k + 1)) / l 0 else 0 by simp [Finset.mem_range.1 hk],
+    ← Finset.sum_filter,
+    show (Finset.range n).filter (m ≤ ·) = Finset.Ico m n by ext; simp [and_comm],
+    ← Finset.sum_div, Finset.sum_Ico_eq_sub _ hm, Finset.sum_range_sub', Finset.sum_range_sub',
+    ← add_div]
+  ring
 
+/-- **Conditional survival in a life table**: a life aged `x` in the finite life table `l` survives
+`k` more years with probability `l (x + k) / l x` under the life-table law. -/
 theorem survive_lifeTable (n : ℕ) (l : ℕ → ℝ) (hl0 : 0 < l 0)
     (hmono : ∀ k < n, l (k + 1) ≤ l k) (hnonneg : ∀ k ≤ n, 0 ≤ l k)
-    (x k : ℕ) (hxk : x + k ≤ n) (_hx : 0 < l x) :
-    survive (lifeTableMeasure n l) (lifeTableLifetime n) (k : ℝ) (x : ℝ)
-      = l (x + k) / l x := by
-  have hmeas : Measurable (lifeTableLifetime n) := by
-    apply measurable_of_finite
-  have hk0 : (0 : ℝ) ≤ (k : ℝ) := by positivity
-  have hx_le : x ≤ n := Nat.le_trans (Nat.le_add_right x k) hxk
-  have hl0' : l 0 ≠ 0 := ne_of_gt hl0
-  have hx' : l x ≠ 0 := ne_of_gt _hx
-  rw [survive_eq_survivalFunction_ratio hmeas _ hk0, ← Nat.cast_add,
-    lifeTable_survivalFunction_eq n l hl0 hmono hnonneg (x + k) hxk,
-    lifeTable_survivalFunction_eq n l hl0 hmono hnonneg x hx_le]
-  field_simp
+    (x k : ℕ) (hxk : x + k ≤ n) :
+    survive (lifeTableMeasure n l) (lifeTableLifetime n) k x = l (x + k) / l x := by
+  rw [survive_eq_survivalFunction_ratio (measurable_of_finite _) _ k.cast_nonneg, ← Nat.cast_add,
+    survivalFunction_lifeTable n l hl0 hmono hnonneg hxk,
+    survivalFunction_lifeTable n l hl0 hmono hnonneg ((x.le_add_right k).trans hxk),
+    div_div_div_cancel_right₀ hl0.ne']
 
 end MathFin.SurvivalModel

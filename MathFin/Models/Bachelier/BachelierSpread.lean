@@ -16,26 +16,27 @@ public import MathFin.Probability.Gaussian.GaussianMoments
 A spread option pays `max(F₁ − F₂ − K, 0)` — the right to deliver asset 2 plus the cash
 amount `K` and receive asset 1. In the Bachelier (normal) model each forward is an
 arithmetic Brownian motion `Fᵢ = fᵢ + σᵢ · Zᵢ`, so pricing reduces to the law of the
-*difference* of two Gaussians. This file establishes the two halves of that reduction
-and their composition:
+*difference* of two Gaussians:
 
 * the **difference reduction** (`hasLaw_sub_gaussianPair`): the spread
   `(f₁ + σ₁·U) − (f₂ + σ₂·V)` of a jointly Gaussian standard pair `(U, V)` with
   `cov(U, V) = ρ` is Gaussian with mean `f₁ − f₂` and the **effective variance**
   `σ₁² + σ₂² − 2ρσ₁σ₂` — the same combination as the Margrabe effective volatility of
-  the log-spread, carried by the spread itself rather than its logarithm. The
-  independent case appears in law form as `hasLaw_sub_indepGaussian`.
+  the log-spread, carried by the spread itself rather than its logarithm;
 * the **stop-loss transform of a general Gaussian law** (`gaussian_call_formula`,
-  `gaussian_put_formula`): `E[(W − K)⁺] = (m − K)·Φ(d) + √v·ϕ(d)` with
-  `d = (m − K)/√v`, for any `W ~ N(m, v)` with `v ≠ 0` and any strike sign — the
-  model-free form of `bachelier_call_formula`, proved by the same standard-normal
-  reduction (standardize `W`, then `integral_max_sub_mul_gaussianPDFReal`).
+  `gaussian_put_formula` in `Probability/Gaussian/GaussianPartialMoments`), which the
+  Bachelier call `bachelier_call_formula` also instantiates.
 
-Composing the two (`bachelier_spread_call`, `bachelier_spread_put`), the spread option
-collapses to a single-name Bachelier formula at the effective standard deviation
-`√(σ₁² + σ₂² − 2ρσ₁σ₂)`: a two-asset normal-model problem that is exactly a one-asset
-one. This is the normal-model analogue of the reduction
-`MathFin/Models/BlackScholes/ExchangeOption.lean` performs for lognormal marginals.
+Composing the two (`bachelier_spread_call`, `bachelier_spread_put`), the expected spread payoff
+is the Bachelier expression at the effective standard deviation `√(σ₁² + σ₂² − 2ρσ₁σ₂)`: a
+two-asset normal-model problem that is exactly a one-asset one. This is the normal-model
+analogue of the reduction `MathFin/Models/BlackScholes/ExchangeOption.lean` performs for
+lognormal marginals.
+
+**Scope.** The results are expectations of the spread payoff under a measure `Q` carrying
+the drivers (the zero-rate pricing-measure reading of `BachelierHyp`), not prices on a
+two-asset `Market`: the library's Bachelier market (`Models/Bachelier/BachelierMarket`) has one
+traded asset, so a spread price in the sense of `Market.price` is not stated here.
 
 ## Main definitions
 
@@ -52,18 +53,12 @@ one. This is the normal-model analogue of the reduction
   volatility is nonzero and the correlation is sub-unit.
 * `hasLaw_sub_gaussianPair`: the difference reduction, `(f₁ + σ₁·U) − (f₂ + σ₂·V) ~
   N(f₁ − f₂, σ₁² + σ₂² − 2ρσ₁σ₂)`.
-* `hasLaw_sub_indepGaussian`: the difference of two independent Gaussians is Gaussian
-  with mean `μ₁ − μ₂` and variance `v₁ + v₂`.
-* `gaussian_call_formula` / `gaussian_put_formula`: the stop-loss transform of an
-  arbitrary Gaussian law, `E[(W − K)⁺] = (m − K)·Φ(d) + √v·ϕ(d)` and its put mirror.
 * `bachelier_spread_call`: under `BachelierSpreadHyp`, the expected spread-call payoff
   equals `(f₁ − f₂ − K)·Φ(d) + √(σ₁² + σ₂² − 2ρσ₁σ₂)·ϕ(d)` with `d = bachelierSpreadD`.
 * `bachelier_spread_put`: the put mirror, priced at the same effective standard
   deviation.
 * `bachelierSpreadD_eq_bachelierD`: the spread `d` is the single-name `bachelierD` of the
   spread mean at the effective standard deviation and unit time.
-* `bachelier_spread_call_eq_bachelier`: the spread-call price written with the
-  single-name `bachelierD`, i.e. in the form of `bachelier_call_formula`.
 
 ## References
 
@@ -137,91 +132,6 @@ theorem hasLaw_sub_gaussianPair {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Mea
     funext ω; ring
   rw [hfun]
   simpa only [zero_add] using gaussianReal_add_const hlin (f₁ - f₂)
-
-/-- **The difference of independent Gaussians is Gaussian**: if `X ~ N(μ₁, v₁)` and
-`Y ~ N(μ₂, v₂)` are independent, then `X − Y ~ N(μ₁ − μ₂, v₁ + v₂)` — the spread of two
-independent normal forwards is itself normal, with the variances adding. This is the
-`ρ = 0` instance of the difference reduction, stated for arbitrary Gaussian laws through
-the convolution `gaussianReal_conv_gaussianReal`. -/
-theorem hasLaw_sub_indepGaussian {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
-    {X Y : Ω → ℝ} {μ₁ μ₂ : ℝ} {v₁ v₂ : ℝ≥0}
-    (hX : HasLaw X (gaussianReal μ₁ v₁) P) (hY : HasLaw Y (gaussianReal μ₂ v₂) P)
-    (h : IndepFun X Y P) :
-    HasLaw (fun ω ↦ X ω - Y ω) (gaussianReal (μ₁ - μ₂) (v₁ + v₂)) P := by
-  have hY' : HasLaw (-Y) (gaussianReal (-μ₂) v₂) P := gaussianReal_neg hY
-  have h' : IndepFun X (-Y) P := h.neg_right
-  have hsum := h'.hasLaw_add hX hY'
-  rw [gaussianReal_conv_gaussianReal] at hsum
-  exact hsum
-
-/-! ### The stop-loss transform of a Gaussian law -/
-
-/-- **Call payoff under a Gaussian law**: if `W ~ N(m, v)` with `v ≠ 0`, then for any
-strike `K` (of either sign),
-
-    E[(W − K)⁺] = (m − K)·Φ(d) + √v·ϕ(d),   d = (m − K)/√v.
-
-This is the model-free form of `bachelier_call_formula` (which transcribes it for the
-Bachelier terminal price with a positive strike): standardize `W` to
-`Z = (W − m)/√v ~ N(0, 1)` (`hasLaw_sub_div_of_gaussianReal`), where the payoff is
-`√v·(Z + d)⁺`, and read the integral off the standard-normal stop-loss transform
-`integral_max_sub_mul_gaussianPDFReal` at `−d`. -/
-theorem gaussian_call_formula {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
-    {W : Ω → ℝ} {m : ℝ} {v : ℝ≥0}
-    (hW : HasLaw W (gaussianReal m v) P) (hv : v ≠ 0) (K : ℝ) :
-    ∫ ω, max (W ω - K) 0 ∂P
-      = (m - K) * Phi ((m - K) / Real.sqrt (v : ℝ))
-        + Real.sqrt (v : ℝ) * gaussianPDFReal 0 1 ((m - K) / Real.sqrt (v : ℝ)) := by
-  have hvpos : 0 < (v : ℝ) := lt_of_le_of_ne (NNReal.coe_nonneg v) (by exact_mod_cast hv.symm)
-  set s : ℝ := Real.sqrt (v : ℝ) with hs_def
-  have hs : 0 < s := Real.sqrt_pos.2 hvpos
-  set d : ℝ := (m - K) / s with hd_def
-  have hsd : s * d = m - K := by rw [hd_def]; field_simp
-  have hZ : HasLaw (fun ω ↦ (W ω - m) / s) (gaussianReal 0 1) P :=
-    hasLaw_sub_div_of_gaussianReal hW hs (by rw [hs_def]; exact (Real.sq_sqrt
-      (NNReal.coe_nonneg v)).symm)
-  have hWcomp : (fun ω ↦ max (W ω - K) 0)
-      = (fun z ↦ max (m + s * z - K) 0) ∘ (fun ω ↦ (W ω - m) / s) := by
-    funext ω
-    have hWω : W ω - K = m + s * ((W ω - m) / s) - K := by
-      field_simp
-      ring
-    rw [Function.comp_apply, hWω]
-  have h_payoff_meas : Measurable fun z : ℝ ↦ max (m + s * z - K) 0 := by fun_prop
-  -- The payoff is `s · (z + d)⁺`, so the integral is `s` times the stop-loss transform.
-  have hpt (z : ℝ) : gaussianPDFReal 0 1 z • max (m + s * z - K) 0
-      = s * (max (z - -d) 0 * gaussianPDFReal 0 1 z) := by
-    have h : m + s * z - K = s * (z - -d) := by linear_combination -hsd
-    have hmax := mul_max_of_nonneg (z - -d) 0 hs.le
-    rw [mul_zero] at hmax
-    rw [smul_eq_mul, h, ← hmax]; ring
-  rw [hWcomp, hZ.integral_comp h_payoff_meas.aestronglyMeasurable,
-    integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0),
-    integral_congr_ae (Filter.Eventually.of_forall hpt), integral_const_mul,
-    integral_max_sub_mul_gaussianPDFReal, gaussianPDFReal_zero_one_neg, Phi_neg]
-  linear_combination Phi d * hsd
-
-/-- **Put payoff under a Gaussian law**: if `W ~ N(m, v)` with `v ≠ 0`, then for any
-strike `K`,
-
-    E[(K − W)⁺] = (K − m)·Φ((K − m)/√v) + √v·ϕ((K − m)/√v),
-
-the put mirror of `gaussian_call_formula`: `(K − W)⁺` is the call `(-W − (-K))⁺` on the
-negated Gaussian `−W ~ N(−m, v)`, so the call formula applies verbatim (the normal-model
-put-call parity `put = call − forward` in disguise). -/
-theorem gaussian_put_formula {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
-    {W : Ω → ℝ} {m : ℝ} {v : ℝ≥0}
-    (hW : HasLaw W (gaussianReal m v) P) (hv : v ≠ 0) (K : ℝ) :
-    ∫ ω, max (K - W ω) 0 ∂P
-      = (K - m) * Phi ((K - m) / Real.sqrt (v : ℝ))
-        + Real.sqrt (v : ℝ) * gaussianPDFReal 0 1 ((K - m) / Real.sqrt (v : ℝ)) := by
-  have hcall := gaussian_call_formula (gaussianReal_neg hW) hv (-K)
-  have hmean : (-m : ℝ) - -K = K - m := by ring
-  rw [hmean] at hcall
-  have hfun : (fun ω ↦ max (K - W ω) 0) = (fun ω ↦ max (-W ω - -K) 0) := by
-    funext ω; congr 1; ring
-  rw [hfun]
-  exact hcall
 
 /-! ### The Bachelier spread pricing identity -/
 
@@ -309,26 +219,5 @@ theorem bachelierSpreadD_eq_bachelierD (f₁ f₂ K σ₁ σ₂ ρ : ℝ) :
     bachelierSpreadD f₁ f₂ K σ₁ σ₂ ρ
       = bachelierD (f₁ - f₂) K (Real.sqrt (bachelierSpreadVariance σ₁ σ₂ ρ)) 1 := by
   simp [bachelierSpreadD, bachelierD]
-
-/-- **Bachelier spread call, in the single-name form**: under `BachelierSpreadHyp`, the
-expected payoff of the spread call is the right-hand side of `bachelier_call_formula` for
-spot `f₁ − f₂`, strike `K`, volatility `√(σ₁² + σ₂² − 2ρσ₁σ₂)` and unit time:
-
-    E_Q[max(F₁ − F₂ − K, 0)] = (f₁ − f₂ − K)·Φ(d) + √v·ϕ(d),
-
-with `d = bachelierD (f₁ − f₂) K √v 1` — `bachelier_spread_call` with `bachelierSpreadD`
-rewritten by `bachelierSpreadD_eq_bachelierD`. -/
-theorem bachelier_spread_call_eq_bachelier {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    {Q : Measure Ω} [IsProbabilityMeasure Q]
-    {f₁ f₂ K σ₁ σ₂ ρ : ℝ} {U V : Ω → ℝ}
-    (h : BachelierSpreadHyp Q f₁ f₂ σ₁ σ₂ ρ U V) :
-    ∫ ω, max ((f₁ + σ₁ * U ω) - (f₂ + σ₂ * V ω) - K) 0 ∂Q
-      = (f₁ - f₂ - K)
-          * Phi (bachelierD (f₁ - f₂) K (Real.sqrt (bachelierSpreadVariance σ₁ σ₂ ρ)) 1)
-        + Real.sqrt (bachelierSpreadVariance σ₁ σ₂ ρ)
-          * gaussianPDFReal 0 1
-              (bachelierD (f₁ - f₂) K (Real.sqrt (bachelierSpreadVariance σ₁ σ₂ ρ)) 1) := by
-  rw [← bachelierSpreadD_eq_bachelierD]
-  exact bachelier_spread_call h
 
 end MathFin

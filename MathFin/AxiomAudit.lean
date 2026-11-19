@@ -2810,6 +2810,14 @@ The landmarks of `docs/blueprint.md` that no section above pins: one `#print axi
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.lifeAnnuityDue_eq_value
 
+/-- info: 'MathFin.wholeLife_epv_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.wholeLife_epv_eq
+
+/-- info: 'MathFin.hasDerivAt_thieleReserve' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.hasDerivAt_thieleReserve
+
 /-- info: 'MathFin.esscherPremium_eq_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.esscherPremium_eq_price
@@ -3168,3 +3176,7 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.Execution.gmQuote_one_ae_eq_quote' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Execution.gmQuote_one_ae_eq_quote
+
+/-- info: 'MathFin.buhlmann_mse_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.buhlmann_mse_le

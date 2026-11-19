@@ -70,6 +70,7 @@ import MathFin.Probability.Gaussian.FeynmanKacHeatEquation
 import MathFin.Probability.Brownian.BrownianMartingale
 import MathFin.Probability.Brownian.BrownianDoobMaximal
 -- Bayes change-of-measure engine + Black–Scholes EMM via an explicit Girsanov density
+import MathFin.Probability.Martingales.CondExpCallJensen
 import MathFin.Probability.Martingales.ChangeOfMeasure
 import MathFin.Probability.Brownian.ExpMartingaleQBrownian
 import MathFin.Probability.Martingales.LevyQuadraticSums
@@ -424,7 +425,6 @@ import MathFin.Models.BlackScholes.DividendsGreeks
 import MathFin.Models.BlackScholes.Forward
 import MathFin.Models.BlackScholes.HigherGreeks
 import MathFin.Models.BlackScholes.StrikeGreeks
-import MathFin.Models.BlackScholes.SqrtTerminal
 -- Local-vol skew of a tilted smile surface via Dupire's ratio; the rule of two
 import MathFin.Models.LocalVol.ForwardSmile
 import MathFin.Models.LocalVol.MarketCallSurface
@@ -539,6 +539,8 @@ import MathFin.Models.StochVol.Heston
 -- The Heston transform at vanishing vol-of-vol: the Black-Scholes moment with the integrated
 -- deterministic variance
 import MathFin.Models.StochVol.HestonSmallVolOfVol
+-- The Heston transform at zero maturity: the Riccati flows vanish at τ = 0 and the
+-- profile degenerates to the point-mass mgf (the undiscounted-payoff convention)
 import MathFin.Models.BlackScholes.Lookback
 import MathFin.Models.BlackScholes.BarrierParity
 import MathFin.Models.BlackScholes.BinaryBarrierOption
@@ -675,7 +677,6 @@ import MathFin.Models.Rates.VasicekMarketPriceOfRisk
 import MathFin.Models.Rates.VasicekZeroMeanReversionLimit
 -- The Nelson–Siegel/Svensson zero-rate at vanishing decay: the loading tends
 -- to 1, the zero rate to c0 + c1, the Svensson second term to 0 (the guarded-limit values)
-import MathFin.Models.Rates.NelsonSiegelZeroMeanReversion
 -- CIR loadings: B solves the Riccati equation, A solves A' = −κθB
 import MathFin.Models.Rates.CIRRiccati
 -- The Black–Scholes forward price under the T-forward measure
@@ -855,6 +856,9 @@ import MathFin.Risk.CollateralizedExposureBrownian
 -- (VaR elicitable, ES not); Bernoulli mixtures and the Basel IRB limit theorem
 import MathFin.Risk.ExpectedShortfall
 import MathFin.Risk.CompoundPoissonCVaR
+-- The stop-loss transform across a gap in the law: the stop-loss recursion of an arithmetic loss
+-- and the Rockafellar–Uryasev objective on its lattice
+import MathFin.Risk.StopLossGap
 import MathFin.Risk.GaussianExpectedShortfall
 import MathFin.Risk.ValueAtRiskBisection
 import MathFin.Risk.VaRSuperadditivity
@@ -931,6 +935,7 @@ import MathFin.Choice.Utility.MarketMarginalUtility
 -- systematic floor, and the square-root-of-time rule for GBM losses
 import MathFin.Choice.Portfolio.Equicorrelation
 import MathFin.Choice.Portfolio.SingleIndexModel
+import MathFin.Choice.Portfolio.RegressionBeta
 
 -- Insurance
 import MathFin.Insurance.StandardDeviationPrinciple
@@ -941,7 +946,7 @@ import MathFin.Insurance.Mortality
 import MathFin.Insurance.SurvivalModel
 import MathFin.Insurance.ActuarialInsurance
 import MathFin.Insurance.AnnuityValue
-import MathFin.Insurance.FiniteCredibilityCovariance
+import MathFin.Insurance.BuhlmannCredibility
 import MathFin.Insurance.EsscherPremium
 
 -- Markets

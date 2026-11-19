@@ -7,7 +7,6 @@ module
 
 public import MathFin.Markets.DeFi.UniswapMechanics
 public import MathFin.Models.BlackScholes.Forward
-public import MathFin.Models.BlackScholes.SqrtTerminal
 
 /-!
 # The constant-product LP position under a lognormal price

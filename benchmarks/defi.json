@@ -140,7 +140,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.integral_lpValue_eq_exp_mul_integral_hodlValue (MathFin/Markets/DeFi/ConstantProductLPLognormal.lean): the LP value is 2 y0 sqrt(r) (MathFin.DeFi.lpPortfolioValue_eq), sqrt of a lognormal factor is lognormal with half the volatility (sqrt_bsTerminal (MathFin/Models/BlackScholes/SqrtTerminal.lean), Real.exp_half), and both expectations are the library's forward identity expected_terminal_eq_forward (MathFin/Models/BlackScholes/Forward.lean); the general-drift formula E[LP_T] = 2 y0 exp((mu/2 - sigma^2/8) T) is integral_lpValue_lognormal. SCOPE: fee-free pool assumed at the external price at T; deposit at the pool price; values in token Y, undiscounted; fees and the path of arbitrage trades are not modelled."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.integral_lpValue_eq_exp_mul_integral_hodlValue (MathFin/Markets/DeFi/ConstantProductLPLognormal.lean): the LP value is 2 y0 sqrt(r) (MathFin.DeFi.lpPortfolioValue_eq), sqrt of a lognormal factor is lognormal with half the volatility (sqrt_bsTerminal (MathFin/Models/BlackScholes/Forward.lean), Real.exp_half), and both expectations are the library's forward identity expected_terminal_eq_forward (MathFin/Models/BlackScholes/Forward.lean); the general-drift formula E[LP_T] = 2 y0 exp((mu/2 - sigma^2/8) T) is integral_lpValue_lognormal. SCOPE: fee-free pool assumed at the external price at T; deposit at the pool price; values in token Y, undiscounted; fees and the path of arbitrage trades are not modelled."
       }
     },
     {

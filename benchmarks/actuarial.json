@@ -253,6 +253,201 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. isPricingMeasure_insuredMarket_tilted_iff in MathFin/Insurance/EsscherPremium.lean: the forward direction is Market.integral_eq_of_isPricingMeasure_oneDate (MathFin/Pricing/OneDateMarket.lean), where the martingale property of the deflated asset between 0 and T keeps its mean (Martingale.setIntegral_eq), combined with the mean of X under the tilt being the premium (integral_tilted_eq_esscherPremium); the converse is Market.isPricingMeasure_oneDate. SCOPE: the hypothesis T > 0 is needed (at T = 0 the quote is never read); uniqueness of the parameter (strict monotonicity of the premium in h) is not proved; the insured market quotes the loss at the Esscher premium by construction and has no dynamics before T. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-life-table-survival-ratio",
+      "name": "Conditional Survival in a Finite Life Table Is the Table Ratio",
+      "domain": "mathematical_finance",
+      "description": "Let l be a finite life table on ages 0..n with l_0 > 0, nonincreasing (l_{k+1} <= l_k for k < n) and nonnegative. Its probability law lifeTableMeasure n l on Fin (n+1) puts mass (l_i - l_{i+1})/l_0 on the death cell i < n and l_n/l_0 on the residual outcome n, and lifeTableLifetime n reads the lifetime i+1 off the outcome i (the residual survivor at n+1). Then for ages x and k with x + k <= n, the probability that a life aged x survives k further years (survive, the conditional probability P(T > x + k | T > x)) is l_{x+k}/l_x. No positivity of l_x is assumed: when l_x = 0 both sides are 0 (division by zero), the conditional probability being that of a null event.",
+      "code": {
+        "lean": "import MathFin.Insurance.SurvivalModel\n\nopen MathFin.SurvivalModel\n\n/-- The conditional survival probability of the life-table law is the table ratio. -/\ntheorem life_table_survival_ratio (n : ℕ) (l : ℕ → ℝ) (hl0 : 0 < l 0)\n    (hmono : ∀ k < n, l (k + 1) ≤ l k) (hnonneg : ∀ k ≤ n, 0 ≤ l k) (x k : ℕ)\n    (hxk : x + k ≤ n) :\n    survive (lifeTableMeasure n l) (lifeTableLifetime n) k x = l (x + k) / l x :=\n  survive_lifeTable n l hl0 hmono hnonneg x k hxk\n"
+      },
+      "metadata": {
+        "reference": "D. C. M. Dickson, M. R. Hardy and H. R. Waters, Actuarial Mathematics for Life Contingent Risks, 2nd ed., Cambridge University Press (2013), Chapter 3 (life tables)",
+        "citations": [
+          {
+            "key": "DicksonHardyWaters2013",
+            "locator": "Chapter 3"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. survive_lifeTable in MathFin/Insurance/SurvivalModel.lean: the survival function of the life-table law at an integer date m <= n is l_m/l_0 (survivalFunction_lifeTable: the integral of the indicator against the finite weights Measure.ofWeights of MathFin/Probability/Laws/FiniteWeights.lean, the weights telescoping over the cells m..n-1 plus the residual), and the conditional survival is the ratio of survival functions (survive_eq_survivalFunction_ratio). SCOPE: a finite table with the survivors of the last age kept as one residual outcome at n + 1; integer ages and durations; the table is an input, there is no mortality law behind it. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-term-insurance-plus-pure-endowment",
+      "name": "Term Insurance Plus Pure Endowment Is One Minus d Times the Life Annuity-Due",
+      "domain": "mathematical_finance",
+      "description": "Let tau be a measurable lifetime, positive almost surely, under a probability measure Q, and r a flat rate. On the deterministic discount t -> zcb r 0 t, with the default indicator 1{tau <= u} as the observed process, the value (Contract.value) of the n-year term insurance, the protection leg cdsProtectionLeg of the unit grid at recovery 0 (one paid at the end of the year of death if death occurs within n years), plus the value of the n-year pure endowment (one paid at time n if tau > n), equals 1 - (1 - e^{-r}) times the value of the n-year life annuity-due (payFlows of one at each date k < n while 1{tau <= k} is zero): A^1_{x:n} + nEx = 1 - d a_{x:n}, with d = 1 - e^{-r}. No condition on r.",
+      "code": {
+        "lean": "import MathFin.Insurance.AnnuityValue\n\nopen MeasureTheory MathFin MathFin.Contracts\nopen scoped NNReal\n\n/-- Term insurance plus pure endowment is `1 − d` times the life annuity-due, in the values of the\ncontracts. -/\ntheorem term_insurance_plus_pure_endowment {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (Q : Measure Ω) [IsProbabilityMeasure Q] {τ : Ω → ℝ} (hτ : Measurable τ)\n    (hpos : ∀ᵐ ω ∂Q, 0 < τ ω) (r : ℝ) (n : ℕ) :\n    (cdsProtectionLeg (fun k : ℕ ↦ (k : ℝ≥0)) 0 n).value Q (fun t _ ↦ zcb r 0 t)\n        (defaultIndicator τ)\n      + (Contract.pay (n : ℝ≥0) (.sub (.const 1) (.obs () (n : ℝ≥0)) : Payoff Unit)).value Q\n          (fun t _ ↦ zcb r 0 t) (defaultIndicator τ)\n      = 1 - (1 - Real.exp (-r)) *\n          (payFlows (fun k ↦ (k : ℝ≥0)) (fun k ↦ (.sub (.const 1) (.obs () k) : Payoff Unit)) n).value\n            Q (fun t _ ↦ zcb r 0 t) (defaultIndicator τ) :=\n  termInsurance_add_pureEndowment_eq Q hτ hpos r n\n"
+      },
+      "metadata": {
+        "reference": "D. C. M. Dickson, M. R. Hardy and H. R. Waters, Actuarial Mathematics for Life Contingent Risks, 2nd ed., Cambridge University Press (2013), Chapters 4 and 5 (insurance benefits, annuities)",
+        "citations": [
+          {
+            "key": "DicksonHardyWaters2013",
+            "locator": "Chapters 4-5"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. termInsurance_add_pureEndowment_eq in MathFin/Insurance/AnnuityValue.lean: the three contracts have values given by the survival function at integer dates (value_termInsurance through value_cdsProtectionLeg of MathFin/Models/Credit/DefaultTime.lean, value_pureEndowment and value_lifeAnnuityFlows through the expectation of 1 - 1{tau <= u}, integral_one_sub_defaultIndicator), the flat-rate bond price at integer dates is the geometric factor zcb_zero_natCast, and the resulting identity of sums is the summation by parts term_add_endowment_eq_annuityDue (MathFin/Insurance/Insurance.lean) with S 0 = 1 from survivalFunction_zero. SCOPE: a deterministic flat-rate discount and annual payments (insurance paid at the end of the year of death); the whole-life limit is the separate entry mf-whole-life-insurance-annuity-due. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-whole-life-insurance-annuity-due",
+      "name": "Whole-Life Insurance Is One Minus d Times the Life Annuity-Due",
+      "domain": "mathematical_finance",
+      "description": "Let tau be a lifetime (an arbitrary function, no measurability is needed), positive almost surely, under a probability measure Q, with survival function S(k) = Q(tau > k), and r > 0 a flat rate, so that the flat-rate bond price at integer dates is zcb r 0 k = e^{-rk}. Then the expected present value of one paid at the end of the year of death, the series sum over k >= 0 of zcb r 0 (k+1) * (S(k) - S(k+1)), equals 1 - (1 - e^{-r}) times the series sum over k >= 0 of zcb r 0 k * S(k), the life annuity-due: A_x = 1 - d a_x with d = 1 - e^{-r}. Both series are infinite sums (tsum); no summability is assumed, both converge by comparison with the geometric series of e^{-r} < 1.",
+      "code": {
+        "lean": "import MathFin.Insurance.AnnuityValue\n\nopen MeasureTheory MathFin\n\n/-- Whole-life insurance is `1 − d` times the life annuity-due: `A = 1 − d ä`. -/\ntheorem whole_life_insurance_annuity_due {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (Q : Measure Ω) [IsProbabilityMeasure Q] {τ : Ω → ℝ}\n    (hpos : ∀ᵐ ω ∂Q, 0 < τ ω) {r : ℝ} (hr : 0 < r) :\n    ∑' k : ℕ, zcb r 0 (k + 1 : ℕ) *\n        (SurvivalModel.survivalFunction Q τ k - SurvivalModel.survivalFunction Q τ (k + 1 : ℕ))\n      = 1 - (1 - Real.exp (-r)) * ∑' k : ℕ, zcb r 0 k * SurvivalModel.survivalFunction Q τ k :=\n  wholeLife_epv_eq Q hpos hr\n"
+      },
+      "metadata": {
+        "reference": "D. C. M. Dickson, M. R. Hardy and H. R. Waters, Actuarial Mathematics for Life Contingent Risks, 2nd ed., Cambridge University Press (2013), Chapters 4 and 5 (insurance benefits, annuities)",
+        "citations": [
+          {
+            "key": "DicksonHardyWaters2013",
+            "locator": "Chapters 4-5"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. wholeLife_epv_eq in MathFin/Insurance/AnnuityValue.lean: the flat-rate bond price at integer dates is (e^{-r})^k (zcb_zero_natCast), and for a nonincreasing survival sequence in [0, 1] from S 0 = 1 (survivalFunction_zero, survivalFunction_antitone) the whole-life identity is wholeLife_add_endowment_eq_annuityDue (MathFin/Insurance/Insurance.lean): the finite identity term_add_endowment_eq_annuityDue passes to the limit, the death and annuity series being dominated by the geometric series of e^{-r} < 1 and the endowment term e^{-rn} S(n) by e^{-rn}. SCOPE: the insurance and annuity are stated as the sums over the survival function at integer dates, not as the value of a contract with infinitely many payments (the n-year contracts are in mf-term-insurance-plus-pure-endowment); annual payments and a flat rate. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-last-survivor-annuity-value",
+      "name": "Last-Survivor Annuity Is the Sum of the Single-Life Values Minus the Joint-Life Value",
+      "domain": "mathematical_finance",
+      "description": "Let T1 and T2 be two measurable lifetimes under a probability measure Q, D a deterministic discount, t_k payment dates and b_k payment amounts for k < n. The model observes the default indicator 1{T_i <= u} of each life (index true for T1, false for T2). The schedule payFlows paying b_k at t_k while either life survives, the payoff b_k * max(1 - 1{T1 <= t_k}, 1 - 1{T2 <= t_k}), is worth, as a Contract.value under Q on the discount D, the value of the schedule paying b_k while life 1 survives plus the value of the schedule paying b_k while life 2 survives minus the value of the schedule paying b_k while both survive (the min of the two survival payoffs). No independence between the lives is assumed.",
+      "code": {
+        "lean": "import MathFin.Insurance.AnnuityValue\n\nopen MeasureTheory MathFin MathFin.Contracts\nopen scoped NNReal\n\n/-- The last-survivor annuity is the sum of the single-life annuities minus the joint-life annuity. -/\ntheorem last_survivor_annuity_value {Ω : Type*} [MeasurableSpace Ω]\n    (Q : Measure Ω) [IsProbabilityMeasure Q] (T1 T2 : Ω → ℝ)\n    (hT1 : Measurable T1) (hT2 : Measurable T2) (D : ℝ≥0 → ℝ) (t : ℕ → ℝ≥0)\n    (b : ℕ → ℝ) (n : ℕ) :\n    (payFlows t (fun k ↦ .mul (.const (b k))\n      (.max (.sub (.const 1) (.obs true (t k))) (.sub (.const 1) (.obs false (t k))))) n).value\n        Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ())\n      = (payFlows t (fun k ↦ .mul (.const (b k))\n          (.sub (.const 1) (.obs true (t k)))) n).value\n          Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ())\n        + (payFlows t (fun k ↦ .mul (.const (b k))\n            (.sub (.const 1) (.obs false (t k)))) n).value\n            Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ())\n        - (payFlows t (fun k ↦ .mul (.const (b k))\n            (.min (.sub (.const 1) (.obs true (t k)))\n              (.sub (.const 1) (.obs false (t k))))) n).value\n            Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ()) := lastSurvivor_annuity_eq_value Q T1 T2 hT1 hT2 D t b n\n"
+      },
+      "metadata": {
+        "reference": "D. C. M. Dickson, M. R. Hardy and H. R. Waters, Actuarial Mathematics for Life Contingent Risks, 2nd ed., Cambridge University Press (2013), Chapter 8 (joint life and last survivor functions)",
+        "citations": [
+          {
+            "key": "DicksonHardyWaters2013",
+            "locator": "Chapter 8"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. lastSurvivor_annuity_eq_value in MathFin/Insurance/AnnuityValue.lean: the value of a schedule is the sum of the integrals of its deflated payoffs (Contract.value_payFlows), and the payoff identity max a b + min a b = a + b (max_add_min) holds pointwise, so Contract.value_payFlows_add_sub (MathFin/Pricing/Value.lean) turns it into the identity of values. SCOPE: a deterministic discount, a schedule of payments b_k at the dates t_k, and two lifetimes under Q with no independence assumed; the value is of the survival payoffs through the default indicators, so it is a statement about the joint law of the two lifetimes only through the integrals. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-reversionary-annuity-value",
+      "name": "Reversionary Annuity Is the Second Life's Value Minus the Joint-Life Value",
+      "domain": "mathematical_finance",
+      "description": "Let T1 and T2 be two measurable lifetimes under a probability measure Q, D a deterministic discount, t_k payment dates and b_k payment amounts for k < n. The model observes the default indicator 1{T_i <= u} of each life (index true for T1, false for T2). The schedule paying b_k at t_k to life 2 only after life 1 has died, the payoff b_k * 1{T1 <= t_k} * (1 - 1{T2 <= t_k}), is worth, as a Contract.value under Q on the discount D, the value of the schedule paying b_k while life 2 survives minus the value of the schedule paying b_k while both survive (the min of the two survival payoffs). No independence between the lives is assumed.",
+      "code": {
+        "lean": "import MathFin.Insurance.AnnuityValue\n\nopen MeasureTheory MathFin MathFin.Contracts\nopen scoped NNReal\n\n/-- The reversionary annuity is the second life's annuity minus the joint-life annuity. -/\ntheorem reversionary_annuity_value {Ω : Type*} [MeasurableSpace Ω]\n    (Q : Measure Ω) [IsProbabilityMeasure Q] (T1 T2 : Ω → ℝ)\n    (hT1 : Measurable T1) (hT2 : Measurable T2) (D : ℝ≥0 → ℝ) (t : ℕ → ℝ≥0)\n    (b : ℕ → ℝ) (n : ℕ) :\n    (payFlows t (fun k ↦ .mul (.const (b k))\n      (.mul (.obs true (t k)) (.sub (.const 1) (.obs false (t k))))) n).value\n        Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ())\n      = (payFlows t (fun k ↦ .mul (.const (b k))\n          (.sub (.const 1) (.obs false (t k)))) n).value\n          Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ())\n        - (payFlows t (fun k ↦ .mul (.const (b k))\n            (.min (.sub (.const 1) (.obs true (t k)))\n              (.sub (.const 1) (.obs false (t k))))) n).value\n            Q (fun s _ ↦ D s) (fun i ↦ defaultIndicator (bif i then T1 else T2) ()) := reversionary_annuity_eq_value Q T1 T2 hT1 hT2 D t b n\n"
+      },
+      "metadata": {
+        "reference": "D. C. M. Dickson, M. R. Hardy and H. R. Waters, Actuarial Mathematics for Life Contingent Risks, 2nd ed., Cambridge University Press (2013), Chapter 8 (joint life and last survivor functions)",
+        "citations": [
+          {
+            "key": "DicksonHardyWaters2013",
+            "locator": "Chapter 8"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. reversionary_annuity_eq_value in MathFin/Insurance/AnnuityValue.lean: the value of a schedule is the sum of the integrals of its deflated payoffs (Contract.value_payFlows), and the payoff identity N1 (1 - N2) = (1 - N2) - min(1 - N1, 1 - N2) for the 0/1-valued default indicators (defaultIndicator_eq_zero_or_one) holds pointwise, so Contract.value_payFlows_sub (MathFin/Pricing/Value.lean) turns it into the identity of values. SCOPE: a deterministic discount, a schedule of payments b_k at the dates t_k, and two lifetimes under Q with no independence assumed; the value is of the survival payoffs through the default indicators, so it is a statement about the joint law of the two lifetimes only through the integrals. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-thiele-reserve-ode",
+      "name": "Thiele's Differential Equation for the Prospective Reserve",
+      "domain": "mathematical_finance",
+      "description": "Let delta (force of interest), mu (force of mortality), prem (premium rate) and b (death benefit) be continuous on [0, T] with T > 0, and g a terminal payment. The prospective reserve V(t) = integral_t^T F(t, s) (mu(s) b(s) - prem(s)) ds + F(t, T) g, with F(t, s) = exp(-integral_t^s delta) * hazardSurvival mu s / hazardSurvival mu t the discount at delta times the probability of surviving from t to s under the force mu (thieleReserve, thieleFactor), is differentiable at every t in (0, T) with V'(t) = (delta(t) + mu(t)) V(t) + prem(t) - mu(t) b(t). Only the differential equation is proved; the discrete one-step recursion for the reserve is not.",
+      "code": {
+        "lean": "import MathFin.Insurance.Mortality\n\nopen MathFin\n\n/-- Thiele's differential equation for the prospective reserve. -/\ntheorem thiele_reserve_ode (δ μ prem b : ℝ → ℝ) (g T : ℝ) (hT : 0 < T)\n    (hδ : ContinuousOn δ (Set.Icc 0 T)) (hμ : ContinuousOn μ (Set.Icc 0 T))\n    (hprem : ContinuousOn prem (Set.Icc 0 T)) (hb : ContinuousOn b (Set.Icc 0 T))\n    (t : ℝ) (ht0 : 0 < t) (htT : t < T) :\n    HasDerivAt (thieleReserve δ μ prem b g T)\n      ((δ t + μ t) * thieleReserve δ μ prem b g T t + prem t - μ t * b t) t :=\n  hasDerivAt_thieleReserve δ μ prem b g T hT hδ hμ hprem hb t ht0 htT\n"
+      },
+      "metadata": {
+        "reference": "D. C. M. Dickson, M. R. Hardy and H. R. Waters, Actuarial Mathematics for Life Contingent Risks, 2nd ed., Cambridge University Press (2013), Chapter 7 (policy values)",
+        "citations": [
+          {
+            "key": "DicksonHardyWaters2013",
+            "locator": "Chapter 7"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. hasDerivAt_thieleReserve in MathFin/Insurance/Mortality.lean: on [0, T] the factor thieleFactor equals S(s)/S(t) for S(u) = exp(-integral_0^u (delta + mu)) (thieleFactor_eq_exp_neg_integral, from the identification of hazardSurvival mu as the credit survival curve of MathFin/Models/Credit/HazardCurve.lean), so the reserve is the quotient of an integral depending on t through its lower limit by S(t); the fundamental theorem of calculus and the quotient rule give the derivative. SCOPE: continuity of the four rates on [0, T] and interior times 0 < t < T; the rates are deterministic; the discrete recursion V_t = v q b + v p V_{t+1} - pi is not proved here. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-buhlmann-single-index-shocks",
+      "name": "Bühlmann Observations Are a Single-Index Model: Shocks Uncorrelated with the Hypothetical Mean and with Each Other",
+      "domain": "mathematical_finance",
+      "description": "In the finite latent mixture (prior weights p on a finite parameter set, n observations iid given the parameter with weights w, observation function v), write each observation as X_i = m(Θ) + ε_i with m(Θ) the hypothetical mean and ε_i = X_i - m(Θ). For every i, cov(m(Θ), ε_i) = 0, for i ≠ j, cov(ε_i, ε_j) = 0, and Var ε_i = E[σ²(Θ)], the expected process variance: the single-index structure of Sharpe's model with the hypothetical mean as the factor with loading 1.",
+      "code": {
+        "lean": "import MathFin.Insurance.BuhlmannCredibility\n\nopen MeasureTheory ProbabilityTheory MathFin\n\n/-- The shocks `Xᵢ - m(Θ)` are uncorrelated with `m(Θ)` and with each other, with variance\n`E[σ²(Θ)]`. -/\ntheorem buhlmann_shocks {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ] [MeasurableSpace Θ] [MeasurableSpace Ξ]\n    [MeasurableSingletonClass Θ] [MeasurableSingletonClass Ξ] {n : ℕ} {p : Θ → ℝ} {w : Θ → Ξ → ℝ}\n    {v : Ξ → ℝ} (hm : IsLatentModel p w) :\n    (∀ i : Fin n, cov[latentMean n w v, shock n w v i; mixtureLaw n p w] = 0)\n      ∧ (∀ i j : Fin n, i ≠ j → cov[shock n w v i, shock n w v j; mixtureLaw n p w] = 0)\n      ∧ ∀ i : Fin n, Var[shock n w v i; mixtureLaw n p w] = expectedProcessVariance p w v :=\n  ⟨covariance_latentMean_shock hm, fun _ _ hij ↦ covariance_shock_shock hm hij,\n    variance_shock hm⟩\n"
+      },
+      "metadata": {
+        "reference": "Bühlmann and Gisler, A Course in Credibility Theory and its Applications (2005), §3.1; Sharpe, A simplified model for portfolio analysis (1963)",
+        "citations": [
+          {
+            "key": "BuhlmannGisler2005"
+          },
+          {
+            "key": "Sharpe1963"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written: covariance_latentMean_shock, covariance_shock_shock and variance_shock in MathFin/Insurance/BuhlmannCredibility.lean, each a finite-sum computation under the mixture law (integrals via Measure.ofWeights; iid coordinates summed through Fintype.prod_sum), with covariance_eq_sub and variance_def'. SCOPE: the model is the finite latent mixture (a finite parameter set Θ with prior weights p, a finite observation alphabet Ξ with conditional weights w, n observations iid given Θ); the observation is a function v of the alphabet, and the premium is for the hypothetical mean m(Θ), not for a future observation. No general measurable-space Bühlmann theorem, no Bühlmann–Straub weights, no empirical (estimated) structural parameters. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-buhlmann-sample-mean-variance-covariance",
+      "name": "Bühlmann Sample Mean: Variance a + s²/n and Covariance a with the Hypothetical Mean",
+      "domain": "mathematical_finance",
+      "description": "In the finite latent mixture with n ≥ 1 observations, the sample mean X̄ has variance Var X̄ = a + s²/n, where a is the variance of the hypothetical mean m(Θ) and s² the expected process variance E[σ²(Θ)], and cov(m(Θ), X̄) = a. The variance is the equal-weight portfolio variance of the single-index model with m(Θ) as the factor.",
+      "code": {
+        "lean": "import MathFin.Insurance.BuhlmannCredibility\n\nopen MeasureTheory ProbabilityTheory MathFin\n\n/-- `Var X̄ = a + s²/n` and `Cov(m(Θ), X̄) = a`. -/\ntheorem buhlmann_sample_mean_moments {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ] [MeasurableSpace Θ] [MeasurableSpace Ξ]\n    [MeasurableSingletonClass Θ] [MeasurableSingletonClass Ξ] {n : ℕ} {p : Θ → ℝ} {w : Θ → Ξ → ℝ}\n    {v : Ξ → ℝ} (hm : IsLatentModel p w) (hn : 0 < n) :\n    Var[sampleMean n v; mixtureLaw n p w]\n        = varianceHypotheticalMean p w v + expectedProcessVariance p w v / n\n      ∧ cov[latentMean n w v, sampleMean n v; mixtureLaw n p w]\n        = varianceHypotheticalMean p w v :=\n  ⟨variance_sampleMean hm hn, covariance_latentMean_sampleMean hm hn⟩\n"
+      },
+      "metadata": {
+        "reference": "Bühlmann and Gisler, A Course in Credibility Theory and its Applications (2005), §3.1; Sharpe, A simplified model for portfolio analysis (1963)",
+        "citations": [
+          {
+            "key": "BuhlmannGisler2005"
+          },
+          {
+            "key": "Sharpe1963"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written: variance_sampleMean and covariance_latentMean_sampleMean in MathFin/Insurance/BuhlmannCredibility.lean. The sample mean is the equal-weight portfolio sum of 1 · m(Θ) + ε_i, so the variance is variance_singleIndex_portfolio (MathFin/Choice/Portfolio/SingleIndexModel.lean, through portfolioVarN) with the shock facts of mf-buhlmann-single-index-shocks; the covariance is bilinearity of covariance. SCOPE: the model is the finite latent mixture (a finite parameter set Θ with prior weights p, a finite observation alphabet Ξ with conditional weights w, n observations iid given Θ); the observation is a function v of the alphabet, and the premium is for the hypothetical mean m(Θ), not for a future observation. No general measurable-space Bühlmann theorem, no Bühlmann–Straub weights, no empirical (estimated) structural parameters. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-buhlmann-credibility-best-affine-predictor",
+      "name": "Bühlmann Credibility Premium Is the Best Affine Predictor of the Hypothetical Mean",
+      "domain": "mathematical_finance",
+      "description": "In the finite latent mixture with n ≥ 1 observations and nonzero variance a of the hypothetical mean, let μ be the collective mean and κ = s²/a. The credibility factor, the CAPM beta of m(Θ) against the sample mean X̄ (Cov(m, X̄)/Var X̄), equals n/(n + κ), and the credibility premium μ + n/(n + κ)(X̄ - μ) has mean squared error, as a predictor of m(Θ), at most that of every affine function c + b X̄ of the sample mean.",
+      "code": {
+        "lean": "import MathFin.Insurance.BuhlmannCredibility\n\nopen MeasureTheory ProbabilityTheory MathFin\n\n/-- The credibility factor is `n/(n + κ)` and the credibility premium is the best affine predictor of\n`m(Θ)`. -/\ntheorem buhlmann_best_affine_predictor {Θ Ξ : Type*} [Fintype Θ] [Fintype Ξ] [MeasurableSpace Θ] [MeasurableSpace Ξ]\n    [MeasurableSingletonClass Θ] [MeasurableSingletonClass Ξ] {n : ℕ} {p : Θ → ℝ} {w : Θ → Ξ → ℝ}\n    {v : Ξ → ℝ} (hm : IsLatentModel p w) (hn : 0 < n)\n    (ha : varianceHypotheticalMean p w v ≠ 0) :\n    beta cov[latentMean n w v, sampleMean n v; mixtureLaw n p w] Var[sampleMean n v; mixtureLaw n p w]\n        = n / (n + credibilityConstant p w v)\n      ∧ ∀ c b : ℝ, ∫ ω, (latentMean n w v ω - (collectiveMean p w v\n          + n / (n + credibilityConstant p w v) * (sampleMean n v ω - collectiveMean p w v))) ^ 2\n            ∂mixtureLaw n p w\n        ≤ ∫ ω, (latentMean n w v ω - (c + b * sampleMean n v ω)) ^ 2 ∂mixtureLaw n p w :=\n  ⟨beta_latentMean_sampleMean hm hn ha, buhlmann_mse_le hm hn ha⟩\n"
+      },
+      "metadata": {
+        "reference": "Bühlmann and Gisler, A Course in Credibility Theory and its Applications (2005), §3.1; Sharpe, A simplified model for portfolio analysis (1963)",
+        "citations": [
+          {
+            "key": "BuhlmannGisler2005"
+          },
+          {
+            "key": "Sharpe1963"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written: beta_latentMean_sampleMean and buhlmann_mse_le in MathFin/Insurance/BuhlmannCredibility.lean. The optimality is the least-squares property of the CAPM beta, integral_sq_affine_le in MathFin/Choice/Portfolio/RegressionBeta.lean (bias-variance decomposition, completing the square), applied to the moments of mf-buhlmann-sample-mean-variance-covariance. SCOPE: the model is the finite latent mixture (a finite parameter set Θ with prior weights p, a finite observation alphabet Ξ with conditional weights w, n observations iid given Θ); the observation is a function v of the alphabet, and the premium is for the hypothetical mean m(Θ), not for a future observation. No general measurable-space Bühlmann theorem, no Bühlmann–Straub weights, no empirical (estimated) structural parameters. Axioms-clean."
+      }
     }
   ]
 }

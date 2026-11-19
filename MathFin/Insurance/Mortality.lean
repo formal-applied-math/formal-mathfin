@@ -1,10 +1,11 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Adam Kiezun
 -/
 module
 
+public import MathFin.Models.Credit.HazardCurve
 public import MathFin.Probability.Analysis.ExponentialDiscount
 public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 public import Mathlib.Analysis.Calculus.Deriv.Inv
@@ -39,18 +40,26 @@ same calculus.
 * `survivalFromForce`: the survival probability `exp(−∫₀^t μ(u) du)` built from the force `μ`.
 * `IsLundbergAdjustmentCoefficient`: the adjustment-coefficient equation
   `λ · (M(R) − 1) − c · R = 0`.
+* `thieleFactor`: the Thiele discount factor, the discount at the force of interest times the
+  survival probability `hazardSurvival μ s / hazardSurvival μ t` of the force of mortality.
+* `thieleReserve`: the prospective reserve, the `thieleFactor`-discounted future death benefits
+  less premiums plus the terminal payment.
 
 ## Main results
 
 * `survivalFromForce_at_zero`: `S(0) = 1`.
 * `survivalFromForce_pos`: positivity.
 * `gompertz_cumulative_force`: for `c ≠ 0`, `∫₀^t B·e^{c·u} du = (B/c)·(e^{c·t} − 1)`.
+* `thieleFactor_eq_exp_neg_integral`: the factor is `exp(−∫ₜˢ (δ + μ))`.
 * `hasDerivAt_thieleReserve`: Thiele's equation `V' = (δ + μ) V + π − μ b` for the
   prospective reserve integral `thieleReserve`, at interior times.
 
 ## References
 
 * [Bowers and others, *Actuarial Mathematics*][BowersEtAl]
+* [D. C. M. Dickson, M. R. Hardy and H. R. Waters, *Actuarial Mathematics for Life
+  Contingent Risks*][DicksonHardyWaters2013], Chapter 7
+  (policy values, Thiele's differential equation)
 
 ## Tags
 
@@ -140,10 +149,25 @@ theorem lundberg_zero_at_zero (lam c : ℝ) (M : ℝ → ℝ) (hM0 : M 0 = 1) :
   rw [hM0]
   ring
 
-/-- Discount-survival factor from `t` to `s`: `exp` of minus the integrated
-force of interest plus force of mortality over `[t, s]`. -/
+/-- The **Thiele discount factor** from `t` to `s`: the discount `exp(−∫ₜˢ δ)` at the force of
+interest `δ`, times the probability `hazardSurvival μ s / hazardSurvival μ t` of surviving from `t`
+to `s` under the force of mortality `μ` (`survivalFromForce μ = hazardSurvival μ`, the credit
+survival curve of `Models/Credit/HazardCurve.lean`). -/
 noncomputable def thieleFactor (δ μ : ℝ → ℝ) (t s : ℝ) : ℝ :=
-  Real.exp (-∫ u in t..s, (δ u + μ u))
+  Real.exp (-∫ u in t..s, δ u) * (hazardSurvival μ s / hazardSurvival μ t)
+
+/-- **The Thiele factor is the exponential of the integrated force of interest plus mortality**:
+`thieleFactor δ μ t s = exp(−∫ₜˢ (δ + μ))`, when `δ` is integrable on `[t, s]` and `μ` on
+`[0, t]` and `[0, s]`. -/
+theorem thieleFactor_eq_exp_neg_integral {δ μ : ℝ → ℝ} {t s : ℝ}
+    (hδ : IntervalIntegrable δ volume t s) (hμt : IntervalIntegrable μ volume 0 t)
+    (hμs : IntervalIntegrable μ volume 0 s) :
+    thieleFactor δ μ t s = Real.exp (-∫ u in t..s, (δ u + μ u)) := by
+  rw [thieleFactor, hazardSurvival, hazardSurvival, survivalFromIntensity, survivalFromIntensity,
+    cumulativeIntensity, cumulativeIntensity, ← Real.exp_sub, ← Real.exp_add,
+    integral_add hδ (hμt.symm.trans hμs), ← integral_interval_sub_left hμs hμt]
+  congr 1
+  ring
 
 /-- Prospective reserve at time `t`: the discounted value of future benefits
 minus premiums plus the discounted terminal payment `g`, all discounted with
@@ -216,31 +240,19 @@ theorem hasDerivAt_thieleReserve (δ μ prem b : ℝ → ℝ) (g T : ℝ) (hT : 
     HasDerivAt.div hAderiv hSderiv hSt
   have hGs : ∀ s : ℝ, G s = S s * (μ s * b s - prem s) := fun s => rfl
   have hlamt : lam t = δ t + μ t := rfl
+  have hI (f : ℝ → ℝ) (hf : ContinuousOn f (Set.Icc 0 T)) {a b : ℝ} (ha : a ∈ Set.Icc (0:ℝ) T)
+      (hb : b ∈ Set.Icc (0:ℝ) T) : IntervalIntegrable f volume a b :=
+    (hf.mono (Set.uIcc_subset_Icc ha hb)).intervalIntegrable
   have hFactor : ∀ u ∈ Set.Icc (0:ℝ) T, ∀ s ∈ Set.Icc (0:ℝ) T,
       thieleFactor δ μ u s = S s / S u := by
     intro u hu s hs
-    have h0u : IntervalIntegrable lam volume 0 u :=
-      ContinuousOn.intervalIntegrable_of_Icc hu.1
-        (hlamC.mono (Set.Icc_subset_Icc le_rfl hu.2))
-    have hus : IntervalIntegrable lam volume u s := by
-      apply ContinuousOn.intervalIntegrable
-      apply hlamC.mono
-      by_cases hle : u ≤ s
-      · rw [Set.uIcc_of_le hle]
-        exact Set.Icc_subset_Icc hu.1 hs.2
-      · rw [Set.uIcc_comm u s, Set.uIcc_of_le (le_of_lt (lt_of_not_ge hle))]
-        exact Set.Icc_subset_Icc hs.1 hu.2
-    have hadd : (∫ v in (0:ℝ)..u, lam v) + (∫ v in u..s, lam v)
-        = ∫ v in (0:ℝ)..s, lam v :=
-      integral_add_adjacent_intervals h0u hus
-    have hsub : (∫ v in (0:ℝ)..s, lam v) - (∫ v in (0:ℝ)..u, lam v)
-        = ∫ v in u..s, lam v := by
-      rw [← hadd, add_sub_cancel_left]
-    have harg : (-∫ v in (0:ℝ)..s, lam v) - (-∫ v in (0:ℝ)..u, lam v)
-        = -∫ v in u..s, lam v := by
-      rw [sub_neg_eq_add, add_comm, ← sub_eq_add_neg, ← neg_sub, hsub]
-    rw [show thieleFactor δ μ u s = Real.exp (-∫ v in u..s, lam v) from rfl,
-      hSapp s, hSapp u, ← Real.exp_sub, harg]
+    have h0 : (0 : ℝ) ∈ Set.Icc (0:ℝ) T := ⟨le_rfl, hT.le⟩
+    rw [thieleFactor_eq_exp_neg_integral (hI δ hδ hu hs) (hI μ hμ h0 hu) (hI μ hμ h0 hs)]
+    change Real.exp (-∫ v in u..s, lam v) = Real.exp (-∫ v in (0:ℝ)..s, lam v)
+      / Real.exp (-∫ v in (0:ℝ)..u, lam v)
+    rw [← Real.exp_sub, ← integral_interval_sub_left (hI lam hlamC h0 hs) (hI lam hlamC h0 hu)]
+    congr 1
+    ring
   have hAu : ∀ u : ℝ, A u = (∫ s in u..T, G s) + S T * g := fun u => rfl
   have hVeq : ∀ u ∈ Set.Icc (0:ℝ) T, thieleReserve δ μ prem b g T u = A u / S u := by
     intro u hu

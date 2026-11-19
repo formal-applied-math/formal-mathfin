@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
@@ -46,6 +46,10 @@ so `F = E_Q[S_T]`. Combined with `expected_terminal_eq_forward`, this gives
   forward identities as integrals against `gaussianReal 0 1`, for `0 ≤ T`.
 * `integral_discounted_bsTerminal`: for `Z` with law `gaussianReal 0 1` under `Q` and `0 ≤ T`,
   `∫ e^{−rT} · S_T(Z) ∂Q = S_0`.
+* `sqrt_bsTerminal`: `√(bsTerminal S₀ μ σ T z) = √S₀ · bsTerminal 1 (μ/2 − σ²/8) (σ/2) T z`, the
+  square root of a lognormal factor is lognormal with half the log-volatility; with the forward
+  identity it gives the mean of any square-root claim (the constant-product LP position, the
+  volatility-swap strike).
 
 ## References
 
@@ -170,5 +174,17 @@ theorem discounted_terminal_eq_S0
     ∫ ω, Real.exp (-(r * T)) * bsTerminal S_0 r σ T (Z ω) ∂Q = S_0 := by
   obtain ⟨_, _, _, hT, hZ⟩ := h
   simpa only [neg_mul] using integral_discounted_bsTerminal hZ S_0 r σ hT.le
+
+/-! ### The square root of a lognormal terminal price -/
+
+/-- The square root of a lognormal factor is lognormal with half the log-mean and half the
+volatility, with the factor `S_0` pulled out of the root:
+`√(bsTerminal S_0 μ σ T z) = √S_0 · bsTerminal 1 (μ/2 − σ²/8) (σ/2) T z`. -/
+lemma sqrt_bsTerminal {S_0 : ℝ} (hS : 0 ≤ S_0) (μ σ T z : ℝ) :
+    Real.sqrt (bsTerminal S_0 μ σ T z)
+      = Real.sqrt S_0 * bsTerminal 1 (μ / 2 - σ ^ 2 / 8) (σ / 2) T z := by
+  rw [bsTerminal, bsTerminal, Real.sqrt_mul hS, one_mul, ← Real.exp_half]
+  congr 2
+  ring
 
 end MathFin

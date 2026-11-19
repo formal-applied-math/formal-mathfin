@@ -1677,31 +1677,51 @@
       }
     },
     {
-      "id": "mf-nelson-siegel-zero-rate-zero-decay-limit",
-      "name": "Nelson–Siegel Loading Tends to 1 and the Zero Rate to c0 + c1 at Vanishing Decay",
-      "description": "At a fixed maturity t != 0 the Nelson–Siegel loading s(kappa*t) = (1 - exp(-kappa*t))/(kappa*t) tends to 1 as the decay parameter kappa -> 0+, so the decay-parameterized zero rate c0 + c1*s(kappa*t) + c2*(s(kappa*t) - exp(-kappa*t)) tends to c0 + c1, and the Svensson second loading term c3*(s(kappa*t) - exp(-kappa*t)) tends to 0. Substitution is not the limit: Lean's x/0 = 0 sends the loading to 0 at kappa = 0 exactly (numerator 1 - exp(0) = 0), so a denominator-epsilon guard evaluates the zero rate to c0 - c2 and the second term to -c3 at kappa = 0 -- values of a different model, recorded as companion theorems. A small-kappa branch must return the limits. The same guarded-limit species as the Vasicek A(t,T) hardcoded-to-0 guard fixed upstream (VasicekZeroMeanReversionLimit.lean's motivating precedent). The core limit transports the repo's existing nssSlope short-end limit tendsto_nssSlope_nhdsNE_zero (NelsonSiegelSvensson.lean) along kappa -> kappa*t via tendsto_div_const_nhdsNE_zero -- no parallel loading analysis.",
+      "id": "mf-nss-vanishing-decay-limit",
+      "name": "Nelson–Siegel–Svensson Yield at Vanishing Decay",
+      "description": "At a fixed maturity tau != 0, as both decay constants l1, l2 of the Nelson–Siegel–Svensson yield nssYield tend to infinity, the yield tends to beta0 + beta1: each argument tau/l_i tends to 0 through nonzero values, so the slope factor s(tau/l_i) = (1 - exp(-tau/l_i))/(tau/l_i) tends to 1 and exp(-tau/l_i) to 1, and both curvature terms (the Nelson–Siegel beta2 term and Svensson's beta3 term) vanish. A limit of the closed-form curve at fixed coefficients; no claim about a fitted curve, and the value at tau = 0 is not this limit.",
       "domain": "mathematical_finance",
       "metadata": {
         "chapter": null,
-        "reference": "C. R. Nelson and A. F. Siegel, Parsimonious Modeling of Yield Curves, Journal of Business 60(4) (1987), 473–489; L. E. O. Svensson, Estimating and Interpreting Forward Interest Rates: Sweden 1992–1994 (NBER Working Paper 4871, 1994); QuantLib, NelsonSiegelFitting, ql/termstructures/yield/nonlinearfittingmethods.hpp",
+        "reference": "C. R. Nelson and A. F. Siegel, Parsimonious Modeling of Yield Curves, Journal of Business 60(4) (1987), 473–489; L. E. O. Svensson, Estimating and Interpreting Forward Interest Rates: Sweden 1992–1994 (NBER Working Paper 4871, 1994)",
         "citations": [
           {
             "key": "NelsonSiegel1987"
           },
           {
             "key": "Svensson1994"
-          },
-          {
-            "key": "QuantLib",
-            "locator": "NelsonSiegelFitting"
           }
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof, MathFin/Models/Rates/NelsonSiegelZeroMeanReversion.lean. The core limit transports the repo's existing nssSlope short-end limit tendsto_nssSlope_nhdsNE_zero (MathFin/Models/Rates/NelsonSiegelSvensson.lean) along kappa -> kappa*t via tendsto_div_const_nhdsNE_zero -- no parallel loading analysis. The substitution companions record the junk values Lean's total division produces at kappa = 0. Scope: kappa -> 0+ at fixed maturity; no engine is formalized. Axioms-clean."
+        "formalization_scope": "Full formal proof, MathFin/Models/Rates/NelsonSiegelSvensson.lean (tendsto_nssYield_decay_atTop), built on tendsto_nssSlope_nhdsNE_zero. Scope: fixed maturity and coefficients, both decay constants to infinity through the product filter; the short-end limit in the maturity direction is tendsto_nssYield_nhdsNE_zero. Axioms-clean."
       },
       "code": {
-        "lean": "import MathFin.Models.Rates.NelsonSiegelZeroMeanReversion\n\nopen Filter Topology Set\n\nnamespace MathFin\n\ntheorem nelson_siegel_zero_rate_zero_decay_limit_thm (c0 c1 c2 t : ℝ) (ht : t ≠ 0) :\n    Tendsto (fun κ => nelsonSiegelZeroRate c0 c1 c2 κ t) (nhdsWithin 0 (Set.Ioi 0))\n      (nhds (c0 + c1)) :=\n  tendsto_nelsonSiegelZeroRate_zero_meanReversion c0 c1 c2 t ht\n\nend MathFin\n"
+        "lean": "import MathFin.Models.Rates.NelsonSiegelSvensson\n\nopen Filter Topology\n\nnamespace MathFin\n\ntheorem nss_vanishing_decay_limit_thm (β₀ β₁ β₂ β₃ τ : ℝ) (hτ : τ ≠ 0) :\n    Tendsto (fun l : ℝ × ℝ => nssYield β₀ β₁ β₂ β₃ l.1 l.2 τ) (atTop ×ˢ atTop)\n      (𝓝 (β₀ + β₁)) :=\n  tendsto_nssYield_decay_atTop β₀ β₁ β₂ β₃ hτ\n\nend MathFin\n"
+      }
+    },
+    {
+      "id": "mf-on-backward-caplet-black",
+      "name": "Backward-looking caplet: Black formula at the integrated damping variance",
+      "description": "A caplet on a compounded overnight rate over [tau0, tau1], with the rate lognormal at total variance sigma^2 Theta under the payment measure, where Theta is the integral from 0 to tau1 of psi(t)^2 and psi(t) = min(1, ((tau1 - t)/(tau1 - tau0))^q) is the volatility damping, has expected undiscounted payoff equal to the Black formula R0 Phi(d1) - K Phi(d2) at that variance. The identification of Theta with s + (tau1 - s) x^(2q)/(2q + 1), s = max(tau0, 0), x = (tau1 - s)/(tau1 - tau0), is proved. The lognormal law of the compounded rate (the Ito isometry for dR = psi sigma R dB) and the martingale property of the rate are hypotheses, not derived; the entry is an expectation under that law, not a contract-level price.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.Rates.OvernightCompounding\n\nopen MeasureTheory ProbabilityTheory MathFin\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} [IsProbabilityMeasure Q]\n  {R₀ K σ τ₀ τ₁ q : ℝ} {Z : Ω → ℝ}\n\ntheorem on_backward_caplet_black_example (hq : 0 < q) (hτ : τ₀ < τ₁) (hτ1 : 0 < τ₁)\n    (hR₀ : 0 < R₀) (hK : 0 < K) (hσ : 0 < σ) (hZ : HasLaw Z (gaussianReal 0 1) Q) :\n    ∫ ω, max (bsTerminal R₀ 0 σ (∫ t in (0 : ℝ)..τ₁, onDamping τ₀ τ₁ q t ^ 2) (Z ω) - K) 0 ∂Q\n      = R₀ * Phi (bsd1 R₀ K 0 σ (∫ t in (0 : ℝ)..τ₁, onDamping τ₀ τ₁ q t ^ 2))\n        - K * Phi (bsd2 R₀ K 0 σ (∫ t in (0 : ℝ)..τ₁, onDamping τ₀ τ₁ q t ^ 2)) :=\n  backwardCaplet_black_integral hq hτ hτ1 hR₀ hK hσ hZ\n"
+      },
+      "metadata": {
+        "chapter": null,
+        "reference": "Lyashenko and Mercurio (2019), Looking forward to backward-looking rates (SSRN 3330240); Willems (2020), SABR smiles for RFR caplets (arXiv:2004.04501), Section 3",
+        "citations": [
+          {
+            "key": "LyashenkoMercurio2019"
+          },
+          {
+            "key": "Willems2020"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Proves the damping-time integral by splitting at max(tau0, 0) and the power-rule substitution, and composes it with the Black call formula. Conditional on the lognormal law of the compounded rate with variance sigma^2 Theta, which is a hypothesis. Not derived: the Ito isometry for the damped diffusion, and that the compounded rate is a martingale under the accrual-end forward measure. Constant volatility."
       }
     }
   ]

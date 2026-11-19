@@ -7,7 +7,6 @@ module
 
 public import MathFin.Models.BlackScholes.Call
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
-public import Mathlib.MeasureTheory.Function.ConditionalExpectation.CondJensen
 
 /-!
 # Backward-looking (compounded overnight) caplets: the variance-damping time
@@ -26,8 +25,9 @@ damping from `1` at `τ₀` to `0` at `τ₁`). For constant volatility `σ` the
 `R(τ₁)` is `σ² · ∫₀^{τ₁} ψ(t)² dt`.
 
 This file proves, from the definition of `ψ`, the damping-time integral, its linear case,
-its bounds and monotonicity in `q`, the reduction of the caplet to the Black formula, and the
-Jensen ordering of forward- and backward-looking caplets.
+its bounds and monotonicity in `q`, and the reduction of the caplet to the Black formula. The
+Jensen ordering of forward- and backward-looking caplets is the general
+`integral_posPart_sub_condExp_le` (`Probability/Martingales/CondExpCallJensen`).
 
 ## Main definitions
 
@@ -46,17 +46,18 @@ Jensen ordering of forward- and backward-looking caplets.
   caplet equals the Black formula at total variance `σ²Θ`, written with the library's
   `bsd1`/`bsd2`.
 * `backwardCaplet_black_integral`: the same with `Θ` written as `∫₀^{τ₁} ψ(t)² dt`.
-* `forwardCaplet_le_backwardCaplet`: `E[(E[R | m] − K)⁺] ≤ E[(R − K)⁺]`, so replacing the payoff
-  rate by its conditional expectation at an earlier time can only lower the caplet value.
+* `onEffectiveTime_pos`: `0 < Θ`.
 
 ## Scope and hypotheses
 
 The model `dR = ψ σ R dB` itself is not constructed here: `backwardCaplet_black` takes the
 lognormal law of `R(τ₁)` with total variance `σ²Θ` as its hypothesis (`BSCallHyp`) and proves
 the pricing reduction. The identity `Var(log R(τ₁)) = σ²Θ` for deterministic integrands is the
-Itô isometry and is not re-derived. Constant volatility is assumed. The Jensen theorem does not
-derive that the compounded rate is a martingale, and equality holds exactly when `R` is
-`m`-measurable, which is not asserted.
+Itô isometry and is not re-derived. Constant volatility is assumed. That the compounded rate is a
+martingale under the `τ₁`-forward measure is not derived either. The caplet is stated as the
+expectation of the payoff under that measure, with the lognormal law of the rate as a hypothesis;
+pricing it as a `Contract` through `Contracts.value_caplet_black76` takes `Θ` as the total-variance
+argument, with `0 < Θ` from `onEffectiveTime_pos`.
 
 ## Relation to `Inflation.lean`
 
@@ -74,7 +75,7 @@ integrand `ψ²`, not the mean.
 ## Tags
 
 overnight rate, compounded rate, backward-looking caplet, volatility damping, variance time,
-Jensen inequality, Black formula, MSC 91G30, JEL G12
+Black formula, MSC 91G30, JEL G12
 -/
 
 @[expose] public section
@@ -182,25 +183,36 @@ theorem onEffectiveTime_one (hτ : τ₀ < τ₁) :
   field_simp
   ring
 
+private lemma ratio_facts (hτ : τ₀ < τ₁) (hτ1 : 0 < τ₁) :
+    max τ₀ 0 < τ₁ ∧ 0 ≤ (τ₁ - max τ₀ 0) / (τ₁ - τ₀) ∧ (τ₁ - max τ₀ 0) / (τ₁ - τ₀) ≤ 1 := by
+  have hL : 0 < τ₁ - τ₀ := sub_pos.2 hτ
+  have hs := max_lt hτ hτ1
+  exact ⟨hs, div_nonneg (sub_nonneg.2 hs.le) hL.le,
+    (div_le_one hL).2 (by linarith [le_max_left τ₀ 0])⟩
+
 /-- The variance time is at least the already-elapsed part `max τ₀ 0`. -/
 theorem le_onEffectiveTime (hq : 0 < q) (hτ : τ₀ < τ₁) (hτ1 : 0 < τ₁) :
     max τ₀ 0 ≤ onEffectiveTime τ₀ τ₁ q := by
-  have hL : 0 < τ₁ - τ₀ := sub_pos.mpr hτ
-  have hs1 : max τ₀ 0 < τ₁ := max_lt hτ hτ1
+  obtain ⟨hs, hx0, -⟩ := ratio_facts hτ hτ1
   unfold onEffectiveTime
-  have hx : 0 ≤ (τ₁ - max τ₀ 0) / (τ₁ - τ₀) := div_nonneg (by linarith) hL.le
   have : 0 ≤ (τ₁ - max τ₀ 0) * (((τ₁ - max τ₀ 0) / (τ₁ - τ₀)) ^ (2 * q)) / (2 * q + 1) :=
-    div_nonneg (mul_nonneg (by linarith) (Real.rpow_nonneg hx _)) (by linarith)
+    div_nonneg (mul_nonneg (sub_nonneg.2 hs.le) (Real.rpow_nonneg hx0 _)) (by linarith)
   linarith
+
+/-- The variance time is positive. -/
+theorem onEffectiveTime_pos (hq : 0 < q) (hτ : τ₀ < τ₁) (hτ1 : 0 < τ₁) :
+    0 < onEffectiveTime τ₀ τ₁ q := by
+  obtain ⟨hs, -, -⟩ := ratio_facts hτ hτ1
+  have hx : 0 < (τ₁ - max τ₀ 0) / (τ₁ - τ₀) := div_pos (sub_pos.2 hs) (sub_pos.2 hτ)
+  unfold onEffectiveTime
+  have : 0 < (τ₁ - max τ₀ 0) * (((τ₁ - max τ₀ 0) / (τ₁ - τ₀)) ^ (2 * q)) / (2 * q + 1) :=
+    div_pos (mul_pos (sub_pos.2 hs) (Real.rpow_pos_of_pos hx _)) (by linarith)
+  linarith [le_max_right τ₀ 0]
 
 /-- The variance time never exceeds the full horizon `τ₁`. -/
 theorem onEffectiveTime_le (hq : 0 < q) (hτ : τ₀ < τ₁) (hτ1 : 0 < τ₁) :
     onEffectiveTime τ₀ τ₁ q ≤ τ₁ := by
-  have hL : 0 < τ₁ - τ₀ := sub_pos.mpr hτ
-  have hs1 : max τ₀ 0 < τ₁ := max_lt hτ hτ1
-  have hx0 : 0 ≤ (τ₁ - max τ₀ 0) / (τ₁ - τ₀) := div_nonneg (by linarith) hL.le
-  have hx1 : (τ₁ - max τ₀ 0) / (τ₁ - τ₀) ≤ 1 := by
-    rw [div_le_one hL]; linarith [le_max_left τ₀ 0]
+  obtain ⟨hs1, hx0, hx1⟩ := ratio_facts hτ hτ1
   have h1 : ((τ₁ - max τ₀ 0) / (τ₁ - τ₀)) ^ (2 * q) ≤ 1 :=
     Real.rpow_le_one hx0 hx1 (by linarith)
   unfold onEffectiveTime
@@ -262,16 +274,9 @@ theorem backwardCaplet_black {Q : Measure Ω} [IsProbabilityMeasure Q]
     ∫ ω, max (bsTerminal R₀ 0 σ (onEffectiveTime τ₀ τ₁ q) (Z ω) - K) 0 ∂Q
       = R₀ * Phi (bsd1 R₀ K 0 σ (onEffectiveTime τ₀ τ₁ q))
         - K * Phi (bsd2 R₀ K 0 σ (onEffectiveTime τ₀ τ₁ q)) := by
-  have hT : 0 < onEffectiveTime τ₀ τ₁ q := by
-    have hL : 0 < τ₁ - τ₀ := sub_pos.mpr hτ
-    have hs1 : max τ₀ 0 < τ₁ := max_lt hτ hτ1
-    have hx : 0 < (τ₁ - max τ₀ 0) / (τ₁ - τ₀) := div_pos (by linarith) hL
-    have h2 : 0 < (τ₁ - max τ₀ 0) * (((τ₁ - max τ₀ 0) / (τ₁ - τ₀)) ^ (2 * q)) / (2 * q + 1) :=
-      div_pos (mul_pos (by linarith) (Real.rpow_pos_of_pos hx _)) (by linarith)
-    unfold onEffectiveTime
-    linarith [le_max_right τ₀ 0]
   have := bs_call_formula (Q := Q) (S_0 := R₀) (K := K) (r := 0) (σ := σ)
-    (T := onEffectiveTime τ₀ τ₁ q) (Z := Z) ⟨hR₀, hK, hσ, hT, hZ⟩
+    (T := onEffectiveTime τ₀ τ₁ q) (Z := Z)
+    ⟨hR₀, hK, hσ, onEffectiveTime_pos hq hτ hτ1, hZ⟩
   simpa using this
 
 /-- **Backward-looking caplet at the integrated damping.** The caplet value of
@@ -287,37 +292,6 @@ theorem backwardCaplet_black_integral {Q : Measure Ω} [IsProbabilityMeasure Q]
         - K * Phi (bsd2 R₀ K 0 σ (∫ t in (0 : ℝ)..τ₁, onDamping τ₀ τ₁ q t ^ 2)) := by
   rw [integral_onDamping_sq hq hτ hτ1]
   exact backwardCaplet_black hq hτ hτ1 hR₀ hK hσ hZ
-
-/-- **Jensen ordering of caplets.** For a sub-σ-algebra `m` (the information at an earlier
-time) and an integrable rate `R`, the call payoff on the conditional expectation
-`E[R | m]` has no larger expected value than the call payoff on `R`:
-`E[(E[R | m] − K)⁺] ≤ E[(R − K)⁺]`. With `m` the information at `τ₀` and `R = R(τ₁)` this
-is the statement that the forward-looking caplet is worth at most the backward-looking
-caplet (`R(τ₀) = E[R(τ₁) | F_{τ₀}]` for the martingale `R`); equality holds exactly when
-`R` is `m`-measurable, which is not asserted here. The measure `μ` stands for the
-`τ₁`-forward measure (the common discount factor `P(0, τ₁)` is omitted). -/
-theorem forwardCaplet_le_backwardCaplet {μ : Measure Ω} [IsProbabilityMeasure μ]
-    {m : MeasurableSpace Ω} (hm : m ≤ mΩ) {R : Ω → ℝ} (hR : Integrable R μ) (K : ℝ) :
-    ∫ ω, max (μ[R | m] ω - K) 0 ∂μ ≤ ∫ ω, max (R ω - K) 0 ∂μ := by
-  set φ : ℝ → ℝ := fun x => max (x - K) 0 with hφ
-  have hlin : ConvexOn ℝ Set.univ (fun x : ℝ => x - K) := by
-    refine ⟨convex_univ, fun x _ y _ a b _ _ hab => ?_⟩
-    simp only [smul_eq_mul]
-    apply le_of_eq
-    rw [show b = 1 - a by linarith]
-    ring
-  have hcvx : ConvexOn ℝ Set.univ φ := hlin.sup (convexOn_const 0 convex_univ)
-  have hcont : Continuous φ := by rw [hφ]; fun_prop
-  have hint : Integrable (φ ∘ R) μ := by
-    have := (hR.sub (integrable_const K)).pos_part
-    simpa [hφ, Function.comp_def, posPart_def] using this
-  have hae := hcvx.map_condExp_le_univ hm hcont.lowerSemicontinuous hR hint
-  have h1 : Integrable (φ ∘ μ[R | m]) μ := by
-    have := (integrable_condExp (m := m) (f := R) (μ := μ)).sub (integrable_const K)
-    simpa [hφ, Function.comp_def, posPart_def] using this.pos_part
-  calc ∫ ω, max (μ[R | m] ω - K) 0 ∂μ ≤ ∫ ω, μ[φ ∘ R | m] ω ∂μ :=
-        integral_mono_ae h1 integrable_condExp hae
-    _ = ∫ ω, max (R ω - K) 0 ∂μ := integral_condExp hm
 
 end Caplet
 
