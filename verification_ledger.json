@@ -573,9 +573,9 @@
     "mf-almgren-chriss-EL": {
       "benchmark_file": "market_microstructure.json",
       "date": "2026-11-19",
-      "elapsed_s": 1.8,
-      "input_hash": "99098580081cccdd362cbc1c9e00eafb08fbce256d399ddeda8c3b7fce3b4933",
-      "verified_at_commit": "cfba75f"
+      "elapsed_s": 2.8,
+      "input_hash": "11f411806abe6cec087fcc9ed622966d86626bdfc5b4da143dcd38d5908ff4b8",
+      "verified_at_commit": "daed461"
     },
     "mf-am-gm-two": {
       "benchmark_file": "exotic_options.json",
@@ -608,9 +608,9 @@
     "mf-american-put-boundary-expiry-limit": {
       "benchmark_file": "american_put_boundary.json",
       "date": "2026-11-19",
-      "elapsed_s": 3.4,
-      "input_hash": "ad4ad8289685b859d96aff4018122e1cf4afae1bc2c9200f0a50384a2b6f4cd0",
-      "verified_at_commit": "b0d5578"
+      "elapsed_s": 3.6,
+      "input_hash": "66c744723a2a10795a626350f1d4dd2dfd22aac7d4d26530bef8b234052ee70e",
+      "verified_at_commit": "daed461"
     },
     "mf-american-put-ge-bsm-european-put": {
       "benchmark_file": "black_scholes.json",
@@ -636,9 +636,9 @@
     "mf-american-put-log-boundary-convex": {
       "benchmark_file": "american_put_boundary.json",
       "date": "2026-11-19",
-      "elapsed_s": 3.1,
-      "input_hash": "c17304a42ebc53aa0c1259bdd3bd671ce347f529f3c5493fc781302e78c5b128",
-      "verified_at_commit": "b0d5578"
+      "elapsed_s": 3.6,
+      "input_hash": "a1d294cc1e3780b478752e729da729f694e58912f983b735b44ad14ef275e79e",
+      "verified_at_commit": "daed461"
     },
     "mf-american-put-optimal-rule-stopped-martingale": {
       "benchmark_file": "american_put_boundary.json",
@@ -657,16 +657,16 @@
     "mf-american-put-stock-boundary-strict-convex": {
       "benchmark_file": "american_put_boundary.json",
       "date": "2026-11-19",
-      "elapsed_s": 2.8,
-      "input_hash": "9d9acee1557c40dfae703f69d3906add833a470dfc067b0902af1caed8e64f2a",
-      "verified_at_commit": "b0d5578"
+      "elapsed_s": 3.5,
+      "input_hash": "35006c15c4323b50bae8b8c4bdd3fc30a6bd8de48c2f685e8b92bc07137f1b40",
+      "verified_at_commit": "daed461"
     },
     "mf-american-sampled-value-snell-envelope": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-19",
       "elapsed_s": 3.1,
-      "input_hash": "e8213d8568923960cfb915a802b2a4baf20124e3186f88e2e915fe9156634b40",
-      "verified_at_commit": "b0d5578"
+      "input_hash": "6a99636f640ff75084740fc98ffde15fe910df874b2d9a8366498426cd75cc57",
+      "verified_at_commit": "daed461"
     },
     "mf-american-supermartingale": {
       "benchmark_file": "binomial.json",
@@ -1406,9 +1406,9 @@
     "mf-bs-market-american-put-price": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-19",
-      "elapsed_s": 3.1,
-      "input_hash": "6480c7b0eb1948c00200926c4ceb1ba3e136ed0a86b4f0db27228b12ece01928",
-      "verified_at_commit": "cfba75f"
+      "elapsed_s": 3.4,
+      "input_hash": "fcf4b86ce4594409554e3e5ee8eac1e40021d3cc0e4098495e749ddd102b2134",
+      "verified_at_commit": "daed461"
     },
     "mf-bs-market-call-price": {
       "benchmark_file": "contracts.json",
@@ -1857,6 +1857,13 @@
       "elapsed_s": 2.4,
       "input_hash": "37a08a7c39d4963521349dd9496f319cbb92676294cc72404bba5d6f24adc5ea",
       "verified_at_commit": "b0d5578"
+    },
+    "mf-chain-ladder-completion-prediction": {
+      "benchmark_file": "actuarial.json",
+      "date": "2026-11-19",
+      "elapsed_s": 3.2,
+      "input_hash": "2d5cdf86bfcb96fa6ae0eec6bd0af31c42e0df5cc04b5ecc052080150fc2ed5d",
+      "verified_at_commit": "daed461"
     },
     "mf-change-of-numeraire": {
       "benchmark_file": "no_arbitrage.json",
@@ -3929,6 +3936,13 @@
       "elapsed_s": 1.5,
       "input_hash": "ac8ecf95bc7a727f10d4f6c6875762ab9f2300fa84d4f518342566cfb58213e3",
       "verified_at_commit": "c047ee3"
+    },
+    "mf-mack-chain-ladder-martingale": {
+      "benchmark_file": "actuarial.json",
+      "date": "2026-11-19",
+      "elapsed_s": 3.1,
+      "input_hash": "edb96452616155e9ed609ba0fb158194a41bf32b0c0712696566995b7afd1c14",
+      "verified_at_commit": "daed461"
     },
     "mf-marchenko-pastur-edges": {
       "benchmark_file": "portfolio_and_performance.json",
