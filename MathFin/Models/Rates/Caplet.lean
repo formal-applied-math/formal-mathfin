@@ -11,14 +11,15 @@ public import MathFin.Models.Rates.FRA
 public import MathFin.Pricing.ForwardMeasure
 public import MathFin.Models.Forwards.Black76
 public import MathFin.Pricing.Market
+public import MathFin.Pricing.BondPrice
 
 /-!
 # Caplets and caps, on the bond prices of a stochastic discount factor
 
 `bondPrice Q 𝓕 D t T = 𝔼_Q[D T | 𝓕 t] / D t` is the zero-coupon bond price `P(t, T)` at time
-`t`, for any stochastic discount factor `D`: the bond prices that floating payoffs need. A
-model `X` carries them as observed processes. `BondModel` says the underlying `b` is
-`P(T₀, T₁)` at `T₀` (a.e.) and `ℓ` is the simple forward rate it implies,
+`t`, for any stochastic discount factor `D` (`Pricing/BondPrice.lean`): the bond prices that
+floating payoffs need. A model `X` carries them as observed processes. `BondModel` says the
+underlying `b` is `P(T₀, T₁)` at `T₀` (a.e.) and `ℓ` is the simple forward rate it implies,
 `L = (1/P − 1)/δ` (`fraForwardRate 1 P δ`), adapted to the information at `T₀`.
 
 * A **caplet** pays `δ (L(T₀, T₁) − K)⁺` at `T₁` (`caplet`, a one-cash-flow `Contract`). In
@@ -47,7 +48,7 @@ hypothesis.
 
 ## Main definitions
 
-* `bondPrice`, `HasBondPrice` (the bond price alone), `BondModel` (with the forward rate),
+* `HasBondPrice` (the bond price alone), `BondModel` (with the forward rate),
   `capletPayoff`, `caplet`, `bondPut`, `cap`.
 
 ## Main results
@@ -81,21 +82,7 @@ namespace MathFin.Contracts
 
 variable {ι Ω : Type*} {mΩ : MeasurableSpace Ω}
 
-/-! ### The bond price at time `t`, and the caplet as a contract -/
-
-/-- The **zero-coupon bond price at time `t`** under the stochastic discount factor `D`:
-`P(t, T) = 𝔼_Q[D T | 𝓕 t] / D t`, the value at `t` of one unit paid at `T`. At `t = 0` with
-`D 0 = 1` and a trivial `𝓕 0` it is the zero curve `zeroCurve Q D T`. -/
-noncomputable def bondPrice (Q : Measure Ω) (𝓕 : Filtration ℝ≥0 mΩ) (D : ℝ≥0 → Ω → ℝ)
-    (t T : ℝ≥0) : Ω → ℝ :=
-  fun ω ↦ (Q[D T | 𝓕 t]) ω / D t ω
-
-/-- **The bond price is the price at `t` of one unit paid at `T`**: in a market whose deflator
-`N 0 / N t` is the discount factor, `P(t, T)` is `Market.priceAt` of the payment of `1` at `T`. -/
-theorem bondPrice_deflator_eq_priceAt (M : Market ι Ω) (Q : Measure Ω) (t T : ℝ≥0) :
-    bondPrice Q M.𝓕 M.deflator t T = M.priceAt Q t (.pay T (.const 1)) := by
-  funext ω
-  simp [Market.priceAt, bondPrice, Contract.pathPV, Contract.cashflows, Payoff.eval]
+/-! ### The caplet as a contract -/
 
 /-- The payoff of a **caplet**: `δ (L − K)⁺`, where the underlying `ℓ` carries the
 simply-compounded forward rate `L(T₀, T₁)`, observed at its reset date `T₀`. -/
