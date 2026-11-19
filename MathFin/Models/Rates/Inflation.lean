@@ -38,14 +38,13 @@ Hull–White model (`Models/Rates/HullWhiteCalibration`) by `integral_exp_hwD_fo
 
 ## Scope
 
-Out of scope, and not claimed: eq. (17.8)'s conditional identity as a named lemma here (the
-landed anchor is `MathFin.changeOfNumeraire_setIntegral_eq`; the tower-property step from the
-martingale hypothesis is `MathFin.Inflation.JarrowYildirim.jyYoyForward_eq_bondRatio`);
-eq. (17.9)'s SDE-level
-drift-shift derivation `δ = −ρ_{rI}σ_rσ_I`; the two-correlated-Hull–White dynamics (the
+Out of scope, and not claimed: eq. (17.8)'s conditional identity as a named lemma here (the landed
+anchor is `MathFin.changeOfNumeraire_setIntegral_eq`; the tower-property step from the martingale
+hypothesis is `MathFin.Inflation.JarrowYildirim.jyYoyForward_eq_bondRatio`); eq. (17.9)'s
+SDE-level drift-shift derivation `δ = −ρ_{rI}σ_rσ_I`; the two-correlated-Hull–White dynamics (the
 means, variances and covariance of the rate deviations are explicit inputs here); and the
-chapter's numeric tables. The Jarrow–Yildirim identification is a hypothesis (`hident`),
-never derived. The reconstitution formula itself, `P(S,T)` as a function of `r_S`, is not derived
+chapter's numeric tables. The Jarrow–Yildirim identification is a hypothesis (`hident`), never
+derived. The reconstitution formula itself, `P(S,T)` as a function of `r_S`, is not derived
 either: only its normalisation under the `S`-forward measure is.
 
 ## Main definitions

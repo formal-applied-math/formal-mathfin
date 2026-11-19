@@ -37,7 +37,7 @@ This module records what follows from that structure without the SDE calculus.
   Pairwise `|ρ| ≤ 1` is not enough for three factors;
   the condition used is `ρ_{rI}² ≤ 1`, `ρ_{nI}² ≤ 1` and the determinant form
   `jyCorrDet ≥ 0`. Degenerate reductions:
-  `jyVariance_eq_of_zero_rate_vols` and `jyVariance_eq_zero_of_zero_vols`.
+  `jyVariance_zero_rate_vols` and `jyVariance_zero_vols`.
 * The zero-coupon inflation caplet and floorlet (`jyZcCaplet_eq_black`, `jyZcFloorlet_eq_black`,
   `jyZcCaplet_floorlet_parity`): if the index under the nominal `T`-forward measure is lognormal
   with log-variance `V` and the index-linked bond is priced on the real curve, the caplet is
@@ -67,8 +67,8 @@ seasonality and Monte Carlo are out of scope.
   Derivatives using an HJM Model*, J. Financial and Quantitative Analysis 38(2) (2003),
   337–358][JarrowYildirim2003]
 * [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
-  2nd ed. (2006), §15.3 (the JY model), §16.3 (YYIIS with the JY model), §17.1 (caplets/floorlets
-  with the JY model)
+  2nd ed. (2006), §15.3 (the JY model), §16.3 (YYIIS with the JY model), §17.1 (the JY
+  caplet; the zero-coupon caplet is its first-period case)
 * [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 17 §17.3, eq. 17.6 (the
   forward index) and §17.4 (eqs. 17.8, 17.10)
 
@@ -90,7 +90,8 @@ namespace MathFin.Inflation.JarrowYildirim
 constant parameters: `a_r, a_n` mean reversions, `σ_I, σ_r, σ_n` volatilities, `ρ_{rI}, ρ_{nI},
 ρ_{nr}` correlations. The Hull–White loadings are the library's `vasicekBondB` at the
 remaining maturity `T − t`. Nonzero mean reversions `a_r, a_n ≠ 0` are implicit in this reading:
-`vasicekBondB 0 τ = 0` by Lean's division convention, not the Ho–Lee limit `τ`:
+`vasicekBondB 0 τ = 0` by Lean's division convention, not the Ho–Lee limit `τ`.
+The integrand is:
 
   `σ_I² + σ_r²B_r² + σ_n²B_n² − 2ρ_{rI}σ_Iσ_rB_r + 2ρ_{nI}σ_Iσ_nB_n − 2ρ_{nr}σ_nσ_rB_nB_r`. -/
 noncomputable def jyVarIntegrand (ar an σI σr σn ρrI ρnI ρnr T t : ℝ) : ℝ :=
@@ -125,7 +126,7 @@ theorem quad2_nonneg {A B C y z : ℝ} (hA : 0 ≤ A) (hC : 0 ≤ C) (hB : B ^ 2
 
 /-- **Three-factor quadratic form.** For correlations with `ρ_{rI}² ≤ 1`, `ρ_{nI}² ≤ 1`
 and `jyCorrDet ≥ 0`, `x² + y² + z² + 2ρ_{rI}xy + 2ρ_{nI}xz + 2ρ_{nr}yz ≥ 0`. -/
-theorem quad3_nonneg {ρrI ρnI ρnr x y z : ℝ} (ha : ρrI ^ 2 ≤ 1) (hb : ρnI ^ 2 ≤ 1)
+theorem quad3_nonneg {ρrI ρnI ρnr x y z : ℝ} (hrI : ρrI ^ 2 ≤ 1) (hnI : ρnI ^ 2 ≤ 1)
     (hdet : 0 ≤ jyCorrDet ρrI ρnI ρnr) :
     0 ≤ x ^ 2 + y ^ 2 + z ^ 2 + 2 * ρrI * x * y + 2 * ρnI * x * z + 2 * ρnr * y * z := by
   have key := quad2_nonneg (A := 1 - ρrI ^ 2) (B := ρnr - ρrI * ρnI) (C := 1 - ρnI ^ 2)
@@ -160,7 +161,7 @@ theorem jyVariance_nonneg {ar an σI σr σn ρrI ρnI ρnr : ℝ} {T : ℝ} (hT
 
 /-- **Zero rate volatilities.** With `σ_r = σ_n = 0` only the index volatility remains:
 `V(0,T) = σ_I²·T`. -/
-theorem jyVariance_eq_of_zero_rate_vols (ar an σI ρrI ρnI ρnr T : ℝ) :
+theorem jyVariance_zero_rate_vols (ar an σI ρrI ρnI ρnr T : ℝ) :
     jyVariance ar an σI 0 0 ρrI ρnI ρnr T = σI ^ 2 * T := by
   unfold jyVariance jyVarIntegrand
   simp only [mul_zero, zero_mul, zero_pow two_ne_zero, add_zero, sub_zero,
@@ -168,9 +169,9 @@ theorem jyVariance_eq_of_zero_rate_vols (ar an σI ρrI ρnI ρnr T : ℝ) :
   ring
 
 /-- **All volatilities zero** gives `V(0,T) = 0`. -/
-theorem jyVariance_eq_zero_of_zero_vols (ar an ρrI ρnI ρnr T : ℝ) :
+theorem jyVariance_zero_vols (ar an ρrI ρnI ρnr T : ℝ) :
     jyVariance ar an 0 0 0 ρrI ρnI ρnr T = 0 := by
-  simp [jyVariance_eq_of_zero_rate_vols]
+  simp [jyVariance_zero_rate_vols]
 
 /-! ### The zero-coupon inflation caplet and floorlet
 
@@ -189,7 +190,10 @@ variable {Ω : Type*} [MeasurableSpace Ω] {Qn : Measure Ω}
 /-- **The lognormal forward index sits on the curve forward.** If `I_T = bsTerminal F₀ 0 √V 1 Z`
 (`= F₀·exp(−V/2 + √V·Z)` for `V ≥ 0`) with `Z ~ N(0,1)` under the nominal `T`-forward
 measure, then the index-linked-bond
-identification forces `F₀ = I₀·Pʳ(0,T)/Pⁿ(0,T)` (`ZCSwap.forwardIndex_eq`). -/
+identification forces `F₀ = I₀·Pʳ(0,T)/Pⁿ(0,T)` (`ZCSwap.forwardIndex_eq`). Hypotheses: `hBTpos`
+(`B_T > 0`), `hBTmeas` (`B_T` measurable), `hPn0T` (`0 < Pⁿ(0,T)`), `hP`
+(`Pⁿ(0,T) = 𝔼^{Qn}[1/B_T]`), `hident` (`𝔼^{Qn}[I_T/B_T] = I₀·Pʳ(0,T)`) and `hZ`. It needs no
+`IsProbabilityMeasure Qn`. -/
 theorem jyForwardIndex_lognormal_eq_curves (BT : Ω → ℝ) (Pn0T Pr0T I0 F0 V : ℝ) (Z : Ω → ℝ)
     (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (hPn0T : 0 < Pn0T)
     (hP : Pn0T = ∫ ω, 1 / BT ω ∂Qn)
@@ -265,10 +269,10 @@ theorem jyZcFloorlet_eq_black [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
   ring
 
 /-- **Caplet–floorlet parity** for the ZC inflation options: the Black caplet minus floorlet
-is `Pⁿ(0,T)·(I₀Pʳ(0,T)/Pⁿ(0,T) − K) = I₀Pʳ(0,T) − K·Pⁿ(0,T)` for `0 < Pⁿ(0,T)`: the value of a
+is `Pⁿ(0,T)·(I₀Pʳ(0,T)/Pⁿ(0,T) − K) = I₀Pʳ(0,T) − K·Pⁿ(0,T)` for `Pⁿ(0,T) ≠ 0`: the value of a
 forward on the index struck at `K` (`I₀` times the zero-coupon inflation swap when
 `K = I₀(1+k)^T`). Pure algebra on `caplet_floorlet_parity`. -/
-theorem jyZcCaplet_floorlet_parity (Pn0T Pr0T I0 V K : ℝ) (hPn0T : 0 < Pn0T) :
+theorem jyZcCaplet_floorlet_parity (Pn0T Pr0T I0 V K : ℝ) (hPn0T : Pn0T ≠ 0) :
     blackCaplet (I0 * Pr0T / Pn0T) K (Real.sqrt V) 1 Pn0T
       - blackFloorlet (I0 * Pr0T / Pn0T) K (Real.sqrt V) 1 Pn0T = I0 * Pr0T - K * Pn0T := by
   rw [caplet_floorlet_parity]
@@ -277,7 +281,9 @@ theorem jyZcCaplet_floorlet_parity (Pn0T Pr0T I0 V K : ℝ) (hPn0T : 0 < Pn0T) :
 /-- **`jyZcCaplet_eq_black` at the Jarrow–Yildirim integrated variance.** The same statement with
 `V := jyVariance ar an σI σr σn ρrI ρnI ρnr T` and the hypothesis `0 < jyVariance …`. It is only
 an instantiation: that the index is lognormal under `Q^T` with this log-variance (`hZ`, `hident`)
-is the SDE-level content and is not derived. -/
+is the SDE-level content and is not derived. Included so that the variance definition is exercised
+by a pricing statement; the identification of `V` with the integrated Jarrow–Yildirim variance is
+not derived. -/
 theorem jyZcCaplet_eq_black_of_jyVariance [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
     (ar an σI σr σn ρrI ρnI ρnr T : ℝ)
     (Pn0T Pr0T I0 F0 K : ℝ) (Z : Ω → ℝ)

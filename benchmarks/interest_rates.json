@@ -1686,7 +1686,7 @@
       },
       "metadata": {
         "chapter": 17,
-        "reference": "R. Jarrow and Y. Yildirim, Pricing Treasury Inflation Protected Securities and Related Derivatives using an HJM Model, Journal of Financial and Quantitative Analysis 38(2) (2003), 337-358; D. Brigo & F. Mercurio, Interest Rate Models - Theory and Practice, 2nd ed. (Springer, 2006), §15.3 (the JY model) and §17.1 (caplets/floorlets with the JY model); S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 17 §17.3, eq. 17.6 (the forward index)",
+        "reference": "R. Jarrow and Y. Yildirim, Pricing Treasury Inflation Protected Securities and Related Derivatives using an HJM Model, Journal of Financial and Quantitative Analysis 38(2) (2003), 337-358; D. Brigo & F. Mercurio, Interest Rate Models - Theory and Practice, 2nd ed. (Springer, 2006), §15.3 (the JY model); §17.1 (the JY caplet; the zero-coupon caplet is its first-period case); S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 17 §17.3, eq. 17.6 (the forward index)",
         "citations": [
           {
             "key": "JarrowYildirim2003",
@@ -1694,7 +1694,7 @@
           },
           {
             "key": "BrigoMercurio2006",
-            "locator": "§15.3, §17.1"
+            "locator": "§15.3; §17.1 (the zero-coupon caplet is its first-period case)"
           },
           {
             "key": "BagariaFIDP",
