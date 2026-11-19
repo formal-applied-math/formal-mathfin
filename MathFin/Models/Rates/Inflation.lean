@@ -38,7 +38,7 @@ Hull–White model (`Models/Rates/HullWhiteCalibration`) by `integral_exp_hwD_fo
 
 ## Scope
 
-Out of scope, and not claimed here: eq. (17.8)'s conditional identity (named as
+Out of scope, and not claimed here: the eq. (17.8) tower step (not named in this module; named as
 `MathFin.Inflation.JarrowYildirim.jyYoyForward_eq_bondRatio` in `Models/Rates/JarrowYildirim.lean`;
 the set-integral anchor is `MathFin.changeOfNumeraire_setIntegral_eq`); eq. (17.9)'s SDE-level
 drift-shift derivation `δ = −ρ_{rI}σ_rσ_I`; the two-correlated-Hull–White dynamics (the

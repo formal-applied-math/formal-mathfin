@@ -60,10 +60,10 @@ The SDE-level derivation of the `−ρ_{rI}σ_rσ_I` drift of the real rate and 
 three SDEs is not claimed: `V` is defined, and the lognormality of the index
 (`hZ`: `Z ~ N(0,1)` under `Q^T` with `I_T = bsTerminal F₀ 0 √V 1 Z`), the
 martingale property of the forward index (`hmart`) and the Hull–White bond-reconstitution form
-of the bond ratio (`hR`) are hypotheses. The paper itself was not available to the author; the
-model form follows the secondary sources below. The exact YoY caplet, calibration,
-seasonality and Monte Carlo are out of scope. `Inflation.lean`'s remark that eq. (17.8) is not a
-named lemma is superseded by `jyYoyForward_eq_bondRatio` below.
+of the bond ratio (`hR`) are hypotheses. The model form is transcribed from the secondary
+sources below; the primary paper was not consulted for the transcription. The exact YoY caplet,
+calibration, seasonality and Monte Carlo are out of scope. The eq. (17.8) tower step is named
+as `jyYoyForward_eq_bondRatio` below.
 
 ## References
 
