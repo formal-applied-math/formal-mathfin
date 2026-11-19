@@ -947,6 +947,9 @@ import MathFin.Insurance.SurvivalModel
 import MathFin.Insurance.ActuarialInsurance
 import MathFin.Insurance.AnnuityValue
 import MathFin.Insurance.BuhlmannCredibility
+-- The chain ladder and Mack's model: the completion is the prediction by the selected factors,
+-- and under Mack's model the predictions of the ultimate are a martingale
+import MathFin.Insurance.ChainLadder
 import MathFin.Insurance.EsscherPremium
 
 -- Markets
