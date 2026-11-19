@@ -653,7 +653,8 @@ split by area. What each bridge proves, by area:
   vanilla leg identified with the digital call contract's value
   (`mf-partial-time-barrier-down-add-up`, `mf-binary-barrier-inout-parity`, both `reduced_core`).
   The Broadie–Glasserman–Kou shifted barrier for discretely monitored down-and-out calls
-  (`mf-bgk-discrete-barrier-shift`, `reduced_core`): the image-form expression at the barrier
+  (`mf-bgk-discrete-barrier-shift`, `reduced_core`): the image-form expression, shown equal to
+  `ptDownOutCall` at carry `r`, at the barrier
   `H·exp(−βσ√(T/m))` tends to its unshifted value as `m → ∞` and is unchanged under
   `(r, σ, T) ↦ (cr, σ√c, T/c)` at fixed `m`, for an arbitrary constant `β`; it is a price only for
   `H ≤ K`, `S > H`. Not derived: the image form as a discounted expected payoff, the value of `β`,

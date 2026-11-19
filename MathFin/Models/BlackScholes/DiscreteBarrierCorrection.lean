@@ -6,6 +6,7 @@ Authors: Yang Ye
 module
 
 public import MathFin.Models.BlackScholes.BarrierParity
+public import MathFin.Models.BlackScholes.PartialTimeBarrierOption
 
 /-!
 # Broadie–Glasserman–Kou barrier shift for discretely monitored barrier options
@@ -32,7 +33,9 @@ This file takes that shift as a **definition** and proves what follows from the 
   the Black–Scholes call price `bsV`. It is the continuously monitored down-and-out call price
   (transcribed from [ReinerRubinstein1991], see also [Hull]) only for `H ≤ K`, `S > H` and no
   dividends; the theorems below concern the expression for any positive `H`, and the
-  reflection-principle step that identifies it with the price is **not** derived here.
+  reflection-principle step that identifies it with the price is **not** derived here. It is a
+  second transcription of the library's `ptDownOutCall`, tied to it by
+  `downOutCallCont_eq_ptDownOutCall`.
 * `bgkDownBarrier`, `bgkUpBarrier`: the shifted barriers `H e^{∓βσ√(T/m)}`.
 * `bgkDownOutCall`: the BGK price of the discretely monitored down-and-out call, the continuous
   price at the shifted barrier. There is no continuous up-and-out closed form in this library,
@@ -43,6 +46,9 @@ This file takes that shift as a **definition** and proves what follows from the 
 
 * `bgkDownBarrier_lt_and_lt_bgkUpBarrier`: the shifted down barrier lies below `H` and the shifted
   up barrier above it.
+* `downOutCallCont_eq_ptDownOutCall`, `bgkDownOutCall_eq_ptDownOutCall`: the image form (and the
+  BGK price at the shifted barrier) equals `ptDownOutCall` at cost of carry `b = r`, for positive
+  spot, strike, barrier and volatility; an identity between two transcribed closed forms.
 * `downOutCallCont_at_barrier`: the continuous price vanishes at `S = H`.
 * `bsV_scale`, `downOutCallCont_scale`: spatial homogeneity, `(K, H, S) ↦ c(K, H, S)` scales the
   price by `c`.
@@ -105,6 +111,41 @@ theorem downOutCallCont_at_barrier {K H r σ τ : ℝ} (hH : 0 < H) :
   have : H ^ 2 / H = H := by field_simp
   simp [downOutCallCont, div_self hH.ne', this]
 
+/-- **Image form equals the library's full-life closed form.** For positive spot, strike, barrier
+and volatility, `downOutCallCont K H r σ S T` is `ptDownOutCall S K H r r σ T`, the transcribed
+Rubinstein–Reiner full-life down-and-out call (`PartialTimeBarrierOption.lean`, the `X ≥ H` branch)
+at cost of carry `b = r`: the exponent `2r/σ² − 1` is `2 · ptMu r σ`, the term
+`(H/S)^{2r/σ²−1} · (H²/S)` is `S · ptHSmu1`, and `d₁, d₂` at `H²/S` are `ptF1, ptF2`. This is an
+identity between two transcribed closed forms; neither is proved here to be a price, and
+the price reading (`H ≤ K`, `S > H`) is the one `ptDownOutCall` carries. -/
+theorem downOutCallCont_eq_ptDownOutCall {K H r σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)
+    (hH : 0 < H) (hσ : 0 < σ) :
+    downOutCallCont K H r σ S T = ptDownOutCall S K H r r σ T := by
+  have hHS : 0 < H / S := div_pos hH hS
+  have hσ2 : σ ^ 2 ≠ 0 := by positivity
+  have hmu : 2 * ptMu r σ = 2 * r / σ ^ 2 - 1 := by
+    unfold ptMu hkMu; field_simp
+  have h0 : ptHSmu S H r σ = (H / S) ^ (2 * r / σ ^ 2 - 1) := by
+    rw [ptHSmu, Real.rpow_def_of_pos hHS, hmu, mul_comm]
+  have h1 : ptHSmu1 S H r σ = ptHSmu S H r σ * (H / S) ^ 2 := by
+    have : 2 * (ptMu r σ + 1) * Real.log (H / S)
+        = 2 * ptMu r σ * Real.log (H / S) + (Real.log (H / S) + Real.log (H / S)) := by ring
+    rw [ptHSmu1, this, Real.exp_add, Real.exp_add, Real.exp_log hHS, ← ptHSmu, sq]
+  have hsq : H ^ 2 / S = S * (H / S) ^ 2 := by field_simp
+  have hf1 : ptF1 S K H r σ T = bsd1 (H ^ 2 / S) K r σ T := by
+    unfold ptF1 bsd1
+    congr 2
+    rw [Real.log_div hS.ne' hK.ne', Real.log_div (by positivity) hK.ne',
+      Real.log_div hH.ne' hS.ne', Real.log_div (by positivity) hS.ne', Real.log_pow]
+    push_cast; ring
+  have hf2 : ptF2 S K H r σ T = bsd2 (H ^ 2 / S) K r σ T := by
+    rw [ptF2, bsd2, hf1]
+  unfold downOutCallCont ptDownOutCall bsV
+  rw [← h0, ← hf1, ← hf2, h1]
+  nth_rewrite 1 [hsq]
+  simp only [ptD1, ptD2, sub_self, zero_mul, Real.exp_zero, neg_mul]
+  ring
+
 /-- The shifted barrier of a down option, `H · exp(−β σ √(T/m))`. -/
 noncomputable def bgkDownBarrier (β : ℝ) (m : ℕ) (H σ T : ℝ) : ℝ :=
   H * Real.exp (-(β * σ * Real.sqrt (T / m)))
@@ -133,6 +174,13 @@ approximation to the discretely monitored price is not proved here. -/
 noncomputable def bgkDownOutCall (β : ℝ) (m : ℕ) (K H r σ S T : ℝ) : ℝ :=
   downOutCallCont K (bgkDownBarrier β m H σ T) r σ S T
 
+/-- The BGK price is the library's full-life down-and-out closed form `ptDownOutCall` (cost of
+carry `b = r`) at the shifted barrier, for positive spot, strike, barrier and volatility. -/
+theorem bgkDownOutCall_eq_ptDownOutCall {β : ℝ} {m : ℕ} {K H r σ S T : ℝ} (hS : 0 < S)
+    (hK : 0 < K) (hH : 0 < H) (hσ : 0 < σ) :
+    bgkDownOutCall β m K H r σ S T = ptDownOutCall S K (bgkDownBarrier β m H σ T) r r σ T :=
+  downOutCallCont_eq_ptDownOutCall hS hK (mul_pos hH (Real.exp_pos _)) hσ
+
 /-- The BGK knock-in price: the Black–Scholes vanilla call price minus the BGK knock-out price. -/
 noncomputable def bgkKnockIn (β : ℝ) (m : ℕ) (K H r σ S T : ℝ) : ℝ :=
   bsV K r σ S T - bgkDownOutCall β m K H r σ S T
@@ -145,21 +193,21 @@ theorem bgkDownOutCall_at_shifted_barrier {β : ℝ} {m : ℕ} {K H r σ T : ℝ
 /-! ### Scaling identities -/
 
 /-- `d₁` is unchanged when spot and strike are scaled together. -/
-theorem bsd1_scale {S K r σ τ c : ℝ} (hc : 0 < c) (hS : 0 < S) (hK : 0 < K) :
+theorem bsd1_scale {S K r σ τ c : ℝ} (hc : 0 < c) (hK : 0 < K) :
     bsd1 (c * S) (c * K) r σ τ = bsd1 S K r σ τ := by
   have : c * S / (c * K) = S / K := by field_simp
   simp [bsd1, this]
 
 /-- `d₂` is unchanged when spot and strike are scaled together. -/
-theorem bsd2_scale {S K r σ τ c : ℝ} (hc : 0 < c) (hS : 0 < S) (hK : 0 < K) :
+theorem bsd2_scale {S K r σ τ c : ℝ} (hc : 0 < c) (hK : 0 < K) :
     bsd2 (c * S) (c * K) r σ τ = bsd2 S K r σ τ := by
-  simp [bsd2, bsd1_scale hc hS hK]
+  simp [bsd2, bsd1_scale hc hK]
 
 /-- **Spatial homogeneity**: `bsV (cK) (cS) = c · bsV K S`. -/
-theorem bsV_scale {K r σ S τ c : ℝ} (hc : 0 < c) (hS : 0 < S) (hK : 0 < K) :
+theorem bsV_scale {K r σ S τ c : ℝ} (hc : 0 < c) (hK : 0 < K) :
     bsV (c * K) r σ (c * S) τ = c * bsV K r σ S τ := by
   unfold bsV
-  rw [bsd1_scale hc hS hK, bsd2_scale hc hS hK]
+  rw [bsd1_scale hc hK, bsd2_scale hc hK]
   ring
 
 /-- Spatial homogeneity of the continuous down-and-out call: scaling strike, barrier and spot by
@@ -171,7 +219,7 @@ theorem downOutCallCont_scale {K H r σ S τ c : ℝ} (hc : 0 < c) (hS : 0 < S) 
   have h2 : (c * H) ^ 2 / (c * S) = c * (H ^ 2 / S) := by field_simp
   have hHS : 0 < H ^ 2 / S := by positivity
   unfold downOutCallCont
-  rw [h1, h2, bsV_scale hc hS hK, bsV_scale hc hHS hK]
+  rw [h1, h2, bsV_scale hc hK, bsV_scale hc hK]
   ring
 
 /-- `d₁` is unchanged under `(r, σ, τ) ↦ (c r, σ √c, τ / c)`, which fixes `σ² τ`, `r τ` and
