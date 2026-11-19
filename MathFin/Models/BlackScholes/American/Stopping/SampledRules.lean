@@ -1,5 +1,5 @@
 /-
-Copyright (c) 2026 Robert Martin. All rights reserved.
+Copyright (c) 2026 Robert Martin, Adam Kiezun. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Robert Martin, Adam Kiezun
 -/
