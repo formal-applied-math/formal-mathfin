@@ -145,6 +145,7 @@ graph TD
   largePortfolioLimit["Vasicek's large-portfolio limit"]:::proved
   levyCharacterization["Lévy's characterization of Brownian motion"]:::proved
   lifeInsuranceEpv["Whole-life insurance and the life annuity-due: A = 1 − d ä"]:::proved
+  mackChainLadder["Mack's model: the chain-ladder predictions are a martingale"]:::proved
   margrabe["Margrabe's exchange option formula"]:::proved
   markowitzLagrangian["Markowitz mean–variance optimality"]:::proved
   marshallOlkin["Marshall–Olkin first-to-default"]:::proved
@@ -439,6 +440,7 @@ graph TD
   empiricalCdfStrongLaw --> largePortfolioLimit
   brownianMotion --> levyCharacterization
   survivalFunction --> lifeInsuranceEpv
+  emm --> mackChainLadder
   standardNormalCdf --> margrabe
   esscherTilt --> margrabe
   portfolioVariance --> markowitzLagrangian
@@ -1046,6 +1048,7 @@ graph TD
 | `thm:large-portfolio-limit` Vasicek's large-portfolio limit | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alarge-portfolio-limit%22%20in%3Abody) |
 | `thm:levy-characterization` Lévy's characterization of Brownian motion | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alevy-characterization%22%20in%3Abody) |
 | `thm:life-insurance-epv` Whole-life insurance and the life annuity-due: A = 1 − d ä | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alife-insurance-epv%22%20in%3Abody) |
+| `thm:mack-chain-ladder` Mack's model: the chain-ladder predictions are a martingale | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amack-chain-ladder%22%20in%3Abody) |
 | `thm:margrabe` Margrabe's exchange option formula | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amargrabe%22%20in%3Abody) |
 | `thm:markowitz-lagrangian` Markowitz mean–variance optimality | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarkowitz-lagrangian%22%20in%3Abody) |
 | `thm:marshall-olkin` Marshall–Olkin first-to-default | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Amarshall-olkin%22%20in%3Abody) |

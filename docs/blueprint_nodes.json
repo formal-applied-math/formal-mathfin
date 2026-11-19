@@ -1542,18 +1542,18 @@
   "label": "thm:market-sdf-capm",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarketSDF.lean"},
- {"uses": ["def:hazard-survival"],
-  "title": "Thiele's differential equation",
+ {"uses": ["def:market", "def:brownian-motion", "def:pricing-measure"],
+  "title": "The Vasicek bond market",
   "text":
-  "For continuous force of interest $\\delta$, force of mortality $\\mu$, premium rate\n  $\\pi$ and death benefit $b$ on $[0, T]$, the prospective reserve $V(t)$, the discounted future\n  death benefits less premiums plus the terminal payment (discounted by $e^{-\\int \\delta}$ times the\n  survival probability of the force $\\mu$), satisfies $V'(t) = (\\delta + \\mu) V(t) + \\pi - \\mu b$\n  for $0 < t < T$. The discrete one-step recursion is not covered.",
-  "name": "MathFin.hasDerivAt_thieleReserve",
-  "module": "MathFin.Insurance.Mortality",
+  "For a pre-Brownian motion $B$, the market of the bank account\n  $N_t = \\exp\\int_0^t r$ of the Vasicek short rate as numéraire and the zero-coupon bond of\n  maturity $T$ as the one asset, under the natural filtration of $B$, is priced by the reference\n  measure at the horizon $T$: the deflated bond is $\\mathbb{E}[\\exp(-\\int_0^T r) \\mid\n  \\mathcal{F}_t]$ almost surely, a martingale; and the price of a unit payment at $T$ is\n  $A(T)e^{-B(T)r_0}$. The model is specified under the pricing measure (no physical measure), the\n  market uses $\\mathcal{F}_t$-measurable representatives of the Wiener integrals, and uniqueness\n  of the pricing measure is not proved.",
+  "name": "MathFin.Rates.isPricingMeasure_vasicekMarket",
+  "module": "MathFin.Models.Rates.VasicekMarket",
   "line": 178,
   "leanOk": true,
   "latexEnv": "theorem",
-  "label": "thm:thiele-reserve",
+  "label": "thm:vasicek-market",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/Mortality.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/VasicekMarket.lean"},
  {"uses":
   ["def:value-at-risk",
    "def:quantile",
@@ -1571,18 +1571,18 @@
   "label": "thm:euler-allocation",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ComponentVaR.lean"},
- {"uses": ["def:market", "def:brownian-motion", "def:pricing-measure"],
-  "title": "The Vasicek bond market",
+ {"uses": ["def:hazard-survival"],
+  "title": "Thiele's differential equation",
   "text":
-  "For a pre-Brownian motion $B$, the market of the bank account\n  $N_t = \\exp\\int_0^t r$ of the Vasicek short rate as numéraire and the zero-coupon bond of\n  maturity $T$ as the one asset, under the natural filtration of $B$, is priced by the reference\n  measure at the horizon $T$: the deflated bond is $\\mathbb{E}[\\exp(-\\int_0^T r) \\mid\n  \\mathcal{F}_t]$ almost surely, a martingale; and the price of a unit payment at $T$ is\n  $A(T)e^{-B(T)r_0}$. The model is specified under the pricing measure (no physical measure), the\n  market uses $\\mathcal{F}_t$-measurable representatives of the Wiener integrals, and uniqueness\n  of the pricing measure is not proved.",
-  "name": "MathFin.Rates.isPricingMeasure_vasicekMarket",
-  "module": "MathFin.Models.Rates.VasicekMarket",
-  "line": 178,
+  "For continuous force of interest $\\delta$, force of mortality $\\mu$, premium rate\n  $\\pi$ and death benefit $b$ on $[0, T]$, the prospective reserve $V(t)$, the discounted future\n  death benefits less premiums plus the terminal payment (discounted by $e^{-\\int \\delta}$ times the\n  survival factor of the force $\\mu$, a probability when $\\mu \\ge 0$), satisfies\n  $V'(t) = (\\delta + \\mu) V(t) + \\pi - \\mu b$ for $0 < t < T$. The discrete one-step recursion is not covered.",
+  "name": "MathFin.hasDerivAt_thieleReserve",
+  "module": "MathFin.Insurance.Mortality",
+  "line": 179,
   "leanOk": true,
   "latexEnv": "theorem",
-  "label": "thm:vasicek-market",
+  "label": "thm:thiele-reserve",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/VasicekMarket.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/Mortality.lean"},
  {"uses":
   ["def:market",
    "def:contract",
@@ -1624,6 +1624,18 @@
   "label": "thm:martingale-transform",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/MartingaleTransform.lean"},
+ {"uses": ["def:emm"],
+  "title": "Mack's model: the chain-ladder predictions are a martingale",
+  "text":
+  "For one accident year, let the cumulative claims $C_j$ after $j$ development\n  years be adapted and integrable with $\\mathbb E[C_{j+1}\\mid\\mathcal F_j]=f_j C_j$ (Mack's\n  model). Then the reference measure is an equivalent martingale measure, up to the ultimate date\n  $N$, of the prediction $m\\mapsto(\\prod_{m\\le k<N}f_k)\\,C_m$ of the ultimate $C_N$; this\n  prediction is $\\mathbb E[C_N\\mid\\mathcal F_m]$, and the claims development result from $m$ to\n  $m+1$ has conditional mean zero. The chain-ladder completion of a triangle is this prediction\n  with the selected factors $\\hat f_j$ in place of $f_j$; their unbiasedness and the standard error\n  of the reserve are not covered.",
+  "name": "MathFin.IsMackRow.isEMM_chainPrediction",
+  "module": "MathFin.Insurance.ChainLadder",
+  "line": 186,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:mack-chain-ladder",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/ChainLadder.lean"},
  {"uses": ["thm:compound-poisson-mgf"],
   "title": "Variance swap and the log contract",
   "text":
@@ -1708,6 +1720,21 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/LPContract.lean"},
  {"uses":
+  ["def:coherent-risk-measure",
+   "thm:superhedging-price-lower-bound",
+   "def:convex-risk-measure"],
+  "title": "The superhedging price is a coherent risk measure",
+  "text":
+  "In the one-period finite-state market with a martingale probability vector, and\n  for a reference measure charging every state, the superhedging price of a claim, read as a\n  loss, is monotone, cash-invariant, positively homogeneous and subadditive. The equality with\n  the supremum of the martingale prices is `thm:superhedging-duality`.",
+  "name": "MathFin.isCoherentRiskMeasure_superhedgingPrice",
+  "module": "MathFin.Risk.Superhedging",
+  "line": 209,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:superhedging-coherent",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"},
+ {"uses":
   ["def:value-at-risk",
    "def:quantile",
    "def:portfolio-variance",
@@ -1723,21 +1750,6 @@
   "label": "thm:gaussian-portfolio-var",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/GaussianRiskMarkowitz.lean"},
- {"uses":
-  ["def:coherent-risk-measure",
-   "thm:superhedging-price-lower-bound",
-   "def:convex-risk-measure"],
-  "title": "The superhedging price is a coherent risk measure",
-  "text":
-  "In the one-period finite-state market with a martingale probability vector, and\n  for a reference measure charging every state, the superhedging price of a claim, read as a\n  loss, is monotone, cash-invariant, positively homogeneous and subadditive. The equality with\n  the supremum of the martingale prices is `thm:superhedging-duality`.",
-  "name": "MathFin.isCoherentRiskMeasure_superhedgingPrice",
-  "module": "MathFin.Risk.Superhedging",
-  "line": 209,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:superhedging-coherent",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"},
  {"uses":
   ["def:market",
    "def:gbm",
@@ -1995,18 +2007,6 @@
   "label": "thm:levy-characterization",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/LevyCharacterization.lean"},
- {"uses": ["def:portfolio-variance", "thm:markowitz-lagrangian"],
-  "title": "Tangent portfolio",
-  "text":
-  "For positive semidefinite $\\Sigma$, a fully invested portfolio with\n  $\\Sigma w = \\lambda(\\mu - r_f)$ is a tangent portfolio and has the least variance among the\n  fully invested portfolios with the same expected return.",
-  "name": "MathFin.isTangentPortfolioN_and_portfolioVarN_le",
-  "module": "MathFin.Choice.Portfolio.MarkowitzLagrangian",
-  "line": 323,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:tangent-portfolio-efficient",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
  {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
   "title": "Martingale representation theorem",
   "text":
@@ -2038,6 +2038,18 @@
   "label": "thm:market-completeness",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/MarketCompleteness.lean"},
+ {"uses": ["def:portfolio-variance", "thm:markowitz-lagrangian"],
+  "title": "Tangent portfolio",
+  "text":
+  "For positive semidefinite $\\Sigma$, a fully invested portfolio with\n  $\\Sigma w = \\lambda(\\mu - r_f)$ is a tangent portfolio and has the least variance among the\n  fully invested portfolios with the same expected return.",
+  "name": "MathFin.isTangentPortfolioN_and_portfolioVarN_le",
+  "module": "MathFin.Choice.Portfolio.MarkowitzLagrangian",
+  "line": 323,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:tangent-portfolio-efficient",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
  {"uses": ["def:standard-normal-cdf"],
   "title": "Black–Scholes Greeks",
   "text":
