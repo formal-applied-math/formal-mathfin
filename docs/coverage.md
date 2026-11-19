@@ -654,7 +654,8 @@ split by area. What each bridge proves, by area:
   (`mf-partial-time-barrier-down-add-up`, `mf-binary-barrier-inout-parity`, both `reduced_core`).
   The Broadie–Glasserman–Kou shifted barrier for discretely monitored down-and-out calls
   (`mf-bgk-discrete-barrier-shift`, `reduced_core`): `ptDownOutCall` at carry `r` is proved equal to
-  the image form printed by Howison and Steinberg; the shifted-barrier expression
+  the image form printed by Howison and Steinberg, and `ptDownOutCall` is homogeneous of degree one
+  under `(S, K, H) ↦ c(S, K, H)` (`ptDownOutCall_scale`); the shifted-barrier expression
   `ptDownOutCall` at `H·exp(−βσ√(T/m))` tends to its unshifted value as `m → ∞` and is unchanged
   under `(r, σ, T) ↦ (cr, σ√c, T/c)` at fixed `m`, for an arbitrary constant `β`; it reads as a
   price only where `ptDownOutCall` does. Not derived: `ptDownOutCall` as a discounted expected
