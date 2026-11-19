@@ -51,9 +51,10 @@ the Reiner–Rubinstein/Hull formula is a matter of transcription, not proved in
 * `ptDownOutCall_eq_image`: `ptDownOutCall S K H r r σ T` is the image form
   `bsV K r σ S T − (H/S)^{2r/σ²−1} · bsV K r σ (H²/S) T`, for positive `S, K, H, σ`.
 * `ptDownOutCall_scale`: spatial homogeneity, `(S, K, H) ↦ c(S, K, H)` scales it by `c`, at any
-  carry.
+  carry (via `bsd1_scale`, `bsd2_scale` in `ScalingInvariance.lean`).
 * `ptDownOutCall_timeScale`: it is unchanged under `(b, r, σ, T) ↦ (c b, c r, σ√c, T/c)`, which
-  fixes `σ²T`, `rT` and `σ√T` (via `bsd1_scale`, `bsd1_timeScale` in `ScalingInvariance.lean`).
+  fixes `σ²T`, `rT` and `σ√T` (via `bsd1_timeScale`, `bsd2_timeScale` in
+  `ScalingInvariance.lean`).
 * `bgkDownBarrier_timeScale`, `bgkDownOutCall_timeScale`: the shift `σ√(T/m)` is fixed by the same
   scaling at fixed `m` (`Δt ↦ Δt/c`), so the BGK expression is as well.
 * `continuousAt_ptDownOutCall_barrier`: `ptDownOutCall` is continuous in the barrier at every
