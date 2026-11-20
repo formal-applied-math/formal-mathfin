@@ -10,9 +10,10 @@ reusable workflow.
 
 Some `MathFin/Probability/` results are general-interest probability /
 stochastic-process lemmas that belong *upstream*, not in a mathematical-finance library.
-Draft files targeting other repos' module trees live under `upstream/` (our `lake`
-never builds them; catalogue in `upstream/README.md`). This doc logs what has been
-*submitted* as a PR and how to do it again.
+Drafts are written in a worktree of the target repository. The `upstream/` folder that
+once staged them here was removed on 2026-11-20; its last contents are at commit `7d801e75`
+(`git show 7d801e75:upstream/README.md`). This doc logs what has been *submitted* as a PR and
+how to do it again.
 
 As of 2026-07-27 the first full submission, **PR #446** (issue #440, stochastic
 intervals), is **MERGED** — it is in BrownianMotion as
@@ -27,8 +28,8 @@ and `stochasticGraph` are their `stochIcc/Ico/Ioc/Ioo` and `stochGraph`.
 |---|---|---|---|
 | brownian-motion | stochastic intervals; `]]σ,τ]]` predictable + an elementary predictable set (issue #440) | [#446](https://github.com/RemyDegenne/brownian-motion/pull/446) | **merged** — upstream `eaa4391`, landed as `stochIcc`/`stochIoc`/… (confirmed 2026-07-27) |
 
-Staged but not yet submitted (drafts only, under `upstream/`): `brownian-motion/Martingale.lean`,
-`mathlib/RealTail.lean`. Both re-checked against the 2026-07-27 pins and still absent upstream
+Drafted but not yet submitted (recoverable from commit `7d801e75` under `upstream/`):
+`brownian-motion/Martingale.lean`, `mathlib/RealTail.lean`. Both re-checked against the 2026-07-27 pins and still absent upstream
 (`squareSubTime_isMartingale` / `waldExponential_isMartingale` are in no BrownianMotion module;
 the Gaussian tail lemmas are in no Mathlib `Gaussian/Real.lean`), so both remain live candidates.
 
@@ -84,8 +85,8 @@ statements is a stale Dec-2025 branch (it predates them), not an active rework.
 `origin` = upstream (RemyDegenne), `fork` = ours (raphaelrrcoelho). The local
 `upstreaming-dashboard` branch is stale — always `git fetch origin` and branch off `origin/master`.
 
-1. **Author + validate in our repo first.** Stage the file under `upstream/brownian-motion/`;
-   validate green via the lean-repl daemon (overwrite-onto-a-`MathFin`-module-path trick above).
+1. **Author + validate in our repo first.** Write the file as a scratch module and validate it
+   green via the lean-repl daemon (overwrite-onto-a-`MathFin`-module-path trick above).
 2. **Branch off latest master in a worktree** (keeps the user's fork checkout untouched):
    `git worktree add -b <branch> ../<dir> origin/master`.
 3. **Drop the file in** at its module path, add an alphabetical `public import` line to

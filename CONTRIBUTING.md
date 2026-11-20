@@ -152,12 +152,9 @@ whose statements it changes: a golf or refactor PR should change no statement.
 
 ## Upstream contributions
 
-Drafts for Mathlib, Degenne's BrownianMotion, and Zulip messages live under
-`upstream/`:
-
-- `upstream/mathlib/` — PR drafts (Lean files + PR_BODY.md).
-- `upstream/brownian-motion/` — PR drafts (Lean files + ISSUE_BODY.md).
-- `upstream/zulip/` — discussion drafts.
+Drafts for Mathlib and Degenne's BrownianMotion are written in a worktree of the
+target repository, not in this one; `docs/upstreaming.md` records what has been
+submitted and how.
 
 When a MathFin result is general enough to belong upstream, draft it
 here first, get a sign-off on the Lean side, then open the PR against the
