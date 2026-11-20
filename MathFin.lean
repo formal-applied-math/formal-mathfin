@@ -431,6 +431,7 @@ import MathFin.Models.LocalVol.ForwardSmile
 import MathFin.Models.LocalVol.MarketCallSurface
 import MathFin.Models.BlackScholes.PutStrikeConvexity
 import MathFin.Models.BlackScholes.AsianInequality
+import MathFin.Models.BlackScholes.AsianArithmeticAverageStrike
 -- Geometric-average Asian: two-date log-driver is Gaussian with the covariance-sum variance
 import MathFin.Models.BlackScholes.AsianGeometric
 -- Geometric-average Asian: n-date driver law + closed-form price via effective-BS reduction
