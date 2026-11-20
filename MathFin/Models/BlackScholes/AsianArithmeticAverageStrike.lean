@@ -5,10 +5,10 @@ Authors: Yang Ye
 -/
 module
 
-public import MathFin.Models.BlackScholes.BasketMomentMatching
 public import MathFin.Models.BlackScholes.Market
 public import MathFin.Models.BlackScholes.PDE
 public import MathFin.Probability.Gaussian.StandardNormal
+public import MathFin.Probability.Martingales.CondExpCallJensen
 
 /-!
 # Discrete arithmetic average-strike Asian option: a conditioning lower bound
@@ -39,25 +39,26 @@ derived here. Rogers and Shi's paper itself was not read.
   `expSum z · e^{−pz}` is.)
 * `integral_max_expSum_hasLaw`: for `Z ~ N(0,1)` and a single crossing at `z*`,
   `E[(expSum Z)⁺] = ∑ₖ aₖ exp(dₖ + cₖ²/2) Φ(cₖ − z*)`.
-* `integral_max_condExp_le`: Jensen, `E[(E[X | 𝒢])⁺] ≤ E[X⁺]`.
 * `condBoundCall_le_integral_max`: the conditioning bound, given the defining property of the
   conditional mean `g(Z)` as a hypothesis (`hcond`; it is not derived from the Brownian model
   here).
 * `condBoundCall_sub_mean_le_integral_max_neg`: the put form, via parity.
-* `integral_gbmSum_eq`, `integral_gbmSum_sq_eq`: exact first and second moments of a weighted sum
-  of GBM prices (instances of the basket moment lemmas); `E[A]`, `E[A²]` and, with weights
-  `(−1/N, …, 1)`, `E[(S_T − A)²]`, which contains `E[S_T A]`.
 * `condBoundCall_one_fixing`: with one fixing `t < T` the bound is `S₀ · bsV 1 r σ 1 (T − t)`,
   the forward-start call struck at the fixing; `condBoundCall_one_fixing_eq_marketPrice` states
   it as `S` times the Black–Scholes market's price of the unit-strike call.
 
 ## Scope
 
+The exact first and second moments of the fixings `S_{tᵢ}` (hence of `A` and `S_T − A`) follow
+from `integral_basket_eq_basketM1` and `integral_basket_sq_eq_basketM2` in
+`MathFin.Models.BlackScholes.BasketMomentMatching`; they are not restated here.
+
 The closeness of the bound to the price is *not* a theorem here. On the grid tested numerically
 (`S = 97`, `r = 5%`, `q = 2%`, `T = 1`, fixings `1, 4, 10, 52`, volatility `20%, 40%, 80%`, two
-million antithetic paths) it agrees with Monte Carlo to within 0.12% (1.3 standard errors) up to
-40% volatility and 0.26% in the worst case at 80%. The bound is below the truth by Jensen. The
-identification of `E[S_T − A | Z]` with `g(Z)` from the Brownian model, and the monotone sign
+million antithetic paths) the bound for calls and puts agrees with Monte Carlo to within 0.12%
+(1.3 standard errors) up to 40% volatility, and to within 0.26% (3.0 standard errors, the worst
+cell: the 80%-volatility put with four fixings) at 80%. The bound is below the truth by Jensen.
+The identification of `E[S_T − A | Z]` with `g(Z)` from the Brownian model, and the monotone sign
 pattern of `g` for general fixing dates, are hypotheses of the general statements.
 
 ## References
@@ -183,23 +184,6 @@ discount factor and `z*` the crossing of `expSum a d c`. -/
 noncomputable def condBoundCall {n : ℕ} (D : ℝ) (a d c : Fin n → ℝ) (zs : ℝ) : ℝ :=
   D * ∑ k, a k * Real.exp (d k + c k ^ 2 / 2) * Phi (c k - zs)
 
-/-! ### Jensen's inequality for the positive part -/
-
-/-- **Jensen for the call payoff:** `E[(E[X | 𝒢])⁺] ≤ E[X⁺]`. -/
-theorem integral_max_condExp_le {Ω : Type*} {m0 : MeasurableSpace Ω} {P : Measure Ω}
-    [IsProbabilityMeasure P] {m : MeasurableSpace Ω} (hm : m ≤ m0) {X : Ω → ℝ}
-    (hX : Integrable X P) :
-    ∫ ω, max ((P[X | m]) ω) 0 ∂P ≤ ∫ ω, max (X ω) 0 ∂P := by
-  have h1 : P[X | m] ≤ᵐ[P] P[fun ω ↦ max (X ω) 0 | m] :=
-    condExp_mono hX hX.pos_part (Filter.Eventually.of_forall fun ω ↦ le_max_left _ _)
-  have h2 : (0 : Ω → ℝ) ≤ᵐ[P] P[fun ω ↦ max (X ω) 0 | m] :=
-    condExp_nonneg (Filter.Eventually.of_forall fun ω ↦ le_max_right _ _)
-  have h3 : (fun ω ↦ max ((P[X | m]) ω) 0) ≤ᵐ[P] P[fun ω ↦ max (X ω) 0 | m] := by
-    filter_upwards [h1, h2] with ω a b using max_le a b
-  calc ∫ ω, max ((P[X | m]) ω) 0 ∂P ≤ ∫ ω, (P[fun ω ↦ max (X ω) 0 | m]) ω ∂P :=
-        integral_mono_ae (integrable_condExp.pos_part) integrable_condExp h3
-    _ = ∫ ω, max (X ω) 0 ∂P := integral_condExp hm
-
 /-- **The conditioning bound.** Let `G` be continuous and `G(Z)` have the defining property of the
 conditional mean of `X` given `Z` (`hcond`: equal integrals over every `σ(Z)`-measurable set).
 Then `E[G(Z)⁺] ≤ E[X⁺]`. -/
@@ -217,7 +201,8 @@ theorem integral_max_comp_le_of_condMean {Ω : Type*} {m0 : MeasurableSpace Ω} 
   calc ∫ ω, max (G (Z ω)) 0 ∂P
       = ∫ ω, max ((P[X | MeasurableSpace.comap Z inferInstance]) ω) 0 ∂P :=
         integral_congr_ae (by filter_upwards [hae] with ω h using by rw [h])
-    _ ≤ ∫ ω, max (X ω) 0 ∂P := integral_max_condExp_le hm hX
+    _ ≤ ∫ ω, max (X ω) 0 ∂P := by
+        simpa [posPart_def] using integral_posPart_sub_condExp_le hm hX 0
 
 /-- **Lower bound for the call.** For `Z ~ N(0,1)` and `X` integrable, if `expSum a d c (Z)` is
 the conditional mean of `X` given `Z` and is positive exactly to the right of `zs`, then for a
@@ -227,10 +212,17 @@ theorem condBoundCall_le_integral_max {Ω : Type*} {m0 : MeasurableSpace Ω} {P 
     (hZ : HasLaw Z (gaussianReal 0 1) P)
     {X : Ω → ℝ} (hX : Integrable X P) {n : ℕ} (a d c : Fin n → ℝ) (zs D : ℝ) (hD : 0 ≤ D)
     (hpos : ∀ z, 0 < expSum a d c z ↔ zs < z)
-    (hGint : Integrable (fun ω ↦ expSum a d c (Z ω)) P)
     (hcond : ∀ s, MeasurableSet[MeasurableSpace.comap Z inferInstance] s →
       ∫ ω in s, expSum a d c (Z ω) ∂P = ∫ ω in s, X ω ∂P) :
     condBoundCall D a d c zs ≤ D * ∫ ω, max (X ω) 0 ∂P := by
+  have hGint : Integrable (fun ω ↦ expSum a d c (Z ω)) P := by
+    have h : Integrable (expSum a d c) (gaussianReal 0 1) := by
+      unfold expSum
+      refine integrable_finsetSum _ fun k _ ↦ ?_
+      simp_rw [Real.exp_add, ← mul_assoc]
+      exact (integrable_exp_mul_gaussianReal (c k)).const_mul _
+    rw [← hZ.map_eq] at h
+    exact h.comp_aemeasurable hZ.aemeasurable
   unfold condBoundCall
   rw [← integral_max_expSum_hasLaw hZ a d c zs hpos]
   exact mul_le_mul_of_nonneg_left
@@ -245,7 +237,6 @@ theorem condBoundCall_sub_mean_le_integral_max_neg {Ω : Type*} {m0 : Measurable
     (hZ : HasLaw Z (gaussianReal 0 1) P)
     {X : Ω → ℝ} (hX : Integrable X P) {n : ℕ} (a d c : Fin n → ℝ) (zs D : ℝ) (hD : 0 ≤ D)
     (hpos : ∀ z, 0 < expSum a d c z ↔ zs < z)
-    (hGint : Integrable (fun ω ↦ expSum a d c (Z ω)) P)
     (hcond : ∀ s, MeasurableSet[MeasurableSpace.comap Z inferInstance] s →
       ∫ ω in s, expSum a d c (Z ω) ∂P = ∫ ω in s, X ω ∂P) :
     condBoundCall D a d c zs - D * ∫ ω, X ω ∂P ≤ D * ∫ ω, max (-X ω) 0 ∂P := by
@@ -256,67 +247,9 @@ theorem condBoundCall_sub_mean_le_integral_max_neg {Ω : Type*} {m0 : Measurable
     rcases le_total (X ω) 0 with h | h
     · rw [max_eq_right h, max_eq_left (neg_nonneg.2 h)]; ring
     · rw [max_eq_left h, max_eq_right (neg_nonpos.2 h)]; ring
-  have := condBoundCall_le_integral_max hZm hZ hX a d c zs D hD hpos hGint hcond
+  have := condBoundCall_le_integral_max hZm hZ hX a d c zs D hD hpos hcond
   rw [hparity]
   linarith
-
-/-! ### Exact moments of a weighted sum of GBM prices -/
-
-section Moments
-
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {n : ℕ} {W : Fin n → Ω → ℝ}
-
-/-- **First moment.** With standard-normal drivers `Wᵢ`, the prices
-`Sᵢ = Fᵢ exp(σ√tᵢ Wᵢ − σ²tᵢ/2)` have `E[∑ wᵢ Sᵢ] = ∑ wᵢ Fᵢ`. This is
-`integral_basket_eq_basketM1` with the per-asset volatility `σ√tᵢ` over unit horizon. With
-`wᵢ = 1/N` it is `E[A] = ∑ Fᵢ/N`. -/
-theorem integral_gbmSum_eq (hstd : ∀ i, HasLaw (W i) (gaussianReal 0 1) P) (w F t : Fin n → ℝ)
-    (σ : ℝ) (ht : ∀ i, 0 ≤ t i) :
-    ∫ ω, ∑ i, w i * (F i * Real.exp (σ * Real.sqrt (t i) * W i ω - σ ^ 2 * t i / 2)) ∂P
-      = ∑ i, w i * F i := by
-  have h := integral_basket_eq_basketM1 hstd w F (fun i ↦ σ * Real.sqrt (t i)) (T := 1)
-    zero_le_one
-  have hfun : ∀ ω, ∑ i, w i * (F i * Real.exp (σ * Real.sqrt (t i) * W i ω - σ ^ 2 * t i / 2))
-      = ∑ i, w i * (F i * basketLognormalFactor (σ * Real.sqrt (t i)) 1 (W i ω)) := fun ω ↦ by
-    refine Finset.sum_congr rfl fun i _ ↦ ?_
-    unfold basketLognormalFactor
-    rw [mul_pow, Real.sq_sqrt (ht i), Real.sqrt_one]
-    congr 4 <;> ring
-  simp_rw [hfun]
-  exact h
-
-/-- **Second moment.** If every pair `(Wᵢ, Wⱼ)` is jointly Gaussian with standard-normal margins
-and `Cov(Wᵢ, Wⱼ) = min(tᵢ, tⱼ)/√(tᵢ tⱼ)` (the Brownian correlation at dates `tᵢ > 0`), then
-`E[(∑ wᵢ Sᵢ)²] = ∑ᵢ∑ⱼ wᵢ wⱼ Fᵢ Fⱼ e^{σ² min(tᵢ, tⱼ)}`. With `wᵢ = 1/N` this is `E[A²]`; with the
-weights `(−1/N, …, −1/N, 1)` of `S_T − A` it is `E[(S_T − A)²]`, which contains `E[S_T A]`. -/
-theorem integral_gbmSum_sq_eq
-    (hpair : ∀ i j, HasGaussianLaw (fun ω ↦ (W i ω, W j ω)) P)
-    (hstd : ∀ i, HasLaw (W i) (gaussianReal 0 1) P) (w F t : Fin n → ℝ) (σ : ℝ)
-    (ht : ∀ i, 0 < t i)
-    (hcorr : ∀ i j, cov[W i, W j; P] = min (t i) (t j) / (Real.sqrt (t i) * Real.sqrt (t j))) :
-    ∫ ω, (∑ i, w i * (F i * Real.exp (σ * Real.sqrt (t i) * W i ω - σ ^ 2 * t i / 2))) ^ 2 ∂P
-      = ∑ i, ∑ j, w i * w j * F i * F j * Real.exp (σ ^ 2 * min (t i) (t j)) := by
-  have h := integral_basket_sq_eq_basketM2 hpair hstd hcorr w F (fun i ↦ σ * Real.sqrt (t i))
-    (T := 1) zero_le_one
-  have hfun : ∀ ω, (∑ i, w i * (F i * Real.exp (σ * Real.sqrt (t i) * W i ω - σ ^ 2 * t i / 2)))
-      ^ 2 = (∑ i, w i * (F i * basketLognormalFactor (σ * Real.sqrt (t i)) 1 (W i ω))) ^ 2 :=
-    fun ω ↦ by
-      congr 1
-      refine Finset.sum_congr rfl fun i _ ↦ ?_
-      unfold basketLognormalFactor
-      rw [mul_pow, Real.sq_sqrt (ht i).le, Real.sqrt_one]
-      congr 4 <;> ring
-  simp_rw [hfun]
-  rw [h]
-  unfold basketM2
-  refine Finset.sum_congr rfl fun i _ ↦ Finset.sum_congr rfl fun j _ ↦ ?_
-  have hi := Real.sqrt_pos.2 (ht i)
-  have hj := Real.sqrt_pos.2 (ht j)
-  congr 2
-  beta_reduce
-  field_simp
-
-end Moments
 
 /-! ### The model data and the one-fixing case -/
 
@@ -344,11 +277,12 @@ theorem condBoundCall_eq_forward {m : ℕ} (D : ℝ) (a F c : Fin m → ℝ) (hF
   rw [show Real.log (F k) - c k ^ 2 / 2 + c k ^ 2 / 2 = Real.log (F k) by ring,
     Real.exp_log (hF k)]
 
-/-- **One fixing at `t < T` (no past fixings).** The data are `u = (−1, 1)` at dates
+/-- **One fixing at `t < T`.** The data are `u = (−1, 1)` at dates
 `(t, T)` and forwards `(S e^{rt}, S e^{rT})`. Then `expSum` is positive exactly to the right of
 `z* = s/2 − rτ/s` (`τ = T − t`, `s = σ√τ`), and the conditioning bound with discount `e^{−rT}`
 equals `S · bsV 1 r σ 1 (T − t)`: the forward-start call `(S_T − S_t)⁺`, priced by the
-Black–Scholes formula at unit spot and strike. -/
+Black–Scholes formula at unit spot and strike. The identity uses only `τ = T − t > 0`; for
+`0 ≤ t` it is the forward-start price, and no past fixings enter. -/
 theorem condBoundCall_one_fixing (S r σ t T : ℝ) (hS : 0 < S) (hσ : 0 < σ)
     (htT : t < T) :
     let ts : Fin 2 → ℝ := ![t, T]
@@ -438,7 +372,7 @@ Black–Scholes market of spot `1`, drift and rate `r`, the pricing measure's pr
 `europeanCall 1 τ` (`τ = T − t > 0`, horizon `H ≥ τ`) is `bsV 1 r σ 1 τ`
 (`price_europeanCall_constGirsanovMeasure`), so the one-fixing conditioning bound of
 `condBoundCall_one_fixing` is `S` times it: the forward-start call, grounded in the pricing
-functional. -/
+functional. Only `τ > 0` is used; for `0 ≤ t` this is the forward-start price. -/
 theorem condBoundCall_one_fixing_eq_marketPrice {Ω : Type*} [MeasurableSpace Ω]
     {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)
     (hWmeas : ∀ s, Measurable (W s)) (S r σ t T : ℝ) {τ H : ℝ≥0} (hS : 0 < S) (hσ : 0 < σ)
