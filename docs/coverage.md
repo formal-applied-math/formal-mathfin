@@ -26,6 +26,23 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Jarrow–Yildirim: the index variance, the ZC inflation caplet, the YoY forward (2026-11-20)
+
+Module `Models/Rates/JarrowYildirim.lean`; two `reduced_core` entries in `interest_rates.json`, each
+composing existing results under model hypotheses.
+
+- **`mf-jarrow-yildirim-zc-inflation-caplet`** (`jyZcCaplet_price`): the priced zero-coupon
+  inflation caplet is `Pⁿ(0,T)` times the Black caplet on the curve forward `I₀Pʳ/Pⁿ`, given the
+  lognormal law of the index under the nominal `T`-forward measure. Not derived: that lognormality
+  and its SDE-level derivation, and the real-rate drift shift. `V` is a free positive input; the
+  statement does not identify it with `jyVariance`.
+- **`mf-jarrow-yildirim-yoy-forward-convexity`** (`jyYoyPayment_price`): the year-on-year forward
+  and the time-0 price of its payment, from the conditional-expectation (martingale) hypothesis for
+  the forward index plus the tower step `jyYoyForward_eq_bondRatio`, closed by `yoyConvexity_eq`.
+  Not derived: the martingale property of `F(·,T)` under `Q^T`, the Hull–White reconstitution form
+  of the bond ratio, and the means, variances and covariance of the rate deviations (all
+  hypotheses or inputs).
+
 ### Marchenko-Pastur support edges (2026-11-08)
 
 One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 805 → 806 on the merged
@@ -566,19 +583,6 @@ split by area. What each bridge proves, by area:
   under that measure (`mf-inflation-hw-reconstitution-normaliser`); the reconstitution formula is
   not derived. Throughout, rates are carried in their Wiener representation: that it solves the
   SDE is cited, not proved.
-- **Jarrow–Yildirim inflation** (`interest_rates.json`; `Models/Rates/JarrowYildirim.lean`). Two
-  `reduced_core` entries, composing existing results under model hypotheses.
-  `mf-jarrow-yildirim-zc-inflation-caplet`: the priced zero-coupon inflation caplet is `Pⁿ(0,T)` times the Black caplet on
-  the curve forward `I₀Pʳ/Pⁿ`, given the lognormal law of the index under the nominal `T`-forward
-  measure with a free positive log-variance `V`. Not derived: the SDE-level derivation of `V` (the
-  integrated Jarrow–Yildirim variance `jyVariance`) and of the real-rate drift shift,
-  and the lognormality under `Q^T`.
-  `mf-jarrow-yildirim-yoy-forward-convexity`: the year-on-year forward and the time-0 price of its
-  payment, from the conditional-expectation (martingale) hypothesis for the forward index plus the
-  tower property, closed by `yoyConvexity_eq`. Not derived: the martingale property of `F(·,T)`
-  under `Q^T`, the Hull–White reconstitution form of the bond ratio, and the means, variances and
-  covariance of the rate deviations (all hypotheses or inputs).
-  The module also supplies the eq. (17.8) tower step (`jyYoyForward_eq_bondRatio`).
 - **Curves and affine models** (`interest_rates.json`). The Vasicek yield in Nelson–Siegel slope
   factors, with its short and long ends (`mf-vasicek-yield-nelson-siegel-factors`,
   `mf-vasicek-yield-curve-ends`); the affine bond PDE from the Riccati equations, for CIR (closed

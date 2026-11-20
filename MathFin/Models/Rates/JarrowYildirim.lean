@@ -5,7 +5,6 @@ Authors: Yang Ye
 -/
 module
 
-public import MathFin.Models.BlackScholes.Put
 public import MathFin.Models.Rates.Caplet
 public import MathFin.Models.Rates.Inflation
 public import MathFin.Models.Rates.VasicekBondPrice
@@ -31,21 +30,19 @@ This module records what follows from that structure without the SDE calculus.
 * The variance integrand of `log F(·,T)` for constant parameters (`jyVarIntegrand`) and its
   integral `V(0,T)` (`jyVariance`). The integrand is the quadratic form of the vector
   `(σ_I, −σ_r·B_r, σ_n·B_n)` against the `(I, r, n)` correlation matrix
-  (`jyVarIntegrand_eq_quadForm`), hence non-negative when that matrix is positive
+  (an identity by `ring`), hence non-negative when that matrix is positive
   semidefinite (`jyVarIntegrand_nonneg`, and for `V(0,T)` with `T ≥ 0`, `jyVariance_nonneg`).
   Pairwise `|ρ| ≤ 1` is not enough for three factors;
   the condition used is `ρ_{rI}² ≤ 1`, `ρ_{nI}² ≤ 1` and the determinant form
   `jyCorrDet ≥ 0`. Degenerate reduction: `jyVariance_zero_rate_vols`.
-* The zero-coupon inflation caplet (`jyZcCaplet_price`):
-  if the index under the nominal `T`-forward measure is lognormal
-  with log-variance `V` and the index-linked bond is priced on the real curve, the priced caplet
-  payoff `𝔼^{Qn}[(I_T − K)⁺/B_T]` (convention
+* The zero-coupon inflation caplet (`jyZcCaplet_price`): if the index under the nominal
+  `T`-forward measure is lognormal with log-variance `V` and the index-linked bond is priced on the
+  real curve, the priced caplet payoff `𝔼^{Qn}[(I_T − K)⁺/B_T]` (convention
   `N[(I_T/I₀ − 1) − κ]⁺ = (N/I₀)·(I_T − K)⁺` with `K = I₀(1+κ)`, `κ` the total, non-annualised
-strike over `[0,T]`; an annual quoted strike `k` is `K = I₀(1+k)^T`) is `Pⁿ(0,T)` times the
-library's Black caplet on the curve forward `I₀·Pʳ(0,T)/Pⁿ(0,T)` at total variance
-`V` (proved by instantiating
-  `MathFin.Contracts.value_caplet_black76`). `jyForwardIndex_lognormal_eq_curves` puts the
-  lognormal index on that curve forward.
+  strike over `[0,T]`; an annual quoted strike `k` is `K = I₀(1+k)^T`) is `Pⁿ(0,T)` times the
+  library's Black caplet on the curve forward `I₀·Pʳ(0,T)/Pⁿ(0,T)` at total variance `V` (proved
+  by instantiating `MathFin.Contracts.value_caplet_black76`).
+  `jyForwardIndex_lognormal_eq_curves` puts the lognormal index on that curve forward.
 * `jyZcCaplet_price_deterministic_rates`: with `σ_r = σ_n = 0` the integrated variance is `σ_I²T`
   and the priced caplet is `Pⁿ·blackCaplet (I₀Pʳ/Pⁿ) K σ_I T 1` (by `blackCaplet_sqrt_variance`:
   Black at total variance `σ²T` and maturity 1 is Black at volatility `σ` and maturity `T`).
@@ -63,8 +60,7 @@ three SDEs is not claimed: `V` is defined, and the lognormality of the index
 martingale property of the forward index (`hmart`) and the Hull–White bond-reconstitution form
 of the bond ratio (`hR`) are hypotheses. The model form is transcribed from the secondary
 sources below; the primary paper was not consulted for the transcription. The exact YoY caplet,
-calibration, seasonality and Monte Carlo are out of scope. The eq. (17.8) tower step is named
-as `jyYoyForward_eq_bondRatio` below.
+calibration, seasonality and Monte Carlo are out of scope.
 
 ## References
 
@@ -145,7 +141,7 @@ theorem quad3_nonneg {ρrI ρnI ρnr x y z : ℝ} (hrI : ρrI ^ 2 ≤ 1) (hnI : 
 
 /-- The integrand is the quadratic form of `(σ_I, −σ_r·B_r, σ_n·B_n)` against the
 `(I, r, n)` correlation matrix: the variance of `σ_I dW_I − σ_rB_r dW_r + σ_nB_n dW_n`. -/
-theorem jyVarIntegrand_eq_quadForm (ar an σI σr σn ρrI ρnI ρnr T t : ℝ) :
+private theorem jyVarIntegrand_eq_quadForm (ar an σI σr σn ρrI ρnI ρnr T t : ℝ) :
     jyVarIntegrand ar an σI σr σn ρrI ρnI ρnr T t
       = σI ^ 2 + (-(σr * vasicekBondB ar (T - t))) ^ 2 + (σn * vasicekBondB an (T - t)) ^ 2
         + 2 * ρrI * σI * (-(σr * vasicekBondB ar (T - t)))
