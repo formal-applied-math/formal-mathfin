@@ -17,6 +17,11 @@ def test_finds_openness_statements():
     assert "remains open" in found[0]["context"]
 
 
+def test_unsolved():
+    assert s.hits("The construction at stopping times is an unsolved problem.")[0]["patterns"] \
+        == ["unsolved"]
+
+
 def test_ignores_open_sets_and_references():
     body = "Let U be an open set and the interval is open. The map is continuous.\n" * 30
     refs = "References\n[1] A. Author, An open problem in finance, 2020.\n"

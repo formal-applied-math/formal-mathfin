@@ -50,6 +50,7 @@ PATTERNS: dict[str, re.Pattern[str]] = {k: re.compile(v, re.I) for k, v in {
                  r"|\bwe\s+do\s+not\s+know\s+(?:whether|if|how)\b"
                  r"|\b(?:has|have)\s+not\s+(?:yet\s+)?been\s+(?:proved|proven|established|"
                  r"resolved|settled|answered)\b",
+    "unsolved": r"\b(?:unsolved|unanswered|unresolved)\b",
     "left-open": r"\bleft\s+(?:as\s+an?\s+)?open\b|\bleave\s+(?:this|it|the\s+\w+)\s+"
                  r"(?:as\s+an?\s+)?open\b",
 }.items()}
