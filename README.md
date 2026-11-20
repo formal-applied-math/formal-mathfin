@@ -17,9 +17,9 @@ machine has checked, to build on them in other Lean projects, and to see what is
 stated and open, and where a new result would fit. It is written for mathematicians and for AI
 agents alike.
 
-The [corpus](docs/glossary.md#corpus) records 904 results from the literature in
+The [corpus](docs/glossary.md#corpus) records 906 results from the literature in
 [`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 864 are proved in
-full, 18 restate a lemma from Mathlib or BrownianMotion, and 22 are
+full, 18 restate a lemma from Mathlib or BrownianMotion, and 24 are
 [reduced cores](docs/glossary.md#status) that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -166,7 +166,7 @@ from one file, [`docs/taxonomy.toml`](docs/taxonomy.toml), and the site's
 
 ## Limitations
 
-- **Reduced cores.** Twenty-two of the results prove less than the theorem they are named after.
+- **Reduced cores.** Twenty-four of the results prove less than the theorem they are named after.
   - Eleven assume a structure whose fields include the textbook conclusion: the reflection
     principle, nowhere differentiability and the law of the iterated logarithm for Brownian motion,
     Novikov's condition, the general Girsanov theorem, the two-dimensional Itô formula, and five
