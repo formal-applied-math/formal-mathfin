@@ -177,7 +177,7 @@ family = "default"
 label = "thm:stefan-uniqueness"
 title = "Stefan uniqueness with accumulating jumps"
 statement = "Physical Stefan problem uniqueness when jumps accumulate at time zero (open problem)."
-uses = ["def:brownian-motion"]
+uses = ["def:supercooled-stefan-solution"]
 area = "valuation/default"
 family = "default"
 
@@ -474,7 +474,7 @@ area = "market"
 label = "thm:semistatic-ftap"
 title = "Semistatic FTAP with entropy"
 statement = "A semistatic no-arbitrage criterion for the existence of an equivalent martingale measure of finite entropy calibrated to option prices (open problem)."
-uses = ["thm:dmw-ftap", "thm:market-carr-madan"]
+uses = ["def:calibrated-martingale-measures", "def:semistatic-strategy", "thm:dmw-ftap"]
 area = "valuation/general"
 
 [[node]]
@@ -547,7 +547,7 @@ area = "choice/portfolio"
 label = "thm:time-inconsistent-equilibrium"
 title = "Relaxed equilibria under time inconsistency"
 statement = "Relaxed equilibria exist with action-dependent diffusion under time inconsistency (open problem)."
-uses = ["thm:sde-strong-solution"]
+uses = ["def:relaxed-controlled-diffusion"]
 area = "choice/dynamic"
 
 [[node]]
@@ -646,7 +646,7 @@ family = "model-free"
 label = "thm:rough-heston-pathwise-uniqueness"
 title = "Rough-Heston pathwise uniqueness"
 statement = "Pathwise uniqueness holds for the square-root rough-Heston variance equation (open problem)."
-uses = ["thm:sde-strong-solution"]
+uses = ["def:stochastic-volterra-equation"]
 area = "valuation/volatility"
 family = "volatility"
 
@@ -662,7 +662,7 @@ family = "volatility"
 label = "thm:schrodinger-spx-vix"
 title = "Schrödinger calibration of SPX/VIX"
 statement = "Integrable Schrödinger potentials exist for continuum SPX/VIX calibration (open problem)."
-uses = ["thm:model-free-variance"]
+uses = ["def:calibrated-martingale-measures", "thm:model-free-variance"]
 area = "valuation/volatility"
 family = "volatility"
 
@@ -739,3 +739,181 @@ title = "Delbaen–Schachermayer: no free lunch with vanishing risk"
 statement = "For a locally bounded semimartingale price process, no free lunch with vanishing risk holds if and only if there is an equivalent local martingale measure; the library proves only that an equivalent martingale measure excludes simple arbitrage (thm:continuous-ftap)."
 uses = ["thm:continuous-ftap", "thm:semimartingale-integral", "thm:dmw-multi-asset"]
 area = "market"
+
+# The objects the catalogued open problems need before they can be stated in Lean
+# (docs/research-problems/problems.json, `formalization.lean_statement.needs`). A problem that
+# cannot be stated yet stays in the catalogue; these nodes are what the library builds toward.
+
+[[node]]
+label = "def:stochastic-volterra-equation"
+title = "Stochastic Volterra equations"
+statement = "A solution of X_t = x₀ + ∫₀ᵗ K(t−s) b(X_s) ds + ∫₀ᵗ K(t−s) σ(X_s) dB_s for a kernel K ∈ L²_loc, possibly singular at 0: a continuous adapted process equal to the right side almost surely at every t, the Itô integral taken for each t of its own integrand s ↦ K(t−s) σ(X_s). Rough volatility is stated in it."
+uses = ["def:ito-integral-clm", "thm:sde-strong-solution"]
+area = "valuation/volatility"
+family = "volatility"
+
+[[node]]
+label = "def:supercooled-stefan-solution"
+title = "Physical solutions of the supercooled Stefan problem"
+statement = "For an initial density g, a nondecreasing càdlàg loss Λ_t = ∫₀^∞ P(τˣ ≤ t) g(x) dx, where τˣ is the first time x + B − Λ reaches 0, whose jumps obey the physical minimal-jump rule: the mean-field model of default contagion through a common loss."
+uses = ["def:brownian-motion"]
+area = "valuation/default"
+family = "default"
+
+[[node]]
+label = "def:relaxed-controlled-diffusion"
+title = "Relaxed controlled diffusions"
+statement = "Relaxed Markov policies π(x, du) on a compact action set, the controlled generator L^π f = ∫_U (b·∇f + ½ tr(a D²f)) π(·, du) with action-dependent covariance a(x, u), and the reward of a policy along its diffusion: the setting of time-inconsistent control."
+uses = ["thm:sde-strong-solution"]
+area = "choice/dynamic"
+
+[[node]]
+label = "def:calibrated-martingale-measures"
+title = "Calibrated martingale measures of finite entropy"
+statement = "Laws Q of the prices at two dates with prescribed marginals (read from call prices), the martingale condition E_Q[Y | X] = X, and finite relative entropy H(Q | P) against a reference law: the feasible set of entropic calibration."
+uses = ["def:emm", "thm:market-carr-madan"]
+ground = "Mathlib: InformationTheory.klDiv, condExp"
+area = "valuation/general"
+
+[[node]]
+label = "def:semistatic-strategy"
+title = "Semistatic trading strategies"
+statement = "A dynamic position h(X)(Y − X) in the underlying together with a static payoff g(Y) bought at its market price ∫ g dν, and semistatic arbitrage: the strategies of model-independent pricing and robust hedging."
+uses = ["def:emm", "thm:market-carr-madan"]
+area = "valuation/general"
+
+[[node]]
+label = "thm:kyle-equilibrium-unique"
+title = "Uniqueness of the Kyle equilibrium"
+statement = "In the one-period Gaussian Kyle model every equilibrium among Borel strategies is Kyle's affine one (resolution reported by Monteiro–Tourky, 2026; unchecked here)."
+uses = ["thm:kyle-equilibrium", "thm:glosten-milgrom-quote"]
+lean = "MathFinFrontier.kyle_equilibrium_unique"
+area = "choice/trading"
+family = "mechanisms"
+
+[[node]]
+label = "def:path-signature"
+title = "Signatures of paths"
+statement = "The signature of a path, the series of its iterated integrals in the tensor algebra, and for Brownian motion its Stratonovich signature up to a stopping time with the expected signature: the features of signature methods."
+uses = ["def:brownian-motion"]
+ground = "Mathlib: TensorAlgebra"
+area = "probability/brownian"
+
+[[node]]
+label = "def:nondominated-model"
+title = "Nondominated models"
+statement = "A set of priors 𝒫 on path space dominated by no single measure, 𝒫-quasi-sure statements, the quasi-sure L^∞ space, and superhedging under every prior: the setting of robust finance."
+uses = ["def:emm"]
+area = "valuation/model-free"
+
+[[node]]
+label = "def:convex-order"
+title = "Convex order"
+statement = "μ ≤_cx ν when ∫ φ dμ ≤ ∫ φ dν for every convex φ; for laws on ℝ with equal means, the ordering of call prices at every strike. Peacocks, martingale couplings and minimal-variance aggregation are stated in it."
+uses = ["thm:market-carr-madan"]
+ground = "Mathlib: ConvexOn, integral"
+area = "valuation/model-free"
+
+[[node]]
+label = "def:markov-martingale"
+title = "Markov martingales"
+statement = "A martingale that is a Markov process with respect to a given filtration, raw or satisfying the usual conditions, and the mimicking problem: a Markov martingale with prescribed one-dimensional marginals."
+uses = ["def:brownian-motion"]
+area = "probability/martingales"
+
+[[node]]
+label = "def:zakai-equation"
+title = "The Zakai equation"
+statement = "The unnormalised filter of a signal observed through Y = ∫ h(X) dt + W under a reference measure, and the Zakai equation it solves: the object of nonlinear filtering under partial information."
+uses = ["def:ito-integral-clm"]
+area = "statistics"
+
+[[node]]
+label = "def:optimal-dividend-problem"
+title = "Optimal dividend problems"
+statement = "For one or several surplus processes (Cramér–Lundberg or diffusion), the value of paying dividends until ruin, with admissible dividend strategies, and its HJB variational inequality: the control problem of de Finetti."
+uses = ["thm:cramer-lundberg-claims"]
+area = "risk/insurance"
+
+[[node]]
+label = "def:sabr-model"
+title = "The SABR model"
+statement = "Forward dF = σ F^β dW, volatility dσ = ν σ dZ with d⟨W, Z⟩ = ρ dt and absorption at zero for β < 1: the stochastic-volatility model behind the Hagan smile, stated as a weak solution with its law."
+uses = ["thm:sde-strong-solution"]
+area = "valuation/smile"
+family = "volatility"
+
+[[node]]
+label = "thm:expected-signature-moment-problem"
+title = "Expected signature of stopped Brownian motion"
+statement = "For Brownian motion stopped at the exit time of a bounded C^{2,α} domain, the expected signature determines the law of the signature (open problem)."
+uses = ["def:path-signature"]
+area = "probability/brownian"
+
+[[node]]
+label = "thm:robust-american-irregular-duality"
+title = "Robust American hedging with irregular payoffs"
+statement = "Under semimartingale-characteristic uncertainty, the Snell envelopes of a non-càdlàg American payoff aggregate and the superhedging duality holds with a minimal hedge (open problem)."
+uses = ["def:nondominated-model", "def:snell-envelope"]
+area = "valuation/american"
+
+[[node]]
+label = "thm:raw-filtration-mimicking-martingale"
+title = "Mimicking Markov martingales for the raw filtration"
+statement = "Whether every peacock on ℝᵈ admits a mimicking martingale that is Markov for its raw filtration (open problem)."
+uses = ["def:convex-order", "def:markov-martingale"]
+area = "valuation/model-free"
+
+[[node]]
+label = "thm:zakai-uniqueness-singular-control"
+title = "Zakai uniqueness under singular control"
+statement = "The unnormalised filter is the unique solution of the Zakai equation when the singular control's jump times accumulate (open problem)."
+uses = ["def:zakai-equation"]
+area = "statistics"
+
+[[node]]
+label = "thm:multidimensional-dividend-boundary"
+title = "Optimal dividends of several insurers on the free boundary"
+statement = "The optimal local control on the free boundaries of the n-dimensional dividend problem, n ≥ 2 (open problem)."
+uses = ["def:optimal-dividend-problem"]
+area = "risk/insurance"
+
+[[node]]
+label = "thm:robust-binomial-duality"
+title = "Quasi-sure duality for the robust multi-period binomial model"
+statement = "Whether the robust multi-period binomial model satisfies l(L^∞) = E', the duality that makes its quasi-sure theory usable (open problem)."
+uses = ["def:nondominated-model", "def:coin-flip-measure"]
+area = "valuation/trees"
+
+[[node]]
+label = "thm:sabr-right-tail-correction"
+title = "SABR right tail: the k^{3/2} correction"
+statement = "For ρ < 0, the log right tail of the absorbed SABR forward has a k^{3/2} correction with the constant of Cao–Huang's Conjecture 8.1 (open problem)."
+uses = ["def:sabr-model"]
+area = "valuation/smile"
+family = "volatility"
+
+[[node]]
+label = "thm:uniform-convex-complete-mixability"
+title = "Complete mixability of uniform laws on convex bodies"
+statement = "The uniform law on a bounded convex body of ℝᵈ is n-completely mixable for every n ≥ d + 1 (open problem, Wang 2015)."
+uses = ["thm:frechet-hoeffding"]
+ground = "Mathlib: Measure.map, cond"
+lean = "MathFinFrontier.uniform_convex_completelyMixable"
+area = "risk/aggregation"
+
+[[node]]
+label = "thm:bounded-law-complete-mixability"
+title = "Complete mixability of bounded absolutely continuous laws"
+statement = "An absolutely continuous law on a bounded interval is n-completely mixable for all large n (two conflicting unrefereed resolution claims; Wang 2015)."
+uses = ["thm:frechet-hoeffding"]
+ground = "Mathlib: Measure.map, AbsolutelyContinuous"
+lean = "MathFinFrontier.absolutelyContinuous_eventually_completelyMixable"
+area = "risk/aggregation"
+
+[[node]]
+label = "thm:convex-order-minimal-sum"
+title = "Convex-order minimal sums"
+statement = "Necessary and sufficient conditions on marginals F₁, …, Fₙ for the sums with these marginals to have a smallest element in convex order (open problem, Wang 2015)."
+uses = ["def:convex-order", "thm:frechet-hoeffding"]
+area = "risk/aggregation"
