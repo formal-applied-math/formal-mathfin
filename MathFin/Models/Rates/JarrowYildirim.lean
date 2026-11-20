@@ -67,9 +67,13 @@ follows without the SDE calculus.
 The SDE-level derivation of the `−ρ_{rI}σ_rσ_I` drift of the real rate and of the log-variance
 `V(0,T)` is not claimed: the index-linked-bond pricing (`hident`), the lognormality of the index
 (`hZ`), the martingale property of the forward index (`hmart`) and the Hull–White reconstitution
-form of the bond ratio (`hR`) are hypotheses. The model form is transcribed from the secondary
-sources below; the primary paper was not consulted. The exact YoY caplet, calibration, seasonality
-and Monte Carlo are out of scope.
+form of the bond ratio (`hR`) are hypotheses. The three-SDE form (dependent Brownian motions for the
+nominal rate, the real rate and the index, with the real-rate drift shift `−ρ_{rI}σ_rσ_I`) is that
+of Dam–Macrina–Skovmand–Sloth §2.2 (arXiv:1801.08804, who cite Brigo–Mercurio ch. 15 for it); the
+nominal-rate–index correlation `ρ_{nI}` is not named there, and the correlation structure of the
+variance integrand is this module's reading. Bagaria ch. 17 supplies only eqs. 17.6, 17.8 and 17.10,
+and the caplet rests on Brigo–Mercurio §17.1. No primary paper was consulted. The exact YoY caplet,
+calibration, seasonality and Monte Carlo are out of scope.
 
 ## References
 
@@ -79,6 +83,8 @@ and Monte Carlo are out of scope.
 * [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006], 2nd
   ed. (2006), §15.3 (the JY model), §16.3 (YYIIS with the JY model), §17.1 (the JY caplet; the
   zero-coupon caplet is its first-period case)
+* [H. Dam, A. Macrina, D. Skovmand and D. Sloth, *Rational Models for Inflation-Linked Derivatives*,
+  2018, arXiv:1801.08804][DamMacrinaSkovmandSloth2018], §2.2
 * [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 17 §17.3, eq. 17.6 (the
   forward index), and §17.4, eqs. 17.8, 17.10
 
@@ -367,13 +373,15 @@ theorem jyYoyForward_eq_bondRatio {mS : MeasurableSpace Ω} (hmS : mS ≤ m)
 §16.3).** Let `μ = Q^T`, and `Z1, Z2` independent standard normals under `μ` (`hZ1`, `hZ2`,
 `hindep`), `ρ` a correlation of the two rate deviations at `S` (a free parameter of the statement;
 it equals `ρ_{nr}` when `a_n = a_r` and in general differs from it), and `yⁿ = mⁿ + √Vⁿ·Z1`,
-`yʳ = mʳ + √Vʳ·(ρ·Z1 + √(1−ρ²)·Z2)` the two Gaussian rate deviations of `yoyConvexity_eq`, with
-means `mⁱ` and variances `Vⁱ` (`0 ≤ Vⁿ`, `0 ≤ Vʳ`, `ρ² ≤ 1`) and covariance `Cov = ρ·√(Vⁿ·Vʳ)`
-(`hCov`). `Bⁿ = B_n(S,T)` and `Bʳ = B_r(S,T)` are the Hull–White loadings over `[S,T]` (free reals
-here; they enter only through `hR`), and `Dⁱ = hwD Bⁱ Vⁱ = −Bⁱ²Vⁱ/2`. Under the hypotheses of
-`jyYoyForward_eq_bondRatio` (including `hmart`), and assuming the bond ratio `R_S = Pʳ(S,T)/Pⁿ(S,T)`
-has the Hull–White reconstitution form `hR` (`R_S` is the naive ratio of forwards
-`Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))` times `exp(Dʳ − Dⁿ − Bʳyʳ + Bⁿyⁿ)`),
+`yʳ = mʳ + √Vʳ·(ρ·Z1 + √(1−ρ²)·Z2)` the two Gaussian rate deviations of `yoyConvexity_eq` (the
+deviation of each short rate at `S` from its time-0 forward rate `fⁱ(0,S)`, as in
+`integral_exp_hwD_forwardMeasure`), with means `mⁱ` and variances `Vⁱ` (`0 ≤ Vⁿ`, `0 ≤ Vʳ`,
+`ρ² ≤ 1`) and covariance `Cov = ρ·√(Vⁿ·Vʳ)` (`hCov`). `Bⁿ = B_n(S,T)` and `Bʳ = B_r(S,T)` are the
+Hull–White loadings over `[S,T]` (free reals here; they enter only through `hR`), and
+`Dⁱ = hwD Bⁱ Vⁱ = −Bⁱ²Vⁱ/2`. Under the hypotheses of `jyYoyForward_eq_bondRatio` (including
+`hmart`), and assuming the bond ratio `R_S = Pʳ(S,T)/Pⁿ(S,T)` has the Hull–White reconstitution form
+`hR` (`R_S` is the naive ratio of forwards `Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))` times
+`exp(Dʳ − Dⁿ − Bʳyʳ + Bⁿyⁿ)`),
 
   `𝔼^T[I_T/I_S] = (Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T)))·exp(−Bʳmʳ + Bⁿmⁿ + Bⁿ²Vⁿ − BʳBⁿ·Cov)`,
 
