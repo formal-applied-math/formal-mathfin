@@ -75,8 +75,7 @@ basics, mixing conditions.
 The departure-lounge doctrine survives intact; only the address changes. The Lean
 ecosystem already has the exact convention: a **`ForMathlib/` directory** —
 "material that belongs upstream, staged here" (junwei-lu's asymptotic-statistics
-repo uses it; so do many Mathlib-adjacent projects; `upstream/` here is the same
-idea). So:
+repo uses it; so do many Mathlib-adjacent projects). So:
 
 - A field-neutral lemma is born in **whichever domain library needs it first**,
   under `<Lib>/ForMathlib/`, upstream-tagged from day one.

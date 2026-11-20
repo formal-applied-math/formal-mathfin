@@ -14,5 +14,3 @@ lean/
 # Non-build content: docs, reference PDFs, upstream-PR drafts. Not needed
 # inside the verify image.
 docs/
-references/
-upstream/
