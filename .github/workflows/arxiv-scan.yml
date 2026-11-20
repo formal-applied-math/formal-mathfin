@@ -1,0 +1,79 @@
+name: arxiv openness scan
+
+# Scans the full texts of the q-fin papers on arXiv for the sentences where authors say
+# something is open (tools/verify/arxiv_scan.py), the evidence the research-problem catalogue
+# needs. PDFs come from the public arxiv-dataset bucket (arXiv's Kaggle copy); only matching
+# passages are kept. Resumable: each run starts from the artifact of the last successful run
+# and, with chain=true, dispatches itself again until every paper is scanned.
+#   gh workflow run arxiv-scan.yml [-f fresh=true]
+#   gh run download <id> -n arxiv-scan
+
+on:
+  workflow_dispatch:
+    inputs:
+      fresh:
+        description: "start over (re-list the papers, ignore earlier runs)"
+        type: boolean
+        default: false
+      minutes:
+        description: "scan budget for this run, in minutes"
+        default: "320"
+      chain:
+        description: "dispatch another run if papers remain"
+        type: boolean
+        default: true
+
+concurrency:
+  group: arxiv-scan
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: pdftotext
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
+
+      - name: Resume from the last run
+        if: ${{ !inputs.fresh }}
+        run: |
+          # the newest finished run that left state (a run that failed midway uploads too)
+          for id in $(gh run list --workflow arxiv-scan.yml --status completed --limit 10 \
+                        --json databaseId -q '.[].databaseId'); do
+            gh run download "$id" -n arxiv-scan -D scan 2>/dev/null && break
+          done
+          ls -la scan 2>/dev/null || echo "no earlier state"
+
+      - name: List the papers
+        run: |
+          [ -s scan/papers.jsonl ] || python3 -m tools.verify.arxiv_scan list --out scan/papers.jsonl
+          wc -l scan/papers.jsonl
+
+      - name: Scan
+        run: python3 -m tools.verify.arxiv_scan scan --papers scan/papers.jsonl --out scan --minutes "${{ inputs.minutes }}"
+
+      - name: Upload
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arxiv-scan
+          path: scan/
+          retention-days: 90
+
+      - name: Chain
+        if: ${{ inputs.chain }}
+        run: |
+          total=$(wc -l < scan/papers.jsonl); done=$(wc -l < scan/done.jsonl)
+          echo "$done of $total scanned"
+          if [ "$done" -lt "$total" ]; then
+            gh workflow run arxiv-scan.yml --ref "${{ github.ref_name }}" -f minutes="${{ inputs.minutes }}"
+          fi
