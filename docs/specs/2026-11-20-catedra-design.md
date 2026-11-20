@@ -1,6 +1,6 @@
 # The cátedra: agents that work the open-problem catalogue
 
-Status: proposed 2026-11-20. Nothing here is built yet.
+Status: adopted 2026-11-20, decisions below. Nothing here is built yet.
 
 ## Why, and the one thing to copy
 
@@ -55,8 +55,7 @@ always a file, a pull request or an issue comment, never just a chat message.
      exactly is open? Drop roadmap sentences ("we conclude with open questions").
   2. **Merge duplicates**, including the same question asked in several papers. Every source
      stays attached.
-  3. **Search for a resolution.** Read the papers citing the source after its date (Semantic
-     Scholar), the relevant abstracts, and the full PDF whenever a candidate seems to close it.
+  3. **Search for a resolution.** Read the papers citing the source after its date (OpenAlex), the relevant abstracts, and the full PDF whenever a candidate seems to close it.
 - **Output:** catalogue records in the existing schema. A record whose openness evidence is the
   author's own sentence is class A by construction. Records it cannot settle go to the dated
   candidates file as leads, never into the catalogue.
@@ -266,19 +265,26 @@ proving queues up.
 - Tokens per solved problem.
 - False opens: records later found closed. The round-1 baseline was 16 of 36 wrong.
 
-## Decisions for the maintainer
+## Decisions (2026-11-20)
 
-1. **A Semantic Scholar API key** for the resolution checks. Free, by request. Without it the
-   citation searches are rate-limited, as round 6's were.
-2. **The Referee's model.** Sonnet with a fresh context (the standing preference), or Opus for
-   more independence from Sonnet authors.
-3. **The budget** per month, and the cap per problem in Phase 4.
-4. **The foundry and the cátedra's issues.** The definition issues (#532–#536, #538–#544) are
-   `type:proof` + `status:ready`, which puts them in the foundry's queue. They need design
-   before code. Should they be `status:blocked-design` until the Builder's proposal is
-   accepted?
-5. **Publishing:**
-   - the catalogue as a dataset on Hugging Face (open problems with Lean statements, like
-     Formal Conjectures);
-   - and/or results on alphaXiv's agent server.
-   Both are outward-facing, and neither is part of Phases 0–5.
+The maintainer delegated the five open decisions; they were taken as follows.
+
+1. **Citations come from OpenAlex**, which needs no key, with Semantic Scholar's unauthenticated
+   API as a fallback. No key is requested, since requesting one would mean registering the
+   maintainer's email with a third party.
+2. **The Referee runs on Sonnet**, like every chair (the standing preference). Its independence
+   comes from what it is not shown (the Formalizer's note and reasoning) and from the
+   kernel-checked anchors, not from a different model. Revisit this if the Referee's
+   rejections are rarely upheld, or if anchors catch what the Referee missed.
+3. **Budget:**
+   - 30M tokens a month while the cátedra runs.
+   - Prover caps: MF-OP-017 5M; other problems 3M by default, raised to 10M only when the
+     issue notes show lemmas proved since the last attempt.
+   - Phase 1 measures real costs, and these numbers are revised against them.
+4. **The definition issues leave the foundry's queue.** #532–#536 and #538–#544 are
+   `status:blocked-design` until the maintainer accepts the Builder's design on each. They
+   then return to `status:ready`.
+5. **No publishing before results.** When Phase 2 reaches 100 records, the catalogue joins the
+   existing Hugging Face export (`tools/verify/hf_dataset.py`): open problems with their Lean
+   statements and evidence. alphaXiv's agent server waits until kernel-checked resolutions
+   exist to show.
