@@ -77,6 +77,13 @@ lean_lib Challenge where
 lean_lib Solution where
   roots := #[`Solution]
 
+-- The further Palomar entries, one folder each (docs/palomar.md): `Palomar/<Entry>/` holds the
+-- Mathlib-only `Challenge`, its `Solution` against the library, the entry's `comparator.json` and
+-- its `formalization.yaml`. The ADEH entry above predates the layout and stays at the root.
+@[default_target]
+lean_lib Palomar where
+  globs := #[.submodules `Palomar]
+
 -- Lean tooling lives in `MathFinTools/`, outside the library: executables that load
 -- the built `MathFin` environment and report on it. Nothing in `MathFin/` imports them,
 -- and they are not default targets.
