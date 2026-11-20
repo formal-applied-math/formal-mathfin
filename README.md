@@ -171,11 +171,14 @@ from one file, [`docs/taxonomy.toml`](docs/taxonomy.toml), and the site's
     principle, nowhere differentiability and the law of the iterated logarithm for Brownian motion,
     Novikov's condition, the general Girsanov theorem, the two-dimensional Itô formula, and five
     theorems on Markov chains.
-  - Three rest on a named hypothesis that is not proved. The Dalang–Morton–Willinger theorem for
+  - Five rest on a named hypothesis that is not proved. The Dalang–Morton–Willinger theorem for
     several assets assumes a conditional one-period fundamental theorem (for one asset the theorem
     is proved without it). Fixed cash flows in a Heath–Jarrow–Morton model assume the bond-pricing
     identity that the drift condition would deliver. The backward-looking caplet assumes the
-    lognormal law of the compounded overnight rate.
+    lognormal law of the compounded overnight rate. The Jarrow–Yildirim zero-coupon inflation
+    caplet assumes the lognormal law of the index under the nominal forward measure, and the
+    year-on-year payment assumes the martingale property of the forward index and the Hull–White
+    reconstitution form of the bond ratio.
   - Eight prove a special case or check transcribed closed forms against each other: the first
     arrival of a Poisson process, the Ornstein–Uhlenbeck Hermite modes up to degree 2, Stulz's call
     on the maximum at zero strike, the Heynen–Kat barrier at zero correlation, Haug's and
