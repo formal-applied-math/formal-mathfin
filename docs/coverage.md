@@ -653,18 +653,11 @@ split by area. What each bridge proves, by area:
   vanilla leg identified with the digital call contract's value
   (`mf-partial-time-barrier-down-add-up`, `mf-binary-barrier-inout-parity`, both `reduced_core`).
   The Broadie–Glasserman–Kou shifted barrier for discretely monitored down-and-out calls
-  (`mf-bgk-discrete-barrier-shift`, `reduced_core`): `ptDownOutCall` at carry `r` is proved equal to
-  the image form (the reciprocal-ratio form of Howison and Steinberg's display); `ptDownOutCall` is
-  homogeneous of degree one under `(S, K, H) ↦ c(S, K, H)` (`ptDownOutCall_scale`); the
-  Black–Scholes call price satisfies that spatial scaling and the time-volatility scaling
-  (`bsV_scale`, `bsV_timeScale`); the shifted-barrier expression `ptDownOutCall` at
-  `H·exp(−βσ√(T/m))` tends to its unshifted value as `m → ∞` (positive spot, strike, barrier, volatility and
-  maturity; no rate of convergence in `m`) and is unchanged under
-  `(r, σ, T) ↦ (cr, σ√c, T/c)` at fixed `m`, for an arbitrary constant `β`; it reads as a price
-  only where `ptDownOutCall` does. Not derived: `ptDownOutCall` as a discounted expected payoff,
-  the value of `β`, and the accuracy of the shift as an approximation to the discretely monitored
-  price. A further theorem is a rearrangement of in–out parity for an arbitrary barrier event, not
-  tied to the monitoring dates.
+  (`mf-bgk-discrete-barrier-shift`, `reduced_core`): the shifted-barrier expression is proved to
+  tend to `ptDownOutCall` as `m → ∞` and to be invariant under the Brownian time-volatility
+  scaling, and `ptDownOutCall` is equal to its image form. Not derived: `ptDownOutCall` as a
+  discounted expected payoff, the value of `β`, any rate of convergence in `m`, and the accuracy
+  of the shift as an approximation to the discretely monitored price.
   `MargrabeGrounding`'s two existential theorems no longer claim to derive their hypothesis: they
   now exhibit the measure and driver. The Goldman–Sosin–Gatto continuous floating-strike lookback
   closed form dominates the vanilla call struck at the running minimum, via a Mills-ratio
