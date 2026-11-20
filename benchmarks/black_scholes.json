@@ -2501,6 +2501,27 @@
       }
     },
     {
+      "id": "mf-heston-zero-maturity-pointmass-collapse",
+      "name": "Heston Transform at Maturity Is the Point-Mass Moment",
+      "domain": "mathematical_finance",
+      "description": "For the explicit Heston transform Φ(t, x, v) = exp(â(T − t) + u·x + b̂(T − t)·v) built from the closed-form Riccati flows, at maturity t = T and for any parameters with nonzero characteristic root γ = √((κ − ρξu)² + ξ²(u − u²)), Φ(T, x, v) = e^{u x} = E[e^{uX}] for X distributed as the point mass at the log-spot x, which is the Gaussian N(x, 0): the zero-variance member of the Black–Scholes log-spot family the transform tends to as the vol-of-vol vanishes. This is the transform at the Riccati level; its identification with E[e^{u log S_T}] for a Heston process is not proved.",
+      "code": {
+        "lean": "import MathFin.Models.StochVol.HestonSmallVolOfVol\n\nopen MeasureTheory ProbabilityTheory MathFin.Heston\n\n/-- At maturity the explicit Heston transform is the moment-generating function of the point\nmass at the log-spot, the zero-variance Gaussian. -/\ntheorem heston_zero_maturity_pointmass (r κ θ ξ ρ u T x v : ℝ)\n    (hγ : hestonGamma κ ξ ρ u ≠ 0) :\n    hestonTransform r κ θ ξ ρ u T T x v = mgf id (Measure.dirac x) u ∧\n      Measure.dirac x = gaussianReal x 0 :=\n  ⟨hestonTransform_terminal_eq_mgf_dirac r κ θ ξ ρ u T x v hγ, (gaussianReal_zero_var x).symm⟩\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Heston (1993)",
+        "citations": [
+          {
+            "key": "Heston1993"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: hestonTransform_terminal_eq_mgf_dirac in MathFin/Models/StochVol/HestonSmallVolOfVol.lean (contributed in #501 as a standalone module, brought beside the vanishing vol-of-vol limit), through hestonTransform_terminal in MathFin/Models/StochVol/Heston.lean, now under the guard γ ≠ 0 alone. At γ = 0 the closed form of â reads log(0/0) at τ = 0 and no statement is made. Riccati level only: the transform is not identified with an expectation under a Heston process."
+      }
+    },
+    {
       "id": "mf-bs-delta-hedge-replication",
       "name": "Black-Scholes Delta Hedge Replicates the Call (Discounted Identity on [0, T'])",
       "description": "Let B be a Brownian motion with continuous paths (pre-Brownian under a probability measure, every path continuous), S_t = S_0 exp((r - sigma^2/2) t + sigma B_t) the risk-neutral stock, K, sigma, S_0 > 0, and T' < T. Writing C(t, S) = bsV K r sigma S (T - t) for the Black-Scholes call price, almost surely and for all t in [0, T'] at once, e^{-rt} C(t, S_t) = C(0, S_0) + I_t, where I is the library's predictable Ito integral predItoIntegral on [0, T'] of the predictable integrand sigma e^{-rs} S_s Phi(d_1(S_s, T - s)), the delta Phi(d_1) of the call times the diffusion coefficient of the discounted stock. So the discounted call value is the initial price plus the gains from holding the delta of shares. The identity is on [0, T'] for T' strictly below T (the delta is discontinuous at maturity); the behaviour at T is the separate statement mf-bs-call-value-tends-to-payoff. Not proved: the identity up to t = T, that the hedge is an admissible self-financing strategy as a structure, or that I equals the integral of the delta against the discounted stock as a semimartingale integrator.",

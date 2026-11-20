@@ -68,6 +68,9 @@ algebra is the same under `u ↦ iz`: QuantLib's `D = √((κ − iρσz)² + (z
 * `tendsto_hestonProfile_smallVolOfVol_blackScholes`: for `v, θ ≥ 0` and `t ≤ T`, the profile
   tends to `mgf id (gaussianReal (x + r(T − t) − W/2) W) u`, the lognormal log-spot moment.
   This is a limit of the Riccati-level profile, not of a Heston process.
+* `hestonTransform_terminal_eq_mgf_dirac`: at maturity, for every vol-of-vol with `γ ≠ 0`, the
+  transform is the moment of the point mass at the log-spot, the zero-variance member of that
+  family.
 * `integral_bsTerminal_rpow`, `tendsto_hestonTransform_smallVolOfVol_bsMoment`: under `BSCallHyp`,
   `E_Q[S_T ^ u]` is the Black–Scholes moment, and at `v = θ = σ²` the Heston transform tends to it
   as `ξ → 0`.
@@ -254,6 +257,19 @@ theorem mgf_gaussianReal_logSpot (x r τ u : ℝ) (W : ℝ≥0) :
   simp only [mgf_id_gaussianReal]
   congr 1
   ring
+
+/-- **At maturity the Heston transform is the moment of the point mass.** Whenever `γ ≠ 0`,
+`Φ(T, x, v) = 𝔼[e^{uX}]` for `X ~ δₓ`, the point mass at the log-spot `x`. The point mass is the
+Gaussian `N(x, 0)` (`gaussianReal_zero_var`), the member at `τ = 0`, `W = 0` of the
+Black–Scholes log-spot family (`mgf_gaussianReal_logSpot`) that the transform tends to as `ξ → 0`
+(`tendsto_hestonProfile_smallVolOfVol_blackScholes`); at maturity it is reached at every
+vol-of-vol. -/
+theorem hestonTransform_terminal_eq_mgf_dirac (r κ θ ξ ρ u T x v : ℝ)
+    (hγ : hestonGamma κ ξ ρ u ≠ 0) :
+    hestonTransform r κ θ ξ ρ u T T x v = mgf id (Measure.dirac x) u := by
+  have h := mgf_gaussianReal_logSpot x r 0 u 0
+  simp only [mul_zero, NNReal.coe_zero, zero_div, sub_zero, add_zero] at h
+  rw [hestonTransform_terminal r κ θ ξ ρ u T x v hγ, ← gaussianReal_zero_var, h]
 
 /-- **Headline: the Heston transform tends to the Black–Scholes moment with the integrated
 variance.** For `κ > 0`, `0 < u < 1`, `v, θ ≥ 0`, `t ≤ T`, as the vol-of-vol `ξ → 0`
