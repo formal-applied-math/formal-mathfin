@@ -41,9 +41,11 @@ module's variance lemmas are module-only, not corpus entries). Corpus 904 → 90
 - **`mf-jarrow-yildirim-yoy-forward-convexity`** (`jyYoyPayment_price`): the year-on-year forward
   and the time-0 price of its payment, from the conditional-expectation (martingale) hypothesis for
   the forward index plus the tower step `jyYoyForward_eq_bondRatio`, closed by `yoyConvexity_eq`.
-  Not derived: the martingale property of `F(·,T)` under `Q^T`, the Hull–White reconstitution form
-  of the bond ratio, and the means, variances and covariance of the rate deviations (all
-  hypotheses or inputs).
+  Not derived: the martingale property of the forward index under `Q^T` (the
+  conditional-expectation hypothesis), the Hull–White reconstitution form of the bond ratio (`hR`),
+  and the means, variances, covariance and Hull–White loadings `Bⁿ`, `Bʳ` (free inputs); all are
+  hypotheses or inputs, and their SDE-level derivation and the real-rate drift shift are not
+  derived either.
 
 ### Marchenko-Pastur support edges (2026-11-08)
 

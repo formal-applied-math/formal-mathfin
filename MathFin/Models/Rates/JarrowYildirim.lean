@@ -7,18 +7,25 @@ module
 
 public import MathFin.Models.Rates.Caplet
 public import MathFin.Models.Rates.Inflation
+public import MathFin.Pricing.FTAP.OneAssetDMW
 public import MathFin.Models.Rates.VasicekBondPrice
 
 /-!
 # Jarrow–Yildirim: the index variance, the zero-coupon caplet and the YoY forward
 
-In the Jarrow–Yildirim model the nominal and real short rates are Gaussian (Hull–White) and
-the price index `I` (`I₀` its value at time `0`) is a geometric Brownian motion, with three
-pairwise correlations. `Qn` is the nominal pricing measure with money-market account `B_T`, and
-`Q^T`/`𝔼^T` its nominal `T`-forward measure/expectation; `Pⁿ(t,T)` and `Pʳ(t,T)` are the nominal
-and real zero-coupon bond prices. The forward index `F(t,T) = I_t·Pʳ(t,T)/Pⁿ(t,T)` is a
-martingale under `Q^T`. This module records what follows from that structure without the SDE
-calculus.
+In the Jarrow–Yildirim model the nominal and real short rates are Gaussian (Hull–White) and the
+price index `I` (`I₀` its value at time `0`) is a geometric Brownian motion, with three pairwise
+correlations. `Qn` is the nominal pricing measure with money-market account `B_T`, and `Q^T`/`𝔼^T`
+its nominal `T`-forward measure/expectation; `Pⁿ(t,T)` and `Pʳ(t,T)` are the nominal and real
+zero-coupon bond prices. The forward index `F(t,T) = I_t·Pʳ(t,T)/Pⁿ(t,T)` is a martingale under
+`Q^T`. This module records what follows from that structure without the SDE calculus.
+
+Notation: `σ_I, σ_r, σ_n` are the volatilities of the index and of the real and nominal short rates,
+`a_r, a_n` the real and nominal mean reversions, `ρ_{rI}, ρ_{nI}, ρ_{nr}` the correlations (real
+rate–index, nominal rate–index, nominal–real rate), and `B_x(t,T) = (1 − e^{−a_x(T−t)})/a_x`
+(`x ∈ {r, n}`) the Hull–White loadings. `K` is a caplet strike, `S < T` the start date and maturity
+of a year-on-year payment `I_T/I_S`, `I_S` the index at `S`, and `F₀` the forward parameter of the
+lognormal index law `I_T = F₀·exp(−V/2 + √V·Z)`, `Z ~ N(0,1)`.
 
 ## Main definitions
 
@@ -30,14 +37,13 @@ calculus.
 
 * `quad2_nonneg`, `quad3_nonneg`: the `2×2` and `3×3` quadratic-form lemmas behind the
   non-negativity of the integrand.
-* The variance integrand of `log F(·,T)` for constant parameters (`jyVarIntegrand`) and its
-  integral `V(0,T)` (`jyVariance`). The integrand is the quadratic form of the vector
-  `(σ_I, −σ_r·B_r, σ_n·B_n)` against the `(I, r, n)` correlation matrix
-  (an identity by `ring`), hence non-negative when that matrix is positive
-  semidefinite (`jyVarIntegrand_nonneg`, and for `V(0,T)` with `T ≥ 0`, `jyVariance_nonneg`).
-  Pairwise `|ρ| ≤ 1` is not enough for three factors;
-  the condition used is `ρ_{rI}² ≤ 1`, `ρ_{nI}² ≤ 1` and the determinant form
-  `jyCorrDet ≥ 0`. Degenerate reduction: `jyVariance_zero_rate_vols`.
+* The variance integrand of `log F(·,T)` for constant parameters (`jyVarIntegrand`) and its integral
+  `V(0,T)` (`jyVariance`). The integrand is the quadratic form of the vector `(σ_I, −σ_r·B_r,
+  σ_n·B_n)` against the `(I, r, n)` correlation matrix (an identity by `ring`), hence non-negative
+  when that matrix is positive semidefinite (`jyVarIntegrand_nonneg`, and for `V(0,T)` with `T ≥ 0`,
+  `jyVariance_nonneg`). Pairwise `|ρ| ≤ 1` is not enough for three factors; the condition used is
+  `ρ_{rI}² ≤ 1`, `ρ_{nI}² ≤ 1` and the determinant form `jyCorrDet ≥ 0`. Degenerate reduction:
+  `jyVariance_zero_rate_vols`.
 * The zero-coupon inflation caplet (`jyZcCaplet_price`): if the index under `Q^T` is lognormal
   with log-variance `V` and the index-linked bond is priced on the real curve, the priced caplet
   payoff `𝔼^{Qn}[(I_T − K)⁺/B_T]` is `Pⁿ(0,T)` times the library's Black caplet on the curve
@@ -59,13 +65,12 @@ calculus.
 
 ## Scope
 
-The SDE-level derivation of the `−ρ_{rI}σ_rσ_I` drift of the real rate and of `V` from the
-three SDEs is not claimed: `V` is defined, and the lognormality of the index
-(`hZ`: `Z ~ N(0,1)` under `Q^T` with `I_T = bsTerminal F₀ 0 √V 1 Z`), the
-martingale property of the forward index (`hmart`) and the Hull–White bond-reconstitution form
-of the bond ratio (`hR`) are hypotheses. The model form is transcribed from the secondary
-sources below; the primary paper was not consulted for the transcription. The exact YoY caplet,
-calibration, seasonality and Monte Carlo are out of scope.
+The SDE-level derivation of the `−ρ_{rI}σ_rσ_I` drift of the real rate and of `V` from the three
+SDEs is not claimed: `V` is defined, and the lognormality of the index (`hZ`: `Z ~ N(0,1)` under
+`Q^T` with `I_T = bsTerminal F₀ 0 √V 1 Z`), the martingale property of the forward index (`hmart`)
+and the Hull–White bond-reconstitution form of the bond ratio (`hR`) are hypotheses. The model form
+is transcribed from the secondary sources below; the primary paper was not consulted for the
+transcription. The exact YoY caplet, calibration, seasonality and Monte Carlo are out of scope.
 
 ## References
 
@@ -93,12 +98,11 @@ namespace MathFin.Inflation.JarrowYildirim
 
 /-! ### The variance integrand -/
 
-/-- The Jarrow–Yildirim variance integrand at time `t` for the forward index `F(·,T)`, with
-constant parameters: `a_r, a_n` mean reversions, `σ_I, σ_r, σ_n` volatilities, `ρ_{rI}, ρ_{nI},
-ρ_{nr}` correlations. The Hull–White loadings are the library's `vasicekBondB` at the
-remaining maturity `T − t`. Nonzero mean reversions `a_r, a_n ≠ 0` are implicit in this reading:
-`vasicekBondB 0 τ = 0` by Lean's division convention, not the Ho–Lee limit `τ`.
-The integrand is:
+/-- The Jarrow–Yildirim variance integrand at time `t` for the forward index `F(·,T)`, with constant
+parameters: `a_r, a_n` mean reversions, `σ_I, σ_r, σ_n` volatilities, `ρ_{rI}, ρ_{nI}, ρ_{nr}`
+correlations. The Hull–White loadings are the library's `vasicekBondB` at the remaining maturity
+`T − t`. Nonzero mean reversions `a_r, a_n ≠ 0` are implicit in this reading: `vasicekBondB 0 τ = 0`
+by Lean's division convention, not the Ho–Lee limit `τ`. The integrand is:
 
   `σ_I² + σ_r²B_r² + σ_n²B_n² − 2ρ_{rI}σ_Iσ_rB_r + 2ρ_{nI}σ_Iσ_nB_n − 2ρ_{nr}σ_nσ_rB_nB_r`. -/
 noncomputable def jyVarIntegrand (ar an σI σr σn ρrI ρnI ρnr T t : ℝ) : ℝ :=
@@ -182,12 +186,11 @@ theorem jyVariance_zero_rate_vols (ar an σI ρrI ρnI ρnr T : ℝ) :
 /-! ### The zero-coupon inflation caplet
 
 `Qn` is the nominal pricing measure with money-market account `BT`, and `Q^T` its nominal
-`T`-forward measure (`MathFin.forwardMeasure`). The hypotheses are: the index-linked bond is
-priced on the real curve (`hident`, as in `ZCSwap.forwardIndex_eq`), and under `Q^T` the index
-is lognormal, `I_T = bsTerminal F₀ 0 √V 1 Z` (`= F₀·exp(−V/2 + √V·Z)` for `V ≥ 0`) with
-`Z ~ N(0,1)` — the log-variance `V` being
-`jyVariance` when the SDE-level derivation is granted (not derived here). The caplet pays
-`(I_T − K)⁺` at `T` and is priced with the nominal bond `Pⁿ(0,T)` as numéraire. -/
+`T`-forward measure (`MathFin.forwardMeasure`). The hypotheses are: the index-linked bond is priced
+on the real curve (`hident`, as in `ZCSwap.forwardIndex_eq`), and under `Q^T` the index is
+lognormal, `I_T = bsTerminal F₀ 0 √V 1 Z` (`= F₀·exp(−V/2 + √V·Z)` for `V ≥ 0`) with `Z ~ N(0,1)`,
+the log-variance `V` being `jyVariance` when the SDE-level derivation is granted (not derived here).
+The caplet pays `(I_T − K)⁺` at `T` and is priced with the nominal bond `Pⁿ(0,T)` as numéraire. -/
 
 section Caplet
 
@@ -222,12 +225,12 @@ theorem jyForwardIndex_lognormal_eq_curves (BT : Ω → ℝ) (Pn0T Pr0T I0 F0 V 
 /-- **ZC inflation caplet: the priced payoff is `Pⁿ(0,T)` times the Black caplet on the curve
 forward.** The zero-coupon inflation caplet, with payoff `(I_T − K)⁺` (convention
 `N[(I_T/I₀ − 1) − κ]⁺ = (N/I₀)·(I_T − K)⁺` with notional `N`, `K = I₀(1+κ)` and `κ` the total,
-non-annualised strike over `[0,T]`; an annual quoted strike `k` is `K = I₀(1+k)^T`), is the
-contract `caplet () 0 0 1 K` in `MathFin.Contracts.value_caplet_black76`, instantiated with the
-time-constant deflator `fun _ => 1/B_T` and the time-constant observed index `fun _ _ => I_T` (the
-contract's time indices are dummies); `Pⁿ(0,T)` plays the role of `zeroCurve Qn D 0`. The forward
-is pinned to the curve by `jyForwardIndex_lognormal_eq_curves`. Under `hident` and a lognormal
-index under `Q^T` with log-variance `V`, and `F₀ > 0`, `V > 0`, `K > 0`,
+non-annualised strike over `[0,T]`; an annual quoted strike `k` is `K = I₀(1+k)^T`), is the contract
+`caplet () 0 0 1 K` in `MathFin.Contracts.value_caplet_black76`, instantiated with the time-constant
+deflator `fun _ => 1/B_T` and the time-constant observed index `fun _ _ => I_T` (the contract's time
+indices are dummies); `Pⁿ(0,T)` plays the role of `zeroCurve Qn D 0`. The forward is pinned to the
+curve by `jyForwardIndex_lognormal_eq_curves`. Under `hident` and a lognormal index under `Q^T` with
+log-variance `V`, and `F₀ > 0`, `V > 0`, `K > 0`,
 
   `𝔼^{Qn}[(I_T − K)⁺/B_T] = Pⁿ(0,T)·blackCaplet (I₀Pʳ(0,T)/Pⁿ(0,T)) K √V 1 1`,
 
@@ -304,11 +307,11 @@ theorem blackCaplet_sqrt_variance (F K σ T α : ℝ) (hσ : 0 < σ) (hT : 0 < T
 /-- **Deterministic rates reduce the zero-coupon inflation caplet to `Pⁿ(0,T)` times the Black
 caplet at the index volatility.** With `σ_r = σ_n = 0`, `σ_I > 0` and `T > 0`, the integrated
 variance is `jyVariance … = σ_I²T` (`jyVariance_zero_rate_vols`), and the priced caplet of
-`jyZcCaplet_price` at `V := jyVariance …` is `Pⁿ(0,T)·blackCaplet (I₀Pʳ/Pⁿ) K σ_I T 1`:
-`Pⁿ(0,T)` times the Black caplet on the curve forward at the index volatility and maturity `T`.
-Hypotheses: all those of `jyZcCaplet_price`, including `[IsProbabilityMeasure Qn]`, except `hV`,
-which follows from `σ_I > 0` and `T > 0`; `hident` is stated at
-`V := jyVariance ar an σI 0 0 ρrI ρnI ρnr T`. None is derived from the SDEs. -/
+`jyZcCaplet_price` at `V := jyVariance …` is `Pⁿ(0,T)·blackCaplet (I₀Pʳ/Pⁿ) K σ_I T 1`: `Pⁿ(0,T)`
+times the Black caplet on the curve forward at the index volatility and maturity `T`. Hypotheses:
+all those of `jyZcCaplet_price`, including `[IsProbabilityMeasure Qn]`, except `hV`, which follows
+from `σ_I > 0` and `T > 0`; `hident` is stated at `V := jyVariance ar an σI 0 0 ρrI ρnI ρnr T`. None
+is derived from the SDEs. -/
 theorem jyZcCaplet_price_deterministic_rates [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
     (ar an σI ρrI ρnI ρnr T : ℝ) (Pn0T Pr0T I0 F0 K : ℝ) (Z : Ω → ℝ)
     (hσI : 0 < σI) (hT : 0 < T)
@@ -343,7 +346,8 @@ variable {Ω : Type*} {m : MeasurableSpace Ω} {μ : Measure Ω}
 /-- **YoY forward = bond-ratio expectation** (Bagaria ch. 17 §17.4, eq. 17.8). Hypotheses:
 `hmS : m_S ≤ m` with `μ.trim hmS` σ-finite; `I_S` is `m_S`-measurable and positive; `I_T` and
 `I_T/I_S` are `μ`-integrable; and `𝔼^T[I_T | m_S] = I_S·R_S` a.e. (`hmart`, the martingale
-property of `F(·,T)`). Then `𝔼^T[I_T/I_S] = 𝔼^T[R_S]`. -/
+property of `F(·,T)`). Then `𝔼^T[I_T/I_S] = 𝔼^T[R_S]`. The proof pulls the `m_S`-measurable
+factor `1/I_S` through the conditional expectation with `MathFin.integral_mul_condExp`. -/
 theorem jyYoyForward_eq_bondRatio {mS : MeasurableSpace Ω} (hmS : mS ≤ m)
     [SigmaFinite (μ.trim hmS)] (IS IT RS : Ω → ℝ)
     (hIS : StronglyMeasurable[mS] IS) (hISpos : ∀ ω, 0 < IS ω)
@@ -353,35 +357,30 @@ theorem jyYoyForward_eq_bondRatio {mS : MeasurableSpace Ω} (hmS : mS ≤ m)
   have hinv : StronglyMeasurable[mS] fun ω => (IS ω)⁻¹ := hIS.measurable.inv.stronglyMeasurable
   have hprod : Integrable (fun ω => (IS ω)⁻¹ * IT ω) μ := by
     simpa [div_eq_inv_mul] using hITS
-  have hpull : μ[fun ω => (IS ω)⁻¹ * IT ω | mS]
-      =ᵐ[μ] fun ω => (IS ω)⁻¹ * (μ[IT | mS]) ω :=
-    condExp_mul_of_stronglyMeasurable_left hinv hprod hIT
-  have h1 : ∫ ω, IT ω / IS ω ∂μ = ∫ ω, (μ[fun ω => (IS ω)⁻¹ * IT ω | mS]) ω ∂μ := by
-    rw [integral_condExp hmS]
-    simp [div_eq_inv_mul]
-  rw [h1, integral_congr_ae hpull]
+  have h1 : ∫ ω, IT ω / IS ω ∂μ = ∫ ω, (IS ω)⁻¹ * (μ[IT | mS]) ω ∂μ := by
+    simpa [div_eq_inv_mul] using integral_mul_condExp hmS hinv hprod hIT
+  rw [h1]
   refine integral_congr_ae ?_
   filter_upwards [hmart] with ω hω
   simp only [hω]
   field_simp [(hISpos ω).ne']
 
-/-- **YoY forward in the printed convexity shape (Bagaria ch. 17 §17.4, eq. 17.10;
-Brigo–Mercurio §16.3).** Under the hypotheses of `jyYoyForward_eq_bondRatio`, and with the bond
-ratio in Hull–White reconstitution form (`hR`: `R_S` is the naive ratio of forwards
-`Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))` times `exp(Dʳ − Dⁿ − Bʳyʳ + Bⁿyⁿ)`), with
-`Dⁱ = hwD Bⁱ Vⁱ = −Bⁱ²Vⁱ/2`, `Bⁿ, Bʳ` the Hull–White loadings of the nominal and real short rates
-over `[S,T]` (free reals here; they enter only through `hR`), `mⁱ, Vⁱ` the mean and variance of the
-rate deviation `yⁱ`, `yⁿ = mⁿ + √Vⁿ·Z1` and `yʳ = mʳ + √Vʳ·(ρ·Z1 + √(1−ρ²)·Z2)`, the two Gaussian
-rate deviations of `yoyConvexity_eq`,
+/-- **YoY forward in the printed convexity shape (Bagaria ch. 17 §17.4, eq. 17.10; Brigo–Mercurio
+§16.3).** Under the hypotheses of `jyYoyForward_eq_bondRatio`, and with the bond ratio in Hull–White
+reconstitution form (`hR`: `R_S` is the naive ratio of forwards `Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))`
+times `exp(Dʳ − Dⁿ − Bʳyʳ + Bⁿyⁿ)`), with `Dⁱ = hwD Bⁱ Vⁱ = −Bⁱ²Vⁱ/2`, `Bⁿ, Bʳ` the Hull–White
+loadings of the nominal and real short rates over `[S,T]` (free reals here; they enter only through
+`hR`), `mⁱ, Vⁱ` the mean and variance of the rate deviation `yⁱ`, `yⁿ = mⁿ + √Vⁿ·Z1` and
+`yʳ = mʳ + √Vʳ·(ρ·Z1 + √(1−ρ²)·Z2)`, the two Gaussian rate deviations of `yoyConvexity_eq`,
 
   `𝔼^T[I_T/I_S] = (Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T)))·exp(−Bʳmʳ + Bⁿmⁿ + Bⁿ²Vⁿ − BʳBⁿ·Cov)`,
 
-where `Cov` is the covariance of the two rate deviations; i.e. the naive ratio times the
-convexity factor. The exponent is the same quantity as in `yoyConvexity_eq`, with its terms in
-Bagaria's printed order (equal by `ring`). Further hypotheses: `Z1, Z2` independent standard
-normals under `μ` (`hZ1`, `hZ2`, `hindep`), `0 ≤ Vⁿ`, `0 ≤ Vʳ`, `ρ² ≤ 1` and
-`hCov : Cov = ρ·√(Vⁿ·Vʳ)`. The means, variances, covariance, `Bⁿ`, `Bʳ`, `hR` and `hmart` are
-hypotheses or inputs; they are not derived from the SDEs here. Junk corner: the naive ratio
+where `Cov` is the covariance of the two rate deviations; i.e. the naive ratio times the convexity
+factor. The exponent is the same quantity as in `yoyConvexity_eq`, with its terms in Bagaria's
+printed order (equal by `ring`). Further hypotheses: `Z1, Z2` independent standard normals under `μ`
+(`hZ1`, `hZ2`, `hindep`), `0 ≤ Vⁿ`, `0 ≤ Vʳ`, `ρ² ≤ 1` and `hCov : Cov = ρ·√(Vⁿ·Vʳ)`. The means,
+variances, covariance, `Bⁿ`, `Bʳ`, `hR` and `hmart` are hypotheses or inputs; they are not derived
+from the SDEs here. Junk corner: the naive ratio
 `Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))` is `0` by Lean's division convention if `Pʳ(0,S)` or
 `Pⁿ(0,T)` is `0`; the bond prices are positive in the model, and the statement is an identity
 about `hR`, so it carries no such guard. -/
