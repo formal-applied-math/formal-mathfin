@@ -1131,8 +1131,8 @@ def build_llms(site: Site, out: Path, blueprint: list[dict], n_search: int) -> N
 
 > A Lean 4 library of formally verified mathematical finance, built on Mathlib and the BrownianMotion
 > package. {len(mods)} modules, {n_thm:,} public theorems and lemmas, a corpus of {len(site.all_entries)}
-> theorem statements. No `sorry`; every theorem the corpus cites is pinned by the build to
-> `propext`, `Classical.choice` and `Quot.sound`.
+> theorem statements. `MathFin` contains no `sorry`; every theorem the corpus cites is pinned by
+> the build to `propext`, `Classical.choice` and `Quot.sound`.
 
 The library covers stochastic calculus, arbitrage and pricing, term structure and credit, portfolios
 and risk, choice and insurance. It is organized around one object, a price system (positions in a

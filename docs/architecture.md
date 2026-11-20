@@ -93,7 +93,7 @@ Every path in this table exists under `MathFin/`.
 Probability such as the Brownian construction, the Wiener integral, Doob `L^p` and quadratic
 variation is useful to the pricing modules only when they consume it. A join is additive: the
 consuming module introduces a constructor `XHyp.of_isPreBrownian` that discharges an existing
-hypothesis (`BSCallHyp`, `BachelierHyp`, `BrownianMartingaleHyp`) from a single Brownian-motion
+hypothesis (`BSCallHyp`, `BachelierHyp`) from a single Brownian-motion
 primitive, and existing modules continue to work unchanged. The joins between limbs and the
 design reasons are in [`organization.md`](organization.md) and [`design.md`](design.md) §4. The
 historical audit that first listed them is [`bridges.md`](bridges.md).

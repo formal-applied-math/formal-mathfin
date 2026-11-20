@@ -33,7 +33,7 @@ theorem).
 |---|---|---|
 | the gains of self-financing strategies | **valuation**: no arbitrage iff a pricing measure exists (FTAP); the superhedging price is the supremum of prices over pricing measures | the FTAP in its discrete forms, for bare price processes; joined to `Market` by one adapter (`DiscreteMarket`) |
 | the positions a risk measure accepts | **risk**: a coherent risk measure is the worst expected loss over a set of measures | on a finite state space (`coherentRisk_isLUB`); expected shortfall's dual on any space |
-| the positions an investor prefers | **choice**: at an optimum, marginal utility is a state-price density, so the investor's optimum defines a pricing measure | in a complete market on a finite sample space (`exists_deriv_eq_mul_sdf_of_stationary`) |
+| the positions an investor prefers | **choice**: at an optimum, marginal utility is a state-price density, so the investor's optimum defines a pricing measure | at a first-order stationary portfolio of a complete market on a finite sample space, marginal utility is the stochastic discount factor up to a positive constant (`exists_deriv_eq_mul_sdf_of_stationary`) |
 
 The three questions (what a position is worth, how dangerous it is, whether to hold it) are the
 [limbs](glossary.md#limb); the dualities are where they meet, and the library calls those
@@ -50,7 +50,7 @@ object, two steps when it mentions an object one step away, and so on. Renaming,
 relabelling changes nothing; only a theorem does. The site's
 [program tree](https://formal-applied-math.github.io/formal-mathfin/tree.html) draws every result
 at its measured height, and its
-[markets page](https://formal-applied-math.github.io/formal-mathfin/markets.html) lists, for each
+[markets page](https://formal-applied-math.github.io/formal-mathfin/joints.html) lists, for each
 model family, the theorem that prices it as a market. The counts are ratchets: a build fails if
 one gets worse.
 
@@ -62,9 +62,9 @@ limbs. The program tree draws each as a dashed dot between the parts it would jo
 
 | bridge | limbs | status |
 |---|---|---|
-| Marginal utility at the optimum is a state-price density. | choice, valuation | in a complete market on a finite sample space (`Market.IsPricingMeasure.exists_deriv_eq_mul_sdf_of_stationary`) |
-| CAPM and the Hansen–Jagannathan bound follow from the stochastic discount factor. | choice, valuation | for every asset of a market with a pricing measure (`Market.IsPricingMeasure.abs_sharpeRatio_le`, `Market.IsPricingMeasure.capm_of_affine_sdf`) |
-| The log-optimal portfolio is the numéraire portfolio. | choice, valuation | for log utility on a finite complete market, the prices deflated by the optimal wealth are martingales in one period (`Market.IsPricingMeasure.integral_div_logOptimal_mul`); the Kelly bet as its two-outcome case (`kelly_statePrices`) |
+| Marginal utility at the optimum is a state-price density. | choice, valuation | at a first-order stationary portfolio of a complete market on a finite sample space, `u'(W)` is the stochastic discount factor up to a positive constant (`Market.IsPricingMeasure.exists_deriv_eq_mul_sdf_of_stationary`) |
+| CAPM and the Hansen–Jagannathan bound follow from the stochastic discount factor. | choice, valuation | Hansen–Jagannathan for an asset of a market with a pricing measure whose initial price is deterministic and nonzero, with square-integrable return and discount factor and a riskless return (`Market.IsPricingMeasure.abs_sharpeRatio_le`); the security market line when the discount factor is affine in a market return (`Market.IsPricingMeasure.capm_of_affine_sdf`) |
+| The log-optimal portfolio is the numéraire portfolio. | choice, valuation | for log utility on a finite complete market, the prices deflated by a stationary log wealth are martingales in one period (optimality itself is not proved) (`Market.IsPricingMeasure.integral_div_logOptimal_mul`); the Kelly bet as its two-outcome case (`kelly_statePrices`) |
 | The superhedging price is a coherent risk measure, represented by the pricing measures. | valuation, risk | coherence and the representation (`superhedgingPrice_isLUB`) on a finite space |
 | A premium principle is a risk-loaded price; the Esscher premium is a price under the Esscher measure. | valuation, risk | the Esscher tilt is a pricing measure of the insured market, under which the loss is worth its Esscher premium (`price_insuredMarket_tilted`) |
 

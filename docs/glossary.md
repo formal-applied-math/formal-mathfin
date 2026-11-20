@@ -47,8 +47,9 @@ A result or definition on the blueprint, with a label such as `thm:ito-formula-c
 inside a proof.
 
 ### landmark
-A result with a textbook name, proved at the generality the library reaches: Itô's formula,
-Girsanov's theorem, the fundamental theorems of asset pricing. The headline landmarks, with their
+A result with a textbook name, proved at the generality the library reaches, which may be less
+than the textbook's: Itô's formula, Girsanov's theorem (for bounded predictable θ), the
+fundamental theorems of asset pricing. The headline landmarks, with their
 exact statements and scope, are on the site's
 [landmarks page](https://formal-applied-math.github.io/formal-mathfin/landmarks.html) and in
 [`landmarks.toml`](landmarks.toml).
@@ -122,8 +123,10 @@ A theorem stating that a measure prices a model family as a `Market`. A family w
 theorem is **priced in a market**; the site's markets page lists them.
 
 ### socket
-The market-side result that reads a cluster which stands apart from the trunk on purpose (a law
-functional, an algebraic certificate, a convex programme), declared in `taxonomy.toml`.
+A model family's socket is its theorem stating that a measure prices it as a market (a market
+statement). A cluster that stands apart from the trunk on purpose (a law functional, an algebraic
+certificate, a convex programme) is declared in `taxonomy.toml` with the market-side result that
+reads it as its socket.
 
 ### program tree
 The site's [drawing](https://formal-applied-math.github.io/formal-mathfin/tree.html) of the whole

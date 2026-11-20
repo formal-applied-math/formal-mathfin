@@ -46,7 +46,8 @@ threshold, by clipping on the exceptional null set.
 
 The files below are under `MathFin/Models/BlackScholes/American/Stopping/`.
 
-* `Rules.lean`, `Reward.lean` and `AmericanValue.lean` define the value `americanPutValue` as a
+* `Reward.lean` and `AmericanValue.lean`, with the stopping rules of
+  `MathFin/Probability/Martingales/StoppingRule.lean`, define the value `americanPutValue` as a
   supremum of expected discounted put payoffs over all stopping times of the filtration bounded by
   the horizon. The stock is geometric Brownian motion with drift `r − q` and volatility `σ`, and
   discounting uses `r`. No exercise grid replaces the supremum.
@@ -94,8 +95,8 @@ assumed classical solution `Boundary.DividendPutSolution`. That structure extend
 is `boundary_smooth`, the smoothness of the boundary at positive times. The conditional track ends
 in `brownian_boundary_curvature_of_price_identification` (`Stopping/ClassicalBridge.lean`), whose
 docstring names its hypothesis `hprice` an outstanding verification obligation. Results there,
-including `brownianUsual_boundary_conclusions`, the only `B'' > 0` statement in the tree, are of
-unknown vacuity. The two headline declarations carry no such hypothesis and do not depend on the
+including the curvature statement `brownianUsual_boundary_conclusions` for the constructed
+Brownian space, are of unknown vacuity. The two headline declarations carry no such hypothesis and do not depend on the
 conditional track. The landmark entry in [`landmarks.toml`](landmarks.toml) separately records the
 verification principle `value_eq_of_attained`, in which the supermartingale is a hypothesis.
 

@@ -38,10 +38,11 @@ measures.
   (`Pricing/SuperhedgingDuality.lean`).
 * Risk: `coherentRisk_isLUB` (`Risk/AcceptanceSet.lean`).
 * Joint of valuation and risk: `superhedgingPrice_isLUB` (`Risk/Superhedging.lean`), the
-  superhedging price as a supremum over pricing measures.
+  superhedging price of a one-period finite-state market as the supremum of prices over its
+  martingale probability vectors.
 
-Not proved: the equality of the superhedging price with the supremum of prices over pricing
-measures, which needs a finite-dimensional Farkas lemma that Mathlib does not carry. The
+Not proved: the superhedging duality over strictly positive pricing measures, in several periods,
+or on a general space. The
 fundamental theorems are proved on a finite space, and for one asset on a general space; the
 several-asset Dalang–Morton–Willinger theorem assumes a conditional one-period theorem. The dual
 of choice (marginal utility as a state-price density) is stated for a two-outcome bet and open
@@ -130,11 +131,14 @@ measure.
 
 Proved connections:
 
-* I and II. The pricing measure of a continuous-time market is an explicit Girsanov density
-  (`bs_discounted_isQMartingale`), and martingale representation gives uniqueness and
-  attainability (`martingale_representation`, `exists_replicating_strategy_in_price`).
-* I and IV. The change of numéraire (`changeOfNumeraire`, `Pricing/Numeraire.lean`) is consumed by
-  the Black–Scholes stock numéraire (`Models/BlackScholes/StockNumeraire.lean`); the log-optimal
+* I and II. The pricing measure of the Black–Scholes market is an explicit Girsanov density
+  (`bs_discounted_isQMartingale`), and martingale representation gives attainability by a unique
+  hedge when σ is almost everywhere nonzero (`martingale_representation`,
+  `exists_replicating_strategy_in_price`).
+* I and IV. The numéraire measure (`numeraireMeasure`, `Pricing/Numeraire.lean`) gives the
+  Black–Scholes stock numéraire (`Models/BlackScholes/StockNumeraire.lean`), and the change of
+  numéraire (`changeOfNumeraire`) prices Margrabe's exchange option
+  (`Models/BlackScholes/ExchangeOption.lean`); the log-optimal
   portfolio is the numéraire portfolio in the discrete Kelly market
   (`kellyMarket_numeraire_portfolio`, `Choice/Performance/KellyNumeraire.lean`).
 * II and III. The Black–Scholes PDE is derived from the Feynman–Kac form

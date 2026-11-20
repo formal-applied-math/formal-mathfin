@@ -16,7 +16,7 @@ A build takes 5 to 15 minutes the first time, and none of the following needs on
 - The [docs site](https://formal-applied-math.github.io/formal-mathfin/) has a search box on every
   page. It is a ranked, client-side search over the library's modules and declarations. The
   [landmarks page](https://formal-applied-math.github.io/formal-mathfin/landmarks.html) lists the
-  proved results the most other results build on. Each area of the library has a page of its own,
+  library's headline results with their exact Lean statements and what each leaves out. Each area of the library has a page of its own,
   and each module has a page with its docstring and declarations.
 - [`MathFinExamples/Applications/`](../MathFinExamples/Applications) holds nine worked examples
   (a binomial tree, put–call parity, a bootstrapped discount curve, a risk report, and others).
@@ -227,7 +227,8 @@ Try these in order; each is more work than the one before and finds more.
    the search box of the [docs site](https://formal-applied-math.github.io/formal-mathfin/). It
    matches names, docstrings and statements.
 2. **Landmarks and area pages.** The [landmarks page](https://formal-applied-math.github.io/formal-mathfin/landmarks.html)
-   lists the proved results the most other results build on, linked to their proofs. The area pages
+   lists the library's headline results with their exact Lean statements and scope, linked to
+   their proofs. The area pages
    and module pages group the rest. [`blueprint.md`](blueprint.md) draws the chain from Brownian
    motion to the Black–Scholes formula, each node linked to its proof. [`organization.md`](organization.md)
    explains how the areas relate.

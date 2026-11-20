@@ -6,8 +6,10 @@ cite or depend on the library. Part two is for an agent that changes the reposit
 ## Using the library
 
 MathFin is a Lean 4 library of formally verified mathematical finance, built on Mathlib and the
-BrownianMotion package. It has no `sorry`, and every theorem the corpus cites is pinned by the build
-to `propext`, `Classical.choice` and `Quot.sound`. The site
+BrownianMotion package. `MathFin/` contains no `sorry` (the comparator file `Challenge.lean` and the
+open-problem statements in `MathFinFrontier/` are deliberate exceptions, and `MathFin/` imports
+neither), and every theorem the corpus cites is pinned by the build to `propext`,
+`Classical.choice` and `Quot.sound`. The site
 (<https://formal-applied-math.github.io/formal-mathfin/>) is generated from the library's
 declaration index and publishes [`llms.txt`](https://formal-applied-math.github.io/formal-mathfin/llms.txt),
 which carries the same summary with current counts.
@@ -24,13 +26,15 @@ then `lake update`, `lake exe cache get`, `lake build`, and `import MathFin`. Th
   data.
 - `python3 -m tools.verify.find <words>` searches the declaration index (`decl-index.json`, produced
   by `lake exe mathfin_index`, and the `decl-index` artifact of the latest `build` run on `main`);
-  `--mentions <name>` and `--used-by <module>` follow the dependency graph.
+  `--mentions <name>` and `--used-by <declaration>` follow the dependency graph.
 - `grep -rn` over `MathFin/` works, and the module docstrings (`## Main results`) name each file's
   theorems.
 
 **Checking a statement.** The statement is the claim, not the prose around it. Read it in the Lean
 source or on the module page, check it with `#check`, and run `#print axioms <name>` in a file that
-imports `MathFin`; the result should list only the three standard axioms.
+imports `MathFin`; for a theorem the corpus cites the result lists only the three standard
+axioms. BrownianMotion has `sorry`s of its own, so a theorem that depends on one of them shows
+`sorryAx`.
 
 **Citing a corpus entry.** Each entry in `benchmarks/*.json` (and the Hugging Face dataset) has
 `metadata.formalization_status`:
