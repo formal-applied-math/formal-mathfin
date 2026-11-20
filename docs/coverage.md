@@ -657,7 +657,7 @@ split by area. What each bridge proves, by area:
   tend to `ptDownOutCall` as `m → ∞` and to be invariant under the `(r, σ, T) ↦ (cr, σ√c, T/c)`
   rescaling; `ptDownOutCall` is spatially homogeneous in `(S, K, H)`, equal to its image form
   (also with a dividend yield, in the printed shape) and `0`, a junk value, at `H = 0`; and the
-  call price `bsV` obeys the same two rescalings (`bsV_scale`, `bsV_timeScale`).
+  closed form `bsV` obeys the same two rescalings (`bsV_scale`, `bsV_timeScale`).
   Not derived: `ptDownOutCall` as a discounted expected payoff, the value of `β`, any rate of
   convergence in `m`, and the accuracy of the shift as an approximation to the discretely
   monitored price.

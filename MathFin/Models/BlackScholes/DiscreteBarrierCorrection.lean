@@ -108,49 +108,10 @@ namespace MathFin
 
 open Filter Topology
 
-/-- **Image form of the full-life down-and-out closed form.** For positive spot, strike, barrier
-and volatility, `ptDownOutCall S K H r r σ T` (the transcribed Reiner–Rubinstein full-life
-down-and-out call, `X ≥ H` branch, at cost of carry `b = r`) equals
-`V(S) − (H/S)^{2r/σ²−1} · V(H²/S)` with `V = bsV`, equivalently the form of [HowisonSteinberg2005],
-§2 (restated as eq. (7) in §3.7) with the ratio reciprocated. The exponent `2r/σ² − 1` is
-`2 · ptMu r σ`, the term `(H/S)^{2r/σ²−1} · (H²/S)` is `S · ptHSmu1`, and `d₁, d₂` at `H²/S` are
-`ptF1, ptF2`. An identity between two closed forms; neither is proved here to be a price. The
-right-hand side is a price form only for `σ > 0`, `0 < T`, `0 < S, K, H`, `H ≤ K` and `S > H`;
-the identity itself holds at every maturity `T`. -/
-theorem ptDownOutCall_eq_image {K H r σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)
-    (hH : 0 < H) (hσ : 0 < σ) :
-    ptDownOutCall S K H r r σ T
-      = bsV K r σ S T - (H / S) ^ (2 * r / σ ^ 2 - 1) * bsV K r σ (H ^ 2 / S) T := by
-  have hHS : 0 < H / S := div_pos hH hS
-  have hσ2 : σ ^ 2 ≠ 0 := by positivity
-  have hmu : 2 * ptMu r σ = 2 * r / σ ^ 2 - 1 := by
-    unfold ptMu hkMu; field_simp
-  have h0 : ptHSmu S H r σ = (H / S) ^ (2 * r / σ ^ 2 - 1) := by
-    rw [ptHSmu, Real.rpow_def_of_pos hHS, hmu, mul_comm]
-  have h1 : ptHSmu1 S H r σ = ptHSmu S H r σ * (H / S) ^ 2 := by
-    have : 2 * (ptMu r σ + 1) * Real.log (H / S)
-        = 2 * ptMu r σ * Real.log (H / S) + (Real.log (H / S) + Real.log (H / S)) := by ring
-    rw [ptHSmu1, this, Real.exp_add, Real.exp_add, Real.exp_log hHS, ← ptHSmu, sq]
-  have hsq : H ^ 2 / S = S * (H / S) ^ 2 := by field_simp
-  have hf1 : ptF1 S K H r σ T = bsd1 (H ^ 2 / S) K r σ T := by
-    unfold ptF1 bsd1
-    congr 2
-    rw [Real.log_div hS.ne' hK.ne', Real.log_div (by positivity) hK.ne',
-      Real.log_div hH.ne' hS.ne', Real.log_div (by positivity) hS.ne', Real.log_pow]
-    push_cast; ring
-  have hf2 : ptF2 S K H r σ T = bsd2 (H ^ 2 / S) K r σ T := by
-    rw [ptF2, bsd2, hf1]
-  symm
-  unfold ptDownOutCall bsV
-  rw [← h0, ← hf1, ← hf2, h1]
-  nth_rewrite 1 [hsq]
-  simp only [ptD1, ptD2, sub_self, zero_mul, Real.exp_zero, neg_mul]
-  ring
-
 /-- **Printed shape of the image form, with a dividend yield.** The display of
 [HowisonSteinberg2005], §2: `V(S) − (S/H)^{1−2(r−q)/σ²} · V(H²/S)` with `V = bsVDiv`, the
 Black–Scholes call price at dividend yield `q`; the closed form `ptDownOutCall` carries the cost
-of carry `b = r − q`. The case `q = 0` is `ptDownOutCall_eq_image` with the base reciprocated. As
+of carry `b = r − q`. The case `q = 0`, with the base reciprocated, is `ptDownOutCall_eq_image`. As
 there, an identity between two closed forms, and a price form only for `σ > 0`, `0 < T`,
 `0 < S, K, H`, `H ≤ K` and `S > H`. -/
 theorem ptDownOutCall_eq_image_printed {K H r q σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)
@@ -192,6 +153,26 @@ theorem ptDownOutCall_eq_image_printed {K H r q σ S T : ℝ} (hS : 0 < S) (hK :
   simp only [ptD1, ptD2]
   linear_combination
     -(K * Phi (bsd2 S K (r - q) σ T) - ptHSmu S H (r - q) σ * K * Phi (ptF2 S K H (r - q) σ T)) * hE
+
+/-- **Image form of the full-life down-and-out closed form.** For positive spot, strike, barrier
+and volatility, `ptDownOutCall S K H r r σ T` (the transcribed Reiner–Rubinstein full-life
+down-and-out call, `X ≥ H` branch, at cost of carry `b = r`) equals
+`V(S) − (H/S)^{2r/σ²−1} · V(H²/S)` with `V = bsV`, equivalently the form of [HowisonSteinberg2005],
+§2 (restated as eq. (7) in §3.7) with the ratio reciprocated. The exponent `2r/σ² − 1` is
+`2 · ptMu r σ`, the term `(H/S)^{2r/σ²−1} · (H²/S)` is `S · ptHSmu1`, and `d₁, d₂` at `H²/S` are
+`ptF1, ptF2`. The case `q = 0` of `ptDownOutCall_eq_image_printed`. An identity between two
+closed forms; neither is proved here to be a price. The right-hand side is a price form only
+for `σ > 0`, `0 < T`, `0 < S, K, H`, `H ≤ K` and `S > H`; the identity itself holds at every
+maturity `T`. -/
+theorem ptDownOutCall_eq_image {K H r σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)
+    (hH : 0 < H) (hσ : 0 < σ) :
+    ptDownOutCall S K H r r σ T
+      = bsV K r σ S T - (H / S) ^ (2 * r / σ ^ 2 - 1) * bsV K r σ (H ^ 2 / S) T := by
+  have h := ptDownOutCall_eq_image_printed (K := K) (H := H) (r := r) (q := 0) (σ := σ)
+    (S := S) (T := T) hS hK hH hσ
+  simp only [sub_zero, bsVDiv, zero_mul, neg_zero, Real.exp_zero, one_mul] at h
+  rw [h, show 1 - 2 * r / σ ^ 2 = -(2 * r / σ ^ 2 - 1) by ring, Real.rpow_neg (by positivity),
+    ← Real.inv_rpow (by positivity), inv_div]
 
 /-- **Zero barrier is a junk corner.** At `H = 0` the logarithm `log (0 / S)` is `0` and
 `ptDownOutCall` is `0`, which is a junk value and not the vanilla price; this is why `0 < H` is
