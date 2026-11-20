@@ -1,254 +1,161 @@
-# The mathematical architecture — the field's spine
+# The methods
 
-Companion to [`architecture.md`](architecture.md), which documents the **engineering** architecture
-(the three honesty tiers, the principle modules, the bridge methodology). **This** document is the
-**mathematical** architecture: the unifying spine of mathematical finance, how the library's towers map
-onto it, where the seams are coherent versus open, and the higher-level unification opportunities. It
-exists because a top-notch formalization is not "all the theorems proved" — it is *the theorems organized
-around the field's actual organizing principles, with the deep connections made load-bearing.*
+[`organization.md`](organization.md) states the library's structure: one object, a price system
+(positions in a market and the pricing measures that price them), three questions about it
+(valuation, risk, choice), met by three dualities, and the model families as a second axis. The
+source tree follows the layers of [`architecture.md`](architecture.md). This page is about a
+different question: what the proofs are made of.
 
-Written 2026-06-29 from a whole-program architectural validation (grounded in code at every seam).
+Four methods recur across the questions and the families. Each is a piece of mathematics with a
+root in the library, and each does its work in several [cells](glossary.md#cell). A new result
+usually calls one or two of them, and knowing which tells you which root to build on and which
+limb it belongs to.
 
-## How the pillars sit in the organization (2026-11-08)
-
-[`organization.md`](organization.md) is the library's organization. It has one object (positions
-in a market), three questions about it (valuation, choice, risk), the joints between the
-questions, and the model families as a second axis. The pillars below are not a rival
-organization. They are the **methods**: what the joints are proved with, and what the families
-are made of.
-
-| pillar | the method | where it does its work |
+| method | the mathematics | where it works |
 |---|---|---|
-| I. Convex duality | separation of a cone from a simplex; Legendre–Fenchel | the fundamental theorems and the superhedging duality (valuation); the robust representation of a risk measure (risk). The joints are dualities between the questions' functionals: marginal utility as a state-price density (choice and valuation), the superhedging price as a coherent risk measure (valuation and risk). |
-| II. Itô calculus | the stochastic integral, Itô's formula, Girsanov, martingale representation | the tool cell `probability/brownian`; consumed by the diffusion, volatility and term-structure families, and by completeness in arbitrage theory |
-| III. Generator and PDE | Feynman–Kac, the Kolmogorov backward equation | `probability/brownian` again; it turns a valuation in the diffusion and term-structure families into a PDE |
-| IV. Intensity and exponential families | the exponential of an integrated intensity; the exponential tilt | the jump, default and mortality-and-claims families. Its joint is the Esscher premium, a premium principle that is a price under the Esscher measure (valuation, risk). |
+| I. Convex duality | separation of a cone from a simplex; Legendre–Fenchel | the fundamental theorems and superhedging (valuation); the robust representation of a coherent risk measure (risk) |
+| II. Itô calculus | the stochastic integral, Itô's formula, Girsanov, martingale representation | the diffusion, volatility and term-structure families; completeness in arbitrage theory |
+| III. Generator and PDE | Feynman–Kac, the Kolmogorov backward equation | diffusion and term-structure valuation as a PDE |
+| IV. Intensities and exponential families | the exponential of an integrated intensity; the exponential tilt | the jump, default and mortality-and-claims families |
 
-The "connective tissue" table below names the seams between the pillars. Where a seam is a joint
-between two questions, `organization.md` carries its current status; the history recorded here
-is the record of how each was wired.
+## I. Convex duality
 
-## The spine: four pillars + connective tissue
+The fundamental theorem of asset pricing is a separating-hyperplane theorem. The cone of
+attainable gains meets the positive orthant only at zero exactly when a strictly positive
+functional vanishes on the cone, and that functional, normalised, is an equivalent martingale
+measure. The same separation proves the robust representation of a coherent risk measure as a
+supremum of expectations over a set of measures, and bounds the superhedging price by the pricing
+measures.
 
-Mathematical finance is a few deep principles whose *consequences* are the models. The library has the
-pillars; the question is whether the **connective tissue** that makes them one architecture is realized.
+* Root: `exists_pos_separating_of_cone_disjoint_simplex` and its companion
+  `exists_separating_of_not_mem_cone` (`Pricing/Duality/ConvexDuality.lean`).
+  `exists_pos_dual_of_disjoint_stdSimplex` (`Pricing/Duality/ConvexSeparation.lean`) is the
+  finite-state form that the FTAP files use.
+* Valuation: `ftap_discrete` (`Pricing/FTAP/FTAPDiscrete.lean`), `ftap_two`
+  (`Pricing/FTAP/FTAPComplete.lean`), and the agreement of the one-period constructions with the
+  multi-state notion, `hasEMMMultiState_iff_exists_isEMM` (`Pricing/FTAP/FTAPMultiState.lean`).
+  Superhedging: `emm_le_superReplication` and `exists_pos_price_le_superReplication`
+  (`Pricing/SuperhedgingDuality.lean`).
+* Risk: `coherentRisk_isLUB` (`Risk/AcceptanceSet.lean`).
+* Joint of valuation and risk: `superhedgingPrice_isLUB` (`Risk/Superhedging.lean`), the
+  superhedging price of a one-period finite-state market as the supremum of prices over its
+  martingale probability vectors.
 
-### Pillar I — No-arbitrage as convex duality (the separating hyperplane)
-The FTAP: *no-arbitrage ⟺ ∃ equivalent martingale measure.* Mathematically this **is** the
-separating-hyperplane theorem — the attainable-gains cone misses the positive orthant ⟺ a
-strictly-positive functional (the EMM) separates them; price `= ⟨EMM, payoff⟩`.
-- **Root:** `Pricing/Duality/ConvexSeparation.exists_pos_dual_of_disjoint_stdSimplex` — its own docstring:
-  *"the separating hyperplane **is** the equivalent martingale measure."*
-- **Instances of the root:** `FTAPMultiState` and `FTAPDiscrete`. `FTAPOnePeriodVector` (its scalar
-  case `FTAPOnePeriod` is a corollary with no proof of its own) proves the one-period FTAP by an independent construction, and `FTAPTwoState` by
-  explicit weights; since 2026-10-21 each is bridged to the multi-state notion, so the two proofs are
-  shown to agree (`hasEMMMultiState_iff_exists_isEMM`, `hasEMMTwoState_iff_multi`). The pricing
-  functional side: `StatePrices`, `Pricing/ConvexPricingFunctional` (the EMM as a convexity-preserving
-  positive operator).
+Not proved: the superhedging duality over strictly positive pricing measures, in several periods,
+or on a general space. The
+fundamental theorems are proved on a finite space, and for one asset on a general space; the
+several-asset Dalang–Morton–Willinger theorem assumes a conditional one-period theorem. The dual
+of choice (marginal utility as a state-price density) is stated for a two-outcome bet and open
+for a finite state space.
 
-### Pillar II — Stochastic calculus (Itô semimartingales)
-The engine of continuous-time models: every model is `dX = b dt + σ dB`, and Itô's formula + the
-stochastic integral make functionals of `X` computable.
-- **Library:** the Itô tower — `ItoIntegralCLM` (+ isometry), `QuadraticVariationL2`,
-  `ItoFormulaUnrestrictedLocMart` (general C² — `f_t`, `f_x`, `f_xx` jointly continuous — as a continuous local martingale), `ItoFormulaGBM`.
-- Since 2026-08-07 ([#183](https://github.com/formal-applied-math/formal-mathfin/issues/183)) the tower
-  states the `σ` in `dX = b dt + σ dB`, not merely that some `σ` exists: every rung from
-  `ito_formula_td_L2_bddDeriv` down to `discountedGBM_eq_itoIntegral` names its integrand, ending at
-  `gfx =ᵐ [σ·Ŝ(·)]` for the discounted GBM. Naming the *representation's* integrand for a general
-  `L²` claim — the Clark–Ocone direction, #182 — is still open.
-- Since 2026-10-28 ([#309](https://github.com/formal-applied-math/formal-mathfin/issues/309)) Itô's
-  formula along `dX = b dt + σ dB` with bounded adapted continuous coefficients holds for every `f ∈ C²`
-  and at each fixed `t ≤ T` (`ItoFormulaAdapted.ito_formula_adapted_local_le`). The integral
-  `∫ f'(X) dM` is there the limit in probability of left-point Riemann sums; for bounded `f'` the same
-  sums converge to the `L²` integral of `f'(X)σ` (`tendstoInMeasure_riemannStieltjes_itoIntegral`).
-  The same holds for `f(t, x)` with jointly continuous `f_t`, `f_x`, `f_xx`
-  (`ItoFormulaAdapted.ito_formula_adapted_td_local_le`, of which the `C²` formula is the case `f_t = 0`), localised by the double cutoff
-  `SummitC.fTrunc` that `ItoFormulaCutoff` built for functions of Brownian motion. The bounds
-  on `σ` and `b` go the same way: for continuous adapted `σ`, `∫ σ dB` is the limit in probability
-  of its Riemann sums (`ItoIntegralLocalised.localItoIntegral`, glued from the integrals of `σ`
-  clipped to `[−N, N]`, no stopping times; adapted, and independent of the horizon `T` up to
-  indistinguishability on `[0, T]`), and the formula holds along `x₀ + ∫ b ds + ∫ σ dB`
-  (`ItoFormulaAdapted.ito_formula_adapted_unbounded_le`). The identity of processes is the
-  next rung.
+## II. Itô calculus
 
-### Pillar III — The probabilistic ⟷ analytic duality (generator / Feynman–Kac / PDE)
-The same price is a risk-neutral **expectation** (probabilistic) and a **PDE solution** (analytic); the
-bridge is the infinitesimal generator: Itô ⟹ Kolmogorov backward equation ⟹ Feynman–Kac.
-- **Library:** `FeynmanKacHeatEquation` + `Models/BlackScholes/PDEFromFeynmanKac` (the BS-PDE keystone, built);
-  `Models/BlackScholes/PDEFromIto` (the PDE in the Brownian coordinate, `∂_t f + ½∂_xx f = 0`, read off the
-  Feynman–Kac form; the local-martingale step via Itô is not proved).
+Every continuous-time model is a process `dX = b dt + σ dB`, and the stochastic integral with
+Itô's formula makes functionals of `X` computable. Girsanov's theorem turns a drift into a change
+of measure, and martingale representation says every square-integrable claim on the Brownian
+filtration is an Itô integral, which is completeness.
 
-### Pillar IV — Intensity & exponential families (the tractability backbone)
-Closed forms come from Gaussian/lognormal/exponential structure; and a single *"exponential of an
-integrated intensity"* unifies discounting, mortality, credit hazard, and the Poisson rate.
-- **Library:** `StandardNormal`/`GaussianMoments` (Gaussian closed forms), `ExponentialDiscount`
-  (the shared root), `Insurance/SurvivalUnification` (mortality ≡ credit hazard, *certified*),
-  `GaussianGirsanov` (the Esscher exponential tilt).
+* The integral: `itoIntegralCLM` (`Probability/Brownian/Ito/ItoIntegralCLM.lean`), a continuous
+  linear map out of `L²` of the predictable integrands with the Itô isometry.
+* The formula: `ito_formula_adapted_local_le`
+  (`Probability/Brownian/Ito/ItoFormulaAdaptedTD.lean`), Itô's formula along an Itô process with
+  bounded adapted continuous coefficients; `Probability/Brownian/Ito/ItoFormulaUnrestrictedLocMart.lean`
+  for functions of Brownian motion as a local martingale.
+* Change of measure: `changeOfMeasure_setIntegral_eq`
+  (`Probability/Martingales/ChangeOfMeasure.lean`), the Bayes rule for martingales;
+  `bs_discounted_isQMartingale` (`Pricing/Girsanov.lean`), the Black–Scholes pricing measure as a
+  density tilt; `isQBrownianMotion_of_expMartingale`
+  (`Probability/Brownian/ExpMartingaleQBrownian.lean`) and
+  `Btheta_isQBrownianMotion_predictable_of_bdd`
+  (`Probability/Brownian/Girsanov/GirsanovPredictableTheta.lean`) for the drift-removed process.
+* Representation and completeness: `itoIntegralCLM_surjective_onto_centered` and
+  `martingale_representation` (`Probability/Brownian/MartingaleRepresentation.lean`);
+  `exists_replicating_strategy_in_price` (`Pricing/MarketCompletenessInPrice.lean`), the hedge as a
+  holding in the price.
+* Bracket: `norm_sq_increment_eq_bracket`
+  (`Probability/Brownian/Ito/ItoIntegralAgainstMartingale.lean`) and `condExp_band_second_moment`
+  (`Probability/Martingales/PointwiseBracket.lean`).
 
-## The connective tissue — what would make it ONE architecture
+Not proved: Girsanov's theorem is proved for bounded predictable `θ`; Novikov's condition and the
+general progressive `θ` are not. Itô's formula for a general continuous semimartingale and a
+quadratic-variation process are not proved; the Itô process is built from one Brownian motion
+with continuous coefficients. In the Brownian market the hedge is not identified with an explicit
+integrand (Clark–Ocone, [#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)),
+and the converse of completeness (uniqueness of the pricing measure implies completeness) is not
+proved. Stochastic differential equations are solved as a fixed point in `L²` of predictable
+processes, not as a process with continuous adapted paths.
 
-| Bridge | Connects | Status |
-|---|---|---|
-| **Girsanov / Esscher** (change of measure) | I (EMM) ↔ II (Itô) ↔ IV (exp tilt) | **PARTIALLY WIRED at I↔II (Phase 2, 2026-06-30) — the martingale side.** `Pricing/Girsanov.bs_discounted_isQMartingale` now exhibits the Black–Scholes EMM as an *explicit* Girsanov density change `Q = withDensity(exp(−θX_T − ½θ²T))` (constant market price of risk `θ = (μ−r)/σ`), under which the discounted stock is a `Q`-martingale — retiring the Wald shortcut of `discountedGBM_isMartingale` (which took `Q = P` from the start). It stands on the reusable **Bayes change-of-measure engine** `Probability/Martingales/ChangeOfMeasure.changeOfMeasure_setIntegral_eq` (`Z` and `Z·D` both `P`-martingales ⟹ `D` is a `Q`-martingale on `[0,T]` — no stochastic calculus, only conditional expectations). **The distributional side is now FULLY CLOSED for constant θ (2026-07-05):** `Probability/Brownian/Girsanov/GirsanovConstantTheta.Btheta_isQBrownianMotion` proves the drift-corrected `B^θ_t = X_t + θ t` has the finite-dimensional laws of a `Q`-Brownian motion on `[0,T]` — zero start, Gaussian increments `B^θ_t − B^θ_s ~ N(0, t−s)`, **and** independent increments; path continuity is not stated (corpus `gir-const-theta-qbm`, `full`; marginal law `gir-const-theta-marginal`, `full`) — from the same Bayes engine + Wald exponentials (`Wald(−θ)`, `Wald(a−θ)`) giving every `Q`-conditional MGF, Mathlib's complex-MGF machinery (`integrableExpSet_eq_of_mgf` → `eqOn_complexMGF_of_mgf` → `ext_of_complexMGF_eq`) reading off the Gaussian laws, **with no adapted-integrand Itô formula**. The increment *independence* — earlier believed blocked by a Mathlib gap ("conditional-MGF ⟹ independence" is absent; only the reverse `condExp_indep_eq` exists) — is reached WITHOUT that lemma: via `indepFun_iff_charFun_prod`, the joint characteristic function at `w = (w₁, w₂)` is the charFun-at-`1` of the Gaussian law of the linear combination `w₁·I₁ + w₂·I₂` (from the joint-MGF factorisation — a `condExp_mul_of_stronglyMeasurable_left` pull-out), so it factors into the two marginal Gaussian characteristic functions (`charFun_gaussianReal`). **Since 2026-07-06 this entire characteristic-function chain is a single reusable module** `Probability/Brownian/ExpMartingaleQBrownian.isQBrownianMotion_of_expMartingale`: any drift-corrected process that supplies its own exponential martingale (`exp(a·Y − ½a²·)` a `Q`-martingale, packaged as `IsExpQMartingale`) is a `Q`-Brownian motion by one application — const-θ instantiates it via `expBtheta_isQMartingale`, and the **simple (piecewise-constant adapted) θ** case now instantiates it too (`GirsanovSimpleTheta.Btheta_simple_isQBrownianMotion`, corpus `gir-simple-adapted`, `full`, 2026-07-06) — the general bounded-adapted-θ Girsanov for the simple case, strictly beyond constant θ, via the spine `simple_spine_ae` (`E^{−c}·exp(a·B^θ − ½a²·) =ᵐ E^{a−c}`) fed to the Bayes engine with an `L²`-Hölder mixed-time integrability, no adapted Itô. **Continuous bounded-adapted θ is now CLOSED too (2026-07-09):** `Probability/Brownian/Girsanov/GirsanovAdaptedTheta.Btheta_isQBrownianMotion_adapted` (corpus `gir-thm-9.1.8`, `full`) proves `B^θ_u = B_u + ∫₀ᵘθ ds` is a `Q`-Brownian motion for bounded `𝓕`-adapted path-continuous θ under `Q = μ.withDensity(exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds))` — spine-free, the simple-θ identity passed to the limit through the a.e.-subsequence set-integral engine, no adapted-integrand Itô formula and no Novikov crux; the const → simple → continuous-adapted arc is COMPLETE. Still **open**: only the strictly more general `L²`/progressive-θ under Novikov (`sc-thm-9.1.8`). The d-asset Esscher FTAP (IV) is a *discrete* Girsanov, still unlinked to the continuous one. *2026-09-25:* the independence described above was of two increments at a time until this date; it is now joint independence of any number of increments (`HasIndepIncrements` on `[0,T]`), by the same argument with `iIndepFun_iff_charFun_pi` in place of `indepFun_iff_charFun_prod`. "`Q`-Brownian motion" in this row means these finite-dimensional laws. |
-| **Martingale representation** (attainability) | II (Itô) ↔ I (EMM) | **WIRED (2026-08-07) — the I↔II seam from the other side.** Girsanov wires this seam in the direction of *existence*: the equivalent martingale measure exhibited as an explicit change of measure. Martingale representation wires it in the direction of *uniqueness and attainability*, and together they close it. `Probability/Brownian/MartingaleRepresentation.itoIntegralCLM_surjective_onto_centered` proves the Itô isometry `φ ↦ ∫₀ᵀ φ dB` (already a `LinearIsometry` from the predictable `L²` integrands into `L²(μ)`) is **onto** the centered `𝓕ᴮ_T`-measurable part of `L²(μ)`, bundled as the `LinearIsometryEquiv` `itoIsometryEquiv`; `exists_itoIntegral_representation` is the terminal `∃!` form and `martingale_representation` the process form (corpus `gir-thm-9.3.4`, flipped `reduced_core → full`). The proof is an orthogonal decomposition against the range — closed because it is an isometry's image, hence orthogonally complemented — plus totality of the step-integrand Doléans exponentials: `DoleansStepRepresentation.stepDoleans_sub_one_mem_range` puts every such exponential minus one *inside* the range, and `WienerExponentialTotality.eq_zero_of_orthogonal_stepDoleans` kills anything orthogonal to all of them, by MGF analytic continuation on the cylinder σ-algebras of `BrownianCylinderGeneration` (`⨆ₙ cylinderSigma B T n = natFiltration`) followed by Lévy upward convergence. No Malliavin calculus, no Clark–Ocone, and no adapted-integrand Itô formula. Centering (`𝔼[∫₀ᵀ φ dB] = 0`) is proved a floor down as `ItoIntegralProcessGeneral.integral_itoIntegralCLM`. The finance reading is `Pricing/MarketCompleteness`: `exists_replicating_strategy` (every `L²` `𝓕ᴮ_T`-claim is `𝔼_μ[H] + ∫₀ᵀ φ dB` for a *unique* hedge) and `superReplication_eq_emm_price` (the continuous-time superreplication duality, its "EMM price" being `𝔼_μ[H]`). **Honest scope on uniqueness:** `measure_eq_of_pricesGainsAtZero` proves uniqueness of the pricing measure on `𝓕ᴮ_T` *for measures that price the traded gains at zero*, not the unconditional second FTAP. The textbook fair-game step needs the wealth process to be an integral against the price `S`; the one built here integrates against `B`, and `S` and `B` share only a filtration, so that step is the named hypothesis `PricesGainsAtZero` — step (i) of the textbook proof hypothesised, step (ii) proved. It is guarded by two proved facts, `pricesGainsAtZero_self` (`μ` satisfies it) and `pricesGainsAtZero_of_gains_martingale` (the textbook gains-martingale condition implies it); the corollary `emm_unique_of_complete` consumes only `IsEMM`'s `isProb` and `ac`. Only `complete ⟹ unique` is delivered; the converse needs Jacod–Yor extreme points. `superReplication_eq_emm_price` does **not** close the finite-state Farkas gap of `Pricing/SuperhedgingDuality` — separation there, martingale representation here. |
-| **Feynman–Kac** (generator) | II ↔ III | **WIRED** (BS-PDE keystone). Not yet abstracted to a general generator / Kolmogorov-backward framework. |
-| **Convex duality** (separation / Legendre–Fenchel) | I (pricing) ↔ IV (risk) | **WIRED (Phase 1, 2026-06-29).** The shared root `Pricing/Duality/ConvexDuality.exists_pos_separating_of_cone_disjoint_simplex` (cone↔simplex) + its companion `exists_separating_of_not_mem_cone` (point↔cone) now carry **both** towers: the FTAP kernel `exists_pos_dual_of_disjoint_stdSimplex` is *re-derived* from the root (pricing side), and the coherent-risk ADEH representation `Risk/AcceptanceSet.coherentRisk_isLUB` is its risk-side instance (`WorstCaseRisk.worstCase_isLUB` a concrete case). Superhedging: the bound `SuperhedgingDuality.emm_le_superReplication` is a direct sum swap; its strictly positive price `exists_pos_price_le_superReplication` (2026-10-21) comes from the multi-state FTAP, which is an instance of the root. The strong-duality *equality* awaits a finite-dim Farkas (Mathlib gap). |
-| **The numéraire** (change of numéraire; log-optimal portfolio) | IV ↔ I (EMM) | **WIRED (2026-07-03) — both seam directions, at their achievable scope.** *(a) The change-of-numéraire law.* `Pricing/Numeraire.changeOfNumeraire`: with `Q^N = Q.withDensity((N_T·B₀)/(N₀·B_T))`, `N₀·𝔼^{Q^N}[X/N_T] = B₀·𝔼^Q[X/B_T]` for every claim `X` (a pure measure-transport identity + cancellation of `N_T` — no integrability needed), companion `numeraireMeasure_isProbabilityMeasure`. Genuinely **consumed** by two instances: the BS stock numéraire (`StockNumeraire.stockNumeraire_exercise_probability` is the `Q^N`-probability of exercise at `B_T=e^{rT}`, `B₀=1`, `N=S`, with no separate stock-measure definition) and `ExchangeOption.exchangeOption_numeraire_price` (Margrabe's `S²`-numéraire valuation = instance `X=` exchange payoff, `N=S²`). (Garman's normal form is post-integration closed-form algebra — no measure — so not an instance; none was fabricated.) *(b) The numéraire-portfolio ⟹ EMM direction.* `Choice/Performance/KellyNumeraire.kellyNumeraire_isRiskNeutral`: the growth-optimal (Kelly) wealth, as deflator, turns the physical measure into the EMM (`q₊·b + q₋·(−1) = 0`), the `p`-independence being the Kelly first-order condition. **Honest remaining scope:** direction (b) is the **discrete, two-outcome** shadow of the **continuous** Long/Platen benchmark theorem (deflated prices are `P`-martingales, EMM density `∝ 1/N*`), still gated on a state-price-density / market model absent from the Itô tower. |
-| **Lattice limit (CLT)** (discrete → continuous) | Binomial ↔ Black–Scholes | **WIRED** (`CRRConvergence.binomialPrice_call_tendsto_bs`), by characteristic functions and Lévy continuity. Donsker's invariance principle is **not** formalized — this is the pricing limit, not the functional CLT, and `docs/applied-areas.md` lists Donsker among the gaps. |
+## III. Generator and PDE
 
-## Coherence verdict
+A price is both a risk-neutral expectation and the solution of a PDE. The bridge is the
+infinitesimal generator: Itô's formula gives the Kolmogorov backward equation, and Feynman–Kac
+identifies the expectation with its solution. In the library the constant-coefficient case is
+proved through the heat kernel.
 
-Individually the towers are coherent and the *engineering* architecture is documented. **Phase 1
-(2026-06-29) realized the spine's #1 unification**: the convex-duality bridge (I↔IV) is now WIRED — the
-FTAP separating functional and the coherent-risk-measure representation are *proved* to be the same
-Hahn–Banach root (`Pricing/Duality/ConvexDuality`), no longer split across files that never name it. Of the
-bridges, Feynman–Kac (II↔III), the lattice limit (discrete↔continuous), and convex-duality (I↔IV) are WIRED;
-Girsanov (I↔II) is now **wired** (Phase 2, 2026-06-30 — the EMM/change-of-measure *martingale*
-side, constant θ: the risk-neutral measure is an explicit density change, built on a reusable Bayes
-change-of-measure engine), with the *distributional* Girsanov now **fully closed for constant θ**
-(2026-07-05, `Btheta_isQBrownianMotion`: `B^θ` is a `Q`-Brownian motion — Gaussian *and independent*
-increments — via `indepFun_iff_charFun_prod` on the Gaussian joint law, no adapted Itô; since 2026-09-25 jointly independent, via
-`iIndepFun_iff_charFun_pi`, with path continuity not stated), and now **fully
-closed for bounded adapted continuous θ** (2026-07-09, `Btheta_isQBrownianMotion_adapted`, `gir-thm-9.1.8`
-`full`, via the spine-free simple → continuous limit), and finally **for bounded predictable θ**
-(`Btheta_isQBrownianMotion_predictable_of_bdd`, `gir-thm-9.1.8-predictable` `full`) — note the hypothesis
-is *bounded* predictable (`∀ t ω, |θ t ω| ≤ C`), which is strictly inside the integrand class:
-`itoIntegralCLM : Lp ℝ 2 (trimMeasure T) →L[ℝ] Lp ℝ 2 μ` accepts every square-integrable predictable
-integrand, and on a finite measure `L² ⊋ L^∞`. So the strictly more general `L²`/progressive-θ under Novikov is still open, as is Novikov's condition itself
-(`gir-thm-9.1.7`, a structure spec, not a derivation); the numéraire (IV↔I) is now **wired at its achievable scope** (2026-07-03):
-the change-of-numéraire *formula* (`Pricing/Numeraire.changeOfNumeraire`, consumed by the BS stock
-numéraire and the Margrabe `S²`-numéraire), **and** the numéraire-*portfolio* ⟹ EMM direction in the
-discrete Kelly market (`Choice/Performance/KellyNumeraire`), with only the *continuous* Long/Platen version of
-the latter (needing a state-price-density model) still open. **The library's pricing↔risk spine is
-realized, the continuous-time EMM is an explicit change of measure, prices are provably numéraire-invariant,
-and the growth-optimal portfolio is shown to induce the EMM.**
+* Root: `heatKernel` and its derivative lemmas
+  (`Probability/Gaussian/FeynmanKacHeatEquation.lean`).
+* Where it works: `bsV_satisfies_bs_pde_via_feynmanKac`
+  (`Models/BlackScholes/PDEFromFeynmanKac.lean`), the Black–Scholes price satisfies the
+  Black–Scholes PDE by reading it off the Feynman–Kac form; `discountedCallBrownian_heat_equation`
+  (`Models/BlackScholes/PDEFromIto.lean`), the PDE in the Brownian coordinate.
 
-**Martingale representation closes I↔II from the other side (2026-08-07).** Girsanov wires that seam in the
-direction of *existence*: the equivalent martingale measure as an explicit change of measure. Martingale
-representation wires it in the direction of *uniqueness and attainability*:
-`MartingaleRepresentation.itoIntegralCLM_surjective_onto_centered` proves the Itô integral exhausts the
-centered `𝓕ᴮ_T`-measurable part of `L²(μ)`, and `MarketCompleteness.exists_replicating_strategy` reads off a
-unique hedge for every square-integrable claim. Together they close the seam. What is still open on it: the
-`L²`/progressive-θ Girsanov under Novikov, and the converse `unique ⟹ complete` (Jacod–Yor extreme
-points). The continuous Long/Platen numéraire-portfolio benchmark also stays open.
+Not proved: a general generator framework. Feynman–Kac is not stated for an arbitrary diffusion
+with a Kolmogorov backward equation of which the Black–Scholes PDE, the heat equation and the
+Vasicek PDE would be instances, and the step from a local-martingale form of Itô's formula to the
+PDE is not carried out in general.
 
-**The `∫ φ dS` half is closed (2026-08-16) — the chain rule.** What that sentence used to list as the
-third open item is built. For a driver `φ` and `M = φ●B`, `ItoIntegralAgainstMartingale` puts the
-integral against `M` on the bracket-weighted `L²(φ²·trim_T)` by composing `itoIntegralCLM` with the
-`p = 2` multiplication isometry `ψ ↦ ψφ` (`LpMulIsometry`; Mathlib carries only `p = 1`, where density
-and multiplier coincide). Both factors are isometries, so `‖∫ψ dM‖ = ‖ψ‖_{L²(⟨M⟩)}`; the chain rule
-`∫ψ dM = ∫ψφ dB` is then how the object is built, and what identifies it as *the* stochastic integral
-against `M` is `itoIntegralAgainst_elementary`, the Riemann–Stieltjes agreement `∫ Z·1_{(a,b]} dM =
-Z·(M_b − M_a)` on a band. Since 2026-08-24 the bracket reading is earned, not just motivated:
-`norm_sq_increment_eq_bracket` proves the unconditional second moment
-`𝔼[(M_b − M_a)²] = ⟨M⟩((a,b] × Ω)` — the defining property quadratic variation is for, at the
-level of expectations. Since 2026-08-27 the conditional form is there too:
-`PointwiseBracket.condExp_band_second_moment` proves
-`𝔼[(M_b − M_a)² | 𝓕_a] =ᵐ 𝔼[⟨M⟩_b − ⟨M⟩_a | 𝓕_a]` against the *pathwise* increment
-`∫_a^b φ_u(ω)² du`, by localising the isometry on an `𝓕_a`-set rather than by a second density
-argument. Since 2026-08-28 that increment is also **adapted**
-(`BracketCompensator.bracketProcess_adapted`, via the trace of the predictable σ-algebra on a
-band), which is what lets the identity rearrange into `𝔼[M_b² − ⟨M⟩_b | 𝓕_a] = M_a² − ⟨M⟩_a` —
-the bracket as the compensator of `M²`. What stays out is any pathwise quadratic variation, a
-bundled `Martingale` structure for `M² − ⟨M⟩`, and Doob–Meyer for a general submartingale. The finance consequence is that a hedge is a **holding in the price**
-(`MarketCompletenessInPrice.exists_replicating_strategy_in_price`, needing only `σ ≠ 0` a.e. — the
-weighted norm rescales, so no uniform lower bound), and that the gains-neutrality hypothesis becomes a
-theorem: `PricingMeasureL2Density.measure_eq_of_density` derives `PricesGainsAtZero` from `S` being a
-`Q`-martingale together with a square-integrable density, and concludes `Q = μ` on `𝓕ᴮ_T`. Still out of
-scope on this seam: the Jacod–Yor converse and the integral against a general semimartingale —
-`ContinuousMarket`'s meaning-2 boundary narrows but does not close. The drift term (#194) is now in
-`Pricing/PricePathDrift.lean`: `S = S₀ + ∫b ds + (σ●B)` and `∫ψ dS = ∫ψb ds + ∫ψ dM`, with
-`ψb ∈ L²` an explicit side condition; with a drift `S` is not a martingale, so no completeness or
-pricing-measure statement extends to it.
+## IV. Intensities and exponential families
 
-## A representation layer, not a fifth pillar: the reified contract (2026-08-17)
+Closed forms come from Gaussian and exponential structure, and one construction recurs: the
+exponential of an integrated intensity. It is a discount factor when the intensity is a rate, a
+survival probability when it is a hazard or a force of mortality, and the survival function of the
+first arrival when it is a Poisson rate. The exponential tilt is the other recurring device; it is
+the Esscher transform, a change of measure by an exponential density.
 
-`MathFin/Contracts/` is not a new mathematical principle beside the four pillars — it is a
-**representation layer that sits across them**, and is worth recording here for that reason.
-Before this tower every payoff in the library was a lambda written once, inline, inside the
-integral that priced it (Pillar II/III territory): the payoff and the pricing model were the same
-syntactic object, so nothing could be said about the payoff independently of the model that
-happened to price it. `Payoff ι` / `Contract ι` (inductives over a typed underlying index) give the
-payoff its own object, prove it measurable and adapted to its own observation times — the
-hypothesis a future Pillar II stochastic-integral rung will need an integrand to satisfy, not
-yet consumed by anything in this round — and reduce `Contract.value` on four reified instruments
-to the Black–Scholes closed forms Pillar IV's
-Gaussian-moment machinery already produced (`bs_call_formula`/`bs_put_formula`/
-`bs_cash_or_nothing_formula` are direct Gaussian-integral derivations; none routes through Pillar
-III's Feynman–Kac/PDE keystone). `Pricing/Value.lean`
-is deliberately thin at the Pillar I seam: `value_deliverAsset` and `value_process_martingale` are
-conditional-expectation facts (`Martingale.condExp_ae_eq` + `martingale_condExp`), needing a bare
-probability measure under which the price is a martingale, not `IsEMM`'s
-equivalence content — so this layer touches Pillar I's *martingale* vocabulary without yet drawing
-on its *no-arbitrage* one.
+* Root: `rate_eq_neg_log_deriv`, `survivalFromIntensity` and
+  `hasDerivAt_neg_log_survivalFromIntensity`
+  (`Probability/Analysis/ExponentialDiscount.lean`).
+* Mortality and credit are the same object: `survivalFunction_eq_hazardSurvival`
+  (`Insurance/SurvivalUnification.lean`); the Cox default time `coxDefaultTime` for a deterministic
+  intensity (`Models/Credit/Cox.lean`).
+* The tilt: `gaussianReal_withDensity_esscher` (`Models/BlackScholes/GaussianGirsanov.lean`), and
+  `esscherPremium_eq_price` (`Insurance/EsscherPremium.lean`), the Esscher premium as a price
+  under the tilted measure. That theorem is the joint of valuation and risk for premium
+  principles.
 
-Consulted as a source, not a template: Bilokon, *The Contract Is Not the Model* (2026); see
-`docs/sources.md` and `docs/bridges.md` rows CT/CT.2 for what was taken and what was designed
-afresh.
+Not proved: intensities are deterministic. A stochastic (doubly stochastic) intensity is not
+constructed, and the discrete Esscher tilt is not unified with the continuous Girsanov change of
+measure.
 
-**Two rungs deferred, each waiting on the corpus case that forces it, not built ahead of it:**
-branching contracts and the lifecycle state machine (outstanding notional, absorbing termination) —
-the strongest part of the source artifact, forced by the first autocall entry; and path-dependent
-instances — every instrument here observes only at maturity `T`, forced by wiring the model map to
-the full GBM path rather than the terminal value, which an Asian or barrier reified instrument
-needs. A third, not deferred but genuinely open: identifying `Contract.value` with the initial
-wealth of a replicating strategy rather than merely a martingale value process — its dependency,
-`∫ ψ dS`, is now built (`MarketCompletenessInPrice.exists_replicating_strategy_in_price`, the row
-above), so this is buildable rather than blocked, and is the natural next seam between this layer
-and Pillar I.
+## Seams between the methods
 
-## The higher-math unification roadmap (apparently-disconnected fields that connect)
+Proved connections:
 
-Ranked by leverage × tractability:
+* I and II. The pricing measure of the Black–Scholes market is an explicit Girsanov density
+  (`bs_discounted_isQMartingale`), and martingale representation gives attainability by a unique
+  hedge when σ is almost everywhere nonzero (`martingale_representation`,
+  `exists_replicating_strategy_in_price`).
+* I and IV. The numéraire measure (`numeraireMeasure`, `Pricing/Numeraire.lean`) gives the
+  Black–Scholes stock numéraire (`Models/BlackScholes/StockNumeraire.lean`), and the change of
+  numéraire (`changeOfNumeraire`) prices Margrabe's exchange option
+  (`Models/BlackScholes/ExchangeOption.lean`); the log-optimal
+  portfolio is the numéraire portfolio in the discrete Kelly market
+  (`kellyMarket_numeraire_portfolio`, `Choice/Performance/KellyNumeraire.lean`).
+* II and III. The Black–Scholes PDE is derived from the Feynman–Kac form
+  (`bsV_satisfies_bs_pde_via_feynmanKac`).
+* Discrete and continuous. The binomial price of a call converges to the Black–Scholes price
+  (`binomialPrice_call_tendsto_bs`, `Models/Binomial/CRRCharFun.lean`), by characteristic
+  functions and Lévy's continuity theorem. Donsker's invariance principle is not formalized.
+* Valuation and risk. `superhedgingPrice_isLUB` and `esscherPremium_eq_price`.
 
-1. **The convex-duality unification (I↔IV) — ✅ REALIZED (Phase 1, 2026-06-29).** The shared root is
-   extracted (`Pricing/Duality/ConvexDuality`: the cone↔simplex separation + the point↔cone companion, sharing
-   two named atoms), and the FTAP kernel (re-derived from it), the coherent-risk ADEH representation
-   (`coherentRisk_isLUB`) and a concrete instance (`worstCase_isLUB`) are instances of it; superhedging
-   reaches it through the multi-state FTAP (`exists_pos_price_le_superReplication`, 2026-10-21). **Proved: the FTAP and the
-   coherent-risk-measure representation are the same Hahn–Banach theorem.** Remaining as backlog: the
-   superhedging strong-duality *equality* (needs a finite-dim Farkas — a Mathlib gap), and the Gaussian
-   `CVaR_α(L) = sup_{Q∈Q_α} E_Q[L]` robust form (the continuous instance, off the finite-state spine).
+Open connections:
 
-2. **Girsanov as the I↔II connective tissue — ✅ MARTINGALE SIDE DONE (Phase 2, 2026-06-30).** The
-   continuous EMM is now *derived as an explicit change of measure*: `Girsanov.bs_discounted_isQMartingale`
-   makes the Black–Scholes risk-neutral measure a Girsanov density tilt (constant θ), under which the
-   discounted stock is a `Q`-martingale — retiring the Wald shortcut, standing on a reusable Bayes engine
-   `ChangeOfMeasure.changeOfMeasure_setIntegral_eq`. **The distributional Girsanov is now fully closed for
-   constant θ (2026-07-05):** `GirsanovConstantTheta.Btheta_isQBrownianMotion` proves drift removal →
-   `Q`-Brownian (Gaussian *and independent* increments) for constant θ, with the increment independence
-   reached via `indepFun_iff_charFun_prod` on the Gaussian joint law (the joint charFun factorises through
-   the Gaussian law of every linear combination of the increments) — sidestepping the missing
-   "conditional-MGF ⟹ independence" lemma entirely, no adapted Itô. (*2026-09-25:* the same argument with
-   `iIndepFun_iff_charFun_pi` now gives joint independence of any number of increments, `HasIndepIncrements`
-   on `[0,T]`; path continuity is not stated.) The characteristic-function chain is
-   now the reusable `ExpMartingaleQBrownian.isQBrownianMotion_of_expMartingale` (2026-07-06), instantiated
-   here from `expBtheta_isQMartingale`, and then for **simple** adapted θ (`Btheta_simple_isQBrownianMotion`,
-   2026-07-06) and **bounded adapted continuous** θ (`Btheta_isQBrownianMotion_adapted`, `gir-thm-9.1.8`
-   `full`, 2026-07-09). The feared adapted-integrand Itô formula was **never needed**: the bounded adapted
-   Doléans exponential is handled **spine-free** — the simple-θ exponential-martingale identity is passed to
-   the limit through an a.e.-subsequence set-integral engine (`tendsto_setIntegral_of_subseq_ae_of_sq_bound`),
-   sidestepping the pathwise quadratic variation the tower lacks. Remaining as backlog: only the strictly more
-   general `L²`/progressive-θ under Novikov (`sc-thm-9.1.8`), and unifying the discrete Esscher FTAP with the
-   continuous tilt. **The seam's other direction — attainability — landed 2026-08-07** (the
-   martingale-representation row above): the Itô integral is onto the centered `𝓕ᴮ_T`-measurable claims, so
-   the market driven by `B` is complete, and the pricing measure is pinned on that filtration among measures
-   that price the traded gains at zero.
+* The continuous numéraire-portfolio theorem (Long, Platen), which needs a state-price-density
+  model.
+* The finite-state dual of choice (marginal utility as a state-price density) and the
+  Hansen–Jagannathan bound, which join convex duality to the choice limb.
+* A general generator abstraction joining II and III.
+* Stochastic intensity joining IV to the Brownian calculus of II.
 
-3. **The generator / Kolmogorov abstraction (II↔III).** Abstract Feynman–Kac into the infinitesimal
-   generator → backward equation, of which the BS-PDE, the heat equation, and Vasicek are instances.
-
-4. **The intensity / Cox extension (IV).** Extend the built `ExponentialDiscount`/`SurvivalUnification`
-   root to *stochastic* intensity (Cox / doubly-stochastic Poisson), unifying credit, mortality, and the
-   Poisson tower; the Esscher tilt = minimal-relative-entropy change ties IV back to I and to information
-   theory.
-
-5. **The numéraire / log-optimal connection (IV↔I).** The Kelly/log-optimal portfolio is the numéraire
-   under which the EMM is the physical measure — connecting portfolio choice to pricing.
-
-## What "top-notch" means at this level
-
-Not more theorems, not polish — **realizing the architecture**: naming the shared roots and wiring the
-open seams, so the library becomes a *formal theory of mathematical finance organized around its actual
-spine.* That is the roadmap's elusive "tier 3": original not as a new theorem, but as a coherent formal
-**architecture** of the field that no one has built.
+The stated and unproved results are the [frontier](glossary.md#frontier) nodes of
+[`blueprint.md`](blueprint.md).

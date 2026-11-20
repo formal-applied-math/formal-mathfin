@@ -10,9 +10,14 @@ whose docstring says so even when its name does not.
     python3 -m tools.verify.find --mentions IsEMM            # everything stated about IsEMM
     python3 -m tools.verify.find --used-by MathFin.IsExpQMartingale
 
-``--index`` defaults to ``decl-index.json`` at the repo root (download the
-``decl-index`` artifact of the latest ``build`` run on main, or build it with
-``lake exe mathfin_index > decl-index.json`` with the daemon down).
+``--index`` defaults to ``decl-index.json`` at the repo root. Get a current index from the
+``decl-index`` artifact of main's latest ``build`` run:
+
+    gh run download "$(gh run list --workflow build.yml --branch main --status success \
+        --limit 1 --json databaseId --jq '.[0].databaseId')" --name decl-index --dir .
+
+or build it, as CI does, with ``lake exe mathfin_index decl-index.json`` (a Lean process that
+loads the whole environment, so stop any REPL daemon first).
 """
 
 from __future__ import annotations
@@ -33,13 +38,29 @@ def _first_line(doc: str | None) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(prog="python3 -m tools.verify.find")
-    ap.add_argument("terms", nargs="*")
-    ap.add_argument("--index", default=DEFAULT_INDEX)
+    ap = argparse.ArgumentParser(
+        prog="python3 -m tools.verify.find",
+        description="Search the declaration index of MathFin by name, docstring and statement.",
+        epilog=(
+            "examples:\n"
+            "  python3 -m tools.verify.find forward measure     words in a name, docstring or statement\n"
+            "  python3 -m tools.verify.find --kind def numeraire   only definitions\n"
+            "  python3 -m tools.verify.find --mentions IsEMM    declarations that use IsEMM\n"
+            "  python3 -m tools.verify.find --used-by MathFin.IsExpQMartingale\n"
+            "                                                   declarations that use this one\n"
+            "\n"
+            "The index is the decl-index artifact of main's latest build run "
+            "(gh run download <run-id> --name decl-index), or "
+            "`lake exe mathfin_index decl-index.json`."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    ap.add_argument("terms", nargs="*", help="words to look for in names, docstrings and statements")
+    ap.add_argument("--index", default=DEFAULT_INDEX, help="path to the declaration index (default: %(default)s)")
     ap.add_argument("--kind", help="theorem, def, structure, inductive, …")
     ap.add_argument("--mentions", help="a constant the statement or proof uses")
     ap.add_argument("--used-by", dest="used_by", help="list what uses this declaration")
-    ap.add_argument("--limit", type=int, default=40)
+    ap.add_argument("--limit", type=int, default=40, help="maximum number of matches (default: %(default)s)")
     ap.add_argument("--types", action="store_true", help="print each statement")
     args = ap.parse_args(argv)
 

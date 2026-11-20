@@ -49,3 +49,6 @@ MathFin/.ledger-exec-check*.lean
 
 # The declaration index (`lake exe mathfin_index decl-index.json`; CI artifact)
 decl-index*.json
+
+# a scratch file for checking Lean snippets (docs/beginners-manual.md)
+Scratch.lean

@@ -1,11 +1,6 @@
 # Mathlib / BrownianMotion-Package Bridge Audit
 
-> **Historical (2026-05-22).** This audit is of the old layout, in which a `Foundations/` layer
-> sat beside the pricing sections and `Bridges/` joined them. Since v2 (2026-11-08) the library
-> is layered, `Probability/` → `Contracts/` → `Pricing/` → `Models/`, `Risk/`, `Choice/`,
-> `Insurance/`, `Markets/` (`tools/verify/layers.py`), and a join lives in the module that
-> consumes it. File paths below were updated to where each module now lives; the findings are
-> as of their date.
+> **Historical.** This is the 2026-05-22 audit of the old foundation layer, superseded by the layers in [`architecture.md`](architecture.md) and the joints in [`organization.md`](organization.md); file paths below were updated to the current locations, and the findings are as of the audit date.
 
 **Date:** 2026-05-22
 **Scope:** All modules under `MathFin/Foundations/`

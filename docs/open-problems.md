@@ -1,166 +1,73 @@
-# Open problems in mathematical finance — survey and research catalogue
+# Open problems in mathematical finance: the earlier survey and candidate pool
 
-**Current catalogue (2026-11-19):** [eighteen structured records](research-problems/README.md)
-with stable IDs, exact statements, source locators, dated reviews, and separate
-mathematical and Lean statuses: fourteen open questions, two formal resolutions, and two
-reported resolutions. Three are stated in Lean (`MathFinFrontier/OpenProblems/`). The
-[JSON database](research-problems/problems.json) is the maintained record. Round 6
-([audit](research-problems/audit-2026-11-19.md)) re-checked every lead below: the Tier 1 entries
-that never became records, all of Tier 3, and the four unswept areas. Its per-candidate verdicts
-(open, lead, solved, reported, not a question) are in
-[candidates-2026-11-19.json](research-problems/candidates-2026-11-19.json), and they supersede
-the descriptions of those entries in this document where the two disagree.
+This is the earlier survey and the pool of candidate questions. The maintained catalogue is
+[`research-problems/`](research-problems/README.md): structured records with stable IDs
+(`MF-OP-NNN`), exact statements, source locators, dated reviews, and separate mathematical and
+Lean statuses. Which artefact owns what is set out in that README. An entry below that a record
+carries is reduced to a pointer; the record is authoritative. The per-candidate verdicts of the
+latest review round are in
+[candidates-2026-11-19.json](research-problems/candidates-2026-11-19.json) and its
+[audit](research-problems/audit-2026-11-19.md); they supersede the text of the entries here where
+the two differ.
 
-**Purpose.** This library formalizes *known* mathematics. This document is the
-scouting report for the other activity: genuinely unsolved problems, and which
-of them our existing formalization actually gives us leverage on.
+The library formalizes known mathematics. This document is the scouting report for the other
+activity: problems that are unsolved, and which of them the existing formalization gives leverage
+on. The umbrella issue is
+[#177](https://github.com/formal-applied-math/formal-mathfin/issues/177).
 
-**Tracking issue:** [#177](https://github.com/formal-applied-math/formal-mathfin/issues/177)
-(umbrella). Active target: [#176](https://github.com/formal-applied-math/formal-mathfin/issues/176)
-impact propagator. Solved: [#175](https://github.com/formal-applied-math/formal-mathfin/issues/175)
-American convexity, by Robert Martin in [#212](https://github.com/formal-applied-math/formal-mathfin/pull/212);
-and [#174](https://github.com/formal-applied-math/formal-mathfin/issues/174) SVI domain, by Robert
-Martin, ported in `MathFin/Models/ModelFree/SVI/` (§2 below).
+## Method, and why entries carry an evidence class
 
-## How this list was built, and why it is organized by evidence
+Six review rounds have been run against the literature. Rounds 1 to 3 audited the initial claims
+and searched for resolutions of the survivors. Round 4 searched for missing problems and re-dated
+the assertions of openness. Round 5 swept further areas and drafted the Tier 3 pool. Round 6
+re-checked every remaining lead and promoted the verified ones to records.
 
-Four adversarial rounds were run against current literature (2026-08). Rounds
-2–3 searched for *resolutions* of claimed-open problems (false positives);
-round 4 searched for *missing* open problems (false negatives) and re-dated
-the surviving assertions:
-
-| round | direction | outcome |
-|---|---|---|
-| 1 | audit of 36 initial claims | 16 wrong or overstated |
-| 2 | resolutions of the 16 survivors | 3 closed, 2 substantially narrowed |
-| 3 | resolutions of 5 never-re-checked | 2 closed |
-| 4 | completeness sweep + assertion re-dating | **4 missing entries found**, 1 folklore item confirmed closed, 1 entry re-dated and demoted |
-
-The attrition in rounds 1–3 was **not uniform**, and the pattern is the most
-useful output of the exercise:
-
-> Nearly every casualty was an entry whose openness had been *inferred from
-> not finding a resolution*. Entries where a source **states** the problem is
-> unsolved survived — unless the stating source had itself aged out.
-
-Round 4 confirmed the second clause the hard way: the entry this document
-previously ranked first (Musiela) carried an openness assertion dating to
-**2007**, around which the theory has since grown (see §7). Each entry
-therefore carries an **evidence class** and the **date of the most recent
-source asserting openness**:
+The pattern in the attrition is the most useful output. Nearly every casualty was an entry whose
+openness had been inferred from not finding a resolution. Entries where a source states that the
+problem is unsolved survived, unless the stating source had itself aged out. Each entry therefore
+carries an evidence class and the date of the most recent source asserting openness.
 
 | class | meaning | track record |
 |---|---|---|
-| **A — asserted** | a source explicitly says the problem is unsolved | survived unless the assertion aged out — *check the date* |
-| **B — bounded** | a proved positive result and a proved negative result bracket the gap | survived |
-| **C — inferred** | no resolution found on search | **essentially all fatalities** |
-| **D — candidate** | a specific question drafted from domain knowledge, **not yet searched at all** | unknown — assume ~40% are already closed |
+| A, asserted | a source explicitly says the problem is unsolved | survived unless the assertion aged out; check the date |
+| B, bounded | a proved positive result and a proved negative result bracket the gap | survived |
+| C, inferred | no resolution found on search | nearly all the casualties |
+| D, candidate | a question drafted from domain knowledge and not yet searched | roughly 40% were already closed |
 
-Class C entries are *leads*, not facts. Class D entries are weaker still: they
-populate the Tier 3 pool below and carry **no verification whatsoever**.
-
-### Round 5 (2026-09) — the breadth round, and its honest result
-
-Round 5 set out to expand this into a comprehensive database. It swept the six
-areas rounds 1–4 declared unswept (robust finance / model uncertainty,
-filtering, insurance and dividend control, McKean–Vlasov control,
-implied-volatility market models, large-markets FTAP) plus energy, XVA,
-limit-order books, principal–agent, and the unchecked Kelly lead.
-
-It also produced a methodological finding worth recording, because it bounds
-what this document can become:
-
-> **Search engines return topic summaries, not openness assertions.** Across
-> the round, targeted queries — including exact-phrase hunts for "remains an
-> open problem" — reliably surfaced *what a field works on* and only rarely
-> *what a field admits it cannot do*. Class A evidence is therefore expensive
-> in a way Class D volume is not.
-
-The consequence is a deliberate two-speed architecture. **Tier 1** stays a
-high-bar verified core and grows slowly. **Tier 3** is a large candidate pool
-that grows fast and is explicitly untrustworthy. Conflating them would destroy
-the only property that makes this document worth more than the dozens of
-topic lists already in circulation — and rounds 1–4 measured exactly what that
-conflation costs: **16 of 36** unverified claims were wrong on first audit.
-
-**What actually makes this database hard to replicate is Tier 2**, the register
-of problems that *were* open and are now closed, with the closing result named.
-Open-problem lists are common; lists that track their own decay are not.
-
-The original survey used publisher pages, author preprints, and mirrors because
-arXiv was then unreachable. The October 2026 audit also consulted arXiv. Except
-where explicitly updated, Tier 2's residuals have not been independently
-revalidated in that audit.
+Class C entries are leads, not facts. Class D entries carry no verification and form the Tier 3
+pool. Search engines return topic summaries more often than assertions of openness, so class A
+evidence is expensive. Tier 1 stays a small verified core; Tier 3 is a pool that grows faster
+and is not to be cited. The original survey used publisher pages, author preprints and mirrors;
+later rounds also consulted arXiv.
 
 ---
 
-## Tier 1 — earlier survey entries, with subsequent status updates
+## Tier 1: survey entries
 
-### 1. Convexity of the American exercise boundary for `0 < q < r` — **solved**
-**Class B · bracketed by theorems on both sides**
+Entries carried by a record are a pointer to it. Solved entries name the declaration that solves
+them.
 
-A clean trichotomy in the dividend yield `q`:
+### 1. Convexity of the American exercise boundary for `0 < q < r`: solved ([MF-OP-006](research-problems/README.md))
 
-| regime | status |
-|---|---|
-| `q = 0` | convexity **proved** (Chen–Chadam–Cheng–Saunders; Ekström) |
-| `q > r` | convexity **disproved** — the boundary is not convex |
-| `0 < q < r` | convexity **proved** by Robert Martin (2026), machine-checked in this repo |
+For `K, r, σ > 0` and `0 ≤ q ≤ r`, `log(B(τ)/K)` is convex and `B(τ)` is strictly convex in time
+to expiry `τ > 0`, where `B` is the exercise boundary of the American put on a geometric Brownian
+motion with drift `r − q`. The theorems are
+`MathFin.BlackScholes.AmericanPut.Stopping.brownianUsualLogBoundary_convexOn` and
+`brownianUsualStockBoundary_strictConvexOn` in
+`MathFin/Models/BlackScholes/American/Stopping/PhysicalBoundaryConvexity.lean`, from Robert
+Martin's proof ([#212](https://github.com/formal-applied-math/formal-mathfin/pull/212)). Convexity
+is in the chord sense; `C²` regularity is not claimed, and for `q > r` the boundary is known not
+to be convex.
 
-**Solved (2026-09).** Robert Martin proved convexity on the whole open region, and his
-proof is machine-checked and axiom-clean in `MathFin/Models/BlackScholes/American/`,
-contributed in [#212](https://github.com/formal-applied-math/formal-mathfin/pull/212) and ported from
-[robertmartin8/AmericanPutConvexity](https://github.com/robertmartin8/AmericanPutConvexity).
-For `K, r, σ > 0` and `0 ≤ q ≤ r`, `log(B(τ)/K)` is convex and `B(τ)` is strictly convex
-in time to expiry `τ > 0`, so both endpoints are covered too. The headline declarations
-are `Stopping.brownianUsualLogBoundary_convexOn` and
-`brownianUsualStockBoundary_strictConvexOn`.
+### 2. Explicit semialgebraic no-butterfly domain for 5-parameter SVI: solved ([MF-OP-007](research-problems/README.md))
 
-The statement is the classical one. The value is the supremum, over all stopping times
-bounded by the horizon, of the expected discounted put payoff on a geometric Brownian
-motion with drift `r − q`, on the completed usual filtration of Degenne's constructed
-Brownian motion. `B` is the supremum of the stock prices in `[0, K]` where the value
-equals the payoff. Nothing assumes a free-boundary solution. Convexity is in the usual
-chord sense; `C²` regularity and `B'' > 0` are not claimed. `q > r` remains disproved
-and is not claimed.
-
-Regularity under jump diffusions is settled separately: `C¹` except at
-maturity, `C^∞` under a regularity assumption on the jump distribution, with
-continuity and near-maturity estimates proven. The smallest and most sharply
-bounded problem on this list — the open region is an interval defined by two
-theorems, not by absence of literature.
-
-### 2. Explicit semialgebraic no-butterfly domain for 5-parameter SVI
-**Class A · asserted in the characterizing papers; restated 2025–26**
-
-Butterfly-freeness of an SVI slice is `g(k) ≥ 0` for all `k` (Durrleman), where
-`w(k) = a + b(ρ(k−m) + √((k−m)² + σ²))`. Martini–Mingone characterized the
-domain completely, but their conditions **require numerical minimization of two
-functions plus root-finding** — stated in the papers themselves. Explicit
-closed forms exist only for sub-SVIs, and the most recent refinement
-(*J. Computational Finance*) is again for **SSVI** slices, not full SVI.
-
-**Open:** eliminating the inner numerics — an explicit description of the
-domain as polynomial inequalities in `(a,b,ρ,m,σ)`. Substituting `y = (k−m)/σ`,
-`z = √(y²+1)` makes this positivity of a polynomial on a real algebraic curve:
-a quantifier-elimination problem.
-
-**Solved (2026-10-04), as stated.** Robert Martin's certificate, ported in
-`MathFin/Models/ModelFree/SVI/`, gives a fixed finite Boolean combination of signs of polynomials in
-`(a,b,ρ,m,σ)` that holds exactly when `σ > 0`, `b ≥ 0`, `ρ² ≤ 1`, the variance is positive and
-`g(k) ≥ 0` for every `k` (`fullCertificateFormula_iff`). A second formula, which also admits
-`σ = 0`, holds exactly when `σ ≥ 0`, `b ≥ 0`, `ρ² ≤ 1`, the variance is positive and the
-SVI-smiled Black–Scholes call is convex in strike
-(`extendedCertificateFormula_iff_bsSmile_convex`); for `σ > 0` the two agree. The formula is an
-explicit quantifier-free construction, by Hermite's trace-form signatures, and is not expanded into
-a list of inequalities. On its own it is the Durrleman / strike-convexity domain stated here. The
-tail condition was added on 2026-10-05 (`MathFin/Models/ModelFree/SVI/TailCondition.lean`):
-for `b ≥ 0` and positive variance, `d₊(k) → −∞` exactly when `b(1+ρ) < 2`, and the smiled call
-vanishes at large strikes exactly then. One more sign atom therefore gives a formula that holds
-exactly when `σ ≥ 0`, `b ≥ 0`, `ρ² ≤ 1`, the variance is positive and the smiled call is
-convex, nonincreasing, between `(1 − K)⁺` and `1`, with limits `1` at strike `0` and `0` at large
-strikes (`butterflyFreeFormula_iff_isNormalizedCallPrice`). Constructing the risk-neutral law from
-such a call price function is not formalised.
+`MathFin.SVI.fullCertificateFormula_iff` gives a fixed Boolean combination of signs of polynomials
+in `(a,b,ρ,m,σ)` that holds exactly when `σ > 0`, `b ≥ 0`, `ρ² ≤ 1`, the variance is positive and
+`g(k) ≥ 0` for every `k`. `extendedCertificateFormula_iff_bsSmile_convex` extends it to `σ = 0`
+and to convexity of the smiled call, and `butterflyFreeFormula_iff_isNormalizedCallPrice` adds the
+tail condition, all in `MathFin/Models/ModelFree/SVI/`. The formula is built by Hermite's
+trace-form signatures and is not expanded into a list of inequalities. Constructing the
+risk-neutral law from such a call price function is not formalised.
 
 ### 3. Multidimensional shadow prices under transaction costs
 **Class A · "has remained elusive", restated 2024–25**
@@ -211,13 +118,12 @@ dimension only under an assumption implied by the Continuum Hypothesis**.
 **Open:** removing that dependence. A targeted search found no work doing so.
 
 ### 7. The "right space" for Musiela's SPDE
-**Class B by bracketing · the openness assertion dates to 2007 — demoted in round 4**
+**Class B by bracketing · the openness assertion dates to 2007**
 
-Previously this document's top entry, tagged "asserted as of 2025". Round 4
-found the tag wrong: the explicit assertion — find a state space whose elements
-admit continuous modifications *and* which supports global mild solutions,
-"not solved even in the case of Brownian noise" — dates to the **2007**
-local-well-posedness paper. The theory has since grown around it:
+The explicit assertion, to find a state space whose elements admit continuous
+modifications *and* which supports global mild solutions, "not solved even in the
+case of Brownian noise", dates to the **2007** local-well-posedness paper. The
+theory has since grown around it:
 
 - **Positive:** global existence and uniqueness for the HJMM equation in
   *weighted `L²` spaces* under sufficient conditions; for **linear volatility**
@@ -234,39 +140,20 @@ weighted-space conditions and function-space regularity is real. But treat this
 as a *bracketed gap in a mature theory*, not the pristine open problem the
 2007 quote suggests.
 
-### 8. Physical Stefan uniqueness when jumps accumulate at time zero
-**Updated 2026-10-21 · author-identified residual · MF-OP-002**
 
-Muñoz (2025) reduces global uniqueness to short-time uniqueness and excludes
-jump accumulation at positive times for integrable initial data.
-[Blore–Hambly (2026-09-21)](https://arxiv.org/html/2609.24297v1), Theorem 3.1,
-then prove global uniqueness when the minimal physical solution is continuous
-on some `(0, ε)`. Their Remark 3.9 identifies jumps accumulating at zero as the
-remaining possible mechanism for nonuniqueness; it does not exhibit two solutions.
+### 8. Physical Stefan uniqueness when jumps accumulate at time zero: [MF-OP-002](research-problems/README.md)
 
-The catalogue asks for uniqueness or a counterexample in that residual regime,
-with a precise initial-data and physical-jump formulation. A separate theorem
-about the maximal weak solution does not establish uniqueness among all physical
-solutions. See [MF-OP-002](research-problems/README.md).
+Uniqueness, or a counterexample, for physical solutions of the supercooled Stefan problem when
+jumps accumulate at time zero.
 
-### 9. Uniqueness of Kyle equilibrium — static resolution reported
-**Updated 2026-10-21 · resolution reported · MF-OP-008**
+### 9. Uniqueness of the one-period Gaussian Kyle equilibrium: [MF-OP-008](research-problems/README.md)
 
-[Monteiro–Tourky (August 2026)](https://cbe.anu.edu.au/researchpapers/econ/wp708.pdf)
-report uniqueness in the one-period Gaussian Kyle model for Borel-measurable
-strategies, with pointwise optimality. The catalogue retains this as a
-**reported resolution**, with the proof not independently checked here, rather
-than publishing the static problem as open.
-
-The continuous-time question needs its own exact hypotheses. The
-[Qiao–Zhang FBSDE paper](https://arxiv.org/html/2506.12281v1) works with a specified
-equilibrium class and discrete inside information in its characterization;
-its small-time result cannot be advertised as a theorem about every classical
-Kyle–Back equilibrium. No new continuous-time research issue is inferred from
-that gap. See [MF-OP-008](research-problems/README.md).
+Whether the affine equilibrium is unique among Borel strategies. A resolution is reported and
+unchecked; the statement is `MathFinFrontier.kyle_equilibrium_unique`. The continuous-time
+Kyle–Back question needs its own exact hypotheses and is not catalogued.
 
 ### 10. Microfoundation of the square-root impact law
-**Class A · "one of the most fascinating puzzles in finance" — found in round 4**
+**Class A · "one of the most fascinating puzzles in finance"**
 
 Empirically, metaorder impact is concave — square-root — across assets, eras
 and venues. Kyle–Obizhaeva derive the *general form* from dimensional analysis
@@ -277,19 +164,11 @@ latent liquidity) coexist without a canonical derivation.
 **Open:** a first-principles equilibrium microfoundation. Connects to the
 Tier 2 propagator-endogeneity residual and to §5.
 
-### 11. Equilibrium existence with action-dependent diffusion
-**Updated 2026-10-21 · explicit future work · MF-OP-003**
 
-[Wang–Yu–Zhang–Zhou (2026-04-04)](https://arxiv.org/html/2603.10321v2)
-**prove** relaxed-equilibrium existence through vanishing entropy regularization
-under their hypotheses for drift control. The earlier survey incorrectly used
-their introductory open-problem statement as if it were their conclusion.
+### 11. Equilibrium existence with action-dependent diffusion: [MF-OP-003](research-problems/README.md)
 
-Section 2 explicitly leaves action-dependent diffusion for future study. The
-catalogue asks for an extension with compact controls, uniform ellipticity,
-regularity, integrability, and appropriate quantitative hypotheses stated
-precisely. It does not assert that unrestricted existence or uniqueness holds.
-See [MF-OP-003](research-problems/README.md).
+Existence of relaxed equilibria for time-inconsistent control when the control enters the
+diffusion coefficient.
 
 ### 12. Epstein–Zin consumption–investment in incomplete markets
 **Class A + B · "absent from the literature" (2025–26), with an intrinsic nonuniqueness theorem**
@@ -332,18 +211,17 @@ of Björk–Svensson's Lie-algebraic theory. No source found *asserting* this is
 open.
 
 ### 15. Optimal execution on AMMs under transient impact
-**Class C — nascent rather than open**
+**Class C: nascent rather than open**
 
-First preprints on Uniswap v2/v3 and CPAMM/CLAMM execution appeared in 2026.
-A young literature is not the same as a hard problem.
+First preprints on Uniswap v2/v3 and CPAMM/CLAMM execution appeared in 2026. A young literature is not the same as a hard problem.
 
 ---
 
 ## Tier 2 — narrowed, closed, or corrected
 
-Entries earlier drafts carried as open — plus, from round 4, folklore items
-confirmed closed before they were ever added. The closing result is usually
-the more useful fact.
+Questions commonly stated as open that a published result has narrowed or closed,
+with the closing result named and what remains. The closing result is usually the
+more useful fact.
 
 | Problem as commonly stated | What closed it | Residual |
 |---|---|---|
@@ -351,7 +229,7 @@ the more useful fact.
 | **[R3]** MFG master equation without monotonicity | Mou–Zhang, *anti-monotonicity conditions* (JEMS 2025); uniqueness with **no** monotonicity constraint via a conservative reading, adapting hyperbolic-systems arguments | Whether a weak-solution notion *selects* Nash equilibria |
 | **[R3]** Radner equilibrium beyond smallness | Xing–Žitković, globally solvable Markovian quadratic BSDE systems (*Ann. Prob.*); global existence for incomplete finite-agent Radner equilibrium under Markovian assumptions; limited-participation existence with exponential preferences | Non-Markovian settings; general preferences |
 | **[R2]** Bass martingale uniqueness / classification in `d ≥ 2` | The decomposition of stretched Brownian motion into Bass martingales: for non-irreducible pairs, SBM decomposes on a canonical paving into irreducible cells, a Bass martingale on each. What an earlier draft quoted *as* the open state was the resolution. | `q`-Bass extensions; convergence of dual optimising sequences |
-| **Corrected 2026-10-21:** pathwise uniqueness for rough/square-root Volterra | The earlier claimed resolution was wrong. For kernel `(t−s)^−α`, Prömel–Scheffels require `ξ > 1/[2(1−α)]`, which excludes square-root diffusion for `α > 0`. | Rough-Heston pathwise uniqueness is explicitly still open in Forde–Gerhold–Smith (2026-10-19); see [MF-OP-001](research-problems/README.md). |
+| Pathwise uniqueness for rough/square-root Volterra | A claimed resolution does not apply. For kernel `(t−s)^−α`, Prömel–Scheffels require `ξ > 1/[2(1−α)]`, which excludes square-root diffusion for `α > 0`. | Rough-Heston pathwise uniqueness is explicitly still open in Forde–Gerhold–Smith (2026-10-19); [MF-OP-001](research-problems/README.md). |
 | **[R2]** Elicitability of systemic risk measures | CoVaR, CoES, MES fail identifiability and elicitability alone; joint elicitability with the reference VaR **also fails** — resolved by *multi-objective* (lexicographically ordered bivariate) scores with Diebold–Mariano-type tests | Set-valued systemic measures; test power |
 | No-trade region shape, multi-asset proportional costs | An **ellipsoid** around the frictionless target, shape given by a matrix-valued algebraic Riccati equation, even in high dimensions | Exact solutions beyond independent assets; the case *with return predictability* |
 | MOT dual attainment / duality gap | Beiglböck–Nutz–Touzi complete quasi-sure duality on the line; Beiglböck–Lim–Obłój sharpness (`C²` attains, `C^{2−ε}` counterexamples) | Higher dimensions; continuous-time multi-marginal |
@@ -366,19 +244,20 @@ the more useful fact.
 | Deep hedging / signature methods lack theory | Universal approximation with convergence guarantees; tight dual bounds; convergence proofs for signature methods, primal and dual | Generalization / sample-complexity bounds explaining practice |
 | Uniqueness of clearing vectors | Non-uniqueness under bankruptcy costs + fire sales + cross-holdings is *established*; the equilibrium set need not be connected | Characterization and equilibrium selection |
 | Ross recovery conditions | Borovička–Hansen–Scheinkman: valid only if the martingale component of the pricing kernel is constant | What identifying restrictions restore recovery |
-| Joint SPX/VIX smile calibration | Guyon (2020) via dispersion-constrained martingale transport; continuous time by martingale interpolation; signature and Gaussian-polynomial models (2025) | A parsimonious low-dimensional continuous-time model |
+| Joint SPX/VIX smile calibration (the continuum question is [MF-OP-004](research-problems/README.md) and [MF-OP-005](research-problems/README.md)) | Guyon (2020) via dispersion-constrained martingale transport; continuous time by martingale interpolation; signature and Gaussian-polynomial models (2025) | A parsimonious low-dimensional continuous-time model |
 | Positivity-constrained term structure | Filipović–Tappe–Teichmann characterized positivity-preserving models via characteristic coefficients | Essentially closed |
 | Minimax rates for risk-measure estimation | Optimal nonparametric ES estimation (2024): optimal properties under minimal assumptions at all finite sample sizes | Essentially closed |
 
 ---
 
+---
+
 ## Tier 3 — the candidate pool (Class D, **unverified**)
 
-Added in round 5. Every entry here is a **specific question drafted from domain
-knowledge that has not been searched**. Rounds 1–4 measured the base rate for
-exactly this kind of claim: roughly **40–45% turn out to be already closed**,
-and the ones that die are overwhelmingly those stated as "X is open" rather
-than "X is bounded between these two theorems."
+Every entry here is a **specific question drafted from domain knowledge**. Early
+audit rounds measured the base rate for this kind of claim: roughly **40–45% turn
+out to be already closed**, and the ones that die are overwhelmingly those stated
+as "X is open" rather than "X is bounded between these two theorems."
 
 **Do not cite a Tier 3 entry as an open problem.** Its purpose is to be a
 queue: a candidate is promoted to Tier 1 only after a resolution search comes
@@ -387,9 +266,12 @@ found and dated. Most will instead be closed, and should then be moved to
 Tier 2 with the closing result named — that is a useful outcome, not a failed
 one.
 
-Entries marked ⚑ were touched by a round-5 search that returned topic-level
-material but no openness assertion; they are the best-informed candidates, not
-verified ones.
+Entries marked ⚑ were touched by a search that returned topic-level material but no
+openness assertion; they are the best-informed candidates, not verified ones. A
+candidate promoted to a record is marked with its MF-OP id and no longer described
+here. Round 6 ([audit](research-problems/audit-2026-11-19.md),
+[verdicts](research-problems/candidates-2026-11-19.json)) checked every entry and
+supersedes the text below where the two differ.
 
 ### Volatility, smiles, and calibration
 
@@ -410,7 +292,7 @@ verified ones.
 |---|---|
 | D9 | Universality of signature methods **with approximation rates**, not just density |
 | D10 | Well-posedness of the signature-calibration inverse problem (does the data determine the model?) |
-| D11 | The moment problem for rough paths: when does the expected signature determine the law? |
+| D11 | Promoted: [MF-OP-009](research-problems/README.md), the expected signature of Brownian motion stopped at a domain exit time |
 
 ### Fixed income and term structure
 
@@ -464,7 +346,7 @@ verified ones.
 
 | # | candidate question |
 |---|---|
-| D35 | Superhedging duality for American options under **general** semimartingale uncertainty — recently advanced; the residual gap needs dating ⚑ |
+| D35 | Promoted, narrowed to its residual: [MF-OP-010](research-problems/README.md), robust American duality for non-càdlàg payoffs |
 | D36 | Nonconcave stochastic control under model uncertainty in **continuous** time (the discrete case advanced in 2026) ⚑ |
 | D37 | Aggregation and time-consistency of nonlinear expectations under non-dominated priors |
 
@@ -474,21 +356,21 @@ verified ones.
 |---|---|
 | D38 | Structure of optimal **multi-marginal** Skorokhod embeddings in `d ≥ 2` |
 | D39 | Quantitative stability *rates* for MOT (qualitative stability is proved — Tier 2) |
-| D40 | Minimal regularization for a mimicking Markov martingale in `d ≥ 2` (Tier 2 residual) |
+| D40 | Promoted in the raw-filtration form: [MF-OP-011](research-problems/README.md) |
 
 ### Filtering and partial information
 
 | # | candidate question |
 |---|---|
 | D41 | Pathwise uniqueness for Kushner–Stratonovich / Zakai equations under general observation structures ⚑ |
-| D42 | Explicit filtering equations for **singular** stochastic control under partial observation — reported as not yet addressed ⚑ |
+| D42 | Promoted as Zakai uniqueness when control jumps accumulate: [MF-OP-012](research-problems/README.md) |
 | D43 | Filtering under model ambiguity: existence of a robust filter for non-dominated prior sets ⚑ |
 
 ### Insurance and actuarial control
 
 | # | candidate question |
 |---|---|
-| D44 | Optimality of **band** strategies for the multi-dimensional optimal dividend problem ⚑ |
+| D44 | Promoted: [MF-OP-013](research-problems/README.md), the optimal local control for `n ≥ 2` insurers |
 | D45 | Optimal dividends for two or more collaborating insurers: explicit solutions beyond strong assumptions ⚑ |
 | D46 | Sharp ruin-probability asymptotics under general dependence between claims |
 | D47 | Time-consistency of the Solvency II risk margin as a dynamic risk measure |
@@ -526,6 +408,8 @@ verified ones.
 | D59 | Equilibrium characterization of MEV extraction |
 | D60 | Closed-form optimal LP strategies in concentrated-liquidity (CLAMM) pools |
 | D61 | Optimal AMM **invariant curve** design under general demand (Tier 1 §13 residual) |
+
+---
 
 ---
 
@@ -577,116 +461,31 @@ D (drafted)  →  search for a resolution
                                    └── not found      →  stays Class C lead
 ```
 
-Anyone extending this document should run that pipeline rather than appending
-to Tier 1 directly. The four verification rounds exist precisely because the
-direct route produced a 44% error rate.
+Anyone extending this document should run that pipeline rather than appending to Tier 1
+directly. The direct route produced a 44% error rate in the first audit.
 
 ---
 
-## Where *this repo* gives leverage
+## Where this library gives leverage
 
-Ranked by **distance from what we have already built**, not by mathematical
-interest. Adjacency is judged against built code; where a target leans on a
-planned-but-unbuilt program, that is stated.
+The ranking criterion is distance from built code, not mathematical interest. The questions
+whose answer is a certificate are the ones where a proof assistant adjudicates rather than taxes:
+a polynomial positivity, a bounded-parameter convexity argument, or an explicit finite
+counterexample. Two of them, entries 1 and 2, are solved. The next candidate of this kind is the
+impact-kernel positive-definiteness question of entry 5.
 
-Round 4's four new entries did **not** change this ranking: Kyle uniqueness
-(§9) and the square-root law (§10) need filtering/FBSDE and equilibrium
-machinery the repo lacks (`Markets/Microstructure/MarketMakingRiccati` is
-LQ-approximation market-making, a different animal); time-inconsistent control
-(§11) and Epstein–Zin (§12) need EHJB / BSDE substrates absent here. The
-incumbents keep their positions for the fourth consecutive round.
+| Entry | Built code it lands on | What is missing |
+|---|---|---|
+| 5, impact kernels | `Choice/Portfolio/CovariancePSD.covariance_kernel_psd` (a positive semi-definite quadratic form over a kernel), `Markets/Execution/AlmgrenChriss`, `Pricing/NoArbitrageCore` | a propagator with a decay kernel; Almgren–Chriss here is the deterministic permanent and temporary model. A counterexample is an explicit kernel with a finite schedule of negative expected cost |
+| 7, Musiela's SPDE | the Itô integral and stochastic Fubini (`MathFin/Probability/Brownian/Ito/StochasticFubini.lean`), planned in `docs/hjm-program.md` | the HJM modules and the SPDE solution notion |
+| 14, Lévy HJM realizations | the Itô–Lévy integral and the Poisson random measure modules in `Probability/` | Lie-algebraic and infinite-dimensional geometry that neither this library nor Mathlib carries |
 
-### 1. SVI butterfly domain (§2) — strongest built-code adjacency
+Entries 3, 4, 10, 12 and 13 have little or no built substrate. Formalizing the statement of an
+open problem, and its known partial results, is ordinary library work, and it makes a later
+resolution checkable without a referee. Before committing to any entry here, re-run the
+resolution search: the list lost roughly a third of its entries to each verification round.
 
-The butterfly-arbitrage criterion is *already formalized*, in substance:
-
-| Existing | What it gives |
-|---|---|
-| `Models/ModelFree/BreedenLitzenberger.breedenLitzenberger` | `∂²V/∂K² = e^{−rT}·density` — butterfly-freeness **is** this second derivative's sign |
-| `BreedenLitzenberger.lognormalTerminalPDF_nonneg_via_strike_convexity` | the density-nonnegativity ⟸ strike-convexity route, already proved |
-| `Models/BlackScholes/StrikeConvexity.bsV_strike_convexOn`, `bsP_strike_convexOn` | the convexity side for calls and puts |
-| `Models/BlackScholes/{ImpliedVolatility,BisectionIV,NewtonConvergence}` | the implied-vol layer, with convergence |
-| `PutStrikeConvexity`, `SpotConvexity`, `PriceBounds` | the surrounding static-arbitrage results |
-
-Missing is small and well-defined: an SVI parametrization module and
-Durrleman's `g`. Positivity certificates land in the house idiom
-(`nlinarith [certificates]`, kernel-checkable, no `native_decide`).
-
-### 2. American boundary convexity for `0 < q < r` (§1) — solved in #212
-
-`Models/Binomial/SnellEnvelope.bermudanPrice_is_snell_envelope` plus
-`Models/Binomial/American`, `Bermudan`,
-`MertonAmericanCallTree`, `Models/BlackScholes/Dividends`, and the convexity trio
-(`StrikeConvexity`, `PutStrikeConvexity`, `SpotConvexity`).
-`Models/Binomial/CRRConvergence` is the discrete→continuous seam.
-
-Solved in [#212](https://github.com/formal-applied-math/formal-mathfin/pull/212), and not through this seam. The proof works in continuous
-time, on the optimal-stopping value directly, and builds on the Itô-formula and
-Feynman–Kac modules in `Probability/` rather than the binomial layer.
-
-### 3. Impact-kernel positive-definiteness (§5) — cheapest decisive output
-
-| Existing | What it gives |
-|---|---|
-| `Choice/Portfolio/CovariancePSD.covariance_kernel_psd`, `portfolioVarN_covariance_nonneg` | a PSD-quadratic-form theorem over a kernel — the exact shape of the no-dynamic-arbitrage criterion |
-| `Markets/Execution/AlmgrenChriss.almgrenChrissPath_satisfies_EL` | the execution Euler–Lagrange path |
-| `Pricing/NoArbitrageCore`, `TriangleArbitrage` | no-arbitrage predicates to land the statement on |
-
-Gap: our Almgren–Chriss is the deterministic permanent+temporary model with
-**no decay kernel** — the propagator must be built. Small build, and refutation
-is cheap: a counterexample is an explicit kernel plus a *finite* schedule with
-negative expected cost, i.e. rational arithmetic closable by `norm_num`/`ring`.
-
-### 4. Musiela's SPDE (§7) — highest conceptual alignment, longest runway, now double-caveated
-
-`docs/hjm-program.md` names Musiela as node **G4**, the deferred SPDE summit
-shipping `placeholder`. But two caveats now stack: **neither
-`MathFin/Models/Rates/HJM/` nor `MathFin/Probability/Brownian/Ito/StochasticFubini*.lean`
-exists yet** (the HJM program is *ratified, not built* — the whole F1→C4 chain
-precedes G4), and round 4 demoted the problem itself from "best-evidenced open
-problem" to a bracketed gap in a mature theory.
-
-### 5. Lévy HJM finite-dimensional realizations (§14) — real tower, heavy missing geometry
-
-The Itô–Lévy tower is genuinely built: `PoissonCompensatedIntegralOperator`,
-`PoissonCompensatedIntegralL2{,Dense}`, `PoissonCompensatedIsometryAdapted`,
-`PoissonRandomMeasure`, `PoissonSuperposition`, `PoissonThinning`, and the
-Itô–Lévy integral CLM in full generality. `docs/hjm-program.md` plans F6, the
-Lévy instance of stochastic Fubini.
-
-Two gaps: FDR theory needs Lie-algebraic / infinite-dimensional differential
-geometry that neither this library nor Mathlib carries — and the target is
-Class C, the evidence class that kept collapsing.
-
-**Weak or absent adjacency.** `Probability/Brownian/ExitTime` gives real hitting-time
-machinery, but `Models/Credit/FirstToDefault` is constant-hazard with independent
-names and `KMVMertonStructural` is one-period Merton — neither a first-passage
-model — so the supercooled-Stefan residual (§8) sits on almost nothing.
-`Risk/RockafellarUryasev.gaussianCVaR_isLeast_ruObjective` remains a
-seed for scoring-function work, but the systemic-elicitability target closed.
-`Markets/DeFi/ConstantProductAMM` is direct but thin. Kyle (§9), the square-root law
-(§10), time-inconsistent control (§11) and Epstein–Zin (§12) have no substrate
-here. The curse-of-dimensionality problem (§4) has **none at all**.
-
-### The recommendation
-
-Unchanged across all four rounds, which is itself the strongest evidence for
-it: start where built code and durable evidence overlap — **§2 (SVI)**, **§1
-(American convexity for `0 < q < r`)**, and **§5 (impact kernels)**. All three
-are certificate-shaped: the answer is a polynomial positivity, a
-bounded-parameter-window convexity argument, or an explicit finite
-counterexample. That is the one class where a proof assistant adjudicates
-rather than taxes. §1 has since been solved, in [#212](https://github.com/formal-applied-math/formal-mathfin/pull/212).
-
-Avoid Class C entries as *starting* points — they supplied essentially every
-casualty across four rounds. And before committing to **any** entry here,
-re-run the resolution search: this list decayed at roughly a third per
-verification round while it was being written.
-
-Formalizing the *statement* of an open problem, and its known partial results,
-is normal library work with a guaranteed floor — and it is what makes a later
-resolution instantly checkable rather than referee-dependent. That is an
-argument for doing it first, not for gating the mathematics behind it.
+---
 
 ---
 

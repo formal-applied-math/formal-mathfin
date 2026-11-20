@@ -6,13 +6,12 @@ the live backlog is the issue tracker, indexed in [`status.md`](status.md).
 
 ## What the library is for
 
-One formalization of mathematical finance, organised around the field's own principles, on Mathlib
-and Degenne's BrownianMotion and nothing else. The principles are the four pillars of
-[`mathematical-architecture.md`](mathematical-architecture.md): no-arbitrage as convex duality,
-stochastic calculus, the probabilistic–analytic duality (Feynman–Kac), and the Gaussian and
-exponential families. The models are their consequences. A result is worth adding when it makes
-one of those consequences a theorem, or when it connects two parts of the library that were
-apart.
+A place to learn, use and extend mathematical finance in Lean, on Mathlib and Degenne's
+BrownianMotion and nothing else, organized as the field organizes itself
+([`organization.md`](organization.md)): one object, a price system; three questions asked of it,
+valuation, risk and choice; the model families as a second axis; probability and statistics as
+the tools. A result is worth adding when it turns a hypothesis somewhere in the library into a
+theorem, or when it connects two parts of the library that were apart.
 
 What the library is not trying to be: the largest theorem count, or a catalogue of closed forms.
 
@@ -27,8 +26,7 @@ drift. Breadth is still welcome, but only on the terms below.
 
 ## How breadth is admitted
 
-Since the coherence pass of 2026-10-21, every module connects to the library
-(`tests/test_architecture.py`):
+Every module connects to the library (`tests/test_architecture.py`):
 
 * It stands on the library's objects. There is one normal law (`Phi`, `PhiInv`, `quantile`), one
   `valueAtRisk`, one Black–Scholes price `bsV`, one numéraire, one bond lemma. Where a new area has
@@ -38,9 +36,8 @@ Since the coherence pass of 2026-10-21, every module connects to the library
   constructs.
 * A module is imported by another module or cited by a corpus entry. A result that nothing uses
   and nothing cites is a claim nobody checks.
-* Imports point one way: `Probability/` → `Contracts/` → `Pricing/` → the limbs (`Models/`, `Risk/`,
-  `Choice/`, `Insurance/`, `Markets/`). A limb imports another limb only through an edge declared in
-  `tools/verify/layers.py`. A join lives in the module that consumes it.
+* Imports follow the layers of [`architecture.md`](architecture.md), and a join lives in the module
+  that consumes it.
 
 Satellites such as market making, DeFi mechanics and the machine-learning utilities of López de
 Prado are integrated by bridges, not fenced off. A satellite that cannot be bridged honestly is a
@@ -48,29 +45,19 @@ sign it does not belong yet. That is a conversation with the maintainer, not a m
 
 ## Direction
 
-The concrete next rungs, each tracked by an issue. The coherence wave (#357–#368) folded about sixty
-parallel developments into instances of one object each; what it left open is below.
+The next rungs, each carried by an open issue; the blueprint's
+[frontier](glossary.md#frontier) states them as results.
 
-* **Rates and credit under a measure the library constructs.** Vasicek, Hull–White and GSR bond prices
-  at t > 0 and the Jamshidian bond put, in the Hull–White, Vasicek and two-piece GSR models, are
-  done (#410, #413), and so is CMS through a swap-rate model bundle (#419). Next come CDS legs as the
-  mesh limit of the grid legs ([#367](https://github.com/formal-applied-math/formal-mathfin/issues/367)),
-  and the CMS convexity adjustment
-  ([#303](https://github.com/formal-applied-math/formal-mathfin/issues/303)) on top of the swap-rate
-  bundle.
-  Then the HJM program ([#138](https://github.com/formal-applied-math/formal-mathfin/issues/138)), through the stochastic Fubini theorems
-  ([#141](https://github.com/formal-applied-math/formal-mathfin/issues/141)–[#145](https://github.com/formal-applied-math/formal-mathfin/issues/145)).
 * **The spine's open seams.** The multi-dimensional martingale representation ([#180](https://github.com/formal-applied-math/formal-mathfin/issues/180)), the
-  converse of the second FTAP in continuous time ([#181](https://github.com/formal-applied-math/formal-mathfin/issues/181)), Clark–Ocone
-  ([#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)), and the Wiener ↔ Itô bridges ([#366](https://github.com/formal-applied-math/formal-mathfin/issues/366), which is partly blocked on Doob–Meyer
+  converse of the second fundamental theorem in continuous time ([#181](https://github.com/formal-applied-math/formal-mathfin/issues/181)), Clark–Ocone ([#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)),
+  and the bridges between the Wiener and Itô integrals ([#366](https://github.com/formal-applied-math/formal-mathfin/issues/366), partly blocked on Doob–Meyer
   upstream).
-* **One object per concept, continued.**
-  * One sampled filtration for the American put's grids, and its leftover canonical parameters
-    ([#414](https://github.com/formal-applied-math/formal-mathfin/issues/414)).
-  * The Itô stack at C² ([#416](https://github.com/formal-applied-math/formal-mathfin/issues/416)).
-  * The accepted elegance rewrites from the lens-8 review ([#418](https://github.com/formal-applied-math/formal-mathfin/issues/418)).
-* **Jumps.** The Itô–Lévy formula ([#132](https://github.com/formal-applied-math/formal-mathfin/issues/132)) and the PIDE ([#133](https://github.com/formal-applied-math/formal-mathfin/issues/133)). Before them comes the
-  jump-diffusion process itself, which the library so far constructs only without jumps ([#305](https://github.com/formal-applied-math/formal-mathfin/issues/305)).
+* **Interest rates.** The CMS convexity adjustment under the payment-date forward measure
+  ([#303](https://github.com/formal-applied-math/formal-mathfin/issues/303)), then the Heath–Jarrow–Morton drift condition through the stochastic Fubini theorems
+  ([#138](https://github.com/formal-applied-math/formal-mathfin/issues/138), [#142](https://github.com/formal-applied-math/formal-mathfin/issues/142)–[#145](https://github.com/formal-applied-math/formal-mathfin/issues/145); [`hjm-program.md`](hjm-program.md)).
+* **Jumps.** A jump-diffusion with jumps, built from the compound Poisson law ([#305](https://github.com/formal-applied-math/formal-mathfin/issues/305)), then the
+  Itô–Lévy formula ([#132](https://github.com/formal-applied-math/formal-mathfin/issues/132)) and the pricing PIDE ([#133](https://github.com/formal-applied-math/formal-mathfin/issues/133)).
+* **Every price through the pricing functional** ([#450](https://github.com/formal-applied-math/formal-mathfin/issues/450)): the model families priced as markets.
 
 ## What stays out
 

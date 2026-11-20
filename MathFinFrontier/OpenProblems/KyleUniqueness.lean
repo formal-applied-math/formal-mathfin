@@ -8,6 +8,9 @@ import MathFin
 /-!
 # Open problem MF-OP-008: the one-period Gaussian Kyle equilibrium is unique
 
+Catalogue record `MF-OP-008` (`docs/research-problems/README.md`); frontier node
+`thm:kyle-equilibrium-unique`; statement `MathFinFrontier.kyle_equilibrium_unique`.
+
 Kyle (1985) found an affine equilibrium of his one-period model: the insider trades
 `φ(v) = (σ/τ)(v - m)` and the market makers price the order flow at `p(y) = m + (τ/(2σ)) y`.
 Whether another equilibrium exists among all Borel strategies was a long-standing open question.

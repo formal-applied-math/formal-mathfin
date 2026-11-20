@@ -8,6 +8,9 @@ import MathFin
 /-!
 # Open problems MF-OP-016 and MF-OP-017: complete mixability
 
+Catalogue records `MF-OP-016` and `MF-OP-017` (`docs/research-problems/README.md`); frontier
+nodes `thm:uniform-convex-complete-mixability` and `thm:bounded-law-complete-mixability`.
+
 A law `F` is **`n`-completely mixable** if there are random variables `X₁, …, Xₙ`, each with law
 `F`, whose sum is almost surely constant. This is the extreme negative dependence of risk
 aggregation: sharp bounds on the `VaR` of a sum with given marginals are built from completely

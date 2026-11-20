@@ -194,7 +194,7 @@ imports both. A limb imports these and its own subtree, and another limb only th
 edge (a Uniswap v3 position priced as a Black–Scholes covered call is a declared
 `Markets → Models` edge). `Bridges/` and `Foundations/` cease to exist: a join belongs to the limb
 that consumes it. `Probability/` is also the staging ground for upstream work: what it holds is
-Mathlib-shaped (the L0 commons of [`program-architecture.md`](../program-architecture.md)), and the
+Mathlib-shaped (the L0 commons of the multi-repo design, removed from `docs/` on 2026-11-20), and the
 upstream ledger ages it.
 
 **I5. The measurements are gated.** `tools/verify/trunk_reach.py` computes four counts from the

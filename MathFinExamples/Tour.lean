@@ -8,9 +8,11 @@ import MathFin
 /-!
 # Examples — a curated tour of five representative results
 
-Five proofs chosen to span the project's techniques and topics. Each is a
-direct re-export of a theorem already proved in the corresponding section;
-this file exists to give a single high-density entry point for visitors.
+Five results from different parts of the library: option pricing, portfolio choice, risk
+measures, growth-optimal betting and variance swaps. Each is an `example` that restates a theorem
+proved in `MathFin/` and closes it with that theorem, so the file shows what the statements look
+like and which hypotheses they carry. It is a first read for a visitor; the worked uses of the
+library are in `MathFinExamples/Applications/`.
 
 1. **BS call delta** via the magic identity (`BlackScholes.PDE.hasDerivAt_bsV_S`).
 2. **Markowitz min-variance** via completing-the-square
