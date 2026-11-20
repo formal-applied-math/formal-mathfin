@@ -8,7 +8,8 @@
 # these.
 
 [project]
-name = "formal-mathfin"
+# v0.4 / Palomar: `name` is the public entry title of the root (ADEH) entry.
+name = "The Artzner–Delbaen–Eber–Heath representation of coherent risk measures on a finite state space"
 authors = ["Raphael Coelho"]
 license = "Apache-2.0"
 # v0.4 / Palomar: the people answerable for this formalization.
