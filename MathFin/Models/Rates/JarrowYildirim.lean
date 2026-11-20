@@ -72,8 +72,8 @@ nominal rate, the real rate and the index, with the real-rate drift shift `−ρ
 of Dam–Macrina–Skovmand–Sloth §2.2 (arXiv:1801.08804, who cite Brigo–Mercurio ch. 15 for it); the
 nominal-rate–index correlation `ρ_{nI}` is not named there, and the correlation structure of the
 variance integrand is this module's reading. Bagaria ch. 17 supplies only eqs. 17.6, 17.8 and 17.10,
-and the caplet rests on Brigo–Mercurio §17.1. No primary paper was consulted. The exact YoY caplet,
-calibration, seasonality and Monte Carlo are out of scope.
+and the caplet rests on Brigo–Mercurio §17.1. Jarrow–Yildirim (2003) itself was not consulted. The
+exact YoY caplet, calibration, seasonality and Monte Carlo are out of scope.
 
 ## References
 
