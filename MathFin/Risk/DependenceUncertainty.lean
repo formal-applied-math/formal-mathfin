@@ -82,14 +82,14 @@ theorem valueAtRisk_sum_le_of_dual (hXm : ∀ i, Measurable (X i))
       _ ≤ ∫ ω, ∑ i, f i (X i ω) ∂P := by
           refine integral_mono_of_nonneg
             (ae_of_all _ fun ω ↦ indicator_nonneg (fun _ _ ↦ zero_le_one) ω)
-            (integrable_finset_sum _ fun i _ ↦ hint i) (ae_of_all _ fun ω ↦ ?_)
+            (integrable_finsetSum _ fun i _ ↦ hint i) (ae_of_all _ fun ω ↦ ?_)
           by_cases h : s < ∑ i, X i ω
           · simpa [indicator_of_mem (show ω ∈ {ω | s < ∑ i, X i ω} from h)] using
               hcover (fun i ↦ X i ω) h
           · simpa [indicator_of_notMem (show ω ∉ {ω | s < ∑ i, X i ω} from h)] using
               Finset.sum_nonneg fun i _ ↦ hf0 i (X i ω)
       _ = ∑ i, ∫ x, f i x ∂μ i := by
-          rw [integral_finset_sum _ fun i _ ↦ hint i]
+          rw [integral_finsetSum _ fun i _ ↦ hint i]
           exact Finset.sum_congr rfl fun i _ ↦ (hX i).integral_comp (hfi i).aestronglyMeasurable
       _ ≤ 1 - α := hmass
   rw [valueAtRisk_le_iff hS.aemeasurable hα]
@@ -124,7 +124,7 @@ lemma one_le_sum_capCall {t : ι → ℝ} (hc : 0 < c) {x : ι → ℝ}
       rw [capCall, min_eq_right (le_max_of_le_left (by linarith)), div_self hc.ne']
     exact hj1.symm.le.trans
       (Finset.single_le_sum (fun i _ ↦ capCall_nonneg hc) (Finset.mem_univ j))
-  · push_neg at h
+  · push Not at h
     have key (i : ι) : x i - t i ≤ c * capCall (t i) c (x i) := by
       rw [capCall, mul_div_cancel₀ _ hc.ne',
         min_eq_left (max_le_iff.2 ⟨by linarith [h i], hc.le⟩)]
@@ -142,10 +142,10 @@ theorem valueAtRisk_sum_le_of_capCall [∀ i, IsProbabilityMeasure (μ i)]
     (hXm : ∀ i, Measurable (X i)) (hX : ∀ i, HasLaw (X i) (μ i) P) (hα : α ∈ Ioo 0 1)
     {t : ι → ℝ} (hc : 0 < c) (hmass : ∑ i, ∫ x, capCall (t i) c x ∂μ i ≤ 1 - α) :
     valueAtRisk (fun ω ↦ ∑ i, X i ω) P α ≤ ∑ i, t i + c :=
-  valueAtRisk_sum_le_of_dual hXm hX hα (fun _ _ ↦ capCall_nonneg hc)
+  valueAtRisk_sum_le_of_dual (f := fun i ↦ capCall (t i) c) hXm hX hα
+    (fun _ _ ↦ capCall_nonneg hc)
     (fun _ ↦ (integrable_const (1 : ℝ)).mono' continuous_capCall.aestronglyMeasurable
-      (ae_of_all _ fun _ ↦ by
-        rw [Real.norm_of_nonneg (capCall_nonneg hc)]; exact capCall_le_one hc))
+      (ae_of_all _ fun _ ↦ (Real.norm_of_nonneg (capCall_nonneg hc)).trans_le (capCall_le_one hc)))
     (fun _ ↦ one_le_sum_capCall hc) hmass
 
 end MathFin

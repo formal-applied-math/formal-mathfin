@@ -1063,6 +1063,58 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. acceptableUnderUtility_exp_iff in MathFin/Risk/EntropicRisk.lean, stated against acceptableUnderUtility (MathFin/Risk/UtilityDerivation.lean), which works on finite weights: the state space is finite and the weights are p i = P {i}. The same module proves the entropic risk measure is a convex risk measure on a finite probability space (isConvexRiskMeasure_entropicRisk, by Hölder) and is not coherent (not_isCoherentRiskMeasure_entropicRisk, an existence statement: positive homogeneity fails on a fair coin for every γ > 0), and that it is law invariant on any space (isLawInvariant_entropicRisk). SCOPE: this entry states only the acceptance equivalence; convexity is stated on finite state spaces because on a general space E[exp(γX)] may be infinite, which the Bochner integral reads as 0. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-var-sum-dual-bound-weak-duality",
+      "name": "Weak Duality for the Value-at-Risk of a Sum under Dependence Uncertainty",
+      "description": "Let losses X_i have marginal laws μ_i and let α ∈ (0, 1). Take nonnegative functions f_i, integrable under μ_i, such that Σ f_i(x_i) ≥ 1 whenever Σ x_i > s. If Σ ∫ f_i dμ_i ≤ 1 − α, then VaR_α(X_1 + … + X_d) ≤ s. The hypotheses involve only the marginals, so the bound holds for every dependence between the losses. This is the weak-duality half of Rüschendorf's duality for the worst-case VaR; the reverse inequality (sharpness) is not proved here.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Risk.DependenceUncertainty\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_sum_le_of_dual_thm {Ω ι : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] [Fintype ι]\n    {X : ι → Ω → ℝ} {μ : ι → Measure ℝ} {α s : ℝ}\n    (hXm : ∀ i, Measurable (X i)) (hX : ∀ i, HasLaw (X i) (μ i) P) (hα : α ∈ Ioo 0 1)\n    {f : ι → ℝ → ℝ} (hf0 : ∀ i x, 0 ≤ f i x) (hfi : ∀ i, Integrable (f i) (μ i))\n    (hcover : ∀ x : ι → ℝ, s < ∑ i, x i → 1 ≤ ∑ i, f i (x i))\n    (hmass : ∑ i, ∫ x, f i x ∂μ i ≤ 1 - α) :\n    valueAtRisk (fun ω ↦ ∑ i, X i ω) P α ≤ s :=\n  valueAtRisk_sum_le_of_dual hXm hX hα hf0 hfi hcover hmass\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "Embrechts–Puccetti, Bounds for functions of dependent risks (2006); McNeil–Frey–Embrechts, Quantitative Risk Management, §8.4.4",
+        "citations": [
+          {
+            "key": "EmbrechtsPuccetti2006",
+            "locator": "Theorem 4.2"
+          },
+          {
+            "key": "McNeilFreyEmbrechts",
+            "locator": "§8.4.4"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the weak-duality bound: P(Σ X_i > s) ≤ E Σ f_i(X_i) = Σ ∫ f_i dμ_i, then the VaR Galois connection. Sharpness of the dual bound (the worst VaR attains it under monotone densities or complete mixability) is not formalised. Lives in MathFin/Risk/DependenceUncertainty.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-var-sum-capped-call-dual-bound",
+      "name": "Capped-Call Dual Bound on the Worst-Case VaR of a Sum",
+      "description": "Let losses X_i have marginal probability laws μ_i, α ∈ (0, 1), thresholds t_i and a cap c > 0. Write capCall(t, c, x) = min((x − t)⁺, c)/c. If Σ_i ∫ capCall(t_i, c, x) dμ_i(x) ≤ 1 − α, then VaR_α(X_1 + … + X_d) ≤ Σ t_i + c, under every dependence between the losses. This is the Embrechts–Puccetti dual bound in the heterogeneous form of Puccetti–Rüschendorf. Only the upper bound is proved; its sharpness is not.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Risk.DependenceUncertainty\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem valueAtRisk_sum_le_of_capCall_thm {Ω ι : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P] [Fintype ι]\n    {X : ι → Ω → ℝ} {μ : ι → Measure ℝ} {α s : ℝ} {t : ι → ℝ} {c : ℝ}\n    [∀ i, IsProbabilityMeasure (μ i)]\n    (hXm : ∀ i, Measurable (X i)) (hX : ∀ i, HasLaw (X i) (μ i) P) (hα : α ∈ Ioo 0 1)\n    (hc : 0 < c) (hmass : ∑ i, ∫ x, capCall (t i) c x ∂μ i ≤ 1 - α) :\n    valueAtRisk (fun ω ↦ ∑ i, X i ω) P α ≤ ∑ i, t i + c :=\n  valueAtRisk_sum_le_of_capCall hXm hX hα hc hmass\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "Embrechts–Puccetti (2006), Theorem 4.2; Puccetti–Rüschendorf, Bounds for joint portfolios of dependent risks (2012), §3",
+        "citations": [
+          {
+            "key": "EmbrechtsPuccetti2006",
+            "locator": "Theorem 4.2"
+          },
+          {
+            "key": "PuccettiRuschendorf2012",
+            "locator": "§3"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof that the capped calls with thresholds t cover the level Σ t_i + c, then weak duality (mf-var-sum-dual-bound-weak-duality). The optimisation over t and c, and the sharpness of the bound, are not formalised. Lives in MathFin/Risk/DependenceUncertainty.lean. Axioms-clean."
+      }
     }
   ]
 }
