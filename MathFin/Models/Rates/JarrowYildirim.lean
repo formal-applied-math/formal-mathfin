@@ -215,7 +215,8 @@ theorem jyForwardIndex_lognormal_eq_curves (BT : Ω → ℝ) (Pn0T Pr0T I0 F0 V 
   rw [← h]
   simpa [bsTerminal] using h2.symm
 
-/-- **ZC inflation caplet: the priced payoff is the Black caplet on the curve forward.** The
+/-- **ZC inflation caplet: the priced payoff is `Pⁿ(0,T)` times the Black caplet on the curve
+forward.** The
 zero-coupon inflation caplet, with payoff `(I_T − K)⁺` (convention
 `N[(I_T/I₀ − 1) − κ]⁺ = (N/I₀)·(I_T − K)⁺` with `K = I₀(1+κ)`, `κ` the total, non-annualised
 strike over `[0,T]`; an annual quoted strike `k` is `K = I₀(1+k)^T`), is the contract
