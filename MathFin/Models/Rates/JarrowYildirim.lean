@@ -229,11 +229,11 @@ lognormal index under `Q^T` with log-variance `V`, and `F₀ > 0`, `V > 0`, `K >
 
   `𝔼^{Qn}[(I_T − K)⁺/B_T] = Pⁿ(0,T)·blackCaplet (I₀Pʳ(0,T)/Pⁿ(0,T)) K √V 1 1`,
 
-i.e. `Pⁿ·[F Φ(d₁) − K Φ(d₂)]` with `d_i = bsd_i F K 0 √V 1`. Further hypotheses: `Qn` is a
-probability measure (inherited from the section variable of `value_caplet_black76`), `B_T > 0` is
-measurable and `Pⁿ(0,T) = 𝔼^{Qn}[1/B_T] > 0`; that `Q^T` is a probability measure follows from
-`hZ`. The index law is a hypothesis; that its log-variance is `jyVariance` is the SDE-level
-content, not proved. -/
+i.e. `Pⁿ·[F Φ(d₁) − K Φ(d₂)]` with `F = I₀Pʳ(0,T)/Pⁿ(0,T)` and `d_i = bsd_i F K 0 √V 1`. Further
+hypotheses: `Qn` is a probability measure (inherited from the section variable of
+`value_caplet_black76`), `B_T > 0` is measurable and `Pⁿ(0,T) = 𝔼^{Qn}[1/B_T] > 0`; that `Q^T` is
+a probability measure follows from `hZ`. The index law is a hypothesis; that its log-variance is
+`jyVariance` is the SDE-level content, not proved. -/
 theorem jyZcCaplet_price [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
     (Pn0T Pr0T I0 F0 V K : ℝ) (Z : Ω → ℝ)
     (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (hPn0T : 0 < Pn0T)
@@ -367,7 +367,8 @@ theorem jyYoyForward_eq_bondRatio {mS : MeasurableSpace Ω} (hmS : mS ≤ m)
 /-- **YoY forward in the printed convexity shape (Bagaria ch. 17 §17.4, eq. 17.10;
 Brigo–Mercurio §16.3).** Under the hypotheses of `jyYoyForward_eq_bondRatio`, and with the
 bond ratio in Hull–White reconstitution form (`hR`: `R_S` is the naive ratio of forwards
-`Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))` times `exp(Dʳ − Dⁿ − Bʳyʳ + Bⁿyⁿ)` with the two
+`Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))` times `exp(Dʳ − Dⁿ − Bʳyʳ + Bⁿyⁿ)`, with
+`Dⁱ = hwD Bⁱ Vⁱ = −Bⁱ²Vⁱ/2`, `yⁿ = mⁿ + √Vⁿ·Z1` and `yʳ = mʳ + √Vʳ·(ρ·Z1 + √(1−ρ²)·Z2)`, the two
 Gaussian rate deviations of `yoyConvexity_eq`),
 
   `𝔼^T[I_T/I_S] = (Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T)))·exp(−Bʳmʳ + Bⁿmⁿ + Bⁿ²Vⁿ − BʳBⁿ·Cov)`,
