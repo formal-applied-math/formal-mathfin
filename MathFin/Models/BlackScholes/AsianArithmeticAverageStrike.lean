@@ -39,8 +39,11 @@ derived here. Rogers and Shi's paper itself was not read.
 * `expSum_pos_iff_of_root`: **single crossing.** If `aₖ(cₖ − p) ≥ 0` for all `k`, strictly for
   one, and `z*` is a root, then `expSum z > 0 ↔ z > z*`. (`expSum` itself need not be monotone;
   `expSum z · e^{−pz}` is.)
-* `integral_max_expSum_hasLaw`: for `Z ~ N(0,1)` and a single crossing at `z*`,
-  `E[(expSum Z)⁺] = ∑ₖ aₖ exp(dₖ + cₖ²/2) Φ(cₖ − z*)`.
+* `integral_max_expSum_mul_gaussianPDFReal`, `integral_max_expSum_hasLaw`: for `Z ~ N(0,1)` and a
+  single crossing at `z*`, `E[(expSum Z)⁺] = ∑ₖ aₖ exp(dₖ + cₖ²/2) Φ(cₖ − z*)`.
+* `integral_max_comp_le_of_condMean`: the Jensen conditioning step for a general conditioning
+  variable, from the library's `integral_posPart_sub_condExp_le`.
+* `condBoundCall_eq_forward`: the closed form rewritten as `D · ∑ₖ aₖ Fₖ Φ(cₖ − z*)`.
 * `condBoundCall_le_integral_max`: the conditioning bound, given the defining property of the
   conditional mean `g(Z)` as a hypothesis (`hcond`; it is not derived from the Brownian model
   here).
@@ -55,11 +58,8 @@ The exact first and second moments of the fixings `S_{tᵢ}` (hence of `A` and `
 from `integral_basket_eq_basketM1` and `integral_basket_sq_eq_basketM2` in
 `MathFin.Models.BlackScholes.BasketMomentMatching`; they are not restated here.
 
-The closeness of the bound to the price is *not* a theorem here. On the grid tested numerically
-(`S = 97`, `r = 5%`, `q = 2%`, `T = 1`, fixings `1, 4, 10, 52`, volatility `20%, 40%, 80%`, two
-million antithetic paths) the bound for calls and puts agrees with Monte Carlo to within 0.12%
-(1.3 standard errors) up to 40% volatility, and to within 0.26% (3.0 standard errors, the worst
-cell: the 80%-volatility put with four fixings) at 80%. The bound is below the truth by Jensen.
+The closeness of the bound to the price is *not* a theorem here; the bound is below the price by
+Jensen, and how far below is a numerical question this file does not address.
 The identification of `E[S_T − A | Z]` with `g(Z)` from the Brownian model, and the monotone sign
 pattern of `g` for general fixing dates, are hypotheses of the general statements.
 
