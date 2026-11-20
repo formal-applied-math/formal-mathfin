@@ -193,9 +193,17 @@ def fetch(works: list[dict], root: Path, workers: int = 16) -> dict:
 
 def cached(works: list[dict], root: Path, budget: float = 0.9) -> dict:
     """OpenAlex's cached PDF for each work that has one and is not yet on disk, until `budget`
-    dollars are spent ($0.01 a file) or OpenAlex refuses (the day's allowance is gone)."""
+    dollars are spent ($0.01 a file) or OpenAlex refuses (the day's allowance is gone). A work
+    with a direct link is taken only once `fetch` has tried that link and failed, so nothing free
+    is paid for; works with no direct link come first."""
+    failed = set()  # direct downloads that were tried and did not give a PDF
+    if (root / "fetched.jsonl").exists():
+        failed = {r["id"] for r in map(json.loads, (root / "fetched.jsonl").open())
+                  if r["status"] != "ok"}
     todo = [w for w in works if (w.get("has_content") or {}).get("pdf")
-            and not local_path(root, w).exists()]
+            and not local_path(root, w).exists()
+            and (not pdf_links(w) or wid(w) in failed)]
+    todo.sort(key=lambda w: bool(pdf_links(w)))  # the cache is the only route for these: first
     spent, attempted, status = 0.0, 0, {}
     with (root / "cached.jsonl").open("a") as log:
         for w in todo:
