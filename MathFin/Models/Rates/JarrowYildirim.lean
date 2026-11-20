@@ -105,7 +105,8 @@ noncomputable def jyVarIntegrand (ar an σI σr σn ρrI ρnI ρnr T t : ℝ) : 
 /-- The integrated variance `V(0,T) = ∫₀ᵀ jyVarIntegrand dt`. Junk value: where `a_r = 0` or
 `a_n = 0` the loading `vasicekBondB 0 τ` is `0` by Lean's division convention, not the Ho–Lee
 limit `τ`, so `V` has its meaning only for nonzero mean reversions (or zero rate volatilities, as
-in `jyVariance_zero_rate_vols`). -/
+in `jyVariance_zero_rate_vols`). `V` is a variance only for `T ≥ 0` (for `T < 0` the integral is
+oriented backwards and the value is not a variance); `jyVariance_nonneg` assumes `0 ≤ T`. -/
 noncomputable def jyVariance (ar an σI σr σn ρrI ρnI ρnr T : ℝ) : ℝ :=
   ∫ t in (0 : ℝ)..T, jyVarIntegrand ar an σI σr σn ρrI ρnI ρnr T t
 
