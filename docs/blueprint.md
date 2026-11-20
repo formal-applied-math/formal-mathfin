@@ -190,6 +190,7 @@ graph TD
   trancheLegPrice["A CDO tranche leg is a contract"]:::proved
   varNotSubadditive["Value-at-risk is not subadditive"]:::proved
   vasicekMarket["The Vasicek bond market"]:::proved
+  americanPutBoundaryConvex["Convexity of the American put exercise boundary"]:::proved
   americanPutDominatesEuropean["The American put value dominates the Black–Scholes European price"]:::proved
   bachelierCall["Bachelier call price formula"]:::proved
   binomialKnockInMarket["The binomial market prices the knock-in by reflection"]:::proved
@@ -580,6 +581,11 @@ graph TD
   brownianMotion --> vasicekMarket
   market --> vasicekMarket
   pricingMeasure --> vasicekMarket
+  brownianMotion --> americanPutBoundaryConvex
+  snellEnvelope --> americanPutBoundaryConvex
+  americanPutOptimalExercise --> americanPutBoundaryConvex
+  feynmanKacHeatEq --> americanPutBoundaryConvex
+  itoFormulaC2 --> americanPutBoundaryConvex
   brownianMotion --> americanPutDominatesEuropean
   contract --> americanPutDominatesEuropean
   contractValue --> americanPutDominatesEuropean
@@ -1155,6 +1161,7 @@ graph TD
 | `thm:tranche-leg-price` A CDO tranche leg is a contract | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Atranche-leg-price%22%20in%3Abody) |
 | `thm:var-not-subadditive` Value-at-risk is not subadditive | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avar-not-subadditive%22%20in%3Abody) |
 | `thm:vasicek-market` The Vasicek bond market | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avasicek-market%22%20in%3Abody) |
+| `thm:american-put-boundary-convex` Convexity of the American put exercise boundary | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-boundary-convex%22%20in%3Abody) |
 | `thm:american-put-dominates-european` The American put value dominates the Black–Scholes European price | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-dominates-european%22%20in%3Abody) |
 | `thm:bachelier-call` Bachelier call price formula | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abachelier-call%22%20in%3Abody) |
 | `thm:binomial-knock-in-market` The binomial market prices the knock-in by reflection | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abinomial-knock-in-market%22%20in%3Abody) |

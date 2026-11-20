@@ -109,6 +109,7 @@ import MathFin.Models.Binomial.CRRClosedForm
 import MathFin.Models.Binomial.MartingaleRepresentation
 import MathFin.Models.Binomial.TrinomialMomentMatching
 import MathFin.Models.BlackScholes.American.Stopping.ActualOptimality
+import MathFin.Models.BlackScholes.American.Stopping.PhysicalBoundaryConvexity
 import MathFin.Models.BlackScholes.American.AmericanPutMarketBound
 import MathFin.Models.BlackScholes.American.AmericanMarketPrice
 import MathFin.Models.Bachelier.BachelierMarket
@@ -1001,6 +1002,18 @@ attribute [blueprint "thm:american-put-optimal-exercise"
   tends to $0$ (`tendsto_brownianUsualExerciseBoundary_expiry`). Normalised parameters only;
   the early-exercise premium decomposition and the perpetual case are not proved. -/)]
   MathFin.BlackScholes.AmericanPut.Stopping.brownianUsualActualContactRule_optimal
+
+attribute [blueprint "thm:american-put-boundary-convex"
+  (title := "Convexity of the American put exercise boundary")
+  (statement := /-- For strike $K > 0$, interest rate $r > 0$, volatility $\sigma > 0$ and
+  dividend yield $0 \le q \le r$, the exercise boundary of the American put on Wiener space
+  (`brownianUsualExerciseBoundary`, time measured to expiry) is strictly convex on $(0,\infty)$,
+  and its logarithm $\log(b(\tau)/K)$ is convex there
+  (`brownianUsualLogBoundary_convexOn`). For $q = 0$ convexity was known (Chen, Chadam, Cheng
+  and Saunders; Ekström) and for $q > r$ it fails; the range $0 < q < r$ was open, and this is
+  Robert Martin's proof of it (catalogue MF-OP-006). Convexity in the chord sense only: no second
+  derivative of the boundary is asserted. -/)]
+  MathFin.BlackScholes.AmericanPut.Stopping.brownianUsualStockBoundary_strictConvexOn
 
 attribute [blueprint "thm:american-put-dominates-european"
   (title := "The American put value dominates the Black–Scholes European price")
