@@ -22,10 +22,10 @@ in the manner of Rogers and Shi (1995): for a Gaussian variable `Z`, Jensen's in
 
 Given `Z = z` every `S_{tₖ}` is lognormal, so `g(z) = E[S_T − A | Z = z]` is a signed sum of
 exponentials `∑ₖ aₖ e^{dₖ + cₖ z}`, and `E[g(Z)⁺]` is a sum of normal-cdf terms at the single
-sign change of `g`. The conditioning idea is after Rogers and Shi (1995), as presented for the continuous
-floating-strike case in G. W. P. Thompson, *Fast narrow bounds on the value of Asian options*
-(Judge Institute of Management working paper wp0209, §3); the discrete-fixing form is derived
-here. Rogers and Shi's paper itself was not read.
+sign change of `g`. The conditioning idea is after Rogers and Shi (1995), as presented for the
+continuous floating-strike case in G. W. P. Thompson, *Fast narrow bounds on the value of Asian
+options* (Judge Institute of Management working paper wp0209, §3); the discrete-fixing form is
+derived here. Rogers and Shi's paper itself was not read.
 
 ## Main definitions
 

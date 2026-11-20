@@ -710,13 +710,6 @@
       "input_hash": "d2f3a3817308f470fb9294475f82d711d2734adb2e4af93417ca543328554255",
       "verified_at_commit": "049ca494"
     },
-    "mf-asian-avgstrike-one-fixing-forward-start": {
-      "benchmark_file": "exotic_options.json",
-      "date": "2026-11-20",
-      "elapsed_s": 1.9,
-      "input_hash": "19d3ae01edd5d99a80e0293f38fc40508aa99323824692dc9a20352e604d93dd",
-      "verified_at_commit": "a14a65f9"
-    },
     "mf-asian-avgstrike-one-fixing-market-price": {
       "benchmark_file": "exotic_options.json",
       "date": "2026-11-20",
