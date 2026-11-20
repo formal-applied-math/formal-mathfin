@@ -1,0 +1,16 @@
+{
+  "challenge_module": "Palomar.MartingaleRepresentation.Challenge",
+  "solution_module": "Palomar.MartingaleRepresentation.Solution",
+  "theorem_names": [
+    "BrownianRepresentation.predictable_le_prod",
+    "BrownianRepresentation.existsUnique_isItoIntegral",
+    "BrownianRepresentation.norm_apply_of_isItoIntegral",
+    "BrownianRepresentation.existsUnique_itoIntegral_representation"
+  ],
+  "definition_names": [],
+  "permitted_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ]
+}

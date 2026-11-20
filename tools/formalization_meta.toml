@@ -175,3 +175,62 @@ declaration = "MathFin.ftap_two"
 file = "MathFin/Pricing/FTAP/FTAPComplete.lean"
 literature = "Second fundamental theorem of asset pricing on a finite space (Harrison and Pliska 1981)"
 source = "harrison-pliska-1981"
+
+[[entries]]
+dir = "Palomar/MartingaleRepresentation"
+name = "The martingale representation theorem for Brownian motion"
+description = """\
+The martingale representation theorem for one-dimensional Brownian motion, in terminal form, \
+formalized in Lean 4 on Mathlib. The Itô integral is not taken as a primitive: it is \
+characterized as a continuous linear map from the predictable square-integrable integrands on \
+the horizon (0, T] to the square-integrable random variables, sending the indicator of each \
+predictable rectangle (s, t] x F, with F observable at time s, to the increment B_t - B_s on F. \
+The first registered theorem shows that exactly one such map exists, so the later statements are \
+about the Itô integral itself; the second is the Itô isometry. The third is the representation \
+theorem: for a process with the finite-dimensional laws of Brownian motion, measurable \
+coordinates and continuous paths, every square-integrable random variable that is measurable for \
+the natural filtration at the horizon, up to a null set, is almost surely its mean plus the Itô \
+integral of an integrand, and that integrand is unique up to a null predictable set. The process \
+form of the theorem and the local-martingale form are not claimed in the registered statements. \
+The proof identifies the range of the Itô isometry by the totality of step-integrand Doléans \
+exponentials in the square-integrable variables of the Brownian filtration. The development sits \
+in formal-mathfin, a library of formally verified mathematical finance built on Mathlib and Rémy \
+Degenne's BrownianMotion package."""
+
+[entries.classification]
+arxiv = ["math.PR", "q-fin.MF"]
+msc2020 = ["60H05", "60G44", "60J65"]
+
+[[entries.sources]]
+id = "ito-1951-multiple-wiener-integral"
+title = "Multiple Wiener integral"
+authors = ["Kiyosi Itô"]
+type = "article"
+location = "Journal of the Mathematical Society of Japan 3 (1951) 157-169; doi:10.2969/jmsj/00310157"
+relationship = "formalizes"
+license = "unknown"
+author_endorsement = "not-contacted"
+note = "The representation of square-integrable functionals of Brownian motion as their mean plus an Itô integral goes back to this paper's chaos expansion. The registered theorem is the terminal form for one-dimensional Brownian motion on a finite horizon and its natural filtration."
+
+[[entries.sources]]
+id = "karatzas-shreve-1991"
+title = "Brownian Motion and Stochastic Calculus"
+authors = ["Ioannis Karatzas", "Steven E. Shreve"]
+type = "book"
+location = "Springer, second edition (1991), Section 3.4"
+relationship = "adapts"
+license = "unknown"
+author_endorsement = "not-contacted"
+note = "Textbook treatment of the representation of Brownian martingales; the registered statement is its terminal form for one-dimensional Brownian motion."
+
+[[entries.main_results]]
+declaration = "MathFin.exists_itoIntegral_representation"
+file = "MathFin/Probability/Brownian/MartingaleRepresentation.lean"
+literature = "Martingale representation theorem for Brownian motion, terminal form (Itô 1951)"
+source = "ito-1951-multiple-wiener-integral"
+
+[[entries.main_results]]
+declaration = "MathFin.ItoIntegralCLM.itoIntegralCLM_norm"
+file = "MathFin/Probability/Brownian/Ito/ItoIntegralCLM.lean"
+literature = "Itô isometry on a finite horizon"
+source = "karatzas-shreve-1991"
