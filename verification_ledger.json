@@ -3825,6 +3825,13 @@
       "input_hash": "e1c0d0112f5e277e34ddff8f50444ce7818469e57b47fbae428117440e7ee85c",
       "verified_at_commit": "8796bf4"
     },
+    "mf-last-survivor-annuity-value": {
+      "benchmark_file": "actuarial.json",
+      "date": "2026-11-20",
+      "elapsed_s": 3.4,
+      "input_hash": "ff614b80c0530d20c6716881593cd9f340758f60c9c07d96b0118ef73b6c0b17",
+      "verified_at_commit": "d0be992"
+    },
     "mf-level-payment-balance-annuity": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-11-19",
@@ -3852,6 +3859,13 @@
       "elapsed_s": 2.6,
       "input_hash": "c49715cad7c60f1b290b3078c57fb7cc1959d7daf21073ca54faf63b5c3a617e",
       "verified_at_commit": "54c0176d"
+    },
+    "mf-life-annuity-due-is-contract-value": {
+      "benchmark_file": "actuarial.json",
+      "date": "2026-11-20",
+      "elapsed_s": 3.4,
+      "input_hash": "f85e437a6780f68ff8e28259f78a0122c9be651391060f9bfeefef133dde3c3a",
+      "verified_at_commit": "d0be992"
     },
     "mf-life-table-survival-ratio": {
       "benchmark_file": "actuarial.json",
@@ -4602,6 +4616,13 @@
       "input_hash": "e8c71d9d7785de15e44a3de537b74fc654c6d8f4c8592fc96a853a26785f6060",
       "verified_at_commit": "c047ee3"
     },
+    "mf-reversionary-annuity-value": {
+      "benchmark_file": "actuarial.json",
+      "date": "2026-11-20",
+      "elapsed_s": 3.3,
+      "input_hash": "f26b9464d368268da78c72a0c1f19b88c22cc5ad88a1651d36827b94d77c5521",
+      "verified_at_commit": "d0be992"
+    },
     "mf-rho": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-16",
@@ -5001,6 +5022,13 @@
       "input_hash": "3d6e77d2db9d87c3a7c260252093062a3094678000e9be6e87ca821b636c15f5",
       "verified_at_commit": "54c0176d"
     },
+    "mf-term-insurance-plus-pure-endowment": {
+      "benchmark_file": "actuarial.json",
+      "date": "2026-11-20",
+      "elapsed_s": 3.4,
+      "input_hash": "78e7321ad1c41d5c5389421a1ccdf34b676cc856404a2dab4e3159db22619a24",
+      "verified_at_commit": "d0be992"
+    },
     "mf-thiele-reserve-ode": {
       "benchmark_file": "actuarial.json",
       "date": "2026-11-19",
@@ -5259,6 +5287,13 @@
       "elapsed_s": 1.9,
       "input_hash": "34279bcc08ed56efa3b055ff8b28f097810be127c6d55583986e6c5c41c5fa28",
       "verified_at_commit": "c047ee3"
+    },
+    "mf-whole-life-insurance-annuity-due": {
+      "benchmark_file": "actuarial.json",
+      "date": "2026-11-20",
+      "elapsed_s": 3.3,
+      "input_hash": "54faff76f1cb06182c79c46e4f275365b6371f06078e7dd1b8563fc55e025253",
+      "verified_at_commit": "d0be992"
     },
     "mf-wiener-conditional-laplace": {
       "benchmark_file": "stochastic_foundations.json",
