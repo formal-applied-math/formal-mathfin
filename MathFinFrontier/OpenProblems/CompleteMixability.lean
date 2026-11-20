@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin
+module
+
+public import MathFin
 
 /-!
 # Open problems MF-OP-016 and MF-OP-017: complete mixability
@@ -31,6 +33,8 @@ both statements use no definition the reader has to trust.
   Neither has been checked here.
   The catalogue records it as `resolution_reported`.
 -/
+
+@[expose] public section
 
 open MeasureTheory ProbabilityTheory Filter
 

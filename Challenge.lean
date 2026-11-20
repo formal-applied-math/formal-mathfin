@@ -1,4 +1,6 @@
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # The Artzner–Delbaen–Eber–Heath representation of a coherent risk measure
@@ -40,6 +42,8 @@ The state space is finite. The separation argument is therefore the
 finite-dimensional one, and no topological dual or σ-additivity hypothesis
 appears; the general (infinite-dimensional) ADEH statement is not claimed here.
 -/
+
+@[expose] public section
 
 namespace ADEH
 
