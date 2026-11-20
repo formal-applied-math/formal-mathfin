@@ -13,16 +13,18 @@ public import MathFin.Models.BlackScholes.PDE
 Two invariances of `bsd1`, `bsd2` and `bsV` that follow from the formulas alone.
 
 * Spatial homogeneity: scaling spot and strike by `c > 0` leaves `d₁`, `d₂` fixed and scales the
-  price by `c`.
+  closed form `bsV` by `c`.
 * Time-volatility scaling: `(r, σ, τ) ↦ (c r, σ√c, τ/c)` fixes `r τ`, `σ² τ` and `σ √τ`, hence
-  `d₁`, `d₂` and the price. For zero rates and `c = τ` the scaling gives the dependence on
-  `σ² τ` alone; `bsV_eq_totalVarianceCall` (`Models/ModelFree/CalendarArbitrage.lean`) is the
-  corresponding statement through the definition of `totalVarianceCall`, for `σ, τ > 0`.
+  `d₁`, `d₂` and the closed form `bsV`. For zero rates and `c = τ` the scaling gives the
+  dependence on `σ² τ` alone; `bsV_eq_totalVarianceCall`
+  (`Models/ModelFree/CalendarArbitrage.lean`) is the corresponding statement through the
+  definition of `totalVarianceCall`, for `σ, τ > 0`.
 
 These are identities of the closed forms. They hold at every input, including the junk corners
 (division by zero at `σ = 0` or `K = 0`, `√` of a negative, `log` of a nonpositive), because both
-sides take the same junk value; they are not claims that the value is a price, which needs
-`σ > 0`, `0 < τ` and `0 < S, K`.
+sides are the same expression of the junk value, up to the factor `c` for the homogeneity
+statements; they are not claims that the value is a price, which needs `σ > 0`, `0 < τ` and
+`0 < S, K`.
 
 ## Main results
 

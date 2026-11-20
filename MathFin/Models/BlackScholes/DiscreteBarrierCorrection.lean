@@ -6,6 +6,7 @@ Authors: Yang Ye
 module
 
 public import MathFin.Models.BlackScholes.BarrierParity
+public import MathFin.Models.BlackScholes.DividendsGreeks
 public import MathFin.Models.BlackScholes.PartialTimeBarrierOption
 public import MathFin.Models.BlackScholes.ScalingInvariance
 
@@ -27,8 +28,9 @@ reproduced nor derived here.
 
 This file takes that shift as a **definition** and proves what follows from the definition alone.
 The scaling theorems are identities of closed forms: they hold at every input, including the junk
-corners (division by zero, `√` of a negative, `log` of a nonpositive), because both sides take the
-same junk value, and they are not claims that the value is a price. A price needs `σ > 0`,
+corners (division by zero, `√` of a negative, `log` of a nonpositive), because both sides are the
+same expression of the junk value, up to the factor `c` for the homogeneity statement, and they
+are not claims that the value is a price. A price needs `σ > 0`,
 `0 < T`, `0 < S, K, H`, a (shifted) barrier at most `K` and spot above it; at `H = 0`, for
 instance, `ptDownOutCall` is a junk value. The theorems that consume positivity state it.
 The continuous down-and-out call is the library's `ptDownOutCall`
@@ -55,8 +57,11 @@ the Reiner–Rubinstein/Hull formula is a matter of transcription, not proved in
 
 * `ptDownOutCall_eq_image`: `ptDownOutCall S K H r r σ T` is the image form
   `bsV K r σ S T − (H/S)^{2r/σ²−1} · bsV K r σ (H²/S) T`, for positive `S, K, H, σ`.
-* `ptDownOutCall_eq_image_printed`: the same with the ratio as printed in [HowisonSteinberg2005],
-  `bsV K r σ S T − (S/H)^{1−2r/σ²} · bsV K r σ (H²/S) T`.
+* `ptDownOutCall_eq_image_printed`: the same with the ratio and the dividend yield `q` as printed
+  in [HowisonSteinberg2005], `ptDownOutCall S K H (r − q) r σ T = bsVDiv K r q σ S T −
+  (S/H)^{1−2(r−q)/σ²} · bsVDiv K r q σ (H²/S) T`.
+* `ptDownOutCall_zero_barrier`, `bgkDownOutCall_zero_barrier`: at `H = 0` the value is the junk
+  value `0`, not the vanilla price.
 * `ptDownOutCall_scale`: spatial homogeneity, `(S, K, H) ↦ c(S, K, H)` scales it by `c`, at any
   carry (via `bsd1_scale`, `bsd2_scale` in `ScalingInvariance.lean`).
 * `ptDownOutCall_timeScale`: it is unchanged under `(b, r, σ, T) ↦ (c b, c r, σ√c, T/c)`, which
@@ -142,17 +147,58 @@ theorem ptDownOutCall_eq_image {K H r σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)
   simp only [ptD1, ptD2, sub_self, zero_mul, Real.exp_zero, neg_mul]
   ring
 
-/-- **Printed shape of the image form.** The `q = 0` instance of the display of
-[HowisonSteinberg2005], §2: `V(S) − (S/H)^{1−2r/σ²} · V(H²/S)` with `V = bsV`. It is
-`ptDownOutCall_eq_image` with the base reciprocated, `(H/S)^e = (S/H)^{−e}`. -/
-theorem ptDownOutCall_eq_image_printed {K H r σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)
+/-- **Printed shape of the image form, with a dividend yield.** The display of
+[HowisonSteinberg2005], §2: `V(S) − (S/H)^{1−2(r−q)/σ²} · V(H²/S)` with `V = bsVDiv`, the
+Black–Scholes call price at dividend yield `q`; the closed form `ptDownOutCall` carries the cost
+of carry `b = r − q`. The case `q = 0` is `ptDownOutCall_eq_image` with the base reciprocated. As
+there, an identity between two closed forms, and a price form only for `σ > 0`, `0 < T`,
+`0 < S, K, H`, `H ≤ K` and `S > H`. -/
+theorem ptDownOutCall_eq_image_printed {K H r q σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)
     (hH : 0 < H) (hσ : 0 < σ) :
-    ptDownOutCall S K H r r σ T
-      = bsV K r σ S T - (S / H) ^ (1 - 2 * r / σ ^ 2) * bsV K r σ (H ^ 2 / S) T := by
-  rw [ptDownOutCall_eq_image hS hK hH hσ]
-  congr 2
-  rw [show 1 - 2 * r / σ ^ 2 = -(2 * r / σ ^ 2 - 1) by ring, Real.rpow_neg (by positivity),
-    ← Real.inv_rpow (by positivity), inv_div]
+    ptDownOutCall S K H (r - q) r σ T
+      = bsVDiv K r q σ S T
+        - (S / H) ^ (1 - 2 * (r - q) / σ ^ 2) * bsVDiv K r q σ (H ^ 2 / S) T := by
+  have hHS : 0 < H / S := div_pos hH hS
+  have hσ2 : σ ^ 2 ≠ 0 := by positivity
+  have hmu : 2 * ptMu (r - q) σ = 2 * (r - q) / σ ^ 2 - 1 := by
+    unfold ptMu hkMu; field_simp
+  have hpow : (S / H) ^ (1 - 2 * (r - q) / σ ^ 2) = (H / S) ^ (2 * (r - q) / σ ^ 2 - 1) := by
+    rw [show 1 - 2 * (r - q) / σ ^ 2 = -(2 * (r - q) / σ ^ 2 - 1) by ring,
+      Real.rpow_neg (by positivity), ← Real.inv_rpow (by positivity), inv_div]
+  have h0 : ptHSmu S H (r - q) σ = (H / S) ^ (2 * (r - q) / σ ^ 2 - 1) := by
+    rw [ptHSmu, Real.rpow_def_of_pos hHS, hmu, mul_comm]
+  have h1 : ptHSmu1 S H (r - q) σ = ptHSmu S H (r - q) σ * (H / S) ^ 2 := by
+    have : 2 * (ptMu (r - q) σ + 1) * Real.log (H / S)
+        = 2 * ptMu (r - q) σ * Real.log (H / S) + (Real.log (H / S) + Real.log (H / S)) := by
+      ring
+    rw [ptHSmu1, this, Real.exp_add, Real.exp_add, Real.exp_log hHS, ← ptHSmu, sq]
+  have hsq : H ^ 2 / S = S * (H / S) ^ 2 := by field_simp
+  have hf1 : ptF1 S K H (r - q) σ T = bsd1 (H ^ 2 / S) K (r - q) σ T := by
+    unfold ptF1 bsd1
+    congr 2
+    rw [Real.log_div hS.ne' hK.ne', Real.log_div (by positivity) hK.ne',
+      Real.log_div hH.ne' hS.ne', Real.log_div (by positivity) hS.ne', Real.log_pow]
+    push_cast; ring
+  have hf2 : ptF2 S K H (r - q) σ T = bsd2 (H ^ 2 / S) K (r - q) σ T := by
+    rw [ptF2, bsd2, hf1]
+  have hE : Real.exp (-(q * T)) * Real.exp (-((r - q) * T)) = Real.exp (-r * T) := by
+    rw [← Real.exp_add]; congr 1; ring
+  have hE' : Real.exp ((r - q - r) * T) = Real.exp (-(q * T)) := by congr 1; ring
+  rw [hpow]
+  symm
+  unfold ptDownOutCall bsVDiv bsV
+  rw [← h0, ← hf1, ← hf2, h1, hE']
+  nth_rewrite 1 [hsq]
+  simp only [ptD1, ptD2]
+  linear_combination
+    -(K * Phi (bsd2 S K (r - q) σ T) - ptHSmu S H (r - q) σ * K * Phi (ptF2 S K H (r - q) σ T)) * hE
+
+/-- **Zero barrier is a junk corner.** At `H = 0` the logarithm `log (0 / S)` is `0` and
+`ptDownOutCall` is `0`, which is a junk value and not the vanilla price; this is why `0 < H` is
+a hypothesis of the continuity and limit theorems below. -/
+theorem ptDownOutCall_zero_barrier {K b r σ S T : ℝ} :
+    ptDownOutCall S K 0 b r σ T = 0 := by
+  simp [ptDownOutCall, ptHSmu, ptHSmu1, ptF1, ptF2, ptD1, ptD2, bsd1, bsd2]
 
 /-- Spatial homogeneity of the closed form: scaling spot, strike and barrier by `c > 0` scales
 `ptDownOutCall` by `c`, at any cost of carry `b`. An identity of the closed form, not a claim of
@@ -220,6 +266,12 @@ noncomputable def bgkDownOutCall (β : ℝ) (m : ℕ) (K H r σ S T : ℝ) : ℝ
 noncomputable def bgkKnockIn (β : ℝ) (m : ℕ) (K H r σ S T : ℝ) : ℝ :=
   bsV K r σ S T - bgkDownOutCall β m K H r σ S T
 
+/-- **Zero barrier is a junk corner.** At `H = 0` the shifted barrier is `0` and `bgkDownOutCall`
+is the junk value `0` of `ptDownOutCall_zero_barrier`, not the vanilla price. -/
+theorem bgkDownOutCall_zero_barrier {β : ℝ} {m : ℕ} {K r σ S T : ℝ} :
+    bgkDownOutCall β m K 0 r σ S T = 0 := by
+  simp [bgkDownOutCall, bgkDownBarrier, ptDownOutCall_zero_barrier]
+
 /-- The shifted down barrier is unchanged under `(σ, T) ↦ (σ √c, T / c)` with `m` fixed: the
 monitoring step becomes `Δt / c` and the shift `σ √Δt` is invariant. -/
 theorem bgkDownBarrier_timeScale {β : ℝ} {m : ℕ} {H σ T c : ℝ} (hc : 0 < c) :
@@ -284,7 +336,8 @@ theorem tendsto_bgkDownBarrier (β H σ T : ℝ) :
 the unshifted barrier, for positive spot and barrier, at every strike, rate, volatility and
 maturity, with no rate of convergence in `m` (the proof consumes only `0 < S` and `0 < H`, so it
 also covers the junk values `σ = 0`, `T ≤ 0`). It reads as "the BGK approximation tends to the
-continuous price" only for `σ > 0`, `0 < T`, `0 < K`, `H ≤ K`, `S > H` and `1 ≤ m`. It is the
+continuous price" only for `σ > 0`, `0 < T`, `0 < K` and `1 ≤ m`, with the shifted barrier at
+most `K` and below the spot (true for all large `m` when `H < K` and `S > H`). It is the
 consistency of the shift with the continuous limit, not an accuracy result. -/
 theorem tendsto_bgkDownOutCall {β K H r σ S T : ℝ} (hS : 0 < S) (hH : 0 < H) :
     Tendsto (fun m : ℕ ↦ bgkDownOutCall β m K H r σ S T) atTop
