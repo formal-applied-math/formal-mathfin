@@ -1,0 +1,14 @@
+{
+  "challenge_module": "Palomar.FTAP.Challenge",
+  "solution_module": "Palomar.FTAP.Solution",
+  "theorem_names": [
+    "DiscreteFTAP.noArbitrage_iff_exists_isEMM",
+    "DiscreteFTAP.isCompleteMarket_iff_existsUnique_isEMM"
+  ],
+  "definition_names": [],
+  "permitted_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ]
+}

@@ -43,6 +43,7 @@ COPY MathFinExamples/ MathFinExamples/
 COPY MathFinTest/ MathFinTest/
 COPY MathFinFrontier/ MathFinFrontier/
 COPY MathFinTools/ MathFinTools/
+COPY Palomar/ Palomar/
 RUN elan toolchain install "$(cat lean-toolchain)" \
     && lean --version \
     && lake --version \
