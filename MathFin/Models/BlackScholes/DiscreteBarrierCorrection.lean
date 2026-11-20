@@ -31,10 +31,9 @@ The scaling theorems are identities of closed forms (the time-volatility rescali
 the spatial homogeneity for every real `c`): they hold at every input, including the junk
 corners (division by zero, `√` of a negative, `log` of a nonpositive), because both sides are the
 same expression of the junk value, up to the factor `c` for the homogeneity statement, and they
-are not claims that the value is a price. A price needs `σ > 0`,
-`0 < T`, `0 < S, K, H`, a (shifted) barrier at most `K` and spot above it (and `1 ≤ m` for the BGK
-expression); at `H = 0`, for
-instance, `ptDownOutCall` is a junk value. The theorems that consume positivity state it.
+are not claims that the value is a price. A price needs `σ > 0`, `0 < T`, `0 < S, K, H`, a
+(shifted) barrier at most `K` and spot above it (and `1 ≤ m` for the BGK expression); at `H = 0`,
+for instance, `ptDownOutCall` is a junk value. The theorems that consume positivity state it.
 The continuous down-and-out call is the library's `ptDownOutCall`
 (`PartialTimeBarrierOption.lean`, the full-life branch with `X ≥ H`) at cost of carry `b = r`;
 no second closed form is introduced. Its image form
@@ -53,7 +52,9 @@ the Reiner–Rubinstein/Hull formula is a matter of transcription, not proved in
 * `bgkDownOutCall`: `ptDownOutCall` at the shifted down barrier, the BGK approximation to the
   discretely monitored down-and-out call. It reads as a price only for `σ > 0`, `0 < T`,
   `1 ≤ m`, `0 < S, K, H`, a shifted barrier at most `K` and spot above it.
-* `bgkKnockIn`: the BGK knock-in expression, the vanilla price `bsV` minus `bgkDownOutCall`.
+* `bgkKnockIn`: the BGK knock-in expression, the vanilla price `bsV` minus `bgkDownOutCall`. It
+  reads as the down-and-in price only under the conditions of `bgkDownOutCall`; at `H = 0` it is
+  `bsV`, a junk value (a zero barrier never knocks in).
 
 ## Main results
 
@@ -62,8 +63,9 @@ the Reiner–Rubinstein/Hull formula is a matter of transcription, not proved in
 * `ptDownOutCall_eq_image_printed`: the same with the ratio and the dividend yield `q` as printed
   in [HowisonSteinberg2005], `ptDownOutCall S K H (r − q) r σ T = bsVDiv K r q σ S T −
   (S/H)^{1−2(r−q)/σ²} · bsVDiv K r q σ (H²/S) T`.
-* `ptDownOutCall_zero_barrier`, `bgkDownOutCall_zero_barrier`: at `H = 0` the value is the junk
-  value `0`, not the vanilla price.
+* `ptDownOutCall_zero_barrier`, `bgkDownOutCall_zero_barrier`, `bgkKnockIn_zero_barrier`: at
+  `H = 0` the closed form and the BGK expression are the junk value `0`, and the BGK knock-in is
+  the vanilla `bsV`.
 * `ptDownOutCall_scale`: spatial homogeneity, `(S, K, H) ↦ c(S, K, H)` scales it by `c`, at any
   carry (via `bsd1_scale`, `bsd2_scale` in `ScalingInvariance.lean`).
 * `ptDownOutCall_timeScale`: it is unchanged under `(b, r, σ, T) ↦ (c b, c r, σ√c, T/c)`, which
@@ -180,8 +182,9 @@ theorem ptDownOutCall_eq_image {K H r σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)
     ← Real.inv_rpow (by positivity), inv_div]
 
 /-- **Zero barrier is a junk corner.** At `H = 0` the logarithm `log (0 / S)` is `0` and
-`ptDownOutCall` is `0`, which is a junk value and not the vanilla price; this is why `0 < H` is
-a hypothesis of the continuity and limit theorems below. -/
+`ptDownOutCall` is `0`, which is a junk value and not the vanilla price. Continuity in the barrier
+is stated for `0 < H` (the financial reading); at `H = 0` the many-dates limit would hold only as
+a statement about this junk value. -/
 theorem ptDownOutCall_zero_barrier {K b r σ S T : ℝ} :
     ptDownOutCall S K 0 b r σ T = 0 := by
   simp [ptDownOutCall, ptHSmu, ptHSmu1, ptF1, ptF2, ptD1, ptD2, bsd1, bsd2]
@@ -248,7 +251,10 @@ here. -/
 noncomputable def bgkDownOutCall (β : ℝ) (m : ℕ) (K H r σ S T : ℝ) : ℝ :=
   ptDownOutCall S K (bgkDownBarrier β m H σ T) r r σ T
 
-/-- The BGK knock-in expression: the Black–Scholes vanilla call price minus `bgkDownOutCall`. -/
+/-- The BGK knock-in expression: the Black–Scholes vanilla call price minus `bgkDownOutCall`. It
+reads as the down-and-in price only under the conditions of `bgkDownOutCall` (`σ > 0`, `0 < T`,
+`0 < S, K, H`, shifted barrier at most `K` and below the spot, `1 ≤ m`); at `H = 0` it is `bsV`, a
+junk value, not `0`. -/
 noncomputable def bgkKnockIn (β : ℝ) (m : ℕ) (K H r σ S T : ℝ) : ℝ :=
   bsV K r σ S T - bgkDownOutCall β m K H r σ S T
 
@@ -257,6 +263,13 @@ is the junk value `0` of `ptDownOutCall_zero_barrier`, not the vanilla price. -/
 theorem bgkDownOutCall_zero_barrier {β : ℝ} {m : ℕ} {K r σ S T : ℝ} :
     bgkDownOutCall β m K 0 r σ S T = 0 := by
   simp [bgkDownOutCall, bgkDownBarrier, ptDownOutCall_zero_barrier]
+
+/-- **Zero barrier is a junk corner for the knock-in.** At `H = 0` the BGK knock-in expression is
+the whole vanilla price `bsV`, whereas a down-and-in call with a zero barrier never knocks in and is
+worth `0`; the value is a junk value. -/
+theorem bgkKnockIn_zero_barrier {β : ℝ} {m : ℕ} {K r σ S T : ℝ} :
+    bgkKnockIn β m K 0 r σ S T = bsV K r σ S T := by
+  simp [bgkKnockIn, bgkDownOutCall_zero_barrier]
 
 /-- The shifted down barrier is unchanged under `(σ, T) ↦ (σ √c, T / c)` with `m` fixed: the
 monitoring step becomes `Δt / c` and the shift `σ √Δt` is invariant. -/
