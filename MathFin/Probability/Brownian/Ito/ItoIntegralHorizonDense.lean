@@ -82,6 +82,7 @@ the `predictableRect` π-system are the bridges it consumes.
 * `simpleAssemblyHorizon`: the `T`-restricted simple-process `L²` embedding, as a linear map.
 * `itoAssemblyHorizon`: the Itô assembly composed with the inclusion `TBoundedSP T ↪ SimpleProcess`.
 * `iocSPHorizon`: the `T`-bounded simple process representing the indicator of `Ioc a b × F`.
+* `rectangleIndicators`: the embedded rectangles `iocSPHorizon hab hbT hF`.
 
 ## Main results
 
@@ -93,8 +94,13 @@ the `predictableRect` π-system are the bridges it consumes.
   the full isometry through the trim-norm equality.
 * `setIntegral_eq_zero_of_orthogonal_pred`: a `g ∈ L²(trim_T)` whose set integral over every basic
   predictable rectangle vanishes has vanishing set integral over every predictable set.
+* `itoSimple_iocSPHorizon`: the elementary Itô integral of `𝟙_{(a, b] × F}` is `𝟙_F (B_b − B_a)`.
+* `ae_simpleAssemblyHorizon_iocSPHorizon`: an embedded rectangle is the indicator of the rectangle.
+* `dense_span_rectangleIndicators`: the rectangles span a dense subspace of `Lp 2 trim_T`.
 * `simpleAssemblyHorizon_denseRange`: the image of `simpleAssemblyHorizon` is dense in
     `Lp 2 trim_T`.
+* `ext_rectangleIndicators`: two continuous linear maps out of `Lp 2 trim_T` that agree on the
+  rectangles are equal.
 
 ## Tags
 
@@ -552,6 +558,40 @@ lemma uncurry_iocSPHorizon_eq {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
       ElementaryPredictableSet.coe_IocProd a b hF]
   rfl
 
+/-- **The elementary Itô integral of a rectangle**: the simple process `𝟙_{(a, b] × F}`, `F ∈ 𝓕ᴮ_a`,
+integrates to `𝟙_F (B_b − B_a)`. -/
+lemma itoSimple_iocSPHorizon {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
+    {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) {F : Set Ω}
+    (hF : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas) a] F) :
+    ItoIntegralL2.itoSimple hBmeas (iocSPHorizon hBmeas hab hbT hF).val =
+      F.indicator fun ω ↦ B b ω - B a ω := by
+  funext ω
+  have hI : (ElementaryPredictableSet.IocProd a b hF).I = {(a, b)} := ite_eq_left hab
+  unfold ItoIntegralL2.itoSimple
+  have hsub : (iocSPHorizon hBmeas hab hbT hF).val.value.support ⊆ {(a, b)} := fun p hp ↦ by
+    by_contra hp_not'
+    have hp_not : p ∉ (ElementaryPredictableSet.IocProd a b hF).I := by rwa [hI]
+    apply Finsupp.mem_support_iff.mp hp
+    change ((ElementaryPredictableSet.IocProd a b hF).indicator (1 : ℝ)).value p = 0
+    simp [ElementaryPredictableSet.indicator, Finsupp.onFinset_apply, hp_not]
+  rw [Finsupp.sum_of_support_subset _ hsub (fun p v ↦ v ω * (B p.2 ω - B p.1 ω))
+    (fun p _ ↦ by simp), Finset.sum_singleton]
+  simp only [iocSPHorizon, ElementaryPredictableSet.indicator, Finsupp.onFinset_apply, hI,
+    Finset.mem_singleton, ite_true]
+  change F.indicator (fun _ ↦ (1 : ℝ)) ω * (B b ω - B a ω) = _
+  by_cases hω : ω ∈ F <;> simp [hω]
+
+/-- The embedded rectangle `iocSPHorizon hab hbT hF` is the indicator of `Ioc a b ×ˢ F`,
+`trimMeasure`-a.e. -/
+lemma ae_simpleAssemblyHorizon_iocSPHorizon {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
+    {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) {F : Set Ω}
+    (hF : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas) a] F) :
+    (simpleAssemblyHorizon (μ := μ) T hBmeas (iocSPHorizon hBmeas hab hbT hF) : ℝ≥0 × Ω → ℝ)
+      =ᵐ[trimMeasure (μ := μ) T hBmeas] (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) := by
+  filter_upwards [MemLp.coeFn_toLp (memLp_uncurry_trimMeasure (μ := μ) T hBmeas
+      (iocSPHorizon hBmeas hab hbT hF).val)] with z hz
+  exact hz.trans (congrFun (uncurry_iocSPHorizon_eq hBmeas hab hbT hF) z)
+
 /-- Inner product of `simpleAssemblyHorizon (iocSPHorizon ...)` with `g` equals the
 set-integral of `g` over the rectangle. -/
 private lemma inner_simpleAssemblyHorizon_iocSPHorizon {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
@@ -568,23 +608,12 @@ private lemma inner_simpleAssemblyHorizon_iocSPHorizon {T : ℝ≥0} (hBmeas : �
   rw [L2.inner_def]
   -- The L² inner product unfolds to ∫ ⟪f z, g z⟫_ℝ = ∫ g z * f z (Mathlib's
   -- real inner product convention `⟪x, y⟫_ℝ = y * x`).
-  have h_coe := MemLp.coeFn_toLp
-    (memLp_uncurry_trimMeasure (μ := μ) T hBmeas
-      (iocSPHorizon hBmeas hab hbT hF : TBoundedSP T hBmeas).val)
-  have h_uncurry_eq := uncurry_iocSPHorizon_eq hBmeas hab hbT hF
   have h_ae_eq : ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas),
       (⟪(simpleAssemblyHorizon (μ := μ) T hBmeas (iocSPHorizon hBmeas hab hbT hF) : ℝ≥0 × Ω → ℝ) z,
         (g : ℝ≥0 × Ω → ℝ) z⟫_ℝ : ℝ)
         = (Set.Ioc a b ×ˢ F).indicator (fun z ↦ (g : ℝ≥0 × Ω → ℝ) z) z := by
-    filter_upwards [h_coe] with z hz
-    -- Rewrite simpleAssemblyHorizon V into uncurry V via h_coe; then uncurry V via h_uncurry_eq.
-    have hSA_eq :
-        (simpleAssemblyHorizon (μ := μ) T hBmeas (iocSPHorizon hBmeas hab hbT hF) : ℝ≥0 × Ω → ℝ) z
-          = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z := by
-      calc (simpleAssemblyHorizon (μ := μ) T hBmeas (iocSPHorizon hBmeas hab hbT hF) :
-            ℝ≥0 × Ω → ℝ) z
-          = Function.uncurry ⇑(iocSPHorizon hBmeas hab hbT hF : TBoundedSP T hBmeas).val z := hz
-        _ = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z := by rw [h_uncurry_eq]
+    filter_upwards [ae_simpleAssemblyHorizon_iocSPHorizon (μ := μ) hBmeas hab hbT hF]
+      with z hSA_eq
     rw [hSA_eq]
     -- Real inner product: ⟪x, y⟫_ℝ = y * x for x, y : ℝ.
     change (g : ℝ≥0 × Ω → ℝ) z * (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z
@@ -625,22 +654,29 @@ lemma setIntegral_eq_setIntegral_inter_supp {T : ℝ≥0}
       = ∫ z, g z ∂((trimMeasure (μ := μ) T hBmeas).restrict (R ∩ Set.Ioc 0 T ×ˢ Set.univ))
   rw [h1]
 
-/-- **Density**: the image of `simpleAssemblyHorizon` is dense in `Lp 2 trim_T`.
-Proof outline: take `g ⊥ range(simpleAssemblyHorizon)`. For every basic predictable
+/-- The embedded rectangles: the `L²` classes `simpleAssemblyHorizon (iocSPHorizon hab hbT hF)` of
+the indicators of `Ioc a b ×ˢ F`, for `a ≤ b ≤ T` and `F ∈ 𝓕ᴮ_a`
+(`ae_simpleAssemblyHorizon_iocSPHorizon`). -/
+def rectangleIndicators (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
+    Set (Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :=
+  {f | ∃ (a b : ℝ≥0) (hab : a ≤ b) (hbT : b ≤ T) (F : Set Ω)
+    (hF : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas) a] F),
+    f = simpleAssemblyHorizon (μ := μ) T hBmeas (iocSPHorizon hBmeas hab hbT hF)}
+
+/-- **The rectangles span a dense subspace** of `Lp 2 trim_T`.
+Proof outline: take `g` orthogonal to every rectangle. For every basic predictable
 rect `R`, derive `∫_R g d trim_T = 0`:
 * For the bot piece `{0} × F₀`: subset of `{0} × univ`, which is `trim_T`-null.
 * For `Ioc a b × F`: reduce to `Ioc a (min b T) × F` via the bridge, then apply
   orthogonality (when non-empty) or get `∫_∅ = 0` (when degenerate).
 Phase 5 extends to all predictable-measurable sets; `Lp.ae_eq_zero` concludes. -/
-theorem simpleAssemblyHorizon_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
-    DenseRange (simpleAssemblyHorizon (μ := μ) T hBmeas) := by
+theorem dense_span_rectangleIndicators (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
+    Dense (Submodule.span ℝ (rectangleIndicators (μ := μ) T hBmeas) :
+      Set (Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))) := by
   set 𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas
-  suffices h_orth_bot :
-      (LinearMap.range (simpleAssemblyHorizon (μ := μ) T hBmeas))ᗮ = ⊥ by
-    rw [denseRange_iff_closure_range,
-        ← LinearMap.coe_range (simpleAssemblyHorizon (μ := μ) T hBmeas),
-        ← Submodule.topologicalClosure_coe,
-        Submodule.topologicalClosure_eq_top_iff.mpr h_orth_bot, Submodule.top_coe]
+  suffices h_orth_bot : (Submodule.span ℝ (rectangleIndicators (μ := μ) T hBmeas))ᗮ = ⊥ from
+    Submodule.dense_iff_topologicalClosure_eq_top.2
+      (Submodule.topologicalClosure_eq_top_iff.2 h_orth_bot)
   rw [Submodule.eq_bot_iff]
   intro g h_mem
   rw [Submodule.mem_orthogonal] at h_mem
@@ -682,7 +718,8 @@ theorem simpleAssemblyHorizon_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measurab
       · -- Build iocSPHorizon at (a, min b T, F): T-bounded with b' = min b T ≤ T.
         have hbT' : min b T ≤ T := min_le_right _ _
         have h_set := inner_simpleAssemblyHorizon_iocSPHorizon (μ := μ) hBmeas hab' hbT' hF g
-        have h_inner := h_mem _ ⟨iocSPHorizon hBmeas hab' hbT' hF, rfl⟩
+        have h_inner := h_mem _
+          (Submodule.subset_span ⟨a, min b T, hab', hbT', F, hF, rfl⟩)
         rw [← h_set]
         exact h_inner
       · -- a > min b T: Ioc a (min b T) = ∅, so R_T = ∅.
@@ -697,6 +734,22 @@ theorem simpleAssemblyHorizon_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measurab
     (fun _ _ _ ↦ ((Lp.memLp g).integrable one_le_two).integrableOn)
     (fun s hs _ ↦ setIntegral_eq_zero_of_orthogonal_pred T hBmeas
       ((Lp.memLp g).integrable one_le_two) h_orth s hs)
+
+/-- **Density**: the image of `simpleAssemblyHorizon` is dense in `Lp 2 trim_T`, since it contains
+the rectangles, whose span is dense (`dense_span_rectangleIndicators`). -/
+theorem simpleAssemblyHorizon_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
+    DenseRange (simpleAssemblyHorizon (μ := μ) T hBmeas) :=
+  (dense_span_rectangleIndicators T hBmeas).mono fun _ hf ↦ LinearMap.mem_range.1 <|
+    Submodule.span_le.2
+      (by rintro _ ⟨a, b, hab, hbT, F, hF, rfl⟩; exact LinearMap.mem_range_self _ _) hf
+
+/-- **A continuous linear map out of the predictable `L²` is fixed by its values on the
+rectangles**: two that agree on every `rectangleIndicators` element are equal. -/
+theorem ext_rectangleIndicators {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {T : ℝ≥0} {hBmeas : ∀ t, Measurable (B t)}
+    {L₁ L₂ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) →L[ℝ] E}
+    (h : ∀ f ∈ rectangleIndicators (μ := μ) T hBmeas, L₁ f = L₂ f) : L₁ = L₂ :=
+  ContinuousLinearMap.ext_on (dense_span_rectangleIndicators T hBmeas) fun _ hf ↦ h _ hf
 
 end ItoIntegralCLM
 end MathFin
