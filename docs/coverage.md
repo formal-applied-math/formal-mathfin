@@ -35,9 +35,10 @@ module's variance lemmas are module-only, not corpus entries). Corpus 904 → 90
 
 - **`mf-jarrow-yildirim-zc-inflation-caplet`** (`jyZcCaplet_price`): the priced zero-coupon
   inflation caplet is `Pⁿ(0,T)` times the Black caplet on the curve forward `I₀Pʳ/Pⁿ`, given the
-  lognormal law of the index under the nominal `T`-forward measure. Not derived: that lognormality
-  and its SDE-level derivation, and the real-rate drift shift. `V` is a free positive input; the
-  statement does not identify it with `jyVariance`.
+  lognormal law of the index under the nominal `T`-forward measure. Not derived: the lognormality of
+  the index under the nominal T-forward measure (hypothesis hZ), its SDE-level derivation, and the
+  real-rate drift shift. `V` is a free positive input; the statement does not identify it with
+  `jyVariance`.
 - **`mf-jarrow-yildirim-yoy-forward-convexity`** (`jyYoyPayment_price`): the year-on-year forward
   and the time-0 price of its payment, from the conditional-expectation (martingale) hypothesis for
   the forward index plus the tower step `jyYoyForward_eq_bondRatio`, closed by `yoyConvexity_eq`.

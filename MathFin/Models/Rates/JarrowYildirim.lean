@@ -7,7 +7,6 @@ module
 
 public import MathFin.Models.Rates.Caplet
 public import MathFin.Models.Rates.Inflation
-public import MathFin.Pricing.FTAP.OneAssetDMW
 public import MathFin.Models.Rates.VasicekBondPrice
 
 /-!
@@ -24,8 +23,10 @@ Notation: `σ_I, σ_r, σ_n` are the volatilities of the index and of the real a
 `a_r, a_n` the real and nominal mean reversions, `ρ_{rI}, ρ_{nI}, ρ_{nr}` the correlations (real
 rate–index, nominal rate–index, nominal–real rate), and `B_x(t,T) = (1 − e^{−a_x(T−t)})/a_x`
 (`x ∈ {r, n}`) the Hull–White loadings. `K` is a caplet strike, `S < T` the start date and maturity
-of a year-on-year payment `I_T/I_S`, `I_S` the index at `S`, and `F₀` the forward parameter of the
-lognormal index law `I_T = F₀·exp(−V/2 + √V·Z)`, `Z ~ N(0,1)`.
+of a year-on-year payment `I_T/I_S`, `I_S` the index at `S`, `𝔼^{Qn}` the expectation under `Qn`,
+`Φ` the standard normal distribution function, `V` the log-variance of the index (`jyVariance` below
+is the candidate value `V(0,T)`), and `F₀` the forward parameter of the lognormal index law
+`I_T = F₀·exp(−V/2 + √V·Z)`, `Z ~ N(0,1)`. `d_{1,2} = (log(F/K) ± V/2)/√V`.
 
 ## Main definitions
 
@@ -38,29 +39,28 @@ lognormal index law `I_T = F₀·exp(−V/2 + √V·Z)`, `Z ~ N(0,1)`.
 * `quad2_nonneg`, `quad3_nonneg`: the `2×2` and `3×3` quadratic-form lemmas behind the
   non-negativity of the integrand.
 * The variance integrand of `log F(·,T)` for constant parameters (`jyVarIntegrand`) and its integral
-  `V(0,T)` (`jyVariance`). The integrand is the quadratic form of the vector `(σ_I, −σ_r·B_r,
-  σ_n·B_n)` against the `(I, r, n)` correlation matrix (an identity by `ring`), hence non-negative
-  when that matrix is positive semidefinite (`jyVarIntegrand_nonneg`, and for `V(0,T)` with `T ≥ 0`,
-  `jyVariance_nonneg`). Pairwise `|ρ| ≤ 1` is not enough for three factors; the condition used is
-  `ρ_{rI}² ≤ 1`, `ρ_{nI}² ≤ 1` and the determinant form `jyCorrDet ≥ 0`. Degenerate reduction:
-  `jyVariance_zero_rate_vols`.
-* The zero-coupon inflation caplet (`jyZcCaplet_price`): if the index under `Q^T` is lognormal
-  with log-variance `V` and the index-linked bond is priced on the real curve, the priced caplet
-  payoff `𝔼^{Qn}[(I_T − K)⁺/B_T]` is `Pⁿ(0,T)` times the library's Black caplet on the curve
-  forward `I₀·Pʳ(0,T)/Pⁿ(0,T)` at total variance `V`, i.e.
-  `Pⁿ(0,T)·[F Φ(d₁) − K Φ(d₂)]` with `F` that forward (proved by instantiating
-  `MathFin.Contracts.value_caplet_black76`). Convention: the market payoff
-  `N[(I_T/I₀ − 1) − κ]⁺` with notional `N` and total, non-annualised strike `κ` over `[0,T]` is
-  `(N/I₀)·(I_T − K)⁺` with `K = I₀(1+κ)`; an annual quoted strike `k` is `K = I₀(1+k)^T`.
+  `V(0,T)` (`jyVariance`). The integrand is the quadratic form of the vector
+  `(σ_I, −σ_r·B_r, σ_n·B_n)` against the `(I, r, n)` correlation matrix (an identity by `ring`),
+  hence non-negative when that matrix is positive semidefinite (`jyVarIntegrand_nonneg`, and for
+  `V(0,T)` with `T ≥ 0`, `jyVariance_nonneg`). Pairwise `|ρ| ≤ 1` is not enough for three factors;
+  the condition used is `ρ_{rI}² ≤ 1`, `ρ_{nI}² ≤ 1` and the determinant form `jyCorrDet ≥ 0`.
+  Degenerate reduction: `jyVariance_zero_rate_vols`.
+* The zero-coupon inflation caplet (`jyZcCaplet_price`): if the index under `Q^T` is lognormal with
+  log-variance `V` and the index-linked bond is priced on the real curve, the priced caplet payoff
+  `𝔼^{Qn}[(I_T − K)⁺/B_T]` is `Pⁿ(0,T)` times the library's Black caplet on the curve forward
+  `I₀·Pʳ(0,T)/Pⁿ(0,T)` at total variance `V`, i.e. `Pⁿ(0,T)·[F Φ(d₁) − K Φ(d₂)]` with `F` that
+  forward (proved by instantiating `MathFin.Contracts.value_caplet_black76`). Convention: the market
+  payoff `N[(I_T/I₀ − 1) − κ]⁺` with notional `N` and total, non-annualised strike `κ` over `[0,T]`
+  is `(N/I₀)·(I_T − K)⁺` with `K = I₀(1+κ)`; an annual quoted strike `k` is `K = I₀(1+k)^T`.
   `jyForwardIndex_lognormal_eq_curves` puts the lognormal index on that curve forward.
 * `jyZcCaplet_price_deterministic_rates`: with `σ_r = σ_n = 0` the integrated variance is `σ_I²T`
   and the priced caplet is `Pⁿ(0,T)·blackCaplet (I₀Pʳ/Pⁿ) K σ_I T 1` (by
-  `blackCaplet_sqrt_variance`: Black at total variance `σ²T` and maturity 1 is Black at
-  volatility `σ` and maturity `T`).
-* The year-on-year forward: `jyYoyForward_eq_bondRatio` is the tower-property step (Bagaria
-  eq. 17.8) from the martingale property of `F(·,T)` under `Q^T` to
-  `𝔼^T[I_T/I_S] = 𝔼^T[Pʳ(S,T)/Pⁿ(S,T)]`; `jyYoyForward_eq_convexity` evaluates that expectation
-  by `yoyConvexity_eq` as the naive ratio of forwards times the convexity factor; and
+  `blackCaplet_sqrt_variance`: Black at total variance `σ²T` and maturity 1 is Black at volatility
+  `σ` and maturity `T`).
+* The year-on-year forward: `jyYoyForward_eq_bondRatio` is the tower-property step (Bagaria eq.
+  17.8) from the martingale property of `F(·,T)` under `Q^T` to
+  `𝔼^T[I_T/I_S] = 𝔼^T[Pʳ(S,T)/Pⁿ(S,T)]`; `jyYoyForward_eq_convexity` evaluates that expectation by
+  `yoyConvexity_eq` as the naive ratio of forwards times the convexity factor; and
   `jyYoyPayment_price` is the time-0 value of the payment (`MathFin.forwardMeasure_price`).
 
 ## Scope
@@ -77,16 +77,16 @@ transcription. The exact YoY caplet, calibration, seasonality and Monte Carlo ar
 * [R. Jarrow and Y. Yildirim, *Pricing Treasury Inflation Protected Securities and Related
   Derivatives using an HJM Model*, J. Financial and Quantitative Analysis 38(2) (2003),
   337–358][JarrowYildirim2003]
-* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006],
-  2nd ed. (2006), §15.3 (the JY model), §16.3 (YYIIS with the JY model), §17.1 (the JY
-  caplet; the zero-coupon caplet is its first-period case)
+* [D. Brigo and F. Mercurio, *Interest Rate Models --- Theory and Practice*][BrigoMercurio2006], 2nd
+  ed. (2006), §15.3 (the JY model), §16.3 (YYIIS with the JY model), §17.1 (the JY caplet; the
+  zero-coupon caplet is its first-period case)
 * [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 17 §17.3, eq. 17.6 (the
   forward index) and §17.4 (eqs. 17.8, 17.10)
 
 ## Tags
 
-Jarrow–Yildirim, inflation model, zero-coupon inflation cap, year-on-year inflation,
-convexity adjustment, Hull–White, MSC 91G30, MSC 91G20, JEL E31
+Jarrow–Yildirim, inflation model, zero-coupon inflation cap, year-on-year inflation, convexity
+adjustment, Hull–White, MSC 91G30, MSC 91G20, JEL E31
 -/
 
 @[expose] public section
@@ -112,17 +112,17 @@ noncomputable def jyVarIntegrand (ar an σI σr σn ρrI ρnI ρnr T t : ℝ) : 
     - 2 * ρnr * σn * σr * vasicekBondB an (T - t) * vasicekBondB ar (T - t)
 
 /-- The integrated variance `V(0,T) = ∫₀ᵀ jyVarIntegrand dt`. Junk value: where `a_r = 0` or
-`a_n = 0` the loading `vasicekBondB 0 τ` is `0` by Lean's division convention, not the Ho–Lee
-limit `τ`, so `V` has its meaning only for nonzero mean reversions (or zero rate volatilities, as
-in `jyVariance_zero_rate_vols`). `V` is a variance only for `T ≥ 0` (for `T < 0` the integral is
+`a_n = 0` the loading `vasicekBondB 0 τ` is `0` by Lean's division convention, not the Ho–Lee limit
+`τ`, so `V` has its meaning only for nonzero mean reversions (or zero rate volatilities, as in
+`jyVariance_zero_rate_vols`). `V` is a variance only for `T ≥ 0` (for `T < 0` the integral is
 oriented backwards and the value is not a variance); `jyVariance_nonneg` assumes `0 ≤ T`. -/
 noncomputable def jyVariance (ar an σI σr σn ρrI ρnI ρnr T : ℝ) : ℝ :=
   ∫ t in (0 : ℝ)..T, jyVarIntegrand ar an σI σr σn ρrI ρnI ρnr T t
 
 /-- The determinant of the `(I, r, n)` correlation matrix
-`[[1, ρ_{rI}, ρ_{nI}], [ρ_{rI}, 1, ρ_{nr}], [ρ_{nI}, ρ_{nr}, 1]]`. Positive
-semidefiniteness of the matrix needs `ρ_{rI}² ≤ 1`, `ρ_{nI}² ≤ 1` and this determinant `≥ 0`
-(the hypotheses of `quad3_nonneg`); the determinant alone does not suffice. -/
+`[[1, ρ_{rI}, ρ_{nI}], [ρ_{rI}, 1, ρ_{nr}], [ρ_{nI}, ρ_{nr}, 1]]`. Positive semidefiniteness of the
+matrix needs `ρ_{rI}² ≤ 1`, `ρ_{nI}² ≤ 1` and this determinant `≥ 0` (the hypotheses of
+`quad3_nonneg`); the determinant alone does not suffice. -/
 def jyCorrDet (ρrI ρnI ρnr : ℝ) : ℝ :=
   1 + 2 * ρrI * ρnI * ρnr - ρrI ^ 2 - ρnI ^ 2 - ρnr ^ 2
 
@@ -139,8 +139,8 @@ theorem quad2_nonneg {A B C y z : ℝ} (hA : 0 ≤ A) (hC : 0 ≤ C) (hB : B ^ 2
       nlinarith [sq_nonneg (A * y + B * z), mul_nonneg (sub_nonneg.2 hB) (sq_nonneg z)]
     exact nonneg_of_mul_nonneg_right h hpos
 
-/-- **Three-factor quadratic form.** For correlations with `ρ_{rI}² ≤ 1`, `ρ_{nI}² ≤ 1`
-and `jyCorrDet ≥ 0`, `x² + y² + z² + 2ρ_{rI}xy + 2ρ_{nI}xz + 2ρ_{nr}yz ≥ 0`. -/
+/-- **Three-factor quadratic form.** For correlations with `ρ_{rI}² ≤ 1`, `ρ_{nI}² ≤ 1` and
+`jyCorrDet ≥ 0`, `x² + y² + z² + 2ρ_{rI}xy + 2ρ_{nI}xz + 2ρ_{nr}yz ≥ 0`. -/
 theorem quad3_nonneg {ρrI ρnI ρnr x y z : ℝ} (hrI : ρrI ^ 2 ≤ 1) (hnI : ρnI ^ 2 ≤ 1)
     (hdet : 0 ≤ jyCorrDet ρrI ρnI ρnr) :
     0 ≤ x ^ 2 + y ^ 2 + z ^ 2 + 2 * ρrI * x * y + 2 * ρnI * x * z + 2 * ρnr * y * z := by
@@ -149,8 +149,8 @@ theorem quad3_nonneg {ρrI ρnI ρnr x y z : ℝ} (hrI : ρrI ^ 2 ≤ 1) (hnI : 
     (by linarith) (by linarith) (by unfold jyCorrDet at hdet; nlinarith)
   nlinarith [sq_nonneg (x + ρrI * y + ρnI * z)]
 
-/-- The integrand is the quadratic form of `(σ_I, −σ_r·B_r, σ_n·B_n)` against the
-`(I, r, n)` correlation matrix: the variance of `σ_I dW_I − σ_rB_r dW_r + σ_nB_n dW_n`. -/
+/-- The integrand is the quadratic form of `(σ_I, −σ_r·B_r, σ_n·B_n)` against the `(I, r, n)`
+correlation matrix: the variance of `σ_I dW_I − σ_rB_r dW_r + σ_nB_n dW_n`. -/
 private theorem jyVarIntegrand_eq_quadForm (ar an σI σr σn ρrI ρnI ρnr T t : ℝ) :
     jyVarIntegrand ar an σI σr σn ρrI ρnI ρnr T t
       = σI ^ 2 + (-(σr * vasicekBondB ar (T - t))) ^ 2 + (σn * vasicekBondB an (T - t)) ^ 2
@@ -160,8 +160,8 @@ private theorem jyVarIntegrand_eq_quadForm (ar an σI σr σn ρrI ρnI ρnr T t
   unfold jyVarIntegrand
   ring
 
-/-- **The variance integrand is non-negative** under the correlation PSD condition
-(`ρ_{rI}² ≤ 1`, `ρ_{nI}² ≤ 1`, `jyCorrDet ≥ 0`), for every `t`. -/
+/-- **The variance integrand is non-negative** under the correlation PSD condition (`ρ_{rI}² ≤ 1`,
+`ρ_{nI}² ≤ 1`, `jyCorrDet ≥ 0`), for every `t`. -/
 theorem jyVarIntegrand_nonneg {ar an σI σr σn ρrI ρnI ρnr : ℝ} (T t : ℝ)
     (hrI : ρrI ^ 2 ≤ 1) (hnI : ρnI ^ 2 ≤ 1) (hdet : 0 ≤ jyCorrDet ρrI ρnI ρnr) :
     0 ≤ jyVarIntegrand ar an σI σr σn ρrI ρnI ρnr T t := by
@@ -236,8 +236,8 @@ log-variance `V`, and `F₀ > 0`, `V > 0`, `K > 0`,
 
 i.e. `Pⁿ(0,T)·[F Φ(d₁) − K Φ(d₂)]` with `F = I₀Pʳ(0,T)/Pⁿ(0,T)` and `d_i = bsd_i F K 0 √V 1`.
 Further hypotheses: `Qn` is a probability measure (inherited from the section variable of
-`value_caplet_black76`), `B_T > 0` is measurable and `Pⁿ(0,T) = 𝔼^{Qn}[1/B_T] > 0`; that `Q^T` is
-a probability measure follows from `hZ`. The index law is a hypothesis; that its log-variance is
+`value_caplet_black76`), `B_T > 0` is measurable and `Pⁿ(0,T) = 𝔼^{Qn}[1/B_T] > 0`; that `Q^T` is a
+probability measure follows from `hZ`. The index law is a hypothesis; that its log-variance is
 `jyVariance` is the SDE-level content, not proved. -/
 theorem jyZcCaplet_price [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
     (Pn0T Pr0T I0 F0 V K : ℝ) (Z : Ω → ℝ)
@@ -278,15 +278,15 @@ theorem jyZcCaplet_price [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
     simp [div_eq_inv_mul]
   rw [key']
 
-/-- **Black caplet at total variance.** At maturity `1`, the Black caplet at total variance `σ²T`
-is the Black caplet at volatility `σ` and maturity `T` (`σ > 0`, `T > 0`): `√(σ²T) = σ√T`, and
-`bsd₁`, `bsd₂` depend on `(σ, T)` only through `σ√T` and `σ²T`. A general Black-76 fact (`σ` and
-`T` enter only through `σ√T`); it is stated here to keep this module self-contained, its natural
-home is next to `blackCaplet` in `Models/Forwards/Black76.lean`, and the same step appears inline
-in `bsV_eq_totalVarianceCall`. This is an identity of the total function `blackCaplet`: it has a
-financial meaning only for `F, K > 0` (`log(F/K)` is junk otherwise). `σ > 0` excludes `σ ≤ 0`
-(for `σ < 0`, `√(σ²T) = |σ|√T ≠ σ√T`; at `σ = 0` both sides are junk `x/0`), and `T > 0`
-excludes the corner `T = 0`, where both sides are junk `x/0` rather than the intrinsic value. -/
+/-- **Black caplet at total variance.** At maturity `1`, the Black caplet at total variance `σ²T` is
+the Black caplet at volatility `σ` and maturity `T` (`σ > 0`, `T > 0`): `√(σ²T) = σ√T`, and `bsd₁`,
+`bsd₂` depend on `(σ, T)` only through `σ√T` and `σ²T`. A general Black-76 fact (`σ` and `T` enter
+only through `σ√T`); it is stated here to keep this module self-contained, its natural home is next
+to `blackCaplet` in `Models/Forwards/Black76.lean`, and the same step appears inline in
+`bsV_eq_totalVarianceCall`. This is an identity of the total function `blackCaplet`: it has a
+financial meaning only for `F, K > 0` (`log(F/K)` is junk otherwise). `σ > 0` excludes `σ ≤ 0` (for
+`σ < 0`, `√(σ²T) = |σ|√T ≠ σ√T`; at `σ = 0` both sides are junk `x/0`), and `T > 0` excludes the
+corner `T = 0`, where both sides are junk `x/0` rather than the intrinsic value. -/
 theorem blackCaplet_sqrt_variance (F K σ T α : ℝ) (hσ : 0 < σ) (hT : 0 < T) :
     blackCaplet F K (Real.sqrt (σ ^ 2 * T)) 1 α = blackCaplet F K σ T α := by
   have hs : Real.sqrt (σ ^ 2 * T) = σ * Real.sqrt T := by
@@ -345,9 +345,11 @@ variable {Ω : Type*} {m : MeasurableSpace Ω} {μ : Measure Ω}
 
 /-- **YoY forward = bond-ratio expectation** (Bagaria ch. 17 §17.4, eq. 17.8). Hypotheses:
 `hmS : m_S ≤ m` with `μ.trim hmS` σ-finite; `I_S` is `m_S`-measurable and positive; `I_T` and
-`I_T/I_S` are `μ`-integrable; and `𝔼^T[I_T | m_S] = I_S·R_S` a.e. (`hmart`, the martingale
-property of `F(·,T)`). Then `𝔼^T[I_T/I_S] = 𝔼^T[R_S]`. The proof pulls the `m_S`-measurable
-factor `1/I_S` through the conditional expectation with `MathFin.integral_mul_condExp`. -/
+`I_T/I_S` are `μ`-integrable; and `𝔼^T[I_T | m_S] = I_S·R_S` a.e. (`hmart`, the martingale property
+of `F(·,T)`). Then `𝔼^T[I_T/I_S] = 𝔼^T[R_S]`. The proof pulls the `m_S`-measurable factor `1/I_S`
+through the conditional expectation (`condExp_mul_of_stronglyMeasurable_left`, `integral_condExp`);
+the same pull-out is `MathFin.integral_mul_condExp` (`Pricing/FTAP/OneAssetDMW.lean`), not imported
+here to keep this module's import closure free of the FTAP chain. -/
 theorem jyYoyForward_eq_bondRatio {mS : MeasurableSpace Ω} (hmS : mS ≤ m)
     [SigmaFinite (μ.trim hmS)] (IS IT RS : Ω → ℝ)
     (hIS : StronglyMeasurable[mS] IS) (hISpos : ∀ ω, 0 < IS ω)
@@ -357,8 +359,13 @@ theorem jyYoyForward_eq_bondRatio {mS : MeasurableSpace Ω} (hmS : mS ≤ m)
   have hinv : StronglyMeasurable[mS] fun ω => (IS ω)⁻¹ := hIS.measurable.inv.stronglyMeasurable
   have hprod : Integrable (fun ω => (IS ω)⁻¹ * IT ω) μ := by
     simpa [div_eq_inv_mul] using hITS
+  have hpull : μ[fun ω => (IS ω)⁻¹ * IT ω | mS]
+      =ᵐ[μ] fun ω => (IS ω)⁻¹ * (μ[IT | mS]) ω :=
+    condExp_mul_of_stronglyMeasurable_left hinv hprod hIT
   have h1 : ∫ ω, IT ω / IS ω ∂μ = ∫ ω, (IS ω)⁻¹ * (μ[IT | mS]) ω ∂μ := by
-    simpa [div_eq_inv_mul] using integral_mul_condExp hmS hinv hprod hIT
+    have := (integral_condExp hmS (f := fun ω => (IS ω)⁻¹ * IT ω)).symm.trans
+      (integral_congr_ae hpull)
+    simpa [div_eq_inv_mul] using this
   rw [h1]
   refine integral_congr_ae ?_
   filter_upwards [hmart] with ω hω
@@ -380,10 +387,9 @@ factor. The exponent is the same quantity as in `yoyConvexity_eq`, with its term
 printed order (equal by `ring`). Further hypotheses: `Z1, Z2` independent standard normals under `μ`
 (`hZ1`, `hZ2`, `hindep`), `0 ≤ Vⁿ`, `0 ≤ Vʳ`, `ρ² ≤ 1` and `hCov : Cov = ρ·√(Vⁿ·Vʳ)`. The means,
 variances, covariance, `Bⁿ`, `Bʳ`, `hR` and `hmart` are hypotheses or inputs; they are not derived
-from the SDEs here. Junk corner: the naive ratio
-`Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))` is `0` by Lean's division convention if `Pʳ(0,S)` or
-`Pⁿ(0,T)` is `0`; the bond prices are positive in the model, and the statement is an identity
-about `hR`, so it carries no such guard. -/
+from the SDEs here. Junk corner: the naive ratio `Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))` is `0` by
+Lean's division convention if `Pʳ(0,S)` or `Pⁿ(0,T)` is `0`; the bond prices are positive in the
+model, and the statement is an identity about `hR`, so it carries no such guard. -/
 theorem jyYoyForward_eq_convexity {mS : MeasurableSpace Ω} (hmS : mS ≤ m)
     [SigmaFinite (μ.trim hmS)] (IS IT RS : Ω → ℝ)
     (hIS : StronglyMeasurable[mS] IS) (hISpos : ∀ ω, 0 < IS ω)
