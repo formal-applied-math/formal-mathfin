@@ -699,16 +699,16 @@
     "mf-asian-avgstrike-conditioning-lower-bound": {
       "benchmark_file": "exotic_options.json",
       "date": "2026-11-20",
-      "elapsed_s": 2.9,
-      "input_hash": "b5cfc5521c83dbef4d7da3501d9bfbaeafa85e6cb8a4233f3c4d2139f05018eb",
-      "verified_at_commit": "f1bb163e"
+      "elapsed_s": 2.5,
+      "input_hash": "bf8eb195b50a0635c87702e00955ba10f3c9b97d187faab6a644e857a1df15a8",
+      "verified_at_commit": "049ca494"
     },
     "mf-asian-avgstrike-expsum-gaussian-positive-part": {
       "benchmark_file": "exotic_options.json",
       "date": "2026-11-20",
-      "elapsed_s": 2.3,
-      "input_hash": "7a83062bc66027316d18f392fb6fb4ced168f5957b7724a04399cfbe043fd0e5",
-      "verified_at_commit": "f1bb163e"
+      "elapsed_s": 2.5,
+      "input_hash": "d2f3a3817308f470fb9294475f82d711d2734adb2e4af93417ca543328554255",
+      "verified_at_commit": "049ca494"
     },
     "mf-asian-avgstrike-one-fixing-forward-start": {
       "benchmark_file": "exotic_options.json",
@@ -720,9 +720,9 @@
     "mf-asian-avgstrike-one-fixing-market-price": {
       "benchmark_file": "exotic_options.json",
       "date": "2026-11-20",
-      "elapsed_s": 2.6,
-      "input_hash": "8e7bbd1dc2d5ff882db5cb4d9fb5356892e1daf9ed7af47c25a6b68774df53a8",
-      "verified_at_commit": "f1bb163e"
+      "elapsed_s": 2.7,
+      "input_hash": "b715c1bb29d802571658b0df4fd72ce1bb686277835855536049c765aeabe905",
+      "verified_at_commit": "049ca494"
     },
     "mf-asian-geom-driver-gaussian": {
       "benchmark_file": "exotic_options.json",

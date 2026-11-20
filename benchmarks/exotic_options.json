@@ -592,7 +592,7 @@
       },
       "metadata": {
         "chapter": 14,
-        "reference": "G. W. Thompson, Fast narrow bounds on the value of Asian options, Judge Institute of Management Studies working paper 02/09, section 3; L. C. G. Rogers and Z. Shi, The value of an Asian option, Journal of Applied Probability 32 (1995) 1077-1088",
+        "reference": "G. W. P. Thompson, Fast narrow bounds on the value of Asian options, Judge Institute of Management working paper wp0209, section 3; L. C. G. Rogers and Z. Shi, The value of an Asian option, Journal of Applied Probability 32 (1995) 1077-1088",
         "citations": [
           {
             "key": "ThompsonAsianBounds"
@@ -610,13 +610,13 @@
       "id": "mf-asian-avgstrike-conditioning-lower-bound",
       "name": "Conditioning Lower Bound for the Average-Strike Asian Call",
       "domain": "mathematical_finance",
-      "description": "Reduced core: if g(Z) is the conditional mean of X = S_T - A given a standard normal Z (stated as the defining integral property over sigma(Z)-sets) and g is positive exactly to the right of z*, then the closed form D * sum a_k exp(d_k + c_k^2/2) Phi(c_k - z*) is at most D * E[X+]. The identification of E[S_T - A | Z] with g(Z) in the Brownian model is not derived here, the closeness of the bound to the price is not proved (it is a numerical measurement, within 0.12% of Monte Carlo up to 40% volatility on the tested grid), and the discrete form is a transcription in the manner of Rogers and Shi (1995), read via Thompson's working paper.",
+      "description": "Reduced core: if g(Z) is the conditional mean of X = S_T - A given a standard normal Z (stated as the defining integral property over sigma(Z)-sets) and g is positive exactly to the right of z*, then the closed form D * sum a_k exp(d_k + c_k^2/2) Phi(c_k - z*) is at most D * E[X+]. The identification of E[S_T - A | Z] with g(Z) in the Brownian model is not derived here, the closeness of the bound to the price is not proved (it is a numerical measurement, within 0.12% of Monte Carlo up to 40% volatility on the tested grid), and the conditioning idea is after Rogers and Shi (1995), as presented in Thompson's working paper, and the discrete form is derived here.",
       "code": {
         "lean": "import MathFin.Models.BlackScholes.AsianArithmeticAverageStrike\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\n/-- **Conditioning lower bound.** Re-exports `MathFin.condBoundCall_le_integral_max`. -/\ntheorem asian_avgstrike_conditioning_lower_bound\n    {Ω : Type*} {m0 : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]\n    {Z : Ω → ℝ} (hZm : Measurable Z) (hZ : HasLaw Z (gaussianReal 0 1) P)\n    {X : Ω → ℝ} (hX : Integrable X P) {n : ℕ} (a d c : Fin n → ℝ) (zs D : ℝ)\n    (hD : 0 ≤ D) (hpos : ∀ z, 0 < expSum a d c z ↔ zs < z)\n    (hGint : Integrable (fun ω ↦ expSum a d c (Z ω)) P)\n    (hcond : ∀ s, MeasurableSet[MeasurableSpace.comap Z inferInstance] s →\n      ∫ ω in s, expSum a d c (Z ω) ∂P = ∫ ω in s, X ω ∂P) :\n    condBoundCall D a d c zs ≤ D * ∫ ω, max (X ω) 0 ∂P :=\n  MathFin.condBoundCall_le_integral_max hZm hZ hX a d c zs D hD hpos hGint hcond\n"
       },
       "metadata": {
         "chapter": 14,
-        "reference": "G. W. Thompson, Fast narrow bounds on the value of Asian options, Judge Institute of Management Studies working paper 02/09, section 3; L. C. G. Rogers and Z. Shi, The value of an Asian option, Journal of Applied Probability 32 (1995) 1077-1088",
+        "reference": "G. W. P. Thompson, Fast narrow bounds on the value of Asian options, Judge Institute of Management working paper wp0209, section 3; L. C. G. Rogers and Z. Shi, The value of an Asian option, Journal of Applied Probability 32 (1995) 1077-1088",
         "citations": [
           {
             "key": "ThompsonAsianBounds"
@@ -640,7 +640,7 @@
       },
       "metadata": {
         "chapter": 14,
-        "reference": "G. W. Thompson, Fast narrow bounds on the value of Asian options, Judge Institute of Management Studies working paper 02/09, section 3; L. C. G. Rogers and Z. Shi, The value of an Asian option, Journal of Applied Probability 32 (1995) 1077-1088",
+        "reference": "G. W. P. Thompson, Fast narrow bounds on the value of Asian options, Judge Institute of Management working paper wp0209, section 3; L. C. G. Rogers and Z. Shi, The value of an Asian option, Journal of Applied Probability 32 (1995) 1077-1088",
         "citations": [
           {
             "key": "ThompsonAsianBounds"
